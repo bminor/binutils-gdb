@@ -40,11 +40,8 @@
 
 #define MALLOC_INCOMPATIBLE
 
-extern void *
-  malloc PARAMS ((size_t));
+extern void *malloc (size_t);
 
-extern void *
-  realloc PARAMS ((void *, size_t));
+extern void *realloc (void *, size_t);
 
-extern void
-free PARAMS ((void *));
+extern void free (void *);

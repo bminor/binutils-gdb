@@ -43,23 +43,23 @@ static int partial_memory_read (CORE_ADDR memaddr, char *myaddr,
 static void print_hex_chars (struct ui_file *, unsigned char *,
 			     unsigned int);
 
-static void show_print PARAMS ((char *, int));
+static void show_print (char *, int);
 
-static void set_print PARAMS ((char *, int));
+static void set_print (char *, int);
 
-static void set_radix PARAMS ((char *, int));
+static void set_radix (char *, int);
 
-static void show_radix PARAMS ((char *, int));
+static void show_radix (char *, int);
 
-static void set_input_radix PARAMS ((char *, int, struct cmd_list_element *));
+static void set_input_radix (char *, int, struct cmd_list_element *);
 
-static void set_input_radix_1 PARAMS ((int, unsigned));
+static void set_input_radix_1 (int, unsigned);
 
-static void set_output_radix PARAMS ((char *, int, struct cmd_list_element *));
+static void set_output_radix (char *, int, struct cmd_list_element *);
 
-static void set_output_radix_1 PARAMS ((int, unsigned));
+static void set_output_radix_1 (int, unsigned);
 
-void _initialize_valprint PARAMS ((void));
+void _initialize_valprint (void);
 
 /* Maximum number of chars to print for a string pointer value or vector
    contents, or UINT_MAX for no limit.  Note that "set print elements 0"
@@ -561,6 +561,7 @@ longest_to_int (arg)
   return (rtnval);
 }
 
+
 /* Print a floating point value of type TYPE, pointed to in GDB by VALADDR,
    on STREAM.  */
 
@@ -574,85 +575,82 @@ print_floating (valaddr, type, stream)
   int inv;
   unsigned len = TYPE_LENGTH (type);
 
-#if defined (IEEE_FLOAT)
-
   /* Check for NaN's.  Note that this code does not depend on us being
      on an IEEE conforming system.  It only depends on the target
      machine using IEEE representation.  This means (a)
      cross-debugging works right, and (2) IEEE_FLOAT can (and should)
-     be defined for systems like the 68881, which uses IEEE
+     be non-zero for systems like the 68881, which uses IEEE
      representation, but is not IEEE conforming.  */
+  if (IEEE_FLOAT)
+    {
+      unsigned long low, high;
+      /* Is the sign bit 0?  */
+      int nonnegative;
+      /* Is it is a NaN (i.e. the exponent is all ones and
+	 the fraction is nonzero)?  */
+      int is_nan;
 
-  {
-    unsigned long low, high;
-    /* Is the sign bit 0?  */
-    int nonnegative;
-    /* Is it is a NaN (i.e. the exponent is all ones and
-       the fraction is nonzero)?  */
-    int is_nan;
+      /* For lint, initialize these two variables to suppress warning: */
+      low = high = nonnegative = 0;
+      if (len == 4)
+	{
+	  /* It's single precision.  */
+	  /* Assume that floating point byte order is the same as
+	     integer byte order.  */
+	  low = extract_unsigned_integer (valaddr, 4);
+	  nonnegative = ((low & 0x80000000) == 0);
+	  is_nan = ((((low >> 23) & 0xFF) == 0xFF)
+		    && 0 != (low & 0x7FFFFF));
+	  low &= 0x7fffff;
+	  high = 0;
+	}
+      else if (len == 8)
+	{
+	  /* It's double precision.  Get the high and low words.  */
 
-    /* For lint, initialize these two variables to suppress warning: */
-    low = high = nonnegative = 0;
-    if (len == 4)
-      {
-	/* It's single precision.  */
-	/* Assume that floating point byte order is the same as
-	   integer byte order.  */
-	low = extract_unsigned_integer (valaddr, 4);
-	nonnegative = ((low & 0x80000000) == 0);
-	is_nan = ((((low >> 23) & 0xFF) == 0xFF)
-		  && 0 != (low & 0x7FFFFF));
-	low &= 0x7fffff;
-	high = 0;
-      }
-    else if (len == 8)
-      {
-	/* It's double precision.  Get the high and low words.  */
-
-	/* Assume that floating point byte order is the same as
-	   integer byte order.  */
-	if (TARGET_BYTE_ORDER == BIG_ENDIAN)
-	  {
-	    low = extract_unsigned_integer (valaddr + 4, 4);
-	    high = extract_unsigned_integer (valaddr, 4);
-	  }
-	else
-	  {
-	    low = extract_unsigned_integer (valaddr, 4);
-	    high = extract_unsigned_integer (valaddr + 4, 4);
-	  }
-	nonnegative = ((high & 0x80000000) == 0);
-	is_nan = (((high >> 20) & 0x7ff) == 0x7ff
-		  && !((((high & 0xfffff) == 0)) && (low == 0)));
-	high &= 0xfffff;
-      }
-    else
-      {
+	  /* Assume that floating point byte order is the same as
+	     integer byte order.  */
+	  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+	    {
+	      low = extract_unsigned_integer (valaddr + 4, 4);
+	      high = extract_unsigned_integer (valaddr, 4);
+	    }
+	  else
+	    {
+	      low = extract_unsigned_integer (valaddr, 4);
+	      high = extract_unsigned_integer (valaddr + 4, 4);
+	    }
+	  nonnegative = ((high & 0x80000000) == 0);
+	  is_nan = (((high >> 20) & 0x7ff) == 0x7ff
+		    && !((((high & 0xfffff) == 0)) && (low == 0)));
+	  high &= 0xfffff;
+	}
+      else
+	{
 #ifdef TARGET_ANALYZE_FLOATING
-	TARGET_ANALYZE_FLOATING;
+	  TARGET_ANALYZE_FLOATING;
 #else
-	/* Extended.  We can't detect extended NaNs for this target.
-	   Also note that currently extendeds get nuked to double in
-	   REGISTER_CONVERTIBLE.  */
-	is_nan = 0;
+	  /* Extended.  We can't detect extended NaNs for this target.
+	     Also note that currently extendeds get nuked to double in
+	     REGISTER_CONVERTIBLE.  */
+	  is_nan = 0;
 #endif 
-      }
+	}
 
-    if (is_nan)
-      {
-	/* The meaning of the sign and fraction is not defined by IEEE.
-	   But the user might know what they mean.  For example, they
-	   (in an implementation-defined manner) distinguish between
-	   signaling and quiet NaN's.  */
-	if (high)
-	  fprintf_filtered (stream, "-NaN(0x%lx%.8lx)" + !!nonnegative,
-			    high, low);
-	else
-	  fprintf_filtered (stream, "-NaN(0x%lx)" + nonnegative, low);
-	return;
-      }
-  }
-#endif /* IEEE_FLOAT.  */
+      if (is_nan)
+	{
+	  /* The meaning of the sign and fraction is not defined by IEEE.
+	     But the user might know what they mean.  For example, they
+	     (in an implementation-defined manner) distinguish between
+	     signaling and quiet NaN's.  */
+	  if (high)
+	    fprintf_filtered (stream, "-NaN(0x%lx%.8lx)" + !!nonnegative,
+			      high, low);
+	  else
+	    fprintf_filtered (stream, "-NaN(0x%lx)" + nonnegative, low);
+	  return;
+	}
+    }
 
   doub = unpack_double (type, valaddr, &inv);
   if (inv)

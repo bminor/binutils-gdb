@@ -37,9 +37,9 @@
 #define TRUNCATION_TOWARDS_ZERO ((-5 / 2) == -2)
 #endif
 
-static value_ptr value_subscripted_rvalue PARAMS ((value_ptr, value_ptr, int));
+static value_ptr value_subscripted_rvalue (value_ptr, value_ptr, int);
 
-void _initialize_valarith PARAMS ((void));
+void _initialize_valarith (void);
 
 
 value_ptr
@@ -79,8 +79,8 @@ value_add (arg1, arg2)
       len = TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (valptrtype)));
       if (len == 0)
 	len = 1;		/* For (void *) */
-      retval = value_from_longest (valptrtype,
-				   value_as_long (valptr)
+      retval = value_from_pointer (valptrtype,
+				   value_as_pointer (valptr)
 				   + (len * value_as_long (valint)));
       VALUE_BFD_SECTION (retval) = VALUE_BFD_SECTION (valptr);
       return retval;
@@ -105,9 +105,9 @@ value_sub (arg1, arg2)
 	{
 	  /* pointer - integer.  */
 	  LONGEST sz = TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type1)));
-	  return value_from_longest
-	    (VALUE_TYPE (arg1),
-	     value_as_long (arg1) - (sz * value_as_long (arg2)));
+	  return value_from_pointer (VALUE_TYPE (arg1),
+				     (value_as_pointer (arg1)
+				      - (sz * value_as_long (arg2))));
 	}
       else if (TYPE_CODE (type2) == TYPE_CODE_PTR
 	       && TYPE_LENGTH (TYPE_TARGET_TYPE (type1))

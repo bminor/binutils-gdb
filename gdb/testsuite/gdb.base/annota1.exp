@@ -277,10 +277,11 @@ match_max 3000
 verbose "match_max now is: [match_max]"
 send_gdb "backtrace\n"
 gdb_expect {
-  -re "frame-begin 0 $hex.*0.*frame-end.*frame-begin 1 $hex.*1.*(\032\032signal-handler-caller\r\n.signal handler called.\r\n\r\n)*\032\032frame-end\r\n\r\n\032\032frame-begin 2 $hex.*2.*(frame-begin 3 $hex.*3.*)*frame-end.*$gdb_prompt$" \
-	{ pass "backtrace @ signal handler" }
-  -re ".*$gdb_prompt$"     { fail "backtrace @ signal handler" }
-  timeout	            { fail "backtrace @ signal handler (timeout)" }
+    -re "frame-begin 0 $hex\r\n#0.*frame-end.*frame-begin 1 $hex\r\n#1.*(\032\032signal-handler-caller\r\n.signal handler called.\r\n\r\n)*\032\032frame-end\r\n\r\n\032\032frame-begin 2 $hex\r\n#2.*(frame-begin 3 $hex\r\n#3.*)*frame-end.*$gdb_prompt$" {
+	pass "backtrace @ signal handler"
+    }
+    -re ".*$gdb_prompt$"   { fail "backtrace @ signal handler" }
+    timeout                { fail "backtrace @ signal handler (timeout)" }
 }
 
 #

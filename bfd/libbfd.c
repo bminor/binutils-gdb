@@ -1306,13 +1306,17 @@ _bfd_generic_verify_endian_match (ibfd, obfd)
      bfd *obfd;
 {
   if (ibfd->xvec->byteorder != obfd->xvec->byteorder
+      && ibfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN
       && obfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)
     {
-      (*_bfd_error_handler)
-	("%s: compiled for a %s endian system and target is %s endian",
-	 bfd_get_filename (ibfd),
-	 bfd_big_endian (ibfd) ? "big" : "little",
-	 bfd_big_endian (obfd) ? "big" : "little");
+      const char *msg;
+
+      if (bfd_big_endian (ibfd))
+	msg = _("%s: compiled for a big endian system and target is little endian");
+      else
+	msg = _("%s: compiled for a little endian system and target is big endian");
+
+      (*_bfd_error_handler) (msg, bfd_get_filename (ibfd));
 
       bfd_set_error (bfd_error_wrong_format);
       return false;

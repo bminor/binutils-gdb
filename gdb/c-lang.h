@@ -25,11 +25,9 @@
 #include "value.h"
 
 
-extern int
-c_parse PARAMS ((void));	/* Defined in c-exp.y */
+extern int c_parse (void);	/* Defined in c-exp.y */
 
-extern void
-c_error PARAMS ((char *));	/* Defined in c-exp.y */
+extern void c_error (char *);	/* Defined in c-exp.y */
 
 /* Defined in c-typeprint.c */
 extern void c_print_type (struct type *, char *, struct ui_file *, int,
@@ -50,7 +48,7 @@ extern void c_printstr (struct ui_file * stream, char *string,
 			unsigned int length, int width,
 			int force_ellipses);
 
-extern struct type *c_create_fundamental_type PARAMS ((struct objfile *, int));
+extern struct type *c_create_fundamental_type (struct objfile *, int);
 
 extern struct type **CONST_PTR (c_builtin_types[]);
 
@@ -77,11 +75,9 @@ extern void cp_print_value_fields (struct type *, struct type *, char *,
 				   int, enum val_prettyprint,
 				   struct type **, int);
 
-extern int
-cp_is_vtbl_ptr_type PARAMS ((struct type *));
+extern int cp_is_vtbl_ptr_type (struct type *);
 
-extern int
-cp_is_vtbl_member PARAMS ((struct type *));
+extern int cp_is_vtbl_member (struct type *);
 
 
 #endif /* !defined (C_LANG_H) */

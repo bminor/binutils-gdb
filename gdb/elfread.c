@@ -33,7 +33,7 @@
 #include "complaints.h"
 #include "demangle.h"
 
-extern void _initialize_elfread PARAMS ((void));
+extern void _initialize_elfread (void);
 
 /* The struct elfinfo is available only during ELF symbol table and
    psymtab reading.  It is destroyed at the completion of psymtab-reading.
@@ -64,32 +64,29 @@ struct complaint stab_info_mismatch_complaint =
 struct complaint stab_info_questionable_complaint =
 {"elf/stab section information questionable for %s", 0, 0};
 
-static void
-elf_symfile_init PARAMS ((struct objfile *));
+static void elf_symfile_init (struct objfile *);
 
-static void
-elf_new_init PARAMS ((struct objfile *));
+static void elf_new_init (struct objfile *);
 
-static void
-elf_symfile_read PARAMS ((struct objfile *, int));
+static void elf_symfile_read (struct objfile *, int);
 
-static void
-elf_symfile_finish PARAMS ((struct objfile *));
+static void elf_symfile_finish (struct objfile *);
 
-static void
-elf_symtab_read PARAMS ((struct objfile *, int));
+static void elf_symtab_read (struct objfile *, int);
 
-static void
-free_elfinfo PARAMS ((void *));
+static void free_elfinfo (void *);
 
-static struct minimal_symbol *
-  record_minimal_symbol_and_info PARAMS ((char *, CORE_ADDR,
-					  enum minimal_symbol_type, char *,
-					  asection * bfd_section,
-					  struct objfile *));
+static struct minimal_symbol *record_minimal_symbol_and_info (char *,
+							      CORE_ADDR,
+							      enum
+							      minimal_symbol_type,
+							      char *,
+							      asection *
+							      bfd_section,
+							      struct objfile
+							      *);
 
-static void
-elf_locate_sections PARAMS ((bfd *, asection *, void *));
+static void elf_locate_sections (bfd *, asection *, void *);
 
 /* We are called once per section from elf_symfile_read.  We
    need to examine each section we are passed, check to see
@@ -191,18 +188,16 @@ record_minimal_symbol_and_info (name, address, ms_type, info, bfd_section,
     {
     case mst_text:
     case mst_file_text:
-      section = SECT_OFF_TEXT;
+      section = bfd_section->index;
 #ifdef SMASH_TEXT_ADDRESS
       SMASH_TEXT_ADDRESS (address);
 #endif
       break;
     case mst_data:
     case mst_file_data:
-      section = SECT_OFF_DATA;
-      break;
     case mst_bss:
     case mst_file_bss:
-      section = SECT_OFF_BSS;
+      section = bfd_section->index;
       break;
     default:
       section = -1;
@@ -293,8 +288,7 @@ elf_symtab_read (objfile, dynamic)
       if (number_of_symbols < 0)
 	error ("Can't read symbols from %s: %s", bfd_get_filename (objfile->obfd),
 	       bfd_errmsg (bfd_get_error ()));
-      /* FIXME: Should use section specific offset, not SECT_OFF_TEXT. */
-      offset = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+
       for (i = 0; i < number_of_symbols; i++)
 	{
 	  sym = symbol_table[i];
@@ -305,6 +299,7 @@ elf_symtab_read (objfile, dynamic)
 	      continue;
 	    }
 
+          offset = ANOFFSET (objfile->section_offsets, sym->section->index);
 	  if (dynamic
 	      && sym->section == &bfd_und_section
 	      && (sym->flags & BSF_FUNCTION))
@@ -460,15 +455,15 @@ elf_symtab_read (objfile, dynamic)
 		      index = SECT_OFF_MAX;
 		      if (STREQ ("Bbss.bss", sym->name))
 			{
-			  index = SECT_OFF_BSS;
+			  index = SECT_OFF_BSS (objfile);
 			}
 		      else if (STREQ ("Ddata.data", sym->name))
 			{
-			  index = SECT_OFF_DATA;
+			  index = SECT_OFF_DATA (objfile);
 			}
 		      else if (STREQ ("Drodata.rodata", sym->name))
 			{
-			  index = SECT_OFF_RODATA;
+			  index = SECT_OFF_RODATA (objfile);
 			}
 		      if (index != SECT_OFF_MAX)
 			{
@@ -593,7 +588,7 @@ elf_symfile_read (objfile, mainline)
   CORE_ADDR offset;
 
   init_minimal_symbol_collection ();
-  back_to = make_cleanup ((make_cleanup_func) discard_minimal_symbols, 0);
+  back_to = make_cleanup_discard_minimal_symbols ();
 
   memset ((char *) &ei, 0, sizeof (ei));
 

@@ -36,10 +36,10 @@
 
 
 INLINE_SIM_MAIN (void)
-genericAdd(unsigned long source, unsigned long destReg)
+genericAdd(unsigned32 source, unsigned32 destReg)
 {
   int z, c, n, v;
-  unsigned long dest, sum;
+  unsigned32 dest, sum;
 
   dest = State.regs[destReg];
   sum = source + dest;
@@ -60,10 +60,10 @@ genericAdd(unsigned long source, unsigned long destReg)
 
 
 INLINE_SIM_MAIN (void)
-genericSub(unsigned long source, unsigned long destReg)
+genericSub(unsigned32 source, unsigned32 destReg)
 {
   int z, c, n, v;
-  unsigned long dest, difference;
+  unsigned32 dest, difference;
 
   dest = State.regs[destReg];
   difference = dest - source;
@@ -81,10 +81,10 @@ genericSub(unsigned long source, unsigned long destReg)
 }
 
 INLINE_SIM_MAIN (void)
-genericCmp(unsigned long leftOpnd, unsigned long rightOpnd)
+genericCmp(unsigned32 leftOpnd, unsigned32 rightOpnd)
 {
   int z, c, n, v;
-  unsigned long value;
+  unsigned32 value;
 
   value = rightOpnd - leftOpnd;
 
@@ -101,7 +101,7 @@ genericCmp(unsigned long leftOpnd, unsigned long rightOpnd)
 
 
 INLINE_SIM_MAIN (void)
-genericOr(unsigned long source, unsigned long destReg)
+genericOr(unsigned32 source, unsigned32 destReg)
 {
   int n, z;
 
@@ -114,7 +114,7 @@ genericOr(unsigned long source, unsigned long destReg)
 
 
 INLINE_SIM_MAIN (void)
-genericXor(unsigned long source, unsigned long destReg)
+genericXor(unsigned32 source, unsigned32 destReg)
 {
   int n, z;
 
@@ -127,9 +127,9 @@ genericXor(unsigned long source, unsigned long destReg)
 
 
 INLINE_SIM_MAIN (void)
-genericBtst(unsigned long leftOpnd, unsigned long rightOpnd)
+genericBtst(unsigned32 leftOpnd, unsigned32 rightOpnd)
 {
-  unsigned long temp;
+  unsigned32 temp;
   int z, n;
 
   temp = rightOpnd;

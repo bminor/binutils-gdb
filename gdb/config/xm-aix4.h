@@ -73,7 +73,7 @@ char *termdef ();
 /* Signal handler for SIGWINCH `window size changed'. */
 
 #define	SIGWINCH_HANDLER  aix_resizewindow
-extern void aix_resizewindow PARAMS ((int));
+extern void aix_resizewindow (int);
 
 /* `lines_per_page' and `chars_per_line' are local to utils.c. Rectify this. */
 

@@ -395,6 +395,27 @@ update_time_from_event (SIM_DESC sd)
       events->time_of_event = current_time - 1;
       events->time_from_event = -1;
     }
+  if (ETRACE_P)
+    {
+      sim_event *event;
+      int i;
+      for (event = events->queue, i = 0;
+	   event != NULL;
+	   event = event->next, i++)
+	{
+	  ETRACE ((_ETRACE,
+		   "event time-from-event - time %ld, delta %ld - event %d, tag 0x%lx, time %ld, handler 0x%lx, data 0x%lx%s%s\n",
+		   (long)current_time,
+		   (long)events->time_from_event,
+		   i,
+		   (long)event,
+		   (long)event->time_of_event,
+		   (long)event->handler,
+		   (long)event->data,
+		   (event->trace != NULL) ? ", " : "",
+		   (event->trace != NULL) ? event->trace : ""));
+	}
+    }
   SIM_ASSERT (current_time == sim_events_time (sd));
 }
 

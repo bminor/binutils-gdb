@@ -37,7 +37,7 @@
 #include "gdb_stat.h"
 #include <sys/core.h>
 
-static void fetch_core_registers PARAMS ((char *, unsigned, int, CORE_ADDR));
+static void fetch_core_registers (char *, unsigned, int, CORE_ADDR);
 
 void
 fetch_inferior_registers (regno)
@@ -129,11 +129,9 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
       break;
 
     case 2:
-#ifdef FP0_REGNUM
       memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)],
 	      core_reg_sect,
 	      core_reg_size);	/* FIXME, probably bogus */
-#endif
 #ifdef FPC_REGNUM
       memcpy (&registers[REGISTER_BYTE (FPC_REGNUM)],
 	      &corestr.c_fpu.f_fpstatus.f_ctrl,

@@ -103,15 +103,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define	YYDEBUG	1		/* Default to no yydebug support */
 #endif
 
-int yyparse PARAMS ((void));
+int yyparse (void);
 
-static int yylex PARAMS ((void));
+static int yylex (void);
 
-void yyerror PARAMS ((char *));
+void yyerror (char *);
 
-static void growbuf_by_size PARAMS ((int));
+static void growbuf_by_size (int);
 
-static int match_string_literal PARAMS ((void));
+static int match_string_literal (void);
 
 %}
 
@@ -143,7 +143,7 @@ static int match_string_literal PARAMS ((void));
 
 %{
 /* YYSTYPE gets defined by %union */
-static int parse_number PARAMS ((char *, int, int, YYSTYPE *));
+static int parse_number (char *, int, int, YYSTYPE *);
 %}
 
 %type <voidval> exp  type_exp start variable 

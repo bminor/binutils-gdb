@@ -39,6 +39,11 @@ extern gdbarch_breakpoint_from_pc_ftype legacy_breakpoint_from_pc;
 /* Frameless functions not identifable. */
 extern gdbarch_frameless_function_invocation_ftype generic_frameless_function_invocation_not;
 
+/* Only structures, unions, and arrays are returned using the struct
+   convention.  Note that arrays are never passed by value in the C
+   language family, so that case is irrelevant for C.  */
+extern gdbarch_return_value_on_stack_ftype generic_return_value_on_stack_not;
+
 /* Map onto old REGISTER_NAMES. */
 extern char *legacy_register_name (int i);
 
@@ -48,5 +53,18 @@ extern int legacy_sizeof_call_dummy_words;
 
 /* Typical remote_translate_xfer_address */
 extern gdbarch_remote_translate_xfer_address_ftype generic_remote_translate_xfer_address;
+
+/* Generic implementation of prologue_frameless_p.  Just calls
+   SKIP_PROLOG and checks the return value to see if it actually
+   changed. */
+extern gdbarch_prologue_frameless_p_ftype generic_prologue_frameless_p;
+
+/* The only possible cases for inner_than. */
+extern int core_addr_lessthan (CORE_ADDR lhs, CORE_ADDR rhs);
+extern int core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs);
+
+/* Floating point values. */
+extern const struct floatformat *default_float_format (struct gdbarch *gdbarch);
+extern const struct floatformat *default_double_format (struct gdbarch *gdbarch);
 
 #endif

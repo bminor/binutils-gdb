@@ -33,8 +33,10 @@
 #include <sys/procfs.h>
 #include <setjmp.h>		/* For JB_XXX.  */
 
-static void
-fetch_core_registers PARAMS ((char *, unsigned int, int, CORE_ADDR));
+/* Prototypes for supply_gregset etc. */
+#include "gregset.h"
+
+static void fetch_core_registers (char *, unsigned int, int, CORE_ADDR);
 
 /* Size of elements in jmpbuf */
 
@@ -342,38 +344,27 @@ static CORE_ADDR breakpoint_addr;	/* Address where end bkpt is set */
 
 /* Local function prototypes */
 
-static void
-sharedlibrary_command PARAMS ((char *, int));
+static void sharedlibrary_command (char *, int);
 
-static int
-enable_break PARAMS ((void));
+static int enable_break (void);
 
-static int
-disable_break PARAMS ((void));
+static int disable_break (void);
 
-static void
-info_sharedlibrary_command PARAMS ((char *, int));
+static void info_sharedlibrary_command (char *, int);
 
-static int
-symbol_add_stub PARAMS ((char *));
+static int symbol_add_stub (void *);
 
-static struct so_list *
-  find_solib PARAMS ((struct so_list *));
+static struct so_list *find_solib (struct so_list *);
 
-static struct link_map *
-  first_link_map_member PARAMS ((void));
+static struct link_map *first_link_map_member (void);
 
-static struct link_map *
-  next_link_map_member PARAMS ((struct so_list *));
+static struct link_map *next_link_map_member (struct so_list *);
 
-static void
-xfer_link_map_member PARAMS ((struct so_list *, struct link_map *));
+static void xfer_link_map_member (struct so_list *, struct link_map *);
 
-static CORE_ADDR
-  locate_base PARAMS ((void));
+static CORE_ADDR locate_base (void);
 
-static int
-solib_map_sections PARAMS ((char *));
+static int solib_map_sections (void *);
 
 /*
 
@@ -403,8 +394,7 @@ solib_map_sections PARAMS ((char *));
  */
 
 static int
-solib_map_sections (arg)
-     char *arg;
+solib_map_sections (void *arg)
 {
   struct so_list *so = (struct so_list *) arg;	/* catch_errors bogon */
   char *filename;
@@ -469,6 +459,7 @@ solib_map_sections (arg)
   /* Free the file names, close the file now.  */
   do_cleanups (old_chain);
 
+  /* must be non-zero */
   return (1);
 }
 
@@ -573,12 +564,13 @@ first_link_map_member ()
     return NULL;
 
   /* Get first list entry.  */
-  lladdr = (CORE_ADDR) listp;
+  /* The MIPS Sign extends addresses. */
+  lladdr = host_pointer_to_address (listp);
   read_memory (lladdr, (char *) &list_old, sizeof (struct obj_list));
 
   /* The first entry in the list is the object file we are debugging,
      so skip it.  */
-  next_lladdr = (CORE_ADDR) list_old.next;
+  next_lladdr = host_pointer_to_address (list_old.next);
 
 #ifdef HANDLE_NEW_OBJ_LIST
   if (list_old.data == NEW_OBJ_INFO_MAGIC)
@@ -638,7 +630,7 @@ next_link_map_member (so_list_ptr)
 	  status = target_read_memory (lm->l_lladdr,
 				       (char *) &list_old,
 				       sizeof (struct obj_list));
-	  next_lladdr = (CORE_ADDR) list_old.next;
+	  next_lladdr = host_pointer_to_address (list_old.next);
 	}
 #ifdef HANDLE_NEW_OBJ_LIST
       else if (lm->l_variant == OBJ_LIST_32)
@@ -691,7 +683,7 @@ xfer_link_map_member (so_list_ptr, lm)
 
   new_lm->l_variant = OBJ_LIST_OLD;
   new_lm->l_lladdr = lladdr;
-  new_lm->l_next = (CORE_ADDR) list_old.next;
+  new_lm->l_next = host_pointer_to_address (list_old.next);
 
 #ifdef HANDLE_NEW_OBJ_LIST
   if (list_old.data == NEW_OBJ_INFO_MAGIC)
@@ -827,8 +819,7 @@ find_solib (so_list_ptr)
 /* A small stub to get us past the arg-passing pinhole of catch_errors.  */
 
 static int
-symbol_add_stub (arg)
-     char *arg;
+symbol_add_stub (void *arg)
 {
   register struct so_list *so = (struct so_list *) arg;		/* catch_errs bogon */
   CORE_ADDR text_addr = 0;
@@ -852,9 +843,12 @@ symbol_add_stub (arg)
 	text_addr = bfd_section_vma (so->abfd, lowest_sect) + LM_OFFSET (so);
     }
 
-  section_addrs.text_addr = text_addr;
+
+  section_addrs.other[0].name = ".text";
+  section_addrs.other[0].addr = text_addr;
   so->objfile = symbol_file_add (so->so_name, so->from_tty,
 				 &section_addrs, 0, 0);
+  /* must be non-zero */
   return (1);
 }
 

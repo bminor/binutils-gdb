@@ -11,7 +11,7 @@ all:
 #### host, target, and site specific Makefile frags come in here.
 
 clean mostlyclean:
-	-rm -f *.ci *.o $(OBJS) $(PROGS) $(MISCELLANEOUS) *~ core
+	-rm -f *.ci *.o $(OBJS) $(PROGS) *~ core
 
 distclean maintainer-clean realclean: clean
 	-rm -f Makefile config.status config.log

@@ -83,6 +83,7 @@ TESTS = \
 	t-ae-st2w-ip.ok \
 	t-ae-st2w-is.ok \
 	t-mod-ld-pre.ok \
+	t-rie-xx.ok \
 #
 
 AS_FOR_TARGET = `\

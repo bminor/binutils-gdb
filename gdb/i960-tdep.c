@@ -29,9 +29,8 @@
 #include "gdbcore.h"
 #include "inferior.h"
 
-static CORE_ADDR next_insn PARAMS ((CORE_ADDR memaddr,
-				    unsigned int *pword1,
-				    unsigned int *pword2));
+static CORE_ADDR next_insn (CORE_ADDR memaddr,
+			    unsigned int *pword1, unsigned int *pword2);
 
 /* Does the specified function use the "struct returning" convention
    or the "value returning" convention?  The "value returning" convention

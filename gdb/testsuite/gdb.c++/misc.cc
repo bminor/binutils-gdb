@@ -215,6 +215,16 @@ void inheritance1 (void)
 
   // ????? = 11;  (g_D.A::a = 11; is ambiguous)
   // ????? = 12;  (g_D.A::x = 12; is ambiguous)
+/* djb 6-3-2000
+
+	This should take care of it. Rather than try to initialize using an ambiguous
+	construct, use 2 unambiguous ones for each. Since the ambiguous a/x member is
+	coming from C, and B, initialize D's C::a, and B::a, and D's C::x and B::x.
+ */
+  g_D.C::a = 15;
+  g_D.C::x = 12;
+  g_D.B::a = 11;
+  g_D.B::x = 12;
   g_D.B::b = 13;
   g_D.B::x = 14;
   // ????? = 15;

@@ -199,7 +199,7 @@ AC_ARG_ENABLE(sim-profile,
 esac
 if test x"$silent" != x"yes" && test x"$sim_profile" != x""; then
   echo "Setting sim profile = $sim_profile" 6>&1
-fi],[sim_profile=""])dnl
+fi],[sim_profile="-DPROFILE=1 -DWITH_PROFILE=-1"])dnl
 AC_SUBST(sim_profile)
 
 

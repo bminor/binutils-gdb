@@ -22,7 +22,7 @@
 #include "complaints.h"
 #include "gdbcmd.h"
 
-extern void _initialize_complaints PARAMS ((void));
+extern void _initialize_complaints (void);
 
 /* Structure to manage complaints about symbol file contents.  */
 

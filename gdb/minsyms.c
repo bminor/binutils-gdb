@@ -75,12 +75,10 @@ static int msym_count;
 
 /* Prototypes for local functions. */
 
-static int
-compare_minimal_symbols PARAMS ((const void *, const void *));
+static int compare_minimal_symbols (const void *, const void *);
 
 static int
-compact_minimal_symbols PARAMS ((struct minimal_symbol *, int,
-				 struct objfile *));
+compact_minimal_symbols (struct minimal_symbol *, int, struct objfile *);
 
 static void add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
 						struct minimal_symbol **table);
@@ -570,7 +568,7 @@ find_stab_function_addr (namestring, filename, objfile)
 /* Return leading symbol character for a BFD. If BFD is NULL,
    return the leading symbol character from the main objfile.  */
 
-static int get_symbol_leading_char PARAMS ((bfd *));
+static int get_symbol_leading_char (bfd *);
 
 static int
 get_symbol_leading_char (abfd)
@@ -609,15 +607,15 @@ prim_record_minimal_symbol (name, address, ms_type, objfile)
     case mst_text:
     case mst_file_text:
     case mst_solib_trampoline:
-      section = SECT_OFF_TEXT;
+      section = SECT_OFF_TEXT (objfile);
       break;
     case mst_data:
     case mst_file_data:
-      section = SECT_OFF_DATA;
+      section = SECT_OFF_DATA (objfile);
       break;
     case mst_bss:
     case mst_file_bss:
-      section = SECT_OFF_BSS;
+      section = SECT_OFF_BSS (objfile);
       break;
     default:
       section = -1;
@@ -685,7 +683,7 @@ prim_record_minimal_symbol_and_info (name, address, ms_type, info, section,
   MSYMBOL_INFO (msymbol) = info;	/* FIXME! */
 
   /* The hash pointers must be cleared! If they're not,
-     MSYMBOL_HASH_ADD will NOT add this msymbol to the hash table. */
+     add_minsym_to_hash_table will NOT add this msymbol to the hash table. */
   msymbol->hash_next = NULL;
   msymbol->demangled_hash_next = NULL;
 
@@ -743,10 +741,8 @@ compare_minimal_symbols (fn1p, fn2p)
    obstack and then simply blow the obstack away when we are done with
    it.  Is it worth the extra trouble though? */
 
-/* ARGSUSED */
-void
-discard_minimal_symbols (foo)
-     int foo;
+static void
+do_discard_minimal_symbols_cleanup (void *arg)
 {
   register struct msym_bunch *next;
 
@@ -757,6 +753,13 @@ discard_minimal_symbols (foo)
       msym_bunch = next;
     }
 }
+
+struct cleanup *
+make_cleanup_discard_minimal_symbols (void)
+{
+  return make_cleanup (do_discard_minimal_symbols_cleanup, 0);
+}
+
 
 
 /* Compact duplicate entries out of a minimal symbol table by walking

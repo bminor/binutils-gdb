@@ -301,13 +301,13 @@ enum inferior_event_type
   };
 
 /* Return the string for a signal.  */
-extern char *target_signal_to_string PARAMS ((enum target_signal));
+extern char *target_signal_to_string (enum target_signal);
 
 /* Return the name (SIGHUP, etc.) for a signal.  */
-extern char *target_signal_to_name PARAMS ((enum target_signal));
+extern char *target_signal_to_name (enum target_signal);
 
 /* Given a name (SIGHUP, etc.), return its signal.  */
-enum target_signal target_signal_from_name PARAMS ((char *));
+enum target_signal target_signal_from_name (char *);
 
 
 /* If certain kinds of activity happen, target_wait should perform
@@ -316,7 +316,7 @@ enum target_signal target_signal_from_name PARAMS ((char *));
    on TARGET_ACTIVITY_FD.  */
 extern int target_activity_fd;
 /* Returns zero to leave the inferior alone, one to interrupt it.  */
-extern int (*target_activity_function) PARAMS ((void));
+extern int (*target_activity_function) (void);
 
 struct thread_info;		/* fwd decl for parameter list below: */
 
@@ -327,19 +327,19 @@ struct target_ops
     char *to_doc;		/* Documentation.  Does not include trailing
 				   newline, and starts with a one-line descrip-
 				   tion (probably similar to to_longname).  */
-    void (*to_open) PARAMS ((char *, int));
-    void (*to_close) PARAMS ((int));
-    void (*to_attach) PARAMS ((char *, int));
-    void (*to_post_attach) PARAMS ((int));
-    void (*to_require_attach) PARAMS ((char *, int));
-    void (*to_detach) PARAMS ((char *, int));
-    void (*to_require_detach) PARAMS ((int, char *, int));
-    void (*to_resume) PARAMS ((int, int, enum target_signal));
-    int (*to_wait) PARAMS ((int, struct target_waitstatus *));
-    void (*to_post_wait) PARAMS ((int, int));
-    void (*to_fetch_registers) PARAMS ((int));
-    void (*to_store_registers) PARAMS ((int));
-    void (*to_prepare_to_store) PARAMS ((void));
+    void (*to_open) (char *, int);
+    void (*to_close) (int);
+    void (*to_attach) (char *, int);
+    void (*to_post_attach) (int);
+    void (*to_require_attach) (char *, int);
+    void (*to_detach) (char *, int);
+    void (*to_require_detach) (int, char *, int);
+    void (*to_resume) (int, int, enum target_signal);
+    int (*to_wait) (int, struct target_waitstatus *);
+    void (*to_post_wait) (int, int);
+    void (*to_fetch_registers) (int);
+    void (*to_store_registers) (int);
+    void (*to_prepare_to_store) (void);
 
     /* Transfer LEN bytes of memory between GDB address MYADDR and
        target address MEMADDR.  If WRITE, transfer them to the target, else
@@ -359,9 +359,8 @@ struct target_ops
        transfer right at MEMADDR, but we could transfer at least
        something at MEMADDR + N.  */
 
-    int (*to_xfer_memory) PARAMS ((CORE_ADDR memaddr, char *myaddr,
-				   int len, int write,
-				   struct target_ops * target));
+    int (*to_xfer_memory) (CORE_ADDR memaddr, char *myaddr,
+			   int len, int write, struct target_ops * target);
 
 #if 0
     /* Enable this after 4.12.  */
@@ -376,60 +375,62 @@ struct target_ops
        If we don't find anything, set *ADDR_FOUND to (CORE_ADDR)0 and
        return.  */
 
-    void (*to_search) PARAMS ((int len, char *data, char *mask,
-			       CORE_ADDR startaddr, int increment,
-			       CORE_ADDR lorange, CORE_ADDR hirange,
-			       CORE_ADDR * addr_found, char *data_found));
+    void (*to_search) (int len, char *data, char *mask,
+		       CORE_ADDR startaddr, int increment,
+		       CORE_ADDR lorange, CORE_ADDR hirange,
+		       CORE_ADDR * addr_found, char *data_found);
 
 #define	target_search(len, data, mask, startaddr, increment, lorange, hirange, addr_found, data_found)	\
     (*current_target.to_search) (len, data, mask, startaddr, increment, \
 				 lorange, hirange, addr_found, data_found)
 #endif				/* 0 */
 
-    void (*to_files_info) PARAMS ((struct target_ops *));
-    int (*to_insert_breakpoint) PARAMS ((CORE_ADDR, char *));
-    int (*to_remove_breakpoint) PARAMS ((CORE_ADDR, char *));
-    void (*to_terminal_init) PARAMS ((void));
-    void (*to_terminal_inferior) PARAMS ((void));
-    void (*to_terminal_ours_for_output) PARAMS ((void));
-    void (*to_terminal_ours) PARAMS ((void));
-    void (*to_terminal_info) PARAMS ((char *, int));
-    void (*to_kill) PARAMS ((void));
-    void (*to_load) PARAMS ((char *, int));
-    int (*to_lookup_symbol) PARAMS ((char *, CORE_ADDR *));
-    void (*to_create_inferior) PARAMS ((char *, char *, char **));
-    void (*to_post_startup_inferior) PARAMS ((int));
-    void (*to_acknowledge_created_inferior) PARAMS ((int));
-    void (*to_clone_and_follow_inferior) PARAMS ((int, int *));
-    void (*to_post_follow_inferior_by_clone) PARAMS ((void));
-    int (*to_insert_fork_catchpoint) PARAMS ((int));
-    int (*to_remove_fork_catchpoint) PARAMS ((int));
-    int (*to_insert_vfork_catchpoint) PARAMS ((int));
-    int (*to_remove_vfork_catchpoint) PARAMS ((int));
-    int (*to_has_forked) PARAMS ((int, int *));
-    int (*to_has_vforked) PARAMS ((int, int *));
-    int (*to_can_follow_vfork_prior_to_exec) PARAMS ((void));
-    void (*to_post_follow_vfork) PARAMS ((int, int, int, int));
-    int (*to_insert_exec_catchpoint) PARAMS ((int));
-    int (*to_remove_exec_catchpoint) PARAMS ((int));
-    int (*to_has_execd) PARAMS ((int, char **));
-    int (*to_reported_exec_events_per_exec_call) PARAMS ((void));
-    int (*to_has_syscall_event) PARAMS ((int, enum target_waitkind *, int *));
-    int (*to_has_exited) PARAMS ((int, int, int *));
-    void (*to_mourn_inferior) PARAMS ((void));
-    int (*to_can_run) PARAMS ((void));
-    void (*to_notice_signals) PARAMS ((int pid));
-    int (*to_thread_alive) PARAMS ((int pid));
-    void (*to_find_new_threads) PARAMS ((void));
-    char *(*to_pid_to_str) PARAMS ((int));
-    char *(*to_extra_thread_info) PARAMS ((struct thread_info *));
-    void (*to_stop) PARAMS ((void));
-    int (*to_query) PARAMS ((int /*char */ , char *, char *, int *));
+    void (*to_files_info) (struct target_ops *);
+    int (*to_insert_breakpoint) (CORE_ADDR, char *);
+    int (*to_remove_breakpoint) (CORE_ADDR, char *);
+    void (*to_terminal_init) (void);
+    void (*to_terminal_inferior) (void);
+    void (*to_terminal_ours_for_output) (void);
+    void (*to_terminal_ours) (void);
+    void (*to_terminal_info) (char *, int);
+    void (*to_kill) (void);
+    void (*to_load) (char *, int);
+    int (*to_lookup_symbol) (char *, CORE_ADDR *);
+    void (*to_create_inferior) (char *, char *, char **);
+    void (*to_post_startup_inferior) (int);
+    void (*to_acknowledge_created_inferior) (int);
+    void (*to_clone_and_follow_inferior) (int, int *);
+    void (*to_post_follow_inferior_by_clone) (void);
+    int (*to_insert_fork_catchpoint) (int);
+    int (*to_remove_fork_catchpoint) (int);
+    int (*to_insert_vfork_catchpoint) (int);
+    int (*to_remove_vfork_catchpoint) (int);
+    int (*to_has_forked) (int, int *);
+    int (*to_has_vforked) (int, int *);
+    int (*to_can_follow_vfork_prior_to_exec) (void);
+    void (*to_post_follow_vfork) (int, int, int, int);
+    int (*to_insert_exec_catchpoint) (int);
+    int (*to_remove_exec_catchpoint) (int);
+    int (*to_has_execd) (int, char **);
+    int (*to_reported_exec_events_per_exec_call) (void);
+    int (*to_has_syscall_event) (int, enum target_waitkind *, int *);
+    int (*to_has_exited) (int, int, int *);
+    void (*to_mourn_inferior) (void);
+    int (*to_can_run) (void);
+    void (*to_notice_signals) (int pid);
+    int (*to_thread_alive) (int pid);
+    void (*to_find_new_threads) (void);
+    char *(*to_pid_to_str) (int);
+    char *(*to_extra_thread_info) (struct thread_info *);
+    void (*to_stop) (void);
+    int (*to_query) (int /*char */ , char *, char *, int *);
     void (*to_rcmd) (char *command, struct ui_file *output);
-    struct symtab_and_line *(*to_enable_exception_callback) PARAMS ((enum exception_event_kind, int));
-    struct exception_event_record *(*to_get_current_exception_event) PARAMS ((void));
-    char *(*to_pid_to_exec_file) PARAMS ((int pid));
-    char *(*to_core_file_to_sym_file) PARAMS ((char *));
+    struct symtab_and_line *(*to_enable_exception_callback) (enum
+							     exception_event_kind,
+							     int);
+    struct exception_event_record *(*to_get_current_exception_event) (void);
+    char *(*to_pid_to_exec_file) (int pid);
+    char *(*to_core_file_to_sym_file) (char *);
     enum strata to_stratum;
     struct target_ops
      *DONT_USE;			/* formerly to_next */
@@ -537,8 +538,7 @@ extern struct target_stack_item *target_stack;
    typed by the user (e.g. a signal to send the process).  FROM_TTY
    says whether to be verbose or not.  */
 
-extern void
-target_detach PARAMS ((char *, int));
+extern void target_detach (char *, int);
 
 /* Detaches from a process on the target side, if not already dettached.
    (If already detached, takes no action.)
@@ -608,24 +608,16 @@ target_detach PARAMS ((char *, int));
 #define	target_prepare_to_store()	\
      (*current_target.to_prepare_to_store) ()
 
-extern int 
-target_read_string PARAMS ((CORE_ADDR, char **, int, int *));
+extern int target_read_string (CORE_ADDR, char **, int, int *);
+
+extern int target_read_memory (CORE_ADDR memaddr, char *myaddr, int len);
+
+extern int target_write_memory (CORE_ADDR, char *, int);
+
+extern int xfer_memory (CORE_ADDR, char *, int, int, struct target_ops *);
 
 extern int
-target_read_memory PARAMS ((CORE_ADDR memaddr, char *myaddr, int len));
-
-extern int
-target_read_memory_section PARAMS ((CORE_ADDR memaddr, char *myaddr, int len,
-				    asection * bfd_section));
-
-extern int
-target_write_memory PARAMS ((CORE_ADDR, char *, int));
-
-extern int
-xfer_memory PARAMS ((CORE_ADDR, char *, int, int, struct target_ops *));
-
-extern int
-child_xfer_memory PARAMS ((CORE_ADDR, char *, int, int, struct target_ops *));
+child_xfer_memory (CORE_ADDR, char *, int, int, struct target_ops *);
 
 /* Make a single attempt at transfering LEN bytes.  On a successful
    transfer, the number of bytes actually transfered is returned and
@@ -639,84 +631,59 @@ target_read_memory_partial (CORE_ADDR addr, char *buf, int len, int *err);
 extern int 
 target_write_memory_partial (CORE_ADDR addr, char *buf, int len, int *err);
 
-extern char *
-child_pid_to_exec_file PARAMS ((int));
+extern char *child_pid_to_exec_file (int);
 
-extern char *
-child_core_file_to_sym_file PARAMS ((char *));
+extern char *child_core_file_to_sym_file (char *);
 
 #if defined(CHILD_POST_ATTACH)
-extern void
-child_post_attach PARAMS ((int));
+extern void child_post_attach (int);
 #endif
 
-extern void
-child_post_wait PARAMS ((int, int));
+extern void child_post_wait (int, int);
 
-extern void
-child_post_startup_inferior PARAMS ((int));
+extern void child_post_startup_inferior (int);
 
-extern void
-child_acknowledge_created_inferior PARAMS ((int));
+extern void child_acknowledge_created_inferior (int);
 
-extern void
-child_clone_and_follow_inferior PARAMS ((int, int *));
+extern void child_clone_and_follow_inferior (int, int *);
 
-extern void
-child_post_follow_inferior_by_clone PARAMS ((void));
+extern void child_post_follow_inferior_by_clone (void);
 
-extern int
-child_insert_fork_catchpoint PARAMS ((int));
+extern int child_insert_fork_catchpoint (int);
 
-extern int
-child_remove_fork_catchpoint PARAMS ((int));
+extern int child_remove_fork_catchpoint (int);
 
-extern int
-child_insert_vfork_catchpoint PARAMS ((int));
+extern int child_insert_vfork_catchpoint (int);
 
-extern int
-child_remove_vfork_catchpoint PARAMS ((int));
+extern int child_remove_vfork_catchpoint (int);
 
-extern int
-child_has_forked PARAMS ((int, int *));
+extern int child_has_forked (int, int *);
 
-extern int
-child_has_vforked PARAMS ((int, int *));
+extern int child_has_vforked (int, int *);
 
-extern void
-child_acknowledge_created_inferior PARAMS ((int));
+extern void child_acknowledge_created_inferior (int);
 
-extern int
-child_can_follow_vfork_prior_to_exec PARAMS ((void));
+extern int child_can_follow_vfork_prior_to_exec (void);
 
-extern void
-child_post_follow_vfork PARAMS ((int, int, int, int));
+extern void child_post_follow_vfork (int, int, int, int);
 
-extern int
-child_insert_exec_catchpoint PARAMS ((int));
+extern int child_insert_exec_catchpoint (int);
 
-extern int
-child_remove_exec_catchpoint PARAMS ((int));
+extern int child_remove_exec_catchpoint (int);
 
-extern int
-child_has_execd PARAMS ((int, char **));
+extern int child_has_execd (int, char **);
 
-extern int
-child_reported_exec_events_per_exec_call PARAMS ((void));
+extern int child_reported_exec_events_per_exec_call (void);
 
-extern int
-child_has_syscall_event PARAMS ((int, enum target_waitkind *, int *));
+extern int child_has_syscall_event (int, enum target_waitkind *, int *);
 
-extern int
-child_has_exited PARAMS ((int, int, int *));
+extern int child_has_exited (int, int, int *);
 
-extern int
-child_thread_alive PARAMS ((int));
+extern int child_thread_alive (int);
 
 /* From exec.c */
 
-extern void
-print_section_info PARAMS ((struct target_ops *, bfd *));
+extern void print_section_info (struct target_ops *, bfd *);
 
 /* Print a line about the current target.  */
 
@@ -1090,7 +1057,7 @@ extern void target_load (char *arg, int from_tty);
 
 extern int target_async_mask (int mask);     
 
-extern void target_link PARAMS ((char *, CORE_ADDR *));
+extern void target_link (char *, CORE_ADDR *);
 
 /* Converts a process id to a string.  Usually, the string just contains
    `process xyz', but on some systems it may contain
@@ -1102,7 +1069,7 @@ extern void target_link PARAMS ((char *, CORE_ADDR *));
 #ifndef target_tid_to_str
 #define target_tid_to_str(PID) \
      target_pid_to_str (PID)
-extern char *normal_pid_to_str PARAMS ((int pid));
+extern char *normal_pid_to_str (int pid);
 #endif
 
 /* Return a short string describing extra information about PID,
@@ -1135,7 +1102,7 @@ extern char *normal_pid_to_str PARAMS ((int pid));
  * can receive this notification (something like with signal handlers).
  */
 
-extern void (*target_new_objfile_hook) PARAMS ((struct objfile *));
+extern void (*target_new_objfile_hook) (struct objfile *);
 
 #ifndef target_pid_or_tid_to_str
 #define target_pid_or_tid_to_str(ID) \
@@ -1290,20 +1257,15 @@ extern void (*target_new_objfile_hook) PARAMS ((struct objfile *));
 
    pop_target:   Remove the top thing on the stack of current targets.  */
 
-extern void
-add_target PARAMS ((struct target_ops *));
+extern void add_target (struct target_ops *);
 
-extern int
-push_target PARAMS ((struct target_ops *));
+extern int push_target (struct target_ops *);
 
-extern int
-unpush_target PARAMS ((struct target_ops *));
+extern int unpush_target (struct target_ops *);
 
-extern void
-target_preopen PARAMS ((int));
+extern void target_preopen (int);
 
-extern void
-pop_target PARAMS ((void));
+extern void pop_target (void);
 
 /* Struct section_table maps address ranges to file sections.  It is
    mostly used with BFD files, but can be used without (e.g. for handling
@@ -1323,60 +1285,45 @@ struct section_table
    Returns 0 if OK, 1 on error.  */
 
 extern int
-build_section_table PARAMS ((bfd *, struct section_table **,
-			     struct section_table **));
+build_section_table (bfd *, struct section_table **, struct section_table **);
 
 /* From mem-break.c */
 
-extern int memory_remove_breakpoint PARAMS ((CORE_ADDR, char *));
+extern int memory_remove_breakpoint (CORE_ADDR, char *);
 
-extern int memory_insert_breakpoint PARAMS ((CORE_ADDR, char *));
+extern int memory_insert_breakpoint (CORE_ADDR, char *);
 
-extern int default_memory_remove_breakpoint PARAMS ((CORE_ADDR, char *));
+extern int default_memory_remove_breakpoint (CORE_ADDR, char *);
 
-extern int default_memory_insert_breakpoint PARAMS ((CORE_ADDR, char *));
+extern int default_memory_insert_breakpoint (CORE_ADDR, char *);
 
 extern breakpoint_from_pc_fn memory_breakpoint_from_pc;
-#ifndef BREAKPOINT_FROM_PC
-#define BREAKPOINT_FROM_PC(pcptr, lenptr) \
-     memory_breakpoint_from_pc (pcptr, lenptr)
-#endif
 
 
 /* From target.c */
 
-extern void
-initialize_targets PARAMS ((void));
+extern void initialize_targets (void);
 
-extern void
-noprocess PARAMS ((void));
+extern void noprocess (void);
 
-extern void
-find_default_attach PARAMS ((char *, int));
+extern void find_default_attach (char *, int);
 
-extern void
-find_default_require_attach PARAMS ((char *, int));
+extern void find_default_require_attach (char *, int);
 
-extern void
-find_default_require_detach PARAMS ((int, char *, int));
+extern void find_default_require_detach (int, char *, int);
 
-extern void
-find_default_create_inferior PARAMS ((char *, char *, char **));
+extern void find_default_create_inferior (char *, char *, char **);
 
-extern void
-find_default_clone_and_follow_inferior PARAMS ((int, int *));
+extern void find_default_clone_and_follow_inferior (int, int *);
 
-extern struct target_ops *
-find_run_target PARAMS ((void));
+extern struct target_ops *find_run_target (void);
 
-extern struct target_ops *
-find_core_target PARAMS ((void));
+extern struct target_ops *find_core_target (void);
 
-extern struct target_ops *
-find_target_beneath PARAMS ((struct target_ops *));
+extern struct target_ops *find_target_beneath (struct target_ops *);
 
 extern int
-target_resize_to_sections PARAMS ((struct target_ops *target, int num_added));
+target_resize_to_sections (struct target_ops *target, int num_added);
 
 extern void remove_target_sections (bfd *abfd);
 
@@ -1392,12 +1339,11 @@ extern int baud_rate;
 /* Timeout limit for response from target. */
 extern int remote_timeout;
 
-extern asection *target_memory_bfd_section;
 
 /* Functions for helping to write a native target.  */
 
 /* This is for native targets which use a unix/POSIX-style waitstatus.  */
-extern void store_waitstatus PARAMS ((struct target_waitstatus *, int));
+extern void store_waitstatus (struct target_waitstatus *, int);
 
 /* Predicate to target_signal_to_host(). Return non-zero if the enum
    targ_signal SIGNO has an equivalent ``host'' representation.  */
@@ -1418,14 +1364,14 @@ extern int target_signal_to_host_p (enum target_signal signo);
    gdb_signal'' would probably be better as it is refering to GDB's
    internal representation of a target operating system's signal.  */
 
-extern enum target_signal target_signal_from_host PARAMS ((int));
-extern int target_signal_to_host PARAMS ((enum target_signal));
+extern enum target_signal target_signal_from_host (int);
+extern int target_signal_to_host (enum target_signal);
 
 /* Convert from a number used in a GDB command to an enum target_signal.  */
-extern enum target_signal target_signal_from_command PARAMS ((int));
+extern enum target_signal target_signal_from_command (int);
 
 /* Any target can call this to switch to remote protocol (in remote.c). */
-extern void push_remote_target PARAMS ((char *name, int from_tty));
+extern void push_remote_target (char *name, int from_tty);
 
 /* Imported from machine dependent code */
 
@@ -1436,7 +1382,7 @@ extern void push_remote_target PARAMS ((char *name, int from_tty));
 #endif /* SOFTWARE_SINGLE_STEP_P */
 
 /* Blank target vector entries are initialized to target_ignore. */
-void target_ignore PARAMS ((void));
+void target_ignore (void);
 
 /* Macro for getting target's idea of a frame pointer.
    FIXME: GDB's whole scheme for dealing with "frames" and

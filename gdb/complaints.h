@@ -44,11 +44,9 @@ extern struct complaint complaint_root[1];
 
 /* Functions that handle complaints.  (in complaints.c)  */
 
-extern void
-complain PARAMS ((struct complaint *,...));
+extern void complain (struct complaint *, ...);
 
-extern void
-clear_complaints PARAMS ((int, int));
+extern void clear_complaints (int, int);
 
 
 #endif /* !defined (COMPLAINTS_H) */

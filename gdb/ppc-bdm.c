@@ -37,14 +37,13 @@
 #include "serial.h"
 #include "ocd.h"
 
-static void bdm_ppc_open PARAMS ((char *name, int from_tty));
+static void bdm_ppc_open (char *name, int from_tty);
 
-static int bdm_ppc_wait PARAMS ((int pid,
-				 struct target_waitstatus * target_status));
+static int bdm_ppc_wait (int pid, struct target_waitstatus *target_status);
 
-static void bdm_ppc_fetch_registers PARAMS ((int regno));
+static void bdm_ppc_fetch_registers (int regno);
 
-static void bdm_ppc_store_registers PARAMS ((int regno));
+static void bdm_ppc_store_registers (int regno);
 
 extern struct target_ops bdm_ppc_ops;	/* Forward decl */
 

@@ -48,15 +48,13 @@ extern int stop_soon_quietly;	/* for wait_for_inferior */
 extern struct target_ops bug_ops;	/* Forward declaration */
 
 /* Forward function declarations */
-static int bug_clear_breakpoints PARAMS ((void));
+static int bug_clear_breakpoints (void);
 
-static int bug_read_memory PARAMS ((CORE_ADDR memaddr,
-				    unsigned char *myaddr,
-				    int len));
+static int bug_read_memory (CORE_ADDR memaddr,
+			    unsigned char *myaddr, int len);
 
-static int bug_write_memory PARAMS ((CORE_ADDR memaddr,
-				     unsigned char *myaddr,
-				     int len));
+static int bug_write_memory (CORE_ADDR memaddr,
+			     unsigned char *myaddr, int len);
 
 /* This variable is somewhat arbitrary.  It's here so that it can be
    set from within a running gdb.  */

@@ -48,33 +48,26 @@
 
 extern int errno;
 
-extern struct vmap *map_vmap PARAMS ((bfd * bf, bfd * arch));
+extern struct vmap *map_vmap (bfd * bf, bfd * arch);
 
 extern struct target_ops exec_ops;
 
-static void
-vmap_exec PARAMS ((void));
+static void vmap_exec (void);
 
-static void
-vmap_ldinfo PARAMS ((struct ld_info *));
+static void vmap_ldinfo (struct ld_info *);
 
-static struct vmap *
-  add_vmap PARAMS ((struct ld_info *));
+static struct vmap *add_vmap (struct ld_info *);
 
-static int
-objfile_symbol_add PARAMS ((char *));
+static int objfile_symbol_add (char *);
 
-static void
-vmap_symtab PARAMS ((struct vmap *));
+static void vmap_symtab (struct vmap *);
 
-static void
-fetch_core_registers PARAMS ((char *, unsigned int, int, CORE_ADDR));
+static void fetch_core_registers (char *, unsigned int, int, CORE_ADDR);
 
-static void
-exec_one_dummy_insn PARAMS ((void));
+static void exec_one_dummy_insn (void);
 
 extern void
-fixup_breakpoints PARAMS ((CORE_ADDR low, CORE_ADDR high, CORE_ADDR delta));
+fixup_breakpoints (CORE_ADDR low, CORE_ADDR high, CORE_ADDR delta);
 
 /* Conversion from gdb-to-system special purpose register numbers.. */
 
@@ -357,9 +350,9 @@ vmap_symtab (vp)
 
   /* The symbols in the object file are linked to the VMA of the section,
      relocate them VMA relative.  */
-  ANOFFSET (new_offsets, SECT_OFF_TEXT) = vp->tstart - vp->tvma;
-  ANOFFSET (new_offsets, SECT_OFF_DATA) = vp->dstart - vp->dvma;
-  ANOFFSET (new_offsets, SECT_OFF_BSS) = vp->dstart - vp->dvma;
+  ANOFFSET (new_offsets, SECT_OFF_TEXT (objfile)) = vp->tstart - vp->tvma;
+  ANOFFSET (new_offsets, SECT_OFF_DATA (objfile)) = vp->dstart - vp->dvma;
+  ANOFFSET (new_offsets, SECT_OFF_BSS (objfile)) = vp->dstart - vp->dvma;
 
   objfile_relocate (objfile, new_offsets);
 }
@@ -639,29 +632,39 @@ void
 xcoff_relocate_symtab (pid)
      unsigned int pid;
 {
-#define	MAX_LOAD_SEGS 64	/* maximum number of load segments */
+  int load_segs = 64; /* number of load segments */
+  int rc;
+  struct ld_info *ldi = NULL;
 
-  struct ld_info *ldi;
+  do
+    {
+      ldi = (void *) xrealloc (ldi, load_segs * sizeof (*ldi));
 
-  ldi = (void *) alloca (MAX_LOAD_SEGS * sizeof (*ldi));
+      /* According to my humble theory, AIX has some timing problems and
+         when the user stack grows, kernel doesn't update stack info in time
+         and ptrace calls step on user stack. That is why we sleep here a
+         little, and give kernel to update its internals. */
 
-  /* According to my humble theory, AIX has some timing problems and
-     when the user stack grows, kernel doesn't update stack info in time
-     and ptrace calls step on user stack. That is why we sleep here a little,
-     and give kernel to update its internals. */
+      usleep (36000);
 
-  usleep (36000);
-
-  errno = 0;
-  ptrace (PT_LDINFO, pid, (PTRACE_ARG3_TYPE) ldi,
-	  MAX_LOAD_SEGS * sizeof (*ldi), (int *) ldi);
-  if (errno)
-    perror_with_name ("ptrace ldinfo");
-
-  vmap_ldinfo (ldi);
-
-  /* relocate the exec and core sections as well. */
-  vmap_exec ();
+      errno = 0;
+      rc = ptrace (PT_LDINFO, pid, (PTRACE_ARG3_TYPE) ldi,
+                  load_segs * sizeof (*ldi), (int *) ldi);
+      if (rc == -1)
+        {
+          if (errno == ENOMEM)
+            load_segs *= 2;
+          else
+            perror_with_name ("ptrace ldinfo");
+        }
+      else
+	{
+          vmap_ldinfo (ldi);
+          vmap_exec (); /* relocate the exec and core sections as well. */
+	}
+    } while (rc == -1);
+  if (ldi)
+    free (ldi);
 }
 
 /* Core file stuff.  */

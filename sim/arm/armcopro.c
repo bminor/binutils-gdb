@@ -16,6 +16,7 @@
     Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #include "armdefs.h"
+#include "armemu.h"
 #include "ansidecl.h"
 
 extern unsigned ARMul_CoProInit (ARMul_State * state);
@@ -79,15 +80,29 @@ MMUMCR (ARMul_State * state, unsigned type ATTRIBUTE_UNUSED, ARMword instr, ARMw
   int reg = BITS (16, 19) & 7;
 
   MMUReg[reg] = value;
+  
   if (reg == 1)
     {
+      ARMword p,d,l,b;
+
+      p = state->prog32Sig;
+      d = state->data32Sig;
+      l = state->lateabtSig;
+      b = state->bigendSig;
+      
       state->prog32Sig = value >> 4 & 1;
       state->data32Sig = value >> 5 & 1;
       state->lateabtSig = value >> 6 & 1;
       state->bigendSig = value >> 7 & 1;
-      state->Emulate = TRUE;	/* force ARMulator to notice these now ! */
+
+      if (p != state->prog32Sig
+	  || d != state->data32Sig
+	  || l != state->lateabtSig
+	  || b != state->bigendSig)
+	state->Emulate = CHANGEMODE;	/* Force ARMulator to notice these now.  */
     }
-  return (ARMul_DONE);
+  
+  return ARMul_DONE;
 }
 
 
@@ -106,15 +121,30 @@ MMUWrite (ARMul_State * state, unsigned reg, ARMword value)
 {
   if (reg < 8)
     MMUReg[reg] = value;
+  
   if (reg == 1)
     {
+      ARMword p,d,l,b;
+
+      p = state->prog32Sig;
+      d = state->data32Sig;
+      l = state->lateabtSig;
+      b = state->bigendSig;
+      
       state->prog32Sig = value >> 4 & 1;
       state->data32Sig = value >> 5 & 1;
       state->lateabtSig = value >> 6 & 1;
       state->bigendSig = value >> 7 & 1;
-      state->Emulate = TRUE;	/* force ARMulator to notice these now ! */
+
+      
+      if (p != state->prog32Sig
+	  || d != state->data32Sig
+	  || l != state->lateabtSig
+	  || b != state->bigendSig)
+	state->Emulate = CHANGEMODE;	/* Force ARMulator to notice these now.  */
     }
-  return (TRUE);
+  
+  return TRUE;
 }
 
 

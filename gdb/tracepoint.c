@@ -58,19 +58,19 @@
 
 
 extern int info_verbose;
-extern void (*readline_begin_hook) PARAMS ((char *,...));
-extern char *(*readline_hook) PARAMS ((char *));
-extern void (*readline_end_hook) PARAMS ((void));
-extern void x_command PARAMS ((char *, int));
+extern void (*readline_begin_hook) (char *, ...);
+extern char *(*readline_hook) (char *);
+extern void (*readline_end_hook) (void);
+extern void x_command (char *, int);
 extern int addressprint;	/* Print machine addresses? */
 
 /* GDB commands implemented in other modules:
  */  
 
-extern void output_command PARAMS ((char *, int));
-extern void registers_info PARAMS ((char *, int));
-extern void args_info      PARAMS ((char *, int));
-extern void locals_info    PARAMS ((char *, int));
+extern void output_command (char *, int);
+extern void registers_info (char *, int);
+extern void args_info (char *, int);
+extern void locals_info (char *, int);
 
 
 /* If this definition isn't overridden by the header files, assume
@@ -129,37 +129,38 @@ static struct symtab_and_line traceframe_sal;
 static struct cmd_list_element *tfindlist;
 
 /* ======= Important command functions: ======= */
-static void trace_command PARAMS ((char *, int));
-static void tracepoints_info PARAMS ((char *, int));
-static void delete_trace_command PARAMS ((char *, int));
-static void enable_trace_command PARAMS ((char *, int));
-static void disable_trace_command PARAMS ((char *, int));
-static void trace_pass_command PARAMS ((char *, int));
-static void trace_actions_command PARAMS ((char *, int));
-static void trace_start_command PARAMS ((char *, int));
-static void trace_stop_command PARAMS ((char *, int));
-static void trace_status_command PARAMS ((char *, int));
-static void trace_find_command PARAMS ((char *, int));
-static void trace_find_pc_command PARAMS ((char *, int));
-static void trace_find_tracepoint_command PARAMS ((char *, int));
-static void trace_find_line_command PARAMS ((char *, int));
-static void trace_find_range_command PARAMS ((char *, int));
-static void trace_find_outside_command PARAMS ((char *, int));
-static void tracepoint_save_command PARAMS ((char *, int));
-static void trace_dump_command PARAMS ((char *, int));
+static void trace_command (char *, int);
+static void tracepoints_info (char *, int);
+static void delete_trace_command (char *, int);
+static void enable_trace_command (char *, int);
+static void disable_trace_command (char *, int);
+static void trace_pass_command (char *, int);
+static void trace_actions_command (char *, int);
+static void trace_start_command (char *, int);
+static void trace_stop_command (char *, int);
+static void trace_status_command (char *, int);
+static void trace_find_command (char *, int);
+static void trace_find_pc_command (char *, int);
+static void trace_find_tracepoint_command (char *, int);
+static void trace_find_line_command (char *, int);
+static void trace_find_range_command (char *, int);
+static void trace_find_outside_command (char *, int);
+static void tracepoint_save_command (char *, int);
+static void trace_dump_command (char *, int);
 
 /* support routines */
-static void trace_mention PARAMS ((struct tracepoint *));
+static void trace_mention (struct tracepoint *);
 
 struct collection_list;
-static void add_aexpr PARAMS ((struct collection_list *, struct agent_expr *));
+static void add_aexpr (struct collection_list *, struct agent_expr *);
 static unsigned char *mem2hex (unsigned char *, unsigned char *, int);
-static void add_register PARAMS ((struct collection_list * collection, 
-				  unsigned int regno));
-static void free_actions_list PARAMS ((char **actions_list));
-static void free_actions_list_cleanup_wrapper PARAMS ((void *));
+static void add_register (struct collection_list *collection,
+			  unsigned int regno);
+static struct cleanup *make_cleanup_free_actions (struct tracepoint *t);
+static void free_actions_list (char **actions_list);
+static void free_actions_list_cleanup_wrapper (void *);
 
-extern void _initialize_tracepoint PARAMS ((void));
+extern void _initialize_tracepoint (void);
 
 /* Utility: returns true if "target remote" */
 static int
@@ -268,11 +269,11 @@ set_traceframe_context (trace_pc)
       traceframe_sal.pc = traceframe_sal.line = 0;
       traceframe_sal.symtab = NULL;
       set_internalvar (lookup_internalvar ("trace_func"),
-		       value_from_longest (charstar, (LONGEST) 0));
+		       value_from_pointer (charstar, (LONGEST) 0));
       set_internalvar (lookup_internalvar ("trace_file"),
-		       value_from_longest (charstar, (LONGEST) 0));
+		       value_from_pointer (charstar, (LONGEST) 0));
       set_internalvar (lookup_internalvar ("trace_line"),
-		       value_from_longest (builtin_type_int, (LONGEST) - 1));
+		       value_from_pointer (builtin_type_int, (LONGEST) - 1));
       return;
     }
 
@@ -289,7 +290,7 @@ set_traceframe_context (trace_pc)
   if (traceframe_fun == NULL ||
       SYMBOL_NAME (traceframe_fun) == NULL)
     set_internalvar (lookup_internalvar ("trace_func"),
-		     value_from_longest (charstar, (LONGEST) 0));
+		     value_from_pointer (charstar, (LONGEST) 0));
   else
     {
       len = strlen (SYMBOL_NAME (traceframe_fun));
@@ -310,7 +311,7 @@ set_traceframe_context (trace_pc)
   if (traceframe_sal.symtab == NULL ||
       traceframe_sal.symtab->filename == NULL)
     set_internalvar (lookup_internalvar ("trace_file"),
-		     value_from_longest (charstar, (LONGEST) 0));
+		     value_from_pointer (charstar, (LONGEST) 0));
   else
     {
       len = strlen (traceframe_sal.symtab->filename);
@@ -759,7 +760,7 @@ trace_pass_command (args, from_tty)
 /* ACTIONS functions: */
 
 /* Prototypes for action-parsing utility commands  */
-static void read_actions PARAMS ((struct tracepoint *));
+static void read_actions (struct tracepoint *);
 
 /* The three functions:
    collect_pseudocommand, 
@@ -854,7 +855,7 @@ read_actions (t)
 	signal (STOP_SIGNAL, stop_sig);
     }
 #endif
-  old_chain = make_cleanup ((make_cleanup_func) free_actions, (void *) t);
+  old_chain = make_cleanup_free_actions (t);
   while (1)
     {
       /* Make sure that all output has been output.  Some machines may let
@@ -977,8 +978,7 @@ validate_actionline (line, t)
 	      /* else fall thru, treat p as an expression and parse it! */
 	    }
 	  exp = parse_exp_1 (&p, block_for_pc (t->address), 1);
-	  old_chain = make_cleanup ((make_cleanup_func) free_current_contents,
-				    &exp);
+	  old_chain = make_cleanup (free_current_contents, &exp);
 
 	  if (exp->elts[0].opcode == OP_VAR_VALUE)
 	    {
@@ -1000,7 +1000,7 @@ validate_actionline (line, t)
 	  /* we have something to collect, make sure that the expr to
 	     bytecode translator can handle it and that it's not too long */
 	  aexpr = gen_trace_for_expr (t->address, exp);
-	  (void) make_cleanup ((make_cleanup_func) free_agent_expr, aexpr);
+	  make_cleanup_free_agent_expr (aexpr);
 
 	  if (aexpr->len > MAX_AGENT_EXPR_LEN)
 	    error ("expression too complicated, try simplifying");
@@ -1064,6 +1064,18 @@ free_actions (t)
   t->actions = NULL;
 }
 
+static void
+do_free_actions_cleanup (void *t)
+{
+  free_actions (t);
+}
+
+static struct cleanup *
+make_cleanup_free_actions (struct tracepoint *t)
+{
+  return make_cleanup (do_free_actions_cleanup, t);
+}
+
 struct memrange
 {
   int type;		/* 0 for absolute memory range, else basereg number */
@@ -1086,7 +1098,7 @@ tracepoint_list, stepping_list;
 
 /* MEMRANGE functions: */
 
-static int memrange_cmp PARAMS ((const void *, const void *));
+static int memrange_cmp (const void *, const void *);
 
 /* compare memranges for qsort */
 static int
@@ -1588,8 +1600,7 @@ encode_actions (t, tdp_actions, stepping_actions)
 		  struct agent_reqs areqs;
 
 		  exp = parse_exp_1 (&action_exp, block_for_pc (t->address), 1);
-		  old_chain = make_cleanup ((make_cleanup_func)
-					    free_current_contents, &exp);
+		  old_chain = make_cleanup (free_current_contents, &exp);
 
 		  switch (exp->elts[0].opcode)
 		    {
@@ -1618,8 +1629,7 @@ encode_actions (t, tdp_actions, stepping_actions)
 		    default:	/* full-fledged expression */
 		      aexpr = gen_trace_for_expr (t->address, exp);
 
-		      old_chain1 = make_cleanup ((make_cleanup_func)
-						 free_agent_expr, aexpr);
+		      old_chain1 = make_cleanup_free_agent_expr (aexpr);
 
 		      ax_reqs (aexpr, &areqs);
 		      if (areqs.flaw != agent_flaw_none)

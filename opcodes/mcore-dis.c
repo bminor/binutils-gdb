@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+#include "sysdep.h"
 #include <stdio.h>
 #define STATIC_TABLE
 #define DEFINE_TABLE
@@ -168,7 +169,7 @@ print_insn_mcore (memaddr, info)
 	    
 	    if (strcmp (op->name, "bsr") == 0)
 	      {
-		/* for bsr, we'll try to get a symbol for the target */
+		/* For bsr, we'll try to get a symbol for the target.  */
 		val = memaddr + 2 + (val << 1);
 		
 		if (info->print_address_func && val != 0)
@@ -267,12 +268,12 @@ print_insn_mcore (memaddr, info)
 	  break;
 	  
 	default:
-	  /* if the disassembler lags the instruction set */
+	  /* If the disassembler lags the instruction set.  */
 	  fprintf (stream, "\tundecoded operands, inst is 0x%04x", inst);
 	  break;
 	}
     }
   
-  /* Say how many bytes we consumed? */
+  /* Say how many bytes we consumed.  */
   return 2;
 }

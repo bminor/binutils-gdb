@@ -46,7 +46,7 @@
 extern int child_suppress_run;
 extern struct target_ops child_ops;	/* target vector for inftarg.c */
 
-extern void _initialize_hpux_thread PARAMS ((void));
+extern void _initialize_hpux_thread (void);
 
 struct string_map
   {
@@ -61,14 +61,13 @@ static int main_pid;		/* Real process ID */
 static CORE_ADDR P_cma__g_known_threads;
 static CORE_ADDR P_cma__g_current_thread;
 
-static struct cleanup *save_inferior_pid PARAMS ((void));
+static struct cleanup *save_inferior_pid (void);
 
-static void restore_inferior_pid PARAMS ((int pid));
+static void restore_inferior_pid (int pid);
 
-static void hpux_thread_resume PARAMS ((int pid, int step,
-					enum target_signal signo));
+static void hpux_thread_resume (int pid, int step, enum target_signal signo);
 
-static void init_hpux_thread_ops PARAMS ((void));
+static void init_hpux_thread_ops (void);
 
 static struct target_ops hpux_thread_ops;
 
@@ -113,7 +112,7 @@ restore_inferior_pid (pid)
   inferior_pid = pid;
 }
 
-static int find_active_thread PARAMS ((void));
+static int find_active_thread (void);
 
 static int cached_thread;
 static int cached_active_thread;
@@ -137,7 +136,7 @@ find_active_thread ()
   return (cma_thread_get_unique (&tcb.prolog.client_thread) << 16) | main_pid;
 }
 
-static cma__t_int_tcb *find_tcb PARAMS ((int thread));
+static cma__t_int_tcb *find_tcb (int thread);
 
 static cma__t_int_tcb *
 find_tcb (thread)
@@ -525,7 +524,7 @@ hpux_thread_create_inferior (exec_file, allargs, env)
  */
 
 /* Saved pointer to previous owner of the new_objfile event. */
-static void (*target_new_objfile_chain) PARAMS ((struct objfile *));
+static void (*target_new_objfile_chain) (struct objfile *);
 
 void
 hpux_thread_new_objfile (objfile)

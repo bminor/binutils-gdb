@@ -1,5 +1,6 @@
 /* Print mips instructions for GDB, the GNU debugger, or for objdump.
-   Copyright (c) 1989, 91-97, 1998 Free Software Foundation, Inc.
+   Copyright (c) 1989, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
+   Free Software Foundation, Inc.
    Contributed by Nobuyuki Hikichi(hikichi@sra.co.jp).
 
 This file is part of GDB, GAS, and the GNU binutils.
@@ -18,7 +19,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#include <ansidecl.h>
 #include "sysdep.h"
 #include "dis-asm.h"
 #include "opcode/mips.h"
@@ -50,7 +50,7 @@ static int _print_insn_mips PARAMS ((bfd_vma, unsigned long int,
 
 
 /* FIXME: This should be shared with gdb somehow.  */
-#define REGISTER_NAMES 	\
+#define STD_REGISTER_NAMES 	\
     {	"zero",	"at",	"v0",	"v1",	"a0",	"a1",	"a2",	"a3", \
 	"t0",	"t1",	"t2",	"t3",	"t4",	"t5",	"t6",	"t7", \
 	"s0",	"s1",	"s2",	"s3",	"s4",	"s5",	"s6",	"s7", \
@@ -64,13 +64,17 @@ static int _print_insn_mips PARAMS ((bfd_vma, unsigned long int,
 	"epc",  "prid"\
     }
 
-static CONST char * CONST reg_names[] = REGISTER_NAMES;
+static CONST char * CONST std_reg_names[] = STD_REGISTER_NAMES;
 
 /* The mips16 register names.  */
 static const char * const mips16_reg_names[] =
 {
   "s0", "s1", "v0", "v1", "a0", "a1", "a2", "a3"
 };
+
+/* Scalar register names. set_mips_isa_type() decides which register name
+   table to use.  */
+static CONST char * CONST *reg_names = NULL;
 
 /* subroutine */
 static void
@@ -133,7 +137,8 @@ print_insn_arg (d, l, pc, info)
 
     case 'a':
       (*info->print_address_func)
-	(((pc & 0xF0000000) | (((l >> OP_SH_TARGET) & OP_MASK_TARGET) << 2)),
+	(((pc & ~ (bfd_vma) 0x0fffffff)
+	  | (((l >> OP_SH_TARGET) & OP_MASK_TARGET) << 2)),
 	 info);
       break;
 
@@ -253,6 +258,9 @@ set_mips_isa_type (mach, isa, cputype)
 {
   int target_processor = 0;
   int mips_isa = 0;
+
+  /* Use standard MIPS register names by default.  */
+  reg_names = std_reg_names;
 
   switch (mach)
     {

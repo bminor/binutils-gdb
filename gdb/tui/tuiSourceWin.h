@@ -5,42 +5,43 @@
  */
 
 
-extern void tuiDisplayMainFunction PARAMS ((void));
+extern void tuiDisplayMainFunction (void);
 extern void tuiUpdateSourceWindow PARAMS
   ((TuiWinInfoPtr, struct symtab *, Opaque, int));
 extern void tuiUpdateSourceWindowAsIs PARAMS
   ((TuiWinInfoPtr, struct symtab *, Opaque, int));
-extern void tuiUpdateSourceWindowsWithAddr PARAMS ((Opaque));
-extern void tui_vUpdateSourceWindowsWithAddr PARAMS ((va_list));
-extern void tuiUpdateSourceWindowsWithLine PARAMS ((struct symtab *, int));
-extern void tui_vUpdateSourceWindowsWithLine PARAMS ((va_list));
-extern void tuiUpdateSourceWindowsFromLocator PARAMS ((void));
-extern void tuiClearSourceContent PARAMS ((TuiWinInfoPtr, int));
-extern void tuiClearAllSourceWinsContent PARAMS ((int));
-extern void tuiEraseSourceContent PARAMS ((TuiWinInfoPtr, int));
-extern void tuiEraseAllSourceWinsContent PARAMS ((int));
-extern void tuiSetSourceContentNil PARAMS ((TuiWinInfoPtr, char *));
-extern void tuiShowSourceContent PARAMS ((TuiWinInfoPtr));
-extern void tuiShowAllSourceWinsContent PARAMS ((void));
-extern void tuiHorizontalSourceScroll PARAMS ((TuiWinInfoPtr, TuiScrollDirection, int));
-extern void tuiUpdateOnEnd PARAMS ((void));
+extern void tuiUpdateSourceWindowsWithAddr (Opaque);
+extern void tui_vUpdateSourceWindowsWithAddr (va_list);
+extern void tuiUpdateSourceWindowsWithLine (struct symtab *, int);
+extern void tui_vUpdateSourceWindowsWithLine (va_list);
+extern void tuiUpdateSourceWindowsFromLocator (void);
+extern void tuiClearSourceContent (TuiWinInfoPtr, int);
+extern void tuiClearAllSourceWinsContent (int);
+extern void tuiEraseSourceContent (TuiWinInfoPtr, int);
+extern void tuiEraseAllSourceWinsContent (int);
+extern void tuiSetSourceContentNil (TuiWinInfoPtr, char *);
+extern void tuiShowSourceContent (TuiWinInfoPtr);
+extern void tuiShowAllSourceWinsContent (void);
+extern void tuiHorizontalSourceScroll (TuiWinInfoPtr, TuiScrollDirection,
+				       int);
+extern void tuiUpdateOnEnd (void);
 
-extern TuiStatus tuiSetExecInfoContent PARAMS ((TuiWinInfoPtr));
-extern void tuiShowExecInfoContent PARAMS ((TuiWinInfoPtr));
-extern void tuiShowAllExecInfosContent PARAMS ((void));
-extern void tuiEraseExecInfoContent PARAMS ((TuiWinInfoPtr));
-extern void tuiEraseAllExecInfosContent PARAMS ((void));
-extern void tuiClearExecInfoContent PARAMS ((TuiWinInfoPtr));
-extern void tuiClearAllExecInfosContent PARAMS ((void));
-extern void tuiUpdateExecInfo PARAMS ((TuiWinInfoPtr));
-extern void tuiUpdateAllExecInfos PARAMS ((void));
+extern TuiStatus tuiSetExecInfoContent (TuiWinInfoPtr);
+extern void tuiShowExecInfoContent (TuiWinInfoPtr);
+extern void tuiShowAllExecInfosContent (void);
+extern void tuiEraseExecInfoContent (TuiWinInfoPtr);
+extern void tuiEraseAllExecInfosContent (void);
+extern void tuiClearExecInfoContent (TuiWinInfoPtr);
+extern void tuiClearAllExecInfosContent (void);
+extern void tuiUpdateExecInfo (TuiWinInfoPtr);
+extern void tuiUpdateAllExecInfos (void);
 
-extern void tuiSetIsExecPointAt PARAMS ((Opaque, TuiWinInfoPtr));
-extern void tuiSetHasBreakAt PARAMS ((struct breakpoint *, TuiWinInfoPtr, int));
-extern void tuiAllSetHasBreakAt PARAMS ((struct breakpoint *, int));
-extern void tui_vAllSetHasBreakAt PARAMS ((va_list));
-extern TuiStatus tuiAllocSourceBuffer PARAMS ((TuiWinInfoPtr));
-extern int tuiLineIsDisplayed PARAMS ((Opaque, TuiWinInfoPtr, int));
+extern void tuiSetIsExecPointAt (Opaque, TuiWinInfoPtr);
+extern void tuiSetHasBreakAt (struct breakpoint *, TuiWinInfoPtr, int);
+extern void tuiAllSetHasBreakAt (struct breakpoint *, int);
+extern void tui_vAllSetHasBreakAt (va_list);
+extern TuiStatus tuiAllocSourceBuffer (TuiWinInfoPtr);
+extern int tuiLineIsDisplayed (Opaque, TuiWinInfoPtr, int);
 
 
 /*

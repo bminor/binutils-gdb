@@ -197,8 +197,8 @@ struct objstats
 
 #define OBJSTAT(objfile, expr) (objfile -> stats.expr)
 #define OBJSTATS struct objstats stats
-extern void print_objfile_statistics PARAMS ((void));
-extern void print_symbol_bcache_statistics PARAMS ((void));
+extern void print_objfile_statistics (void);
+extern void print_symbol_bcache_statistics (void);
 
 /* Number of entries in the minimal symbol hash table.  */
 #define MINIMAL_SYMBOL_HASH_SIZE 349
@@ -372,6 +372,18 @@ struct objfile
     struct section_offsets *section_offsets;
     int num_sections;
 
+    /* Indexes in the section_offsets array. These are initialized by the
+       *_symfile_offsets() family of functions (som_symfile_offsets,
+       xcoff_symfile_offsets, default_symfile_offsets). In theory they
+       should correspond to the section indexes used by bfd for the
+       current objfile. The exception to this for the time being is the
+       SOM version. */
+
+    int sect_index_text;
+    int sect_index_data;
+    int sect_index_bss;
+    int sect_index_rodata;
+
     /* These pointers are used to locate the section table, which
        among other things, is used to map pc addresses into sections.
        SECTIONS points to the first entry in the table, and
@@ -481,56 +493,45 @@ extern struct objfile *object_files;
 
 /* Declarations for functions defined in objfiles.c */
 
-extern struct objfile *
-allocate_objfile PARAMS ((bfd *, int));
+extern struct objfile *allocate_objfile (bfd *, int);
 
-extern int
-build_objfile_section_table PARAMS ((struct objfile *));
+extern int build_objfile_section_table (struct objfile *);
 
-extern void objfile_to_front PARAMS ((struct objfile *));
+extern void objfile_to_front (struct objfile *);
 
-extern void
-unlink_objfile PARAMS ((struct objfile *));
+extern void unlink_objfile (struct objfile *);
 
-extern void
-free_objfile PARAMS ((struct objfile *));
+extern void free_objfile (struct objfile *);
 
-extern void
-free_all_objfiles PARAMS ((void));
+extern struct cleanup *make_cleanup_free_objfile (struct objfile *);
 
-extern void
-objfile_relocate PARAMS ((struct objfile *, struct section_offsets *));
+extern void free_all_objfiles (void);
 
-extern int
-have_partial_symbols PARAMS ((void));
+extern void objfile_relocate (struct objfile *, struct section_offsets *);
 
-extern int
-have_full_symbols PARAMS ((void));
+extern int have_partial_symbols (void);
+
+extern int have_full_symbols (void);
 
 /* This operation deletes all objfile entries that represent solibs that
    weren't explicitly loaded by the user, via e.g., the add-symbol-file
    command.
  */
-extern void
-objfile_purge_solibs PARAMS ((void));
+extern void objfile_purge_solibs (void);
 
 /* Functions for dealing with the minimal symbol table, really a misc
    address<->symbol mapping for things we don't have debug symbols for.  */
 
-extern int
-have_minimal_symbols PARAMS ((void));
+extern int have_minimal_symbols (void);
 
-extern struct obj_section *
-  find_pc_section PARAMS ((CORE_ADDR pc));
+extern struct obj_section *find_pc_section (CORE_ADDR pc);
 
-extern struct obj_section *
-  find_pc_sect_section PARAMS ((CORE_ADDR pc, asection * section));
+extern struct obj_section *find_pc_sect_section (CORE_ADDR pc,
+						 asection * section);
 
-extern int
-in_plt_section PARAMS ((CORE_ADDR, char *));
+extern int in_plt_section (CORE_ADDR, char *);
 
-extern int
-is_in_import_list PARAMS ((char *, struct objfile *));
+extern int is_in_import_list (char *, struct objfile *);
 
 /* Traverse all object files.  ALL_OBJFILES_SAFE works even if you delete
    the objfile during the traversal.  */
@@ -583,5 +584,21 @@ is_in_import_list PARAMS ((char *, struct objfile *));
 #define ALL_OBJSECTIONS(objfile, osect)		\
   ALL_OBJFILES (objfile)			\
     ALL_OBJFILE_OSECTIONS (objfile, osect)
+
+#define SECT_OFF_DATA(objfile) \
+     ((objfile->sect_index_data == -1) ? \
+      (internal_error ("sect_index_data not initialized"), -1) : objfile->sect_index_data)
+
+#define SECT_OFF_RODATA(objfile) \
+     ((objfile->sect_index_rodata == -1) ? \
+      (internal_error ("sect_index_rodata not initialized"), -1) : objfile->sect_index_rodata)
+
+#define SECT_OFF_TEXT(objfile) \
+     ((objfile->sect_index_text == -1) ? \
+      (internal_error ("sect_index_text not initialized"), -1) : objfile->sect_index_text)
+
+#define SECT_OFF_BSS(objfile) \
+     ((objfile->sect_index_bss == -1) ? \
+      (internal_error ("sect_index_bss not initialized"), -1) : objfile->sect_index_bss)
 
 #endif /* !defined (OBJFILES_H) */

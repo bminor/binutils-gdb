@@ -46,7 +46,7 @@
 
 extern struct target_ops child_ops;
 
-static void child_stop PARAMS ((void));
+static void child_stop (void);
 
 static void
 child_fetch_inferior_registers (int r)

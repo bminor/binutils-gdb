@@ -63,7 +63,7 @@
 static char zerobuf[MAX_REGISTER_RAW_SIZE] =
 {0};
 
-static void fetch_core_registers PARAMS ((char *, unsigned, int, CORE_ADDR));
+static void fetch_core_registers (char *, unsigned, int, CORE_ADDR);
 
 /* Get all registers from the inferior */
 

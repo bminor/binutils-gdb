@@ -35,14 +35,11 @@
 
 #include <sys/file.h>
 
-static void
-fetch_inferior_register PARAMS ((int, unsigned int));
+static void fetch_inferior_register (int, unsigned int);
 
-static void
-store_inferior_register_1 PARAMS ((int, unsigned int, int));
+static void store_inferior_register_1 (int, unsigned int, int);
 
-static void
-store_inferior_register PARAMS ((int, unsigned int));
+static void store_inferior_register (int, unsigned int);
 
 /* Get kernel_u_addr using HPUX-style nlist().  */
 CORE_ADDR kernel_u_addr;

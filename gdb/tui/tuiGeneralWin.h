@@ -4,20 +4,20 @@
 /*
    ** Functions
  */
-extern void tuiClearWin PARAMS ((TuiGenWinInfoPtr));
-extern void unhighlightWin PARAMS ((TuiWinInfoPtr));
-extern void makeVisible PARAMS ((TuiGenWinInfoPtr, int));
-extern void makeAllVisible PARAMS ((int));
-extern void scrollWinForward PARAMS ((TuiGenWinInfoPtr, int));
-extern void scrollWinBackward PARAMS ((TuiGenWinInfoPtr, int));
-extern void makeWindow PARAMS ((TuiGenWinInfoPtr, int));
-extern TuiWinInfoPtr copyWin PARAMS ((TuiWinInfoPtr));
-extern void boxWin PARAMS ((TuiGenWinInfoPtr, int));
-extern void highlightWin PARAMS ((TuiWinInfoPtr));
-extern void checkAndDisplayHighlightIfNeeded PARAMS ((TuiWinInfoPtr));
-extern void refreshAll PARAMS ((TuiWinInfoPtr *));
-extern void tuiDelwin PARAMS ((WINDOW * window));
-extern void tuiRefreshWin PARAMS ((TuiGenWinInfoPtr));
+extern void tuiClearWin (TuiGenWinInfoPtr);
+extern void unhighlightWin (TuiWinInfoPtr);
+extern void makeVisible (TuiGenWinInfoPtr, int);
+extern void makeAllVisible (int);
+extern void scrollWinForward (TuiGenWinInfoPtr, int);
+extern void scrollWinBackward (TuiGenWinInfoPtr, int);
+extern void makeWindow (TuiGenWinInfoPtr, int);
+extern TuiWinInfoPtr copyWin (TuiWinInfoPtr);
+extern void boxWin (TuiGenWinInfoPtr, int);
+extern void highlightWin (TuiWinInfoPtr);
+extern void checkAndDisplayHighlightIfNeeded (TuiWinInfoPtr);
+extern void refreshAll (TuiWinInfoPtr *);
+extern void tuiDelwin (WINDOW * window);
+extern void tuiRefreshWin (TuiGenWinInfoPtr);
 
 /*
    ** Macros

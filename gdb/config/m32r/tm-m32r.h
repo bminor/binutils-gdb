@@ -107,15 +107,15 @@ struct value;
   int using_frame_pointer;
 
 
-extern void m32r_init_extra_frame_info PARAMS ((struct frame_info * fi));
+extern void m32r_init_extra_frame_info (struct frame_info *fi);
 /* mvs_check  INIT_EXTRA_FRAME_INFO */
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) m32r_init_extra_frame_info (fi)
 /* mvs_no_check  INIT_FRAME_PC */
 #define INIT_FRAME_PC		/* Not necessary */
 
 extern void
-m32r_frame_find_saved_regs PARAMS ((struct frame_info * fi,
-				    struct frame_saved_regs * regaddr));
+m32r_frame_find_saved_regs (struct frame_info *fi,
+			    struct frame_saved_regs *regaddr);
 
 /* Put here the code to store, into a struct frame_saved_regs,
    the addresses of the saved registers of frame described by FRAME_INFO.
@@ -127,15 +127,14 @@ m32r_frame_find_saved_regs PARAMS ((struct frame_info * fi,
 #define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs)	    \
    m32r_frame_find_saved_regs(frame_info, &(frame_saved_regs))
 
-extern CORE_ADDR m32r_frame_chain PARAMS ((struct frame_info * fi));
+extern CORE_ADDR m32r_frame_chain (struct frame_info *fi);
 /* mvs_check  FRAME_CHAIN */
 #define FRAME_CHAIN(fi) 		m32r_frame_chain (fi)
 
 #define FRAME_CHAIN_VALID(fp, frame)	generic_file_frame_chain_valid (fp, frame)
 
-extern CORE_ADDR m32r_find_callers_reg PARAMS ((struct frame_info * fi,
-						int regnum));
-extern CORE_ADDR m32r_frame_saved_pc PARAMS ((struct frame_info *));
+extern CORE_ADDR m32r_find_callers_reg (struct frame_info *fi, int regnum);
+extern CORE_ADDR m32r_frame_saved_pc (struct frame_info *);
 /* mvs_check  FRAME_SAVED_PC */
 #define FRAME_SAVED_PC(fi)		m32r_frame_saved_pc (fi)
 
@@ -152,7 +151,7 @@ extern CORE_ADDR m32r_frame_saved_pc PARAMS ((struct frame_info *));
 		       ((TYPE_LENGTH (TYPE) > 4 ? 8:4) - TYPE_LENGTH (TYPE)),\
 		       (VALBUF), TYPE_LENGTH (TYPE));
 
-extern CORE_ADDR m32r_skip_prologue PARAMS ((CORE_ADDR pc));
+extern CORE_ADDR m32r_skip_prologue (CORE_ADDR pc);
 /* mvs_check  SKIP_PROLOGUE */
 #define SKIP_PROLOGUE(pc) (m32r_skip_prologue (pc))
 
@@ -198,19 +197,19 @@ extern use_struct_convention_fn m32r_use_struct_convention;
 
 /* target-specific dummy_frame stuff */
 
-extern struct frame_info *m32r_pop_frame PARAMS ((struct frame_info * frame));
+extern struct frame_info *m32r_pop_frame (struct frame_info *frame);
 /* mvs_check  POP_FRAME */
 #define POP_FRAME m32r_pop_frame (get_current_frame ())
 
 /* mvs_no_check  STACK_ALIGN */
 /* #define STACK_ALIGN(x) ((x + 3) & ~3) */
 
-extern CORE_ADDR m32r_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));
-extern CORE_ADDR m32r_push_arguments PARAMS ((int nargs,
-					      struct value ** args,
-					      CORE_ADDR sp,
-					      unsigned char struct_return,
-					      CORE_ADDR struct_addr));
+extern CORE_ADDR m32r_push_return_address (CORE_ADDR, CORE_ADDR);
+extern CORE_ADDR m32r_push_arguments (int nargs,
+				      struct value **args,
+				      CORE_ADDR sp,
+				      unsigned char struct_return,
+				      CORE_ADDR struct_addr);
 
 
 

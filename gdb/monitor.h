@@ -95,16 +95,15 @@ struct monitor_ops
        GDB with the value of a register.  */
     char *dump_registers;	/* Command to dump all regs at once */
     char *register_pattern;	/* Pattern that picks out register from reg dump */
-    void (*supply_register) PARAMS ((char *name, int namelen,
-				     char *val, int vallen));
+    void (*supply_register) (char *name, int namelen, char *val, int vallen);
     void (*load_routine) PARAMS ((serial_t desc, char *file,
 				  int hashmark));	/* Download routine */
     int (*dumpregs) PARAMS ((void));	/* routine to dump all registers */
     int (*continue_hook) PARAMS ((void));	/* Emit the continue command */
-    int (*wait_filter) PARAMS ((char *buf,	/* Maybe contains registers */
-				int bufmax,
-				int *response_length,
-				struct target_waitstatus * status));
+    int (*wait_filter) (char *buf,	/* Maybe contains registers */
+			int bufmax,
+			int *response_length,
+			struct target_waitstatus * status);
     char *load;			/* load command */
     char *loadresp;		/* Response to load command */
     char *prompt;		/* monitor command prompt */
@@ -233,20 +232,18 @@ struct monitor_ops
 
 #define SREC_SIZE 160
 
-extern void monitor_open PARAMS ((char *args, struct monitor_ops * ops,
-				  int from_tty));
-extern void monitor_close PARAMS ((int quitting));
-extern char *monitor_supply_register PARAMS ((int regno, char *valstr));
-extern int monitor_expect PARAMS ((char *prompt, char *buf, int buflen));
-extern int monitor_expect_prompt PARAMS ((char *buf, int buflen));
-extern void monitor_printf
-PARAMS ((char *,...))
+extern void monitor_open (char *args, struct monitor_ops *ops, int from_tty);
+extern void monitor_close (int quitting);
+extern char *monitor_supply_register (int regno, char *valstr);
+extern int monitor_expect (char *prompt, char *buf, int buflen);
+extern int monitor_expect_prompt (char *buf, int buflen);
+extern void monitor_printf (char *, ...) ATTR_FORMAT (printf, 1, 2);
+extern void
+monitor_printf_noecho (char *, ...)
 ATTR_FORMAT (printf, 1, 2);
-     extern void monitor_printf_noecho PARAMS ((char *,...))
-  ATTR_FORMAT (printf, 1, 2);
-     extern void monitor_write PARAMS ((char *buf, int buflen));
-     extern int monitor_readchar PARAMS ((void));
-     extern char *monitor_get_dev_name PARAMS ((void));
-     extern void init_monitor_ops PARAMS ((struct target_ops *));
-     extern int monitor_dump_reg_block PARAMS ((char *dump_cmd));
-     extern void flush_monitor_dcache PARAMS ((void));
+extern void monitor_write (char *buf, int buflen);
+extern int monitor_readchar (void);
+extern char *monitor_get_dev_name (void);
+extern void init_monitor_ops (struct target_ops *);
+extern int monitor_dump_reg_block (char *dump_cmd);
+extern void flush_monitor_dcache (void);

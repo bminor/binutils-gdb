@@ -161,8 +161,25 @@ update_time_from_event(event_queue *events)
     events->time_of_event = current_time - 1;
     events->time_from_event = -1;
   }
+  if (WITH_TRACE && ppc_trace[trace_events])
+    {
+      event_entry *event;
+      int i;
+      for (event = events->queue, i = 0;
+	   event != NULL;
+	   event = event->next, i++)
+	{
+	  TRACE(trace_events, ("event time-from-event - time %ld, delta %ld - event %d, tag 0x%lx, time %ld, handler 0x%lx, data 0x%lx\n",
+			       (long)current_time,
+			       (long)events->time_from_event,
+			       i,
+			       (long)event,
+			       (long)event->time_of_event,
+			       (long)event->handler,
+			       (long)event->data));
+	}
+    }
   ASSERT(current_time == event_queue_time(events));
-  ASSERT((events->time_from_event >= 0) == (events->queue != NULL));
 }
 
 STATIC_INLINE_EVENTS\
@@ -369,18 +386,22 @@ event_queue_process(event_queue *events)
     event_handler *handler = to_do->handler;
     void *data = to_do->data;
     events->queue = to_do->next;
-    TRACE(trace_events, ("event issued at %ld - tag 0x%lx - handler 0x%lx, data 0x%lx\n",
+    TRACE(trace_events, ("event issued at %ld - tag 0x%lx - time %ld, handler 0x%lx, data 0x%lx\n",
 			 (long)event_time,
 			 (long)to_do,
+			 (long)to_do->time_of_event,
 			 (long)handler,
 			 (long)data));
     zfree(to_do);
+    /* Always re-compute the time to the next event so that HANDLER()
+       can safely insert new events into the queue. */
+    update_time_from_event(events);
     handler(data);
   }
   events->processing = 0;
 
-  /* re-caculate time for new events */
-  update_time_from_event(events);
+  ASSERT(events->time_from_event > 0);
+  ASSERT(events->queue != NULL); /* always poll event */
 }
 
 

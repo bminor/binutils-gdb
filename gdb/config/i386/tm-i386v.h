@@ -90,7 +90,6 @@
 struct frame_info;
 struct frame_saved_regs;
 
-extern int
-i386_frame_num_args PARAMS ((struct frame_info *));
+extern int i386_frame_num_args (struct frame_info *);
 
 #endif /* ifndef TM_I386V_H */

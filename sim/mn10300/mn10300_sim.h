@@ -366,12 +366,12 @@ void put_byte PARAMS ((uint8 *, uint8));
 
 extern uint8 *map PARAMS ((SIM_ADDR addr));
 
-INLINE_SIM_MAIN (void) genericAdd PARAMS ((unsigned long source, unsigned long destReg));
-INLINE_SIM_MAIN (void) genericSub PARAMS ((unsigned long source, unsigned long destReg));
-INLINE_SIM_MAIN (void) genericCmp PARAMS ((unsigned long leftOpnd, unsigned long rightOpnd));
-INLINE_SIM_MAIN (void) genericOr PARAMS ((unsigned long source, unsigned long destReg));
-INLINE_SIM_MAIN (void) genericXor PARAMS ((unsigned long source, unsigned long destReg));
-INLINE_SIM_MAIN (void) genericBtst PARAMS ((unsigned long leftOpnd, unsigned long rightOpnd));
+INLINE_SIM_MAIN (void) genericAdd PARAMS ((unsigned32 source, unsigned32 destReg));
+INLINE_SIM_MAIN (void) genericSub PARAMS ((unsigned32 source, unsigned32 destReg));
+INLINE_SIM_MAIN (void) genericCmp PARAMS ((unsigned32 leftOpnd, unsigned32 rightOpnd));
+INLINE_SIM_MAIN (void) genericOr PARAMS ((unsigned32 source, unsigned32 destReg));
+INLINE_SIM_MAIN (void) genericXor PARAMS ((unsigned32 source, unsigned32 destReg));
+INLINE_SIM_MAIN (void) genericBtst PARAMS ((unsigned32 leftOpnd, unsigned32 rightOpnd));
 INLINE_SIM_MAIN (int) syscall_read_mem PARAMS ((host_callback *cb,
 						struct cb_syscall *sc,
 						unsigned long taddr,

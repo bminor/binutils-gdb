@@ -28,7 +28,7 @@
 #include "xmodem.h"
 
 
-static void w89k_open PARAMS ((char *args, int from_tty));
+static void w89k_open (char *args, int from_tty);
 
 /*
  * this array of registers need to match the indexes used by GDB. The

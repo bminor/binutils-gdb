@@ -195,89 +195,71 @@ static struct complaint ef_complaint =
 static struct complaint eb_complaint =
 {"Mismatched .eb symbol ignored starting at symnum %d", 0, 0};
 
-static void
-xcoff_initial_scan PARAMS ((struct objfile *, int));
+static void xcoff_initial_scan (struct objfile *, int);
+
+static void scan_xcoff_symtab (struct objfile *);
+
+static char *xcoff_next_symbol_text (struct objfile *);
+
+static void record_include_begin (struct coff_symbol *);
 
 static void
-scan_xcoff_symtab PARAMS ((struct objfile *));
+enter_line_range (struct subfile *, unsigned, unsigned,
+		  CORE_ADDR, CORE_ADDR, unsigned *);
 
-static char *
-  xcoff_next_symbol_text PARAMS ((struct objfile *));
+static void init_stringtab (bfd *, file_ptr, struct objfile *);
 
-static void
-record_include_begin PARAMS ((struct coff_symbol *));
+static void xcoff_symfile_init (struct objfile *);
 
-static void
-enter_line_range PARAMS ((struct subfile *, unsigned, unsigned,
-			  CORE_ADDR, CORE_ADDR, unsigned *));
+static void xcoff_new_init (struct objfile *);
 
-static void
-init_stringtab PARAMS ((bfd *, file_ptr, struct objfile *));
+static void xcoff_symfile_finish (struct objfile *);
 
 static void
-xcoff_symfile_init PARAMS ((struct objfile *));
+xcoff_symfile_offsets (struct objfile *, struct section_addr_info *addrs);
 
-static void
-xcoff_new_init PARAMS ((struct objfile *));
+static void find_linenos (bfd *, sec_ptr, PTR);
 
-static void
-xcoff_symfile_finish PARAMS ((struct objfile *));
+static char *coff_getfilename (union internal_auxent *, struct objfile *);
 
-static void
-  xcoff_symfile_offsets PARAMS ((struct objfile *, struct section_addr_info *addrs));
+static void read_symbol (struct internal_syment *, int);
 
-static void
-find_linenos PARAMS ((bfd *, sec_ptr, PTR));
+static int read_symbol_lineno (int);
 
-static char *
-  coff_getfilename PARAMS ((union internal_auxent *, struct objfile *));
+static int read_symbol_nvalue (int);
 
-static void
-read_symbol PARAMS ((struct internal_syment *, int));
+static struct symbol *process_xcoff_symbol (struct coff_symbol *,
+					    struct objfile *);
 
-static int
-read_symbol_lineno PARAMS ((int));
-
-static int
-read_symbol_nvalue PARAMS ((int));
-
-static struct symbol *
-  process_xcoff_symbol PARAMS ((struct coff_symbol *, struct objfile *));
-
-static void
-read_xcoff_symtab PARAMS ((struct partial_symtab *));
+static void read_xcoff_symtab (struct partial_symtab *);
 
 #if 0
-static void
-add_stab_to_list PARAMS ((char *, struct pending_stabs **));
+static void add_stab_to_list (char *, struct pending_stabs **);
 #endif
 
-static int
-compare_lte PARAMS ((const void *, const void *));
+static int compare_lte (const void *, const void *);
 
-static struct linetable *
-  arrange_linetable PARAMS ((struct linetable *));
+static struct linetable *arrange_linetable (struct linetable *);
 
-static void
-record_include_end PARAMS ((struct coff_symbol *));
+static void record_include_end (struct coff_symbol *);
 
-static void
-process_linenos PARAMS ((CORE_ADDR, CORE_ADDR));
+static void process_linenos (CORE_ADDR, CORE_ADDR);
 
 
 /* Translate from a COFF section number (target_index) to a SECT_OFF_*
    code.  */
-static int secnum_to_section PARAMS ((int, struct objfile *));
-static asection *secnum_to_bfd_section PARAMS ((int, struct objfile *));
+static int secnum_to_section (int, struct objfile *);
+static asection *secnum_to_bfd_section (int, struct objfile *);
 
 struct find_targ_sec_arg
   {
     int targ_index;
     int *resultp;
     asection **bfd_sect;
+    struct objfile *objfile;
   };
 
-static void find_targ_sec PARAMS ((bfd *, asection *, void *));
+static void find_targ_sec (bfd *, asection *, void *);
 
 static void
 find_targ_sec (abfd, sect, obj)
@@ -286,15 +268,16 @@ find_targ_sec (abfd, sect, obj)
      PTR obj;
 {
   struct find_targ_sec_arg *args = (struct find_targ_sec_arg *) obj;
+  struct objfile *objfile = args->objfile;
   if (sect->target_index == args->targ_index)
     {
       /* This is the section.  Figure out what SECT_OFF_* code it is.  */
       if (bfd_get_section_flags (abfd, sect) & SEC_CODE)
-	*args->resultp = SECT_OFF_TEXT;
+	*args->resultp = SECT_OFF_TEXT (objfile);
       else if (bfd_get_section_flags (abfd, sect) & SEC_LOAD)
-	*args->resultp = SECT_OFF_DATA;
+	*args->resultp = SECT_OFF_DATA (objfile);
       else
-	*args->resultp = SECT_OFF_BSS;
+	*args->resultp = SECT_OFF_BSS (objfile);
       *args->bfd_sect = sect;
     }
 }
@@ -305,12 +288,13 @@ secnum_to_section (secnum, objfile)
      int secnum;
      struct objfile *objfile;
 {
-  int off = SECT_OFF_TEXT;
+  int off = SECT_OFF_TEXT (objfile);
   asection *sect = NULL;
   struct find_targ_sec_arg args;
   args.targ_index = secnum;
   args.resultp = &off;
   args.bfd_sect = &sect;
+  args.objfile = objfile;
   bfd_map_over_sections (objfile->obfd, find_targ_sec, &args);
   return off;
 }
@@ -321,7 +305,7 @@ secnum_to_bfd_section (secnum, objfile)
      int secnum;
      struct objfile *objfile;
 {
-  int off = SECT_OFF_TEXT;
+  int off = SECT_OFF_TEXT (objfile);
   asection *sect = NULL;
   struct find_targ_sec_arg args;
   args.targ_index = secnum;
@@ -530,7 +514,7 @@ static int inclIndx;		/* last entry to table */
 static int inclLength;		/* table length */
 static int inclDepth;		/* nested include depth */
 
-static void allocate_include_entry PARAMS ((void));
+static void allocate_include_entry (void);
 
 static void
 record_include_begin (cs)
@@ -849,7 +833,7 @@ enter_line_range (subfile, beginoffset, endoffset, startaddr, endaddr,
 	      ? int_lnno.l_addr.l_paddr
 	      : read_symbol_nvalue (int_lnno.l_addr.l_symndx));
       addr += ANOFFSET (this_symtab_psymtab->objfile->section_offsets,
-			SECT_OFF_TEXT);
+			SECT_OFF_TEXT (this_symtab_psymtab->objfile));
 
       if (addr < startaddr || (endaddr && addr >= endaddr))
 	return;
@@ -1095,7 +1079,7 @@ read_xcoff_symtab (pst)
 	  if (last_source_file)
 	    {
 	      pst->symtab =
-		end_symtab (cur_src_end_addr, objfile, SECT_OFF_TEXT);
+		end_symtab (cur_src_end_addr, objfile, SECT_OFF_TEXT (objfile));
 	      end_stabs ();
 	    }
 
@@ -1160,7 +1144,7 @@ read_xcoff_symtab (pst)
 			{
 			  complete_symtab (filestring, file_start_addr);
 			  cur_src_end_addr = file_end_addr;
-			  end_symtab (file_end_addr, objfile, SECT_OFF_TEXT);
+			  end_symtab (file_end_addr, objfile, SECT_OFF_TEXT (objfile));
 			  end_stabs ();
 			  start_stabs ();
 			  /* Give all csects for this source file the same
@@ -1180,7 +1164,7 @@ read_xcoff_symtab (pst)
 
 		      file_start_addr =
 			cs->c_value + ANOFFSET (objfile->section_offsets,
-						SECT_OFF_TEXT);
+						SECT_OFF_TEXT (objfile));
 		      file_end_addr = file_start_addr + CSECT_LEN (&main_aux);
 
 		      if (cs->c_name && cs->c_name[0] == '.')
@@ -1276,7 +1260,7 @@ read_xcoff_symtab (pst)
 
 	  complete_symtab (filestring, file_start_addr);
 	  cur_src_end_addr = file_end_addr;
-	  end_symtab (file_end_addr, objfile, SECT_OFF_TEXT);
+	  end_symtab (file_end_addr, objfile, SECT_OFF_TEXT (objfile));
 	  end_stabs ();
 
 	  /* XCOFF, according to the AIX 3.2 documentation, puts the filename
@@ -1311,7 +1295,7 @@ read_xcoff_symtab (pst)
 	  if (STREQ (cs->c_name, ".bf"))
 	    {
 	      CORE_ADDR off = ANOFFSET (objfile->section_offsets,
-					SECT_OFF_TEXT);
+					SECT_OFF_TEXT (objfile));
 	      bfd_coff_swap_aux_in (abfd, raw_auxptr, cs->c_type, cs->c_sclass,
 				    0, cs->c_naux, &main_aux);
 
@@ -1323,7 +1307,7 @@ read_xcoff_symtab (pst)
 		(fcn_cs_saved.c_value + off,
 		 fcn_stab_saved.c_name, 0, 0, objfile);
 	      if (new->name != NULL)
-		SYMBOL_SECTION (new->name) = SECT_OFF_TEXT;
+		SYMBOL_SECTION (new->name) = SECT_OFF_TEXT (objfile);
 	    }
 	  else if (STREQ (cs->c_name, ".ef"))
 	    {
@@ -1356,7 +1340,7 @@ read_xcoff_symtab (pst)
 			    (fcn_cs_saved.c_value
 			     + fcn_aux_saved.x_sym.x_misc.x_fsize
 			     + ANOFFSET (objfile->section_offsets,
-					 SECT_OFF_TEXT)),
+					 SECT_OFF_TEXT (objfile))),
 			    objfile);
 	      within_function = 0;
 	    }
@@ -1426,7 +1410,7 @@ read_xcoff_symtab (pst)
 	      new = push_context (depth,
 				  (cs->c_value
 				   + ANOFFSET (objfile->section_offsets,
-					       SECT_OFF_TEXT)));
+					       SECT_OFF_TEXT (objfile))));
 	    }
 	  else if (STREQ (cs->c_name, ".eb"))
 	    {
@@ -1448,7 +1432,7 @@ read_xcoff_symtab (pst)
 				new->start_addr,
 				(cs->c_value
 				 + ANOFFSET (objfile->section_offsets,
-					     SECT_OFF_TEXT)),
+					     SECT_OFF_TEXT (objfile))),
 				objfile);
 		}
 	      local_symbols = new->locals;
@@ -1467,7 +1451,7 @@ read_xcoff_symtab (pst)
 
       complete_symtab (filestring, file_start_addr);
       cur_src_end_addr = file_end_addr;
-      s = end_symtab (file_end_addr, objfile, SECT_OFF_TEXT);
+      s = end_symtab (file_end_addr, objfile, SECT_OFF_TEXT (objfile));
       /* When reading symbols for the last C_FILE of the objfile, try
          to make sure that we set pst->symtab to the symtab for the
          file, not to the _globals_ symtab.  I'm not sure whether this
@@ -1784,7 +1768,7 @@ find_linenos (abfd, asect, vpinfo)
     info->max_lineno_offset = maxoff;
 }
 
-static void xcoff_psymtab_to_symtab_1 PARAMS ((struct partial_symtab *));
+static void xcoff_psymtab_to_symtab_1 (struct partial_symtab *);
 
 static void
 xcoff_psymtab_to_symtab_1 (pst)
@@ -1838,7 +1822,7 @@ xcoff_psymtab_to_symtab_1 (pst)
   pst->readin = 1;
 }
 
-static void xcoff_psymtab_to_symtab PARAMS ((struct partial_symtab *));
+static void xcoff_psymtab_to_symtab (struct partial_symtab *);
 
 /* Read in all of the symbols for a given psymtab for real.
    Be verbose about it if the user wants that.  */
@@ -1997,8 +1981,8 @@ init_stringtab (abfd, offset, objfile)
 static unsigned int first_fun_line_offset;
 
 static struct partial_symtab *xcoff_start_psymtab
-  PARAMS ((struct objfile *, char *, int,
-	   struct partial_symbol **, struct partial_symbol **));
+  (struct objfile *, char *, int,
+   struct partial_symbol **, struct partial_symbol **);
 
 /* Allocate and partially fill a partial symtab.  It will be
    completely filled at the end of the symbol list.
@@ -2035,8 +2019,8 @@ xcoff_start_psymtab (objfile, filename, first_symnum, global_syms,
 }
 
 static struct partial_symtab *xcoff_end_psymtab
-  PARAMS ((struct partial_symtab *, char **, int, int,
-	   struct partial_symtab **, int, int));
+  (struct partial_symtab *, char **, int, int,
+   struct partial_symtab **, int, int);
 
 /* Close off the current usage of PST.  
    Returns PST, or NULL if the partial symtab was empty and thrown away.
@@ -2141,10 +2125,9 @@ xcoff_end_psymtab (pst, include_list, num_includes, capping_symbol_number,
   return pst;
 }
 
-static void swap_sym PARAMS ((struct internal_syment *,
-			      union internal_auxent *, char **, char **,
-			      unsigned int *,
-			      struct objfile *));
+static void swap_sym (struct internal_syment *,
+		      union internal_auxent *, char **, char **,
+		      unsigned int *, struct objfile *);
 
 /* Swap raw symbol at *RAW and put the name in *NAME, the symbol in
    *SYMBOL, the first auxent in *AUX.  Advance *RAW and *SYMNUMP over
@@ -2743,7 +2726,7 @@ xcoff_initial_scan (objfile, mainline)
   back_to = make_cleanup (really_free_pendings, 0);
 
   init_minimal_symbol_collection ();
-  make_cleanup ((make_cleanup_func) discard_minimal_symbols, 0);
+  make_cleanup_discard_minimal_symbols ();
 
   /* Now that the symbol table data of the executable file are all in core,
      process them and define symbols accordingly.  */
@@ -2763,22 +2746,43 @@ xcoff_symfile_offsets (objfile, addrs)
      struct objfile *objfile;
      struct section_addr_info *addrs;
 {
+  asection *sect = NULL;
   int i;
 
   objfile->num_sections = SECT_OFF_MAX;
   objfile->section_offsets = (struct section_offsets *)
     obstack_alloc (&objfile->psymbol_obstack, SIZEOF_SECTION_OFFSETS);
 
-  /* syms_from_objfile kindly subtracts from addr the bfd_section_vma
-     of the .text section.  This strikes me as wrong--whether the
-     offset to be applied to symbol reading is relative to the start
-     address of the section depends on the symbol format.  In any
-     event, this whole "addr" concept is pretty broken (it doesn't
-     handle any section but .text sensibly), so just ignore the addr
-     parameter and use 0.  rs6000-nat.c will set the correct section
-     offsets via objfile_relocate.  */
+  /* Initialize the section indexes for future use. */
+  sect = bfd_get_section_by_name (objfile->obfd, ".text");
+  if (sect) 
+    objfile->sect_index_text = sect->index;
+
+  sect = bfd_get_section_by_name (objfile->obfd, ".data");
+  if (sect) 
+    objfile->sect_index_data = sect->index;
+
+  sect = bfd_get_section_by_name (objfile->obfd, ".bss");
+  if (sect) 
+    objfile->sect_index_bss = sect->index;
+
+  sect = bfd_get_section_by_name (objfile->obfd, ".rodata");
+  if (sect) 
+    objfile->sect_index_rodata = sect->index;
+
   for (i = 0; i < objfile->num_sections; ++i)
-    ANOFFSET (objfile->section_offsets, i) = 0;
+    {
+      /* syms_from_objfile kindly subtracts from addr the
+	 bfd_section_vma of the .text section.  This strikes me as
+	 wrong--whether the offset to be applied to symbol reading is
+	 relative to the start address of the section depends on the
+	 symbol format.  In any event, this whole "addr" concept is
+	 pretty broken (it doesn't handle any section but .text
+	 sensibly), so just ignore the addr parameter and use 0.
+	 rs6000-nat.c will set the correct section offsets via
+	 objfile_relocate.  */
+	ANOFFSET (objfile->section_offsets, i) = 0;
+    }
 }
 
 /* Register our ability to parse symbols for xcoff BFD files.  */

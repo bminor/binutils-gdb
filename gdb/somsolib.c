@@ -57,7 +57,7 @@
 extern struct target_ops exec_ops;
 
 /* This lives in hppa-tdep.c. */
-extern struct unwind_table_entry *find_unwind_entry PARAMS ((CORE_ADDR pc));
+extern struct unwind_table_entry *find_unwind_entry (CORE_ADDR pc);
 
 /* These ought to be defined in some public interface, but aren't.  They
    define the meaning of the various bits in the distinguished __dld_flags
@@ -203,9 +203,9 @@ dld_cache;
 
 
 
-static void som_sharedlibrary_info_command PARAMS ((char *, int));
+static void som_sharedlibrary_info_command (char *, int);
 
-static void som_solib_sharedlibrary_command PARAMS ((char *, int));
+static void som_solib_sharedlibrary_command (char *, int);
 
 static LONGEST
 som_solib_sizeof_symbol_table (filename)
@@ -290,7 +290,8 @@ som_solib_add_solib_objfile (so, name, from_tty, text_addr)
   struct section_addr_info section_addrs;
 
   memset (&section_addrs, 0, sizeof (section_addrs));
-  section_addrs.text_addr = text_addr;
+  section_addrs.other[0].name = ".text";
+  section_addrs.other[0].addr = text_addr;
   so->objfile = symbol_file_add (name, from_tty, &section_addrs, 0, OBJF_SHARED);
   so->abfd = so->objfile->obfd;
 
@@ -354,13 +355,13 @@ som_solib_load_symbols (so, name, from_tty, text_addr, target)
     {
       if (p->the_bfd_section->flags & SEC_CODE)
 	{
-	  p->addr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_TEXT);
-	  p->endaddr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_TEXT);
+	  p->addr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_TEXT (so->objfile));
+	  p->endaddr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_TEXT (so->objfile));
 	}
       else if (p->the_bfd_section->flags & SEC_DATA)
 	{
-	  p->addr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_DATA);
-	  p->endaddr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_DATA);
+	  p->addr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_DATA (so->objfile));
+	  p->endaddr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_DATA (so->objfile));
 	}
     }
 
@@ -1406,11 +1407,11 @@ som_solib_section_offsets (objfile, offsets)
 	  asection *private_section;
 
 	  /* The text offset is easy.  */
-	  ANOFFSET (offsets, SECT_OFF_TEXT)
+	  ANOFFSET (offsets, SECT_OFF_TEXT (objfile))
 	    = (so_list->som_solib.text_addr
 	       - so_list->som_solib.text_link_addr);
-	  ANOFFSET (offsets, SECT_OFF_RODATA)
-	    = ANOFFSET (offsets, SECT_OFF_TEXT);
+	  ANOFFSET (offsets, SECT_OFF_RODATA (objfile))
+	    = ANOFFSET (offsets, SECT_OFF_TEXT (objfile));
 
 	  /* We should look at presumed_dp in the SOM header, but
 	     that's not easily available.  This should be OK though.  */
@@ -1419,14 +1420,14 @@ som_solib_section_offsets (objfile, offsets)
 	  if (!private_section)
 	    {
 	      warning ("Unable to find $PRIVATE$ in shared library!");
-	      ANOFFSET (offsets, SECT_OFF_DATA) = 0;
-	      ANOFFSET (offsets, SECT_OFF_BSS) = 0;
+	      ANOFFSET (offsets, SECT_OFF_DATA (objfile)) = 0;
+	      ANOFFSET (offsets, SECT_OFF_BSS (objfile)) = 0;
 	      return 1;
 	    }
-	  ANOFFSET (offsets, SECT_OFF_DATA)
+	  ANOFFSET (offsets, SECT_OFF_DATA (objfile))
 	    = (so_list->som_solib.data_start - private_section->vma);
-	  ANOFFSET (offsets, SECT_OFF_BSS)
-	    = ANOFFSET (offsets, SECT_OFF_DATA);
+	  ANOFFSET (offsets, SECT_OFF_BSS (objfile))
+	    = ANOFFSET (offsets, SECT_OFF_DATA (objfile));
 	  return 1;
 	}
       so_list = so_list->next;

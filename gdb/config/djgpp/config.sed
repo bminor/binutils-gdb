@@ -6,12 +6,13 @@ s|\.gdbinit|gdb.ini|g
 /ac_given_INSTALL=/,/^CEOF/ {
   /^s%@prefix@%/a\
   s,\\([yp*]\\)\\.tab,\\1_tab,g\
-  /^	@rm -f/s,\\$@-\\[0-9\\]\\[0-9\\],&$*.i[1-9] $*[1-9][0-9],\
+  /^	@rm -f/s,\\$@-\\[0-9\\]\\[0-9\\],& *.i[1-9] *.i[1-9][0-9],\
   s,\\.info\\*,.inf* *.i[1-9] *.i[1-9][0-9],\
   s,\\.gdbinit,gdb.ini,g\
   /TEXINPUTS=/s,:,';',g\
   /VPATH *=/s,:,;,g\
   /\\$\\$file-\\[0-9\\]/s,echo,& *.i[1-9] *.i[1-9][0-9],\
+  /\\$\\$file-\\[0-9\\]/s,rm -f \\$\\$file,& \\${PACKAGE}.i[1-9] \\${PACKAGE}.i[1-9][0-9],\
   s,config\\.h\\.in,config.h-in,g\
   s,po2tbl\\.sed\\.in,po2tblsed.in,g
 }

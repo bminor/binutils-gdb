@@ -22,7 +22,7 @@
 
 #define GDB_TARGET_IS_W65
 
-#define IEEE_FLOAT 1
+#define IEEE_FLOAT (1)
 
 /* Define the bit, byte, and word ordering of the machine.  */
 
@@ -190,7 +190,7 @@ extern CORE_ADDR w65_skip_prologue ();
 
 typedef unsigned short INSN_WORD;
 
-extern CORE_ADDR w65_addr_bits_remove PARAMS ((CORE_ADDR));
+extern CORE_ADDR w65_addr_bits_remove (CORE_ADDR);
 #define ADDR_BITS_REMOVE(addr) w65_addr_bits_remove (addr)
 
 #define CALL_DUMMY_LENGTH 10

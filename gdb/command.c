@@ -35,31 +35,33 @@
 
 /* Prototypes for local functions */
 
-static void undef_cmd_error PARAMS ((char *, char *));
+static void undef_cmd_error (char *, char *);
 
-static void show_user PARAMS ((char *, int));
+static void show_user (char *, int);
 
 static void show_user_1 (struct cmd_list_element *, struct ui_file *);
 
-static void make_command PARAMS ((char *, int));
+static void make_command (char *, int);
 
-static void shell_escape PARAMS ((char *, int));
+static void shell_escape (char *, int);
 
-static int parse_binary_operation PARAMS ((char *));
+static int parse_binary_operation (char *);
 
 static void print_doc_line (struct ui_file *, char *);
 
-static struct cmd_list_element *find_cmd PARAMS ((char *command,
-						  int len,
-					    struct cmd_list_element * clist,
-						  int ignore_help_classes,
-						  int *nfound));
+static struct cmd_list_element *find_cmd (char *command,
+					  int len,
+					  struct cmd_list_element *clist,
+					  int ignore_help_classes,
+					  int *nfound);
 static void apropos_cmd_helper (struct ui_file *, struct cmd_list_element *, 
 		    		struct re_pattern_buffer *, char *);
 
+static void help_all (struct ui_file *stream);
+
 void apropos_command (char *, int);
 
-void _initialize_command PARAMS ((void));
+void _initialize_command (void);
 
 /* Add element named NAME.
    CLASS is the top level category into which commands are broken down
@@ -82,7 +84,7 @@ struct cmd_list_element *
 add_cmd (name, class, fun, doc, list)
      char *name;
      enum command_class class;
-     void (*fun) PARAMS ((char *, int));
+     void (*fun) (char *, int);
      char *doc;
      struct cmd_list_element **list;
 {
@@ -166,7 +168,7 @@ struct cmd_list_element *
 add_abbrev_cmd (name, class, fun, doc, list)
      char *name;
      enum command_class class;
-     void (*fun) PARAMS ((char *, int));
+     void (*fun) (char *, int);
      char *doc;
      struct cmd_list_element **list;
 {
@@ -220,7 +222,7 @@ add_prefix_cmd (name, class, fun, doc, prefixlist, prefixname,
 		allow_unknown, list)
      char *name;
      enum command_class class;
-     void (*fun) PARAMS ((char *, int));
+     void (*fun) (char *, int);
      char *doc;
      struct cmd_list_element **prefixlist;
      char *prefixname;
@@ -241,7 +243,7 @@ add_abbrev_prefix_cmd (name, class, fun, doc, prefixlist, prefixname,
 		       allow_unknown, list)
      char *name;
      enum command_class class;
-     void (*fun) PARAMS ((char *, int));
+     void (*fun) (char *, int);
      char *doc;
      struct cmd_list_element **prefixlist;
      char *prefixname;
@@ -265,7 +267,7 @@ not_just_help_class_command (args, from_tty)
 }
 
 /* This is an empty "sfunc".  */
-static void empty_sfunc PARAMS ((char *, int, struct cmd_list_element *));
+static void empty_sfunc (char *, int, struct cmd_list_element *);
 
 static void
 empty_sfunc (args, from_tty, c)
@@ -283,13 +285,12 @@ empty_sfunc (args, from_tty, c)
    DOC is the documentation string.  */
 
 struct cmd_list_element *
-add_set_cmd (name, class, var_type, var, doc, list)
-     char *name;
-     enum command_class class;
-     var_types var_type;
-     char *var;
-     char *doc;
-     struct cmd_list_element **list;
+add_set_cmd (char *name,
+	     enum command_class class,
+	     var_types var_type,
+	     void *var,
+	     char *doc,
+	     struct cmd_list_element **list)
 {
   struct cmd_list_element *c
   = add_cmd (name, class, NO_FUNCTION, doc, list);
@@ -312,13 +313,12 @@ add_set_cmd (name, class, var_type, var, doc, list)
    DOC is the documentation string.  */
 
 struct cmd_list_element *
-add_set_enum_cmd (name, class, enumlist, var, doc, list)
-     char *name;
-     enum command_class class;
-     char *enumlist[];
-     char *var;
-     char *doc;
-     struct cmd_list_element **list;
+add_set_enum_cmd (char *name,
+		  enum command_class class,
+		  char *enumlist[],
+		  char **var,
+		  char *doc,
+		  struct cmd_list_element **list)
 {
   struct cmd_list_element *c
   = add_set_cmd (name, class, var_enum, var, doc, list);
@@ -510,6 +510,12 @@ help_cmd (command, stream)
       return;
     }
 
+  if (strcmp (command, "all") == 0)
+    {
+      help_all (stream);
+      return;
+    }
+
   c = lookup_cmd (&command, cmdlist, "", 0, 0);
 
   if (c == 0)
@@ -600,6 +606,26 @@ Type \"help%s\" followed by a class name for a list of commands in that class.",
 Type \"help%s\" followed by %scommand name for full documentation.\n\
 Command name abbreviations are allowed if unambiguous.\n",
 		    cmdtype1, cmdtype2);
+}
+
+static void
+help_all (struct ui_file *stream)
+{
+  struct cmd_list_element *c;
+  extern struct cmd_list_element *cmdlist;
+
+  for (c = cmdlist; c; c = c->next)
+    {
+      if (c->abbrev_flag)
+        continue;
+      /* If this is a prefix command, print it's subcommands */
+      if (c->prefixlist)
+        help_cmd_list (*c->prefixlist, all_commands, c->prefixname, 0, stream);
+    
+      /* If this is a class name, print all of the commands in the class */
+      else if (c->function.cfunc == NULL)
+        help_cmd_list (cmdlist, c->class, "", 0, stream);
+    }
 }
 
 /* Print only the first line of STR on STREAM.  */
@@ -1695,7 +1721,7 @@ do_setshow_command (arg, from_tty, c)
       int quote;
 
       stb = ui_out_stream_new (uiout);
-      old_chain = make_cleanup ((make_cleanup_func) ui_out_stream_delete, stb);
+      old_chain = make_cleanup_ui_out_stream_delete (stb);
 #endif /* UI_OUT */
 
       /* Print doc minus "show" at start.  */

@@ -43,24 +43,23 @@ extern int objectprint;
 
 /* Prototypes for local functions. */
 
-static value_ptr evaluate_subexp_for_sizeof PARAMS ((struct expression *,
-						     int *));
+static value_ptr evaluate_subexp_for_sizeof (struct expression *, int *);
 
-static value_ptr evaluate_subexp_for_address PARAMS ((struct expression *,
-						      int *, enum noside));
+static value_ptr evaluate_subexp_for_address (struct expression *,
+					      int *, enum noside);
 
-static value_ptr evaluate_subexp PARAMS ((struct type *, struct expression *,
-					  int *, enum noside));
+static value_ptr evaluate_subexp (struct type *, struct expression *,
+				  int *, enum noside);
 
-static char *get_label PARAMS ((struct expression *, int *));
+static char *get_label (struct expression *, int *);
 
 static value_ptr
-  evaluate_struct_tuple PARAMS ((value_ptr, struct expression *, int *,
-				 enum noside, int));
+evaluate_struct_tuple (value_ptr, struct expression *, int *,
+		       enum noside, int);
 
 static LONGEST
-  init_array_element PARAMS ((value_ptr, value_ptr, struct expression *,
-			      int *, enum noside, LONGEST, LONGEST));
+init_array_element (value_ptr, value_ptr, struct expression *,
+		    int *, enum noside, LONGEST, LONGEST);
 
 #if defined (__GNUC__) && !__STDC__
 inline
@@ -85,7 +84,7 @@ parse_and_eval_address (exp)
   struct expression *expr = parse_expression (exp);
   register CORE_ADDR addr;
   register struct cleanup *old_chain =
-  make_cleanup ((make_cleanup_func) free_current_contents, &expr);
+  make_cleanup (free_current_contents, &expr);
 
   addr = value_as_pointer (evaluate_expression (expr));
   do_cleanups (old_chain);
@@ -102,7 +101,7 @@ parse_and_eval_address_1 (expptr)
   struct expression *expr = parse_exp_1 (expptr, (struct block *) 0, 0);
   register CORE_ADDR addr;
   register struct cleanup *old_chain =
-  make_cleanup ((make_cleanup_func) free_current_contents, &expr);
+  make_cleanup (free_current_contents, &expr);
 
   addr = value_as_pointer (evaluate_expression (expr));
   do_cleanups (old_chain);
@@ -116,7 +115,7 @@ parse_and_eval (exp)
   struct expression *expr = parse_expression (exp);
   register value_ptr val;
   register struct cleanup *old_chain
-  = make_cleanup ((make_cleanup_func) free_current_contents, &expr);
+  = make_cleanup (free_current_contents, &expr);
 
   val = evaluate_expression (expr);
   do_cleanups (old_chain);
@@ -134,7 +133,7 @@ parse_to_comma_and_eval (expp)
   struct expression *expr = parse_exp_1 (expp, (struct block *) 0, 1);
   register value_ptr val;
   register struct cleanup *old_chain
-  = make_cleanup ((make_cleanup_func) free_current_contents, &expr);
+  = make_cleanup (free_current_contents, &expr);
 
   val = evaluate_expression (expr);
   do_cleanups (old_chain);
@@ -832,8 +831,9 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	  /* Method invocation : stuff "this" as first parameter */
 	  /* pai: this used to have lookup_pointer_type for some reason,
 	   * but temp is already a pointer to the object */
-	  argvec[1] = value_from_longest (VALUE_TYPE (temp),
-				VALUE_ADDRESS (temp) + VALUE_OFFSET (temp));
+	  argvec[1]
+	    = value_from_pointer (VALUE_TYPE (temp),
+				  VALUE_ADDRESS (temp) + VALUE_OFFSET (temp));
 	  /* Name of method from expression */
 	  strcpy (tstr, &exp->elts[pc2 + 2].string);
 
@@ -1122,7 +1122,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
       /* Now, convert these values to an address.  */
       arg1 = value_cast (lookup_pointer_type (TYPE_DOMAIN_TYPE (type)),
 			 arg1);
-      arg3 = value_from_longest (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
+      arg3 = value_from_pointer (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
 				 value_as_long (arg1) + mem_offset);
       return value_ind (arg3);
     bad_pointer_to_member:

@@ -28,8 +28,8 @@
 #include "c-lang.h"
 #include "valprint.h"
 
-extern void _initialize_m2_language PARAMS ((void));
-static struct type *m2_create_fundamental_type PARAMS ((struct objfile *, int));
+extern void _initialize_m2_language (void);
+static struct type *m2_create_fundamental_type (struct objfile *, int);
 static void m2_printstr (struct ui_file * stream, char *string,
 			 unsigned int length, int width,
 			 int force_ellipses);

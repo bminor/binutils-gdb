@@ -5365,6 +5365,8 @@ som_decode_symclass (symbol)
     return 'U';
   if (bfd_is_ind_section (symbol->section))
     return 'I';
+  if (symbol->flags & BSF_WEAK)
+    return 'W';
   if (!(symbol->flags & (BSF_GLOBAL|BSF_LOCAL)))
     return '?';
 

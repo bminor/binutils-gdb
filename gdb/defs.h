@@ -56,9 +56,6 @@
 
 #include "libiberty.h"
 
-/* libiberty.h can't declare this one, but evidently we can.  */
-extern char *strsignal (int);
-
 #include "progress.h"
 
 #ifdef USE_MMALLOC
@@ -105,10 +102,6 @@ typedef bfd_vma CORE_ADDR;
 #endif /* No BFD64 */
 
 #endif /* ! LONGEST */
-
-extern int core_addr_lessthan (CORE_ADDR lhs, CORE_ADDR rhs);
-extern int core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs);
-
 
 #ifndef min
 #define min(a, b) ((a) < (b) ? (a) : (b))
@@ -253,7 +246,7 @@ struct cleanup
    works everywhere we use it. */
 
 #ifndef ATTR_NORETURN
-#if defined(__GNUC__) && __GNUC__ >= 2 && __GNUC_MINOR__ >= 7
+#if defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7))
 #define ATTR_NORETURN __attribute__ ((noreturn))
 #else
 #define ATTR_NORETURN		/* nothing */
@@ -261,7 +254,7 @@ struct cleanup
 #endif
 
 #ifndef ATTR_FORMAT
-#if defined(__GNUC__) && __GNUC__ >= 2 && __GNUC_MINOR__ >= 4
+#if defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 4))
 #define ATTR_FORMAT(type, x, y) __attribute__ ((format(type, x, y)))
 #else
 #define ATTR_FORMAT(type, x, y)	/* nothing */
@@ -296,8 +289,6 @@ extern int strcmp_iw (const char *, const char *);
 extern int subset_compare (char *, char *);
 
 extern char *safe_strerror (int);
-
-extern char *safe_strsignal (int);
 
 extern void init_malloc (void *);
 
@@ -336,6 +327,10 @@ extern struct cleanup *make_cleanup_freeargv (char **);
 struct ui_file;
 extern struct cleanup *make_cleanup_ui_file_delete (struct ui_file *);
 
+extern struct cleanup *make_cleanup_close (int fd);
+
+extern struct cleanup *make_cleanup_bfd_close (bfd *abfd);
+
 extern struct cleanup *make_final_cleanup (make_cleanup_ftype *, void *);
 
 extern struct cleanup *make_my_cleanup (struct cleanup **,
@@ -354,7 +349,7 @@ extern void restore_cleanups (struct cleanup *);
 extern void restore_final_cleanups (struct cleanup *);
 extern void restore_my_cleanups (struct cleanup **, struct cleanup *);
 
-extern void free_current_contents (char **);
+extern void free_current_contents (void *);
 
 extern void null_cleanup (void *);
 
@@ -373,6 +368,9 @@ extern void mfree (PTR, PTR);
 #endif
 
 extern void init_page_info (void);
+
+extern CORE_ADDR host_pointer_to_address (void *ptr);
+extern void *address_to_host_pointer (CORE_ADDR addr);
 
 /* From demangle.c */
 
@@ -484,9 +482,8 @@ extern char *paddr_nz (CORE_ADDR addr);
 extern char *paddr_u (CORE_ADDR addr);
 extern char *paddr_d (LONGEST addr);
 
-typedef bfd_vma t_reg;
-extern char *preg (t_reg reg);
-extern char *preg_nz (t_reg reg);
+extern char *phex (ULONGEST l, int sizeof_l);
+extern char *phex_nz (ULONGEST l, int sizeof_l);
 
 extern void fprintf_symbol_filtered (struct ui_file *, char *,
 				     enum language, int);
@@ -984,6 +981,12 @@ extern char *alloca ();
 
 /* Dynamic target-system-dependent parameters for GDB. */
 #include "gdbarch.h"
+#if (GDB_MULTI_ARCH == 0)
+/* Multi-arch targets _should_ be including "arch-utils.h" directly
+   into their *-tdep.c file.  This is a prop to help old non-
+   multi-arch targets to continue to compile. */
+#include "arch-utils.h"
+#endif
 
 /* Static target-system-dependent parameters for GDB. */
 
@@ -1067,11 +1070,15 @@ extern int extract_long_unsigned_integer (void *, int, LONGEST *);
 
 extern CORE_ADDR extract_address (void *, int);
 
+extern CORE_ADDR extract_typed_address (void *buf, struct type *type);
+
 extern void store_signed_integer (void *, int, LONGEST);
 
 extern void store_unsigned_integer (void *, int, ULONGEST);
 
 extern void store_address (void *, int, LONGEST);
+
+extern void store_typed_address (void *buf, struct type *type, CORE_ADDR addr);
 
 /* Setup definitions for host and target floating point formats.  We need to
    consider the format for `float', `double', and `long double' for both target
@@ -1103,21 +1110,6 @@ extern const struct floatformat floatformat_unknown;
 
 #ifndef HOST_LONG_DOUBLE_FORMAT
 #define HOST_LONG_DOUBLE_FORMAT &floatformat_unknown
-#endif
-
-#ifndef TARGET_FLOAT_FORMAT
-#define TARGET_FLOAT_FORMAT (TARGET_BYTE_ORDER == BIG_ENDIAN \
-			     ? &floatformat_ieee_single_big \
-			     : &floatformat_ieee_single_little)
-#endif
-#ifndef TARGET_DOUBLE_FORMAT
-#define TARGET_DOUBLE_FORMAT (TARGET_BYTE_ORDER == BIG_ENDIAN \
-			      ? &floatformat_ieee_double_big \
-			      : &floatformat_ieee_double_little)
-#endif
-
-#ifndef TARGET_LONG_DOUBLE_FORMAT
-#define TARGET_LONG_DOUBLE_FORMAT &floatformat_unknown
 #endif
 
 /* Use `long double' if the host compiler supports it.  (Note that this is not

@@ -11,11 +11,11 @@
 #include "breakpoint.h"
 #endif
 
-extern TuiStatus tuiSetSourceContent PARAMS ((struct symtab *, int, int));
-extern void tuiShowSource PARAMS ((struct symtab *, Opaque, int));
-extern void tuiShowSourceAsIs PARAMS ((struct symtab *, Opaque, int));
-extern int tuiSourceIsDisplayed PARAMS ((char *));
-extern void tuiVerticalSourceScroll PARAMS ((TuiScrollDirection, int));
+extern TuiStatus tuiSetSourceContent (struct symtab *, int, int);
+extern void tuiShowSource (struct symtab *, Opaque, int);
+extern void tuiShowSourceAsIs (struct symtab *, Opaque, int);
+extern int tuiSourceIsDisplayed (char *);
+extern void tuiVerticalSourceScroll (TuiScrollDirection, int);
 
 
 /*******************

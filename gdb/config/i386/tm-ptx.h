@@ -139,8 +139,7 @@ since it uses host specific ptrace calls.
 #define REGISTER_U_ADDR(addr, blockend, regno) \
 { (addr) = ptx_register_u_addr((blockend), (regno)); }
 
-extern int
-ptx_register_u_addr PARAMS ((int, int));
+extern int ptx_register_u_addr (int, int);
 
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.  10 i*86 registers, 8 i387

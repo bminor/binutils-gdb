@@ -25,7 +25,7 @@ SECTION
 
 	BFD maintains relocations in much the same way it maintains
 	symbols: they are left alone until required, then read in
-	en-mass and translated into an internal form.  A common
+	en-masse and translated into an internal form.  A common
 	routine <<bfd_perform_relocation>> acts upon the
 	canonical form to do the fixup.
 
@@ -729,6 +729,7 @@ bfd_perform_relocation (abfd, reloc_entry, data, input_section, output_bfd,
 	  /* WTF?? */
 	  if (abfd->xvec->flavour == bfd_target_coff_flavour
 	      && strcmp (abfd->xvec->name, "aixcoff-rs6000") != 0
+	      && strcmp (abfd->xvec->name, "aixcoff64-rs6000") != 0
 	      && strcmp (abfd->xvec->name, "xcoff-powermac") != 0
 	      && strcmp (abfd->xvec->name, "coff-Intel-little") != 0
 	      && strcmp (abfd->xvec->name, "coff-Intel-big") != 0)
@@ -1125,6 +1126,7 @@ bfd_install_relocation (abfd, reloc_entry, data_start, data_start_offset,
       /* WTF?? */
       if (abfd->xvec->flavour == bfd_target_coff_flavour
 	  && strcmp (abfd->xvec->name, "aixcoff-rs6000") != 0
+	  && strcmp (abfd->xvec->name, "aixcoff64-rs6000") != 0
 	  && strcmp (abfd->xvec->name, "xcoff-powermac") != 0
 	  && strcmp (abfd->xvec->name, "coff-Intel-little") != 0
 	  && strcmp (abfd->xvec->name, "coff-Intel-big") != 0)
@@ -1498,11 +1500,9 @@ _bfd_relocate_contents (howto, input_bfd, relocation, location)
              trouble; we would need to verify that B is in range, as
              we do for A above.  */
 	  signmask = ((~ howto->src_mask) >> 1) & howto->src_mask;
-	  if ((b & signmask) != 0)
-	    {
-	      /* Set all the bits above the sign bit.  */
-	      b -= signmask << 1;
-	    }
+
+	  /* Set all the bits above the sign bit.  */
+	  b = (b ^ signmask) - signmask;
 
 	  b = (b & addrmask) >> bitpos;
 
@@ -1545,7 +1545,7 @@ _bfd_relocate_contents (howto, input_bfd, relocation, location)
 
 	case complain_overflow_bitfield:
 	  /* Much like the signed check, but for a field one bit
-	     wider, and no trimming with addrmask.  We allow a
+	     wider, and no trimming inputs with addrmask.  We allow a
 	     bitfield to represent numbers in the range -2**n to
 	     2**n-1, where n is the number of bits in the field.
 	     Note that when bfd_vma is 32 bits, a 32-bit reloc can't
@@ -1558,15 +1558,19 @@ _bfd_relocate_contents (howto, input_bfd, relocation, location)
 	    flag = bfd_reloc_overflow;
 
 	  signmask = ((~ howto->src_mask) >> 1) & howto->src_mask;
-	  if ((b & signmask) != 0)
-	    b -= signmask << 1;
+	  b = (b ^ signmask) - signmask;
 
 	  b >>= bitpos;
 
 	  sum = a + b;
 
+	  /* We mask with addrmask here to explicitly allow an address
+	     wrap-around.  The Linux kernel relies on it, and it is
+	     the only way to write assembler code which can run when
+	     loaded at a location 0x80000000 away from the location at
+	     which it is linked.  */
 	  signmask = fieldmask + 1;
-	  if (((~ (a ^ b)) & (a ^ sum)) & signmask)
+	  if (((~ (a ^ b)) & (a ^ sum)) & signmask & addrmask)
 	    flag = bfd_reloc_overflow;
 
 	  break;
@@ -2747,6 +2751,142 @@ ENUMDOC
   is stored in the reloc's addend.  For Rel hosts, we are forced to put
   this offset in the reloc's section offset.
 
+ENUM
+  BFD_RELOC_IA64_IMM14
+ENUMX
+  BFD_RELOC_IA64_IMM22
+ENUMX
+  BFD_RELOC_IA64_IMM64
+ENUMX
+  BFD_RELOC_IA64_DIR32MSB
+ENUMX
+  BFD_RELOC_IA64_DIR32LSB
+ENUMX
+  BFD_RELOC_IA64_DIR64MSB
+ENUMX
+  BFD_RELOC_IA64_DIR64LSB
+ENUMX
+  BFD_RELOC_IA64_GPREL22
+ENUMX
+  BFD_RELOC_IA64_GPREL64I
+ENUMX
+  BFD_RELOC_IA64_GPREL32MSB
+ENUMX
+  BFD_RELOC_IA64_GPREL32LSB
+ENUMX
+  BFD_RELOC_IA64_GPREL64MSB
+ENUMX
+  BFD_RELOC_IA64_GPREL64LSB
+ENUMX
+  BFD_RELOC_IA64_LTOFF22
+ENUMX
+  BFD_RELOC_IA64_LTOFF64I
+ENUMX
+  BFD_RELOC_IA64_PLTOFF22
+ENUMX
+  BFD_RELOC_IA64_PLTOFF64I
+ENUMX
+  BFD_RELOC_IA64_PLTOFF64MSB
+ENUMX
+  BFD_RELOC_IA64_PLTOFF64LSB
+ENUMX
+  BFD_RELOC_IA64_FPTR64I
+ENUMX
+  BFD_RELOC_IA64_FPTR32MSB
+ENUMX
+  BFD_RELOC_IA64_FPTR32LSB
+ENUMX
+  BFD_RELOC_IA64_FPTR64MSB
+ENUMX
+  BFD_RELOC_IA64_FPTR64LSB
+ENUMX
+  BFD_RELOC_IA64_PCREL21B
+ENUMX
+  BFD_RELOC_IA64_PCREL21BI
+ENUMX
+  BFD_RELOC_IA64_PCREL21M
+ENUMX
+  BFD_RELOC_IA64_PCREL21F
+ENUMX
+  BFD_RELOC_IA64_PCREL22
+ENUMX
+  BFD_RELOC_IA64_PCREL60B
+ENUMX
+  BFD_RELOC_IA64_PCREL64I
+ENUMX
+  BFD_RELOC_IA64_PCREL32MSB
+ENUMX
+  BFD_RELOC_IA64_PCREL32LSB
+ENUMX
+  BFD_RELOC_IA64_PCREL64MSB
+ENUMX
+  BFD_RELOC_IA64_PCREL64LSB
+ENUMX
+  BFD_RELOC_IA64_LTOFF_FPTR22
+ENUMX
+  BFD_RELOC_IA64_LTOFF_FPTR64I
+ENUMX
+  BFD_RELOC_IA64_LTOFF_FPTR64MSB
+ENUMX
+  BFD_RELOC_IA64_LTOFF_FPTR64LSB
+ENUMX
+  BFD_RELOC_IA64_SEGBASE
+ENUMX
+  BFD_RELOC_IA64_SEGREL32MSB
+ENUMX
+  BFD_RELOC_IA64_SEGREL32LSB
+ENUMX
+  BFD_RELOC_IA64_SEGREL64MSB
+ENUMX
+  BFD_RELOC_IA64_SEGREL64LSB
+ENUMX
+  BFD_RELOC_IA64_SECREL32MSB
+ENUMX
+  BFD_RELOC_IA64_SECREL32LSB
+ENUMX
+  BFD_RELOC_IA64_SECREL64MSB
+ENUMX
+  BFD_RELOC_IA64_SECREL64LSB
+ENUMX
+  BFD_RELOC_IA64_REL32MSB
+ENUMX
+  BFD_RELOC_IA64_REL32LSB
+ENUMX
+  BFD_RELOC_IA64_REL64MSB
+ENUMX
+  BFD_RELOC_IA64_REL64LSB
+ENUMX
+  BFD_RELOC_IA64_LTV32MSB
+ENUMX
+  BFD_RELOC_IA64_LTV32LSB
+ENUMX
+  BFD_RELOC_IA64_LTV64MSB
+ENUMX
+  BFD_RELOC_IA64_LTV64LSB
+ENUMX
+  BFD_RELOC_IA64_IPLTMSB
+ENUMX
+  BFD_RELOC_IA64_IPLTLSB
+ENUMX
+  BFD_RELOC_IA64_EPLTMSB
+ENUMX
+  BFD_RELOC_IA64_EPLTLSB
+ENUMX
+  BFD_RELOC_IA64_COPY
+ENUMX
+  BFD_RELOC_IA64_TPREL22
+ENUMX
+  BFD_RELOC_IA64_TPREL64MSB
+ENUMX
+  BFD_RELOC_IA64_TPREL64LSB
+ENUMX
+  BFD_RELOC_IA64_LTOFF_TP22
+ENUMX
+  BFD_RELOC_IA64_LTOFF22X
+ENUMX
+  BFD_RELOC_IA64_LDXMOV
+ENUMDOC
+  Intel IA64 Relocations.
 ENDSENUM
   BFD_RELOC_UNUSED
 CODE_FRAGMENT

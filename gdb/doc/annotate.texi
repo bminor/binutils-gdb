@@ -53,7 +53,7 @@
 @c  @node Top
 @c  @top GDB Annotations
 
-@syncodeindex fn cp
+@c  @syncodeindex fn cp
 
 @node Annotations
 @chapter @value{GDBN} Annotations

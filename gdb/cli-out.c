@@ -88,7 +88,7 @@ static struct ui_out_impl cli_ui_out_impl =
 
 /* Prototypes for local functions */
 
-extern void _initialize_cli_out PARAMS ((void));
+extern void _initialize_cli_out (void);
 
 static void field_separator (void);
 

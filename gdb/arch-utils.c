@@ -41,6 +41,8 @@
 #include "symfile.h"		/* for overlay functions */
 #endif
 
+#include "floatformat.h"
+
 /* Convenience macro for allocting typesafe memory. */
 
 #ifndef XMALLOC
@@ -97,6 +99,12 @@ generic_frameless_function_invocation_not (struct frame_info *fi)
   return 0;
 }
 
+int
+generic_return_value_on_stack_not (struct type *type)
+{
+  return 0;
+}
+
 char *
 legacy_register_name (int i)
 {
@@ -125,6 +133,77 @@ generic_remote_translate_xfer_address (CORE_ADDR gdb_addr, int gdb_len,
 {
   *rem_addr = gdb_addr;
   *rem_len = gdb_len;
+}
+
+int
+generic_prologue_frameless_p (CORE_ADDR ip)
+{
+#ifdef SKIP_PROLOGUE_FRAMELESS_P
+  return ip == SKIP_PROLOGUE_FRAMELESS_P (ip);
+#else
+  return ip == SKIP_PROLOGUE (ip);
+#endif
+}
+
+
+/* Helper functions for INNER_THAN */
+
+int
+core_addr_lessthan (lhs, rhs)
+     CORE_ADDR lhs;
+     CORE_ADDR rhs;
+{
+  return (lhs < rhs);
+}
+
+int
+core_addr_greaterthan (lhs, rhs)
+     CORE_ADDR lhs;
+     CORE_ADDR rhs;
+{
+  return (lhs > rhs);
+}
+
+
+/* Helper functions for TARGET_{FLOAT,DOUBLE}_FORMAT */
+
+const struct floatformat *
+default_float_format (struct gdbarch *gdbarch)
+{
+#if GDB_MULTI_ARCH
+  int byte_order = gdbarch_byte_order (gdbarch);
+#else
+  int byte_order = TARGET_BYTE_ORDER;
+#endif
+  switch (byte_order)
+    {
+    case BIG_ENDIAN:
+      return &floatformat_ieee_single_big;
+    case LITTLE_ENDIAN:
+      return &floatformat_ieee_single_little;
+    default:
+      internal_error ("default_float_format: bad byte order");
+    }
+}
+
+
+const struct floatformat *
+default_double_format (struct gdbarch *gdbarch)
+{
+#if GDB_MULTI_ARCH
+  int byte_order = gdbarch_byte_order (gdbarch);
+#else
+  int byte_order = TARGET_BYTE_ORDER;
+#endif
+  switch (byte_order)
+    {
+    case BIG_ENDIAN:
+      return &floatformat_ieee_double_big;
+    case LITTLE_ENDIAN:
+      return &floatformat_ieee_double_little;
+    default:
+      internal_error ("default_double_format: bad byte order");
+    }
 }
 
 /* */

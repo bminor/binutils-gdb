@@ -3,6 +3,7 @@
 
 			Blanket Write Privs
 
+Jim Blandy			jimb@cygnus.com
 Andrew Cagney			ac131313@cygnus.com
 Stan Shebs			shebs@apple.com
 Michael Snyder			msnyder@cygnus.com
@@ -36,7 +37,7 @@ mn10300 target		Andrew Cagney		cagney@cygnus.com
 powerpc target		Kevin Buettner		kevinb@cygnus.com
 			Elena Zannoni		ezannoni@cygnus.com
 arm target		Fernando Nasser		fnasser@cygnus.com
-			Jim Ingham		jingham@cygnus.com
+			Jim Ingham		jingham@apple.com
 			Scott Bambrough		scottb@netwinder.org
 m32r target		Michael Snyder		msnyder@cygnus.com
 IA-64 target		Kevin Buettner		kevinb@cygnus.com
@@ -60,8 +61,8 @@ djgpp native		Eli Zaretskii		eliz@gnu.org
 MS Windows (N.T., CE, '00) host & native
 			Chris Faylor		cgf@cygnus.com
 GNU/Linux/x86 native & host
-			Jim Blandy		jimb@cygnus.com
 			Mark Kettenis		kettenis@gnu.org
+			Jim Blandy		jimb@cygnus.com
 GNU/Linux PPC native	Kevin Buettner		kevinb@cygnus.com
 hurd native		Mark Kettenis		kettenis@gnu.org
 macos host & native	Stan Shebs		shebs@apple.com
@@ -75,17 +76,26 @@ Solaris/x86 native & host
 			Peter Schauer		Peter.Schauer@regent.e-technik.tu-muenchen.de
 Solaris/SPARC native & host
 			David Taylor		taylor@cygnus.com
+Mac OS X		Klee Dienes		kdienes@apple.com
+			Jim Ingham		jingham@apple.com
 
 Core: Generic components used by all of GDB
 
 generic arch support	Andrew Cagney		cagney@cygnus.com
+			Any host/target maintainer can add to
+			gdbarch.{c,h,sh}.  Send tricky ones to cagney.
 target vector		Andrew Cagney		cagney@cygnus.com
 main (main.c, top.c)	Elena Zannoni		ezannoni@cygnus.com
 event loop		Elena Zannoni           ezannoni@cygnus.com
 generic symtabs		Jim Blandy		jimb@cygnus.com
-dwarf readers		Jim Blandy		jimb@cygnus.com
-elf reader		Jim Blandy		jimb@cygnus.com
-stabs reader		Jim Blandy		jimb@cygnus.com
+			Elena Zannoni		ezannoni@cygnus.com
+  dwarf readers		Jim Blandy		jimb@cygnus.com
+			Elena Zannoni		ezannoni@cygnus.com
+  elf reader		Jim Blandy		jimb@cygnus.com
+			Elena Zannoni		ezannoni@cygnus.com
+  stabs reader		Jim Blandy		jimb@cygnus.com
+			Elena Zannoni		ezannoni@cygnus.com
+  coff reader		Philippe De Muyter	phdm@macqel.be
 tracing bytecode stuff  Jim Blandy              jimb@cygnus.com
 tracing			Michael Snyder		msnyder@cygnus.com
 threads			Michael Snyder		msnyder@cygnus.com
@@ -94,20 +104,22 @@ breakpoint.c		Michael Snyder		msnyder@cygnus.com
 language support	David Taylor		taylor@cygnus.com
   C++ support		Daniel Berlin		dan@cgsoftware.com
   Java support		Anthony Green 		green@cygnus.com
+  Objective-C/C++	Klee Dienes		kdienes@apple.com
+			Jim Ingham		jimgham@apple.com
+  Pascal support	Pierre Muller		muller@sourceware.cygnus.com
 expression eval		David Taylor		taylor@cygnus.com
 defs.h			David Taylor		taylor@cygnus.com
 utils.c			David Taylor		taylor@cygnus.com
 Scheme support		Jim Blandy		jimb@cygnus.com
 svr4 shlibs (solib.c)	Jim Blandy		jimb@cygnus.com
-coff reader		Philippe De Muyter	phdm@macqel.be
 remote.c		Andrew Cagney		cagney@cygnus.com
 			J.T. Conklin		jtc@redback.com
 include/remote-sim.h, remote-sim.c
 			Andrew Cagney		cagney@cygnus.com
 sds protocol		Fernando Nasser		fnasser@cygnus.com
-			Jim Ingham		jingham@cygnus.com
+			Jim Ingham		jingham@apple.com
 rdi/adp protocol	Fernando Nasser		fnasser@cygnus.com
-			Jim Ingham		jingham@cygnus.com
+			Jim Ingham		jingham@apple.com
 gdbserver		Stan Shebs		shebs@apple.com
 documentation	 	Stan Shebs		shebs@apple.com
 			Eli Zaretskii		eliz@gnu.org
@@ -121,11 +133,15 @@ Kernel Object Display	Fernando Nasser		fnasser@cygnus.com
 UI: External (user) interfaces.
 
 command interpreter	Fernando Nasser		fnasser@cygnus.com
-gdbtk (c & tcl)		Jim Ingham		jingham@cygnus.com
-libgui (w/foundry, sn)	Jim Ingham		jingham@cygnus.com
+gdbtk (c & tcl)		Syd Polk		spolk@cygnus.com
+			Jim Ingham		jingham@apple.com
+libgui (w/foundry, sn)	Syd Polk		spolk@cygnus.com
+			Jim Ingham		jingham@apple.com
 mi (gdb/mi)		Andrew Cagney		cagney@cygnus.com
 			Elena Zannoni           ezannoni@cygnus.com
 			Fernando Nasser		fnasser@cygnus.com
+tui			Technical Contact Point	wdb@cup.hp.com
+			Jimmy Guo		guo@cup.hp.com
 
 
 Misc:
@@ -155,6 +171,8 @@ H.J. Lu						hjl@lucon.org
 Nick Clifton					nickc@cygnus.com
 Jonathan Larmour				jlarmour@redhat.co.uk
 Glen McCready					gkm@cygnus.com
+Gary Thomas					gthomas@redhat.com
+Pierre Muller					muller@sourceware.cygnus.com
 
 
 * Indicates folks we need to get Kerberos/SSH accounts ready so they

@@ -35,14 +35,15 @@
 #include "buildsym.h"
 #include "demangle.h"
 #include "expression.h"
+
 #include "language.h"
 #include "complaints.h"
-
+#include "bcache.h"
 #include <fcntl.h>
 #include "gdb_string.h"
 #include <sys/types.h>
 
-/* .debug_info header for a compilation unit 
+/* .debug_info header for a compilation unit
    Because of alignment constraints, this structure has padding and cannot
    be mapped directly onto the beginning of the .debug_info section.  */
 typedef struct comp_unit_header
@@ -267,6 +268,11 @@ static struct abbrev_info *dwarf2_abbrevs[ABBREV_HASH_SIZE];
 
 static struct die_info *die_ref_table[REF_HASH_SIZE];
 
+#ifndef TYPE_HASH_SIZE
+#define TYPE_HASH_SIZE 4096
+#endif
+static struct type *dwarf2_cached_types[TYPE_HASH_SIZE];
+
 /* Obstack for allocating temporary storage used during symbol reading.  */
 static struct obstack dwarf2_tmp_obstack;
 
@@ -333,7 +339,7 @@ static int islocal;		/* Variable is at the returned offset
 static int frame_base_reg;
 static CORE_ADDR frame_base_offset;
 
-/* This value is added to each symbol value.  FIXME:  Generalize to 
+/* This value is added to each symbol value.  FIXME:  Generalize to
    the section_offsets structure used by dbxread (once this is done,
    pass the appropriate section number to end_symtab).  */
 static CORE_ADDR baseaddr;	/* Add to each symbol value */
@@ -550,211 +556,196 @@ extern int info_verbose;	/* From main.c; nonzero => verbose */
 
 /* local function prototypes */
 
-static void dwarf2_locate_sections PARAMS ((bfd *, asection *, PTR));
+static void dwarf2_locate_sections (bfd *, asection *, PTR);
 
 #if 0
-static void dwarf2_build_psymtabs_easy PARAMS ((struct objfile *, int));
+static void dwarf2_build_psymtabs_easy (struct objfile *, int);
 #endif
 
-static void dwarf2_build_psymtabs_hard PARAMS ((struct objfile *, int));
+static void dwarf2_build_psymtabs_hard (struct objfile *, int);
 
-static char *scan_partial_symbols PARAMS ((char *, struct objfile *,
-					   CORE_ADDR *, CORE_ADDR *));
+static char *scan_partial_symbols (char *, struct objfile *,
+				   CORE_ADDR *, CORE_ADDR *);
 
-static void add_partial_symbol PARAMS ((struct partial_die_info *,
-					struct objfile *));
+static void add_partial_symbol (struct partial_die_info *, struct objfile *);
 
-static void dwarf2_psymtab_to_symtab PARAMS ((struct partial_symtab *));
+static void dwarf2_psymtab_to_symtab (struct partial_symtab *);
 
-static void psymtab_to_symtab_1 PARAMS ((struct partial_symtab *));
+static void psymtab_to_symtab_1 (struct partial_symtab *);
 
-static char *dwarf2_read_section PARAMS ((struct objfile *, file_ptr,
-					  unsigned int));
+static char *dwarf2_read_section (struct objfile *, file_ptr, unsigned int);
 
-static void dwarf2_read_abbrevs PARAMS ((bfd *, unsigned int));
+static void dwarf2_read_abbrevs (bfd *, unsigned int);
 
-static void dwarf2_empty_abbrev_table PARAMS ((PTR));
+static void dwarf2_empty_abbrev_table (PTR);
 
-static struct abbrev_info *dwarf2_lookup_abbrev PARAMS ((unsigned int));
+static struct abbrev_info *dwarf2_lookup_abbrev (unsigned int);
 
-static char *read_partial_die PARAMS ((struct partial_die_info *,
-				       bfd *, char *, int *));
+static char *read_partial_die (struct partial_die_info *,
+			       bfd *, char *, int *);
 
-static char *read_full_die PARAMS ((struct die_info **, bfd *, char *));
+static char *read_full_die (struct die_info **, bfd *, char *);
 
-static char *read_attribute PARAMS ((struct attribute *, struct attr_abbrev *,
-				     bfd *, char *));
+static char *read_attribute (struct attribute *, struct attr_abbrev *,
+			     bfd *, char *);
 
-static unsigned int read_1_byte PARAMS ((bfd *, char *));
+static unsigned int read_1_byte (bfd *, char *);
 
-static int read_1_signed_byte PARAMS ((bfd *, char *));
+static int read_1_signed_byte (bfd *, char *);
 
-static unsigned int read_2_bytes PARAMS ((bfd *, char *));
+static unsigned int read_2_bytes (bfd *, char *);
 
-static unsigned int read_4_bytes PARAMS ((bfd *, char *));
+static unsigned int read_4_bytes (bfd *, char *);
 
-static unsigned int read_8_bytes PARAMS ((bfd *, char *));
+static unsigned int read_8_bytes (bfd *, char *);
 
-static CORE_ADDR read_address PARAMS ((bfd *, char *));
+static CORE_ADDR read_address (bfd *, char *);
 
-static char *read_n_bytes PARAMS ((bfd *, char *, unsigned int));
+static char *read_n_bytes (bfd *, char *, unsigned int);
 
-static char *read_string PARAMS ((bfd *, char *, unsigned int *));
+static char *read_string (bfd *, char *, unsigned int *);
 
-static unsigned int read_unsigned_leb128 PARAMS ((bfd *, char *,
-						  unsigned int *));
+static unsigned int read_unsigned_leb128 (bfd *, char *, unsigned int *);
 
-static int read_signed_leb128 PARAMS ((bfd *, char *, unsigned int *));
+static int read_signed_leb128 (bfd *, char *, unsigned int *);
 
-static void set_cu_language PARAMS ((unsigned int));
+static void set_cu_language (unsigned int);
 
-static struct attribute *dwarf_attr PARAMS ((struct die_info *,
-					     unsigned int));
+static struct attribute *dwarf_attr (struct die_info *, unsigned int);
 
 static int die_is_declaration (struct die_info *);
 
-static void dwarf_decode_lines PARAMS ((unsigned int, char *, bfd *));
+static void dwarf_decode_lines (unsigned int, char *, bfd *);
 
-static void dwarf2_start_subfile PARAMS ((char *, char *));
+static void dwarf2_start_subfile (char *, char *);
 
-static struct symbol *new_symbol PARAMS ((struct die_info *, struct type *,
-					  struct objfile *));
+static struct symbol *new_symbol (struct die_info *, struct type *,
+				  struct objfile *);
 
-static void dwarf2_const_value PARAMS ((struct attribute *, struct symbol *,
-					struct objfile *));
+static void dwarf2_const_value (struct attribute *, struct symbol *,
+				struct objfile *);
 
 static void dwarf2_const_value_data (struct attribute *attr,
 				     struct symbol *sym,
 				     int bits);
 
-static struct type *die_type PARAMS ((struct die_info *, struct objfile *));
+static struct type *die_type (struct die_info *, struct objfile *);
 
-static struct type *die_containing_type PARAMS ((struct die_info *,
-						 struct objfile *));
-
-#if 0
-static struct type *type_at_offset PARAMS ((unsigned int, struct objfile *));
-#endif
-
-static struct type *tag_type_to_type PARAMS ((struct die_info *,
-					      struct objfile *));
-
-static void read_type_die PARAMS ((struct die_info *, struct objfile *));
-
-static void read_typedef PARAMS ((struct die_info *, struct objfile *));
-
-static void read_base_type PARAMS ((struct die_info *, struct objfile *));
-
-static void read_file_scope PARAMS ((struct die_info *, struct objfile *));
-
-static void read_func_scope PARAMS ((struct die_info *, struct objfile *));
-
-static void read_lexical_block_scope PARAMS ((struct die_info *,
-					      struct objfile *));
-
-static int dwarf2_get_pc_bounds PARAMS ((struct die_info *,
-					 CORE_ADDR *, CORE_ADDR *,
-					 struct objfile *));
-
-static void dwarf2_add_field PARAMS ((struct field_info *, struct die_info *,
-				      struct objfile *));
-
-static void dwarf2_attach_fields_to_type PARAMS ((struct field_info *,
-						  struct type *,
-						  struct objfile *));
-
-static void dwarf2_add_member_fn PARAMS ((struct field_info *,
-					  struct die_info *, struct type *,
-					  struct objfile * objfile));
-
-static void dwarf2_attach_fn_fields_to_type PARAMS ((struct field_info *,
-						     struct type *,
-						     struct objfile *));
-
-static void read_structure_scope PARAMS ((struct die_info *, struct objfile *));
-
-static void read_common_block PARAMS ((struct die_info *, struct objfile *));
-
-static void read_enumeration PARAMS ((struct die_info *, struct objfile *));
-
-static struct type *dwarf_base_type PARAMS ((int, int, struct objfile *));
-
-static CORE_ADDR decode_locdesc PARAMS ((struct dwarf_block *,
-					 struct objfile *));
-
-static void read_array_type PARAMS ((struct die_info *, struct objfile *));
-
-static void read_tag_pointer_type PARAMS ((struct die_info *,
-					   struct objfile *));
-
-static void read_tag_ptr_to_member_type PARAMS ((struct die_info *,
-						 struct objfile *));
-
-static void read_tag_reference_type PARAMS ((struct die_info *,
-					     struct objfile *));
-
-static void read_tag_const_type PARAMS ((struct die_info *, struct objfile *));
-
-static void read_tag_volatile_type PARAMS ((struct die_info *,
-					    struct objfile *));
-
-static void read_tag_string_type PARAMS ((struct die_info *,
-					  struct objfile *));
-
-static void read_subroutine_type PARAMS ((struct die_info *,
-					  struct objfile *));
-
-struct die_info *read_comp_unit PARAMS ((char *, bfd *));
-
-static void free_die_list PARAMS ((struct die_info *));
-
-static void process_die PARAMS ((struct die_info *, struct objfile *));
-
-static char *dwarf2_linkage_name PARAMS ((struct die_info *));
-
-static char *dwarf_tag_name PARAMS ((unsigned int));
-
-static char *dwarf_attr_name PARAMS ((unsigned int));
-
-static char *dwarf_form_name PARAMS ((unsigned int));
-
-static char *dwarf_stack_op_name PARAMS ((unsigned int));
-
-static char *dwarf_bool_name PARAMS ((unsigned int));
-
-static char *dwarf_type_encoding_name PARAMS ((unsigned int));
+static struct type *die_containing_type (struct die_info *, struct objfile *);
 
 #if 0
-static char *dwarf_cfi_name PARAMS ((unsigned int));
-
-struct die_info *copy_die PARAMS ((struct die_info *));
+static struct type *type_at_offset (unsigned int, struct objfile *);
 #endif
 
-struct die_info *sibling_die PARAMS ((struct die_info *));
+static struct type *tag_type_to_type (struct die_info *, struct objfile *);
 
-void dump_die PARAMS ((struct die_info *));
+static void read_type_die (struct die_info *, struct objfile *);
 
-void dump_die_list PARAMS ((struct die_info *));
+static void read_typedef (struct die_info *, struct objfile *);
 
-void store_in_ref_table PARAMS ((unsigned int, struct die_info *));
+static void read_base_type (struct die_info *, struct objfile *);
 
-static void dwarf2_empty_die_ref_table PARAMS ((void));
+static void read_file_scope (struct die_info *, struct objfile *);
 
-static unsigned int dwarf2_get_ref_die_offset PARAMS ((struct attribute *));
+static void read_func_scope (struct die_info *, struct objfile *);
 
-struct die_info *follow_die_ref PARAMS ((unsigned int));
+static void read_lexical_block_scope (struct die_info *, struct objfile *);
 
-static struct type *dwarf2_fundamental_type PARAMS ((struct objfile *, int));
+static int dwarf2_get_pc_bounds (struct die_info *,
+				 CORE_ADDR *, CORE_ADDR *, struct objfile *);
+
+static void dwarf2_add_field (struct field_info *, struct die_info *,
+			      struct objfile *);
+
+static void dwarf2_attach_fields_to_type (struct field_info *,
+					  struct type *, struct objfile *);
+
+static void dwarf2_add_member_fn (struct field_info *,
+				  struct die_info *, struct type *,
+				  struct objfile *objfile);
+
+static void dwarf2_attach_fn_fields_to_type (struct field_info *,
+					     struct type *, struct objfile *);
+
+static void read_structure_scope (struct die_info *, struct objfile *);
+
+static void read_common_block (struct die_info *, struct objfile *);
+
+static void read_enumeration (struct die_info *, struct objfile *);
+
+static struct type *dwarf_base_type (int, int, struct objfile *);
+
+static CORE_ADDR decode_locdesc (struct dwarf_block *, struct objfile *);
+
+static void read_array_type (struct die_info *, struct objfile *);
+
+static void read_tag_pointer_type (struct die_info *, struct objfile *);
+
+static void read_tag_ptr_to_member_type (struct die_info *, struct objfile *);
+
+static void read_tag_reference_type (struct die_info *, struct objfile *);
+
+static void read_tag_const_type (struct die_info *, struct objfile *);
+
+static void read_tag_volatile_type (struct die_info *, struct objfile *);
+
+static void read_tag_string_type (struct die_info *, struct objfile *);
+
+static void read_subroutine_type (struct die_info *, struct objfile *);
+
+struct die_info *read_comp_unit (char *, bfd *);
+
+static void free_die_list (struct die_info *);
+
+static struct cleanup *make_cleanup_free_die_list (struct die_info *);
+
+static void process_die (struct die_info *, struct objfile *);
+
+static char *dwarf2_linkage_name (struct die_info *);
+
+static char *dwarf_tag_name (unsigned int);
+
+static char *dwarf_attr_name (unsigned int);
+
+static char *dwarf_form_name (unsigned int);
+
+static char *dwarf_stack_op_name (unsigned int);
+
+static char *dwarf_bool_name (unsigned int);
+
+static char *dwarf_type_encoding_name (unsigned int);
+
+#if 0
+static char *dwarf_cfi_name (unsigned int);
+
+struct die_info *copy_die (struct die_info *);
+#endif
+
+struct die_info *sibling_die (struct die_info *);
+
+void dump_die (struct die_info *);
+
+void dump_die_list (struct die_info *);
+
+void store_in_ref_table (unsigned int, struct die_info *);
+
+static void dwarf2_empty_die_ref_table (void);
+
+static unsigned int dwarf2_get_ref_die_offset (struct attribute *);
+
+struct die_info *follow_die_ref (unsigned int);
+
+static struct type *dwarf2_fundamental_type (struct objfile *, int);
 
 /* memory allocation interface */
 
-static void dwarf2_free_tmp_obstack PARAMS ((PTR));
+static void dwarf2_free_tmp_obstack (PTR);
 
-static struct dwarf_block *dwarf_alloc_block PARAMS ((void));
+static struct dwarf_block *dwarf_alloc_block (void);
 
-static struct abbrev_info *dwarf_alloc_abbrev PARAMS ((void));
+static struct abbrev_info *dwarf_alloc_abbrev (void);
 
-static struct die_info *dwarf_alloc_die PARAMS ((void));
+static struct die_info *dwarf_alloc_die (void);
 
 /* Try to locate the sections we need for DWARF 2 debugging
    information and return true if we have enough to do something.  */
@@ -1322,7 +1313,7 @@ psymtab_to_symtab_1 (pst)
 
   dies = read_comp_unit (info_ptr, abfd);
 
-  make_cleanup ((make_cleanup_func) free_die_list, dies);
+  make_cleanup_free_die_list (dies);
 
   /* Do line number decoding in read_file_scope () */
   process_die (dies, objfile);
@@ -1998,8 +1989,7 @@ dwarf2_add_member_fn (fip, die, type, objfile)
 		      (fip->nfnfields + DW_FIELD_ALLOC_CHUNK)
 		      * sizeof (struct fnfieldlist));
 	  if (fip->nfnfields == 0)
-	    make_cleanup ((make_cleanup_func) free_current_contents,
-			  &fip->fnfieldlists);
+	    make_cleanup (free_current_contents, &fip->fnfieldlists);
 	}
       flp = &fip->fnfieldlists[fip->nfnfields];
       flp->name = fieldname;
@@ -2506,8 +2496,7 @@ read_array_type (die, objfile)
 		xrealloc (range_types, (ndim + DW_FIELD_ALLOC_CHUNK)
 			  * sizeof (struct type *));
 	      if (ndim == 0)
-		make_cleanup ((make_cleanup_func) free_current_contents,
-			      &range_types);
+		make_cleanup (free_current_contents, &range_types);
 	    }
 	  range_types[ndim++] = create_range_type (NULL, index_type, low, high);
 	}
@@ -2957,6 +2946,19 @@ free_die_list (dies)
       die = next;
     }
 }
+
+static void
+do_free_die_list_cleanup (void *dies)
+{
+  free_die_list (dies);
+}
+
+static struct cleanup *
+make_cleanup_free_die_list (struct die_info *dies)
+{
+  return make_cleanup (do_free_die_list_cleanup, dies);
+}
+
 
 /* Read the contents of the section at OFFSET and of size SIZE from the
    object file specified by OBJFILE into the psymbol_obstack and return it.  */
@@ -3760,8 +3762,7 @@ dwarf_decode_lines (offset, comp_dir, abfd)
   line_ptr += 1;
   lh.standard_opcode_lengths = (unsigned char *)
     xmalloc (lh.opcode_base * sizeof (unsigned char));
-  back_to = make_cleanup ((make_cleanup_func) free_current_contents,
-			  &lh.standard_opcode_lengths);
+  back_to = make_cleanup (free_current_contents, &lh.standard_opcode_lengths);
 
   lh.standard_opcode_lengths[0] = 1;
   for (i = 1; i < lh.opcode_base; ++i)
@@ -3780,7 +3781,7 @@ dwarf_decode_lines (offset, comp_dir, abfd)
 	    xrealloc (dirs.dirs,
 		      (dirs.num_dirs + DIR_ALLOC_CHUNK) * sizeof (char *));
 	  if (dirs.num_dirs == 0)
-	    make_cleanup ((make_cleanup_func) free_current_contents, &dirs.dirs);
+	    make_cleanup (free_current_contents, &dirs.dirs);
 	}
       dirs.dirs[dirs.num_dirs++] = cur_dir;
     }
@@ -3797,8 +3798,7 @@ dwarf_decode_lines (offset, comp_dir, abfd)
 		      (files.num_files + FILE_ALLOC_CHUNK)
 		      * sizeof (struct fileinfo));
 	  if (files.num_files == 0)
-	    make_cleanup ((make_cleanup_func) free_current_contents,
-			  &files.files);
+	    make_cleanup (free_current_contents, &files.files);
 	}
       files.files[files.num_files].name = cur_file;
       files.files[files.num_files].dir =
@@ -3873,8 +3873,7 @@ dwarf_decode_lines (offset, comp_dir, abfd)
 				  (files.num_files + FILE_ALLOC_CHUNK)
 				  * sizeof (struct fileinfo));
 		      if (files.num_files == 0)
-			make_cleanup ((make_cleanup_func) free_current_contents,
-				      &files.files);
+			make_cleanup (free_current_contents, &files.files);
 		    }
 		  files.files[files.num_files].name = cur_file;
 		  files.files[files.num_files].dir =
@@ -3967,9 +3966,9 @@ done:
 
    DW_AT_name:          /srcdir/list0.c
    DW_AT_comp_dir:              /compdir
-   files.files[0].name: list0.h         
+   files.files[0].name: list0.h
    files.files[0].dir:  /srcdir
-   files.files[1].name: list0.c         
+   files.files[1].name: list0.c
    files.files[1].dir:  /srcdir
 
    The line number information for list0.c has to end up in a single
@@ -4346,7 +4345,7 @@ dwarf2_const_value_data (struct attribute *attr,
       if (TYPE_UNSIGNED (SYMBOL_TYPE (sym)))
 	l &= ((LONGEST) 1 << bits) - 1;
       else
-	l = (l << (sizeof (l) - bits)) >> (sizeof (l) - bits);
+	l = (l << (sizeof (l) * 8 - bits)) >> (sizeof (l) * 8 - bits);
     }
 
   SYMBOL_VALUE (sym) = l;
@@ -4456,7 +4455,38 @@ tag_type_to_type (die, objfile)
     }
   else
     {
-      read_type_die (die, objfile);
+      struct attribute *attr;
+      attr = dwarf_attr (die, DW_AT_name);
+      if (attr && DW_STRING (attr))
+	{
+	  char *attrname=DW_STRING (attr);
+	  unsigned long hashval=hash(attrname, strlen(attrname)) % TYPE_HASH_SIZE;
+
+	  if (dwarf2_cached_types[hashval] != NULL)
+	    {
+	      const char *nameoftype;
+	      nameoftype = TYPE_NAME(dwarf2_cached_types[hashval]) == NULL ? TYPE_TAG_NAME(dwarf2_cached_types[hashval]) : TYPE_NAME(dwarf2_cached_types[hashval]);
+	      if (strcmp(attrname, nameoftype) == 0)
+		{
+		  die->type=dwarf2_cached_types[hashval];
+		}
+	      else
+		{
+		  read_type_die (die, objfile);
+		  dwarf2_cached_types[hashval] = die->type;
+		}
+	    }
+	  else
+	    {
+	      read_type_die (die, objfile);
+	      dwarf2_cached_types[hashval] = die->type;
+	    }
+	}
+      else
+	{
+	  read_type_die (die, objfile);
+	}
+
       if (!die->type)
 	{
 	  dump_die (die);

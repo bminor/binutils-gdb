@@ -357,7 +357,6 @@ elf_link_add_archive_symbols (abfd, info)
 	    }
 
 	  /* We need to include this archive member.  */
-
 	  element = _bfd_get_elt_at_filepos (abfd, symdef->file_offset);
 	  if (element == (bfd *) NULL)
 	    goto error_return;
@@ -1852,6 +1851,18 @@ elf_link_add_object_symbols (abfd, info)
 		    goto error_return;
 		}
 	    }
+	  else if (dynsym && h->dynindx != -1)
+	    /* If the symbol already has a dynamic index, but
+	       visibility says it should not be visible, turn it into
+	       a local symbol.  */
+	    switch (ELF_ST_VISIBILITY (h->other))
+	      {
+	      case STV_INTERNAL:
+	      case STV_HIDDEN:  
+		h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
+		(*bed->elf_backend_hide_symbol) (h);
+		break;
+	      }
 	}
     }
 
@@ -3278,6 +3289,9 @@ elf_fix_symbol_flags (h, eif)
      an ELF dynamic object.  */
   if ((h->elf_link_hash_flags & ELF_LINK_NON_ELF) != 0)
     {
+      while (h->root.type == bfd_link_hash_indirect)
+	h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
       if (h->root.type != bfd_link_hash_defined
 	  && h->root.type != bfd_link_hash_defweak)
 	h->elf_link_hash_flags |= (ELF_LINK_HASH_REF_REGULAR
@@ -3339,10 +3353,12 @@ elf_fix_symbol_flags (h, eif)
   /* If -Bsymbolic was used (which means to bind references to global
      symbols to the definition within the shared object), and this
      symbol was defined in a regular object, then it actually doesn't
-     need a PLT entry.  */
+     need a PLT entry.  Likewise, if the symbol has any kind of
+     visibility (internal, hidden, or protected), it doesn't need a
+     PLT.  */
   if ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0
       && eif->info->shared
-      && eif->info->symbolic
+      && (eif->info->symbolic || ELF_ST_VISIBILITY (h->other))
       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
     {
       h->elf_link_hash_flags &=~ ELF_LINK_HASH_NEEDS_PLT;
@@ -4086,7 +4102,7 @@ elf_bfd_final_link (abfd, info)
 		 the linker has decided to not include.  */
 	      sec->linker_mark = true;
 
-	      if (info->relocateable)
+	      if (info->relocateable || info->emitrelocations)
 		o->reloc_count += sec->reloc_count;
 
 	      if (sec->_raw_size > max_contents_size)
@@ -4154,7 +4170,7 @@ elf_bfd_final_link (abfd, info)
   /* Figure out how many relocations we will have in each section.
      Just using RELOC_COUNT isn't good enough since that doesn't
      maintain a separate value for REL vs. RELA relocations.  */
-  if (info->relocateable)
+  if (info->relocateable || info->emitrelocations)
     for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
       for (o = sub->sections; o != NULL; o = o->next)
 	{
@@ -4262,7 +4278,7 @@ elf_bfd_final_link (abfd, info)
 
   /* Start writing out the symbol table.  The first symbol is always a
      dummy symbol.  */
-  if (info->strip != strip_all || info->relocateable)
+  if (info->strip != strip_all || info->relocateable || info->emitrelocations)
     {
       elfsym.st_value = 0;
       elfsym.st_size = 0;
@@ -4295,7 +4311,7 @@ elf_bfd_final_link (abfd, info)
      symbols have no names.  We store the index of each one in the
      index field of the section, so that we can find it again when
      outputting relocs.  */
-  if (info->strip != strip_all || info->relocateable)
+  if (info->strip != strip_all || info->relocateable || info->emitrelocations)
     {
       elfsym.st_size = 0;
       elfsym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
@@ -5017,12 +5033,9 @@ elf_link_output_extsym (h, data)
          symbol foo@@GNU_1.2 is the default, which should be used when
          foo is used with no version, then we add an indirect symbol
          foo which points to foo@@GNU_1.2.  We ignore these symbols,
-         since the indirected symbol is already in the hash table.  If
-         the indirect symbol is non-ELF, fall through and output it.  */
-      if ((h->elf_link_hash_flags & ELF_LINK_NON_ELF) == 0)
-	return true;
+         since the indirected symbol is already in the hash table.  */
+      return true;
 
-      /* Fall through.  */
     case bfd_link_hash_warning:
       /* We can't represent these symbols in ELF, although a warning
          symbol may have come from a .gnu.warning.SYMBOL section.  We
@@ -5071,6 +5084,11 @@ elf_link_output_extsym (h, data)
 	bindtype = STB_WEAK;
       sym.st_info = ELF_ST_INFO (bindtype, ELF_ST_TYPE (sym.st_info));
     }
+
+  /* If a symbol is not defined locally, we clear the visibility
+     field. */
+  if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
+    sym.st_other ^= ELF_ST_VISIBILITY(sym.st_other);
 
   /* If this symbol should be put in the .dynsym section, then put it
      there now.  We have already know the symbol index.  We also fill
@@ -5474,7 +5492,7 @@ elf_link_input_bfd (finfo, input_bfd)
 				     finfo->sections))
 	    return false;
 
-	  if (finfo->info->relocateable)
+	  if (finfo->info->relocateable || finfo->info->emitrelocations)
 	    {
 	      Elf_Internal_Rela *irela;
 	      Elf_Internal_Rela *irelaend;
@@ -5496,6 +5514,10 @@ elf_link_input_bfd (finfo, input_bfd)
 		  asection *sec;
 
 		  irela->r_offset += o->output_offset;
+
+		  /* Relocs in an executable have to be virtual addresses.  */
+		  if (finfo->info->emitrelocations)
+		    irela->r_offset += o->output_section->vma;
 
 		  r_symndx = ELF_R_SYM (irela->r_info);
 
@@ -6403,7 +6425,7 @@ elf_gc_sections (abfd, info)
              struct elf_link_hash_entry *h, Elf_Internal_Sym *));
 
   if (!get_elf_backend_data (abfd)->can_gc_sections
-      || info->relocateable
+      || info->relocateable || info->emitrelocations
       || elf_hash_table (info)->dynamic_sections_created)
     return true;
 
@@ -6615,7 +6637,8 @@ elf_gc_common_finalize_got_offsets (abfd, info)
 	}
     }
 
-  /* Then the global .got and .plt entries.  */
+  /* Then the global .got entries.  .plt refcounts are handled by
+     adjust_dynamic_symbol  */
   elf_link_hash_traverse (elf_hash_table (info),
 			  elf_gc_allocate_got_offsets,
 			  (PTR) &gotoff);

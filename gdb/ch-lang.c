@@ -28,22 +28,19 @@
 #include "ch-lang.h"
 #include "valprint.h"
 
-extern void _initialize_chill_language PARAMS ((void));
+extern void _initialize_chill_language (void);
 
 static value_ptr
-  evaluate_subexp_chill PARAMS ((struct type *, struct expression *, int *, enum noside));
+evaluate_subexp_chill (struct type *, struct expression *, int *,
+		       enum noside);
 
-static value_ptr
-  value_chill_max_min PARAMS ((enum exp_opcode, value_ptr));
+static value_ptr value_chill_max_min (enum exp_opcode, value_ptr);
 
-static value_ptr
-  value_chill_card PARAMS ((value_ptr));
+static value_ptr value_chill_card (value_ptr);
 
-static value_ptr
-  value_chill_length PARAMS ((value_ptr));
+static value_ptr value_chill_length (value_ptr);
 
-static struct type *
-  chill_create_fundamental_type PARAMS ((struct objfile *, int));
+static struct type *chill_create_fundamental_type (struct objfile *, int);
 
 static void chill_printstr (struct ui_file * stream, char *string,
 			    unsigned int length, int width,

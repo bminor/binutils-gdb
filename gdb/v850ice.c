@@ -46,81 +46,80 @@ struct MessageIO
   };
 
 /* Prototypes for functions located in other files */
-extern void break_command PARAMS ((char *, int));
+extern void break_command (char *, int);
 
-extern void stepi_command PARAMS ((char *, int));
+extern void stepi_command (char *, int);
 
-extern void nexti_command PARAMS ((char *, int));
+extern void nexti_command (char *, int);
 
-extern void continue_command PARAMS ((char *, int));
+extern void continue_command (char *, int);
 
-extern int (*ui_loop_hook) PARAMS ((int));
+extern int (*ui_loop_hook) (int);
 
 /* Prototypes for local functions */
-static int init_hidden_window PARAMS ((void));
+static int init_hidden_window (void);
 
-static LRESULT CALLBACK v850ice_wndproc PARAMS ((HWND, UINT, WPARAM, LPARAM));
+static LRESULT CALLBACK v850ice_wndproc (HWND, UINT, WPARAM, LPARAM);
 
-static void v850ice_files_info PARAMS ((struct target_ops * ignore));
+static void v850ice_files_info (struct target_ops *ignore);
 
-static int v850ice_xfer_memory PARAMS ((CORE_ADDR memaddr, char *myaddr,
-					int len, int should_write,
-					struct target_ops * target));
+static int v850ice_xfer_memory (CORE_ADDR memaddr, char *myaddr,
+				int len, int should_write,
+				struct target_ops *target);
 
-static void v850ice_prepare_to_store PARAMS ((void));
+static void v850ice_prepare_to_store (void);
 
-static void v850ice_fetch_registers PARAMS ((int regno));
+static void v850ice_fetch_registers (int regno);
 
-static void v850ice_resume PARAMS ((int pid, int step,
-				    enum target_signal siggnal));
+static void v850ice_resume (int pid, int step, enum target_signal siggnal);
 
-static void v850ice_open PARAMS ((char *name, int from_tty));
+static void v850ice_open (char *name, int from_tty);
 
-static void v850ice_close PARAMS ((int quitting));
+static void v850ice_close (int quitting);
 
-static void v850ice_stop PARAMS ((void));
+static void v850ice_stop (void);
 
-static void v850ice_store_registers PARAMS ((int regno));
+static void v850ice_store_registers (int regno);
 
-static void v850ice_mourn PARAMS ((void));
+static void v850ice_mourn (void);
 
-static int v850ice_wait PARAMS ((int pid, struct target_waitstatus * status));
+static int v850ice_wait (int pid, struct target_waitstatus *status);
 
-static void v850ice_kill PARAMS ((void));
+static void v850ice_kill (void);
 
-static void v850ice_detach PARAMS ((char *args, int from_tty));
+static void v850ice_detach (char *args, int from_tty);
 
-static int v850ice_insert_breakpoint PARAMS ((CORE_ADDR, char *));
+static int v850ice_insert_breakpoint (CORE_ADDR, char *);
 
-static int v850ice_remove_breakpoint PARAMS ((CORE_ADDR, char *));
+static int v850ice_remove_breakpoint (CORE_ADDR, char *);
 
-static void v850ice_command PARAMS ((char *, int));
+static void v850ice_command (char *, int);
 
-static int ice_disassemble PARAMS ((unsigned long, int, char *));
+static int ice_disassemble (unsigned long, int, char *);
 
-static int ice_lookup_addr PARAMS ((unsigned long *, char *, char *));
+static int ice_lookup_addr (unsigned long *, char *, char *);
 
-static int ice_lookup_symbol PARAMS ((unsigned long, char *));
+static int ice_lookup_symbol (unsigned long, char *);
 
-static void ice_SimulateDisassemble PARAMS ((char *, int));
+static void ice_SimulateDisassemble (char *, int);
 
-static void ice_SimulateAddrLookup PARAMS ((char *, int));
+static void ice_SimulateAddrLookup (char *, int);
 
-static void ice_Simulate_SymLookup PARAMS ((char *, int));
+static void ice_Simulate_SymLookup (char *, int);
 
 static void ice_fputs (const char *, struct ui_file *);
 
-static int ice_file PARAMS ((char *));
+static int ice_file (char *);
 
-static int ice_cont PARAMS ((char *));
+static int ice_cont (char *);
 
-static int ice_stepi PARAMS ((char *));
+static int ice_stepi (char *);
 
-static int ice_nexti PARAMS ((char *));
+static int ice_nexti (char *);
 
-static void togdb_force_update PARAMS ((void));
+static void togdb_force_update (void);
 
-static void view_source PARAMS ((CORE_ADDR));
+static void view_source (CORE_ADDR);
 
 static void do_gdb (char *, char *, void (*func) PARAMS ((char *, int)), int);
 
@@ -856,7 +855,7 @@ static void
 do_gdb (cmd, str, func, count)
      char *cmd;
      char *str;
-     void (*func) PARAMS ((char *, int));
+     void (*func) (char *, int);
      int count;
 {
   ReplyMessage ((LRESULT) 1);

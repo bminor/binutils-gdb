@@ -17,8 +17,8 @@
 ** STATIC LOCAL FUNCTIONS FORWARD DECLS    **
 ******************************************/
 
-static char *_getFuncNameFromFrame PARAMS ((struct frame_info *));
-static void _tuiUpdateLocation_command PARAMS ((char *, int));
+static char *_getFuncNameFromFrame (struct frame_info *);
+static void _tuiUpdateLocation_command (char *, int);
 
 
 
@@ -529,7 +529,7 @@ _tuiUpdateLocation_command (arg, fromTTY)
 #endif
 {
 #ifndef TRY
-  extern void frame_command PARAMS ((char *, int));
+extern void frame_command (char *, int);
   frame_command ("0", FALSE);
 #else
   struct frame_info *curFrame;

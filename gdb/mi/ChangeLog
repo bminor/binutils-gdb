@@ -1,3 +1,30 @@
+Tue May 16 14:13:41 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mi-main.c (mi_cmd_execute): Use free_current_contents.
+	(free_and_reset): Delete.
+
+Mon May 15 16:17:56 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mi-main.c (mi_cmd_data_assign, mi_cmd_data_evaluate_expression),
+ 	mi-cmd-var.c (mi_cmd_var_create, mi_cmd_var_delete): Delete
+ 	make_cleanup_func casts. Not needed.
+
+2000-05-07  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* gdbmi.texinfo: Lots of typos and grammar fixes from Brian
+        Youmans <3diff@flib.gnu.ai.mit.edu>.
+
+Wed Apr 26 18:35:19 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbmi.texinfo (GDB/MI Output Syntax v2.0): Convert Draft 2.0
+ 	Output Syntax into a new section.  Cross reference.
+	(menu): Fix tipo. GDB/MI Compatibility with CLI.
+
+2000-04-23  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* gdbmi.texinfo: Lots of changes, to include this document as part
+	of the GDB manual.
+
 2000-03-13  James Ingham  <jingham@leda.cygnus.com>
 
 	* mi-cmd-var.c (mi_cmd_var_create): Add special frame cookie "@"

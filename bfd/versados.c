@@ -1,5 +1,5 @@
 /* BFD back-end for VERSAdos-E objects.
-   Copyright 1995, 96, 97, 98, 1999 Free Software Foundation, Inc.
+   Copyright 1995, 96, 97, 98, 99, 2000 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
    Versados is a Motorola trademark.
@@ -483,10 +483,12 @@ versados_scan (abfd)
   int j;
   int nsecs = 0;
 
+  VDATA (abfd)->stringlen = 0;
   VDATA (abfd)->nrefs = 0;
   VDATA (abfd)->ndefs = 0;
   VDATA (abfd)->ref_idx = 0;
   VDATA (abfd)->def_idx = 0;
+  VDATA (abfd)->pass_2_done = 0;
 
   while (loop)
     {

@@ -28,7 +28,7 @@
 
 /* Prototypes for local functions. */
 
-static void abug_open PARAMS ((char *args, int from_tty));
+static void abug_open (char *args, int from_tty);
 
 static void
 abug_supply_register (regname, regnamelen, val, vallen)

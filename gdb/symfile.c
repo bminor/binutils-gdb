@@ -68,9 +68,11 @@ void (*show_load_progress) (const char *section,
 			    unsigned long section_size, 
 			    unsigned long total_sent, 
 			    unsigned long total_size);
-void (*pre_add_symbol_hook) PARAMS ((char *));
-void (*post_add_symbol_hook) PARAMS ((void));
-void (*target_new_objfile_hook) PARAMS ((struct objfile *));
+void (*pre_add_symbol_hook) (char *);
+void (*post_add_symbol_hook) (void);
+void (*target_new_objfile_hook) (struct objfile *);
+
+static void clear_symtab_users_cleanup (void *ignore);
 
 /* Global variables owned by this file */
 int readnow_symbol_files;	/* Read full symbols immediately */
@@ -94,73 +96,72 @@ struct complaint unknown_option_complaint =
 
 extern int info_verbose;
 
-extern void report_transfer_performance PARAMS ((unsigned long,
-						 time_t, time_t));
+extern void report_transfer_performance (unsigned long, time_t, time_t);
 
 /* Functions this file defines */
 
 #if 0
-static int simple_read_overlay_region_table PARAMS ((void));
-static void simple_free_overlay_region_table PARAMS ((void));
+static int simple_read_overlay_region_table (void);
+static void simple_free_overlay_region_table (void);
 #endif
 
-static void set_initial_language PARAMS ((void));
+static void set_initial_language (void);
 
-static void load_command PARAMS ((char *, int));
+static void load_command (char *, int);
 
-static void add_symbol_file_command PARAMS ((char *, int));
+static void add_symbol_file_command (char *, int);
 
-static void add_shared_symbol_files_command PARAMS ((char *, int));
+static void add_shared_symbol_files_command (char *, int);
 
-static void cashier_psymtab PARAMS ((struct partial_symtab *));
+static void cashier_psymtab (struct partial_symtab *);
 
-static int compare_psymbols PARAMS ((const void *, const void *));
+static int compare_psymbols (const void *, const void *);
 
-static int compare_symbols PARAMS ((const void *, const void *));
+static int compare_symbols (const void *, const void *);
 
-bfd *symfile_bfd_open PARAMS ((char *));
+bfd *symfile_bfd_open (char *);
 
-static void find_sym_fns PARAMS ((struct objfile *));
+static void find_sym_fns (struct objfile *);
 
-static void decrement_reading_symtab PARAMS ((void *));
+static void decrement_reading_symtab (void *);
 
-static void overlay_invalidate_all PARAMS ((void));
+static void overlay_invalidate_all (void);
 
-static int overlay_is_mapped PARAMS ((struct obj_section *));
+static int overlay_is_mapped (struct obj_section *);
 
-void list_overlays_command PARAMS ((char *, int));
+void list_overlays_command (char *, int);
 
-void map_overlay_command PARAMS ((char *, int));
+void map_overlay_command (char *, int);
 
-void unmap_overlay_command PARAMS ((char *, int));
+void unmap_overlay_command (char *, int);
 
-static void overlay_auto_command PARAMS ((char *, int));
+static void overlay_auto_command (char *, int);
 
-static void overlay_manual_command PARAMS ((char *, int));
+static void overlay_manual_command (char *, int);
 
-static void overlay_off_command PARAMS ((char *, int));
+static void overlay_off_command (char *, int);
 
-static void overlay_load_command PARAMS ((char *, int));
+static void overlay_load_command (char *, int);
 
-static void overlay_command PARAMS ((char *, int));
+static void overlay_command (char *, int);
 
-static void simple_free_overlay_table PARAMS ((void));
+static void simple_free_overlay_table (void);
 
-static void read_target_long_array PARAMS ((CORE_ADDR, unsigned int *, int));
+static void read_target_long_array (CORE_ADDR, unsigned int *, int);
 
-static int simple_read_overlay_table PARAMS ((void));
+static int simple_read_overlay_table (void);
 
-static int simple_overlay_update_1 PARAMS ((struct obj_section *));
+static int simple_overlay_update_1 (struct obj_section *);
 
-static void add_filename_language PARAMS ((char *ext, enum language lang));
+static void add_filename_language (char *ext, enum language lang);
 
-static void set_ext_lang_command PARAMS ((char *args, int from_tty));
+static void set_ext_lang_command (char *args, int from_tty);
 
-static void info_ext_lang_command PARAMS ((char *args, int from_tty));
+static void info_ext_lang_command (char *args, int from_tty);
 
-static void init_filename_language_table PARAMS ((void));
+static void init_filename_language_table (void);
 
-void _initialize_symfile PARAMS ((void));
+void _initialize_symfile (void);
 
 /* List of all available sym_fns.  On gdb startup, each object file reader
    calls add_symtab_fns() to register information on each format it is
@@ -478,13 +479,6 @@ build_section_addr_info_from_section_table (const struct section_table *start,
 
   for (stp = start, oidx = 0; stp != end; stp++)
     {
-      if (strcmp (stp->the_bfd_section->name, ".text") == 0)
-	sap->text_addr = stp->addr;
-      else if (strcmp (stp->the_bfd_section->name, ".data") == 0)
-	sap->data_addr = stp->addr;
-      else if (strcmp (stp->the_bfd_section->name, ".bss") == 0)
-	sap->bss_addr = stp->addr;
-
       if (stp->the_bfd_section->flags & (SEC_ALLOC | SEC_LOAD)
 	  && oidx < MAX_SECTIONS)
 	{
@@ -525,42 +519,49 @@ default_symfile_offsets (objfile, addrs)
      struct section_addr_info *addrs;
 {
   int i;
+  asection *sect = NULL;
 
   objfile->num_sections = SECT_OFF_MAX;
   objfile->section_offsets = (struct section_offsets *)
     obstack_alloc (&objfile->psymbol_obstack, SIZEOF_SECTION_OFFSETS);
   memset (objfile->section_offsets, 0, SIZEOF_SECTION_OFFSETS);
 
-  /* If user explicitly specified values for data and bss, set them here. */
-  
-  if (addrs->text_addr)
-    ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT) = addrs->text_addr;
-  if (addrs->data_addr)
-    ANOFFSET (objfile->section_offsets, SECT_OFF_DATA) = addrs->data_addr;
-  if (addrs->bss_addr)
-    ANOFFSET (objfile->section_offsets, SECT_OFF_BSS)  = addrs->bss_addr;
-    
-  /* Now calculate offsets for other sections. */
+  /* Now calculate offsets for section that were specified by the
+     caller. */
   for (i = 0; i < MAX_SECTIONS && addrs->other[i].name; i++)
     {
       struct other_sections *osp ;
 
       osp = &addrs->other[i] ;
-      if (addrs->other[i].addr == 0)
+      if (osp->addr == 0)
   	continue;
-#if 0
-      if (strcmp (".text", osp->name) == 0)
-	SECT_OFF_TEXT = osp->sectindex ;
-      else if (strcmp (".data", osp->name) == 0)
-	SECT_OFF_DATA = osp->sectindex ;
-      else if (strcmp (".bss", osp->name) == 0)
-	SECT_OFF_BSS =  osp->sectindex ;
-#endif
+
       /* Record all sections in offsets */
+      /* The section_offsets in the objfile are here filled in using
+         the BFD index. */
       ANOFFSET (objfile->section_offsets, osp->sectindex) = osp->addr;
     }
-}
 
+  /* Remember the bfd indexes for the .text, .data, .bss and
+     .rodata sections. */
+
+  sect = bfd_get_section_by_name (objfile->obfd, ".text");
+  if (sect) 
+    objfile->sect_index_text = sect->index;
+
+  sect = bfd_get_section_by_name (objfile->obfd, ".data");
+  if (sect) 
+    objfile->sect_index_data = sect->index;
+
+  sect = bfd_get_section_by_name (objfile->obfd, ".bss");
+  if (sect) 
+    objfile->sect_index_bss = sect->index;
+
+  sect = bfd_get_section_by_name (objfile->obfd, ".rodata");
+  if (sect) 
+    objfile->sect_index_rodata = sect->index;
+
+}
 
 /* Process a symbol file, as either the main file or as a dynamically
    loaded file.
@@ -605,13 +606,13 @@ syms_from_objfile (objfile, addrs, mainline, verbo)
 
   /* Make sure that partially constructed symbol tables will be cleaned up
      if an error occurs during symbol reading.  */
-  old_chain = make_cleanup ((make_cleanup_func) free_objfile, objfile);
+  old_chain = make_cleanup_free_objfile (objfile);
 
   if (mainline)
     {
       /* We will modify the main symbol table, make sure that all its users
          will be cleaned up if an error occurs during symbol reading.  */
-      make_cleanup ((make_cleanup_func) clear_symtab_users, 0);
+      make_cleanup (clear_symtab_users_cleanup, 0 /*ignore*/);
 
       /* Since no error yet, throw away the old symbol table.  */
 
@@ -635,14 +636,7 @@ syms_from_objfile (objfile, addrs, mainline, verbo)
 
      We no longer warn if the lowest section is not a text segment (as
      happens for the PA64 port.  */
-  if (mainline)
-    {
-      /* No offset from objfile addresses.  */
-      addrs -> text_addr = 0;
-      addrs -> data_addr = 0;
-      addrs -> bss_addr = 0;
-    }
-  else
+  if (!mainline)
     {
       /* Find lowest loadable section to be used as starting point for 
          continguous sections. FIXME!! won't work without call to find
@@ -654,12 +648,12 @@ syms_from_objfile (objfile, addrs, mainline, verbo)
       if (lower_sect == NULL)
 	warning ("no loadable sections found in added symbol-file %s",
 		 objfile->name);
-      else if ((bfd_get_section_flags (objfile->obfd, lower_sect) & SEC_CODE)
-	       == 0)
-	warning ("Lowest section in %s is %s at %s",
-		 objfile->name,
-		 bfd_section_name (objfile->obfd, lower_sect),
-		 paddr (bfd_section_vma (objfile->obfd, lower_sect)));
+      else 
+	if ((bfd_get_section_flags (objfile->obfd, lower_sect) & SEC_CODE) == 0)
+	  warning ("Lowest section in %s is %s at %s",
+		   objfile->name,
+		   bfd_section_name (objfile->obfd, lower_sect),
+		   paddr (bfd_section_vma (objfile->obfd, lower_sect)));
       if (lower_sect != NULL)
  	lower_offset = bfd_section_vma (objfile->obfd, lower_sect);
       else
@@ -675,57 +669,17 @@ syms_from_objfile (objfile, addrs, mainline, verbo)
  	 (the loadable section directly below it in memory).
  	 this_offset = lower_offset = lower_addr - lower_orig_addr */
 
-      /* FIXME: These sections will not need special treatment because ALL
-	 sections are in the other sections table */
- 
-      if (addrs->text_addr != 0)
- 	{
- 	  sect = bfd_get_section_by_name (objfile->obfd, ".text");
- 	  if (sect)
- 	    {
- 	      addrs->text_addr -= bfd_section_vma (objfile->obfd, sect);
- 	      lower_offset = addrs->text_addr;
- 	    }
- 	}
-      else 
- 	/* ??? who's below me? */
-	addrs->text_addr = lower_offset;
- 
-      if (addrs->data_addr != 0)
-	{
-	  sect = bfd_get_section_by_name (objfile->obfd, ".data");
-	  if (sect)
- 	    {
-	      addrs->data_addr -= bfd_section_vma (objfile->obfd, sect);
- 	      lower_offset = addrs->data_addr;
- 	    }
-	}
-      else
-	addrs->data_addr = lower_offset;
- 
-      if (addrs->bss_addr != 0)
-	{
-	  sect = bfd_get_section_by_name (objfile->obfd, ".bss");
-	  if (sect)
- 	    {
-	      addrs->bss_addr -= bfd_section_vma (objfile->obfd, sect);
- 	      lower_offset = addrs->bss_addr;
- 	    }
-	}
-      else
-	addrs->bss_addr = lower_offset;
-  
-       /* Now calculate offsets for other sections. */
+       /* Calculate offsets for sections. */
       for (i=0 ; i < MAX_SECTIONS && addrs->other[i].name; i++)
 	{
-	 
- 	  if (addrs->other[i].addr != 0)
+	  if (addrs->other[i].addr != 0)
  	    {
- 	      sect=bfd_get_section_by_name(objfile->obfd, addrs->other[i].name);
+ 	      sect = bfd_get_section_by_name (objfile->obfd, addrs->other[i].name);
  	      if (sect)
  		{
  		  addrs->other[i].addr -= bfd_section_vma (objfile->obfd, sect);
  		  lower_offset = addrs->other[i].addr;
+		  /* This is the index used by BFD. */
 		  addrs->other[i].sectindex = sect->index ;
  		}
  	      else
@@ -782,13 +736,6 @@ syms_from_objfile (objfile, addrs, mainline, verbo)
 	  CORE_ADDR s_addr = 0;
 	  int i;
 
- 	  if (strcmp (s->the_bfd_section->name, ".text") == 0)
- 	    s_addr = addrs->text_addr;
- 	  else if (strcmp (s->the_bfd_section->name, ".data") == 0)
- 	    s_addr = addrs->data_addr;
- 	  else if (strcmp (s->the_bfd_section->name, ".bss") == 0)
- 	    s_addr = addrs->bss_addr;
- 	  else 
  	    for (i = 0; 
 	         !s_addr && i < MAX_SECTIONS && addrs->other[i].name;
 		 i++)
@@ -993,6 +940,10 @@ symbol_file_add (name, from_tty, addrs, mainline, flags)
    used in GDB (perhaps "set mapped on", "set readnow on" would be
    better), (3) the order of options matters, which is contrary to GNU
    conventions (because it is confusing and inconvenient).  */
+/* Note: ezannoni 2000-04-17. This function used to have support for
+   rombug (see remote-os9k.c). It consisted of a call to target_link()
+   (target.c) to get the address of the text segment from the target,
+   and pass that to symbol_file_add(). This is no longer supported. */
 
 void
 symbol_file_command (args, from_tty)
@@ -1001,7 +952,6 @@ symbol_file_command (args, from_tty)
 {
   char **argv;
   char *name = NULL;
-  CORE_ADDR text_relocation = 0;	/* text_relocation */
   struct cleanup *cleanups;
   int flags = OBJF_USERLOADED;
 
@@ -1026,9 +976,7 @@ symbol_file_command (args, from_tty)
 
       symfile_objfile = NULL;
       if (from_tty)
-	{
 	  printf_unfiltered ("No symbol file now.\n");
-	}
 #ifdef HPUXHPPA
       RESET_HP_UX_GLOBALS ();
 #endif
@@ -1043,56 +991,26 @@ symbol_file_command (args, from_tty)
       while (*argv != NULL)
 	{
 	  if (STREQ (*argv, "-mapped"))
-	    {
-	      flags |= OBJF_MAPPED;
-	    }
-	  else if (STREQ (*argv, "-readnow"))
-	    {
+	    flags |= OBJF_MAPPED;
+	  else 
+	    if (STREQ (*argv, "-readnow"))
 	      flags |= OBJF_READNOW;
-	    }
-	  else if (**argv == '-')
-	    {
-	      error ("unknown option `%s'", *argv);
-	    }
-	  else
-	    {
-	      char *p;
-
-	      name = *argv;
-
-	      /* this is for rombug remote only, to get the text relocation by
-	         using link command */
-	      p = strrchr (name, '/');
-	      if (p != NULL)
-		p++;
+	    else 
+	      if (**argv == '-')
+		error ("unknown option `%s'", *argv);
 	      else
-		p = name;
-
-	      target_link (p, &text_relocation);
-
-	      if (text_relocation == (CORE_ADDR) 0)
-		return;
-	      else if (text_relocation == (CORE_ADDR) -1)
 		{
+                  name = *argv;
 		  symbol_file_add (name, from_tty, NULL, 1, flags);
 #ifdef HPUXHPPA
 		  RESET_HP_UX_GLOBALS ();
 #endif
-		}
-	      else
-		{
-		  struct section_addr_info section_addrs;
-		  memset (&section_addrs, 0, sizeof (section_addrs));
-		  section_addrs.text_addr = (CORE_ADDR) text_relocation;
-		  symbol_file_add (name, from_tty, &section_addrs, 0, flags);
-		}
+		  /* Getting new symbols may change our opinion about
+		     what is frameless.  */
+		  reinit_frame_cache ();
 
-	      /* Getting new symbols may change our opinion about what is
-	         frameless.  */
-	      reinit_frame_cache ();
-
-	      set_initial_language ();
-	    }
+		  set_initial_language ();
+		}
 	  argv++;
 	}
 
@@ -1313,7 +1231,7 @@ generic_load (char *args, int from_tty)
   /* FIXME: should be checking for errors from bfd_close (for one thing,
      on error it does not free all the storage associated with the
      bfd).  */
-  make_cleanup ((make_cleanup_func) bfd_close, loadfile_bfd);
+  make_cleanup_bfd_close (loadfile_bfd);
 
   if (!bfd_check_format (loadfile_bfd, bfd_object))
     {
@@ -1505,6 +1423,12 @@ print_transfer_performance (struct ui_file *stream,
 
 /* This function allows the addition of incrementally linked object files.
    It does not modify any state in the target, only in the debugger.  */
+/* Note: ezannoni 2000-04-13 This function/command used to have a
+   special case syntax for the rombug target (Rombug is the boot
+   monitor for Microware's OS-9 / OS-9000, see remote-os9k.c). In the
+   rombug case, the user doesn't need to supply a text address,
+   instead a call to target_link() (in target.c) would supply the
+   value to use. We are now discontinuing this type of ad hoc syntax. */
 
 /* ARGSUSED */
 static void
@@ -1512,198 +1436,157 @@ add_symbol_file_command (args, from_tty)
      char *args;
      int from_tty;
 {
-  char *name = NULL;
+  char *filename = NULL;
   int flags = OBJF_USERLOADED;
   char *arg;
   int expecting_option = 0;
-  int option_index = 0;
+  int section_index = 0;
   int argcnt = 0;
   int sec_num = 0;
   int i;
+  int expecting_sec_name = 0;
+  int expecting_sec_addr = 0;
+
   struct
   {
-    enum { OPT_SECTION } type;
     char *name;
     char *value;
-  } opt[SECT_OFF_MAX];
+  } sect_opts[SECT_OFF_MAX];
+
   struct section_addr_info section_addrs;
+  struct cleanup *my_cleanups;
 
   dont_repeat ();
 
   if (args == NULL)
-    {
-      error ("add-symbol-file takes a file name and an address");
-    }
+    error ("add-symbol-file takes a file name and an address");
 
   /* Make a copy of the string that we can safely write into. */
-
   args = xstrdup (args);
-  make_cleanup (free, args);
 
   /* Ensure section_addrs is initialized */
   memset (&section_addrs, 0, sizeof (section_addrs));
 
-  /* Pick off any -option args and the file name. */
-
   while (*args != '\000')
     {
+      /* Any leading spaces? */
       while (isspace (*args))
-	{
-	  args++;
-	}
+	args++;
+
+      /* Point arg to the beginning of the argument. */
       arg = args;
+
+      /* Move args pointer over the argument. */
       while ((*args != '\000') && !isspace (*args))
-	{
-	  args++;
-	}
+	args++;
+
+      /* If there are more arguments, terminate arg and
+         proceed past it. */
       if (*args != '\000')
-	{
-	  *args++ = '\000';
-	}
-      if (*arg != '-')
-	{
-	  if (expecting_option)
-	    {
- 	      opt[option_index++].value = arg;
- 	      expecting_option = 0;
- 	    }
- 	  else
- 	    {
-	      switch (argcnt)
-		{
- 		case 0:
- 		  name = arg;
- 		  break;
- 		case 1: 
- 		  opt[option_index].type = OPT_SECTION;
- 		  opt[option_index].name = ".text";
- 		  opt[option_index++].value = arg;
- 		  break;
- 		case 2: 
- 		  opt[option_index].type = OPT_SECTION;
- 		  opt[option_index].name = ".data";
- 		  opt[option_index++].value = arg;
- 		  break;
- 		case 3: 
- 		  opt[option_index].type = OPT_SECTION;
- 		  opt[option_index].name = ".bss";
- 		  opt[option_index++].value = arg;
- 		  break;
- 		default:
- 		  warning ("Too many arguments entered; see \"help add-symbol-file\" for command syntax.");
-		}
-	      argcnt++;
- 	    }
-	}
-      else if (STREQ (arg, "-mapped"))
-	{
-	  flags |= OBJF_MAPPED;
-	}
-      else if (STREQ (arg, "-readnow"))
-	{
-	  flags |= OBJF_READNOW;
-	}
-      else if (STREQN (arg, "-T", 2))
- 	{
- 	  if (option_index >= SECT_OFF_MAX)
-	    {
-	      warning ("Number of options exceeds maximum allowed.");
-	    }
- 	  else
- 	    {
- 	      expecting_option = 1;
- 	      opt[option_index].type = OPT_SECTION;
- 	      opt[option_index].name = arg + 2;
- 	    }
- 	}
-      else 
-        {
-	  error ("Unknown option `%s'", arg);
-        }
-    }
+	*args++ = '\000';
 
-  if (name == NULL)
-    {
-      error ("add-symbol-file takes a file name");
-    }
-  name = tilde_expand (name);
-  make_cleanup (free, name);
-
-  if (option_index > 0)
-    {
-      /* Print the prompt for the query below.
-	 We have to split this up into 3 print statements because
-	 local_hex_string returns a local static string. */
- 
-      printf_filtered ("add symbol table from file \"%s\" at\n", name);
-      for (i = 0; i < option_index; i++)
+      /* Now process the argument. */
+      if (argcnt == 0)
 	{
-	  switch (opt[i].type)
-	    {
-	    case OPT_SECTION:
+	  /* The first argument is the file name. */
+	  filename = tilde_expand (arg);
+	  my_cleanups = make_cleanup (free, filename);
+	}
+      else
+	if (argcnt == 1)
+	  {
+	    /* The second argument is always the text address at which
+               to load the program. */
+	    sect_opts[section_index].name = ".text";
+	    sect_opts[section_index].value = arg;
+	    section_index++;		  
+	  }
+	else
+	  {
+	    /* It's an option (starting with '-') or it's an argument
+	       to an option */
+
+	    if (*arg == '-')
 	      {
-                CORE_ADDR addr;
-                char *val = opt[i].value;
-                char *sec = opt[i].name;
- 
-                val = opt[i].value;
-                if (val[0] == '0' && val[1] == 'x')
-                  addr = strtoul (val+2, NULL, 16);
-                else
-                  addr = strtoul (val, NULL, 10);
- 
-                if (strcmp (sec, ".text") == 0)
-                  section_addrs.text_addr = addr;
-                else if (strcmp (sec, ".data") == 0)
-                  section_addrs.data_addr = addr;
-                else if (strcmp (sec, ".bss") == 0)
-                  section_addrs.bss_addr = addr;
-                /* Add the section to the others even if it is a
-                   text data or bss section. This is redundent but
-                   eventually, none will be given special treatment */
-		{
-		  section_addrs.other[sec_num].name = xstrdup (sec);
-		  make_cleanup (free, section_addrs.other[sec_num].name);
-		  section_addrs.other[sec_num++].addr = addr;
-		  printf_filtered ("\t%s_addr = %s\n",
-				   sec, 
-				   local_hex_string ((unsigned long)addr));
-		}
- 
-                /* The object's sections are initialized when a 
-                   call is made to build_objfile_section_table (objfile).
-                   This happens in reread_symbols. 
-                   At this point, we don't know what file type this is,
-                   so we can't determine what section names are valid.  */
-              }
-              break;
-            default:
-              complain (&unknown_option_complaint, opt[i].name);
-	    }
-	}
-      /* Eventually, these hard coded names will be obsolete */
-      /* All the addresses will be on the others section */
+		if (strcmp (arg, "-mapped") == 0)
+		  flags |= OBJF_MAPPED;
+		else 
+		  if (strcmp (arg, "-readnow") == 0)
+		    flags |= OBJF_READNOW;
+		  else 
+		    if (strcmp (arg, "-s") == 0)
+		      {
+			if (section_index >= SECT_OFF_MAX)
+			  error ("Too many sections specified.");
+			expecting_sec_name = 1;
+			expecting_sec_addr = 1;
+		      }
+	      }
+	    else
+	      {
+		if (expecting_sec_name)
+		  {
+		    sect_opts[section_index].name = arg;
+		    expecting_sec_name = 0;
+		  }
+		else
+		  if (expecting_sec_addr)
+		    {
+		      sect_opts[section_index].value = arg;
+		      expecting_sec_addr = 0;
+		      section_index++;		  
+		    }
+		  else
+		    error ("USAGE: add-symbol-file <filename> <textaddress> [-mapped] [-readnow] [-s <secname> <addr>]*");
+	      }
+	  }
+      argcnt++;
     }
-  else
+
+  /* Print the prompt for the query below. And save the arguments into
+     a sect_addr_info structure to be passed around to other
+     functions.  We have to split this up into separate print
+     statements because local_hex_string returns a local static
+     string. */
+ 
+  printf_filtered ("add symbol table from file \"%s\" at\n", filename);
+  for (i = 0; i < section_index; i++)
     {
-      CORE_ADDR text_addr;
-      target_link (name, &text_addr);  
-      if (text_addr == (CORE_ADDR) -1)
-	error("Don't know how to get text start location for this file");
-      section_addrs.text_addr = text_addr;
-      section_addrs.data_addr = 0;
-      section_addrs.bss_addr = 0;
-      printf_filtered("add symbol table from file \"%s\" at text_addr = %s?\n",
-		      name, local_hex_string ((unsigned long)text_addr));
+      CORE_ADDR addr;
+      char *val = sect_opts[i].value;
+      char *sec = sect_opts[i].name;
+ 
+      val = sect_opts[i].value;
+      if (val[0] == '0' && val[1] == 'x')
+	addr = strtoul (val+2, NULL, 16);
+      else
+	addr = strtoul (val, NULL, 10);
+
+      /* Here we store the section offsets in the order they were
+         entered on the command line. */
+      section_addrs.other[sec_num].name = sec;
+      section_addrs.other[sec_num].addr = addr;
+      printf_filtered ("\t%s_addr = %s\n",
+		       sec, 
+		       local_hex_string ((unsigned long)addr));
+      sec_num++;
+
+      /* The object's sections are initialized when a 
+	 call is made to build_objfile_section_table (objfile).
+	 This happens in reread_symbols. 
+	 At this point, we don't know what file type this is,
+	 so we can't determine what section names are valid.  */
     }
+
   if (from_tty && (!query ("%s", "")))
     error ("Not confirmed.");
 
-  symbol_file_add (name, from_tty, &section_addrs, 0, flags);
+  symbol_file_add (filename, from_tty, &section_addrs, 0, flags);
 
   /* Getting new symbols may change our opinion about what is
      frameless.  */
   reinit_frame_cache ();
+  do_cleanups (my_cleanups);
 }
 
 static void
@@ -1775,10 +1658,9 @@ reread_symbols ()
 	      /* If we get an error, blow away this objfile (not sure if
 	         that is the correct response for things like shared
 	         libraries).  */
-	      old_cleanups = make_cleanup ((make_cleanup_func) free_objfile,
-					   objfile);
+	      old_cleanups = make_cleanup_free_objfile (objfile);
 	      /* We need to do this whenever any symbols go away.  */
-	      make_cleanup ((make_cleanup_func) clear_symtab_users, 0);
+	      make_cleanup (clear_symtab_users_cleanup, 0 /*ignore*/);
 
 	      /* Clean up any state BFD has sitting around.  We don't need
 	         to close the descriptor but BFD lacks a way of closing the
@@ -2206,6 +2088,12 @@ clear_symtab_users ()
     target_new_objfile_hook (NULL);
 }
 
+static void
+clear_symtab_users_cleanup (void *ignore)
+{
+  clear_symtab_users ();
+}
+
 /* clear_symtab_users_once:
 
    This function is run after symbol reading, or from a cleanup.
@@ -2234,8 +2122,7 @@ clear_symtab_users ()
 #if 0
 /* FIXME:  As free_named_symtabs is currently a big noop this function
    is no longer needed.  */
-static void
-clear_symtab_users_once PARAMS ((void));
+static void clear_symtab_users_once (void);
 
 static int clear_symtab_users_queued;
 static int clear_symtab_users_done;
@@ -2666,9 +2553,8 @@ int overlay_debugging = 0;	/* 0 == off, 1 == manual, -1 == auto */
 int overlay_cache_invalid = 0;	/* True if need to refresh mapped state */
 
 /* Target vector for refreshing overlay mapped state */
-static void simple_overlay_update PARAMS ((struct obj_section *));
-void (*target_overlay_update) PARAMS ((struct obj_section *))
-= simple_overlay_update;
+static void simple_overlay_update (struct obj_section *);
+void (*target_overlay_update) (struct obj_section *) = simple_overlay_update;
 
 /* Function: section_is_overlay (SECTION)
    Returns true if SECTION has VMA not equal to LMA, ie. 
@@ -3370,13 +3256,12 @@ to execute.", &cmdlist);
   c->completer = filename_completer;
 
   c = add_cmd ("add-symbol-file", class_files, add_symbol_file_command,
-	       "Usage: add-symbol-file FILE ADDR [DATA_ADDR [BSS_ADDR]]\n\
-or:    add-symbol-file FILE -T<SECT> <SECT_ADDR> -T<SECT> <SECT_ADDR> ...\n\
+	       "Usage: add-symbol-file FILE ADDR [-s <SECT> <SECT_ADDR> -s <SECT> <SECT_ADDR> ...]\n\
 Load the symbols from FILE, assuming FILE has been dynamically loaded.\n\
 ADDR is the starting address of the file's text.\n\
-The optional arguments, DATA_ADDR and BSS_ADDR, should be specified\n\
-if the data and bss segments are not contiguous with the text.\n\
-For complicated cases, SECT is a section name to be loaded at SECT_ADDR.",
+The optional arguments are section-name section-address pairs and\n\
+should be specified if the data and bss segments are not contiguous\n\
+with the text. SECT is a section name to be loaded at SECT_ADDR.",
 	       &cmdlist);
   c->completer = filename_completer;
 

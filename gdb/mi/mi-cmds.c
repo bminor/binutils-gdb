@@ -258,7 +258,3 @@ _initialize_mi_cmds ()
   build_table (mi_cmds);
   memset (&stats, 0, sizeof (stats));
 }
-
-/* Local variables: */
-/* change-log-default-name: "ChangeLog-mi" */
-/* End: */

@@ -33,8 +33,7 @@
 #define REGISTER_U_ADDR(addr, blockend, regno) \
 	(addr) = i386_register_u_addr ((blockend),(regno));
 
-extern int
-i386_register_u_addr PARAMS ((int, int));
+extern int i386_register_u_addr (int, int);
 
 /* When calling functions on SCO, sometimes we get an error writing some
    of the segment registers.  This would appear to be a kernel

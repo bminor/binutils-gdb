@@ -18,9 +18,25 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#define TARGET_SPARCLET 1	/* Still needed for non-multi-arch case */
+
 #include "sparc/tm-sparc.h"
 
-#define TARGET_SPARCLET 1
+/* Note: we are not defining GDB_MULTI_ARCH for the sparclet target
+   at this time, because we have not figured out how to detect the
+   sparclet target from the bfd structure.  */
+
+/* Sparclet regs, for debugging purposes.  */
+
+enum { 
+  CCSR_REGNUM   = 72,
+  CCPR_REGNUM   = 73, 
+  CCCRCR_REGNUM = 74,
+  CCOR_REGNUM   = 75, 
+  CCOBR_REGNUM  = 76,
+  CCIBR_REGNUM  = 77,
+  CCIR_REGNUM   = 78
+};
 
 /* Select the sparclet disassembler.  Slightly different instruction set from
    the V8 sparc.  */
@@ -37,6 +53,11 @@
 #undef BREAKPOINT
 #define BIG_BREAKPOINT {0x91, 0xd0, 0x20, 0x01}
 #define LITTLE_BREAKPOINT {0x01, 0x20, 0xd0, 0x91}
+
+#if !defined (GDB_MULTI_ARCH) || (GDB_MULTI_ARCH == 0)
+/*
+ * The following defines must go away for MULTI_ARCH.
+ */
 
 #undef  NUM_REGS		/* formerly "72" */
 /*                WIN  FP   CPU  CCP  ASR  AWR  APSR */
@@ -80,7 +101,7 @@
 
 /* Remove FP dependant code which was defined in tm-sparc.h */
 #undef	FP0_REGNUM		/* Floating point register 0 */
-#undef	FPS_REGNUM		/* Floating point status register */
+#undef  FPS_REGNUM		/* Floating point status register */
 #undef 	CPS_REGNUM		/* Coprocessor status register */
 
 /* sparclet register numbers */
@@ -102,6 +123,8 @@
     write_register_bytes (REGISTER_BYTE (O0_REGNUM), (VALBUF),         \
 			  TYPE_LENGTH (TYPE));                         \
   }
+
+#endif /* GDB_MULTI_ARCH */
 
 #undef PRINT_REGISTER_HOOK
 #define PRINT_REGISTER_HOOK(regno)
@@ -127,7 +150,6 @@
    extract the pc (JB_PC) that we will land at.  The pc is copied into ADDR.
    This routine returns true on success */
 
-extern int
-get_longjmp_target PARAMS ((CORE_ADDR *));
+extern int get_longjmp_target (CORE_ADDR *);
 
 #define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)

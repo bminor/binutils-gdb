@@ -48,9 +48,12 @@
 #include "command.h"
 #include "gdbcore.h"
 
-static void fetch_core_registers PARAMS ((char *, unsigned, int, CORE_ADDR));
+/* Prototypes for supply_gregset etc. */
+#include "gregset.h"
 
-void _initialize_core_regset PARAMS ((void));
+static void fetch_core_registers (char *, unsigned, int, CORE_ADDR);
+
+void _initialize_core_regset (void);
 
 /*
 
@@ -109,9 +112,8 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
       else
 	{
 	  memcpy ((char *) &fpregset, core_reg_sect, sizeof (fpregset));
-#if defined (FP0_REGNUM)
-	  supply_fpregset (&fpregset);
-#endif
+	  if (FP0_REGNUM >= 0)
+	    supply_fpregset (&fpregset);
 	}
     }
 #endif /* defined(HAVE_GREGSET_T) && defined (HAVE_FPREGSET_T) */

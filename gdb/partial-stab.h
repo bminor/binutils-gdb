@@ -46,19 +46,19 @@ switch (CUR_SYMBOL_TYPE)
 
   case N_TEXT | N_EXT:
   case N_NBTEXT | N_EXT:
-    CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+    CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
     goto record_it;
 
   case N_DATA | N_EXT:
   case N_NBDATA | N_EXT:
-    CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA);
+    CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
     goto record_it;
 
   case N_BSS:
   case N_BSS | N_EXT:
   case N_NBBSS | N_EXT:
   case N_SETV | N_EXT:		/* FIXME, is this in BSS? */
-    CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_BSS);
+    CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_BSS (objfile));
     goto record_it;
 
   case N_ABS | N_EXT:
@@ -85,7 +85,7 @@ switch (CUR_SYMBOL_TYPE)
   case N_FN_SEQ:
   case N_TEXT:
 #ifdef DBXREAD_ONLY
-    CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+    CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
     SET_NAMESTRING ();
     if ((namestring[0] == '-' && namestring[1] == 'l')
 	|| (namestring[(nsl = strlen (namestring)) - 1] == 'o'
@@ -121,7 +121,7 @@ switch (CUR_SYMBOL_TYPE)
     continue;
 
   case N_DATA:
-    CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA);
+    CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
     goto record_it;
 
   case N_UNDF | N_EXT:
@@ -203,7 +203,7 @@ switch (CUR_SYMBOL_TYPE)
       char *p;
       int prev_textlow_not_set;
 
-      valu = CUR_SYMBOL_VALUE + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+      valu = CUR_SYMBOL_VALUE + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
       prev_textlow_not_set = textlow_not_set;
 
@@ -423,7 +423,7 @@ switch (CUR_SYMBOL_TYPE)
     switch (p[1])
       {
       case 'S':
-	CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA);
+	CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
 #ifdef STATIC_TRANSFORM_NAME
 	namestring = STATIC_TRANSFORM_NAME (namestring);
 #endif
@@ -434,7 +434,7 @@ switch (CUR_SYMBOL_TYPE)
 			     psymtab_language, objfile);
 	continue;
       case 'G':
-	CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA);
+	CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
 	/* The addresses in these entries are reported to be
 	   wrong.  See the code that reads 'G's for symtabs. */
 	add_psymbol_to_list (namestring, p - namestring,
@@ -575,7 +575,7 @@ switch (CUR_SYMBOL_TYPE)
 	continue;
 
       case 'f':
-	CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+	CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 #ifdef DBXREAD_ONLY
 	/* Kludges for ELF/STABS with Sun ACC */
 	last_function_name = namestring;
@@ -602,7 +602,7 @@ switch (CUR_SYMBOL_TYPE)
 	if (textlow_not_set
 	    || (CUR_SYMBOL_VALUE < pst->textlow
 		&& CUR_SYMBOL_VALUE
-		!= ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT)))
+		!= ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile))))
 	  {
 	    pst->textlow = CUR_SYMBOL_VALUE;
 	    textlow_not_set = 0;
@@ -619,7 +619,7 @@ switch (CUR_SYMBOL_TYPE)
 	   are put into the global psymtab like one would expect.
 	   They're also in the minimal symbol table.  */
       case 'F':
-	CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+	CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 #ifdef DBXREAD_ONLY
 	/* Kludges for ELF/STABS with Sun ACC */
 	last_function_name = namestring;
@@ -627,7 +627,7 @@ switch (CUR_SYMBOL_TYPE)
 	/* Do not fix textlow==0 for .o or NLM files, as 0 is a legit
 	   value for the bottom of the text seg in those cases. */
 	if (CUR_SYMBOL_VALUE == ANOFFSET (objfile->section_offsets, 
-	                                  SECT_OFF_TEXT))
+	                                  SECT_OFF_TEXT (objfile)))
 	  CUR_SYMBOL_VALUE = 
 	    find_stab_function_addr (namestring, pst->filename, objfile);
 	if (pst && textlow_not_set)
@@ -649,7 +649,7 @@ switch (CUR_SYMBOL_TYPE)
 	if (textlow_not_set
 	    || (CUR_SYMBOL_VALUE < pst->textlow
 		&& CUR_SYMBOL_VALUE
-		!= ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT)))
+		!= ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile))))
 	  {
 	    pst->textlow = CUR_SYMBOL_VALUE;
 	    textlow_not_set = 0;

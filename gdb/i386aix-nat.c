@@ -52,7 +52,7 @@ extern int errno;
 
 #include "target.h"
 
-static void fetch_core_registers PARAMS ((char *, unsigned, int, CORE_ADDR));
+static void fetch_core_registers (char *, unsigned, int, CORE_ADDR);
 
 
 /* this table must line up with REGISTER_NAMES in tm-i386v.h */

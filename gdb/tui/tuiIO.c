@@ -29,8 +29,8 @@ int insert_mode = 0;
 /********************************************
 **       LOCAL STATIC FORWARD DECLS        **
 ********************************************/
-static void _updateCommandInfo PARAMS ((int));
-static unsigned int _tuiHandleResizeDuringIO PARAMS ((unsigned int));
+static void _updateCommandInfo (int);
+static unsigned int _tuiHandleResizeDuringIO (unsigned int);
 
 
 /*********************************************************************************
@@ -112,7 +112,7 @@ void
 tui_tputs (str, affcnt, putfunc)
      char *str;
      int affcnt;
-     int (*putfunc) PARAMS ((int));
+     int (*putfunc) (int);
 {
   extern char *rl_prompt;	/* the prompt string */
 

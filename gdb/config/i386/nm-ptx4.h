@@ -39,7 +39,7 @@
 
 #define CHILD_WAIT
 struct target_waitstatus;
-extern int child_wait PARAMS ((int, struct target_waitstatus *));
+extern int child_wait (int, struct target_waitstatus *);
 
 /*
  * ptx does attach as of ptx version 2.1.  Prior to that, the interface

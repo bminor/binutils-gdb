@@ -56,16 +56,16 @@ static void dump_psymtab (struct objfile *, struct partial_symtab *,
 
 static void dump_msymbols (struct objfile *, struct ui_file *);
 
-static void dump_objfile PARAMS ((struct objfile *));
+static void dump_objfile (struct objfile *);
 
-static int block_depth PARAMS ((struct block *));
+static int block_depth (struct block *);
 
 static void print_partial_symbols (struct partial_symbol **, int,
 				   char *, struct ui_file *);
 
-static void free_symtab_block PARAMS ((struct objfile *, struct block *));
+static void free_symtab_block (struct objfile *, struct block *);
 
-void _initialize_symmisc PARAMS ((void));
+void _initialize_symmisc (void);
 
 struct print_symbol_args
   {
@@ -74,10 +74,9 @@ struct print_symbol_args
     struct ui_file *outfile;
   };
 
-static int print_symbol PARAMS ((PTR));
+static int print_symbol (PTR);
 
-static void
-free_symtab_block PARAMS ((struct objfile *, struct block *));
+static void free_symtab_block (struct objfile *, struct block *);
 
 
 /* Free a struct block <- B and all the symbols defined in that block.  */

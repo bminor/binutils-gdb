@@ -1,5 +1,5 @@
 /* Core dump and executable file functions below target vector, for GDB.
-   Copyright 1986, 87, 89, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright 1986, 87, 89, 91, 92, 93, 94, 95, 96, 97, 1998, 2000
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -44,35 +44,37 @@ static struct core_fns *core_file_fns = NULL;
 
 static struct core_fns *core_vec = NULL;
 
-static void core_files_info PARAMS ((struct target_ops *));
+static void core_files_info (struct target_ops *);
 
 #ifdef SOLIB_ADD
-static int solib_add_stub PARAMS ((PTR));
+static int solib_add_stub (PTR);
 #endif
 
-static struct core_fns *sniff_core_bfd PARAMS ((bfd *));
+static struct core_fns *sniff_core_bfd (bfd *);
 
-static boolean gdb_check_format PARAMS ((bfd *));
+static boolean gdb_check_format (bfd *);
 
-static void core_open PARAMS ((char *, int));
+static void core_open (char *, int);
 
-static void core_detach PARAMS ((char *, int));
+static void core_detach (char *, int);
 
-static void core_close PARAMS ((int));
+static void core_close (int);
 
-static void get_core_registers PARAMS ((int));
+static void core_close_cleanup (void *ignore);
 
-static void add_to_thread_list PARAMS ((bfd *, asection *, PTR));
+static void get_core_registers (int);
 
-static int ignore PARAMS ((CORE_ADDR, char *));
+static void add_to_thread_list (bfd *, asection *, PTR);
 
-static char *core_file_to_sym_file PARAMS ((char *));
+static int ignore (CORE_ADDR, char *);
 
-static int core_file_thread_alive PARAMS ((int tid));
+static char *core_file_to_sym_file (char *);
 
-static void init_core_ops PARAMS ((void));
+static int core_file_thread_alive (int tid);
 
-void _initialize_corelow PARAMS ((void));
+static void init_core_ops (void);
+
+void _initialize_corelow (void);
 
 struct target_ops core_ops;
 
@@ -207,6 +209,12 @@ core_close (quitting)
   core_vec = NULL;
 }
 
+static void
+core_close_cleanup (void *ignore)
+{
+  core_close (0/*ignored*/);
+}
+
 #ifdef SOLIB_ADD
 /* Stub function for catch_errors around shared library hacking.  FROM_TTYP
    is really an int * which points to from_tty.  */
@@ -295,7 +303,7 @@ core_open (filename, from_tty)
       /* FIXME: should be checking for errors from bfd_close (for one thing,
          on error it does not free all the storage associated with the
          bfd).  */
-      make_cleanup ((make_cleanup_func) bfd_close, temp_bfd);
+      make_cleanup_bfd_close (temp_bfd);
       error ("\"%s\" is not a core dump: %s",
 	     filename, bfd_errmsg (bfd_get_error ()));
     }
@@ -305,7 +313,7 @@ core_open (filename, from_tty)
   discard_cleanups (old_chain);	/* Don't free filename any more */
   unpush_target (&core_ops);
   core_bfd = temp_bfd;
-  old_chain = make_cleanup ((make_cleanup_func) core_close, core_bfd);
+  old_chain = make_cleanup (core_close_cleanup, 0 /*ignore*/);
 
   /* Find a suitable core file handler to munch on core_bfd */
   core_vec = sniff_core_bfd (core_bfd);
@@ -318,6 +326,8 @@ core_open (filename, from_tty)
     error ("\"%s\": Can't find sections: %s",
 	   bfd_get_filename (core_bfd), bfd_errmsg (bfd_get_error ()));
 
+  set_gdbarch_from_file (core_bfd);
+
   ontop = !push_target (&core_ops);
   discard_cleanups (old_chain);
 
@@ -327,8 +337,12 @@ core_open (filename, from_tty)
 
   siggy = bfd_core_file_failing_signal (core_bfd);
   if (siggy > 0)
+    /* NOTE: target_signal_from_host() converts a target signal value
+       into gdb's internal signal value.  Unfortunatly gdb's internal
+       value is called ``target_signal'' and this function got the
+       name ..._from_host(). */
     printf_filtered ("Program terminated with signal %d, %s.\n", siggy,
-		     safe_strsignal (siggy));
+		     target_signal_to_string (target_signal_from_host (siggy)));
 
   /* Build up thread list from BFD sections. */
 
@@ -491,7 +505,7 @@ core_file_to_sym_file (core)
       /* FIXME: should be checking for errors from bfd_close (for one thing,
          on error it does not free all the storage associated with the
          bfd).  */
-      make_cleanup ((make_cleanup_func) bfd_close, temp_bfd);
+      make_cleanup_bfd_close (temp_bfd);
       error ("\"%s\" is not a core dump: %s",
 	     core, bfd_errmsg (bfd_get_error ()));
     }

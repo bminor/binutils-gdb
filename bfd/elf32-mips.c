@@ -1520,7 +1520,7 @@ gprel16_with_gp (abfd, symbol, reloc_entry, input_section, relocateable, data,
     reloc_entry->address += input_section->output_offset;
 
   /* Make sure it fit in 16 bits.  */
-  if (val >= 0x8000 && val < 0xffff8000)
+  if ((long) val >= 0x8000 || (long) val < -0x8000)
     return bfd_reloc_overflow;
 
   return bfd_reloc_ok;
@@ -2460,21 +2460,8 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
   boolean ok;
 
   /* Check if we have the same endianess */
-  if (ibfd->xvec->byteorder != obfd->xvec->byteorder
-      && obfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)
-    {
-      const char *msg;
-
-      if (bfd_big_endian (ibfd))
-	msg = _("%s: compiled for a big endian system and target is little endian");
-      else
-	msg = _("%s: compiled for a little endian system and target is big endian");
-
-      (*_bfd_error_handler) (msg, bfd_get_filename (ibfd));
-
-      bfd_set_error (bfd_error_wrong_format);
-      return false;
-    }
+  if (_bfd_generic_verify_endian_match (ibfd, obfd) == false)
+    return false;
 
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
@@ -5930,7 +5917,8 @@ mips_elf_calculate_relocation (abfd,
 	   and check to see if they exist by looking at their
 	   addresses.  */
 	symbol = 0;
-      else if (info->shared && !info->symbolic && !info->no_undefined)
+      else if (info->shared && !info->symbolic && !info->no_undefined
+	       && ELF_ST_VISIBILITY (h->root.other) == STV_DEFAULT)
 	symbol = 0;
       else if (strcmp (h->root.root.root.string, "_DYNAMIC_LINK") == 0)
 	{
@@ -5948,7 +5936,8 @@ mips_elf_calculate_relocation (abfd,
 	  if (! ((*info->callbacks->undefined_symbol)
 		 (info, h->root.root.root.string, input_bfd,
 		  input_section, relocation->r_offset,
-		  (!info->shared || info->no_undefined))))
+		  (!info->shared || info->no_undefined
+		   || ELF_ST_VISIBILITY (h->root.other)))))
 	    return bfd_reloc_undefined;
 	  symbol = 0;
 	}
@@ -6739,8 +6728,8 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  bfd_vma low_bits;
 		  bfd_vma high_bits;
 		  
-		  if (addend & 0x80000000u)
-		    sign_bits = 0xffffffffu;
+		  if (addend & ((bfd_vma) 1 << 31))
+		    sign_bits = ((bfd_vma) 1 << 32) - 1;
 		  else
 		    sign_bits = 0;
 		  
@@ -6859,8 +6848,8 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  bfd_vma low_bits;
 	  bfd_vma high_bits;
 
-	  if (value & 0x80000000u)
-	    sign_bits = 0xffffffffu;
+	  if (value & ((bfd_vma) 1 << 31))
+	    sign_bits = ((bfd_vma) 1 << 32) - 1;
 	  else
 	    sign_bits = 0;
 

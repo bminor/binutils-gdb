@@ -102,14 +102,11 @@ extern int hp_som_som_object_present;
 #define	YYDEBUG	0		/* Default to no yydebug support */
 #endif
 
-int
-yyparse PARAMS ((void));
+int yyparse (void);
 
-static int
-yylex PARAMS ((void));
+static int yylex (void);
 
-void
-yyerror PARAMS ((char *));
+void yyerror (char *);
 
 %}
 
@@ -144,8 +141,7 @@ yyerror PARAMS ((char *));
 
 %{
 /* YYSTYPE gets defined by %union */
-static int
-parse_number PARAMS ((char *, int, int, YYSTYPE *));
+static int parse_number (char *, int, int, YYSTYPE *);
 %}
 
 %type <voidval> exp exp1 type_exp start variable qualified_name lcurly
@@ -1437,8 +1433,6 @@ yylex ()
 
       if (c == '<')
 	{ 
-           if (hp_som_som_object_present)
-             {
                /* Scan ahead to get rest of the template specification.  Note
                   that we look ahead only when the '<' adjoins non-whitespace
                   characters; for comparison expressions, e.g. "a < b > c",
@@ -1448,26 +1442,6 @@ yylex ()
                if (p)
                  namelen = p - tokstart;
                break;
-             }
-           else
-             { 
-	       int i = namelen;
-	       int nesting_level = 1;
-	       while (tokstart[++i])
-		 {
-		   if (tokstart[i] == '<')
-		     nesting_level++;
-		   else if (tokstart[i] == '>')
-		     {
-		       if (--nesting_level == 0)
-			 break;
-		     }
-		 }
-	       if (tokstart[i] == '>')
-		 namelen = i;
-	       else
-		 break;
-	     }
 	}
       c = tokstart[++namelen];
     }

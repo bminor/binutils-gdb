@@ -42,7 +42,7 @@ void ARMul_R15Altered (ARMul_State * state);
 
 ARMword ARMul_SwitchMode (ARMul_State * state, ARMword oldmode,
 			  ARMword newmode);
-static ARMword ModeToBank (ARMul_State * state, ARMword mode);
+static ARMword ModeToBank (ARMword mode);
 
 unsigned ARMul_NthReg (ARMword instr, unsigned number);
 
@@ -87,7 +87,7 @@ ARMul_GetReg (ARMul_State * state, unsigned mode, unsigned reg)
 {
   mode &= MODEBITS;
   if (mode != state->Mode)
-    return (state->RegBank[ModeToBank (state, (ARMword) mode)][reg]);
+    return (state->RegBank[ModeToBank ((ARMword) mode)][reg]);
   else
     return (state->Reg[reg]);
 }
@@ -101,7 +101,7 @@ ARMul_SetReg (ARMul_State * state, unsigned mode, unsigned reg, ARMword value)
 {
   mode &= MODEBITS;
   if (mode != state->Mode)
-    state->RegBank[ModeToBank (state, (ARMword) mode)][reg] = value;
+    state->RegBank[ModeToBank ((ARMword) mode)][reg] = value;
   else
     state->Reg[reg] = value;
 }
@@ -233,11 +233,12 @@ ARMul_FixCPSR (ARMul_State * state, ARMword instr, ARMword rhs)
 ARMword
 ARMul_GetSPSR (ARMul_State * state, ARMword mode)
 {
-  ARMword bank = ModeToBank (state, mode & MODEBITS);
-  if (bank == USERBANK || bank == DUMMYBANK)
-    return (CPSR);
-  else
-    return (state->Spsr[bank]);
+  ARMword bank = ModeToBank (mode & MODEBITS);
+
+  if (! BANK_CAN_ACCESS_SPSR (bank))
+    return CPSR;
+
+  return state->Spsr[bank];
 }
 
 /***************************************************************************\
@@ -247,8 +248,9 @@ ARMul_GetSPSR (ARMul_State * state, ARMword mode)
 void
 ARMul_SetSPSR (ARMul_State * state, ARMword mode, ARMword value)
 {
-  ARMword bank = ModeToBank (state, mode & MODEBITS);
-  if (bank != USERBANK && bank != DUMMYBANK)
+  ARMword bank = ModeToBank (mode & MODEBITS);
+  
+  if (BANK_CAN_ACCESS_SPSR (bank))
     state->Spsr[bank] = value;
 }
 
@@ -259,7 +261,7 @@ ARMul_SetSPSR (ARMul_State * state, ARMword mode, ARMword value)
 void
 ARMul_FixSPSR (ARMul_State * state, ARMword instr, ARMword rhs)
 {
-  if (state->Bank != USERBANK && state->Bank != DUMMYBANK)
+  if (BANK_CAN_ACCESS_SPSR (state->Bank))
     {
       if (BITS (16, 19) == 9)
 	SETPSR (state->Spsr[state->Bank], rhs);
@@ -282,11 +284,14 @@ ARMul_CPSRAltered (ARMul_State * state)
 
   if (state->prog32Sig == LOW)
     state->Cpsr &= (CCBITS | INTBITS | R15MODEBITS);
+
   oldmode = state->Mode;
+  
   if (state->Mode != (state->Cpsr & MODEBITS))
     {
       state->Mode =
 	ARMul_SwitchMode (state, state->Mode, state->Cpsr & MODEBITS);
+      
       state->NtransSig = (state->Mode & 3) ? HIGH : LOW;
     }
 
@@ -317,7 +322,6 @@ ARMul_CPSRAltered (ARMul_State * state)
       else
 	state->Reg[15] = ECC | ER15INT | EMODE | R15PC;
     }
-
 }
 
 /***************************************************************************\
@@ -355,23 +359,30 @@ ARMword
 ARMul_SwitchMode (ARMul_State * state, ARMword oldmode, ARMword newmode)
 {
   unsigned i;
-
-  oldmode = ModeToBank (state, oldmode);
-  state->Bank = ModeToBank (state, newmode);
-  if (oldmode != state->Bank)
+  ARMword  oldbank;
+  ARMword  newbank;
+  
+  oldbank = ModeToBank (oldmode);
+  newbank = state->Bank = ModeToBank (newmode);
+  
+  if (oldbank != newbank)
     {				/* really need to do it */
-      switch (oldmode)
+      switch (oldbank)
 	{			/* save away the old registers */
+	case SYSTEMBANK:
+	  /* The System mode uses the USER bank.  */
+	  oldbank = USERBANK;
+	  /* Fall through.  */
 	case USERBANK:
 	case IRQBANK:
 	case SVCBANK:
 	case ABORTBANK:
 	case UNDEFBANK:
-	  if (state->Bank == FIQBANK)
+	  if (newbank == FIQBANK)
 	    for (i = 8; i < 13; i++)
 	      state->RegBank[USERBANK][i] = state->Reg[i];
-	  state->RegBank[oldmode][13] = state->Reg[13];
-	  state->RegBank[oldmode][14] = state->Reg[14];
+	  state->RegBank[oldbank][13] = state->Reg[13];
+	  state->RegBank[oldbank][14] = state->Reg[14];
 	  break;
 	case FIQBANK:
 	  for (i = 8; i < 15; i++)
@@ -381,20 +392,25 @@ ARMul_SwitchMode (ARMul_State * state, ARMword oldmode, ARMword newmode)
 	  for (i = 8; i < 15; i++)
 	    state->RegBank[DUMMYBANK][i] = 0;
 	  break;
-
+	default:
+	  abort ();
 	}
-      switch (state->Bank)
+      
+      switch (newbank)
 	{			/* restore the new registers */
+	case SYSTEMBANK:
+	  newbank = USERBANK;
+	  /* Fall through.  */
 	case USERBANK:
 	case IRQBANK:
 	case SVCBANK:
 	case ABORTBANK:
 	case UNDEFBANK:
-	  if (oldmode == FIQBANK)
+	  if (oldbank == FIQBANK)
 	    for (i = 8; i < 13; i++)
 	      state->Reg[i] = state->RegBank[USERBANK][i];
-	  state->Reg[13] = state->RegBank[state->Bank][13];
-	  state->Reg[14] = state->RegBank[state->Bank][14];
+	  state->Reg[13] = state->RegBank[newbank][13];
+	  state->Reg[14] = state->RegBank[newbank][14];
 	  break;
 	case FIQBANK:
 	  for (i = 8; i < 15; i++)
@@ -404,9 +420,12 @@ ARMul_SwitchMode (ARMul_State * state, ARMword oldmode, ARMword newmode)
 	  for (i = 8; i < 15; i++)
 	    state->Reg[i] = 0;
 	  break;
+	default:
+	  abort ();
 	}			/* switch */
     }				/* if */
-  return (newmode);
+  
+  return newmode;
 }
 
 /***************************************************************************\
@@ -415,21 +434,24 @@ ARMul_SwitchMode (ARMul_State * state, ARMword oldmode, ARMword newmode)
 \***************************************************************************/
 
 static ARMword
-ModeToBank (ARMul_State * state ATTRIBUTE_UNUSED, ARMword mode)
+ModeToBank (ARMword mode)
 {
-  static ARMword bankofmode[] = { USERBANK, FIQBANK, IRQBANK, SVCBANK,
+  static ARMword bankofmode[] =
+  {
+    USERBANK,  FIQBANK,   IRQBANK,   SVCBANK,
     DUMMYBANK, DUMMYBANK, DUMMYBANK, DUMMYBANK,
     DUMMYBANK, DUMMYBANK, DUMMYBANK, DUMMYBANK,
     DUMMYBANK, DUMMYBANK, DUMMYBANK, DUMMYBANK,
-    USERBANK, FIQBANK, IRQBANK, SVCBANK,
+    USERBANK,  FIQBANK,   IRQBANK,   SVCBANK,
     DUMMYBANK, DUMMYBANK, DUMMYBANK, ABORTBANK,
-    DUMMYBANK, DUMMYBANK, DUMMYBANK, UNDEFBANK
+    DUMMYBANK, DUMMYBANK, DUMMYBANK, UNDEFBANK,
+    DUMMYBANK, DUMMYBANK, DUMMYBANK, SYSTEMBANK
   };
 
-  if (mode > UNDEF32MODE)
-    return (DUMMYBANK);
-  else
-    return (bankofmode[mode]);
+  if (mode >= (sizeof (bankofmode) / sizeof (bankofmode[0])))
+    return DUMMYBANK;
+
+  return bankofmode[mode];
 }
 
 /***************************************************************************\
@@ -650,9 +672,11 @@ ARMul_MCR (ARMul_State * state, ARMword instr, ARMword source)
   unsigned cpab;
 
   cpab = (state->MCR[CPNum]) (state, ARMul_FIRST, instr, source);
+
   while (cpab == ARMul_BUSY)
     {
       ARMul_Icycles (state, 1, 0);
+
       if (IntPending (state))
 	{
 	  cpab = (state->MCR[CPNum]) (state, ARMul_INTERRUPT, instr, 0);
@@ -661,6 +685,7 @@ ARMul_MCR (ARMul_State * state, ARMword instr, ARMword source)
       else
 	cpab = (state->MCR[CPNum]) (state, ARMul_BUSY, instr, source);
     }
+
   if (cpab == ARMul_CANT)
     ARMul_Abort (state, ARMul_UndefinedInstrV);
   else

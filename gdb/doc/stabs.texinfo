@@ -86,6 +86,10 @@ This document describes the stabs debugging format.
 @end menu
 @end ifinfo
 
+@c TeX can handle the contents at the start but makeinfo 3.12 can not
+@iftex
+@contents
+@end iftex
 
 @node Overview
 @chapter Overview of Stabs
@@ -4015,5 +4019,12 @@ However, no one has yet designed or implemented such a scheme.
 
 @printindex fn
 
+@c TeX can handle the contents at the start but makeinfo 3.12 can not
+@ifinfo
 @contents
+@end ifinfo
+@ifhtml
+@contents
+@end ifhtml
+
 @bye

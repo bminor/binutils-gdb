@@ -454,6 +454,7 @@ java_val_print (type, valaddr, embedded_offset, address, stream, format,
 		deref_ref, recurse, pretty)
      struct type *type;
      char *valaddr;
+     int embedded_offset;
      CORE_ADDR address;
      struct ui_file *stream;
      int format;

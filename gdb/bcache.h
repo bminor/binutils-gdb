@@ -125,5 +125,6 @@ extern void free_bcache (struct bcache *bcache);
    kind of data BCACHE holds.  Statistics are printed using
    `printf_filtered' and its ilk.  */
 extern void print_bcache_statistics (struct bcache *bcache, char *type);
-
+/* The hash function */
+extern unsigned long hash(void *addr, int length);
 #endif /* BCACHE_H */

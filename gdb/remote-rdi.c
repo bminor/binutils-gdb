@@ -44,57 +44,55 @@
 #include "rdi-share/adp.h"
 #include "rdi-share/hsys.h"
 
-extern int isascii PARAMS ((int));
+extern int isascii (int);
 
 /* Prototypes for local functions */
 
-static void arm_rdi_files_info PARAMS ((struct target_ops * ignore));
+static void arm_rdi_files_info (struct target_ops *ignore);
 
-static int arm_rdi_xfer_memory PARAMS ((CORE_ADDR memaddr, char *myaddr,
-					int len, int should_write,
-					struct target_ops * target));
+static int arm_rdi_xfer_memory (CORE_ADDR memaddr, char *myaddr,
+				int len, int should_write,
+				struct target_ops *target);
 
-static void arm_rdi_prepare_to_store PARAMS ((void));
+static void arm_rdi_prepare_to_store (void);
 
-static void arm_rdi_fetch_registers PARAMS ((int regno));
+static void arm_rdi_fetch_registers (int regno);
 
-static void arm_rdi_resume PARAMS ((int pid, int step,
-				    enum target_signal siggnal));
+static void arm_rdi_resume (int pid, int step, enum target_signal siggnal);
 
-static int arm_rdi_start_remote PARAMS ((char *dummy));
+static int arm_rdi_start_remote (char *dummy);
 
-static void arm_rdi_open PARAMS ((char *name, int from_tty));
+static void arm_rdi_open (char *name, int from_tty);
 
-static void arm_rdi_create_inferior PARAMS ((char *exec_file, char *args,
-					     char **env));
+static void arm_rdi_create_inferior (char *exec_file, char *args, char **env);
 
-static void arm_rdi_close PARAMS ((int quitting));
+static void arm_rdi_close (int quitting);
 
-static void arm_rdi_store_registers PARAMS ((int regno));
+static void arm_rdi_store_registers (int regno);
 
-static void arm_rdi_mourn PARAMS ((void));
+static void arm_rdi_mourn (void);
 
-static void arm_rdi_send PARAMS ((char *buf));
+static void arm_rdi_send (char *buf);
 
-static int arm_rdi_wait PARAMS ((int pid, struct target_waitstatus * status));
+static int arm_rdi_wait (int pid, struct target_waitstatus *status);
 
-static void arm_rdi_kill PARAMS ((void));
+static void arm_rdi_kill (void);
 
-static void arm_rdi_detach PARAMS ((char *args, int from_tty));
+static void arm_rdi_detach (char *args, int from_tty);
 
-static void arm_rdi_interrupt PARAMS ((int signo));
+static void arm_rdi_interrupt (int signo);
 
-static void arm_rdi_interrupt_twice PARAMS ((int signo));
+static void arm_rdi_interrupt_twice (int signo);
 
-static void interrupt_query PARAMS ((void));
+static void interrupt_query (void);
 
-static int arm_rdi_insert_breakpoint PARAMS ((CORE_ADDR, char *));
+static int arm_rdi_insert_breakpoint (CORE_ADDR, char *);
 
-static int arm_rdi_remove_breakpoint PARAMS ((CORE_ADDR, char *));
+static int arm_rdi_remove_breakpoint (CORE_ADDR, char *);
 
-static char *rdi_error_message PARAMS ((int err));
+static char *rdi_error_message (int err);
 
-static enum target_signal rdi_error_signal PARAMS ((int err));
+static enum target_signal rdi_error_signal (int err);
 
 /* Global variables.  */
 

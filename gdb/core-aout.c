@@ -41,7 +41,7 @@
 
 /* These are needed on various systems to expand REGISTER_U_ADDR.  */
 #ifndef USG
-#include <sys/dir.h>
+#include "gdb_dirent.h"
 #include <sys/file.h>
 #include "gdb_stat.h"
 #include <sys/user.h>
@@ -55,9 +55,9 @@
 #include <sys/core.h>
 #endif
 
-static void fetch_core_registers PARAMS ((char *, unsigned, int, CORE_ADDR));
+static void fetch_core_registers (char *, unsigned, int, CORE_ADDR);
 
-void _initialize_core_aout PARAMS ((void));
+void _initialize_core_aout (void);
 
 /* Extract the register values out of the core file and store
    them where `read_register' will find them.

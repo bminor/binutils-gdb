@@ -3,7 +3,6 @@
    ** This module supports general window behavior
  */
 
-#include <curses.h>
 #include "defs.h"
 #include "tui.h"
 #include "tuiData.h"
@@ -13,7 +12,7 @@
 /*
    ** local support functions
  */
-static void _winResize PARAMS ((void));
+static void _winResize (void);
 
 
 /***********************

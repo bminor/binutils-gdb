@@ -119,6 +119,8 @@ elf32-v850.c
 elf32.c
 elf64-alpha.c
 elf64-gen.c
+elf64-hppa.c
+elf64-hppa.h
 elf64-mips.c
 elf64-sparc.c
 elf64.c

@@ -25,13 +25,13 @@
    -s		generates the simulator code jump table
    -d		generates a define table
    -x		generates the simulator code switch statement
-   default 	generates the opcode tables
+   default 	used to generate the opcode tables
 
 */
 
 #include <stdio.h>
 
-#define MAX_NR_STUFF 20
+#define MAX_NR_STUFF 42
 
 typedef struct
 {
@@ -86,51 +86,55 @@ op tab[] =
 
   { "", "", "bf <bdisp8>", "10001011i8p1....",
     "if (!T) {",
-    "  nia = PC + 4 + (SEXT(i) * 2);",
+    "  SET_NIP (PC + 4 + (SEXT(i) * 2));",
     "  cycles += 2;",
     "}",
   },
 
   { "", "", "bf.s <bdisp8>", "10001111i8p1....",
     "if (!T) {",
-    "  nia = PC + 4 + (SEXT (i) * 2);",
+    "  SET_NIP (PC + 4 + (SEXT (i) * 2));",
     "  cycles += 2;",
     "  Delay_Slot (PC + 2);",
     "}",
   },
 
   { "", "", "bra <bdisp12>", "1010i12.........",
-    "nia = PC + 4 + (SEXT12 (i) * 2);",
+    "SET_NIP (PC + 4 + (SEXT12 (i) * 2));",
+    "cycles += 2;",
     "Delay_Slot (PC + 2);",
   },
 
   { "", "n", "braf <REG_N>", "0000nnnn00100011",
-    "nia = PC + 4 + R[n];",
+    "SET_NIP (PC + 4 + R[n]);",
+    "cycles += 2;",
     "Delay_Slot (PC + 2);",
   },
 
   { "", "", "bsr <bdisp12>", "1011i12.........",
-    "PR = PC + 4;",
-    "nia = PC + 4 + (SEXT12 (i) * 2);",
+    "PR = PH2T (PC + 4);",
+    "SET_NIP (PC + 4 + (SEXT12 (i) * 2));",
+    "cycles += 2;",
     "Delay_Slot (PC + 2);",
   },
 
   { "", "n", "bsrf <REG_N>", "0000nnnn00000011",
-    "PR = PC + 4;",
-    "nia = PC + 4 + R[n];",
+    "PR = PH2T (PC) + 4;",
+    "SET_NIP (PC + 4 + R[n]);",
+    "cycles += 2;",
     "Delay_Slot (PC + 2);",
   },
 
   { "", "", "bt <bdisp8>", "10001001i8p1....",
     "if (T) {",
-    "  nia = PC + 4 + (SEXT (i) * 2);",
+    "  SET_NIP (PC + 4 + (SEXT (i) * 2));",
     "  cycles += 2;",
     "}",
   },
 
   { "", "", "bt.s <bdisp8>", "10001101i8p1....",
     "if (T) {",
-    "  nia = PC + 4 + (SEXT (i) * 2);",
+    "  SET_NIP (PC + 4 + (SEXT (i) * 2));",
     "  cycles += 2;",
     "  Delay_Slot (PC + 2);",
     "}",
@@ -247,7 +251,7 @@ op tab[] =
   /* sh4 */
   { "", "", "fcnvds <DR_N>,FPUL", "1111nnnn10111101",
     "if (! FPSCR_PR || n & 1)",
-    "  saved_state.asregs.exception = SIGILL;",
+    "  RAISE_EXCEPTION (SIGILL);",
     "else",
     "{",
     "  union",
@@ -263,7 +267,7 @@ op tab[] =
   /* sh4 */
   { "", "", "fcnvsd FPUL,<DR_N>", "1111nnnn10101101",
     "if (! FPSCR_PR || n & 1)",
-    "  saved_state.asregs.exception = SIGILL;",
+    "  RAISE_EXCEPTION (SIGILL);",
     "else",
     "{",
     "  union",
@@ -285,7 +289,7 @@ op tab[] =
   /* sh4 */
   { "", "", "fipr <FV_M>,<FV_N>", "1111nnmm11101101",
     "/* FIXME: not implemented */",
-    "saved_state.asregs.exception = SIGILL;",
+    "RAISE_EXCEPTION (SIGILL);",
     "/* FIXME: check for DP and (n & 1) == 0? */",
   },
 
@@ -486,37 +490,30 @@ op tab[] =
   },
 
   { "", "n", "jmp @<REG_N>", "0100nnnn00101011",
-    "nia = R[n];",
+    "SET_NIP (PT2H (R[n]));",
+    "cycles += 2;",
     "Delay_Slot (PC + 2);",
   },
 
   { "", "n", "jsr @<REG_N>", "0100nnnn00001011",
-    "PR = PC + 4;",
-    "nia = R[n];",
+    "PR = PH2T (PC + 4);",
     "if (~doprofile)",
-    "  gotcall (PR, nia);",
+    "  gotcall (PR, R[n]);",
+    "SET_NIP (PT2H (R[n]));",
+    "cycles += 2;",
     "Delay_Slot (PC + 2);",
   },
 
-  { "", "n", "ldc <REG_N>,GBR", "0100nnnn00011110",
-    "GBR = R[n];",
+  { "", "n", "ldc <REG_N>,<CREG_M>", "0100nnnnmmmm1110",
+    "CREG (m) = R[n];",
     "/* FIXME: user mode */",
   },
   { "", "n", "ldc <REG_N>,SR", "0100nnnn00001110",
     "SET_SR (R[n]);",
     "/* FIXME: user mode */",
   },
-  { "", "n", "ldc <REG_N>,VBR", "0100nnnn00101110",
-    "VBR = R[n];",
-    "/* FIXME: user mode */",
-  },
-  { "", "n", "ldc <REG_N>,SSR", "0100nnnn00111110",
-    "SSR = R[n];",
-    "/* FIXME: user mode */",
-  },
-  { "", "n", "ldc <REG_N>,SPC", "0100nnnn01001110",
-    "SPC = R[n];",
-    "/* FIXME: user mode */",
+  { "", "n", "ldc <REG_N>,MOD", "0100nnnn01011110",
+    "SET_MOD (R[n]);",
   },
 #if 0
   { "", "n", "ldc <REG_N>,DBR", "0100nnnn11111010",
@@ -524,41 +521,9 @@ op tab[] =
     "/* FIXME: user mode */",
   },
 #endif
-  { "", "n", "ldc <REG_N>,R0_BANK", "0100nnnn10001110",
-    "SET_Rn_BANK (0, R[n]);",
-    "/* FIXME: user mode */",
-  },
-  { "", "n", "ldc <REG_N>,R1_BANK", "0100nnnn10011110",
-    "SET_Rn_BANK (1, R[n]);",
-    "/* FIXME: user mode */",
-  },
-  { "", "n", "ldc <REG_N>,R2_BANK", "0100nnnn10101110",
-    "SET_Rn_BANK (2, R[n]);",
-    "/* FIXME: user mode */",
-  },
-  { "", "n", "ldc <REG_N>,R3_BANK", "0100nnnn10111110",
-    "SET_Rn_BANK (3, R[n]);",
-    "/* FIXME: user mode */",
-  },
-  { "", "n", "ldc <REG_N>,R4_BANK", "0100nnnn11001110",
-    "SET_Rn_BANK (4, R[n]);",
-    "/* FIXME: user mode */",
-  },
-  { "", "n", "ldc <REG_N>,R5_BANK", "0100nnnn11011110",
-    "SET_Rn_BANK (5, R[n]);",
-    "/* FIXME: user mode */",
-  },
-  { "", "n", "ldc <REG_N>,R6_BANK", "0100nnnn11101110",
-    "SET_Rn_BANK (6, R[n]);",
-    "/* FIXME: user mode */",
-  },
-  { "", "n", "ldc <REG_N>,R7_BANK", "0100nnnn11111110",
-    "SET_Rn_BANK (7, R[n]);",
-    "/* FIXME: user mode */",
-  },
-  { "", "n", "ldc.l @<REG_N>+,GBR", "0100nnnn00010111",
+  { "", "n", "ldc.l @<REG_N>+,<CREG_M>", "0100nnnnmmmm0111",
     "MA (1);",
-    "GBR = RLAT (R[n]);",
+    "CREG (m) = RLAT (R[n]);",
     "R[n] += 4;",
     "/* FIXME: user mode */",
   },
@@ -568,23 +533,10 @@ op tab[] =
     "R[n] += 4;",
     "/* FIXME: user mode */",
   },
-  { "", "n", "ldc.l @<REG_N>+,VBR", "0100nnnn00100111",
+  { "", "n", "ldc.l @<REG_N>+,MOD", "0100nnnn01010111",
     "MA (1);",
-    "VBR = RLAT (R[n]);",
+    "SET_MOD (RLAT (R[n]));",
     "R[n] += 4;",
-    "/* FIXME: user mode */",
-  },
-  { "", "n", "ldc.l @<REG_N>+,SSR", "0100nnnn00110111",
-    "MA (1);",
-    "SSR = RLAT (R[n]);",
-    "R[n] += 4;",
-    "/* FIXME: user mode */",
-  },
-  { "", "n", "ldc.l @<REG_N>+,SPC", "0100nnnn01000111",
-    "MA (1);",
-    "SPC = RLAT (R[n]);",
-    "R[n] += 4;",
-    "/* FIXME: user mode */",
   },
 #if 0
   { "", "n", "ldc.l @<REG_N>+,DBR", "0100nnnn11110110",
@@ -594,99 +546,32 @@ op tab[] =
     "/* FIXME: user mode */",
   },
 #endif
-  { "", "n", "ldc.l @<REG_N>+,R0_BANK", "0100nnnn10000111",
-    "MA (1);",
-    "SET_Rn_BANK (0, RLAT (R[n]));",
-    "R[n] += 4;",
-    "/* FIXME: user mode */",
+
+  /* sh-dsp */
+  { "", "", "ldre @(<disp>,PC)", "10001110i8p1....",
+    "RE = SEXT (i) * 2 + 4 + PH2T (PC);",
   },
-  { "", "n", "ldc.l @<REG_N>+,R1_BANK", "0100nnnn10010111",
-    "MA (1);",
-    "SET_Rn_BANK (1, RLAT (R[n]));",
-    "R[n] += 4;",
-    "/* FIXME: user mode */",
-  },
-  { "", "n", "ldc.l @<REG_N>+,R2_BANK", "0100nnnn10100111",
-    "MA (1);",
-    "SET_Rn_BANK (2, RLAT (R[n]));",
-    "R[n] += 4;",
-    "/* FIXME: user mode */",
-  },
-  { "", "n", "ldc.l @<REG_N>+,R3_BANK", "0100nnnn10110111",
-    "MA (1);",
-    "SET_Rn_BANK (3, RLAT (R[n]));",
-    "R[n] += 4;",
-    "/* FIXME: user mode */",
-  },
-  { "", "n", "ldc.l @<REG_N>+,R4_BANK", "0100nnnn11000111",
-    "MA (1);",
-    "SET_Rn_BANK (4, RLAT (R[n]));",
-    "R[n] += 4;",
-    "/* FIXME: user mode */",
-  },
-  { "", "n", "ldc.l @<REG_N>+,R5_BANK", "0100nnnn11010111",
-    "MA (1);",
-    "SET_Rn_BANK (5, RLAT (R[n]));",
-    "R[n] += 4;",
-    "/* FIXME: user mode */",
-  },
-  { "", "n", "ldc.l @<REG_N>+,R6_BANK", "0100nnnn11100111",
-    "MA (1);",
-    "SET_Rn_BANK (6, RLAT (R[n]));",
-    "R[n] += 4;",
-    "/* FIXME: user mode */",
-  },
-  { "", "n", "ldc.l @<REG_N>+,R7_BANK", "0100nnnn11110111",
-    "MA (1);",
-    "SET_Rn_BANK (7, RLAT (R[n]));",
-    "R[n] += 4;",
-    "/* FIXME: user mode */",
+  { "", "", "ldrs @(<disp>,PC)", "10001100i8p1....",
+    "RS = SEXT (i) * 2 + 4 + PH2T (PC);",
   },
 
-  /* sh3e */
-  { "", "", "lds <REG_N>,FPUL", "0100nnnn01011010",
-    "FPUL = R[n];",
+  { "", "n", "lds <REG_N>,<SREG_M>", "0100nnnnssss1010",
+    "SREG (m) = R[n];",
   },
-  /* sh3e */
-  { "", "", "lds.l @<REG_N>+,FPUL", "0100nnnn01010110",
+  { "", "n", "lds.l @<REG_N>+,<SREG_M>", "0100nnnnssss0110",
     "MA (1);",
-    "FPUL = RLAT(R[n]);",
+    "SREG (m) = RLAT(R[n]);",
     "R[n] += 4;",
   },
-  /* sh3e */
-  { "", "", "lds <REG_N>,FPSCR", "0100nnnn01101010",
+  /* sh3e / sh-dsp (lds <REG_N>,DSR) */
+  { "", "n", "lds <REG_N>,FPSCR", "0100nnnn01101010",
     "SET_FPSCR(R[n]);",
   },
-  /* sh3e */
-  { "", "", "lds.l @<REG_N>+,FPSCR", "0100nnnn01100110",
+  /* sh3e / sh-dsp (lds.l @<REG_N>+,DSR) */
+  { "", "n", "lds.l @<REG_N>+,FPSCR", "0100nnnn01100110",
     "MA (1);",
     "SET_FPSCR (RLAT(R[n]));",
     "R[n] += 4;",
-  },
-
-  { "", "n", "lds <REG_N>,MACH", "0100nnnn00001010",
-    "MACH = R[n];",
-  },
-  { "", "n", "lds <REG_N>,MACL", "0100nnnn00011010",
-    "MACL= R[n];",
-  },
-  { "", "n", "lds <REG_N>,PR", "0100nnnn00101010",
-    "PR = R[n];",
-  },
-  { "", "n", "lds.l @<REG_N>+,MACH", "0100nnnn00000110",
-    "MA (1);",
-    "MACH = SEXT(RLAT(R[n]));",
-    "R[n]+=4;",
-  },
-  { "", "n", "lds.l @<REG_N>+,MACL", "0100nnnn00010110",
-    "MA (1);",
-    "MACL = RLAT(R[n]);",
-    "R[n]+=4;",
-  },
-  { "", "n", "lds.l @<REG_N>+,PR", "0100nnnn00100110",
-    "MA (1);",
-    "PR = RLAT(R[n]);",
-    "R[n]+=4;;",
   },
 
   { "", "", "ldtlb", "0000000000111000",
@@ -694,12 +579,12 @@ op tab[] =
   },
 
   { "", "nm", "mac.l @<REG_M>+,@<REG_N>+", "0000nnnnmmmm1111",
-    "trap (255,R0,memory,maskl,maskw,little_endian);",
+    "trap (255,R0,memory,maskl,maskw, endianw);",
     "/* FIXME: mac.l support */",
   },
 
   { "", "nm", "mac.w @<REG_M>+,@<REG_N>+", "0100nnnnmmmm1111",
-    "macw(R0,memory,n,m);",
+    "macw(R0,memory,n,m,endianw);",
   },
 
   { "n", "", "mov #<imm>,<REG_N>", "1110nnnni8*1....",
@@ -764,7 +649,7 @@ op tab[] =
   },
   { "n", "", "mov.l @(<disp>,PC),<REG_N>", "1101nnnni8p4....",
     "MA (1);",
-    "R[n] = RLAT((PC & ~3) + 4 + i);",
+    "R[n] = RLAT ((PH2T (PC) & ~3) + 4 + i);",
     "L (n);",
   },
   { "n", "m", "mov.l @(<disp>,<REG_M>),<REG_N>", "0101nnnnmmmmi4*4",
@@ -817,7 +702,7 @@ op tab[] =
   },
   { "n", "", "mov.w @(<disp>,PC),<REG_N>", "1001nnnni8p2....",
     "MA (1);",
-    "R[n] = RSWAT (PC + 4 + i);",
+    "R[n] = RSWAT (PH2T (PC + 4 + i));",
     "L (n);",
   },
   { "0", "m", "mov.w @(<disp>,<REG_M>),R0", "10000101mmmmi4*2",
@@ -864,12 +749,12 @@ op tab[] =
   },
 
   { "0", "", "mova @(<disp>,PC),R0", "11000111i8p4....",
-    "R0 = ((i + 4 + PC) & ~0x3);",
+    "R0 = ((i + 4 + PH2T (PC)) & ~0x3);",
   },
 
   { "0", "", "movca.l @R0, <REG_N>", "0000nnnn11000011",
     "/* FIXME: Not implemented */",
-    "saved_state.asregs.exception = SIGILL;",
+    "RAISE_EXCEPTION (SIGILL);",
   },
 
   { "n", "", "movt <REG_N>", "0000nnnn00101001",
@@ -917,12 +802,12 @@ op tab[] =
 
   { "0", "", "ocbi @<REG_N>", "0000nnnn10010011",
     "/* FIXME: Not implemented */",
-    "saved_state.asregs.exception = SIGILL;",
+    "RAISE_EXCEPTION (SIGILL);",
   },
 
   { "0", "", "ocbp @<REG_N>", "0000nnnn10100011",
     "/* FIXME: Not implemented */",
-    "saved_state.asregs.exception = SIGILL;",
+    "RAISE_EXCEPTION (SIGILL);",
   },
 
   { "", "n", "ocbwb @<REG_N>", "0000nnnn10110011",
@@ -974,21 +859,41 @@ op tab[] =
 #if 0
     /* SH-[12] */
     "int tmp = PC;",
-    "nia = RLAT (R[15]) + 2;",
+    "SET_NIP (PT2H (RLAT (R[15]) + 2));",
     "R[15] += 4;",
     "SET_SR (RLAT (R[15]) & 0x3f3);",
     "R[15] += 4;",
     "Delay_Slot (PC + 2);",
 #else
-    "nia = SPC;",
     "SET_SR (SSR);",
+    "SET_NIP (PT2H (SPC));",
+    "cycles += 2;",
     "Delay_Slot (PC + 2);",
 #endif
   },
 
   { "", "", "rts", "0000000000001011",
-    "nia = PR;",
+    "SET_NIP (PT2H (PR));",
+    "cycles += 2;",
     "Delay_Slot (PC + 2);",
+  },
+
+  /* sh-dsp */
+  { "", "n", "setrc <REG_N>", "0100nnnn00010100",
+    "SET_RC (R[n]);",
+  },
+  { "", "n", "setrc #<imm>", "10000010i8*1....",
+    /* It would be more realistic to let loop_start point to some static
+       memory that contains an illegal opcode and then give a bus error when
+       the loop is eventually encountered, but it seems not only simpler,
+       but also more debugging-friendly to just catch the failure here.  */
+    "if (BUSERROR (RS | RE, maskw))",
+    "  RAISE_EXCEPTION (SIGILL);",
+    "else {",
+    "  SET_RC (i);",
+    "  loop = get_loop_bounds (RS, RE, memory, mem_end, maskw, endianw);",
+    "  CHECK_INSN_PTR (insn_ptr);",
+    "}",
   },
 
   { "", "", "sets", "0000000001011000",
@@ -1048,25 +953,14 @@ op tab[] =
   },
 
   { "", "", "sleep", "0000000000011011",
-    "trap (0xc3, R0, memory, maskl, maskw, little_endian);",
-    "nia = PC;",
+    "nip = PC;",
+    "trap (0xc3, R0, memory, maskl, maskw, endianw);",
   },
 
-  { "n", "", "stc GBR,<REG_N>", "0000nnnn00010010",
-    "R[n] = GBR;",
+  { "n", "", "stc <CREG_M>,<REG_N>", "0000nnnnmmmm0010",
+    "R[n] = CREG (m);",
   },
-  { "n", "", "stc SR,<REG_N>",  "0000nnnn00000010",
-    "R[n] = GET_SR ();",
-  },
-  { "n", "", "stc VBR,<REG_N>", "0000nnnn00100010",
-    "R[n] = VBR;",
-  },
-  { "n", "", "stc SSR,<REG_N>", "0000nnnn00110010",
-    "R[n] = SSR;",
-  },
-  { "n", "", "stc SPC,<REG_N>", "0000nnnn01000010",
-    "R[n] = SPC;",
-  },
+
 #if 0
   { "n", "", "stc SGR,<REG_N>", "0000nnnn00111010",
     "R[n] = SGR;",
@@ -1075,54 +969,10 @@ op tab[] =
     "R[n] = DBR;",
   },
 #endif
-  { "n", "", "stc R0_BANK,<REG_N>", "0000nnnn10000010",
-    "R[n] = Rn_BANK (0);",
-  },
-  { "n", "", "stc R1_BANK,<REG_N>", "0000nnnn10010010",
-    "R[n] = Rn_BANK (1);",
-  },
-  { "n", "", "stc R2_BANK,<REG_N>", "0000nnnn10100010",
-    "R[n] = Rn_BANK (2);",
-  },
-  { "n", "", "stc R3_BANK,<REG_N>", "0000nnnn10110010",
-    "R[n] = Rn_BANK (3);",
-  },
-  { "n", "", "stc R4_BANK,<REG_N>", "0000nnnn11000010",
-    "R[n] = Rn_BANK (4);",
-  },
-  { "n", "", "stc R5_BANK,<REG_N>", "0000nnnn11010010",
-    "R[n] = Rn_BANK (5);",
-  },
-  { "n", "", "stc R6_BANK,<REG_N>", "0000nnnn11100010",
-    "R[n] = Rn_BANK (6);",
-  },
-  { "n", "", "stc R7_BANK,<REG_N>", "0000nnnn11110010",
-    "R[n] = Rn_BANK (7);",
-  },
-  { "n", "n", "stc.l GBR,@-<REG_N>", "0100nnnn00010011",
+  { "n", "n", "stc.l <CREG_M>,@-<REG_N>", "0100nnnnmmmm0011",
     "MA (1);",
     "R[n] -= 4;",
-    "WLAT (R[n], GBR);;",
-  },
-  { "n", "n", "stc.l SR,@-<REG_N>",  "0100nnnn00000011",
-    "MA (1);",
-    "R[n] -= 4;",
-    "WLAT (R[n], GET_SR());",
-  },
-  { "n", "n", "stc.l VBR,@-<REG_N>", "0100nnnn00100011",
-    "MA (1);",
-    "R[n] -= 4;",
-    "WLAT (R[n], VBR);",
-  },
-  { "n", "n", "stc.l SSR,@-<REG_N>", "0100nnnn00110011",
-    "MA (1);",
-    "R[n] -= 4;",
-    "WLAT (R[n], SSR);",
-  },
-  { "n", "n", "stc.l SPC,@-<REG_N>", "0100nnnn01000011",
-    "MA (1);",
-    "R[n] -= 4;",
-    "WLAT (R[n], SPC);",
+    "WLAT (R[n], CREG (m));",
   },
 #if 0
   { "n", "n", "stc.l SGR,@-<REG_N>", "0100nnnn00110010",
@@ -1136,91 +986,14 @@ op tab[] =
     "WLAT (R[n], DBR);",
   },
 #endif
-  { "n", "", "stc R0_BANK,@-<REG_N>", "0100nnnn10000010",
-    "MA (1);",
-    "R[n] -= 4;",
-    "WLAT (R[n], Rn_BANK (0));",
-  },
-  { "n", "", "stc R1_BANK,@-<REG_N>", "0100nnnn10010010",
-    "MA (1);",
-    "R[n] -= 4;",
-    "WLAT (R[n], Rn_BANK (1));",
-  },
-  { "n", "", "stc R2_BANK,@-<REG_N>", "0100nnnn10100010",
-    "MA (1);",
-    "R[n] -= 4;",
-    "WLAT (R[n], Rn_BANK (2));",
-  },
-  { "n", "", "stc R3_BANK,@-<REG_N>", "0100nnnn10110010",
-    "MA (1);",
-    "R[n] -= 4;",
-    "WLAT (R[n], Rn_BANK (3));",
-  },
-  { "n", "", "stc R4_BANK,@-<REG_N>", "0100nnnn11000010",
-    "MA (1);",
-    "R[n] -= 4;",
-    "WLAT (R[n], Rn_BANK (4));",
-  },
-  { "n", "", "stc R5_BANK,@-<REG_N>", "0100nnnn11010010",
-    "MA (1);",
-    "R[n] -= 4;",
-    "WLAT (R[n], Rn_BANK (5));",
-  },
-  { "n", "", "stc R6_BANK,@-<REG_N>", "0100nnnn11100010",
-    "MA (1);",
-    "R[n] -= 4;",
-    "WLAT (R[n], Rn_BANK (6));",
-  },
-  { "n", "", "stc R7_BANK,@-<REG_N>", "0100nnnn11110010",
-    "MA (1);",
-    "R[n] -= 4;",
-    "WLAT (R[n], Rn_BANK (7));",
-  },
 
-  /* sh3e */
-  { "", "", "sts FPUL,<REG_N>", "0000nnnn01011010",
-    "R[n] = FPUL;",
+  { "n", "", "sts <SREG_M>,<REG_N>", "0000nnnnssss1010",
+    "R[n] = SREG (m);",
   },
-  /* sh3e */
-  { "", "", "sts.l FPUL,@-<REG_N>", "0100nnnn01010010",
+  { "n", "n", "sts.l <SREG_M>,@-<REG_N>", "0100nnnnssss0010",
     "MA (1);",
     "R[n] -= 4;",
-    "WLAT (R[n], FPUL);",
-  },
-  /* sh3e */
-  { "", "", "sts FPSCR,<REG_N>", "0000nnnn01101010",
-    "R[n] = GET_FPSCR ();",
-  },
-  /* sh3e */
-  { "", "", "sts.l FPSCR,@-<REG_N>", "0100nnnn01100010",
-    "MA (1);",
-    "R[n] -= 4;",
-    "WLAT (R[n], GET_FPSCR ());",
-  },
-
-  { "n", "", "sts MACH,<REG_N>", "0000nnnn00001010",
-    "R[n] = MACH;",
-  },
-  { "n", "", "sts MACL,<REG_N>", "0000nnnn00011010",
-    "R[n] = MACL;",
-  },
-  { "n", "", "sts PR,<REG_N>", "0000nnnn00101010",
-    "R[n] = PR;",
-  },
-  { "n", "n", "sts.l MACH,@-<REG_N>", "0100nnnn00000010",
-    "MA (1);",
-    "R[n] -= 4;",
-    "WLAT (R[n], MACH);",
-  },
-  { "n", "n", "sts.l MACL,@-<REG_N>", "0100nnnn00010010",
-    "MA (1);",
-    "R[n] -= 4;",
-    "WLAT (R[n], MACL);",
-  },
-  { "n", "n", "sts.l PR,@-<REG_N>", "0100nnnn00100010",
-    "MA (1);",
-    "R[n] -= 4;",
-    "WLAT (R[n], PR);",
+    "WLAT (R[n], SREG (m));",
   },
 
   { "n", "nm", "sub <REG_M>,<REG_N>", "0011nnnnmmmm1000",
@@ -1264,7 +1037,7 @@ op tab[] =
     "if (i==0xc3)",
     "  PC-=2;",
     "if (i<20||i==34||i==0xc3)",
-    "  trap(i,R,memory,maskl,maskw,little_endian);",
+    "  trap(i,R,memory,maskl,maskw,endianw);",
     "else {",
     "  R[15]-=4;",
     "  WLAT(R[15],GET_SR());",
@@ -1275,18 +1048,18 @@ op tab[] =
 #else
     "if (i == 0xc3)",
     "  {",
-    "    nia = PC;",
-    "    trap (i, R, memory, maskl, maskw, little_endian);",
+    "    nip = PC;",
+    "    trap (i, R, memory, maskl, maskw,endianw);",
     "  }",
     "else if (i < 20 || i==34 || i==0xc3)",
-    "  trap (i, R, memory, maskl, maskw, little_endian);",
+    "  trap (i, R, memory, maskl, maskw,endianw);",
     "else if (!SR_BL) {",
     "  /* FIXME: TRA = (imm << 2); */",
     "  SSR = GET_SR();",
-    "  SPC = PC + 2;",
+    "  SPC = PH2T (PC + 2);",
     "  SET_SR (GET_SR() | SR_MASK_MD | SR_MASK_BL | SR_MASK_RB);",
     "  /* FIXME: EXPEVT = 0x00000160; */",
-    "  nia = VBR + 0x00000100;",
+    "  SET_NIP (PT2H (VBR + 0x00000100));",
     "}",
 #endif
   },
@@ -1330,6 +1103,711 @@ op tab[] =
 #endif
 
   {0, 0}};
+
+op movsxy_tab[] =
+{
+/* If this is disabled, the simulator speeds up by about 12% on a
+   450 MHz PIII - 9% with ACE_FAST.
+   Maybe we should have separate simulator loops?  */
+#if 1
+  { "n", "n", "movs.w @-<REG_N>,<DSP_REG_M>", "111101NNMMMM0000",
+    "MA (1);",
+    "R[n] -= 2;",
+    "DSP_R (m) = RSWAT (R[n]) << 16;",
+    "DSP_GRD (m) = SIGN32 (DSP_R (m));",
+  },
+  { "", "n",  "movs.w @<REG_N>,<DSP_REG_M>",  "111101NNMMMM0100",
+    "MA (1);",
+    "DSP_R (m) = RSWAT (R[n]) << 16;",
+    "DSP_GRD (m) = SIGN32 (DSP_R (m));",
+  },
+  { "n", "n", "movs.w @<REG_N>+,<DSP_REG_M>", "111101NNMMMM1000",
+    "MA (1);",
+    "DSP_R (m) = RSWAT (R[n]) << 16;",
+    "DSP_GRD (m) = SIGN32 (DSP_R (m));",
+    "R[n] += 2;",
+  },
+  { "n", "n8","movs.w @<REG_N>+REG_8,<DSP_REG_M>", "111101NNMMMM1100",
+    "MA (1);",
+    "DSP_R (m) = RSWAT (R[n]) << 16;",
+    "DSP_GRD (m) = SIGN32 (DSP_R (m));",
+    "R[n] += R[8];",
+  },
+  { "n", "n", "movs.w @-<REG_N>,<DSP_GRD_M>", "111101NNGGGG0000",
+    "MA (1);",
+    "R[n] -= 2;",
+    "DSP_R (m) = RSWAT (R[n]);",
+  },
+  { "", "n",  "movs.w @<REG_N>,<DSP_GRD_M>",  "111101NNGGGG0100",
+    "MA (1);",
+    "DSP_R (m) = RSWAT (R[n]);",
+  },
+  { "n", "n", "movs.w @<REG_N>+,<DSP_GRD_M>", "111101NNGGGG1000",
+    "MA (1);",
+    "DSP_R (m) = RSWAT (R[n]);",
+    "R[n] += 2;",
+  },
+  { "n", "n8","movs.w @<REG_N>+REG_8,<DSP_GRD_M>", "111101NNGGGG1100",
+    "MA (1);",
+    "DSP_R (m) = RSWAT (R[n]);",
+    "R[n] += R[8];",
+  },
+  { "n", "n", "<DSP_REG_M>,movs.w @-<REG_N>", "111101NNMMMM0001",
+    "MA (1);",
+    "R[n] -= 2;",
+    "WWAT (R[n], DSP_R (m) >> 16);",
+  },
+  { "", "n",  "movs.w <DSP_REG_M>,@<REG_N>",  "111101NNMMMM0101",
+    "MA (1);",
+    "WWAT (R[n], DSP_R (m) >> 16);",
+  },
+  { "n", "n", "movs.w <DSP_REG_M>,@<REG_N>+", "111101NNMMMM1001",
+    "MA (1);",
+    "WWAT (R[n], DSP_R (m) >> 16);",
+    "R[n] += 2;",
+  },
+  { "n", "n8","movs.w <DSP_REG_M>,@<REG_N>+REG_8", "111101NNMMMM1101",
+    "MA (1);",
+    "WWAT (R[n], DSP_R (m) >> 16);",
+    "R[n] += R[8];",
+  },
+  { "n", "n", "movs.w <DSP_GRD_M>,@-<REG_N>", "111101NNGGGG0001",
+    "MA (1);",
+    "R[n] -= 2;",
+    "WWAT (R[n], SEXT (DSP_R (m)));",
+  },
+  { "", "n",  "movs.w <DSP_GRD_M>,@<REG_N>",  "111101NNGGGG0101",
+    "MA (1);",
+    "WWAT (R[n], SEXT (DSP_R (m)));",
+  },
+  { "n", "n", "movs.w <DSP_GRD_M>,@<REG_N>+", "111101NNGGGG1001",
+    "MA (1);",
+    "WWAT (R[n], SEXT (DSP_R (m)));",
+    "R[n] += 2;",
+  },
+  { "n", "n8","movs.w <DSP_GRD_M>,@<REG_N>+REG_8", "111101NNGGGG1101",
+    "MA (1);",
+    "WWAT (R[n], SEXT (DSP_R (m)));",
+    "R[n] += R[8];",
+  },
+  { "n", "n", "movs.l @-<REG_N>,<DSP_REG_M>", "111101NNMMMM0010",
+    "MA (1);",
+    "R[n] -= 4;",
+    "DSP_R (m) = RLAT (R[n]);",
+    "DSP_GRD (m) = SIGN32 (DSP_R (m));",
+  },
+  { "", "n",  "movs.l @<REG_N>,<DSP_REG_M>",  "111101NNMMMM0110",
+    "MA (1);",
+    "DSP_R (m) = RLAT (R[n]);",
+    "DSP_GRD (m) = SIGN32 (DSP_R (m));",
+  },
+  { "n", "n", "movs.l @<REG_N>+,<DSP_REG_M>", "111101NNMMMM1010",
+    "MA (1);",
+    "DSP_R (m) = RLAT (R[n]);",
+    "DSP_GRD (m) = SIGN32 (DSP_R (m));",
+    "R[n] += 4;",
+  },
+  { "n", "n8","movs.l @<REG_N>+REG_8,<DSP_REG_M>", "111101NNMMMM1110",
+    "MA (1);",
+    "DSP_R (m) = RLAT (R[n]);",
+    "DSP_GRD (m) = SIGN32 (DSP_R (m));",
+    "R[n] += R[8];",
+  },
+  { "n", "n", "<DSP_REG_M>,movs.l @-<REG_N>", "111101NNMMMM0011",
+    "MA (1);",
+    "R[n] -= 4;",
+    "WLAT (R[n], DSP_R (m));",
+  },
+  { "", "n",  "movs.l <DSP_REG_M>,@<REG_N>",  "111101NNMMMM0111",
+    "MA (1);",
+    "WLAT (R[n], DSP_R (m));",
+  },
+  { "n", "n", "movs.l <DSP_REG_M>,@<REG_N>+", "111101NNMMMM1011",
+    "MA (1);",
+    "WLAT (R[n], DSP_R (m));",
+    "R[n] += 4;",
+  },
+  { "n", "n8","movs.l <DSP_REG_M>,@<REG_N>+REG_8", "111101NNMMMM1111",
+    "MA (1);",
+    "WLAT (R[n], DSP_R (m));",
+    "R[n] += R[8];",
+  },
+  { "n", "n", "<DSP_GRD_M>,movs.l @-<REG_N>", "111101NNGGGG0011",
+    "MA (1);",
+    "R[n] -= 4;",
+    "WLAT (R[n], SEXT (DSP_R (m)));",
+  },
+  { "", "n",  "movs.l <DSP_GRD_M>,@<REG_N>",  "111101NNGGGG0111",
+    "MA (1);",
+    "WLAT (R[n], SEXT (DSP_R (m)));",
+  },
+  { "n", "n", "movs.l <DSP_GRD_M>,@<REG_N>+", "111101NNGGGG1011",
+    "MA (1);",
+    "WLAT (R[n], SEXT (DSP_R (m)));",
+    "R[n] += 4;",
+  },
+  { "n", "n8","movs.l <DSP_GRD_M>,@<REG_N>+REG_8", "111101NNGGGG1111",
+    "MA (1);",
+    "WLAT (R[n], SEXT (DSP_R (m)));",
+    "R[n] += R[8];",
+  },
+  { "", "n", "movx.w @<REG_x>,<DSP_XX>",   "111100xxXX000100",
+    "DSP_R (m) = RSWAT (R[n]) << 16;",
+    "iword &= 0xfd53; goto top;",
+  },
+  { "n", "n", "movx.w @<REG_x>+,<DSP_XX>", "111100xxXX001000",
+    "DSP_R (m) = RSWAT (R[n]) << 16;",
+    "R[n] += ((R[n] & 0xffff) == MOD_ME) ? MOD_DELTA : 2;",
+    "iword &= 0xfd53; goto top;",
+  },
+  { "n", "n8","movx.w @<REG_x>+REG_8,<DSP_XX>", "111100xxXX001000",
+    "DSP_R (m) = RSWAT (R[n]) << 16;",
+    "R[n] += ((R[n] & 0xffff) == MOD_ME) ? MOD_DELTA : R[8];",
+    "iword &= 0xfd53; goto top;",
+  },
+  { "", "n", "movx.w <DSP_Aa>,@<REG_x>",   "111100xxaa100100",
+    "WWAT (R[n], DSP_R (m) >> 16);",
+    "iword &= 0xfd53; goto top;",
+  },
+  { "n", "n", "movx.w <DSP_Aa>,@<REG_x>+", "111100xxaa101000",
+    "WWAT (R[n], DSP_R (m) >> 16);",
+    "R[n] += ((R[n] & 0xffff) == MOD_ME) ? MOD_DELTA : 2;",
+    "iword &= 0xfd53; goto top;",
+  },
+  { "n", "n8","movx.w <DSP_Aa>,@<REG_x>+REG_8","111100xxaa101000",
+    "WWAT (R[n], DSP_R (m) >> 16);",
+    "R[n] += ((R[n] & 0xffff) == MOD_ME) ? MOD_DELTA : R[8];",
+    "iword &= 0xfd53; goto top;",
+  },
+  { "", "n", "movy.w @<REG_y>,<DSP_YY>",   "111100yyYY000001",
+    "DSP_R (m) = RSWAT (R[n]) << 16;",
+  },
+  { "n", "n", "movy.w @<REG_x>+,<DSP_YY>", "111100yyYY000010",
+    "DSP_R (m) = RSWAT (R[n]) << 16;",
+    "R[n] += ((R[n] | ~0xffff) == MOD_ME) ? MOD_DELTA : 2;",
+  },
+  { "n", "n9","movy.w @<REG_x>+REG_9,<DSP_YY>", "111100yyYY000010",
+    "DSP_R (m) = RSWAT (R[n]) << 16;",
+    "R[n] += ((R[n] | ~0xffff) == MOD_ME) ? MOD_DELTA : R[9];",
+  },
+  { "", "n", "movy.w <DSP_Aa>,@<REG_x>",   "111100yyAA010001",
+    "WWAT (R[n], DSP_R (m) >> 16);",
+  },
+  { "n", "n", "movy.w <DSP_Aa>,@<REG_x>+", "111100yyAA010010",
+    "WWAT (R[n], DSP_R (m) >> 16);",
+    "R[n] += ((R[n] | ~0xffff) == MOD_ME) ? MOD_DELTA : 2;",
+  },
+  { "n", "n9", "movy.w <DSP_Aa>,@<REG_x>+REG_9", "111100yyAA010010",
+    "WWAT (R[n], DSP_R (m) >> 16);",
+    "R[n] += ((R[n] | ~0xffff) == MOD_ME) ? MOD_DELTA : R[9];",
+  },
+  { "", "", "nopx nopy", "1111000000000000",
+    "/* nop */",
+  },
+  { "", "", "ppi", "1111100000000000",
+    "ppi_insn (RIAT (nip));",
+    "nip += 2;",
+    "iword &= 0xf7ff; goto top;",
+  },
+#endif
+  {0, 0}};
+
+op ppi_tab[] =
+{
+  { "","", "pshl #<imm>,dz",	"00000iiim16.zzzz",
+    "int Sz = DSP_R (z) & 0xffff0000;",
+    "",
+    "if (i < 16)",
+    "  res = Sz << i;",
+    "else if (i >= 128 - 16)",
+    "  res = Sz >> 128 - i;",
+    "else"
+    "  {",
+    "    RAISE_EXCEPTION (SIGILL);",
+    "    return;",
+    "  }",
+    "res &= 0xffff0000;",
+    "res_grd = 0;",
+    "goto logical;",
+  },
+  { "","", "psha #<imm>,dz",	"00010iiim32.zzzz",
+    "int Sz = DSP_R (z);",
+    "int Sz_grd = GET_DSP_GRD (z);",
+    "",
+    "if (i < 32)",
+    "  {",
+    "    if (i == 32)"
+    "      {",
+    "        res = 0;",
+    "        res_grd = Sz;",
+    "      }",
+    "    else",
+    "      {",
+    "        res = Sz << i;",
+    "        res_grd = Sz_grd << i | (unsigned) Sz >> 32 - i;",
+    "      }",
+    "    res_grd = SEXT (res_grd);",
+    "    carry = res_grd & 1;",
+    "  }",
+    "else if (i >= 96)",
+    "  {",
+    "    i = 128 - i;",
+    "    if (i == 32)"
+    "      {",
+    "        res_grd = SIGN32 (Sz_grd);",
+    "        res = Sz_grd;",
+    "      }",
+    "    else",
+    "      {",
+    "        res = Sz >> i | Sz_grd << 32 - i;",
+    "        res_grd = Sz_grd >> i;",
+    "      }",
+    "    carry = Sz >> (i - 1) & 1;",
+    "  }",
+    "else"
+    "  {",
+    "    RAISE_EXCEPTION (SIGILL);",
+    "    return;",
+    "  }",
+    "COMPUTE_OVERFLOW;",
+    "greater_equal = 0;",
+  },
+  { "","", "pmuls Se,Sf,Dg",	"0100eeffxxyygguu",
+    "res = (DSP_R (e)) >> 16 * (DSP_R (f) >> 16) * 2;",
+    "if (res == 0x80000000)",
+    "  res = 0x7fffffff;",
+    "DSP_R (g) = res;",
+    "DSP_GRD (g) = SIGN32 (res);",
+    "return;",
+  },
+  { "","", "psub Sx,Sy,Du pmuls Se,Sf,Dg",	"0110eeffxxyygguu",
+    "int Sx = DSP_R (x);",
+    "int Sx_grd = GET_DSP_GRD (x);",
+    "int Sy = DSP_R (y);",
+    "int Sy_grd = SIGN32 (Sy);",
+    "",
+    "res = (DSP_R (e)) >> 16 * (DSP_R (f) >> 16) * 2;",
+    "if (res == 0x80000000)",
+    "  res = 0x7fffffff;",
+    "DSP_R (g) = res;",
+    "DSP_GRD (g) = SIGN32 (res);",
+    "",
+    "z = u;",
+    "res = Sx - Sy;",
+    "carry = (unsigned) res > (unsigned) Sx;",
+    "res_grd = Sx_grd - Sy_grd - carry;",
+    "COMPUTE_OVERFLOW;",
+    "ADD_SUB_GE;",
+  },
+  { "","", "padd Sx,Sy,Du pmuls Se,Sf,Dg",	"0111eeffxxyygguu",
+    "int Sx = DSP_R (x);",
+    "int Sx_grd = GET_DSP_GRD (x);",
+    "int Sy = DSP_R (y);",
+    "int Sy_grd = SIGN32 (Sy);",
+    "",
+    "res = (DSP_R (e)) >> 16 * (DSP_R (f) >> 16) * 2;",
+    "if (res == 0x80000000)",
+    "  res = 0x7fffffff;",
+    "DSP_R (g) = res;",
+    "DSP_GRD (g) = SIGN32 (res);",
+    "",
+    "z = u;",
+    "res = Sx + Sy;",
+    "carry = (unsigned) res < (unsigned) Sx;",
+    "res_grd = Sx_grd + Sy_grd + carry;",
+    "COMPUTE_OVERFLOW;",
+  },
+  { "","", "psubc Sx,Sy,Dz",		"10100000xxyyzzzz",
+    "int Sx = DSP_R (x);",
+    "int Sx_grd = GET_DSP_GRD (x);",
+    "int Sy = DSP_R (y);",
+    "int Sy_grd = SIGN32 (Sy);",
+    "",
+    "res = Sx - Sy - (DSR & 1);",
+    "carry = (unsigned) res > (unsigned) Sx || (res == Sx && Sy);",
+    "res_grd = Sx_grd + Sy_grd + carry;",
+    "COMPUTE_OVERFLOW;",
+    "ADD_SUB_GE;",
+    "DSR &= ~0xf1;\n",
+    "if (res || res_grd)\n",
+    "  DSR |= greater_equal | res_grd >> 2 & DSR_MASK_N | overflow;\n",
+    "else\n",
+    "  DSR |= DSR_MASK_Z | overflow;\n",
+    "DSR |= carry;\n",
+    "goto assign_z;\n",
+  },
+  { "","", "paddc Sx,Sy,Dz",	"10110000xxyyzzzz",
+    "int Sx = DSP_R (x);",
+    "int Sx_grd = GET_DSP_GRD (x);",
+    "int Sy = DSP_R (y);",
+    "int Sy_grd = SIGN32 (Sy);",
+    "",
+    "res = Sx + Sy + (DSR & 1);",
+    "carry = (unsigned) res < (unsigned) Sx || (res == Sx && Sy);",
+    "res_grd = Sx_grd + Sy_grd + carry;",
+    "COMPUTE_OVERFLOW;",
+    "ADD_SUB_GE;",
+    "DSR &= ~0xf1;\n",
+    "if (res || res_grd)\n",
+    "  DSR |= greater_equal | res_grd >> 2 & DSR_MASK_N | overflow;\n",
+    "else\n",
+    "  DSR |= DSR_MASK_Z | overflow;\n",
+    "DSR |= carry;\n",
+    "goto assign_z;\n",
+  },
+  { "","", "pcmp Sx,Sy",	"10000100xxyy....",
+    "int Sx = DSP_R (x);",
+    "int Sx_grd = GET_DSP_GRD (x);",
+    "int Sy = DSP_R (y);",
+    "int Sy_grd = SIGN32 (Sy);",
+    "",
+    "z = 17; /* Ignore result.  */",
+    "res = Sx - Sy;",
+    "carry = (unsigned) res > (unsigned) Sx;",
+    "res_grd = Sx_grd - Sy_grd - carry;",
+    "COMPUTE_OVERFLOW;",
+    "ADD_SUB_GE;",
+  },
+  { "","", "pwsb Sx,Sy,Dz",	"10100100xxyyzzzz",
+  },
+  { "","", "pwad Sx,Sy,Dz",	"10110100xxyyzzzz",
+  },
+  { "","", "pabs Sx,Dz",	"10001000xx..zzzz",
+    "res = DSP_R (x);",
+    "res_grd = GET_DSP_GRD (x);",
+    "if (res >= 0)",
+    "  carry = 0;",
+    "else",
+    "  {",
+    "    res = -res;",
+    "    carry = (res != 0); /* The manual has a bug here.  */", 
+    "    res_grd = -res_grd - carry;", 
+    "  }",
+    "COMPUTE_OVERFLOW;",
+    "/* ??? The re-computing of overflow after",
+    "   saturation processing is specific to pabs.  */",
+    "overflow = res_grd != SIGN32 (res) ? DSR_MASK_V : 0;",
+    "ADD_SUB_GE;",
+  },
+  { "","", "prnd Sx,Dz",	"10011000xx..zzzz",
+    "int Sx = DSP_R (x);",
+    "int Sx_grd = GET_DSP_GRD (x);",
+    "",
+    "res = Sx + 0x8000;",
+    "carry = (unsigned) res < (unsigned) Sx;",
+    "res_grd = Sx_grd + carry;",
+    "COMPUTE_OVERFLOW;",
+    "ADD_SUB_GE;",
+  },
+  { "","", "pabs Sy,Dz",	"10101000..yyzzzz",
+    "res = DSP_R (y);",
+    "res_grd = 0;",
+    "overflow = 0;",
+    "greater_equal = DSR_MASK_G;",
+    "if (res >= 0)",
+    "  carry = 0;",
+    "else",
+    "  {",
+    "    res = -res;",
+    "    carry = 1;",
+    "    if (res < 0)",
+    "      {",
+    "        if (S)",
+    "          res = 0x7fffffff;",
+    "        else",
+    "          {",
+    "            overflow = DSR_MASK_V;",
+    "            greater_equal = 0;",
+    "          }",
+    "      }",
+    "  }",
+  },
+  { "","", "prnd Sy,Dz",	"10111000..yyzzzz",
+    "int Sy = DSP_R (y);",
+    "int Sy_grd = SIGN32 (Sy);",
+    "",
+    "res = Sy + 0x8000;",
+    "carry = (unsigned) res < (unsigned) Sy;",
+    "res_grd = Sy_grd + carry;",
+    "COMPUTE_OVERFLOW;",
+    "ADD_SUB_GE;",
+  },
+  { "","", "(if cc) pshl Sx,Sy,Dz",	"100000ccxxyyzzzz",
+    "int Sx = DSP_R (x) & 0xffff0000;",
+    "int Sy = DSP_R (y) >> 16 & 0x7f;",
+    "",
+    "if (Sy < 16)",
+    "  res = Sx << Sy;",
+    "else if (Sy >= 128 - 16)",
+    "  res = Sx >> 128 - Sy;",
+    "else"
+    "  {",
+    "    RAISE_EXCEPTION (SIGILL);",
+    "    return;",
+    "  }",
+    "goto cond_logical;",
+  },
+  { "","", "(if cc) psha Sx,Sy,Dz",	"100100ccxxyyzzzz",
+    "int Sx = DSP_R (x);",
+    "int Sx_grd = GET_DSP_GRD (x);",
+    "int Sy = DSP_R (y) >> 16 & 0x7f;",
+    "",
+    "if (Sy < 32)",
+    "  {",
+    "    if (Sy == 32)"
+    "      {",
+    "        res = 0;",
+    "        res_grd = Sx;",
+    "      }",
+    "    else",
+    "      {",
+    "        res = Sx << Sy;",
+    "        res_grd = Sx_grd << Sy | (unsigned) Sx >> 32 - Sy;",
+    "      }",
+    "    res_grd = SEXT (res_grd);",
+    "    carry = res_grd & 1;",
+    "  }",
+    "else if (Sy >= 96)",
+    "  {",
+    "    Sy = 128 - Sy;",
+    "    if (Sy == 32)"
+    "      {",
+    "        res_grd = SIGN32 (Sx_grd);",
+    "        res = Sx_grd;",
+    "      }",
+    "    else",
+    "      {",
+    "        res = Sx >> Sy | Sx_grd << 32 - Sy;",
+    "        res_grd = Sx_grd >> Sy;",
+    "      }",
+    "    carry = Sx >> (Sy - 1) & 1;",
+    "  }",
+    "else"
+    "  {",
+    "    RAISE_EXCEPTION (SIGILL);",
+    "    return;",
+    "  }",
+    "COMPUTE_OVERFLOW;",
+    "greater_equal = 0;",
+  },
+  { "","", "(if cc) psub Sx,Sy,Dz",	"101000ccxxyyzzzz",
+    "int Sx = DSP_R (x);",
+    "int Sx_grd = GET_DSP_GRD (x);",
+    "int Sy = DSP_R (y);",
+    "int Sy_grd = SIGN32 (Sy);",
+    "",
+    "res = Sx - Sy;",
+    "carry = (unsigned) res > (unsigned) Sx;",
+    "res_grd = Sx_grd - Sy_grd - carry;",
+    "COMPUTE_OVERFLOW;",
+    "ADD_SUB_GE;",
+  },
+  { "","", "(if cc) padd Sx,Sy,Dz",	"101100ccxxyyzzzz",
+    "int Sx = DSP_R (x);",
+    "int Sx_grd = GET_DSP_GRD (x);",
+    "int Sy = DSP_R (y);",
+    "int Sy_grd = SIGN32 (Sy);",
+    "",
+    "res = Sx + Sy;",
+    "carry = (unsigned) res < (unsigned) Sx;",
+    "res_grd = Sx_grd + Sy_grd + carry;",
+    "COMPUTE_OVERFLOW;",
+    "ADD_SUB_GE;",
+  },
+  { "","", "(if cc) pand Sx,Sy,Dz",	"100101ccxxyyzzzz",
+    "res = DSP_R (x) & DSP_R (y);",
+  "cond_logical:",
+    "res &= 0xffff0000;",
+    "res_grd = 0;",
+    "if (iword & 0x200)\n",
+    "  goto assign_z;\n",
+  "logical:",
+    "carry = 0;",
+    "overflow = 0;",
+    "greater_equal = 0;",
+    "DSR &= ~0xf1;\n",
+    "if (res)\n",
+    "  DSR |= res >> 26 & DSR_MASK_N;\n",
+    "else\n",
+    "  DSR |= DSR_MASK_Z;\n",
+    "goto assign_dc;\n",
+  },
+  { "","", "(if cc) pxor Sx,Sy,Dz",	"101001ccxxyyzzzz",
+    "res = DSP_R (x) ^ DSP_R (y);",
+    "goto cond_logical;",
+  },
+  { "","", "(if cc) por Sx,Sy,Dz",	"101101ccxxyyzzzz",
+    "res = DSP_R (x) | DSP_R (y);",
+    "goto cond_logical;",
+  },
+  { "","", "(if cc) pdec Sx,Dz",	"100010ccxx..zzzz",
+    "int Sx = DSP_R (x);",
+    "int Sx_grd = GET_DSP_GRD (x);",
+    "",
+    "res = Sx - 0x10000;",
+    "carry = res > Sx;",
+    "res_grd = Sx_grd - carry;",
+    "COMPUTE_OVERFLOW;",
+    "ADD_SUB_GE;",
+    "res &= 0xffff0000;",
+  },
+  { "","", "(if cc) pinc Sx,Dz",	"100110ccxx..zzzz",
+    "int Sx = DSP_R (x);",
+    "int Sx_grd = GET_DSP_GRD (x);",
+    "",
+    "res = Sx + 0x10000;",
+    "carry = res < Sx;",
+    "res_grd = Sx_grd + carry;",
+    "COMPUTE_OVERFLOW;",
+    "ADD_SUB_GE;",
+    "res &= 0xffff0000;",
+  },
+  { "","", "(if cc) pdec Sy,Dz",	"101010cc..yyzzzz",
+    "int Sy = DSP_R (y);",
+    "int Sy_grd = SIGN32 (Sy);",
+    "",
+    "res = Sy - 0x10000;",
+    "carry = res > Sy;",
+    "res_grd = Sy_grd - carry;",
+    "COMPUTE_OVERFLOW;",
+    "ADD_SUB_GE;",
+    "res &= 0xffff0000;",
+  },
+  { "","", "(if cc) pinc Sy,Dz",	"101110cc..yyzzzz",
+    "int Sy = DSP_R (y);",
+    "int Sy_grd = SIGN32 (Sy);",
+    "",
+    "res = Sy + 0x10000;",
+    "carry = res < Sy;",
+    "res_grd = Sy_grd + carry;",
+    "COMPUTE_OVERFLOW;",
+    "ADD_SUB_GE;",
+    "res &= 0xffff0000;",
+  },
+  { "","", "(if cc) pclr Dz",		"100011cc....zzzz",
+    "res = 0;",
+    "res_grd = 0;",
+    "carry = 0;",
+    "overflow = 0;",
+    "greater_equal = 1;",
+  },
+  { "","", "(if cc) pdmsb Sx,Dz",	"100111ccxx..zzzz",
+    "unsigned Sx = DSP_R (x);",
+    "int Sx_grd = GET_DSP_GRD (x);",
+    "int i = 16;"
+    "",
+    "if (Sx_grd < 0)",
+    "  {",
+    "    Sx_grd = ~Sx_grd;",
+    "    Sx = ~Sx;",
+    "  }",
+    "if (Sx_grd)",
+    "  {",
+    "    Sx = Sx_grd;",
+    "    res = -2;",
+    "  }",
+    "else if (Sx)",
+    "  res = 30;",
+    "else",
+    "  res = 31;",
+    "do"
+    "  {",
+    "    if (Sx & ~0 << i)",
+    "      {",
+    "        res -= i;",
+    "        Sx >>= i;",
+    "      }",
+    "  }",
+    "while (i >>= 1);",
+    "res <<= 16;",
+    "res_grd = SIGN32 (res);",
+    "carry = 0;",
+    "overflow = 0;",
+    "ADD_SUB_GE;",
+  },
+  { "","", "(if cc) pdmsb Sy,Dz",	"101111cc..yyzzzz",
+    "unsigned Sy = DSP_R (y);",
+    "int i;"
+    "",
+    "if (Sy < 0)",
+    "  Sy = ~Sy;",
+    "Sy <<= 1;",
+    "res = 31;",
+    "do"
+    "  {",
+    "    if (Sy & ~0 << i)",
+    "      {",
+    "        res -= i;",
+    "        Sy >>= i;",
+    "      }",
+    "  }",
+    "while (i >>= 1);",
+    "res <<= 16;",
+    "res_grd = SIGN32 (res);",
+    "carry = 0;",
+    "overflow = 0;",
+    "ADD_SUB_GE;",
+  },
+  { "","", "(if cc) pneg Sx,Dz",	"110010ccxx..zzzz",
+    "int Sx = DSP_R (x);",
+    "int Sx_grd = GET_DSP_GRD (x);",
+    "",
+    "res = 0 - Sx;",
+    "carry = res != 0;",
+    "res_grd = 0 - Sx_grd - carry;",
+    "COMPUTE_OVERFLOW;",
+    "ADD_SUB_GE;",
+  },
+  { "","", "(if cc) pcopy Sx,Dz",	"110110ccxx..zzzz",
+    "res = DSP_R (x);",
+    "res_grd = GET_DSP_GRD (x);",
+    "carry = 0;",
+    "COMPUTE_OVERFLOW;",
+    "ADD_SUB_GE;",
+  },
+  { "","", "(if cc) pneg Sy,Dz",	"111010cc..yyzzzz",
+    "int Sy = DSP_R (y);",
+    "int Sy_grd = SIGN32 (Sy);",
+    "",
+    "res = 0 - Sy;",
+    "carry = res != 0;",
+    "res_grd = 0 - Sy_grd - carry;",
+    "COMPUTE_OVERFLOW;",
+    "ADD_SUB_GE;",
+  },
+  { "","", "(if cc) pcopy Sy,Dz",	"111110cc..yyzzzz",
+    "res = DSP_R (y);",
+    "res_grd = SIGN32 (res);",
+    "carry = 0;",
+    "COMPUTE_OVERFLOW;",
+    "ADD_SUB_GE;",
+  },
+  { "","", "(if cc) psts MACH,Dz",	"110011cc....zzzz",
+    "res = MACH;",
+    "res_grd = SIGN32 (res);",
+    "goto assign_z;",
+  },
+  { "","", "(if cc) psts MACL,Dz",	"110111cc....zzzz",
+    "res = MACL;",
+    "res_grd = SIGN32 (res);",
+    "goto assign_z;",
+  },
+  { "","", "(if cc) plds Dz,MACH",	"111011cc....zzzz",
+    "if (0xa05f >> z & 1)",
+    "  RAISE_EXCEPTION (SIGILL);",
+    "else",
+    "  MACH = DSP_R (z);",
+    "return;",
+  },
+  { "","", "(if cc) plds Dz,MACL",	"111111cc....zzzz",
+    "if (0xa05f >> z & 1)",
+    "  RAISE_EXCEPTION (SIGILL);",
+    "else",
+    "  MACL = DSP_R (z) = res;",
+    "return;",
+  },
+  {0, 0}
+};
 
 /* Tables of things to put into enums for sh-opc.h */
 static char *nibble_type_list[] =
@@ -1423,6 +1901,8 @@ qfunc (a, b)
 {
   char bufa[9];
   char bufb[9];
+  int diff;
+
   memcpy (bufa, a->code, 4);
   memcpy (bufa + 4, a->code + 12, 4);
   bufa[8] = 0;
@@ -1430,7 +1910,10 @@ qfunc (a, b)
   memcpy (bufb, b->code, 4);
   memcpy (bufb + 4, b->code + 12, 4);
   bufb[8] = 0;
-  return (strcmp (bufa, bufb));
+  diff = strcmp (bufa, bufb);
+  /* Stabilize the sort, so that later entries can override more general
+     preceding entries.  */
+  return diff ? diff : a - b;
 }
 
 static void
@@ -1448,118 +1931,6 @@ sorttab ()
 }
 
 static void
-printonmatch (ptr, a, rep)
-     char **ptr;
-     char *a;
-     char *rep;
-{
-  int l = strlen (a);
-  if (strncmp (*ptr, a, l) == 0)
-    {
-      printf ("%s", rep);
-      *ptr += l;
-      if (**ptr)
-	printf (",");
-    }
-}
-
-
-static 
-void
-think (o)
-     op *o;
-{
-  char *n;
-  char *p;
-
-  printf ("{\"");
-  n = o->name;
-  while (*n && *n != ' ')
-    {
-      printf ("%c", *n);
-      n++;
-    }
-  printf ("\",{");
-
-  p = n;
-
-  if (!*p)
-    {
-      printf ("0");
-    }
-  while (*p)
-    {
-      while (*p == ',' || *p == ' ')
-	p++;
-      printonmatch (&p, "#<imm>", "A_IMM");
-      printonmatch (&p, "R0", "A_R0");
-      printonmatch (&p, "<REG_N>", "A_REG_N");
-      printonmatch (&p, "@<REG_N>+", "A_INC_N");
-      printonmatch (&p, "@<REG_N>", "A_IND_N");
-      printonmatch (&p, "@-<REG_N>", "A_DEC_N");
-      printonmatch (&p, "<REG_M>", " A_REG_M");
-      printonmatch (&p, "@<REG_M>+", "A_INC_M");
-      printonmatch (&p, "@<REG_M>", "A_IND_M");
-      printonmatch (&p, "@-<REG_M>", "A_DEC_M");
-      printonmatch (&p, "@(<disp>,PC)", "A_DISP_PC");
-      printonmatch (&p, "@(<disp>,<REG_M>)", "A_DISP_REG_M");
-      printonmatch (&p, "@(<disp>,<REG_N>)", "A_DISP_REG_N");
-      printonmatch (&p, "@(R0,<REG_N>)", "A_IND_R0_REG_N");
-      printonmatch (&p, "@(R0,<REG_M>)", "A_IND_R0_REG_M");
-      printonmatch (&p, "@(<disp>,GBR)", "A_DISP_GBR");
-      printonmatch (&p, "@(R0,GBR)", "A_R0_GBR");
-      printonmatch (&p, "<bdisp8>", "A_BDISP8");
-      printonmatch (&p, "<bdisp12>", "A_BDISP12");
-      printonmatch (&p, "SR", "A_SR");
-      printonmatch (&p, "GBR", "A_GBR");
-      printonmatch (&p, "VBR", "A_VBR");
-      printonmatch (&p, "SSR", "A_SSR");
-      printonmatch (&p, "SPC", "A_SPC");
-      printonmatch (&p, "MACH", "A_MACH");
-      printonmatch (&p, "MACL", "A_MACL");
-      printonmatch (&p, "PR", "A_PR");
-
-    }
-  printf ("},{");
-
-  p = o->code;
-  while (*p)
-    {
-      printonmatch (&p, "0000", "HEX_0");
-      printonmatch (&p, "0001", "HEX_1");
-      printonmatch (&p, "0010", "HEX_2");
-      printonmatch (&p, "0011", "HEX_3");
-      printonmatch (&p, "0100", "HEX_4");
-      printonmatch (&p, "0101", "HEX_5");
-      printonmatch (&p, "0110", "HEX_6");
-      printonmatch (&p, "0111", "HEX_7");
-
-      printonmatch (&p, "1000", "HEX_8");
-      printonmatch (&p, "1001", "HEX_9");
-      printonmatch (&p, "1010", "HEX_A");
-      printonmatch (&p, "1011", "HEX_B");
-      printonmatch (&p, "1100", "HEX_C");
-      printonmatch (&p, "1101", "HEX_D");
-      printonmatch (&p, "1110", "HEX_E");
-      printonmatch (&p, "1111", "HEX_F");
-      printonmatch (&p, "i8*1....", "IMM_8");
-      printonmatch (&p, "i4*1", "IMM_4");
-      printonmatch (&p, "i8p4....", "PCRELIMM_8BY4");
-      printonmatch (&p, "i8p2....", "PCRELIMM_8BY2");
-      printonmatch (&p, "i8*2....", "IMM_8BY2");
-      printonmatch (&p, "i4*2", "IMM_4BY2");
-      printonmatch (&p, "i8*4....", "IMM_8BY4");
-      printonmatch (&p, "i4*4", "IMM_4BY4");
-      printonmatch (&p, "i12.........", "BRANCH_12");
-      printonmatch (&p, "i8p1....", "BRANCH_8");
-      printonmatch (&p, "nnnn", "REG_N");
-      printonmatch (&p, "mmmm", "REG_M");
-
-    }
-  printf ("}},\n");
-}
-
-static void
 gengastab ()
 {
   op *p;
@@ -1571,35 +1942,6 @@ gengastab ()
 
 
 }
-
-
-static void
-genopc ()
-{
-  op *p;
-  make_enum_list ("sh_nibble_type", nibble_type_list);
-  make_enum_list ("sh_arg_type", arg_type_list);
-
-  printf ("typedef struct {\n");
-  printf ("char *name;\n");
-  printf ("sh_arg_type arg[3];\n");
-  printf ("sh_nibble_type nibbles[4];\n");
-  printf ("} sh_opcode_info;\n");
-  printf ("#ifdef DEFINE_TABLE\n");
-  printf ("sh_opcode_info sh_table[]={\n");
-  for (p = tab; p->name; p++)
-    {
-      printf ("\n/* %s %-20s*/", p->code, p->name);
-      think (p);
-    }
-  printf ("0};\n");
-  printf ("#endif\n");
-}
-
-
-
-
-
 
 /* Convert a string of 4 binary digits into an int */
 
@@ -1647,12 +1989,28 @@ expand_opcode (shift, val, i, s)
 	case '0':
 	case '1':
 	  {
+	    int m, mv;
 
-	    int n = bton (s);
-	    if (n >= 0)
-	      {
-		expand_opcode (shift - 4, val | (n << shift), i, s + 4);
-	      }
+	    val |= bton (s) << shift;
+	    if (s[2] == '0' || s[2] == '1')
+	      expand_opcode (shift - 4, val, i, s + 4);
+	    else if (s[2] == 'N')
+	      for (j = 0; j < 4; j++)
+		expand_opcode (shift - 4, val | (j << shift), i, s + 4);
+	    else if (s[2] == 'x')
+	      for (j = 0; j < 4; j += 2)
+		for (m = 0; m < 32; m++)
+		  {
+		    /* Ignore illegal nopy */
+		    if ((m & 7) == 0 && m != 0)
+		      continue;
+		    mv = m & 3 | (m & 4) << 2 | (m & 8) << 3 | (m & 16) << 4;
+		    expand_opcode (shift - 4, val | mv | (j << shift), i,
+				   s + 4);
+		  }
+	    else if (s[2] == 'y')
+	      for (j = 0; j < 2; j++)
+		expand_opcode (shift - 4, val | (j << shift), i, s + 4);
 	    break;
 	  }
 	case 'n':
@@ -1662,6 +2020,37 @@ expand_opcode (shift, val, i, s)
 	      expand_opcode (shift - 4, val | (j << shift), i, s + 4);
 
 	    }
+	  break;
+	case 'M':
+	  /* A1, A0,X0,X1,Y0,Y1,M0,A1G,M1,M1G */
+	  for (j = 5; j < 16; j++)
+	    if (j != 6)
+	      expand_opcode (shift - 4, val | (j << shift), i, s + 4);
+	  break;
+	case 'G':
+	  /* A1G, A0G: */
+	  for (j = 13; j <= 15; j +=2)
+	    expand_opcode (shift - 4, val | (j << shift), i, s + 4);
+	  break;
+	case 's':
+	  /* System registers mach, macl, pr: */
+	  for (j = 0; j < 3; j++)
+	    expand_opcode (shift - 4, val | (j << shift), i, s + 4);
+	  /* System registers fpul, fpscr/dsr, a0, x0, x1, y0, y1: */
+	  for (j = 5; j < 12; j++)
+	    expand_opcode (shift - 4, val | (j << shift), i, s + 4);
+	  break;
+	case 'X':
+	case 'a':
+	  val |= bton (s) << shift;
+	  for (j = 0; j < 16; j += 8)
+	    expand_opcode (shift - 4, val | (j << shift), i, s + 4);
+	  break;
+	case 'Y':
+	case 'A':
+	  val |= bton (s) << shift;
+	  for (j = 0; j < 8; j += 4)
+	    expand_opcode (shift - 4, val | (j << shift), i, s + 4);
 	  break;
 
 	default:
@@ -1677,18 +2066,22 @@ expand_opcode (shift, val, i, s)
    statement entry. */
 
 static void
-dumptable ()
+dumptable (name, size, start)
+     char *name;
+     int size;
+     int start;
 {
   int lump = 256;
   int online = 16;
 
-  int i = 0;
+  int i = start;
 
-  while (i < 1 << 16)
+  printf ("unsigned char %s[%d]={\n", name, size);
+  while (i < start + size)
     {
       int j = 0;
 
-      printf ("unsigned char sh_jump_table%x[%d]={\n", i, lump);
+      printf ("/* 0x%x */\n", i);
 
       while (j < lump)
 	{
@@ -1705,37 +2098,46 @@ dumptable ()
 	  printf ("\n");
 	}
       i += j;
-      printf ("};\n");
     }
-
+  printf ("};\n");
 }
 
 
 static void
-filltable ()
+filltable (p)
+     op *p;
 {
-  op *p;
-  int index = 1;
+  static int index = 1;
 
   sorttab ();
-  for (p = tab; p->name; p++)
+  for (; p->name; p++)
     {
       p->index = index++;
       expand_opcode (12, 0, p->index, p->code);
     }
 }
 
+/* Table already contais all the switch case tags for 16-bit opcode double
+   data transfer (ddt) insns, and the switch case tag for processing parallel
+   processing insns (ppi) for code 0xf800 (ppi nopx nopy).  Copy the
+   latter tag to represent all combinations of ppi with ddt.  */
 static void
-gensim ()
+ppi_moves ()
 {
-  op *p;
-  int j;
+  int i;
 
-  printf ("{\n");
-  printf ("  switch (jump_table[iword]) {\n");
+  for (i = 0xf000; i < 0xf400; i++)
+    if (table[i])
+      table[i + 0x800] = table[0xf800];
+}
 
-  for (p = tab; p->name; p++)
+static void
+gensim_caselist (p)
+     op *p;
+{
+  for (; p->name; p++)
     {
+      int j;
       int sextbit = -1;
       int needm = 0;
       int needn = 0;
@@ -1752,6 +2154,8 @@ gensim ()
 	    {
 	    case '0':
 	    case '1':
+	      s += 2;
+	      break;
 	    case '.':
 	      s += 4;
 	      break;
@@ -1760,11 +2164,43 @@ gensim ()
 	      needn = 1;
 	      s += 4;
 	      break;
+	    case 'N':
+	      printf ("      int n = (((iword >> 8) - 2) & 0x3) + 2;\n");
+	      s += 2;
+	      break;
+	    case 'x':
+	      printf ("      int n = ((iword >> 9) & 1) + 4;\n");
+	      needn = 1;
+	      s += 2;
+	      break;
+	    case 'y':
+	      printf ("      int n = ((iword >> 8) & 1) + 4;\n");
+	      needn = 1;
+	      s += 2;
+	      break;
 	    case 'm':
-	      printf ("      int m = (iword >>4) & 0xf;\n");
 	      needm = 1;
+	    case 's':
+	    case 'M':
+	    case 'G':
+	      printf ("      int m = (iword >>4) & 0xf;\n");
 	      s += 4;
-
+	      break;
+	    case 'X':
+	      printf ("      int m = ((iword >> 7) & 1) + 8;\n");
+	      s += 2;
+	      break;
+	    case 'a':
+	      printf ("      int m = 7 - ((iword >> 6) & 2);\n");
+	      s += 2;
+	      break;
+	    case 'Y':
+	      printf ("      int m = ((iword >> 6) & 1) + 10;\n");
+	      s += 2;
+	      break;
+	    case 'A':
+	      printf ("      int m = 7 - ((iword >> 5) & 2);\n");
+	      s += 2;
 	      break;
 
 	    case 'i':
@@ -1820,6 +2256,8 @@ gensim ()
 	for (r = p->refs; *r; r++)
 	  {
 	    if (*r == '0') printf("      CREF(0);\n"); 
+	    if (*r == '8') printf("      CREF(8);\n"); 
+	    if (*r == '9') printf("      CREF(9);\n"); 
 	    if (*r == 'n') printf("      CREF(n);\n"); 
 	    if (*r == 'm') printf("      CREF(m);\n"); 
 	  }
@@ -1849,20 +2287,30 @@ gensim ()
       printf ("      break;\n");
       printf ("    }\n");
     }
+}
+
+static void
+gensim ()
+{
+  printf ("{\n");
+  printf ("  switch (jump_table[iword]) {\n");
+
+  gensim_caselist (tab);
+  gensim_caselist (movsxy_tab);
+
   printf ("  default:\n");
   printf ("    {\n");
-  printf ("      saved_state.asregs.exception = SIGILL;\n");
+  printf ("      RAISE_EXCEPTION (SIGILL);\n");
   printf ("    }\n");
   printf ("  }\n");
   printf ("}\n");
 }
 
-
 static void
 gendefines ()
 {
   op *p;
-  filltable();
+  filltable (tab);
   for (p = tab; p->name; p++)
     {
       char *s = p->name;
@@ -1878,6 +2326,234 @@ gendefines ()
       }
       printf(" %d\n",p->index);
     }
+}
+
+static int ppi_index;
+
+/* Take an ppi code, expand all varying fields in it and fill all the
+   right entries in 'table' with the opcode index.  */
+
+static void
+expand_ppi_code (val, i, s)
+     int val;
+     int i;
+     char *s;
+{
+  int j;
+
+  for (;;)
+    {
+      switch (s[0])
+	{
+	/* The last eight bits are disregarded for the switch table.  */
+	case 'm':
+	case 'x':
+	case '.':
+	  table[val] = i;
+	  return;
+	case '0':
+	  val += val;
+	  s++;
+	  break;
+	case '1':
+	  val += val + 1;
+	  s++;
+	  break;
+	case 'i':
+	case 'e': case 'f':
+	  val += val;
+	  s++;
+	  expand_ppi_code (val, i, s);
+	  val++;
+	  break;
+	case 'c':
+	  val <<= 2;
+	  s += 2;
+	  val++;
+	  expand_ppi_code (val, ppi_index++, s);
+	  val++;
+	  expand_ppi_code (val, i, s);
+	  val++;
+	  break;
+	}
+    }
+}
+
+static void
+ppi_filltable ()
+{
+  op *p;
+  ppi_index = 1;
+
+  for (p = ppi_tab; p->name; p++)
+    {
+      p->index = ppi_index++;
+      expand_ppi_code (0, p->index, p->code);
+    }
+}
+
+static void
+ppi_gensim ()
+{
+  op *p = ppi_tab;
+
+  printf ("#define DSR_MASK_G 0x80\n");
+  printf ("#define DSR_MASK_Z 0x40\n");
+  printf ("#define DSR_MASK_N 0x20\n");
+  printf ("#define DSR_MASK_V 0x10\n");
+  printf ("\n");
+  printf ("#define COMPUTE_OVERFLOW do {\\\n");
+  printf ("  overflow = res_grd != SIGN32 (res) ? DSR_MASK_V : 0; \\\n");
+  printf ("  if (overflow && S) \\\n");
+  printf ("    { \\\n");
+  printf ("      if (res_grd & 0x80) \\\n");
+  printf ("        { \\\n");
+  printf ("          res = 0x80000000; \\\n");
+  printf ("          res_grd |=  0xff; \\\n");
+  printf ("        } \\\n");
+  printf ("      else \\\n");
+  printf ("        { \\\n");
+  printf ("          res = 0x7fffffff; \\\n");
+  printf ("          res_grd &= ~0xff; \\\n");
+  printf ("        } \\\n");
+  printf ("      overflow = 0; \\\n");
+  printf ("    } \\\n");
+  printf ("} while (0)\n");
+  printf ("\n");
+  printf ("#define ADD_SUB_GE \\\n");
+  printf ("  (greater_equal = ~(overflow << 3 & res_grd) & DSR_MASK_G)\n");
+  printf ("\n");
+  printf ("static void\n");
+  printf ("ppi_insn (iword)\n");
+  printf ("     int iword;\n");
+  printf ("{\n");
+  printf ("  static char e_tab[] = { 8,  9, 10,  5};\n");
+  printf ("  static char f_tab[] = {10, 11,  8,  5};\n");
+  printf ("  static char x_tab[] = { 8,  9,  7,  5};\n");
+  printf ("  static char y_tab[] = {10, 11, 12, 14};\n");
+  printf ("  static char g_tab[] = {12, 14,  7,  5};\n");
+  printf ("  static char u_tab[] = { 8, 10,  7,  5};\n");
+  printf ("\n");
+  printf ("  int z;\n");
+  printf ("  int res, res_grd;\n");
+  printf ("  int carry, overflow, greater_equal;\n");
+  printf ("\n");
+  printf ("  switch (ppi_table[iword >> 8]) {\n");
+
+  for (; p->name; p++)
+    {
+      int shift, j;
+      int cond = 0;
+      int havedecl = 0;
+      
+      char *s = p->code;
+
+      printf ("  /* %s %s */\n", p->name, p->code);
+      printf ("  case %d:      \n", p->index);
+
+      printf ("    {\n");
+      for (shift = 16; *s; )
+	{
+	  switch (*s)
+	    {
+	    case 'i':
+	      printf ("      int i = (iword >> 4) & 0x7f;\n");
+	      s += 6;
+	      break;
+	    case 'e':
+	    case 'f':
+	    case 'x':
+	    case 'y':
+	    case 'g':
+	    case 'u':
+	      shift -= 2;
+	      printf ("      int %c = %c_tab[(iword >> %d) & 3];\n",
+		      *s, *s, shift);
+	      havedecl = 1;
+	      s += 2;
+	      break;
+	    case 'c':
+	      printf ("      if ((((iword >> 8) ^ DSR) & 1) == 0)\n");
+	      printf ("\tbreak;\n");
+	      printf ("    }\n");
+	      printf ("  case %d:      \n", p->index + 1);
+	      printf ("    {\n");
+	      cond = 1;
+	    case '0':
+	    case '1':
+	    case '.':
+	      shift -= 2;
+	      s += 2;
+	      break;
+	    case 'z':
+	      if (havedecl)
+		printf ("\n");
+	      printf ("      z = iword & 0xf;\n");
+	      havedecl = 2;
+	      s += 4;
+	      break;
+	    }
+	}
+      if (havedecl == 1)
+	printf ("\n");
+      else if (havedecl == 2)
+	printf ("      {\n");
+      for (j = 0; j < MAX_NR_STUFF; j++)
+	{
+	  if (p->stuff[j])
+	    {
+	      printf ("      %s%s\n",
+		      (havedecl == 2 ? "  " : ""),
+		      p->stuff[j]);
+	    }
+	}
+      if (havedecl == 2)
+	printf ("      }\n");
+      if (cond)
+	{
+	  printf ("      if (iword & 0x200)\n");
+	  printf ("        goto assign_z;\n");
+	}
+      printf ("      break;\n");
+      printf ("    }\n");
+    }
+
+  printf ("  default:\n");
+  printf ("    {\n");
+  printf ("      RAISE_EXCEPTION (SIGILL);\n");
+  printf ("      return;\n");
+  printf ("    }\n");
+  printf ("  }\n");
+  printf ("  DSR &= ~0xf1;\n");
+  printf ("  if (res || res_grd)\n");
+  printf ("    DSR |= greater_equal | res_grd >> 2 & DSR_MASK_N | overflow;\n");
+  printf ("  else\n");
+  printf ("    DSR |= DSR_MASK_Z | overflow;\n");
+  printf (" assign_dc:\n");
+  printf ("  switch (DSR >> 1 & 7)\n");
+  printf ("    {\n");
+  printf ("    case 0: /* Carry Mode */\n");
+  printf ("      DSR |= carry;\n");
+  printf ("    case 1: /* Negative Value Mode */\n");
+  printf ("      DSR |= res_grd >> 7 & 1;\n");
+  printf ("    case 2: /* Zero Value Mode */\n");
+  printf ("      DSR |= DSR >> 6 & 1;\n");
+  printf ("    case 3: /* Overflow mode\n");
+  printf ("      DSR |= overflow >> 4;\n");
+  printf ("    case 4: /* Signed Greater Than Mode */\n");
+  printf ("      DSR |= DSR >> 7 & 1;\n");
+  printf ("    case 4: /* Signed Greater Than Or Equal Mode */\n");
+  printf ("      DSR |= greater_equal >> 7;\n");
+  printf ("    }\n");
+  printf (" assign_z:\n");
+  printf ("  if (0xa05f >> z & 1)\n");
+  printf ("    {\n");
+  printf ("      RAISE_EXCEPTION (SIGILL);\n");
+  printf ("      return;\n");
+  printf ("    }\n");
+  printf ("  DSP_R (z) = res;\n");
+  printf ("  DSP_GRD (z) = res_grd;\n");
+  printf ("}\n");
 }
 
 int
@@ -1913,19 +2589,31 @@ main (ac, av)
 	}
       else if (strcmp (av[1], "-s") == 0)
 	{
-	  filltable ();
-	  dumptable ();
+	  filltable (tab);
+	  dumptable ("sh_jump_table", 1 << 16, 0);
 
+	  memset (table, 0, sizeof table);
+	  filltable (movsxy_tab);
+	  ppi_moves ();
+	  dumptable ("sh_dsp_table", 1 << 12, 0xf000);
+
+	  memset (table, 0, sizeof table);
+	  ppi_filltable ();
+	  dumptable ("ppi_table", 1 << 8, 0);
 	}
       else if (strcmp (av[1], "-x") == 0)
 	{
-	  filltable ();
+	  filltable (tab);
+	  filltable (movsxy_tab);
 	  gensim ();
+	}
+      else if (strcmp (av[1], "-p") == 0)
+	{
+	  ppi_filltable ();
+	  ppi_gensim ();
 	}
     }
   else
-    {
-      genopc ();
-    }
+    fprintf (stderr, "Opcode table generation no longer supported.\n");
   return 0;
 }

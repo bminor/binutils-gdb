@@ -34,7 +34,9 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "language.h"
+#include "arch-utils.h"
 
+#include "floatformat.h"
 #include "sim-d10v.h"
 
 #undef XMALLOC
@@ -84,17 +86,18 @@ enum
 
 /* Local functions */
 
-extern void _initialize_d10v_tdep PARAMS ((void));
+extern void _initialize_d10v_tdep (void);
 
-static void d10v_eva_prepare_to_trace PARAMS ((void));
+static void d10v_eva_prepare_to_trace (void);
 
-static void d10v_eva_get_trace_data PARAMS ((void));
+static void d10v_eva_get_trace_data (void);
 
-static int prologue_find_regs PARAMS ((unsigned short op, struct frame_info * fi, CORE_ADDR addr));
+static int prologue_find_regs (unsigned short op, struct frame_info *fi,
+			       CORE_ADDR addr);
 
-extern void d10v_frame_init_saved_regs PARAMS ((struct frame_info *));
+extern void d10v_frame_init_saved_regs (struct frame_info *);
 
-static void do_d10v_pop_frame PARAMS ((struct frame_info * fi));
+static void do_d10v_pop_frame (struct frame_info *fi);
 
 int
 d10v_frame_chain_valid (chain, frame)
@@ -104,7 +107,7 @@ d10v_frame_chain_valid (chain, frame)
   return ((chain) != 0 && (frame) != 0 && (frame)->pc > IMEM_START);
 }
 
-CORE_ADDR
+static CORE_ADDR
 d10v_stack_align (CORE_ADDR len)
 {
   return (len + 1) & ~1;
@@ -1021,7 +1024,8 @@ struct stack_item
   void *data;
 };
 
-static struct stack_item *push_stack_item PARAMS ((struct stack_item * prev, void *contents, int len));
+static struct stack_item *push_stack_item (struct stack_item *prev,
+					   void *contents, int len);
 static struct stack_item *
 push_stack_item (prev, contents, len)
      struct stack_item *prev;
@@ -1037,7 +1041,7 @@ push_stack_item (prev, contents, len)
   return si;
 }
 
-static struct stack_item *pop_stack_item PARAMS ((struct stack_item * si));
+static struct stack_item *pop_stack_item (struct stack_item *si);
 static struct stack_item *
 pop_stack_item (si)
      struct stack_item *si;
@@ -1246,15 +1250,15 @@ remote_d10v_translate_xfer_address (CORE_ADDR memaddr, int nr_bytes,
 
 #define TRACE_BUFFER_BASE (0xf40000)
 
-static void trace_command PARAMS ((char *, int));
+static void trace_command (char *, int);
 
-static void untrace_command PARAMS ((char *, int));
+static void untrace_command (char *, int);
 
-static void trace_info PARAMS ((char *, int));
+static void trace_info (char *, int);
 
-static void tdisassemble_command PARAMS ((char *, int));
+static void tdisassemble_command (char *, int);
 
-static void display_trace PARAMS ((int, int));
+static void display_trace (int, int);
 
 /* True when instruction traces are being collected.  */
 
@@ -1593,9 +1597,26 @@ d10v_gdbarch_init (info, arches)
   set_gdbarch_int_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_long_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_long_long_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+  /* NOTE: The d10v as a 32 bit ``float'' and ``double''. ``long
+     double'' is 64 bits. */
   set_gdbarch_float_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_double_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_long_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
+  switch (info.byte_order)
+    {
+    case BIG_ENDIAN:
+      set_gdbarch_float_format (gdbarch, &floatformat_ieee_single_big);
+      set_gdbarch_double_format (gdbarch, &floatformat_ieee_single_big);
+      set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_double_big);
+      break;
+    case LITTLE_ENDIAN:
+      set_gdbarch_float_format (gdbarch, &floatformat_ieee_single_little);
+      set_gdbarch_double_format (gdbarch, &floatformat_ieee_single_little);
+      set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_double_little);
+      break;
+    default:
+      internal_error ("d10v_gdbarch_init: bad byte order for float format");
+    }
 
   set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
   set_gdbarch_call_dummy_length (gdbarch, 0);
@@ -1655,13 +1676,14 @@ d10v_gdbarch_init (info, arches)
   set_gdbarch_frame_locals_address (gdbarch, d10v_frame_locals_address);
   set_gdbarch_saved_pc_after_call (gdbarch, d10v_saved_pc_after_call);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
+  set_gdbarch_stack_align (gdbarch, d10v_stack_align);
 
   return gdbarch;
 }
 
 
-extern void (*target_resume_hook) PARAMS ((void));
-extern void (*target_wait_loop_hook) PARAMS ((void));
+extern void (*target_resume_hook) (void);
+extern void (*target_wait_loop_hook) (void);
 
 void
 _initialize_d10v_tdep ()

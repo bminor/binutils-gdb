@@ -137,7 +137,7 @@ struct _sim_cpu {
 #define IBA 	(STATE_CPU (sd, 0)->regs.control[instruction_break_address_cr])
 #define EIT_VB	(STATE_CPU (sd, 0)->regs.control[eit_vector_base_cr])
 #define GPR	(STATE_CPU (sd, 0)->regs.general_purpose)
-#define GPR_SET(N,VAL) (GPR[(N)] = (VAL))
+#define GPR_CLEAR(N) (GPR[(N)] = 0)
 #define ACC	(STATE_CPU (sd, 0)->regs.accumulator)
 #define CREG	(STATE_CPU (sd, 0)->regs.control)
 #define SP      (GPR[STACK_POINTER_GPR])

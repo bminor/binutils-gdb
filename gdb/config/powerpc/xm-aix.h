@@ -22,7 +22,7 @@
 #include "xm-aix4.h"
 
 /* This doesn't seem to be declared in any header file I can find.  */
-char *termdef PARAMS ((int, int));
+char *termdef (int, int);
 
 /* UINT_MAX is defined in <sys/limits.h> as a decimal constant (4294967295)
    which is too large to fit in a signed int when it is parsed by the

@@ -33,5 +33,4 @@
 #define REGISTER_U_ADDR(addr, blockend, regno) \
 	(addr) = i386_register_u_addr ((blockend),(regno));
 
-extern int
-i386_register_u_addr PARAMS ((int, int));
+extern int i386_register_u_addr (int, int);

@@ -505,7 +505,12 @@ extern const bfd_target arm_epoc_pei_little_vec;
 extern const bfd_target arm_epoc_pei_big_vec;
 extern const bfd_target b_out_vec_big_host;
 extern const bfd_target b_out_vec_little_host;
+extern const bfd_target bfd_efi_app_ia32_vec;
+extern const bfd_target bfd_efi_app_ia64_vec;
 extern const bfd_target bfd_elf64_alpha_vec;
+extern const bfd_target bfd_elf64_hppa_vec;
+extern const bfd_target bfd_elf64_ia64_little_vec;
+extern const bfd_target bfd_elf64_ia64_big_vec;
 extern const bfd_target bfd_elf32_avr_vec;
 extern const bfd_target bfd_elf32_bigarc_vec;
 extern const bfd_target bfd_elf32_bigarm_vec;
@@ -609,6 +614,7 @@ extern const bfd_target ppcboot_vec;
 extern const bfd_target riscix_vec;
 extern const bfd_target pmac_xcoff_vec;
 extern const bfd_target rs6000coff_vec;
+extern const bfd_target rs6000coff64_vec;
 extern const bfd_target shcoff_vec;
 extern const bfd_target shlcoff_vec;
 extern const bfd_target shcoff_small_vec;
@@ -689,6 +695,11 @@ const bfd_target * const bfd_target_vector[] = {
 	&b_out_vec_big_host,
 	&b_out_vec_little_host,
 
+	&bfd_efi_app_ia32_vec,
+#ifdef BFD64
+	&bfd_efi_app_ia64_vec,
+#endif
+
 	/* This, and other vectors, may not be used in any *.mt configuration.
 	   But that does not mean they are unnecessary.  If configured with
 	   --enable-targets=all, objdump or gdb should be able to examine
@@ -696,6 +707,9 @@ const bfd_target * const bfd_target_vector[] = {
 	&bfd_elf32_big_generic_vec,
 #ifdef BFD64
 	&bfd_elf64_alpha_vec,
+	&bfd_elf64_hppa_vec,
+	&bfd_elf64_ia64_little_vec,
+	&bfd_elf64_ia64_big_vec,
 #endif
 	&bfd_elf32_avr_vec,
 	&bfd_elf32_bigarc_vec,
@@ -707,9 +721,7 @@ const bfd_target * const bfd_target_vector[] = {
 #endif
 	&bfd_elf32_d10v_vec,
 	&bfd_elf32_d30v_vec,
-#if 0
 	&bfd_elf32_hppa_vec,
-#endif
 	&bfd_elf32_i370_vec,
 	&bfd_elf32_i386_vec,
 	&bfd_elf32_i860_vec,
@@ -854,6 +866,9 @@ const bfd_target * const bfd_target_vector[] = {
 	&pmac_xcoff_vec,
 #endif
 	&rs6000coff_vec,
+#ifdef BFD64
+	&rs6000coff64_vec,
+#endif
 	&ppcboot_vec,
 	&shcoff_vec,
 	&shlcoff_vec,

@@ -35,6 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    whole approach.  */
 #define XCOFF_XVECP(xv) \
   (strcmp ((xv)->name, "aixcoff-rs6000") == 0 \
+   || strcmp ((xv)->name, "aixcoff64-rs6000") == 0 \
    || strcmp ((xv)->name, "xcoff-powermac") == 0)
 
 /* Get the XCOFF hash table entries for a BFD.  */

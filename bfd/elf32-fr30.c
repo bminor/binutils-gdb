@@ -1,5 +1,5 @@
 /* FR30-specific support for 32-bit ELF.
-   Copyright (C) 1998, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1998, 1999, 2000 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -275,7 +275,7 @@ fr30_elf_i20_reloc (abfd, reloc_entry, symbol, data,
     + symbol->section->output_offset
     + reloc_entry->addend;
 
-  if (relocation > ((1U << 20) - 1))
+  if (relocation > (((bfd_vma) 1 << 20) - 1))
     return bfd_reloc_overflow;
 
   x = bfd_get_32 (abfd, data + reloc_entry->address);

@@ -57,107 +57,108 @@
 
 /* Prototypes for local functions */
 
-static void dont_repeat_command PARAMS ((char *, int));
+static void dont_repeat_command (char *, int);
 
-static void source_cleanup_lines PARAMS ((PTR));
+static void source_cleanup_lines (PTR);
 
-static void user_defined_command PARAMS ((char *, int));
+static void user_defined_command (char *, int);
 
-static void init_signals PARAMS ((void));
+static void init_signals (void);
 
 #ifdef STOP_SIGNAL
-static void stop_sig PARAMS ((int));
+static void stop_sig (int);
 #endif
 
-static char *line_completion_function PARAMS ((char *, int, char *, int));
+static char *line_completion_function (char *, int, char *, int);
 
-static char *readline_line_completion_function PARAMS ((char *, int));
+static char *readline_line_completion_function (char *, int);
 
 /* NOTE 1999-04-29: this function will be static again, after we make the
    event loop be the default command loop for gdb, and we merge
    event-top.c into this file, top.c */
-/* static */ void command_loop_marker PARAMS ((int));
+/* static */ void command_loop_marker (void *);
 
-static void while_command PARAMS ((char *, int));
+static void while_command (char *, int);
 
-static void if_command PARAMS ((char *, int));
+static void if_command (char *, int);
 
-static struct command_line *
-  build_command_line PARAMS ((enum command_control_type, char *));
+static struct command_line *build_command_line (enum command_control_type,
+						char *);
 
-static struct command_line *
-  get_command_line PARAMS ((enum command_control_type, char *));
+static struct command_line *get_command_line (enum command_control_type,
+					      char *);
 
-static void realloc_body_list PARAMS ((struct command_line *, int));
+static void realloc_body_list (struct command_line *, int);
 
-static enum misc_command_type read_next_line PARAMS ((struct command_line **));
+static enum misc_command_type read_next_line (struct command_line **);
 
 static enum command_control_type
-recurse_read_control_structure PARAMS ((struct command_line *));
+recurse_read_control_structure (struct command_line *);
 
-static struct cleanup *setup_user_args PARAMS ((char *));
+static struct cleanup *setup_user_args (char *);
 
-static char *locate_arg PARAMS ((char *));
+static char *locate_arg (char *);
 
-static char *insert_args PARAMS ((char *));
+static char *insert_args (char *);
 
-static void arg_cleanup PARAMS ((void));
+static void arg_cleanup (void *);
 
-static void init_main PARAMS ((void));
+static void init_main (void);
 
-static void init_cmd_lists PARAMS ((void));
+static void init_cmd_lists (void);
 
-static void float_handler PARAMS ((int));
+static void float_handler (int);
 
-static void init_signals PARAMS ((void));
+static void init_signals (void);
 
-static void set_verbose PARAMS ((char *, int, struct cmd_list_element *));
+static void set_verbose (char *, int, struct cmd_list_element *);
 
-static void show_history PARAMS ((char *, int));
+static void show_history (char *, int);
 
-static void set_history PARAMS ((char *, int));
+static void set_history (char *, int);
 
-static void set_history_size_command PARAMS ((char *, int,
-					      struct cmd_list_element *));
+static void set_history_size_command (char *, int, struct cmd_list_element *);
 
-static void show_commands PARAMS ((char *, int));
+static void show_commands (char *, int);
 
-static void echo_command PARAMS ((char *, int));
+static void echo_command (char *, int);
 
-static void pwd_command PARAMS ((char *, int));
+static void pwd_command (char *, int);
 
-static void show_version PARAMS ((char *, int));
+static void show_version (char *, int);
 
-static void document_command PARAMS ((char *, int));
+static void document_command (char *, int);
 
-static void define_command PARAMS ((char *, int));
+static void define_command (char *, int);
 
-static void validate_comname PARAMS ((char *));
+static void validate_comname (char *);
 
-static void help_command PARAMS ((char *, int));
+static void help_command (char *, int);
 
-static void show_command PARAMS ((char *, int));
+static void show_command (char *, int);
 
-static void info_command PARAMS ((char *, int));
+static void info_command (char *, int);
 
-static void complete_command PARAMS ((char *, int));
+static void complete_command (char *, int);
 
-static void do_nothing PARAMS ((int));
+static void do_nothing (int);
 
-static void show_debug PARAMS ((char *, int));
+static void show_debug (char *, int);
 
-static void set_debug PARAMS ((char *, int));
+static void set_debug (char *, int);
 
 #ifdef SIGHUP
 /* NOTE 1999-04-29: This function will be static again, once we modify
    gdb to use the event loop as the default command loop and we merge
    event-top.c into this file, top.c */
-/* static */ int quit_cover PARAMS ((PTR));
+/* static */ int quit_cover (PTR);
 
-static void disconnect PARAMS ((int));
+static void disconnect (int);
 #endif
 
-static void source_cleanup PARAMS ((FILE *));
+static void do_restore_instream_cleanup (void *stream);
+
+static struct cleanup *make_cleanup_free_command_lines (struct command_line **);
 
 /* Default command line prompt.  This is overriden in some configs. */
 
@@ -284,14 +285,14 @@ char gdb_dirbuf[1024];
    The function receives two args: an input stream,
    and a prompt string.  */
 
-void (*window_hook) PARAMS ((FILE *, char *));
+void (*window_hook) (FILE *, char *);
 
 int epoch_interface;
 int xgdb_verbose;
 
 /* gdb prints this when reading a command interactively */
 static char *gdb_prompt_string;	/* the global prompt string */
-extern char *get_prompt PARAMS ((void));	/* access function for prompt string */
+extern char *get_prompt (void);	/* access function for prompt string */
 
 /* Buffer used for reading command lines, and the size
    allocated for it so far.  */
@@ -369,7 +370,7 @@ struct user_args
 #ifndef STOP_SIGNAL
 #ifdef SIGTSTP
 #define STOP_SIGNAL SIGTSTP
-static void stop_sig PARAMS ((int));
+static void stop_sig (int);
 #endif
 #endif
 
@@ -391,31 +392,31 @@ static void stop_sig PARAMS ((int));
 /* Called after most modules have been initialized, but before taking users
    command file.  */
 
-void (*init_ui_hook) PARAMS ((char *argv0));
+void (*init_ui_hook) (char *argv0);
 
 /* This hook is called from within gdb's many mini-event loops which could
    steal control from a real user interface's event loop. It returns
    non-zero if the user is requesting a detach, zero otherwise. */
 
-int (*ui_loop_hook) PARAMS ((int));
+int (*ui_loop_hook) (int);
 
 /* Called instead of command_loop at top level.  Can be invoked via
    return_to_top_level.  */
 
-void (*command_loop_hook) PARAMS ((void));
+void (*command_loop_hook) (void);
 
 
 /* Called from print_frame_info to list the line we stopped in.  */
 
-void (*print_frame_info_listing_hook) PARAMS ((struct symtab * s, int line,
-					       int stopline, int noerror));
+void (*print_frame_info_listing_hook) (struct symtab * s, int line,
+				       int stopline, int noerror);
 /* Replaces most of query.  */
 
-int (*query_hook) PARAMS ((const char *, va_list));
+int (*query_hook) (const char *, va_list);
 
 /* Replaces most of warning.  */
 
-void (*warning_hook) PARAMS ((const char *, va_list));
+void (*warning_hook) (const char *, va_list);
 
 /* These three functions support getting lines of text from the user.  They
    are used in sequence.  First readline_begin_hook is called with a text
@@ -428,51 +429,51 @@ void (*warning_hook) PARAMS ((const char *, va_list));
    to notify the GUI that we are done with the interaction window and it
    can close it. */
 
-void (*readline_begin_hook) PARAMS ((char *,...));
-char *(*readline_hook) PARAMS ((char *));
-void (*readline_end_hook) PARAMS ((void));
+void (*readline_begin_hook) (char *, ...);
+char *(*readline_hook) (char *);
+void (*readline_end_hook) (void);
 
 /* Called as appropriate to notify the interface of the specified breakpoint
    conditions.  */
 
-void (*create_breakpoint_hook) PARAMS ((struct breakpoint * bpt));
-void (*delete_breakpoint_hook) PARAMS ((struct breakpoint * bpt));
-void (*modify_breakpoint_hook) PARAMS ((struct breakpoint * bpt));
+void (*create_breakpoint_hook) (struct breakpoint * bpt);
+void (*delete_breakpoint_hook) (struct breakpoint * bpt);
+void (*modify_breakpoint_hook) (struct breakpoint * bpt);
 
 /* Called as appropriate to notify the interface that we have attached
    to or detached from an already running process. */
 
-void (*attach_hook) PARAMS ((void));
-void (*detach_hook) PARAMS ((void));
+void (*attach_hook) (void);
+void (*detach_hook) (void);
 
 /* Called during long calculations to allow GUI to repair window damage, and to
    check for stop buttons, etc... */
 
-void (*interactive_hook) PARAMS ((void));
+void (*interactive_hook) (void);
 
 /* Called when the registers have changed, as a hint to a GUI
    to minimize window update. */
 
-void (*registers_changed_hook) PARAMS ((void));
+void (*registers_changed_hook) (void);
 
 /* Tell the GUI someone changed the register REGNO. -1 means
    that the caller does not know which register changed or
    that several registers have changed (see value_assign). */
-void (*register_changed_hook) PARAMS ((int regno));
+void (*register_changed_hook) (int regno);
 
 /* Tell the GUI someone changed LEN bytes of memory at ADDR */
-void (*memory_changed_hook) PARAMS ((CORE_ADDR addr, int len));
+void (*memory_changed_hook) (CORE_ADDR addr, int len);
 
 /* Called when going to wait for the target.  Usually allows the GUI to run
    while waiting for target events.  */
 
-int (*target_wait_hook) PARAMS ((int pid, struct target_waitstatus * status));
+int (*target_wait_hook) (int pid, struct target_waitstatus * status);
 
 /* Used by UI as a wrapper around command execution.  May do various things
    like enabling/disabling buttons, etc...  */
 
-void (*call_command_hook) PARAMS ((struct cmd_list_element * c, char *cmd,
-				   int from_tty));
+void (*call_command_hook) (struct cmd_list_element * c, char *cmd,
+			   int from_tty);
 
 /* Called after a `set' command has finished.  Is only run if the
    `set' command succeeded.  */
@@ -481,7 +482,7 @@ void (*set_hook) (struct cmd_list_element * c);
 
 /* Called when the current thread changes.  Argument is thread id.  */
 
-void (*context_hook) PARAMS ((int id));
+void (*context_hook) (int id);
 
 /* Takes control from error ().  Typically used to prevent longjmps out of the
    middle of the GUI.  Usually used in conjunction with a catch routine.  */
@@ -760,8 +761,7 @@ static int source_error_allocated;
    user-defined command).  */
 
 static void
-source_cleanup (stream)
-     FILE *stream;
+do_restore_instream_cleanup (void *stream)
 {
   /* Restore the previous input stream.  */
   instream = stream;
@@ -774,15 +774,24 @@ read_command_file (stream)
 {
   struct cleanup *cleanups;
 
-  cleanups = make_cleanup ((make_cleanup_func) source_cleanup, instream);
+  cleanups = make_cleanup (do_restore_instream_cleanup, instream);
   instream = stream;
   command_loop ();
   do_cleanups (cleanups);
 }
 
-extern void init_proc PARAMS ((void));
+extern void init_proc (void);
 
-void (*pre_init_ui_hook) PARAMS ((void));
+void (*pre_init_ui_hook) (void);
+
+#ifdef __MSDOS__
+void
+do_chdir_cleanup (void *old_dir)
+{
+  chdir (old_dir);
+  free (old_dir);
+}
+#endif
 
 void
 gdb_init (argv0)
@@ -799,7 +808,7 @@ gdb_init (argv0)
 #ifdef __MSDOS__
   /* Make sure we return to the original directory upon exit, come
      what may, since the OS doesn't do that for us.  */
-  make_final_cleanup ((make_cleanup_func) chdir, strsave (current_directory));
+  make_final_cleanup (do_chdir_cleanup, xstrdup (current_directory));
 #endif
 
   init_cmd_lists ();		/* This needs to be done first */
@@ -884,7 +893,7 @@ get_command_line (type, arg)
   /* Allocate and build a new command line structure.  */
   cmd = build_command_line (type, arg);
 
-  old_chain = make_cleanup ((make_cleanup_func) free_command_lines, &cmd);
+  old_chain = make_cleanup_free_command_lines (&cmd);
 
   /* Read in the body of this command.  */
   if (recurse_read_control_structure (cmd) == invalid_control)
@@ -1094,8 +1103,7 @@ execute_control_command (cmd)
       new_line = insert_args (cmd->line);
       if (!new_line)
 	return invalid_control;
-      old_chain = make_cleanup ((make_cleanup_func) free_current_contents,
-				&new_line);
+      old_chain = make_cleanup (free_current_contents, &new_line);
       execute_command (new_line, 0);
       ret = cmd->control_type;
       break;
@@ -1113,10 +1121,9 @@ execute_control_command (cmd)
 	new_line = insert_args (cmd->line);
 	if (!new_line)
 	  return invalid_control;
-	old_chain = make_cleanup ((make_cleanup_func) free_current_contents,
-				  &new_line);
+	old_chain = make_cleanup (free_current_contents, &new_line);
 	expr = parse_expression (new_line);
-	make_cleanup ((make_cleanup_func) free_current_contents, &expr);
+	make_cleanup (free_current_contents, &expr);
 
 	ret = simple_control;
 	loop = 1;
@@ -1174,11 +1181,10 @@ execute_control_command (cmd)
 	new_line = insert_args (cmd->line);
 	if (!new_line)
 	  return invalid_control;
-	old_chain = make_cleanup ((make_cleanup_func) free_current_contents,
-				  &new_line);
+	old_chain = make_cleanup (free_current_contents, &new_line);
 	/* Parse the conditional for the if statement.  */
 	expr = parse_expression (new_line);
-	make_cleanup ((make_cleanup_func) free_current_contents, &expr);
+	make_cleanup (free_current_contents, &expr);
 
 	current = NULL;
 	ret = simple_control;
@@ -1264,7 +1270,7 @@ if_command (arg, from_tty)
 
 /* Cleanup */
 static void
-arg_cleanup ()
+arg_cleanup (void *ignore)
 {
   struct user_args *oargs = user_args;
   if (!user_args)
@@ -1291,7 +1297,7 @@ setup_user_args (p)
   args->next = user_args;
   user_args = args;
 
-  old_chain = make_cleanup ((make_cleanup_func) arg_cleanup, 0);
+  old_chain = make_cleanup (arg_cleanup, 0/*ignored*/);
 
   if (p == NULL)
     return old_chain;
@@ -1455,7 +1461,7 @@ execute_user_command (c, args)
 
   /* Set the instream to 0, indicating execution of a
      user-defined function.  */
-  old_chain = make_cleanup ((make_cleanup_func) source_cleanup, instream);
+  old_chain = make_cleanup (do_restore_instream_cleanup, instream);
   instream = (FILE *) 0;
   while (cmdlines)
     {
@@ -1483,7 +1489,7 @@ execute_command (p, from_tty)
   static int warned = 0;
   char *line;
   /* FIXME: These should really be in an appropriate header file */
-  extern void serial_log_command PARAMS ((const char *));
+extern void serial_log_command (const char *);
 
   free_all_values ();
 
@@ -1580,8 +1586,7 @@ execute_command (p, from_tty)
    gdb to use the event loop as the default command loop and we merge
    event-top.c into this file, top.c */
 /* static */ void
-command_loop_marker (foo)
-     int foo;
+command_loop_marker (void *foo)
 {
 }
 
@@ -1612,7 +1617,7 @@ command_loop ()
       quit_flag = 0;
       if (instream == stdin && stdin_is_tty)
 	reinitialize_more_filter ();
-      old_chain = make_cleanup ((make_cleanup_func) command_loop_marker, 0);
+      old_chain = make_cleanup (command_loop_marker, 0);
 
 #if defined(TUI)
       /* A bit of paranoia: I want to make sure the "insert_mode" global
@@ -1693,7 +1698,7 @@ simplified_command_loop (read_input_func, execute_command_func)
       quit_flag = 0;
       if (instream == stdin && stdin_is_tty)
 	reinitialize_more_filter ();
-      old_chain = make_cleanup ((make_cleanup_func) command_loop_marker, 0);
+      old_chain = make_cleanup (command_loop_marker, 0);
 
       /* Get a command-line. */
       command = (*read_input_func) (instream == stdin ?
@@ -1833,6 +1838,12 @@ char *gdb_completer_word_break_characters =
 char *gdb_completer_command_word_break_characters =
 " \t\n!@#$%^&*()+=|~`}{[]\"';:?/>.<,";
 
+/* When completing on file names, we remove from the list of word
+   break characters any characters that are commonly used in file
+   names, such as '-', '+', '~', etc.  Otherwise, readline displays
+   incorrect completion candidates.  */
+char *gdb_completer_file_name_break_characters = " \t\n*|\"';:?/><";
+
 /* Characters that can be used to quote completion strings.  Note that we
    can't include '"' because the gdb C parser treats such quoted sequences
    as strings. */
@@ -1859,7 +1870,7 @@ filename_completer (text, word)
      char *word;
 {
   /* From readline.  */
-  extern char *filename_completion_function PARAMS ((char *, int));
+extern char *filename_completion_function (char *, int);
   int subsequent_name;
   char **return_val;
   int return_val_used;
@@ -2122,6 +2133,9 @@ line_completion_function (text, matches, line_buffer, point)
 		      /* It is a normal command; what comes after it is
 		         completed by the command's completer function.  */
 		      list = (*c->completer) (p, word);
+		      if (c->completer == filename_completer)
+			rl_completer_word_break_characters =
+			  gdb_completer_file_name_break_characters;
 		    }
 		}
 	      else
@@ -2168,6 +2182,9 @@ line_completion_function (text, matches, line_buffer, point)
 		{
 		  /* It is a normal command.  */
 		  list = (*c->completer) (p, word);
+		  if (c->completer == filename_completer)
+		    rl_completer_word_break_characters =
+		      gdb_completer_file_name_break_characters;
 		}
 	    }
 	}
@@ -2855,8 +2872,7 @@ read_command_lines (prompt_arg, from_tty)
       else
 	{
 	  head = next;
-	  old_chain = make_cleanup ((make_cleanup_func) free_command_lines,
-				    &head);
+	  old_chain = make_cleanup_free_command_lines (&head);
 	}
       tail = next;
     }
@@ -2905,13 +2921,25 @@ free_command_lines (lptr)
       l = next;
     }
 }
+
+static void
+do_free_command_lines_cleanup (void *arg)
+{
+  free_command_lines (arg);
+}
+
+static struct cleanup *
+make_cleanup_free_command_lines (struct command_line **arg)
+{
+  return make_cleanup (do_free_command_lines_cleanup, arg);
+}
 
 /* Add an element to the list of info subcommands.  */
 
 struct cmd_list_element *
 add_info (name, fun, doc)
      char *name;
-     void (*fun) PARAMS ((char *, int));
+     void (*fun) (char *, int);
      char *doc;
 {
   return add_cmd (name, no_class, fun, doc, &infolist);
@@ -2985,7 +3013,7 @@ struct cmd_list_element *
 add_com (name, class, fun, doc)
      char *name;
      enum command_class class;
-     void (*fun) PARAMS ((char *, int));
+     void (*fun) (char *, int);
      char *doc;
 {
   return add_cmd (name, class, fun, doc, &cmdlist);
@@ -3739,6 +3767,12 @@ source_cleanup_lines (args)
 }
 
 /* ARGSUSED */
+static void
+do_fclose_cleanup (void *stream)
+{
+  fclose (stream);
+}
+
 void
 source_command (args, from_tty)
      char *args;
@@ -3767,7 +3801,7 @@ source_command (args, from_tty)
 	return;
     }
 
-  make_cleanup ((make_cleanup_func) fclose, stream);
+  make_cleanup (do_fclose_cleanup, stream);
 
   old_lines.old_line = source_line_number;
   old_lines.old_file = source_file_name;
@@ -3862,7 +3896,7 @@ show_commands (args, from_tty)
      than the number of the last command).  Relative to history_base.  */
   int hist_len;
 
-  extern HIST_ENTRY *history_get PARAMS ((int));
+extern HIST_ENTRY *history_get (int);
 
   /* Print out some of the commands from the command history.  */
   /* First determine the length of the history list.  */

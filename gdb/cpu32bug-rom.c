@@ -26,7 +26,7 @@
 #include "monitor.h"
 #include "serial.h"
 
-static void cpu32bug_open PARAMS ((char *args, int from_tty));
+static void cpu32bug_open (char *args, int from_tty);
 
 static void
 cpu32bug_supply_register (regname, regnamelen, val, vallen)

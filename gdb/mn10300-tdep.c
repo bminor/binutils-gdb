@@ -30,8 +30,8 @@
 #include "symfile.h"
 
 extern void _initialize_mn10300_tdep (void);
-static CORE_ADDR mn10300_analyze_prologue PARAMS ((struct frame_info * fi,
-						   CORE_ADDR pc));
+static CORE_ADDR mn10300_analyze_prologue (struct frame_info *fi,
+					   CORE_ADDR pc);
 
 /* Additional info used by the frame */
 
@@ -102,7 +102,7 @@ mn10300_store_return_value (type, valbuf)
     write_register_bytes (REGISTER_BYTE (0), valbuf, TYPE_LENGTH (type));
 }
 
-static struct frame_info *analyze_dummy_frame PARAMS ((CORE_ADDR, CORE_ADDR));
+static struct frame_info *analyze_dummy_frame (CORE_ADDR, CORE_ADDR);
 static struct frame_info *
 analyze_dummy_frame (pc, frame)
      CORE_ADDR pc;

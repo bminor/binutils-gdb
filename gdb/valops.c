@@ -41,30 +41,34 @@ extern int hp_som_som_object_present;
 extern int overload_debug;
 /* Local functions.  */
 
-static int typecmp PARAMS ((int staticp, struct type * t1[], value_ptr t2[]));
+static int typecmp (int staticp, struct type *t1[], value_ptr t2[]);
 
-static CORE_ADDR find_function_addr PARAMS ((value_ptr, struct type **));
-static value_ptr value_arg_coerce PARAMS ((value_ptr, struct type *, int));
+static CORE_ADDR find_function_addr (value_ptr, struct type **);
+static value_ptr value_arg_coerce (value_ptr, struct type *, int);
 
 
-static CORE_ADDR value_push PARAMS ((CORE_ADDR, value_ptr));
+static CORE_ADDR value_push (CORE_ADDR, value_ptr);
 
-static value_ptr search_struct_field PARAMS ((char *, value_ptr, int,
-					      struct type *, int));
+static value_ptr search_struct_field (char *, value_ptr, int,
+				      struct type *, int);
 
-static value_ptr search_struct_method PARAMS ((char *, value_ptr *,
-					       value_ptr *,
-					       int, int *, struct type *));
+static value_ptr search_struct_method (char *, value_ptr *,
+				       value_ptr *,
+				       int, int *, struct type *);
 
-static int check_field_in PARAMS ((struct type *, const char *));
+static int check_field_in (struct type *, const char *);
 
-static CORE_ADDR allocate_space_in_inferior PARAMS ((int));
+static CORE_ADDR allocate_space_in_inferior (int);
 
-static value_ptr cast_into_complex PARAMS ((struct type *, value_ptr));
+static value_ptr cast_into_complex (struct type *, value_ptr);
 
-static struct fn_field *find_method_list PARAMS ((value_ptr * argp, char *method, int offset, int *static_memfuncp, struct type * type, int *num_fns, struct type ** basetype, int *boffset));
+static struct fn_field *find_method_list (value_ptr * argp, char *method,
+					  int offset, int *static_memfuncp,
+					  struct type *type, int *num_fns,
+					  struct type **basetype,
+					  int *boffset);
 
-void _initialize_valops PARAMS ((void));
+void _initialize_valops (void);
 
 #define VALUE_SUBSTRING_START(VAL) VALUE_FRAME(VAL)
 
@@ -108,12 +112,12 @@ find_function_in_inferior (name)
       if (msymbol != NULL)
 	{
 	  struct type *type;
-	  LONGEST maddr;
+	  CORE_ADDR maddr;
 	  type = lookup_pointer_type (builtin_type_char);
 	  type = lookup_function_type (type);
 	  type = lookup_pointer_type (type);
-	  maddr = (LONGEST) SYMBOL_VALUE_ADDRESS (msymbol);
-	  return value_from_longest (type, maddr);
+	  maddr = SYMBOL_VALUE_ADDRESS (msymbol);
+	  return value_from_pointer (type, maddr);
 	}
       else
 	{
@@ -465,7 +469,7 @@ value_at (type, addr, sect)
       store_address (VALUE_CONTENTS_RAW (val), 4, num);
     }
   else
-    read_memory_section (addr, VALUE_CONTENTS_ALL_RAW (val), TYPE_LENGTH (type), sect);
+    read_memory (addr, VALUE_CONTENTS_ALL_RAW (val), TYPE_LENGTH (type));
 
   VALUE_LVAL (val) = lval_memory;
   VALUE_ADDRESS (val) = addr;
@@ -540,8 +544,8 @@ value_fetch_lazy (val)
       store_address (VALUE_CONTENTS_RAW (val), 4, num);
     }
   else if (length)
-    read_memory_section (addr, VALUE_CONTENTS_ALL_RAW (val), length,
-			 VALUE_BFD_SECTION (val));
+    read_memory (addr, VALUE_CONTENTS_ALL_RAW (val), length);
+  
   VALUE_LAZY (val) = 0;
   return 0;
 }
@@ -901,8 +905,8 @@ value_coerce_array (arg1)
   if (VALUE_LVAL (arg1) != lval_memory)
     error ("Attempt to take address of value not located in memory.");
 
-  return value_from_longest (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
-		    (LONGEST) (VALUE_ADDRESS (arg1) + VALUE_OFFSET (arg1)));
+  return value_from_pointer (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
+			     (VALUE_ADDRESS (arg1) + VALUE_OFFSET (arg1)));
 }
 
 /* Given a value which is a function, return a value which is a pointer
@@ -917,8 +921,8 @@ value_coerce_function (arg1)
   if (VALUE_LVAL (arg1) != lval_memory)
     error ("Attempt to take address of value not located in memory.");
 
-  retval = value_from_longest (lookup_pointer_type (VALUE_TYPE (arg1)),
-		    (LONGEST) (VALUE_ADDRESS (arg1) + VALUE_OFFSET (arg1)));
+  retval = value_from_pointer (lookup_pointer_type (VALUE_TYPE (arg1)),
+			       (VALUE_ADDRESS (arg1) + VALUE_OFFSET (arg1)));
   VALUE_BFD_SECTION (retval) = VALUE_BFD_SECTION (arg1);
   return retval;
 }
@@ -948,10 +952,10 @@ value_addr (arg1)
     error ("Attempt to take address of value not located in memory.");
 
   /* Get target memory address */
-  arg2 = value_from_longest (lookup_pointer_type (VALUE_TYPE (arg1)),
-			     (LONGEST) (VALUE_ADDRESS (arg1)
-					+ VALUE_OFFSET (arg1)
-					+ VALUE_EMBEDDED_OFFSET (arg1)));
+  arg2 = value_from_pointer (lookup_pointer_type (VALUE_TYPE (arg1)),
+			     (VALUE_ADDRESS (arg1)
+			      + VALUE_OFFSET (arg1)
+			      + VALUE_EMBEDDED_OFFSET (arg1)));
 
   /* This may be a pointer to a base subobject; so remember the
      full derived object's type ... */
@@ -1126,18 +1130,6 @@ default_push_arguments (nargs, args, sp, struct_return, struct_addr)
     sp = value_push (sp, args[i]);
   return sp;
 }
-
-
-/* If we're calling a function declared without a prototype, should we
-   promote floats to doubles?  FORMAL and ACTUAL are the types of the
-   arguments; FORMAL may be NULL.
-
-   If we have no definition for this macro, either from the target or
-   from gdbarch, provide a default.  */
-#ifndef COERCE_FLOAT_TO_DOUBLE
-#define COERCE_FLOAT_TO_DOUBLE(formal, actual) \
-  (default_coerce_float_to_double ((formal), (actual)))
-#endif
 
 
 /* A default function for COERCE_FLOAT_TO_DOUBLE: do the coercion only
@@ -1327,7 +1319,8 @@ find_function_addr (function, retval_type)
 
    ARGS is modified to contain coerced values. */
 
-static value_ptr hand_function_call PARAMS ((value_ptr function, int nargs, value_ptr * args));
+static value_ptr hand_function_call (value_ptr function, int nargs,
+				     value_ptr * args);
 static value_ptr
 hand_function_call (function, nargs, args)
      value_ptr function;
@@ -1376,8 +1369,7 @@ hand_function_call (function, nargs, args)
     noprocess ();
 
   inf_status = save_inferior_status (1);
-  old_chain = make_cleanup ((make_cleanup_func) restore_inferior_status,
-			    inf_status);
+  old_chain = make_cleanup_restore_inferior_status (inf_status);
 
   /* PUSH_DUMMY_FRAME is responsible for saving the inferior registers
      (and POP_FRAME for restoring them).  (At least on most machines)
@@ -1522,72 +1514,72 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 		  }
     }
 
-#if defined (REG_STRUCT_HAS_ADDR)
-  {
-    /* This is a machine like the sparc, where we may need to pass a pointer
-       to the structure, not the structure itself.  */
-    for (i = nargs - 1; i >= 0; i--)
-      {
-	struct type *arg_type = check_typedef (VALUE_TYPE (args[i]));
-	if ((TYPE_CODE (arg_type) == TYPE_CODE_STRUCT
-	     || TYPE_CODE (arg_type) == TYPE_CODE_UNION
-	     || TYPE_CODE (arg_type) == TYPE_CODE_ARRAY
-	     || TYPE_CODE (arg_type) == TYPE_CODE_STRING
-	     || TYPE_CODE (arg_type) == TYPE_CODE_BITSTRING
-	     || TYPE_CODE (arg_type) == TYPE_CODE_SET
-	     || (TYPE_CODE (arg_type) == TYPE_CODE_FLT
-		 && TYPE_LENGTH (arg_type) > 8)
-	    )
-	    && REG_STRUCT_HAS_ADDR (using_gcc, arg_type))
-	  {
-	    CORE_ADDR addr;
-	    int len;		/*  = TYPE_LENGTH (arg_type); */
-	    int aligned_len;
-	    arg_type = check_typedef (VALUE_ENCLOSING_TYPE (args[i]));
-	    len = TYPE_LENGTH (arg_type);
+  if (REG_STRUCT_HAS_ADDR_P ())
+    {
+      /* This is a machine like the sparc, where we may need to pass a
+	 pointer to the structure, not the structure itself.  */
+      for (i = nargs - 1; i >= 0; i--)
+	{
+	  struct type *arg_type = check_typedef (VALUE_TYPE (args[i]));
+	  if ((TYPE_CODE (arg_type) == TYPE_CODE_STRUCT
+	       || TYPE_CODE (arg_type) == TYPE_CODE_UNION
+	       || TYPE_CODE (arg_type) == TYPE_CODE_ARRAY
+	       || TYPE_CODE (arg_type) == TYPE_CODE_STRING
+	       || TYPE_CODE (arg_type) == TYPE_CODE_BITSTRING
+	       || TYPE_CODE (arg_type) == TYPE_CODE_SET
+	       || (TYPE_CODE (arg_type) == TYPE_CODE_FLT
+		   && TYPE_LENGTH (arg_type) > 8)
+	       )
+	      && REG_STRUCT_HAS_ADDR (using_gcc, arg_type))
+	    {
+	      CORE_ADDR addr;
+	      int len;		/*  = TYPE_LENGTH (arg_type); */
+	      int aligned_len;
+	      arg_type = check_typedef (VALUE_ENCLOSING_TYPE (args[i]));
+	      len = TYPE_LENGTH (arg_type);
 
-#ifdef STACK_ALIGN
-	    /* MVS 11/22/96: I think at least some of this stack_align code is
-	       really broken.  Better to let PUSH_ARGUMENTS adjust the stack in
-	       a target-defined manner.  */
-	    aligned_len = STACK_ALIGN (len);
-#else
-	    aligned_len = len;
-#endif
-	    if (INNER_THAN (1, 2))
-	      {
-		/* stack grows downward */
-		sp -= aligned_len;
-	      }
-	    else
-	      {
-		/* The stack grows up, so the address of the thing we push
-		   is the stack pointer before we push it.  */
-		addr = sp;
-	      }
-	    /* Push the structure.  */
-	    write_memory (sp, VALUE_CONTENTS_ALL (args[i]), len);
-	    if (INNER_THAN (1, 2))
-	      {
-		/* The stack grows down, so the address of the thing we push
-		   is the stack pointer after we push it.  */
-		addr = sp;
-	      }
-	    else
-	      {
-		/* stack grows upward */
-		sp += aligned_len;
-	      }
-	    /* The value we're going to pass is the address of the thing
-	       we just pushed.  */
-	    /*args[i] = value_from_longest (lookup_pointer_type (value_type),
-	       (LONGEST) addr); */
-	    args[i] = value_from_longest (lookup_pointer_type (arg_type),
-					  (LONGEST) addr);
-	  }
-      }
-  }
-#endif /* REG_STRUCT_HAS_ADDR.  */
+	      if (STACK_ALIGN_P ())
+		/* MVS 11/22/96: I think at least some of this
+		   stack_align code is really broken.  Better to let
+		   PUSH_ARGUMENTS adjust the stack in a target-defined
+		   manner.  */
+		aligned_len = STACK_ALIGN (len);
+	      else
+		aligned_len = len;
+	      if (INNER_THAN (1, 2))
+		{
+		  /* stack grows downward */
+		  sp -= aligned_len;
+		}
+	      else
+		{
+		  /* The stack grows up, so the address of the thing
+		     we push is the stack pointer before we push it.  */
+		  addr = sp;
+		}
+	      /* Push the structure.  */
+	      write_memory (sp, VALUE_CONTENTS_ALL (args[i]), len);
+	      if (INNER_THAN (1, 2))
+		{
+		  /* The stack grows down, so the address of the thing
+		     we push is the stack pointer after we push it.  */
+		  addr = sp;
+		}
+	      else
+		{
+		  /* stack grows upward */
+		  sp += aligned_len;
+		}
+	      /* The value we're going to pass is the address of the
+		 thing we just pushed.  */
+	      /*args[i] = value_from_longest (lookup_pointer_type (value_type),
+		(LONGEST) addr); */
+	      args[i] = value_from_pointer (lookup_pointer_type (arg_type),
+					    addr);
+	    }
+	}
+    }
+
 
   /* Reserve space for the return structure to be written on the
      stack, if necessary */
@@ -1595,12 +1587,11 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
   if (struct_return)
     {
       int len = TYPE_LENGTH (value_type);
-#ifdef STACK_ALIGN
-      /* MVS 11/22/96: I think at least some of this stack_align code is
-         really broken.  Better to let PUSH_ARGUMENTS adjust the stack in
-         a target-defined manner.  */
-      len = STACK_ALIGN (len);
-#endif
+      if (STACK_ALIGN_P ())
+	/* MVS 11/22/96: I think at least some of this stack_align
+	   code is really broken.  Better to let PUSH_ARGUMENTS adjust
+	   the stack in a target-defined manner.  */
+	len = STACK_ALIGN (len);
       if (INNER_THAN (1, 2))
 	{
 	  /* stack grows downward */
@@ -1621,11 +1612,10 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
    hppa_push_arguments */
 #ifndef NO_EXTRA_ALIGNMENT_NEEDED
 
-#if defined(STACK_ALIGN)
   /* MVS 11/22/96: I think at least some of this stack_align code is
      really broken.  Better to let PUSH_ARGUMENTS adjust the stack in
      a target-defined manner.  */
-  if (INNER_THAN (1, 2))
+  if (STACK_ALIGN_P () && INNER_THAN (1, 2))
     {
       /* If stack grows down, we must leave a hole at the top. */
       int len = 0;
@@ -1636,7 +1626,6 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	len += CALL_DUMMY_STACK_ADJUST;
       sp -= STACK_ALIGN (len) - len;
     }
-#endif /* STACK_ALIGN */
 #endif /* NO_EXTRA_ALIGNMENT_NEEDED */
 
   sp = PUSH_ARGUMENTS (nargs, args, sp, struct_return, struct_addr);
@@ -1654,8 +1643,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
   sp = PUSH_RETURN_ADDRESS (real_pc, sp);
 #endif /* PUSH_RETURN_ADDRESS */
 
-#if defined(STACK_ALIGN)
-  if (!INNER_THAN (1, 2))
+  if (STACK_ALIGN_P () && !INNER_THAN (1, 2))
     {
       /* If stack grows up, we must leave a hole at the bottom, note
          that sp already has been advanced for the arguments!  */
@@ -1663,7 +1651,6 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	sp += CALL_DUMMY_STACK_ADJUST;
       sp = STACK_ALIGN (sp);
     }
-#endif /* STACK_ALIGN */
 
 /* XXX This seems wrong.  For stacks that grow down we shouldn't do
    anything here!  */
@@ -1695,9 +1682,8 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
      wouldn't happen.  (See store_inferior_registers in sparc-nat.c.)  */
   write_sp (sp);
 
-#ifdef SAVE_DUMMY_FRAME_TOS
-  SAVE_DUMMY_FRAME_TOS (sp);
-#endif
+  if (SAVE_DUMMY_FRAME_TOS_P ())
+    SAVE_DUMMY_FRAME_TOS (sp);
 
   {
     char retbuf[REGISTER_BYTES];

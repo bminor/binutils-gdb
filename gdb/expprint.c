@@ -504,7 +504,7 @@ op_string (op)
 /* Support for dumping the raw data from expressions in a human readable
    form.  */
 
-static char *op_name PARAMS ((int opcode));
+static char *op_name (int opcode);
 
 static char *
 op_name (opcode)
@@ -736,7 +736,8 @@ dump_prefix_expression (exp, stream, note)
     }
 }
 
-static int dump_subexp PARAMS ((struct expression * exp, struct ui_file * stream, int elt));
+static int dump_subexp (struct expression *exp, struct ui_file *stream,
+			int elt);
 
 static int
 dump_subexp (exp, stream, elt)

@@ -1609,6 +1609,9 @@ fr30_cgen_cpu_open (enum cgen_cpu_open_arg arg_type, ...)
   cd->rebuild_tables = fr30_cgen_rebuild_tables;
   fr30_cgen_rebuild_tables (cd);
 
+  /* Initialise flags.  */
+  cd->signed_overflow_ok_p = 0;
+  
   return (CGEN_CPU_DESC) cd;
 }
 

@@ -17,7 +17,6 @@ hppa*)			gdb_host_cpu=pa ;;
 i[3456]86*)		gdb_host_cpu=i386 ;;
 m68*)			gdb_host_cpu=m68k ;;
 m88*)			gdb_host_cpu=m88k ;;
-# OBSOLETE np1)			gdb_host_cpu=gould ;;
 # OBSOLETE pyramid)		gdb_host_cpu=pyr ;;
 powerpc*)		gdb_host_cpu=powerpc ;;
 sparc64)		gdb_host_cpu=sparc ;;
@@ -35,6 +34,7 @@ alpha*-*-osf1*)		gdb_host=alpha-osf1 ;;
 alpha*-*-osf2*)		gdb_host=alpha-osf2 ;;
 alpha*-*-osf[3456789]*)	gdb_host=alpha-osf3 ;;
 alpha*-*-linux*)	gdb_host=alpha-linux ;;
+alpha*-*-freebsd*)	gdb_host=fbsd ;;
 
 arm*-*-linux*)		gdb_host=linux ;;
 arm*-*-*)		gdb_host=arm ;;
@@ -57,6 +57,8 @@ i[3456]86-*-aix*)	gdb_host=i386aix ;;
 i[3456]86-*-bsd*)	gdb_host=i386bsd ;;
 i[3456]86-*-dgux*)	gdb_host=i386dgux ;;
 i[3456]86-*-freebsd*)	gdb_host=fbsd ;;
+i[3456]86-*-netbsdelf*)	gdb_host=nbsdelf ;;
+i[3456]86-*-netbsdaout*) gdb_host=nbsd ;;
 i[3456]86-*-netbsd*)	gdb_host=nbsd ;;
 i[3456]86-*-go32*)	gdb_host=go32 ;;
 i[3456]86-*-msdosdjgpp*) gdb_host=go32 ;;
@@ -127,8 +129,6 @@ mips-*-riscos*)		gdb_host=riscos ;;
 
 none-*-*)		gdb_host=none ;;
 
-# OBSOLETE np1-*-*)		gdb_host=np1 ;;
-
 ns32k-*-mach3*)		gdb_host=ns32km3 ;;
 ns32k-*-netbsd*)	gdb_host=nbsd ;;
 ns32k-umax-*)		gdb_host=umax ;;
@@ -138,6 +138,7 @@ powerpc-*-aix*)		gdb_host=aix ;;
 powerpcle-*-cygwin*)	gdb_host=cygwin ;;
 powerpcle-*-solaris*)	gdb_host=solaris ;;
 powerpc-*-linux*)	gdb_host=linux ;;
+powerpc-*-netbsd*)	gdb_host=nbsd ;;
 
 # OBSOLETE pn-*-*)		gdb_host=pn ;;
 

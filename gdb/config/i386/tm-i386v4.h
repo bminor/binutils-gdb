@@ -55,8 +55,7 @@
    we extract the pc (JB_PC) that we will land at.  The pc is copied into ADDR.
    This routine returns true on success */
 
-extern int
-get_longjmp_target PARAMS ((CORE_ADDR *));
+extern int get_longjmp_target (CORE_ADDR *);
 
 #define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)
 
@@ -74,6 +73,6 @@ get_longjmp_target PARAMS ((CORE_ADDR *));
 /* Saved Pc.  Get it from ucontext if within sigtramp.  */
 
 #define sigtramp_saved_pc i386v4_sigtramp_saved_pc
-extern CORE_ADDR i386v4_sigtramp_saved_pc PARAMS ((struct frame_info *));
+extern CORE_ADDR i386v4_sigtramp_saved_pc (struct frame_info *);
 
 #endif /* ifndef TM_I386V4_H */

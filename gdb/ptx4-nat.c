@@ -26,6 +26,9 @@
 #include <sys/param.h>
 #include <fcntl.h>
 
+/* Prototypes for supply_gregset etc. */
+#include "gregset.h"
+
 /*  Given a pointer to a general register set in /proc format (gregset_t *),
    unpack the register contents and supply them as gdb's idea of the current
    register values. */
@@ -62,8 +65,6 @@ fill_gregset (gregsetp, regno)
     }
 }
 
-#if defined (FP0_REGNUM)
-
 /*  Given a pointer to a floating point register set in /proc format
    (fpregset_t *), unpack the register contents and supply them as gdb's
    idea of the current floating point register values. */
@@ -93,8 +94,6 @@ fill_fpregset (fpregsetp, regno)
   /* FIXME: see m68k-tdep.c for an example, for the m68k. */
 }
 
-#endif /* defined (FP0_REGNUM) */
-
 /*
  * This doesn't quite do the same thing as the procfs.c version, but give
  * it the same name so we don't have to put an ifdef in solib.c.
@@ -102,7 +101,7 @@ fill_fpregset (fpregsetp, regno)
 /* this could use elf_interpreter() from elfread.c */
 int
 proc_iterate_over_mappings (func)
-     int (*func) PARAMS ((int, CORE_ADDR));
+     int (*func) (int, CORE_ADDR);
 {
   vaddr_t curseg, memptr;
   pt_vseg_t pv;

@@ -1,5 +1,5 @@
 /* Print Motorola 68k instructions.
-   Copyright 1986, 87, 89, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright 1986, 87, 89, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
 
 This file is free software; you can redistribute it and/or modify
@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+#include "sysdep.h"
 #include "dis-asm.h"
 #include "floatformat.h"
 #include <libiberty.h>
@@ -150,16 +151,17 @@ fetch_data (info, addr)
 /* This function is used to print to the bit-bucket. */
 static int
 #ifdef __STDC__
-dummy_printer (FILE * file, const char * format, ...)
+dummy_printer (FILE * file ATTRIBUTE_UNUSED,
+	       const char * format ATTRIBUTE_UNUSED, ...)
 #else
-dummy_printer (file) FILE *file;
+dummy_printer (file) FILE *file ATTRIBUTE_UNUSED;
 #endif
  { return 0; }
 
 static void
 dummy_print_address (vma, info)
-     bfd_vma vma;
-     struct disassemble_info *info;
+     bfd_vma vma ATTRIBUTE_UNUSED;
+     struct disassemble_info *info ATTRIBUTE_UNUSED;
 {
 }
 

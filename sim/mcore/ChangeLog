@@ -1,3 +1,7 @@
+Tue May 23 21:39:23 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 2000-02-14  Nick Clifton  <nickc@cygnus.com>
 
 	* interp.c (handle_trap1): Fix handling of fclose system call.

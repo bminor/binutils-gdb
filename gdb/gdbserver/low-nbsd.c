@@ -46,7 +46,30 @@ extern char **environ;
 extern int inferior_pid;
 void quit (), perror_with_name ();
 
-#ifdef TM_I386_H
+#define RF(dst, src) \
+	memcpy(&registers[REGISTER_BYTE(dst)], &src, sizeof(src))
+
+#define RS(src, dst) \
+	memcpy(&dst, &registers[REGISTER_BYTE(src)], sizeof(dst))
+
+#ifdef __i386__
+struct env387
+  {
+    unsigned short control;
+    unsigned short r0;
+    unsigned short status;
+    unsigned short r1;
+    unsigned short tag;  
+    unsigned short r2;
+    unsigned long eip;
+    unsigned short code_seg;
+    unsigned short opcode;
+    unsigned long operand; 
+    unsigned short operand_seg;
+    unsigned short r3;
+    unsigned char regs[8][10];
+  };
+
 /* i386_register_raw_size[i] is the number of bytes of storage in the
    actual machine representation for register i.  */
 int i386_register_raw_size[MAX_NUM_REGS] = {
@@ -81,8 +104,14 @@ initialize_arch()
       }
   }   
 }       
+#endif	/* !__i386__ */
 
-#endif
+#ifdef __powerpc__
+static void
+initialize_arch()
+{
+}
+#endif	/* !__powerpc__ */
 
 
 /* Start an inferior process and returns its pid.
@@ -183,6 +212,8 @@ myresume (step, signal)
     perror_with_name ("ptrace");
 }
 
+
+#ifdef __i386__
 /* Fetch one or more registers from the inferior.  REGNO == -1 to get
    them all.  We actually fetch more than requested, when convenient,
    marking them as valid so we won't fetch them again.  */
@@ -192,19 +223,47 @@ fetch_inferior_registers (ignored)
      int ignored;
 {
   struct reg inferior_registers;
-  struct fpreg inferior_fp_registers;
+  struct env387 inferior_fp_registers;
 
   ptrace (PT_GETREGS, inferior_pid,
 	  (PTRACE_ARG3_TYPE) &inferior_registers, 0);
-  memcpy (&registers[REGISTER_BYTE(0)], &inferior_registers, 
-	  sizeof(inferior_registers));
-
-#if 0 /* def FP0_REGNUM */
   ptrace (PT_GETFPREGS, inferior_pid,
 	  (PTRACE_ARG3_TYPE) &inferior_fp_registers, 0);
-  memcpy (&registers[REGISTER_BYTE(FP0_REGNUM)], &inferior_fp_registers,
-	  sizeof(inferior_fp_registers));
-#endif
+
+  RF ( 0, inferior_registers.r_eax); 
+  RF ( 1, inferior_registers.r_ecx);
+  RF ( 2, inferior_registers.r_edx);
+  RF ( 3, inferior_registers.r_ebx);
+  RF ( 4, inferior_registers.r_esp);
+  RF ( 5, inferior_registers.r_ebp);
+  RF ( 6, inferior_registers.r_esi);
+  RF ( 7, inferior_registers.r_edi);
+  RF ( 8, inferior_registers.r_eip);
+  RF ( 9, inferior_registers.r_eflags);
+  RF (10, inferior_registers.r_cs);
+  RF (11, inferior_registers.r_ss);
+  RF (12, inferior_registers.r_ds);
+  RF (13, inferior_registers.r_es);
+  RF (14, inferior_registers.r_fs);
+  RF (15, inferior_registers.r_gs);
+
+  RF (FP0_REGNUM,     inferior_fpregisters.regs[0]);
+  RF (FP0_REGNUM + 1, inferior_fpregisters.regs[1]);
+  RF (FP0_REGNUM + 2, inferior_fpregisters.regs[2]);
+  RF (FP0_REGNUM + 3, inferior_fpregisters.regs[3]);
+  RF (FP0_REGNUM + 4, inferior_fpregisters.regs[4]);
+  RF (FP0_REGNUM + 5, inferior_fpregisters.regs[5]);
+  RF (FP0_REGNUM + 6, inferior_fpregisters.regs[6]);
+  RF (FP0_REGNUM + 7, inferior_fpregisters.regs[7]);
+  
+  RF (FCTRL_REGNUM,   inferior_fpregisters.control);
+  RF (FSTAT_REGNUM,   inferior_fpregisters.status);
+  RF (FTAG_REGNUM,    inferior_fpregisters.tag);
+  RF (FCS_REGNUM,     inferior_fpregisters.code_seg);
+  RF (FCOFF_REGNUM,   inferior_fpregisters.eip);
+  RF (FDS_REGNUM,     inferior_fpregisters.operand_seg);
+  RF (FDOFF_REGNUM,   inferior_fpregisters.operand);
+  RF (FOP_REGNUM,     inferior_fpregisters.opcode);
 }
 
 /* Store our register values back into the inferior.
@@ -216,20 +275,109 @@ store_inferior_registers (ignored)
      int ignored;
 {
   struct reg inferior_registers;
-  struct fpreg inferior_fp_registers;
+  struct env387 inferior_fp_registers;
 
-  memcpy (&inferior_registers, &registers[REGISTER_BYTE(0)], 
-	  sizeof(inferior_registers));
+  RS ( 0, inferior_registers.r_eax); 
+  RS ( 1, inferior_registers.r_ecx);
+  RS ( 2, inferior_registers.r_edx);
+  RS ( 3, inferior_registers.r_ebx);
+  RS ( 4, inferior_registers.r_esp);
+  RS ( 5, inferior_registers.r_ebp);
+  RS ( 6, inferior_registers.r_esi);
+  RS ( 7, inferior_registers.r_edi);
+  RS ( 8, inferior_registers.r_eip);
+  RS ( 9, inferior_registers.r_eflags);
+  RS (10, inferior_registers.r_cs);
+  RS (11, inferior_registers.r_ss);
+  RS (12, inferior_registers.r_ds);
+  RS (13, inferior_registers.r_es);
+  RS (14, inferior_registers.r_fs);
+  RS (15, inferior_registers.r_gs);
+
+  RS (FP0_REGNUM,     inferior_fpregisters.regs[0]);
+  RS (FP0_REGNUM + 1, inferior_fpregisters.regs[1]);
+  RS (FP0_REGNUM + 2, inferior_fpregisters.regs[2]);
+  RS (FP0_REGNUM + 3, inferior_fpregisters.regs[3]);
+  RS (FP0_REGNUM + 4, inferior_fpregisters.regs[4]);
+  RS (FP0_REGNUM + 5, inferior_fpregisters.regs[5]);
+  RS (FP0_REGNUM + 6, inferior_fpregisters.regs[6]);
+  RS (FP0_REGNUM + 7, inferior_fpregisters.regs[7]);
+  
+  RS (FCTRL_REGNUM,   inferior_fpregisters.control);
+  RS (FSTAT_REGNUM,   inferior_fpregisters.status);
+  RS (FTAG_REGNUM,    inferior_fpregisters.tag);
+  RS (FCS_REGNUM,     inferior_fpregisters.code_seg);
+  RS (FCOFF_REGNUM,   inferior_fpregisters.eip);
+  RS (FDS_REGNUM,     inferior_fpregisters.operand_seg);
+  RS (FDOFF_REGNUM,   inferior_fpregisters.operand);
+  RS (FOP_REGNUM,     inferior_fpregisters.opcode);
+
   ptrace (PT_SETREGS, inferior_pid,
 	  (PTRACE_ARG3_TYPE) &inferior_registers, 0);
-
-#if 0 /* def FP0_REGNUM */
-  memcpy (&inferior_fp_registers, &registers[REGISTER_BYTE (FP0_REGNUM)],
-	  sizeof (inferior_fp_registers));
   ptrace (PT_SETFPREGS, inferior_pid,
 	  (PTRACE_ARG3_TYPE) &inferior_fp_registers, 0);
-#endif
 }
+#endif	/* !__i386__ */
+
+#ifdef __powerpc__
+/* Fetch one or more registers from the inferior.  REGNO == -1 to get
+   them all.  We actually fetch more than requested, when convenient,
+   marking them as valid so we won't fetch them again.  */
+
+void
+fetch_inferior_registers (regno)
+     int regno;
+{
+  struct reg inferior_registers;
+  struct fpreg inferior_fp_registers;
+  int i;
+
+  ptrace (PT_GETREGS, inferior_pid,
+	  (PTRACE_ARG3_TYPE) & inferior_registers, 0);
+  ptrace (PT_GETFPREGS, inferior_pid,
+	  (PTRACE_ARG3_TYPE) & inferior_fp_registers, 0);
+
+  for (i = 0; i < 32; i++)
+    RF (i, inferior_registers.fixreg[i]);
+  RF (LR_REGNUM, inferior_registers.lr);
+  RF (CR_REGNUM, inferior_registers.cr);
+  RF (XER_REGNUM, inferior_registers.xer);
+  RF (CTR_REGNUM, inferior_registers.ctr);
+  RF (PC_REGNUM, inferior_registers.pc);
+
+  for (i = 0; i < 32; i++)
+    RF (FP0_REGNUM + i, inferior_fp_registers.r_regs[i]);
+}
+
+/* Store our register values back into the inferior.
+   If REGNO is -1, do this for all registers.
+   Otherwise, REGNO specifies which register (so we can save time).  */
+
+void
+store_inferior_registers (regno)
+     int regno;
+{
+  struct reg inferior_registers;
+  struct fpreg inferior_fp_registers;
+  int i;
+
+  for (i = 0; i < 32; i++)
+    RS (i, inferior_registers.fixreg[i]);
+  RS (LR_REGNUM, inferior_registers.lr);
+  RS (CR_REGNUM, inferior_registers.cr);
+  RS (XER_REGNUM, inferior_registers.xer);
+  RS (CTR_REGNUM, inferior_registers.ctr);
+  RS (PC_REGNUM, inferior_registers.pc);
+
+  for (i = 0; i < 32; i++)
+    RS (FP0_REGNUM + i, inferior_fp_registers.r_regs[i]);
+
+  ptrace (PT_SETREGS, inferior_pid,
+	  (PTRACE_ARG3_TYPE) & inferior_registers, 0);
+  ptrace (PT_SETFPREGS, inferior_pid,
+	  (PTRACE_ARG3_TYPE) & inferior_fp_registers, 0);
+}
+#endif	/* !__powerpc__ */
 
 /* NOTE! I tried using PTRACE_READDATA, etc., to read and write memory
    in the NEW_SUN_PTRACE case.

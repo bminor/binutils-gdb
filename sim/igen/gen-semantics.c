@@ -246,7 +246,7 @@ print_semantic_body (lf *file,
     {
       lf_printf (file, "\n");
       lf_printf (file, "/* Architecture expects REG to be zero */\n");
-      lf_printf (file, "GPR_SET(%d, 0);\n", options.gen.zero_reg_nr);
+      lf_printf (file, "GPR_CLEAR(%d);\n", options.gen.zero_reg_nr);
     }
   
   /* generate the code (or at least something */

@@ -31,7 +31,7 @@
 
 /* Type of function passed to bfd_map_over_sections.  */
 
-typedef void (*section_map_func) PARAMS ((bfd * abfd, asection * sect, PTR obj));
+typedef void (*section_map_func) (bfd * abfd, asection * sect, PTR obj);
 
 /* Packet escape character used by Densan monitor.  */
 
@@ -44,8 +44,7 @@ typedef void (*section_map_func) PARAMS ((bfd * abfd, asection * sect, PTR obj))
 
 /* External functions.  */
 
-extern void report_transfer_performance PARAMS ((unsigned long,
-						 time_t, time_t));
+extern void report_transfer_performance (unsigned long, time_t, time_t);
 
 /* Certain registers are "bitmapped", in that the monitor can only display
    them or let the user modify them as a series of named bitfields.
@@ -62,36 +61,32 @@ struct bit_field
 
 /* Local functions for register manipulation.  */
 
-static void r3900_supply_register PARAMS ((char *regname, int regnamelen,
-					   char *val, int vallen));
-static void fetch_bad_vaddr PARAMS ((void));
-static unsigned long fetch_fields PARAMS ((struct bit_field * bf));
-static void fetch_bitmapped_register PARAMS ((int regno,
-					      struct bit_field * bf));
-static void r3900_fetch_registers PARAMS ((int regno));
-static void store_bitmapped_register PARAMS ((int regno,
-					      struct bit_field * bf));
-static void r3900_store_registers PARAMS ((int regno));
+static void r3900_supply_register (char *regname, int regnamelen,
+				   char *val, int vallen);
+static void fetch_bad_vaddr (void);
+static unsigned long fetch_fields (struct bit_field *bf);
+static void fetch_bitmapped_register (int regno, struct bit_field *bf);
+static void r3900_fetch_registers (int regno);
+static void store_bitmapped_register (int regno, struct bit_field *bf);
+static void r3900_store_registers (int regno);
 
 /* Local functions for fast binary loading.  */
 
-static void write_long PARAMS ((char *buf, long n));
-static void write_long_le PARAMS ((char *buf, long n));
-static int debug_readchar PARAMS ((int hex));
-static void debug_write PARAMS ((unsigned char *buf, int buflen));
-static void ignore_packet PARAMS ((void));
-static void send_packet PARAMS ((char type, unsigned char *buf, int buflen,
-				 int seq));
-static void process_read_request PARAMS ((unsigned char *buf, int buflen));
-static void count_section PARAMS ((bfd * abfd, asection * s,
-				   unsigned int *section_count));
-static void load_section PARAMS ((bfd * abfd, asection * s,
-				  unsigned int *data_count));
-static void r3900_load PARAMS ((char *filename, int from_tty));
+static void write_long (char *buf, long n);
+static void write_long_le (char *buf, long n);
+static int debug_readchar (int hex);
+static void debug_write (unsigned char *buf, int buflen);
+static void ignore_packet (void);
+static void send_packet (char type, unsigned char *buf, int buflen, int seq);
+static void process_read_request (unsigned char *buf, int buflen);
+static void count_section (bfd * abfd, asection * s,
+			   unsigned int *section_count);
+static void load_section (bfd * abfd, asection * s, unsigned int *data_count);
+static void r3900_load (char *filename, int from_tty);
 
 /* Miscellaneous local functions.  */
 
-static void r3900_open PARAMS ((char *args, int from_tty));
+static void r3900_open (char *args, int from_tty);
 
 
 /* Pointers to static functions in monitor.c for fetching and storing
@@ -100,13 +95,13 @@ static void r3900_open PARAMS ((char *args, int from_tty));
    format, and those that can't be modified at all.  In those cases
    we have to use our own functions to fetch and store their values.  */
 
-static void (*orig_monitor_fetch_registers) PARAMS ((int regno));
-static void (*orig_monitor_store_registers) PARAMS ((int regno));
+static void (*orig_monitor_fetch_registers) (int regno);
+static void (*orig_monitor_store_registers) (int regno);
 
 /* Pointer to static function in monitor. for loading programs.
    We use this function for loading S-records via the serial link.  */
 
-static void (*orig_monitor_load) PARAMS ((char *file, int from_tty));
+static void (*orig_monitor_load) (char *file, int from_tty);
 
 /* This flag is set if a fast ethernet download should be used.  */
 

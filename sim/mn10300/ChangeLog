@@ -1,3 +1,24 @@
+Tue May 23 21:39:23 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+2000-05-22  Alexandre Oliva  <aoliva@cygnus.com>
+
+	* am33.igen: Fix leading comments of SP-relative offset insns that
+	referred to other registers.  Make their offsets unsigned.
+
+2000-05-18  Alexandre Oliva  <aoliva@cygnus.com>
+
+	* mn10300_sim.h (genericAdd, genericSub, genericCmp, genericOr,
+	genericXor, genericBtst): Use `unsigned32'.
+	* op_utils.c: Likewise.
+	* mn10300.igen, am33.igen: Use `unsigned32', `signed32',
+	`unsigned64' or `signed64' where type width is relevant.
+
+2000-04-25  Alexandre Oliva  <aoliva@cygnus.com>
+
+	* am33.igen (inc4 Rn): Use genericAdd so as to modify flags.
+
 2000-04-09  Alexandre Oliva  <aoliva@cygnus.com>
 
 	* am33.igen: Make SP-relative offsets unsigned.  Add `*am33' for

@@ -34,76 +34,62 @@
 
 #include "gdb_wait.h"
 
-extern struct symtab_and_line *
-  child_enable_exception_callback PARAMS ((enum exception_event_kind, int));
+extern struct symtab_and_line *child_enable_exception_callback (enum
+								exception_event_kind,
+								int);
 
-extern struct exception_event_record *
-  child_get_current_exception_event PARAMS ((void));
+extern struct exception_event_record
+  *child_get_current_exception_event (void);
 
-extern void _initialize_inftarg PARAMS ((void));
+extern void _initialize_inftarg (void);
 
-static void
-child_prepare_to_store PARAMS ((void));
+static void child_prepare_to_store (void);
 
 #ifndef CHILD_WAIT
-static int child_wait PARAMS ((int, struct target_waitstatus *));
+static int child_wait (int, struct target_waitstatus *);
 #endif /* CHILD_WAIT */
 
 #if !defined(CHILD_POST_WAIT)
-void
-child_post_wait PARAMS ((int, int));
+void child_post_wait (int, int);
 #endif
 
-static void child_open PARAMS ((char *, int));
+static void child_open (char *, int);
 
-static void
-child_files_info PARAMS ((struct target_ops *));
+static void child_files_info (struct target_ops *);
 
-static void
-child_detach PARAMS ((char *, int));
+static void child_detach (char *, int);
 
-static void
-child_detach_from_process PARAMS ((int, char *, int, int));
+static void child_detach_from_process (int, char *, int, int);
 
-static void
-child_attach PARAMS ((char *, int));
+static void child_attach (char *, int);
 
-static void
-child_attach_to_process PARAMS ((char *, int, int));
+static void child_attach_to_process (char *, int, int);
 
 #if !defined(CHILD_POST_ATTACH)
-extern void child_post_attach PARAMS ((int));
+extern void child_post_attach (int);
 #endif
 
-static void
-child_require_attach PARAMS ((char *, int));
+static void child_require_attach (char *, int);
 
-static void
-child_require_detach PARAMS ((int, char *, int));
+static void child_require_detach (int, char *, int);
 
-static void
-ptrace_me PARAMS ((void));
+static void ptrace_me (void);
 
-static void
-ptrace_him PARAMS ((int));
+static void ptrace_him (int);
 
-static void
-child_create_inferior PARAMS ((char *, char *, char **));
+static void child_create_inferior (char *, char *, char **);
 
-static void
-child_mourn_inferior PARAMS ((void));
+static void child_mourn_inferior (void);
 
-static int
-child_can_run PARAMS ((void));
+static int child_can_run (void);
 
-static void
-child_stop PARAMS ((void));
+static void child_stop (void);
 
 #ifndef CHILD_THREAD_ALIVE
-int child_thread_alive PARAMS ((int));
+int child_thread_alive (int);
 #endif
 
-static void init_child_ops PARAMS ((void));
+static void init_child_ops (void);
 
 extern char **environ;
 

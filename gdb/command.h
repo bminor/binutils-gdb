@@ -33,7 +33,7 @@ enum command_class
   no_class = -1, class_run = 0, class_vars, class_stack,
   class_files, class_support, class_info, class_breakpoint, class_trace,
   class_alias, class_obscure, class_user, class_maintenance,
-  class_pseudo, class_tui, class_xdb,
+  class_pseudo, class_tui, class_xdb
 };
 
 /* Not a set/show command.  Note that some commands which begin with
@@ -108,12 +108,11 @@ struct cmd_list_element
     union
       {
 	/* If type is not_set_cmd, call it like this:  */
-	void (*cfunc) PARAMS ((char *args, int from_tty));
+	void (*cfunc) (char *args, int from_tty);
 
 	/* If type is cmd_set or show_cmd, first set the variables, and
 	   then call this.  */
-	void (*sfunc) PARAMS ((char *args, int from_tty,
-			       struct cmd_list_element * c));
+	void (*sfunc) (char *args, int from_tty, struct cmd_list_element * c);
       }
     function;
 #define NO_FUNCTION ((void (*) PARAMS((char *args, int from_tty))) 0)
@@ -186,7 +185,7 @@ struct cmd_list_element
        returned relative to this position.  For example, suppose TEXT is "foo"
        and we want to complete to "foobar".  If WORD is "oo", return
        "oobar"; if WORD is "baz/foo", return "baz/foobar".  */
-    char **(*completer) PARAMS ((char *text, char *word));
+    char **(*completer) (char *text, char *word);
 
     /* Type of "set" or "show" command (or SET_NOT_SET if not "set"
        or "show").  */
@@ -194,7 +193,7 @@ struct cmd_list_element
 
     /* Pointer to variable affected by "set" and "show".  Doesn't matter
        if type is not_set.  */
-    char *var;
+    void *var;
 
     /* What kind of variable is *VAR?  */
     var_types var_type;
@@ -216,31 +215,39 @@ struct cmd_list_element
 
 /* Forward-declarations of the entry-points of command.c.  */
 
-extern struct cmd_list_element *
-  add_cmd PARAMS ((char *, enum command_class, void (*fun) (char *, int),
-		   char *, struct cmd_list_element **));
+extern struct cmd_list_element *add_cmd (char *, enum command_class,
+					 void (*fun) (char *, int), char *,
+					 struct cmd_list_element **);
 
-extern struct cmd_list_element *
-  add_alias_cmd PARAMS ((char *, char *, enum command_class, int,
-			 struct cmd_list_element **));
+extern struct cmd_list_element *add_alias_cmd (char *, char *,
+					       enum command_class, int,
+					       struct cmd_list_element **);
 
-extern struct cmd_list_element *
-  add_prefix_cmd PARAMS ((char *, enum command_class, void (*fun) (char *, int),
-			  char *, struct cmd_list_element **, char *, int,
-			  struct cmd_list_element **));
+extern struct cmd_list_element *add_prefix_cmd (char *, enum command_class,
+						void (*fun) (char *, int),
+						char *,
+						struct cmd_list_element **,
+						char *, int,
+						struct cmd_list_element **);
 
-extern struct cmd_list_element *
-  add_abbrev_prefix_cmd PARAMS ((char *, enum command_class,
-				 void (*fun) (char *, int), char *,
-				 struct cmd_list_element **, char *, int,
-				 struct cmd_list_element **));
+extern struct cmd_list_element *add_abbrev_prefix_cmd (char *,
+						       enum command_class,
+						       void (*fun) (char *,
+								    int),
+						       char *,
+						       struct cmd_list_element
+						       **, char *, int,
+						       struct cmd_list_element
+						       **);
 
-extern struct cmd_list_element *
-  lookup_cmd PARAMS ((char **, struct cmd_list_element *, char *, int, int));
+extern struct cmd_list_element *lookup_cmd (char **,
+					    struct cmd_list_element *, char *,
+					    int, int);
 
-extern struct cmd_list_element *
-  lookup_cmd_1 PARAMS ((char **, struct cmd_list_element *,
-			struct cmd_list_element **, int));
+extern struct cmd_list_element *lookup_cmd_1 (char **,
+					      struct cmd_list_element *,
+					      struct cmd_list_element **,
+					      int);
 
 extern struct cmd_list_element *
   deprecate_cmd (struct cmd_list_element *, char * );
@@ -254,27 +261,22 @@ extern int
                         struct cmd_list_element **prefix_cmd,
                         struct cmd_list_element **cmd);
 
-extern struct cmd_list_element *
-  add_com PARAMS ((char *, enum command_class, void (*fun) (char *, int),
-		 char *));
+extern struct cmd_list_element *add_com (char *, enum command_class,
+					 void (*fun) (char *, int), char *);
 
-extern struct cmd_list_element *
-  add_com_alias PARAMS ((char *, char *, enum command_class, int));
+extern struct cmd_list_element *add_com_alias (char *, char *,
+					       enum command_class, int);
 
-extern struct cmd_list_element *
-  add_info PARAMS ((char *, void (*fun) (char *, int), char *));
+extern struct cmd_list_element *add_info (char *, void (*fun) (char *, int),
+					  char *);
 
-extern struct cmd_list_element *
-  add_info_alias PARAMS ((char *, char *, int));
+extern struct cmd_list_element *add_info_alias (char *, char *, int);
 
-extern char **
-  complete_on_cmdlist PARAMS ((struct cmd_list_element *, char *, char *));
+extern char **complete_on_cmdlist (struct cmd_list_element *, char *, char *);
 
-extern char **
-  complete_on_enum PARAMS ((char **enumlist, char *, char *));
+extern char **complete_on_enum (char **enumlist, char *, char *);
 
-extern void
-delete_cmd PARAMS ((char *, struct cmd_list_element **));
+extern void delete_cmd (char *, struct cmd_list_element **);
 
 extern void help_cmd (char *, struct ui_file *);
 
@@ -284,42 +286,42 @@ extern void help_list (struct cmd_list_element *, char *,
 extern void help_cmd_list (struct cmd_list_element *, enum command_class,
 			   char *, int, struct ui_file *);
 
-extern struct cmd_list_element *
-  add_set_cmd PARAMS ((char *, enum command_class, var_types, char *, char *,
-		       struct cmd_list_element **));
+extern struct cmd_list_element *add_set_cmd (char *name, enum
+					     command_class class,
+					     var_types var_type, void *var,
+					     char *doc,
+					     struct cmd_list_element **list);
 
-extern struct cmd_list_element *
-  add_set_enum_cmd PARAMS ((char *name, enum command_class, char *list[],
-		       char *var, char *doc, struct cmd_list_element ** c));
+extern struct cmd_list_element *add_set_enum_cmd (char *name,
+						  enum command_class class,
+						  char *enumlist[],
+						  char **var,
+						  char *doc,
+						  struct cmd_list_element **list);
 
-extern struct cmd_list_element *
-  add_show_from_set PARAMS ((struct cmd_list_element *,
-			     struct cmd_list_element **));
+extern struct cmd_list_element *add_show_from_set (struct cmd_list_element *,
+						   struct cmd_list_element
+						   **);
 
 /* Do a "set" or "show" command.  ARG is NULL if no argument, or the text
    of the argument, and FROM_TTY is nonzero if this command is being entered
    directly by the user (i.e. these are just like any other
    command).  C is the command list element for the command.  */
 
-extern void
-do_setshow_command PARAMS ((char *, int, struct cmd_list_element *));
+extern void do_setshow_command (char *, int, struct cmd_list_element *);
 
 /* Do a "show" command for each thing on a command list.  */
 
-extern void
-cmd_show_list PARAMS ((struct cmd_list_element *, int, char *));
+extern void cmd_show_list (struct cmd_list_element *, int, char *);
 
-extern void
-error_no_arg PARAMS ((char *));
+extern void error_no_arg (char *);
 
-extern void
-dont_repeat PARAMS ((void));
+extern void dont_repeat (void);
 
 /* Used to mark commands that don't do anything.  If we just leave the
    function field NULL, the command is interpreted as a help topic, or
    as a class of commands.  */
 
-extern void
-not_just_help_class_command PARAMS ((char *, int));
+extern void not_just_help_class_command (char *, int);
 
 #endif /* !defined (COMMAND_H) */

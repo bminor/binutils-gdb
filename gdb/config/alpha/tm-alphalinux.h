@@ -26,7 +26,7 @@
 
 /* Are we currently handling a signal ?  */
 
-extern long alpha_linux_sigtramp_offset PARAMS ((CORE_ADDR));
+extern long alpha_linux_sigtramp_offset (CORE_ADDR);
 #undef IN_SIGTRAMP
 #define IN_SIGTRAMP(pc, name)	(alpha_linux_sigtramp_offset (pc) >= 0)
 

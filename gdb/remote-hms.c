@@ -26,7 +26,7 @@
 #include "monitor.h"
 #include "serial.h"
 
-static void hms_open PARAMS ((char *args, int from_tty));
+static void hms_open (char *args, int from_tty);
 static void
 hms_supply_register (regname, regnamelen, val, vallen)
      char *regname;

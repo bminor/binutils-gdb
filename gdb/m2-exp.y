@@ -100,22 +100,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define	YYDEBUG	0		/* Default to no yydebug support */
 #endif
 
-int
-yyparse PARAMS ((void));
+int yyparse (void);
 
-static int
-yylex PARAMS ((void));
+static int yylex (void);
 
-void
-yyerror PARAMS ((char *));
+void yyerror (char *);
 
 #if 0
-static char *
-make_qualname PARAMS ((char *, char *));
+static char *make_qualname (char *, char *);
 #endif
 
-static int
-parse_number PARAMS ((int));
+static int parse_number (int);
 
 /* The sign of the number being parsed. */
 static int number_sign = 1;

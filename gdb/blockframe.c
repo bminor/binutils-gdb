@@ -300,15 +300,9 @@ frameless_look_for_prologue (frame)
   if (func_start)
     {
       func_start += FUNCTION_START_OFFSET;
-      after_prologue = func_start;
-#ifdef SKIP_PROLOGUE_FRAMELESS_P
       /* This is faster, since only care whether there *is* a
          prologue, not how long it is.  */
-      after_prologue = SKIP_PROLOGUE_FRAMELESS_P (after_prologue);
-#else
-      after_prologue = SKIP_PROLOGUE (after_prologue);
-#endif
-      return after_prologue == func_start;
+      return PROLOGUE_FRAMELESS_P (func_start);
     }
   else if (frame->pc == 0)
     /* A frame with a zero PC is usually created by dereferencing a
@@ -1109,7 +1103,7 @@ pc_in_call_dummy_at_entry_point (pc, sp, frame_address)
 
 /* Dummy frame.  This saves the processor state just prior to setting
    up the inferior function call.  Older targets save the registers
-   target stack (but that really slows down function calls).  */
+   on the target stack (but that really slows down function calls).  */
 
 struct dummy_frame
 {
@@ -1213,8 +1207,8 @@ generic_push_dummy_frame ()
   dummy_frame = xmalloc (sizeof (struct dummy_frame));
   dummy_frame->registers = xmalloc (REGISTER_BYTES);
 
-  dummy_frame->pc = read_register (PC_REGNUM);
-  dummy_frame->sp = read_register (SP_REGNUM);
+  dummy_frame->pc = read_pc ();
+  dummy_frame->sp = read_sp ();
   dummy_frame->top = dummy_frame->sp;
   dummy_frame->fp = fp;
   read_register_bytes (0, dummy_frame->registers, REGISTER_BYTES);

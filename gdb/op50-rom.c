@@ -25,7 +25,7 @@
 #include "monitor.h"
 #include "serial.h"
 
-static void op50n_open PARAMS ((char *args, int from_tty));
+static void op50n_open (char *args, int from_tty);
 
 /*
  * this array of registers need to match the indexes used by GDB. The

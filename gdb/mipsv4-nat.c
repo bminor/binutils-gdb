@@ -27,6 +27,9 @@
 #include <sys/procfs.h>
 #include <setjmp.h>		/* For JB_XXX.  */
 
+/* Prototypes for supply_gregset etc. */
+#include "gregset.h"
+
 /* Size of elements in jmpbuf */
 
 #define JB_ELEMENT_SIZE 4

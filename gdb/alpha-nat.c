@@ -33,10 +33,8 @@
 
 /* Prototypes for local functions. */
 
-static void fetch_osf_core_registers PARAMS ((char *,
-					      unsigned, int, CORE_ADDR));
-static void fetch_elf_core_registers PARAMS ((char *,
-					      unsigned, int, CORE_ADDR));
+static void fetch_osf_core_registers (char *, unsigned, int, CORE_ADDR);
+static void fetch_elf_core_registers (char *, unsigned, int, CORE_ADDR);
 
 /* Size of elements in jmpbuf */
 
@@ -198,6 +196,9 @@ kernel_u_size ()
 
 #if defined(USE_PROC_FS) || defined(HAVE_GREGSET_T)
 #include <sys/procfs.h>
+
+/* Prototypes for supply_gregset etc. */
+#include "gregset.h"
 
 /*
  * See the comment in m68k-tdep.c regarding the utility of these functions.

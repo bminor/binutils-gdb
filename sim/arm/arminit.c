@@ -85,7 +85,8 @@ ARMul_NewState (void)
     }
   for (i = 0; i < 7; i++)
     state->Spsr[i] = 0;
-  state->Mode = 0;
+  
+  state->Mode = USER26MODE;
 
   state->CallDebug = FALSE;
   state->Debug = FALSE;
@@ -156,18 +157,23 @@ void
 ARMul_Reset (ARMul_State * state)
 {
   state->NextInstr = 0;
+
   if (state->prog32Sig)
     {
       state->Reg[15] = 0;
       state->Cpsr = INTBITS | SVC32MODE;
+      state->Mode = SVC32MODE;
     }
   else
     {
       state->Reg[15] = R15INTBITS | SVC26MODE;
       state->Cpsr = INTBITS | SVC26MODE;
+      state->Mode = SVC26MODE;
     }
+
   ARMul_CPSRAltered (state);
   state->Bank = SVCBANK;
+
   FLUSHPIPE;
 
   state->EndCondition = 0;

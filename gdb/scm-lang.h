@@ -52,19 +52,19 @@ extern int scm_val_print (struct type *, char *, int, CORE_ADDR,
 			  struct ui_file *, int, int, int,
 			  enum val_prettyprint);
 
-extern LONGEST scm_get_field PARAMS ((LONGEST, int));
+extern LONGEST scm_get_field (LONGEST, int);
 
 extern void scm_scmval_print (LONGEST, struct ui_file *, int, int, int,
 			      enum val_prettyprint);
 
-extern int is_scmvalue_type PARAMS ((struct type *));
+extern int is_scmvalue_type (struct type *);
 
 extern void scm_printchar (int, struct ui_file *);
 
-extern struct value *scm_evaluate_string PARAMS ((char *, int));
+extern struct value *scm_evaluate_string (char *, int);
 
 extern struct type *builtin_type_scm;
 
-extern int scm_parse PARAMS ((void));
+extern int scm_parse (void);
 
-extern LONGEST scm_unpack PARAMS ((struct type *, char *, enum type_code));
+extern LONGEST scm_unpack (struct type *, char *, enum type_code);

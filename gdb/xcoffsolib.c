@@ -34,7 +34,7 @@
    hook is initialized in by rs6000-nat.c.  If not, it is currently left
    NULL and never called. */
 
-void (*xcoff_relocate_symtab_hook) PARAMS ((unsigned int)) = NULL;
+void (*xcoff_relocate_symtab_hook) (unsigned int) = NULL;
 
 #ifdef SOLIB_SYMBOLS_MANUAL
 
@@ -116,7 +116,7 @@ solib_add (arg_string, from_tty, target)
 
 	  syms_from_objfile (obj, NULL, 0, 0);
 	  new_symfile_objfile (obj, 0, 0);
-	  vmap_symtab (vp, 0, 0);
+	  vmap_symtab (vp);
 	  printf_unfiltered ("Done.\n");
 	  loaded = vp->loaded = 1;
 	}
@@ -165,7 +165,7 @@ pc_load_segment_name (addr)
   return "(unknown load module)";
 }
 
-static void solib_info PARAMS ((char *, int));
+static void solib_info (char *, int);
 
 static void
 solib_info (args, from_tty)

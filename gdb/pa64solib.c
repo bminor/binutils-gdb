@@ -59,10 +59,9 @@
 /* Defined in exec.c; used to prevent dangling pointer bug.  */
 extern struct target_ops exec_ops;
 
-static CORE_ADDR
-  bfd_lookup_symbol PARAMS ((bfd *, char *));
+static CORE_ADDR bfd_lookup_symbol (bfd *, char *);
 /* This lives in hppa-tdep.c. */
-extern struct unwind_table_entry *find_unwind_entry PARAMS ((CORE_ADDR pc));
+extern struct unwind_table_entry *find_unwind_entry (CORE_ADDR pc);
 
 /* These ought to be defined in some public interface, but aren't.  They
    identify dynamic linker events.  */
@@ -121,18 +120,18 @@ dld_cache_t;
 
 static dld_cache_t dld_cache;
 
-static void pa64_sharedlibrary_info_command PARAMS ((char *, int));
+static void pa64_sharedlibrary_info_command (char *, int);
 
-static void pa64_solib_sharedlibrary_command PARAMS ((char *, int));
+static void pa64_solib_sharedlibrary_command (char *, int);
 
-static void * pa64_target_read_memory PARAMS ((void *, CORE_ADDR, size_t, int));
+static void *pa64_target_read_memory (void *, CORE_ADDR, size_t, int);
 
-static boolean read_dld_descriptor PARAMS ((struct target_ops *));
+static boolean read_dld_descriptor (struct target_ops *);
 
-static boolean read_dynamic_info PARAMS ((asection *, dld_cache_t *));
+static boolean read_dynamic_info (asection *, dld_cache_t *);
 
-static void add_to_solist PARAMS ((boolean, char *, struct load_module_desc *,
-				   CORE_ADDR, struct target_ops *));
+static void add_to_solist (boolean, char *, struct load_module_desc *,
+			   CORE_ADDR, struct target_ops *);
 
 /* When examining the shared library for debugging information we have to
    look for HP debug symbols, stabs and dwarf2 debug symbols.  */
@@ -272,7 +271,8 @@ pa64_solib_add_solib_objfile (so, name, from_tty, text_addr)
   tmp_bfd = NULL;
 
   /* Now let the generic code load up symbols for this library.  */
-  section_addrs.text_addr = text_addr;
+  section_addrs.other[0].addr = text_addr;
+  section_addrs.other[0].name = ".text";
   so->objfile = symbol_file_add (name, from_tty, &section_addrs, 0, OBJF_SHARED);
   so->abfd = so->objfile->obfd;
 
@@ -327,9 +327,9 @@ pa64_solib_load_symbols (so, name, from_tty, text_addr, target)
       return;
     }
 
-  ANOFFSET (so->objfile->section_offsets, SECT_OFF_TEXT)
+  ANOFFSET (so->objfile->section_offsets, SECT_OFF_TEXT (so->objfile))
     = so->pa64_solib_desc.text_base;
-  ANOFFSET (so->objfile->section_offsets, SECT_OFF_DATA)
+  ANOFFSET (so->objfile->section_offsets, SECT_OFF_DATA (so->objfile))
     = so->pa64_solib_desc.data_base;
 
   /* Relocate all the sections based on where they got loaded.  */
@@ -337,13 +337,13 @@ pa64_solib_load_symbols (so, name, from_tty, text_addr, target)
     {
       if (p->the_bfd_section->flags & SEC_CODE)
 	{
-	  p->addr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_TEXT);
-	  p->endaddr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_TEXT);
+	  p->addr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_TEXT (so->objfile));
+	  p->endaddr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_TEXT (so->objfile));
 	}
       else if (p->the_bfd_section->flags & SEC_DATA)
 	{
-	  p->addr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_DATA);
-	  p->endaddr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_DATA);
+	  p->addr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_DATA (so->objfile));
+	  p->endaddr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_DATA (so->objfile));
 	}
     }
 

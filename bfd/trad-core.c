@@ -25,7 +25,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "libaout.h"           /* BFD a.out internal data structures */
 
 #include <sys/param.h>
-#include <sys/dir.h>
+#ifdef HAVE_DIRENT_H
+# include <dirent.h>
+#else
+# ifdef HAVE_SYS_NDIR_H
+#  include <sys/ndir.h>
+# endif
+# ifdef HAVE_SYS_DIR_H
+#  include <sys/dir.h>
+# endif
+# ifdef HAVE_NDIR_H
+#  include <ndir.h>
+# endif
+#endif
 #include <signal.h>
 
 #include <sys/user.h>		/* After a.out.h  */
@@ -112,7 +124,7 @@ trad_unix_core_file_p (abfd)
 				 + u.u_ssize))
 	> (unsigned long) statbuf.st_size)
       {
-	bfd_set_error (bfd_error_file_truncated);
+	bfd_set_error (bfd_error_wrong_format);
 	return 0;
       }
 #ifndef TRAD_CORE_ALLOW_ANY_EXTRA_SIZE

@@ -28,7 +28,7 @@ extern struct symtab *current_source_symtab;
 ** STATIC LOCAL FUNCTIONS FORWARD DECLS    **
 ******************************************/
 
-static struct breakpoint *_hasBreak PARAMS ((char *, int));
+static struct breakpoint *_hasBreak (char *, int);
 
 
 /*****************************************

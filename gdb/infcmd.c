@@ -42,79 +42,79 @@
 
 /* Functions exported for general use: */
 
-void nofp_registers_info PARAMS ((char *, int));
+void nofp_registers_info (char *, int);
 
-void all_registers_info PARAMS ((char *, int));
+void all_registers_info (char *, int);
 
-void registers_info PARAMS ((char *, int));
+void registers_info (char *, int);
 
 /* Local functions: */
 
-void continue_command PARAMS ((char *, int));
+void continue_command (char *, int);
 
 static void print_return_value (int struct_return, struct type *value_type);
 
-static void finish_command_continuation PARAMS ((struct continuation_arg *));
+static void finish_command_continuation (struct continuation_arg *);
 
-static void until_next_command PARAMS ((int));
+static void until_next_command (int);
 
-static void until_command PARAMS ((char *, int));
+static void until_command (char *, int);
 
-static void path_info PARAMS ((char *, int));
+static void path_info (char *, int);
 
-static void path_command PARAMS ((char *, int));
+static void path_command (char *, int);
 
-static void unset_command PARAMS ((char *, int));
+static void unset_command (char *, int);
 
-static void float_info PARAMS ((char *, int));
+static void float_info (char *, int);
 
-static void detach_command PARAMS ((char *, int));
+static void detach_command (char *, int);
 
 static void interrupt_target_command (char *args, int from_tty);
 
 #if !defined (DO_REGISTERS_INFO)
-static void do_registers_info PARAMS ((int, int));
+static void do_registers_info (int, int);
 #endif
 
-static void unset_environment_command PARAMS ((char *, int));
+static void unset_environment_command (char *, int);
 
-static void set_environment_command PARAMS ((char *, int));
+static void set_environment_command (char *, int);
 
-static void environment_info PARAMS ((char *, int));
+static void environment_info (char *, int);
 
-static void program_info PARAMS ((char *, int));
+static void program_info (char *, int);
 
-static void finish_command PARAMS ((char *, int));
+static void finish_command (char *, int);
 
-static void signal_command PARAMS ((char *, int));
+static void signal_command (char *, int);
 
-static void jump_command PARAMS ((char *, int));
+static void jump_command (char *, int);
 
-static void step_1 PARAMS ((int, int, char *));
+static void step_1 (int, int, char *);
 static void step_once (int skip_subroutines, int single_inst, int count);
 static void step_1_continuation (struct continuation_arg *arg);
 
-void nexti_command PARAMS ((char *, int));
+void nexti_command (char *, int);
 
-void stepi_command PARAMS ((char *, int));
+void stepi_command (char *, int);
 
-static void next_command PARAMS ((char *, int));
+static void next_command (char *, int);
 
-static void step_command PARAMS ((char *, int));
+static void step_command (char *, int);
 
-static void run_command PARAMS ((char *, int));
+static void run_command (char *, int);
 
-static void run_no_args_command PARAMS ((char *args, int from_tty));
+static void run_no_args_command (char *args, int from_tty);
 
-static void go_command PARAMS ((char *line_no, int from_tty));
+static void go_command (char *line_no, int from_tty);
 
-static int strip_bg_char PARAMS ((char **));
+static int strip_bg_char (char **);
 
-void _initialize_infcmd PARAMS ((void));
+void _initialize_infcmd (void);
 
 #define GO_USAGE   "Usage: go <location>\n"
 
-static void breakpoint_auto_delete_contents PARAMS ((PTR));
+static void breakpoint_auto_delete_contents (PTR);
 
 #define ERROR_NO_INFERIOR \
    if (!target_has_execution) error ("The program is not being run.");
@@ -455,6 +455,12 @@ nexti_command (count_string, from_tty)
 }
 
 static void
+disable_longjmp_breakpoint_cleanup (void *ignore)
+{
+  disable_longjmp_breakpoint ();
+}
+
+static void
 step_1 (skip_subroutines, single_inst, count_string)
      int skip_subroutines;
      int single_inst;
@@ -489,10 +495,9 @@ step_1 (skip_subroutines, single_inst, count_string)
     {
       enable_longjmp_breakpoint ();
       if (!event_loop_p || !target_can_async_p ())
-	cleanups = make_cleanup ((make_cleanup_func) disable_longjmp_breakpoint,
-				 0);
+	cleanups = make_cleanup (disable_longjmp_breakpoint_cleanup, 0 /*ignore*/);
       else
-        make_exec_cleanup ((make_cleanup_func) disable_longjmp_breakpoint, 0);
+        make_exec_cleanup (disable_longjmp_breakpoint_cleanup, 0 /*ignore*/);
     }
 
   /* In synchronous case, all is well, just use the regular for loop. */
@@ -1194,9 +1199,9 @@ finish_command (arg, from_tty)
   breakpoint = set_momentary_breakpoint (sal, frame, bp_finish);
 
   if (!event_loop_p || !target_can_async_p ())
-    old_chain = make_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
+    old_chain = make_cleanup_delete_breakpoint (breakpoint);
   else
-    old_chain = make_exec_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
+    old_chain = make_exec_cleanup_delete_breakpoint (breakpoint);
 
   /* Find the function we will return from.  */
 
@@ -1998,6 +2003,7 @@ use \"set args\" without arguments.");
   add_info ("registers", nofp_registers_info,
 	    "List of integer registers and their contents, for selected stack frame.\n\
 Register name as argument means describe only that register.");
+  add_info_alias ("r", "registers", 1);
 
   if (xdb_commands)
     add_com ("lr", class_info, nofp_registers_info,

@@ -13,9 +13,6 @@
    THIS SOFTWARE INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
    MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
-   $Revision$
-   $Date$             
-
 NOTEs:
 
 The IDT monitor (found on the VR4300 board), seems to lie about

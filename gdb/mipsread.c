@@ -42,23 +42,19 @@
 #include "elf/common.h"
 #include "elf/mips.h"
 
-extern void _initialize_mipsread PARAMS ((void));
+extern void _initialize_mipsread (void);
+
+static void mipscoff_new_init (struct objfile *);
+
+static void mipscoff_symfile_init (struct objfile *);
+
+static void mipscoff_symfile_read (struct objfile *, int);
+
+static void mipscoff_symfile_finish (struct objfile *);
 
 static void
-mipscoff_new_init PARAMS ((struct objfile *));
-
-static void
-mipscoff_symfile_init PARAMS ((struct objfile *));
-
-static void
-mipscoff_symfile_read PARAMS ((struct objfile *, int));
-
-static void
-mipscoff_symfile_finish PARAMS ((struct objfile *));
-
-static void
-read_alphacoff_dynamic_symtab PARAMS ((struct section_offsets *,
-				       struct objfile * objfile));
+read_alphacoff_dynamic_symtab (struct section_offsets *,
+			       struct objfile *objfile);
 
 /* Initialize anything that needs initializing when a completely new
    symbol file is specified (not just adding some symbols from another
@@ -94,7 +90,7 @@ mipscoff_symfile_read (objfile, mainline)
   struct cleanup *back_to;
 
   init_minimal_symbol_collection ();
-  back_to = make_cleanup ((make_cleanup_func) discard_minimal_symbols, 0);
+  back_to = make_cleanup_discard_minimal_symbols ();
 
   /* Now that the executable file is positioned at symbol table,
      process it and define symbols accordingly.  */
@@ -194,8 +190,7 @@ struct alphacoff_dynsecinfo
     asection *got_sect;		/* Section pointer for .got section */
   };
 
-static void
-alphacoff_locate_sections PARAMS ((bfd *, asection *, void *));
+static void alphacoff_locate_sections (bfd *, asection *, void *);
 
 /* We are called once per section from read_alphacoff_dynamic_symtab.
    We need to examine each section we are passed, check to see
@@ -402,7 +397,7 @@ read_alphacoff_dynamic_symtab (section_offsets, objfile)
 		ms_type = mst_text;
 	      else
 		ms_type = mst_file_text;
-	      sym_value += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+	      sym_value += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
 	    }
 	  else if (sym_shndx == SHN_MIPS_DATA)
 	    {
@@ -410,7 +405,7 @@ read_alphacoff_dynamic_symtab (section_offsets, objfile)
 		ms_type = mst_data;
 	      else
 		ms_type = mst_file_data;
-	      sym_value += ANOFFSET (section_offsets, SECT_OFF_DATA);
+	      sym_value += ANOFFSET (section_offsets, SECT_OFF_DATA (objfile));
 	    }
 	  else if (sym_shndx == SHN_MIPS_ACOMMON)
 	    {
@@ -418,7 +413,7 @@ read_alphacoff_dynamic_symtab (section_offsets, objfile)
 		ms_type = mst_bss;
 	      else
 		ms_type = mst_file_bss;
-	      sym_value += ANOFFSET (section_offsets, SECT_OFF_BSS);
+	      sym_value += ANOFFSET (section_offsets, SECT_OFF_BSS (objfile));
 	    }
 	  else if (sym_shndx == SHN_ABS)
 	    {

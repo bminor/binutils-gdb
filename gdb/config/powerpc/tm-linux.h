@@ -75,7 +75,8 @@ CORE_ADDR ppc_linux_frame_chain (struct frame_info *);
 #undef FRAME_CHAIN
 #define FRAME_CHAIN(thisframe) ppc_linux_frame_chain (thisframe)
 
-CORE_ADDR ppc_sysv_abi_push_arguments PARAMS ((int, struct value **, CORE_ADDR, int, CORE_ADDR));
+CORE_ADDR ppc_sysv_abi_push_arguments (int, struct value **, CORE_ADDR, int,
+				       CORE_ADDR);
 #undef PUSH_ARGUMENTS
 #define	PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
   (ppc_sysv_abi_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr)))

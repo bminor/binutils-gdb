@@ -205,13 +205,11 @@ sim_create_inferior (sd, abfd, argv, env)
   else
     ARMul_SetPC (state, 0);	/* ??? */
 
-#if 1				/* JGS */
   /* We explicitly select a processor capable of supporting the ARM
-     32bit mode, and then we force the simulated CPU into the 32bit
-     User mode: */
+     32bit mode.  JGS  */
   ARMul_SelectProcessor (state, ARM600);
+  /* And then we force the simulated CPU into the 32bit User mode.  */
   ARMul_SetCPSR (state, USER32MODE);
-#endif
 
   if (argv != NULL)
     {
@@ -320,7 +318,13 @@ sim_store_register (sd, rn, memory, length)
      int length ATTRIBUTE_UNUSED;
 {
   init ();
-  ARMul_SetReg (state, state->Mode, rn, frommem (state, memory));
+  if (rn == 25)
+    {
+      state->Cpsr = frommem (state, memory);
+      ARMul_CPSRAltered (state);	     
+    }
+  else
+    ARMul_SetReg (state, state->Mode, rn, frommem (state, memory));
   return -1;
 }
 
@@ -353,7 +357,7 @@ sim_open (kind, ptr, abfd, argv)
 {
   sim_kind = kind;
   if (myname) free (myname);
-  myname = xstrdup (argv[0]);
+  myname = (char *) xstrdup (argv[0]);
   sim_callback = ptr;
 
   /* Decide upon the endian-ness of the processor.

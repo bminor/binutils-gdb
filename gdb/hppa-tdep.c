@@ -62,70 +62,70 @@
 #define THREAD_INITIAL_FRAME_SYMBOL  "__pthread_exit"
 #define THREAD_INITIAL_FRAME_SYM_LEN  sizeof(THREAD_INITIAL_FRAME_SYMBOL)
 
-static int extract_5_load PARAMS ((unsigned int));
+static int extract_5_load (unsigned int);
 
-static unsigned extract_5R_store PARAMS ((unsigned int));
+static unsigned extract_5R_store (unsigned int);
 
-static unsigned extract_5r_store PARAMS ((unsigned int));
+static unsigned extract_5r_store (unsigned int);
 
-static void find_dummy_frame_regs PARAMS ((struct frame_info *,
-					   struct frame_saved_regs *));
+static void find_dummy_frame_regs (struct frame_info *,
+				   struct frame_saved_regs *);
 
-static int find_proc_framesize PARAMS ((CORE_ADDR));
+static int find_proc_framesize (CORE_ADDR);
 
-static int find_return_regnum PARAMS ((CORE_ADDR));
+static int find_return_regnum (CORE_ADDR);
 
-struct unwind_table_entry *find_unwind_entry PARAMS ((CORE_ADDR));
+struct unwind_table_entry *find_unwind_entry (CORE_ADDR);
 
-static int extract_17 PARAMS ((unsigned int));
+static int extract_17 (unsigned int);
 
-static unsigned deposit_21 PARAMS ((unsigned int, unsigned int));
+static unsigned deposit_21 (unsigned int, unsigned int);
 
-static int extract_21 PARAMS ((unsigned));
+static int extract_21 (unsigned);
 
-static unsigned deposit_14 PARAMS ((int, unsigned int));
+static unsigned deposit_14 (int, unsigned int);
 
-static int extract_14 PARAMS ((unsigned));
+static int extract_14 (unsigned);
 
-static void unwind_command PARAMS ((char *, int));
+static void unwind_command (char *, int);
 
-static int low_sign_extend PARAMS ((unsigned int, unsigned int));
+static int low_sign_extend (unsigned int, unsigned int);
 
-static int sign_extend PARAMS ((unsigned int, unsigned int));
+static int sign_extend (unsigned int, unsigned int);
 
-static int restore_pc_queue PARAMS ((struct frame_saved_regs *));
+static int restore_pc_queue (struct frame_saved_regs *);
 
-static int hppa_alignof PARAMS ((struct type *));
+static int hppa_alignof (struct type *);
 
 /* To support multi-threading and stepping. */
-int hppa_prepare_to_proceed PARAMS (());
+int hppa_prepare_to_proceed ();
 
-static int prologue_inst_adjust_sp PARAMS ((unsigned long));
+static int prologue_inst_adjust_sp (unsigned long);
 
-static int is_branch PARAMS ((unsigned long));
+static int is_branch (unsigned long);
 
-static int inst_saves_gr PARAMS ((unsigned long));
+static int inst_saves_gr (unsigned long);
 
-static int inst_saves_fr PARAMS ((unsigned long));
+static int inst_saves_fr (unsigned long);
 
-static int pc_in_interrupt_handler PARAMS ((CORE_ADDR));
+static int pc_in_interrupt_handler (CORE_ADDR);
 
-static int pc_in_linker_stub PARAMS ((CORE_ADDR));
+static int pc_in_linker_stub (CORE_ADDR);
 
-static int compare_unwind_entries PARAMS ((const void *, const void *));
+static int compare_unwind_entries (const void *, const void *);
 
-static void read_unwind_info PARAMS ((struct objfile *));
+static void read_unwind_info (struct objfile *);
 
-static void internalize_unwinds PARAMS ((struct objfile *,
-					 struct unwind_table_entry *,
-					 asection *, unsigned int,
-					 unsigned int, CORE_ADDR));
-static void pa_print_registers PARAMS ((char *, int, int));
+static void internalize_unwinds (struct objfile *,
+				 struct unwind_table_entry *,
+				 asection *, unsigned int,
+				 unsigned int, CORE_ADDR);
+static void pa_print_registers (char *, int, int);
 static void pa_strcat_registers (char *, int, int, struct ui_file *);
-static void pa_register_look_aside PARAMS ((char *, int, long *));
-static void pa_print_fp_reg PARAMS ((int));
+static void pa_register_look_aside (char *, int, long *);
+static void pa_print_fp_reg (int);
 static void pa_strcat_fp_reg (int, struct ui_file *, enum precision_type);
-static void record_text_segment_lowaddr PARAMS ((bfd *, asection *, void *));
+static void record_text_segment_lowaddr (bfd *, asection *, void *);
 
 typedef struct
   {
@@ -146,8 +146,7 @@ extern int hp_som_som_object_present;
 extern int exception_catchpoints_are_fragile;
 
 /* This is defined in valops.c. */
-extern value_ptr
-  find_function_in_inferior PARAMS ((char *));
+extern value_ptr find_function_in_inferior (char *);
 
 /* Should call_function allocate stack space for a struct return?  */
 int
@@ -781,7 +780,7 @@ find_proc_framesize (pc)
 }
 
 /* Return offset from sp at which rp is saved, or 0 if not saved.  */
-static int rp_saved PARAMS ((CORE_ADDR));
+static int rp_saved (CORE_ADDR);
 
 static int
 rp_saved (pc)
@@ -1618,7 +1617,7 @@ hppa_pop_frame ()
       breakpoint->silent = 1;
 
       /* So we can clean things up.  */
-      old_chain = make_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
+      old_chain = make_cleanup_delete_breakpoint (breakpoint);
 
       /* Start up the inferior.  */
       clear_proceed_status ();
@@ -2005,11 +2004,11 @@ find_stub_with_shl_get (function, handle)
   /* now prepare the arguments for the call */
 
   args[0] = value_from_longest (TYPE_FIELD_TYPE (ftype, 0), 12);
-  args[1] = value_from_longest (TYPE_FIELD_TYPE (ftype, 1), SYMBOL_VALUE_ADDRESS (msymbol));
-  args[2] = value_from_longest (TYPE_FIELD_TYPE (ftype, 2), endo_buff_addr);
+  args[1] = value_from_pointer (TYPE_FIELD_TYPE (ftype, 1), SYMBOL_VALUE_ADDRESS (msymbol));
+  args[2] = value_from_pointer (TYPE_FIELD_TYPE (ftype, 2), endo_buff_addr);
   args[3] = value_from_longest (TYPE_FIELD_TYPE (ftype, 3), TYPE_PROCEDURE);
-  args[4] = value_from_longest (TYPE_FIELD_TYPE (ftype, 4), value_return_addr);
-  args[5] = value_from_longest (TYPE_FIELD_TYPE (ftype, 5), errno_return_addr);
+  args[4] = value_from_pointer (TYPE_FIELD_TYPE (ftype, 4), value_return_addr);
+  args[5] = value_from_pointer (TYPE_FIELD_TYPE (ftype, 5), errno_return_addr);
 
   /* now call the function */
 

@@ -68,15 +68,15 @@
 #define	SETPGRP_ARGS 1
 
 /* AIX doesn't have strdup, so we need to declare it for libiberty */
-extern char *strdup PARAMS ((char *));
+extern char *strdup (char *);
 
 /* Signal handler for SIGWINCH `window size changed'. */
 
 #define	SIGWINCH_HANDLER  aix_resizewindow
-extern void aix_resizewindow PARAMS ((int));
+extern void aix_resizewindow (int);
 
 /* This doesn't seem to be declared in any header file I can find.  */
-char *termdef PARAMS ((int, int));
+char *termdef (int, int);
 
 /* `lines_per_page' and `chars_per_line' are local to utils.c. Rectify this. */
 

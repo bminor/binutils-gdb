@@ -45,29 +45,29 @@
 
 #include "xcoffsolib.h"
 
-struct vmap *map_vmap PARAMS ((bfd *, bfd *));
+struct vmap *map_vmap (bfd *, bfd *);
 
-void (*file_changed_hook) PARAMS ((char *));
+void (*file_changed_hook) (char *);
 
 /* Prototypes for local functions */
 
-static void add_to_section_table PARAMS ((bfd *, sec_ptr, PTR));
+static void add_to_section_table (bfd *, sec_ptr, PTR);
 
-static void exec_close PARAMS ((int));
+static void exec_close (int);
 
-static void file_command PARAMS ((char *, int));
+static void file_command (char *, int);
 
-static void set_section_command PARAMS ((char *, int));
+static void set_section_command (char *, int);
 
-static void exec_files_info PARAMS ((struct target_ops *));
+static void exec_files_info (struct target_ops *);
 
-static void bfdsec_to_vmap PARAMS ((bfd *, sec_ptr, PTR));
+static void bfdsec_to_vmap (bfd *, sec_ptr, PTR);
 
-static int ignore PARAMS ((CORE_ADDR, char *));
+static int ignore (CORE_ADDR, char *);
 
-static void init_exec_ops PARAMS ((void));
+static void init_exec_ops (void);
 
-void _initialize_exec PARAMS ((void));
+void _initialize_exec (void);
 
 extern int info_verbose;
 
@@ -473,7 +473,7 @@ xfer_memory (memaddr, myaddr, len, write, target)
   boolean res;
   struct section_table *p;
   CORE_ADDR nextsectaddr, memend;
-  boolean (*xfer_fn) PARAMS ((bfd *, sec_ptr, PTR, file_ptr, bfd_size_type));
+  boolean (*xfer_fn) (bfd *, sec_ptr, PTR, file_ptr, bfd_size_type);
   asection *section;
 
   if (len <= 0)
@@ -490,49 +490,6 @@ xfer_memory (memaddr, myaddr, len, write, target)
   xfer_fn = write ? bfd_set_section_contents : bfd_get_section_contents;
   nextsectaddr = memend;
 
-#if 0				/* Stu's implementation */
-/* If a section has been specified, try to use it.  Note that we cannot use the
-   specified section directly.  This is because it usually comes from the
-   symbol file, which may be different from the exec or core file.  Instead, we
-   have to lookup the specified section by name in the bfd associated with
-   to_sections.  */
-
-  if (target_memory_bfd_section)
-    {
-      asection *s;
-      bfd *abfd;
-      asection *target_section;
-      bfd *target_bfd;
-
-      s = target_memory_bfd_section;
-      abfd = s->owner;
-
-      target_bfd = target->to_sections->bfd;
-      target_section = bfd_get_section_by_name (target_bfd, bfd_section_name (abfd, s));
-
-      if (target_section)
-	{
-	  bfd_vma sec_addr;
-	  bfd_size_type sec_size;
-
-	  sec_addr = bfd_section_vma (target_bfd, target_section);
-	  sec_size = target_section->_raw_size;
-
-	  /* Make sure the requested memory starts inside the section.  */
-
-	  if (memaddr >= sec_addr
-	      && memaddr < sec_addr + sec_size)
-	    {
-	      /* Cut back length in case request overflows the end of the section. */
-	      len = min (len, sec_addr + sec_size - memaddr);
-
-	      res = xfer_fn (target_bfd, target_section, myaddr, memaddr - sec_addr, len);
-
-	      return res ? len : 0;
-	    }
-	}
-    }
-#endif /* 0, Stu's implementation */
   for (p = target->to_sections; p < target->to_sections_end; p++)
     {
       if (overlay_debugging && section && p->the_bfd_section &&

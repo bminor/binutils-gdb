@@ -118,6 +118,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define elf_add_dynamic_entry		NAME(bfd_elf,add_dynamic_entry)
 #define elf_write_shdrs_and_ehdr	NAME(bfd_elf,write_shdrs_and_ehdr)
 #define elf_write_out_phdrs		NAME(bfd_elf,write_out_phdrs)
+#define elf_write_relocs		NAME(bfd_elf,write_relocs)
+#define elf_slurp_reloc_table		NAME(bfd_elf,slurp_reloc_table)
 #define elf_link_create_dynamic_sections \
   NAME(bfd_elf,link_create_dynamic_sections)
 #define elf_link_record_dynamic_symbol  _bfd_elf_link_record_dynamic_symbol
@@ -168,10 +170,6 @@ static void elf_swap_shdr_out
 static boolean elf_slurp_reloc_table_from_section 
   PARAMS ((bfd *, asection *, Elf_Internal_Shdr *, bfd_size_type,
 	   arelent *, asymbol **, boolean));
-static boolean elf_slurp_reloc_table
-  PARAMS ((bfd *, asection *, asymbol **, boolean));
-
-static void write_relocs PARAMS ((bfd *, asection *, PTR));
 
 static boolean elf_file_p PARAMS ((Elf_External_Ehdr *));
 
@@ -746,8 +744,8 @@ elf_object_p (abfd)
 
 /* Write out the relocs.  */
 
-static void
-write_relocs (abfd, sec, data)
+void
+elf_write_relocs (abfd, sec, data)
      bfd *abfd;
      asection *sec;
      PTR data;
@@ -1325,7 +1323,7 @@ elf_slurp_reloc_table_from_section (abfd, asect, rel_hdr, reloc_count,
 
 /* Read in and swap the external relocs.  */
 
-static boolean
+boolean
 elf_slurp_reloc_table (abfd, asect, symbols, dynamic)
      bfd *abfd;
      asection *asect;
@@ -1533,7 +1531,7 @@ const struct elf_size_info NAME(_bfd_elf,size_info) = {
   ELFCLASS, EV_CURRENT,
   elf_write_out_phdrs,
   elf_write_shdrs_and_ehdr,
-  write_relocs,
+  elf_write_relocs,
   elf_swap_symbol_out,
   elf_slurp_reloc_table,
   elf_slurp_symbol_table,

@@ -700,8 +700,8 @@ concat_filename (table, file)
 
   if (file - 1 >= table->num_files)
     {
-      (*_bfd_error_handler) (_("Dwarf Error: mangled line number "
-			       "section (bad file number)."));
+      (*_bfd_error_handler)
+	(_("Dwarf Error: mangled line number section (bad file number)."));
       return "<unknown>";
     }
 

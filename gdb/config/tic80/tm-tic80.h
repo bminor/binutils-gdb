@@ -121,7 +121,7 @@ struct frame_saved_regs;
 /* Discard from the stack the innermost frame, restoring all registers.  */
 
 #define POP_FRAME tic80_pop_frame(get_current_frame ())
-extern struct frame_info *tic80_pop_frame PARAMS ((struct frame_info * frame));
+extern struct frame_info *tic80_pop_frame (struct frame_info *frame);
 
 /* Return number of bytes at start of arglist that are not really args.  */
 
@@ -149,7 +149,7 @@ extern struct frame_info *tic80_pop_frame PARAMS ((struct frame_info * frame));
   int frameoffset;		\
   int framereg;
 
-extern void tic80_init_extra_frame_info PARAMS ((struct frame_info * fi));
+extern void tic80_init_extra_frame_info (struct frame_info *fi);
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) tic80_init_extra_frame_info (fi)
 #define INIT_FRAME_PC		/* Not necessary */
 
@@ -161,13 +161,14 @@ extern void tic80_init_extra_frame_info PARAMS ((struct frame_info * fi));
 
 #define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs)	    \
    tic80_frame_find_saved_regs(frame_info, &(frame_saved_regs))
-extern void tic80_frame_find_saved_regs PARAMS ((struct frame_info *, struct frame_saved_regs *));
+extern void tic80_frame_find_saved_regs (struct frame_info *,
+					 struct frame_saved_regs *);
 
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
 #define SKIP_PROLOGUE(pc) (tic80_skip_prologue (pc))
-extern CORE_ADDR tic80_skip_prologue PARAMS ((CORE_ADDR pc));
+extern CORE_ADDR tic80_skip_prologue (CORE_ADDR pc);
 
 /* Immediately after a function call, return the saved pc.
    Can't always go through the frames for this because on some machines
@@ -183,10 +184,10 @@ extern CORE_ADDR tic80_skip_prologue PARAMS ((CORE_ADDR pc));
    and produces the frame's chain-pointer. */
 
 #define FRAME_CHAIN(thisframe) (CORE_ADDR) tic80_frame_chain (thisframe)
-extern CORE_ADDR tic80_frame_chain PARAMS ((struct frame_info *));
+extern CORE_ADDR tic80_frame_chain (struct frame_info *);
 
 #define FRAME_SAVED_PC(FRAME)	tic80_frame_saved_pc (FRAME)
-extern CORE_ADDR tic80_frame_saved_pc PARAMS ((struct frame_info *));
+extern CORE_ADDR tic80_frame_saved_pc (struct frame_info *);
 
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function. 
@@ -217,17 +218,17 @@ extern CORE_ADDR tic80_frame_saved_pc PARAMS ((struct frame_info *));
 
 
 /* PUSH_ARGUMENTS */
-extern CORE_ADDR tic80_push_arguments PARAMS ((int nargs,
-					       struct value ** args,
-					       CORE_ADDR sp,
-					       unsigned char struct_return,
-					       CORE_ADDR struct_addr));
+extern CORE_ADDR tic80_push_arguments (int nargs,
+				       struct value **args,
+				       CORE_ADDR sp,
+				       unsigned char struct_return,
+				       CORE_ADDR struct_addr);
 
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
   (tic80_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR))
 
 /* PUSH_RETURN_ADDRESS */
-extern CORE_ADDR tic80_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));
+extern CORE_ADDR tic80_push_return_address (CORE_ADDR, CORE_ADDR);
 #define PUSH_RETURN_ADDRESS(PC, SP)	tic80_push_return_address (PC, SP)
 
 /* override the standard get_saved_register function with 

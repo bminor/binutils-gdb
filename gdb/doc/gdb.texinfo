@@ -21,8 +21,10 @@
 @finalout
 @syncodeindex ky cp
 
-@c readline appendices use @vindex
+@c readline appendices use @vindex, @findex and @ftable,
+@c annotate.texi and gdbmi use @findex.
 @syncodeindex vr cp
+@syncodeindex fn cp
 
 @c !!set GDB manual's edition---not the same as GDB version!
 @set EDITION Eighth
@@ -75,7 +77,7 @@ into another language, under the above conditions for modified versions.
 @sp 1
 @subtitle @value{EDITION} Edition, for @value{GDBN} version @value{GDBVN}
 @subtitle @value{DATE}
-@author Richard M. Stallman and Roland H. Pesch
+@author Richard Stallman, Roland Pesch, Stan Shebs, et al.
 @page
 @tex
 {\parskip=0pt
@@ -142,6 +144,7 @@ Copyright (C) 1988-2000 Free Software Foundation, Inc.
 * Sequences::                   Canned sequences of commands
 * Emacs::                       Using @value{GDBN} under @sc{gnu} Emacs
 * Annotations::                 @value{GDBN}'s annotation interface.
+* GDB/MI::                      @value{GDBN}'s Machine Interface.
 
 * GDB Bugs::                    Reporting bugs in @value{GDBN}
 * Formatting Documentation::    How to format and print @value{GDBN} documentation
@@ -202,6 +205,11 @@ Copyright (C) 1988-2000 Free Software Foundation, Inc.
 @end menu
 
 @end ifhtml
+
+@c TeX can handle the contents at the start but makeinfo 3.12 can not
+@iftex
+@contents
+@end iftex
 
 @node Summary
 @unnumbered Summary of @value{GDBN}
@@ -291,6 +299,7 @@ omitted from this list, we would like to add your names!
 So that they may not regard their many labors as thankless, we
 particularly thank those who shepherded @value{GDBN} through major
 releases:
+Andrew Cagney (release 5.0);
 Jim Blandy (release 4.18);
 Jason Molenda (release 4.17);
 Stan Shebs (release 4.14);
@@ -1040,9 +1049,7 @@ Use the interpreter @var{interp} for interface with the controlling
 program or device.  This option is meant to be set by programs which
 communicate with @value{GDBN} using it as a back end.  For example,
 @samp{--interpreter=mi} causes @value{GDBN} to use the @dfn{gdbmi
-interface}.
-@c FIXME: There should be an @xref here to the GDB/MI docs, but
-@c gdbmi.texi doesn't have a single node to reference!
+interface} (@pxref{GDB/MI, , The @sc{gdb/mi} Interface}).
 
 @item -write
 @cindex @code{--write}
@@ -1069,7 +1076,7 @@ no-warranty blurb, and exit.
 
 @table @code
 @kindex quit @r{[}@var{expression}@r{]}
-@kindex q
+@kindex q @r{(@code{quit})}
 @item quit @r{[}@var{expression}@r{]}
 @itemx q
 To exit @value{GDBN}, use the @code{quit} command (abbreviated
@@ -1154,7 +1161,7 @@ names start with @code{s}.  You can test abbreviations by using them as
 arguments to the @code{help} command.
 
 @cindex repeating commands
-@kindex RET
+@kindex RET @r{(repeat last command)}
 A blank line as input to @value{GDBN} (typing just @key{RET}) means to
 repeat the previous command.  Certain commands (for example, @code{run})
 will not repeat this way; these are commands whose unintentional
@@ -1171,7 +1178,7 @@ output, in a way similar to the common utility @code{more}
 @key{RET} too many in this situation, @value{GDBN} disables command
 repetition after any command that generates this sort of display.
 
-@kindex #
+@kindex # @r{(a comment)}
 @cindex comment
 Any text from a @kbd{#} to the end of the line is a comment; it does
 nothing.  This is useful mainly in command files (@pxref{Command
@@ -1305,7 +1312,7 @@ You can always ask @value{GDBN} itself for information on its commands,
 using the command @code{help}.
 
 @table @code
-@kindex h
+@kindex h @r{(@code{help})}
 @item help
 @itemx h
 You can use @code{help} (abbreviated @code{h}) with no arguments to
@@ -1421,7 +1428,7 @@ all the sub-commands.  @xref{Index}.
 @c @group
 @table @code
 @kindex info
-@kindex i
+@kindex i @r{(@code{info})}
 @item info
 This command (abbreviated @code{i}) is for describing the state of your
 program.  For example, you can list the arguments given to your program
@@ -1557,6 +1564,7 @@ format; if your @sc{gnu} C compiler has this option, do not use it.
 
 @table @code
 @kindex run
+@kindex r @r{(@code{run})}
 @item run
 @itemx r
 Use the @code{run} command to start your program under @value{GDBN}.
@@ -1646,8 +1654,8 @@ the program, not by the shell.
 @code{run} with no arguments uses the same arguments used by the previous
 @code{run}, or those set by the @code{set args} command.
 
-@kindex set args
 @table @code
+@kindex set args
 @item set args
 Specify the arguments to be used the next time your program is run.  If
 @code{set args} has no arguments, @code{run} executes your program
@@ -1954,7 +1962,7 @@ control, one thread in particular is always the focus of debugging.
 This thread is called the @dfn{current thread}.  Debugging commands show
 program information from the perspective of the current thread.
 
-@kindex New @var{systag}
+@cindex @code{New} @var{systag} message
 @cindex thread identifier (system)
 @c FIXME-implementors!! It would be more helpful if the [New...] message
 @c included GDB's numeric thread handle, so you could just go to that
@@ -2025,8 +2033,8 @@ For debugging purposes, @value{GDBN} associates its own thread
 number---a small integer assigned in thread-creation order---with each
 thread in your program.
 
-@kindex New @var{systag}
-@cindex thread identifier (system)
+@cindex @code{New} @var{systag} message, on HP-UX
+@cindex thread identifier (system), on HP-UX
 @c FIXME-implementors!! It would be more helpful if the [New...] message
 @c included GDB's numeric thread handle, so you could just go to that
 @c thread without first checking `info threads'.
@@ -2311,8 +2319,8 @@ all breakpoint in that range are operated on.
 @c FIXME 2 is there stuff on this already? break at fun start, already init?
 
 @kindex break
-@kindex b
-@kindex $bpnum
+@kindex b @r{(@code{break})}
+@vindex $bpnum@r{, convenience variable}
 @cindex latest breakpoint
 Breakpoints are set with the @code{break} command (abbreviated
 @code{b}).  The debugger convenience variable @samp{$bpnum} records the
@@ -2822,7 +2830,7 @@ Delete any breakpoints set at or within the code of the specified line.
 
 @cindex delete breakpoints
 @kindex delete
-@kindex d
+@kindex d @r{(@code{delete})}
 @item delete @r{[}breakpoints@r{]} @r{[}@var{range}@dots{}@r{]}
 Delete the breakpoints, watchpoints, or catchpoints of the breakpoint
 ranges specified as arguments.  If no argument is specified, delete all
@@ -2870,7 +2878,7 @@ watchpoints, and catchpoints:
 @table @code
 @kindex disable breakpoints
 @kindex disable
-@kindex dis
+@kindex dis @r{(@code{disable})}
 @item disable @r{[}breakpoints@r{]} @r{[}@var{range}@dots{}@r{]}
 Disable the specified breakpoints---or all breakpoints, if none are
 listed.  A disabled breakpoint has no effect but is not forgotten.  All
@@ -3218,8 +3226,8 @@ it stops due to a signal, you may want to use @code{handle}, or use
 
 @table @code
 @kindex continue
-@kindex c
-@kindex fg
+@kindex c @r{(@code{continue})}
+@kindex fg @r{(resume foreground execution)}
 @item continue @r{[}@var{ignore-count}@r{]}
 @itemx c @r{[}@var{ignore-count}@r{]}
 @itemx fg @r{[}@var{ignore-count}@r{]}
@@ -3253,7 +3261,7 @@ interesting, until you see the problem happen.
 
 @table @code
 @kindex step
-@kindex s
+@kindex s @r{(@code{step})}
 @item step
 Continue running your program until control reaches a different source
 line, then stop it and return control to @value{GDBN}.  This command is
@@ -3292,7 +3300,7 @@ breakpoint is reached, or a signal not related to stepping occurs before
 @var{count} steps, stepping stops right away.
 
 @kindex next
-@kindex n
+@kindex n @r{(@code{next})}
 @item next @r{[}@var{count}@r{]}
 Continue to the next source line in the current (innermost) stack frame.
 This is similar to @code{step}, but function calls that appear within
@@ -3324,7 +3332,7 @@ Contrast this with the @code{return} command (@pxref{Returning,
 ,Returning from a function}).
 
 @kindex until
-@kindex u
+@kindex u @r{(@code{until})}
 @item until
 @itemx u
 Continue running until a source line past the current line, in the
@@ -3378,7 +3386,7 @@ the forms of argument acceptable to @code{break} (@pxref{Set Breaks,
 and hence is quicker than @code{until} without an argument.
 
 @kindex stepi
-@kindex si
+@kindex si @r{(@code{stepi})}
 @item stepi
 @itemx stepi @var{arg}
 @itemx si
@@ -3393,7 +3401,7 @@ An argument is a repeat count, as in @code{step}.
 
 @need 750
 @kindex nexti
-@kindex ni
+@kindex ni @r{(@code{nexti})}
 @item nexti
 @itemx nexti @var{arg}
 @itemx ni
@@ -3680,6 +3688,7 @@ no provision for frameless functions elsewhere in the stack.
 
 @table @code
 @kindex frame@r{, command}
+@cindex current stack frame
 @item frame @var{args}
 The @code{frame} command allows you to move from one stack frame to another,
 and to print the stack frame you select.  @var{args} may be either the
@@ -3687,6 +3696,7 @@ address of the frame or the stack frame number.  Without an argument,
 @code{frame} prints the current stack frame.
 
 @kindex select-frame
+@cindex selecting frame silently
 @item select-frame
 The @code{select-frame} command allows you to move from one stack frame
 to another without printing the frame.  This is the silent version of
@@ -3706,7 +3716,7 @@ stack.
 
 @table @code
 @kindex backtrace
-@kindex bt
+@kindex bt @r{(@code{backtrace})}
 @item backtrace
 @itemx bt
 Print a backtrace of the entire stack: one line per frame for all
@@ -3726,7 +3736,7 @@ Similar, but print only the outermost @var{n} frames.
 
 @kindex where
 @kindex info stack
-@kindex info s
+@kindex info s @r{(@code{info stack})}
 The names @code{where} and @code{info stack} (abbreviated @code{info s})
 are additional aliases for @code{backtrace}.
 
@@ -3766,7 +3776,7 @@ of the stack frame just selected.
 
 @table @code
 @kindex frame@r{, selecting}
-@kindex f
+@kindex f @r{(@code{frame})}
 @item frame @var{n}
 @itemx f @var{n}
 Select frame number @var{n}.  Recall that frame zero is the innermost
@@ -3801,7 +3811,7 @@ advances toward the outermost frame, to higher frame numbers, to frames
 that have existed longer.  @var{n} defaults to one.
 
 @kindex down
-@kindex do
+@kindex do @r{(@code{down})}
 @item down @var{n}
 Move @var{n} frames down the stack.  For positive numbers @var{n}, this
 advances toward the innermost frame, to lower frame numbers, to frames
@@ -3858,7 +3868,7 @@ argument, this command is used to select a stack frame.
 @xref{Selection, ,Selecting a frame}.
 
 @kindex info frame
-@kindex info f
+@kindex info f @r{(@code{info frame})}
 @item info frame
 @itemx info f
 This command prints a verbose description of the selected stack frame,
@@ -3944,7 +3954,7 @@ prefer to use Emacs facilities to view source; see @ref{Emacs, ,Using
 @section Printing source lines
 
 @kindex list
-@kindex l
+@kindex l @r{(@code{list})}
 To print lines from a source file, use the @code{list} command
 (abbreviated @code{l}).  By default, ten lines are printed.
 There are several ways to specify what part of the file you want to print.
@@ -4127,8 +4137,8 @@ path; this moves it forward, so @value{GDBN} searches it sooner.
 
 @kindex cdir
 @kindex cwd
-@kindex $cdir
-@kindex $cwd
+@vindex $cdir@r{, convenience variable}
+@vindex $cwdr@r{, convenience variable}
 @cindex compilation directory
 @cindex current directory
 @cindex working directory
@@ -4205,7 +4215,7 @@ Line 926 of "builtin.c" starts at pc 0x63e4 and ends at 0x6404.
 @end smallexample
 
 @cindex @code{$_} and @code{info line}
-@kindex x@r{, and }@code{info line}
+@kindex x@r{(examine), and} info line
 After @code{info line}, the default address for the @code{x} command
 is changed to the starting address of the line, so that @samp{x/i} is
 sufficient to begin examining the machine code (@pxref{Memory,
@@ -4429,7 +4439,7 @@ using the colon-colon notation:
 @cindex colon-colon, context for variables/functions
 @iftex
 @c info cannot cope with a :: index entry, but why deprive hard copy readers?
-@kindex ::
+@cindex @code{::}, context for variables/functions
 @end iftex
 @example
 @var{file}::@var{variable}
@@ -4500,7 +4510,7 @@ information.
 @section Artificial arrays
 
 @cindex artificial array
-@kindex @@
+@kindex @@@r{, referencing memory as an array}
 It is often useful to print out several successive objects of the
 same type in memory; a section of an array, or an array of
 dynamically determined size for which only a pointer exists in the
@@ -4645,7 +4655,7 @@ any of several formats, independently of your program's data types.
 
 @cindex examining memory
 @table @code
-@kindex x
+@kindex x @r{(examine memory)}
 @item x/@var{nfu} @var{addr}
 @itemx x @var{addr}
 @itemx x
@@ -5336,7 +5346,7 @@ Some convenience variables are created automatically by @value{GDBN} and given
 values likely to be useful.
 
 @table @code
-@kindex $_
+@vindex $_@r{, convenience variable}
 @item $_
 The variable @code{$_} is automatically set by the @code{x} command to
 the last address examined (@pxref{Memory, ,Examining memory}).  Other
@@ -5346,14 +5356,14 @@ and @code{info breakpoint}.  The type of @code{$_} is @code{void *}
 except when set by the @code{x} command, in which case it is a pointer
 to the type of @code{$__}.
 
-@kindex $__
+@vindex $__@r{, convenience variable}
 @item $__
 The variable @code{$__} is automatically set by the @code{x} command
 to the value found in the last address examined.  Its type is chosen
 to match the format in which the data was printed.
 
 @item $_exitcode
-@kindex $_exitcode
+@vindex $_exitcode@r{, convenience variable}
 The variable @code{$_exitcode} is automatically set to the exit code when
 the program being debugged terminates.
 @end table
@@ -5868,8 +5878,8 @@ Since C and C++ are so closely related, many features of @value{GDBN} apply
 to both languages.  Whenever this is the case, we discuss those languages
 together.
 
-@cindex C++
-@kindex g++
+@cindex C@t{++}
+@cindex @code{g++}, @sc{gnu} C@t{++} compiler
 @cindex @sc{gnu} C++
 The C++ debugging facilities are jointly implemented by the C++
 compiler and @value{GDBN}.  Therefore, to debug your C++ code
@@ -6161,7 +6171,7 @@ Member function calls are allowed; you can use expressions like
 count = aml->GetOriginal(x, y)
 @end example
 
-@kindex this
+@vindex this@r{, inside C@t{++} member functions}
 @cindex namespace in C++
 @item
 While a member function is active (in the selected stack frame), your
@@ -6762,14 +6772,14 @@ index bounds, and all built-in functions and procedures.
 @node M2 Scope
 @subsubsection The scope operators @code{::} and @code{.}
 @cindex scope
-@kindex .
+@cindex @code{.}, Modula-2 scope operator
 @cindex colon, doubled as scope operator
 @ifinfo
-@kindex colon-colon@r{, in Modula-2}
+@vindex colon-colon@r{, in Modula-2}
 @c Info cannot handle :: but TeX can.
 @end ifinfo
 @iftex
-@kindex ::
+@vindex ::@r{, in Modula-2}
 @end iftex
 
 There are a few subtle differences between the Modula-2 scope operator
@@ -8012,19 +8022,16 @@ the program is running.  To do this, use the @code{kill} command
 @cindex dynamic linking
 @item add-symbol-file @var{filename} @var{address}
 @itemx add-symbol-file @var{filename} @var{address} @r{[} -readnow @r{]} @r{[} -mapped @r{]}
-@itemx add-symbol-file @var{filename} @var{address} @var{data_address} @var{bss_address}
-@itemx add-symbol-file @var{filename} @r{-T}@var{section} @var{address}
+@itemx add-symbol-file @var{filename} @r{-s}@var{section} @var{address}
 The @code{add-symbol-file} command reads additional symbol table
 information from the file @var{filename}.  You would use this command
 when @var{filename} has been dynamically loaded (by some other means)
 into the program that is running.  @var{address} should be the memory
 address at which the file has been loaded; @value{GDBN} cannot figure
-this out for itself.  You can specify up to three addresses, in which
-case they are taken to be the addresses of the text, data, and bss
-segments respectively.  For complicated cases, you can specify an
-arbitrary number of @samp{@r{-T}@var{section} @var{address}} pairs, to
-give an explicit section name and base address for that section.  You
-can specify any @var{address} as an expression.
+this out for itself.  You can additionally specify an arbitrary number
+of @samp{@r{-s}@var{section} @var{address}} pairs, to give an explicit
+section name and base address for that section.  You can specify any
+@var{address} as an expression.
 
 The symbol table of the file @var{filename} is added to the symbol table
 originally read with the @code{symbol-file} command.  You can use the
@@ -8421,10 +8428,6 @@ specifies a fixed address.
 
 @cindex choosing target byte order
 @cindex target byte order
-@kindex set endian big
-@kindex set endian little
-@kindex set endian auto
-@kindex show endian
 
 Some types of processors, such as the MIPS, PowerPC, and Hitachi SH,
 offer the ability to run either big-endian or little-endian byte
@@ -8536,30 +8539,30 @@ These working remote stubs are distributed with @value{GDBN}:
 @table @code
 
 @item i386-stub.c
-@kindex i386-stub.c
+@cindex @file{i386-stub.c}
 @cindex Intel
 @cindex i386
 For Intel 386 and compatible architectures.
 
 @item m68k-stub.c
-@kindex m68k-stub.c
+@cindex @file{m68k-stub.c}
 @cindex Motorola 680x0
 @cindex m680x0
 For Motorola 680x0 architectures.
 
 @item sh-stub.c
-@kindex sh-stub.c
+@cindex @file{sh-stub.c}
 @cindex Hitachi
 @cindex SH
 For Hitachi SH architectures.
 
 @item sparc-stub.c
-@kindex sparc-stub.c
+@cindex @file{sparc-stub.c}
 @cindex Sparc
 For @sc{sparc} architectures.
 
 @item sparcl-stub.c
-@kindex sparcl-stub.c
+@cindex @file{sparcl-stub.c}
 @cindex Fujitsu
 @cindex SparcLite
 For Fujitsu @sc{sparclite} architectures.
@@ -8754,7 +8757,7 @@ void (*exceptionHook)() = 0;
 
 @noindent
 but if before calling @code{set_debug_traps}, you set it to point to a
-function in your program; that function is called when
+function in your program, that function is called when
 @code{@value{GDBN}} continues after stopping on a trap (for example, bus
 error).  The function indicated by @code{exceptionHook} is called with
 one parameter: an @code{int} which is the exception number.
@@ -8928,7 +8931,7 @@ So:
 @noindent
 means the same as "0000".
 
-The error response, returned for some packets includes a two character
+The error response returned for some packets includes a two character
 error number.  That number is not well defined.
 
 For any @var{command} not supported by the stub, an empty response
@@ -8942,7 +8945,7 @@ optional.
 
 Below is a complete list of all currently defined @var{command}s and
 their corresponding response @var{data}:
-
+@page
 @multitable @columnfractions .30 .30 .40
 @item Packet
 @tab Request
@@ -8952,7 +8955,7 @@ their corresponding response @var{data}:
 @tab @code{!}
 @tab
 Use the extended remote protocol.  Sticky---only needs to be set once.
-The extended remote protocol support the @samp{R} packet.
+The extended remote protocol supports the @samp{R} packet.
 @item
 @tab reply @samp{}
 @tab
@@ -8976,6 +8979,9 @@ and continue.
 
 @item set program arguments @strong{(reserved)}
 @tab @code{A}@var{arglen}@code{,}@var{argnum}@code{,}@var{arg}@code{,...}
+@tab
+@item
+@tab
 @tab
 Initialized @samp{argv[]} array passed into program. @var{arglen}
 specifies the number of bytes in the hex encoded byte stream @var{arg}.
@@ -9023,7 +9029,7 @@ Continue with signal @var{sig} (hex signal number).  If
 @tab reply
 @tab see below
 
-@item toggle debug @emph{(deprecated)}
+@item toggle debug @strong{(deprecated)}
 @tab @code{d}
 @tab
 toggle debug flag.
@@ -9036,7 +9042,7 @@ Detach @value{GDBN} from the remote system.  Sent to the remote target before
 @item
 @tab reply @emph{no response}
 @tab
-@value{GDBN} does not check for any response after sending this packet
+@value{GDBN} does not check for any response after sending this packet.
 
 @item reserved
 @tab @code{e}
@@ -9219,7 +9225,7 @@ digits for each byte in the register (target byte order).
 @item general query
 @tab @code{q}@var{query}
 @tab
-Request info about @var{query}.  In general @value{GDBN} @var{query}'s
+Request info about @var{query}.  In general @value{GDBN} queries
 have a leading upper case letter.  Custom vendor queries should use a
 company prefix (in lower case) ex: @samp{qfsf.var}.  @var{query} may
 optionally be followed by a @samp{,} or @samp{;} separated list.  Stubs
@@ -9240,7 +9246,7 @@ must ensure that they match the full @var{query} name.
 Set value of @var{var} to @var{val}.  See @samp{q} for a discussing of
 naming conventions.
 
-@item reset @emph{(deprecated)}
+@item reset @strong{(deprecated)}
 @tab @code{r}
 @tab
 Reset the entire system.
@@ -9448,7 +9454,7 @@ sequence will be the @code{qs}@code{ThreadInfo} query.
 @tab reply @code{m}@var{<id>}
 @tab A single thread id
 @item
-@tab reply @code{m}@var{<id>,}@var{<id>...}
+@tab reply @code{m}@var{<id>},@var{<id>...}
 @tab a comma-separated list of thread ids
 @item
 @tab reply @code{l}
@@ -9534,6 +9540,9 @@ offset to the @code{Bss} section.}
 @item thread info request
 @tab @code{q}@code{P}@var{mode}@var{threadid}
 @tab
+@item
+@tab
+@tab
 Returns information on @var{threadid}.  Where: @var{mode} is a hex
 encoded 32 bit mode; @var{threadid} is a hex encoded 64 bit thread ID.
 @item
@@ -9543,6 +9552,9 @@ See @code{remote.c:remote_unpack_thread_info_response()}.
 
 @item remote command
 @tab @code{q}@code{Rcmd,}@var{COMMAND}
+@tab
+@item
+@tab
 @tab
 @var{COMMAND} (hex encoded) is passed to the local interpreter for
 execution.  Invalid commands should be reported using the output string.
@@ -10339,7 +10351,7 @@ and type @kbd{~.} to leave @code{tip} or @code{cu}.
 
 @node Remote Log
 @subsubsection Remote log
-@kindex eb.log
+@cindex @file{eb.log}, a log file for EB29K
 @cindex log file for EB29K
 
 The @code{target amd-eb} command creates a file @file{eb.log} in the
@@ -10598,6 +10610,7 @@ memory}.  The accepted values for @var{mod} are @code{small},
 @item target mon960 @var{dev}
 MON960 monitor for Intel i960.
 
+@kindex target nindy
 @item target nindy @var{devicename}
 An Intel 960 board controlled by a Nindy Monitor.  @var{devicename} is
 the name of the serial device to use for the connection, e.g.
@@ -10622,12 +10635,6 @@ By responding to a prompt on startup;
 @item
 By using the @code{target} command at any point during your @value{GDBN}
 session.  @xref{Target Commands, ,Commands for managing targets}.
-
-@kindex target nindy
-@item target nindy @var{devicename}
-An Intel 960 board controlled by a Nindy Monitor.  @var{devicename} is
-the name of the serial device to use for the connection, e.g.
-@file{/dev/ttya}.
 
 @end itemize
 
@@ -11004,14 +11011,14 @@ both the Unix host and on the Sparclet target.  The program
 @code{@value{GDBP}} is installed and executed on the Unix host.
 
 @table @code
-@item timeout @var{args}
+@item remotetimeout @var{args}
 @kindex remotetimeout
 @value{GDBN} supports the option @code{remotetimeout}.
 This option is set by the user, and  @var{args} represents the number of
 seconds @value{GDBN} waits for responses.
 @end table
 
-@kindex Compiling
+@cindex compiling, on Sparclet
 When compiling for debugging, include the options @samp{-g} to get debug
 information and @samp{-Ttext} to relocate the program to where you wish to
 load it on the target.  You may also want to add the options @samp{-n} or
@@ -11027,7 +11034,7 @@ You can use @code{objdump} to verify that the addresses are what you intended:
 sparclet-aout-objdump --headers --syms prog
 @end example
 
-@kindex Running
+@cindex running, on Sparclet
 Once you have set
 your Unix execution search path to find @value{GDBN}, you are ready to
 run @value{GDBN}.  From your Unix host, run @code{@value{GDBP}}
@@ -11316,7 +11323,7 @@ you may want to limit the size of this search, using one of these
 commands:
 
 @table @code
-@cindex @code{heuristic-fence-post} (Alpha,MIPS)
+@cindex @code{heuristic-fence-post} (Alpha, MIPS)
 @item set heuristic-fence-post @var{limit}
 Restrict @value{GDBN} to examining at most @var{limit} bytes in its
 search for the beginning of a function.  A value of @var{0} (the
@@ -11493,7 +11500,7 @@ These commands display the state of the @value{GDBN} history parameters.
 @end table
 
 @table @code
-@kindex show commands
+@kindex shows
 @item show commands
 Display the last ten commands in the command history.
 
@@ -11907,16 +11914,30 @@ the last command, as it would from the terminal.
 @cindex @file{.gdbinit}
 @cindex @file{gdb.ini}
 When you start @value{GDBN}, it automatically executes commands from its
-@dfn{init files}.  These are files named @file{.gdbinit} on Unix, or
-@file{gdb.ini} on DOS/Windows.  @value{GDBN} reads the init file (if
-any) in your home directory@footnote{On DOS/Windows systems, the home
-directory is the one pointed to by the @code{HOME} environment
-variable.}, then processes command line options and operands, and then
-reads the init file (if any) in the current working directory.  This is
-so the init file in your home directory can set options (such as
-@code{set complaints}) which affect the processing of the command line
-options and operands.  The init files are not executed if you use the
-@samp{-nx} option; @pxref{Mode Options, ,Choosing modes}.
+@dfn{init files}.  These are files named @file{.gdbinit} on Unix and
+@file{gdb.ini} on DOS/Windows.  During startup, @value{GDBN} does the
+following:
+
+@enumerate
+@item
+Reads the init file (if any) in your home directory@footnote{On
+DOS/Windows systems, the home directory is the one pointed to by the
+@code{HOME} environment variable.}.
+
+@item
+Processes command line options and operands.
+
+@item
+Reads the init file (if any) in the current working directory.
+
+@item
+Reads command files specified by the @samp{-x} option.
+@end enumerate
+
+The init file in your home directory can set options (such as @samp{set
+complaints}) that affect subsequent processing of command line options
+and operands.  Init files are not executed if you use the @samp{-nx}
+option (@pxref{Mode Options, ,Choosing modes}).
 
 @cindex init file name
 On some configurations of @value{GDBN}, the init file is known by a
@@ -11925,18 +11946,18 @@ form of @value{GDBN} may need to coexist with other forms, hence a
 different name for the specialized version's init file).  These are the
 environments with special init file names:
 
-@kindex .vxgdbinit
+@cindex @file{.vxgdbinit}
 @itemize @bullet
 @item
-VxWorks (Wind River Systems real-time OS): @samp{.vxgdbinit}
+VxWorks (Wind River Systems real-time OS): @file{.vxgdbinit}
 
-@kindex .os68gdbinit
+@cindex @file{.os68gdbinit}
 @item
-OS68K (Enea Data Systems real-time OS): @samp{.os68gdbinit}
+OS68K (Enea Data Systems real-time OS): @file{.os68gdbinit}
 
-@kindex .esgdbinit
+@cindex @file{.esgdbinit}
 @item
-ES-1800 (Ericsson Telecom AB M68000 emulator): @samp{.esgdbinit}
+ES-1800 (Ericsson Telecom AB M68000 emulator): @file{.esgdbinit}
 @end itemize
 
 You can also request the execution of a command file with the
@@ -12212,6 +12233,7 @@ each value is printed in its own window.
 @end ignore
 
 @include annotate.texi
+@include gdbmi.texinfo
 
 @node GDB Bugs
 @chapter Reporting Bugs in @value{GDBN}
@@ -12857,5 +12879,12 @@ needed for special purposes only.
 % Blame: doc@cygnus.com, 1991.
 @end tex
 
+@c TeX can handle the contents at the start but makeinfo 3.12 can not
+@ifinfo
 @contents
+@end ifinfo
+@ifhtml
+@contents
+@end ifhtml
+
 @bye

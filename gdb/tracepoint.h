@@ -115,17 +115,16 @@ extern unsigned long trace_running_p;
 
 /* A hook used to notify the UI of tracepoint operations */
 
-void (*create_tracepoint_hook) PARAMS ((struct tracepoint *));
-void (*delete_tracepoint_hook) PARAMS ((struct tracepoint *));
-void (*modify_tracepoint_hook) PARAMS ((struct tracepoint *));
-void (*trace_find_hook) PARAMS ((char *arg, int from_tty));
-void (*trace_start_stop_hook) PARAMS ((int start, int from_tty));
+void (*create_tracepoint_hook) (struct tracepoint *);
+void (*delete_tracepoint_hook) (struct tracepoint *);
+void (*modify_tracepoint_hook) (struct tracepoint *);
+void (*trace_find_hook) (char *arg, int from_tty);
+void (*trace_start_stop_hook) (int start, int from_tty);
 
-struct tracepoint *get_tracepoint_by_number PARAMS ((char **, int, int));
-int get_traceframe_number PARAMS ((void));
-void free_actions PARAMS ((struct tracepoint *));
-enum actionline_type validate_actionline PARAMS ((char **,
-						  struct tracepoint *));
+struct tracepoint *get_tracepoint_by_number (char **, int, int);
+int get_traceframe_number (void);
+void free_actions (struct tracepoint *);
+enum actionline_type validate_actionline (char **, struct tracepoint *);
 
 
 /* Walk the following statement or block through all tracepoints.

@@ -37,11 +37,11 @@
 #define DEFAULT_NETROM_LOAD_PORT    1236
 #define DEFAULT_NETROM_CONTROL_PORT 1237
 
-static void nrom_close PARAMS ((int quitting));
+static void nrom_close (int quitting);
 
 /* New commands.  */
 
-static void nrom_passthru PARAMS ((char *, int));
+static void nrom_passthru (char *, int);
 
 /* We talk to the NetROM over these sockets.  */
 

@@ -450,132 +450,95 @@ static const struct language_defn *cu_language_defn;
 /* Forward declarations of static functions so we don't have to worry
    about ordering within this file.  */
 
-static void
-free_utypes PARAMS ((PTR));
+static void free_utypes (PTR);
 
-static int
-attribute_size PARAMS ((unsigned int));
+static int attribute_size (unsigned int);
 
-static CORE_ADDR
-  target_to_host PARAMS ((char *, int, int, struct objfile *));
+static CORE_ADDR target_to_host (char *, int, int, struct objfile *);
 
-static void
-add_enum_psymbol PARAMS ((struct dieinfo *, struct objfile *));
+static void add_enum_psymbol (struct dieinfo *, struct objfile *);
+
+static void handle_producer (char *);
 
 static void
-handle_producer PARAMS ((char *));
+read_file_scope (struct dieinfo *, char *, char *, struct objfile *);
 
 static void
-read_file_scope PARAMS ((struct dieinfo *, char *, char *, struct objfile *));
+read_func_scope (struct dieinfo *, char *, char *, struct objfile *);
 
 static void
-read_func_scope PARAMS ((struct dieinfo *, char *, char *, struct objfile *));
+read_lexical_block_scope (struct dieinfo *, char *, char *, struct objfile *);
+
+static void scan_partial_symbols (char *, char *, struct objfile *);
 
 static void
-read_lexical_block_scope PARAMS ((struct dieinfo *, char *, char *,
-				  struct objfile *));
+scan_compilation_units (char *, char *, file_ptr, file_ptr, struct objfile *);
+
+static void add_partial_symbol (struct dieinfo *, struct objfile *);
+
+static void basicdieinfo (struct dieinfo *, char *, struct objfile *);
+
+static void completedieinfo (struct dieinfo *, struct objfile *);
+
+static void dwarf_psymtab_to_symtab (struct partial_symtab *);
+
+static void psymtab_to_symtab_1 (struct partial_symtab *);
+
+static void read_ofile_symtab (struct partial_symtab *);
+
+static void process_dies (char *, char *, struct objfile *);
 
 static void
-scan_partial_symbols PARAMS ((char *, char *, struct objfile *));
+read_structure_scope (struct dieinfo *, char *, char *, struct objfile *);
+
+static struct type *decode_array_element_type (char *);
+
+static struct type *decode_subscript_data_item (char *, char *);
+
+static void dwarf_read_array_type (struct dieinfo *);
+
+static void read_tag_pointer_type (struct dieinfo *dip);
+
+static void read_tag_string_type (struct dieinfo *dip);
+
+static void read_subroutine_type (struct dieinfo *, char *, char *);
 
 static void
-scan_compilation_units PARAMS ((char *, char *, file_ptr,
-				file_ptr, struct objfile *));
+read_enumeration (struct dieinfo *, char *, char *, struct objfile *);
+
+static struct type *struct_type (struct dieinfo *, char *, char *,
+				 struct objfile *);
+
+static struct type *enum_type (struct dieinfo *, struct objfile *);
+
+static void decode_line_numbers (char *);
+
+static struct type *decode_die_type (struct dieinfo *);
+
+static struct type *decode_mod_fund_type (char *);
+
+static struct type *decode_mod_u_d_type (char *);
+
+static struct type *decode_modified_type (char *, unsigned int, int);
+
+static struct type *decode_fund_type (unsigned int);
+
+static char *create_name (char *, struct obstack *);
+
+static struct type *lookup_utype (DIE_REF);
+
+static struct type *alloc_utype (DIE_REF, struct type *);
+
+static struct symbol *new_symbol (struct dieinfo *, struct objfile *);
 
 static void
-add_partial_symbol PARAMS ((struct dieinfo *, struct objfile *));
+synthesize_typedef (struct dieinfo *, struct objfile *, struct type *);
 
-static void
-basicdieinfo PARAMS ((struct dieinfo *, char *, struct objfile *));
+static int locval (struct dieinfo *);
 
-static void
-completedieinfo PARAMS ((struct dieinfo *, struct objfile *));
+static void set_cu_language (struct dieinfo *);
 
-static void
-dwarf_psymtab_to_symtab PARAMS ((struct partial_symtab *));
-
-static void
-psymtab_to_symtab_1 PARAMS ((struct partial_symtab *));
-
-static void
-read_ofile_symtab PARAMS ((struct partial_symtab *));
-
-static void
-process_dies PARAMS ((char *, char *, struct objfile *));
-
-static void
-read_structure_scope PARAMS ((struct dieinfo *, char *, char *,
-			      struct objfile *));
-
-static struct type *
-  decode_array_element_type PARAMS ((char *));
-
-static struct type *
-  decode_subscript_data_item PARAMS ((char *, char *));
-
-static void
-dwarf_read_array_type PARAMS ((struct dieinfo *));
-
-static void
-read_tag_pointer_type PARAMS ((struct dieinfo * dip));
-
-static void
-read_tag_string_type PARAMS ((struct dieinfo * dip));
-
-static void
-read_subroutine_type PARAMS ((struct dieinfo *, char *, char *));
-
-static void
-read_enumeration PARAMS ((struct dieinfo *, char *, char *, struct objfile *));
-
-static struct type *
-  struct_type PARAMS ((struct dieinfo *, char *, char *, struct objfile *));
-
-static struct type *
-  enum_type PARAMS ((struct dieinfo *, struct objfile *));
-
-static void
-decode_line_numbers PARAMS ((char *));
-
-static struct type *
-  decode_die_type PARAMS ((struct dieinfo *));
-
-static struct type *
-  decode_mod_fund_type PARAMS ((char *));
-
-static struct type *
-  decode_mod_u_d_type PARAMS ((char *));
-
-static struct type *
-  decode_modified_type PARAMS ((char *, unsigned int, int));
-
-static struct type *
-  decode_fund_type PARAMS ((unsigned int));
-
-static char *
-  create_name PARAMS ((char *, struct obstack *));
-
-static struct type *
-  lookup_utype PARAMS ((DIE_REF));
-
-static struct type *
-  alloc_utype PARAMS ((DIE_REF, struct type *));
-
-static struct symbol *
-  new_symbol PARAMS ((struct dieinfo *, struct objfile *));
-
-static void
-synthesize_typedef PARAMS ((struct dieinfo *, struct objfile *,
-			    struct type *));
-
-static int
-locval PARAMS ((struct dieinfo *));
-
-static void
-set_cu_language PARAMS ((struct dieinfo *));
-
-static struct type *
-  dwarf_fundamental_type PARAMS ((struct objfile *, int));
+static struct type *dwarf_fundamental_type (struct objfile *, int);
 
 
 /*

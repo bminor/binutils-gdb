@@ -121,60 +121,61 @@ static int display_number;
 
 /* Prototypes for exported functions. */
 
-void output_command PARAMS ((char *, int));
+void output_command (char *, int);
 
-void _initialize_printcmd PARAMS ((void));
+void _initialize_printcmd (void);
 
 /* Prototypes for local functions. */
 
-static void delete_display PARAMS ((int));
+static void delete_display (int);
 
-static void enable_display PARAMS ((char *, int));
+static void enable_display (char *, int);
 
-static void disable_display_command PARAMS ((char *, int));
+static void disable_display_command (char *, int);
 
-static void disassemble_command PARAMS ((char *, int));
+static void disassemble_command (char *, int);
 
-static void printf_command PARAMS ((char *, int));
+static void printf_command (char *, int);
 
 static void print_frame_nameless_args (struct frame_info *, long,
 				       int, int, struct ui_file *);
 
-static void display_info PARAMS ((char *, int));
+static void display_info (char *, int);
 
-static void do_one_display PARAMS ((struct display *));
+static void do_one_display (struct display *);
 
-static void undisplay_command PARAMS ((char *, int));
+static void undisplay_command (char *, int);
 
-static void free_display PARAMS ((struct display *));
+static void free_display (struct display *);
 
-static void display_command PARAMS ((char *, int));
+static void display_command (char *, int);
 
-void x_command PARAMS ((char *, int));
+void x_command (char *, int);
 
-static void address_info PARAMS ((char *, int));
+static void address_info (char *, int);
 
-static void set_command PARAMS ((char *, int));
+static void set_command (char *, int);
 
-static void call_command PARAMS ((char *, int));
+static void call_command (char *, int);
 
-static void inspect_command PARAMS ((char *, int));
+static void inspect_command (char *, int);
 
-static void print_command PARAMS ((char *, int));
+static void print_command (char *, int);
 
-static void print_command_1 PARAMS ((char *, int, int));
+static void print_command_1 (char *, int, int);
 
-static void validate_format PARAMS ((struct format_data, char *));
+static void validate_format (struct format_data, char *);
 
-static void do_examine PARAMS ((struct format_data, CORE_ADDR addr, asection * section));
+static void do_examine (struct format_data, CORE_ADDR addr,
+			asection * section);
 
 static void print_formatted (value_ptr, int, int, struct ui_file *);
 
-static struct format_data decode_format PARAMS ((char **, int, int));
+static struct format_data decode_format (char **, int, int);
 
 static int print_insn (CORE_ADDR, struct ui_file *);
 
-static void sym_info PARAMS ((char *, int));
+static void sym_info (char *, int);
 
 
 /* Decode a format specification.  *STRING_PTR should point to it.
@@ -537,8 +538,8 @@ set_next_address (addr)
 
   /* Make address available to the user as $_.  */
   set_internalvar (lookup_internalvar ("_"),
-		value_from_longest (lookup_pointer_type (builtin_type_void),
-				    (LONGEST) addr));
+		   value_from_pointer (lookup_pointer_type (builtin_type_void),
+				       addr));
 }
 
 /* Optionally print address ADDR symbolically as <SYMBOL+OFFSET> on STREAM,
@@ -562,12 +563,15 @@ print_address_symbolic (addr, stream, do_demangle, leadin)
   int offset = 0;
   int line = 0;
 
-  struct cleanup *cleanup_chain = make_cleanup (free, name);
-  if (print_symbol_filename)
-    make_cleanup (free, filename);
+  /* throw away both name and filename */
+  struct cleanup *cleanup_chain = make_cleanup (free_current_contents, &name);
+  make_cleanup (free_current_contents, &filename);
 
   if (build_address_symbolic (addr, do_demangle, &name, &offset, &filename, &line, &unmapped))
-    return;
+    {
+      do_cleanups (cleanup_chain);
+      return;
+    }
 
   fputs_filtered (leadin, stream);
   if (unmapped)
@@ -932,8 +936,7 @@ print_command_1 (exp, inspect, voidprint)
     {
       struct type *type;
       expr = parse_expression (exp);
-      old_chain = make_cleanup ((make_cleanup_func) free_current_contents,
-				&expr);
+      old_chain = make_cleanup (free_current_contents, &expr);
       cleanup = 1;
       val = evaluate_expression (expr);
 
@@ -1046,7 +1049,7 @@ output_command (exp, from_tty)
     }
 
   expr = parse_expression (exp);
-  old_chain = make_cleanup ((make_cleanup_func) free_current_contents, &expr);
+  old_chain = make_cleanup (free_current_contents, &expr);
 
   val = evaluate_expression (expr);
 
@@ -1069,8 +1072,8 @@ set_command (exp, from_tty)
      int from_tty;
 {
   struct expression *expr = parse_expression (exp);
-  register struct cleanup *old_chain
-  = make_cleanup ((make_cleanup_func) free_current_contents, &expr);
+  register struct cleanup *old_chain =
+    make_cleanup (free_current_contents, &expr);
   evaluate_expression (expr);
   do_cleanups (old_chain);
 }
@@ -1367,8 +1370,7 @@ x_command (exp, from_tty)
          But don't clobber a user-defined command's definition.  */
       if (from_tty)
 	*exp = 0;
-      old_chain = make_cleanup ((make_cleanup_func) free_current_contents,
-				&expr);
+      old_chain = make_cleanup (free_current_contents, &expr);
       val = evaluate_expression (expr);
       if (TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_REF)
 	val = value_ind (val);
@@ -1396,10 +1398,11 @@ x_command (exp, from_tty)
     {
       /* Make last address examined available to the user as $_.  Use
          the correct pointer type.  */
+      struct type *pointer_type
+	= lookup_pointer_type (VALUE_TYPE (last_examine_value));
       set_internalvar (lookup_internalvar ("_"),
-		       value_from_longest (
-		      lookup_pointer_type (VALUE_TYPE (last_examine_value)),
-					    (LONGEST) last_examine_address));
+		       value_from_pointer (pointer_type,
+					   last_examine_address));
 
       /* Make contents of last address examined available to the user as $__. */
       /* If the last value has not been fetched from memory then don't
@@ -1850,7 +1853,7 @@ print_frame_args (func, fi, num, stream)
   struct ui_stream *stb;
 
   stb = ui_out_stream_new (uiout);
-  old_chain = make_cleanup ((make_cleanup_func) ui_out_stream_delete, stb);
+  old_chain = make_cleanup_ui_out_stream_delete (stb);
 #endif /* UI_OUT */
 
   if (func)
@@ -1877,8 +1880,8 @@ print_frame_args (func, fi, num, stream)
 
 	    /* Compute address of next argument by adding the size of
 	       this argument and rounding to an int boundary.  */
-	    current_offset
-	      = ((current_offset + arg_size + sizeof (int) - 1)
+	    current_offset =
+	      ((current_offset + arg_size + sizeof (int) - 1)
 		 & ~(sizeof (int) - 1));
 
 	    /* If this is the highest offset seen yet, set highest_offset.  */
@@ -2106,8 +2109,7 @@ printf_command (arg, from_tty)
   struct cleanup *old_cleanups;
 
   val_args = (value_ptr *) xmalloc (allocated_args * sizeof (value_ptr));
-  old_cleanups = make_cleanup ((make_cleanup_func) free_current_contents,
-			       &val_args);
+  old_cleanups = make_cleanup (free_current_contents, &val_args);
 
   if (s == 0)
     error_no_arg ("format-control string and values to print");
@@ -2318,15 +2320,14 @@ printf_command (arg, from_tty)
 		{
 		  char c;
 		  QUIT;
-		  read_memory_section (tem + j, &c, 1,
-				       VALUE_BFD_SECTION (val_args[i]));
+		  read_memory (tem + j, &c, 1);
 		  if (c == 0)
 		    break;
 		}
 
 	      /* Copy the string contents into a string inside GDB.  */
 	      str = (char *) alloca (j + 1);
-	      read_memory_section (tem, str, j, VALUE_BFD_SECTION (val_args[i]));
+	      read_memory (tem, str, j);
 	      str[j] = 0;
 
 	      printf_filtered (current_substring, str);

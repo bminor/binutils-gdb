@@ -34,35 +34,34 @@
 
 /* Prototypes for local functions. */
 
-static alpha_extra_func_info_t push_sigtramp_desc PARAMS ((CORE_ADDR low_addr));
+static alpha_extra_func_info_t push_sigtramp_desc (CORE_ADDR low_addr);
 
-static CORE_ADDR read_next_frame_reg PARAMS ((struct frame_info *, int));
+static CORE_ADDR read_next_frame_reg (struct frame_info *, int);
 
-static CORE_ADDR heuristic_proc_start PARAMS ((CORE_ADDR));
+static CORE_ADDR heuristic_proc_start (CORE_ADDR);
 
-static alpha_extra_func_info_t heuristic_proc_desc PARAMS ((CORE_ADDR,
-							    CORE_ADDR,
-						      struct frame_info *));
+static alpha_extra_func_info_t heuristic_proc_desc (CORE_ADDR,
+						    CORE_ADDR,
+						    struct frame_info *);
 
-static alpha_extra_func_info_t find_proc_desc PARAMS ((CORE_ADDR,
-						       struct frame_info *));
+static alpha_extra_func_info_t find_proc_desc (CORE_ADDR,
+					       struct frame_info *);
 
 #if 0
-static int alpha_in_lenient_prologue PARAMS ((CORE_ADDR, CORE_ADDR));
+static int alpha_in_lenient_prologue (CORE_ADDR, CORE_ADDR);
 #endif
 
-static void reinit_frame_cache_sfunc PARAMS ((char *, int,
-					      struct cmd_list_element *));
+static void reinit_frame_cache_sfunc (char *, int, struct cmd_list_element *);
 
-static CORE_ADDR after_prologue PARAMS ((CORE_ADDR pc,
-					 alpha_extra_func_info_t proc_desc));
+static CORE_ADDR after_prologue (CORE_ADDR pc,
+				 alpha_extra_func_info_t proc_desc);
 
-static int alpha_in_prologue PARAMS ((CORE_ADDR pc,
-				      alpha_extra_func_info_t proc_desc));
+static int alpha_in_prologue (CORE_ADDR pc,
+			      alpha_extra_func_info_t proc_desc);
 
-static int alpha_about_to_return PARAMS ((CORE_ADDR pc));
+static int alpha_about_to_return (CORE_ADDR pc);
 
-void _initialize_alpha_tdep PARAMS ((void));
+void _initialize_alpha_tdep (void);
 
 /* Heuristic_proc_start may hunt through the text section for a long
    time across a 2400 baud serial line.  Allows the user to limit this
@@ -169,7 +168,7 @@ struct linked_proc_info
 #ifndef TM_LINUXALPHA_H
 /* HACK: Provide a prototype when compiling this file for non
    linuxalpha targets. */
-long alpha_linux_sigtramp_offset PARAMS ((CORE_ADDR pc));
+long alpha_linux_sigtramp_offset (CORE_ADDR pc);
 #endif
 long
 alpha_linux_sigtramp_offset (pc)

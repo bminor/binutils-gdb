@@ -45,23 +45,23 @@
 
 /* Prototypes for exported functions. */
 
-void _initialize_thread PARAMS ((void));
+void _initialize_thread (void);
 
 /* Prototypes for local functions. */
 
 static struct thread_info *thread_list = NULL;
 static int highest_thread_num;
 
-static struct thread_info *find_thread_id PARAMS ((int num));
+static struct thread_info *find_thread_id (int num);
 
-static void thread_command PARAMS ((char *tidstr, int from_tty));
-static void thread_apply_all_command PARAMS ((char *, int));
-static int thread_alive PARAMS ((struct thread_info *));
-static void info_threads_command PARAMS ((char *, int));
-static void thread_apply_command PARAMS ((char *, int));
-static void restore_current_thread PARAMS ((int));
-static void switch_to_thread PARAMS ((int pid));
-static void prune_threads PARAMS ((void));
+static void thread_command (char *tidstr, int from_tty);
+static void thread_apply_all_command (char *, int);
+static int thread_alive (struct thread_info *);
+static void info_threads_command (char *, int);
+static void thread_apply_command (char *, int);
+static void restore_current_thread (int);
+static void switch_to_thread (int pid);
+static void prune_threads (void);
 
 void
 init_thread_list ()

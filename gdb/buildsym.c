@@ -36,7 +36,7 @@
 #include "gdb_string.h"
 #include "expression.h"		/* For "enum exp_opcode" used by... */
 #include "language.h"		/* For "longest_local_hex_string_custom" */
-
+#include "bcache.h"
 /* Ask buildsym.h to define the vars it normally declares `extern'.  */
 #define	EXTERN
 /**/
@@ -1055,33 +1055,13 @@ push_context (int desc, CORE_ADDR valu)
   return new;
 }
 
+
 /* Compute a small integer hash code for the given name. */
 
 int
 hashname (char *name)
 {
-  register char *p = name;
-  register int total = p[0];
-  register int c;
-
-  c = p[1];
-  total += c << 2;
-  if (c)
-    {
-      c = p[2];
-      total += c << 4;
-      if (c)
-	{
-	  total += p[3] << 6;
-	}
-    }
-
-  /* Ensure result is positive.  */
-  if (total < 0)
-    {
-      total += (1000 << 6);
-    }
-  return (total % HASHSIZE);
+    return (hash(name,strlen(name)) % HASHSIZE);
 }
 
 

@@ -28,11 +28,9 @@ struct section_offsets;
 #define SOLIB_ADD(filename, from_tty, targ) \
     pa64_solib_add (filename, from_tty, targ)
 
-extern void
-  pa64_solib_add PARAMS ((char *, int, struct target_ops *));
+extern void pa64_solib_add (char *, int, struct target_ops *);
 
-extern CORE_ADDR
-  pa64_solib_get_got_by_pc PARAMS ((CORE_ADDR));
+extern CORE_ADDR pa64_solib_get_got_by_pc (CORE_ADDR);
 
 /* Function to be called when the inferior starts up, to discover the names
    of shared libraries that are dynamically linked, the base addresses to
@@ -41,8 +39,7 @@ extern CORE_ADDR
 
 #define SOLIB_CREATE_INFERIOR_HOOK(PID)	pa64_solib_create_inferior_hook()
 
-extern void
-  pa64_solib_create_inferior_hook PARAMS ((void));
+extern void pa64_solib_create_inferior_hook (void);
 
 /* Function to be called to remove the connection between debugger and
    dynamic linker that was established by SOLIB_CREATE_INFERIOR_HOOK.
@@ -50,8 +47,7 @@ extern void
    the debugger, as CLEAR_SOLIB does.)  */
 #define SOLIB_REMOVE_INFERIOR_HOOK(PID) pa64_solib_remove_inferior_hook(PID)
 
-extern void
-  pa64_solib_remove_inferior_hook PARAMS ((int));
+extern void pa64_solib_remove_inferior_hook (int);
 
 /* This function is called by the "catch load" command.  It allows
    the debugger to be notified by the dynamic linker when a specified
@@ -59,8 +55,7 @@ extern void
 #define SOLIB_CREATE_CATCH_LOAD_HOOK(pid,tempflag, filename,cond_string) \
    pa64_solib_create_catch_load_hook (pid, tempflag, filename, cond_string)
 
-extern void
-  pa64_solib_create_catch_load_hook PARAMS ((int, int, char *, char *));
+extern void pa64_solib_create_catch_load_hook (int, int, char *, char *);
 
 /* This function is called by the "catch unload" command.  It allows
    the debugger to be notified by the dynamic linker when a specified
@@ -68,8 +63,7 @@ extern void
 #define SOLIB_CREATE_CATCH_UNLOAD_HOOK(pid,tempflag,filename, cond_string) \
    pa64_solib_create_catch_unload_hook (pid, tempflag, filename, cond_string)
 
-extern void
-  pa64_solib_create_catch_unload_hook PARAMS ((int, int, char *, char *));
+extern void pa64_solib_create_catch_unload_hook (int, int, char *, char *);
 
 /* This function returns TRUE if the dynamic linker has just reported
    a load of a library.
@@ -79,8 +73,7 @@ extern void
 #define SOLIB_HAVE_LOAD_EVENT(pid) \
    pa64_solib_have_load_event (pid)
 
-extern int
-  pa64_solib_have_load_event PARAMS ((int));
+extern int pa64_solib_have_load_event (int);
 
 /* This function returns a pointer to the string representation of the
    pathname of the dynamically-linked library that has just been loaded.
@@ -95,8 +88,7 @@ extern int
 #define SOLIB_LOADED_LIBRARY_PATHNAME(pid) \
    pa64_solib_loaded_library_pathname (pid)
 
-extern char *
-  pa64_solib_loaded_library_pathname PARAMS ((int));
+extern char *pa64_solib_loaded_library_pathname (int);
 
 /* This function returns TRUE if the dynamic linker has just reported
    an unload of a library.
@@ -106,8 +98,7 @@ extern char *
 #define SOLIB_HAVE_UNLOAD_EVENT(pid) \
    pa64_solib_have_unload_event (pid)
 
-extern int
-  pa64_solib_have_unload_event PARAMS ((int));
+extern int pa64_solib_have_unload_event (int);
 
 /* This function returns a pointer to the string representation of the
    pathname of the dynamically-linked library that has just been unloaded.
@@ -122,8 +113,7 @@ extern int
 #define SOLIB_UNLOADED_LIBRARY_PATHNAME(pid) \
    pa64_solib_unloaded_library_pathname (pid)
 
-extern char *
-  pa64_solib_unloaded_library_pathname PARAMS ((int));
+extern char *pa64_solib_unloaded_library_pathname (int);
 
 /* This function returns TRUE if pc is the address of an instruction that
    lies within the dynamic linker (such as the event hook, or the dld
@@ -135,8 +125,7 @@ extern char *
 #define SOLIB_IN_DYNAMIC_LINKER(pid,pc) \
    pa64_solib_in_dynamic_linker (pid, pc)
 
-extern int
-  pa64_solib_in_dynamic_linker PARAMS ((int, CORE_ADDR));
+extern int pa64_solib_in_dynamic_linker (int, CORE_ADDR);
 
 /* This function must be called when the inferior is killed, and the program
    restarted.  This is not the same as CLEAR_SOLIB, in that it doesn't discard
@@ -146,16 +135,14 @@ extern int
 #define SOLIB_RESTART() \
    pa64_solib_restart ()
 
-extern void
-  pa64_solib_restart PARAMS ((void));
+extern void pa64_solib_restart (void);
 
 /* If we can't set a breakpoint, and it's in a shared library, just
    disable it.  */
 
 #define DISABLE_UNSETTABLE_BREAK(addr)	(pa64_solib_address(addr) != NULL)
 
-extern char *
-  pa64_solib_address PARAMS ((CORE_ADDR));	/* somsolib.c */
+extern char *pa64_solib_address (CORE_ADDR);	/* somsolib.c */
 
 /* If ADDR lies in a shared library, return its name.  */
 

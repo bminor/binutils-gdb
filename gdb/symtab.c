@@ -47,72 +47,68 @@
 /* Prototype for one function in parser-defs.h,
    instead of including that entire file. */
 
-extern char *find_template_name_end PARAMS ((char *));
+extern char *find_template_name_end (char *);
 
 /* Prototypes for local functions */
 
-static int find_methods PARAMS ((struct type *, char *, struct symbol **));
+static int find_methods (struct type *, char *, struct symbol **);
 
-static void completion_list_add_name PARAMS ((char *, char *, int, char *,
-					      char *));
+static void completion_list_add_name (char *, char *, int, char *, char *);
 
-static void build_canonical_line_spec PARAMS ((struct symtab_and_line *,
-					       char *, char ***));
+static void build_canonical_line_spec (struct symtab_and_line *,
+				       char *, char ***);
 
-static struct symtabs_and_lines decode_line_2 PARAMS ((struct symbol *[],
-						       int, int, char ***));
+static struct symtabs_and_lines decode_line_2 (struct symbol *[],
+					       int, int, char ***);
 
-static void rbreak_command PARAMS ((char *, int));
+static void rbreak_command (char *, int);
 
-static void types_info PARAMS ((char *, int));
+static void types_info (char *, int);
 
-static void functions_info PARAMS ((char *, int));
+static void functions_info (char *, int);
 
-static void variables_info PARAMS ((char *, int));
+static void variables_info (char *, int);
 
-static void sources_info PARAMS ((char *, int));
+static void sources_info (char *, int);
 
-static void output_source_filename PARAMS ((char *, int *));
+static void output_source_filename (char *, int *);
 
-char *operator_chars PARAMS ((char *, char **));
+char *operator_chars (char *, char **);
 
-static int find_line_common PARAMS ((struct linetable *, int, int *));
+static int find_line_common (struct linetable *, int, int *);
 
 static struct partial_symbol *lookup_partial_symbol PARAMS
   ((struct partial_symtab *, const char *,
     int, namespace_enum));
 
-static struct partial_symbol *fixup_psymbol_section PARAMS ((struct
-				       partial_symbol *, struct objfile *));
+static struct partial_symbol *fixup_psymbol_section (struct
+						     partial_symbol *,
+						     struct objfile *);
 
-static struct symtab *lookup_symtab_1 PARAMS ((char *));
+static struct symtab *lookup_symtab_1 (char *);
 
-static void cplusplus_hint PARAMS ((char *));
+static void cplusplus_hint (char *);
 
-static struct symbol *find_active_alias PARAMS ((struct symbol * sym,
-						 CORE_ADDR addr));
+static struct symbol *find_active_alias (struct symbol *sym, CORE_ADDR addr);
 
 /* This flag is used in hppa-tdep.c, and set in hp-symtab-read.c */
 /* Signals the presence of objects compiled by HP compilers */
 int hp_som_som_object_present = 0;
 
-static void fixup_section PARAMS ((struct general_symbol_info *,
-				   struct objfile *));
+static void fixup_section (struct general_symbol_info *, struct objfile *);
 
-static int file_matches PARAMS ((char *, char **, int));
+static int file_matches (char *, char **, int);
 
-static void print_symbol_info PARAMS ((namespace_enum,
-				       struct symtab *, struct symbol *,
-				       int, char *));
+static void print_symbol_info (namespace_enum,
+			       struct symtab *, struct symbol *, int, char *);
 
-static void print_msymbol_info PARAMS ((struct minimal_symbol *));
+static void print_msymbol_info (struct minimal_symbol *);
 
-static void symtab_symbol_info PARAMS ((char *, namespace_enum, int));
+static void symtab_symbol_info (char *, namespace_enum, int);
 
-static void overload_list_add_symbol PARAMS ((struct symbol * sym,
-					      char *oload_name));
+static void overload_list_add_symbol (struct symbol *sym, char *oload_name);
 
-void _initialize_symtab PARAMS ((void));
+void _initialize_symtab (void);
 
 /* */
 
@@ -958,7 +954,7 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
     *symtab = NULL;
   return 0;
 }
-
+								
 /* Look, in partial_symtab PST, for symbol NAME.  Check the global
    symbols if GLOBAL, the static symbols if not */
 
@@ -969,20 +965,20 @@ lookup_partial_symbol (pst, name, global, namespace)
      int global;
      namespace_enum namespace;
 {
+  struct partial_symbol *temp;
   struct partial_symbol **start, **psym;
   struct partial_symbol **top, **bottom, **center;
   int length = (global ? pst->n_global_syms : pst->n_static_syms);
   int do_linear_search = 1;
-
+  
   if (length == 0)
     {
       return (NULL);
     }
-
   start = (global ?
 	   pst->objfile->global_psymbols.list + pst->globals_offset :
 	   pst->objfile->static_psymbols.list + pst->statics_offset);
-
+  
   if (global)			/* This means we can use a binary search. */
     {
       do_linear_search = 0;
@@ -1000,9 +996,7 @@ lookup_partial_symbol (pst, name, global, namespace)
 	  if (!(center < top))
 	    abort ();
 	  if (!do_linear_search
-	      && (SYMBOL_LANGUAGE (*center) == language_cplus
-		  || SYMBOL_LANGUAGE (*center) == language_java
-	      ))
+	      && (SYMBOL_LANGUAGE (*center) == language_java))
 	    {
 	      do_linear_search = 1;
 	    }
@@ -1017,11 +1011,15 @@ lookup_partial_symbol (pst, name, global, namespace)
 	}
       if (!(top == bottom))
 	abort ();
-      while (STREQ (SYMBOL_NAME (*top), name))
+
+      /* djb - 2000-06-03 - Use SYMBOL_MATCHES_NAME, not a strcmp, so
+	 we don't have to force a linear search on C++. Probably holds true
+	 for JAVA as well, no way to check.*/
+      while (SYMBOL_MATCHES_NAME (*top,name))
 	{
 	  if (SYMBOL_NAMESPACE (*top) == namespace)
 	    {
-	      return (*top);
+		  return (*top);
 	    }
 	  top++;
 	}
@@ -1031,7 +1029,7 @@ lookup_partial_symbol (pst, name, global, namespace)
      we should also do a linear search. */
 
   if (do_linear_search)
-    {
+    {			
       for (psym = start; psym < start + length; psym++)
 	{
 	  if (namespace == SYMBOL_NAMESPACE (*psym))
@@ -1844,8 +1842,7 @@ find_pc_line (pc, notcurrent)
 }
 
 
-static struct symtab *find_line_symtab PARAMS ((struct symtab *, int,
-						int *, int *));
+static struct symtab *find_line_symtab (struct symtab *, int, int *, int *);
 
 /* Find line number LINE in any symtab whose name is the same as
    SYMTAB.
@@ -2077,7 +2074,7 @@ find_pc_line_pc_range (pc, startptr, endptr)
    of real code inside the function.  */
 
 static struct symtab_and_line
-find_function_start_sal PARAMS ((struct symbol * sym, int));
+find_function_start_sal (struct symbol *sym, int);
 
 static struct symtab_and_line
 find_function_start_sal (sym, funfirstline)
@@ -2217,7 +2214,7 @@ operator_chars (p, end)
    reader because the type of the baseclass might still be stubbed
    when the definition of the derived class is parsed.  */
 
-static int total_number_of_methods PARAMS ((struct type * type));
+static int total_number_of_methods (struct type *type);
 
 static int
 total_number_of_methods (type)
@@ -3569,6 +3566,19 @@ free_search_symbols (symbols)
     }
 }
 
+static void
+do_free_search_symbols_cleanup (void *symbols)
+{
+  free_search_symbols (symbols);
+}
+
+struct cleanup *
+make_cleanup_free_search_symbols (struct symbol_search *symbols)
+{
+  return make_cleanup (do_free_search_symbols_cleanup, symbols);
+}
+
+
 /* Search the symbol table for matches to the regular expression REGEXP,
    returning the results in *MATCHES.
 
@@ -3801,8 +3811,7 @@ search_symbols (regexp, kind, nfiles, files, matches)
 		  if (tail == NULL)
 		    {
 		      sr = psr;
-		      old_chain = make_cleanup ((make_cleanup_func)
-						free_search_symbols, sr);
+		      old_chain = make_cleanup_free_search_symbols (sr);
 		    }
 		  else
 		    tail->next = psr;
@@ -3846,8 +3855,7 @@ search_symbols (regexp, kind, nfiles, files, matches)
 			if (tail == NULL)
 			  {
 			    sr = psr;
-			    old_chain = make_cleanup ((make_cleanup_func)
-						  free_search_symbols, &sr);
+			    old_chain = make_cleanup_free_search_symbols (sr);
 			  }
 			else
 			  tail->next = psr;
@@ -3962,7 +3970,7 @@ symtab_symbol_info (regexp, kind, from_tty)
 
   /* must make sure that if we're interrupted, symbols gets freed */
   search_symbols (regexp, kind, 0, (char **) NULL, &symbols);
-  old_chain = make_cleanup ((make_cleanup_func) free_search_symbols, symbols);
+  old_chain = make_cleanup_free_search_symbols (symbols);
 
   printf_filtered (regexp
 		   ? "All %ss matching regular expression \"%s\":\n"
@@ -4012,6 +4020,7 @@ functions_info (regexp, from_tty)
   symtab_symbol_info (regexp, FUNCTIONS_NAMESPACE, from_tty);
 }
 
+
 static void
 types_info (regexp, from_tty)
      char *regexp;
@@ -4050,7 +4059,7 @@ rbreak_command (regexp, from_tty)
   struct cleanup *old_chain;
 
   search_symbols (regexp, FUNCTIONS_NAMESPACE, 0, (char **) NULL, &ss);
-  old_chain = make_cleanup ((make_cleanup_func) free_search_symbols, ss);
+  old_chain = make_cleanup_free_search_symbols (ss);
 
   for (p = ss; p != NULL; p = p->next)
     {
@@ -4402,43 +4411,64 @@ in_prologue (pc, func_start)
   struct symtab_and_line sal;
   CORE_ADDR func_addr, func_end;
 
-  if (!find_pc_partial_function (pc, NULL, &func_addr, &func_end))
-    goto nosyms;		/* Might be in prologue */
+  /* We have several sources of information we can consult to figure
+     this out.
+     - Compilers usually emit line number info that marks the prologue
+       as its own "source line".  So the ending address of that "line"
+       is the end of the prologue.  If available, this is the most
+       reliable method.
+     - The minimal symbols and partial symbols, which can usually tell
+       us the starting and ending addresses of a function.
+     - If we know the function's start address, we can call the
+       architecture-defined SKIP_PROLOGUE function to analyze the
+       instruction stream and guess where the prologue ends.
+     - Our `func_start' argument; if non-zero, this is the caller's
+       best guess as to the function's entry point.  At the time of
+       this writing, handle_inferior_event doesn't get this right, so
+       it should be our last resort.  */
 
+  /* Consult the partial symbol table, to find which function
+     the PC is in.  */
+  if (! find_pc_partial_function (pc, NULL, &func_addr, &func_end))
+    {
+      CORE_ADDR prologue_end;
+
+      /* We don't even have minsym information, so fall back to using
+         func_start, if given.  */
+      if (! func_start)
+	return 1;		/* We *might* be in a prologue.  */
+
+      prologue_end = SKIP_PROLOGUE (func_start);
+
+      return func_start <= pc && pc < prologue_end;
+    }
+
+  /* If we have line number information for the function, that's
+     usually pretty reliable.  */
   sal = find_pc_line (func_addr, 0);
 
-  if (sal.line == 0)
-    goto nosyms;
+  /* Now sal describes the source line at the function's entry point,
+     which (by convention) is the prologue.  The end of that "line",
+     sal.end, is the end of the prologue.
 
-  /* sal.end is the address of the first instruction past sal.line. */
-  if (sal.end > func_addr
-      && sal.end <= func_end)	/* Is prologue in function? */
-    return pc < sal.end;	/* Yes, is pc in prologue? */
+     Note that, for functions whose source code is all on a single
+     line, the line number information doesn't always end up this way.
+     So we must verify that our purported end-of-prologue address is
+     *within* the function, not at its start or end.  */
+  if (sal.line == 0
+      || sal.end <= func_addr
+      || func_end <= sal.end)
+    {
+      /* We don't have any good line number info, so use the minsym
+	 information, together with the architecture-specific prologue
+	 scanning code.  */
+      CORE_ADDR prologue_end = SKIP_PROLOGUE (func_addr);
 
-  /* The line after the prologue seems to be outside the function.  In this
-     case, tell the caller to find the prologue the hard way.  */
+      return func_addr <= pc && pc < prologue_end;
+    }
 
-  return 1;
-
-/* Come here when symtabs don't contain line # info.  In this case, it is
-   likely that the user has stepped into a library function w/o symbols, or
-   is doing a stepi/nexti through code without symbols.  */
-
-nosyms:
-
-/* If func_start is zero (meaning unknown) then we don't know whether pc is
-   in the prologue or not.  I.E. it might be. */
-
-  if (!func_start)
-    return 1;
-
-/* We need to call the target-specific prologue skipping functions with the
-   function's start address because PC may be pointing at an instruction that
-   could be mistakenly considered part of the prologue.  */
-
-  func_start = SKIP_PROLOGUE (func_start);
-
-  return pc < func_start;
+  /* We have line number info, and it looks good.  */
+  return func_addr <= pc && pc < sal.end;
 }
 
 
@@ -4637,6 +4667,7 @@ _initialize_symtab ()
   add_info ("functions", functions_info,
 	    "All function names, or those matching REGEXP.");
 
+  
   /* FIXME:  This command has at least the following problems:
      1.  It prints builtin types (in a very strange and confusing fashion).
      2.  It doesn't print right, e.g. with

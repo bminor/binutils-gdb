@@ -34,7 +34,7 @@
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-extern CORE_ADDR umax_skip_prologue PARAMS ((CORE_ADDR));
+extern CORE_ADDR umax_skip_prologue (CORE_ADDR);
 #define SKIP_PROLOGUE(pc) (umax_skip_prologue (pc))
 
 /* Immediately after a function call, return the saved pc.
@@ -232,7 +232,7 @@ extern CORE_ADDR ns32k_get_enter_addr ();
    ways in the stack frame.  sp is even more special:
    the address we return for it IS the sp for the next frame.  */
 
-extern int umax_frame_num_args PARAMS ((struct frame_info * fi));
+extern int umax_frame_num_args (struct frame_info *fi);
 #define FRAME_NUM_ARGS(fi) (umax_frame_num_args ((fi)))
 
 /* Things needed for making the inferior call functions.  */

@@ -46,7 +46,7 @@ static void sig_print_info (enum target_signal);
 
 static void sig_print_header (void);
 
-static void resume_cleanups (int);
+static void resume_cleanups (void *);
 
 static int hook_stop_stub (void *);
 
@@ -436,13 +436,13 @@ static int follow_vfork_when_exec;
 
 static char *follow_fork_mode_kind_names[] =
 {
-/* ??rehrauer:  The "both" option is broken, by what may be a 10.20
-   kernel problem.  It's also not terribly useful without a GUI to
-   help the user drive two debuggers.  So for now, I'm disabling
-   the "both" option.
-   "parent", "child", "both", "ask" };
- */
-  "parent", "child", "ask"};
+  /* ??rehrauer: The "both" option is broken, by what may be a 10.20
+     kernel problem.  It's also not terribly useful without a GUI to
+     help the user drive two debuggers.  So for now, I'm disabling the
+     "both" option. */
+  /* "parent", "child", "both", "ask" */
+  "parent", "child", "ask", NULL
+};
 
 static char *follow_fork_mode_string = NULL;
 
@@ -752,7 +752,7 @@ static int singlestep_breakpoints_inserted_p = 0;
 /* Things to clean up if we QUIT out of resume ().  */
 /* ARGSUSED */
 static void
-resume_cleanups (int arg)
+resume_cleanups (void *ignore)
 {
   normal_stop ();
 }
@@ -762,7 +762,12 @@ static char schedlock_on[] = "on";
 static char schedlock_step[] = "step";
 static char *scheduler_mode = schedlock_off;
 static char *scheduler_enums[] =
-{schedlock_off, schedlock_on, schedlock_step};
+{
+  schedlock_off,
+  schedlock_on,
+  schedlock_step,
+  NULL
+};
 
 static void
 set_schedlock_func (char *args, int from_tty, struct cmd_list_element *c)
@@ -791,8 +796,7 @@ void
 resume (int step, enum target_signal sig)
 {
   int should_resume = 1;
-  struct cleanup *old_cleanups = make_cleanup ((make_cleanup_func)
-					       resume_cleanups, 0);
+  struct cleanup *old_cleanups = make_cleanup (resume_cleanups, 0);
   QUIT;
 
 #ifdef CANNOT_STEP_BREAKPOINT
@@ -1044,9 +1048,11 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
       int temp = insert_breakpoints ();
       if (temp)
 	{
-	  print_sys_errmsg ("ptrace", temp);
+	  print_sys_errmsg ("insert_breakpoints", temp);
 	  error ("Cannot insert breakpoints.\n\
-The same program may be running in another process.");
+The same program may be running in another process,\n\
+or you may have requested too many hardware\n\
+breakpoints and/or watchpoints.\n");
 	}
 
       breakpoints_inserted = 1;
@@ -2267,6 +2273,8 @@ handle_inferior_event (struct execution_control_state *ecs)
            the HP-UX maintainer to furnish a fix that doesn't break other
            platforms.  --JimB, 20 May 1999 */
 	check_sigtramp2 (ecs);
+	keep_going (ecs);
+	return;
       }
 
     /* Handle cases caused by hitting a breakpoint.  */
@@ -2738,6 +2746,20 @@ handle_inferior_event (struct execution_control_state *ecs)
 	if (step_over_calls > 0 || IGNORE_HELPER_CALL (stop_pc))
 	  {
 	    /* We're doing a "next".  */
+
+	    if (IN_SIGTRAMP (stop_pc, ecs->stop_func_name)
+		&& INNER_THAN (step_frame_address, read_sp()))
+	      /* We stepped out of a signal handler, and into its
+                 calling trampoline.  This is misdetected as a
+                 subroutine call, but stepping over the signal
+                 trampoline isn't such a bad idea.  In order to do
+                 that, we have to ignore the value in
+                 step_frame_address, since that doesn't represent the
+                 frame that'll reach when we return from the signal
+                 trampoline.  Otherwise we'll probably continue to the
+                 end of the program.  */
+	      step_frame_address = 0;
+
 	    step_over_function (ecs);
 	    keep_going (ecs);
 	    return;
@@ -3038,7 +3060,7 @@ step_over_function (struct execution_control_state *ecs)
   step_resume_breakpoint =
     set_momentary_breakpoint (sr_sal, get_current_frame (), bp_step_resume);
 
-  if (!IN_SOLIB_DYNSYM_RESOLVE_CODE (sr_sal.pc))
+  if (step_frame_address && !IN_SOLIB_DYNSYM_RESOLVE_CODE (sr_sal.pc))
     step_resume_breakpoint->frame = step_frame_address;
 
   if (breakpoints_inserted)
@@ -3383,9 +3405,11 @@ normal_stop (void)
   if (breakpoints_failed)
     {
       target_terminal_ours_for_output ();
-      print_sys_errmsg ("ptrace", breakpoints_failed);
+      print_sys_errmsg ("While inserting breakpoints", breakpoints_failed);
       printf_filtered ("Stopped; cannot insert breakpoints.\n\
-The same program may be running in another process.\n");
+The same program may be running in another process,\n\
+or you may have requested too many hardware breakpoints\n\
+and/or watchpoints.\n");
     }
 
   if (target_has_execution && breakpoints_inserted)
@@ -4089,6 +4113,18 @@ restore_inferior_status (struct inferior_status *inf_status)
   free_inferior_status (inf_status);
 }
 
+static void
+do_restore_inferior_status_cleanup (void *sts)
+{
+  restore_inferior_status (sts);
+}
+
+struct cleanup *
+make_cleanup_restore_inferior_status (struct inferior_status *inf_status)
+{
+  return make_cleanup (do_restore_inferior_status_cleanup, inf_status);
+}
+
 void
 discard_inferior_status (struct inferior_status *inf_status)
 {
@@ -4242,7 +4278,7 @@ to the user would be loading/unloading of a new library.\n",
   c = add_set_enum_cmd ("follow-fork-mode",
 			class_run,
 			follow_fork_mode_kind_names,
-			(char *) &follow_fork_mode_string,
+			&follow_fork_mode_string,
 /* ??rehrauer:  The "both" option is broken, by what may be a 10.20
    kernel problem.  It's also not terribly useful without a GUI to
    help the user drive two debuggers.  So for now, I'm disabling
@@ -4277,7 +4313,7 @@ By default, the debugger will follow the parent process.",
 
   c = add_set_enum_cmd ("scheduler-locking", class_run,
 			scheduler_enums,	/* array of string names */
-			(char *) &scheduler_mode,	/* current mode  */
+			&scheduler_mode,	/* current mode  */
 			"Set mode for locking scheduler during execution.\n\
 off  == no locking (threads may preempt at any time)\n\
 on   == full locking (no thread except the current thread may run)\n\

@@ -33,7 +33,3 @@ extern void mi_out_rewind (struct ui_out *uiout);
 extern void mi_out_buffered (struct ui_out *uiout, char *string);
 
 #endif /* MI_OUT_H */
-
-/* Local variables: */
-/* change-log-default-name: "ChangeLog-mi" */
-/* End: */

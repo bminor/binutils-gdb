@@ -19,6 +19,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#define GDB_MULTI_ARCH 2
+
 #include "sparc/tm-sparc.h"
 #include "tm-sysv4.h"
 
@@ -61,8 +63,7 @@
    extract the pc (JB_PC) that we will land at.  The pc is copied into ADDR.
    This routine returns true on success */
 
-extern int
-get_longjmp_target PARAMS ((CORE_ADDR *));
+extern int get_longjmp_target (CORE_ADDR *);
 
 #define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)
 #endif /* 0 */
@@ -71,7 +72,7 @@ get_longjmp_target PARAMS ((CORE_ADDR *));
    and for SunPRO 3.0, N_FUN symbols too.  */
 #define SOFUN_ADDRESS_MAYBE_MISSING
 
-extern char *sunpro_static_transform_name PARAMS ((char *));
+extern char *sunpro_static_transform_name (char *);
 #define STATIC_TRANSFORM_NAME(x) sunpro_static_transform_name (x)
 #define IS_STATIC_TRANSFORM_NAME(name) ((name)[0] == '$')
 

@@ -37,14 +37,14 @@
 #include <sys/dos.h>
 #endif
 
-static int e7000pc_open PARAMS ((serial_t scb, const char *name));
-static void e7000pc_raw PARAMS ((serial_t scb));
-static int e7000pc_readchar PARAMS ((serial_t scb, int timeout));
-static int e7000pc_setbaudrate PARAMS ((serial_t scb, int rate));
-static int e7000pc_write PARAMS ((serial_t scb, const char *str, int len));
-static void e7000pc_close PARAMS ((serial_t scb));
-static serial_ttystate e7000pc_get_tty_state PARAMS ((serial_t scb));
-static int e7000pc_set_tty_state PARAMS ((serial_t scb, serial_ttystate state));
+static int e7000pc_open (serial_t scb, const char *name);
+static void e7000pc_raw (serial_t scb);
+static int e7000pc_readchar (serial_t scb, int timeout);
+static int e7000pc_setbaudrate (serial_t scb, int rate);
+static int e7000pc_write (serial_t scb, const char *str, int len);
+static void e7000pc_close (serial_t scb);
+static serial_ttystate e7000pc_get_tty_state (serial_t scb);
+static int e7000pc_set_tty_state (serial_t scb, serial_ttystate state);
 
 #define OFF_DPD 	0x0000
 #define OFF_DDP 	0x1000

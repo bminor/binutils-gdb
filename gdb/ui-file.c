@@ -315,7 +315,7 @@ static ui_file_rewind_ftype mem_file_rewind;
 static ui_file_put_ftype mem_file_put;
 static ui_file_write_ftype mem_file_write;
 static ui_file_delete_ftype mem_file_delete;
-static struct ui_file *mem_file_new PARAMS ((void));
+static struct ui_file *mem_file_new (void);
 static int mem_file_magic;
 
 static struct ui_file *
@@ -407,7 +407,7 @@ static ui_file_write_ftype stdio_file_write;
 static ui_file_fputs_ftype stdio_file_fputs;
 static ui_file_isatty_ftype stdio_file_isatty;
 static ui_file_delete_ftype stdio_file_delete;
-static struct ui_file *stdio_file_new PARAMS ((FILE * file, int close_p));
+static struct ui_file *stdio_file_new (FILE * file, int close_p);
 static ui_file_flush_ftype stdio_file_flush;
 
 static int stdio_file_magic;

@@ -36,38 +36,29 @@
 
 /* Various things we might complain about... */
 
-static void
-som_symfile_init PARAMS ((struct objfile *));
+static void som_symfile_init (struct objfile *);
+
+static void som_new_init (struct objfile *);
+
+static void som_symfile_read (struct objfile *, int);
+
+static void som_symfile_finish (struct objfile *);
 
 static void
-som_new_init PARAMS ((struct objfile *));
+som_symtab_read (bfd *, struct objfile *, struct section_offsets *);
 
 static void
-som_symfile_read PARAMS ((struct objfile *, int));
-
-static void
-som_symfile_finish PARAMS ((struct objfile *));
-
-static void
-som_symtab_read PARAMS ((bfd *, struct objfile *,
-			 struct section_offsets *));
-
-static void
-som_symfile_offsets PARAMS ((struct objfile *, struct section_addr_info *));
+som_symfile_offsets (struct objfile *, struct section_addr_info *);
 
 /* FIXME: These should really be in a common header somewhere */
 
-extern void
-hpread_build_psymtabs PARAMS ((struct objfile *, int));
+extern void hpread_build_psymtabs (struct objfile *, int);
 
-extern void
-hpread_symfile_finish PARAMS ((struct objfile *));
+extern void hpread_symfile_finish (struct objfile *);
 
-extern void
-hpread_symfile_init PARAMS ((struct objfile *));
+extern void hpread_symfile_init (struct objfile *);
 
-extern void
-do_pxdb PARAMS ((bfd *));
+extern void do_pxdb (bfd *);
 
 /*
 
@@ -366,7 +357,7 @@ som_symfile_read (objfile, mainline)
   do_pxdb (symfile_bfd_open (objfile->name));
 
   init_minimal_symbol_collection ();
-  back_to = make_cleanup ((make_cleanup_func) discard_minimal_symbols, 0);
+  back_to = make_cleanup_discard_minimal_symbols ();
 
   /* Read in the import list and the export list.  Currently
      the export list isn't used; the import list is used in
@@ -465,17 +456,37 @@ som_symfile_offsets (objfile, addrs)
      struct section_addr_info *addrs;
 {
   int i;
+  CORE_ADDR text_addr;
 
   objfile->num_sections = SECT_OFF_MAX;
   objfile->section_offsets = (struct section_offsets *)
     obstack_alloc (&objfile->psymbol_obstack, SIZEOF_SECTION_OFFSETS);
 
+  /* FIXME: ezannoni 2000-04-20 The section names in SOM are not
+     .text, .data, etc, but $TEXT$, $DATA$,... We should initialize
+     SET_OFF_* from bfd. (See default_symfile_offsets()). But I don't
+     know the correspondence between SOM sections and GDB's idea of
+     section names. So for now we default to what is was before these
+     changes.*/
+  objfile->sect_index_text = 0;
+  objfile->sect_index_data = 1;
+  objfile->sect_index_bss = 2;
+  objfile->sect_index_rodata = 3;
+
   /* First see if we're a shared library.  If so, get the section
      offsets from the library, else get them from addrs.  */
   if (!som_solib_section_offsets (objfile, objfile->section_offsets))
     {
+      /* Note: Here is OK to compare with ".text" because this is the
+         name that gdb itself gives to that section, not the SOM
+         name. */
+      for (i = 0; i < SECT_OFF_MAX && addrs->other[i].name; i++)
+	if (strcmp (addrs->other[i].name, ".text") == 0)
+	  break;
+      text_addr = addrs->other[i].addr;
+
       for (i = 0; i < SECT_OFF_MAX; i++)
-	ANOFFSET (objfile->section_offsets, i) = addrs -> text_addr;
+	ANOFFSET (objfile->section_offsets, i) = text_addr;
     }
 }
 

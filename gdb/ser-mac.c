@@ -35,15 +35,15 @@ struct mac_ttystate
     int bogus;
   };
 
-static int mac_open PARAMS ((serial_t scb, const char *name));
-static void mac_raw PARAMS ((serial_t scb));
-static int mac_readchar PARAMS ((serial_t scb, int timeout));
-static int mac_setbaudrate PARAMS ((serial_t scb, int rate));
-static int mac_write PARAMS ((serial_t scb, const char *str, int len));
-static void mac_close PARAMS ((serial_t scb));
-static serial_ttystate mac_get_tty_state PARAMS ((serial_t scb));
-static int mac_set_tty_state PARAMS ((serial_t scb, serial_ttystate state));
-static char *aptr PARAMS ((short p));
+static int mac_open (serial_t scb, const char *name);
+static void mac_raw (serial_t scb);
+static int mac_readchar (serial_t scb, int timeout);
+static int mac_setbaudrate (serial_t scb, int rate);
+static int mac_write (serial_t scb, const char *str, int len);
+static void mac_close (serial_t scb);
+static serial_ttystate mac_get_tty_state (serial_t scb);
+static int mac_set_tty_state (serial_t scb, serial_ttystate state);
+static char *aptr (short p);
 
 short input_refnum;
 short output_refnum;

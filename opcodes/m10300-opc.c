@@ -17,7 +17,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* This file is formatted at > 80 columns.  Attempting to read it on a
    screeen with less than 80 columns will be difficult.  */
-#include "ansidecl.h"
+#include "sysdep.h"
 #include "opcode/mn10300.h"
 
 

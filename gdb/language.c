@@ -42,49 +42,35 @@
 #include "target.h"
 #include "parser-defs.h"
 
-extern void _initialize_language PARAMS ((void));
+extern void _initialize_language (void);
 
-static void
-show_language_command PARAMS ((char *, int));
+static void show_language_command (char *, int);
 
-static void
-set_language_command PARAMS ((char *, int));
+static void set_language_command (char *, int);
 
-static void
-show_type_command PARAMS ((char *, int));
+static void show_type_command (char *, int);
 
-static void
-set_type_command PARAMS ((char *, int));
+static void set_type_command (char *, int);
 
-static void
-show_range_command PARAMS ((char *, int));
+static void show_range_command (char *, int);
 
-static void
-set_range_command PARAMS ((char *, int));
+static void set_range_command (char *, int);
 
-static void
-set_range_str PARAMS ((void));
+static void set_range_str (void);
 
-static void
-set_type_str PARAMS ((void));
+static void set_type_str (void);
 
-static void
-set_lang_str PARAMS ((void));
+static void set_lang_str (void);
 
-static void
-unk_lang_error PARAMS ((char *));
+static void unk_lang_error (char *);
 
-static int
-unk_lang_parser PARAMS ((void));
+static int unk_lang_parser (void);
 
-static void
-show_check PARAMS ((char *, int));
+static void show_check (char *, int);
 
-static void
-set_check PARAMS ((char *, int));
+static void set_check (char *, int);
 
-static void
-set_type_range PARAMS ((void));
+static void set_type_range (void);
 
 static void unk_lang_emit_char (int c, struct ui_file *stream, int quoter);
 
@@ -94,8 +80,7 @@ static void unk_lang_printstr (struct ui_file * stream, char *string,
 			       unsigned int length, int width,
 			       int force_ellipses);
 
-static struct type *
-  unk_lang_create_fundamental_type PARAMS ((struct objfile *, int));
+static struct type *unk_lang_create_fundamental_type (struct objfile *, int);
 
 static void unk_lang_print_type (struct type *, char *, struct ui_file *,
 				 int, int);

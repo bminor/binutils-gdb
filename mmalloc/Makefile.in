@@ -110,8 +110,13 @@ mmalloc.dvi: mmalloc.texi
 	rm -f mmalloc.?? mmalloc.??s mmalloc.log mmalloc.aux mmalloc.toc
 
 install-info: info
+	$(SHELL) $(srcdir)/../mkinstalldirs $(infodir)
 	if test ! -f mmalloc.info ; then cd $(srcdir); fi; \
 	$(INSTALL_DATA) mmalloc.info $(infodir)/mmalloc.info
+	@if $(SHELL) -c 'install-info --version | sed 1q | fgrep -s -v -i debian' >/dev/null 2>&1; then \
+	  echo " install-info --info-dir=$(infodir) $(infodir)/mmalloc.info";\
+	  install-info --info-dir=$(infodir) $(infodir)/mmalloc.info || :;\
+	else : ; fi
 
 check: test1.c
 #	$(CC) -g $(srcdir)/test1.c libmmalloc.a

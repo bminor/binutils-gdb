@@ -902,7 +902,7 @@ update_stop_threads (test_pid)
  */
 
 /* Saved pointer to previous owner of the new_objfile event. */
-static void (*target_new_objfile_chain) PARAMS ((struct objfile *));
+static void (*target_new_objfile_chain) (struct objfile *);
 
 void
 linuxthreads_new_objfile (objfile)

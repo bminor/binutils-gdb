@@ -39,19 +39,15 @@
 extern int objectprint;		/* Controls looking up an object's derived type
 				   using what we find in its vtables.  */
 
-extern void _initialize_typeprint PARAMS ((void));
+extern void _initialize_typeprint (void);
 
-static void
-ptype_command PARAMS ((char *, int));
+static void ptype_command (char *, int);
 
-static struct type *
-  ptype_eval PARAMS ((struct expression *));
+static struct type *ptype_eval (struct expression *);
 
-static void
-whatis_command PARAMS ((char *, int));
+static void whatis_command (char *, int);
 
-static void
-whatis_exp PARAMS ((char *, int));
+static void whatis_exp (char *, int);
 
 /* Print a description of a type TYPE in the form of a declaration of a
    variable named VARSTRING.  (VARSTRING is demangled if necessary.)
@@ -90,8 +86,7 @@ whatis_exp (exp, show)
   if (exp)
     {
       expr = parse_expression (exp);
-      old_chain = make_cleanup ((make_cleanup_func) free_current_contents,
-				&expr);
+      old_chain = make_cleanup (free_current_contents, &expr);
       val = evaluate_type (expr);
     }
   else
@@ -185,8 +180,7 @@ ptype_command (typename, from_tty)
   else
     {
       expr = parse_expression (typename);
-      old_chain = make_cleanup ((make_cleanup_func) free_current_contents,
-				&expr);
+      old_chain = make_cleanup (free_current_contents, &expr);
       type = ptype_eval (expr);
       if (type != NULL)
 	{
@@ -306,7 +300,7 @@ maintenance_print_type (typename, from_tty)
   if (typename != NULL)
     {
       expr = parse_expression (typename);
-      old_chain = make_cleanup ((make_cleanup_func) free_current_contents, &expr);
+      old_chain = make_cleanup (free_current_contents, &expr);
       if (expr->elts[0].opcode == OP_TYPE)
 	{
 	  /* The user expression names a type directly, just use that type. */

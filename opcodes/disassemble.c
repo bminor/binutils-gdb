@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#include "ansidecl.h"
+#include "sysdep.h"
 #include "dis-asm.h"
 
 #ifdef ARCH_all
@@ -33,6 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ARCH_i370
 #define ARCH_i386
 #define ARCH_i960
+#define ARCH_ia64
 #define ARCH_fr30
 #define ARCH_m32r
 #define ARCH_m68k
@@ -48,6 +49,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ARCH_sh
 #define ARCH_sparc
 #define ARCH_tic30
+#define ARCH_tic54x
 #define ARCH_tic80
 #define ARCH_v850
 #define ARCH_vax
@@ -147,6 +149,11 @@ disassembler (abfd)
       disassemble = print_insn_i960;
       break;
 #endif
+#ifdef ARCH_ia64
+    case bfd_arch_ia64:
+      disassemble = print_insn_ia64;
+      break;
+#endif
 #ifdef ARCH_fr30
     case bfd_arch_fr30:
       disassemble = print_insn_fr30;
@@ -210,7 +217,10 @@ disassembler (abfd)
 #endif
 #ifdef ARCH_rs6000
     case bfd_arch_rs6000:
-      disassemble = print_insn_rs6000;
+      if (bfd_get_mach (abfd) == 620)
+	disassemble = print_insn_big_powerpc;
+      else
+	disassemble = print_insn_rs6000;
       break;
 #endif
 #ifdef ARCH_sh
@@ -229,6 +239,11 @@ disassembler (abfd)
 #ifdef ARCH_tic30
     case bfd_arch_tic30:
       disassemble = print_insn_tic30;
+      break;
+#endif
+#ifdef ARCH_tic54x
+    case bfd_arch_tic54x:
+      disassemble = print_insn_tic54x;
       break;
 #endif
 #ifdef ARCH_tic80
@@ -267,7 +282,7 @@ disassembler (abfd)
 
 void
 disassembler_usage (stream)
-     FILE *stream ATTRIBUTE_UNUSED;
+     FILE * stream ATTRIBUTE_UNUSED;
 {
 #ifdef ARCH_arm
   print_arm_disassembler_options (stream);

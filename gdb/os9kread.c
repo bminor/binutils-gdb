@@ -61,7 +61,7 @@
 #include "os9k.h"
 #include "stabsread.h"
 
-extern void _initialize_os9kread PARAMS ((void));
+extern void _initialize_os9kread (void);
 
 /* Each partial symbol table entry contains a pointer to private data for the
    read_symtab() function to use when expanding a partial symbol table entry
@@ -126,51 +126,41 @@ static struct complaint lbrac_mismatch_complaint =
 
 /* Local function prototypes */
 
-static void
-read_minimal_symbols PARAMS ((struct objfile *));
+static void read_minimal_symbols (struct objfile *);
+
+static void os9k_read_ofile_symtab (struct partial_symtab *);
+
+static void os9k_psymtab_to_symtab (struct partial_symtab *);
+
+static void os9k_psymtab_to_symtab_1 (struct partial_symtab *);
+
+static void read_os9k_psymtab (struct objfile *, CORE_ADDR, int);
+
+static int fill_sym (FILE *, bfd *);
+
+static void os9k_symfile_init (struct objfile *);
+
+static void os9k_new_init (struct objfile *);
+
+static void os9k_symfile_read (struct objfile *, int);
+
+static void os9k_symfile_finish (struct objfile *);
 
 static void
-os9k_read_ofile_symtab PARAMS ((struct partial_symtab *));
+os9k_process_one_symbol (int, int, CORE_ADDR, char *,
+			 struct section_offsets *, struct objfile *);
 
-static void
-os9k_psymtab_to_symtab PARAMS ((struct partial_symtab *));
+static struct partial_symtab *os9k_start_psymtab (struct objfile *, char *,
+						  CORE_ADDR, int, int,
+						  struct partial_symbol **,
+						  struct partial_symbol **);
 
-static void
-os9k_psymtab_to_symtab_1 PARAMS ((struct partial_symtab *));
+static struct partial_symtab *os9k_end_psymtab (struct partial_symtab *,
+						char **, int, int, CORE_ADDR,
+						struct partial_symtab **,
+						int);
 
-static void
-read_os9k_psymtab PARAMS ((struct objfile *, CORE_ADDR, int));
-
-static int
-fill_sym PARAMS ((FILE *, bfd *));
-
-static void
-os9k_symfile_init PARAMS ((struct objfile *));
-
-static void
-os9k_new_init PARAMS ((struct objfile *));
-
-static void
-os9k_symfile_read PARAMS ((struct objfile *, int));
-
-static void
-os9k_symfile_finish PARAMS ((struct objfile *));
-
-static void
-os9k_process_one_symbol PARAMS ((int, int, CORE_ADDR, char *,
-			       struct section_offsets *, struct objfile *));
-
-static struct partial_symtab *
-  os9k_start_psymtab PARAMS ((struct objfile *, char *,
-			      CORE_ADDR, int, int, struct partial_symbol **,
-			      struct partial_symbol **));
-
-static struct partial_symtab *
-  os9k_end_psymtab PARAMS ((struct partial_symtab *, char **, int, int, CORE_ADDR,
-			    struct partial_symtab **, int));
-
-static void
-record_minimal_symbol PARAMS ((char *, CORE_ADDR, int, struct objfile *));
+static void record_minimal_symbol (char *, CORE_ADDR, int, struct objfile *);
 
 #define HANDLE_RBRAC(val) \
   if ((val) > pst->texthigh) pst->texthigh = (val);
@@ -208,7 +198,7 @@ record_minimal_symbol (name, address, type, objfile)
     {
     case N_TEXT:
       ms_type = mst_text;
-      address += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+      address += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
       break;
     case N_DATA:
       ms_type = mst_data;
@@ -342,7 +332,7 @@ os9k_symfile_read (objfile, mainline)
   free_pending_blocks ();
   back_to = make_cleanup (really_free_pendings, 0);
 
-  make_cleanup ((make_cleanup_func) discard_minimal_symbols, 0);
+  make_cleanup_discard_minimal_symbols ();
   read_minimal_symbols (objfile);
 
   /* Now that the symbol table data of the executable file are all in core,
@@ -608,7 +598,7 @@ read_os9k_psymtab (objfile, text_addr, text_size)
 #ifdef END_OF_TEXT_DEFAULT
   end_of_text_addr = END_OF_TEXT_DEFAULT;
 #else
-  end_of_text_addr = text_addr + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT)
+  end_of_text_addr = text_addr + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile))
     + text_size;		/* Relocate */
 #endif
 
@@ -655,7 +645,7 @@ read_os9k_psymtab (objfile, text_addr, text_size)
 	  continue;
 
 	case N_SYM_SE:
-	  CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+	  CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 	  if (psymfile_depth == 1 && pst)
 	    {
 	      os9k_end_psymtab (pst, psymtab_include_list, includes_used,
@@ -692,7 +682,7 @@ read_os9k_psymtab (objfile, text_addr, text_size)
 
 		valu = CUR_SYMBOL_VALUE;
 		if (valu)
-		  valu += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+		  valu += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 		past_first_source_file = 1;
 
 		p = strchr (namestring, ':');
@@ -884,7 +874,7 @@ read_os9k_psymtab (objfile, text_addr, text_size)
 	      continue;
 
 	    case 'f':
-	      CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+	      CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 	      if (pst && pst->textlow == 0)
 		pst->textlow = CUR_SYMBOL_VALUE;
 
@@ -895,7 +885,7 @@ read_os9k_psymtab (objfile, text_addr, text_size)
 	      continue;
 
 	    case 'F':
-	      CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+	      CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 	      if (pst && pst->textlow == 0)
 		pst->textlow = CUR_SYMBOL_VALUE;
 
@@ -933,7 +923,7 @@ read_os9k_psymtab (objfile, text_addr, text_size)
 	    }
 
 	case N_SYM_RBRAC:
-	  CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
+	  CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 #ifdef HANDLE_RBRAC
 	  HANDLE_RBRAC (CUR_SYMBOL_VALUE);
 	  continue;
@@ -1423,7 +1413,7 @@ os9k_read_ofile_symtab (pst)
      which comes from pst->textlow is correct. */
   if (last_source_start_addr == 0)
     last_source_start_addr = text_offset;
-  pst->symtab = end_symtab (text_offset + text_size, objfile, SECT_OFF_TEXT);
+  pst->symtab = end_symtab (text_offset + text_size, objfile, SECT_OFF_TEXT (objfile));
   end_stabs ();
 }
 
@@ -1473,12 +1463,12 @@ os9k_process_one_symbol (type, desc, valu, name, section_offsets, objfile)
     case N_SYM_LBRAC:
       /* On most machines, the block addresses are relative to the
          N_SO, the linker did not relocate them (sigh).  */
-      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
       new = push_context (desc, valu);
       break;
 
     case N_SYM_RBRAC:
-      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
       new = pop_context ();
 
 #if !defined (OS9K_VARIABLES_INSIDE_BLOCK)
@@ -1547,7 +1537,7 @@ os9k_process_one_symbol (type, desc, valu, name, section_offsets, objfile)
          one line-number -- core-address correspondence.
          Enter it in the line list for this symbol table. */
       /* Relocate for dynamic loading and for ELF acc fn-relative syms.  */
-      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
       /* FIXME: loses if sizeof (char *) > sizeof (int) */
       record_line (current_subfile, (int) name, valu);
       break;
@@ -1570,7 +1560,7 @@ os9k_process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	  switch (deftype)
 	    {
 	    case 'S':
-	      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+	      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
 	      n = strrchr (name, '/');
 	      if (n != NULL)
 		{
@@ -1588,7 +1578,7 @@ os9k_process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 		{
 		  if (last_source_file)
 		    {
-		      end_symtab (valu, objfile, SECT_OFF_TEXT);
+		      end_symtab (valu, objfile, SECT_OFF_TEXT (objfile));
 		      end_stabs ();
 		    }
 		  start_stabs ();
@@ -1605,7 +1595,7 @@ os9k_process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 
 	    case 'f':
 	    case 'F':
-	      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+	      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
 	      function_stab_type = type;
 
 	      within_function = 1;
@@ -1615,7 +1605,7 @@ os9k_process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 
 	    case 'V':
 	    case 'v':
-	      valu += ANOFFSET (section_offsets, SECT_OFF_DATA);
+	      valu += ANOFFSET (section_offsets, SECT_OFF_DATA (objfile));
 	      define_symbol (valu, name, desc, type, objfile);
 	      break;
 

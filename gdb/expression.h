@@ -333,9 +333,9 @@ struct expression
 
 /* From parse.c */
 
-extern struct expression *parse_expression PARAMS ((char *));
+extern struct expression *parse_expression (char *);
 
-extern struct expression *parse_exp_1 PARAMS ((char **, struct block *, int));
+extern struct expression *parse_exp_1 (char **, struct block *, int);
 
 /* The innermost context required by the stack and register variables
    we've encountered so far.  To use this, set it to NULL, then call
@@ -362,13 +362,13 @@ enum noside
   };
 
 extern struct value *evaluate_subexp_standard
-  PARAMS ((struct type *, struct expression *, int *, enum noside));
+  (struct type *, struct expression *, int *, enum noside);
 
 /* From expprint.c */
 
 extern void print_expression (struct expression *, struct ui_file *);
 
-extern char *op_string PARAMS ((enum exp_opcode));
+extern char *op_string (enum exp_opcode);
 
 extern void dump_prefix_expression (struct expression *,
 				    struct ui_file *,

@@ -54,20 +54,20 @@
 
 extern int stop_soon_quietly;	/* for wait_for_inferior */
 extern struct value *call_function_by_hand ();
-static void udi_resume PARAMS ((int pid, int step, enum target_signal sig));
-static void udi_fetch_registers PARAMS ((int regno));
-static void udi_load PARAMS ((char *args, int from_tty));
-static void fetch_register PARAMS ((int regno));
-static void udi_store_registers PARAMS ((int regno));
-static int store_register PARAMS ((int regno));
-static int regnum_to_srnum PARAMS ((int regno));
-static void udi_close PARAMS ((int quitting));
-static CPUSpace udi_memory_space PARAMS ((CORE_ADDR addr));
-static int udi_write_inferior_memory PARAMS ((CORE_ADDR memaddr, char *myaddr,
-					      int len));
-static int udi_read_inferior_memory PARAMS ((CORE_ADDR memaddr, char *myaddr,
-					     int len));
-static void download PARAMS ((char *load_arg_string, int from_tty));
+static void udi_resume (int pid, int step, enum target_signal sig);
+static void udi_fetch_registers (int regno);
+static void udi_load (char *args, int from_tty);
+static void fetch_register (int regno);
+static void udi_store_registers (int regno);
+static int store_register (int regno);
+static int regnum_to_srnum (int regno);
+static void udi_close (int quitting);
+static CPUSpace udi_memory_space (CORE_ADDR addr);
+static int udi_write_inferior_memory (CORE_ADDR memaddr, char *myaddr,
+				      int len);
+static int udi_read_inferior_memory (CORE_ADDR memaddr, char *myaddr,
+				     int len);
+static void download (char *load_arg_string, int from_tty);
 char CoffFileName[100] = "";
 
 #define FREEZE_MODE     (read_register(CPS_REGNUM) & 0x400)
@@ -1108,7 +1108,7 @@ download (load_arg_string, from_tty)
     error ("Must specify at least a file name with the load command");
 
   filename = tilde_expand (filename);
-  make_cleanup ((make_cleanup_func) free, filename);
+  make_cleanup (free, filename);
 
   while (token = strtok (NULL, " \t"))
     {
@@ -1162,7 +1162,7 @@ download (load_arg_string, from_tty)
   /* FIXME: should be checking for errors from bfd_close (for one thing,
      on error it does not free all the storage associated with the
      bfd).  */
-  make_cleanup ((make_cleanup_func) bfd_close, pbfd);
+  make_cleanup_bfd_close (pbfd);
 
   QUIT;
   immediate_quit++;

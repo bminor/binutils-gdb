@@ -21,26 +21,13 @@
 #ifndef NM_ARMLINUX_H
 #define NM_ARMLINUX_H
 
+#include "nm-linux.h"
+
 /* Return sizeof user struct to callers in less machine dependent routines */
 extern int kernel_u_size (void);
 #define KERNEL_U_SIZE	arm_linux_kernel_u_size()
 
 /* Override copies of {fetch,store}_inferior_registers in infptrace.c.  */
 #define FETCH_INFERIOR_REGISTERS
-
-/* Tell gdb that we can attach and detach other processes.  */
-#define ATTACH_DETACH
-
-extern int arm_register_u_addr (int, int);
-#define REGISTER_U_ADDR(addr, blockend, regno) \
-	{ (addr) = arm_linux_register_u_addr((blockend), (regno)); }
-
-/* We define this if link.h is available, because with ELF we use SVR4 style
-   shared libraries. */
-
-#ifdef HAVE_LINK_H
-#define SVR4_SHARED_LIBS
-#include "solib.h"		/* Support for shared libraries. */
-#endif
 
 #endif /* NM_ARMLINUX_H */

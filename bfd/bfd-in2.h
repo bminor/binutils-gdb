@@ -89,7 +89,7 @@ typedef struct _bfd bfd;
 /* Yup, SVR4 has a "typedef enum boolean" in <sys/types.h>  -fnf */
 /* It gets worse if the host also defines a true/false enum... -sts */
 /* And even worse if your compiler has built-in boolean types... -law */
-#if defined (__GNUG__) && (__GNUC_MINOR__ > 5)
+#if defined (__GNUG__) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 6))
 #define TRUE_FALSE_ALREADY_DEFINED
 #endif
 #ifdef MPW
@@ -640,6 +640,9 @@ extern long bfd_get_elf_phdr_upper_bound PARAMS ((bfd *abfd));
    error occurs; bfd_get_error will return an appropriate code.  */
 extern int bfd_get_elf_phdrs PARAMS ((bfd *abfd, void *phdrs));
 
+/* Return the arch_size field of an elf bfd, or -1 if not elf.  */
+extern int bfd_elf_get_arch_size PARAMS ((bfd *));
+
 /* SunOS shared library support routines for the linker.  */
 
 extern struct bfd_link_needed_list *bfd_sunos_get_needed_list
@@ -747,6 +750,13 @@ extern boolean bfd_elf32_arm_process_before_allocation
 
 extern boolean bfd_elf32_arm_get_bfd_for_interworking
   PARAMS ((bfd *, struct bfd_link_info *));
+
+/* TI COFF load page support. */
+extern void bfd_ticoff_set_section_load_page
+  PARAMS ((struct sec *, int));
+
+extern int bfd_ticoff_get_section_load_page
+  PARAMS ((struct sec *));
 
 /* And more from the source.  */
 void 
@@ -1058,9 +1068,9 @@ typedef struct sec
 #define SEC_SHARED 0x4000000
 
         /* When a section with this flag is being linked, then if the size of
-           the input section is less than a page, it should not cross a page
-           boundary.  If the size of the input section is one page or more, it
-           should be aligned on a page boundary.  */
+          the input section is less than a page, it should not cross a page
+          boundary.  If the size of the input section is one page or more, it
+          should be aligned on a page boundary.  */
 #define SEC_BLOCK 0x8000000
 
         /* Conditionally link this section; do not link if there are no
@@ -1425,6 +1435,7 @@ enum bfd_architecture
   bfd_arch_fr30,
 #define bfd_mach_fr30          0x46523330
   bfd_arch_mcore,
+  bfd_arch_ia64,       /* HP/Intel ia64 */
   bfd_arch_pj,
   bfd_arch_avr,        /* Atmel AVR microcontrollers */
 #define bfd_mach_avr1          1
@@ -2441,6 +2452,75 @@ is stored in the reloc's addend.  For Rel hosts, we are forced to put
 this offset in the reloc's section offset. */
   BFD_RELOC_VTABLE_INHERIT,
   BFD_RELOC_VTABLE_ENTRY,
+
+/* Intel IA64 Relocations. */
+  BFD_RELOC_IA64_IMM14,
+  BFD_RELOC_IA64_IMM22,
+  BFD_RELOC_IA64_IMM64,
+  BFD_RELOC_IA64_DIR32MSB,
+  BFD_RELOC_IA64_DIR32LSB,
+  BFD_RELOC_IA64_DIR64MSB,
+  BFD_RELOC_IA64_DIR64LSB,
+  BFD_RELOC_IA64_GPREL22,
+  BFD_RELOC_IA64_GPREL64I,
+  BFD_RELOC_IA64_GPREL32MSB,
+  BFD_RELOC_IA64_GPREL32LSB,
+  BFD_RELOC_IA64_GPREL64MSB,
+  BFD_RELOC_IA64_GPREL64LSB,
+  BFD_RELOC_IA64_LTOFF22,
+  BFD_RELOC_IA64_LTOFF64I,
+  BFD_RELOC_IA64_PLTOFF22,
+  BFD_RELOC_IA64_PLTOFF64I,
+  BFD_RELOC_IA64_PLTOFF64MSB,
+  BFD_RELOC_IA64_PLTOFF64LSB,
+  BFD_RELOC_IA64_FPTR64I,
+  BFD_RELOC_IA64_FPTR32MSB,
+  BFD_RELOC_IA64_FPTR32LSB,
+  BFD_RELOC_IA64_FPTR64MSB,
+  BFD_RELOC_IA64_FPTR64LSB,
+  BFD_RELOC_IA64_PCREL21B,
+  BFD_RELOC_IA64_PCREL21BI,
+  BFD_RELOC_IA64_PCREL21M,
+  BFD_RELOC_IA64_PCREL21F,
+  BFD_RELOC_IA64_PCREL22,
+  BFD_RELOC_IA64_PCREL60B,
+  BFD_RELOC_IA64_PCREL64I,
+  BFD_RELOC_IA64_PCREL32MSB,
+  BFD_RELOC_IA64_PCREL32LSB,
+  BFD_RELOC_IA64_PCREL64MSB,
+  BFD_RELOC_IA64_PCREL64LSB,
+  BFD_RELOC_IA64_LTOFF_FPTR22,
+  BFD_RELOC_IA64_LTOFF_FPTR64I,
+  BFD_RELOC_IA64_LTOFF_FPTR64MSB,
+  BFD_RELOC_IA64_LTOFF_FPTR64LSB,
+  BFD_RELOC_IA64_SEGBASE,
+  BFD_RELOC_IA64_SEGREL32MSB,
+  BFD_RELOC_IA64_SEGREL32LSB,
+  BFD_RELOC_IA64_SEGREL64MSB,
+  BFD_RELOC_IA64_SEGREL64LSB,
+  BFD_RELOC_IA64_SECREL32MSB,
+  BFD_RELOC_IA64_SECREL32LSB,
+  BFD_RELOC_IA64_SECREL64MSB,
+  BFD_RELOC_IA64_SECREL64LSB,
+  BFD_RELOC_IA64_REL32MSB,
+  BFD_RELOC_IA64_REL32LSB,
+  BFD_RELOC_IA64_REL64MSB,
+  BFD_RELOC_IA64_REL64LSB,
+  BFD_RELOC_IA64_LTV32MSB,
+  BFD_RELOC_IA64_LTV32LSB,
+  BFD_RELOC_IA64_LTV64MSB,
+  BFD_RELOC_IA64_LTV64LSB,
+  BFD_RELOC_IA64_IPLTMSB,
+  BFD_RELOC_IA64_IPLTLSB,
+  BFD_RELOC_IA64_EPLTMSB,
+  BFD_RELOC_IA64_EPLTLSB,
+  BFD_RELOC_IA64_COPY,
+  BFD_RELOC_IA64_TPREL22,
+  BFD_RELOC_IA64_TPREL64MSB,
+  BFD_RELOC_IA64_TPREL64LSB,
+  BFD_RELOC_IA64_LTOFF_TP22,
+  BFD_RELOC_IA64_LTOFF22X,
+  BFD_RELOC_IA64_LDXMOV,
   BFD_RELOC_UNUSED };
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
 reloc_howto_type *

@@ -44,4 +44,33 @@ extern int ia64_register_u_addr(int, int);
 #define PTRACE_ARG3_TYPE long
 #define PTRACE_XFER_TYPE long
 
+/* Hardware watchpoints */
+
+#define TARGET_HAS_HARDWARE_WATCHPOINTS
+
+#define TARGET_CAN_USE_HARDWARE_WATCHPOINT(type, cnt, ot) 1
+
+/* The IA-64 architecture can step over a watch point (without triggering
+   it again) if the "dd" (data debug fault disable) bit in the processor
+   status word is set.
+   
+   This PSR bit is set in ia64_linux_stopped_by_watchpoint when the
+   code there has determined that a hardware watchpoint has indeed
+   been hit.  The CPU will then be able to execute one instruction 
+   without triggering a watchpoint. */
+#define HAVE_STEPPABLE_WATCHPOINT 1
+
+#define STOPPED_BY_WATCHPOINT(W) \
+  ia64_linux_stopped_by_watchpoint (inferior_pid)
+extern CORE_ADDR ia64_linux_stopped_by_watchpoint (int);
+
+#define target_insert_watchpoint(addr, len, type) \
+  ia64_linux_insert_watchpoint (inferior_pid, addr, len, type)
+extern int ia64_linux_insert_watchpoint (int pid, CORE_ADDR addr,
+                                         int len, int rw);
+
+#define target_remove_watchpoint(addr, len, type) \
+  ia64_linux_remove_watchpoint (inferior_pid, addr, len)
+extern int ia64_linux_remove_watchpoint (int pid, CORE_ADDR addr, int len);
+
 #endif /* #ifndef NM_LINUX_H */

@@ -29,7 +29,7 @@
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-extern CORE_ADDR vax_skip_prologue PARAMS ((CORE_ADDR));
+extern CORE_ADDR vax_skip_prologue (CORE_ADDR);
 #define SKIP_PROLOGUE(pc) (vax_skip_prologue (pc))
 
 /* Immediately after a function call, return the saved pc.
@@ -214,7 +214,7 @@ extern CORE_ADDR vax_skip_prologue PARAMS ((CORE_ADDR));
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
 
-extern int vax_frame_num_args PARAMS ((struct frame_info * fi));
+extern int vax_frame_num_args (struct frame_info *fi);
 #define FRAME_NUM_ARGS(fi) (vax_frame_num_args ((fi)))
 
 /* Return number of bytes at start of arglist that are not really args.  */

@@ -50,34 +50,28 @@
 ** STATIC LOCAL FUNCTIONS FORWARD DECLS    **
 ******************************************/
 static TuiStatus _tuiSetRegsContent
-  PARAMS ((int, int, struct frame_info *,
-	   TuiRegisterDisplayType, int));
-static char *_tuiRegisterName PARAMS ((int));
-static TuiStatus _tuiGetRegisterRawValue
-  PARAMS ((int, char *, struct frame_info *));
+  (int, int, struct frame_info *, TuiRegisterDisplayType, int);
+static char *_tuiRegisterName (int);
+static TuiStatus _tuiGetRegisterRawValue (int, char *, struct frame_info *);
 static void _tuiSetRegisterElement
-  PARAMS ((int, struct frame_info *,
-	   TuiDataElementPtr, int));
-static void _tuiDisplayRegister
-  PARAMS ((int, TuiGenWinInfoPtr, enum precision_type));
+  (int, struct frame_info *, TuiDataElementPtr, int);
+static void _tuiDisplayRegister (int, TuiGenWinInfoPtr, enum precision_type);
 static void _tuiRegisterFormat
-  PARAMS ((char *, int, int, TuiDataElementPtr,
-	   enum precision_type));
-static TuiStatus _tuiSetGeneralRegsContent PARAMS ((int));
-static TuiStatus _tuiSetSpecialRegsContent PARAMS ((int));
-static TuiStatus _tuiSetGeneralAndSpecialRegsContent PARAMS ((int));
-static TuiStatus _tuiSetFloatRegsContent PARAMS ((TuiRegisterDisplayType, int));
+  (char *, int, int, TuiDataElementPtr, enum precision_type);
+static TuiStatus _tuiSetGeneralRegsContent (int);
+static TuiStatus _tuiSetSpecialRegsContent (int);
+static TuiStatus _tuiSetGeneralAndSpecialRegsContent (int);
+static TuiStatus _tuiSetFloatRegsContent (TuiRegisterDisplayType, int);
 static int _tuiRegValueHasChanged
-  PARAMS ((TuiDataElementPtr, struct frame_info *,
-	   char *));
-static void _tuiShowFloat_command PARAMS ((char *, int));
-static void _tuiShowGeneral_command PARAMS ((char *, int));
-static void _tuiShowSpecial_command PARAMS ((char *, int));
-static void _tui_vShowRegisters_commandSupport PARAMS ((va_list));
-static void _tuiToggleFloatRegs_command PARAMS ((char *, int));
-static void _tuiScrollRegsForward_command PARAMS ((char *, int));
-static void _tuiScrollRegsBackward_command PARAMS ((char *, int));
-static void _tui_vShowRegisters_commandSupport PARAMS ((va_list));
+  (TuiDataElementPtr, struct frame_info *, char *);
+static void _tuiShowFloat_command (char *, int);
+static void _tuiShowGeneral_command (char *, int);
+static void _tuiShowSpecial_command (char *, int);
+static void _tui_vShowRegisters_commandSupport (va_list);
+static void _tuiToggleFloatRegs_command (char *, int);
+static void _tuiScrollRegsForward_command (char *, int);
+static void _tuiScrollRegsBackward_command (char *, int);
+static void _tui_vShowRegisters_commandSupport (va_list);
 
 
 

@@ -1,5 +1,5 @@
 /* BFD back-end for HP PA-RISC ELF files.
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
 
    Written by
@@ -311,17 +311,17 @@ hppa_elf_relocate_insn (abfd, input_sect, insn, address, sym_value,
     case BL:
     case BE:
     case BLE:
-      /* XXX computing constant_value is not needed??? */
+      /* XXX r_addend ignored ???.  */
       constant_value = assemble_17 ((insn & 0x001f0000) >> 16,
 				    (insn & 0x00001ffc) >> 2,
 				    insn & 1);
 
-      constant_value = (constant_value << 15) >> 15;
+      constant_value = (constant_value << (BFD_ARCH_SIZE-17))
+				       >> (BFD_ARCH_SIZE-17);
       if (pcrel)
 	{
-	  sym_value -=
-	    address + input_sect->output_offset
-	    + input_sect->output_section->vma;
+	  sym_value -= (address + input_sect->output_offset
+			+ input_sect->output_section->vma);
 	  sym_value = hppa_field_adjust (sym_value, -8, r_field);
 	}
       else
@@ -665,7 +665,7 @@ elf32_hppa_bfd_final_link_relocate (howto, input_bfd, output_bfd,
 
 	/* Any kind of linker stub needed?  */
 	if (((int)(value - location) > 0x3ffff)
-	    || ((int)(value - location) < (int)0xfffc0000))
+	    || ((int)(value - location) < -0x40000))
 	  {
 	    struct elf32_hppa_stub_hash_table *stub_hash_table;
 	    struct elf32_hppa_stub_hash_entry *stub_hash;
@@ -831,7 +831,7 @@ elf32_hppa_size_of_stub (location, destination, sym_name)
 {
   /* Determine if a long branch stub is needed.  */
   if (!(((int)(location - destination) > 0x3ffff)
-	|| ((int)(location - destination) < (int)0xfffc0000)))
+	|| ((int)(location - destination) < -0x40000)))
     return 0;
 
   if (!strncmp ("$$", sym_name, 2)

@@ -879,7 +879,7 @@ go32_handle_nonaligned_watchpoint (wp_op what, CORE_ADDR waddr, CORE_ADDR addr,
       else if (what == wp_count)
 	rv++;
       else
-	status = -1;
+	status = EINVAL;
       /* We keep the loop going even after a failure, because some of
 	 the other aligned watchpoints might still succeed, e.g. if
 	 they watch addresses that are already watched, and thus just
@@ -1055,7 +1055,7 @@ go32_insert_hw_breakpoint (CORE_ADDR addr, void *shadow ATTRIBUTE_UNUSED)
     }
   SHOW_DR (insert_hw, 0);
 
-  return i < 4 ? 0 : -1;
+  return i < 4 ? 0 : EBUSY;
 }
 
 /* Put the device open on handle FD into either raw or cooked

@@ -99,8 +99,6 @@ lookup_hash (ins, size)
     {
       if (h->next == NULL)
 	{
-	  (*d10v_callback->printf_filtered)
-	    (d10v_callback, "ERROR: Illegal instruction %x at PC %x\n", ins, PC);
 	  State.exception = SIGILL;
 	  State.pc_changed = 1; /* Don't increment the PC. */
 	  return NULL;
@@ -979,6 +977,13 @@ sim_resume (sd, step, siggnal)
       JMP (AE_VECTOR_START);
       SLOT_FLUSH ();
       break;
+    case SIGILL:
+      SET_BPC (PC);
+      SET_BPSW (PSW);
+      SET_HW_PSW ((PSW & (PSW_F0_BIT | PSW_F1_BIT | PSW_C_BIT)));
+      JMP (RIE_VECTOR_START);
+      SLOT_FLUSH ();
+      break;
     default:
       /* just ignore it */
       break;
@@ -1247,7 +1252,8 @@ sim_create_inferior (sd, abfd, argv, env)
       set_imap_register (1, 0x1000);
       set_dmap_register (0, 0x2000);
       set_dmap_register (1, 0x2000);
-      set_dmap_register (2, 0x0000); /* Old DMAP, Value is not 0x2000 */
+      set_dmap_register (2, 0x2000); /* DMAP2 initial internal value is
+					0x2000 on the new board. */
       set_dmap_register (3, 0x0000);
     }
 

@@ -31,7 +31,7 @@
 #define TARGET_BYTE_ORDER BIG_ENDIAN
 
 /* Floating point uses IEEE representations.  */
-#define IEEE_FLOAT
+#define IEEE_FLOAT (1)
 
 /* Recognize our magic number.  */
 #define BADMAG(x) ((x).f_magic != 0572)
@@ -508,7 +508,9 @@ extern CORE_ADDR frame_locals_address ();
    because registers get renumbered on the a29k without getting saved.  */
 
 struct frame_info;
-void a29k_get_saved_register PARAMS ((char *raw_buffer, int *optimized, CORE_ADDR * addrp, struct frame_info * frame, int regnum, enum lval_type * lvalp));
+void a29k_get_saved_register (char *raw_buffer, int *optimized,
+			      CORE_ADDR * addrp, struct frame_info *frame,
+			      int regnum, enum lval_type *lvalp);
 #define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
       a29k_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 
@@ -713,4 +715,4 @@ processor_type;
    "frame" or "info frame" command.  */
 
 #define SETUP_ARBITRARY_FRAME(argc, argv) setup_arbitrary_frame (argc, argv)
-extern struct frame_info *setup_arbitrary_frame PARAMS ((int, CORE_ADDR *));
+extern struct frame_info *setup_arbitrary_frame (int, CORE_ADDR *);

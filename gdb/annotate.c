@@ -28,17 +28,17 @@
 
 /* Prototypes for local functions. */
 
-extern void _initialize_annotate PARAMS ((void));
+extern void _initialize_annotate (void);
 
-static void print_value_flags PARAMS ((struct type *));
+static void print_value_flags (struct type *);
 
-static void breakpoint_changed PARAMS ((struct breakpoint *));
+static void breakpoint_changed (struct breakpoint *);
 
-void (*annotate_starting_hook) PARAMS ((void));
-void (*annotate_stopped_hook) PARAMS ((void));
-void (*annotate_signalled_hook) PARAMS ((void));
-void (*annotate_signal_hook) PARAMS ((void));
-void (*annotate_exited_hook) PARAMS ((void));
+void (*annotate_starting_hook) (void);
+void (*annotate_stopped_hook) (void);
+void (*annotate_signalled_hook) (void);
+void (*annotate_signal_hook) (void);
+void (*annotate_exited_hook) (void);
 
 static int ignore_count_changed = 0;
 

@@ -1,3 +1,35 @@
+Tue May 30 16:45:25 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* floatformat.c: Add name to each floatformat field.
+
+Tue May 30 15:07:52 2000  Jeffrey A Law  (law@cygnus.com)
+
+	* Makefile.in (objalloc.o): Depend on config.h
+
+2000-05-29  Zack Weinberg  <zack@wolery.cumb.org>
+
+	* hashtab.c, partition.c, xmemdup.c: Include string.h
+	if HAVE_STRING_H.
+	* pexecute.c, xexit.c: Include stdlib.h if HAVE_STDLIB_H.
+	* objalloc.c: Include config.h.  Include stdlib.h and don't
+	declare malloc or free if HAVE_STDLIB_H.
+	* strerror.c, strsignal.c: Include stdlib.h if HAVE_STDLIB_H,
+	else declare malloc without prototype.  Include string.h if
+	HAVE_STRING_H, else declare memset without prototype.  Don't
+	include stddef.h.
+
+	* sort.c: Bring over from GCC.
+
+2000-05-26  Alexandre Oliva  <aoliva@cygnus.com>
+
+	* Makefile.in (maintainer-clean-subdir): Fix handling of empty
+	SUBDIRS.
+
+2000-04-21  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	* Makefile.in (*-subdir): Revamp slightly to avoid losing on
+	4.3BSD systems.
+
 2000-04-05  Richard Henderson  <rth@cygnus.com>
 
 	* splay-tree.c (splay_tree_remove): New.

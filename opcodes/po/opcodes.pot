@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-04-04 23:21+0930\n"
+"POT-Creation-Date: 2000-05-30 11:33-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,7 +22,7 @@ msgstr ""
 msgid "jump hint unaligned"
 msgstr ""
 
-#: arc-dis.c:231
+#: arc-dis.c:232
 msgid "*unknown*"
 msgstr ""
 
@@ -48,21 +48,21 @@ msgstr ""
 msgid "branch address not on 4 byte boundary"
 msgstr ""
 
-#: arm-dis.c:470
+#: arm-dis.c:476
 msgid "<illegal precision>"
 msgstr ""
 
-#: arm-dis.c:882
+#: arm-dis.c:888
 #, c-format
 msgid "Unrecognised register name set: %s\n"
 msgstr ""
 
-#: arm-dis.c:889
+#: arm-dis.c:895
 #, c-format
 msgid "Unrecognised disassembler option: %s\n"
 msgstr ""
 
-#: arm-dis.c:1053
+#: arm-dis.c:1059
 msgid ""
 "\n"
 "The following ARM specific disassembler options are supported for use with\n"
@@ -83,7 +83,7 @@ msgstr ""
 msgid "operand out of range (%lu not between %lu and %lu)"
 msgstr ""
 
-#: d30v-dis.c:305
+#: d30v-dis.c:306
 #, c-format
 msgid "<unknown register %d>"
 msgstr ""
@@ -171,23 +171,23 @@ msgstr ""
 msgid "Unrecognized field %d while setting vma operand.\n"
 msgstr ""
 
-#: h8300-dis.c:404
+#: h8300-dis.c:405
 #, c-format
 msgid "Hmmmm %x"
 msgstr ""
 
-#: h8300-dis.c:416
+#: h8300-dis.c:417
 #, c-format
 msgid "Don't understand %x \n"
 msgstr ""
 
-#: h8500-dis.c:139
+#: h8500-dis.c:140
 #, c-format
 msgid "can't cope with insert %d\n"
 msgstr ""
 
 #. Couldn't understand anything
-#: h8500-dis.c:344
+#: h8500-dis.c:345
 #, c-format
 msgid "%02x\t\t*unknown*"
 msgstr ""
@@ -202,27 +202,27 @@ msgstr ""
 msgid "unknown\t0x%04lx"
 msgstr ""
 
-#: m10300-dis.c:680
+#: m10300-dis.c:685
 #, c-format
 msgid "unknown\t0x%04x"
 msgstr ""
 
-#: m68k-dis.c:410
+#: m68k-dis.c:412
 #, c-format
 msgid "<internal error in opcode table: %s %s>\n"
 msgstr ""
 
-#: m68k-dis.c:988
+#: m68k-dis.c:990
 #, c-format
 msgid "<function code %d>"
 msgstr ""
 
-#: m88k-dis.c:273
+#: m88k-dis.c:274
 #, c-format
 msgid "# <dis error: %08x>"
 msgstr ""
 
-#: mips-dis.c:237
+#: mips-dis.c:242
 #, c-format
 msgid "# internal error, undefined modifier(%c)"
 msgstr ""
@@ -237,50 +237,50 @@ msgstr ""
 msgid "$<undefined>"
 msgstr ""
 
-#: ppc-opc.c:586 ppc-opc.c:617
+#: ppc-opc.c:619 ppc-opc.c:650
 msgid "invalid conditional option"
 msgstr ""
 
-#: ppc-opc.c:619
+#: ppc-opc.c:652
 msgid "attempt to set y bit when using + or - modifier"
 msgstr ""
 
-#: ppc-opc.c:674
+#: ppc-opc.c:707
 msgid "ignoring least significant bits in branch offset"
 msgstr ""
 
-#: ppc-opc.c:709 ppc-opc.c:746
+#: ppc-opc.c:742 ppc-opc.c:779
 msgid "illegal bitmask"
 msgstr ""
 
-#: ppc-opc.c:815
+#: ppc-opc.c:848
 msgid "value out of range"
 msgstr ""
 
-#: ppc-opc.c:889
+#: ppc-opc.c:922
 msgid "index register in load range"
 msgstr ""
 
-#: ppc-opc.c:904
+#: ppc-opc.c:937
 msgid "invalid register operand when updating"
 msgstr ""
 
 #. Mark as non-valid instruction
-#: sparc-dis.c:744
+#: sparc-dis.c:743
 msgid "unknown"
 msgstr ""
 
-#: sparc-dis.c:816
+#: sparc-dis.c:815
 #, c-format
 msgid "Internal error:  bad sparc-opcode.h: \"%s\", %#.8lx, %#.8lx\n"
 msgstr ""
 
-#: sparc-dis.c:827
+#: sparc-dis.c:826
 #, c-format
 msgid "Internal error: bad sparc-opcode.h: \"%s\", %#.8lx, %#.8lx\n"
 msgstr ""
 
-#: sparc-dis.c:876
+#: sparc-dis.c:875
 #, c-format
 msgid "Internal error: bad sparc-opcode.h: \"%s\" == \"%s\"\n"
 msgstr ""

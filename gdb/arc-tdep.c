@@ -90,9 +90,9 @@ int debug_pipeline_p;
    | ((d) & 511))
 
 /* Codestream stuff.  */
-static void codestream_read PARAMS ((unsigned int *, int));
-static void codestream_seek PARAMS ((CORE_ADDR));
-static unsigned int codestream_fill PARAMS ((int));
+static void codestream_read (unsigned int *, int);
+static void codestream_seek (CORE_ADDR);
+static unsigned int codestream_fill (int);
 
 #define CODESTREAM_BUFSIZ 16
 static CORE_ADDR codestream_next_addr;

@@ -1399,21 +1399,8 @@ ppc_elf_merge_private_bfd_data (ibfd, obfd)
   boolean error;
 
   /* Check if we have the same endianess */
-  if (ibfd->xvec->byteorder != obfd->xvec->byteorder
-      && obfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)
-    {
-      const char *msg;
-
-      if (bfd_big_endian (ibfd))
-	msg = _("%s: compiled for a big endian system and target is little endian");
-      else
-	msg = _("%s: compiled for a little endian system and target is big endian");
-
-      (*_bfd_error_handler) (msg, bfd_get_filename (ibfd));
-
-      bfd_set_error (bfd_error_wrong_format);
-      return false;
-    }
+  if (_bfd_generic_verify_endian_match (ibfd, obfd) == false)
+    return false;
 
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
@@ -2540,7 +2527,7 @@ ppc_elf_gc_sweep_hook (abfd, info, sec, relocs)
 	    if (h->got.refcount > 0)
 	      h->got.refcount--;
 	  }
-	else
+	else if (local_got_refcounts != NULL)
 	  {
 	    if (local_got_refcounts[r_symndx] > 0)
 	      local_got_refcounts[r_symndx]--;
@@ -3022,6 +3009,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      sec = h->root.u.def.section;
 	      if ((r_type == R_PPC_PLT32
+		   && splt != NULL
 		   && h->plt.offset != (bfd_vma) -1)
 		  || (r_type == R_PPC_LOCAL24PC
 		      && sec->output_section == NULL)
@@ -3043,7 +3031,9 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
                              It's here to avoid a crash when
                              generating a shared library with DWARF
                              debugging information.  */
-		          || (input_section->flags & SEC_DEBUGGING) != 0)
+			  || ((input_section->flags & SEC_DEBUGGING) != 0
+			      && (h->elf_link_hash_flags
+				  & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
 		      && (r_type == R_PPC_ADDR32
 			  || r_type == R_PPC_ADDR24
 			  || r_type == R_PPC_ADDR16
@@ -3101,7 +3091,9 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    relocation = 0;
-	  else if (info->shared && !info->symbolic && !info->no_undefined)
+	  else if (info->shared && !info->symbolic
+		   && !info->no_undefined
+		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    relocation = 0;
 	  else
 	    {
@@ -3111,7 +3103,8 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 							 input_section,
 							 rel->r_offset,
 							 (!info->shared
-							  || info->no_undefined)))
+							  || info->no_undefined
+							  || ELF_ST_VISIBILITY (h->other))))
 		return false;
 	      relocation = 0;
 	    }

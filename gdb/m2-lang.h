@@ -18,11 +18,9 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-extern int
-m2_parse PARAMS ((void));	/* Defined in m2-exp.y */
+extern int m2_parse (void);	/* Defined in m2-exp.y */
 
-extern void
-m2_error PARAMS ((char *));	/* Defined in m2-exp.y */
+extern void m2_error (char *);	/* Defined in m2-exp.y */
 
 /* Defined in m2-typeprint.c */
 extern void m2_print_type (struct type *, char *, struct ui_file *, int,

@@ -67,7 +67,7 @@ char **h8300_register_names = original_register_names;
 /* Local function declarations.  */
 
 static CORE_ADDR examine_prologue ();
-static void set_machine_hook PARAMS ((char *filename));
+static void set_machine_hook (char *filename);
 
 void h8300_frame_find_saved_regs ();
 

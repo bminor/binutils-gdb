@@ -53,7 +53,3 @@ extern struct mi_parse *mi_parse (char *cmd);
 extern void mi_parse_free (struct mi_parse *cmd);
 
 #endif
-
-/* Local variables: */
-/* change-log-default-name: "ChangeLog-mi" */
-/* End: */

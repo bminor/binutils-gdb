@@ -28,7 +28,7 @@
 static serial_t parallel;
 static int parallel_in_use;
 
-static void sh3_open PARAMS ((char *args, int from_tty));
+static void sh3_open (char *args, int from_tty);
 
 static void
 sh3_supply_register (regname, regnamelen, val, vallen)

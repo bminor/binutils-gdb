@@ -50,6 +50,8 @@
 #include "language.h"
 #include "annotate.h"
 
+#include "inferior.h" /* for signed_pointer_to_address */
+
 #include <readline/readline.h>
 
 #undef XMALLOC
@@ -58,7 +60,7 @@
 /* readline defines this.  */
 #undef savestring
 
-void (*error_begin_hook) PARAMS ((void));
+void (*error_begin_hook) (void);
 
 /* Holds the last error message issued by gdb */
 
@@ -72,17 +74,14 @@ static void vfprintf_maybe_filtered (struct ui_file *, const char *,
 static void fputs_maybe_filtered (const char *, struct ui_file *, int);
 
 #if defined (USE_MMALLOC) && !defined (NO_MMCHECK)
-static void malloc_botch PARAMS ((void));
+static void malloc_botch (void);
 #endif
 
-static void
-prompt_for_continue PARAMS ((void));
+static void prompt_for_continue (void);
 
-static void
-set_width_command PARAMS ((char *, int, struct cmd_list_element *));
+static void set_width_command (char *, int, struct cmd_list_element *);
 
-static void
-set_width PARAMS ((void));
+static void set_width (void);
 
 /* Chain of cleanup actions established with make_cleanup,
    to be executed if an error happens.  */
@@ -201,6 +200,31 @@ make_cleanup_freeargv (arg)
      char **arg;
 {
   return make_my_cleanup (&cleanup_chain, do_freeargv, arg);
+}
+
+static void
+do_bfd_close_cleanup (void *arg)
+{
+  bfd_close (arg);
+}
+
+struct cleanup *
+make_cleanup_bfd_close (bfd *abfd)
+{
+  return make_cleanup (do_bfd_close_cleanup, abfd);
+}
+
+static void
+do_close_cleanup (void *arg)
+{
+  close ((int) arg);
+}
+
+struct cleanup *
+make_cleanup_close (int fd)
+{
+  /* int into void*. Outch!! */
+  return make_cleanup (do_close_cleanup, (void *) fd);
 }
 
 static void
@@ -375,10 +399,16 @@ restore_my_cleanups (pmy_chain, chain)
    to arrange to free the object thus allocated.  */
 
 void
-free_current_contents (location)
-     char **location;
+free_current_contents (void *ptr)
 {
-  free (*location);
+  void **location = ptr;
+  if (location == NULL)
+    internal_error ("free_current_contents: NULL pointer");
+  if (*location != NULL)
+    {
+      free (*location);
+      *location = NULL;
+    }
 }
 
 /* Provide a known function that does nothing, to use as a base for
@@ -398,7 +428,7 @@ null_cleanup (void *arg)
    cmd_continuation. The new continuation will be added at the front.*/
 void
 add_continuation (continuation_hook, arg_list)
-     void (*continuation_hook) PARAMS ((struct continuation_arg *));
+     void (*continuation_hook) (struct continuation_arg *);
      struct continuation_arg *arg_list;
 {
   struct continuation *continuation_ptr;
@@ -460,7 +490,7 @@ discard_all_continuations ()
    intermediate_continuation. The new continuation will be added at the front.*/
 void
 add_intermediate_continuation (continuation_hook, arg_list)
-     void (*continuation_hook) PARAMS ((struct continuation_arg *));
+     void (*continuation_hook) (struct continuation_arg *);
      struct continuation_arg *arg_list;
 {
   struct continuation *continuation_ptr;
@@ -679,6 +709,7 @@ internal_verror (const char *fmt, va_list ap)
     }
 
   /* Try to get the message out */
+  target_terminal_ours ();
   fputs_unfiltered ("gdb-internal-error: ", gdb_stderr);
   vfprintf_unfiltered (gdb_stderr, fmt, ap);
   fputs_unfiltered ("\n", gdb_stderr);
@@ -719,6 +750,7 @@ internal_error (char *string, ...)
 {
   va_list ap;
   va_start (ap, string);
+
   internal_verror (string, ap);
   va_end (ap);
 }
@@ -741,26 +773,6 @@ safe_strerror (errnum)
     }
   return (msg);
 }
-
-/* The strsignal() function can return NULL for signal values that are
-   out of range.  Provide a "safe" version that always returns a
-   printable string. */
-
-char *
-safe_strsignal (signo)
-     int signo;
-{
-  char *msg;
-  static char buf[32];
-
-  if ((msg = strsignal (signo)) == NULL)
-    {
-      sprintf (buf, "(undocumented signal %d)", signo);
-      msg = buf;
-    }
-  return (msg);
-}
-
 
 /* Print the system error message for errno, and also mention STRING
    as the file name for which the error was encountered.
@@ -1391,8 +1403,8 @@ static void printchar (int c, void (*do_fputs) (const char *, struct ui_file*), 
 static void
 printchar (c, do_fputs, do_fprintf, stream, quoter)
      int c;
-     void (*do_fputs) PARAMS ((const char *, struct ui_file*));
-     void (*do_fprintf) PARAMS ((struct ui_file*, const char *, ...));
+     void (*do_fputs) (const char *, struct ui_file *);
+     void (*do_fprintf) (struct ui_file *, const char *, ...);
      struct ui_file *stream;
      int quoter;
 {
@@ -2306,7 +2318,7 @@ subset_compare (string_to_compare, template_string)
 }
 
 
-static void pagination_on_command PARAMS ((char *arg, int from_tty));
+static void pagination_on_command (char *arg, int from_tty);
 static void
 pagination_on_command (arg, from_tty)
      char *arg;
@@ -2315,7 +2327,7 @@ pagination_on_command (arg, from_tty)
   pagination_enabled = 1;
 }
 
-static void pagination_on_command PARAMS ((char *arg, int from_tty));
+static void pagination_on_command (char *arg, int from_tty);
 static void
 pagination_off_command (arg, from_tty)
      char *arg;
@@ -2363,6 +2375,7 @@ initialize_utils ()
 		  var_boolean, (char *) &pagination_enabled,
 		  "Set state of pagination.", &setlist),
      &showlist);
+
   if (xdb_commands)
     {
       add_com ("am", class_support, pagination_on_command,
@@ -2406,11 +2419,9 @@ SIGWINCH_HANDLER_BODY
    a system header, what we do if not, etc.  */
 #define FLOATFORMAT_CHAR_BIT 8
 
-static unsigned long get_field PARAMS ((unsigned char *,
-					enum floatformat_byteorders,
-					unsigned int,
-					unsigned int,
-					unsigned int));
+static unsigned long get_field (unsigned char *,
+				enum floatformat_byteorders,
+				unsigned int, unsigned int, unsigned int);
 
 /* Extract a field which starts at START and is LEN bytes long.  DATA and
    TOTAL_LEN are the thing we are extracting it from, in byteorder ORDER.  */
@@ -2586,11 +2597,9 @@ floatformat_to_doublest (fmt, from, to)
   *to = dto;
 }
 
-static void put_field PARAMS ((unsigned char *, enum floatformat_byteorders,
-			       unsigned int,
-			       unsigned int,
-			       unsigned int,
-			       unsigned long));
+static void put_field (unsigned char *, enum floatformat_byteorders,
+		       unsigned int,
+		       unsigned int, unsigned int, unsigned long);
 
 /* Set a field which starts at START and is LEN bytes long.  DATA and
    TOTAL_LEN are the thing we are extracting it from, in byteorder ORDER.  */
@@ -2661,7 +2670,7 @@ put_field (data, order, total_len, start, len, stuff_to_put)
    The range of the returned value is >= 0.5 and < 1.0.  This is equivalent to
    frexp, but operates on the long double data type.  */
 
-static long double ldfrexp PARAMS ((long double value, int *eptr));
+static long double ldfrexp (long double value, int *eptr);
 
 static long double
 ldfrexp (value, eptr)
@@ -2815,6 +2824,8 @@ floatformat_from_doublest (fmt, from, to)
     }
 }
 
+/* print routines to handle variable size regs, etc. */
+
 /* temporary storage using circular buffer */
 #define NUMCELLS 16
 #define CELLSIZE 32
@@ -2828,79 +2839,22 @@ get_cell ()
   return buf[cell];
 }
 
-/* print routines to handle variable size regs, etc.
-
-   FIXME: Note that t_addr is a bfd_vma, which is currently either an
-   unsigned long or unsigned long long, determined at configure time.
-   If t_addr is an unsigned long long and sizeof (unsigned long long)
-   is greater than sizeof (unsigned long), then I believe this code will
-   probably lose, at least for little endian machines.  I believe that
-   it would also be better to eliminate the switch on the absolute size
-   of t_addr and replace it with a sequence of if statements that compare
-   sizeof t_addr with sizeof the various types and do the right thing,
-   which includes knowing whether or not the host supports long long.
-   -fnf
-
- */
-
 int
 strlen_paddr (void)
 {
   return (TARGET_PTR_BIT / 8 * 2);
 }
 
-
-/* eliminate warning from compiler on 32-bit systems */
-static int thirty_two = 32;
-
 char *
 paddr (CORE_ADDR addr)
 {
-  char *paddr_str = get_cell ();
-  switch (TARGET_PTR_BIT / 8)
-    {
-    case 8:
-      sprintf (paddr_str, "%08lx%08lx",
-	       (unsigned long) (addr >> thirty_two), (unsigned long) (addr & 0xffffffff));
-      break;
-    case 4:
-      sprintf (paddr_str, "%08lx", (unsigned long) addr);
-      break;
-    case 2:
-      sprintf (paddr_str, "%04x", (unsigned short) (addr & 0xffff));
-      break;
-    default:
-      sprintf (paddr_str, "%lx", (unsigned long) addr);
-    }
-  return paddr_str;
+  return phex (addr, TARGET_PTR_BIT / 8);
 }
 
 char *
 paddr_nz (CORE_ADDR addr)
 {
-  char *paddr_str = get_cell ();
-  switch (TARGET_PTR_BIT / 8)
-    {
-    case 8:
-      {
-	unsigned long high = (unsigned long) (addr >> thirty_two);
-	if (high == 0)
-	  sprintf (paddr_str, "%lx", (unsigned long) (addr & 0xffffffff));
-	else
-	  sprintf (paddr_str, "%lx%08lx",
-		   high, (unsigned long) (addr & 0xffffffff));
-	break;
-      }
-    case 4:
-      sprintf (paddr_str, "%lx", (unsigned long) addr);
-      break;
-    case 2:
-      sprintf (paddr_str, "%x", (unsigned short) (addr & 0xffff));
-      break;
-    default:
-      sprintf (paddr_str, "%lx", (unsigned long) addr);
-    }
-  return paddr_str;
+  return phex_nz (addr, TARGET_PTR_BIT / 8);
 }
 
 static void
@@ -2955,71 +2909,79 @@ paddr_d (LONGEST addr)
   return paddr_str;
 }
 
+/* eliminate warning from compiler on 32-bit systems */
+static int thirty_two = 32;
+
 char *
-preg (reg)
-     t_reg reg;
+phex (ULONGEST l, int sizeof_l)
 {
-  char *preg_str = get_cell ();
-  switch (sizeof (t_reg))
+  char *str = get_cell ();
+  switch (sizeof_l)
     {
     case 8:
-      sprintf (preg_str, "%08lx%08lx",
-	       (unsigned long) (reg >> thirty_two), (unsigned long) (reg & 0xffffffff));
+      sprintf (str, "%08lx%08lx",
+	       (unsigned long) (l >> thirty_two),
+	       (unsigned long) (l & 0xffffffff));
       break;
     case 4:
-      sprintf (preg_str, "%08lx", (unsigned long) reg);
+      sprintf (str, "%08lx", (unsigned long) l);
       break;
     case 2:
-      sprintf (preg_str, "%04x", (unsigned short) (reg & 0xffff));
+      sprintf (str, "%04x", (unsigned short) (l & 0xffff));
       break;
     default:
-      sprintf (preg_str, "%lx", (unsigned long) reg);
+      phex (l, sizeof (l));
+      break;
     }
-  return preg_str;
+  return str;
 }
 
 char *
-preg_nz (reg)
-     t_reg reg;
+phex_nz (ULONGEST l, int sizeof_l)
 {
-  char *preg_str = get_cell ();
-  switch (sizeof (t_reg))
+  char *str = get_cell ();
+  switch (sizeof_l)
     {
     case 8:
       {
-	unsigned long high = (unsigned long) (reg >> thirty_two);
+	unsigned long high = (unsigned long) (l >> thirty_two);
 	if (high == 0)
-	  sprintf (preg_str, "%lx", (unsigned long) (reg & 0xffffffff));
+	  sprintf (str, "%lx", (unsigned long) (l & 0xffffffff));
 	else
-	  sprintf (preg_str, "%lx%08lx",
-		   high, (unsigned long) (reg & 0xffffffff));
+	  sprintf (str, "%lx%08lx",
+		   high, (unsigned long) (l & 0xffffffff));
 	break;
       }
     case 4:
-      sprintf (preg_str, "%lx", (unsigned long) reg);
+      sprintf (str, "%lx", (unsigned long) l);
       break;
     case 2:
-      sprintf (preg_str, "%x", (unsigned short) (reg & 0xffff));
+      sprintf (str, "%x", (unsigned short) (l & 0xffff));
       break;
     default:
-      sprintf (preg_str, "%lx", (unsigned long) reg);
+      phex_nz (l, sizeof (l));
+      break;
     }
-  return preg_str;
+  return str;
 }
 
-/* Helper functions for INNER_THAN */
-int
-core_addr_lessthan (lhs, rhs)
-     CORE_ADDR lhs;
-     CORE_ADDR rhs;
+
+/* Convert to / from the hosts pointer to GDB's internal CORE_ADDR
+   using the target's conversion routines. */
+CORE_ADDR
+host_pointer_to_address (void *ptr)
 {
-  return (lhs < rhs);
+  if (sizeof (ptr) != TYPE_LENGTH (builtin_type_ptr))
+    internal_error ("core_addr_to_void_ptr: bad cast");
+  return POINTER_TO_ADDRESS (builtin_type_ptr, &ptr);
 }
 
-int
-core_addr_greaterthan (lhs, rhs)
-     CORE_ADDR lhs;
-     CORE_ADDR rhs;
+void *
+address_to_host_pointer (CORE_ADDR addr)
 {
-  return (lhs > rhs);
+  void *ptr;
+  if (sizeof (ptr) != TYPE_LENGTH (builtin_type_ptr))
+    internal_error ("core_addr_to_void_ptr: bad cast");
+  ADDRESS_TO_POINTER (builtin_type_ptr, &ptr, addr);
+  return ptr;
 }

@@ -977,6 +977,7 @@ _bfd_elf_link_hash_table_init (table, abfd, newfunc)
   table->needed = NULL;
   table->hgot = NULL;
   table->stab_info = NULL;
+  table->dynlocal = NULL;
   return _bfd_link_hash_table_init (&table->root, abfd, newfunc);
 }
 
@@ -1354,8 +1355,9 @@ bfd_section_from_shdr (abfd, shindex)
 	target_sect->rel_filepos = hdr->sh_offset;
 	/* In the section to which the relocations apply, mark whether
 	   its relocations are of the REL or RELA variety.  */
-	elf_section_data (target_sect)->use_rela_p 
-	  = (hdr->sh_type == SHT_RELA);
+	if (hdr->sh_size != 0)
+	  elf_section_data (target_sect)->use_rela_p
+	    = (hdr->sh_type == SHT_RELA);
 	abfd->flags |= HAS_RELOC;
 	return true;
       }
@@ -1752,6 +1754,22 @@ elf_fake_sections (abfd, asect, failedptrarg)
     *failedptr = true;
 }
 
+/* Get elf arch size (32 / 64).
+   Returns -1 if not elf.  */
+
+int
+bfd_elf_get_arch_size (abfd)
+     bfd *abfd;
+{
+  if (abfd->xvec->flavour != bfd_target_elf_flavour)
+    {
+      bfd_set_error (bfd_error_wrong_format);
+      return -1;
+    }
+
+  return (get_elf_backend_data (abfd))->s->arch_size;
+}
+
 /* Assign all ELF section numbers.  The dummy first section is handled here
    too.  The link/info pointers for the standard section types are filled
    in here too, while we're at it.  */
@@ -1764,7 +1782,6 @@ assign_section_numbers (abfd)
   asection *sec;
   unsigned int section_number;
   Elf_Internal_Shdr **i_shdrp;
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   section_number = 1;
 
@@ -1899,7 +1916,7 @@ assign_section_numbers (abfd)
 
 		  /* This is a .stab section.  */
 		  elf_section_data (s)->this_hdr.sh_entsize =
-		    4 + 2 * (bed->s->arch_size / 8);
+		    4 + 2 * bfd_elf_get_arch_size (abfd) / 8;
 		}
 	    }
 	  break;
@@ -3205,7 +3222,7 @@ prep_headers (abfd)
     bfd_big_endian (abfd) ? ELFDATA2MSB : ELFDATA2LSB;
   i_ehdrp->e_ident[EI_VERSION] = bed->s->ev_current;
 
-  i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_SYSV;
+  i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_NONE;
   i_ehdrp->e_ident[EI_ABIVERSION] = 0;
 
   for (count = EI_PAD; count < EI_NIDENT; count++)
@@ -3226,7 +3243,7 @@ prep_headers (abfd)
       i_ehdrp->e_machine = EM_NONE;
       break;
     case bfd_arch_sparc:
-      if (bed->s->arch_size == 64)
+      if (bfd_elf_get_arch_size (abfd) == 64)
 	i_ehdrp->e_machine = EM_SPARCV9;
       else
 	i_ehdrp->e_machine = EM_SPARC;
@@ -3236,6 +3253,9 @@ prep_headers (abfd)
       break;
     case bfd_arch_i386:
       i_ehdrp->e_machine = EM_386;
+      break;
+    case bfd_arch_ia64:
+      i_ehdrp->e_machine = EM_IA_64;
       break;
     case bfd_arch_m68k:
       i_ehdrp->e_machine = EM_68K;
@@ -3726,7 +3746,7 @@ copy_private_bfd_data (ibfd, obfd)
 	 more to do.  */
 
       isec = 0;
-      matching_lma = false;
+      matching_lma = 0;
       suggested_lma = 0;
 
       for (j = 0, s = ibfd->sections; s != NULL; s = s->next)
@@ -3792,21 +3812,32 @@ copy_private_bfd_data (ibfd, obfd)
 	  free (sections);
 	  continue;
 	}
-      else if (matching_lma != 0)
-	{
-	  /* At least one section fits inside the current segment.
-	     Keep it, but modify its physical address to match the
-	     LMA of the first section that fitted.  */
-
-	  m->p_paddr = matching_lma;
-	}
       else
 	{
-	  /* None of the sections fitted inside the current segment.
-	     Change the current segment's physical address to match
-	     the LMA of the first section.  */
+	  if (matching_lma != 0)
+	    {
+	      /* At least one section fits inside the current segment.
+		 Keep it, but modify its physical address to match the
+		 LMA of the first section that fitted.  */
 
-	  m->p_paddr = suggested_lma;
+	      m->p_paddr = matching_lma;
+	    }
+	  else
+	    {
+	      /* None of the sections fitted inside the current segment.
+		 Change the current segment's physical address to match
+		 the LMA of the first section.  */
+
+	      m->p_paddr = suggested_lma;
+	    }
+
+	  /* Offset the segment physical address from the lma to allow
+	     for space taken up by elf headers.  */
+	  if (m->includes_filehdr)
+	    m->p_paddr -= iehdr->e_ehsize;
+
+	  if (m->includes_phdrs)
+	    m->p_paddr -= iehdr->e_phnum * iehdr->e_phentsize;
 	}
 
       /* Step Three: Loop over the sections again, this time assigning
@@ -3839,7 +3870,12 @@ copy_private_bfd_data (ibfd, obfd)
 		    {
 		      /* If the first section in a segment does not start at
 			 the beginning of the segment, then something is wrong.  */
-		      if (os->lma != m->p_paddr)
+		      if (os->lma != (m->p_paddr
+				      + (m->includes_filehdr
+					 ? iehdr->e_ehsize : 0)
+				      + (m->includes_phdrs
+					 ? iehdr->e_phnum * iehdr->e_phentsize
+					 : 0)))
 			abort ();
 		    }
 		  else
@@ -4470,17 +4506,12 @@ _bfd_elf_slurp_version_tables (abfd)
       Elf_Internal_Shdr *hdr;
       Elf_External_Verdef *everdef;
       Elf_Internal_Verdef *iverdef;
+      Elf_Internal_Verdef *iverdefarr;
+      Elf_Internal_Verdef iverdefmem;
       unsigned int i;
+      unsigned int maxidx;
 
       hdr = &elf_tdata (abfd)->dynverdef_hdr;
-
-      elf_tdata (abfd)->verdef =
-	((Elf_Internal_Verdef *)
-	 bfd_zalloc (abfd, hdr->sh_info * sizeof (Elf_Internal_Verdef)));
-      if (elf_tdata (abfd)->verdef == NULL)
-	goto error_return;
-
-      elf_tdata (abfd)->cverdefs = hdr->sh_info;
 
       contents = (bfd_byte *) bfd_malloc (hdr->sh_size);
       if (contents == NULL)
@@ -4489,15 +4520,42 @@ _bfd_elf_slurp_version_tables (abfd)
 	  || bfd_read ((PTR) contents, 1, hdr->sh_size, abfd) != hdr->sh_size)
 	goto error_return;
 
+      /* We know the number of entries in the section but not the maximum
+	 index.  Therefore we have to run through all entries and find
+	 the maximum.  */
       everdef = (Elf_External_Verdef *) contents;
-      iverdef = elf_tdata (abfd)->verdef;
-      for (i = 0; i < hdr->sh_info; i++, iverdef++)
+      maxidx = 0;
+      for (i = 0; i < hdr->sh_info; ++i)
+	{
+	  _bfd_elf_swap_verdef_in (abfd, everdef, &iverdefmem);
+
+	  if ((iverdefmem.vd_ndx & VERSYM_VERSION) > maxidx)
+	    maxidx = iverdefmem.vd_ndx & VERSYM_VERSION;
+
+	  everdef = ((Elf_External_Verdef *)
+		     ((bfd_byte *) everdef + iverdefmem.vd_next));
+	}
+
+      elf_tdata (abfd)->verdef =
+	((Elf_Internal_Verdef *)
+	 bfd_zalloc (abfd, maxidx * sizeof (Elf_Internal_Verdef)));
+      if (elf_tdata (abfd)->verdef == NULL)
+	goto error_return;
+
+      elf_tdata (abfd)->cverdefs = maxidx;
+
+      everdef = (Elf_External_Verdef *) contents;
+      iverdefarr = elf_tdata (abfd)->verdef;
+      for (i = 0; i < hdr->sh_info; i++)
 	{
 	  Elf_External_Verdaux *everdaux;
 	  Elf_Internal_Verdaux *iverdaux;
 	  unsigned int j;
 
-	  _bfd_elf_swap_verdef_in (abfd, everdef, iverdef);
+	  _bfd_elf_swap_verdef_in (abfd, everdef, &iverdefmem);
+
+	  iverdef = &iverdefarr[(iverdefmem.vd_ndx & VERSYM_VERSION) - 1];
+	  memcpy (iverdef, &iverdefmem, sizeof (Elf_Internal_Verdef));
 
 	  iverdef->vd_bfd = abfd;
 

@@ -21,7 +21,16 @@
 #ifndef TM_I386SOL2_H
 #define TM_I386SOL2_H 1
 
+#define HAVE_I387_REGS
 #include "i386/tm-i386v4.h"
+
+/* If the current gcc for for this target does not produce correct
+   debugging information for float parameters, both prototyped and
+   unprototyped, then define this macro.  This forces gdb to always
+   assume that floats are passed as doubles and then converted in the
+   callee. */
+
+#define COERCE_FLOAT_TO_DOUBLE(formal, actual) (1)
 
 /* Signal handler frames under Solaris 2 are recognized by a return address
    of 0xFFFFFFFF, the third parameter on the signal handler stack is
@@ -36,7 +45,7 @@
    and for SunPRO 3.0, N_FUN symbols too.  */
 #define SOFUN_ADDRESS_MAYBE_MISSING
 
-extern char *sunpro_static_transform_name PARAMS ((char *));
+extern char *sunpro_static_transform_name (char *);
 #define STATIC_TRANSFORM_NAME(x) sunpro_static_transform_name (x)
 #define IS_STATIC_TRANSFORM_NAME(name) ((name)[0] == '.')
 

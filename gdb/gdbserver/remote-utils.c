@@ -33,6 +33,7 @@
 #include <fcntl.h>
 
 int remote_debug = 0;
+struct ui_file *gdb_stdlog;
 
 static int remote_desc;
 
@@ -487,9 +488,8 @@ prepare_resume_reply (buf, status, signo)
       buf = outreg (PC_REGNUM, buf);
       buf = outreg (FP_REGNUM, buf);
       buf = outreg (SP_REGNUM, buf);
-#ifdef NPC_REGNUM
-      buf = outreg (NPC_REGNUM, buf);
-#endif
+      if (NPC_REGNUM >= 0)
+	buf = outreg (NPC_REGNUM, buf);
 #ifdef O7_REGNUM
       buf = outreg (O7_REGNUM, buf);
 #endif
