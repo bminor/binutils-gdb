@@ -1,5 +1,8 @@
 Mon Sep 16 17:55:21 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* scripttempl/armcoff.sc: Only define symbols if RELOCATING.  Fix
+	syntax error on __end__ line.
+
 	* scripttempl/armcoff.sc: For -N or -n, don't align .data.  From
  	Chris Hadley <Christopher.Hadley@cl.cam.ac.uk>
 
