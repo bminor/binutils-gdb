@@ -3199,6 +3199,8 @@ debug_type_samep (info, t1, t2)
 		break;
 	      ++pn1;
 	      ++pn2;
+	      ++pv1;
+	      ++pv2;
 	    }
 	  ret = *pn1 == NULL && *pn2 == NULL;
 	}
