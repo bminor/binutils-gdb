@@ -1,3 +1,7 @@
+2002-03-27  David O'Brien  <obrien@FreeBSD.org>
+
+	* ppc/hw_disk.c: Export a disk device property.
+
 2002-02-24  Andrew Cagney  <ac131313@redhat.com>
 
 	From wiz at danbala:
