@@ -274,9 +274,6 @@ Possible feature: A version of the "disassemble" command which shows
 both source and assembly code ("set symbol-filename on" is a partial
 solution).
 
-xcoffexec.c should be eliminated, contents going into either exec.c
-or rs6000-nat.c.
-
 investigate "x/s 0" (right now stops early) (I think maybe GDB is
 using a 0 address for bad purposes internally).
 
@@ -320,9 +317,7 @@ Put dirname in psymtabs and change lookup*symtab to use dirname (so
 /foo/bar.c works whether compiled by cc /foo/bar.c, or cd /foo; cc
 bar.c).
 
-merge xcoffexec.c and exec.c (might need a simple hook or two in
-exec.c, but that's no excuse to duplicate the whole thing).  Merge
-xcoffread.c and coffread.c.  Use breakpoint_re_set instead of
+Merge xcoffread.c and coffread.c.  Use breakpoint_re_set instead of
 fixup_breakpoints.
 
 Fix byte order and int size sins in tm-a29k.h
