@@ -1,9 +1,20 @@
+2005-03-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* utils.c (safe_strerror): Use xsnprintf instead of sprintf.
+	(decimal2str, octal2str): Change to return a string allocated by
+	get_cell.  Use xsnprint instead of snprintf.
+	(paddr_u, paddr_d): Adjust for changed calling convention of
+	decimal2str.
+	(phex, phex_nz, hex_string): Use xsnprintf instead of snprintf.
+	(int_string): Likewise.  Adjust for changed calling convention of
+	decimal2str and octal2str.
+
 2005-03-18  Kevin Buettner  <kevinb@redhat.com>
 
 	* frv-linux-tdep.c (frv_linux_sigcontext_reg_addr): Update comments.
 	Adjust incorrectly computed constant for realtime signal frame.
 
-2005-03-18  Mark Kettenis  <kettenis@elgar.sibelius.xs4all.nl>
+2005-03-18  Mark Kettenis  <kettenis@gnu.org>
 
 	From Ralf Corsepius <ralf.corsepius@rtems.org>
 	* configure.tgt: Add m68*-*-rtems*.

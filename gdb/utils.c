@@ -846,12 +846,12 @@ char *
 safe_strerror (int errnum)
 {
   char *msg;
-  static char buf[32];
 
   msg = strerror (errnum);
   if (msg == NULL)
     {
-      sprintf (buf, "(undocumented errno %d)", errnum);
+      static char buf[32];
+      xsnprintf (buf, sizeof buf, "(undocumented errno %d)", errnum);
       msg = buf;
     }
   return (msg);
@@ -2620,12 +2620,14 @@ paddress (CORE_ADDR addr)
   return hex_string (addr);
 }
 
-static void
-decimal2str (char *paddr_str, char *sign, ULONGEST addr, int width)
+static char *
+decimal2str (char *sign, ULONGEST addr, int width)
 {
-  /* steal code from valprint.c:print_decimal().  Should this worry
+  /* Steal code from valprint.c:print_decimal().  Should this worry
      about the real size of addr as the above does? */
   unsigned long temp[3];
+  char *str = get_cell ();
+
   int i = 0;
   do
     {
@@ -2635,31 +2637,38 @@ decimal2str (char *paddr_str, char *sign, ULONGEST addr, int width)
       width -= 9;
     }
   while (addr != 0 && i < (sizeof (temp) / sizeof (temp[0])));
+
   width += 9;
   if (width < 0)
     width = 0;
+
   switch (i)
     {
     case 1:
-      sprintf (paddr_str, "%s%0*lu", sign, width, temp[0]);
+      xsnprintf (str, CELLSIZE, "%s%0*lu", sign, width, temp[0]);
       break;
     case 2:
-      sprintf (paddr_str, "%s%0*lu%09lu", sign, width, temp[1], temp[0]);
+      xsnprintf (str, CELLSIZE, "%s%0*lu%09lu", sign, width,
+		 temp[1], temp[0]);
       break;
     case 3:
-      sprintf (paddr_str, "%s%0*lu%09lu%09lu", sign, width,
-	       temp[2], temp[1], temp[0]);
+      xsnprintf (str, CELLSIZE, "%s%0*lu%09lu%09lu", sign, width,
+		 temp[2], temp[1], temp[0]);
       break;
     default:
       internal_error (__FILE__, __LINE__,
 		      _("failed internal consistency check"));
     }
+
+  return str;
 }
 
-static void
-octal2str (char *paddr_str, ULONGEST addr, int width)
+static char *
+octal2str (ULONGEST addr, int width)
 {
   unsigned long temp[3];
+  char *str = get_cell ();
+
   int i = 0;
   do
     {
@@ -2669,76 +2678,78 @@ octal2str (char *paddr_str, ULONGEST addr, int width)
       width -= 10;
     }
   while (addr != 0 && i < (sizeof (temp) / sizeof (temp[0])));
+
   width += 10;
   if (width < 0)
     width = 0;
+
   switch (i)
     {
     case 1:
       if (temp[0] == 0)
-	sprintf (paddr_str, "%*o", width, 0);
+	xsnprintf (str, CELLSIZE, "%*o", width, 0);
       else
-	sprintf (paddr_str, "0%0*lo", width, temp[0]);
+	xsnprintf (str, CELLSIZE, "0%0*lo", width, temp[0]);
       break;
     case 2:
-      sprintf (paddr_str, "0%0*lo%010lo", width, temp[1], temp[0]);
+      xsnprintf (str, CELLSIZE, "0%0*lo%010lo", width, temp[1], temp[0]);
       break;
     case 3:
-      sprintf (paddr_str, "0%0*lo%010lo%010lo", width,
-	       temp[2], temp[1], temp[0]);
+      xsnprintf (str, CELLSIZE, "0%0*lo%010lo%010lo", width,
+		 temp[2], temp[1], temp[0]);
       break;
     default:
       internal_error (__FILE__, __LINE__,
 		      _("failed internal consistency check"));
     }
+
+  return str;
 }
 
 char *
 paddr_u (CORE_ADDR addr)
 {
-  char *paddr_str = get_cell ();
-  decimal2str (paddr_str, "", addr, 0);
-  return paddr_str;
+  return decimal2str ("", addr, 0);
 }
 
 char *
 paddr_d (LONGEST addr)
 {
-  char *paddr_str = get_cell ();
   if (addr < 0)
-    decimal2str (paddr_str, "-", -addr, 0);
+    return decimal2str ("-", -addr, 0);
   else
-    decimal2str (paddr_str, "", addr, 0);
-  return paddr_str;
+    return decimal2str ("", addr, 0);
 }
 
-/* eliminate warning from compiler on 32-bit systems */
+/* Eliminate warning from compiler on 32-bit systems.  */
 static int thirty_two = 32;
 
 char *
 phex (ULONGEST l, int sizeof_l)
 {
   char *str;
+
   switch (sizeof_l)
     {
     case 8:
       str = get_cell ();
-      sprintf (str, "%08lx%08lx",
-	       (unsigned long) (l >> thirty_two),
-	       (unsigned long) (l & 0xffffffff));
+      xsnprintf (str, CELLSIZE, "%08lx%08lx",
+		 (unsigned long) (l >> thirty_two),
+		 (unsigned long) (l & 0xffffffff));
       break;
     case 4:
       str = get_cell ();
-      sprintf (str, "%08lx", (unsigned long) l);
+      xsnprintf (str, CELLSIZE, "%08lx", (unsigned long) l);
       break;
     case 2:
       str = get_cell ();
-      sprintf (str, "%04x", (unsigned short) (l & 0xffff));
+      xsnprintf (str, CELLSIZE, "%04x", (unsigned short) (l & 0xffff));
       break;
     default:
       str = phex (l, sizeof (l));
       break;
     }
+
   return str;
 }
 
@@ -2746,6 +2757,7 @@ char *
 phex_nz (ULONGEST l, int sizeof_l)
 {
   char *str;
+
   switch (sizeof_l)
     {
     case 8:
@@ -2753,23 +2765,26 @@ phex_nz (ULONGEST l, int sizeof_l)
 	unsigned long high = (unsigned long) (l >> thirty_two);
 	str = get_cell ();
 	if (high == 0)
-	  sprintf (str, "%lx", (unsigned long) (l & 0xffffffff));
+	  xsnprintf (str, CELLSIZE, "%lx",
+		     (unsigned long) (l & 0xffffffff));
 	else
-	  sprintf (str, "%lx%08lx", high, (unsigned long) (l & 0xffffffff));
+	  xsnprintf (str, CELLSIZE, "%lx%08lx", high,
+		     (unsigned long) (l & 0xffffffff));
 	break;
       }
     case 4:
       str = get_cell ();
-      sprintf (str, "%lx", (unsigned long) l);
+      xsnprintf (str, CELLSIZE, "%lx", (unsigned long) l);
       break;
     case 2:
       str = get_cell ();
-      sprintf (str, "%x", (unsigned short) (l & 0xffff));
+      xsnprintf (str, CELLSIZE, "%x", (unsigned short) (l & 0xffff));
       break;
     default:
       str = phex_nz (l, sizeof (l));
       break;
     }
+
   return str;
 }
 
@@ -2779,7 +2794,7 @@ char *
 hex_string (LONGEST num)
 {
   char *result = get_cell ();
-  snprintf (result, CELLSIZE, "0x%s", phex_nz (num, sizeof (num)));
+  xsnprintf (result, CELLSIZE, "0x%s", phex_nz (num, sizeof (num)));
   return result;
 }
 
@@ -2833,17 +2848,14 @@ int_string (LONGEST val, int radix, int is_signed, int width,
       }
     case 10:
       {
-	char *result = get_cell ();
 	if (is_signed && val < 0)
-	  decimal2str (result, "-", -val, width);
+	  return decimal2str ("-", -val, width);
 	else
-	  decimal2str (result, "", val, width);
-	return result;
+	  return decimal2str ("", val, width);
       }
     case 8:
       {
-	char *result = get_cell ();
-	octal2str (result, val, width);
+	char *result = octal2str (val, width);
 	if (use_c_format || val == 0)
 	  return result;
 	else
