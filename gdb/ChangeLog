@@ -1,3 +1,16 @@
+2002-11-24  Andrew Cagney  <ac131313@redhat.com>
+
+	* dummy-frame.c (pc_in_dummy_frame): New function.
+	(generic_pc_in_call_dummy): Call pc_in_dummy_frame.
+	(find_dummy_frame): Update comment.
+	(generic_pop_current_frame): Use get_frame_type.
+	* dummy-frame.h (pc_in_dummy_frame): Declare.
+	* frame.c (set_unwind_by_pc): Use pc_in_dummy_frame.
+	(create_new_frame): Use pc_in_dummy_frame.
+	(get_prev_frame): Use pc_in_dummy_frame.
+	(frame_saved_regs_register_unwind): Use get_prev_frame.
+	(deprecated_generic_get_saved_register): Use get_prev_frame.
+
 2002-11-23  Andrew Cagney  <ac131313@redhat.com>
 
 	* blockframe.c (find_frame_addr_in_frame_chain): Move function

@@ -457,7 +457,7 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
      dummy.  (generic_call_dummy_register_unwind ought to have been called
      instead.)  */
   gdb_assert (!(USE_GENERIC_DUMMY_FRAMES
-                && PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame)));
+		&& (get_frame_type (frame) == DUMMY_FRAME)));
 
   /* Load the saved_regs register cache.  */
   if (frame->saved_regs == NULL)
@@ -588,7 +588,7 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
 
   while (frame && ((frame = frame->next) != NULL))
     {
-      if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+      if (get_frame_type (frame) == DUMMY_FRAME)
 	{
 	  if (lval)		/* found it in a CALL_DUMMY frame */
 	    *lval = not_lval;
@@ -656,7 +656,7 @@ set_unwind_by_pc (CORE_ADDR pc, CORE_ADDR fp,
       *unwind_register = frame_saved_regs_register_unwind;
       *unwind_pc = frame_saved_regs_pc_unwind;
     }
-  else if (PC_IN_CALL_DUMMY (pc, fp, fp))
+  else if (pc_in_dummy_frame (pc))
     {
       *unwind_register = dummy_frame_register_unwind;
       *unwind_pc = dummy_frame_pc_unwind;
@@ -694,7 +694,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
      has previously set it.  This is really somewhat bogus.  The
      initialization, as seen in create_new_frame(), should occur
      before the INIT function has been called.  */
-  if (USE_GENERIC_DUMMY_FRAMES && PC_IN_CALL_DUMMY (fi->pc, 0, 0))
+  if (USE_GENERIC_DUMMY_FRAMES && pc_in_dummy_frame (pc))
     /* NOTE: cagney/2002-11-11: Does this even occure?  */
     type = DUMMY_FRAME;
   else
@@ -976,7 +976,7 @@ get_prev_frame (struct frame_info *next_frame)
      initialization, as seen in create_new_frame(), should occur
      before the INIT function has been called.  */
   if (USE_GENERIC_DUMMY_FRAMES
-      && PC_IN_CALL_DUMMY (prev->pc, 0, 0))
+      && pc_in_dummy_frame (prev->pc))
     prev->type = DUMMY_FRAME;
   else
     {

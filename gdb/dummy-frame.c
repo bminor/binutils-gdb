@@ -56,7 +56,7 @@ static struct dummy_frame *dummy_frame_stack = NULL;
 /* Function: find_dummy_frame(pc, fp, sp)
 
    Search the stack of dummy frames for one matching the given PC and
-   FP/SP.  Unlike PC_IN_CALL_DUMMY, this function doesn't need to
+   FP/SP.  Unlike pc_in_dummy_frame(), this function doesn't need to
    adjust for DECR_PC_AFTER_BREAK.  This is because it is only legal
    to call this function after the PC has been adjusted.  */
 
@@ -138,6 +138,24 @@ deprecated_generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
 
 int
 generic_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR fp)
+{
+  return pc_in_dummy_frame (pc);
+}
+
+/* Return non-zero if the PC falls in a dummy frame.
+
+   The code below which allows DECR_PC_AFTER_BREAK is for infrun.c,
+   which may give the function a PC without that subtracted out.
+
+   FIXME: cagney/2002-11-23: This is silly.  Surely "infrun.c" can
+   figure out what the real PC (as in the resume address) is BEFORE
+   calling this function (Oh, and I'm not even sure that this function
+   is called with an decremented PC, the call to pc_in_call_dummy() in
+   that file is conditional on !CALL_DUMMY_BREAKPOINT_OFFSET_P yet
+   generic dummy targets set CALL_DUMMY_BREAKPOINT_OFFSET. True?).  */
+
+int
+pc_in_dummy_frame (CORE_ADDR pc)
 {
   struct dummy_frame *dummyframe;
   for (dummyframe = dummy_frame_stack;
@@ -241,8 +259,9 @@ void
 generic_pop_current_frame (void (*popper) (struct frame_info * frame))
 {
   struct frame_info *frame = get_current_frame ();
-
-  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (get_frame_type (frame) == DUMMY_FRAME)
+    /* NOTE: cagney/2002-22-23: Does this ever occure?  Surely a dummy
+       frame will have already been poped by the "infrun.c" code.  */
     generic_pop_dummy_frame ();
   else
     (*popper) (frame);
