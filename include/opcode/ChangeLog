@@ -1,3 +1,17 @@
+Thu Jun  2 12:23:17 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* m68k.h (m68060): Defined.
+	(m68040up, mfloat, mmmu): Include it.
+	(struct m68k_opcode): Widen `arch' field.
+	(m68k_opcodes): Updated for M68060.  Removed comments that were
+	instructions commented out by "JF" years ago.
+
+Thu Apr 28 18:31:14 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* m68k.h (struct m68k_opcode): Shorten `arch' field to 8 bits, and
+	add a one-bit `flags' field.
+	(F_ALIAS): New macro.
+
 Wed Apr 27 11:29:52 1994  Steve Chamberlain  (sac@cygnus.com)
 
 	* h8300.h (dec, inc): Get encoding right.
