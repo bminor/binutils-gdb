@@ -21,6 +21,15 @@ Thu Apr 21 09:29:37 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 Thu Apr 21 11:58:19 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	Clean up uses of _bfd_dummy_target (from Peter Schauer).
+	* libbfd.c (_bfd_dummy_target): Set bfd_error_wrong_format.
+	* nlm-target.h (nlm_core_file_p): Define as _bfd_dummy_target, not
+	NULL.
+	* srec.c (srec_vec): Use _bfd_dummy_target, not NULL, in
+	_bfd_check_format.
+	(symbolsrec_vec): Likewise.
+	* tekhex.c (tekhex_vec): Likewise.
+
 	* libnlm.h (struct nlm_obj_tdata): Add nlm_cygnus_section_hdr
 	field.
 	(nlm_cygnus_section_header): New accessor macro.
