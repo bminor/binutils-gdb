@@ -30,10 +30,10 @@
    almost all of the extended instruction mnemonics.  This permits the
    disassembler to use them, and simplifies the assembler logic, at the
    cost of increasing the table size.  The table is strictly constant
-   data, so the compiler should be able to put it in the .text section.
+   data, so the compiler should be able to put it in the text segment.
 
    This file also holds the operand table.  All knowledge about inserting
-   operands into instructions and vice-versa is kept in this file.
+   and extracting operands from instructions is kept in this file.
 
    The information for the base instruction set was compiled from the
    _Alpha Architecture Handbook_, Digital Order Number EC-QD2KB-TE,
@@ -1103,6 +1103,7 @@ const struct alpha_opcode alpha_opcodes[] = {
   { "ecb",		MFC(0x18,0xE800), BASE, { ZA, PRB } },	/* ev56 una */
   { "rs",		MFC(0x18,0xF000), BASE, { RA } },
   { "wh64",		MFC(0x18,0xF800), BASE, { ZA, PRB } },	/* ev56 una */
+  { "wh64en",		MFC(0x18,0xFC00), BASE, { ZA, PRB } },	/* ev7 una */
 
   { "hw_mfpr",		OPR(0x19,0x00), EV4, { RA, RBA, EV4EXTHWINDEX } },
   { "hw_mfpr",		OP(0x19), OP_MASK, EV5, { RA, RBA, EV5HWINDEX } },

@@ -1,3 +1,7 @@
+2001-12-06  Richard Henderson  <rth@redhat.com>
+
+	* alpha-opc.c (alpha_opcodes): Add wh64en.
+
 2001-12-04  Alexandre Oliva  <aoliva@redhat.com>
 
 	* d10v-opc.c (d10v_predefined_registers): Remove warnings
