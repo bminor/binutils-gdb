@@ -1,3 +1,14 @@
+Mon Nov  7 01:58:49 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/tc-a29k.c (octal, toHex): Variables deleted.
+	(isoctal): Macro deleted.
+	(md_begin): Don't initialize them.
+	(machine_ip, case 'P'/'A'): For absolute operand, generate an
+	error message if it's out of range.
+	(md_apply_fix, case RELOC_JUMPTARG): Check range for PC-relative
+	jumps.
+	(md_apply_fix): Delete code inside "#if 0".
+
 Thu Nov  3 20:20:40 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* config/go32.mh: Unused file deleted.

@@ -123,10 +123,6 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
    changed in read.c.  Ideally it shouldn't have to know about it at
    all, but nothing is ideal around here.  */
 
-static unsigned char octal[256];
-#define isoctal(c)  octal[c]
-static unsigned char toHex[256];
-
 /*
  *  anull bit - causes the branch delay slot instructions to not be executed
  */
@@ -337,15 +333,6 @@ md_begin ()
 
   if (lose)
     as_fatal ("Broken assembler.  No assembly attempted.");
-
-  for (i = '0'; i < '8'; ++i)
-    octal[i] = 1;
-  for (i = '0'; i <= '9'; ++i)
-    toHex[i] = i - '0';
-  for (i = 'a'; i <= 'f'; ++i)
-    toHex[i] = i + 10 - 'a';
-  for (i = 'A'; i <= 'F'; ++i)
-    toHex[i] = i + 10 - 'A';
 
   define_some_regs ();
 }
@@ -595,6 +582,13 @@ machine_ip (str)
 	      /* Make sure the 'A' case really exists.  */
 	      if ((insn->opcode | ABSOLUTE_BIT) != (insn + 1)->opcode)
 		break;
+	      {
+		bfd_vma v, mask;
+		mask = 0x1ffff;
+		v = operand->X_add_number & ~ mask;
+		if (v)
+		  as_bad ("call/jmp target out of range");
+	      }
 	      opcode |= ABSOLUTE_BIT |
 		(operand->X_add_number & 0x0003FC00) << 6 |
 		((operand->X_add_number & 0x000003FC) >> 2);
@@ -860,16 +854,20 @@ md_apply_fix (fixP, val)
       buf[3] = val;
       break;
 
-#if 0
-    case RELOC_PC10:
-    case RELOC_PC22:
-    case RELOC_JMP_TBL:
-    case RELOC_SEGOFF16:
-    case RELOC_GLOB_DAT:
-    case RELOC_JMP_SLOT:
-    case RELOC_RELATIVE:
-#endif
     case RELOC_JUMPTARG:	/* 00XX00XX pattern in a word */
+      if (!fixP->fx_done)
+	/* let linker deal */
+	;
+      else if (fixP->fx_pcrel)
+	{
+	  long v = val >> 16;
+	  if (v != 0 && v != -1)
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  "call/jmp target out of range");
+	}
+      else
+	/* this case was supposed to be handled in machine_ip */
+	abort ();
       buf[1] = val >> 10;	/* Holds bits 0003FFFC of address */
       buf[3] = val >> 2;
       break;
