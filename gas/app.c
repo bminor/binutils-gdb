@@ -48,7 +48,7 @@ static int scrub_m68k_mri;
 static const char mri_pseudo[] = ".mri 0";
 
 #if defined TC_ARM && defined OBJ_ELF
-/* The pseudo-op for which we need to special-case `@' characters. 
+/* The pseudo-op for which we need to special-case `@' characters.
    See the comment in do_scrub_chars.  */
 static const char   symver_pseudo[] = ".symver";
 static const char * symver_state;
@@ -88,9 +88,9 @@ static int process_escape PARAMS ((int));
 
 /* FIXME-soon: The entire lexer/parser thingy should be
    built statically at compile time rather than dynamically
-   each and every time the assembler is run.  xoxorich. */
+   each and every time the assembler is run.  xoxorich.  */
 
-void 
+void
 do_scrub_begin (m68k_mri)
      int m68k_mri ATTRIBUTE_UNUSED;
 {
@@ -258,7 +258,7 @@ app_push ()
   saved->symver_state = symver_state;
 #endif
 
-  /* do_scrub_begin() is not useful, just wastes time. */
+  /* do_scrub_begin() is not useful, just wastes time.  */
 
   state = 0;
   saved_input = NULL;
@@ -266,13 +266,13 @@ app_push ()
   return (char *) saved;
 }
 
-void 
+void
 app_pop (arg)
      char *arg;
 {
   register struct app_save *saved = (struct app_save *) arg;
 
-  /* There is no do_scrub_end (). */
+  /* There is no do_scrub_end ().  */
   state = saved->state;
   old_state = saved->old_state;
   out_string = saved->out_string;
@@ -302,7 +302,7 @@ app_pop (arg)
 
 /* @@ This assumes that \n &c are the same on host and target.  This is not
    necessarily true.  */
-static int 
+static int
 process_escape (ch)
      int ch;
 {
@@ -1031,7 +1031,7 @@ do_scrub_chars (get, tostart, tolen)
 	      --add_newlines;
 	      UNGET (ch);
 	    }
-	  /* fall thru into... */
+	  /* Fall through.  */
 
 	case LEX_IS_LINE_SEPARATOR:
 	  state = 0;
@@ -1046,7 +1046,7 @@ do_scrub_chars (get, tostart, tolen)
 	      UNGET (ch2);
 	      goto de_fault;
 	    }
-	  /* read and skip to end of line */
+	  /* Read and skip to end of line.  */
 	  do
 	    {
 	      ch = GET ();
@@ -1059,7 +1059,7 @@ do_scrub_chars (get, tostart, tolen)
 	  state = 0;
 	  PUT ('\n');
 	  break;
-#endif	    
+#endif
 #ifdef DOUBLEBAR_PARALLEL
 	case LEX_IS_DOUBLEBAR_1ST:
 	  ch2 = GET();
@@ -1074,7 +1074,7 @@ do_scrub_chars (get, tostart, tolen)
 	  PUT ('|');
 	  PUT ('|');
 	  break;
-#endif	    
+#endif
 	case LEX_IS_LINE_COMMENT_START:
 	  /* FIXME-someday: The two character comment stuff was badly
 	     thought out.  On i386, we want '/' as line comment start
@@ -1123,7 +1123,7 @@ do_scrub_chars (get, tostart, tolen)
 		  PUT ('\n');
 		  break;
 		}
-	      /* Loks like `# 123 "filename"' from cpp.  */
+	      /* Looks like `# 123 "filename"' from cpp.  */
 	      UNGET (ch);
 	      old_state = 4;
 	      state = -1;
@@ -1254,7 +1254,7 @@ do_scrub_chars (get, tostart, tolen)
 			case 2: *to++ = *from++;
 			case 1: *to++ = *from++;
 			}
-		    } 
+		    }
 		  ch = GET ();
 		}
 	    }
