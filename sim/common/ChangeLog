@@ -1,3 +1,23 @@
+1999-01-14  Doug Evans  <devans@casey.cygnus.com>
+
+	* cgen-defs.h (PCADDR,CIA): Define in terms of IADDR.
+	(sim_disassemble_insn): Update prototype.
+	(sim_engine_invalid_insn): Ditto.
+	* cgen-engine.h (SEMANTIC_FN): Add !WITH_SCACHE version.
+	(SEM_BRANCH_INIT): PCADDR->IADDR.
+	(SEM_NBRANCH_FINI): New macro for !WITH_SCACHE case.
+	* cgen-scache.c (scache_lookup,scache_lookup_or_alloc): PCADDR->IADDR.
+	* cgen-scache.h (*): Ditto.
+	* cgen-trace.c (*): Ditto.
+	* cgen-trace.h (*): Ditto.
+	* cgen-utils.c (*): Ditto.
+	* cgen-types.h (integer modes): Use signedNN/unsignedNN types.
+	(insn_t): Delete.
+	* genmloop.sh (@cpu@_fill_argbuf): Add !WITH_SCACHE support.
+	(simple engine framework): Rewrite.
+	* sim-module.c (modules): Install model module sooner (and in
+	particular before the profile module).
+
 1999-01-12  Doug Evans  <devans@casey.cygnus.com>
 
 	* sim-model.h (sim_mach_lookup_bfd_name): Add prototype.
