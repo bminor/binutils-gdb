@@ -18,6 +18,16 @@
 	* lin-lwp.c: Add set/show debug lin-lwp command.  Use this
 	command to turn extra debugging output on / off.
 
+2001-04-30  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* buildsym.c (start_subfile): Use FILENAME_CMP instead of STREQ.
+	(top-level): #include filenames.h.
+
+	* dwarf2read.c (dwarf2_start_subfile): Use IS_ABSOLUTE_PATH and
+	FILENAME_CMP, to DTRT on non-Posix platforms.
+	(top-level): #include filenames.h.
+
+
 2001-04-27  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbtypes.c (check_stub_method): Always initialize ``p''.
