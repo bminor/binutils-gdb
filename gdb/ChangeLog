@@ -1,5 +1,9 @@
 Sat Oct  2 15:50:41 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* m88k-nat.c (store_inferior_registers): When writing all registers,
+	don't try to write EXIP_REGNUM or ENIP_REGNUM (not needed for this
+	case, and they cause trouble).
+
 	* TODO: Don't suggest doing fast watchpoints by stepping a line
 	at a time.  That would be really hairy and still not fast enough.
 	Do suggest debug registers and page table diddling.

@@ -114,60 +114,62 @@ store_inferior_registers (regno)
 
   struct USER u;
 
-
   unsigned int offset = (char *) &u.pt_r0 - (char *) &u;
 
   regaddr = offset;
 
+  /* Don't try to deal with EXIP_REGNUM or ENIP_REGNUM, because I think either
+     svr3 doesn't run on an 88110, or the kernel isolates the different (not
+     completely sure this is true, but seems to be.  */
   if (regno >= 0)
     {
-/*      regaddr = register_addr (regno, offset); */
-        if (regno < PC_REGNUM)
-           { 
-	     regaddr = offset + regno * sizeof (int);
-             errno = 0;
-             ptrace (6, inferior_pid,
-		     (PTRACE_ARG3_TYPE) regaddr, read_register (regno));
-             if (errno != 0)
-	       {
-	         sprintf (buf, "writing register number %d", regno);
-	         perror_with_name (buf);
-	       }
-           }
-	else if (regno == SXIP_REGNUM)
-             ptrace (6, inferior_pid,
-		     (PTRACE_ARG3_TYPE) SXIP_OFFSET, read_register(regno));
-	else if (regno == SNIP_REGNUM)
-	     ptrace (6, inferior_pid,
-		     (PTRACE_ARG3_TYPE) SNIP_OFFSET, read_register(regno));
-	else if (regno == SFIP_REGNUM)
-	     ptrace (6, inferior_pid,
-		     (PTRACE_ARG3_TYPE) SFIP_OFFSET, read_register(regno));
-	else printf ("Bad register number for store_inferior routine\n");
-    }
-  else { 
-         for (regno = 0; regno < NUM_REGS - 3; regno++)
-           {
       /*      regaddr = register_addr (regno, offset); */
-              errno = 0;
-              regaddr = offset + regno * sizeof (int);
-              ptrace (6, inferior_pid,
-		      (PTRACE_ARG3_TYPE) regaddr, read_register (regno));
-              if (errno != 0)
-         	{
-	          sprintf (buf, "writing register number %d", regno);
-	          perror_with_name (buf);
-	        }
-           }
-	 ptrace (6,inferior_pid,
-		 (PTRACE_ARG3_TYPE) SXIP_OFFSET,read_register(SXIP_REGNUM));
-	 ptrace (6,inferior_pid,
-		 (PTRACE_ARG3_TYPE) SNIP_OFFSET,read_register(SNIP_REGNUM));
-	 ptrace (6,inferior_pid,
-		 (PTRACE_ARG3_TYPE) SFIP_OFFSET,read_register(SFIP_REGNUM));
-       }	
-           
-
+      if (regno < PC_REGNUM)
+	{ 
+	  regaddr = offset + regno * sizeof (int);
+	  errno = 0;
+	  ptrace (6, inferior_pid,
+		  (PTRACE_ARG3_TYPE) regaddr, read_register (regno));
+	  if (errno != 0)
+	    {
+	      sprintf (buf, "writing register number %d", regno);
+	      perror_with_name (buf);
+	    }
+	}
+      else if (regno == SXIP_REGNUM)
+	ptrace (6, inferior_pid,
+		(PTRACE_ARG3_TYPE) SXIP_OFFSET, read_register(regno));
+      else if (regno == SNIP_REGNUM)
+	ptrace (6, inferior_pid,
+		(PTRACE_ARG3_TYPE) SNIP_OFFSET, read_register(regno));
+      else if (regno == SFIP_REGNUM)
+	ptrace (6, inferior_pid,
+		(PTRACE_ARG3_TYPE) SFIP_OFFSET, read_register(regno));
+      else
+	printf ("Bad register number for store_inferior routine\n");
+    }
+  else
+    { 
+      for (regno = 0; regno < PC_REGNUM; regno++)
+	{
+	  /*      regaddr = register_addr (regno, offset); */
+	  errno = 0;
+	  regaddr = offset + regno * sizeof (int);
+	  ptrace (6, inferior_pid,
+		  (PTRACE_ARG3_TYPE) regaddr, read_register (regno));
+	  if (errno != 0)
+	    {
+	      sprintf (buf, "writing register number %d", regno);
+	      perror_with_name (buf);
+	    }
+	}
+      ptrace (6,inferior_pid,
+	      (PTRACE_ARG3_TYPE) SXIP_OFFSET,read_register(SXIP_REGNUM));
+      ptrace (6,inferior_pid,
+	      (PTRACE_ARG3_TYPE) SNIP_OFFSET,read_register(SNIP_REGNUM));
+      ptrace (6,inferior_pid,
+	      (PTRACE_ARG3_TYPE) SFIP_OFFSET,read_register(SFIP_REGNUM));
+    }
 }
 
 
