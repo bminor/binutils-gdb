@@ -1,3 +1,12 @@
+Wed Nov  8 11:38:48 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/obj-coff.c (c_dot_file_symbol): Cast xmalloc return.
+
+Tue Nov  7 09:14:35 1995  Kim Knuttila  <krk@cygnus.com>
+
+	* config/tc-ppc.c (md_apply_fix3): Added BFD_RELOC_RVA. Currently
+	used only by "dlltool.c".
+
 Mon Nov  6 18:51:26 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-alpha.c: Undefine inline if not __GNUC__.

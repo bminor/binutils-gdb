@@ -3005,7 +3005,13 @@ write_object_file ()
 #ifndef SUB_SEGMENT_ALIGN
 #define SUB_SEGMENT_ALIGN(SEG) 1
 #endif
+#ifdef md_do_align
+      md_do_align (SUB_SEGMENT_ALIGN (now_seg), NOP_OPCODE, alignment_done);
+#endif
       frag_align (SUB_SEGMENT_ALIGN (now_seg), NOP_OPCODE);
+#ifdef md_do_align
+    alignment_done:
+#endif
       frag_wane (frag_now);
       frag_now->fr_fix = 0;
       know (frag_now->fr_next == NULL);
@@ -3407,7 +3413,8 @@ c_dot_file_symbol (filename)
 	 we stick it into the string table instead.  We keep
 	 a linked list of the filenames we find so we can emit
 	 them later.*/
-      struct filename_list *f = xmalloc (sizeof (struct filename_list));
+      struct filename_list *f = ((struct filename_list *)
+				 xmalloc (sizeof (struct filename_list)));
 
       f->filename = filename;
       f->next = 0;
