@@ -1,3 +1,7 @@
+Wed Oct 16 13:50:06 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* simops.c (OP_5F00): Correct tracing of accumulators.	
+
 Tue Oct 15 10:57:50 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* simops.c (OP_5F00): Add support for getpid, kill system calls.

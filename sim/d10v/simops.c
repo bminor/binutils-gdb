@@ -2595,8 +2595,8 @@ OP_5F00 ()
 
       for (i = 0; i < 2; i++)
 	(*d10v_callback->printf_filtered) (d10v_callback, " %.2x%.8lx",
-					   ((int)(State.a[OP[i]] >> 32) & 0xff),
-					   ((unsigned long)State.a[OP[i]]) & 0xffffffff);
+					   ((int)(State.a[i] >> 32) & 0xff),
+					   ((unsigned long)State.a[i]) & 0xffffffff);
 
       (*d10v_callback->printf_filtered) (d10v_callback, "  %d  %d %d\n",
 					 State.F0 != 0, State.F1 != 0, State.C != 0);
