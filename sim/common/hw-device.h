@@ -172,7 +172,7 @@ typedef unsigned (hw_reset_method)
    node is described as the bus owner and is responisble for
    co-ordinating bus operations. On the bus, a SPACE:ADDR pair is used
    to specify an address.  A device that is both a bus owner (parent)
-   and bus client (child) are refered to as a bridging device.
+   and bus client (child) are referred to as a bridging device.
 
    A child performing a data (DMA) transfer will pass its request to
    the bus owner (the devices parent).  The bus owner will then either

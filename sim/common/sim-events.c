@@ -37,7 +37,7 @@
 #include <stdlib.h>
 #endif
 
-#include <signal.h> /* For SIGPROCMASK et.al. */
+#include <signal.h> /* For SIGPROCMASK et al. */
 
 typedef enum {
   watch_invalid,
@@ -112,7 +112,7 @@ struct _sim_event {
    variables.
    
    TIME_OF_EVENT: this holds the time at which the next event is ment
-   to occure.  If no next event it will hold the time of the last
+   to occur.  If no next event it will hold the time of the last
    event.
 
    TIME_FROM_EVENT: The current distance from TIME_OF_EVENT.  A value
@@ -447,7 +447,7 @@ insert_sim_event (SIM_DESC sd,
   if (delta < 0)
     sim_io_error (sd, "what is past is past!\n");
   
-  /* compute when the event should occure */
+  /* compute when the event should occur */
   time_of_event = sim_events_time (sd) + delta;
   
   /* find the queue insertion point - things are time ordered */

@@ -28,7 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
    jump right out of the simulator.
 
    It is intended as a holder for simulators that have started to use
-   sim-core et.al. but are not yet in a position to use sim-engine
+   sim-core et al. but are not yet in a position to use sim-engine
    (the setjmp/longjmp code). */
 
 

@@ -96,7 +96,7 @@ SIM_RC sim_profile_set_option (SIM_DESC sd_, const char *name_, int idx_,
 #define WITH_PROFILE_CORE_P (WITH_PROFILE & PROFILE_core)
 
 /* If MAX_TARGET_MODES isn't defined, we can't do memory profiling.
-   ??? It is intended that this is a temporary occurence.  Normally
+   ??? It is intended that this is a temporary occurrence.  Normally
    MAX_TARGET_MODES is defined.  */
 #ifndef MAX_TARGET_MODES
 #undef WITH_PROFILE_MEMORY_P

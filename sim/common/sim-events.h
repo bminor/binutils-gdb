@@ -245,7 +245,7 @@ INLINE_SIM_EVENTS\
  int slip);
 
 
-/* Progress time such that an event shall occure upon the next call to
+/* Progress time such that an event shall occur upon the next call to
    sim_events tick */
 
 #if 0

@@ -321,7 +321,7 @@ INLINE_SIM_FPU (int) sim_fpu_exp (const sim_fpu *s);
 
 /* Specific comparison operators
 
-   For NaNs et.al., the comparison operators will set IS to zero and
+   For NaNs et al., the comparison operators will set IS to zero and
    return a nonzero result. */
 
 INLINE_SIM_FPU (int) sim_fpu_lt (int *is, const sim_fpu *l, const sim_fpu *r);

@@ -167,7 +167,7 @@ extern void sim_core_detach
 /* Variable sized read/write
 
    Transfer a variable sized block of raw data between the host and
-   target.  Should any problems occure, the number of bytes
+   target.  Should any problems occur, the number of bytes
    successfully transfered is returned.
 
    No host/target byte endian conversion is performed.  No xor-endian
@@ -213,7 +213,7 @@ extern void sim_core_set_xor
 /* XOR version of variable sized read/write.
 
    Transfer a variable sized block of raw data between the host and
-   target.  Should any problems occure, the number of bytes
+   target.  Should any problems occur, the number of bytes
    successfully transfered is returned.
 
    No host/target byte endian conversion is performed.  If applicable

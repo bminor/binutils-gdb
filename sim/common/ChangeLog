@@ -1,3 +1,17 @@
+2002-02-10  Chris Demetriou  <cgd@broadcom.com>
+
+	* callback.c: Fix some spelling errors.
+	* hw-device.h: Likewise.
+	* hw-tree.c: Likewise.
+	* sim-abort.c: Likewise.
+	* sim-alu.h: Likewise.
+	* sim-core.h: Likewise.
+	* sim-events.c: Likewise.
+	* sim-events.h: Likewise.
+	* sim-fpu.h: Likewise.
+	* sim-profile.h: Likewise.
+	* sim-utils.c: Likewise.
+
 2002-01-31  Hans-Peter Nilsson  <hp@axis.com>
 
 	* cgen-ops.h (ADDCQI, ADDCFQI, ADDOFQI, SUBCQI, SUBCFQI, SUBOFQI):

@@ -681,7 +681,7 @@ parse_string_property (struct hw *current,
       /* copy it in */
       if (*chp == '"')
 	{
-	  /* a quoted string - watch for '\' et.al. */
+	  /* a quoted string - watch for '\' et al. */
 	  /* estimate the size and allocate space for it */
 	  int pos;
 	  chp++;

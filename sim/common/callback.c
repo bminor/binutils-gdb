@@ -726,7 +726,7 @@ store (p, size, val, big_p)
    TS is ignored.
 
    The result is the size of the target's stat struct,
-   or zero if an error occured during the translation.  */
+   or zero if an error occurred during the translation.  */
 
 int
 cb_host_to_target_stat (cb, hs, ts)
