@@ -218,6 +218,8 @@ remote_start_remote (dummy)
      char *dummy;
 {
   /* Ack any packet which the remote side has already sent.  */
+  /* I'm not sure this \r is needed; we don't use it any other time we
+     send an ack.  */
   SERIAL_WRITE (remote_desc, "+\r", 2);
   putpkt ("?");			/* initiate a query from remote machine */
 
