@@ -1,3 +1,9 @@
+Wed Jun 29 18:53:36 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* remote-mips.c: Replace all \r chars with \015.
+	(mips_receive_header): Display control characters readably.
+	(mips_xfer_memory): Add a simple progress display.
+
 Wed Jun 29 13:11:45 1994  Steve Chamberlain  (sac@cirdan.cygnus.com)
 
 	* remote-e7000.c (e7000_open): Don't try a tcp open if we're

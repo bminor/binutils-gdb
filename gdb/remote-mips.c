@@ -366,7 +366,7 @@ mips_readchar (timeout)
 	/* Don't use _filtered; we can't deal with a QUIT out of
 	   target_wait, and I think this might be called from there.  */
 	printf_unfiltered ("Reinitializing MIPS debugging mode\n");
-      SERIAL_WRITE (mips_desc, "\rdb tty0\r", sizeof "\rdb tty0\r" - 1);
+      SERIAL_WRITE (mips_desc, "\015db tty0\015", sizeof "\015db tty0\015" - 1);
       sleep (1);
 
       mips_need_reply = 0;
@@ -418,7 +418,13 @@ mips_receive_header (hdr, pgarbage, ch, timeout)
 		 we can't deal with a QUIT out of target_wait.  */
 	      if (! mips_initializing || sr_get_debug () > 0)
 		{
-		  putchar_unfiltered (ch);
+		  if (ch < 0x20 && ch != '\n')
+		    {
+		      putchar_unfiltered ('^');
+		      putchar_unfiltered (ch + 0x40);
+		    }
+		  else
+		    putchar_unfiltered (ch);
 		  gdb_flush (gdb_stdout);
 		}
 
@@ -947,7 +953,8 @@ mips_initialize ()
   /* The board seems to want to send us a packet.  I don't know what
      it means.  The packet seems to be triggered by a carriage return
      character, although perhaps any character would do.  */
-  cr = '\r';
+  cr = '\015';
+  /* FIXME check the result from this */
   SERIAL_WRITE (mips_desc, &cr, 1);
 
   if (mips_receive_packet (buff, 0, 3) < 0)
@@ -960,9 +967,9 @@ mips_initialize ()
       cc = '\003';
       SERIAL_WRITE (mips_desc, &cc, 1);
       sleep (2);
-      SERIAL_WRITE (mips_desc, "\rdb tty0\r", sizeof "\rdb tty0\r" - 1);
+      SERIAL_WRITE (mips_desc, "\015db tty0\015", sizeof "\015db tty0\015" - 1);
       sleep (1);
-      cr = '\r';
+      cr = '\015';
       SERIAL_WRITE (mips_desc, &cr, 1);
     }
   mips_receive_packet (buff, 1, 3);
@@ -1339,6 +1346,12 @@ mips_xfer_memory (memaddr, myaddr, len, write, ignore)
 	  status = mips_store_word (addr,
 				    extract_unsigned_integer (&buffer[i*4], 4),
 				    NULL);
+	  /* Report each kilobyte (we download 32-bit words at a time) */
+	  if (i % 256 == 255) 
+	    {
+	      printf_unfiltered ("*");
+	      fflush (stdout);
+	    }
 	  if (status)
 	    {
 	      errno = status;
@@ -1346,6 +1359,8 @@ mips_xfer_memory (memaddr, myaddr, len, write, ignore)
 	    }
 	  /* FIXME: Do we want a QUIT here?  */
 	}
+      if (count >= 256)
+	printf_unfiltered ("\n");
     }
   else
     {
