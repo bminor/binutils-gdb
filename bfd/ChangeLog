@@ -1,3 +1,8 @@
+Mon Jan  4 07:20:01 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* srec.c (srec_write_records): one of my boards wants a CR between
+	records.
+
 Wed Dec 30 12:46:30 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* archive.c (do_slurp_coff_armap): set symdef_count correctly
