@@ -14,7 +14,7 @@ if ![file exists $binfile] then {
 
 proc signal_tests_1 {} {
     global prompt
-    if [runto main] then {
+    if [runto_main] then {
 	gdb_test "next" "signal \\(SIGUSR1.*" \
 		"next over signal (SIGALRM, handler)"
 	gdb_test "next" "alarm \\(.*" \
@@ -267,7 +267,7 @@ expect {
     default { perror "sync trouble in signals.exp" }
 }
 
-if [runto main] then {
+if [runto_main] then {
     gdb_test "break handler if 0" "Breakpoint \[0-9\]+ .*"
     gdb_test "set \$handler_breakpoint_number = \$bpnum" ""
 
