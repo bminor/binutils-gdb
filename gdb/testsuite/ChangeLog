@@ -1,3 +1,8 @@
+Fri Nov 19 14:09:02 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* TODO: New file, describing tests we could write.
+	* gdb.t06/corefile.exp: Move description of tests to write to TODO.
+
 Tue Nov 16 21:07:44 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t06/signals.exp: Add kludge to force re-sync.
