@@ -322,8 +322,9 @@ sim_kill ()
 }
 
 void
-sim_open (name)
-     char *name;
+sim_open (kind,argv)
+     SIM_OPEN_KIND kind;
+     char **argv;
 {
 }
 
