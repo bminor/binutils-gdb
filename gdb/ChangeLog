@@ -1,3 +1,8 @@
+2001-02-19  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
+
+	* parse.c (write_exp_msymbol): Make the type CORE_ADDR, to 
+	accomodate 64-bit addresses.
+
 2001-02-19  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	From Peter Schauer <Peter.Schauer@regent.e-technik.tu-muenchen.de>

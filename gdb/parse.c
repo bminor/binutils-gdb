@@ -403,13 +403,15 @@ static struct type *msym_data_symbol_type;
 static struct type *msym_unknown_symbol_type;
 
 void
-write_exp_msymbol (struct minimal_symbol *msymbol,
-		   struct type *text_symbol_type, struct type *data_symbol_type)
+write_exp_msymbol (struct minimal_symbol *msymbol, 
+		   struct type *text_symbol_type, 
+		   struct type *data_symbol_type)
 {
   CORE_ADDR addr;
 
   write_exp_elt_opcode (OP_LONG);
-  write_exp_elt_type (lookup_pointer_type (builtin_type_void));
+  /* Let's make the type big enough to hold a 64-bit address.  */
+  write_exp_elt_type (builtin_type_CORE_ADDR);
 
   addr = SYMBOL_VALUE_ADDRESS (msymbol);
   if (overlay_debugging)
