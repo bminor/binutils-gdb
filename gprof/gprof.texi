@@ -88,6 +88,8 @@ can use it to determine which parts of a program are taking most of the
 execution time.  We assume that you know how to write, compile, and
 execute programs.  @sc{gnu} @code{gprof} was written by Jay Fenlason.
 
+This manual was updated January 1993.
+
 @menu
 * Why::                 What profiling means, and why it is useful.
 * Compiling::           How to compile your program for profiling.
