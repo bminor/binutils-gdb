@@ -3950,6 +3950,11 @@ select_control_regs ()
   /* Note which set of "movec" control registers is available.  */
   switch (cpu_of_arch (current_architecture))
     {
+    case 0:
+      as_warn (_("architecture not yet selected: defaulting to 68020"));
+      control_regs = m68020_control_regs;
+      break;
+      
     case m68000:
       control_regs = m68000_control_regs;
       break;

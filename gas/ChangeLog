@@ -1,3 +1,8 @@
+2002-09-19  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-m68k.c (select_control_regs): Handle situation where
+	architecture has not yet been selected.
+
 2002-09-18  Chris Demetriou  <cgd@broadcom.com>
 
 	* config/tc-mips.c (IS_SEXT_32BIT_NUM): Move closer to top of file.
