@@ -1032,9 +1032,9 @@ m68hc11_print_register (struct gdbarch *gdbarch, struct ui_file *file,
 
   if (regno == HARD_PC_REGNUM || regno == HARD_SP_REGNUM
       || regno == SOFT_FP_REGNUM || regno == M68HC12_HARD_PC_REGNUM)
-    frame_read_unsigned_register (frame, regno, &rval);
+    rval = get_frame_register_unsigned (frame, regno);
   else
-    frame_read_signed_register (frame, regno, &rval);
+    rval = get_frame_register_signed (frame, regno);
 
   if (regno == HARD_A_REGNUM || regno == HARD_B_REGNUM
       || regno == HARD_CCR_REGNUM || regno == HARD_PAGE_REGNUM)
@@ -1049,7 +1049,7 @@ m68hc11_print_register (struct gdbarch *gdbarch, struct ui_file *file,
         {
           ULONGEST page;
 
-          frame_read_unsigned_register (frame, HARD_PAGE_REGNUM, &page);
+          page = get_frame_register_unsigned (frame, HARD_PAGE_REGNUM);
           fprintf_filtered (file, "0x%02x:%04x ", (unsigned) page,
                             (unsigned) rval);
         }

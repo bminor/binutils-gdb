@@ -299,7 +299,7 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 	{
 	  /* Should we adjust for stack bias here? */
 	  ULONGEST tmp;
-	  frame_read_unsigned_register (fi, DEPRECATED_FP_REGNUM, &tmp);
+	  tmp = get_frame_register_unsigned (fi, DEPRECATED_FP_REGNUM);
 	  deprecated_update_frame_base_hack (fi, tmp);
 	  if (GDB_TARGET_IS_SPARC64 && (get_frame_base (fi) & 1))
 	    deprecated_update_frame_base_hack (fi, get_frame_base (fi) + 2047);
@@ -339,7 +339,7 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 	      /* Overwrite the frame's address with the value in %i7.  */
 	      {
 		ULONGEST tmp;
-		frame_read_unsigned_register (fi, I7_REGNUM, &tmp);
+		tmp = get_frame_register_unsigned (fi, I7_REGNUM);
 		deprecated_update_frame_base_hack (fi, tmp);
 	      }
 
@@ -455,7 +455,7 @@ sparc_frame_saved_pc (struct frame_info *frame)
       /* The sigcontext address is contained in register O2.  */
       {
 	ULONGEST tmp;
-	frame_read_unsigned_register (frame, O0_REGNUM + 2, &tmp);
+	tmp = get_frame_register_unsigned (frame, O0_REGNUM + 2);
 	sigcontext_addr = tmp;
       }
 
@@ -474,7 +474,7 @@ sparc_frame_saved_pc (struct frame_info *frame)
       /* A frameless function interrupted by a signal did not save
          the PC, it is still in %o7.  */
       ULONGEST tmp;
-      frame_read_unsigned_register (frame, O7_REGNUM, &tmp);
+      tmp = get_frame_register_unsigned (frame, O7_REGNUM);
       return PC_ADJUST (tmp);
     }
   if (get_frame_extra_info (frame)->flat)
@@ -1337,7 +1337,7 @@ sparc_pop_frame (void)
 	     it is a complicated way of saying
 	     "pc = read_register (O7_REGNUM);".  */
 	  ULONGEST tmp;
-	  frame_read_unsigned_register (frame, O7_REGNUM, &tmp);
+	  tmp = get_frame_register_unsigned (frame, O7_REGNUM);
 	  pc = PC_ADJUST (tmp);
 	}
 
@@ -3169,7 +3169,7 @@ sparc_fetch_pointer_argument (struct frame_info *frame, int argi,
 			      struct type *type)
 {
   CORE_ADDR addr;
-  frame_read_register (frame, O0_REGNUM + argi, &addr);
+  get_frame_register (frame, O0_REGNUM + argi, &addr);
   return addr;
 }
 

@@ -944,7 +944,7 @@ h8300_print_register (struct gdbarch *gdbarch, struct ui_file *file,
   if (!name || !*name)
     return;
 
-  frame_read_signed_register (frame, regno, &rval);
+  rval = get_frame_register_signed (frame, regno);
 
   fprintf_filtered (file, "%-14s ", name);
   if (regno == E_PSEUDO_CCR_REGNUM || (regno == E_PSEUDO_EXR_REGNUM && h8300smode))

@@ -398,22 +398,6 @@ extern void frame_register (struct frame_info *frame, int regnum,
 			    CORE_ADDR *addrp, int *realnump,
 			    void *valuep);
 
-/* More convenient interface to frame_register().  */
-/* NOTE: cagney/2002-09-13: Return void as one day these functions may
-   be changed to return an indication that the read succeeded.  */
-
-/* Use get_frame_register.  */
-extern void frame_read_register (struct frame_info *frame, int regnum,
-				 void *buf);
-
-/* Use get_frame_register_signed.  */
-extern void frame_read_signed_register (struct frame_info *frame,
-					int regnum, LONGEST *val);
-
-/* Use get_frame_register_unsigned.  */
-extern void frame_read_unsigned_register (struct frame_info *frame,
-					  int regnum, ULONGEST *val);
-
 /* The reverse.  Store a register value relative to the specified
    frame.  Note: this call makes the frame's state undefined.  The
    register and frame caches must be flushed.  */
@@ -591,11 +575,11 @@ extern void deprecated_generic_get_saved_register (char *, int *, CORE_ADDR *,
 extern void generic_save_call_dummy_addr (CORE_ADDR lo, CORE_ADDR hi);
 
 /* FIXME: cagney/2003-02-02: Should be deprecated or replaced with a
-   function called frame_read_register_p().  This slightly weird (and
-   older) variant of frame_read_register() returns zero (indicating
-   the register is unavailable) if either: the register isn't cached;
-   or the register has been optimized out.  Problem is, neither check
-   is exactly correct.  A register can't be optimized out (it may not
+   function called get_frame_register_p().  This slightly weird (and
+   older) variant of get_frame_register() returns zero (indicating the
+   register is unavailable) if either: the register isn't cached; or
+   the register has been optimized out.  Problem is, neither check is
+   exactly correct.  A register can't be optimized out (it may not
    have been saved as part of a function call); The fact that a
    register isn't in the register cache doesn't mean that the register
    isn't available (it could have been fetched from memory).  */

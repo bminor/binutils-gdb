@@ -795,11 +795,11 @@ d10v_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
 
   {
     ULONGEST pc, psw, rpt_s, rpt_e, rpt_c;
-    frame_read_unsigned_register (frame, D10V_PC_REGNUM, &pc);
-    frame_read_unsigned_register (frame, PSW_REGNUM, &psw);
-    frame_read_unsigned_register (frame, frame_map_name_to_regnum (frame, "rpt_s", -1), &rpt_s);
-    frame_read_unsigned_register (frame, frame_map_name_to_regnum (frame, "rpt_e", -1), &rpt_e);
-    frame_read_unsigned_register (frame, frame_map_name_to_regnum (frame, "rpt_c", -1), &rpt_c);
+    pc = get_frame_register_unsigned (frame, D10V_PC_REGNUM);
+    psw = get_frame_register_unsigned (frame, PSW_REGNUM);
+    rpt_s = get_frame_register_unsigned (frame, frame_map_name_to_regnum (frame, "rpt_s", -1));
+    rpt_e = get_frame_register_unsigned (frame, frame_map_name_to_regnum (frame, "rpt_e", -1));
+    rpt_c = get_frame_register_unsigned (frame, frame_map_name_to_regnum (frame, "rpt_c", -1));
     fprintf_filtered (file, "PC=%04lx (0x%lx) PSW=%04lx RPT_S=%04lx RPT_E=%04lx RPT_C=%04lx\n",
 		     (long) pc, (long) d10v_make_iaddr (pc), (long) psw,
 		     (long) rpt_s, (long) rpt_e, (long) rpt_c);
@@ -814,7 +814,7 @@ d10v_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
 	for (r = group; r < group + 8; r++)
 	  {
 	    ULONGEST tmp;
-	    frame_read_unsigned_register (frame, r, &tmp);
+	    tmp = get_frame_register_unsigned (frame, r);
 	    fprintf_filtered (file, " %04lx", (long) tmp);
 	  }
 	fprintf_filtered (file, "\n");
@@ -856,7 +856,7 @@ d10v_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
       {
 	int i;
 	fprintf_filtered (file, "  ");
-	frame_read_register (frame, a, num);
+	get_frame_register (frame, a, num);
 	for (i = 0; i < register_size (gdbarch, a); i++)
 	  {
 	    fprintf_filtered (file, "%02x", (num[i] & 0xff));

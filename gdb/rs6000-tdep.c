@@ -237,7 +237,7 @@ rs6000_fetch_pointer_argument (struct frame_info *frame, int argi,
 			       struct type *type)
 {
   CORE_ADDR addr;
-  frame_read_register (frame, 3 + argi, &addr);
+  get_frame_register (frame, 3 + argi, &addr);
   return addr;
 }
 

@@ -1,5 +1,29 @@
 2003-09-28  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (frame_read_unsigned_register): Delete function.
+	* frame.h (frame_read_unsigned_register): Delete declaration.
+	* sparc-tdep.c (sparc_init_extra_frame_info): Use
+	get_frame_register_unsigned.
+	(sparc_frame_saved_pc, sparc_pop_frame): Ditto.
+	* m68hc11-tdep.c (m68hc11_print_register): Ditto.
+	* d10v-tdep.c (d10v_print_registers_info): Ditto.
+	
+	* frame.h (frame_read_register): Delete declaration.
+	* frame.c (frame_read_register): Delete function.
+	* arch-utils.c (legacy_register_to_value): Use get_frame_register.
+	* sparc-tdep.c (sparc_fetch_pointer_argument): Ditto.
+	* rs6000-tdep.c (rs6000_fetch_pointer_argument): Ditto.
+	* mips-tdep.c (mips_register_to_value): Ditto.
+	* hppa-tdep.c (hppa_fetch_pointer_argument): Ditto.
+	* d10v-tdep.c (d10v_print_registers_info): Ditto.
+
+	* frame.c (frame_read_signed_register): Delete function.
+	(frame_read_unsigned_register): Update comments.
+	* frame.h (frame_read_signed_register): Delete declaration.
+	* h8300-tdep.c (h8300_print_register): Use
+	get_frame_register_signed.
+	* m68hc11-tdep.c (m68hc11_print_register): Ditto.
+
 	* config/pa/tm-hppa.h (DEPRECATED_VALUE_RETURNED_FROM_STACK):
 	Rename VALUE_RETURNED_FROM_STACK.
 	* infcmd.c (print_return_value): Update.

@@ -338,7 +338,7 @@ legacy_register_to_value (struct frame_info *frame, int regnum,
 			  struct type *type, void *to)
 {
   char from[MAX_REGISTER_SIZE];
-  frame_read_register (frame, regnum, from);
+  get_frame_register (frame, regnum, from);
   DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL (regnum, type, from, to);
 }
 

@@ -763,8 +763,8 @@ static void
 mips_register_to_value (struct frame_info *frame, int regnum,
 			struct type *type, void *to)
 {
-  frame_read_register (frame, regnum + 0, (char *) to + 4);
-  frame_read_register (frame, regnum + 1, (char *) to + 0);
+  get_frame_register (frame, regnum + 0, (char *) to + 4);
+  get_frame_register (frame, regnum + 1, (char *) to + 0);
 }
 
 static void

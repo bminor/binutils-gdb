@@ -5075,7 +5075,7 @@ hppa_fetch_pointer_argument (struct frame_info *frame, int argi,
 			     struct type *type)
 {
   CORE_ADDR addr;
-  frame_read_register (frame, R0_REGNUM + 26 - argi, &addr);
+  get_frame_register (frame, R0_REGNUM + 26 - argi, &addr);
   return addr;
 }
 
