@@ -1,3 +1,7 @@
+2005-03-03  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/mips/mips.exp: Move tls tests to main $elf block.
+
 2005-03-03  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/arch6zk.s: Add three nop instructions in order to pad

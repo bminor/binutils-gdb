@@ -336,11 +336,6 @@ proc run_list_test_arches { name opts arch_list } {
     foreach arch $arch_list {
 	run_list_test_arch "$name" "$opts" "$arch"
     }
-
-    if $elf {
-	run_list_test "tls-ill" "-32"
-	run_dump_test "tls-o32"
-    }
 }
 
 
@@ -690,6 +685,9 @@ if { [istarget mips*-*-*] } then {
 	}
 	run_dump_test "elf-consthilo"
 	run_dump_test "expr1"
+
+	run_list_test "tls-ill" "-32"
+	run_dump_test "tls-o32"
     }
 
     if $has_newabi {
