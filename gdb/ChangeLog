@@ -1,3 +1,39 @@
+2002-10-11  Daniel Jacobowitz  <drow@mvista.com>
+
+	* c-exp.y (THIS): Delete token and grammar rule.
+	(yylex): Don't return THIS.
+	* cp-valprint.c (vtbl_ptr_name_old): Delete.
+	(cp_is_vtbl_ptr_type): Don't check vtbl_ptr_name_old.
+	* demangle.c (cplus_markers): Update comment.  Put '$'
+	first.  Remove CPLUS_MARKER.
+	(_initialize_demangler): Don't call set_cplus_marker_for_demangling.
+	* jv-exp.y (THIS): Delete token and grammar rule.
+	(yylex): Don't return THIS.
+	* mips-tdep.c (mips_dump_tdep): Don't dump CPLUS_MARKER.
+	* objc-exp.y (THIS): Delete token and grammar rule.
+	(yylex): Don't return THIS.
+	* p-exp.y (yylex): Remove reference to CPLUS_MARKER.
+	* stabsread.c (vptr_name, vb_name): Replace CPLUS_MARKER with '$'.
+	(read_member_functions): Likewise for opname.
+	(read_tilde_fields): Use is_cplus_marker.
+
+	* defs.h (CPLUS_MARKER): Don't define.
+	* config/tm-sysv4.h (CPLUS_MARKER): Likewise.
+	* config/i386/xm-i386sco.h (CPLUS_MARKER): Likewise.
+	* config/mips/tm-irix3.h (CPLUS_MARKER): Likewise.
+	* config/mips/tm-irix6.h (CPLUS_MARKER): Likewise.
+	* config/rs6000/tm-rs6000.h (CPLUS_MARKER): Likewise.
+
+	* config/i386/tm-i386v4.h: Delete file.
+	* config/djgpp/fnchange.lst: Delete tm-i386v4.h.
+	* config/i386/tm-i386sol2.h: Include "i386/tm-i386.h" instead.
+	* config/i386/tm-i386v42mp.h: Include "i386/tm-i386.h" instead.
+	* config/i386/tm-ptx.h: Include "i386/tm-i386.h" instead.
+	* config/i386/i386gnu.mt (TM_FILE): Use tm-i386.h.
+	* config/i386/i386sco5.mt (TM_FILE): Likewise.
+	* config/i386/i386v4.mt (TM_FILE): Likewise.
+	* config/i386/ncr3000.mt (TM_FILE): Likewise.
+
 2002-10-10  Marko Mlinar  <markom@opencores.org>
 
 	* infrun.c (resume): Convert #ifdef HAVE_NONSTEPPABLE_WATCHPOINT into C,

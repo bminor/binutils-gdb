@@ -1358,8 +1358,7 @@ yylex ()
         {
           /* here we search for 'this' like
              inserted in FPC stabs debug info */
-	  static const char this_name[] =
-				 { /* CPLUS_MARKER,*/ 't', 'h', 'i', 's', '\0' };
+	  static const char this_name[] = "this";
 
 	  if (lookup_symbol (this_name, expression_context_block,
 			     VAR_NAMESPACE, (int *) NULL,
