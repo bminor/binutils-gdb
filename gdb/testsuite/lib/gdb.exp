@@ -440,9 +440,9 @@ proc gdb_test { args } {
 		# we need to set -notransfer expect option so that
 		# command output is not lost for pattern matching
 		# - guo
-		gdb_expect -notransfer 2 {
-		    -re "\[\r\n\]" { }
-		    timeout { }
+		gdb_expect 2 {
+		    -notransfer -re "\[\r\n\]" { verbose "partial: match" 3 }
+		    timeout { verbose "partial: timeout" 3 }
 		}
 		set string [string range "$string" [expr $foo + 1] end];
 	    } else {
@@ -1132,20 +1132,6 @@ proc send_gdb { string } {
 #
 
 proc gdb_expect { args } {
-    # allow -notransfer expect flag specification,
-    # used by gdb_test routine for multi-line commands.
-    # packed with gtimeout when fed to remote_expect routine,
-    # which is a hack but due to what looks like a res and orig
-    # parsing problem in remote_expect routine (dejagnu/lib/remote.exp):
-    # what's fed into res is not removed from orig.
-    # - guo
-    if { [lindex $args 0] == "-notransfer" } {
-	set notransfer -notransfer;
-	set args [lrange $args 1 end];
-    } else {
-	set notransfer "";
-    }
-
     if { [llength $args] == 2  && [lindex $args 0] != "-re" } {
 	set gtimeout [lindex $args 0];
 	set expcode [list [lindex $args 1]];
@@ -1186,7 +1172,7 @@ proc gdb_expect { args } {
 	}
     }
     set code [catch \
-	{uplevel remote_expect host "$gtimeout $notransfer" $expcode} string];
+	{uplevel remote_expect host $gtimeout $expcode} string];
     if [info exists old_val] {
 	set remote_suppress_flag $old_val;
     } else {

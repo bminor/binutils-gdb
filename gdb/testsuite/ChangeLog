@@ -1,3 +1,8 @@
+2002-04-03  Daniel Jacobowitz  <drow@mvista.com>
+
+	* lib/gdb.exp (gdb_test): Move -notransfer inside of gdb_expect.
+	(gdb_expect): Remove $notransfer hack.
+
 2002-04-02  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.c++/classes.exp ("calling method for small class"): Match
