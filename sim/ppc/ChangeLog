@@ -1,3 +1,9 @@
+1998-11-19  Michael Meissner  <meissner@cygnus.com>
+
+	* ppc-instructions (is_{NaN,inf}): Use unsigned64 to get the
+	fractional type, so that quiet NaN's aren't treated like
+	Infinities.
+
 Mon Sep 28 09:42:45 1998  Drew Moseley  <dmoseley@cygnus.com>
 
 	* table.c (table_open): For cygwin hosts, we need to use the return value
