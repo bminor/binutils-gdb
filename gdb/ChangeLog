@@ -1,3 +1,9 @@
+Wed Jun 24 00:26:56 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* partial-stab.h (case N_TEXT):  Fix fencepost error when
+	detecting start of new symbol info after reading symtab for a
+	module with a zero length TEXT segment.
+
 Tue Jun 23 21:46:26 1992  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (VERSION):  Bump to 4.5.6.

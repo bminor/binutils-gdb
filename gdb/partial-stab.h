@@ -89,7 +89,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	      if (past_first_source_file && pst
 		  /* The gould NP1 uses low values for .o and -l symbols
 		     which are not the address.  */
-		  && CUR_SYMBOL_VALUE > pst->textlow)
+		  && CUR_SYMBOL_VALUE >= pst->textlow)
 		{
 		  END_PSYMTAB (pst, psymtab_include_list, includes_used,
 			       symnum * symbol_size, CUR_SYMBOL_VALUE,
