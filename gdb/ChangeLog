@@ -1,3 +1,7 @@
+Thu Oct  8 18:27:35 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* Makefile.in (HFILES):  Add nm-*.h files.
+
 Thu Oct  8 16:27:45 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* config/sun4os4.mh (XDEPFILES): fork-child.o removed.
