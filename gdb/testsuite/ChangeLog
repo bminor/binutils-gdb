@@ -1,3 +1,8 @@
+2004-05-07  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/lineinc.exp, gdb.base/lineinc1.h, gdb.base/lineinc2.h,
+	gdb.base/lineinc3.h, gdb.base/lineinc.c: New tests.
+
 2004-05-06  Joel Brobecker  <brobecker@gnat.com>
 
 	* gdb.base/sep.exp: No longer setup_kfail when the program was
@@ -142,7 +147,6 @@
 
 	* lib/ada.exp: New file.
 
->>>>>>> 1.851
 2004-03-24  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.base/gdb1250.exp: Use runto {allow-pending}.
