@@ -1,8 +1,12 @@
+#include "config.h"
+
 #include <signal.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #include "d10v_sim.h"
 #include "simops.h"
@@ -403,6 +407,8 @@ trace_input_func (name, in1, in2, in3)
 	    }
 	}
     }
+
+  (*d10v_callback->flush_stdout) (d10v_callback);
 }
 
 static void
@@ -480,6 +486,8 @@ trace_output_func (result)
 	  break;
 	}
     }
+
+  (*d10v_callback->flush_stdout) (d10v_callback);
 }
 
 #else
@@ -761,7 +769,7 @@ OP_4900 ()
 {
   trace_input ("bl.s", OP_CONSTANT8, OP_R2, OP_R3);
   State.regs[13] = PC+1;
-  PC += SEXT8 (OP[0]);
+  JMP( PC + SEXT8 (OP[0]));
   trace_output (OP_VOID);
 }
 
@@ -771,7 +779,7 @@ OP_24800000 ()
 {
   trace_input ("bl.l", OP_CONSTANT16, OP_R2, OP_R3);
   State.regs[13] = PC+1;
-  PC += OP[0];
+  JMP (PC + OP[0]);
   trace_output (OP_VOID);
 }
 
@@ -789,7 +797,7 @@ void
 OP_4800 ()
 {
   trace_input ("bra.s", OP_CONSTANT8, OP_VOID, OP_VOID);
-  PC += SEXT8 (OP[0]);
+  JMP (PC + SEXT8 (OP[0]));
   trace_output (OP_VOID);
 }
 
@@ -798,7 +806,7 @@ void
 OP_24000000 ()
 {
   trace_input ("bra.l", OP_CONSTANT16, OP_VOID, OP_VOID);
-  PC += OP[0];
+  JMP (PC + OP[0]);
   trace_output (OP_VOID);
 }
 
@@ -808,7 +816,7 @@ OP_4A00 ()
 {
   trace_input ("brf0f.s", OP_CONSTANT8, OP_VOID, OP_VOID);
   if (State.F0 == 0)
-    PC += SEXT8 (OP[0]);
+    JMP (PC + SEXT8 (OP[0]));
   trace_output (OP_FLAG);
 }
 
@@ -818,7 +826,7 @@ OP_25000000 ()
 {
   trace_input ("brf0f.l", OP_CONSTANT16, OP_VOID, OP_VOID);
   if (State.F0 == 0)
-    PC += OP[0];
+    JMP (PC + OP[0]);
   trace_output (OP_FLAG);
 }
 
@@ -828,7 +836,7 @@ OP_4B00 ()
 {
   trace_input ("brf0t.s", OP_CONSTANT8, OP_VOID, OP_VOID);
   if (State.F0)
-    PC += SEXT8 (OP[0]);
+    JMP (PC + SEXT8 (OP[0]));
   trace_output (OP_FLAG);
 }
 
@@ -838,7 +846,7 @@ OP_25800000 ()
 {
   trace_input ("brf0t.l", OP_CONSTANT16, OP_VOID, OP_VOID);
   if (State.F0)
-    PC += OP[0];
+    JMP (PC + OP[0]);
   trace_output (OP_FLAG);
 }
 
@@ -906,7 +914,7 @@ OP_1403 ()
 {
   trace_input ("cmpeq", OP_ACCUM, OP_ACCUM, OP_VOID);
   State.F1 = State.F0;
-  State.F0 = (State.a[OP[0]] == State.a[OP[1]]) ? 1 : 0;
+  State.F0 = ((State.a[OP[0]] & MASK40) == (State.a[OP[1]] & MASK40)) ? 1 : 0;
   trace_output (OP_FLAG);
 }
 
@@ -1124,10 +1132,9 @@ OP_15002A02 ()
   int i;
 
   trace_input ("exp", OP_REG_OUTPUT, OP_ACCUM, OP_VOID);
-  if (SEXT40(State.a[OP[1]]) >= 0)
-    tmp = State.a[OP[1]];
-  else
-    tmp = ~(State.a[OP[1]]);
+  tmp = SEXT40(State.a[OP[1]]);
+  if (tmp < 0)
+    tmp = ~tmp & MASK40;
   
   foo = 0x4000000000LL;
   for (i=1;i<25;i++)
@@ -1150,7 +1157,7 @@ OP_4D00 ()
 {
   trace_input ("jl", OP_REG, OP_R2, OP_R3);
   State.regs[13] = PC+1;
-  PC = State.regs[OP[0]]; 
+  JMP (State.regs[OP[0]]);
   trace_output (OP_VOID);
 }
 
@@ -1162,7 +1169,7 @@ OP_4C00 ()
 	       (OP[0] == 13) ? OP_R2 : OP_VOID,
 	       (OP[0] == 13) ? OP_R3 : OP_VOID);
 
-  PC = State.regs[OP[0]]; 
+  JMP (State.regs[OP[0]]);
   trace_output (OP_VOID);
 }
 
@@ -1180,6 +1187,12 @@ void
 OP_6401 ()
 {
   trace_input ("ld", OP_REG_OUTPUT, OP_POSTDEC, OP_VOID);
+  if ( OP[1] == 15 )
+    {
+      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: cannot post-decrement register r15 (SP).\n");
+      State.exception = SIGILL;
+      return;
+    }
   State.regs[OP[0]] = RW (State.regs[OP[1]]);
   INC_ADDR(State.regs[OP[1]],-2);
   trace_output (OP_REG);
@@ -1221,6 +1234,12 @@ OP_6601 ()
 {
   uint16 addr = State.regs[OP[1]];
   trace_input ("ld2w", OP_REG_OUTPUT, OP_POSTDEC, OP_VOID);
+  if ( OP[1] == 15 )
+    {
+      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: cannot post-decrement register r15 (SP).\n");
+      State.exception = SIGILL;
+      return;
+    }
   State.regs[OP[0]] = RW (addr);
   State.regs[OP[0]+1] = RW (addr+2);
   INC_ADDR(State.regs[OP[1]],-4);
@@ -1281,7 +1300,7 @@ OP_4001 ()
 void
 OP_20000000 ()
 {
-  trace_input ("ldi.s", OP_REG_OUTPUT, OP_CONSTANT16, OP_VOID);
+  trace_input ("ldi.l", OP_REG_OUTPUT, OP_CONSTANT16, OP_VOID);
   State.regs[OP[0]] = OP[1];
   trace_output (OP_REG);
 }
@@ -1619,9 +1638,9 @@ OP_3E00 ()
 void
 OP_3E01 ()
 {
-  trace_input ("mv2wtac", OP_ACCUM_OUTPUT, OP_DREG, OP_VOID);
+  trace_input ("mv2wtac", OP_DREG, OP_ACCUM_OUTPUT, OP_VOID);
   State.a[OP[1]] = (SEXT16 (State.regs[OP[0]]) << 16 | State.regs[OP[0]+1]) & MASK40;
-  trace_output (OP_ACCUM);
+  trace_output (OP_ACCUM_REVERSE);
 }
 
 /* mvac */
@@ -2169,7 +2188,7 @@ OP_3400 ()
 {
   trace_input ("sra", OP_ACCUM, OP_REG, OP_VOID);
   if ((State.regs[OP[1]] & 31) <= 16)
-    State.a[OP[0]] >>= (State.regs[OP[1]] & 31);
+    State.a[OP[0]] = (SEXT40(State.a[OP[0]]) >> (State.regs[OP[1]] & 31)) & MASK40;
   else
     {
       (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: shift value %d too large.\n", State.regs[OP[1]] & 31);
@@ -2197,7 +2216,7 @@ OP_3401 ()
     OP[1] = 16;
 
   trace_input ("srai", OP_ACCUM, OP_CONSTANT16, OP_VOID);
-  State.a[OP[0]] >>= OP[1];
+  State.a[OP[0]] = (SEXT40(State.a[OP[0]]) >> OP[1]) & MASK40;
   trace_output (OP_ACCUM);
 }
 
@@ -2216,7 +2235,7 @@ OP_3000 ()
 {
   trace_input ("srl", OP_ACCUM, OP_REG, OP_VOID);
   if ((State.regs[OP[1]] & 31) <= 16)
-    State.a[OP[0]] >>= (State.regs[OP[1]] & 31);
+    State.a[OP[0]] = (uint64)((State.a[OP[0]] & MASK40) >> (State.regs[OP[1]] & 31));
   else
     {
       (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: shift value %d too large.\n", State.regs[OP[1]] & 31);
@@ -2244,7 +2263,7 @@ OP_3001 ()
     OP[1] = 16;
 
   trace_input ("srli", OP_ACCUM, OP_CONSTANT16, OP_VOID);
-  State.a[OP[0]] >>= OP[1];
+  State.a[OP[0]] = (uint64)(State.a[OP[0]] & MASK40) >> OP[1];
   trace_output (OP_ACCUM);
 }
 
@@ -2309,6 +2328,12 @@ void
 OP_6C01 ()
 {
   trace_input ("st", OP_REG, OP_POSTDEC, OP_VOID);
+  if ( OP[1] == 15 )
+    {
+      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: cannot post-decrement register r15 (SP).\n");
+      State.exception = SIGILL;
+      return;
+    }
   SW (State.regs[OP[1]], State.regs[OP[0]]);
   INC_ADDR (State.regs[OP[1]],-2);
   trace_output (OP_VOID);
@@ -2356,6 +2381,12 @@ void
 OP_6A01 ()
 {
   trace_input ("st2w", OP_DREG, OP_POSTDEC, OP_VOID);
+  if ( OP[1] == 15 )
+    {
+      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: cannot post-decrement register r15 (SP).\n");
+      State.exception = SIGILL;
+      return;
+    }
   SW (State.regs[OP[1]],   State.regs[OP[0]]);
   SW (State.regs[OP[1]]+2, State.regs[OP[0]+1]);
   INC_ADDR (State.regs[OP[1]],4);
@@ -2465,12 +2496,12 @@ void
 OP_1000 ()
 {
   int64 tmp;
-  int32 a,b;
+  uint32 a,b;
 
   trace_input ("sub2w", OP_DREG, OP_DREG, OP_VOID);
   a = (int32)((State.regs[OP[0]] << 16) | State.regs[OP[0]+1]);
   b = (int32)((State.regs[OP[1]] << 16) | State.regs[OP[1]+1]);
-  tmp = a-b;
+  tmp = (int64)a-b;
   State.C = (tmp & 0xffffffff00000000LL) ? 1 : 0;  
   State.regs[OP[0]] = (tmp >> 16) & 0xffff;
   State.regs[OP[0]+1] = tmp & 0xffff;
@@ -2618,6 +2649,7 @@ OP_5F00 ()
 
       (*d10v_callback->printf_filtered) (d10v_callback, "  %d  %d %d\n",
 					 State.F0 != 0, State.F1 != 0, State.C != 0);
+      (*d10v_callback->flush_stdout) (d10v_callback);
       break;
 #endif
 
@@ -2777,6 +2809,7 @@ OP_5F00 ()
 		  {
 		    trace_output (OP_VOID);
 		    (*d10v_callback->printf_filtered) (d10v_callback, "Unknown signal %d\n", PARM2);
+		    (*d10v_callback->flush_stdout) (d10v_callback);
 		    State.exception = SIGILL;
 		  }
 		else
@@ -2972,6 +3005,7 @@ OP_5F00 ()
 					   (int16)State.regs[3],
 					   (int16)State.regs[4],
 					   (int16)State.regs[5]);
+	(*d10v_callback->flush_stdout) (d10v_callback);
 	break;
       }
 

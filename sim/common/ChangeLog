@@ -1,3 +1,34 @@
+Thu Mar 13 10:24:05 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* callback.c (os_printf_filtered): Do not call exit(1) or print a
+	final newline.
+
+Thu Mar  6 15:50:28 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* callback.c: Add os_flush_stdout and vprintf_filtered callbacks.
+  	Route stdout through buffered IO.
+
+	* callback.c: Add os_flush_stderr, os_write_stderr,
+ 	os_evprintf_filtered functions to route error output through
+ 	stderr.
+	
+	* sim-io.h, sim-io.c (sim_io_flush_stderr, sim_io_flush_stdout):
+ 	Correct return type - should be void.
+
+Fri Mar  7 20:14:37 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* sim-basics.h: Clean up.  Many macro's moved to sim-inline.h.
+
+	* sim-config.h: Ditto.  For some options - eg WITH_DEVICES - do
+ 	not provide a default value as undefined indicates disable code.
+
+Thu Mar  6 15:50:28 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* sim-core.h, sim-core-n.h, sim-core.c: Borrow code from ppc
+ 	directory.
+	* sim-events.h, sim-events.c: Ditto.
+	* sim-io.h, sim-io.c: Ditto.
+	
 Tue Mar  4 09:35:56 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
 	
 	* sim-alu.h (ALU_SUB_CA, ALU*_SUB_CA): New alu operation.

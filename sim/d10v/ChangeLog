@@ -1,3 +1,14 @@
+Thu Mar 13 10:29:04 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* simops.c (trace_{input,output}_func): Call flush_stdout from the
+	callback functions.
+	(OP_5F00): Ditto.
+
+Wed Feb 12 16:04:15 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* simops.c (OP_{1403,15002A02,3{0,4}0{0,1}}): Only use the bottom
+	40 bits of accumulators.  Sign/zero extend as appropriate.
+
 Tue Feb  4 13:33:30 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* Makefile.in (@COMMON_MAKEFILE_FRAG): Use
