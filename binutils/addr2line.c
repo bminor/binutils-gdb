@@ -271,7 +271,7 @@ main (argc, argv)
      int argc;
      char **argv;
 {
-  char *filename;
+  const char *filename;
   char *target;
   int c;
 
