@@ -1,3 +1,8 @@
+Mon Mar  4 23:44:16 1996  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* ch-lang.c (evaluate_subexp_chill case MULTI_SUBSCRIPT):  Error
+	if "function" is pointer to non-function.
+
 Mon Mar  4 17:47:03 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* top.c (print_gdb_version): Update copyright year.
