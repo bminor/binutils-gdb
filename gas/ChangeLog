@@ -1,3 +1,18 @@
+2004-04-28  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* config/obj-som.c (obj_som_init_stab_section): Add new arguments in
+	call to obj_set_subsection_attributes.
+	(obj_som_init_stab_section): Likewise.
+	* config/tc-hppa.c (default_subspace_dict): Add comdat field.
+	(pa_def_subspaces): Provide comdat default.
+	(pa_subspace): Handle new "comdat" parameter.  Set SEC_LINK_ONCE and
+	not SEC_IS_COMMON if section is comdat, common or dup_common.  Update
+	calls to create_new_subspace and update_subspace to pass comdat flag.
+	(create_new_subspace, update_subspace): Add new comdat argument.  Use
+	it in calls to obj_set_subsection_attributes.
+	* doc/c-hppa.texi (.subspa, .nsubspa): Document new comdat parameter
+	and use of comdat, common and dup_comm parameters.
+
 2004-04-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/obj-elf.c (obj_elf_change_section): Check if the old

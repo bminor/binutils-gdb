@@ -146,6 +146,9 @@ struct som_misc_symbol_info {
   unsigned int symbol_value;
   unsigned int priv_level;
   unsigned int secondary_def;
+  unsigned int is_comdat;
+  unsigned int is_common;
+  unsigned int dup_common;
 };
 
 /* Forward declarations.  */
@@ -1905,7 +1908,7 @@ setup_sections (abfd, file_hdr, current_offset)
   for (space_index = 0; space_index < file_hdr->space_total; space_index++)
     {
       struct space_dictionary_record space;
-      struct subspace_dictionary_record subspace, save_subspace;
+      struct som_subspace_dictionary_record subspace, save_subspace;
       unsigned int subspace_index;
       asection *space_asect;
       char *newname;
@@ -1973,7 +1976,7 @@ setup_sections (abfd, file_hdr, current_offset)
 
       /* Initialize save_subspace so we can reliably determine if this
 	 loop placed any useful values into it.  */
-      memset (&save_subspace, 0, sizeof (struct subspace_dictionary_record));
+      memset (&save_subspace, 0, sizeof (save_subspace));
 
       /* Loop over the rest of the subspaces, building up more sections.  */
       for (subspace_index = 0; subspace_index < space.subspace_quantity;
@@ -2004,7 +2007,10 @@ setup_sections (abfd, file_hdr, current_offset)
 	  if (! bfd_som_set_subsection_attributes (subspace_asect, space_asect,
 						   subspace.access_control_bits,
 						   subspace.sort_key,
-						   subspace.quadrant))
+						   subspace.quadrant,
+						   subspace.is_comdat,
+						   subspace.is_common,
+						   subspace.dup_common))
 	    goto error_return;
 
 	  /* Keep an easy mapping between subspaces and sections.
@@ -2050,9 +2056,10 @@ setup_sections (abfd, file_hdr, current_offset)
 	      break;
 	    }
 
-	  if (subspace.dup_common || subspace.is_common)
-	    subspace_asect->flags |= SEC_IS_COMMON;
-	  else if (subspace.subspace_length > 0)
+	  if (subspace.is_comdat || subspace.is_common || subspace.dup_common)
+	    subspace_asect->flags |= SEC_LINK_ONCE;
+
+	  if (subspace.subspace_length > 0)
 	    subspace_asect->flags |= SEC_HAS_CONTENTS;
 
 	  if (subspace.is_loadable)
@@ -2402,21 +2409,15 @@ som_prep_headers (abfd)
       else
 	{
 	  /* Allocate space for the subspace dictionary.  */
-	  amt = sizeof (struct subspace_dictionary_record);
+	  amt = sizeof (struct som_subspace_dictionary_record);
 	  som_section_data (section)->subspace_dict =
-	    (struct subspace_dictionary_record *) bfd_zalloc (abfd, amt);
+	    (struct som_subspace_dictionary_record *) bfd_zalloc (abfd, amt);
 	  if (som_section_data (section)->subspace_dict == NULL)
 	    return FALSE;
 
 	  /* Set subspace attributes.  Basic stuff is done here, additional
 	     attributes are filled in later as more information becomes
 	     available.  */
-	  if (section->flags & SEC_IS_COMMON)
-	    {
-	      som_section_data (section)->subspace_dict->dup_common = 1;
-	      som_section_data (section)->subspace_dict->is_common = 1;
-	    }
-
 	  if (section->flags & SEC_ALLOC)
 	    som_section_data (section)->subspace_dict->is_loadable = 1;
 
@@ -2439,6 +2440,12 @@ som_prep_headers (abfd)
 	    som_section_data (section)->copy_data->access_control_bits;
 	  som_section_data (section)->subspace_dict->quadrant =
 	    som_section_data (section)->copy_data->quadrant;
+	  som_section_data (section)->subspace_dict->is_comdat =
+	    som_section_data (section)->copy_data->is_comdat;
+	  som_section_data (section)->subspace_dict->is_common =
+	    som_section_data (section)->copy_data->is_common;
+	  som_section_data (section)->subspace_dict->dup_common =
+	    som_section_data (section)->copy_data->dup_common;
 	}
     }
   return TRUE;
@@ -3474,7 +3481,8 @@ som_begin_writing (abfd)
   num_subspaces = som_count_subspaces (abfd);
   obj_som_file_hdr (abfd)->subspace_location = current_offset;
   obj_som_file_hdr (abfd)->subspace_total = num_subspaces;
-  current_offset += num_subspaces * sizeof (struct subspace_dictionary_record);
+  current_offset
+    += num_subspaces * sizeof (struct som_subspace_dictionary_record);
 
   /* Next is the string table for the space/subspace names.  We will
      build and write the string table on the fly.  At the same time
@@ -3849,7 +3857,7 @@ som_finish_writing (abfd)
 	  som_section_data (subsection)->subspace_dict->space_index = i;
 
 	  /* Dump the current subspace header.  */
-	  amt = sizeof (struct subspace_dictionary_record);
+	  amt = sizeof (struct som_subspace_dictionary_record);
 	  if (bfd_bwrite ((PTR) som_section_data (subsection)->subspace_dict,
 			 amt, abfd) != amt)
 	    return FALSE;
@@ -3905,7 +3913,7 @@ som_finish_writing (abfd)
 	  som_section_data (subsection)->subspace_dict->space_index = i;
 
 	  /* Dump this subspace header.  */
-	  amt = sizeof (struct subspace_dictionary_record);
+	  amt = sizeof (struct som_subspace_dictionary_record);
 	  if (bfd_bwrite ((PTR) som_section_data (subsection)->subspace_dict,
 			 amt, abfd) != amt)
 	    return FALSE;
@@ -4053,12 +4061,12 @@ som_bfd_derive_misc_symbol_info (abfd, sym, info)
     info->symbol_type = ST_DATA;
   else
     {
-      /* Common symbols must have scope SS_UNSAT and type
-	 ST_STORAGE or the linker will choke.  */
+      /* For BFD style common, the linker will choke unless we set the
+	 type and scope to ST_STORAGE and SS_UNSAT, respectively.  */
       if (bfd_is_com_section (sym->section))
 	{
-	  info->symbol_scope = SS_UNSAT;
 	  info->symbol_type = ST_STORAGE;
+	  info->symbol_scope = SS_UNSAT;
 	}
 
       /* It is possible to have a symbol without an associated
@@ -4097,9 +4105,6 @@ som_bfd_derive_misc_symbol_info (abfd, sym, info)
 	    info->symbol_type = ST_DATA;
 	}
 
-      else if (som_symbol_data (sym)->som_type == SYMBOL_TYPE_UNKNOWN)
-	info->symbol_type = ST_DATA;
-
       /* From now on it's a very simple mapping.  */
       else if (som_symbol_data (sym)->som_type == SYMBOL_TYPE_ABSOLUTE)
 	info->symbol_type = ST_ABSOLUTE;
@@ -4120,14 +4125,15 @@ som_bfd_derive_misc_symbol_info (abfd, sym, info)
   /* Now handle the symbol's scope.  Exported data which is not
      in the common section has scope SS_UNIVERSAL.  Note scope
      of common symbols was handled earlier!  */
-  if (bfd_is_und_section (sym->section))
+  if (bfd_is_com_section (sym->section))
+    ;
+  else if (bfd_is_und_section (sym->section))
     info->symbol_scope = SS_UNSAT;
-  else if (sym->flags & (BSF_EXPORT | BSF_WEAK)
-	   && ! bfd_is_com_section (sym->section))
+  else if (sym->flags & (BSF_EXPORT | BSF_WEAK))
     info->symbol_scope = SS_UNIVERSAL;
   /* Anything else which is not in the common section has scope
      SS_LOCAL.  */
-  else if (! bfd_is_com_section (sym->section))
+  else
     info->symbol_scope = SS_LOCAL;
 
   /* Now set the symbol_info field.  It has no real meaning
@@ -4146,12 +4152,49 @@ som_bfd_derive_misc_symbol_info (abfd, sym, info)
   /* Set the symbol's value.  */
   info->symbol_value = sym->value + sym->section->vma;
 
-  /* The secondary_def field is for weak symbols.  */
+  /* The secondary_def field is for "weak" symbols.  */
   if (sym->flags & BSF_WEAK)
     info->secondary_def = TRUE;
   else
     info->secondary_def = FALSE;
 
+  /* The is_comdat, is_common and dup_common fields provide various
+     flavors of common.
+
+     For data symbols, setting IS_COMMON provides Fortran style common
+     (duplicate definitions and overlapped initialization).  Setting both
+     IS_COMMON and DUP_COMMON provides Cobol style common (duplicate
+     definitions as long as they are all the same length).  In a shared
+     link data symbols retain their IS_COMMON and DUP_COMMON flags.
+     An IS_COMDAT data symbol is similar to a IS_COMMON | DUP_COMMON
+     symbol except in that it loses its IS_COMDAT flag in a shared link.
+
+     For code symbols, IS_COMDAT and DUP_COMMON have effect.  Universal
+     DUP_COMMON code symbols are not exported from shared libraries.
+     IS_COMDAT symbols are exported but they lose their IS_COMDAT flag.
+
+     We take a simplified approach to setting the is_comdat, is_common
+     and dup_common flags in symbols based on the flag settings of their
+     subspace.  This avoids having to add directives like `.comdat' but
+     the linker behavior is probably undefined if there is more than one
+     universal symbol (comdat key sysmbol) in a subspace.
+
+     The behavior of these flags is not well documentmented, so there
+     may be bugs and some surprising interactions with other flags.  */
+  if (som_section_data (sym->section)
+      && som_section_data (sym->section)->subspace_dict
+      && info->symbol_scope == SS_UNIVERSAL
+      && (info->symbol_type == ST_ENTRY
+	  || info->symbol_type == ST_CODE
+	  || info->symbol_type == ST_DATA))
+    {
+      info->is_comdat
+	= som_section_data (sym->section)->subspace_dict->is_comdat;
+      info->is_common
+	= som_section_data (sym->section)->subspace_dict->is_common;
+      info->dup_common
+	= som_section_data (sym->section)->subspace_dict->dup_common;
+    }
 }
 
 /* Build and write, in one big chunk, the entire symbol table for
@@ -4197,6 +4240,9 @@ som_build_and_write_symbol_table (abfd)
       som_symtab[i].xleast = 3;
       som_symtab[i].symbol_value = info.symbol_value | info.priv_level;
       som_symtab[i].secondary_def = info.secondary_def;
+      som_symtab[i].is_comdat = info.is_comdat;
+      som_symtab[i].is_common = info.is_common;
+      som_symtab[i].dup_common = info.dup_common;
     }
 
   /* Everything is ready, seek to the right location and
@@ -5220,12 +5266,13 @@ bfd_som_set_section_attributes (section, defined, private, sort_key, spnum)
 
 bfd_boolean
 bfd_som_set_subsection_attributes (section, container, access,
-				   sort_key, quadrant)
+				   sort_key, quadrant, comdat,
+				   common, dup_common)
      asection *section;
      asection *container;
      int access;
      unsigned int sort_key;
-     int quadrant;
+     int quadrant, comdat, common, dup_common;
 {
   /* Allocate memory to hold the magic information.  */
   if (som_section_data (section)->copy_data == NULL)
@@ -5241,6 +5288,9 @@ bfd_som_set_subsection_attributes (section, container, access,
   som_section_data (section)->copy_data->access_control_bits = access;
   som_section_data (section)->copy_data->quadrant = quadrant;
   som_section_data (section)->copy_data->container = container;
+  som_section_data (section)->copy_data->is_comdat = comdat;
+  som_section_data (section)->copy_data->is_common = common;
+  som_section_data (section)->copy_data->dup_common = dup_common;
   return TRUE;
 }
 
@@ -6044,7 +6094,7 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst, elength)
 	  curr_lst_sym->initially_frozen = 0;
 	  curr_lst_sym->memory_resident = 0;
 	  curr_lst_sym->is_common = bfd_is_com_section (sym->symbol.section);
-	  curr_lst_sym->dup_common = 0;
+	  curr_lst_sym->dup_common = info.dup_common;
 	  curr_lst_sym->xleast = 3;
 	  curr_lst_sym->arg_reloc = info.arg_reloc;
 	  curr_lst_sym->name.n_strx = p - strings + 4;
@@ -6370,7 +6420,7 @@ const bfd_target som_vec = {
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED | DYNAMIC),
-  (SEC_CODE | SEC_DATA | SEC_ROM | SEC_HAS_CONTENTS
+  (SEC_CODE | SEC_DATA | SEC_ROM | SEC_HAS_CONTENTS | SEC_LINK_ONCE
    | SEC_ALLOC | SEC_LOAD | SEC_RELOC),		/* section flags */
 
 /* leading_symbol_char: is the first char of a user symbol

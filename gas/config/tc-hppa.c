@@ -363,6 +363,9 @@ struct default_subspace_dict
     /* Nonzero if this subspace contains only code.  */
     char code_only;
 
+    /* Nonzero if this is a comdat subspace.  */
+    char comdat;
+
     /* Nonzero if this is a common subspace.  */
     char common;
 
@@ -555,13 +558,13 @@ static sd_chain_struct *create_new_space PARAMS ((char *, int, int,
 						  asection *, int));
 static ssd_chain_struct *create_new_subspace PARAMS ((sd_chain_struct *,
 						      char *, int, int,
-						      int, int, int,
+						      int, int, int, int,
 						      int, int, int, int,
 						      int, asection *));
 static ssd_chain_struct *update_subspace PARAMS ((sd_chain_struct *,
 						  char *, int, int, int,
 						  int, int, int, int,
-						  int, int, int,
+						  int, int, int, int,
 						  asection *));
 static sd_chain_struct *is_defined_space PARAMS ((char *));
 static ssd_chain_struct *is_defined_subspace PARAMS ((char *));
@@ -1117,12 +1120,12 @@ static const struct selector_entry selector_table[] =
 
 static struct default_subspace_dict pa_def_subspaces[] =
 {
-  {"$CODE$", 1, 1, 1, 0, 0, 0, 24, 0x2c, 0, 8, 0, 0, SUBSEG_CODE},
-  {"$DATA$", 1, 1, 0, 0, 0, 0, 24, 0x1f, 1, 8, 1, 1, SUBSEG_DATA},
-  {"$LIT$", 1, 1, 0, 0, 0, 0, 16, 0x2c, 0, 8, 0, 0, SUBSEG_LIT},
-  {"$MILLICODE$", 1, 1, 0, 0, 0, 0, 8, 0x2c, 0, 8, 0, 0, SUBSEG_MILLI},
-  {"$BSS$", 1, 1, 0, 0, 0, 1, 80, 0x1f, 1, 8, 1, 1, SUBSEG_BSS},
-  {NULL, 0, 1, 0, 0, 0, 0, 255, 0x1f, 0, 4, 0, 0, 0}
+  {"$CODE$", 1, 1, 1, 0, 0, 0, 0, 24, 0x2c, 0, 8, 0, 0, SUBSEG_CODE},
+  {"$DATA$", 1, 1, 0, 0, 0, 0, 0, 24, 0x1f, 1, 8, 1, 1, SUBSEG_DATA},
+  {"$LIT$", 1, 1, 0, 0, 0, 0, 0, 16, 0x2c, 0, 8, 0, 0, SUBSEG_LIT},
+  {"$MILLICODE$", 1, 1, 0, 0, 0, 0, 0, 8, 0x2c, 0, 8, 0, 0, SUBSEG_MILLI},
+  {"$BSS$", 1, 1, 0, 0, 0, 0, 1, 80, 0x1f, 1, 8, 1, 1, SUBSEG_BSS},
+  {NULL, 0, 1, 0, 0, 0, 0, 0, 255, 0x1f, 0, 4, 0, 0, 0}
 };
 
 static struct default_space_dict pa_def_spaces[] =
@@ -7454,7 +7457,7 @@ pa_subspace (create_new)
      int create_new;
 {
   char *name, *ss_name, c;
-  char loadable, code_only, common, dup_common, zero, sort;
+  char loadable, code_only, comdat, common, dup_common, zero, sort;
   int i, access, space_index, alignment, quadrant, applicable, flags;
   sd_chain_struct *space;
   ssd_chain_struct *ssd;
@@ -7480,6 +7483,7 @@ pa_subspace (create_new)
       sort = 0;
       access = 0x7f;
       loadable = 1;
+      comdat = 0;
       common = 0;
       dup_common = 0;
       code_only = 0;
@@ -7514,6 +7518,7 @@ pa_subspace (create_new)
 	      if (strcasecmp (pa_def_subspaces[i].name, ss_name) == 0)
 		{
 		  loadable = pa_def_subspaces[i].loadable;
+		  comdat = pa_def_subspaces[i].comdat;
 		  common = pa_def_subspaces[i].common;
 		  dup_common = pa_def_subspaces[i].dup_common;
 		  code_only = pa_def_subspaces[i].code_only;
@@ -7577,6 +7582,11 @@ pa_subspace (create_new)
 		  *input_line_pointer = c;
 		  loadable = 0;
 		}
+	      else if ((strncasecmp (name, "comdat", 6) == 0))
+		{
+		  *input_line_pointer = c;
+		  comdat = 1;
+		}
 	      else if ((strncasecmp (name, "common", 6) == 0))
 		{
 		  *input_line_pointer = c;
@@ -7609,8 +7619,17 @@ pa_subspace (create_new)
 	flags |= (SEC_ALLOC | SEC_LOAD);
       if (code_only)
 	flags |= SEC_CODE;
-      if (common || dup_common)
-	flags |= SEC_IS_COMMON;
+
+      /* These flags are used to implement various flavors of initialized
+	 common.  The SOM linker discards duplicate subspaces when they
+	 have the same "key" symbol name.  This support is more like
+	 GNU linkonce than BFD common.  Further, pc-relative relocations
+	 are converted to section relative relocations in BFD common
+	 sections.  This complicates the handling of relocations in
+	 common sections containing text and isn't currently supported
+	 correctly in the SOM BFD backend.  */
+      if (comdat || common || dup_common)
+	flags |= SEC_LINK_ONCE;
 
       flags |= SEC_RELOC | SEC_HAS_CONTENTS;
 
@@ -7652,16 +7671,16 @@ pa_subspace (create_new)
       if (ssd)
 
 	current_subspace = update_subspace (space, ss_name, loadable,
-					    code_only, common, dup_common,
-					    sort, zero, access, space_index,
-					    alignment, quadrant,
+					    code_only, comdat, common,
+					    dup_common, sort, zero, access,
+					    space_index, alignment, quadrant,
 					    section);
       else
 	current_subspace = create_new_subspace (space, ss_name, loadable,
-						code_only, common,
+						code_only, comdat, common,
 						dup_common, zero, sort,
 						access, space_index,
-					      alignment, quadrant, section);
+						alignment, quadrant, section);
 
       demand_empty_rest_of_line ();
       current_subspace->ssd_seg = section;
@@ -7782,6 +7801,7 @@ pa_spaces_begin ()
       create_new_subspace (space, name,
 			   pa_def_subspaces[i].loadable,
 			   pa_def_subspaces[i].code_only,
+			   pa_def_subspaces[i].comdat,
 			   pa_def_subspaces[i].common,
 			   pa_def_subspaces[i].dup_common,
 			   pa_def_subspaces[i].zero,
@@ -7883,12 +7903,12 @@ create_new_space (name, spnum, loadable, defined, private,
    order as defined by the SORT entries.  */
 
 static ssd_chain_struct *
-create_new_subspace (space, name, loadable, code_only, common,
+create_new_subspace (space, name, loadable, code_only, comdat, common,
 		     dup_common, is_zero, sort, access, space_index,
 		     alignment, quadrant, seg)
      sd_chain_struct *space;
      char *name;
-     int loadable, code_only, common, dup_common, is_zero;
+     int loadable, code_only, comdat, common, dup_common, is_zero;
      int sort;
      int access;
      int space_index;
@@ -7945,8 +7965,8 @@ create_new_subspace (space, name, loadable, code_only, common,
     }
 
 #ifdef obj_set_subsection_attributes
-  obj_set_subsection_attributes (seg, space->sd_seg, access,
-				 sort, quadrant);
+  obj_set_subsection_attributes (seg, space->sd_seg, access, sort,
+				 quadrant, comdat, common, dup_common);
 #endif
 
   return chain_entry;
@@ -7956,12 +7976,13 @@ create_new_subspace (space, name, loadable, code_only, common,
    various arguments.   Return the modified subspace chain entry.  */
 
 static ssd_chain_struct *
-update_subspace (space, name, loadable, code_only, common, dup_common, sort,
-		 zero, access, space_index, alignment, quadrant, section)
+update_subspace (space, name, loadable, code_only, comdat, common, dup_common,
+		 sort, zero, access, space_index, alignment, quadrant, section)
      sd_chain_struct *space;
      char *name;
      int loadable;
      int code_only;
+     int comdat;
      int common;
      int dup_common;
      int zero;
@@ -7977,8 +7998,8 @@ update_subspace (space, name, loadable, code_only, common, dup_common, sort,
   chain_entry = is_defined_subspace (name);
 
 #ifdef obj_set_subsection_attributes
-  obj_set_subsection_attributes (section, space->sd_seg, access,
-				 sort, quadrant);
+  obj_set_subsection_attributes (section, space->sd_seg, access, sort,
+				 quadrant, comdat, common, dup_common);
 #endif
 
   return chain_entry;

@@ -1,3 +1,33 @@
+2004-04-28  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* som.c (struct som_misc_symbol_info): Add is_comdat, is_common and
+	dup_common fields.
+	(setup_sections): Use som_subspace_dictionary_record struct instead
+	subspace_dictionary_record.  Set SEC_LINK_ONCE if subspace is
+	is_comdat, is_common or dup_common.
+	(som_prep_headers): Use som_subspace_dictionary_record struct.  Set
+	is_comdat, is_common and dup_common in section subspace_dict from
+	copy_data.
+	(som_begin_writing): Use som_subspace_dictionary_record struct.
+	(som_finish_writing): Likewise.
+	(som_bfd_derive_misc_symbol_info): Add support to set is_comdat,
+	is_common and dup_common flags in info for symbol.  Add comment
+	regarding linker support for these fields.  Slightly reorganize
+	function.
+	(som_build_and_write_symbol_table): Set is_comdat, is_common and
+	dup_common fields in symbol table from symbol info.
+	(bfd_som_set_subsection_attributes): Add comdat, common and dup_common
+	arguments.  Set corresponding fields in copy_data.  Change all callers.
+	(som_bfd_ar_write_symbol_stuff): Set dup_common flag in library
+	symbol table.
+	(som_vec): Add SEC_LINK_ONCE to applicable section flags.
+	* som.h (som_subspace_dictionary_record): Define.
+	(som_copyable_section_data_struct): Add is_comdat, is_common and
+	dup_common fields.
+	(som_section_data_struct): Use som_subspace_dictionary_record struct
+	instead of subspace_dictionary_record.
+	(bfd_boolean bfd_som_set_subsection_attributes): Adjust prototype.
+
 2004-04-27  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (xtensa_read_table_entries): Use section _cooked_size
