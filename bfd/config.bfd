@@ -1090,7 +1090,12 @@ case "${targ}" in
 #endif
     targ_underscore=yes
     ;;
-  sh-*-elf* | sh[1234]*-elf* | sh-*-rtemself* | sh-*-kaos*)
+  sh-*-rtemscoff*)
+    targ_defvec=shcoff_vec
+    targ_selvecs="shcoff_vec shlcoff_vec shcoff_small_vec shlcoff_small_vec"
+    targ_underscore=yes
+    ;;
+  sh-*-elf* | sh[1234]*-elf* | sh-*-rtems* | sh-*-kaos*)
     targ_defvec=bfd_elf32_sh_vec
     targ_selvecs="bfd_elf32_shl_vec shcoff_vec shlcoff_vec shcoff_small_vec shlcoff_small_vec"
 #ifdef BFD64
@@ -1116,7 +1121,7 @@ case "${targ}" in
     # compiled correctly.
     targ_selvecs="$targ_selvecs shcoff_vec shlcoff_vec shcoff_small_vec shlcoff_small_vec"
     ;;
-  sh-*-* | sh-*-rtems*)
+  sh-*-*)
     targ_defvec=shcoff_vec
     targ_selvecs="shcoff_vec shlcoff_vec shcoff_small_vec shlcoff_small_vec"
     targ_underscore=yes
