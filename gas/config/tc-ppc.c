@@ -761,12 +761,15 @@ md_begin ()
 		  || (((ppc_cpu & PPC_OPCODE_601) == 0
 		       || strcmp (op->name, "mfdec") != 0)
 		      && (((ppc_cpu & ~PPC_OPCODE_POWER2)
-			  == (PPC_OPCODE_POWER | PPC_OPCODE_PPC))
+			  != (PPC_OPCODE_POWER | PPC_OPCODE_PPC))
 			  || (strcmp (op->name, "cmpli") != 0
 			      && strcmp (op->name, "cmpi") != 0
 			      && strcmp (op->name, "cmp") != 0
 			      && strcmp (op->name, "cmpl") != 0))))
-		as_fatal ("Internal assembler error for instruction %s", op->name);
+		{
+		  as_bad ("Internal assembler error for instruction %s", op->name);
+		  abort ();
+		}
 	    }
 	}
     }
