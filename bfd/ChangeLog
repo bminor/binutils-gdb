@@ -1,3 +1,7 @@
+Tue Nov 10 14:04:38 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: minor tweaks to make $(CC) command lines more consistent
+
 Mon Nov  9 23:58:17 1992  John Gilmore  (gnu@cygnus.com)
 
 	* opncls.c (bfd_fdopenr, bfd_close):  Add doc about cacheing
