@@ -235,7 +235,7 @@ typedef enum bfd_print_symbol
   bfd_print_symbol_name,
   bfd_print_symbol_more,
   bfd_print_symbol_all,
-  bfd_print_symbol_nm, /* Pretty format suitable for nm program. */
+  bfd_print_symbol_nm	/* Pretty format suitable for nm program. */
 } bfd_print_symbol_type;
     
 
@@ -990,7 +990,7 @@ struct _bfd
     struct bfd_target *xvec;
 
      /* To avoid dragging too many header files into every file that
-       includes @file{bfd.h}, IOSTREAM has been declared as a "char
+       includes `<<bfd.h>>', IOSTREAM has been declared as a "char
        *", and MTIME as a "long".  Their correct types, to which they
        are cast when used, are "FILE *" and "time_t".    The iostream
        is the result of an fopen on the filename. */
