@@ -383,10 +383,11 @@ init_extra_frame_info (fci)
     /* Assume innermost frame.  May produce strange results for "info frame"
        but there isn't any way to tell the difference.  */
     init_frame_info (1, fci);
-  else
-    /* We're in get_prev_frame_info.
-       Take care of everything in init_frame_pc.  */
-    ;
+  else {
+      /* We're in get_prev_frame_info.
+         Take care of everything in init_frame_pc.  */
+      ;
+    }
 }
 
 void
@@ -455,7 +456,7 @@ read_register_stack (memaddr, myaddr, actual_mem_addr, lval)
       if (lval != NULL)
 	*lval = lval_memory;
       if (actual_mem_addr != NULL)
-	*actual_mem_addr == memaddr;
+	*actual_mem_addr = memaddr;
     }
 }
 
@@ -500,7 +501,7 @@ write_register_stack (memaddr, myaddr, actual_mem_addr)
       if (myaddr != NULL)
 	write_memory (memaddr, myaddr, 4);
       if (actual_mem_addr != NULL)
-	*actual_mem_addr == memaddr;
+	*actual_mem_addr = memaddr;
     }
 }
 

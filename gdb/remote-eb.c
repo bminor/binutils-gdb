@@ -694,7 +694,7 @@ eb_fetch_registers ()
 
 /* Fetch register REGNO, or all registers if REGNO is -1.
    Returns errno value.  */
-int
+void
 eb_fetch_register (regno)
      int regno;
 {
@@ -709,7 +709,7 @@ eb_fetch_register (regno)
       get_hex_regs (1, regno);
       expect_prompt ();
     }
-  return 0;
+  return;
 }
 
 /* Store the remote registers from the contents of the block REGS.  */
