@@ -413,34 +413,45 @@ DESCRIPTION
 	To detect calling these with less than a bfd_vma, use gcc
 	-Wconversion on a host with 64 bit bfd_vma's.
 
+.
+.{* Byte swapping macros for user section data.  *}
+.
 .#define bfd_put_8(abfd, val, ptr) \
-.                (*((unsigned char *)ptr) = (unsigned char)val)
-.#define bfd_put_signed_8(abfd, val, ptr) (*((char *)(ptr)) = (char)(val))
+.                (*((unsigned char *)(ptr)) = (unsigned char)val)
+.#define bfd_put_signed_8 \
+.		bfd_put_8
 .#define bfd_get_8(abfd, ptr) \
-.                (*((unsigned char *)(ptr)))
-.#define bfd_get_signed_8(abfd, ptr) (((*(char *)(ptr) ^ 0x80) & 0xff) - 0x80)
+.                (*(unsigned char *)(ptr))
+.#define bfd_get_signed_8(abfd, ptr) \
+.		((*(unsigned char *)(ptr) ^ 0x80) - 0x80)
+.
 .#define bfd_put_16(abfd, val, ptr) \
 .                BFD_SEND(abfd, bfd_putx16, ((val),(ptr)))
-.#define bfd_put_signed_16 bfd_put_16
+.#define bfd_put_signed_16 \
+.		 bfd_put_16
 .#define bfd_get_16(abfd, ptr) \
 .                BFD_SEND(abfd, bfd_getx16, (ptr))
 .#define bfd_get_signed_16(abfd, ptr) \
 .         	 BFD_SEND (abfd, bfd_getx_signed_16, (ptr))
+.
 .#define bfd_put_32(abfd, val, ptr) \
 .                BFD_SEND(abfd, bfd_putx32, ((val),(ptr)))
-.#define bfd_put_signed_32 bfd_put_32
+.#define bfd_put_signed_32 \
+.		 bfd_put_32
 .#define bfd_get_32(abfd, ptr) \
 .                BFD_SEND(abfd, bfd_getx32, (ptr))
 .#define bfd_get_signed_32(abfd, ptr) \
 .		 BFD_SEND(abfd, bfd_getx_signed_32, (ptr))
+.
 .#define bfd_put_64(abfd, val, ptr) \
 .                BFD_SEND(abfd, bfd_putx64, ((val), (ptr)))
-.#define bfd_put_signed_64 bfd_put_64
+.#define bfd_put_signed_64 \
+.		 bfd_put_64
 .#define bfd_get_64(abfd, ptr) \
 .                BFD_SEND(abfd, bfd_getx64, (ptr))
 .#define bfd_get_signed_64(abfd, ptr) \
 .		 BFD_SEND(abfd, bfd_getx_signed_64, (ptr))
-
+.
 */ 
 
 /*
@@ -454,43 +465,54 @@ DESCRIPTION
 	bretherin, except that they are used for removing information
 	for the header records of object files. Believe it or not,
 	some object files keep their header records in big endian
-	order, and their data in little endan order.
-
+	order, and their data in little endian order.
+.
+.{* Byte swapping macros for file header data.  *}
+.
 .#define bfd_h_put_8(abfd, val, ptr) \
-.                (*((unsigned char *)ptr) = (unsigned char)val)
-.#define bfd_h_put_signed_8(abfd, val, ptr) (*((char *)(ptr)) = (char)(val))
+.		bfd_put_8 (abfd, val, ptr)
+.#define bfd_h_put_signed_8(abfd, val, ptr) \
+.		bfd_put_8 (abfd, val, ptr)
 .#define bfd_h_get_8(abfd, ptr) \
-.                (*((unsigned char *)(ptr)))
-.#define bfd_h_get_signed_8 bfd_get_signed_8
+.		bfd_get_8 (abfd, ptr)
+.#define bfd_h_get_signed_8(abfd, ptr) \
+.		bfd_get_signed_8 (abfd, ptr)
+.
 .#define bfd_h_put_16(abfd, val, ptr) \
 .                BFD_SEND(abfd, bfd_h_putx16,(val,ptr))
-.#define bfd_h_put_signed_16 bfd_h_put_16
+.#define bfd_h_put_signed_16 \
+.		 bfd_h_put_16
 .#define bfd_h_get_16(abfd, ptr) \
 .                BFD_SEND(abfd, bfd_h_getx16,(ptr))
 .#define bfd_h_get_signed_16(abfd, ptr) \
 .		 BFD_SEND(abfd, bfd_h_getx_signed_16, (ptr))
+.
 .#define bfd_h_put_32(abfd, val, ptr) \
 .                BFD_SEND(abfd, bfd_h_putx32,(val,ptr))
-.#define bfd_h_put_signed_32 bfd_h_put_32
+.#define bfd_h_put_signed_32 \
+.		 bfd_h_put_32
 .#define bfd_h_get_32(abfd, ptr) \
 .                BFD_SEND(abfd, bfd_h_getx32,(ptr))
 .#define bfd_h_get_signed_32(abfd, ptr) \
 .		 BFD_SEND(abfd, bfd_h_getx_signed_32, (ptr))
+.
 .#define bfd_h_put_64(abfd, val, ptr) \
 .                BFD_SEND(abfd, bfd_h_putx64,(val, ptr))
-.#define bfd_h_put_signed_64 bfd_h_put_64
+.#define bfd_h_put_signed_64 \
+.		 bfd_h_put_64
 .#define bfd_h_get_64(abfd, ptr) \
 .                BFD_SEND(abfd, bfd_h_getx64,(ptr))
 .#define bfd_h_get_signed_64(abfd, ptr) \
 .		 BFD_SEND(abfd, bfd_h_getx_signed_64, (ptr))
-
+.
 */ 
 
 /* Sign extension to bfd_signed_vma.  */
 #define COERCE16(x) ((bfd_signed_vma) (((x) ^ 0x8000) - 0x8000))
 #define COERCE32(x) ((bfd_signed_vma) (((x) ^ 0x80000000) - 0x80000000))
+#define EIGHT_GAZILLION (((HOST_64_BIT)0x80000000) << 32)
 #define COERCE64(x) ((bfd_signed_vma)\
-		     (((x) ^ 0x8000000000000000) - 0x8000000000000000))
+		     (((x) ^ EIGHT_GAZILLION) - EIGHT_GAZILLION))
 
 bfd_vma
 DEFUN(_do_getb16,(addr),
