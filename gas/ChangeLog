@@ -1,3 +1,8 @@
+Fri Oct 10 16:09:35 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/tc-d10v.c (parallel_ok): Allow parallel instruction issue
+ 	when second instruction is writing to first instructions inputs.
+	
 Mon Oct 13 15:27:17 1997  Richard Henderson  <rth@cygnus.com>
 
 	* ecoff.c (PAGE_SIZE): Double to 8k as a hack to allow some C++

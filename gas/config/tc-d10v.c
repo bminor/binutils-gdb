@@ -808,15 +808,20 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
   if (exec_type == 0 && (op1->exec_type & BRANCH) != 0)
     return 0;
 
-  /* The idea here is to create two sets of bitmasks (mod and used) */
-  /* which indicate which registers are modified or used by each instruction. */
-  /* The operation can only be done in parallel if instruction 1 and instruction 2 */
-  /* modify different registers, and neither instruction modifies any registers */
-  /* the other is using.  Accesses to control registers, PSW, and memory are treated */
-  /* as accesses to a single register.  So if both instructions write memory or one */
-  /* instruction writes memory and the other reads, then they cannot be done in parallel. */
-  /* Likewise, if one instruction mucks with the psw and the other reads the PSW */
-  /* (which includes C, F0, and F1), then they cannot operate safely in parallel. */
+  /* The idea here is to create two sets of bitmasks (mod and used)
+     which indicate which registers are modified or used by each
+     instruction.  The operation can only be done in parallel if
+     instruction 1 and instruction 2 modify different registers, and
+     the first instruction does not modify registers that the second
+     is using (The second instruction can modify registers that the
+     first is using as they are only written back after the first
+     instruction has completed).  Accesses to control registers, PSW,
+     and memory are treated as accesses to a single register.  So if
+     both instructions write memory or if the first instruction writes
+     memory and the second reads, then they cannot be done in
+     parallel.  Likewise, if the first instruction mucks with the psw
+     and the second reads the PSW (which includes C, F0, and F1), then
+     they cannot operate safely in parallel. */
 
   /* the bitmasks (mod and used) look like this (bit 31 = MSB) */
   /* r0-r15	  0-15  */
@@ -898,7 +903,7 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
       else if (op->exec_type & WCAR)
 	mod[j] |= 1 << 19;
     }
-  if ((mod[0] & mod[1]) == 0 && (mod[0] & used[1]) == 0 && (mod[1] & used[0]) == 0)
+  if ((mod[0] & mod[1]) == 0 && (mod[0] & used[1]) == 0)
     return 1;
   return 0;
 }
