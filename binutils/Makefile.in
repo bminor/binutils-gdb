@@ -20,7 +20,11 @@
 #$Id$
 
 srcdir = .
-destdir = /usr/local
+
+ddestdir = /usr/local
+idestdir = $(ddestdir)
+
+SHELL = /bin/sh
 
 # Distribution version
 VERSION=1.91
@@ -28,11 +32,14 @@ VERSION=1.91
 DIST_NAME=binutils-beta-${VERSION}
 
 version=`$(unsubdir)/../gcc$(subdir)/gcc -dumpversion`
-prefix = $(destdir)
+prefix = $(ddestdir)
 bindir = $(prefix)/bin
+mandir = $(idestdir)/man
 
 # Where to find texinfo.tex to format docn with TeX
 TEXIDIR = $(srcdir)/../texinfo/fsf
+
+MANPAGES= ar.1 nm.1 objdump.1 ranlib.1 size.1 strip.1
 
 #INSTALL = install -c
 #INSTALL_PROGRAM = $(INSTALL)
@@ -219,6 +226,10 @@ install: $(PROGS)
 	for i in $(PROGS) ; do \
 		cp $$i $(bindir)/$$i.new ; \
 		mv -f $(bindir)/$$i.new $(bindir)/$$i ; \
+	done
+	for i in $(MANPAGES) ; do \
+		cp $(srcdir)/$$i $(mandir)/man1/$$i.new ; \
+		mv -f $(mandir)/man1/$$i.new $(mandir)/man1/$$i ; \
 	done
 
 dist: $(DIST_NAME).tar.Z
