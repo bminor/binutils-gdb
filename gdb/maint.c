@@ -495,6 +495,7 @@ to test internal functions such as the C++ demangler, etc.",
      "Commands for showing internal info about the program being debugged.",
 		  &maintenanceinfolist, "maintenance info ", 0,
 		  &maintenancelist);
+  add_alias_cmd ("i", "info", class_maintenance, 1, &maintenancelist);
 
   add_cmd ("sections", class_maintenance, maintenance_info_sections,
 	   "List the BFD sections of the exec and core files.",

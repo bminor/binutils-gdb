@@ -1,4 +1,8 @@
 2000-03-27  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+ 
+         * maint.c (_initialize_maint_cmds):  Add `mt i' alias for `mt info'.
+ 
+2000-03-27  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
         * infcmd.c (_initialize_infcmd):  Add `info r' alias for
         `info registers'.
