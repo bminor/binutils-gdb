@@ -24,7 +24,7 @@ srcdir = .
 ddestdir = /usr/local
 libdir = $(ddestdir)/lib
 docdir = $(srcdir)/doc
-
+includedir= $(ddestdir)/include
 RANLIB = ranlib
 AR = ar
 AR_FLAGS = clq
@@ -209,6 +209,7 @@ install:
 	cp libbfd.a $(libdir)/libbfd.a.new
 	$(RANLIB) $(libdir)/libbfd.a.new
 	mv -f $(libdir)/libbfd.a.new $(libdir)/libbfd.a
+	cp $(INCDIR)/bfd.h $(includedir)/bfd.h
 	$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS)"
 
 # Target to uncomment host-specific lines in this makefile.  Such lines must
