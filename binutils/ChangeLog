@@ -17,6 +17,7 @@ Tue Jan 23 15:54:18 1996  Ian Lance Taylor  <ian@cygnus.com>
 Tue Jan 23 09:53:54 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* objdump.c (disassemble_data): Handle unknown endianness.
+	Pass fprintf to INIT_DISASSEMBLE_INFO.
 
 Mon Jan 22 16:46:43 1996  Doug Evans  <dje@charmed.cygnus.com>
 

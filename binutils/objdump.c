@@ -830,7 +830,7 @@ disassemble_data (abfd)
   /* Sort the symbols into section and symbol order */
   qsort (sorted_syms, sorted_symcount, sizeof (asymbol *), compare_symbols);
 
-  INIT_DISASSEMBLE_INFO(disasm_info, stdout);
+  INIT_DISASSEMBLE_INFO(disasm_info, stdout, fprintf);
   disasm_info.application_data = (PTR) &aux;
   aux.abfd = abfd;
   disasm_info.print_address_func = objdump_print_address;
