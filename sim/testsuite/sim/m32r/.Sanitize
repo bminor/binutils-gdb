@@ -168,6 +168,10 @@ xor3.cgs
 
 hello.ms
 hw-trap.ms
+uread16.ms
+uread32.ms
+uwrite16.ms
+uwrite32.ms
 
 Things-to-lose:
 

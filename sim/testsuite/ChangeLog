@@ -10,6 +10,11 @@
 
 	* sim/m32r/trap.cgs: Properly align trap2_handler.
 
+	* sim/m32r/uread16.ms: New testcase.
+	* sim/m32r/uread32.ms: New testcase.
+	* sim/m32r/uwrite16.ms: New testcase.
+	* sim/m32r/uwrite32.ms: New testcase.
+
 1998-12-14  Dave Brolley  <brolley@cygnus.com>
 
 	* sim/fr30/call.cgs: Test ret here as well.
