@@ -1,3 +1,10 @@
+2005-03-11  Michael Snyder  <msnyder@redhat.com>
+
+	* mn10300-tdep.c (mn10300_dummy_unwind_dummy_id): Replace 
+	stub fn with real implementatin mn10300_unwind_dummy_id.
+	(mn10300_push_dummy_call): Implement.  Bare bones version,
+	does not handle structs or floats.
+
 2005-03-11  Jim Blandy  <jimb@redhat.com>
 
 	Avoid warnings due to the use of -Wuninitialized without -O.

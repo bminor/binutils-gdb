@@ -55,6 +55,9 @@
 #include "regcache.h"
 #include "gdb_string.h"
 #include "gdb_assert.h"
+#include "gdbcore.h"	/* for write_memory_unsigned_integer */
+#include "value.h"
+#include "gdbtypes.h"
 #include "frame.h"
 #include "frame-unwind.h"
 #include "frame-base.h"
@@ -311,7 +314,7 @@ mn10300_frame_unwind_cache (struct frame_info *next_frame,
 
   cache = trad_frame_cache_zalloc (next_frame);
   pc = gdbarch_unwind_pc (current_gdbarch, next_frame);
-  mn10300_analyze_prologue (next_frame, &cache, pc);
+  mn10300_analyze_prologue (next_frame, (void **) &cache, pc);
 
   trad_frame_set_id (cache, 
 		     frame_id_build (trad_frame_get_this_base (cache), pc));
@@ -322,10 +325,11 @@ mn10300_frame_unwind_cache (struct frame_info *next_frame,
 
 /* Here is a dummy implementation.  */
 static struct frame_id
-mn10300_dummy_unwind_dummy_id (struct gdbarch *gdbarch,
-			       struct frame_info *next_frame)
+mn10300_unwind_dummy_id (struct gdbarch *gdbarch,
+			 struct frame_info *next_frame)
 {
-  return frame_id_build (0, 0);
+  return frame_id_build (frame_sp_unwind (next_frame), 
+			 frame_pc_unwind (next_frame));
 }
 
 /* Trad frame implementation.  */
@@ -411,20 +415,102 @@ mn10300_frame_unwind_init (struct gdbarch *gdbarch)
   frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
   frame_unwind_append_sniffer (gdbarch, mn10300_frame_sniffer);
   frame_base_set_default (gdbarch, &mn10300_frame_base);
-  set_gdbarch_unwind_dummy_id (gdbarch, mn10300_dummy_unwind_dummy_id);
+  set_gdbarch_unwind_dummy_id (gdbarch, mn10300_unwind_dummy_id);
   set_gdbarch_unwind_pc (gdbarch, mn10300_unwind_pc);
   set_gdbarch_unwind_sp (gdbarch, mn10300_unwind_sp);
 }
 
-/* Dump out the mn10300 specific architecture information. */
+/* Function: push_dummy_call
+ *
+ * Set up machine state for a target call, including
+ * function arguments, stack, return address, etc.
+ *
+ */
 
-static void
-mn10300_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
+static CORE_ADDR
+mn10300_push_dummy_call (struct gdbarch *gdbarch, 
+			 struct value *target_func,
+			 struct regcache *regcache,
+			 CORE_ADDR bp_addr, 
+			 int nargs, struct value **args,
+			 CORE_ADDR sp, 
+			 int struct_return,
+			 CORE_ADDR struct_addr)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  fprintf_unfiltered (file, "mn10300_dump_tdep: am33_mode = %d\n",
-		      tdep->am33_mode);
+  const int push_size = register_size (gdbarch, E_PC_REGNUM);
+  int regs_used = struct_return ? 1 : 0;
+  int len, arg_len; 
+  int stack_offset = 0;
+  int argnum;
+  char *val;
+
+  /* FIXME temp, don't handle struct args at all.  */
+  if (struct_return)
+    error ("Target doesn't handle struct return");
+
+  /* This should be a nop, but align the stack just in case something
+     went wrong.  Stacks are four byte aligned on the mn10300.  */
+  sp &= ~3;
+
+  /* Now make space on the stack for the args.
+
+     XXX This doesn't appear to handle pass-by-invisible reference
+     arguments.  */
+  for (len = 0, argnum = 0; argnum < nargs; argnum++)
+    {
+      arg_len = (TYPE_LENGTH (value_type (args[argnum])) + 3) & ~3;
+      if (TYPE_CODE (value_type (args[argnum])) == TYPE_CODE_STRUCT)
+	error ("Target does not handle struct args");
+      while (regs_used < 2 && arg_len > 0)
+	{
+	  regs_used++;
+	  arg_len -= push_size;
+	}
+      len += arg_len;
+    }
+
+  /* Allocate stack space.  */
+  sp -= len;
+
+  regs_used = struct_return ? 1 : 0;
+  /* Push all arguments onto the stack. */
+  for (argnum = 0; argnum < nargs; argnum++)
+    {
+      /* FIXME what about structs?  */
+      arg_len = TYPE_LENGTH (value_type (*args));
+      val = (char *) value_contents (*args);
+
+      while (regs_used < 2 && arg_len > 0)
+	{
+	  write_register (regs_used, extract_unsigned_integer (val, 
+							       push_size));
+	  val += push_size;
+	  arg_len -= push_size;
+	  regs_used++;
+	}
+
+      while (arg_len > 0)
+	{
+	  write_memory (sp + stack_offset, val, push_size);
+	  arg_len -= push_size;
+	  val += push_size;
+	  stack_offset += push_size;
+	}
+
+      args++;
+    }
+
+  /* Make space for the flushback area.  */
+  sp -= 8;
+
+  /* Push the return address that contains the magic breakpoint.  */
+  sp -= 4;
+  write_memory_unsigned_integer (sp, push_size, bp_addr);
+  /* Update $sp.  */
+  regcache_cooked_write_unsigned (regcache, E_SP_REGNUM, sp);
+  return sp;
 }
+
 
 static struct gdbarch *
 mn10300_gdbarch_init (struct gdbarch_info info,
@@ -480,12 +566,27 @@ mn10300_gdbarch_init (struct gdbarch_info info,
 						mn10300_use_struct_convention);
   set_gdbarch_store_return_value (gdbarch, mn10300_store_return_value);
   set_gdbarch_extract_return_value (gdbarch, mn10300_extract_return_value);
+  
+  /* Stage 3 -- get target calls working.  */
+  set_gdbarch_push_dummy_call (gdbarch, mn10300_push_dummy_call);
+  /* set_gdbarch_return_value (store, extract) */
+
 
   mn10300_frame_unwind_init (gdbarch);
 
   return gdbarch;
 }
  
+/* Dump out the mn10300 specific architecture information. */
+
+static void
+mn10300_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  fprintf_unfiltered (file, "mn10300_dump_tdep: am33_mode = %d\n",
+		      tdep->am33_mode);
+}
+
 void
 _initialize_mn10300_tdep (void)
 {
