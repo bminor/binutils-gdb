@@ -1,3 +1,8 @@
+2001-10-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* infcmd.c (do_registers_info): Delete code dumping large
+	registers.  Handled by val_print.
+
 2001-09-30  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh (gdbarch_alloc): Name the new architecture

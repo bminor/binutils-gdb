@@ -1534,18 +1534,6 @@ do_registers_info (int regnum, int fpregs)
 	    }
 	  printf_filtered (")");
 	}
-
-/* FIXME!  val_print probably can handle all of these cases now...  */
-
-      /* Else if virtual format is too long for printf,
-         print in hex a byte at a time.  */
-      else if (REGISTER_VIRTUAL_SIZE (i) > (int) sizeof (long))
-	{
-	  register int j;
-	  printf_filtered ("0x");
-	  for (j = 0; j < REGISTER_VIRTUAL_SIZE (i); j++)
-	    printf_filtered ("%02x", (unsigned char) virtual_buffer[j]);
-	}
       /* Else print as integer in hex and in decimal.  */
       else
 	{
