@@ -4,6 +4,15 @@
 @settitle GNU Coding Standards
 @c %**end of header
 
+@ifinfo
+@format
+START-INFO-DIR-ENTRY
+* standards: (standards).		GNU Project Coding Standards
+END-INFO-DIR-ENTRY
+@end format
+@end ifinfo
+
+
 @setchapternewpage off
 
 @ifinfo

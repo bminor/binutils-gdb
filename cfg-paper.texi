@@ -61,7 +61,7 @@ by Cygnus Support.
 @ifinfo
 @format
 START-INFO-DIR-ENTRY
-* configuration: (cfg-paper.info).	Some theory on configuring source.
+* configuration: (cfg-paper).	Some theory on configuring source.
 END-INFO-DIR-ENTRY
 @end format
 @end ifinfo

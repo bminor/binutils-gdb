@@ -1,3 +1,10 @@
+Tue Aug  4 01:12:43 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: use the new gen-info-dir, which needs a template
+	argument (which also lives in texinfo)
+
+	* configure.texi, standards.texi: fix INFO-DIR-ENTRY
+
 Mon Aug  3 15:41:28 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* config/mh-solaris: removed the -xs from CFLAGS (let the people

@@ -11,6 +11,14 @@
 @setchapternewpage off
 
 @ifinfo
+@format
+START-INFO-DIR-ENTRY
+* configure: (configure).		Cygnus configure.
+END-INFO-DIR-ENTRY
+@end format
+@end ifinfo
+
+@ifinfo
 This document attempts to describe the Cygnus Support version of
 @code{configure}.
 
@@ -64,11 +72,6 @@ by Cygnus Support.
 @end titlepage
 
 @ifinfo
-@format
-START-INFO-DIR-ENTRY
-* configure: (configure.info).	Cygnus configure.
-END-INFO-DIR-ENTRY
-@end format
 
 @node top, What Configure Does, (dir), (dir)
 @top top
