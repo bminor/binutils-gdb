@@ -107,139 +107,139 @@ static reloc_howto_type elf_v850_howto_table[] =
 	 true),			/* pcrel_offset */
 
   /* High 16 bits of symbol value.  */
-  HOWTO (R_V850_HI16_S,         /* type */
-         0,                     /* rightshift */
-         1,                     /* size (0 = byte, 1 = short, 2 = long) */
-         16,                    /* bitsize */
-         false,                 /* pc_relative */
-         0,                    /* bitpos */
-         complain_overflow_dont,/* complain_on_overflow */
-         bfd_elf32_v850_reloc, /* special_function */
-         "R_V850_HI16_S",       /* name */
-         true,                  /* partial_inplace */
-         0xffff,                /* src_mask */
-         0xffff,                /* dst_mask */
-         false),                /* pcrel_offset */
+  HOWTO (R_V850_HI16_S,		/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,		       /* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf32_v850_reloc, /* special_function */
+	 "R_V850_HI16_S",	/* name */
+	 true,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
 
   /* High 16 bits of symbol value.  */
-  HOWTO (R_V850_HI16,           /* type */
-         0,                     /* rightshift */
-         1,                     /* size (0 = byte, 1 = short, 2 = long) */
-         16,                    /* bitsize */
-         false,                 /* pc_relative */
-         0,                    /* bitpos */
-         complain_overflow_dont,/* complain_on_overflow */
-         bfd_elf32_v850_reloc, /* special_function */
-         "R_V850_HI16",         /* name */
-         true,                  /* partial_inplace */
-         0xffff,                /* src_mask */
-         0xffff,                /* dst_mask */
-         false),                /* pcrel_offset */
+  HOWTO (R_V850_HI16,		/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,		       /* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf32_v850_reloc, /* special_function */
+	 "R_V850_HI16",		/* name */
+	 true,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
 
   /* Low 16 bits of symbol value.  */
-  HOWTO (R_V850_LO16,           /* type */
-         0,                     /* rightshift */
-         1,                     /* size (0 = byte, 1 = short, 2 = long) */
-         16,                    /* bitsize */
-         false,                 /* pc_relative */
-         0,                     /* bitpos */
-         complain_overflow_dont,/* complain_on_overflow */
-         bfd_elf_generic_reloc, /* special_function */
-         "R_V850_LO16",         /* name */
-         true,                  /* partial_inplace */
-         0xffff,                /* src_mask */
-         0xffff,                /* dst_mask */
-         false),                /* pcrel_offset */
+  HOWTO (R_V850_LO16,		/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */
+	 "R_V850_LO16",		/* name */
+	 true,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
 
   /* Simple 32bit reloc.  */
-  HOWTO (R_V850_32,           /* type */
-         0,                     /* rightshift */
-         2,                     /* size (0 = byte, 1 = short, 2 = long) */
-         32,                    /* bitsize */
-         false,                 /* pc_relative */
-         0,                     /* bitpos */
-         complain_overflow_dont,/* complain_on_overflow */
-         bfd_elf_generic_reloc, /* special_function */
-         "R_V850_32",         /* name */
-         true,                  /* partial_inplace */
-         0xffffffff,                /* src_mask */
-         0xffffffff,                /* dst_mask */
-         false),                /* pcrel_offset */
+  HOWTO (R_V850_32,	      /* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */
+	 "R_V850_32",	      /* name */
+	 true,			/* partial_inplace */
+	 0xffffffff,		    /* src_mask */
+	 0xffffffff,		    /* dst_mask */
+	 false),		/* pcrel_offset */
 
   /* Simple 16bit reloc.  */
-  HOWTO (R_V850_16,           /* type */
-         0,                     /* rightshift */
-         1,                     /* size (0 = byte, 1 = short, 2 = long) */
-         16,                    /* bitsize */
-         false,                 /* pc_relative */
-         0,                     /* bitpos */
-         complain_overflow_dont,/* complain_on_overflow */
-         bfd_elf_generic_reloc, /* special_function */
-         "R_V850_16",         /* name */
-         true,                  /* partial_inplace */
-         0xffff,                /* src_mask */
-         0xffff,                /* dst_mask */
-         false),                /* pcrel_offset */
+  HOWTO (R_V850_16,	      /* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */
+	 "R_V850_16",	      /* name */
+	 true,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
 
-  /* Simple 8bit reloc.  */
-  HOWTO (R_V850_8,           /* type */
-         0,                     /* rightshift */
-         0,                     /* size (0 = byte, 1 = short, 2 = long) */
-         8,                    /* bitsize */
-         false,                 /* pc_relative */
-         0,                     /* bitpos */
-         complain_overflow_dont,/* complain_on_overflow */
-         bfd_elf_generic_reloc, /* special_function */
-         "R_V850_8",         /* name */
-         true,                  /* partial_inplace */
-         0xff,                /* src_mask */
-         0xff,                /* dst_mask */
-         false),                /* pcrel_offset */
+  /* Simple 8bit reloc.	 */
+  HOWTO (R_V850_8,	     /* type */
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,		       /* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */
+	 "R_V850_8",	     /* name */
+	 true,			/* partial_inplace */
+	 0xff,		      /* src_mask */
+	 0xff,		      /* dst_mask */
+	 false),		/* pcrel_offset */
 
   /* Offset from the short data area pointer.  */
-  HOWTO (R_V850_SDA_OFFSET,     /* type */
-         0,                     /* rightshift */
-         1,                     /* size (0 = byte, 1 = short, 2 = long) */
-         16,                    /* bitsize */
-         false,                 /* pc_relative */
-         0,                     /* bitpos */
-         complain_overflow_dont,/* complain_on_overflow */
-         bfd_elf_generic_reloc, /* special_function */
-         "R_V850_SDA_OFFSET",   /* name */
-         true,                  /* partial_inplace */
-         0xffff,                /* src_mask */
-         0xffff,                /* dst_mask */
-         false),                /* pcrel_offset */
+  HOWTO (R_V850_SDA_OFFSET,	/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */
+	 "R_V850_SDA_OFFSET",	/* name */
+	 true,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
 
   /* Offset from the zero data area pointer.  */
-  HOWTO (R_V850_ZDA_OFFSET,     /* type */
-         0,                     /* rightshift */
-         1,                     /* size (0 = byte, 1 = short, 2 = long) */
-         16,                    /* bitsize */
-         false,                 /* pc_relative */
-         0,                     /* bitpos */
-         complain_overflow_dont,/* complain_on_overflow */
-         bfd_elf_generic_reloc, /* special_function */
-         "R_V850_ZDA_OFFSET",   /* name */
-         true,                  /* partial_inplace */
-         0xffff,                /* src_mask */
-         0xffff,                /* dst_mask */
-         false),                /* pcrel_offset */
+  HOWTO (R_V850_ZDA_OFFSET,	/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */
+	 "R_V850_ZDA_OFFSET",	/* name */
+	 true,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
 
   /* Offset from the tiny data area pointer.  */
-  HOWTO (R_V850_TDA_OFFSET,     /* type */
-         0,                     /* rightshift */
-         2,                     /* size (0 = byte, 1 = short, 2 = long) */
-         8,                    /* bitsize */
-         false,                 /* pc_relative */
-         0,                     /* bitpos */
-         complain_overflow_dont,/* complain_on_overflow */
-         bfd_elf_generic_reloc, /* special_function */
-         "R_V850_TDA_OFFSET",   /* name */
-         true,                  /* partial_inplace */
-         0xff,                /* src_mask */
-         0xff,                /* dst_mask */
-         false),                /* pcrel_offset */
+  HOWTO (R_V850_TDA_OFFSET,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */
+	 "R_V850_TDA_OFFSET",	/* name */
+	 true,			/* partial_inplace */
+	 0xff,			/* src_mask */
+	 0xff,			/* dst_mask */
+	 false),		/* pcrel_offset */
 
 };
 
@@ -588,13 +588,13 @@ elf32_v850_bfd_final_link_relocate (howto, input_bfd, output_bfd,
 	   instruction being used!  */
 	if ((insn & 0x0780) == 0x0500)
 	  {
-	    value += ((insn & 0x7f) << 2);
+	    value += ((insn & 0x7f) << 1);
 
 	    /* Handle sld.w and sst.w -- 8 bit unsigned offset */
 	    if ((long) value > 0xff || (long) value < 0)
 	      return bfd_reloc_overflow;
 
-	    if ((value % 4) != 0)
+	    if ((value % 2) != 0)
 	      return bfd_reloc_dangerous;
 
 	    insn &= 0xff81;
