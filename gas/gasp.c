@@ -4090,7 +4090,6 @@ static struct keyword kinfo[] =
 
 static struct keyword mrikinfo[] =
 {
-  { "IF", K_IFNE, 0 },
   { "IFEQ", K_IFEQ, 0 },
   { "IFNE", K_IFNE, 0 },
   { "IFLT", K_IFLT, 0 },
