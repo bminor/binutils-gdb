@@ -1,5 +1,7 @@
 Mon Oct 11 02:48:57 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
+	* mipsread.c (parse_partial_symbols):  Do not add undefined
+	symbols to the partial symbol table.
 	* alpha-tdep.c (init_extra_frame_info):  Remove kludge for gcc,
 	gcc has to be compatible with the native tools.
 	* alpha-tdep.c (alpha_push_arguments):  Rename NUM_ARG_REGS to

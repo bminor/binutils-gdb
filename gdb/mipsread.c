@@ -180,8 +180,11 @@ struct complaint basic_type_complaint =
 struct complaint unknown_type_qual_complaint =
 {"unknown type qualifier 0x%x", 0, 0};
 
+struct complaint array_index_type_complaint =
+{"illegal array index type for %s, assuming int", 0, 0};
+
 struct complaint array_bitsize_complaint =
-{"size of array target type not known, assuming %d bits", 0, 0};
+{"size of array target type for %s not known, assuming %d bits", 0, 0};
 
 struct complaint bad_tag_guess_complaint =
 {"guessed tag type of %s incorrectly", 0, 0};
@@ -202,13 +205,16 @@ struct complaint pdr_for_nonsymbol_complaint =
 {"PDR for %s, but no symbol", 0, 0};
 
 struct complaint pdr_static_symbol_complaint =
-{"can't handle PDR for static proc at 0x%x", 0, 0};
+{"can't handle PDR for static proc at 0x%lx", 0, 0};
 
 struct complaint bad_setjmp_pdr_complaint =
 {"fixing bad setjmp PDR from libc", 0, 0};
 
 struct complaint bad_fbitfield_complaint =
 {"can't handle TIR fBitfield for %s", 0, 0};
+
+struct complaint bad_continued_complaint =
+{"illegal TIR continued for %s", 0, 0};
 
 struct complaint bad_rfd_entry_complaint =
 {"bad rfd entry for %s: file %d, index %d", 0, 0};
@@ -224,6 +230,9 @@ struct complaint illegal_forward_tq0_complaint =
 
 struct complaint illegal_forward_bt_complaint =
 {"illegal bt %d in forward typedef for %s", 0, 0};
+
+struct complaint bad_linetable_guess_complaint =
+{"guessed size of linetable for %s incorrectly", 0, 0};
 
 /* Macros and extra defs */
 
@@ -284,7 +293,7 @@ static void
 read_the_mips_symtab PARAMS ((bfd *));
 
 static int
-upgrade_type PARAMS ((int, struct type **, int, union aux_ext *, int));
+upgrade_type PARAMS ((int, struct type **, int, union aux_ext *, int, char *));
 
 static void
 parse_partial_symbols PARAMS ((struct objfile *,
@@ -319,7 +328,7 @@ static int
 parse_symbol PARAMS ((SYMR *, union aux_ext *, char *, int));
 
 static struct type *
-parse_type PARAMS ((int, union aux_ext *, int *, int, char *));
+parse_type PARAMS ((int, union aux_ext *, unsigned int, int *, int, char *));
 
 static struct symbol *
 mylookup_symbol PARAMS ((char *, struct block *, enum namespace,
@@ -719,6 +728,7 @@ parse_symbol (sh, ax, ext_sh, bigend)
   enum address_class class;
   TIR tir;
   long svalue = sh->value;
+  int bitsize;
 
   if (ext_sh == (char *) NULL)
     name = ecoff_data (cur_bfd)->ssext + sh->iss;
@@ -777,7 +787,7 @@ parse_symbol (sh, ax, ext_sh, bigend)
 	  sh->index == 0xfffff)
 	SYMBOL_TYPE (s) = builtin_type_int;	/* undefined? */
       else
-	SYMBOL_TYPE (s) = parse_type (cur_fd, ax + sh->index, 0, bigend, name);
+	SYMBOL_TYPE (s) = parse_type (cur_fd, ax, sh->index, 0, bigend, name);
       /* Value of a data symbol is its memory address */
       break;
 
@@ -813,7 +823,7 @@ parse_symbol (sh, ax, ext_sh, bigend)
 	  break;
 	}
       SYMBOL_VALUE (s) = svalue;
-      SYMBOL_TYPE (s) = parse_type (cur_fd, ax + sh->index, 0, bigend, name);
+      SYMBOL_TYPE (s) = parse_type (cur_fd, ax, sh->index, 0, bigend, name);
       add_symbol (s, top_stack->cur_block);
 #if 0
       /* FIXME:  This has not been tested.  See dbxread.c */
@@ -841,7 +851,7 @@ parse_symbol (sh, ax, ext_sh, bigend)
       if (sh->sc == scUndefined || sh->sc == scNil)
 	t = builtin_type_int;
       else
-	t = parse_type (cur_fd, ax + sh->index + 1, 0, bigend, name);
+	t = parse_type (cur_fd, ax, sh->index + 1, 0, bigend, name);
       b = top_stack->cur_block;
       if (sh->st == stProc)
 	{
@@ -1203,8 +1213,9 @@ parse_symbol (sh, ax, ext_sh, bigend)
       f = &TYPE_FIELDS (top_stack->cur_type)[top_stack->cur_field++];
       f->name = name;
       f->bitpos = sh->value;
-      f->bitsize = 0;
-      f->type = parse_type (cur_fd, ax + sh->index, &f->bitsize, bigend, name);
+      bitsize = 0;
+      f->type = parse_type (cur_fd, ax, sh->index, &bitsize, bigend, name);
+      f->bitsize = bitsize;
       break;
 
     case stTypedef:		/* type definition */
@@ -1217,7 +1228,7 @@ parse_symbol (sh, ax, ext_sh, bigend)
       pend = is_pending_symbol (cur_fdr, ext_sh);
       if (pend == (struct mips_pending *) NULL)
 	{
-	  t = parse_type (cur_fd, ax + sh->index, (int *)NULL, bigend, name);
+	  t = parse_type (cur_fd, ax, sh->index, (int *)NULL, bigend, name);
 	  add_pending (cur_fdr, ext_sh, t);
 	}
       else
@@ -1305,9 +1316,10 @@ parse_symbol (sh, ax, ext_sh, bigend)
    they are big-endian or little-endian (from fh->fBigendian).  */
 
 static struct type *
-parse_type (fd, ax, bs, bigend, sym_name)
+parse_type (fd, ax, aux_index, bs, bigend, sym_name)
      int fd;
      union aux_ext *ax;
+     unsigned int aux_index;
      int *bs;
      int bigend;
      char *sym_name;
@@ -1356,12 +1368,18 @@ parse_type (fd, ax, bs, bigend, sym_name)
 
   TIR t[1];
   struct type *tp = 0;
-  union aux_ext *tax;
   enum type_code type_code = TYPE_CODE_UNDEF;
 
+  /* Handle corrupt aux indices.  */
+  if (aux_index >= (ecoff_data (cur_bfd)->fdr + fd)->caux)
+    {
+      complain (&index_complaint, sym_name);
+      return builtin_type_int;
+    }
+  ax += aux_index;
+
   /* Use aux as a type information record, map its basic type.  */
-  tax = ax;
-  ecoff_swap_tir_in (bigend, &tax->a_ti, t);
+  ecoff_swap_tir_in (bigend, &ax->a_ti, t);
   if (t->bt >= (sizeof (map_bt) / sizeof (*map_bt)))
     {
       complain (&basic_type_complaint, t->bt, sym_name);
@@ -1404,19 +1422,6 @@ parse_type (fd, ax, bs, bigend, sym_name)
 	  complain (&basic_type_complaint, t->bt, sym_name);
 	  return builtin_type_int;
 	}
-    }
-
-  /* Skip over any further type qualifiers (FIXME).  */
-  if (t->continued)
-    {
-      /* This is the way it would work if the compiler worked */
-      TIR t1[1];
-      do
-	{
-	  ax++;
-	  ecoff_swap_tir_in (bigend, &ax->a_ti, t1);
-	}
-      while (t1->continued);
     }
 
   /* Move on to next aux */
@@ -1561,23 +1566,34 @@ parse_type (fd, ax, bs, bigend, sym_name)
   /* Parse all the type qualifiers now. If there are more
      than 6 the game will continue in the next aux */
 
+  while (1)
+    {
 #define PARSE_TQ(tq) \
-	if (t->tq != tqNil) ax += upgrade_type(fd, &tp, t->tq, ax, bigend);
+      if (t->tq != tqNil) \
+	ax += upgrade_type(fd, &tp, t->tq, ax, bigend, sym_name); \
+      else \
+	break;
 
-again:PARSE_TQ (tq0);
-  PARSE_TQ (tq1);
-  PARSE_TQ (tq2);
-  PARSE_TQ (tq3);
-  PARSE_TQ (tq4);
-  PARSE_TQ (tq5);
+      PARSE_TQ (tq0);
+      PARSE_TQ (tq1);
+      PARSE_TQ (tq2);
+      PARSE_TQ (tq3);
+      PARSE_TQ (tq4);
+      PARSE_TQ (tq5);
 #undef	PARSE_TQ
 
-  if (t->continued)
-    {
-      tax++;
-      ecoff_swap_tir_in (bigend, &tax->a_ti, t);
-      goto again;
+      /* mips cc 2.x and gcc never put out continued aux entries.  */
+      if (!t->continued)
+	break;
+
+      ecoff_swap_tir_in (bigend, &ax->a_ti, t);
+      ax++;
     }
+
+  /* Complain for illegal continuations due to corrupt aux entries.  */
+  if (t->continued)
+    complain (&bad_continued_complaint, sym_name);
+ 
   return tp;
 }
 
@@ -1589,12 +1605,13 @@ again:PARSE_TQ (tq0);
    Returns the number of aux symbols we parsed. */
 
 static int
-upgrade_type (fd, tpp, tq, ax, bigend)
+upgrade_type (fd, tpp, tq, ax, bigend, sym_name)
      int fd;
      struct type **tpp;
      int tq;
      union aux_ext *ax;
      int bigend;
+     char *sym_name;
 {
   int off;
   struct type *t;
@@ -1635,10 +1652,16 @@ upgrade_type (fd, tpp, tq, ax, bigend)
       fh = get_rfd (fd, rf);
 
       indx = parse_type (fd,
-			 (ecoff_data (cur_bfd)->external_aux
-			  + fh->iauxBase
-			  + id),
-			 (int *) NULL, bigend, "<array index>");
+			 ecoff_data (cur_bfd)->external_aux + fh->iauxBase,
+			 id, (int *) NULL, bigend, sym_name);
+
+      /* The bounds type should be an integer type, but might be anything
+	 else due to corrupt aux entries.  */
+      if (TYPE_CODE (indx) != TYPE_CODE_INT)
+	{
+	  complain (&array_index_type_complaint, sym_name);
+	  indx = builtin_type_int;
+	}
 
       /* Get the bounds, and create the array type.  */
       ax++;
@@ -1666,7 +1689,7 @@ upgrade_type (fd, tpp, tq, ax, bigend)
 	  TYPE_LENGTH (TYPE_TARGET_TYPE (t)) = id >> 3;
 	}
       if (id != rf)
-	complain (&array_bitsize_complaint, rf);
+	complain (&array_bitsize_complaint, sym_name, rf);
 
       *tpp = t;
       return 4 + off;
@@ -1716,7 +1739,7 @@ parse_procedure (pr, search_symtab, first_off)
       if (pr->isym == -1)
 	{
 	  /* Static procedure at address pr->adr.  Sigh. */
-	  complain (&pdr_static_symbol_complaint, pr->adr);
+	  complain (&pdr_static_symbol_complaint, (unsigned long) pr->adr);
 	  return;
 	}
       else
@@ -1812,13 +1835,18 @@ parse_procedure (pr, search_symtab, first_off)
 
       /* Correct incorrect setjmp procedure descriptor from the library
 	 to make backtrace through setjmp work.  */
-      if (e->pdr.pcreg == 0 && strcmp (sh_name, "setjmp") == 0)
+      if (e->pdr.pcreg == 0 && STREQ (sh_name, "setjmp"))
 	{
 	  complain (&bad_setjmp_pdr_complaint, 0);
 	  e->pdr.pcreg = RA_REGNUM;
 	  e->pdr.regmask = 0x80000000;
 	  e->pdr.regoffset = -4;
 	}
+
+      /* Fake PC_REGNUM for alpha __sigtramp so that read_next_frame_reg
+	 will use the saved user pc from the sigcontext.  */
+      if (STREQ (sh_name, "__sigtramp"))
+	e->pdr.pcreg = PC_REGNUM;
     }
 }
 
@@ -1857,6 +1885,10 @@ parse_external (es, skip_procedures, bigend)
       char *what;
       switch (es->asym.st)
 	{
+	case stNil:
+	  /* These are generated for static symbols in .o files,
+	     ignore them.  */
+	  return;
 	case stStaticProc:
 	case stProc:
 	  what = "procedure";
@@ -1913,10 +1945,11 @@ parse_external (es, skip_procedures, bigend)
    with that and do not need to reorder our linetables */
 
 static void
-parse_lines (fh, pr, lt)
+parse_lines (fh, pr, lt, maxlines)
      FDR *fh;
      PDR *pr;
      struct linetable *lt;
+     int maxlines;
 {
   unsigned char *base;
   int j, k;
@@ -1932,33 +1965,27 @@ parse_lines (fh, pr, lt)
   k = 0;
   for (j = 0; j < fh->cpd; j++, pr++)
     {
-      long l, halt;
+      long l;
       unsigned long adr;
+      unsigned char *halt;
 
       /* No code for this one */
       if (pr->iline == ilineNil ||
 	  pr->lnLow == -1 || pr->lnHigh == -1)
 	continue;
 
-      /* Aurgh! To know where to stop expanding we must look-ahead.  */
-      for (l = 1; l < (fh->cpd - j); l++)
-	if (pr[l].iline != -1)
-	  break;
-      if (l == (fh->cpd - j))
-	halt = fh->cline;
+      /* Determine start and end address of compressed line bytes for
+	 this procedure.  */
+      base = ecoff_data (cur_bfd)->line + fh->cbLineOffset;
+      if (j != (fh->cpd - 1))
+ 	halt = base + pr[1].cbLineOffset;
       else
-	halt = pr[l].iline;
+ 	halt = base + fh->cbLine;
+      base += pr->cbLineOffset;
 
-      /* When procedures are moved around the linenumbers are
-	 attributed to the next procedure up.  */
-      if (pr->iline >= halt)
-	continue;
-
-      base = ecoff_data (cur_bfd)->line + fh->cbLineOffset + pr->cbLineOffset;
       adr = fh->adr + pr->adr - first_off;
       l = adr >> 2;		/* in words */
-      halt += (adr >> 2) - pr->iline;
-      for (lineno = pr->lnLow; l < halt;)
+      for (lineno = pr->lnLow; base < halt; )
 	{
 	  count = *base & 0x0f;
 	  delta = *base++ >> 4;
@@ -1972,6 +1999,14 @@ parse_lines (fh, pr, lt)
 	      base += 2;
 	    }
 	  lineno += delta;	/* first delta is 0 */
+
+	  /* Complain if the line table overflows. Could happen
+	     with corrupt binaries.  */
+	  if (lt->nitems >= maxlines)
+	    {
+	      complain (&bad_linetable_guess_complaint, fdr_name (fh));
+	      break;
+	    }
 	  k = add_line (lt, lineno, l, k);
 	  l += count + 1;
 	}
@@ -2138,6 +2173,13 @@ parse_partial_symbols (objfile, section_offsets)
 	  else
 	    ms_type = mst_bss;
 	  break;
+	case stLocal:
+	  /* The alpha has the section start addresses in stLocal symbols
+	     whose name starts with a `.'. Skip those but complain for all
+	     other stLocal symbols.  */
+	  if (name[0] == '.')
+	    continue;
+	  /* Fall through.  */
 	default:
 	  ms_type = mst_unknown;
 	  complain (&unknown_ext_complaint, name);
@@ -2437,8 +2479,17 @@ parse_partial_symbols (objfile, section_offsets)
 	      if (ext_ptr->ifd != f_idx)
 		abort ();
 	      psh = &ext_ptr->asym;
+
+	      /* Do not add undefined symbols to the partial symbol table.  */
+	      if (psh->sc == scUndefined || psh->sc == scNil)
+		continue;
+
 	      switch (psh->st)
 		{
+		case stNil:
+		  /* These are generated for static symbols in .o files,
+		     ignore them.  */
+		  continue;
 		case stProc:
 		case stStaticProc:
 		  class = LOC_BLOCK;
@@ -2811,7 +2862,7 @@ psymtab_to_symtab_1 (pst, filename)
 		   pdr_ptr += external_pdr_size, pdr_in++)
 		(*swap_pdr_in) (cur_bfd, pdr_ptr, pdr_in);
 
-	      parse_lines (fh, pr_block, lines);
+	      parse_lines (fh, pr_block, lines, maxlines);
 	      if (lines->nitems < fh->cline)
 		lines = shrink_linetable (lines);
 
@@ -2842,8 +2893,10 @@ psymtab_to_symtab_1 (pst, filename)
       for (i = PST_PRIVATE (pst)->extern_count; --i >= 0; ext_ptr++)
 	parse_external (ext_ptr, 1, fh->fBigendian);
 
-      /* If there are undefined, tell the user */
-      if (n_undef_symbols)
+      /* If there are undefined symbols, tell the user.
+	 The alpha has an undefined symbol for every symbol that is
+	 from a shared library, so tell the user only if verbose is on.  */
+      if (info_verbose && n_undef_symbols)
 	{
 	  printf_filtered ("File %s contains %d unresolved references:",
 			   st->filename, n_undef_symbols);
@@ -3033,8 +3086,8 @@ cross_ref (fd, ax, tpp, type_code, pname, bigend, sym_name)
 	     two files and the copied type would not get filled in when
 	     we later parse its definition.   */
 	  *tpp = parse_type (xref_fd,
-			     (ecoff_data (cur_bfd)->external_aux
-			      + fh->iauxBase + sh.index),
+			     ecoff_data (cur_bfd)->external_aux + fh->iauxBase,
+			     sh.index,
 			     (int *)NULL,
 			     fh->fBigendian,
 			     (ecoff_data (cur_bfd)->ss
@@ -3186,7 +3239,8 @@ add_line (lt, lineno, adr, last)
 
 static int
 compare_blocks (arg1, arg2)
-     const void *arg1, *arg2;
+     const PTR arg1;
+     const PTR arg2;
 {
   register int addr_diff;
   struct block **b1 = (struct block **) arg1;
