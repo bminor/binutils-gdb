@@ -57,10 +57,8 @@ static int read_relative_register_raw_bytes_for_frame PARAMS ((int regnum, char 
 you lose
 #endif
 
-  LONGEST
-extract_signed_integer (addr, len)
-     PTR addr;
-     int len;
+LONGEST
+extract_signed_integer (void *addr, int len)
 {
   LONGEST retval;
   unsigned char *p;
@@ -94,9 +92,7 @@ That operation is not available on integers of more than %d bytes.",
 }
 
 ULONGEST
-extract_unsigned_integer (addr, len)
-     PTR addr;
-     int len;
+extract_unsigned_integer (void *addr, int len)
 {
   ULONGEST retval;
   unsigned char *p;
@@ -130,10 +126,7 @@ That operation is not available on integers of more than %d bytes.",
    function returns 1 and sets *PVAL.  Otherwise it returns 0.  */
 
 int
-extract_long_unsigned_integer (addr, orig_len, pval)
-     PTR addr;
-     int orig_len;
-     LONGEST *pval;
+extract_long_unsigned_integer (void *addr, int orig_len, LONGEST *pval)
 {
   char *p, *first_addr;
   int len;
@@ -177,9 +170,7 @@ extract_long_unsigned_integer (addr, orig_len, pval)
 }
 
 CORE_ADDR
-extract_address (addr, len)
-     PTR addr;
-     int len;
+extract_address (void *addr, int len)
 {
   /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
      whether we want this to be true eventually.  */
@@ -187,10 +178,7 @@ extract_address (addr, len)
 }
 
 void
-store_signed_integer (addr, len, val)
-     PTR addr;
-     int len;
-     LONGEST val;
+store_signed_integer (void *addr, int len, LONGEST val)
 {
   unsigned char *p;
   unsigned char *startaddr = (unsigned char *) addr;
@@ -217,10 +205,7 @@ store_signed_integer (addr, len, val)
 }
 
 void
-store_unsigned_integer (addr, len, val)
-     PTR addr;
-     int len;
-     ULONGEST val;
+store_unsigned_integer (void *addr, int len, ULONGEST val)
 {
   unsigned char *p;
   unsigned char *startaddr = (unsigned char *) addr;
@@ -250,10 +235,7 @@ store_unsigned_integer (addr, len, val)
    gdb-local memory pointed to by "addr"
    for "len" bytes. */
 void
-store_address (addr, len, val)
-     PTR addr;
-     int len;
-     LONGEST val;
+store_address (void *addr, int len, LONGEST val)
 {
   store_unsigned_integer (addr, len, val);
 }

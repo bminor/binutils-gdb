@@ -1,3 +1,12 @@
+Sat Mar  4 11:49:21 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* defs.h (store_address, store_unsigned_integer, store_address):
+ 	Replace PTR with void* in delcaration.
+	* findvar.c (extract_signed_integer, extract_unsigned_integer,
+ 	extract_long_unsigned_integer, extract_address,
+ 	store_signed_integer, store_unsigned_integer, store_address):
+ 	Convert definition to ISO-C.  Replace PTR with void*.
+
 Sat Mar  4 10:57:25 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* defs.h (make_cleanup_func): Document as deprecated.

@@ -1038,11 +1038,11 @@ extern int extract_long_unsigned_integer (void *, int, LONGEST *);
 
 extern CORE_ADDR extract_address (void *, int);
 
-extern void store_signed_integer (PTR, int, LONGEST);
+extern void store_signed_integer (void *, int, LONGEST);
 
-extern void store_unsigned_integer (PTR, int, ULONGEST);
+extern void store_unsigned_integer (void *, int, ULONGEST);
 
-extern void store_address (PTR, int, LONGEST);
+extern void store_address (void *, int, LONGEST);
 
 /* Setup definitions for host and target floating point formats.  We need to
    consider the format for `float', `double', and `long double' for both target
