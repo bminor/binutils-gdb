@@ -1,9 +1,14 @@
+Thu Oct 17 18:14:07 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld.texinfo: Try to consistently use a single or a double dash
+	for each option.
+
 start-sanitize-m32r
 Thu Oct 17 10:17:20 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* emulparams/m32relf.sh (EMBEDDED): Define.
-end-sanitize-m32r
 
+end-sanitize-m32r
 start-sanitize-v850
 Thu Oct 17 10:56:49 1996  Jeffrey A Law  (law@cygnus.com)
 
