@@ -1,5 +1,8 @@
 2001-07-16  DJ Delorie  <dj@redhat.com>
 
+	* resres.c (write_res_header): Align header size.
+	(res_align_file): Calculate alignment correctly.
+
 	* rcparse.y (styles): use SUBLANG_SHIFT instead of 8 (or the more
 	correct 10).
 	* resrc.c (write_rc_resource): Likewise.
