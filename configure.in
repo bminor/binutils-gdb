@@ -104,6 +104,7 @@ case "${host}" in
   i[34]86-*-linux*)       host_makefile_frag=config/mh-linux ;;
   i[34]86-*-solaris2*)    host_makefile_frag=config/mh-sysv4 ;;
   i[34]86-*-aix*)	  host_makefile_frag=config/mh-aix386 ;;
+  i[34]86-*-go32*)	  host_makefile_frag=config/mh-go32 ;;
   vax-*-ultrix2*)         host_makefile_frag=config/mh-vaxult2 ;;
   *-ibm-aix*)             host_makefile_frag=config/mh-aix ;;
   *-bull-bosx*)           host_makefile_frag=config/mh-aix ;;
@@ -160,6 +161,13 @@ else
 	done
 fi	
 
+# Configure extra directories which are host specific
+
+case "${host}" in
+  i[34]86-*-go32*)
+		  configdirs="$configdirs dosrel" ;;
+esac
+
 # Remove more programs from consideration, based on the host or 
 # target this usually means that a port of the program doesn't
 # exist yet.
@@ -177,6 +185,10 @@ case "${host}" in
     noconfigdirs="tcl expect deja-gnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff"
     ;;
 esac
+
+
+
+
 
 case "${target}" in
   alpha-dec-osf1*)
