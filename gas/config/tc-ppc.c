@@ -1852,7 +1852,11 @@ md_assemble (str)
 		break;
 
 	      case BFD_RELOC_LO16:
-		if (ex.X_unsigned)
+		/* X_unsigned is the default, so if the user has done
+                   something which cleared it, we always produce a
+                   signed value.  */
+		if (ex.X_unsigned
+		    && (operand->flags & PPC_OPERAND_SIGNED) == 0)
 		  ex.X_add_number &= 0xffff;
 		else
 		  ex.X_add_number = (((ex.X_add_number & 0xffff)
@@ -2424,6 +2428,7 @@ ppc_change_csect (sym)
     {
       symbolS **list_ptr;
       int after_toc;
+      int hold_chunksize;
       symbolS *list;
 
       /* This is a new csect.  We need to look at the symbol class to
@@ -2464,7 +2469,16 @@ ppc_change_csect (sym)
 	  abort ();
 	}
 
+      /* We set the obstack chunk size to a small value before
+         changing subsegments, so that we don't use a lot of memory
+         space for what may be a small section.  */
+      hold_chunksize = chunksize;
+      chunksize = 64;
+
       subseg_new (segment_name (S_GET_SEGMENT (sym)), sym->sy_tc.subseg);
+
+      chunksize = hold_chunksize;
+
       if (after_toc)
 	ppc_after_toc_frag = frag_now;
 
@@ -4005,7 +4019,7 @@ ppc_frob_symbol (sym)
       ppc_last_function = sym;
       if (sym->sy_tc.size != (symbolS *) NULL)
 	{
-	  resolve_symbol_value (sym->sy_tc.size);
+	  resolve_symbol_value (sym->sy_tc.size, 1);
 	  SA_SET_SYM_FSIZE (sym, (long) S_GET_VALUE (sym->sy_tc.size));
 	}
     }
@@ -4064,7 +4078,7 @@ ppc_frob_symbol (sym)
 				     - S_GET_VALUE (sym));
 	  else
 	    {
-	      resolve_symbol_value (sym->sy_tc.next);
+	      resolve_symbol_value (sym->sy_tc.next, 1);
 	      a->x_csect.x_scnlen.l = (S_GET_VALUE (sym->sy_tc.next)
 				       - S_GET_VALUE (sym));
 	    }
@@ -4117,7 +4131,7 @@ ppc_frob_symbol (sym)
 	    }
 	  else
 	    {
-	      resolve_symbol_value (next);
+	      resolve_symbol_value (next, 1);
 	      a->x_csect.x_scnlen.l = (S_GET_VALUE (next)
 				       - S_GET_VALUE (sym));
 	    }
@@ -4148,7 +4162,7 @@ ppc_frob_symbol (sym)
 	    {
 	      while (csect->sy_tc.next != (symbolS *) NULL)
 		{
-		  resolve_symbol_value (csect->sy_tc.next);
+		  resolve_symbol_value (csect->sy_tc.next, 1);
 		  if (S_GET_VALUE (csect->sy_tc.next) > S_GET_VALUE (sym))
 		    break;
 		  csect = csect->sy_tc.next;
@@ -4189,7 +4203,7 @@ ppc_frob_symbol (sym)
       /* The value is the offset from the enclosing csect.  */
       block = sym->sy_tc.within;
       csect = block->sy_tc.within;
-      resolve_symbol_value (csect);
+      resolve_symbol_value (csect, 1);
       S_SET_VALUE (sym, S_GET_VALUE (sym) - S_GET_VALUE (csect));
     }
   else if (S_GET_STORAGE_CLASS (sym) == C_BINCL
@@ -4414,7 +4428,7 @@ ppc_fix_adjustable (fix)
 {
   valueT val;
 
-  resolve_symbol_value (fix->fx_addsy);
+  resolve_symbol_value (fix->fx_addsy, 1);
   val = S_GET_VALUE (fix->fx_addsy);
   if (ppc_toc_csect != (symbolS *) NULL
       && fix->fx_addsy != (symbolS *) NULL
@@ -4434,7 +4448,7 @@ ppc_fix_adjustable (fix)
 	    continue;
 	  if (sy->sy_tc.class != XMC_TC)
 	    break;
-	  resolve_symbol_value (sy);
+	  resolve_symbol_value (sy, 1);
 	  if (val == S_GET_VALUE (sy))
 	    {
 	      fix->fx_addsy = sy;
@@ -4513,7 +4527,7 @@ ppc_fix_adjustable (fix)
       && S_GET_SEGMENT (fix->fx_addsy) == bss_section
       && ! S_IS_EXTERNAL (fix->fx_addsy))
     {
-      resolve_symbol_value (fix->fx_addsy->sy_frag->fr_symbol);
+      resolve_symbol_value (fix->fx_addsy->sy_frag->fr_symbol, 1);
       fix->fx_offset += (S_GET_VALUE (fix->fx_addsy)
 			 - S_GET_VALUE (fix->fx_addsy->sy_frag->fr_symbol));
       fix->fx_addsy = fix->fx_addsy->sy_frag->fr_symbol;
@@ -4798,9 +4812,35 @@ md_apply_fix3 (fixp, valuep, seg)
 
 	case BFD_RELOC_24_PLT_PCREL:
 	case BFD_RELOC_PPC_LOCAL24PC:
-	  if (!fixp->fx_pcrel)
+	  if (!fixp->fx_pcrel && !fixp->fx_done)
 	    abort ();
 
+	  if (fixp->fx_done)
+	  {
+	    char *where;
+	    unsigned long insn;
+	    
+	    /* Fetch the instruction, insert the fully resolved operand
+	       value, and stuff the instruction back again.  */
+	    where = fixp->fx_frag->fr_literal + fixp->fx_where;
+	    if (target_big_endian)
+	      insn = bfd_getb32 ((unsigned char *) where);
+	    else
+	      insn = bfd_getl32 ((unsigned char *) where);
+	    if ((value & 3) != 0)
+	      as_bad_where (fixp->fx_file, fixp->fx_line,
+			    "must branch to an address a multiple of 4");
+	    if ((long)value << 6 >> 6 != value)
+	      as_bad_where (fixp->fx_file, fixp->fx_line,
+			    "@local or @plt branch destination is too far "
+			    "away, %ld bytes",
+			    value);
+	    insn = insn | (value & 0x03fffffc);
+	    if (target_big_endian)
+	      bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
+	    else
+	      bfd_putl32 ((bfd_vma) insn, (unsigned char *) where);
+	  }
 	  break;
 
 	default:

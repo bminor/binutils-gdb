@@ -1,5 +1,8 @@
 Fri Oct 24 15:56:47 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-ppc.c (md_assemble): When handling @l, always sign
+	extend if the operand expects a signed value.
+
 	* config/tc-mips.h (LOCAL_LABELS_DOLLAR): Don't define; use
 	default which is to permit dollar labels.
 
