@@ -267,7 +267,7 @@ printed.
 
 @item q
 @cindex quick append to archive
-@emph{Quick append}; add the files @var{member}@dots{} to the end of
+@emph{Quick append}; Historically, add the files @var{member}@dots{} to the end of
 @var{archive}, without checking for replacement.
 
 The modifiers @samp{a}, @samp{b}, and @samp{i} do @emph{not} affect this
@@ -278,6 +278,9 @@ The modifier @samp{v} makes @code{ar} list each file as it is appended.
 Since the point of this operation is speed, the archive's symbol table
 index is not updated, even if it already existed; you can use @samp{ar s} or
 @code{ranlib} explicitly to update the symbol table index.
+
+However, too many different system assume quick append rebuilds the
+index, so GNU ar treats @code{q} to same way its treats @code{r}.
 
 @item r
 @cindex replacement in archive
