@@ -1,3 +1,19 @@
+2000-08-14  Will Cohen  <wcohen@redhat.com>
+
+	* config/tc-sh.h (DWARF2_LINE_MIN_INSN_LENGTH): Defined.
+
+	* config/tc-sh.c (md_assemble): Changed so debug_type
+	test performed for ppi_assemble
+	* config/tc-sh.c: Included dwarf2dbg.h.
+	(debug_line): Defined.
+	(md_assemble): Generates dwarf2 line info.
+	(sh_finalize): New function.  Finalize dwarf2 info.
+	(assemble_ppi): Returns size of code generated.
+	(build_Mytes): Returns size of code generated.
+	(md_pseudo_table): Added "file" and "loc" psuedo ops.
+	* config/tc-sh.h (md_end): Defined.
+	(sh_finalize): Declared.
+
 2000-08-15  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-sh.c (md_apply_fix) [BFD_RELOC_32, BFD_RELOC_16]: Use

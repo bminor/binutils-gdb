@@ -33,6 +33,9 @@
 #include "elf/sh.h"
 #endif
 
+#include "dwarf2dbg.h"
+struct dwarf2_line_info debug_line;
+
 const char comment_chars[] = "!";
 const char line_separator_chars[] = ";";
 const char line_comment_chars[] = "!#";
@@ -46,7 +49,7 @@ void cons ();
 void s_align_bytes ();
 static void s_uacons PARAMS ((int));
 static sh_opcode_info *find_cooked_opcode PARAMS ((char **));
-static void assemble_ppi PARAMS ((char *, sh_opcode_info *));
+static unsigned int assemble_ppi PARAMS ((char *, sh_opcode_info *));
 
 int shl = 0;
 
@@ -77,6 +80,8 @@ const pseudo_typeS md_pseudo_table[] =
   {"uses", s_uses, 0},
   {"uaword", s_uacons, 2},
   {"ualong", s_uacons, 4},
+  { "file", dwarf2_directive_file, 0 },
+  { "loc", dwarf2_directive_loc, 0 },
   {0, 0, 0}
 };
 
@@ -1278,7 +1283,7 @@ insert_loop_bounds (output, operand)
 
 /* Now we know what sort of opcodes it is, let's build the bytes.  */
 
-static void
+static unsigned int
 build_Mytes (opcode, operand)
      sh_opcode_info *opcode;
      sh_operand_info *operand;
@@ -1287,6 +1292,7 @@ build_Mytes (opcode, operand)
   int index;
   char nbuf[4];
   char *output = frag_more (2);
+  unsigned int size = 2;
   int low_byte = target_big_endian ? 1 : 0;
   nbuf[0] = 0;
   nbuf[1] = 0;
@@ -1383,6 +1389,7 @@ build_Mytes (opcode, operand)
       output[0] = (nbuf[0] << 4) | (nbuf[1]);
       output[1] = (nbuf[2] << 4) | (nbuf[3]);
     }
+  return size;
 }
 
 /* Find an opcode at the start of *STR_P in the hash table, and set
@@ -1436,7 +1443,7 @@ find_cooked_opcode (str_p)
 /* Assemble a parallel processing insn.  */
 #define DDT_BASE 0xf000 /* Base value for double data transfer insns */
 
-static void
+static unsigned int
 assemble_ppi (op_end, opcode)
      char *op_end;
      sh_opcode_info *opcode;
@@ -1447,6 +1454,7 @@ assemble_ppi (op_end, opcode)
   int field_b = 0;
   char *output;
   int move_code;
+  unsigned int size;
 
   /* Some insn ignore one or more register fields, e.g. psts machl,a0.
      Make sure we encode a defined insn pattern.  */
@@ -1464,11 +1472,12 @@ assemble_ppi (op_end, opcode)
 	{
 	  /* Couldn't find an opcode which matched the operands.  */
 	  char *where = frag_more (2);
+	  size = 2;
 
 	  where[0] = 0x0;
 	  where[1] = 0x0;
 	  as_bad (_("invalid operands for opcode"));
-	  return;
+	  return size;
 	}
 
       if (opcode->nibbles[0] != PPI)
@@ -1613,6 +1622,7 @@ assemble_ppi (op_end, opcode)
       unsigned long ppi_code = (movx | movy | 0xf800) << 16 | field_b;
 
       output = frag_more (4);
+      size = 4;
       if (! target_big_endian)
 	{
 	  output[3] = ppi_code >> 8;
@@ -1626,8 +1636,11 @@ assemble_ppi (op_end, opcode)
       move_code |= 0xf800;
     }
   else
-    /* Just a double data transfer.  */
-    output = frag_more (2);
+    {
+      /* Just a double data transfer.  */
+      output = frag_more (2);
+      size = 2;
+    }
   if (! target_big_endian)
     {
       output[1] = move_code >> 8;
@@ -1638,6 +1651,7 @@ assemble_ppi (op_end, opcode)
       output[0] = move_code >> 8;
       output[1] = move_code;
     }
+  return size;
 }
 
 /* This is the guts of the machine-dependent assembler.  STR points to a
@@ -1651,6 +1665,7 @@ md_assemble (str)
   unsigned char *op_end;
   sh_operand_info operand[3];
   sh_opcode_info *opcode;
+  unsigned int size;
 
   opcode = find_cooked_opcode (&str);
   op_end = str;
@@ -1673,48 +1688,67 @@ md_assemble (str)
 
   if (opcode->nibbles[0] == PPI)
     {
-      assemble_ppi (op_end, opcode);
-      return;
-    }
-
-  if (opcode->arg[0] == A_BDISP12
-      || opcode->arg[0] == A_BDISP8)
-    {
-      parse_exp (op_end + 1, &operand[0]);
-      build_relax (opcode, &operand[0]);
+      size = assemble_ppi (op_end, opcode);
     }
   else
     {
-      if (opcode->arg[0] == A_END)
+      if (opcode->arg[0] == A_BDISP12
+	  || opcode->arg[0] == A_BDISP8)
 	{
-	  /* Ignore trailing whitespace.  If there is any, it has already
-	     been compressed to a single space.  */
-	  if (*op_end == ' ')
-	    op_end++;
+	  parse_exp (op_end + 1, &operand[0]);
+	  build_relax (opcode, &operand[0]);
 	}
       else
 	{
-	  op_end = get_operands (opcode, op_end, operand);
+	  if (opcode->arg[0] == A_END)
+	    {
+	      /* Ignore trailing whitespace.  If there is any, it has already
+		 been compressed to a single space.  */
+	      if (*op_end == ' ')
+		op_end++;
+	    }
+	  else
+	    {
+	      op_end = get_operands (opcode, op_end, operand);
+	    }
+	  opcode = get_specific (opcode, operand);
+
+	  if (opcode == 0)
+	    {
+	      /* Couldn't find an opcode which matched the operands.  */
+	      char *where = frag_more (2);
+	      size = 2;
+
+	      where[0] = 0x0;
+	      where[1] = 0x0;
+	      as_bad (_("invalid operands for opcode"));
+	    }
+	  else
+	    {
+	      if (*op_end)
+		as_bad (_("excess operands: '%s'"), op_end);
+
+	      size = build_Mytes (opcode, operand);
+	    }
 	}
-      opcode = get_specific (opcode, operand);
-
-      if (opcode == 0)
-	{
-	  /* Couldn't find an opcode which matched the operands.  */
-	  char *where = frag_more (2);
-
-	  where[0] = 0x0;
-	  where[1] = 0x0;
-	  as_bad (_("invalid operands for opcode"));
-	  return;
-	}
-
-      if (*op_end)
-	as_bad (_("excess operands: '%s'"), op_end);
-
-      build_Mytes (opcode, operand);
     }
+  
 
+  if (debug_type == DEBUG_DWARF2)
+    {
+      bfd_vma addr;
+      
+      /* First update the notion of the current source line.  */
+      dwarf2_where (&debug_line);
+
+      /* We want the offset of the start of this instruction within the
+	 the current frag.  may be used later */
+      addr = frag_now->fr_address + frag_now_fix () - size;
+  
+
+      /* And record the information.  */
+      dwarf2_gen_line_info (addr, &debug_line);
+    }
 }
 
 /* This routine is called each time a label definition is seen.  It
@@ -3082,3 +3116,10 @@ tc_gen_reloc (section, fixp)
 }
 
 #endif /* BFD_ASSEMBLER */
+
+void
+sh_finalize ()
+{
+  if (debug_type == DEBUG_DWARF2)
+    dwarf2_finish ();
+}

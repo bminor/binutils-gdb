@@ -41,6 +41,9 @@ extern int sh_small;
 /* Don't try to break words.  */
 #define WORKING_DOT_WORD
 
+/* All SH instructions are multiples of 16 bits.  */
+#define DWARF2_LINE_MIN_INSN_LENGTH 2
+
 /* We require .long, et. al., to be aligned correctly.  */
 #define md_cons_align(nbytes) sh_cons_align (nbytes)
 extern void sh_cons_align PARAMS ((int));
@@ -159,5 +162,8 @@ extern int target_big_endian;
 extern void sh_elf_final_processing PARAMS ((void));
 
 #endif /* OBJ_ELF */
+
+#define md_end() sh_finalize ()
+void sh_finalize PARAMS ((void));
 
 /* end of tc-sh.h */
