@@ -1,3 +1,7 @@
+Fri Feb 21 14:37:32 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* readline.c, examples/fileman.c: patches from DJ to support DOS
+
 Thu Feb 20 23:23:16 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* readline.c (rl_read_init_file):  Make sure that null filename is

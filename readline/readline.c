@@ -46,6 +46,11 @@ static char *xmalloc (), *xrealloc ();
 #define HAVE_BSD_SIGNALS
 /* #define USE_XON_XOFF */
 
+#ifdef __MSDOS__
+#undef NEW_TTY_DRIVER
+#undef HAVE_BSD_SIGNALS
+#endif
+
 /* Some USG machines have BSD signal handling (sigblock, sigsetmask, etc.) */
 #if defined (USG) && !defined (hpux)
 #undef HAVE_BSD_SIGNALS
@@ -104,9 +109,12 @@ extern int errno;
 #define S_ISDIR(m) (((m)&S_IFMT) == S_IFDIR)
 #endif
 
+#ifndef __MSDOS__
 /* These next are for filename completion.  Perhaps this belongs
    in a different place. */
 #include <pwd.h>
+#endif /* __MSDOS__ */
+
 #if defined (USG) && !defined (isc386) && !defined (sgi)
 struct passwd *getpwuid (), *getpwent ();
 #endif
@@ -169,6 +177,11 @@ typedef sighandler SigHandler ();
 
 /* If on, then readline handles signals in a way that doesn't screw. */
 #define HANDLE_SIGNALS
+
+#ifdef __GO32__
+#include <pc.h>
+#undef HANDLE_SIGNALS
+#endif
 
 
 /* **************************************************************** */
@@ -686,6 +699,18 @@ rl_unget_char (key)
    and stuff it into IBUFFER.  Otherwise, just return. */
 rl_gather_tyi ()
 {
+#ifdef __GO32__
+  char input;
+  if (isatty(0))
+  {
+    int i = rl_getc();
+    if (i != EOF)
+      rl_stuff_char(i);
+  }
+  else
+    if (kbhit() && ibuffer_space())
+      rl_stuff_char(getkey());
+#else
   int tty = fileno (in_stream);
   register int tem, result = -1;
   long chars_avail;
@@ -736,6 +761,7 @@ rl_gather_tyi ()
       if (chars_avail)
 	rl_stuff_char (input);
     }
+#endif /* def __GO32__/else */
 }
 
 static int next_macro_key ();
@@ -1126,6 +1152,7 @@ readline_initialize_everything ()
    equivalents, iff the characters are not bound to keymaps. */
 readline_default_bindings ()
 {
+#ifndef __GO32__
 
 #if defined (NEW_TTY_DRIVER)
   struct sgttyb ttybuff;
@@ -1217,6 +1244,7 @@ readline_default_bindings ()
 #endif /* VWERASE */
     }
 #endif /* !NEW_TTY_DRIVER */
+#endif /* def __GO32__ */
 }
 
 
@@ -1776,7 +1804,11 @@ move_cursor_relative (new, data)
      of moving backwards. */
   if (new + 1 < last_c_pos - new)
     {
+#ifdef __MSDOS__
+      putc('\r', out_stream);
+#else
       tputs (term_cr, 1, output_character_function);
+#endif
       last_c_pos = 0;
     }
 
@@ -1824,6 +1856,13 @@ move_vert (to)
   if (to > screenheight)
     return;
 
+#ifdef __GO32__
+  {
+    int cur_r, cur_c;
+    ScreenGetCursor(&cur_r, &cur_c);
+    ScreenSetCursor(cur_r+to-last_v_pos, cur_c);
+  }
+#else /* __GO32__ */
   if ((delta = to - last_v_pos) > 0)
     {
       for (i = 0; i < delta; i++)
@@ -1837,6 +1876,7 @@ move_vert (to)
 	for (i = 0; i < -delta; i++)
 	  tputs (term_up, 1, output_character_function);
     }
+#endif /* __GO32__ */
   last_v_pos = to;		/* now to is here */
 }
 
@@ -1959,6 +1999,18 @@ rl_reset_terminal (terminal_name)
 init_terminal_io (terminal_name)
      char *terminal_name;
 {
+#ifdef __GO32__
+  screenwidth = ScreenCols();
+  screenheight = ScreenRows();
+  term_cr = "\r";
+  term_im = term_ei = term_ic = term_IC = (char *)NULL;
+  term_up = term_dc = term_DC = visible_bell = (char *)NULL;
+#if defined (HACK_TERMCAP_MOTION)
+      term_forward_char = (char *)NULL;
+#endif
+  terminal_can_insert = 0;
+  return;
+#else
   extern char *tgetstr ();
   char *term, *buffer;
 #if defined (TIOCGWINSZ)
@@ -2056,6 +2108,7 @@ init_terminal_io (terminal_name)
   term_DC = tgetstr ("DC", &buffer);
 
   visible_bell = tgetstr ("vb", &buffer);
+#endif /* !__GO32__ */
 }
 
 /* A function for the use of tputs () */
@@ -2080,6 +2133,13 @@ static
 delete_chars (count)
      int count;
 {
+#ifdef __GO32__
+  int r, c, w;
+  ScreenGetCursor(&r, &c);
+  w = ScreenCols();
+  memcpy(ScreenPrimary+r*w+c, ScreenPrimary+r*w+c+count, w-c-count);
+  memset(ScreenPrimary+r*w+w-count, 0, count*2);
+#else /* __GO32__ */
   if (count > screenwidth)
     return;
 
@@ -2095,6 +2155,7 @@ delete_chars (count)
 	while (count--)
 	  tputs (term_dc, 1, output_character_function);
     }
+#endif /* __GO32__ */
 }
 
 /* Insert COUNT characters from STRING to the output stream. */
@@ -2103,6 +2164,14 @@ insert_some_chars (string, count)
      char *string;
      int count;
 {
+#ifdef __GO32__
+  int r, c, w;
+  ScreenGetCursor(&r, &c);
+  w = ScreenCols();
+  memcpy(ScreenPrimary+r*w+c+count, ScreenPrimary+r*w+c, w-c-count);
+  /* Print the text. */
+  output_some_chars (string, count);
+#else /* __GO32__ */
   /* If IC is defined, then we do not have to "enter" insert mode. */
   if (term_IC)
     {
@@ -2135,6 +2204,7 @@ insert_some_chars (string, count)
       if (term_ei && *term_ei)
 	tputs (term_ei, 1, output_character_function);
     }
+#endif /* __GO32__ */
 }
 
 /* Move the cursor back. */
@@ -2143,10 +2213,12 @@ backspace (count)
 {
   register int i;
 
+#ifndef __GO32__
   if (term_backspace)
     for (i = 0; i < count; i++)
       tputs (term_backspace, 1, output_character_function);
   else
+#endif /* !__GO32__ */
     for (i = 0; i < count; i++)
       putc ('\b', out_stream);
 }
@@ -2165,11 +2237,13 @@ crlf ()
 clear_to_eol (count)
      int count;
 {
+#ifndef __GO32__
   if (term_clreol)
     {
       tputs (term_clreol, 1, output_character_function);
     }
   else
+#endif /* !__GO32__ */
     {
       register int i;
 
@@ -2216,6 +2290,7 @@ static struct sgttyb the_ttybuff;
 static void
 rl_prep_terminal ()
 {
+#ifndef __GO32__
   int tty = fileno (rl_instream);
 #if defined (HAVE_BSD_SIGNALS)
   int oldmask;
@@ -2317,12 +2392,14 @@ rl_prep_terminal ()
 #if defined (HAVE_BSD_SIGNALS)
   sigsetmask (oldmask);
 #endif
+#endif /* !__GO32__ */
 }
 
 /* Restore the terminal to its original state. */
 static void
 rl_deprep_terminal ()
 {
+#ifndef __GO32__
   int tty = fileno (rl_instream);
 #if defined (HAVE_BSD_SIGNALS)
   int oldmask;
@@ -2353,6 +2430,7 @@ rl_deprep_terminal ()
 #if defined (HAVE_BSD_SIGNALS)
   sigsetmask (oldmask);
 #endif
+#endif /* !__GO32 */
 }
 
 #else  /* !defined (NEW_TTY_DRIVER) */
@@ -2365,15 +2443,18 @@ rl_deprep_terminal ()
 #define VTIME VEOL
 #endif
 
+#ifndef __GO32__
 #if defined (TERMIOS_TTY_DRIVER)
 static struct termios otio;
 #else
 static struct termio otio;
 #endif /* !TERMIOS_TTY_DRIVER */
+#endif /* __GO32__ */
 
 static void
 rl_prep_terminal ()
 {
+#ifndef __GO32__
   int tty = fileno (rl_instream);
 #if defined (TERMIOS_TTY_DRIVER)
   struct termios tio;
@@ -2476,11 +2557,13 @@ rl_prep_terminal ()
   sigsetmask (oldmask);
 #  endif /* HAVE_BSD_SIGNALS */
 #endif /* !HAVE_POSIX_SIGNALS */
+#endif /* !__GO32__ */
 }
 
 static void
 rl_deprep_terminal ()
 {
+#ifndef __GO32__ 
   int tty = fileno (rl_instream);
 
   /* Try to keep this function from being INTerrupted.  We can do it
@@ -2523,6 +2606,7 @@ rl_deprep_terminal ()
   sigsetmask (oldmask);
 #  endif /* HAVE_BSD_SIGNALS */
 #endif /* !HAVE_POSIX_SIGNALS */
+#endif /* !__GO32__ */
 }
 #endif  /* NEW_TTY_DRIVER */
 
@@ -2566,9 +2650,11 @@ ding ()
 {
   if (readline_echoing_p)
     {
+#ifndef __GO32__
       if (prefer_visible_bell && visible_bell)
 	tputs (visible_bell, 1, output_character_function);
       else
+#endif /* !__GO32__ */
 	{
 	  fprintf (stderr, "\007");
 	  fflush (stderr);
@@ -2883,8 +2969,17 @@ rl_refresh_line ()
   move_vert(curr_line);
   move_cursor_relative (0, the_line);   /* XXX is this right */
 
+#ifdef __GO32__
+  {
+  int r, c, w;
+  ScreenGetCursor(&r, &c);
+  w = ScreenCols();
+  memset(ScreenPrimary+r*w+c, 0, (w-c)*2);
+  }
+#else /* __GO32__ */
   if (term_clreol)
     tputs (term_clreol, 1, output_character_function);
+#endif /* __GO32__/else */
 
   rl_forced_update_display ();
   rl_display_fixed = 1;
@@ -2903,9 +2998,11 @@ rl_clear_screen ()
       return;
     }
 
+#ifndef __GO32__
   if (term_clrpag)
     tputs (term_clrpag, 1, output_character_function);
   else
+#endif /* !__GO32__ */
     crlf ();
 
   rl_forced_update_display ();
@@ -3943,6 +4040,9 @@ username_completion_function (text, state)
      int state;
      char *text;
 {
+#ifdef __GO32__
+  return (char *)NULL;
+#else /* !__GO32__ */
   static char *username = (char *)NULL;
   static struct passwd *entry;
   static int namelen, first_char, first_char_loc;
@@ -3988,6 +4088,7 @@ username_completion_function (text, state)
 
       return (value);
     }
+#endif /* !__GO32__ */
 }
 
 /* **************************************************************** */
@@ -5457,7 +5558,10 @@ rl_named_function (string)
 }
 
 /* The last key bindings file read. */
-static char *last_readline_init_file = "~/.inputrc";
+#ifdef __MSDOS__
+static char *last_readline_init_file = "~/inputrc";
+#else
+#endif
 
 /* Re-read the current keybindings file. */
 rl_re_read_init_file (count, ignore)
@@ -6289,6 +6393,11 @@ rl_getc (stream)
   int result;
   unsigned char c;
 
+#ifdef __GO32__
+  if (isatty(0))
+    return getkey();
+#endif /* __GO32__ */
+
   while (1)
     {
       result = read (fileno (stream), &c, sizeof (char));
@@ -6301,11 +6410,13 @@ rl_getc (stream)
       if (result == 0)
 	return (EOF);
 
+#ifndef __GO32__
       /* If the error that we received was SIGINT, then try again,
 	 this is simply an interrupted system call to read ().
 	 Otherwise, some error ocurred, also signifying EOF. */
       if (errno != EINTR)
 	return (EOF);
+#endif /* !__GO32__ */
     }
 }
 
