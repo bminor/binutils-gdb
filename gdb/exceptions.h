@@ -122,12 +122,12 @@ struct ui_out;
 typedef int (catch_exceptions_ftype) (struct ui_out *ui_out, void *args);
 extern int catch_exceptions (struct ui_out *uiout,
 			     catch_exceptions_ftype *func, void *func_args,
-			     char *errstring, return_mask mask);
+			     return_mask mask);
 typedef void (catch_exception_ftype) (struct ui_out *ui_out, void *args);
 extern int catch_exceptions_with_msg (struct ui_out *uiout,
 			     	      catch_exceptions_ftype *func, 
 			     	      void *func_args,
-			     	      char *errstring, char **gdberrmsg,
+			     	      char **gdberrmsg,
 				      return_mask mask);
 
 /* This function, in addition, suppresses the printing of the captured

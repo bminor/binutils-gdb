@@ -1,5 +1,17 @@
 2005-01-14  Andrew Cagney  <cagney@gnu.org>
 
+	* exceptions.h (catch_exceptions): Delete errstring parameter.
+	(catch_exceptions_with_msg): Ditto.
+	* exceptions.c (catch_exceptions_with_msg): Update.
+	(catch_exceptions): Update.
+	* symfile-mem.c (add_vsyscall_page): Update.
+	* frame.c (get_current_frame): Update.
+	* wrapper.c (gdb_value_struct_elt): Update.
+	* exceptions.c (catch_exceptions): Update.
+	* thread.c (gdb_list_thread_ids, gdb_thread_select): Update.
+	* breakpoint.c (gdb_breakpoint_query, gdb_breakpoint): Update.
+	* remote-fileio.c (remote_fileio_request): Update.
+	
 	* exceptions.h (exception_fprintf): Declare.
 	(exception_print): Drop pre_print parameter.
 	* mi/mi-main.c (mi_execute_command): Update exception_print call.

@@ -204,7 +204,7 @@ add_vsyscall_page (struct target_ops *target, int from_tty)
 	 typed "run" at the TTY.  */
       args.from_tty = 0;
       catch_exceptions (uiout, symbol_file_add_from_memory_wrapper,
-			&args, NULL, RETURN_MASK_ALL);
+			&args, RETURN_MASK_ALL);
     }
 }
 

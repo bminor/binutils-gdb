@@ -320,7 +320,7 @@ gdb_value_struct_elt (struct ui_out *uiout, struct value **result, struct value 
   cargs.err = err;
   cargs.result_ptr = result;
   return catch_exceptions (uiout, do_captured_value_struct_elt, &cargs,
-			   NULL, RETURN_MASK_ALL);
+			   RETURN_MASK_ALL);
 }
 
 static int

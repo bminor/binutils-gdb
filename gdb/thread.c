@@ -285,7 +285,7 @@ enum gdb_rc
 gdb_list_thread_ids (struct ui_out *uiout, char **error_message)
 {
   return catch_exceptions_with_msg (uiout, do_captured_list_thread_ids, NULL,
-				    NULL, error_message, RETURN_MASK_ALL);
+				    error_message, RETURN_MASK_ALL);
 }
 
 /* Load infrun state for the thread PID.  */
@@ -670,7 +670,7 @@ enum gdb_rc
 gdb_thread_select (struct ui_out *uiout, char *tidstr, char **error_message)
 {
   return catch_exceptions_with_msg (uiout, do_captured_thread_select, tidstr,
-				    NULL, error_message, RETURN_MASK_ALL);
+				    error_message, RETURN_MASK_ALL);
 }
 
 /* Commands with a prefix of `thread'.  */

@@ -1329,7 +1329,7 @@ remote_fileio_request (char *buf)
   remote_fio_no_longjmp = 0;
 
   ex = catch_exceptions (uiout, do_remote_fileio_request, (void *)buf,
-			 NULL, RETURN_MASK_ALL);
+			 RETURN_MASK_ALL);
   switch (ex)
     {
       case RETURN_ERROR:

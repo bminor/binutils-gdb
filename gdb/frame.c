@@ -803,7 +803,7 @@ get_current_frame (void)
       struct frame_info *sentinel_frame =
 	create_sentinel_frame (current_regcache);
       if (catch_exceptions (uiout, unwind_to_current_frame, sentinel_frame,
-			    NULL, RETURN_MASK_ERROR) != 0)
+			    RETURN_MASK_ERROR) != 0)
 	{
 	  /* Oops! Fake a current frame?  Is this useful?  It has a PC
              of zero, for instance.  */

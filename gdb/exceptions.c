@@ -467,11 +467,9 @@ int
 catch_exceptions (struct ui_out *uiout,
 		  catch_exceptions_ftype *func,
 		  void *func_args,
-		  char *errstring,
 		  return_mask mask)
 {
-  return catch_exceptions_with_msg (uiout, func, func_args, errstring,
-				    NULL, mask);
+  return catch_exceptions_with_msg (uiout, func, func_args, NULL, mask);
 }
 
 struct exception
@@ -493,13 +491,12 @@ int
 catch_exceptions_with_msg (struct ui_out *uiout,
 		  	   catch_exceptions_ftype *func,
 		  	   void *func_args,
-		  	   char *errstring,
 			   char **gdberrmsg,
 		  	   return_mask mask)
 {
   volatile struct exception exception;
   volatile int val = 0;
-  SIGJMP_BUF *catch = catcher_init (uiout, errstring, &exception, mask, 1);
+  SIGJMP_BUF *catch = catcher_init (uiout, NULL, &exception, mask, 1);
   for (SIGSETJMP ((*catch)); catcher_state_machine (CATCH_ITER);)
     val = (*func) (uiout, func_args);
   gdb_assert (val >= 0);
