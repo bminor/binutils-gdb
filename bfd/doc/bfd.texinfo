@@ -204,8 +204,8 @@ For example, a very common operation for the linker is processing symbol
 tables.  Each BFD back end provides a routine for converting
 between the object file's representation of symbols and an internal
 canonical format. When the linker asks for the symbol table of an object
-file, it calls through the memory pointer to the relevant BFD
-back end routine which reads and converts the table into a canonical
+file, it calls through the memory pointer to a routine from the
+relevant BFD back end which reads and converts the table into a canonical
 form.  The linker then operates upon the canonical form. When the link is
 finished and the linker writes the output file's symbol table,
 another BFD back end routine is called to take the newly
