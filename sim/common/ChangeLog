@@ -1,3 +1,16 @@
+Mon Nov  3 15:03:04 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-endian.h (U16_8): Implement
+
+	* sim-endian.c (sim_endian_split_16, sim_endian_join_16): New functions
+
+	* sim-endian.h (VL8_16, VH8_16): Implement.
+
+	* sim-memopt.c (memory_option_handler): Typecast 64bit value to
+ 	long in printf.
+	(memory_option_handler): Only zalloc modulo bytes when non-zero.
+	(memory_option_handler): Skip comma in alias address list
+
 Fri Oct 31 13:03:33 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-memopt.c (do_memopt_add, do_memopt_delete): Add level and
