@@ -305,6 +305,7 @@ print_only_stack_frame (fi, level, source)
 struct print_args_args {
   struct symbol *func;
   struct frame_info *fi;
+  GDB_FILE *stream;
 };
 
 static int print_args_stub PARAMS ((PTR));
@@ -319,7 +320,7 @@ print_args_stub (args)
   struct print_args_args *p = (struct print_args_args *)args;
 
   numargs = FRAME_NUM_ARGS (p->fi);
-  print_frame_args (p->func, p->fi, numargs, gdb_stdout);
+  print_frame_args (p->func, p->fi, numargs, p->stream);
   return 0;
 }
 
@@ -504,6 +505,7 @@ print_frame_info_base (fi, level, source, args)
 	  struct print_args_args args;
 	  args.fi = fi;
 	  args.func = func;
+	  args.stream = gdb_stdout;
 	  catch_errors (print_args_stub, &args, "", RETURN_MASK_ALL);
 	  QUIT;
 	}

@@ -347,22 +347,20 @@ enum streamtype
 };
 
 /* new */
-typedef struct tui_stream
+struct tui_stream
 {
+  int *ts_magic;
   enum streamtype ts_streamtype;
   FILE *ts_filestream;
   char *ts_strbuf;
   int ts_buflen;
-} GDB_FILE;
+};
+
+struct gdb_file;
+typedef struct gdb_file GDB_FILE; /* deprecated */
 
 extern GDB_FILE *gdb_stdout;
 extern GDB_FILE *gdb_stderr;
-
-#if 0
-typedef FILE GDB_FILE;
-#define gdb_stdout stdout
-#define gdb_stderr stderr
-#endif
 
 #if defined(TUI)
 #include "tui.h"
@@ -373,6 +371,33 @@ typedef FILE GDB_FILE;
 #include "tuiWin.h"
 #endif
 
+/* Create a new gdb_file with the specified methods. */
+
+typedef void (gdb_file_flush_ftype) PARAMS ((struct gdb_file *stream));
+extern void set_gdb_file_flush PARAMS ((struct gdb_file *stream, gdb_file_flush_ftype *flush));
+
+typedef void (gdb_file_fputs_ftype) PARAMS ((const char *, struct gdb_file *stream));
+extern void set_gdb_file_fputs PARAMS ((struct gdb_file *stream, gdb_file_fputs_ftype *fputs));
+
+typedef int (gdb_file_isatty_ftype) PARAMS ((struct gdb_file *stream));
+extern void set_gdb_file_isatty PARAMS ((struct gdb_file *stream, gdb_file_isatty_ftype *isatty));
+
+typedef void (gdb_file_delete_ftype) PARAMS ((struct gdb_file *stream));
+extern void set_gdb_file_data PARAMS ((struct gdb_file *stream, void *data, gdb_file_delete_ftype *delete));
+
+extern struct gdb_file *gdb_file_new PARAMS ((void));
+
+extern void gdb_file_delete PARAMS ((struct gdb_file *stream));
+
+extern void *gdb_file_data PARAMS ((struct gdb_file *file));
+
+/* Open the specified FILE as a gdb_file. */
+extern struct gdb_file *stdio_fileopen PARAMS ((FILE *)); 
+/* #if defined (TUI) */
+extern struct gdb_file *tui_fileopen PARAMS ((FILE *)); 
+/* #endif */
+
+/* deprecated - use gdb_file_delete */
 extern void gdb_fclose PARAMS ((GDB_FILE **));
 
 extern void gdb_flush PARAMS ((GDB_FILE *));
@@ -427,13 +452,19 @@ extern void printf_unfiltered PARAMS ((const char *, ...))
 
 extern int gdb_file_isatty PARAMS ((GDB_FILE *));
 
+/* #if defined (TUI) */
 extern GDB_FILE *gdb_file_init_astring PARAMS ((int));
+/* #endif */
 
 extern void gdb_file_deallocate PARAMS ((GDB_FILE **));
 
+/* #if defined (TUI) */
 extern char *gdb_file_get_strbuf PARAMS ((GDB_FILE *));
+/* #endif */
 
+/* #if defined (TUI) */
 extern void gdb_file_adjust_strbuf PARAMS ((int, GDB_FILE *));
+/* #endif */
 
 extern void print_spaces PARAMS ((int, GDB_FILE *));
 

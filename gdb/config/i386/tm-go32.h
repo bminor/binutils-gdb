@@ -208,5 +208,3 @@ extern void double_to_i387 PARAMS ((char *, char *));
 
 #undef TARGET_LONG_DOUBLE_BIT
 #define TARGET_LONG_DOUBLE_BIT 96
-
-#define NAMES_HAVE_UNDERSCORE

@@ -227,8 +227,6 @@ extern void sh_frame_find_saved_regs PARAMS ((struct frame_info *fi,
 #define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs)	    \
    sh_frame_find_saved_regs(frame_info, &(frame_saved_regs))
 
-#define NAMES_HAVE_UNDERSCORE
-
 typedef unsigned short INSN_WORD;
 
 extern CORE_ADDR sh_push_arguments PARAMS ((int nargs,

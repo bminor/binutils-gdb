@@ -253,8 +253,6 @@ extern int d30v_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
 
 extern void d30v_frame_find_saved_regs PARAMS ((struct frame_info *, struct frame_saved_regs *));
 
-#define NAMES_HAVE_UNDERSCORE
-      
 /* DUMMY FRAMES.  Need these to support inferior function calls.
    They work like this on D30V:
    First we set a breakpoint at 0 or __start.

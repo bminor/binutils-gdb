@@ -1536,11 +1536,155 @@ begin_line ()
     }
 }
 
-int 
-gdb_file_isatty (stream)
-    GDB_FILE *stream;
-{
 
+/* ``struct gdb_file'' implementation that maps directly onto
+   <stdio.h>'s FILE. */
+
+static gdb_file_fputs_ftype stdio_file_fputs;
+static gdb_file_isatty_ftype stdio_file_isatty;
+static gdb_file_delete_ftype stdio_file_delete;
+static struct gdb_file *stdio_file_new PARAMS ((FILE *file, int close_p));
+static gdb_file_flush_ftype stdio_file_flush;
+
+static int stdio_file_magic;
+
+struct stdio_file
+{
+  int *magic;
+  FILE *file;
+  int close_p;
+};
+
+static struct gdb_file *
+stdio_file_new (file, close_p)
+     FILE *file;
+     int close_p;
+{
+  struct gdb_file *gdb_file = gdb_file_new ();
+  struct stdio_file *stdio = xmalloc (sizeof (struct stdio_file));
+  stdio->magic = &stdio_file_magic;
+  stdio->file = file;
+  stdio->close_p = close_p;
+  set_gdb_file_data (gdb_file, stdio, stdio_file_delete);
+  set_gdb_file_flush (gdb_file, stdio_file_flush);
+  set_gdb_file_fputs (gdb_file, stdio_file_fputs);
+  set_gdb_file_isatty (gdb_file, stdio_file_isatty);
+  return gdb_file;
+}
+
+static void
+stdio_file_delete (file)
+     struct gdb_file *file;
+{
+  struct stdio_file *stdio = gdb_file_data (file);
+  if (stdio->magic != &stdio_file_magic)
+    error ("Internal error: bad magic number");
+  if (stdio->close_p)
+    {
+      fclose (stdio->file);
+    }
+  free (stdio);
+}
+
+static void
+stdio_file_flush (file)
+     struct gdb_file *file;
+{
+  struct stdio_file *stdio = gdb_file_data (file);
+  if (stdio->magic != &stdio_file_magic)
+    error ("Internal error: bad magic number");
+  fflush (stdio->file);
+}
+
+static void
+stdio_file_fputs (linebuffer, file)
+     const char *linebuffer;
+     struct gdb_file *file;
+{
+  struct stdio_file *stdio = gdb_file_data (file);
+  if (stdio->magic != &stdio_file_magic)
+    error ("Internal error: bad magic number");
+  fputs (linebuffer, stdio->file);
+}
+
+static int
+stdio_file_isatty (file)
+     struct gdb_file *file;
+{
+  struct stdio_file *stdio = gdb_file_data (file);
+  if (stdio->magic != &stdio_file_magic)
+    error ("Internal error: bad magic number");
+  return (isatty (fileno (stdio->file)));
+}
+
+/* Like fdopen().  Create a gdb_file from a previously opened FILE. */
+
+struct gdb_file *
+stdio_fileopen (file)
+     FILE *file;
+{
+  return stdio_file_new (file, 0);
+}
+
+
+/* A ``struct gdb_file'' that is compatible with all the legacy
+   code. */
+
+static gdb_file_flush_ftype tui_file_flush;
+extern gdb_file_fputs_ftype tui_file_fputs;
+static gdb_file_isatty_ftype tui_file_isatty;
+static gdb_file_delete_ftype tui_file_delete;
+static struct gdb_file *tui_file_new PARAMS ((void));
+static int tui_file_magic;
+
+static struct gdb_file *
+tui_file_new ()
+{
+  struct tui_stream *tui = xmalloc (sizeof (struct tui_stream));
+  struct gdb_file *file = gdb_file_new ();
+  set_gdb_file_data (file, tui, tui_file_delete);
+  set_gdb_file_flush (file, tui_file_flush);
+  set_gdb_file_fputs (file, tui_file_fputs);
+  set_gdb_file_isatty (file, tui_file_isatty);
+  tui->ts_magic = &tui_file_magic;
+  return file;
+}
+
+static void
+tui_file_delete (file)
+     struct gdb_file *file;
+{
+  struct tui_stream *tmpstream = gdb_file_data (file);
+  if (tmpstream->ts_magic != &tui_file_magic)
+    error ("Internal error: bad magic number");
+  if ((tmpstream->ts_streamtype == astring) &&
+      (tmpstream->ts_strbuf != NULL)) 
+    {
+      free (tmpstream->ts_strbuf);
+    }
+  free (tmpstream);
+}
+
+struct gdb_file *
+tui_fileopen (stream)
+     FILE *stream;
+{
+  struct gdb_file *file = tui_file_new ();
+  struct tui_stream *tmpstream = gdb_file_data (file);
+  tmpstream->ts_streamtype = afile;
+  tmpstream->ts_filestream = stream;
+  tmpstream->ts_strbuf = NULL;
+  tmpstream->ts_buflen = 0;
+  return file;
+}
+
+static int 
+tui_file_isatty (file)
+    struct gdb_file *file;
+{
+  struct tui_stream *stream = gdb_file_data (file);
+  if (stream->ts_magic != &tui_file_magic)
+    error ("Internal error: bad magic number");
   if (stream->ts_streamtype == afile)
      return (isatty(fileno(stream->ts_filestream)));
   else return 0;
@@ -1550,9 +1694,11 @@ GDB_FILE *
 gdb_file_init_astring (n)
     int n;
 {
-  GDB_FILE *tmpstream;
+  struct gdb_file *file = tui_file_new ();
+  struct tui_stream *tmpstream = gdb_file_data (file);
+  if (tmpstream->ts_magic != &tui_file_magic)
+    error ("Internal error: bad magic number");
 
-  tmpstream = xmalloc (sizeof(GDB_FILE));
   tmpstream->ts_streamtype = astring;
   tmpstream->ts_filestream = NULL;
   if (n > 0)
@@ -1564,41 +1710,38 @@ gdb_file_init_astring (n)
      tmpstream->ts_strbuf = NULL;
   tmpstream->ts_buflen = n;
 
-  return tmpstream;
+  return file;
 }
 
 void
 gdb_file_deallocate (streamptr)
     GDB_FILE **streamptr;
 {
-  GDB_FILE *tmpstream;
-
-  tmpstream = *streamptr;
-  if ((tmpstream->ts_streamtype == astring) &&
-      (tmpstream->ts_strbuf != NULL)) 
-    {
-      free (tmpstream->ts_strbuf);
-    }
-
-  free (tmpstream);
+  gdb_file_delete (*streamptr);
   *streamptr = NULL;
 }
  
 char *
-gdb_file_get_strbuf (stream)
-     GDB_FILE *stream;
+gdb_file_get_strbuf (file)
+     GDB_FILE *file;
 {
+  struct tui_stream *stream = gdb_file_data (file);
+  if (stream->ts_magic != &tui_file_magic)
+    error ("Internal error: bad magic number");
   return (stream->ts_strbuf);
 }
 
 /* adjust the length of the buffer by the amount necessary
    to accomodate appending a string of length N to the buffer contents */
 void
-gdb_file_adjust_strbuf (n, stream)
+gdb_file_adjust_strbuf (n, file)
      int n;
-     GDB_FILE *stream;
+     GDB_FILE *file;
 {
+  struct tui_stream *stream = gdb_file_data (file);
   int non_null_chars;
+  if (stream->ts_magic != &tui_file_magic)
+    error ("Internal error: bad magic number");
 
   if (stream->ts_streamtype != astring)
     return;
@@ -1624,28 +1767,24 @@ gdb_fopen (name, mode)
      char * name;
      char * mode;
 {
-  int       gdb_file_size;
-  GDB_FILE *tmp;
-
-  gdb_file_size = sizeof(GDB_FILE);
-  tmp = (GDB_FILE *) xmalloc (gdb_file_size);
-  tmp->ts_streamtype = afile;
-  tmp->ts_filestream = fopen (name, mode);
-  tmp->ts_strbuf = NULL;
-  tmp->ts_buflen = 0;
-  
-  return tmp;
+  FILE *f = fopen (name, mode);
+  if (f == NULL)
+    return NULL;
+  return stdio_file_new (f, 1);
 }
 
-void
-gdb_flush (stream)
-     GDB_FILE *stream;
+static void
+tui_file_flush (file)
+     GDB_FILE *file;
 {
+  struct tui_stream *stream = gdb_file_data (file);
+  if (stream->ts_magic != &tui_file_magic)
+    error ("Internal error: bad magic number");
   if (flush_hook
-      && (stream == gdb_stdout
-	  || stream == gdb_stderr))
+      && (file == gdb_stdout
+	  || file == gdb_stderr))
     {
-      flush_hook (stream);
+      flush_hook (file);
       return;
     }
 
@@ -1656,11 +1795,136 @@ void
 gdb_fclose(streamptr)
      GDB_FILE **streamptr;
 {
-  GDB_FILE *tmpstream;
+  gdb_file_delete (*streamptr);
+  *streamptr = NULL;
+}
 
-  tmpstream = *streamptr;
-  fclose (tmpstream->ts_filestream);
-  gdb_file_deallocate (streamptr);
+
+/* Implement the ``struct gdb_file'' object. */
+
+static gdb_file_isatty_ftype null_file_isatty;
+static gdb_file_fputs_ftype null_file_fputs;
+static gdb_file_flush_ftype null_file_flush;
+static gdb_file_delete_ftype null_file_delete;
+
+struct gdb_file
+{
+  gdb_file_flush_ftype *to_flush;
+  gdb_file_fputs_ftype *to_fputs;
+  gdb_file_delete_ftype *to_delete;
+  gdb_file_isatty_ftype *to_isatty;
+  void *to_data;
+};
+
+struct gdb_file *
+gdb_file_new ()
+{
+  struct gdb_file *file = xmalloc (sizeof (struct gdb_file));
+  set_gdb_file_data (file, NULL, null_file_delete);
+  set_gdb_file_flush (file, null_file_flush);
+  set_gdb_file_fputs (file, null_file_fputs);
+  set_gdb_file_isatty (file, null_file_isatty);
+  return file;
+}
+
+void
+gdb_file_delete (file)
+     struct gdb_file *file;
+{
+  file->to_delete (file);
+  free (file);
+}
+
+static int
+null_file_isatty (file)
+     struct gdb_file *file;
+{
+  return 0;
+}
+
+static void
+null_file_flush (file)
+     struct gdb_file *file;
+{
+  return;
+}
+
+static void
+null_file_fputs (buf, file)
+     const char *buf;
+     struct gdb_file *file;
+{
+  return;
+}
+
+static void
+null_file_delete (file)
+     struct gdb_file *file;
+{
+  return;
+}
+
+void *
+gdb_file_data (file)
+     struct gdb_file *file;
+{
+  return file->to_data;
+}
+
+void
+gdb_flush (file)
+     struct gdb_file *file;
+{
+  file->to_flush (file);
+}
+
+int
+gdb_file_isatty (file)
+     struct gdb_file *file;
+{
+  return file->to_isatty (file);
+}
+
+void
+fputs_unfiltered (buf, file)
+     const char *buf;
+     struct gdb_file *file;
+{
+  file->to_fputs (buf, file);
+}
+
+void
+set_gdb_file_flush (file, flush)
+     struct gdb_file *file;
+     gdb_file_flush_ftype *flush;
+{
+  file->to_flush = flush;
+}
+
+void
+set_gdb_file_isatty (file, isatty)
+     struct gdb_file *file;
+     gdb_file_isatty_ftype *isatty;
+{
+  file->to_isatty = isatty;
+}
+
+void
+set_gdb_file_fputs (file, fputs)
+     struct gdb_file *file;
+     gdb_file_fputs_ftype *fputs;
+{
+  file->to_fputs = fputs;
+}
+
+void
+set_gdb_file_data (file, data, delete)
+     struct gdb_file *file;
+     void *data;
+     gdb_file_delete_ftype *delete;
+{
+  file->to_data = data;
+  file->to_delete = delete;
 }
 
 /* Like fputs but if FILTER is true, pause after every screenful.

@@ -247,8 +247,6 @@ extern void h8500_pop_frame PARAMS ((void));
 #define SHORT_INT_MAX 32767
 #define SHORT_INT_MIN -32768
 
-#define NAMES_HAVE_UNDERSCORE
-
 typedef unsigned short INSN_WORD;
 
 extern CORE_ADDR h8500_addr_bits_remove PARAMS ((CORE_ADDR));

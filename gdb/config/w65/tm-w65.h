@@ -187,8 +187,6 @@ extern CORE_ADDR w65_skip_prologue ();
 #define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs)	    \
    frame_find_saved_regs(frame_info, &(frame_saved_regs))
 
-#define NAMES_HAVE_UNDERSCORE
-
 typedef unsigned short INSN_WORD;
 
 extern CORE_ADDR w65_addr_bits_remove PARAMS ((CORE_ADDR));

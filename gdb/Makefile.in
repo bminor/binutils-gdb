@@ -219,7 +219,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 19990525
+VERSION = 19990601
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -1636,5 +1636,6 @@ f-exp.tab.o: f-exp.tab.c f-lang.h $(defs_h) $(expression_h) \
 m2-exp.tab.o: m2-exp.tab.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 	language.h m2-lang.h parser-defs.h $(symtab_h) $(value_h) \
 	$(bfd_h) objfiles.h symfile.h
+
 
 ### end of the gdb Makefile.in.

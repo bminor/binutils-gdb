@@ -877,6 +877,9 @@ which its expression is valid.\n", b->number);
 	    case bp_catch_exec :
 	      val = target_insert_exec_catchpoint (inferior_pid);
 	      break;
+	    default:
+	      warning ("GDB bug: breakpoint.c (insert_breakpoints): enclosing `if' does not protect `switch'");
+	      break;
             }
           if (val < 0)
             {
@@ -1191,6 +1194,9 @@ remove_breakpoint (b, is)
           case bp_catch_exec :
             val = target_remove_exec_catchpoint (inferior_pid);
             break;
+	default:
+	  warning ("GDB bug: breakpoint.c (remove_breakpoint): enclosing `if' does not protect `switch'");
+	  break;
         }
       if (val)
 	return val;

@@ -1,3 +1,104 @@
+Tue Jun  1 18:47:54 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* parse.c (build_parse): New function.  Initialize
+ 	msym_text_symbol_type, msym_data_symbol_type and
+ 	msym_unknown_symbol_type.
+	(_initialize_parse): Call build_parse.
+
+Tue Jun  1 10:45:24 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/d10v/tm-d10v.h (REGISTER_CONVERTIBLE,
+ 	REGISTER_CONVERT_TO_RAW, REGISTER_CONVERT_TO_VIRTUAL): Convert
+ 	macros into functions.
+	* config/d10v/tm-d10v.h, d10v-tdep.c (d10v_register_convertable,
+ 	d10v_register_convert_to_virtual, d10v_register_convert_to_raw):
+ 	The new functions.
+
+1999-05-31  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* stack.c (print_args_stub): Add missing stream parameter.
+
+Mon May 31 15:50:08 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	Fri May 28 16:51:00 1999  Martin Dorey  <martin.dorey@madge.com>:
+        * valops.c, value.h (default_push_arguments): Fix order of
+ 	parameters to match PUSH_ARGUMENTS arguments.
+
+Thu May 27 11:42:55 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.h (EXTRACT_STRUCT_VALUE_ADDRESS): Return 0.
+
+	* valops.c (value_assign): Delete redundant test of
+ 	REGISTER_CONVERTIBLE.
+
+Thu May 27 11:33:57 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/w65/tm-w65.h, config/tic80/tm-tic80.h, config/sh/tm-sh.h,
+ 	config/i386/tm-i386m3.h, config/i386/tm-go32.h,
+ 	config/i386/tm-cygwin.h, config/h8500/tm-h8500.h,
+ 	config/d30v/tm-d30v.h, config/d10v/tm-d10v.h: Delete definition of
+ 	macro NAMES_HAVE_UNDERSCORE.
+
+Thu May 27 09:31:06 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.h (EXTRACT_STRUCT_VALUE_ADDRESS,
+ 	EXTRACT_STRUCT_VALUE_ADDRESS_P): Provide default definitions.
+	* values.c (value_being_returned): Use
+ 	EXTRACT_STRUCT_VALUE_ADDRESS when EXTRACT_STRUCT_VALUE_ADDRESS_P.
+
+Wed May 26 13:51:25 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* utils.c (tui_file_new, tui_file_delete, tui_fileopen): New
+ 	functions.
+	(tui_file_isatty): Rename gdb_file_isatty.
+	(gdb_file_init_astring): Use tui_file_new to create stream.
+	(gdb_file_get_strbuf, gdb_file_adjust_strbuf): Call gdb_file_data
+ 	to access the tui_stream.
+	(tui_file_flush): Rename gdb_flush. Call gdb_file_data to access
+ 	the tui_stream. Pass FILE and not STREAM down.
+	
+	* utils.c (struct stdio_file, stdio_file_flush, stdio_file_fputs,
+ 	stdio_file_isatty, stdio_file_delete, stdio_file_new,
+ 	stdio_fileopen): Define type and functions.  Implement a simple
+ 	STDIO based gdb_file.
+	(struct gdb_file, gdb_file_new, gdb_file_delete, null_file_isatty,
+ 	null_file_flush, null_file_fputs, null_file_delete, gdb_file_data,
+ 	set_gdb_file_flush, set_gdb_file_isatty, set_gdb_file_fputs,
+ 	set_gdb_file_data, fputs_unfiltered, gdb_flush, gdb_file_isatty):
+ 	Define type and functions.  Implement virtual functions for
+ 	gdb_file.
+
+	* defs.h (struct gdb_file): Declare.
+	(GDB_FILE): Change type to struct gdb_file. Deprecate.
+	(gdb_file_flush_ftype, gdb_file_fputs_ftype,
+ 	gdb_file_isatty_ftype, gdb_file_delete_ftype): Add function type
+ 	declarations.
+	
+	* defs.h (set_gdb_file_flush, set_gdb_file_fputs,
+ 	set_gdb_file_isatty, set_gdb_file_data, gdb_file_new,
+ 	gdb_file_delete, gdb_file_data, stdio_fileopen, tui_fileopen): Add
+ 	function declarations.
+	(gdb_fopen): Re-implement. Call stdio_file_new.
+	(gdb_fclose): Re-implement. Call gdb_file_delete.
+	
+	* main.c (tui_file_fputs): Rename fputs_unfiltered.  Use
+ 	gdb_file_data to gain access to the tui_stream data.  Use FILE
+ 	instead of STREAM where applicable.
+	(main): Create gdb_stdout and gdb_stderr using tui_fileopen.
+	
+	* defs.h (struct tui_stream): Add field ts_magic.
+	* utils.c (tui_file_magic): Local variable.
+	(tui_file_new): Set field ts_magic.
+	(tui_file_delete, tui_file_isatty, gdb_file_init_astring,
+ 	gdb_file_get_strbuf, gdb_file_adjust_strbuf, tui_file_flush):
+ 	Verify ts_magic.
+
+1999-05-25  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+ 	* breakpoint.c (insert_breakpoints, remove_breakpoint,
+	breakpoint_1): Add a 'default' case, which prints a warning
+	message, to remove EGCS warnings.
+
 1999-05-25  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
 	* utils.c (gdb_file_adjust_strbuf): Take into account the

@@ -151,24 +151,43 @@ d10v_register_virtual_type (reg_nr)
     return builtin_type_short;
 }
 
-#if 0
 /* convert $pc and $sp to/from virtual addresses */
-#define REGISTER_CONVERTIBLE(N) ((N) == PC_REGNUM || (N) == SP_REGNUM)
-#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,TYPE,FROM,TO) \
-{ \
-    ULONGEST x = extract_unsigned_integer ((FROM), REGISTER_RAW_SIZE (REGNUM)); \
-    if (REGNUM == PC_REGNUM) x = (x << 2) | IMEM_START; \
-    else x |= DMEM_START; \
-    store_unsigned_integer ((TO), TYPE_LENGTH(TYPE), x); \
+int
+d10v_register_convertible (nr)
+     int nr;
+{
+  return ((nr) == PC_REGNUM || (nr) == SP_REGNUM);
 }
-#define REGISTER_CONVERT_TO_RAW(TYPE,REGNUM,FROM,TO) \
-{ \
-    ULONGEST x = extract_unsigned_integer ((FROM), TYPE_LENGTH(TYPE)); \
-    x &= 0x3ffff; \
-    if (REGNUM == PC_REGNUM) x >>= 2; \
-    store_unsigned_integer ((TO), 2, x); \
+
+void
+d10v_register_convert_to_virtual (regnum, type, from, to)
+     int regnum;
+     struct type *type;
+     char *from;
+     char *to;
+{
+  ULONGEST x = extract_unsigned_integer (from, REGISTER_RAW_SIZE (regnum));
+  if (regnum == PC_REGNUM)
+    x = (x << 2) | IMEM_START;
+  else
+    x |= DMEM_START;
+  store_unsigned_integer (to, TYPE_LENGTH (type), x);
 }
-#endif
+
+void
+d10v_register_convert_to_raw (type, regnum, from, to)
+     struct type *type;
+     int regnum;
+     char *from;
+     char *to;
+{
+  ULONGEST x = extract_unsigned_integer (from, TYPE_LENGTH (type));
+  x &= 0x3ffff;
+  if (regnum == PC_REGNUM)
+    x >>= 2;
+  store_unsigned_integer (to, 2, x);
+}
+
 
 CORE_ADDR
 d10v_make_daddr (x)
@@ -1262,6 +1281,7 @@ display_trace (low, high)
 	}
     }
 }
+
 
 extern void (*target_resume_hook) PARAMS ((void));
 extern void (*target_wait_loop_hook) PARAMS ((void));

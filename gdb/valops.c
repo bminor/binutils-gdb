@@ -575,8 +575,7 @@ value_assign (toval, fromval)
      convert FROMVAL's contents now, with result in `raw_buffer',
      and set USE_BUFFER to the number of bytes to write.  */
 
-  if (VALUE_REGNO (toval) >= 0
-      && REGISTER_CONVERTIBLE (VALUE_REGNO (toval)))
+  if (VALUE_REGNO (toval) >= 0)
     {
       int regno = VALUE_REGNO (toval);
       if (REGISTER_CONVERTIBLE (regno))
@@ -1096,11 +1095,11 @@ value_push (sp, arg)
 #endif
 
 CORE_ADDR
-default_push_arguments (nargs, args, struct_return, sp, struct_addr)
+default_push_arguments (nargs, args, sp, struct_return, struct_addr)
      int nargs;
      value_ptr *args;
-     int struct_return;
      CORE_ADDR sp;
+     int struct_return;
      CORE_ADDR struct_addr;
 {
   /* ASSERT ( !struct_return); */

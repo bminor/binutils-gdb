@@ -129,6 +129,17 @@ extern disassemble_info tm_print_insn_info;
 #endif
 
 
+/* Fallback definition for EXTRACT_STRUCT_VALUE_ADDRESS */
+#ifndef EXTRACT_STRUCT_VALUE_ADDRESS
+#define EXTRACT_STRUCT_VALUE_ADDRESS_P (0)
+#define EXTRACT_STRUCT_VALUE_ADDRESS(X) (abort (), 0)
+#else
+#ifndef EXTRACT_STRUCT_VALUE_ADDRESS_P
+#define EXTRACT_STRUCT_VALUE_ADDRESS_P (1)
+#endif
+#endif
+
+
 /* Set the dynamic target-system-dependant parameters (architecture,
    byte-order, ...) using information found in the BFD */
 

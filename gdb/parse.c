@@ -1317,14 +1317,10 @@ follow_types (follow_type)
   return follow_type;
 }
 
-void
-_initialize_parse ()
+static void build_parse PARAMS ((void));
+static void
+build_parse ()
 {
-  type_stack_size = 80;
-  type_stack_depth = 0;
-  type_stack = (union type_stack_elt *)
-    xmalloc (type_stack_size * sizeof (*type_stack));
-
   msym_text_symbol_type =
     init_type (TYPE_CODE_FUNC, 1, 0, "<text variable, no debug info>", NULL);
   TYPE_TARGET_TYPE (msym_text_symbol_type) = builtin_type_int;
@@ -1335,6 +1331,17 @@ _initialize_parse ()
     init_type (TYPE_CODE_INT, 1, 0,
 	       "<variable (not text or data), no debug info>",
 	       NULL);
+}
+
+void
+_initialize_parse ()
+{
+  type_stack_size = 80;
+  type_stack_depth = 0;
+  type_stack = (union type_stack_elt *)
+    xmalloc (type_stack_size * sizeof (*type_stack));
+
+  build_parse ();
 
   add_show_from_set (
      add_set_cmd ("expressiondebug", class_maintenance, var_zinteger,

@@ -1614,13 +1614,18 @@ _BRA,01000,00,6.**,6.**,6.**:BRA:short:mu:REIT
 // REPEAT
 
 void::function::do_repeat:unsigned32 count, address_word pcaddr
+	address_word rpt_s = cia + 8;
+	address_word rpt_e = cia + pcaddr;
+
 	if (count == 0)
 	  sim_engine_abort (SD, CPU, cia, "REPEAT with ra=0 and REPEATI with imm = 0 is forbidden.");
 	if (count > 1)
 	  PSW_SET_QUEUE (PSW_RP, 1);
+	if (rpt_e  < rpt_s + 0x18)
+	  sim_io_eprintf (sd, "warning: 0x%lx: REPEAT or REPEATI loop is too small\n", cia);
 	WRITE32_QUEUE (&RPT_C, count - 1);
-	WRITE32_QUEUE (&RPT_S, cia + 8);
-	WRITE32_QUEUE (&RPT_E, cia + pcaddr);
+	WRITE32_QUEUE (&RPT_S, rpt_s);
+	WRITE32_QUEUE (&RPT_E, rpt_e);
 
 _BRA,11000,00,6.RA,6.**,6.RC:BRA:short:mu:REPEAT
 "repeat r<RA>, r<RC>"

@@ -1,3 +1,12 @@
+Tue Jun  1 15:04:15 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbint.texinfo (TARGET_COMPLEX_BIT, TARGET_DOUBLE_COMPLEX_BIT):
+ 	Document that these are not used.
+
+Thu May 27 09:28:15 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbint.texinfo (EXTRACT_STRUCT_VALUE_ADDRESS_P): Document.
+
 Mon May 24 10:07:39 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbint.texinfo (FRAME_NUM_ARGS): Update definition.  Parameter

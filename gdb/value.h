@@ -567,8 +567,8 @@ extern value_ptr find_function_in_inferior PARAMS ((char *));
 extern value_ptr value_allocate_space_in_inferior PARAMS ((int));
 
 extern CORE_ADDR default_push_arguments PARAMS ((int nargs, value_ptr *args,
-						 int struct_return,
 						 CORE_ADDR sp,
+						 int struct_return,
 						 CORE_ADDR struct_addr));
 
 #endif	/* !defined (VALUE_H) */

@@ -1498,15 +1498,15 @@ value_being_returned (valtype, retbuf, struct_return)
   register value_ptr val;
   CORE_ADDR addr;
 
-#if defined (EXTRACT_STRUCT_VALUE_ADDRESS)
   /* If this is not defined, just use EXTRACT_RETURN_VALUE instead.  */
-  if (struct_return) {
-    addr = EXTRACT_STRUCT_VALUE_ADDRESS (retbuf);
-    if (!addr)
-      error ("Function return value unknown");
-    return value_at (valtype, addr, NULL);
-  }
-#endif
+  if (EXTRACT_STRUCT_VALUE_ADDRESS_P)
+    if (struct_return)
+      {
+	addr = EXTRACT_STRUCT_VALUE_ADDRESS (retbuf);
+	if (!addr)
+	  error ("Function return value unknown");
+	return value_at (valtype, addr, NULL);
+      }
 
   val = allocate_value (valtype);
   CHECK_TYPEDEF (valtype);

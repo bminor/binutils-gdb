@@ -157,19 +157,14 @@ main (argc, argv)
   getcwd (gdb_dirbuf, sizeof (gdb_dirbuf));
   current_directory = gdb_dirbuf;
 
-  gdb_file_size = sizeof(GDB_FILE);
-
-  gdb_stdout = (GDB_FILE *)xmalloc (gdb_file_size);
-  gdb_stdout->ts_streamtype = afile;
-  gdb_stdout->ts_filestream = stdout;
-  gdb_stdout->ts_strbuf = NULL;
-  gdb_stdout->ts_buflen = 0;
-
-  gdb_stderr = (GDB_FILE *)xmalloc (gdb_file_size);
-  gdb_stderr->ts_streamtype = afile;
-  gdb_stderr->ts_filestream = stderr;
-  gdb_stderr->ts_strbuf = NULL;
-  gdb_stderr->ts_buflen = 0;
+#if 0
+  /* not yet */
+  gdb_stdout = stdio_fileopen (stdout);
+  gdb_stderr = stdio_fileopen (stderr);
+#else
+  gdb_stdout = tui_fileopen (stdout);
+  gdb_stderr = tui_fileopen (stderr);
+#endif
 
   /* Parse arguments and options.  */
   {
@@ -715,17 +710,21 @@ Report bugs to \"bug-gdb@prep.ai.mit.edu\".\
 }
 
 
-/* All I/O sent to the *_filtered and *_unfiltered functions eventually ends up
-   here.  The fputs_unfiltered_hook is primarily used by GUIs to collect all
-   output and send it to the GUI, instead of the controlling terminal.  Only
-   output to gdb_stdout and gdb_stderr are sent to the hook.  Everything else
-   is sent on to fputs to allow file I/O to be handled appropriately.  */
+/* All TUI I/O sent to the *_filtered and *_unfiltered functions
+   eventually ends up here.  The fputs_unfiltered_hook is primarily
+   used by GUIs to collect all output and send it to the GUI, instead
+   of the controlling terminal.  Only output to gdb_stdout and
+   gdb_stderr are sent to the hook.  Everything else is sent on to
+   fputs to allow file I/O to be handled appropriately.  */
+
+/* FIXME: Should be broken up and moved to a TUI specific file. */
 
 void
-fputs_unfiltered (linebuffer, stream)
+tui_file_fputs (linebuffer, file)
      const char *linebuffer;
-     GDB_FILE *stream;
+     GDB_FILE *file;
 {
+  struct tui_stream *stream = gdb_file_data (file);
 #if defined(TUI)
   extern int tui_owns_terminal;
 #endif
@@ -736,9 +735,9 @@ fputs_unfiltered (linebuffer, stream)
    * new (XDB style) scheme, we do not do that anymore... - RT
    */
   if (fputs_unfiltered_hook
-      && (stream == gdb_stdout
-	  || stream == gdb_stderr))
-    fputs_unfiltered_hook (linebuffer, stream);
+      && (file == gdb_stdout
+	  || file == gdb_stderr))
+    fputs_unfiltered_hook (linebuffer, file);
   else
     {
 #if defined(TUI)
@@ -772,7 +771,7 @@ fputs_unfiltered (linebuffer, stream)
 
 #else
       if (stream->ts_streamtype == astring) {
-           gdb_file_adjust_strbuf(strlen(linebuffer), stream);
+           gdb_file_adjust_strbuf(strlen(linebuffer), file);
            strcat(stream->ts_strbuf, linebuffer);
         } else fputs (linebuffer, stream->ts_filestream);
 #endif

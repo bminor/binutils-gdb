@@ -40,11 +40,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* we can do it */
 #define ATTACH_DETACH 1
 
-/* Define this if the C compiler puts an underscore at the front
-   of external names before giving them to the linker.  */
-
-#define NAMES_HAVE_UNDERSCORE
-
 /* Sigh. There should be a file for i386 but no sysv stuff in it */
 #include "i386/tm-i386.h"
 

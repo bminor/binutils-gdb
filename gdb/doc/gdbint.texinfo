@@ -1318,10 +1318,13 @@ the raw register state @var{regbuf} and copy that, in virtual format,
 into @var{valbuf}.
  
 @item EXTRACT_STRUCT_VALUE_ADDRESS(regbuf)
-Define this to extract from an array @var{regbuf} containing the (raw)
-register state, the address in which a function should return its
-structure value, as a CORE_ADDR (or an expression that can be used as
-one).
+When @var{EXTRACT_STRUCT_VALUE_ADDRESS_P} this is used to to extract
+from an array @var{regbuf} (containing the raw register state) the
+address in which a function should return its structure value, as a
+CORE_ADDR (or an expression that can be used as one).
+
+@item EXTRACT_STRUCT_VALUE_ADDRESS_P
+Predicate for @var{EXTRACT_STRUCT_VALUE_ADDRESS}.
 
 @item FLOAT_INFO
 If defined, then the `info float' command will print information about
@@ -1618,11 +1621,15 @@ Number of bits in a char; defaults to 8.
 @item TARGET_COMPLEX_BIT
 Number of bits in a complex number; defaults to @code{2 * TARGET_FLOAT_BIT}.
 
+At present this macro is not used.
+
 @item TARGET_DOUBLE_BIT
 Number of bits in a double float; defaults to @code{8 * TARGET_CHAR_BIT}.
 
 @item TARGET_DOUBLE_COMPLEX_BIT
 Number of bits in a double complex; defaults to @code{2 * TARGET_DOUBLE_BIT}.
+
+At present this macro is not used.
 
 @item TARGET_FLOAT_BIT
 Number of bits in a float; defaults to @code{4 * TARGET_CHAR_BIT}.

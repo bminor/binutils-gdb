@@ -1,5 +1,5 @@
 /* Target-specific definition for the Mitsubishi D10V
-   Copyright (C) 1996 Free Software Foundation, Inc.
+   Copyright (C) 1996,1999 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -18,6 +18,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Contributed by Martin Hunt, hunt@cygnus.com */
+
 
 /* #define GDB_TARGET_IS_D10V - moved to gdbarch.h */
 
@@ -118,21 +119,14 @@ extern struct type *d10v_register_virtual_type PARAMS ((int reg_nr));
 
 
 /* convert $pc and $sp to/from virtual addresses */
-#define REGISTER_CONVERTIBLE(N) ((N) == PC_REGNUM || (N) == SP_REGNUM)
+extern int d10v_register_convertible PARAMS ((int nr));
+#define REGISTER_CONVERTIBLE(N) (d10v_register_convertible ((N)))
+extern void d10v_register_convert_to_virtual PARAMS ((int regnum, struct type *type, char *from, char *to));
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,TYPE,FROM,TO) \
-{ \
-    ULONGEST x = extract_unsigned_integer ((FROM), REGISTER_RAW_SIZE (REGNUM)); \
-    if (REGNUM == PC_REGNUM) x = (x << 2) | IMEM_START; \
-    else x |= DMEM_START; \
-    store_unsigned_integer ((TO), TYPE_LENGTH(TYPE), x); \
-}
+  d10v_register_convert_to_virtual ((REGNUM), (TYPE), (FROM), (TO))
+extern void d10v_register_convert_to_raw PARAMS ((struct type *type, int regnum, char *from, char *to));
 #define REGISTER_CONVERT_TO_RAW(TYPE,REGNUM,FROM,TO) \
-{ \
-    ULONGEST x = extract_unsigned_integer ((FROM), TYPE_LENGTH(TYPE)); \
-    x &= 0x3ffff; \
-    if (REGNUM == PC_REGNUM) x >>= 2; \
-    store_unsigned_integer ((TO), 2, x); \
-}
+  d10v_register_convert_to_raw ((TYPE), (REGNUM), (FROM), (TO))
 
 extern CORE_ADDR d10v_make_daddr PARAMS ((CORE_ADDR x));
 #define D10V_MAKE_DADDR(x) (d10v_make_daddr (x))
@@ -251,9 +245,6 @@ extern CORE_ADDR d10v_saved_pc_after_call PARAMS ((struct frame_info *frame));
    d10v_frame_find_saved_regs(frame_info, &(frame_saved_regs))
 
 extern void d10v_frame_find_saved_regs PARAMS ((struct frame_info *, struct frame_saved_regs *));
-
-#define NAMES_HAVE_UNDERSCORE
-
 
 /* DUMMY FRAMES.  Need these to support inferior function calls.  They
    work like this on D10V: First we set a breakpoint at 0 or __start.
