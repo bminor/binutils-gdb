@@ -175,7 +175,7 @@ if ![regexp "start address (\[0-9a-fA-FxX\]+)" $got all origstart] then {
     perror "objdump can not recognize bintest.o"
     set origstart ""
 } else {
-    set got [binutils_run $OBJCOPY "$OBJCOPYFLAGS -O srec $tempfile ${copyfile}.srec --set-start 0x7654"]
+    set got [binutils_run $OBJCOPY "$OBJCOPYFLAGS -O srec --set-start 0x7654 $tempfile ${copyfile}.srec"]
     if ![string match "" $got] then {
 	fail "objcopy --set-start"
     } else {
@@ -192,7 +192,7 @@ if ![regexp "start address (\[0-9a-fA-FxX\]+)" $got all origstart] then {
 	}
     }
 
-    set got [binutils_run $OBJCOPY "$OBJCOPYFLAGS -O srec $tempfile ${copyfile}.srec --adjust-start 0x123"]
+    set got [binutils_run $OBJCOPY "$OBJCOPYFLAGS -O srec --adjust-start 0x123 $tempfile ${copyfile}.srec"]
     if ![string match "" $got] then {
 	fail "objcopy --adjust-start"
     } else {
@@ -237,7 +237,7 @@ while {[regexp $headers_regexp $got all name size vma rest]} {
 if {$low == "" || $origstart == ""} then {
     perror "objdump can not recognize bintest.o"
 } else {
-    set got [binutils_run $OBJCOPY "$OBJCOPYFLAGS -O srec $tempfile ${copyfile}.srec --adjust-vma 0x123"]
+    set got [binutils_run $OBJCOPY "$OBJCOPYFLAGS -O srec --adjust-vma 0x123 $tempfile ${copyfile}.srec"]
     if ![string match "" $got] then {
         fail "objcopy --adjust-vma"
     } else {
@@ -271,7 +271,7 @@ if {$low == "" || $origstart == ""} then {
 	set got $rest
     }
 
-    set got [binutils_run $OBJCOPY "$OBJCOPYFLAGS -O srec $tempfile ${copyfile}.srec $arg"]
+    set got [binutils_run $OBJCOPY "$OBJCOPYFLAGS -O srec $arg $tempfile ${copyfile}.srec"]
     if ![string match "" $got] then {
 	fail "objcopy --adjust-section-vma +"
     } else {
@@ -291,7 +291,7 @@ if {$low == "" || $origstart == ""} then {
     }
 
     regsub -all "\\+4" $arg "=[expr $low + 4]" argeq
-    set got [binutils_run $OBJCOPY "$OBJCOPYFLAGS -O srec $tempfile ${copyfile}.srec $argeq"]
+    set got [binutils_run $OBJCOPY "$OBJCOPYFLAGS -O srec $argeq $tempfile ${copyfile}.srec"]
     if ![string match "" $got] then {
 	fail "objcopy --adjust-section-vma ="
     } else {
