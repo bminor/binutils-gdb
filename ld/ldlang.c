@@ -881,7 +881,34 @@ wild (s, section, file, target, output)
   else
     {
       /* Perform the iteration over a single file */
-      wild_section (s, section, lookup_name (file), output);
+      f = lookup_name (file);
+      if (f->the_bfd == NULL
+	  || ! bfd_check_format (f->the_bfd, bfd_archive))
+	wild_section (s, section, f, output);
+      else
+	{
+	  bfd *member;
+
+	  /* This is an archive file.  We must map each member of the
+             archive separately.  */
+	  member = bfd_openr_next_archived_file (f->the_bfd, (bfd *) NULL);
+	  while (member != NULL)
+	    {
+	      /* When lookup_name is called, it will call the
+                 add_symbols entry point for the archive.  For each
+                 element of the archive which is included, BFD will
+                 call ldlang_add_file, which will set the usrdata
+                 field of the member to the lang_input_statement.  */
+	      if (member->usrdata != NULL)
+		{
+		  wild_section (s, section,
+				(lang_input_statement_type *) member->usrdata,
+				output);
+		}
+
+	      member = bfd_openr_next_archived_file (f->the_bfd, member);
+	    }
+	}
     }
   if (section != (char *) NULL
       && strcmp (section, "COMMON") == 0

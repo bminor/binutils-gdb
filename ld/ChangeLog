@@ -1,3 +1,8 @@
+Mon Mar  4 14:11:17 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldlang.c (wild): Handle foo.a(.text) by mapping each included
+	member of foo.a separately.  From Jouke Numan <jnuman@bazis.nl>.
+
 Fri Mar  1 10:24:59 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_find_exp_assignment):
