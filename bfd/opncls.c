@@ -813,7 +813,7 @@ INTERNAL_FUNCTION
 	bfd_alloc
 
 SYNOPSIS
-	void *bfd_alloc (bfd *abfd, size_t wanted);
+	void *bfd_alloc (bfd *abfd, bfd_size_type wanted);
 
 DESCRIPTION
 	Allocate a block of @var{wanted} bytes of memory attached to
