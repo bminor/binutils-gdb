@@ -1,3 +1,47 @@
+2004-03-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (struct elf_reloc_cookie): Add r_sym_shift field.
+	* elflink.h: Replace all occurrences of sizeof (Elf_External_*)
+	where Elf_External_* is different for 64 and 32 bit, with
+	corresponding elf_size_info field.
+	(struct elf_final_link_info): Use "bfd_byte *" instead
+	of "Elf_External_Sym *" for external_syms and symbuf.
+	(elf_link_adjust_relocs): Set up r_type_mask and r_sym_shift local
+	vars and use instead of ELF_R_INFO and ELF_R_TYPE macros.
+	(struct elf_link_sort_rela): Add "sym_mask" alias for "offset".
+	(elf_link_sort_cmp1): Use sym_mask field instead of ELF_R_SYM.
+	(elf_link_sort_cmp2): Adjust.
+	(elf_link_sort_relocs): Set up r_sym_mask local var instead of
+	using ELF_R_SYM macro.  Set u.sym_mask.
+	(elf_bfd_final_link): Call _bfd_elf_stringtab_init instead of macro
+	version, elf_stringtab_init.  Ditto for bfd_section_from_elf_index
+	vs. section_from_elf_index.  Adjust Elf_External_Sym pointer
+	arithmetic.  Pass bed to elf_link_flush_output_syms.  Adjust
+	Elf_External_Dyn pointer arithmentic.  Use bed swap_dyn_in and
+	swap_syn_out functions.  Rearrange dyn swap in/out switch.
+	(elf_link_output_sym): Adjust Elf_External_Sym pointer arithmentic.
+	Pass bed to elf_link_flush_output_syms.  Use bed swap_symbol_out.
+	(elf_link_flush_output_syms): Add elf_backend_data arg.
+	(elf_link_check_versioned_symbol): Likewise.
+	(elf_link_output_extsym): Pass bed to elf_link_check_versioned_symbol.
+	Adjust Elf_External_Sym pointer arithmetic.  Use bed swap_symbol_out.
+	(elf_link_input_bfd): Use bfd_section_from_elf_index.  Set up
+	r_type_mask and r_sym_shift local vars and use instead of ELF_R_SYM,
+	ELF_R_TYPE and ELF_R_INFO macros.
+	(elf_reloc_link_order): Select ELF32_R_INFO or ELF64_R_INFO invocation
+	based on size rather than using ELF_R_INFO.
+	(elf_gc_mark): Set up r_sym_shift local var and use instead of
+	ELF_R_SYM macro.
+	(struct alloc_got_off_arg): New.
+	(elf_gc_common_finalize_got_offsets): Use elf_size_info instead of
+	ARCH_SIZE.  Pass get entry size down to elf_gc_allocate_got_offsets.
+	(elf_gc_allocate_got_offsets): Adjust.
+	(elf_reloc_symbol_deleted_p): Usee cookie.r_sym_shift instead of
+	ELF_R_SYM.  Use bfd_section_from_elf_index.
+	(elf_bfd_discard_info): Set cookie.r_sym_shift.
+	* elfcode.h (elf_stringtab_init, section_from_elf_index): Delete.
+	(elf_slurp_symbol_table): Use bfd_section_from_elf_index.
+
 2004-03-26  Stan Shebs  <shebs@apple.com>
 
 	Remove MPW support, no longer used.

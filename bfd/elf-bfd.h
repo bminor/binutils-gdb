@@ -492,6 +492,7 @@ struct elf_reloc_cookie
   size_t locsymcount;
   size_t extsymoff;
   struct elf_link_hash_entry **sym_hashes;
+  int r_sym_shift;
   bfd_boolean bad_symtab;
 };
 

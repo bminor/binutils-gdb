@@ -149,10 +149,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define LOG_FILE_ALIGN	2
 #endif
 
-#define elf_stringtab_init _bfd_elf_stringtab_init
-
-#define section_from_elf_index bfd_section_from_elf_index
-
 #ifdef DEBUG
 static void elf_debug_section (int, Elf_Internal_Shdr *);
 static void elf_debug_file (Elf_Internal_Ehdr *);
@@ -1109,8 +1105,8 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
 	  else if (isym->st_shndx < SHN_LORESERVE
 		   || isym->st_shndx > SHN_HIRESERVE)
 	    {
-	      sym->symbol.section = section_from_elf_index (abfd,
-							    isym->st_shndx);
+	      sym->symbol.section = bfd_section_from_elf_index (abfd,
+								isym->st_shndx);
 	      if (sym->symbol.section == NULL)
 		{
 		  /* This symbol is in a section for which we did not
