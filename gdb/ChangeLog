@@ -1,5 +1,7 @@
 Tue Mar 29 21:14:04 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
+	* ch-exp.y:  Implement SIZE(mode_name) and SIZE(expression).
+
 	* ch-lang.c (chill_is_varying_struct):  Magic string is
 	was "<var_length>" is now "__var_length" (more portable).
 

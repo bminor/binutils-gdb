@@ -295,7 +295,7 @@ yyerror PARAMS ((char *));
 %type <voidval>		lower_element
 %type <voidval>		upper_element
 %type <voidval>		first_element
-%type <voidval>		mode_argument
+%type <tval>		mode_argument
 %type <voidval>		upper_lower_argument
 %type <voidval>		length_argument
 %type <voidval>		array_mode_name
@@ -903,14 +903,13 @@ chill_value_built_in_routine_call :
 			{
 			  $$ = 0;	/* FIXME */
 			}
-		|	SIZE '(' location ')'
-			{
-			  $$ = 0;	/* FIXME */
-			}
+		|	SIZE '(' expression ')'
+			{ write_exp_elt_opcode (UNOP_SIZEOF); }
 		|	SIZE '(' mode_argument ')'
-			{
-			  $$ = 0;	/* FIXME */
-			}
+			{ write_exp_elt_opcode (OP_LONG);
+			  write_exp_elt_type (builtin_type_int);
+			  write_exp_elt_longcst ((LONGEST) TYPE_LENGTH ($3));
+			  write_exp_elt_opcode (OP_LONG); }
 		|	UPPER '(' upper_lower_argument ')'
 			{
 			  $$ = 0;	/* FIXME */
@@ -927,7 +926,7 @@ chill_value_built_in_routine_call :
 
 mode_argument :		mode_name
 			{
-			  $$ = 0;	/* FIXME */
+			  $$ = $1.type;
 			}
 		|	array_mode_name '(' expression ')'
 			{
