@@ -1,5 +1,9 @@
 2004-12-10  Ian Lance Taylor  <ian@wasabisystems.com>
 
+	* config/tc-mips.c (macro) [M_LA_AB]: Give an error for a offset
+	which is too large in the case of NO_PIC without 64-bit
+	addresses.
+
 	* config/tc-mips.c (mips_in_shared): New static variable.
 	(macro_build_lui): Permit "_gp" if !mips_in_shared.
 	(md_longopts): Add -mshared and -mno-shared.

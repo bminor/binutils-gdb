@@ -4996,6 +4996,8 @@ macro (struct mips_cl_insn *ip)
 			       tempreg, mips_gp_register, BFD_RELOC_GPREL16);
 		  relax_switch ();
 		}
+	      if (!IS_SEXT_32BIT_NUM (offset_expr.X_add_number))
+		as_bad (_("offset too large"));
 	      macro_build_lui (&offset_expr, tempreg);
 	      macro_build (&offset_expr, ADDRESS_ADDI_INSN, "t,r,j",
 			   tempreg, tempreg, BFD_RELOC_LO16);
