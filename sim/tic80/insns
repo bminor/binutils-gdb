@@ -295,27 +295,24 @@ void::function::do_cmnd:signed32 source
 // cmp
 unsigned32::function::cmp_vals:signed32 s1, unsigned32 u1, signed32 s2, unsigned32 u2
 	unsigned32 field = 0;
-	if (s1 == s2) field |= BIT32 (0);
-	if (s1 != s2) field |= BIT32 (1);
-	if (s1 >  s2) field |= BIT32 (2);
-	if (s1 <= s2) field |= BIT32 (3);
-	if (s1 <  s2) field |= BIT32 (4);
-	if (s1 >= s2) field |= BIT32 (5);
-	if (u1 >  u2) field |= BIT32 (6);
-	if (u1 <= u2) field |= BIT32 (7);
-	if (u1 <  u2) field |= BIT32 (8);
-	if (u1 >= u2) field |= BIT32 (9);
+	if (s1 == s2) field |= 0x001;
+	if (s1 != s2) field |= 0x002;
+	if (s1 >  s2) field |= 0x004;
+	if (s1 <= s2) field |= 0x008;
+	if (s1 <  s2) field |= 0x010;
+	if (s1 >= s2) field |= 0x020;
+	if (u1 >  u2) field |= 0x040;
+	if (u1 <= u2) field |= 0x080;
+	if (u1 <  u2) field |= 0x100;
+	if (u1 >= u2) field |= 0x200;
 	return field;
 void::function::do_cmp:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
 	unsigned32 field = 0;
-	field |= INSERTED32 (cmp_vals (_SD, Source2, Source1, Source2, Source2),
-	                     29, 20);
-	field |= INSERTED32 (cmp_vals (_SD, (signed16)Source1, (unsigned16)Source1,
-	                               (signed16)Source2, (unsigned16)Source2),
-	                     19, 10);
-	field |= INSERTED32 (cmp_vals (_SD, (signed8)Source1, (unsigned8)Source1,
-	                               (signed8)Source2, (unsigned8)Source2),
-	                     9, 0);
+	field |= cmp_vals (_SD, Source1, Source1, Source2, Source2) << 20;
+	field |= cmp_vals (_SD, (signed16)Source1, (unsigned16)Source1,
+			   (signed16)Source2, (unsigned16)Source2) << 10;
+	field |= cmp_vals (_SD, (signed8)Source1, (unsigned8)Source1,
+			    (signed8)Source2, (unsigned8)Source2);
 	TRACE_ALU3 (MY_INDEX, field, Source1, Source2);
 	*rDest = field;
 31.Dest,26.Source2,21.0b1010000,14.SignedImmediate::::cmp i
