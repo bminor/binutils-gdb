@@ -1,3 +1,21 @@
+Wed Apr  2 14:34:19 1997 Andrew Cagney <cagney@kremvax.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Thu Mar 20 11:58:02 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* simops.c: Fix register extraction for a two "movbu" variants.
+	Somewhat simplify "sub" instructions.
+	Correctly sign extend operands for "mul".  Put the correct
+	half of the result in MDR for "mul" and "mulu".
+	Implement remaining instructions.
+	Tweak opcode for "syscall".
+
+Tue Mar 18 14:21:21 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* simops.c: Do syscall emulation in "syscall" instruction.  Add
+	dummy "trap" instruction.
+
 Wed Mar 19 01:14:00 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

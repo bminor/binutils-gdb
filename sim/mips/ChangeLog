@@ -1,3 +1,15 @@
+Wed Apr  2 14:34:19 1997 Andrew Cagney <cagney@kremvax.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Tue Mar 25 11:38:22 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* interp.c (sim_open): Set optind to 0 before calling getopt.
+
+Wed Mar 19 01:14:00 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Mon Mar 17 10:52:59 1997  Gavin Koch  <gavin@cetus.cygnus.com>
 
 	* interp.c : Replace uses of pr_addr with pr_uword64

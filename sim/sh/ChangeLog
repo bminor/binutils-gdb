@@ -1,3 +1,15 @@
+Wed Apr  2 14:34:19 1997 Andrew Cagney <cagney@kremvax.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Wed Mar 19 09:34:36 1997  Fred Fish  <fnf@cygnus.com>
+
+	* interp.c (sim_do_command): Check for NULL command or empty
+	string and handle it the same as a "help" command.  Use callback
+ 	to print error message for unrecognized commands.  Replace
+	hardcoded tab in literal string with a \t.  Other minor code
+ 	cleanup.
+
 Wed Mar 19 01:14:00 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

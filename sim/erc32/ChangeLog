@@ -1,3 +1,11 @@
+Wed Apr  2 14:34:19 1997 Andrew Cagney <cagney@kremvax.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Mon Mar 17 15:10:07 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* configure: Re-generate.
+
 Thu Mar 13 12:46:04 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* interf.c (sim_open): New SIM_DESC result.  Argument is now in

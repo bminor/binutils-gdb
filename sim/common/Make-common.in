@@ -162,6 +162,74 @@ targ-map.c: gentmap
 	rm -f targ-map.c
 	./gentmap -c >targ-map.c
 
+
+#
+# Rules for building sim-* components.  Triggered by listing the corresponding
+# .o file in the list of simulator targets.
+#
+
+sim-assert_h = $(srcdir)/../common/sim-assert.h
+sim-endian_h = $(srcdir)/../common/sim-endian.h
+sim-n-endian_h = $(srcdir)/../common/sim-n-endian.h
+sim-bits_h = $(srcdir)/../common/sim-bits.h
+sim-config_h = $(srcdir)/../common/sim-config.h
+sim-n-bits_h = $(srcdir)/../common/sim-n-bits.h
+sim-core_h = $(srcdir)/../common/sim-core.h
+sim-n-core_h = $(srcdir)/../common/sim-n-core.h
+sim-events_h = $(srcdir)/../common/sim-events.h
+sim-io_h = $(srcdir)/../common/sim-io.h
+sim-n-io_h = $(srcdir)/../common/sim-n-io.h
+
+sim-bits.o: sim-bits.c $(sim-bits_h) $(sim-n-bits_h) $(sim-assert_h)
+sim-bits.c: $(srcdir)/../common/sim-bits.c
+	rm -f $@ tmp-$@
+	echo "# 1 \"$(srcdir)/../common/$@\"" > tmp-$@
+	cat $(srcdir)/../common/$@ >> tmp-$@
+	$(srcdir)/../../move-if-change tmp-$@ $@
+
+sim-config.o: sim-config.c $(sim-config_h) $(sim-nconfig_h) $(sim-assert_h)
+sim-config.c: $(srcdir)/../common/sim-config.c
+	rm -f $@ tmp-$@
+	echo "# 1 \"$(srcdir)/../common/$@\"" > tmp-$@
+	cat $(srcdir)/../common/$@ >> tmp-$@
+	$(srcdir)/../../move-if-change tmp-$@ $@
+
+sim-core.o: sim-core.c $(sim-core_h) $(sim-n-core_h)
+sim-core.c: $(srcdir)/../common/sim-core.c
+	rm -f $@ tmp-$@
+	echo "# 1 \"$(srcdir)/../common/$@\"" > tmp-$@
+	cat $(srcdir)/../common/$@ >> tmp-$@
+	$(srcdir)/../../move-if-change tmp-$@ $@
+
+sim-endian.o: sim-endian.c $(sim-endian_h) $(sim-n-endian_h) $(sim-assert_h)
+sim-endian.c: $(srcdir)/../common/sim-endian.c
+	rm -f $@ tmp-$@
+	echo "# 1 \"$(srcdir)/../common/$@\"" > tmp-$@
+	cat $(srcdir)/../common/$@ >> tmp-$@
+	$(srcdir)/../../move-if-change tmp-$@ $@
+
+sim-events.o: sim-events.c $(sim-events_h) $(sim-assert_h)
+sim-events.c: $(srcdir)/../common/sim-events.c
+	rm -f $@ tmp-$@
+	echo "# 1 \"$(srcdir)/../common/$@\"" > tmp-$@
+	cat $(srcdir)/../common/$@ >> tmp-$@
+	$(srcdir)/../../move-if-change tmp-$@ $@
+
+sim-inline.c: $(srcdir)/../common/sim-inline.c
+	rm -f $@ tmp-$@
+	echo "# 1 \"$(srcdir)/../common/$@\"" > tmp-$@
+	cat $(srcdir)/../common/$@ >> tmp-$@
+	$(srcdir)/../../move-if-change tmp-$@ $@
+
+sim-io.o: sim-io.c $(sim-io_h) $(sim-assert_h)
+sim-io.c: $(srcdir)/../common/sim-io.c
+	rm -f $@ tmp-$@
+	echo "# 1 \"$(srcdir)/../common/$@\"" > tmp-$@
+	cat $(srcdir)/../common/$@ >> tmp-$@
+	$(srcdir)/../../move-if-change tmp-$@ $@
+
+
+
 install: install-common $(SIM_EXTRA_INSTALL)
 
 install-common:
@@ -185,6 +253,7 @@ clean: $(SIM_EXTRA_CLEAN)
 	rm -f *.[oa] *~ core
 	rm -f run libsim.a
 	rm -f gentmap targ-map.c targ-vals.h
+	rm -f sim-bits.c sim-config.c sim-core.c sim-endian.c sim-events.c sim-inline.c sim-io.c
 
 distclean mostlyclean maintainer-clean realclean: clean
 	rm -f TAGS

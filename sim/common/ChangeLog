@@ -1,3 +1,41 @@
+Wed Apr  2 14:34:19 1997 Andrew Cagney <cagney@kremvax.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Wed Apr  2 11:08:11 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* sim-config.h (WITH_ALIGNMENT, WITH_FLOATING_POINT,
+ 	WITH_XOR_ENDIAN, WITH_SMP, WITH_RESERVED_BITS): Assume that these
+ 	are defined by the configure.
+
+	* aclocal.m4 (sim-stdio): Add option stdio from ../ppc configure.
+	
+	* aclocal.m4 (floating-point, xor-endian, alignment, smp,
+ 	reserved-bits): Always define.
+	
+	* sim-config.h, sim-config.c (sim_config): New function - and new
+ 	file - co-ordinate the setting/checking of the common simulator
+ 	configuration options.
+
+	* Make-common.in (sim-config.o): Add rule.
+
+Fri Mar 28 15:32:00 1997  Mike Meissner  <meissner@cygnus.com>
+
+	* callback.c (os_{,e}vprintf_filtered): Change stdarg type to
+	va_list from void *, since va_list might not be a pointer type.
+
+Mon Mar 24 15:27:12 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* sim-n-endian.h (offset_N): Correct assertion - word and sub word
+ 	in wrong order.
+	(offset_N): Correct computation of LE offset.
+
+	* sim-io.c (sim_io_error): Include a new line when reporting
+ 	errors.
+
+	* sim-assert.h (SIM_FILTER_PATH): Out by one when locating last
+ 	`/'.
+
 Thu Mar 20 22:31:06 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* run.c: Include alloca-conf.h.

@@ -18,6 +18,8 @@ ac_help="$ac_help
 ac_help="$ac_help
   --enable-sim-debug=opts		Enable debugging flags"
 ac_help="$ac_help
+  --enable-sim-stdio			Specify whether to use stdio for console input/output."
+ac_help="$ac_help
   --enable-sim-trace=opts		Enable tracing flags"
 
 # Initialize some variables set by options.
@@ -736,7 +738,7 @@ else
   yes;
 #endif
 EOF
-if { ac_try='${CC-cc} -E conftest.c'; { (eval echo configure:740: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }; } | egrep yes >/dev/null 2>&1; then
+if { ac_try='${CC-cc} -E conftest.c'; { (eval echo configure:742: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }; } | egrep yes >/dev/null 2>&1; then
   ac_cv_prog_gcc=yes
 else
   ac_cv_prog_gcc=no
@@ -843,11 +845,11 @@ else
   ac_cv_c_cross=yes
 else
 cat > conftest.$ac_ext <<EOF
-#line 847 "configure"
+#line 849 "configure"
 #include "confdefs.h"
 main(){return(0);}
 EOF
-{ (eval echo configure:851: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }
+{ (eval echo configure:853: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }
 if test -s conftest && (./conftest; exit) 2>/dev/null; then
   ac_cv_c_cross=no
 else
@@ -904,11 +906,6 @@ fi
 
 
 
-
-
-
-
-
 # Check whether --enable-sim-bswap or --disable-sim-bswap was given.
 if test "${enable_sim_bswap+set}" = set; then
   enableval="$enable_sim_bswap"
@@ -961,33 +958,20 @@ fi
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# Check whether --enable-sim-stdio or --disable-sim-stdio was given.
+if test "${enable_sim_stdio+set}" = set; then
+  enableval="$enable_sim_stdio"
+  case "${enableval}" in
+  yes)	sim_stdio="-DWITH_STDIO=DO_USE_STDIO";;
+  no)	sim_stdio="-DWITH_STDIO=DONT_USE_STDIO";;
+  *)	{ echo "configure: error: "Unknown value $enableval passed to --enable-sim-stdio"" 1>&2; exit 1; }; sim_stdio="";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_stdio" != x""; then
+  echo "Setting stdio flags = $sim_stdio" 6>&1
+fi
+else
+  sim_stdio=""
+fi
 
 
 
@@ -1005,11 +989,6 @@ fi
 else
   sim_trace=""
 fi
-
-
-
-
-
 
 
 
@@ -1077,13 +1056,13 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 1081 "configure"
+#line 1060 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1087: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1066: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   :
@@ -1092,13 +1071,13 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 1096 "configure"
+#line 1075 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1102: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1081: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   :
@@ -1126,12 +1105,12 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1130 "configure"
+#line 1109 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1135: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1114: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1298,6 +1277,7 @@ s%@RANLIB@%$RANLIB%g
 s%@sim_bswap@%$sim_bswap%g
 s%@sim_cflags@%$sim_cflags%g
 s%@sim_debug@%$sim_debug%g
+s%@sim_stdio@%$sim_stdio%g
 s%@sim_trace@%$sim_trace%g
 s%@CPP_FOR_TARGET@%$CPP_FOR_TARGET%g
 s%@TARGET_SUBDIR@%$TARGET_SUBDIR%g
