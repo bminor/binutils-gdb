@@ -40,3 +40,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Breakpoint patching is handled at the target end in VxWorks.  */
 /* #define BREAKPOINT {0x00, 0x3e, 0x00, 0x66} */
+
+/* Number of registers in a ptrace_getregs call. */
+
+#define VX_NUM_REGS (16 + 16 + 3)
+
+/* Number of registers in a ptrace_getfpregs call. */
+
+    /* @@ Can't use this -- the rdb library for the 960 target
+       doesn't support setting or retrieving FP regs.  KR  */
+
+/* #define VX_SIZE_FPREGS (REGISTER_RAW_SIZE (FP0_REGNUM) * 4) */

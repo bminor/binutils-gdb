@@ -385,11 +385,7 @@ vx_read_register (regno)
   
   ptrace_in.pid = inferior_pid;
   ptrace_out.info.more_data = (caddr_t) &out_data;
-#ifndef I80960
-  out_data.len   = 18 * REGISTER_RAW_SIZE (0);		/* FIXME m68k hack */
-#else
-  out_data.len = (16 + 16 + 3) * REGISTER_RAW_SIZE (0);
-#endif
+  out_data.len   = VX_NUM_REGS * REGISTER_RAW_SIZE (0);
   out_data.bytes = (caddr_t) registers;
   
   status = net_ptrace_clnt_call (PTRACE_GETREGS, &ptrace_in, &ptrace_out);
@@ -401,50 +397,17 @@ vx_read_register (regno)
       perror_with_name ("net_ptrace_clnt_call(PTRACE_GETREGS)");
     }
   
-#ifdef I80960
-
-  {
+#ifdef VX_SIZE_FPREGS
     /* If the target has floating point registers, fetch them.
        Otherwise, zero the floating point register values in
        registers[] for good measure, even though we might not
        need to.  */
-    /* @@ Can't use this -- the rdb library for the 960 target
-       doesn't support setting or retrieving FP regs.  KR  */
-#if 0
-    struct fp_status inferior_fp_registers;
-
-    if (target_has_fp)
-      {
-	ptrace_in.pid = inferior_pid;
-	ptrace_out.info.more_data = (caddr_t) &inferior_fp_registers;
-	status = net_ptrace_clnt_call (PTRACE_GETFPREGS,
-				       &ptrace_in, &ptrace_out);
-	if (status)
-	  error (rpcerr);
-	if (ptrace_out.status == -1)
-	  {
-	    errno = ptrace_out.errno;
-	    perror_with_name ("net_ptrace_clnt_call(PTRACE_GETFPREGS)");
-	  }
-
-	bcopy (&inferior_fp_registers, &registers[REGISTER_BYTE (FP0_REGNUM)],
-	       REGISTER_RAW_SIZE (FP0_REGNUM) * 4);
-      }
-    else
-      {
-	bzero ((char *) &registers[REGISTER_BYTE (FP0_REGNUM)],
-	       REGISTER_RAW_SIZE (FP0_REGNUM) * 4);
-      }
-#endif
-  }
-#else  /* not 960, thus must be 68000:  FIXME!  */
 
   if (target_has_fp)
     {
       ptrace_in.pid = inferior_pid;
       ptrace_out.info.more_data = (caddr_t) &out_data;
-      out_data.len   =  8 * REGISTER_RAW_SIZE (FP0_REGNUM)	/* FIXME */
-		     + (3 * sizeof (REGISTER_TYPE));
+      out_data.len   =  VX_SIZE_FPREGS;
       out_data.bytes = (caddr_t) &registers[REGISTER_BYTE (FP0_REGNUM)];
   
       status = net_ptrace_clnt_call (PTRACE_GETFPREGS, &ptrace_in, &ptrace_out);
@@ -458,12 +421,9 @@ vx_read_register (regno)
     }
   else
     {
-      bzero (&registers[REGISTER_BYTE (FP0_REGNUM)],
-      	     8 * REGISTER_RAW_SIZE (FP0_REGNUM));
-      bzero (&registers[REGISTER_BYTE (FPC_REGNUM)],
-	     3 * sizeof (REGISTER_TYPE));
+      bzero (&registers[REGISTER_BYTE (FP0_REGNUM)], VX_SIZE_FPREGS);
     }
-#endif  /* various architectures */
+#endif /* VX_SIZE_FPREGS */
 }
 
 /* Prepare to store registers.  Since we will store all of them,
@@ -502,15 +462,7 @@ vx_write_register (regno)
 
   in_data.bytes = registers;
 
-#ifdef I80960
-
-  in_data.len = (16 + 16 + 3) * sizeof (REGISTER_TYPE);
-
-#else  /* not 960 -- assume m68k -- FIXME */
-
-  in_data.len = 18 * sizeof (REGISTER_TYPE);
-
-#endif  /* Different register sets */
+  in_data.len = VX_NUM_REGS * sizeof (REGISTER_TYPE);
 
   /* XXX change second param to be a proc number */
   status = net_ptrace_clnt_call (PTRACE_SETREGS, &ptrace_in, &ptrace_out);
@@ -522,6 +474,7 @@ vx_write_register (regno)
       perror_with_name ("net_ptrace_clnt_call(PTRACE_SETREGS)");
     }
 
+#ifdef VX_SIZE_FPREGS
   /* Store floating point registers if the target has them.  */
 
   if (target_has_fp)
@@ -531,18 +484,8 @@ vx_write_register (regno)
       ptrace_in.info.more_data = (caddr_t) &in_data;
 
 
-#ifdef I80960
-#if 0 /* @@ Not supported by target.  */
       in_data.bytes = &registers[REGISTER_BYTE (FP0_REGNUM)];
-      in_data.len = 4 * REGISTER_RAW_SIZE (FP0_REGNUM);
-#endif
-#else  /* not 960 -- assume m68k -- FIXME */
-
-      in_data.bytes = &registers[REGISTER_BYTE (FP0_REGNUM)];
-      in_data.len = (8 * REGISTER_RAW_SIZE (FP0_REGNUM)
-                      + (3 * sizeof (REGISTER_TYPE)));
-
-#endif  /* Different register sets */
+      in_data.len = VX_SIZE_FPREGS;
 
       status = net_ptrace_clnt_call (PTRACE_SETFPREGS, &ptrace_in, &ptrace_out);
       if (status)
@@ -553,6 +496,7 @@ vx_write_register (regno)
 	  perror_with_name ("net_ptrace_clnt_call(PTRACE_SETFPREGS)");
 	}
     }
+#endif  /* VX_SIZE_FPREGS */
 }
 
 /* Copy LEN bytes to or from remote inferior's memory starting at MEMADDR

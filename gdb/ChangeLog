@@ -1,3 +1,11 @@
+Tue Jun  8 13:45:07 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* remove-vx.c (vx_read_register, vx_write_register): collapse
+	  ifdef I80960 else (assumes) m68k into parameterizable macros
+	  VX_NUM_REGS and VX_SIZE_FPREGS.
+	* config/m68k/tm-vx68.h, config/i960/tm-vx960.h (VX_NUM_REGS,
+	  VX_SIZE_FPREGS): new definitions.
+
 Tue Jun  8 11:08:29 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* symfile.{c,h} (generic_load): New function.

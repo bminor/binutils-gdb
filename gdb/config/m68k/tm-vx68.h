@@ -76,3 +76,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    This routine returns true on success */
 
 #define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)
+
+/* Number of registers in a ptrace_getregs call. */
+
+#define VX_NUM_REGS (18)
+
+/* Number of registers in a ptrace_getfpregs call. */
+
+#define VX_SIZE_FPREGS (8 * REGISTER_RAW_SIZE (FP0_REGNUM) \
+			+ (3 * sizeof (REGISTER_TYPE)))
