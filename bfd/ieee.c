@@ -847,8 +847,8 @@ DEFUN(ieee_slurp_sections,(abfd),
 {
   ieee_data_type *ieee = IEEE_DATA(abfd);
   file_ptr offset = ieee->w.r.section_part;
-
   asection *section = (asection *)NULL;
+  char *name;
 
   if (offset != 0) {
     bfd_byte section_type[3];
