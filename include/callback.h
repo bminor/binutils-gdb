@@ -22,12 +22,16 @@ struct host_callback_struct
   int (*write_stdout) PARAMS ((host_callback *, const char *, int));
 
   /* Used when the target has gone away, so we can close open
-     handles and free memory etc etc. */
+     handles and free memory etc etc.  */
   int (*shutdown) PARAMS ((host_callback *));
   int (*init)     PARAMS ((host_callback *));
 
-  /* Talk to the user on a console. */
+  /* Talk to the user on a console.  */
   void (*printf_filtered) PARAMS ((host_callback *, const char *, ...));
+  /* Print an error message and "exit".
+     In the case of gdb "exiting" means doing a longjmp back to the main
+     command loop.  */
+  void (*error) PARAMS ((host_callback *, const char *, ...));
 
   int last_errno;		/* host format */
 
