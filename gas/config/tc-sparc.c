@@ -279,7 +279,11 @@ sparc_target_format ()
   return "a.out-sparc-netbsd";
 #else
 #ifdef TE_SPARCAOUT
-  return target_big_endian ? "a.out-sunos-big" : "a.out-sparc-little";
+  if (target_big_endian)
+    return "a.out-sunos-big";
+  else if (default_arch_type == sparc86x && target_little_endian_data)
+    return "a.out-sunos-big";
+  else return "a.out-sparc-little";
 #else
   return "a.out-sunos-big";
 #endif
@@ -1154,8 +1158,13 @@ sparc_ip (str, pinsn)
   int comma = 0;
   int v9_arg_p;
 
-  for (s = str; islower ((unsigned char) *s) || (*s >= '0' && *s <= '3'); ++s)
-    ;
+  s = str;
+  if (islower ((unsigned char) *s))
+    {
+      do
+	++s;
+      while (islower ((unsigned char) *s) || isdigit ((unsigned char) *s));
+    }
 
   switch (*s)
     {
@@ -2453,7 +2462,11 @@ md_number_to_chars (buf, val, n)
 {
   if (target_big_endian)
     number_to_chars_bigendian (buf, val, n);
-  else
+  else if (target_little_endian_data
+	   && ((n == 4 || n == 2) && ~now_seg->flags & SEC_ALLOC))
+    /* Output debug words, which are not in allocated sections, as big endian */
+    number_to_chars_bigendian (buf, val, n);
+  else if (target_little_endian_data || ! target_big_endian)
     number_to_chars_littleendian (buf, val, n);
 }
 
@@ -2555,7 +2568,7 @@ md_apply_fix3 (fixP, value, segment)
       md_number_to_chars (buf, val, 2);
     }
   else if (fixP->fx_r_type == BFD_RELOC_32
-	   || fixP->fx_r_type == BFD_RELOC_SPARC_32LE)
+	   || fixP->fx_r_type == BFD_RELOC_SPARC_REV32)
     {
       md_number_to_chars (buf, val, 4);
     }
@@ -2793,7 +2806,7 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_SPARC_L44:
     case BFD_RELOC_SPARC_HIX22:
     case BFD_RELOC_SPARC_LOX10:
-    case BFD_RELOC_SPARC_32LE:
+    case BFD_RELOC_SPARC_REV32:
       code = fixp->fx_r_type;
       break;
     default:
@@ -3092,6 +3105,10 @@ s_reserve (ignore)
 	  S_SET_SEGMENT (symbolP, bss_section);
 
 	  subseg_set (current_seg, current_subseg);
+
+#ifdef OBJ_ELF
+	  S_SET_SIZE (symbolP, size);
+#endif
 	}
     }
   else
@@ -3220,6 +3237,7 @@ s_common (ignore)
 	  *p = 0;
 	  S_SET_SEGMENT (symbolP, bss_section);
 	  S_CLEAR_EXTERNAL (symbolP);
+	  S_SET_SIZE (symbolP, size);
 	  subseg_set (old_sec, old_subsec);
 	}
       else
@@ -3229,6 +3247,7 @@ s_common (ignore)
 	  S_SET_VALUE (symbolP, (valueT) size);
 #ifdef OBJ_ELF
 	  S_SET_ALIGN (symbolP, temp);
+	  S_SET_SIZE (symbolP, size);
 #endif
 	  S_SET_EXTERNAL (symbolP);
 	  S_SET_SEGMENT (symbolP, bfd_com_section_ptr);
@@ -3496,9 +3515,8 @@ cons_fix_new_sparc (frag, where, nbytes, exp)
        (nbytes == 2 ? BFD_RELOC_16 :
 	(nbytes == 4 ? BFD_RELOC_32 : BFD_RELOC_64)));
 
-#ifdef OBJ_ELF
-  if (target_little_endian_data && nbytes == 4)
-    r = BFD_RELOC_SPARC_32LE;
-#endif  
+  if (target_little_endian_data && nbytes == 4
+      && now_seg->flags & SEC_ALLOC)  
+    r = BFD_RELOC_SPARC_REV32;
   fix_new_exp (frag, where, (int) nbytes, exp, 0, r);
 }

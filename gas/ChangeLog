@@ -1,3 +1,8 @@
+Tue Sep  1 15:01:33 1998  Jakub Jelinek <jj@sunsite.ms.mff.cuni.cz>
+
+	* config/tc-sparc.c (sparc_ip): Allow all digits in an instruction
+	to handle edge8 and edge16.
+
 Mon Aug 31 09:51:14 1998  Richard Henderson  <rth@cygnus.com>
 
 	* config/obj-elf.c (obj_elf_vtable_inherit): Print error message
