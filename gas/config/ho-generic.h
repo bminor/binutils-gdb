@@ -25,6 +25,8 @@
 
 #define HAVE_STRERROR
 
+#include <string.h>
+
 #ifdef __STDC__
 extern void *malloc (), *realloc ();
 #else
