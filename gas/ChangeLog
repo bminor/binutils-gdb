@@ -1,3 +1,10 @@
+2003-10-29  Phil Edwards  <phil@codesourcery.com>
+
+	* configure.in (arm-*-vxworks, i386-*-vxworks, mips-*-vxworks,
+	ppc-*-vxworks, ppc-*-windiss):  Remove separate outdated stanzas.
+	(*-*-vxworks, *-*-windiss):  Use common stanzas, all ELF.
+	* configure:  Regenerated.
+
 2003-10-27  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* ChangeLog: Fix typos.

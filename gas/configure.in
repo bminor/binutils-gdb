@@ -217,7 +217,6 @@ changequote([,])dnl
       arm-*-wince)			fmt=coff em=wince-pe ;;
       arm-*-pe | thumb-*-pe)		fmt=coff em=pe ;;
       arm-*-riscix*)			fmt=aout em=riscix ;;
-      arm-*-vxworks)			fmt=coff ;;
 
       avr-*-*)				fmt=elf ;;
 
@@ -315,7 +314,6 @@ changequote([,])dnl
       i386-*-mingw32*)			fmt=coff em=pe ;;
       i386-*-nto-qnx*)			fmt=elf ;;
       i386-*-*nt*)			fmt=coff em=pe ;;
-      i386-*-vxworks*)			fmt=aout ;;
       i386-*-chaos)			fmt=elf ;;
 
       i860-*-*)				fmt=elf endian=little
@@ -393,7 +391,6 @@ changequote([,])dnl
       mips-*-elf* | mips-*-rtems*)	fmt=elf ;;
       mips-*-netbsd*)			fmt=elf ;;
       mips-*-openbsd*)			fmt=elf ;;
-      mips-*-vxworks*)			fmt=elf ;;
 
       mmix-*-*)				fmt=elf ;;
       mn10200-*-*)			fmt=elf ;;
@@ -429,8 +426,6 @@ changequote([,])dnl
       ppc-*-macos* | ppc-*-mpw*)	fmt=coff em=macos ;;
       ppc-*-netware*)			fmt=elf em=ppcnw ;;
       ppc-**-nto*)			fmt=elf ;;
-      ppc-*-vxworks*)			fmt=elf ;;
-      ppc-*-windiss*)			fmt=elf ;;
       ppc-*-kaos*)			fmt=elf ;;
 
       s390x-*-linux-gnu*)		fmt=elf em=linux ;;
@@ -514,8 +509,8 @@ changequote([,])dnl
       *-*-xray | *-*-hms)		fmt=coff ;;
       *-*-sim)				fmt=coff ;;
       *-*-elf | *-*-sysv4* | *-*-solaris*) fmt=elf dev=yes ;;
-      *-*-aros*)				fmt=elf em=linux bfd_gas=yes ;;
-      *-*-vxworks)			fmt=aout ;;
+      *-*-aros*)			fmt=elf em=linux bfd_gas=yes ;;
+      *-*-vxworks | *-*-windiss)	fmt=elf ;;
       *-*-netware)			fmt=elf ;;
     esac
 
