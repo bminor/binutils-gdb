@@ -45,21 +45,22 @@ ADDR2LINE_PROG=addr2line
 NLMCONV_PROG=nlmconv
 DLLTOOL_PROG=dlltool
 WINDRES_PROG=windres
+DLLWRAP_PROG=dllwrap
 
 SRCONV_PROG=srconv$(EXEEXT) sysdump$(EXEEXT) coffdump$(EXEEXT) 
 
 man_MANS = ar.1 nm.1 objdump.1 ranlib.1 size.1 strings.1 strip.1 objcopy.1 \
 	addr2line.1 nlmconv.1 $(DEMANGLER_PROG).1
 
-PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ $(ADDR2LINE_PROG) $(READELF_PROG)
+PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ $(ADDR2LINE_PROG) $(READELF_PROG) @BUILD_DLLWRAP@
 
-bin_PROGRAMS = $(SIZE_PROG) $(OBJDUMP_PROG) $(AR_PROG) $(STRINGS_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ $(ADDR2LINE_PROG) $(READELF_PROG)
+bin_PROGRAMS = $(SIZE_PROG) $(OBJDUMP_PROG) $(AR_PROG) $(STRINGS_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ $(ADDR2LINE_PROG) $(READELF_PROG) @BUILD_DLLWRAP@
 
 ## We need a special rule to install the programs which are built with -new
 noinst_PROGRAMS = $(NM_PROG) $(STRIP_PROG)
 
 EXTRA_PROGRAMS = $(NLMCONV_PROG) srconv sysdump coffdump $(DLLTOOL_PROG) \
-	$(WINDRES_PROG)	
+	$(WINDRES_PROG)	$(DLLWRAP_PROG)
 
 # Stuff that goes in tooldir/ if appropriate
 TOOL_PROGS = nm-new strip-new ar ranlib dlltool
@@ -73,7 +74,7 @@ DEP = mkdep
 INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) @HDEFINES@ -I$(srcdir)/../intl -I../intl -DLOCALEDIR="\"$(prefix)/share/locale\""
 
 HFILES = arsup.h bucomm.h budbg.h coffgrok.h debug.h nlmconv.h dlltool.h \
-	windres.h winduni.h
+	windres.h winduni.h dyn-string.h
 
 GENERATED_HFILES = arparse.h sysroff.h sysinfo.h defparse.h
 
@@ -83,7 +84,7 @@ CFILES = addr2line.c ar.c arsup.c bucomm.c coffdump.c coffgrok.c debug.c \
 	objcopy.c objdump.c prdbg.c rdcoff.c rddbg.c size.c srconv.c \
 	stabs.c strings.c sysdump.c version.c wrstabs.c \
 	windres.c resrc.c rescoff.c resbin.c winduni.c readelf.c \
-	resres.c
+	resres.c dyn-string.c dllwrap.c
 
 GENERATED_CFILES = \
 	underscore.c arparse.c arlex.c sysroff.c sysinfo.c syslex.c \
@@ -255,6 +256,9 @@ nlmconv_SOURCES = nlmconv.c nlmheader.y $(BULIBS)
 windres_SOURCES = windres.c resrc.c rescoff.c resbin.c rcparse.y rclex.l \
 	winduni.c resres.c $(BULIBS)
 windres_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
+
+dllwrap_SOURCES = dllwrap.c dyn-string.c 
+dllwrap_LDADD = $(LIBIBERTY)
 
 DISTSTUFF = arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h \
 	syslex.c deflex.c defparse.h defparse.c rclex.c rcparse.h rcparse.c
@@ -456,7 +460,7 @@ readelf.o: readelf.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/elf/m32r.h $(INCDIR)/elf/d10v.h $(INCDIR)/elf/d30v.h \
   $(INCDIR)/elf/sh.h $(INCDIR)/elf/mn10200.h $(INCDIR)/elf/mn10300.h \
   $(INCDIR)/elf/hppa.h $(INCDIR)/elf/arc.h bucomm.h config.h \
-  $(INCDIR)/fopen-same.h $(INCDIR)/getopt.h
+  $(INCDIR)/fopen-same.h $(INCDIR)/getopt.h $(INCDIR)/elf/fr30.h
 underscore.o: underscore.c
 arparse.o: arparse.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h arsup.h
@@ -477,5 +481,7 @@ rcparse.o: rcparse.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
 rclex.o: rclex.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
   windres.h winduni.h rcparse.h
+dllwrap.o: dllwrap.c dyn-string.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/getopt.h config.h $(INCDIR)/libiberty.h 
 
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY

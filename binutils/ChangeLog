@@ -1,3 +1,8 @@
+Tue Nov 10 15:31:52 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* Makefile.am: Add dependency of readelf.c on elf/fr30.h
+	* Makefile.in: Regenerate.
+
 Wed Nov  4 16:25:55 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* readelf.c: Add support for the FR30. 

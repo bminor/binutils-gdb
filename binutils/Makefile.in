@@ -146,20 +146,21 @@ ADDR2LINE_PROG=addr2line
 NLMCONV_PROG=nlmconv
 DLLTOOL_PROG=dlltool
 WINDRES_PROG=windres
+DLLWRAP_PROG=dllwrap
 
 SRCONV_PROG=srconv$(EXEEXT) sysdump$(EXEEXT) coffdump$(EXEEXT) 
 
 man_MANS = ar.1 nm.1 objdump.1 ranlib.1 size.1 strings.1 strip.1 objcopy.1 \
 	addr2line.1 nlmconv.1 $(DEMANGLER_PROG).1
 
-PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ $(ADDR2LINE_PROG) $(READELF_PROG)
+PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ $(ADDR2LINE_PROG) $(READELF_PROG) @BUILD_DLLWRAP@
 
-bin_PROGRAMS = $(SIZE_PROG) $(OBJDUMP_PROG) $(AR_PROG) $(STRINGS_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ $(ADDR2LINE_PROG) $(READELF_PROG)
+bin_PROGRAMS = $(SIZE_PROG) $(OBJDUMP_PROG) $(AR_PROG) $(STRINGS_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ $(ADDR2LINE_PROG) $(READELF_PROG) @BUILD_DLLWRAP@
 
 noinst_PROGRAMS = $(NM_PROG) $(STRIP_PROG)
 
 EXTRA_PROGRAMS = $(NLMCONV_PROG) srconv sysdump coffdump $(DLLTOOL_PROG) \
-	$(WINDRES_PROG)	
+	$(WINDRES_PROG)	$(DLLWRAP_PROG)
 
 # Stuff that goes in tooldir/ if appropriate
 TOOL_PROGS = nm-new strip-new ar ranlib dlltool
@@ -173,7 +174,7 @@ DEP = mkdep
 INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) @HDEFINES@ -I$(srcdir)/../intl -I../intl -DLOCALEDIR="\"$(prefix)/share/locale\""
 
 HFILES = arsup.h bucomm.h budbg.h coffgrok.h debug.h nlmconv.h dlltool.h \
-	windres.h winduni.h
+	windres.h winduni.h dyn-string.h
 
 GENERATED_HFILES = arparse.h sysroff.h sysinfo.h defparse.h
 
@@ -183,7 +184,7 @@ CFILES = addr2line.c ar.c arsup.c bucomm.c coffdump.c coffgrok.c debug.c \
 	objcopy.c objdump.c prdbg.c rdcoff.c rddbg.c size.c srconv.c \
 	stabs.c strings.c sysdump.c version.c wrstabs.c \
 	windres.c resrc.c rescoff.c resbin.c winduni.c readelf.c \
-	resres.c
+	resres.c dyn-string.c dllwrap.c
 
 GENERATED_CFILES = \
 	underscore.c arparse.c arlex.c sysroff.c sysinfo.c syslex.c \
@@ -271,6 +272,9 @@ windres_SOURCES = windres.c resrc.c rescoff.c resbin.c rcparse.y rclex.l \
 	winduni.c resres.c $(BULIBS)
 windres_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
 
+dllwrap_SOURCES = dllwrap.c dyn-string.c 
+dllwrap_LDADD = $(LIBIBERTY)
+
 DISTSTUFF = arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h \
 	syslex.c deflex.c defparse.h defparse.c rclex.c rcparse.h rcparse.c
 
@@ -290,7 +294,7 @@ CONFIG_CLEAN_FILES =
 bin_PROGRAMS =  size$(EXEEXT) objdump$(EXEEXT) ar$(EXEEXT) \
 strings$(EXEEXT) ranlib$(EXEEXT) c++filt$(EXEEXT) objcopy$(EXEEXT) \
 @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ \
-addr2line$(EXEEXT) readelf$(EXEEXT)
+addr2line$(EXEEXT) readelf$(EXEEXT) @BUILD_DLLWRAP@
 noinst_PROGRAMS =  nm-new$(EXEEXT) strip-new$(EXEEXT)
 PROGRAMS =  $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
@@ -323,6 +327,9 @@ windres_OBJECTS =  windres.o resrc.o rescoff.o resbin.o rcparse.o \
 rclex.o winduni.o resres.o bucomm.o version.o filemode.o
 windres_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
 windres_LDFLAGS = 
+dllwrap_OBJECTS =  dllwrap.o dyn-string.o
+dllwrap_DEPENDENCIES =  ../libiberty/libiberty.a
+dllwrap_LDFLAGS = 
 size_OBJECTS =  size.o bucomm.o version.o filemode.o
 size_LDADD = $(LDADD)
 size_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
@@ -395,8 +402,8 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP = --best
-SOURCES = $(nlmconv_SOURCES) $(srconv_SOURCES) $(sysdump_SOURCES) $(coffdump_SOURCES) $(dlltool_SOURCES) $(windres_SOURCES) $(size_SOURCES) $(objdump_SOURCES) $(ar_SOURCES) $(strings_SOURCES) $(ranlib_SOURCES) $(c__filt_SOURCES) $(objcopy_SOURCES) $(addr2line_SOURCES) $(readelf_SOURCES) $(nm_new_SOURCES) $(strip_new_SOURCES)
-OBJECTS = $(nlmconv_OBJECTS) $(srconv_OBJECTS) $(sysdump_OBJECTS) $(coffdump_OBJECTS) $(dlltool_OBJECTS) $(windres_OBJECTS) $(size_OBJECTS) $(objdump_OBJECTS) $(ar_OBJECTS) $(strings_OBJECTS) $(ranlib_OBJECTS) $(c__filt_OBJECTS) $(objcopy_OBJECTS) $(addr2line_OBJECTS) $(readelf_OBJECTS) $(nm_new_OBJECTS) $(strip_new_OBJECTS)
+SOURCES = $(nlmconv_SOURCES) $(srconv_SOURCES) $(sysdump_SOURCES) $(coffdump_SOURCES) $(dlltool_SOURCES) $(windres_SOURCES) $(dllwrap_SOURCES) $(size_SOURCES) $(objdump_SOURCES) $(ar_SOURCES) $(strings_SOURCES) $(ranlib_SOURCES) $(c__filt_SOURCES) $(objcopy_SOURCES) $(addr2line_SOURCES) $(readelf_SOURCES) $(nm_new_SOURCES) $(strip_new_SOURCES)
+OBJECTS = $(nlmconv_OBJECTS) $(srconv_OBJECTS) $(sysdump_OBJECTS) $(coffdump_OBJECTS) $(dlltool_OBJECTS) $(windres_OBJECTS) $(dllwrap_OBJECTS) $(size_OBJECTS) $(objdump_OBJECTS) $(ar_OBJECTS) $(strings_OBJECTS) $(ranlib_OBJECTS) $(c__filt_OBJECTS) $(objcopy_OBJECTS) $(addr2line_OBJECTS) $(readelf_OBJECTS) $(nm_new_OBJECTS) $(strip_new_OBJECTS)
 
 all: all-recursive-am all-am
 
@@ -533,6 +540,10 @@ dlltool$(EXEEXT): $(dlltool_OBJECTS) $(dlltool_DEPENDENCIES)
 windres$(EXEEXT): $(windres_OBJECTS) $(windres_DEPENDENCIES)
 	@rm -f windres$(EXEEXT)
 	$(LINK) $(windres_LDFLAGS) $(windres_OBJECTS) $(windres_LDADD) $(LIBS)
+
+dllwrap$(EXEEXT): $(dllwrap_OBJECTS) $(dllwrap_DEPENDENCIES)
+	@rm -f dllwrap$(EXEEXT)
+	$(LINK) $(dllwrap_LDFLAGS) $(dllwrap_OBJECTS) $(dllwrap_LDADD) $(LIBS)
 
 size$(EXEEXT): $(size_OBJECTS) $(size_DEPENDENCIES)
 	@rm -f size$(EXEEXT)
@@ -1251,7 +1262,7 @@ readelf.o: readelf.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/elf/m32r.h $(INCDIR)/elf/d10v.h $(INCDIR)/elf/d30v.h \
   $(INCDIR)/elf/sh.h $(INCDIR)/elf/mn10200.h $(INCDIR)/elf/mn10300.h \
   $(INCDIR)/elf/hppa.h $(INCDIR)/elf/arc.h bucomm.h config.h \
-  $(INCDIR)/fopen-same.h $(INCDIR)/getopt.h
+  $(INCDIR)/fopen-same.h $(INCDIR)/getopt.h $(INCDIR)/elf/fr30.h
 underscore.o: underscore.c
 arparse.o: arparse.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h arsup.h
@@ -1272,6 +1283,8 @@ rcparse.o: rcparse.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
 rclex.o: rclex.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
   windres.h winduni.h rcparse.h
+dllwrap.o: dllwrap.c dyn-string.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/getopt.h config.h $(INCDIR)/libiberty.h 
 
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
 
