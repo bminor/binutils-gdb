@@ -86,6 +86,7 @@ proc gdb_start { } {
 proc gdb_sparclet_startup { arg } {
     global gdb_prompt
     global GDB
+    global verbose
 
     set is_running_stub 0;
 
