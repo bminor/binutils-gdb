@@ -1,3 +1,7 @@
+Tue Sep  6 23:23:18 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* config.sub:  Merge nextstep cleanup from FSF.
+
 Mon Sep  5 05:01:30 1994  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 
 	* configure.in (arm-*-*): Don't configure ld for this target.
