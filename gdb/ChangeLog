@@ -1,3 +1,8 @@
+2004-10-30  Mark Kettenis  <kettenis@gnu.org>
+
+	* procfs.c (procfs_fetch_registers, procfs_store_registers): Like
+	Remove optimization for DEPRECATED_FP_REGNUM.
+
 2004-10-30  Andrew Cagney  <cagney@gnu.org>
 
 	* alpha-tdep.c (alpha_setup_arbitrary_frame): Delete.

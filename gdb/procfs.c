@@ -3712,7 +3712,6 @@ procfs_fetch_registers (int regnum)
 
       if ((regnum >= 0 && regnum < FP0_REGNUM)
 	  || regnum == PC_REGNUM
-	  || regnum == DEPRECATED_FP_REGNUM
 	  || regnum == SP_REGNUM)
 	return;			/* Not a floating point register.  */
 
@@ -3783,7 +3782,6 @@ procfs_store_registers (int regnum)
 
       if ((regnum >= 0 && regnum < FP0_REGNUM)
 	  || regnum == PC_REGNUM
-	  || regnum == DEPRECATED_FP_REGNUM
 	  || regnum == SP_REGNUM)
 	return;			/* Not a floating point register.  */
 
