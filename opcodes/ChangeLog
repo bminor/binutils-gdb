@@ -14,7 +14,7 @@
 	shadowing outer block.
 	(GET_BIT): Define.
 
-2000-06-05  DJ Delorie  <dj@redhat.com>
+2000-07-05  DJ Delorie  <dj@redhat.com>
 
 	* MAINTAINERS: new
 
