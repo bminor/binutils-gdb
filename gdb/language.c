@@ -1578,12 +1578,11 @@ _initialize_language ()
   add_language (&auto_language_defn);
 
   language = savestring ("auto", strlen ("auto"));
-  range = savestring ("auto", strlen ("auto"));
-  type = savestring ("auto", strlen ("auto"));
-
-  /* Have the above take effect */
-
   set_language_command (language, 0);
+
+  type = savestring ("auto", strlen ("auto"));
   set_type_command (NULL, 0);
+
+  range = savestring ("auto", strlen ("auto"));
   set_range_command (NULL, 0);
 }

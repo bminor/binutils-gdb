@@ -774,7 +774,7 @@ child_resume (pid, step, signal)
    buffer.  */
 
 char *
-lynx_pid_to_str (pid)
+child_pid_to_str (pid)
      int pid;
 {
   static char buf[40];

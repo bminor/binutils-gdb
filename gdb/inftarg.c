@@ -814,6 +814,14 @@ child_core_file_to_sym_file (core)
 }
 
 
+#if !defined(CHILD_PID_TO_STR)
+char *
+child_pid_to_str (pid)
+     int pid;
+{
+  return normal_pid_to_str (pid);
+}
+#endif
 
 static void
 init_child_ops ()
@@ -865,6 +873,7 @@ init_child_ops ()
   child_ops.to_mourn_inferior = child_mourn_inferior;
   child_ops.to_can_run = child_can_run;
   child_ops.to_thread_alive = child_thread_alive;
+  child_ops.to_pid_to_str = child_pid_to_str;
   child_ops.to_stop = child_stop;
   child_ops.to_enable_exception_callback = child_enable_exception_callback;
   child_ops.to_get_current_exception_event = child_get_current_exception_event;

@@ -329,6 +329,7 @@ extern int myread (int, char *, int);
 extern int query (char *, ...) ATTR_FORMAT (printf, 1, 2);
 
 #if !defined (USE_MMALLOC)
+extern PTR mcalloc (void *, size_t, size_t);
 extern PTR mmalloc (PTR, size_t);
 extern PTR mrealloc (PTR, PTR, size_t);
 extern void mfree (PTR, PTR);
@@ -1283,7 +1284,8 @@ extern int use_windows;
    the actual pid. */
 
 #ifndef PIDGET
-#define PIDGET(pid) (pid)
+#define PIDGET(PID) (PID)
+#define TIDGET(PID) 0
 #endif
 
 /* If under Cygwin, provide backwards compatibility with older

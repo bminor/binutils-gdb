@@ -34,6 +34,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <sys/reg.h>
 #endif
 
+/*
+ * Some systems (Linux) may have threads implemented as pseudo-processes, 
+ * in which case we may be tracing more than one process at a time.
+ * In that case, inferior_pid will contain the main process ID and the 
+ * individual thread (process) id mashed together.  These macros are 
+ * used to separate them out.  The definitions may be overridden in tm.h
+ */
+
+#if !defined (PIDGET)	/* Default definition for PIDGET/TIDGET.  */
+#define PIDGET(PID)	PID
+#define TIDGET(PID)	0
+#endif
+
 /* This is a duplicate of the table in i386-xdep.c. */
 
 static int regmap[] = 
@@ -141,12 +154,12 @@ fill_gregset (gregset_t *gregsetp,
 /* Read the general registers from the process, and store them
    in registers[].  */
 static void
-fetch_regs ()
+fetch_regs (int tid)
 {
   int ret, regno;
   gregset_t buf;
 
-  ret = ptrace (PTRACE_GETREGS, inferior_pid, 0, (int) &buf);
+  ret = ptrace (PTRACE_GETREGS, tid, 0, (int) &buf);
   if (ret < 0)
     {
       warning ("Couldn't get registers");
@@ -160,12 +173,12 @@ fetch_regs ()
 /* Set the inferior's general registers to the values in registers[]
    --- but only those registers marked as valid.  */
 static void
-store_regs ()
+store_regs (int tid)
 {
   int ret, regno;
   gregset_t buf;
 
-  ret = ptrace (PTRACE_GETREGS, inferior_pid, 0, (int) &buf);
+  ret = ptrace (PTRACE_GETREGS, tid, 0, (int) &buf);
   if (ret < 0)
     {
       warning ("Couldn't get registers");
@@ -174,7 +187,7 @@ store_regs ()
 
   convert_to_gregset (&buf, registers, register_valid);
 
-  ret = ptrace (PTRACE_SETREGS, inferior_pid, 0, (int)buf);
+  ret = ptrace (PTRACE_SETREGS, tid, 0, (int)buf);
   if (ret < 0)
     {
       warning ("Couldn't write registers");
@@ -285,12 +298,12 @@ fill_fpregset (fpregset_t *fpregsetp,
 /* Get the whole floating point state of the process and store the
    floating point stack into registers[].  */
 static void
-fetch_fpregs ()
+fetch_fpregs (int tid)
 {
   int ret, regno;
   fpregset_t buf;
 
-  ret = ptrace (PTRACE_GETFPREGS, inferior_pid,	0, (int) &buf);
+  ret = ptrace (PTRACE_GETFPREGS, tid, 0, (int) &buf);
   if (ret < 0)
     {
       warning ("Couldn't get floating point status");
@@ -306,12 +319,12 @@ fetch_fpregs ()
 /* Set the inferior's floating-point registers to the values in
    registers[] --- but only those registers marked valid.  */
 static void
-store_fpregs ()
+store_fpregs (int tid)
 {
   int ret;
   fpregset_t buf;
 
-  ret = ptrace (PTRACE_GETFPREGS, inferior_pid,	0, (int) &buf);
+  ret = ptrace (PTRACE_GETFPREGS, tid, 0, (int) &buf);
   if (ret < 0)
     {
       warning ("Couldn't get floating point status");
@@ -320,7 +333,7 @@ store_fpregs ()
 
   convert_to_fpregset (&buf, registers, register_valid);
 
-  ret = ptrace (PTRACE_SETFPREGS, inferior_pid, 0, (int) &buf);
+  ret = ptrace (PTRACE_SETFPREGS, tid, 0, (int) &buf);
   if (ret < 0)
     {
       warning ("Couldn't write floating point status");
@@ -427,7 +440,7 @@ convert_to_xfpregset (struct user_xfpregs_struct *xfpregs,
 /* Make a PTRACE_GETXFPREGS request, and supply all the register
    values that yields to GDB.  */
 static int
-fetch_xfpregs ()
+fetch_xfpregs (int tid)
 {
   int ret;
   struct user_xfpregs_struct xfpregs;
@@ -435,7 +448,7 @@ fetch_xfpregs ()
   if (! have_ptrace_getxfpregs) 
     return 0;
 
-  ret = ptrace (PTRACE_GETXFPREGS, inferior_pid, 0, &xfpregs);
+  ret = ptrace (PTRACE_GETXFPREGS, tid, 0, &xfpregs);
   if (ret == -1)
     {
       if (errno == EIO)
@@ -456,7 +469,7 @@ fetch_xfpregs ()
 /* Send all the valid register values in GDB's register file covered
    by the PTRACE_SETXFPREGS request to the inferior.  */
 static int
-store_xfpregs ()
+store_xfpregs (int tid)
 {
   int ret;
   struct user_xfpregs_struct xfpregs;
@@ -464,7 +477,7 @@ store_xfpregs ()
   if (! have_ptrace_getxfpregs)
     return 0;
 
-  ret = ptrace (PTRACE_GETXFPREGS, inferior_pid, 0, &xfpregs);
+  ret = ptrace (PTRACE_GETXFPREGS, tid, 0, &xfpregs);
   if (ret == -1)
     {
       if (errno == EIO)
@@ -479,7 +492,7 @@ store_xfpregs ()
 
   convert_to_xfpregset (&xfpregs, registers, register_valid);
 
-  if (ptrace (PTRACE_SETXFPREGS, inferior_pid, 0, &xfpregs) < 0)
+  if (ptrace (PTRACE_SETXFPREGS, tid, 0, &xfpregs) < 0)
     {
       warning ("Couldn't write floating-point and SSE registers.");
       return 0;
@@ -511,8 +524,8 @@ dummy_sse_values ()
 
 /* Stub versions of the above routines, for systems that don't have
    PTRACE_GETXFPREGS.  */
-static int store_xfpregs () { return 0; }
-static int fetch_xfpregs () { return 0; }
+static int store_xfpregs (int tid) { return 0; }
+static int fetch_xfpregs (int tid) { return 0; }
 static void dummy_sse_values () {}
 
 #endif
@@ -528,27 +541,33 @@ static void dummy_sse_values () {}
 void
 fetch_inferior_registers (int regno)
 {
+  /* linux lwp id's are process id's */
+  int tid;
+
+  if ((tid = TIDGET (inferior_pid)) == 0)
+    tid = inferior_pid;		/* not a threaded program */
+
   /* Use the xfpregs requests whenever possible, since they transfer
      more registers in one system call, and we'll cache the results.
      But remember that fetch_xfpregs can fail, and return zero.  */
   if (regno == -1)
     {
-      fetch_regs ();
-      if (fetch_xfpregs ())
+      fetch_regs (tid);
+      if (fetch_xfpregs (tid))
 	return;
-      fetch_fpregs ();
+      fetch_fpregs (tid);
       return;
     }
 
   if (GETREGS_SUPPLIES (regno))
     {
-      fetch_regs ();
+      fetch_regs (tid);
       return;
     }
 
   if (GETXFPREGS_SUPPLIES (regno))
     {
-      if (fetch_xfpregs ())
+      if (fetch_xfpregs (tid))
 	return;
 
       /* Either our processor or our kernel doesn't support the SSE
@@ -557,7 +576,7 @@ fetch_inferior_registers (int regno)
 	 more graceful to handle differences in the register set using
 	 gdbarch.  Until then, this will at least make things work
 	 plausibly.  */
-      fetch_fpregs ();
+      fetch_fpregs (tid);
       dummy_sse_values ();
       return;
     }
@@ -577,32 +596,38 @@ void
 store_inferior_registers (regno)
      int regno;
 {
+  /* linux lwp id's are process id's */
+  int tid;
+
+  if ((tid = TIDGET (inferior_pid)) == 0)
+    tid = inferior_pid;		/* not a threaded program */
+
   /* Use the xfpregs requests whenever possible, since they transfer
      more registers in one system call.  But remember that
-     fetch_xfpregs can fail, and return zero.  */
+     store_xfpregs can fail, and return zero.  */
   if (regno == -1)
     {
-      store_regs ();
-      if (store_xfpregs ())
+      store_regs (tid);
+      if (store_xfpregs (tid))
 	return;
-      store_fpregs ();
+      store_fpregs (tid);
       return;
     }
 
   if (GETREGS_SUPPLIES (regno))
     {
-      store_regs ();
+      store_regs (tid);
       return;
     }
 
   if (GETXFPREGS_SUPPLIES (regno))
     {
-      if (store_xfpregs ())
+      if (store_xfpregs (tid))
 	return;
 
       /* Either our processor or our kernel doesn't support the SSE
 	 registers, so just write the FP registers in the traditional way.  */
-      store_fpregs ();
+      store_fpregs (tid);
       return;
     }
 

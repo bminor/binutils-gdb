@@ -422,7 +422,9 @@ extern void mips_push_dummy_frame PARAMS ((void));
 #define POP_FRAME		mips_pop_frame()
 extern void mips_pop_frame PARAMS ((void));
 
+#if !GDB_MULTI_ARCH
 #define CALL_DUMMY { 0 }
+#endif
 
 #define CALL_DUMMY_START_OFFSET (0)
 

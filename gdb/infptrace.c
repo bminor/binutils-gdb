@@ -24,10 +24,18 @@
 #include "inferior.h"
 #include "target.h"
 #include "gdb_string.h"
+
+#ifdef HAVE_WAIT_H
+#include <wait.h>
+#else
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
-#include "wait.h" /* NOTE: This is ../include/wait.h */
+#endif
+
+/* "wait.h" fills in the gaps left by <wait.h> */
+#include "wait.h"	/* NOTE: This is ../include/wait.h */
+
 #include "command.h"
 
 #ifdef USG
@@ -109,6 +117,22 @@ static void fetch_register PARAMS ((int));
 static void store_register PARAMS ((int));
 #endif
 
+/*
+ * Some systems (Linux) may have threads implemented as pseudo-processes, 
+ * in which case we may be tracing more than one process at a time.
+ * In that case, inferior_pid will contain the main process ID and the 
+ * individual thread (process) id mashed together.  These macros are 
+ * used to separate them out.  The definitions may be overridden in tm.h
+ *
+ * NOTE: default definitions here are for systems with no threads.
+ * Useful definitions MUST be provided in tm.h
+ */
+
+#if !defined (PIDGET)	/* Default definition for PIDGET/TIDGET.  */
+#define PIDGET(PID)	PID
+#define TIDGET(PID)	0
+#endif
+
 void _initialize_kernel_u_addr PARAMS ((void));
 void _initialize_infptrace PARAMS ((void));
 
@@ -135,14 +159,13 @@ call_ptrace (request, pid, addr, data)
   if (request == PT_SETTRC)
     {
       errno = 0;
-      pt_status = ptrace (PT_SETTRC, pid, addr, data
-#if defined (FIVE_ARG_PTRACE)
+#if !defined (FIVE_ARG_PTRACE)
+      pt_status = ptrace (PT_SETTRC, pid, addr, data);
+#else
       /* Deal with HPUX 8.0 braindamage.  We never use the
          calls which require the fifth argument.  */
-			  ,0
+      pt_status = ptrace (PT_SETTRC, pid, addr, data, 0);
 #endif
-	);
-
       if (errno)
 	perror_with_name ("ptrace");
 #if 0
@@ -173,13 +196,14 @@ call_ptrace (request, pid, addr, data)
   saved_errno = errno;
   errno = 0;
 #endif
-  pt_status = ptrace (request, pid, addr, data
-#if defined (FIVE_ARG_PTRACE)
+#if !defined (FIVE_ARG_PTRACE)
+  pt_status = ptrace (request, pid, addr, data);
+#else
   /* Deal with HPUX 8.0 braindamage.  We never use the
      calls which require the fifth argument.  */
-		      ,0
+  pt_status = ptrace (request, pid, addr, data, 0);
 #endif
-    );
+
 #if 0
   if (errno)
     printf (" [errno = %d]", errno);
@@ -275,7 +299,9 @@ child_resume (pid, step, signal)
 	    target_signal_to_host (signal));
 
   if (errno)
-    perror_with_name ("ptrace");
+    {
+      perror_with_name ("ptrace");
+    }
 }
 #endif /* CHILD_RESUME */
 
@@ -368,6 +394,7 @@ fetch_register (regno)
   register int i;
   unsigned int offset;		/* Offset of registers within the u area.  */
   char buf[MAX_REGISTER_RAW_SIZE];
+  int tid;
 
   if (CANNOT_FETCH_REGISTER (regno))
     {
@@ -376,18 +403,23 @@ fetch_register (regno)
       return;
     }
 
+  /* Overload thread id onto process id */
+  if ((tid = TIDGET (inferior_pid)) == 0)
+    tid = inferior_pid;		/* no thread id, just use process id */
+
   offset = U_REGS_OFFSET;
 
   regaddr = register_addr (regno, offset);
   for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))
     {
       errno = 0;
-      *(PTRACE_XFER_TYPE *) & buf[i] = ptrace (PT_READ_U, inferior_pid,
-					     (PTRACE_ARG3_TYPE) regaddr, 0);
+      *(PTRACE_XFER_TYPE *) & buf[i] = ptrace (PT_READ_U, tid,
+					       (PTRACE_ARG3_TYPE) regaddr, 0);
       regaddr += sizeof (PTRACE_XFER_TYPE);
       if (errno != 0)
 	{
-	  sprintf (mess, "reading register %s (#%d)", REGISTER_NAME (regno), regno);
+	  sprintf (mess, "reading register %s (#%d)", 
+		   REGISTER_NAME (regno), regno);
 	  perror_with_name (mess);
 	}
     }
@@ -432,11 +464,16 @@ store_register (regno)
   char mess[128];		/* For messages */
   register int i;
   unsigned int offset;		/* Offset of registers within the u area.  */
+  int tid;
 
   if (CANNOT_STORE_REGISTER (regno))
     {
       return;
     }
+
+  /* Overload thread id onto process id */
+  if ((tid = TIDGET (inferior_pid)) == 0)
+    tid = inferior_pid;		/* no thread id, just use process id */
 
   offset = U_REGS_OFFSET;
 
@@ -444,12 +481,13 @@ store_register (regno)
   for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))
     {
       errno = 0;
-      ptrace (PT_WRITE_U, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
+      ptrace (PT_WRITE_U, tid, (PTRACE_ARG3_TYPE) regaddr,
 	      *(PTRACE_XFER_TYPE *) & registers[REGISTER_BYTE (regno) + i]);
       regaddr += sizeof (PTRACE_XFER_TYPE);
       if (errno != 0)
 	{
-	  sprintf (mess, "writing register %s (#%d)", REGISTER_NAME (regno), regno);
+	  sprintf (mess, "writing register %s (#%d)", 
+		   REGISTER_NAME (regno), regno);
 	  perror_with_name (mess);
 	}
     }
@@ -520,14 +558,14 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
       if (addr != memaddr || len < (int) sizeof (PTRACE_XFER_TYPE))
 	{
 	  /* Need part of initial word -- fetch it.  */
-	  buffer[0] = ptrace (PT_READ_I, inferior_pid, (PTRACE_ARG3_TYPE) addr,
-			      0);
+	  buffer[0] = ptrace (PT_READ_I, PIDGET (inferior_pid), 
+			      (PTRACE_ARG3_TYPE) addr, 0);
 	}
 
       if (count > 1)		/* FIXME, avoid if even boundary */
 	{
-	  buffer[count - 1]
-	    = ptrace (PT_READ_I, inferior_pid,
+	  buffer[count - 1] 
+	    = ptrace (PT_READ_I, PIDGET (inferior_pid),
 		      ((PTRACE_ARG3_TYPE)
 		       (addr + (count - 1) * sizeof (PTRACE_XFER_TYPE))),
 		      0);
@@ -544,15 +582,15 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
       for (i = 0; i < count; i++, addr += sizeof (PTRACE_XFER_TYPE))
 	{
 	  errno = 0;
-	  ptrace (PT_WRITE_D, inferior_pid, (PTRACE_ARG3_TYPE) addr,
-		  buffer[i]);
+	  ptrace (PT_WRITE_D, PIDGET (inferior_pid), 
+		  (PTRACE_ARG3_TYPE) addr, buffer[i]);
 	  if (errno)
 	    {
 	      /* Using the appropriate one (I or D) is necessary for
 	         Gould NP1, at least.  */
 	      errno = 0;
-	      ptrace (PT_WRITE_I, inferior_pid, (PTRACE_ARG3_TYPE) addr,
-		      buffer[i]);
+	      ptrace (PT_WRITE_I, PIDGET (inferior_pid), 
+		      (PTRACE_ARG3_TYPE) addr, buffer[i]);
 	    }
 	  if (errno)
 	    return 0;
@@ -567,7 +605,7 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
       for (i = 0; i < count; i++, addr += sizeof (PTRACE_XFER_TYPE))
 	{
 	  errno = 0;
-	  buffer[i] = ptrace (PT_READ_I, inferior_pid,
+	  buffer[i] = ptrace (PT_READ_I, PIDGET (inferior_pid),
 			      (PTRACE_ARG3_TYPE) addr, 0);
 	  if (errno)
 	    return 0;

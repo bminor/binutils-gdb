@@ -257,7 +257,7 @@ echo "#endif"
 cat <<EOF
 
 /* Install custom gdb-events hooks. */
-extern void set_gdb_event_hooks (struct gdb_events *vector);
+extern struct gdb_events *set_gdb_event_hooks (struct gdb_events *vector);
 
 /* Deliver any pending events. */
 extern void gdb_events_deliver (struct gdb_events *vector);
@@ -361,13 +361,15 @@ echo "#endif"
 echo ""
 cat <<EOF
 #if WITH_GDB_EVENTS
-void
+struct gdb_events *
 set_gdb_event_hooks (struct gdb_events *vector)
 {
+  struct gdb_events *old_events = current_event_hooks;
   if (vector == NULL)
     current_event_hooks = &queue_event_hooks;
   else
     current_event_hooks = vector;
+  return old_events;
 EOF
 function_list | while eval read $read
 do

@@ -84,13 +84,15 @@ breakpoint_modify_event (int b)
 #endif
 
 #if WITH_GDB_EVENTS
-void
+struct gdb_events *
 set_gdb_event_hooks (struct gdb_events *vector)
 {
+  struct gdb_events *old_events = current_event_hooks;
   if (vector == NULL)
     current_event_hooks = &queue_event_hooks;
   else
     current_event_hooks = vector;
+  return old_events;
 }
 #endif
 

@@ -26,8 +26,6 @@
 #include <mach.h>
 #include <mach/exception.h>
 
-#undef target_pid_to_str
-#define target_pid_to_str(pid) gnu_target_pid_to_str(pid)
 extern char *gnu_target_pid_to_str (int pid);
 
 /* Before storing, we need to read all the registers.  */

@@ -90,6 +90,7 @@ extern int hppa_prepare_to_proceed PARAMS ((void));
 #define CHILD_HAS_SYSCALL_EVENT
 #define CHILD_POST_ATTACH
 #define CHILD_THREAD_ALIVE
+#define CHILD_PID_TO_STR
 
 #define REQUIRE_ATTACH(pid) hppa_require_attach(pid)
 extern int hppa_require_attach PARAMS ((int));
@@ -226,9 +227,8 @@ extern void hppa_disable_page_protection_events PARAMS ((int));
  * than processes.  So we need a new way to print
  * the string.  Code is in hppah-nat.c.
  */
-#define target_pid_to_str( pid ) \
-        hppa_pid_to_str( pid )
-extern char *hppa_pid_to_str PARAMS ((pid_t));
+
+extern char *child_pid_to_str PARAMS ((pid_t));
 
 #define target_tid_to_str( pid ) \
         hppa_tid_to_str( pid )
@@ -276,13 +276,6 @@ extern void hppa_ensure_vforking_parent_remains_stopped PARAMS ((int));
 #define RESUME_EXECD_VFORKING_CHILD_TO_GET_PARENT_VFORK() \
         hppa_resume_execd_vforking_child_to_get_parent_vfork ()
 extern int hppa_resume_execd_vforking_child_to_get_parent_vfork PARAMS ((void));
-
-#ifdef HAVE_HPUX_THREAD_SUPPORT
-
-extern char *hpux_pid_to_str PARAMS ((int pid));
-#define target_pid_to_str(PID) hpux_pid_to_str (PID)
-
-#endif /* HAVE_HPUX_THREAD_SUPPORT */
 
 #define HPUXHPPA
 

@@ -115,7 +115,7 @@ static int *linuxthreads_wait_status;	/* wait array of status */
 static int linuxthreads_wait_last;	/* index of last valid elt in
 					   linuxthreads_wait_{pid,status} */
 
-static sigset_t linuxthreads_wait_mask;	/* sigset with SIGCHLD */
+static sigset_t linuxthreads_block_mask;  /* sigset without SIGCHLD */
 
 static int linuxthreads_step_pid;	/* current stepped pid */
 static int linuxthreads_step_signo;	/* current stepped target signal */
@@ -169,6 +169,13 @@ struct linuxthreads_signal linuxthreads_sig_cancel = {
 struct linuxthreads_signal linuxthreads_sig_debug = {
   "__pthread_sig_debug", 0, 0, 0, 0, 0
 };
+
+/* Set by thread_db module when it takes over the thread_stratum. 
+   In that case we must:
+   a) refrain from turning on the debug signal, and
+   b) refrain from calling add_thread.  */
+
+int using_thread_db = 0;
 
 /* A table of breakpoint locations, one per PID.  */
 static struct linuxthreads_breakpoint {
@@ -292,23 +299,37 @@ linuxthreads_find_trap (pid, stop)
     {
       /* Make sure that we'll find what we're looking for.  */
       if (!found_trap)
-	kill (pid, SIGTRAP);
+	{
+	  kill (pid, SIGTRAP);
+	}
       if (!found_stop)
-	kill (pid, SIGSTOP);
+	{
+	  kill (pid, SIGSTOP);
+	}
     }
 		      
   /* Catch all status until SIGTRAP and optionally SIGSTOP show up.  */
   for (;;)
     {
+      /* resume the child every time... */
       child_resume (pid, 1, TARGET_SIGNAL_0);
 
+      /* loop as long as errno == EINTR:
+	 waitpid syscall may be aborted due to GDB receiving a signal. 
+	 FIXME: EINTR handling should no longer be necessary here, since
+	 we now block SIGCHLD except in an explicit sigsuspend call.  */
+      
       for (;;)
 	{
 	  rpid = waitpid (pid, &status, __WCLONE);
 	  if (rpid > 0)
-	    break;
+	    {
+	      break;
+	    }
 	  if (errno == EINTR)
-	    continue;
+	    {
+	      continue;
+	    }
 
 	  /* There are a few reasons the wait call above may have
 	     failed.  If the thread manager dies, its children get
@@ -320,9 +341,11 @@ linuxthreads_find_trap (pid, stop)
 	     2.0.36.  */
 	  rpid = waitpid (pid, &status, 0);
 	  if (rpid > 0)
-	    break;
+	    {
+	      break;
+	    }
 	  if (errno != EINTR)
-	    perror_with_name ("waitpid");
+	    perror_with_name ("find_trap/waitpid");
 	}
 
       if (!WIFSTOPPED(status)) /* Thread has died */
@@ -347,7 +370,9 @@ linuxthreads_find_trap (pid, stop)
   /* Resend any other signals we noticed to the thread, to be received
      when we continue it.  */
   while (--last >= 0)
-    kill (pid, WSTOPSIG(wstatus[last]));
+    {
+      kill (pid, WSTOPSIG(wstatus[last]));
+    }
 
   return 1;
 }
@@ -357,15 +382,22 @@ static void
 restore_inferior_pid (arg)
     void *arg;
 {
-  int pid = (int) arg;
-  inferior_pid = pid;
+#if TARGET_PTR_BIT > TARGET_INT_BIT
+  inferior_pid = (int) ((long) arg);
+#else
+  inferior_pid = (int) arg;
+#endif
 }
 
 /* Register a cleanup to restore the value of inferior_pid.  */
 static struct cleanup *
 save_inferior_pid ()
 {
+#if TARGET_PTR_BIT > TARGET_INT_BIT
+  return make_cleanup (restore_inferior_pid, (void *) ((long) inferior_pid));
+#else
   return make_cleanup (restore_inferior_pid, (void *) inferior_pid);
+#endif
 }
 
 static void
@@ -476,8 +508,7 @@ check_signal_number (sig)
   sig->print = signal_print_update (target_signal_from_host (num), 0);
 }
 
-
-static void
+void
 check_all_signal_numbers ()
 {
   /* If this isn't a LinuxThreads program, quit early.  */
@@ -497,6 +528,7 @@ check_all_signal_numbers ()
       sact.sa_handler = sigchld_handler;
       sigemptyset(&sact.sa_mask);
       sact.sa_flags = 0;
+
       if (linuxthreads_sig_debug.signal > 0)
 	sigaction(linuxthreads_sig_cancel.signal, &sact, NULL);
       else
@@ -576,7 +608,6 @@ iterate_active_threads (func, all)
 	    (*func)(pid);
 	}
     }
-
 }
 
 /* Insert a thread breakpoint at linuxthreads_breakpoint_addr.
@@ -640,9 +671,13 @@ kill_thread (pid)
     int pid;
 {
   if (in_thread_list (pid))
-    ptrace (PT_KILL, pid, (PTRACE_ARG3_TYPE) 0, 0);
+    {
+      ptrace (PT_KILL, pid, (PTRACE_ARG3_TYPE) 0, 0);
+    }
   else
-    kill (pid, SIGKILL);
+    {
+      kill (pid, SIGKILL);
+    }
 }
 
 /* Resume a thread */
@@ -655,9 +690,13 @@ resume_thread (pid)
       && linuxthreads_thread_alive (pid))
     {
       if (pid == linuxthreads_step_pid)
-	child_resume (pid, 1, linuxthreads_step_signo);
+	{
+	  child_resume (pid, 1, linuxthreads_step_signo);
+	}
       else
-	child_resume (pid, 0, TARGET_SIGNAL_0);
+	{
+	  child_resume (pid, 0, TARGET_SIGNAL_0);
+	}
     }
 }
 
@@ -677,6 +716,15 @@ detach_thread (pid)
     }
 }
 
+/* Attach a thread */
+void
+attach_thread (pid)
+     int pid;
+{
+  if (ptrace (PT_ATTACH, pid, (PTRACE_ARG3_TYPE) 0, 0) != 0)
+    perror_with_name ("attach_thread");
+}
+
 /* Stop a thread */
 static void
 stop_thread (pid)
@@ -685,17 +733,21 @@ stop_thread (pid)
   if (pid != inferior_pid)
     {
       if (in_thread_list (pid))
-	kill (pid, SIGSTOP);
+	{
+	  kill (pid, SIGSTOP);
+	}
       else if (ptrace (PT_ATTACH, pid, (PTRACE_ARG3_TYPE) 0, 0) == 0)
 	{
 	  if (!linuxthreads_attach_pending)
-	    printf_unfiltered ("[New %s]\n", target_pid_to_str (pid));
+	    printf_filtered ("[New %s]\n", target_pid_to_str (pid));
 	  add_thread (pid);
 	  if (linuxthreads_sig_debug.signal)
-	    /* After a new thread in glibc 2.1 signals gdb its existence,
-	       it suspends itself and wait for linuxthreads_sig_restart,
-	       now we can wake up it. */
-	    kill (pid, linuxthreads_sig_restart.signal);
+	    {
+	      /* After a new thread in glibc 2.1 signals gdb its existence,
+		 it suspends itself and wait for linuxthreads_sig_restart,
+		 now we can wake it up. */
+	      kill (pid, linuxthreads_sig_restart.signal);
+	    }
 	}
       else
 	perror_with_name ("ptrace in stop_thread");
@@ -712,14 +764,22 @@ wait_thread (pid)
 
   if (pid != inferior_pid && in_thread_list (pid))
     {
+      /* loop as long as errno == EINTR:
+	 waitpid syscall may be aborted if GDB receives a signal. 
+	 FIXME: EINTR handling should no longer be necessary here, since
+	 we now block SIGCHLD except during an explicit sigsuspend call. */
       for (;;)
 	{
 	  /* Get first pid status.  */
 	  rpid = waitpid(pid, &status, __WCLONE);
 	  if (rpid > 0)
-	    break;
+	    {
+	      break;
+	    }
 	  if (errno == EINTR)
-	    continue;
+	    {
+	      continue;
+	    }
 
 	  /* There are two reasons this might have failed:
 
@@ -739,9 +799,11 @@ wait_thread (pid)
 	     didn't work.  */
 	  rpid = waitpid(pid, &status, 0);
 	  if (rpid > 0)
-	    break;
+	    {
+	      break;
+	    }
 	  if (errno != EINTR && linuxthreads_thread_alive (pid))
-	    perror_with_name ("waitpid");
+	    perror_with_name ("wait_thread/waitpid");
 
 	  /* the thread is dead.  */
 	  return;
@@ -810,16 +872,17 @@ update_stop_threads (test_pid)
 	      if (!in_thread_list (test_pid))
 	        {
 		  if (!linuxthreads_attach_pending)
-		    printf_unfiltered ("[New %s]\n",
-				       target_pid_to_str (test_pid));
+		    printf_filtered ("[New %s]\n",
+				     target_pid_to_str (test_pid));
 		  add_thread (test_pid);
 		  if (linuxthreads_sig_debug.signal
 		      && inferior_pid == test_pid)
-		    /* After a new thread in glibc 2.1 signals gdb its
-		       existence, it suspends itself and wait for
-		       linuxthreads_sig_restart, now we can wake up
-		       it. */
-		    kill (test_pid, linuxthreads_sig_restart.signal);
+		    {
+		      /* After a new thread in glibc 2.1 signals gdb its
+			 existence, it suspends itself and wait for
+			 linuxthreads_sig_restart, now we can wake it up. */
+		      kill (test_pid, linuxthreads_sig_restart.signal);
+		    }
 		}
 	    }
 	  iterate_active_threads (stop_thread, 0);
@@ -850,6 +913,13 @@ linuxthreads_new_objfile (objfile)
     struct objfile *objfile;
 {
   struct minimal_symbol *ms;
+
+  /* Call predecessor on chain, if any.
+     Calling the new module first allows it to dominate, 
+     if it finds its compatible libraries.  */
+
+  if (target_new_objfile_chain)
+    target_new_objfile_chain (objfile);
 
   if (!objfile)
     {
@@ -989,19 +1059,21 @@ any thread other than the main thread.");
   linuxthreads_breakpoint_zombie = (struct linuxthreads_breakpoint *)
     xmalloc (sizeof (struct linuxthreads_breakpoint) * (linuxthreads_max + 1));
 
-  if (inferior_pid && !linuxthreads_attach_pending)
+  if (inferior_pid && 
+      !linuxthreads_attach_pending && 
+      !using_thread_db)		/* suppressed by thread_db module */
     {
       int on = 1;
+
       target_write_memory (linuxthreads_debug, (char *)&on, sizeof (on));
       linuxthreads_attach_pending = 1;
       update_stop_threads (inferior_pid);
       linuxthreads_attach_pending = 0;
     }
 
+  check_all_signal_numbers ();
+
 quit:
-  /* Call predecessor on chain, if any. */
-  if (target_new_objfile_chain)
-    target_new_objfile_chain (objfile);
 }
 
 /* If we have switched threads from a one that stopped at breakpoint,
@@ -1147,7 +1219,9 @@ linuxthreads_resume (pid, step, signo)
     enum target_signal signo;
 {
   if (!linuxthreads_max || stop_soon_quietly || linuxthreads_manager_pid == 0)
-    child_ops.to_resume (pid, step, signo);
+    {
+      child_ops.to_resume (pid, step, signo);
+    }
   else
     {
       int rpid;
@@ -1208,10 +1282,68 @@ linuxthreads_resume (pid, step, signo)
 	}
 
       /* Resume initial thread. */
+      /* [unles it has a wait event pending] */
       if (!linuxthreads_pending_status (rpid))
-	child_ops.to_resume (rpid, step, signo);
+	{
+	  child_ops.to_resume (rpid, step, signo);
+	}
     }
 }
+
+/* Abstract out the child_wait functionality.  */
+int
+linux_child_wait (pid, rpid, status)
+     int pid;
+     int *rpid;
+     int *status;
+{
+  int save_errno;
+
+  /* Note: inftarg has these inside the loop. */
+  set_sigint_trap ();	/* Causes SIGINT to be passed on to the
+			   attached process. */
+  set_sigio_trap  ();
+
+  errno = save_errno = 0;
+  for (;;)
+    {
+      errno = 0;
+      *rpid = waitpid (pid, status, __WCLONE | WNOHANG);
+      save_errno = errno;
+
+      if (*rpid > 0)
+	{
+	  /* Got an event -- break out */
+	  break;
+	}
+      if (errno == EINTR)	/* interrupted by signal, try again */
+	{
+	  continue;
+	}
+
+      errno = 0;
+      *rpid = waitpid (pid, status, WNOHANG);
+      if (*rpid > 0)
+	{
+	  /* Got an event -- break out */
+	  break;
+	}
+      if (errno == EINTR)
+	{
+	  continue;
+	}
+      if (errno != 0 && save_errno != 0)
+	{
+	  break;
+	}
+      sigsuspend(&linuxthreads_block_mask);
+    }
+  clear_sigio_trap  ();
+  clear_sigint_trap ();
+
+  return errno ? errno : save_errno;
+}
+
 
 /* Wait for any threads to stop.  We may have to convert PID from a thread id
    to a LWP id, and vice versa on the way out.  */
@@ -1280,44 +1412,8 @@ linuxthreads_wait (pid, ourstatus)
       if (rpid == 0)
 	{
 	  int save_errno;
-	  sigset_t omask;
 
-	  set_sigint_trap();	/* Causes SIGINT to be passed on to the
-				   attached process. */
-	  set_sigio_trap ();
-
-	  sigprocmask(SIG_BLOCK, &linuxthreads_wait_mask, &omask);
-	  for (;;)
-	    {
-	      rpid = waitpid (pid, &status, __WCLONE | WNOHANG);
-	      if (rpid > 0)
-		break;
-	      if (rpid == 0)
-		save_errno = 0;
-	      else if (errno != EINTR)
-		save_errno = errno;
-	      else
-		continue;
-
-	      rpid = waitpid (pid, &status, WNOHANG);
-	      if (rpid > 0)
-		break;
-	      if (rpid < 0)
-		{
-		  if (errno == EINTR)
-		    continue;
-		  else if (save_errno != 0)
-		    break;
-		}
-
-	      sigsuspend(&omask);
-	    }
-	  sigprocmask(SIG_SETMASK, &omask, NULL);
-
-	  save_errno = errno;
-	  clear_sigio_trap ();
-
-	  clear_sigint_trap();
+	  save_errno = linux_child_wait (pid, &rpid, &status);
 
 	  if (rpid == -1)
 	    {
@@ -1338,15 +1434,19 @@ linuxthreads_wait (pid, ourstatus)
 		}
 	    }
 
-	  /* Signals arrive in any order.  So get all signals until SIGTRAP
-	     and resend previous ones to be held after.  */
+	  /* We have now gotten a new event from waitpid above. */
+
+	  /* Signals arrive in any order.  So get all signals until
+	     SIGTRAP and resend previous ones to be held after.  */
 	  if (linuxthreads_max
 	      && !linuxthreads_breakpoints_inserted
 	      && WIFSTOPPED(status))
 	    if (WSTOPSIG(status) == SIGTRAP)
 	      {
 		while (--last >= 0)
-		  kill (rpid, WSTOPSIG(wstatus[last]));
+		  {
+		    kill (rpid, WSTOPSIG(wstatus[last]));
+		  }
 
 		/* insert negative zombie breakpoint */
 		for (i = 0; i <= linuxthreads_breakpoint_last; i++)
@@ -1368,7 +1468,9 @@ linuxthreads_wait (pid, ourstatus)
 		      if (wstatus[i] == status)
 			break;
 		    if (i >= last)
-		      wstatus[last++] = status;
+		      {
+			wstatus[last++] = status;
+		      }
 		  }
 		child_resume (rpid, 1, TARGET_SIGNAL_0);
 		continue;
@@ -1387,9 +1489,13 @@ linuxthreads_wait (pid, ourstatus)
 	      if (!linuxthreads_pending_status (rpid))
 		{
 		  if (linuxthreads_step_pid == rpid)
-		    child_resume (rpid, 1, linuxthreads_step_signo);
+		    {
+		      child_resume (rpid, 1, linuxthreads_step_signo);
+		    }
 		  else
-		    child_resume (rpid, 0, TARGET_SIGNAL_0);
+		    {
+		      child_resume (rpid, 0, TARGET_SIGNAL_0);
+		    }
 		}
 	      continue;
 	    }
@@ -1433,9 +1539,13 @@ linuxthreads_wait (pid, ourstatus)
 		  write_pc_pid (linuxthreads_breakpoint_zombie[i].pc
 				- DECR_PC_AFTER_BREAK, rpid);
 		  if (linuxthreads_step_pid == rpid)
-		    child_resume (rpid, 1, linuxthreads_step_signo);
+		    {
+		      child_resume (rpid, 1, linuxthreads_step_signo);
+		    }
 		  else
-		    child_resume (rpid, 0, TARGET_SIGNAL_0);
+		    {
+		      child_resume (rpid, 0, TARGET_SIGNAL_0);
+		    }
 		  continue;
 		}
 	    }
@@ -1453,8 +1563,12 @@ linuxthreads_wait (pid, ourstatus)
       if (linuxthreads_attach_pending && !stop_soon_quietly)
         {
 	  int on = 1;
-	  target_write_memory (linuxthreads_debug, (char *)&on, sizeof (on));
-	  update_stop_threads (rpid);
+	  if (!using_thread_db)
+	    {
+	      target_write_memory (linuxthreads_debug, 
+				   (char *) &on, sizeof (on));
+	      update_stop_threads (rpid);
+	    }
 	  linuxthreads_attach_pending = 0;
         }
 
@@ -1496,6 +1610,19 @@ Use the \"file\" or \"exec-file\" command.");
   child_ops.to_create_inferior (exec_file, allargs, env);
 }
 
+void
+linuxthreads_discard_global_state ()
+{
+  linuxthreads_inferior_pid = 0;
+  linuxthreads_breakpoint_pid = 0;
+  linuxthreads_step_pid = 0;
+  linuxthreads_step_signo = TARGET_SIGNAL_0;
+  linuxthreads_manager_pid = 0;
+  linuxthreads_initial_pid = 0;
+  linuxthreads_attach_pending = 0;
+  linuxthreads_max = 0;
+}
+
 /* Clean up after the inferior dies.  */
 
 static void
@@ -1506,13 +1633,7 @@ linuxthreads_mourn_inferior ()
       int off = 0;
       target_write_memory (linuxthreads_debug, (char *)&off, sizeof (off));
 
-      linuxthreads_inferior_pid = 0;
-      linuxthreads_breakpoint_pid = 0;
-      linuxthreads_step_pid = 0;
-      linuxthreads_step_signo = TARGET_SIGNAL_0;
-      linuxthreads_manager_pid = 0;
-      linuxthreads_initial_pid = 0;
-      linuxthreads_attach_pending = 0;
+      linuxthreads_discard_global_state ();
       init_thread_list();           /* Destroy thread info */
     }
 
@@ -1566,12 +1687,18 @@ linuxthreads_kill ()
 
   /* Wait for all threads. */
   do
-    rpid = waitpid (-1, &status, __WCLONE | WNOHANG);
+    {
+      rpid = waitpid (-1, &status, __WCLONE | WNOHANG);
+    }
   while (rpid > 0 || errno == EINTR);
+  /* FIXME: should no longer need to handle EINTR here. */
 
   do
-    rpid = waitpid (-1, &status, WNOHANG);
+    {
+      rpid = waitpid (-1, &status, WNOHANG);
+    }
   while (rpid > 0 || errno == EINTR);
+  /* FIXME: should no longer need to handle EINTR here. */
 
   linuxthreads_mourn_inferior ();
 }
@@ -1617,6 +1744,7 @@ linuxthreads_can_run ()
 {
   return child_suppress_run;
 }
+
 
 static void
 init_linuxthreads_ops ()
@@ -1636,6 +1764,7 @@ init_linuxthreads_ops ()
   linuxthreads_ops.to_create_inferior   = linuxthreads_create_inferior;
   linuxthreads_ops.to_mourn_inferior    = linuxthreads_mourn_inferior;
   linuxthreads_ops.to_thread_alive      = linuxthreads_thread_alive;
+  linuxthreads_ops.to_pid_to_str        = linuxthreads_pid_to_str;
   linuxthreads_ops.to_magic             = OPS_MAGIC;
 }
 
@@ -1643,6 +1772,7 @@ void
 _initialize_linuxthreads ()
 {
   struct sigaction sact;
+  sigset_t linuxthreads_wait_mask;	  /* sigset with SIGCHLD */
 
   init_linuxthreads_ops ();
   add_target (&linuxthreads_ops);
@@ -1664,4 +1794,10 @@ _initialize_linuxthreads ()
   /* initialize SIGCHLD mask */
   sigemptyset (&linuxthreads_wait_mask);
   sigaddset (&linuxthreads_wait_mask, SIGCHLD);
+
+  /* Use SIG_BLOCK to block receipt of SIGCHLD.
+     The block_mask will allow us to wait for this signal explicitly.  */
+  sigprocmask(SIG_BLOCK, 
+	      &linuxthreads_wait_mask, 
+	      &linuxthreads_block_mask);
 }

@@ -5899,6 +5899,9 @@ init_procfs_ops ()
   procfs_ops.to_can_run = procfs_can_run;
   procfs_ops.to_notice_signals = procfs_notice_signals;
   procfs_ops.to_thread_alive = procfs_thread_alive;
+#ifdef TIDGET
+  procfs_ops.to_pid_to_str = procfs_pid_to_str;
+#endif
   procfs_ops.to_stop = procfs_stop;
   procfs_ops.to_stratum = process_stratum;
   procfs_ops.to_has_all_memory = 1;

@@ -285,6 +285,15 @@
 /* Define if you have the <wait.h> header file.  */
 #undef HAVE_WAIT_H
 
+/* Define if you have the <thread_db.h> header file.  */
+#undef HAVE_THREAD_DB_H
+
+/* Define if you have the <proc_service.h> header file.  */
+#undef HAVE_PROC_SERVICE_H
+
+/* Define if you have the <stdint.h> header file.  */
+#undef HAVE_STDINT_H
+
 /* Define if you have the <wchar.h> header file.  */
 #undef HAVE_WCHAR_H
 

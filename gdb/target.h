@@ -414,6 +414,7 @@ struct target_ops
     void (*to_notice_signals) PARAMS ((int pid));
     int (*to_thread_alive) PARAMS ((int pid));
     void (*to_find_new_threads) PARAMS ((void));
+    char *(*to_pid_to_str) PARAMS ((int));
     void (*to_stop) PARAMS ((void));
     int (*to_query) PARAMS ((int /*char */ , char *, char *, int *));
     void (*to_rcmd) (char *command, struct gdb_file *output);
@@ -438,6 +439,7 @@ struct target_ops
     int (*to_can_async_p) (void);
     int (*to_is_async_p) (void);
     void (*to_async) (void (*cb) (enum inferior_event_type, void *context), void *context);
+    int to_async_mask_value;
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related? */
   };
@@ -597,7 +599,8 @@ target_detach PARAMS ((char *, int));
 #define	target_prepare_to_store()	\
 	(*current_target.to_prepare_to_store) ()
 
-extern int target_read_string PARAMS ((CORE_ADDR, char **, int, int *));
+extern int 
+target_read_string PARAMS ((CORE_ADDR, char **, int, int *));
 
 extern int
 target_read_memory PARAMS ((CORE_ADDR memaddr, char *myaddr, int len));
@@ -621,15 +624,17 @@ child_xfer_memory PARAMS ((CORE_ADDR, char *, int, int, struct target_ops *));
    of bytes actually transfered is not defined) and ERR is set to a
    non-zero error indication. */
 
-extern int target_read_memory_partial (CORE_ADDR addr, char *buf, int len, int *err);
+extern int 
+target_read_memory_partial (CORE_ADDR addr, char *buf, int len, int *err);
 
-extern int target_write_memory_partial (CORE_ADDR addr, char *buf, int len, int *err);
+extern int 
+target_write_memory_partial (CORE_ADDR addr, char *buf, int len, int *err);
 
 extern char *
-  child_pid_to_exec_file PARAMS ((int));
+child_pid_to_exec_file PARAMS ((int));
 
 extern char *
-  child_core_file_to_sym_file PARAMS ((char *));
+child_core_file_to_sym_file PARAMS ((char *));
 
 #if defined(CHILD_POST_ATTACH)
 extern void
@@ -1060,23 +1065,40 @@ extern void target_load (char *arg, int from_tty);
 /* Put the target in async mode with the specified callback function. */
 #define target_async(CALLBACK,CONTEXT) (current_target.to_async((CALLBACK), (CONTEXT)))
 
+/* This is to be used ONLY within run_stack_dummy(). It
+   provides a workaround, to have inferior function calls done in
+   sychronous mode, even though the target is asynchronous. After
+   target_async_mask(0) is called, calls to target_can_async_p() will
+   return FALSE , so that target_resume() will not try to start the
+   target asynchronously. After the inferior stops, we IMMEDIATELY
+   restore the previous nature of the target, by calling
+   target_async_mask(1). After that, target_can_async_p() will return
+   TRUE. ANY OTHER USE OF THIS FEATURE IS DEPRECATED. 
+
+   FIXME ezannoni 1999-12-13: we won't need this once we move
+   the turning async on and off to the single execution commands,
+   from where it is done currently, in remote_resume().*/
+
+#define	target_async_mask_value	\
+	(current_target.to_async_mask_value)
+
+extern int target_async_mask (int mask);     
+
 extern void target_link PARAMS ((char *, CORE_ADDR *));
 
 /* Converts a process id to a string.  Usually, the string just contains
    `process xyz', but on some systems it may contain
    `process xyz thread abc'.  */
 
-#ifndef target_pid_to_str
-#define target_pid_to_str(PID) \
-	normal_pid_to_str (PID)
-extern char *normal_pid_to_str PARAMS ((int pid));
-#endif
+#undef target_pid_to_str
+#define target_pid_to_str(PID) current_target.to_pid_to_str (PID)
 
 #ifndef target_tid_to_str
 #define target_tid_to_str(PID) \
-        normal_pid_to_str (PID)
+        target_pid_to_str (PID)
 extern char *normal_pid_to_str PARAMS ((int pid));
 #endif
+
 
 /*
  * New Objfile Event Hook:
@@ -1105,7 +1127,7 @@ extern void (*target_new_objfile_hook) PARAMS ((struct objfile *));
 
 #ifndef target_pid_or_tid_to_str
 #define target_pid_or_tid_to_str(ID) \
-	normal_pid_to_str (ID)
+	target_pid_to_str (ID)
 #endif
 
 /* Attempts to find the pathname of the executable file
@@ -1321,24 +1343,28 @@ noprocess PARAMS ((void));
 extern void
 find_default_attach PARAMS ((char *, int));
 
-void
+extern void
 find_default_require_attach PARAMS ((char *, int));
 
-void
+extern void
 find_default_require_detach PARAMS ((int, char *, int));
 
 extern void
 find_default_create_inferior PARAMS ((char *, char *, char **));
 
-void
+extern void
 find_default_clone_and_follow_inferior PARAMS ((int, int *));
 
-extern struct target_ops *find_run_target PARAMS ((void));
+extern struct target_ops *
+find_run_target PARAMS ((void));
 
 extern struct target_ops *
-  find_core_target PARAMS ((void));
+find_core_target PARAMS ((void));
 
-int
+extern struct target_ops *
+find_target_beneath PARAMS ((struct target_ops *));
+
+extern int
 target_resize_to_sections PARAMS ((struct target_ops *target, int num_added));
 
 /* Stuff that should be shared among the various remote targets.  */

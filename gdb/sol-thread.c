@@ -1609,6 +1609,7 @@ init_sol_thread_ops ()
   sol_thread_ops.to_can_run = sol_thread_can_run;
   sol_thread_ops.to_notice_signals = sol_thread_notice_signals;
   sol_thread_ops.to_thread_alive = sol_thread_alive;
+  sol_thread_ops.to_pid_to_str = solaris_pid_to_str;
   sol_thread_ops.to_find_new_threads = sol_find_new_threads;
   sol_thread_ops.to_stop = sol_thread_stop;
   sol_thread_ops.to_stratum = process_stratum;
@@ -1659,6 +1660,7 @@ init_sol_core_ops ()
   sol_core_ops.to_has_registers = 1;
   sol_core_ops.to_has_execution = 0;
   sol_core_ops.to_has_thread_control = tc_none;
+  sol_core_ops.to_pid_to_str = solaris_pid_to_str;
   sol_core_ops.to_sections = 0;
   sol_core_ops.to_sections_end = 0;
   sol_core_ops.to_magic = OPS_MAGIC;

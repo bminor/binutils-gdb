@@ -1,3 +1,276 @@
+1999-12-21  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* blockframe.c (generic_pop_current_frame): Cosmetic changes to
+	clarify.
+
+	
+1999-12-21  Jim Blandy  <jimb@cygnus.com>
+
+	* Makefile.in (elf_bfd_h): Look for elf-bfd.h in BFD_SRC, not
+	BFD_DIR.  Unlike bfd.h, it is not a generated file.
+	
+Fri Dec 17 18:24:58 1999  David Taylor  <taylor@texas.cygnus.com>
+
+	* language.c (_initialize_language): move settings of language,
+ 	range, and type and corresponding function calls
+ 	set_language_command, set_type_command, and set_range_command
+ 	closer together to match the model of having the user set the
+ 	variable via the 'set {language | range | type}' commands.
+	This eliminates startup noise introduced by Jimmy Guo's change
+	of Dec 13th.
+
+1999-12-17  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* configure.in: test for <stdint.h>, which is not available
+	on earlier versions of Linux.
+	* config.in: define HAVE_STDINT_H if it's present.
+	* configure: autoconfiscate.
+	* lin-thread.c: if not HAVE_STDINT_H, stub out the entire module.
+	
+Fri Dec 17 20:45:21 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* target.c (find_target_beneath): Change ``='' in if to ``==''.
+
+1999-12-16  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* defs.h (TIDGET): add default definition.
+	* lin-thread.c (check_for_thread_event): for now, just provide
+	an empty definition (to be filled in later).
+
+1999-12-16  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* varobj.c (varobj_list): Improve the test and the text of the
+	assertion that guards against wrong tally of root varobjs.
+	(uninstall_variable): Fix for a bug in which the number of root
+	varobjs was not decremented if the first one in the list was deleted.
+
+1999-12-16  Michael Snyder  <msnyder@cleaver.cygnus.com>
+	
+	* linux-thread.c: Remove printf-debugging code.
+	* lin-thread.c: ditto.
+	* config/alpha/nm-linux.h: protect with NM_LINUX_H.
+	* testsuite/gdb.threads/linux-dp.exp: Make test for "New Thread"
+	message more forgiving.  Ditto test for "info threads".
+	
+1999-12-16  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* lin-thread.c: new file.  Implements multi-thread debugging on
+	Linux using the thread_db API first implemented on Solaris.  This
+	frees GDB from any dependency on the internal implementation of
+	the thread library.  Future versions of the thread library will
+	implement a libthread_db API for debuggers, which GDB will use.
+	* config/i386/linux.mh: add lin-thread.o to the link, and add
+	-ldl and -rdynamic since libthread_db is a dynamic library.
+	* config/alpha/alpha-linux.mh: ditto.
+	* configure.in: test for thread_db.h, proc_service.h
+	* configure: autoconf.
+	* config.in: conditionally define HAVE_THREAD_DB_H
+	and HAVE_PROC_SERVICE_H
+	* gdb_thread_db.h: new file, used when the system doesn't have it.
+	* gdb_proc_service.h: ditto.
+	
+1999-12-16  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* linux-thread.c: changes to accomodate the new lin-thread.c
+	module based on the thread_db API.  These changes make parts of
+	linux-thread.c shareable with lin-thread.c.
+	(linuxthreads_wait_mask): replace with linuxthreads_block_mask.
+	(using_thread_db): new variable.  Allows linux-thread module to 
+	detect when lin-thread (thread_db API) module is in use.
+	(save_inferior_pid, restore_inferior_pid): make 32/64 bit safe.
+	(check_all_signal_numbers) make extern, shared with lin-thead.c.
+	(linuxthreads_new_objfile): use target_new_objfile_chain to share
+	this hook with the lin-thread module.  Call the other module FIRST.
+	If using_thread_db is turned on by the other thread module, do not
+	set linuxthreads_debug and do not call update_stop_threads.  Do call
+	check_all_signal_numbers, to be sure it gets set before target_wait.
+	(linux_child_wait): new function.  Abstracts out the "child_wait"
+	functionality, so that it can be shared with the lin-thread module.
+	(linuxthreads_wait): call linux_child_wait, instead of doing the
+	waiting inline.  If using_thread_db, do not call update_stop_threads
+	and do not turn on linuxthreads_debug.
+	(linuxthreads_mourn_inferior): abstract out the clearing of global
+	state, so that it can be shared with the lin-thread.c module.
+	(_initialize_linuxthreads): use linuxthreads_wait_mask to block
+	SIGCHLD exactly ONCE, and leave it blocked!  Then linux_child_wait
+	will call sigsuspend when it wants to wait for this signal.
+	(thread_attach): abstract out ptrace attach to share with lin-thread.c
+	
+1999-12-16  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	Make target_pid_to_str a target_ops vector.
+	* target.h (target_pid_to_str): redefine to use a target_ops vector.
+	(target_tid_to_str): default to using target_pid_to_str.
+	(target_pid_or_tid_to_str): ditto.
+	* target.c (update_current_target): inherit to_pid_to_str method.
+	(find_target_beneath): new function.  Find target stratum below 
+	the given one.
+	* config/nm-gnu.h: don't define target_pid_to_str.
+	* config/i386/tm-i386sol2.h: ditto.
+	* config/sparc/tm-sun4sol2.h: ditto.
+	* gnu-nat.c (init_gnu_ops): initialize to_pid_to_str vector.
+	* linux-thread.c (init_linuxthreads_ops): ditto.
+	* sol-thread.c (init_sol_thread_ops: ditto.
+	* procfs.c (init_procfs_ops): ditto.
+	* win32-nat.c (init_child_ops): ditto.
+	* config/i386/tm-cygwin.h: don't define target_pid_to_str.
+	* inftarg.c (child_pid_to_str): new function, used to initialize
+	to_pid_to_str vector.  May be suppressed by defining CHILD_PID_TO_STR.
+	(init_child_ops): initialize to_pid_to_str using child_pid_to_str.
+	Derivative modules may substitute their own child_pid_to_str func
+	by defining CHILD_PID_TO_STR.
+	* lynx-nat.c (lynx_pid_to_str): rename to child_pid_to_str.
+	* config/nm-lynx.h: define CHILD_PID_TO_STR.  
+	Don't define target_pid_to_str.
+	* hppah-nat.c (hppa_pid_to_str): rename to child_pid_to_str.
+	* infttrace.c (hppa_pid_or_tid_to_str): call child_pid_to str 
+	instead of hppa_pid_to_str.
+	* config/pa/nm-hppah.h: define CHILD_PID_TO_STR.
+	Don't define target_pid_to_str.
+	
+1999-12-16  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* i386-linux-nat.c: introduce PIDGET/TIDGET macros as on Solaris, 
+	preparatory to using the thread_db debugging API for Linux.
+	(fill_gregset): guard against invalid input.
+	(fetch_regs): add a pid/thread_id argument, so we can fetch regs
+	from multiple processes/clones/threads.  (store_regs): ditto.
+	(fetch_fpregs): ditto.  (store_fpregs): ditto.
+	(fetch_xfpregs): ditto.  (store_xfpregs): ditto.
+	(fetch_inferior_registers): use TIDGET to extract an appropriate
+	thread/clone/process id from inferior_pid, if there's one there, 
+	and pass it to fetch_regs etc.  (store_inferior_registers): ditto.
+
+	* infptrace.c: include every available version of wait.h.
+	introduce PIDGET/TIDGET macros for use with thread_db API on Linux.
+	(call_ptrace): rearrange lines that were split by an ifdef.
+	(fetch_register): use TIDGET to extract an appropriate process ID
+	from inferior_pid, in case we are debugging more than one process.
+	(store_register): ditto.  This is for Linux.
+	(child_xfer_memory): use PIDGET to extract the main process id from
+	inferior_pid, in case we are debugging multiple processes that share
+	the same address space (as on Linux).
+
+1999-12-16  Christopher Faylor  <cgf@cygnus.com>
+
+	* win32-nat.c: Add a missing register to mappings array.
+	(child_fetch_inferior_registers): Use precalculated index into mappings
+	array as supply_registers argument.
+	(handle_output_debug_string): Avoid considering every debug string as a
+	cygwin signal.
+	(handle_exception): Trap first chance exceptions.
+	(child_create_inferior): Initialize Microsoft thread walking API.
+	(sgmb): New function.  Used by Microsoft API for stack walking.
+	(child_frame_chain): New function.  Uses Microsoft API for stack
+	walking.
+	(child_frame_chain_saved_pc): Ditto.
+	* config/i386/tm-cygwin.h: Define frame handling stuff.
+
+1999-12-15  Stan Shebs  <shebs@andros.cygnus.com>
+
+	ARM GNU/Linux support and general ARM target fixes/cleanup from
+ 	Scott Bambrough <scottb@netwinder.org>, plus obsoletion of the old
+ 	RISCix support.
+	* NEWS: Mention addition and obsoletion.
+	* configure.host: Recognize arm* instead of just arm.
+ 	(arm*-*-linux*): Recognize.
+	* configure.tgt: Ditto, plus assume arm*-*-* is embedded.
+	* config/arm/arm.mh, config/arm/arm.mt, config/arm/nm-arm.h,
+ 	config/arm/xm-arm.h: Mark as OBSOLETE.
+	* config/arm/embed.mt, config/arm/tm-embed.h: New files.
+	* config/arm/linux.mh, config/arm/linux.mt, config/arm/nm-linux.h,
+ 	config/arm/tm-linux.h, config/arm/xm-linux.h: Ditto.
+	* config/arm/tm-arm.h: Add more comments, eliminate PARAMS.
+	(STACK_END_ADDR): Remove.
+	(ARM_LE_BREAKPOINT, ARM_BE_BREAKPOINT, THUMB_LE_BREAKPOINT,
+	THUMB_BE_BREAKPOINT): Move to here from arm-tdep.c.
+	(NUM_REGS): Define as sum.
+	(NUM_FREGS, NUM_SREGS, NUM_GREGS): New definitions.
+	(FP_REGISTER_RAW_SIZE, FP_REGISTER_VIRTUAL_SIZE,
+ 	STATUS_REGISTER_SIZE): Define.
+	(REGISTER_BYTES, REGISTER_BYTE, REGISTER_RAW_SIZE,
+	REGISTER_VIRTUAL_SIZE): Rewrite to use symbolic values.
+	(REGISTER_CONVERTIBLE, REGISTER_CONVERT_TO_VIRTUAL,
+	REGISTER_CONVERT_TO_RAW, USE_STRUCT_CONVENTION,
+	EXTRACT_RETURN_VALUE): Rewrite to use new functions.
+	(IN_SIGTRAMP): Remove definition.
+	* arm-convert.s: Mark as OBSOLETE.
+	* arm-linux-nat.c: New file.
+	* Makefile.in: Add build rule for it.
+	* arm-tdep.c (struct frame_extra_info): New struct.
+	(arm_use_struct_convention): Rewrite.
+	(arm_push_arguments): Rewrite to handle more cases.
+	(arm_register_convertible, arm_register_convert_to_virtual,
+ 	arm_register_convert_to_raw, arm_extract_return_value): New
+ 	functions.
+	(LITTLE_BREAKPOINT, BIG_BREAKPOINT): Remove.
+	* arm-xdep.c: Mark as OBSOLETE.
+
+1999-12-15  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* infcmd.c (run_stack_dummy): Temporarily lie about the target
+ 	ability to support asynchronous execution.
+
+	* remote.c (remote_can_async_p, remote_is_async_p): Return true
+ 	iff to_async_mask_value is true too.
+	(remote_async): Error out if called when to_async_mask_value is 0.
+	(init_remote_async_ops): Initialize to_async_mask_value to 1.
+	(remote_async_detach, remote_async_resume, remote_async_wait,
+ 	remote_async_kill): Change SERIAL_IS_ASYNC_P call to
+ 	target_is_async_p call.
+	(remote_async_resume): Change SERIAL_CAN_ASYNC_P call to
+ 	target_can_async_p call.
+	
+	* target.c (update_current_target): Inherit to_async_mask_value.
+	(target_async_mask): New function. To temporarily turn the target
+ 	into a synchronous one for inferior function calls, and back to
+ 	asynchronous.
+
+	* target.h (to_async_mask_value): New entry in the target
+ 	vector.
+	(target_async_mask): Export.
+	(target_async_mask_value): Define.
+ 	
+Wed Dec 15 11:24:32 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* hp-psymtab-read.c (trans_lang): Use HP_LANGUAGE_FORTRAN instead
+	of HP_LANGUAGE_F77.
+
+Wed Dec 15 13:37:55 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb-events.h, gdb-events.c (set_gdb_event_hooks): Return the old
+ 	event hooks vector.
+
+1999-08-13  Jim Kingdon  <http://developer.redhat.com/>
+
+        * breakpoint.c (bpstat_stop_status): Revert 1998-09-08 change
+        to ->frame matching.  The change did not match the ChangeLog
+        entry, looked fishy, and caused infinite stepping when running
+        "next" from main on sparc w/ RH Linux.  Thanks to Jakub for the
+	report.
+
+1999-12-14  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* arm-tdep.c (arm_get_next_pc): Add argument to shifted_reg_val
+	call.
+
+1999-12-14  Mark Salter  <msalter@cygnus.com>
+
+	* mips-tdep.c (mips_print_register): Fix printing of individual
+	registers when REGISTER_VIRTUAL_SIZE != REGISTER_RAW_SIZE.
+
+Tue Dec 14 23:29:19 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* defs.h (mcalloc): Delcare.
+	* utils.c (xcalloc, mcalloc): New functions.
+
+1999-12-13  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* config/arm/tm-arm.h: Reformat comments, in preparation for
+	real changes.
+	* arm-tdep.c: Similarly, plus change function definitions to
+	modern form.
+
 1999-12-13  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* breakpoint.h (enum bptype): add new BP type bp_thread_event.
@@ -396,7 +669,7 @@ Thu Dec  2 17:14:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	signal that we are ignoring, and GDB silently resumes the child, 
 	resume ALL threads (not just the one that got the signal).  All
 	threads are stopped, so all must be resumed.
-	(handle_inferior_pid): on detecting a thread context switch, 
+	(handle_inferior_event): on detecting a thread context switch, 
 	swap infrun_state ONLY if both the old thread and the new one
 	are in the thread list.  Otherwise state information will be lost!
 	Problem may arise with flaky back-ends.

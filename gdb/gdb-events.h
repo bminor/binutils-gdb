@@ -83,7 +83,7 @@ extern void breakpoint_modify_event (int b);
 #endif
 
 /* Install custom gdb-events hooks. */
-extern void set_gdb_event_hooks (struct gdb_events *vector);
+extern struct gdb_events *set_gdb_event_hooks (struct gdb_events *vector);
 
 /* Deliver any pending events. */
 extern void gdb_events_deliver (struct gdb_events *vector);

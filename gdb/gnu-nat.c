@@ -2415,6 +2415,35 @@ gnu_xfer_memory (memaddr, myaddr, len, write, target)
     }
 }
 
+/* Return printable description of proc.  */
+static char *
+proc_string (struct proc *proc)
+{
+  static char tid_str[80];
+  if (proc_is_task (proc))
+    sprintf (tid_str, "process %d", proc->inf->pid);
+  else
+    sprintf (tid_str, "thread %d.%d",
+	     proc->inf->pid, pid_to_thread_id (proc->tid));
+  return tid_str;
+}
+
+static char *
+gnu_pid_to_str (int tid)
+{
+  struct inf *inf = current_inferior;
+  struct proc *thread = inf_tid_to_thread (inf, tid);
+
+  if (thread)
+    return proc_string (thread);
+  else
+    {
+      static char tid_str[80];
+      sprintf (tid_str, "bogus thread id %d", tid);
+      return tid_str;
+    }
+}
+
 extern void gnu_store_registers (int regno);
 extern void gnu_fetch_registers (int regno);
 
@@ -2473,6 +2502,7 @@ init_gnu_ops (void)
   gnu_ops.to_can_run = gnu_can_run;	/* to_can_run */
   gnu_ops.to_notice_signals = 0;	/* to_notice_signals */
   gnu_ops.to_thread_alive = gnu_thread_alive;	/* to_thread_alive */
+  gnu_ops.to_pid_to_str = gnu_pid_to_str;   /* to_pid_to_str */
   gnu_ops.to_stop = gnu_stop;	/* to_stop */
   gnu_ops.to_pid_to_exec_file = gnu_pid_to_exec_file;	/* to_pid_to_exec_file */
   gnu_ops.to_core_file_to_sym_file = NULL;
@@ -2487,35 +2517,6 @@ init_gnu_ops (void)
   gnu_ops.to_sections_end = 0;	/* sections_end */
   gnu_ops.to_magic = OPS_MAGIC;	/* to_magic */
 }				/* init_gnu_ops */
-
-/* Return printable description of proc.  */
-char *
-proc_string (struct proc *proc)
-{
-  static char tid_str[80];
-  if (proc_is_task (proc))
-    sprintf (tid_str, "process %d", proc->inf->pid);
-  else
-    sprintf (tid_str, "thread %d.%d",
-	     proc->inf->pid, pid_to_thread_id (proc->tid));
-  return tid_str;
-}
-
-char *
-gnu_target_pid_to_str (int tid)
-{
-  struct inf *inf = current_inferior;
-  struct proc *thread = inf_tid_to_thread (inf, tid);
-
-  if (thread)
-    return proc_string (thread);
-  else
-    {
-      static char tid_str[80];
-      sprintf (tid_str, "bogus thread id %d", tid);
-      return tid_str;
-    }
-}
 
 /* User task commands.  */
 

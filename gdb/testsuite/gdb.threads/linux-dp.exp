@@ -68,7 +68,7 @@ for {set i 0} {$i < 5} {incr i} {
     gdb_continue_to_breakpoint "about to create philosopher: $i"
     send_gdb "next\n"
     gdb_expect {
-	-re "\\\[New Thread .*\\\].*$gdb_prompt $" {
+	-re "\\\[New .*\\\].*$gdb_prompt $" {
 	    pass "create philosopher: $i"
 	}
 	-re "Program received signal.*(Unknown signal|SIGUSR).*$gdb_prompt $" {
@@ -90,7 +90,7 @@ for {set i 0} {$i < 5} {incr i} {
 # Run until there are some threads.
 gdb_breakpoint [gdb_get_line_number "linuxthreads.exp: info threads 2"]
 gdb_continue_to_breakpoint "main thread's sleep"
-gdb_test "info threads" "7 Thread .*6 Thread .*5 Thread .*4 Thread .*3 Thread .*2 Thread .* \\(initial thread\\)  main \\(argc=1, argv=.*\\) at .*linux-dp.c:.*1 Thread .* \\(manager thread\\).*" "info threads 2"
+gdb_test "info threads" "7 Thread .*6 Thread .*5 Thread .*4 Thread .*3 Thread .*2 Thread .*1 Thread .*" "info threads 2"
 
 # Try setting a thread-specific breakpoint.
 gdb_breakpoint "print_philosopher thread 5"

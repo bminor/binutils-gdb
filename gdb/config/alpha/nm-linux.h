@@ -18,6 +18,9 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#ifndef NM_LINUX_H
+#define NM_LINUX_H
+
 #include "nm-linux.h"
 
 /* Figure out where the longjmp will land.  We expect that we have just entered
@@ -64,3 +67,4 @@ get_longjmp_target PARAMS ((CORE_ADDR *));
    pointer to the first register.  */
 #define ALPHA_REGSET_BASE(regsetp)  ((long *) (regsetp))
 
+#endif /* NM_LINUX_H */

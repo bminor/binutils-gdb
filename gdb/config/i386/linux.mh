@@ -5,4 +5,6 @@ XDEPFILES= ser-tcp.o
 
 NAT_FILE= nm-linux.h
 NATDEPFILES= infptrace.o solib.o inftarg.o fork-child.o corelow.o \
-	core-aout.o i386v-nat.o i386-linux-nat.o linux-thread.o
+	core-aout.o i386v-nat.o i386-linux-nat.o linux-thread.o lin-thread.o
+
+LOADLIBES = -ldl -rdynamic

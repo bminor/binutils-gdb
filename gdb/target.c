@@ -78,7 +78,7 @@ static void
 target_command PARAMS ((char *, int));
 
 static struct target_ops *
-  find_default_run_target PARAMS ((char *));
+find_default_run_target PARAMS ((char *));
 
 static void
 update_current_target PARAMS ((void));
@@ -536,6 +536,7 @@ update_current_target ()
       INHERIT (to_notice_signals, t);
       INHERIT (to_thread_alive, t);
       INHERIT (to_find_new_threads, t);
+      INHERIT (to_pid_to_str, t);
       INHERIT (to_stop, t);
       INHERIT (to_query, t);
       INHERIT (to_rcmd, t);
@@ -556,6 +557,7 @@ update_current_target ()
       INHERIT (to_can_async_p, t);
       INHERIT (to_is_async_p, t);
       INHERIT (to_async, t);
+      INHERIT (to_async_mask_value, t);
       INHERIT (to_magic, t);
 
 #undef INHERIT
@@ -1046,6 +1048,14 @@ target_link (modname, t_reloc)
     *t_reloc = (CORE_ADDR) -1;
 }
 
+int
+target_async_mask (int mask)
+{
+  int saved_async_masked_status = target_async_mask_value;
+  target_async_mask_value = mask;
+  return saved_async_masked_status;
+}
+
 /* Look through the list of possible targets for a target that can
    execute a run or attach command without any other data.  This is
    used to locate the default process stratum.
@@ -1226,6 +1236,9 @@ find_run_target ()
   return (count == 1 ? runable : NULL);
 }
 
+/* Find a single core_stratum target in the list of targets and return it.
+   If for some reason there is more than one, return NULL.  */
+
 struct target_ops *
 find_core_target ()
 {
@@ -1247,6 +1260,27 @@ find_core_target ()
 
   return (count == 1 ? runable : NULL);
 }
+
+/*
+ * Find the next target down the stack from the specified target.
+ */
+
+struct target_ops *
+find_target_beneath (t)
+     struct target_ops *t;
+{
+  struct target_stack_item *cur;
+
+  for (cur = target_stack; cur; cur = cur->next)
+    if (cur->target_ops == t)
+      break;
+
+  if (cur == NULL || cur->next == NULL)
+    return NULL;
+  else
+    return cur->next->target_ops;
+}
+
 
 /* The inferior process has died.  Long live the inferior!  */
 
@@ -2053,6 +2087,7 @@ init_dummy_target ()
   dummy_target.to_require_detach = find_default_require_detach;
   dummy_target.to_create_inferior = find_default_create_inferior;
   dummy_target.to_clone_and_follow_inferior = find_default_clone_and_follow_inferior;
+  dummy_target.to_pid_to_str = normal_pid_to_str;
   dummy_target.to_stratum = dummy_stratum;
   dummy_target.to_magic = OPS_MAGIC;
 }

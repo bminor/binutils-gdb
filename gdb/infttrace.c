@@ -5773,7 +5773,7 @@ hppa_pid_or_tid_to_str (id)
 
   /* Does this appear to be a process?  If so, print it that way. */
   if (is_process_id (id))
-    return hppa_pid_to_str (id);
+    return child_pid_to_str (id);
 
   /* Else, print both the GDB thread number and the system thread id. */
   sprintf (buf, "thread %d (", pid_to_thread_id (id));

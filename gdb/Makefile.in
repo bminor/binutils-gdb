@@ -229,7 +229,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 19991213
+VERSION = 19991221
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -414,7 +414,7 @@ LINTFILES = $(SFILES) $(YYFILES) @CONFIG_SRCS@ init.c
 getopt_h =	$(INCLUDE_DIR)/getopt.h
 floatformat_h =	$(INCLUDE_DIR)/floatformat.h
 bfd_h =		$(BFD_DIR)/bfd.h
-elf_bfd_h =     $(BFD_DIR)/elf-bfd.h
+elf_bfd_h =     $(BFD_SRC)/elf-bfd.h
 wait_h =	$(INCLUDE_DIR)/wait.h
 dis-asm_h =	$(INCLUDE_DIR)/dis-asm.h 
 remote-sim_h =	$(INCLUDE_DIR)/remote-sim.h
@@ -956,7 +956,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	29k-share/udi/udi2go32.c \
 	a29k-tdep.c a68v-nat.c alpha-nat.c alpha-tdep.c \
 	altos-xdep.c arm-convert.s \
-	arm-tdep.c arm-xdep.c coff-solib.c \
+	arm-linux-nat.c arm-tdep.c arm-xdep.c coff-solib.c \
 	convex-tdep.c convex-xdep.c \
 	core-sol2.c core-regset.c core-aout.c corelow.c \
 	dcache.c delta68-nat.c dpx2-nat.c dstread.c exec.c fork-child.c \
@@ -1016,6 +1016,9 @@ alpha-tdep.o: alpha-tdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 # OBSOLETE altos-xdep.o: altos-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
 annotate.o: annotate.c $(defs_h) annotate.h $(value_h) target.h $(gdbtypes_h)
+
+arm-linux-nat.o: arm-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
+	gdb_string.h
 
 arm-tdep.o: arm-tdep.c $(gdbcmd_h) $(gdbcore_h) $(inferior_h) $(defs_h) \
 	$(gdbcore_h)

@@ -1229,19 +1229,18 @@ generic_save_dummy_frame_tos (sp)
   dummy_frame_stack->top = sp;
 }
 
-/* Function: pop_frame
-   Restore the machine state from either the saved dummy stack or a
+/* Restore the machine state from either the saved dummy stack or a
    real stack frame. */
 
 void
-generic_pop_current_frame (pop)
-     void (*pop) (struct frame_info * frame);
+generic_pop_current_frame (void (*popper) (struct frame_info * frame))
 {
   struct frame_info *frame = get_current_frame ();
+
   if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     generic_pop_dummy_frame ();
   else
-    pop (frame);
+    (*popper) (frame);
 }
 
 /* Function: pop_dummy_frame

@@ -845,6 +845,7 @@ run_stack_dummy (addr, buffer)
      char *buffer;
 {
   struct cleanup *old_cleanups = make_cleanup (null_cleanup, 0);
+  int saved_async = 0;
 
   /* Now proceed, having reached the desired place.  */
   clear_proceed_status ();
@@ -891,7 +892,15 @@ run_stack_dummy (addr, buffer)
 
   disable_watchpoints_before_interactive_call_start ();
   proceed_to_finish = 1;	/* We want stop_registers, please... */
+
+  if (target_can_async_p ())
+    saved_async = target_async_mask (0);
+
   proceed (addr, TARGET_SIGNAL_0, 0);
+
+  if (saved_async)
+    target_async_mask (saved_async);
+
   enable_watchpoints_after_interactive_call_stop ();
 
   discard_cleanups (old_cleanups);

@@ -11,6 +11,7 @@
 case "${host_cpu}" in
 
 alpha*)			gdb_host_cpu=alpha ;;
+arm*)			gdb_host_cpu=arm ;;
 # OBSOLETE c[12])		gdb_host_cpu=convex ;;
 hppa*)			gdb_host_cpu=pa ;;
 i[3456]86*)		gdb_host_cpu=i386 ;;
@@ -35,7 +36,8 @@ alpha*-*-osf2*)		gdb_host=alpha-osf2 ;;
 alpha*-*-osf[3456789]*)	gdb_host=alpha-osf3 ;;
 alpha*-*-linux*)	gdb_host=alpha-linux ;;
 
-arm-*-*)		gdb_host=arm ;;
+arm*-*-linux*)		gdb_host=linux ;;
+arm*-*-*)		gdb_host=arm ;;
 
 # OBSOLETE c[12]-*-*)		gdb_host=convex ;;
 

@@ -2137,7 +2137,7 @@ remote_async_detach (args, from_tty)
   remote_send (buf, PBUFSIZ);
 
   /* Unregister the file descriptor from the event loop. */
-  if (SERIAL_IS_ASYNC_P (remote_desc))
+  if (target_is_async_p ())
     SERIAL_ASYNC (remote_desc, NULL, 0);
 
   pop_target ();
@@ -2254,14 +2254,14 @@ remote_async_resume (pid, step, siggnal)
   /* FIXME: ezannoni 1999-09-28: We may need to move this out of here
      into infcmd.c in order to allow inferior function calls to work
      NOT asynchronously. */
-  if (event_loop_p && SERIAL_CAN_ASYNC_P (remote_desc))
+  if (event_loop_p && target_can_async_p ())
     target_async (inferior_event_handler, 0);
   /* Tell the world that the target is now executing. */
   /* FIXME: cagney/1999-09-23: Is it the targets responsibility to set
      this?  Instead, should the client of target just assume (for
      async targets) that the target is going to start executing?  Is
      this information already found in the continuation block?  */
-  if (SERIAL_IS_ASYNC_P (remote_desc))
+  if (target_is_async_p ())
     target_executing = 1;
   putpkt (buf);
 }
@@ -2710,14 +2710,14 @@ remote_async_wait (pid, status)
     {
       unsigned char *p;
 
-      if (!SERIAL_IS_ASYNC_P (remote_desc))
+      if (!target_is_async_p ())
 	ofunc = signal (SIGINT, remote_interrupt);
       /* FIXME: cagney/1999-09-27: If we're in async mode we should
          _never_ wait for ever -> test on target_is_async_p().
          However, before we do that we need to ensure that the caller
          knows how to take the target into/out of async mode. */
       getpkt (buf, PBUFSIZ, wait_forever_enabled_p);
-      if (!SERIAL_IS_ASYNC_P (remote_desc))
+      if (!target_is_async_p ())
 	signal (SIGINT, ofunc);
 
       /* This is a hook for when we need to do something (perhaps the
@@ -4009,7 +4009,7 @@ static void
 remote_async_kill ()
 {
   /* Unregister the file descriptor from the event loop. */
-  if (SERIAL_IS_ASYNC_P (remote_desc))
+  if (target_is_async_p ())
     SERIAL_ASYNC (remote_desc, NULL, 0);
 
   /* For some mysterious reason, wait_for_inferior calls kill instead of
@@ -5297,14 +5297,14 @@ static int
 remote_can_async_p (void)
 {
   /* We're async whenever the serial device is. */
-  return SERIAL_CAN_ASYNC_P (remote_desc);
+  return (current_target.to_async_mask_value) && SERIAL_CAN_ASYNC_P (remote_desc);
 }
 
 static int
 remote_is_async_p (void)
 {
   /* We're async whenever the serial device is. */
-  return SERIAL_IS_ASYNC_P (remote_desc);
+  return (current_target.to_async_mask_value) && SERIAL_IS_ASYNC_P (remote_desc);
 }
 
 /* Pass the SERIAL event on and up to the client.  One day this code
@@ -5326,6 +5326,9 @@ remote_async_serial_handler (serial_t scb, void *context)
 static void
 remote_async (void (*callback) (enum inferior_event_type event_type, void *context), void *context)
 {
+  if (current_target.to_async_mask_value == 0)
+    internal_error ("Calling remote_async when async is masked");
+
   if (callback != NULL)
     {
       SERIAL_ASYNC (remote_desc, remote_async_serial_handler, NULL);
@@ -5382,6 +5385,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_async_ops.to_can_async_p = remote_can_async_p;
   remote_async_ops.to_is_async_p = remote_is_async_p;
   remote_async_ops.to_async = remote_async;
+  remote_async_ops.to_async_mask_value = 1;
   remote_async_ops.to_magic = OPS_MAGIC;
 }
 

@@ -99,7 +99,7 @@ trans_lang (in_lang)
   else if (in_lang == HP_LANGUAGE_CPLUSPLUS)
     return language_cplus;
 
-  else if (in_lang == HP_LANGUAGE_F77)
+  else if (in_lang == HP_LANGUAGE_FORTRAN)
     return language_fortran;
 
   else

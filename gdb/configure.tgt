@@ -13,6 +13,7 @@
 case "${target_cpu}" in
 
 alpha*)			gdb_target_cpu=alpha ;;
+arm*)			gdb_target_cpu=arm ;;
 # OBSOLETE c[12])		gdb_target_cpu=convex ;;
 hppa*)			gdb_target_cpu=pa ;;
 i[3456]86*)		gdb_target_cpu=i386 ;;
@@ -50,8 +51,9 @@ alpha*-*-linux*)	gdb_target=alpha-linux ;;
 
 arc-*-*)		gdb_target=arc ;;
 
-arm-*-* | thumb-*-* | strongarm-*-*)
-			gdb_target=arm 
+arm*-*-linux*)		gdb_target=linux ;;
+arm*-*-* | thumb*-*-* | strongarm*-*-*)
+			gdb_target=embed
                         configdirs="$configdirs rdi-share"
                         ;;
 # OBSOLETE c1-*-*)		gdb_target=convex ;;

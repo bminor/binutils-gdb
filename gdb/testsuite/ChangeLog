@@ -1,8 +1,11 @@
-1999-12-13n Fernando Nasser  <fnasser@totem.to.cygnus.com>
+1999-12-16  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.base/default.exp: Match arm* etc instead of arm in "info
+ 	float" test.
+
+1999-12-13 Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
 	* gdb.base/watchpoint.exp: Add missing "(timeout)" to test message.
-
-1999-12-13n Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
 	* gdb.base/break.exp: Add missing anchor to reg exp on "finish from
 	outermost frame disallowed".

@@ -2430,8 +2430,18 @@ mips_print_register (regnum, all)
 		 gdb_stdout, 0, 1, 0, Val_pretty_default);
   /* Else print as integer in hex.  */
   else
-    print_scalar_formatted (raw_buffer, REGISTER_VIRTUAL_TYPE (regnum),
-			    'x', 0, gdb_stdout);
+    {
+      int offset;
+
+      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+        offset = REGISTER_RAW_SIZE (regnum) - REGISTER_VIRTUAL_SIZE (regnum);
+      else
+	offset = 0;
+	
+      print_scalar_formatted (raw_buffer + offset,
+			      REGISTER_VIRTUAL_TYPE (regnum),
+			      'x', 0, gdb_stdout);
+    }
 }
 
 /* Replacement for generic do_registers_info.  
@@ -3783,6 +3793,7 @@ mips_gdbarch_init (info, arches)
     switch (info.bfd_arch_info->mach)
       {
       case bfd_mach_mips4100:
+      case bfd_mach_mips4111:
 	tdep->mips_fpu_type = MIPS_FPU_NONE;
 	break;
       default:

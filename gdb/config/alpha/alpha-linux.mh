@@ -3,7 +3,9 @@ XDEPFILES= ser-tcp.o
 XM_FILE= xm-alphalinux.h
 NAT_FILE= nm-linux.h
 NATDEPFILES= infptrace.o inftarg.o corelow.o core-regset.o alpha-nat.o \
-	fork-child.o solib.o linux-thread.o
+	fork-child.o solib.o linux-thread.o lin-thread.o 
+
+LOADLIBES = -ldl -rdynamic
 
 MMALLOC = 
 MMALLOC_CFLAGS = -DNO_MMALLOC 

@@ -438,7 +438,7 @@ child_post_follow_vfork (parent_pid, followed_parent, child_pid, followed_child)
 /* Format a process id, given PID.  Be sure to terminate
    this with a null--it's going to be printed via a "%s".  */
 char *
-hppa_pid_to_str (pid)
+child_pid_to_str (pid)
      pid_t pid;
 {
   /* Static because address returned */
@@ -658,7 +658,7 @@ hppa_pid_or_tid_to_str (id)
      pid_t id;
 {
   /* In the ptrace world, there are only processes. */
-  return hppa_pid_to_str (id);
+  return child_pid_to_str (id);
 }
 
 /* This function has no meaning in a non-threaded world.  Thus, we

@@ -2528,9 +2528,8 @@ bpstat_stop_status (pc, not_a_breakpoint)
 	real_breakpoint = 1;
       }
 
-    if (b->frame && b->frame != (get_current_frame ())->frame &&
-	(b->type == bp_step_resume &&
-	 (INNER_THAN (get_current_frame ()->frame, b->frame))))
+    if (b->frame &&
+       b->frame != (get_current_frame ())->frame)
       bs->stop = 0;
     else
       {

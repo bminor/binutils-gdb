@@ -931,6 +931,12 @@ request_quit (signo)
 
 #if !defined (USE_MMALLOC)
 
+void *
+mcalloc (void *md, size_t number, size_t size)
+{
+  return calloc (number, size);
+}
+
 PTR
 mmalloc (md, size)
      PTR md;
@@ -1090,6 +1096,17 @@ xmalloc (size)
      size_t size;
 {
   return (xmmalloc ((PTR) NULL, size));
+}
+
+/* Like calloc but get error if no storage available */
+
+PTR
+xcalloc (size_t number, size_t size)
+{
+  void *mem = mcalloc (NULL, number, size);
+  if (mem == NULL)
+    nomem (number * size);
+  return mem;
 }
 
 /* Like mrealloc but get error if no storage available.  */

@@ -108,7 +108,7 @@ static const OPTION profile_options[] = {
 
 /* Set/reset the profile options indicated in MASK.  */
 
-static SIM_RC
+SIM_RC
 set_profile_option_mask (SIM_DESC sd, const char *name, int mask, const char *arg)
 {
   int profile_nr;
