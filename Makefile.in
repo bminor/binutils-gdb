@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #
-# Last Mod Tue Oct 22 22:00:18 PDT 1991, by rich@cygnus.com
+# Last Mod Tue Oct 22 22:34:49 PDT 1991, by rich@cygnus.com
 #
 # $Id$
 
@@ -28,7 +28,6 @@ SHELL=/bin/sh
 RANLIB = ranlib
 AR = ar
 AR_FLAGS = cq
-BISONPATH = 
 
 BISON = `if [ -d $(unsubdir)/../bison ] ; \
 	then echo \`pwd\`/$(unsubdir)/../bison$(subdir)/bison -L \`pwd\`/$(unsubdir)/../bison/ ; \
