@@ -1,3 +1,14 @@
+2001-10-31  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/tm-i386.h (REGISTER_NAMES): Remove.
+	(REGISTER_NAME): New define.
+	(i386_register_name): New prototype.
+	* i386-tdep.c (i386_register_names): New variable.
+	(i386_register_name): New function.
+	* config/i386/tm-i386os9k.h, config/i386/tm-ptx.h,
+	config/i386/tm-symmetry.h: Undefine REGISTER_NAME instead of
+	REGISTER_NAMES.
+
 2001-10-31  Christopher Faylor  <cgf@redhat.com>
 
 	* win32-nat.c (register_loaded_dll): Attempt to ensure that the case of

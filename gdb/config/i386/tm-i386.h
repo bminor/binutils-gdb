@@ -127,25 +127,6 @@ extern CORE_ADDR i386_saved_pc_after_call (struct frame_info *frame);
 /* Largest number of registers we could have in any configuration.  */
 #define MAX_NUM_REGS (16 + 16 + 9)
 
-/* Initializer for an array of names of registers.  There should be at least
-   NUM_REGS strings in this initializer.  Any excess ones are simply ignored.
-   The order of the first 8 registers must match the compiler's numbering
-   scheme (which is the same as the 386 scheme) and also regmap in the various
-   *-nat.c files. */
-
-#define REGISTER_NAMES { "eax",   "ecx",    "edx",   "ebx",	\
-			 "esp",   "ebp",    "esi",   "edi",	\
-			 "eip",   "eflags", "cs",    "ss",	\
-			 "ds",    "es",     "fs",    "gs",	\
-			 "st0",   "st1",    "st2",   "st3",	\
-			 "st4",   "st5",    "st6",   "st7",	\
-			 "fctrl", "fstat",  "ftag",  "fiseg",	\
-                         "fioff", "foseg",  "fooff", "fop",	\
-			 "xmm0",  "xmm1",   "xmm2",  "xmm3",	\
-			 "xmm4",  "xmm5",   "xmm6",  "xmm7",	\
-                         "mxcsr"				\
-		       }
-
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,
    and correspond to the general registers of the machine,
@@ -194,6 +175,11 @@ extern CORE_ADDR i386_saved_pc_after_call (struct frame_info *frame);
 #define IS_SSE_REGNUM(n) (XMM0_REGNUM <= (n) && (n) <= XMM7_REGNUM)
 
 #define FPU_REG_RAW_SIZE (10)
+
+/* Return the name of register REG.  */
+
+#define REGISTER_NAME(reg) i386_register_name ((reg))
+extern char *i386_register_name (int reg);
 
 /* Use the "default" register numbering scheme for stabs and COFF.  */
 

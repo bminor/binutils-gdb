@@ -66,7 +66,7 @@
    break mysteriously for no apparent reason.  Also note that the st(0)...
    st(7) 387 registers are represented as st0...st7.  */
 
-#undef  REGISTER_NAMES
+#undef REGISTER_NAME
 #define REGISTER_NAMES {     "eax",  "edx",  "ecx",   "st0",  "st1", \
 			     "ebx",  "esi",  "edi",   "st2",  "st3", \
 			     "st4",  "st5",  "st6",   "st7",  "esp", \

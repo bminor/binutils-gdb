@@ -37,6 +37,23 @@
 
 #include "gdb_assert.h"
 
+/* Names of the registers.  The first 10 registers match the register
+   numbering scheme used by GCC for stabs and DWARF.  */
+static char *i386_register_names[] =
+{
+  "eax",   "ecx",    "edx",   "ebx",
+  "esp",   "ebp",    "esi",   "edi",
+  "eip",   "eflags", "cs",    "ss",
+  "ds",    "es",     "fs",    "gs",
+  "st0",   "st1",    "st2",   "st3",
+  "st4",   "st5",    "st6",   "st7",
+  "fctrl", "fstat",  "ftag",  "fiseg",
+  "fioff", "foseg",  "fooff", "fop",
+  "xmm0",  "xmm1",   "xmm2",  "xmm3",
+  "xmm4",  "xmm5",   "xmm6",  "xmm7",
+  "mxcsr"
+};
+
 /* i386_register_byte[i] is the offset into the register file of the
    start of register number i.  We initialize this from
    i386_register_raw_size.  */
@@ -61,6 +78,19 @@ int i386_register_raw_size[MAX_NUM_REGS] = {
 /* i386_register_virtual_size[i] is the size in bytes of the virtual
    type of register i.  */
 int i386_register_virtual_size[MAX_NUM_REGS];
+
+/* Return the name of register REG.  */
+
+char *
+i386_register_name (int reg)
+{
+  if (reg < 0)
+    return NULL;
+  if (reg >= sizeof (i386_register_names) / sizeof (*i386_register_names))
+    return NULL;
+
+  return i386_register_names[reg];
+}
 
 /* Convert stabs register number REG to the appropriate register
    number used by GDB.  */

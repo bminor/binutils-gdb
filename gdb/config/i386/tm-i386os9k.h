@@ -34,7 +34,7 @@
    scheme (which is the same as the 386 scheme) and also regmap in the various
    *-nat.c files. */
 
-#undef  REGISTER_NAMES
+#undef REGISTER_NAME
 #define REGISTER_NAMES { "eax", "ecx", "edx", "ebx", \
                          "esp", "ebp", "esi", "edi", \
                          "eip", "eflags", "cs", "ss", \
