@@ -13820,7 +13820,7 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "rm5261",         0,      ISA_MIPS4,      CPU_R5000 },
   { "rm5721",         0,      ISA_MIPS4,      CPU_R5000 },
   { "rm7000",         0,      ISA_MIPS4,      CPU_RM7000 },
-  { "rm9000",         0,      ISA_MIPS4,      CPU_RM7000 },
+  { "rm9000",         0,      ISA_MIPS4,      CPU_RM9000 },
 
   /* MIPS 32 */
   { "4kc",            0,      ISA_MIPS32,     CPU_MIPS32 },

@@ -1,3 +1,8 @@
+2004-12-09  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* config/tc-mips.c (mips_cpu_info_table): Change "9000" entry to
+	use CPU_RM9000.
+
 2004-12-07  Ben Elliston  <bje@gnu.org>
 
 	* read.c (s_align): Use an align_limit temporary to allay a GCC
