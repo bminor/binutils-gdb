@@ -1,13 +1,13 @@
 Thu Oct 14 11:40:30 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
-	* gdb.t20/inherit.exp: Remove all xfails from within expect statements.
-	None of these happen anymore and they cause regressions to be silently
-	unnoticed.
+	* gdb.t20/inherit.exp, gdb.t22/virtfunc.exp: Remove all xfails
+	from within expect statements.  None of these happen anymore and
+	they cause regressions to be silently unnoticed.
 
-	* gdb.t20/inherit.exp: Add note (in failure message) about known
-	failure with gcc cygnus-2.4.5-930417.
+	* gdb.t20/inherit.exp, gdb.t22/virtfunc.exp: Add notes (in failure
+	messages) about known failures with gcc cygnus-2.4.5-930417.
 
-	* gdb.t22/virtfunc.exp: Add notes (in comments and failure message)
+	* gdb.t22/virtfunc.exp: Add notes (in comment and failure message)
 	about problem with gcc cygnus-2.4.5-930828.
 
 	* gdb.t02/Makefile.in, gdb.t08/Makefile.in: Make all depend on
