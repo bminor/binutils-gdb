@@ -409,42 +409,16 @@ void arm_software_single_step (int, int);
 
 CORE_ADDR arm_get_next_pc (CORE_ADDR pc);
 
-/* Macros for setting and testing a bit in a minimal symbol that marks
-   it as Thumb function.  The MSB of the minimal symbol's "info" field
-   is used for this purpose. This field is already being used to store
-   the symbol size, so the assumption is that the symbol size cannot
-   exceed 2^31.
 
-   COFF_MAKE_MSYMBOL_SPECIAL
-   ELF_MAKE_MSYMBOL_SPECIAL
-   
-   These macros test whether the COFF or ELF symbol corresponds to a
-   thumb function, and set a "special" bit in a minimal symbol to
-   indicate that it does.
-   
-   MSYMBOL_SET_SPECIAL	Actually sets the "special" bit.
-   MSYMBOL_IS_SPECIAL   Tests the "special" bit in a minimal symbol.
-   MSYMBOL_SIZE         Returns the size of the minimal symbol,
-   			i.e. the "info" field with the "special" bit
-   			masked out 
-   */
+struct minimal_symbol;
 
-extern int coff_sym_is_thumb (int val);
+void arm_elf_make_msymbol_special(asymbol *, struct minimal_symbol *);
+#define ELF_MAKE_MSYMBOL_SPECIAL(SYM,MSYM) \
+	arm_elf_make_msymbol_special (SYM, MSYM)
 
-#define MSYMBOL_SET_SPECIAL(msym) \
-	MSYMBOL_INFO (msym) = (char *) (((long) MSYMBOL_INFO (msym)) | 0x80000000)
-#define MSYMBOL_IS_SPECIAL(msym) \
-  (((long) MSYMBOL_INFO (msym) & 0x80000000) != 0)
-#define MSYMBOL_SIZE(msym) \
-  ((long) MSYMBOL_INFO (msym) & 0x7fffffff)
-
-/* Thumb symbols are of type STT_LOPROC, (synonymous with STT_ARM_TFUNC) */
-#define ELF_MAKE_MSYMBOL_SPECIAL(sym,msym) \
-	{ if(ELF_ST_TYPE(((elf_symbol_type *)(sym))->internal_elf_sym.st_info) == STT_LOPROC) \
-		MSYMBOL_SET_SPECIAL(msym); }
-
-#define COFF_MAKE_MSYMBOL_SPECIAL(val,msym) \
- { if(coff_sym_is_thumb(val)) MSYMBOL_SET_SPECIAL(msym); }
+void arm_coff_make_msymbol_special(int, struct minimal_symbol *);
+#define COFF_MAKE_MSYMBOL_SPECIAL(VAL,MSYM) \
+	arm_coff_make_msymbol_special (VAL, MSYM)
 
 /* The first 0x20 bytes are the trap vectors.  */
 #define LOWEST_PC	0x20

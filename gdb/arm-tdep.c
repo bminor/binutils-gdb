@@ -33,6 +33,8 @@
 #include "doublest.h"
 #include "value.h"
 #include "solib-svr4.h"
+#include "elf-bfd.h"
+#include "coff/internal.h"
 
 /* Each OS has a different mechanism for accessing the various
    registers stored in the sigcontext structure.
@@ -64,7 +66,27 @@
 #define SIGCONTEXT_REGISTER_ADDRESS_P() 0
 #endif
 
-extern void _initialize_arm_tdep (void);
+/* Macros for setting and testing a bit in a minimal symbol that marks
+   it as Thumb function.  The MSB of the minimal symbol's "info" field
+   is used for this purpose. This field is already being used to store
+   the symbol size, so the assumption is that the symbol size cannot
+   exceed 2^31.
+
+   MSYMBOL_SET_SPECIAL	Actually sets the "special" bit.
+   MSYMBOL_IS_SPECIAL   Tests the "special" bit in a minimal symbol.
+   MSYMBOL_SIZE         Returns the size of the minimal symbol,
+   			i.e. the "info" field with the "special" bit
+   			masked out.  */
+
+#define MSYMBOL_SET_SPECIAL(msym)					\
+	MSYMBOL_INFO (msym) = (char *) (((long) MSYMBOL_INFO (msym))	\
+					| 0x80000000)
+
+#define MSYMBOL_IS_SPECIAL(msym)				\
+	(((long) MSYMBOL_INFO (msym) & 0x80000000) != 0)
+
+#define MSYMBOL_SIZE(msym)				\
+	((long) MSYMBOL_INFO (msym) & 0x7fffffff)
 
 /* Number of different reg name sets (options). */
 static int num_flavor_options;
@@ -2282,6 +2304,43 @@ arm_linux_svr4_fetch_link_map_offsets (void)
     return lmp;
 }
 
+/* Test whether the coff symbol specific value corresponds to a Thumb
+   function.  */
+
+static int
+coff_sym_is_thumb (int val)
+{
+  return (val == C_THUMBEXT ||
+	  val == C_THUMBSTAT ||
+	  val == C_THUMBEXTFUNC ||
+	  val == C_THUMBSTATFUNC ||
+	  val == C_THUMBLABEL);
+}
+
+/* arm_coff_make_msymbol_special()
+   arm_elf_make_msymbol_special()
+   
+   These functions test whether the COFF or ELF symbol corresponds to
+   an address in thumb code, and set a "special" bit in a minimal
+   symbol to indicate that it does.  */
+   
+void
+arm_elf_make_msymbol_special(asymbol *sym, struct minimal_symbol *msym)
+{
+  /* Thumb symbols are of type STT_LOPROC, (synonymous with
+     STT_ARM_TFUNC).  */
+  if (ELF_ST_TYPE (((elf_symbol_type *)sym)->internal_elf_sym.st_info)
+      == STT_LOPROC)
+    MSYMBOL_SET_SPECIAL (msym);
+}
+
+void
+arm_coff_make_msymbol_special(int val, struct minimal_symbol *msym)
+{
+  if (coff_sym_is_thumb (val))
+    MSYMBOL_SET_SPECIAL (msym);
+}
+
 void
 _initialize_arm_tdep (void)
 {
@@ -2358,17 +2417,4 @@ The valid values are:\n");
     xcalloc (1, sizeof (struct frame_extra_info));
   prologue_cache.saved_regs = (CORE_ADDR *)
     xcalloc (1, SIZEOF_FRAME_SAVED_REGS);
-}
-
-/* Test whether the coff symbol specific value corresponds to a Thumb
-   function.  */
-
-int
-coff_sym_is_thumb (int val)
-{
-  return (val == C_THUMBEXT ||
-	  val == C_THUMBSTAT ||
-	  val == C_THUMBEXTFUNC ||
-	  val == C_THUMBSTATFUNC ||
-	  val == C_THUMBLABEL);
 }

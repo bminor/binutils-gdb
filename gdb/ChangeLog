@@ -1,5 +1,21 @@
 2002-02-06  Richard Earnshaw  <rearnsha@arm.com>
 
+	* arm-tdep.c: Include elf-bfd.h and coff/internal.h.
+	(MSYMBOL_SET_SPECIAL, MSYMBOL_IS_SPECIAL, MSYMBOL_SIZE): Move defines
+	to here from config/tm-arm.h.
+	(coff_sym_is_thumb): Make static.
+	(arm_elf_make_msymbol_special): New function.
+	(arm_coff_make_msymbol_special): New function.
+	* config/arm/tm-arm.h (MSYMBOL_SET_SPECIAL): Delete definition.
+	(MSYMBOL_IS_SPECIAL, MSYMBOL_SIZE): Likewise.
+	(coff_sym_is_thumb): Delete declaration.
+	(arm_elf_make_msymbol_special): Declare.
+	(arm_coff_make_msymbol_special): Declare.
+	(ELF_MAKE_MSYMBOL_SPECIAL): Call arm_elf_make_msymbol_special.
+	(COFF_MAKE_MSYMBOL_SPECIAL): Call arm_coff_make_msymbol_special.
+
+2002-02-06  Richard Earnshaw  <rearnsha@arm.com>
+
 	* arm-tdep.c (arm_software_single_step): ANSIfy function declaration.
 
 2002-02-06  Richard Earnshaw  <rearnsha@arm.com>
