@@ -143,17 +143,17 @@ memory_error (status, memaddr)
       /* Actually, address between memaddr and memaddr + len
 	 was out of bounds. */
       error_begin ();
-      printf_unfiltered ("Cannot access memory at address ");
+      printf_filtered ("Cannot access memory at address ");
       print_address_numeric (memaddr, gdb_stdout);
-      printf_unfiltered (".\n");
+      printf_filtered (".\n");
       return_to_top_level (RETURN_ERROR);
     }
   else
     {
       error_begin ();
-      printf_unfiltered ("Error accessing memory address ");
+      printf_filtered ("Error accessing memory address ");
       print_address_numeric (memaddr, gdb_stdout);
-      printf_unfiltered (": %s.\n",
+      printf_filtered (": %s.\n",
 			 safe_strerror (status));
       return_to_top_level (RETURN_ERROR);
     }
