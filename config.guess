@@ -248,6 +248,9 @@ EOF
     hp8??:OSF1:*:*)
 	echo hppa1.0-hp-osf
 	exit 0 ;;
+    parisc*:Lites*:*:*)
+	echo hppa1.1-hp-lites
+	exit 0 ;;
     C1*:ConvexOS:*:* | convex:ConvexOS:C1*:*)
 	echo c1-convex-bsd
         exit 0 ;;
