@@ -738,18 +738,6 @@ extern void deprecated_set_frame_next_hack (struct frame_info *fi,
 extern void deprecated_set_frame_prev_hack (struct frame_info *fi,
 					    struct frame_info *prev);
 
-/* FIXME: cagney/2003-01-07: Instead of the dwarf2cfi having its own
-   dedicated `struct frame_info . context' field, the code should use
-   the per frame `unwind_cache' that is passed to the
-   frame_pc_unwind(), frame_register_unwind() and frame_id_unwind()
-   methods.
-
-   See "dummy-frame.c" for an example of how a cfi-frame object can be
-   implemented using this.  */
-extern struct context *deprecated_get_frame_context (struct frame_info *fi);
-extern void deprecated_set_frame_context (struct frame_info *fi,
-					  struct context *context);
-
 /* Return non-zero if the architecture is relying on legacy frame
    code.  */
 extern int legacy_frame_p (struct gdbarch *gdbarch);

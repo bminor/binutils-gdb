@@ -86,10 +86,6 @@ struct frame_info
      initialized by DEPRECATED_INIT_EXTRA_FRAME_INFO */
   struct frame_extra_info *extra_info;
 
-  /* If dwarf2 unwind frame informations is used, this structure holds
-     all related unwind data.  */
-  struct context *context;
-
   /* The frame's low-level unwinder and corresponding cache.  The
      low-level unwinder is responsible for unwinding register values
      for the previous frame.  The low-level unwind methods are
@@ -2246,26 +2242,6 @@ deprecated_set_frame_next_hack (struct frame_info *fi,
 				struct frame_info *next)
 {
   fi->next = next;
-}
-
-void
-deprecated_set_frame_prev_hack (struct frame_info *fi,
-				struct frame_info *prev)
-{
-  fi->prev = prev;
-}
-
-struct context *
-deprecated_get_frame_context (struct frame_info *fi)
-{
-  return fi->context;
-}
-
-void
-deprecated_set_frame_context (struct frame_info *fi,
-			      struct context *context)
-{
-  fi->context = context;
 }
 
 struct frame_info *

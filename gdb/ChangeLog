@@ -1,5 +1,11 @@
 2003-11-22  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (deprecated_get_frame_context): Delete function.
+	(deprecated_set_frame_prev_hack): Delete function.
+	(struct frame_info): Delete member "context".
+	* frame.h (deprecated_get_frame_context): Delete declaration.
+	(deprecated_set_frame_context): Delete declaration.
+
 	* procfs.c (procfs_wait): Delete FAULTED_USE_SIGINFO comment.
 	* config/sparc/tm-sun4sol2.h (FAULTED_USE_SIGINFO): Delete macro.
 	* config/i386/tm-i386sol2.h (FAULTED_USE_SIGINFO): Delete macro.
