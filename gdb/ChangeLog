@@ -1,5 +1,9 @@
 2004-01-31  Daniel Jacobowitz  <drow@mvista.com>
 
+	* breakpoint.h: Update copyright years.
+
+2004-01-31  Daniel Jacobowitz  <drow@mvista.com>
+
 	* breakpoint.c (software_breakpoint_inserted_here_p): New function.
 	(bpstat_stop_status): Don't decrement PC.
 	* breakpoint.h (software_breakpoint_inserted_here_p): Add
