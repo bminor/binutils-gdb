@@ -304,7 +304,7 @@ vax_frame_cache (struct frame_info *next_frame, void **this_cache)
       ULONGEST numarg;
 
       /* This is a procedure with Stack Argument List.  Adjust the
-         stack address for the arguments thet were pushed onto the
+         stack address for the arguments that were pushed onto the
          stack.  The return instruction will automatically pop the
          arguments from the stack.  */
       numarg = get_frame_memory_unsigned (next_frame, addr, 1);
