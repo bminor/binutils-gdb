@@ -1367,7 +1367,7 @@ arch-utils.o: arch-utils.c $(defs_h) $(bfd_h) $(gdbcmd_h) \
 
 gdbtypes.o: gdbtypes.c $(bfd_h) complaints.h $(defs_h) $(expression_h) \
 	$(gdbtypes_h) language.h objfiles.h symfile.h $(symtab_h) target.h \
-	$(value_h) gdb_string.h
+	$(value_h) gdb_string.h wrapper.h
 
 go32-nat.o: go32-nat.c $(defs_h) $(inferior_h) gdb_wait.h $(gdbcore_h) \
 	$(command_h) $(floatformat_h) target.h
@@ -1944,7 +1944,7 @@ gdb-events.o: gdb-events.c gdb-events.h $(defs_h) $(gdbcmd_h)
 ui-out.o: ui-out.c $(defs_h) $(ui_out_h) expression.h language.h
 cli-out.o: cli-out.c $(defs_h) $(ui_out_h) $(cli_out_h)
 varobj.o: varobj.c $(defs_h) $(frame_h) $(value_h) \
-	$(language_h) valprint.h varobj.h
+	$(language_h) valprint.h varobj.h wrapper.h
 	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $<
 wrapper.o: wrapper.c $(defs_h) $(frame_h) $(value_h) wrapper.h
 
