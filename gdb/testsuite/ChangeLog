@@ -1,3 +1,10 @@
+2002-03-26  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/default.exp: Add tests for dump, append, and restore.
+	* gdb.base/help.exp: Add tests for dump, append, and restore.
+	* gdb.base/dump.exp: New file, test dump, append and restore.
+	* gdb.base/dump.c: New file.
+
 2002-03-27  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.base/help.exp: Modify expect strings to reflect 

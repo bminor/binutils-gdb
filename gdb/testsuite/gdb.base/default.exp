@@ -34,6 +34,14 @@ set timeout 60
 
 gdb_test "add-symbol-file" "add-symbol-file takes a file name and an address" "add-symbol-file"
 
+# test append
+gdb_test "append" "\"append\" must be followed by a subcommand\.\[\r\n\]+List of append subcommands:.*" 
+gdb_test "append binary" "\"append binary\" must be followed by a subcommand\.\[\r\n\]+List of append binary subcommands:.*" 
+gdb_test "append memory" "Missing filename\." 
+gdb_test "append value"  "Missing filename\." 
+gdb_test "append binary memory" "Missing filename\." 
+gdb_test "append binary value"  "Missing filename\." 
+
 setup_xfail "mips-idt-*"
 send_gdb "attach\n"
 gdb_expect {
@@ -191,6 +199,22 @@ gdb_test "document" "Argument required .name of command to define.*" "document"
 gdb_test "down" "No stack.*" "down"
 #test down-silently
 gdb_test "down-silently" "No stack." "down-silently"
+# test dump
+gdb_test "dump" "\"dump\" must be followed by a subcommand\.\[\r\n\]+List of dump subcommands:.*" 
+gdb_test "dump binary" "\"dump binary\" must be followed by a subcommand\.\[\r\n\]+List of dump binary subcommands:.*" 
+gdb_test "dump ihex" "\"dump ihex\" must be followed by a subcommand\.\[\r\n\]+List of dump ihex subcommands:.*" 
+gdb_test "dump memory" "Missing filename\." 
+gdb_test "dump srec" "\"dump srec\" must be followed by a subcommand\.\[\r\n\]+List of dump srec subcommands:.*" 
+gdb_test "dump tekhex" "\"dump tekhex\" must be followed by a subcommand\.\[\r\n\]+List of dump tekhex subcommands:.*" 
+gdb_test "dump value" "Missing filename\." 
+gdb_test "dump binary memory" "Missing filename\." 
+gdb_test "dump binary value"  "Missing filename\." 
+gdb_test "dump ihex memory" "Missing filename\." 
+gdb_test "dump ihex value"  "Missing filename\." 
+gdb_test "dump srec memory" "Missing filename\." 
+gdb_test "dump srec value"  "Missing filename\." 
+gdb_test "dump tekhex memory" "Missing filename\." 
+gdb_test "dump tekhex value"  "Missing filename\." 
 #test echo
 gdb_test "echo" "" "echo"
 #test enable breakpoints delete
@@ -490,6 +514,9 @@ No program loaded.*$gdb_prompt $"\
 
 #test rbreak
 gdb_test "rbreak" "" "rbreak"
+
+# test restore
+gdb_test "restore" "You can't do that without a process to debug\."
 
 #test return
 # The middle case accomodated the OBSOLETE a29k, where doing the "ni"
