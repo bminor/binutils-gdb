@@ -1,3 +1,9 @@
+2004-04-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* simple.c (bfd_simple_get_relocated_section_contents): Don't
+	change reloc_done.  Set and restore _cooked_size.
+	(RETURN): Delete.
+
 2004-04-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* netbsd-core.c (netbsd_core_file_p): Set architecture for VAX
