@@ -4599,16 +4599,17 @@ load_partial_dies (bfd *abfd, char *info_ptr, struct dwarf2_cu *cu)
       part_die = obstack_alloc (&cu->partial_die_obstack,
 				sizeof (struct partial_die_info));
 
-      /* For some DIEs we want to follow their children (if any).  We do
-         not normally follow the children of structures; do so for C++
-         so that we can use method physnames to infer fully qualified
-         type names.  */
+      /* For some DIEs we want to follow their children (if any).  For C
+         we have no reason to follow the children of structures; for other
+	 languages we have to, both so that we can get at method physnames
+	 to infer fully qualified class names, and for DW_AT_specification.  */
       if (last_die->has_children
 	  && (last_die->tag == DW_TAG_namespace
 	      || last_die->tag == DW_TAG_enumeration_type
-	      || (cu->language == language_cplus
+	      || (cu->language != language_c
 		  && (last_die->tag == DW_TAG_class_type
-		      || last_die->tag == DW_TAG_structure_type))))
+		      || last_die->tag == DW_TAG_structure_type
+		      || last_die->tag == DW_TAG_union_type))))
 	{
 	  nesting_level++;
 	  parent_die = last_die;
