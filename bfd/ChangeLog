@@ -1,3 +1,11 @@
+Tue Apr 14 14:34:42 1992  Fred Fish  (fnf@cygnus.com)
+
+	* elf.c (bfd_add_strtab, bfd_add_2_to_strtab):  CONST spreads
+	like ooze.
+	* elf.c (elf_compute_section_file_positions,
+	elf_write_object_contents):  Return boolean, not NULL (which
+	can be void *).
+
 Fri Apr 10 22:29:18 1992  Fred Fish  (fnf@cygnus.com)
 
 	* configure.in:  Recognize ncr3000 config

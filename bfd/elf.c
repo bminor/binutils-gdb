@@ -518,7 +518,7 @@ static int
 DEFUN(bfd_add_to_strtab, (abfd, ss, str),
       bfd		*abfd AND
       struct strtab	*ss AND
-      char		*str)
+      CONST char	*str)
 {
   /* should search first, but for now: */
   /* include the trailing NUL */
@@ -540,7 +540,7 @@ DEFUN(bfd_add_2_to_strtab, (abfd, ss, str, str2),
       bfd		*abfd AND
       struct strtab	*ss AND
       char		*str AND
-      char		*str2)
+      CONST char	*str2)
 {
   /* should search first, but for now: */
   /* include the trailing NUL */
@@ -1598,7 +1598,7 @@ DEFUN (elf_compute_section_file_positions, (abfd), bfd *abfd)
   if (! i_shdrp)
     {
       bfd_error = no_memory;
-      return (NULL);
+      return (false);
     }
   for (count=0; count < maxsections; count++) 
     {
@@ -1631,6 +1631,7 @@ DEFUN (elf_compute_section_file_positions, (abfd), bfd *abfd)
 
   bfd_map_over_sections(abfd, elf_fake_sections, &est);
   elf_onesymtab (abfd) = est.symtab_section;
+  return (true);
 }
 
 static boolean
@@ -1764,7 +1765,7 @@ DEFUN (elf_write_object_contents, (abfd), bfd *abfd)
   if (! x_shdrp)
     {
       bfd_error = no_memory;
-      return (NULL);
+      return (false);
     }
 
   fprintf(stderr, "ELF>> total sections: %d\n", i_ehdrp->e_shnum);
