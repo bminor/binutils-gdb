@@ -218,7 +218,7 @@ c_val_print (struct type *type, char *valaddr, int embedded_offset,
 		  int is_this_fld;
 
 		  if (msymbol != NULL)
-		    wsym = lookup_symbol (SYMBOL_NAME (msymbol), block,
+		    wsym = lookup_symbol (DEPRECATED_SYMBOL_NAME (msymbol), block,
 					  VAR_NAMESPACE, &is_this_fld, &s);
 
 		  if (wsym)

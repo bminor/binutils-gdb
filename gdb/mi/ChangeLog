@@ -1,3 +1,8 @@
+2003-02-25  David Carlton  <carlton@math.stanford.edu>
+
+	* mi-cmd-stack.c: Replace all instances of SYMBOL_NAME with
+	DEPRECATED_SYMBOL_NAME.  Update copyright.
+
 2003-02-21  Daniel Jacobowitz  <drow@mvista.com>
 
 	* mi-cmd-stack.c (list_args_or_locals): Handle LOC_COMPUTED and

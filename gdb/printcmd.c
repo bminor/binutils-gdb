@@ -643,7 +643,7 @@ build_address_symbolic (CORE_ADDR addr,  /* IN */
       if (do_demangle || asm_demangle)
 	name_temp = SYMBOL_PRINT_NAME (symbol);
       else
-	name_temp = SYMBOL_NAME (symbol);
+	name_temp = DEPRECATED_SYMBOL_NAME (symbol);
     }
 
   if (msymbol != NULL)
@@ -658,7 +658,7 @@ build_address_symbolic (CORE_ADDR addr,  /* IN */
 	  if (do_demangle || asm_demangle)
 	    name_temp = SYMBOL_PRINT_NAME (msymbol);
 	  else
-	    name_temp = SYMBOL_NAME (msymbol);
+	    name_temp = DEPRECATED_SYMBOL_NAME (msymbol);
 	}
     }
   if (symbol == NULL && msymbol == NULL)
@@ -1122,7 +1122,7 @@ address_info (char *exp, int from_tty)
     }
 
   printf_filtered ("Symbol \"");
-  fprintf_symbol_filtered (gdb_stdout, SYMBOL_NAME (sym),
+  fprintf_symbol_filtered (gdb_stdout, DEPRECATED_SYMBOL_NAME (sym),
 			   current_language->la_language, DMGL_ANSI);
   printf_filtered ("\" is ");
   val = SYMBOL_VALUE (sym);
@@ -1240,7 +1240,7 @@ address_info (char *exp, int from_tty)
       {
 	struct minimal_symbol *msym;
 
-	msym = lookup_minimal_symbol (SYMBOL_NAME (sym), NULL, NULL);
+	msym = lookup_minimal_symbol (DEPRECATED_SYMBOL_NAME (sym), NULL, NULL);
 	if (msym == NULL)
 	  printf_filtered ("unresolved");
 	else
@@ -1840,11 +1840,11 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
 	     Null parameter names occur on the RS/6000, for traceback tables.
 	     FIXME, should we even print them?  */
 
-	  if (*SYMBOL_NAME (sym))
+	  if (*DEPRECATED_SYMBOL_NAME (sym))
 	    {
 	      struct symbol *nsym;
 	      nsym = lookup_symbol
-		(SYMBOL_NAME (sym),
+		(DEPRECATED_SYMBOL_NAME (sym),
 		 b, VAR_NAMESPACE, (int *) NULL, (struct symtab **) NULL);
 	      if (SYMBOL_CLASS (nsym) == LOC_REGISTER)
 		{

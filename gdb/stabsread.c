@@ -420,7 +420,7 @@ patch_block_stabs (struct pending *symbols, struct pending_stabs *stabs,
 	      memset (sym, 0, sizeof (struct symbol));
 	      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
 	      SYMBOL_CLASS (sym) = LOC_OPTIMIZED_OUT;
-	      SYMBOL_NAME (sym) =
+	      DEPRECATED_SYMBOL_NAME (sym) =
 		obsavestring (name, pp - name, &objfile->symbol_obstack);
 	      pp += 2;
 	      if (*(pp - 1) == 'F' || *(pp - 1) == 'f')
@@ -940,13 +940,13 @@ read_type_number (register char **pp, register int *typenums)
 // OBSOLETE    /* Get symbol typs name and validate 
 // OBSOLETE       eg: p = "A;;__ct__1AFv foo__1AFv ;;;" */
 // OBSOLETE    sname = get_substring (&p, ';');
-// OBSOLETE    if (!sname || strcmp (sname, SYMBOL_NAME (sym)))
+// OBSOLETE    if (!sname || strcmp (sname, DEPRECATED_SYMBOL_NAME (sym)))
 // OBSOLETE      error ("Internal error: base symbol type name does not match\n");
 
 // OBSOLETE    /* Find symbol's internal gdb reference using demangled_name.
 // OBSOLETE       This is the real sym that we want; 
 // OBSOLETE       sym was a temp hack to make debugger happy */
-// OBSOLETE    ref_sym = lookup_symbol (SYMBOL_NAME (sym), 0, STRUCT_NAMESPACE, 0, 0);
+// OBSOLETE    ref_sym = lookup_symbol (DEPRECATED_SYMBOL_NAME (sym), 0, STRUCT_NAMESPACE, 0, 0);
 // OBSOLETE    type = SYMBOL_TYPE (ref_sym);
 
 
@@ -1073,7 +1073,7 @@ resolve_symbol_reference (struct objfile *objfile, struct symbol *sym, char *p)
      will correctly print the name.
      Don't add_symbol_to_list so that lookup_symbol won't find it.
      nope... needed for fixups. */
-  SYMBOL_NAME (sym) = SYMBOL_NAME (ref_sym);
+  DEPRECATED_SYMBOL_NAME (sym) = DEPRECATED_SYMBOL_NAME (ref_sym);
 
   /* Done!  */
   return 1;
@@ -1277,16 +1277,16 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       switch (string[1])
 	{
 	case 't':
-	  SYMBOL_NAME (sym) = obsavestring ("this", strlen ("this"),
+	  DEPRECATED_SYMBOL_NAME (sym) = obsavestring ("this", strlen ("this"),
 					    &objfile->symbol_obstack);
 	  break;
 
 	case 'v':		/* $vtbl_ptr_type */
-	  /* Was: SYMBOL_NAME (sym) = "vptr"; */
+	  /* Was: DEPRECATED_SYMBOL_NAME (sym) = "vptr"; */
 	  goto normal;
 
 	case 'e':
-	  SYMBOL_NAME (sym) = obsavestring ("eh_throw", strlen ("eh_throw"),
+	  DEPRECATED_SYMBOL_NAME (sym) = obsavestring ("eh_throw", strlen ("eh_throw"),
 					    &objfile->symbol_obstack);
 	  break;
 
@@ -1324,14 +1324,14 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	return NULL;
 
       /* S..P contains the name of the symbol.  We need to store
-         the correct name into SYMBOL_NAME.  */
+         the correct name into DEPRECATED_SYMBOL_NAME.  */
       nlen = p - s;
       if (refnum >= 0)
 	{
 	  if (nlen > 0)
 	    SYMBOL_SET_NAMES (sym, s, nlen, objfile);
 	  else
-	    /* FIXME! Want SYMBOL_NAME (sym) = 0;
+	    /* FIXME! Want DEPRECATED_SYMBOL_NAME (sym) = 0;
 	       Get error if leave name 0.  So give it something. */
 	    {
 	      nlen = p - string;
@@ -1576,9 +1576,9 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
          Symbol references don't have valid names and wont't match up with
          minimal symbols when the global_sym_chain is relocated.
          We'll fixup symbol references when we fixup the defining symbol.  */
-      if (SYMBOL_NAME (sym) && SYMBOL_NAME (sym)[0] != '#')
+      if (DEPRECATED_SYMBOL_NAME (sym) && DEPRECATED_SYMBOL_NAME (sym)[0] != '#')
 	{
-	  i = hashname (SYMBOL_NAME (sym));
+	  i = hashname (DEPRECATED_SYMBOL_NAME (sym));
 	  SYMBOL_VALUE_CHAIN (sym) = global_sym_chain[i];
 	  global_sym_chain[i] = sym;
 	}
@@ -1778,7 +1778,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	      prev_sym = local_symbols->symbol[local_symbols->nsyms - 1];
 	      if ((SYMBOL_CLASS (prev_sym) == LOC_REF_ARG
 		   || SYMBOL_CLASS (prev_sym) == LOC_ARG)
-		  && STREQ (SYMBOL_NAME (prev_sym), SYMBOL_NAME (sym)))
+		  && STREQ (DEPRECATED_SYMBOL_NAME (prev_sym), DEPRECATED_SYMBOL_NAME (sym)))
 		{
 		  SYMBOL_CLASS (prev_sym) = LOC_REGPARM;
 		  /* Use the type from the LOC_REGISTER; that is the type
@@ -1801,13 +1801,13 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       SYMBOL_CLASS (sym) = LOC_STATIC;
       SYMBOL_VALUE_ADDRESS (sym) = valu;
 #ifdef STATIC_TRANSFORM_NAME
-      if (IS_STATIC_TRANSFORM_NAME (SYMBOL_NAME (sym)))
+      if (IS_STATIC_TRANSFORM_NAME (DEPRECATED_SYMBOL_NAME (sym)))
 	{
 	  struct minimal_symbol *msym;
-	  msym = lookup_minimal_symbol (SYMBOL_NAME (sym), NULL, objfile);
+	  msym = lookup_minimal_symbol (DEPRECATED_SYMBOL_NAME (sym), NULL, objfile);
 	  if (msym != NULL)
 	    {
-	      SYMBOL_NAME (sym) = STATIC_TRANSFORM_NAME (SYMBOL_NAME (sym));
+	      DEPRECATED_SYMBOL_NAME (sym) = STATIC_TRANSFORM_NAME (DEPRECATED_SYMBOL_NAME (sym));
 	      SYMBOL_VALUE_ADDRESS (sym) = SYMBOL_VALUE_ADDRESS (msym);
 	    }
 	}
@@ -1852,7 +1852,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	  extern const char vtbl_ptr_name[];
 
 	  if ((TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_PTR
-	       && strcmp (SYMBOL_NAME (sym), vtbl_ptr_name))
+	       && strcmp (DEPRECATED_SYMBOL_NAME (sym), vtbl_ptr_name))
 	      || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_FUNC)
 	    {
 	      /* If we are giving a name to a type such as "pointer to
@@ -1892,11 +1892,11 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	      /* Pascal accepts names for pointer types. */
 	      if (current_subfile->language == language_pascal)
 		{
-		  TYPE_NAME (SYMBOL_TYPE (sym)) = SYMBOL_NAME (sym);
+		  TYPE_NAME (SYMBOL_TYPE (sym)) = DEPRECATED_SYMBOL_NAME (sym);
           	}
 	    }
 	  else
-	    TYPE_NAME (SYMBOL_TYPE (sym)) = SYMBOL_NAME (sym);
+	    TYPE_NAME (SYMBOL_TYPE (sym)) = DEPRECATED_SYMBOL_NAME (sym);
 	}
 
       add_symbol_to_list (sym, &file_symbols);
@@ -1931,7 +1931,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       SYMBOL_NAMESPACE (sym) = STRUCT_NAMESPACE;
       if (TYPE_TAG_NAME (SYMBOL_TYPE (sym)) == 0)
 	TYPE_TAG_NAME (SYMBOL_TYPE (sym))
-	  = obconcat (&objfile->type_obstack, "", "", SYMBOL_NAME (sym));
+	  = obconcat (&objfile->type_obstack, "", "", DEPRECATED_SYMBOL_NAME (sym));
       add_symbol_to_list (sym, &file_symbols);
 
       if (synonym)
@@ -1945,7 +1945,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	  SYMBOL_NAMESPACE (typedef_sym) = VAR_NAMESPACE;
 	  if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
 	    TYPE_NAME (SYMBOL_TYPE (sym))
-	      = obconcat (&objfile->type_obstack, "", "", SYMBOL_NAME (sym));
+	      = obconcat (&objfile->type_obstack, "", "", DEPRECATED_SYMBOL_NAME (sym));
 	  add_symbol_to_list (typedef_sym, &file_symbols);
 	}
       break;
@@ -1956,13 +1956,13 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       SYMBOL_CLASS (sym) = LOC_STATIC;
       SYMBOL_VALUE_ADDRESS (sym) = valu;
 #ifdef STATIC_TRANSFORM_NAME
-      if (IS_STATIC_TRANSFORM_NAME (SYMBOL_NAME (sym)))
+      if (IS_STATIC_TRANSFORM_NAME (DEPRECATED_SYMBOL_NAME (sym)))
 	{
 	  struct minimal_symbol *msym;
-	  msym = lookup_minimal_symbol (SYMBOL_NAME (sym), NULL, objfile);
+	  msym = lookup_minimal_symbol (DEPRECATED_SYMBOL_NAME (sym), NULL, objfile);
 	  if (msym != NULL)
 	    {
-	      SYMBOL_NAME (sym) = STATIC_TRANSFORM_NAME (SYMBOL_NAME (sym));
+	      DEPRECATED_SYMBOL_NAME (sym) = STATIC_TRANSFORM_NAME (DEPRECATED_SYMBOL_NAME (sym));
 	      SYMBOL_VALUE_ADDRESS (sym) = SYMBOL_VALUE_ADDRESS (msym);
 	    }
 	}
@@ -2395,7 +2395,7 @@ again:
 	      if (SYMBOL_CLASS (sym) == LOC_TYPEDEF
 		  && SYMBOL_NAMESPACE (sym) == STRUCT_NAMESPACE
 		  && (TYPE_CODE (SYMBOL_TYPE (sym)) == code)
-		  && STREQ (SYMBOL_NAME (sym), type_name))
+		  && STREQ (DEPRECATED_SYMBOL_NAME (sym), type_name))
 		{
 		  obstack_free (&objfile->type_obstack, type_name);
 		  type = SYMBOL_TYPE (sym);
@@ -4497,7 +4497,7 @@ read_enum_type (register char **pp, register struct type *type,
       sym = (struct symbol *)
 	obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));
       memset (sym, 0, sizeof (struct symbol));
-      SYMBOL_NAME (sym) = name;
+      DEPRECATED_SYMBOL_NAME (sym) = name;
       SYMBOL_LANGUAGE (sym) = current_subfile->language;
       SYMBOL_CLASS (sym) = LOC_CONST;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
@@ -4539,7 +4539,7 @@ read_enum_type (register char **pp, register struct type *type,
 	{
 	  struct symbol *xsym = syms->symbol[j];
 	  SYMBOL_TYPE (xsym) = type;
-	  TYPE_FIELD_NAME (type, n) = SYMBOL_NAME (xsym);
+	  TYPE_FIELD_NAME (type, n) = DEPRECATED_SYMBOL_NAME (xsym);
 	  TYPE_FIELD_BITPOS (type, n) = SYMBOL_VALUE (xsym);
 	  TYPE_FIELD_BITSIZE (type, n) = 0;
 	}
@@ -5072,7 +5072,7 @@ common_block_end (struct objfile *objfile)
     obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));
   memset (sym, 0, sizeof (struct symbol));
   /* Note: common_block_name already saved on symbol_obstack */
-  SYMBOL_NAME (sym) = common_block_name;
+  DEPRECATED_SYMBOL_NAME (sym) = common_block_name;
   SYMBOL_CLASS (sym) = LOC_BLOCK;
 
   /* Now we copy all the symbols which have been defined since the BCOMM.  */
@@ -5099,7 +5099,7 @@ common_block_end (struct objfile *objfile)
   /* Should we be putting local_symbols back to what it was?
      Does it matter?  */
 
-  i = hashname (SYMBOL_NAME (sym));
+  i = hashname (DEPRECATED_SYMBOL_NAME (sym));
   SYMBOL_VALUE_CHAIN (sym) = global_sym_chain[i];
   global_sym_chain[i] = sym;
   common_block_name = NULL;
@@ -5190,7 +5190,7 @@ cleanup_undefined_types (void)
 			    && SYMBOL_NAMESPACE (sym) == STRUCT_NAMESPACE
 			    && (TYPE_CODE (SYMBOL_TYPE (sym)) ==
 				TYPE_CODE (*type))
-			    && STREQ (SYMBOL_NAME (sym), typename))
+			    && STREQ (DEPRECATED_SYMBOL_NAME (sym), typename))
                           replace_type (*type, SYMBOL_TYPE (sym));
 		      }
 		  }
@@ -5246,7 +5246,7 @@ scan_file_globals (struct objfile *objfile)
 	return;
 
       for (msymbol = resolve_objfile->msymbols;
-	   msymbol && SYMBOL_NAME (msymbol) != NULL;
+	   msymbol && DEPRECATED_SYMBOL_NAME (msymbol) != NULL;
 	   msymbol++)
 	{
 	  QUIT;
@@ -5267,12 +5267,12 @@ scan_file_globals (struct objfile *objfile)
 	  /* Get the hash index and check all the symbols
 	     under that hash index. */
 
-	  hash = hashname (SYMBOL_NAME (msymbol));
+	  hash = hashname (DEPRECATED_SYMBOL_NAME (msymbol));
 
 	  for (sym = global_sym_chain[hash]; sym;)
 	    {
-	      if (SYMBOL_NAME (msymbol)[0] == SYMBOL_NAME (sym)[0] &&
-		  STREQ (SYMBOL_NAME (msymbol) + 1, SYMBOL_NAME (sym) + 1))
+	      if (DEPRECATED_SYMBOL_NAME (msymbol)[0] == DEPRECATED_SYMBOL_NAME (sym)[0] &&
+		  STREQ (DEPRECATED_SYMBOL_NAME (msymbol) + 1, DEPRECATED_SYMBOL_NAME (sym) + 1))
 		{
 
 		  struct alias_list *aliases;
@@ -5364,7 +5364,7 @@ scan_file_globals (struct objfile *objfile)
 	  else
 	    complaint (&symfile_complaints,
 		       "%s: common block `%s' from global_sym_chain unresolved",
-		       objfile->name, SYMBOL_NAME (prev));
+		       objfile->name, DEPRECATED_SYMBOL_NAME (prev));
 	}
     }
   memset (global_sym_chain, 0, sizeof (global_sym_chain));

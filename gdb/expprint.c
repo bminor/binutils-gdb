@@ -890,7 +890,7 @@ dump_subexp (struct expression *exp, struct ui_file *stream, int elt)
       fprintf_filtered (stream, ", symbol @");
       gdb_print_host_address (exp->elts[elt + 1].symbol, stream);
       fprintf_filtered (stream, " (%s)",
-			SYMBOL_NAME (exp->elts[elt + 1].symbol));
+			DEPRECATED_SYMBOL_NAME (exp->elts[elt + 1].symbol));
       elt += 3;
       break;
     case OP_LAST:

@@ -587,7 +587,7 @@ extern int is_in_import_list (char *, struct objfile *);
 /* Traverse all minimal symbols in one objfile.  */
 
 #define	ALL_OBJFILE_MSYMBOLS(objfile, m) \
-    for ((m) = (objfile) -> msymbols; SYMBOL_NAME(m) != NULL; (m)++)
+    for ((m) = (objfile) -> msymbols; DEPRECATED_SYMBOL_NAME(m) != NULL; (m)++)
 
 /* Traverse all symtabs in all objfiles.  */
 

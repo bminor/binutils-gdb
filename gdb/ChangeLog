@@ -1,3 +1,31 @@
+2003-02-25  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.h (SYMBOL_NATURAL_NAME): New macro.
+	(SYMBOL_LINKAGE_NAME): Ditto.
+	(SYMBOL_PRINT_NAME): Use SYMBOL_NATURAL_NAME and
+	SYMBOL_LINKAGE_NAME.
+	(struct general_symbol_info): Expand comment.
+	(DEPRECATED_SYMBOL_NAME): Rename from SYMBOL_NAME.
+	(SYMBOL_MATCHES_NAME): Use DEPRECATED_SYMBOL_NAME.
+	(SYMBOL_MATCHES_REGEXP): Ditto.
+	* symtab.c (symbol_natural_name): New function.
+	* objfiles.h: Replace all uses of SYMBOL_NAME by
+	DEPRECATED_SYMBOL_NAME.
+	* xcoffread.c, valops.c, typeprint.c, tracepoint.c: Ditto.
+	* symtab.c, symmisc.c, symfile.c, stack.c, stabsread.c: Ditto.
+	* somsolib.c, sol-thread.c, rs6000-tdep.c, p-valprint.c: Ditto.
+	* printcmd.c, objfiles.c, objc-lang.c, mipsread.c: Ditto.
+	* minsyms.c, mdebugread.c, linespec.c, jv-lang.c: Ditto.
+	* i386-tdep.c, i386-linux-tdep.c, hpread.c, hppa-tdep.c: Ditto.
+	* gnu-v2-abi.c, f-valprint.c, findvar.c, expprint.c: Ditto.
+	* dwarfread.c, dwarf2read.c, dbxread.c, c-valprint.c: Ditto.
+	* cp-valprint.c, coffread.c, buildsym.c, breakpoint.c: Ditto.
+	* blockframe.c, ax-gdb.c, arm-linux-tdep.c, ada-lang.c: Ditto.
+	* ada-exp.y: Ditto.
+	* ada-exp.y: Update copyright.
+	* sol-thread.c, mipsread.c, jv-lang.c, f-valprint.c: Ditto.
+	* cp-valprint.c: Ditto.
+
 2003-02-25  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* infptrace.c (detach): Do not flag error if ptrace detach fails

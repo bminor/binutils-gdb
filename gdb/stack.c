@@ -356,7 +356,7 @@ print_frame (struct frame_info *fi,
 	  /* We also don't know anything about the function besides
 	     its address and name.  */
 	  func = 0;
-	  funname = SYMBOL_NAME (msymbol);
+	  funname = DEPRECATED_SYMBOL_NAME (msymbol);
 	  funlang = SYMBOL_LANGUAGE (msymbol);
 	}
       else
@@ -373,7 +373,7 @@ print_frame (struct frame_info *fi,
 	     here, while we still have our hands on the function
 	     symbol.) */
 	  char *demangled;
-	  funname = SYMBOL_NAME (func);
+	  funname = DEPRECATED_SYMBOL_NAME (func);
 	  funlang = SYMBOL_LANGUAGE (func);
 	  if (funlang == language_cplus)
 	    {
@@ -391,7 +391,7 @@ print_frame (struct frame_info *fi,
       struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (frame_address_in_block (fi));
       if (msymbol != NULL)
 	{
-	  funname = SYMBOL_NAME (msymbol);
+	  funname = DEPRECATED_SYMBOL_NAME (msymbol);
 	  funlang = SYMBOL_LANGUAGE (msymbol);
 	}
     }
@@ -653,7 +653,7 @@ frame_info (char *addr_exp, int from_tty)
        * have our hands on the function symbol.)
        */
       char *demangled;
-      funname = SYMBOL_NAME (func);
+      funname = DEPRECATED_SYMBOL_NAME (func);
       funlang = SYMBOL_LANGUAGE (func);
       if (funlang == language_cplus)
 	{
@@ -671,7 +671,7 @@ frame_info (char *addr_exp, int from_tty)
       register struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (get_frame_pc (fi));
       if (msymbol != NULL)
 	{
-	  funname = SYMBOL_NAME (msymbol);
+	  funname = DEPRECATED_SYMBOL_NAME (msymbol);
 	  funlang = SYMBOL_LANGUAGE (msymbol);
 	}
     }
@@ -1113,7 +1113,7 @@ print_block_frame_labels (struct block *b, int *have_default,
 
   ALL_BLOCK_SYMBOLS (b, i, sym)
     {
-      if (STREQ (SYMBOL_NAME (sym), "default"))
+      if (STREQ (DEPRECATED_SYMBOL_NAME (sym), "default"))
 	{
 	  if (*have_default)
 	    continue;
@@ -1326,7 +1326,7 @@ print_frame_arg_vars (register struct frame_info *fi,
 	     float).  There are also LOC_ARG/LOC_REGISTER pairs which
 	     are not combined in symbol-reading.  */
 
-	  sym2 = lookup_symbol (SYMBOL_NAME (sym),
+	  sym2 = lookup_symbol (DEPRECATED_SYMBOL_NAME (sym),
 		   b, VAR_NAMESPACE, (int *) NULL, (struct symtab **) NULL);
 	  print_variable_value (sym2, fi, stream);
 	  fprintf_filtered (stream, "\n");

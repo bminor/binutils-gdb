@@ -5829,7 +5829,7 @@ get_catch_sals (int this_level_only)
 
 	      ALL_BLOCK_SYMBOLS (b, i, sym)
 		{
-		  if (STREQ (SYMBOL_NAME (sym), "default"))
+		  if (STREQ (DEPRECATED_SYMBOL_NAME (sym), "default"))
 		    {
 		      if (have_default)
 			continue;

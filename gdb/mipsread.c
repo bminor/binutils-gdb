@@ -1,6 +1,6 @@
 /* Read a symbol table in MIPS' format (Third-Eye).
    Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1998, 1999, 2000, 2001
+   1998, 1999, 2000, 2001, 2003
    Free Software Foundation, Inc.
    Contributed by Alessandro Forin (af@cs.cmu.edu) at CMU.  Major work
    by Per Bothner, John Gilmore and Ian Lance Taylor at Cygnus Support.
@@ -118,7 +118,7 @@ mipscoff_symfile_read (struct objfile *objfile, int mainline)
       struct minimal_symbol *m;
 
       m = lookup_minimal_symbol_by_pc (objfile->ei.entry_point);
-      if (m && SYMBOL_NAME (m + 1))
+      if (m && DEPRECATED_SYMBOL_NAME (m + 1))
 	{
 	  objfile->ei.entry_file_lowpc = SYMBOL_VALUE_ADDRESS (m);
 	  objfile->ei.entry_file_highpc = SYMBOL_VALUE_ADDRESS (m + 1);

@@ -1293,7 +1293,7 @@ i386_pe_skip_trampoline_code (CORE_ADDR pc, char *name)
       unsigned long indirect = read_memory_unsigned_integer (pc + 2, 4);
       struct minimal_symbol *indsym =
 	indirect ? lookup_minimal_symbol_by_pc (indirect) : 0;
-      char *symname = indsym ? SYMBOL_NAME (indsym) : 0;
+      char *symname = indsym ? DEPRECATED_SYMBOL_NAME (indsym) : 0;
 
       if (symname)
 	{

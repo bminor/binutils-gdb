@@ -677,7 +677,7 @@ pc_in_interrupt_handler (CORE_ADDR pc)
   msym_us = lookup_minimal_symbol_by_pc (pc);
 
   return (u->HP_UX_interrupt_marker
-	  && !PC_IN_SIGTRAMP (pc, SYMBOL_NAME (msym_us)));
+	  && !PC_IN_SIGTRAMP (pc, DEPRECATED_SYMBOL_NAME (msym_us)));
 }
 
 /* Called when no unwind descriptor was found for PC.  Returns 1 if it
@@ -795,7 +795,7 @@ find_proc_framesize (CORE_ADDR pc)
   if (u->Save_SP
       && !pc_in_interrupt_handler (pc)
       && msym_us
-      && !PC_IN_SIGTRAMP (pc, SYMBOL_NAME (msym_us)))
+      && !PC_IN_SIGTRAMP (pc, DEPRECATED_SYMBOL_NAME (msym_us)))
     return -1;
 
   return u->Total_frame_size << 3;
@@ -1153,7 +1153,7 @@ hppa_frame_chain (struct frame_info *frame)
          pthread library itself, you'd get errors.
 
          So for today, we don't make that check. */
-      frame_symbol_name = SYMBOL_NAME (min_frame_symbol);
+      frame_symbol_name = DEPRECATED_SYMBOL_NAME (min_frame_symbol);
       if (frame_symbol_name != 0)
 	{
 	  if (0 == strncmp (frame_symbol_name,
@@ -1984,7 +1984,7 @@ find_stub_with_shl_get (struct minimal_symbol *function, CORE_ADDR handle)
   msymbol = lookup_minimal_symbol ("__shldp", NULL, NULL);
   symbol2 = lookup_symbol ("__shldp", NULL, VAR_NAMESPACE, NULL, NULL);
   endo_buff_addr = SYMBOL_VALUE_ADDRESS (buff_minsym);
-  namelen = strlen (SYMBOL_NAME (function));
+  namelen = strlen (DEPRECATED_SYMBOL_NAME (function));
   value_return_addr = endo_buff_addr + namelen;
   ftype = check_typedef (SYMBOL_TYPE (get_sym));
 
@@ -1997,7 +1997,7 @@ find_stub_with_shl_get (struct minimal_symbol *function, CORE_ADDR handle)
 
   /* set up stuff needed by __d_shl_get in buffer in end.o */
 
-  target_write_memory (endo_buff_addr, SYMBOL_NAME (function), namelen);
+  target_write_memory (endo_buff_addr, DEPRECATED_SYMBOL_NAME (function), namelen);
 
   target_write_memory (value_return_addr, (char *) &tmp, 4);
 
@@ -2235,10 +2235,10 @@ hppa_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
 	  {
 	    stub_symbol
 	      = lookup_minimal_symbol_solib_trampoline
-	      (SYMBOL_NAME (funsymbol), NULL, objfile);
+	      (DEPRECATED_SYMBOL_NAME (funsymbol), NULL, objfile);
 
 	    if (!stub_symbol)
-	      stub_symbol = lookup_minimal_symbol (SYMBOL_NAME (funsymbol),
+	      stub_symbol = lookup_minimal_symbol (DEPRECATED_SYMBOL_NAME (funsymbol),
 						   NULL, objfile);
 
 	    /* Found a symbol with the right name.  */
@@ -2339,7 +2339,7 @@ hppa_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
 	  new_stub = find_stub_with_shl_get (fmsymbol, solib_handle);
 
 	  if (new_stub == 0)
-	    error ("Can't find an import stub for %s", SYMBOL_NAME (fmsymbol));
+	    error ("Can't find an import stub for %s", DEPRECATED_SYMBOL_NAME (fmsymbol));
 
 	  /* We have to store the address of the stub in __shlib_funcptr.  */
 	  msymbol = lookup_minimal_symbol ("__shlib_funcptr", NULL,
@@ -3015,7 +3015,7 @@ hppa_in_solib_call_trampoline (CORE_ADDR pc, char *name)
     return 1;
 
   minsym = lookup_minimal_symbol_by_pc (pc);
-  if (minsym && strcmp (SYMBOL_NAME (minsym), ".stub") == 0)
+  if (minsym && strcmp (DEPRECATED_SYMBOL_NAME (minsym), ".stub") == 0)
     return 1;
 
   /* Get the unwind descriptor corresponding to PC, return zero
@@ -3258,7 +3258,7 @@ hppa_skip_trampoline_code (CORE_ADDR pc)
 	  ALL_MSYMBOLS (objfile, msymbol)
 	  {
 	    if (MSYMBOL_TYPE (msymbol) == mst_text
-		&& STREQ (SYMBOL_NAME (msymbol), SYMBOL_NAME (msym)))
+		&& STREQ (DEPRECATED_SYMBOL_NAME (msymbol), DEPRECATED_SYMBOL_NAME (msym)))
 	      {
 		function_found = 1;
 		break;
@@ -3353,11 +3353,11 @@ hppa_skip_trampoline_code (CORE_ADDR pc)
 	      return orig_pc == pc ? 0 : pc & ~0x3;
 	    }
 
-	  libsym = lookup_minimal_symbol (SYMBOL_NAME (stubsym), NULL, NULL);
+	  libsym = lookup_minimal_symbol (DEPRECATED_SYMBOL_NAME (stubsym), NULL, NULL);
 	  if (libsym == NULL)
 	    {
 	      warning ("Unable to find library symbol for %s\n",
-		       SYMBOL_NAME (stubsym));
+		       DEPRECATED_SYMBOL_NAME (stubsym));
 	      return orig_pc == pc ? 0 : pc & ~0x3;
 	    }
 

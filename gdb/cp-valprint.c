@@ -1,6 +1,6 @@
 /* Support for printing C++ values for GDB, the GNU debugger.
    Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   2000, 2001, 2002
+   2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -130,7 +130,7 @@ cp_print_class_method (char *valaddr,
 	  check_stub_method_group (domain, i);
 	  for (j = 0; j < len2; j++)
 	    {
-	      if (strcmp (SYMBOL_NAME (sym), TYPE_FN_FIELD_PHYSNAME (f, j))
+	      if (strcmp (DEPRECATED_SYMBOL_NAME (sym), TYPE_FN_FIELD_PHYSNAME (f, j))
 		  == 0)
 		goto common;
 	    }

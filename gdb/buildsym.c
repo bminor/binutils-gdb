@@ -137,7 +137,7 @@ find_symbol_in_list (struct pending *list, char *name, int length)
     {
       for (j = list->nsyms; --j >= 0;)
 	{
-	  pp = SYMBOL_NAME (list->symbol[j]);
+	  pp = DEPRECATED_SYMBOL_NAME (list->symbol[j]);
 	  if (*pp == *name && strncmp (pp, name, length) == 0 &&
 	      pp[length] == '\0')
 	    {
@@ -266,7 +266,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	      unsigned int hash_index;
 	      const char *name = SYMBOL_DEMANGLED_NAME (next->symbol[j]);
 	      if (name == NULL)
-		name = SYMBOL_NAME (next->symbol[j]);
+		name = DEPRECATED_SYMBOL_NAME (next->symbol[j]);
 	      hash_index = msymbol_hash_iw (name);
 	      hash_index = hash_index % BLOCK_BUCKETS (block);
 	      sym = BLOCK_BUCKET (block, hash_index);

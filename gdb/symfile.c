@@ -2708,7 +2708,7 @@ add_psymbol_with_dem_name_to_list (char *name, int namelength, char *dem_name,
 
   memcpy (buf, name, namelength);
   buf[namelength] = '\0';
-  SYMBOL_NAME (&psymbol) = bcache (buf, namelength + 1, objfile->psymbol_cache);
+  DEPRECATED_SYMBOL_NAME (&psymbol) = bcache (buf, namelength + 1, objfile->psymbol_cache);
 
   buf = alloca (dem_namelength + 1);
   memcpy (buf, dem_name, dem_namelength);

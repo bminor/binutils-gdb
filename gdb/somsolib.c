@@ -938,7 +938,7 @@ som_solib_create_inferior_hook (void)
     struct minimal_symbol *msymbol2;
 
     /* What a crock.  */
-    msymbol2 = lookup_minimal_symbol_solib_trampoline (SYMBOL_NAME (msymbol),
+    msymbol2 = lookup_minimal_symbol_solib_trampoline (DEPRECATED_SYMBOL_NAME (msymbol),
 						       NULL, objfile);
     /* Found a symbol with the right name.  */
     if (msymbol2)

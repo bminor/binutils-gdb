@@ -1444,7 +1444,7 @@ rs6000_skip_trampoline_code (CORE_ADDR pc)
 
   /* Check for bigtoc fixup code.  */
   msymbol = lookup_minimal_symbol_by_pc (pc);
-  if (msymbol && rs6000_in_solib_return_trampoline (pc, SYMBOL_NAME (msymbol)))
+  if (msymbol && rs6000_in_solib_return_trampoline (pc, DEPRECATED_SYMBOL_NAME (msymbol)))
     {
       /* Double-check that the third instruction from PC is relative "b".  */
       op = read_memory_integer (pc + 8, 4);

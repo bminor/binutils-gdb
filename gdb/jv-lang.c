@@ -1,5 +1,5 @@
 /* Java language support routines for GDB, the GNU debugger.
-   Copyright 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 1999, 2000, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -164,7 +164,7 @@ add_class_symbol (struct type *type, CORE_ADDR addr)
     obstack_alloc (&dynamics_objfile->symbol_obstack, sizeof (struct symbol));
   memset (sym, 0, sizeof (struct symbol));
   SYMBOL_LANGUAGE (sym) = language_java;
-  SYMBOL_NAME (sym) = TYPE_TAG_NAME (type);
+  DEPRECATED_SYMBOL_NAME (sym) = TYPE_TAG_NAME (type);
   SYMBOL_CLASS (sym) = LOC_TYPEDEF;
   /*  SYMBOL_VALUE (sym) = valu; */
   SYMBOL_TYPE (sym) = type;

@@ -472,7 +472,7 @@ decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
 		{
 		  if (canonical_arr[i] == NULL)
 		    {
-		      symname = SYMBOL_NAME (sym_arr[i]);
+		      symname = DEPRECATED_SYMBOL_NAME (sym_arr[i]);
 		      canonical_arr[i] = savestring (symname, strlen (symname));
 		    }
 		}
@@ -495,7 +495,7 @@ decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
 	    {
 	      if (canonical_arr)
 		{
-		  symname = SYMBOL_NAME (sym_arr[num]);
+		  symname = DEPRECATED_SYMBOL_NAME (sym_arr[num]);
 		  make_cleanup (xfree, symname);
 		  canonical_arr[i] = savestring (symname, strlen (symname));
 		}

@@ -1,5 +1,5 @@
 /* YACC parser for Ada expressions, for GDB.
-   Copyright (C) 1986, 1989, 1990, 1991, 1993, 1994, 1997, 2000
+   Copyright (C) 1986, 1989, 1990, 1991, 1993, 1994, 1997, 2000, 2003
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -802,7 +802,7 @@ write_object_renaming (orig_left_context, renaming)
      struct block* orig_left_context;
      struct symbol* renaming;
 {
-  const char* qualification = SYMBOL_NAME (renaming);
+  const char* qualification = DEPRECATED_SYMBOL_NAME (renaming);
   const char* simple_tail;
   const char* expr = TYPE_FIELD_NAME (SYMBOL_TYPE (renaming), 0);
   const char* suffix;
@@ -944,7 +944,7 @@ write_object_renaming (orig_left_context, renaming)
 
  BadEncoding:
   error ("Internal error in encoding of renaming declaration: %s",
-	 SYMBOL_NAME (renaming));
+	 DEPRECATED_SYMBOL_NAME (renaming));
 }
 
 /* Convert the character literal whose ASCII value would be VAL to the

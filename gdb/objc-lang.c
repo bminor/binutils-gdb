@@ -868,7 +868,7 @@ selectors_info (char *regexp, int from_tty)
       QUIT;
       name = SYMBOL_DEMANGLED_NAME (msymbol);
       if (name == NULL)
-	name = SYMBOL_NAME (msymbol);
+	name = DEPRECATED_SYMBOL_NAME (msymbol);
       if (name &&
 	 (name[0] == '-' || name[0] == '+') &&
 	  name[1] == '[')		/* Got a method name.  */
@@ -901,7 +901,7 @@ selectors_info (char *regexp, int from_tty)
 	  QUIT;
 	  name = SYMBOL_DEMANGLED_NAME (msymbol);
 	  if (name == NULL)
-	    name = SYMBOL_NAME (msymbol);
+	    name = DEPRECATED_SYMBOL_NAME (msymbol);
 	  if (name &&
 	     (name[0] == '-' || name[0] == '+') &&
 	      name[1] == '[')		/* Got a method name.  */
@@ -927,7 +927,7 @@ selectors_info (char *regexp, int from_tty)
 	  QUIT;
 	  name = SYMBOL_DEMANGLED_NAME (sym_arr[ix]);
 	  if (name == NULL)
-	    name = SYMBOL_NAME (sym_arr[ix]);
+	    name = DEPRECATED_SYMBOL_NAME (sym_arr[ix]);
 	  name = strchr (name, ' ') + 1;
 	  if (p[0] && specialcmp(name, p) == 0)
 	    continue;		/* Seen this one already (not unique).  */
@@ -1011,7 +1011,7 @@ classes_info (char *regexp, int from_tty)
       QUIT;
       name = SYMBOL_DEMANGLED_NAME (msymbol);
       if (name == NULL)
-	name = SYMBOL_NAME (msymbol);
+	name = DEPRECATED_SYMBOL_NAME (msymbol);
       if (name &&
 	 (name[0] == '-' || name[0] == '+') &&
 	  name[1] == '[')			/* Got a method name.  */
@@ -1037,7 +1037,7 @@ classes_info (char *regexp, int from_tty)
 	  QUIT;
 	  name = SYMBOL_DEMANGLED_NAME (msymbol);
 	  if (name == NULL)
-	    name = SYMBOL_NAME (msymbol);
+	    name = DEPRECATED_SYMBOL_NAME (msymbol);
 	  if (name &&
 	     (name[0] == '-' || name[0] == '+') &&
 	      name[1] == '[')			/* Got a method name.  */
@@ -1056,7 +1056,7 @@ classes_info (char *regexp, int from_tty)
 	  QUIT;
 	  name = SYMBOL_DEMANGLED_NAME (sym_arr[ix]);
 	  if (name == NULL)
-	    name = SYMBOL_NAME (sym_arr[ix]);
+	    name = DEPRECATED_SYMBOL_NAME (sym_arr[ix]);
 	  name += 2;
 	  if (p[0] && specialcmp(name, p) == 0)
 	    continue;	/* Seen this one already (not unique).  */
@@ -1319,7 +1319,7 @@ find_methods (struct symtab *symtab, char type,
 
       symname = SYMBOL_DEMANGLED_NAME (msymbol);
       if (symname == NULL)
-	symname = SYMBOL_NAME (msymbol);
+	symname = DEPRECATED_SYMBOL_NAME (msymbol);
       if (symname == NULL)
 	continue;
 
@@ -1358,7 +1358,7 @@ find_methods (struct symtab *symtab, char type,
           const char *newsymname = SYMBOL_DEMANGLED_NAME (sym);
 	  
           if (newsymname == NULL)
-            newsymname = SYMBOL_NAME (sym);
+            newsymname = DEPRECATED_SYMBOL_NAME (sym);
           if (strcmp (symname, newsymname) == 0)
             {
               /* Found a high-level method sym: swap it into the

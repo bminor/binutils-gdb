@@ -54,9 +54,11 @@ struct agent_expr;
 
 struct general_symbol_info
 {
-  /* Name of the symbol.  This is a required field.  Storage for the name is
-     allocated on the psymbol_obstack or symbol_obstack for the associated
-     objfile. */
+  /* Name of the symbol.  This is a required field.  Storage for the
+     name is allocated on the psymbol_obstack or symbol_obstack for
+     the associated objfile.  For languages like C++ that make a
+     distinction between the mangled name and demangled name, this is
+     the mangled name.  */
 
   char *name;
 
@@ -90,9 +92,9 @@ struct general_symbol_info
 
   union
   {
-    struct cplus_specific	/* For C++ */
-      /*  and Java */
+    struct cplus_specific
     {
+      /* This is in fact used for C++, Java, and Objective C.  */
       char *demangled_name;
     }
     cplus_specific;
@@ -129,7 +131,7 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
    functions, unless the callers are changed to pass in the ginfo
    field only, instead of the SYMBOL parameter.  */
 
-#define SYMBOL_NAME(symbol)		(symbol)->ginfo.name
+#define DEPRECATED_SYMBOL_NAME(symbol)	(symbol)->ginfo.name
 #define SYMBOL_VALUE(symbol)		(symbol)->ginfo.value.ivalue
 #define SYMBOL_VALUE_ADDRESS(symbol)	(symbol)->ginfo.value.address
 #define SYMBOL_VALUE_BYTES(symbol)	(symbol)->ginfo.value.bytes
@@ -160,6 +162,37 @@ extern void symbol_set_names (struct general_symbol_info *symbol,
 			      const char *name, int len,
 			      struct objfile *objfile);
 
+/* Now come lots of name accessor macros.  Short version as to when to
+   use which: Use SYMBOL_NATURAL_NAME to refer to the name of the
+   symbol in the original source code.  Use SYMBOL_LINKAGE_NAME if you
+   want to know what the linker thinks the symbol's name is.  Use
+   SYMBOL_PRINT_NAME for output.  Use SYMBOL_DEMANGLED_NAME if you
+   specifically need to know whether SYMBOL_NATURAL_NAME and
+   SYMBOL_LINKAGE_NAME are different.  Don't use
+   DEPRECATED_SYMBOL_NAME at all: instances of that macro should be
+   replaced by SYMBOL_NATURAL_NAME, SYMBOL_LINKAGE_NAME, or perhaps
+   SYMBOL_PRINT_NAME.  */
+
+/* Return SYMBOL's "natural" name, i.e. the name that it was called in
+   the original source code.  In languages like C++ where symbols may
+   be mangled for ease of manipulation by the linker, this is the
+   demangled name.  */
+
+#define SYMBOL_NATURAL_NAME(symbol) \
+  (symbol_natural_name (&(symbol)->ginfo))
+extern char *symbol_natural_name (const struct general_symbol_info *symbol);
+
+/* Return SYMBOL's name from the point of view of the linker.  In
+   languages like C++ where symbols may be mangled for ease of
+   manipulation by the linker, this is the mangled name; otherwise,
+   it's the same as SYMBOL_NATURAL_NAME.  This is currently identical
+   to DEPRECATED_SYMBOL_NAME, but please use SYMBOL_LINKAGE_NAME when
+   appropriate: it conveys the additional semantic information that
+   you really have thought about the issue and decided that you mean
+   SYMBOL_LINKAGE_NAME instead of SYMBOL_NATURAL_NAME.  */
+
+#define SYMBOL_LINKAGE_NAME(symbol)	(symbol)->ginfo.name
+
 /* Return the demangled name for a symbol based on the language for
    that symbol.  If no demangled name exists, return NULL. */
 #define SYMBOL_DEMANGLED_NAME(symbol) \
@@ -175,9 +208,7 @@ extern char *symbol_demangled_name (struct general_symbol_info *symbol);
    output.  */
 
 #define SYMBOL_PRINT_NAME(symbol)					\
-  (demangle && SYMBOL_DEMANGLED_NAME (symbol) != NULL			\
-   ? SYMBOL_DEMANGLED_NAME (symbol)					\
-   : SYMBOL_NAME (symbol))
+  (demangle ? SYMBOL_NATURAL_NAME (symbol) : SYMBOL_LINKAGE_NAME (symbol))
 
 /* Macro that tests a symbol for a match against a specified name string.
    First test the unencoded name, then looks for and test a C++ encoded
@@ -187,7 +218,7 @@ extern char *symbol_demangled_name (struct general_symbol_info *symbol);
    Evaluates to zero if the match fails, or nonzero if it succeeds. */
 
 #define SYMBOL_MATCHES_NAME(symbol, name)				\
-  (STREQ (SYMBOL_NAME (symbol), (name))					\
+  (STREQ (DEPRECATED_SYMBOL_NAME (symbol), (name))			\
    || (SYMBOL_DEMANGLED_NAME (symbol) != NULL				\
        && strcmp_iw (SYMBOL_DEMANGLED_NAME (symbol), (name)) == 0))
 
@@ -197,7 +228,7 @@ extern char *symbol_demangled_name (struct general_symbol_info *symbol);
    Evaluates to zero if the match fails, or nonzero if it succeeds. */
 
 #define SYMBOL_MATCHES_REGEXP(symbol)					\
-  (re_exec (SYMBOL_NAME (symbol)) != 0					\
+  (re_exec (DEPRECATED_SYMBOL_NAME (symbol)) != 0			\
    || (SYMBOL_DEMANGLED_NAME (symbol) != NULL				\
        && re_exec (SYMBOL_DEMANGLED_NAME (symbol)) != 0))
 

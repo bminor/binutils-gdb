@@ -3261,13 +3261,13 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 		  int l = colon_pos - name;
 
 		  m = lookup_minimal_symbol_by_pc (last_pc_address);
-		  if (m && STREQN (SYMBOL_NAME (m), name, l)
-		      && SYMBOL_NAME (m)[l] == '\0')
+		  if (m && STREQN (DEPRECATED_SYMBOL_NAME (m), name, l)
+		      && DEPRECATED_SYMBOL_NAME (m)[l] == '\0')
 		    /* last_pc_address was in this function */
 		    valu = SYMBOL_VALUE (m);
-		  else if (m && SYMBOL_NAME (m + 1)
-			   && STREQN (SYMBOL_NAME (m + 1), name, l)
-			   && SYMBOL_NAME (m + 1)[l] == '\0')
+		  else if (m && DEPRECATED_SYMBOL_NAME (m + 1)
+			   && STREQN (DEPRECATED_SYMBOL_NAME (m + 1), name, l)
+			   && DEPRECATED_SYMBOL_NAME (m + 1)[l] == '\0')
 		    /* last_pc_address was in last function */
 		    valu = SYMBOL_VALUE (m + 1);
 		  else

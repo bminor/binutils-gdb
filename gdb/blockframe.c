@@ -364,7 +364,7 @@ find_pc_sect_partial_function (CORE_ADDR pc, asection *section, char **name,
 	    {
 	      cache_pc_function_low = BLOCK_START (SYMBOL_BLOCK_VALUE (f));
 	      cache_pc_function_high = BLOCK_END (SYMBOL_BLOCK_VALUE (f));
-	      cache_pc_function_name = SYMBOL_NAME (f);
+	      cache_pc_function_name = DEPRECATED_SYMBOL_NAME (f);
 	      cache_pc_function_section = section;
 	      goto return_cached_value;
 	    }
@@ -385,7 +385,7 @@ find_pc_sect_partial_function (CORE_ADDR pc, asection *section, char **name,
 	      if (address)
 		*address = SYMBOL_VALUE_ADDRESS (psb);
 	      if (name)
-		*name = SYMBOL_NAME (psb);
+		*name = DEPRECATED_SYMBOL_NAME (psb);
 	      /* endaddr non-NULL can't happen here.  */
 	      return 1;
 	    }
@@ -416,7 +416,7 @@ find_pc_sect_partial_function (CORE_ADDR pc, asection *section, char **name,
     }
 
   cache_pc_function_low = SYMBOL_VALUE_ADDRESS (msymbol);
-  cache_pc_function_name = SYMBOL_NAME (msymbol);
+  cache_pc_function_name = DEPRECATED_SYMBOL_NAME (msymbol);
   cache_pc_function_section = section;
 
   /* Use the lesser of the next minimal symbol in the same section, or
@@ -426,14 +426,14 @@ find_pc_sect_partial_function (CORE_ADDR pc, asection *section, char **name,
      other sections, to find the next symbol in this section with
      a different address.  */
 
-  for (i = 1; SYMBOL_NAME (msymbol + i) != NULL; i++)
+  for (i = 1; DEPRECATED_SYMBOL_NAME (msymbol + i) != NULL; i++)
     {
       if (SYMBOL_VALUE_ADDRESS (msymbol + i) != SYMBOL_VALUE_ADDRESS (msymbol)
 	  && SYMBOL_BFD_SECTION (msymbol + i) == SYMBOL_BFD_SECTION (msymbol))
 	break;
     }
 
-  if (SYMBOL_NAME (msymbol + i) != NULL
+  if (DEPRECATED_SYMBOL_NAME (msymbol + i) != NULL
       && SYMBOL_VALUE_ADDRESS (msymbol + i) < osect->endaddr)
     cache_pc_function_high = SYMBOL_VALUE_ADDRESS (msymbol + i);
   else

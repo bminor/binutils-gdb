@@ -575,6 +575,25 @@ symbol_init_demangled_name (struct general_symbol_info *gsymbol,
     }
 }
 
+/* Return the source code name of a symbol.  In languages where
+   demangling is necessary, this is the demangled name.  */
+
+char *
+symbol_natural_name (const struct general_symbol_info *gsymbol)
+{
+  if ((gsymbol->language == language_cplus
+       || gsymbol->language == language_java
+       || gsymbol->language == language_objc)
+      && (gsymbol->language_specific.cplus_specific.demangled_name != NULL))
+    {
+      return gsymbol->language_specific.cplus_specific.demangled_name;
+    }
+  else
+    {
+      return gsymbol->name;
+    }
+}
+
 /* Return the demangled name for a symbol based on the language for
    that symbol.  If no demangled name exists, return NULL. */
 char *
@@ -1273,7 +1292,7 @@ lookup_symbol_aux_minsyms (const char *name,
 	      bv = BLOCKVECTOR (s);
 	      block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 
-	      /* This call used to pass `SYMBOL_NAME (msymbol)' as the
+	      /* This call used to pass `DEPRECATED_SYMBOL_NAME (msymbol)' as the
 	         `name' argument to lookup_block_symbol.  But the name
 	         of a minimal symbol is always mangled, so that seems
 	         to be clearly the wrong thing to pass as the
@@ -1334,11 +1353,11 @@ lookup_symbol_aux_minsyms (const char *name,
 	    }
 	  else if (MSYMBOL_TYPE (msymbol) != mst_text
 		   && MSYMBOL_TYPE (msymbol) != mst_file_text
-		   && !STREQ (name, SYMBOL_NAME (msymbol)))
+		   && !STREQ (name, DEPRECATED_SYMBOL_NAME (msymbol)))
 	    {
 	      /* This is a mangled variable, look it up by its
 	         mangled name.  */
-	      return lookup_symbol_aux (SYMBOL_NAME (msymbol), mangled_name,
+	      return lookup_symbol_aux (DEPRECATED_SYMBOL_NAME (msymbol), mangled_name,
 					NULL, namespace, is_a_field_of_this,
 					symtab);
 	    }
@@ -1603,7 +1622,7 @@ lookup_block_symbol (register const struct block *block, const char *name,
 	{
 	  if (SYMBOL_NAMESPACE (sym) == namespace 
 	      && (mangled_name
-		  ? strcmp (SYMBOL_NAME (sym), mangled_name) == 0
+		  ? strcmp (DEPRECATED_SYMBOL_NAME (sym), mangled_name) == 0
 		  : SYMBOL_MATCHES_NAME (sym, name)))
 	    return sym;
 	}
@@ -1673,7 +1692,7 @@ lookup_block_symbol (register const struct block *block, const char *name,
 	  sym = BLOCK_SYM (block, bot);
 	  if (SYMBOL_NAMESPACE (sym) == namespace
 	      && (mangled_name
-		  ? strcmp (SYMBOL_NAME (sym), mangled_name) == 0
+		  ? strcmp (DEPRECATED_SYMBOL_NAME (sym), mangled_name) == 0
 		  : SYMBOL_MATCHES_NAME (sym, name)))
 	    {
 	      return sym;
@@ -1708,7 +1727,7 @@ lookup_block_symbol (register const struct block *block, const char *name,
 	  sym = BLOCK_SYM (block, bot);
 	  if (SYMBOL_NAMESPACE (sym) == namespace
 	      && (mangled_name
-		  ? strcmp (SYMBOL_NAME (sym), mangled_name) == 0
+		  ? strcmp (DEPRECATED_SYMBOL_NAME (sym), mangled_name) == 0
 		  : SYMBOL_MATCHES_NAME (sym, name)))
 	    {
 	      /* If SYM has aliases, then use any alias that is active
@@ -2012,7 +2031,7 @@ find_pc_sect_line (CORE_ADDR pc, struct sec *section, int notcurrent)
   if (msymbol != NULL)
     if (MSYMBOL_TYPE (msymbol) == mst_solib_trampoline)
       {
-	mfunsym = lookup_minimal_symbol_text (SYMBOL_NAME (msymbol), NULL, NULL);
+	mfunsym = lookup_minimal_symbol_text (DEPRECATED_SYMBOL_NAME (msymbol), NULL, NULL);
 	if (mfunsym == NULL)
 	  /* I eliminated this warning since it is coming out
 	   * in the following situation:
@@ -2023,12 +2042,12 @@ find_pc_sect_line (CORE_ADDR pc, struct sec *section, int notcurrent)
 	   * so of course we can't find the real func/line info,
 	   * but the "break" still works, and the warning is annoying.
 	   * So I commented out the warning. RT */
-	  /* warning ("In stub for %s; unable to find real function/line info", SYMBOL_NAME(msymbol)) */ ;
+	  /* warning ("In stub for %s; unable to find real function/line info", DEPRECATED_SYMBOL_NAME (msymbol)) */ ;
 	/* fall through */
 	else if (SYMBOL_VALUE (mfunsym) == SYMBOL_VALUE (msymbol))
 	  /* Avoid infinite recursion */
 	  /* See above comment about why warning is commented out */
-	  /* warning ("In stub for %s; unable to find real function/line info", SYMBOL_NAME(msymbol)) */ ;
+	  /* warning ("In stub for %s; unable to find real function/line info", DEPRECATED_SYMBOL_NAME (msymbol)) */ ;
 	/* fall through */
 	else
 	  return find_pc_line (SYMBOL_VALUE (mfunsym), 0);
@@ -2960,7 +2979,7 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
 		       symbol associated to a given minimal symbol (if
 		       any).  */
 		    if (kind == FUNCTIONS_NAMESPACE
-			|| lookup_symbol (SYMBOL_NAME (msymbol),
+			|| lookup_symbol (DEPRECATED_SYMBOL_NAME (msymbol),
 					  (struct block *) NULL,
 					  VAR_NAMESPACE,
 					0, (struct symtab **) NULL) == NULL)
@@ -3050,7 +3069,7 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
 		    (0 == find_pc_symtab (SYMBOL_VALUE_ADDRESS (msymbol))))
 		  {
 		    /* Variables/Absolutes:  Look up by name */
-		    if (lookup_symbol (SYMBOL_NAME (msymbol),
+		    if (lookup_symbol (DEPRECATED_SYMBOL_NAME (msymbol),
 				       (struct block *) NULL, VAR_NAMESPACE,
 				       0, (struct symtab **) NULL) == NULL)
 		      {
@@ -3231,11 +3250,11 @@ rbreak_command (char *regexp, int from_tty)
       if (p->msymbol == NULL)
 	{
 	  char *string = (char *) alloca (strlen (p->symtab->filename)
-					  + strlen (SYMBOL_NAME (p->symbol))
+					  + strlen (DEPRECATED_SYMBOL_NAME (p->symbol))
 					  + 4);
 	  strcpy (string, p->symtab->filename);
 	  strcat (string, ":'");
-	  strcat (string, SYMBOL_NAME (p->symbol));
+	  strcat (string, DEPRECATED_SYMBOL_NAME (p->symbol));
 	  strcat (string, "'");
 	  break_command (string, from_tty);
 	  print_symbol_info (FUNCTIONS_NAMESPACE,
@@ -3246,7 +3265,7 @@ rbreak_command (char *regexp, int from_tty)
 	}
       else
 	{
-	  break_command (SYMBOL_NAME (p->msymbol), from_tty);
+	  break_command (DEPRECATED_SYMBOL_NAME (p->msymbol), from_tty);
 	  printf_filtered ("<function, no debug info> %s;\n",
 			   SYMBOL_PRINT_NAME (p->msymbol));
 	}
@@ -3272,7 +3291,7 @@ static char **return_val;
 	(SYMBOL_DEMANGLED_NAME (symbol), (sym_text), (len), (text), (word)); \
     else \
       completion_list_add_name \
-	(SYMBOL_NAME (symbol), (sym_text), (len), (text), (word)); \
+	(DEPRECATED_SYMBOL_NAME (symbol), (sym_text), (len), (text), (word)); \
   } while (0)
 
 /*  Test to see if the symbol specified by SYMNAME (which is already
@@ -3928,7 +3947,7 @@ overload_list_add_symbol (struct symbol *sym, char *oload_name)
 
   /* skip any symbols that we've already considered. */
   for (i = 0; i < sym_return_val_index; ++i)
-    if (!strcmp (SYMBOL_NAME (sym), SYMBOL_NAME (sym_return_val[i])))
+    if (!strcmp (DEPRECATED_SYMBOL_NAME (sym), DEPRECATED_SYMBOL_NAME (sym_return_val[i])))
       return;
 
   /* Get the demangled name without parameters */

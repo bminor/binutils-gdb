@@ -2735,7 +2735,7 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
   else
     {
       int i = -1;
-      func_name = cplus_demangle (SYMBOL_NAME (fsym), DMGL_NO_OPTS);
+      func_name = cplus_demangle (DEPRECATED_SYMBOL_NAME (fsym), DMGL_NO_OPTS);
 
       /* If the name is NULL this must be a C-style function.
          Just return the same symbol. */

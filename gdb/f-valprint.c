@@ -1,5 +1,5 @@
 /* Support for printing Fortran values for GDB, the GNU debugger.
-   Copyright 1993, 1994, 1995, 1996, 1998, 1999, 2000
+   Copyright 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2003
    Free Software Foundation, Inc.
    Contributed by Motorola.  Adapted from the C definitions by Farooq Butt
    (fmbutt@engage.sps.mot.com), additionally worked over by Stan Shebs.
@@ -618,9 +618,9 @@ info_common_command (char *comname, int from_tty)
       if (msymbol != NULL
 	  && (SYMBOL_VALUE_ADDRESS (msymbol)
 	      > BLOCK_START (SYMBOL_BLOCK_VALUE (func))))
-	funname = SYMBOL_NAME (msymbol);
+	funname = DEPRECATED_SYMBOL_NAME (msymbol);
       else
-	funname = SYMBOL_NAME (func);
+	funname = DEPRECATED_SYMBOL_NAME (func);
     }
   else
     {
@@ -628,7 +628,7 @@ info_common_command (char *comname, int from_tty)
       lookup_minimal_symbol_by_pc (get_frame_pc (fi));
 
       if (msymbol != NULL)
-	funname = SYMBOL_NAME (msymbol);
+	funname = DEPRECATED_SYMBOL_NAME (msymbol);
     }
 
   /* If comname is NULL, we assume the user wishes to see the 
@@ -654,7 +654,7 @@ info_common_command (char *comname, int from_tty)
 
       while (entry != NULL)
 	{
-	  printf_filtered ("%s = ", SYMBOL_NAME (entry->symbol));
+	  printf_filtered ("%s = ", DEPRECATED_SYMBOL_NAME (entry->symbol));
 	  print_variable_value (entry->symbol, fi, gdb_stdout);
 	  printf_filtered ("\n");
 	  entry = entry->next;
@@ -710,9 +710,9 @@ there_is_a_visible_common_named (char *comname)
       if (msymbol != NULL
 	  && (SYMBOL_VALUE_ADDRESS (msymbol)
 	      > BLOCK_START (SYMBOL_BLOCK_VALUE (func))))
-	funname = SYMBOL_NAME (msymbol);
+	funname = DEPRECATED_SYMBOL_NAME (msymbol);
       else
-	funname = SYMBOL_NAME (func);
+	funname = DEPRECATED_SYMBOL_NAME (func);
     }
   else
     {
@@ -720,7 +720,7 @@ there_is_a_visible_common_named (char *comname)
       lookup_minimal_symbol_by_pc (fi->pc);
 
       if (msymbol != NULL)
-	funname = SYMBOL_NAME (msymbol);
+	funname = DEPRECATED_SYMBOL_NAME (msymbol);
     }
 
   the_common = find_common_for_function (comname, funname);

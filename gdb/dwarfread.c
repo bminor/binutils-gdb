@@ -1676,7 +1676,7 @@ enum_type (struct dieinfo *dip, struct objfile *objfile)
 	  sym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
 						 sizeof (struct symbol));
 	  memset (sym, 0, sizeof (struct symbol));
-	  SYMBOL_NAME (sym) = create_name (list->field.name,
+	  DEPRECATED_SYMBOL_NAME (sym) = create_name (list->field.name,
 					   &objfile->symbol_obstack);
 	  SYMBOL_INIT_LANGUAGE_SPECIFIC (sym, cu_language);
 	  SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
@@ -2979,7 +2979,7 @@ synthesize_typedef (struct dieinfo *dip, struct objfile *objfile,
 	obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));
       OBJSTAT (objfile, n_syms++);
       memset (sym, 0, sizeof (struct symbol));
-      SYMBOL_NAME (sym) = create_name (dip->at_name,
+      DEPRECATED_SYMBOL_NAME (sym) = create_name (dip->at_name,
 				       &objfile->symbol_obstack);
       SYMBOL_INIT_LANGUAGE_SPECIFIC (sym, cu_language);
       SYMBOL_TYPE (sym) = type;
