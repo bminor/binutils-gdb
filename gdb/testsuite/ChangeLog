@@ -1,5 +1,14 @@
 Tue Apr  5 15:16:33 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* gdb.t00/default.exp: Use "exp_continue" rather than obsolete
+	"continue -expect".
+	* gdb.t06/break.exp: Likewise.
+	* gdb.t07/watchpoint.exp: Likewise.
+	* gdb.t13/bitfields.exp: Likewise.
+	* gdb.t15/{funcargs,return}.exp: Likewise.
+	* gdb.stabs/weird.exp: Likewise.
+	* config/{mips,udi}-gdb.exp: Likewise.
+
 	* hppa.sed: Enclose comments within a sed command to avoid
 	losing with the old OSF1 sed.
 
