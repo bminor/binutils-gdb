@@ -1523,7 +1523,7 @@ if test "${hostfile}" != ""; then
     GDB_XM_FILE="config/${gdb_host_cpu}/${hostfile}"
     files="${files} ${GDB_XM_FILE}"
     links="${links} xm.h"
-    AC_DEFINE_UNQUOTED(GDB_XM_FILE, ${GDB_XM_FILE})
+    AC_DEFINE_UNQUOTED(GDB_XM_FILE, "${GDB_XM_FILE}")
 fi
 AC_SUBST(xm_h)
 
@@ -1534,7 +1534,7 @@ if test "${targetfile}" != ""; then
     GDB_TM_FILE="config/${gdb_target_cpu}/${targetfile}"
     files="${files} ${GDB_TM_FILE}"
     links="${links} tm.h"
-    AC_DEFINE_UNQUOTED(GDB_TM_FILE, ${GDB_TM_FILE})
+    AC_DEFINE_UNQUOTED(GDB_TM_FILE, "${GDB_TM_FILE}")
 fi
 AC_SUBST(tm_h)
 
@@ -1545,7 +1545,7 @@ if test "${nativefile}" != ""; then
     GDB_NM_FILE="config/${gdb_host_cpu}/${nativefile}"
     files="${files} ${GDB_NM_FILE}"
     links="${links} nm.h"
-    AC_DEFINE_UNQUOTED(GDB_NM_FILE, ${GDB_NM_FILE})
+    AC_DEFINE_UNQUOTED(GDB_NM_FILE, "${GDB_NM_FILE}")
 fi
 AC_SUBST(nm_h)
 

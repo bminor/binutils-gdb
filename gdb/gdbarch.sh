@@ -1486,9 +1486,27 @@ cat <<EOF
 void
 gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
 {
+  const char *gdb_xm_file = "<not-defined>";
+  const char *gdb_nm_file = "<not-defined>";
+  const char *gdb_tm_file = "<not-defined>";
+#if defined (GDB_XM_FILE)
+  gdb_xm_file = GDB_XM_FILE;
+#endif
   fprintf_unfiltered (file,
-                      "gdbarch_dump: GDB_MULTI_ARCH = %d\\n",
-                      GDB_MULTI_ARCH);
+                      "gdbarch_dump: GDB_XM_FILE = %s\\n",
+                      gdb_xm_file);
+#if defined (GDB_NM_FILE)
+  gdb_nm_file = GDB_NM_FILE;
+#endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: GDB_NM_FILE = %s\\n",
+                      gdb_nm_file);
+#if defined (GDB_TM_FILE)
+  gdb_tm_file = GDB_TM_FILE;
+#endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: GDB_TM_FILE = %s\\n",
+                      gdb_tm_file);
 EOF
 function_list | sort -t: -k 4 | while do_read
 do
