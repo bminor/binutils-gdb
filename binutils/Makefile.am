@@ -52,7 +52,7 @@ noinst_PROGRAMS = $(NM_PROG) $(STRIP_PROG)
 EXTRA_PROGRAMS = $(NLMCONV_PROG) $(SRCONV_PROG) $(DLLTOOL_PROG) $(WINDRES_PROG)
 
 # Stuff that goes in tooldir/ if appropriate
-TOOL_PROGS = nm.new strip.new ar ranlib $(DLLTOOL_PROG)
+TOOL_PROGS = nm.new strip.new ar$(EXEEXT) ranlib$(EXEEXT) dlltool$(EXEEXT)
 
 BASEDIR = $(srcdir)/..
 BFDDIR = $(BASEDIR)/bfd
@@ -300,17 +300,17 @@ CLEANFILES = dep.sed .dep .dep1
 install-exec-local: $(bin_PROGRAMS) $(noinst_PROGRAMS)
 	@list='$(noinst_PROGRAMS)'; for p in $$list; do \
 	  if test -f $$p; then \
-	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p$(EXEEXT) $(bindir)/`echo $$p|sed -e 's/.new//'|sed '$(transform)'`$(EXEEXT)"; \
-	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p$(EXEEXT) $(bindir)/`echo $$p|sed -e 's/.new//'|sed '$(transform)'`$(EXEEXT); \
+	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/.new//'|sed '$(transform)'`$(EXEEXT)"; \
+	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/.new//'|sed '$(transform)'`$(EXEEXT); \
 	  else :; fi; \
 	done
 	for i in $(TOOL_PROGS); do \
 	  if [ -f $$i ]; then \
-	    j=`echo $$i | sed -e 's/.new//'`; \
-	    rm -f $(tooldir)/bin/$$j; \
+	    j=`echo $$i | sed -e 's/.new//' -e 's/$(EXEEXT)//'`; \
+	    rm -f $(tooldir)/bin/$$j$(EXEEXT); \
 	    k=`echo $$j | sed '$(transform)'`; \
-	    ln $(bindir)/$$k $(tooldir)/bin/$$j >/dev/null 2>/dev/null \
-		|| $(INSTALL_PROGRAM) $$i $(tooldir)/bin/$$j; \
+	    ln $(bindir)/$$k$(EXEEXT) $(tooldir)/bin/$$j$(EXEEXT) >/dev/null 2>/dev/null \
+		|| $(INSTALL_PROGRAM) $$i $(tooldir)/bin/$$j$(EXEEXT); \
 	  else true; \
 	  fi; \
 	done

@@ -140,50 +140,50 @@ for targ in $target $canon_targets
 do
     if test "x$targ" = "xall"; then
         all_targets=true
-	BUILD_NLMCONV='$(NLMCONV_PROG)'
-	BUILD_SRCONV='$(SRCONV_PROG)'
+	BUILD_NLMCONV='$(NLMCONV_PROG)$(EXEEXT)'
+	BUILD_SRCONV='$(SRCONV_PROG)$(EXEEXT)'
 	NLMCONV_DEFS="-DNLMCONV_I386 -DNLMCONV_ALPHA -DNLMCONV_POWERPC -DNLMCONV_SPARC"
     else
 	case $targ in
 changequote(,)dnl
 	i[3456]86*-*-netware*) 
 changequote([,])dnl
-	  BUILD_NLMCONV='$(NLMCONV_PROG)'
+	  BUILD_NLMCONV='$(NLMCONV_PROG)$(EXEEXT)'
 	  NLMCONV_DEFS="$NLMCONV_DEFS -DNLMCONV_I386"
 	  ;;
 	alpha*-*-netware*)
-	  BUILD_NLMCONV='$(NLMCONV_PROG)'
+	  BUILD_NLMCONV='$(NLMCONV_PROG)$(EXEEXT)'
 	  NLMCONV_DEFS="$NLMCONV_DEFS -DNLMCONV_ALPHA"
 	  ;;
 	powerpc*-*-netware*)
-	  BUILD_NLMCONV='$(NLMCONV_PROG)'
+	  BUILD_NLMCONV='$(NLMCONV_PROG)$(EXEEXT)'
 	  NLMCONV_DEFS="$NLMCONV_DEFS -DNLMCONV_POWERPC"
 	  ;;
 	sparc*-*-netware*)
-	  BUILD_NLMCONV='$(NLMCONV_PROG)'
+	  BUILD_NLMCONV='$(NLMCONV_PROG)$(EXEEXT)'
 	  NLMCONV_DEFS="$NLMCONV_DEFS -DNLMCONV_SPARC"
 	  ;;
 	esac
 	case $targ in
-	*-*-hms*) BUILD_SRCONV='$(SRCONV_PROG)' ;;
+	*-*-hms*) BUILD_SRCONV='$(SRCONV_PROG)$(EXEEXT)' ;;
 	esac
 	case $targ in
 	arm-*pe*)
-  	  BUILD_DLLTOOL='$(DLLTOOL_PROG)'
+  	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_ARM"
-	  BUILD_WINDRES='$(WINDRES_PROG)'
+	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
 	 ;;
 changequote(,)dnl
 	i[3-6]86-*pe* | i[3-6]86-*-cygwin32)
 changequote([,])dnl
-  	  BUILD_DLLTOOL='$(DLLTOOL_PROG)'
+  	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_I386"
-	  BUILD_WINDRES='$(WINDRES_PROG)'
+	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
 	 ;;
 	powerpc*-*-*pe* | powerpc*-*-cygwin32)
-  	  BUILD_DLLTOOL='$(DLLTOOL_PROG)'
+  	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_PPC"
-	  BUILD_WINDRES='$(WINDRES_PROG)'
+	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
 	 ;;
 	esac
     fi
