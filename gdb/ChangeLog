@@ -1,3 +1,8 @@
+2002-05-23  Andrew Cagney  <ac131313@redhat.com>
+
+	From Ross Alexander at NEC Europe:
+	* config/pa/hpux11w.mh (NATDEPFILES): Add solib.o.
+
 2002-05-23  Michael Snyder  <msnyder@redhat.com>
 
 	* cli/cli-dump.c (restore_command): Use parse_and_eval_long
