@@ -1,3 +1,8 @@
+2000-05-22  Nick Clifton  <nickc@cygnus.com>
+
+	* configure.in : Add peigen.lo to MIPS PE targets.
+	* configure: Regenerate.
+
 2000-05-22  Momchil Velikov  <velco@fadata.bg>
 
 	* libbfd.c (_bfd_generic_verify_endian_match): Compare endianess
