@@ -1,8 +1,12 @@
+Sat Feb  3 23:00:03 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coffcode.h: Move today's libcoff.h change into coffcode.h.
+
 Sat Feb  3 15:43:44 1996  Fred Fish  <fnf@cygnus.com>
 
-	* libcoff.h (bfd_coff_link_add_one_symbol): Combine macro args back into
-	one line.  Some compilers (sunos 4.1.3 for example) won't accept args
-	split across more than one line.
+	* libcoff.h (bfd_coff_link_add_one_symbol): Combine macro args
+	back into one line.  Some compilers (sunos 4.1.3 for example)
+	won't accept args split across more than one line.
 
 Fri Feb  2 11:42:15 1996  Steve Chamberlain  <sac@slash.cygnus.com>
 
