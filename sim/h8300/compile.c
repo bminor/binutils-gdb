@@ -26,12 +26,18 @@
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
+#endif
 #include "wait.h"
 #include "ansidecl.h"
 #include "bfd.h"
 #include "callback.h"
 #include "remote-sim.h"
+
+#ifndef SIGTRAP
+# define SIGTRAP 5
+#endif
 
 int debug;
 
@@ -1269,7 +1275,10 @@ sim_resume (sd, step, siggnal)
 	  goto next;
 
 	case O (O_SYSCALL, SB):
-	  printf ("%c", cpu.regs[2]);
+	  {
+	    char c = cpu.regs[2];
+	    sim_callback->write_stdout (sim_callback, &c, 1);
+	  }
 	  goto next;
 
 	  ONOT (O_NOT, rd = ~rd; v = 0;);
@@ -1714,9 +1723,9 @@ sim_resume (sd, step, siggnal)
       ;
       /*      if (cpu.regs[8] ) abort(); */
 
-      if (poll_count++ > 100)
+      if (--poll_count < 0)
 	{
-	  poll_count = 0;
+	  poll_count = 100;
 	  if ((*sim_callback->poll_quit) != NULL
 	      && (*sim_callback->poll_quit) (sim_callback))
 	    sim_stop (sd);
@@ -2108,7 +2117,8 @@ sim_load (sd, prog, abfd, from_tty)
   cpu.mask = memory_size - 1;
 
   if (sim_load_file (sd, myname, sim_callback, prog, prog_bfd,
-		     sim_kind == SIM_OPEN_DEBUG)
+		     sim_kind == SIM_OPEN_DEBUG,
+		     0, sim_write)
       == NULL)
     {
       /* Close the bfd if we opened it.  */

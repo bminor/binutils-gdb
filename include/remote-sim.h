@@ -121,14 +121,21 @@ void sim_close PARAMS ((SIM_DESC sd, int quitting));
    If ABFD is non-NULL, the bfd for the file has already been opened.
    The result is a return code indicating success.
 
-   Hardware simulator: A call to this function should not effect the
-   state of the processor registers.  Multiple calls to this function
-   are permitted and have an accumulative effect.
+   Hardware simulator: Normally, each program section is written into
+   memory according to that sections LMA using physical (direct)
+   addressing.  The exception being systems, such as PPC/CHRP, which
+   support more complicated program loaders.  A call to this function
+   should not effect the state of the processor registers.  Multiple
+   calls to this function are permitted and have an accumulative
+   effect.
 
    Process simulator: Calls to this function may be ignored.
 
-   FIXME: Some hardware targets, before a loaded program can be
-   executed, require the manipulation of VM registers and tables.
+   FIXME: Most hardware simulators load the image at the VMA using
+   virtual addressing.
+
+   FIXME: For some hardware targets, before a loaded program can be
+   executed, it requires the manipulation of VM registers and tables.
    Such manipulation should probably (?) occure in
    sim_create_inferior. */
 

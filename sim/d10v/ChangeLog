@@ -1,3 +1,11 @@
+Wed Oct 22 14:43:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_write_phys): New function, write to physical
+ 	instead of virtual memory.
+	
+	* wrapper.c (sim_load): Pass lma_p and sim_write_phys to
+ 	sim_load_file.
+
 Mon Oct 13 10:55:07 1997  Fred Fish  <cygnus.com>
 
 	* simops.c (OP_6A01): Change OP_POSTDEC to OP_POSTINC and move

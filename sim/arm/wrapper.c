@@ -175,11 +175,16 @@ sim_resume (sd, step, siggnal)
 }
 
 SIM_RC
-sim_create_inferior (sd, argv, env)
+sim_create_inferior (sd, abfd, argv, env)
      SIM_DESC sd;
+     struct _bfd *abfd;
      char **argv;
      char **env;
 {
+  if (abfd != NULL)
+    ARMul_SetPC (state, bfd_get_start_address (abfd));
+  else
+    ARMul_SetPC (state, 0); /* ??? */
   return SIM_RC_OK;
 }
 
@@ -290,10 +295,10 @@ sim_load (sd, prog, abfd, from_tty)
   bfd *prog_bfd;
 
   prog_bfd = sim_load_file (sd, myname, sim_callback, prog, abfd,
-			    sim_kind == SIM_OPEN_DEBUG);
+			    sim_kind == SIM_OPEN_DEBUG,
+			    0, sim_write);
   if (prog_bfd == NULL)
     return SIM_RC_FAIL;
-  ARMul_SetPC (state, bfd_get_start_address (prog_bfd));
   if (abfd == NULL)
     bfd_close (prog_bfd);
   return SIM_RC_OK;

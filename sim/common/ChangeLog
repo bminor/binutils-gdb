@@ -1,3 +1,10 @@
+Wed Oct 22 14:18:38 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-hload.c (sim_load): Pass lma_p==0 and do_load=sim_load.
+
+	* sim-utils.h, sim-load.c (sim_load_file): Add lma_p and do_load
+ 	arguments.
+
 Tue Oct 21 18:37:57 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* nrun.c (main): Remove useless test of name != NULL.

@@ -432,6 +432,16 @@ xfer_mem (addr, buffer, size, write)
 }
 
 
+static int
+sim_write_phys (sd, addr, buffer, size)
+     SIM_DESC sd;
+     SIM_ADDR addr;
+     unsigned char *buffer;
+     int size;
+{
+  return xfer_mem( addr, buffer, size, 1);
+}
+
 int
 sim_write (sd, addr, buffer, size)
      SIM_DESC sd;
@@ -439,6 +449,7 @@ sim_write (sd, addr, buffer, size)
      unsigned char *buffer;
      int size;
 {
+  /* FIXME: this should be performing a virtual transfer */
   return xfer_mem( addr, buffer, size, 1);
 }
 
@@ -449,6 +460,7 @@ sim_read (sd, addr, buffer, size)
      unsigned char *buffer;
      int size;
 {
+  /* FIXME: this should be performing a virtual transfer */
   return xfer_mem( addr, buffer, size, 0);
 }
 
@@ -600,6 +612,9 @@ pc_addr()
       return 0;
     }
 
+  /* Discard upper bit(s) of PC in case IMAP1 selects unified memory. */
+  pc &= (1 << UMEM_SIZE) - 1;
+
   return State.umem[imap & 0xff] + pc;
 }
 
@@ -664,7 +679,10 @@ sim_resume (sd, step, siggnal)
 	{
 	  RPT_C -= 1;
 	  if (RPT_C == 0)
-	    State.RP = 0;
+	    {
+	      State.RP = 0;
+	      PC++;
+	    }
 	  else
 	    PC = RPT_S;
 	}
@@ -926,7 +944,8 @@ sim_load (sd, prog, abfd, from_tty)
   if (prog_bfd != NULL && prog_bfd_was_opened_p)
     bfd_close (prog_bfd);
   prog_bfd = sim_load_file (sd, myname, d10v_callback, prog, abfd,
-			    sim_kind == SIM_OPEN_DEBUG);
+			    sim_kind == SIM_OPEN_DEBUG,
+			    0, sim_write_phys);
   if (prog_bfd == NULL)
     return SIM_RC_FAIL;
   prog_bfd_was_opened_p = abfd == NULL;
