@@ -289,12 +289,15 @@ m68hc11_pseudo_register_read (struct gdbarch *gdbarch,
      addressing mode.  */
   if (regno == M68HC12_HARD_PC_REGNUM)
     {
+      ULONGEST pc;
       const int regsize = TYPE_LENGTH (builtin_type_uint32);
-      CORE_ADDR pc = read_register (HARD_PC_REGNUM);
-      int page = read_register (HARD_PAGE_REGNUM);
 
+      regcache_cooked_read_unsigned (regcache, HARD_PC_REGNUM, &pc);
       if (pc >= 0x8000 && pc < 0xc000)
         {
+          ULONGEST page;
+
+          regcache_cooked_read_unsigned (regcache, HARD_PAGE_REGNUM, &page);
           pc -= 0x8000;
           pc += (page << 14);
           pc += 0x1000000;
@@ -336,12 +339,14 @@ m68hc11_pseudo_register_write (struct gdbarch *gdbarch,
       if (pc >= 0x1000000)
         {
           pc -= 0x1000000;
-          write_register (HARD_PAGE_REGNUM, (pc >> 14) & 0x0ff);
+          regcache_cooked_write_unsigned (regcache, HARD_PAGE_REGNUM,
+                                          (pc >> 14) & 0x0ff);
           pc &= 0x03fff;
-          write_register (HARD_PC_REGNUM, pc + 0x8000);
+          regcache_cooked_write_unsigned (regcache, HARD_PC_REGNUM,
+                                          pc + 0x8000);
         }
       else
-        write_register (HARD_PC_REGNUM, pc);
+        regcache_cooked_write_unsigned (regcache, HARD_PC_REGNUM, pc);
       return;
     }
   
@@ -393,9 +398,11 @@ static CORE_ADDR
 m68hc11_saved_pc_after_call (struct frame_info *frame)
 {
   CORE_ADDR addr;
-  
-  addr = read_register (HARD_SP_REGNUM) + STACK_CORRECTION;
-  addr &= 0x0ffff;
+  ULONGEST sp;
+
+  regcache_cooked_read_unsigned (current_regcache, HARD_SP_REGNUM, &sp);
+  sp += STACK_CORRECTION;
+  addr = sp & 0x0ffff;
   return read_memory_integer (addr, 2) & 0x0FFFF;
 }
 
@@ -1057,8 +1064,11 @@ m68hc11_call_dummy_address (void)
   return entry_point_address ();
 }
 
+/* Return the GDB type object for the "standard" data type
+   of data in register N.  */
+
 static struct type *
-m68hc11_register_virtual_type (int reg_nr)
+m68hc11_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
   switch (reg_nr)
     {
@@ -1086,23 +1096,21 @@ m68hc11_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 }
 
 static void
-m68hc11_store_return_value (struct type *type, char *valbuf)
+m68hc11_store_return_value (struct type *type, struct regcache *regcache,
+                            const void *valbuf)
 {
   int len;
 
   len = TYPE_LENGTH (type);
 
   /* First argument is passed in D and X registers.  */
-  if (len <= 4)
+  if (len <= 2)
+    regcache_raw_write_part (regcache, HARD_D_REGNUM, 2 - len, len, valbuf);
+  else if (len <= 4)
     {
-      LONGEST v = extract_unsigned_integer (valbuf, len);
-
-      write_register (HARD_D_REGNUM, v);
-      if (len > 2)
-        {
-          v >>= 16;
-          write_register (HARD_X_REGNUM, v);
-        }
+      regcache_raw_write_part (regcache, HARD_X_REGNUM, 4 - len,
+                               len - 2, valbuf);
+      regcache_raw_write (regcache, HARD_D_REGNUM, (char*) valbuf + (len - 2));
     }
   else
     error ("return of value > 4 is not supported.");
@@ -1166,10 +1174,12 @@ m68hc11_return_value_on_stack (struct type *type)
    the address in which a function should return its structure value,
    as a CORE_ADDR (or an expression that can be used as one).  */
 static CORE_ADDR
-m68hc11_extract_struct_value_address (char *regbuf)
+m68hc11_extract_struct_value_address (struct regcache *regcache)
 {
-  return extract_unsigned_integer (&regbuf[HARD_D_REGNUM * 2],
-				   REGISTER_RAW_SIZE (HARD_D_REGNUM));
+  char buf[M68HC11_REG_SIZE];
+
+  regcache_cooked_read (regcache, HARD_D_REGNUM, buf);
+  return extract_unsigned_integer (buf, M68HC11_REG_SIZE);
 }
 
 /* Function: push_return_address (pc)
@@ -1360,8 +1370,6 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
 
   /* Set register info.  */
   set_gdbarch_fp0_regnum (gdbarch, -1);
-  set_gdbarch_deprecated_max_register_raw_size (gdbarch, 2);
-  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 2);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, m68hc11_frame_init_saved_regs);
   set_gdbarch_frame_args_skip (gdbarch, 0);
 
@@ -1371,9 +1379,7 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_sp_regnum (gdbarch, HARD_SP_REGNUM);
   set_gdbarch_deprecated_fp_regnum (gdbarch, SOFT_FP_REGNUM);
   set_gdbarch_register_name (gdbarch, m68hc11_register_name);
-  set_gdbarch_deprecated_register_size (gdbarch, 2);
-  set_gdbarch_deprecated_register_bytes (gdbarch, M68HC11_ALL_REGS * 2);
-  set_gdbarch_deprecated_register_virtual_type (gdbarch, m68hc11_register_virtual_type);
+  set_gdbarch_register_type (gdbarch, m68hc11_register_type);
   set_gdbarch_pseudo_register_read (gdbarch, m68hc11_pseudo_register_read);
   set_gdbarch_pseudo_register_write (gdbarch, m68hc11_pseudo_register_write);
 
@@ -1387,8 +1393,8 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_return_value_on_stack (gdbarch, m68hc11_return_value_on_stack);
 
   set_gdbarch_deprecated_store_struct_return (gdbarch, m68hc11_store_struct_return);
-  set_gdbarch_deprecated_store_return_value (gdbarch, m68hc11_store_return_value);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, m68hc11_extract_struct_value_address);
+  set_gdbarch_store_return_value (gdbarch, m68hc11_store_return_value);
+  set_gdbarch_extract_struct_value_address (gdbarch, m68hc11_extract_struct_value_address);
 
   set_gdbarch_deprecated_frame_chain (gdbarch, m68hc11_frame_chain);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, m68hc11_frame_saved_pc);
