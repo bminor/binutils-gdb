@@ -1995,7 +1995,8 @@ bfd_section_from_r_symndx (bfd *abfd,
     }
   cache->indx[ent] = r_symndx;
   cache->sec[ent] = sec;
-  if (isym.st_shndx < SHN_LORESERVE || isym.st_shndx > SHN_HIRESERVE)
+  if ((isym.st_shndx != SHN_UNDEF && isym.st_shndx < SHN_LORESERVE)
+      || isym.st_shndx > SHN_HIRESERVE)
     {
       asection *s;
       s = bfd_section_from_elf_index (abfd, isym.st_shndx);
