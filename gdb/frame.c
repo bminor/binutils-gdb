@@ -986,8 +986,9 @@ get_prev_frame (struct frame_info *next_frame)
      to require INIT_EXTRA_FRAME_INFO before they can do
      INIT_FRAME_PC.  Phoo.
 
-     We shouldn't need INIT_FRAME_PC_FIRST to add more complication to
-     an already overcomplicated part of GDB.  gnu@cygnus.com, 15Sep92.
+     We shouldn't need DEPRECATED_INIT_FRAME_PC_FIRST to add more
+     complication to an already overcomplicated part of GDB.
+     gnu@cygnus.com, 15Sep92.
 
      Assuming that some machines need INIT_FRAME_PC after
      INIT_EXTRA_FRAME_INFO, one possible scheme:
@@ -1040,7 +1041,8 @@ get_prev_frame (struct frame_info *next_frame)
      FRAME_SAVED_PC() is being superseed by frame_pc_unwind() and that
      function does have somewhere to cache that PC value.  */
 
-  INIT_FRAME_PC_FIRST (fromleaf, prev);
+  if (DEPRECATED_INIT_FRAME_PC_FIRST_P ())
+    DEPRECATED_INIT_FRAME_PC_FIRST (fromleaf, prev);
 
   if (INIT_EXTRA_FRAME_INFO_P ())
     INIT_EXTRA_FRAME_INFO (fromleaf, prev);

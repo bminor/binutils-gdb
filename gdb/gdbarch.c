@@ -195,7 +195,7 @@ struct gdbarch
   int call_dummy_stack_adjust_p;
   int call_dummy_stack_adjust;
   gdbarch_fix_call_dummy_ftype *fix_call_dummy;
-  gdbarch_init_frame_pc_first_ftype *init_frame_pc_first;
+  gdbarch_deprecated_init_frame_pc_first_ftype *deprecated_init_frame_pc_first;
   gdbarch_init_frame_pc_ftype *init_frame_pc;
   int believe_pcc_promotion;
   int believe_pcc_promotion_type;
@@ -533,7 +533,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->call_dummy_words = legacy_call_dummy_words;
   current_gdbarch->sizeof_call_dummy_words = legacy_sizeof_call_dummy_words;
   current_gdbarch->call_dummy_stack_adjust_p = -1;
-  current_gdbarch->init_frame_pc_first = init_frame_pc_noop;
   current_gdbarch->init_frame_pc = init_frame_pc_default;
   current_gdbarch->coerce_float_to_double = default_coerce_float_to_double;
   current_gdbarch->register_convertible = generic_register_convertible_not;
@@ -712,7 +711,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->fix_call_dummy == 0))
     fprintf_unfiltered (log, "\n\tfix_call_dummy");
-  /* Skip verify of init_frame_pc_first, invalid_p == 0 */
+  /* Skip verify of deprecated_init_frame_pc_first, has predicate */
   /* Skip verify of init_frame_pc, invalid_p == 0 */
   /* Skip verify of coerce_float_to_double, invalid_p == 0 */
   /* Skip verify of get_saved_register, has predicate */
@@ -1193,6 +1192,29 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->deprecated_extract_struct_value_address
                         /*DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS ()*/);
 #endif
+#ifdef DEPRECATED_INIT_FRAME_PC_FIRST_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_INIT_FRAME_PC_FIRST_P()",
+                      XSTRING (DEPRECATED_INIT_FRAME_PC_FIRST_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_INIT_FRAME_PC_FIRST_P() = %d\n",
+                      DEPRECATED_INIT_FRAME_PC_FIRST_P ());
+#endif
+#ifdef DEPRECATED_INIT_FRAME_PC_FIRST
+#if GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_INIT_FRAME_PC_FIRST(fromleaf, prev)",
+                      XSTRING (DEPRECATED_INIT_FRAME_PC_FIRST (fromleaf, prev)));
+#endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DEPRECATED_INIT_FRAME_PC_FIRST = 0x%08lx\n",
+                        (long) current_gdbarch->deprecated_init_frame_pc_first
+                        /*DEPRECATED_INIT_FRAME_PC_FIRST ()*/);
+#endif
 #ifdef DEPRECATED_PC_IN_CALL_DUMMY_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1571,20 +1593,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: INIT_FRAME_PC = 0x%08lx\n",
                         (long) current_gdbarch->init_frame_pc
                         /*INIT_FRAME_PC ()*/);
-#endif
-#ifdef INIT_FRAME_PC_FIRST
-#if GDB_MULTI_ARCH
-  /* Macro might contain `[{}]' when not multi-arch */
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "INIT_FRAME_PC_FIRST(fromleaf, prev)",
-                      XSTRING (INIT_FRAME_PC_FIRST (fromleaf, prev)));
-#endif
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: INIT_FRAME_PC_FIRST = 0x%08lx\n",
-                        (long) current_gdbarch->init_frame_pc_first
-                        /*INIT_FRAME_PC_FIRST ()*/);
 #endif
 #ifdef INNER_THAN
   fprintf_unfiltered (file,
@@ -3776,23 +3784,30 @@ set_gdbarch_fix_call_dummy (struct gdbarch *gdbarch,
   gdbarch->fix_call_dummy = fix_call_dummy;
 }
 
-void
-gdbarch_init_frame_pc_first (struct gdbarch *gdbarch, int fromleaf, struct frame_info *prev)
+int
+gdbarch_deprecated_init_frame_pc_first_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->init_frame_pc_first == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_init_frame_pc_first invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_init_frame_pc_first called\n");
-  gdbarch->init_frame_pc_first (fromleaf, prev);
+  return gdbarch->deprecated_init_frame_pc_first != 0;
 }
 
 void
-set_gdbarch_init_frame_pc_first (struct gdbarch *gdbarch,
-                                 gdbarch_init_frame_pc_first_ftype init_frame_pc_first)
+gdbarch_deprecated_init_frame_pc_first (struct gdbarch *gdbarch, int fromleaf, struct frame_info *prev)
 {
-  gdbarch->init_frame_pc_first = init_frame_pc_first;
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->deprecated_init_frame_pc_first == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_deprecated_init_frame_pc_first invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_init_frame_pc_first called\n");
+  gdbarch->deprecated_init_frame_pc_first (fromleaf, prev);
+}
+
+void
+set_gdbarch_deprecated_init_frame_pc_first (struct gdbarch *gdbarch,
+                                            gdbarch_deprecated_init_frame_pc_first_ftype deprecated_init_frame_pc_first)
+{
+  gdbarch->deprecated_init_frame_pc_first = deprecated_init_frame_pc_first;
 }
 
 void

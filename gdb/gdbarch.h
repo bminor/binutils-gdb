@@ -1178,20 +1178,40 @@ extern void set_gdbarch_fix_call_dummy (struct gdbarch *gdbarch, gdbarch_fix_cal
 #endif
 #endif
 
-/* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (INIT_FRAME_PC_FIRST)
-#define INIT_FRAME_PC_FIRST(fromleaf, prev) (init_frame_pc_noop (fromleaf, prev))
+#if defined (DEPRECATED_INIT_FRAME_PC_FIRST)
+/* Legacy for systems yet to multi-arch DEPRECATED_INIT_FRAME_PC_FIRST */
+#if !defined (DEPRECATED_INIT_FRAME_PC_FIRST_P)
+#define DEPRECATED_INIT_FRAME_PC_FIRST_P() (1)
+#endif
 #endif
 
-typedef void (gdbarch_init_frame_pc_first_ftype) (int fromleaf, struct frame_info *prev);
-extern void gdbarch_init_frame_pc_first (struct gdbarch *gdbarch, int fromleaf, struct frame_info *prev);
-extern void set_gdbarch_init_frame_pc_first (struct gdbarch *gdbarch, gdbarch_init_frame_pc_first_ftype *init_frame_pc_first);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (INIT_FRAME_PC_FIRST)
-#error "Non multi-arch definition of INIT_FRAME_PC_FIRST"
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_INIT_FRAME_PC_FIRST_P)
+#define DEPRECATED_INIT_FRAME_PC_FIRST_P() (0)
+#endif
+
+extern int gdbarch_deprecated_init_frame_pc_first_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_INIT_FRAME_PC_FIRST_P)
+#error "Non multi-arch definition of DEPRECATED_INIT_FRAME_PC_FIRST"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_INIT_FRAME_PC_FIRST_P)
+#define DEPRECATED_INIT_FRAME_PC_FIRST_P() (gdbarch_deprecated_init_frame_pc_first_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_INIT_FRAME_PC_FIRST)
+#define DEPRECATED_INIT_FRAME_PC_FIRST(fromleaf, prev) (internal_error (__FILE__, __LINE__, "DEPRECATED_INIT_FRAME_PC_FIRST"), 0)
+#endif
+
+typedef void (gdbarch_deprecated_init_frame_pc_first_ftype) (int fromleaf, struct frame_info *prev);
+extern void gdbarch_deprecated_init_frame_pc_first (struct gdbarch *gdbarch, int fromleaf, struct frame_info *prev);
+extern void set_gdbarch_deprecated_init_frame_pc_first (struct gdbarch *gdbarch, gdbarch_deprecated_init_frame_pc_first_ftype *deprecated_init_frame_pc_first);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_INIT_FRAME_PC_FIRST)
+#error "Non multi-arch definition of DEPRECATED_INIT_FRAME_PC_FIRST"
 #endif
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (INIT_FRAME_PC_FIRST)
-#define INIT_FRAME_PC_FIRST(fromleaf, prev) (gdbarch_init_frame_pc_first (current_gdbarch, fromleaf, prev))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_INIT_FRAME_PC_FIRST)
+#define DEPRECATED_INIT_FRAME_PC_FIRST(fromleaf, prev) (gdbarch_deprecated_init_frame_pc_first (current_gdbarch, fromleaf, prev))
 #endif
 #endif
 

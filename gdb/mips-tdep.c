@@ -5964,8 +5964,8 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_addr_bits_remove (gdbarch, mips_addr_bits_remove);
 
   /* There's a mess in stack frame creation.  See comments in
-     blockframe.c near reference to INIT_FRAME_PC_FIRST.  */
-  set_gdbarch_init_frame_pc_first (gdbarch, mips_init_frame_pc_first);
+     blockframe.c near reference to DEPRECATED_INIT_FRAME_PC_FIRST.  */
+  set_gdbarch_deprecated_init_frame_pc_first (gdbarch, mips_init_frame_pc_first);
   set_gdbarch_init_frame_pc (gdbarch, init_frame_pc_noop);
 
   /* Map debug register numbers onto internal register numbers.  */

@@ -1,3 +1,17 @@
+2002-12-06  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh (DEPRECATED_INIT_FRAME_PC_FIRST): Rename
+	INIT_FRAME_PC_FIRST.  Change to a function with predicate.  Do not
+	provide a default value.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* frame.c (get_prev_frame): Update.  Check
+	DEPRECATED_INIT_FRAME_PC_FIRST_P.
+	* s390-tdep.c (s390_gdbarch_init): Update.
+	* mips-tdep.c (mips_gdbarch_init): Update.
+	* config/sparc/tm-sparc.h (DEPRECATED_INIT_FRAME_PC_FIRST): Update.
+	* config/rs6000/tm-rs6000.h (DEPRECATED_INIT_FRAME_PC_FIRST): Update.
+	* alpha-tdep.c (alpha_gdbarch_init): Update.
+	
 2002-12-06  Elena Zannoni  <ezannoni@redhat.com>
 
 	* ia64-linux-nat.c: Include gdb_string.h.

@@ -1790,7 +1790,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_breakpoint_from_pc (gdbarch, s390_breakpoint_from_pc);
   set_gdbarch_skip_prologue (gdbarch, s390_skip_prologue);
   set_gdbarch_init_extra_frame_info (gdbarch, s390_init_extra_frame_info);
-  set_gdbarch_init_frame_pc_first (gdbarch, s390_init_frame_pc_first);
+  set_gdbarch_deprecated_init_frame_pc_first (gdbarch, s390_init_frame_pc_first);
   set_gdbarch_read_fp (gdbarch, s390_read_fp);
   /* This function that tells us whether the function invocation represented
      by FI does not have a frame on the stack associated with it.  If it

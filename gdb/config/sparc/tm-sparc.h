@@ -520,7 +520,7 @@ extern void sparc_print_extra_frame_info (struct frame_info *);
 /* INIT_EXTRA_FRAME_INFO needs the PC to detect flat frames.  */
 
 #define	INIT_FRAME_PC(FROMLEAF, PREV)	/* nothing */
-#define INIT_FRAME_PC_FIRST(FROMLEAF, PREV) \
+#define DEPRECATED_INIT_FRAME_PC_FIRST(FROMLEAF, PREV) \
   (PREV)->pc = ((FROMLEAF) ? SAVED_PC_AFTER_CALL ((PREV)->next) : \
 	      (PREV)->next ? FRAME_SAVED_PC ((PREV)->next) : read_pc ());
 
