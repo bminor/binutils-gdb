@@ -1,3 +1,8 @@
+Sat May 20 03:49:32 2000  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* Makefile.am (TARG_ENV_HFILES): Delete te-multi.h.
+	* Makefile.in: Regenerated.
+
 2000-05-19  Catherine Moore  <clm@cygnus.com>
 
 	* cgen.h (GAS_CGEN_MAX_FIXUPS): Check if already defined.

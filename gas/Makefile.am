@@ -328,7 +328,6 @@ TARG_ENV_HFILES = \
 	config/te-lynx.h \
 	config/te-mach.h \
 	config/te-macos.h \
-	config/te-multi.h \
 	config/te-nbsd.h \
 	config/te-nbsd532.h \
 	config/te-pc532mach.h \
