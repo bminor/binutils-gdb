@@ -1,3 +1,7 @@
+2003-01-02  Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in: Remove obsolete code.
+
 2002-11-20  Daniel Jacobowitz  <drow@mvista.com>
 
 	* linux-s390-low.c (s390_regmap): Check GPR_SIZE instead of
