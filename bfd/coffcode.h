@@ -852,11 +852,13 @@ coff_new_section_hook (abfd, section)
   /* The .stab section must be aligned to 2**2 at most, because
      otherwise there may be gaps in the section which gdb will not
      know how to interpret.  Examining the section name is a hack, but
-     that is also how gdb locates the section.  We also align the
-     .stabstr section this way for backward compatibility, although I
-     believe it would work anyhow.  */
+     that is also how gdb locates the section.
+     We need to handle the .ctors and .dtors sections similarly, to
+     avoid introducing null words in the tables.  */
   if (COFF_DEFAULT_SECTION_ALIGNMENT_POWER > 2
-      && (strncmp (section->name, ".stab", 5) == 0))
+      && (strncmp (section->name, ".stab", 5) == 0
+	  || strcmp (section->name, ".ctors") == 0
+	  || strcmp (section->name, ".dtors") == 0))
     section->alignment_power = 2;
 
   return true;
