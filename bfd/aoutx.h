@@ -156,47 +156,45 @@ DESCRIPTION
 
 reloc_howto_type howto_table_ext[] = 
 {
-/*      type rightshift size bitsize pc_  bit absol compl  spec  name partial_ src_ dst_    pcrel_
-                                     rela pos ute   ain_on ial_       inplace  mask mask    offset
-                                     tive           _overf fn                                       */
-  HOWTO(RELOC_8,      0,  0,  	8,  false, 0, true,  true,0,"8",        false, 0,0x000000ff, false),
-  HOWTO(RELOC_16,     0,  1, 	16, false, 0, true,  true,0,"16",       false, 0,0x0000ffff, false),
-  HOWTO(RELOC_32,     0,  2, 	32, false, 0, true,  true,0,"32",       false, 0,0xffffffff, false),
-  HOWTO(RELOC_DISP8,  0,  0, 	8,  true,  0, false, true,0,"DISP8", 	false, 0,0x000000ff, false),
-  HOWTO(RELOC_DISP16, 0,  1, 	16, true,  0, false, true,0,"DISP16", 	false, 0,0x0000ffff, false),
-  HOWTO(RELOC_DISP32, 0,  2, 	32, true,  0, false, true,0,"DISP32", 	false, 0,0xffffffff, false),
-  HOWTO(RELOC_WDISP30,2,  2, 	30, true,  0, false, true,0,"WDISP30", 	false, 0,0x3fffffff, false),
-  HOWTO(RELOC_WDISP22,2,  2, 	22, true,  0, false, true,0,"WDISP22", 	false, 0,0x003fffff, false),
-  HOWTO(RELOC_HI22,   10, 2, 	22, false, 0, false, true,0,"HI22",	false, 0,0x003fffff, false),
-  HOWTO(RELOC_22,     0,  2, 	22, false, 0, false, true,0,"22",       false, 0,0x003fffff, false),
-  HOWTO(RELOC_13,     0,  2, 	13, false, 0, false, true,0,"13",       false, 0,0x00001fff, false),
-  HOWTO(RELOC_LO10,   0,  2, 	10, false, 0, false, true,0,"LO10",     false, 0,0x000003ff, false),
-  HOWTO(RELOC_SFA_BASE,0, 2, 	32, false, 0, false, true,0,"SFA_BASE", false, 0,0xffffffff, false),
-  HOWTO(RELOC_SFA_OFF13,0,2, 	32, false, 0, false, true,0,"SFA_OFF13",false, 0,0xffffffff, false),
-  HOWTO(RELOC_BASE10, 0,  2, 	16, false, 0, false, true,0,"BASE10",   false, 0,0x0000ffff, false),
-  HOWTO(RELOC_BASE13, 0,  2,	13, false, 0, false, true,0,"BASE13",   false, 0,0x00001fff, false),
-  HOWTO(RELOC_BASE22, 0,  2,	0,  false, 0, false, true,0,"BASE22",   false, 0,0x00000000, false),
-  HOWTO(RELOC_PC10,   0,  2,	10, false, 0, false, true,0,"PC10",	false, 0,0x000003ff, false),
-  HOWTO(RELOC_PC22,   0,  2,	22, false, 0, false, true,0,"PC22",	false, 0,0x003fffff, false),
-  HOWTO(RELOC_JMP_TBL,0,  2,	32, false, 0, false, true,0,"JMP_TBL",	false, 0,0xffffffff, false),
-  HOWTO(RELOC_SEGOFF16,0, 2,	0,  false, 0, false, true,0,"SEGOFF16",	false, 0,0x00000000, false),
-  HOWTO(RELOC_GLOB_DAT,0, 2,	0,  false, 0, false, true,0,"GLOB_DAT",	false, 0,0x00000000, false),
-  HOWTO(RELOC_JMP_SLOT,0, 2,	0,  false, 0, false, true,0,"JMP_SLOT",	false, 0,0x00000000, false),
-  HOWTO(RELOC_RELATIVE,0, 2,	0,  false, 0, false, true,0,"RELATIVE",	false, 0,0x00000000, false),
+  /* type           rs   size bsz  pcrel bitpos ovrf sf name    part_inpl   readmask  setmask  pcdone */
+  HOWTO(RELOC_8,      0,  0,  	8,  false, 0, complain_overflow_bitfield,0,"8",        false, 0,0x000000ff, false),
+  HOWTO(RELOC_16,     0,  1, 	16, false, 0, complain_overflow_bitfield,0,"16",       false, 0,0x0000ffff, false),
+  HOWTO(RELOC_32,     0,  2, 	32, false, 0, complain_overflow_bitfield,0,"32",       false, 0,0xffffffff, false),
+  HOWTO(RELOC_DISP8,  0,  0, 	8,  true,  0, complain_overflow_signed,0,"DISP8", 	false, 0,0x000000ff, false),
+  HOWTO(RELOC_DISP16, 0,  1, 	16, true,  0, complain_overflow_signed,0,"DISP16", 	false, 0,0x0000ffff, false),
+  HOWTO(RELOC_DISP32, 0,  2, 	32, true,  0, complain_overflow_signed,0,"DISP32", 	false, 0,0xffffffff, false),
+  HOWTO(RELOC_WDISP30,2,  2, 	30, true,  0, complain_overflow_signed,0,"WDISP30", 	false, 0,0x3fffffff, false),
+  HOWTO(RELOC_WDISP22,2,  2, 	22, true,  0, complain_overflow_signed,0,"WDISP22", 	false, 0,0x003fffff, false),
+  HOWTO(RELOC_HI22,   10, 2, 	22, false, 0, complain_overflow_bitfield,0,"HI22",	false, 0,0x003fffff, false),
+  HOWTO(RELOC_22,     0,  2, 	22, false, 0, complain_overflow_bitfield,0,"22",       false, 0,0x003fffff, false),
+  HOWTO(RELOC_13,     0,  2, 	13, false, 0, complain_overflow_bitfield,0,"13",       false, 0,0x00001fff, false),
+  HOWTO(RELOC_LO10,   0,  2, 	10, false, 0, complain_overflow_dont,0,"LO10",     false, 0,0x000003ff, false),
+  HOWTO(RELOC_SFA_BASE,0, 2, 	32, false, 0, complain_overflow_bitfield,0,"SFA_BASE", false, 0,0xffffffff, false),
+  HOWTO(RELOC_SFA_OFF13,0,2, 	32, false, 0, complain_overflow_bitfield,0,"SFA_OFF13",false, 0,0xffffffff, false),
+  HOWTO(RELOC_BASE10, 0,  2, 	16, false, 0, complain_overflow_bitfield,0,"BASE10",   false, 0,0x0000ffff, false),
+  HOWTO(RELOC_BASE13, 0,  2,	13, false, 0, complain_overflow_bitfield,0,"BASE13",   false, 0,0x00001fff, false),
+  HOWTO(RELOC_BASE22, 0,  2,	0,  false, 0, complain_overflow_bitfield,0,"BASE22",   false, 0,0x00000000, false),
+  HOWTO(RELOC_PC10,   0,  2,	10, false, 0, complain_overflow_bitfield,0,"PC10",	false, 0,0x000003ff, false),
+  HOWTO(RELOC_PC22,   0,  2,	22, false, 0, complain_overflow_bitfield,0,"PC22",	false, 0,0x003fffff, false),
+  HOWTO(RELOC_JMP_TBL,0,  2,	32, false, 0, complain_overflow_bitfield,0,"JMP_TBL",	false, 0,0xffffffff, false),
+  HOWTO(RELOC_SEGOFF16,0, 2,	0,  false, 0, complain_overflow_bitfield,0,"SEGOFF16",	false, 0,0x00000000, false),
+  HOWTO(RELOC_GLOB_DAT,0, 2,	0,  false, 0, complain_overflow_bitfield,0,"GLOB_DAT",	false, 0,0x00000000, false),
+  HOWTO(RELOC_JMP_SLOT,0, 2,	0,  false, 0, complain_overflow_bitfield,0,"JMP_SLOT",	false, 0,0x00000000, false),
+  HOWTO(RELOC_RELATIVE,0, 2,	0,  false, 0, complain_overflow_bitfield,0,"RELATIVE",	false, 0,0x00000000, false),
 };
 
 /* Convert standard reloc records to "arelent" format (incl byte swap).  */
 
 reloc_howto_type howto_table_std[] = {
-  /* type           rs   size bsz  pcrel bitpos  abs ovrf sf name    part_inpl   readmask  setmask  pcdone */
-HOWTO( 0,	       0,  0,  	8,  false, 0, true,  true,0,"8",	true, 0x000000ff,0x000000ff, false),
-HOWTO( 1,	       0,  1, 	16, false, 0, true,  true,0,"16",	true, 0x0000ffff,0x0000ffff, false),
-HOWTO( 2,	       0,  2, 	32, false, 0, true,  true,0,"32",	true, 0xffffffff,0xffffffff, false),
-HOWTO( 3,	       0,  3, 	64, false, 0, true,  true,0,"64",       true, 0xdeaddead,0xdeaddead, false),
-HOWTO( 4,	       0,  0, 	8,  true,  0, false, true,0,"DISP8",    true, 0x000000ff,0x000000ff, false),
-HOWTO( 5,	       0,  1, 	16, true,  0, false, true,0,"DISP16",   true, 0x0000ffff,0x0000ffff, false),
-HOWTO( 6,	       0,  2, 	32, true,  0, false, true,0,"DISP32",   true, 0xffffffff,0xffffffff, false),
-HOWTO( 7,	       0,  3, 	64, true,  0, false, true,0,"DISP64",   true, 0xfeedface,0xfeedface, false),
+  /* type           rs   size bsz  pcrel bitpos ovrf sf name    part_inpl   readmask  setmask  pcdone */
+HOWTO( 0,	       0,  0,  	8,  false, 0, complain_overflow_bitfield,0,"8",	true, 0x000000ff,0x000000ff, false),
+HOWTO( 1,	       0,  1, 	16, false, 0, complain_overflow_bitfield,0,"16",	true, 0x0000ffff,0x0000ffff, false),
+HOWTO( 2,	       0,  2, 	32, false, 0, complain_overflow_bitfield,0,"32",	true, 0xffffffff,0xffffffff, false),
+HOWTO( 3,	       0,  3, 	64, false, 0, complain_overflow_bitfield,0,"64",       true, 0xdeaddead,0xdeaddead, false),
+HOWTO( 4,	       0,  0, 	8,  true,  0, complain_overflow_signed,0,"DISP8",    true, 0x000000ff,0x000000ff, false),
+HOWTO( 5,	       0,  1, 	16, true,  0, complain_overflow_signed,0,"DISP16",   true, 0x0000ffff,0x0000ffff, false),
+HOWTO( 6,	       0,  2, 	32, true,  0, complain_overflow_signed,0,"DISP32",   true, 0xffffffff,0xffffffff, false),
+HOWTO( 7,	       0,  3, 	64, true,  0, complain_overflow_signed,0,"DISP64",   true, 0xfeedface,0xfeedface, false),
 };
 
 CONST struct reloc_howto_struct *
@@ -405,8 +403,8 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
   /* The default symbol entry size is that of traditional Unix. */
   obj_symbol_entry_size (abfd) = EXTERNAL_NLIST_SIZE;
 
-  /* create the sections.  This is raunchy, but bfd_close wants to reclaim
-     them */
+  /* Create the sections.  This is raunchy, but bfd_close wants to reclaim
+     them.  */
 
   obj_textsec (abfd) = bfd_make_section_old_way (abfd, ".text");
   obj_datasec (abfd) = bfd_make_section_old_way (abfd, ".data");
@@ -535,7 +533,7 @@ DEFUN(NAME(aout,mkobject),(abfd),
   bfd_error = system_call_error;
 
   /* Use an intermediate variable for clarity */
-  rawptr = (struct aout_data_struct  *)bfd_zalloc (abfd, sizeof (struct aout_data_struct ));
+  rawptr = (struct aout_data_struct *)bfd_zalloc (abfd, sizeof (struct aout_data_struct ));
   
   if (rawptr == NULL) {
     bfd_error = no_memory;
@@ -653,7 +651,9 @@ DEFUN(NAME(aout,set_arch_mach),(abfd, arch, machine),
       enum bfd_architecture arch AND
       unsigned long machine)
 {
-  bfd_default_set_arch_mach(abfd, arch, machine);
+  if (! bfd_default_set_arch_mach (abfd, arch, machine))
+    return false;
+
   if (arch != bfd_arch_unknown &&
       NAME(aout,machine_type) (arch, machine) == M_UNKNOWN)
     return false;		/* We can't represent this type */
@@ -707,7 +707,8 @@ DEFUN (NAME (aout,adjust_sizes_and_vmas), (abfd, text_size, text_end),
   if (adata(abfd).magic == undecided_magic)
     {
       if (abfd->flags & D_PAGED)
-	/* whether or not WP_TEXT is set */
+	/* Whether or not WP_TEXT is set -- let D_PAGED override.  */
+	/* @@ What about QMAGIC?  */
 	adata(abfd).magic = z_magic;
       else if (abfd->flags & WP_TEXT)
 	adata(abfd).magic = n_magic;
@@ -940,12 +941,12 @@ DEFUN(NAME(aout,new_section_hook),(abfd, newsect),
 }
 
 boolean
-  DEFUN(NAME(aout,set_section_contents),(abfd, section, location, offset, count),
-	bfd *abfd AND
-	sec_ptr section AND
-	PTR location AND
-	file_ptr offset AND
-	bfd_size_type count)
+DEFUN(NAME(aout,set_section_contents),(abfd, section, location, offset, count),
+      bfd *abfd AND
+      sec_ptr section AND
+      PTR location AND
+      file_ptr offset AND
+      bfd_size_type count)
 {
   file_ptr text_end;
   bfd_size_type text_size;
@@ -1579,15 +1580,10 @@ log2 (num)
      int num;
 {
   double d = num;
-#if defined (__i386__) && __GNUC__ >= 2
-  asm ("fyl2x" : "=t" (d) : "0" (d), "u" (1.0));
-  return d;
-#else
   int n = 0;
   while (d >= 2.0)
     n++, d /= 2.0;
   return ((d > 1.41) ? 0.5 : 0) + n;
-#endif
 }
 #endif
 

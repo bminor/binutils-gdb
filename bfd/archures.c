@@ -36,7 +36,7 @@ SECTION
 	The arch information is provided by each architecture package.
 	The set of default architectures is selected by the #define
 	<<SELECT_ARCHITECTURES>>.  This is normally set up in the
-	<<hosts/*.h>> file of your choice.  If the name is not
+	<<config/target.mt>> file of your choice.  If the name is not
 	defined, then all the architectures supported are included. 
 
 	When BFD starts up, all the architectures are called with an
@@ -95,11 +95,16 @@ DESCRIPTION
 .  bfd_arch_m88k,      {* Motorola 88xxx *}
 .  bfd_arch_pyramid,   {* Pyramid Technology *}
 .  bfd_arch_h8300,     {* Hitachi H8/300 *}
+.#define bfd_mach_h8300   1
+.#define bfd_mach_h8300h  2
 .  bfd_arch_rs6000,    {* IBM RS/6000 *}
 .  bfd_arch_hppa,      {* HP PA RISC *}
 .  bfd_arch_z8k,       {* Zilog Z8000 *}
 .#define bfd_mach_z8001		1
 .#define bfd_mach_z8002		2
+.  bfd_arch_h8500,     {* Hitachi H8/500 *}
+.  bfd_arch_sh,        {* Hitachi SH *}
+.  bfd_arch_alpha,     {* Dec Alpha *}
 .  bfd_arch_last
 .  };
 
@@ -252,7 +257,7 @@ DESCRIPTION
 
 bfd_arch_info_type bfd_default_arch_struct =
 {
-    32,32,8,bfd_arch_unknown,0,"unknown","unknown",1,true,
+    32,32,8,bfd_arch_unknown,0,"unknown","unknown",2,true,
     bfd_default_compatible,
     bfd_default_scan, 
     0,
@@ -314,7 +319,7 @@ boolean DEFUN(bfd_default_set_arch_mach,(abfd, arch, mach),
     if (found==false) {
       /*looked for it and it wasn't there, so put in the default */
       old_ptr = &bfd_default_arch_struct;
-
+      bfd_error = bad_value;
     }
   }
   else {
@@ -403,6 +408,9 @@ unsigned int DEFUN(bfd_arch_bits_per_address, (abfd), bfd *abfd)
 
 
 extern void bfd_h8300_arch PARAMS ((void));
+extern void bfd_sh_arch PARAMS ((void));
+extern void bfd_h8500_arch PARAMS ((void));
+extern void bfd_alpha_arch PARAMS ((void));
 extern void bfd_i960_arch PARAMS ((void));
 extern void bfd_empty_arch PARAMS ((void));
 extern void bfd_sparc_arch PARAMS ((void));
@@ -422,19 +430,22 @@ static void (*archures_init_table[]) PARAMS ((void)) =
 #ifdef SELECT_ARCHITECTURES
   SELECT_ARCHITECTURES,
 #else
-  bfd_sparc_arch,
   bfd_a29k_arch,
-  bfd_mips_arch,
+  bfd_alpha_arch,
   bfd_h8300_arch,
+  bfd_h8500_arch,
+  bfd_hppa_arch,
   bfd_i386_arch,
-  bfd_m88k_arch,
   bfd_i960_arch,
   bfd_m68k_arch,
-  bfd_vax_arch,
+  bfd_m88k_arch,
+  bfd_mips_arch,
   bfd_rs6000_arch,
-  bfd_hppa_arch,
-  bfd_z8k_arch,
+  bfd_sh_arch,
+  bfd_sparc_arch,
+  bfd_vax_arch,
   bfd_we32k_arch,
+  bfd_z8k_arch,
 #endif
   0
   };
@@ -570,6 +581,14 @@ CONST char *string)
 
     switch (number) 
     {
+     case 300:
+      arch = bfd_arch_h8300;
+      break;
+
+     case 500:
+      arch = bfd_arch_h8500;
+      break;
+
       case 68010:
       case 68020:
       case 68030:

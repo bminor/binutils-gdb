@@ -1,3 +1,10 @@
+Tue Aug 17 15:19:41 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* archures.c (bfd_default_set_arch_mach): Set bfd_error on
+	failure.
+	* aoutx.h (NAME(aout,set_arch_mach)): Check return value of
+	bfd_default_set_arch_mach.
+
 Tue Aug 17 09:42:16 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* config.bfd (cpu): Extract from canonical name with sed.
