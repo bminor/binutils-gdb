@@ -1,3 +1,8 @@
+Mon Nov 11 14:12:06 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.base/funcargs.c: Use cast rather than "UL" suffix to
+	force argument to an unsigned long type.
+
 Mon Nov 11 10:27:55 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.c++/inherit.exp (test_ptype_si): Fix tagless struct ptype
