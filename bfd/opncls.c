@@ -405,7 +405,7 @@ static file_ptr
 opncls_bread (struct bfd *abfd, void *buf, file_ptr nbytes)
 {
   struct opncls *vec = abfd->iostream;
-  file_ptr nread = vec->pread (abfd, vec->stream, buf, nbytes, vec->where);
+  file_ptr nread = (vec->pread) (abfd, vec->stream, buf, nbytes, vec->where);
   if (nread < 0)
     return nread;
   vec->where += nread;
@@ -428,7 +428,7 @@ opncls_bclose (struct bfd *abfd)
      free it.  */
   int status = 0;
   if (vec->close != NULL)
-    status = vec->close (abfd, vec->stream);
+    status = (vec->close) (abfd, vec->stream);
   abfd->iostream = NULL;
   return status;
 }
