@@ -1,3 +1,12 @@
+start-sanitize-sky
+Fri Jul 24 09:13:46 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-dvp.c (assemble_vif): Make label at start of overlay
+	a local label.
+	(create_vuoverlay_section): Put __start_ label at start of overlay
+	for gdb.
+
+end-sanitize-sky
 Thu Jul 23 13:19:50 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10300.c (md_assemble): Make sure "errmsg" has a non-NULL
