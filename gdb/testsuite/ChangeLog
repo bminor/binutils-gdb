@@ -1,4 +1,11 @@
+Mon Jan  3 11:35:26 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* configure.in (*-*-lynxos*): Add stabs tests.
+
 Wed Dec  1 21:54:05 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gdb.stabs/hppa.sed: Only lables should ever start in column zero,
+	so insert a tab before any assembler directive in column zero.
 
 	* gdb.disasm/hppa.exp (all_fpu_memory_tests): Test FP quadword
 	stores.

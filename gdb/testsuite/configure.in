@@ -58,6 +58,7 @@ rs6000-*-aix*)		configdirs="${configdirs} ${stabsdirs}" ;;
 *-*-bsd*)		configdirs="${configdirs} ${stabsdirs}" ;;
 *-*-go32*)		configdirs="${configdirs} ${stabsdirs}" ;;
 *-*-linux*)		configdirs="${configdirs} ${stabsdirs}" ;;
+*-*-lynxos*)		configdirs="${configdirs} ${stabsdirs}" ;;
 *-sun-*)		configdirs="${configdirs} ${stabsdirs}" ;;
 
 *)			if [ x${with_stabs} = xyes ]; then
