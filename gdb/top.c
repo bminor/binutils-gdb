@@ -1461,7 +1461,7 @@ quit_target (void *arg)
     }
 
   /* UDI wants this, to kill the TIP.  */
-  target_close (1);
+  target_close (&current_target, 1);
 
   /* Save the history information if it is appropriate to do so.  */
   if (write_history_p && history_filename)

@@ -672,8 +672,7 @@ push_target (struct target_ops *t)
       struct target_ops *tmp = (*cur);
       (*cur) = (*cur)->beneath;
       tmp->beneath = NULL;
-      if (tmp->to_close)
-	(tmp->to_close) (0);
+      target_close (tmp, 0);
     }
 
   /* We have removed all targets in our stratum, now add the new one.  */
@@ -698,8 +697,7 @@ unpush_target (struct target_ops *t)
   struct target_ops **cur;
   struct target_ops *tmp;
 
-  if (t->to_close)
-    t->to_close (0);		/* Let it clean up */
+  target_close (t, 0);
 
   /* Look for the specified target.  Note that we assume that a target
      can only occur once in the target stack. */
@@ -726,7 +724,7 @@ unpush_target (struct target_ops *t)
 void
 pop_target (void)
 {
-  (current_target.to_close) (0);	/* Let it clean up */
+  target_close (&current_target, 0);	/* Let it clean up */
   if (unpush_target (target_stack) == 1)
     return;
 
@@ -1600,9 +1598,17 @@ debug_to_open (char *args, int from_tty)
 static void
 debug_to_close (int quitting)
 {
-  debug_target.to_close (quitting);
-
+  target_close (&debug_target, quitting);
   fprintf_unfiltered (gdb_stdlog, "target_close (%d)\n", quitting);
+}
+
+void
+target_close (struct target_ops *targ, int quitting)
+{
+  if (targ->to_xclose != NULL)
+    targ->to_xclose (targ, quitting);
+  else if (targ->to_close != NULL)
+    targ->to_close (quitting);
 }
 
 static void

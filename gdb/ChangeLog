@@ -1,3 +1,15 @@
+2003-10-22  Andrew Cagney  <cagney@redhat.com>
+
+	* target.c (target_close): New function.
+	(debug_to_close): Use "target_close".
+	(push_target): Use "target_close".
+	(unpush_target): Use "target_close".
+	(pop_target): Use "target_close".
+	* target.h (struct target_ops): Add "to_xclose".
+	(target_open): Delete macro.  Move comment to "to_open".
+	(target_close): Replace macro with function that takes a target.
+	* top.c (quit_target): Pass "current_target" to "target_close".
+
 2003-10-21  Elena Zannoni  <ezannoni@redhat.com>
 
 	* minsyms.c (lookup_minimal_symbol_text): Remove unused parameter.

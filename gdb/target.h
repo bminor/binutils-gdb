@@ -266,7 +266,15 @@ struct target_ops
     char *to_doc;		/* Documentation.  Does not include trailing
 				   newline, and starts with a one-line descrip-
 				   tion (probably similar to to_longname).  */
+    /* The open routine takes the rest of the parameters from the
+       command, and (if successful) pushes a new target onto the
+       stack.  Targets should supply this routine, if only to provide
+       an error message.  */
     void (*to_open) (char *, int);
+    /* Old targets with a static target vector provide "to_close".
+       New re-entrant targets provide "to_xclose" and that is expected
+       to xfree everything (including the "struct target_ops").  */
+    void (*to_xclose) (struct target_ops *targ, int quitting);
     void (*to_close) (int);
     void (*to_attach) (char *, int);
     void (*to_post_attach) (int);
@@ -413,26 +421,16 @@ extern struct target_ops current_target;
 #define	target_shortname	(current_target.to_shortname)
 #define	target_longname		(current_target.to_longname)
 
-/* The open routine takes the rest of the parameters from the command,
-   and (if successful) pushes a new target onto the stack.
-   Targets should supply this routine, if only to provide an error message.  */
+/* Does whatever cleanup is required for a target that we are no
+   longer going to be calling.  QUITTING indicates that GDB is exiting
+   and should not get hung on an error (otherwise it is important to
+   perform clean termination, even if it takes a while).  This routine
+   is automatically always called when popping the target off the
+   target stack (to_beneath is undefined).  Closing file descriptors
+   and freeing all memory allocated memory are typical things it
+   should do.  */
 
-#define	target_open(name, from_tty)					\
-  do {									\
-    dcache_invalidate (target_dcache);					\
-    (*current_target.to_open) (name, from_tty);				\
-  } while (0)
-
-/* Does whatever cleanup is required for a target that we are no longer
-   going to be calling.  Argument says whether we are quitting gdb and
-   should not get hung in case of errors, or whether we want a clean
-   termination even if it takes a while.  This routine is automatically
-   always called just before a routine is popped off the target stack.
-   Closing file descriptors and freeing memory are typical things it should
-   do.  */
-
-#define	target_close(quitting)	\
-     (*current_target.to_close) (quitting)
+void target_close (struct target_ops *targ, int quitting);
 
 /* Attaches to a process on the target side.  Arguments are as passed
    to the `attach' command by the user.  This routine can be called
