@@ -92,9 +92,6 @@ static void mangle_relocs PARAMS ((bfd *, asection *, arelent **,
 static void i386_mangle_relocs PARAMS ((bfd *, asection *, arelent **,
 					bfd_size_type *, char *,
 					bfd_size_type));
-static void sparc_mangle_relocs PARAMS ((bfd *, asection *, arelent **,
-					bfd_size_type *, char *,
-					bfd_size_type));
 
 /* The main routine.  */
 

@@ -1,3 +1,13 @@
+Wed Nov 17 17:38:58 1993  Sean Eric Fagan  (sef@cygnus.com)
+
+	* nlmconv.c (select_output_format): Use nlm32-sparc for
+	bfd_arch_sparc.
+
+Wed Nov 17 14:41:35 1993  Jeffrey Osier  (jeffrey@thepub.cygnus.com)
+
+        * nlmconv.1:   added man page
+	* objcopy.1:   fixed format errors
+
 Wed Nov 17 12:03:41 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* Makefile.in: Use CFLAGS as well as LDFLAGS when linking.
