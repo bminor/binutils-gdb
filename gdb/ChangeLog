@@ -1,3 +1,20 @@
+1998-10-02  Keith Seitz  <keiths@cygnus.com>
+
+	* remote.c (remote_interrupt): Rewrite to use remote_stop.
+	(remote_interrupt_twice): Remove. remote_stop now handles it.
+	(remote_stop): New function which handles interrupting the
+	remote target so that CLUI and GUI use the same core functions
+	to achieve the same goal.
+	(remote_wait): Change to handle remote_stop properly.
+	[interrupted_already]: New static global to help remote_stop.
+	[remote_ops, extended_remote_ops]: Add remote_stop for to_stop member.
+
+	* target.c: Rename static function "ignore" to "target_ignore" and
+	export it so that gdb can determin if some target vector member is
+	actually not defined. Replace all occurances of ignore.
+
+	* target.h: Export target_ignore.
+
 Fri Oct  2 03:51:48 1998  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* target.c (target_xfer_memory):  Handle requests with zero
