@@ -1,3 +1,27 @@
+2002-09-28  Andrew Cagney  <ac131313@redhat.com>
+
+	Import from mainline:
+
+	From Grace Sainsbury <graces@redhat.com>:
+	* Makefile.in (gdbtk-main.o): New target.
+	(gdb.o): New target.
+	(main_h): Define.
+	(main.o): Update dependencies.
+	(gdb$(EXEEXT)): Add gdb.o.
+	(SUBDIR_GDBTK_SRCS): Add gdbtk-main.c.
+	(SUBDIR_GDBTK_ALL, SUBDIR_GDBTK_UNINSTALL): Set.
+	(SUBDIR_GDBTK_CLEAN): Set.
+	(install-gdbtk): Install the insight binary.
+	(uninstall-gdbtk): New target.
+	(all-gdbtk, clean-gdbtk): New rule.
+	* top.c (use_windows): Default to zero.
+	* main.c: Include "main.h".
+	(main): Delete.
+	(struct captured_main_args): Delete.
+	(gdb_main): New function.
+	* main.h: New file.
+	* gdb.c: New File.
+
 2002-09-03  Andrew Cagney  <ac131313@redhat.com>
 
 	* frame.c: Include "gdb_string.h" and "builtin-regs.h".
