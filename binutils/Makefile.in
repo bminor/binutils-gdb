@@ -134,6 +134,7 @@ BFD = $(LIBDIR)/libbfd.a
 all: $(ADDL_LIBS) $(PROGS)
 
 check:
+	/bin/sh $(srcdir)/sanity.sh .
 
 info: binutils.info
 
