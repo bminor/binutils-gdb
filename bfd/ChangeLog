@@ -1,3 +1,8 @@
+Wed Feb 21 13:58:04 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-sh.c (sh_relax_delete_bytes): Correct range of R_SH_USES
+	reloc.
+
 Tue Feb 20 16:22:44 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* bfd.c (tdata): Add netbsd_core_data.
