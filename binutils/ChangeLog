@@ -1,3 +1,8 @@
+2003-06-03  Elias Athanasopoulos  <elathan@phys.uoa.gr>
+
+	* NEWS: Document the new BSD/POSIX single-character mapping for
+	.comment/.note sections.
+	
 2003-06-02  Chris Demetriou  <cgd@broadcom.com>
             Jason Thorpe  <thorpej@wasabisystems.com>
 

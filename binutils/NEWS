@@ -1,5 +1,9 @@
 -*- text -*-
 
+* BFD marks the sections .comment and .note as 'n' in the BSD/POSIX
+  single-character representation.  This can be checked by running nm
+  with the -a switch.
+
 * Added --info switch to objcopy and strip.
 
 * Support for Vitesse IQ2000 added by Red Hat.

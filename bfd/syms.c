@@ -619,6 +619,9 @@ decode_section_type (section)
     }
   if (section->flags & SEC_DEBUGGING)
     return 'N';
+  if ((section->flags & SEC_HAS_CONTENTS) &&
+      (section->flags & SEC_READONLY))
+    return 'n';
 
   return '?';
 }
