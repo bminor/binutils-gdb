@@ -314,7 +314,7 @@ print_insn (info, memaddr, num, insn, is_long, show_ext)
 	}
       /* repeati has a relocation, but its first argument is a plain
 	 immediate.  OTOH instructions like djsri have a pc-relative
-	 delay target, but a absolute jump target.  Therefore, a test
+	 delay target, but an absolute jump target.  Therefore, a test
 	 of insn->op->reloc_flag is not specific enough; we must test
 	 if the actual operand we are handling now is pc-relative.  */
       else if (oper->flags & OPERAND_PCREL)
