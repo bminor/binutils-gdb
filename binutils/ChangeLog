@@ -1,3 +1,20 @@
+Thu Jan 13 17:32:44 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* objdump.c (dump_relocs): Don't crash if section name is NULL.
+
+Tue Jan 11 19:46:33 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* filemode.c (filemodestring): Commented out; not used.
+	(mode_string): Use POSIX definitions.
+	(ftypelet): Likewise.
+	(rwx): Removed; no longer used.
+	* bucomm.c: Include bucomm.h.
+	(bfd_nonfatal, bfd_fatal): Argument is const.
+	(fatal): Make __STDC__ version.
+	* bucomm.h (mode_string): Declare.
+	* Makefile.in (bucomm.o): Depend upon bucomm.h
+
+Sun Jan  9 12:03:20 1994  Ken Raeburn  (raeburn@rtl.cygnus.com)
 
 	* bucomm.c (xmalloc, xrealloc): Deleted.
 	* bucomm.h (xmalloc, xrealloc): Fix prototypes, to correspond to

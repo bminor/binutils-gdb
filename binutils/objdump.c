@@ -77,6 +77,9 @@ dump_relocs PARAMS ((bfd *abfd));
 
 static void
 dump_symbols PARAMS ((bfd *abfd));
+
+static void
+display_bfd PARAMS ((bfd *abfd));
 
 void
 usage (stream, status)
@@ -84,21 +87,35 @@ usage (stream, status)
      int status;
 {
   fprintf (stream, "\
-Usage: %s [-ahifdrtxsl] [-m machine] [-j section_name] [-b bfdname]\n\
-       [--syms] [--reloc] [--header] [--stabs] [--version] [--help] objfile...\n\
-       at least one option besides -l must be given\n",
+Usage: %s [-ahifdrtxsl] [-b bfdname] [-m machine] [-j section-name]\n\
+       [--archive-headers] [--target=bfdname] [--disassemble] [--file-headers]\n\
+       [--section-headers] [--headers] [--info] [--section=section-name]\n\
+       [--line-numbers] [--architecture=machine] [--reloc] [--full-contents]\n\
+       [--stabs] [--syms] [--all-headers] [--version] [--help] objfile...\n\
+at least one option besides -l (--line-numbers) must be given\n",
 	   program_name);
   exit (status);
 }
 
 static struct option long_options[]=
 {
-  {"syms", no_argument, &dump_symtab, 1},
-  {"reloc", no_argument, &dump_reloc_info, 1},
-  {"header", no_argument, &dump_section_headers, 1},
-  {"version", no_argument, &show_version,    1},
-  {"help", no_argument, 0, 'H'},
+  {"all-headers", no_argument, NULL, 'x'},
+  {"architecture", required_argument, NULL, 'm'},
+  {"archive-headers", no_argument, NULL, 'a'},
+  {"disassemble", no_argument, NULL, 'd'},
+  {"file-headers", no_argument, NULL, 'f'},
+  {"full-contents", no_argument, NULL, 's'},
+  {"headers", no_argument, NULL, 'h'},
+  {"help", no_argument, NULL, 'H'},
+  {"info", no_argument, NULL, 'i'},
+  {"line-numbers", no_argument, NULL, 'l'},
+  {"reloc", no_argument, NULL, 'r'},
+  {"section", required_argument, NULL, 'j'},
+  {"section-headers", no_argument, NULL, 'h'},
   {"stabs", no_argument, &dump_stab_section_info, 1},
+  {"syms", no_argument, NULL, 't'},
+  {"target", required_argument, NULL, 'b'},
+  {"version", no_argument, &show_version,    1},
   {0, no_argument, 0, 0}
 };
 
@@ -162,12 +179,7 @@ DEFUN (slurp_symtab, (abfd),
   storage = get_symtab_upper_bound (abfd);
   if (storage)
     {
-      sy = (asymbol **) malloc (storage);
-      if (sy == NULL)
-	{
-	  fprintf (stderr, "%s: out of memory.\n", program_name);
-	  exit (1);
-	}
+      sy = (asymbol **) xmalloc (storage);
     }
   symcount = bfd_canonicalize_symtab (abfd, sy);
   if (symcount <= 0)
@@ -544,13 +556,8 @@ disassemble_data (abfd)
 	  if (bfd_get_section_size_before_reloc (section) == 0)
 	    continue;
 
-	  data = (bfd_byte *) malloc ((size_t) bfd_get_section_size_before_reloc (section));
+	  data = (bfd_byte *) xmalloc ((size_t) bfd_get_section_size_before_reloc (section));
 
-	  if (data == (bfd_byte *) NULL)
-	    {
-	      fprintf (stderr, "%s: memory exhausted.\n", program_name);
-	      exit (1);
-	    }
 	  datasize = bfd_get_section_size_before_reloc (section);
 
 	  bfd_get_section_contents (abfd, section, data, 0, bfd_get_section_size_before_reloc (section));
@@ -645,7 +652,7 @@ struct stab_print stab_print[] = {
 #define __define_stab(NAME, CODE, STRING) {CODE, STRING},
 #include "aout/stab.def"
 #undef __define_stab
-  {0, 0}
+  {0, ""}
 };
 
 void dump_stabs_1 ();
@@ -675,6 +682,7 @@ dump_stabs (abfd)
   dump_stabs_1 (abfd, ".stab", ".stabstr");
   dump_stabs_1 (abfd, ".stab.excl", ".stab.exclstr");
   dump_stabs_1 (abfd, ".stab.index", ".stab.indexstr");
+  dump_stabs_1 (abfd, "$GDB_SYMBOLS$", "$GDB_STRINGS$");
 }
 
 void
@@ -786,10 +794,11 @@ dump_stabs_1 (abfd, name1, name2)
   for (i = -1; stabs < stabs_end; stabs++, i++)
     {
       SWAP_SYMBOL (stabs, abfd);
-      printf ("\n%-6d %-6s %-6d %-6d %08x %-6d", i,
+      printf ("\n%-6d %-6s %-6d %-6d ", i,
 	      stab_name [stabs->n_type],
-	      stabs->n_other, stabs->n_desc, stabs->n_value,
-	      stabs->n_strx);
+	      stabs->n_other, stabs->n_desc);
+      printf_vma (stabs->n_value);
+      printf (" %-6lu", stabs->n_strx);
 
       /* Symbols with type == 0 (N_UNDF) specify the length of the
 	 string table associated with this file.  We use that info
@@ -814,6 +823,7 @@ dump_stabs_1 (abfd, name1, name2)
   printf ("\n\n");
 }
 
+static void
 display_bfd (abfd)
      bfd *abfd;
 {
@@ -941,12 +951,7 @@ dump_data (abfd)
 
 	      if (bfd_section_size (abfd, section) == 0)
 		continue;
-	      data = (bfd_byte *) malloc ((size_t) bfd_section_size (abfd, section));
-	      if (data == (bfd_byte *) NULL)
-		{
-		  fprintf (stderr, "%s: memory exhausted.\n", program_name);
-		  exit (1);
-		}
+	      data = (bfd_byte *) xmalloc ((size_t) bfd_section_size (abfd, section));
 	      datasize = bfd_section_size (abfd, section);
 
 
@@ -1077,15 +1082,17 @@ dump_relocs (abfd)
 		{
 		  arelent *q = *p;
 		  CONST char *sym_name;
-		  CONST char *section_name = (*(q->sym_ptr_ptr))->section->name;
+		  CONST char *section_name;
 
 		  if (q->sym_ptr_ptr && *q->sym_ptr_ptr)
 		    {
 		      sym_name = (*(q->sym_ptr_ptr))->name;
+		      section_name = (*(q->sym_ptr_ptr))->section->name;
 		    }
 		  else
 		    {
-		      sym_name = 0;
+		      sym_name = NULL;
+		      section_name = NULL;
 		    }
 		  if (sym_name)
 		    {
@@ -1096,6 +1103,8 @@ dump_relocs (abfd)
 		    }
 		  else
 		    {
+		      if (section_name == (CONST char *) NULL)
+			section_name = "*unknown*";
 		      printf_vma (q->address);
 		      printf (" %-16s  [%s]",
 			      q->howto->name,
@@ -1182,7 +1191,7 @@ DEFUN_VOID (display_info)
 		  bfd_printable_arch_mach ((enum bfd_architecture) j, 0));
     }
   columns = 0;
-  if (colum = getenv ("COLUMNS"))
+  if ((colum = getenv ("COLUMNS")) != (char *) NULL)
     columns = atoi (colum);
   if (!columns)
     columns = 80;
