@@ -37,7 +37,7 @@ if [get_compiler_info ${binfile}] {
 
 # This test must be compiled with -O2 if using gcc.
 
-if {$gcc_compiled} then {
+if { [test_compiler_info gcc-*-*] } then {
     if  { [gdb_compile "${srcdir}/$subdir/${srcfile}" "${binfile}" executable {debug additional_flags=-O2}] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
     }
@@ -56,7 +56,7 @@ if [runto middle] then {
     # PR 3016
     #   warning: Hit heuristic-fence-post without finding
     #   warning: enclosing function for pc 0x1006ead0
-    if {$gcc_compiled} then { 
+    if { [test_compiler_info gcc-*-*] } then {
 	setup_xfail "mips*-sgi-irix4*" "mips64*-*-elf"
     }
     # The call chain is main -> top -> middle.  But gcc can optimize a tail

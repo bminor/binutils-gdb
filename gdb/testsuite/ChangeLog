@@ -1,3 +1,9 @@
+2003-12-02  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Partial fix for PR testsuite/1456.
+	* gdb.base/mips_pro.exp: Replace references to gcc_compiled with calls
+	to test_compiler_info.
+
 2003-11-28  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.objc/objcdecode.exp: Match and KFAIL the output that comes
