@@ -306,7 +306,8 @@ proc runto_main {} {
 #             Takes three parameters.
 #             Parameters:
 #                First one is the command to execute,
-#                Second one is the pattern to match for a PASS,
+#                Second one is the pattern to match for a PASS, and must NOT include
+#		   the \r\n sequence immediately before the gdb prompt.
 #                Third one is an optional message to be printed. If this
 #                  a null string "", then the pass/fail messages are not printed.
 #             Returns:

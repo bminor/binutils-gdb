@@ -56,11 +56,16 @@ proc test_with_self {} {
     # After gdb is started, set the timeout to 30 seconds for the duration
     # of this test, and then back to the original value.
 
+    set oldtimeout $timeout
     set timeout 600
     verbose "Timeout is now $timeout seconds" 2
     if {[gdb_load "./x$tool"] <0} then {
+	set timeout $oldtimeout
+	verbose "Timeout is now $timeout seconds" 2
 	return -1
     }
+    set timeout 30
+    verbose "Timeout is now $timeout seconds" 2
 
     # disassemble yourself
     send "x/10i main\n"
@@ -95,6 +100,10 @@ proc test_with_self {} {
     }
 
     # run yourself
+    # It may take a very long time for the inferior gdb to start (lynx),
+    # so we bump it back up for the duration of this command.
+    set timeout 600
+
     set description "run until breakpoint at main"
     send "run -nw\n"
     expect {
@@ -106,10 +115,14 @@ proc test_with_self {} {
 	}
 	-re "vfork: No more processes.*$prompt $" {
 	    fail "$description (out of virtual memory)"
+	    set timeout $oldtimeout
+	    verbose "Timeout is now $timeout seconds" 2
 	    return -1
 	}
 	-re ".*$prompt $" {
 	    fail "$description"
+	    set timeout $oldtimeout
+	    verbose "Timeout is now $timeout seconds" 2
 	    return -1
 	}
 	timeout {
@@ -117,8 +130,6 @@ proc test_with_self {} {
 	}
     }
 
-    # It may take a very long time for the inferior gdb to start (lynx),
-    # so we wait until after it's started to reset the timeout value.
     set timeout 30
     verbose "Timeout is now $timeout seconds" 2
 
@@ -486,6 +497,8 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$prompt $"\
     gdb_exit
 
     # Set the timeout back to the value it had when we were called.
+    set timeout $oldtimeout
+    verbose "Timeout is now $timeout seconds" 2
 
     # Restart gdb in case next test expects it to be started already.
     gdb_start

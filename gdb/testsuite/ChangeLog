@@ -1,3 +1,12 @@
+Mon Aug  5 18:11:53 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/signals.exp (test_handle_all_print): Test separately for
+	each signal's status in the output of "handle all print".
+	* lib/gdb.exp (gdb_test): Document that the pattern must NOT include
+	the \r\n sequence that immediately precedes the gdb prompt.
+	* gdb.base/a1-selftest.exp: Save original timeout and restore
+	after test.
+
 Sun Aug  4 10:20:50 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gdb.disasm/hppa.s: Export fmemLRbug_tests_4 as a ST_CODE

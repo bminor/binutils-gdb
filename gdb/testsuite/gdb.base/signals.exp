@@ -300,15 +300,257 @@ gdb_start
 # This will need to be updated as the exact list of signals changes,
 # but I want to test that TARGET_SIGNAL_0, TARGET_SIGNAL_DEFAULT, and
 # TARGET_SIGNAL_UNKNOWN are skipped.
+# Increase timeout and expect input buffer for large output from gdb.
+# Allow blank or TAB as whitespace characters and test individually for
+# each specific signal.
+
 proc test_handle_all_print {} {
     global timeout
-    # Increase timeout and expect input buffer for large output from gdb.
-    # Allow blank or TAB as whitespace characters.
+
     set oldtimeout $timeout
-    set timeout [expr "$timeout + 60"]
+    set timeout [expr "$timeout + 15"]
     verbose "Timeout is now $timeout seconds" 2
-    match_max 8000
-    gdb_test "handle all print" "Signal\[ 	\]+Stop\[ 	\]+Print\[ 	\]+Pass to program\[ 	\]+Description\r\nSIGHUP\[ 	\]+Yes\[ 	\]+Yes\[ 	\]+Yes\[ 	\]+Hangup.*SIG63\[ 	\]+Yes\[ 	\]+Yes\[ 	\]+Yes\[ 	\]+Real-time event 63"
+    match_max 10000
+    gdb_test "handle all print" \
+	 "Signal\[ \t\]+Stop\[ \t\]+Print\[ \t\]+Pass to program\[ \t\]+Description\r\n.*" \
+	 "handle all print - Output headers"
+    gdb_test "handle all print" \
+	 ".*SIGHUP\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Hangup\r\n.*" \
+	 "handle all print - Hangup"
+    gdb_test "handle all print" \
+	 ".*SIGQUIT\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Quit\r\n.*" \
+	 "handle all print - Quit"
+    gdb_test "handle all print" \
+	 ".*SIGILL\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Illegal instruction\r\n.*" \
+	 "handle all print - Illegal instruction"
+    gdb_test "handle all print" \
+	 ".*SIGABRT\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Aborted\r\n.*" \
+	 "handle all print - Aborted"
+    gdb_test "handle all print" \
+	 ".*SIGEMT\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Emulation trap\r\n.*" \
+	 "handle all print - Emulation trap"
+    gdb_test "handle all print" \
+	 ".*SIGFPE\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Arithmetic exception\r\n.*" \
+	 "handle all print - Arithmetic exception"
+    gdb_test "handle all print" \
+	 ".*SIGKILL\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Killed\r\n.*" \
+	 "handle all print - Killed"
+    gdb_test "handle all print" \
+	 ".*SIGBUS\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Bus error\r\n.*" \
+	 "handle all print - Bus error"
+    gdb_test "handle all print" \
+	 ".*SIGSEGV\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Segmentation fault\r\n.*" \
+	 "handle all print - Segmentation fault"
+    gdb_test "handle all print" \
+	 ".*SIGSYS\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Bad system call\r\n.*" \
+	 "handle all print - Bad system call"
+    gdb_test "handle all print" \
+	 ".*SIGPIPE\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Broken pipe\r\n.*" \
+	 "handle all print - Broken pipe"
+    gdb_test "handle all print" \
+	 ".*SIGALRM\[ \t\]+No\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Alarm clock\r\n.*" \
+	 "handle all print - Alarm clock"
+    gdb_test "handle all print" \
+	 ".*SIGTERM\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Terminated\r\n.*" \
+	 "handle all print - Terminated"
+    gdb_test "handle all print" \
+	 ".*SIGURG\[ \t\]+No\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Urgent I/O condition\r\n.*" \
+	 "handle all print - Urgent I/O condition"
+    gdb_test "handle all print" \
+	 ".*SIGSTOP\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Stopped \\(signal\\)\r\n.*" \
+	 "handle all print - Stopped (signal)"
+    gdb_test "handle all print" \
+	 ".*SIGTSTP\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Stopped \\(user\\)\r\n.*" \
+	 "handle all print - Stopped (user)"
+    gdb_test "handle all print" \
+	 ".*SIGCONT\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Continued\r\n.*" \
+	 "handle all print - Continued"
+    gdb_test "handle all print" \
+	 ".*SIGCHLD\[ \t\]+No\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Child status changed\r\n.*" \
+	 "handle all print - Child status changed"
+    gdb_test "handle all print" \
+	 ".*SIGTTIN\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Stopped \\(tty input\\)\r\n.*" \
+	 "handle all print - Stopped (tty input)"
+    gdb_test "handle all print" \
+	 ".*SIGTTOU\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Stopped \\(tty output\\)\r\n.*" \
+	 "handle all print - Stopped (tty output)"
+    gdb_test "handle all print" \
+	 ".*SIGIO\[ \t\]+No\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+I/O possible\r\n.*" \
+	 "handle all print - I/O possible"
+    gdb_test "handle all print" \
+	 ".*SIGXCPU\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+CPU time limit exceeded\r\n.*" \
+	 "handle all print - CPU time limit exceeded"
+    gdb_test "handle all print" \
+	 ".*SIGXFSZ\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+File size limit exceeded\r\n.*" \
+	 "handle all print - File size limit exceeded"
+    gdb_test "handle all print" \
+	 ".*SIGVTALRM\[ \t\]+No\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Virtual timer expired\r\n.*" \
+	 "handle all print - Virtual timer expired"
+    gdb_test "handle all print" \
+	 ".*SIGPROF\[ \t\]+No\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Profiling timer expired\r\n.*" \
+	 "handle all print - Profiling timer expired"
+    gdb_test "handle all print" \
+	 ".*SIGWINCH\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Window size changed\r\n.*" \
+	 "handle all print - Window size changed"
+    gdb_test "handle all print" \
+	 ".*SIGLOST\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Resource lost\r\n.*" \
+	 "handle all print - Resource lost"
+    gdb_test "handle all print" \
+	 ".*SIGUSR1\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+User defined signal 1\r\n.*" \
+	 "handle all print - User defined signal 1"
+    gdb_test "handle all print" \
+	 ".*SIGUSR2\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+User defined signal 2\r\n.*" \
+	 "handle all print - User defined signal 2"
+    gdb_test "handle all print" \
+	 ".*SIGPWR\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Power fail/restart\r\n.*" \
+	 "handle all print - Power fail/restart"
+    gdb_test "handle all print" \
+	 ".*SIGPOLL\[ \t\]+No\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Pollable event occurred\r\n.*" \
+	 "handle all print - Pollable event occurred"
+    gdb_test "handle all print" \
+	 ".*SIGWIND\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+SIGWIND\r\n.*" \
+	 "handle all print - SIGWIND"
+    gdb_test "handle all print" \
+	 ".*SIGPHONE\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+SIGPHONE\r\n.*" \
+	 "handle all print - SIGPHONE"
+    gdb_test "handle all print" \
+	 ".*SIGWAITING\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Process's LWPs are blocked\r\n.*" \
+	 "handle all print - Process's LWPs are blocked"
+    gdb_test "handle all print" \
+	 ".*SIGLWP\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Signal LWP\r\n.*" \
+	 "handle all print - Signal LWP"
+    gdb_test "handle all print" \
+	 ".*SIGDANGER\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Swap space dangerously low\r\n.*" \
+	 "handle all print - Swap space dangerously low"
+    gdb_test "handle all print" \
+	 ".*SIGGRANT\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Monitor mode granted\r\n.*" \
+	 "handle all print - Monitor mode granted"
+    gdb_test "handle all print" \
+	 ".*SIGRETRACT\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Need to relinguish monitor mode\r\n.*" \
+	 "handle all print - Need to relinguish monitor mode"
+    gdb_test "handle all print" \
+	 ".*SIGMSG\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Monitor mode data available\r\n.*" \
+	 "handle all print - Monitor mode data available"
+    gdb_test "handle all print" \
+	 ".*SIGSOUND\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Sound completed\r\n.*" \
+	 "handle all print - Sound completed"
+    gdb_test "handle all print" \
+	 ".*SIGSAK\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Secure attention\r\n.*" \
+	 "handle all print - Secure attention"
+    gdb_test "handle all print" \
+	 ".*SIGPRIO\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+SIGPRIO\r\n.*" \
+	 "handle all print - SIGPRIO"
+    gdb_test "handle all print" \
+	 ".*SIG33\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 33\r\n.*" \
+	 "handle all print - Real-time event 33"
+    gdb_test "handle all print" \
+	 ".*SIG34\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 34\r\n.*" \
+	 "handle all print - Real-time event 34"
+    gdb_test "handle all print" \
+	 ".*SIG35\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 35\r\n.*" \
+	 "handle all print - Real-time event 35"
+    gdb_test "handle all print" \
+	 ".*SIG36\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 36\r\n.*" \
+	 "handle all print - Real-time event 36"
+    gdb_test "handle all print" \
+	 ".*SIG37\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 37\r\n.*" \
+	 "handle all print - Real-time event 37"
+    gdb_test "handle all print" \
+	 ".*SIG38\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 38\r\n.*" \
+	 "handle all print - Real-time event 38"
+    gdb_test "handle all print" \
+	 ".*SIG39\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 39\r\n.*" \
+	 "handle all print - Real-time event 39"
+    gdb_test "handle all print" \
+	 ".*SIG40\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 40\r\n.*" \
+	 "handle all print - Real-time event 40"
+    gdb_test "handle all print" \
+	 ".*SIG41\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 41\r\n.*" \
+	 "handle all print - Real-time event 41"
+    gdb_test "handle all print" \
+	 ".*SIG42\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 42\r\n.*" \
+	 "handle all print - Real-time event 42"
+    gdb_test "handle all print" \
+	 ".*SIG43\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 43\r\n.*" \
+	 "handle all print - Real-time event 43"
+    gdb_test "handle all print" \
+	 ".*SIG44\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 44\r\n.*" \
+	 "handle all print - Real-time event 44"
+    gdb_test "handle all print" \
+	 ".*SIG45\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 45\r\n.*" \
+	 "handle all print - Real-time event 45"
+    gdb_test "handle all print" \
+	 ".*SIG46\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 46\r\n.*" \
+	 "handle all print - Real-time event 46"
+    gdb_test "handle all print" \
+	 ".*SIG47\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 47\r\n.*" \
+	 "handle all print - Real-time event 47"
+    gdb_test "handle all print" \
+	 ".*SIG48\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 48\r\n.*" \
+	 "handle all print - Real-time event 48"
+    gdb_test "handle all print" \
+	 ".*SIG49\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 49\r\n.*" \
+	 "handle all print - Real-time event 49"
+    gdb_test "handle all print" \
+	 ".*SIG50\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 50\r\n.*" \
+	 "handle all print - Real-time event 50"
+    gdb_test "handle all print" \
+	 ".*SIG51\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 51\r\n.*" \
+	 "handle all print - Real-time event 51"
+    gdb_test "handle all print" \
+	 ".*SIG52\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 52\r\n.*" \
+	 "handle all print - Real-time event 52"
+    gdb_test "handle all print" \
+	 ".*SIG53\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 53\r\n.*" \
+	 "handle all print - Real-time event 53"
+    gdb_test "handle all print" \
+	 ".*SIG54\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 54\r\n.*" \
+	 "handle all print - Real-time event 54"
+    gdb_test "handle all print" \
+	 ".*SIG55\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 55\r\n.*" \
+	 "handle all print - Real-time event 55"
+    gdb_test "handle all print" \
+	 ".*SIG56\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 56\r\n.*" \
+	 "handle all print - Real-time event 56"
+    gdb_test "handle all print" \
+	 ".*SIG57\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 57\r\n.*" \
+	 "handle all print - Real-time event 57"
+    gdb_test "handle all print" \
+	 ".*SIG58\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 58\r\n.*" \
+	 "handle all print - Real-time event 58"
+    gdb_test "handle all print" \
+	 ".*SIG59\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 59\r\n.*" \
+	 "handle all print - Real-time event 59"
+    gdb_test "handle all print" \
+	 ".*SIG60\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 60\r\n.*" \
+	 "handle all print - Real-time event 60"
+    gdb_test "handle all print" \
+	 ".*SIG61\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 61\r\n.*" \
+	 "handle all print - Real-time event 61"
+    gdb_test "handle all print" \
+	 ".*SIG62\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 62\r\n.*" \
+	 "handle all print - Real-time event 62"
+    gdb_test "handle all print" \
+	 ".*SIG63\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Real-time event 63\r\n.*" \
+	 "handle all print - Real-time event 63"
+    gdb_test "handle all print" \
+	 ".*EXC_BAD_ACCESS\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Could not access memory\r\n.*" \
+	 "handle all print - Could not access memory"
+    gdb_test "handle all print" \
+	 ".*EXC_BAD_INSTRUCTION\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Illegal instruction/operand\r\n.*" \
+	 "handle all print - Illegal instruction/operand"
+    gdb_test "handle all print" \
+	 ".*EXC_ARITHMETIC\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Arithmetic exception\r\n.*" \
+	 "handle all print - Arithmetic exception"
+    gdb_test "handle all print" \
+	 ".*EXC_EMULATION\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Emulation instruction\r\n.*" \
+	 "handle all print - Emulation instruction"
+    gdb_test "handle all print" \
+	 ".*EXC_SOFTWARE\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Software generated exception\r\n.*" \
+	 "handle all print - Software generated exception"
+    gdb_test "handle all print" \
+	 ".*EXC_BREAKPOINT\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Breakpoint.*" \
+	 "handle all print - Breakpoint"
     set timeout $oldtimeout
     verbose "Timeout restored to $timeout seconds" 2
 }
