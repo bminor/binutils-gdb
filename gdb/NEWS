@@ -19,6 +19,11 @@ systems (Solaris, IRIX).  Ref: server/519.
 Older HPUX ANSI C compilers did not accept variable array sizes.  somsolib.c
 has been updated to use constant array sizes.
 
+* Bug fixes
+
+gdb/1628: GDB now handles the DW_EH_PE_funcrel encoding in DWARF Call
+Frame Info.
+
 *** Changes in GDB 6.1:
 
 * Removed --with-mmalloc

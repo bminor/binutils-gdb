@@ -1,3 +1,7 @@
+2004-06-11  Mark Kettenis  <kettenis@gnu.org>
+
+	* NEWS: Mention fix for PR gdb/1628.
+
 2004-06-03  Randolph Chung  <tausq@debian.org>
 
 	Fix PR build/1458 (partial)
