@@ -1,5 +1,10 @@
 2003-06-13  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh: Document what PUSH_DUMMY_CALL replaces.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	
+2003-06-13  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh: Document what UNWIND_DUMMY_ID replaces.  Clarify
 	when deprecated REGISTER macros can be deleted.
 	* gdbarch.h, gdbarch.c: Re-generate.

@@ -148,7 +148,6 @@ struct gdbarch
   gdbarch_read_pc_ftype *read_pc;
   gdbarch_write_pc_ftype *write_pc;
   gdbarch_read_sp_ftype *read_sp;
-  gdbarch_deprecated_dummy_write_sp_ftype *deprecated_dummy_write_sp;
   gdbarch_virtual_frame_pointer_ftype *virtual_frame_pointer;
   gdbarch_pseudo_register_read_ftype *pseudo_register_read;
   gdbarch_pseudo_register_write_ftype *pseudo_register_write;
@@ -165,7 +164,6 @@ struct gdbarch
   gdbarch_sdb_reg_to_regnum_ftype *sdb_reg_to_regnum;
   gdbarch_dwarf2_reg_to_regnum_ftype *dwarf2_reg_to_regnum;
   gdbarch_register_name_ftype *register_name;
-  int deprecated_register_size;
   gdbarch_register_type_ftype *register_type;
   gdbarch_deprecated_register_virtual_type_ftype *deprecated_register_virtual_type;
   int deprecated_register_bytes;
@@ -178,6 +176,24 @@ struct gdbarch
   gdbarch_save_dummy_frame_tos_ftype *save_dummy_frame_tos;
   int deprecated_fp_regnum;
   gdbarch_deprecated_target_read_fp_ftype *deprecated_target_read_fp;
+  gdbarch_push_dummy_call_ftype *push_dummy_call;
+  gdbarch_deprecated_push_arguments_ftype *deprecated_push_arguments;
+  int deprecated_use_generic_dummy_frames;
+  gdbarch_deprecated_push_return_address_ftype *deprecated_push_return_address;
+  gdbarch_deprecated_dummy_write_sp_ftype *deprecated_dummy_write_sp;
+  int deprecated_register_size;
+  int call_dummy_location;
+  gdbarch_call_dummy_address_ftype *call_dummy_address;
+  CORE_ADDR deprecated_call_dummy_start_offset;
+  CORE_ADDR deprecated_call_dummy_breakpoint_offset;
+  int deprecated_call_dummy_length;
+  LONGEST * deprecated_call_dummy_words;
+  int deprecated_sizeof_call_dummy_words;
+  int deprecated_call_dummy_stack_adjust;
+  gdbarch_deprecated_fix_call_dummy_ftype *deprecated_fix_call_dummy;
+  gdbarch_push_dummy_code_ftype *push_dummy_code;
+  gdbarch_deprecated_push_dummy_frame_ftype *deprecated_push_dummy_frame;
+  int deprecated_extra_stack_alignment_needed;
   gdbarch_deprecated_do_registers_info_ftype *deprecated_do_registers_info;
   gdbarch_print_registers_info_ftype *print_registers_info;
   gdbarch_print_float_info_ftype *print_float_info;
@@ -187,18 +203,7 @@ struct gdbarch
   gdbarch_cannot_fetch_register_ftype *cannot_fetch_register;
   gdbarch_cannot_store_register_ftype *cannot_store_register;
   gdbarch_get_longjmp_target_ftype *get_longjmp_target;
-  int deprecated_use_generic_dummy_frames;
-  int call_dummy_location;
-  gdbarch_call_dummy_address_ftype *call_dummy_address;
-  CORE_ADDR deprecated_call_dummy_start_offset;
-  CORE_ADDR deprecated_call_dummy_breakpoint_offset;
-  int deprecated_call_dummy_length;
   gdbarch_deprecated_pc_in_call_dummy_ftype *deprecated_pc_in_call_dummy;
-  LONGEST * deprecated_call_dummy_words;
-  int deprecated_sizeof_call_dummy_words;
-  int deprecated_call_dummy_stack_adjust;
-  gdbarch_deprecated_fix_call_dummy_ftype *deprecated_fix_call_dummy;
-  gdbarch_push_dummy_code_ftype *push_dummy_code;
   gdbarch_deprecated_init_frame_pc_first_ftype *deprecated_init_frame_pc_first;
   gdbarch_deprecated_init_frame_pc_ftype *deprecated_init_frame_pc;
   int believe_pcc_promotion;
@@ -214,10 +219,6 @@ struct gdbarch
   gdbarch_address_to_pointer_ftype *address_to_pointer;
   gdbarch_integer_to_address_ftype *integer_to_address;
   gdbarch_return_value_on_stack_ftype *return_value_on_stack;
-  gdbarch_deprecated_push_arguments_ftype *deprecated_push_arguments;
-  gdbarch_push_dummy_call_ftype *push_dummy_call;
-  gdbarch_deprecated_push_dummy_frame_ftype *deprecated_push_dummy_frame;
-  gdbarch_deprecated_push_return_address_ftype *deprecated_push_return_address;
   gdbarch_deprecated_pop_frame_ftype *deprecated_pop_frame;
   gdbarch_deprecated_store_struct_return_ftype *deprecated_store_struct_return;
   gdbarch_extract_return_value_ftype *extract_return_value;
@@ -252,7 +253,6 @@ struct gdbarch
   gdbarch_frame_num_args_ftype *frame_num_args;
   gdbarch_stack_align_ftype *stack_align;
   gdbarch_frame_align_ftype *frame_align;
-  int deprecated_extra_stack_alignment_needed;
   gdbarch_reg_struct_has_addr_ftype *reg_struct_has_addr;
   int parm_boundary;
   const struct floatformat * float_format;
@@ -316,7 +316,6 @@ struct gdbarch startup_gdbarch =
   0,  /* read_pc */
   0,  /* write_pc */
   0,  /* read_sp */
-  0,  /* deprecated_dummy_write_sp */
   0,  /* virtual_frame_pointer */
   0,  /* pseudo_register_read */
   0,  /* pseudo_register_write */
@@ -333,7 +332,6 @@ struct gdbarch startup_gdbarch =
   0,  /* sdb_reg_to_regnum */
   0,  /* dwarf2_reg_to_regnum */
   0,  /* register_name */
-  0,  /* deprecated_register_size */
   0,  /* register_type */
   0,  /* deprecated_register_virtual_type */
   0,  /* deprecated_register_bytes */
@@ -346,6 +344,24 @@ struct gdbarch startup_gdbarch =
   0,  /* save_dummy_frame_tos */
   -1,  /* deprecated_fp_regnum */
   0,  /* deprecated_target_read_fp */
+  0,  /* push_dummy_call */
+  0,  /* deprecated_push_arguments */
+  0,  /* deprecated_use_generic_dummy_frames */
+  0,  /* deprecated_push_return_address */
+  0,  /* deprecated_dummy_write_sp */
+  0,  /* deprecated_register_size */
+  0,  /* call_dummy_location */
+  0,  /* call_dummy_address */
+  0,  /* deprecated_call_dummy_start_offset */
+  0,  /* deprecated_call_dummy_breakpoint_offset */
+  0,  /* deprecated_call_dummy_length */
+  0,  /* deprecated_call_dummy_words */
+  0,  /* deprecated_sizeof_call_dummy_words */
+  0,  /* deprecated_call_dummy_stack_adjust */
+  0,  /* deprecated_fix_call_dummy */
+  0,  /* push_dummy_code */
+  0,  /* deprecated_push_dummy_frame */
+  0,  /* deprecated_extra_stack_alignment_needed */
   0,  /* deprecated_do_registers_info */
   default_print_registers_info,  /* print_registers_info */
   0,  /* print_float_info */
@@ -355,18 +371,7 @@ struct gdbarch startup_gdbarch =
   0,  /* cannot_fetch_register */
   0,  /* cannot_store_register */
   0,  /* get_longjmp_target */
-  0,  /* deprecated_use_generic_dummy_frames */
-  0,  /* call_dummy_location */
-  0,  /* call_dummy_address */
-  0,  /* deprecated_call_dummy_start_offset */
-  0,  /* deprecated_call_dummy_breakpoint_offset */
-  0,  /* deprecated_call_dummy_length */
   generic_pc_in_call_dummy,  /* deprecated_pc_in_call_dummy */
-  0,  /* deprecated_call_dummy_words */
-  0,  /* deprecated_sizeof_call_dummy_words */
-  0,  /* deprecated_call_dummy_stack_adjust */
-  0,  /* deprecated_fix_call_dummy */
-  0,  /* push_dummy_code */
   0,  /* deprecated_init_frame_pc_first */
   0,  /* deprecated_init_frame_pc */
   0,  /* believe_pcc_promotion */
@@ -382,10 +387,6 @@ struct gdbarch startup_gdbarch =
   0,  /* address_to_pointer */
   0,  /* integer_to_address */
   0,  /* return_value_on_stack */
-  0,  /* deprecated_push_arguments */
-  0,  /* push_dummy_call */
-  0,  /* deprecated_push_dummy_frame */
-  0,  /* deprecated_push_return_address */
   0,  /* deprecated_pop_frame */
   0,  /* deprecated_store_struct_return */
   0,  /* extract_return_value */
@@ -420,7 +421,6 @@ struct gdbarch startup_gdbarch =
   0,  /* frame_num_args */
   0,  /* stack_align */
   0,  /* frame_align */
-  0,  /* deprecated_extra_stack_alignment_needed */
   0,  /* reg_struct_has_addr */
   0,  /* parm_boundary */
   0,  /* float_format */
@@ -521,16 +521,16 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->deprecated_register_raw_size = generic_register_size;
   current_gdbarch->deprecated_register_virtual_size = generic_register_size;
   current_gdbarch->deprecated_fp_regnum = -1;
+  current_gdbarch->deprecated_use_generic_dummy_frames = 1;
+  current_gdbarch->call_dummy_location = AT_ENTRY_POINT;
+  current_gdbarch->call_dummy_address = entry_point_address;
+  current_gdbarch->deprecated_call_dummy_words = legacy_call_dummy_words;
+  current_gdbarch->deprecated_sizeof_call_dummy_words = legacy_sizeof_call_dummy_words;
   current_gdbarch->print_registers_info = default_print_registers_info;
   current_gdbarch->register_sim_regno = legacy_register_sim_regno;
   current_gdbarch->cannot_fetch_register = cannot_register_not;
   current_gdbarch->cannot_store_register = cannot_register_not;
-  current_gdbarch->deprecated_use_generic_dummy_frames = 1;
-  current_gdbarch->call_dummy_location = AT_ENTRY_POINT;
-  current_gdbarch->call_dummy_address = entry_point_address;
   current_gdbarch->deprecated_pc_in_call_dummy = generic_pc_in_call_dummy;
-  current_gdbarch->deprecated_call_dummy_words = legacy_call_dummy_words;
-  current_gdbarch->deprecated_sizeof_call_dummy_words = legacy_sizeof_call_dummy_words;
   current_gdbarch->deprecated_register_convertible = deprecated_register_convertible_not;
   current_gdbarch->convert_register_p = legacy_convert_register_p;
   current_gdbarch->register_to_value = legacy_register_to_value;
@@ -623,7 +623,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of read_pc, has predicate */
   /* Skip verify of write_pc, invalid_p == 0 */
   /* Skip verify of read_sp, has predicate */
-  /* Skip verify of deprecated_dummy_write_sp, has predicate */
   /* Skip verify of virtual_frame_pointer, invalid_p == 0 */
   /* Skip verify of pseudo_register_read, has predicate */
   /* Skip verify of pseudo_register_write, has predicate */
@@ -653,6 +652,20 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of save_dummy_frame_tos, has predicate */
   /* Skip verify of deprecated_fp_regnum, invalid_p == 0 */
   /* Skip verify of deprecated_target_read_fp, has predicate */
+  /* Skip verify of push_dummy_call, has predicate */
+  /* Skip verify of deprecated_push_arguments, has predicate */
+  /* Skip verify of deprecated_use_generic_dummy_frames, invalid_p == 0 */
+  /* Skip verify of deprecated_push_return_address, has predicate */
+  /* Skip verify of deprecated_dummy_write_sp, has predicate */
+  /* Skip verify of call_dummy_location, invalid_p == 0 */
+  /* Skip verify of call_dummy_address, invalid_p == 0 */
+  /* Skip verify of deprecated_call_dummy_words, invalid_p == 0 */
+  /* Skip verify of deprecated_sizeof_call_dummy_words, invalid_p == 0 */
+  /* Skip verify of deprecated_call_dummy_stack_adjust, has predicate */
+  /* Skip verify of deprecated_fix_call_dummy, has predicate */
+  /* Skip verify of push_dummy_code, has predicate */
+  /* Skip verify of deprecated_push_dummy_frame, has predicate */
+  /* Skip verify of deprecated_extra_stack_alignment_needed, invalid_p == 0 */
   /* Skip verify of deprecated_do_registers_info, has predicate */
   /* Skip verify of print_registers_info, invalid_p == 0 */
   /* Skip verify of print_float_info, has predicate */
@@ -662,15 +675,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of cannot_fetch_register, invalid_p == 0 */
   /* Skip verify of cannot_store_register, invalid_p == 0 */
   /* Skip verify of get_longjmp_target, has predicate */
-  /* Skip verify of deprecated_use_generic_dummy_frames, invalid_p == 0 */
-  /* Skip verify of call_dummy_location, invalid_p == 0 */
-  /* Skip verify of call_dummy_address, invalid_p == 0 */
   /* Skip verify of deprecated_pc_in_call_dummy, has predicate */
-  /* Skip verify of deprecated_call_dummy_words, invalid_p == 0 */
-  /* Skip verify of deprecated_sizeof_call_dummy_words, invalid_p == 0 */
-  /* Skip verify of deprecated_call_dummy_stack_adjust, has predicate */
-  /* Skip verify of deprecated_fix_call_dummy, has predicate */
-  /* Skip verify of push_dummy_code, has predicate */
   /* Skip verify of deprecated_init_frame_pc_first, has predicate */
   /* Skip verify of deprecated_init_frame_pc, has predicate */
   /* Skip verify of deprecated_get_saved_register, has predicate */
@@ -684,10 +689,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of address_to_pointer, invalid_p == 0 */
   /* Skip verify of integer_to_address, has predicate */
   /* Skip verify of return_value_on_stack, invalid_p == 0 */
-  /* Skip verify of deprecated_push_arguments, has predicate */
-  /* Skip verify of push_dummy_call, has predicate */
-  /* Skip verify of deprecated_push_dummy_frame, has predicate */
-  /* Skip verify of deprecated_push_return_address, has predicate */
   /* Skip verify of deprecated_pop_frame, has predicate */
   /* Skip verify of deprecated_store_struct_return, has predicate */
   /* Skip verify of extract_return_value, invalid_p == 0 */
@@ -732,7 +733,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of frame_num_args, has predicate */
   /* Skip verify of stack_align, has predicate */
   /* Skip verify of frame_align, has predicate */
-  /* Skip verify of deprecated_extra_stack_alignment_needed, invalid_p == 0 */
   /* Skip verify of reg_struct_has_addr, has predicate */
   if (gdbarch->float_format == 0)
     gdbarch->float_format = default_float_format (gdbarch);
@@ -2981,32 +2981,6 @@ set_gdbarch_read_sp (struct gdbarch *gdbarch,
   gdbarch->read_sp = read_sp;
 }
 
-int
-gdbarch_deprecated_dummy_write_sp_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->deprecated_dummy_write_sp != 0;
-}
-
-void
-gdbarch_deprecated_dummy_write_sp (struct gdbarch *gdbarch, CORE_ADDR val)
-{
-  gdb_assert (gdbarch != NULL);
-  if (gdbarch->deprecated_dummy_write_sp == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_deprecated_dummy_write_sp invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_dummy_write_sp called\n");
-  gdbarch->deprecated_dummy_write_sp (val);
-}
-
-void
-set_gdbarch_deprecated_dummy_write_sp (struct gdbarch *gdbarch,
-                                       gdbarch_deprecated_dummy_write_sp_ftype deprecated_dummy_write_sp)
-{
-  gdbarch->deprecated_dummy_write_sp = deprecated_dummy_write_sp;
-}
-
 void
 gdbarch_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc, int *frame_regnum, LONGEST *frame_offset)
 {
@@ -3314,22 +3288,6 @@ set_gdbarch_register_name (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_deprecated_register_size (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_register_size called\n");
-  return gdbarch->deprecated_register_size;
-}
-
-void
-set_gdbarch_deprecated_register_size (struct gdbarch *gdbarch,
-                                      int deprecated_register_size)
-{
-  gdbarch->deprecated_register_size = deprecated_register_size;
-}
-
-int
 gdbarch_register_type_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
@@ -3604,6 +3562,379 @@ set_gdbarch_deprecated_target_read_fp (struct gdbarch *gdbarch,
 }
 
 int
+gdbarch_push_dummy_call_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->push_dummy_call != 0;
+}
+
+CORE_ADDR
+gdbarch_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr, struct regcache *regcache, CORE_ADDR bp_addr, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->push_dummy_call == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_push_dummy_call invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_push_dummy_call called\n");
+  return gdbarch->push_dummy_call (gdbarch, func_addr, regcache, bp_addr, nargs, args, sp, struct_return, struct_addr);
+}
+
+void
+set_gdbarch_push_dummy_call (struct gdbarch *gdbarch,
+                             gdbarch_push_dummy_call_ftype push_dummy_call)
+{
+  gdbarch->push_dummy_call = push_dummy_call;
+}
+
+int
+gdbarch_deprecated_push_arguments_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->deprecated_push_arguments != 0;
+}
+
+CORE_ADDR
+gdbarch_deprecated_push_arguments (struct gdbarch *gdbarch, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->deprecated_push_arguments == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_deprecated_push_arguments invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_push_arguments called\n");
+  return gdbarch->deprecated_push_arguments (nargs, args, sp, struct_return, struct_addr);
+}
+
+void
+set_gdbarch_deprecated_push_arguments (struct gdbarch *gdbarch,
+                                       gdbarch_deprecated_push_arguments_ftype deprecated_push_arguments)
+{
+  gdbarch->deprecated_push_arguments = deprecated_push_arguments;
+}
+
+int
+gdbarch_deprecated_use_generic_dummy_frames (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of deprecated_use_generic_dummy_frames, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_use_generic_dummy_frames called\n");
+  return gdbarch->deprecated_use_generic_dummy_frames;
+}
+
+void
+set_gdbarch_deprecated_use_generic_dummy_frames (struct gdbarch *gdbarch,
+                                                 int deprecated_use_generic_dummy_frames)
+{
+  gdbarch->deprecated_use_generic_dummy_frames = deprecated_use_generic_dummy_frames;
+}
+
+int
+gdbarch_deprecated_push_return_address_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->deprecated_push_return_address != 0;
+}
+
+CORE_ADDR
+gdbarch_deprecated_push_return_address (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR sp)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->deprecated_push_return_address == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_deprecated_push_return_address invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_push_return_address called\n");
+  return gdbarch->deprecated_push_return_address (pc, sp);
+}
+
+void
+set_gdbarch_deprecated_push_return_address (struct gdbarch *gdbarch,
+                                            gdbarch_deprecated_push_return_address_ftype deprecated_push_return_address)
+{
+  gdbarch->deprecated_push_return_address = deprecated_push_return_address;
+}
+
+int
+gdbarch_deprecated_dummy_write_sp_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->deprecated_dummy_write_sp != 0;
+}
+
+void
+gdbarch_deprecated_dummy_write_sp (struct gdbarch *gdbarch, CORE_ADDR val)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->deprecated_dummy_write_sp == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_deprecated_dummy_write_sp invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_dummy_write_sp called\n");
+  gdbarch->deprecated_dummy_write_sp (val);
+}
+
+void
+set_gdbarch_deprecated_dummy_write_sp (struct gdbarch *gdbarch,
+                                       gdbarch_deprecated_dummy_write_sp_ftype deprecated_dummy_write_sp)
+{
+  gdbarch->deprecated_dummy_write_sp = deprecated_dummy_write_sp;
+}
+
+int
+gdbarch_deprecated_register_size (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_register_size called\n");
+  return gdbarch->deprecated_register_size;
+}
+
+void
+set_gdbarch_deprecated_register_size (struct gdbarch *gdbarch,
+                                      int deprecated_register_size)
+{
+  gdbarch->deprecated_register_size = deprecated_register_size;
+}
+
+int
+gdbarch_call_dummy_location (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of call_dummy_location, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_call_dummy_location called\n");
+  return gdbarch->call_dummy_location;
+}
+
+void
+set_gdbarch_call_dummy_location (struct gdbarch *gdbarch,
+                                 int call_dummy_location)
+{
+  gdbarch->call_dummy_location = call_dummy_location;
+}
+
+CORE_ADDR
+gdbarch_call_dummy_address (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->call_dummy_address == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_call_dummy_address invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_call_dummy_address called\n");
+  return gdbarch->call_dummy_address ();
+}
+
+void
+set_gdbarch_call_dummy_address (struct gdbarch *gdbarch,
+                                gdbarch_call_dummy_address_ftype call_dummy_address)
+{
+  gdbarch->call_dummy_address = call_dummy_address;
+}
+
+CORE_ADDR
+gdbarch_deprecated_call_dummy_start_offset (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_call_dummy_start_offset called\n");
+  return gdbarch->deprecated_call_dummy_start_offset;
+}
+
+void
+set_gdbarch_deprecated_call_dummy_start_offset (struct gdbarch *gdbarch,
+                                                CORE_ADDR deprecated_call_dummy_start_offset)
+{
+  gdbarch->deprecated_call_dummy_start_offset = deprecated_call_dummy_start_offset;
+}
+
+CORE_ADDR
+gdbarch_deprecated_call_dummy_breakpoint_offset (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_call_dummy_breakpoint_offset called\n");
+  return gdbarch->deprecated_call_dummy_breakpoint_offset;
+}
+
+void
+set_gdbarch_deprecated_call_dummy_breakpoint_offset (struct gdbarch *gdbarch,
+                                                     CORE_ADDR deprecated_call_dummy_breakpoint_offset)
+{
+  gdbarch->deprecated_call_dummy_breakpoint_offset = deprecated_call_dummy_breakpoint_offset;
+}
+
+int
+gdbarch_deprecated_call_dummy_length (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_call_dummy_length called\n");
+  return gdbarch->deprecated_call_dummy_length;
+}
+
+void
+set_gdbarch_deprecated_call_dummy_length (struct gdbarch *gdbarch,
+                                          int deprecated_call_dummy_length)
+{
+  gdbarch->deprecated_call_dummy_length = deprecated_call_dummy_length;
+}
+
+LONGEST *
+gdbarch_deprecated_call_dummy_words (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of deprecated_call_dummy_words, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_call_dummy_words called\n");
+  return gdbarch->deprecated_call_dummy_words;
+}
+
+void
+set_gdbarch_deprecated_call_dummy_words (struct gdbarch *gdbarch,
+                                         LONGEST * deprecated_call_dummy_words)
+{
+  gdbarch->deprecated_call_dummy_words = deprecated_call_dummy_words;
+}
+
+int
+gdbarch_deprecated_sizeof_call_dummy_words (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of deprecated_sizeof_call_dummy_words, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_sizeof_call_dummy_words called\n");
+  return gdbarch->deprecated_sizeof_call_dummy_words;
+}
+
+void
+set_gdbarch_deprecated_sizeof_call_dummy_words (struct gdbarch *gdbarch,
+                                                int deprecated_sizeof_call_dummy_words)
+{
+  gdbarch->deprecated_sizeof_call_dummy_words = deprecated_sizeof_call_dummy_words;
+}
+
+int
+gdbarch_deprecated_call_dummy_stack_adjust_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->deprecated_call_dummy_stack_adjust != 0;
+}
+
+int
+gdbarch_deprecated_call_dummy_stack_adjust (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_call_dummy_stack_adjust called\n");
+  return gdbarch->deprecated_call_dummy_stack_adjust;
+}
+
+void
+set_gdbarch_deprecated_call_dummy_stack_adjust (struct gdbarch *gdbarch,
+                                                int deprecated_call_dummy_stack_adjust)
+{
+  gdbarch->deprecated_call_dummy_stack_adjust = deprecated_call_dummy_stack_adjust;
+}
+
+int
+gdbarch_deprecated_fix_call_dummy_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->deprecated_fix_call_dummy != 0;
+}
+
+void
+gdbarch_deprecated_fix_call_dummy (struct gdbarch *gdbarch, char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->deprecated_fix_call_dummy == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_deprecated_fix_call_dummy invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_fix_call_dummy called\n");
+  gdbarch->deprecated_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p);
+}
+
+void
+set_gdbarch_deprecated_fix_call_dummy (struct gdbarch *gdbarch,
+                                       gdbarch_deprecated_fix_call_dummy_ftype deprecated_fix_call_dummy)
+{
+  gdbarch->deprecated_fix_call_dummy = deprecated_fix_call_dummy;
+}
+
+int
+gdbarch_push_dummy_code_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->push_dummy_code != 0;
+}
+
+CORE_ADDR
+gdbarch_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc, struct value **args, int nargs, struct type *value_type, CORE_ADDR *real_pc, CORE_ADDR *bp_addr)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->push_dummy_code == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_push_dummy_code invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_push_dummy_code called\n");
+  return gdbarch->push_dummy_code (gdbarch, sp, funaddr, using_gcc, args, nargs, value_type, real_pc, bp_addr);
+}
+
+void
+set_gdbarch_push_dummy_code (struct gdbarch *gdbarch,
+                             gdbarch_push_dummy_code_ftype push_dummy_code)
+{
+  gdbarch->push_dummy_code = push_dummy_code;
+}
+
+int
+gdbarch_deprecated_push_dummy_frame_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->deprecated_push_dummy_frame != 0;
+}
+
+void
+gdbarch_deprecated_push_dummy_frame (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->deprecated_push_dummy_frame == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_deprecated_push_dummy_frame invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_push_dummy_frame called\n");
+  gdbarch->deprecated_push_dummy_frame ();
+}
+
+void
+set_gdbarch_deprecated_push_dummy_frame (struct gdbarch *gdbarch,
+                                         gdbarch_deprecated_push_dummy_frame_ftype deprecated_push_dummy_frame)
+{
+  gdbarch->deprecated_push_dummy_frame = deprecated_push_dummy_frame;
+}
+
+int
+gdbarch_deprecated_extra_stack_alignment_needed (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of deprecated_extra_stack_alignment_needed, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_extra_stack_alignment_needed called\n");
+  return gdbarch->deprecated_extra_stack_alignment_needed;
+}
+
+void
+set_gdbarch_deprecated_extra_stack_alignment_needed (struct gdbarch *gdbarch,
+                                                     int deprecated_extra_stack_alignment_needed)
+{
+  gdbarch->deprecated_extra_stack_alignment_needed = deprecated_extra_stack_alignment_needed;
+}
+
+int
 gdbarch_deprecated_do_registers_info_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
@@ -3810,107 +4141,6 @@ set_gdbarch_get_longjmp_target (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_deprecated_use_generic_dummy_frames (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  /* Skip verify of deprecated_use_generic_dummy_frames, invalid_p == 0 */
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_use_generic_dummy_frames called\n");
-  return gdbarch->deprecated_use_generic_dummy_frames;
-}
-
-void
-set_gdbarch_deprecated_use_generic_dummy_frames (struct gdbarch *gdbarch,
-                                                 int deprecated_use_generic_dummy_frames)
-{
-  gdbarch->deprecated_use_generic_dummy_frames = deprecated_use_generic_dummy_frames;
-}
-
-int
-gdbarch_call_dummy_location (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  /* Skip verify of call_dummy_location, invalid_p == 0 */
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_call_dummy_location called\n");
-  return gdbarch->call_dummy_location;
-}
-
-void
-set_gdbarch_call_dummy_location (struct gdbarch *gdbarch,
-                                 int call_dummy_location)
-{
-  gdbarch->call_dummy_location = call_dummy_location;
-}
-
-CORE_ADDR
-gdbarch_call_dummy_address (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  if (gdbarch->call_dummy_address == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_call_dummy_address invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_call_dummy_address called\n");
-  return gdbarch->call_dummy_address ();
-}
-
-void
-set_gdbarch_call_dummy_address (struct gdbarch *gdbarch,
-                                gdbarch_call_dummy_address_ftype call_dummy_address)
-{
-  gdbarch->call_dummy_address = call_dummy_address;
-}
-
-CORE_ADDR
-gdbarch_deprecated_call_dummy_start_offset (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_call_dummy_start_offset called\n");
-  return gdbarch->deprecated_call_dummy_start_offset;
-}
-
-void
-set_gdbarch_deprecated_call_dummy_start_offset (struct gdbarch *gdbarch,
-                                                CORE_ADDR deprecated_call_dummy_start_offset)
-{
-  gdbarch->deprecated_call_dummy_start_offset = deprecated_call_dummy_start_offset;
-}
-
-CORE_ADDR
-gdbarch_deprecated_call_dummy_breakpoint_offset (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_call_dummy_breakpoint_offset called\n");
-  return gdbarch->deprecated_call_dummy_breakpoint_offset;
-}
-
-void
-set_gdbarch_deprecated_call_dummy_breakpoint_offset (struct gdbarch *gdbarch,
-                                                     CORE_ADDR deprecated_call_dummy_breakpoint_offset)
-{
-  gdbarch->deprecated_call_dummy_breakpoint_offset = deprecated_call_dummy_breakpoint_offset;
-}
-
-int
-gdbarch_deprecated_call_dummy_length (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_call_dummy_length called\n");
-  return gdbarch->deprecated_call_dummy_length;
-}
-
-void
-set_gdbarch_deprecated_call_dummy_length (struct gdbarch *gdbarch,
-                                          int deprecated_call_dummy_length)
-{
-  gdbarch->deprecated_call_dummy_length = deprecated_call_dummy_length;
-}
-
-int
 gdbarch_deprecated_pc_in_call_dummy_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
@@ -3935,115 +4165,6 @@ set_gdbarch_deprecated_pc_in_call_dummy (struct gdbarch *gdbarch,
                                          gdbarch_deprecated_pc_in_call_dummy_ftype deprecated_pc_in_call_dummy)
 {
   gdbarch->deprecated_pc_in_call_dummy = deprecated_pc_in_call_dummy;
-}
-
-LONGEST *
-gdbarch_deprecated_call_dummy_words (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  /* Skip verify of deprecated_call_dummy_words, invalid_p == 0 */
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_call_dummy_words called\n");
-  return gdbarch->deprecated_call_dummy_words;
-}
-
-void
-set_gdbarch_deprecated_call_dummy_words (struct gdbarch *gdbarch,
-                                         LONGEST * deprecated_call_dummy_words)
-{
-  gdbarch->deprecated_call_dummy_words = deprecated_call_dummy_words;
-}
-
-int
-gdbarch_deprecated_sizeof_call_dummy_words (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  /* Skip verify of deprecated_sizeof_call_dummy_words, invalid_p == 0 */
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_sizeof_call_dummy_words called\n");
-  return gdbarch->deprecated_sizeof_call_dummy_words;
-}
-
-void
-set_gdbarch_deprecated_sizeof_call_dummy_words (struct gdbarch *gdbarch,
-                                                int deprecated_sizeof_call_dummy_words)
-{
-  gdbarch->deprecated_sizeof_call_dummy_words = deprecated_sizeof_call_dummy_words;
-}
-
-int
-gdbarch_deprecated_call_dummy_stack_adjust_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->deprecated_call_dummy_stack_adjust != 0;
-}
-
-int
-gdbarch_deprecated_call_dummy_stack_adjust (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_call_dummy_stack_adjust called\n");
-  return gdbarch->deprecated_call_dummy_stack_adjust;
-}
-
-void
-set_gdbarch_deprecated_call_dummy_stack_adjust (struct gdbarch *gdbarch,
-                                                int deprecated_call_dummy_stack_adjust)
-{
-  gdbarch->deprecated_call_dummy_stack_adjust = deprecated_call_dummy_stack_adjust;
-}
-
-int
-gdbarch_deprecated_fix_call_dummy_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->deprecated_fix_call_dummy != 0;
-}
-
-void
-gdbarch_deprecated_fix_call_dummy (struct gdbarch *gdbarch, char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p)
-{
-  gdb_assert (gdbarch != NULL);
-  if (gdbarch->deprecated_fix_call_dummy == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_deprecated_fix_call_dummy invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_fix_call_dummy called\n");
-  gdbarch->deprecated_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p);
-}
-
-void
-set_gdbarch_deprecated_fix_call_dummy (struct gdbarch *gdbarch,
-                                       gdbarch_deprecated_fix_call_dummy_ftype deprecated_fix_call_dummy)
-{
-  gdbarch->deprecated_fix_call_dummy = deprecated_fix_call_dummy;
-}
-
-int
-gdbarch_push_dummy_code_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->push_dummy_code != 0;
-}
-
-CORE_ADDR
-gdbarch_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc, struct value **args, int nargs, struct type *value_type, CORE_ADDR *real_pc, CORE_ADDR *bp_addr)
-{
-  gdb_assert (gdbarch != NULL);
-  if (gdbarch->push_dummy_code == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_push_dummy_code invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_push_dummy_code called\n");
-  return gdbarch->push_dummy_code (gdbarch, sp, funaddr, using_gcc, args, nargs, value_type, real_pc, bp_addr);
-}
-
-void
-set_gdbarch_push_dummy_code (struct gdbarch *gdbarch,
-                             gdbarch_push_dummy_code_ftype push_dummy_code)
-{
-  gdbarch->push_dummy_code = push_dummy_code;
 }
 
 int
@@ -4351,110 +4472,6 @@ set_gdbarch_return_value_on_stack (struct gdbarch *gdbarch,
                                    gdbarch_return_value_on_stack_ftype return_value_on_stack)
 {
   gdbarch->return_value_on_stack = return_value_on_stack;
-}
-
-int
-gdbarch_deprecated_push_arguments_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->deprecated_push_arguments != 0;
-}
-
-CORE_ADDR
-gdbarch_deprecated_push_arguments (struct gdbarch *gdbarch, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr)
-{
-  gdb_assert (gdbarch != NULL);
-  if (gdbarch->deprecated_push_arguments == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_deprecated_push_arguments invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_push_arguments called\n");
-  return gdbarch->deprecated_push_arguments (nargs, args, sp, struct_return, struct_addr);
-}
-
-void
-set_gdbarch_deprecated_push_arguments (struct gdbarch *gdbarch,
-                                       gdbarch_deprecated_push_arguments_ftype deprecated_push_arguments)
-{
-  gdbarch->deprecated_push_arguments = deprecated_push_arguments;
-}
-
-int
-gdbarch_push_dummy_call_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->push_dummy_call != 0;
-}
-
-CORE_ADDR
-gdbarch_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr, struct regcache *regcache, CORE_ADDR bp_addr, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr)
-{
-  gdb_assert (gdbarch != NULL);
-  if (gdbarch->push_dummy_call == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_push_dummy_call invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_push_dummy_call called\n");
-  return gdbarch->push_dummy_call (gdbarch, func_addr, regcache, bp_addr, nargs, args, sp, struct_return, struct_addr);
-}
-
-void
-set_gdbarch_push_dummy_call (struct gdbarch *gdbarch,
-                             gdbarch_push_dummy_call_ftype push_dummy_call)
-{
-  gdbarch->push_dummy_call = push_dummy_call;
-}
-
-int
-gdbarch_deprecated_push_dummy_frame_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->deprecated_push_dummy_frame != 0;
-}
-
-void
-gdbarch_deprecated_push_dummy_frame (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  if (gdbarch->deprecated_push_dummy_frame == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_deprecated_push_dummy_frame invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_push_dummy_frame called\n");
-  gdbarch->deprecated_push_dummy_frame ();
-}
-
-void
-set_gdbarch_deprecated_push_dummy_frame (struct gdbarch *gdbarch,
-                                         gdbarch_deprecated_push_dummy_frame_ftype deprecated_push_dummy_frame)
-{
-  gdbarch->deprecated_push_dummy_frame = deprecated_push_dummy_frame;
-}
-
-int
-gdbarch_deprecated_push_return_address_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->deprecated_push_return_address != 0;
-}
-
-CORE_ADDR
-gdbarch_deprecated_push_return_address (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR sp)
-{
-  gdb_assert (gdbarch != NULL);
-  if (gdbarch->deprecated_push_return_address == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_deprecated_push_return_address invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_push_return_address called\n");
-  return gdbarch->deprecated_push_return_address (pc, sp);
-}
-
-void
-set_gdbarch_deprecated_push_return_address (struct gdbarch *gdbarch,
-                                            gdbarch_deprecated_push_return_address_ftype deprecated_push_return_address)
-{
-  gdbarch->deprecated_push_return_address = deprecated_push_return_address;
 }
 
 int
@@ -5206,23 +5223,6 @@ set_gdbarch_frame_align (struct gdbarch *gdbarch,
                          gdbarch_frame_align_ftype frame_align)
 {
   gdbarch->frame_align = frame_align;
-}
-
-int
-gdbarch_deprecated_extra_stack_alignment_needed (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  /* Skip verify of deprecated_extra_stack_alignment_needed, invalid_p == 0 */
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_extra_stack_alignment_needed called\n");
-  return gdbarch->deprecated_extra_stack_alignment_needed;
-}
-
-void
-set_gdbarch_deprecated_extra_stack_alignment_needed (struct gdbarch *gdbarch,
-                                                     int deprecated_extra_stack_alignment_needed)
-{
-  gdbarch->deprecated_extra_stack_alignment_needed = deprecated_extra_stack_alignment_needed;
 }
 
 int
