@@ -1,5 +1,9 @@
 2001-05-25  Alan Modra  <amodra@one.net.au>
 
+	* expr.c (expr): Set return value to absolute_section for
+	subtractive operations on symbols within a segment.
+	* read.c (pseudo_set): Set segment for complex expressions.
+
 	From 2.11 branch 2001-03-30  Richard Henderson  <rth@redhat.com>
 	* config/tc-i386.c (md_convert_frag): Don't die on local symbols
 	that have been finalized.

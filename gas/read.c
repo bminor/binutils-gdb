@@ -3151,6 +3151,7 @@ pseudo_set (symbolP)
      symbolS *symbolP;
 {
   expressionS exp;
+  segT seg;
 #if (defined (OBJ_AOUT) || defined (OBJ_BOUT)) && ! defined (BFD_ASSEMBLER)
   int ext;
 #endif /* OBJ_AOUT or OBJ_BOUT */
@@ -3160,7 +3161,7 @@ pseudo_set (symbolP)
   ext = S_IS_EXTERNAL (symbolP);
 #endif /* OBJ_AOUT or OBJ_BOUT */
 
-  (void) expression (&exp);
+  seg = expression (&exp);
 
   if (exp.X_op == O_illegal)
     as_bad (_("illegal expression; zero assumed"));
@@ -3236,9 +3237,9 @@ pseudo_set (symbolP)
       break;
 
     default:
-      /* The value is some complex expression.
-	 FIXME: Should we set the segment to anything?  */
+      /* The value is some complex expression.  */
       symbol_set_value_expression (symbolP, &exp);
+      S_SET_SEGMENT (symbolP, seg);
       break;
     }
 }
