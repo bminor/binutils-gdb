@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #
-# Last Mod Tue Nov 5 23:28:51 PST 1991, by rich@cygnus.com
+# Last Mod Wed Nov 6 20:56:58 PST 1991, by rich@rtl.cygnus.com
 #
 # $Id$
 
@@ -108,7 +108,7 @@ pass:
 		-B`pwd`/$(unsubdir)/gcc$(subdir)/$(stagepass)/ \
 		-B`pwd`/$(unsubdir)/gas$(subdir)/$(stagepass)/ \
 		-B`pwd`/$(unsubdir)/ld$(subdir)/$(stagepass)/" \
-		"AR=`pwd`/$(unsubdir)/binutil$(subdir)/$(stagepass)/ar" \
+		"AR=`pwd`/$(unsubdir)/binutils$(subdir)/$(stagepass)/ar" \
 		"RANLIB=`pwd`/$(unsubdir)/binutils$(subdir)/$(stagepass)/ranlib" \
 		"LOADLIBES=`pwd`/$(unsubdir)/gnulib$(subdir)/$(stagepass)/gnulib.a /lib/libc.a" \
 		"LDFLAGS=-nostdlib /lib/crt0.o \
@@ -141,24 +141,22 @@ clean:
 	rm -rf *.a TEMP errs core *.o *~ \#* TAGS *.E
 	$(MAKE) subdir_do DO=clean "DODIRS=$(SUBDIRS) $(OTHERS)"
 
-install: install-dirs $(INSTALL_FIXED_INCLUDES)
+install: install-dirs $(INSTALL_FIXED_INCLUDES) $(INSTALL_HEADERS)
 	$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS) $(OTHERS)"
 
 # The "else true" stuff is for Ultrix; the shell returns the exit code
 # of the "if" command, if no commands are run in the "then" or "else" part,
 # causing Make to quit.
-install-dirs: force $(INSTALL_HEADERS)
+install-dirs: force
 	- mkdir $(ddestdir)
+	- mkdir $(ddestdir)/bin
 	- mkdir $(ddestdir)/include
 	- mkdir $(ddestdir)/lib
 	- mkdir $(ddestdir)/lib/emacs
-	- mkdir $(ddestdir)/bin
-	- mkdir $(ddestdir)/lib
-	- mkdir $(ddestdir)
-	- mkdir $(ddestdir)/bin
-	- mkdir $(ddestdir)/lib
 	- mkdir $(idestdir)
-	- mkdir $(idestdir)include
+	- mkdir $(idestdir)/bin
+	- mkdir $(idestdir)/lib
+	- mkdir $(idestdir)/include
 	- mkdir $(idestdir)/doc
 	- mkdir $(idestdir)/man
 	- mkdir $(idestdir)/man/man1
