@@ -1158,6 +1158,9 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
 	    case STT_OBJECT:
 	      sym->symbol.flags |= BSF_OBJECT;
 	      break;
+	    case STT_TLS:
+	      sym->symbol.flags |= BSF_THREAD_LOCAL;
+	      break;
 	    }
 
 	  if (dynamic)

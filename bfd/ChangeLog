@@ -1,3 +1,8 @@
+2004-11-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 574:
+	* elfcode.h (elf_slurp_symbol_table): Handle STT_TLS.
+
 2004-11-24  Paul Brook  <paul@codesourcery.com>
 
 	* elf.c (assign_section_numbers): Number SHT_GROUP sections first.
