@@ -3261,14 +3261,14 @@ generate_unwind_image (text_name)
      const char *text_name;
 {
   int size;
-  unsigned char *unw_rec;
+  void *unw_rec;
 
   /* Force out pending instructions, to make sure all unwind records have
      a valid slot_number field.  */
   ia64_flush_insns ();
 
   /* Generate the unwind record.  */
-  size = output_unw_records (unwind.list, (void **) &unw_rec);
+  size = output_unw_records (unwind.list, &unw_rec);
   if (size % md.pointer_size != 0)
     as_bad ("Unwind record is not a multiple of %d bytes.", md.pointer_size);
 
