@@ -1,3 +1,14 @@
+Wed Jul 15 11:37:31 1992  Fred Fish  (fnf@cygnus.com)
+
+	* dbxread.c, dwarfread.c:  Re-enable experimental code to
+	automatically select demangling style.
+	* demangle.c (DEFAULT_DEMANGLING_STYLE):  Rename from simply
+	DEMANGLING_STYLE, to make more descriptive.  Revert back to
+	"auto" as default.  Comment use.
+	* Makefile.in (DEMANGLING_STYLE, DEMANGLE_OPTS):  Remove.
+	* Makefile.in (${DEMANGLER}.o) Remove target and special
+	compilation rule.
+
 Tue Jul 14 23:05:14 1992  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (VERSION):  Bump to 4.6.1 (post-release versions).

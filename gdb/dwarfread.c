@@ -1577,7 +1577,7 @@ handle_producer (producer)
      is not auto.  We also leave the demangling style alone if we find a
      gcc (cc1) producer, as opposed to a g++ (cc1plus) producer. */
 
-#if 0 /* Works, but is disabled for now.  -fnf */
+#if 1 /* Works, but is experimental.  -fnf */
   if (current_demangling_style == auto_demangling)
     {
       if (STREQN (producer, GPLUS_PRODUCER, strlen (GPLUS_PRODUCER)))

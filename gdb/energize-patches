@@ -21,21 +21,17 @@ diff -c -r2.56 .Sanitize
   environ.h
   eval.c
 ===================================================================
-RCS file: /local/cvsfiles/devo/gdb/Makefile.in,v
-retrieving revision 1.162
-diff -c -r1.162 Makefile.in
-*** 1.162	1992/07/05 17:21:11
---- Makefile.in	1992/07/05 18:46:03
+*** Makefile.in	Wed Jul 15 12:22:03 1992
+--- Makefile.in	Wed Jul 15 12:15:34 1992
 ***************
 *** 123,128 ****
---- 123,133 ----
+--- 123,132 ----
   READLINE_DEP = $$(READLINE_DIR)
   RL_LIB = ./../readline${subdir}/libreadline.a
   
 + # Energize libraries
-+ ENERGIZE_DIR = ${srcdir}/energize
-+ ENERGIZE_INCLUDES = -I${ENERGIZE_DIR}
-+ ENERGIZE_LIB = ${ENERGIZE_DIR}/libconn.a
++ ENERGIZE_DIR = ${srcdir}/../gdb/energize
++ ENERGIZE_LIB = ./../gdb/energize${subdir}/libconn.a
 + 
   # All the includes used for CFLAGS and for lint.
   # -I. for config files.
@@ -54,11 +50,11 @@ diff -c -r1.162 Makefile.in
   
   VERSION = 4.6.1
   DIST=gdb
---- 160,172 ----
+--- 159,171 ----
   # {X,T}M_CLIBS, defined in *config files, have host- and target-dependent libs.
   # TERMCAP comes after readline, since readline depends on it.
   CLIBS = ${BFD_LIB}  ${RL_LIB} ${TERMCAP} ${MMALLOC_LIB} ${LIBIBERTY} \
-! 	${XM_CLIBS} ${TM_CLIBS} ${ENERGIZE_LIB}
+! 	${ENERGIZE_LIB} ${XM_CLIBS} ${TM_CLIBS}
   CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${MMALLOC_LIB} ${LIBIBERTY} \
   	${RL_LIB} ${MMALLOC_LIB}
   
@@ -69,24 +65,7 @@ diff -c -r1.162 Makefile.in
   VERSION = 4.6.1
   DIST=gdb
 ***************
-*** 175,181 ****
-  # selection of the style unless you do an explicit "set demangle auto".
-  # To select one of these as the default, set DEMANGLING_STYLE in the
-  # appropriate target dependent makefile fragment.
-! DEMANGLING_STYLE = "gnu"
-  
-  # Select demangler to use.
-  DEMANGLER = cplus-dem
---- 181,187 ----
-  # selection of the style unless you do an explicit "set demangle auto".
-  # To select one of these as the default, set DEMANGLING_STYLE in the
-  # appropriate target dependent makefile fragment.
-! DEMANGLING_STYLE = "lucid"
-  
-  # Select demangler to use.
-  DEMANGLER = cplus-dem
-***************
-*** 199,205 ****
+*** 190,196 ****
   	 ${DEMANGLER}.c mem-break.c target.c inftarg.c \
   	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c \
   	 ieee-float.c language.c parse.c buildsym.c objfiles.c \
@@ -94,7 +73,7 @@ diff -c -r1.162 Makefile.in
   
   # Source files in subdirectories (which will be handled separately by
   #  'make gdb.tar.Z').
---- 205,211 ----
+--- 195,201 ----
   	 ${DEMANGLER}.c mem-break.c target.c inftarg.c \
   	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c \
   	 ieee-float.c language.c parse.c buildsym.c objfiles.c \
@@ -103,7 +82,7 @@ diff -c -r1.162 Makefile.in
   # Source files in subdirectories (which will be handled separately by
   #  'make gdb.tar.Z').
 ***************
-*** 285,291 ****
+*** 276,282 ****
       command.o utils.o expprint.o environ.o version.o gdbtypes.o \
       copying.o $(DEPFILES) ${DEMANGLER}.o mem-break.o target.o \
       inftarg.o ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
@@ -111,7 +90,7 @@ diff -c -r1.162 Makefile.in
       dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o
   
   RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)
---- 291,297 ----
+--- 281,287 ----
       command.o utils.o expprint.o environ.o version.o gdbtypes.o \
       copying.o $(DEPFILES) ${DEMANGLER}.o mem-break.o target.o \
       inftarg.o ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
@@ -120,7 +99,7 @@ diff -c -r1.162 Makefile.in
   
   RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)
 ***************
-*** 298,304 ****
+*** 289,295 ****
   
   NTSSTART = kdb-start.o
   
@@ -128,7 +107,7 @@ diff -c -r1.162 Makefile.in
   
   # For now, shortcut the "configure GDB for fewer languages" stuff.
   YYFILES = c-exp.tab.c m2-exp.tab.c
---- 304,310 ----
+--- 294,300 ----
   
   NTSSTART = kdb-start.o
   
@@ -137,8 +116,8 @@ diff -c -r1.162 Makefile.in
   # For now, shortcut the "configure GDB for fewer languages" stuff.
   YYFILES = c-exp.tab.c m2-exp.tab.c
 ***************
-*** 352,357 ****
---- 358,377 ----
+*** 343,348 ****
+--- 348,367 ----
   	#load `echo " "$(DEPFILES) | sed -e 's/\.o/.c/g' -e 's, , ../,g'`
   	echo "Load .c corresponding to:" $(DEPFILES)
   
@@ -160,17 +139,19 @@ diff -c -r1.162 Makefile.in
   # This is useful when debugging GDB, because some Unix's don't let you run GDB
   # on itself without copying the executable.  So "make gdb1" will make
 ***************
-*** 700,705 ****
---- 720,728 ----
+*** 665,670 ****
+--- 684,694 ----
   
-  ttyflush.o: ${srcdir}/nindy-share/ttyflush.c
-  	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/nindy-share/ttyflush.c
+  xcoffexec.o: ${srcdir}/xcoffexec.c
+  	${CC} -c ${INTERNAL_CFLAGS} -I$(BFD_DIR) ${srcdir}/xcoffexec.c
++ 
++ # Energize support has dependencies on ENERGIZE header files.
 + 
 + energize.o: ${srcdir}/energize.c
-+ 	${CC} -c ${INTERNAL_CFLAGS} ${ENERGIZE_INCLUDES} ${srcdir}/energize.c
++ 	${CC} -c ${INTERNAL_CFLAGS} -I$(ENERGIZE_DIR) ${srcdir}/energize.c
   
-  lint: $(LINTFILES)
-  	$(LINT) $(INCLUDE_CFLAGS) $(LINTFLAGS) $(LINTFILES) \
+  # Drag in the files that are in another directory.
+  
 ===================================================================
 RCS file: /local/cvsfiles/devo/gdb/breakpoint.c,v
 retrieving revision 1.38
@@ -913,9 +894,8 @@ diff -c -r1.4 amix.mh
 + # These are the libs that are needed for the Energize version of gdb on
 + # SVR4.  Note that we MUST include the standard C library before libucb.a,
 + # otherwise we get lots of broken stuff we don't want.
-+ ENERGIZE_LIB = energize/libconn.a
-+ ENERGIZE_LIBS = ${ENERGIZE_LIB} -L/usr/lib -lm -lnet -lresolv -lform \
-+ 	-lsocket -lc /usr/ucblib/libucb.a -lnsl
++ XM_CLIBS = -L/usr/lib -lm -lnet -lresolv -lform -lsocket -lc \
++ 	/usr/ucblib/libucb.a -lnsl
 ===================================================================
 RCS file: /local/cvsfiles/devo/gdb/config/ncr3000.mh,v
 retrieving revision 1.4
@@ -924,7 +904,7 @@ diff -c -r1.4 ncr3000.mh
 --- config/ncr3000.mh	1992/07/05 17:49:34
 ***************
 *** 38,40 ****
---- 38,47 ----
+--- 38,46 ----
   # The /usr/ucb/install program is incompatible (complains about unknown
   # group staff).  Use good old cp...
   INSTALL = cp
@@ -932,6 +912,25 @@ diff -c -r1.4 ncr3000.mh
 + # These are the libs that are needed for the Energize version of gdb on
 + # SVR4.  Note that we MUST include the standard C library before libucb.a,
 + # otherwise we get lots of broken stuff we don't want.
-+ ENERGIZE_LIB = energize/libconn.a
-+ ENERGIZE_LIBS = ${ENERGIZE_LIB} -L/usr/lib -lm -lnet -lresolv -lform \
-+ 	-lsocket -lc /usr/ucblib/libucb.a -lnsl
++ XM_CLIBS = -L/usr/lib -lm -lnet -lresolv -lform -lsocket -lc \
++ 	/usr/ucblib/libucb.a -lnsl
+===================================================================
+*** demangle.c	Wed Jul 15 11:42:27 1992
+--- demangle.c	Wed Jul 15 11:25:14 1992
+***************
+*** 37,43 ****
+     the appropriate target configuration file. */
+  
+  #ifndef DEFAULT_DEMANGLING_STYLE
+! # define DEFAULT_DEMANGLING_STYLE AUTO_DEMANGLING_STYLE_STRING
+  #endif
+  
+  /* The current demangling style in affect.  Global so that the demangler
+--- 37,43 ----
+     the appropriate target configuration file. */
+  
+  #ifndef DEFAULT_DEMANGLING_STYLE
+! # define DEFAULT_DEMANGLING_STYLE LUCID_DEMANGLING_STYLE_STRING
+  #endif
+  
+  /* The current demangling style in affect.  Global so that the demangler
