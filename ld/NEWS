@@ -5,6 +5,8 @@
   should report them and the switch --warn-unresolved-symbols has been added to
   make reports be issued as warning messages rather than errors.
 
+Changes in 2.14:
+
 * Added support for Xtensa architecture.
 
 * Added --with-sysroot configure switch to specify a target system root, for

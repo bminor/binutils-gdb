@@ -19,6 +19,8 @@
   single-character representation.  This can be checked by running nm
   with the -a switch.
 
+Changes in 2.14:
+
 * Added --info switch to objcopy and strip.
 
 * Support for Vitesse IQ2000 added by Red Hat.

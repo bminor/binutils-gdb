@@ -1,5 +1,9 @@
 2003-09-30  Chris Demetriou  <cgd@broadcom.com>
 
+	* NEWS: Add an indication of the cutoff for 2.14.
+
+2003-09-30  Chris Demetriou  <cgd@broadcom.com>
+
 	* configure.in (mipsisa64r2, mipsisa64r2el, mipsisa64r2*): New CPUs.
 	* configure: Regenerate.
 	* config/tc-mips.c (imm2_expr): New variable.
