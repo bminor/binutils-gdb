@@ -202,10 +202,10 @@ insert_normal (cd, value, attrs, word_offset, start, length, word_length,
 }
 
 /* Default insn builder (insert handler).
-   The instruction is recorded in CGEN_INT_INSN_P byte order
-   (meaning that if CGEN_INT_INSN_P BUFFER is an int * and thus the value is
-   recorded in host byte order, otherwise BUFFER is an array of bytes and the
-   value is recorded in target byte order).
+   The instruction is recorded in CGEN_INT_INSN_P byte order (meaning
+   that if CGEN_INSN_BYTES_PTR is an int * and thus, the value is
+   recorded in host byte order, otherwise BUFFER is an array of bytes
+   and the value is recorded in target byte order).
    The result is an error message or NULL if success.  */
 
 static const char *
