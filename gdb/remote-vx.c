@@ -26,7 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 #include "command.h"
 #include "symtab.h"
-#include "symfile.h"		/* for struct complaint */
+#include "complaints.h"
 
 #include <string.h>
 #include <errno.h>

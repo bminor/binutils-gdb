@@ -1,3 +1,7 @@
+Mon Dec 21 02:17:57 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* remote-vx.c: remove include of "symfile.h", replace it with "complaints.h"
+
 Fri Dec 18 10:32:25 1992  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (VERSION):  Bump to 4.7.4.
