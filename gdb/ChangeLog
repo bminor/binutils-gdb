@@ -1,3 +1,18 @@
+2000-04-12  Kevin Buettner  <kevinb@redhat.com>
+
+	* ia64-linux-nat.c (IA64_PSR_DB, IA64_PSR_DD): Define.
+	(fetch_debug_register, fetch_debug_register_pair,
+	store_debug_register, store_debug_register_pair, is_power_of_2,
+	enable_watchpoints_in_psr, ia64_linux_insert_watchpoint,
+	ia64_linux_remove_watchpoint, ia64_linux_stopped_by_watchpoint):
+	New functions.
+	* config/ia64/nm-linux.h (TARGET_HAS_HARDWARE_WATCHPOINTS,
+	TARGET_CAN_USE_HARDWARE_WATCHPOINT, HAVE_STEPPABLE_WATCHPOINT,
+	STOPPED_BY_WATCHPOINT, target_insert_watchpoint,
+	target_remove_watchpoint): Define.
+	(ia64_linux_stopped_by_watchpoint, ia64_linux_insert_watchpoint,
+	ia64_linux_remove_watchpoint): Declare.
+
 2000-04-12  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* go32-nat.c (go32_insert_hw_breakpoint): When there are no more

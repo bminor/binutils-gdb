@@ -473,3 +473,174 @@ fill_fpregset (fpregsetp, regno)
 	}
     }
 }
+
+#define IA64_PSR_DB (1UL << 24)
+#define IA64_PSR_DD (1UL << 39)
+
+static void
+enable_watchpoints_in_psr (int pid)
+{
+  CORE_ADDR psr;
+
+  psr = read_register_pid (IA64_PSR_REGNUM, pid);
+  if (!(psr & IA64_PSR_DB))
+    {
+      psr |= IA64_PSR_DB;	/* Set the db bit - this enables hardware
+			           watchpoints and breakpoints. */
+      write_register_pid (IA64_PSR_REGNUM, psr, pid);
+    }
+}
+
+static long
+fetch_debug_register (int pid, int idx)
+{
+  long val;
+  int tid;
+
+  tid = TIDGET(pid);
+  if (tid == 0)
+    tid = pid;
+
+  val = ptrace (PT_READ_U, tid, (PTRACE_ARG3_TYPE) (PT_DBR + 8 * idx), 0);
+
+  return val;
+}
+
+static void
+store_debug_register (int pid, int idx, long val)
+{
+  int tid;
+
+  tid = TIDGET(pid);
+  if (tid == 0)
+    tid = pid;
+
+  (void) ptrace (PT_WRITE_U, tid, (PTRACE_ARG3_TYPE) (PT_DBR + 8 * idx), val);
+}
+
+static void
+fetch_debug_register_pair (int pid, int idx, long *dbr_addr, long *dbr_mask)
+{
+  if (dbr_addr)
+    *dbr_addr = fetch_debug_register (pid, 2 * idx);
+  if (dbr_mask)
+    *dbr_mask = fetch_debug_register (pid, 2 * idx + 1);
+}
+
+static void
+store_debug_register_pair (int pid, int idx, long *dbr_addr, long *dbr_mask)
+{
+  if (dbr_addr)
+    store_debug_register (pid, 2 * idx, *dbr_addr);
+  if (dbr_mask)
+    store_debug_register (pid, 2 * idx + 1, *dbr_mask);
+}
+
+static int
+is_power_of_2 (int val)
+{
+  int i, onecount;
+
+  onecount = 0;
+  for (i = 0; i < 8 * sizeof (val); i++)
+    if (val & (1 << i))
+      onecount++;
+
+  return onecount <= 1;
+}
+
+int
+ia64_linux_insert_watchpoint (int pid, CORE_ADDR addr, int len, int rw)
+{
+  int idx;
+  long dbr_addr, dbr_mask;
+  int max_watchpoints = 4;
+
+  if (len <= 0 || !is_power_of_2 (len))
+    return -1;
+
+  for (idx = 0; idx < max_watchpoints; idx++)
+    {
+      fetch_debug_register_pair (pid, idx, NULL, &dbr_mask);
+      if ((dbr_mask & (0x3UL << 62)) == 0)
+	{
+	  /* Exit loop if both r and w bits clear */
+	  break;
+	}
+    }
+
+  if (idx == max_watchpoints)
+    return -1;
+
+  dbr_addr = (long) addr;
+  dbr_mask = (~(len - 1) & 0x00ffffffffffffffL);  /* construct mask to match */
+  dbr_mask |= 0x0800000000000000L;           /* Only match privilege level 3 */
+  switch (rw)
+    {
+    case hw_write:
+      dbr_mask |= (1L << 62);			/* Set w bit */
+      break;
+    case hw_read:
+      dbr_mask |= (1L << 63);			/* Set r bit */
+      break;
+    case hw_access:
+      dbr_mask |= (3L << 62);			/* Set both r and w bits */
+      break;
+    default:
+      return -1;
+    }
+
+  store_debug_register_pair (pid, idx, &dbr_addr, &dbr_mask);
+  enable_watchpoints_in_psr (pid);
+
+  return 0;
+}
+
+int
+ia64_linux_remove_watchpoint (int pid, CORE_ADDR addr, int len)
+{
+  int idx;
+  long dbr_addr, dbr_mask;
+  int max_watchpoints = 4;
+
+  if (len <= 0 || !is_power_of_2 (len))
+    return -1;
+
+  for (idx = 0; idx < max_watchpoints; idx++)
+    {
+      fetch_debug_register_pair (pid, idx, &dbr_addr, &dbr_mask);
+      if ((dbr_mask & (0x3UL << 62)) && addr == (CORE_ADDR) dbr_addr)
+	{
+	  dbr_addr = 0;
+	  dbr_mask = 0;
+	  store_debug_register_pair (pid, idx, &dbr_addr, &dbr_mask);
+	  return 0;
+	}
+    }
+  return -1;
+}
+
+CORE_ADDR
+ia64_linux_stopped_by_watchpoint (int pid)
+{
+  CORE_ADDR psr;
+  int tid;
+  struct siginfo siginfo;
+
+  tid = TIDGET(pid);
+  if (tid == 0)
+    tid = pid;
+  
+  errno = 0;
+  ptrace (PTRACE_GETSIGINFO, tid, (PTRACE_ARG3_TYPE) 0, &siginfo);
+
+  if (errno != 0 || siginfo.si_code != 4 /* TRAP_HWBKPT */)
+    return 0;
+
+  psr = read_register_pid (IA64_PSR_REGNUM, pid);
+  psr |= IA64_PSR_DD;	/* Set the dd bit - this will disable the watchpoint
+                           for the next instruction */
+  write_register_pid (IA64_PSR_REGNUM, psr, pid);
+
+  return (CORE_ADDR) siginfo.si_addr;
+}
