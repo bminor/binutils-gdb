@@ -15,14 +15,6 @@
 
 Do-first:
 
-mpw_files="mpw-config.in mpw-make.in ChangeLog.mpw"
-
-if ( echo $* | grep keep\-mpw > /dev/null ) ; then
-	keep_these_too="${mpw_files} ${keep_these_too}"
-else
-	lose_these_too="${mpw_files} ${lose_these_too}"
-fi
-
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -59,6 +51,8 @@ is-ranlib.c
 is-strip.c
 maybe-ranlib.c
 maybe-strip.c
+mpw-config.in
+mpw-make.in
 nlmconv.1
 nlmconv.c
 nlmconv.h
