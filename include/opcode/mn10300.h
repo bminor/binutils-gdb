@@ -141,6 +141,6 @@ extern const struct mn10300_operand mn10300_operands[];
 #define FMT_D8 13
 #define FMT_D9 14
 #define FMT_D10 15
-/* start-sanitize-am33 */
+/* end-sanitize-am33 */
 
 #endif /* MN10300_H */
