@@ -36,6 +36,8 @@ i960-dis.c
 m68881-ext.c
 m68k-dis.c
 mips-dis.c
+sh-opc.h
+sh-dis.c
 sparc-dis.c
 sparc-opc.c
 z8k-dis.c
@@ -45,6 +47,7 @@ alpha-opc.h
 alpha-dis.c
 
 Do-last:
+
 
 if ( echo $* | grep keep\-v9 > /dev/null ) ; then
 	echo Keeping v9 in sparc-opc.c
