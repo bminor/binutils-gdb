@@ -18,7 +18,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#define ARCH 32
 #define TARGETNAME "a.out-sunos-big"
 #define MY(OP) CAT(sunos_big_,OP)
 
@@ -855,10 +854,10 @@ sunos_add_one_symbol (info, abfd, name, flags, section, value, string,
      section of the dynamic object.  We don't want to allocate space
      for it in our process image.  */
   if ((abfd->flags & DYNAMIC) != 0
-      && section == &bfd_com_section)
+      && bfd_is_com_section (section))
     section = obj_bsssec (abfd);
 
-  if (section != &bfd_und_section
+  if (! bfd_is_und_section (section)
       && h->root.root.type != bfd_link_hash_new
       && h->root.root.type != bfd_link_hash_undefined)
     {
@@ -870,9 +869,10 @@ sunos_add_one_symbol (info, abfd, name, flags, section, value, string,
 	     We do not want this new definition to override the
 	     existing definition, so we pretend it is just a
 	     reference.  */
-	  section = &bfd_und_section;
+	  section = bfd_und_section_ptr;
 	}
       else if ((h->root.root.type == bfd_link_hash_defined
+		&& h->root.root.u.def.section->owner != NULL
 		&& (h->root.root.u.def.section->owner->flags & DYNAMIC) != 0)
 	       || (h->root.root.type == bfd_link_hash_common
 		   && ((h->root.root.u.c.section->owner->flags & DYNAMIC)
@@ -898,14 +898,14 @@ sunos_add_one_symbol (info, abfd, name, flags, section, value, string,
      object.  */
   if ((abfd->flags & DYNAMIC) == 0)
     {
-      if (section == &bfd_und_section)
+      if (bfd_is_und_section (section))
 	new_flag = SUNOS_REF_REGULAR;
       else
 	new_flag = SUNOS_DEF_REGULAR;
     }
   else
     {
-      if (section == &bfd_und_section)
+      if (bfd_is_und_section (section))
 	new_flag = SUNOS_REF_DYNAMIC;
       else
 	new_flag = SUNOS_DEF_DYNAMIC;
@@ -1668,7 +1668,7 @@ sunos_write_dynamic_symbol (output_bfd, info, harg)
 
 	sec = h->root.root.u.def.section;
 	output_section = sec->output_section;
-	BFD_ASSERT (output_section == &bfd_abs_section
+	BFD_ASSERT (bfd_is_abs_section (output_section)
 		    || output_section->owner == output_bfd);
 	if (strcmp (sec->name, ".plt") == 0)
 	  {

@@ -1,5 +1,8 @@
 Wed Jan 11 14:36:41 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	* sunos.c (sunos_add_one_symbol): Don't core dump if a multiple
+	definition of an absolute symbol is encountered.
+
 	* linker.c (_bfd_generic_link_add_one_symbol): Ignore
 	redefinitions of an absolute symbol to the same value.
 
