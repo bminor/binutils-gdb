@@ -534,7 +534,9 @@ Index
 * BFD_RELOC_SPARC_REGISTER:              howto manager.
 * BFD_RELOC_SPARC_RELATIVE:              howto manager.
 * BFD_RELOC_SPARC_REV32:                 howto manager.
+* BFD_RELOC_SPARC_UA16:                  howto manager.
 * BFD_RELOC_SPARC_UA32:                  howto manager.
+* BFD_RELOC_SPARC_UA64:                  howto manager.
 * BFD_RELOC_SPARC_WDISP16:               howto manager.
 * BFD_RELOC_SPARC_WDISP19:               howto manager.
 * BFD_RELOC_SPARC_WDISP22:               howto manager.

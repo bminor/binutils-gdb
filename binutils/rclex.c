@@ -635,7 +635,7 @@ char *yytext;
 #line 1 "rclex.l"
 #define INITIAL 0
 #line 2 "rclex.l"
-/* Copyright 1997, 1998 Free Software Foundation, Inc.
+/* Copyright 1997, 1998, 1999 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GNU Binutils.

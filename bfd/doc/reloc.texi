@@ -599,7 +599,9 @@ Reloc types used for i960/b.out.
 @deffnx {} BFD_RELOC_SPARC_GLOB_DAT
 @deffnx {} BFD_RELOC_SPARC_JMP_SLOT
 @deffnx {} BFD_RELOC_SPARC_RELATIVE
+@deffnx {} BFD_RELOC_SPARC_UA16
 @deffnx {} BFD_RELOC_SPARC_UA32
+@deffnx {} BFD_RELOC_SPARC_UA64
 SPARC ELF relocations.  There is probably some overlap with other
 relocation types already defined.
 @end deffn

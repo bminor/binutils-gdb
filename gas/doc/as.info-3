@@ -1285,7 +1285,7 @@ Options
 
 `-marc[5|6|7|8]'
      This option selects the core processor variant. Using `-marc' is
-     the same as `-marc5', which is also the default.
+     the same as `-marc6', which is also the default.
 
     `arc5'
           Base instruction set.
@@ -1399,12 +1399,12 @@ directives:
 
 `.option ARC|ARC5|ARC6|ARC7|ARC8'
      The `.option' directive must be followed by the desired core
-     version. Again `arc' is an alias for `arc5'.
+     version. Again `arc' is an alias for `arc6'.
 
      Note: the `.option' directive overrides the command line option
      `-marc'; a warning is emitted when the version is not consistent
      between the two - even for the implicit default core version
-     (arc5).
+     (arc6).
 
 `.short EXPRESSIONS'
      *TODO*
