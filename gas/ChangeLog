@@ -1,4 +1,8 @@
 start-sanitize-d10v
+Wed Dec 18 16:00:42 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/tc-d10v.c (do_assemble): Correct previous bug fix.
+
 Wed Dec 18 15:27:40 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.c (md_assemble): Fix bug which caused
