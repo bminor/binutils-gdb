@@ -1,3 +1,12 @@
+Mon Dec 15 16:11:22 1997  Fred Fish  <fnf@cygnus.com>
+
+	* coffcode.h (ALIGN_SECTIONS_IN_FILE): Define if I960 not defined.
+	(coff_compute_section_file_positions): Use ALIGN_SECTIONS_IN_FILE
+	to decide when to align the file sections for paging.
+start-sanitize-tic80
+	* coffcode.h (ALIGN_SECTIONS_IN_FILE): Undefine for TIC80COFF.
+end-sanitize-tic80
+
 Mon Dec 15 15:01:15 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-m32r.c (m32r_elf_object_p): New Function.
