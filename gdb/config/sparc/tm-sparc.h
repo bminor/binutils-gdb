@@ -465,116 +465,63 @@ extern CORE_ADDR sparc_frame_saved_pc PARAMS ((struct frame_info *));
 #define POP_FRAME	sparc_pop_frame ()
 
 void sparc_push_dummy_frame PARAMS ((void)), sparc_pop_frame PARAMS ((void));
+
 /* This sequence of words is the instructions
 
-   save %sp,-0x140,%sp
-   std	%f30,[%fp-0x08]
-   std	%f28,[%fp-0x10]
-   std	%f26,[%fp-0x18]
-   std	%f24,[%fp-0x20]
-   std	%f22,[%fp-0x28]
-   std	%f20,[%fp-0x30]
-   std	%f18,[%fp-0x38]
-   std	%f16,[%fp-0x40]
-   std	%f14,[%fp-0x48]
-   std	%f12,[%fp-0x50]
-   std	%f10,[%fp-0x58]
-   std	%f8,[%fp-0x60]
-   std	%f6,[%fp-0x68]
-   std	%f4,[%fp-0x70]
-   std	%f2,[%fp-0x78]
-   std	%f0,[%fp-0x80]
-   std	%g6,[%fp-0x88]
-   std	%g4,[%fp-0x90]
-   std	%g2,[%fp-0x98]
-   std	%g0,[%fp-0xa0]
-   std	%i6,[%fp-0xa8]
-   std	%i4,[%fp-0xb0]
-   std	%i2,[%fp-0xb8]
-   std	%i0,[%fp-0xc0]
-   nop ! stcsr	[%fp-0xc4]
-   nop ! stfsr	[%fp-0xc8]
-   nop ! wr	%npc,[%fp-0xcc]
-   nop ! wr	%pc,[%fp-0xd0]
-   rd	%tbr,%o0
-   st	%o0,[%fp-0xd4]
-   rd	%wim,%o1
-   st	%o0,[%fp-0xd8]
-   rd	%psr,%o0
-   st	%o0,[%fp-0xdc]
-   rd	%y,%o0
-   st	%o0,[%fp-0xe0]
+ 0:	mov	%g1, %fp
+ 4:	save	%sp, %g0, %sp
+ 8:	mov	%g2, %fp
+12:	mov	%g3, %i7
+16:	ld	[%sp+0x58],%o5
+20:	ld	[%sp+0x54],%o4
+24:	ld	[%sp+0x50],%o3
+28:	ld	[%sp+0x4c],%o2
+32:	ld	[%sp+0x48],%o1
+36:	call 0x00000000
+40:	ld	[%sp+0x44],%o0
+44:	nop
+48:	ta 1
+52:	nop
 
-     /..* The arguments are pushed at this point by GDB;
-	no code is needed in the dummy for this.
-	The CALL_DUMMY_START_OFFSET gives the position of
-	the following ld instruction.  *../
+   NOTES:
+	* the first four instructions are necessary only on the simulator.
+	* this is a multiple of 8 (not only 4) bytes.
+	* the `call' insn is a relative, not an absolute call.
+	* the `nop' at the end is needed to keep the trap from
+	  clobbering things (if NPC pointed to garbage instead).
+*/
 
-   ld	[%sp+0x58],%o5
-   ld	[%sp+0x54],%o4
-   ld	[%sp+0x50],%o3
-   ld	[%sp+0x4c],%o2
-   ld	[%sp+0x48],%o1
-   call 0x00000000
-   ld	[%sp+0x44],%o0
-   nop
-   ta 1
-   nop
+#define CALL_DUMMY { 0xbc100001, 0x9de38000, 0xbc100002, 0xbe100003,	\
+		     0xda03a058, 0xd803a054, 0xd603a050, 0xd403a04c,	\
+		     0xd203a048, 0x40000000, 0xd003a044, 0x01000000,	\
+		     0x91d02001, 0x01000000 }
 
-   note that this is 192 bytes, which is a multiple of 8 (not only 4) bytes.
-   note that the `call' insn is a relative, not an absolute call.
-   note that the `nop' at the end is needed to keep the trap from
-        clobbering things (if NPC pointed to garbage instead).
 
-We actually start executing at the `sethi', since the pushing of the
-registers (as arguments) is done by PUSH_DUMMY_FRAME.  If this were
-real code, the arguments for the function called by the CALL would be
-pushed between the list of ST insns and the CALL, and we could allow
-it to execute through.  But the arguments have to be pushed by GDB
-after the PUSH_DUMMY_FRAME is done, and we cannot allow these ST
-insns to be performed again, lest the registers saved be taken for
-arguments.  */
+/* Size of the call dummy in bytes. */
 
-#define CALL_DUMMY { 0x9de3bee0, 0xfd3fbff8, 0xf93fbff0, 0xf53fbfe8,	\
-		     0xf13fbfe0, 0xed3fbfd8, 0xe93fbfd0, 0xe53fbfc8,	\
-		     0xe13fbfc0, 0xdd3fbfb8, 0xd93fbfb0, 0xd53fbfa8,	\
-		     0xd13fbfa0, 0xcd3fbf98, 0xc93fbf90, 0xc53fbf88,	\
-		     0xc13fbf80, 0xcc3fbf78, 0xc83fbf70, 0xc43fbf68,	\
-		     0xc03fbf60, 0xfc3fbf58, 0xf83fbf50, 0xf43fbf48,	\
-		     0xf03fbf40, 0x01000000, 0x01000000, 0x01000000,	\
-		     0x01000000, 0x91580000, 0xd027bf50, 0x93500000,	\
-		     0xd027bf4c, 0x91480000, 0xd027bf48, 0x91400000,	\
-		     0xd027bf44, 0xda03a058, 0xd803a054, 0xd603a050,	\
-		     0xd403a04c, 0xd203a048, 0x40000000, 0xd003a044,	\
-		     0x01000000, 0x91d02001, 0x01000000, 0x01000000}
+#define CALL_DUMMY_LENGTH 56
 
-#define CALL_DUMMY_LENGTH 192
+/* Offset within call dummy of first instruction to execute. */
 
-#define CALL_DUMMY_START_OFFSET 148
+#define CALL_DUMMY_START_OFFSET 0
 
-#define CALL_DUMMY_BREAKPOINT_OFFSET (CALL_DUMMY_START_OFFSET + (8 * 4))
+/* Offset within CALL_DUMMY of the 'call' instruction. */
+
+#define CALL_DUMMY_CALL_OFFSET (CALL_DUMMY_START_OFFSET + 36)
+
+/* Offset within CALL_DUMMY of the 'ta 1' instruction. */
+
+#define CALL_DUMMY_BREAKPOINT_OFFSET (CALL_DUMMY_START_OFFSET + 48)
 
 #define CALL_DUMMY_STACK_ADJUST 68
 
 /* Insert the specified number of args and function address
-   into a call sequence of the above form stored at DUMMYNAME.
+   into a call sequence of the above form stored at DUMMYNAME.  */
 
-   For structs and unions, if the function was compiled with Sun cc,
-   it expects 'unimp' after the call.  But gcc doesn't use that
-   (twisted) convention.  So leave a nop there for gcc (FIX_CALL_DUMMY
-   can assume it is operating on a pristine CALL_DUMMY, not one that
-   has already been customized for a different function).  */
-
-#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p)	\
-{									\
-  store_unsigned_integer (dummyname + 168, 4,				\
-			  (0x40000000					\
-			   | (((fun - (pc + 168)) >> 2) & 0x3fffffff))); \
-  if (!gcc_p								\
-      && (TYPE_CODE (type) == TYPE_CODE_STRUCT				\
-	  || TYPE_CODE (type) == TYPE_CODE_UNION))			\
-    store_unsigned_integer (dummyname + 176, 4, TYPE_LENGTH (type) & 0x1fff); \
-}
+#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p) \
+ sparc_fix_call_dummy (dummyname, pc, fun, type, gcc_p)
+void sparc_fix_call_dummy PARAMS ((char *dummy, CORE_ADDR pc, CORE_ADDR fun,
+				   struct type *value_type, int using_gcc));
 
 /* The Sparc returns long doubles on the stack.  */
 

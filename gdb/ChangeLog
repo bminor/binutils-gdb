@@ -1,3 +1,14 @@
+Mon Apr 27 14:32:21 1998  Mark Alexander  <marka@cygnus.com>
+
+	* config/sparc/tm-sparc.h (CALL_DUMMY): Shorten it drastically,
+	make it work on the simulator.
+	(FIX_CALL_DUMMY): Convert to function call instead of inline code.
+	(sparc_fix_call_dummy): Declare.
+	* sparc-tdep.c (sparc_fix_call_dummy): New function, taken from
+	old FIX_CALL_DUMMY macro, with additional fixes for simulator.
+	(sparc_push_dummy_frame): Set registers differently on simulator
+	to prevent corrupted register window save areas.
+
 Mon Apr 27 13:46:40 1998  John Metzler  <jmetzler@cygnus.com>
 
 	* rom68k-rom.c (_initialize_rom68k init_rom68k_cmds):
@@ -11,8 +22,8 @@ Mon Apr 27 13:46:40 1998  John Metzler  <jmetzler@cygnus.com>
 	* remote-est.c ( _initialize_est  init_est_cmds) :
 	* remote-hms.c (  _initialize_remote_hms  init_hms_cmds) :
 	  Convert all static initializations of monitor ops structures to
- 	executable initializations in oreer tat additions to the data structure
-	definition can me made without repeating this editing exercise.
+ 	executable initializations in order that additions to the data structure
+	definition can be made without repeating this editing exercise.
 
 Mon Apr 27 10:43:04 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
