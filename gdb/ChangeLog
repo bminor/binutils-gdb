@@ -1,3 +1,10 @@
+Fri Jul 29 13:46:08 1994  Fred Fish  (fnf@cygnus.com)
+
+        From Kevin A. Buettner (kev@cujo.geg.mot.com).
+	* Makefile.in (coredep.o):  Add inferior.h as dependency.
+	* inflow.c:  Add F_SETOWN to list of defines to check
+	around code that uses F_SETOWN.
+
 Fri Jul 29 09:59:05 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
 	* Makefile.in (CC_FOR_TARGET, CXX_FOR_TARGET): If using newlib,

@@ -578,7 +578,7 @@ clear_sigint_trap()
   signal (SIGINT, osig);
 }
 
-#if defined (SIGIO) && defined (FASYNC) && defined (FD_SET)
+#if defined (SIGIO) && defined (FASYNC) && defined (FD_SET) && defined (F_SETOWN)
 static void (*old_sigio) ();
 
 static void
