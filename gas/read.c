@@ -1256,7 +1256,9 @@ void s_set() {
 	demand_empty_rest_of_line();
 } /* s_set() */
 
-void s_space() {
+void s_space(mult) 
+int mult;
+{
 	long temp_repeat;
 	register long temp_fill;
 	register char *p;
@@ -1267,6 +1269,10 @@ void s_space() {
 	} else {
 		input_line_pointer --; /* Backup over what was not a ','. */
 		temp_fill = 0;
+	}
+	if(mult) 
+	{
+	  temp_fill *= mult;
 	}
 	if (temp_repeat <= 0) {
 		as_warn("Repeat < 0, .space ignored");

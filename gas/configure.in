@@ -73,12 +73,21 @@ emulation=generic
 
 cpu_type=${target_cpu}
 
+# check for architecture variants
+case ${target_cpu} in
+sparclite) cpu_type=sparc ;;
+m680[01234]0) cpu_type=m68k ;;
+m683?2) cpu_type=m68k ;;
+esac
+
+gas_target=${cpu_type}
+
 # assign object format
 case ${target_os} in
 aix*)
 	case "${target_cpu}" in
 	i386)	obj_format=coff
-		target_cpu=i386aix
+		gas_target=i386aix
 		emulation=i386aix
 		;;
 	esac
@@ -93,22 +102,21 @@ bsd* | sunos*)
 udi)
 	obj_format=coffbfd
 	need_bfd="./../bfd/libbfd.a"
-	target_cpu=ebmon29k
+	gas_target=ebmon29k
 	;;
 ebmon-old)
 	obj_format=coff
 	need_bfd="./../bfd/libbfd.a"
-	target_cpu=ebmon29k
+	gas_target=ebmon29k
 	;;
 
 ebmon)
 	obj_format=coffbfd
 	need_bfd="./../bfd/libbfd.a"
-	target_cpu=ebmon29k
+	gas_target=ebmon29k
 	;;
 
 generic) obj_format=generic ;;
-
 
 xray | hms)
 	obj_format=coffbfd
@@ -128,6 +136,13 @@ sim)
 
 coff* | sysv*)
 	obj_format=coff
+
+	case ${target_cpu} in
+		m68*) 	obj_format=coffbfd
+		      	need_bfd="./../bfd/libbfd.a"
+			gas_target=m68kcoff
+			;;
+	esac
 
 	case ${target_vendor} in
 	bull)	emulation=dpx2 ;;
@@ -150,7 +165,7 @@ OSE | ose)
 	obj_format=aout
 	emulation=sun3
 	;;
-aout)
+aout | scout)
 	obj_format=aout
 	;;
 *)
@@ -176,16 +191,9 @@ vax)	atof=vax ;;
 *)	atof=ieee ;;
 esac
 
-# check for architecture variants
-case ${target_cpu} in
-sparclite) cpu_type=sparc ;;
-m680[01234]0) cpu_type=m68k ;;
-m683?2) cpu_type=m68k ;;
-esac
-
 # and target makefile frag
 
-target_makefile_frag=config/${target_cpu}.mt
+target_makefile_frag=config/${gas_target}.mt
 
 files="config/ho-${gas_host}.h config/tc-${cpu_type}.c \
 	config/tc-${cpu_type}.h config/te-${emulation}.h \
