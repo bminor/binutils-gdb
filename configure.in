@@ -424,7 +424,7 @@ case "${target}" in
     ;;
   powerpc-*-aix*)
     # copied from rs6000-*-* entry
-    noconfigdirs="$noconfigdirs gas ld binutils gprof textutils cvs"
+    noconfigdirs="$noconfigdirs gas ld gprof textutils cvs"
     ;;
   powerpc*-*-winnt* | powerpc*-*-pe*)
     noconfigdirs="$noconfigdirs ld gdb"
@@ -439,7 +439,7 @@ case "${target}" in
     ;;
   rs6000-*-*)
     # a gcc built textutils will cause the linker to hang on 'join'
-    noconfigdirs="$noconfigdirs gas ld binutils gprof textutils"
+    noconfigdirs="$noconfigdirs gas ld gprof textutils"
     ;;
   m68k-*-netbsd*)
     noconfigdirs="$noconfigdirs gdb"
