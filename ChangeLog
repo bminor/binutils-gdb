@@ -1,3 +1,7 @@
+Wed Aug 11 15:37:51 1993  Jason Merrill  (jason@deneb.cygnus.com)
+
+	* Makefile.in (all-send-pr): depends on all-prms
+
 Wed Aug 11 16:56:03 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config.guess: Fix typo (9000/8??:4.3bsd -> 9000/7??:4.3bsd).

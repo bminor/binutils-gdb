@@ -315,6 +315,7 @@ ALL_MODULES = \
 	all-cvs \
 	all-dejagnu \
 	all-diff \
+	all-dosutils \
 	all-etc \
 	all-fileutils \
 	all-find \
@@ -849,12 +850,12 @@ all-mmalloc:
 all-newlib: all-binutils all-gas all-gcc
 all-opcodes: all-bfd
 all-patch:
-all-prms:
+all-prms: all-libiberty
 all-rcs:
 all-readline:
 all-recode: all-libiberty
-all-sed:
-all-send-pr:
+all-sed: all-libiberty
+all-send-pr: all-prms
 all-shellutils:
 all-sim: all-libiberty all-bfd
 all-tar: all-libiberty
