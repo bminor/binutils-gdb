@@ -2189,7 +2189,7 @@ _bfd_coff_arm_set_private_flags (abfd, flags)
   if (APCS_SET (abfd)
       && (   (APCS_26_FLAG    (abfd) != flag)
 	  || (APCS_FLOAT_FLAG (abfd) != (flags & F_APCS_FLOAT))
-	  || (PIC_FLAG        (abfd) != (flags & F_PIC_INT ? F_PIC : 0))
+	  || (PIC_FLAG        (abfd) != (flags & F_PIC))
 	  ))
     return false;
 

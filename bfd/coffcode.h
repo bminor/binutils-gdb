@@ -1419,11 +1419,13 @@ coff_set_arch_mach_hook (abfd, filehdr)
       arch = bfd_arch_arm;
       switch (internal_f->f_flags & F_ARM_ARCHITECTURE_MASK)
 	{
-	case F_ARM_2:  machine = bfd_mach_arm_2;  break;
-	case F_ARM_3:  machine = bfd_mach_arm_3;  break;
-	default:
-	case F_ARM_4:  machine = bfd_mach_arm_4;  break;
-	case F_ARM_4T: machine = bfd_mach_arm_4T; break;
+        case F_ARM_2:  machine = bfd_mach_arm_2;  break;
+        case F_ARM_2a: machine = bfd_mach_arm_2a; break;
+        case F_ARM_3:  machine = bfd_mach_arm_3;  break;
+        default:
+        case F_ARM_3M: machine = bfd_mach_arm_3M; break;
+        case F_ARM_4:  machine = bfd_mach_arm_4;  break;
+        case F_ARM_4T: machine = bfd_mach_arm_4T; break;
 	}
       break;
 #endif
@@ -2050,7 +2052,7 @@ coff_set_flags (abfd, magicp, flagsp)
 	    * flagsp |= F_APCS_FLOAT;
 	  
 	  if (PIC_FLAG (abfd))
-	    * flagsp |= F_PIC_INT;
+	    * flagsp |= F_PIC;
 	}
       if (INTERWORK_SET (abfd) && INTERWORK_FLAG (abfd))
 	* flagsp |= F_INTERWORK;

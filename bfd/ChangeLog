@@ -1,3 +1,9 @@
+Mon May 17 13:35:35 1999  Stan Cox  <scox@cygnus.com>
+	* coff-arm.c (_bfd_coff_arm_set_private_flags): Changed
+	F_PIC_INT to F_PIC.
+	* coffcode.h (coff_set_arch_mach_hook): Added F_ARM_2a, and
+	F_ARM_3M labels.  Changed F_PIC_INT to F_PIC.
+	
 1999-05-16  Nick Clifton  <nickc@cygnus.com>
 
 	* coff-mcore.c (in_reloc_p): Reinstate.
