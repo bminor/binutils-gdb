@@ -2136,8 +2136,8 @@ rank_function (parms, nparms, args, nargs)
   LENGTH_MATCH (bv) = (nargs != nparms) ? LENGTH_MISMATCH_BADNESS : 0;
 
   /* Now rank all the parameters of the candidate function */
-  for (i = 1; i < min_len; i++)
-    bv->rank[i] = rank_one_type (parms[i], args[i]);
+  for (i = 1; i <= min_len; i++)
+    bv->rank[i] = rank_one_type (parms[i-1], args[i-1]);
 
   /* If more arguments than parameters, add dummy entries */
   for (i = min_len + 1; i <= nargs; i++)
