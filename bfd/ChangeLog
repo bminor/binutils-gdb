@@ -1,3 +1,8 @@
+2001-10-10  Jakub Jelinek  <jakub@redhat.com>
+
+	* elflink.h (elf_link_sort_cmp2): Don't mix PLT and non-PLT
+	relocations against the same symbol in .rel{,a}.dyn section.
+
 2001-10-10  Kazu Hirata  <kazu@hxi.com>
 
 	* aout-encap.c: Fix comment typos.

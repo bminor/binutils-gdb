@@ -4378,8 +4378,8 @@ elf_link_sort_cmp2 (A, B)
     return -1;
   if (a->offset > b->offset)
     return 1;
-  copya = a->type == reloc_class_copy;
-  copyb = b->type == reloc_class_copy;
+  copya = (a->type == reloc_class_copy) * 2 + (a->type == reloc_class_plt);
+  copyb = (b->type == reloc_class_copy) * 2 + (b->type == reloc_class_plt);
   if (copya < copyb)
     return -1;
   if (copya > copyb)
