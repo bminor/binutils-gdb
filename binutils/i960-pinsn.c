@@ -22,7 +22,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* $Id$ 
    $Log
 */
-#include <stdio.h>
+
 #include "sysdep.h"
 #include "bfd.h"
 
@@ -58,7 +58,7 @@ static void put_abs();
 int
 print_insn_i960( memaddr, buffer, s )
     bfd_vma memaddr;
-uint8e_type *buffer;
+    uint8e_type *buffer;
     FILE *s;
 {
     unsigned int word1, word2;
