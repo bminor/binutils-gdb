@@ -8075,7 +8075,7 @@ _bfd_mips_elf_gc_sweep_hook (abfd, info, sec, relocs)
 /* Copy data from a MIPS ELF indirect symbol to its direct symbol,
    hiding the old indirect symbol.  Process additional relocation
    information.  Also called for weakdefs, in which case we just let
-   _bfd_elf_link_hach_copy_indirect copy the flags for us.  */
+   _bfd_elf_link_hash_copy_indirect copy the flags for us.  */
 
 static void
 _bfd_mips_elf_copy_indirect_symbol (dir, ind)
