@@ -1,0 +1,3 @@
+if [istarget i386-*] then {
+    gas_test "inout.s" "" $stdoptlist "various in/out syntaxes"
+}

@@ -26,12 +26,8 @@ Do-first:
 
 Things-to-keep:
 
-gas.exp
-comment.s
-float.s
-p1480.s
-p2425.s
-x930509.s
+all.exp
+inout.s
 
 Do-last:
 
