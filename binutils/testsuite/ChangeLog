@@ -1,3 +1,10 @@
+2005-03-29  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
+
+	* binutils-all/vax: New directory.
+	* binutils-all/vax/objdump.exp: New script.  Test the -Mentry:
+	switch added to the VAX disassembler.
+	* binutils-all/vax/entrymask.s: New assembler source file.
+
 2005-03-08  Ben Elliston  <bje@au.ibm.com>
 
        * config/default.exp: Remove send_user call for stray output.

@@ -1,3 +1,21 @@
+2005-03-21  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
+	    Nick Clifton  <nickc@redhat.com>
+	    
+	* vax-dis.c: (entry_addr): New varible:  An array of user supplied
+	function entry mask addresses.
+	(entry_addr_occupied_slots): New variable: The number of occupied
+	elements in entry_addr. 
+	(entry_addr_total_slots): New variable: The total number of
+	elements in entry_addr.
+	(parse_disassembler_options): New function.  Fills in the entry_addr
+	array.
+	(free_entry_array): New function.  Release the memory used by the
+	entry addr array.  Suppressed because there is no way to call it.
+	(is_function_entry): Check if a given address is a function's
+	start address by looking at supplied entry mask addresses and
+	symbol information, if available.
+	(print_insn_vax): Use parse_disassembler_options and is_function_entry.
+
 2005-03-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* cris-dis.c (print_with_operands): Use ~31L for long instead

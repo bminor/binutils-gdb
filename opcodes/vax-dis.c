@@ -17,6 +17,8 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+#include <setjmp.h>
+#include <string.h>
 #include "sysdep.h"
 #include "opcode/vax.h"
 #include "dis-asm.h"
@@ -77,15 +79,13 @@ static char *entry_mask_bit[] =
 /* Maximum length of an instruction.  */
 #define MAXLEN 25
 
-#include <setjmp.h>
-
 struct private
 {
   /* Points to first byte not fetched.  */
-  bfd_byte *max_fetched;
-  bfd_byte the_buffer[MAXLEN];
-  bfd_vma insn_start;
-  jmp_buf bailout;
+  bfd_byte * max_fetched;
+  bfd_byte   the_buffer[MAXLEN];
+  bfd_vma    insn_start;
+  jmp_buf    bailout;
 };
 
 /* Make sure that bytes from INFO->PRIVATE_DATA->BUFFER (inclusive)
@@ -119,6 +119,95 @@ fetch_data (info, addr)
   return 1;
 }
 
+/* Entry mask handling.  */
+static unsigned int  entry_addr_occupied_slots = 0;
+static unsigned int  entry_addr_total_slots = 0;
+static bfd_vma *     entry_addr = NULL;
+
+/* Parse the VAX specific disassembler options.  These contain function
+   entry addresses, which can be useful to disassemble ROM images, since
+   there's no symbol table.  Returns TRUE upon success, FALSE otherwise.  */
+
+static bfd_boolean
+parse_disassembler_options (char * options)
+{
+  const char * entry_switch = "entry:";
+
+  while ((options = strstr (options, entry_switch)))
+    {
+      options += strlen (entry_switch);
+
+      /* The greater-than part of the test below is paranoia.  */
+      if (entry_addr_occupied_slots >= entry_addr_total_slots)
+	{
+	  /* A guesstimate of the number of entries we will have to create.  */
+	  entry_addr_total_slots +=
+	    strlen (options) / (strlen (entry_switch) + 5);
+	  
+	  entry_addr = realloc (entry_addr, sizeof (bfd_vma)
+				* entry_addr_total_slots);
+	}
+
+      if (entry_addr == NULL)
+	return FALSE;
+	  
+      entry_addr[entry_addr_occupied_slots] = bfd_scan_vma (options, NULL, 0);
+      entry_addr_occupied_slots ++;
+    }
+
+  return TRUE;
+}
+
+#if 0 /* FIXME:  Ideally the disassembler should have target specific
+	 initialisation and termination function pointers.  Then
+	 parse_disassembler_options could be the init function and
+	 free_entry_array (below) could be the termination routine.
+	 Until then there is no way for the disassembler to tell us
+	 that it has finished and that we no longer need the entry
+	 array, so this routine is suppressed for now.  It does mean
+	 that we leak memory, but only to the extent that we do not
+	 free it just before the disassembler is about to terminate
+	 anyway.  */
+
+/* Free memory allocated to our entry array.  */
+
+static void
+free_entry_array (void)
+{
+  if (entry_addr)
+    {
+      free (entry_addr);
+      entry_addr = NULL;
+      entry_addr_occupied_slots = entry_addr_total_slots = 0;
+    }
+}
+#endif
+/* Check if the given address is a known function entry. Either there must
+   be a symbol of function type at this address, or the address must be
+   a forced entry point.  The later helps in disassembling ROM images, because
+   there's no symbol table at all.  Forced entry points can be given by
+   supplying several -M options to objdump: -M entry:0xffbb7730.  */
+
+static bfd_boolean
+is_function_entry (struct disassemble_info *info, bfd_vma addr)
+{
+  unsigned int i;
+
+  /* Check if there's a BSF_FUNCTION symbol at our address.  */
+  if (info->symbols
+      && info->symbols[0]
+      && (info->symbols[0]->flags & BSF_FUNCTION)
+      && addr == bfd_asymbol_value (info->symbols[0]))
+    return TRUE;
+
+  /* Check for forced function entry address.  */
+  for (i = entry_addr_occupied_slots; i--;)
+    if (entry_addr[i] == addr)
+      return TRUE;
+
+  return FALSE;
+}
+
 /* Print the vax instruction at address MEMADDR in debugged memory,
    on INFO->STREAM.  Returns length of the instruction, in bytes.  */
 
@@ -127,6 +216,7 @@ print_insn_vax (memaddr, info)
      bfd_vma memaddr;
      disassemble_info *info;
 {
+  static bfd_boolean parsed_disassembler_options = FALSE;
   const struct vot *votp;
   const char *argp;
   unsigned char *arg;
@@ -136,6 +226,15 @@ print_insn_vax (memaddr, info)
   info->private_data = (PTR) &priv;
   priv.max_fetched = priv.the_buffer;
   priv.insn_start = memaddr;
+
+  if (! parsed_disassembler_options
+      && info->disassembler_options != NULL)
+    {
+      parse_disassembler_options (info->disassembler_options);
+
+      /* To avoid repeated parsing of these options.  */
+      parsed_disassembler_options = TRUE;
+    }
 
   if (setjmp (priv.bailout) != 0)
     {
@@ -157,10 +256,7 @@ print_insn_vax (memaddr, info)
     }
 
   /* Decode function entry mask.  */
-  if (info->symbols
-      && info->symbols[0]
-      && (info->symbols[0]->flags & BSF_FUNCTION)
-      && memaddr == bfd_asymbol_value (info->symbols[0]))
+  if (is_function_entry (info, memaddr))
     {
       int i = 0;
       int register_mask = buffer[1] << 8 | buffer[0];

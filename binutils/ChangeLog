@@ -1,3 +1,9 @@
+2005-03-21  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
+
+	* doc/binutils.texi: Document new VAX disassembler-specific option
+	-M entry:0xfooba8.
+	* NEWS: Mention the new option.
+	
 2005-03-29  Anil Paranjpe  <anilp1@kpitcummins.com>
 
 	* MAINTAINERS: Add myself as H8300 maintainer.

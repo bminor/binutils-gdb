@@ -1793,6 +1793,13 @@ rather than names, for the selected types of registers.
 You can list the available values of @var{ABI} and @var{ARCH} using
 the @option{--help} option.
 
+For VAX, you can specify function entry addresses with @option{-M
+entry:0xf00ba}.  You can use this multiple times to properly
+disassemble VAX binary files that don't contain symbol tables (like
+ROM dumps).  In these cases, the function entry mask would otherwise
+be decoded as VAX instructions, which would probably lead the the rest
+of the function being wrongly disassembled.
+
 @item -p
 @itemx --private-headers
 Print information that is specific to the object file format.  The exact

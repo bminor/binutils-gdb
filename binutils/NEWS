@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add "-M entry:<addr>" switch to objdump to specify a function entry address
+  when disassembling VAX binaries.
+
 * Add "--globalize-symbol <name>" and "--globalize-symbols <filename>" switches
   to objcopy to convert local symbols into global symbols.
 
