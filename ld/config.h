@@ -24,10 +24,8 @@
 /* Otherwise default to this emulation */
 
 #ifndef DEFAULT_EMULATION
-#define DEFAULT_EMULATION "unknown"
+error you must set a default emulation
 #endif /* DEFAULT_EMULATION */
-
-
 
 /* Look in this variable for a target format */
 #define TARGET_ENVIRON "GNUTARGET"
