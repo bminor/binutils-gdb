@@ -1,3 +1,11 @@
+Tue Jun  1 21:28:06 1993  Fred Fish  (fnf@cygnus.com)
+
+	* gdb.t00 (teststrategy.exp):  Remove notice about PR 1823.  Bug
+	is fixed and PR is closed.
+	* gdb.t16 (gdbme.c):  Add simple test string variable.
+	* gdb.t16 (printcmds.exp):  Add tests with simple test string
+	variable, primarily for boundaries on "set print elements".
+
 Mon May 31 11:36:08 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* gdb.stabs/wierd.exp: Remove xfail for printing big integer.
