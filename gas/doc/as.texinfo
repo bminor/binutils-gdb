@@ -252,10 +252,13 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @end smallexample
 
 @table @code
-@item -a[dhlns]
+@item -a[cdhlmns]
 Turn on listings, in any of a variety of ways:
 
 @table @code
+@item -ac
+omit false conditionals
+
 @item -ad
 omit debugging directives
 
@@ -264,6 +267,9 @@ include high-level source
 
 @item -al
 include assembly
+
+@item -am
+include macro expansions
 
 @item -an
 omit forms processing
@@ -277,8 +283,7 @@ set the name of the listing file
 
 You may combine these options; for example, use @samp{-aln} for assembly
 listing without forms processing.  The @samp{=file} option, if used, must be
-the last one.  By itself, @samp{-a} defaults to @samp{-ahls}---that is, all
-listings turned on.
+the last one.  By itself, @samp{-a} defaults to @samp{-ahls}.
 
 @item -D
 Ignored.  This option is accepted for script compatibility with calls to
@@ -1437,6 +1442,11 @@ is considered a comment and is ignored.  The line comment character is
 @ifset Z8000
 @samp{!} for the Z8000;
 @end ifset
+@c start-sanitize-v850
+@ifset V850
+@samp{#} on the V850;
+@end ifset
+@c end-sanitize-v850
 see @ref{Machine Dependencies}.  @refill
 @c FIXME What about i386, m88k, i860?
 
@@ -1445,6 +1455,15 @@ On some machines there are two different line comment characters.  One
 character only begins a comment if it is the first non-whitespace character on
 a line, while the other always begins a comment.
 @end ifset
+
+@c start-sanitize-v850
+@ifset V850
+The V850 assembler also supports a double dash as starting a comment that
+extends to the end of the line.
+
+@samp{--};
+@end ifset
+@c end-sanitize-v850
 
 @kindex #
 @cindex lines starting with @code{#}
@@ -4825,6 +4844,12 @@ family.
 @ifset VAX
 @include c-vax.texi
 @end ifset
+
+@c start-sanitize-v850
+@ifset V850
+@include c-v850.texi
+@end ifset
+@c end-sanitize-v850
 
 @ifset GENERIC
 @c reverse effect of @down at top of generic Machine-Dep chapter

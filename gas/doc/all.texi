@@ -26,17 +26,24 @@
 @c CPUs of interest
 @c ================
 @set A29K
+@set ARC
+@set ARM
+@set D10V
 @set H8/300
 @set H8/500
 @set SH
 @set I80386
 @set I960
+@set MIPS
 @set M680X0
 @set Z8000
 @set SPARC
 @set VAX
 @set VXWORKS
 @set HPPA
+@c start-sanitize-v850
+@set V850
+@c end-sanitize-v850
 
 @c Does this version of the assembler use the difference-table kluge?
 @set DIFF-TBL-KLUGE

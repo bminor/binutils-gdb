@@ -1,9 +1,13 @@
+start-sanitize-v850
 Fri Aug 22 11:16:14 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* doc/as.texinfo: Add inclusion of c-v850.texi
+
+	* doc/c-v850.texi: New file.
 
 	* read.c (is_end_of_line): Make NUL character be considered to be
 	a line terminator.
 
-start-sanitize-v850
 Fri Aug 22 10:45:33 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-v850.c (parse_register_list): Add support for curly
