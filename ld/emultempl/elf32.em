@@ -1213,6 +1213,9 @@ cat >>e${EMULATION_NAME}.c <<EOF
 
 #include "getopt.h"
 
+#define OPTION_DISABLE_NEW_DTAGS	(400)
+#define OPTION_ENABLE_NEW_DTAGS		(OPTION_DISABLE_NEW_DTAGS + 1)
+
 static struct option longopts[] =
 {
 EOF
@@ -1220,7 +1223,8 @@ fi
 
 if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
 cat >>e${EMULATION_NAME}.c <<EOF
-  {NULL, required_argument, NULL, 'z'},
+  {"disable-new-dtags", no_argument, NULL, OPTION_DISABLE_NEW_DTAGS},
+  {"enable-new-dtags", no_argument, NULL, OPTION_ENABLE_NEW_DTAGS},
 EOF
 fi
 
@@ -1260,11 +1264,20 @@ gld_${EMULATION_NAME}_parse_args (argc, argv)
 	xexit (1);
       optind =  prevoptind;
       return 0;
+
 EOF
 fi
 
 if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
 cat >>e${EMULATION_NAME}.c <<EOF
+    case OPTION_DISABLE_NEW_DTAGS:
+      link_info.new_dtags = false;
+      break;
+
+    case OPTION_ENABLE_NEW_DTAGS:
+      link_info.new_dtags = true;
+      break;
+
     case 'z':
       if (strcmp (optarg, "initfirst") == 0)
 	link_info.flags_1 |= (bfd_vma) DF_1_INITFIRST;
@@ -1291,7 +1304,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
 	  link_info.flags_1 |= (bfd_vma) DF_1_ORIGIN;
 	}
       /* What about the other Solaris -z options? FIXME.  */
-    break;
+      break;
 EOF
 fi
 
@@ -1317,6 +1330,8 @@ fi
 
 if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
 cat >>e${EMULATION_NAME}.c <<EOF
+  fprintf (file, _("  --disable-new-dtags\tDisable new dynamic tags\n"));
+  fprintf (file, _("  --enable-new-dtags\tEnable new dynamic tags\n"));
   fprintf (file, _("  -z initfirst\t\tMark DSO to be initialized first at rutime\n"));
   fprintf (file, _("  -z interpose\t\tMark object to interpose all DSOs but execuable\n"));
   fprintf (file, _("  -z loadfltr\t\tMark object requiring immediate process\n"));

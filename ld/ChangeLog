@@ -1,3 +1,14 @@
+2000-07-20  H.J. Lu  <hjl@gnu.org>
+
+	* ld.texinfo: Add documentation for --disable-new-dtags and
+	--enable-new-dtags.
+
+	* ldmain.c (main): Initialize link_info.new_dtags to false.
+
+	* emultempl/elf32.em (gld_${EMULATION_NAME}_parse_args): Add
+	--disable-new-dtags and --enable-new-dtags.
+	(gld_${EMULATION_NAME}_list_options): Likewise.
+
 2000-07-05  Kenneth Block  <krblock@computer.org>
 
         * ld/lexsup.c: Add optional style to demangle switch
