@@ -105,58 +105,6 @@ static boolean
    host system */
 #define _H(index) (bfd_h_get_16(abfd, (bfd_byte *)(header+index*2)))
 
-/* This function checks if the bfd is a stubbed coff image */
-static const bfd_target *
-go32_stubbed_coff_object_p (abfd)
-     bfd *abfd;
-{
-  unsigned char header[10];
-  char magic[8];
-  unsigned long coff_start, exe_start;
-
-  if (bfd_read (&header, 1, sizeof (header), abfd) != sizeof (header))
-    {
-      if (bfd_get_error () != bfd_error_system_call)
-	bfd_set_error (bfd_error_wrong_format);
-      return 0;
-    }
-  if (_H (0) != 0x5a4d)		/* it is not an exe file. maybe a coff-image */
-    {
-      if (bfd_get_error () != bfd_error_system_call)
-	bfd_set_error (bfd_error_wrong_format);
-      return 0;
-    }
-  coff_start = (long) _H (2) * 512L;
-  if (_H (1))
-    coff_start += (long) _H (1) - 512L;
-
-  /* We can handle only a stub with a length of STUBSIZE */
-  if (coff_start != STUBSIZE)
-    {
-      bfd_set_error (bfd_error_wrong_format);
-      return 0;
-    }
-  exe_start = _H (4) * 16;
-  if (bfd_seek (abfd, exe_start, SEEK_SET) != 0)
-    return 0;
-  if (bfd_read (&magic, 1, 8, abfd) != 8)
-    {
-      if (bfd_get_error () != bfd_error_system_call)
-	bfd_set_error (bfd_error_wrong_format);
-      return 0;
-    }
-  if (memcmp (magic, "go32stub", 8) != 0)
-    {
-      bfd_set_error (bfd_error_wrong_format);
-      return 0;
-    }
-  if (bfd_seek (abfd, 0, SEEK_SET) != 0)
-    return 0;
-
-  /* Call the normal COFF detection routine */
-  return coff_object_p (abfd);
-}
-
 /* These bytes are a 2048-byte DOS executable, which loads the COFF
    image into memory and then runs it. It is called 'stub' */
 

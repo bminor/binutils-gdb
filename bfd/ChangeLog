@@ -1,5 +1,7 @@
 1999-08-03  Ian Lance Taylor  <ian@zembu.com>
 
+	* coff-stgo32.c (go32_stubbed_coff_object_p): Remove; not used.
+
 	* acinclude.m4 (BFD_CC_FOR_BUILD): Change to use conftest, and to
 	look for generated file correctly.
 	* aclocal.m4, configure: Rebuild.
