@@ -1,3 +1,11 @@
+Tue Aug  5 23:05:03 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: Rebuild with autoconf 2.12.1.
+
+Mon Aug  4 12:00:35 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* aclocal.m4, configure: Rebuild with new automake patches.
+
 Sun Aug  3 08:15:12 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* rs6000-core.c (make_bfd_asection):  New function to add a section
