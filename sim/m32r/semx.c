@@ -3031,7 +3031,7 @@ SEM_FN_NAME (m32rx,sat) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   EXTRACT_FMT_60_SAT_VARS /* f-op1 f-r1 f-op2 f-r2 f-uimm16 */
   EXTRACT_FMT_60_SAT_CODE
 
-  CPU (h_gr[f_r1]) = (OPRND (condbit)) ? ((LTSI (OPRND (sr), 0)) ? (2147483647) : (0x80000000)) : (OPRND (sr));
+  CPU (h_gr[f_r1]) = ((OPRND (condbit)) ? (((LTSI (OPRND (sr), 0)) ? (2147483647) : (0x80000000))) : (OPRND (sr)));
   TRACE_RESULT (current_cpu, "dr", 'x', CPU (h_gr[f_r1]));
 
 #if WITH_PROFILE_MODEL_P

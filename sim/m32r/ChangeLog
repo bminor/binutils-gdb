@@ -1,3 +1,10 @@
+start-sanitize-m32rx
+Fri Feb 27 10:14:29 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* mloopx.in: Fix handling of branch in parallel with another insn.
+	* semx.c: Regenerate.
+
+end-sanitize-m32rx
 Mon Feb 23 13:30:46 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* sim-main.h: #include symcat.h.
