@@ -1,3 +1,9 @@
+Wed Feb  4 13:17:19 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* as.h: If gcc version greater than 2.6, use `__format__' and
+	`__printf__' in function attributes, rather than `format' and
+	`printf'.
+
 Mon Feb  2 18:38:18 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-sparc.c: Only include elf/sparc.h if OBJ_ELF.

@@ -490,21 +490,36 @@ typedef struct _pseudo_type pseudo_typeS;
 #ifdef USE_STDARG
 #if (__GNUC__ >= 2) && !defined(VMS)
 /* for use with -Wformat */
-#define PRINTF_LIKE(FCN)	void FCN (const char *format, ...) \
-					__attribute__ ((format (printf, 1, 2)))
-#define PRINTF_WHERE_LIKE(FCN)	void FCN (char *file, unsigned int line, \
-					  const char *format, ...) \
-					__attribute__ ((format (printf, 3, 4)))
-#else /* ANSI C with stdarg, but not GNU C */
+
+#if __GNUC_MINOR__ < 6
+/* Support for double underscores in attribute names was added in gcc
+   2.6, so avoid them if we are using an earlier version.  */
+#define __printf__ printf
+#define __format__ format
+#endif
+
+#define PRINTF_LIKE(FCN) \
+  void FCN (const char *format, ...) \
+    __attribute__ ((__format__ (__printf__, 1, 2)))
+#define PRINTF_WHERE_LIKE(FCN) \
+  void FCN (char *file, unsigned int line, const char *format, ...) \
+    __attribute__ ((__format__ (__printf__, 3, 4)))
+
+#else /* __GNUC__ < 2 || defined(VMS) */
+
 #define PRINTF_LIKE(FCN)	void FCN PARAMS ((const char *format, ...))
 #define PRINTF_WHERE_LIKE(FCN)	void FCN PARAMS ((char *file, \
 						  unsigned int line, \
 					  	  const char *format, ...))
-#endif
-#else /* not using stdarg */
+
+#endif /* __GNUC__ < 2 || defined(VMS) */
+
+#else /* ! USE_STDARG */
+
 #define PRINTF_LIKE(FCN)	void FCN ()
 #define PRINTF_WHERE_LIKE(FCN)	void FCN ()
-#endif
+
+#endif /* ! USE_STDARG */
 
 PRINTF_LIKE (as_bad);
 PRINTF_LIKE (as_fatal);
@@ -512,6 +527,7 @@ PRINTF_LIKE (as_tsktsk);
 PRINTF_LIKE (as_warn);
 PRINTF_WHERE_LIKE (as_bad_where);
 PRINTF_WHERE_LIKE (as_warn_where);
+
 void as_assert PARAMS ((const char *, int, const char *));
 void as_abort PARAMS ((const char *, int, const char *));
 
