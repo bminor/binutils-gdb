@@ -115,6 +115,10 @@ SECTIONS
     KEEP (*crtend.o(.dtors))
     ${CONSTRUCTING+___dtors_end = .;}
   }
+  .jcr		:
+  {
+    KEEP (*(.jcr))
+  }
 
   .got		: { *(.got.plt) *(.got) }
   .dynamic	: { *(.dynamic) }

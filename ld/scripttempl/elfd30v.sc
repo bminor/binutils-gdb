@@ -124,6 +124,9 @@ SECTIONS
   .eh_frame	${RELOCATING-0} : { KEEP (*(.eh_frame)) }	${RELOCATING+ > ${DATA_MEMORY}}
   .gcc_except_table ${RELOCATING-0} : { *(.gcc_except_table) }	${RELOCATING+ > ${DATA_MEMORY}}
 
+  /* Java class registration support.  */
+  .jcr		${RELOCATING-0} : { KEEP (*(.jcr)) }	${RELOCATING+ >${DATA_MEMORY}}
+
   ${RELOCATING+${CTOR}}
   ${RELOCATING+${DTOR}}
 

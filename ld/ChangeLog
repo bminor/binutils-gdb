@@ -1,3 +1,9 @@
+2001-08-12  Richard Henderson  <rth@redhat.com>
+
+	* scripttempl/elf.sc, scripttempl/elfd30v.sc,
+	scripttempl/elfm68hc11.sc, scripttempl/elfm68hc12.sc,
+	scripttempl/v850.sc: Keep .jcr data.
+
 2001-08-12  H.J. Lu  <hjl@gnu.org>
             Andrew Haley  <aph@cambridge.redhat.com>
             Nick Clifton  <nickc@redhat.com>

@@ -312,6 +312,7 @@ SECTIONS
   ${TEXT_DYNAMIC-${DYNAMIC}}
   ${RELOCATING+${CTOR}}
   ${RELOCATING+${DTOR}}
+  .jcr : { KEEP (*(.jcr)) }
   ${DATA_PLT+${PLT}}
   ${RELOCATING+${OTHER_GOT_SYMBOLS}}
   .got		${RELOCATING-0} : { *(.got.plt) *(.got) }

@@ -331,7 +331,7 @@ SECTIONS
 
   .eh_frame ${RELOCATING-0} :
   {
-    *(.eh_frame)
+    KEEP (*(.eh_frame))
   } ${RELOCATING+ > ${TEXT_MEMORY}}
 
   .rodata  ${RELOCATING-0} :
@@ -349,6 +349,11 @@ SECTIONS
   /* Constructor and destructor tables are in ROM.  */
   ${RELOCATING+${CTOR}}
   ${RELOCATING+${DTOR}}
+
+  .jcr ${RELOCATING-0} :
+  {
+    KEEP (*(.jcr))
+  } ${RELOCATING+ > ${TEXT_MEMORY}}
 
   /* Start of the data section image in ROM.  */
   ${RELOCATING+__data_image = .;}
