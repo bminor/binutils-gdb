@@ -261,38 +261,6 @@ sort_pst_symbols (struct partial_symtab *pst)
 	 compare_psymbols);
 }
 
-/* Call sort_block_syms to sort alphabetically the symbols of one block.  */
-
-void
-sort_block_syms (register struct block *b)
-{
-  qsort (&BLOCK_SYM (b, 0), BLOCK_NSYMS (b),
-	 sizeof (struct symbol *), compare_symbols);
-}
-
-/* Call sort_symtab_syms to sort alphabetically
-   the symbols of each block of one symtab.  */
-
-void
-sort_symtab_syms (register struct symtab *s)
-{
-  register struct blockvector *bv;
-  int nbl;
-  int i;
-  register struct block *b;
-
-  if (s == 0)
-    return;
-  bv = BLOCKVECTOR (s);
-  nbl = BLOCKVECTOR_NBLOCKS (bv);
-  for (i = 0; i < nbl; i++)
-    {
-      b = BLOCKVECTOR_BLOCK (bv, i);
-      if (BLOCK_SHOULD_SORT (b))
-	sort_block_syms (b);
-    }
-}
-
 /* Make a null terminated copy of the string at PTR with SIZE characters in
    the obstack pointed to by OBSTACKP .  Returns the address of the copy.
    Note that the string at PTR does not have to be null terminated, I.E. it

@@ -1606,7 +1606,6 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
     }
   pst->symtab = symtab;
   pst->readin = 1;
-  sort_symtab_syms (pst->symtab);
 
   do_cleanups (back_to);
 }

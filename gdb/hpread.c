@@ -2729,7 +2729,6 @@ hpread_psymtab_to_symtab_1 (struct partial_symtab *pst)
 	hpread_expand_symtab (pst->objfile, LDSYMOFF (pst), LDSYMLEN (pst),
 			      pst->textlow, pst->texthigh - pst->textlow,
 			      pst->section_offsets, pst->filename);
-      sort_symtab_syms (pst->symtab);
 
       do_cleanups (old_chain);
     }

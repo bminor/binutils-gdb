@@ -637,15 +637,6 @@ coff_symfile_read (struct objfile *objfile, int mainline)
 
   coff_symtab_read ((long) symtab_offset, num_symbols, objfile);
 
-  /* Sort symbols alphabetically within each block.  */
-
-  {
-    struct symtab *s;
-
-    for (s = objfile->symtabs; s != NULL; s = s->next)
-      sort_symtab_syms (s);
-  }
-
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile.  */
 

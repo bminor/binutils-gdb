@@ -198,12 +198,6 @@ extern struct partial_symtab *start_psymtab_common (struct objfile *,
 						    struct partial_symbol **,
 						    struct partial_symbol **);
 
-/* Sorting your symbols for fast lookup or alphabetical printing.  */
-
-extern void sort_block_syms (struct block *);
-
-extern void sort_symtab_syms (struct symtab *);
-
 /* Make a copy of the string at PTR with SIZE characters in the symbol obstack
    (and add a null character at the end in the copy).
    Returns the address of the copy.  */

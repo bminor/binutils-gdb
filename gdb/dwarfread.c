@@ -2364,7 +2364,6 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
 		  wrap_here ("");
 		  gdb_flush (gdb_stdout);
 		}
-	      sort_symtab_syms (pst->symtab);
 	      do_cleanups (old_chain);
 	    }
 	  pst->readin = 1;

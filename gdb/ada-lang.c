@@ -3949,7 +3949,6 @@ ada_add_block_symbols (struct block *block, const char *name,
   struct symbol *arg_sym;
   /* Set true when we find a matching non-argument symbol */
   int found_sym;
-  int is_sorted = BLOCK_SHOULD_SORT (block);
   struct symbol *sym;
 
   arg_sym = NULL;
@@ -3985,45 +3984,14 @@ ada_add_block_symbols (struct block *block, const char *name,
     }
   else
     {
-      if (is_sorted)
-	{
-	  int U;
-	  i = 0;
-	  U = BLOCK_NSYMS (block) - 1;
-	  while (U - i > 4)
-	    {
-	      int M = (U + i) >> 1;
-	      struct symbol *sym = BLOCK_SYM (block, M);
-	      if (SYMBOL_NAME (sym)[0] < name[0])
-		i = M + 1;
-	      else if (SYMBOL_NAME (sym)[0] > name[0])
-		U = M - 1;
-	      else if (strcmp (SYMBOL_NAME (sym), name) < 0)
-		i = M + 1;
-	      else
-		U = M;
-	    }
-	}
-      else
-	i = 0;
-
-      for (; i < BLOCK_BUCKETS (block); i += 1)
-	for (sym = BLOCK_BUCKET (block, i); sym != NULL; sym = sym->hash_next)
+      ALL_BLOCK_SYMBOLS (block, i, sym)
 	  {
 	    if (SYMBOL_NAMESPACE (sym) == namespace)
 	      {
 		int cmp = strncmp (name, SYMBOL_NAME (sym), name_len);
 
-		if (cmp < 0)
-		  {
-		    if (is_sorted)
-		      {
-			i = BLOCK_BUCKETS (block);
-			break;
-		      }
-		  }
-		else if (cmp == 0
-			 && is_name_suffix (SYMBOL_NAME (sym) + name_len))
+		if (cmp == 0
+		    && is_name_suffix (SYMBOL_NAME (sym) + name_len))
 		  {
 		    switch (SYMBOL_CLASS (sym))
 		      {
@@ -4059,30 +4027,8 @@ ada_add_block_symbols (struct block *block, const char *name,
     {
       arg_sym = NULL;
       found_sym = 0;
-      if (is_sorted)
-	{
-	  int U;
-	  i = 0;
-	  U = BLOCK_NSYMS (block) - 1;
-	  while (U - i > 4)
-	    {
-	      int M = (U + i) >> 1;
-	      struct symbol *sym = BLOCK_SYM (block, M);
-	      if (SYMBOL_NAME (sym)[0] < '_')
-		i = M + 1;
-	      else if (SYMBOL_NAME (sym)[0] > '_')
-		U = M - 1;
-	      else if (strcmp (SYMBOL_NAME (sym), "_ada_") < 0)
-		i = M + 1;
-	      else
-		U = M;
-	    }
-	}
-      else
-	i = 0;
 
-      for (; i < BLOCK_BUCKETS (block); i += 1)
-	for (sym = BLOCK_BUCKET (block, i); sym != NULL; sym = sym->hash_next)
+      ALL_BLOCK_SYMBOLS (block, i, sym)
 	  {
 	    struct symbol *sym = BLOCK_SYM (block, i);
 
@@ -4098,16 +4044,8 @@ ada_add_block_symbols (struct block *block, const char *name,
 		      cmp = strncmp (name, SYMBOL_NAME (sym) + 5, name_len);
 		  }
 
-		if (cmp < 0)
-		  {
-		    if (is_sorted)
-		      {
-			i = BLOCK_BUCKETS (block);
-			break;
-		      }
-		  }
-		else if (cmp == 0
-			 && is_name_suffix (SYMBOL_NAME (sym) + name_len + 5))
+		if (cmp == 0
+		    && is_name_suffix (SYMBOL_NAME (sym) + name_len + 5))
 		  {
 		    switch (SYMBOL_CLASS (sym))
 		      {

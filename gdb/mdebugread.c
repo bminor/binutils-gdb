@@ -3960,10 +3960,6 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, char *filename)
 	  end_stabs ();
 	}
 
-      /* Sort the symbol table now, we are done adding symbols to it.
-         We must do this before parse_procedure calls lookup_symbol.  */
-      sort_symtab_syms (st);
-
       /* There used to be a call to sort_blocks here, but this should not
          be necessary for stabs symtabs.  And as sort_blocks modifies the
          start address of the GLOBAL_BLOCK to the FIRST_LOCAL_BLOCK,
@@ -4157,9 +4153,6 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, char *filename)
       pop_parse_stack ();
 
       st->primary = 1;
-
-      /* Sort the symbol table now, we are done adding symbols to it. */
-      sort_symtab_syms (st);
 
       sort_blocks (st);
     }

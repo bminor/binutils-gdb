@@ -1,3 +1,29 @@
+2002-09-18  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.h: Delete BLOCK_SHOULD_SORT.
+	* symtab.c (lookup_block_symbol): Assume non-hashed blocks aren't
+	sorted.
+	* ada-lang.c (ada_add_block_symbols): Ditto.
+	* symfile.h: Delete prototypes for sort_block_syms and
+	sort_symtab_syms.
+	* symfile.c: Delete functions sort_block_syms and
+	sort_symtab_syms.
+	* coffread.c (coff_symfile_read): Remove call to
+	sort_symtab_syms.
+	* xcoffread.c (xcoff_psymtab_to_symtab_1): Ditto.
+	* mdebugread.c (psymtab_to_symtab_1): Ditto.
+	* hpread.c (hpread_psymtab_to_symtab_1): Ditto.
+	* dwarfread.c (psymtab_to_symtab_1): Ditto.
+	* dwarf2read.c (psymtab_to_symtab_1): Ditto.
+	* dbxread.c (dbx_psymtab_to_symtab_1): Ditto.
+
+2002-09-20  David Carlton  <carlton@math.stanford.edu>
+
+	* Makefile.in (c-lang.o): Correct dependencies.
+	(utils.o): Gather dependencies.
+	(charset.o): Move.
+	* c-lang.c: #include "gdb_string.h"
+
 2002-09-20  Fernando Nasser  <fnasser@redhat.com>
 
 	From 2002-07-02  George Helffrich <george@gly.bris.ac.uk>

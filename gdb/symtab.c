@@ -1335,10 +1335,9 @@ lookup_block_symbol (register const struct block *block, const char *name,
 		     const char *mangled_name,
 		     const namespace_enum namespace)
 {
-  register int bot, top, inc;
+  register int bot, top;
   register struct symbol *sym;
   register struct symbol *sym_found = NULL;
-  register int do_linear_search = 1;
 
   if (BLOCK_HASHTABLE (block))
     {
@@ -1355,103 +1354,27 @@ lookup_block_symbol (register const struct block *block, const char *name,
 	}
       return NULL;
     }
-
-  /* If the blocks's symbols were sorted, start with a binary search.  */
-
-  if (BLOCK_SHOULD_SORT (block))
+  else
     {
-      /* Reset the linear search flag so if the binary search fails, we
-         won't do the linear search once unless we find some reason to
-         do so */
-
-      do_linear_search = 0;
-      top = BLOCK_NSYMS (block);
-      bot = 0;
-
-      /* Advance BOT to not far before the first symbol whose name is NAME. */
-
-      while (1)
-	{
-	  inc = (top - bot + 1);
-	  /* No need to keep binary searching for the last few bits worth.  */
-	  if (inc < 4)
-	    {
-	      break;
-	    }
-	  inc = (inc >> 1) + bot;
-	  sym = BLOCK_SYM (block, inc);
-	  if (!do_linear_search && (SYMBOL_LANGUAGE (sym) == language_java))
-	    {
-	      do_linear_search = 1;
-	    }
-	  if (SYMBOL_SOURCE_NAME (sym)[0] < name[0])
-	    {
-	      bot = inc;
-	    }
-	  else if (SYMBOL_SOURCE_NAME (sym)[0] > name[0])
-	    {
-	      top = inc;
-	    }
-	  else if (strcmp (SYMBOL_SOURCE_NAME (sym), name) < 0)
-	    {
-	      bot = inc;
-	    }
-	  else
-	    {
-	      top = inc;
-	    }
-	}
-
-      /* Now scan forward until we run out of symbols, find one whose
-         name is greater than NAME, or find one we want.  If there is
-         more than one symbol with the right name and namespace, we
-         return the first one; I believe it is now impossible for us
-         to encounter two symbols with the same name and namespace
-         here, because blocks containing argument symbols are no
-         longer sorted.  The exception is for C++, where multiple functions
-	 (cloned constructors / destructors, in particular) can have
-	 the same demangled name.  So if we have a particular
-	 mangled name to match, try to do so.  */
-
-      top = BLOCK_NSYMS (block);
-      while (bot < top)
-	{
-	  sym = BLOCK_SYM (block, bot);
-	  if (SYMBOL_NAMESPACE (sym) == namespace
-	      && (mangled_name
-		  ? strcmp (SYMBOL_NAME (sym), mangled_name) == 0
-		  : SYMBOL_MATCHES_NAME (sym, name)))
-	    {
-	      return sym;
-	    }
-          if (SYMBOL_SOURCE_NAME (sym)[0] > name[0])
-            {
-              break;
-            }
-	  bot++;
-	}
-    }
-
-  /* Here if block isn't sorted, or we fail to find a match during the
-     binary search above.  If during the binary search above, we find a
-     symbol which is a Java symbol, then we have re-enabled the linear
-     search flag which was reset when starting the binary search.
-
-     This loop is equivalent to the loop above, but hacked greatly for speed.
-
-     Note that parameter symbols do not always show up last in the
-     list; this loop makes sure to take anything else other than
-     parameter symbols first; it only uses parameter symbols as a
-     last resort.  Note that this only takes up extra computation
-     time on a match.  */
-
-  if (do_linear_search)
-    {
+      /* Note that parameter symbols do not always show up last in the
+	 list.  This loop makes sure to take anything else other than
+	 parameter symbols first; it only uses parameter symbols as a
+	 last resort.  Note that this only takes up extra computation
+	 time on a match.  */
       top = BLOCK_NSYMS (block);
       bot = 0;
       while (bot < top)
 	{
 	  sym = BLOCK_SYM (block, bot);
+	  /* If there is more than one symbol with the right name and
+	     namespace, we return the first one; I believe it is now
+	     impossible for us to encounter two symbols with the same
+	     name and namespace here, because blocks containing
+	     argument symbols are no longer sorted.  The exception is
+	     for C++, where multiple functions (cloned constructors /
+	     destructors, in particular) can have the same demangled
+	     name.  So if we have a particular mangled name to match,
+	     try to do so.  */
 	  if (SYMBOL_NAMESPACE (sym) == namespace
 	      && (mangled_name
 		  ? strcmp (SYMBOL_NAME (sym), mangled_name) == 0
@@ -1493,8 +1416,8 @@ lookup_block_symbol (register const struct block *block, const char *name,
 	    }
 	  bot++;
 	}
+      return (sym_found);		/* Will be NULL if not found. */
     }
-  return (sym_found);		/* Will be NULL if not found. */
 }
 
 /* Given a main symbol SYM and ADDR, search through the alias

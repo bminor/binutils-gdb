@@ -441,13 +441,6 @@ struct block
 	  for ((sym) = BLOCK_BUCKET ((bl), (i)); (sym);		\
 	       (sym) = (sym)->hash_next)
 
-/* Nonzero if symbols of block BL should be sorted alphabetically.
-   Don't sort a block which corresponds to a function.  If we did the
-   sorting would have to preserve the order of the symbols for the
-   arguments.  Also don't sort any block that we chose to hash.  */
-
-#define BLOCK_SHOULD_SORT(bl) (! BLOCK_HASHTABLE (bl) \
-			       && BLOCK_FUNCTION (bl) == NULL)
 
 
 /* Represent one symbol name; a variable, constant, function or typedef.  */

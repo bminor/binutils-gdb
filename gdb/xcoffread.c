@@ -1768,7 +1768,6 @@ xcoff_psymtab_to_symtab_1 (struct partial_symtab *pst)
       old_chain = make_cleanup (really_free_pendings, 0);
 
       read_xcoff_symtab (pst);
-      sort_symtab_syms (pst->symtab);
 
       do_cleanups (old_chain);
     }
