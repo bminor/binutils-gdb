@@ -39,9 +39,9 @@ Tue Feb 10 15:15:40 1998  Doug Evans  <devans@canuck.cygnus.com>
 end-sanitize-sky
 Tue Feb 10 18:04:00 1998  Jim Lemke  <jlemke@cygnus.com>
 
-	* as.c: Use [TEXT|DATA|BSS]_SECTION_NAME
+	* as.c: (perform_an_assembly_pass): Use [TEXT|DATA|BSS]_SECTION_NAME
 	* as.h: Define default values of [TEXT|DATA|BSS]_SECTION_NAME
-	* config/obj-elf.c: Use [TEXT|DATA|BSS]_SECTION_NAME
+	* config/obj-elf.c (elf_begin): Use [TEXT|DATA|BSS]_SECTION_NAME
 start-sanitize-sky
 	* config/tc-dvp.h: Add configuration specific section names.
 end-sanitize-sky
