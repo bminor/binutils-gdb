@@ -1,4 +1,4 @@
-/* Remote target glue for the Intel 960 ROM monitor.
+/* Remote target glue for the Intel 960 MON960 ROM monitor.
    Copyright 1995, 1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -25,6 +25,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "serial.h"
 #include "srec.h"
 #include "xmodem.h"
+#include "symtab.h"
+#include "symfile.h" /* for generic_load */
 
 #if !defined (HAVE_TERMIOS) && !defined (HAVE_TERMIO) && !defined (HAVE_SGTTY)
 #define HAVE_SGTTY
@@ -41,23 +43,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define USE_GENERIC_LOAD
 
-int quiet = 0;	/* 1 => stifle unnecessary messages */
-serial_t mon960_serial;
-char *mon960_ttyname;   /* name of tty to talk to mon960 on, or null */
+static struct target_ops mon960_ops;
+
 static struct monitor_ops mon960_cmds;
 
-#ifdef USE_GENERIC_LOAD
-extern void generic_load PARAMS ((char* filename, int from_tty));
-#endif
 static void mon960_open PARAMS ((char *args, int from_tty));
 
 #ifdef USE_GENERIC_LOAD
+
 static void
 mon960_load_gen (filename, from_tty) 
     char *filename;
     int from_tty;
 {
   extern int inferior_pid;
+
   generic_load (filename, from_tty);
   /* Finally, make the PC point at the start address */
   if (exec_bfd)
@@ -67,6 +67,7 @@ mon960_load_gen (filename, from_tty)
 }
 
 #else
+
 static void
 mon960_load (desc, file, hashmark)
      serial_t desc;
@@ -122,7 +123,8 @@ mon960_load (desc, file, hashmark)
   if (hashmark) 
     putchar_unfiltered ('\n');
 }
-#endif
+
+#endif /* USE_GENERIC_LOAD */
 
 /* This array of registers need to match the indexes used by GDB.
    This exists because the various ROM monitors use different strings
@@ -145,10 +147,9 @@ static char *mon960_regnames[NUM_REGS] = {
    through to a printf style function, we may include formatting
    strings. We also need a CR or LF on the end.  */
 
-static struct target_ops mon960_ops;
-
 /* need to pause the monitor for timing reasons, so slow it down */
-static char *mon960_inits[] = {"\n\r\r\r\r\r\r\r\r\r\r\r\r\r\r\n\r\n\r\n", NULL}; /* Exits sub-command mode & download cmds */
+
+static char *mon960_inits[] = {"\n\r\r\r\r\r\r\r\r\r\r\r\r\r\r\n\r\n\r\n", NULL};
 
 static struct monitor_ops mon960_cmds =
 {
@@ -221,30 +222,13 @@ static struct monitor_ops mon960_cmds =
   MONITOR_OPS_MAGIC		/* magic */
 };
 
-/* invoked from monitor.c - opens the serial port */
 static void
 mon960_open (args, from_tty)
      char *args;
      int from_tty;
 {
-  char *serial_port_name = args;
-  if (args) 
-    {
-      char *cursor =  serial_port_name = strsave (args);
-
-      while (*cursor && *cursor != ' ')
- 	cursor++;
-
-      if (*cursor)
-	*cursor++ = 0;
-
-      while (*cursor == ' ')
-	cursor++;
-
-    }
-  monitor_open (serial_port_name, &mon960_cmds, from_tty);
+  monitor_open (args, &mon960_cmds, from_tty);
 }
-
 
 void
 _initialize_mon960 ()
@@ -252,7 +236,7 @@ _initialize_mon960 ()
   init_monitor_ops (&mon960_ops);
 
   mon960_ops.to_shortname = "mon960"; /* for the target command */
-  mon960_ops.to_longname = "Intel 960 rom monitor";
+  mon960_ops.to_longname = "Intel 960 MON960 monitor";
 #ifdef USE_GENERIC_LOAD
   mon960_ops.to_load = mon960_load_gen; /* FIXME - should go back and try "do" */
 #endif
@@ -261,7 +245,7 @@ _initialize_mon960 ()
   mon960_ops.to_remove_breakpoint = memory_remove_breakpoint; 
 
   mon960_ops.to_doc = 
-    "Debug on an Intel 960 eval board running the Mon960 rom monitor.\n"
+    "Use an Intel 960 board running the MON960 debug monitor.\n"
     "Specify the serial device it is connected to (e.g. /dev/ttya).";
 
   mon960_ops.to_open = mon960_open;

@@ -1,3 +1,11 @@
+Sun Mar 31 15:39:00 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mon960-rom.c: Cleanups and elimination of unused code,
+	clarify documentation string.
+	(mon960_serial, mon960_ttyname): Remove.
+	* config/i960/tm-mon960.h (ADDITIONAL_OPTIONS,
+	ADDITIONAL_OPTION_CASES, ADDITIONAL_OPTION_HELP): Remove.
+
 Sat Mar 30 11:00:22 1996  Fred Fish  <fnf@cygnus.com>
 
 	* configure.in: Check whether printf family supports printing
