@@ -47,6 +47,8 @@
 #include "inferior.h"		/* for NUM_PSEUDO_REGS.  NOTE: replace 
 				   with "gdbarch.h" when appropriate.  */
 #include "doublest.h"
+#include "builtin-regs.h"
+#include "gdb_assert.h"
 
 
 /* Symbols which architectures can redefine.  */
@@ -132,6 +134,14 @@ target_map_name_to_register (char *str, int len)
       {
 	return std_regs[i].regnum;
       }
+
+  /* Try builtin registers.  */
+  i = builtin_reg_map_name_to_regnum (str, len);
+  if (i >= 0)
+    {
+      gdb_assert (i >= NUM_REGS + NUM_PSEUDO_REGS);
+      return i;
+    }
 
   return -1;
 }

@@ -550,6 +550,7 @@ SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	tui/tui-file.h tui/tui-file.c tui/tui-out.c tui/tui-hooks.c \
 	ui-file.h ui-file.c \
 	frame.c doublest.c \
+	builtin-regs.c std-regs.c \
 	gnu-v2-abi.c gnu-v3-abi.c hpacc-abi.c cp-abi.c
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
@@ -589,6 +590,7 @@ annotate_h =	annotate.h $(symtab_h) $(gdbtypes_h)
 arch_utils_h =	arch-utils.h
 ax_h = 		ax.h $(doublest_h)
 bcache_h =	bcache.h
+builtin_regs_h = builtin-regs.h
 breakpoint_h =	breakpoint.h $(frame_h) $(value_h)
 buildsym_h =	buildsym.h
 c_lang_h =	c-lang.h $(value_h)
@@ -708,6 +710,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	event-loop.o event-top.o inf-loop.o completer.o \
 	gdbarch.o arch-utils.o gdbtypes.o copying.o $(DEPFILES) \
 	memattr.o mem-break.o target.o parse.o language.o $(YYOBJ) buildsym.o \
+	builtin-regs.o std-regs.o \
 	signals.o \
 	kod.o kod-cisco.o \
 	gdb-events.o \
@@ -1273,6 +1276,9 @@ breakpoint.o: breakpoint.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 buildsym.o: buildsym.c $(bfd_h) $(buildsym_h) $(complaints_h) $(defs_h) \
 	$(objfiles_h) $(symfile_h) $(symtab_h) $(gdb_string_h)
 
+builtin-regs.o: builtin-regs.c $(defs.h) $(builtin_regs_h) $(gdbtypes_h) \
+	$(gdb_string_h) $(value_h) $(frame_h)
+
 c-lang.o: c-lang.c $(c_lang_h) $(defs_h) $(expression_h) $(gdbtypes_h) \
 	$(language_h) $(parser_defs_h) $(symtab_h)
 
@@ -1407,7 +1413,7 @@ expprint.o: expprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 	$(language_h) $(parser_defs_h) $(symtab_h) $(value_h)
 
 findvar.o: findvar.c $(defs_h) $(gdbcore_h) $(inferior_h) $(target_h) \
-	$(gdb_string_h) $(regcache_h)
+	$(gdb_string_h) $(regcache_h) $(builtin_regs_h)
 
 frame.o: frame.c $(defs_h) $(frame_h) $(target_h) $(value_h) $(inferior_h) \
 	$(regcache_h)
@@ -1803,6 +1809,9 @@ somread.o: somread.c $(bfd_h) $(buildsym_h) $(complaints_h) $(defs_h) \
 	$(gdb_stabs_h) $(objfiles_h) $(symfile_h) $(symtab_h) $(gdb_string_h)
 
 somsolib.o: somsolib.c $(defs_h) $(regcache_h)
+
+std-regs.o: std-regs.c $(defs_h) $(builtin_regs_h) $(frame_h) \
+	$(gdbtypes_h) $(value_h)
 
 pa64solib.o: pa64solib.c $(defs_h) $(regcache_h)
 

@@ -33,6 +33,7 @@
 #include "floatformat.h"
 #include "symfile.h"		/* for overlay functions */
 #include "regcache.h"
+#include "builtin-regs.h"
 
 /* Basic byte-swapping routines.  GDB has needed these for a long time...
    All extract a target-format integer at ADDR which is LEN bytes long.  */
@@ -298,6 +299,11 @@ value_of_register (int regnum, struct frame_info *frame)
   struct value *reg_val;
   char *raw_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
   enum lval_type lval;
+
+  /* Builtin registers lie completly outside of the range of normal
+     registers.  Catch them early so that the target never sees them.  */
+  if (regnum >= NUM_REGS + NUM_PSEUDO_REGS)
+    return value_of_builtin_reg (regnum, selected_frame);
 
   get_saved_register (raw_buffer, &optim, &addr,
 		      frame, regnum, &lval);

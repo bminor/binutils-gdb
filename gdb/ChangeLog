@@ -1,3 +1,19 @@
+2002-04-08  Andrew Cagney  <ac131313@redhat.com>
+
+	* findvar.c: Include "builtin-regs.h".
+	(value_of_register): Call value_of_builtin_reg when applicable.
+	* parse.c: Include "builtin-regs.h" and "gdb_assert.h".
+	(target_map_name_to_register): Call
+	builtin_reg_map_name_to_regnum.
+	* Makefile.in (SFILES): Add builtin-regs.c and std-regs.c.
+	(COMMON_OBS): Add builtin-regs.o and std-regs.o.
+	(builtin_regs_h): Define.
+	(builtin-regs.o): New target.
+	(findvar.o): Add $(builtin_regs_h).
+	* builtin-regs.c, builtin-regs.h: New files.
+	* std-regs.c: New file.
+	Partial fix for PR gdb/251.
+
 2002-04-08  Kevin Buettner  <kevinb@redhat.com>
 
 	* rs6000-tdep.c (rs6000_gdbarch_init): Don't set tm_print_insn;
