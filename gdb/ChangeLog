@@ -1,5 +1,23 @@
 2002-11-13  Andrew Cagney  <cagney@redhat.com>
 
+	* regcache.c (struct regcache): Replace passthough_p with
+	readonly_p.
+	(regcache_xmalloc): Initialize readonly_p.
+	(build_regcache): Initialize readonly_p.
+	(regcache_save): New function.
+	(regcache_restore): New function.
+	(regcache_cpy): Re-implement using regcache_save and
+	regcache_restore.
+	(regcache_raw_read): Update.
+	(regcache_cooked_read): When a read-only cache, checked for cached
+	pseudo register values.
+	(regcache_raw_write): Assert that the cache is not read-only.
+	Remove code handling a non-passthrough cache.
+	* regcache.h (regcache_save): Declare.
+	(regcache_restore): Declare.
+
+2002-11-13  Andrew Cagney  <cagney@redhat.com>
+
 	* regcache.c (struct regcache_descr): Add fields
 	sizeof_cooked_registers and sizeof_cooked_register_valid_p.
 	(init_legacy_regcache_descr): Compute the size of a cooked

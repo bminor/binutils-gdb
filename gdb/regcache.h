@@ -134,6 +134,16 @@ extern int max_register_size (struct gdbarch *gdbarch);
 
 extern char *registers;
 
+/* Save/restore a register cache.  The registers saved/restored is
+   determined by the save_reggroup and restore_reggroup (although you
+   can't restore a register that wasn't saved as well :-).  You can
+   only save to a read-only cache (default from regcache_xmalloc())
+   from a live cache and you can only restore from a read-only cache
+   to a live cache.  */
+
+extern void regcache_save (struct regcache *dst, struct regcache *src);
+extern void regcache_restore (struct regcache *dst, struct regcache *src);
+
 /* Copy/duplicate the contents of a register cache.  By default, the
    operation is pass-through.  Writes to DST and reads from SRC will
    go through to the target.
