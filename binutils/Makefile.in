@@ -33,6 +33,7 @@ NM_PROG=nm
 OBJDUMP_PROG=objdump
 
 PROGS = $(SIZE_PROG) $(COPY_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRIP_PROG) $(RANLIB_PROG)
+STAGESTUFF = $(PROGS) *.o
 
 BASEDIR = $(srcdir)/..
 LIBDIR  = $(srcdir)/../bfd$(subdir)
@@ -104,15 +105,20 @@ $(STRIP_PROG): $(COPY_PROG)
 
 stage1: force
 	- mkdir stage1
-	- mv -f *.o $(PROGS) stage1
+	- mv -f $(STAGESTUFF) stage1
 
 stage2: force
 	- mkdir stage2
-	- mv -f *.o $(PROGS) stage2
+	- mv -f $(STAGESTUFF) stage2
 
 stage3: force
 	- mkdir stage3
-	- mv -f *.o $(PROGS) stage3
+	- mv -f $(STAGESTUFF) stage3
+
+against=stage2
+
+comparison: force
+	for i in $(STAGESTUFF) ; do cmp $$i $(against)/$$i ; done
 
 de-stage1: force
 	- (cd stage1 ; mv -f * ..)
@@ -127,7 +133,7 @@ de-stage3: force
 	- rmdir stage3
 
 clean:
-	-rm -f *.o *~ \#* core $(PROGS) TAGS
+	-rm -f *.o *~ \#* core $(STAGESTUFF) TAGS
 
 etags tags: TAGS
 
@@ -135,7 +141,7 @@ TAGS: force
 	etags $(INCDIR)/*.h $(BFDSRC)/*.[hc] *.[hc]
 
 realclean: clean
-	-rm -f $(PROGS) TAGS
+	-rm -f $(STAGESTUFF) TAGS
 
 install: $(PROGS)
 	for i in $(PROGS) ; do \
@@ -148,10 +154,8 @@ size.o: size.c
 copy.o: copy.c
 objdump.o: objdump.c
 m68k-pinsn.o: m68k-pinsn.c
-m68k-pinsn.o: ./m68k-opcode.h
 i960-pinsn.o: i960-pinsn.c
 sparc-pinsn.o: sparc-pinsn.c
-sparc-pinsn.o: ./sparc-opcode.h
 nm.o: nm.c
 ar.o: ar.c
 getopt.o:getopt.c

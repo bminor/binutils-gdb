@@ -72,6 +72,11 @@ stage3: force
 	- mkdir stage3
 	- mv -f $(STAGESTUFF) stage3
 
+against=stage2
+
+comparison: force
+	for i in *.o ; do cmp $$i $(against)/$$i || exit 1 ; done
+
 de-stage1: force
 	- (cd stage1 ; mv -f $(STAGESTUFF) ..)
 	- rmdir stage1

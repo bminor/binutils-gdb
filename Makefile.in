@@ -1,7 +1,7 @@
 #
 # Makefile for directory with subdirs to build.
 #
-# Last Mod Mon May 27 15:55:09 PDT 1991, by rich@cygint.cygnus.com
+# Last Mod Fri May 31 10:35:51 PDT 1991, by rich@cygint.cygnus.com
 #
 
 # $Id$
@@ -26,21 +26,18 @@ all:
 	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS) $(OTHERS)"
 
 subdir_do: force
-	for i in $(DODIRS); \
-	  do \
-	    if [ -d $(srcdir)/$$i -o -d $(srcdir)/$$i.$(target) ] ; then \
-	      if (cd $(srcdir)/$$i`if [ -d $(srcdir)/$$i.$(target) ] ; \
-		  then echo .$(target) ; fi`$(subdir); \
-		  $(MAKE) \
-		      "destdir=$(destdir)" \
-		      "AR=$(AR)" \
-		      "AR_FLAGS=$(AR_FLAGS)" \
-		      "RANLIB=$(RANLIB)" $(DO)) ; \
-	      then true ; \
-	      else exit 1 ; \
-	      fi ;\
-	    else true; fi ; \
-	  done
+	for i in $(DODIRS); do \
+		if [ -d $(srcdir)/$$i -o -d $(srcdir)/$$i.$(target) ] ; then \
+			if (cd $(srcdir)/$$i`if [ -d $(srcdir)/$$i.$(target) ] ; \
+				then echo .$(target) ; fi`$(subdir); \
+				$(MAKE) \
+					"against=$(against)" \
+					"AR=$(AR)" \
+					"AR_FLAGS=$(AR_FLAGS)" \
+					"RANLIB=$(RANLIB)" $(DO)) ; then true ; \
+			else exit 1 ; fi ; \
+		else true ; fi ; \
+	done
 
 bootstrap:
 	$(MAKE) all
@@ -48,14 +45,17 @@ bootstrap:
 	$(MAKE) pass "stagepass=stage1"
 	$(MAKE) stage2
 	$(MAKE) pass "stagepass=stage2"
+	$(MAKE) comparison
 
 bootstrap2:
 	$(MAKE) pass "stagepass=stage1"
 	$(MAKE) stage2
 	$(MAKE) pass "stagepass=stage2"
+	$(MAKE) comparison
 
 bootstrap3:
 	$(MAKE) pass "stagepass=stage2"
+	$(MAKE) comparison
 
 pass:
 	cp $(srcdir)/gcc`if [ -d $(srcdir)/gcc.$(target) ] ; \
@@ -89,6 +89,10 @@ stage3:
 
 stage4:
 	$(MAKE) subdir_do DO=stage4 "DODIRS=$(SUBDIRS)"
+
+against=stage2
+
+comparison:; $(MAKE) subdir_do DO=comparison against=$(against) "DODIRS=$(SUBDIRS)"
 
 de-stage1:; $(MAKE) subdir_do DO=de-stage1 "DODIRS=$(SUBDIRS)"
 de-stage2:; $(MAKE) subdir_do DO=de-stage2 "DODIRS=$(SUBDIRS)"
@@ -132,7 +136,10 @@ Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
 
 #
 # $Log$
-# Revision 1.14  1991/05/31 12:34:55  gnu
+# Revision 1.15  1991/06/09 20:27:01  rich
+# added support for binary comparisons.
+#
+# Revision 1.14  1991/05/31  12:34:55  gnu
 # Avoid error stop from Make if a directory doesn't exist during subdir_do.
 #
 # Revision 1.13  1991/05/27  23:03:20  rich

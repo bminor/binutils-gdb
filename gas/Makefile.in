@@ -488,17 +488,17 @@ bootstrap: as force
 	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage1/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as
 	$(MAKE) stage2
 	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as
-	$(MAKE) stage-last
+	$(MAKE) comparison against=stage2
 
 bootstrap2: force
 	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage1/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as
 	$(MAKE) stage2
 	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as
-	$(MAKE) stage-last
+	$(MAKE) comparison against-stage2
 
 bootstrap3: force
 	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as
-	$(MAKE) stage-last
+	$(MAKE) comparison against=stage2
 
 # Copy the object files from a particular stage into a subdirectory.
 stage1: force
@@ -513,6 +513,11 @@ stage3: force
 	-mkdir stage3
 	-mv $(STAGESTUFF) stage3
 
+against=stage2
+
+comparison: force
+	for i in $(STAGESTUFF) ; do cmp $$i $(against)/$$i ; done
+
 de-stage1: force
 	- (cd stage1 ; mv -f * ..)
 	- rmdir stage1
@@ -524,9 +529,6 @@ de-stage2: force
 de-stage3: force
 	- (cd stage3 ; mv -f * ..)
 	- rmdir stage3
-
-stage-last:
-	for i in *.o; do cmp $$i stage2/$$i; done
 
 # Copy just the executable files from a particular stage into a subdirectory,
 # and delete the object files.  Use this if you're just verifying a version
@@ -562,14 +564,6 @@ risky-stage4: force
 #In GNU Make, ignore whether `stage*' exists.
 .PHONY: stage1 stage2 stage3 stage4 clean realclean TAGS bootstrap
 .PHONY: risky-stage1 risky-stage2 risky-stage3 risky-stage4
-
-comparison: clean
-	$(MAKE) "CC=/usr/local/bin/gcc -Wall" as
-	$(MAKE) stage1
-	- $(MAKE) "CC=/usr/local/bin/gcc -Wall -b$(target) -Bstage1/" as -k
-	$(MAKE) stage2
-	- $(MAKE) "CC=/usr/local/bin/gcc -Wall -b$(target)" as -k
-	$(MAKE) stage-last
 
 force:
 
