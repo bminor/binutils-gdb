@@ -1,5 +1,5 @@
 /* POWER/PowerPC XCOFF linker support.
-   Copyright 1995, 1996, 1997 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>, Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -3272,10 +3272,15 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
   xcoff_hash_table (info)->file_align = file_align;
   xcoff_hash_table (info)->textro = textro;
 
-  hentry = xcoff_link_hash_lookup (xcoff_hash_table (info), entry,
-				   false, false, true);
-  if (hentry != NULL)
-    hentry->flags |= XCOFF_ENTRY;
+  if (entry == NULL)
+    hentry = NULL;
+  else
+    {
+      hentry = xcoff_link_hash_lookup (xcoff_hash_table (info), entry,
+				       false, false, true);
+      if (hentry != NULL)
+	hentry->flags |= XCOFF_ENTRY;
+    }
 
   /* Garbage collect unused sections.  */
   if (info->relocateable
