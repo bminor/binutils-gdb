@@ -810,7 +810,7 @@ static void mips16_mark_labels
   PARAMS ((void));
 static void append_insn
   PARAMS ((char *place, struct mips_cl_insn * ip, expressionS * p,
-	   bfd_reloc_code_real_type *r, bfd_boolean));
+	   bfd_reloc_code_real_type *r));
 static void mips_no_prev_insn
   PARAMS ((int));
 static void mips_emit_delays
@@ -856,12 +856,10 @@ static void mips16_ip
 static void mips16_immed
   PARAMS ((char *, unsigned int, int, offsetT, bfd_boolean, bfd_boolean,
 	   bfd_boolean, unsigned long *, bfd_boolean *, unsigned short *));
-static int my_getPercentOp
-  PARAMS ((char **, unsigned int *, int *));
-static int my_getSmallParser
-  PARAMS ((char **, unsigned int *, int *));
-static int my_getSmallExpression
-  PARAMS ((expressionS *, char *));
+static bfd_boolean parse_relocation
+  PARAMS ((char **, bfd_reloc_code_real_type *));
+static size_t my_getSmallExpression
+  PARAMS ((expressionS *, bfd_reloc_code_real_type *, char *));
 static void my_getExpression
   PARAMS ((expressionS *, char *));
 #ifdef OBJ_ELF
@@ -945,32 +943,6 @@ static void show
 static int mips_need_elf_addend_fixup
   PARAMS ((fixS *));
 #endif
-
-/* Return values of my_getSmallExpression().  */
-
-enum small_ex_type
-{
-  S_EX_NONE = 0,
-  S_EX_REGISTER,
-
-  /* Direct relocation creation by %percent_op().  */
-  S_EX_HALF,
-  S_EX_HI,
-  S_EX_LO,
-  S_EX_GP_REL,
-  S_EX_GOT,
-  S_EX_CALL16,
-  S_EX_GOT_DISP,
-  S_EX_GOT_PAGE,
-  S_EX_GOT_OFST,
-  S_EX_GOT_HI,
-  S_EX_GOT_LO,
-  S_EX_NEG,
-  S_EX_HIGHER,
-  S_EX_HIGHEST,
-  S_EX_CALL_HI,
-  S_EX_CALL_LO
-};
 
 /* Table and functions used to map between CPU/ISA names, and
    ISA levels, and CPU numbers.  */
@@ -1135,10 +1107,6 @@ static bfd_reloc_code_real_type imm_reloc[3]
   = {BFD_RELOC_UNUSED, BFD_RELOC_UNUSED, BFD_RELOC_UNUSED};
 static bfd_reloc_code_real_type offset_reloc[3]
   = {BFD_RELOC_UNUSED, BFD_RELOC_UNUSED, BFD_RELOC_UNUSED};
-
-/* This is set by mips_ip if imm_reloc is an unmatched HI16_S reloc.  */
-
-static bfd_boolean imm_unmatched_hi;
 
 /* These are set by mips16_ip if an explicit extension is used.  */
 
@@ -1430,7 +1398,6 @@ md_assemble (str)
     = {BFD_RELOC_UNUSED, BFD_RELOC_UNUSED, BFD_RELOC_UNUSED};
 
   imm_expr.X_op = O_absent;
-  imm_unmatched_hi = FALSE;
   offset_expr.X_op = O_absent;
   imm_reloc[0] = BFD_RELOC_UNUSED;
   imm_reloc[1] = BFD_RELOC_UNUSED;
@@ -1464,11 +1431,11 @@ md_assemble (str)
   else
     {
       if (imm_expr.X_op != O_absent)
-	append_insn (NULL, &insn, &imm_expr, imm_reloc, imm_unmatched_hi);
+	append_insn (NULL, &insn, &imm_expr, imm_reloc);
       else if (offset_expr.X_op != O_absent)
-	append_insn (NULL, &insn, &offset_expr, offset_reloc, FALSE);
+	append_insn (NULL, &insn, &offset_expr, offset_reloc);
       else
-	append_insn (NULL, &insn, NULL, unused_reloc, FALSE);
+	append_insn (NULL, &insn, NULL, unused_reloc);
     }
 }
 
@@ -1616,23 +1583,24 @@ mips16_mark_labels ()
    used with RELOC_TYPE.  */
 
 static void
-append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
+append_insn (place, ip, address_expr, reloc_type)
      char *place;
      struct mips_cl_insn *ip;
      expressionS *address_expr;
      bfd_reloc_code_real_type *reloc_type;
-     bfd_boolean unmatched_hi;
 {
   register unsigned long prev_pinfo, pinfo;
   char *f;
   fixS *fixp[3];
   int nops = 0;
+  bfd_boolean unmatched_reloc_p;
 
   /* Mark instruction labels in mips16 mode.  */
   mips16_mark_labels ();
 
   prev_pinfo = prev_insn.insn_mo->pinfo;
   pinfo = ip->insn_mo->pinfo;
+  unmatched_reloc_p = FALSE;
 
   if (place == NULL && (! mips_opts.noreorder || prev_nop_frag != NULL))
     {
@@ -2176,17 +2144,17 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 		   || *reloc_type == BFD_RELOC_MIPS_RELGOT))
 		fixp[0]->fx_no_overflow = 1;
 
-	      if (unmatched_hi)
+	      if (reloc_type[0] == BFD_RELOC_HI16_S)
 		{
 		  struct mips_hi_fixup *hi_fixup;
 
-		  assert (*reloc_type == BFD_RELOC_HI16_S);
 		  hi_fixup = ((struct mips_hi_fixup *)
 			      xmalloc (sizeof (struct mips_hi_fixup)));
 		  hi_fixup->fixp = fixp[0];
 		  hi_fixup->seg = now_seg;
 		  hi_fixup->next = mips_hi_fixup_list;
 		  mips_hi_fixup_list = hi_fixup;
+		  unmatched_reloc_p = TRUE;
 		}
 
 	      if (reloc_type[1] != BFD_RELOC_UNUSED)
@@ -2743,7 +2711,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
      reloc does not become a variant frag.  Otherwise, the
      rearrangement of %hi relocs in frob_file may confuse
      tc_gen_reloc.  */
-  if (unmatched_hi)
+  if (unmatched_reloc_p)
     {
       frag_wane (frag_now);
       frag_new (0);
@@ -3140,7 +3108,7 @@ macro_build (place, counter, ep, name, fmt, va_alist)
   va_end (args);
   assert (*r == BFD_RELOC_UNUSED ? ep == NULL : ep != NULL);
 
-  append_insn (place, &insn, ep, r, FALSE);
+  append_insn (place, &insn, ep, r);
 }
 
 static void
@@ -3266,7 +3234,7 @@ mips16_macro_build (place, counter, ep, name, fmt, args)
 
   assert (*r == BFD_RELOC_UNUSED ? ep == NULL : ep != NULL);
 
-  append_insn (place, &insn, ep, r, FALSE);
+  append_insn (place, &insn, ep, r);
 }
 
 /*
@@ -3356,10 +3324,10 @@ macro_build_lui (place, counter, ep, regnum)
   if (*r == BFD_RELOC_UNUSED)
     {
       insn.insn_opcode |= high_expr.X_add_number;
-      append_insn (place, &insn, NULL, r, FALSE);
+      append_insn (place, &insn, NULL, r);
     }
   else
-    append_insn (place, &insn, &high_expr, r, FALSE);
+    append_insn (place, &insn, &high_expr, r);
 }
 
 /* Generate a sequence of instructions to do a load or store from a constant
@@ -9065,122 +9033,70 @@ mips_ip (str, ip)
 	    case 'i':		/* 16 bit unsigned immediate */
 	    case 'j':		/* 16 bit signed immediate */
 	      *imm_reloc = BFD_RELOC_LO16;
-	      c = my_getSmallExpression (&imm_expr, s);
-	      if (c != S_EX_NONE)
-		{
-		  if (c != S_EX_LO)
-		    {
-		      if (c == S_EX_HI)
-			{
-			  *imm_reloc = BFD_RELOC_HI16_S;
-			  imm_unmatched_hi = TRUE;
-			}
-#ifdef OBJ_ELF
-		      else if (c == S_EX_HIGHEST)
-			*imm_reloc = BFD_RELOC_MIPS_HIGHEST;
-		      else if (c == S_EX_HIGHER)
-			*imm_reloc = BFD_RELOC_MIPS_HIGHER;
-		      else if (c == S_EX_GP_REL)
-			{
-			  /* This occurs in NewABI only.  */
-			  c = my_getSmallExpression (&imm_expr, s);
-			  if (c != S_EX_NEG)
-			    as_bad (_("bad composition of relocations"));
-			  else
-			    {
-			      c = my_getSmallExpression (&imm_expr, s);
-			      if (c != S_EX_LO)
-				as_bad (_("bad composition of relocations"));
-			      else
-				{
-				  imm_reloc[0] = BFD_RELOC_GPREL16;
-				  imm_reloc[1] = BFD_RELOC_MIPS_SUB;
-				  imm_reloc[2] = BFD_RELOC_LO16;
-				}
-			    }
-			}
-#endif
-		      else
-			*imm_reloc = BFD_RELOC_HI16;
-		    }
-		  else if (imm_expr.X_op == O_constant)
-		    imm_expr.X_add_number &= 0xffff;
-		}
-	      if (*args == 'i')
-		{
-		  if ((c == S_EX_NONE && imm_expr.X_op != O_constant)
-		      || ((imm_expr.X_add_number < 0
-			   || imm_expr.X_add_number >= 0x10000)
-			  && imm_expr.X_op == O_constant))
-		    {
-		      if (insn + 1 < &mips_opcodes[NUMOPCODES] &&
-			  !strcmp (insn->name, insn[1].name))
-			break;
-		      if (imm_expr.X_op == O_constant
-			  || imm_expr.X_op == O_big)
-			as_bad (_("16 bit expression not in range 0..65535"));
-		    }
-		}
-	      else
+	      if (my_getSmallExpression (&imm_expr, imm_reloc, s) == 0)
 		{
 		  int more;
-		  offsetT max;
+		  offsetT minval, maxval;
 
-		  /* The upper bound should be 0x8000, but
-		     unfortunately the MIPS assembler accepts numbers
-		     from 0x8000 to 0xffff and sign extends them, and
-		     we want to be compatible.  We only permit this
-		     extended range for an instruction which does not
-		     provide any further alternates, since those
-		     alternates may handle other cases.  People should
-		     use the numbers they mean, rather than relying on
-		     a mysterious sign extension.  */
-		  more = (insn + 1 < &mips_opcodes[NUMOPCODES] &&
-			  strcmp (insn->name, insn[1].name) == 0);
-		  if (more)
-		    max = 0x8000;
+		  more = (insn + 1 < &mips_opcodes[NUMOPCODES]
+			  && strcmp (insn->name, insn[1].name) == 0);
+
+		  /* If the expression was written as an unsigned number,
+		     only treat it as signed if there are no more
+		     alternatives.  */
+		  if (more
+		      && *args == 'j'
+		      && sizeof (imm_expr.X_add_number) <= 4
+		      && imm_expr.X_op == O_constant
+		      && imm_expr.X_add_number < 0
+		      && imm_expr.X_unsigned
+		      && HAVE_64BIT_GPRS)
+		    break;
+
+		  /* For compatibility with older assemblers, we accept
+		     0x8000-0xffff as signed 16-bit numbers when only
+		     signed numbers are allowed.  */
+		  if (*args == 'i')
+		    minval = 0, maxval = 0xffff;
+		  else if (more)
+		    minval = -0x8000, maxval = 0x7fff;
 		  else
-		    max = 0x10000;
-		  if ((c == S_EX_NONE && imm_expr.X_op != O_constant)
-		      || ((imm_expr.X_add_number < -0x8000
-			   || imm_expr.X_add_number >= max)
-			  && imm_expr.X_op == O_constant)
-		      || (more
-			  && imm_expr.X_add_number < 0
-			  && HAVE_64BIT_GPRS
-			  && imm_expr.X_unsigned
-			  && sizeof (imm_expr.X_add_number) <= 4))
+		    minval = -0x8000, maxval = 0xffff;
+
+		  if (imm_expr.X_op != O_constant
+		      || imm_expr.X_add_number < minval
+		      || imm_expr.X_add_number > maxval)
 		    {
 		      if (more)
 			break;
 		      if (imm_expr.X_op == O_constant
 			  || imm_expr.X_op == O_big)
-			as_bad (_("16 bit expression not in range -32768..32767"));
+			as_bad (_("expression out of range"));
 		    }
 		}
 	      s = expr_end;
 	      continue;
 
 	    case 'o':		/* 16 bit offset */
-	      c = my_getSmallExpression (&offset_expr, s);
+	      /* Check whether there is only a single bracketed expression
+		 left.  If so, it must be the base register and the
+		 constant must be zero.  */
+	      if (*s == '(' && strchr (s + 1, '(') == 0)
+		{
+		  offset_expr.X_op = O_constant;
+		  offset_expr.X_add_number = 0;
+		  continue;
+		}
 
 	      /* If this value won't fit into a 16 bit offset, then go
 		 find a macro that will generate the 32 bit offset
 		 code pattern.  */
-	      if (c == S_EX_NONE
+	      if (my_getSmallExpression (&offset_expr, offset_reloc, s) == 0
 		  && (offset_expr.X_op != O_constant
 		      || offset_expr.X_add_number >= 0x8000
 		      || offset_expr.X_add_number < -0x8000))
 		break;
 
-	      if (c == S_EX_HI)
-		{
-		  if (offset_expr.X_op != O_constant)
-		    break;
-		  offset_expr.X_add_number =
-		    (offset_expr.X_add_number >> 16) & 0xffff;
-		}
-	      *offset_reloc = BFD_RELOC_LO16;
 	      s = expr_end;
 	      continue;
 
@@ -9191,49 +9107,10 @@ mips_ip (str, ip)
 	      continue;
 
 	    case 'u':		/* upper 16 bits */
-	      c = my_getSmallExpression (&imm_expr, s);
-	      *imm_reloc = BFD_RELOC_LO16;
-	      if (c != S_EX_NONE)
-		{
-		  if (c != S_EX_LO)
-		    {
-		      if (c == S_EX_HI)
-			{
-			  *imm_reloc = BFD_RELOC_HI16_S;
-			  imm_unmatched_hi = TRUE;
-			}
-#ifdef OBJ_ELF
-		      else if (c == S_EX_HIGHEST)
-			*imm_reloc = BFD_RELOC_MIPS_HIGHEST;
-		      else if (c == S_EX_GP_REL)
-			{
-			  /* This occurs in NewABI only.  */
-			  c = my_getSmallExpression (&imm_expr, s);
-			  if (c != S_EX_NEG)
-			    as_bad (_("bad composition of relocations"));
-			  else
-			    {
-			      c = my_getSmallExpression (&imm_expr, s);
-			      if (c != S_EX_HI)
-				as_bad (_("bad composition of relocations"));
-			      else
-				{
-				  imm_reloc[0] = BFD_RELOC_GPREL16;
-				  imm_reloc[1] = BFD_RELOC_MIPS_SUB;
-				  imm_reloc[2] = BFD_RELOC_HI16_S;
-				}
-			    }
-			}
-#endif
-		      else
-			*imm_reloc = BFD_RELOC_HI16;
-		    }
-		  else if (imm_expr.X_op == O_constant)
-		    imm_expr.X_add_number &= 0xffff;
-		}
-	      else if (imm_expr.X_op == O_constant
-		       && (imm_expr.X_add_number < 0
-			   || imm_expr.X_add_number >= 0x10000))
+	      if (my_getSmallExpression (&imm_expr, imm_reloc, s) == 0
+		  && imm_expr.X_op == O_constant
+		  && (imm_expr.X_add_number < 0
+		      || imm_expr.X_add_number >= 0x10000))
 		as_bad (_("lui expression not in range 0..65535"));
 	      s = expr_end;
 	      continue;
@@ -10070,222 +9947,118 @@ mips16_immed (file, line, type, val, warn, small, ext, insn, use_extend,
     }
 }
 
-static struct percent_op_match
+static const struct percent_op_match
 {
-   const char *str;
-   const enum small_ex_type type;
+  const char *str;
+  bfd_reloc_code_real_type reloc;
 } percent_op[] =
 {
-  {"%lo", S_EX_LO},
+  {"%lo", BFD_RELOC_LO16},
 #ifdef OBJ_ELF
-  {"%call_hi", S_EX_CALL_HI},
-  {"%call_lo", S_EX_CALL_LO},
-  {"%call16", S_EX_CALL16},
-  {"%got_disp", S_EX_GOT_DISP},
-  {"%got_page", S_EX_GOT_PAGE},
-  {"%got_ofst", S_EX_GOT_OFST},
-  {"%got_hi", S_EX_GOT_HI},
-  {"%got_lo", S_EX_GOT_LO},
-  {"%got", S_EX_GOT},
-  {"%gp_rel", S_EX_GP_REL},
-  {"%half", S_EX_HALF},
-  {"%highest", S_EX_HIGHEST},
-  {"%higher", S_EX_HIGHER},
-  {"%neg", S_EX_NEG},
+  {"%call_hi", BFD_RELOC_MIPS_CALL_HI16},
+  {"%call_lo", BFD_RELOC_MIPS_CALL_LO16},
+  {"%call16", BFD_RELOC_MIPS_CALL16},
+  {"%got_disp", BFD_RELOC_MIPS_GOT_DISP},
+  {"%got_page", BFD_RELOC_MIPS_GOT_PAGE},
+  {"%got_ofst", BFD_RELOC_MIPS_GOT_OFST},
+  {"%got_hi", BFD_RELOC_MIPS_GOT_HI16},
+  {"%got_lo", BFD_RELOC_MIPS_GOT_LO16},
+  {"%got", BFD_RELOC_MIPS_GOT16},
+  {"%gp_rel", BFD_RELOC_GPREL16},
+  {"%half", BFD_RELOC_16},
+  {"%highest", BFD_RELOC_MIPS_HIGHEST},
+  {"%higher", BFD_RELOC_MIPS_HIGHER},
+  {"%neg", BFD_RELOC_MIPS_SUB},
 #endif
-  {"%hi", S_EX_HI}
+  {"%hi", BFD_RELOC_HI16_S}
 };
 
-/* Parse small expression input.  STR gets adjusted to eat up whitespace.
-   It detects valid "%percent_op(...)" and "($reg)" strings.  Percent_op's
-   can be nested, this is handled by blanking the innermost, parsing the
-   rest by subsequent calls.  */
 
-static int
-my_getSmallParser (str, len, nestlevel)
+/* Return true if *STR points to a relocation operator.  When returning true,
+   move *STR over the operator and store its relocation code in *RELOC.
+   Leave both *STR and *RELOC alone when returning false.  */
+
+static bfd_boolean
+parse_relocation (str, reloc)
      char **str;
-     unsigned int *len;
-     int *nestlevel;
+     bfd_reloc_code_real_type *reloc;
 {
-  *len = 0;
-  *str += strspn (*str, " \t");
-  /* Check for expression in parentheses.  */
-  if (**str == '(')
-    {
-      char *b = *str + 1 + strspn (*str + 1, " \t");
-      char *e;
+  size_t i;
 
-      /* Check for base register.  */
-      if (b[0] == '$')
-	{
-	  if (strchr (b, ')')
-	      && (e = b + strcspn (b, ") \t"))
-	      && e - b > 1 && e - b < 4)
-	    {
-	      if ((e - b == 3
-		   && ((b[1] == 'f' && b[2] == 'p')
-		       || (b[1] == 's' && b[2] == 'p')
-		       || (b[1] == 'g' && b[2] == 'p')
-		       || (b[1] == 'a' && b[2] == 't')
-		       || (ISDIGIT (b[1])
-			   && ISDIGIT (b[2]))))
-		  || (ISDIGIT (b[1])))
-		{
-		  *len = strcspn (*str, ")") + 1;
-		  return S_EX_REGISTER;
-		}
-	    }
-	}
-      /* Check for percent_op (in parentheses).  */
-      else if (b[0] == '%')
-	{
-	  *str = b;
-	  return my_getPercentOp (str, len, nestlevel);
-	}
-
-      /* Some other expression in the parentheses, which can contain
-	 parentheses itself. Attempt to find the matching one.  */
+  for (i = 0; i < ARRAY_SIZE (percent_op); i++)
+    if (strncasecmp (*str, percent_op[i].str, strlen (percent_op[i].str)) == 0)
       {
-	int pcnt = 1;
-	char *s;
+	*str += strlen (percent_op[i].str);
+	*reloc = percent_op[i].reloc;
 
-	*len = 1;
-	for (s = *str + 1; *s && pcnt; s++, (*len)++)
+	/* Check whether the output BFD supports this relocation.
+	   If not, issue an error and fall back on something safe.  */
+	if (!bfd_reloc_type_lookup (stdoutput, percent_op[i].reloc))
 	  {
-	    if (*s == '(')
-	      ++pcnt;
-	    else if (*s == ')')
-	      --pcnt;
+	    as_bad ("relocation %s isn't supported by the current ABI",
+		    percent_op[i].str);
+	    *reloc = BFD_RELOC_LO16;
 	  }
+	return TRUE;
       }
-    }
-  /* Check for percent_op (outside of parentheses).  */
-  else if (*str[0] == '%')
-    return my_getPercentOp (str, len, nestlevel);
-
-  /* Any other expression.  */
-  return S_EX_NONE;
+  return FALSE;
 }
 
-static int
-my_getPercentOp (str, len, nestlevel)
-     char **str;
-     unsigned int *len;
-     int *nestlevel;
-{
-  char *tmp = *str + 1;
-  unsigned int i = 0;
 
-  while (ISALPHA (*tmp) || *tmp == '_')
-    {
-      *tmp = TOLOWER (*tmp);
-      tmp++;
-    }
-  while (i < (sizeof (percent_op) / sizeof (struct percent_op_match)))
-    {
-      if (strncmp (*str, percent_op[i].str, strlen (percent_op[i].str)))
-	i++;
-      else
-	{
-	  int type = percent_op[i].type;
+/* Parse string STR as a 16-bit relocatable operand.  Store the
+   expression in *EP and the relocations in the array starting
+   at RELOC.  Return the number of relocation operators used.
 
-	  /* Only %hi and %lo are allowed for OldABI.  */
-	  if (! HAVE_NEWABI && type != S_EX_HI && type != S_EX_LO)
-	    return S_EX_NONE;
+   On exit, EXPR_END points to the first character after the expression.
+   If no relocation operators are used, RELOC[0] is set to BFD_RELOC_LO16.  */
 
-	  *len = strlen (percent_op[i].str);
-	  ++(*nestlevel);
-	  return type;
-	}
-    }
-  return S_EX_NONE;
-}
-
-static int
-my_getSmallExpression (ep, str)
+static size_t
+my_getSmallExpression (ep, reloc, str)
      expressionS *ep;
+     bfd_reloc_code_real_type *reloc;
      char *str;
 {
-  static char *oldstr = NULL;
-  int c = S_EX_NONE;
-  int oldc;
-  int nestlevel = -1;
-  unsigned int len;
+  bfd_reloc_code_real_type reversed_reloc[3];
+  size_t reloc_index, i;
+  int bracket_depth;
 
-  /* Don't update oldstr if the last call had nested percent_op's. We need
-     it to parse the outer ones later.  */
-  if (! oldstr)
-    oldstr = str;
+  reloc_index = 0;
+  bracket_depth = 0;
 
-  do
+  /* Search for the start of the main expression, recoding relocations
+     in REVERSED_RELOC.  */
+  for (;;)
     {
-      oldc = c;
-      c = my_getSmallParser (&str, &len, &nestlevel);
-      if (c != S_EX_NONE && c != S_EX_REGISTER)
-	str += len;
-    }
-  while (c != S_EX_NONE && c != S_EX_REGISTER);
-
-  if (nestlevel >= 0)
-    {
-      /* A percent_op was encountered.  Don't try to get an expression if
-	 it is already blanked out.  */
-      if (*(str + strspn (str + 1, " )")) != ')')
-	{
-	  char save;
-
-	  /* Let my_getExpression() stop at the closing parenthesis.  */
-	  save = *(str + len);
-	  *(str + len) = '\0';
-	  my_getExpression (ep, str);
-	  *(str + len) = save;
-	}
-      if (nestlevel > 0)
-	{
-	  /* Blank out including the % sign and the proper matching
-	     parenthesis.  */
-	  int pcnt = 1;
-	  char *s = strrchr (oldstr, '%');
-	  char *end;
-
-	  for (end = strchr (s, '(') + 1; *end && pcnt; end++)
-	    {
-	      if (*end == '(')
-		++pcnt;
-	      else if (*end == ')')
-		--pcnt;
-	    }
-
-	  memset (s, ' ', end - s);
-	  str = oldstr;
-	}
+      if (*str == '(')
+	bracket_depth++, str++;
+      else if (*str == ' ' || *str == '\t')
+	str++;
+      else if (*str == '%'
+	       && reloc_index < (HAVE_NEWABI ? 3 : 1)
+	       && parse_relocation (&str, &reversed_reloc[reloc_index]))
+	reloc_index++;
       else
-	expr_end = str + len;
-
-      c = oldc;
-    }
-  else if (c == S_EX_NONE)
-    {
-      my_getExpression (ep, str);
-    }
-  else if (c == S_EX_REGISTER)
-    {
-      ep->X_op = O_constant;
-      expr_end = str;
-      ep->X_add_symbol = NULL;
-      ep->X_op_symbol = NULL;
-      ep->X_add_number = 0;
-    }
-  else
-    {
-      as_fatal (_("internal error"));
+	break;
     }
 
-  if (nestlevel <= 0)
-    /* All percent_op's have been handled.  */
-    oldstr = NULL;
+  my_getExpression (ep, str);
+  str = expr_end;
 
-  return c;
+  /* Match every open bracket.  */
+  while (bracket_depth > 0 && (*str == ')' || *str == ' ' || *str == '\t'))
+    if (*str++ == ')')
+      bracket_depth--;
+
+  if (bracket_depth > 0)
+    as_bad ("unclosed '('");
+
+  expr_end = str;
+
+  reloc[0] = BFD_RELOC_LO16;
+  for (i = 0; i < reloc_index; i++)
+    reloc[i] = reversed_reloc[reloc_index - 1 - i];
+
+  return reloc_index;
 }
 
 static void

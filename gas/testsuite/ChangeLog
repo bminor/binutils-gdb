@@ -1,3 +1,10 @@
+2003-02-02  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/mips/elf-rel8.[sd], gas/mips/elf-rel9.[sd],
+	gas/mips/elf-rel10.[sd], gas/mips/elf-rel11.[sd]: New tests.
+	* gas/mips/mips.exp: Run elf-rel8 and elf-rel9 for all elf
+	targets.  Run elf-rel10 and elf-rel11 for NewABI targets.
+
 2003-01-27  Alexandre Oliva  <aoliva@redhat.com>
 
 	* gas/mips/n32-consec.d: New.

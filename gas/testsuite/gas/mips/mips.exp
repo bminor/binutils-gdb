@@ -376,7 +376,7 @@ if { [istarget mips*-*-*] } then {
     set ilocks [istarget mipstx39*-*-*]
     set gpr_ilocks [expr [istarget mipstx39*-*-*]]
     set addr32 [expr [istarget mipstx39*-*-*]]
-    set hasn32 [expr [istarget *-*-irix6*] || [istarget mips64*-*-linux*]]
+    set has_newabi [expr [istarget *-*-irix6*] || [istarget mips64*-*-linux*]]
 
     if { [istarget "mips*-*-*linux*"] } then {
 	set tmips "t"
@@ -602,6 +602,12 @@ if { [istarget mips*-*-*] } then {
 	run_dump_test "elf-rel5"
 	run_dump_test "elf-rel6"
 	run_dump_test "elf-rel7"
+	run_dump_test "elf-rel8"
+	run_dump_test "elf-rel9"
+	if $has_newabi {
+	    run_dump_test "elf-rel10"
+	    run_dump_test "elf-rel11"
+	}
 	run_dump_test "${tmips}${el}empic"
 	run_dump_test "empic2"
 	run_dump_test "empic3_e"
@@ -614,7 +620,7 @@ if { [istarget mips*-*-*] } then {
 	run_dump_test "elf-consthilo"
     }
 
-    if $hasn32 {
+    if $has_newabi {
 	run_dump_test "n32-consec"
     }
 

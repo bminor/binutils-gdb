@@ -1,3 +1,24 @@
+2003-02-02  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/tc-mips.c (enum small_ex_type): Remove.
+	(imm_unmatched_hi): Remove.
+	(md_assemble): Remove use of imm_unmatched_hi.  Remove the last
+	argument from calls to append_insn.
+	(append_insn): Remove unmatched_hi parameter; check reloc_type[0]
+	instead.
+	(macro_build): Update append_insn calls.
+	(mips16_macro_build, macro_build_lui): Likewise.
+	(mips_ip): Rework handling of small expressions.  Move explicit
+	relocation handling into my_getSmallExpression.  Assume that the
+	value of 'o' operands is zero if there is only one bracketed
+	expression left.
+	(percent_op): Make constant.  Record the BFD relocation code
+	associated with each operator.
+	(my_getSmallParser, my_getPercentOp): Remove.
+	(parse_relocation): New function.
+	(my_getSamllExpression): Rework.  Fill in relocations here
+	rather than in mips_ip.
+
 2003-01-29  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-i386.c (line_comment_chars): Add '#'.  This makes the
