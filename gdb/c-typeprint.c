@@ -407,7 +407,9 @@ is_type_conversion_operator (struct type *type, int i, int j)
   else if (strncmp (name, "delete", 6) == 0)
     name += 6;
   else
-    return 0;
+    /* If it doesn't look like new or delete, it's a type conversion
+       operator.  */
+    return 1;
 
   /* Is that really the end of the name?  */
   if (('a' <= *name && *name <= 'z')
