@@ -459,13 +459,13 @@ write_dollar_variable (str)
   /* Handle tokens that refer to machine registers:
      $ followed by a register name.  */
   for (i = 0; i < NUM_REGS; i++)
-    if (str.length - 1 == strlen (reg_names[i])
+    if (reg_names[i] && str.length - 1 == strlen (reg_names[i])
 	&& STREQN (str.ptr + 1, reg_names[i], str.length - 1))
       {
 	goto handle_register;
       }
   for (i = 0; i < num_std_regs; i++)
-    if (str.length - 1 == strlen (std_regs[i].name)
+    if (std_regs[i].name && str.length - 1 == strlen (std_regs[i].name)
 	&& STREQN (str.ptr + 1, std_regs[i].name, str.length - 1))
       {
 	i = std_regs[i].regnum;

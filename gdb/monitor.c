@@ -123,6 +123,8 @@ static int dump_reg_flag;	/* Non-zero means do a dump_registers cmd when
 				   monitor_wait wakes up.  */
 
 static DCACHE *remote_dcache;
+static int first_time=0;	/* is this the first time we're executing after 
+					gaving created the child proccess? */
 
 /* monitor_debug is like fputs_unfiltered, except it prints special
    characters in printable fashion.  */
@@ -139,7 +141,7 @@ monitor_debug (prefix, string, suffix)
   static int new_line=1;
   static char *prev_prefix = "";
   static char *prev_suffix = "";
-      
+
   /* if the prefix is changing, print the previous suffix, a new line,
      and the new prefix */
   if (strcmp(prev_prefix, prefix) != 0 && !new_line)
@@ -693,6 +695,15 @@ monitor_resume (pid, step, sig)
      int pid, step;
      enum target_signal sig;
 {
+  /* Some monitors require a different command when starting a program */
+  if (current_monitor->flags & MO_RUN_FIRST_TIME && first_time == 1)
+    {
+      first_time = 0;
+      monitor_printf ("run\r");
+      if (current_monitor->flags & MO_NEED_REGDUMP_AFTER_CONT)
+	    dump_reg_flag = 1;
+      return;
+    }
   dcache_flush (remote_dcache);
   if (step)
     monitor_printf (current_monitor->step);
@@ -884,6 +895,20 @@ monitor_fetch_register (regno)
 
   if (current_monitor->getreg.resp_delim)
     monitor_expect (current_monitor->getreg.resp_delim, NULL, 0);
+
+  /* Skip leading spaces and "0x" if MO_HEX_PREFIX flag is set */
+  if (current_monitor->flags & MO_HEX_PREFIX) 
+    {
+      int c;
+      c = readchar (timeout);
+      while (c == ' ')
+	c = readchar (timeout);
+      if ((c == '0') && ((c = readchar (timeout)) == 'x'))
+	;
+      else
+	  error ("Bad value returned from monitor while fetching register %x.",
+		 regno);
+    }
 
   /* Read upto the maximum number of hex digits for this register, skipping
      spaces, but stop reading if something else is seen.  Some monitors
@@ -1078,7 +1103,10 @@ monitor_write_memory (memaddr, myaddr, len)
 
   val = extract_unsigned_integer (myaddr, len);
 
-  monitor_printf (cmd, memaddr, val);
+  if (current_monitor->flags & MO_NO_ECHO_ON_SETMEM)
+    monitor_printf_noecho (cmd, memaddr, val);
+  else
+    monitor_printf (cmd, memaddr, val);
 
   monitor_expect_prompt (NULL, 0);
 
@@ -1135,6 +1163,19 @@ monitor_read_memory_single (memaddr, myaddr, len)
 /* Now, read the appropriate number of hex digits for this loc, skipping
    spaces.  */
 
+  /* Skip leading spaces and "0x" if MO_HEX_PREFIX flag is set */
+  if (current_monitor->flags & MO_HEX_PREFIX) 
+    {
+      int c;
+      c = readchar (timeout);
+      while (c == ' ')
+	c = readchar (timeout);
+      if ((c == '0') && ((c = readchar (timeout)) == 'x'))
+	;
+      else
+	  error ("monitor_read_memory_single (0x%x):  bad response from monitor: %.*s%c.",
+		 memaddr, i, membuf, c);
+    }
   for (i = 0; i < len * 2; i++)
     {
       int c;
@@ -1331,6 +1372,7 @@ monitor_create_inferior (exec_file, args, env)
   if (args && (*args != '\000'))
     error ("Args are not supported by the monitor.");
 
+  first_time = 1;
   clear_proceed_status ();
   proceed (bfd_get_start_address (exec_bfd), TARGET_SIGNAL_0, 0);
 }
@@ -1432,6 +1474,7 @@ monitor_load (file, from_tty)
       if (current_monitor->loadresp)
 	monitor_expect (current_monitor->loadresp, NULL, 0);
 
+/* FIXME Should add arg here for load_offset (already done for generic_load) */
       load_srec (monitor_desc, file, 32, SREC_ALL, hashmark,
 		 current_monitor->flags & MO_SREC_ACK ?
 		   monitor_wait_srec_ack : NULL);

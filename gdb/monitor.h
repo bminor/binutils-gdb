@@ -152,6 +152,18 @@ struct monitor_ops
 
 #define MO_SREC_ACK 0x100
 
+/* Allow 0x prefix on addresses retured from monitor */
+
+#define MO_HEX_PREFIX 0x200
+
+/* Some monitors require a different command when starting a program */
+
+#define MO_RUN_FIRST_TIME 0x400
+
+/* Don't expect echos when getting memory */
+
+#define MO_NO_ECHO_ON_SETMEM 0x800
+
 #define SREC_SIZE 160
 
 extern void monitor_open PARAMS ((char *args, struct monitor_ops *ops,

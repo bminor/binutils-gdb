@@ -657,6 +657,8 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
 
   new_symfile_objfile (objfile, mainline, from_tty);
 
+  target_new_objfile (objfile);
+
   return (objfile);
 }
 
@@ -920,6 +922,16 @@ generic_load (filename, from_tty)
   bfd *loadfile_bfd;
   time_t start_time, end_time;	/* Start and end times of download */
   unsigned long data_count = 0;	/* Number of bytes transferred to memory */
+  int n; 
+  unsigned long load_offset = 0; 	/* offset to add to vma for each section */
+  char buf[128];
+
+  /* enable user to specify address for downloading as 2nd arg to load */
+  n = sscanf(filename, "%s 0x%x", buf, &load_offset);
+  if (n > 1 ) 
+    filename = buf;
+  else
+    load_offset = 0;
 
   loadfile_bfd = bfd_openr (filename, gnutarget);
   if (loadfile_bfd == NULL)
@@ -959,6 +971,7 @@ generic_load (filename, from_tty)
 	      old_chain = make_cleanup (free, buffer);
 
 	      vma = bfd_get_section_vma (loadfile_bfd, s);
+		  vma += load_offset;
 
 	      /* Is this really necessary?  I guess it gives the user something
 		 to look at during a long download.  */
@@ -978,6 +991,8 @@ generic_load (filename, from_tty)
     }
 
   end_time = time (NULL);
+
+  printf_filtered ("Start address 0x%lx\n", loadfile_bfd->start_address);
 
   /* We were doing this in remote-mips.c, I suspect it is right
      for other targets too.  */
@@ -1424,6 +1439,7 @@ clear_symtab_users ()
   current_source_symtab = 0;
   current_source_line = 0;
   clear_pc_function_cache ();
+  target_new_objfile (NULL);
 }
 
 /* clear_symtab_users_once:
@@ -1654,35 +1670,42 @@ start_psymtab_common (objfile, section_offsets,
   return (psymtab);
 }
 
-/* Debugging versions of functions that are usually inline macros
-   (see symfile.h).  */
-
-#if !INLINE_ADD_PSYMBOL
-
 /* Add a symbol with a long value to a psymtab.
    Since one arg is a struct, we pass in a ptr and deref it (sigh).  */
 
 void
-add_psymbol_to_list (name, namelength, namespace, class, list, val, language,
-		     objfile)
+add_psymbol_to_list (name, namelength, namespace, class, list, val, coreaddr,
+		     language, objfile)
      char *name;
      int namelength;
      namespace_enum namespace;
      enum address_class class;
      struct psymbol_allocation_list *list;
-     long val;
+     long val;					/* Value as a long */
+     CORE_ADDR coreaddr;			/* Value as a CORE_ADDR */
      enum language language;
      struct objfile *objfile;
 {
   register struct partial_symbol *psym;
   char *buf = alloca (namelength + 1);
-  struct partial_symbol psymbol;
+  /* psymbol is static so that there will be no uninitialized gaps in the
+     structure which might contain random data, causing cache misses in
+     bcache. */
+  static struct partial_symbol psymbol;
 
   /* Create local copy of the partial symbol */
   memcpy (buf, name, namelength);
   buf[namelength] = '\0';
   SYMBOL_NAME (&psymbol) = bcache (buf, namelength + 1, &objfile->psymbol_cache);
-  SYMBOL_VALUE (&psymbol) = val;
+  /* val and coreaddr are mutually exclusive, one of them *will* be zero */
+  if (val != 0)
+    {
+      SYMBOL_VALUE (&psymbol) = val;
+    }
+  else
+    {
+      SYMBOL_VALUE_ADDRESS (&psymbol) = coreaddr;
+    }
   SYMBOL_SECTION (&psymbol) = 0;
   SYMBOL_LANGUAGE (&psymbol) = language;
   PSYMBOL_NAMESPACE (&psymbol) = namespace;
@@ -1700,49 +1723,6 @@ add_psymbol_to_list (name, namelength, namespace, class, list, val, language,
   *list->next++ = psym;
   OBJSTAT (objfile, n_psyms++);
 }
-
-/* Add a symbol with a CORE_ADDR value to a psymtab. */
-
-void
-add_psymbol_addr_to_list (name, namelength, namespace, class, list, val,
-			  language, objfile)
-     char *name;
-     int namelength;
-     namespace_enum namespace;
-     enum address_class class;
-     struct psymbol_allocation_list *list;
-     CORE_ADDR val;
-     enum language language;
-     struct objfile *objfile;
-{
-  register struct partial_symbol *psym;
-  char *buf = alloca (namelength + 1);
-  struct partial_symbol psymbol;
-
-  /* Create local copy of the partial symbol */
-  memcpy (buf, name, namelength);
-  buf[namelength] = '\0';
-  SYMBOL_NAME (&psymbol) = bcache (buf, namelength + 1, &objfile->psymbol_cache);
-  SYMBOL_VALUE_ADDRESS (&psymbol) = val;
-  SYMBOL_SECTION (&psymbol) = 0;
-  SYMBOL_LANGUAGE (&psymbol) = language;
-  PSYMBOL_NAMESPACE (&psymbol) = namespace;
-  PSYMBOL_CLASS (&psymbol) = class;
-  SYMBOL_INIT_LANGUAGE_SPECIFIC (&psymbol, language);
-
-  /* Stash the partial symbol away in the cache */
-  psym = bcache (&psymbol, sizeof (struct partial_symbol), &objfile->psymbol_cache);
-
-  /* Save pointer to partial symbol in psymtab, growing symtab if needed. */
-  if (list->next >= list->list + list->size)
-    {
-      extend_psymbol_list (list, objfile);
-    }
-  *list->next++ = psym;
-  OBJSTAT (objfile, n_psyms++);
-}
-
-#endif /* !INLINE_ADD_PSYMBOL */
 
 /* Initialize storage for partial symbols.  */
 

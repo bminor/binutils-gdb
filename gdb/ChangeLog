@@ -1,3 +1,25 @@
+
+
+
+Fri Jun 28 06:34:19 1996  Dawn Perchik  <dawn@cygnus.com>
+
+	* configure,configure.in: Add target sparclet.
+	* monitor.h,monitor.c:
+	Added monitor flags MO_NO_ECHO_ON_SETMEM (don't expect echo on 
+	setmem command), MO_RUN_FIRST_TIME (if command to start process 
+	running on target is different from one to continue execution), 
+	MO_HEX_PREFIX (if addresses from monitor have a "0x" prefix).
+	* monitor.c,parse.c,sparc-tdep.c:
+	Don't require strings in the registers array.  This is to allow 
+	NULLs to be place holders in the tm-*.h file so that only minor 
+	changes are needed when a new processor is introduced (eg, one 
+	without floating point).
+	* sparc-tdep.c: Conditionally remove dependancies on floating point.
+	* sparclet-rom.c,config/sparc/sparclet.mt,config/sparc/tm-sparclet.h:
+	New files for target sparclet.
+	* symfile.c: Add option for 2nd parameter on load command : a load 
+	offset added to the vma of each section.
+
 Fri Jun 28 05:39:19 1996  Dawn Perchik  <dawn@cygnus.com>
 
         * main.c (main): Add option "l" for setting remote_timeout.
