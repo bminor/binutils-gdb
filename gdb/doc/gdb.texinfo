@@ -8,11 +8,12 @@
 @c _HOST__ architectures (and you can of course get the full source,
 @c with all configurations, from wherever you got this).
 _if__(0)
-_0__
 
 THIS IS THE FULL SOURCE.  The full source needs to be run through m4
 before either tex- or info- formatting: for example,
+_0__
     m4 pretex.m4 none.m4 m680x0.m4 gdb.texinfo >gdb-680x0.texinfo
+_1__
 will produce (assuming your path finds either GNU or SysV m4; Berkeley
 won't do) a file suitable for formatting.  See the text in "pretex.m4"
 for a fuller explanation (and the macro definitions).
@@ -20,7 +21,6 @@ for a fuller explanation (and the macro definitions).
 any "info" markup that can be generated automatically; you should first
 preprocess it as above, then run it through C-u texinfo-master-menu,
 before actually info-formatting it.
-_1__
 _fi__(0)
 @c
 @syncodeindex ky cp
@@ -194,7 +194,7 @@ The script @samp{config.gdb} now handles specification of separate host
 and target configurations.
 
 @item
-INTERACTION: _GDBN__ now uses the GNU @code{readline} interface to read its
+INTERACTION: _GDBN__ now uses the GNU readline interface to read its
 input; this provides inline editing of commands, using the familiar
 Emacs or @code{vi} keymaps, and command-history support. The user interface
 to _GDBN__'s control variables has been simplified and consolidated in two
@@ -798,7 +798,7 @@ _GDBN__ will come up showing the prompt:
 @end smallexample
 
 @node VxWorks connection,,,
-@subsubsection Connecting to a VxWorks Target
+@subsubsection Connecting to VxWorks
 
 The _GDBN__ command @samp{target} lets you connect to a VxWorks target on the
 network.  To connect to a target whose host name is ``@code{tt}'', type:
@@ -828,7 +828,7 @@ should add the appropriate directory to the source path and execute the
 @samp{target} command again.
 
 @node VxWorks download,,,
-@subsubsection Downloading to a VxWorks Target
+@subsubsection Downloading to VxWorks
 
 If you have connected to the VxWorks target and you want to debug an
 object that has not yet been loaded, you can use the _GDBN__ @samp{load}
@@ -969,7 +969,7 @@ command @samp{help}.
 @item help
 Used with no arguments, @samp{help} displays a short list of named
 categories of commands:
-@example
+@smallexample
 (_GDBP__) help
 List of classes of commands:
 
@@ -988,7 +988,7 @@ Type "help" followed by a class name for a list of commands in that class.
 Type "help" followed by command name for full documentation.
 Command name abbreviations are allowed if unambiguous.
 (_GDBP__) 
-@end example
+@end smallexample
 
 @item help @var{category}
 Using one of the general help categories as an argument, you can get a
@@ -1090,9 +1090,9 @@ Some things do not work as well with @samp{-g -O} as with just
 doubt, recompile with @samp{-g} alone, and if this fixes the problem,
 please report it as a bug (including a test case---@pxref{_GDBN__ Bugs}).
 
-Older versions of the GNU C compiler, _GCC__, permitted a variant option
-@samp{-gg} for debugging information.  _GDBN__ no longer supports this format;
-if your GNU C compiler has this option, do not use it.
+Older versions of the GNU C compiler permitted a variant option
+@samp{-gg} for debugging information.  _GDBN__ no longer supports this
+format; if your GNU C compiler has this option, do not use it.
 
 @ignore
 @comment As far as I know, there are no cases in which _GDBN__ will
@@ -1116,10 +1116,16 @@ option or use shorter file names.  Alternatively, use a version of GNU
 @cindex starting
 @cindex running
 @kindex run
-To start your program under _GDBN__, use the @samp{run} command.  Except on
-VxWorks, the program must already have been specified using the
+To start your program under _GDBN__, use the @samp{run} command.  
+_if__(_VXWORKS__)
+Except on VxWorks, the 
+_fi__(_VXWORKS__)
+_if__(!_VXWORKS__)
+The
+_fi__(!_VXWORKS__)
+program must already have been specified using the
 @samp{file} or @samp{exec-file} command, or with an argument to _GDBN__
-(@pxref{Files}).
+(@pxref{Files}).@refill
 
 On targets that support processes, @samp{run} creates an inferior
 process and makes that process run your program.  On other targets,
@@ -1131,11 +1137,11 @@ receives from its superior.  _GDBN__ provides ways to specify this
 information, which you must do @i{before} starting the program.  (You
 can change it after starting the program, but such changes do not affect
 the program unless you start it over again.)  This information may be
-divided into three categories:
+divided into four categories:
 
 @table @asis
 @item The @i{arguments.}
-You specify the arguments to give the program as the arguments of the
+You specify the arguments to give your program as the arguments of the
 @samp{run} command.  If a shell is available on your target, the shell
 is used to pass the arguments, so that you may use normal conventions
 (for example regular expression expansion or variable substitution) in
@@ -1143,14 +1149,20 @@ describing the arguments.  In Unix systems, you can control which shell
 is used with the @code{SHELL} environment variable.
 
 @item The @i{environment.}
-The program normally inherits its environment from _GDBN__, but you can
-use the _GDBN__ commands @samp{set environment} and
-@samp{unset environment} to change parts of the environment that will
-be given to the program.@refill
+Your program normally inherits its environment from _GDBN__, but you can
+use the _GDBN__ commands @samp{set environment} and @samp{unset
+environment} to change parts of the environment that will be given to
+the program.@refill
 
 @item The @i{working directory.}
-The program inherits its working directory from _GDBN__.  You can set _GDBN__'s
-working directory with the @samp{cd} command in _GDBN__.
+Your program inherits its working directory from _GDBN__.  You can set
+_GDBN__'s working directory with the @samp{cd} command in _GDBN__.
+
+@item The @i{standard input and output.}
+Your program normally uses the same device for standard input and
+standard output as _GDBN__ is using.  You can redirect input and output
+in the @code{run} command line, or you can use the @samp{tty} command to
+set a different device for your program.
 @end table
 
 When you issue the @samp{run} command, your program begins to execute
@@ -1231,13 +1243,11 @@ set env USER = foo
 tells the program, when subsequently run, to assume it is being run
 on behalf of the user named @samp{foo}.
 
-@item delete environment @var{varname}
-@itemx unset environment @var{varname}
-@kindex delete environment
+@item unset environment @var{varname}
 @kindex unset environment
 Remove variable @var{varname} from the environment to be passed to your
 program.  This is different from @samp{set env @var{varname}@ =};
-@samp{delete environment} removes the variable from the environment,
+@samp{unset environment} removes the variable from the environment,
 rather than assigning it an empty value.  This command can be
 abbreviated @samp{d e}.
 @end table
@@ -1325,19 +1335,19 @@ started outside of _GDBN__.  (The usual way to find out the process-id of
 a Unix process is with the @code{ps} utility, or with the @code{jobs -l}
 shell command.)  In this case, you must have permission to send the
 process a signal, and it must have the same effective user ID as the
-debugger.
+_GDBN__ process.
 @end table
 
 When using @samp{attach}, you should first use the @samp{file} command
 to specify the program running in the process and load its symbol table.
 
-The first thing _GDBN__ does after arranging to debug the process is to stop
-it.  You can examine and modify an attached process with all the _GDBN__
-commands that ordinarily available when you start processes with
-@samp{run}.  You can insert breakpoints; you can step and continue; you
-can modify storage.  If you would rather the process continue running,
-you may use the @samp{continue} command after attaching _GDBN__ to the
-process.
+The first thing _GDBN__ does after arranging to debug the specified
+process is to stop it.  You can examine and modify an attached process
+with all the _GDBN__ commands that ordinarily available when you start
+processes with @samp{run}.  You can insert breakpoints; you can step and
+continue; you can modify storage.  If you would rather the process
+continue running, you may use the @samp{continue} command after
+attaching _GDBN__ to the process.
 
 @kindex detach
 When you have finished debugging the attached process, you can use the
@@ -1361,12 +1371,13 @@ whether or not this happens by using the @samp{set caution} command
 Kill the child process in which your program is running under _GDBN__.
 @end table
 
-This command is useful if you wish to debug a core dump instead.  _GDBN__
-ignores any core dump file if it is actually running the program.
+This command is useful if you wish to debug a core dump instead of a
+running process.  _GDBN__ ignores any core dump file while your program
+is running.
 
 On some operating systems, you can't execute your program in another
-process while breakpoints are active inside _GDBN__.  The @samp{kill}
-command is also useful in this situation, if you wish to run the program
+process while breakpoints are active inside _GDBN__.  You can use the
+@samp{kill} command in this situation to permit running the program
 outside the debugger.
 
 The @samp{kill} command is also useful if you wish to recompile and
@@ -1401,46 +1412,12 @@ breakpoint you want to change.  Each breakpoint may be @dfn{enabled} or
 @dfn{disabled}; if disabled, it has no effect on the program until you
 enable it again.
 
-@table @code
-@kindex info break
-@kindex $_
-@item info break
-The command @samp{info break} prints a list of all breakpoints set and not
-deleted, showing their numbers, where in the program they are, and any
-special features in use for them.  Disabled breakpoints are included in the
-list, but marked as disabled.  @samp{info break} with a breakpoint number
-as argument lists only that breakpoint.  The convenience variable @code{$_}
-and the default examining-address for the @samp{x} command are set to the
-address of the last breakpoint listed (@pxref{Memory}).
-
-@kindex info watch
-@item info watch
-This command prints a list of watchpoints. 
-
-@cindex watchpoints
-A @dfn{watchpoint} is a special breakpoint that stops your program when
-the value of an expression changes.  You can use a watchpoint to stop
-execution whenever the value of an expression changes, without having to
-predict a particular place in the inferior process where this may
-happen.  Aside from the different syntax in setting a watchpoint, it is
-managed exactly like any other breakpoint and is enabled, disabled, and
-deleted using exactly the same commands.
-
-Watchpoints currently execute two orders of magnitude more slowly than
-other breakpoints, but this can well be worth it to catch errors where
-you have no clue what part of your program is the culprit.  Some
-processors provide special hardware to implement this feature; future
-releases of _GDBN__ will use such hardware if it is available.
-
-@end table
-
 @node Set Breaks,,,
 @subsection Setting Breakpoints
 
 @kindex break
 @kindex watch
 Breakpoints are set with the @samp{break} command (abbreviated @samp{b}).
-Watchpoints are set with the @samp{watch} command.
 
 You have several ways to say where the breakpoint should go.
 
@@ -1512,14 +1489,49 @@ Once these breakpoints are set, they are treated just like the
 breakpoints set with the @samp{break} command.  They can be deleted,
 disabled, made conditional, etc., in the standard ways.
 
-@kindex watch 
-@item watch @var{expr}
-Set a watchpoint for an expression.
+@kindex info breakpoints
+@kindex $_
+@item info breakpoints
+The command @samp{info breakpoints} prints a list of all breakpoints set
+and not deleted, showing their numbers, where in the program they are,
+and any special features in use for them.  Disabled breakpoints are
+included in the list, but marked as disabled.  @samp{info break} with a
+breakpoint number as argument lists only that breakpoint.  The
+convenience variable @code{$_} and the default examining-address for the
+@samp{x} command are set to the address of the last breakpoint listed
+(@pxref{Memory}).
 @end table
 
 _GDBN__ allows you to set any number of breakpoints at the same place in the
 program.  There is nothing silly or meaningless about this.  When the
 breakpoints are conditional, this is even useful (@pxref{Conditions}).
+
+@node Set Watchpoints,,,
+@subsection Setting Watchpoints
+@cindex watchpoints
+A @dfn{watchpoint} is a special breakpoint that stops your program when
+the value of an expression changes.  You can use a watchpoint to stop
+execution whenever the value of an expression changes, without having to
+predict a particular place in the inferior process where this may
+happen.  Aside from the different syntax in setting a watchpoint, it is
+managed exactly like any other breakpoint and is enabled, disabled, and
+deleted using exactly the same commands.
+
+Watchpoints currently execute two orders of magnitude more slowly than
+other breakpoints, but this can well be worth it to catch errors where
+you have no clue what part of your program is the culprit.  Some
+processors provide special hardware to implement this feature; future
+releases of _GDBN__ will use such hardware if it is available.
+
+@table @code
+@kindex watch 
+@item watch @var{expr}
+Set a watchpoint for an expression.
+
+@kindex info watch
+@item info watch
+This command prints a list of watchpoints. 
+@end table
 
 @node Exception Handling,,,
 @subsection Breakpoints and Exceptions
@@ -1529,27 +1541,6 @@ Some languages, such as GNU C++, implement exception handling.  _GDBN__
 can be used to examine what caused the program to raise an exception
 and to list the exceptions the program is prepared to handle at a
 given point in time.
-
-@cindex raise exceptions
-GNU C++ raises an exception by calling a library function named
-@code{__raise_exception} which has the following ANSI C interface:
-
-@example
-    /* ADDR is where the exception identifier is stored.
-       ID is the exception identifier.  */
-    void __raise_exception (void **addr, void *id);
-@end example
-
-@noindent
-You can make the debugger catch all exceptions @emph{before} any stack
-unwinding takes place: set a breakpoint on @code{__raise_exception}
-(@pxref{Breakpoints}).  If you set a breakpoint in an exception handler
-instead, it may not be easy to find out where the exception was raised.
-
-By using a conditional breakpoint (@xref{Conditions}), you can cause
-the debugger to stop only when a specific exception is raised.
-Multiple conditional breakpoints can be used to stop the program when
-any of a number of exceptions are raised.
 
 @table @code
 @item catch @var{exceptions}
@@ -1579,6 +1570,34 @@ You cannot raise an exception interactively.
 @item
 You cannot interactively install an exception handler.
 @end itemize
+
+@cindex raise exceptions
+Sometimes @samp{catch} is not the best way to debug exception handling:
+if you need to know exactly where an exception is raised, it's better to
+stop @emph{before} the exception handler is called, since that way you
+can see the stack before any unwinding takes place.  
+
+To stop just before an exception handler is called, you need some
+knowledge of the implementation.  In the case of GNU C++ exception are
+raised by calling a library function named @code{__raise_exception}
+which has the following ANSI C interface:
+
+@example
+    /* ADDR is where the exception identifier is stored.
+       ID is the exception identifier.  */
+    void __raise_exception (void **addr, void *id);
+@end example
+
+@noindent
+To make the debugger catch all exceptions before any stack
+unwinding takes place, set a breakpoint on @code{__raise_exception}
+(@pxref{Breakpoints}).  If you set a breakpoint in an exception handler
+instead, it may not be easy to find out where the exception was raised.
+
+With a conditional breakpoint (@xref{Conditions}) that depends on the
+value of @code{id}, you can cause the debugger to stop only when a
+specific exception is raised.  Multiple conditional breakpoints can be
+used to stop the program when any of a number of exceptions are raised.
 
 @node Delete Breaks,,,
 @subsection Deleting Breakpoints
@@ -1692,10 +1711,10 @@ state before that time comes).
 @end table
 
 Save for a breakpoint set with @samp{tbreak} (@pxref{Set Breaks}),
-breakpoints that you set are enabled or disabled only when you use one
-of the commands above.  (The command @samp{until} can set and delete a
-breakpoint on its own, but it will not change the state of your
-breakpoints).
+breakpoints that you set initially enabled; subsequently, they become
+disabled or enabled only when you use one of the commands above.  (The
+command @samp{until} can set and delete a breakpoint of its own, but it
+will not change the state of your other breakpoints).
 
 @node Conditions,,,
 @subsection Break Conditions
@@ -1773,8 +1792,9 @@ breakpoint that the program stopped at to @var{count} minus one.
 Thus, the program will not stop at this breakpoint until the
 @var{count}'th time it is reached.
 
-This command is allowed only when the program stopped due to a
-breakpoint.  At other times, the argument to @samp{cont} is ignored.
+An argument to this command is meaningful only when the program stopped
+due to a breakpoint.  At other times, the argument to @samp{cont} is
+ignored.
 
 The synonym @samp{fg} is provided purely for convenience, and has
 exactly the same behavior as other forms of the command.
@@ -1829,7 +1849,7 @@ The commands @samp{echo} and @samp{output} that allow you to print precisely
 controlled output are often useful in silent breakpoints.  @xref{Output}.
 
 For example, here is how you could use breakpoint commands to print the
-value of @code{x} at entry to @code{foo} whenever it is positive.
+value of @code{x} at entry to @code{foo} whenever @code{x} is positive.
 
 _0__@example
 break foo if x>0
@@ -1915,7 +1935,7 @@ to nonsharable executables.
 
 @cindex stepping
 @dfn{Stepping} means setting your program in motion for a limited time, so
-that control will return automatically to the debugger after one line of
+that control will return automatically to _GDBN__ after one line of
 code or one machine instruction.  Breakpoints are active during stepping
 and the program will stop for them even if it has not gone as far as the
 stepping command specifies.
@@ -1923,14 +1943,14 @@ stepping command specifies.
 @table @code
 @item step
 @kindex step
-Continue running the program until control reaches a different line,
-then stop it and return control to the debugger.  This command is
+Continue running the program until control reaches a different source
+line, then stop it and return control to the debugger.  This command is
 abbreviated @samp{s}.
 
 This command may be given when control is within a function for which
 there is no debugging information.  In that case, execution will proceed
 until control reaches a different function, or is about to return from
-this function.  An argument repeats this action.
+this function.  
 
 @item step @var{count}
 Continue running as in @samp{step}, but do so @var{count} times.  If a
@@ -1939,14 +1959,15 @@ breakpoint is reached or a signal not related to stepping occurs before
 
 @item next
 @kindex next
-Similar to @samp{step}, but any function calls appearing within the line of
-code are executed without stopping.  Execution stops when control reaches a
+Continue to the next source line in the current stack frame.  Similar to
+@samp{step}, but any function calls appearing within the line of code
+are executed without stopping.  Execution stops when control reaches a
 different line of code at the stack level which was executing when the
 @samp{next} command was given.  This command is abbreviated @samp{n}.
 
 An argument is a repeat count, as in @samp{step}.
 
-@samp{next} within a function without debugging information acts as does
+@samp{next} within a function that lacks debugging information acts as does
 @samp{step}, but any function calls appearing within the code of the
 function are executed without stopping.
 
@@ -1960,10 +1981,12 @@ Contrast this with the @samp{return} command (@pxref{Returning}).
 
 @item until
 @kindex until
-This command is used to avoid single stepping through a loop more than
-once.  It is like the @samp{next} command, except that when @samp{until}
-encounters a jump, it automatically continues execution until the
-program counter is greater than the address of the jump.
+Continue running until a source line past the current line, in the
+current stack frame, is reached.  This command is used to avoid single
+stepping through a loop more than once.  It is like the @samp{next}
+command, except that when @samp{until} encounters a jump, it
+automatically continues execution until the program counter is greater
+than the address of the jump.
 
 This means that when you reach the end of a loop after single stepping
 though it, @samp{until} will cause the program to continue execution
@@ -1983,7 +2006,7 @@ Therefore, the @samp{until} command would appear to step back to the
 beginning of the loop when it advances to this expression.  However, it
 has not really done so, not in terms of the actual machine code.
 
-Note that @samp{until} with no argument works by means of single
+@samp{until} with no argument works by means of single
 instruction stepping, and hence is slower than @samp{until} with an
 argument.
 
@@ -2010,17 +2033,18 @@ An argument is a repeat count, as in @samp{step}.
 @itemx ni
 @kindex nexti
 @kindex ni
-Execute one machine instruction, but if it is a subroutine call,
-proceed until the subroutine returns.
+Execute one machine instruction, but if it is a function call,
+proceed until the function returns.
 
 An argument is a repeat count, as in @samp{next}.
 @end table
 
 A typical technique for using stepping is to put a breakpoint
 (@pxref{Breakpoints}) at the beginning of the function or the section of
-the program in which a problem is believed to lie, and then step through
-the suspect area, examining the variables that are interesting, until the
-problem happens.
+the program in which a problem is believed to lie, run the program until
+it stops at that breakpoint, and then step through the suspect area,
+examining the variables that are interesting, until you see the problem
+happen.
 
 The @samp{cont} command can be used after stepping to resume execution
 until the next breakpoint or signal.
@@ -2044,7 +2068,6 @@ is the address of the breakpoint.  You might expect that continuing would
 just stop at the same breakpoint immediately.  In fact, @samp{cont}
 takes special care to prevent that from happening.  You do not need
 to delete the breakpoint to proceed through it after stopping at it.
-
 You can, however, specify an ignore-count for the breakpoint that the
 program stopped at, by means of an argument to the @samp{cont} command.
 @xref{Conditions}.
@@ -2104,8 +2127,9 @@ number of a signal or its name (with or without the @samp{SIG} at the
 beginning).  The @var{keywords} say what change to make.
 @end table
 
+@group
 The keywords allowed by the @samp{handle} command can be abbreviated.
-Their full names are
+Their full names are:
 
 @table @code
 @item nostop
@@ -2131,6 +2155,7 @@ and not handled.
 @item nopass
 _GDBN__ should not allow the program to see this signal.
 @end table
+@end group
 
 When a signal has been set to stop the program, the program cannot see the
 signal until you continue.  It will see the signal then, if @samp{pass} is
@@ -2203,10 +2228,11 @@ in a register called the @dfn{frame pointer register} while execution is
 going on in that frame.
 
 @cindex frame number
-_GDBN__ assigns numbers to all existing stack frames, starting with zero for
-the innermost frame, one for the frame that called it, and so on upward.
-These numbers do not really exist in your program; they are to give you a
-way of talking about stack frames in _GDBN__ commands.
+_GDBN__ assigns numbers to all existing stack frames, starting with
+@code{0} for the innermost frame, @code{1} for the frame that called it,
+and so on upward.  These numbers do not really exist in your program;
+they are assigned by _GDBN__ to give you a way of designating stack
+frames in _GDBN__ commands.
 
 @cindex selected frame
 Many _GDBN__ commands refer implicitly to one stack frame, called the
@@ -2215,15 +2241,16 @@ _GDBN__ commands, and then other commands will operate on that frame.  When
 your program stops, _GDBN__ automatically selects the innermost frame.
 
 @cindex frameless execution
-Some compilers allow functions to be compiled to run without a frame
-reserved for them on the stack. (For example, the _GCC__ option
+Some compilers allow functions to be compiled so that they operate
+without stack frames.  (For example, the _GCC__ option
 @samp{-fomit-frame-pointer} will generate functions without a frame.)
 This is occasionally done with heavily used library functions to save
-the frame setup time.  _GDBN__ has limited facilities for dealing with these
-function invocations; if the innermost function invocation has no stack
-frame, _GDBN__ will give it a virtual stack frame of 0 and correctly allow
-tracing of the function call chain.  Results are undefined if a function
-invocation besides the innermost one is frameless.
+the frame setup time.  _GDBN__ has limited facilities for dealing with
+these function invocations; if the innermost function invocation has no
+stack frame, _GDBN__ will give it a virtual stack frame of 0 and
+correctly allow tracing of the function call chain.  Results are
+undefined if a function invocation besides the innermost one is
+frameless.
 
 @node Backtrace,,,
 @section Backtraces
@@ -2248,8 +2275,8 @@ character, normally @kbd{Control-C}.
 @itemx bt @var{n}
 Similar, but print only the innermost @var{n} frames.
 
-@item backtrace @var{-n}
-@itemx bt @var{-n}
+@item backtrace -@var{n}
+@itemx bt -@var{n}
 Similar, but print only the outermost @var{n} frames.
 @end table
 
@@ -2258,7 +2285,7 @@ Similar, but print only the outermost @var{n} frames.
 The names @samp{where} and @samp{info stack} are additional aliases
 for @samp{backtrace}.
 
-Every line in the backtrace shows the frame number and the function
+Each line in the backtrace shows the frame number and the function
 name.  The program counter value is also shown---unless you use
 @samp{set addressprint off}.
 
@@ -2280,11 +2307,12 @@ Here is an example of a backtrace.  It was made with the command
 @end example
 
 @noindent
-The functions @code{expand_call} and @code{expand_expr} are in a file
-whose symbol details have not been fully read.  Full detail is available
-for the function @code{rtx_equal_p}, which is in the file
-@file{rtlanal.c}.  Its arguments, named @code{x} and @code{y}, are shown
-with their typed values.
+_GDBN__ displayed the functions @code{expand_call} and @code{expand_expr}
+with place-holders in place of their argument values and line numbers,
+because each is in a file whose symbol details have not been fully read.
+Full detail is available for the function @code{rtx_equal_p}, which is
+in the file @file{rtlanal.c}.  Its arguments, named @code{x} and
+@code{y}, are shown with their typed values.
 
 @node Selection,,,
 @section Selecting a Frame
@@ -2311,17 +2339,15 @@ switches between them.
 
 @item up @var{n}
 @kindex up
-Select the frame @var{n} frames up from the frame previously selected.
-For positive numbers @var{n}, this advances toward the outermost
-frame, to higher frame numbers, to frames that have existed longer.
-@var{n} defaults to one.
+Move @var{n} frames up the stack.  For positive numbers @var{n}, this
+advances toward the outermost frame, to higher frame numbers, to frames
+that have existed longer.  @var{n} defaults to one.
 
 @item down @var{n}
 @kindex down
-Select the frame @var{n} frames down from the frame previously
-selected.  For positive numbers @var{n}, this advances toward the
-innermost frame, to lower frame numbers, to frames that were created
-more recently.  @var{n} defaults to one.
+Move @var{n} frames down the stack.  For positive numbers @var{n}, this
+advances toward the innermost frame, to lower frame numbers, to frames
+that were created more recently.  @var{n} defaults to one.
 @end table
 
 All of these commands end by printing some information on the frame that
@@ -2329,10 +2355,11 @@ has been selected: the frame number, the function name, the arguments, the
 source file and line number of execution in that frame, and the text of
 that source line.  For example:
 
-@example
-#3  main (argc=3, argv=??, env=??) at main.c:67
-67        read_input_file (argv[i]);
-@end example
+@smallexample
+(_GDBP__) up
+#1  0x22f0 in main (argc=1, argv=0xf7fffbf4, env=0xf7fffbfc) at env.c:10
+10		read_input_file (argv[i]);
+@end smallexample
 
 After such a printout, the @samp{list} command with no arguments will print
 ten lines centered on the point of execution in the frame.  @xref{List}.
@@ -2359,17 +2386,15 @@ stack frame.
 @table @code
 @item frame
 When used without any argument, this command does not change which frame
-is selected, but still prints a brief description of the currently
+is selected, but prints a brief description of the currently
 selected stack frame.  It can be abbreviated @samp{f}.  With an
-argument, this command is used to select a stack frame; with no
-argument, it does not change which frame is selected, but still prints
-the same kind of information.
+argument, this command is used to select a stack frame (@pxref{Selection}).
 
 @item info frame
 @kindex info frame
 This command prints a verbose description of the selected stack frame,
-including the address of the frame, the addresses of the next frame in
-(called by this frame) and the next frame out (caller of this frame),
+including the address of the frame, the addresses of the next frame down
+(called by this frame) and the next frame up (caller of this frame),
 the address of the frame's arguments, the program counter saved in it
 (the address of execution in the caller frame), and which registers
 were saved in the frame.  The verbose description is useful when
@@ -2396,7 +2421,7 @@ program blocks that execution in this frame is currently inside of.
 @cindex catch exceptions
 @cindex exception handlers
 Print a list of all the exception handlers that are active in the
-current stack frame given the current value of @code{pc}.  To see other
+current stack frame at the current point of execution.  To see other
 exception handlers, visit the associated frame (using the @samp{up},
 @samp{down}, or @samp{frame} commands); then type @samp{info catch}.
 @xref{Exception Handling}.
@@ -2447,7 +2472,7 @@ Repeating a @samp{list} command with @key{RET} discards the argument,
 so it is equivalent to typing just @samp{list}.  This is more useful
 than listing the same lines again.  An exception is made for an
 argument of @samp{-}; that argument is preserved in repetition so that
-each repetition moves up in the file.
+each repetition moves up in the source file.
 
 @cindex linespec
 In general, the @samp{list} command expects you to supply zero, one or two
@@ -2515,22 +2540,6 @@ Specifies the line containing the program address @var{address}.
 @var{address} may be any expression.
 @end table
 
-One other command is used to map source lines to program addresses.
-
-@table @code
-@item info line @var{linenum}
-@kindex info line
-Print the starting and ending addresses of the compiled code for
-source line @var{linenum}.
-
-@kindex $_
-The default examine address for the @samp{x} command is changed to the
-starting address of the line, so that @samp{x/i} is sufficient to
-begin examining the machine code (@pxref{Memory}).  Also, this address
-is saved as the value of the convenience variable @code{$_}
-(@pxref{Convenience Vars}).
-@end table
-
 @node Search,,,
 @section Searching Source Files
 @cindex searching
@@ -2595,11 +2604,9 @@ Reset the source path to empty again.  This requires confirmation.
 Print the source path: show which directories it contains.
 @end table
 
-Because the @samp{directory} command, when used with arguments, adds to
-the front of the source path, it can affect files that _GDBN__ has already
-found.  If the source path contains directories that you do not want,
-and these directories contain misleading files with names matching your
-source files, the way to correct the situation is as follows:
+If your source path is cluttered with directories that are no longer of
+interest, _GDBN__ may sometimes cause confusion by finding the wrong
+versions of source.  You can correct the situation as follows:
 
 @enumerate
 @item
@@ -2610,6 +2617,39 @@ Use @samp{directory} with suitable arguments to add any other
 directories you want in the source path.  You can add all the directories
 in one command.
 @end enumerate
+
+@node Machine Code,,,
+@section Source and Machine Code
+You can use the command @samp{info line} to map source lines to program
+addresses, and the command @samp{disassemble} or its synonym
+@samp{disasm} to display a range of addresses as machine instructions.
+
+@table @code
+@item info line @var{linespec}
+@kindex info line
+Print the starting and ending addresses of the compiled code for
+source line @var{linespec}.
+
+@kindex $_
+The default examine address for the @samp{x} command is changed to the
+starting address of the line, so that @samp{x/i} is sufficient to
+begin examining the machine code (@pxref{Memory}).  Also, this address
+is saved as the value of the convenience variable @code{$_}
+(@pxref{Convenience Vars}).
+
+@kindex disassemble
+@kindex disasm
+@item disassemble
+@itemx disasm
+This specialized command is provided to dump a range of memory as
+machine instructions.  The default memory range is the function
+surrounding the program counter of the selected frame.  A single
+argument to this command is a program counter value; the function
+surrounding this value will be dumped.  Two arguments (separated by one
+or more spaces) specify a range of addresses (first inclusive, second
+exclusive) to be dumped.  The two spellings, @samp{disasm} and
+@samp{disassemble}, are equivalent.
+@end table
 
 @node Data,,,
 @chapter Examining Data
@@ -2708,10 +2748,10 @@ is declared.
 
 As a special exception, you can refer to a variable or function whose
 scope is a single source file even if the current execution point is not
-in this file.  But it is possible to have more than one such variable
-or function with the same name (if they are in different source files).
-In such a case, it is not defined which one you will get.  If you wish,
-you can specify any one of them using the colon-colon construct:
+in this file.  But it is possible to have more than one such variable or
+function with the same name (in different source files).  In such a
+case, it is not defined which one you will get.  If you wish, you can
+specify any one of them using the colon-colon construct:
 
 @cindex colon-colon
 @cindex scope
@@ -2772,8 +2812,8 @@ after you had printed it out.)
 _GDBN__ normally prints all values according to their data types.  Sometimes
 this is not what you want.  For example, you might want to print a number
 in hex, or a pointer in decimal.  Or you might want to view data in memory
-at a certain address as a character string or an instruction.  These things
-can be done with @dfn{output formats}.
+at a certain address as a character string or an instruction.  To do
+these things, specify an @dfn{output format} when you print a value.
 
 The simplest use of output formats is to say how to print a value
 already computed.  This is done by starting the arguments of the
@@ -2831,16 +2871,6 @@ expression.  For example, @samp{p/x} reprints the last value in hex.
 
 @cindex examining memory
 @table @code
-@kindex disassemble
-@item disassemble
-This specialized command is provided to dump a range of memory as
-machine instructions.  The default memory range is the function
-surrounding the program counter of the selected frame.  A single
-argument to this command is a program counter value; the function
-surrounding this value will be dumped.  Two arguments (separated by one
-or more spaces) specify a range of addresses (first inclusive, second
-exclusive) to be dumped.
-
 @kindex x
 @item x
 The command @samp{x} (for `examine') can be used to examine memory
@@ -2857,10 +2887,10 @@ expressions.  For example, @samp{x/4xw $sp} prints the four words of
 memory above the stack pointer in hexadecimal.
 
 The output format in this case specifies both how big a unit of memory
-to examine and how to print the contents of that unit.  It is done
+to examine and how to print the contents of that unit.  This is done
 with one or two of the following letters:
 
-These letters specify just the size of unit to examine:
+These letters specify the size of unit to examine:
 
 @table @samp
 @item b
@@ -2884,7 +2914,7 @@ runs on.
 Examine giant words (8 bytes).
 @end table
 
-These letters specify just the way to print the contents:
+These letters specify the way to print the contents:
 
 @table @samp
 @item x
@@ -2909,18 +2939,21 @@ Print as character constants.
 @item f
 Print as floating point.  This works only with sizes @samp{w} and
 @samp{g}.
+@end table
 
+These letters specify both the unit size and the output format:
+@table @samp
 @item s
-Print a null-terminated string of characters.  The specified unit size
-is ignored; instead, the unit is however many bytes it takes to reach
-a null character (including the null character).
+Print a null-terminated string of characters.  Any explicitly specified
+unit size is ignored; instead, the unit is however many bytes it takes
+to reach a null character (including the null character).
 
 @item i
-Print a machine instruction in assembler syntax (or nearly).  The
+Print a machine instruction in assembler syntax (or nearly).  Any
 specified unit size is ignored; the number of bytes in an instruction
 varies depending on the type of machine, the opcode and the addressing
 modes used.  The command @samp{disassemble} gives an alternative way of
-inspecting machine instructions.
+inspecting machine instructions.  @xref{Machine Code}.
 @end table
 
 If either the manner of printing or the size of unit fails to be specified,
@@ -2935,8 +2968,9 @@ string or instruction examined will start in the right place.
 When the @samp{print} command shows a value that resides in memory,
 @samp{print} also sets the default address for the @samp{x} command.
 @samp{info line} also sets the default for @samp{x}, to the address of
-the start of the machine code for the specified line and @samp{info
-breakpoints} sets it to the address of the last breakpoint listed.
+the start of the machine code for the specified line (@pxref{Machine
+Code}), and @samp{info breakpoints} sets it to the address of the last
+breakpoint listed (@pxref{Set Breaks}).
 
 When you use @key{RET} to repeat an @samp{x} command, the address
 specified previously (if any) is ignored, so that the repeated command
@@ -2966,15 +3000,14 @@ in which the format and address are allowed to default.
 
 @kindex $_
 @kindex $__
-The addresses and contents printed by the @samp{x} command are not put in
-the value history because there is often too much of them and they would
-get in the way.  Instead, _GDBN__ makes these values available for subsequent
-use in expressions as values of the convenience variables @code{$_} and
-@code{$__}.
-
-After an @samp{x} command, the last address examined is available for use
-in expressions in the convenience variable @code{$_}.  The contents of that
-address, as examined, are available in the convenience variable @code{$__}.
+The addresses and contents printed by the @samp{x} command are not put
+in the value history because there is often too much of them and they
+would get in the way.  Instead, _GDBN__ makes these values available for
+subsequent use in expressions as values of the convenience variables
+@code{$_} and @code{$__}.  After an @samp{x} command, the last address
+examined is available for use in expressions in the convenience variable
+@code{$_}.  The contents of that address, as examined, are available in
+the convenience variable @code{$__}.
 
 If the @samp{x} command has a repeat count, the address and contents saved
 are from the last memory unit printed; this is not the same as the last
@@ -3000,17 +3033,6 @@ The automatic display looks like this:
 @noindent
 showing item numbers, expressions and their current values.
 
-If the expression refers to local variables, then it does not make sense
-outside the lexical context for which it was set up.  Such an expression
-is disabled when execution enters a context where one of its variables
-is not defined.  For example, if you give the command 
-@samp{display name} while inside a function with an argument
-@code{name}, then this argument will be displayed while the program
-continues to stop inside that function.  When it stops elsewhere---where
-there is no variable @samp{name}---display is disabled.  The next time
-your program stops where @samp{name} is meaningful, you can enable the
-display expression once again.
-
 @table @code
 @item display @var{exp}
 @kindex display
@@ -3027,7 +3049,13 @@ For @var{fmt} @samp{i} or @samp{s}, or including a unit-size or a
 number of units, add the expression @var{addr} as a memory address to
 be examined each time the program stops.  Examining means in effect
 doing @samp{x/@var{fmt} @var{addr}}.  @xref{Memory}.
+@end table
 
+For example, @samp{display/i $pc} can be helpful, to see the machine
+instruction about to be executed each time execution stops (@samp{$pc}
+is a common name for the program counter; @pxref{Registers}).
+
+@table @code
 @item undisplay @var{dnums}@dots{}
 @itemx delete display @var{dnums}@dots{}
 @kindex delete display
@@ -3057,6 +3085,17 @@ values.  This includes disabled expressions, which are marked as such.
 It also includes expressions which would not be displayed right now
 because they refer to automatic variables not currently available.
 @end table
+
+If a display expression refers to local variables, then it does not make
+sense outside the lexical context for which it was set up.  Such an
+expression is disabled when execution enters a context where one of its
+variables is not defined.  For example, if you give the command
+@samp{display name} while inside a function with an argument
+@code{name}, then this argument will be displayed while the program
+continues to stop inside that function.  When it stops elsewhere---where
+there is no variable @samp{name}---display is disabled.  The next time
+your program stops where @samp{name} is meaningful, you can enable the
+display expression once again.
 
 @node Print Settings,,,
 @section Print Settings
@@ -3259,10 +3298,11 @@ p *$.next
 @end example
 
 @noindent
-It might be useful to repeat this command many times by typing @key{RET}.
+You can print successive links in the chain by repeating this
+command---which you can do by just typing @key{RET}.
 
 Note that the history records values, not expressions.  If the value of
-@code{x} is 4 and you type this command:
+@code{x} is 4 and you type these commands:
 
 @example
 print x
@@ -3294,15 +3334,15 @@ Print ten history values just after the values last printed.
 @section Convenience Variables
 
 @cindex convenience variables
-_GDBN__ provides @dfn{convenience variables} that you can use within _GDBN__ to
-hold on to a value and refer to it later.  These variables exist entirely
-within _GDBN__; they are not part of your program, and setting a convenience
-variable has no effect on further execution of your program.  That's why
-you can use them freely.
+_GDBN__ provides @dfn{convenience variables} that you can use within
+_GDBN__ to hold on to a value and refer to it later.  These variables
+exist entirely within _GDBN__; they are not part of your program, and
+setting a convenience variable has no direct effect on further execution
+of your program.  That's why you can use them freely.
 
 Convenience variables have names starting with @samp{$}.  Any name starting
 with @samp{$} can be used for a convenience variable, unless it is one of
-the predefined set of register names (@pxref{Registers}).
+the predefined machine-specific register names (@pxref{Registers}).
 
 You can save a value in a convenience variable with an assignment
 expression, just as you would set a variable in your program.  Example:
@@ -3322,7 +3362,7 @@ another assignment at any time.
 Convenience variables have no fixed types.  You can assign a convenience
 variable any type of value, including structures and arrays, even if
 that variable already has a value of a different type.  The convenience
-variable as an expression has whatever type its current value has.
+variable, when used as an expression, has the type of its current value.
 
 @table @code
 @item info convenience
@@ -3332,7 +3372,8 @@ Abbreviated @samp{i con}.
 @end table
 
 One of the ways to use a convenience variable is as a counter to be
-incremented or a pointer to be advanced.  For example:
+incremented or a pointer to be advanced.  For example, to print
+a field from successive elements of an array of structures:
 
 _0__@example
 set $i = 0
@@ -3362,23 +3403,24 @@ to the value found in the last address examined.
 @cindex registers
 Machine register contents can be referred to in expressions as variables
 with names starting with @samp{$}.  The names of registers are different
-for each machine; use @samp{info registers} to see the names used on your
-machine.  The names @code{$pc} and @code{$sp} are used on most machines for
-the program counter register and the stack pointer.  Often @code{$fp} is
-used for a register that contains a pointer to the current stack frame,
-and @code{$ps} is used for a register that contains the processor
-status.  These standard register names may be available on your machine
-even though the @code{info registers} command displays them with a
-different name.  For example, on the SPARC, @code{info registers}
+for each machine; use @samp{info registers} to see the names used on
+your machine.  The names @code{$pc} and @code{$sp} are used on most
+machines for the program counter register and the stack pointer.  Often
+@code{$fp} is used for a register that contains a pointer to the current
+stack frame, and @code{$ps} is sometimes used for a register that
+contains the processor status.  These standard register names may be
+available on your machine even though the @code{info registers} command
+shows other names.  For example, on the SPARC, @code{info registers}
 displays the processor status register as @code{$psr} but you can also
 refer to it as @code{$ps}.
 
-_GDBN__ always considers the contents of an ordinary register as an integer
-when the register is examined in this way.  Some machines have special
-registers which can hold nothing but floating point; these registers are
-considered floating point.  There is no way to refer to the contents of an
-ordinary register as floating point value (although you can @emph{print}
-it as a floating point value with @samp{print/f $@var{regname}}).
+_GDBN__ always considers the contents of an ordinary register as an
+integer when the register is examined in this way.  Some machines have
+special registers which can hold nothing but floating point; these
+registers are considered to have floating point values.  There is no way
+to refer to the contents of an ordinary register as floating point value
+(although you can @emph{print} it as a floating point value with
+@samp{print/f $@var{regname}}).
 
 Some registers have distinct ``raw'' and ``virtual'' data formats.  This
 means that the data format in which the register contents are saved by
@@ -3393,7 +3435,7 @@ prints the data in both formats.
 Register values are relative to the selected stack frame
 (@pxref{Selection}).  This means that you get the value that the register
 would contain if all stack frames farther in were exited and their saved
-registers restored.  In order to see the real contents of all registers,
+registers restored.  In order to see the contents of hardware registers,
 you must select the innermost frame (with @samp{frame 0}).
 
 Some registers are never saved (typically those numbered zero or one)
@@ -3506,7 +3548,7 @@ start with @samp{step}.
 @item info variables
 @kindex info variables
 Print the names and data types of all variables that are declared
-outside of functions (i.e., except for local variables).
+outside of functions (i.e., excluding local variables).
 
 @item info variables @var{regexp}
 Print the names and data types of all variables (except for local
@@ -3560,12 +3602,11 @@ print x=4
 @end example
 
 @noindent
-would store the value 4 into the variable @code{x}, and then print
-the value of the assignment expression (which is 4).
-
-All the assignment operators of C are supported, including the
-increment operators @samp{++} and @samp{--}, and combining
-assignments such as @samp{+=} and _0__@samp{<<=}_1__.
+would store the value 4 into the variable @code{x}, and then print the
+value of the assignment expression (which is 4).  All the assignment
+operators of C are supported, including the increment operators
+@samp{++} and @samp{--}, and combining assignments such as @samp{+=} and
+_0__@samp{<<=}_1__.
 
 @kindex set
 @kindex set variable
@@ -3576,10 +3617,10 @@ really the same as @samp{print} except that the expression's value is not
 printed and is not put in the value history (@pxref{Value History}).  The
 expression is evaluated only for side effects.
 
-Note that if the beginning of the argument string of the @samp{set} command
-appears identical to a @samp{set} subcommand, it may be necessary to use
-the @samp{set variable} command.  This command is identical to @samp{set}
-except for its lack of subcommands.
+If the beginning of the argument string of the @samp{set} command
+appears identical to a @samp{set} subcommand, use the @samp{set
+variable} command instead of just @samp{set}.  This command is identical
+to @samp{set} except for its lack of subcommands.
 
 _GDBN__ allows more implicit conversions in assignments than C does; you can
 freely store an integer value into a pointer variable or vice versa, and
@@ -3590,15 +3631,16 @@ length or shorter.
 
 To store values into arbitrary places in memory, use the @samp{@{@dots{}@}}
 construct to generate a value of specified type at a specified address
-(@pxref{Expressions}).  For example, @code{@{int@}0x83040} would refer
-to memory location 0x83040 as an integer (which implies a certain size
+(@pxref{Expressions}).  For example, @code{@{int@}0x83040} refers
+to memory location @code{0x83040} as an integer (which implies a certain size
 and representation in memory), and
 
 @example
 set @{int@}0x83040 = 4
 @end example
 
-would store the value 4 into that memory location.
+@noindent
+stores the value 4 into that memory location.
 
 @node Jumping,,,
 @section Continuing at a Different Address
@@ -3672,25 +3714,21 @@ You can cancel execution of a function call with the @samp{return}
 command.
 @end table
 
-This command has the effect of discarding the selected stack
-frame (and all frames within it), so that control moves to the caller of
-that function.  You can think of this as making the discarded frame
-return prematurely.
+This command abandons execution of a function.  When you use
+@code{return}, _GDBN__ discards the selected stack frame (and all frames
+within it).  You can think of this as making the discarded frame return
+prematurely.  If you wish to specify a value to be returned, give that
+value as the argument to @code{return}.
 
-First select the stack frame that you wish to return from
-(@pxref{Selection}).  Then type the @samp{return} command.  If you wish
-to specify the value to be returned, give that as an argument.
-
-This pops the selected stack frame (and any other frames inside of it),
-leaving its caller as the innermost remaining frame.  That frame becomes
-selected.  The specified value is stored in the registers used for
-returning values of functions.
+This pops the selected stack frame (@pxref{Selection}), and any other
+frames inside of it, leaving its caller as the innermost remaining
+frame.  That frame becomes selected.  The specified value is stored in
+the registers used for returning values of functions.
 
 The @samp{return} command does not resume execution; it leaves the
 program stopped in the state that would exist if the function had just
-returned.  Contrast this with the @samp{finish} command
-(@pxref{Stepping}), which resumes execution until the selected stack
-frame returns @emph{naturally}.
+returned.  In contrast, the @samp{finish} command (@pxref{Stepping})
+resumes execution until the selected stack frame returns naturally.
 
 @node     Calling,,,
 @section Calling your Program's Functions
@@ -3704,7 +3742,7 @@ returned values.
 @end table
 
 You can use this variant of the @samp{print} command if you want to
-execute some piece of your program, but without cluttering the output
+execute a function from your program, but without cluttering the output
 with @code{void} returned values.  The result is printed and saved in
 the value history, if it is not void.
 
@@ -3723,7 +3761,7 @@ The usual way to specify the executable and core dump file names is with
 the command arguments given when you start _GDBN__, as discussed in
 @pxref{Invocation}.
 
-But occasionally it is necessary to change to a different file during a
+Occasionally it is necessary to change to a different file during a
 _GDBN__ session.  Or you may run _GDBN__ and forget to specify the files you
 want to use.  In these situations the _GDBN__ commands to specify new files
 are useful.
@@ -3733,15 +3771,15 @@ are useful.
 @cindex executable file
 @kindex file
 Use @var{filename} as the program to be debugged.  It is read for its
-symbols, for getting the contents of pure memory, and it is the program
+symbols and for the contents of pure memory.  It is also the program
 executed when you use the @samp{run} command.  If you do not specify a
 directory and the file is not found in _GDBN__'s working directory,
 _GDBN__ will use the environment variable @code{PATH} as a list of
 directories to search, just as the shell does when looking for a program
 to run.
 
-@samp{file} with no argument makes both executable file and symbol
-table become unspecified.
+@samp{file} with no argument makes _GDBN__ discard any information it
+has on both executable file and the symbol table.
 
 @item exec-file @var{filename}
 @kindex exec-file
@@ -3840,9 +3878,9 @@ targets rather than current ones.
 
 @end table
 
-While all three file-specifying commands allow both absolute and relative
-file names as arguments, _GDBN__ always converts the file name to an absolute
-one and remembers it that way.
+All file-specifying commands allow both absolute and relative file names
+as arguments.  _GDBN__ always converts the file name to an absolute path
+name and remembers it that way.
 
 @kindex sharedlibrary
 @kindex share
@@ -3850,8 +3888,8 @@ one and remembers it that way.
 
 _GDBN__ supports the SunOS shared library format.  Symbols from a shared
 library cannot be referenced before the shared library has been linked
-with the program.  (That is to say, after one types @samp{run} and 
-the function @code{main()} has been entered; or when examining core
+with the program.  (That is to say, after you type @samp{run} and 
+the function @code{main} has been entered; or when examining core
 files.)  Once the shared library has been linked in, you can use the
 following commands:
 
@@ -4156,12 +4194,11 @@ Directs _GDBN__ to use @var{newprompt} as its prompt string henceforth.
 Prints a line of the form: @samp{Gdb's prompt is: @var{your-prompt}}
 @end table
 
-@node Editing/History,,,
-@section Command Editing and History
+@node Editing,,,
+@section Command Editing
 @cindex readline
 @cindex command line editing
-@cindex history substitution
-_GDBN__ reads its input commands via the @code{readline} interface.  This
+_GDBN__ reads its input commands via the @dfn{readline} interface.  This
 GNU library provides consistent behavior for programs which provide a
 command line interface to the user.  Advantages are @samp{emacs}-style
 or @samp{vi}-style inline editing of commands, @samp{csh}-like history
@@ -4186,26 +4223,29 @@ Disable command line editing.
 @item show editing
 Show whether command line editing is enabled.
 
+@node History,,,
+@section Command History
+@cindex history substitution
 @cindex history file
 @kindex set history file
 @item set history file @var{filename}
-Set the name of the _GDBN__ command history file to @samp{filename}.  This is
+Set the name of the _GDBN__ command history file to @var{filename}.  This is
 the file from which _GDBN__ will read an initial command history
 list or to which it will write this list when it exits.  This list is
 accessed through history expansion or through the history
 command editing characters listed below.  This file defaults to the
 value of the environmental variable @code{GDBHISTFILE}, or to
-@code{./.gdb_history} if this variable is not set.
+@file{./.gdb_history} if this variable is not set.
 
 @cindex history write
 @kindex set history write
 @item set history write
 @itemx set history write on
-Make _GDBN__ record command history in a file, whose name may be specified with the
+Record command history in a file, whose name may be specified with the
 @samp{set history file} command.  By default, this option is disabled.
 
 @item set history write off
-Make _GDBN__ stop recording command history in a file.
+Stop recording command history in a file.
 
 @cindex history size
 @kindex set history size
@@ -4224,7 +4264,7 @@ Since @samp{!} is also the logical not operator in C, history expansion
 is off by default. If you decide to enable history expansion with the
 @samp{set history expansion on} command, you may sometimes need to
 follow @samp{!} (when it is used as logical not, in an expression) with
-a space or a tab to prevent it from being expanded.  The @code{readline}
+a space or a tab to prevent it from being expanded.  The readline
 history facilities will not attempt substitution on the strings
 @samp{!=} and @samp{!(}, even when history expansion is enabled.
 
@@ -4240,7 +4280,7 @@ Enable history expansion.  History expansion is off by default.
 @item set history expansion off
 Disable history expansion.
 
-The @code{readline} code comes with more complete documentation of
+The readline code comes with more complete documentation of
 editing and history expansion features.  Users unfamiliar with @samp{emacs}
 or @samp{vi} may wish to read it. 
 @iftex
@@ -4467,7 +4507,7 @@ stops execution of the user-defined command.
 Commands that would ask for confirmation if used interactively proceed
 without asking when used inside a user-defined command.  Many _GDBN__ commands
 that normally print messages to say what they are doing omit the messages
-when used in user-defined command.
+when used in a user-defined command.
 
 @node Command Files,,,
 @section Command Files
@@ -4480,12 +4520,12 @@ it would from the terminal.
 
 @cindex init file
 @cindex @file{_GDBINIT__}
-When you start _GDBN__, it first executes commands from its @dfn{init files}.
-These are files named @file{_GDBINIT__}.  _GDBN__ reads the init file (if any)
-in your home directory and then the init file (if any) in the current
-working directory.  (The init files are not executed if the @samp{-nx}
-option is given.)  You can also request the execution of a command file
-with the @samp{source} command:
+When you start _GDBN__, it automatically executes commands from its
+@dfn{init files}.  These are files named @file{_GDBINIT__}.  _GDBN__
+reads the init file (if any) in your home directory and then the init
+file (if any) in the current working directory.  (The init files are not
+executed if the @samp{-nx} option is given.)  You can also request the
+execution of a command file with the @samp{source} command:
 
 @table @code
 @item source @var{filename}
@@ -4500,7 +4540,7 @@ of the command file.
 Commands that would ask for confirmation if used interactively proceed
 without asking when used in a command file.  Many _GDBN__ commands that
 normally print messages to say what they are doing omit the messages
-when used in a command file.
+when called from command files.
 
 @node Output,,,
 @section Commands for Controlled Output
@@ -4741,12 +4781,12 @@ each value is printed in its own window.
 Your bug reports play an essential role in making _GDBN__ reliable.
 
 Reporting a bug may help you by bringing a solution to your problem, or it
-may not.  But in any case the important function of a bug report is to help
+may not.  But in any case the principal function of a bug report is to help
 the entire community by making the next version of _GDBN__ work better.  Bug
 reports are your contribution to the maintenance of _GDBN__.
 
 In order for a bug report to serve its purpose, you must include the
-information that makes for fixing the bug.
+information that enables us to fix the bug.
 
 @node Bug Criteria,,,
 @section Have You Found a Bug?
@@ -4799,7 +4839,7 @@ bug-gdb@@prep.ai.mit.edu
 
 @strong{Do not send bug reports to @samp{info-gdb}, or to
 @samp{help-gdb}, or to any newsgroups.} Most users of _GDBN__ do not want to
-receive bug reports.  Those that do, have asked to be on @samp{bug-gdb}.
+receive bug reports.  Those that do, have arranged to receive @samp{bug-gdb}.
 
 The mailing list @samp{bug-gdb} has a newsgroup which serves as a
 repeater.  The mailing list and the newsgroup carry exactly the same
@@ -4823,7 +4863,7 @@ The fundamental principle of reporting bugs usefully is this:
 fact or leave it out, state it!
 
 Often people omit facts because they think they know what causes the
-problem and they conclude that some details don't matter.  Thus, you might
+problem and assume that some details don't matter.  Thus, you might
 assume that the name of the variable you use in an example does not matter.
 Well, probably it doesn't, but one cannot be sure.  Perhaps the bug is a
 stray memory reference which happens to fetch from the location where that
@@ -4833,9 +4873,9 @@ the bug.  Play it safe and give a specific, complete example.  That is the
 easiest thing for you to do, and the most helpful.
 
 Keep in mind that the purpose of a bug report is to enable us to fix
-the bug if it is not known.  It isn't very important what happens if
+the bug if it is new to us.  It isn't very important what happens if
 the bug is already known.  Therefore, always write your bug reports on
-the assumption that the bug is not known.
+the assumption that the bug has not been reported previously.
 
 Sometimes people give a few sketchy facts and ask, ``Does this ring a
 bell?''  Those bug reports are useless, and we urge everyone to
