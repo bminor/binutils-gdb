@@ -1,3 +1,9 @@
+start-sanitize-r5900
+Wed May 20 00:22:27 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* mips-opc.c (multu1): Add two operand variant for the r5900.
+
+end-sanitize-r5900
 Tue May 19 17:36:08 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips-dis.c (print_mips16_insn_arg): Handle type ']' correctly
