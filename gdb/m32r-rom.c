@@ -40,8 +40,6 @@
 #include <ctype.h>
 #include "regcache.h"
 
-extern void report_transfer_performance (unsigned long, time_t, time_t);
-
 /*
  * All this stuff just to get my host computer's IP address!
  */
@@ -165,7 +163,8 @@ m32r_load (char *filename, int from_tty)
 #endif
   end_time = time (NULL);
   printf_filtered ("Start address 0x%lx\n", bfd_get_start_address (abfd));
-  report_transfer_performance (data_count, start_time, end_time);
+  print_transfer_performance (gdb_stdout, data_count, 0,
+			      end_time - start_time);
 
   /* Finally, make the PC point at the start address */
   if (exec_bfd)
@@ -264,7 +263,9 @@ m32r_supply_register (char *regname, int regnamelen, char *val, int vallen)
 
       if (regno == SPI_REGNUM || regno == SPU_REGNUM)
 	{			/* special handling for stack pointer (spu or spi) */
-	  unsigned long stackmode = read_register (PSW_REGNUM) & 0x80;
+	  ULONGEST stackmode, psw;
+	  regcache_cooked_read_unsigned (current_regcache, PSW_REGNUM, &psw);
+	  stackmode = psw & 0x80;
 
 	  if (regno == SPI_REGNUM && !stackmode)	/* SP == SPI */
 	    monitor_supply_register (SP_REGNUM, val);
@@ -568,8 +569,9 @@ m32r_upload_command (char *args, int from_tty)
 	  }
       /* Finally, make the PC point at the start address */
       write_pc (bfd_get_start_address (abfd));
-      report_transfer_performance (data_count, start_time, end_time);
       printf_filtered ("Start address 0x%lx\n", bfd_get_start_address (abfd));
+      print_transfer_performance (gdb_stdout, data_count, 0,
+				  end_time - start_time);
     }
   inferior_ptid = null_ptid;	/* No process now */
 
@@ -610,23 +612,23 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   mon2000_ops.to_open = mon2000_open;
   add_target (&mon2000_ops);
 
-  add_show_from_set
-    (add_set_cmd ("download-path", class_obscure, var_string,
-		  (char *) &download_path,
-		  "Set the default path for downloadable SREC files.",
-		  &setlist), &showlist);
+  add_setshow_cmd ("download-path", class_obscure,
+		   var_string, &download_path,
+		   "Set the default path for downloadable SREC files.",
+		   "Show the default path for downloadable SREC files.",
+		   NULL, NULL, &setlist, &showlist);
 
-  add_show_from_set
-    (add_set_cmd ("board-address", class_obscure, var_string,
-		  (char *) &board_addr,
-		  "Set IP address for M32R-EVA target board.",
-		  &setlist), &showlist);
+  add_setshow_cmd ("board-address", class_obscure,
+		   var_string, &board_addr,
+		   "Set IP address for M32R-EVA target board.",
+		   "Show IP address for M32R-EVA target board.",
+		   NULL, NULL, &setlist, &showlist);
 
-  add_show_from_set
-    (add_set_cmd ("server-address", class_obscure, var_string,
-		  (char *) &server_addr,
-		  "Set IP address for download server (GDB's host computer).",
-		  &setlist), &showlist);
+  add_setshow_cmd ("server-address", class_obscure,
+		   var_string, &server_addr,
+		   "Set IP address for download server (GDB's host computer).",
+		   "Show IP address for download server (GDB's host computer).",
+		   NULL, NULL, &setlist, &showlist);
 
   add_com ("upload", class_obscure, m32r_upload_command,
 	   "Upload the srec file via the monitor's Ethernet upload capability.");

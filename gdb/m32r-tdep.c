@@ -111,8 +111,8 @@ m32r_memory_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
   /* Determine appropriate breakpoint contents and size for this address.  */
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     {
-      if (((addr & 3) == 0) &&
-	  ((contents_cache[0] & 0x80) || (contents_cache[2] & 0x80)))
+      if (((addr & 3) == 0)
+	  && ((contents_cache[0] & 0x80) || (contents_cache[2] & 0x80)))
 	{
 	  static unsigned char insn[] = M32R_BE_BREAKPOINT32;
 	  bp = insn;
@@ -127,8 +127,8 @@ m32r_memory_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
     }
   else
     {				/* little-endian */
-      if (((addr & 3) == 0) &&
-	  ((contents_cache[1] & 0x80) || (contents_cache[3] & 0x80)))
+      if (((addr & 3) == 0)
+	  && ((contents_cache[1] & 0x80) || (contents_cache[3] & 0x80)))
 	{
 	  static unsigned char insn[] = M32R_LE_BREAKPOINT32;
 	  bp = insn;
@@ -156,8 +156,8 @@ m32r_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
   /* Determine appropriate breakpoint contents and size for this address.  */
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     {
-      if (((addr & 3) == 0) &&
-	  ((contents_cache[0] & 0x80) || (contents_cache[2] & 0x80)))
+      if (((addr & 3) == 0)
+	  && ((contents_cache[0] & 0x80) || (contents_cache[2] & 0x80)))
 	{
 	  static unsigned char insn[] = M32R_BE_BREAKPOINT32;
 	  bplen = sizeof (insn);
@@ -171,8 +171,8 @@ m32r_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
   else
     {
       /* little-endian */
-      if (((addr & 3) == 0) &&
-	  ((contents_cache[1] & 0x80) || (contents_cache[3] & 0x80)))
+      if (((addr & 3) == 0)
+	  && ((contents_cache[1] & 0x80) || (contents_cache[3] & 0x80)))
 	{
 	  static unsigned char insn[] = M32R_BE_BREAKPOINT32;
 	  bplen = sizeof (insn);
@@ -362,9 +362,9 @@ decode_prologue (CORE_ADDR start_pc, CORE_ADDR scan_limit,
 		}
 	      else
 		{
-		  if (((insn >> 8) == 0xe4) &&	/* ld24 r4, xxxxxx; sub sp, r4 */
-		      read_memory_unsigned_integer (current_pc + 2,
-						    2) == 0x0f24)
+		  if (((insn >> 8) == 0xe4)	/* ld24 r4, xxxxxx; sub sp, r4 */
+		      && read_memory_unsigned_integer (current_pc + 2,
+						       2) == 0x0f24)
 		    /* subtract 24 bit sign-extended negative-offset */
 		    {
 		      insn = read_memory_unsigned_integer (current_pc - 2, 4);
@@ -564,9 +564,9 @@ m32r_frame_unwind_cache (struct frame_info *next_frame,
 		  short n = op & 0xffff;
 		  info->sp_offset += n;
 		}
-	      else if (((op >> 8) == 0xe4) &&	/* ld24 r4, xxxxxx; sub sp, r4 */
-		       get_frame_memory_unsigned (next_frame, pc + 4,
-						  2) == 0x0f24)
+	      else if (((op >> 8) == 0xe4)	/* ld24 r4, xxxxxx; sub sp, r4 */
+		       && get_frame_memory_unsigned (next_frame, pc + 4,
+						     2) == 0x0f24)
 		{
 		  unsigned long n = op & 0xffffff;
 		  info->sp_offset += n;
@@ -617,7 +617,7 @@ m32r_frame_unwind_cache (struct frame_info *next_frame,
       /* The SP was moved to the FP.  This indicates that a new frame
          was created.  Get THIS frame's FP value by unwinding it from
          the next frame.  */
-      frame_unwind_unsigned_register (next_frame, M32R_FP_REGNUM, &this_base);
+      this_base = frame_unwind_register_unsigned (next_frame, M32R_FP_REGNUM);
       /* The FP points at the last saved register.  Adjust the FP back
          to before the first saved register giving the SP.  */
       prev_sp = this_base + info->size;
@@ -626,7 +626,7 @@ m32r_frame_unwind_cache (struct frame_info *next_frame,
     {
       /* Assume that the FP is this frame's SP but with that pushed
          stack space added back.  */
-      frame_unwind_unsigned_register (next_frame, M32R_SP_REGNUM, &this_base);
+      this_base = frame_unwind_register_unsigned (next_frame, M32R_SP_REGNUM);
       prev_sp = this_base + info->size;
     }
 
@@ -657,11 +657,11 @@ static CORE_ADDR
 m32r_read_pc (ptid_t ptid)
 {
   ptid_t save_ptid;
-  CORE_ADDR pc;
+  ULONGEST pc;
 
   save_ptid = inferior_ptid;
   inferior_ptid = ptid;
-  pc = (int) read_register (M32R_PC_REGNUM);
+  regcache_cooked_read_unsigned (current_regcache, M32R_PC_REGNUM, &pc);
   inferior_ptid = save_ptid;
   return pc;
 }
@@ -680,9 +680,7 @@ m32r_write_pc (CORE_ADDR val, ptid_t ptid)
 static CORE_ADDR
 m32r_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
-  ULONGEST sp;
-  frame_unwind_unsigned_register (next_frame, M32R_SP_REGNUM, &sp);
-  return sp;
+  return frame_unwind_register_unsigned (next_frame, M32R_SP_REGNUM);
 }
 
 
@@ -744,7 +742,7 @@ m32r_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
       else if (len < 4)
 	{
 	  /* value gets right-justified in the register or stack word */
-	  memcpy (valbuf + (REGISTER_RAW_SIZE (argreg) - len),
+	  memcpy (valbuf + (register_size (gdbarch, argreg) - len),
 		  (char *) VALUE_CONTENTS (args[argnum]), len);
 	  val = valbuf;
 	}
@@ -763,15 +761,16 @@ m32r_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	    {
 	      /* there's room in a register */
 	      regval =
-		extract_unsigned_integer (val, REGISTER_RAW_SIZE (argreg));
+		extract_unsigned_integer (val,
+					  register_size (gdbarch, argreg));
 	      regcache_cooked_write_unsigned (regcache, argreg++, regval);
 	    }
 
 	  /* Store the value 4 bytes at a time.  This means that things
 	     larger than 4 bytes may go partly in registers and partly
 	     on the stack.  */
-	  len -= REGISTER_RAW_SIZE (argreg);
-	  val += REGISTER_RAW_SIZE (argreg);
+	  len -= register_size (gdbarch, argreg);
+	  val += register_size (gdbarch, argreg);
 	}
     }
 
@@ -811,9 +810,7 @@ m32r_extract_return_value (struct type *type, struct regcache *regcache,
 static CORE_ADDR
 m32r_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
-  ULONGEST pc;
-  frame_unwind_unsigned_register (next_frame, M32R_PC_REGNUM, &pc);
-  return pc;
+  return frame_unwind_register_unsigned (next_frame, M32R_PC_REGNUM);
 }
 
 /* Given a GDB frame, determine the address of the calling function's
@@ -884,7 +881,7 @@ static const struct frame_unwind m32r_frame_unwind = {
 };
 
 static const struct frame_unwind *
-m32r_frame_p (CORE_ADDR pc)
+m32r_frame_sniffer (struct frame_info *next_frame)
 {
   return &m32r_frame_unwind;
 }
@@ -966,7 +963,7 @@ m32r_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_frame_align (gdbarch, m32r_frame_align);
 
-  frame_unwind_append_predicate (gdbarch, m32r_frame_p);
+  frame_unwind_append_sniffer (gdbarch, m32r_frame_sniffer);
   frame_base_set_default (gdbarch, &m32r_frame_base);
 
   /* Methods for saving / extracting a dummy frame's ID.  The ID's

@@ -1,3 +1,25 @@
+2003-07-27  Andrew Cagney  <cagney@redhat.com>
+
+	Patch from 2003-07-22 Kei Sakamoto <sakamoto.kei@renesas.com>:
+	* m32r-tdep.c (m32r_memory_insert_breakpoint): Fix code style -
+	operator at start and not end of line.
+	(decode_prologue): Ditto.
+	(m32r_frame_unwind_cache, m32r_unwind_sp, m32r_unwind_pc): Use
+	frame_unwind_register_unsigned instead of
+	frame_unwind_unsigned_register.
+	(m32r_read_pc): Use regcache_cooked_read_unsigned instead of
+	read_register.
+	(m32r_push_dummy_call): Use register_size instead of
+	REGISTER_RAW_SIZE.
+	(m32r_frame_sniffer): Replace m32r_frame_p.
+	(m32r_gdbarch_init): Call frame_unwind_append_sniffer.
+	* m32r-rom.c (report_transfer_performance): Delete extern
+	declaration.
+	(m32r_load, m32r_upload_command): Use print_transfer_performance
+	instead of report_transfer_performance.
+	(_initialize_m32r_rom): Use add_setshow_cmd instead of add_set_cmd
+	/ add_show_from_set.
+
 2003-07-26  Andrew Cagney  <cagney@redhat.com>
 
 	* m68hc11-tdep.c (m68hc11_gdbarch_init): Set non-deprecated
