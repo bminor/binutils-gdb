@@ -1,3 +1,12 @@
+start-sanitize-sh4
+Fri Jun 20 17:58:34 1997  Fred Fish  <fnf@cygnus.com>
+
+	* sh-tdep.c (sh_skip_prologue): Also recognize fmov insns.
+	(sh_frame_find_saved_regs): Recognize fmov insns and adjust
+	stack push count accordingly.
+	* sh-tdep.c (IS_FMOV, FPSCR_SZ): New defines
+
+end-sanitize-sh4
 Thu Jun 19 08:18:48 1997  Mark Alexander  <marka@cygnus.com>
 
 	* utils.c (floatformat_from_doublest): Improve test for infinity.

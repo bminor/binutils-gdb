@@ -113,6 +113,10 @@ struct {
 #define IS_MOV_R3(x) 		(((x) & 0xff00) == 0x1a00)
 #define IS_SHLL_R3(x)		((x) == 0x4300)
 #define IS_ADD_R3SP(x)		((x) == 0x3f3c)
+/* start-sanitize-sh4 */
+#define IS_FMOV(x)		(((x) & 0xf00f) == 0xf00b)
+#define FPSCR_SZ		(1 << 20)
+/* end-sanitize-sh4 */
 
 /* Skip any prologue before the guts of a function */
 
@@ -124,6 +128,9 @@ sh_skip_prologue (start_pc)
 
   w = read_memory_integer (start_pc, 2);
   while (IS_STS (w)
+	 /* start-sanitize-sh4 */
+	 || IS_FMOV (w)
+	 /* end-sanitize-sh4 */
 	 || IS_PUSH (w)
 	 || IS_MOV_SP_FP (w)
 	 || IS_MOV_R3 (w)
@@ -240,9 +247,11 @@ sh_frame_find_saved_regs (fi, fsr)
 
   depth = 0;
 
-  /* Loop around examining the prologue insns, but give up
-     after 15 of them, since we're getting silly then */
-  while (pc < opc + 15 * 2)
+  /* Loop around examining the prologue insns until we find something
+     that does not appear to be part of the prologue.  But give up
+     after 20 of them, since we're getting silly then. */
+
+  while (pc < opc + 20 * 2)
     {
       /* See where the registers will be saved to */
       if (IS_PUSH (insn))
@@ -286,6 +295,21 @@ sh_frame_find_saved_regs (fi, fsr)
 	  depth -= ((insn & 0xff) ^ 0x80) - 0x80;
 	  insn = read_memory_integer (pc, 2);
 	}
+      /* start-sanitize-sh4 */
+      else if (IS_FMOV (insn))
+	{
+	  pc += 2;
+	  insn = read_memory_integer (pc, 2);
+	  if (read_register (FPSCR_REGNUM) & FPSCR_SZ)
+	    {
+	      depth += 8;
+	    }
+	  else
+	    {
+	      depth += 4;
+	    }
+	}
+      /* end-sanitize-sh4 */
       else
 	break;
     }
