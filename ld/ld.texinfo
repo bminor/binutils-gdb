@@ -1680,12 +1680,6 @@ You write the @samp{SECTIONS} command as the keyword @samp{SECTIONS},
 followed by a series of symbol assignments and output section
 descriptions enclosed in curly braces.
 
-The first line in the above example sets the special symbol @samp{.},
-which is the location counter.  If you do not specify the address of an
-output section in some other way (other ways are described later), the
-address is set from the current value of the location counter.  The
-location counter is then incremented by the size of the output section.
-
 The first line inside the @samp{SECTIONS} command of the above example
 sets the value of the special symbol @samp{.}, which is the location
 counter.  If you do not specify the address of an output section in some
