@@ -528,7 +528,6 @@ const struct mips_opcode mips_builtin_opcodes[] = {
   /* end-sanitize-vr5400 */
 {"mad",	    "s,t",	0x70000000, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO|RD_HI|RD_LO,	P3	},
 {"madu",    "s,t",	0x70000001, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO|RD_HI|RD_LO,	P3	},
-{"addciu",  "t,r,j",	0x70000000, 0xfc000000,	WR_t|RD_s,L1	},
 {"madd.d",  "D,R,S,T",	0x4c000021, 0xfc00003f, RD_R|RD_S|RD_T|WR_D|FP_D,	I4	},
 {"madd.s",  "D,R,S,T",	0x4c000020, 0xfc00003f, RD_R|RD_S|RD_T|WR_D|FP_S,	I4	},
 /* start-sanitize-r5900 */
@@ -552,7 +551,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"max.s",   "D,S,T",    0x46000028, 0xffe0003f, WR_D|RD_S|RD_T|FP_S,    T5 },
 {"min.s",   "D,S,T",    0x46000030, 0xffe0003f, WR_D|RD_S|RD_T|FP_S,    T5 },
 {"msuba.s", "S,T",      0x4600001f, 0xffe007ff, RD_S|RD_T|FP_S,         T5 },
-{"multa.s", "S,T",      0x4600001a, 0xffe007ff, RD_S|RD_T|FP_S,         T5 },
+{"mult.s",  "S,T",      0x4600001a, 0xffe007ff, RD_S|RD_T|FP_S,         T5 },
 {"suba.s",  "S,T",      0x46000019, 0xffe007ff, RD_S|RD_T|FP_S,         T5 },
 {"di",      "",         0x42000039, 0xffffffff, WR_C0,          T5      },
 {"ei",      "",         0x42000038, 0xffffffff, WR_C0,          T5      },
@@ -676,7 +675,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"mulhiu",  "d,s,t",	0x00000259, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
 {"mul",     "d,s,t",	0x00000058, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
   /* end-sanitize-vr5400 */
-{"mul",     "d,v,t",	0x70000002, 0xfc0007ff, WR_d|RD_s|RD_t|WR_HI|WR_LO,	P3	},
+{"mul",     "d,v,t",	0x70000002, 0xfc0007ff, WR_d|RD_s|RD_t|WR_HI|WR_LO,P3},
 {"mul",     "d,v,t",	0,    (int) M_MUL,	INSN_MACRO,	I1	},
 {"mul",     "d,v,I",	0,    (int) M_MUL_I,	INSN_MACRO,	I1	},
 {"mulo",    "d,v,t",	0,    (int) M_MULO,	INSN_MACRO,	I1	},
@@ -1114,6 +1113,11 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"cop1",     "C",	0,    (int) M_COP1,	INSN_MACRO,	I1	},
 {"cop2",     "C",	0,    (int) M_COP2,	INSN_MACRO,	I1	},
 {"cop3",     "C",	0,    (int) M_COP3,	INSN_MACRO,	I1	},
+
+  /* Conflicts with the 4650's "mul" instruction.  Nobody's using the
+     4010 any more, so move this insn out of the way.  If the object
+     format gave us more info, we could do this right.  */
+{"addciu",  "t,r,j",	0x70000000, 0xfc000000,	WR_t|RD_s,L1	},
 };
 
 #define MIPS_NUM_OPCODES \

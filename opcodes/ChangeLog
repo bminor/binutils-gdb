@@ -1,3 +1,9 @@
+start-sanitize-r5900
+Fri Feb 20 01:23:16 1998  Jeffrey A Law  (law@cygnus.com)
+
+        * mips-opc.c (mula.s): Renamed from multa.s.
+
+end-sanitize-r5900
 Thu Feb 19 16:51:13 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* m32r-opc.[ch]: Regenerate.
