@@ -1,3 +1,43 @@
+Thu Apr 10 13:20:53 1997  Geoffrey Noer  <noer@cygnus.com>
+
+	* procfs.c: Substantial (but incomplete) changes to support
+	sysv4.2mp procfs as implemented in UnixWare 2.1.  The procinfo
+	struct now has substructs like struct flt_ctl instead of
+	just a fltset_t and has a ctl_fd, status_fd, as_fd, and
+	map_fd instead of a single fd.  Non-sysv4.2mp procfs models
+	still have the structs and multiple fds, but don't use the
+	entire struct and the four fds all point to the same thing.
+	We use PROCFS_USE_READ_WRITE to decide whether to talk to
+	procfs with reads/writes or use ioctl instead.  We use
+	HAVE_MULTIPLE_PROC_FDS to determine whether procfs really has
+	multiple fds or not.  PROC_NAME_FMT is split out into
+	CTL_PROC_NAME_FMT, AS_PROC_NAME_FMT, MAP_PROC_NAME_FMT, 
+	STATUS_PROC_NAME_FMT.
+	
+	(procfs_notice_signals): now a necessary wrapper around
+	(notice_signals): which are the new guts for noticing signals
+	(open_proc_file): gets a new flag arg used in sysv4.2mp to
+	determine whether or not to attempt to open the ctl_fd.
+	(procfs_read_status): new local function, reads procfs status
+	(procfs_write_pcwstop): new local function, writes a PCWSTOP
+	(procfs_write_pckill): new local function, writes a PCKILL
+	(unconditionally_kill_inferior): remove signo since we now
+	just call procfs_write_pckill().
+	(procfs_xfer_memory): call lseek with SEEK_SET rather than 0	
+	(proc_iterate_over_mappings): the whole function is ifdefed
+	on UNIXWARE to keep things readable.
+	
+	Expanded the syscall_table to include new potential sysv4.2mp
+	members.  Note that all ifdefs of UNIXWARE should be eliminated
+	if possible or renamed to describe what's being selected for a
+	bit better.  Sysv4.2mp and IRIX both have SYS_sproc so the
+	IRIX specific code now also checks it's not UNIXWARE.
+
+	* config/i386/tm-i386v42mp.h: also define HAVE_PSTATUS_T,
+	HAVE_NO_PRRUN_T, PROCFS_USE_READ_WRITE, and UNIXWARE
+	* config/mips/nm-irix4.h: set CTL_PROC_NAME_FMT et al to
+	"/debug/%d" as PROC_NAME_FMT used to be
+
 Wed Apr  9 11:36:14 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300-tdep.c: Almost completely rewritten based on mn10200

@@ -25,10 +25,25 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "i386/tm-i386v4.h"
 
-/* proc on this architecture has multiple fds (ctl, as, map, status) */
-/* including a control fd */
+/* procfs on this architecture has multiple fds (ctl, as, map, status)
+	including a control fd */
 
 #define HAVE_MULTIPLE_PROC_FDS
-#define HAVE_CONTROL_PROC_FD
+
+/* procfs on this architecture has a pstatus_t instead of prstatus_t */
+
+#define HAVE_PSTATUS_T
+
+/* procfs on this architecture has no prrun_t */
+#define HAVE_NO_PRRUN_T
+
+/* procfs on this architecture communicates with read/write instead
+	of ioctl */
+
+#define PROCFS_USE_READ_WRITE
+
+/* define to select for other sysv4.2mp weirdness */
+
+#define UNIXWARE
 
 #endif  /* ifndef TM_I386V42MP_H */

@@ -23,7 +23,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
  * with ptrace(), which seems *extremely* fragile, anyway.
  */
 #define USE_PROC_FS
-#define PROC_NAME_FMT "/debug/%d"
+#define CTL_PROC_NAME_FMT "/debug/%d"
+#define AS_PROC_NAME_FMT "/debug/%d"
+#define MAP_PROC_NAME_FMT "/debug/%d"
+#define STATUS_PROC_NAME_FMT "/debug/%d"
 
 /* Don't need special routines for the SGI -- we can use infptrace.c */
 #undef FETCH_INFERIOR_REGISTERS
