@@ -29,7 +29,7 @@
 #include "cgen.h"
 #include "dwarf2dbg.h"
 
-static void queue_fixup PARAMS ((int, int, expressionS *));
+static void queue_fixup (int, int, expressionS *);
 
 /* Opcode table descriptor, must be set by md_begin.  */
 

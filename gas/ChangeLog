@@ -1,3 +1,14 @@
+2003-11-20  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* app.c: Convert to ISO-C.
+	* as.h: Likewise.
+	* atof-generic.c: Likewise.
+	* bignum-copy.c: Likewise.
+	* bignum.h: Likewise.
+	* cgen.c: Likewise.
+	* cgen.h: Likewise.
+	* cond.c: Likewise.
+
 2003-11-20  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-sh64.c (shmedia_frob_section): Only frob elf32
