@@ -1,3 +1,9 @@
+Mon Jun 23 18:03:27 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.h (elf_merge_symbol): New static function, broken out of
+	elf_link_add_object_symbols.
+	(elf_link_add_object_symbols): Call it.
+
 Sun Jun 22 19:40:57 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coff-i386.c (i3coff_object_p): If COFF_IMAGE_WITH_PE, hack to
