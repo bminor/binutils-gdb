@@ -328,48 +328,6 @@ NaN (op, fmt)
 }
 
 int
-Infinity (op, fmt)
-     uword64 op;
-     FP_formats fmt;
-{
-  int boolean = 0;
-
-#ifdef DEBUG
-  printf ("DBG: Infinity: format %s 0x%s\n",
-	  fpu_format_name (fmt), pr_addr (op));
-#endif /* DEBUG */
-
-  switch (fmt)
-    {
-    case fmt_single:
-      {
-	sim_fpu wop;
-	sim_fpu_32to (&wop, op);
-	boolean = sim_fpu_is_infinity (&wop);
-	break;
-      }
-    case fmt_double:
-      {
-	sim_fpu wop;
-	sim_fpu_64to (&wop, op);
-	boolean = sim_fpu_is_infinity (&wop);
-	break;
-      }
-    default:
-      printf ("DBG: TODO: unrecognised format (%s) for Infinity check\n",
-	      fpu_format_name (fmt));
-      break;
-    }
-
-#ifdef DEBUG
-  printf ("DBG: Infinity: returning %d for 0x%s (format = %s)\n",
-	  boolean, pr_addr (op), fpu_format_name (fmt));
-#endif /* DEBUG */
-
-  return (boolean);
-}
-
-int
 Less (op1, op2, fmt)
      uword64 op1;
      uword64 op2;
@@ -467,429 +425,170 @@ Equal (op1, op2, fmt)
   return (boolean);
 }
 
-uword64
-AbsoluteValue (op, fmt)
-     uword64 op;
-     FP_formats fmt;
+
+/* Basic arithmetic operations.  */
+
+static unsigned64
+fp_unary(sim_cpu *cpu,
+	 address_word cia,
+	 int (*sim_fpu_op)(sim_fpu *, const sim_fpu *),
+	 unsigned64 op,
+	 FP_formats fmt)
 {
-  uword64 result = 0;
+  sim_fpu wop;
+  sim_fpu ans;
+  unsigned64 result = 0;
 
-#ifdef DEBUG
-  printf ("DBG: AbsoluteValue: %s: op = 0x%s\n",
-	  fpu_format_name (fmt), pr_addr (op));
-#endif /* DEBUG */
-
-  /* The format type should already have been checked:  */
+  /* The format type has already been checked: */
   switch (fmt)
     {
     case fmt_single:
       {
-	sim_fpu wop;
-	unsigned32 ans;
+	unsigned32 res;
 	sim_fpu_32to (&wop, op);
-	sim_fpu_abs (&wop, &wop);
-	sim_fpu_to32 (&ans, &wop);
-	result = ans;
+	(*sim_fpu_op) (&ans, &wop);
+	sim_fpu_to32 (&res, &ans);
+	result = res;
 	break;
       }
     case fmt_double:
       {
-	sim_fpu wop;
-	unsigned64 ans;
+	unsigned64 res;
 	sim_fpu_64to (&wop, op);
-	sim_fpu_abs (&wop, &wop);
-	sim_fpu_to64 (&ans, &wop);
-	result = ans;
+	(*sim_fpu_op) (&ans, &wop);
+	sim_fpu_to64 (&res, &ans);
+	result = res;
 	break;
       }
     default:
-      fprintf (stderr, "Bad switch\n");
+      sim_io_eprintf (SD, "Bad switch\n");
       abort ();
     }
 
-  return (result);
+  return result;
 }
 
-uword64
-Negate (op, fmt)
-     uword64 op;
-     FP_formats fmt;
+static unsigned64
+fp_binary(sim_cpu *cpu,
+	  address_word cia,
+	  int (*sim_fpu_op)(sim_fpu *, const sim_fpu *, const sim_fpu *),
+	  unsigned64 op1,
+	  unsigned64 op2,
+	  FP_formats fmt)
 {
-  uword64 result = 0;
+  sim_fpu wop1;
+  sim_fpu wop2;
+  sim_fpu ans;
+  unsigned64 result = 0;
 
-#ifdef DEBUG
-  printf ("DBG: Negate: %s: op = 0x%s\n",
-	  fpu_format_name (fmt), pr_addr (op));
-#endif /* DEBUG */
-
-  /* The format type should already have been checked:  */
+  /* The format type has already been checked: */
   switch (fmt)
     {
     case fmt_single:
       {
-	sim_fpu wop;
-	unsigned32 ans;
-	sim_fpu_32to (&wop, op);
-	sim_fpu_neg (&wop, &wop);
-	sim_fpu_to32 (&ans, &wop);
-	result = ans;
-	break;
-      }
-    case fmt_double:
-      {
-	sim_fpu wop;
-	unsigned64 ans;
-	sim_fpu_64to (&wop, op);
-	sim_fpu_neg (&wop, &wop);
-	sim_fpu_to64 (&ans, &wop);
-	result = ans;
-	break;
-      }
-    default:
-      fprintf (stderr, "Bad switch\n");
-      abort ();
-    }
-
-  return (result);
-}
-
-uword64
-Add (op1, op2, fmt)
-     uword64 op1;
-     uword64 op2;
-     FP_formats fmt;
-{
-  uword64 result = 0;
-
-#ifdef DEBUG
-  printf ("DBG: Add: %s: op1 = 0x%s : op2 = 0x%s\n",
-	  fpu_format_name (fmt), pr_addr (op1), pr_addr (op2));
-#endif /* DEBUG */
-
-  /* The registers must specify FPRs valid for operands of type
-     "fmt". If they are not valid, the result is undefined.  */
-  
-  /* The format type should already have been checked:  */
-  switch (fmt)
-    {
-    case fmt_single:
-      {
-	sim_fpu wop1;
-	sim_fpu wop2;
-	sim_fpu ans;
 	unsigned32 res;
 	sim_fpu_32to (&wop1, op1);
 	sim_fpu_32to (&wop2, op2);
-	sim_fpu_add (&ans, &wop1, &wop2);
+	(*sim_fpu_op) (&ans, &wop1, &wop2);
 	sim_fpu_to32 (&res, &ans);
 	result = res;
 	break;
       }
     case fmt_double:
       {
-	sim_fpu wop1;
-	sim_fpu wop2;
-	sim_fpu ans;
 	unsigned64 res;
 	sim_fpu_64to (&wop1, op1);
 	sim_fpu_64to (&wop2, op2);
-	sim_fpu_add (&ans, &wop1, &wop2);
+	(*sim_fpu_op) (&ans, &wop1, &wop2);
 	sim_fpu_to64 (&res, &ans);
 	result = res;
 	break;
       }
     default:
-      fprintf (stderr, "Bad switch\n");
+      sim_io_eprintf (SD, "Bad switch\n");
       abort ();
     }
 
-#ifdef DEBUG
-  printf ("DBG: Add: returning 0x%s (format = %s)\n",
-	  pr_addr (result), fpu_format_name (fmt));
-#endif /* DEBUG */
-
-  return (result);
+  return result;
 }
 
-uword64
-Sub (op1, op2, fmt)
-     uword64 op1;
-     uword64 op2;
-     FP_formats fmt;
+
+unsigned64
+fp_abs(sim_cpu *cpu,
+       address_word cia,
+       unsigned64 op,
+       FP_formats fmt)
 {
-  uword64 result = 0;
-
-#ifdef DEBUG
-  printf ("DBG: Sub: %s: op1 = 0x%s : op2 = 0x%s\n",
-	  fpu_format_name (fmt), pr_addr (op1), pr_addr (op2));
-#endif /* DEBUG */
-
-  /* The registers must specify FPRs valid for operands of type
-     "fmt". If they are not valid, the result is undefined.  */
-
-  /* The format type should already have been checked:  */
-  switch (fmt)
-    {
-    case fmt_single:
-      {
-	sim_fpu wop1;
-	sim_fpu wop2;
-	sim_fpu ans;
-	unsigned32 res;
-	sim_fpu_32to (&wop1, op1);
-	sim_fpu_32to (&wop2, op2);
-	sim_fpu_sub (&ans, &wop1, &wop2);
-	sim_fpu_to32 (&res, &ans);
-	result = res;
-      }
-      break;
-    case fmt_double:
-      {
-	sim_fpu wop1;
-	sim_fpu wop2;
-	sim_fpu ans;
-	unsigned64 res;
-	sim_fpu_64to (&wop1, op1);
-	sim_fpu_64to (&wop2, op2);
-	sim_fpu_sub (&ans, &wop1, &wop2);
-	sim_fpu_to64 (&res, &ans);
-	result = res;
-      }
-      break;
-    default:
-      fprintf (stderr, "Bad switch\n");
-      abort ();
-    }
-
-#ifdef DEBUG
-  printf ("DBG: Sub: returning 0x%s (format = %s)\n",
-	  pr_addr (result), fpu_format_name (fmt));
-#endif /* DEBUG */
-
-  return (result);
+  return fp_unary(cpu, cia, &sim_fpu_abs, op, fmt);
 }
 
-uword64
-Multiply (op1, op2, fmt)
-     uword64 op1;
-     uword64 op2;
-     FP_formats fmt;
+unsigned64
+fp_neg(sim_cpu *cpu,
+       address_word cia,
+       unsigned64 op,
+       FP_formats fmt)
 {
-  uword64 result = 0;
-
-#ifdef DEBUG
-  printf ("DBG: Multiply: %s: op1 = 0x%s : op2 = 0x%s\n",
-	  fpu_format_name (fmt), pr_addr (op1), pr_addr (op2));
-#endif /* DEBUG */
-
-  /* The registers must specify FPRs valid for operands of type
-     "fmt". If they are not valid, the result is undefined.  */
-
-  /* The format type should already have been checked:  */
-  switch (fmt)
-    {
-    case fmt_single:
-      {
-	sim_fpu wop1;
-	sim_fpu wop2;
-	sim_fpu ans;
-	unsigned32 res;
-	sim_fpu_32to (&wop1, op1);
-	sim_fpu_32to (&wop2, op2);
-	sim_fpu_mul (&ans, &wop1, &wop2);
-	sim_fpu_to32 (&res, &ans);
-	result = res;
-	break;
-      }
-    case fmt_double:
-      {
-	sim_fpu wop1;
-	sim_fpu wop2;
-	sim_fpu ans;
-	unsigned64 res;
-	sim_fpu_64to (&wop1, op1);
-	sim_fpu_64to (&wop2, op2);
-	sim_fpu_mul (&ans, &wop1, &wop2);
-	sim_fpu_to64 (&res, &ans);
-	result = res;
-	break;
-      }
-    default:
-      fprintf (stderr, "Bad switch\n");
-      abort ();
-    }
-
-#ifdef DEBUG
-  printf ("DBG: Multiply: returning 0x%s (format = %s)\n",
-	  pr_addr (result), fpu_format_name (fmt));
-#endif /* DEBUG */
-
-  return (result);
+  return fp_unary(cpu, cia, &sim_fpu_neg, op, fmt);
 }
 
-uword64
-Divide (op1, op2, fmt)
-     uword64 op1;
-     uword64 op2;
-     FP_formats fmt;
+unsigned64
+fp_add(sim_cpu *cpu,
+       address_word cia,
+       unsigned64 op1,
+       unsigned64 op2,
+       FP_formats fmt)
 {
-  uword64 result = 0;
-
-#ifdef DEBUG
-  printf ("DBG: Divide: %s: op1 = 0x%s : op2 = 0x%s\n",
-	  fpu_format_name (fmt), pr_addr (op1), pr_addr (op2));
-#endif /* DEBUG */
-
-  /* The registers must specify FPRs valid for operands of type
-     "fmt". If they are not valid, the result is undefined.  */
-
-  /* The format type should already have been checked:  */
-  switch (fmt)
-    {
-    case fmt_single:
-      {
-	sim_fpu wop1;
-	sim_fpu wop2;
-	sim_fpu ans;
-	unsigned32 res;
-	sim_fpu_32to (&wop1, op1);
-	sim_fpu_32to (&wop2, op2);
-	sim_fpu_div (&ans, &wop1, &wop2);
-	sim_fpu_to32 (&res, &ans);
-	result = res;
-	break;
-      }
-    case fmt_double:
-      {
-	sim_fpu wop1;
-	sim_fpu wop2;
-	sim_fpu ans;
-	unsigned64 res;
-	sim_fpu_64to (&wop1, op1);
-	sim_fpu_64to (&wop2, op2);
-	sim_fpu_div (&ans, &wop1, &wop2);
-	sim_fpu_to64 (&res, &ans);
-	result = res;
-	break;
-      }
-    default:
-      fprintf (stderr, "Bad switch\n");
-      abort ();
-    }
-
-#ifdef DEBUG
-  printf ("DBG: Divide: returning 0x%s (format = %s)\n",
-	  pr_addr (result), fpu_format_name (fmt));
-#endif /* DEBUG */
-
-  return (result);
+  return fp_binary(cpu, cia, &sim_fpu_add, op1, op2, fmt);
 }
 
-uword64 UNUSED
-Recip (op, fmt)
-     uword64 op;
-     FP_formats fmt;
+unsigned64
+fp_sub(sim_cpu *cpu,
+       address_word cia,
+       unsigned64 op1,
+       unsigned64 op2,
+       FP_formats fmt)
 {
-  uword64 result = 0;
-
-#ifdef DEBUG
-  printf ("DBG: Recip: %s: op = 0x%s\n",
-	  fpu_format_name (fmt), pr_addr (op));
-#endif /* DEBUG */
-
-  /* The registers must specify FPRs valid for operands of type
-     "fmt". If they are not valid, the result is undefined.  */
-
-  /* The format type should already have been checked:  */
-  switch (fmt)
-    {
-    case fmt_single:
-      {
-	sim_fpu wop;
-	sim_fpu ans;
-	unsigned32 res;
-	sim_fpu_32to (&wop, op);
-	sim_fpu_inv (&ans, &wop);
-	sim_fpu_to32 (&res, &ans);
-	result = res;
-	break;
-      }
-    case fmt_double:
-      {
-	sim_fpu wop;
-	sim_fpu ans;
-	unsigned64 res;
-	sim_fpu_64to (&wop, op);
-	sim_fpu_inv (&ans, &wop);
-	sim_fpu_to64 (&res, &ans);
-	result = res;
-	break;
-      }
-    default:
-      fprintf (stderr, "Bad switch\n");
-      abort ();
-    }
-
-#ifdef DEBUG
-  printf ("DBG: Recip: returning 0x%s (format = %s)\n",
-	  pr_addr (result), fpu_format_name (fmt));
-#endif /* DEBUG */
-
-  return (result);
+  return fp_binary(cpu, cia, &sim_fpu_sub, op1, op2, fmt);
 }
 
-uword64
-SquareRoot (op, fmt)
-     uword64 op;
-     FP_formats fmt;
+unsigned64
+fp_mul(sim_cpu *cpu,
+       address_word cia,
+       unsigned64 op1,
+       unsigned64 op2,
+       FP_formats fmt)
 {
-  uword64 result = 0;
-
-#ifdef DEBUG
-  printf ("DBG: SquareRoot: %s: op = 0x%s\n",
-	  fpu_format_name (fmt), pr_addr (op));
-#endif /* DEBUG */
-
-  /* The registers must specify FPRs valid for operands of type
-     "fmt". If they are not valid, the result is undefined.  */
-
-  /* The format type should already have been checked:  */
-  switch (fmt)
-    {
-    case fmt_single:
-      {
-	sim_fpu wop;
-	sim_fpu ans;
-	unsigned32 res;
-	sim_fpu_32to (&wop, op);
-	sim_fpu_sqrt (&ans, &wop);
-	sim_fpu_to32 (&res, &ans);
-	result = res;
-	break;
-      }
-    case fmt_double:
-      {
-	sim_fpu wop;
-	sim_fpu ans;
-	unsigned64 res;
-	sim_fpu_64to (&wop, op);
-	sim_fpu_sqrt (&ans, &wop);
-	sim_fpu_to64 (&res, &ans);
-	result = res;
-	break;
-      }
-    default:
-      fprintf (stderr, "Bad switch\n");
-      abort ();
-    }
-
-#ifdef DEBUG
-  printf ("DBG: SquareRoot: returning 0x%s (format = %s)\n",
-	  pr_addr (result), fpu_format_name (fmt));
-#endif /* DEBUG */
-
-  return (result);
+  return fp_binary(cpu, cia, &sim_fpu_mul, op1, op2, fmt);
 }
+
+unsigned64
+fp_div(sim_cpu *cpu,
+       address_word cia,
+       unsigned64 op1,
+       unsigned64 op2,
+       FP_formats fmt)
+{
+  return fp_binary(cpu, cia, &sim_fpu_div, op1, op2, fmt);
+}
+
+unsigned64
+fp_recip(sim_cpu *cpu,
+         address_word cia,
+         unsigned64 op,
+         FP_formats fmt)
+{
+  return fp_unary(cpu, cia, &sim_fpu_inv, op, fmt);
+}
+
+unsigned64
+fp_sqrt(sim_cpu *cpu,
+        address_word cia,
+        unsigned64 op,
+        FP_formats fmt)
+{
+  return fp_unary(cpu, cia, &sim_fpu_sqrt, op, fmt);
+}
+
 
 uword64
 convert (sim_cpu *cpu,

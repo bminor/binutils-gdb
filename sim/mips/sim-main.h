@@ -716,17 +716,24 @@ void store_fpr (SIM_STATE, int fpr, FP_formats fmt, unsigned64 value);
 
 /* FPU operations.  */
 int NaN (unsigned64 op, FP_formats fmt);
-int Infinity (unsigned64 op, FP_formats fmt);
 int Less (unsigned64 op1, unsigned64 op2, FP_formats fmt);
 int Equal (unsigned64 op1, unsigned64 op2, FP_formats fmt);
-unsigned64 AbsoluteValue (unsigned64 op, FP_formats fmt);
-unsigned64 Negate (unsigned64 op, FP_formats fmt);
-unsigned64 Add (unsigned64 op1, unsigned64 op2, FP_formats fmt);
-unsigned64 Sub (unsigned64 op1, unsigned64 op2, FP_formats fmt);
-unsigned64 Multiply (unsigned64 op1, unsigned64 op2, FP_formats fmt);
-unsigned64 Divide (unsigned64 op1, unsigned64 op2, FP_formats fmt);
-unsigned64 Recip (unsigned64 op, FP_formats fmt);
-unsigned64 SquareRoot (unsigned64 op, FP_formats fmt);
+unsigned64 fp_abs (SIM_STATE, unsigned64 op, FP_formats fmt);
+#define AbsoluteValue(op,fmt) fp_abs(SIM_ARGS, op, fmt)
+unsigned64 fp_neg (SIM_STATE, unsigned64 op, FP_formats fmt);
+#define Negate(op,fmt) fp_neg(SIM_ARGS, op, fmt)
+unsigned64 fp_add (SIM_STATE, unsigned64 op1, unsigned64 op2, FP_formats fmt);
+#define Add(op1,op2,fmt) fp_add(SIM_ARGS, op1, op2, fmt)
+unsigned64 fp_sub (SIM_STATE, unsigned64 op1, unsigned64 op2, FP_formats fmt);
+#define Sub(op1,op2,fmt) fp_sub(SIM_ARGS, op1, op2, fmt)
+unsigned64 fp_mul (SIM_STATE, unsigned64 op1, unsigned64 op2, FP_formats fmt);
+#define Multiply(op1,op2,fmt) fp_mul(SIM_ARGS, op1, op2, fmt)
+unsigned64 fp_div (SIM_STATE, unsigned64 op1, unsigned64 op2, FP_formats fmt);
+#define Divide(op1,op2,fmt) fp_div(SIM_ARGS, op1, op2, fmt)
+unsigned64 fp_recip (SIM_STATE, unsigned64 op, FP_formats fmt);
+#define Recip(op,fmt) fp_recip(SIM_ARGS, op, fmt)
+unsigned64 fp_sqrt (SIM_STATE, unsigned64 op, FP_formats fmt);
+#define SquareRoot(op,fmt) fp_sqrt(SIM_ARGS, op, fmt)
 unsigned64 convert (SIM_STATE, int rm, unsigned64 op, FP_formats from, FP_formats to);
 #define Convert(rm,op,from,to) convert (SIM_ARGS, rm, op, from, to)
 

@@ -1,3 +1,20 @@
+2002-06-04  Chris Demetriou  <cgd@broadcom.com>
+            Ed Satterthwaite  <ehs@broadcom.com>
+
+	* cp1.c (Infinity): Remove.
+	* sim-main.h (Infinity): Likewise.
+
+	* cp1.c (fp_unary, fp_binary): New functions.
+	(fp_abs, fp_neg, fp_add, fp_sub, fp_mul, fp_div, fp_recip)
+	(fp_sqrt): New functions, implemented in terms of the above.
+	(AbsoluteValue, Negate, Add, Sub, Multiply, Divide)
+	(Recip, SquareRoot): Remove (replaced by functions above).
+	* sim-main.h (fp_abs, fp_neg, fp_add, fp_sub, fp_mul, fp_div)
+	(fp_recip, fp_sqrt): New prototypes.
+	(AbsoluteValue, Negate, Add, Sub, Multiply, Divide)
+	(Recip, SquareRoot): Replace prototypes with #defines which
+	invoke the functions above.
+	
 2002-06-03  Chris Demetriou  <cgd@broadcom.com>
 
 	* sim-main.h (Nan, Infinity, Less, Equal, AbsoluteValue, Negate)
