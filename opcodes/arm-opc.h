@@ -51,7 +51,6 @@ struct thumb_opcode
    %<bitnum>?ab		print a if bit is one else print b
    %p			print 'p' iff bits 12-15 are 15
    %t			print 't' iff bit 21 set and bit 24 clear
-   %h                   print 'h' iff bit 5 set, else print 'b'
    %o			print operand2 (immediate or register + shift)
    %a			print address for ldr/str instruction
    %s                   print address for ldr/str halfword/signextend instruction
@@ -146,8 +145,8 @@ static struct arm_opcode arm_opcodes[] =
     {0x0c500000, 0x0ff00000, "mrrc%c\t%8-11d, %4-7d, %12-15r, %16-19r, cr%0-3d"},
 
     /* ARM Instructions.  */
-    {0x00000090, 0x0e100090, "str%c%6's%h\t%12-15r, %s"},
-    {0x00100090, 0x0e100090, "ldr%c%6's%h\t%12-15r, %s"},
+    {0x00000090, 0x0e100090, "str%c%6's%5?hb\t%12-15r, %s"},
+    {0x00100090, 0x0e100090, "ldr%c%6's%5?hb\t%12-15r, %s"},
     {0x00000000, 0x0de00000, "and%c%20's\t%12-15r, %16-19r, %o"},
     {0x00200000, 0x0de00000, "eor%c%20's\t%12-15r, %16-19r, %o"},
     {0x00400000, 0x0de00000, "sub%c%20's\t%12-15r, %16-19r, %o"},

@@ -390,13 +390,6 @@ print_insn_arm (pc, info, given)
 			func (stream, "t");
 		      break;
 
-		    case 'h':
-		      if ((given & 0x00000020) == 0x00000020)
-			func (stream, "h");
-                      else
-                        func (stream, "b");
-		      break;
-
 		    case 'A':
 		      func (stream, "[%s", arm_regnames [(given >> 16) & 0xf]);
 		      if ((given & 0x01000000) != 0)
