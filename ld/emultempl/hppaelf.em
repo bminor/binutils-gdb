@@ -39,7 +39,7 @@ static lang_input_statement_type *stub_file = 0;
 static lang_input_section_type *stub_input_section = NULL;
 
 /* FIXME.  This doesn't belong here.  */
-extern asymbol *hppa_look_for_stubs_in_section ();
+extern lang_statement_list_type file_chain;
   
 /* Perform some emulation specific initialization.  For PA ELF we set
    up the local label prefix and the output architecture.  */
@@ -132,7 +132,6 @@ hppaelf_finish ()
      amount of code will still function without linker stubs allowing us
      to continue testing.  */
 
-#if 0  
   /* Only create stubs for final objects.  */
   if (link_info.relocateable == false)
     {
@@ -162,7 +161,6 @@ hppaelf_finish ()
 						     abfd,
 						     output_bfd,
 						     section,
-						     statement->asymbols,
 						     &new_sym_cnt,
 						     &link_info);
 	      
@@ -213,7 +211,6 @@ hppaelf_finish ()
 		      &stat_ptr->head, 0, (bfd_vma) 0, false);
   
   /* FIXME:  Do we need to redo the "assignments" too?  */
-#endif
 }
 
 /* Create any emulation specific output statements.  FIXME?  Is this

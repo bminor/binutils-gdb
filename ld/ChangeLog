@@ -1,3 +1,11 @@
+Sun Feb 27 16:29:38 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* emultempl/hppaelf.em: Include elf32-hppa.h.
+	(file_chain): Add decl.
+	(hppa_look_for_stubs_in_section): Delete decl.
+	(hppaelf_finish): Reenable code.  Do not pass symbols
+	down to hppa_look_for_stubs_in_section.
+
 Sat Feb 26 10:58:25 1994  Ian Lance Taylor  (ian@cygnus.com)
 
 	* ldmain.c (write_map): Don't define.  Removed all references.
