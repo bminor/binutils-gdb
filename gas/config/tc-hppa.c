@@ -5008,6 +5008,9 @@ pa_procend (unused)
      int unused;
 {
 
+  if (last_call_info->start_symbol == NULL)
+    as_bad ("Missing function name for .PROC");
+
   if (!within_procedure)
     as_bad ("misplaced .procend");
 
