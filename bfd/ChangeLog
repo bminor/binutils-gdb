@@ -1,3 +1,19 @@
+2002-10-09  Richard Shann <richard.shann@superh.com>
+	    Stephen Clarke <stephen.clarke@superh.com>
+
+	* Makefile.am: Add entries for elf32-sh64-lin.c and
+	elf64-sh64-lin.c. Regenerate.
+	* Makefile.in: Regenerate.
+	* config.bfd:  Change sh64eb-*-linux* and sh64-*-linux*
+	to use sh64 vectors rather than sh vectors.
+	* configure.in: Add bfd_elf32_sh64lin_vec, bfd_elf32_sh64blin_vec,
+	bfd_elf64_sh64lin_vec, bfd_elf64_sh64blin_vec.
+	* configure: Regenerate.
+	* elf32-sh64-lin.c: New file.
+	* elf64-sh64-lin.c: New file.
+	* targets.c: Add bfd_elf32_sh64lin_vec, bfd_elf32_sh64blin_vec,
+ 	bfd_elf64_sh64lin_vec, bfd_elf64_sh64blin_vec.
+	
 2002-10-08  H.J. Lu <hjl@gnu.org>
 
 	* elf32-i386.c (elf_i386_relocate_section): Re-arrange the
