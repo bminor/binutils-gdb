@@ -90,7 +90,6 @@ int write_files = 0;
 #ifndef NEED_TEXT_START_END
 #define NEED_TEXT_START_END (0)
 #endif
-CORE_ADDR text_start = 0;
 CORE_ADDR text_end = 0;
 
 struct vmap *vmap;
@@ -279,7 +278,7 @@ exec_file_attach (char *filename, int from_tty)
 	  /* FIXME: The comment above does not match the code.  The
 	     code checks for sections with are either code *or*
 	     readonly.  */
-	  text_start = ~(CORE_ADDR) 0;
+	  CORE_ADDR text_start = ~(CORE_ADDR) 0;
 	  text_end = (CORE_ADDR) 0;
 	  for (p = exec_ops.to_sections; p < exec_ops.to_sections_end; p++)
 	    if (bfd_get_section_flags (p->bfd, p->the_bfd_section)

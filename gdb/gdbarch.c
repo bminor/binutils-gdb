@@ -986,7 +986,7 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: CALL_DUMMY_LENGTH # %s\n",
                       XSTRING (CALL_DUMMY_LENGTH));
-  if (CALL_DUMMY_LOCATION == BEFORE_TEXT_END || CALL_DUMMY_LOCATION == AFTER_TEXT_END)
+  if (gdbarch->call_dummy_length >= 0)
     fprintf_unfiltered (file,
                         "gdbarch_dump: CALL_DUMMY_LENGTH = %d\n",
                         CALL_DUMMY_LENGTH);

@@ -33,7 +33,7 @@
 #include "gdbcore.h"
 #include "value.h"
 #include "dis-asm.h"
-#include "inferior.h"		/* for BEFORE_TEXT_END etc. */
+#include "inferior.h"
 #include "gdb_string.h"
 #include "arch-utils.h"
 #include "floatformat.h"

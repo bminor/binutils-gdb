@@ -1398,37 +1398,6 @@ hand_function_call (struct value *function, int nargs, struct value **args)
 	generic_save_call_dummy_addr (start_sp, start_sp + sizeof_dummy1);
     }
 
-  if (CALL_DUMMY_LOCATION == BEFORE_TEXT_END)
-    {
-      /* Convex Unix prohibits executing in the stack segment. */
-      /* Hope there is empty room at the top of the text segment. */
-      extern CORE_ADDR text_end;
-      static int checked = 0;
-      if (!checked)
-	for (start_sp = text_end - sizeof_dummy1; start_sp < text_end; ++start_sp)
-	  if (read_memory_integer (start_sp, 1) != 0)
-	    error ("text segment full -- no place to put call");
-      checked = 1;
-      sp = old_sp;
-      real_pc = text_end - sizeof_dummy1;
-      write_memory (real_pc, (char *) dummy1, sizeof_dummy1);
-      if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
-	generic_save_call_dummy_addr (real_pc, real_pc + sizeof_dummy1);
-    }
-
-  if (CALL_DUMMY_LOCATION == AFTER_TEXT_END)
-    {
-      extern CORE_ADDR text_end;
-      int errcode;
-      sp = old_sp;
-      real_pc = text_end;
-      errcode = target_write_memory (real_pc, (char *) dummy1, sizeof_dummy1);
-      if (errcode != 0)
-	error ("Cannot write text segment -- call_function failed");
-      if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
-	generic_save_call_dummy_addr (real_pc, real_pc + sizeof_dummy1);
-    }
-
   if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
     {
       real_pc = funaddr;

@@ -1,5 +1,21 @@
 2003-01-21  Andrew Cagney  <ac131313@redhat.com>
 
+	* exec.c (text_start): Delete global variable.
+	(exec_file_attach): Make text_start local to the function.
+	* inferior.h (BEFORE_TEXT_END, AFTER_TEXT_END): Delete macros.
+	* valops.c (hand_function_call): Delete code that handles
+	BEFORE_TEXT_END and AFTER_TEXT_END.
+	* gdbarch.sh (CALL_DUMMY_LENGTH): Test call_dummy_length instead
+	of CALL_DUMMY_LOCATION.
+	* gdbarch.c: Regenerate.
+	* inferior.h (deprecated_pc_in_call_dummy_before_text_end)
+	(deprecated_pc_in_call_dummy_after_text_end): Delete declaration.
+	* blockframe.c (deprecated_pc_in_call_dummy_before_text_end)
+	(deprecated_pc_in_call_dummy_after_text_end): Delete functions.
+	(text_end): Delete extern declaration.
+
+2003-01-21  Andrew Cagney  <ac131313@redhat.com>
+
 	* frame.h (FRAME_OBSTACK_ZALLOC): Define.
 	* blockframe.c (backtrace_below_main): Move to "frame.c".
 	(frame_chain_valid): Delete check for backtrace_below_main.

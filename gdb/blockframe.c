@@ -607,24 +607,6 @@ block_innermost_frame (struct block *block)
    below is for infrun.c, which may give the macro a pc without that
    subtracted out.  */
 
-extern CORE_ADDR text_end;
-
-int
-deprecated_pc_in_call_dummy_before_text_end (CORE_ADDR pc, CORE_ADDR sp,
-					     CORE_ADDR frame_address)
-{
-  return ((pc) >= text_end - CALL_DUMMY_LENGTH
-	  && (pc) <= text_end + DECR_PC_AFTER_BREAK);
-}
-
-int
-deprecated_pc_in_call_dummy_after_text_end (CORE_ADDR pc, CORE_ADDR sp,
-					    CORE_ADDR frame_address)
-{
-  return ((pc) >= text_end
-	  && (pc) <= text_end + CALL_DUMMY_LENGTH + DECR_PC_AFTER_BREAK);
-}
-
 /* Is the PC in a call dummy?  SP and FRAME_ADDRESS are the bottom and
    top of the stack frame which we are checking, where "bottom" and
    "top" refer to some section of memory which contains the code for
