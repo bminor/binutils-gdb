@@ -343,36 +343,29 @@ static CORE_ADDR baseaddr;	/* Add to each symbol value */
 static struct section_offsets *base_section_offsets;
 
 /* Each partial symbol table entry contains a pointer to private data for the
-   read_symtab() function to use when expanding a partial symbol table entry
-   to a full symbol table entry.  For DWARF debugging info, this data is
-   contained in the following structure and macros are provided for easy
-   access to the members given a pointer to a partial symbol table entry.
-
-   dbfoff	Always the absolute file offset to the start of the ".debug"
-		section for the file containing the DIE's being accessed.
-
-   dbroff	Relative offset from the start of the ".debug" access to the
-		first DIE to be accessed.  When building the partial symbol
-		table, this value will be zero since we are accessing the
-		entire ".debug" section.  When expanding a partial symbol
-		table entry, this value will be the offset to the first
-		DIE for the compilation unit containing the symbol that
-		triggers the expansion.
-
-   dblength	The size of the chunk of DIE's being examined, in bytes.
-
-   lnfoff	The absolute file offset to the line table fragment.  Ignored
-		when building partial symbol tables, but used when expanding
-		them, and contains the absolute file offset to the fragment
-		of the ".line" section containing the line numbers for the
-		current compilation unit.
- */
+   sym_read function to use when expanding a partial symbol table entry
+   to a full symbol table entry.  */
 
 struct dwfinfo {
-  file_ptr dbfoff;	/* Absolute file offset to start of .debug section */
-  int dbroff;		/* Relative offset from start of .debug section */
-  int dblength;		/* Size of the chunk of DIE's being examined */
-  file_ptr lnfoff;	/* Absolute file offset to line table fragment */
+  /* Always the absolute file offset to the start of the ".debug"
+     section for the file containing the DIE's being accessed.  */
+  file_ptr dbfoff;
+  /* Relative offset from the start of the ".debug" section to the
+     first DIE to be accessed.  When building the partial symbol
+     table, this value will be zero since we are accessing the
+     entire ".debug" section.  When expanding a partial symbol
+     table entry, this value will be the offset to the first
+     DIE for the compilation unit containing the symbol that
+     triggers the expansion.  */
+  int dbroff;
+  /* The size of the chunk of DIE's being examined, in bytes.  */
+  int dblength;
+  /* The absolute file offset to the line table fragment.  Ignored
+     when building partial symbol tables, but used when expanding
+     them, and contains the absolute file offset to the fragment
+     of the ".line" section containing the line numbers for the
+     current compilation unit.  */
+  file_ptr lnfoff;
 };
 
 #define DBFOFF(p) (((struct dwfinfo *)((p)->read_symtab_private))->dbfoff)

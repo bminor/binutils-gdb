@@ -1,3 +1,9 @@
+Thu Apr 20 10:12:21 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* dwarfread.c (struct dwfinfo), dbxread.c (struct symloc),
+	mdebugread.c (struct symloc), hpread.c (struct symloc): Clean
+	up comments.
+
 Wed Apr 19 16:58:11 1995  Stu Grossman  (grossman@andros.cygnus.com)
 
 	* hppa-tdep.c (deposit_17):  New routine to deposit 17 bit

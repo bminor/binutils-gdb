@@ -99,29 +99,31 @@ struct hpread_symfile_info
     } \
   else \
     *NAMEP = (SYM)->dsfile.name + VT (OBJFILE)
-
+
 /* Each partial symbol table entry contains a pointer to private data for the
-   read_symtab() function to use when expanding a partial symbol table entry
-   to a full symbol table entry.
+   sym_read function to use when expanding a partial symbol table entry
+   to a full symbol table entry.  */
 
-   For hpuxread this structure contains the offset within the file symbol table
-   of first local symbol for this file, and length (in bytes) of the section
-   of the symbol table devoted to this file's symbols (actually, the section
-   bracketed may contain more than just this file's symbols).
+struct symloc
+{
+  /* The offset within the file symbol table of first local symbol for
+     this file.  */
 
-   If ldsymlen is 0, the only reason for this thing's existence is the
-   dependency list.  Nothing else will happen when it is read in.  */
+  int ldsymoff;
+
+  /* Length (in bytes) of the section of the symbol table devoted to
+     this file's symbols (actually, the section bracketed may contain
+     more than just this file's symbols).  If ldsymlen is 0, the only
+     reason for this thing's existence is the dependency list.
+     Nothing else will happen when it is read in.  */
+
+  int ldsymlen;
+};
 
 #define LDSYMOFF(p) (((struct symloc *)((p)->read_symtab_private))->ldsymoff)
 #define LDSYMLEN(p) (((struct symloc *)((p)->read_symtab_private))->ldsymlen)
 #define SYMLOC(p) ((struct symloc *)((p)->read_symtab_private))
-
-struct symloc
-{
-  int ldsymoff;
-  int ldsymlen;
-};
-
+
 /* FIXME: Shouldn't this stuff be in a .h file somewhere?  */
 /* Nonzero means give verbose info on gdb action.  */
 extern int info_verbose;

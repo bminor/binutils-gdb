@@ -97,14 +97,26 @@ typedef struct mips_extra_func_info {
 #ifndef ECOFF_REG_TO_REGNUM
 #define ECOFF_REG_TO_REGNUM(num) (num)
 #endif
+
+/* Each partial symbol table entry contains a pointer to private data for the
+   sym_read function to use when expanding a partial symbol table entry
+   to a full symbol table entry.  */
 
-/* Each partial symbol table entry contains a pointer to private data
-   for the read_symtab() function to use when expanding a partial
-   symbol table entry to a full symbol table entry.
-
-   For mdebugread this structure contains the index of the FDR that this
-   psymtab represents and a pointer to the BFD that the psymtab was
-   created from.  */
+struct symloc
+{
+  /* Index of the FDR that this psymtab represents.  */
+  int fdr_idx;
+  /* The BFD that the psymtab was created from.  */
+  bfd *cur_bfd;
+  const struct ecoff_debug_swap *debug_swap;
+  struct ecoff_debug_info *debug_info;
+  struct mdebug_pending **pending_list;
+  /* Pointer to external symbols for this file.  */
+  EXTR *extern_tab;
+  /* Size of extern_tab.  */
+  int extern_count;
+  enum language pst_language;
+};
 
 #define PST_PRIVATE(p) ((struct symloc *)(p)->read_symtab_private)
 #define FDR_IDX(p) (PST_PRIVATE(p)->fdr_idx)
@@ -112,19 +124,7 @@ typedef struct mips_extra_func_info {
 #define DEBUG_SWAP(p) (PST_PRIVATE(p)->debug_swap)
 #define DEBUG_INFO(p) (PST_PRIVATE(p)->debug_info)
 #define PENDING_LIST(p) (PST_PRIVATE(p)->pending_list)
-
-struct symloc
-{
-  int fdr_idx;
-  bfd *cur_bfd;
-  const struct ecoff_debug_swap *debug_swap;
-  struct ecoff_debug_info *debug_info;
-  struct mdebug_pending **pending_list;
-  EXTR *extern_tab;		/* Pointer to external symbols for this file. */
-  int extern_count;		/* Size of extern_tab. */
-  enum language pst_language;
-};
-
+
 /* Things we import explicitly from other modules */
 
 extern int info_verbose;
