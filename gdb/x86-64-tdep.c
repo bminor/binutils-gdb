@@ -144,7 +144,7 @@ x86_64_register_type (struct gdbarch *gdbarch, int regnum)
 static int x86_64_dwarf_regmap[] =
 {
   /* General Purpose Registers RAX, RDX, RCX, RBX, RSI, RDI.  */
-  X86_64_RAX_REGNUM, X86_64_RDX_REGNUM, 2, 1, 
+  X86_64_RAX_REGNUM, X86_64_RDX_REGNUM, 2, 1,
   4, X86_64_RDI_REGNUM,
 
   /* Frame Pointer Register RBP.  */
@@ -172,7 +172,7 @@ static int x86_64_dwarf_regmap[] =
   X86_64_XMM0_REGNUM + 14, X86_64_XMM0_REGNUM + 15,
 
   /* Floating Point Registers 0-7.  */
-  X86_64_ST0_REGNUM + 0, X86_64_ST0_REGNUM + 1,	
+  X86_64_ST0_REGNUM + 0, X86_64_ST0_REGNUM + 1,
   X86_64_ST0_REGNUM + 2, X86_64_ST0_REGNUM + 3,
   X86_64_ST0_REGNUM + 4, X86_64_ST0_REGNUM + 5,
   X86_64_ST0_REGNUM + 6, X86_64_ST0_REGNUM + 7
