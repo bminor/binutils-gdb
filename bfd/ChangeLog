@@ -1,4 +1,33 @@
+Mon Sep 13 21:03:18 1993  John Gilmore  (gnu@cacophony.cygnus.com)
+
+	Improve timestamp support in BSD archive files to avoid linker
+	warnings.
+
+	* libbfd.h (struct artdata):  Add armap_timestamp and armap_datepos.
+	(bfd_flush, bfd_stat):  Add prototypes.
+	* libbfd.c (bfd_flush):  Add, does fflush on a BFD.
+	(bfd_stat):  Add, does fstat on a BFD.
+
+	* archive.c (_bfd_write_archive_contents): At end of file writing,
+	verify and possibly update the timestamp in the armap, if a BSD
+	archive.  FIXME!  Kludge recognizes BSD archive, rather than
+	vectoring properly.  Should add to xvec.
+	(compute_and_write_armap):  Move prototype to top, avoid PROTO.
+	(bsd_write_armap): Save timestamp and file location thereof, when
+	writing the armap in a BSD file.
+	(bsd_update_armap_timestamp):  New function to check and
+	rewrite the timestamp.
+
 Sat Sep 11 18:13:42 1993  Jim Kingdon  (kingdon@poseidon.cygnus.com)
+
+	* hosts/i386sco.h: Define a bunch of stuff for core files.
+	* sco-core.c: Remove, replace by trad-core.c.
+	* trad-core.c: If HOST_STACK_START_ADDR is defined, use it.
+	* config/i386sco.mh: Use trad-core not sco-core.
+	* hosts/i386isc.h, config/i386isc.mh: Remove.
+	* configure.host: Use i386sco for isc.
+	* config/i386-sco.mt: Remove, identical to i386-coff.mt.
+	* config.bfd: Use i386-coff not i386-sco.
 
 	* config.bfd: Recognize i[34]86-*-solaris2* specifically rather
 	than using *-*-solaris2* (i486-unknown-solaris2 is i386-elf, not

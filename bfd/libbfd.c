@@ -121,10 +121,10 @@ char *
 DEFUN(zalloc,(size),
       bfd_size_type size)
 {
-  char *ptr = (char *) malloc ((int)size);
+  char *ptr = (char *) malloc ((size_t)size);
 
   if ((ptr != NULL) && (size != 0))
-   memset(ptr,0, size);
+   memset(ptr,0, (size_t) size);
 
   return ptr;
 }
@@ -153,13 +153,31 @@ DEFUN(PTR bfd_xmalloc,(size),
   static CONST char no_memory_message[] = "Virtual memory exhausted!\n";
   PTR ptr;
   if (size == 0) size = 1;
-  ptr = (PTR)malloc(size);
+  ptr = (PTR)malloc((size_t) size);
   if (!ptr)
     {
       write (2, no_memory_message, sizeof(no_memory_message)-1);
       exit (-1);
     }
   return ptr;
+}
+
+/*
+INTERNAL_FUNCTION
+	bfd_xmalloc_by_size_t
+
+SYNOPSIS
+	PTR bfd_xmalloc_by_size_t ( size_t size);
+
+DESCRIPTION
+	Like malloc, but exit if no more memory.
+	Uses size_t, so it's suitable for use as obstack_chunk_alloc.
+ */
+PTR
+DEFUN(bfd_xmalloc_by_size_t, (size),
+      size_t size)
+{
+  return bfd_xmalloc ((bfd_size_type) size);
 }
 
 /* Some IO code */
@@ -221,7 +239,7 @@ SYNOPSIS
 
 DESCRIPTION
 	Writes a 4 byte integer to the outputing bfd, in big endian
-	mode regardless of what else is going on.  This is usefull in
+	mode regardless of what else is going on.  This is useful in
 	archives.
 
 */
@@ -231,7 +249,7 @@ DEFUN(bfd_write_bigendian_4byte_int,(abfd, i),
       int i)
 {
   bfd_byte buffer[4];
-  _do_putb32(i, buffer);
+  bfd_putb32(i, buffer);
   bfd_write((PTR)buffer, 4, 1, abfd);
 }
 
@@ -247,6 +265,21 @@ DEFUN(bfd_tell,(abfd),
     ptr -= abfd->origin;
   abfd->where = ptr;
   return ptr;
+}
+
+int
+DEFUN(bfd_flush,(abfd),
+      bfd *abfd)
+{
+  return fflush (bfd_cache_lookup(abfd));
+}
+
+int
+DEFUN(bfd_stat,(abfd, statbuf),
+      bfd *abfd AND
+      struct stat *statbuf)
+{
+  return fstat (fileno(bfd_cache_lookup(abfd)), statbuf);
 }
 
 int
@@ -349,7 +382,7 @@ DEFUN(bfd_add_to_string_table,(table, new_string, table_length, free_ptr),
        take it next time */
     space_length = (string_length < DEFAULT_STRING_SPACE_SIZE ?
                     DEFAULT_STRING_SPACE_SIZE : string_length+1);
-    base = zalloc (space_length);
+    base = zalloc ((bfd_size_type) space_length);
 
     if (base == NULL) {
       bfd_error = no_memory;
@@ -515,35 +548,35 @@ DESCRIPTION
 		     (((x) ^ EIGHT_GAZILLION) - EIGHT_GAZILLION))
 
 bfd_vma
-DEFUN(_do_getb16,(addr),
+DEFUN(bfd_getb16,(addr),
       register bfd_byte *addr)
 {
         return (addr[0] << 8) | addr[1];
 }
 
 bfd_vma
-DEFUN(_do_getl16,(addr),
+DEFUN(bfd_getl16,(addr),
       register bfd_byte *addr)
 {
         return (addr[1] << 8) | addr[0];
 }
 
 bfd_signed_vma
-DEFUN(_do_getb_signed_16,(addr),
+DEFUN(bfd_getb_signed_16,(addr),
       register bfd_byte *addr)
 {
         return COERCE16((addr[0] << 8) | addr[1]);
 }
 
 bfd_signed_vma
-DEFUN(_do_getl_signed_16,(addr),
+DEFUN(bfd_getl_signed_16,(addr),
       register bfd_byte *addr)
 {
         return COERCE16((addr[1] << 8) | addr[0]);
 }
 
 void
-DEFUN(_do_putb16,(data, addr),
+DEFUN(bfd_putb16,(data, addr),
       bfd_vma data AND
       register bfd_byte *addr)
 {
@@ -552,7 +585,7 @@ DEFUN(_do_putb16,(data, addr),
 }
 
 void
-DEFUN(_do_putl16,(data, addr),
+DEFUN(bfd_putl16,(data, addr),
       bfd_vma data AND              
       register bfd_byte *addr)
 {
@@ -561,21 +594,21 @@ DEFUN(_do_putl16,(data, addr),
 }
 
 bfd_vma
-_do_getb32 (addr)
+bfd_getb32 (addr)
      register bfd_byte *addr;
 {
         return ((((addr[0] << 8) | addr[1]) << 8) | addr[2]) << 8 | addr[3];
 }
 
 bfd_vma
-_do_getl32 (addr)
+bfd_getl32 (addr)
         register bfd_byte *addr;
 {
         return ((((addr[3] << 8) | addr[2]) << 8) | addr[1]) << 8 | addr[0];
 }
 
 bfd_signed_vma
-_do_getb_signed_32 (addr)
+bfd_getb_signed_32 (addr)
      register bfd_byte *addr;
 {
         return COERCE32(((((addr[0] << 8) | addr[1]) << 8)
@@ -583,7 +616,7 @@ _do_getb_signed_32 (addr)
 }
 
 bfd_signed_vma
-_do_getl_signed_32 (addr)
+bfd_getl_signed_32 (addr)
         register bfd_byte *addr;
 {
         return COERCE32(((((addr[3] << 8) | addr[2]) << 8)
@@ -591,10 +624,10 @@ _do_getl_signed_32 (addr)
 }
 
 bfd_vma
-DEFUN(_do_getb64,(addr),
+DEFUN(bfd_getb64,(addr),
       register bfd_byte *addr)
 {
-#ifdef HOST_64_BIT
+#ifdef BFD64
   bfd_vma low, high;
 
   high= ((((((((addr[0]) << 8) |
@@ -616,11 +649,11 @@ DEFUN(_do_getb64,(addr),
 }
 
 bfd_vma
-DEFUN(_do_getl64,(addr),
+DEFUN(bfd_getl64,(addr),
       register bfd_byte *addr)
 {
 
-#ifdef HOST_64_BIT
+#ifdef BFD64
   bfd_vma low, high;
   high= (((((((addr[7] << 8) |
               addr[6]) << 8) |
@@ -641,10 +674,10 @@ DEFUN(_do_getl64,(addr),
 }
 
 bfd_signed_vma
-DEFUN(_do_getb_signed_64,(addr),
+DEFUN(bfd_getb_signed_64,(addr),
       register bfd_byte *addr)
 {
-#ifdef HOST_64_BIT
+#ifdef BFD64
   bfd_vma low, high;
 
   high= ((((((((addr[0]) << 8) |
@@ -666,11 +699,11 @@ DEFUN(_do_getb_signed_64,(addr),
 }
 
 bfd_signed_vma
-DEFUN(_do_getl_signed_64,(addr),
+DEFUN(bfd_getl_signed_64,(addr),
       register bfd_byte *addr)
 {
 
-#ifdef HOST_64_BIT
+#ifdef BFD64
   bfd_vma low, high;
   high= (((((((addr[7] << 8) |
               addr[6]) << 8) |
@@ -691,7 +724,7 @@ DEFUN(_do_getl_signed_64,(addr),
 }
 
 void
-DEFUN(_do_putb32,(data, addr),
+DEFUN(bfd_putb32,(data, addr),
       bfd_vma data AND
       register bfd_byte *addr)
 {
@@ -702,7 +735,7 @@ DEFUN(_do_putb32,(data, addr),
 }
 
 void
-DEFUN(_do_putl32,(data, addr),
+DEFUN(bfd_putl32,(data, addr),
       bfd_vma data AND
       register bfd_byte *addr)
 {
@@ -712,11 +745,11 @@ DEFUN(_do_putl32,(data, addr),
         addr[3] = (bfd_byte)(data >> 24);
 }
 void
-DEFUN(_do_putb64,(data, addr),
+DEFUN(bfd_putb64,(data, addr),
         bfd_vma data AND
         register bfd_byte *addr)
 {
-#ifdef HOST_64_BIT
+#ifdef BFD64
   addr[0] = (bfd_byte)(data >> (7*8));
   addr[1] = (bfd_byte)(data >> (6*8));
   addr[2] = (bfd_byte)(data >> (5*8));
@@ -732,11 +765,11 @@ DEFUN(_do_putb64,(data, addr),
 }
 
 void
-DEFUN(_do_putl64,(data, addr),
+DEFUN(bfd_putl64,(data, addr),
       bfd_vma data AND
       register bfd_byte *addr)
 {
-#ifdef HOST_64_BIT
+#ifdef BFD64
   addr[7] = (bfd_byte)(data >> (7*8));
   addr[6] = (bfd_byte)(data >> (6*8));
   addr[5] = (bfd_byte)(data >> (5*8));
@@ -801,13 +834,14 @@ DESCRIPTION
 	arg of 1025 would return 11.
 
 SYNOPSIS
-	bfd_vma bfd_log2(bfd_vma x);
+	unsigned int bfd_log2(bfd_vma x);
 */
 
-bfd_vma bfd_log2(x)
-bfd_vma x;
+unsigned
+bfd_log2(x)
+     bfd_vma x;
 {
-  bfd_vma  result = 0;
+  unsigned result = 0;
   while ( (bfd_vma)(1<< result) < x)
     result++;
   return result;
