@@ -1,3 +1,12 @@
+Thu Jul 29 20:20:39 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* hosts/sun3.h: remove some function decls that conflict w/ ANSI
+	C, and aren't needed anyway (return int)
+
+Wed Jul 28 15:46:38 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* elfcode.h: Use casts with bfd_alloc and alloca.
+
 Tue Jul 27 12:51:43 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
 	* nlm{32,64}-gen.c (JUMP_TABLE_PREFIX):  Delete.
@@ -160,7 +169,7 @@ Tue Jul 20 14:36:27 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 Tue Jul 20 16:21:52 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
-	* elf32-sparc.c (elf_sparc_howto_table): Don't use "^&" before
+	* elf32-sparc.c (elf_sparc_howto_table): Don't use "&" before
 	function name; it's valid without, and some compilers give
 	warnings with it there.
 
@@ -198,7 +207,7 @@ Mon Jul 19 14:53:30 1993  Ken Raeburn  (raeburn@rtl.cygnus.com)
 	* elf.c, elfcode.h, libelf.h: Serious reorganization.
 	Deleted `thunk' structure, merged into tdata, duplicate data
 	eliminated.
-	Rearranged functions, grouping by function.
+	Rearranged functions, grouping by functionality.
 	Broke up many functions in elfcode.h, re-ordered many parts of
 	file writing to handle unpredictable state of section relocation
 	table as provided by various applications.
