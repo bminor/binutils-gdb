@@ -1,3 +1,10 @@
+2002-10-03  Jeff Johnston  <jjohnstn@redhat.com>
+        
+	* mi-cmd-var.c (mi_cmd_var_update): Fix for PR gdb/672.  For m2, 
+	output list begin and end for "changelist" rather than tuple begin/end.
+	(varobj_update_one): For m2, add tuple begin and end for varobj 
+	update output.
+
 2002-10-02  Elena Zannoni  <ezannoni@redhat.com>
 
 	* mi-main.c (mi_cmd_exec_return): Don't use
