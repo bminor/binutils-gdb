@@ -1695,7 +1695,7 @@ mips-tdep.o: mips-tdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 
 mipsread.o: mipsread.c buildsym.h complaints.h $(bfd_h) $(defs_h) \
 	$(expression_h) gdb-stabs.h $(gdbcore_h) $(gdbtypes_h) language.h \
-	objfiles.h partial-stab.h stabsread.h $(symfile_h) $(symtab_h) \
+	objfiles.h stabsread.h $(symfile_h) $(symtab_h) \
 	$(gdb_string_h)
 
 mipsv4-nat.o: mipsv4-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(target_h) \

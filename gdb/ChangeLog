@@ -1,5 +1,9 @@
 2001-10-01  Elena Zannoni <ezannoni@redhat.com>
 
+        * Makefile.in (mipsread.o): Remove old dependency on partial-stab.h.
+
+2001-10-01  Elena Zannoni <ezannoni@redhat.com>
+
         * xcoffread.c (N_UNDF, N_ABS, N_TEXT, N_DATA, N_BSS, N_COMM, N_FN,
         N_EXT, N_INDR, N_SETA, N_SETT, N_SETD, N_SETB, N_SETV,
         CUR_SYMBOL_TYPE, CUR_SYMBOL_VALUE, START_PSYMTAB, END_PSYMTAB,
