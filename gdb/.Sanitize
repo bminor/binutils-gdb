@@ -16,7 +16,7 @@
 Do-first:
 
 if ( echo $* | grep keep\-v9 > /dev/null ) ; then
-	keep_these_too="sp64-tdep.c remote-sp64sim.c"
+	keep_these_too="sp64-tdep.c remote-sp64sim.c remote-sim.h"
 fi
 
 # All files listed between the "Things-to-keep:" line and the
