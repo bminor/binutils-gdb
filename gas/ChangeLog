@@ -1,5 +1,8 @@
 2001-07-03  Nick Clifton  <nickc@cambridge.redhat.com>
 
+	* config/tc-sh.c (sh_frob_section): Replace symbol_get_frag() with
+	fscan->fx_frag.
+
 	* write.c (TC_FINALIZE_SYMS_BEFORE_SIZE_SEG): Default to 1.
         (write_object_file): Set finalize_syms to
         TC_FINALIZE_SYMS_BEFORE_SIZE_SEG just before size_segs is

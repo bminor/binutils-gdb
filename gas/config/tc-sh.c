@@ -2340,8 +2340,8 @@ sh_frob_section (abfd, sec, ignore)
 	 We have already adjusted the value of sym to include the
 	 fragment address, so we undo that adjustment here.  */
       subseg_change (sec, 0);
-      fix_new (symbol_get_frag (sym),
-	       S_GET_VALUE (sym) - symbol_get_frag (sym)->fr_address,
+      fix_new (fscan->fx_frag,
+	       S_GET_VALUE (sym) - fscan->fx_frag->fr_address,
 	       4, &abs_symbol, info.count, 0, BFD_RELOC_SH_COUNT);
     }
 }
