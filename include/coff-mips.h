@@ -66,6 +66,13 @@ struct external_scnhdr {
 #define	SCNHDR	struct external_scnhdr
 #define	SCNHSZ	sizeof(SCNHDR)
 
+/*
+ * names of "special" sections
+ */
+#define _TEXT   ".text"
+#define _DATA   ".data"
+#define _BSS    ".bss"
+
 #define DEFAULT_DATA_SECTION_ALIGNMENT 4
 #define DEFAULT_BSS_SECTION_ALIGNMENT 4
 #define DEFAULT_TEXT_SECTION_ALIGNMENT 16

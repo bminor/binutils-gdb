@@ -100,6 +100,12 @@ struct external_scnhdr {
 #define	SCNHDR	struct external_scnhdr
 #define	SCNHSZ	sizeof(SCNHDR)
 
+/*
+ * names of "special" sections
+ */
+#define _TEXT   ".text"
+#define _DATA   ".data"
+#define _BSS    ".bss"
 
 /********************** LINE NUMBERS **********************/
 

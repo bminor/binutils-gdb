@@ -106,13 +106,6 @@ struct internal_scnhdr {
 
 
 /*
- * names of "special" sections
- */
-#define _TEXT	".text"
-#define _DATA	".data"
-#define _BSS	".bss"
-
-/*
  * s_flags "type"
  */
 #define STYP_REG	 (0x0000) /* "regular": allocated, relocated, loaded */
