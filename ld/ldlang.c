@@ -103,8 +103,9 @@ extern boolean write_map;
 
 
 
-
-
+/* LOCALS */
+static CONST char *current_target;
+static CONST char *output_target;
 size_t longest_section_name = 8;
 
 
@@ -684,17 +685,24 @@ DEFUN(wild,(s, section, file, target, output),
   read in all the files 
   */
 static bfd *	
-DEFUN(open_output,(name, target),
-      CONST char *CONST name AND
-      CONST char *CONST target)
+DEFUN(open_output,(name),
+      CONST char *CONST name)
 {
   extern CONST char *output_filename;
-  bfd * output = bfd_openw(name, target);
+  bfd *output;
+  if (output_target == (char *)NULL) {
+    if (current_target != (char *)NULL)
+      output_target = current_target;
+    else
+      output_target = default_target;
+  }
+  output = bfd_openw(name, output_target);
   output_filename = name;	    
+
   if (output == (bfd *)NULL) 
       {
 	if (bfd_error == invalid_target) {
-	  info("%P%F target %s not found\n", target);
+	  info("%P%F target %s not found\n", output_target);
 	}
 	info("%P%F problem opening output file %s, %E", name);
       }
@@ -705,7 +713,7 @@ DEFUN(open_output,(name, target),
 }
 
 
-static CONST  char *current_target;
+
 
 static void
 DEFUN(ldlang_open_output,(statement),
@@ -714,7 +722,7 @@ DEFUN(ldlang_open_output,(statement),
   switch (statement->header.type) 
       {
       case  lang_output_statement_enum:
-	output_bfd = open_output(statement->output_statement.name,current_target);
+	output_bfd = open_output(statement->output_statement.name);
 	ldemul_set_output_arch();
 	break;
 
@@ -1189,7 +1197,9 @@ DEFUN(print_statement,(s, os),
       printf("TARGET(%s)\n", s->target_statement.target);
       break;
     case lang_output_statement_enum:
-      printf("OUTPUT(%s)\n", s->output_statement.name);
+      printf("OUTPUT(%s %s)\n",
+	     s->output_statement.name,
+	     output_target);
       break;
     case lang_input_statement_enum:
       print_input_statement(&s->input_statement);
@@ -1738,7 +1748,8 @@ DEFUN_VOID(lang_common)
 	    }
 
 
-	    com->flags = BSF_EXPORT | BSF_GLOBAL;
+	    com->flags = BSF_EXPORT | BSF_GLOBAL ;
+
 
 	    if (write_map) 
 		{
@@ -1749,6 +1760,8 @@ DEFUN_VOID(lang_common)
 		}
 	    com->value = com->section->size;
 	    com->section->size += size;
+	    com->the_bfd = output_bfd;
+
 
 	  }
 	}
@@ -2239,5 +2252,10 @@ DEFUN(lang_statement_append,(list, element, field),
   list->tail = field;
 }
 
-
-
+/* Set the output format type */
+void
+DEFUN(lang_add_output_format,(format),
+CONST char *format)
+{
+  output_target = format;
+}
