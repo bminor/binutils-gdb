@@ -36,7 +36,7 @@ sky_files="$sky_files sky-engine.c sky-gpuif.c sky-gpuif.h"
 sky_files="$sky_files sky-gs.c sky-gs.h"
 sky_files="$sky_files sky-hardware.c sky-hardware.h sky-gdb.c"
 sky_files="$sky_files sky-libvpe.c sky-libvpe.h sky-pke.c sky-pke.h"
-sky_files="$sky_files sky-vpe.h sky-vu.h sky-vu.c"
+sky_files="$sky_files sky-vpe.h sky-vu.h sky-vu.c sky-vudis.h sky-vudis.c"
 if ( echo $* | grep keep\-sky > /dev/null ) ; then
         keep_these_too="${sky_files} ${keep_these_too}"
 else
