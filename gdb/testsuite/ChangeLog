@@ -1,3 +1,7 @@
+Tue Feb 11 16:57:58 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* config/udi.exp: Use mondfe,name instead of remote_host.
+
 Tue Feb 11 11:22:36 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* gdb.base/structs.exp: Expect some failures from the .

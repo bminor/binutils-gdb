@@ -31,7 +31,7 @@ proc gdb_target_udi { } {
     global verbose
     global exit_status
 
-    set targetname [target_info remote_host];
+    set targetname [target_info mondfe,name];
     # set targets hostname
     send "target udi $targetname\n"
     set timeout 60
