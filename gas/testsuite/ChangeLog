@@ -1,3 +1,7 @@
+2003-08-01  Jason Eckhardt  <jle@rice.edu>
+
+	* gas/i860/README.i860: New file.
+
 2003-07-29  Nick Clifton  <nickc@redhat.com>
 
 	* gas/sparc/unalign.d: Remove empty .text disassembly line.
