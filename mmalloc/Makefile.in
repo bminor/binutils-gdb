@@ -97,7 +97,7 @@ TARGETOBJS =	mm.o
 
 STAGESTUFF =	$(TARGETLIB) *.o
 
-all:		$(TARGETLIB) install-info
+all:		$(TARGETLIB)
 
 info: $(INFO_DEPS)
 dvi: mmalloc.dvi
@@ -155,7 +155,7 @@ check: test1.c
 # for gdb, perhaps).
 #	./a.out
 
-install:	all
+install:	all install-info
 		$(INSTALL_DATA) $(TARGETLIB) $(libdir)/$(TARGETLIB)n
 		$(RANLIB) $(libdir)/$(TARGETLIB)n
 		mv -f $(libdir)/$(TARGETLIB)n $(libdir)/$(TARGETLIB)
