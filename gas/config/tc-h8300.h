@@ -58,6 +58,9 @@ extern void tc_reloc_mangle
    visible symbols can be overridden.  */
 #define EXTERN_FORCE_RELOC 0
 
+/* Minimum instruction is of 16 bits.  */
+#define DWARF2_LINE_MIN_INSN_LENGTH 2
+
 #ifdef OBJ_ELF
 /* Provide mappings from the original H8 COFF relocation names to
    their corresponding BFD relocation names.  This allows us to use

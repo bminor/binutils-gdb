@@ -25,6 +25,11 @@
 #include "as.h"
 #include "subsegs.h"
 #include "bfd.h"
+
+#ifdef BFD_ASSEMBLER
+#include "dwarf2dbg.h"
+#endif
+
 #define DEFINE_TABLE
 #define h8_opcodes ops
 #include "opcode/h8300.h"
@@ -145,6 +150,11 @@ const pseudo_typeS md_pseudo_table[] =
   {"h8300sn", h8300snmode, 0},
   {"sbranch", sbranch, L_8},
   {"lbranch", sbranch, L_16},
+
+#ifdef BFD_ASSEMBLER
+  {"file", (void (*) PARAMS ((int))) dwarf2_directive_file, 0 },
+  {"loc", dwarf2_directive_loc, 0 },
+#endif
 
   {"int", pint, 0},
   {"data.b", cons, 1},
@@ -1406,6 +1416,10 @@ md_assemble (str)
     }
 
   build_bytes (instruction, operand);
+
+#ifdef BFD_ASSEMBLER
+  dwarf2_emit_insn (instruction->length);
+#endif
 }
 
 #ifndef BFD_ASSEMBLER

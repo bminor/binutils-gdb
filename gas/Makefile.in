@@ -825,13 +825,14 @@ DEPTC_h8300_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-h8300.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/h8300.h $(INCDIR)/coff/external.h $(BFDDIR)/libcoff.h \
   $(INCDIR)/bfdlink.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/h8300.h \
-  $(INCDIR)/safe-ctype.h
+  $(INCDIR)/safe-ctype.h dwarf2dbg.h 
 
 DEPTC_h8300_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-h8300.h \
   subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/h8300.h \
-  $(INCDIR)/safe-ctype.h $(INCDIR)/elf/h8.h $(INCDIR)/elf/reloc-macros.h
+  $(INCDIR)/safe-ctype.h $(INCDIR)/elf/h8.h $(INCDIR)/elf/reloc-macros.h \
+  dwarf2dbg.h 
 
 DEPTC_h8500_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-h8500.h $(INCDIR)/coff/internal.h \

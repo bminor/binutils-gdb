@@ -1,3 +1,12 @@
+2003-04-24 Dhananjay Deshpande <dhananjayd@kpitcummins.com>
+
+	* config/tc-h8300.h (DWARF2_LINE_MIN_INSN_LENGTH): New
+	* config/tc-h8300.c (dwarf2dbg.h): Include 
+	(md_pseudo_table): Handle .loc and .file
+	(md_assemble): Call dwarf2_emit_insn if BFD_ASSEMBLER.
+	* Makefile.am: Add dependency on dwarf2dbg.h for h8300 targets.
+	* Makefile.in: Regenerate.
+
 2003-04-24 Dhananjay Deshpande <dhananjayd@kpitcummins.com> 
 
 	* config/tc-h8300.c (Nmode, h8300hnmode, h8300snmode): New.
