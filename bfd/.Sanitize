@@ -76,6 +76,7 @@ cpu-h8300.c
 cpu-i960.c
 cpu-m88k.c
 cpu-rs6000.c
+hp300bsd.c
 init.c
 cpu-sparc.c
 libbfd.c
@@ -122,7 +123,16 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.37  1992/02/21 22:55:08  sac
+# Revision 1.38  1992/02/27 03:52:15  sac
+# Wed Feb 26 19:40:59 1992  Steve Chamberlain  (sac at thepub.cygnus.com)
+#
+# 	* bfd.c: lint
+# 	* coff-h8300.c: fix stupid reloc subtraction bug
+# 	* coffcode.h (coff_swap_aux_out): only swap a tvndx by 2 bytes,
+# 	since that's how wide it is. (coff_slurp_symbol_table): always zero out
+# 	the symbol.flags and done_lineno fields.
+#
+# Revision 1.37  1992/02/21  22:55:08  sac
 # DOS file name change
 #
 # Revision 1.36  1992/01/27  21:48:38  grossman

@@ -1,3 +1,25 @@
+Wed Feb 26 19:40:59 1992  Steve Chamberlain  (sac at thepub.cygnus.com)
+
+	* bfd.c: lint
+	* coff-h8300.c: fix stupid reloc subtraction bug
+	* coffcode.h (coff_swap_aux_out): only swap a tvndx by 2 bytes,
+	since that's how wide it is. (coff_slurp_symbol_table): always zero out
+	the symbol.flags and done_lineno fields.
+
+Tue Feb 25 14:29:24 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* coffcode.h (coff_write_symbol): write out the correct number of
+	auxents. 
+	* cpu-h8300.c: fix disassembly bug
+
+Fri Feb 21 21:39:56 1992  John Gilmore  (gnu at cygnus.com)
+
+	* bfd-in.h (bfd_errmsg), coffcode.h (coff_swap_aux_in,
+	section_from_bfd_index), cpu-h8300.c (howto*_callback),
+	reloc.c, section.c (bfd_map_over_sections), targets.c
+	(bfd_target_list):  Protolint.
+	* libbfd.h:  Update to match a libbfd-in.h from a month ago.
+
 Fri Feb 21 10:57:54 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* coffcode.h (coff_swap_aux_in): lint, (coff_print_symbol): prints
@@ -136,8 +158,6 @@ Mon Jan 27 19:44:08 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 	* seclet.c: moved much of this into coffcode.h
 	* srec.c: call generic_relax
 	* targets.c: define new transfer vector
-
-	
 
 Fri Jan 24 14:40:17 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 
