@@ -1,24 +1,28 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl
 
-dnl Default to a non shared library.  This may be overridden by the
-dnl configure option --enable-shared.  The divert stuff is a hack
-dnl to set the variable before argument parsing is done.
-divert(AC_DIVERSION_INIT)
-enable_shared=no
-divert(-1)
-
 AC_PREREQ(2.5)
 AC_INIT(z8k-dis.c)
 
 AC_CANONICAL_SYSTEM
 
-AM_INIT_AUTOMAKE(opcodes, 2.8.2)
+# We currently only use the version number for the name of any shared
+# library.  For user convenience, we always use the same version
+# number that BFD is using.
+changequote(,)dnl
+BFD_VERSION=`grep INIT_AUTOMAKE ${srcdir}/../bfd/configure.in | sed -n -e 's/[ 	]//g' -e 's/^.*,\(.*\)).*$/\1/p'`
+changequote([,])dnl
+
+AM_INIT_AUTOMAKE(opcodes, ${BFD_VERSION})
 
 dnl These must be called before AM_PROG_LIBTOOL, because it may want
 dnl to call AC_CHECK_PROG.
 AC_CHECK_TOOL(AR, ar)
 AC_CHECK_TOOL(RANLIB, ranlib, :)
+
+dnl Default to a non shared library.  This may be overridden by the
+dnl configure option --enable-shared.
+AM_DISABLE_SHARED
 
 AM_PROG_LIBTOOL
 
@@ -44,6 +48,9 @@ if test -z "$target" ; then
     AC_MSG_ERROR(Unrecognized target system type; please check config.sub.)
 fi
 AC_ARG_PROGRAM
+
+ALL_LINGUAS=
+CY_GNU_GETTEXT
 
 AM_MAINTAINER_MODE
 AM_CYGWIN32
@@ -75,6 +82,20 @@ if test $use_cgen = yes ; then
     AC_CHECK_PROG(SCHEME, guile, guile, guile)
 fi
 # end-sanitize-cygnus
+
+# Horrible hacks to build DLLs on Windows.
+WIN32LDFLAGS=
+WIN32LIBADD=
+case "${host}" in
+*-*-cygwin32*)
+  if test "$enable_shared" = "yes"; then
+    WIN32LDFLAGS="-no-undefined"
+    WIN32LIBADD="-L`pwd`/../bfd -lbfd -L`pwd`/../libiberty -liberty -lcygwin"
+  fi
+  ;;
+esac
+AC_SUBST(WIN32LDFLAGS)
+AC_SUBST(WIN32LIBADD)
 
 # target-specific stuff:
 
@@ -150,6 +171,7 @@ if test x${all_targets} = xfalse ; then
 	bfd_sh_arch)		ta="$ta sh-dis.lo" ;;
 	bfd_sparc_arch)		ta="$ta sparc-dis.lo sparc-opc.lo" ;;
 	bfd_tahoe_arch)		;;
+	bfd_tic30_arch)		ta="$ta tic30-dis.lo" ;;
 # start-sanitize-tic80
 	bfd_tic80_arch)		ta="$ta tic80-dis.lo tic80-opc.lo" ;;
 # end-sanitize-tic80
@@ -201,4 +223,5 @@ fi
 AC_SUBST(archdefs)
 AC_SUBST(BFD_MACHINES)
 
-AC_OUTPUT(Makefile)
+AC_OUTPUT(Makefile po/Makefile.in:po/Make-in,
+[sed -e '/POTFILES =/r po/POTFILES' po/Makefile.in > po/Makefile])

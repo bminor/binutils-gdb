@@ -1,0 +1,73 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR Free Software Foundation, Inc.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 1998-04-27 14:22-0700\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: ENCODING\n"
+
+#: arm-dis.c:357
+msgid "<illegal precision>"
+msgstr ""
+
+#: v850-dis.c:228
+#, c-format
+msgid "unknown operand shift: %x\n"
+msgstr ""
+
+#: v850-dis.c:240
+#, c-format
+msgid "unknown pop reg: %d\n"
+msgstr ""
+
+#: v850-opc.c:46
+msgid "displacement value is not in range and is not aligned"
+msgstr ""
+
+#: v850-opc.c:47
+msgid "displacement value is out of range"
+msgstr ""
+
+#: v850-opc.c:48
+msgid "displacement value is not aligned"
+msgstr ""
+
+#: v850-opc.c:50
+msgid "immediate value is out of range"
+msgstr ""
+
+#: v850-opc.c:61
+msgid "branch value not in range and to odd offset"
+msgstr ""
+
+#: v850-opc.c:63 v850-opc.c:95
+msgid "branch value out of range"
+msgstr ""
+
+#: v850-opc.c:66 v850-opc.c:98
+msgid "branch to odd offset"
+msgstr ""
+
+#: v850-opc.c:93
+msgid "branch value not in range and to an odd offset"
+msgstr ""
+
+#: v850-opc.c:322
+msgid "invalid register for stack adjustment"
+msgstr ""
+
+#: v850-opc.c:344
+msgid "immediate value not in range and not even"
+msgstr ""
+
+#: v850-opc.c:349
+msgid "immediate value must be even"
+msgstr ""

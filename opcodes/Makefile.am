@@ -2,6 +2,8 @@
 
 AUTOMAKE_OPTIONS = cygnus
 
+SUBDIRS = po
+
 INCDIR = $(srcdir)/../include
 BFDDIR = $(srcdir)/../bfd
 DEP = mkdep
@@ -118,15 +120,15 @@ ALL_MACHINES = \
 
 OFILES = @BFD_MACHINES@
 
-INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(INCDIR) -I$(BFDDIR) @HDEFINES@
+INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(INCDIR) -I$(BFDDIR) @HDEFINES@ -I$(srcdir)/../intl -I../intl
 
 disassemble.lo: disassemble.c $(INCDIR)/dis-asm.h
 	$(LIBTOOL) --mode=compile $(COMPILE) -c @archdefs@ $(srcdir)/disassemble.c
 
 libopcodes_la_SOURCES =  dis-buf.c disassemble.c
 libopcodes_la_DEPENDENCIES = $(OFILES)
-libopcodes_la_LIBADD = $(OFILES)
-libopcodes_la_LDFLAGS = -release $(VERSION)
+libopcodes_la_LIBADD = $(OFILES) @WIN32LIBADD@
+libopcodes_la_LDFLAGS = -release $(VERSION) @WIN32LDFLAGS@
 
 # libtool will build .libs/libopcodes.a.  We create libopcodes.a in
 # the build directory so that we don't have to convert all the
@@ -143,6 +145,11 @@ stamp-lib: libopcodes.la
 	touch stamp-lib
 
 libopcodes.a: stamp-lib ; @true
+
+POTFILES = $(BFD_H) $(HFILES) $(CFILES)
+po/POTFILES.in: @MAINT@ Makefile
+	for file in $(POTFILES); do echo $$file; done | sort > tmp \
+	  && mv tmp $(srcdir)/po/POTFILES.in
 
 CLEANFILES = libopcodes.a stamp-lib dep.sed .dep .dep1
 # start-sanitize-cygnus
