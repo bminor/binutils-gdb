@@ -1,3 +1,8 @@
+Tue May 19 16:59:44 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-d30v.c (d30v_align): Apply address adjustment to all
+	symbols at the given address, not just the last one specified.
+
 Tue May 19 08:25:19 1998  Catherine Moore <clm@cygnus.com>
 
         * config/tc-sparc.c (sparc_handle_align): Use number_to_chars_bigendian
