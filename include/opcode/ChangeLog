@@ -1,3 +1,9 @@
+Mon Feb 23 10:38:21 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen.h (CGEN_CAT3): Delete.  Use CONCAT3 now.
+	(cgen_insn): Record syntax and format entries here, rather than
+	separately.
+
 start-sanitize-sky
 Fri Feb 20 18:00:10 1998  Doug Evans  <devans@canuck.cygnus.com>
 

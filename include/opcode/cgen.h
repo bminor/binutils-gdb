@@ -21,15 +21,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef CGEN_H
 #define CGEN_H
 
-#ifndef CGEN_CAT3
-#if defined(__STDC__) || defined(ALMOST_STDC)
-#define CGEN_XCAT3(a,b,c) a ## b ## c
-#define CGEN_CAT3(a,b,c) CGEN_XCAT3 (a, b, c)
-#else
-#define CGEN_CAT3(a,b,c) a/**/b/**/c
-#endif
-#endif
-
 /* Prepend the cpu name, defined in cpu-opc.h, and _cgen_ to symbol S.
    The lack of spaces in the arg list is important for non-stdc systems.
    This file is included by <cpu>-opc.h.
@@ -37,7 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
    dependent portions will be declared as "unknown_cgen_foo".  */
 
 #ifndef CGEN_SYM
-#define CGEN_SYM(s) CGEN_CAT3 (unknown,_cgen_,s)
+#define CGEN_SYM(s) CONCAT3 (unknown,_cgen_,s)
 #endif
 
 /* This file contains the static (unchanging) pieces and as much other stuff
@@ -235,10 +226,6 @@ extern cgen_print_fn * CGEN_SYM (print_handlers) [];
    It's a collection of the common elements needed to parse, insert, extract,
    and print each of them.  */
 
-#ifndef CGEN_INSN_MAX_ATTRS
-#define CGEN_INSN_MAX_ATTRS 1
-#endif
-
 struct cgen_base
 {
   /* Indices into the handler tables.
@@ -357,10 +344,6 @@ typedef struct cgen_hw_entry
 
 const CGEN_HW_ENTRY * cgen_hw_lookup PARAMS ((const char *));
 
-#ifndef CGEN_KEYWORD_MAX_ATTRS
-#define CGEN_KEYWORD_MAX_ATTRS 1
-#endif
-
 /* This struct is used to describe things like register names, etc.  */
 
 typedef struct cgen_keyword_entry
@@ -381,7 +364,10 @@ typedef struct cgen_keyword_entry
   /* ??? Moving this last should be done by treating keywords like insn lists
      and moving the `next' fields into a CGEN_KEYWORD_LIST struct.  */
   /* FIXME: Not used yet.  */
-  CGEN_ATTR_TYPE (CGEN_KEYWORD_MAX_ATTRS) attrs;
+#ifndef CGEN_KEYWORD_NBOOL_ATTRS
+#define CGEN_KEYWORD_NBOOL_ATTRS 1
+#endif
+  CGEN_ATTR_TYPE (CGEN_KEYWORD_NBOOL_ATTRS) attrs;
 
   /* Next name hash table entry.  */
   struct cgen_keyword_entry *next_name;
@@ -484,10 +470,6 @@ enum cgen_mode {
 
 /* This struct defines each entry in the operand table.  */
 
-#ifndef CGEN_OPERAND_MAX_ATTRS
-#define CGEN_OPERAND_MAX_ATTRS 1
-#endif
-
 typedef struct cgen_operand
 {
   /* Name as it appears in the syntax string.  */
@@ -525,7 +507,10 @@ typedef struct cgen_operand
      array in that one architecture may have 1 nonbool attribute and another
      may have more.  Having this last means the non-architecture specific code
      needn't care, now or tomorrow.  */
-  CGEN_ATTR_TYPE (CGEN_OPERAND_MAX_ATTRS) attrs;
+#ifndef CGEN_OPERAND_NBOOL_ATTRS
+#define CGEN_OPERAND_NBOOL_ATTRS 1
+#endif
+  CGEN_ATTR_TYPE (CGEN_OPERAND_NBOOL_ATTRS) attrs;
 #define CGEN_OPERAND_ATTRS(operand) (&(operand)->attrs)
 } CGEN_OPERAND;
 
@@ -615,14 +600,21 @@ typedef struct
    However, we treat mnemonics as just another operand of the instruction.
    A value of 1 means "this is where the mnemonic appears".  1 isn't
    special other than it's a non-printable ASCII char.  */
-#define CGEN_SYNTAX_MNEMONIC_P(ch) ((ch) == 1)
+#define CGEN_SYNTAX_MNEMONIC       1
+#define CGEN_SYNTAX_MNEMONIC_P(ch) ((ch) == CGEN_SYNTAX_MNEMONIC)
 
 /* Instruction formats.
 
    Instructions are grouped by format.  Associated with an instruction is its
-   format.  Each opcode table entry contains a pointer into the format table.
-   This cuts down on the size of the opcode table as there are relatively few
-   formats compared with the number of instructions.  */
+   format.  Each opcode table entry contains a format table entry.
+   ??? There is usually very few formats compared with the number of insns,
+   so one can reduce the size of the opcode table by recording the format table
+   as a separate entity.  Given that we currently don't, format table entries
+   are also distinguished by their operands.  This increases the size of the
+   table, but reduces the number of tables.  It's all minutiae anyway so it
+   doesn't really matter [at this point in time].
+
+   ??? Support for variable length ISA's is wip.  */
 
 typedef struct
 {
@@ -633,10 +625,10 @@ typedef struct
      less than CGEN_BASE_INSN_BITSIZE.  */
   unsigned char mask_length;
 
-  /* Total length of instruction.  */
+  /* Total length of instruction, in bits.  */
   unsigned char length;
 
-  /* Mask to apply to the first BASE_LENGTH bits.
+  /* Mask to apply to the first MASK_LENGTH bits.
      Each insn's value is stored with the insn.
      The first step in recognizing an insn for disassembly is
      (opcode & mask) == value.  */
@@ -668,23 +660,19 @@ struct cgen_insn
   const char * mnemonic;
 #define CGEN_INSN_MNEMONIC(insn) ((insn)->mnemonic)
 
-  /* Syntax string.
-     For now this only points to CGEN_SYNTAX elements, but it can point
-     to other things (e.g. something different for macros?).  */
-  const CGEN_SYNTAX * syntax;
-#define CGEN_INSN_SYNTAX(insn) ((CGEN_SYNTAX *) (insn)->syntax)
+  /* Syntax string.  */
+  const CGEN_SYNTAX syntax;
+#define CGEN_INSN_SYNTAX(insn) (& (insn)->syntax)
 
-  /* Format entry.
-     For now this only points to CGEN_FORMAT elements, but it can point
-     to other things (e.g. something different for macros?).  */
-  const CGEN_FORMAT * format;
-#define CGEN_INSN_MASK_BITSIZE(insn) (((CGEN_FORMAT *) (insn)->format)->mask_length)
-#define CGEN_INSN_BITSIZE(insn) (((CGEN_FORMAT *) (insn)->format)->length)
+  /* Format entry.  */
+  const CGEN_FORMAT format;
+#define CGEN_INSN_MASK_BITSIZE(insn) ((insn)->format.mask_length)
+#define CGEN_INSN_BITSIZE(insn) ((insn)->format.length)
 
   /* Instruction opcode value.  */
   unsigned int value;
 #define CGEN_INSN_VALUE(insn) ((insn)->value)
-#define CGEN_INSN_MASK(insn) (((CGEN_FORMAT *) (insn)->format)->mask)
+#define CGEN_INSN_MASK(insn) ((insn)->format.mask)
 
   /* Pointer to NULL entry terminated table of operands used,
      or NULL if none.  */
@@ -696,7 +684,10 @@ struct cgen_insn
      architecture may have 1 nonbool attribute and another may have more.
      Having this last means the non-architecture specific code needn't
      care.  */
-  CGEN_ATTR_TYPE (CGEN_INSN_MAX_ATTRS) attrs;
+#ifndef CGEN_INSN_NBOOL_ATTRS
+#define CGEN_INSN_NBOOL_ATTRS 1
+#endif
+  CGEN_ATTR_TYPE (CGEN_INSN_NBOOL_ATTRS) attrs;
 #define CGEN_INSN_ATTRS(insn) (&(insn)->attrs)
 /* Return value of attribute ATTR in INSN.  */
 #define CGEN_INSN_ATTR(insn, attr) \
