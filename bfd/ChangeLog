@@ -1,4 +1,12 @@
+Sun Aug 15 20:45:45 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* configure.host: Make sure all OS fields end in *.
+
 Fri Aug 13 16:33:33 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecoff.c (ecoff_slurp_reloc_table): Use bfd_abs_section for
+	RELOC_SECTION_NONE and RELOC_SECTION_ABS.  If a reloc section
+	doesn't exist, don't try to create it.
 
 	* nlmcode.h (nlm_write_object_contents): procedure offsets are
 	from start of code segment, not start of file.
