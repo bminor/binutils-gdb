@@ -1,3 +1,9 @@
+2003-09-06  Stephane Carrez  <stcarrez@nerim.fr>
+
+	PR savannah/4358:
+	* config/tc-m68hc11.c (s_m68hc11_relax): Use 2 for size to avoid
+	overflow complain.
+
 2003-09-05  Richard Sandiford  <rsandifo@redhat.com>
 
 	* config/tc-frv.c (md_pcrel_from_section): Heed TC_FORCE_RELOCATION.

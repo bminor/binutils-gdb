@@ -2734,7 +2734,7 @@ s_m68hc11_relax (ignore)
       return;
     }
 
-  fix_new_exp (frag_now, frag_now_fix (), 1, &ex, 1,
+  fix_new_exp (frag_now, frag_now_fix (), 2, &ex, 1,
                BFD_RELOC_M68HC11_RL_GROUP);
 
   demand_empty_rest_of_line ();
