@@ -72,8 +72,8 @@ LEX = `if [ -f $${rootme}/flex/flex ] ; \
 	then echo $${rootme}/flex/flex ; \
 	else echo flex ; fi`
 
-MAKEINFO = `if [ -f $${rootme}/texinfo/C/makeinfo ] ; \
-	then echo $${rootme}/texinfo/C/makeinfo ; \
+MAKEINFO = `if [ -f $${rootme}/texinfo/makeinfo/makeinfo ] ; \
+	then echo $${rootme}/texinfo/makeinfo/makeinfo ; \
 	else echo makeinfo ; fi`
 
 
@@ -235,16 +235,15 @@ $(end-sanitize-chill)\
 
 # Flags to pass down to most sub-makes, in which we're building with
 # the host environment.
-# Because of the way do-info, et. al., use this, this must not contain
-# any backquotes.
+# If any variables are added here, they must be added to do-*, below.
 EXTRA_HOST_FLAGS = \
-	"AR=$(AR)" \
-	"AS=$(AS)" \
-	"CC=$(CC)" \
-	"CXX=$(CXX)" \
-	"NM=$(NM)" \
-	"RANLIB=$(RANLIB)" \
-	"XTRAFLAGS="
+	'AR=$(AR)' \
+	'AS=$(AS)' \
+	'CC=$(CC)' \
+	'CXX=$(CXX)' \
+	'NM=$(NM)' \
+	'RANLIB=$(RANLIB)' \
+	'XTRAFLAGS='
 
 FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_HOST_FLAGS)
 
@@ -264,8 +263,7 @@ $(end-sanitize-chill)
 # Flags to pass down to makes which are built with the target environment.
 # The double $ decreases the length of the command line; the variables
 # are set in BASE_FLAGS_TO_PASS, and the sub-make will expand them.
-# Because of the way do-info, et. al., use this, this must not contain
-# any backquotes.
+# If any variables are added here, they must be added to do-*, below.
 EXTRA_TARGET_FLAGS = \
 	'AR=$$(AR_FOR_TARGET)' \
 	'AS=$$(AS_FOR_TARGET)' \
@@ -280,16 +278,15 @@ TARGET_FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_TARGET_FLAGS)
 # Flags to pass down to gcc.  gcc builds a library, libgcc.a, so it
 # unfortunately needs the native compiler and the target ar and
 # ranlib.
-# Because of the way do-info, et. al., use this, this must not contain
-# any backquotes.
+# If any variables are added here, they must be added to do-*, below.
 EXTRA_GCC_FLAGS = \
 	'AR=$$(AR_FOR_TARGET)' \
-	"AS=$(AS)" \
-	"CC=$(CC)" \
-	"CXX=$(CXX)" \
-	"NM=$(NM)" \
+	'AS=$(AS)' \
+	'CC=$(CC)' \
+	'CXX=$(CXX)' \
+	'NM=$(NM)' \
 	'RANLIB=$$(RANLIB_FOR_TARGET)' \
-	"XTRAFLAGS="
+	'XTRAFLAGS='
 
 GCC_FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_GCC_FLAGS)
 
@@ -316,18 +313,27 @@ do-info do-check do-dvi do-install-info do-clean do-mostlyclean do-distclean do-
 	  if [ -f ./$$i/localenv ] || [ -f ./$$i/Makefile ]; then \
 	    case $$i in \
 	    $(TARGET_LIBS) ) \
-	      extra_flags=`echo $(EXTRA_TARGET_FLAGS)`; \
+	      for flag in $(EXTRA_TARGET_FLAGS); do \
+		eval `echo "$$flag" | sed -e "s|^\(.*\)=\(.*\)|\1='\2'|"`; \
+	      done; \
 	      ;; \
 	    gcc) \
-	      extra_flags=`echo $(EXTRA_GCC_FLAGS)`; \
+	      for flag in $(EXTRA_GCC_FLAGS); do \
+		eval `echo "$$flag" | sed -e "s|^\(.*\)=\(.*\)|\1='\2'|"`; \
+	      done; \
 	      ;; \
 	    *) \
-	      extra_flags=`echo $(EXTRA_HOST_FLAGS)`; \
+	      for flag in $(EXTRA_HOST_FLAGS); do \
+		eval `echo "$$flag" | sed -e "s|^\(.*\)=\(.*\)|\1='\2'|"`; \
+	      done; \
 	      ;; \
 	    esac ; \
-	    export extra_flags; \
+	    export AR AS CC CXX NM RANLIB XTRAFLAGS; \
 	    if (cd ./$$i; \
-	        $(MAKE) $(BASE_FLAGS_TO_PASS) $${extra_flags} $${target}); \
+	        $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+			"CC=$${CC}" "CXX=$${CXX}" "NM=$${NM}" \
+			"RANLIB=$${RANLIB}" "XTRAFLAGS=$${XTRAFLAGS}" \
+			$${target}); \
 	    then true; else exit 1; fi; \
 	  else true; fi; \
 	done
@@ -1428,8 +1434,9 @@ Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
 # Build GDB distributions that contain BFD, Include, Libiberty, Readline, etc
 
 DEVO_SUPPORT= README Makefile.in configure configure.in \
-	config.guess config.sub config etc move-if-change \
-	COPYING.LIB
+	config.guess config.sub config move-if-change
+ETC_SUPPORT= Makefile.in cfg-paper.texi configure.in configure.man \
+	configure.texi
 GDB_SUPPORT_DIRS= bfd include libiberty mmalloc opcodes readline glob
 GDB_SUPPORT_FILES= $(GDB_SUPPORT_DIRS)
 
@@ -1448,6 +1455,10 @@ make-gdb.tar.Z: $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) gdb texinfo/texinfo.tex
 	ln -s ../gdb/proto-gdb.dir proto-toplev/gdb
 	(cd proto-toplev; for i in $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS); do \
 		ln -s ../$$i . ; \
+	done)
+	mkdir proto-toplev/etc
+	(cd proto-toplev/etc; for i in $(ETC_SUPPORT); do \
+		ln -s ../../etc/$$i . ; \
 	done)
 	# Put only one copy (four hard links) of COPYING in the tar file.
 	rm                          proto-toplev/bfd/COPYING

@@ -1,4 +1,16 @@
+Tue Feb 16 00:58:20 1993  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in (DEVO_SUPPORT):  Remove etc directory
+	(ETC_SUPPORT):  Only add the files GDB wants from etc/.
+	(gdb.tar.Z):  Use ETC_SUPPORT.
+
+Thu Feb 11 20:14:28 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in:  makeinfo binary is in a new location
+
 Tue Feb  9 12:42:27 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config.sub: Accept -ecoff as an OS.
 
 	* Makefile.in: Various changes to eliminate a level of make
 	recursion and reduce the required command line length.
