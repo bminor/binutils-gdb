@@ -83,9 +83,16 @@ gdb_test_multiple "step" "${test}" {
 	send_gdb "step\n"
 	exp_continue
     }
-    -re "return 0.*${gdb_prompt} $" {
-	# Stepping out of a function GDB advances the inferior to the
-	# start of the next line
+    -re "Program exited normally.*${gdb_prompt} $" {
+	kfail gdb/1613 "$test (program exited)"
+    }
+    -re "(while ..done|return 0).*${gdb_prompt} $" {
+	# After stepping out of a function /r signal-handler, GDB will
+	# advance the inferior until it is at the first instruction of
+	# a code-line.  While typically things return to the middle of
+	# the "while..." (and hence GDB advances the inferior to the
+	# "return..." line) it is also possible for the return to land
+	# on the first instruction of "while...".  Accept both cases.
 	pass "$test"
     }
 }

@@ -1,3 +1,8 @@
+2004-04-23  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/siginfo.exp: Better handle step out of signal.
+	* gdb.base/sigstep.exp: Ditto.
+
 2004-04-22  Jeff Johnston  <jjohnstn@redhat.com>
             Daniel Jacobowitz  <drow@mvista.com>
 
