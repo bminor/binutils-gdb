@@ -1364,32 +1364,12 @@ extern int use_windows;
 #define DIRNAME_SEPARATOR ':'
 #endif
 
-#ifndef SLASH_P
-#if defined(__GO32__)||defined(_WIN32)
-#define SLASH_P(X) ((X)=='\\')
-#else
-#define SLASH_P(X) ((X)=='/')
-#endif
-#endif
-
-#ifndef SLASH_CHAR
-#if defined(__GO32__)||defined(_WIN32)
-#define SLASH_CHAR '\\'
-#else
-#define SLASH_CHAR '/'
-#endif
-#endif
-
 #ifndef SLASH_STRING
-#if defined(__GO32__)||defined(_WIN32)
+#ifdef _WIN32
 #define SLASH_STRING "\\"
 #else
 #define SLASH_STRING "/"
 #endif
-#endif
-
-#ifndef ROOTED_P
-#define ROOTED_P(X) (SLASH_P((X)[0]))
 #endif
 
 /* Provide default definitions of PIDGET, TIDGET, and MERGEPID.

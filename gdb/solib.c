@@ -39,6 +39,7 @@
 #include "language.h"
 #include "gdbcmd.h"
 #include "completer.h"
+#include "filenames.h"		/* for DOSish file names */
 
 #include "solist.h"
 
@@ -101,10 +102,14 @@ solib_open (char *in_pathname, char **found_pathname)
 {
   int found_file = -1;
   char *temp_pathname = NULL;
+  char *p = in_pathname;
 
-  if (strchr (in_pathname, SLASH_CHAR))
+  while (*p && !IS_DIR_SEPARATOR (*p))
+    p++;
+
+  if (*p)
     {
-      if (! ROOTED_P (in_pathname) || solib_absolute_prefix == NULL)
+      if (! IS_ABSOLUTE_PATH (in_pathname) || solib_absolute_prefix == NULL)
         temp_pathname = in_pathname;
       else
 	{
@@ -112,7 +117,7 @@ solib_open (char *in_pathname, char **found_pathname)
 
 	  /* Remove trailing slashes from absolute prefix.  */
 	  while (prefix_len > 0
-		 && SLASH_P (solib_absolute_prefix[prefix_len - 1]))
+		 && IS_DIR_SEPARATOR (solib_absolute_prefix[prefix_len - 1]))
 	    prefix_len--;
 
 	  /* Cat the prefixed pathname together.  */

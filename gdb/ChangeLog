@@ -1,5 +1,26 @@
 2001-06-04  Eli Zaretskii  <eliz@is.elta.co.il>
 
+	* source.c (mod_path, openp): Use HAVE_DOS_BASED_FILE_SYSTEM
+	instead of system-specific define's like _WIN32 and __MSDOS__.
+	Use IS_DIR_SEPARATOR and IS_ABSOLUTE_PATH instead of SLASH_P and
+	ROOTED_P.
+	(top-level): #include "filenames.h".
+
+	* solib.c (solib_open): Use IS_DIR_SEPARATOR and IS_ABSOLUTE_PATH
+	instead of SLASH_CHAR, ROOTED_P and SLASH_P.
+	(top-level): #include "filenames.h".
+
+	* defs.h (SLASH_P, SLASH_CHAR, ROOTED_P): Remove definitions.
+	(SLASH_STRING): Define only for _WIN32.
+
+	* completer.c: Use HAVE_DOS_BASED_FILE_SYSTEM instead of
+	__MSDOS_.
+
+	* cli/cli-cmds.c (cd_command): Use IS_DIR_SEPARATOR and
+	IS_ABSOLUTE_PATH instead of SLASH_P and ROOTED_P.  Replace
+	system-specific ifdefs with HAVE_DOS_BASED_FILE_SYSTEM.
+	(top-level): #include "filenames.h".
+
 	* go32-nat.c (go32_wait): Change the return value to ptid_t.
 
 	* config/djgpp/fnchange.lst: Add two new files in the

@@ -40,6 +40,7 @@
 #include "annotate.h"
 #include "gdbtypes.h"
 #include "linespec.h"
+#include "filenames.h"		/* for DOSish file names */
 #ifdef UI_OUT
 #include "ui-out.h"
 #endif
@@ -330,12 +331,12 @@ mod_path (char *dirname, char **which_path)
 	  }
       }
 
-      if (!(SLASH_P (*name) && p <= name + 1)	/* "/" */
-#if defined(_WIN32) || defined(__MSDOS__) || defined(__CYGWIN__)
+      if (!(IS_DIR_SEPARATOR (*name) && p <= name + 1)	 /* "/" */
+#if HAVE_DOS_BASED_FILE_SYSTEM
       /* On MS-DOS and MS-Windows, h:\ is different from h: */
-	  && !(!SLASH_P (*name) && ROOTED_P (name) && p <= name + 3)	/* d:/ */
+	  && !(p == name + 3 && name[1] == ':') 	 /* "d:/" */
 #endif
-	  && SLASH_P (p[-1]))
+	  && IS_DIR_SEPARATOR (p[-1]))
 	/* Sigh. "foo/" => "foo" */
 	--p;
       *p = '\0';
@@ -348,7 +349,7 @@ mod_path (char *dirname, char **which_path)
 	      name = current_directory;
 	      goto append;
 	    }
-	  else if (p > name + 1 && SLASH_P (p[-2]))
+	  else if (p > name + 1 && IS_DIR_SEPARATOR (p[-2]))
 	    {
 	      if (p - name == 2)
 		{
@@ -370,11 +371,11 @@ mod_path (char *dirname, char **which_path)
 
       if (name[0] == '~')
 	name = tilde_expand (name);
-#if defined(_WIN32) || defined(__MSDOS__) || defined(__CYGWIN__)
-      else if (ROOTED_P (name) && p == name + 2)	/* "d:" => "d:." */
+#if HAVE_DOS_BASED_FILE_SYSTEM
+      else if (IS_ABSOLUTE_PATH (name) && p == name + 2) /* "d:" => "d:." */
 	name = concat (name, ".", NULL);
 #endif
-      else if (!ROOTED_P (name) && name[0] != '$')
+      else if (!IS_ABSOLUTE_PATH (name) && name[0] != '$')
 	name = concat (current_directory, SLASH_STRING, name, NULL);
       else
 	name = savestring (name, p - name);
@@ -530,7 +531,7 @@ openp (char *path, int try_cwd_first, char *string, int mode, int prot,
   mode |= O_BINARY;
 #endif
 
-  if (try_cwd_first || ROOTED_P (string))
+  if (try_cwd_first || IS_ABSOLUTE_PATH (string))
     {
       int i;
       filename = string;
@@ -538,12 +539,12 @@ openp (char *path, int try_cwd_first, char *string, int mode, int prot,
       if (fd >= 0)
 	goto done;
       for (i = 0; string[i]; i++)
-	if (SLASH_P (string[i]))
+	if (IS_DIR_SEPARATOR (string[i]))
 	  goto done;
     }
 
   /* ./foo => foo */
-  while (string[0] == '.' && SLASH_P (string[1]))
+  while (string[0] == '.' && IS_DIR_SEPARATOR (string[1]))
     string += 2;
 
   alloclen = strlen (path) + strlen (string) + 2;
@@ -581,7 +582,7 @@ openp (char *path, int try_cwd_first, char *string, int mode, int prot,
 	}
 
       /* Remove trailing slashes */
-      while (len > 0 && SLASH_P (filename[len - 1]))
+      while (len > 0 && IS_DIR_SEPARATOR (filename[len - 1]))
 	filename[--len] = 0;
 
       strcat (filename + len, SLASH_STRING);
@@ -597,14 +598,14 @@ done:
     {
       if (fd < 0)
 	*filename_opened = (char *) 0;
-      else if (ROOTED_P (filename))
+      else if (IS_ABSOLUTE_PATH (filename))
 	*filename_opened = savestring (filename, strlen (filename));
       else
 	{
 	  /* Beware the // my son, the Emacs barfs, the botch that catch... */
 
 	  *filename_opened = concat (current_directory,
-		 SLASH_P (current_directory[strlen (current_directory) - 1])
+           IS_DIR_SEPARATOR (current_directory[strlen (current_directory) - 1])
 				     ? "" : SLASH_STRING,
 				     filename, NULL);
 	}

@@ -23,6 +23,7 @@
 #include "target.h"	 /* For baud_rate, remote_debug and remote_timeout */
 #include "gdb_wait.h"		/* For shell escape implementation */
 #include "gnu-regex.h"		/* Used by apropos_command */
+#include "filenames.h"		/* for DOSish file names */
 
 #ifdef UI_OUT
 #include "ui-out.h"
@@ -292,7 +293,7 @@ cd_command (char *dir, int from_tty)
   if (chdir (dir) < 0)
     perror_with_name (dir);
 
-#if defined(_WIN32) || defined(__MSDOS__)
+#if HAVE_DOS_BASED_FILE_SYSTEM
   /* There's too much mess with DOSish names like "d:", "d:.",
      "d:./foo" etc.  Instead of having lots of special #ifdef'ed code,
      simply get the canonicalized name of the current directory.  */
@@ -300,24 +301,24 @@ cd_command (char *dir, int from_tty)
 #endif
 
   len = strlen (dir);
-  if (SLASH_P (dir[len - 1]))
+  if (IS_DIR_SEPARATOR (dir[len - 1]))
     {
       /* Remove the trailing slash unless this is a root directory
          (including a drive letter on non-Unix systems).  */
       if (!(len == 1)		/* "/" */
-#if defined(_WIN32) || defined(__MSDOS__)
-	  && !(!SLASH_P (*dir) && ROOTED_P (dir) && len <= 3)	/* "d:/" */
+#if HAVE_DOS_BASED_FILE_SYSTEM
+	  && !(len == 3 && dir[1] == ':') /* "d:/" */
 #endif
 	  )
 	len--;
     }
 
   dir = savestring (dir, len);
-  if (ROOTED_P (dir))
+  if (IS_ABSOLUTE_PATH (dir))
     current_directory = dir;
   else
     {
-      if (SLASH_P (current_directory[strlen (current_directory) - 1]))
+      if (IS_DIR_SEPARATOR (current_directory[strlen (current_directory) - 1]))
 	current_directory = concat (current_directory, dir, NULL);
       else
 	current_directory = concat (current_directory, SLASH_STRING, dir, NULL);
@@ -329,17 +330,18 @@ cd_command (char *dir, int from_tty)
   found_real_path = 0;
   for (p = current_directory; *p;)
     {
-      if (SLASH_P (p[0]) && p[1] == '.' && (p[2] == 0 || SLASH_P (p[2])))
+      if (IS_DIR_SEPARATOR (p[0]) && p[1] == '.'
+	  && (p[2] == 0 || IS_DIR_SEPARATOR (p[2])))
 	strcpy (p, p + 2);
-      else if (SLASH_P (p[0]) && p[1] == '.' && p[2] == '.'
-	       && (p[3] == 0 || SLASH_P (p[3])))
+      else if (IS_DIR_SEPARATOR (p[0]) && p[1] == '.' && p[2] == '.'
+	       && (p[3] == 0 || IS_DIR_SEPARATOR (p[3])))
 	{
 	  if (found_real_path)
 	    {
 	      /* Search backwards for the directory just before the "/.."
 	         and obliterate it and the "/..".  */
 	      char *q = p;
-	      while (q != current_directory && !SLASH_P (q[-1]))
+	      while (q != current_directory && !IS_DIR_SEPARATOR (q[-1]))
 		--q;
 
 	      if (q == current_directory)
