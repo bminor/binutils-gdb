@@ -1,5 +1,7 @@
 2004-04-22  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.h (show_frame_info): Delete declaration.
+
 	* arm-tdep.c (arm_prologue_this_id): Delete redundant cycle test.
 	* m68hc11-tdep.c (m68hc11_frame_this_id): Ditto.
 	* m32r-tdep.c (m32r_frame_this_id): Ditto.

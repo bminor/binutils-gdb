@@ -563,8 +563,6 @@ extern void show_stack_frame (struct frame_info *);
 
 extern void print_frame_info (struct frame_info *, int, int, int);
 
-extern void show_frame_info (struct frame_info *, int, int, int);
-
 extern struct frame_info *block_innermost_frame (struct block *);
 
 /* NOTE: cagney/2002-09-13: There is no need for this function.  */
