@@ -1,5 +1,8 @@
 Thu Sep 23 10:49:37 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* valops.c (search_struct_method, value_struct_elt):
+	Use (value)-1, not -1, for error.
+
 	* infcmd.c (step_1), infrun.c (wait_for_inferior): Add comments
 	about SHIFT_INST_REGS.
 
