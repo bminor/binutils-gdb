@@ -1,3 +1,9 @@
+Sat Jun 13 07:45:38 1998  Doug Evans  <devans@fallis.cygnus.com>
+
+	* cgen-trace.c (trace_insn_fini): Redo cycle handling.
+	* sim-profile.h (PROFILE_DATA): Rename cycle handling members.
+	* sim-profile.c (profile_print_model): Update.
+
 Fri Jun 12 18:35:07 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* gennltvals.def (m32r): Use common syscall.h now.
