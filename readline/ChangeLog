@@ -1,3 +1,9 @@
+Wed Jan  6 12:24:19 1999  Christopher Faylor <cgf@cygnus.com>
+
+	* configure.in: Use LOCAL_CFLAGS rather than CFLAGS for
+	searching libtermcap directory.
+	* configure: Regenerate.
+
 Thu Dec 31 12:07:01 1998  Christopher Faylor <cgf@cygnus.com>
 
 	* configure.in: Search devo libtermcap directory for termcap.h
