@@ -1,6 +1,10 @@
+2004-09-30  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c: Use ISO C90 formatting.
+
 2004-09-30  Vladimir Ivanov  <vladitx@nucleusys.com>
 
-	* gas/config/tc-arm.c (mav_reg_required_here): Allow REG_TYPE_CN
+	* config/tc-arm.c (mav_reg_required_here): Allow REG_TYPE_CN
 	as alternative when REG_TYPE_MVF, REG_TYPE_MVD, REG_TYPE_MVFX or
 	REG_TYPE_MVDX is expected.
 
