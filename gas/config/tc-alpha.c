@@ -1341,7 +1341,7 @@ alpha_fix_adjustable (f)
 {
 #ifdef OBJ_ELF
   /* Prevent all adjustments to global symbols */
-  if (S_IS_EXTERN (f->fx_addsy))
+  if (S_IS_EXTERN (f->fx_addsy) || S_IS_WEAK (f->fx_addsy))
     return 0;
 #endif
 

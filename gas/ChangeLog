@@ -1,3 +1,7 @@
+Sat Aug  8 15:21:28 1998  Richard Henderson  <rth@cygnus.com>
+
+	* config/tc-alpha.c (alpha_fix_adjustable): Don't adjust weak syms.
+
 start-sanitize-armelf
 Wed Aug  5 15:54:14 1998  Nick Clifton  <nickc@cygnus.com>
 
