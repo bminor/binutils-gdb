@@ -2,7 +2,11 @@
 
 Changes since 2.7:
 
+MIPS16 support added.
+
 Motorola ColdFire 5200 support added (configure for m68k and use -m5200).
+
+Alpha/VMS support added.
 
 Changes since 2.6:
 
