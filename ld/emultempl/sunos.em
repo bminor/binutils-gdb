@@ -29,24 +29,32 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <sys/types.h>
 #include <sys/stat.h>
 
-/* FIXME: On some hosts we will need to include a different file.
-   This is correct for SunOS, which is the only place this file will
-   typically be compiled.  However, if somebody configures the linker
-   for all targets, they will run into trouble here.  */
-#include <dirent.h>
-
 #include "bfd.h"
 #include "sysdep.h"
 #include "bfdlink.h"
 
 #include "ld.h"
-#include "config.h"
 #include "ldmain.h"
 #include "ldemul.h"
 #include "ldfile.h"
 #include "ldmisc.h"
 #include "ldexp.h"
 #include "ldlang.h"
+
+#ifdef HAVE_DIRENT_H
+# include <dirent.h>
+#else
+# define dirent direct
+# ifdef HAVE_SYS_NDIR_H
+#  include <sys/ndir.h>
+# endif
+# ifdef HAVE_SYS_DIR_H
+#  include <sys/dir.h>
+# endif
+# ifdef HAVE_NDIR_H
+#  include <ndir.h>
+# endif
+#endif
 
 static void gld${EMULATION_NAME}_before_parse PARAMS ((void));
 static void gld${EMULATION_NAME}_create_output_section_statements
@@ -82,8 +90,7 @@ gld${EMULATION_NAME}_before_parse()
 static void
 gld${EMULATION_NAME}_create_output_section_statements ()
 {
-  if (config.dynamic_link)
-    lang_for_each_input_file (gld${EMULATION_NAME}_find_so);
+  lang_for_each_input_file (gld${EMULATION_NAME}_find_so);
 }
 
 /* Search the directory for a .so file for each library search.  */
@@ -104,7 +111,8 @@ gld${EMULATION_NAME}_find_so (inp)
   struct stat st;
 
   if (! inp->search_dirs_flag
-      || ! inp->is_archive)
+      || ! inp->is_archive
+      || ! inp->dynamic)
     return;
 
   ASSERT (strncmp (inp->local_sym_name, "-l", 2) == 0);
@@ -118,7 +126,7 @@ gld${EMULATION_NAME}_find_so (inp)
     {
       force_maj = atoi (dot + 1);
       len = dot - filename;
-      alc = (char *) alloca (len + 1);
+      alc = (char *) xmalloc (len + 1);
       strncpy (alc, filename, len);
       alc[len] = '\0';
       filename = alc;
@@ -213,7 +221,7 @@ gld${EMULATION_NAME}_find_so (inp)
 
   /* Now look for the same file name, but with .sa instead of .so.  If
      found, add it to the list of input files.  */
-  alc = (char *) alloca (strlen (inp->filename) + 1);
+  alc = (char *) xmalloc (strlen (inp->filename) + 1);
   strcpy (alc, inp->filename);
   strstr (alc, ".so.")[2] = 'a';
   if (stat (alc, &st) == 0)
