@@ -1,3 +1,7 @@
+Mon Oct 27 12:03:53 1997  Jason Merrill  <jason@yorick.cygnus.com>
+
+	* Makefile.in: check-target-libio depends on all-target-libstdc++.
+
 start-sanitize-vr5400
 Wed Oct 22 14:05:29 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
