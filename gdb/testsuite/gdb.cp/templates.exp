@@ -399,7 +399,7 @@ gdb_expect {
     -re "type = class Baz<int, ?'s'> {\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*int baz\\(int, int\\);\r\n}\r\n$gdb_prompt $"
     { # GCC 3.1, DWARF-2 output.
 	kfail "gdb/57" "ptype Baz" }
-    -re "type = class Baz<int, ?115> {\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*int baz\\(int, int\\);\r\n}\r\n$gdb_prompt $"
+    -re "type = class Baz<int, ?(\\(char\\))?115> {\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*int baz\\(int, int\\);\r\n}\r\n$gdb_prompt $"
     { # GCC 3.x, DWARF-2 output, running into gdb/57 and gdb/1512.
 	kfail "gdb/57" "ptype Baz" }
     -re "No symbol \"Baz\" in current context.\r\n$gdb_prompt $"

@@ -1,5 +1,9 @@
 2004-08-08  Daniel Jacobowitz  <dan@debian.org>
 
+	* gdb.cp/templates.exp: Handle (char)115 for template argument 's'.
+
+2004-08-08  Daniel Jacobowitz  <dan@debian.org>
+
 	PR gdb/1736
 	* gdb.base/sigaltstack.exp (finish_test): New procedure.  KFAIL
 	for i?86-*-linux*.
