@@ -1,3 +1,15 @@
+Tue Dec 31 16:04:26 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mh-linux: Remove.
+
+Mon Nov 11 10:29:51 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* mt-ppc: Delete file, options moved to newlib configure.
+
+Fri Oct  4 12:21:03 1996  Angela Marie Thomas (angela@cygnus.com)
+
+	* mh-dgux386: New file.  x86 dgux specific flags
+
 Mon Sep 30 15:10:07 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-mh-mpw (EXTRALIBS_PPC_XCOFF): New, was EXTRALIBS_PPC.
@@ -36,7 +48,6 @@ Fri Jul  5 11:49:02 1996  Ian Lance Taylor  <ian@cygnus.com>
 Sun Jun 23 22:59:25 1996  Geoffrey Noer  <noer@cygnus.com>
 
 	* mh-cygwin32: new file.  Like mh-go32 without the CFLAGS entry.
-	* .Sanitize: listed new file
 
 Tue Mar 26 14:10:41 1996  Ian Lance Taylor  <ian@cygnus.com>
 
