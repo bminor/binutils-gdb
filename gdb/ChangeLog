@@ -1,3 +1,12 @@
+Sat Feb 24 12:30:28 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* partial-stab.h (case N_FUN):  Function symbols generated
+	by SPARCworks cc have a meaningless zero value, do not update
+	pst->textlow if the function symbol value is zero. 
+
+	* stabsread.c (define_symbol):  Initialize SYMBOL_TYPE field
+	for function prototype declaration symbols.
+
 Fri Feb 23 22:33:04 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* remote-e7000.c (e7000_load):  New routine to download via the

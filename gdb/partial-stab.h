@@ -568,7 +568,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 		 the bounds created by N_SO symbols.  If that's the case
 		 use the address of this function as the low bound for
 		 the partial symbol table.  */
-	      if (pst->textlow == 0 || CUR_SYMBOL_VALUE < pst->textlow)
+	      if (pst->textlow == 0
+		  || (CUR_SYMBOL_VALUE < pst->textlow
+		      && CUR_SYMBOL_VALUE
+			   != ANOFFSET (section_offsets, SECT_OFF_TEXT)))
 		pst->textlow = CUR_SYMBOL_VALUE;
 #endif /* DBXREAD_ONLY */
 	      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
@@ -604,7 +607,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 		 the bounds created by N_SO symbols.  If that's the case
 		 use the address of this function as the low bound for
 		 the partial symbol table.  */
-	      if (pst->textlow == 0 || CUR_SYMBOL_VALUE < pst->textlow)
+	      if (pst->textlow == 0
+		  || (CUR_SYMBOL_VALUE < pst->textlow
+		      && CUR_SYMBOL_VALUE
+			   != ANOFFSET (section_offsets, SECT_OFF_TEXT)))
 		pst->textlow = CUR_SYMBOL_VALUE;
 #endif /* DBXREAD_ONLY */
 	      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,

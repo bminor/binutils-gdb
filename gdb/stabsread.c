@@ -938,12 +938,12 @@ define_symbol (valu, string, desc, type, objfile)
 #endif /* !BELIEVE_PCC_PROMOTION.  */
 
     case 'P':
-      /* acc seems to use P to delare the prototypes of functions that
+      /* acc seems to use P to declare the prototypes of functions that
          are referenced by this file.  gdb is not prepared to deal
          with this extra information.  FIXME, it ought to.  */
       if (type == N_FUN)
 	{
-	  read_type (&p, objfile);
+	  SYMBOL_TYPE (sym) = read_type (&p, objfile);
 	  goto process_prototype_types;
 	}
       /*FALLTHROUGH*/
