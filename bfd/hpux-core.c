@@ -244,10 +244,11 @@ hpux_core_core_file_p (abfd)
             if (core_kernel_thread_id (abfd) == 0)
               {
                 if (!make_bfd_asection (abfd, ".reg",
-                                        SEC_HAS_CONTENTS,
-                                        core_header.len,
-                                        (int) &proc_info - (int) & proc_info.hw_regs,
-                                        2))
+					SEC_HAS_CONTENTS,
+					core_header.len,
+					(bfd_vma) offsetof (struct proc_info,
+							    hw_regs),
+					2))
 		  goto fail;
               }
             else
@@ -259,17 +260,19 @@ hpux_core_core_file_p (abfd)
 		    if (!make_bfd_asection (abfd, ".reg",
 					    SEC_HAS_CONTENTS,
 					    core_header.len,
-					    (int) &proc_info - (int) & proc_info.hw_regs,
+					    (bfd_vma)offsetof (struct proc_info,
+							       hw_regs),
 					    2))
 		      goto fail;
                   }
                 /* We always make one of these sections, for every thread. */
                 sprintf (secname, ".reg/%d", core_kernel_thread_id (abfd));
                 if (!make_bfd_asection (abfd, secname,
-                                        SEC_HAS_CONTENTS,
-                                        core_header.len,
-                                        (int) &proc_info - (int) & proc_info.hw_regs,
-                                        2))
+					SEC_HAS_CONTENTS,
+					core_header.len,
+					(bfd_vma) offsetof (struct proc_info,
+							    hw_regs),
+					2))
 		  goto fail;
               }
 	    core_signal (abfd) = proc_info.sig;

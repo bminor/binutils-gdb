@@ -1,3 +1,8 @@
+2004-11-20  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* hpux-core.c (hpux_core_core_file_p): Use offsetof macro in calls to
+	make_bfd_asection.
+
 2004-11-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-arm.c (elf32_arm_finish_dynamic_sections): Warning fix.
