@@ -5,27 +5,37 @@ present in version 3 and new bugs.  I have filed all the bug reports
 and fixes mailed to bug-gdb, and the fixes in particular will move
 into these sources as I find the time.
 
-	      => THIS VERSION IS PARTICULARLY FRAGILE! <=
+	      => THIS VERSION IS FRAGILE! <=
 
-	It depends on a preliminary version of a new "binary file
-	descriptor" library and a new global "include" directory, which
+	It depends on preliminary versions of a new "binary file
+	descriptor" library, a new global "include" directory, 
+	and separate libraries for "readline" and "libiberty", which
 	are packaged separately from GDB.  You must obtain, configure
-	and build this library manually, then configure and build gdb.
+	and build these libraries manually, then configure and build gdb.
 	When building gdb's for multiple platforms, you must manually
-	rebuild the bfd library separately for each platform.  Yes, of
+	rebuild the libraries separately for each platform.  Yes, of
 	course, we are working on this!  FIXME!
 
-	Configure bfd for your host system by:
+	Configure and build the libraries for your host system by:
 
 		cd ../bfd
-		edit Makefile
+		./configure HOSTNAME
+		make
+
+		cd ../libiberty
+		./configure HOSTNAME
+		make
+
+		cd ../readline
+		[edit Makefile as appropriate]
 		make
 
 	Then you can cd ../gdb-whatever, and config and build gdb.
 
-This release moves the generic GNU include files, the BFD library,
-and the getopt routines into the parent directory of gdb.  The idea
-is that a variety of GNU tools can share a common copy of these things.
+This release moves the generic GNU include files, the BFD library, the
+getopt routines, obstacks, and the readline library into the parent
+directory of gdb.  The idea is that a variety of GNU tools can share a
+common copy of these things.
 
 A summary of features new since gdb-3.5 is in the file `WHATS.NEW'.
 
@@ -56,16 +66,16 @@ configure it this way by specifying `config.gdb host target' where host
 is where GDB runs, and target is where your program runs.
 
 If you want a new (current to this release) version of the manual, you
-will have to use the gdb.texinfo file provided with this distribution.
-For details see the texinfo manual (distributed with emacs and as a
-printed manual).
+will have to use the gdb.texinfo and texinfo.tex files provided with
+this distribution.  For details see the texinfo manual (distributed
+with emacs and as a printed manual).
 
 About languages other than C...
 
 C++ support has been integrated into gdb.  GDB should work with FORTRAN
-programs (if you have problem, please send a bug report; note that you
+programs.  (If you have problem, please send a bug report; note that you
 may have to refer to some FORTRAN variables with a trailing
-underscore), but I am not aware of anyone who is working on getting it
+underscore).  I am not aware of anyone who is working on getting it
 to use the syntax of any language other than C or C++.  Pascal programs
 which use sets, subranges, file variables, or nested functions will not
 currently work.
@@ -80,7 +90,7 @@ About remote debugging...
 
 [This section seems to be out of date, I have never seen the "rapp"
 program, though I would like to.  FIXME.]
-`rapp' runs under unix and acts as a remote stub (like remote-multi.shar
+`rapp' runs under unix and acts as a remote stub (like rem-multi.shar
 distributed with GDB version 3).  Currently it just works over UDP
 (network), not over a serial line.  To get it running
 * Compile GDB on the host machine as usual
@@ -90,13 +100,14 @@ distributed with GDB version 3).  Currently it just works over UDP
 
 This will get reworked before the initial release of 4.x.  FIXME.
 
-The two files remote-multi.shar and remote-sa.m68k.shar contain two
-examples of a remote stub to be used with remote.c.  The the -multi
-file is a general stub that can probably be running on various
-different flavors of unix to allow debugging over a serial line from
-one machine to another.  The remote-sa.m68k.shar is designed to run
-standalone on a 68k type cpu and communicate properley with the
-remote.c stub over a serial line.
+The files m68k-stub.c and i386-stub.c contain two examples of remote
+stubs to be used with remote.c.  They are designeded to run standalone
+on a 68k or 386 cpu and communicate properly with the remote.c stub
+over a serial line.
+
+The file rem-multi.shar contains a general stub that can probably be
+running on various different flavors of unix to allow debugging over a
+serial line from one machine to another.
 
 The files remote-eb.c and remote-nindy.c are two examples of remote
 interfaces for talking to existing ROM monitors (for the AMD 29000 and the
@@ -111,18 +122,9 @@ The correct address for reporting bugs found with gdb is
 
 About xgdb...
 
-Hopefully a new xgdb will be in 4.x.
+xgdb is obsolete.  We are not doing any development or support of it.
 
-xgdb.c was provided to us by the user community; it is not an integral
-part of the gdb distribution.  The problem of providing visual
-debugging support on top of gdb is peripheral to the GNU project and
-(at least right now) we can't afford to put time into it.  So while we
-will be happy to incorporate user fixes to xgdb.c, we do not guarantee
-that it will work and we will not fix bugs reported in it.  See
-XGDB-README for one person's opinion about what is wrong with the
-current xgdb.  Someone is working on writing a new XGDB, so improving
-(e.g. by fixing it so that it will work, if it doesn't currently) the
-current one is not worth it.
+There is an "xxgdb", which shows more promise.
 
 For those intersted in auto display of source and the availability of
 an editor while debugging I suggest trying gdb-mode in gnu-emacs
@@ -212,7 +214,7 @@ symbols which need to be ignored on a specific machine.  Calling
 IGNORE_SYMBOL in dbxread.c is a lot cleaner than a maze of #if
 defined's).  The machine-independent code should do whatever "most"
 machines want if the macro is not defined in param.h.  Using #if
-defined can sometimes be OK (e.g.  SET_STACK_LIMIT_HUGE) but should be
+defined can sometimes be OK (e.g. SET_STACK_LIMIT_HUGE) but should be
 conditionalized on a specific feature of an operating system (set in
 tm.h or xm.h) rather than something like #if defined(vax) or #if
 defined(SYSV).  If you use an #ifdef on some symbol that is defined

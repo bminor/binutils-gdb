@@ -1,5 +1,12 @@
 Sun May 19 05:36:59 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
+	* README:  Update for release.
+        * config.gdb:  Don't create readline dir in subdir builds.
+        * main.c:  Include with "..." form for non-system include files,
+        so "gcc -MM" for "make depend" works.
+        Include readline files with "...h" rather than <readline/...h>.
+        * mipsread.c:  Include "ecoff.h" rather than "intel-coff.h".
+
 	* coffread.c:  Undo minor damage done by Rich Pixley.  Use
 	different internal and external representations of COFF
 	data structures.  Use new BFD routines for swapping them in and
