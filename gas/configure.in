@@ -39,7 +39,7 @@ te_file=generic
 # check for architecture variants
 case ${target_cpu} in
   armeb)	cpu_type=arm endian=big ;;
-  arm*)		cpu_tpye=arm endian=little ;;
+  arm*)		cpu_type=arm endian=little ;;
   hppa*)	cpu_type=hppa ;;
 changequote(,)dnl
   i[45]86)	cpu_type=i386 ;;
@@ -109,7 +109,7 @@ changequote([,])dnl
       rs6000*)		cpu_type=ppc ;;
       sparc64)		cpu_type=sparc obj_format=elf want_sparcv9=true ;;
       sparclite*)	cpu_type=sparc ;;
-      *)		cpu_type=${target_cpu} ;;
+      *)		cpu_type=${cpu} ;;
     esac
 
     if test ${this_target} = $target ; then
@@ -137,8 +137,7 @@ changequote([,])dnl
       arc-*-elf*)           fmt=elf bfd_gas=yes ;;
 # end-sanitize-arc
 
-      arm-*-riscix*)	    fmt=aout targ=arm-lit
-			    emulation=riscix ;;
+      arm-*-riscix*)	    fmt=aout targ=arm-lit ;;
       arm-*-aout)	    fmt=aout
 			    case "$endian" in
 			      big)	targ=arm-big ;;
@@ -162,7 +161,7 @@ changequote([,])dnl
       i386-*-bsd*)          fmt=aout em=386bsd ;;
       i386-*-netbsd0.8)     fmt=aout em=386bsd ;;
       i386-*-netbsd*)       fmt=aout em=nbsd bfd_gas=yes;;
-      i386-*-linux*aout*)   fmt=aout  em=linux ;;
+      i386-*-linux*aout* | i386-*-linuxoldld)   fmt=aout em=linux ;;
       i386-*-linux*coff*)   fmt=coff em=linux
 			     targ=i386coff ;;
       i386-*-linux*)        fmt=elf em=linux ;;
@@ -299,6 +298,10 @@ changequote([,])dnl
       *-ecoff)	bfd_gas=yes ;;
       *-som)	bfd_gas=yes ;;
       *)		;;
+    esac
+
+    case ${cpu_type} in
+      m68k) extra_objects="$extra_objects m68k-parse.o" ;;
     esac
 
 # See if we really can support this configuration with the emulation code.

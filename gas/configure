@@ -555,7 +555,7 @@ te_file=generic
 # check for architecture variants
 case ${target_cpu} in
   armeb)	cpu_type=arm endian=big ;;
-  arm*)		cpu_tpye=arm endian=little ;;
+  arm*)		cpu_type=arm endian=little ;;
   hppa*)	cpu_type=hppa ;;
   i[45]86)	cpu_type=i386 ;;
   m680[012346]0) cpu_type=m68k ;;
@@ -636,7 +636,7 @@ for this_target in $target $canon_targets ; do
       rs6000*)		cpu_type=ppc ;;
       sparc64)		cpu_type=sparc obj_format=elf want_sparcv9=true ;;
       sparclite*)	cpu_type=sparc ;;
-      *)		cpu_type=${target_cpu} ;;
+      *)		cpu_type=${cpu} ;;
     esac
 
     if test ${this_target} = $target ; then
@@ -664,8 +664,7 @@ for this_target in $target $canon_targets ; do
       arc-*-elf*)           fmt=elf bfd_gas=yes ;;
 # end-sanitize-arc
 
-      arm-*-riscix*)	    fmt=aout targ=arm-lit
-			    emulation=riscix ;;
+      arm-*-riscix*)	    fmt=aout targ=arm-lit ;;
       arm-*-aout)	    fmt=aout
 			    case "$endian" in
 			      big)	targ=arm-big ;;
@@ -689,7 +688,7 @@ for this_target in $target $canon_targets ; do
       i386-*-bsd*)          fmt=aout em=386bsd ;;
       i386-*-netbsd0.8)     fmt=aout em=386bsd ;;
       i386-*-netbsd*)       fmt=aout em=nbsd bfd_gas=yes;;
-      i386-*-linux*aout*)   fmt=aout  em=linux ;;
+      i386-*-linux*aout* | i386-*-linuxoldld)   fmt=aout em=linux ;;
       i386-*-linux*coff*)   fmt=coff em=linux
 			     targ=i386coff ;;
       i386-*-linux*)        fmt=elf em=linux ;;
@@ -826,6 +825,10 @@ for this_target in $target $canon_targets ; do
       *-ecoff)	bfd_gas=yes ;;
       *-som)	bfd_gas=yes ;;
       *)		;;
+    esac
+
+    case ${cpu_type} in
+      m68k) extra_objects="$extra_objects m68k-parse.o" ;;
     esac
 
 # See if we really can support this configuration with the emulation code.
@@ -1227,7 +1230,7 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 1231 "configure"
+#line 1230 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -1241,7 +1244,7 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 1245 "configure"
+#line 1244 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -1274,7 +1277,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1278 "configure"
+#line 1277 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
@@ -1326,7 +1329,7 @@ else
   ac_cv_c_cross=yes
 else
 cat > conftest.$ac_ext <<EOF
-#line 1330 "configure"
+#line 1329 "configure"
 #include "confdefs.h"
 main(){return(0);}
 EOF
@@ -1349,7 +1352,7 @@ if eval "test \"`echo '$''{'ac_cv_header_alloca_h'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1353 "configure"
+#line 1352 "configure"
 #include "confdefs.h"
 #include <alloca.h>
 int main() { return 0; }
@@ -1380,7 +1383,7 @@ if eval "test \"`echo '$''{'ac_cv_func_alloca'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1384 "configure"
+#line 1383 "configure"
 #include "confdefs.h"
 
 #ifdef __GNUC__
@@ -1438,7 +1441,7 @@ if eval "test \"`echo '$''{'ac_cv_os_cray'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1442 "configure"
+#line 1441 "configure"
 #include "confdefs.h"
 #if defined(CRAY) && ! defined(CRAY2)
 webecray
@@ -1466,7 +1469,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1470 "configure"
+#line 1469 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1520,7 +1523,7 @@ else
   ac_cv_c_stack_direction=0
 else
 cat > conftest.$ac_ext <<EOF
-#line 1524 "configure"
+#line 1523 "configure"
 #include "confdefs.h"
 find_stack_direction ()
 {
@@ -1562,7 +1565,7 @@ else
   ac_cv_c_inline=no
 for ac_kw in inline __inline__ __inline; do
   cat > conftest.$ac_ext <<EOF
-#line 1566 "configure"
+#line 1565 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1601,7 +1604,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1605 "configure"
+#line 1604 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1654,7 +1657,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1658 "configure"
+#line 1657 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1707,7 +1710,7 @@ if eval "test \"`echo '$''{'gas_cv_assert_ok'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1711 "configure"
+#line 1710 "configure"
 #include "confdefs.h"
 #include <assert.h>
 #include <stdio.h>
@@ -1764,7 +1767,7 @@ if eval "test \"`echo '$''{'gas_cv_decl_needed_malloc'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1768 "configure"
+#line 1767 "configure"
 #include "confdefs.h"
 $gas_test_headers
 int main() { return 0; }
@@ -1800,7 +1803,7 @@ if eval "test \"`echo '$''{'gas_cv_decl_needed_free'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1804 "configure"
+#line 1803 "configure"
 #include "confdefs.h"
 $gas_test_headers
 int main() { return 0; }
@@ -1839,7 +1842,7 @@ if eval "test \"`echo '$''{'gas_cv_decl_needed_errno'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1843 "configure"
+#line 1842 "configure"
 #include "confdefs.h"
 
 #ifdef HAVE_ERRNO_H

@@ -62,11 +62,12 @@ INSTALL_DATA = $(INSTALL)
 INSTALL_XFORM = $(INSTALL) -t='-e $(program_transform_name)'
 INSTALL_XFORM1= $(INSTALL_XFORM) -b=.1
 
-DISTSTUFF= make-gas.com
+DISTSTUFF= make-gas.com m68k-parse.c
 
 AR = ar
 AR_FLAGS = qv
-BISON = bison -y
+BISON = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison ; else echo bison -y ; fi`
+BISONFLAGS =
 MAKEINFO = makeinfo
 TEXI2DVI = texi2dvi
 RANLIB = ranlib
@@ -289,7 +290,8 @@ TARG_CPU_DEP_hppa    =
 TARG_CPU_DEP_i386    = $(srcdir)/../include/opcode/i386.h
 TARG_CPU_DEP_i860    =
 TARG_CPU_DEP_i960    =
-TARG_CPU_DEP_m68k    = $(srcdir)/../include/opcode/m68k.h
+TARG_CPU_DEP_m68k    = $(srcdir)/../include/opcode/m68k.h \
+			$(srcdir)/config/m68k-parse.h
 TARG_CPU_DEP_m88k    = $(srcdir)/config/m88k-opcode.h
 TARG_CPU_DEP_mips    = $(srcdir)/../include/opcode/mips.h
 TARG_CPU_DEP_ns32k   =
@@ -346,6 +348,13 @@ e-mipself.o : $(srcdir)/config/e-mipself.c
 	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $(srcdir)/config/e-mipself.c
 e-mipsecoff.o : $(srcdir)/config/e-mipsecoff.c
 	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $(srcdir)/config/e-mipsecoff.c
+
+# The m68k operand parser.
+
+m68k-parse.c: $(srcdir)/config/m68k-parse.y
+	$(BISON) $(BISONFLAGS) $(srcdir)/config/m68k-parse.y
+	mv -f y.tab.c m68k-parse.c
+m68k-parse.o: m68k-parse.c $(srcdir)/config/m68k-parse.y
 
 # Remake the info files.
 
@@ -492,7 +501,7 @@ de-stage3: force
 force:
 
 Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag) \
-		$(srcdir)/configure.in config.status
+		$(srcdir)/configure.in config.status conf.in
 	$(SHELL) ./config.status
 .gdbinit: $(srcdir)/gdbinit.in config.status
 	$(SHELL) ./config.status

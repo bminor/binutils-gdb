@@ -1,3 +1,46 @@
+Mon Aug  7 17:18:10 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/m68k-parse.y: New file: bison grammar for m68k operands,
+	including support for Motorola syntax.
+	* config/m68k-parse.h: New file; definitions shared between
+	m68k-parse.y and tc-m68k.c.
+	* config/tc-m68k.c: Include m68k-parse.h.
+	(enum operand_type): Move to m68k-parse.h, where it is named
+	m68k_operand_type.  Rename all uses.  Rearrange somewhat.  Add
+	FPREG.  Rename AOFF to DISP.  Rename AINDX to BASE.  Rename APODX
+	to POST.  Rename APRDX to PRE.  Remove AMIND.  Rename MSCR to
+	CONTROL.  Remove DINDR.
+	(struct m68k_exp): Move to m68k-parse.h.  Remove e_beg, e_end and
+	e_seg fields.  Rename e_exp to exp.  Rename e_siz to size, and
+	change type to enum m68k_size.  Change all uses.
+	(enum _register): Move to m68k-parse.h, where it is named
+	m68k_register.  Rename all uses.  Add ZDATA0-7 and ZADDR0-7.
+	(struct m68k_op): Move to m68k-parse.h.  Change all fields.
+	(seg): Don't define.
+	(add_exp): Remove.
+	(FAIL, OK): Remove.
+	(m68k_reg_parse): Move to m68k-parse.y, and rewrite.
+	(SKIP_WHITE, SKIP_W): Remove.
+	(try_moto_index, try_index): Remove.
+	(m68k_ip_op): Move to m68k-parse.y, and rewrite to use grammar.
+	(main): Remove obsolete test function.
+	(m68k_ip): Extensive changes to use new grammar.
+	(get_regs): Remove.
+	(crack_operand): m68k_ip_op now returns 0 on success.
+	(init_table): Add ssp, zd0-7 and za0-7.
+	(md_assemble): Make er const.  Correct loop over operands when
+	looking for error message.
+	(md_begin): Set alt_notend_table for '(' and '@'.
+	(get_num): Expression is already parsed.  Don't set seg.
+	* configure.in: If cpu_type is m68k, put m68k-parse.o in
+	extra-objects.
+	* configure: Rebuild.
+	* Makefile.in (DISTSTUFF): Add m68k-parse.c.
+	(BISON): Use ../bison/bison if it exists.
+	(BISONFLAGS): Define as empty.
+	(TARG_CPU_DEP_m68k): Depend upon $(srcdir)/config/m68k-parse.h.
+	(m68k-parse.c, m68k-parse.o): New targets.
+
 start-sanitize-sh3e
 Mon Aug  7 02:54:20 1995  Jeff Law  (law@snake.cs.utah.edu)
 
