@@ -1,5 +1,5 @@
 /* i386-opcode.h -- Intel 80386 opcode table
-   Copyright 1989, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation.
+   Copyright 1989, 91, 92, 93, 94, 95, 96, 97, 1998 Free Software Foundation.
 
 This file is part of GAS, the GNU Assembler, and GDB, the GNU Debugger.
 
