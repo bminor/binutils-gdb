@@ -1,5 +1,5 @@
 # If you change this file, please also look at files which source this one:
-# elf64bmip.sh elf64btsmip.sh
+# elf64bmip.sh elf64btsmip.sh elf32btsmipn32.sh
 
 # This is an ELF platform.
 SCRIPT_NAME=elf

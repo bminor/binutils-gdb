@@ -1,3 +1,15 @@
+2002-07-31  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* Makefile.am (eelf32btsmipn32.o, eelf32ltsmipn32.o): New emulations
+	for n32 ABI support.
+	* Makefile.in: Regenerate.
+	* configure.tgt (mips64*el-*-linux-gnu*,mips64*-*-linux-gnu*): Add
+	n32 ABI emulations for these 64 bit targets.
+	* emulparams/elf32bmipn32.sh: Expand comment.
+	* emulparams/elf32btsmipn32.sh: New file, for traditional big endian
+	n32 ABI.
+	* emulparams/elf32ltsmipn32.sh: Likewise for little endian.
+
 2002-07-30  Graeme Peterson  <gp@qnx.com>
 
 	* configure.tgt: Add support for arm-*-nto target.
