@@ -6651,7 +6651,7 @@ the entry's @code{mapped} member to determine whether the overlay is
 currently mapped.
 
 In addition, your overlay manager may define a function called
-@var{_ovly_debug_event}.  If this function is defined, @value{GDBN}
+@code{_ovly_debug_event}.  If this function is defined, @value{GDBN}
 will silently set a breakpoint there.  If the overlay manager then
 calls this function whenever it has changed the overlay table, this
 will enable @value{GDBN} to accurately keep track of which overlays
