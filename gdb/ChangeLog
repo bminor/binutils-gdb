@@ -1,3 +1,7 @@
+2001-07-01  Mark Elbrecht <snowball@bigfoot.com>
+
+	* coffread.c (coff_symfile_read): Parse DWARF2 info if present.
+
 2001-06-28  Elena Zannoni  <ezannoni@redhat.com>
 
 	* TODO: Add import of readline 4.2 as a gdb 5.2 task.
