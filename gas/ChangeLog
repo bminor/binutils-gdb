@@ -1,5 +1,9 @@
 1999-07-16  Jakub Jelinek  <jj@ultra.linux.cz>
 
+	* doc/c-sparc.texi: Document .register and .nword pseudo-ops.
+
+1999-07-16  Jakub Jelinek  <jj@ultra.linux.cz>
+
 	* config/tc-sparc.c (sparc_ip): Allow OLO10 relocations
 	on -64 and not pic.
 	(output_insn): Put OLO10's secondary addend into tc_fix_data.
