@@ -1,3 +1,7 @@
+Tue Oct  4 12:05:42 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* configure: Use ${config_shell} when running ${configsub}.
+
 Mon Oct  3 14:28:34 1994  Doug Evans  <dje@canuck.cygnus.com>
 
 	* config.sub: No longer recognize h8300h.
