@@ -2,7 +2,7 @@ typedef enum
 {
   
   bfd_indirect_seclet,
-  
+  bfd_fill_seclet
 } bfd_seclet_enum_type;
 
 
@@ -18,8 +18,10 @@ struct bfd_seclet_struct
     {
       asection *section;
       asymbol **symbols;
-      
     } indirect;
+    struct {
+      int value;
+    } fill;
   }
   u;
 };
