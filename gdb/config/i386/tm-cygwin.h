@@ -35,5 +35,3 @@ char *solib_address (CORE_ADDR);
 char *child_solib_loaded_library_pathname(int);
 void child_clear_solibs (void);
 void dll_symbol_command (char *, int);
-
-#define LINKER_SYMBOLS_HAVE_WIN32_STDCALL_ARG_SIZES (1)

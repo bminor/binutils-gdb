@@ -1,6 +1,0 @@
-# OBSOLETE # Host: Little endian MIPS machine such as pmax
-# OBSOLETE # running Mach 3.0 operating system
-# OBSOLETE 
-# OBSOLETE NATDEPFILES= mipsm3-nat.o m3-nat.o core-aout.o
-# OBSOLETE XM_FILE= xm-mipsm3.h
-# OBSOLETE NAT_FILE= ../nm-m3.h

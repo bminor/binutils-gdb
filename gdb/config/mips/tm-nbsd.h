@@ -22,9 +22,6 @@
 #ifndef TM_NBSD_H
 #define TM_NBSD_H
 
-/* Saved Pc.  Get it from sigcontext if within sigtramp.  */
-#define SIGCONTEXT_PC_OFFSET 8
-
 #include "mips/tm-mips.h"
 #include "solib.h"
 
@@ -35,6 +32,6 @@
 #undef IGNORE_HELPER_CALL
 
 /* XXX undef a bunch of stuff we want to use multi-arch */
-#undef IN_SIGTRAMP
+#undef DEPRECATED_IN_SIGTRAMP
 
 #endif /* TM_NBSD_H */

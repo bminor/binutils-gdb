@@ -51,5 +51,5 @@
 
 /* BFD handles finding the registers in the core file, so they are at
    the start of the BFD .reg section.  */
-#define REGISTER_U_ADDR(addr,blockend,regno) (addr = REGISTER_BYTE (regno))
+#define REGISTER_U_ADDR(addr,blockend,regno) (addr = DEPRECATED_REGISTER_BYTE (regno))
 #define KERNEL_U_ADDR 0

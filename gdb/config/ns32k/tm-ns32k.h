@@ -32,6 +32,4 @@
 #define STACK_END_ADDR (0xfffff000)
 #endif
 
-#define NUM_GENERAL_REGS	8
-
 #endif /* TM_NS32K_H */

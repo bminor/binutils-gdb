@@ -21,9 +21,3 @@
 
 #include "mips/tm-mips.h"
 #include "config/tm-vxworks.h"
-
-/* FIXME: These are almost certainly wrong. */
-
-/* Number of registers in a ptrace_getregs call. */
-
-#define VX_NUM_REGS (NUM_REGS)

@@ -1,6 +1,7 @@
-/* Native-dependent definitions for Sparc running NetBSD, for GDB.
-   Copyright 1986, 1987, 1989, 1992, 1994, 1996, 1999, 2000, 2002
-   Free Software Foundation, Inc.
+/* Native-dependent definitions for NetBSD/sparc.
+
+   Copyright 1986, 1987, 1989, 1992, 1994, 1996, 1999, 2000, 2002,
+   2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,14 +23,20 @@
 #ifndef NM_NBSD_H
 #define NM_NBSD_H
 
-#include "regcache.h"
-
-/* Get generic NetBSD native definitions. */
-
+/* Get generic NetBSD native definitions.  */
 #include "config/nm-nbsd.h"
+
 
-/* Before storing, we need to read all the registers.  */
+/* Support for StackGhost cookies.  */
 
-#define CHILD_PREPARE_TO_STORE() deprecated_read_register_bytes (0, NULL, DEPRECATED_REGISTER_BYTES)
+#include "target.h"
+struct target_ops;	/* Fool ARI.  */
 
-#endif /* NM_NBSD_H */
+#define NATIVE_XFER_WCOOKIE sparc_xfer_wcookie
+extern LONGEST sparc_xfer_wcookie (struct target_ops *ops,
+				   enum target_object object,
+				   const char *annex,
+				   void *readbuf, const void *writebuf,
+				   ULONGEST offset, LONGEST len);
+
+#endif /* nm-nbsd.h */

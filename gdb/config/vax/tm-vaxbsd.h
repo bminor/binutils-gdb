@@ -22,8 +22,6 @@
 #ifndef TM_VAXBSD_H
 #define TM_VAXBSD_H
 
-#include "vax/tm-vax.h"
-
 #define TARGET_UPAGES 14
 #define TARGET_NBPG 512
 #define STACK_END_ADDR (0x80000000 - (TARGET_UPAGES * TARGET_NBPG))
@@ -33,9 +31,5 @@
    files around.  This should be close enough.  */
 #define SIGTRAMP_START(pc)	STACK_END_ADDR
 #define SIGTRAMP_END(pc)	0x80000000
-
-/* Offset to saved PC in sigcontext, from <sys/signal.h>.  */
-/* XXXJRT should go away */
-#define SIGCONTEXT_PC_OFFSET 12
 
 #endif /* TM_VAXBSD_H */

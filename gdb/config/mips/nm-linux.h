@@ -1,6 +1,6 @@
 /* Native-dependent definitions for GNU/Linux on MIPS.
 
-   Copyright 1996, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1996, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,8 +21,6 @@
 
 #ifndef NM_MIPSLINUX_H
 #define NM_MIPSLINUX_H
-
-#define MIPS_GNULINUX_TARGET
 
 #include "config/nm-linux.h"
 

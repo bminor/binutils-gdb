@@ -1,6 +1,6 @@
 /* Native support for GNU/Linux on S390.
 
-   Copyright 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
 
    Ported by D.J. Barrow for IBM Deutschland Entwicklung GmbH, IBM
    Corporation.  derived from i390-nmlinux.h
@@ -27,58 +27,37 @@
 
 #include "config/nm-linux.h"
 
-#define REGISTER_U_ADDR(addr, blockend, regno) \
-	(addr) = s390_register_u_addr((blockend),(regno));
-extern int s390_register_u_addr (int, int);
 
-/* Return sizeof user struct to callers in less machine dependent routines */
+/* ptrace access.  */
+
+#define PTRACE_ARG3_TYPE long
+#define PTRACE_XFER_TYPE long
+
+#define FETCH_INFERIOR_REGISTERS
 
 #define KERNEL_U_SIZE kernel_u_size()
 extern int kernel_u_size (void);
 
-#define U_REGS_OFFSET 0
 
+/* Hardware watchpoints.  */
 
-/* We define this if link.h is available, because with ELF we use SVR4 style
-   shared libraries. */
-
-#ifdef HAVE_LINK_H
-#define SVR4_SHARED_LIBS
-#include "solib.h"		/* Support for shared libraries. */
-#endif
-
-
-/* WATCHPOINT SPECIFIC STUFF */
+extern int s390_stopped_by_watchpoint (void);
+extern int s390_insert_watchpoint (CORE_ADDR addr, int len);
+extern int s390_remove_watchpoint (CORE_ADDR addr, int len);
 
 #define TARGET_HAS_HARDWARE_WATCHPOINTS
+#define TARGET_CAN_USE_HARDWARE_WATCHPOINT(type, cnt, ot) 1
+#define TARGET_REGION_OK_FOR_HW_WATCHPOINT(addr, len) 1
 #define HAVE_CONTINUABLE_WATCHPOINT 1
-#define target_insert_watchpoint(addr, len, type)  \
-  s390_insert_watchpoint (PIDGET (inferior_ptid), addr, len, type)
 
-#define target_remove_watchpoint(addr, len, type)  \
-  s390_remove_watchpoint (PIDGET (inferior_ptid), addr, len)
+#define STOPPED_BY_WATCHPOINT(w) \
+  s390_stopped_by_watchpoint ()
 
-extern int watch_area_cnt;
-/* gdb if really stupid & calls this all the time without a
-   watchpoint even being set */
-#define STOPPED_BY_WATCHPOINT(W)  \
-  (watch_area_cnt&&s390_stopped_by_watchpoint (PIDGET(inferior_ptid)))
+#define target_insert_watchpoint(addr, len, type) \
+  s390_insert_watchpoint (addr, len)
 
-extern CORE_ADDR s390_stopped_by_watchpoint (int);
-
-/*
-  Type can be 1 for a read_watchpoint or 2 for an access watchpoint.
- */
-extern int s390_insert_watchpoint (int pid, CORE_ADDR addr, int len, int rw);
-extern int s390_remove_watchpoint (int pid, CORE_ADDR addr, int len);
-#define TARGET_CAN_USE_HARDWARE_WATCHPOINT(type, cnt, ot) \
-	 (((type) == bp_hardware_watchpoint)|| \
-	 ((type) == bp_watchpoint)|| \
-	 ((type) == bp_read_watchpoint) || \
-         ((type) == bp_access_watchpoint))
+#define target_remove_watchpoint(addr, len, type) \
+  s390_remove_watchpoint (addr, len)
 
 
-/* Needed for s390x */
-#define PTRACE_ARG3_TYPE long
-#define PTRACE_XFER_TYPE long
 #endif /* nm_linux.h */

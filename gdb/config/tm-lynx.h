@@ -21,9 +21,6 @@
 #ifndef TM_LYNX_H
 #define TM_LYNX_H
 
-/* Override number of expected traps from sysv. */
-#define START_INFERIOR_TRAPS_EXPECTED 2
-
 #include "coff-solib.h"		/* COFF shared library support */
 
 /* Lynx's signal.h doesn't seem to have any macros for what signal numbers

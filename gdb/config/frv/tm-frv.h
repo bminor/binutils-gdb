@@ -43,3 +43,5 @@ extern CORE_ADDR frv_stopped_data_address(void);
 
 /* Use these macros for watchpoint insertion/deletion.  */
 #define target_stopped_data_address() frv_stopped_data_address()
+
+#include "solib.h"		/* Include support for shared libraries.  */

@@ -57,52 +57,6 @@ extern int hpread_adjust_stack_address (CORE_ADDR);
 
 /* jimb: omitted dynamic linking stuff here */
 
-/* This sequence of words is the instructions
-
-; Call stack frame has already been built by gdb. Since we could be calling
-; a varargs function, and we do not have the benefit of a stub to put things in
-; the right place, we load the first 8 word of arguments into both the general
-; and fp registers.
-call_dummy
-	nop
-        copy %r4,%r29
-        copy %r5,%r22
-        copy %r6,%r27
-        fldd -64(0,%r29),%fr4
-        fldd -56(0,%r29),%fr5
-        fldd -48(0,%r29),%fr6
-        fldd -40(0,%r29),%fr7
-        fldd -32(0,%r29),%fr8
-        fldd -24(0,%r29),%fr9
-        fldd -16(0,%r29),%fr10
-        fldd -8(0,%r29),%fr11
-        copy %r22,%r1
-        ldd -64(%r29), %r26
-        ldd -56(%r29), %r25
-        ldd -48(%r29), %r24
-        ldd -40(%r29), %r23
-        ldd -32(%r29), %r22
-        ldd -24(%r29), %r21
-        ldd -16(%r29), %r20
-        bve,l (%r1),%r2
-        ldd -8(%r29), %r19
-        break 4, 8
-	mtsp %r21, %sr0
-	ble 0(%sr0, %r22)
-        nop
-*/
-
-/* Call dummys are sized and written out in word sized hunks.  So we have
-   to pack the instructions into words.  Ugh.  */
-#undef CALL_DUMMY
-#define CALL_DUMMY {0x08000240349d0000LL, 0x34b6000034db0000LL, \
-                    0x53a43f8353a53f93LL, 0x53a63fa353a73fb3LL,\
-                    0x53a83fc353a93fd3LL, 0x2fa1100a2fb1100bLL,\
-                    0x36c1000053ba3f81LL, 0x53b93f9153b83fa1LL,\
-                    0x53b73fb153b63fc1LL, 0x53b53fd10fa110d4LL,\
-                    0xe820f0000fb110d3LL, 0x0001000400151820LL,\
-                    0xe6c0000008000240LL}
-
 /* The PA64 ABI reserves 64 bytes of stack space for outgoing register
    parameters.  */
 #undef REG_PARM_STACK_SPACE
