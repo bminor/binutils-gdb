@@ -1042,7 +1042,7 @@ get_prev_frame (struct frame_info *next_frame)
      function does have somewhere to cache that PC value.  */
 
   if (DEPRECATED_INIT_FRAME_PC_FIRST_P ())
-    DEPRECATED_INIT_FRAME_PC_FIRST (fromleaf, prev);
+    prev->pc = (DEPRECATED_INIT_FRAME_PC_FIRST (fromleaf, prev));
 
   if (INIT_EXTRA_FRAME_INFO_P ())
     INIT_EXTRA_FRAME_INFO (fromleaf, prev);
@@ -1050,7 +1050,7 @@ get_prev_frame (struct frame_info *next_frame)
   /* This entry is in the frame queue now, which is good since
      FRAME_SAVED_PC may use that queue to figure out its value (see
      tm-sparc.h).  We want the pc saved in the inferior frame. */
-  INIT_FRAME_PC (fromleaf, prev);
+  prev->pc = (INIT_FRAME_PC (fromleaf, prev));
 
   /* If ->frame and ->pc are unchanged, we are in the process of
      getting ourselves into an infinite backtrace.  Some architectures

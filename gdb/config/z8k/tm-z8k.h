@@ -108,9 +108,8 @@ extern int z8k_saved_pc_after_call (struct frame_info *frame);
 #define REGISTER_VIRTUAL_TYPE(N) \
  (REGISTER_VIRTUAL_SIZE(N) == 2? builtin_type_unsigned_int : builtin_type_long)
 
-/*#define INIT_FRAME_PC(x,y) init_frame_pc(x,y) */
-/* Initializer for an array of names of registers.
-   Entries beyond the first NUM_REGS are ignored.  */
+#define INIT_FRAME_PC(x,y) (init_frame_pc_noop (x, y))
+#define INIT_FRAME_PC_FIRST(x,y) (init_frame_pc_noop (x, y))
 
 #define REGISTER_NAMES  \
  {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", \

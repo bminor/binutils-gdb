@@ -1677,7 +1677,7 @@ mips_software_single_step (enum target_signal sig, int insert_breakpoints_p)
     target_remove_breakpoint (next_pc, break_mem);
 }
 
-static void
+static CORE_ADDR
 mips_init_frame_pc_first (int fromleaf, struct frame_info *prev)
 {
   CORE_ADDR pc, tmp;
@@ -1685,7 +1685,7 @@ mips_init_frame_pc_first (int fromleaf, struct frame_info *prev)
   pc = ((fromleaf) ? SAVED_PC_AFTER_CALL (prev->next) :
 	prev->next ? FRAME_SAVED_PC (prev->next) : read_pc ());
   tmp = SKIP_TRAMPOLINE_CODE (pc);
-  prev->pc = tmp ? tmp : pc;
+  return tmp ? tmp : pc;
 }
 
 

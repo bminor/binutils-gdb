@@ -117,12 +117,6 @@ i386_interix_skip_trampoline_code (CORE_ADDR pc)
   return i386_pe_skip_trampoline_code (pc, 0);
 }
 
-static void
-i386_interix_init_frame_pc (int fromleaf, struct frame_info *prev)
-{
-  /* Nothing to do on Interix.  */
-}
-
 static int
 i386_interix_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
 {
@@ -337,7 +331,7 @@ i386_interix_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_skip_trampoline_code (gdbarch,
                                     i386_interix_skip_trampoline_code);
   set_gdbarch_init_extra_frame_info (gdbarch, i386_interix_back_one_frame);
-  set_gdbarch_init_frame_pc (gdbarch, i386_interix_init_frame_pc);
+  set_gdbarch_init_frame_pc (gdbarch, init_frame_pc_noop);
   set_gdbarch_frame_chain_valid (gdbarch, i386_interix_frame_chain_valid);
   set_gdbarch_frame_saved_pc (gdbarch, i386_interix_frame_saved_pc);
   set_gdbarch_name_of_malloc (gdbarch, "_malloc");

@@ -1,5 +1,39 @@
 2002-12-08  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdbarch.sh (INIT_FRAME_PC_FIRST, INIT_FRAME_PC_DEFAULT): Convert
+	to pure functions.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* frame.c (get_prev_frame): Explictly assign prev's pc with value
+	returned by INIT_FRAME_PC_FIRST and INIT_EXTRA_FRAME_INFO.
+
+	* arch-utils.h (init_frame_pc_default, init_frame_pc_noop): Change
+	declaration to a function returning a CORE_ADDR.
+	* x86-64-tdep.h (x86_64_init_frame_pc): Ditto.
+	* arch-utils.c (init_frame_pc_noop): Return the PC value.
+	(init_frame_pc_default): Ditto.
+	* x86-64-linux-tdep.c (x86_64_init_frame_pc): Ditto.
+	* s390-tdep.c (s390_init_frame_pc_first): Ditto.
+	* mips-tdep.c (mips_init_frame_pc_first): Ditto.
+	* dwarf2cfi.h (cfi_init_frame_pc): Ditto.
+	* dwarf2cfi.c (cfi_init_frame_pc): Ditto.
+	* alpha-tdep.c (alpha_init_frame_pc_first): Ditto.
+
+	* i386-interix-tdep.c (i386_interix_init_abi): Set init_frame_pc
+	to init_frame_pc_noop.
+	(i386_interix_init_frame_pc): Delete function.
+	* z8k-tdep.c (init_frame_pc): Delete function.
+	* config/z8k/tm-z8k.h (INIT_FRAME_PC): Define as init_frame_pc_noop.
+	(INIT_FRAME_PC_FIRST): Ditto.
+	* config/mn10200/tm-mn10200.h (INIT_FRAME_PC): Ditto.
+	(INIT_FRAME_PC_FIRST): Ditto.
+	* config/sparc/tm-sparc.h (INIT_FRAME_PC): Ditto.
+	* config/rs6000/tm-rs6000.h (INIT_FRAME_PC): Redefine as
+	init_frame_pc_noop.
+	(INIT_FRAME_PC_FIRST): Convert to an expression.
+	* config/sparc/tm-sparc.h (INIT_FRAME_PC_FIRST): Ditto.
+
+2002-12-08  Andrew Cagney  <ac131313@redhat.com>
+
 	* blockframe.c: Use get_frame_base instead of directly accessing
 	the `struct frame_info' member frame.
 	* f-valprint.c, std-regs.c, rs6000-tdep.c: Ditto.

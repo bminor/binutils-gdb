@@ -67,7 +67,7 @@ void cfi_pop_frame (struct frame_info *);
 CORE_ADDR cfi_frame_chain (struct frame_info *fi);
 
 /* Sets the pc of the frame.  */
-void cfi_init_frame_pc (int fromleaf, struct frame_info *fi);
+CORE_ADDR cfi_init_frame_pc (int fromleaf, struct frame_info *fi);
 
 /* Initialize unwind context informations of the frame.  */
 void cfi_init_extra_frame_info (int fromleaf, struct frame_info *fi);

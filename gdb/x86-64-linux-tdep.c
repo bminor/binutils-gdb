@@ -175,17 +175,17 @@ x86_64_linux_frame_chain (struct frame_info *fi)
   return fp;
 }
 
-void
+CORE_ADDR
 x86_64_init_frame_pc (int fromleaf, struct frame_info *fi)
 {
   CORE_ADDR addr;
 
-  if (fi->next && (get_frame_type (fi->next) == SIGTRAMP_FRAME))
+  if (get_next_frame (fi) && (get_frame_type (fi->next) == SIGTRAMP_FRAME))
     {
-      addr = fi->next->next->frame
+      addr = get_frame_base (get_next_frame (get_next_frame (fi)))
 	+ LINUX_SIGINFO_SIZE + LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
-      fi->pc = read_memory_integer (addr + LINUX_SIGCONTEXT_PC_OFFSET, 8);
+      return read_memory_integer (addr + LINUX_SIGCONTEXT_PC_OFFSET, 8);
     }
   else
-    cfi_init_frame_pc (fromleaf, fi);
+    return cfi_init_frame_pc (fromleaf, fi);
 }

@@ -166,12 +166,6 @@ z8k_frame_chain (struct frame_info *thisframe)
   return 0;
 }
 
-void
-init_frame_pc (void)
-{
-  internal_error (__FILE__, __LINE__, "failed internal consistency check");
-}
-
 /* Put here the code to store, into a struct frame_saved_regs,
    the addresses of the saved registers of frame described by FRAME_INFO.
    This includes special registers such as pc and fp saved in special

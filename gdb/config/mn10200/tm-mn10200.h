@@ -107,7 +107,8 @@ struct value;
 
 extern void mn10200_init_extra_frame_info (struct frame_info *);
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) mn10200_init_extra_frame_info (fi)
-#define INIT_FRAME_PC(x,y)
+#define INIT_FRAME_PC(x,y) (init_frame_pc_noop (x, y))
+#define INIT_FRAME_PC_FIRST(x,y) (init_frame_pc_noop (x, y))
 
 extern void mn10200_frame_find_saved_regs (struct frame_info *,
 					   struct frame_saved_regs *);

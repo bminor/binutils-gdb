@@ -456,11 +456,12 @@ alpha_frame_init_saved_regs (struct frame_info *fi)
   fi->saved_regs[SP_REGNUM] = fi->frame;
 }
 
-static void
+static CORE_ADDR
 alpha_init_frame_pc_first (int fromleaf, struct frame_info *prev)
 {
-  prev->pc = (fromleaf ? SAVED_PC_AFTER_CALL (prev->next) :
-	      prev->next ? FRAME_SAVED_PC (prev->next) : read_pc ());
+  return (fromleaf ? SAVED_PC_AFTER_CALL (get_next_frame (prev)) 
+	  : get_next_frame (prev) ? FRAME_SAVED_PC (prev->next)
+	  : read_pc ());
 }
 
 static CORE_ADDR

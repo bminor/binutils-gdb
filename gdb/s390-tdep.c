@@ -881,25 +881,24 @@ s390_is_sigreturn (CORE_ADDR pc, struct frame_info *sighandler_fi,
   for the moment.
   For some reason the blockframe.c calls us with fi->next->fromleaf
   so this seems of little use to us. */
-void
+CORE_ADDR
 s390_init_frame_pc_first (int next_fromleaf, struct frame_info *fi)
 {
   CORE_ADDR sigcaller_pc;
-
-  fi->pc = 0;
+  CORE_ADDR pc = 0;
   if (next_fromleaf)
     {
-      fi->pc = ADDR_BITS_REMOVE (read_register (S390_RETADDR_REGNUM));
+      pc = ADDR_BITS_REMOVE (read_register (S390_RETADDR_REGNUM));
       /* fix signal handlers */
     }
-  else if (fi->next && fi->next->pc)
-    fi->pc = s390_frame_saved_pc_nofix (fi->next);
-  if (fi->pc && fi->next && fi->next->frame &&
-      s390_is_sigreturn (fi->pc, fi->next, NULL, &sigcaller_pc))
+  else if (get_next_frame (fi) && get_frame_pc (get_next_frame (fi)))
+    pc = s390_frame_saved_pc_nofix (get_next_frame (fi));
+  if (pc && get_next_frame (fi) && get_frame_base (get_next_frame (fi))
+      && s390_is_sigreturn (pc, get_next_frame (fi), NULL, &sigcaller_pc))
     {
-      fi->pc = sigcaller_pc;
+      pc = sigcaller_pc;
     }
-
+  return pc;
 }
 
 void
