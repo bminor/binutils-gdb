@@ -1,3 +1,8 @@
+Sun Aug 18 13:29:48 1996  Fred Fish  <fnf@cygnus.com>
+
+	* tests2.exp: Remove mips-sgi-irix* setup_xfail for
+	"real write 4" and "real write 8".
+
 Mon Jun 10 14:04:05 1996  Fred Fish  <fnf@cygnus.com>
 
 	* tests1.exp (test_modes): Remove *-*-* setup_sfail for 
