@@ -1,3 +1,9 @@
+Tue Sep  5 16:09:59 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sparc-dis.c (X_DISP19): Define.
+	(print_insn, case 'G'): Use it.
+	(print_insn, case 'L'): Sign extend displacement.
+
 Mon Sep  4 14:28:46 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Run ../bfd/configure.host before AC_PROG_CC.
