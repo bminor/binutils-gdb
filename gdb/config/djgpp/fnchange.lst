@@ -1,8 +1,9 @@
-@V@/bfd/ChangeLog-0001 @V@/bfd/ChangeLog.0001
 @V@/bfd/ChangeLog-9193 @V@/bfd/ChangeLog.9193
 @V@/bfd/ChangeLog-9495 @V@/bfd/ChangeLog.9495
 @V@/bfd/ChangeLog-9697 @V@/bfd/ChangeLog.9697
 @V@/bfd/ChangeLog-9899 @V@/bfd/ChangeLog.9899
+@V@/bfd/ChangeLog-0001 @V@/bfd/ChangeLog.0001
+@V@/bfd/ChangeLog-0203 @V@/bfd/ChangeLog.0203
 @V@/bfd/coff-tic30.c @V@/bfd/cofftic30.c
 @V@/bfd/coff-tic4x.c @V@/bfd/cofftic40.c
 @V@/bfd/coff-tic54x.c @V@/bfd/cofftic54x.c
@@ -60,6 +61,7 @@
 @V@/gdb/ChangeLog-2000 @V@/gdb/ChangeLog.000
 @V@/gdb/ChangeLog-2001 @V@/gdb/ChangeLog.001
 @V@/gdb/ChangeLog-2002 @V@/gdb/ChangeLog.002
+@V@/gdb/ChangeLog-2003 @V@/gdb/ChangeLog.003
 @V@/gdb/ChangeLog-3.x @V@/gdb/ChangeLog.3-x
 @V@/gdb/ada-exp.tab.c @V@/gdb/ada-exp_tab.c
 @V@/gdb/amd64fbsd-nat.c @V@/gdb/a64fb-nat.c
