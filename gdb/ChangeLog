@@ -1,3 +1,11 @@
+Tue Jan  3 16:52:03 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* ch-typeprint.c (chill_type_print_base):  Get names of PTR and
+	BOOL from TYPE_NAME.
+	* ch-valprint.c (chill_print_type_scalar):  New function, to handle
+	TYPE_CODE_RANGE better than print_type_scalar does.
+	(chill_val_print_array_elements):  Use above new function.
+
 Mon Jan  2 15:02:51 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* remote-udi.c (udi_load): Tell symbol_file_add that the

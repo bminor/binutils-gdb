@@ -36,6 +36,30 @@ chill_print_value_fields PARAMS ((struct type *, char *, GDB_FILE *, int, int,
 				  enum val_prettyprint, struct type **));
 
 
+/* Print integral scalar data VAL, of type TYPE, onto stdio stream STREAM.
+   Used to print data from type structures in a specified type.  For example,
+   array bounds may be characters or booleans in some languages, and this
+   allows the ranges to be printed in their "natural" form rather than as
+   decimal integer values. */
+
+void
+chill_print_type_scalar (type, val, stream)
+     struct type *type;
+     LONGEST val;
+     GDB_FILE *stream;
+{
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_RANGE:
+      if (TYPE_TARGET_TYPE (type))
+	{
+	  chill_print_type_scalar (TYPE_TARGET_TYPE (type), val, stream);
+	  return;
+	}
+    }
+  print_type_scalar (type, val, stream);
+}
+
 /* Print the elements of an array.
    Similar to val_print_array_elements, but prints
    element indexes (in Chill syntax). */
@@ -99,11 +123,12 @@ chill_val_print_array_elements (type, valaddr, address, stream,
 	}
 
       fputs_filtered ("(", stream);
-      print_type_scalar (index_type, low_bound + i, stream);
+      chill_print_type_scalar (index_type, low_bound + i, stream);
       if (reps > 1)
 	{
 	  fputs_filtered (":", stream);
-	  print_type_scalar (index_type, low_bound + i + reps - 1, stream);
+	  chill_print_type_scalar (index_type, low_bound + i + reps - 1,
+				   stream);
 	  fputs_filtered ("): ", stream);
 	  val_print (elttype, valaddr + i * eltlen, 0, stream, format,
 		     deref_ref, recurse + 1, pretty);
@@ -323,7 +348,7 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	      {
 		if (need_comma)
 		  fputs_filtered (", ", stream);
-		print_type_scalar (range, i, stream);
+		chill_print_type_scalar (range, i, stream);
 		need_comma = 1;
 
 		/* Look for a continuous range of true elements. */
@@ -334,7 +359,7 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 		    while (i+1 <= high_bound
 			   && value_bit_index (type, valaddr, ++i))
 		      j = i;
-		    print_type_scalar (range, j, stream);
+		    chill_print_type_scalar (range, j, stream);
 		  }
 	      }
 	  }

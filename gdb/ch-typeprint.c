@@ -106,7 +106,8 @@ chill_type_print_base (type, stream, show, level)
       case TYPE_CODE_PTR:
 	if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_VOID)
 	  {
-	    fprintf_filtered (stream, "PTR");
+	    fprintf_filtered (stream,
+			      TYPE_NAME (type) ? TYPE_NAME (type) : "PTR");
 	    break;
 	  }
 	fprintf_filtered (stream, "REF ");
@@ -118,7 +119,8 @@ chill_type_print_base (type, stream, show, level)
 	   anyone ever fixes the compiler to give us the real names
 	   in the presence of the chill equivalent of typedef (assuming
 	   there is one).  */
-	fprintf_filtered (stream, "BOOL");
+	fprintf_filtered (stream,
+			  TYPE_NAME (type) ? TYPE_NAME (type) : "BOOL");
 	break;
 
       case TYPE_CODE_ARRAY:
