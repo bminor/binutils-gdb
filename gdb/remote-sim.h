@@ -43,7 +43,10 @@ typedef struct sim_state *SIM_DESC;
 /* Initialize the simulator.  This function is called when the simulator
    is selected from the command line.  ARGV is passed from the command line
    and can be used to select whatever run time options the simulator provides.
-   ARGV is the standard NULL terminated array of pointers.  */
+   ARGV is the standard NULL terminated array of pointers, with argv[0]
+   being the program name.
+   The result is a descriptor that must be passed back to the other sim_foo
+   functions.  */
 
 SIM_DESC sim_open PARAMS ((char **argv));
 
@@ -111,11 +114,15 @@ void sim_stop_reason PARAMS ((SIM_DESC sd, enum sim_stop *reason, int *sigrc));
 
 void sim_resume PARAMS ((SIM_DESC sd, int step, int siggnal));
 
-/* Passthru for other commands that the simulator might support. */
+/* Passthru for other commands that the simulator might support.
+   If SD is NULL, the command is to be interpreted as refering to
+   the global state, however the simulator defines that.  */
 
 void sim_do_command PARAMS ((SIM_DESC sd, char *cmd));
 
-/* Provide simulator with a standard host_callback_struct. */
+/* Provide simulator with a standard host_callback_struct.
+   If SD is NULL, the command is to be interpreted as refering to
+   the global state, however the simulator defines that.  */
 
 void sim_set_callbacks PARAMS ((SIM_DESC sd, struct host_callback_struct *));
 
