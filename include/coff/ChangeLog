@@ -1,3 +1,12 @@
+Tue Sep 12 12:08:20 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* internal.h (struct internal_syment): Change n_numaux field from
+	char to unsigned char.
+
+Fri Sep  1 15:39:36 1995  Kazumoto Kojima  <kkojima@info.kanagawa-u.ac.jp>
+
+	* mips.h (struct rpdr_ext): Define.
+
 Thu Aug 31 16:51:50 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* internal.h (internal_aouthdr, internal_filehdr):
