@@ -1,6 +1,5 @@
 /* tc-mcore.c -- Assemble code for M*Core
-
-   Copyright (C) 1993,1994, 1999 Free Software Foundation.
+   Copyright (C) 1999 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -2117,7 +2116,8 @@ tc_gen_reloc (section, fixp)
   }
 
   rel = (arelent *) xmalloc (sizeof (arelent));
-  rel->sym_ptr_ptr = & fixp->fx_addsy->bsym;
+  rel->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  *rel->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   rel->address = fixp->fx_frag->fr_address + fixp->fx_where;
   /* Always pass the addend along!  */
   rel->addend = fixp->fx_addnumber;

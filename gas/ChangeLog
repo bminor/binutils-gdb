@@ -1,3 +1,16 @@
+1999-06-22  Jonathan Larmour  <jlarmour@cygnus.co.uk>
+
+	* config/tc-arc.c (tc_gen_reloc): Use symbol_get_bfdsym to get at
+	the symbol, rather than accessing the bsym member.
+	* config/tc-d10v.c (tc_gen_reloc): Likewise.
+	* config/tc-d30v.c (tc_gen_reloc): Likewise.
+	* config/tc-mcore.c (tc_gen_reloc): Likewise.
+	* config/tc-mn10200.c (tc_gen_reloc): Likewise.
+	* config/tc-mn10300.c (tc_gen_reloc): Likewise.
+	* config/tc-ns32k.c (tc_gen_reloc): Likewise.
+	* config/tc-tic30.c (tc_gen_reloc): Likewise.
+	* config/tc-v850.c (tc_gen_reloc): Likewise.
+
 Mon Jun 21 16:45:19 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* tc-hppa.c (elf_hppa_reloc_type): Renamed from elf32_hppa_reloc_type.
