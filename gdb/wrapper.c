@@ -50,6 +50,8 @@ static int wrap_value_fetch_lazy (char *);
 
 static int wrap_value_equal (char *);
 
+static int wrap_value_assign (char *);
+
 static int wrap_value_subscript (char *);
 
 static int wrap_value_ind (char *opaque_arg);
@@ -163,6 +165,42 @@ wrap_value_equal (char *a)
   val2 = (value_ptr) (args)->args[1].pointer;
 
   (args)->result.integer = value_equal (val1, val2);
+  return 1;
+}
+
+int
+gdb_value_assign (val1, val2, result)
+     value_ptr val1;
+     value_ptr val2;
+     value_ptr *result;
+{
+  struct gdb_wrapper_arguments args;
+
+  args.args[0].pointer = val1;
+  args.args[1].pointer = val2;
+
+  if (!catch_errors ((catch_errors_ftype *) wrap_value_assign, &args,
+		     "", RETURN_MASK_ERROR))
+    {
+      /* An error occurred */
+      return 0;
+    }
+
+  *result = (value_ptr) args.result.pointer;
+  return 1;
+}
+
+static int
+wrap_value_assign (a)
+     char *a;
+{
+  struct gdb_wrapper_arguments *args = (struct gdb_wrapper_arguments *) a;
+  value_ptr val1, val2;
+
+  val1 = (value_ptr) (args)->args[0].pointer;
+  val2 = (value_ptr) (args)->args[1].pointer;
+
+  (args)->result.pointer = value_assign (val1, val2);
   return 1;
 }
 

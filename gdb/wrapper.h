@@ -31,6 +31,8 @@ extern int gdb_value_fetch_lazy (value_ptr);
 
 extern int gdb_value_equal (value_ptr, value_ptr, int *);
 
+extern int gdb_value_assign (value_ptr, value_ptr, value_ptr *);
+
 extern int gdb_value_subscript (value_ptr, value_ptr, value_ptr *);
 
 extern int gdb_value_ind (value_ptr val, value_ptr * rval);

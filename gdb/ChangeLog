@@ -1,3 +1,13 @@
+2000-11-06  Fernando Nasser  <fnasser@totem.toronto.redhat.com>
+
+	* wrapper.c (gdb_value_assign): New function.  Longjump-free
+	version of value_assign.
+	(wrap_value_assign): New function. Wrapper for value_assign.
+	* wrapper.h: Add declaration for the above.
+	* varobj.c (varobj_set_value): Use gdb_value_assign, not
+	value_assign which can longjump.  Do not change varobj value if
+	assign fails.
+	
 2000-11-06  Fernando Nasser  <fnasser@cygnus.com>
 
 	From  Steven Johnson  <sbjohnson@ozemail.com.au>:

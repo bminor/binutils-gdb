@@ -818,7 +818,8 @@ varobj_set_value (struct varobj *var, char *expression)
 	}
 
       VALUE_ADDRESS (temp) += offset;
-      val = value_assign (temp, value);
+      if (!gdb_value_assign (temp, value, &val))
+	return 0;
       VALUE_ADDRESS (val) -= offset;
       value_free (var->value);
       release_value (val);
