@@ -66,6 +66,38 @@ install-info: all-info
 		|| exit 1 ; \
 	done
 
+STAGESTUFF = *.info* gdb-all.texi gdbVN.m4
+
+# Copy the object files from a particular stage into a subdirectory.
+stage1: force
+	-mkdir stage1
+	-mv $(STAGESTUFF) stage1
+
+stage2: force
+	-mkdir stage2
+	-mv $(STAGESTUFF) stage2
+
+stage3: force
+	-mkdir stage3
+	-mv $(STAGESTUFF) stage3
+
+against=stage2
+
+comparison: force
+	for i in $(STAGESTUFF) ; do cmp $$i $(against)/$$i ; done
+
+de-stage1: force
+	- (cd stage1 ; mv -f * ..)
+	- rmdir stage1
+
+de-stage2: force
+	- (cd stage2 ; mv -f * ..)
+	- rmdir stage2
+
+de-stage3: force
+	- (cd stage3 ; mv -f * ..)
+	- rmdir stage3
+
 clean:
 	rm -f gdb.dvi rdl-apps.texi gdb-all* gdb.info* gdbVN.m4
 	rm -f gdb-internals gdbint.?? gdbint.??? gdbint.info
