@@ -1,3 +1,20 @@
+Thu Dec 26 15:15:21 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* sparclet-rom.c: Remove includes of Unix system files.
+	  Add function "sparclet_supply_register" so that parse_register_dump
+	  will not seg-fault by calling a null function pointer.
+	  Remove XMODEM support (unfinished work?).
+	  Remove flag "MO_HANDLE_NL", so monitor's output can be read by humans.
+	  Add fill command.
+	  Remove colon from getreg.resp_delim so PSR register will work.
+	  Remove pointer to sparclet_load (downloading SREC's doesn't work).
+	  Null out local register names for %g0, all %cc and all %asr regs,
+	  since the monitor can't report them.  Will return zero instead.
+	* sparclet-stub.c: New -- remote protocol support for sparclet CPU.
+	* config/sparc/tm-sparclet.h: Re-arrange REGISTER_NAMES:
+	  Add back %g0 and %psr, add %cc coprocessor regs, add %asr regs.
+	  Adjust NUM_REGS and REGISTER_BYTES accordingly
+
 Tue Dec 24 10:27:37 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* remote-e7000.c (want_h8300h, want_nopc_h8300h): Renamed

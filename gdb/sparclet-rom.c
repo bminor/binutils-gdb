@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "symtab.h"
 #include "symfile.h" /* for generic_load */
 
+#if 0	/* Do we really need all this Unix stuff here? */
 #if !defined (HAVE_TERMIOS) && !defined (HAVE_TERMIO) && !defined (HAVE_SGTTY)
 #define HAVE_SGTTY
 #endif
@@ -39,6 +40,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <sys/file.h>
 #include <signal.h>
 #include <sys/stat.h>
+#endif /* Unix stuff */
 
 #define USE_GENERIC_LOAD
 #define USE_SW_BREAKS
@@ -64,7 +66,9 @@ sparclet_load_gen (filename, from_tty)
   inferior_pid = 0;             /* No process now */
 }
 
-#else
+#endif
+
+#ifdef USE_XMODEM_LOAD
 
 static void
 sparclet_xmodem_load (desc, file, hashmark)
@@ -130,7 +134,7 @@ sparclet_load (desc, file, hashmark)
 {
 ???
 }
-#endif /* USE_GENERIC_LOAD */
+#endif /* USE_XMODEM_LOAD */
 
 /* This array of registers need to match the indexes used by GDB.
    This exists because the various ROM monitors use different strings
@@ -160,6 +164,26 @@ y:   0x00000000
 /* monitor wants lower case */
 static char *sparclet_regnames[NUM_REGS] = REGISTER_NAMES;
 
+
+/* Function: sparclet_supply_register
+   Just returns with no action.
+   This function is required, because parse_register_dump (monitor.c)
+   expects to be able to call it.  If we don't supply something, it will
+   call a null pointer and core-dump.  Since this function does not 
+   actually do anything, GDB will request the registers individually.  */
+
+static void
+sparclet_supply_register (regname, regnamelen, val, vallen)
+     char *regname;
+     int regnamelen;
+     char *val;
+     int vallen;
+{
+  return;
+}
+
+
+
 /* Define the monitor command strings. Since these are passed directly
    through to a printf style function, we may include formatting
    strings. We also need a CR or LF on the end.  */
@@ -170,32 +194,31 @@ static char *sparclet_inits[] = {"\n\r\r\n", NULL};
 
 static struct monitor_ops sparclet_cmds =
 {
-  MO_CLR_BREAK_USES_ADDR
-    | MO_HEX_PREFIX
-    | MO_HANDLE_NL
-    | MO_NO_ECHO_ON_OPEN
-    | MO_NO_ECHO_ON_SETMEM
-    | MO_RUN_FIRST_TIME
-    | MO_GETMEM_READ_SINGLE,    /* flags */
-  sparclet_inits,			/* Init strings */
+  MO_CLR_BREAK_USES_ADDR |
+  MO_HEX_PREFIX          |
+  MO_NO_ECHO_ON_OPEN     |
+  MO_NO_ECHO_ON_SETMEM   |
+  MO_RUN_FIRST_TIME      |
+  MO_GETMEM_READ_SINGLE,	/* flags */
+  sparclet_inits,		/* Init strings */
   "cont\r",			/* continue command */
   "step\r",			/* single step */
-  "\r",			/* break interrupts the program */
-  "+bp %x\r",				/* set a breakpoint */
+  "\r",				/* break interrupts the program */
+  "+bp %x\r",			/* set a breakpoint */
 				/* can't use "br" because only 2 hw bps are supported */
-  "-bp %x\r",				/* clear a breakpoint */
-  "-bp\r",				/* clear all breakpoints */
-  NULL,				/* fill (start end val) */
+  "-bp %x\r",			/* clear a breakpoint */
+  "-bp\r",			/* clear all breakpoints */
+  "fill %x -n %x -v %x -b\r",	/* fill (start length val) */
 				/* can't use "fi" because it takes words, not bytes */
   {
     /* ex [addr] [-n count] [-b|-s|-l]          default: ex cur -n 1 -b */
-    "ex %x -b\r%x\rq\r",                        /* setmem.cmdb (addr, value) */
-    "ex %x -s\r%x\rq\r",                /* setmem.cmdw (addr, value) */
-    "ex %x -l\r%x\rq\r",         
+    "ex %x -b\r%x\rq\r",	/* setmem.cmdb (addr, value) */
+    "ex %x -s\r%x\rq\r",	/* setmem.cmdw (addr, value) */
+    "ex %x -l\r%x\rq\r",        /* setmem.cmdl (addr, value) */
     NULL,			/* setmem.cmdll (addr, value) */
-    NULL, /*": ",			/* setmem.resp_delim */
-    NULL, /*"? ",			/* setmem.term */
-    NULL, /*"q\r",			/* setmem.term_cmd */
+    NULL, /*": " */		/* setmem.resp_delim */
+    NULL, /*"? " */		/* setmem.term */
+    NULL, /*"q\r" */		/* setmem.term_cmd */
   },
   {
     /* since the parsing of multiple bytes is difficult due to
@@ -205,7 +228,7 @@ static struct monitor_ops sparclet_cmds =
     "ex %x -n 1 -b\r",		/* getmem.cmdb (addr, #bytes) */
     "ex %x -n 1 -s\r",		/* getmem.cmdw (addr, #swords) */
     "ex %x -n 1 -l\r",		/* getmem.cmdl (addr, #words) */
-    NULL,		/* getmem.cmdll (addr, #dwords) */
+    NULL,			/* getmem.cmdll (addr, #dwords) */
     ": ",			/* getmem.resp_delim */
     NULL,			/* getmem.term */
     NULL,			/* getmem.term_cmd */
@@ -217,29 +240,29 @@ static struct monitor_ops sparclet_cmds =
     NULL			/* setreg.term_cmd */
   },
   {
-    "reg %s\r",		/* getreg.cmd (name) */
-    ": ",			/* getreg.resp_delim */
+    "reg %s\r",			/* getreg.cmd (name) */
+    " ",			/* getreg.resp_delim */
     NULL,			/* getreg.term */
     NULL,			/* getreg.term_cmd */
   },
   "reg\r",			/* dump_registers */
   "\\(\\w+\\)=\\([0-9a-fA-F]+\\)",	/* register_pattern */
-  NULL,				/* supply_register */
+  sparclet_supply_register,	/* supply_register */
 #ifdef USE_GENERIC_LOAD
   NULL,				/* load_routine (defaults to SRECs) */
   NULL,				/* download command */
   NULL,				/* load response */
 #else
-  sparclet_load,			/* load_routine (defaults to SRECs) */
-  /* load [c|a] [s|f|r] [addr count] */
-  "load a s %x\r",			/* download command */
-  "load: ",		/* load response */
+  NULL,				/* load_routine (defaults to SRECs) */
+  /* load [c|a] [s | f | r [addr count]] */
+  "load c s\r",			/* download command (srecs on console) */
+  "load: ",			/* load response */
 #endif
-  "monitor>",				/* monitor command prompt */
+  "monitor>",			/* monitor command prompt */
   /* yikes!  gdb core dumps without this delimitor!! */
-  "\r",			/* end-of-command delimitor */
+  "\r",				/* end-of-command delimitor */
   NULL,				/* optional command terminator */
-  &sparclet_ops,			/* target operations */
+  &sparclet_ops,		/* target operations */
   SERIAL_1_STOPBITS,		/* number of stop bits */
   sparclet_regnames,		/* registers names */
   MONITOR_OPS_MAGIC		/* magic */
@@ -256,8 +279,16 @@ sparclet_open (args, from_tty)
 void
 _initialize_sparclet ()
 {
-  init_monitor_ops (&sparclet_ops);
+  int i;
 
+  for (i = 0; i < NUM_REGS; i++)
+    if (sparclet_regnames[i][0] == 'c' ||
+	sparclet_regnames[i][0] == 'a')
+      sparclet_regnames[i] = 0;		/* mon can't report c* or a* regs */
+
+  sparclet_regnames[0] = 0;		/* mon won't report %G0 */
+
+  init_monitor_ops (&sparclet_ops);
   sparclet_ops.to_shortname = "sparclet"; /* for the target command */
   sparclet_ops.to_longname = "SPARC Sparclet monitor";
 #ifdef USE_GENERIC_LOAD
