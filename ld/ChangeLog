@@ -1,3 +1,8 @@
+Wed Mar  1 13:51:16 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emulparams/gld960coff.sh (COFF_CTORS): Define.
+	* scripttempl/i960.sc: Use COFF_CTORS if CONSTRUCTING.
+
 Tue Feb 28 12:42:56 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in (i[345]86-*-linuxelf*): New target.  Use i386-lelf.
