@@ -21,27 +21,28 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#include "gdb_string.h"
+#include "arch-utils.h"
+#include "command.h"
+#include "dummy-frame.h"
+#include "doublest.h"
+#include "floatformat.h"
 #include "frame.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
 #include "inferior.h"
+#include "gdbcmd.h"
 #include "gdbcore.h"
 #include "objfiles.h"
-#include "target.h"
-#include "floatformat.h"
+#include "osabi.h"
+#include "regcache.h"
+#include "reggroups.h"
 #include "symfile.h"
 #include "symtab.h"
-#include "gdbcmd.h"
-#include "command.h"
-#include "arch-utils.h"
-#include "regcache.h"
-#include "doublest.h"
+#include "target.h"
 #include "value.h"
+
 #include "gdb_assert.h"
-#include "reggroups.h"
-#include "dummy-frame.h"
-#include "osabi.h"
+#include "gdb_string.h"
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"
@@ -216,19 +217,6 @@ static const char *valid_flavors[] =
 };
 static const char *disassembly_flavor = att_flavor;
 
-
-/* Determine whether the function invocation represented by FRAME does
-   not have a frame on the stack associated with it.  If it does not,
-   return non-zero, otherwise return zero.  */
-
-static int
-i386_frameless_function_invocation (struct frame_info *frame)
-{
-  if (get_frame_type (frame) == SIGTRAMP_FRAME)
-    return 0;
-
-  return frameless_look_for_prologue (frame);
-}
 
 /* Use the program counter to determine the contents and size of a
    breakpoint instruction.  Return a pointer to a string of bytes that
@@ -777,7 +765,7 @@ i386_frame_this_id (struct frame_info *next_frame, void **this_cache,
   if (inside_entry_file (cache->pc))
     return;
 
-  (*this_id) = frame_id_build (cache->base, cache->pc);
+  (*this_id) = frame_id_build (cache->base + 8, cache->pc);
 }
 
 static void
@@ -916,7 +904,7 @@ i386_sigtramp_frame_this_id (struct frame_info *next_frame, void **this_cache,
   struct i386_frame_cache *cache =
     i386_sigtramp_frame_cache (next_frame, this_cache);
 
-  (*this_id) = frame_id_build (cache->base, frame_pc_unwind (next_frame));
+  (*this_id) = frame_id_build (cache->base + 8, frame_pc_unwind (next_frame));
 }
 
 static void
@@ -969,6 +957,12 @@ static const struct frame_base i386_frame_base =
   i386_frame_base_address
 };
 
+static void
+i386_save_dummy_frame_tos (CORE_ADDR sp)
+{
+  generic_save_dummy_frame_tos (sp + 8);
+}
+
 static struct frame_id
 i386_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
@@ -978,7 +972,7 @@ i386_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
   frame_unwind_register (next_frame, I386_EBP_REGNUM, buf);
   fp = extract_typed_address (buf, builtin_type_void_data_ptr);
 
-  return frame_id_build (fp, frame_pc_unwind (next_frame));
+  return frame_id_build (fp + 8, frame_pc_unwind (next_frame));
 }
 
 
@@ -1701,8 +1695,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_function_start_offset (gdbarch, 0);
 
   set_gdbarch_frame_args_skip (gdbarch, 8);
-  set_gdbarch_frameless_function_invocation (gdbarch,
-                                           i386_frameless_function_invocation);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_pc_in_sigtramp);
 
@@ -1714,7 +1706,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_print_insn (gdbarch, i386_print_insn);
 
   set_gdbarch_unwind_dummy_id (gdbarch, i386_unwind_dummy_id);
-  set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
+  set_gdbarch_save_dummy_frame_tos (gdbarch, i386_save_dummy_frame_tos);
 
   set_gdbarch_unwind_pc (gdbarch, i386_unwind_pc);
 

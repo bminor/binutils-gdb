@@ -1,5 +1,17 @@
 2003-05-04  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c: Put header files in alphabetical orde.
+	(i386_frameless_function_invocation): Removed.
+	(i386_frame_this_id, i386_sigtramp_frame_this_id): Adjust stack
+	address when building the frame ID.
+	(i386_save_dummy_frame_tos): New function.
+	(i386_unwind_dummy_id): Adjust stack address when building the
+	frame ID.
+	(i386_gdbarch_init): Don't set frameless_function_invocation.  Set
+	save_dummy_frame_tos to i386_save_dummy_frame_tos.
+
+2003-05-04  Mark Kettenis  <kettenis@gnu.org>
+
 	* i386-tdep.c (i386_gdbarch_init): Don't set deprecated_fp_regnum.
 
 2003-05-04  Mark Kettenis  <kettenis@gnu.org>
