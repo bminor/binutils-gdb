@@ -61,6 +61,7 @@ static struct gdbarch_data *frame_base_data;
 struct frame_base_table
 {
   frame_base_p_ftype **p;
+  frame_base_sniffer_ftype **sniffer;
   const struct frame_base *default_base;
   int nr;
 };
@@ -79,6 +80,7 @@ frame_base_free (struct gdbarch *gdbarch, void *data)
   struct frame_base_table *table =
     gdbarch_data (gdbarch, frame_base_data);
   xfree (table->p);
+  xfree (table->sniffer);
   xfree (table);
 }
 
@@ -98,11 +100,16 @@ frame_base_table (struct gdbarch *gdbarch)
 
 /* Append a predicate to the end of the table.  */
 static void
-append_predicate (struct frame_base_table *table, frame_base_p_ftype *p)
+append_predicate (struct frame_base_table *table, frame_base_p_ftype *p,
+		  frame_base_sniffer_ftype *sniffer)
 {
   table->p = xrealloc (table->p, ((table->nr + 1)
 				  * sizeof (frame_base_p_ftype *)));
+  table->sniffer = xrealloc (table->sniffer,
+			     ((table->nr + 1)
+			      * sizeof (frame_base_sniffer_ftype *)));
   table->p[table->nr] = p;
+  table->sniffer[table->nr] = sniffer;
   table->nr++;
 }
 
@@ -111,7 +118,15 @@ frame_base_append_predicate (struct gdbarch *gdbarch,
 			     frame_base_p_ftype *p)
 {
   struct frame_base_table *table = frame_base_table (gdbarch);
-  append_predicate (table, p);
+  append_predicate (table, p, NULL);
+}
+
+void
+frame_base_append_sniffer (struct gdbarch *gdbarch,
+			   frame_base_sniffer_ftype *sniffer)
+{
+  struct frame_base_table *table = frame_base_table (gdbarch);
+  append_predicate (table, NULL, sniffer);
 }
 
 void
@@ -123,13 +138,18 @@ frame_base_set_default (struct gdbarch *gdbarch,
 }
 
 const struct frame_base *
-frame_base_find_by_pc (struct gdbarch *gdbarch, CORE_ADDR pc)
+frame_base_find_by_frame (struct frame_info *next_frame)
 {
-  int i;
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
   struct frame_base_table *table = frame_base_table (gdbarch);
+  int i;
   for (i = 0; i < table->nr; i++)
     {
-      const struct frame_base *desc = table->p[i] (pc);
+      const struct frame_base *desc = NULL;
+      if (table->p[i] != NULL)
+	desc = table->p[i] (frame_pc_unwind (next_frame));
+      else if (table->sniffer[i] != NULL)
+	desc = table->sniffer[i] (next_frame);
       if (desc != NULL)
 	return desc;
     }

@@ -1,5 +1,33 @@
 2003-07-15  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (get_frame_id): Use frame_unwind_find_by_frame.
+	(frame_register_unwind, create_new_frame): Ditto.
+	(legacy_get_prev_frame, get_frame_type): Ditto.
+	(get_frame_base_address): Use frame_base_find_by_frame.
+	(get_frame_locals_address): Use frame_base_find_by_frame.
+	(get_frame_args_address): Use frame_base_find_by_frame.
+	* frame-base.h (frame_base_sniffer_ftype): Declare.
+	(frame_base_append_sniffer): Declare.
+	(frame_base_find_by_frame): Replace frame_base_find_by_pc.
+	* frame-base.c (append_predicate): Add a "sniffer" parameter.
+	(frame_base_append_sniffer): New function.
+	(frame_base_append_predicate): Add a NULL sniffer.
+	(frame_base_find_by_frame): Replace "frame_base_find_by_pc".
+	(struct frame_base_table): Add "sniffer".
+	(frame_base_free): Free the "sniffer" table.
+	* frame-unwind.h (frame_unwind_sniffer_ftype): Define.
+	(frame_unwind_append_sniffer): Declare.
+	(frame_unwind_find_by_frame): Replace frame_unwind_find_by_pc.
+	* frame-unwind.c (frame_unwind_free): Free the "sniffer" table.
+	(struct frame_unwind_table): Add "sniffer", delete "middle".
+	(append_predicate): Add "sniffer" parameter, append the sniffer.
+	(frame_unwind_init): Update append_predicate call.
+	(frame_unwind_append_sniffer): New function.
+	(frame_unwind_append_predicate): Update append_predicate call.
+	(frame_unwind_find_by_frame): Replace frame_unwind_find_by_pc.
+
+2003-07-15  Andrew Cagney  <cagney@redhat.com>
+
 	* frame.c (get_prev_frame): Move disabled inside_entry_func to
 	before code inhibiting repeated unwind attempts.  Add to
 	commentary on that test's problems.

@@ -229,8 +229,7 @@ get_frame_id (struct frame_info *fi)
       /* Find the unwinder.  */
       if (fi->unwind == NULL)
 	{
-	  fi->unwind = frame_unwind_find_by_pc (current_gdbarch,
-						get_frame_pc (fi));
+	  fi->unwind = frame_unwind_find_by_frame (fi->next);
 	  /* FIXME: cagney/2003-04-02: Rather than storing the frame's
 	     type in the frame, the unwinder's type should be returned
 	     directly.  Unfortunatly, legacy code, called by
@@ -517,8 +516,7 @@ frame_register_unwind (struct frame_info *frame, int regnum,
   /* Find the unwinder.  */
   if (frame->unwind == NULL)
     {
-      frame->unwind = frame_unwind_find_by_pc (current_gdbarch,
-					       get_frame_pc (frame));
+      frame->unwind = frame_unwind_find_by_frame (frame->next);
       /* FIXME: cagney/2003-04-02: Rather than storing the frame's
 	 type in the frame, the unwinder's type should be returned
 	 directly.  Unfortunatly, legacy code, called by
@@ -1233,7 +1231,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 
   /* Select/initialize both the unwind function and the frame's type
      based on the PC.  */
-  fi->unwind = frame_unwind_find_by_pc (current_gdbarch, pc);
+  fi->unwind = frame_unwind_find_by_frame (fi->next);
   if (fi->unwind->type != UNKNOWN_FRAME)
     fi->type = fi->unwind->type;
   else
@@ -1392,8 +1390,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 
       /* Set the unwind functions based on that identified PC.  Ditto
          for the "type" but strongly prefer the unwinder's frame type.  */
-      prev->unwind = frame_unwind_find_by_pc (current_gdbarch,
-					      get_frame_pc (prev));
+      prev->unwind = frame_unwind_find_by_frame (prev->next);
       if (prev->unwind->type == UNKNOWN_FRAME)
 	prev->type = frame_type_from_pc (get_frame_pc (prev));
       else
@@ -1541,8 +1538,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
              to the new frame code.  Implement FRAME_CHAIN the way the
              new frame will.  */
 	  /* Find PREV frame's unwinder.  */
-	  prev->unwind = frame_unwind_find_by_pc (current_gdbarch,
-						  frame_pc_unwind (this_frame));
+	  prev->unwind = frame_unwind_find_by_frame (this_frame->next);
 	  /* FIXME: cagney/2003-04-02: Rather than storing the frame's
 	     type in the frame, the unwinder's type should be returned
 	     directly.  Unfortunatly, legacy code, called by
@@ -1703,8 +1699,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
      If there isn't a FRAME_CHAIN, the code above will have already
      done this.  */
   if (prev->unwind == NULL)
-    prev->unwind = frame_unwind_find_by_pc (current_gdbarch,
-					    get_frame_pc (prev));
+    prev->unwind = frame_unwind_find_by_frame (prev->next);
 
   /* If the unwinder provides a frame type, use it.  Otherwize
      continue on to that heuristic mess.  */
@@ -2117,7 +2112,7 @@ get_frame_base_address (struct frame_info *fi)
   if (get_frame_type (fi) != NORMAL_FRAME)
     return 0;
   if (fi->base == NULL)
-    fi->base = frame_base_find_by_pc (current_gdbarch, get_frame_pc (fi));
+    fi->base = frame_base_find_by_frame (fi->next);
   /* Sneaky: If the low-level unwind and high-level base code share a
      common unwinder, let them share the prologue cache.  */
   if (fi->base->unwind == fi->unwind)
@@ -2133,7 +2128,7 @@ get_frame_locals_address (struct frame_info *fi)
     return 0;
   /* If there isn't a frame address method, find it.  */
   if (fi->base == NULL)
-    fi->base = frame_base_find_by_pc (current_gdbarch, get_frame_pc (fi));
+    fi->base = frame_base_find_by_frame (fi->next);
   /* Sneaky: If the low-level unwind and high-level base code share a
      common unwinder, let them share the prologue cache.  */
   if (fi->base->unwind == fi->unwind)
@@ -2151,7 +2146,7 @@ get_frame_args_address (struct frame_info *fi)
     return 0;
   /* If there isn't a frame address method, find it.  */
   if (fi->base == NULL)
-    fi->base = frame_base_find_by_pc (current_gdbarch, get_frame_pc (fi));
+    fi->base = frame_base_find_by_frame (fi->next);
   /* Sneaky: If the low-level unwind and high-level base code share a
      common unwinder, let them share the prologue cache.  */
   if (fi->base->unwind == fi->unwind)
@@ -2190,8 +2185,7 @@ get_frame_type (struct frame_info *frame)
     {
       /* Initialize the frame's unwinder because it is that which
          provides the frame's type.  */
-      frame->unwind = frame_unwind_find_by_pc (current_gdbarch,
-					       get_frame_pc (frame));
+      frame->unwind = frame_unwind_find_by_frame (frame->next);
       /* FIXME: cagney/2003-04-02: Rather than storing the frame's
 	 type in the frame, the unwinder's type should be returned
 	 directly.  Unfortunatly, legacy code, called by

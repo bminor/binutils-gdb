@@ -30,17 +30,21 @@ static struct gdbarch_data *frame_unwind_data;
 struct frame_unwind_table
 {
   frame_unwind_p_ftype **p;
-  int middle;
+  frame_unwind_sniffer_ftype **sniffer;
   int nr;
 };
 
 /* Append a predicate to the end of the table.  */
 static void
-append_predicate (struct frame_unwind_table *table, frame_unwind_p_ftype *p)
+append_predicate (struct frame_unwind_table *table, frame_unwind_p_ftype *p,
+		  frame_unwind_sniffer_ftype *sniffer)
 {
   table->p = xrealloc (table->p, ((table->nr + 1)
 				  * sizeof (frame_unwind_p_ftype *)));
+  table->sniffer = xrealloc (table->sniffer, ((table->nr + 1)
+					      * sizeof (frame_unwind_sniffer_ftype *)));
   table->p[table->nr] = p;
+  table->sniffer[table->nr] = sniffer;
   table->nr++;
 }
 
@@ -48,7 +52,7 @@ static void *
 frame_unwind_init (struct gdbarch *gdbarch)
 {
   struct frame_unwind_table *table = XCALLOC (1, struct frame_unwind_table);
-  append_predicate (table, dummy_frame_p);
+  append_predicate (table, dummy_frame_p, NULL);
   return table;
 }
 
@@ -58,6 +62,7 @@ frame_unwind_free (struct gdbarch *gdbarch, void *data)
   struct frame_unwind_table *table =
     gdbarch_data (gdbarch, frame_unwind_data);
   xfree (table->p);
+  xfree (table->sniffer);
   xfree (table);
 }
 
@@ -74,15 +79,31 @@ frame_unwind_append_predicate (struct gdbarch *gdbarch,
       table = frame_unwind_init (gdbarch);
       set_gdbarch_data (gdbarch, frame_unwind_data, table);
     }
-  append_predicate (table, p);
+  append_predicate (table, p, NULL);
+}
+
+void
+frame_unwind_append_sniffer (struct gdbarch *gdbarch,
+			     frame_unwind_sniffer_ftype *sniffer)
+{
+  struct frame_unwind_table *table =
+    gdbarch_data (gdbarch, frame_unwind_data);
+  if (table == NULL)
+    {
+      /* ULGH, called during architecture initialization.  Patch
+         things up.  */
+      table = frame_unwind_init (gdbarch);
+      set_gdbarch_data (gdbarch, frame_unwind_data, table);
+    }
+  append_predicate (table, NULL, sniffer);
 }
 
 const struct frame_unwind *
-frame_unwind_find_by_pc (struct gdbarch *gdbarch, CORE_ADDR pc)
+frame_unwind_find_by_frame (struct frame_info *next_frame)
 {
   int i;
-  struct frame_unwind_table *table =
-    gdbarch_data (gdbarch, frame_unwind_data);
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct frame_unwind_table *table = gdbarch_data (gdbarch, frame_unwind_data);
   if (!DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
     /* Seriously old code.  Don't even try to use this new mechanism.
        (Note: The variable USE_GENERIC_DUMMY_FRAMES is deprecated, not
@@ -91,7 +112,13 @@ frame_unwind_find_by_pc (struct gdbarch *gdbarch, CORE_ADDR pc)
     return legacy_saved_regs_unwind;
   for (i = 0; i < table->nr; i++)
     {
-      const struct frame_unwind *desc = table->p[i] (pc);
+      const struct frame_unwind *desc;
+      if (table->p[i] != NULL)
+	desc = table->p[i] (frame_pc_unwind (next_frame));
+      else if (table->sniffer[i] != NULL)
+	desc = table->sniffer[i] (next_frame);
+      else
+	internal_error (__FILE__, __LINE__, "Missing sniffer?");
       if (desc != NULL)
 	return desc;
     }
