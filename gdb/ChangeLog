@@ -1,3 +1,16 @@
+Sat Nov 12 02:26:50 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* Makefile.in (copying.o, f-exp.tab.o, dpx2-nat.o, dstread.o,
+	i386aix-nat.o, i386m3-nat.o, irix5-nat.o, lynx-nat.o, m3-nat.o,
+	mipsm3-nat.o, ns32km3-nat.o, remote-e7000.o, remote-os9k.o):
+	Add dependencies.
+	(copying.o, os9kread.o, remote.o):  Update dependencies.
+
+	* valarith.c (value_sub):  When subtracting pointers, only
+	check for a match of the pointed to element lengths.
+	Cast element length to LONGEST to obtain a signed result for
+	pointer subtractions.
+
 Fri Nov 11 10:51:07 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* ch-exp.y (yylex): Fix off-by-one error when converting string to

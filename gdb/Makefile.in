@@ -425,7 +425,7 @@ HFILES_NO_SRCDIR = buildsym.h call-cmds.h coff-solib.h defs.h dst.h environ.h \
 	vx-share/dbgRpcLib.h vx-share/ptrace.h vx-share/vxTypes.h \
 	vx-share/vxWorks.h vx-share/wait.h vx-share/xdr_ld.h \
 	vx-share/xdr_ptrace.h vx-share/xdr_rdb.h thread.h \
-	dcache.h remote-utils.h remote-sim.h top.h
+	dcache.h remote-utils.h remote-sim.h top.h somsolib.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -906,7 +906,8 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	nindy-share/Onindy.c nindy-share/nindy.c \
 	nindy-share/ttyflush.c nindy-tdep.c \
 	ns32k-pinsn.c ns32km3-nat.c osfsolib.c \
-	somread.c $(HPREAD_SOURCE) procfs.c pyr-pinsn.c pyr-tdep.c pyr-xdep.c \
+	somread.c somsolib.c $(HPREAD_SOURCE) \
+	procfs.c pyr-pinsn.c pyr-tdep.c pyr-xdep.c \
 	remote-adapt.c remote-bug.c remote-e7000.c remote-eb.c remote-es.c \
 	remote-hms.c remote-mips.c \
 	remote-mm.c remote-mon.c remote-nindy.c remote-os9k.c remote-sim.c \
@@ -1068,6 +1069,8 @@ convex-tdep.o: convex-tdep.c $(wait_h) $(defs_h) $(gdbcmd_h) \
 convex-xdep.o: convex-xdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h)
 
+copying.o: copying.c $(defs_h) $(gdbcmd_h)
+
 core-sol2.o: core-sol2.c $(command_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h
 
@@ -1085,18 +1088,18 @@ corelow.o: corelow.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 cp-valprint.o: cp-valprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(gdbtypes_h) $(symtab_h) $(value_h)
 
-dcache.o: dcache.c $(dcache_h)
+dcache.o: dcache.c $(dcache_h) $(defs_h) $(gdbcmd_h)
 
 dbxread.o: dbxread.c $(breakpoint_h) buildsym.h $(command_h) \
 	complaints.h $(defs_h) $(expression_h) gdb-stabs.h $(gdbcore_h) \
 	$(gdbtypes_h) language.h objfiles.h partial-stab.h stabsread.h \
 	symfile.h $(symtab_h) target.h
 
-dcache.o: dcache.c $(dcache_h)
-
 delta68-nat.o: delta68-nat.c $(defs_h)
 
 demangle.o: demangle.c $(defs_h) $(gdbcmd_h)
+
+dpx2-nat.o: dpx2-nat.c $(defs_h) $(gdbcore_h)
 
 dwarfread.o: dwarfread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 	$(expression_h) $(gdbtypes_h) language.h objfiles.h symfile.h \
@@ -1150,11 +1153,15 @@ hppa-tdep.o: hppa-tdep.c $(wait_h) $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 
 hppab-nat.o: hppab-nat.c $(bfd_h) $(defs_h) $(inferior_h) target.h
 hppah-nat.o: hppah-nat.c $(bfd_h) $(defs_h) $(inferior_h) target.h
+
 i386-pinsn.o: i386-pinsn.c $(bfd_h) $(dis-asm_h) $(defs_h)
 i386-tdep.o: i386-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h
+i386aix-nat.o: i386aix-nat.c $(defs_h) $(frame_h) $(inferior_h) \
+	language.h $(gdbcore_h) $(floatformat_h) target.h
 i386b-nat.o: i386b-nat.c $(defs_h) 
 i386ly-nat.o: i386ly-nat.c $(defs_h) $(frame_h) $(inferior_h) target.h
 i386ly-tdep.o: i386ly-tdep.c $(defs_h) $(inferior_h) target.h
+i386m3-nat.o: i386m3-nat.c $(defs_h) $(inferior_h) $(floatformat_h) target.h
 i386mach-nat.o: i386mach-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) 
 
 i386v-nat.o: i386v-nat.c $(floatformat_h) $(defs_h) $(gdbcore_h) \
@@ -1185,11 +1192,16 @@ inftarg.o: inftarg.c $(wait_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 	target.h terminal.h $(command_h)
 
 irix4-nat.o: irix4-nat.c $(defs_h) $(inferior_h)
+irix5-nat.o: irix5-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) target.h \
+	$(symtab_h) symfile.h objfiles.h $(command_h) $(frame_h) regex.h \
+	language.h
 isi-xdep.o: isi-xdep.c
 
 language.o: language.c $(bfd_h) $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbcmd_h) $(gdbtypes_h) language.h parser-defs.h $(symtab_h) \
 	target.h $(value_h)
+
+lynx-nat.o: lynx-nat.c $(defs_h) $(frame_h) $(inferior_h) target.h
 
 m2-lang.o: m2-lang.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 	language.h m2-lang.h parser-defs.h $(symtab_h)
@@ -1200,6 +1212,9 @@ m2-typeprint.o: m2-typeprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 
 m2-valprint.o: m2-valprint.c $(defs_h) $(gdbtypes_h) $(symtab_h) \
 	valprint.h
+
+m3-nat.o: m3-nat.c $(defs_h) $(inferior_h) $(value_h) language.h target.h \
+	$(wait_h) $(gdbcmd_h) $(gdbcore_h)
 
 m68k-pinsn.o: m68k-pinsn.c $(bfd_h) $(dis-asm_h) $(defs_h) 
 m68k-tdep.o: m68k-tdep.c $(defs_h) $(frame_h) $(symtab_h) 
@@ -1221,9 +1236,11 @@ mdebugread.o: mdebugread.c buildsym.h complaints.h $(bfd_h) $(defs_h) \
 	$(expression_h) gdb-stabs.h $(gdbcore_h) $(gdbtypes_h) language.h \
 	objfiles.h partial-stab.h stabsread.h symfile.h $(symtab_h)
 
-os9kread.o: os9kread.c buildsym.h complaints.h $(bfd_h) $(def_h) \
+mipsm3-nat.o: mipsm3-nat.c $(defs_h) $(inferior_h)
+
+os9kread.o: os9kread.c buildsym.h complaints.h $(bfd_h) $(defs_h) \
         $(expression_h) gdb-stabs.h $(gdbcore_h) $(gdbtypes_h) language.h \
-        objfiles.h partial-stab.h stabsread.h symfile.h $(symtab_h)
+        objfiles.h partial-stab.h stabsread.h symfile.h $(symtab_h) target.h
 
 mem-break.o: mem-break.c $(defs_h) 
 
@@ -1255,6 +1272,8 @@ nindy.o: nindy-share/nindy.c $(wait_h) nindy-share/block_io.h \
 nlmread.o: nlmread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 	gdb-stabs.h objfiles.h symfile.h $(symtab_h) stabsread.h
 
+ns32km3-nat.o: ns32km3-nat.c $(defs_h) $(inferior_h)
+
 ttyflush.o: nindy-share/ttyflush.c
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/nindy-share/ttyflush.c
 
@@ -1270,6 +1289,8 @@ osfsolib.o: osfsolib.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 
 somread.o: somread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 	gdb-stabs.h objfiles.h symfile.h $(symtab_h)
+
+somsolib.o: somsolib.c $(defs_h)
 
 # start-sanitize-hpread
 hpread.o: hpread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
@@ -1292,13 +1313,16 @@ pyr-pinsn.o: pyr-pinsn.c $(OP_INCLUDE)/pyr.h $(defs_h) $(gdbcore_h) \
 pyr-tdep.o: pyr-tdep.c $(defs_h) 
 pyr-xdep.o: pyr-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h) 
 
-regex.o: regex.c regex.h
+regex.o: regex.c regex.h $(defs_h)
 
 remote-adapt.o: remote-adapt.c $(wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h
 
 remote-bug.o: remote-bug.c $(wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h $(remote_utils_h)
+
+remote-e7000.o: remote-e7000.c $(defs_h) $(gdbcore_h) target.h \
+	$(wait_h) serial.h
 
 remote-eb.o: remote-eb.c $(wait_h) $(srcdir)/config/a29k/tm-a29k.h \
 	$(defs_h) $(gdbcore_h) $(inferior_h) symfile.h target.h terminal.h
@@ -1322,6 +1346,10 @@ remote-nindy.o: remote-nindy.c $(floatformat_h) $(wait_h) $(command_h) \
 	$(defs_h) $(gdbcore_h) $(inferior_h) \
 	nindy-share/env.h nindy-share/stop.h $(remote_utils_h) \
 	symfile.h
+
+remote-os9k.o: remote-os9k.c $(defs_h) $(gdbcore_h) $(wait_h) \
+	$(command_h) monitor.h $(remote_utils_h) $(symtab_h) symfile.h \
+	objfiles.h gdb-stabs.h
 
 remote-sim.o: remote-sim.c $(wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h
@@ -1464,6 +1492,9 @@ c-exp.tab.o: c-exp.tab.c c-lang.h $(defs_h) $(expression_h) \
 ch-exp.tab.o: ch-exp.tab.c ch-lang.h $(defs_h) $(expression_h) \
 	$(gdbtypes_h) language.h parser-defs.h $(symtab_h) $(value_h) \
 	$(bfd_h) objfiles.h symfile.h
+
+f-exp.tab.o: f-exp.tab.c f-lang.h $(defs_h) $(expression_h) \
+	language.h parser-defs.h $(value_h) $(bfd_h) objfiles.h symfile.h
 
 m2-exp.tab.o: m2-exp.tab.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 	language.h m2-lang.h parser-defs.h $(symtab_h) $(value_h) \
