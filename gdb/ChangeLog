@@ -1,5 +1,23 @@
 2004-01-18  Andrew Cagney  <cagney@redhat.com>
 
+	* tui/tui-io.c: Update copyright.
+	(key_is_end_sequence, key_is_backspace): New functions.
+	(key_is_command_char, key_is_start_sequence): New function.
+	(tui_getc): Update references.
+	* tui/tui-io.h: Update copyright.
+	(m_tuiStartNewLine): Delete macro.
+	(m_isBackspace, m_isDeleteChar): Delete macros.
+	(m_isDeleteLine, m_isDeleteToEol): Delete macros.
+	(m_isNextPage, m_isPrevPage): Delete macros.
+	(m_isLeftArrow, m_isRightArrow): Delete macros.
+	(m_isXdbStyleCommandChar): Delete macro.
+	(key_is_start_sequence): Declare, replace m_isStartSequence.
+	(key_is_end_sequence): Declare, replace m_isEndSequence.
+	(key_is_backspace): Declare ,replace m_isBackspace.
+	(key_is_command_char): Declare, replace m_isCommandChar.
+	* tui/tui-command.c: Update copyright.
+	(tuiDispatchCtrlChar): Update references.
+
 	* config/djgpp/fnchange.lst: Delete tui/tuiSourceWin.c and
 	tuiSourceWin.h.
 

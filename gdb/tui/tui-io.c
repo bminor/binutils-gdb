@@ -1,7 +1,7 @@
 /* TUI support I/O functions.
 
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
-   Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+   Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -50,6 +50,34 @@
 #include <curses.h>
 #endif
 #endif
+
+int
+key_is_start_sequence (int ch)
+{
+  return (ch == 27);
+}
+
+int
+key_is_end_sequence (int ch)
+{
+  return (ch == 126);
+}
+
+int
+key_is_backspace (int ch)
+{
+  return (ch == 8);
+}
+
+int
+key_is_command_char (int ch)
+{
+  return ((ch == KEY_NPAGE) || (ch == KEY_PPAGE)
+	  || (ch == KEY_LEFT) || (ch == KEY_RIGHT)
+	  || (ch == KEY_UP) || (ch == KEY_DOWN)
+	  || (ch == KEY_SF) || (ch == KEY_SR)
+	  || (ch == (int)'\f') || key_is_start_sequence (ch));
+}
 
 /* Use definition from readline 4.3.  */
 #undef CTRL_CHAR
@@ -659,7 +687,7 @@ tui_getc (FILE *fp)
         }
     }
   
-  if (m_isCommandChar (ch))
+  if (key_is_command_char (ch))
     {				/* Handle prev/next/up/down here */
       ch = tuiDispatchCtrlChar (ch);
     }

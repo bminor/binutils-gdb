@@ -1,7 +1,7 @@
 /* Specific command window processing.
 
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
-   Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+   Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -78,12 +78,12 @@ tuiDispatchCtrlChar (unsigned int ch)
       term = (char *) getenv ("TERM");
       for (i = 0; (term && term[i]); i++)
 	term[i] = toupper (term[i]);
-      if ((strcmp (term, "XTERM") == 0) && m_isStartSequence (ch))
+      if ((strcmp (term, "XTERM") == 0) && key_is_start_sequence (ch))
 	{
 	  unsigned int pageCh = 0, tmpChar;
 
 	  tmpChar = 0;
-	  while (!m_isEndSequence (tmpChar))
+	  while (!key_is_end_sequence (tmpChar))
 	    {
 	      tmpChar = (int) wgetch (w);
 	      if (tmpChar == ERR)
