@@ -892,6 +892,11 @@ struct m68k_op *opP;
 		case '2':
 		case '4':
 		case '8':
+			if (cpu_of_arch(current_architecture) < m68020) {
+				opP->error="no index scaling in pre-68020's";
+				*s=ss;
+				return FAIL;
+			}
 			opP->imul= *ss-'0';
 			break;
 		default:

@@ -1,7 +1,11 @@
+Wed Aug  5 01:54:34 1992  John Gilmore  (gnu at cygnus.com)
+
+	* tc-m68k.c (try_index):  Error if index scaling specified and
+	assembling for an older CPU than a 68020.
+
 Mon Jul  6 17:09:32 1992  Steve Chamberlain  (sac@cygnus.com)
 
 	* obj-coffbfd.c (fill_section): mark .lit sections as STYP_LIT
-
 
 Tue Jun  9 07:50:46 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
@@ -21,7 +25,6 @@ Mon May  4 18:56:19 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 	* obj-coffbfd.c: use is a synonym for section, (do_relocs_for):
 	calc the base of relocs correctly.
 	* tc-a29k.c (parse_operand): allow expressions to be in any section.
-	
 
 Thu Mar 12 04:42:38 1992  K. Richard Pixley  (rich@cygnus.com)
 
