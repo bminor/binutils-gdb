@@ -1,5 +1,5 @@
-/* Remote target communications for serial-line targets in custom GDB protocol
-   Copyright 1988, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+/* Remote target communications for the ARC
+   Copyright 1995, 1997 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -118,13 +118,13 @@ int icache;
    starts.  */
 static serial_t arc_desc = NULL;
 
-#define AUDIO_PROCESSOR   0
-#define GRAPHIC_PROCESSOR 1
-#define HOST_PROCESSOR    2
+#define UNUSED1_PROCESSOR 0
+#define UNUSED2_PROCESSOR 1
+#define UNUSED3_PROCESSOR 2
 static unsigned char cntl_reg_halt_bit[3] = { 0x08, 0x10, 0x20 };
 static unsigned char cntl_reg_step_bit[3] = { 0x01, 0x02, 0x04 };
 
-static int curr_processor = HOST_PROCESSOR;
+static int curr_processor = UNUSED1_PROCESSOR;
 static unsigned char cntl_reg = 0;
 static unsigned int status_reg = 0;
 
@@ -322,7 +322,7 @@ arc_xfer_reg (processor, rw, aux, regnum, data)
 {
   unsigned int tmp;
 
-  if (processor == HOST_PROCESSOR)
+  if (processor == UNUSED1_PROCESSOR)
     {
       /* write addr (regnum) */
       arc_set_addrreg (regnum);
@@ -336,7 +336,7 @@ arc_xfer_reg (processor, rw, aux, regnum, data)
       arc_xfer_datareg (0, 1, 0, tmp);
 
       /* read/write from data reg (aux reg 15/16) */
-      arc_set_addrreg (processor == AUDIO_PROCESSOR ? 0x10 : 0xf);
+      arc_set_addrreg (/*processor == ??? ? 0x10 :*/ 0xf);
       arc_xfer_datareg (rw, 1, 0, data);
     }
 }
@@ -468,10 +468,11 @@ arc_wait (pid, status)
       status->kind = TARGET_WAITKIND_STOPPED;
     }
 
-  if ((curr_processor != HOST_PROCESSOR) && 
-      !(cntl_reg & cntl_reg_halt_bit[HOST_PROCESSOR]))
+#if 0
+  if ((curr_processor != UNUSED1_PROCESSOR) && 
+      !(cntl_reg & cntl_reg_halt_bit[UNUSED1_PROCESSOR]))
     {
-      cmd = cntl_reg | cntl_reg_halt_bit[HOST_PROCESSOR];
+      cmd = cntl_reg | cntl_reg_halt_bit[UNUSED1_PROCESSOR];
       arc_xfer_cntlreg (0, &cmd);
       while (1)
 	{
@@ -480,18 +481,19 @@ arc_wait (pid, status)
 	  ofunc = (void (*)()) signal (SIGINT, arc_interrupt);
 	  arc_xfer_cntlreg (1, &cntl_reg);
 	  signal (SIGINT, ofunc);
-	  if (cntl_reg & cntl_reg_halt_bit[HOST_PROCESSOR])
+	  if (cntl_reg & cntl_reg_halt_bit[UNUSED1_PROCESSOR])
 	    break;
 	}
     }
 
-  for (proc = AUDIO_PROCESSOR ; proc <= GRAPHIC_PROCESSOR; proc++)
+  for (proc = UNUSED1_PROCESSOR ; proc <= UNUSED3_PROCESSOR; proc++)
     {
       if ((cntl_reg & cntl_reg_halt_bit[proc]))
 	continue;
       cmd = cntl_reg | cntl_reg_halt_bit[proc];
       arc_xfer_cntlreg (0, &cmd);
     }
+#endif
 
   arc_xfer_reg (curr_processor, 1, 1, 0, &status_reg);
   return inferior_pid;
@@ -517,7 +519,7 @@ arc_fetch_registers (regno)
   arc_set_addrreg (0);
   for (i = 0; i < AUX_BEG_REGNUM; i++)
     {
-      if (curr_processor == HOST_PROCESSOR)
+      if (curr_processor == UNUSED1_PROCESSOR)
 	arc_xfer_datareg (1, 0, 1, &regs[REGISTER_BYTE(i)]);
       else
 	arc_xfer_reg (curr_processor, 1, 0, regno, &regs[REGISTER_BYTE(i)]);
@@ -583,7 +585,7 @@ arc_store_registers (regno)
   for (i = 0; i < AUX_BEG_REGNUM; i++)
     {
       regp = &registers[REGISTER_BYTE (i)];
-      if (curr_processor == HOST_PROCESSOR)
+      if (curr_processor == UNUSED1_PROCESSOR)
 	arc_xfer_datareg (0, 0, 1, regp);
       else
 	arc_xfer_reg (curr_processor, 0, 0, regno, regp);
@@ -934,46 +936,6 @@ arc_remove_breakpoint (addr, contents_cache)
 {
   return target_write_memory (addr, contents_cache, BREAKPOINT_LEN);
 }
-
-/* switch_command
-   support 'switch' command to switch among the three processors of ARC. */
-
-static void
-switch_command (args, fromtty)
-     char *args;
-     int fromtty;
-{
-  struct target_waitstatus status;
-  int proc;
-
-  if (strncmp (args, "audio", 3) == 0)
-    proc = 0;
-  else if (strncmp (args, "graphic", 3) == 0)
-    proc = 1;
-  else if (strncmp (args, "host", 4) == 0)
-    proc = 2;
-
-  curr_processor = proc;
-  
-  switch (proc)
-    {
-    case 0:
-      tm_print_insn = arc_get_disassembler (bfd_mach_arc_audio,
-					    TARGET_BYTE_ORDER == BIG_ENDIAN);
-      break;
-    case 1:
-      tm_print_insn = arc_get_disassembler (bfd_mach_arc_graphics,
-					    TARGET_BYTE_ORDER == BIG_ENDIAN);
-      break;
-    case 2:
-      tm_print_insn = arc_get_disassembler (bfd_mach_arc_host,
-					    TARGET_BYTE_ORDER == BIG_ENDIAN);
-      break;
-    }
-
-  return;
-}
-
 
 /* Define the target subroutine names */
 
