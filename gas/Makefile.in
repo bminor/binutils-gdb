@@ -1,5 +1,5 @@
 # Makefile for GNU Assembler
-#   Copyright (C) 1987, 1988, 1990, 1991 Free Software Foundation, Inc.
+#   Copyright (C) 1987-1992 Free Software Foundation, Inc.
 
 #This file is part of GNU GAS.
 
@@ -161,8 +161,16 @@ OBJS = \
 #### host, target, and site specific Makefile frags come in here.
 
 all: as.new
+	(cd doc ; $(MAKE) all)
+
 info:
+	(cd doc ; $(MAKE) info)
+
 install-info:
+	(cd doc ; $(MAKE) install-info)
+
+clean-info:
+	(cd doc ; $(MAKE) clean-info)
 
 # Now figure out from those variables how to compile and link.
 
@@ -301,6 +309,7 @@ $(srcdir)/as.info: $(srcdir)/doc/as.texinfo
 	(cd doc; make as.info; mv as.info $srcdir)	
 
 clean:
+	(cd doc ; $(MAKE) clean)
 	-rm -f $(STAGESTUFF) core
 
 # Like clean but also delete the links made to configure gas.
