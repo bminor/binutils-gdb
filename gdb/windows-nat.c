@@ -68,7 +68,7 @@ enum
 #include <psapi.h>
 
 #ifdef HAVE_SSE_REGS
-#define CONTEXT_DEBUGGER_DR CONTEXT_DEBUGGER | CONTEXT_EXTENDED_REGISTERS 
+#define CONTEXT_DEBUGGER_DR CONTEXT_DEBUGGER | CONTEXT_EXTENDED_REGISTERS
 #else
 #define CONTEXT_DEBUGGER_DR CONTEXT_DEBUGGER
 #endif
@@ -365,7 +365,7 @@ static BOOL WINAPI (*psapi_EnumProcessModules) (HANDLE, HMODULE *, DWORD, LPDWOR
 static BOOL WINAPI (*psapi_GetModuleInformation) (HANDLE, HMODULE, LPMODULEINFO, DWORD) = NULL;
 static DWORD WINAPI (*psapi_GetModuleFileNameExA) (HANDLE, HMODULE, LPSTR, DWORD) = NULL;
 
-int 
+int
 psapi_get_dll_name (DWORD BaseAddress, char *dll_name_ret)
 {
   DWORD len;
@@ -601,7 +601,7 @@ handle_load_dll (void *dummy ATTRIBUTE_UNUSED)
 			 sizeof (dll_name_ptr), &done);
 
       /* See if we could read the address of a string, and that the
-         address isn't null. */
+	 address isn't null. */
 
       if (done != sizeof (dll_name_ptr) || !dll_name_ptr)
 	return 1;
@@ -983,7 +983,7 @@ get_child_debug_event (int pid ATTRIBUTE_UNUSED, struct target_waitstatus *ourst
       catch_errors (handle_unload_dll, NULL, (char *) "", RETURN_MASK_ALL);
       registers_changed ();	/* mark all regs invalid */
       /* ourstatus->kind = TARGET_WAITKIND_UNLOADED;
-         does not exist yet. */
+	 does not exist yet. */
       break;
 
     case EXCEPTION_DEBUG_EVENT:
@@ -1166,11 +1166,11 @@ child_detach (char *args ATTRIBUTE_UNUSED, int from_tty)
       delete_command (NULL, 0);
       child_continue (DBG_CONTINUE, -1);
       if (!DebugActiveProcessStop (current_event.dwProcessId))
-        {
+	{
 	  error ("Can't detach process %lu (error %lu)",
 		 current_event.dwProcessId, GetLastError ());
 	  detached = 0;
-        }
+	}
       DebugSetProcessKillOnExit (FALSE);
     }
   if (detached && from_tty)
@@ -1456,7 +1456,7 @@ static void
 child_close (int x ATTRIBUTE_UNUSED)
 {
   DEBUG_EVENTS (("gdb: child_close, inferior_ptid=%d\n",
-                PIDGET (inferior_ptid)));
+		PIDGET (inferior_ptid)));
 }
 
 struct target_ops child_ops;
@@ -1656,7 +1656,7 @@ map_single_dll_code_section (bfd * abfd, asection * sect, void *obj)
       target->to_sections_end = target->to_sections + (1 + old);
 
       /* Update the to_sections field in the core_ops structure
-         if needed.  */
+	 if needed.  */
       if (update_coreops)
 	{
 	  core_ops.to_sections = target->to_sections;
@@ -1770,7 +1770,7 @@ child_solib_add (char *filename ATTRIBUTE_UNUSED, int from_tty, struct target_op
     {
       if (solib_end && solib_end->name)
 	     solib_end->objfile = solib_symbols_add (solib_end->name, from_tty,
-                                                solib_end->load_addr);
+						solib_end->load_addr);
     }
 }
 
