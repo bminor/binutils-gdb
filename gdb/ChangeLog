@@ -1,3 +1,9 @@
+1998-08-18  Keith Seitz  <keiths@cygnus.com>
+
+	* stack.c: Define new hook, selected_frame_level_changed_hook, which
+	will be called whenever the selected stack level changes.
+	(select_frame): Call the selected_frame_level_changed_hook.
+	
 Tue Aug 18 18:03:42 1998  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* remote-rdi.c (arm_rdi_open): Pass serial device name to
