@@ -3871,12 +3871,25 @@ read_frame (char *buf,
 	case '#':
 	  {
 	    unsigned char pktcsum;
+	    int check_0 = 0;
+	    int check_1 = 0;
 
 	    buf[bc] = '\0';
 
-	    pktcsum = fromhex (readchar (remote_timeout)) << 4;
-	    pktcsum |= fromhex (readchar (remote_timeout));
+	    check_0 = readchar (remote_timeout);
+	    if (check_0 >= 0)
+	      check_1 = readchar (remote_timeout);
+	    
+	    if (check_0 == SERIAL_TIMEOUT || check_1 == SERIAL_TIMEOUT)
+	      {
+		if (remote_debug)
+		  fputs_filtered ("Timeout in checksum, retrying\n", gdb_stdlog);
+		return -1;
+	      }
+	    else if (check_0 < 0 || check_1 < 0)
+	      error ("Communication error in checksum");
 
+	    pktcsum = (fromhex (check_0) << 4) | fromhex (check_1);
 	    if (csum == pktcsum)
               return bc;
 
