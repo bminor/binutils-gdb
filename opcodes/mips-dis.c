@@ -26,21 +26,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* FIXME: we need direct access to the swapping functions.  */
 #include "libbfd.h"
 
-/* We use bfd_vma in a couple of places where gdb expects CORE_ADDR.  */
-#ifdef HOST_64_BIT
- #error FIXME: bfd_vma will not match gdb expectations
-#endif
-
-/* This file is used both by gdb and by objdump.  A program which
-   wants to use this code must provide an external function
-   print_address.  */
-extern int print_address PARAMS ((bfd_vma, FILE *));
-
 /* Mips instructions are never longer than this many bytes.  */
 #define MAXLEN 4
-
-/* Number of elements in the opcode table.  */
-#define NOPCODES (sizeof mips_opcodes / sizeof mips_opcodes[0])
 
 /* FIXME: This should be shared with gdb somehow.  */
 #define REGISTER_NAMES 	\
@@ -67,6 +54,8 @@ print_insn_arg (d, l, pc, info)
      bfd_vma pc;
      struct disassemble_info *info;
 {
+  int delta;
+
   switch (*d)
     {
     case ',':
@@ -76,34 +65,48 @@ print_insn_arg (d, l, pc, info)
       break;
 
     case 's':
+    case 'b':
+    case 'r':
+    case 'v':
       (*info->fprintf_func) (info->stream, "$%s",
 			     reg_names[(l >> OP_SH_RS) & OP_MASK_RS]);
       break;
 
     case 't':
+    case 'w':
       (*info->fprintf_func) (info->stream, "$%s",
 			     reg_names[(l >> OP_SH_RT) & OP_MASK_RT]);
       break;
 
     case 'i':
+    case 'u':
       (*info->fprintf_func) (info->stream, "%d",
 			(l >> OP_SH_IMMEDIATE) & OP_MASK_IMMEDIATE);
       break;
 
     case 'j': /* same as i, but sign-extended */
+    case 'o':
+      delta = (l >> OP_SH_DELTA) & OP_MASK_DELTA;
+      if (delta & 0x8000)
+	delta |= ~0xffff;
       (*info->fprintf_func) (info->stream, "%d",
-			     (l >> OP_SH_DELTA) & OP_MASK_DELTA);
+			     delta);
       break;
 
     case 'a':
-      print_address (((pc & 0xF0000000)
-		      | (((l >> OP_SH_TARGET) & OP_MASK_TARGET) << 2)),
-		     info->stream);
+      (*info->print_address_func)
+	(((pc & 0xF0000000) | (((l >> OP_SH_TARGET) & OP_MASK_TARGET) << 2)),
+	 info);
       break;
 
-    case 'b':
-      print_address ((((l >> OP_SH_DELTA) & OP_MASK_DELTA) << 2) + pc + 4,
-		     info->stream);
+    case 'p':
+      /* sign extend the displacement */
+      delta = (l >> OP_SH_DELTA) & OP_MASK_DELTA;
+      if (delta & 0x8000)
+	delta |= ~0xffff;
+      (*info->print_address_func)
+	((delta << 2) + pc + 4,
+	 info);
       break;
 
     case 'd':
@@ -111,22 +114,34 @@ print_insn_arg (d, l, pc, info)
 			     reg_names[(l >> OP_SH_RD) & OP_MASK_RD]);
       break;
 
-    case 'h':
+    case '<':
       (*info->fprintf_func) (info->stream, "0x%x",
 			     (l >> OP_SH_SHAMT) & OP_MASK_SHAMT);
       break;
 
-    case 'B':
+    case 'c':
       (*info->fprintf_func) (info->stream, "0x%x",
 			     (l >> OP_SH_CODE) & OP_MASK_CODE);
       break;
 
+    case 'C':
+      (*info->fprintf_func) (info->stream, "0x%x",
+			     (l >> OP_SH_COPZ) & OP_MASK_COPZ);
+      break;
+
+    case 'B':
+      (*info->fprintf_func) (info->stream, "0x%x",
+			     (l >> OP_SH_SYSCALL) & OP_MASK_SYSCALL);
+      break;
+
     case 'S':
+    case 'V':
       (*info->fprintf_func) (info->stream, "$f%d",
 			     (l >> OP_SH_FS) & OP_MASK_FS);
       break;
 
     case 'T':
+    case 'W':
       (*info->fprintf_func) (info->stream, "$f%d",
 			     (l >> OP_SH_FT) & OP_MASK_FT);
       break;
@@ -134,6 +149,16 @@ print_insn_arg (d, l, pc, info)
     case 'D':
       (*info->fprintf_func) (info->stream, "$f%d",
 			     (l >> OP_SH_FD) & OP_MASK_FD);
+      break;
+
+    case 'E':
+      (*info->fprintf_func) (info->stream, "$%d",
+			     (l >> OP_SH_RT) & OP_MASK_RT);
+      break;
+
+    case 'G':
+      (*info->fprintf_func) (info->stream, "$%d",
+			     (l >> OP_SH_RD) & OP_MASK_RD);
       break;
 
     default:
@@ -157,16 +182,19 @@ _print_insn_mips (memaddr, word, info)
   register int i;
   register char *d;
 
-  for (i = 0; i < NOPCODES; i++)
+  for (i = 0; i < NUMOPCODES; i++)
     {
-      register unsigned int opcode = mips_opcodes[i].opcode;
-      register unsigned int match = mips_opcodes[i].match;
-      if ((word & match) == opcode)
-	break;
+      if (mips_opcodes[i].pinfo != INSN_MACRO)
+	{
+	  register unsigned int match = mips_opcodes[i].match;
+	  register unsigned int mask = mips_opcodes[i].mask;
+	  if ((word & mask) == match)
+	    break;
+	}
     }
 
   /* Handle undefined instructions.  */
-  if (i == NOPCODES)
+  if (i == NUMOPCODES)
     {
       (*info->fprintf_func) (info->stream, "0x%x", word);
       return 4;

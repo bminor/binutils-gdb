@@ -1,3 +1,9 @@
+Tue Jul  6 15:18:37 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* mips-dis.c: Updated to account for name changes in new version
+	of opcode/mips.h.
+	* Makefile.in: Added header file dependencies.
+
 Sat Jul  3 23:47:56 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* h8300-dis.c (bfd_h8_disassemble): Correct fetching of instruction.
