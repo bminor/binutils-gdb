@@ -3627,6 +3627,9 @@ do_detach (int signo)
 	if (!proc_clear_current_fault (pi))
 	  proc_warn (pi, "do_detach, clear_current_fault", __LINE__);
 
+	if (signo == 0 && !proc_clear_current_signal (pi))
+	  proc_warn (pi, "do_detach, clear_current_signal", __LINE__);
+
 	if (!proc_set_run_on_last_close (pi))
 	  proc_warn (pi, "do_detach, set_rlc", __LINE__);
       }
