@@ -34,8 +34,10 @@
 #include "hist.h"
 #include "libiberty.h"
 
+#ifdef BFD_HOST_U_64_BIT
 static int gmon_io_read_64 PARAMS ((FILE *, BFD_HOST_U_64_BIT *));
 static int gmon_io_write_64 PARAMS ((FILE *, BFD_HOST_U_64_BIT));
+#endif
 static int gmon_read_raw_arc
   PARAMS ((FILE *, bfd_vma *, bfd_vma *, unsigned long *));
 static int gmon_write_raw_arc
@@ -57,6 +59,7 @@ gmon_io_read_32 (ifp, valp)
   return 0;
 }
 
+#ifdef BFD_HOST_U_64_BIT
 static int
 gmon_io_read_64 (ifp, valp)
      FILE *ifp;
@@ -69,6 +72,7 @@ gmon_io_read_64 (ifp, valp)
   *valp = bfd_get_64 (core_bfd, buf);
   return 0;
 }
+#endif
 
 int
 gmon_io_read_vma (ifp, valp)
@@ -76,7 +80,9 @@ gmon_io_read_vma (ifp, valp)
      bfd_vma *valp;
 {
   unsigned int val32;
+#ifdef BFD_HOST_U_64_BIT
   BFD_HOST_U_64_BIT val64;
+#endif
 
   switch (bfd_arch_bits_per_address (core_bfd))
     {
@@ -86,11 +92,13 @@ gmon_io_read_vma (ifp, valp)
       *valp = val32;
       break;
 
+#ifdef BFD_HOST_U_64_BIT
     case 64:
       if (gmon_io_read_64 (ifp, &val64))
 	return 1;
       *valp = val64;
       break;
+#endif
 
     default:
       fprintf (stderr, _("%s: bits per address has unexpected value of %u\n"),
@@ -124,6 +132,7 @@ gmon_io_write_32 (ofp, val)
   return 0;
 }
 
+#ifdef BFD_HOST_U_64_BIT
 static int
 gmon_io_write_64 (ofp, val)
      FILE *ofp;	
@@ -136,6 +145,7 @@ gmon_io_write_64 (ofp, val)
     return 1;
   return 0;
 }
+#endif
 
 int
 gmon_io_write_vma (ofp, val)
@@ -150,10 +160,12 @@ gmon_io_write_vma (ofp, val)
 	return 1;
       break;
 
+#ifdef BFD_HOST_U_64_BIT
     case 64:
       if (gmon_io_write_64 (ofp, (BFD_HOST_U_64_BIT) val))
 	return 1;
       break;
+#endif
 
     default:
       fprintf (stderr, _("%s: bits per address has unexpected value of %u\n"),
@@ -194,7 +206,9 @@ gmon_read_raw_arc (ifp, fpc, spc, cnt)
      bfd_vma *spc;
      unsigned long *cnt;
 {
+#ifdef BFD_HOST_U_64_BIT
   BFD_HOST_U_64_BIT cnt64;
+#endif
   unsigned int cnt32;
 
   if (gmon_io_read_vma (ifp, fpc)
@@ -209,11 +223,13 @@ gmon_read_raw_arc (ifp, fpc, spc, cnt)
       *cnt = cnt32;
       break;
 
+#ifdef BFD_HOST_U_64_BIT
     case 64:
       if (gmon_io_read_64 (ifp, &cnt64))
 	return 1;
       *cnt = cnt64;
       break;
+#endif
 
     default:
       fprintf (stderr, _("%s: bits per address has unexpected value of %u\n"),
@@ -242,10 +258,12 @@ gmon_write_raw_arc (ofp, fpc, spc, cnt)
 	return 1;
       break;
 
+#ifdef BFD_HOST_U_64_BIT
     case 64:
       if (gmon_io_write_64 (ofp, (BFD_HOST_U_64_BIT) cnt))
 	return 1;
       break;
+#endif
 
     default:
       fprintf (stderr, _("%s: bits per address has unexpected value of %u\n"),
