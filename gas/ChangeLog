@@ -13,6 +13,11 @@ Tue Nov  2 15:07:07 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 	stdio.h.  Delete bogus declaration of free.  Get path to
 	alloca-conf.h right.
 
+Tue Nov  2 13:57:30 1993  Ken Raeburn  (raeburn@rover.cygnus.com)
+
+	* expr.c (operand): Fix checks for characters following "0b" or
+	"0f".
+
 Mon Nov  1 21:37:04 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/obj-som.h (obj_attach_unwind_info): Define as a hook
