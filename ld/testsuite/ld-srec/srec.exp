@@ -228,18 +228,19 @@ proc run_srec_test { test objs } {
 	set flags "$flags --defsym V_SPILL=0 --defsym V_FILL=0"
     }
 
-    # ARM targets call __gccmain
-    if [istarget arm*-*-*] {
-	set flags "$flags --defsym ___gccmain=0"
-    }
+    if {[istarget arm*-*-*]       || \
+        [istarget strongarm*-*-*] || \
+        [istarget xscale*-*-*]    || \
+        [istarget thumb-*-*] } {
     
-    if [istarget strongarm*-*-*] {
-	set flags "$flags --defsym __gccmain=0"
-    }
-    
-    # Thumb targets call __gccmain
-    if [istarget thumb-*-*] {
-	set flags "$flags --defsym ___gccmain=0"
+        # ARM targets call __gccmain
+        set flags "$flags --defsym __gccmain=0"
+
+        # ARM targets cannot convert format in the linker 
+        # using the -oformat command line switch
+	setup_xfail "*arm*-*-*"
+	setup_xfail "xscale-*-*"
+	setup_xfail "thumb-*-*"
     }
 
     # PowerPC EABI code calls __eabi.
@@ -326,7 +327,8 @@ setup_xfail "*-*-aix*" "*-*-xcoff*"
 
 # The S-record linker doesn't build ARM/Thumb stubs.
 setup_xfail "arm-*-coff"
-setup_xfail "strongarm*-*-*"
+setup_xfail "strongarm*-*-coff"
+setup_xfail "xscale*-*-coff"
 setup_xfail "arm-*-pe*"
 # setup_xfail "arm-*elf*"
 setup_xfail "thumb-*-coff*"
