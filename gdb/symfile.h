@@ -94,7 +94,7 @@ struct sym_fns {
 			/*   Functions   */
 
 extern int  free_named_symtabs ();
-extern int  fill_in_vptr_fieldno ();
+extern void fill_in_vptr_fieldno ();
 extern void add_symtab_fns ();
 
 /* Functions for dealing with the misc "function" vector, really a misc
