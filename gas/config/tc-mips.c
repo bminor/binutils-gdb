@@ -7746,10 +7746,8 @@ mips_ip (str, ip)
 		      if (insn + 1 < &mips_opcodes[NUMOPCODES] &&
 			  !strcmp (insn->name, insn[1].name))
 			break;
-		      if (imm_expr.X_op != O_constant
-			  && imm_expr.X_op != O_big)
-			insn_error = _("absolute expression required");
-		      else
+		      if (imm_expr.X_op == O_constant
+			  || imm_expr.X_op == O_big)
 			as_bad (_("16 bit expression not in range 0..65535"));
 		    }
 		}
@@ -7785,10 +7783,8 @@ mips_ip (str, ip)
 		    {
 		      if (more)
 			break;
-		      if (imm_expr.X_op != O_constant
-			  && imm_expr.X_op != O_big)
-			insn_error = _("absolute expression required");
-		      else
+		      if (imm_expr.X_op == O_constant
+			  || imm_expr.X_op == O_big)
 			as_bad (_("16 bit expression not in range -32768..32767"));
 		    }
 		}

@@ -1,3 +1,9 @@
+2000-06-27  Aldy Hernandez  <aldyh@redhat.com>
+
+	* config/tc-mips.c (mips_ip): handle "(foo-.-4)" type of
+	expressions.  Ignore the problem when handling 16 bit immediates,
+	because the assembler will take care of the relocation later.
+
 2000-06-27  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-d30v.c (write_2_short): Do not allow opcodes with
