@@ -35,6 +35,9 @@ Fri Apr  7 17:43:01 1995  Stu Grossman  (grossman@andros.cygnus.com)
 	* (w89k_cmds):  Add clear all breakpoints, memory fill, and dump
 	registers commands.
 
+	* config/pa/tm-hppa.h:  Define lots register offsets needed by
+	w89k-rom.c.
+
 Thu Apr  6 17:00:46 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* Makefile.in (X11_INCLUDES): Define as empty.
