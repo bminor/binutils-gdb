@@ -124,6 +124,9 @@ static void togdb_force_update PARAMS ((void));
 
 static void view_source PARAMS ((CORE_ADDR));
 
+static void do_gdb (char *, char *, int);
+
+
 /* Globals */
 static HWND hidden_hwnd;                 /* HWND for messages */
 
@@ -843,17 +846,30 @@ ice_cont (c)
   return 1;
 }
 
+static void
+do_gdb (cmd, str, count)
+     char *cmd;
+     char *str;
+     int count;
+{
+
+  ReplyMessage ((LRESULT) 1);
+
+  while (count--)
+    {
+      printf_unfiltered (str);
+      Tcl_Eval (gdbtk_interp, cmd);
+    }
+}
+
+
 static int
 ice_stepi (c)
   char *c;
 {
-  char string[50] = "\0";
   int count = (int) c;
 
-  sprintf (string, "gdb_immediate stepi %d", count);
-  printf_unfiltered ("stepi (ice)\n");
-  ReplyMessage ((LRESULT) 1);
-  Tcl_Eval (gdbtk_interp, string);
+  do_gdb ("gdb_immediate stepi", "stepi (ice)\n", count);
   return 1;
 }
 
@@ -861,13 +877,9 @@ static int
 ice_nexti (c)
   char *c;
 {
-  char string[50] = "\0";
   int count = (int) c;
 
-  sprintf (string, "gdb_immediate nexti %d", count);
-  printf_unfiltered ("nexti (ice)\n");
-  ReplyMessage ((LRESULT) 1);
-  Tcl_Eval (gdbtk_interp, string);
+  do_gdb ("gdb_immediate nexti", "nexti (ice)\n", count);
   return 1;
 }
 
@@ -896,7 +908,7 @@ view_source (addr)
 {
   char c[256];
 
-  sprintf (c, "set src [lindex [manage find src] 0]\n$src location [gdb_loc *0x%x]", addr);
+  sprintf (c, "set src [lindex [manage find src] 0]\n$src location BROWSE [gdb_loc *0x%x]", addr);
   Tcl_Eval (gdbtk_interp, c);
 }
 
