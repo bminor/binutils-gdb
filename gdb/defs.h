@@ -295,9 +295,6 @@ batch_mode PARAMS ((void));
 extern int
 input_from_terminal_p PARAMS ((void));
 
-extern int
-catch_errors PARAMS ((int (*) (char *), char *, char *));
-
 /* From printcmd.c */
 
 extern void
@@ -626,8 +623,25 @@ exit PARAMS ((int));			/* 4.10.4.3 */
 extern NORETURN void			/* Does not return to the caller.  */
 nomem PARAMS ((long));
 
+/* Reasons for calling return_to_top_level.  */
+enum return_reason {
+  /* User interrupt.  */
+  RETURN_QUIT,
+
+  /* Any other error.  */
+  RETURN_ERROR
+};
+
+#define RETURN_MASK_QUIT (1 << (int)RETURN_QUIT)
+#define RETURN_MASK_ERROR (1 << (int)RETURN_ERROR)
+#define RETURN_MASK_ALL (RETURN_MASK_QUIT | RETURN_MASK_ERROR)
+typedef int return_mask;
+
 extern NORETURN void			/* Does not return to the caller.  */
-return_to_top_level PARAMS ((void));
+return_to_top_level PARAMS ((enum return_reason));
+
+extern int catch_errors PARAMS ((int (*) (char *), void *, char *,
+				 return_mask));
 
 extern void
 warning_setup PARAMS ((void));
@@ -776,18 +790,12 @@ strerror PARAMS ((int));				/* 4.11.6.2 */
 #define LITTLE_ENDIAN 1234
 #endif
 
-/* Target-system-dependent parameters for GDB.
-
-   The standard thing is to include defs.h.  However, files that are
-   specific to a particular target can define TM_FILE_OVERRIDE before
-   including defs.h, then can include any particular tm-file they desire.  */
+/* Target-system-dependent parameters for GDB. */
 
 /* Target machine definition.  This will be a symlink to one of the
    tm-*.h files, built by the `configure' script.  */
 
-#ifndef TM_FILE_OVERRIDE
 #include "tm.h"
-#endif
 
 /* The bit byte-order has to do just with numbering of bits in
    debugging symbols and such.  Conceptually, it's quite separate

@@ -1,3 +1,9 @@
+Fri Jul  9 09:47:02 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* defs.h, remote-eb.c (TM_FILE_OVERRIDE):  Remove it.
+	* mips-tdep.c (init_extra_frame_info):  Set proper fci->frame if pc
+	is at the start of the dummy code.
+
 Thu Jul  8 14:48:54 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* sparc-tdep.c (sparc_push_dummy_frame): Skip all the do_save_insn

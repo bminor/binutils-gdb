@@ -331,7 +331,7 @@ init_extra_frame_info(fci)
 
       /* Fixup frame-pointer - only needed for top frame */
       /* This may not be quite right, if proc has a real frame register */
-      if (fci->pc == PROC_LOW_ADDR(proc_desc))
+      if (fci->pc == PROC_LOW_ADDR(proc_desc) && !PROC_DESC_IS_DUMMY(proc_desc))
 	fci->frame = read_register (SP_REGNUM);
       else
 	fci->frame = READ_FRAME_REG(fci, PROC_FRAME_REG(proc_desc))
@@ -687,36 +687,6 @@ mips_frame_num_args(fip)
 		return p->the_info.numargs;
 #endif
 	return -1;
-}
-
-
-/* Bad floats: Returns 0 if P points to a valid IEEE floating point number,
-   1 if P points to a denormalized number or a NaN. LEN says whether this is
-   a single-precision or double-precision float */
-#define SINGLE_EXP_BITS  8
-#define DOUBLE_EXP_BITS 11
-int
-isa_NAN(p, len)
-     int *p, len;
-{
-  int exponent;
-  if (len == 4)
-    {
-      exponent = *p;
-      exponent = exponent << 1 >> (32 - SINGLE_EXP_BITS - 1);
-      return ((exponent == -1) || (exponent == 0 && ((*p << 1) != 0)));
-    }
-  else if (len == 8)
-    {
-#if TARGET_BYTE_ORDER == BIG_ENDIAN
-      exponent = *p;
-#else
-      exponent = *(p+1);
-#endif
-      exponent = exponent << 1 >> (32 - DOUBLE_EXP_BITS - 1);
-      return ((exponent == -1) || (! exponent && *p * *(p+1)));
-    }
-  else return 1;
 }
 
 /* To skip prologues, I use this predicate.  Returns either PC

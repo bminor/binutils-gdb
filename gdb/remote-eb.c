@@ -25,10 +25,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    has PC/NFS, so it can access the same executables that gdb can,
    over the net in real time.  */
 
-#define	 TM_FILE_OVERRIDE
 #include "defs.h"
 #include <string.h>
-#include "a29k/tm-a29k.h"
 
 #include "inferior.h"
 #include "bfd.h"
