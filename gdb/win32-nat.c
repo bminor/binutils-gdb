@@ -1,5 +1,5 @@
 /* Target-vector operations for controlling win32 child processes, for GDB.
-   Copyright 1995, 1996 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
    This file is part of GDB.
@@ -768,6 +768,9 @@ child_create_inferior (exec_file, allargs, env)
 static void
 child_mourn_inferior ()
 {
+  (void) ContinueDebugEvent (current_process_id,
+			     current_thread_id,
+			     DBG_CONTINUE);
   unpush_target (&child_ops);
   generic_mourn_inferior ();
 }
@@ -808,6 +811,22 @@ void
 child_kill_inferior (void)
 {
   CHECK (TerminateProcess (current_process, 0));
+  
+  for (;;)
+    {
+      DEBUG_EVENT event;
+      if (!ContinueDebugEvent (current_process_id,
+			       current_thread_id,
+			       DBG_CONTINUE))
+	break;
+      if (!WaitForDebugEvent (&event, INFINITE))
+	break;
+      current_thread_id = event.dwThreadId;
+      current_process_id = event.dwProcessId;
+      if (event.dwDebugEventCode == EXIT_PROCESS_DEBUG_EVENT)
+	break;
+    }
+
   CHECK (CloseHandle (current_process));
   CHECK (CloseHandle (current_thread));
   target_mourn_inferior();	/* or just child_mourn_inferior? */

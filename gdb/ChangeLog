@@ -1,5 +1,11 @@
 Mon Jan 19 13:34:40 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	From cgf@bbc.com (Chris Faylor):
+	* win32-nat.c (child_mourn_inferior): Call ContinueDebugEvent to
+	let the child exit.
+	(child_kill_inferior): Respond to all debug events as the child is
+	terminating.
+
 	* Makefile.in (all): Change gdb dependency to gdb$(EXEEXT).
 	(uninstall): Add $(EXEEXT) to file name to remove.
 	(gdb$(EXEEXT)): Rename target from plain gdb.
