@@ -1,4 +1,4 @@
-/* Target-dependent code for the NEC V850 for GDB, the GNU debugger.
+/* Target-dependent code for the Fujitsu FR30.
    Copyright 1996, Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -34,28 +34,59 @@ niy(char *f, int l)
 }
 #define NIY() niy(__FILE__, __LINE__)
 
+/* Function: pop_frame
+   This routine gets called when either the user uses the `return'
+   command, or the call dummy breakpoint gets hit.  */
+
 void
-fr30_pop_frame()
+fr30_pop_frame ()
 {
-	NIY();
+  struct frame_info *frame = get_current_frame();
+  int regnum;
+
+  if (PC_IN_CALL_DUMMY(frame->pc, frame->frame, frame->frame))
+    generic_pop_dummy_frame ();
+  else
+    {
+      write_register (PC_REGNUM, FRAME_SAVED_PC (frame));
+
+      for (regnum = 0; regnum < NUM_REGS; regnum++)
+	if (frame->fsr.regs[regnum] != 0)
+	  write_register (regnum,
+		  read_memory_unsigned_integer (frame->fsr.regs[regnum],
+			REGISTER_RAW_SIZE(regnum)));
+
+      write_register (SP_REGNUM, FRAME_FP (frame));
+    }
+
+  flush_cached_frames ();
 }
 
-CORE_ADDR
-fr30_frame_chain(struct frame_info *fi)
-{
-	NIY();
-}
-
-CORE_ADDR
-fr30_frame_saved_pc(struct frame_info *fi)
-{
-	NIY();
-}
+/* Function: skip_prologue
+   Return the address of the first code past the prologue of the function.  */
 
 CORE_ADDR
 fr30_skip_prologue(CORE_ADDR pc)
 {
-	NIY();
+  CORE_ADDR func_addr, func_end;
+
+  /* See what the symbol table says */
+
+  if (find_pc_partial_function (pc, NULL, &func_addr, &func_end))
+    {
+      struct symtab_and_line sal;
+
+      sal = find_pc_line (func_addr, 0);
+
+      if (sal.line != 0 && sal.end < func_end)
+	return sal.end;
+    }
+
+/* Either we didn't find the start of this function (nothing we can do),
+   or there's no line info, or the line after the prologue is after
+   the end of the function (there probably isn't a prologue). */
+
+  return pc;
 }
 
 
@@ -79,8 +110,6 @@ fr30_push_arguments(nargs, args, sp, struct_return, struct_addr)
       (struct stack_arg*)alloca (nargs * sizeof (struct stack_arg));
   int nstack_args = 0;
 
-
-  /* Initialize the integer and float register pointers.  */
   argreg = FIRST_ARGREG;
 
   /* the struct_return pointer occupies the first parameter-passing reg */
@@ -160,7 +189,6 @@ _initialize_fr30_tdep()
 }
 
 
-#if(0) /* Z.R. for now */
 /* Info gleaned from scanning a function's prologue.  */
 
 struct pifsr			/* Info about one saved reg */
@@ -179,7 +207,7 @@ struct prologue_info
   struct pifsr *pifsrs;
 };
 
-static CORE_ADDR xfr30_scan_prologue PARAMS ((CORE_ADDR pc, 
+static CORE_ADDR fr30_scan_prologue PARAMS ((CORE_ADDR pc, 
 					     struct prologue_info *fs));
 
 /* Function: scan_prologue
@@ -192,7 +220,7 @@ static CORE_ADDR xfr30_scan_prologue PARAMS ((CORE_ADDR pc,
    be determined till after we have scanned the prologue.  */
 
 static CORE_ADDR
-xfr30_scan_prologue (pc, pi)
+fr30_scan_prologue (pc, pi)
      CORE_ADDR pc;
      struct prologue_info *pi;
 {
@@ -313,12 +341,13 @@ xfr30_scan_prologue (pc, pi)
 	pi->frameoffset += ((insn & 0x1f) ^ 0x10) - 0x10;
       else if (insn == ((SP_REGNUM << 11) | 0x0600 | SP_REGNUM))	/* addi <imm>,sp,sp */
 	pi->frameoffset += read_memory_integer (current_pc + 2, 2);
-      else if (insn == ((FP_RAW_REGNUM << 11) | 0x0000 | SP_REGNUM))	/* mov sp,fp */
+      else if (insn == ((FP_REGNUM << 11) | 0x0000 | SP_REGNUM))	/* mov sp,fp */
 	{
 	  fp_used = 1;
-	  pi->framereg = FP_RAW_REGNUM;
+	  pi->framereg = FP_REGNUM;
 	}
 
+#if(0) /* Z.R. XXX */
       else if (insn == ((R12_REGNUM << 11) | 0x0640 | R0_REGNUM))	/* movhi hi(const),r0,r12 */
 	r12_tmp = read_memory_integer (current_pc + 2, 2) << 16;
       else if (insn == ((R12_REGNUM << 11) | 0x0620 | R12_REGNUM))	/* movea lo(const),r12,r12 */
@@ -361,6 +390,7 @@ xfr30_scan_prologue (pc, pi)
 #endif
 	  pifsr++;
 	}
+#endif /* Z.R. */
 
       if ((insn & 0x0780) >= 0x0600) /* Four byte instruction? */
 	current_pc += 2;
@@ -400,14 +430,14 @@ xfr30_scan_prologue (pc, pi)
    Note that when we are called for the last frame (currently active frame),
    that fi->pc and fi->frame will already be setup.  However, fi->frame will
    be valid only if this routine uses FP.  For previous frames, fi-frame will
-   always be correct (since that is derived from xfr30_frame_chain ()).
+   always be correct (since that is derived from fr30_frame_chain ()).
 
    We can be called with the PC in the call dummy under two circumstances.
    First, during normal backtracing, second, while figuring out the frame
    pointer just prior to calling the target function (see run_stack_dummy).  */
 
 void
-xfr30_init_extra_frame_info (fi)
+fr30_init_extra_frame_info (fi)
      struct frame_info *fi;
 {
   struct prologue_info pi;
@@ -426,7 +456,7 @@ xfr30_init_extra_frame_info (fi)
 
   pi.pifsrs = pifsrs;
 
-  xfr30_scan_prologue (fi->pc, &pi);
+  fr30_scan_prologue (fi->pc, &pi);
 
   if (!fi->next && pi.framereg == SP_REGNUM)
     fi->frame = read_register (pi.framereg) - pi.frameoffset;
@@ -440,42 +470,6 @@ xfr30_init_extra_frame_info (fi)
     }
 }
 
-/* Function: frame_chain
-   Figure out the frame prior to FI.  Unfortunately, this involves
-   scanning the prologue of the caller, which will also be done
-   shortly by xfr30_init_extra_frame_info.  For the dummy frame, we
-   just return the stack pointer that was in use at the time the
-   function call was made.  */
-
-CORE_ADDR
-xfr30_frame_chain (fi)
-     struct frame_info *fi;
-{
-  struct prologue_info pi;
-  CORE_ADDR callers_pc, fp;
-
-  /* First, find out who called us */
-  callers_pc = FRAME_SAVED_PC (fi);
-  /* If caller is a call-dummy, then our FP bears no relation to his FP! */
-  fp = xfr30_find_callers_reg (fi, FP_RAW_REGNUM);
-  if (PC_IN_CALL_DUMMY(callers_pc, fp, fp))
-    return fp;	/* caller is call-dummy: return oldest value of FP */
-
-  /* Caller is NOT a call-dummy, so everything else should just work.
-     Even if THIS frame is a call-dummy! */
-  pi.pifsrs = NULL;
-
-  xfr30_scan_prologue (callers_pc, &pi);
-
-  if (pi.start_function)
-    return 0;			/* Don't chain beyond the start function */
-
-  if (pi.framereg == FP_RAW_REGNUM)
-    return xfr30_find_callers_reg (fi, pi.framereg);
-
-  return fi->frame - pi.frameoffset;
-}
-
 /* Function: find_callers_reg
    Find REGNUM on the stack.  Otherwise, it's in an active register.
    One thing we might want to do here is to check REGNUM against the
@@ -485,7 +479,7 @@ xfr30_frame_chain (fi)
    frame.  */
 
 CORE_ADDR
-xfr30_find_callers_reg (fi, regnum)
+fr30_find_callers_reg (fi, regnum)
      struct frame_info *fi;
      int regnum;
 {
@@ -499,64 +493,42 @@ xfr30_find_callers_reg (fi, regnum)
   return read_register (regnum);
 }
 
-/* Function: skip_prologue
-   Return the address of the first code past the prologue of the function.  */
+
+/* Function: frame_chain
+   Figure out the frame prior to FI.  Unfortunately, this involves
+   scanning the prologue of the caller, which will also be done
+   shortly by fr30_init_extra_frame_info.  For the dummy frame, we
+   just return the stack pointer that was in use at the time the
+   function call was made.  */
 
 CORE_ADDR
-xfr30_skip_prologue (pc)
-     CORE_ADDR pc;
+fr30_frame_chain (fi)
+     struct frame_info *fi;
 {
-  CORE_ADDR func_addr, func_end;
+  struct prologue_info pi;
+  CORE_ADDR callers_pc, fp;
 
-  /* See what the symbol table says */
+  /* First, find out who called us */
+  callers_pc = FRAME_SAVED_PC (fi);
+  /* If caller is a call-dummy, then our FP bears no relation to his FP! */
+  fp = fr30_find_callers_reg (fi, FP_REGNUM);
+  if (PC_IN_CALL_DUMMY(callers_pc, fp, fp))
+    return fp;	/* caller is call-dummy: return oldest value of FP */
 
-  if (find_pc_partial_function (pc, NULL, &func_addr, &func_end))
-    {
-      struct symtab_and_line sal;
+  /* Caller is NOT a call-dummy, so everything else should just work.
+     Even if THIS frame is a call-dummy! */
+  pi.pifsrs = NULL;
 
-      sal = find_pc_line (func_addr, 0);
+  fr30_scan_prologue (callers_pc, &pi);
 
-      if (sal.line != 0 && sal.end < func_end)
-	return sal.end;
-      else
-	/* Either there's no line info, or the line after the prologue is after
-	   the end of the function.  In this case, there probably isn't a
-	   prologue.  */
-	return pc;
-    }
+  if (pi.start_function)
+    return 0;			/* Don't chain beyond the start function */
 
-/* We can't find the start of this function, so there's nothing we can do. */
-  return pc;
+  if (pi.framereg == FP_REGNUM)
+    return fr30_find_callers_reg (fi, pi.framereg);
+
+  return fi->frame - pi.frameoffset;
 }
-
-/* Function: pop_frame
-   This routine gets called when either the user uses the `return'
-   command, or the call dummy breakpoint gets hit.  */
-
-void
-xfr30_pop_frame (frame)
-     struct frame_info *frame;
-{
-  int regnum;
-
-  if (PC_IN_CALL_DUMMY(frame->pc, frame->frame, frame->frame))
-    generic_pop_dummy_frame ();
-  else
-    {
-      write_register (PC_REGNUM, FRAME_SAVED_PC (frame));
-
-      for (regnum = 0; regnum < NUM_REGS; regnum++)
-	if (frame->fsr.regs[regnum] != 0)
-	  write_register (regnum,
-			  read_memory_unsigned_integer (frame->fsr.regs[regnum],
-							REGISTER_RAW_SIZE(regnum)));
-
-      write_register (SP_REGNUM, FRAME_FP (frame));
-    }
-
-  flush_cached_frames ();
-}
-
 /* Function: push_arguments
    Setup arguments and RP for a call to the target.  First four args
    go in R6->R9, subsequent args go into sp + 16 -> sp + ...  Structs
@@ -568,8 +540,9 @@ xfr30_pop_frame (frame)
    Stack space for the args has NOT been allocated: that job is up to us.
    */
 
+#if(0) /* Z.R. XXX */
 CORE_ADDR
-xfr30_push_arguments (nargs, args, sp, struct_return, struct_addr)
+fr30_push_arguments (nargs, args, sp, struct_return, struct_addr)
      int nargs;
      value_ptr *args;
      CORE_ADDR sp;
@@ -647,13 +620,14 @@ xfr30_push_arguments (nargs, args, sp, struct_return, struct_addr)
     }
   return sp;
 }
+#endif /* Z.R. */
 
 /* Function: push_return_address (pc)
    Set up the return address for the inferior function call.
    Needed for targets where we don't actually execute a JSR/BSR instruction */
  
 CORE_ADDR
-xfr30_push_return_address (pc, sp)
+fr30_push_return_address (pc, sp)
      CORE_ADDR pc;
      CORE_ADDR sp;
 {
@@ -669,15 +643,16 @@ xfr30_push_return_address (pc, sp)
    will be found.  */
 
 CORE_ADDR
-xfr30_frame_saved_pc (fi)
+fr30_frame_saved_pc (fi)
      struct frame_info *fi;
 {
   if (PC_IN_CALL_DUMMY(fi->pc, fi->frame, fi->frame))
     return generic_read_register_dummy(fi->pc, fi->frame, PC_REGNUM);
   else
-    return xfr30_find_callers_reg (fi, RP_REGNUM);
+    return fr30_find_callers_reg (fi, RP_REGNUM);
 }
 
+#if(0) /* Z.R. XXX */
 void
 get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
      char *raw_buffer;
@@ -690,6 +665,7 @@ get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
   generic_get_saved_register (raw_buffer, optimized, addrp, 
 			      frame, regnum, lval);
 }
+#endif /* Z.R. */
 
 
 /* Function: fix_call_dummy
@@ -700,7 +676,7 @@ get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
    */
 
 int
-xfr30_fix_call_dummy (dummy, sp, fun, nargs, args, type, gcc_p)
+fr30_fix_call_dummy (dummy, sp, fun, nargs, args, type, gcc_p)
      char *dummy;
      CORE_ADDR sp;
      CORE_ADDR fun;
@@ -720,4 +696,3 @@ xfr30_fix_call_dummy (dummy, sp, fun, nargs, args, type, gcc_p)
   return 0;
 }
 
-#endif /* Z.R. */
