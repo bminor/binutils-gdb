@@ -1,3 +1,9 @@
+Thu Feb  1 09:38:18 1996  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* configure.in (i[3-6]86-*-win32): Becomes i[3-6]86-*-cygwin32.
+	(powerpc*-*-cygwin32): New.
+	* configure: Regenerated.
+
 Wed Jan 31 13:22:03 1996  Richard Henderson  <rth@tamu.edu>
 
 	* Makefile.in (distclean): Remove $(DEMANGLER_PROG).1.
@@ -452,7 +458,7 @@ Fri Dec 15 16:30:57 1995  Ian Lance Taylor  <ian@cygnus.com>
 Fri Dec 15 07:51:34 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* dlltool.c (fill_ordinals): Start from 1 if no other instructions
-	given.
+ 	given.
 
 Tue Dec 12 12:05:21 1995  Ian Lance Taylor  <ian@cygnus.com>
 

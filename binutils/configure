@@ -1135,11 +1135,11 @@ do
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)'
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_ARM"
 	 ;;
-	i[3-6]86-*pe* | i[3-6]86-*-win32)
+	i[3-6]86-*pe* | i[3-6]86-*-cygwin32)
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)'
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_I386"
 	 ;;
-	powerpc*-*-*pe* | powerpc*-*-win*)
+	powerpc*-*-*pe* | powerpc*-*-cygwin32)
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)'
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_PPC"
 	 ;;
