@@ -95,6 +95,22 @@ if test x"$silent" != x"yes"; then
 fi])dnl
 
 
+AC_ARG_ENABLE(sim-decode-mechanism,
+[  --enable-sim-decode-mechanism=which		Specify the instruction decode mechanism.],
+[case "${enableval}" in
+  yes|no)	AC_MSG_ERROR("No value supplied for --enable-sim-decode-mechanism=file");;
+  array|switch|padded-switch|goto-switch)	sim_decode_mechanism="-T ${enableval}";;
+  *)		AC_MSG_ERROR("File $enableval is not an opcode rules file");
+		sim_decode_mechanism="switch";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_decode_mechanism" != x""; then
+  echo "Setting decode mechanism flags = $sim_decode_mechanism" 6>&1
+fi],[sim_decode_mechanism=""
+if test x"$silent" != x"yes"; then
+  echo "Setting decode mechanism flags = $sim_decode_mechanism"
+fi])dnl
+
+
 AC_ARG_ENABLE(sim-default-model,
 [  --enable-sim-default-model=which	Specify default PowerPC to model.],
 [case "${enableval}" in
@@ -368,16 +384,16 @@ AC_ARG_ENABLE(sim-opcode,
   yes|no)	AC_MSG_ERROR("No value supplied for --enable-sim-opcode=file");;
   *)		if test -f "${srcdir}/${enableval}"; then
 		  sim_opcode="${enableval}"
-		elif test -f "${srcdir}/ppc-opcode-${enableval}"; then
-		  sim_opcode="ppc-opcode-${enableval}"
+		elif test -f "${srcdir}/dc-${enableval}"; then
+		  sim_opcode="dc-${enableval}"
 		else
 		  AC_MSG_ERROR("File $enableval is not an opcode rules file");
-		  sim_opcode="ppc-opcode-complex"
+		  sim_opcode="dc-complex"
 		fi;;
 esac
 if test x"$silent" != x"yes" && test x"$sim_opcode" != x""; then
   echo "Setting opcode flags = $sim_opcode" 6>&1
-fi],[sim_opcode="ppc-opcode-complex"
+fi],[sim_opcode="dc-complex"
 if test x"$silent" != x"yes"; then
   echo "Setting opcode flags = $sim_opcode"
 fi])dnl
@@ -681,6 +697,7 @@ AC_SUBST(sim_config)
 AC_SUBST(sim_opcode)
 AC_SUBST(sim_switch)
 AC_SUBST(sim_dup)
+AC_SUBST(sim_decode_mechanism)
 AC_SUBST(sim_jump)
 AC_SUBST(sim_filter)
 AC_SUBST(sim_icache)
