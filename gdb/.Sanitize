@@ -29,23 +29,6 @@ else
 	fi
 fi
 
-# WinGDB files are not really ready to be part of FSF releases, but
-# keep them for progressives and such.
-
-mswin_files="mswin"
-
-if ( echo $* | grep lose\-mswin > /dev/null ) ; then
-	lose_these_too="${mswin_files} ${lose_these_too}"
-	if [ -n "${verbose}" ] ; then
-		echo Deleting ${mswin_files}
-	fi
-else
-	keep_these_too="${mswin_files} ${keep_these_too}"
-	if [ -n "${verbose}" ] ; then
-		echo Keeping ${mswin_files}
-	fi
-fi
-
 tic80_files="tic80-tdep.c"
 
 if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
@@ -823,33 +806,6 @@ else
 			fi
 			cp $i new
 			sed '/start\-sanitize\-tclpro/,/end-\sanitize\-tclpro/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
-if ( echo $* | grep keep\-mswin > /dev/null ) ; then
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-mswin $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping mswin stuff in $i
-			fi
-		fi
-	done
-else
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-mswin $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"mswin\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-mswin/,/end-\sanitize\-mswin/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...
