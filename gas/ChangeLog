@@ -1,3 +1,13 @@
+2000-05-14  David O'Brien  <obrien@FreeBSD.org>
+
+	* config/te-freebsd.h: New file.
+
+	* doc/as.1: Fix unbalanced brackets.
+
+	* config/tc-i386.c (comment_chars): Don't use '/' as comment start if
+	TE_FreeBSD.
+	(line_comment_chars): Set to '/' if TE_FreeBSD.
+
 1999-07-03  Joel Sherrill <joel@OARcorp.com>
 
 	* configure.in (*rtems except sh): Move RTEMS targets to elf.
