@@ -1,3 +1,10 @@
+Sat Nov 14 15:16:01 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in (vms_alpha_vec): Rename from evax_alpha_vec, and
+	update for file name changes of July 2, 1998.
+	(vms_vax_vec): New.
+	* configure: Rebuild.
+
 Thu Nov 12 19:19:54 1998  Dave Brolley  <brolley@cygnus.com>
 
 	* po/bfd.pot: Regenerated.
