@@ -1,3 +1,8 @@
+2002-01-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (func_desc_adjust): Don't supply missing function
+	descriptor symbols.
+
 2002-01-29  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* elf32-i386 (elf_i386_adjust_dynamic_symbol): Do not replace PLT32

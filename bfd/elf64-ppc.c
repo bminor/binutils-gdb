@@ -2494,42 +2494,10 @@ func_desc_adjust (h, inf)
       struct elf_link_hash_entry *fdh;
       boolean force_local;
 
-      /* Find the corresponding function descriptor symbol.  Create it
-	 as undefined if necessary.  */
+      /* Find the corresponding function descriptor symbol.  */
 
       fdh = elf_link_hash_lookup (&htab->elf, h->root.root.string + 1,
 				  false, false, true);
-
-      if (fdh == NULL && info->shared)
-	{
-	  bfd *abfd;
-	  asymbol *newsym;
-
-	  /* Create it as undefined.  */
-	  if (h->root.type == bfd_link_hash_undefined
-	      || h->root.type == bfd_link_hash_undefweak)
-	    abfd = h->root.u.undef.abfd;
-	  else if (h->root.type == bfd_link_hash_defined
-		   || h->root.type == bfd_link_hash_defweak)
-	    abfd = h->root.u.def.section->owner;
-	  else
-	    abort ();
-	  newsym = bfd_make_empty_symbol (abfd);
-	  newsym->name = h->root.root.string + 1;
-	  newsym->section = bfd_und_section_ptr;
-	  newsym->value = 0;
-	  newsym->flags = BSF_OBJECT;
-	  if (h->root.type == bfd_link_hash_undefweak)
-	    newsym->flags |= BSF_WEAK;
-
-	  if ( !(_bfd_generic_link_add_one_symbol
-		 (info, abfd, newsym->name, newsym->flags,
-		  newsym->section, newsym->value, NULL, false, false,
-		  (struct bfd_link_hash_entry **) &fdh)))
-	    {
-	      return false;
-	    }
-	}
 
       if (fdh != NULL
 	  && (fdh->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0
