@@ -1,5 +1,8 @@
 Mon Mar 28 12:53:27 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* configure.in (powerpc-*-aix*): New target; use rs6000.mt.
+	* config/rs6000.mt (SELECT_ARCHITECTURES): Add bfd_powerpc_arch.
+
 	* aoutx.h (translate_from_native_sym_flags): Set SEC_RELOC flag
 	for generated constructor section.
 
