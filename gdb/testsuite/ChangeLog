@@ -1,3 +1,22 @@
+Sun Aug  6 16:52:29 1995  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/corefile.exp:  Change xfail for backtrace in
+	corefile.exp from linuxaout to all linux.
+	* gdb.base/sigall.exp (test_one_sig):  Specifically deal with
+	cases where we miss the breakpoint at the signal handler
+	for some reason.  Setup xfail for linuxoldld/linuxaout and
+	getting SIGIO.  Setup xfail for linuxoldld/linuxaout for
+	hitting SIGURG breakpoint.
+	* gdb.base/signals.exp:  Setup xfail for "next" acting like
+	continue to add linuxoldld.  Setup xfail for all linux for
+	"next to handler in signals_tests_1", "backtrace in
+	signals_tests_1", "continue to func1", "pass SIGUSR1",
+	and continue to handler".
+
+Thu Aug  3 10:45:37 1995  Fred Fish  <fnf@cygnus.com>
+
+	* Update all FSF addresses except those in COPYING* files.
+
 Sun Jul 30 17:50:35 1995  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/a2-run.exp: Change messages to be more explicit about

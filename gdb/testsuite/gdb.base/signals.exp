@@ -38,6 +38,10 @@ proc signal_tests_1 {} {
 	setup_xfail "i*86-univel-sysv4*"
 	# lynx fails with "next" acting like "continue"
 	setup_xfail "*-*-*lynx*"
+	# linux (aout versions) also fails with "next" acting like "continue"
+	# this is probably more dependant on the kernel version than on the
+	# object file format or utils.  (sigh)
+	setup_xfail "i*86-*-linuxaout" "i*86-*-linuxoldld"
 	send "next\n"
 	expect {
 	    -re "alarm .*$prompt $" { pass "next to 2nd alarm (1)" }
@@ -104,6 +108,7 @@ proc signal_tests_1 {} {
 
 	set bash_bug 0
 	send "next\n"
+	setup_xfail "i*86-*-linux"
 	expect {
 	    -re "Breakpoint.*handler.*$prompt $" {
 		pass "next to handler in signals_tests_1"
@@ -123,6 +128,7 @@ proc signal_tests_1 {} {
 	# This doesn't test that main is frame #2, just that main is frame
 	# #2, #3, or higher.  At some point this should be fixed (but
 	# it quite possibly would introduce new FAILs on some systems).
+	setup_xfail "i*86-*-linux"
 	gdb_test "backtrace" "#0.*handler.*#1.*#2.*main.*" \
 	    "backtrace in signals_tests_1"
 
@@ -133,6 +139,7 @@ proc signal_tests_1 {} {
 	# a SIGTRAP, but with different symptoms.
 	setup_xfail "vax-*-ultrix*"
 	setup_xfail "i*86-*-bsd*"
+	setup_xfail "i*86-*-linux"
 	send "continue\n"
 	expect {
 	    -re "Breakpoint.*func1.*$prompt $" { pass "continue to func1" }
@@ -163,6 +170,7 @@ proc signal_tests_1 {} {
 	}
 
 	setup_xfail "*-*-irix*"
+	setup_xfail "i*86-*-linux"
 	send "signal SIGUSR1\n"
 	expect {
 	    -re "Breakpoint.*handler.*$prompt $" { pass "signal SIGUSR1" }
@@ -217,6 +225,7 @@ proc signal_tests_1 {} {
 	    setup_xfail "m68*-*-sunos4*"
 	}
 
+	setup_xfail "i*86-*-linux"
 	gdb_test "continue" "Breakpoint.*handler.*" "continue to handler"
 
 	# If the NO_SINGLE_STEP failure happened, we have already exited.
@@ -258,6 +267,7 @@ if {[ istarget "m68*-motorola-*" ] || [ istarget "hppa*-*-bsd*" ] ||
 if [ istarget "*-*-*lynx*" ] then {
   setup_xfail "*-*-*"
   fail "kernel scroggs stack pointer in signal tests on this target"
+  return 0
 }
 
 gdb_exit
