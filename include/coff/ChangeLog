@@ -1,3 +1,7 @@
+Fri Jul 16 09:54:35 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* mips.h (MIPS_AOUT_{OZ}MAGIC): Renamed from {OZ}MAGIC.
+
 Thu Jul 15 12:23:55 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* m88k.h (union external_auxent): Move x_fcn back inside x_fcnary.
