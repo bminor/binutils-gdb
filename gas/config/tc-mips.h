@@ -55,6 +55,9 @@ extern int mips_relax_frag PARAMS ((struct frag *, long));
 #define md_undefined_symbol(name)	(0)
 #define md_operand(x)
 
+extern int mips_do_align PARAMS ((int, const char *, int, int));
+#define md_do_align(n,fill,len,max,l) if (mips_do_align (n,fill,len,max)) goto l
+
 /* We permit PC relative difference expressions when generating
    embedded PIC code.  */
 #define DIFF_EXPR_OK

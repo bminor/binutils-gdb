@@ -1,3 +1,8 @@
+2000-01-13  Clinton Popetz  <cpopetz@cygnus.com>
+
+        * config/tc-mips.c (mips_do_align): New function.
+        * config/tc-mips.h (md_do_align): Define.
+
 2000-01-10  Philip Blundell  <philb@gnu.org>
 
 	* doc/c-arm.texi (ARM Options): Fix typo.

@@ -11436,6 +11436,36 @@ static procS cur_proc;
 static procS *cur_proc_ptr;
 static int numprocs;
 
+/* When we align code in the .text section of mips16, use the correct two
+   byte nop pattern of 0x6500 (move $0,$0) */
+
+int
+mips_do_align (n, fill, len, max)
+     int n;
+     const char *fill;
+     int len;
+     int max;
+{
+  if (fill == NULL
+      && subseg_text_p (now_seg)
+      && n > 1
+      && mips_opts.mips16)
+    {
+      static const unsigned char be_nop[] = { 0x65, 0x00 };
+      static const unsigned char le_nop[] = { 0x00, 0x65 };
+
+      frag_align (1, 0, 0);
+
+      if (target_big_endian)
+      	frag_align_pattern (n, be_nop, 2, max);      
+      else
+      	frag_align_pattern (n, le_nop, 2, max);      
+      return 1;
+    }
+
+  return 0;
+}
+
 static void
 md_obj_begin ()
 {
