@@ -1,3 +1,13 @@
+2002-09-17  Stan Cox  <scox@redhat.com>
+
+	* tc-mips.c (load_address): Use BFD_RELOC_MIPS_GOT_DISP for newabi.
+	(macro): Likewise for la.  Likewise for ld.
+	(mips_after_parse_args): Make -xgot optional, not the default.
+	(md_apply_fix3): Allow composite relocation to set up gp.
+	(tc_gen_reloc): Allow relaxing for newabi.
+	Relax R_MIPS_CALL16 to R_MIPS_GOT_PAGE/R_MIPS_GOT_OFST if local.
+	Relax R_MIPS_GOT16/R_MIPS_LO16 to R_MIPS_GOT_DISP if local.
+
 2002-09-17  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c (md_apply_fix3): Note that an implemented
