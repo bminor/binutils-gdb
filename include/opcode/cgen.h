@@ -651,10 +651,9 @@ struct cgen_insn
   struct cgen_base base;
 #define CGEN_INSN_BASE(insn) (&(insn)->base)
 
-  /* Each real instruction is enumerated.  This is used, for example, to do
-     insn profiling in the simulator.
-     Macro-insns are not enumerated.  The simulator doesn't use them and there
-     is currently no other need for it.  */
+  /* Each real instruction is enumerated.
+     The simulator use to use this value but currently no longer does.
+     This may go away in time.  */
   int num;
 #define CGEN_INSN_NUM(insn) ((insn)->num)
 
