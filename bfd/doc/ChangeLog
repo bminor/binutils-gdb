@@ -1,3 +1,9 @@
+Fri Mar 19 01:13:00 1993  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* bfd.texinfo: Since BFD version number has been bumped, do same
+	to "version number" on title page, and elsewhere.  Should be
+	fixed to extract real version number.
+
 Tue Mar 16 12:15:13 1993  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* Makefile.in:  Add *clean rules.
