@@ -55,7 +55,7 @@ const struct v850_operand v850_operands[] = {
 
 #define B3	(D22+1)
 /* The 3 bit immediate field in format 8 insn.  */
-  { 3, 3, OPERAND_NUM }
+  { 3, 27, OPERAND_NUM }
 } ; 
 
 
