@@ -1,3 +1,14 @@
+2002-02-18  Elena Zannoni  <ezannoni@redhat.com>
+
+	* ppc-linux-nat.c: Update copyright.
+	(fetch_register, store_register): Add tid parameter, don't compute
+	tid here.
+	(fetch_ppc_registers, store_ppc_registers): Add tid
+	parameter. Pass it along to callees.
+	(fetch_inferior_registers, store_inferior_registers): Compute tid
+	here, and pass it to calleed functions.
+	(fill_gregset, supply_fpregset): Clean up formatting.
+
 2002-02-18  Richard Earnshaw  <rearnsha@arm.com>
 
 	* arm-tdep.c (arm_gdbarch_init): Initialize coerce_float_to_double.

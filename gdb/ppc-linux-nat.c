@@ -1,5 +1,5 @@
 /* PPC linux native support.
-   Copyright 1988, 1989, 1991, 1992, 1994, 1996, 2000, 2001
+   Copyright 1988, 1989, 1991, 1992, 1994, 1996, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -16,7 +16,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "frame.h"
@@ -109,14 +110,13 @@ ppc_ptrace_cannot_fetch_store_register (int regno)
 }
 
 static void
-fetch_register (int regno)
+fetch_register (int tid, int regno)
 {
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   char mess[128];              /* For messages */
   register int i;
   unsigned int offset;         /* Offset of registers within the u area. */
   char *buf = alloca (MAX_REGISTER_RAW_SIZE);
-  int tid;
   CORE_ADDR regaddr = ppc_register_u_addr (regno);
 
   if (regaddr == -1)
@@ -125,10 +125,6 @@ fetch_register (int regno)
       supply_register (regno, buf);
       return;
     }
-
-  /* Overload thread id onto process id */
-  if ((tid = TIDGET (inferior_ptid)) == 0)
-    tid = PIDGET (inferior_ptid);      /* no thread id, just use process id */
 
   for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))
     {
@@ -147,13 +143,13 @@ fetch_register (int regno)
 }
 
 static void 
-fetch_ppc_registers (void)
+fetch_ppc_registers (int tid)
 {
   int i;
   int last_register = gdbarch_tdep (current_gdbarch)->ppc_mq_regnum;
   
   for (i = 0; i <= last_register; i++)
-    fetch_register (i);
+    fetch_register (tid, i);
 }
 
 /* Fetch registers from the child process.  Fetch all registers if
@@ -162,32 +158,34 @@ fetch_ppc_registers (void)
 void
 fetch_inferior_registers (int regno)
 {
-  if (regno == -1)
-    fetch_ppc_registers ();
+ /* Overload thread id onto process id */
+  int tid = TIDGET (inferior_ptid);
+
+  /* No thread id, just use process id */
+  if (tid == 0)
+    tid = PIDGET (inferior_ptid);
+
+   if (regno == -1)
+    fetch_ppc_registers (tid);
   else 
-    fetch_register (regno);
+    fetch_register (tid, regno);
 }
 
 /* Store one register. */
 static void
-store_register (int regno)
+store_register (int tid, int regno)
 {
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr = ppc_register_u_addr (regno);
   char mess[128];              /* For messages */
   register int i;
   unsigned int offset;         /* Offset of registers within the u area.  */
-  int tid;
   char *buf = alloca (MAX_REGISTER_RAW_SIZE);
 
   if (regaddr == -1)
     {
       return;
     }
-
-  /* Overload thread id onto process id */
-  if ((tid = TIDGET (inferior_ptid)) == 0)
-    tid = PIDGET (inferior_ptid);      /* no thread id, just use process id */
 
   regcache_collect (regno, buf);
   for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))
@@ -206,22 +204,29 @@ store_register (int regno)
 }
 
 static void
-store_ppc_registers (void)
+store_ppc_registers (int tid)
 {
   int i;
   int last_register = gdbarch_tdep (current_gdbarch)->ppc_mq_regnum;
   
   for (i = 0; i <= last_register; i++)
-    store_register (i);
+    store_register (tid, i);
 }
 
 void
 store_inferior_registers (int regno)
 {
+  /* Overload thread id onto process id */
+  int tid = TIDGET (inferior_ptid);
+
+  /* No thread id, just use process id */
+  if (tid == 0)
+    tid = PIDGET (inferior_ptid);
+
   if (regno >= 0)
-    store_register (regno);
+    store_register (tid, regno);
   else
-    store_ppc_registers ();
+    store_ppc_registers (tid);
 }
 
 void
@@ -258,23 +263,17 @@ fill_gregset (gdb_gregset_t *gregsetp, int regno)
 
   if ((regno == -1) || regno == PC_REGNUM)
     regcache_collect (PC_REGNUM, regp + PT_NIP);
-  if ((regno == -1) 
-      || regno == tdep->ppc_lr_regnum)
+  if ((regno == -1) || regno == tdep->ppc_lr_regnum)
     regcache_collect (tdep->ppc_lr_regnum, regp + PT_LNK);
-  if ((regno == -1)
-      || regno == tdep->ppc_cr_regnum)
+  if ((regno == -1) || regno == tdep->ppc_cr_regnum)
     regcache_collect (tdep->ppc_cr_regnum, regp + PT_CCR);
-  if ((regno == -1)
-      || regno == tdep->ppc_xer_regnum)
+  if ((regno == -1) || regno == tdep->ppc_xer_regnum)
     regcache_collect (tdep->ppc_xer_regnum, regp + PT_XER);
-  if ((regno == -1)
-      || regno == tdep->ppc_ctr_regnum)
+  if ((regno == -1) || regno == tdep->ppc_ctr_regnum)
     regcache_collect (tdep->ppc_ctr_regnum, regp + PT_CTR);
-  if ((regno == -1)
-      || regno == tdep->ppc_mq_regnum)
+  if ((regno == -1) || regno == tdep->ppc_mq_regnum)
     regcache_collect (tdep->ppc_mq_regnum, regp + PT_MQ);
-  if ((regno == -1)
-      || regno == tdep->ppc_ps_regnum)
+  if ((regno == -1) || regno == tdep->ppc_ps_regnum)
     regcache_collect (tdep->ppc_ps_regnum, regp + PT_MSR);
 }
 
@@ -283,9 +282,7 @@ supply_fpregset (gdb_fpregset_t * fpregsetp)
 {
   int regi;
   for (regi = 0; regi < 32; regi++)
-    {
-      supply_register (FP0_REGNUM + regi, (char *) (*fpregsetp + regi));
-    }
+    supply_register (FP0_REGNUM + regi, (char *) (*fpregsetp + regi));
 }
 
 /*  Given a pointer to a floating point register set in /proc format
