@@ -1,3 +1,7 @@
+Fri May  1 10:58:34 1998  John Metzler  <jmetzler@cygnus.com>
+
+	* monitor.c: Turn off debug
+
 Fri May  1 09:29:56 1998  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* breakpoint.c (delete_command):  Skip internal breakpoints when
