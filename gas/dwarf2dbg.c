@@ -428,7 +428,10 @@ dwarf2_directive_loc (dummy)
 
 #ifndef NO_LISTING
   if (listing)
-    listing_source_line (line);
+    {
+      listing_source_file (files[filenum].filename);
+      listing_source_line (line);
+    }
 #endif
 }
 

@@ -1,3 +1,8 @@
+2002-05-22  H.J. Lu <hjl@gnu.org>
+
+	* dwarf2dbg.c (dwarf2_directive_loc): Call listing_source_file
+	for source file.
+
 2002-05-22  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* config/tc-arm.c (arm_s_section): Enable for COFF builds as well
