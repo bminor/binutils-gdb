@@ -1,3 +1,8 @@
+Wed Oct  8 16:28:53 1997  Richard Henderson  <rth@cygnus.com>
+
+	* config/tc-alpha.c (load_expression): Disable the sym+const .got
+	optimization to reduce the alignment surprises for gcc.
+
 Wed Oct  8 16:11:15 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* config/obj-coff.h (TC_SPARC): Don't define TARGET_FORMAT.

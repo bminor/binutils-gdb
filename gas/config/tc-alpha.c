@@ -401,6 +401,45 @@ static int alpha_flag_show_after_trunc = 0;		/* -H */
 static int alpha_basereg_clobbered;
 #endif
 
+/* A table of CPU names and opcode sets.  */
+
+static const struct cpu_type
+{
+  const char *name;
+  unsigned flags;
+} cpu_types[] =
+{
+  /* Ad hoc convention: cpu number gets palcode, process code doesn't.
+     This supports usage under DU 4.0b that does ".arch ev4", and 
+     usage in MILO that does -m21064.  Probably something more
+     specific like -m21064-pal should be used, but oh well.  */
+
+  { "21064", AXP_OPCODE_BASE|AXP_OPCODE_EV4 },
+  { "21064a", AXP_OPCODE_BASE|AXP_OPCODE_EV4 },
+  { "21066", AXP_OPCODE_BASE|AXP_OPCODE_EV4 },
+  { "21068", AXP_OPCODE_BASE|AXP_OPCODE_EV4 },
+  { "21164", AXP_OPCODE_BASE|AXP_OPCODE_EV5 },
+  /* Do we have CIX extension here? */
+  { "21164a", AXP_OPCODE_BASE|AXP_OPCODE_EV5|AXP_OPCODE_BWX },
+  /* Still same PALcodes? */
+  { "21164pc", (AXP_OPCODE_BASE|AXP_OPCODE_EV5|AXP_OPCODE_BWX
+		|AXP_OPCODE_CIX|AXP_OPCODE_MAX) },
+  /* All new PALcodes?  Extras? */
+  { "21264", (AXP_OPCODE_BASE|AXP_OPCODE_BWX
+	      |AXP_OPCODE_CIX|AXP_OPCODE_MAX) },
+
+  { "ev4", AXP_OPCODE_BASE },
+  { "ev45", AXP_OPCODE_BASE },
+  { "lca45", AXP_OPCODE_BASE },
+  { "ev5", AXP_OPCODE_BASE },
+  { "ev56", AXP_OPCODE_BASE|AXP_OPCODE_BWX },
+  { "pca56", AXP_OPCODE_BASE|AXP_OPCODE_BWX|AXP_OPCODE_CIX|AXP_OPCODE_MAX },
+  { "ev6", AXP_OPCODE_BASE|AXP_OPCODE_BWX|AXP_OPCODE_CIX|AXP_OPCODE_MAX },
+
+  { "all", AXP_OPCODE_BASE },
+  { 0 }
+};
+
 /* The macro table */
 
 static const struct alpha_macro alpha_macros[] = {
@@ -639,38 +678,30 @@ static const int alpha_num_macros
 void
 md_begin ()
 {
-  unsigned int i = 0;
+  unsigned int i;
 
   /* Create the opcode hash table */
 
   alpha_opcode_hash = hash_new ();
   for (i = 0; i < alpha_num_opcodes; )
     {
-      const char *name, *retval;
+      const char *name, *retval, *slash;
 
       name = alpha_opcodes[i].name;
       retval = hash_insert (alpha_opcode_hash, name, (PTR)&alpha_opcodes[i]);
       if (retval)
 	as_fatal ("internal error: can't hash opcode `%s': %s", name, retval);
 
-      while (++i < alpha_num_opcodes
-	     && (alpha_opcodes[i].name == name
-		 || !strcmp (alpha_opcodes[i].name, name)))
-	continue;
-    }
+      /* Some opcodes include modifiers of various sorts with a "/mod"
+	 syntax, like the architecture manual suggests.  However, for
+	 use with gcc at least, we also need access to those same opcodes
+	 without the "/".  */
 
-  /* Some opcodes include modifiers of various sorts with a "/mod" syntax,
-     like the architecture manual suggests.  However, for use with gcc at
-     least, we also need access to those same opcodes without the "/".  */
-  for (i = 0; i < alpha_num_opcodes; )
-    {
-      const char *name, *slash;
-      name = alpha_opcodes[i].name;
-      if ((slash = strchr(name, '/')) != NULL)
+      if ((slash = strchr (name, '/')) != NULL)
 	{
 	  char *p = xmalloc (strlen (name));
-	  memcpy(p, name, slash-name);
-	  strcpy(p+(slash-name), slash+1);
+	  memcpy (p, name, slash - name);
+	  strcpy (p + (slash - name), slash + 1);
 
 	  (void)hash_insert(alpha_opcode_hash, p, (PTR)&alpha_opcodes[i]);
 	  /* Ignore failures -- the opcode table does duplicate some
@@ -892,41 +923,8 @@ md_parse_option (c, arg)
 
     case 'm':
       {
-	static const struct machine
-	{
-	  const char *name;
-	  unsigned flags;
-	} *p, m[] =
-	{
-	  { "21064", AXP_OPCODE_BASE|AXP_OPCODE_EV4 },
-	  { "21064a", AXP_OPCODE_BASE|AXP_OPCODE_EV4 },
-	  { "21066", AXP_OPCODE_BASE|AXP_OPCODE_EV4 },
-	  { "21068", AXP_OPCODE_BASE|AXP_OPCODE_EV4 },
-	  { "21164", AXP_OPCODE_BASE|AXP_OPCODE_EV5 },
-	  /* Do we have CIX extension here? */
-	  { "21164a", AXP_OPCODE_BASE|AXP_OPCODE_EV5|AXP_OPCODE_BWX },
-	  /* Still same PALcodes? */
-	  { "21164pc", (AXP_OPCODE_BASE|AXP_OPCODE_EV5|AXP_OPCODE_BWX
-			|AXP_OPCODE_CIX|AXP_OPCODE_MAX) },
-	  /* All new PALcodes?  Extras? */
-	  { "21264", (AXP_OPCODE_BASE|AXP_OPCODE_BWX
-		      |AXP_OPCODE_CIX|AXP_OPCODE_MAX) },
-
-	  { "ev4", AXP_OPCODE_BASE|AXP_OPCODE_EV4 },
-	  { "ev45", AXP_OPCODE_BASE|AXP_OPCODE_EV4 },
-	  { "lca45", AXP_OPCODE_BASE|AXP_OPCODE_EV4 },
-	  { "ev5", AXP_OPCODE_BASE|AXP_OPCODE_EV5 },
-	  { "ev56", AXP_OPCODE_BASE|AXP_OPCODE_EV5|AXP_OPCODE_BWX },
-	  { "pca56", (AXP_OPCODE_BASE|AXP_OPCODE_EV5|AXP_OPCODE_BWX
-		      |AXP_OPCODE_CIX|AXP_OPCODE_MAX) },
-	  { "ev6", (AXP_OPCODE_BASE|AXP_OPCODE_BWX
-		    |AXP_OPCODE_CIX|AXP_OPCODE_MAX) },
-
-	  { "all", AXP_OPCODE_BASE },
-	  { 0 }
-	};
-
-	for (p = m; p->name; ++p)
+	const struct cpu_type *p;
+	for (p = cpu_types; p->name; ++p)
 	  if (strcmp(arg, p->name) == 0)
 	    {
 	      alpha_target_name = p->name, alpha_target = p->flags;
@@ -1954,7 +1952,7 @@ assemble_tokens_to_insn(opname, tok, ntok, insn)
 	as_bad ("inappropriate arguments for opcode `%s'", opname);
       else
 	as_bad ("opcode `%s' not supported for target %s", opname,
-	       alpha_target_name);
+	        alpha_target_name);
     }
   else
     as_bad ("unknown opcode `%s'", opname);
@@ -2012,7 +2010,7 @@ assemble_tokens (opname, tok, ntok, local_macros_on)
       as_bad ("inappropriate arguments for opcode `%s'", opname);
     else
       as_bad ("opcode `%s' not supported for target %s", opname,
-	     alpha_target_name);
+	      alpha_target_name);
   else
     as_bad ("unknown opcode `%s'", opname);
 }
@@ -2241,7 +2239,10 @@ load_expression (targreg, exp, pbasereg, poffset)
 	else
 	  set_tok_reg (newtok[0], targreg);
 
-	if (!range_signed_32 (addend)
+	/* XXX: Disable this .got minimizing optimization so that we can get
+	   better instruction offset knowledge in the compiler.  This happens
+	   very infrequently anyway.  */
+	if (1 || !range_signed_32 (addend)
 	    && (alpha_noat_on || targreg == AXP_REG_AT))
 	  {
 	    newtok[1] = *exp;
@@ -4018,6 +4019,7 @@ s_alpha_proc (is_static)
   int temp;
 
   /* Takes ".proc name,nargs"  */
+  SKIP_WHITESPACE ();
   name = input_line_pointer;
   c = get_symbol_end ();
   p = input_line_pointer;
@@ -4049,13 +4051,12 @@ static void
 s_alpha_set (x)
      int x;
 {
-  char *name = input_line_pointer, ch, *s;
+  char *name, ch, *s;
   int yesno = 1;
 
-  while (!is_end_of_line[(unsigned char) *input_line_pointer])
-    input_line_pointer++;
-  ch = *input_line_pointer;
-  *input_line_pointer = '\0';
+  SKIP_WHITESPACE ();
+  name = input_line_pointer;
+  ch = get_symbol_end ();
 
   s = name;
   if (s[0] == 'n' && s[1] == 'o')
@@ -4214,6 +4215,32 @@ s_alpha_ucons (bytes)
   alpha_auto_align_on = hold;
 }
 
+/* Switch the working cpu type.  */
+
+static void
+s_alpha_arch (ignored)
+     int ignored;
+{
+  char *name, ch;
+  const struct cpu_type *p;
+
+  SKIP_WHITESPACE ();
+  name = input_line_pointer;
+  ch = get_symbol_end ();
+
+  for (p = cpu_types; p->name; ++p)
+    if (strcmp(name, p->name) == 0)
+      {
+        alpha_target_name = p->name, alpha_target = p->flags;
+	goto found;
+      }
+  as_warn("Unknown CPU identifier `%s'", name);
+
+found:
+  *input_line_pointer = ch;
+  demand_empty_rest_of_line ();
+}
+
 
 
 #ifdef DEBUG1
@@ -4330,6 +4357,8 @@ const pseudo_typeS md_pseudo_table[] =
 /* We don't do any optimizing, so we can safely ignore these.  */
   {"noalias", s_ignore, 0},
   {"alias", s_ignore, 0},
+
+  {"arch", s_alpha_arch, 0},
 
   {NULL, 0, 0},
 };
