@@ -1,3 +1,12 @@
+2003-09-06  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* elf32-m68hc12.c (elf32_m68hc12_special_sections): New for hc11.
+	(elf_backend_special_sections): Define.a
+
+	PR savannah/4950:
+	* elf32-m68hc11.c (elf32_m68hc11_special_sections): The .vectors
+	section is read-only.
+
 2003-09-04  Nick Clifton  <nickc@redhat.com>
 
 	* archures.c (bfd_mach_v850e1): Define.
