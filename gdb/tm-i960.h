@@ -1,5 +1,5 @@
 /* Parameters for target machine Intel 960, for GDB, the GNU debugger.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright (C) 1990, 1991, 1993 Free Software Foundation, Inc.
    Contributed by Intel Corporation.
 This file is part of GDB.
 
@@ -40,12 +40,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* We have IEEE floating point, if we have any float at all.  */
 
 #define IEEE_FLOAT
-
-/* Define this if the C compiler puts an underscore at the front
-   of external names before giving them to the linker.  */
-
-#define NAMES_HAVE_UNDERSCORE
-
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */

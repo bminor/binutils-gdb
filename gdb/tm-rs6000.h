@@ -95,11 +95,6 @@ function_frame_info PARAMS ((CORE_ADDR, struct aix_framedata *));
 
 #define TARGET_BYTE_ORDER	BIG_ENDIAN
 
-/* Define this if the C compiler puts an underscore at the front
-   of external names before giving them to the linker.  */
-
-#undef NAMES_HAVE_UNDERSCORE
-
 /* AIX's assembler doesn't grok dollar signs in identifiers.
    So we use dots instead.  This item must be coordinated with G++. */
 #undef CPLUS_MARKER

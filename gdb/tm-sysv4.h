@@ -1,5 +1,5 @@
 /* Macro definitions for GDB on all SVR4 target systems.
-   Copyright (C) 1991, 1992, Free Software Foundation, Inc.
+   Copyright 1991, 1992, 1993 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support (fnf@cygnus.com).
 
 This file is part of GDB.
@@ -33,12 +33,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    when we have stepped into one of these fragments. */
 
 #define IN_SOLIB_TRAMPOLINE(pc,name) ((name) && (STREQ ("_init", name)))
-
-/* In SVR4 ELF files, the ABI defines (pg. 4-25) that "External C symbols
-   have the same names in C, assembly code, and object files' symbol
-   tables."  So... */
-
-#undef	NAMES_HAVE_UNDERSCORE
 
 /* It is unknown which, if any, SVR4 assemblers do not accept dollar signs
    in identifiers.  The default in G++ is to use dots instead, for all SVR4

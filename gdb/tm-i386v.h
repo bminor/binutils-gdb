@@ -30,11 +30,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* turn this on when rest of gdb is ready */
 #define IEEE_FLOAT
 
-/* Define this if the C compiler puts an underscore at the front
-   of external names before giving them to the linker.  */
-
-/* #define NAMES_HAVE_UNDERSCORE */
-
 /* number of traps that happen between exec'ing the shell 
  * to run an inferior, and when we finally get to 
  * the inferior code.  This is 2 on most implementations.

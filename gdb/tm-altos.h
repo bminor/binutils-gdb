@@ -22,11 +22,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define BPT_VECTOR 0xe
 
-/* Define this if the C compiler puts an underscore at the front
-   of external names before giving them to the linker.  */
-
-#undef NAMES_HAVE_UNDERSCORE
-
 /* Address of end of stack space.  */
 
 /*#define STACK_END_ADDR (0xffffff)*/

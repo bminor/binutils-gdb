@@ -39,11 +39,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    whether there is one or not.  */
 extern int mips_fpu;
 
-/* Define this if the C compiler puts an underscore at the front
-   of external names before giving them to the linker.  */
-
-/*#define NAMES_HAVE_UNDERSCORE*/
-
 /* Offset from address of function to start of its code.
    Zero on most machines.  */
 

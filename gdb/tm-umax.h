@@ -1,5 +1,5 @@
 /* Definitions to make GDB run on an encore under umax 4.2
-   Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1987, 1989, 1991, 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -18,11 +18,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define TARGET_BYTE_ORDER LITTLE_ENDIAN
-
-/* Define this if the C compiler puts an underscore at the front
-   of external names before giving them to the linker.  */
-
-#define NAMES_HAVE_UNDERSCORE
 
 /* Need to get function ends by adding this to epilogue address from .bf
    record, not using x_fsize field.  */

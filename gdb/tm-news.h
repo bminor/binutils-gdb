@@ -1,5 +1,5 @@
 /* Parameters for execution on a Sony/NEWS, for GDB, the GNU debugger.
-   Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1987, 1989, 1991, 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -28,11 +28,6 @@ Here is an m-news.h file for gdb.  It supports the 68881 registers.
   But we cannot change the floating register(see adb(1) in OS 3.2) yet.  */
 
 #define HAVE_68881
-
-/* Define this if the C compiler puts an underscore at the front
-   of external names before giving them to the linker.  */
-
-#define NAMES_HAVE_UNDERSCORE
 
 /* Use to compute STACK_END_ADDR.  */
 #define TARGET_UPAGES 2

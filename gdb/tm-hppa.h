@@ -1,6 +1,6 @@
-/* Parameters for execution on a Hewlett-Packard PA-RISC machine, running
-   HPUX or BSD.
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992 Free Software Foundation, Inc. 
+/* Parameters for execution on any Hewlett-Packard PA-RISC machine.
+   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993
+   Free Software Foundation, Inc. 
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
@@ -49,11 +49,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Groan */
 
 #define	ARGS_GROW_DOWN
-
-/* Define this if the C compiler puts an underscore at the front
-   of external names before giving them to the linker.  */
-
-/* #define NAMES_HAVE_UNDERSCORE */
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */

@@ -1,5 +1,5 @@
 /* Parameters for targeting on a Gould NP1, for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -73,10 +73,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Define COFF and other symbolic names needed on NP1 */
 #define	NS32GMAGIC	GNP1MAGIC
 #define	NS32SMAGIC	GPNMAGIC
-
-/* Define this if the C compiler puts an underscore at the front
-   of external names before giving them to the linker.  */
-#define NAMES_HAVE_UNDERSCORE
 
 /* Address of blocks in N_LBRAC and N_RBRAC symbols are absolute addresses,
    not relative to start of source address.  */

@@ -1,5 +1,5 @@
 /* Parameters for target machine Hewlett-Packard 9000/300, running bsd.
-   Copyright (C) 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -29,11 +29,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    This is the vector number used by traps to indicate a breakpoint. */
 
 #define BPT_VECTOR 0x2
-
-/* Define this if the C compiler puts an underscore at the front
-   of external names before giving them to the linker.  */
-
-#define NAMES_HAVE_UNDERSCORE
 
 #define TARGET_NBPG 4096
 #define TARGET_UPAGES 3

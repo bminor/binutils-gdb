@@ -1,6 +1,6 @@
 /* Target machine definitions for GDB on a Sequent Symmetry under dynix 3.0,
    with Weitek 1167 and i387 support.
-   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
    Symmetry version by Jay Vosburgh (uunet!sequent!fubar).
 
 This file is part of GDB.
@@ -24,11 +24,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <machine/reg.h>
 
 #define TARGET_BYTE_ORDER LITTLE_ENDIAN
-
-/* Define this if the C compiler puts an underscore at the front
-   of external names before giving them to the linker.  */
-
-#define NAMES_HAVE_UNDERSCORE
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */

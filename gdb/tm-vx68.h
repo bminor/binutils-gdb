@@ -1,5 +1,5 @@
 /* Target machine description for VxWorks 68k's, for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB.
@@ -28,11 +28,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	DECR_PC_AFTER_BREAK	0
 
 #include "tm-68k.h"
-
-/* Define this if the C compiler puts an underscore at the front
-   of external names before giving them to the linker.  */
-
-#define NAMES_HAVE_UNDERSCORE
 
 /* We are guaranteed to have a zero frame pointer at bottom of stack, too. */
 #undef	FRAME_CHAIN

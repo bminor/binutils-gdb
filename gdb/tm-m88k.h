@@ -1,5 +1,6 @@
 /* Target machine description for generic Motorola 88000, for GDB.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1993
+   Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -41,11 +42,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 extern void init_extra_frame_info ();
 
 #define IEEE_FLOAT
-
-/* Define this if the C compiler puts an underscore at the front
-   of external names before giving them to the linker.  */
-
-#define NAMES_HAVE_UNDERSCORE
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */

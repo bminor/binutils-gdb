@@ -1,5 +1,5 @@
 /* Parameters for a Sun 386i target machine, for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1991, 1992, 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -30,7 +30,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define COFF_ENCAPSULATE
 
 #ifdef COFF_ENCAPSULATE
-#define NAMES_HAVE_UNDERSCORE
 /* Avoid conflicts between our include files and <sys/exec.h>
    (maybe not needed anymore).  */
 #define _EXEC_

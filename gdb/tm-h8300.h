@@ -1,5 +1,5 @@
 /* Parameters for execution on a H8/300 series machine.
-   Copyright (C) 1992 Free Software Foundation, Inc.
+   Copyright 1992, 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -291,9 +291,6 @@ UNSIGNED_SHORT(read_memory_integer (read_register (SP_REGNUM), 2))
 
 #define	BEFORE_MAIN_LOOP_HOOK	\
   hms_before_main_loop();
-
-
-#define NAMES_HAVE_UNDERSCORE
 
 typedef unsigned short INSN_WORD;
 

@@ -23,10 +23,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Most definitions from sysv could be used. */
 #include "tm-i386v.h"
 
-/* Define this if the C compiler puts an underscore at the front
-   of external names before giving them to the linker.  */
-#define NAMES_HAVE_UNDERSCORE
-
 /* 386BSD cannot handle the segment registers. */
 #undef NUM_REGS
 #define NUM_REGS 11

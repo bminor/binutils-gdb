@@ -1,5 +1,5 @@
 /* Definitions to target GDB on an ISI Optimum V (3.05) under 4.3bsd.
-   Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1989, 1991, 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -21,11 +21,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    work.  */
 
 #define HAVE_68881
-
-/* Define this if the C compiler puts an underscore at the front
-   of external names before giving them to the linker.  */
-
-#define NAMES_HAVE_UNDERSCORE
 
 /* Address of end of stack space.  */
 
