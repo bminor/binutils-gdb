@@ -2058,6 +2058,14 @@ sequence of input section descriptions is probably in error, because the
 .data1 : @{ data.o(.data) @}
 @end smallexample
 
+@cindex SORT
+Normally, the linker will place files and sections matched by wildcards
+in the order in which they are seen during the link.  You can change
+this by using the @code{SORT} keyword, which appears before a wildcard
+pattern in parentheses (e.g., @code{SORT(.text*)}).  When the
+@code{SORT} keyword is used, the linker will sort the files or sections
+into ascending order by name before placing them in the output file.
+
 If you ever get confused about where input sections are going, use the
 @samp{-M} linker option to generate a map file.  The map file shows
 precisely how input sections are mapped to output sections.
@@ -3371,12 +3379,13 @@ existed, its value is preserved:
 
 @smallexample
 @group
-SECTIONS@{ @dots{}
+SECTIONS @{ @dots{}
   .text : @{
     begin = DEFINED(begin) ? begin : . ;
     @dots{}
   @}
-@dots{} @}
+  @dots{}
+@}
 @end group
 @end smallexample
 
@@ -3478,6 +3487,7 @@ functionality are not listed.
 @menu
 * H8/300::                      @code{ld} and the H8/300
 * i960::                        @code{ld} and the Intel 960 family
+* ARM::				@code{ld} and the ARM family
 @end menu
 @end ifset
 
@@ -3487,6 +3497,7 @@ functionality are not listed.
 @ifclear GENERIC
 @raisesections
 @end ifclear
+
 @node H8/300
 @section @code{ld} and the H8/300
 
@@ -3512,6 +3523,7 @@ page of memory, and changes them to use the eight-bit address form.
 @samp{mov.b @code{@@}@var{aa}:8} whenever the address @var{aa} is in the
 top page of memory).
 @end table
+
 @ifclear GENERIC
 @lowersections
 @end ifclear
@@ -3534,6 +3546,7 @@ these chips.
 @ifclear GENERIC
 @raisesections
 @end ifclear
+
 @node i960
 @section @code{ld} and the Intel 960 family
 
@@ -3585,6 +3598,30 @@ not itself call any subroutines).
 @lowersections
 @end ifclear
 @end ifset
+
+@ifclear GENERIC
+@raisesections
+@end ifclear
+
+@node ARM
+@section @code{ld}'s support for interworking between ARM and Thumb code
+
+@cindex ARM interworking support
+@cindex --support-old-code
+For the ARM, @code{ld} will generate code stubs to allow functions calls
+betweem ARM and Thumb code.  These stubs only work with code that has
+been compiled and assembled with the @samp{-mthumb-interwork} command
+line option.  If it is necessary to link with old ARM object files or
+libraries, which have not been compiled with the -mthumb-interwork
+option then the @samp{--support-old-code} command line switch should be
+given to the linker.  This will make it generate larger stub functions
+which will work with non-interworking aware ARM code.  Note, however,
+the linker does not support generating stubs for function calls to
+non-interworking aware Thumb code.
+
+@ifclear GENERIC
+@lowersections
+@end ifclear
 
 @ifclear SingleFormat
 @node BFD

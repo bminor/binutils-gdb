@@ -1,3 +1,14 @@
+Mon Jun  1 14:01:20 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld.texinfo (Input Section Wildcards): Document SORT keyword.
+
+Mon May 18 12:42:53 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* ld.h (ld_config_type): New member has_shared.
+	* ldmain.c (main): Initialize it.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_parse): Set it.
+	* lexsup.c (parse_args): Treat -shared as error if not supported.
+
 Mon May 18 13:14:43 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	From Jason Merrill <jason@cygnus.com>:
