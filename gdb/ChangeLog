@@ -1,8 +1,16 @@
+Thu Oct 28 09:14:42 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* valops.c (value_assign): Change bitfield code to use a buffer of
+	the correct size, rather than an int.
+
 Wed Oct 27 13:43:07 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
-	* config/i386/{i386m3.mt,i386m3.mh}: Use correct names for TM_FILE
-	and XM_FILE.  Replace host file i386mach3-xdep.o with native file
-	i386m3-nat.o.
+	* config/i386/{i386m3.mt,i386m3.mh},
+	config/mips/{mipsm3.mt,mipsm3.mh},
+	config/ns32k/{ns32km3.mt,ns32km3.mh}: Use correct names for TM_FILE
+	and XM_FILE.  Replace host files *mach3-xdep.o with native
+	files *m3-nat.o.  Replace host file os-mach3.o with native
+	file m3-nat.o.
 
 	* remote-udi.c: Remove LOG_FILE stuff; superceded by "set remotedebug".
 	* remote-mon.c: Remove commented out "set remotedebug" command.

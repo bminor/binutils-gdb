@@ -329,13 +329,24 @@ value_assign (toval, fromval)
     case lval_memory:
       if (VALUE_BITSIZE (toval))
 	{
-	  int v;		/* FIXME, this won't work for large bitfields */
+	  char buffer[sizeof (LONGEST)];
+	  /* We assume that the argument to read_memory is in units of
+	     host chars.  FIXME:  Is that correct?  */
+	  int len = (VALUE_BITPOS (toval)
+		     + VALUE_BITSIZE (toval)
+		     + HOST_CHAR_BIT - 1)
+		    / HOST_CHAR_BIT;
+	  /* If bigger than a LONGEST, we don't handle it correctly,
+	     but at least avoid corrupting memory.  */
+	  if (len > sizeof (LONGEST))
+	    len = sizeof (LONGEST);
+
 	  read_memory (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
-		       (char *) &v, sizeof v);
-	  modify_field ((char *) &v, value_as_long (fromval),
+		       buffer, len);
+	  modify_field (buffer, value_as_long (fromval),
 			VALUE_BITPOS (toval), VALUE_BITSIZE (toval));
 	  write_memory (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
-			(char *)&v, sizeof v);
+			buffer, len);
 	}
       else if (use_buffer)
 	write_memory (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
@@ -348,14 +359,14 @@ value_assign (toval, fromval)
     case lval_register:
       if (VALUE_BITSIZE (toval))
 	{
-	  int v;
-
-	  read_register_bytes (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
-			       (char *) &v, sizeof v);
-	  modify_field ((char *) &v, value_as_long (fromval),
-			VALUE_BITPOS (toval), VALUE_BITSIZE (toval));
-	  write_register_bytes (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
-				(char *) &v, sizeof v);
+	  char buffer[MAX_REGISTER_RAW_SIZE];
+          int len = REGISTER_RAW_SIZE (VALUE_REGNO (toval));
+          read_register_bytes (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
+                               buffer, len);
+          modify_field (buffer, value_as_long (fromval),
+                        VALUE_BITPOS (toval), VALUE_BITSIZE (toval));
+          write_register_bytes (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
+                                buffer, len);
 	}
       else if (use_buffer)
 	write_register_bytes (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
@@ -392,7 +403,12 @@ value_assign (toval, fromval)
 	int byte_offset = VALUE_OFFSET (toval) % reg_size;
 	int reg_offset = VALUE_OFFSET (toval) / reg_size;
 	int amount_copied;
-	char *buffer = (char *) alloca (amount_to_copy);
+
+	/* Make the buffer large enough in all cases.  */
+	char *buffer = (char *) alloca (amount_to_copy
+					+ sizeof (LONGEST)
+					+ MAX_REGISTER_RAW_SIZE);
+
 	int regno;
 	FRAME frame;
 
