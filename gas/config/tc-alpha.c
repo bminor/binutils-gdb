@@ -62,7 +62,6 @@
 #endif
 
 #include <ctype.h>
-
 
 /* Local types */
 
@@ -72,22 +71,19 @@
 #define MAX_INSN_FIXUPS 2
 #define MAX_INSN_ARGS 5
 
-struct alpha_fixup
-{
+struct alpha_fixup {
   expressionS exp;
   bfd_reloc_code_real_type reloc;
 };
 
-struct alpha_insn
-{
+struct alpha_insn {
   unsigned insn;
   int nfixups;
   struct alpha_fixup fixups[MAX_INSN_FIXUPS];
   unsigned sequence[MAX_INSN_FIXUPS];
 };
 
-enum alpha_macro_arg
-{
+enum alpha_macro_arg {
   MACRO_EOA = 1,
   MACRO_IR,
   MACRO_PIR,
@@ -101,8 +97,7 @@ enum alpha_macro_arg
   MACRO_JSR
 };
 
-struct alpha_macro
-{
+struct alpha_macro {
   const char *name;
   void (*emit) PARAMS ((const expressionS *, int, const PTR));
   const PTR arg;
@@ -181,7 +176,7 @@ struct alpha_macro
 				 (t).X_add_number = (r))
 #define set_tok_freg(t, r)	(memset (&(t), 0, sizeof (t)),		\
 				 (t).X_op = O_register,			\
-				 (t).X_add_number = (r)+32)
+				 (t).X_add_number = (r) + 32)
 #define set_tok_sym(t, s, a)	(memset (&(t), 0, sizeof (t)),		\
 				 (t).X_op = O_symbol,			\
 				 (t).X_add_symbol = (s),		\
@@ -189,7 +184,6 @@ struct alpha_macro
 #define set_tok_const(t, n)	(memset (&(t), 0, sizeof (t)),		\
 				 (t).X_op = O_constant,			\
 				 (t).X_add_number = (n))
-
 
 /* Prototypes for all local functions */
 
@@ -272,7 +266,6 @@ static void alpha_align PARAMS ((int, char *, symbolS *, int));
 #ifdef RELOC_OP_P
 static void alpha_adjust_symtab_relocs PARAMS ((bfd *, asection *, PTR));
 #endif
-
 
 /* Generic assembler global variables which must be defined by all
    targets.  */
@@ -309,11 +302,11 @@ const char *md_shortopts = "Fm:gG:";
 struct option md_longopts[] = {
 #define OPTION_32ADDR (OPTION_MD_BASE)
   { "32addr", no_argument, NULL, OPTION_32ADDR },
-#define OPTION_RELAX (OPTION_32ADDR+1)
+#define OPTION_RELAX (OPTION_32ADDR + 1)
   { "relax", no_argument, NULL, OPTION_RELAX },
 #ifdef OBJ_ELF
-#define OPTION_MDEBUG (OPTION_RELAX+1)
-#define OPTION_NO_MDEBUG (OPTION_MDEBUG+1)
+#define OPTION_MDEBUG (OPTION_RELAX + 1)
+#define OPTION_NO_MDEBUG (OPTION_MDEBUG + 1)
   { "mdebug", no_argument, NULL, OPTION_MDEBUG },
   { "no-mdebug", no_argument, NULL, OPTION_NO_MDEBUG },
 #endif
@@ -321,7 +314,6 @@ struct option md_longopts[] = {
 };
 
 size_t md_longopts_size = sizeof (md_longopts);
-
 
 #ifdef OBJ_EVAX
 #define AXP_REG_R0     0
@@ -576,12 +568,10 @@ static struct hash_control *alpha_literal_hash;
 
 /* A table of CPU names and opcode sets.  */
 
-static const struct cpu_type
-{
+static const struct cpu_type {
   const char *name;
   unsigned flags;
-} cpu_types[] =
-{
+} cpu_types[] = {
   /* Ad hoc convention: cpu number gets palcode, process code doesn't.
      This supports usage under DU 4.0b that does ".arch ev4", and
      usage in MILO that does -m21064.  Probably something more
@@ -827,12 +817,12 @@ md_begin ()
   /* Create the opcode hash table */
 
   alpha_opcode_hash = hash_new ();
-  for (i = 0; i < alpha_num_opcodes; )
+  for (i = 0; i < alpha_num_opcodes;)
     {
       const char *name, *retval, *slash;
 
       name = alpha_opcodes[i].name;
-      retval = hash_insert (alpha_opcode_hash, name, (PTR)&alpha_opcodes[i]);
+      retval = hash_insert (alpha_opcode_hash, name, (PTR) &alpha_opcodes[i]);
       if (retval)
 	as_fatal (_("internal error: can't hash opcode `%s': %s"), name, retval);
 
@@ -847,7 +837,7 @@ md_begin ()
 	  memcpy (p, name, slash - name);
 	  strcpy (p + (slash - name), slash + 1);
 
-	  (void) hash_insert (alpha_opcode_hash, p, (PTR)&alpha_opcodes[i]);
+	  (void) hash_insert (alpha_opcode_hash, p, (PTR) &alpha_opcodes[i]);
 	  /* Ignore failures -- the opcode table does duplicate some
 	     variants in different forms, like "hw_stq" and "hw_st/q".  */
 	}
@@ -861,14 +851,15 @@ md_begin ()
   /* Create the macro hash table */
 
   alpha_macro_hash = hash_new ();
-  for (i = 0; i < alpha_num_macros; )
+  for (i = 0; i < alpha_num_macros;)
     {
       const char *name, *retval;
 
       name = alpha_macros[i].name;
-      retval = hash_insert (alpha_macro_hash, name, (PTR)&alpha_macros[i]);
+      retval = hash_insert (alpha_macro_hash, name, (PTR) &alpha_macros[i]);
       if (retval)
-	as_fatal (_("internal error: can't hash macro `%s': %s"), name, retval);
+	as_fatal (_("internal error: can't hash macro `%s': %s"),
+		  name, retval);
 
       while (++i < alpha_num_macros
 	     && (alpha_macros[i].name == name
@@ -888,7 +879,7 @@ md_begin ()
   for (; i < 64; ++i)
     {
       char name[5];
-      sprintf (name, "$f%d", i-32);
+      sprintf (name, "$f%d", i - 32);
       alpha_register_table[i] = symbol_create (name, reg_section, i,
 					       &zero_address_frag);
     }
@@ -915,7 +906,7 @@ md_begin ()
   if (ECOFF_DEBUGGING)
     {
       segT sec = subseg_new (".mdebug", (subsegT) 0);
-      bfd_set_section_flags (stdoutput, sec, SEC_HAS_CONTENTS|SEC_READONLY);
+      bfd_set_section_flags (stdoutput, sec, SEC_HAS_CONTENTS | SEC_READONLY);
       bfd_set_section_alignment (stdoutput, sec, 3);
     }
 #endif /* OBJ_ELF */
@@ -1329,7 +1320,7 @@ md_apply_fix (fixP, valueP)
   else
     {
       as_warn_where (fixP->fx_file, fixP->fx_line,
-		    _("type %d reloc done?\n"), (int) fixP->fx_r_type);
+		     _("type %d reloc done?\n"), (int) fixP->fx_r_type);
       goto done;
     }
 
@@ -1477,7 +1468,8 @@ alpha_force_relocation (f)
       return 0;
 
     default:
-      assert ((int) f->fx_r_type < 0 && -(int) f->fx_r_type < (int) alpha_num_operands);
+      assert ((int) f->fx_r_type < 0
+	      && -(int) f->fx_r_type < (int) alpha_num_operands);
       return 0;
     }
 }
@@ -1658,10 +1650,10 @@ alpha_frob_file_before_adjust ()
 
 #ifdef RELOC_OP_P
 
-/* Before the relocations are written, reorder them, so that user supplied
-   !lituse relocations follow the appropriate !literal relocations.  Also
-   convert the gas-internal relocations to the appropriate linker relocations.
-   */
+/* Before the relocations are written, reorder them, so that user
+   supplied !lituse relocations follow the appropriate !literal
+   relocations.  Also convert the gas-internal relocations to the
+   appropriate linker relocations.  */
 
 void
 alpha_adjust_symtab ()
@@ -1672,12 +1664,13 @@ alpha_adjust_symtab ()
       fprintf (stderr, "alpha_adjust_symtab called\n");
 #endif
 
-      /* Go over each section, reordering the relocations so that all of the
-         explicit LITUSE's are adjacent to the explicit LITERAL's */
-      bfd_map_over_sections (stdoutput, alpha_adjust_symtab_relocs, (char *) 0);
+      /* Go over each section, reordering the relocations so that all
+         of the explicit LITUSE's are adjacent to the explicit
+         LITERAL's.  */
+      bfd_map_over_sections (stdoutput, alpha_adjust_symtab_relocs,
+			     (char *) 0);
     }
 }
-
 
 /* Inner function to move LITUSE's next to the LITERAL.  */
 
@@ -1700,8 +1693,9 @@ alpha_adjust_symtab_relocs (abfd, sec, ptr)
   int n_dup_literals = 0;
 #endif
 
-  /* If seginfo is NULL, we did not create this section; don't do anything with
-     it.  By using a pointer to a pointer, we can update the links in place.  */
+  /* If seginfo is NULL, we did not create this section; don't do
+     anything with it.  By using a pointer to a pointer, we can update
+     the links in place.  */
   if (seginfo == NULL)
     return;
 
@@ -1824,7 +1818,6 @@ alpha_adjust_symtab_relocs (abfd, sec, ptr)
 }
 
 #endif /* RELOC_OP_P */
-
 
 #ifdef DEBUG_ALPHA
 static void
@@ -1971,7 +1964,7 @@ tokenize_arguments (str, tok, ntok)
 	    }
 
 	  r = &alpha_reloc_op[0];
-	  for (i = alpha_num_reloc_op-1; i >= 0; i--, r++)
+	  for (i = alpha_num_reloc_op - 1; i >= 0; i--, r++)
 	    {
 	      if (len == r->length
 		  && memcmp (input_line_pointer, r->name, len) == 0)
@@ -1979,7 +1972,8 @@ tokenize_arguments (str, tok, ntok)
 	    }
 	  if (i < 0)
 	    {
-	      as_bad (_("Unknown relocation operand: !%s"), input_line_pointer);
+	      as_bad (_("Unknown relocation operand: !%s"),
+		      input_line_pointer);
 	      goto err_report;
 	    }
 
@@ -1992,7 +1986,8 @@ tokenize_arguments (str, tok, ntok)
 	  if (tok->X_op != O_constant
 	      || ! ALPHA_RELOC_SEQUENCE_OK (tok->X_add_number))
 	    {
-	      as_bad (_("Bad sequence number: !%s!%s"), r->name, input_line_pointer);
+	      as_bad (_("Bad sequence number: !%s!%s"),
+		      r->name, input_line_pointer);
 	      goto err_report;
 	    }
 
@@ -2120,12 +2115,12 @@ find_opcode_match (first_opcode, tok, pntok, pcpumatch)
 		  || !is_fpr_num (tok[tokidx].X_add_number))
 		goto match_failed;
 	      break;
-	    case AXP_OPERAND_IR|AXP_OPERAND_PARENS:
+	    case AXP_OPERAND_IR | AXP_OPERAND_PARENS:
 	      if (tok[tokidx].X_op != O_pregister
 		  || !is_ir_num (tok[tokidx].X_add_number))
 		goto match_failed;
 	      break;
-	    case AXP_OPERAND_IR|AXP_OPERAND_PARENS|AXP_OPERAND_COMMA:
+	    case AXP_OPERAND_IR | AXP_OPERAND_PARENS | AXP_OPERAND_COMMA:
 	      if (tok[tokidx].X_op != O_cpregister
 		  || !is_ir_num (tok[tokidx].X_add_number))
 		goto match_failed;
@@ -2164,7 +2159,7 @@ find_opcode_match (first_opcode, tok, pntok, pcpumatch)
 
     match_failed:;
     }
-  while (++opcode-alpha_opcodes < alpha_num_opcodes
+  while (++opcode - alpha_opcodes < alpha_num_opcodes
 	 && !strcmp (opcode->name, first_opcode->name));
 
   if (*pcpumatch)
@@ -2309,7 +2304,7 @@ find_macro_match (first_macro, tok, pntok)
 	  ++arg;
 	}
     }
-  while (++macro-alpha_macros < alpha_num_macros
+  while (++macro - alpha_macros < alpha_num_macros
 	 && !strcmp (macro->name, first_macro->name));
 
   return NULL;
@@ -2462,12 +2457,12 @@ assemble_insn (opcode, tok, ntok, insn)
 
 static void
 emit_insn (insn)
-    struct alpha_insn *insn;
+     struct alpha_insn *insn;
 {
   char *f;
   int i;
 
-  /* Take care of alignment duties */
+  /* Take care of alignment duties.  */
   if (alpha_auto_align_on && alpha_current_align < 2)
     alpha_align (2, (char *) NULL, alpha_insn_label, 0);
   if (alpha_current_align > 2)
@@ -2700,9 +2695,9 @@ assemble_tokens (opname, tok, ntok, local_macros_on)
     }
 
 #ifdef RELOC_OP_P
-  if (ntok && USER_RELOC_P (tok[ntok-1].X_op))
+  if (ntok && USER_RELOC_P (tok[ntok - 1].X_op))
     {
-      const expressionS *reloc_exp = &tok[ntok-1];
+      const expressionS *reloc_exp = &tok[ntok - 1];
       const struct alpha_reloc_op_tag *r = ALPHA_RELOC_TABLE (reloc_exp->X_op);
       as_bad (_("Cannot use !%s!%d with %s"), r->name,
 	      (int) reloc_exp->X_add_number, opname);
@@ -2734,7 +2729,6 @@ assemble_tokens (opname, tok, ntok, local_macros_on)
   else
     as_bad (_("unknown opcode `%s'"), opname);
 }
-
 
 /* Some instruction sets indexed by lg(size) */
 static const char * const sextX_op[] = { "sextb", "sextw", "sextl", NULL };
@@ -2767,9 +2761,9 @@ FIXME
   expressionS addend;
 
 #ifdef RELOC_OP_P
-  if (ntok && USER_RELOC_P (tok[ntok-1].X_op))
+  if (ntok && USER_RELOC_P (tok[ntok - 1].X_op))
     {
-      const expressionS *reloc_exp = &tok[ntok-1];
+      const expressionS *reloc_exp = &tok[ntok - 1];
       const struct alpha_reloc_op_tag *r = ALPHA_RELOC_TABLE (reloc_exp->X_op);
       as_bad (_("Cannot use !%s!%d with %s"), r->name,
 	      (int) reloc_exp->X_add_number, "ldgp");
@@ -2976,8 +2970,9 @@ load_expression (targreg, exp, pbasereg, poffset, explicit_reloc)
 	/* XXX: Disable this .got minimizing optimization so that we can get
 	   better instruction offset knowledge in the compiler.  This happens
 	   very infrequently anyway.  */
-	if (1 || (!range_signed_32 (addend)
-	    && (alpha_noat_on || targreg == AXP_REG_AT)))
+	if (1
+	    || (!range_signed_32 (addend)
+		&& (alpha_noat_on || targreg == AXP_REG_AT)))
 	  {
 	    newtok[1] = *exp;
 	    addend = 0;
@@ -3273,11 +3268,11 @@ emit_lda (tok, ntok, opname)
   const expressionS *reloc = (const expressionS *) 0;
 
 #ifdef RELOC_OP_P
-  if (ntok && USER_RELOC_P (tok[ntok-1].X_op))
+  if (ntok && USER_RELOC_P (tok[ntok - 1].X_op))
     {
       const struct alpha_reloc_op_tag *r;
 
-      reloc = &tok[ntok-1];
+      reloc = &tok[ntok - 1];
       r = ALPHA_RELOC_TABLE (reloc->X_op);
       switch (reloc->X_op)
 	{
@@ -3338,9 +3333,9 @@ emit_ldah (tok, ntok, unused)
   expressionS newtok[3];
 
 #ifdef RELOC_OP_P
-  if (ntok && USER_RELOC_P (tok[ntok-1].X_op))
+  if (ntok && USER_RELOC_P (tok[ntok - 1].X_op))
     {
-      const expressionS *reloc_exp = &tok[ntok-1];
+      const expressionS *reloc_exp = &tok[ntok - 1];
       const struct alpha_reloc_op_tag *r = ALPHA_RELOC_TABLE (reloc_exp->X_op);
       as_bad (_("Cannot use !%s!%d with %s"), r->name,
 	      (int) reloc_exp->X_add_number, "ldah");
@@ -3372,11 +3367,11 @@ emit_ir_load (tok, ntok, opname)
 #ifdef RELOC_OP_P
   const expressionS *reloc = (const expressionS *) 0;
 
-  if (ntok && USER_RELOC_P (tok[ntok-1].X_op))
+  if (ntok && USER_RELOC_P (tok[ntok - 1].X_op))
     {
       const struct alpha_reloc_op_tag *r;
 
-      reloc = &tok[ntok-1];
+      reloc = &tok[ntok - 1];
       switch (reloc->X_op)
 	{
 	case O_lituse_base:
@@ -3463,12 +3458,12 @@ emit_loadstore (tok, ntok, opname)
 #ifdef RELOC_OP_P
   const expressionS *reloc = (const expressionS *) 0;
 
-  if (ntok && USER_RELOC_P (tok[ntok-1].X_op))
+  if (ntok && USER_RELOC_P (tok[ntok - 1].X_op))
     {
       reloc = &tok[--ntok];
       if (reloc->X_op != O_lituse_base)
 	{
-	  const struct alpha_reloc_op_tag *r = &alpha_reloc_op[ reloc->X_md ];
+	  const struct alpha_reloc_op_tag *r = &alpha_reloc_op[reloc->X_md];
 	  as_bad (_("Cannot use !%s!%d with %s"), r->name,
 		  (int) reloc->X_add_number, (const char *) opname);
 	}
@@ -3548,9 +3543,9 @@ emit_ldXu (tok, ntok, vlgsize)
       expressionS newtok[3];
 
 #ifdef RELOC_OP_P
-  if (ntok && USER_RELOC_P (tok[ntok-1].X_op))
+      if (ntok && USER_RELOC_P (tok[ntok - 1].X_op))
 	{
-	  const expressionS *reloc_exp = &tok[ntok-1];
+	  const expressionS *reloc_exp = &tok[ntok - 1];
 	  const struct alpha_reloc_op_tag *r
 	    = ALPHA_RELOC_TABLE (reloc_exp->X_op);
 
@@ -3627,7 +3622,7 @@ emit_uldXu (tok, ntok, vlgsize)
   /* emit "ldq_u $t10, size-1($at)" */
 
   set_tok_reg (newtok[0], AXP_REG_T10);
-  set_tok_const (newtok[1], (1<<lgsize)-1);
+  set_tok_const (newtok[1], (1 << lgsize) - 1);
   assemble_tokens ("ldq_u", newtok, 3, 1);
 
   /* emit "extXl $t9, $at, $t9" */
@@ -3676,9 +3671,9 @@ emit_ldil (tok, ntok, unused)
   expressionS newtok[2];
 
 #ifdef RELOC_OP_P
-  if (ntok && USER_RELOC_P (tok[ntok-1].X_op))
+  if (ntok && USER_RELOC_P (tok[ntok - 1].X_op))
     {
-      const expressionS *reloc_exp = &tok[ntok-1];
+      const expressionS *reloc_exp = &tok[ntok - 1];
       const struct alpha_reloc_op_tag *r = ALPHA_RELOC_TABLE (reloc_exp->X_op);
       as_bad (_("Cannot use !%s!%d with %s"), r->name,
 	      (int) reloc_exp->X_add_number, "ldil");
@@ -3777,7 +3772,7 @@ emit_ustX (tok, ntok, vlgsize)
   /* emit "ldq_u $10, size-1($at)" */
 
   set_tok_reg (newtok[0], AXP_REG_T10);
-  set_tok_const (newtok[1], (1 << lgsize)-1);
+  set_tok_const (newtok[1], (1 << lgsize) - 1);
   assemble_tokens ("ldq_u", newtok, 3, 1);
 
   /* emit "insXl src, $at, $t11" */
@@ -3828,7 +3823,7 @@ emit_ustX (tok, ntok, vlgsize)
   /* emit "stq_u $t10, size-1($at)" */
 
   set_tok_reg (newtok[0], AXP_REG_T10);
-  set_tok_const (newtok[1], (1 << lgsize)-1);
+  set_tok_const (newtok[1], (1 << lgsize) - 1);
   assemble_tokens ("stq_u", newtok, 3, 1);
 }
 
@@ -3851,9 +3846,9 @@ emit_sextX (tok, ntok, vlgsize)
       expressionS newtok[3];
 
 #ifdef RELOC_OP_P
-      if (ntok && USER_RELOC_P (tok[ntok-1].X_op))
+      if (ntok && USER_RELOC_P (tok[ntok - 1].X_op))
 	{
-	  const expressionS *reloc_exp = &tok[ntok-1];
+	  const expressionS *reloc_exp = &tok[ntok - 1];
 	  const struct alpha_reloc_op_tag *r
 	    = ALPHA_RELOC_TABLE (reloc_exp->X_op);
 
@@ -3910,9 +3905,9 @@ emit_division (tok, ntok, symname)
   expressionS newtok[3];
 
 #ifdef RELOC_OP_P
-  if (ntok && USER_RELOC_P (tok[ntok-1].X_op))
+  if (ntok && USER_RELOC_P (tok[ntok - 1].X_op))
     {
-      const expressionS *reloc_exp = &tok[ntok-1];
+      const expressionS *reloc_exp = &tok[ntok - 1];
       const struct alpha_reloc_op_tag *r = ALPHA_RELOC_TABLE (reloc_exp->X_op);
       as_bad (_("Cannot use !%s!%d with %s"), r->name,
 	      (int) reloc_exp->X_add_number, (char char *) symname);
@@ -4020,9 +4015,9 @@ emit_division (tok, ntok, symname)
   expressionS newtok[3];
 
 #ifdef RELOC_OP_P
-  if (ntok && USER_RELOC_P (tok[ntok-1].X_op))
+  if (ntok && USER_RELOC_P (tok[ntok - 1].X_op))
     {
-      const expressionS *reloc_exp = &tok[ntok-1];
+      const expressionS *reloc_exp = &tok[ntok - 1];
       const struct alpha_reloc_op_tag *r = ALPHA_RELOC_TABLE (reloc_exp->X_op);
       as_bad (_("Cannot use !%s!%d with %s"), r->name,
 	      (int) reloc_exp->X_add_number, (const char *) symname);
@@ -4127,9 +4122,9 @@ emit_jsrjmp (tok, ntok, vopname)
   int r, tokidx = 0, lituse = 0;
 
 #ifdef RELOC_OP_P
-  if (ntok && USER_RELOC_P (tok[ntok-1].X_op))
+  if (ntok && USER_RELOC_P (tok[ntok - 1].X_op))
     {
-      const expressionS *reloc_exp = &tok[ntok-1];
+      const expressionS *reloc_exp = &tok[ntok - 1];
       const struct alpha_reloc_op_tag *r = ALPHA_RELOC_TABLE (reloc_exp->X_op);
       as_bad (_("Cannot use !%s!%d with %s"), r->name,
 	      (int) reloc_exp->X_add_number, opname);
@@ -4204,9 +4199,9 @@ emit_retjcr (tok, ntok, vopname)
   int r, tokidx = 0;
 
 #ifdef RELOC_OP_P
-  if (ntok && USER_RELOC_P (tok[ntok-1].X_op))
+  if (ntok && USER_RELOC_P (tok[ntok - 1].X_op))
     {
-      const expressionS *reloc_exp = &tok[ntok-1];
+      const expressionS *reloc_exp = &tok[ntok - 1];
       const struct alpha_reloc_op_tag *r = ALPHA_RELOC_TABLE (reloc_exp->X_op);
       as_bad (_("Cannot use !%s!%d with %s"), r->name,
 	      (int) reloc_exp->X_add_number, opname);
@@ -4515,7 +4510,7 @@ s_alpha_end (dummy)
 		(expressionS *) xmalloc (sizeof (expressionS));
 	      symbol_get_obj (sym)->size->X_op = O_subtract;
 	      symbol_get_obj (sym)->size->X_add_symbol
-	        = symbol_new ("L0\001", now_seg, frag_now_fix (), frag_now);
+		= symbol_new ("L0\001", now_seg, frag_now_fix (), frag_now);
 	      symbol_get_obj (sym)->size->X_op_symbol = sym;
 	      symbol_get_obj (sym)->size->X_add_number = 0;
 	    }
@@ -4588,7 +4583,7 @@ s_alpha_prologue (ignore)
     }
 }
 
-static char * first_file_directive;
+static char *first_file_directive;
 
 static void
 s_alpha_file (ignore)
@@ -4635,7 +4630,7 @@ s_alpha_stab (n)
   if (alpha_flag_mdebug < 0)
     {
       segT sec = subseg_new (".mdebug", 0);
-      bfd_set_section_flags (stdoutput, sec, SEC_HAS_CONTENTS|SEC_READONLY);
+      bfd_set_section_flags (stdoutput, sec, SEC_HAS_CONTENTS | SEC_READONLY);
       bfd_set_section_alignment (stdoutput, sec, 3);
 
       ecoff_read_begin_hook ();
@@ -4643,7 +4638,7 @@ s_alpha_stab (n)
       if (first_file_directive)
 	{
 	  char *save_ilp = input_line_pointer;
-          input_line_pointer = first_file_directive;
+	  input_line_pointer = first_file_directive;
 	  ecoff_directive_file (0);
 	  input_line_pointer = save_ilp;
 	  free (first_file_directive);
@@ -4691,7 +4686,7 @@ s_alpha_section (secid)
 {
   int temp;
 #define EVAX_SECTION_COUNT 5
-  static char *section_name[EVAX_SECTION_COUNT+1] =
+  static char *section_name[EVAX_SECTION_COUNT + 1] =
     { "NULL", ".rdata", ".comm", ".link", ".ctors", ".dtors" };
 
   if ((secid <= 0) || (secid > EVAX_SECTION_COUNT))
@@ -4871,33 +4866,32 @@ s_alpha_pdesc (ignore)
 
   *p = alpha_evax_proc.pdsckind
     | ((alpha_evax_proc.framereg == 29) ? PDSC_S_M_BASE_REG_IS_FP : 0);
-  *(p+1) = PDSC_S_M_NATIVE
-    | PDSC_S_M_NO_JACKET;
+  *(p + 1) = PDSC_S_M_NATIVE | PDSC_S_M_NO_JACKET;
 
   switch (alpha_evax_proc.pdsckind)
     {
     case PDSC_S_K_KIND_NULL:
-      *(p+2) = 0;
-      *(p+3) = 0;
+      *(p + 2) = 0;
+      *(p + 3) = 0;
       break;
     case PDSC_S_K_KIND_FP_REGISTER:
-      *(p+2) = alpha_evax_proc.fp_save;
-      *(p+3) = alpha_evax_proc.ra_save;
+      *(p + 2) = alpha_evax_proc.fp_save;
+      *(p + 3) = alpha_evax_proc.ra_save;
       break;
     case PDSC_S_K_KIND_FP_STACK:
-      md_number_to_chars (p+2, (valueT) alpha_evax_proc.rsa_offset, 2);
+      md_number_to_chars (p + 2, (valueT) alpha_evax_proc.rsa_offset, 2);
       break;
     default:		/* impossible */
       break;
     }
 
-  *(p+4) = 0;
-  *(p+5) = alpha_evax_proc.type & 0x0f;
+  *(p + 4) = 0;
+  *(p + 5) = alpha_evax_proc.type & 0x0f;
 
   /* Signature offset.  */
-  md_number_to_chars (p+6, (valueT) 0, 2);
+  md_number_to_chars (p + 6, (valueT) 0, 2);
 
-  fix_new_exp (frag_now, p-frag_now->fr_literal+8, 8, &exp, 0, BFD_RELOC_64);
+  fix_new_exp (frag_now, p - frag_now->fr_literal+8, 8, &exp, 0, BFD_RELOC_64);
 
   if (alpha_evax_proc.pdsckind == PDSC_S_K_KIND_NULL)
     return;
@@ -4911,10 +4905,10 @@ s_alpha_pdesc (ignore)
   /* pdesc+16: Size.  */
   md_number_to_chars (p, (valueT) alpha_evax_proc.framesize, 4);
 
-  md_number_to_chars (p+4, (valueT) 0, 2);
+  md_number_to_chars (p + 4, (valueT) 0, 2);
 
   /* Entry length.  */
-  md_number_to_chars (p+6, alpha_evax_proc.prologue, 2);
+  md_number_to_chars (p + 6, alpha_evax_proc.prologue, 2);
 
   if (alpha_evax_proc.pdsckind == PDSC_S_K_KIND_FP_REGISTER)
     return;
@@ -4928,7 +4922,7 @@ s_alpha_pdesc (ignore)
   /* pdesc+24: register masks.  */
 
   md_number_to_chars (p, alpha_evax_proc.imask, 4);
-  md_number_to_chars (p+4, alpha_evax_proc.fmask, 4);
+  md_number_to_chars (p + 4, alpha_evax_proc.fmask, 4);
 
   return;
 }
@@ -4968,7 +4962,7 @@ s_alpha_name (ignore)
   p = frag_more (8);
   seginfo->literal_pool_size += 8;
 
-  fix_new_exp (frag_now, p-frag_now->fr_literal, 8, &exp, 0, BFD_RELOC_64);
+  fix_new_exp (frag_now, p - frag_now->fr_literal, 8, &exp, 0, BFD_RELOC_64);
 
   return;
 }
@@ -5170,7 +5164,7 @@ s_alpha_gprel32 (ignore)
 
   p = frag_more (4);
   memset (p, 0, 4);
-  fix_new_exp (frag_now, p-frag_now->fr_literal, 4,
+  fix_new_exp (frag_now, p - frag_now->fr_literal, 4,
 	       &e, 0, BFD_RELOC_GPREL32);
 }
 
@@ -5450,9 +5444,7 @@ found:
   *input_line_pointer = ch;
   demand_empty_rest_of_line ();
 }
-
 
-
 #ifdef DEBUG1
 /* print token expression with alpha specific extension.  */
 
@@ -5485,8 +5477,7 @@ alpha_print_token (f, exp)
 
 /* The target specific pseudo-ops which we support.  */
 
-const pseudo_typeS md_pseudo_table[] =
-{
+const pseudo_typeS md_pseudo_table[] = {
 #ifdef OBJ_ECOFF
   {"comm", s_alpha_comm, 0},	/* osf1 compiler does this */
   {"rdata", s_alpha_rdata, 0},
@@ -5593,7 +5584,6 @@ const pseudo_typeS md_pseudo_table[] =
 
   {NULL, 0, 0},
 };
-
 
 /* Build a BFD section with its flags set appropriately for the .lita,
    .lit8, or .lit4 sections.  */
@@ -5641,7 +5631,8 @@ select_gp_value ()
   assert (alpha_gp_value == 0);
 
   /* Get minus-one in whatever width...  */
-  alpha_gp_value = 0; alpha_gp_value--;
+  alpha_gp_value = 0;
+  alpha_gp_value--;
 
   /* Select the smallest VMA of these existing sections.  */
   maybe_set_gp (alpha_lita_section);
