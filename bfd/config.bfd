@@ -88,6 +88,7 @@ case "${canon}" in
   sparc64-*-elf*)	bfd_name=sparc64-elf ;;
 #	end-sanitize-v9
   sparc-*-netware*)	bfd_name=sparc-nlm ;;
+  sparc*-*-coff*)	bfd_name=sparc-coff ;;
   sparc*-*-*)		bfd_name=sparc-aout ;;
   tahoe-*-*)		bfd_name=tahoe ;;
   vax-*-vms*)		bfd_name=vax-vms ;;
