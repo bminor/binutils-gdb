@@ -27,17 +27,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bfd.h"
 #include "sysdep.h"
 #include "bfdlink.h"
+#include "getopt.h"
 
 #include "ld.h"
 #include "ldmain.h"
 #include "ldmisc.h"
-
 #include "ldexp.h"
 #include "ldlang.h"
 #include "ldfile.h"
 #include "ldemul.h"
-
-#include "getopt.h"
 
 static int coff_version;
 

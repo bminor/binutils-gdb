@@ -1,5 +1,5 @@
 /* ldemul.c -- clearing house for ld emulation states
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000, 2002
+   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000, 2002, 2003
    Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
@@ -21,6 +21,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 
 #include "bfd.h"
 #include "sysdep.h"
+#include "getopt.h"
 
 #include "ld.h"
 #include "ldmisc.h"

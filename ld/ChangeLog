@@ -1,3 +1,9 @@
+2003-03-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldemul.c: Include getopt.h.
+	* emultempl/elf32.em: Include getopt.h earlier.
+	* emultempl/ticoff.em: Likewise.
+
 2003-02-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_get_script): Add combreloc

@@ -39,6 +39,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "sysdep.h"
 #include "libiberty.h"
 #include "safe-ctype.h"
+#include "getopt.h"
 
 #include "bfdlink.h"
 
@@ -51,7 +52,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "ldemul.h"
 #include <ldgram.h>
 #include "elf/common.h"
-#include "getopt.h"
 
 static void gld${EMULATION_NAME}_before_parse
   PARAMS ((void));
