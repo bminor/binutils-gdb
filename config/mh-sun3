@@ -1,0 +1,8 @@
+# X11 
+OPENWINHOME = /usr/openwin
+X11_INCLUDE_FLAGS = -I$(OPENWINHOME)/include
+X11_LIB_FLAGS = -L$(OPENWINHOME)/lib
+
+# Sun's C compiler needs the -J flag to be able to compile cp-parse.c
+# without overflowing the jump tables (-J says to use a 32 bit table)
+CC = cc -J
