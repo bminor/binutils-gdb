@@ -685,6 +685,7 @@ macrotab_h = macrotab.h
 main_h = main.h
 memattr_h = memattr.h
 minimon_h = minimon.h
+mips_tdep_h = mips-tdep.h
 mipsnbsd_tdep_h = mipsnbsd-tdep.h
 monitor_h = monitor.h
 nbsd_tdep_h = nbsd-tdep.h
@@ -1940,8 +1941,8 @@ mips-nat.o: mips-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(regcache_h)
 mips-tdep.o: mips-tdep.c $(defs_h) $(gdb_string_h) $(frame_h) $(inferior_h) \
 	$(symtab_h) $(value_h) $(gdbcmd_h) $(language_h) $(gdbcore_h) \
 	$(symfile_h) $(objfiles_h) $(gdbtypes_h) $(target_h) $(arch_utils_h) \
-	$(regcache_h) $(osabi_h) $(opcode_mips_h) $(elf_mips_h) $(elf_bfd_h) \
-	$(symcat_h)
+	$(regcache_h) $(osabi_h) $(mips_tdep_h) $(opcode_mips_h) \
+	$(elf_mips_h) $(elf_bfd_h) $(symcat_h)
 mipsm3-nat.o: mipsm3-nat.c $(defs_h) $(inferior_h) $(regcache_h)
 mipsnbsd-nat.o: mipsnbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(mipsnbsd_tdep_h)

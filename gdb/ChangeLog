@@ -1,3 +1,12 @@
+2002-12-04  Kevin Buettner  <kevinb@redhat.com>
+
+	* Makefile.in (mips_tdep_h): Define.
+	(mips-tdep.o): Add mips_tdep_h to dependency list.
+	* mips-tdep.h: New file.
+	* mips-tdep.c (mips-tdep.h): Include.
+	(enum mips_abi): Move to mips-tdep.h.
+	(mips_abi): New function.
+
 2002-12-04  David Carlton  <carlton@math.stanford.edu>
 
 	* Makefile.in (f-exp.tab.c): Don't depend on c-exp.tab.c.

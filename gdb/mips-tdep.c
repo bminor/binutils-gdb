@@ -39,6 +39,7 @@
 #include "arch-utils.h"
 #include "regcache.h"
 #include "osabi.h"
+#include "mips-tdep.h"
 
 #include "opcode/mips.h"
 #include "elf/mips.h"
@@ -57,19 +58,6 @@ enum
   MIPS_FPU_DOUBLE_REGSIZE = 8
 };
 
-/* All the possible MIPS ABIs. */
-
-enum mips_abi
-  {
-    MIPS_ABI_UNKNOWN = 0,
-    MIPS_ABI_N32,
-    MIPS_ABI_O32,
-    MIPS_ABI_N64,
-    MIPS_ABI_O64,
-    MIPS_ABI_EABI32,
-    MIPS_ABI_EABI64,
-    MIPS_ABI_LAST
-  };
 
 static const char *mips_abi_string;
 
@@ -161,6 +149,13 @@ struct gdbarch_tdep
 static const char *mips_saved_regsize_string = size_auto;
 
 #define MIPS_SAVED_REGSIZE (mips_saved_regsize())
+
+/* Return the MIPS ABI associated with GDBARCH.  */
+enum mips_abi
+mips_abi (struct gdbarch *gdbarch)
+{
+  return gdbarch_tdep (gdbarch)->mips_abi;
+}
 
 static unsigned int
 mips_saved_regsize (void)
