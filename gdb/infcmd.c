@@ -211,6 +211,7 @@ run_command (args, from_tty)
 
   dont_repeat ();
 
+  /* Shouldn't this be target_has_execution?  FIXME.  */
   if (inferior_pid)
     {
       if (
