@@ -40,7 +40,7 @@
 #define HAVE_BSD_SIGNALS
 /* #define USE_XON_XOFF */
 
-#if defined(__MSDOS__) || defined(_MSC_VER)
+#if defined(__MSDOS__) || defined(_WIN32)
 #define NO_SYS_FILE
 #define SIGALRM 1234
 #undef NEW_TTY_DRIVER
@@ -58,15 +58,10 @@
 #  undef HAVE_BSD_SIGNALS
 #endif
 
-#if defined (__WIN32__) && !defined(_MSC_VER)
-#undef NEW_TTY_DRIVER
-#define MINIMAL
-#undef HAVE_BSD_SIGNALS
-#define TERMIOS_TTY_DRIVER
-#undef HANDLE_SIGNALS
-#include <termios.h>
-/*#define HAVE_POSIX_SIGNALS*/
-#endif
+#define ScreenCols() 80
+#define ScreenRows() 24
+#define ScreenSetCursor() abort();
+#define ScreenGetCursor() abort();
 
 /* System V machines use termio. */
 #if !defined (_POSIX_VERSION)
@@ -189,7 +184,7 @@ extern char *strchr (), *strrchr ();
 /* If on, then readline handles signals in a way that doesn't screw. */
 #define HANDLE_SIGNALS
 
-#if defined(__WIN32__) || defined(__MSDOS__)
+#if defined(_WIN32) || defined(__MSDOS__)
 #undef HANDLE_SIGNALS
 #endif
 

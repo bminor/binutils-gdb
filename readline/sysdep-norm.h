@@ -26,11 +26,17 @@ extern char *alloca ();
 #endif /* USGr4 */
 #endif /* USG && TIOCGWINSZ */
 
+#ifndef _WIN32
 #include <dirent.h>
 typedef struct dirent dirent;
+#endif
 
 /* SVR4 systems should use <termios.h> rather than <termio.h>. */
 
 #if defined (USGr4)
 #define _POSIX_VERSION
+#endif
+
+#ifdef _WIN32
+#include <malloc.h>
 #endif

@@ -1,3 +1,12 @@
+Fri Aug  9 08:54:26 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* bind.c complete.c history.c readline.c:  Don't include sys/file.h.
+	* complete.c display.c parens.c readline.c rldefs.h rltty.c
+	signals.c tilde.c:  Change refs to _MSC_VER and __WIN32__ to _WIN32.
+	* signals.c (rl_signal_handler):  Ifdef out kill if _WIN32.
+	* sysdep-norm.h:  Ifdef out include of dirent.h if _WIN32.
+	Include malloc.h if _WIN32.
+
 Thu Jul 18 15:59:35 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* rldefs.h (sys/uio.h) Before sys/stream.h is included under AIX,
