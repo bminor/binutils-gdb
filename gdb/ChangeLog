@@ -1,5 +1,7 @@
 2005-01-16  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc64-tdep.c (sparc64_store_arguments): Fix typo.
+
 	* sparc-tdep.c (sparc_integral_or_pointer_p): Simplify.
 
 2005-01-16  Andrew Cagney  <cagney@gnu.org>

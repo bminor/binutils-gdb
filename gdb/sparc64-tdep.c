@@ -939,7 +939,7 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
 	    }
 	}
 
-      /* Always store the argument in memeory.  */
+      /* Always store the argument in memory.  */
       write_memory (sp + element * 8, valbuf, len);
       element += ((len + 7) / 8);
     }
