@@ -35,6 +35,9 @@ const pseudo_typeS obj_pseudo_table[] =
 static int version_seen = 0;
 static int copyright_seen = 0;
 
+/* Unused by SOM.  */
+void obj_read_begin_hook () {}
+
 /* Handle a .version directive.  */
 
 void
@@ -203,12 +206,28 @@ adjust_stab_sections (abfd, sec, xxx)
   bfd_h_put_32 (abfd, (bfd_vma) strsz, (bfd_byte *) p + 8);
 }
 
+/* Adjust the VMA address for each $CODE$ subspace.  */
+static void
+adjust_code_sections (abfd, sec, xxx)
+     bfd *abfd;
+     asection *sec;
+     PTR xxx;
+{
+  static unsigned size_so_far = 0;
+
+  if (strcmp (sec->name, "$CODE$"))
+    return;
+
+  bfd_set_section_vma (stdoutput, sec, size_so_far);
+  size_so_far += bfd_get_section_size_before_reloc (sec);
+}
+
 /* Called late in the asssembly phase to adjust the special
-   stab entry.  This is where any other late object-file dependent
-   processing which should happen.  */
+   stab entry and to set the starting address for each code subspace.  */
 
 void
 som_frob_file ()
 {
   bfd_map_over_sections (stdoutput, adjust_stab_sections, (PTR) 0);
+  bfd_map_over_sections (stdoutput, adjust_code_sections, (PTR) 0);
 }

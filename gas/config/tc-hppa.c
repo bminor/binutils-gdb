@@ -1348,7 +1348,11 @@ md_assemble (str)
 
   /* If we are within a procedure definition, make sure we've
      defined a label for the procedure; handle case where the
-     label was defined after the .PROC directive.  */
+     label was defined after the .PROC directive. 
+
+     Note there's not need to diddle with the segment or fragment
+     for the label symbol in this case.  We have already switched
+     into the new $CODE$ subspace at this point.  */
   if (within_procedure && last_call_info->start_symbol == NULL)
     {
       label_symbol_struct *label_symbol = pa_get_label ();
@@ -1359,6 +1363,19 @@ md_assemble (str)
 	    {
 	      last_call_info->start_symbol = label_symbol->lss_label;
 	      label_symbol->lss_label->bsym->flags |= BSF_FUNCTION;
+#ifdef OBJ_SOM
+	      /* Also handle allocation of a fixup to hold the unwind
+		 information when the label appears after the proc/procend.  */
+	      if (within_entry_exit)
+		{
+		  char *where = frag_more (0);
+
+		  fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
+				last_call_info->start_symbol, (offsetT) 0, NULL,
+				0, R_HPPA_ENTRY, e_fsel, 0, 0,
+				(char *) &last_call_info->ci_unwind.descriptor);
+		}
+#endif
 	    }
 	  else
 	    as_bad ("Missing function name for .PROC (corrupted label chain)");
@@ -2915,9 +2932,11 @@ md_apply_fix (fixP, valp)
       if ((fixP->fx_addsy && fixP->fx_addsy->bsym->section == &bfd_und_section)
 	  || (fixP->fx_subsy
 	      && fixP->fx_subsy->bsym->section == &bfd_und_section)
-	  || (fixP->fx_addsy
+	  || (fixP->fx_pcrel
+	      && fixP->fx_addsy
 	      && S_GET_SEGMENT (fixP->fx_addsy) != hppa_fixP->segment)
-	  || (fixP->fx_subsy
+	  || (fixP->fx_pcrel
+	      && fixP->fx_subsy
 	      && S_GET_SEGMENT (fixP->fx_subsy) != hppa_fixP->segment))
 	return 1;
 
@@ -4369,10 +4388,6 @@ pa_entry (unused)
   demand_empty_rest_of_line ();
   within_entry_exit = TRUE;
 
-  /* Go back to the last symbol and turn on the BSF_FUNCTION flag.
-     It will not be on if no .EXPORT pseudo-op exists (static function).  */
-  last_call_info->start_symbol->bsym->flags |= BSF_FUNCTION;
-
 #ifdef OBJ_SOM
   /* SOM defers building of unwind descriptors until the link phase.
      The assembler is responsible for creating an R_ENTRY relocation
@@ -4383,14 +4398,15 @@ pa_entry (unused)
      is an unwind requires too much relocation space.  Hmmm.  Maybe
      if we split the unwind bits up between the relocations which
      denote the entry and exit points.  */
-  {
-    char *where = frag_more (0);
+  if (last_call_info->start_symbol != NULL)
+    {
+      char *where = frag_more (0);
 
-    fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
-		  last_call_info->start_symbol, (offsetT) 0, NULL,
-		  0, R_HPPA_ENTRY, e_fsel, 0, 0,
-		  (char *) &last_call_info->ci_unwind.descriptor);
-  }
+      fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
+		    last_call_info->start_symbol, (offsetT) 0, NULL,
+		    0, R_HPPA_ENTRY, e_fsel, 0, 0,
+		    (char *) &last_call_info->ci_unwind.descriptor);
+    }
 #endif
 }
 
@@ -4793,6 +4809,7 @@ pa_proc (unused)
      int unused;
 {
   struct call_info *call_info;
+  segT seg;
 
   if (within_procedure)
     as_fatal ("Nested procedures");
@@ -4800,6 +4817,33 @@ pa_proc (unused)
   /* Reset global variables for new procedure.  */
   callinfo_found = FALSE;
   within_procedure = TRUE;
+
+  /* Create a new CODE subspace for each procedure if we are not
+     using space/subspace aliases.  */
+  if (!USE_ALIASES && call_info_root != NULL)
+    {
+      /* Force creation of a new $CODE$ subspace; inherit attributes from
+	 the first $CODE$ subspace.  */
+      seg = subseg_force_new ("$CODE$", 0);
+
+      /* Now set the flags.  */
+      bfd_set_section_flags (stdoutput, seg, 
+			     bfd_get_section_flags (abfd, text_section));
+
+      /* Record any alignment request for this section.  */
+      record_alignment (seg, 
+			bfd_get_section_alignment (stdoutput, text_section));
+
+      /* Change the "text_section" to be our new $CODE$ subspace.  */
+      text_section = seg;
+      subseg_set (text_section, 0);
+
+#ifdef obj_set_subsection_attributes
+      /* Need a way to inherit the the access bits, sort key and quadrant
+	 from the first $CODE$ subspace.  FIXME.  */
+      obj_set_subsection_attributes (seg, current_space->sd_seg, 0x2c, 24, 0);
+#endif
+    }
 
   /* Create another call_info structure.  */
   call_info = (struct call_info *) xmalloc (sizeof (struct call_info));
@@ -4839,6 +4883,16 @@ pa_proc (unused)
 	  {
 	    last_call_info->start_symbol = label_symbol->lss_label;
 	    label_symbol->lss_label->bsym->flags |= BSF_FUNCTION;
+	    if (! USE_ALIASES)
+	      {
+		/* The label was defined in a different segment.  Fix that
+		   along with the value and associated fragment.  */
+		S_SET_SEGMENT (last_call_info->start_symbol, now_seg);
+                S_SET_VALUE (last_call_info->start_symbol,
+			     ((char*)obstack_next_free (&frags)
+			       - frag_now->fr_literal));
+		last_call_info->start_symbol->sy_frag = frag_now;
+	      }
 	  }
 	else
 	  as_bad ("Missing function name for .PROC (corrupted label chain)");
