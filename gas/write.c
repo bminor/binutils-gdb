@@ -124,6 +124,8 @@ fix_new_internal (frag, where, size, add_symbol, sub_symbol, offset, pcrel,
   fixP->fx_callj = 0;
 #endif
 
+  as_where (&fixP->fx_file, &fixP->fx_line);
+
   /* Usually, we want relocs sorted numerically, but while
      comparing to older versions of gas that have relocs
      reverse sorted, it is convenient to have this compile
@@ -634,6 +636,13 @@ write_relocs (abfd, sec, xxx)
       /* Pass bogus address so that when bfd_perform_relocation adds
 	 `address' back in, it'll come up with `data', which is where
 	 we want it to operate.  */
+      if (reloc->howto->partial_inplace == false
+	  && reloc->howto->pcrel_offset == true
+	  && reloc->howto->pc_relative == true)
+	{
+	  /* bfd_perform_relocation screws this up */
+	  reloc->addend += reloc->address;
+	}
       s = bfd_perform_relocation (stdoutput, reloc, data - reloc->address,
 				  sec, stdoutput);
       switch (s)
@@ -1986,8 +1995,8 @@ fixup_segment (fixP, this_segment_type)
 		    seg_reloc_count++;
 		    add_number += S_GET_VALUE (add_symbolP);
 		  }
-	      }			/* if not in local seg */
-	  }			/* if there was a + symbol */
+	      }
+	  }
 
 	if (pcrel)
 	  {
@@ -2018,9 +2027,10 @@ fixup_segment (fixP, this_segment_type)
 		if (add_number > 1000)
 		  sprint_value (buf2, add_number);
 		else
-		  sprintf (buf2, "%d", (long) add_number);
-		as_bad ("Value of %s too large for field of %d bytes at %s",
-			buf2, size, buf);
+		  sprintf (buf2, "%ld", (long) add_number);
+		as_bad_where (fixP->fx_file, fixP->fx_line,
+			      "Value of %s too large for field of %d bytes at %s",
+			      buf2, size, buf);
 	      }			/* generic error checking */
 #ifdef WARN_SIGNED_OVERFLOW_WORD
 	    /* Warn if a .word value is too large when treated as a signed
@@ -2029,9 +2039,10 @@ fixup_segment (fixP, this_segment_type)
 	    if (!flagseen['J']
 		&& size == 2
 		&& add_number > 0x7fff)
-	      as_bad ("Signed .word overflow; switch may be too large; %ld at 0x%lx",
-		      (long) add_number,
-		      (unsigned long) (fragP->fr_address + where));
+	      as_bad_where (fixP->fx_file, fixP->fx_line,
+			    "Signed .word overflow; switch may be too large; %ld at 0x%lx",
+			    (long) add_number,
+			    (unsigned long) (fragP->fr_address + where));
 #endif
 	  }			/* not a bit fix */
 
