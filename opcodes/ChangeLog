@@ -1,3 +1,20 @@
+Wed Feb 26 13:38:30 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* m68k-dis.c (NEXTSINGLE, NEXTDOUBLE, NEXTEXTEND): Use
+	floatformat_to_double to make portable.
+	(print_insn_arg): Use NEXTEXTEND macro when extracting extended
+	precision float.
+
+Mon Feb 24 19:26:12 1997  Dawn Perchik  <dawn@cygnus.com>
+
+	* mips-opc.c: Initialize mips_opcodes to mips_builtin_opcodes,
+	and bfd_mips_num_opcodes to bfd_mips_num_builtin_opcodes.
+
+Mon Feb 24 15:19:01 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* d10v-dis.c, d10v-opc.c: Change pre_defined_registers to 
+	d10v_predefined_registers and reg_name_cnt to d10v_reg_name_cnt.
+
 start-sanitize-tic80
 Mon Feb 24 14:33:26 1997  Fred Fish  <fnf@cygnus.com>
 
