@@ -1,6 +1,11 @@
-start-sanitize-v850
 Wed Oct 16 11:24:35 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* linker.c (_bfd_generic_final_link): Set "linker_mark" for
+	all sections that will be included in the output file.
+	(_bfd_generic_link_output_symbols): Discard symbols in sections
+	which are being discarded.
+
+start-sanitize-v850
 	* elf32-v850.c (bfd_elf32_v850_reloc): Mask out bits we
 	no longer want in pc-relative relocs.
 
