@@ -1,3 +1,8 @@
+Wed May 25 17:06:15 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in: Replace libgdb.a with libgdb-files.  Make "all"
+	build it.
+
 Thu May 19 09:56:20 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* target.c, target.h: New variables target_activity_function and

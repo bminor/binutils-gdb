@@ -449,7 +449,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
 
 OBS = $(COMMON_OBS) main.o utils.o annotate.o
 
-LIBGDB_OBS = $(COMMON_OBS) libmain.o libutils.o
+LIBGDB_OBS = libmain.o libutils.o
 
 TSOBS = inflow.o
 
@@ -468,7 +468,7 @@ YYOBJ = c-exp.tab.o m2-exp.tab.o ch-exp.tab.o
 .c.o:
 	$(CC) -c $(INTERNAL_CFLAGS) $<
 
-all: gdb
+all: gdb libgdb-files $(LIBGDB_OBS)
 	@$(MAKE) $(FLAGS_TO_PASS) DO=all "DODIRS=`echo $(SUBDIRS) | sed 's/testsuite//'`" subdir_do
 
 installcheck:
@@ -549,27 +549,18 @@ init.c: $(OBS) $(TSOBS)
 
 .PRECIOUS: init.c
 
-# The gdb target has two dependencies that aren't really
-# used when linking gdb.  They are built for the sake of cyscm.
-
 # Removing the old gdb first works better if it is running, at least on SunOS.
-gdb: $(OBS) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o libmain.o libutils.o
+gdb: $(OBS) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o
 	rm -f gdb
 	$(CC-LD) $(INTERNAL_LDFLAGS) -o gdb \
 	  init.o $(OBS) $(TSOBS) $(ADD_FILES) $(CLIBS) $(LOADLIBES)
 
-LIBGDBFILES=$(LIBGDB_OBS) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o
-LIBGDBPREFIX=.
-libgdb-files: force_update
+LIBGDBFILES=$(COMMON_OBS) $(LIBGDB_OBS) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o
+libgdb-files: $(LIBGDBFILES) Makefile.in
 	-rm -f libgdb-files
 	for i in $(LIBGDBFILES); do\
-		echo ${LIBGDBPREFIX}/$$i >> libgdb-files;\
+		echo $$i >> libgdb-files;\
 	done
-
-libgdb.a: $(LIBGDB_OBS) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o
-	rm -f libgdb.a
-	$(AR) $(AR_FLAGS) libgdb.a $(LIBGDB_OBS) $(TSOBS) $(ADD_FILES) init.o
-	$(RANLIB) libgdb.a
 
 libmain.o: main.c
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/main.c -DMAIN_OVERRIDE \
