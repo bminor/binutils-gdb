@@ -173,7 +173,6 @@ mips64*vr4320*-*-elf*)	gdb_target=vr4300 ;;
 # end-sanitize-vr4320
 mips64*vr4300*el-*-elf*)	gdb_target=vr4300el ;;
 mips64*vr4300*-*-elf*)	gdb_target=vr4300 ;;
-mips64*vr4320*-*-elf)   gdb_target=vr4xxx ;;
 mips64*vr4100*el-*-elf*)	gdb_target=vr4300el ;;
 mips64*vr4100*-*-elf*)	gdb_target=vr4xxx ;;
 mips64*vr5000*el-*-elf*)	gdb_target=vr5000el ;;
