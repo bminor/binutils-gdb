@@ -1,3 +1,7 @@
+Wed Jun  2 19:58:46 1993  John Gilmore  (gnu@cygnus.com)
+
+	* remote-es1800.c:  Fix typo.
+
 Tue Jun  1 21:22:39 1993  Fred Fish  (fnf@cygnus.com)
 
 	* target.c (target_read_memory_partial):  Like target_read_memory,

@@ -247,16 +247,25 @@ z8k-tdep.c
 
 
 # Things which are explicitly *not* kept, for now.
-# deblib/		- ???
+# deblib/		- CVS won't let you blow away directories yet,
+#			  so this is still around from when Stu checked
+#			  it in, as part of Lucid support.
 # energize		- Part of Lucid support.
 # energize-patches	- Part of Lucid support.
 # energize.c		- Part of Lucid support.
 # energize.h		- Part of Lucid support.
-# infrun.hacked.c	- Beats me...
-# remote-sa.sparc.c	- ???
+# infrun.hacked.c	- An old version of infrun.c that had some 
+#			  wait_for_inferior improvements by gnu,
+#			  which were never fully debugged.
+# remote-sa.sparc.c	- Remote target for a standalone SPARC, using
+#			  the FORTH console ROMs.  We never got the paperwork
+#			  straight, since Sun's lawyers messed with the
+#			  FSF contract and RMS didn't accept the changes.
+#			  Written at SunLabs.
 # state.c		- Not used at the moment, keep for reference (fnf)
 # state.h		- Not used at the moment, keep for reference (fnf)
-# tests			- ?
+# tests			- Old test programs for GDB, pre-gdbtest and pre-
+#			  DejaGnu.
 
 Things-to-lose:
 

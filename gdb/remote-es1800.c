@@ -3,7 +3,7 @@
 
    This file is added to GDB to make it possible to do debugging via an
    ES-1800 emulator. The code was originally written by Johan Holmberg
-   TT/SJ Ericsson Telecom AB and later modified byJohan Henriksson
+   TT/SJ Ericsson Telecom AB and later modified by Johan Henriksson
    TT/SJ. It was modified for gdb 4.0 by TX/DK Jan Nordenand by TX/DKG
    Harald Johansen.
 
