@@ -1,3 +1,8 @@
+2003-05-09  David Carlton  <carlton@bactrian.org>
+
+	* linespec.c (examine_compound_token): Handled classes nested
+	within classes, not just classes nested within namespaces.
+
 2003-05-07  David Carlton  <carlton@bactrian.org>
 
 	* valops.c (value_aggregate_elt): Add 'noside' argument.

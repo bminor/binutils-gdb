@@ -801,6 +801,7 @@ examine_compound_token (char **argptr, int funfirstline,
 			char *saved_arg, char *current_component,
 			struct symtabs_and_lines *values)
 {
+  /* The namespace or class that we're nested within.  */
   const char *namespace = "";
 
   while (1)
@@ -817,57 +818,56 @@ examine_compound_token (char **argptr, int funfirstline,
 
       if (class_sym == NULL)
 	return 0;
-
       t = check_typedef (SYMBOL_TYPE (class_sym));
 
-      switch (TYPE_CODE (t))
+      current_component = find_next_token (argptr);
+      if (*current_component == ':')
 	{
-	case TYPE_CODE_STRUCT:
-	case TYPE_CODE_UNION:
-	  /* Find the next token (everything up to end or next blank).  */
+	  /* We're still in the process of reading types: we haven't
+	     found the method at the bottom yet.  */
+	  namespace = TYPE_TAG_NAME (t);
+	}
+      else
+	{
+	  switch (TYPE_CODE (t))
+	    {
+	    case TYPE_CODE_STRUCT:
+	    case TYPE_CODE_UNION:
+	      /* Find the next token (everything up to end or next blank).  */
 
-	  current_component = find_next_token (argptr);
-	  copy = alloca (current_component - *argptr + 1);
-	  memcpy (copy, *argptr, current_component - *argptr);
-	  copy[current_component - *argptr] = '\0';
-	  if (current_component != *argptr
-	      && copy[current_component - *argptr - 1]
-	      && (strchr (get_gdb_completer_quote_characters (),
-			  copy[current_component - *argptr - 1])
-		  != NULL))
-	    copy[current_component - *argptr - 1] = '\0';
+	      copy = alloca (current_component - *argptr + 1);
+	      memcpy (copy, *argptr, current_component - *argptr);
+	      copy[current_component - *argptr] = '\0';
+	      if (current_component != *argptr
+		  && copy[current_component - *argptr - 1]
+		  && (strchr (get_gdb_completer_quote_characters (),
+			      copy[current_component - *argptr - 1])
+		      != NULL))
+		copy[current_component - *argptr - 1] = '\0';
 	      
-	  while (*current_component == ' ' || *current_component == '\t')
-	    current_component++;
-	  *argptr = current_component;
+	      while (*current_component == ' ' || *current_component == '\t')
+		current_component++;
+	      *argptr = current_component;
 
-	  *values = find_method (funfirstline, canonical, saved_arg, copy,
-				 t, class_sym);
+	      *values = find_method (funfirstline, canonical, saved_arg, copy,
+				     t, class_sym);
       
-	  return 1;
-	case TYPE_CODE_NAMESPACE:
-	  {
-	    char *next_component = find_next_token (argptr);
-	    namespace = TYPE_TAG_NAME (t);
-	    if (*next_component == ':')
-	      {
-		current_component = next_component;
-		break;
-	      }
-	    else
+	      return 1;
+	    case TYPE_CODE_NAMESPACE:
 	      {
 		return decode_namespace (argptr, funfirstline,
 					 canonical,
-					 next_component, namespace,
+					 current_component,
+					 TYPE_TAG_NAME (t),
 					 values);
 	      }
-	  }
-	default:
-	  /* FIXME: carlton/2002-11-19: Once this all settles down, this
-	     case should be an error rather than a return 0; that will
-	     allow us to make VALUES the return value rather than an
-	     argument.  */
-	  return 0;
+	    default:
+	      /* FIXME: carlton/2002-11-19: Once this all settles
+		 down, this case should be an error rather than a
+		 return 0; that will allow us to make VALUES the
+		 return value rather than an argument.  */
+	      return 0;
+	    }
 	}
     }
 }

@@ -1,3 +1,10 @@
+2003-05-09  David Carlton  <carlton@bactrian.org>
+
+	* gdb.c++/breakpoint.cc: New.
+	* gdb.c++/breakpoint.exp: New.
+	* gdb.c++/namespace.exp: Update "print C::D::cd" for current
+	output.
+
 2003-05-07  David Carlton  <carlton@bactrian.org>
 
 	* gdb.c++/namespace.exp: Update messages to match new parser
