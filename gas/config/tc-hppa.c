@@ -2179,6 +2179,8 @@ pa_ip (str)
 		{
 		  the_insn.reloc = R_HPPA_ABS_CALL;
 		  the_insn.format = 17;
+		  the_insn.arg_reloc = last_call_desc.arg_reloc;
+		  bzero (&last_call_desc, sizeof (struct call_desc));
 		  continue;
 		}
 
@@ -2813,16 +2815,6 @@ md_undefined_symbol (name)
   return 0;
 }
 
-/* Parse an operand that is machine-specific.
-   We just return without modifying the expression as we have nothing
-   to do on the PA.  */
-
-void
-md_operand (expressionP)
-     expressionS *expressionP;
-{
-}
-
 /* Apply a fixup to an instruction.  */
 
 int
@@ -2868,6 +2860,15 @@ md_apply_fix (fixP, valp)
 #endif
 	  )
 	new_val = ((fmt == 12 || fmt == 17) ? 8 : 0);
+#ifdef OBJ_SOM
+      /* This is truely disgusting.  The machine independent code blindly
+	 adds in the value of the symbol being relocated against.  Damn!  */
+      else if (fmt == 32
+	       && fixP->fx_addsy != NULL
+	       && S_GET_SEGMENT (fixP->fx_addsy) != bfd_com_section_ptr)
+	new_val = hppa_field_adjust (*valp - S_GET_VALUE (fixP->fx_addsy),
+				     0, hppa_fixP->fx_r_field);
+#endif
       else
 	new_val = hppa_field_adjust (*valp, 0, hppa_fixP->fx_r_field);
 

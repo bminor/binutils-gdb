@@ -1,3 +1,8 @@
+Sun Mar  5 19:38:09 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (pa_ip, case 'z'): Don't lose argument
+	relocation bits for absolute calls.
+
 Fri Mar  3 17:41:50 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* config/tc-h8300.* (md_operand): Change empty function to empty
