@@ -1,3 +1,8 @@
+2001-10-20  H.J. Lu  <hjl@gnu.org>
+
+	* config/tc-arm.c (do_c_shift): Use ISDIGIT instead of isdigit.
+	(cirrus_parse_offset): Likewise.
+
 2001-10-19  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* config/tc-arm.c: Restore line_comment_chars.

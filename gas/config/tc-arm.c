@@ -6557,7 +6557,7 @@ do_c_shift (str, flags, mode)
   if (*str == '#')
     ++str;
 
-  if (!isdigit (*str) && *str != '-')
+  if (!ISDIGIT (*str) && *str != '-')
     {
       inst.error = _("expecting immediate, 7bit operand");
       return;
@@ -6569,7 +6569,7 @@ do_c_shift (str, flags, mode)
       ++str;
     }
 
-  for (imm = 0; *str && isdigit (*str); ++str)
+  for (imm = 0; *str && ISDIGIT (*str); ++str)
     imm = imm * 10 + *str - '0';
 
   if (imm > 64)
@@ -6619,13 +6619,13 @@ cirrus_parse_offset (str, negative)
       ++p;
     }
 
-  if (!isdigit (*p))
+  if (!ISDIGIT (*p))
     {
       inst.error = _("offset expected");
       return 0;
     }
 
-  for (offset = 0; *p && isdigit (*p); ++p)
+  for (offset = 0; *p && ISDIGIT (*p); ++p)
     offset = offset * 10 + *p - '0';
 
   if (offset > 0xff)
