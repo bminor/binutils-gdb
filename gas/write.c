@@ -48,8 +48,11 @@ extern CONST int md_long_jump_size;
 #endif
 
 int symbol_table_frozen;
+void print_fixup PARAMS ((fixS *));
 
 #ifdef BFD_ASSEMBLER
+static void renumber_sections PARAMS ((bfd *, asection *, PTR));
+
 /* We generally attach relocs to frag chains.  However, after we have
    chained these all together into a segment, any relocs we add after
    that must be attached to a segment.  This will include relocs added
@@ -131,6 +134,7 @@ fix_new_internal (frag, where, size, add_symbol, sub_symbol, offset, pcrel,
   fixP->fx_subsy = sub_symbol;
   fixP->fx_offset = offset;
   fixP->fx_pcrel = pcrel;
+  fixP->fx_plt = 0;
 #if defined(NEED_FX_R_TYPE) || defined (BFD_ASSEMBLER)
   fixP->fx_r_type = r_type;
 #endif
@@ -309,6 +313,24 @@ record_alignment (seg, align)
     section_alignment[(int) seg] = align;
 #endif
 }
+
+#ifdef BFD_ASSEMBLER
+
+/* Reset the section indices after removing the gas created sections.  */
+
+static void
+renumber_sections (abfd, sec, countparg)
+     bfd *abfd;
+     asection *sec;
+     PTR countparg;
+{
+  int *countp = (int *) countparg;
+
+  sec->index = *countp;
+  ++*countp;
+}
+
+#endif /* defined (BFD_ASSEMBLER) */
 
 #if defined (BFD_ASSEMBLER) || ! defined (BFD)
 
@@ -585,11 +607,17 @@ adjust_reloc_syms (abfd, sec, xxx)
       /* ignore it */;
     else if (fixp->fx_addsy)
       {
-	symbolS *sym = fixp->fx_addsy;
+	symbolS *sym;
 	asection *symsec;
 
       reduce_fixup:
 
+#ifdef DEBUG5
+	fprintf (stderr, "\n\nadjusting fixup:\n");
+	print_fixup (fixp);
+#endif
+
+	sym = fixp->fx_addsy;
 	symsec = sym->bsym->section;
 
 	/* If it's one of these sections, assume the symbol is
@@ -602,7 +630,7 @@ adjust_reloc_syms (abfd, sec, xxx)
 	    || bfd_is_com_section (symsec))
 	  {
 	    fixp->fx_addsy->sy_used_in_reloc = 1;
-	    continue;
+	    goto done;
 	  }
 
 	/* Since we're reducing to section symbols, don't attempt to reduce
@@ -610,7 +638,7 @@ adjust_reloc_syms (abfd, sec, xxx)
 	if (sym->bsym->flags & BSF_SECTION_SYM)
 	  {
 	    fixp->fx_addsy->sy_used_in_reloc = 1;
-	    continue;
+	    goto done;
 	  }
 
 	/* Is there some other reason we can't adjust this one?  (E.g.,
@@ -619,7 +647,7 @@ adjust_reloc_syms (abfd, sec, xxx)
 	if (! obj_fix_adjustable (fixp))
 	  {
 	    fixp->fx_addsy->sy_used_in_reloc = 1;
-	    continue;
+	    goto done;
 	  }
 #endif
 
@@ -630,7 +658,7 @@ adjust_reloc_syms (abfd, sec, xxx)
 	if (! tc_fix_adjustable (fixp))
 	  {
 	    fixp->fx_addsy->sy_used_in_reloc = 1;
-	    continue;
+	    goto done;
 	  }
 #endif
 
@@ -651,7 +679,7 @@ adjust_reloc_syms (abfd, sec, xxx)
 	  {
 	    fixp->fx_offset += S_GET_VALUE (sym->sy_value.X_op_symbol);
 	    fixp->fx_offset += sym->sy_value.X_add_number;
-	    fixp->fx_addsy = sym = sym->sy_value.X_add_symbol;
+	    fixp->fx_addsy = sym->sy_value.X_add_symbol;
 	    goto reduce_fixup;
 	  }
 
@@ -659,10 +687,11 @@ adjust_reloc_syms (abfd, sec, xxx)
 	   at least should still work.  If not, figure out what to do
 	   when we run into that case.  */
 	fixp->fx_offset += S_GET_VALUE (sym);
-	if (sym->sy_frag)
-	  fixp->fx_offset += sym->sy_frag->fr_address;
 	fixp->fx_addsy = section_symbol (symsec);
 	fixp->fx_addsy->sy_used_in_reloc = 1;
+
+      done:
+	;
       }
 #if 1/*def RELOC_REQUIRES_SYMBOL*/
     else
@@ -673,7 +702,7 @@ adjust_reloc_syms (abfd, sec, xxx)
 	   a local symbol in the absolute section.  */
 
 	fixp->fx_addsy = section_symbol (absolute_section);
-	fixp->fx_addsy->sy_used_in_reloc = 1;
+/*	fixp->fx_addsy->sy_used_in_reloc = 1; */
       }
 #endif
 
@@ -780,9 +809,10 @@ write_relocs (abfd, sec, xxx)
 	abort ();
       for (j = 0; reloc[j]; j++)
         {
-	  s = bfd_perform_relocation (stdoutput, reloc[j],
-				      data - reloc[0]->address,
-				      sec, stdoutput, &err);
+	  s = bfd_install_relocation (stdoutput, reloc[j],
+				      fixp->fx_frag->fr_literal,
+				      fixp->fx_frag->fr_address,
+				      sec, &err);
           switch (s)
 	    {
 	    case bfd_reloc_ok:
@@ -1182,6 +1212,8 @@ write_object_file ()
   /* Remove the sections created by gas for its own purposes.  */
   {
     asection **seclist, *sec;
+    int i;
+
     seclist = &stdoutput->sections;
     while (seclist && *seclist)
       {
@@ -1197,6 +1229,8 @@ write_object_file ()
 	if (*seclist)
 	  seclist = &(*seclist)->next;
       }
+    i = 0;
+    bfd_map_over_sections (stdoutput, renumber_sections, &i);
   }
 
   bfd_map_over_sections (stdoutput, chain_frchains_together, (char *) 0);
@@ -2013,7 +2047,7 @@ fixup_segment (fixP, this_segment_type)
   int size;
   char *place;
   long where;
-  char pcrel;
+  int pcrel, plt;
   fragS *fragP;
   segT add_symbol_segment = absolute_section;
   
@@ -2034,6 +2068,11 @@ fixup_segment (fixP, this_segment_type)
 
   for (; fixP; fixP = fixP->fx_next)
     {
+#ifdef DEBUG5
+      fprintf (stderr, "\nprocessing fixup:\n");
+      print_fixup (fixP);
+#endif
+
       fragP = fixP->fx_frag;
       know (fragP);
       where = fixP->fx_where;
@@ -2046,7 +2085,8 @@ fixup_segment (fixP, this_segment_type)
       sub_symbolP = fixP->fx_subsy;
       add_number = fixP->fx_offset;
       pcrel = fixP->fx_pcrel;
-      
+      plt = fixP->fx_plt;
+
       if (add_symbolP)
 	add_symbol_segment = S_GET_SEGMENT (add_symbolP);
       
@@ -2144,7 +2184,7 @@ fixup_segment (fixP, this_segment_type)
 
       if (add_symbolP)
 	{
-	  if (add_symbol_segment == this_segment_type && pcrel
+	  if (add_symbol_segment == this_segment_type && pcrel && !plt
 	      && TC_RELOC_RTSYM_LOC_FIXUP (fixP->fx_r_type))
 	    {
 	      /*
@@ -2226,7 +2266,9 @@ fixup_segment (fixP, this_segment_type)
 	      else
 		{
 		  seg_reloc_count++;
+#if !defined (TC_I386) || !(defined (OBJ_ELF) || defined (OBJ_COFF))
 		  add_number += S_GET_VALUE (add_symbolP);
+#endif
 		}
 	    }
 	}
@@ -2305,9 +2347,12 @@ fixup_segment (fixP, this_segment_type)
 #endif
 	}
 #ifdef TC_VALIDATE_FIX
-    skip:
+    skip: ;
 #endif
-      ;
+#ifdef DEBUG5
+      fprintf (stderr, "result:\n");
+      print_fixup (fixP);
+#endif
     }				/* For each fixS in this segment. */
 
   TC_ADJUST_RELOC_COUNT (fixP, seg_reloc_count);
@@ -2354,7 +2399,7 @@ print_fixup (fixp)
      fixS *fixp;
 {
   indent_level = 1;
-  fprintf (stderr, "fix %s:%d", fixp->fx_file, fixp->fx_line);
+  fprintf (stderr, "fix %lx %s:%d", (long) fixp, fixp->fx_file, fixp->fx_line);
   if (fixp->fx_pcrel)
     fprintf (stderr, " pcrel");
   if (fixp->fx_pcrel_adjust)
@@ -2371,19 +2416,27 @@ print_fixup (fixp)
     fprintf (stderr, " tcbit");
   if (fixp->fx_done)
     fprintf (stderr, " done");
-  fprintf (stderr, "\n    size=%d frag=%lx where=%ld addnumber=%lx",
-	   fixp->fx_size, (long) fixp->fx_frag, fixp->fx_where,
-	   (long) fixp->fx_addnumber);
+  fprintf (stderr, "\n    size=%d frag=%lx where=%ld offset=%lx addnumber=%lx",
+	   fixp->fx_size, (long) fixp->fx_frag, (long) fixp->fx_where,
+	   (long) fixp->fx_offset, (long) fixp->fx_addnumber);
 #ifdef BFD_ASSEMBLER
   fprintf (stderr, "\n    %s (%d)", bfd_get_reloc_code_name (fixp->fx_r_type),
 	   fixp->fx_r_type);
 #else
+#ifdef NEED_FX_R_TYPE
   fprintf (stderr, " r_type=%d", fixp->fx_r_type);
+#endif
 #endif
   if (fixp->fx_addsy)
     {
-      fprintf (stderr, "\n    <");
+      fprintf (stderr, "\n   +<");
       print_symbol_value_1 (stderr, fixp->fx_addsy);
+      fprintf (stderr, ">");
+    }
+  if (fixp->fx_subsy)
+    {
+      fprintf (stderr, "\n   -<");
+      print_symbol_value_1 (stderr, fixp->fx_subsy);
       fprintf (stderr, ">");
     }
   fprintf (stderr, "\n");
