@@ -1,3 +1,8 @@
+Mon Aug 10 17:48:09 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	config/tc-i386.c (i386_operand): Size immediate constants by
+	suffix (erroneously removed as part of July 7 change).
+
 start-sanitize-armelf
 Sun Aug  9 20:45:32 1998  Catherine Moore  <clm@cygnus.com>
 
