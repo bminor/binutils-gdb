@@ -1094,7 +1094,7 @@ arm_make_sigtramp_cache (struct frame_info *next_frame)
   cache->framereg = ARM_SP_REGNUM;
   cache->prev_sp
     = read_memory_integer (cache->saved_regs[cache->framereg].addr,
-			   DEPRECATED_REGISTER_RAW_SIZE (cache->framereg));
+			   register_size (current_gdbarch, cache->framereg));
 
   return cache;
 }
@@ -1396,7 +1396,7 @@ arm_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
    register N.  */
 
 static struct type *
-arm_register_type (int regnum)
+arm_register_type (struct gdbarch *gdbarch, int regnum)
 {
   if (regnum >= ARM_F0_REGNUM && regnum < ARM_F0_REGNUM + NUM_FREGS)
     {
@@ -1416,42 +1416,14 @@ static int
 arm_register_byte (int regnum)
 {
   if (regnum < ARM_F0_REGNUM)
-    return regnum * INT_REGISTER_RAW_SIZE;
+    return regnum * INT_REGISTER_SIZE;
   else if (regnum < ARM_PS_REGNUM)
-    return (NUM_GREGS * INT_REGISTER_RAW_SIZE
-	    + (regnum - ARM_F0_REGNUM) * FP_REGISTER_RAW_SIZE);
+    return (NUM_GREGS * INT_REGISTER_SIZE
+	    + (regnum - ARM_F0_REGNUM) * FP_REGISTER_SIZE);
   else
-    return (NUM_GREGS * INT_REGISTER_RAW_SIZE
-	    + NUM_FREGS * FP_REGISTER_RAW_SIZE
+    return (NUM_GREGS * INT_REGISTER_SIZE
+	    + NUM_FREGS * FP_REGISTER_SIZE
 	    + (regnum - ARM_FPS_REGNUM) * STATUS_REGISTER_SIZE);
-}
-
-/* Number of bytes of storage in the actual machine representation for
-   register N.  All registers are 4 bytes, except fp0 - fp7, which are
-   12 bytes in length.  */
-
-static int
-arm_register_raw_size (int regnum)
-{
-  if (regnum < ARM_F0_REGNUM)
-    return INT_REGISTER_RAW_SIZE;
-  else if (regnum < ARM_FPS_REGNUM)
-    return FP_REGISTER_RAW_SIZE;
-  else
-    return STATUS_REGISTER_SIZE;
-}
-
-/* Number of bytes of storage in a program's representation
-   for register N.  */
-static int
-arm_register_virtual_size (int regnum)
-{
-  if (regnum < ARM_F0_REGNUM)
-    return INT_REGISTER_VIRTUAL_SIZE;
-  else if (regnum < ARM_FPS_REGNUM)
-    return FP_REGISTER_VIRTUAL_SIZE;
-  else
-    return STATUS_REGISTER_SIZE;
 }
 
 /* Map GDB internal REGNUM onto the Arm simulator register numbers.  */
@@ -2082,7 +2054,7 @@ arm_extract_return_value (struct type *type,
 	    /* The value is in register F0 in internal format.  We need to
 	       extract the raw value and then convert it to the desired
 	       internal type.  */
-	    bfd_byte tmpbuf[FP_REGISTER_RAW_SIZE];
+	    bfd_byte tmpbuf[FP_REGISTER_SIZE];
 
 	    regcache_cooked_read (regs, ARM_F0_REGNUM, tmpbuf);
 	    convert_from_extended (floatformat_from_type (type), tmpbuf,
@@ -2095,7 +2067,7 @@ arm_extract_return_value (struct type *type,
 	  regcache_cooked_read (regs, ARM_A1_REGNUM, valbuf);
 	  if (TYPE_LENGTH (type) > 4)
 	    regcache_cooked_read (regs, ARM_A1_REGNUM + 1,
-				  valbuf + INT_REGISTER_RAW_SIZE);
+				  valbuf + INT_REGISTER_SIZE);
 	  break;
 
 	default:
@@ -2124,11 +2096,11 @@ arm_extract_return_value (struct type *type,
 	     anything special for small big-endian values.  */
 	  regcache_cooked_read_unsigned (regs, regno++, &tmp);
 	  store_unsigned_integer (valbuf, 
-				  (len > INT_REGISTER_RAW_SIZE
-				   ? INT_REGISTER_RAW_SIZE : len),
+				  (len > INT_REGISTER_SIZE
+				   ? INT_REGISTER_SIZE : len),
 				  tmp);
-	  len -= INT_REGISTER_RAW_SIZE;
-	  valbuf += INT_REGISTER_RAW_SIZE;
+	  len -= INT_REGISTER_SIZE;
+	  valbuf += INT_REGISTER_SIZE;
 	}
     }
   else
@@ -2138,15 +2110,15 @@ arm_extract_return_value (struct type *type,
          registers with 32-bit load instruction(s).  */
       int len = TYPE_LENGTH (type);
       int regno = ARM_A1_REGNUM;
-      bfd_byte tmpbuf[INT_REGISTER_RAW_SIZE];
+      bfd_byte tmpbuf[INT_REGISTER_SIZE];
 
       while (len > 0)
 	{
 	  regcache_cooked_read (regs, regno++, tmpbuf);
 	  memcpy (valbuf, tmpbuf,
-		  len > INT_REGISTER_RAW_SIZE ? INT_REGISTER_RAW_SIZE : len);
-	  len -= INT_REGISTER_RAW_SIZE;
-	  valbuf += INT_REGISTER_RAW_SIZE;
+		  len > INT_REGISTER_SIZE ? INT_REGISTER_SIZE : len);
+	  len -= INT_REGISTER_SIZE;
+	  valbuf += INT_REGISTER_SIZE;
 	}
     }
 }
@@ -2270,7 +2242,7 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
-      char buf[ARM_MAX_REGISTER_RAW_SIZE];
+      char buf[MAX_REGISTER_SIZE];
 
       switch (arm_get_fp_model (current_gdbarch))
 	{
@@ -2285,7 +2257,7 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 	  regcache_cooked_write (regs, ARM_A1_REGNUM, valbuf);
 	  if (TYPE_LENGTH (type) > 4)
 	    regcache_cooked_write (regs, ARM_A1_REGNUM + 1, 
-				   valbuf + INT_REGISTER_RAW_SIZE);
+				   valbuf + INT_REGISTER_SIZE);
 	  break;
 
 	default:
@@ -2306,10 +2278,10 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 	{
 	  /* Values of one word or less are zero/sign-extended and
 	     returned in r0.  */
-	  bfd_byte tmpbuf[INT_REGISTER_RAW_SIZE];
+	  bfd_byte tmpbuf[INT_REGISTER_SIZE];
 	  LONGEST val = unpack_long (type, valbuf);
 
-	  store_signed_integer (tmpbuf, INT_REGISTER_RAW_SIZE, val);
+	  store_signed_integer (tmpbuf, INT_REGISTER_SIZE, val);
 	  regcache_cooked_write (regs, ARM_A1_REGNUM, tmpbuf);
 	}
       else
@@ -2323,8 +2295,8 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 	  while (len > 0)
 	    {
 	      regcache_cooked_write (regs, regno++, valbuf);
-	      len -= INT_REGISTER_RAW_SIZE;
-	      valbuf += INT_REGISTER_RAW_SIZE;
+	      len -= INT_REGISTER_SIZE;
+	      valbuf += INT_REGISTER_SIZE;
 	    }
 	}
     }
@@ -2335,15 +2307,15 @@ arm_store_return_value (struct type *type, struct regcache *regs,
          registers with 32-bit load instruction(s).  */
       int len = TYPE_LENGTH (type);
       int regno = ARM_A1_REGNUM;
-      bfd_byte tmpbuf[INT_REGISTER_RAW_SIZE];
+      bfd_byte tmpbuf[INT_REGISTER_SIZE];
 
       while (len > 0)
 	{
 	  memcpy (tmpbuf, valbuf,
-		  len > INT_REGISTER_RAW_SIZE ? INT_REGISTER_RAW_SIZE : len);
+		  len > INT_REGISTER_SIZE ? INT_REGISTER_SIZE : len);
 	  regcache_cooked_write (regs, regno++, tmpbuf);
-	  len -= INT_REGISTER_RAW_SIZE;
-	  valbuf += INT_REGISTER_RAW_SIZE;
+	  len -= INT_REGISTER_SIZE;
+	  valbuf += INT_REGISTER_SIZE;
 	}
     }
 }
@@ -2352,16 +2324,16 @@ static int
 arm_get_longjmp_target (CORE_ADDR *pc)
 {
   CORE_ADDR jb_addr;
-  char buf[INT_REGISTER_RAW_SIZE];
+  char buf[INT_REGISTER_SIZE];
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   
   jb_addr = read_register (ARM_A1_REGNUM);
 
   if (target_read_memory (jb_addr + tdep->jb_pc * tdep->jb_elt_size, buf,
-			  INT_REGISTER_RAW_SIZE))
+			  INT_REGISTER_SIZE))
     return 0;
 
-  *pc = extract_unsigned_integer (buf, INT_REGISTER_RAW_SIZE);
+  *pc = extract_unsigned_integer (buf, INT_REGISTER_SIZE);
   return 1;
 }
 
@@ -2805,15 +2777,11 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, ARM_PC_REGNUM);
   set_gdbarch_deprecated_register_byte (gdbarch, arm_register_byte);
   set_gdbarch_deprecated_register_bytes (gdbarch,
-					 (NUM_GREGS * INT_REGISTER_RAW_SIZE
-					  + NUM_FREGS * FP_REGISTER_RAW_SIZE
+					 (NUM_GREGS * INT_REGISTER_SIZE
+					  + NUM_FREGS * FP_REGISTER_SIZE
 					  + NUM_SREGS * STATUS_REGISTER_SIZE));
   set_gdbarch_num_regs (gdbarch, NUM_GREGS + NUM_FREGS + NUM_SREGS);
-  set_gdbarch_deprecated_register_raw_size (gdbarch, arm_register_raw_size);
-  set_gdbarch_deprecated_register_virtual_size (gdbarch, arm_register_virtual_size);
-  set_gdbarch_deprecated_max_register_raw_size (gdbarch, FP_REGISTER_RAW_SIZE);
-  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, FP_REGISTER_VIRTUAL_SIZE);
-  set_gdbarch_deprecated_register_virtual_type (gdbarch, arm_register_type);
+  set_gdbarch_register_type (gdbarch, arm_register_type);
 
   /* Internal <-> external register number maps.  */
   set_gdbarch_register_sim_regno (gdbarch, arm_register_sim_regno);
