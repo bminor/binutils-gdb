@@ -32,12 +32,6 @@ struct frame_saved_regs;
 struct value;
 struct type;
 
-/* Number of traps that happen between exec'ing the shell to run an
-   inferior, and when we finally get to the inferior code.  This is 2
-   on most implementations. */
-
-#define START_INFERIOR_TRAPS_EXPECTED 2
-
 /* Offset from address of function to start of its code.
    Zero on most machines.  */
 
