@@ -76,7 +76,6 @@ else
 				mv $i .Recover
 			fi
 			mv new $i
-			echo $i >> .Recover
 		fi
 	done
 fi
@@ -90,7 +89,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.14  1991/09/13 03:11:27  gnu
+# Revision 1.15  1991/09/13 03:20:18  gnu
+# One more try at top-level sanity on config.sub
+#
+# Revision 1.14  1991/09/13  03:11:27  gnu
 # Clean out "v9" stuff from here, and propagate configure and config.sub
 # to all lower directories after sanity sets in.
 #
