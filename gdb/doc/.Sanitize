@@ -29,6 +29,7 @@ ChangeLog
 Makefile.in
 all.m4
 amd29k.m4
+config
 configure.in
 gdb.texinfo
 gdbint.texinfo
