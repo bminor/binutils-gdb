@@ -45,6 +45,7 @@
 #include "as.h"
 #include "config.h"
 #include "subsegs.h"
+#include "output-file.h"
 
 #ifndef SIGTY
 #ifdef __STDC__
@@ -54,7 +55,10 @@
 #endif /* __STDC__ */
 #endif /* SIGTY */
 
+#if 0
+/* Not currently used.  */
 static SIGTY got_sig PARAMS ((int sig));
+#endif
 static void perform_an_assembly_pass PARAMS ((int argc, char **argv));
 
 #ifndef EXIT_SUCCESS
@@ -66,8 +70,7 @@ int listing;			/* true if a listing is wanted */
 
 char *myname;			/* argv[0] */
 #ifdef BFD_ASSEMBLER
-segT big_section, reg_section, pass1_section;
-segT diff_section, absent_section;
+segT reg_section, expr_section;
 segT text_section, data_section, bss_section;
 #endif
 
@@ -155,7 +158,7 @@ main (argc, argv)
 	{			/* scan all the 1-char flags */
 	  arg++;		/* arg->after letter. */
 	  a &= 0x7F;		/* ascii only please */
-	  flagseen[a] = 1;
+	  flagseen[(unsigned char) a] = 1;
 	  switch (a)
 	    {
 	    case 'a':
@@ -215,7 +218,7 @@ main (argc, argv)
 		  {
 		    temp = strdup (arg);
 		    if (!temp)
-		      as_fatal ("virtual memory exhuasted");
+		      as_fatal ("virtual memory exhausted");
 		  }
 		else if (work_argc)
 		  {
@@ -265,7 +268,13 @@ main (argc, argv)
 
 	    case 'R':
 	      /* -R means put data into text segment */
+#ifdef NO_FOLD_DATA_AND_TEXT
+	      as_warn ("-R option not supported on this target.");
+	      flag_readonly_data_in_text = 0;
+	      flagseen['R'] = 0;
+#else
 	      flag_readonly_data_in_text = 1;
+#endif
 	      break;
 
 	    case 'v':
@@ -391,20 +400,21 @@ perform_an_assembly_pass (argc, argv)
       segment_info[i].fix_root = 0;
   }
   /* Create the three fixed ones */
-  subseg_new (SEG_E0, 0);
-  subseg_new (SEG_E1, 0);
-  subseg_new (SEG_E2, 0);
-  strcpy (segment_info[SEG_E0].scnhdr.s_name, ".text");
-  strcpy (segment_info[SEG_E1].scnhdr.s_name, ".data");
-  strcpy (segment_info[SEG_E2].scnhdr.s_name, ".bss");
+  {
+    segT seg;
 
-  subseg_new (SEG_E0, 0);
+    seg = subseg_new (".text", 0);
+    assert (seg == SEG_E0);
+    seg = subseg_new (".data", 0);
+    assert (seg == SEG_E1);
+    seg = subseg_new (".bss", 0);
+    assert (seg == SEG_E2);
+  }
+
 #else /* not MANY_SEGMENTS */
   text_fix_root = NULL;
   data_fix_root = NULL;
   bss_fix_root = NULL;
-
-  subseg_new (SEG_TEXT, 0);
 #endif /* not MANY_SEGMENTS */
 #else /* BFD_ASSEMBLER */
   /* Create the standard sections, and those the assembler uses
@@ -424,14 +434,12 @@ perform_an_assembly_pass (argc, argv)
   bfd_set_section_flags (stdoutput, bss_section, applicable & SEC_ALLOC);
   subseg_new (BFD_ABS_SECTION_NAME, 0);
   subseg_new (BFD_UND_SECTION_NAME, 0);
-  big_section = subseg_new ("*GAS `big' section*", 0);
   reg_section = subseg_new ("*GAS `reg' section*", 0);
-  pass1_section = subseg_new ("*GAS `pass1' section*", 0);
-  diff_section = subseg_new ("*GAS `diff' section*", 0);
-  absent_section = subseg_new ("*GAS `absent' section*", 0);
+  expr_section = subseg_new ("*GAS `expr' section*", 0);
 
-  subseg_new (".text", 0);
 #endif /* BFD_ASSEMBLER */
+
+  subseg_set (text_section, 0);
 
   /* This may add symbol table entries, which requires having an open BFD,
      and sections already created, in BFD_ASSEMBLER mode.  */
@@ -453,6 +461,8 @@ perform_an_assembly_pass (argc, argv)
     read_a_source_file ("");
 }				/* perform_an_assembly_pass() */
 
+#if 0
+/* This is not currently used.  */
 static SIGTY
 got_sig (sig)
      int sig;
@@ -466,5 +476,6 @@ got_sig (sig)
   return ((SIGTY) 0);
 #endif
 }
+#endif
 
 /* end of as.c */
