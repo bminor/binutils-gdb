@@ -722,70 +722,66 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
   if (SAVE_DUMMY_FRAME_TOS_P ())
     SAVE_DUMMY_FRAME_TOS (sp);
 
+  /* Now proceed, having reached the desired place.  */
+  clear_proceed_status ();
+    
+  /* Create a momentary breakpoint at the return address of the
+     inferior.  That way it breaks when it returns.  */
+
   {
-    {
-      /* Execute a "stack dummy", a piece of code stored in the stack
-	 by the debugger to be executed in the inferior.
+    struct breakpoint *bpt;
+    struct symtab_and_line sal;
+    struct frame_id frame;
+    init_sal (&sal);		/* initialize to zeroes */
+    sal.pc = bp_addr;
+    sal.section = find_pc_overlay (sal.pc);
+    /* Set up a frame ID for the dummy frame so we can pass it to
+       set_momentary_breakpoint.  We need to give the breakpoint a
+       frame ID so that the breakpoint code can correctly
+       re-identify the dummy breakpoint.  */
+    frame = frame_id_build (read_fp (), sal.pc);
+    bpt = set_momentary_breakpoint (sal, frame, bp_call_dummy);
+    bpt->disposition = disp_del;
+  }
 
-	 The dummy's frame is automatically popped whenever that break
-	 is hit.  If that is the first time the program stops,
-	 call_function_by_hand returns to its caller with that frame
-	 already gone and sets RC to 0.
+  /* Execute a "stack dummy", a piece of code stored in the stack by
+     the debugger to be executed in the inferior.
+
+     The dummy's frame is automatically popped whenever that break is
+     hit.  If that is the first time the program stops,
+     call_function_by_hand returns to its caller with that frame
+     already gone and sets RC to 0.
    
-	 Otherwise, set RC to a non-zero value.  If the called
-	 function receives a random signal, we do not allow the user
-	 to continue executing it as this may not work.  The dummy
-	 frame is poped and we return 1.  If we hit a breakpoint, we
-	 leave the frame in place and return 2 (the frame will
-	 eventually be popped when we do hit the dummy end
-	 breakpoint).  */
+     Otherwise, set RC to a non-zero value.  If the called function
+     receives a random signal, we do not allow the user to continue
+     executing it as this may not work.  The dummy frame is poped and
+     we return 1.  If we hit a breakpoint, we leave the frame in place
+     and return 2 (the frame will eventually be popped when we do hit
+     the dummy end breakpoint).  */
 
-      struct cleanup *old_cleanups = make_cleanup (null_cleanup, 0);
-      int saved_async = 0;
+  {
+    struct cleanup *old_cleanups = make_cleanup (null_cleanup, 0);
+    int saved_async = 0;
 
-      /* Now proceed, having reached the desired place.  */
-      clear_proceed_status ();
+    /* If all error()s out of proceed ended up calling normal_stop
+       (and perhaps they should; it already does in the special case
+       of error out of resume()), then we wouldn't need this.  */
+    make_cleanup (breakpoint_auto_delete_contents, &stop_bpstat);
 
-      /* Create a momentary breakpoint at the return address of the
-	 inferior.  That way it breaks when it returns.  */
+    disable_watchpoints_before_interactive_call_start ();
+    proceed_to_finish = 1;	/* We want stop_registers, please... */
 
-      {
-	struct breakpoint *bpt;
-	struct symtab_and_line sal;
-	struct frame_id frame;
-	init_sal (&sal);		/* initialize to zeroes */
-	sal.pc = bp_addr;
-	sal.section = find_pc_overlay (sal.pc);
-	/* Set up a frame ID for the dummy frame so we can pass it to
-	   set_momentary_breakpoint.  We need to give the breakpoint a
-	   frame ID so that the breakpoint code can correctly
-	   re-identify the dummy breakpoint.  */
-	frame = frame_id_build (read_fp (), sal.pc);
-	bpt = set_momentary_breakpoint (sal, frame, bp_call_dummy);
-	bpt->disposition = disp_del;
-      }
-
-      /* If all error()s out of proceed ended up calling normal_stop
-	 (and perhaps they should; it already does in the special case
-	 of error out of resume()), then we wouldn't need this.  */
-      make_cleanup (breakpoint_auto_delete_contents, &stop_bpstat);
-
-      disable_watchpoints_before_interactive_call_start ();
-      proceed_to_finish = 1;	/* We want stop_registers, please... */
-
-      if (target_can_async_p ())
-	saved_async = target_async_mask (0);
-
-      proceed (real_pc, TARGET_SIGNAL_0, 0);
-
-      if (saved_async)
-	target_async_mask (saved_async);
+    if (target_can_async_p ())
+      saved_async = target_async_mask (0);
+    
+    proceed (real_pc, TARGET_SIGNAL_0, 0);
+    
+    if (saved_async)
+      target_async_mask (saved_async);
+    
+    enable_watchpoints_after_interactive_call_stop ();
       
-      enable_watchpoints_after_interactive_call_stop ();
-      
-      discard_cleanups (old_cleanups);
-  
-    }
+    discard_cleanups (old_cleanups);
   }
 
   if (stopped_by_random_signal || !stop_stack_dummy)
@@ -888,53 +884,50 @@ the function call).", name);
       internal_error (__FILE__, __LINE__, "... should not be here");
     }
 
-  {
-    /* If we get here the called FUNCTION run to completion. */
+  /* If we get here the called FUNCTION run to completion. */
 
-    /* On normal return, the stack dummy has been popped
-       already.  */
-    regcache_cpy_no_passthrough (retbuf, stop_registers);
+  /* On normal return, the stack dummy has been popped already.  */
+  regcache_cpy_no_passthrough (retbuf, stop_registers);
 
-    /* Restore the inferior status, via its cleanup.  At this stage,
-       leave the RETBUF alone.  */
-    do_cleanups (inf_status_cleanup);
+  /* Restore the inferior status, via its cleanup.  At this stage,
+     leave the RETBUF alone.  */
+  do_cleanups (inf_status_cleanup);
 
-    /* Figure out the value returned by the function.  */
-    /* elz: I defined this new macro for the hppa architecture only.
-       this gives us a way to get the value returned by the function
-       from the stack, at the same address we told the function to put
-       it.  We cannot assume on the pa that r28 still contains the
-       address of the returned structure. Usually this will be
-       overwritten by the callee.  I don't know about other
-       architectures, so I defined this macro */
+  /* Figure out the value returned by the function.  */
+  /* elz: I defined this new macro for the hppa architecture only.
+     this gives us a way to get the value returned by the function
+     from the stack, at the same address we told the function to put
+     it.  We cannot assume on the pa that r28 still contains the
+     address of the returned structure. Usually this will be
+     overwritten by the callee.  I don't know about other
+     architectures, so I defined this macro */
 #ifdef VALUE_RETURNED_FROM_STACK
-    if (struct_return)
-      {
-	do_cleanups (retbuf_cleanup);
-	return VALUE_RETURNED_FROM_STACK (value_type, struct_addr);
-      }
+  if (struct_return)
+    {
+      do_cleanups (retbuf_cleanup);
+      return VALUE_RETURNED_FROM_STACK (value_type, struct_addr);
+    }
 #endif
-    /* NOTE: cagney/2002-09-10: Only when the stack has been correctly
-       aligned (using frame_align()) do we can trust STRUCT_ADDR and
-       fetch the return value direct from the stack.  This lack of
-       trust comes about because legacy targets have a nasty habit of
-       silently, and local to PUSH_ARGUMENTS(), moving STRUCT_ADDR.
-       For such targets, just hope that value_being_returned() can
-       find the adjusted value.  */
-    if (struct_return && gdbarch_frame_align_p (current_gdbarch))
-      {
-        struct value *retval = value_at (value_type, struct_addr, NULL);
-        do_cleanups (retbuf_cleanup);
-        return retval;
-      }
-    else
-      {
-	struct value *retval = value_being_returned (value_type, retbuf,
-						     struct_return);
-	do_cleanups (retbuf_cleanup);
-	return retval;
-      }
-  }
+  /* NOTE: cagney/2002-09-10: Only when the stack has been correctly
+     aligned (using frame_align()) do we can trust STRUCT_ADDR and
+     fetch the return value direct from the stack.  This lack of trust
+     comes about because legacy targets have a nasty habit of
+     silently, and local to PUSH_ARGUMENTS(), moving STRUCT_ADDR.  For
+     such targets, just hope that value_being_returned() can find the
+     adjusted value.  */
+  if (struct_return && gdbarch_frame_align_p (current_gdbarch))
+    {
+      struct value *retval = value_at (value_type, struct_addr, NULL);
+      do_cleanups (retbuf_cleanup);
+      return retval;
+    }
+  else
+    {
+      struct value *retval = value_being_returned (value_type, retbuf,
+						   struct_return);
+      do_cleanups (retbuf_cleanup);
+      return retval;
+    }
 }
 
 void _initialize_infcall (void);

@@ -1,5 +1,11 @@
 2003-04-23  Andrew Cagney  <cagney@redhat.com>
 
+	* infcall.c (call_function_by_hand): Eliminate redundant
+	indentation.  Move "saved_async" and "old_cleanups" to where they
+	are needed.
+	
+2003-04-23  Andrew Cagney  <cagney@redhat.com>
+
 	* infcall.c (call_function_by_hand): Eliminate the variables "rc"
 	and "buffer".  Move the "name" code to where it is needed.
 
