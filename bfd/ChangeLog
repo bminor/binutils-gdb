@@ -1,5 +1,7 @@
 2001-11-19  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-hppa.c (clobber_millicode_symbols): Dec dynstr refcount.
+
 	* elf32-hppa.c (elf32_hppa_size_stubs): Don't consider undefined
 	millicode syms as candidates for import stubs.
 

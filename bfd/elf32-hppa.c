@@ -2225,9 +2225,13 @@ clobber_millicode_symbols (h, info)
      Therefore we do not leave ELF_LINK_FORCED_LOCAL set.  */
   if (h->type == STT_PARISC_MILLI)
     {
+      struct elf32_hppa_link_hash_table *htab;
       unsigned short oldflags = h->elf_link_hash_flags;
+
       h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
       elf32_hppa_hide_symbol (info, h);
+      htab = hppa_link_hash_table (info);
+      _bfd_elf_strtab_delref (htab->elf.dynstr, h->dynstr_index);
       h->elf_link_hash_flags &= ~ELF_LINK_FORCED_LOCAL;
       h->elf_link_hash_flags |= oldflags & ELF_LINK_FORCED_LOCAL;
     }
