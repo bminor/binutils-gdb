@@ -179,6 +179,32 @@ else
 	done
 fi
 
+if ( echo $* | grep for\-fsf > /dev/null ) ; then
+	if [ -n "${verbose}" ]; then
+		echo Cleaning up configure.in for FSF release...
+	fi
+	sed '/start\-sanitize\-for\-fsf/,/end\-sanitize\-for\-fsf/d' < configure.in > new
+	if [ -n "${safe}" -a ! -f .Recover/$i ]; then
+		if [ -n "${verbose}" ]; then
+			echo Caching configure.in in .Recover...
+		fi
+		mv configure.in .Recover
+	fi
+	mv new configure.in
+else
+	if [ -n "${verbose}" ]; then
+		echo Removing sanitize-for-fsf markers from configure.in...
+	fi
+	grep -v sanitize-for-fsf < configure.in > new
+	if [ -n "${safe}" ]; then
+		if [ -n "${verbose}" ]; then
+			echo Caching configure.in in .Recover...
+		fi
+		mv configure.in .Recover
+	fi
+	mv new configure.in
+fi
+
 for i in * ; do
 	if test ! -d $i && (grep sanitize $i > /dev/null) ; then
 		echo '***' Some mentions of Sanitize are still left in $i! 1>&2
