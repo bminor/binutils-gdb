@@ -28,6 +28,7 @@ BUGS
 COPYING
 COPYING.LIB
 ChangeLog
+ChangeLog.00
 INSTALL
 Makefile.in
 NOTES
@@ -67,6 +68,18 @@ events.c
 events.h
 filter_filename.c
 filter_filename.h
+hw_com.c
+hw_cpu.c
+hw_cpu.h
+hw_eeprom.c
+hw_iobus.c
+hw_memory.c
+hw_nvram.c
+hw_pal.c
+hw_pci_ide.c
+hw_phb.c
+hw_phb.h
+hw_pic.c
 idecode_branch.h
 idecode_expression.h
 idecode_fields.h
@@ -98,6 +111,7 @@ ppc-spr-table
 ppc.mt
 psim.c
 psim.h
+psim.texinfo
 registers.c
 registers.h
 sim-endian-n.h
