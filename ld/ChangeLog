@@ -1,3 +1,13 @@
+1999-01-12  Nick Clifton  <nickc@cygnus.com>
+
+	* Makefile.am: Replace efr30.o with eelf32fr30.o.
+	* Makefile.in: Regenerate.
+
+	* configure.tgt: Replace fr30 with elf32fr30.
+
+	* emulparams/elf32fr30.sh: New file: Replaces fr30.sh, and uses
+	generic elf.sc script.
+
 1999-01-11  Nick Clifton  <nickc@cygnus.com>
 
 	* scripttempl/fr30.sc: Fill .init and .fini sections with NOP
