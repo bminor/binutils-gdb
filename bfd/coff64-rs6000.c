@@ -410,10 +410,6 @@ _bfd_xcoff64_put_ldsymbol_name (abfd, ldinfo, ldsym, name)
   return true;
 }
 
-extern const bfd_target * rs6000coff_core_p ();
-extern boolean rs6000coff_core_file_matches_executable_p ();
-extern char *rs6000coff_core_file_failing_command PARAMS ((bfd *abfd));
-extern int rs6000coff_core_file_failing_signal PARAMS ((bfd *abfd));
 extern boolean _bfd_xcoff_mkobject PARAMS ((bfd *));
 extern boolean _bfd_xcoff_copy_private_bfd_data PARAMS ((bfd *, bfd *));
 extern boolean _bfd_xcoff_is_local_label_name PARAMS ((bfd *, const char *));
@@ -457,7 +453,27 @@ extern unsigned int _bfd_xcoff_swap_aux_out PARAMS ((bfd *, PTR, int, int, int, 
 #define coff_bfd_copy_private_bfd_data _bfd_xcoff_copy_private_bfd_data 
 #define coff_bfd_is_local_label_name _bfd_xcoff_is_local_label_name 
 #define coff_bfd_reloc_type_lookup xcoff64_reloc_type_lookup 
+#ifdef AIX_CORE
+extern const bfd_target * rs6000coff_core_p ();
+extern boolean rs6000coff_core_file_matches_executable_p ();
+extern char *rs6000coff_core_file_failing_command PARAMS ((bfd *abfd));
+extern int rs6000coff_core_file_failing_signal PARAMS ((bfd *abfd));
 #define CORE_FILE_P rs6000coff_core_p
+#define coff_core_file_failing_command \
+  rs6000coff_core_file_failing_command
+#define coff_core_file_failing_signal \
+  rs6000coff_core_file_failing_signal
+#define coff_core_file_matches_executable_p \
+  rs6000coff_core_file_matches_executable_p
+#else
+#define CORE_FILE_P _bfd_dummy_target
+#define coff_core_file_failing_command \
+  _bfd_nocore_core_file_failing_command
+#define coff_core_file_failing_signal \
+  _bfd_nocore_core_file_failing_signal
+#define coff_core_file_matches_executable_p \
+  _bfd_nocore_core_file_matches_executable_p
+#endif
 #define coff_SWAP_sym_in _bfd_xcoff64_swap_sym_in
 #define coff_SWAP_sym_out _bfd_xcoff64_swap_sym_out
 #define coff_SWAP_aux_in _bfd_xcoff64_swap_aux_in
@@ -2146,7 +2162,7 @@ const bfd_target rs6000coff64_vec =
     _bfd_dummy_target, 
     coff_object_p, 	
     xcoff64_archive_p, 
-    rs6000coff_core_p
+   CORE_FILE_P 
   },
   
   { /* bfd_set_format */
@@ -2183,10 +2199,10 @@ const bfd_target rs6000coff64_vec =
   ((boolean (*) (bfd *, void * )) bfd_true),  /* _bfd_print_private_bfd_data */
 
   /* Core */
-  rs6000coff_core_file_failing_command,    /* _core_file_failing_command */
-  rs6000coff_core_file_failing_signal,     /* _core_file_failing_signal */
+  coff_core_file_failing_command,    /* _core_file_failing_command */
+  coff_core_file_failing_signal,     /* _core_file_failing_signal */
                                           /* _core_file_matches_executable_p */
-  rs6000coff_core_file_matches_executable_p, 
+  coff_core_file_matches_executable_p, 
 
   /* Archive */
   xcoff64_slurp_armap,                  /* _slurp_armap */

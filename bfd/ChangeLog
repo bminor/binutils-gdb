@@ -1,3 +1,13 @@
+2001-05-25  H.J. Lu  <hjl@gnu.org>
+
+	* coff-rs6000.c (rs6000coff_vec): Use rs6000coff_core_p,
+	rs6000coff_core_file_matches_executable_p,
+	rs6000coff_core_file_failing_command and
+	rs6000coff_core_file_failing_signal only if AIX_CORE is
+	defined.
+	(pmac_xcoff_vec): Likewise.
+	* coff64-rs6000.c (rs6000coff64_vec): Likewise.
+
 2001-05-25  Timothy Wall  <twall@redhat.com>
 
 	* elfxx-ia64.c (allocate_dynrel_entries): Don't allocate an entry

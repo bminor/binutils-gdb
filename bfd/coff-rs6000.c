@@ -37,10 +37,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "libcoff.h"
 #include "libxcoff.h"
 
-extern const bfd_target * rs6000coff_core_p ();
-extern boolean rs6000coff_core_file_matches_executable_p ();
-extern char *rs6000coff_core_file_failing_command PARAMS ((bfd *abfd));
-extern int rs6000coff_core_file_failing_signal PARAMS ((bfd *abfd));
 extern boolean _bfd_xcoff_mkobject PARAMS ((bfd *));
 extern boolean _bfd_xcoff_copy_private_bfd_data PARAMS ((bfd *, bfd *));
 extern boolean _bfd_xcoff_is_local_label_name PARAMS ((bfd *, const char *));
@@ -84,7 +80,27 @@ void _bfd_xcoff_rtype2howto PARAMS ((arelent *, struct internal_reloc *));
 #define coff_bfd_copy_private_bfd_data _bfd_xcoff_copy_private_bfd_data 
 #define coff_bfd_is_local_label_name _bfd_xcoff_is_local_label_name 
 #define coff_bfd_reloc_type_lookup _bfd_xcoff_reloc_type_lookup 
+#ifdef AIX_CORE
+extern const bfd_target * rs6000coff_core_p ();
+extern boolean rs6000coff_core_file_matches_executable_p ();
+extern char *rs6000coff_core_file_failing_command PARAMS ((bfd *abfd));
+extern int rs6000coff_core_file_failing_signal PARAMS ((bfd *abfd));
 #define CORE_FILE_P rs6000coff_core_p
+#define coff_core_file_failing_command \
+  rs6000coff_core_file_failing_command
+#define coff_core_file_failing_signal \
+  rs6000coff_core_file_failing_signal
+#define coff_core_file_matches_executable_p \
+  rs6000coff_core_file_matches_executable_p
+#else
+#define CORE_FILE_P _bfd_dummy_target
+#define coff_core_file_failing_command \
+  _bfd_nocore_core_file_failing_command
+#define coff_core_file_failing_signal \
+  _bfd_nocore_core_file_failing_signal
+#define coff_core_file_matches_executable_p \
+  _bfd_nocore_core_file_matches_executable_p
+#endif
 #define coff_SWAP_sym_in _bfd_xcoff_swap_sym_in
 #define coff_SWAP_sym_out _bfd_xcoff_swap_sym_out
 #define coff_SWAP_aux_in _bfd_xcoff_swap_aux_in
@@ -3050,10 +3066,10 @@ const bfd_target rs6000coff_vec =
   ((boolean (*) (bfd *, void * )) bfd_true),  /* _bfd_print_private_bfd_data */
 
   /* Core */
-  rs6000coff_core_file_failing_command,    /* _core_file_failing_command */
-  rs6000coff_core_file_failing_signal,     /* _core_file_failing_signal */
+  coff_core_file_failing_command,    /* _core_file_failing_command */
+  coff_core_file_failing_signal,     /* _core_file_failing_signal */
                                           /* _core_file_matches_executable_p */
-  rs6000coff_core_file_matches_executable_p, 
+  coff_core_file_matches_executable_p, 
 
   /* Archive */
   _bfd_xcoff_slurp_armap,                  /* _slurp_armap */
@@ -3307,10 +3323,10 @@ const bfd_target pmac_xcoff_vec =
   ((boolean (*) (bfd *, void * )) bfd_true),  /* _bfd_print_private_bfd_data */
 
   /* Core */
-  rs6000coff_core_file_failing_command,    /* _core_file_failing_command */
-  rs6000coff_core_file_failing_signal,     /* _core_file_failing_signal */
+  coff_core_file_failing_command,    /* _core_file_failing_command */
+  coff_core_file_failing_signal,     /* _core_file_failing_signal */
                                           /* _core_file_matches_executable_p */
-  rs6000coff_core_file_matches_executable_p, 
+  coff_core_file_matches_executable_p, 
 
   /* Archive */
   _bfd_xcoff_slurp_armap,                  /* _slurp_armap */
