@@ -1,3 +1,9 @@
+2002-02-06  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.texinfo (overlays): Mention new magic symbol
+	'_ovly_debug_event', which allows GDB to keep better track
+	of overlays.
+
 2002-02-03  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* gdb.texinfo (Memory Region Attributes): Fix the wording.

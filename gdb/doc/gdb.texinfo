@@ -6646,6 +6646,15 @@ executable file.  When @value{GDBN} finds a matching entry, it consults
 the entry's @code{mapped} member to determine whether the overlay is
 currently mapped.
 
+In addition, your overlay manager may define a function called
+@var{_ovly_debug_event}.  If this function is defined, @value{GDBN}
+will silently set a breakpoint there.  If the overlay manager then
+calls this function whenever it has changed the overlay table, this
+will enable @value{GDBN} to accurately keep track of which overlays
+are in program memory, and update any breakpoints that may be set
+in overlays.  This will allow breakpoints to work even if the 
+overlays are kept in ROM or other non-writable memory while they
+are not being executed.
 
 @node Overlay Sample Program
 @section Overlay Sample Program
