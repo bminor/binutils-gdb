@@ -1,3 +1,8 @@
+2004-03-05  David Carlton  <carlton@kealia.com>
+
+	* cp-namespace.c (cp_lookup_transparent_type_loop): Fix recursion
+	bug.
+
 2004-03-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc-tdep.c (sparc_frame_cache): Don't bail out if %fp is zero.
