@@ -175,7 +175,7 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @c We don't use deffn and friends for the following because they seem
 @c to be limited to one line for the header.
 @smallexample
-  @value{AS} [ -a | -al | -as ] [ -D ] [ -f ]
+  @value{AS} [ -a[dhlns] ] [ -D ] [ -f ]
    [ -I @var{path} ] [ -K ] [ -L ]
    [ -o @var{objfile} ] [ -R ] [ -v ] [ -w ]
 @ifset A29K
@@ -196,7 +196,10 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
    [ -b ] [ -norelax ]
 @end ifset
 @ifset M680X0
-   [ -l ] [ -mc68000 | -mc68010 | -mc68020 ]
+   [ -l ] [ -m68000 | -m68010 | -m68020 | ... ]
+@end ifset
+@ifset MIPS
+   [ -nocpp ] [ -EL ] [ -EB ] [ -G @var{num} ]
 @end ifset
    [ -- | @var{files} @dots{} ]
 @end smallexample
@@ -208,10 +211,10 @@ Turn on listings;
 @samp{-ah}, include high-level source,
 @samp{-al}, assembly listing,
 @samp{-an}, no forms processing,
-@samp{-as}, symbols.  These options may be combined; @emph{e.g.},
-@samp{-aln} for assembly listing without forms processing.
-By itself, @samp{-a} defaults to @samp{-ahls} --- that is, all listings
-turned on.
+@samp{-as}, symbols.
+These options may be combined; @emph{e.g.}, @samp{-aln} for assembly
+listing without forms processing.  By itself, @samp{-a} defaults to
+@samp{-ahls} --- that is, all listings turned on.
 
 @item -D
 This option is accepted only for script compatibility with calls to
@@ -278,7 +281,8 @@ Motorola 68000 series.
 @item -l
 Shorten references to undefined symbols, to one word instead of two.
 
-@item -m68000 | -m68008 | -m68010 | -m68020 | -m68030 | -m68040 | -mcpu32
+@item -m68000 | -m68008 | -m68010 | -m68020 | -m68030 | -m68040
+@itemx | -m68302 | -m68331 | -m68332 | -m68333 | -m68340 | -mcpu32
 Specify what processor in the 68000 family is the target.  The default
 is normally the 68020, but this can be changed at configuration time.
 
@@ -306,6 +310,25 @@ Explicitly select a variant of the SPARC architecture.
 
 @item -bump
 Warn when the assembler switches to another architecture.
+@end table
+@end ifset
+
+@ifset MIPS
+The following options are available when @value{AS} is configured for
+the MIPS R2000/R3000 processors.
+
+@table @code
+
+@item -G @var{num}
+This option sets the largest size of an object that can be referenced
+implicitly with the @code{gp} register.  It is only accepted for targets
+that use ECOFF format, such as a DECstation running Ultrix.
+
+@item -nocpp
+@itemx -EB, -EL
+These options are ignored.  They are accepted for compatibility with the
+native tools.
+
 @end table
 @end ifset
 
@@ -5375,6 +5398,14 @@ by @samp{:b}, @samp{:w}, or @samp{:l}.
 @end ignore
 @end table
 
+For some configurations, especially those where the compiler normally
+does not prepend an underscore to the names of user variables, the
+assembler requires a @samp{%} before any use of a register name.  This
+is intended to let the assembler distinguish between user variables and
+registers named @samp{a0} through @samp{a7}, et cetera.  The @samp{%} is
+always accepted, but is only required for some configurations, notably
+@samp{m68k-coff}.
+
 @node M68K-Float
 @section Floating Point
 
@@ -6497,12 +6528,31 @@ set addr(rd),imm4       subl rrd,addr(rs)
 @end iftex
 
 @end ifset
+
+@ifset MIPS
+@ifset GENERIC
+@page
+@node MIPS-Dependent
+@chapter MIPS Dependent Features
+@end ifset
+@ifclear GENERIC
+@node Machine Dependencies
+@chapter MIPS Dependent Features
+@end ifclear
+The MIPS @value{AS} supports the MIPS R2000 and R3000 processors.
+
+It ignores the @kbd{-nocpp}, @kbd{-EL}, and @kbd{-EB} options.
+
+@i{FIXME: What other information do we need to note here?}
+
+@end ifset
+
 @ifset GENERIC
 @c reverse effect of @down at top of generic Machine-Dep chapter
 @up
 @end ifset
 
-@ignore
+@ifset INTERNALS
 @c pesch@cygnus.com: we ignore the following chapters, since internals are
 @c                   changing rapidly.  These may need to be moved to another
 @c                   book anyhow, if we adopt the model of user/modifier
@@ -7418,7 +7468,7 @@ usually only needed by the machine-independent part of
 @code{@value{AS}}.
 
 @end table
-@end ignore
+@end ifset
 
 @ifset GENERIC
 @include gpl.texinfo
