@@ -184,7 +184,7 @@ DEFUN (slurp_symtab, (abfd),
   symcount = bfd_canonicalize_symtab (abfd, sy);
   if (symcount <= 0)
     {
-      fprintf (stderr, "%s: Bad symbol table in \"%s\".\n",
+      fprintf (stderr, "%s: %s: Invalid symbol table\n",
 	       program_name, bfd_get_filename (abfd));
       exit (1);
     }
@@ -516,7 +516,7 @@ disassemble_data (abfd)
 	    disassemble = print_insn_little_mips;
 	  break;
 #endif
-#ifdef ARCH_rs6000:
+#ifdef ARCH_rs6000
 	case bfd_arch_rs6000:
 	  disassemble = print_insn_rs6000;
 	  break;
@@ -730,7 +730,7 @@ dump_stabs_1 (abfd, name1, name2)
 
   if (is_elf ? (0 == stabstr_hdr) : (0 == stabstrsect))
     {
-      fprintf (stderr, "%s: %s has no %s section.\n", program_name,
+      fprintf (stderr, "%s: %s has no %s section\n", program_name,
 	       abfd->filename, name2);
       return;
     }
@@ -747,7 +747,7 @@ dump_stabs_1 (abfd, name1, name2)
       if (bfd_seek (abfd, stab_hdr->sh_offset, SEEK_SET) < 0 ||
 	  stab_size != bfd_read ((PTR) stabs, stab_size, 1, abfd))
 	{
-	  fprintf (stderr, "%s: reading %s section of %s failed.\n",
+	  fprintf (stderr, "%s: Reading %s section of %s failed\n",
 		   program_name, name1, 
 		   abfd->filename);
 	  return;
@@ -763,7 +763,7 @@ dump_stabs_1 (abfd, name1, name2)
       if (bfd_seek (abfd, stabstr_hdr->sh_offset, SEEK_SET) < 0 ||
 	  stabstr_size != bfd_read ((PTR) strtab, stabstr_size, 1, abfd))
 	{
-	  fprintf (stderr, "%s: reading %s section of %s failed.\n",
+	  fprintf (stderr, "%s: Reading %s section of %s failed\n",
 		   program_name, name2,
 		   abfd->filename);
 	  return;
@@ -833,14 +833,26 @@ dump_stabs_1 (abfd, name1, name2)
 }
 
 static void
+list_matching_formats()
+{
+  char **p = bfd_matching_formats ();
+
+  fprintf(stderr, "%s: Matching formats:", program_name);
+  while (*p)
+    fprintf(stderr, " %s", *p++);
+  fprintf(stderr, "\n");
+}
+
+static void
 display_bfd (abfd)
      bfd *abfd;
 {
-
   if (!bfd_check_format (abfd, bfd_object))
     {
-      fprintf (stderr, "%s:%s: %s\n", program_name, abfd->filename,
+      fprintf (stderr, "%s: %s: %s\n", program_name, abfd->filename,
 	       bfd_errmsg (bfd_error));
+      if (bfd_error == file_ambiguously_recognized)
+	list_matching_formats();
       return;
     }
   printf ("\n%s:     file format %s\n", abfd->filename, abfd->xvec->name);
@@ -904,6 +916,8 @@ display_file (filename, target)
     {
       fprintf (stderr, "%s: ", program_name);
       bfd_perror (filename);
+      if (bfd_error == file_ambiguously_recognized)
+	list_matching_formats();
       return;
     }
 

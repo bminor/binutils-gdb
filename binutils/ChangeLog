@@ -1,3 +1,10 @@
+Fri Jan 21 20:22:30 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* objdump.c (list_matching_formats): If the file format is ambiguous,
+	print the matching names so the user can choose one.
+	(display_bfd): Call it.
+	(display_file): Call it.
+
 Fri Jan 21 19:17:25 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* objdump.c (disassemble_data): Support bfd_arch_rs6000.
