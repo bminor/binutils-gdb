@@ -4431,7 +4431,7 @@ md_apply_fix (fixP, valp)
     }
 #endif
 
-  insn = bfd_get_32 (stdoutput, (unsigned char *)buf);
+  insn = bfd_get_32 (stdoutput, (unsigned char *) buf);
   /* There should have been an HPPA specific fixup associated
      with the GAS fixup.  */
   if (hppa_fixP)
@@ -8342,6 +8342,7 @@ hppa_fix_adjustable (fixp)
   /* Reject reductions of symbols in 32bit relocs.  */
   if (fixp->fx_r_type == R_HPPA && hppa_fix->fx_r_format == 32)
     return 0;
+#endif
 
   /* Reject reductions of symbols in sym1-sym2 expressions when
      the fixup will occur in a CODE subspace.
@@ -8359,12 +8360,38 @@ hppa_fix_adjustable (fixp)
     }
 
   /* We can't adjust any relocs that use LR% and RR% field selectors.
-     That confuses the HP linker.  */
+
+     If a symbol is reduced to a section symbol, the assembler will
+     adjust the addend unless the symbol happens to reside right at
+     the start of the section.  Additionally, the linker has no choice
+     but to manipulate the addends when coalescing input sections for
+     "ld -r".  Since an LR% field selector is defined to round the
+     addend, we can't change the addend without risking that a LR% and
+     it's corresponding (possible multiple) RR% field will no longer
+     sum to the right value.
+
+     eg. Suppose we have
+     .		ldil	LR%foo+0,%r21
+     .		ldw	RR%foo+0(%r21),%r26
+     .		ldw	RR%foo+10(%r21),%r25
+
+     If foo is at address 4090 (decimal) in section `sect', then after
+     reducing to the section symbol, we get
+     .			LR%sect+4090 == L%sect+0
+     .			RR%sect+4090 == R%sect+4090
+     .			RR%sect+4100 == R%sect-4092 (4100 - 8192)
+     and the last address loses.
+
+     Obviously, in cases where the LR% expression is identical to the
+     RR% one we will never have a problem, but is so happens that gcc
+     rounds addends involved in LR% field selectors to work around a
+     HP linker bug.  ie. We often have addresses like the last case
+     above where the LR% expression is offset from the RR% one.  */
+
   if (hppa_fix->fx_r_field == e_lrsel
       || hppa_fix->fx_r_field == e_rrsel
       || hppa_fix->fx_r_field == e_nlrsel)
     return 0;
-#endif
 
   /* Reject reductions of symbols in DLT relative relocs,
      relocations with plabels.  */

@@ -1,3 +1,10 @@
+2000-07-15  Alan Modra  <alan@linuxcare.com.au>
+
+	* config/tc-hppa.c (hppa_fix_adjustable): Use the same checks for
+	ELF as are used for SOM (except the 32-bit reloc one) to decide
+	whether a symbol can be reduced to a section symbol.  Expand on
+	the comment for symbols involved in LR% and RR% expressions.
+
 2000-07-14  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-mips.c (mips_disable_float_construction): New
