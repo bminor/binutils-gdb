@@ -1797,6 +1797,15 @@ DEFUN(coff_write_relocs,(abfd),
 	abort ();
 
       n.r_vaddr = q->address + s->vma;
+      /* The 29k const/consth reloc pair is a real kludge - the consth
+	 part doesn't have a symbol - it has an offset. So rebuilt
+	 that here */
+#ifdef R_IHCONST                       
+      if (q->howto->type == R_IHCONST)
+	n.r_symndx = q->addend;
+      else
+#endif
+
       if (q->sym_ptr_ptr) {
 	n.r_symndx = get_index((*(q->sym_ptr_ptr)));
 	/* Take notice if the symbol reloc points to a symbol we don't have
