@@ -1860,8 +1860,7 @@ mips_wait (ptid_t ptid, struct target_waitstatus *status)
 }
 
 /* We have to map between the register numbers used by gdb and the
-   register numbers used by the debugging protocol.  This function
-   assumes that we are using tm-mips.h.  */
+   register numbers used by the debugging protocol.  */
 
 #define REGNO_OFFSET 96
 

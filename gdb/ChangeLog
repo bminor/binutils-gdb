@@ -1,5 +1,15 @@
 2004-10-31  Andrew Cagney  <cagney@gnu.org>
 
+	* config/mips/tm-mips.h: Delete file.
+	* remote-mips.c: Delete tm-mips.h from comment.
+	* config/mips/embed.mt (DEPRECATED_TM_FILE): Delete.
+	* config/mips/tm-nbsd.h: Don't include tm-mips.h.
+	* config/mips/irix6.mt (DEPRECATED_TM_FILE): Delete.
+	* config/mips/tm-linux.h: Don't include tm-mips.h.
+	* config/mips/tm-vxmips.h: Don't include tm-mips.h.
+	* config/mips/irix5.mt (DEPRECATED_TM_FILE): 
+	* config/mips/tm-wince.h: Don't include.
+
 	* mdebugread.h (MDEBUG_EFI_SYMBOL_NAME): Define.
 	* mdebugread.c (MDEBUG_EFI_SYMBOL_NAME): Delete.
 	* config/alpha/tm-alpha.h (MDEBUG_EFI_SYMBOL_NAME): Delete.

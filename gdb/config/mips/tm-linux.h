@@ -22,12 +22,6 @@
 #ifndef TM_MIPSLINUX_H
 #define TM_MIPSLINUX_H
 
-#include "mips/tm-mips.h"
-
-/* We don't want to inherit tm-mips.h's shared library trampoline code.  */
-
-#undef IGNORE_HELPER_CALL
-
 /* GNU/Linux MIPS has __SIGRTMAX == 127.  */
 
 #ifndef REALTIME_LO

@@ -22,10 +22,8 @@
 #ifndef TM_NBSD_H
 #define TM_NBSD_H
 
-#include "mips/tm-mips.h"
 #include "solib.h"
 
-/* We don't want to inherit tm-mips.h's shared library trampoline code.  */
 #undef IN_SOLIB_CALL_TRAMPOLINE
 #undef SKIP_TRAMPOLINE_CODE
 #undef DEPRECATED_IGNORE_HELPER_CALL

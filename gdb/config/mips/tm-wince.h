@@ -22,8 +22,6 @@
 #ifndef TM_WINCE_H
 #define TM_WINCE_H 1
 
-#include "mips/tm-mips.h"
-
 #undef SOFTWARE_SINGLE_STEP_P
 #define SOFTWARE_SINGLE_STEP_P() 1
 #define SOFTWARE_SINGLE_STEP(sig, bp_p) wince_software_single_step (sig, bp_p)
