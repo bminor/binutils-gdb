@@ -1,3 +1,10 @@
+Tue Mar 14 05:54:33 1995  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* stab-syms.c (aout_stab_name): Moved aout_stab_names to be local
+	to this function.  Recoded function to stop using table, to
+	improve performance (on i486-netbsd host).  Left old version
+	intact under "#if 0" for further performance testing.
+
 Mon Mar 13 13:48:49 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elfcode.h (write_relocs): Make static.  Use PTR argument as a
