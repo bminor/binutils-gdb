@@ -1,5 +1,9 @@
 2002-02-17  Daniel Jacobowitz  <drow@mvista.com>
 
+	* ld-elfvsb/sh1.c: Use #pragma weak.
+
+2002-02-17  Daniel Jacobowitz  <drow@mvista.com>
+
 	* vers.exp: Do not call diff -q.
 
 2002-02-17  Hans-Peter Nilsson  <hp@bitrange.com>
