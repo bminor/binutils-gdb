@@ -1,3 +1,10 @@
+2003-07-23  Andreas Schwab  <schwab@suse.de>
+
+	* ia64-tdep.c (ia64_print_insn): New function.
+	(ia64_gdbarch_init): Set print_insn to it.
+	(_initialize_ia64_tdep): Don't set deprecated_tm_print_insn and
+	deprecated_tm_print_insn_info.
+
 2003-07-22  Elena Zannoni  <ezannoni@redhat.com>
 	
 	* dwarf2loc.c (locexpr_describe_location): Fix typos.

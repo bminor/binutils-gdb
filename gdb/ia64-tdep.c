@@ -2160,6 +2160,13 @@ process_note_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
     }
 }
 
+static int
+ia64_print_insn (bfd_vma memaddr, struct disassemble_info *info)
+{
+  info->bytes_per_line = SLOT_MULTIPLIER;
+  return print_insn_ia64 (memaddr, info);
+}
+
 static struct gdbarch *
 ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
@@ -2313,6 +2320,8 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_remote_translate_xfer_address (
     gdbarch, ia64_remote_translate_xfer_address);
 
+  set_gdbarch_print_insn (gdbarch, ia64_print_insn);
+
   return gdbarch;
 }
 
@@ -2322,7 +2331,4 @@ void
 _initialize_ia64_tdep (void)
 {
   register_gdbarch_init (bfd_arch_ia64, ia64_gdbarch_init);
-
-  deprecated_tm_print_insn = print_insn_ia64;
-  deprecated_tm_print_insn_info.bytes_per_line = SLOT_MULTIPLIER;
 }
