@@ -289,6 +289,9 @@ static CORE_ADDR after_prologue (CORE_ADDR pc,
 static void mips_read_fp_register_single (int regno, char *rare_buffer);
 static void mips_read_fp_register_double (int regno, char *rare_buffer);
 
+static struct type *mips_float_register_type (void);
+static struct type *mips_double_register_type (void);
+
 /* This value is the model of MIPS in use.  It is derived from the value
    of the PrID register.  */
 
@@ -2738,6 +2741,24 @@ mips_pop_frame (void)
    regs could be 32 bits wide in one frame and 64 on the frame above
    and below).  */
 
+static struct type *
+mips_float_register_type (void)
+{
+  if (TARGET_BYTE_ORDER == BFD_BIG_ENDIAN)
+    return builtin_type_ieee_single_big;
+  else
+    return builtin_type_ieee_single_little;
+}
+
+static struct type *
+mips_double_register_type (void)
+{
+  if (TARGET_BYTE_ORDER == BFD_BIG_ENDIAN)
+    return builtin_type_ieee_double_big;
+  else
+    return builtin_type_ieee_double_little;
+}
+
 /* Copy a 32-bit single-precision value from the current frame
    into rare_buffer.  */
 
@@ -2831,7 +2852,7 @@ mips_print_register (int regnum, int all)
       mips_read_fp_register_double (regnum, dbuffer);
 
       printf_filtered ("(d%d: ", regnum - FP0_REGNUM);
-      val_print (builtin_type_double, dbuffer, 0, 0,
+      val_print (mips_double_register_type (), dbuffer, 0, 0,
 		 gdb_stdout, 0, 1, 0, Val_pretty_default);
       printf_filtered ("); ");
     }
@@ -2855,10 +2876,10 @@ mips_print_register (int regnum, int all)
 	int offset = 4 * (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG);
 
 	printf_filtered (" (float) ");
-	val_print (builtin_type_float, raw_buffer + offset, 0, 0,
+	val_print (mips_float_register_type (), raw_buffer + offset, 0, 0,
 		   gdb_stdout, 0, 1, 0, Val_pretty_default);
 	printf_filtered (", (double) ");
-	val_print (builtin_type_double, raw_buffer, 0, 0,
+	val_print (mips_double_register_type (), raw_buffer, 0, 0,
 		   gdb_stdout, 0, 1, 0, Val_pretty_default);
       }
     else
@@ -2897,13 +2918,13 @@ do_fp_register_row (int regnum)
       /* 4-byte registers: we can fit two registers per row.  */
       /* Also print every pair of 4-byte regs as an 8-byte double.  */
       mips_read_fp_register_single (regnum, raw_buffer);
-      flt1 = unpack_double (builtin_type_float, raw_buffer, &inv1);
+      flt1 = unpack_double (mips_float_register_type (), raw_buffer, &inv1);
 
       mips_read_fp_register_single (regnum + 1, raw_buffer);
-      flt2 = unpack_double (builtin_type_float, raw_buffer, &inv2);
+      flt2 = unpack_double (mips_float_register_type (), raw_buffer, &inv2);
 
       mips_read_fp_register_double (regnum, raw_buffer);
-      doub = unpack_double (builtin_type_double, raw_buffer, &inv3);
+      doub = unpack_double (mips_double_register_type (), raw_buffer, &inv3);
       
       printf_filtered (" %-5s", REGISTER_NAME (regnum));
       if (inv1)
@@ -2931,10 +2952,10 @@ do_fp_register_row (int regnum)
     {
       /* Eight byte registers: print each one as float AND as double.  */
       mips_read_fp_register_single (regnum, raw_buffer);
-      flt1 = unpack_double (builtin_type_double, raw_buffer, &inv1);
+      flt1 = unpack_double (mips_double_register_type (), raw_buffer, &inv1);
 
       mips_read_fp_register_double (regnum, raw_buffer);
-      doub = unpack_double (builtin_type_double, raw_buffer, &inv3);
+      doub = unpack_double (mips_double_register_type (), raw_buffer, &inv3);
       
       printf_filtered (" %-5s: ", REGISTER_NAME (regnum));
       if (inv1)
