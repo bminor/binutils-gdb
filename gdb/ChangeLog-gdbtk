@@ -1,3 +1,16 @@
+Mon Jul 27 13:07:16 1998  Martin M. Hunt  <hunt@cygnus.com>
+
+	* gdbtk.c (gdbtk_call_command): Removed because it is now
+	in gdbtk-hooks.c
+	(null_routine): Removed.
+
+	* gdbtk-hooks.c (tracepoint_notify): Fix sprintf to
+	match number of arguments.
+
+	* gdbtk-cmds.c (gdb_loc): When calling gdb_loc with an
+	argument, call find_pc_line() to get a complete
+	symtab_and_line struct.
+
 Fri Jul 24 14:25:43 1998  Keith Seitz  <keiths@cygnus.com>
 
 	* gdbtk-cmds.c (gdb_search): Add missing NULL to switches.
@@ -1676,7 +1689,7 @@ Thu Jul 28 14:37:36 1994  Stu Grossman  (grossman@cygnus.com)
 
 
 Local Variables:
-mode: indented-text
+mode: change-log
 left-margin: 8
 fill-column: 74
 version-control: never

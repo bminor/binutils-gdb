@@ -204,21 +204,12 @@ static int gdb_tracepoint_exists_command PARAMS ((ClientData, Tcl_Interp *,
 						  Tcl_Obj *CONST objv[]));
 static int gdb_get_tracepoint_info PARAMS ((ClientData, Tcl_Interp *, int,
 					    Tcl_Obj *CONST objv[]));
-static void gdbtk_create_breakpoint PARAMS ((struct breakpoint *));
 static int gdbtk_dis_asm_read_memory PARAMS ((bfd_vma, bfd_byte *, int, disassemble_info *));
-static void gdbtk_create_tracepoint PARAMS ((struct tracepoint *));
-static void gdbtk_delete_breakpoint PARAMS ((struct breakpoint *));
-static void gdbtk_delete_tracepoint PARAMS ((struct tracepoint *));
-static void gdbtk_modify_breakpoint PARAMS ((struct breakpoint *));
-static void gdbtk_modify_tracepoint PARAMS ((struct tracepoint *));
-static void gdbtk_print_frame_info PARAMS ((struct symtab *, int, int, int));
-static void gdbtk_readline_end PARAMS ((void));
 static int get_pc_register PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST []));
 char * get_prompt PARAMS ((void));
 static void get_register PARAMS ((int, void *));
 static void get_register_name PARAMS ((int, void *));
 static int map_arg_registers PARAMS ((int, Tcl_Obj *CONST [], void (*) (int, void *), void *));
-static void pc_changed PARAMS ((void));
 static int perror_with_name_wrapper PARAMS ((char *args));
 static void register_changed_p PARAMS ((int, void *));
 void TclDebug PARAMS ((const char *fmt, ...));
@@ -325,7 +316,6 @@ call_wrapper (clientData, interp, objc, objv)
 {
   struct wrapped_call_args wrapped_args;
   gdbtk_result new_result, *old_result_ptr;
-  int length;
   
   old_result_ptr = result_ptr;
   result_ptr = &new_result;
@@ -592,7 +582,7 @@ gdb_eval (clientData, interp, objc, objv)
      Tcl_Obj *CONST objv[];
 {
   struct expression *expr;
-  struct cleanup *old_chain;
+  struct cleanup *old_chain=NULL;
   value_ptr val;
 
   if (objc != 2)
@@ -798,7 +788,6 @@ gdb_load_info (clientData, interp, objc, objv)
    struct cleanup *old_cleanups;
    asection *s;
    Tcl_Obj *ob[2];
-   int i = 0;
 
    char *filename = Tcl_GetStringFromObj (objv[1], NULL);
 
@@ -986,7 +975,6 @@ gdb_get_line_command (clientData, interp, objc, objv)
      int objc;
      Tcl_Obj *CONST objv[];
 {
-  Tcl_Obj *result;
   struct symtabs_and_lines sals;
   char *args, **canonical;
   
@@ -1028,7 +1016,6 @@ gdb_get_file_command (clientData, interp, objc, objv)
      int objc;
      Tcl_Obj *CONST objv[];
 {
-  Tcl_Obj *result;
   struct symtabs_and_lines sals;
   char *args, **canonical;
   
@@ -1165,14 +1152,13 @@ gdb_listfiles (clientData, interp, objc, objv)
   struct objfile *objfile;
   struct partial_symtab *psymtab;
   struct symtab *symtab;
-  char *lastfile, *pathname, **files;
+  char *lastfile, *pathname=NULL, **files;
   int files_size;
   int i, numfiles = 0, len = 0;
-  Tcl_Obj *mylist;
   
   files_size = 1000;
   files = (char **) xmalloc (sizeof (char *) * files_size);
-
+  
   if (objc > 2)
     {
       Tcl_WrongNumArgs (interp, 1, objv, "Usage: gdb_listfiles ?pathname?");
@@ -1265,11 +1251,11 @@ gdb_search (clientData, interp, objc, objv)
 {
   struct symbol_search *ss = NULL;
   struct symbol_search *p;
-  struct cleanup *old_chain;
-  Tcl_Obj *list, *result, *CONST *switch_objv;
+  struct cleanup *old_chain = NULL;
+  Tcl_Obj *CONST *switch_objv;
   int index, switch_objc, i;
-  namespace_enum space;
-  char *regexp, *val;
+  namespace_enum space = 0;
+  char *regexp;
   int static_only, nfiles;
   Tcl_Obj **file_list;
   char **files;
@@ -1417,7 +1403,6 @@ gdb_listfuncs (clientData, interp, objc, objv)
   struct blockvector *bv;
   struct block *b;
   struct symbol *sym;
-  char buf[128];
   int i,j;
   Tcl_Obj *funcVals[2];
 
@@ -2063,12 +2048,14 @@ gdb_disassemble (clientData, interp, objc, objv)
    */
 
   if (disassemble_from_exec == -1)
-    if (strcmp (target_shortname, "child") == 0
-	|| strcmp (target_shortname, "procfs") == 0
-	|| strcmp (target_shortname, "vxprocess") == 0)
-      disassemble_from_exec = 0; /* It's a child process, read inferior mem */
-    else
-      disassemble_from_exec = 1; /* It's remote, read the exec file */
+    {
+      if (strcmp (target_shortname, "child") == 0
+	  || strcmp (target_shortname, "procfs") == 0
+	  || strcmp (target_shortname, "vxprocess") == 0)
+	disassemble_from_exec = 0; /* It's a child process, read inferior mem */
+      else
+	disassemble_from_exec = 1; /* It's remote, read the exec file */
+    }
 
   if (disassemble_from_exec)
     di.read_memory_func = gdbtk_dis_asm_read_memory;
@@ -2312,7 +2299,6 @@ gdb_loc (clientData, interp, objc, objv)
 	  Tcl_SetStringObj (result_ptr->obj_ptr, "Ambiguous line spec", -1);
 	  return TCL_ERROR;
 	}
-
       pc = sal.pc;
     }
   else
@@ -2377,7 +2363,7 @@ gdb_get_mem (clientData, interp, objc, objv)
   CORE_ADDR addr;
   int nbytes, rnum, bpr;
   long tmp;
-  char format, c, *ptr, buff[128], aschar, *mbuf, *mptr, *cptr, *bptr;
+  char format, c, buff[128], aschar, *mbuf, *mptr, *cptr, *bptr;
   struct type *val_type;
 
   if (objc < 6 || objc > 7)
@@ -2549,8 +2535,8 @@ gdb_loadfile (clientData, interp, objc, objv)
   int objc;
   Tcl_Obj *CONST objv[];
 {
-  char *file, *widget, *buf, msg[128];
-  int linenumbers, ln, anum, lnum, ltable_size;
+  char *file, *widget;
+  int linenumbers, ln, lnum, ltable_size;
   FILE *fp;
   char *ltable;
   struct symtab *symtab;
@@ -2825,7 +2811,7 @@ gdb_set_bp (clientData, interp, objc, objv)
   Tcl_DStringAppend (&cmd, "gdbtk_tcl_breakpoint create ", -1);
   sprintf (buf, "%d", b->number);
   Tcl_DStringAppendElement(&cmd, buf);
-  sprintf (buf, "0x%x", sal.pc);
+  sprintf (buf, "0x%lx", (long)sal.pc);
   Tcl_DStringAppendElement (&cmd, buf);
   Tcl_DStringAppendElement (&cmd, Tcl_GetStringFromObj (objv[2], NULL));
   Tcl_DStringAppendElement (&cmd, Tcl_GetStringFromObj (objv[1], NULL));

@@ -81,12 +81,12 @@ static struct itimerval it_on, it_off;
 
 extern int Tktable_Init PARAMS ((Tcl_Interp *interp)); 
 
-static void null_routine PARAMS ((int));
 static void gdbtk_init PARAMS ((char *));
 void gdbtk_interactive PARAMS ((void));
 static void cleanup_init PARAMS ((int));
 static void tk_command PARAMS ((char *, int));
 
+void gdbtk_add_hooks PARAMS ((void));
 int gdbtk_test PARAMS ((char *));
 
 /*
@@ -148,12 +148,6 @@ Tcl_Free(ptr)
 }
 
 #endif /* ! _WIN32 */
-
-static void
-null_routine(arg)
-     int arg;
-{
-}
 
 #ifdef _WIN32
 
@@ -296,55 +290,6 @@ gdbtk_stop_timer ()
     }
 }
 
-/* This is called from execute_command, and provides a wrapper around
-   various command routines in a place where both protocol messages and
-   user input both flow through.  Mostly this is used for indicating whether
-   the target process is running or not.
-*/
-
-static void
-gdbtk_call_command (cmdblk, arg, from_tty)
-     struct cmd_list_element *cmdblk;
-     char *arg;
-     int from_tty;
-{
-  running_now = 0;
-  if (cmdblk->class == class_run || cmdblk->class == class_trace)
-    {
-
-/* HACK! HACK! This is to get the gui to update the tstart/tstop
-   button only incase of tstart/tstop commands issued from the console
-   We don't want to update the src window, so we need to have specific
-   procedures to do tstart and tstop
-   Unfortunately this will not display errors from tstart or tstop in the 
-   console window itself, but as dialogs.*/
-
-      if (!strcmp(cmdblk->name, "tstart") && !No_Update)
-        {
-              Tcl_Eval (gdbtk_interp, "gdbtk_tcl_tstart"); 
-              (*cmdblk->function.cfunc)(arg, from_tty);
-        }
-      else if (!strcmp(cmdblk->name, "tstop") && !No_Update) 
-             {
-              Tcl_Eval (gdbtk_interp, "gdbtk_tcl_tstop"); 
-              (*cmdblk->function.cfunc)(arg, from_tty);
-             }
-/* end of hack */
-           else 
-             {
-                 running_now = 1;
-                 if (!No_Update)
-                   Tcl_Eval (gdbtk_interp, "gdbtk_tcl_busy");
-                 (*cmdblk->function.cfunc)(arg, from_tty);
-                 running_now = 0;
-                 if (!No_Update)
-                   Tcl_Eval (gdbtk_interp, "gdbtk_tcl_idle");
-             }
-    }
-  else
-    (*cmdblk->function.cfunc)(arg, from_tty);
-}
-
 /* gdbtk_init installs this function as a final cleanup.  */
 
 static void
@@ -372,12 +317,9 @@ gdbtk_init ( argv0 )
 {
   struct cleanup *old_chain;
   char *lib, *gdbtk_lib, *gdbtk_lib_tmp, *gdbtk_file;
-  int i, found_main;
+  int found_main;
   Tcl_Obj *auto_path_elem, *auto_path_name;
-#ifndef WINNT
-  struct sigaction action;
-  static sigset_t nullsigmask = {0};
-#endif
+
 #ifdef IDE
   /* start-sanitize-ide */
   struct ide_event_handle *h;
@@ -554,11 +496,13 @@ gdbtk_init ( argv0 )
 
   gdbtk_lib = getenv ("GDBTK_LIBRARY");
   if (!gdbtk_lib)
-    if (access ("gdbtcl/main.tcl", R_OK) == 0)
-      gdbtk_lib = "gdbtcl";
-    else
-      gdbtk_lib = GDBTK_LIBRARY;
-
+    {
+      if (access ("gdbtcl/main.tcl", R_OK) == 0)
+	gdbtk_lib = "gdbtcl";
+      else
+	gdbtk_lib = GDBTK_LIBRARY;
+    }
+  
   gdbtk_lib_tmp = xstrdup (gdbtk_lib);
 
   found_main = 0;

@@ -297,15 +297,10 @@ void
 gdbtk_ignorable_warning (warning)
      const char *warning;
 {
-  char buf[200], *merge[2];
-  char *command;
-
+  char buf[512];
   sprintf (buf, warning);
   gdbtk_two_elem_cmd ("gdbtk_tcl_ignorable_warning", buf);
-
 }
-
-
 
 static void
 pc_changed()
@@ -402,8 +397,7 @@ gdbtk_readline_begin (va_alist)
 #endif
 {
   va_list args;
-  char buf[200], *merge[2];
-  char *command;
+  char buf[200];
 
 #ifdef ANSI_PROTOTYPES
   va_start (args, format);
@@ -674,7 +668,7 @@ tracepoint_notify(tp, action)
   filename = symtab_to_filename (sal.symtab);
   if (filename == NULL)
     filename = "N/A";
-  sprintf (buf, "gdbtk_tcl_tracepoint %s %d 0x%lx %d {%s}", action, tp->number, 
+  sprintf (buf, "gdbtk_tcl_tracepoint %s %d 0x%lx %d {%s} %d", action, tp->number, 
 	   (long)tp->address, sal.line, filename, tp->pass_count);
 
   v = Tcl_Eval (gdbtk_interp, buf);
