@@ -1,5 +1,8 @@
 2003-11-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-linux-tdep.c (sparc32_linux_init_abi): Set long_double_bit
+	to 64.
+
 	* sparc-tdep.c (sparc32_register_names): Remove trailing comma.
 	(sparc32_pseudo_register_names): New variable.
 	(SPARC32_NUM_PSEUDO_REGS): New define.

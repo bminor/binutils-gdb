@@ -289,6 +289,9 @@ sparc32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* ... but doesn't have kernel-assisted single-stepping support.  */
   set_gdbarch_software_single_step (gdbarch, sparc_software_single_step);
 
+  /* GNU/Linux doesn't support the 128-bit `long double' from the psABI.  */
+  set_gdbarch_long_double_bit (gdbarch, 64);
+
   set_gdbarch_pc_in_sigtramp (gdbarch, sparc32_linux_pc_in_sigtramp);
   frame_unwind_append_sniffer (gdbarch, sparc32_linux_sigtramp_frame_sniffer);
 
