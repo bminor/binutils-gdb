@@ -1,3 +1,8 @@
+2004-02-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (cp-names-main.tab.o): Rename to test-cp-names.tab.o.
+	* config/djgpp/config.sed: Handle new *cp-names.tab.* references.
+
 2004-02-09  Daniel Jacobowitz  <drow@mvista.com>
 
 	* config/djgpp/fnchange.lst: Add cp-names.tab.c.

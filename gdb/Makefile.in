@@ -1462,11 +1462,11 @@ c-exp.tab.c: c-exp.y
 
 cp-names.tab.o: cp-names.tab.c $(safe_ctype_h) $(libiberty_h) $(demangle_h)
 
-cp-names-main.tab.o: cp-names.tab.c $(safe_ctype_h) $(libiberty_h) $(demangle_h)
+test-cp-names.tab.o: cp-names.tab.c $(safe_ctype_h) $(libiberty_h) $(demangle_h)
 	$(CC) -c $(INTERNAL_CFLAGS) -DTEST_CPNAMES \
-		-o cp-names-main.tab.o cp-names.tab.c
-test-cpnames: cp-names-main.tab.o $(LIBIBERTY)
-	$(CC) -o test-cpnames cp-names-main.tab.o $(LIBIBERTY)
+		-o test-cp-names.tab.o cp-names.tab.c
+test-cpnames: test-cp-names.tab.o $(LIBIBERTY)
+	$(CC) -o test-cpnames test-cp-names.tab.o $(LIBIBERTY)
 
 .PRECIOUS: cp-names.tab.c
 cp-names.tab.c: cp-names.y
