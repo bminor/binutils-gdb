@@ -34,13 +34,33 @@
 #include "gdb_string.h"
 #include <signal.h>
 
-extern CORE_ADDR text_end;
-
 extern int hpux_has_forked (int pid, int *childpid);
 extern int hpux_has_vforked (int pid, int *childpid);
 extern int hpux_has_execd (int pid, char **execd_pathname);
 extern int hpux_has_syscall_event (int pid, enum target_waitkind *kind,
 				   int *syscall_id);
+
+static CORE_ADDR text_end;
+
+void
+deprecated_hpux_text_end (struct target_ops *exec_ops)
+{
+  struct section_table *p;
+
+  /* Set text_end to the highest address of the end of any readonly
+     code section.  */
+  /* FIXME: The comment above does not match the code.  The code
+     checks for sections with are either code *or* readonly.  */
+  text_end = (CORE_ADDR) 0;
+  for (p = exec_ops->to_sections; p < exec_ops->to_sections_end; p++)
+    if (bfd_get_section_flags (p->bfd, p->the_bfd_section)
+	& (SEC_CODE | SEC_READONLY))
+      {
+	if (text_end < p->endaddr)
+	  text_end = p->endaddr;
+      }
+}
+
 
 static void fetch_register (int);
 

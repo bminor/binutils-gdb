@@ -85,13 +85,6 @@ bfd *exec_bfd = NULL;
 
 int write_files = 0;
 
-/* Text start and end addresses (KLUDGE) if needed */
-
-#ifndef NEED_TEXT_START_END
-#define NEED_TEXT_START_END (0)
-#endif
-CORE_ADDR text_end = 0;
-
 struct vmap *vmap;
 
 void
@@ -266,30 +259,9 @@ exec_file_attach (char *filename, int from_tty)
 		 scratch_pathname, bfd_errmsg (bfd_get_error ()));
 	}
 
-      /* text_end is sometimes used for where to put call dummies.  A
-         few ports use these for other purposes too.  */
-      if (NEED_TEXT_START_END)
-	{
-	  struct section_table *p;
-
-	  /* Set text_start to the lowest address of the start of any
-	     readonly code section and set text_end to the highest
-	     address of the end of any readonly code section.  */
-	  /* FIXME: The comment above does not match the code.  The
-	     code checks for sections with are either code *or*
-	     readonly.  */
-	  CORE_ADDR text_start = ~(CORE_ADDR) 0;
-	  text_end = (CORE_ADDR) 0;
-	  for (p = exec_ops.to_sections; p < exec_ops.to_sections_end; p++)
-	    if (bfd_get_section_flags (p->bfd, p->the_bfd_section)
-		& (SEC_CODE | SEC_READONLY))
-	      {
-		if (text_start > p->addr)
-		  text_start = p->addr;
-		if (text_end < p->endaddr)
-		  text_end = p->endaddr;
-	      }
-	}
+#ifdef DEPRECATED_HPUX_TEXT_END
+      DEPRECATED_HPUX_TEXT_END (&exec_ops);
+#endif
 
       validate_files ();
 

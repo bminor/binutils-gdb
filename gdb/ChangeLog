@@ -1,5 +1,18 @@
 2003-09-19  Andrew Cagney  <cagney@redhat.com>
 
+	* config/pa/nm-hppah.h (NEED_TEXT_START_END): Delete.
+	(DEPRECATED_HPUX_TEXT_END): Define.
+	(deprecated_hpux_text_end): Declare.
+	(struct target_ops): Declare opaque.
+	* hppah-nat.c (text_end): Make static.
+	(deprecated_hpux_text_end): New function.
+	* exec.c (text_end): Delete global variable.
+	(NEED_TEXT_START_END): Do not define.
+	(exec_file_attach): Replace code computing "text_end" code with
+	call to DEPRECATED_HPUX_TEXT_END.
+
+2003-09-19  Andrew Cagney  <cagney@redhat.com>
+
 	* utils.c (align_up, align_down): New functions.
 	* defs.h (align_up, align_down): Declare.
 	* ppc-sysv-tdep.c (align_up, align_down): Delete functions.
