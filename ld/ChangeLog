@@ -1,3 +1,8 @@
+2003-04-02  Bob Wilson  <bob.wilson@acm.org>
+
+	* emulparams/xtensa-config.sh: Remove comment indicating that this is
+	a generated file.
+
 2003-04-01  Bob Wilson  <bob.wilson@acm.org>
 
         * Makefile.am (ALL_EMULATIONS): Add eelf32xtensa.o.
