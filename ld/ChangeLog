@@ -1,3 +1,8 @@
+2002-07-19  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* emultempl/mmo.em (mmo_place_orphan): Handle case of no .text
+	output section.
+
 2002-07-16  Denis Chertykov  <denisc@overta.ru>
 	    Nick Clifton  <nickc@redhat.com>
 	    Frank Ch. Eigler  <fche@redhat.com>
