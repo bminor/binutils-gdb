@@ -5,6 +5,8 @@ Tue Apr 14 14:34:42 1992  Fred Fish  (fnf@cygnus.com)
 	* elf.c (elf_compute_section_file_positions,
 	elf_write_object_contents):  Return boolean, not NULL (which
 	can be void *).
+	* elf.c (bfd_section_from_shdr):  Ifdef-out debugging code.
+	Also ifdef-out code that aborts on unhandled section types.
 
 Fri Apr 10 22:29:18 1992  Fred Fish  (fnf@cygnus.com)
 
