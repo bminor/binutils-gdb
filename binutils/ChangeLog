@@ -1,3 +1,7 @@
+Tue Feb 17 20:34:11 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* dlltool.c (make_one_lib_file): Don't add 1 to hint.
+
 Fri Feb 13 16:37:44 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (AUTOMAKE_OPTIONS): Define.
