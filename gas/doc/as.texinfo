@@ -275,8 +275,8 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 
 @emph{Target ARM options:}
 @c Don't document the deprecated options
-   [@b{-mcpu}=@var{processor}[+@var{extension}@dots]]
-   [@b{-march}=@var{architecture}[+@var{extension}@dots]]
+   [@b{-mcpu}=@var{processor}[+@var{extension}@dots{}]]
+   [@b{-march}=@var{architecture}[+@var{extension}@dots{}]]
    [@b{-mfpu}=@var{floating-point-fromat}]
    [@b{-mthumb}]
    [@b{-EB}|@b{-EL}]
@@ -561,9 +561,9 @@ The following options are available when @value{AS} is configured for the ARM
 processor family.
 
 @table @gcctabopt
-@item -mcpu=@var{processor}[+@var{extension}@dots]
+@item -mcpu=@var{processor}[+@var{extension}@dots{}]
 Specify which ARM processor variant is the target.
-@item -march=@var{architecture}[+@var{extension}@dots]
+@item -march=@var{architecture}[+@var{extension}@dots{}]
 Specify which ARM architecture variant is used by the target.
 @item -mfpu=@var{floating-point-format}
 Select which Floating Point architecture is the target.

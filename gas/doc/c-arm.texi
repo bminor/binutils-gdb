@@ -32,7 +32,7 @@
 @table @code
 
 @cindex @code{-mcpu=} command line option, ARM
-@item -mcpu=@var{processor}[+@var{extension}@dots]
+@item -mcpu=@var{processor}[+@var{extension}@dots{}]
 This option specifies the target processor.  The assembler will issue an
 error message if an attempt is made to assemble an instruction which
 will not execute on the target processor.  The following processor names are
@@ -106,7 +106,7 @@ and
 @code{+xscale}.
 
 @cindex @code{-march=} command line option, ARM
-@item -march=@var{architecture}[+@var{extension}@dots]
+@item -march=@var{architecture}[+@var{extension}@dots{}]
 This option specifies the target architecture.  The assembler will issue
 an error message if an attempt is made to assemble an instruction which
 will not execute on the target architecture.  The following architecture 

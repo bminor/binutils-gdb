@@ -1,3 +1,10 @@
+2002-01-21  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* doc/as.texinfo (Overview) <Target ARM options>: Add missing {}
+	to @dots call.
+	<Detailed description, ARM options>: Ditto.
+	* doc/c-arm.texi (ARM Options): Ditto.
+
 2002-01-18  Richard Earnshaw  <rearnsha@arm.com>
 
 	* tc-arm.c (do_xsc_mia, do_xsc_mar, do_xsc_mra): Renamed from
