@@ -5,6 +5,8 @@
 # Sets the following shell variables:
 #  targ_defvec		Default vector for this target
 #  targ_selvecs		Vectors to build for this target
+#  targ64_selvecs	Vectors to build if --enable-64-bit-bfd is given
+#			or if host is 64 bit.
 #  targ_archs		Architectures for this target
 #  targ_cflags		$(CFLAGS) for this target (FIXME: pretty bogus)
 #  targ_underscore	Whether underscores are used: yes or no
@@ -23,6 +25,7 @@
 
 targ_defvec=
 targ_selvecs=
+targ64_selvecs=
 targ_cflags=
 targ_underscore=no
 
@@ -724,9 +727,7 @@ case "${targ}" in
 
   powerpc-*-aix* | powerpc-*-beos* | rs6000-*-*)
     targ_defvec=rs6000coff_vec
-#ifdef BFD64
-    targ_selvecs="rs6000coff64_vec"
-#endif
+    targ64_selvecs="rs6000coff64_vec"
     ;;
 #ifdef BFD64
   powerpc64-*-aix*)
@@ -947,6 +948,12 @@ case "${targ}" in
     echo 1>&2 "*** BFD does not support target ${targ}."
     echo 1>&2 "*** Look in bfd/config.bfd for supported targets."
     exit 1
+    ;;
+esac
+
+case "${host64}${want64}" in
+  *true*)
+    targ_selvecs="${targ_selvecs} ${targ64_selvecs}"
     ;;
 esac
 

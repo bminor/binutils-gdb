@@ -1,5 +1,8 @@
 2001-08-17  Alan Modra  <amodra@bigpond.net.au>
 
+	* config.bfd (targ64_selvecs): New.
+	<powerpc-*-aix* entry>: Use it here instead of ineffectual #ifdef.
+
 	* bfd-in.h (BFD_VERSION): Remove wrong comment.
 	(BFD_DEFAULT_TARGET_SIZE): New.
 	(BFD_ARCH_SIZE): Comment.
