@@ -48,6 +48,7 @@ case "${target}" in
   i[34]86-*-sco*)	bfd_target=i386-sco ;;
   i[34]86-*-bsd*)	bfd_target=i386-bsd ;;
   i[34]86-*-aix*)	bfd_target=i386-coff ;;
+  i[34]86-*-elf)	bfd_target=i386-elf ;;
   i[34]86-none-*)	bfd_target=i386-coff ;;
   i960-*-vxworks)	bfd_target=i960-bout ;;
   i960-*-aout)		bfd_target=i960-bout ;;
@@ -63,6 +64,7 @@ case "${target}" in
   m68*-netx-*)		bfd_target=m68k-aout ;;
   m88k-*-*)		bfd_target=m88k-coff ;;
   mips-big-*)		bfd_target=irix3 ;;
+  mips-dec-bsd*)        bfd_target=mipsdecbsd ;;
   mips-dec-*)		bfd_target=decstation ;;
   mips-sgi-*)		bfd_target=irix3 ;;
   rs6000-*-*)		bfd_target=rs6000 ;;
@@ -70,6 +72,7 @@ case "${target}" in
   sparc-*-sysv4*)	bfd_target=sparc-elf ;;
   sparc*-*-*)		bfd_target=sparc-aout ;;
   tahoe-*-*)		bfd_target=tahoe ;;
+  vax-*-vms)		bfd_target=vax-vms ;;
   vax-*-*)		bfd_target=vax ;;
   we32k-*-*)		bfd_target=we32k ;;
   z8k*-*-*)		bfd_target=z8k-coff ;;
@@ -103,3 +106,16 @@ target_makefile_frag=config/${bfd_target}.mt
 
 # We don't do any links based on the target system, just very minor makefile
 # config.
+
+# post-target:
+
+case ${with_minimal_bfd} in
+  yes)
+    echo MINIMIZE=1 >> Makefile
+    ;;
+  no | "")
+    ;;
+  *)
+    echo "*** bad value \"${with_minimal_bfd}\" for minimal-bfd flag; ignored" 1>&2
+    ;;
+esac
