@@ -38,7 +38,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Naming convention:
 
    sim_* are the interface to the simulator (see remote-sim.h).
-
+   sim_callback_* are the stuff which the simulator can see inside GDB.
    gdbsim_* are stuff which is internal to gdb.  */
 
 /* Forward data declarations */
@@ -97,7 +97,7 @@ int regno;
 
 
 int 
-gdbsim_write_stdout (arg, len)
+sim_callback_write_stdout (arg, len)
 char *arg;
 int len;
 {

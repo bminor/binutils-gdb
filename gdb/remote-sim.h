@@ -39,7 +39,7 @@ typedef CORE_ADDR_TYPE SIM_ADDR;
    void printf_filtered (char *msg, ...);
    void error /-* noreturn *-/ (char *msg, ...);
    void *xmalloc (long size);
-   int gdbsim_write_stdout (char *, int len);
+   int sim_callback_write_stdout (char *, int len);
 */
 
 /* Main simulator entry points ...
@@ -127,6 +127,6 @@ void sim_do_command PARAMS ((char *cmd));
 
 /* Callbacks for the simulator to use. */
 
-int gdbsim_write_stdout PARAMS ((char *, int));
+int sim_callback_write_stdout PARAMS ((char *, int));
 
 #endif /* !defined (REMOTE_SIM_H) */
