@@ -60,6 +60,14 @@ if [istarget "i\[3456\]86-*-*"] then {
 if [istarget "m32r*-*"] then {
     set asm-arch m32r
 }
+if [istarget "m6811-*-*"] then {
+    set asm-arch m68hc11
+    set asm-flags "-mshort-double -m68hc11 -gdwarf2 --no-warn -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+}
+if [istarget "m6812-*-*"] then {
+    set asm-arch m68hc11
+    set asm-flags "-mshort-double -m68hc12 -gdwarf2 --no-warn -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+}
 if [istarget "mips*-*"] then {
     set asm-arch mips
 }

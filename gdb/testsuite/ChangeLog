@@ -1,3 +1,8 @@
+2003-03-21  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* gdb.asm/asm-source.exp: Set asm-arch for m6811 and m6812.
+	* gdb.asm/m68hc11.inc: New file for HC11/HC12 macros.
+
 2003-03-20  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.base/default.exp: Fix regular expression.
