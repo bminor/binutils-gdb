@@ -1,3 +1,10 @@
+2001-01-17  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (copy_object): Fail if attempting to convert the
+	endianness of the input object file.
+
+	* binutils.texi: Explain that objcopy cannot convert endianness.
+	
 2001-01-16  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (string_table_length): New variable.

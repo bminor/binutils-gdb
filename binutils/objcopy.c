@@ -1,5 +1,5 @@
 /* objcopy.c -- copy object file from input to output, optionally massaging it.
-   Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000
+   Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -765,6 +765,13 @@ copy_object (ibfd, obfd)
   long symsize;
   PTR dhandle;
 
+  if (ibfd->xvec->byteorder != obfd->xvec->byteorder
+      && ibfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN
+      && obfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)
+    {
+      fatal (_("Unable to change endianness of input file(s)"));
+      return;
+    }
 
   if (!bfd_set_format (obfd, bfd_get_format (ibfd)))
     RETURN_NONFATAL (bfd_get_filename (obfd));
