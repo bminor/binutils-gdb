@@ -1,3 +1,9 @@
+2002-03-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
 2002-03-20  Albert Chin-A-Young  <china@thewrittenword.com>
 
 	* config/tc-arm.c (vfp_dp_reg_required_here): Fix typo

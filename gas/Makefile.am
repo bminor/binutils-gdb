@@ -1332,6 +1332,13 @@ DEPTC_sh_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   subsegs.h $(INCDIR)/obstack.h $(srcdir)/../opcodes/sh-opc.h \
   $(INCDIR)/safe-ctype.h struc-symbol.h $(INCDIR)/elf/sh.h \
   $(INCDIR)/elf/reloc-macros.h dwarf2dbg.h
+DEPTC_sh64_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-sh64.h \
+  $(srcdir)/config/tc-sh.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
+  $(INCDIR)/safe-ctype.h $(srcdir)/../opcodes/sh64-opc.h \
+  $(srcdir)/config/tc-sh.c subsegs.h $(INCDIR)/obstack.h \
+  $(srcdir)/../opcodes/sh-opc.h struc-symbol.h dwarf2dbg.h
 DEPTC_sparc_aout = $(INCDIR)/symcat.h $(srcdir)/config/obj-aout.h \
   $(srcdir)/config/tc-sparc.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
@@ -1424,13 +1431,6 @@ DEPTC_v850_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-v850.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
   $(INCDIR)/opcode/v850.h dwarf2dbg.h
-DEPTC_sh64_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
-  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
-  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-sh64.h \
-  $(srcdir)/config/tc-sh.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
-  $(INCDIR)/safe-ctype.h $(srcdir)/../opcodes/sh64-opc.h \
-  $(srcdir)/config/tc-sh.c subsegs.h $(INCDIR)/obstack.h \
-  $(srcdir)/../opcodes/sh-opc.h struc-symbol.h dwarf2dbg.h
 DEPTC_xstormy16_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-xstormy16.h $(INCDIR)/coff/internal.h \
   $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h subsegs.h $(INCDIR)/obstack.h \
@@ -2267,7 +2267,8 @@ symbols.o: symbols.c $(INCDIR)/symcat.h $(INCDIR)/safe-ctype.h \
   $(INCDIR)/obstack.h subsegs.h struc-symbol.h
 write.o: write.c $(INCDIR)/symcat.h subsegs.h $(INCDIR)/obstack.h \
   output-file.h dwarf2dbg.h
-gasp.o: gasp.c $(INCDIR)/safe-ctype.h sb.h macro.h
+gasp.o: gasp.c $(INCDIR)/safe-ctype.h sb.h macro.h \
+  $(INCDIR)/xregex.h $(INCDIR)/xregex2.h
 itbl-ops.o: itbl-ops.c itbl-ops.h $(INCDIR)/symcat.h
 e-crisaout.o: $(srcdir)/config/e-crisaout.c $(INCDIR)/symcat.h \
   emul-target.h
