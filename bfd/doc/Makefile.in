@@ -110,6 +110,7 @@ install-info: info
 docs: chew protos bfd.info bfd.dvi bfd.ps
 
 chew: chew.c
+	$(CC) $(CFLAGS) -o chew $(srcdir)/chew.c $(LOADLIBES)
 
 protos: libbfd.h libcoff.h bfd.h
 
