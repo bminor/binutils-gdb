@@ -36,7 +36,7 @@
    In reality, this module talks to a debug monitor called 'STDEBUG', which
    runs in a phone switch.  We communicate with STDEBUG via either a direct
    serial line, or a TCP (or possibly TELNET) stream to a terminal multiplexor,
-   which in turn talks to the phone switch. */
+   which in turn talks to the phone switch.  */
 
 #include "defs.h"
 #include "gdbcore.h"
