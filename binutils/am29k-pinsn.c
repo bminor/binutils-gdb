@@ -27,6 +27,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #else
 # include "bfd.h"
 # include "sysdep.h"
+# include "objdump.h"
 # include "opcode/a29k.h"
 # define am29k_opcodes a29k_opcodes
 # define am29k_opcode a29k_opcode

@@ -19,6 +19,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
+#include "bucomm.h"
 
 asymbol       **sympp;
 char           *input_target = NULL;
@@ -29,7 +30,6 @@ char           *output_filename = NULL;
 
 static void     setup_sections();
 static void     copy_sections();
-static boolean  strip;
 static boolean verbose;
 
 /* This flag distinguishes between strip and copy:
@@ -39,7 +39,7 @@ extern int is_strip;
 
 /* IMPORTS */
 extern char    *program_name;
-extern char *xmalloc();
+
 
 static
 void            
@@ -349,13 +349,13 @@ copy_sections(ibfd, isection, obfd)
   if (size == 0)
     return;
 
-  if (is_strip || get_reloc_upper_bound(ibfd, isection) == 0) 
+  if (is_strip || bfd_get_reloc_upper_bound(ibfd, isection) == 0) 
     {
       bfd_set_reloc(obfd, osection, (arelent **)NULL, 0);
     } 
   else 
     {
-      relpp = (arelent **) xmalloc(get_reloc_upper_bound(ibfd, isection));
+      relpp = (arelent **) xmalloc(bfd_get_reloc_upper_bound(ibfd, isection));
       relcount = bfd_canonicalize_reloc(ibfd, isection, relpp, sympp);
       bfd_set_reloc(obfd, osection, relpp, relcount);
     }

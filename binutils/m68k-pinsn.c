@@ -20,9 +20,23 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$
    $Log$
-   Revision 1.6  1991/12/01 02:58:34  sac
-   Updated to point to where the header files are now
+   Revision 1.7  1991/12/08 01:14:04  sac
+   	* bucomm.h: created to hold prototypes of bucomm.c
+   	* objdump.h: created to hold prototyes of objdump.c
+   	* am29k-pinsn.c: include objdump.h
+   	* ar.c: include bucomm.h, get ar.h from the right place and
+   	include libbfd.h
+   	* bucomm.c: defunize bfd_fatal
+   	* copy.c: include bucomm.h, lint.
+   	* i960-pinsn.h: include bucomm.h
+   	* m68k-pinsn.h: lint
+   	* nm.c: include bucomm.h, lint
+   	* objdump.c: lint
+   	* sparc-pinsn.c: include objdump.h
 
+ * Revision 1.6  1991/12/01  02:58:34  sac
+ * Updated to point to where the header files are now
+ *
  * Revision 1.5  1991/11/03  22:58:44  bothner
  * 	* Makefile.in ($(DIST_NAME).tar.Z), TODO:  Various fixes.
  * 	* ar.c (get_pos_bfd): Fix to handling of before/after
@@ -85,7 +99,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdio.h>
 #include "opcode/m68k.h"
 
-extern int fputs();
 extern void print_address();
 
 /* 68k instructions are never longer than this many bytes.  */
@@ -233,12 +246,12 @@ print_insn_arg (d, buffer, p, addr, stream)
  bfd_vma addr;		/* PC for this arg to be relative to */
      FILE *stream;
 {
-  register int val;
+  register int val = 0;
   register int place = d[1];
   int regno;
   register char *regname;
   register unsigned char *p1;
-  register double flval;
+  register double flval = 0;
   int flt_p;
 
   switch (*d)
@@ -639,7 +652,7 @@ fetch_arg (buffer, code, bits)
      char code;
      int bits;
 {
-  register int val;
+  register int val = 0;
   switch (code)
     {
     case 's':

@@ -21,9 +21,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
-
-extern char *xmalloc();
-extern int fputs();
+#include "bucomm.h"
 
 static char *reg_names[] = {
 /*  0 */	"pfp", "sp",  "rip", "r3",  "r4",  "r5",  "r6",  "r7", 

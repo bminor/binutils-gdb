@@ -24,8 +24,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "sysdep.h"
 #include <stdio.h>
 #include "opcode/sparc.h"
-
-extern int fputs();
+#include "objdump.h"
 extern int print_address();
 
 static  char *reg_names[] =
@@ -392,7 +391,7 @@ memcpy(&insn,buffer, sizeof (insn));
 	  if (imm_added_to_rs1)
 	    {
 	      union sparc_insn prev_insn;
-	      int errcode;
+	      int errcode = 0;
 
 	      memcpy(&prev_insn, buffer -4,  sizeof (prev_insn));
 
