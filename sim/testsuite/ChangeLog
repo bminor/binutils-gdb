@@ -1,4 +1,9 @@
 start-sanitize-sky
+Fri Jul 17 13:57:50 1998 Jillian Ye <jillian@cygnus.com>
+
+        * forward fitting sky-980617 branch updates of
+        fast_gs.
+
 Thu Jul 2 15:22:29 EDT 1998  Jim Lemke  <jlemke@cygnus.com>
 
 	* sim/sky/pr16213.[dvpasm|c|brn]: Add a PR test case.
@@ -39,7 +44,6 @@ Thu Jun 18 23:53:43 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* sim/sky/vureloc{.brn,-main.c,.dvpasm}: New files.
 
-end-sanitize-sky
 Tue Jun 16 18:39:32 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* sim/sky/sky-defs.tcl: Use --sky-debug option instead of environment
