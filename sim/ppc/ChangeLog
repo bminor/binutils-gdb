@@ -1,3 +1,8 @@
+2003-06-21  Andrew Cagney  <cagney@redhat.com>
+
+	* hw_com.c (hw_com_device_init_data): Check that the output, and
+	not input file opened.  Pointed out by masahino tky3.3web.ne.jp.
+
 2003-06-20  Andrew Cagney  <cagney@redhat.com>
 
 	* sim_calls.c (sim_create_inferior): Assert that
