@@ -1,5 +1,9 @@
 Tue Mar  8 06:56:13 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* parser-defs.h: Add "extern" to start of variable declarations so
+	we don't end up with commons.
+	* parse.c: Define these variables.
+
 	* irix5-nat.c (find_solib): Cast o_path to CORE_ADDR when using it
 	as one.
 

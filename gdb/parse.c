@@ -38,7 +38,22 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "command.h"
 #include "language.h"
 #include "parser-defs.h"
-
+
+/* Global variables declared in parser-defs.h (and commented there).  */
+struct expression *expout;
+int expout_size;
+int expout_ptr;
+struct block *expression_context_block;
+struct block *innermost_block;
+struct block *block_found;
+int arglist_len;
+union type_stack_elt *type_stack;
+int type_stack_depth, type_stack_size;
+char *lexptr;
+char *namecopy;
+int paren_depth;
+int comma_terminates;
+
 static void
 free_funcalls PARAMS ((void));
 
