@@ -1,3 +1,8 @@
+Thu Dec 24 12:40:21 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* Makefile.in (mostlyclean, distclean, realclean):  Fix to
+	do more-or-less the right thing.
+
 Wed Dec 16 10:25:31 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in: Add lines defining CC and CXX, and use CXX rather

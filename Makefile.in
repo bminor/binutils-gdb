@@ -225,7 +225,7 @@ TARGET_FLAGS_TO_PASS = \
 # The first rule in the file had better be this one.  Don't put any above it.
 all:	$(ALL)
 
-.PHONY: all info install-info dvi clean-info distclean mostlyclean realclean
+.PHONY: all info install-info dvi clean-info
 .NOEXPORT:
 
 info check clean-info dvi distclean mostlyclean realclean:	
@@ -260,11 +260,28 @@ all.cross: all-libiberty all-mmalloc all-gas all-byacc all-flex all-ld \
 	 all-opcodes all-z8ksim all-bfd all-readline all-gdb all-binutils all-gcc \
 	all-newlib all-deja-gnu
 
-.PHONY: clean
-clean:	
+.PHONY: clean distclean mostlyclean realclean do_clean
+
+do_clean:
+	-rm -rf *.a TEMP errs core *.o *~ \#* TAGS *.E
+
+mostlyclean: do_clean
+	@rootme=`pwd` ; export rootme ; \
+	  $(MAKE) $(FLAGS_TO_PASS) DO=mostlyclean "DODIRS=$(SUBDIRS)" subdir_do
+
+clean: do_clean
 	@rootme=`pwd` ; export rootme ; \
 	  $(MAKE) $(FLAGS_TO_PASS) DO=clean "DODIRS=$(SUBDIRS)" subdir_do
-	-rm -rf *.a TEMP errs core *.o *~ \#* TAGS *.E
+
+distclean: do_clean
+	@rootme=`pwd` ; export rootme ; \
+	  $(MAKE) $(FLAGS_TO_PASS) DO=distclean "DODIRS=$(SUBDIRS)" subdir_do
+	-rm -rf Makefile config.status
+
+realclean: do_clean
+	@rootme=`pwd` ; export rootme ; \
+	  $(MAKE) $(FLAGS_TO_PASS) DO=realclean "DODIRS=$(SUBDIRS)" subdir_do
+	-rm -rf Makefile config.status
 
 uninstall:
 	@echo "the uninstall target is not supported in this tree"
