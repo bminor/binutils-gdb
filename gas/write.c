@@ -2412,7 +2412,7 @@ relax_segment (struct frag *segment_frag_root, segT segment)
 		      fragP->fr_type = rs_align;
 		      fragP->fr_subtype = 0;
 		      fragP->fr_offset = 0;
-		      fragP->fr_fix = after - address;
+		      fragP->fr_fix = after - was_address;
 		      growth = stretch;
 		    }
 

@@ -1,3 +1,8 @@
+2004-08-05  Bob Wilson  <bob.wilson@acm.org>
+
+	* write.c (relax_segment): Use was_address instead of address when
+	setting fr_fix field for align frag due to backwards .org.
+
 2004-07-29  Alexandre Oliva  <aoliva@redhat.com>
 
 	Introduce SH2a support.
