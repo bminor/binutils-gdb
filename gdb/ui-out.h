@@ -27,7 +27,7 @@
 
 struct ui_out;
 struct ui_out_data;
-
+struct ui_file;
 
 /* the current ui_out */
 

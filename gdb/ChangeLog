@@ -1,3 +1,9 @@
+2003-07-18  Andrew Cagney  <cagney@redhat.com>
+
+	* user-regs.h (struct gdbarch): Declare opaque.
+	* ui-out.h (struct ui_file): Declare opaque.
+	* dwarf2-frame.h (struct frame_info): Declare opaque.
+
 2003-07-18  Kris Warkentin  <kewarken@qnx.com>
 
 	* nto-procfs.c: Clean ARI hits.  Change #include <..> to

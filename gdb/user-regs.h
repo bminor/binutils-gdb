@@ -40,6 +40,7 @@
    register descriptor that contains all the relvent access methods.  */
 
 struct frame_info;
+struct gdbarch;
 
 /* Given an architecture, map a user visible register name onto its
    index.  */
