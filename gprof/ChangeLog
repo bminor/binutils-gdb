@@ -1,3 +1,11 @@
+Mon Feb  5 16:34:44 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	Support for building bfd and opcodes as shared libraries, based on
+	patches from Alan Modra <alan@spri.levels.unisa.edu.au>:
+	* Makefile.in (LIBDEPS): New variable.
+	(LIBS): Use -L../bfd -lbfd.
+	(gprof): Depend upon $(LIBDEPS) rather than $(LIBS).
+
 Sat Dec 30 10:11:03 1995  Jeffrey A Law  (law@cygnus.com)
 
 	* gprof.c (long_options): Add "--function-ordering" and
