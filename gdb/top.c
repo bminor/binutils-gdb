@@ -373,9 +373,15 @@ void (*init_ui_hook) PARAMS ((void));
 
 void (*command_loop_hook) PARAMS ((void));
 
+
 /* Called instead of fputs for all output.  */
 
 void (*fputs_unfiltered_hook) PARAMS ((const char *linebuffer, FILE *stream));
+
+/* Called when the target says something to the host, which may
+   want to appear in a different window. */
+
+void (*target_output_hook) PARAMS ((void));
 
 /* Called from print_frame_info to list the line we stopped in.  */
 

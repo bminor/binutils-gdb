@@ -1,5 +1,6 @@
 Mon Aug  7 15:34:29 1995  steve chamberlain  <sac@slash.cygnus.com>
 
+	* top.c (target_output_hook): New definition.
 	* stack.c (gdb_string.h): Include after defs.h
 	* defs.h (target_output_hook): New declaration.
 	* source.c (mod_path): Fix Win32 \ handling.
