@@ -581,7 +581,8 @@ $(CONFIGURED_OFILES): stamp-picdir
 	else true; fi
 	$(COMPILE.c) $(srcdir)/getcwd.c $(OUTPUT_OPTION)
 
-./getopt.o: $(srcdir)/getopt.c config.h $(INCDIR)/getopt.h
+./getopt.o: $(srcdir)/getopt.c config.h $(INCDIR)/getopt.h \
+	$(INCDIR)/ansidecl.h
 	if [ x"$(PICFLAG)" != x ]; then \
 	  $(COMPILE.c) $(PICFLAG) $(srcdir)/getopt.c -o pic/$@; \
 	else true; fi

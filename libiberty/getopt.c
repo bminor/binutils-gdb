@@ -3,8 +3,8 @@
    "Keep this file name-space clean" means, talk to drepper@gnu.org
    before changing it!
 
-   Copyright (C) 1987, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98
-   	Free Software Foundation, Inc.
+   Copyright (C) 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
+   	1996, 1997, 1998, 2004 Free Software Foundation, Inc.
 
    NOTE: This source is derived from an old version taken from the GNU C
    Library (glibc).
@@ -89,6 +89,9 @@
 #  define _(msgid)	(msgid)
 # endif
 #endif
+
+/* Needed for ATTRIBUTE_UNUSED.  */
+#include <ansidecl.h>
 
 /* This version of `getopt' appears to the caller like standard Unix `getopt'
    but it behaves differently for the user, since it allows the user
@@ -393,8 +396,8 @@ static const char *_getopt_initialize (int, char *const *, const char *);
 #endif
 static const char *
 _getopt_initialize (argc, argv, optstring)
-     int argc;
-     char *const *argv;
+     int argc ATTRIBUTE_UNUSED;
+     char *const *argv ATTRIBUTE_UNUSED;
      const char *optstring;
 {
   /* Start processing options with ARGV-element 1 (since ARGV-element 0
