@@ -1,3 +1,9 @@
+2002-07-02  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* elf64-s390.c (create_got_section): Set .got section alignment to
+	8 bytes.
+	(elf_s390_check_relocs): Set .rela.dyn section alignment to 8 bytes.
+
 2002-07-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (_bfd_elf_reloc_type_class): Fix comment grammar.

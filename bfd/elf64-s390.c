@@ -471,7 +471,7 @@ create_got_section (dynobj, info)
 				  (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
 				   | SEC_IN_MEMORY | SEC_LINKER_CREATED
 				   | SEC_READONLY))
-      || ! bfd_set_section_alignment (dynobj, htab->srelgot, 2))
+      || ! bfd_set_section_alignment (dynobj, htab->srelgot, 3))
     return false;
   return true;
 }
@@ -776,7 +776,7 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 			flags |= SEC_ALLOC | SEC_LOAD;
 		      if (sreloc == NULL
 			  || ! bfd_set_section_flags (dynobj, sreloc, flags)
-			  || ! bfd_set_section_alignment (dynobj, sreloc, 2))
+			  || ! bfd_set_section_alignment (dynobj, sreloc, 3))
 			return false;
 		    }
 		  elf_section_data (sec)->sreloc = sreloc;
