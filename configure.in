@@ -458,6 +458,8 @@ case "${target}" in
   powerpc-*-aix*)
     # copied from rs6000-*-* entry
     noconfigdirs="$noconfigdirs gprof cvs target-libgloss"
+    # This is needed until gcc and ld are fixed to work together.
+    use_gnu_ld=no
     ;;
   powerpc*-*-winnt* | powerpc*-*-pe* | ppc*-*-pe)
     target_configdirs="$target_configdirs target-winsup"
@@ -473,6 +475,11 @@ case "${target}" in
     # The CVS server code doesn't work on the RS/6000
     # Newlib makes problems for libg++ in crosses.
     noconfigdirs="$noconfigdirs target-newlib gprof cvs"
+    ;;
+  rs6000-*-aix*)
+    noconfigdirs="$noconfigdirs gprof"
+    # This is needed until gcc and ld are fixed to work together.
+    use_gnu_ld=no
     ;;
   rs6000-*-*)
     noconfigdirs="$noconfigdirs gprof"
