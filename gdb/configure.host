@@ -15,6 +15,7 @@ arm*)			gdb_host_cpu=arm ;;
 hppa*)			gdb_host_cpu=pa ;;
 i[34567]86*)		gdb_host_cpu=i386 ;;
 m68*)			gdb_host_cpu=m68k ;;
+m88*)			gdb_host_cpu=m88k ;;
 mips*)			gdb_host_cpu=mips ;;
 powerpc*)		gdb_host_cpu=powerpc ;;
 sparcv9 | sparc64)	gdb_host_cpu=sparc ;;
@@ -87,6 +88,8 @@ m68*-*-linux*)		gdb_host=linux ;;
 m68*-*-netbsdelf*)	gdb_host=nbsdelf ;;
 m68*-*-netbsd*)		gdb_host=nbsdaout ;;
 m68*-*-openbsd*)	gdb_host=obsd ;;
+
+m88*-*-openbsd*)	gdb_host=obsd ;;
 
 mips-sgi-irix5*)	gdb_host=irix5 ;;
 mips-sgi-irix6*)	gdb_host=irix6 ;;

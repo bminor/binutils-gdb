@@ -29,7 +29,8 @@ systems (Solaris, IRIX).  Ref: server/519.
 
 * New native configurations
 
-OpenBSD/m68k					m68k-*-openbsd*
+OpenBSD/m68k					m68*-*-openbsd*
+OpenBSD/m88k					m88*-*-openbsd*
 OpenBSD/powerpc					powerpc-*-openbsd*
 NetBSD/vax					vax-*-netbsd*
 OpenBSD/vax					vax-*-openbsd*
