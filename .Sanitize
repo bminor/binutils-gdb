@@ -109,10 +109,10 @@ fi
 ide_files="itcl libide vmake"
 
 if (echo $* | grep keep\-ide > /dev/null); then
-	lose_these_too="${lose_these_too} ${ide_files}"
+	keep_these_too="${keep_these_too} ${ide_files}"
 	test -n "$verbose" && echo Keeping ${ide_files}
 else
-	keep_these_too="${keep_these_too} ${ide_files}"
+	lose_these_too="${lose_these_too} ${ide_files}"
 fi
 
 
@@ -320,7 +320,7 @@ else
 				echo Removing traces of \"v850eq\" from $i...
 			fi
 			cp $i new
-			sed '/start\-sanitize\-v850/,/end-\sanitize\-v850eq/d' < $i > new
+			sed '/start\-sanitize\-v850eq/,/end-\sanitize\-v850eq/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...
@@ -390,22 +390,6 @@ else
 	done
 fi
 
-if ( echo $* | grep lose\-gdbtk > /dev/null ) ; then
-	echo Catering to RMS by removing traces of \"gdbtk\"...
-	if [ -n "${verbose}" ] ; then
-		echo Removing traces of \"gdbtk\" from Makefile.in...
-	fi
-	cp Makefile.in new
-	sed -e '/GDBTK_SUPPORT_DIRS=/d' -e 's/ $(GDBTK_SUPPORT_DIRS)//' < Makefile.in > new
-	if [ -n "${safe}" -a ! -f .Recover/Makefile.in ] ; then
-		if [ -n "${verbose}" ] ; then
-			echo Caching Makefile.in in .Recover...
-		fi
-		mv Makefile.in .Recover
-	fi
-	mv new Makefile.in
-fi
-
 if ( echo $* | grep keep\-gm > /dev/null ) ; then
 	for i in * ; do
 		if test ! -d $i && (grep sanitize-gm $i > /dev/null) ; then
@@ -458,6 +442,22 @@ else
 			mv new $i
 		fi
 	done
+fi
+
+if ( echo $* | grep lose\-gdbtk > /dev/null ) ; then
+	echo Catering to RMS by removing traces of \"gdbtk\"...
+	if [ -n "${verbose}" ] ; then
+		echo Removing traces of \"gdbtk\" from Makefile.in...
+	fi
+	cp Makefile.in new
+	sed -e '/GDBTK_SUPPORT_DIRS=/d' -e 's/ $(GDBTK_SUPPORT_DIRS)//' < Makefile.in > new
+	if [ -n "${safe}" -a ! -f .Recover/Makefile.in ] ; then
+		if [ -n "${verbose}" ] ; then
+			echo Caching Makefile.in in .Recover...
+		fi
+		mv Makefile.in .Recover
+	fi
+	mv new Makefile.in
 fi
 
 # Do this check LAST!
