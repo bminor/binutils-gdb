@@ -2037,38 +2037,40 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 				    contents, rel->r_offset,
 				    relocation, (bfd_vma) 0);
 
-      switch (r)
+      if (r != bfd_reloc_ok)
 	{
-	case bfd_reloc_ok:
-	  break;
+	  const char *name;
 
-	case bfd_reloc_overflow:
-	  {
-	    const char *name;
+	  if (h != NULL)
+	    name = h->root.root.string;
+	  else
+	    {
+	      name = bfd_elf_string_from_elf_section (input_bfd,
+						      symtab_hdr->sh_link,
+						      sym->st_name);
+	      if (name == NULL)
+		return false;
+	      if (*name == '\0')
+		name = bfd_section_name (input_bfd, sec);
+	    }
 
-	    if (h != NULL)
-	      name = h->root.root.string;
-	    else
-	      {
-		name = bfd_elf_string_from_elf_section (input_bfd,
-							symtab_hdr->sh_link,
-							sym->st_name);
-		if (name == NULL)
-		  return false;
-		if (*name == '\0')
-		  name = bfd_section_name (input_bfd, sec);
-	      }
-	    if (! ((*info->callbacks->reloc_overflow)
-		   (info, name, howto->name, (bfd_vma) 0,
-		    input_bfd, input_section, rel->r_offset)))
+	  if (r == bfd_reloc_overflow)
+	    {
+
+	      if (! ((*info->callbacks->reloc_overflow)
+		     (info, name, howto->name, (bfd_vma) 0,
+		      input_bfd, input_section, rel->r_offset)))
+		return false;
+	    }
+	  else
+	    {
+	      (*_bfd_error_handler)
+		(_("%s(%s+0x%lx): reloc against `%s': error %d"),
+		 bfd_archive_filename (input_bfd),
+		 bfd_get_section_name (input_bfd, input_section),
+		 (long) rel->r_offset, name, (int) r);
 	      return false;
-	  }
-	  break;
-
-	default:
-	case bfd_reloc_outofrange:
-	  abort ();
-	  break;
+	    }
 	}
     }
 
