@@ -73,7 +73,6 @@ RANLIB = ar rvs
 INCDIR = $(srcdir)/../include
 CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
 DEP = mkdep
-MINUS_G=-g
 
 SUBDIRS = doc
 
