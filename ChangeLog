@@ -1,3 +1,8 @@
+Mon Jul 25 11:10:06 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* configure.in: Warn about use of /usr/ucb/cc on Solaris.  From
+	Bill Cox <bill@cygnus.com>.
+
 Sat Jul 23 12:19:46 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* config.guess:  Recognize ISC.  Patch from kwzh@gnu.ai.mit.edu.
