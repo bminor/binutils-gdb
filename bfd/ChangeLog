@@ -1,3 +1,8 @@
+2001-08-29  Joel Sherrill <joel@OARcorp.com>
+
+	* config.bfd (i[3456]86-*-rtems*, m68*-*-rtems*): Change 
+	default from coff to elf.
+
 2001-08-29  Jeff Law <law@redhat.com>
 
 	* cpu-h8300.c (h8300_scan, compatible): Prototype.
