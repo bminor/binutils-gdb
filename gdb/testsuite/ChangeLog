@@ -1,3 +1,8 @@
+Tue Jun 17 13:10:10 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* lib/gdb.exp(gdb_expect): Declare errorInfo and errorCode
+	as global variables.
+
 Sat Jun 14 09:23:26 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* lib/gdb.exp: Close connection to remote host if gdb doesn't
