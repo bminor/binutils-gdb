@@ -46,6 +46,7 @@ typedef unsigned int CORE_ADDR;
 /* Get at various relevent fields of an instruction word. */
 
 #define MASK_5 0x1f
+#define MASK_10 0x3ff
 #define MASK_11 0x7ff
 #define MASK_14 0x3fff
 #define MASK_21 0x1fffff
@@ -127,8 +128,11 @@ static const char float_comp_names[][8] =
 };
 static const char *const signed_unsigned_names[][3] = {",u", ",s"};
 static const char *const mix_half_names[][3] = {",l", ",r"};
-static const char *const saturation_names[][3] = {",us", ",ss", 0, ""};
-
+static const char *const saturation_names[][4] = {",us", ",ss", 0, ""};
+static const char *const read_write_names[][3] = {",r", ",w"};
+static const char *const add_compl_names[] = {
+  0, "", ",l", ",tsv"
+};
 
 /* For a bunch of different instructions form an index into a 
    completer name table. */
@@ -233,6 +237,14 @@ extract_5R_store (word)
      unsigned word;
 {
   return (word >> 16 & MASK_5);
+}
+
+/* extract the 10 bit immediate field from a {sr}sm instruction */
+static unsigned
+extract_10U_store (word)
+     unsigned word;
+{
+  return (word >> 16 & MASK_10);
 }
 
 /* extract the immediate field from a bb instruction */
@@ -440,11 +452,67 @@ print_insn_hppa (memaddr, info)
 		      (*info->fprintf_func) (info->stream, "%s ",
 					     short_bytes_compl_names[GET_COMPL (insn)]);
 		      break;
+		    case 'L':
+		      (*info->fprintf_func) (info->stream, ",l");
+		      break;
+		    case 'w':
+		      (*info->fprintf_func) (info->stream, "%s ",
+					     read_write_names[GET_FIELD (insn, 25, 25)]);
+		      break;
+		    case 'W':
+		      (*info->fprintf_func) (info->stream, ",w");
+		      break;
+		    case 'r':
+		      if (GET_FIELD (insn, 23, 26) == 5)
+			(*info->fprintf_func) (info->stream, ",r");
+		      break;
 		    case 'Z':
 		      if (GET_FIELD (insn, 26, 26))
 			(*info->fprintf_func) (info->stream, ",m ");
 		      else
 			(*info->fprintf_func) (info->stream, " ");
+		      break;
+		    case 'i':
+		      if (GET_FIELD (insn, 25, 25))
+			(*info->fprintf_func) (info->stream, ",i");
+		      break;
+		    case 'a':
+		      (*info->fprintf_func)
+			(info->stream, "%s", add_compl_names[GET_FIELD
+							    (insn, 20, 21)]);
+		      break;
+		    case 'Y':
+		      (*info->fprintf_func)
+			(info->stream, ",dc%s", add_compl_names[GET_FIELD
+							       (insn, 20, 21)]);
+		      break;
+		    case 'y':
+		      (*info->fprintf_func)
+			(info->stream, ",c%s", add_compl_names[GET_FIELD
+							      (insn, 20, 21)]);
+		      break;
+		    case 'v':
+		      if (GET_FIELD (insn, 20, 20))
+			(*info->fprintf_func) (info->stream, ",tsv");
+		      break;
+		    case 't':
+		      (*info->fprintf_func) (info->stream, ",tc");
+		      if (GET_FIELD (insn, 20, 20))
+			(*info->fprintf_func) (info->stream, ",tsv");
+		      break;
+		    case 'B':
+		      (*info->fprintf_func) (info->stream, ",db");
+		      if (GET_FIELD (insn, 20, 20))
+			(*info->fprintf_func) (info->stream, ",tsv");
+		      break;
+		    case 'b':
+		      (*info->fprintf_func) (info->stream, ",b");
+		      if (GET_FIELD (insn, 20, 20))
+			(*info->fprintf_func) (info->stream, ",tsv");
+		      break;
+		    case 'T':
+		      if (GET_FIELD (insn, 25, 25))
+			(*info->fprintf_func) (info->stream, ",tc");
 		      break;
 		    case 'S':
 		      /* EXTRD/W has a following condition.  */
@@ -617,6 +685,9 @@ print_insn_hppa (memaddr, info)
 		case 'R':
 		  fput_const (extract_5R_store (insn), info);
 		  break;
+		case 'U':
+		  fput_const (extract_10U_store (insn), info);
+		  break;
 		case 'Q':
 		  fput_const (extract_5Q_store (insn), info);
 		  break;
@@ -662,6 +733,10 @@ print_insn_hppa (memaddr, info)
 		case '.':
 		  (*info->fprintf_func) (info->stream, "%d",
 				    GET_FIELD (insn, 24, 25));
+		  break;
+		case '*':
+		  (*info->fprintf_func) (info->stream, "%d",
+				    GET_FIELD (insn, 22, 25));
 		  break;
 		case '!':
 		  (*info->fprintf_func) (info->stream, "%sar");

@@ -1,5 +1,9 @@
 Sat Aug 28 00:27:24 1999  Jerry Quinn <jquinn@nortelnetworks.com>
 
+	* hppa-dis.c (MASK_10, read_write_names, add_compl_names,
+	extract_10U_store):  New.
+	(print_insn_hppa):  Add new completers.
+
 	* hppa-dis.c (signed_unsigned_names,mix_half_names,
 	saturation_names):  New.
 	(print_insn_hppa): Add completer codes 'a', 'ch', 'cH', 'cS', and 'c*'.
