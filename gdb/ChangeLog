@@ -1,5 +1,12 @@
 2001-04-16  Kevin Buettner  <kevinb@redhat.com>
 
+	* solib-aix5.c (map_index_vs_section_name_okay): New function.
+	(aix5_relocate_main_executable): Don't use file offsets for
+	determining corresponding sections and map file entries.  Call
+	map_index_vs_section_name_okay() to do this instead.
+
+2001-04-16  Kevin Buettner  <kevinb@redhat.com>
+
 	* procfs.c (open_with_retry): New function.
 	(open_procinfo_files, load_syscalls, proc_iterate_over_mappings)
 	(proc_get_LDT_entry): Call open_with_retry() instead of open().

@@ -562,6 +562,133 @@ aix5_special_symbol_handling (void)
   /* Nothing needed (yet) for AIX5. */
 }
 
+/* On AIX5, the /proc/PID/map information is used to determine
+   the relocation offsets needed for relocating the main executable.
+   There is no problem determining which map entries correspond
+   to the main executable, because these will have the MA_MAINEXEC
+   flag set.  The tricky part is determining which sections correspond
+   to which map entries.  To date, the following approaches have
+   been tried:
+
+    - Use the MA_WRITE attribute of pr_mflags to distinguish the read-only
+      mapping from the read/write mapping.  (This assumes that there are
+      only two mappings for the main executable.)  All writable sections
+      are associated with the read/write mapping and all non-writable
+      sections are associated with the read-only mapping.
+
+      This approach worked quite well until we came across executables
+      which didn't have a read-only mapping.  Both mappings had the
+      same attributes represented in pr_mflags and it was impossible
+      to tell them apart.
+
+    - Use the pr_off field (which represents the offset into the
+      executable) to determine the section-to-mapping relationship.
+      Unfortunately, this approach doesn't work either, because the
+      offset value contained in the mapping is rounded down by some
+      moderately large power-of-2 value (4096 is a typical value).
+      A small (e.g. "Hello World") program will appear to have all
+      of its sections belonging to both mappings.
+
+   Also, the following approach has been considered, but dismissed:
+
+    - The section vma values typically look (something) like
+      0x00000001xxxxxxxx or 0x00000002xxxxxxxx.  Furthermore, the
+      0x00000001xxxxxxxx values always belong to one mapping and
+      the 0x00000002xxxxxxxx values always belong to the other.
+      Thus it seems conceivable that GDB could use the bit patterns
+      in the upper portion (for some definition of "upper") in a
+      section's vma to help determine the section-to-mapping
+      relationship.
+
+      This approach was dismissed because there is nothing to prevent
+      the linker from lumping the section vmas together in one large
+      contiguous space and still expecting the dynamic linker to
+      separate them and relocate them independently.  Also, different
+      linkers have been observed to use different patterns for the
+      upper portions of the vma addresses and it isn't clear what the
+      mask ought to be for distinguishing these patterns.
+
+   The current (admittedly inelegant) approach uses a lookup 
+   table which associates section names with the map index that
+   they're permitted to be in.  This is inelegant because we are
+   making the following assumptions:
+
+    1) There will only be two mappings.
+    2) The relevant (i.e. main executable) mappings will always appear
+       in the same order in the map file.
+    3) The sections named in the table will always belong to the
+       indicated mapping.
+    4) The table completely enumerates all possible section names.
+
+   IMO, any of these deficiencies alone will normally be sufficient
+   to disqualify this approach, but I haven't been able to think of
+   a better way to do it.
+   
+   map_index_vs_section_name_okay() is a predicate which returns
+   true iff the section name NAME is associated with the map index
+   IDX in its builtin table.  Of course, there's no guarantee that
+   this association is actually valid...  */
+
+static int
+map_index_vs_section_name_okay (int idx, const char *name)
+{
+  static struct
+    {
+      char *name;
+      int idx;
+    } okay[] =
+    {
+      { ".interp", 0 },
+      { ".hash", 0 },
+      { ".dynsym", 0 },
+      { ".dynstr", 0 },
+      { ".rela.text", 0 },
+      { ".rela.rodata", 0 },
+      { ".rela.data", 0 },
+      { ".rela.ctors", 0 },
+      { ".rela.dtors", 0 },
+      { ".rela.got", 0 },
+      { ".rela.sdata", 0 },
+      { ".rela.IA_64.pltoff", 0 },
+      { ".rel.data", 0 },
+      { ".rel.sdata", 0 },
+      { ".rel.got", 0 },
+      { ".rel.AIX.pfdesc", 0 },
+      { ".rel.IA_64.pltoff", 0 },
+      { ".dynamic", 0 },
+      { ".init", 0 },
+      { ".plt", 0 },
+      { ".text", 0 },
+      { ".fini", 0 },
+      { ".rodata", 0 },
+      { ".IA_64.unwind_info", 0 },
+      { ".IA_64.unwind", 0 },
+      { ".AIX.mustrel", 0 },
+
+      { ".data", 1 },
+      { ".ctors", 1 },
+      { ".dtors", 1 },
+      { ".got", 1 },
+      { ".dynamic", 1},
+      { ".sdata", 1 },
+      { ".IA_64.pltoff", 1 },
+      { ".sbss", 1 },
+      { ".bss", 1 },
+      { ".AIX.pfdesc", 1 }
+    };
+  int i;
+
+  for (i = 0; i < sizeof (okay) / sizeof (okay[0]); i++)
+    {
+      if (strcmp (name, okay[i].name) == 0)
+	return idx == okay[i].idx;
+    }
+
+  warning ("solib-aix5.c: Ignoring section %s when relocating the executable\n",
+           name);
+  return 0;
+}
+
 #define SECTMAPMASK (~ (CORE_ADDR) 0x03ffffff)
 
 static void
@@ -608,8 +735,8 @@ aix5_relocate_main_executable (void)
 	  if (flags & SEC_ALLOC)
 	    {
 	      file_ptr filepos = sect->the_bfd_section->filepos;
-	      if (mapping->offset <= filepos
-	          && filepos <= mapping->offset + mapping->size)
+	      if (map_index_vs_section_name_okay (i,
+		    bfd_get_section_name (obfd, sect->the_bfd_section)))
 		{
 		  int idx = sect->the_bfd_section->index;
 
