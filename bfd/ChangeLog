@@ -1,3 +1,9 @@
+2003-04-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.h (elf_merge_symbol): When we find a regular definition
+	for an indirect symbol, flip the indirection so that the old
+	direct symbol now points to the new definition.
+
 2003-04-24  Roland McGrath  <roland@redhat.com>
 
 	* elf.c (bfd_section_from_phdr): Map PT_GNU_EH_FRAME to "eh_frame_hdr".

@@ -479,6 +479,7 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
 {
   asection *sec;
   struct elf_link_hash_entry *h;
+  struct elf_link_hash_entry *flip;
   int bind;
   bfd *oldbfd;
   bfd_boolean newdyn, olddyn, olddef, newdef, newdyncommon, olddyncommon;
@@ -769,6 +770,7 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
      As above, we permit a non-weak definition in a shared object to
      override a weak definition in a regular object.  */
 
+  flip = NULL;
   if (! newdyn
       && (newdef
 	  || (bfd_is_com_section (sec)
@@ -797,19 +799,13 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
       if (bfd_is_com_section (sec))
 	*type_change_ok = TRUE;
 
-      /* This union may have been set to be non-NULL when this symbol
-	 was seen in a dynamic object.  We must force the union to be
-	 NULL, so that it is correct for a regular symbol.  */
-
-      h->verinfo.vertree = NULL;
-
-      /* In this special case, if H is the target of an indirection,
-	 we want the caller to frob with H rather than with the
-	 indirect symbol.  That will permit the caller to redefine the
-	 target of the indirection, rather than the indirect symbol
-	 itself.  FIXME: This will break the -y option if we store a
-	 symbol with a different name.  */
-      *sym_hash = h;
+      if ((*sym_hash)->root.type == bfd_link_hash_indirect)
+	flip = *sym_hash;
+      else
+	/* This union may have been set to be non-NULL when this symbol
+	   was seen in a dynamic object.  We must force the union to be
+	   NULL, so that it is correct for a regular symbol.  */
+	h->verinfo.vertree = NULL;
     }
 
   /* Handle the special case of a new common symbol merging with an
@@ -849,7 +845,26 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
       *size_change_ok = TRUE;
       *type_change_ok = TRUE;
 
-      h->verinfo.vertree = NULL;
+      if ((*sym_hash)->root.type == bfd_link_hash_indirect)
+	flip = *sym_hash;
+      else
+	h->verinfo.vertree = NULL;
+    }
+
+  if (flip != NULL)
+    {
+      /* Handle the case where we had a versioned symbol in a dynamic
+	 library and now find a definition in a normal object.  In this
+	 case, we make the versioned symbol point to the normal one.  */
+      flip->root.type = h->root.type;
+      flip->root.u.undef.abfd = h->root.u.undef.abfd;
+      h->root.type = bfd_link_hash_indirect;
+      h->root.u.i.link = (struct bfd_link_hash_entry *) flip;
+      if (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC)
+	{
+	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_DEF_DYNAMIC;
+	  flip->elf_link_hash_flags |= ELF_LINK_HASH_REF_DYNAMIC;
+	}
     }
 
   /* Handle the special case of a weak definition in a regular object
@@ -883,7 +898,7 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
 
   /* Handle the special case of a non-weak definition in a shared
      object followed by a weak definition in a regular object.  In
-     this case we prefer to definition in the shared object.  To make
+     this case we prefer the definition in the shared object.  To make
      this work we have to tell the caller to not treat the new symbol
      as a definition.  */
   if (olddef
