@@ -24,6 +24,10 @@
 #include "config.h"
 #include <stdio.h>
 #include <ctype.h>
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#include "libiberty.h"
 #include "sb.h"
 #include "hash.h"
 #include "macro.h"
