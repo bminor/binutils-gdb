@@ -193,7 +193,11 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
      core file without a upage, reg_ptr will be zero and this is all a big
      NOP.  */
   if (reg_ptr > core_reg_size)
+#ifdef KERNEL_U_ADDR
     reg_ptr -= KERNEL_U_ADDR;
+#else
+    error ("Old mips core file can't be processed on this machine.");
+#endif
 
   for (regno = 0; regno < NUM_REGS; regno++)
     {

@@ -4,6 +4,8 @@ Thu Jul  1 09:51:27 1993  Jim Kingdon  (kingdon@cygnus.com)
 	Define FETCH_INFERIOR_REGISTERS.
 	* config/mips/riscos.mh: Don't include coredep.o; mips-nat.o is enough.
 	Fix misspelling of NAT_FILE.
+	* mips-nat.c (fetch_core_registers): If KERNEL_U_ADDR is not defined,
+	we can still process "modern" core files.
 
 	* ser-unix.c (hardwire_print_tty_state) [HAVE_TERMIOS]: Don't
 	print c_line.
