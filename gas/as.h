@@ -38,7 +38,7 @@
 /* These #defines are for parameters of entire assembler. */
 
 /* For some systems, this is required to be first.  */
-#include "../libiberty/alloca-conf.h"
+#include "libiberty/alloca-conf.h"
 
 /* Now, tend to the rest of the configuration.  */
 #include "config.h"
