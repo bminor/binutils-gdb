@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2004
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -453,6 +453,7 @@ void enums1 ()
   obj_with_enum.x = 0;
   enums2 ();
   obj_with_enum.priv_enum = ClassWithEnum::green;
+  obj_with_enum.x = 1;
 }
 
 class ClassParam {

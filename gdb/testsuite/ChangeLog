@@ -1,5 +1,13 @@
 2004-03-09  Michael Chastain  <mec.gnu@mindspring.com>
 
+	From Corinna Vinschen with modifications.
+	* gdb.cp/classes.cc (enums1): Add a line to extend scope of
+	local variable obj_with_enum.
+	* gdb.cp/classes.exp (test_enums): Remove TODO note about FAIL
+	results with obj_with_enum.
+
+2004-03-09  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.cp/classes.cc: New file, copied from misc.cc.
 	* gdb.cp/classes.exp: Use classes.cc rather than misc.cc.
 
