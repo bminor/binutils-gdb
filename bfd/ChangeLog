@@ -1,5 +1,10 @@
 Sat Oct 29 12:18:10 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Don't move a
+	symbol with a PLT entry into the .plt section if it is defined in
+	a regular file.
+	* elf32-sparc.c (elf32_sparc_adjust_dynamic_symbol): Likewise.
+
 	* linker.c (_bfd_generic_link_add_archive_symbols): It's not an
 	error if an empty archive has no symbol table.
 	* ecoff.c (ecoff_link_add_archive_symbols): Likewise.
