@@ -227,7 +227,7 @@ nlm_symfile_read (objfile, section_offsets, mainline)
   mainsym = lookup_symbol ("main", NULL, VAR_NAMESPACE, NULL, NULL);
 
   if (mainsym
-      && mainsym->class == LOC_BLOCK)
+      && SYMBOL_CLASS(mainsym) == LOC_BLOCK)
     {
       objfile->ei.main_func_lowpc = BLOCK_START (SYMBOL_BLOCK_VALUE (mainsym));
       objfile->ei.main_func_highpc = BLOCK_END (SYMBOL_BLOCK_VALUE (mainsym));
