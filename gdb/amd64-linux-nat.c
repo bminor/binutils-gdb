@@ -350,31 +350,60 @@ amd64_linux_dr_get_status (void)
 }
 
 
+/* This function is called by libthread_db as part of its handling of
+   a request for a thread's local storage address.  */
+
 ps_err_e
 ps_get_thread_area (const struct ps_prochandle *ph,
                     lwpid_t lwpid, int idx, void **base)
 {
-/* This definition comes from prctl.h, but some kernels may not have it.  */
+  if (gdbarch_ptr_bit (current_gdbarch) == 32)
+    {
+      /* The full structure is found in <asm-i386/ldt.h>.  The second
+	 integer is the LDT's base_address and that is used to locate
+	 the thread's local storage.  See i386-linux-nat.c more
+	 info.  */
+      unsigned int desc[4];
+
+      /* This code assumes that "int" is 32 bits and that
+	 GET_THREAD_AREA returns no more than 4 int values.  */
+      gdb_assert (sizeof (int) == 4);	
+#ifndef PTRACE_GET_THREAD_AREA
+#define PTRACE_GET_THREAD_AREA 25
+#endif
+      if  (ptrace (PTRACE_GET_THREAD_AREA, 
+		   lwpid, (void *) (long) idx, (unsigned long) &desc) < 0)
+	return PS_ERR;
+      
+      /* Extend the value to 64 bits.  Here it's assumed that a "long"
+	 and a "void *" are the same.  */
+      (*base) = (void *) (long) desc[1];
+      return PS_OK;
+    }
+  else
+    {
+      /* This definition comes from prctl.h, but some kernels may not
+         have it.  */
 #ifndef PTRACE_ARCH_PRCTL
 #define PTRACE_ARCH_PRCTL      30
 #endif
-
-  /* FIXME: ezannoni-2003-07-09 see comment above about include file order.
-     We could be getting bogus values for these two.  */
-  gdb_assert (FS < ELF_NGREG);
-  gdb_assert (GS < ELF_NGREG);
-  switch (idx)
-    {
-    case FS:
-      if (ptrace (PTRACE_ARCH_PRCTL, lwpid, base, ARCH_GET_FS) == 0)
-	return PS_OK;
-      break;
-    case GS:
-      if (ptrace (PTRACE_ARCH_PRCTL, lwpid, base, ARCH_GET_GS) == 0)
-	return PS_OK;
-      break;
-    default:                   /* Should not happen.  */
-      return PS_BADADDR;
+      /* FIXME: ezannoni-2003-07-09 see comment above about include
+	 file order.  We could be getting bogus values for these two.  */
+      gdb_assert (FS < ELF_NGREG);
+      gdb_assert (GS < ELF_NGREG);
+      switch (idx)
+	{
+	case FS:
+	  if (ptrace (PTRACE_ARCH_PRCTL, lwpid, base, ARCH_GET_FS) == 0)
+	    return PS_OK;
+	  break;
+	case GS:
+	  if (ptrace (PTRACE_ARCH_PRCTL, lwpid, base, ARCH_GET_GS) == 0)
+	    return PS_OK;
+	  break;
+	default:                   /* Should not happen.  */
+	  return PS_BADADDR;
+	}
     }
   return PS_ERR;               /* ptrace failed.  */
 }
