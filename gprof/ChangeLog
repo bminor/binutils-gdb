@@ -1,3 +1,8 @@
+2005-03-15  Nick Clifton  <nickc@redhat.com>
+
+	* basic_blocks.c (print_exec_counts): Step through sorted array of
+	basic blocks.
+
 2005-03-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/es.po: Commit new Spanish translation.
