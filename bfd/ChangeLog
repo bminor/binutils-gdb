@@ -1,4 +1,9 @@
-Fri Jan 21 14:11:16 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+Fri Jan 21 14:11:16 1994  Sean Fagan (sef@cygnus.com)
+
+	* nlmcode.h, liblnm.h, nlm32-alpha.c nlm32-i386.c nlm32-sparc.c:
+	The sparc (and possibly other?) NLM format requires a different
+	way to write exports, so add a write_export field to the backend
+	data (and set it to NULL for everything but the sparc).
 
 	* sunos.c (MY(read_dynamic_relocs)): Compare info->dynrel with NULL,
 	not (struct external_nlist *) NULL.  info->dynrel is a PTR, not
