@@ -314,7 +314,7 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       /* Compute ->frame as if not flat.  If it is flat, we'll change
          it later.  */
       if (fi->next->next != NULL
-	  && (fi->next->next->signal_handler_caller
+	  && ((get_frame_type (fi->next->next) == SIGTRAMP_FRAME)
 	      || deprecated_frame_in_dummy (fi->next->next))
 	  && frameless_look_for_prologue (fi->next))
 	{
@@ -451,7 +451,7 @@ sparc_frame_saved_pc (struct frame_info *frame)
   CORE_ADDR addr;
 
   buf = alloca (MAX_REGISTER_RAW_SIZE);
-  if (frame->signal_handler_caller)
+  if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     {
       /* This is the signal trampoline frame.
          Get the saved PC from the sigcontext structure.  */
@@ -487,7 +487,7 @@ sparc_frame_saved_pc (struct frame_info *frame)
     }
   else if (frame->extra_info->in_prologue ||
 	   (frame->next != NULL &&
-	    (frame->next->signal_handler_caller ||
+	    ((get_frame_type (frame->next) == SIGTRAMP_FRAME) ||
 	     deprecated_frame_in_dummy (frame->next)) &&
 	    frameless_look_for_prologue (frame)))
     {

@@ -1001,8 +1001,8 @@ s390_frame_saved_pc (struct frame_info *fi)
 
 
 
-/* We want backtraces out of signal handlers so we don't
-   set thisframe->signal_handler_caller to 1 */
+/* We want backtraces out of signal handlers so we don't set
+   (get_frame_type (thisframe) == SIGTRAMP_FRAME) to 1 */
 
 CORE_ADDR
 s390_frame_chain (struct frame_info *thisframe)

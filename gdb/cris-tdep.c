@@ -392,7 +392,7 @@ static CORE_ADDR bfd_lookup_symbol (bfd *, const char *);
 
    CORE_ADDR frame
    CORE_ADDR pc
-   int signal_handler_caller
+   enum frame_type type;
    CORE_ADDR return_pc
    int leaf_function
 
@@ -405,8 +405,9 @@ static CORE_ADDR bfd_lookup_symbol (bfd *, const char *);
    of the register PC.  All other frames contain the content of the
    register PC in the next frame.
 
-   The variable signal_handler_caller is non-zero when the frame is
-   associated with the call of a signal handler.
+   The variable `type' indicates the frame's type: normal, SIGTRAMP
+   (associated with a signal handler), dummy (associated with a dummy
+   frame).
 
    The variable return_pc contains the address where execution should be
    resumed when the present frame has finished, the return address.
@@ -1140,7 +1141,7 @@ cris_abi_v2_reg_struct_has_addr (int gcc_p, struct type *type)
 int
 cris_frameless_function_invocation (struct frame_info *fi)
 {
-  if (fi->signal_handler_caller)
+  if ((get_frame_type (fi) == SIGTRAMP_FRAME))
     return 0;
   else
     return frameless_look_for_prologue (fi);

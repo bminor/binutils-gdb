@@ -270,7 +270,7 @@ m68k_store_return_value (struct type *type, char *valbuf)
 static CORE_ADDR
 m68k_frame_chain (struct frame_info *thisframe)
 {
-  if (thisframe->signal_handler_caller)
+  if ((get_frame_type (thisframe) == SIGTRAMP_FRAME))
     return thisframe->frame;
   else if (!inside_entry_file ((thisframe)->pc))
     return read_memory_integer ((thisframe)->frame, 4);
@@ -285,7 +285,7 @@ m68k_frame_chain (struct frame_info *thisframe)
 static int
 m68k_frameless_function_invocation (struct frame_info *fi)
 {
-  if (fi->signal_handler_caller)
+  if ((get_frame_type (fi) == SIGTRAMP_FRAME))
     return 0;
   else
     return frameless_look_for_prologue (fi);
@@ -294,7 +294,7 @@ m68k_frameless_function_invocation (struct frame_info *fi)
 static CORE_ADDR
 m68k_frame_saved_pc (struct frame_info *frame)
 {
-  if (frame->signal_handler_caller)
+  if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     {
       if (frame->next)
 	return read_memory_integer (frame->next->frame + SIG_PC_FP_OFFSET, 4);
@@ -343,12 +343,12 @@ delta68_frame_args_address (struct frame_info *frame_info)
 {
   /* we assume here that the only frameless functions are the system calls
      or other functions who do not put anything on the stack. */
-  if (frame_info->signal_handler_caller)
+  if ((get_frame_type (frame_info) == SIGTRAMP_FRAME))
     return frame_info->frame + 12;
   else if (frameless_look_for_prologue (frame_info))
     {
       /* Check for an interrupted system call */
-      if (frame_info->next && frame_info->next->signal_handler_caller)
+      if (frame_info->next && (get_frame_type (frame_info->next) == SIGTRAMP_FRAME))
 	return frame_info->next->frame + 16;
       else
 	return frame_info->frame + 4;
@@ -759,7 +759,7 @@ lose:;
   frame_info->saved_regs[PC_REGNUM] = (frame_info)->frame + 4;
 #ifdef SIG_SP_FP_OFFSET
   /* Adjust saved SP_REGNUM for fake _sigtramp frames.  */
-  if (frame_info->signal_handler_caller && frame_info->next)
+  if ((get_frame_type (frame_info) == SIGTRAMP_FRAME) && frame_info->next)
     frame_info->saved_regs[SP_REGNUM] =
       frame_info->next->frame + SIG_SP_FP_OFFSET;
 #endif

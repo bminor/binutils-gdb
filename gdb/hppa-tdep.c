@@ -891,7 +891,7 @@ hppa_frame_saved_pc (struct frame_info *frame)
 
 #ifdef FRAME_SAVED_PC_IN_SIGTRAMP
   /* Deal with signal handler caller frames too.  */
-  if (frame->signal_handler_caller)
+  if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     {
       CORE_ADDR rp;
       FRAME_SAVED_PC_IN_SIGTRAMP (frame, &rp);
@@ -910,7 +910,7 @@ hppa_frame_saved_pc (struct frame_info *frame)
          register area to get the return pointer (the values
          in the registers may not correspond to anything useful).  */
       if (frame->next
-	  && (frame->next->signal_handler_caller
+	  && ((get_frame_type (frame->next) == SIGTRAMP_FRAME)
 	      || pc_in_interrupt_handler (frame->next->pc)))
 	{
 	  struct frame_saved_regs saved_regs;
@@ -950,7 +950,7 @@ hppa_frame_saved_pc (struct frame_info *frame)
          information out of the saved register info.  */
       if (rp_offset == 0
 	  && frame->next
-	  && (frame->next->signal_handler_caller
+	  && ((get_frame_type (frame->next) == SIGTRAMP_FRAME)
 	      || pc_in_interrupt_handler (frame->next->pc)))
 	{
 	  struct frame_saved_regs saved_regs;
@@ -1144,7 +1144,7 @@ frame_chain (struct frame_info *frame)
     frame_base = read_memory_integer (frame->frame + SP_REGNUM * 4,
 				      TARGET_PTR_BIT / 8);
 #ifdef FRAME_BASE_BEFORE_SIGTRAMP
-  else if (frame->signal_handler_caller)
+  else if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     {
       FRAME_BASE_BEFORE_SIGTRAMP (frame, &frame_base);
     }
@@ -1215,7 +1215,7 @@ frame_chain (struct frame_info *frame)
 	}
 
       if (u->Save_SP
-	  || tmp_frame->signal_handler_caller
+	  || (get_frame_type (tmp_frame) == SIGTRAMP_FRAME)
 	  || pc_in_interrupt_handler (tmp_frame->pc))
 	break;
 
@@ -1240,7 +1240,7 @@ frame_chain (struct frame_info *frame)
       /* We may have walked down the chain into a function with a frame
          pointer.  */
       if (u->Save_SP
-	  && !tmp_frame->signal_handler_caller
+	  && !(get_frame_type (tmp_frame) == SIGTRAMP_FRAME)
 	  && !pc_in_interrupt_handler (tmp_frame->pc))
 	{
 	  return read_memory_integer (tmp_frame->frame, TARGET_PTR_BIT / 8);
@@ -1388,7 +1388,7 @@ hppa_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
      and doesn't "call" an interrupt routine or signal handler caller,
      then its not valid.  */
   if (u->Save_SP || u->Total_frame_size || u->stub_unwind.stub_type != 0
-      || (thisframe->next && thisframe->next->signal_handler_caller)
+      || (thisframe->next && (get_frame_type (thisframe->next) == SIGTRAMP_FRAME))
       || (next_u && next_u->HP_UX_interrupt_marker))
     return 1;
 
@@ -3888,7 +3888,7 @@ hppa_frame_find_saved_regs (struct frame_info *frame_info,
 
 #ifdef FRAME_FIND_SAVED_REGS_IN_SIGTRAMP
   /* Handle signal handler callers.  */
-  if (frame_info->signal_handler_caller)
+  if ((get_frame_type (frame_info) == SIGTRAMP_FRAME))
     {
       FRAME_FIND_SAVED_REGS_IN_SIGTRAMP (frame_info, frame_saved_regs);
       return;

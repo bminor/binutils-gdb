@@ -1117,19 +1117,24 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 	  + fi->next->extra_info->framesize);
 
   /* Determine whether or not we're in a sigtramp frame.
-     Unfortunately, it isn't sufficient to test
-     fi->signal_handler_caller because this value is sometimes set
-     after invoking INIT_EXTRA_FRAME_INFO.  So we test *both*
-     fi->signal_handler_caller and PC_IN_SIGTRAMP to determine if we
-     need to use the sigcontext addresses for the saved registers.
+     Unfortunately, it isn't sufficient to test (get_frame_type (fi)
+     == SIGTRAMP_FRAME) because this value is sometimes set after
+     invoking INIT_EXTRA_FRAME_INFO.  So we test *both*
+     (get_frame_type (fi) == SIGTRAMP_FRAME) and PC_IN_SIGTRAMP to
+     determine if we need to use the sigcontext addresses for the
+     saved registers.
 
      Note: If an ARM PC_IN_SIGTRAMP method ever needs to compare
      against the name of the function, the code below will have to be
      changed to first fetch the name of the function and then pass
      this name to PC_IN_SIGTRAMP.  */
 
+  /* FIXME: cagney/2002-11-18: This problem will go away once
+     frame.c:get_prev_frame() is modified to set the frame's type
+     before calling functions like this.  */
+
   if (SIGCONTEXT_REGISTER_ADDRESS_P () 
-      && (fi->signal_handler_caller || PC_IN_SIGTRAMP (fi->pc, (char *)0)))
+      && ((get_frame_type (fi) == SIGTRAMP_FRAME) || PC_IN_SIGTRAMP (fi->pc, (char *)0)))
     {
       for (reg = 0; reg < NUM_REGS; reg++)
 	fi->saved_regs[reg] = SIGCONTEXT_REGISTER_ADDRESS (sp, fi->pc, reg);

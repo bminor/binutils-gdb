@@ -377,7 +377,7 @@ alpha_find_saved_regs (struct frame_info *frame)
 #define SIGFRAME_REGSAVE_OFF	(4 * 8)
 #define SIGFRAME_FPREGSAVE_OFF	(SIGFRAME_REGSAVE_OFF + 32 * 8 + 8)
 #endif
-  if (frame->signal_handler_caller)
+  if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     {
       CORE_ADDR sigcontext_addr;
 
@@ -471,7 +471,7 @@ read_next_frame_reg (struct frame_info *fi, int regno)
     {
       /* We have to get the saved sp from the sigcontext
          if it is a signal handler frame.  */
-      if (regno == SP_REGNUM && !fi->signal_handler_caller)
+      if (regno == SP_REGNUM && !(get_frame_type (fi) == SIGTRAMP_FRAME))
 	return fi->frame;
       else
 	{
@@ -490,7 +490,7 @@ alpha_frame_saved_pc (struct frame_info *frame)
   alpha_extra_func_info_t proc_desc = frame->extra_info->proc_desc;
   /* We have to get the saved pc from the sigcontext
      if it is a signal handler frame.  */
-  int pcreg = frame->signal_handler_caller ? PC_REGNUM
+  int pcreg = (get_frame_type (frame) == SIGTRAMP_FRAME) ? PC_REGNUM
                                            : frame->extra_info->pc_reg;
 
   if (proc_desc && PROC_DESC_IS_DUMMY (proc_desc))
@@ -515,7 +515,7 @@ alpha_saved_pc_after_call (struct frame_info *frame)
   proc_desc = find_proc_desc (pc, frame->next);
   pcreg = proc_desc ? PROC_PC_REG (proc_desc) : ALPHA_RA_REGNUM;
 
-  if (frame->signal_handler_caller)
+  if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     return alpha_frame_saved_pc (frame);
   else
     return read_register (pcreg);
@@ -955,7 +955,7 @@ alpha_frame_chain (struct frame_info *frame)
       && PROC_FRAME_OFFSET (proc_desc) == 0
   /* The previous frame from a sigtramp frame might be frameless
      and have frame size zero.  */
-      && !frame->signal_handler_caller)
+      && !(get_frame_type (frame) == SIGTRAMP_FRAME))
     return alpha_frame_past_sigtramp_frame (frame, saved_pc);
   else
     return read_next_frame_reg (frame, PROC_FRAME_REG (proc_desc))
@@ -1018,8 +1018,12 @@ alpha_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 	  char *name;
 
 	  /* Do not set the saved registers for a sigtramp frame,
-	     alpha_find_saved_registers will do that for us.
-	     We can't use frame->signal_handler_caller, it is not yet set.  */
+	     alpha_find_saved_registers will do that for us.  We can't
+	     use (get_frame_type (frame) == SIGTRAMP_FRAME), it is not
+	     yet set.  */
+	  /* FIXME: cagney/2002-11-18: This problem will go away once
+             frame.c:get_prev_frame() is modified to set the frame's
+             type before calling functions like this.  */
 	  find_pc_partial_function (frame->pc, &name,
 				    (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
 	  if (!PC_IN_SIGTRAMP (frame->pc, name))

@@ -367,7 +367,7 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
       annotate_frame_end ();
       return;
     }
-  if (fi->signal_handler_caller)
+  if ((get_frame_type (fi) == SIGTRAMP_FRAME))
     {
       annotate_frame_begin (level == -1 ? 0 : level, fi->pc);
 
@@ -385,15 +385,15 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
     }
 
   /* If fi is not the innermost frame, that normally means that fi->pc
-     points to *after* the call instruction, and we want to get the line
-     containing the call, never the next line.  But if the next frame is
-     a signal_handler_caller or a dummy frame, then the next frame was
-     not entered as the result of a call, and we want to get the line
-     containing fi->pc.  */
+     points to *after* the call instruction, and we want to get the
+     line containing the call, never the next line.  But if the next
+     frame is a SIGTRAMP_FRAME or a DUMMY_FRAME, then the next frame
+     was not entered as the result of a call, and we want to get the
+     line containing fi->pc.  */
   sal =
     find_pc_line (fi->pc,
 		  fi->next != NULL
-		  && !fi->next->signal_handler_caller
+		  && !(get_frame_type (fi->next) == SIGTRAMP_FRAME)
 		  && !deprecated_frame_in_dummy (fi->next));
 
   location_print = (source == LOCATION 
@@ -793,7 +793,7 @@ frame_info (char *addr_exp, int from_tty)
 
   sal = find_pc_line (fi->pc,
 		      fi->next != NULL
-		      && !fi->next->signal_handler_caller
+		      && !(get_frame_type (fi->next) == SIGTRAMP_FRAME)
 		      && !deprecated_frame_in_dummy (fi->next));
   func = get_frame_function (fi);
   s = find_pc_symtab (fi->pc);

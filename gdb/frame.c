@@ -675,7 +675,7 @@ struct frame_info *
 create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 {
   struct frame_info *fi;
-  char *name;
+  enum frame_type type;
 
   fi = (struct frame_info *)
     obstack_alloc (&frame_cache_obstack,
@@ -686,8 +686,27 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 
   fi->frame = addr;
   fi->pc = pc;
-  find_pc_partial_function (pc, &name, (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
-  fi->signal_handler_caller = PC_IN_SIGTRAMP (fi->pc, name);
+  /* NOTE: cagney/2002-11-18: The code segments, found in
+     create_new_frame and get_prev_frame(), that initializes the
+     frames type is subtly different.  The latter only updates ->type
+     when it encounters a SIGTRAMP_FRAME or DUMMY_FRAME.  This stops
+     get_prev_frame() overriding the frame's type when the INIT code
+     has previously set it.  This is really somewhat bogus.  The
+     initialization, as seen in create_new_frame(), should occur
+     before the INIT function has been called.  */
+  if (USE_GENERIC_DUMMY_FRAMES && PC_IN_CALL_DUMMY (fi->pc, 0, 0))
+    /* NOTE: cagney/2002-11-11: Does this even occure?  */
+    type = DUMMY_FRAME;
+  else
+    {
+      char *name;
+      find_pc_partial_function (pc, &name, NULL, NULL);
+      if (PC_IN_SIGTRAMP (fi->pc, name))
+	type = SIGTRAMP_FRAME;
+      else
+	type = NORMAL_FRAME;
+    }
+  fi->type = type;
 
   if (INIT_EXTRA_FRAME_INFO_P ())
     INIT_EXTRA_FRAME_INFO (0, fi);
@@ -746,7 +765,6 @@ get_prev_frame (struct frame_info *next_frame)
   CORE_ADDR address = 0;
   struct frame_info *prev;
   int fromleaf;
-  char *name;
 
   /* Return the inner-most frame, when the caller passes in NULL.  */
   /* NOTE: cagney/2002-11-09: Not sure how this would happen.  The
@@ -845,6 +863,11 @@ get_prev_frame (struct frame_info *next_frame)
   prev->next = next_frame;
   prev->frame = address;
   prev->level = next_frame->level + 1;
+  /* FIXME: cagney/2002-11-18: Should be setting the frame's type
+     here, before anything else, and not last.  Various INIT functions
+     are full of work-arounds for the frames type not being set
+     correctly from the word go.  Ulgh!  */
+  prev->type = NORMAL_FRAME;
 
   /* This change should not be needed, FIXME!  We should determine
      whether any targets *need* INIT_FRAME_PC to happen after
@@ -944,10 +967,36 @@ get_prev_frame (struct frame_info *next_frame)
   set_unwind_by_pc (prev->pc, prev->frame, &prev->register_unwind,
 		    &prev->pc_unwind);
 
-  find_pc_partial_function (prev->pc, &name,
-			    (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
-  if (PC_IN_SIGTRAMP (prev->pc, name))
-    prev->signal_handler_caller = 1;
+  /* NOTE: cagney/2002-11-18: The code segments, found in
+     create_new_frame and get_prev_frame(), that initializes the
+     frames type is subtly different.  The latter only updates ->type
+     when it encounters a SIGTRAMP_FRAME or DUMMY_FRAME.  This stops
+     get_prev_frame() overriding the frame's type when the INIT code
+     has previously set it.  This is really somewhat bogus.  The
+     initialization, as seen in create_new_frame(), should occur
+     before the INIT function has been called.  */
+  if (USE_GENERIC_DUMMY_FRAMES
+      && PC_IN_CALL_DUMMY (prev->pc, 0, 0))
+    prev->type = DUMMY_FRAME;
+  else
+    {
+      /* FIXME: cagney/2002-11-10: This should be moved to before the
+	 INIT code above so that the INIT code knows what the frame's
+	 type is (in fact, for a [generic] dummy-frame, the type can
+	 be set and then the entire initialization can be skipped.
+	 Unforunatly, its the INIT code that sets the PC (Hmm, catch
+	 22).  */
+      char *name;
+      find_pc_partial_function (prev->pc, &name, NULL, NULL);
+      if (PC_IN_SIGTRAMP (prev->pc, name))
+	prev->type = SIGTRAMP_FRAME;
+      /* FIXME: cagney/2002-11-11: Leave prev->type alone.  Some
+         architectures are forcing the frame's type in INIT so we
+         don't want to override it here.  Remember, NORMAL_FRAME == 0,
+         so it all works (just :-/).  Once this initialization is
+         moved to the start of this function, all this nastness will
+         go away.  */
+    }
 
   return prev;
 }
@@ -956,6 +1005,24 @@ CORE_ADDR
 get_frame_pc (struct frame_info *frame)
 {
   return frame->pc;
+}
+
+enum frame_type
+get_frame_type (struct frame_info *frame)
+{
+  /* Some targets still don't use [generic] dummy frames.  Catch them
+     here.  */
+  if (!USE_GENERIC_DUMMY_FRAMES
+      && deprecated_frame_in_dummy (frame))
+    return DUMMY_FRAME;
+  return frame->type;
+}
+
+void
+deprecated_set_frame_type (struct frame_info *frame, enum frame_type type)
+{
+  /* Arrrg!  See comment in "frame.h".  */
+  frame->type = type;
 }
 
 #ifdef FRAME_FIND_SAVED_REGS

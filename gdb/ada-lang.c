@@ -5032,16 +5032,19 @@ find_printable_frame (struct frame_info *fi, int level)
 
   for (; fi != NULL; level += 1, fi = get_prev_frame (fi))
     {
-      /* If fi is not the innermost frame, that normally means that fi->pc
-         points to *after* the call instruction, and we want to get the line
-         containing the call, never the next line.  But if the next frame is
-         a signal_handler_caller or a dummy frame, then the next frame was
-         not entered as the result of a call, and we want to get the line
-         containing fi->pc.  */
+      /* If fi is not the innermost frame, that normally means that
+         fi->pc points at the return instruction (which is *after* the
+         call instruction), and we want to get the line containing the
+         call (because the call is where the user thinks the program
+         is).  However, if the next frame is either a SIGTRAMP_FRAME
+         or a DUMMY_FRAME, then the next frame will contain a saved
+         interrupt PC and such a PC indicates the current (rather than
+         next) instruction/line, consequently, for such cases, want to
+         get the line containing fi->pc.  */
       sal =
 	find_pc_line (fi->pc,
 		      fi->next != NULL
-		      && !fi->next->signal_handler_caller
+		      && !(get_frame_type (fi->next) == SIGTRAMP_FRAME)
 		      && !deprecated_frame_in_dummy (fi->next));
       if (sal.symtab && !is_ada_runtime_file (sal.symtab->filename))
 	{

@@ -93,6 +93,35 @@ extern void get_frame_id (struct frame_info *fi, struct frame_id *id);
    for an invalid frame).  */
 extern int frame_relative_level (struct frame_info *fi);
 
+/* Return the frame's type.  Some are real, some are signal
+   trampolines, and some are completly artificial (dummy).  */
+
+enum frame_type
+{
+  /* A true stack frame, created by the target program during normal
+     execution.  */
+  NORMAL_FRAME,
+  /* A fake frame, created by GDB when performing an inferior function
+     call.  */
+  DUMMY_FRAME,
+  /* In a signal handler, various OSs handle this in various ways.
+     The main thing is that the frame may be far from normal.  */
+  SIGTRAMP_FRAME
+};
+extern enum frame_type get_frame_type (struct frame_info *);
+
+/* FIXME: cagney/2002-11-10: Some targets want to directly mark a
+   frame as being of a specific type.  This shouldn't be necessary.
+   PC_IN_SIGTRAMP() indicates a SIGTRAMP_FRAME and PC_IN_CALL_DUMMY()
+   indicates a DUMMY_FRAME.  I suspect the real problem here is that
+   get_prev_frame() only sets initialized after INIT_EXTRA_FRAME_INFO
+   as been called.  Consequently, some targets found that the frame's
+   type was wrong and tried to fix it.  The correct fix is to modify
+   get_prev_frame() so that it initializes the frame's type before
+   calling any other functions.  */
+extern void deprecated_set_frame_type (struct frame_info *,
+				       enum frame_type type);
+
 /* Unwind the stack frame so that the value of REGNUM, in the previous
    (up, older) frame is returned.  If VALUEP is NULL, don't
    fetch/compute the value.  Instead just return the location of the
@@ -227,15 +256,8 @@ struct frame_info
        moment leave this as speculation.  */
     int level;
 
-    /* Nonzero if this is a frame associated with calling a signal handler.
-
-       Set by machine-dependent code.  On some machines, if
-       the machine-dependent code fails to check for this, the backtrace
-       will look relatively normal.  For example, on the i386
-       #3  0x158728 in sighold ()
-       On other machines (e.g. rs6000), the machine-dependent code better
-       set this to prevent us from trying to print it like a normal frame.  */
-    int signal_handler_caller;
+    /* The frame's type.  */
+    enum frame_type type;
 
     /* For each register, address of where it was saved on entry to
        the frame, or zero if it was not saved on entry to this frame.

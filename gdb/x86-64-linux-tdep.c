@@ -125,7 +125,7 @@ x86_64_linux_sigtramp_saved_pc (struct frame_info *frame)
 CORE_ADDR
 x86_64_linux_saved_pc_after_call (struct frame_info *frame)
 {
-  if (frame->signal_handler_caller)
+  if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     return x86_64_linux_sigtramp_saved_pc (frame);
 
   return read_memory_integer (read_register (SP_REGNUM), 8);
@@ -135,7 +135,7 @@ x86_64_linux_saved_pc_after_call (struct frame_info *frame)
 CORE_ADDR
 x86_64_linux_frame_saved_pc (struct frame_info *frame)
 {
-  if (frame->signal_handler_caller)
+  if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     return x86_64_linux_sigtramp_saved_pc (frame);
   return cfi_get_ra (frame);
 }
@@ -157,7 +157,7 @@ x86_64_linux_frame_chain (struct frame_info *fi)
   ULONGEST addr;
   CORE_ADDR fp, pc;
 
-  if (!fi->signal_handler_caller)
+  if (!(get_frame_type (fi) == SIGTRAMP_FRAME))
     {
       fp = cfi_frame_chain (fi);
       if (fp)
@@ -180,7 +180,7 @@ x86_64_init_frame_pc (int fromleaf, struct frame_info *fi)
 {
   CORE_ADDR addr;
 
-  if (fi->next && fi->next->signal_handler_caller)
+  if (fi->next && (get_frame_type (fi->next) == SIGTRAMP_FRAME))
     {
       addr = fi->next->next->frame
 	+ LINUX_SIGINFO_SIZE + LINUX_UCONTEXT_SIGCONTEXT_OFFSET;

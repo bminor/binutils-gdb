@@ -351,7 +351,7 @@ tuiShowFrameInfo (struct frame_info *fi)
 
       sal = find_pc_line (fi->pc,
                           (fi->next != (struct frame_info *) NULL &&
-                           !fi->next->signal_handler_caller &&
+                           !(get_frame_type (fi->next) == SIGTRAMP_FRAME) &&
                            !deprecated_frame_in_dummy (fi->next)));
 
       sourceAlreadyDisplayed = sal.symtab != 0

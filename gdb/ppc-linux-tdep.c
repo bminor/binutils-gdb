@@ -143,10 +143,15 @@ static int ppc_linux_at_sigtramp_return_path (CORE_ADDR pc);
    behavior is ever fixed.)
 
    PC_IN_SIGTRAMP is called from blockframe.c as well in order to set
-   the signal_handler_caller flag.  Because of our strange definition
-   of in_sigtramp below, we can't rely on signal_handler_caller
+   the frame's type (if a SIGTRAMP_FRAME).  Because of our strange
+   definition of in_sigtramp below, we can't rely on the frame's type
    getting set correctly from within blockframe.c.  This is why we
-   take pains to set it in init_extra_frame_info().  */
+   take pains to set it in init_extra_frame_info().
+
+   NOTE: cagney/2002-11-10: I suspect the real problem here is that
+   the get_prev_frame() only initializes the frame's type after the
+   call to INIT_FRAME_INFO.  get_prev_frame() should be fixed, this
+   code shouldn't be working its way around a bug :-(.  */
 
 int
 ppc_linux_in_sigtramp (CORE_ADDR pc, char *func_name)
@@ -318,14 +323,14 @@ ppc_linux_skip_trampoline_code (CORE_ADDR pc)
 CORE_ADDR
 ppc_linux_frame_saved_pc (struct frame_info *fi)
 {
-  if (fi->signal_handler_caller)
+  if ((get_frame_type (fi) == SIGTRAMP_FRAME))
     {
       CORE_ADDR regs_addr =
 	read_memory_integer (fi->frame + PPC_LINUX_REGS_PTR_OFFSET, 4);
       /* return the NIP in the regs array */
       return read_memory_integer (regs_addr + 4 * PPC_LINUX_PT_NIP, 4);
     }
-  else if (fi->next && fi->next->signal_handler_caller)
+  else if (fi->next && (get_frame_type (fi->next) == SIGTRAMP_FRAME))
     {
       CORE_ADDR regs_addr =
 	read_memory_integer (fi->next->frame + PPC_LINUX_REGS_PTR_OFFSET, 4);
@@ -347,9 +352,11 @@ ppc_linux_init_extra_frame_info (int fromleaf, struct frame_info *fi)
          this is a signal frame by looking to see if the pc points
          at trampoline code */
       if (ppc_linux_at_sigtramp_return_path (fi->pc))
-	fi->signal_handler_caller = 1;
+	deprecated_set_frame_type (fi, SIGTRAMP_FRAME);
       else
-	fi->signal_handler_caller = 0;
+	/* FIXME: cagney/2002-11-10: Is this double bogus?  What
+           happens if the frame has previously been marked as a dummy?  */
+	deprecated_set_frame_type (fi, NORMAL_FRAME);
     }
 }
 
@@ -367,7 +374,7 @@ ppc_linux_frameless_function_invocation (struct frame_info *fi)
 void
 ppc_linux_frame_init_saved_regs (struct frame_info *fi)
 {
-  if (fi->signal_handler_caller)
+  if ((get_frame_type (fi) == SIGTRAMP_FRAME))
     {
       CORE_ADDR regs_addr;
       int i;
@@ -405,7 +412,7 @@ CORE_ADDR
 ppc_linux_frame_chain (struct frame_info *thisframe)
 {
   /* Kernel properly constructs the frame chain for the handler */
-  if (thisframe->signal_handler_caller)
+  if ((get_frame_type (thisframe) == SIGTRAMP_FRAME))
     return read_memory_integer ((thisframe)->frame, 4);
   else
     return rs6000_frame_chain (thisframe);

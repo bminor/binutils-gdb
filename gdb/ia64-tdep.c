@@ -328,9 +328,9 @@ read_sigcontext_register (struct frame_info *frame, int regnum)
   if (frame == NULL)
     internal_error (__FILE__, __LINE__,
 		    "read_sigcontext_register: NULL frame");
-  if (!frame->signal_handler_caller)
+  if (!(get_frame_type (frame) == SIGTRAMP_FRAME))
     internal_error (__FILE__, __LINE__,
-		    "read_sigcontext_register: frame not a signal_handler_caller");
+		    "read_sigcontext_register: frame not a signal trampoline");
   if (SIGCONTEXT_REGISTER_ADDRESS == 0)
     internal_error (__FILE__, __LINE__,
 		    "read_sigcontext_register: SIGCONTEXT_REGISTER_ADDRESS is 0");
@@ -703,7 +703,7 @@ rse_address_add(CORE_ADDR addr, int nslots)
 CORE_ADDR
 ia64_frame_chain (struct frame_info *frame)
 {
-  if (frame->signal_handler_caller)
+  if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     return read_sigcontext_register (frame, sp_regnum);
   else if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     return frame->frame;
@@ -720,7 +720,7 @@ ia64_frame_chain (struct frame_info *frame)
 CORE_ADDR
 ia64_frame_saved_pc (struct frame_info *frame)
 {
-  if (frame->signal_handler_caller)
+  if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     return read_sigcontext_register (frame, pc_regnum);
   else if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     return deprecated_read_register_dummy (frame->pc, frame->frame, pc_regnum);
@@ -730,7 +730,7 @@ ia64_frame_saved_pc (struct frame_info *frame)
 
       if (frame->saved_regs[IA64_VRAP_REGNUM])
 	return read_memory_integer (frame->saved_regs[IA64_VRAP_REGNUM], 8);
-      else if (frame->next && frame->next->signal_handler_caller)
+      else if (frame->next && (get_frame_type (frame->next) == SIGTRAMP_FRAME))
 	return read_sigcontext_register (frame->next, IA64_BR0_REGNUM);
       else	/* either frameless, or not far enough along in the prologue... */
 	return ia64_saved_pc_after_call (frame);
@@ -1163,7 +1163,7 @@ ia64_frame_init_saved_regs (struct frame_info *frame)
   if (frame->saved_regs)
     return;
 
-  if (frame->signal_handler_caller && SIGCONTEXT_REGISTER_ADDRESS)
+  if ((get_frame_type (frame) == SIGTRAMP_FRAME) && SIGCONTEXT_REGISTER_ADDRESS)
     {
       int regno;
 
@@ -1493,7 +1493,7 @@ ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
       cfm = read_register (IA64_CFM_REGNUM);
 
     }
-  else if (frame->next->signal_handler_caller)
+  else if ((get_frame_type (frame->next) == SIGTRAMP_FRAME))
     {
       bsp = read_sigcontext_register (frame->next, IA64_BSP_REGNUM);
       cfm = read_sigcontext_register (frame->next, IA64_CFM_REGNUM);
@@ -1515,7 +1515,7 @@ ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 
       if (frn->saved_regs[IA64_CFM_REGNUM] != 0)
 	cfm = read_memory_integer (frn->saved_regs[IA64_CFM_REGNUM], 8);
-      else if (frn->next && frn->next->signal_handler_caller)
+      else if (frn->next && (get_frame_type (frn->next) == SIGTRAMP_FRAME))
 	cfm = read_sigcontext_register (frn->next, IA64_PFS_REGNUM);
       else if (frn->next
                && PC_IN_CALL_DUMMY (frn->next->pc, frn->next->frame,
@@ -1531,7 +1531,7 @@ ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
   frame->extra_info->sof = cfm & 0x7f;
   frame->extra_info->sol = (cfm >> 7) & 0x7f;
   if (frame->next == 0 
-      || frame->next->signal_handler_caller 
+      || (get_frame_type (frame->next) == SIGTRAMP_FRAME) 
       || next_frame_is_call_dummy)
     frame->extra_info->bsp = rse_address_add (bsp, -frame->extra_info->sof);
   else

@@ -1,3 +1,40 @@
+2002-11-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* frame.h (enum frame_type): Define.
+	(get_frame_type): Declare.
+	(struct frame_info): Add field `type'.  Delete field
+	signal_handler_caller.
+	(deprecated_set_frame_signal_handler_caller): Declare.
+	* frame.c (get_frame_type): New function.
+	(deprecated_set_frame_type): New function.
+	(create_new_frame): Set the frame's type.
+	(get_prev_frame): Similar.
+	* sparc-tdep.c: Use get_frame_type instead of signal_handler_caller.
+	* s390-tdep.c: Ditto.
+	* m68klinux-nat.c: Ditto.
+	* ns32k-tdep.c: Ditto.
+	* x86-64-linux-tdep.c: Ditto.
+	* vax-tdep.c: Ditto.
+	* rs6000-tdep.c: Ditto.
+	* ppc-linux-tdep.c: Ditto.
+	* i386-interix-tdep.c: Ditto.
+	* mips-tdep.c: Ditto.
+	* m68k-tdep.c: Ditto.
+	* hppa-tdep.c: Ditto.
+	* ia64-tdep.c: Ditto.
+	* cris-tdep.c: Ditto.
+	* arm-tdep.c: Ditto.
+	* alpha-tdep.c: Ditto.
+	* i386-tdep.c: Ditto.
+	* stack.c: Ditto.
+	* ada-lang.c: Ditto.
+	* blockframe.c: Update.
+	* i386-interix-tdep.c (i386_interix_back_one_frame): Use
+	deprecated_set_frame_type instead of signal_handler_caller.
+	* ppc-linux-tdep.c (ppc_linux_init_extra_frame_info): Ditto.
+	* rs6000-tdep.c (rs6000_init_extra_frame_info): Ditto.
+	* breakpoint.h: Delete FIXME suggesting get_frame_type.
+
 2002-11-18   Klee Dienes  <kdienes@apple.com>
 
 	* Makefile.in (buildsym.o): Add dependency for gdb_assert.h.

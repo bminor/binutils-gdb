@@ -1423,7 +1423,7 @@ mips_find_saved_regs (struct frame_info *fci)
 /* FIXME!  Is this correct?? */
 #define SIGFRAME_REG_SIZE	MIPS_REGSIZE
 #endif
-  if (fci->signal_handler_caller)
+  if ((get_frame_type (fci) == SIGTRAMP_FRAME))
     {
       for (ireg = 0; ireg < MIPS_NUMREGS; ireg++)
 	{
@@ -1456,7 +1456,7 @@ mips_find_saved_regs (struct frame_info *fci)
 				   a signal, we assume that all registers have been saved.
 				   This assumes that all register saves in a function happen before
 				   the first function call.  */
-       (fci->next == NULL || fci->next->signal_handler_caller)
+       (fci->next == NULL || (get_frame_type (fci->next) == SIGTRAMP_FRAME))
 
   /* In a dummy frame we know exactly where things are saved.  */
        && !PROC_DESC_IS_DUMMY (proc_desc)
@@ -1701,7 +1701,7 @@ mips_frame_saved_pc (struct frame_info *frame)
   mips_extra_func_info_t proc_desc = frame->extra_info->proc_desc;
   /* We have to get the saved pc from the sigcontext
      if it is a signal handler frame.  */
-  int pcreg = frame->signal_handler_caller ? PC_REGNUM
+  int pcreg = (get_frame_type (frame) == SIGTRAMP_FRAME) ? PC_REGNUM
   : (proc_desc ? PROC_PC_REG (proc_desc) : RA_REGNUM);
 
   if (USE_GENERIC_DUMMY_FRAMES
@@ -2451,7 +2451,7 @@ mips_frame_chain (struct frame_info *frame)
       && PROC_FRAME_OFFSET (proc_desc) == 0
       /* The previous frame from a sigtramp frame might be frameless
 	 and have frame size zero.  */
-      && !frame->signal_handler_caller
+      && !(get_frame_type (frame) == SIGTRAMP_FRAME)
       /* For a generic dummy frame, let get_frame_pointer() unwind a
          register value saved as part of the dummy frame call.  */
       && !(USE_GENERIC_DUMMY_FRAMES
@@ -2502,8 +2502,12 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
 	  char *name;
 
 	  /* Do not set the saved registers for a sigtramp frame,
-	     mips_find_saved_registers will do that for us.
-	     We can't use fci->signal_handler_caller, it is not yet set.  */
+	     mips_find_saved_registers will do that for us.  We can't
+	     use (get_frame_type (fci) == SIGTRAMP_FRAME), it is not
+	     yet set.  */
+	  /* FIXME: cagney/2002-11-18: This problem will go away once
+             frame.c:get_prev_frame() is modified to set the frame's
+             type before calling functions like this.  */
 	  find_pc_partial_function (fci->pc, &name,
 				    (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
 	  if (!PC_IN_SIGTRAMP (fci->pc, name))

@@ -685,7 +685,7 @@ m68k_linux_sigtramp_saved_pc (struct frame_info *frame)
 CORE_ADDR
 m68k_linux_frame_saved_pc (struct frame_info *frame)
 {
-  if (frame->signal_handler_caller)
+  if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     return m68k_linux_sigtramp_saved_pc (frame);
 
   return read_memory_integer (frame->frame + 4, 4);

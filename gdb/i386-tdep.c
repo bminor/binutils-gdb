@@ -472,17 +472,16 @@ i386_get_frame_setup (CORE_ADDR pc)
    frame -- that is, the frame which was in progress when the signal
    trampoline was entered.  GDB mostly treats this frame pointer value
    as a magic cookie.  We detect the case of a signal trampoline by
-   looking at the SIGNAL_HANDLER_CALLER field, which is set based on
-   PC_IN_SIGTRAMP.
+   testing for get_frame_type() == SIGTRAMP_FRAME, which is set based
+   on PC_IN_SIGTRAMP.
 
    When a signal trampoline is invoked from a frameless function, we
    essentially have two frameless functions in a row.  In this case,
    we use the same magic cookie for three frames in a row.  We detect
-   this case by seeing whether the next frame has
-   SIGNAL_HANDLER_CALLER set, and, if it does, checking whether the
-   current frame is actually frameless.  In this case, we need to get
-   the PC by looking at the SP register value stored in the signal
-   context.
+   this case by seeing whether the next frame is a SIGTRAMP_FRAME,
+   and, if it does, checking whether the current frame is actually
+   frameless.  In this case, we need to get the PC by looking at the
+   SP register value stored in the signal context.
 
    This should work in most cases except in horrible situations where
    a signal occurs just as we enter a function but before the frame
@@ -498,7 +497,7 @@ i386_get_frame_setup (CORE_ADDR pc)
 int
 i386_frameless_signal_p (struct frame_info *frame)
 {
-  return (frame->next && frame->next->signal_handler_caller
+  return (frame->next && get_frame_type (frame->next) == SIGTRAMP_FRAME
 	  && (frameless_look_for_prologue (frame)
 	      || frame->pc == get_pc_function_start (frame->pc)));
 }
@@ -513,7 +512,7 @@ i386_frame_chain (struct frame_info *frame)
   if (PC_IN_CALL_DUMMY (frame->pc, 0, 0))
     return frame->frame;
 
-  if (frame->signal_handler_caller
+  if (get_frame_type (frame) == SIGTRAMP_FRAME
       || i386_frameless_signal_p (frame))
     return frame->frame;
 
@@ -530,7 +529,7 @@ i386_frame_chain (struct frame_info *frame)
 static int
 i386_frameless_function_invocation (struct frame_info *frame)
 {
-  if (frame->signal_handler_caller)
+  if (get_frame_type (frame) == SIGTRAMP_FRAME)
     return 0;
 
   return frameless_look_for_prologue (frame);
@@ -575,7 +574,7 @@ i386_frame_saved_pc (struct frame_info *frame)
       return pc;
     }
 
-  if (frame->signal_handler_caller)
+  if (get_frame_type (frame) == SIGTRAMP_FRAME)
     return i386_sigtramp_saved_pc (frame);
 
   if (i386_frameless_signal_p (frame))
@@ -592,7 +591,7 @@ i386_frame_saved_pc (struct frame_info *frame)
 static CORE_ADDR
 i386_saved_pc_after_call (struct frame_info *frame)
 {
-  if (frame->signal_handler_caller)
+  if (get_frame_type (frame) == SIGTRAMP_FRAME)
     return i386_sigtramp_saved_pc (frame);
 
   return read_memory_unsigned_integer (read_register (SP_REGNUM), 4);

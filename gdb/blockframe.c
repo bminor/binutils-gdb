@@ -210,7 +210,11 @@ frame_address_in_block (struct frame_info *frame)
      instruction. Unfortunately, this is not straightforward to do, so
      we just use the address minus one, which is a good enough
      approximation.  */
-  if (frame->next != 0 && frame->next->signal_handler_caller == 0)
+  /* FIXME: cagney/2002-11-10: Should this instead test for
+     NORMAL_FRAME?  A dummy frame (in fact all the abnormal frames)
+     save the PC value in the block.  */
+  if (frame->next != 0
+      && get_frame_type (frame->next) != SIGTRAMP_FRAME)
     --pc;
 
   return pc;
