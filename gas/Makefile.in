@@ -316,7 +316,8 @@ configure: configure.in aclocal.m4 acconfig.h
 config.h: config-stamp ; @true
 config-stamp: Makefile conf
 	-rm -f config.new config-stamp
-	echo '#ifndef GAS_VERSION'			 > config.new
+	echo '/* config.h.  Generated automatically by make.  */' > config.new
+	echo '#ifndef GAS_VERSION'			>> config.new
 	echo '#define GAS_VERSION "$(VERSION)"'		>> config.new
 	echo ''						>> config.new
 	cat conf					>> config.new
