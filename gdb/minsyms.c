@@ -176,7 +176,7 @@ lookup_minimal_symbol_by_pc (pc)
       if ((msymbol = objfile -> msymbols) != NULL)
 	{
 	  lo = 0;
-	  hi = objfile -> minimal_symbol_count - 2;
+	  hi = objfile -> minimal_symbol_count - 1;
 	  
 	  /* This code assumes that the minimal symbols are sorted by
 	     ascending address values.  If the pc value is greater than or

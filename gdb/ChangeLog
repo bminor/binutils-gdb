@@ -1,3 +1,10 @@
+Wed Nov  4 11:13:25 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* minsyms.c (lookup_minimal_symbol_by_pc): subtract 1, not 2, from
+	minimal_symbol_count, because the NULL symbol is not included in
+	the count.  This prevented this function from finding the last
+	symbol in the table.
+
 Tue Nov  3 11:29:17 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* dbxread.c (process_one_symbol): if not defined
