@@ -802,11 +802,17 @@ frame_state_for (struct context *context, struct frame_state *fs)
   context->args_size = 0;
   context->lsda = 0;
 
-  if ((fde = get_fde_for_addr (context->ra - 1)) != NULL)
-    {
-      fs->pc = fde->initial_location;
+  fde = get_fde_for_addr (context->ra - 1);
 
+  if (fde == NULL)
+    return;
+  
+  fs->pc = fde->initial_location;
+
+  if (fde->cie_ptr)
+  {
       cie = fde->cie_ptr;
+      
       fs->code_align = cie->code_align;
       fs->data_align = cie->data_align;
       fs->retaddr_column = cie->ra;
@@ -817,7 +823,11 @@ frame_state_for (struct context *context, struct frame_state *fs)
 			   cie->data + cie->data_length, context, fs);
       execute_cfa_program (cie->objfile, fde->data,
 			   fde->data + fde->data_length, context, fs);
-    }
+  }
+  else
+	internal_error (__FILE__, __LINE__,
+		"%s(): Internal error: fde->cie_ptr==NULL !", 
+		__func__);
 }
 
 static void
@@ -1367,6 +1377,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
   bfd *abfd = objfile->obfd;
   char *start = NULL;
   char *end = NULL;
+  int from_eh = 0;
 
   obstack_init (&unwind_tmp_obstack);
 
@@ -1389,6 +1400,8 @@ dwarf2_build_frame_info (struct objfile *objfile)
 
       start = dwarf_frame_buffer;
       end = dwarf_frame_buffer + dwarf_eh_frame_size;
+
+      from_eh = 1;
     }
 
   if (start)
@@ -1410,7 +1423,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
 	  cie_id = read_length (abfd, start, &bytes_read, dwarf64);
 	  start += bytes_read;
 
-	  if (is_cie (cie_id, dwarf64))
+	  if ((from_eh && cie_id == 0) || is_cie (cie_id, dwarf64))
 	    {
 	      struct cie_unit *cie = cie_unit_alloc ();
 	      char *aug;
@@ -1461,7 +1474,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
 		      aug += 1;
 		    }
 		  else
-		    warning ("unknown augmentation");
+		    warning ("%s(): unknown augmentation", __func__);
 		}
 
 	      cie->data = start;
@@ -1476,13 +1489,27 @@ dwarf2_build_frame_info (struct objfile *objfile)
 	      fde = fde_unit_alloc ();
 
 	      fde_chunks.array[fde_chunks.elems++] = fde;
-	      fde->initial_location = read_pointer (abfd, &start);
+	      
+	      fde->initial_location = read_pointer (abfd, &start)
+	        + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 	      fde->address_range = read_pointer (abfd, &start);
 
-	      for (cie = cie_chunks;
-		   cie && (cie->offset != cie_id); cie = cie->next);
+	      cie = cie_chunks;
+	      while(cie)
+	      {
+	        if (cie->objfile == objfile)
+		{
+		  if (from_eh && (cie->offset == (unit_offset + bytes_read - cie_id)))
+		      break;
+		  if (!from_eh && (cie->offset == cie_id))
+		    break;
+		}
+
+		cie = cie->next;
+	      }
+	    
 	      if (!cie)
-		error ("dwarf cfi error: can't find CIE pointer");
+		error ("%s(): can't find CIE pointer", __func__);
 	      fde->cie_ptr = cie;
 
 	      if (cie->augmentation[0] == 'z')
