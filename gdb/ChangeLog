@@ -1,5 +1,11 @@
 2002-01-18  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* alpha-tdep.c (alpha_register_name): New function. 
+	* config/alpha/tm-alpha.h (REGISTER_NAMES): Remove.
+	(REGISTER_NAME): Define.
+
+2002-01-18  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* config/nm-nbsd.h (KERNEL_U_ADDR): Remove.
 
 2002-01-18  Jason Thorpe  <thorpej@wasabisystems.com>
