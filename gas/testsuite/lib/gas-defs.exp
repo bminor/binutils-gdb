@@ -24,10 +24,9 @@ proc gas_version {} {
     catch "exec $AS -version < /dev/null" tmp
     # Should find a way to discard constant parts, keep whatever's
     # left, so the version string could be almost anything at all...
-    regexp " \[0-9\]\[0-9\.a-zA-Z-\]+" $tmp version
+    regexp "version (cygnus-|)\[-0-9.a-zA-Z-\]+" $tmp version
     set tmp $version
-    regexp "\[0-9\.a-zA-Z-\]+" $tmp version
-    clone_output "[which $AS] version $version\n"
+    clone_output "[which $AS] $version\n"
     unset tmp
     unset version
 }
@@ -122,6 +121,9 @@ proc gas_test { file as_opts var_opts testname } {
 	} else {
 	    want_no_output "$testname ($extra_opts)"
 	}
+    }
+    if [info exists errorInfo] then {
+        unset errorInfo
     }
 }
 
