@@ -1,3 +1,7 @@
+2004-03-11  Andrew Cagney  <cagney@redhat.com>
+
+	* solib-svr4.h: Add #ifndef SOLIB_SVR4 wrapper.
+
 2004-03-11  Kevin Buettner  <kevinb@redhat.com>
 
 	* solist.h (master_so_list): New function.
