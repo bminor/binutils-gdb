@@ -253,6 +253,9 @@ struct breakpoint *breakpoint_chain;
 
 int breakpoint_count;
 
+/* Internal breakpoint number */
+static int internal_breakpoint_number = -1;
+
 /* Pointer to current exception event record */
 static struct exception_event_record *current_exception_event;
 
@@ -3810,7 +3813,6 @@ make_breakpoint_permanent (struct breakpoint *b)
 static struct breakpoint *
 create_internal_breakpoint (CORE_ADDR address, enum bptype type)
 {
-  static int internal_breakpoint_number = -1;
   struct symtab_and_line sal;
   struct breakpoint *b;
 
@@ -3822,6 +3824,7 @@ create_internal_breakpoint (CORE_ADDR address, enum bptype type)
   b = set_raw_breakpoint (sal, type);
   b->number = internal_breakpoint_number--;
   b->disposition = disp_donttouch;
+  breakpoint_create_event (b->number);
 
   return b;
 }
@@ -4107,6 +4110,7 @@ solib_load_unload_1 (char *hookname, int tempflag, char *dll_pathname,
     }
 
   mention (b);
+  breakpoint_create_event (b->number);
   do_cleanups (old_chain);
 }
 
@@ -4152,6 +4156,7 @@ create_fork_vfork_event_catchpoint (int tempflag, char *cond_string,
   b->forked_inferior_pid = 0;
 
   mention (b);
+  breakpoint_create_event (b->number);
 }
 
 void
@@ -4190,6 +4195,7 @@ create_exec_event_catchpoint (int tempflag, char *cond_string)
   b->disposition = tempflag ? disp_del : disp_donttouch;
 
   mention (b);
+  breakpoint_create_event (b->number);
 }
 
 static int
@@ -4316,6 +4322,7 @@ set_momentary_breakpoint (struct symtab_and_line sal, struct frame_info *frame,
   if (in_thread_list (inferior_ptid))
     b->thread = pid_to_thread_id (inferior_ptid);
 
+  breakpoint_create_event (b->number);
   return b;
 }
 
@@ -4331,15 +4338,6 @@ mention (struct breakpoint *b)
 
   stb = ui_out_stream_new (uiout);
   old_chain = make_cleanup_ui_out_stream_delete (stb);
-
-  /* FIXME: This is misplaced; mention() is called by things (like hitting a
-     watchpoint) other than breakpoint creation.  It should be possible to
-     clean this up and at the same time replace the random calls to
-     breakpoint_changed with this hook, as has already been done for
-     delete_breakpoint_hook and so on.  */
-  if (create_breakpoint_hook)
-    create_breakpoint_hook (b);
-  breakpoint_create_event (b->number);
 
   switch (b->type)
     {
@@ -4506,6 +4504,7 @@ create_breakpoints (struct symtabs_and_lines sals, char **addr_string,
 	b->enable_state = bp_enabled;
 	b->disposition = disposition;
 	mention (b);
+	breakpoint_create_event (b->number);
       }
   }    
 }
@@ -5342,8 +5341,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
 
 	  scope_breakpoint = set_raw_breakpoint (scope_sal,
 	                                         bp_watchpoint_scope);
-	  set_breakpoint_count (breakpoint_count + 1);
-	  scope_breakpoint->number = breakpoint_count;
+	  scope_breakpoint->number = internal_breakpoint_number--;
 
 	  scope_breakpoint->enable_state = bp_enabled;
 
@@ -5359,9 +5357,12 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
 	  /* The scope breakpoint is related to the watchpoint.  We
 	     will need to act on them together.  */
 	  b->related_breakpoint = scope_breakpoint;
+
+	  breakpoint_create_event (scope_breakpoint->number);
 	}
     }
   value_free_to_mark (mark);
+  breakpoint_create_event (b->number);
   mention (b);
 }
 
@@ -6095,6 +6096,7 @@ create_exception_catchpoint (int tempflag, char *cond_string,
   b->enable_state = bp_enabled;
   b->disposition = tempflag ? disp_del : disp_donttouch;
   mention (b);
+  breakpoint_create_event (b->number);
 }
 
 /* Deal with "catch catch" and "catch throw" commands */
@@ -6260,6 +6262,7 @@ handle_gnu_4_16_catch_command (char *arg, int tempflag, int from_tty)
       b->disposition = tempflag ? disp_del : disp_donttouch;
 
       mention (b);
+      breakpoint_create_event (b->number);
     }
 
   if (sals.nelts > 1)
@@ -6402,6 +6405,7 @@ set_breakpoint_sal (struct symtab_and_line sal)
   b->number = breakpoint_count;
   b->cond = 0;
   b->thread = -1;
+  breakpoint_create_event (b->number);
   return b;
 }
 

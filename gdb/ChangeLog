@@ -1,3 +1,26 @@
+2002-06-18  Keith Seitz  <keiths@redhat.com>
+
+	* breakpoint.c (internal_breakpoint_number): Make static global.
+	(condition_command): Add modify breakpoint event notification.
+	(commands_command): Likewise.
+	(create_internal_breakpoint): internal_breakpoint_number is now global.
+	Add create breakpoint event notification.
+	(create_fork_vfork_event_catchpoint): Likewise.
+	(create_exec_event_catchpoint): Likewise.
+	(mention): Remove FIXME and create breakpoint event.
+	(create_breakpoints): Add create breakpoint event notification.
+	(watch_command_1): Likewise.
+	(create_exception_catchpoint): Likewise.
+	(set_breakpoint_sal): Likewise.
+	(set_ignore_count): Add modify breakopint event notification.
+	
+	* interps.h: Add GDB_INTERPRETER_MI1. GDB_INTERPRETER_MI will
+	now be mi version 2.
+
+	* cli/cli-interp.c (cli_uiout): Make static.
+	(cli_interp): Make static.
+	(cli_interpreter_exec): Use cli_uiout instead of uiout.
+
 2002-05-28  Keith Seitz  <keiths@redhat.com>
 
 	* cli/cli-interp.c: New file. Almost entirely from Apple's

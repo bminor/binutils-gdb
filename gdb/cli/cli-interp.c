@@ -36,8 +36,8 @@ int cli_interpreter_exec (void *data, char *command_str);
 int cli_interpreter_display_prompt (void *data, char *new_prompt);
 
 /* These are the ui_out and the interpreter for the console interpreter. */
-struct ui_out *cli_uiout;
-struct gdb_interpreter *cli_interp;
+static struct ui_out *cli_uiout;
+static struct gdb_interpreter *cli_interp;
 
 /* These implement the cli out interpreter: */
 
@@ -90,7 +90,7 @@ cli_interpreter_display_prompt (void *data, char *new_prompt)
 int
 cli_interpreter_exec (void *data, char *command_str)
 {
-  return gdb_execute_command (uiout, command_str, 0);
+  return gdb_execute_command (cli_uiout, command_str, 0);
 }
 
 /* standard gdb initialization hook */
