@@ -26,7 +26,7 @@ END-INFO-DIR-ENTRY
 @end ifinfo
 
 @ifinfo
-Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
+Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -54,7 +54,7 @@ into another language, under the above conditions for modified versions.
 @c This file documents the GNU binary utilities "ar", "ld", "objcopy",
 @c  "objdump", "nm", "size", "strings", "strip", "readelf" and "ranlib".
 @c
-@c Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
+@c Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000 Free Software Foundation, Inc.
 @c 
 @c This text may be freely distributed under the terms of the GNU
 @c General Public License.
@@ -1353,6 +1353,12 @@ register 13 called 'sp', register 14 called 'lr' and register 15 called
 select the name set used by the ARM Procedure Call Standard, whilst
 specifying @samp{--disassembler-options=reg-names-raw} will just use
 @samp{r} followed by the register number.
+
+This option can also be used for ARM architectures to force the
+disassembler to interpret all instructions as THUMB instructions by
+using the switch @samp{--disassembler-options=force-thumb}.  This can be
+useful when attempting to disassemble thumb code produced by other
+compilers.
 
 @item -p
 @itemx --private-headers

@@ -1,3 +1,8 @@
+2000-01-03  Nick Clifton  <nickc@cygnus.com>
+
+	* binutils.texi: Document new, ARM specific disassembler
+          command line switch "-M force-thumb".
+
 1999-12-28  Nick Clifton  <nickc@cygnus.com>
 
 	* readelf.c: Update with new constants added by Oct 4, 1999
