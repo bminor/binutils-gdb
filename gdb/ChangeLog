@@ -28,10 +28,6 @@ end-sanitize-gdbtk
 	* config/sparc/tm-sparc.h (FIX_CALL_DUMMY):  Fix byte-order
 	problems.  Makes DOS hosted function calling work.
 	* sparclite/crt0.s:  Define _start to make COFF happy.
-	* testsuite/config/rom68k.exp (gdb_target_rom68k):  Use
-	$targetname, $serialport and $baud instead of hardwired variables.
-	* testsuite/gdb.base/{sigall.exp signals.exp}:  Skip these if the
-	target doesn't support signals.
 
 Wed Mar 29 09:11:51 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
