@@ -1,3 +1,11 @@
+Sat Jan 29 23:25:57 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* paread.c (read_unwind_info): Fix typo.
+
+	* paread.c (pa_symtab_read): Update the "check_strange_names"
+	filter to match GCC's current output.  Filter out section symbols
+	(which the HP linker sometimes puts in the wrong place).
+
 Sat Jan 29 07:44:59 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* serial.h (SERIAL_SET_TTY_STATE): Comment return value.

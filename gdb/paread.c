@@ -190,18 +190,18 @@ pa_symtab_read (abfd, addr, objfile)
 #endif
 
 	    check_strange_names:
-	      /* GAS leaves labels in .o files after assembling.  At
-		 least labels starting with "LS$", "LBB$", "LBE$",
-		 "LC$", and "L$" can happen.  This should be fixed in
-		 the assembler and/or compiler, to save space in the
-		 executable (and because having GDB make gross
-		 distinctions based on the name is kind of ugly), but
-		 until then, just ignore them.  ("L$" at least, has something
-		 to do with getting relocation correct, so that one might
-		 be hard to fix).  */
-	      if (*symname == 'L'
-		  && (symname[1] == '$' || symname[2] == '$' 
-		      || symname[3] == '$'))
+	      /* Utah GCC 2.5, FSF GCC 2.6 and later generate correct local
+		 label prefixes for stabs, constant data, etc.  So we need
+		 only filter out L$ symbols which are left in due to
+		 limitations in how GAS generates SOM relocations.
+
+		 When linking in the HPUX C-library the HP linker has
+		 the nasty habit of placing section symbols from the literal
+		 subspaces in the middle of the program's text.  Filter
+		 those out as best we can.  Check for first and last character
+		 being '$'.  */
+	      if ((symname[0] == 'L' && symname[1] == '$')
+		  || (symname[0] == '$' && symname[strlen(symname) - 1] == '$'))
 		continue;
 	      break;
 
@@ -314,7 +314,7 @@ read_unwind_info (objfile)
 
   /* Allocate memory for the unwind table.  */
   ui->table = obstack_alloc (&objfile->psymbol_obstack, total_size);
-  ui->last = total_entries + 1;
+  ui->last = total_entries - 1;
 
   /* We will read the unwind entries into temporary memory, then
      fill in the actual unwind table.  */
