@@ -1939,7 +1939,7 @@ DEFUN_VOID (write_object_file)
      go is up to Ken.. */
   if (bfd_close_all_done (abfd) == false)
     as_fatal ("Can't close %s: %s", out_file_name,
-	      bfd_errmsg (bfd_error));
+	      bfd_errmsg (bfd_get_error ()));
 #else
   {
     extern bfd *stdoutput;
