@@ -85,30 +85,6 @@ extern int fputc();
 extern int unlink();
 #endif /* STDC_HEADERS */
 
-#ifndef uint64e_type
-#ifdef __GNUC__
-#define uint64e_type unsigned long long
-#define int64e_type long long
-#define uint64_typeLOW(x) (unsigned long)(((x) & 0xffffffff))
-#define uint64_typeHIGH(x) (unsigned long)(((x) >> 32) & 0xffffffff)
-#else
-struct  uint64e_struct {
-  unsigned long low, high;
-};
-#define uint64e_type struct uint64e_struct
-#define int64e_type struct uint64e_struct
-#define uint64_typeLOW(x) (unsigned long)(((x).low))
-#define uint64_typeHIGH(x) (unsigned long)(((x).high))
-#endif
-#endif
-
-#ifndef int64_type
-#define int64_type int64e_type
-#endif
-#ifndef uint64_type
-#define uint64_type uint64e_type
-#endif
-
 #ifndef BYTES_IN_PRINTF_INT
 #define BYTES_IN_PRINTF_INT 4
 #endif
