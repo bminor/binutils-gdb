@@ -224,7 +224,7 @@ fillup_symbols (abfd, buf, len, val)
 	  abfd->tdata.srec_data->strings = (char *) bfd_alloc (abfd, abfd->tdata.srec_data->string_size);
 	  if (!abfd->tdata.srec_data->symbols || !abfd->tdata.srec_data->strings)
 	    {
-	      bfd_error = no_memory;
+	      bfd_set_error (bfd_error_no_memory);
 	      abort ();		/* FIXME */
 	    }
 	  abfd->tdata.srec_data->symbol_idx = 0;
@@ -314,7 +314,7 @@ DEFUN (srec_mkobject, (abfd),
       tdata_type *tdata = (tdata_type *) bfd_alloc (abfd, sizeof (tdata_type));
       if (!tdata)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return false;
 	}
       abfd->tdata.srec_data = tdata;
@@ -350,7 +350,6 @@ pass_over (abfd, func, symbolfunc, section)
       switch (*src)
 	{
 	default:
-	  eof = (boolean) (bfd_read (src, 1, 1, abfd) != 1);
 	  if (eof)
 	    return;
 	  break;
@@ -533,7 +532,7 @@ DEFUN (srec_get_section_contents, (abfd, section, location, offset, count),
       section->used_by_bfd = (PTR) bfd_alloc (abfd, section->_raw_size);
       if (!section->used_by_bfd)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return false;
 	}
 
@@ -574,7 +573,7 @@ DEFUN (srec_set_section_contents, (abfd, section, location, offset, bytes_to_do)
 
   if (!entry)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -584,7 +583,7 @@ DEFUN (srec_set_section_contents, (abfd, section, location, offset, bytes_to_do)
       unsigned char *data = (unsigned char *) bfd_alloc (abfd, bytes_to_do);
       if (!data)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return false;
 	}
       memcpy (data, location, bytes_to_do);

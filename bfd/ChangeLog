@@ -1,3 +1,8 @@
+Fri Feb 25 12:57:00 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* srec.c (pass_over): Don't skip too many characters when
+	end of line seen.
+
 Fri Feb 25 11:41:57 1994  Ian Lance Taylor  (ian@cygnus.com)
 
 	* ecoff.c (ecoff_sizeof_headers): Align result to 16 byte
