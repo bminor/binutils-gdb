@@ -1,3 +1,8 @@
+2003-07-23  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* elf32-m68hc1x.c (elf32_m68hc11_size_stubs): Avoid crash when
+	we have a local symbol in common section.
+
 2003-07-22  H.J. Lu <hongjiu.lu@intel.com>
 
 	* elflink.c (_bfd_elf_dynamic_symbol_p): Don't return TRUE for
