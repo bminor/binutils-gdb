@@ -1250,7 +1250,8 @@ _bfd_strip_section_from_output (info, s)
 	  asection *is;
 	  for (is = abfd->sections; is != NULL; is = is->next)
 	    {
-	      if (is != s && is->output_section == os)
+	      if (is != s && is->output_section == os
+		  && (is->flags & SEC_EXCLUDE) == 0)
 		break;
 	    }
 	  if (is != NULL)
@@ -1273,4 +1274,6 @@ _bfd_strip_section_from_output (info, s)
 	    break;
 	  }
     }
+
+  s->flags |= SEC_EXCLUDE;
 }

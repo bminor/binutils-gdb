@@ -1,3 +1,8 @@
+2001-10-18  Jakub Jelinek  <jakub@redhat.com>
+
+	* section.c (_bfd_strip_section_from_output): Don't count
+	SEC_EXCLUDE sections as references.  Set SEC_EXCLUDE.
+
 2001-10-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-m10200.c (mn10200_elf_relax_section): Cast assignment to
