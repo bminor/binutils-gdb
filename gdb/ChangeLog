@@ -1,5 +1,8 @@
 Thu Jan 23 22:24:43 1992  Fred Fish  (fnf at cygnus.com)
 
+	* i386-tdep.c (i386_frame_num_args):  Takes a pointer to a struct
+	not the entire struct itself.
+
 	* valops.c (value_assign):  Cast some args to modify_field() and
 	{read,write}_register_bytes() correctly.
 
