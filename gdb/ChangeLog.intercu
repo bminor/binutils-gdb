@@ -1,3 +1,20 @@
+2004-02-24  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2read.c (free_one_comp_unit): Update signature so it can be
+	used as a cleanup.  Clear the per_cu pointer.  Add some comments.
+	(free_one_cached_comp_unit): Update signature so it can be used
+	as a cleanup.  Remove unused argument.
+	(dwarf2_build_psymtabs_hard): Update call to
+	free_one_cached_comp_unit.  Don't free the obstack here.
+	(process_queue): Keep dwarf2_queue up to date as we remove items
+	from the queue.
+	(dwarf2_release_queue): New function.
+	(psymtab_to_symtab_1): Use cleanups.
+	(load_full_comp_unit): Likewise.
+	(free_comp_units_worker): Remove clearing of the cu pointer.
+	(clear_per_cu_pointer): Also free the partial_die_obstack.  Update
+	comments.
+
 2004-02-23  Daniel Jacobowitz  <drow@mvista.com>
 
 	* dwarf2read.c (MAX_CACHE_AGE): Lower to 5.

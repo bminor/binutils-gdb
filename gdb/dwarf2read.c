@@ -987,7 +987,7 @@ static struct dwarf2_per_cu_data *dwarf2_find_containing_comp_unit
 static struct partial_symtab *dwarf2_find_comp_unit_psymtab
   (unsigned int offset, struct objfile *objfile);
 
-static void free_one_comp_unit (struct dwarf2_cu *);
+static void free_one_comp_unit (void *);
 
 static void clear_per_cu_pointer (void *);
 
@@ -995,7 +995,7 @@ static void free_cached_comp_units (void *);
 
 static void age_cached_comp_units (void *);
 
-static void free_one_cached_comp_unit (struct dwarf2_cu *, struct dwarf2_cu *);
+static void free_one_cached_comp_unit (void *);
 
 static void set_die_type (struct die_info *, struct type *,
 			  struct dwarf2_cu *);
@@ -1446,7 +1446,7 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 	     a nice speed boost but require a lot of editing in this
 	     function.  */
 	  if (per_cu->cu != NULL)
-	    free_one_cached_comp_unit (&cu, per_cu->cu);
+	    free_one_cached_comp_unit (per_cu->cu);
 
 	  cu.per_cu = per_cu;
 
@@ -1485,9 +1485,6 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 	  first_die = load_partial_dies (abfd, info_ptr, 1, &cu);
 
 	  scan_partial_symbols (first_die, &lowpc, &highpc, &cu, 0);
-
-	  cu.partial_dies = NULL;
-	  obstack_free (&cu.partial_die_obstack, NULL);
 
 	  /* If we didn't find a lowpc, set it to highpc to avoid
 	     complaints from `maint check'.  */
@@ -2346,6 +2343,33 @@ process_queue (struct objfile *objfile)
 	  item->per_cu->queued = 0;
 	}
       last = item;
+      dwarf2_queue = item = last->next;
+      xfree (last);
+    }
+}
+
+/* Free all allocated queue entries.  This function only releases anything if
+   an error was thrown; if the queue was processed then it would have been
+   freed as we went along.  */
+
+static void
+dwarf2_release_queue (void *dummy)
+{
+  struct dwarf2_queue_item *item, *last;
+
+  item = dwarf2_queue;
+  while (item)
+    {
+      /* Anything still marked queued is likely to be in an
+	 inconsistent state, so discard it.  */
+      if (item->per_cu->queued)
+	{
+	  if (item->per_cu->cu != NULL)
+	    free_one_cached_comp_unit (item->per_cu->cu);
+	  item->per_cu->queued = 0;
+	}
+
+      last = item;
       item = item->next;
       xfree (last);
     }
@@ -2361,13 +2385,12 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
   obstack_init (&dwarf2_tmp_obstack);
   back_to = make_cleanup (dwarf2_free_tmp_obstack, NULL);
 
-  /* FIXME: More cleanup issues.  */
   if (dwarf2_per_objfile->cu_tree == NULL)
     {
       struct dwarf2_cu *cu;
       cu = load_full_comp_unit (pst, NULL);
+      make_cleanup (free_one_comp_unit, cu);
       process_full_comp_unit (pst, cu);
-      free_one_comp_unit (cu);
     }
   else
     {
@@ -2381,6 +2404,9 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
       per_cu = (struct dwarf2_per_cu_data *) node->value;
 
       per_cu->psymtab = pst;
+
+      make_cleanup (dwarf2_release_queue, NULL);
+
       queue_comp_unit (per_cu);
 
       process_queue (pst->objfile);
@@ -2390,9 +2416,10 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
          caching.  */
       age_cached_comp_units (NULL);
     }
+
+  do_cleanups (back_to);
 }
 
-/* FIXME: Cleanup issues.  */
 static struct dwarf2_cu *
 load_full_comp_unit (struct partial_symtab *pst,
 		     struct dwarf2_per_cu_data *per_cu)
@@ -2401,7 +2428,7 @@ load_full_comp_unit (struct partial_symtab *pst,
   struct dwarf2_cu *cu;
   unsigned long offset;
   char *info_ptr;
-  struct cleanup *back_to;
+  struct cleanup *back_to, *free_cu_cleanup;
   struct attribute *attr;
 
   /* Set local variables from the partial symbol table info.  */
@@ -2411,6 +2438,9 @@ load_full_comp_unit (struct partial_symtab *pst,
 
   cu = xmalloc (sizeof (struct dwarf2_cu));
   memset (cu, 0, sizeof (struct dwarf2_cu));
+
+  /* If an error occurs while loading, release our storage.  */
+  free_cu_cleanup = make_cleanup (free_one_comp_unit, cu);
 
   cu->objfile = pst->objfile;
 
@@ -2443,6 +2473,10 @@ load_full_comp_unit (struct partial_symtab *pst,
     set_cu_language (language_minimal, cu);
 
   do_cleanups (back_to);
+
+  /* We've successfully allocated this compilation unit.  Let our caller
+     clean it up when finished with it.  */
+  discard_cleanups (free_cu_cleanup);
 
   return cu;
 }
@@ -9095,14 +9129,23 @@ dwarf2_find_comp_unit_psymtab (unsigned int offset, struct objfile *objfile)
 		  offset);
 }
 
-/* Release one cached compilation unit, CU.  */
+/* Release one cached compilation unit, CU.  We unlink it from the tree
+   of compilation units, but we don't remove it from the read_in_chain
+   (so it should not be on that chain to begin with).  */
 
 static void
-free_one_comp_unit (struct dwarf2_cu *cu)
+free_one_comp_unit (void *data)
 {
+  struct dwarf2_cu *cu = data;
+
+  if (cu->per_cu != NULL)
+    cu->per_cu->cu = NULL;
+  cu->per_cu = NULL;
+
   obstack_free (&cu->partial_die_obstack, NULL);
   if (cu->dies)
     free_die_list (cu->dies);
+
   xfree (cu);
 }
 
@@ -9143,7 +9186,6 @@ free_comp_units_worker (struct dwarf2_cu *target_cu, int aging)
 	  || (!aging && target_cu == NULL))
 	{
 	  free_one_comp_unit (per_cu->cu);
-	  per_cu->cu = NULL;
 	  *last_chain = next_cu;
 	}
       else
@@ -9156,6 +9198,13 @@ free_comp_units_worker (struct dwarf2_cu *target_cu, int aging)
     }
 }
 
+/* This cleanup function is passed the address of a dwarf2_cu on the stack
+   when we're finished with it.  We can't free the pointer itself, but be
+   sure to unlink it from the cache.  Also release any associated storage
+   and perform cache maintenance.
+
+   Only used during partial symbol parsing.  */
+
 static void
 clear_per_cu_pointer (void *data)
 {
@@ -9163,12 +9212,15 @@ clear_per_cu_pointer (void *data)
 
   if (cu->per_cu != NULL)
     {
-      age_cached_comp_units (NULL);
+      obstack_free (&cu->partial_die_obstack, NULL);
+      cu->partial_dies = NULL;
 
       /* This compilation unit is on the stack in our caller, so we
 	 should not xfree it.  Just unlink it.  */
       cu->per_cu->cu = NULL;
       cu->per_cu = NULL;
+
+      age_cached_comp_units (NULL);
     }
 }
 
@@ -9185,7 +9237,7 @@ age_cached_comp_units (void *data)
 }
 
 static void
-free_one_cached_comp_unit (struct dwarf2_cu *cu, struct dwarf2_cu *target_cu)
+free_one_cached_comp_unit (void *target_cu)
 {
   free_comp_units_worker (target_cu, 0);
 }
