@@ -1,5 +1,5 @@
 /* Target-dependent code for the IA-64 for GDB, the GNU debugger.
-   Copyright 2000
+   Copyright 2000, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -29,7 +29,7 @@
    overly generous to allow for different pages sizes. */
 
 #define GATE_AREA_START 0xa000000000000100LL
-#define GATE_AREA_END   0xa000000000010000LL
+#define GATE_AREA_END   0xa000000000020000LL
 
 /* Offset to sigcontext structure from frame of handler */
 #define IA64_LINUX_SIGCONTEXT_OFFSET 192

@@ -1515,7 +1515,7 @@ go32_sldt (char *arg, int from_tty)
 	  if (ldt_entry < 0
 	      || (ldt_entry & 4) == 0
 	      || (ldt_entry & 3) != (cpl & 3))
-	    error ("Invalid LDT entry 0x%03x.", ldt_entry);
+	    error ("Invalid LDT entry 0x%03lx.", (unsigned long)ldt_entry);
 	}
     }
 
@@ -1553,8 +1553,8 @@ go32_sldt (char *arg, int from_tty)
       if (ldt_entry >= 0)
 	{
 	  if (ldt_entry > limit)
-	    error ("Invalid LDT entry %#x: outside valid limits [0..%#x]",
-		   ldt_entry, limit);
+	    error ("Invalid LDT entry %#lx: outside valid limits [0..%#x]",
+		   (unsigned long)ldt_entry, limit);
 
 	  display_descriptor (ldt_descr.stype, base, ldt_entry / 8, 1);
 	}
@@ -1584,8 +1584,8 @@ go32_sgdt (char *arg, int from_tty)
 	{
 	  gdt_entry = parse_and_eval_long (arg);
 	  if (gdt_entry < 0 || (gdt_entry & 7) != 0)
-	    error ("Invalid GDT entry 0x%03x: not an integral multiple of 8.",
-		   gdt_entry);
+	    error ("Invalid GDT entry 0x%03lx: not an integral multiple of 8.",
+		   (unsigned long)gdt_entry);
 	}
     }
 
@@ -1595,8 +1595,8 @@ go32_sgdt (char *arg, int from_tty)
   if (gdt_entry >= 0)
     {
       if (gdt_entry > gdtr.limit)
-	error ("Invalid GDT entry %#x: outside valid limits [0..%#x]",
-	       gdt_entry, gdtr.limit);
+	error ("Invalid GDT entry %#lx: outside valid limits [0..%#x]",
+	       (unsigned long)gdt_entry, gdtr.limit);
 
       display_descriptor (0, gdtr.base, gdt_entry / 8, 1);
     }
@@ -1625,7 +1625,7 @@ go32_sidt (char *arg, int from_tty)
 	{
 	  idt_entry = parse_and_eval_long (arg);
 	  if (idt_entry < 0)
-	    error ("Invalid (negative) IDT entry %d.", idt_entry);
+	    error ("Invalid (negative) IDT entry %ld.", idt_entry);
 	}
     }
 
@@ -1637,8 +1637,8 @@ go32_sidt (char *arg, int from_tty)
   if (idt_entry >= 0)
     {
       if (idt_entry > idtr.limit)
-	error ("Invalid IDT entry %#x: outside valid limits [0..%#x]",
-	       idt_entry, idtr.limit);
+	error ("Invalid IDT entry %#lx: outside valid limits [0..%#x]",
+	       (unsigned long)idt_entry, idtr.limit);
 
       display_descriptor (1, idtr.base, idt_entry, 1);
     }
@@ -1834,7 +1834,7 @@ display_page_table (long n, int force)
 static void
 go32_pte (char *arg, int from_tty)
 {
-  long pde_idx = -1, i;
+  long pde_idx = -1L, i;
 
   if (arg && *arg)
     {
@@ -1845,7 +1845,7 @@ go32_pte (char *arg, int from_tty)
 	{
 	  pde_idx = parse_and_eval_long (arg);
 	  if (pde_idx < 0 || pde_idx >= 1024)
-	    error ("Entry %d is outside valid limits [0..1023].", pde_idx);
+	    error ("Entry %ld is outside valid limits [0..1023].", pde_idx);
 	}
     }
 

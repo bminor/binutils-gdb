@@ -1,6 +1,6 @@
 # This testcase is part of GDB, the GNU debugger.
 
-# Copyright 1996, 1997, 1999, 2003 Free Software Foundation, Inc.
+# Copyright 1996, 1997, 1999, 2003, 2004 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -219,6 +219,9 @@ proc test_struct_calls { n } {
 
     # Call fun${n}, checking the printed return-value.
     setup_kfails structs-*tld* i*86-*-* gdb/1447
+    setup_kfails structs-*tld* sparc64-*-* gdb/1447
+    setup_kfails structs-*tld* sparc*-*-solaris2* gdb/1447
+    setup_kfails structs-*tld* x86_64-*-* gdb/1447
     setup_compiler_kfails structs-tc-* gcc-3-3 "DWARF 2" i*86-*-* gdb/1455
     gdb_test "p/c fun${n}()"  "[foo ${n}]" "p/c fun<n>(); ${tests}"
 
@@ -231,6 +234,9 @@ proc test_struct_calls { n } {
 
     gdb_test "call Fun${n}(foo${n})" "" "call Fun<n>(foo<n>); ${tests}"
     setup_kfails structs-*tld* i*86-*-* gdb/1447
+    setup_kfails structs-*tld* sparc64-*-* gdb/1447
+    setup_kfails structs-*tld* sparc*-*-solaris2* gdb/1447
+    setup_kfails structs-*tld* x86_64-*-* gdb/1447
     setup_compiler_kfails structs-tc-* gcc-3-3 "DWARF 2" i*86-*-* gdb/1455
     gdb_test "p/c L${n}" [foo ${n}] "p/c L<n>; ${tests}"
 }
@@ -285,7 +291,10 @@ proc test_struct_returns { n } {
 
     # Check that the program invalidated the relevant global.
     setup_kfails structs-tld i*86-*-* gdb/1447
-    gdb_test "p/c L${n}" " = [zed $n]" "zed L<n> for return; ${tests} .${testfile}."
+    setup_kfails structs-tld sparc64-*-* gdb/1447
+    setup_kfails structs-tld sparc*-*-solaris2* gdb/1447
+    setup_kfails structs-tld x86_64-*-* gdb/1447
+    gdb_test "p/c L${n}" " = [zed $n]" "zed L<n> for return; ${tests}"
 
     # Force the "return".  This checks that the return is always
     # performed, and that GDB correctly reported this to the user.
@@ -334,6 +343,9 @@ proc test_struct_returns { n } {
 
     set test "value foo<n> returned; ${tests}"
     setup_kfails structs-*tld* i*86-*-* gdb/1447
+    setup_kfails structs-*tld* sparc64-*-* gdb/1447
+    setup_kfails structs-*tld* sparc*-*-solaris2* gdb/1447
+    setup_kfails structs-*tld* x86_64-*-* gdb/1447
     gdb_test_multiple "p/c L${n}" "${test}" {
 	-re " = [foo ${n}].*${gdb_prompt} $" {
 	    if $return_value_unknown {
@@ -385,6 +397,9 @@ proc test_struct_returns { n } {
 
     # Check that the program invalidated the relevant global.
     setup_kfails structs-tld i*86-*-* gdb/1447
+    setup_kfails structs-tld sparc64-*-* gdb/1447
+    setup_kfails structs-tld sparc*-*-solaris2* gdb/1447
+    setup_kfails structs-tld x86_64-*-* gdb/1447
     gdb_test "p/c L${n}" " = [zed $n]" "zed L<n> for finish; ${tests}"
 
     # Finish the function, set 'finish_value_unknown" to non-empty if the
@@ -407,6 +422,9 @@ proc test_struct_returns { n } {
     # check that the variable was cleared, is printed.
     set test "value foo<n> finished; ${tests}"
     setup_kfails structs-*tld* i*86-*-* gdb/1447
+    setup_kfails structs-*tld* sparc64-*-* gdb/1447
+    setup_kfails structs-*tld* sparc*-*-solaris2* gdb/1447
+    setup_kfails structs-*tld* x86_64-*-* gdb/1447
     gdb_test_multiple "p/c" "${test}" {
 	-re "[foo ${n}]\[\r\n\]+${gdb_prompt} $" {
 	    if $finish_value_unknown {

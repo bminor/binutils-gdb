@@ -1,7 +1,6 @@
 /* Native-dependent code for GNU/Linux x86-64.
 
-   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
-
+   Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
    Contributed by Jiri Smid, SuSE Labs.
 
    This file is part of GDB.
@@ -67,6 +66,7 @@ static int x86_64_linux_gregset64_reg_offset[] =
   R12 * 8, R13 * 8,
   R14 * 8, R15 * 8,		/* ... %r15 */
   RIP * 8, EFLAGS * 8,		/* %rip, %eflags */
+  CS * 8, SS * 8,		/* %cs, %ss */
   DS * 8, ES * 8,		/* %ds, %es */
   FS * 8, GS * 8		/* %fs, %gs */
 };

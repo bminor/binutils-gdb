@@ -1513,10 +1513,6 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 #define ELF_ARCH			bfd_arch_mips
 #define ELF_MACHINE_CODE		EM_MIPS
 
-/* The SVR4 MIPS ABI says that this should be 0x10000, but Irix 5 uses
-   a value of 0x1000, and we are compatible.  */
-#define ELF_MAXPAGESIZE			0x1000
-
 #define elf_backend_collect		TRUE
 #define elf_backend_type_change_ok	TRUE
 #define elf_backend_can_gc_sections	TRUE
@@ -1594,20 +1590,29 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 #define TARGET_BIG_SYM			bfd_elf32_bigmips_vec
 #define TARGET_BIG_NAME			"elf32-bigmips"
 
+/* The SVR4 MIPS ABI says that this should be 0x10000, but Irix 5 uses
+   a value of 0x1000, and we are compatible.  */
+#define ELF_MAXPAGESIZE			0x1000
+
 #include "elf32-target.h"
 
 /* Support for traditional mips targets.  */
-#define INCLUDED_TARGET_FILE            /* More a type of flag.  */
-
 #undef TARGET_LITTLE_SYM
 #undef TARGET_LITTLE_NAME
 #undef TARGET_BIG_SYM
 #undef TARGET_BIG_NAME
 
+#undef ELF_MAXPAGESIZE
+
 #define TARGET_LITTLE_SYM               bfd_elf32_tradlittlemips_vec
 #define TARGET_LITTLE_NAME              "elf32-tradlittlemips"
 #define TARGET_BIG_SYM                  bfd_elf32_tradbigmips_vec
 #define TARGET_BIG_NAME                 "elf32-tradbigmips"
+
+/* The SVR4 MIPS ABI says that this should be 0x10000, and Linux uses
+   page sizes of up to that limit, so we need to respect it.  */
+#define ELF_MAXPAGESIZE			0x10000
+#define elf32_bed			elf32_tradbed
 
 /* Include the target file again for this target.  */
 #include "elf32-target.h"

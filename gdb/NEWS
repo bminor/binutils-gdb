@@ -3,6 +3,19 @@
 
 *** Changes since GDB 6.0:
 
+* Changes in AMD64 configurations
+
+The AMD64 target now includes the %cs and %ss registers.  As a result
+the AMD64 remote protocol has changed; this affects the floating-point
+and SSE registers.  If you rely on those registers for your debugging,
+you should upgrade gdbserver on the remote side.
+
+* Revised SPARC target
+
+The SPARC target has been completely revised, incorporating the
+FreeBSD/sparc64 support that was added for GDB 6.0.  As a result
+support for LynxOS and SunOS 4 has been dropped.
+
 * New C++ demangler
 
 GDB has a new C++ demangler which does a better job on the mangled
@@ -63,6 +76,8 @@ PMAX (MIPS) running Mach 3.0			mips*-*-mach3*
 Sequent family					i[3456]86-sequent-sysv4*
 						i[3456]86-sequent-sysv*
 						i[3456]86-sequent-bsd*
+SPARC running LynxOS				sparc-*-lynxos*
+SPARC running SunOS 4				sparc-*-sunos4*
 Tsqware Sparclet				sparclet-*-*
 Fujitsu SPARClite 			sparclite-fujitsu-none  or  sparclite
 

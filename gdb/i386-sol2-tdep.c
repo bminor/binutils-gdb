@@ -53,6 +53,20 @@ i386_sol2_pc_in_sigtramp (CORE_ADDR pc, char *name)
   return (pc == 0xffffffff);
 }
 
+/* Solaris doesn't have a `struct sigcontext', but it does have a
+   `mcontext_t' that contains the saved set of machine registers.  */
+
+static CORE_ADDR
+i386_sol2_mcontext_addr (struct frame_info *next_frame)
+{
+  CORE_ADDR sp, ucontext_addr;
+
+  sp = frame_unwind_register_unsigned (next_frame, I386_ESP_REGNUM);
+  ucontext_addr = get_frame_memory_unsigned (next_frame, sp + 8, 4);
+
+  return ucontext_addr + 36;
+}
+
 /* Solaris 2.  */
 
 static void
@@ -70,6 +84,10 @@ i386_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->gregset_num_regs = ARRAY_SIZE (i386_sol2_gregset_reg_offset);
   tdep->sizeof_gregset = 19 * 4;
   tdep->sizeof_fpregset = 380;
+
+  tdep->sigcontext_addr = i386_sol2_mcontext_addr;
+  tdep->sc_reg_offset = tdep->gregset_reg_offset;
+  tdep->sc_num_regs = tdep->gregset_num_regs;
 
   /* Signal trampolines are slightly different from SVR4.  */
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_sol2_pc_in_sigtramp);

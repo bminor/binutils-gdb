@@ -73,7 +73,7 @@ extern struct type *cp_lookup_rtti_type (const char *name,
 
 extern unsigned char processing_has_namespace_info;
 
-extern const char *processing_current_namespace;
+extern const char *processing_current_prefix;
 
 extern int cp_is_anonymous (const char *namespace);
 

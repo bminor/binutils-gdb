@@ -22,6 +22,7 @@ s390*)			gdb_host_cpu=s390 ;;
 sh*)			gdb_host_cpu=sh ;;
 x86_64*)		gdb_host_cpu=i386 ;;
 xscale*)		gdb_host_cpu=arm ;;
+m32r*)			gdb_host_cpu=m32r ;;
 *)			gdb_host_cpu=$host_cpu ;;
 
 esac
@@ -124,20 +125,16 @@ s390*-*-*)		gdb_host=s390 ;;
 
 sh*-*-netbsdelf*)	gdb_host=nbsd ;;
 
+sparc64-*-freebsd*)	gdb_host=fbsd ;;
 sparc-*-linux*)		gdb_host=linux ;;
-sparc-*-lynxos*)	gdb_host=sparclynx ;;
+sparc64-*-linux*)	gdb_host=linux64 ;;
 sparc-*-netbsdelf*)	gdb_host=nbsdelf ;;
 sparc-*-netbsdaout*)	gdb_host=nbsdaout ;;
 sparc-*-netbsd*)	gdb_host=nbsdaout ;;
-sparc-*-solaris2*)	gdb_host=sun4sol2 ;;
-sparc-*-sunos4*)	gdb_host=sun4os4 ;;
-sparc-*-sunos5*)	gdb_host=sun4sol2 ;;
-sparc-*-*)		gdb_host=sun4os4 ;;
-sparc64-*-freebsd*|ultrasparc-*-freebsd*|sparcv9-*-freebsd*)
-			gdb_host=fbsd ;;
-sparc64-*-linux*)	gdb_host=linux ;;
 sparc64-*-netbsd*)	gdb_host=nbsd64 ;;
-sparcv9-*-* | sparc64-*-*) gdb_host=sun4sol2 ;;
+sparc-*-solaris2* | sparcv9-*-solaris2* | sparc64-*-solaris2*)
+			gdb_host=sol2
+			;;
 
 vax-*-bsd*)		gdb_host=vaxbsd ;;
 vax-*-ultrix2*)		gdb_host=vaxult2 ;;
@@ -146,5 +143,7 @@ vax-*-ultrix*)		gdb_host=vaxult ;;
 x86_64-*-linux*)	gdb_host=x86-64linux ;;
 x86_64-*-freebsd*)	gdb_host=fbsd64 ;;
 x86_64-*-netbsd*)	gdb_host=nbsd64 ;;
+
+m32r*-*-linux*)          gdb_host=linux ;;
 
 esac

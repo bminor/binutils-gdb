@@ -355,7 +355,6 @@ extern void request_quit (int);
 
 extern void do_cleanups (struct cleanup *);
 extern void do_final_cleanups (struct cleanup *);
-extern void do_my_cleanups (struct cleanup **, struct cleanup *);
 extern void do_run_cleanups (struct cleanup *);
 extern void do_exec_cleanups (struct cleanup *);
 extern void do_exec_error_cleanups (struct cleanup *);

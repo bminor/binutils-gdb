@@ -23,12 +23,13 @@
 
 #ifdef HAVE_LIBUNWIND_H
 
+struct frame_info;
+struct frame_id;
+
 #ifndef LIBUNWIND_FRAME_H
 #define LIBUNWIND_FRAME_H 1
 
 #include "libunwind.h"
-
-struct frame_info;
 
 struct libunwind_descr
 {

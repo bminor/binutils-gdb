@@ -1,3 +1,22 @@
+2003-12-28  Eli Zaretskii  <eliz@elta.co.il>
+
+	* readline.c (rl_save_state, rl_restore_state): Support systems
+	that don't define SIGWINCH.
+
+2003-12-25  Eli Zaretskii  <eliz@elta.co.il>
+
+	* terminal.c (_rl_get_screen_size) [__DJGPP__]: Compute the
+	screen width and height using console I/O.
+	(_rl_init_terminal_io) [__MSDOS__]: Zero out all the _rl_term_*
+	variables.  Convert to _rl_* naming scheme.
+	(_rl_set_cursor) [__MSDOS__]: Ifdef away this function.
+
+2003-12-23  Eli Zaretskii  <eliz@elta.co.il>
+
+	* display.c (_rl_move_vert) [__MSDOS__]: Don't use undeclared
+	variable `l'.  Use `delta' instead recomputing its value anew.
+	Assign -delta to i instead of the other way around.
+
 2003-12-11  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* rlmbutil.h: Require HAVE_MBSTATE_T for HANDLE_MULTIBYTE.

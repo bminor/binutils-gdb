@@ -1,6 +1,6 @@
 /* Native-dependent code for NetBSD/amd64.
 
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -47,8 +47,8 @@ static int amd64nbsd32_r_reg_offset[] =
   0 * 8,			/* %edi */
   21 * 8,			/* %eip */
   23 * 8,			/* %eflags */
-  -1,				/* %cs */
-  -1,				/* %ss */
+  22 * 8,			/* %cs */
+  25 * 8,			/* %ss */
   18 * 8,			/* %ds */
   17 * 8,			/* %es */
   16 * 8,			/* %fs */

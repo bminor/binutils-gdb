@@ -1,6 +1,6 @@
 /* Native-dependent code for FreeBSD/amd64.
 
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -74,6 +74,8 @@ static int reg_offset[] =
   REG_OFFSET (r_r15),
   REG_OFFSET (r_rip),
   REG_OFFSET (r_rflags),
+  REG_OFFSET (r_cs),
+  REG_OFFSET (r_ss),
   -1,
   -1,
   -1,

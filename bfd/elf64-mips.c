@@ -2676,11 +2676,6 @@ const struct elf_size_info mips_elf64_size_info =
 #define ELF_ARCH			bfd_arch_mips
 #define ELF_MACHINE_CODE		EM_MIPS
 
-/* The SVR4 MIPS ABI says that this should be 0x10000, but Irix 5 uses
-   a value of 0x1000, and we are compatible.
-   FIXME: How does this affect NewABI?  */
-#define ELF_MAXPAGESIZE			0x1000
-
 #define elf_backend_collect		TRUE
 #define elf_backend_type_change_ok	TRUE
 #define elf_backend_can_gc_sections	TRUE
@@ -2791,9 +2786,12 @@ extern bfd_boolean bfd_elf64_archive_write_armap
 #define TARGET_BIG_SYM			bfd_elf64_bigmips_vec
 #define TARGET_BIG_NAME			"elf64-bigmips"
 
-#include "elf64-target.h"
+/* The SVR4 MIPS ABI says that this should be 0x10000, but Irix 5 uses
+   a value of 0x1000, and we are compatible.
+   FIXME: How does this affect NewABI?  */
+#define ELF_MAXPAGESIZE			0x1000
 
-#define INCLUDED_TARGET_FILE            /* More a type of flag.  */
+#include "elf64-target.h"
 
 /* The SYSV-style 'traditional' (n)64 NewABI.  */
 #undef TARGET_LITTLE_SYM
@@ -2801,10 +2799,17 @@ extern bfd_boolean bfd_elf64_archive_write_armap
 #undef TARGET_BIG_SYM
 #undef TARGET_BIG_NAME
 
+#undef ELF_MAXPAGESIZE
+
 #define TARGET_LITTLE_SYM               bfd_elf64_tradlittlemips_vec
 #define TARGET_LITTLE_NAME              "elf64-tradlittlemips"
 #define TARGET_BIG_SYM                  bfd_elf64_tradbigmips_vec
 #define TARGET_BIG_NAME                 "elf64-tradbigmips"
+
+/* The SVR4 MIPS ABI says that this should be 0x10000, and Linux uses
+   page sizes of up to that limit, so we need to respect it.  */
+#define ELF_MAXPAGESIZE			0x10000
+#define elf64_bed			elf64_tradbed
 
 /* Include the target file again for this target.  */
 #include "elf64-target.h"

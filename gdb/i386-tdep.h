@@ -27,6 +27,7 @@ struct frame_info;
 struct gdbarch;
 struct reggroup;
 struct regset;
+struct regcache;
 
 /* GDB's i386 target supports both the 32-bit Intel Architecture
    (IA-32) and the 64-bit AMD x86-64 architecture.  Internally it uses
@@ -164,6 +165,8 @@ enum i386_regnum
   I386_EDI_REGNUM,		/* %edi */
   I386_EIP_REGNUM,		/* %eip */
   I386_EFLAGS_REGNUM,		/* %eflags */
+  I386_CS_REGNUM,		/* %cs */
+  I386_SS_REGNUM,		/* %ss */
   I386_ST0_REGNUM = 16,		/* %st(0) */
 };
 

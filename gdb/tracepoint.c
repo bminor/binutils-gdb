@@ -914,6 +914,10 @@ validate_actionline (char **line, struct tracepoint *t)
   struct cleanup *old_chain = NULL;
   char *p;
 
+  /* if EOF is typed, *line is NULL */
+  if (*line == NULL)
+    return END;
+
   for (p = *line; isspace ((int) *p);)
     p++;
 

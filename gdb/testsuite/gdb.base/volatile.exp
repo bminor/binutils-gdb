@@ -1,4 +1,4 @@
-#   Copyright 1997, 1998, 1999, 2003 Free Software Foundation, Inc.
+# Copyright 1997, 1998, 1999, 2003, 2004 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -55,27 +55,14 @@ if [get_compiler_info ${binfile}] {
     return -1;
 }
 
-if {$hp_aCC_compiler || $hp_cc_compiler} {
-    set lang "c++"
-} else {
-    set lang ""
-}
-
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [concat debug $lang]] != "" } {
+if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable debug ] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
-}
-
-remote_exec build "rm -f ${binfile}.ci"
-if  [get_compiler_info ${binfile}] {
-    return -1
 }
 
 gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
-
-source ${binfile}.ci
 
 #
 # set it up at a breakpoint so we can play with the variable values
@@ -93,6 +80,11 @@ proc local_compiler_xfail_check { } {
 		&& ![test_debug_format "DWARF 2"] } then {
 	    setup_xfail "*-*-*" 
 	}
+    }
+
+    global hp_cc_compiler
+    if { $hp_cc_compiler } {
+	setup_xfail "hppa*-*-hpux*"
     }
 }
 

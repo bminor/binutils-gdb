@@ -1918,3 +1918,87 @@ proc gdb_skip_bogus_test { msg } {
     return 0;
 }
 
+
+# Note: the procedure gdb_gnu_strip_debug will produce an executable called
+# ${binfile}.dbglnk, which is just like the executable ($binfile) but without
+# the debuginfo. Instead $binfile has a .gnu_debuglink section which contains
+# the name of a idebuginfo only file. This file will be stored in the 
+# gdb.base/.debug subdirectory.
+
+# Functions for separate debug info testing
+
+# starting with an executable:
+# foo --> original executable
+
+# at the end of the process we have:
+# foo.stripped --> foo w/o debug info
+# .debug/foo.debug --> foo's debug info
+# foo --> like foo, but with a new .gnu_debuglink section pointing to foo.debug.
+
+# Return the name of the file in which we should stor EXEC's separated
+# debug info. EXEC contains the full path.
+proc separate_debug_filename { exec } {
+
+    # In a .debug subdirectory off the same directory where the testcase
+    # executable is going to be. Something like:
+    # <your-path>/gdb/testsuite/gdb.base/.debug/blah.debug.
+    # This is the default location where gdb expects to findi
+    # the debug info file.
+
+    set exec_dir [file dirname $exec]
+    set exec_file [file tail $exec]
+    set debug_dir [file join $exec_dir ".debug"]
+    set debug_file [file join $debug_dir "${exec_file}.debug"]
+
+    return $debug_file
+}
+
+
+proc gdb_gnu_strip_debug { dest } {
+
+    set debug_file [separate_debug_filename $dest]
+    set strip_to_file_program strip
+    set objcopy_program objcopy
+
+    # Make sure the directory that will hold the separated debug
+    # info actually exists.
+    set debug_dir [file dirname $debug_file]
+    if {! [file isdirectory $debug_dir]} {
+	file mkdir $debug_dir
+    }
+
+    set debug_link [file tail $debug_file]
+    set stripped_file "${dest}.stripped"
+
+    # Get rid of the debug info, and store result in stripped_file
+    # something like gdb/testsuite/gdb.base/blah.stripped.
+    set result [catch "exec $strip_to_file_program --strip-debug ${dest} -o ${stripped_file}" output]
+    verbose "result is $result"
+    verbose "output is $output"
+    if {$result == 1} {
+      return 1
+    }
+
+    # Get rid of everything but the debug info, and store result in debug_file
+    # This will be in the .debug subdirectory, see above.
+    set result [catch "exec $strip_to_file_program --only-keep-debug ${dest} -o ${debug_file}" output]
+    verbose "result is $result"
+    verbose "output is $output"
+    if {$result == 1} {
+      return 1
+    }
+
+    # Link the two previous output files together, adding the .gnu_debuglink
+    # section to the stripped_file, containing a pointer to the debug_file,
+    # save the new file in dest.
+    # This will be the regular executable filename, in the usual location.
+    set result [catch "exec $objcopy_program --add-gnu-debuglink=${debug_file} ${stripped_file} ${dest}" output]
+    verbose "result is $result"
+    verbose "output is $output"
+    if {$result == 1} {
+      return 1
+    }
+
+   return 0
+}
+

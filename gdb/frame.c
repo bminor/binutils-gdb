@@ -1,7 +1,7 @@
 /* Cache and manage frames for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1989, 1991, 1994, 1995, 1996, 1998, 2000,
-   2001, 2002, 2003 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1726,7 +1726,12 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 
 /* Return a structure containing various interesting information
    about the frame that called THIS_FRAME.  Returns NULL
-   if there is no such frame.  */
+   if there is no such frame.
+
+   This function tests some target-independent conditions that should
+   terminate the frame chain, such as unwinding past main().  It
+   should not contain any target-dependent tests, such as checking
+   whether the program-counter is zero.  */
 
 struct frame_info *
 get_prev_frame (struct frame_info *this_frame)
@@ -1942,37 +1947,6 @@ get_prev_frame (struct frame_info *this_frame)
      allocation calls.  */
   prev_frame = FRAME_OBSTACK_ZALLOC (struct frame_info);
   prev_frame->level = this_frame->level + 1;
-
-  /* Try to unwind the PC.  If that doesn't work, assume we've reached
-     the oldest frame and simply return.  Is there a better sentinal
-     value?  The unwound PC value is then used to initialize the new
-     previous frame's type.
-
-     Note that the pc-unwind is intentionally performed before the
-     frame chain.  This is ok since, for old targets, both
-     frame_pc_unwind (nee, FRAME_SAVED_PC) and
-     DEPRECATED_FRAME_CHAIN()) assume THIS_FRAME's data structures
-     have already been initialized (using
-     DEPRECATED_INIT_EXTRA_FRAME_INFO) and hence the call order
-     doesn't matter.
-
-     By unwinding the PC first, it becomes possible to, in the case of
-     a dummy frame, avoid also unwinding the frame ID.  This is
-     because (well ignoring the PPC) a dummy frame can be located
-     using THIS_FRAME's frame ID.  */
-
-  if (frame_pc_unwind (this_frame) == 0)
-    {
-      /* The allocated PREV_FRAME will be reclaimed when the frame
-	 obstack is next purged.  */
-      if (frame_debug)
-	{
-	  fprintf_unfiltered (gdb_stdlog, "-> ");
-	  fprint_frame (gdb_stdlog, NULL);
-	  fprintf_unfiltered (gdb_stdlog, " // unwound PC zero }\n");
-	}
-      return NULL;
-    }
 
   /* Don't yet compute ->unwind (and hence ->type).  It is computed
      on-demand in get_frame_type, frame_register_unwind, and

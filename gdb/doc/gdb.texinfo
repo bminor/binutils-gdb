@@ -1,6 +1,6 @@
 \input texinfo      @c -*-texinfo-*-
 @c Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,
-@c 1999, 2000, 2001, 2002, 2003
+@c 1999, 2000, 2001, 2002, 2003, 2004
 @c Free Software Foundation, Inc.
 @c
 @c %**start of header
@@ -52,7 +52,7 @@ This is the @value{EDITION} Edition, of @cite{Debugging with
 Version @value{GDBVN}.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,@*
-              1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+              1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
@@ -115,7 +115,7 @@ This file describes @value{GDBN}, the @sc{gnu} symbolic debugger.
 This is the @value{EDITION} Edition, for @value{GDBN} Version
 @value{GDBVN}.
 
-Copyright (C) 1988-2003 Free Software Foundation, Inc.
+Copyright (C) 1988-2004 Free Software Foundation, Inc.
 
 @menu
 * Summary::                     Summary of @value{GDBN}
@@ -8482,12 +8482,13 @@ A fully qualified Objective-C method name is specified as
 -[@var{Class} @var{methodName}]
 @end smallexample
 
-where the minus sign is used to indicate an instance method and a plus
-sign (not shown) is used to indicate a class method. The
-class name @var{Class} and method name @var{methoName} are enclosed in
-brackets, similar to the way messages are specified in Objective-C source
-code. For example, to set a breakpoint at the @code{create} instance method of 
-class @code{Fruit} in the program currently being debugged, enter:
+where the minus sign is used to indicate an instance method and a
+plus sign (not shown) is used to indicate a class method.  The class
+name @var{Class} and method name @var{methodName} are enclosed in
+brackets, similar to the way messages are specified in Objective-C
+source code.  For example, to set a breakpoint at the @code{create}
+instance method of class @code{Fruit} in the program currently being
+debugged, enter:
 
 @smallexample
 break -[Fruit create]
@@ -8500,10 +8501,10 @@ enter:
 list +[NSText initialize]
 @end smallexample
 
-In the current version of GDB, the plus or minus sign is required.  In
-future versions of GDB, the plus or minus sign will be optional, but you
-can use it to narrow the search.  It is also possible to specify just a
-method name:
+In the current version of @value{GDBN}, the plus or minus sign is
+required.  In future versions of @value{GDBN}, the plus or minus
+sign will be optional, but you can use it to narrow the search.  It
+is also possible to specify just a method name:
 
 @smallexample
 break create
@@ -8524,20 +8525,24 @@ clear -[NSWindow makeKeyAndOrderFront:]
 
 @node The Print Command with Objective-C
 @subsubsection The Print Command With Objective-C
+@kindex print-object
+@kindex po @r{(@code{print-object})}
 
-The print command has also been extended to accept methods. For example:
+The print command has also been extended to accept methods.  For example:
 
 @smallexample
-print -[object hash]
+print -[@var{object} hash]
 @end smallexample
 
 @cindex print an Objective-C object description
-will tell gdb to send the -hash message to object and print the
-result. Also an additional command has been added, @code{print-object}
-or @code{po} for short, which is meant to print the description of an
-object. However, this command may only work with certain Objective-C
-libraries that have a particular hook function, called
-@code{_NSPrintForDebugger} defined.
+@cindex @code{_NSPrintForDebugger}, and printing Objective-C objects
+@noindent
+will tell @value{GDBN} to send the @code{hash} message to @var{object}
+and print the result.  Also, an additional command has been added,
+@code{print-object} or @code{po} for short, which is meant to print
+the description of an object.  However, this command may only work
+with certain Objective-C libraries that have a particular hook
+function, @code{_NSPrintForDebugger}, defined.
 
 @node Modula-2,  , Objective-C, Support
 @subsection Modula-2

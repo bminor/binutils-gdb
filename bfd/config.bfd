@@ -329,7 +329,7 @@ case "${targ}" in
     targ_defvec=bfd_elf32_fr30_vec
     ;;
 
-  frv-*-elf)
+  frv-*-elf | frv-*-*linux*)
     targ_defvec=bfd_elf32_frv_vec
     ;;
 
@@ -651,7 +651,7 @@ case "${targ}" in
     targ_defvec=m68kcoff_vec
     targ_selvecs="m68kcoff_vec versados_vec ieee_vec aout0_big_vec"
     ;;
-  m68*-*-elf* | m68*-*-sysv4*)
+  m68*-*-elf* | m68*-*-sysv4* | m68*-*-uclinux*)
     targ_defvec=bfd_elf32_m68k_vec
     targ_selvecs="m68kcoff_vec ieee_vec"
     ;;

@@ -876,6 +876,8 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 
       if (is_branch)
 	{
+	  bfd_signed_vma offset;
+
 	  reladdr = (sec->output_section->vma
 		     + sec->output_offset
 		     + roff) & (bfd_vma) -4;
@@ -911,6 +913,13 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 
 	      /* Resize the current section to make room for the new branch. */
 	      trampoff = (sec->_cooked_size + 15) & (bfd_vma) -16;
+
+	      /* If trampoline is out of range, there is nothing we
+		 can do.  */
+	      offset = trampoff - (roff & (bfd_vma) -4);
+	      if (offset < -0x1000000 || offset > 0x0FFFFF0)
+		continue;
+
 	      amt = trampoff + size;
 	      contents = (bfd_byte *) bfd_realloc (contents, amt);
 	      if (contents == NULL)
@@ -957,14 +966,18 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	    }
 	  else
 	    {
+	      /* If trampoline is out of range, there is nothing we
+		 can do.  */
+	      offset = f->trampoff - (roff & (bfd_vma) -4);
+	      if (offset < -0x1000000 || offset > 0x0FFFFF0)
+		continue;
+
 	      /* Nop out the reloc, since we're finalizing things here.  */
 	      irel->r_info = ELFNN_R_INFO (0, R_IA64_NONE);
 	    }
 
-	  /* Fix up the existing branch to hit the trampoline.  Hope like
-	     hell this doesn't overflow too.  */
-	  if (elfNN_ia64_install_value (abfd, contents + roff,
-					f->trampoff - (roff & (bfd_vma) -4),
+	  /* Fix up the existing branch to hit the trampoline.  */
+	  if (elfNN_ia64_install_value (abfd, contents + roff, offset,
 					r_type) != bfd_reloc_ok)
 	    goto error_return;
 

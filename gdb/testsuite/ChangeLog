@@ -1,3 +1,264 @@
+2004-01-12  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.base/sepdebug.exp: New file.
+	* gdb.base/sepdebug.c: New file.
+	* lib/gdb.exp (separate_debug_filename): New procedure.
+	(gdb_gnu_strip_debug): New procedure.
+
+2004-01-12  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.mi/ChangeLog: Delete file.  Renamed to ...
+	* gdb.mi/ChangeLog-1999-2003: New file.
+
+2004-01-12  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/fileio.exp: Update copyright year.  On GNU/Linux, for
+	"Renaming a directory to a non-empty directory returns ENOTEMPTY
+	or EEXIST", treat EBUSY as an XFAIL.
+
+2004-01-11  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/scope.exp: Remove obsolete setup_xfail for
+	hp_cc_compiler.
+
+2004-01-10  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/classes.exp: Remove old "(obsolescent gcc or gdb)"
+	decorations.
+
+2004-01-10  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/virtfunc.exp: Remove old "(obsolescent gcc or gdb)"
+	and "(aCC)" decorations.  Remove obsolete doco about old
+	test results.
+
+2004-01-09  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/exception.exp: Fix typo in doco.
+
+2004-01-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/gdb1476.exp: Fix typo.
+
+2004-01-09  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.hp/gdb.aCC/exception.exp: Re-create as a nearly empty
+	file.
+
+2004-01-09  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/exception.cc: Change <iostream.h> to <iostream>.
+	* gdb.cp/exception.exp: Use gdb test, gdb_test_multiple.
+	Use gdb_compile.  Remove restriction on gcc.  Add some patterns
+	for recent version of gdb.  Delete second half, which was a copy
+	of the first half with different build flags.  This test is
+	still disabled because it is still not ready for production.
+
+2004-01-08  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/exception.cc: Add copyright notice.
+	* gdb.cp/exception.exp: Add a notice that this file is broken
+	because of line number changes caused by addition of copyright
+	notice.
+
+2004-01-08  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/exception.cc: Renamed from gdb.hp/gdb.aCC/exception.cc.
+	* gdb.cp/exception.exp: Renamed from gdb.hp/gdb.aCC/exception.exp.
+
+2004-01-08  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/classes.exp: Accept gnu abi 2.
+	* gdb.cp/derivation.exp: Likewise.
+	* gdb.cp/overload.exp: Likewise.
+	* gdb.cp/virtfunc.exp: Likewise.
+
+2004-01-08  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.mi/pthreads.c (done_making_threads): Remove extraneous
+	semicolon after end of function.
+
+2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/bs15503.cc: Include <iostream>, not <iostream.h>.
+	* gdb.cp/bs15503.exp: Remove hp-only restriction.  Use modern
+	boilerplate code for compiling and running the program under
+	test.  Add some string method tests.
+
+2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/bs15503.cc: Add copyright notice.
+	* gdb.cp/bs15503.exp: Adjust line number.
+
+2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.hp/gdb.defects/bs15503.exp: Renamed to gdb.cp/bs15503.exp.
+	* gdb.hp/gdb.defects/bs15503.cc: Renamed to gdb.cp/bs15503.cc.
+
+2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/funcargs.exp: Remove obsolete setup_xfail for
+	hp_cc_compiler.
+
+2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/cttiadd.c: Add a marker for gdb_get_line_number.
+	* gdb.cp/ctti.exp: Use the marker instead of "next".
+	With gcc, run further before bailing.
+
+2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/cttiadd.cc: Add copyright notice.
+	* gdb.cp/cttiadd1.cc: Likewise.
+	* gdb.cp/cttiadd2.cc: Likewise.
+	* gdb.cp/cttiadd3.cc: Likewise.
+
+2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/ctti.exp: Partial rewrite.  Call gdb_compile properly.
+	Use gdb_test, gdb_test_multiple.  Use floating-point values that
+	have exact representations in IEEE-ish formats.
+
+2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/constvars.exp: Do not force lang=c++ if using HP
+	compilers.  Delete duplicate call to get_compiler_info.
+	(local_compiler_xfail_check): setup_xfail if $hp_cc_compiler.
+	* gdb.base/volatile.exp: Likewise.
+
+2004-01-07  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/gdb1476.exp: Only run the tests if we can't read the
+	memory at address 0.
+
+2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.stabs/weird.exp: Use hp_cc_compiler and hp_aCC_compiler
+	to test for hp-ux assembler.  Fix copyright years.
+
+2004-01-07  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/fileio.c (strerrno): Add "EBUSY".
+
+2004-01-07  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/fileio.c (test_open): Do not pass S_IWUSR to "open"
+	when creating the read-only file.  From analysis by Roland McGrath
+	and Elena Zannoni.
+
+2004-01-06  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/namespace.exp: Call get_compiler_info with "c++".
+
+2004-01-06  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/cvexpr.c: Be type-safe with function pointers and
+	data pointers.
+
+2004-01-06  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/m-static.exp: Compile one source file at a time.
+	Delete unused call to get_compiler_info.
+
+2004-01-06  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/call-ar-st.exp: Delete explicit reference to ${binfile}.ci.
+	* gdb.base/call-rt-st.exp: Likewise.
+	* gdb.base/nodebug.exp: Likewise.
+	* gdb.base/volatile.exp: Likewise.
+	* gdb.cp/ref-types.exp: Likewise.
+	* gdb.cp/templates.exp: Likewise.
+
+2004-01-05  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/gdb1476.exp, gdb.base/gdb1476.c: New files.
+
+2004-01-05  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/funcargs.exp: Delete special timeout of 240 seconds for
+	hppa*-hp-hpux*.
+
+2004-01-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/structs.exp: Add patterns to kfail PR gdb/1447 for
+	x86_64-*-*.
+
+	* gdb.base/structs.exp: Add patterns to kfail PR gdb/1447 for
+	sparc64-*-* and sparc*-solaris2*.
+
+2004-01-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/structs.exp: Remove ${testfile} from "zed L<n> for
+	return ${tests}" test.  The ${tests} already mentions the
+	filename.
+
+2004-01-02  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/local.exp: Accept gcc abi 2.
+
+2004-01-02  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/templates.exp: Accept gcc abi 2.
+
+2004-01-02  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* lib/compiler.cc: Remove supports_template_debugging.
+	* gdb.cp/templates.exp: Do not test supports_template_debugging.
+
+2004-01-01  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/namespace.exp: Accept gcc abi 2.
+
+2004-01-01  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/method.exp: Accept gcc abi 2.
+
+2004-01-01  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/classes.exp: Generate identical results as old version.
+	* gdb.cp/derivation.exp: Likewise.
+	* gdb.cp/overload.exp: Likewise.
+	* gdb.cp/virtfunc.exp: Likewise.
+
+2004-01-01  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/virtfunc.exp: Modify some patterns to avoid a
+	mysterious bug with sourceware version of expect.
+
+2004-01-01  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/overload.exp: Rewrite.  Clean up patterns to match
+	current versions of gcc, including gcc abi 2.  Remove gratuitous
+	restart of test program.  Use gdb_test_multiple and gdb_test for
+	all tests.  Add patterns to xfail missing "const" in "const char *"
+	and kfail PR gdb/1155.
+
+2004-01-01  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/derivation.exp: Rewrite.  Clean up patterns to match
+	current versions of gcc, including gcc abi 2.  Remove gratuitous
+	restart of test program.  Use gdb_test_multiple and gdb_test for
+	all tests.  Add patterns to kfail PR gdb/1498.
+
+2003-12-31  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/virtfunc.exp: Rewrite.  Clean up patterns to match
+	current versions of gcc, including gcc abi 2.  Use "breakpoint"
+	and "continue" instead of restarting the target program.  Use
+	gdb_test_multiple and gdb_test for all tests.
+
+2004-01-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.asm/asm-source.exp: Update copyright year.  Link statically
+	for *-*-solaris2*.
+
+2003-12-31  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/classes.exp: Rewrite.  Clean up patterns to match
+	current versions of gcc, including gcc abi 2.  Use "breakpoint"
+	and "continue" instead of restarting the target program several
+	times.  Use gdb_test_multiple and gdb_test for all tests.
+
 2003-12-18  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.base/sect-cmd.exp: Handle compiling test case from multiple
@@ -11027,6 +11288,8 @@ Sun Feb 21 10:55:55 1993  Mike Werner  (mtw@poseidon.cygnus.com)
 	of dejagnu.  The modifications to these testcases, etc., which
 	will allow them to work with the new version of dejagnu will be
 	made in a future update.
+
+For additional changes see gdb.mi/ChangeLog-1999-2003.
 
 Local Variables:
 mode: change-log

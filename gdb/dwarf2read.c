@@ -1,5 +1,6 @@
 /* DWARF 2 debugging format support for GDB.
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
+   2004
    Free Software Foundation, Inc.
 
    Adapted by Gary Funck (gary@intrepid.com), Intrepid Technology,
@@ -808,6 +809,9 @@ static void read_common_block (struct die_info *, struct dwarf2_cu *);
 
 static void read_namespace (struct die_info *die, struct dwarf2_cu *);
 
+static const char *namespace_name (struct die_info *die,
+				   int *is_anonymous);
+
 static void read_enumeration (struct die_info *, struct dwarf2_cu *);
 
 static struct type *dwarf_base_type (int, int, struct dwarf2_cu *);
@@ -1423,6 +1427,7 @@ add_partial_symbol (struct partial_die_info *pdi,
 {
   struct objfile *objfile = cu->objfile;
   CORE_ADDR addr = 0;
+  char *actual_name = pdi->name;
   const struct partial_symbol *psym = NULL;
 
   switch (pdi->tag)
@@ -1430,9 +1435,9 @@ add_partial_symbol (struct partial_die_info *pdi,
     case DW_TAG_subprogram:
       if (pdi->is_external)
 	{
-	  /*prim_record_minimal_symbol (pdi->name, pdi->lowpc + baseaddr,
+	  /*prim_record_minimal_symbol (actual_name, pdi->lowpc + baseaddr,
 	     mst_text, objfile); */
-	  psym = add_psymbol_to_list (pdi->name, strlen (pdi->name),
+	  psym = add_psymbol_to_list (actual_name, strlen (actual_name),
 				      VAR_DOMAIN, LOC_BLOCK,
 				      &objfile->global_psymbols,
 				      0, pdi->lowpc + baseaddr,
@@ -1440,9 +1445,9 @@ add_partial_symbol (struct partial_die_info *pdi,
 	}
       else
 	{
-	  /*prim_record_minimal_symbol (pdi->name, pdi->lowpc + baseaddr,
+	  /*prim_record_minimal_symbol (actual_name, pdi->lowpc + baseaddr,
 	     mst_file_text, objfile); */
-	  psym = add_psymbol_to_list (pdi->name, strlen (pdi->name),
+	  psym = add_psymbol_to_list (actual_name, strlen (actual_name),
 				      VAR_DOMAIN, LOC_BLOCK,
 				      &objfile->static_psymbols,
 				      0, pdi->lowpc + baseaddr,
@@ -1468,7 +1473,7 @@ add_partial_symbol (struct partial_die_info *pdi,
 	  if (pdi->locdesc)
 	    addr = decode_locdesc (pdi->locdesc, cu);
 	  if (pdi->locdesc || pdi->has_type)
-	    psym = add_psymbol_to_list (pdi->name, strlen (pdi->name),
+	    psym = add_psymbol_to_list (actual_name, strlen (actual_name),
 					VAR_DOMAIN, LOC_STATIC,
 					&objfile->global_psymbols,
 					0, addr + baseaddr,
@@ -1480,9 +1485,9 @@ add_partial_symbol (struct partial_die_info *pdi,
 	  if (pdi->locdesc == NULL)
 	    return;
 	  addr = decode_locdesc (pdi->locdesc, cu);
-	  /*prim_record_minimal_symbol (pdi->name, addr + baseaddr,
+	  /*prim_record_minimal_symbol (actual_name, addr + baseaddr,
 	     mst_file_data, objfile); */
-	  psym = add_psymbol_to_list (pdi->name, strlen (pdi->name),
+	  psym = add_psymbol_to_list (actual_name, strlen (actual_name),
 				      VAR_DOMAIN, LOC_STATIC,
 				      &objfile->static_psymbols,
 				      0, addr + baseaddr,
@@ -1491,7 +1496,7 @@ add_partial_symbol (struct partial_die_info *pdi,
       break;
     case DW_TAG_typedef:
     case DW_TAG_base_type:
-      add_psymbol_to_list (pdi->name, strlen (pdi->name),
+      add_psymbol_to_list (actual_name, strlen (actual_name),
 			   VAR_DOMAIN, LOC_TYPEDEF,
 			   &objfile->static_psymbols,
 			   0, (CORE_ADDR) 0, cu_language, objfile);
@@ -1504,7 +1509,7 @@ add_partial_symbol (struct partial_die_info *pdi,
          references.  */
       if (pdi->has_children == 0)
 	return;
-      add_psymbol_to_list (pdi->name, strlen (pdi->name),
+      add_psymbol_to_list (actual_name, strlen (actual_name),
 			   STRUCT_DOMAIN, LOC_TYPEDEF,
 			   &objfile->static_psymbols,
 			   0, (CORE_ADDR) 0, cu_language, objfile);
@@ -1512,14 +1517,14 @@ add_partial_symbol (struct partial_die_info *pdi,
       if (cu_language == language_cplus)
 	{
 	  /* For C++, these implicitly act as typedefs as well. */
-	  add_psymbol_to_list (pdi->name, strlen (pdi->name),
+	  add_psymbol_to_list (actual_name, strlen (actual_name),
 			       VAR_DOMAIN, LOC_TYPEDEF,
 			       &objfile->static_psymbols,
 			       0, (CORE_ADDR) 0, cu_language, objfile);
 	}
       break;
     case DW_TAG_enumerator:
-      add_psymbol_to_list (pdi->name, strlen (pdi->name),
+      add_psymbol_to_list (actual_name, strlen (actual_name),
 			   VAR_DOMAIN, LOC_CONST,
 			   &objfile->static_psymbols,
 			   0, (CORE_ADDR) 0, cu_language, objfile);
@@ -1862,7 +1867,7 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
       if (!processing_has_namespace_info)
 	{
 	  processing_has_namespace_info = 1;
-	  processing_current_namespace = "";
+	  processing_current_prefix = "";
 	}
       read_namespace (die, cu);
       break;
@@ -1877,7 +1882,7 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
       if (!processing_has_namespace_info)
 	{
 	  processing_has_namespace_info = 1;
-	  processing_current_namespace = "";
+	  processing_current_prefix = "";
 	}
       gdb_assert (die->child == NULL);
       break;
@@ -3094,12 +3099,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
 		{
 		  dwarf2_non_const_array_bound_ignored_complaint
 		    (dwarf_form_name (attr->form));
-#ifdef FORTRAN_HACK
-		  die->type = lookup_pointer_type (element_type);
-		  return;
-#else
 		  low = 0;
-#endif
 		}
 	    }
 	  attr = dwarf_attr (child_die, DW_AT_upper_bound);
@@ -3136,12 +3136,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
 		{
 		  dwarf2_non_const_array_bound_ignored_complaint
 		    (dwarf_form_name (attr->form));
-#ifdef FORTRAN_HACK
-		  die->type = lookup_pointer_type (element_type);
-		  return;
-#else
 		  high = 1;
-#endif
 		}
 	    }
 
@@ -3233,10 +3228,78 @@ static void
 read_namespace (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
-  const char *previous_namespace = processing_current_namespace;
+  const char *previous_prefix = processing_current_prefix;
   const char *name = NULL;
   int is_anonymous;
   struct die_info *current_die;
+
+  name = namespace_name (die, &is_anonymous);
+
+  /* Now build the name of the current namespace.  */
+
+  if (previous_prefix[0] == '\0')
+    {
+      processing_current_prefix = name;
+    }
+  else
+    {
+      /* We need temp_name around because processing_current_prefix
+	 is a const char *.  */
+      char *temp_name = alloca (strlen (previous_prefix)
+				+ 2 + strlen(name) + 1);
+      strcpy (temp_name, previous_prefix);
+      strcat (temp_name, "::");
+      strcat (temp_name, name);
+
+      processing_current_prefix = temp_name;
+    }
+
+  /* Add a symbol associated to this if we haven't seen the namespace
+     before.  Also, add a using directive if it's an anonymous
+     namespace.  */
+
+  if (dwarf2_extension (die) == NULL)
+    {
+      struct type *type;
+
+      /* FIXME: carlton/2003-06-27: Once GDB is more const-correct,
+	 this cast will hopefully become unnecessary.  */
+      type = init_type (TYPE_CODE_NAMESPACE, 0, 0,
+			(char *) processing_current_prefix,
+			objfile);
+      TYPE_TAG_NAME (type) = TYPE_NAME (type);
+
+      new_symbol (die, type, cu);
+
+      if (is_anonymous)
+	cp_add_using_directive (processing_current_prefix,
+				strlen (previous_prefix),
+				strlen (processing_current_prefix));
+    }
+
+  if (die->child != NULL)
+    {
+      struct die_info *child_die = die->child;
+      
+      while (child_die && child_die->tag)
+	{
+	  process_die (child_die, cu);
+	  child_die = sibling_die (child_die);
+	}
+    }
+
+  processing_current_prefix = previous_prefix;
+}
+
+/* Return the name of the namespace represented by DIE.  Set
+   *IS_ANONYMOUS to tell whether or not the namespace is an anonymous
+   namespace.  */
+
+static const char *
+namespace_name (struct die_info *die, int *is_anonymous)
+{
+  struct die_info *current_die;
+  const char *name = NULL;
 
   /* Loop through the extensions until we find a name.  */
 
@@ -3251,64 +3314,11 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
 
   /* Is it an anonymous namespace?  */
 
-  is_anonymous = (name == NULL);
-  if (is_anonymous)
+  *is_anonymous = (name == NULL);
+  if (*is_anonymous)
     name = "(anonymous namespace)";
 
-  /* Now build the name of the current namespace.  */
-
-  if (previous_namespace[0] == '\0')
-    {
-      processing_current_namespace = name;
-    }
-  else
-    {
-      /* We need temp_name around because processing_current_namespace
-	 is a const char *.  */
-      char *temp_name = alloca (strlen (previous_namespace)
-				+ 2 + strlen(name) + 1);
-      strcpy (temp_name, previous_namespace);
-      strcat (temp_name, "::");
-      strcat (temp_name, name);
-
-      processing_current_namespace = temp_name;
-    }
-
-  /* Add a symbol associated to this if we haven't seen the namespace
-     before.  Also, add a using directive if it's an anonymous
-     namespace.  */
-
-  if (dwarf2_extension (die) == NULL)
-    {
-      struct type *type;
-
-      /* FIXME: carlton/2003-06-27: Once GDB is more const-correct,
-	 this cast will hopefully become unnecessary.  */
-      type = init_type (TYPE_CODE_NAMESPACE, 0, 0,
-			(char *) processing_current_namespace,
-			objfile);
-      TYPE_TAG_NAME (type) = TYPE_NAME (type);
-
-      new_symbol (die, type, cu);
-
-      if (is_anonymous)
-	cp_add_using_directive (processing_current_namespace,
-				strlen (previous_namespace),
-				strlen (processing_current_namespace));
-    }
-
-  if (die->child != NULL)
-    {
-      struct die_info *child_die = die->child;
-      
-      while (child_die && child_die->tag)
-	{
-	  process_die (child_die, cu);
-	  child_die = sibling_die (child_die);
-	}
-    }
-
-  processing_current_namespace = previous_namespace;
+  return name;
 }
 
 /* Extract all information from a DW_TAG_pointer_type DIE and add to

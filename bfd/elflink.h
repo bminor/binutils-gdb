@@ -5801,7 +5801,10 @@ elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
       || info->emitrelocations
       || !is_elf_hash_table (info->hash)
       || elf_hash_table (info)->dynamic_sections_created)
-    return TRUE;
+    {
+      (*_bfd_error_handler)(_("Warning: gc-sections option ignored"));
+      return TRUE;
+    }
 
   /* Apply transitive closure to the vtable entry usage info.  */
   elf_link_hash_traverse (elf_hash_table (info),

@@ -79,6 +79,9 @@
 /* Define if your struct reg has r_fs.  */
 #undef HAVE_STRUCT_REG_R_FS
 
+/* Define if your struct stat has st_blocks.  */
+#undef HAVE_STRUCT_STAT_ST_BLOCKS
+
 /* Define if your struct reg has r_gs.  */
 #undef HAVE_STRUCT_REG_R_GS
 
@@ -287,6 +290,9 @@
 /* Define if you have the <locale.h> header file.  */
 #undef HAVE_LOCALE_H
 
+/* Define if you have the <machine/reg.h> header file.  */
+#undef HAVE_MACHINE_REG_H
+
 /* Define if you have the <malloc.h> header file.  */
 #undef HAVE_MALLOC_H
 
@@ -455,6 +461,9 @@
 
 /* Define to 1 if the regex included in libiberty should be used. */
 #undef USE_INCLUDED_REGEX
+
+/* Define to 1 if your system has struct reg in <machine/reg.h>. */
+#undef HAVE_STRUCT_REG
 
 /* Define if <stdint.h> provides the uintptr_t type. */
 #undef HAVE_UINTPTR_T

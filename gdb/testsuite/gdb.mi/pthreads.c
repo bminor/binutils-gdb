@@ -1,5 +1,5 @@
 /* Pthreads test program.
-   Copyright 1996, 2002, 2003
+   Copyright 1996, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    Written by Keith Seitz of Red Hat.
@@ -58,7 +58,7 @@ void
 done_making_threads (void)
 {
   /* Nothing */
-};
+}
 
 void
 create_thread (void)

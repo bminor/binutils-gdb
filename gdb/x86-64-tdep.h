@@ -1,8 +1,6 @@
 /* Target-dependent code for the x86-64.
 
-   Copyright 2001, 2003
-   Free Software Foundation, Inc.
-
+   Copyright 2001, 2003, 2004 Free Software Foundation, Inc.
    Contributed by Jiri Smid, SuSE Labs.
 
    This file is part of GDB.
@@ -40,12 +38,12 @@ struct regcache;
 #define X86_64_RSP_REGNUM	7 /* %rsp */
 #define X86_64_RIP_REGNUM	16 /* %rip */
 #define X86_64_EFLAGS_REGNUM	17 /* %eflags */
-#define X86_64_ST0_REGNUM	22 /* %st0 */
-#define X86_64_XMM0_REGNUM	38 /* %xmm0 */
-#define X86_64_XMM1_REGNUM	39 /* %xmm1 */
+#define X86_64_ST0_REGNUM	24 /* %st0 */
+#define X86_64_XMM0_REGNUM	40 /* %xmm0 */
+#define X86_64_XMM1_REGNUM	41 /* %xmm1 */
 
 /* Number of general purpose registers.  */
-#define X86_64_NUM_GREGS	22
+#define X86_64_NUM_GREGS	24
 
 void x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch);
 

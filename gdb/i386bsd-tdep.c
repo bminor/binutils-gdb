@@ -144,6 +144,15 @@ i386bsd_aout_osabi_sniffer (bfd *abfd)
   return GDB_OSABI_UNKNOWN;
 }
 
+static enum gdb_osabi
+i386bsd_core_osabi_sniffer (bfd *abfd)
+{
+  if (strcmp (bfd_get_target (abfd), "netbsd-core") == 0)
+    return GDB_OSABI_NETBSD_AOUT;
+
+  return GDB_OSABI_UNKNOWN;
+}
+
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 void _initialize_i386bsd_tdep (void);
@@ -153,4 +162,9 @@ _initialize_i386bsd_tdep (void)
 {
   gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_aout_flavour,
 				  i386bsd_aout_osabi_sniffer);
+
+  /* BFD doesn't set the architecture for NetBSD style a.out core
+     files.  */
+  gdbarch_register_osabi_sniffer (bfd_arch_unknown, bfd_target_unknown_flavour,
+				  i386bsd_core_osabi_sniffer);
 }

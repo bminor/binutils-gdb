@@ -1,6 +1,6 @@
 /* BFD back-end for Renesas H8/300 COFF binaries.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003
+   2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Steve Chamberlain, <sac@cygnus.com>.
 
@@ -666,6 +666,7 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
   bfd_vma value;
   bfd_vma dot;
   int gap, tmp;
+  unsigned char temp_code;
 
   switch (reloc->howto->type)
     {
@@ -947,14 +948,24 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       if (data[dst_address - 2] != 0x6a)
 	abort ();
 
+      temp_code = data[src_address - 1];
+      if ((temp_code & 0x10) != 0x10)
+	temp_code &= 0xf0;
+
       /* Fix up the opcode.  */
-      switch (data[src_address - 1] & 0xf0)
+      switch (temp_code)
 	{
 	case 0x00:
 	  data[dst_address - 2] = (data[src_address - 1] & 0xf) | 0x20;
 	  break;
 	case 0x80:
 	  data[dst_address - 2] = (data[src_address - 1] & 0xf) | 0x30;
+	  break;
+	case 0x18:
+	  data[dst_address - 2] = 0x7f;
+	  break;
+	case 0x10:
+	  data[dst_address - 2] = 0x7e;
 	  break;
 	default:
 	  abort ();
@@ -972,14 +983,24 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       if (data[dst_address - 2] != 0x6a)
 	abort ();
 
+      temp_code = data[src_address - 1];
+      if ((temp_code & 0x30) != 0x30)
+	temp_code &= 0xf0;
+
       /* Fix up the opcode.  */
-      switch (data[src_address - 1] & 0xf0)
+      switch (temp_code)
 	{
 	case 0x20:
 	  data[dst_address - 2] = (data[src_address - 1] & 0xf) | 0x20;
 	  break;
 	case 0xa0:
 	  data[dst_address - 2] = (data[src_address - 1] & 0xf) | 0x30;
+	  break;
+	case 0x38:
+	  data[dst_address - 2] = 0x7f;
+	  break;
+	case 0x30:
+	  data[dst_address - 2] = 0x7e;
 	  break;
 	default:
 	  abort ();
