@@ -1,3 +1,7 @@
+2004-10-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldctor.c (ldctor_add_set_entry): Fix comment typo.
+
 2004-10-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 445
