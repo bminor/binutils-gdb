@@ -1,3 +1,13 @@
+2004-02-17  Daniel Jacobowitz  <drow@mvista.com>
+            Richard Sandiford  <rsandifo@redhat.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Use
+	_bfd_elf_symbol_refs_local_p to decide whether to decay
+	a GOT_PAGE/GOT_OFST pair to GOT_DISP/addend.
+	(_bfd_mips_elf_check_relocs): Add a global GOT entry for GOT_PAGE
+	relocs if the symbol wasn't defined by a regular object file.
+	Don't check the symbol's dynindx.
+
 2004-02-16  Andrew Cagney  <cagney@redhat.com>
 
 	* bfd-in.h (file_ptr, ufile_ptr): Configure type using

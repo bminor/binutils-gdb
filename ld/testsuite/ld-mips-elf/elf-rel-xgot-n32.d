@@ -19,8 +19,8 @@ Disassembly of section \.text:
 100000bc:	3c050000 	lui	a1,0x0
 100000c0:	00bc2821 	addu	a1,a1,gp
 100000c4:	8ca58034 	lw	a1,-32716\(a1\)
-100000c8:	3c010002 	lui	at,0x2
-100000cc:	2421e240 	addiu	at,at,-7616
+100000c8:	3c010001 	lui	at,0x1
+100000cc:	3421e240 	ori	at,at,0xe240
 100000d0:	00a12821 	addu	a1,a1,at
 100000d4:	3c050000 	lui	a1,0x0
 100000d8:	00bc2821 	addu	a1,a1,gp
@@ -34,8 +34,8 @@ Disassembly of section \.text:
 100000f8:	3c050000 	lui	a1,0x0
 100000fc:	00bc2821 	addu	a1,a1,gp
 10000100:	8ca58034 	lw	a1,-32716\(a1\)
-10000104:	3c010002 	lui	at,0x2
-10000108:	2421e240 	addiu	at,at,-7616
+10000104:	3c010001 	lui	at,0x1
+10000108:	3421e240 	ori	at,at,0xe240
 1000010c:	00a12821 	addu	a1,a1,at
 10000110:	00b12821 	addu	a1,a1,s1
 10000114:	3c050000 	lui	a1,0x0
@@ -192,8 +192,8 @@ Disassembly of section \.text:
 10000370:	3c050000 	lui	a1,0x0
 10000374:	00bc2821 	addu	a1,a1,gp
 10000378:	8ca58038 	lw	a1,-32712\(a1\)
-1000037c:	3c010002 	lui	at,0x2
-10000380:	2421e240 	addiu	at,at,-7616
+1000037c:	3c010001 	lui	at,0x1
+10000380:	3421e240 	ori	at,at,0xe240
 10000384:	00a12821 	addu	a1,a1,at
 10000388:	3c050000 	lui	a1,0x0
 1000038c:	00bc2821 	addu	a1,a1,gp
@@ -207,8 +207,8 @@ Disassembly of section \.text:
 100003ac:	3c050000 	lui	a1,0x0
 100003b0:	00bc2821 	addu	a1,a1,gp
 100003b4:	8ca58038 	lw	a1,-32712\(a1\)
-100003b8:	3c010002 	lui	at,0x2
-100003bc:	2421e240 	addiu	at,at,-7616
+100003b8:	3c010001 	lui	at,0x1
+100003bc:	3421e240 	ori	at,at,0xe240
 100003c0:	00a12821 	addu	a1,a1,at
 100003c4:	00b12821 	addu	a1,a1,s1
 100003c8:	3c050000 	lui	a1,0x0
@@ -425,3 +425,4 @@ Disassembly of section \.got:
 101007d0:	100006a0 	.*
 101007d4:	101006fc 	.*
 101007d8:	10100774 	.*
+#pass
