@@ -1,3 +1,9 @@
+Sat Feb  5 11:53:31 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (pa_ip): addb[tf] should only accept
+	non-negated condition completers.  Add support for addb pseudo-op
+	which accepts both negated and non-negated completers.
+
 Sat Feb  5 00:15:49 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* configure.in (rs6000*): Use cpu_type ppc.
