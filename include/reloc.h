@@ -55,8 +55,10 @@ enum reloc_type
 "SFA_BASE",	"SFAOFF13",	"BASE10",	"BASE13",	\
 "BASE22",	"PC10",		"PC22",		"JMP_TBL",	\
 "SEGOFF16",	"GLOB_DAT",	"JMP_SLOT",	"RELATIVE",	\
-"11",		"WDISP2_14",	"WDISP19", 	"JUMPTARG",	\
-"CONST",	"CONSTH",	"WDISP14",	"WDISP21",	\
+"11",		"WDISP2_14",	"WDISP19", 	"HHI22",	\
+"HLO10",							\
+"JUMPTARG",	"CONST",	"CONSTH",	"WDISP14",	\
+"WDISP21",	\
 "NO_RELOC"
 
 #endif /* _RELOC_H_READ_ */
