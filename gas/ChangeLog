@@ -1,3 +1,10 @@
+Tue Aug  6 11:15:26 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-h8300.c (get_specific): New operand "size" derived
+	from ".b", ".w" and ".l" extensions.  All callers changed.  If
+	the base instruction has no operands, then use the size to
+	determine which specific instruction to use.
+
 Mon Aug  5 14:21:10 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-i960.c (mem_fmt): Call parse_expr before emit.
