@@ -1,3 +1,11 @@
+Mon Aug  9 16:27:30 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* bfd.texinfo (BFD back end): New section on ELF, includes
+	elf.texi and elfcode.texi.
+	* Makefile.in (DOCFILES): Include elf.texi, elfcode.texi.
+	(SRCDOC): Include elfcode.h, elf.c.
+	(elf.texi, elfcode.texi): New intermediate targets.
+
 Thu Jun 24 13:48:13 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* Makefile.in (.c.o, chew.o): Put CFLAGS last.
