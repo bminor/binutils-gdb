@@ -1,3 +1,7 @@
+2003-06-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/apuinfo.rd: Update.
+
 2003-06-21  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* ld-mips-elf/elf-rel-got-n32.d: Remove special handling for n32 ABI.
@@ -2277,7 +2281,7 @@ Thu Jul 15 18:00:30 1999  Mark P. Mitchell  <mark@codesourcery.com>
 1999-07-07  Ian Lance Taylor  <ian@zembu.com>
 
 	* ld-elfvers/vers.exp: Add new tests vers17 to vers19.
-	* ld/elfvers/{vers17.*, vers18.*, vers19.*}: New files.
+	* ld-elfvers/{vers17.*, vers18.*, vers19.*}: New files.
 
 1999-06-13  Ian Lance Taylor  <ian@zembu.com>
 
