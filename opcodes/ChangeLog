@@ -1,3 +1,79 @@
+start-sanitize-d30v
+Mon Mar 30 15:18:00 1998  Ken Raeburn  <raeburn@cygnus.com>
+
+	* d30v-dis.c (print_insn_d30v): Don't use uninitialized "num" when
+	disassembling last 4 bytes of a section.
+
+end-sanitize-d30v
+Fri Mar 27 18:08:13 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	Fix some gcc -Wall warnings:
+	* arc-dis.c (print_insn): Add casts to avoid warnings.
+	* cgen-opc.c (cgen_keyword_lookup_name): Likewise.
+	* d10v-dis.c (dis_long, dis_2_short): Likewise.
+start-sanitize-sky
+	* dvp-opc.c (issymchar, SKIP_BLANKS): Likewise.
+	(parse_dotdest, parse_dotdest1, u_parse_sdest): Likewise.
+	(parse_bc, parse_vfreg, parse_accdest): Likewise.
+	(parse_ffstreg, parse_vif_mode): Likewise.
+end-sanitize-sky
+	* m10200-dis.c (disassemble): Likewise.
+	* m10300-dis.c (disassemble): Likewise.
+	* ns32k-dis.c (print_insn_ns32k): Likewise.
+	* ppc-opc.c (insert_ral, insert_ram): Likewise.
+	* cgen-dis.c (build_dis_hash_table): Remove used local variables.
+	* cgen-opc.c (cgen_keyword_search_next): Likewise.
+	* d10v-dis.c (dis_long, dis_2_short): Likewise.
+start-sanitize-d30v
+	* d30v-dis.c (print_insn_d30v, lookup_opcode): Likewise.
+end-sanitize-d30v
+start-sanitize-sky
+	* dvp-dis.c (print_dma, print_vif, print_gif): Likewise.
+	* dvp-opc.c (parse_dest1, print_uflags): Likewise.
+	(parse_gif_nloop, dvp_opcode_init_tables): Likewise.
+end-sanitize-sky
+	* ns32k-dis.c (bit_extract, print_insn_ns32k): Likewise.
+start-sanitize-tic80
+	* tic80-dis.c (print_one_instruction): Likewise.
+end-sanitize-tic80
+	* w65-dis.c (print_operand): Likewise.
+	* z8k-dis.c (fetch_data): Likewise.
+	* a29k-dis.c: Add return type for find_byte_func_type.
+	* arc-opc.c: Include <stdio.h>.  Remove declarations of
+	insert_multshift and extract_multshift.
+start-sanitize-d30v
+	* d30v-dis.c (lookup_opcode): Parenthesize assignments in
+	conditionals.
+	(extract_value): Fully parenthesize expression.
+end-sanitize-d30v
+start-sanitize-sky
+	* dvp-opc.c: Include <ctype.h>.
+	(print_sdest): Add default case to switch.
+end-sanitize-sky
+	* h8500-dis.c (print_insn_h8500): Initialize local variables.
+	* h8500-opc.h (h8500_table): Fully bracket initializer.
+	* w65-opc.h (optable): Likewise.
+	* i386-dis.c (print_insn_x86): Declare aflag and flag parameters.
+	* i386-dis.c (OP_E): Initialize local variables.
+	* m10200-dis.c (print_insn_mn10200): Likewise.
+	* mips-dis.c (print_insn_mips16): Likewise.
+	* sh-dis.c (print_insn_shx): Likewise.
+	* v850-dis.c (print_insn_v850): Likewise.
+	* ns32k-dis.c (print_insn_arg): Declare.
+	(get_displacement, invalid_float): Declare.
+	(list_search, sign_extend, flip_bytes): Declare return type.
+	(get_displacement): Likewise.
+	(print_insn_arg): Likewise.  Make d int.  Fix sprintf format
+	string.
+	(print_insn_ns32k): Make i unsigned.
+	(invalid_float): Make static.  Declare type of val.
+	* tic30-dis.c (print_par_insn): Make i size_t.  Don't check strlen
+	on each for iteration.
+	* tic30-dis.c (get_indirect_operand): Likewise.
+	* z8k-dis.c (print_insn_z8001): Declare return type.
+	(print_insn_z8002): Likewise.
+	(unparse_instr): Fix sprintf format strings.
+
 Fri Mar 27 00:05:23 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* mips-opc.c: Add "sync.l" and "sync.p".
