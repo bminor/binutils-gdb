@@ -56,21 +56,30 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #endif
 
 /* Handle for TCL interpreter */
+
 static Tcl_Interp *interp = NULL;
 
 /* Handle for TK main window */
+
 static Tk_Window mainWindow = NULL;
 
 static int x_fd;		/* X network socket */
 
-/* This variable determines where memory used for disassembly is read from.
+/* This variable is true when the inferior is running.  Although it's
+   possible to disable most input from widgets and thus prevent
+   attempts to do anything while the inferior is running, any commands
+   that get through - even a simple memory read - are Very Bad, and
+   may cause GDB to crash or behave strangely.  So, this variable
+   provides an extra layer of defense.  */
 
-   If > 0, then disassembly comes from the exec file rather than the target
-   (which might be at the other end of a slow serial link).  If == 0 then
-   disassembly comes from target.  If < 0 disassembly is automatically switched
-   to the target if it's an inferior process, otherwise the exec file is
-   used.
- */
+static int running_now;
+
+/* This variable determines where memory used for disassembly is read from.
+   If > 0, then disassembly comes from the exec file rather than the
+   target (which might be at the other end of a slow serial link).  If
+   == 0 then disassembly comes from target.  If < 0 disassembly is
+   automatically switched to the target if it's an inferior process,
+   otherwise the exec file is used.  */
 
 static int disassemble_from_exec = -1;
 
@@ -138,6 +147,7 @@ gdbtk_fputs (ptr, stream)
      const char *ptr;
      FILE *stream;
 {
+
   if (result_ptr)
     Tcl_DStringAppend (result_ptr, (char *)ptr, -1);
   else
@@ -610,7 +620,7 @@ register_changed_p (regnum, argp)
 	      REGISTER_RAW_SIZE (regnum)) == 0)
     return;
 
-  /* Found a changed register.  Save new value and return it's number. */
+  /* Found a changed register.  Save new value and return its number. */
 
   memcpy (&old_regs[REGISTER_BYTE (regnum)], raw_buffer,
 	  REGISTER_RAW_SIZE (regnum));
@@ -631,7 +641,7 @@ gdb_changed_register_list (clientData, interp, argc, argv)
   return map_arg_registers (argc, argv, register_changed_p, NULL);
 }
 
-/* This implements the TCL command `gdb_cmd', which sends it's argument into
+/* This implements the TCL command `gdb_cmd', which sends its argument into
    the GDB command scanner.  */
 
 static int
@@ -643,6 +653,9 @@ gdb_cmd (clientData, interp, argc, argv)
 {
   if (argc != 2)
     error ("wrong # args");
+
+  if (running_now)
+    return TCL_OK;
 
   execute_command (argv[1], 1);
 
@@ -690,8 +703,9 @@ call_wrapper (clientData, interp, argc, argv)
 
       gdb_flush (gdb_stdout);	/* Sometimes error output comes here as well */
 
-/* In case of an error, we may need to force the GUI into idle mode because
-   gdbtk_call_command may have bombed out while in the command routine.  */
+      /* In case of an error, we may need to force the GUI into idle
+	 mode because gdbtk_call_command may have bombed out while in
+	 the command routine.  */
 
       Tcl_Eval (interp, "gdbtk_tcl_idle");
     }
@@ -843,7 +857,7 @@ gdb_disassemble (clientData, interp, argc, argv)
      correctly.
 
      Else, we're debugging a remote process, and should disassemble from the
-     exec file for speed.  However, this is no good if the target modifies it's
+     exec file for speed.  However, this is no good if the target modifies its
      code (for relocation, or whatever).
    */
 
@@ -1080,11 +1094,14 @@ gdbtk_call_command (cmdblk, arg, from_tty)
      char *arg;
      int from_tty;
 {
+  running_now = 0;
   if (cmdblk->class == class_run)
     {
+      running_now = 1;
       Tcl_Eval (interp, "gdbtk_tcl_busy");
       (*cmdblk->function.cfunc)(arg, from_tty);
       Tcl_Eval (interp, "gdbtk_tcl_idle");
+      running_now = 0;
     }
   else
     (*cmdblk->function.cfunc)(arg, from_tty);

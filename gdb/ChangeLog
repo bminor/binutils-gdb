@@ -1,4 +1,12 @@
 start-sanitize-gdbtk
+Fri Apr  5 13:44:40 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdbtk.c (running_now): New global variable.
+	(gdb_cmd): Test it before executing any command.
+	(gdbtk_call_command): Set it when inferior is running.
+	* gdbtk.tcl (gdbtk_tcl_busy, gdbtk_tcl_idle): Enable and
+	disable interaction with command window's text appropriately.
+
 Fri Apr  5 13:25:42 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* gdbtk.c (SIOCSPGRP, linux): If on Linux, undef SIOCSPGRP, since
@@ -14,11 +22,8 @@ Thu Apr  4 20:16:55 1996  Fred Fish  <fnf@cygnus.com>
 	if it is actually defined.
 	(gdb_setpgid): Use HAVE_SETPGID.
 	* ch-exp.c: Change include of <string.h> to "gdb_string.h".
-	* c-exp.y: Ditto.
-	* f-exp.y: Ditto.
-	* m2-exp.y: Ditto.
-	* c-exp.y: Include <ctype.h>.
-	* serial.c: Ditto.
+	* c-exp.y, f-exp.y, m2-exp.y: Ditto.
+	* c-exp.y, serial.c: Include <ctype.h>.
 	* config/m68k/nm-news.h: Add typedef for pid_t which is
 	apparently missing from <sys/types.h>.  Enclose entire
 	file in NM_NEWS_H ifndef and define when included.
@@ -106,7 +111,7 @@ Fri Mar 29 21:39:56 1996  Fred Fish  <fnf@cygnus.com>
 	* values.c (unpack_field_as_long, modify_field): Ditto.
 	* valops.c (value_assign, call_function_by_hand): Ditto.
 	* infcmd.c (do_registers_info): Ditto.
-	* ser-tcp.c (tcp_open): Ditto
+	* ser-tcp.c (tcp_open): Ditto.
 	* remote.c (putpkt): Ditto.
 	* dcache.c (dcache_peek): Ditto.
 	* dcache.c (dcache_poke): Ditto.
@@ -116,7 +121,7 @@ Fri Mar 29 21:39:56 1996  Fred Fish  <fnf@cygnus.com>
 	out unused macro definition and variables.
 	* inftarg.c (proc_wait): Move from main.c to here, and make static.
 	* valprint.c (val_print_string): Change bufsize from int to unsigned.
-	* main.c (wait.h): Include
+	* main.c (wait.h): Include.
 	* top.c (command_line_input): Remove unused variable "c".
 	* f-typeprint.c (f_type_print_varspec_prefix): Add missing enum
 	value TYPE_CODE_TYPEDEF to switch statement.

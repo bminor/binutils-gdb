@@ -668,6 +668,9 @@ proc delete_breakpoint_tag {win line} {
 }
 
 proc gdbtk_tcl_busy {} {
+	if {[winfo exists .cmd]} {
+		.cmd.text configure -state disabled
+	}
 	if {[winfo exists .src]} {
 		.src.start configure -state disabled
 		.src.stop configure -state normal
@@ -692,6 +695,9 @@ proc gdbtk_tcl_busy {} {
 }
 
 proc gdbtk_tcl_idle {} {
+	if {[winfo exists .cmd]} {
+		.cmd.text configure -state normal
+	}
 	if {[winfo exists .src]} {
 		.src.start configure -state normal
 		.src.stop configure -state disabled
@@ -703,7 +709,6 @@ proc gdbtk_tcl_idle {} {
 		.src.down configure -state normal
 		.src.bottom configure -state normal
 	}
-
 	if {[winfo exists .asm]} {
 		.asm.stepi configure -state normal
 		.asm.nexti configure -state normal
