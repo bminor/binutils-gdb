@@ -5,7 +5,7 @@ This file is part of GAS.
 
 GAS is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 GAS is distributed in the hope that it will be useful,
@@ -23,7 +23,46 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "targ-cpu.h"
 
+
+
+#ifdef BFD_HEADERS
+#ifdef TC_A29K
+#include "bfd.h"
+#include "coff-a29k.h"
+
+/* This internal_lineno crap is to stop namespace pollution from the bfd internal 
+   coff headerfile. */
+
+
+#define internal_lineno bfd_internal_lineno
+#include "internalcoff.h"
+#undef internal_lineno
+/*
+#undef RELOC
+#undef SYMENT
+#undef AUXENT
+#undef LINENO
+#undef FILHDR
+#undef SCNHDR
+#define RELOC struct internal_reloc
+#define SYMENT struct internal_syment
+#define AUXENT union internal_auxent
+#define SCNHDR struct internal_scnhdr
+#define LINENO struct bfd_internal_lineno 
+#define AOUTHDR struct internal_aouthdr
+#define FILHDR struct internal_filehdr
+#define AOUTHDRSZ sizeof(struct external_aouthdr)
+*/
+/*#define x_endndx x_endndx.l
+#define x_tagndx x_tagndx.l*/
+#define TARGET_FORMAT "coff-a29k-big"
+extern bfd *stdoutput;
+#else
+help me
+#endif
+#else
 #include "coff.gnu.h"
+#endif
 
 #ifdef USE_NATIVE_HEADERS
 #include <filehdr.h>
@@ -80,10 +119,13 @@ extern const segT  N_TYPE_seg[];
 /* Magic number of paged executable. */
 #define DEFAULT_MAGIC_NUMBER_FOR_OBJECT_FILE	(OMAGIC)
 
+#ifndef BFD_HEADERS
+
 /* Add these definitions to have a consistent convention for all the
    types used in COFF format. */
 #define AOUTHDR			struct aouthdr
 #define AOUTHDRSZ		sizeof(AOUTHDR)
+#endif
 
 /* SYMBOL TABLE */
 
@@ -95,8 +137,13 @@ extern const segT  N_TYPE_seg[];
 /* Symbol table entry data type */
 
 typedef struct {
+#ifdef BFD_HEADERS
+	struct internal_syment  ost_entry;       /* Basic symbol */
+	union internal_auxent ost_auxent[OBJ_COFF_MAX_AUXENTRIES];      /* Auxiliary entry. */
+#else
 	SYMENT ost_entry;       /* Basic symbol */
 	AUXENT ost_auxent[OBJ_COFF_MAX_AUXENTRIES];      /* Auxiliary entry. */
+#endif
 	unsigned int ost_flags; /* obj_coff internal use only flags */
 } obj_symbol_type;
 
@@ -122,6 +169,7 @@ typedef struct {
 #define C_DEBUG_SECTION		N_DEBUG
 #define C_NTV_SECTION		N_TV
 #define C_PTV_SECTION		P_TV
+#define C_REGISTER_SECTION	4
 
 /*
  *  Macros to extract information from a symbol table entry.
@@ -143,6 +191,7 @@ typedef struct {
 /* True if a symbol is local symbol name */
 /* A symbol name whose name begin with ^A is a gas internal pseudo symbol */
 #define S_IS_LOCAL(s)		(S_GET_NAME(s)[0] == '\001' || \
+				 (s)->sy_symbol.ost_entry.n_scnum == C_REGISTER_SECTION || \
 				 (S_LOCAL_NAME(s) && !flagseen['L']))
 /* True if a symbol is not defined in this file */
 #define S_IS_EXTERN(s)		((s)->sy_symbol.ost_entry.n_scnum == 0 && (s)->sy_symbol.ost_entry.n_value == 0)
@@ -197,12 +246,20 @@ typedef struct {
 /* Auxiliary entry macros. SA_ stands for symbol auxiliary */
 /* Omit the tv related fields */
 /* Accessors */
+#ifdef BFD_HEADERS
+#define SA_GET_SYM_TAGNDX(s)	((s)->sy_symbol.ost_auxent[0].x_sym.x_tagndx.l)
+#else
 #define SA_GET_SYM_TAGNDX(s)	((s)->sy_symbol.ost_auxent[0].x_sym.x_tagndx)
+#endif
 #define SA_GET_SYM_LNNO(s)	((s)->sy_symbol.ost_auxent[0].x_sym.x_misc.x_lnsz.x_lnno)
 #define SA_GET_SYM_SIZE(s)	((s)->sy_symbol.ost_auxent[0].x_sym.x_misc.x_lnsz.x_size)
 #define SA_GET_SYM_FSIZE(s)	((s)->sy_symbol.ost_auxent[0].x_sym.x_misc.x_fsize)
 #define SA_GET_SYM_LNNOPTR(s)	((s)->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_fcn.x_lnnoptr)
+#ifdef BFD_HEADERS
+#define SA_GET_SYM_ENDNDX(s)	((s)->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_fcn.x_endndx.l)
+#else
 #define SA_GET_SYM_ENDNDX(s)	((s)->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_fcn.x_endndx)
+#endif
 #define SA_GET_SYM_DIMEN(s,i)	((s)->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_ary.x_dimen[(i)])
 #define SA_GET_FILE_FNAME(s)	((s)->sy_symbol.ost_auxent[0].x_file.x_fname)
 #define SA_GET_SCN_SCNLEN(s)	((s)->sy_symbol.ost_auxent[0].x_scn.x_scnlen)
@@ -210,12 +267,20 @@ typedef struct {
 #define SA_GET_SCN_NLINNO(s)	((s)->sy_symbol.ost_auxent[0].x_scn.x_nlinno)
 
 /* Modifiers */
+#ifdef BFD_HEADERS
+#define SA_SET_SYM_TAGNDX(s,v)	((s)->sy_symbol.ost_auxent[0].x_sym.x_tagndx.l=(v))
+#else
 #define SA_SET_SYM_TAGNDX(s,v)	((s)->sy_symbol.ost_auxent[0].x_sym.x_tagndx=(v))
+#endif
 #define SA_SET_SYM_LNNO(s,v)	((s)->sy_symbol.ost_auxent[0].x_sym.x_misc.x_lnsz.x_lnno=(v))
 #define SA_SET_SYM_SIZE(s,v)	((s)->sy_symbol.ost_auxent[0].x_sym.x_misc.x_lnsz.x_size=(v))
 #define SA_SET_SYM_FSIZE(s,v)	((s)->sy_symbol.ost_auxent[0].x_sym.x_misc.x_fsize=(v))
 #define SA_SET_SYM_LNNOPTR(s,v)	((s)->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_fcn.x_lnnoptr=(v))
+#ifdef BFD_HEADERS
+#define SA_SET_SYM_ENDNDX(s,v)	((s)->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_fcn.x_endndx.l=(v))
+#else
 #define SA_SET_SYM_ENDNDX(s,v)	((s)->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_fcn.x_endndx=(v))
+#endif
 #define SA_SET_SYM_DIMEN(s,i,v)	((s)->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_ary.x_dimen[(i)]=(v))
 #define SA_SET_FILE_FNAME(s,v)	strncpy((s)->sy_symbol.ost_auxent[0].x_file.x_fname,(v),FILNMLEN)
 #define SA_SET_SCN_SCNLEN(s,v)	((s)->sy_symbol.ost_auxent[0].x_scn.x_scnlen=(v))
@@ -316,7 +381,7 @@ typedef struct {
 	   H_GET_NUMBER_OF_SECTIONS(h) * SCNHSZ + \
 	   H_GET_TEXT_SIZE(h) + H_GET_DATA_SIZE(h) + \
 	   H_GET_RELOCATION_SIZE(h) + H_GET_LINENO_SIZE(h) + \
-	   H_GET_SYMBOL_TABLE_SIZE(h) * SYMESZ + \
+	   H_GET_SYMBOL_TABLE_SIZE(h) + \
 	   (h)->string_table_size)
 #define H_GET_TEXT_FILE_OFFSET(h) \
     (long)(FILHSZ + OBJ_COFF_AOUTHDRSZ + \
@@ -356,13 +421,26 @@ typedef struct {
 #define H_GET_NUMBER_OF_SECTIONS(h)	((h)->filehdr.f_nscns)
 #define H_GET_TIME_STAMP(h)		((h)->filehdr.f_timdat)
 #define H_GET_SYMBOL_TABLE_POINTER(h)	((h)->filehdr.f_symptr)
-#define H_GET_SYMBOL_TABLE_SIZE(h)	((h)->filehdr.f_nsyms)
+#define H_GET_SYMBOL_COUNT(h)		((h)->filehdr.f_nsyms)
+#define H_GET_SYMBOL_TABLE_SIZE(h)	(H_GET_SYMBOL_COUNT(h) * SYMESZ)
 #define H_GET_SIZEOF_OPTIONAL_HEADER(h)	((h)->filehdr.f_opthdr)
 #define H_GET_FLAGS(h)			((h)->filehdr.f_flags)
 /* Extra fields to achieve bsd a.out compatibility and for convenience */
 #define H_GET_RELOCATION_SIZE(h)   	((h)->relocation_size)
 #define H_GET_STRING_SIZE(h)            ((h)->string_table_size)
 #define H_GET_LINENO_SIZE(h)            ((h)->lineno_size)
+
+#ifndef OBJ_COFF_OMIT_OPTIONAL_HEADER
+#define H_GET_HEADER_SIZE(h)		(sizeof(FILHDR) \
+					 + sizeof(AOUTHDR)\
+					 + (H_GET_NUMBER_OF_SECTIONS(h) * SCNHSZ))
+#else /* OBJ_COFF_OMIT_OPTIONAL_HEADER */
+#define H_GET_HEADER_SIZE(h)		(sizeof(FILHDR) \
+					 + (H_GET_NUMBER_OF_SECTIONS(h) * SCNHSZ))
+#endif /* OBJ_COFF_OMIT_OPTIONAL_HEADER */
+
+#define H_GET_TEXT_RELOCATION_SIZE(h)	(text_section_header.s_nreloc * RELSZ)
+#define H_GET_DATA_RELOCATION_SIZE(h)	(data_section_header.s_nreloc * RELSZ)
 
 /* Modifiers */
 /* aouthdr */
@@ -391,8 +469,13 @@ typedef struct {
 #define segment_name(v)	(seg_name[(int) (v)])
 
 typedef struct {
+#ifdef BFD_HEADERS
+    struct internal_aouthdr	   aouthdr;             /* a.out header */
+    struct internal_filehdr	   filehdr;		/* File header, not machine dep. */
+#else
     AOUTHDR	   aouthdr;             /* a.out header */
     FILHDR	   filehdr;		/* File header, not machine dep. */
+#endif
     long       string_table_size;   /* names + '\0' + sizeof(int) */
     long	   relocation_size;	/* Cumulated size of relocation
 					   information for all sections in
@@ -407,7 +490,11 @@ extern int		text_lineno_number;
 /* line numbering stuff. */
 
 typedef struct internal_lineno {
+#ifdef BFD_HEADERS
+  struct bfd_internal_lineno line;
+#else
     LINENO line;			/* The lineno structure itself */
+#endif
     char* frag;				/* Frag to which the line number is related */
     struct internal_lineno* next;	/* Forward chain pointer */
 } lineno;
@@ -449,7 +536,13 @@ void tc_headers_hook(object_headers *headers);
 void tc_coff_symbol_emit_hook(); /* really tc_coff_symbol_emit_hook(symbolS *symbolP) */
 #endif /* tc_coff_symbol_emit_hook */
 
-void c_section_header(SCNHDR *header,
+void c_section_header(
+#ifdef BFD_HEADERS
+		      struct internal_scnhdr *header,
+#else
+		      SCNHDR *header,
+#endif
+
 		      char *name,
 		      long core_address,
 		      long size,
@@ -483,7 +576,13 @@ void tc_coff_symbol_emit_hook();
 hey!  Where is the C_LEAFSTAT definition?  i960-coff support is depending on it.
 #endif /* no C_LEAFSTAT */
 #endif /* TC_I960 */
-
+#ifdef BFD_HEADERS
+extern struct internal_scnhdr data_section_header;
+extern struct internal_scnhdr text_section_header;
+#else
+extern SCNHDR data_section_header;
+extern SCNHDR text_section_header;
+#endif
 /*
  * Local Variables:
  * comment-column: 0
