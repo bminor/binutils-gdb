@@ -1,0 +1,88 @@
+srcdir = .
+prefix = /usr/local
+
+exec_prefix = $(prefix)
+bindir = $(exec_prefix)/bin
+libdir = $(exec_prefix)/lib
+tooldir = $(libdir)/$(target_alias)
+
+SHELL = /bin/sh
+
+CFLAGS = -g
+SUBDIRS =
+CC = cc
+GDB = gdb
+RUNTEST = runtest
+RUNTESTFLAGS = 
+
+FLAGS_TO_PASS = \
+	"CC=$(CC)" \
+	"CFLAGS=$(CFLAGS)" \
+	"GDB=$(GDB)" \
+	"RUNTEST=$(RUNTEST)" \
+	"RUNTESTFLAGS=$(RUNTESTFLAGS)"
+
+#### host, target, and site specific Makefile frags come in here.
+
+all:	 subdirs
+
+.PHONY: check installcheck
+check:
+installcheck:
+
+.NOEXPORT:
+MAKEOVERRIDES=
+
+just-check:	force	
+	rootme=`pwd`; export rootme; $(MAKE) DO=check DODIRS=testsuite subdir_do
+		
+check:	force	
+	rootme=`pwd`; export rootme; $(MAKE) DO=check DODIRS=testsuite subdir_do
+		
+subdir_do: force
+	@for i in $(DODIRS); do \
+	    if [ -d ./$$i ] ; then \
+		if (rootme=`pwd`/ ; export rootme ; \
+		    rootsrc=`cd $(srcdir); pwd`/ ; export rootsrc ; \
+		    cd ./$$i; \
+		    $(MAKE) $(FLAGS_TO_PASS) $(DO)) ; then true ; \
+		else exit 1 ; fi ; \
+	    else true ; fi ; \
+	done
+force:
+
+
+subdirs:
+	@for dir in ${SUBDIRS}; \
+	do \
+		echo "$$dir:"; \
+		if [ -d $$dir ]; then \
+			(rootme=`pwd`/ ; export rootme ; \
+			 rootsrc=`cd $(srcdir); pwd`/ ; export rootsrc ; \
+			 cd $$dir; $(MAKE) $(FLAGS_TO_PASS)); \
+		fi; \
+	done
+
+clean:
+	-rm -f *~ core *.o a.out xgdb *.x
+		for dir in ${SUBDIRS}; \
+		do \
+			echo "$$dir:"; \
+			if [ -d $$dir ]; then \
+				(cd $$dir; $(MAKE) clean); \
+			fi; \
+		done
+
+distclean: clean
+	-rm -f *~ core
+	-rm -f Makefile config.status *-init.exp site.*
+	-rm -fr *.log summary detail
+		for dir in ${SUBDIRS}; \
+		do \
+			echo "$$dir:"; \
+			(cd $$dir; $(MAKE) distclean); \
+		done
+
+Makefile : $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
+	$(SHELL) ./config.status
+
