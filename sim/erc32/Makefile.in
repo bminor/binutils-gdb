@@ -53,7 +53,7 @@ end.h: end
 # Copy the files into directories where they will be run.
 install-sis: installdirs
 	n=`echo sis | sed '$(program_transform_name)'`; \
-	$(INSTALL_PROGRAM) sis $(bindir)/$$n
+	$(INSTALL_PROGRAM) sis$(EXEEXT) $(bindir)/$$n$(EXEEXT)
 
 clean-sis:
 	rm -f sis end end.h

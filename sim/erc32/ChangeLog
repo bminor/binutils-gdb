@@ -1,3 +1,8 @@
+2000-03-07  Frank Ch. Eigler  <fche@redhat.com>
+
+	From John Dallaway  <jld@redhat.co.uk>:
+	* Makefile.in (install-sis): Add $(EXEEXT) for Windows host.
+
 2000-03-03  Jonathan Larmour  <jlarmour@redhat.co.uk>
 
 	* func.c (buffer_read_memory): Change type of size to unsigned to
