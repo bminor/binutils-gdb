@@ -1836,9 +1836,9 @@ format.
 The new file format is defined in header file @file{gmon_out.h}.  It
 consists of a header containing the magic cookie and a version number,
 as well as some spare bytes available for future extensions.  All data
-in a profile data file is in the native format of the host on which
-the profile was collected.  @sc{gnu} @code{gprof} adapts automatically to the
-byte-order in use.
+in a profile data file is in the native format of the target for which
+the profile was collected.  @sc{gnu} @code{gprof} adapts automatically
+to the byte-order in use.
 
 In the new file format, the header is followed by a sequence of
 records.  Currently, there are three different record types: histogram
