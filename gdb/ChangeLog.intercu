@@ -1,5 +1,13 @@
 2004-02-21  Daniel Jacobowitz  <drow@mvista.com>
 
+	* dwarf2read.c (maybe_specification_partial_die): Removed.
+	(is_type_tag_for_partial): Renamed from is_type_tag.  Remove
+	some tags.
+	(load_partial_dies): Call is_type_tag_for_partial.  Handle simple
+	DIEs early.
+
+2004-02-21  Daniel Jacobowitz  <drow@mvista.com>
+
 	* dwarf2read.c (scan_partial_symbols): Don't return anything.  Take
 	a DIE argument instead of an info_ptr.
 	(add_partial_namespace, add_partial_structure)

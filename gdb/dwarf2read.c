@@ -4462,62 +4462,36 @@ dwarf2_lookup_abbrev (unsigned int number, struct dwarf2_cu *cu)
   return NULL;
 }
 
-/* Returns nonzero if TAG represents a type.  */
+/* Returns nonzero if TAG represents a type that we might generate a partial
+   symbol for.  */
 
 static int
-is_type_tag (int tag)
+is_type_tag_for_partial (int tag)
 { 
   switch (tag)
     {
+#if 0
+    /* Some types that would be reasonable to generate partial symbols for,
+       that we don't at present.  */
     case DW_TAG_array_type:
-    case DW_TAG_class_type:
-    case DW_TAG_enumeration_type:
-    case DW_TAG_pointer_type:
-    case DW_TAG_reference_type:
-    case DW_TAG_string_type:
-    case DW_TAG_structure_type:
-    case DW_TAG_subroutine_type:
-    case DW_TAG_union_type:
+    case DW_TAG_file_type:
     case DW_TAG_ptr_to_member_type:
     case DW_TAG_set_type:
-    case DW_TAG_subrange_type:
+    case DW_TAG_string_type:
+    case DW_TAG_subroutine_type:
+#endif
     case DW_TAG_base_type:
-    case DW_TAG_const_type:
-    case DW_TAG_file_type:
-    case DW_TAG_packed_type:
-    case DW_TAG_volatile_type:
+    case DW_TAG_class_type:
+    case DW_TAG_enumeration_type:
+    case DW_TAG_structure_type:
+    case DW_TAG_subrange_type:
     case DW_TAG_typedef:
+    case DW_TAG_union_type:
       return 1;
     default:
       return 0;
     }
 }
-
-#if 0
-/* Returns non-zero if PART_DIE might be referenced via DW_AT_specification
-   or DW_AT_abstract_origin.  */
-
-static int
-maybe_specification_partial_die (struct partial_die_info *part_die)
-{
-  if (is_type_tag (part_die->tag))
-    return 1;
-
-  /* FIXME: How does DW_AT_abstract_origin play into this?  Is it
-     possible to reference abstract origin in another CU (probably);
-     will they all be declarations (probably not?).
-
-     Understand this issue before posting patch.  */
-  if (part_die->is_declaration && !part_die->has_specification)
-    return 1;
-
-  /* FIXME: That's all GCC checks (is_symbol_die); but GCC can emit
-     DW_AT_specification for non-declarations.  I think they ought to
-     be tagged as declarations... */
-
-  return 0;
-}
-#endif
 
 /* Load all DIEs that are interesting for partial symbols into memory.  */
 
@@ -4558,7 +4532,7 @@ load_partial_dies (bfd *abfd, char *info_ptr, struct dwarf2_cu *cu)
 	}
 
       /* Check whether this DIE is interesting enough to save.  */
-      if (!is_type_tag (abbrev->tag)
+      if (!is_type_tag_for_partial (abbrev->tag)
 	  && abbrev->tag != DW_TAG_enumerator
 	  && abbrev->tag != DW_TAG_subprogram
 	  && abbrev->tag != DW_TAG_variable
@@ -4573,6 +4547,62 @@ load_partial_dies (bfd *abfd, char *info_ptr, struct dwarf2_cu *cu)
       //      fprintf_unfiltered (gdb_stderr, "Loading DIE %x\n", info_ptr - dwarf_info_buffer);
       info_ptr = load_partial_die (part_die, abbrev, bytes_read,
 				   abfd, info_ptr, cu);
+
+      /* This two-pass algorithm for processing partial symbols has a high
+	 cost in cache pressure.  Thus, handle some trivial cases here
+	 which cover the majority of C partial symbols.  DIEs which
+         neither have specification tags in them, nor could have specification
+         tags elsewhere pointing at them, can simply be processed and
+	 discarded.
+
+	 This segment is also optional; scan_partial_symbols and
+	 add_partial_symbol will handle these DIEs if we simply chain
+	 them in normally.  When compilers which do not emit large
+         quantities of duplicate debug information are more common,
+         this code can probably be removed.  */
+
+      /* Any complete simple types at the top level (pretty much all
+	 of them, for a language without namespaces), can be processed
+	 directly.  */
+      if (parent_die == NULL
+	  && part_die->has_specification == 0
+	  && part_die->is_declaration == 0
+	  && (part_die->tag == DW_TAG_typedef
+	      || part_die->tag == DW_TAG_base_type
+	      || part_die->tag == DW_TAG_subrange_type
+	      || part_die->tag == DW_TAG_enumeration_type))
+	{
+	  add_psymbol_to_list (part_die->name, strlen (part_die->name),
+			       VAR_DOMAIN, LOC_TYPEDEF,
+			       &cu->objfile->static_psymbols,
+			       0, (CORE_ADDR) 0, cu->language, cu->objfile);
+	  info_ptr = locate_pdi_sibling (part_die, info_ptr, abfd, cu);
+	  continue;
+	}
+
+      /* If we're at the second level, and we're an enumerator, and
+	 our parent has no specification (meaning possibly lives in a
+	 namespace elsewhere), then we can add the partial symbol now
+	 instead of queueing it.  */
+      if (part_die->tag == DW_TAG_enumerator
+	  && parent_die != NULL
+	  && parent_die->die_parent == NULL
+	  && parent_die->tag == DW_TAG_enumeration_type
+	  && parent_die->has_specification == 0)
+	{
+	  if (part_die->name == NULL)
+	    complaint (&symfile_complaints, "malformed enumerator DIE ignored");
+	  else
+	    add_psymbol_to_list (part_die->name, strlen (part_die->name),
+				 VAR_DOMAIN, LOC_CONST,
+				 cu->language == language_cplus
+				 ? &cu->objfile->global_psymbols
+				 : &cu->objfile->static_psymbols,
+				 0, (CORE_ADDR) 0, cu->language, cu->objfile);
+
+	  info_ptr = locate_pdi_sibling (part_die, info_ptr, abfd, cu);
+	  continue;
+	}
 
       /* We'll save this DIE so link it in.  */
       part_die->die_parent = parent_die;
