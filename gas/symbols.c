@@ -375,7 +375,7 @@ symbol_table_insert (symbolP)
  */
 symbolS *
 symbol_find_or_make (name)
-     char *name;
+     const char *name;
 {
   register symbolS *symbolP;
 
@@ -752,6 +752,8 @@ resolve_symbol_value (symp)
 	case O_le:
 	case O_ge:
 	case O_gt:
+	case O_logical_and:
+	case O_logical_or:
 	  resolve_symbol_value (symp->sy_value.X_add_symbol);
 	  resolve_symbol_value (symp->sy_value.X_op_symbol);
 	  seg_left = S_GET_SEGMENT (symp->sy_value.X_add_symbol);
@@ -787,6 +789,8 @@ resolve_symbol_value (symp)
 	    case O_le:		val = left <= right ? ~ (offsetT) 0 : 0;
 	    case O_ge:		val = left >= right ? ~ (offsetT) 0 : 0;
 	    case O_gt:		val = left >  right ? ~ (offsetT) 0 : 0;
+	    case O_logical_and:	val = left && right; break;
+	    case O_logical_or:	val = left || right; break;
 	    default:			abort ();
 	    }
 	  S_SET_VALUE (symp,
@@ -1542,6 +1546,12 @@ print_expr_1 (file, exp)
       break;
     case O_gt:
       fprintf (file, "gt");
+      break;
+    case O_logical_and:
+      fprintf (file, "logical_and");
+      break;
+    case O_logical_or:
+      fprintf (file, "logical_or");
       break;
     case O_add:
       indent_level++;

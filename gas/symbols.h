@@ -36,13 +36,13 @@ extern int symbols_case_sensitive;
 char *decode_local_label_name PARAMS ((char *s));
 symbolS *symbol_find PARAMS ((CONST char *name));
 symbolS *symbol_find_base PARAMS ((CONST char *name, int strip_underscore));
-symbolS *symbol_find_or_make PARAMS ((char *name));
+symbolS *symbol_find_or_make PARAMS ((const char *name));
 symbolS *symbol_make PARAMS ((CONST char *name));
 symbolS *symbol_new PARAMS ((CONST char *name, segT segment, valueT value,
 			     fragS * frag));
 symbolS *symbol_create PARAMS ((CONST char *name, segT segment, valueT value,
 				fragS * frag));
-symbolS *colon PARAMS ((char *sym_name));
+symbolS *colon PARAMS ((const char *sym_name));
 void local_colon PARAMS ((int n));
 void symbol_begin PARAMS ((void));
 void symbol_table_insert PARAMS ((symbolS * symbolP));

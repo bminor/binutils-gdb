@@ -1,3 +1,8 @@
+Sat Oct 28 01:02:05 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* symbols.c (symbol_find_or_make): Change name to be const.
+	* symbols.h (symbol_find_or_make): Update declaration.
+
 Thu Oct 26 19:18:27 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* doc/as.texinfo (Align): Mention SH.
