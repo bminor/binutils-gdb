@@ -1,10 +1,64 @@
+2002-02-21  Andreas Jaeger  <aj@suse.de>
+
+	* elf64-x86-64.c: Major rework that introduces all recent changes
+	to the x86-64 backend.  Get a closer match to elf32-i386.
+	(struct elf64_x86_64_dyn_relocs): Rename from
+	elf64_x86_64_pcrel_relocs_copied, add additional fields.  Change
+	all users.
+	(struct elf64_x86_64_link_hash_table): Add short cuts to some
+	sections.
+	(link_hash_newfunc): Rename from elf64_x86_64_link_hash_newfunc,
+	remove casts, initialize new hash members.
+	(create_got_section): New.
+	(elf64_x86_64_create_dynamic_sections): New.
+	(elf64_x86_64_copy_indirect_symbol): New.
+	(elf64_x86_64_check_relocs): Don't allocate space for dynamic
+	relocs, .got or .relgot here but do it in allocate_dynrelocs.
+	Reference count possible .plt and .got entries.  Don't test input
+	section SEC_READONLY here to try to avoid copy relocs, and keep
+	dyn_relocs regardless of ELF_LINK_NON_GOT_REF.  Don't set
+	DF_TEXTREL here.  Delay setting of variables until needed.  Cache
+	pointer to "sreloc" section in elf_section_data. Tweak condition
+	under which .got created.  Report files with bad relocation
+	section names.
+	(elf64_x86_64_gc_sweep_hook): Sweep dyn_relocs and local_dynrel.
+	Reference count possible .plt entries.  Don't deallocate .got and
+	.relgot space here.
+	(elf64_x86_64_adjust_dynamic_symbol): Handle nocopyreloc.  Don't
+	do copy reloc processing for weakdefs.  Remove redundant casts and
+	aborts.  Delay setting of vars until needed.  Move creation of
+	dynamic symbols and allocation of .plt and .rela.plt to
+	allocate_dynrelocs.  Replace BFD_ASSERT with abort.
+	(WILL_CALL_FINISH_DYNAMIC_SYMBOL): New.
+	(allocate_dynrelocs): New.
+	(readonly_dynrelocs): New.
+	(elf64_x86_64_size_dynamic_sections): Call readonly_dynrelocs.
+	Allocate space for dyn relocs.  Replace BFD_ASSERT with abort.
+	Zero out the dynamic allocated content space.
+	(elf64_x86_64_discard_copies): Removed.
+	(elf64_x86_64_relocate_section): Make use of dynamic section
+	short-cuts.  Localise vars, and delay setting.  Better error
+	reporting, replace BFD_ASSERT with abort.  Check
+	ELF_LINK_HASH_DEF_DYNAMIC to see if a symbol is not defined in the
+	regular object file and tread the weak definition as the normal
+	one.  Don't discard relocs for undefweak or undefined symbols and
+	check !DEF_REGULAR as well as DEF_DYNAMIC in test for avoided copy
+	relocs.
+	(elf64_x86_64_finish_dynamic_symbol): Don't copy relocs for
+	symbols that have been forced local.  Use same test to decide if
+	we can use a relative reloc for got as relocate_section.  Expand
+	SHN_UNDEF comment.  Move expressions out of function calls.
+	Replace BFD_ASSERT with abort.
+	(bfd_elf64_bfd_final_link): Removed.
+	(elf_backend_copy_indirect_symbol): Define.
+
 2002-02-20  Tom Rix  <trix@redhat.com>
 
 	* coff-rs6000.c (xcoff_howto_table): Add 16 bit R_BA.
 	(_bfd_xcoff_reloc_type_lookup): Use it.
 	* coff64-rs6000.c (xcoff64_howto_table): Same.
 	(xcoff64_reloc_type_lookup): Same.
-	
+
 2002-02-20  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* osf-core.c (osf_core_vec):  OSF/1 (Digital Unix) core files are
