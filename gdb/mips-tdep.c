@@ -135,6 +135,9 @@ struct gdbarch_tdep
     int mips_fp_register_double;
     int mips_default_stack_argsize;
     int default_mask_address_p;
+    /* Is the target using 64-bit raw integer registers but only
+       storing a left-aligned 32-bit value in each?  */
+    int mips64_transfers_32bit_regs_p;
   };
 
 #define MIPS_EABI (gdbarch_tdep (current_gdbarch)->mips_abi == MIPS_ABI_EABI32 \
@@ -180,9 +183,9 @@ unmake_mips16_addr (CORE_ADDR addr)
 static LONGEST
 read_signed_register (int regnum)
 {
-  void *buf = alloca (DEPRECATED_REGISTER_RAW_SIZE (regnum));
+  void *buf = alloca (register_size (current_gdbarch, regnum));
   deprecated_read_register_gen (regnum, buf);
-  return (extract_signed_integer (buf, DEPRECATED_REGISTER_RAW_SIZE (regnum)));
+  return (extract_signed_integer (buf, register_size (current_gdbarch, regnum)));
 }
 
 static LONGEST
@@ -275,7 +278,7 @@ mips_xfer_register (struct regcache *regcache, int reg_num, int length,
   switch (endian)
     {
     case BFD_ENDIAN_BIG:
-      reg_offset = DEPRECATED_REGISTER_RAW_SIZE (reg_num) - length;
+      reg_offset = register_size (current_gdbarch, reg_num) - length;
       break;
     case BFD_ENDIAN_LITTLE:
       reg_offset = 0;
@@ -321,7 +324,7 @@ mips2_fp_compat (void)
 {
   /* MIPS1 and MIPS2 have only 32 bit FPRs, and the FR bit is not
      meaningful.  */
-  if (DEPRECATED_REGISTER_RAW_SIZE (FP0_REGNUM) == 4)
+  if (register_size (current_gdbarch, FP0_REGNUM) == 4)
     return 0;
 
 #if 0
@@ -617,43 +620,25 @@ struct linked_proc_info
  *linked_proc_desc_table = NULL;
 
 /* Number of bytes of storage in the actual machine representation for
-   register N.  NOTE: This indirectly defines the register size
-   transfered by the GDB protocol.  */
+   register N.  NOTE: This defines the pseudo register type so need to
+   rebuild the architecture vector.  */
 
 static int mips64_transfers_32bit_regs_p = 0;
 
-static int
-mips_register_raw_size (int regnum)
+static void
+set_mips64_transfers_32bit_regs (char *args, int from_tty,
+				 struct cmd_list_element *c)
 {
-  gdb_assert (regnum >= 0);
-  if (regnum < NUM_REGS)
+  struct gdbarch_info info;
+  gdbarch_info_init (&info);
+  /* FIXME: cagney/2003-11-15: Should be setting a field in "info"
+     instead of relying on globals.  Doing that would let generic code
+     handle the search for this specific architecture.  */
+  if (!gdbarch_update_p (info))
     {
-      /* For compatibility with old code, implemnt the broken register raw
-	 size map for the raw registers.
-
-	 NOTE: cagney/2003-06-15: This is so bogus.  The register's
-	 raw size is changing according to the ABI
-	 (FP_REGISTER_DOUBLE).  Also, GDB's protocol is defined by a
-	 combination of DEPRECATED_REGISTER_RAW_SIZE and
-	 DEPRECATED_REGISTER_BYTE.  */
-      if (mips64_transfers_32bit_regs_p)
-	return register_size (current_gdbarch, regnum);
-      else if (regnum >= FP0_REGNUM && regnum < FP0_REGNUM + 32
-	       && FP_REGISTER_DOUBLE)
-	/* For MIPS_ABI_N32 (for example) we need 8 byte floating point
-	   registers.  */
-	return 8;
-      else
-	return mips_regsize (current_gdbarch);
+      mips64_transfers_32bit_regs_p = 0;
+      error ("32-bit compatibility mode not supported");
     }
-  else if (regnum < 2 * NUM_REGS)
-    {
-      /* For the moment map [NUM_REGS .. 2*NUM_REGS) onto the same raw
-	 registers, but return the register's virtual size.  */
-      return TYPE_LENGTH (gdbarch_register_type (current_gdbarch, regnum));
-    }
-  else
-    internal_error (__FILE__, __LINE__, "Register %d out of range", regnum);
 }
 
 /* Convert between RAW and VIRTUAL registers.  The RAW register size
@@ -662,10 +647,10 @@ mips_register_raw_size (int regnum)
 static int
 mips_register_convertible (int reg_nr)
 {
-  if (mips64_transfers_32bit_regs_p)
+  if (gdbarch_tdep (current_gdbarch)->mips64_transfers_32bit_regs_p)
     return 0;
   else
-    return (DEPRECATED_REGISTER_RAW_SIZE (reg_nr) > register_size (current_gdbarch, reg_nr));
+    return (register_size (current_gdbarch, reg_nr) > register_size (current_gdbarch, reg_nr));
 }
 
 static void
@@ -674,7 +659,7 @@ mips_register_convert_to_virtual (int n, struct type *virtual_type,
 {
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     memcpy (virt_buf,
-	    raw_buf + (DEPRECATED_REGISTER_RAW_SIZE (n) - TYPE_LENGTH (virtual_type)),
+	    raw_buf + (register_size (current_gdbarch, n) - TYPE_LENGTH (virtual_type)),
 	    TYPE_LENGTH (virtual_type));
   else
     memcpy (virt_buf,
@@ -686,9 +671,9 @@ static void
 mips_register_convert_to_raw (struct type *virtual_type, int n,
 			      const char *virt_buf, char *raw_buf)
 {
-  memset (raw_buf, 0, DEPRECATED_REGISTER_RAW_SIZE (n));
+  memset (raw_buf, 0, register_size (current_gdbarch, n));
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-    memcpy (raw_buf + (DEPRECATED_REGISTER_RAW_SIZE (n) - TYPE_LENGTH (virtual_type)),
+    memcpy (raw_buf + (register_size (current_gdbarch, n) - TYPE_LENGTH (virtual_type)),
 	    virt_buf,
 	    TYPE_LENGTH (virtual_type));
   else
@@ -701,7 +686,7 @@ static int
 mips_convert_register_p (int regnum, struct type *type)
 {
   return (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-	  && DEPRECATED_REGISTER_RAW_SIZE (regnum) == 4
+	  && register_size (current_gdbarch, regnum) == 4
 	  && (regnum) >= FP0_REGNUM && (regnum) < FP0_REGNUM + 32
 	  && TYPE_CODE(type) == TYPE_CODE_FLT
 	  && TYPE_LENGTH(type) == 8);
@@ -756,6 +741,12 @@ mips_register_type (struct gdbarch *gdbarch, int regnum)
 	   && regnum <= NUM_REGS + LAST_EMBED_REGNUM)
     /* The pseudo/cooked view of the embedded registers is always
        32-bit.  The raw view is handled below.  */
+    return builtin_type_int32;
+  else if (regnum >= NUM_REGS && mips_regsize (gdbarch)
+	   && gdbarch_tdep (gdbarch)->mips64_transfers_32bit_regs_p)
+    /* The target, while using a 64-bit register buffer, is only
+       transfering 32-bits of each integer register.  Reflect this in
+       the cooked/pseudo register value.  */
     return builtin_type_int32;
   else if (mips_regsize (gdbarch) == 8)
     /* 64-bit ISA.  */
@@ -4008,7 +3999,7 @@ static void
 mips_read_fp_register_single (struct frame_info *frame, int regno,
 			      char *rare_buffer)
 {
-  int raw_size = DEPRECATED_REGISTER_RAW_SIZE (regno);
+  int raw_size = register_size (current_gdbarch, regno);
   char *raw_buffer = alloca (raw_size);
 
   if (!frame_register_read (frame, regno, raw_buffer))
@@ -4040,7 +4031,7 @@ static void
 mips_read_fp_register_double (struct frame_info *frame, int regno,
 			      char *rare_buffer)
 {
-  int raw_size = DEPRECATED_REGISTER_RAW_SIZE (regno);
+  int raw_size = register_size (current_gdbarch, regno);
 
   if (raw_size == 8 && !mips2_fp_compat ())
     {
@@ -4079,13 +4070,13 @@ mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
   double doub, flt1, flt2;	/* doubles extracted from raw hex data */
   int inv1, inv2, namelen;
 
-  raw_buffer = (char *) alloca (2 * DEPRECATED_REGISTER_RAW_SIZE (FP0_REGNUM));
+  raw_buffer = (char *) alloca (2 * register_size (current_gdbarch, FP0_REGNUM));
 
   fprintf_filtered (file, "%s:", REGISTER_NAME (regnum));
   fprintf_filtered (file, "%*s", 4 - (int) strlen (REGISTER_NAME (regnum)),
 		    "");
 
-  if (DEPRECATED_REGISTER_RAW_SIZE (regnum) == 4 || mips2_fp_compat ())
+  if (register_size (current_gdbarch, regnum) == 4 || mips2_fp_compat ())
     {
       /* 4-byte registers: Print hex and floating.  Also print even
          numbered registers as doubles.  */
@@ -4172,7 +4163,7 @@ mips_print_register (struct ui_file *file, struct frame_info *frame,
     fprintf_filtered (file, ": ");
 
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-    offset = DEPRECATED_REGISTER_RAW_SIZE (regnum) - register_size (current_gdbarch, regnum);
+    offset = register_size (current_gdbarch, regnum) - register_size (current_gdbarch, regnum);
   else
     offset = 0;
 
@@ -4247,8 +4238,8 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
 	printf_filtered ("  ");
       /* Now print the register value in hex, endian order. */
       if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-	for (byte = DEPRECATED_REGISTER_RAW_SIZE (regnum) - register_size (current_gdbarch, regnum);
-	     byte < DEPRECATED_REGISTER_RAW_SIZE (regnum);
+	for (byte = register_size (current_gdbarch, regnum) - register_size (current_gdbarch, regnum);
+	     byte < register_size (current_gdbarch, regnum);
 	     byte++)
 	  fprintf_filtered (file, "%02x", (unsigned char) raw_buffer[byte]);
       else
@@ -4587,7 +4578,7 @@ return_value_location (struct type *valtype,
 	  lo->buf_offset = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? 4 : 0;
 	  hi->buf_offset = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? 0 : 4;
 	  lo->reg_offset = ((TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-			     && DEPRECATED_REGISTER_RAW_SIZE (FP0_REGNUM) == 8)
+			     && register_size (current_gdbarch, FP0_REGNUM) == 8)
 			    ? 4 : 0);
 	  hi->reg_offset = lo->reg_offset;
 	  lo->reg = FP0_REGNUM + 0;
@@ -4600,7 +4591,7 @@ return_value_location (struct type *valtype,
 	  /* The floating point value fits in a single floating-point
 	     register. */
 	  lo->reg_offset = ((TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-			     && DEPRECATED_REGISTER_RAW_SIZE (FP0_REGNUM) == 8
+			     && register_size (current_gdbarch, FP0_REGNUM) == 8
 			     && len == 4)
 			    ? 4 : 0);
 	  lo->reg = FP0_REGNUM;
@@ -4656,7 +4647,7 @@ return_value_location (struct type *valtype,
 	    }
 	}
       if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-	  && DEPRECATED_REGISTER_RAW_SIZE (regnum) == 8
+	  && register_size (current_gdbarch, regnum) == 8
 	  && MIPS_SAVED_REGSIZE == 4)
 	{
 	  /* Account for the fact that only the least-signficant part
@@ -4724,14 +4715,14 @@ mips_eabi_store_return_value (struct type *valtype, char *valbuf)
   memset (raw_buffer, 0, sizeof (raw_buffer));
   memcpy (raw_buffer + lo.reg_offset, valbuf + lo.buf_offset, lo.len);
   deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (lo.reg), raw_buffer,
-				   DEPRECATED_REGISTER_RAW_SIZE (lo.reg));
+				   register_size (current_gdbarch, lo.reg));
 
   if (hi.len > 0)
     {
       memset (raw_buffer, 0, sizeof (raw_buffer));
       memcpy (raw_buffer + hi.reg_offset, valbuf + hi.buf_offset, hi.len);
       deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (hi.reg), raw_buffer,
-				       DEPRECATED_REGISTER_RAW_SIZE (hi.reg));
+				       register_size (current_gdbarch, hi.reg));
     }
 }
 
@@ -4746,14 +4737,14 @@ mips_o64_store_return_value (struct type *valtype, char *valbuf)
   memset (raw_buffer, 0, sizeof (raw_buffer));
   memcpy (raw_buffer + lo.reg_offset, valbuf + lo.buf_offset, lo.len);
   deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (lo.reg), raw_buffer,
-				   DEPRECATED_REGISTER_RAW_SIZE (lo.reg));
+				   register_size (current_gdbarch, lo.reg));
 
   if (hi.len > 0)
     {
       memset (raw_buffer, 0, sizeof (raw_buffer));
       memcpy (raw_buffer + hi.reg_offset, valbuf + hi.buf_offset, hi.len);
       deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (hi.reg), raw_buffer,
-				       DEPRECATED_REGISTER_RAW_SIZE (hi.reg));
+				       register_size (current_gdbarch, hi.reg));
     }
 }
 
@@ -4848,9 +4839,9 @@ mips_o32_xfer_return_value (struct type *type,
       int regnum;
       for (offset = 0, regnum = V0_REGNUM;
 	   offset < TYPE_LENGTH (type);
-	   offset += DEPRECATED_REGISTER_RAW_SIZE (regnum), regnum++)
+	   offset += register_size (current_gdbarch, regnum), regnum++)
 	{
-	  int xfer = DEPRECATED_REGISTER_RAW_SIZE (regnum);
+	  int xfer = register_size (current_gdbarch, regnum);
 	  if (offset + xfer > TYPE_LENGTH (type))
 	    xfer = TYPE_LENGTH (type) - offset;
 	  if (mips_debug)
@@ -4959,9 +4950,9 @@ mips_n32n64_xfer_return_value (struct type *type,
       int regnum;
       for (offset = 0, regnum = V0_REGNUM;
 	   offset < TYPE_LENGTH (type);
-	   offset += DEPRECATED_REGISTER_RAW_SIZE (regnum), regnum++)
+	   offset += register_size (current_gdbarch, regnum), regnum++)
 	{
-	  int xfer = DEPRECATED_REGISTER_RAW_SIZE (regnum);
+	  int xfer = register_size (current_gdbarch, regnum);
 	  if (offset + xfer > TYPE_LENGTH (type))
 	    xfer = TYPE_LENGTH (type) - offset;
 	  if (mips_debug)
@@ -4979,9 +4970,9 @@ mips_n32n64_xfer_return_value (struct type *type,
       int regnum;
       for (offset = 0, regnum = V0_REGNUM;
 	   offset < TYPE_LENGTH (type);
-	   offset += DEPRECATED_REGISTER_RAW_SIZE (regnum), regnum++)
+	   offset += register_size (current_gdbarch, regnum), regnum++)
 	{
-	  int xfer = DEPRECATED_REGISTER_RAW_SIZE (regnum);
+	  int xfer = register_size (current_gdbarch, regnum);
 	  int pos = 0;
 	  if (offset + xfer > TYPE_LENGTH (type))
 	    xfer = TYPE_LENGTH (type) - offset;
@@ -5789,6 +5780,11 @@ mips_gdbarch_init (struct gdbarch_info info,
 	continue;
       if (gdbarch_tdep (arches->gdbarch)->mips_abi != mips_abi)
 	continue;
+      /* Need to be pedantic about which register virtual size is
+         used.  */
+      if (gdbarch_tdep (arches->gdbarch)->mips64_transfers_32bit_regs_p
+	  != mips64_transfers_32bit_regs_p)
+	continue;
       return arches->gdbarch;
     }
 
@@ -5796,6 +5792,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   tdep = (struct gdbarch_tdep *) xmalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
   tdep->elf_flags = elf_flags;
+  tdep->mips64_transfers_32bit_regs_p = mips64_transfers_32bit_regs_p;
 
   /* Initially set everything according to the default ABI/ISA.  */
   set_gdbarch_short_bit (gdbarch, 16);
@@ -5803,7 +5800,6 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_float_bit (gdbarch, 32);
   set_gdbarch_double_bit (gdbarch, 64);
   set_gdbarch_long_double_bit (gdbarch, 64);
-  set_gdbarch_deprecated_register_raw_size (gdbarch, mips_register_raw_size);
   set_gdbarch_register_reggroup_p (gdbarch, mips_register_reggroup_p);
   set_gdbarch_pseudo_register_read (gdbarch, mips_pseudo_register_read);
   set_gdbarch_pseudo_register_write (gdbarch, mips_pseudo_register_write);
@@ -6555,16 +6551,18 @@ Show zeroing of upper 32 bits of 64-bit addresses.",
 
   /* Allow the user to control the size of 32 bit registers within the
      raw remote packet.  */
-  add_show_from_set (add_set_cmd ("remote-mips64-transfers-32bit-regs",
-				  class_obscure,
-				  var_boolean,
-				  (char *)&mips64_transfers_32bit_regs_p, "\
-Set compatibility with MIPS targets that transfers 32 and 64 bit quantities.\n\
+  add_setshow_cmd ("remote-mips64-transfers-32bit-regs", class_obscure,
+		   var_boolean, &mips64_transfers_32bit_regs_p, "\
+Set compatibility with 64-bit MIPS targets that transfer 32-bit quantities.\n\
+Use \"on\" to enable backward compatibility with older MIPS 64 GDB+target\n\
+that would transfer 32 bits for some registers (e.g. SR, FSR) and\n\
+64 bits for others.  Use \"off\" to disable compatibility mode",  "\
+Show compatibility with 64-bit MIPS targets that transfer 32-bit quantities.\n\
 Use \"on\" to enable backward compatibility with older MIPS 64 GDB+target\n\
 that would transfer 32 bits for some registers (e.g. SR, FSR) and\n\
 64 bits for others.  Use \"off\" to disable compatibility mode",
-				  &setlist),
-		     &showlist);
+		   set_mips64_transfers_32bit_regs, NULL,
+		   &setlist, &showlist);
 
   /* Debug this files internals. */
   add_show_from_set (add_set_cmd ("mips", class_maintenance, var_zinteger,

@@ -1,3 +1,19 @@
+2003-11-16  Andrew Cagney  <cagney@redhat.com>
+
+	* mips-tdep.c: Replace DEPRECATED_REGISTER_RAW_SIZE with
+	register_size.
+	(mips_register_raw_size): Delete function.
+	(mips_register_type): Handle "mips64_transfers_32bit_regs_p".
+	(mips_gdbarch_init): Do not set "deprecated_register_raw_size".
+	Check and set "mips64_transfers_32bit_regs_p".
+	(struct gdbarch_tdep): Add "mips64_transfers_32bit_regs_p".
+	(mips_register_convertible): Check the architecture's
+	"mips64_transfers_32bit_regs_p".
+	(set_mips64_transfers_32bit_regs): New function.
+	(_initialize_mips_tdep): Use "add_setshow_cmd" when adding the
+	"set remote-mips64-transfers-32bit-regs" command.  Specify
+	set_mips64_transfers_32bit_regs as the set function.
+
 2003-11-16  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.h (i386_supply_gregset): Provide prototype.
