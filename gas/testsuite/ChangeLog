@@ -1,3 +1,8 @@
+Thu Feb 24 07:11:57 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+        * gas/hppa/more.parse/parse.exp (no subspace test): Only expect
+	a failure if gas is not producing an ELF object.
+
 Mon Feb 14 09:24:03 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gas/hppa/basic/fmemLRbug.s: New test.
