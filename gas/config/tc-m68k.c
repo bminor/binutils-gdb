@@ -22,7 +22,6 @@
 #include <ctype.h>
 #define  NO_RELOC 0
 #include "as.h"
-#include "read.h"
 
 #include "obstack.h"
 
@@ -270,7 +269,7 @@ enum _register
     BAC6,
     BAC7,
     PSR,			/* aka MMUSR on 68030 (but not MMUSR on 68040)
-		   and ACUSR on 68ec030 */
+				   and ACUSR on 68ec030 */
     PCSR,
 
     IC,				/* instruction cache token */
@@ -360,23 +359,29 @@ static struct m68k_it the_ins;	/* the instruction being assembled */
 			  )
 
 
-/* The numo+1 kludge is so we can hit the low order byte of the prev word. Blecch*/
-#define add_fix(width,exp,pc_rel) {\
-				       the_ins.reloc[the_ins.nrel].n= ((width)=='B') ? (the_ins.numo*2-1) : \
-					   (((width)=='b') ? ((the_ins.numo-1)*2) : (the_ins.numo*2));\
-					       the_ins.reloc[the_ins.nrel].add=adds((exp));\
-						   the_ins.reloc[the_ins.nrel].sub=subs((exp));\
-						       the_ins.reloc[the_ins.nrel].off=offs((exp));\
-							   the_ins.reloc[the_ins.nrel].wid=width;\
-							       the_ins.reloc[the_ins.nrel++].pcrel=pc_rel;\
-							   }
+/* The numo+1 kludge is so we can hit the low order byte of the prev word.
+   Blecch.  */
+#define add_fix(width,exp,pc_rel) \
+{\
+   the_ins.reloc[the_ins.nrel].n= (((width)=='B') \
+				   ? (the_ins.numo*2-1) \
+				   : (((width)=='b') \
+				      ? ((the_ins.numo-1)*2) \
+				      : (the_ins.numo*2)));\
+   the_ins.reloc[the_ins.nrel].add=adds((exp));\
+   the_ins.reloc[the_ins.nrel].sub=subs((exp));\
+   the_ins.reloc[the_ins.nrel].off=offs((exp));\
+   the_ins.reloc[the_ins.nrel].wid=width;\
+   the_ins.reloc[the_ins.nrel++].pcrel=pc_rel;\
+}
 
-#define add_frag(add,off,type)  {\
-				     the_ins.fragb[the_ins.nfrag].fragoff=the_ins.numo;\
-					 the_ins.fragb[the_ins.nfrag].fadd=add;\
-					     the_ins.fragb[the_ins.nfrag].foff=off;\
-						 the_ins.fragb[the_ins.nfrag++].fragty=type;\
-					     }
+#define add_frag(add,off,type) \
+{\
+   the_ins.fragb[the_ins.nfrag].fragoff=the_ins.numo;\
+   the_ins.fragb[the_ins.nfrag].fadd=add;\
+   the_ins.fragb[the_ins.nfrag].foff=off;\
+   the_ins.fragb[the_ins.nfrag++].fragty=type;\
+}
 
 #define isvar(exp)	((exp) && (adds(exp) || subs(exp)))
 
@@ -1898,11 +1903,11 @@ m68k_ip (instring)
 		  break;
 
 		  /* JF these are out of order.  We could put them
-	     in order if we were willing to put up with
-	     bunches of #ifdef m68851s in the code.
+		     in order if we were willing to put up with
+		     bunches of #ifdef m68851s in the code.
 
-	     Don't forget that you need these operands
-	     to use 68030 MMU instructions.  */
+		     Don't forget that you need these operands
+		     to use 68030 MMU instructions.  */
 #ifndef NO_68851
 		  /* Memory addressing mode used by pflushr */
 		case '|':
@@ -2196,13 +2201,11 @@ m68k_ip (instring)
 	      nextword = get_num (opP->con1, 80);
 	      /* Force into index mode.  Hope this works */
 
-	      /* We do the first bit for 32-bit displacements,
-	   and the second bit for 16 bit ones.  It is
-	   possible that we should make the default be
-	   WORD instead of LONG, but I think that'd
-	   break GCC, so we put up with a little
-	   inefficiency for the sake of working output.
-	   */
+	      /* We do the first bit for 32-bit displacements, and the
+		 second bit for 16 bit ones.  It is possible that we
+		 should make the default be WORD instead of LONG, but
+		 I think that'd break GCC, so we put up with a little
+		 inefficiency for the sake of working output.  */
 
 	      if (!issword (nextword)
 		  || (isvar (opP->con1)
@@ -2220,7 +2223,7 @@ m68k_ip (instring)
 		      if (opP->reg == PC)
 			{
 			  add_frag (adds (opP->con1),
-				    offs (opP->con1),
+				    offs (opP->con1) + 2,
 				    TAB (PCLEA, SZ_UNDEF));
 			  break;
 			}
@@ -2579,13 +2582,13 @@ m68k_ip (instring)
 		goto long_branch;
 
 	      /* This could either be a symbol, or an
-	   absolute address.  No matter, the
-	   frag hacking will finger it out.
-	   Not quite: it can't switch from
-	   BRANCH to BCC68000 for the case
-	   where opnd is absolute (it needs
-	   to use the 68000 hack since no
-	   conditional abs jumps).  */
+		 absolute address.  No matter, the
+		 frag hacking will finger it out.
+		 Not quite: it can't switch from
+		 BRANCH to BCC68000 for the case
+		 where opnd is absolute (it needs
+		 to use the 68000 hack since no
+		 conditional abs jumps).  */
 	      if (((cpu_of_arch (current_architecture) < m68020) || (0 == adds (opP->con1)))
 		  && (the_ins.opcode[0] >= 0x6200)
 		  && (the_ins.opcode[0] <= 0x6f00))
@@ -4385,11 +4388,11 @@ tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
      relax_addressT segment_address_in_file;
 {
   /*
-	 * In: length of relocation (or of address) in chars: 1, 2 or 4.
-	 * Out: GNU LD relocation length code: 0, 1, or 2.
-	 */
+   * In: length of relocation (or of address) in chars: 1, 2 or 4.
+   * Out: GNU LD relocation length code: 0, 1, or 2.
+   */
 
-  static unsigned char nbytes_r_length[] =
+  static CONST unsigned char nbytes_r_length[] =
   {42, 0, 1, 42, 2};
   long r_symbolnum;
 
@@ -4617,8 +4620,8 @@ get_num (exp, ok)
       if (offs (exp) < 0	/* flonum */
 	  && (ok == 80		/* no bignums */
 	      || (ok > 10	/* small-int ranges including 0 ok */
-      /* If we have a flonum zero, a zero integer should
-			       do as well (e.g., in moveq).  */
+		  /* If we have a flonum zero, a zero integer should
+		     do as well (e.g., in moveq).  */
 		  && generic_floating_point_number.exponent == 0
 		  && generic_floating_point_number.low[0] == 0)))
 	{
@@ -4793,36 +4796,31 @@ md_parse_option (argP, cntP, vecP)
 	  omagic = 1 << 16 | OMAGIC;
 #endif
 	  current_architecture |= m68010;
-
 	}
       else if (!strcmp (*argP, "68020"))
 	{
 	  current_architecture |= m68020 | MAYBE_FLOAT_TOO;
-
 	}
       else if (!strcmp (*argP, "68030"))
 	{
 	  current_architecture |= m68030 | MAYBE_FLOAT_TOO;
-
 	}
       else if (!strcmp (*argP, "68040"))
 	{
 	  current_architecture |= m68040 | MAYBE_FLOAT_TOO;
-
 #ifndef NO_68881
 	}
       else if (!strcmp (*argP, "68881"))
 	{
 	  current_architecture |= m68881;
-
 	}
       else if (!strcmp (*argP, "68882"))
 	{
 	  current_architecture |= m68882;
 #endif /* NO_68881 */
 	  /* Even if we aren't configured to support the processor,
-		   it should still be possible to assert that the user
-		   doesn't have it...  */
+	     it should still be possible to assert that the user
+	     doesn't have it...  */
 	}
       else if (!strcmp (*argP, "no-68881")
 	       || !strcmp (*argP, "no-68882"))
@@ -4961,46 +4959,6 @@ is_label (str)
 
    */
 
-
-
-#ifdef DONTDEF
-abort ()
-{
-  printf ("ABORT!\n");
-  exit (12);
-}
-
-print_frags ()
-{
-  fragS *fragP;
-  extern fragS *text_frag_root;
-
-  for (fragP = text_frag_root; fragP; fragP = fragP->fr_next)
-    {
-      printf ("addr %lu  next 0x%x  fix %ld  var %ld  symbol 0x%x  offset %ld\n",
-	      fragP->fr_address, fragP->fr_next, fragP->fr_fix, fragP->fr_var, fragP->fr_symbol, fragP->fr_offset);
-      printf ("opcode 0x%x  type %d  subtype %d\n\n", fragP->fr_opcode, fragP->fr_type, fragP->fr_subtype);
-    }
-  fflush (stdout);
-  return 0;
-}
-
-#endif
-
-#ifdef DONTDEF
-/*VARARGS1*/
-panic (format, args)
-     char *format;
-{
-  fputs ("Internal error:", stderr);
-  _doprnt (format, &args, stderr);
-  (void) putc ('\n', stderr);
-  as_where ();
-  abort ();
-}
-
-#endif
-
 /* We have no need to default values of symbols.  */
 
 /* ARGSUSED */
@@ -5063,12 +5021,5 @@ tc_coff_sizemachdep (frag)
     }
 
 }
-
-/*
- * Local Variables:
- * comment-column: 0
- * fill-column: 131
- * End:
- */
 
 /* end of tc-m68k.c */
