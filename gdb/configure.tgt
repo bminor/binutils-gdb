@@ -271,7 +271,7 @@ v850-*-*)		gdb_target=v850
 			case $gdb_host in
 			windows)
 				CONFIG_OBS="${CONFIG_OBS} v850ice.o"
-				LIBS="${LIBS} v850.lib" ;;
+				LIBS="${LIBS} necmsg.lib" ;;
 			esac
 			;;
 # start-sanitize-v850e
