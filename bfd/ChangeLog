@@ -1,3 +1,25 @@
+Wed Sep  8 17:56:11 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* elf-hppa.h (elf_hppa_final_link): Set the value of __gp to the        
+	address of the .PARISC.global section.
+	(elf_hppa_relocate_section): Lookup and pass the PA64 hash
+	table entry elf_hppa_final_link_relocate.  Do not give a warning
+	for a reloc against an external symbol if it has a PA64 hash
+	table entry.
+	(elf_hppa_final_link_relocate): Significantly rework.  Handle   
+	DLTIND relocations.  Compute the final value of the relocation
+	before passing the value of elf_hppa_relocate_insn.
+	(elf_hppa_relocate_insn): Revamp to handle just bit tiwiddling
+	relocation support.  Handle DLTIND relocation requests just like
+	DLTREL relocation requests.  Simplify branch handling.
+
+1999-09-08  Ulrich Drepper  <drepper@cygnus.com>
+
+	* elf-hppa.h (elf_hppa_relocate_section): Catch problems with
+	non-allocated section as done in i386 version.
+	(elf_hppa_final_link_relocate): Uncomment R_PARISC_14F in switch
+	statement since this is no know relocation.
+
 Tue Sep  7 17:25:12 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* elf-hppa.h (elf_hppa_final_link_relocate): Handle DLTREL14F
