@@ -126,15 +126,12 @@ CORE_ADDR hppa_skip_prologue (CORE_ADDR pc);
 CORE_ADDR hppa_skip_trampoline_code (CORE_ADDR pc);
 int hppa_in_solib_call_trampoline (CORE_ADDR pc, char *name);
 int hppa_in_solib_return_trampoline (CORE_ADDR pc, char *name);
-int hppa_inner_than (CORE_ADDR lhs, CORE_ADDR rhs);
 int hppa_pc_requires_run_before_use (CORE_ADDR pc);
 int hppa_instruction_nullified (void);
 int hppa_cannot_store_register (int regnum);
 CORE_ADDR hppa_smash_text_address (CORE_ADDR addr);
 CORE_ADDR hppa_target_read_pc (ptid_t ptid);
 void hppa_target_write_pc (CORE_ADDR v, ptid_t ptid);
-
-static int is_pa_2 = 0;		/* False */
 
 /* Handle 32/64-bit struct return conventions.  */
 
@@ -2470,13 +2467,6 @@ hppa_reg_struct_has_addr (int gcc_p, struct type *type)
 }
 
 int
-hppa_inner_than (CORE_ADDR lhs, CORE_ADDR rhs)
-{
-  /* Stack grows upward */
-  return (lhs > rhs);
-}
-
-int
 hppa_pc_requires_run_before_use (CORE_ADDR pc)
 {
   /* Sometimes we may pluck out a minimal symbol that has a negative address.
@@ -2678,7 +2668,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_in_solib_call_trampoline (gdbarch, hppa_in_solib_call_trampoline);
   set_gdbarch_in_solib_return_trampoline (gdbarch,
                                           hppa_in_solib_return_trampoline);
-  set_gdbarch_inner_than (gdbarch, hppa_inner_than);
+  set_gdbarch_inner_than (gdbarch, core_addr_greaterthan);
   set_gdbarch_sp_regnum (gdbarch, HPPA_SP_REGNUM);
   set_gdbarch_fp0_regnum (gdbarch, HPPA_FP0_REGNUM);
   set_gdbarch_cannot_store_register (gdbarch, hppa_cannot_store_register);

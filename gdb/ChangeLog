@@ -1,3 +1,9 @@
+2004-04-07  Randolph Chung  <tausq@debian.org>
+
+	* hppa-tdep.c (hppa_inner_than): Remove.
+	(is_pa_2): Remove unused static variable.
+	(hppa_gdbarch_init): Use core_addr_greaterthan instead of own version. 
+
 2004-03-10  Paul N. Hilfinger  <Hilfinger@gnat.com>
 
 	* language.h (language_defn): Add new la_post_parser field.
