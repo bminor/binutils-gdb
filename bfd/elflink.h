@@ -39,9 +39,14 @@ static boolean elf_link_add_object_symbols
 static boolean elf_link_add_archive_symbols
   PARAMS ((bfd *, struct bfd_link_info *));
 static boolean elf_merge_symbol
-  PARAMS ((bfd *, struct bfd_link_info *, const char *, Elf_Internal_Sym *,
-	   asection **, bfd_vma *, struct elf_link_hash_entry **,
-	   boolean *, boolean *, boolean *, boolean));
+  PARAMS ((bfd *, struct bfd_link_info *, const char *,
+	   Elf_Internal_Sym *, asection **, bfd_vma *,
+	   struct elf_link_hash_entry **, boolean *, boolean *,
+	   boolean *, boolean));
+static boolean elf_add_default_symbol
+  PARAMS ((bfd *, struct bfd_link_info *, struct elf_link_hash_entry *,
+	   const char *, Elf_Internal_Sym *, asection **, bfd_vma *,
+	   boolean *, boolean, boolean));
 static boolean elf_export_symbol
   PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean elf_finalize_dynstr
@@ -894,6 +899,243 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
   return true;
 }
 
+/* This function is called to create an indirect symbol from the
+   default for the symbol with the default version if needed. The
+   symbol is described by H, NAME, SYM, SEC, VALUE, and OVERRIDE.  We
+   set DYNSYM if the new indirect symbol is dynamic. DT_NEEDED
+   indicates if it comes from a DT_NEEDED entry of a shared object.  */
+
+static boolean
+elf_add_default_symbol (abfd, info, h, name, sym, sec, value,
+			dynsym, override, dt_needed)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     struct elf_link_hash_entry *h;
+     const char *name;
+     Elf_Internal_Sym *sym;
+     asection **sec;
+     bfd_vma *value;
+     boolean *dynsym;
+     boolean override;
+     boolean dt_needed;
+{
+  boolean type_change_ok;
+  boolean size_change_ok;
+  char *shortname;
+  struct elf_link_hash_entry *hi;
+  struct elf_backend_data *bed;
+  boolean collect;
+  boolean dynamic;
+  char *p;
+
+  /* If this symbol has a version, and it is the default version, we
+     create an indirect symbol from the default name to the fully
+     decorated name.  This will cause external references which do not
+     specify a version to be bound to this version of the symbol.  */
+  p = strchr (name, ELF_VER_CHR);
+  if (p == NULL || p[1] != ELF_VER_CHR)
+    return true;
+
+  if (override)
+    {
+      /* We are overridden by an old defition. We need to check if we
+	 need to crreate the indirect symbol from the default name.  */
+      hi = elf_link_hash_lookup (elf_hash_table (info), name, true,
+				 false, false);
+      BFD_ASSERT (hi != NULL);
+      if (hi == h)
+	return true;
+      while (hi->root.type == bfd_link_hash_indirect
+	     || hi->root.type == bfd_link_hash_warning)
+	{
+	  hi = (struct elf_link_hash_entry *) hi->root.u.i.link;
+	  if (hi == h)
+	    return true;
+	}
+    }
+
+  bed = get_elf_backend_data (abfd);
+  collect = bed->collect;
+  dynamic = (abfd->flags & DYNAMIC) != 0;
+
+  shortname = bfd_hash_allocate (&info->hash->table,
+				 (size_t) (p - name + 1));
+  if (shortname == NULL)
+    return false;
+  strncpy (shortname, name, (size_t) (p - name));
+  shortname [p - name] = '\0';
+
+  /* We are going to create a new symbol.  Merge it with any existing
+     symbol with this name.  For the purposes of the merge, act as
+     though we were defining the symbol we just defined, although we
+     actually going to define an indirect symbol.  */
+  type_change_ok = false;
+  size_change_ok = false;
+  if (! elf_merge_symbol (abfd, info, shortname, sym, sec, value,
+			  &hi, &override, &type_change_ok,
+			  &size_change_ok, dt_needed))
+    return false;
+
+  if (! override)
+    {
+      if (! (_bfd_generic_link_add_one_symbol
+	     (info, abfd, shortname, BSF_INDIRECT, bfd_ind_section_ptr,
+	      (bfd_vma) 0, name, false, collect,
+	      (struct bfd_link_hash_entry **) &hi)))
+	return false;
+    }
+  else
+    {
+      /* In this case the symbol named SHORTNAME is overriding the
+	 indirect symbol we want to add.  We were planning on making
+	 SHORTNAME an indirect symbol referring to NAME.  SHORTNAME
+	 is the name without a version.  NAME is the fully versioned
+	 name, and it is the default version.
+
+	 Overriding means that we already saw a definition for the
+	 symbol SHORTNAME in a regular object, and it is overriding
+	 the symbol defined in the dynamic object.
+
+	 When this happens, we actually want to change NAME, the
+	 symbol we just added, to refer to SHORTNAME.  This will cause
+	 references to NAME in the shared object to become references
+	 to SHORTNAME in the regular object.  This is what we expect
+	 when we override a function in a shared object: that the
+	 references in the shared object will be mapped to the
+	 definition in the regular object.  */
+
+      while (hi->root.type == bfd_link_hash_indirect
+	     || hi->root.type == bfd_link_hash_warning)
+	hi = (struct elf_link_hash_entry *) hi->root.u.i.link;
+
+      h->root.type = bfd_link_hash_indirect;
+      h->root.u.i.link = (struct bfd_link_hash_entry *) hi;
+      if (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC)
+	{
+	  h->elf_link_hash_flags &=~ ELF_LINK_HASH_DEF_DYNAMIC;
+	  hi->elf_link_hash_flags |= ELF_LINK_HASH_REF_DYNAMIC;
+	  if (hi->elf_link_hash_flags
+	      & (ELF_LINK_HASH_REF_REGULAR
+		 | ELF_LINK_HASH_DEF_REGULAR))
+	    {
+	      if (! _bfd_elf_link_record_dynamic_symbol (info, hi))
+		return false;
+	    }
+	}
+
+      /* Now set HI to H, so that the following code will set the
+         other fields correctly.  */
+      hi = h;
+    }
+
+  /* If there is a duplicate definition somewhere, then HI may not
+     point to an indirect symbol.  We will have reported an error to
+     the user in that case.  */
+
+  if (hi->root.type == bfd_link_hash_indirect)
+    {
+      struct elf_link_hash_entry *ht;
+
+      /* If the symbol became indirect, then we assume that we have
+	 not seen a definition before.  */
+      BFD_ASSERT ((hi->elf_link_hash_flags
+		   & (ELF_LINK_HASH_DEF_DYNAMIC
+		      | ELF_LINK_HASH_DEF_REGULAR)) == 0);
+
+      ht = (struct elf_link_hash_entry *) hi->root.u.i.link;
+      (*bed->elf_backend_copy_indirect_symbol) (ht, hi);
+
+      /* See if the new flags lead us to realize that the symbol must
+	 be dynamic.  */
+      if (! *dynsym)
+	{
+	  if (! dynamic)
+	    {
+	      if (info->shared
+		  || ((hi->elf_link_hash_flags
+		       & ELF_LINK_HASH_REF_DYNAMIC) != 0))
+		*dynsym = true;
+	    }
+	  else
+	    {
+	      if ((hi->elf_link_hash_flags
+		   & ELF_LINK_HASH_REF_REGULAR) != 0)
+		*dynsym = true;
+	    }
+	}
+    }
+
+  /* We also need to define an indirection from the nondefault version
+     of the symbol.  */
+
+  shortname = bfd_hash_allocate (&info->hash->table, strlen (name));
+  if (shortname == NULL)
+    return false;
+  strncpy (shortname, name, (size_t) (p - name));
+  strcpy (shortname + (p - name), p + 1);
+
+  /* Once again, merge with any existing symbol.  */
+  type_change_ok = false;
+  size_change_ok = false;
+  if (! elf_merge_symbol (abfd, info, shortname, sym, sec, value,
+			  &hi, &override, &type_change_ok,
+			  &size_change_ok, dt_needed))
+    return false;
+
+  if (override)
+    {
+      /* Here SHORTNAME is a versioned name, so we don't expect to see
+	 the type of override we do in the case above.  */
+      (*_bfd_error_handler)
+	(_("%s: warning: unexpected redefinition of `%s'"),
+	 bfd_archive_filename (abfd), shortname);
+    }
+  else
+    {
+      if (! (_bfd_generic_link_add_one_symbol
+	     (info, abfd, shortname, BSF_INDIRECT,
+	      bfd_ind_section_ptr, (bfd_vma) 0, name, false,
+	      collect, (struct bfd_link_hash_entry **) &hi)))
+	return false;
+
+      /* If there is a duplicate definition somewhere, then HI may not
+	 point to an indirect symbol.  We will have reported an error
+	 to the user in that case.  */
+
+      if (hi->root.type == bfd_link_hash_indirect)
+	{
+	  /* If the symbol became indirect, then we assume that we have
+	     not seen a definition before.  */
+	  BFD_ASSERT ((hi->elf_link_hash_flags
+		       & (ELF_LINK_HASH_DEF_DYNAMIC
+			  | ELF_LINK_HASH_DEF_REGULAR)) == 0);
+
+          (*bed->elf_backend_copy_indirect_symbol) (h, hi);
+
+	  /* See if the new flags lead us to realize that the symbol
+	     must be dynamic.  */
+	  if (! *dynsym)
+	    {
+	      if (! dynamic)
+		{
+		  if (info->shared
+		      || ((hi->elf_link_hash_flags
+			   & ELF_LINK_HASH_REF_DYNAMIC) != 0))
+		    *dynsym = true;
+		}
+	      else
+		{
+		  if ((hi->elf_link_hash_flags
+		       & ELF_LINK_HASH_REF_REGULAR) != 0)
+		    *dynsym = true;
+		}
+	    }
+	}
+    }
+
+  return true;
+}
+
 /* Add symbols from an ELF object file to the linker hash table.  */
 
 static boolean
@@ -1373,6 +1615,9 @@ elf_link_add_object_symbols (abfd, info)
       boolean size_change_ok, type_change_ok;
       boolean new_weakdef;
       unsigned int old_alignment;
+      boolean override;
+
+      override = false;
 
       elf_swap_symbol_in (abfd, esym, &sym);
 
@@ -1463,7 +1708,6 @@ elf_link_add_object_symbols (abfd, info)
 	{
 	  Elf_Internal_Versym iver;
 	  unsigned int vernum = 0;
-	  boolean override;
 
 	  if (ever != NULL)
 	    {
@@ -1735,217 +1979,13 @@ elf_link_add_object_symbols (abfd, info)
 
 	  h->elf_link_hash_flags |= new_flag;
 
-	  /* If this symbol has a version, and it is the default
-             version, we create an indirect symbol from the default
-             name to the fully decorated name.  This will cause
-             external references which do not specify a version to be
-             bound to this version of the symbol.  */
+	  /* Check to see if we need to add an indirect symbol for
+	     the default name.  */
 	  if (definition || h->root.type == bfd_link_hash_common)
-	    {
-	      char *p;
-
-	      p = strchr (name, ELF_VER_CHR);
-	      if (p != NULL && p[1] == ELF_VER_CHR)
-		{
-		  char *shortname;
-		  struct elf_link_hash_entry *hi;
-		  boolean override;
-
-		  shortname = bfd_hash_allocate (&info->hash->table,
-						 (size_t) (p - name + 1));
-		  if (shortname == NULL)
-		    goto error_return;
-		  strncpy (shortname, name, (size_t) (p - name));
-		  shortname[p - name] = '\0';
-
-		  /* We are going to create a new symbol.  Merge it
-                     with any existing symbol with this name.  For the
-                     purposes of the merge, act as though we were
-                     defining the symbol we just defined, although we
-                     actually going to define an indirect symbol.  */
-		  type_change_ok = false;
-		  size_change_ok = false;
-		  if (! elf_merge_symbol (abfd, info, shortname, &sym, &sec,
-					  &value, &hi, &override,
-					  &type_change_ok,
-					  &size_change_ok, dt_needed))
-		    goto error_return;
-
-		  if (! override)
-		    {
-		      if (! (_bfd_generic_link_add_one_symbol
-			     (info, abfd, shortname, BSF_INDIRECT,
-			      bfd_ind_section_ptr, (bfd_vma) 0, name, false,
-			      collect, (struct bfd_link_hash_entry **) &hi)))
-			goto error_return;
-		    }
-		  else
-		    {
-		      /* In this case the symbol named SHORTNAME is
-                         overriding the indirect symbol we want to
-                         add.  We were planning on making SHORTNAME an
-                         indirect symbol referring to NAME.  SHORTNAME
-                         is the name without a version.  NAME is the
-                         fully versioned name, and it is the default
-                         version.
-
-			 Overriding means that we already saw a
-			 definition for the symbol SHORTNAME in a
-			 regular object, and it is overriding the
-			 symbol defined in the dynamic object.
-
-			 When this happens, we actually want to change
-			 NAME, the symbol we just added, to refer to
-			 SHORTNAME.  This will cause references to
-			 NAME in the shared object to become
-			 references to SHORTNAME in the regular
-			 object.  This is what we expect when we
-			 override a function in a shared object: that
-			 the references in the shared object will be
-			 mapped to the definition in the regular
-			 object.  */
-
-		      while (hi->root.type == bfd_link_hash_indirect
-			     || hi->root.type == bfd_link_hash_warning)
-			hi = (struct elf_link_hash_entry *) hi->root.u.i.link;
-
-		      h->root.type = bfd_link_hash_indirect;
-		      h->root.u.i.link = (struct bfd_link_hash_entry *) hi;
-		      if (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC)
-			{
-			  h->elf_link_hash_flags &=~ ELF_LINK_HASH_DEF_DYNAMIC;
-			  hi->elf_link_hash_flags |= ELF_LINK_HASH_REF_DYNAMIC;
-			  if (hi->elf_link_hash_flags
-			      & (ELF_LINK_HASH_REF_REGULAR
-				 | ELF_LINK_HASH_DEF_REGULAR))
-			    {
-			      if (! _bfd_elf_link_record_dynamic_symbol (info,
-									 hi))
-				goto error_return;
-			    }
-			}
-
-		      /* Now set HI to H, so that the following code
-                         will set the other fields correctly.  */
-		      hi = h;
-		    }
-
-		  /* If there is a duplicate definition somewhere,
-		     then HI may not point to an indirect symbol.  We
-		     will have reported an error to the user in that
-		     case.  */
-
-		  if (hi->root.type == bfd_link_hash_indirect)
-		    {
-		      struct elf_link_hash_entry *ht;
-
-		      /* If the symbol became indirect, then we assume
-			 that we have not seen a definition before.  */
-		      BFD_ASSERT ((hi->elf_link_hash_flags
-				   & (ELF_LINK_HASH_DEF_DYNAMIC
-				      | ELF_LINK_HASH_DEF_REGULAR))
-				  == 0);
-
-		      ht = (struct elf_link_hash_entry *) hi->root.u.i.link;
-		      (*bed->elf_backend_copy_indirect_symbol) (ht, hi);
-
-		      /* See if the new flags lead us to realize that
-			 the symbol must be dynamic.  */
-		      if (! dynsym)
-			{
-			  if (! dynamic)
-			    {
-			      if (info->shared
-				  || ((hi->elf_link_hash_flags
-				       & ELF_LINK_HASH_REF_DYNAMIC)
-				      != 0))
-				dynsym = true;
-			    }
-			  else
-			    {
-			      if ((hi->elf_link_hash_flags
-				   & ELF_LINK_HASH_REF_REGULAR) != 0)
-				dynsym = true;
-			    }
-			}
-		    }
-
-		  /* We also need to define an indirection from the
-                     nondefault version of the symbol.  */
-
-		  shortname = bfd_hash_allocate (&info->hash->table,
-						 strlen (name));
-		  if (shortname == NULL)
-		    goto error_return;
-		  strncpy (shortname, name, (size_t) (p - name));
-		  strcpy (shortname + (p - name), p + 1);
-
-		  /* Once again, merge with any existing symbol.  */
-		  type_change_ok = false;
-		  size_change_ok = false;
-		  if (! elf_merge_symbol (abfd, info, shortname, &sym, &sec,
-					  &value, &hi, &override,
-					  &type_change_ok,
-					  &size_change_ok, dt_needed))
-		    goto error_return;
-
-		  if (override)
-		    {
-		      /* Here SHORTNAME is a versioned name, so we
-                         don't expect to see the type of override we
-                         do in the case above.  */
-		      (*_bfd_error_handler)
-			(_("%s: warning: unexpected redefinition of `%s'"),
-			 bfd_archive_filename (abfd), shortname);
-		    }
-		  else
-		    {
-		      if (! (_bfd_generic_link_add_one_symbol
-			     (info, abfd, shortname, BSF_INDIRECT,
-			      bfd_ind_section_ptr, (bfd_vma) 0, name, false,
-			      collect, (struct bfd_link_hash_entry **) &hi)))
-			goto error_return;
-
-		      /* If there is a duplicate definition somewhere,
-                         then HI may not point to an indirect symbol.
-                         We will have reported an error to the user in
-                         that case.  */
-
-		      if (hi->root.type == bfd_link_hash_indirect)
-			{
-			  /* If the symbol became indirect, then we
-                             assume that we have not seen a definition
-                             before.  */
-			  BFD_ASSERT ((hi->elf_link_hash_flags
-				       & (ELF_LINK_HASH_DEF_DYNAMIC
-					  | ELF_LINK_HASH_DEF_REGULAR))
-				      == 0);
-
-		          (*bed->elf_backend_copy_indirect_symbol) (h, hi);
-
-			  /* See if the new flags lead us to realize
-                             that the symbol must be dynamic.  */
-			  if (! dynsym)
-			    {
-			      if (! dynamic)
-				{
-				  if (info->shared
-				      || ((hi->elf_link_hash_flags
-					   & ELF_LINK_HASH_REF_DYNAMIC)
-					  != 0))
-				    dynsym = true;
-				}
-			      else
-				{
-				  if ((hi->elf_link_hash_flags
-				       & ELF_LINK_HASH_REF_REGULAR) != 0)
-				    dynsym = true;
-				}
-			    }
-			}
-		    }
-		}
-	    }
+	    if (! elf_add_default_symbol (abfd, info, h, name, &sym,
+					  &sec, &value, &dynsym,
+					  override, dt_needed))
+	      goto error_return;
 
 	  if (dynsym && h->dynindx == -1)
 	    {
