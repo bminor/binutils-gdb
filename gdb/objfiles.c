@@ -48,18 +48,6 @@
 
 /* Prototypes for local functions */
 
-#if defined(USE_MMALLOC) && defined(HAVE_MMAP)
-
-#include "mmalloc.h"
-
-static int open_existing_mapped_file (char *, long, int);
-
-static int open_mapped_file (char *filename, long mtime, int flags);
-
-static void *map_to_file (int);
-
-#endif /* defined(USE_MMALLOC) && defined(HAVE_MMAP) */
-
 static void objfile_alloc_data (struct objfile *objfile);
 static void objfile_free_data (struct objfile *objfile);
 
@@ -70,8 +58,6 @@ struct objfile *object_files;	/* Linked list of all objfiles */
 struct objfile *current_objfile;	/* For symbol file being read in */
 struct objfile *symfile_objfile;	/* Main symbol table loaded from */
 struct objfile *rt_common_objfile;	/* For runtime common symbols */
-
-int mapped_symbol_files;	/* Try to use mapped symbol files */
 
 /* Locate all mappable sections of a BFD file. 
    objfile_p_char is a char * to get it through
@@ -150,10 +136,8 @@ build_objfile_section_table (struct objfile *objfile)
    new objfile struct.
 
    The FLAGS word contains various bits (OBJF_*) that can be taken as
-   requests for specific operations, like trying to open a mapped
-   version of the objfile (OBJF_MAPPED).  Other bits like
-   OBJF_SHARED are simply copied through to the new objfile flags
-   member. */
+   requests for specific operations.  Other bits like OBJF_SHARED are
+   simply copied through to the new objfile flags member. */
 
 /* NOTE: carlton/2003-02-04: This function is called with args NULL, 0
    by jv-lang.c, to create an artificial objfile used to hold
@@ -169,119 +153,6 @@ allocate_objfile (bfd *abfd, int flags)
 {
   struct objfile *objfile = NULL;
   struct objfile *last_one = NULL;
-
-  if (mapped_symbol_files)
-    flags |= OBJF_MAPPED;
-
-#if defined(USE_MMALLOC) && defined(HAVE_MMAP)
-  if (abfd != NULL)
-    {
-
-      /* If we can support mapped symbol files, try to open/reopen the
-         mapped file that corresponds to the file from which we wish to
-         read symbols.  If the objfile is to be mapped, we must malloc
-         the structure itself using the mmap version, and arrange that
-         all memory allocation for the objfile uses the mmap routines.
-         If we are reusing an existing mapped file, from which we get
-         our objfile pointer, we have to make sure that we update the
-         pointers to the alloc/free functions in the obstack, in case
-         these functions have moved within the current gdb.  */
-
-      int fd;
-
-      fd = open_mapped_file (bfd_get_filename (abfd), bfd_get_mtime (abfd),
-			     flags);
-      if (fd >= 0)
-	{
-	  void *md;
-
-	  if ((md = map_to_file (fd)) == NULL)
-	    {
-	      close (fd);
-	    }
-	  else if ((objfile = (struct objfile *) mmalloc_getkey (md, 0)) != NULL)
-	    {
-	      /* Update memory corruption handler function addresses. */
-	      init_malloc (md);
-	      objfile->md = md;
-	      objfile->mmfd = fd;
-	      /* Update pointers to functions to *our* copies */
-	      if (objfile->demangled_names_hash)
-		htab_set_functions_ex
-		  (objfile->demangled_names_hash, htab_hash_string,
-		   (int (*) (const void *, const void *)) streq, NULL,
-		   objfile->md, xmcalloc, xmfree);
-	      obstack_chunkfun (&objfile->psymbol_cache.cache, xmmalloc);
-	      obstack_freefun (&objfile->psymbol_cache.cache, xmfree);
-	      obstack_chunkfun (&objfile->macro_cache.cache, xmmalloc);
-	      obstack_freefun (&objfile->macro_cache.cache, xmfree);
-	      obstack_chunkfun (&objfile->psymbol_obstack, xmmalloc);
-	      obstack_freefun (&objfile->psymbol_obstack, xmfree);
-	      obstack_chunkfun (&objfile->symbol_obstack, xmmalloc);
-	      obstack_freefun (&objfile->symbol_obstack, xmfree);
-	      obstack_chunkfun (&objfile->type_obstack, xmmalloc);
-	      obstack_freefun (&objfile->type_obstack, xmfree);
-	      /* If already in objfile list, unlink it. */
-	      unlink_objfile (objfile);
-	      /* Forget things specific to a particular gdb, may have changed. */
-	      objfile->sf = NULL;
-	    }
-	  else
-	    {
-
-	      /* Set up to detect internal memory corruption.  MUST be
-	         done before the first malloc.  See comments in
-	         init_malloc() and mmcheck().  */
-
-	      init_malloc (md);
-
-	      objfile = (struct objfile *)
-		xmmalloc (md, sizeof (struct objfile));
-	      memset (objfile, 0, sizeof (struct objfile));
-	      objfile->md = md;
-	      objfile->mmfd = fd;
-	      objfile->flags |= OBJF_MAPPED;
-	      mmalloc_setkey (objfile->md, 0, objfile);
-	      obstack_specify_allocation_with_arg (&objfile->psymbol_cache.cache,
-						   0, 0, xmmalloc, xmfree,
-						   objfile->md);
-	      obstack_specify_allocation_with_arg (&objfile->macro_cache.cache,
-						   0, 0, xmmalloc, xmfree,
-						   objfile->md);
-	      obstack_specify_allocation_with_arg (&objfile->psymbol_obstack,
-						   0, 0, xmmalloc, xmfree,
-						   objfile->md);
-	      obstack_specify_allocation_with_arg (&objfile->symbol_obstack,
-						   0, 0, xmmalloc, xmfree,
-						   objfile->md);
-	      obstack_specify_allocation_with_arg (&objfile->type_obstack,
-						   0, 0, xmmalloc, xmfree,
-						   objfile->md);
-	    }
-	}
-
-      if ((flags & OBJF_MAPPED) && (objfile == NULL))
-	{
-	  warning ("symbol table for '%s' will not be mapped",
-		   bfd_get_filename (abfd));
-	  flags &= ~OBJF_MAPPED;
-	}
-    }
-#else /* !defined(USE_MMALLOC) || !defined(HAVE_MMAP) */
-
-  if (flags & OBJF_MAPPED)
-    {
-      warning ("mapped symbol tables are not supported on this machine; missing or broken mmap().");
-
-      /* Turn off the global flag so we don't try to do mapped symbol tables
-         any more, which shuts up gdb unless the user specifically gives the
-         "mapped" keyword again. */
-
-      mapped_symbol_files = 0;
-      flags &= ~OBJF_MAPPED;
-    }
-
-#endif /* defined(USE_MMALLOC) && defined(HAVE_MMAP) */
 
   /* If we don't support mapped symbol files, didn't ask for the file to be
      mapped, or failed to open the mapped file for some reason, then revert
@@ -300,7 +171,6 @@ allocate_objfile (bfd *abfd, int flags)
 				  xfree);
       obstack_specify_allocation (&objfile->type_obstack, 0, 0, xmalloc,
 				  xfree);
-      flags &= ~OBJF_MAPPED;
 
       terminate_minimal_symbol_table (objfile);
     }
@@ -545,52 +415,27 @@ free_objfile (struct objfile *objfile)
      to call this here.  */
   clear_pc_function_cache ();
 
-  /* The last thing we do is free the objfile struct itself for the
-     non-reusable case, or detach from the mapped file for the
-     reusable case.  Note that the mmalloc_detach or the xmfree() is
-     the last thing we can do with this objfile. */
+  /* The last thing we do is free the objfile struct itself. */
 
-#if defined(USE_MMALLOC) && defined(HAVE_MMAP)
-
-  if (objfile->flags & OBJF_MAPPED)
+  objfile_free_data (objfile);
+  if (objfile->name != NULL)
     {
-      /* Remember the fd so we can close it.  We can't close it before
-         doing the detach, and after the detach the objfile is gone. */
-      int mmfd;
-
-      mmfd = objfile->mmfd;
-      mmalloc_detach (objfile->md);
-      objfile = NULL;
-      close (mmfd);
+      xmfree (objfile->md, objfile->name);
     }
-
-#endif /* defined(USE_MMALLOC) && defined(HAVE_MMAP) */
-
-  /* If we still have an objfile, then either we don't support reusable
-     objfiles or this one was not reusable.  So free it normally. */
-
-  if (objfile != NULL)
-    {
-      objfile_free_data (objfile);
-      if (objfile->name != NULL)
-	{
-	  xmfree (objfile->md, objfile->name);
-	}
-      if (objfile->global_psymbols.list)
-	xmfree (objfile->md, objfile->global_psymbols.list);
-      if (objfile->static_psymbols.list)
-	xmfree (objfile->md, objfile->static_psymbols.list);
-      /* Free the obstacks for non-reusable objfiles */
-      bcache_xfree (objfile->psymbol_cache);
-      bcache_xfree (objfile->macro_cache);
-      if (objfile->demangled_names_hash)
-	htab_delete (objfile->demangled_names_hash);
-      obstack_free (&objfile->psymbol_obstack, 0);
-      obstack_free (&objfile->symbol_obstack, 0);
-      obstack_free (&objfile->type_obstack, 0);
-      xmfree (objfile->md, objfile);
-      objfile = NULL;
-    }
+  if (objfile->global_psymbols.list)
+    xmfree (objfile->md, objfile->global_psymbols.list);
+  if (objfile->static_psymbols.list)
+    xmfree (objfile->md, objfile->static_psymbols.list);
+  /* Free the obstacks for non-reusable objfiles */
+  bcache_xfree (objfile->psymbol_cache);
+  bcache_xfree (objfile->macro_cache);
+  if (objfile->demangled_names_hash)
+    htab_delete (objfile->demangled_names_hash);
+  obstack_free (&objfile->psymbol_obstack, 0);
+  obstack_free (&objfile->symbol_obstack, 0);
+  obstack_free (&objfile->type_obstack, 0);
+  xmfree (objfile->md, objfile);
+  objfile = NULL;
 }
 
 static void
@@ -881,168 +726,6 @@ have_minimal_symbols (void)
   }
   return 0;
 }
-
-#if defined(USE_MMALLOC) && defined(HAVE_MMAP)
-
-/* Given the name of a mapped symbol file in SYMSFILENAME, and the timestamp
-   of the corresponding symbol file in MTIME, try to open an existing file
-   with the name SYMSFILENAME and verify it is more recent than the base
-   file by checking it's timestamp against MTIME.
-
-   If SYMSFILENAME does not exist (or can't be stat'd), simply returns -1.
-
-   If SYMSFILENAME does exist, but is out of date, we check to see if the
-   user has specified creation of a mapped file.  If so, we don't issue
-   any warning message because we will be creating a new mapped file anyway,
-   overwriting the old one.  If not, then we issue a warning message so that
-   the user will know why we aren't using this existing mapped symbol file.
-   In either case, we return -1.
-
-   If SYMSFILENAME does exist and is not out of date, but can't be opened for
-   some reason, then prints an appropriate system error message and returns -1.
-
-   Otherwise, returns the open file descriptor.  */
-
-static int
-open_existing_mapped_file (char *symsfilename, long mtime, int flags)
-{
-  int fd = -1;
-  struct stat sbuf;
-
-  if (stat (symsfilename, &sbuf) == 0)
-    {
-      if (sbuf.st_mtime < mtime)
-	{
-	  if (!(flags & OBJF_MAPPED))
-	    {
-	      warning ("mapped symbol file `%s' is out of date, ignored it",
-		       symsfilename);
-	    }
-	}
-      else if ((fd = open (symsfilename, O_RDWR)) < 0)
-	{
-	  if (error_pre_print)
-	    {
-	      printf_unfiltered (error_pre_print);
-	    }
-	  print_sys_errmsg (symsfilename, errno);
-	}
-    }
-  return (fd);
-}
-
-/* Look for a mapped symbol file that corresponds to FILENAME and is more
-   recent than MTIME.  If MAPPED is nonzero, the user has asked that gdb
-   use a mapped symbol file for this file, so create a new one if one does
-   not currently exist.
-
-   If found, then return an open file descriptor for the file, otherwise
-   return -1.
-
-   This routine is responsible for implementing the policy that generates
-   the name of the mapped symbol file from the name of a file containing
-   symbols that gdb would like to read.  Currently this policy is to append
-   ".syms" to the name of the file.
-
-   This routine is also responsible for implementing the policy that
-   determines where the mapped symbol file is found (the search path).
-   This policy is that when reading an existing mapped file, a file of
-   the correct name in the current directory takes precedence over a
-   file of the correct name in the same directory as the symbol file.
-   When creating a new mapped file, it is always created in the current
-   directory.  This helps to minimize the chances of a user unknowingly
-   creating big mapped files in places like /bin and /usr/local/bin, and
-   allows a local copy to override a manually installed global copy (in
-   /bin for example).  */
-
-static int
-open_mapped_file (char *filename, long mtime, int flags)
-{
-  int fd;
-  char *symsfilename;
-
-  /* First try to open an existing file in the current directory, and
-     then try the directory where the symbol file is located. */
-
-  symsfilename = concat ("./", lbasename (filename), ".syms", (char *) NULL);
-  if ((fd = open_existing_mapped_file (symsfilename, mtime, flags)) < 0)
-    {
-      xfree (symsfilename);
-      symsfilename = concat (filename, ".syms", (char *) NULL);
-      fd = open_existing_mapped_file (symsfilename, mtime, flags);
-    }
-
-  /* If we don't have an open file by now, then either the file does not
-     already exist, or the base file has changed since it was created.  In
-     either case, if the user has specified use of a mapped file, then
-     create a new mapped file, truncating any existing one.  If we can't
-     create one, print a system error message saying why we can't.
-
-     By default the file is rw for everyone, with the user's umask taking
-     care of turning off the permissions the user wants off. */
-
-  if ((fd < 0) && (flags & OBJF_MAPPED))
-    {
-      xfree (symsfilename);
-      symsfilename = concat ("./", lbasename (filename), ".syms",
-			     (char *) NULL);
-      if ((fd = open (symsfilename, O_RDWR | O_CREAT | O_TRUNC, 0666)) < 0)
-	{
-	  if (error_pre_print)
-	    {
-	      printf_unfiltered (error_pre_print);
-	    }
-	  print_sys_errmsg (symsfilename, errno);
-	}
-    }
-
-  xfree (symsfilename);
-  return (fd);
-}
-
-static void *
-map_to_file (int fd)
-{
-  void *md;
-  CORE_ADDR mapto;
-
-  md = mmalloc_attach (fd, 0);
-  if (md != NULL)
-    {
-      mapto = (CORE_ADDR) mmalloc_getkey (md, 1);
-      md = mmalloc_detach (md);
-      if (md != NULL)
-	{
-	  /* FIXME: should figure out why detach failed */
-	  md = NULL;
-	}
-      else if (mapto != (CORE_ADDR) NULL)
-	{
-	  /* This mapping file needs to be remapped at "mapto" */
-	  md = mmalloc_attach (fd, mapto);
-	}
-      else
-	{
-	  /* This is a freshly created mapping file. */
-	  mapto = (CORE_ADDR) mmalloc_findbase (20 * 1024 * 1024);
-	  if (mapto != 0)
-	    {
-	      /* To avoid reusing the freshly created mapping file, at the 
-	         address selected by mmap, we must truncate it before trying
-	         to do an attach at the address we want. */
-	      ftruncate (fd, 0);
-	      md = mmalloc_attach (fd, mapto);
-	      if (md != NULL)
-		{
-		  mmalloc_setkey (md, 1, mapto);
-		}
-	    }
-	}
-    }
-  return (md);
-}
-
-#endif /* defined(USE_MMALLOC) && defined(HAVE_MMAP) */
 
 /* Returns a section whose range includes PC and SECTION, or NULL if
    none found.  Note the distinction between the return type, struct

@@ -1,3 +1,37 @@
+2004-01-07  Michael Snyder  <msnyder@redhat.com>
+
+	* gencode.c: Whitespace cleanup.
+	* interp.c: Ditto.
+
+	* gencode.c: Replace 'Hitachi' with 'Renesas'.
+	(op tab): Add new instructions for sh4a, DBR, SBR.
+	(expand_opcode): Add handling for new movxy combinations.
+	(gensym_caselist): Ditto.
+	(expand_ppi_movxy): Remove movx/movy expansions, 
+	now handled in expand_opcode.
+	(gensym): Add some helpful macros.
+	(expand_ppi_code): Flatten loop for simplicity, tweak for 12-bit
+	instead of 8-bit table (some insns are ambiguous to 8 bits).
+	(ppi_gensim, main): Generate 12-bit instead of 8-bit ppi table.
+
+	* interp.c: Replace 'Hitachi' with 'Renesas'.
+	(union saved_state_type): Add dbr, sgr, ldst.
+	(get_loop_bounds_ext): New function.
+	(init_dsp): Add bfd_mach_sh4al_dsp.
+	(sim_resume): Handle extended loop bounds.	
+
+2003-12-18  Michael Snyder  <msnyder@redhat.com>
+
+	* gencode.c (expand_opcode): Simplify and reorganize.
+	Eliminate "shift" parameter.  Eliminate "4 bits at a time"
+	assumption.  Flatten switch statement to a single level.
+	Add "eeee" token for even-numbered registers.
+	(bton): Delete.
+	(fsca): Use "eeee" token.
+	(ppi_moves): Rename to "expand_ppi_movxy".  Do the ddt
+	[movx/movy] expansion here, as well as the ppi expansion.
+	(gensim_caselist): Accept 'eeee' along with 'nnnn'.
+
 2003-11-03  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* interp.c (fsca_s, fsrra_s): New functions.

@@ -3848,6 +3848,20 @@ fi
 
 
 
+  case "${target_alias}" in
+  m32r*-linux*)
+    traps_obj=traps-linux.o
+    sim_extra_cflags="-DM32R_LINUX"
+    ;;
+  *)
+    traps_obj=traps.o
+    sim_extra_cflags="-DM32R_ELF"
+    ;;
+  esac
+
+
+
+
 
 
 trap '' 1 2 15
@@ -4061,6 +4075,8 @@ s%@EXEEXT@%$EXEEXT%g
 s%@CGEN_MAINT@%$CGEN_MAINT%g
 s%@cgendir@%$cgendir%g
 s%@cgen@%$cgen%g
+s%@traps_obj@%$traps_obj%g
+s%@sim_extra_cflags@%$sim_extra_cflags%g
 
 CEOF
 EOF

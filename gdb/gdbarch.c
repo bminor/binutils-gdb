@@ -1,7 +1,9 @@
 /* *INDENT-OFF* */ /* THIS FILE IS GENERATED */
 
 /* Dynamic architecture support for GDB, the GNU debugger.
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -137,7 +139,6 @@ struct gdbarch
   int pc_regnum;
   int ps_regnum;
   int fp0_regnum;
-  int deprecated_npc_regnum;
   gdbarch_stab_reg_to_regnum_ftype *stab_reg_to_regnum;
   gdbarch_ecoff_reg_to_regnum_ftype *ecoff_reg_to_regnum;
   gdbarch_dwarf_reg_to_regnum_ftype *dwarf_reg_to_regnum;
@@ -208,7 +209,6 @@ struct gdbarch
   gdbarch_deprecated_store_return_value_ftype *deprecated_store_return_value;
   gdbarch_use_struct_convention_ftype *use_struct_convention;
   gdbarch_extract_struct_value_address_ftype *extract_struct_value_address;
-  gdbarch_deprecated_extract_struct_value_address_ftype *deprecated_extract_struct_value_address;
   gdbarch_deprecated_frame_init_saved_regs_ftype *deprecated_frame_init_saved_regs;
   gdbarch_deprecated_init_extra_frame_info_ftype *deprecated_init_extra_frame_info;
   gdbarch_skip_prologue_ftype *skip_prologue;
@@ -310,7 +310,6 @@ struct gdbarch startup_gdbarch =
   -1,  /* pc_regnum */
   -1,  /* ps_regnum */
   0,  /* fp0_regnum */
-  0,  /* deprecated_npc_regnum */
   0,  /* stab_reg_to_regnum */
   0,  /* ecoff_reg_to_regnum */
   0,  /* dwarf_reg_to_regnum */
@@ -381,7 +380,6 @@ struct gdbarch startup_gdbarch =
   0,  /* deprecated_store_return_value */
   0,  /* use_struct_convention */
   0,  /* extract_struct_value_address */
-  0,  /* deprecated_extract_struct_value_address */
   0,  /* deprecated_frame_init_saved_regs */
   0,  /* deprecated_init_extra_frame_info */
   0,  /* skip_prologue */
@@ -493,7 +491,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->pc_regnum = -1;
   current_gdbarch->ps_regnum = -1;
   current_gdbarch->fp0_regnum = -1;
-  current_gdbarch->deprecated_npc_regnum = -1;
   current_gdbarch->stab_reg_to_regnum = no_op_reg_to_regnum;
   current_gdbarch->ecoff_reg_to_regnum = no_op_reg_to_regnum;
   current_gdbarch->dwarf_reg_to_regnum = no_op_reg_to_regnum;
@@ -525,8 +522,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->prologue_frameless_p = generic_prologue_frameless_p;
   current_gdbarch->memory_insert_breakpoint = default_memory_insert_breakpoint;
   current_gdbarch->memory_remove_breakpoint = default_memory_remove_breakpoint;
-  current_gdbarch->decr_pc_after_break = -1;
-  current_gdbarch->function_start_offset = -1;
   current_gdbarch->remote_translate_xfer_address = generic_remote_translate_xfer_address;
   current_gdbarch->frame_args_skip = -1;
   current_gdbarch->frameless_function_invocation = generic_frameless_function_invocation_not;
@@ -632,7 +627,6 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of pc_regnum, invalid_p == 0 */
   /* Skip verify of ps_regnum, invalid_p == 0 */
   /* Skip verify of fp0_regnum, invalid_p == 0 */
-  /* Skip verify of deprecated_npc_regnum, invalid_p == 0 */
   /* Skip verify of stab_reg_to_regnum, invalid_p == 0 */
   /* Skip verify of ecoff_reg_to_regnum, invalid_p == 0 */
   /* Skip verify of dwarf_reg_to_regnum, invalid_p == 0 */
@@ -693,7 +687,6 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of store_return_value, invalid_p == 0 */
   /* Skip verify of use_struct_convention, invalid_p == 0 */
   /* Skip verify of extract_struct_value_address, has predicate */
-  /* Skip verify of deprecated_extract_struct_value_address, has predicate */
   /* Skip verify of deprecated_frame_init_saved_regs, has predicate */
   /* Skip verify of deprecated_init_extra_frame_info, has predicate */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
@@ -709,12 +702,8 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of adjust_breakpoint_address, has predicate */
   /* Skip verify of memory_insert_breakpoint, invalid_p == 0 */
   /* Skip verify of memory_remove_breakpoint, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (current_gdbarch->decr_pc_after_break == -1))
-    fprintf_unfiltered (log, "\n\tdecr_pc_after_break");
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (current_gdbarch->function_start_offset == -1))
-    fprintf_unfiltered (log, "\n\tfunction_start_offset");
+  /* Skip verify of decr_pc_after_break, invalid_p == 0 */
+  /* Skip verify of function_start_offset, invalid_p == 0 */
   /* Skip verify of remote_translate_xfer_address, invalid_p == 0 */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (current_gdbarch->frame_args_skip == -1))
@@ -1098,25 +1087,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
                       (long) current_gdbarch->deprecated_extract_return_value
                       /*DEPRECATED_EXTRACT_RETURN_VALUE ()*/);
 #endif
-#ifdef DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P()",
-                      XSTRING (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P() = %d\n",
-                      DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P ());
-#endif
-#ifdef DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(regbuf)",
-                      XSTRING (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS (regbuf)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_extract_struct_value_address
-                      /*DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS ()*/);
-#endif
 #ifdef DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED
   fprintf_unfiltered (file,
                       "gdbarch_dump: DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED # %s\n",
@@ -1375,14 +1345,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE = %d\n",
                       DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE);
-#endif
-#ifdef DEPRECATED_NPC_REGNUM
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_NPC_REGNUM # %s\n",
-                      XSTRING (DEPRECATED_NPC_REGNUM));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_NPC_REGNUM = %d\n",
-                      DEPRECATED_NPC_REGNUM);
 #endif
 #ifdef DEPRECATED_PC_IN_CALL_DUMMY_P
   fprintf_unfiltered (file,
@@ -2993,23 +2955,6 @@ set_gdbarch_fp0_regnum (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_deprecated_npc_regnum (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  /* Skip verify of deprecated_npc_regnum, invalid_p == 0 */
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_npc_regnum called\n");
-  return gdbarch->deprecated_npc_regnum;
-}
-
-void
-set_gdbarch_deprecated_npc_regnum (struct gdbarch *gdbarch,
-                                   int deprecated_npc_regnum)
-{
-  gdbarch->deprecated_npc_regnum = deprecated_npc_regnum;
-}
-
-int
 gdbarch_stab_reg_to_regnum (struct gdbarch *gdbarch, int stab_regnr)
 {
   gdb_assert (gdbarch != NULL);
@@ -4425,30 +4370,6 @@ set_gdbarch_extract_struct_value_address (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_deprecated_extract_struct_value_address_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->deprecated_extract_struct_value_address != NULL;
-}
-
-CORE_ADDR
-gdbarch_deprecated_extract_struct_value_address (struct gdbarch *gdbarch, char *regbuf)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->deprecated_extract_struct_value_address != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_extract_struct_value_address called\n");
-  return gdbarch->deprecated_extract_struct_value_address (regbuf);
-}
-
-void
-set_gdbarch_deprecated_extract_struct_value_address (struct gdbarch *gdbarch,
-                                                     gdbarch_deprecated_extract_struct_value_address_ftype deprecated_extract_struct_value_address)
-{
-  gdbarch->deprecated_extract_struct_value_address = deprecated_extract_struct_value_address;
-}
-
-int
 gdbarch_deprecated_frame_init_saved_regs_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
@@ -4626,8 +4547,7 @@ CORE_ADDR
 gdbarch_decr_pc_after_break (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Check variable changed from pre-default.  */
-  gdb_assert (gdbarch->decr_pc_after_break != -1);
+  /* Skip verify of decr_pc_after_break, invalid_p == 0 */
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_decr_pc_after_break called\n");
   return gdbarch->decr_pc_after_break;
@@ -4644,8 +4564,7 @@ CORE_ADDR
 gdbarch_function_start_offset (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Check variable changed from pre-default.  */
-  gdb_assert (gdbarch->function_start_offset != -1);
+  /* Skip verify of function_start_offset, invalid_p == 0 */
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_function_start_offset called\n");
   return gdbarch->function_start_offset;

@@ -85,6 +85,10 @@ m32r_core_signal ((SD), (CPU), (CIA), (MAP), (NR_BYTES), (ADDR), \
 		  (TRANSFER), (ERROR))
 
 /* Default memory size.  */
+#ifdef M32R_LINUX
+#define M32R_DEFAULT_MEM_SIZE 0x2000000 /* 32M */
+#else
 #define M32R_DEFAULT_MEM_SIZE 0x800000 /* 8M */
+#endif
 
 #endif /* SIM_MAIN_H */

@@ -125,7 +125,8 @@ static NORETURN void cplusplus_error (const char *name,
 
 static struct symtab *symtab_from_filename (char **argptr,
 					    char *filename_end,
-					    int is_quote_enclosed);
+					    int is_quote_enclosed,
+					    int *not_found_ptr);
 
 static int is_all_digits (char *arg);
 
@@ -150,7 +151,8 @@ static struct symtabs_and_lines decode_variable (char **argptr,
 						 int is_quoted,
 						 int is_objc_method,
 						 char *paren_pointer,
-						 struct symtab *file_symtab);
+						 struct symtab *file_symtab,
+						 int *not_found_ptr);
 
 static void build_canonical_line_spec (struct symtab_and_line *sal,
 				       char *symname,
@@ -205,7 +207,12 @@ symtabs_and_lines minsym_found (int funfirstline,
 
    Note that it is possible to return zero for the symtab
    if no file is validly specified.  Callers must check that.
-   Also, the line number returned may be invalid.  */
+   Also, the line number returned may be invalid.  
+ 
+   If NOT_FOUND_PTR is not null, store a boolean true/false value at the location, based
+   on whether or not failure occurs due to an unknown function or file.  In the case
+   where failure does occur due to an unknown function or file, do not issue an error
+   message.  */
 
 /* We allow single quotes in various places.  This is a hideous
    kludge, which exists because the completer can't yet deal with the
@@ -224,7 +231,7 @@ symtabs_and_lines minsym_found (int funfirstline,
 
 struct symtabs_and_lines
 decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
-	       int default_line, char ***canonical)
+	       int default_line, char ***canonical, int *not_found_ptr)
 {
   /* This is NULL if there are no parens in *ARGPTR, or a pointer to
      the closing parenthesis if there are parens.  */
@@ -238,6 +245,9 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   /* This function advances *ARGPTR, but, for error messages, we want
      to remember what it pointed to initially.  */
   char *saved_arg = *argptr;
+
+  if (not_found_ptr)
+    *not_found_ptr = 0;
 
   /* Defaults have defaults.  */
 
@@ -302,7 +312,8 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 	/* No, the first part is a filename; set file_symtab
 	   accordingly.  Also, move argptr past the filename.  */
       
-	file_symtab = symtab_from_filename (argptr, p, is_quote_enclosed);
+	file_symtab = symtab_from_filename (argptr, p, is_quote_enclosed,
+					    not_found_ptr);
       }
   }
 
@@ -326,7 +337,8 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
      file's per-file block to start with.  */
 
   return decode_variable (argptr, funfirstline, canonical, is_quoted,
-			  is_objc_method, paren_pointer, file_symtab);
+			  is_objc_method, paren_pointer, file_symtab,
+			  not_found_ptr);
 }
 
 /* Now, the helper functions.  */
@@ -1466,11 +1478,13 @@ cplusplus_error (const char *name, const char *fmt, ...)
 
 
 /* Return the symtab associated to the filename given by the substring
-   of *ARGPTR ending at FILE_NAME_END.  */
+   of *ARGPTR ending at FILE_NAME_END.  If NOT_FOUND_PTR is not null
+   and the source file is not found, store boolean true at the
+   location pointed to and do not issue an error message.  */
 
 static struct symtab *
 symtab_from_filename (char **argptr, char *filename_end,
-		       int is_quote_enclosed)
+		       int is_quote_enclosed, int *not_found_ptr)
 {
   char *saved_filename_end;
   char *copy;
@@ -1496,6 +1510,18 @@ symtab_from_filename (char **argptr, char *filename_end,
     {
       if (!have_full_symbols () && !have_partial_symbols ())
 	error ("No symbol table is loaded.  Use the \"file\" command.");
+      if (not_found_ptr)
+	{
+	  *not_found_ptr = 1;
+	  /* The caller has indicated that it wishes quiet notification of any
+	     error where the function or file is not found.  A call to 
+	     error_silent causes an error to occur, but it does not issue 
+	     the supplied message.  The message can be manually output by
+	     the caller, if desired.  This is used, for example, when 
+	     attempting to set breakpoints for functions in shared libraries 
+	     that have not yet been loaded.  */
+	  error_silent ("No source file named %s.", copy);
+	}
       error ("No source file named %s.", copy);
     }
   
@@ -1693,12 +1719,14 @@ decode_dollar (char **argptr, int funfirstline, struct symtab *default_symtab,
 
 
 /* Decode a linespec that's a variable.  If FILE_SYMTAB is non-NULL,
-   look in that file's static variables first.  */
+   look in that file's static variables first.  If NOT_FOUND_PTR is not NULL and
+   the function cannot be found, store boolean true in the location pointed to
+   and do not issue an error message.  */ 
 
 static struct symtabs_and_lines
 decode_variable (char **argptr, int funfirstline, char ***canonical,
 		 int is_quoted, int is_objc_method, char *paren_pointer,
-		 struct symtab *file_symtab)
+		 struct symtab *file_symtab, int *not_found_ptr)
 {
   char *p;
   char *copy;
@@ -1770,6 +1798,19 @@ decode_variable (char **argptr, int funfirstline, char ***canonical,
       !have_partial_symbols () && !have_minimal_symbols ())
     error ("No symbol table is loaded.  Use the \"file\" command.");
 
+  if (not_found_ptr)
+    {
+      *not_found_ptr = 1;
+      /* The caller has indicated that it wishes quiet notification of any
+	 error where the function or file is not found.  A call to 
+	 error_silent causes an error to occur, but it does not issue 
+	 the supplied message.  The message can be manually output by
+	 the caller, if desired.  This is used, for example, when 
+	 attempting to set breakpoints for functions in shared libraries 
+	 that have not yet been loaded.  */
+      error_silent ("Function \"%s\" not defined.", copy);
+    }
+  
   error ("Function \"%s\" not defined.", copy);
 }
 

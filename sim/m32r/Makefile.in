@@ -23,6 +23,7 @@
 M32R_OBJS = m32r.o cpu.o decode.o sem.o model.o mloop.o
 M32RX_OBJS = m32rx.o cpux.o decodex.o modelx.o mloopx.o
 M32R2_OBJS = m32r2.o cpu2.o decode2.o model2.o mloop2.o
+TRAPS_OBJ = @traps_obj@
 
 CONFIG_DEVICES = dv-sockser.o
 CONFIG_DEVICES =
@@ -40,7 +41,8 @@ SIM_OBJS = \
 	$(M32R_OBJS) \
 	$(M32RX_OBJS) \
 	$(M32R2_OBJS) \
-	traps.o devices.o \
+	$(TRAPS_OBJ) \
+	devices.o \
 	$(CONFIG_DEVICES)
 
 # Extra headers included by sim-main.h.
@@ -48,7 +50,7 @@ SIM_EXTRA_DEPS = \
 	$(CGEN_INCLUDE_DEPS) \
 	arch.h cpuall.h m32r-sim.h $(srcdir)/../../opcodes/m32r-desc.h
 
-SIM_EXTRA_CFLAGS =
+SIM_EXTRA_CFLAGS = @sim_extra_cflags@
 
 SIM_RUN_OBJS = nrun.o
 SIM_EXTRA_CLEAN = m32r-clean
@@ -65,6 +67,7 @@ sim-if.o: sim-if.c $(SIM_MAIN_DEPS) $(srcdir)/../common/sim-core.h
 arch.o: arch.c $(SIM_MAIN_DEPS)
 
 traps.o: traps.c targ-vals.h $(SIM_MAIN_DEPS)
+traps-linux.o: traps.c syscall.h targ-vals.h $(SIM_MAIN_DEPS)
 devices.o: devices.c $(SIM_MAIN_DEPS)
 
 # M32R objs

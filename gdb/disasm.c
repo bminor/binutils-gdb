@@ -1,6 +1,6 @@
 /* Disassemble support for GDB.
 
-   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -164,6 +164,8 @@ do_mixed_source_and_assembly (struct ui_out *uiout,
   CORE_ADDR pc;
   int num_displayed = 0;
   struct cleanup *ui_out_chain;
+  struct cleanup *ui_out_tuple_chain = make_cleanup (null_cleanup, 0);
+  struct cleanup *ui_out_list_chain = make_cleanup (null_cleanup, 0);
 
   mle = (struct dis_line_entry *) alloca (nlines
 					  * sizeof (struct dis_line_entry));
@@ -221,10 +223,6 @@ do_mixed_source_and_assembly (struct ui_out *uiout,
 
   for (i = 0; i < newlines; i++)
     {
-      struct cleanup *ui_out_tuple_chain = NULL;
-      struct cleanup *ui_out_list_chain = NULL;
-      int close_list = 1;
-      
       /* Print out everything from next_line to the current line.  */
       if (mle[i].line >= next_line)
 	{
@@ -275,23 +273,23 @@ do_mixed_source_and_assembly (struct ui_out *uiout,
 	  next_line = mle[i].line + 1;
 	  ui_out_list_chain
 	    = make_cleanup_ui_out_list_begin_end (uiout, "line_asm_insn");
-	  /* Don't close the list if the lines are not in order. */
-	  if (i < (newlines - 1) && mle[i + 1].line <= mle[i].line)
-	    close_list = 0;
 	}
 
       num_displayed += dump_insns (uiout, di, mle[i].start_pc, mle[i].end_pc,
 				   how_many, stb);
-      if (close_list)
+
+      /* When we've reached the end of the mle array, or we've seen the last
+         assembly range for this source line, close out the list/tuple.  */
+      if (i == (newlines - 1) || mle[i + 1].line > mle[i].line)
 	{
 	  do_cleanups (ui_out_list_chain);
 	  do_cleanups (ui_out_tuple_chain);
+	  ui_out_tuple_chain = make_cleanup (null_cleanup, 0);
+	  ui_out_list_chain = make_cleanup (null_cleanup, 0);
 	  ui_out_text (uiout, "\n");
-	  close_list = 0;
 	}
-      if (how_many >= 0)
-	if (num_displayed >= how_many)
-	  break;
+      if (how_many >= 0 && num_displayed >= how_many)
+	break;
     }
   do_cleanups (ui_out_chain);
 }

@@ -1,6 +1,7 @@
 /* Target-dependent code for Renesas Super-H, for GDB.
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
+   2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -831,12 +832,6 @@ is_media_pseudo (int rn)
 }
 
 static int
-sh64_get_gdb_regnum (int gcc_regnum, CORE_ADDR pc)
-{
-  return translate_insn_rn (gcc_regnum, pc_is_isa32 (pc));
-}
-
-static int
 sh64_media_reg_base_num (int reg_nr)
 {
   int base_regnum = -1;
@@ -1347,11 +1342,14 @@ sh64_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 }
 
 static CORE_ADDR
-sh64_extract_struct_value_address (char *regbuf)
+sh64_extract_struct_value_address (struct regcache *regcache)
 {
-  return (extract_unsigned_integer ((regbuf + DEPRECATED_REGISTER_BYTE (STRUCT_RETURN_REGNUM)), 
-				    register_size (current_gdbarch, 
-						   STRUCT_RETURN_REGNUM)));
+  /* FIXME: cagney/2004-01-17: Does the ABI guarantee that the return
+     address regster is preserved across function calls?  Probably
+     not, making this function wrong.  */
+  ULONGEST val;
+  regcache_raw_read_unsigned (regcache, STRUCT_RETURN_REGNUM, &val);
+  return val;
 }
 
 static CORE_ADDR
@@ -2848,8 +2846,6 @@ sh64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_skip_prologue (gdbarch, sh_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  set_gdbarch_decr_pc_after_break (gdbarch, 0);
-  set_gdbarch_function_start_offset (gdbarch, 0);
 
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation (gdbarch, frameless_look_for_prologue);
@@ -2891,7 +2887,7 @@ sh64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_push_return_address (gdbarch, sh64_push_return_address);
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
   set_gdbarch_deprecated_store_struct_return (gdbarch, sh64_store_struct_return);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, sh64_extract_struct_value_address);
+  set_gdbarch_extract_struct_value_address (gdbarch, sh64_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, sh64_use_struct_convention);
   set_gdbarch_deprecated_pop_frame (gdbarch, sh64_pop_frame);
   set_gdbarch_elf_make_msymbol_special (gdbarch,

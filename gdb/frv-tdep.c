@@ -44,8 +44,6 @@ static gdbarch_breakpoint_from_pc_ftype frv_breakpoint_from_pc;
 static gdbarch_adjust_breakpoint_address_ftype frv_gdbarch_adjust_breakpoint_address;
 static gdbarch_skip_prologue_ftype frv_skip_prologue;
 static gdbarch_frameless_function_invocation_ftype frv_frameless_function_invocation;
-static gdbarch_deprecated_push_arguments_ftype frv_push_arguments;
-static gdbarch_deprecated_saved_pc_after_call_ftype frv_saved_pc_after_call;
 
 /* Register numbers.  The order in which these appear define the
    remote protocol, so take care in changing them.  */
@@ -417,6 +415,61 @@ is_argument_reg (int reg)
   return (8 <= reg && reg <= 13);
 }
 
+/* Given PC at the function's start address, attempt to find the
+   prologue end using SAL information.  Return zero if the skip fails.
+
+   A non-optimized prologue traditionally has one SAL for the function
+   and a second for the function body.  A single line function has
+   them both pointing at the same line.
+
+   An optimized prologue is similar but the prologue may contain
+   instructions (SALs) from the instruction body.  Need to skip those
+   while not getting into the function body.
+
+   The functions end point and an increasing SAL line are used as
+   indicators of the prologue's endpoint.
+
+   This code is based on the function refine_prologue_limit (versions
+   found in both ia64 and ppc).  */
+
+static CORE_ADDR
+skip_prologue_using_sal (CORE_ADDR func_addr)
+{
+  struct symtab_and_line prologue_sal;
+  CORE_ADDR start_pc;
+  CORE_ADDR end_pc;
+
+  /* Get an initial range for the function.  */
+  find_pc_partial_function (func_addr, NULL, &start_pc, &end_pc);
+  start_pc += FUNCTION_START_OFFSET;
+
+  prologue_sal = find_pc_line (start_pc, 0);
+  if (prologue_sal.line != 0)
+    {
+      while (prologue_sal.end < end_pc)
+	{
+	  struct symtab_and_line sal;
+
+	  sal = find_pc_line (prologue_sal.end, 0);
+	  if (sal.line == 0)
+	    break;
+	  /* Assume that a consecutive SAL for the same (or larger)
+             line mark the prologue -> body transition.  */
+	  if (sal.line >= prologue_sal.line)
+	    break;
+	  /* The case in which compiler's optimizer/scheduler has
+	     moved instructions into the prologue.  We look ahead in
+	     the function looking for address ranges whose
+	     corresponding line number is less the first one that we
+	     found for the function.  This is more conservative then
+	     refine_prologue_limit which scans a large number of SALs
+	     looking for any in the prologue */
+	  prologue_sal = sal;
+	}
+    }
+  return prologue_sal.end;
+}
+
 
 /* Scan an FR-V prologue, starting at PC, until frame->PC.
    If FRAME is non-zero, fill in its saved_regs with appropriate addresses.
@@ -474,15 +527,99 @@ frv_analyze_prologue (CORE_ADDR pc, struct frame_info *next_frame,
   char gr_saved[64];
   int gr_sp_offset[64];
 
+  /* The address of the most recently scanned prologue instruction.  */
+  CORE_ADDR last_prologue_pc;
+
+  /* The address of the next instruction. */
+  CORE_ADDR next_pc;
+
+  /* The upper bound to of the pc values to scan.  */
+  CORE_ADDR lim_pc;
+
   memset (gr_saved, 0, sizeof (gr_saved));
 
-  while (! next_frame || pc < frame_pc_unwind (next_frame))
+  last_prologue_pc = pc;
+
+  /* Try to compute an upper limit (on how far to scan) based on the
+     line number info.  */
+  lim_pc = skip_prologue_using_sal (pc);
+  /* If there's no line number info, lim_pc will be 0.  In that case,
+     set the limit to be 100 instructions away from pc.  Hopefully, this
+     will be far enough away to account for the entire prologue.  Don't
+     worry about overshooting the end of the function.  The scan loop
+     below contains some checks to avoid scanning unreasonably far.  */
+  if (lim_pc == 0)
+    lim_pc = pc + 400;
+
+  /* If we have a frame, we don't want to scan past the frame's pc.  This
+     will catch those cases where the pc is in the prologue.  */
+  if (next_frame)
+    {
+      CORE_ADDR frame_pc = frame_pc_unwind (next_frame);
+      if (frame_pc < lim_pc)
+	lim_pc = frame_pc;
+    }
+
+  /* Scan the prologue.  */
+  while (pc < lim_pc)
     {
       LONGEST op = read_memory_integer (pc, 4);
+      next_pc = pc + 4;
 
       /* The tests in this chain of ifs should be in order of
 	 decreasing selectivity, so that more particular patterns get
 	 to fire before less particular patterns.  */
+
+      /* Some sort of control transfer instruction: stop scanning prologue.
+	 Integer Conditional Branch:
+	  X XXXX XX 0000110 XX XXXXXXXXXXXXXXXX
+	 Floating-point / media Conditional Branch:
+	  X XXXX XX 0000111 XX XXXXXXXXXXXXXXXX
+	 LCR Conditional Branch to LR
+	  X XXXX XX 0001110 XX XX 001 X XXXXXXXXXX
+	 Integer conditional Branches to LR
+	  X XXXX XX 0001110 XX XX 010 X XXXXXXXXXX
+	  X XXXX XX 0001110 XX XX 011 X XXXXXXXXXX
+	 Floating-point/Media Branches to LR
+	  X XXXX XX 0001110 XX XX 110 X XXXXXXXXXX
+	  X XXXX XX 0001110 XX XX 111 X XXXXXXXXXX
+	 Jump and Link
+	  X XXXXX X 0001100 XXXXXX XXXXXX XXXXXX
+	  X XXXXX X 0001101 XXXXXX XXXXXX XXXXXX
+	 Call
+	  X XXXXXX 0001111 XXXXXXXXXXXXXXXXXX
+	 Return from Trap
+	  X XXXXX X 0000101 XXXXXX XXXXXX XXXXXX
+	 Integer Conditional Trap
+	  X XXXX XX 0000100 XXXXXX XXXX 00 XXXXXX
+	  X XXXX XX 0011100 XXXXXX XXXXXXXXXXXX
+	 Floating-point /media Conditional Trap
+	  X XXXX XX 0000100 XXXXXX XXXX 01 XXXXXX
+	  X XXXX XX 0011101 XXXXXX XXXXXXXXXXXX
+	 Break
+	  X XXXX XX 0000100 XXXXXX XXXX 11 XXXXXX
+	 Media Trap
+	  X XXXX XX 0000100 XXXXXX XXXX 10 XXXXXX */
+      if ((op & 0x01d80000) == 0x00180000 /* Conditional branches and Call */
+          || (op & 0x01f80000) == 0x00300000  /* Jump and Link */
+	  || (op & 0x01f80000) == 0x00100000  /* Return from Trap, Trap */
+	  || (op & 0x01f80000) == 0x00700000) /* Trap immediate */
+	{
+	  /* Stop scanning; not in prologue any longer.  */
+	  break;
+	}
+
+      /* Loading something from memory into fp probably means that
+         we're in the epilogue.  Stop scanning the prologue.
+         ld @(GRi, GRk), fp
+	 X 000010 0000010 XXXXXX 000100 XXXXXX
+	 ldi @(GRi, d12), fp
+	 X 000010 0110010 XXXXXX XXXXXXXXXXXX */
+      else if ((op & 0x7ffc0fc0) == 0x04080100
+               || (op & 0x7ffc0000) == 0x04c80000)
+	{
+	  break;
+	}
 
       /* Setting the FP from the SP:
 	 ori sp, 0, fp
@@ -490,10 +627,11 @@ frv_analyze_prologue (CORE_ADDR pc, struct frame_info *next_frame,
 	 0 111111 1111111 111111 111111111111 = 0x7fffffff
              .    .   .    .   .    .   .   .
 	 We treat this as part of the prologue.  */
-      if ((op & 0x7fffffff) == 0x04881000)
+      else if ((op & 0x7fffffff) == 0x04881000)
 	{
 	  fp_set = 1;
 	  fp_offset = 0;
+	  last_prologue_pc = next_pc;
 	}
 
       /* Move the link register to the scratch register grJ, before saving:
@@ -508,11 +646,10 @@ frv_analyze_prologue (CORE_ADDR pc, struct frame_info *next_frame,
 
           /* If we're moving it to a scratch register, that's fine.  */
           if (is_caller_saves_reg (gr_j))
-            lr_save_reg = gr_j;
-          /* Otherwise it's not a prologue instruction that we
-             recognize.  */
-          else
-            break;
+	    {
+	      lr_save_reg = gr_j;
+	      last_prologue_pc = next_pc;
+	    }
         }
 
       /* To save multiple callee-saves registers on the stack, at
@@ -550,10 +687,8 @@ frv_analyze_prologue (CORE_ADDR pc, struct frame_info *next_frame,
 		  gr_saved[gr_k + i] = 1;
 		  gr_sp_offset[gr_k + i] = 4 * i;
 		}
+	      last_prologue_pc = next_pc;
 	    }
-	  else
-	    /* It's not a prologue instruction.  */
-	    break;
 	}
 
       /* Adjusting the stack pointer.  (The stack pointer is GR1.)
@@ -564,11 +699,22 @@ frv_analyze_prologue (CORE_ADDR pc, struct frame_info *next_frame,
 	 We treat this as part of the prologue.  */
       else if ((op & 0x7ffff000) == 0x02401000)
         {
-	  /* Sign-extend the twelve-bit field.
-	     (Isn't there a better way to do this?)  */
-	  int s = (((op & 0xfff) - 0x800) & 0xfff) - 0x800;
+	  if (framesize == 0)
+	    {
+	      /* Sign-extend the twelve-bit field.
+		 (Isn't there a better way to do this?)  */
+	      int s = (((op & 0xfff) - 0x800) & 0xfff) - 0x800;
 
-	  framesize -= s;
+	      framesize -= s;
+	      last_prologue_pc = pc;
+	    }
+	  else
+	    {
+	      /* If the prologue is being adjusted again, we've
+	         likely gone too far; i.e. we're probably in the
+		 epilogue.  */
+	      break;
+	    }
 	}
 
       /* Setting the FP to a constant distance from the SP:
@@ -584,6 +730,7 @@ frv_analyze_prologue (CORE_ADDR pc, struct frame_info *next_frame,
 	  int s = (((op & 0xfff) - 0x800) & 0xfff) - 0x800;
 	  fp_set = 1;
 	  fp_offset = s;
+	  last_prologue_pc = pc;
 	}
 
       /* To spill an argument register to a scratch register:
@@ -602,10 +749,10 @@ frv_analyze_prologue (CORE_ADDR pc, struct frame_info *next_frame,
 	{
 	  int gr_i = ((op >> 12) & 0x3f);
 
-          /* If the source isn't an arg register, then this isn't a
-             prologue instruction.  */
-	  if (! is_argument_reg (gr_i))
-	    break;
+          /* Make sure that the source is an arg register; if it is, we'll
+	     treat it as a prologue instruction.  */
+	  if (is_argument_reg (gr_i))
+	    last_prologue_pc = next_pc;
 	}
 
       /* To spill 16-bit values to the stack:
@@ -625,8 +772,10 @@ frv_analyze_prologue (CORE_ADDR pc, struct frame_info *next_frame,
 	{
 	  int gr_k = ((op >> 25) & 0x3f);
 
-	  if (! is_argument_reg (gr_k))
-	    break;		/* Source isn't an arg register.  */
+          /* Make sure that GRk is really an argument register; treat
+	     it as a prologue instruction if so.  */
+	  if (is_argument_reg (gr_k))
+	    last_prologue_pc = next_pc;
 	}
 
       /* To save multiple callee-saves register on the stack, at a
@@ -667,10 +816,8 @@ frv_analyze_prologue (CORE_ADDR pc, struct frame_info *next_frame,
 		  gr_saved[gr_k + i] = 1;
 		  gr_sp_offset[gr_k + i] = s + (4 * i);
 		}
+	      last_prologue_pc = next_pc;
 	    }
-	  else
-	    /* It's not a prologue instruction.  */
-	    break;
 	}
 
       /* Storing any kind of integer register at any constant offset
@@ -704,13 +851,16 @@ frv_analyze_prologue (CORE_ADDR pc, struct frame_info *next_frame,
           /* If the address isn't relative to the SP or FP, it's not a
              prologue instruction.  */
           if (gr_i != sp_regnum && gr_i != fp_regnum)
-            break;
+	    {
+	      /* Do nothing; not a prologue instruction.  */
+	    }
 
           /* Saving the old FP in the new frame (relative to the SP).  */
-          if (gr_k == fp_regnum && gr_i == sp_regnum)
+          else if (gr_k == fp_regnum && gr_i == sp_regnum)
 	    {
 	      gr_saved[fp_regnum] = 1;
               gr_sp_offset[fp_regnum] = offset;
+	      last_prologue_pc = next_pc;
 	    }
 
           /* Saving callee-saves register(s) on the stack, relative to
@@ -723,6 +873,7 @@ frv_analyze_prologue (CORE_ADDR pc, struct frame_info *next_frame,
 		gr_sp_offset[gr_k] = offset;
 	      else
 		gr_sp_offset[gr_k] = offset + fp_offset;
+	      last_prologue_pc = next_pc;
             }
 
           /* Saving the scratch register holding the return address.  */
@@ -734,24 +885,14 @@ frv_analyze_prologue (CORE_ADDR pc, struct frame_info *next_frame,
 		lr_sp_offset = offset;
 	      else
 	        lr_sp_offset = offset + fp_offset;
+	      last_prologue_pc = next_pc;
 	    }
 
           /* Spilling int-sized arguments to the stack.  */
           else if (is_argument_reg (gr_k))
-            ;
-
-          /* It's not a store instruction we recognize, so this must
-             be the end of the prologue.  */
-          else
-            break;
+	    last_prologue_pc = next_pc;
         }
-
-      /* It's not any instruction we recognize, so this must be the end
-         of the prologue.  */
-      else
-	break;
-
-      pc += 4;
+      pc = next_pc;
     }
 
   if (next_frame && info)
@@ -790,7 +931,7 @@ frv_analyze_prologue (CORE_ADDR pc, struct frame_info *next_frame,
       trad_frame_set_value (info->saved_regs, sp_regnum, info->prev_sp);
     }
 
-  return pc;
+  return last_prologue_pc;
 }
 
 
@@ -1276,9 +1417,6 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
-
-  set_gdbarch_decr_pc_after_break (gdbarch, 0);
-  set_gdbarch_function_start_offset (gdbarch, 0);
 
   set_gdbarch_remote_translate_xfer_address
     (gdbarch, generic_remote_translate_xfer_address);

@@ -1,6 +1,7 @@
 /* Print VAX instructions for GDB, the GNU debugger.
-   Copyright 1986, 1989, 1991, 1992, 1995, 1996, 1998, 1999, 2000, 2002, 2003
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1989, 1991, 1992, 1995, 1996, 1998, 1999, 2000,
+   2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -41,8 +42,6 @@ static gdbarch_frame_num_args_ftype vax_frame_num_args;
 static gdbarch_deprecated_frame_chain_ftype vax_frame_chain;
 
 static gdbarch_deprecated_extract_return_value_ftype vax_extract_return_value;
-static gdbarch_deprecated_extract_struct_value_address_ftype
-    vax_extract_struct_value_address;
 
 static gdbarch_deprecated_push_dummy_frame_ftype vax_push_dummy_frame;
 
@@ -275,13 +274,6 @@ vax_store_return_value (struct type *valtype, char *valbuf)
 {
   deprecated_write_register_bytes (0, valbuf, TYPE_LENGTH (valtype));
 }
-
-static CORE_ADDR
-vax_extract_struct_value_address (char *regbuf)
-{
-  return (extract_unsigned_integer (regbuf + DEPRECATED_REGISTER_BYTE (0),
-				    DEPRECATED_REGISTER_RAW_SIZE (0)));
-}
 
 static const unsigned char *
 vax_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
@@ -391,7 +383,6 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_store_struct_return (gdbarch, vax_store_struct_return);
   set_gdbarch_deprecated_extract_return_value (gdbarch, vax_extract_return_value);
   set_gdbarch_deprecated_store_return_value (gdbarch, vax_store_return_value);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, vax_extract_struct_value_address);
 
   /* Call dummy info */
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, vax_push_dummy_frame);
@@ -406,7 +397,6 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Breakpoint info */
   set_gdbarch_breakpoint_from_pc (gdbarch, vax_breakpoint_from_pc);
-  set_gdbarch_decr_pc_after_break (gdbarch, 0);
 
   /* Misc info */
   set_gdbarch_function_start_offset (gdbarch, 2);

@@ -1,7 +1,9 @@
 /* *INDENT-OFF* */ /* THIS FILE IS GENERATED */
 
 /* Dynamic architecture support for GDB, the GNU debugger.
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -374,18 +376,6 @@ extern void set_gdbarch_fp0_regnum (struct gdbarch *gdbarch, int fp0_regnum);
 #endif
 #if !defined (FP0_REGNUM)
 #define FP0_REGNUM (gdbarch_fp0_regnum (current_gdbarch))
-#endif
-
-/* Replace DEPRECATED_NPC_REGNUM with an implementation of WRITE_PC
-   that updates PC, NPC and even NNPC. */
-
-extern int gdbarch_deprecated_npc_regnum (struct gdbarch *gdbarch);
-extern void set_gdbarch_deprecated_npc_regnum (struct gdbarch *gdbarch, int deprecated_npc_regnum);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_NPC_REGNUM)
-#error "Non multi-arch definition of DEPRECATED_NPC_REGNUM"
-#endif
-#if !defined (DEPRECATED_NPC_REGNUM)
-#define DEPRECATED_NPC_REGNUM (gdbarch_deprecated_npc_regnum (current_gdbarch))
 #endif
 
 /* Convert stab register number (from `r' declaration) to a gdb REGNUM. */
@@ -1546,31 +1536,6 @@ extern void set_gdbarch_extract_struct_value_address (struct gdbarch *gdbarch, g
 #endif
 #if !defined (EXTRACT_STRUCT_VALUE_ADDRESS)
 #define EXTRACT_STRUCT_VALUE_ADDRESS(regcache) (gdbarch_extract_struct_value_address (current_gdbarch, regcache))
-#endif
-
-#if defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS)
-/* Legacy for systems yet to multi-arch DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS */
-#if !defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P)
-#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P() (1)
-#endif
-#endif
-
-extern int gdbarch_deprecated_extract_struct_value_address_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P)
-#error "Non multi-arch definition of DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS"
-#endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P)
-#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P() (gdbarch_deprecated_extract_struct_value_address_p (current_gdbarch))
-#endif
-
-typedef CORE_ADDR (gdbarch_deprecated_extract_struct_value_address_ftype) (char *regbuf);
-extern CORE_ADDR gdbarch_deprecated_extract_struct_value_address (struct gdbarch *gdbarch, char *regbuf);
-extern void set_gdbarch_deprecated_extract_struct_value_address (struct gdbarch *gdbarch, gdbarch_deprecated_extract_struct_value_address_ftype *deprecated_extract_struct_value_address);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS)
-#error "Non multi-arch definition of DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS"
-#endif
-#if !defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS)
-#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(regbuf) (gdbarch_deprecated_extract_struct_value_address (current_gdbarch, regbuf))
 #endif
 
 #if defined (DEPRECATED_FRAME_INIT_SAVED_REGS)

@@ -1,8 +1,8 @@
 /* Everything about breakpoints, for GDB.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
-   Foundation, Inc.
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -243,16 +243,6 @@ static int overlay_events_enabled;
 	for (B = bp_location_chain;	\
 	     B ? (TMP=B->next, 1): 0;	\
 	     B = TMP)
-
-/* True if SHIFT_INST_REGS defined, false otherwise.  */
-
-int must_shift_inst_regs =
-#if defined(SHIFT_INST_REGS)
-1
-#else
-0
-#endif
- ;
 
 /* True if breakpoint hit counts should be displayed in breakpoint info.  */
 
@@ -1992,7 +1982,6 @@ bpstat_do_actions (bpstat *bsp)
 {
   bpstat bs;
   struct cleanup *old_chain;
-  struct command_line *cmd;
 
   /* Avoid endless recursion if a `source' command is contained
      in bs->commands.  */
@@ -2017,7 +2006,23 @@ top:
   breakpoint_proceeded = 0;
   for (; bs != NULL; bs = bs->next)
     {
+      struct command_line *cmd;
+      struct cleanup *this_cmd_tree_chain;
+
+      /* Take ownership of the BSP's command tree, if it has one.
+
+         The command tree could legitimately contain commands like
+         'step' and 'next', which call clear_proceed_status, which
+         frees stop_bpstat's command tree.  To make sure this doesn't
+         free the tree we're executing out from under us, we need to
+         take ownership of the tree ourselves.  Since a given bpstat's
+         commands are only executed once, we don't need to copy it; we
+         can clear the pointer in the bpstat, and make sure we free
+         the tree when we're done.  */
       cmd = bs->commands;
+      bs->commands = 0;
+      this_cmd_tree_chain = make_cleanup_free_command_lines (&cmd);
+
       while (cmd != NULL)
 	{
 	  execute_control_command (cmd);
@@ -2027,14 +2032,16 @@ top:
 	  else
 	    cmd = cmd->next;
 	}
+
+      /* We can free this command tree now.  */
+      do_cleanups (this_cmd_tree_chain);
+
       if (breakpoint_proceeded)
 	/* The inferior is proceeded by the command; bomb out now.
 	   The bpstat chain has been blown away by wait_for_inferior.
 	   But since execution has stopped again, there is a new bpstat
 	   to look at, so start over.  */
 	goto top;
-      else
-	free_command_lines (&bs->commands);
     }
   do_cleanups (old_chain);
 }
@@ -2605,7 +2612,7 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint)
 
     if (b->type == bp_hardware_breakpoint)
       {
-	if (b->loc->address != (*pc - DECR_PC_AFTER_HW_BREAK))
+	if (b->loc->address != *pc)
 	  continue;
 	if (overlay_debugging		/* unmapped overlay section */
 	    && section_is_overlay (b->loc->section) 
@@ -2865,24 +2872,12 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint)
 
   if (real_breakpoint && bs)
     {
-      if (bs->breakpoint_at->type == bp_hardware_breakpoint)
+      if (bs->breakpoint_at->type != bp_hardware_breakpoint)
 	{
-	  if (DECR_PC_AFTER_HW_BREAK != 0)
-	    {
-	      *pc = *pc - DECR_PC_AFTER_HW_BREAK;
-	      write_pc (*pc);
-	    }
-	}
-      else
-	{
-	  if (DECR_PC_AFTER_BREAK != 0 || must_shift_inst_regs)
+	  if (DECR_PC_AFTER_BREAK != 0)
 	    {
 	      *pc = bp_addr;
-#if defined (SHIFT_INST_REGS)
-	      SHIFT_INST_REGS ();
-#else /* No SHIFT_INST_REGS.  */
 	      write_pc (bp_addr);
-#endif /* No SHIFT_INST_REGS.  */
 	    }
 	}
     }
@@ -4328,7 +4323,7 @@ solib_load_unload_1 (char *hookname, int tempflag, char *dll_pathname,
   int thread = -1;		/* All threads. */
 
   /* Set a breakpoint on the specified hook. */
-  sals = decode_line_1 (&hookname, 1, (struct symtab *) NULL, 0, &canonical);
+  sals = decode_line_1 (&hookname, 1, (struct symtab *) NULL, 0, &canonical, NULL);
   addr_end = hookname;
 
   if (sals.nelts == 0)
@@ -4845,9 +4840,9 @@ parse_breakpoint_sals (char **address,
  	      || ((strchr ("+-", (*address)[0]) != NULL)
  		  && ((*address)[1] != '['))))
 	*sals = decode_line_1 (address, 1, default_breakpoint_symtab,
-			       default_breakpoint_line, addr_string);
+			       default_breakpoint_line, addr_string, NULL);
       else
-	*sals = decode_line_1 (address, 1, (struct symtab *) NULL, 0, addr_string);
+	*sals = decode_line_1 (address, 1, (struct symtab *) NULL, 0, addr_string, NULL);
     }
   /* For any SAL that didn't have a canonical string, fill one in. */
   if (sals->nelts > 0 && *addr_string == NULL)
@@ -5293,7 +5288,7 @@ break_at_finish_command_1 (char *arg, int flag, int from_tty)
 
   beg_addr_string = addr_string;
   sals = decode_line_1 (&addr_string, 1, (struct symtab *) NULL, 0,
-			(char ***) NULL);
+			(char ***) NULL, NULL);
 
   xfree (beg_addr_string);
   old_chain = make_cleanup (xfree, sals.sals);
@@ -5810,10 +5805,10 @@ until_break_command (char *arg, int from_tty, int anywhere)
 
   if (default_breakpoint_valid)
     sals = decode_line_1 (&arg, 1, default_breakpoint_symtab,
-			  default_breakpoint_line, (char ***) NULL);
+			  default_breakpoint_line, (char ***) NULL, NULL);
   else
     sals = decode_line_1 (&arg, 1, (struct symtab *) NULL, 
-			  0, (char ***) NULL);
+			  0, (char ***) NULL, NULL);
 
   if (sals.nelts != 1)
     error ("Couldn't get information on specified line.");
@@ -6273,7 +6268,7 @@ handle_gnu_v3_exceptions (int tempflag, char *cond_string,
     trigger_func_name = xstrdup ("__cxa_throw");
 
   nameptr = trigger_func_name;
-  sals = decode_line_1 (&nameptr, 1, NULL, 0, NULL);
+  sals = decode_line_1 (&nameptr, 1, NULL, 0, NULL, NULL);
   if (sals.nelts == 0)
     {
       xfree (trigger_func_name);
@@ -6980,7 +6975,7 @@ breakpoint_re_set_one (void *bint)
       set_language (b->language);
       input_radix = b->input_radix;
       s = b->addr_string;
-      sals = decode_line_1 (&s, 1, (struct symtab *) NULL, 0, (char ***) NULL);
+      sals = decode_line_1 (&s, 1, (struct symtab *) NULL, 0, (char ***) NULL, NULL);
       for (i = 0; i < sals.nelts; i++)
 	{
 	  resolve_sal_pc (&sals.sals[i]);
@@ -7516,10 +7511,10 @@ decode_line_spec_1 (char *string, int funfirstline)
     sals = decode_line_1 (&string, funfirstline,
 			  default_breakpoint_symtab,
 			  default_breakpoint_line,
-			  (char ***) NULL);
+			  (char ***) NULL, NULL);
   else
     sals = decode_line_1 (&string, funfirstline,
-			  (struct symtab *) NULL, 0, (char ***) NULL);
+			  (struct symtab *) NULL, 0, (char ***) NULL, NULL);
   if (*string)
     error ("Junk at end of line specification: %s", string);
   return sals;

@@ -205,8 +205,6 @@ struct elf32_arm_relocs_copied
     asection * section;
     /* Number of relocs copied in this section.  */
     bfd_size_type count;
-    /* Number of relocs copied in this section.  */
-    bfd_size_type pc_count;
   };
 
 /* Arm ELF linker hash entry.  */
@@ -383,7 +381,6 @@ elf32_arm_copy_indirect_symbol (const struct elf_backend_data *bed,
 	      for (q = edir->relocs_copied; q != NULL; q = q->next)
 		if (q->section == p->section)
 		  {
-		    q->pc_count += p->pc_count;
 		    q->count += p->count;
 		    *pp = p->next;
 		    break;
@@ -1307,21 +1304,44 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 #ifndef OLD_ARM_ABI
     case R_ARM_XPC25:
 #endif
+    case R_ARM_PLT32:
       /* r_symndx will be zero only for relocs against symbols
 	 from removed linkonce sections, or sections discarded by
 	 a linker script.  */
       if (r_symndx == 0)
 	return bfd_reloc_ok;
 
+      /* Handle relocations which should use the PLT entry.  ABS32/REL32
+	 will use the symbol's value, which may point to a PLT entry, but we
+	 don't need to handle that here.  If we created a PLT entry, all
+	 branches in this object should go to it.  */
+      if ((r_type != R_ARM_ABS32 && r_type != R_ARM_REL32)
+	  && h != NULL
+	  && splt != NULL
+	  && h->plt.offset != (bfd_vma) -1)
+	{
+	  /* If we've created a .plt section, and assigned a PLT entry to
+	     this function, it should not be known to bind locally.  If
+	     it were, we would have cleared the PLT entry.  */
+	  BFD_ASSERT (!SYMBOL_CALLS_LOCAL (info, h));
+
+	  value = (splt->output_section->vma
+		   + splt->output_offset
+		   + h->plt.offset);
+	  return _bfd_final_link_relocate (howto, input_bfd, input_section,
+					   contents, rel->r_offset, value,
+					   (bfd_vma) 0);
+	}
+
       /* When generating a shared object, these relocations are copied
 	 into the output file to be resolved at run time.  */
-      if ((info->shared
-	   && (input_section->flags & SEC_ALLOC)
-	   && (h == NULL
-	       || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-	       || h->root.type != bfd_link_hash_undefweak)
-	   && (r_type != R_ARM_PC24
-	       || !SYMBOL_CALLS_LOCAL (info, h))))
+      if (info->shared
+	  && (input_section->flags & SEC_ALLOC)
+	  && (h == NULL
+	      || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+	      || h->root.type != bfd_link_hash_undefweak)
+	  && r_type != R_ARM_PC24
+	  && r_type != R_ARM_PLT32)
 	{
 	  Elf_Internal_Rela outrel;
 	  bfd_byte *loc;
@@ -1364,8 +1384,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	    memset (&outrel, 0, sizeof outrel);
 	  else if (h != NULL
 		   && h->dynindx != -1
-		   && (r_type == R_ARM_PC24
-		       || !info->shared
+		   && (!info->shared
 		       || !info->symbolic
 		       || (h->elf_link_hash_flags
 			   & ELF_LINK_HASH_DEF_REGULAR) == 0))
@@ -1397,6 +1416,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	case R_ARM_XPC25:	  /* Arm BLX instruction.  */
 #endif
 	case R_ARM_PC24:	  /* Arm B/BL instruction */
+	case R_ARM_PLT32:
 #ifndef OLD_ARM_ABI
 	  if (r_type == R_ARM_XPC25)
 	    {
@@ -1868,37 +1888,6 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
       return _bfd_final_link_relocate (howto, input_bfd, input_section,
 				       contents, rel->r_offset, value,
 				       (bfd_vma) 0);
-
-    case R_ARM_PLT32:
-      /* Relocation is to the entry for this symbol in the
-         procedure linkage table.  */
-
-      /* Resolve a PLT32 reloc against a local symbol directly,
-         without using the procedure linkage table.  */
-      if (h == NULL)
-        return _bfd_final_link_relocate (howto, input_bfd, input_section,
-				 contents, rel->r_offset, value,
-				 (bfd_vma) 0);
-
-      if (h->plt.offset == (bfd_vma) -1
-	  || globals->splt == NULL)
-        /* We didn't make a PLT entry for this symbol.  This
-           happens when statically linking PIC code, or when
-           using -Bsymbolic.  */
-	return _bfd_final_link_relocate (howto, input_bfd, input_section,
-					 contents, rel->r_offset, value,
-					 (bfd_vma) 0);
-
-      BFD_ASSERT(splt != NULL);
-      if (splt == NULL)
-        return bfd_reloc_notsupported;
-
-      value = (splt->output_section->vma
-	       + splt->output_offset
-	       + h->plt.offset);
-      return _bfd_final_link_relocate (howto, input_bfd, input_section,
-			       contents, rel->r_offset, value,
-			       (bfd_vma) 0);
 
     case R_ARM_SBREL32:
       return bfd_reloc_notsupported;
@@ -2808,6 +2797,7 @@ elf32_arm_gc_sweep_hook (abfd, info, sec, relocs)
       case R_ARM_ABS32:
       case R_ARM_REL32:
       case R_ARM_PC24:
+      case R_ARM_PLT32:
 	r_symndx = ELF32_R_SYM (rel->r_info);
 	if (r_symndx >= symtab_hdr->sh_info)
 	  {
@@ -2817,31 +2807,24 @@ elf32_arm_gc_sweep_hook (abfd, info, sec, relocs)
 
 	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 
-	    if (!info->shared && h->plt.refcount > 0)
-	      h->plt.refcount -= 1;
-
-	    eh = (struct elf32_arm_link_hash_entry *) h;
-
-	    for (pp = &eh->relocs_copied; (p = *pp) != NULL; pp = &p->next)
-	      if (p->section == sec)
-		{
-		  if (ELF32_R_TYPE (rel->r_info) == R_ARM_PC24)
-		    p->pc_count -= 1;
-		  p->count -= 1;
-		  if (p->count == 0)
-		    *pp = p->next;
-		  break;
-		}
-	  }
-	break;
-
-      case R_ARM_PLT32:
-	r_symndx = ELF32_R_SYM (rel->r_info);
-	if (r_symndx >= symtab_hdr->sh_info)
-	  {
-	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 	    if (h->plt.refcount > 0)
 	      h->plt.refcount -= 1;
+
+	    if (ELF32_R_TYPE (rel->r_info) == R_ARM_ABS32
+		|| ELF32_R_TYPE (rel->r_info) == R_ARM_REL32)
+	      {
+		eh = (struct elf32_arm_link_hash_entry *) h;
+
+		for (pp = &eh->relocs_copied; (p = *pp) != NULL;
+		     pp = &p->next)
+		if (p->section == sec)
+		  {
+		    p->count -= 1;
+		    if (p->count == 0)
+		      *pp = p->next;
+		    break;
+		  }
+	      }
 	  }
 	break;
 
@@ -2902,23 +2885,6 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
 
       switch (ELF32_R_TYPE (rel->r_info))
         {
-	  case R_ARM_PLT32:
-	    /* This symbol requires a procedure linkage table entry.  We
-               actually build the entry in adjust_dynamic_symbol,
-               because this might be a case of linking PIC code which is
-               never referenced by a dynamic object, in which case we
-               don't need to generate a procedure linkage table entry
-               after all.  */
-
-	    /* If this is a local symbol, we resolve it directly without
-               creating a procedure linkage table entry.  */
-	    if (h == NULL)
-	      continue;
-
-	    h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
-	    h->plt.refcount++;
-	    break;
-
 	  case R_ARM_GOT32:
 	    /* This symbol requires a global offset table entry.  */
 	    if (h != NULL)
@@ -2961,7 +2927,8 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
 	  case R_ARM_ABS32:
 	  case R_ARM_REL32:
 	  case R_ARM_PC24:
-	    if (h != NULL && !info->shared)
+	  case R_ARM_PLT32:
+	    if (h != NULL)
 	      {
 		/* If this reloc is in a read-only section, we might
 		   need a copy reloc.  We can't check reliably at this
@@ -2969,10 +2936,19 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
 		   sections have not yet been mapped to output sections.
 		   Tentatively set the flag for now, and correct in
 		   adjust_dynamic_symbol.  */
-		h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
-		
+		if (!info->shared)
+		  h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
+
 		/* We may need a .plt entry if the function this reloc
-		   refers to is in a shared lib.  */
+		   refers to is in a different object.  We can't tell for
+		   sure yet, because something later might force the
+		   symbol local.  */
+		if (ELF32_R_TYPE (rel->r_info) == R_ARM_PC24
+		    || ELF32_R_TYPE (rel->r_info) == R_ARM_PLT32)
+		  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
+
+		/* If we create a PLT entry, this relocation will reference
+		   it, even if it's an ABS32 relocation.  */
 		h->plt.refcount += 1;
 	      }
 
@@ -2990,7 +2966,8 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
                relocs_copied field of the hash table entry.  */
 	    if (info->shared
 		&& (sec->flags & SEC_ALLOC) != 0
-		&& (ELF32_R_TYPE (rel->r_info) != R_ARM_PC24
+		&& ((ELF32_R_TYPE (rel->r_info) != R_ARM_PC24
+		     && ELF32_R_TYPE (rel->r_info) != R_ARM_PLT32)
 		    || (h != NULL
 			&& (! info->symbolic
 			    || (h->elf_link_hash_flags
@@ -3068,12 +3045,11 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
 		    *head = p;
 		    p->section = sec;
 		    p->count = 0;
-		    p->pc_count = 0;
 		  }
 		
-		p->count += 1;
-		if (ELF32_R_TYPE (rel->r_info) == R_ARM_PC24)
-		  p->pc_count += 1;
+		if (ELF32_R_TYPE (rel->r_info) == R_ARM_ABS32
+		    || ELF32_R_TYPE (rel->r_info) == R_ARM_REL32)
+		  p->count += 1;
 	      }
 	    break;
 
@@ -3348,7 +3324,7 @@ allocate_dynrelocs (h, inf)
 	}
 
       if (info->shared
-	  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info, h))
+	  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, 0, h))
 	{
 	  asection *s = htab->splt;
 
@@ -3432,29 +3408,8 @@ allocate_dynrelocs (h, inf)
 
   if (info->shared)
     {
-      /* The only reloc that uses pc_count is R_ARM_PC24, which will
-	 appear on a call or on something like ".long foo - .".  We
-	 want calls to protected symbols to resolve directly to the
-	 function rather than going via the plt.  If people want
-	 function pointer comparisons to work as expected then they
-	 should avoid writing assembly like ".long foo - .".  */
-      if (SYMBOL_CALLS_LOCAL (info, h))
-	{
-	  struct elf32_arm_relocs_copied **pp;
-
-	  for (pp = &eh->relocs_copied; (p = *pp) != NULL; )
-	    {
-	      p->count -= p->pc_count;
-	      p->pc_count = 0;
-	      if (p->count == 0)
-		*pp = p->next;
-	      else
-		pp = &p->next;
-	    }
-	}
-
-      /* Also discard relocs on undefined weak syms with non-default
-	 visibility.  */
+      /* Discard relocs on undefined weak syms with non-default
+         visibility.  */
       if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
 	  && h->root.type == bfd_link_hash_undefweak)
 	eh->relocs_copied = NULL;

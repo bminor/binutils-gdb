@@ -1,7 +1,7 @@
 /* Source-language-related definitions for GDB.
 
-   Copyright 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2003 Free
-   Software Foundation, Inc.
+   Copyright 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2003,
+   2004 Free Software Foundation, Inc.
 
    Contributed by the Department of Computer Science at the State University
    of New York at Buffalo.
@@ -232,6 +232,9 @@ struct language_defn
 						 const struct block *,
 						 const domain_enum,
 						 struct symtab **);
+
+    /* Find the definition of the type with the given name.  */
+    struct type *(*la_lookup_transparent_type) (const char *);
 
     /* Return demangled language symbol, or NULL.  */
     char *(*la_demangle) (const char *mangled, int options);

@@ -1,4 +1,5 @@
-# Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+# Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004
+# Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,6 +24,9 @@
 
 
 # This file is part of the gdb testsuite
+
+set ws "\[\r\n\t \]+"
+set nl "\[\r\n\]+"
 
 if $tracelevel then {
         strace $tracelevel
@@ -96,6 +100,13 @@ gdb_test "up" ".*foobar.*" "up from marker1"
 #
 # chastain 2002-04-08
 
+# pattern #5
+# PASS
+#   stabs+
+#     gcc HEAD abi-2
+#
+# chastain 2004-01-02
+
 set sep "(\[.\]|___)\[0-9\]"
 
 send_gdb "ptype Local\n"
@@ -106,6 +117,7 @@ gdb_expect {
   }
   -re "type = class Local \{\[\r\n\t \]*public:\[\r\n\t \]*int loc1;\[\r\n\t \]*Local & operator *=\\((foobar__Fi${sep}::|)Local const *&\\);\[\r\n\t \]*Local\\((foobar__Fi${sep}::|)Local const *&\\);\[\r\n\t \]*Local\\((void|)\\);\[\r\n\t \]*char loc_foo\\(char\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype Local" }
   -re "type = class Local \{\r\n\[\t \]*public:\r\n\[\t \]*int loc1;\r\n\r\n\[\t \]*char loc_foo\\(char\\);\r\n\[\t \]*\\(Local at.*local\\.cc:\[0-9\]*\\)\r\n\}.*$gdb_prompt $" { xpass "ptype Local (old aCC)" }
+  -re "type = class Local \{\[\r\n\t \]*public:\[\r\n\t \]*int loc1;\[\r\n\t \]*char loc_foo\\(char\\);\[\r\n\t \]*Local & operator *=\\((foobar__Fi${sep}::|)Local const *&\\);\[\r\n\t \]*Local\\((foobar__Fi${sep}::|)Local const *&\\);\[\r\n\t \]*Local\\((void|)\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype Local" }
   -re ".*$gdb_prompt $"   {  fail "ptype Local" }
   timeout             { fail "(timeout) ptype Local" }
 }
@@ -129,6 +141,10 @@ gdb_expect {
         # properly preserve the scoping of local classes.  I think
         # we'd need to start using Sun's extensions to stabs to get
         # this right.
+        kfail gdb/825 "Local out of scope"
+    }
+    -re "ptype Local${eol}type = class Local {${eol}  public:${eol}    int loc1;${eol}    char loc_foo\\(char\\);${eol}.*${eol}}${eol}${gdb_prompt} " {
+	# gcc 3.X abi-2 -gstabs+
         kfail gdb/825 "Local out of scope"
     }
     -re ".*${gdb_prompt} $" {
@@ -168,12 +184,20 @@ gdb_expect {
 #
 # chastain 2002-05-27
 
+# Pattern 5:
+# PASS
+#   stabs+
+#     HEAD
+#
+# chastain 2004-01-02
+
 send_gdb "ptype InnerLocal\n"
 gdb_expect {
   -re "type = class InnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*char ilc;\[\r\n\t \]*int \\* *ip;\[\r\n\t \]*(InnerLocal::|)NestedInnerLocal nest1;\[\r\n\t \]*int il_foo\\((unsigned char const|const unsigned char) *&\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype InnerLocal (pattern 1)" }
   -re "type = class InnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*char ilc;\[\r\n\t \]*int \\* *ip;\[\r\n\t \]*(InnerLocal::|)NestedInnerLocal nest1;\[\r\n\t \]*InnerLocal *& operator *=\\((main${sep}::|)InnerLocal const *&\\);\[\r\n\t \]*InnerLocal\\((main${sep}::|)InnerLocal const *&\\);\[\r\n\t \]*InnerLocal\\((void|)\\);\[\r\n\t \]*int il_foo\\(unsigned char const *&\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype InnerLocal (pattern 2)" }
   -re "type = class InnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*char ilc;\r\n\[\t \]*int \\*ip;\r\n\[\t \]*InnerLocal::NestedInnerLocal nest1;\r\n\r\n\[\t \]*.int il_foo\\(unsigned char const &\\);\r\n\[\t \]*\}\[\t \]*\\(Local at.*local\\.cc:36\\).*$gdb_prompt $" { pass "ptype InnerLocal (old HP aCC)" }
   -re "type = class InnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*char ilc;\r\n\[\t \]*int \\*ip;\r\n\[\t \]*class InnerLocal4::NestedInnerLocal nest1;\r\n\r\n\[\t \]*int il_foo\\(unsigned char const &\\);\r\n\[\t \]*\\(Local at.*local\.cc:\[0-9\]+\\)\r\n\}.*$gdb_prompt $" { pass "ptype InnerLocal (old HP aCC)" }
+  -re "type = class InnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*char ilc;\[\r\n\t \]*int \\* *ip;\[\r\n\t \]*(InnerLocal::|)NestedInnerLocal nest1;\[\r\n\t \]* int il_foo\\(unsigned char const *&\\);\[\r\n\t \]*InnerLocal *& operator *=\\((main${sep}::|)InnerLocal const *&\\);\[\r\n\t \]*InnerLocal\\((main${sep}::|)InnerLocal const *&\\);\[\r\n\t \]*InnerLocal\\((void|)\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype InnerLocal (pattern 5)" }
   -re ".*$gdb_prompt $"   {  fail "ptype InnerLocal" }
   timeout             { fail "(timeout) ptype InnerLocal" }
 }
@@ -199,30 +223,28 @@ gdb_expect {
   timeout             { fail "(timeout) ptype NestedInnerLocal" }
 }
 
-# gdb incorrectly interprets the NestedInnerLocal in
-# InnerLocal::NestedInnerLocal as field name instead of a type name;
-# See CLLbs14784.
+set re_class		"((struct|class) InnerLocal::NestedInnerLocal \{${ws}public:|struct InnerLocal::NestedInnerLocal \{)"
+set re_fields		"int nil;"
+set re_methods		"int nil_foo\\(int\\);"
+set re_synth_gcc_23	"InnerLocal::NestedInnerLocal & operator=\\(InnerLocal::NestedInnerLocal const ?&\\);${ws}NestedInnerLocal\\(InnerLocal::NestedInnerLocal const ?&\\);${ws}NestedInnerLocal\\(\\);"
 
-#---
-# Pattern 3:
-# FAIL
-# The comment above, about CLLbs14784, is still correct.
-#   dwarf-2
-#     gcc 2.95.3, 2.96-rh, 3.0.4, gcc-3_1-branch, HEAD
-#   stabs+
-#     gcc 2.95.3, 2.96-rh, 3.0.4, gcc-3_1-branch, HEAD
-#
-# chastain 2002-04-08
-
-send_gdb "ptype InnerLocal::NestedInnerLocal\n"
-gdb_expect {
-  -re "type = class InnerLocal::NestedInnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*int nil;\[\r\n\t \]*int nil_foo\\(int\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype InnerLocal::NestedInnerLocal" }
-  -re "type = class InnerLocal::NestedInnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*int nil;\[\r\n\t \]*NestedInnerLocal *& *operator *= *\\((main${sep}::|)InnerLocal::NestedInnerLocal const *&\\);\[\r\n\t \]*NestedInnerLocal\\((main${sep}::|)InnerLocal::NestedInnerLocal const *&\\);\[\r\n\t \]*NestedInnerLocal\\((void|)\\);\[\r\n\t \]*int nil_foo\\(int\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype InnerLocal::NestedInnerLocal" }
-  -re "There is no field named NestedInnerLocal.*$gdb_prompt $" {
-    setup_kfail "gdb/482" *-*-*
-    fail "ptype InnerLocal::NestedInnerLocal"
-  }
-  -re "No symbol .*NestedInnerLocal.* in current context.*$gdb_prompt $" { fail "ptype InnerLocal::NestedInnerLocal (bogus symbol lookup)" }
-  -re ".*$gdb_prompt $"   {  fail "ptype InnerLocal::NestedInnerLocal" }
-  timeout             { fail "(timeout) ptype InnerLocal::NestedInnerLocal" }
+set name "ptype InnerLocal::NestedInnerLocal"
+gdb_test_multiple "ptype InnerLocal::NestedInnerLocal" $name {
+    -re "type = $re_class${ws}$re_fields${ws}$re_methods$nl\}$nl$gdb_prompt $" {
+	# gcc -gdwarf-2 should produce this but does not yet
+	pass $name
+    }
+    -re "type = $re_class${ws}$re_fields${ws}$re_synth_gcc_23${ws}$re_methods${ws}$nl\}$nl$gdb_prompt $" {
+	# gcc 2.95.3 -gstabs+
+	# gcc v3 -gstabs+, abi 1
+	pass $name
+    }
+    -re "type = $re_class${ws}$re_fields${ws}$re_methods${ws}$re_synth_gcc_23${ws}$nl\}$nl$gdb_prompt $" {
+	# gcc v3 -gstabs+, abi 2
+	pass $name
+    }
+    -re "There is no field named NestedInnerLocal.*$gdb_prompt $" {
+	# gcc v3 -gdwarf-2
+	kfail "gdb/482" $name
+    }
 }

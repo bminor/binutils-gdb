@@ -1,5 +1,7 @@
 /* Support for printing Java values for GDB, the GNU debugger.
-   Copyright 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -298,9 +300,6 @@ java_print_value_fields (struct type *type, char *valaddr, CORE_ADDR address,
 	  java_print_value_fields (baseclass, base_valaddr, address + boffset,
 				   stream, format, recurse + 1, pretty);
 	  fputs_filtered (", ", stream);
-
-	flush_it:
-	  ;
 	}
 
     }

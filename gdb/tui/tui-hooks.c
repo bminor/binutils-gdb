@@ -39,15 +39,15 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "tui.h"
-#include "tuiData.h"
-#include "tuiLayout.h"
-#include "tuiIO.h"
-#include "tuiRegs.h"
-#include "tuiWin.h"
-#include "tuiStack.h"
-#include "tuiDataWin.h"
-#include "tuiSourceWin.h"
+#include "tui/tui.h"
+#include "tui/tui-data.h"
+#include "tui/tui-layout.h"
+#include "tui/tui-io.h"
+#include "tui/tui-regs.h"
+#include "tui/tui-win.h"
+#include "tui/tui-stack.h"
+#include "tui/tui-windata.h"
+#include "tui/tui-winsource.h"
 
 #ifdef HAVE_NCURSES_H
 #include <ncurses.h>

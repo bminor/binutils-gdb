@@ -1,3 +1,54 @@
+2004-01-24  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (KOD): Document "show os".  Add index entries for
+	"set/show os" and "info cisco" commands.
+
+2004-01-21  Eli Zaretskii  <eliz@gnu.org>
+
+	* Makefile.in (install-info): Prepend $(DESTDIR) to $(infodir).
+
+2004-01-19  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdbint.texinfo: Delete USE_MMALLOC, NO_MMCHECK, MMCHECK_FORCE,
+	MMAP_BASE_ADDRESS, MMAP_INCREMENT.
+
+2004-01-19  Nick Roberts  <nick@nick.uklinux.net>
+
+	* gdb.texinfo (GDB/MI Stack Manipulation): Describe extension to
+	-stack-list-locals.
+	(GDB/MI Variable Objects): Describe extension to
+	-var-list-children.
+
+2004-01-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbint.texinfo (DECR_PC_AFTER_HW_BREAK): Don't document.
+
+2004-01-17  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	documentation on DEPRECATED_NPC_REGNUM.
+
+2004-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.texinfo: Update copyright year.  Mention that set
+	follow-fork-mode is supported on GNU/Linux.  Remove documentation of
+	"set follow-fork-mode ask".
+
+2004-01-13  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo: Update copyright year.
+	(Coding): Add -Wunused-label to list of -Werror warnings.
+
+2004-01-08  Jason Molenda  <jmolenda@apple.com>
+            Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* gdb.texinfo: Update copyright.
+	(Objective-C): "methodName" typeo fixed.  Add @code/@var markup
+	around names, as appropriate.  Minor syntax cleanup of
+	_NSPrintForDebugger explanation.  Two spaces after periods.
+	GDBN used instead of lit. "gdb".  Index entries added for
+	print-object and _NSPrintForDebugger.  @noindent added in one spot.
+
 2003-11-11  Elena Zannoni  <ezannoni@redhat.com>
 
 	* stabs.texinfo: Add dircategory and direntry commands.

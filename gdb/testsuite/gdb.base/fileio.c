@@ -103,7 +103,7 @@ test_open ()
     close (ret);
   /* Open for write but no write permission */
   errno = 0;
-  ret = open (NOWRITE, O_CREAT | O_RDONLY, S_IRUSR | S_IWUSR);
+  ret = open (NOWRITE, O_CREAT | O_RDONLY, S_IRUSR);
   if (ret >= 0)
     {
       close (ret);
@@ -478,6 +478,9 @@ strerrno (int err)
 #endif
 #ifdef ENOTEMPTY
     case ENOTEMPTY: return "ENOTEMPTY";
+#endif
+#ifdef EBUSY
+    case EBUSY: return "EBUSY";
 #endif
     default: return "E??";
     }

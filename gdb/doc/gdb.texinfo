@@ -1,6 +1,6 @@
 \input texinfo      @c -*-texinfo-*-
 @c Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,
-@c 1999, 2000, 2001, 2002, 2003
+@c 1999, 2000, 2001, 2002, 2003, 2004
 @c Free Software Foundation, Inc.
 @c
 @c %**start of header
@@ -52,7 +52,7 @@ This is the @value{EDITION} Edition, of @cite{Debugging with
 Version @value{GDBVN}.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,@*
-              1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+              1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
@@ -84,7 +84,7 @@ development.''
 
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-1996, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 @sp 2
 Published by the Free Software Foundation @*
 59 Temple Place - Suite 330, @*
@@ -115,7 +115,7 @@ This file describes @value{GDBN}, the @sc{gnu} symbolic debugger.
 This is the @value{EDITION} Edition, for @value{GDBN} Version
 @value{GDBVN}.
 
-Copyright (C) 1988-2003 Free Software Foundation, Inc.
+Copyright (C) 1988-2004 Free Software Foundation, Inc.
 
 @menu
 * Summary::                     Summary of @value{GDBN}
@@ -2289,9 +2289,10 @@ get its process ID.  Then tell @value{GDBN} (a new invocation of
 the child process (@pxref{Attach}).  From that point on you can debug
 the child process just like any other process which you attached to.
 
-On HP-UX (11.x and later only?), @value{GDBN} provides support for
-debugging programs that create additional processes using the
-@code{fork} or @code{vfork} function.
+On some systems, @value{GDBN} provides support for debugging programs that
+create additional processes using the @code{fork} or @code{vfork} functions.
+Currently, the only platforms with this feature are HP-UX (11.x and later
+only?) and GNU/Linux (kernel version 2.5.60 and later).
 
 By default, when a program forks, @value{GDBN} will continue to debug
 the parent process and the child process will run unimpeded.
@@ -2315,8 +2316,6 @@ unimpeded.  This is the default.
 The new process is debugged after a fork.  The parent process runs
 unimpeded.
 
-@item ask
-The debugger will ask for one of the above choices.
 @end table
 
 @item show follow-fork-mode
@@ -8482,12 +8481,13 @@ A fully qualified Objective-C method name is specified as
 -[@var{Class} @var{methodName}]
 @end smallexample
 
-where the minus sign is used to indicate an instance method and a plus
-sign (not shown) is used to indicate a class method. The
-class name @var{Class} and method name @var{methoName} are enclosed in
-brackets, similar to the way messages are specified in Objective-C source
-code. For example, to set a breakpoint at the @code{create} instance method of 
-class @code{Fruit} in the program currently being debugged, enter:
+where the minus sign is used to indicate an instance method and a
+plus sign (not shown) is used to indicate a class method.  The class
+name @var{Class} and method name @var{methodName} are enclosed in
+brackets, similar to the way messages are specified in Objective-C
+source code.  For example, to set a breakpoint at the @code{create}
+instance method of class @code{Fruit} in the program currently being
+debugged, enter:
 
 @smallexample
 break -[Fruit create]
@@ -8500,10 +8500,10 @@ enter:
 list +[NSText initialize]
 @end smallexample
 
-In the current version of GDB, the plus or minus sign is required.  In
-future versions of GDB, the plus or minus sign will be optional, but you
-can use it to narrow the search.  It is also possible to specify just a
-method name:
+In the current version of @value{GDBN}, the plus or minus sign is
+required.  In future versions of @value{GDBN}, the plus or minus
+sign will be optional, but you can use it to narrow the search.  It
+is also possible to specify just a method name:
 
 @smallexample
 break create
@@ -8524,20 +8524,24 @@ clear -[NSWindow makeKeyAndOrderFront:]
 
 @node The Print Command with Objective-C
 @subsubsection The Print Command With Objective-C
+@kindex print-object
+@kindex po @r{(@code{print-object})}
 
-The print command has also been extended to accept methods. For example:
+The print command has also been extended to accept methods.  For example:
 
 @smallexample
-print -[object hash]
+print -[@var{object} hash]
 @end smallexample
 
 @cindex print an Objective-C object description
-will tell gdb to send the -hash message to object and print the
-result. Also an additional command has been added, @code{print-object}
-or @code{po} for short, which is meant to print the description of an
-object. However, this command may only work with certain Objective-C
-libraries that have a particular hook function, called
-@code{_NSPrintForDebugger} defined.
+@cindex @code{_NSPrintForDebugger}, and printing Objective-C objects
+@noindent
+will tell @value{GDBN} to send the @code{hash} message to @var{object}
+and print the result.  Also, an additional command has been added,
+@code{print-object} or @code{po} for short, which is meant to print
+the description of an object.  However, this command may only work
+with certain Objective-C libraries that have a particular hook
+function, @code{_NSPrintForDebugger}, defined.
 
 @node Modula-2,  , Objective-C, Support
 @subsection Modula-2
@@ -10628,9 +10632,7 @@ configuration of @value{GDBN}; use @code{help target} to list them.
 
 @node KOD
 @section Kernel Object Display
-
 @cindex kernel object display
-@cindex kernel object
 @cindex KOD
 
 Some targets support kernel object display.  Using this facility,
@@ -10639,6 +10641,7 @@ and can display information about operating system-level objects such as
 mutexes and other synchronization objects.  Exactly which objects can be
 displayed is determined on a per-OS basis.
 
+@kindex set os
 Use the @code{set os} command to set the operating system.  This tells
 @value{GDBN} which kernel object display module to initialize:
 
@@ -10646,11 +10649,17 @@ Use the @code{set os} command to set the operating system.  This tells
 (@value{GDBP}) set os cisco
 @end smallexample
 
+@kindex show os
+The associated command @code{show os} displays the operating system
+set with the @code{set os} command; if no operating system has been
+set, @code{show os} will display an empty string @samp{""}.
+
 If @code{set os} succeeds, @value{GDBN} will display some information
 about the operating system, and will create a new @code{info} command
 which can be used to query the target.  The @code{info} command is named
 after the operating system:
 
+@kindex info cisco
 @smallexample
 (@value{GDBP}) info cisco
 List of Cisco Kernel Objects
@@ -10661,8 +10670,10 @@ any        Any and all objects
 Further subcommands can be used to query about particular objects known
 by the kernel.
 
-There is currently no way to determine whether a given operating system
-is supported other than to try it.
+There is currently no way to determine whether a given operating
+system is supported other than to try setting it with @kbd{set os
+@var{name}}, where @var{name} is the name of the operating system you
+want to try.
 
 
 @node Remote Debugging
@@ -17202,8 +17213,14 @@ Show a single frame:
 @end smallexample
 
 Display the local variable names for the current frame.  With an
-argument of 0 prints only the names of the variables, with argument of 1
-prints also their values.
+argument of 0 or @code{--no-values}, prints only the names of the variables.
+With argument of 1 or @code{--all-values}, prints also their values.  With
+argument of 2 or @code{--simple-values}, prints the name, type and value for
+simple data types and the name and type for arrays, structures and
+unions.  In this last case, the idea is that the user can see the
+value of simple data types immediately and he can create variable
+objects for other data types if he wishes to explore their values in
+more detail.
 
 @subsubheading @value{GDBN} Command
 
@@ -17216,9 +17233,12 @@ prints also their values.
 -stack-list-locals 0
 ^done,locals=[name="A",name="B",name="C"]
 (@value{GDBP})
--stack-list-locals 1
+-stack-list-locals --all-values
 ^done,locals=[@{name="A",value="1"@},@{name="B",value="2"@},
-  @{name="C",value="3"@}]
+  @{name="C",value="@{1, 2, 3@}"@}]
+-stack-list-locals --simple-values
+^done,locals=[@{name="A",type="int",value="1"@},
+  @{name="B",type="int",value="2"@},@{name="C",type="int [3]"@}]
 (@value{GDBP})
 @end smallexample
 
@@ -18162,14 +18182,26 @@ Returns the number of children of a variable object @var{name}:
 @subsubheading Synopsis
 
 @smallexample
- -var-list-children @var{name}
+ -var-list-children [@var{print-values}] @var{name}
 @end smallexample
 
-Returns a list of the children of the specified variable object:
+Returns a list of the children of the specified variable object.  With
+just the variable object name as an argument or with an optional
+preceding argument of 0 or @code{--no-values}, prints only the names of the
+variables.  With an optional preceding argument of 1 or @code{--all-values},
+also prints their values.
+
+@subsubheading Example
 
 @smallexample
+(@value{GDBP})
+ -var-list-children n
  numchild=@var{n},children=[@{name=@var{name},
  numchild=@var{n},type=@var{type}@},@r{(repeats N times)}]
+(@value{GDBP})
+ -var-list-children --all-values n
+ numchild=@var{n},children=[@{name=@var{name},
+ numchild=@var{n},value=@var{value},type=@var{type}@},@r{(repeats N times)}]
 @end smallexample
 
 

@@ -2356,6 +2356,20 @@ to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_FRV_GPREL32,
   BFD_RELOC_FRV_GPRELHI,
   BFD_RELOC_FRV_GPRELLO,
+  BFD_RELOC_FRV_GOT12,
+  BFD_RELOC_FRV_GOTHI,
+  BFD_RELOC_FRV_GOTLO,
+  BFD_RELOC_FRV_FUNCDESC,
+  BFD_RELOC_FRV_FUNCDESC_GOT12,
+  BFD_RELOC_FRV_FUNCDESC_GOTHI,
+  BFD_RELOC_FRV_FUNCDESC_GOTLO,
+  BFD_RELOC_FRV_FUNCDESC_VALUE,
+  BFD_RELOC_FRV_FUNCDESC_GOTOFF12,
+  BFD_RELOC_FRV_FUNCDESC_GOTOFFHI,
+  BFD_RELOC_FRV_FUNCDESC_GOTOFFLO,
+  BFD_RELOC_FRV_GOTOFF12,
+  BFD_RELOC_FRV_GOTOFFHI,
+  BFD_RELOC_FRV_GOTOFFLO,
 
 
 /* This is a 24bit GOT-relative reloc for the mn10300.  */
@@ -2806,6 +2820,22 @@ used when the lower 16 bits are treated as signed.  */
 /* This is a 16-bit reloc containing the small data area offset for use in
 add3, load, and store instructions.  */
   BFD_RELOC_M32R_SDA16,
+
+/* For PIC.  */
+  BFD_RELOC_M32R_GOT24,
+  BFD_RELOC_M32R_26_PLTREL,
+  BFD_RELOC_M32R_COPY,
+  BFD_RELOC_M32R_GLOB_DAT,
+  BFD_RELOC_M32R_JMP_SLOT,
+  BFD_RELOC_M32R_RELATIVE,
+  BFD_RELOC_M32R_GOTOFF,
+  BFD_RELOC_M32R_GOTPC24,
+  BFD_RELOC_M32R_GOT16_HI_ULO,
+  BFD_RELOC_M32R_GOT16_HI_SLO,
+  BFD_RELOC_M32R_GOT16_LO,
+  BFD_RELOC_M32R_GOTPC_HI_ULO,
+  BFD_RELOC_M32R_GOTPC_HI_SLO,
+  BFD_RELOC_M32R_GOTPC_LO,
 
 /* This is a 9-bit reloc  */
   BFD_RELOC_V850_9_PCREL,
@@ -3346,6 +3376,10 @@ This is a 24-bit reloc that represents the address with a 16-bit
 value and a 8-bit page number.  The symbol address is transformed
 to follow the 16K memory bank of 68HC12 (seen as mapped in the window).  */
   BFD_RELOC_M68HC11_24,
+
+/* Motorola 68HC12 reloc.
+This is the 5 bits of a value.  */
+  BFD_RELOC_M68HC12_5B,
 
 /* These relocs are only used within the CRIS assembler.  They are not
 (at present) written to any object files.  */

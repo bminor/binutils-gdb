@@ -105,6 +105,7 @@ enum dwarf2_reg_rule
      about a register, leaving how to obtain its value totally
      unspecified.  */
   REG_UNSPECIFIED = 0,
+
   /* The term "undefined" comes from the DWARF2 CFI spec which this
      code is moddeling; it indicates that the register's value is
      "undefined".  GCC uses the less formal term "unsaved".  Its
@@ -115,7 +116,12 @@ enum dwarf2_reg_rule
   REG_SAVED_OFFSET,
   REG_SAVED_REG,
   REG_SAVED_EXP,
-  REG_SAME_VALUE
+  REG_SAME_VALUE,
+
+  /* These aren't defined by the DWARF2 CFI specification, but are
+     used internally by GDB.  */
+  REG_RA,			/* Return Address.  */
+  REG_CFA			/* Call Frame Address.  */
 };
 
 struct dwarf2_frame_state
@@ -426,6 +432,9 @@ execute_cfa_program (unsigned char *insn_ptr, unsigned char *insn_end,
 	      /* cfa_how deliberately not set.  */
 	      break;
 
+	    case DW_CFA_nop:
+	      break;
+
 	    case DW_CFA_def_cfa_expression:
 	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &fs->cfa_exp_len);
 	      fs->cfa_exp = insn_ptr;
@@ -443,7 +452,26 @@ execute_cfa_program (unsigned char *insn_ptr, unsigned char *insn_end,
 	      insn_ptr += utmp;
 	      break;
 
-	    case DW_CFA_nop:
+	    case DW_CFA_offset_extended_sf:
+	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &reg);
+	      insn_ptr = read_sleb128 (insn_ptr, insn_end, &offset);
+	      offset += fs->data_align;
+	      dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
+	      fs->regs.reg[reg].how = REG_SAVED_OFFSET;
+	      fs->regs.reg[reg].loc.offset = offset;
+	      break;
+
+	    case DW_CFA_def_cfa_sf:
+	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &fs->cfa_reg);
+	      insn_ptr = read_sleb128 (insn_ptr, insn_end, &offset);
+	      fs->cfa_offset = offset * fs->data_align;
+	      fs->cfa_how = CFA_REG_OFFSET;
+	      break;
+
+	    case DW_CFA_def_cfa_offset_sf:
+	      insn_ptr = read_sleb128 (insn_ptr, insn_end, &offset);
+	      fs->cfa_offset = offset * fs->data_align;
+	      /* cfa_how deliberately not set.  */
 	      break;
 
 	    case DW_CFA_GNU_args_size:
@@ -547,38 +575,59 @@ dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
       internal_error (__FILE__, __LINE__, "Unknown CFA rule.");
     }
 
-  /* Initialize things so that all registers are marked as
-     unspecified.  */
+  /* Initialize the register rules.  If we have a register that acts
+     as a program counter, mark it as a destination for the return
+     address.  If we have a register that serves as the stack pointer,
+     arrange for it to be filled with the call frame address (CFA).
+     The other registers are marked as unspecified.
+
+     We copy the return address to the program counter, since many
+     parts in GDB assume that it is possible to get the return address
+     by unwind the program counter register.  However, on ISA's with a
+     dedicated return address register, the CFI usually only contains
+     information to unwind that return address register.
+
+     The reason we're treating the stack pointer special here is
+     because in many cases GCC doesn't emit CFI for the stack pointer
+     and implicitly assumes that it is equal to the CFA.  This makes
+     some sense since the DWARF specification (version 3, draft 8,
+     p. 102) says that:
+
+     "Typically, the CFA is defined to be the value of the stack
+     pointer at the call site in the previous frame (which may be
+     different from its value on entry to the current frame)."
+
+     However, this isn't true for all platforms supported by GCC
+     (e.g. IBM S/390 and zSeries).  For those targets we should
+     override the defaults given here.  */
   {
     int regnum;
 
     for (regnum = 0; regnum < num_regs; regnum++)
-      cache->reg[regnum].how = REG_UNSPECIFIED;
+      {
+	if (regnum == PC_REGNUM)
+	  cache->reg[regnum].how = REG_RA;
+	else if (regnum == SP_REGNUM)
+	  cache->reg[regnum].how = REG_CFA;
+	else
+	  cache->reg[regnum].how = REG_UNSPECIFIED;
+      }
   }
 
   /* Go through the DWARF2 CFI generated table and save its register
-     location information in the cache.  */
+     location information in the cache.  Note that we don't skip the
+     return address column; it's perfectly all right for it to
+     correspond to a real register.  If it doesn't correspond to a
+     real register, or if we shouldn't treat it as such,
+     DWARF2_REG_TO_REGNUM should be defined to return a number outside
+     the range [0, NUM_REGS).  */
   {
     int column;		/* CFI speak for "register number".  */
 
     for (column = 0; column < fs->regs.num_regs; column++)
       {
-	int regnum;
-	
-	/* Skip the return address column.  */
-	if (column == fs->retaddr_column)
-	  /* NOTE: cagney/2003-06-07: Is this right?  What if
-	     RETADDR_COLUMN corresponds to a real register (and,
-	     worse, that isn't the PC_REGNUM)?  I'm guessing that the
-	     PC_REGNUM further down is trying to handle this.  That
-	     can't be right though; PC_REGNUM may not be valid (it can
-	     be negative).  I think, instead when RETADDR_COLUM isn't
-	     a real register, it should map itself onto
-	     frame_pc_unwind.  */
-	  continue;
-
 	/* Use the GDB register number as the destination index.  */
-	regnum = DWARF2_REG_TO_REGNUM (column);
+	int regnum = DWARF2_REG_TO_REGNUM (column);
 
 	/* If there's no corresponding GDB register, ignore it.  */
 	if (regnum < 0 || regnum >= num_regs)
@@ -599,35 +648,33 @@ dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
 	  complaint (&symfile_complaints,
 		     "Incomplete CFI data; unspecified registers at 0x%s",
 		     paddr (fs->pc));
-
-	cache->reg[regnum] = fs->regs.reg[column];
+	else
+	  cache->reg[regnum] = fs->regs.reg[column];
       }
   }
 
-  /* Store the location of the return addess.  If the return address
-     column (adjusted) is not the same as GDB's PC_REGNUM, then this
-     implies a copy from the return address column register.  */
-  if (fs->retaddr_column < fs->regs.num_regs
-      && fs->regs.reg[fs->retaddr_column].how != REG_UNDEFINED)
-    {
-      /* See comment above about a possibly negative PC_REGNUM.  If
-         this assertion fails, it's a problem with this code and not
-         the architecture.  */
-      gdb_assert (PC_REGNUM >= 0);
-      cache->reg[PC_REGNUM] = fs->regs.reg[fs->retaddr_column];
-    }
-  else
-    {
-      if (DWARF2_REG_TO_REGNUM (fs->retaddr_column) != PC_REGNUM)
-	{
-	  /* See comment above about PC_REGNUM being negative.  If
-	     this assertion fails, it's a problem with this code and
-	     not the architecture.  */
-	  gdb_assert (PC_REGNUM >= 0);
-	  cache->reg[PC_REGNUM].loc.reg = fs->retaddr_column;
-	  cache->reg[PC_REGNUM].how = REG_SAVED_REG;
-	}
-    }
+  /* Eliminate any REG_RA rules.  */
+  {
+    int regnum;
+
+    for (regnum = 0; regnum < num_regs; regnum++)
+      {
+	if (cache->reg[regnum].how == REG_RA)
+	  {
+	    if (fs->retaddr_column < fs->regs.num_regs)
+	      cache->reg[regnum] = fs->regs.reg[fs->retaddr_column];
+	    else
+	      {
+		/* It turns out that GCC assumes that if the return
+                   address column is "empty" the return address can be
+                   found in the register corresponding to the return
+                   address column.  */
+		cache->reg[regnum].loc.reg = fs->retaddr_column;
+		cache->reg[regnum].how = REG_SAVED_REG;
+	      }
+	  }
+      }
+  }
 
   do_cleanups (old_chain);
 
@@ -663,42 +710,7 @@ dwarf2_frame_prev_register (struct frame_info *next_frame, void **this_cache,
       *lvalp = not_lval;
       *addrp = 0;
       *realnump = -1;
-      if (regnum == SP_REGNUM)
-	{
-	  /* GCC defines the CFA as the value of the stack pointer
-	     just before the call instruction is executed.  Do other
-	     compilers use the same definition?  */
-	  /* DWARF V3 Draft 7 p102: Typically, the CFA is defined to
-	     be the value of the stack pointer at the call site in the
-	     previous frame (which may be different from its value on
-	     entry to the current frame).  */
-	  /* DWARF V3 Draft 7 p103: The first column of the rules
-             defines the rule which computes the CFA value; it may be
-             either a register and a signed offset that are added
-             together or a DWARF expression that is evaluated.  */
-	  /* FIXME: cagney/2003-07-07: I don't understand this.  The
-             CFI info should have provided unwind information for the
-             SP register and then pointed ->cfa_reg at it, not the
-             reverse.  Assuming that SP_REGNUM isn't negative, there
-             is a very real posibility that CFA is an offset from some
-             other register, having nothing to do with the unwound SP
-             value.  */
-	  /* FIXME: cagney/2003-09-05: I think I understand.  GDB was
-	     lumping the two states "unspecified" and "undefined"
-	     together.  Here SP_REGNUM was "unspecified", GCC assuming
-	     that in such a case CFA would be used.  This branch of
-	     the if statement should be deleted - the problem of
-	     SP_REGNUM is now handed by the case REG_UNSPECIFIED
-	     below.  */
-	  *optimizedp = 0;
-	  if (valuep)
-	    {
-	      /* Store the value.  */
-	      store_typed_address (valuep, builtin_type_void_data_ptr,
-				   cache->cfa);
-	    }
-	}
-      else if (valuep)
+      if (valuep)
 	{
 	  /* In some cases, for example %eflags on the i386, we have
 	     to provide a sane value, even though this register wasn't
@@ -749,53 +761,25 @@ dwarf2_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 	 "undefined").  Code above issues a complaint about this.
 	 Here just fudge the books, assume GCC, and that the value is
 	 more inner on the stack.  */
-      if (SP_REGNUM >= 0 && regnum == SP_REGNUM)
-	{
-	  /* Can things get worse?  Yep!  One of the registers GCC
-	     forgot to provide unwind information for was the stack
-	     pointer.  Outch!  GCC appears to assumes that the CFA
-	     address can be used - after all it points to the inner
-	     most address of the previous frame before the function
-	     call and that's always the same as the stack pointer on
-	     return, right?  Wrong.  See GCC's i386 STDCALL option for
-	     an ABI that has a different entry and return stack
-	     pointer.  */
-	  /* DWARF V3 Draft 7 p102: Typically, the CFA is defined to
-	     be the value of the stack pointer at the call site in the
-	     previous frame (which may be different from its value on
-	     entry to the current frame).  */
-	  /* DWARF V3 Draft 7 p103: The first column of the rules
-             defines the rule which computes the CFA value; it may be
-             either a register and a signed offset that are added
-             together or a DWARF expression that is evaluated.  */
-	  /* NOTE: cagney/2003-09-05: Should issue a complaint.
-             Unfortunately it turns out that DWARF2 CFI has a problem.
-             Since CFI specifies the location at which a register was
-             saved (not its value) it isn't possible to specify
-             something like "unwound(REG) == REG + constant" using CFI
-             as will almost always occure with the stack pointer.  I
-             guess CFI should be point SP at CFA.  Ref: danielj,
-             "Describing unsaved stack pointers", posted to dwarf2
-             list 2003-08-15.  */
-	  *optimizedp = 0;
-	  *lvalp = not_lval;
-	  *addrp = 0;
-	  *realnump = -1;
-	  if (valuep)
-	    /* Store the value.  */
-	    store_typed_address (valuep, builtin_type_void_data_ptr,
-				 cache->cfa);
-	}
-      else
-	/* Assume that the register can be found in the next inner
-           most frame.  */
-	frame_register_unwind (next_frame, regnum,
-			       optimizedp, lvalp, addrp, realnump, valuep);
+      frame_register_unwind (next_frame, regnum,
+			     optimizedp, lvalp, addrp, realnump, valuep);
       break;
 
     case REG_SAME_VALUE:
       frame_register_unwind (next_frame, regnum,
 			     optimizedp, lvalp, addrp, realnump, valuep);
+      break;
+
+    case REG_CFA:
+      *optimizedp = 0;
+      *lvalp = not_lval;
+      *addrp = 0;
+      *realnump = -1;
+      if (valuep)
+	{
+	  /* Store the value.  */
+	  store_typed_address (valuep, builtin_type_void_data_ptr, cache->cfa);
+	}
       break;
 
     default:

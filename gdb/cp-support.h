@@ -1,5 +1,5 @@
 /* Helper routines for C++ support in GDB.
-   Copyright 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
    Namespace support contributed by David Carlton.
@@ -113,7 +113,7 @@ extern struct type *cp_lookup_nested_type (struct type *parent_type,
 extern void cp_check_possible_namespace_symbols (const char *name,
 						 struct objfile *objfile);
 
-struct type *lookup_transparent_type_namespace (const char *name);
+struct type *cp_lookup_transparent_type (const char *name);
 
 /* The list of "maint cplus" commands.  */
 

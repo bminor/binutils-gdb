@@ -174,8 +174,8 @@ support - typically shared libraries and quirks to procfs/ptrace/...
 The Native maintainer works with the Arch and Core maintainers when
 resolving more generic problems.
 
-The host maintainer ensures that gdb (including mmalloc) can be built
-as a cross debugger on their platform.
+The host maintainer ensures that gdb can be built as a cross debugger on
+their platform.
 
 AIX			Peter Schauer		Peter.Schauer@regent.e-technik.tu-muenchen.de
 			Kevin Buettner		kevinb@redhat.com
@@ -316,6 +316,7 @@ Philip Blundell					philb@gnu.org
 Per Bothner					per@bothner.com
 Joel Brobecker					brobecker@act-europe.fr
 Dave Brolley					brolley@redhat.com
+Paul Brook					paul@codesourcery.com
 Kevin Buettner					kevinb@redhat.com
 Andrew Cagney					ac131313@redhat.com
 David Carlton					carlton@kealia.com
@@ -364,8 +365,10 @@ H.J. Lu						hjl@lucon.org
 Michal Ludvig                                   mludvig@suse.cz
 Glen McCready					gkm@redhat.com
 Greg McGary					greg@mcgary.org
+Roland McGrath					roland@redhat.com
 Jason Merrill					jason@redhat.com
 David S. Miller					davem@redhat.com
+Mark Mitchell					mark@codesourcery.com
 Marko Mlinar                                    markom@opencores.org
 Alan Modra					amodra@bigpond.net.au
 Jason Molenda					jmolenda@apple.com
@@ -375,7 +378,8 @@ Hans-Peter Nilsson				hp@bitrange.com
 David O'Brien					obrien@freebsd.org
 Alexandre Oliva					aoliva@redhat.com
 Tom Rix						trix@redhat.com
-Bob Rossi 					bob_rossi@cox.net 
+Nick Roberts					nick@nick.uklinux.net
+Bob Rossi 					bob_rossi@cox.net
 Theodore A. Roth				troth@openavr.org
 Ian Roxborough					irox@redhat.com
 Grace Sainsbury					graces@redhat.com

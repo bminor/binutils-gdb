@@ -1,6 +1,6 @@
-/* Native-dependent code for UltraSPARC systems running NetBSD.
-   Copyright 2002, 2003 Free Software Foundation, Inc.
-   Contributed by Wasabi Systems, Inc.
+/* Native-dependent code for NetBSD/sparc64.
+
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,189 +20,120 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#include "inferior.h"
-#include "regcache.h"
 
-#include "sparc-tdep.h"
-#include "sparcnbsd-tdep.h"
+#include "sparc64-tdep.h"
+#include "sparc-nat.h"
 
-#include <sys/types.h>
-#include <sys/ptrace.h>
-#include <machine/reg.h>
+/* NetBSD is different from the other OSes that support both SPARC and
+   UltraSPARC in that the result of ptrace(2) depends on whether the
+   traced process is 32-bit or 64-bit.  */
 
-/* NOTE: We don't bother with any of the deferred_store nonsense; it
-   makes things a lot more complicated than they need to be.  */
-
-/* Determine if PT_GETREGS fetches this register.  */
-static int
-getregs_supplies (int regno)
+static void
+sparc64nbsd_supply_gregset (const struct sparc_gregset *gregset,
+			    struct regcache *regcache,
+			    int regnum, const void *gregs)
 {
-  /* FIXME: PS_REGNUM for 32-bit code.  */
-  return (regno == TSTATE_REGNUM
-	  || regno == PC_REGNUM
-	  || regno == DEPRECATED_NPC_REGNUM
-	  || regno == Y_REGNUM
-	  || (regno >= G0_REGNUM && regno <= G7_REGNUM)
-	  || (regno >= O0_REGNUM && regno <= O7_REGNUM)
-	  /* stack regs (handled by sparcnbsd_supply_reg)  */
-	  || (regno >= L0_REGNUM && regno <= I7_REGNUM));
+  int sparc32 = (gdbarch_ptr_bit (current_gdbarch) == 32);
+
+  if (sparc32)
+    sparc32_supply_gregset (&sparc32nbsd_gregset, regcache, regnum, gregs);
+  else
+    sparc64_supply_gregset (&sparc64nbsd_gregset, regcache, regnum, gregs);
 }
 
-/* Determine if PT_GETFPREGS fetches this register.  */
-static int
-getfpregs_supplies (int regno)
+static void
+sparc64nbsd_collect_gregset (const struct sparc_gregset *gregset,
+			     const struct regcache *regcache,
+			     int regnum, void *gregs)
 {
-  return ((regno >= FP0_REGNUM && regno <= (FP0_REGNUM + 47))
-	  || regno == FPS_REGNUM);
+  int sparc32 = (gdbarch_ptr_bit (current_gdbarch) == 32);
+
+  if (sparc32)
+    sparc32_collect_gregset (&sparc32nbsd_gregset, regcache, regnum, gregs);
+  else
+    sparc64_collect_gregset (&sparc64nbsd_gregset, regcache, regnum, gregs);
 }
+
+static void
+sparc64nbsd_supply_fpregset (struct regcache *regcache,
+			     int regnum, const void *fpregs)
+{
+  int sparc32 = (gdbarch_ptr_bit (current_gdbarch) == 32);
+
+  if (sparc32)
+    sparc32_supply_fpregset (regcache, regnum, fpregs);
+  else
+    sparc64_supply_fpregset (regcache, regnum, fpregs);
+}
+
+static void
+sparc64nbsd_collect_fpregset (const struct regcache *regcache,
+			      int regnum, void *fpregs)
+{
+  int sparc32 = (gdbarch_ptr_bit (current_gdbarch) == 32);
+
+  if (sparc32)
+    sparc32_collect_fpregset (regcache, regnum, fpregs);
+  else
+    sparc64_collect_fpregset (regcache, regnum, fpregs);
+}
+
+/* Determine whether `gregset_t' contains register REGNUM.  */
+
+static int
+sparc64nbsd_gregset_supplies_p (int regnum)
+{
+  if (gdbarch_ptr_bit (current_gdbarch) == 32)
+    return sparc32_gregset_supplies_p (regnum);
+
+  /* Integer registers.  */
+  if ((regnum >= SPARC_G1_REGNUM && regnum <= SPARC_G7_REGNUM)
+      || (regnum >= SPARC_O0_REGNUM && regnum <= SPARC_O7_REGNUM)
+      || (regnum >= SPARC_L0_REGNUM && regnum <= SPARC_L7_REGNUM)
+      || (regnum >= SPARC_I0_REGNUM && regnum <= SPARC_I7_REGNUM))
+    return 1;
+
+  /* Control registers.  */
+  if (regnum == SPARC64_PC_REGNUM
+      || regnum == SPARC64_NPC_REGNUM
+      || regnum == SPARC64_STATE_REGNUM
+      || regnum == SPARC64_Y_REGNUM)
+    return 1;
+
+  return 0;
+}
+
+/* Determine whether `fpregset_t' contains register REGNUM.  */
+
+static int
+sparc64nbsd_fpregset_supplies_p (int regnum)
+{
+  if (gdbarch_ptr_bit (current_gdbarch) == 32)
+    return sparc32_fpregset_supplies_p (regnum);
+
+  /* Floating-point registers.  */
+  if ((regnum >= SPARC_F0_REGNUM && regnum <= SPARC_F31_REGNUM)
+      || (regnum >= SPARC64_F32_REGNUM && regnum <= SPARC64_F62_REGNUM))
+    return 1;
+
+  /* Control registers.  */
+  if (regnum == SPARC64_FSR_REGNUM)
+    return 1;
+
+  return 0;
+}
+
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+void _initialize_sparcnbsd_nat (void);
 
 void
-fetch_inferior_registers (int regno)
+_initialize_sparcnbsd_nat (void)
 {
-  /* We don't use deferred stores.  */
-  if (deferred_stores)
-    internal_error (__FILE__, __LINE__,
-		    "fetch_inferior_registers: deferred stores pending");
-
-  if (regno == -1 || getregs_supplies (regno))
-    {
-      union {
-	struct reg32 regs32;
-	struct reg64 regs64;
-      } regs;
-
-      if (ptrace (PT_GETREGS, PIDGET (inferior_ptid),
-		  (PTRACE_ARG3_TYPE) &regs, 0) == -1)
-        perror_with_name ("Couldn't get registers");
-
-      if (gdbarch_ptr_bit (current_gdbarch) == 32)
-        sparcnbsd_supply_reg32 ((char *) &regs.regs32, regno);
-      else
-	sparcnbsd_supply_reg64 ((char *) &regs.regs64, regno);
-      if (regno != -1)
-	return;
-    }
-
-  if (regno == -1 || getfpregs_supplies (regno))
-    {
-      union {
-        struct fpreg32 fpregs32;
-	struct fpreg64 fpregs64;
-      } fpregs;
-
-      if (ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
-		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
-        perror_with_name ("Couldn't get floating point registers");
-
-      if (gdbarch_ptr_bit (current_gdbarch) == 32)
-        sparcnbsd_supply_fpreg32 ((char *) &fpregs.fpregs32, regno);
-      else
-        sparcnbsd_supply_fpreg64 ((char *) &fpregs.fpregs64, regno);
-      if (regno != -1)
-	return;
-    }
-}
-
-void
-store_inferior_registers (int regno)
-{
-  /* We don't use deferred stores.  */
-  if (deferred_stores)
-    internal_error (__FILE__, __LINE__,
-		    "store_inferior_registers: deferred stores pending");
-
-  if (regno == -1 || getregs_supplies (regno))
-    {
-      union {
-	struct reg32 regs32;
-	struct reg64 regs64;
-      } regs;
-
-      if (ptrace (PT_GETREGS, PIDGET (inferior_ptid),
-		  (PTRACE_ARG3_TYPE) &regs, 0) == -1)
-	perror_with_name ("Couldn't get registers");
-
-      if (gdbarch_ptr_bit (current_gdbarch) == 32)
-        sparcnbsd_fill_reg32 ((char *) &regs.regs32, regno);
-      else
-	sparcnbsd_fill_reg64 ((char *) &regs.regs64, regno);
-
-      if (ptrace (PT_SETREGS, PIDGET (inferior_ptid),
-		  (PTRACE_ARG3_TYPE) &regs, 0) == -1)
-	perror_with_name ("Couldn't write registers");
-
-      /* Deal with the stack regs.  */
-      if (regno == -1 || regno == SP_REGNUM
-	  || (regno >= L0_REGNUM && regno <= I7_REGNUM))
-	{
-	  CORE_ADDR sp = read_register (SP_REGNUM);
-	  int i;
-	  char buf[8];
-
-	  if (sp & 1)
-	    {
-	      /* Registers are 64-bit.  */
-	      sp += 2047;
-
-	      for (i = L0_REGNUM; i <= I7_REGNUM; i++)
-		{
-		  if (regno == -1 || regno == SP_REGNUM || regno == i)
-		    {
-		      regcache_collect (i, buf);
-		      target_write_memory (sp + ((i - L0_REGNUM) * 8),
-					   buf, sizeof (buf));
-		    }
-		}
-            }
-	  else
-	    {
-	      /* Registers are 32-bit.  Toss any sign-extension of the stack
-		 pointer.
-
-		 FIXME: We don't currently handle 32-bit code in a binary
-		 that indicated LP64.  Do we have to care about that?  */
-              if (gdbarch_ptr_bit (current_gdbarch) != 32)
-		internal_error
-		    (__FILE__, __LINE__,
-		    "store_inferior_registers: 32-bit code in 64-bit inferior");
-
-	      sp &= 0xffffffffUL;
-	      for (i = L0_REGNUM; i <= I7_REGNUM; i++)
-	        {
-	          if (regno == -1 || regno == SP_REGNUM || regno == i)
-		    {
-		      regcache_collect (i, buf);
-		      target_write_memory (sp + ((i - L0_REGNUM) * 4), buf, 4);
-		    }
-		}
-	    }
-	}
-
-      if (regno != -1)
-	return;
-    }
-
-  if (regno == -1 || getfpregs_supplies (regno))
-    {
-      union {
-	struct fpreg32 fpregs32;
-	struct fpreg64 fpregs64;
-      } fpregs;
-
-      if (ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
-		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
-	perror_with_name ("Couldn't get floating point registers");
-
-      if (gdbarch_ptr_bit (current_gdbarch) == 32)
-        sparcnbsd_fill_fpreg32 ((char *) &fpregs.fpregs32, regno);
-      else
-	sparcnbsd_fill_fpreg64 ((char *) &fpregs.fpregs64, regno);
-      
-      if (ptrace (PT_SETFPREGS, PIDGET (inferior_ptid),
-		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
-	perror_with_name ("Couldn't write floating point registers");
-
-      if (regno != -1)
-	return;
-    }
+  sparc_supply_gregset = sparc64nbsd_supply_gregset;
+  sparc_collect_gregset = sparc64nbsd_collect_gregset;
+  sparc_supply_fpregset = sparc64nbsd_supply_fpregset;
+  sparc_collect_fpregset = sparc64nbsd_collect_fpregset;
+  sparc_gregset_supplies_p = sparc64nbsd_gregset_supplies_p;
+  sparc_fpregset_supplies_p = sparc64nbsd_fpregset_supplies_p;
 }

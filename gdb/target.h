@@ -1,7 +1,7 @@
 /* Interface between GDB and target environments, including files and processes
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.  Written by John Gilmore.
 
@@ -1082,13 +1082,6 @@ extern void (*target_new_objfile_hook) (struct objfile *);
 #ifndef target_stopped_data_address
 #define target_stopped_data_address() \
     (*current_target.to_stopped_data_address) ()
-#endif
-
-/* If defined, then we need to decr pc by this much after a hardware break-
-   point.  Presumably this overrides DECR_PC_AFTER_BREAK...  */
-
-#ifndef DECR_PC_AFTER_HW_BREAK
-#define DECR_PC_AFTER_HW_BREAK 0
 #endif
 
 /* Sometimes gdb may pick up what appears to be a valid target address

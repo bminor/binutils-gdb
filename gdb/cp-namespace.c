@@ -1,5 +1,5 @@
 /* Helper routines for C++ support in GDB.
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by David Carlton and by Kealia, Inc.
 
@@ -36,9 +36,9 @@
 /* When set, the file that we're processing is known to have debugging
    info for C++ namespaces.  */
 
-/* NOTE: carlton/2003-11-10: No currently released version of GCC (the
+/* NOTE: carlton/2004-01-13: No currently released version of GCC (the
    latest of which is 3.3.x at the time of this writing) produces this
-   debug info.  */
+   debug info.  GCC 3.4 should, however.  */
 
 unsigned char processing_has_namespace_info;
 
@@ -53,9 +53,9 @@ unsigned char processing_has_namespace_info;
       };
     }
 
-    then processing_current_prefix should be set to "N::C".  If
-    processing_has_namespace_info is false, then this variable might
-    not be reliable.  */
+   then processing_current_prefix should be set to "N::C".  If
+   processing_has_namespace_info is false, then this variable might
+   not be reliable.  */
 
 const char *processing_current_prefix;
 
@@ -86,9 +86,9 @@ static struct symbol *lookup_symbol_file (const char *name,
 					  struct symtab **symtab,
 					  int anonymous_namespace);
 
-static struct type *lookup_transparent_type_namespace_loop (const char *name,
-							    const char *scope,
-							    int scope_len);
+static struct type *cp_lookup_transparent_type_loop (const char *name,
+						     const char *scope,
+						     int scope_len);
 
 static void initialize_namespace_symtab (struct objfile *objfile);
 
@@ -531,19 +531,13 @@ cp_lookup_nested_type (struct type *parent_type,
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_NAMESPACE:
       {
-	/* NOTE: carlton/2002-12-17: As of this writing, C++ class
-	   members of classes aren't treated like, say, data or
-	   function members.  Instead, they're just represented by
-	   symbols whose names are qualified by the name of the
-	   surrounding class.  This is just like members of
-	   namespaces; in particular, lookup_symbol_namespace works
-	   when looking them up.  */
+	/* NOTE: carlton/2003-11-10: We don't treat C++ class members
+	   of classes like, say, data or function members.  Instead,
+	   they're just represented by symbols whose names are
+	   qualified by the name of the surrounding class.  This is
+	   just like members of namespaces; in particular,
+	   lookup_symbol_namespace works when looking them up.  */
 
-	/* NOTE: carlton/2002-12-17: The above is, actually, lying:
-	   there are still situations where nested types are
-	   represented by symbols that include only the member name,
-	   not the parent name.  Sigh.  Blame it on stabs, or
-	   something.  */
 	const char *parent_name = TYPE_TAG_NAME (parent_type);
 	struct symbol *sym = cp_lookup_symbol_namespace (parent_name,
 							 nested_name,
@@ -562,56 +556,72 @@ cp_lookup_nested_type (struct type *parent_type,
     }
 }
 
-/* Try to look up the type definition associated to NAME if honest
-   methods don't work: look for NAME in the classes/namespaces that
-   are currently active, on the off chance that it might be there.  */
+/* The C++-version of lookup_transparent_type.  */
+
+/* FIXME: carlton/2004-01-16: The problem that this is trying to
+   address is that, unfortunately, sometimes NAME is wrong: it may not
+   include the name of namespaces enclosing the type in question.
+   lookup_transparent_type gets called when the the type in question
+   is a declaration, and we're trying to find its definition; but, for
+   declarations, our type name deduction mechanism doesn't work.
+   There's nothing we can do to fix this in general, I think, in the
+   absence of debug information about namespaces (I've filed PR
+   gdb/1511 about this); until such debug information becomes more
+   prevalent, one heuristic which sometimes looks is to search for the
+   definition in namespaces containing the current namespace.
+
+   We should delete this functions once the appropriate debug
+   information becomes more widespread.  (GCC 3.4 will be the first
+   released version of GCC with such information.)  */
 
 struct type *
-lookup_transparent_type_namespace (const char *name)
+cp_lookup_transparent_type (const char *name)
 {
-  const char *scope = block_scope (get_selected_block (0));
+  /* First, try the honest way of looking up the definition.  */
+  struct type *t = basic_lookup_transparent_type (name);
+  const char *scope;
 
-  if (strstr (scope, "::") == NULL)
+  if (t != NULL)
+    return t;
+
+  /* If that doesn't work and we're within a namespace, look there
+     instead.  */
+  scope = block_scope (get_selected_block (0));
+
+  if (scope[0] == '\0')
     return NULL;
 
-  return lookup_transparent_type_namespace_loop (name, scope, 0);
+  return cp_lookup_transparent_type_loop (name, scope, 0);
 }
 
 /* Lookup the the type definition associated to NAME in
-   namespaces/classes containing SCOPE other than the global
-   namespace.  */
+   namespaces/classes containing SCOPE whose name is strictly longer
+   than LENGTH.  LENGTH must be the index of the start of a
+   component of SCOPE.  */
 
 static struct type *
-lookup_transparent_type_namespace_loop (const char *name, const char *scope,
-					int scope_len)
+cp_lookup_transparent_type_loop (const char *name, const char *scope,
+				 int length)
 {
-  int new_scope_len = scope_len;
+  int scope_length = cp_find_first_component (scope + length);
   char *full_name;
 
-  /* If the current scope is followed by "::", skip past that.  */
-  if (new_scope_len != 0)
-    new_scope_len += 2;
-  new_scope_len += cp_find_first_component (scope + new_scope_len);
-
-  if (scope[new_scope_len] == ':')
+  /* If the current scope is followed by "::", look in the next
+     component.  */
+  if (scope[scope_length] == ':')
     {
       struct type *retval
-	= lookup_transparent_type_namespace_loop (name, scope, new_scope_len);
+	= cp_lookup_transparent_type_loop (name, scope, scope_length + 2);
       if (retval != NULL)
 	return retval;
     }
 
-  /* If there's no enclosing scope, lookup_transparent_type would have
-     found it. */
-  if (scope_len == 0)
-    return NULL;
+  full_name = alloca (scope_length + 2 + strlen (name) + 1);
+  strncpy (full_name, scope, scope_length);
+  strncpy (full_name + scope_length, "::", 2);
+  strcpy (full_name + scope_length + 2, name);
 
-  full_name = alloca (scope_len + 2 + strlen (name) + 1);
-  strncpy (full_name, scope, scope_len);
-  strncpy (full_name + scope_len, "::", 2);
-  strcpy (full_name + scope_len + 2, name);
-
-  return lookup_transparent_type_aux (full_name);
+  return basic_lookup_transparent_type (full_name);
 }
 
 /* Now come functions for dealing with symbols associated to

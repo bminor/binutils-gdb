@@ -1,3 +1,10 @@
+2003-12-15  David Carlton  <carlton@kealia.com>
+
+	* Merge with mainline; tag is carlton_dictionary-20031215-merge.
+	* cp-support.c (class_name_from_physname): Add DMGL_PARAMS to call
+	to cplus_demangle.
+	(method_name_from_physname): Ditto.
+
 2003-12-30  Eli Zaretskii  <eliz@elta.co.il>
 
 	* configure.in: Check for st_blocks member in struct stat and

@@ -1357,7 +1357,7 @@ display_command (char *exp, int from_tty)
   /* NOTE: cagney/2003-02-13 The `tui_active' was previously
      `tui_version'.  */
   if (tui_active && *exp == '$')
-    display_it = (tui_set_layout (exp) == TUI_FAILURE);
+    display_it = (tui_set_layout_for_display_command (exp) == TUI_FAILURE);
 #endif
 
   if (display_it)

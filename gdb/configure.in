@@ -1,5 +1,5 @@
 dnl Autoconf configure script for GDB, the GNU debugger.
-dnl Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+dnl Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
 dnl Free Software Foundation, Inc.
 dnl
 dnl This file is part of GDB.
@@ -317,8 +317,7 @@ case $host_os in
       LIBS="../libtermcap/libtermcap.a $LIBS"
       ac_cv_search_tgetent="../libtermcap/libtermcap.a"
     fi ;;
-  go32*)
-    # ??? Is this really true?
+  go32* | *djgpp*)
     ac_cv_search_tgetent="none required"
     ;;
   aix*)
@@ -344,6 +343,7 @@ AC_HEADER_DIRENT
 AC_HEADER_STAT
 AC_HEADER_STDC
 AC_CHECK_HEADERS(link.h)
+AC_CHECK_HEADERS(machine/reg.h)
 AC_CHECK_HEADERS(nlist.h)
 AC_CHECK_HEADERS(poll.h sys/poll.h)
 AC_CHECK_HEADERS(proc_service.h thread_db.h)
@@ -384,6 +384,18 @@ AC_CHECK_HEADERS(curses.h ncurses.h term.h)
 # unconditionally, so what's the point in checking these?
 AC_CHECK_HEADERS(ctype.h time.h)
 
+dnl Check for struct stat with an st_blocks member
+AC_MSG_CHECKING(for member st_blocks in struct stat)
+AC_CACHE_VAL(gdb_cv_have_struct_stat_with_st_blocks_member,
+  [AC_TRY_COMPILE([#include <sys/types.h>
+#include <sys/stat.h>],
+                  [struct stat st; (void) st.st_blocks;],
+                  gdb_cv_have_struct_stat_with_st_blocks_member=yes,
+                  gdb_cv_have_struct_stat_with_st_blocks_member=no)])
+AC_MSG_RESULT($gdb_cv_have_struct_stat_with_st_blocks_member)
+if test $gdb_cv_have_struct_stat_with_st_blocks_member = yes; then
+  AC_DEFINE(HAVE_STRUCT_STAT_ST_BLOCKS)
+fi
 # ------------------------- #
 # Checks for declarations.  #
 # ------------------------- #
@@ -478,6 +490,16 @@ AC_ARG_WITH(included-regex,
 if test "$gdb_with_regex" = yes; then
   AC_DEFINE(USE_INCLUDED_REGEX, 1,
     [Define to 1 if the regex included in libiberty should be used.])
+fi
+
+# See if <machine/reg.h> degines `struct reg'.
+AC_CACHE_CHECK([for struct reg in machine/reg.h], gdb_cv_struct_reg,
+[AC_TRY_COMPILE([#include <sys/types.h>
+#include <machine/reg.h>], [struct reg r;],
+gdb_cv_struct_reg=yes, gdb_cv_struct_reg=no)])
+if test $gdb_cv_struct_reg = yes; then
+  AC_DEFINE(HAVE_STRUCT_REG, 1,
+            [Define to 1 if your system has struct reg in <machine/reg.h>.])
 fi
 
 # See if <machine/reg.h> supports the %fs and %gs i386 segment registers.
@@ -1002,9 +1024,10 @@ AC_SUBST(TARGET_SYSTEM_ROOT_DEFINE)
 # NOTE: If you add to this list, remember to update
 # gdb/doc/gdbint.texinfo.
 build_warnings="-Wimplicit -Wreturn-type -Wcomment -Wtrigraphs \
--Wformat -Wparentheses -Wpointer-arith -Wuninitialized"
+-Wformat -Wparentheses -Wpointer-arith -Wuninitialized -Wformat-nonliteral \
+-Wunused-label"
 # Up for debate: -Wswitch -Wcomment -trigraphs -Wtrigraphs
-# -Wunused-function -Wunused-label -Wunused-variable -Wunused-value
+# -Wunused-function -Wunused-variable -Wunused-value
 # -Wchar-subscripts -Wtraditional -Wshadow -Wcast-qual
 # -Wcast-align -Wwrite-strings -Wconversion -Wstrict-prototypes
 # -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls
@@ -1058,26 +1081,6 @@ then
 fi
 AC_SUBST(WARN_CFLAGS)
 AC_SUBST(WERROR_CFLAGS)
-
-MMALLOC_CFLAGS=
-MMALLOC=
-AC_SUBST(MMALLOC_CFLAGS)
-AC_SUBST(MMALLOC)
-
-AC_ARG_WITH(mmalloc,
-[  --with-mmalloc          Use memory mapped malloc package],
-[case "${withval}" in
-  yes)  want_mmalloc=true ;;
-  no)   want_mmalloc=false;;
-  *)    AC_MSG_ERROR(bad value ${withval} for GDB with-mmalloc option) ;;
-esac],[want_mmalloc=false])dnl
-
-if test x$want_mmalloc = xtrue; then
-   AC_DEFINE(USE_MMALLOC)
-   AC_DEFINE(MMCHECK_FORCE)
-   MMALLOC_CFLAGS="-I$srcdir/../mmalloc"
-   MMALLOC='../mmalloc/libmmalloc.a'
-fi
 
 # In the Cygwin environment, we need some additional flags.
 AC_CACHE_CHECK([for cygwin], gdb_cv_os_cygwin,

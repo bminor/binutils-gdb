@@ -1,5 +1,7 @@
 /* Target dependent code for CRIS, for GDB, the GNU debugger.
-   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+
+   Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+
    Contributed by Axis Communications AB.
    Written by Hendrik Ruijter, Stefan Andersson, and Orjan Friberg.
 
@@ -175,9 +177,6 @@ cris_abi (void)
 {
   return (gdbarch_tdep (current_gdbarch)->cris_abi);
 }
-
-/* For saving call-clobbered contents in R9 when returning structs.  */
-static CORE_ADDR struct_return_address;
 
 struct frame_extra_info
 {
@@ -1078,26 +1077,14 @@ cris_abi_v2_extract_return_value (struct type *type, char *regbuf,
 }
 
 /* Store the address of the place in which to copy the structure the
-   subroutine will return.  In the CRIS ABI, R9 is used in order to pass 
-   the address of the allocated area where a structure return value must 
-   be stored.  R9 is call-clobbered, which means we must save it here for
-   later use.  */
+   subroutine will return.  In the CRIS ABI, R9 is used in order to
+   pass the address of the allocated area where a structure return
+   value must be stored.  */
 
 static void
 cris_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
   write_register (STR_REGNUM, addr);
-  struct_return_address = addr;
-}
-
-/* Extract from regbuf the address where a function should return a 
-   structure value.  It's not there in the CRIS ABI, so we must do it another
-   way.  */
-
-static CORE_ADDR
-cris_extract_struct_value_address (char *regbuf)
-{
-  return struct_return_address;
 }
 
 /* Returns 1 if the given type will be passed by pointer rather than 
@@ -4267,8 +4254,6 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_pop_frame (gdbarch, cris_pop_frame);
 
   set_gdbarch_deprecated_store_struct_return (gdbarch, cris_store_struct_return);
-  set_gdbarch_deprecated_extract_struct_value_address
-    (gdbarch, cris_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
 
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, cris_frame_init_saved_regs);
@@ -4280,13 +4265,6 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
   set_gdbarch_breakpoint_from_pc (gdbarch, cris_breakpoint_from_pc);
-  
-  /* The PC must not be decremented after a breakpoint.  (The breakpoint
-     handler takes care of that.)  */
-  set_gdbarch_decr_pc_after_break (gdbarch, 0);
-  
-  /* Offset from address of function to start of its code.  */
-  set_gdbarch_function_start_offset (gdbarch, 0);  
   
   /* The number of bytes at the start of arglist that are not really args,
      0 in the CRIS ABI.  */

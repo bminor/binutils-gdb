@@ -1,5 +1,5 @@
 /* Intel 80386/80486-specific support for 32-bit ELF
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -346,29 +346,50 @@ elf_i386_is_local_label_name (bfd *abfd, const char *name)
 }
 
 /* Support for core dump NOTE sections.  */
+
 static bfd_boolean
 elf_i386_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 {
   int offset;
   size_t raw_size;
 
-  switch (note->descsz)
+  if (note->namesz == 8 && strcmp (note->namedata, "FreeBSD") == 0)
     {
-      default:
-	return FALSE;
+      int pr_version = bfd_get_32 (abfd, note->descdata);
 
-      case 144:		/* Linux/i386 */
-	/* pr_cursig */
-	elf_tdata (abfd)->core_signal = bfd_get_16 (abfd, note->descdata + 12);
+      if (pr_version != 1)
+ 	return FALSE;
 
-	/* pr_pid */
-	elf_tdata (abfd)->core_pid = bfd_get_32 (abfd, note->descdata + 24);
+      /* pr_cursig */
+      elf_tdata (abfd)->core_signal = bfd_get_32 (abfd, note->descdata + 20);
 
-	/* pr_reg */
-	offset = 72;
-	raw_size = 68;
+      /* pr_pid */
+      elf_tdata (abfd)->core_pid = bfd_get_32 (abfd, note->descdata + 24);
 
-	break;
+      /* pr_reg */
+      offset = 28;
+      raw_size = bfd_get_32 (abfd, note->descdata + 8);
+    }
+  else
+    {
+      switch (note->descsz)
+	{
+	default:
+	  return FALSE;
+
+	case 144:		/* Linux/i386 */
+	  /* pr_cursig */
+	  elf_tdata (abfd)->core_signal = bfd_get_16 (abfd, note->descdata + 12);
+
+	  /* pr_pid */
+	  elf_tdata (abfd)->core_pid = bfd_get_32 (abfd, note->descdata + 24);
+
+	  /* pr_reg */
+	  offset = 72;
+	  raw_size = 68;
+
+	  break;
+	}
     }
 
   /* Make a ".reg/999" section.  */
@@ -379,22 +400,36 @@ elf_i386_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 static bfd_boolean
 elf_i386_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 {
-  switch (note->descsz)
+  if (note->namesz == 8 && strcmp (note->namedata, "FreeBSD") == 0)
     {
-      default:
+      int pr_version = bfd_get_32 (abfd, note->descdata);
+
+      if (pr_version != 1)
 	return FALSE;
 
-      case 124:		/* Linux/i386 elf_prpsinfo */
-	elf_tdata (abfd)->core_program
-	  = _bfd_elfcore_strndup (abfd, note->descdata + 28, 16);
-	elf_tdata (abfd)->core_command
-	  = _bfd_elfcore_strndup (abfd, note->descdata + 44, 80);
+      elf_tdata (abfd)->core_program
+	= _bfd_elfcore_strndup (abfd, note->descdata + 8, 17);
+      elf_tdata (abfd)->core_command
+	= _bfd_elfcore_strndup (abfd, note->descdata + 25, 81);
+    }
+  else
+    {
+      switch (note->descsz)
+	{
+	default:
+	  return FALSE;
+
+	case 124:		/* Linux/i386 elf_prpsinfo.  */
+	  elf_tdata (abfd)->core_program
+	    = _bfd_elfcore_strndup (abfd, note->descdata + 28, 16);
+	  elf_tdata (abfd)->core_command
+	    = _bfd_elfcore_strndup (abfd, note->descdata + 44, 80);
+	}
     }
 
   /* Note that for some reason, a spurious space is tacked
      onto the end of the args in some (at least one anyway)
      implementations, so strip it off if it exists.  */
-
   {
     char *command = elf_tdata (abfd)->core_command;
     int n = strlen (command);

@@ -1,7 +1,7 @@
 /* Symbol table lookup for the GNU debugger, GDB.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -41,7 +41,6 @@
 #include "source.h"
 #include "filenames.h"		/* for FILENAME_CMP */
 #include "objc-lang.h"
-#include "dictionary.h"
 
 #include "hashtab.h"
 
@@ -1527,48 +1526,23 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 }
 
 /* Look up a type named NAME in the struct_domain.  The type returned
-   must not be opaque -- i.e., must have at least one field defined
-
-   This code was modelled on lookup_symbol -- the parts not relevant to looking
-   up types were just left out.  In particular it's assumed here that types
-   are available in struct_domain and only at file-static or global blocks. */
-
-/* FIXME: carlton/2002-10-25: This function duplicates too much of
-   lookup_symbol_aux's code: it's a maintenance burden.  That should
-   be taken care of.  Unfortunately, right now there's no clean fix
-   for that.  The obvious thing to do is to put in calls to
-   lookup_symbol_aux_nonlocal; but, if I'm reading its caller, it
-   seems like this is used when there are perhaps multiple definitions
-   for NAME, in which case lookup_symbol_aux_nonlocal might find the
-   wrong one.  Something to keep in mind when we have iterators,
-   though.  */
-
-/* NOTE: carlton/2003-01-13: Callers for this should have the full
-   name of the type in question, so this doesn't have to get any
-   smarter about namespace stuff.  */
-
-/* FIXME: carlton/2003-05-23: No, sometimes, unfortunately, the name
-   is wrong.  This function gets called when the the type in question
-   is a declaration; in that situation, our type name deduction
-   machinery doesn't work, so if the type is declared in a namespace
-   and GCC isn't giving us namespace debug info, we're screwed.  Sigh.
-   There's nothing we can do to fix this in general, I think.  */
+   must not be opaque -- i.e., must have at least one field
+   defined.  */
 
 struct type *
 lookup_transparent_type (const char *name)
 {
-  struct type *retval = lookup_transparent_type_aux (name);
-
-  if (retval != NULL)
-    return retval;
-  else
-    /* See above FIXME comment: with proper debug info, this should
-       never be necessary (or even desirable).  */
-    return lookup_transparent_type_namespace (name);
+  return current_language->la_lookup_transparent_type (name);
 }
 
+/* The standard implementation of lookup_transparent_type.  This code
+   was modeled on lookup_symbol -- the parts not relevant to looking
+   up types were just left out.  In particular it's assumed here that
+   types are available in struct_domain and only at file-static or
+   global blocks.  */
+
 struct type *
-lookup_transparent_type_aux (const char *name)
+basic_lookup_transparent_type (const char *name)
 {
   struct symbol *sym;
   struct symtab *s = NULL;
@@ -1612,7 +1586,9 @@ lookup_transparent_type_aux (const char *name)
 	    block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
 	    sym = lookup_block_symbol (block, name, NULL, STRUCT_DOMAIN);
 	    if (!sym)
-	      error ("Internal: global symbol `%s' found in %s psymtab but not in symtab.\n%s may be an inlined function, or may be a template function\n(if a template, try specifying an instantiation: %s<type>).",
+	      error ("Internal: global symbol `%s' found in %s psymtab but not in symtab.\n\
+%s may be an inlined function, or may be a template function\n\
+(if a template, try specifying an instantiation: %s<type>).",
 		     name, ps->filename, name, name);
 	  }
 	if (!TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
@@ -1657,7 +1633,9 @@ lookup_transparent_type_aux (const char *name)
 	    block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 	    sym = lookup_block_symbol (block, name, NULL, STRUCT_DOMAIN);
 	    if (!sym)
-	      error ("Internal: static symbol `%s' found in %s psymtab but not in symtab.\n%s may be an inlined function, or may be a template function\n(if a template, try specifying an instantiation: %s<type>).",
+	      error ("Internal: static symbol `%s' found in %s psymtab but not in symtab.\n\
+%s may be an inlined function, or may be a template function\n\
+(if a template, try specifying an instantiation: %s<type>).",
 		     name, ps->filename, name, name);
 	  }
 	if (!TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
@@ -1666,6 +1644,7 @@ lookup_transparent_type_aux (const char *name)
   }
   return (struct type *) 0;
 }
+
 
 /* Find the psymtab containing main(). */
 /* FIXME:  What about languages without main() or specially linked
@@ -3935,7 +3914,7 @@ decode_line_spec (char *string, int funfirstline)
   
   sals = decode_line_1 (&string, funfirstline,
 			cursal.symtab, cursal.line,
-			(char ***) NULL);
+			(char ***) NULL, NULL);
 
   if (*string)
     error ("Junk at end of line specification: %s", string);

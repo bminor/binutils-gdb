@@ -1064,7 +1064,11 @@ styp_to_sec_flags (abfd, hdr, name, section, flags_ptr)
 	  sec_flags &= ~ SEC_READONLY;
 	  break;
 	case IMAGE_SCN_MEM_DISCARDABLE:
-	  sec_flags |= SEC_DEBUGGING;
+	  /* The MS PE spec sets the DISCARDABLE flag on .reloc sections
+	     but we do not want them to be labelled as debug section, since
+	     then strip would remove them.  */
+	  if (strncmp (name, ".reloc", sizeof ".reloc" - 1) != 0)
+	    sec_flags |= SEC_DEBUGGING;
 	  break;
 	case IMAGE_SCN_MEM_SHARED:
 	  sec_flags |= SEC_SHARED;

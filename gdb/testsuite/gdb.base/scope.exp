@@ -1,5 +1,5 @@
-# Copyright 1992, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2002, 2003
-# Free Software Foundation, Inc.
+# Copyright 1992, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2002, 2003,
+# 2004 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -112,7 +112,6 @@ proc test_at_main {} {
     # Print scope1.c::filelocal, which is 2
 
     if { [test_compiler_info gcc-*-*] } then { setup_xfail "rs6000-*-*" }
-    if {$hp_cc_compiler} then { setup_xfail "hppa2.0w-*-*" 11747CLLbs}
     if [gdb_test "print 'scope1.c'::filelocal" "\\\$$decimal = 2" "print 'scope1.c'::filelocal"  "No symbol \"scope1.c\" in current context.*" "print '$srcdir/$subdir/scope1.c'::filelocal"] { 
       gdb_suppress_tests ; 
     }
@@ -121,7 +120,6 @@ proc test_at_main {} {
     # Print scope1.c::filelocal_bss, which is 102
 
     if { [test_compiler_info gcc-*-*] } then { setup_xfail "rs6000-*-*" }
-    if {$hp_cc_compiler} then { setup_xfail "hppa2.0w-*-*" 11747CLLbs}
     if [gdb_test "print 'scope1.c'::filelocal_bss" "\\\$$decimal = 102" "print 'scope1.c'::filelocal_bss"  "No symbol \"scope1.c\" in current context.*" "print '$srcdir/$subdir/scope1.c'::filelocal_bss"] { 
       gdb_suppress_tests ; 
     }

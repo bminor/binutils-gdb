@@ -1642,10 +1642,10 @@ _rl_move_vert (to)
 #ifdef __MSDOS__
       int row, col;
 
-      l = fflush (rl_outstream); /* make sure the cursor pos is current! */
+      fflush (rl_outstream); /* make sure the cursor pos is current! */
       ScreenGetCursor (&row, &col);
-      ScreenSetCursor ((row + to - _rl_last_v_pos), col);
-      delta = i;
+      ScreenSetCursor (row + delta, col);
+      i = -delta;    /* in case someone wants to use it after the loop */
 #else /* !__MSDOS__ */
       if (_rl_term_up && *_rl_term_up)
 	for (i = 0; i < -delta; i++)

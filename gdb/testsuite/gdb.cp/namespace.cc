@@ -144,6 +144,13 @@ namespace C
     };
   };
 
+  void ensureRefs () {
+    // NOTE (2004-04-23, carlton): This function is here only to make
+    // sure that GCC 3.4 outputs debug info for these classes.
+    static CClass *c = new CClass();
+    static CClass::NestedClass *n = new CClass::NestedClass();
+  }
+
   namespace
   {
     int cX = 6;

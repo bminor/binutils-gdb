@@ -268,7 +268,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   2,
 	   2,
 	   24,
-	   FALSE,
+	   TRUE,
 	   0,
 	   complain_overflow_dont,
 	   aoutarm_fix_pcrel_26_done,
@@ -276,7 +276,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	   FALSE,
 	   0x00ffffff,
 	   0x0,
-	   FALSE),
+	   PCRELOFFSET),
     HOWTO (ARM_32,
 	   0,
 	   2,
@@ -1250,7 +1250,8 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
          when doing a relocatable link.  However, we want to convert
          ARM_26 to ARM_26D relocs if possible.  We return a fake howto in
          this case without pcrel_offset set, and adjust the addend to
-         compensate.  */
+         compensate.  'partial_inplace' is also set, since we want 'done'
+         relocations to be reflected in section's data.  */
       if (rel->r_type == ARM_26
           && h != NULL
           && info->relocatable
@@ -1269,12 +1270,17 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
     	       complain_overflow_signed,
     	       aoutarm_fix_pcrel_26 ,
     	       "ARM_26",
-    	       FALSE,
+    	       TRUE,
     	       0x00ffffff,
     	       0x00ffffff,
     	       FALSE);
 
           addend -= rel->r_vaddr - input_section->vma;
+#ifdef ARM_WINCE
+          /* FIXME: I don't know why, but the hack is necessary for correct
+                    generation of bl's instruction offset. */
+          addend -= 8;
+#endif
           howto = &fake_arm26_reloc;
         }
 
@@ -1734,10 +1740,13 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 #endif
       else
 #endif /* THUMBEXTENSION */
-        rstat = _bfd_final_link_relocate (howto, input_bfd, input_section,
-                                          contents,
-                                          rel->r_vaddr - input_section->vma,
-                                          val, addend);
+        if (info->relocatable && ! howto->partial_inplace)
+            rstat = bfd_reloc_ok;
+        else
+	  rstat = _bfd_final_link_relocate (howto, input_bfd, input_section,
+					    contents,
+					    rel->r_vaddr - input_section->vma,
+					    val, addend);
 #if 1 /* THUMBEXTENSION */
       /* FIXME:
 	 Is this the best way to fix up thumb addresses? krk@cygnus.com

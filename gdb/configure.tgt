@@ -38,8 +38,7 @@ esac
 case "${target}" in
 
 x86_64-*-freebsd*)	gdb_target=fbsd64 ;;
-*-*-freebsd*)		gdb_target=fbsd
-			;;
+*-*-freebsd*)		gdb_target=fbsd	;;
 
 alpha*-*-osf*)		gdb_target=alpha-osf1 ;;
 alpha*-*-linux*)	gdb_target=alpha-linux ;;
@@ -129,6 +128,7 @@ m68*-*-os68k*)		gdb_target=os68k ;;
 # OBSOLETE m68*-*-sunos3*)		gdb_target=sun3os3 ;;
 # OBSOLETE m68*-*-sunos4*)		gdb_target=sun3os4 ;;
 # OBSOLETE m68*-*-sysv4*)		gdb_target=m68kv4 ;;
+m68*-*-uclinux*)	gdb_target=monitor ;;
 m68*-*-vxworks*)	gdb_target=vxworks68 ;;
 
 mcore*-*-*)		gdb_target=mcore ;;
@@ -185,26 +185,23 @@ sh*-*-netbsdelf*)	gdb_target=nbsd ;;
 sh-*-nto*)		gdb_target=nto ;;
 sh*)			gdb_target=embed ;;
 
-sparc-*-aout*)		gdb_target=sparc-em ;;
-sparc-*-coff*)		gdb_target=sparc-em ;;
-sparc-*-elf*)		gdb_target=sparc-em ;;
 sparc-*-linux*)		gdb_target=linux ;;
-sparc-*-lynxos*)	gdb_target=sparclynx ;;
+sparc64-*-linux*)	gdb_target=linux64 ;;
 sparc-*-netbsd*)	gdb_target=nbsd ;;
-sparc-*-solaris2*)	gdb_target=sun4sol2 ;;
-sparc-*-sunos4*)	gdb_target=sun4os4 ;;
-sparc-*-sunos5*)	gdb_target=sun4sol2 ;;
-sparc-*-vxworks*)	gdb_target=vxsparc ;;
-sparc-*-*)		gdb_target=sun4os4 ;;
-# It's not clear what the right solution for "v8plus" systems is yet.
-# For now, stick with sparc-sun-solaris2 since that's what config.guess
-# should return.  Work is still needed to get gdb to print the 64 bit
-# regs (some of which are usable in v8plus) so sp64sol.mt hasn't been
-# deleted though presumably it should be eventually.
-#sparc64-*-solaris2*)	gdb_target=sp64sol2 ;;
-sparc64-*-linux*)	gdb_target=sp64linux ;;
 sparc64-*-netbsd*)	gdb_target=nbsd64 ;;
-sparcv9-*-* | sparc64-*-*) gdb_target=sp64 ;;
+sparc-*-openbsd*)	gdb_target=obsd ;;
+sparc64-*-openbsd*)	gdb_target=obsd64
+			gdb_osabi=GDB_OSABI_OPENBSD_ELF
+			;;
+sparc-*-solaris2.[0-6] | sparc-*-solaris2.[0-6].*)
+			gdb_target=sol2
+			;;
+sparc-*-solaris2* | sparcv9-*-solaris2* | sparc64-*-solaris2*)
+			gdb_target=sol2-64
+			;;
+sparc-*-vxworks*)	gdb_target=vxworks ;;
+sparc-*-*)		gdb_target=sparc ;;
+sparc64-*-*)		gdb_target=sparc64 ;;
 
 xstormy16-*-*)          gdb_target=xstormy16 ;;
 

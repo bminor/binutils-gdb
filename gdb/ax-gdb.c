@@ -134,7 +134,6 @@ static void gen_sizeof (union exp_element **pc,
 static void gen_expr (union exp_element **pc,
 		      struct agent_expr *ax, struct axs_value *value);
 
-static void print_axs_value (struct ui_file *f, struct axs_value * value);
 static void agent_command (char *exp, int from_tty);
 
 
@@ -1797,33 +1796,6 @@ gen_trace_for_expr (CORE_ADDR scope, struct expression *expr)
   discard_cleanups (old_chain);
   return ax;
 }
-
-
-
-/* The "agent" command, for testing: compile and disassemble an expression.  */
-
-static void
-print_axs_value (struct ui_file *f, struct axs_value *value)
-{
-  switch (value->kind)
-    {
-    case axs_rvalue:
-      fputs_filtered ("rvalue", f);
-      break;
-
-    case axs_lvalue_memory:
-      fputs_filtered ("memory lvalue", f);
-      break;
-
-    case axs_lvalue_register:
-      fprintf_filtered (f, "register %d lvalue", value->u.reg);
-      break;
-    }
-
-  fputs_filtered (" : ", f);
-  type_print (value->type, "", f, -1);
-}
-
 
 static void
 agent_command (char *exp, int from_tty)

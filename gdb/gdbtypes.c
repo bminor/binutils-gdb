@@ -127,8 +127,6 @@ struct extra
     int len;
   };				/* maximum extension is 128! FIXME */
 
-static void add_name (struct extra *, const char *);
-static void add_mangled_type (struct extra *, struct type *);
 static void print_bit_vector (B_TYPE *, int);
 static void print_arg_types (struct field *, int, int);
 static void dump_fn_fieldlists (struct type *, int);

@@ -2597,9 +2597,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_pop_frame (gdbarch, s390_pop_frame);
   /* Stack grows downward.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  /* Offset from address of function to start of its code.
-     Zero on most machines.  */
-  set_gdbarch_function_start_offset (gdbarch, 0);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 8);
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 8);
   set_gdbarch_breakpoint_from_pc (gdbarch, s390_breakpoint_from_pc);

@@ -1,8 +1,8 @@
 /* Print and select stack frames for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
-   Foundation, Inc.
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -967,10 +967,6 @@ frame_info (char *addr_exp, int from_tty)
   if (s)
     printf_filtered (" source language %s.\n",
 		     language_str (s->language));
-
-#ifdef DEPRECATED_PRINT_EXTRA_FRAME_INFO
-  DEPRECATED_PRINT_EXTRA_FRAME_INFO (fi);
-#endif
 
   {
     /* Address of the argument list for this frame, or 0.  */

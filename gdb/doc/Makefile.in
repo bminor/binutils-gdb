@@ -171,8 +171,8 @@ install-info: $(INFO_DEPS)
 	@if $(SHELL) -c 'install-info --version | sed 1q | fgrep -s -v -i debian' >/dev/null 2>&1; then \
 	  list='$(INFO_DEPS)'; \
 	  for file in $$list; do \
-	    echo " install-info --info-dir=$(infodir) $(DESTDIR)$(infodir)/$$file";\
-	    install-info --info-dir=$(infodir) $(DESTDIR)$(infodir)/$$file || :;\
+	    echo " install-info --info-dir=$(DESTDIR)$(infodir) $(DESTDIR)$(infodir)/$$file";\
+	    install-info --info-dir=$(DESTDIR)$(infodir) $(DESTDIR)$(infodir)/$$file || :;\
 	  done; \
 	else : ; fi
 

@@ -76,8 +76,8 @@ enum
 	| CONTEXT_EXTENDED_REGISTERS
 
 static unsigned dr[8];
-static int debug_registers_changed = 0;
-static int debug_registers_used = 0;
+static int debug_registers_changed;
+static int debug_registers_used;
 
 /* The string sent by cygwin when it processes a signal.
    FIXME: This should be in a cygwin include file. */
@@ -108,6 +108,7 @@ typedef struct thread_info_struct
     HANDLE h;
     char *name;
     int suspend_count;
+    int reload_context;
     CONTEXT context;
     STACKFRAME sf;
   }
@@ -228,7 +229,6 @@ check (BOOL ok, const char *file, int line)
 		     GetLastError ());
 }
 
-
 /* Find a thread record given a thread id.
    If get_context then also retrieve the context for this
    thread. */
@@ -246,19 +246,7 @@ thread_rec (DWORD id, int get_context)
 	      th->suspend_count = SuspendThread (th->h) + 1;
 	    else if (get_context < 0)
 	      th->suspend_count = -1;
-
-	    th->context.ContextFlags = CONTEXT_DEBUGGER_DR;
-	    GetThreadContext (th->h, &th->context);
-	    if (id == current_event.dwThreadId)
-	      {
-		/* Copy dr values from that thread.  */
-		dr[0] = th->context.Dr0;
-		dr[1] = th->context.Dr1;
-		dr[2] = th->context.Dr2;
-		dr[3] = th->context.Dr3;
-		dr[6] = th->context.Dr6;
-		dr[7] = th->context.Dr7;
-	      }
+	    th->reload_context = 1;
 	  }
 	return th;
       }
@@ -349,6 +337,25 @@ do_child_fetch_inferior_registers (int r)
   char *context_offset = ((char *) &current_thread->context) + mappings[r];
   long l;
 
+  if (!current_thread)
+    return;	/* Windows sometimes uses a non-existent thread id in its
+		   events */
+
+  if (current_thread->reload_context)
+    {
+      thread_info *th = current_thread;
+      th->context.ContextFlags = CONTEXT_DEBUGGER_DR;
+      GetThreadContext (th->h, &th->context);
+      /* Copy dr values from that thread.  */
+      dr[0] = th->context.Dr0;
+      dr[1] = th->context.Dr1;
+      dr[2] = th->context.Dr2;
+      dr[3] = th->context.Dr3;
+      dr[6] = th->context.Dr6;
+      dr[7] = th->context.Dr7;
+      current_thread->reload_context = 0;
+    }
+
 #define I387_ST0_REGNUM I386_ST0_REGNUM
 
   if (r == I387_FISEG_REGNUM)
@@ -376,13 +383,18 @@ static void
 child_fetch_inferior_registers (int r)
 {
   current_thread = thread_rec (PIDGET (inferior_ptid), TRUE);
-  do_child_fetch_inferior_registers (r);
+  /* Check if current_thread exists.  Windows sometimes uses a non-existent
+     thread id in its events */
+  if (current_thread)
+    do_child_fetch_inferior_registers (r);
 }
 
 static void
 do_child_store_inferior_registers (int r)
 {
-  if (r >= 0)
+  if (!current_thread)
+    /* Windows sometimes uses a non-existent thread id in its events */;
+  else if (r >= 0)
     regcache_collect (r, ((char *) &current_thread->context) + mappings[r]);
   else
     {
@@ -396,7 +408,10 @@ static void
 child_store_inferior_registers (int r)
 {
   current_thread = thread_rec (PIDGET (inferior_ptid), TRUE);
-  do_child_store_inferior_registers (r);
+  /* Check if current_thread exists.  Windows sometimes uses a non-existent
+     thread id in its events */
+  if (current_thread)
+    do_child_store_inferior_registers (r);
 }
 
 static int psapi_loaded = 0;
@@ -1179,7 +1194,7 @@ child_continue (DWORD continue_status, int id)
 	  th->suspend_count = 0;
 	  if (debug_registers_changed)
 	    {
-	      /* Only change the value of the debug reisters */
+	      /* Only change the value of the debug registers */
 	      th->context.ContextFlags = CONTEXT_DEBUG_REGISTERS;
 	      th->context.Dr0 = dr[0];
 	      th->context.Dr1 = dr[1];
@@ -1197,6 +1212,19 @@ child_continue (DWORD continue_status, int id)
   return res;
 }
 
+/* Called in pathological case where Windows fails to send a
+   CREATE_PROCESS_DEBUG_EVENT after an attach.  */
+DWORD
+fake_create_process (void)
+{
+  current_process_handle = OpenProcess (PROCESS_ALL_ACCESS, FALSE,
+					current_event.dwProcessId);
+  main_thread_id = current_event.dwThreadId;
+  current_thread = child_add_thread (main_thread_id,
+				     current_event.u.CreateThread.hThread);
+  return main_thread_id;
+}
+
 /* Get the next event from the child.  Return 1 if the event requires
    handling by WFI (or whatever).
  */
@@ -1205,7 +1233,7 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus)
 {
   BOOL debug_event;
   DWORD continue_status, event_code;
-  thread_info *th = NULL;
+  thread_info *th;
   static thread_info dummy_thread_info;
   int retval = 0;
 
@@ -1219,6 +1247,7 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus)
 
   event_code = current_event.dwDebugEventCode;
   ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+  th = NULL;
 
   switch (event_code)
     {
@@ -1228,7 +1257,17 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus)
 		     (unsigned) current_event.dwThreadId,
 		     "CREATE_THREAD_DEBUG_EVENT"));
       if (saw_create != 1)
-	break;
+	{
+	  if (!saw_create && attach_flag)
+	    {
+	      /* Kludge around a Windows bug where first event is a create
+		 thread event.  Caused when attached process does not have
+		 a main thread. */
+	      retval = ourstatus->value.related_pid = fake_create_process ();
+	      saw_create++;
+	    }
+	  break;
+	}
       /* Record the existence of this thread */
       th = child_add_thread (current_event.dwThreadId,
 			     current_event.u.CreateThread.hThread);
@@ -1244,10 +1283,11 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus)
 		     (unsigned) current_event.dwProcessId,
 		     (unsigned) current_event.dwThreadId,
 		     "EXIT_THREAD_DEBUG_EVENT"));
-      if (saw_create != 1)
-	break;
-      child_delete_thread (current_event.dwThreadId);
-      th = &dummy_thread_info;
+      if (current_event.dwThreadId != main_thread_id)
+	{
+	  child_delete_thread (current_event.dwThreadId);
+	  th = &dummy_thread_info;
+	}
       break;
 
     case CREATE_PROCESS_DEBUG_EVENT:
@@ -1263,12 +1303,10 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus)
 	}
 
       current_process_handle = current_event.u.CreateProcessInfo.hProcess;
+      if (main_thread_id)
+	child_delete_thread (main_thread_id);
       main_thread_id = current_event.dwThreadId;
       /* Add the main thread */
-#if 0
-      th = child_add_thread (current_event.dwProcessId,
-			     current_event.u.CreateProcessInfo.hProcess);
-#endif
       th = child_add_thread (main_thread_id,
 			     current_event.u.CreateProcessInfo.hThread);
       retval = ourstatus->value.related_pid = current_event.dwThreadId;
@@ -1353,8 +1391,8 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus)
     CHECK (child_continue (continue_status, -1));
   else
     {
-      current_thread = th ? : thread_rec (current_event.dwThreadId, TRUE);
       inferior_ptid = pid_to_ptid (retval);
+      current_thread = th ?: thread_rec (current_event.dwThreadId, TRUE);
     }
 
 out:
@@ -1569,10 +1607,9 @@ child_attach (char *args, int from_tty)
     }
 
   if (has_detach_ability ())
-    {
-      attach_flag = 1;
-      DebugSetProcessKillOnExit (FALSE);
-    }
+    DebugSetProcessKillOnExit (FALSE);
+
+  attach_flag = 1;
 
   if (from_tty)
     {
@@ -1693,6 +1730,8 @@ child_create_inferior (char *exec_file, char *allargs, char **env)
 
   if (new_console)
     flags |= CREATE_NEW_CONSOLE;
+
+  attach_flag = 0;
 
   args = alloca (strlen (toexec) + strlen (allargs) + 2);
   strcpy (args, toexec);
@@ -1895,7 +1934,8 @@ child_kill_inferior (void)
   CHECK (CloseHandle (current_process_handle));
 
   /* this may fail in an attached process so don't check. */
-  (void) CloseHandle (current_thread->h);
+  if (current_thread && current_thread->h)
+    (void) CloseHandle (current_thread->h);
   target_mourn_inferior ();	/* or just child_mourn_inferior? */
 }
 
@@ -2147,7 +2187,6 @@ cygwin_get_dr6 (void)
   return dr[6];
 }
 
-
 /* Determine if the thread referenced by "pid" is alive
    by "polling" it.  If WaitForSingleObject returns WAIT_OBJECT_0
    it means that the pid has died.  Otherwise it is assumed to be alive. */
@@ -2199,65 +2238,65 @@ core_dll_symbols_add (char *dll_name, DWORD base_addr)
       }
   }
 
-  register_loaded_dll (dll_name, base_addr + 0x1000);
-  solib_symbols_add (dll_name, 0, (CORE_ADDR) base_addr + 0x1000);
+    register_loaded_dll (dll_name, base_addr + 0x1000);
+    solib_symbols_add (dll_name, 0, (CORE_ADDR) base_addr + 0x1000);
 
-out:
-  return 1;
-}
+  out:
+    return 1;
+  }
 
-typedef struct
-{
-  struct target_ops *target;
-  bfd_vma addr;
-} map_code_section_args;
+  typedef struct
+  {
+    struct target_ops *target;
+    bfd_vma addr;
+  } map_code_section_args;
 
-static void
-map_single_dll_code_section (bfd * abfd, asection * sect, void *obj)
-{
-  int old;
-  int update_coreops;
-  struct section_table *new_target_sect_ptr;
+  static void
+  map_single_dll_code_section (bfd * abfd, asection * sect, void *obj)
+  {
+    int old;
+    int update_coreops;
+    struct section_table *new_target_sect_ptr;
 
-  map_code_section_args *args = (map_code_section_args *) obj;
-  struct target_ops *target = args->target;
-  if (sect->flags & SEC_CODE)
-    {
-      update_coreops = core_ops.to_sections == target->to_sections;
+    map_code_section_args *args = (map_code_section_args *) obj;
+    struct target_ops *target = args->target;
+    if (sect->flags & SEC_CODE)
+      {
+	update_coreops = core_ops.to_sections == target->to_sections;
 
-      if (target->to_sections)
-	{
-	  old = target->to_sections_end - target->to_sections;
-	  target->to_sections = (struct section_table *)
-	    xrealloc ((char *) target->to_sections,
-		      (sizeof (struct section_table)) * (1 + old));
-	}
-      else
-	{
-	  old = 0;
-	  target->to_sections = (struct section_table *)
-	    xmalloc ((sizeof (struct section_table)));
-	}
-      target->to_sections_end = target->to_sections + (1 + old);
+	if (target->to_sections)
+	  {
+	    old = target->to_sections_end - target->to_sections;
+	    target->to_sections = (struct section_table *)
+	      xrealloc ((char *) target->to_sections,
+			(sizeof (struct section_table)) * (1 + old));
+	  }
+	else
+	  {
+	    old = 0;
+	    target->to_sections = (struct section_table *)
+	      xmalloc ((sizeof (struct section_table)));
+	  }
+	target->to_sections_end = target->to_sections + (1 + old);
 
-      /* Update the to_sections field in the core_ops structure
-	 if needed.  */
-      if (update_coreops)
-	{
-	  core_ops.to_sections = target->to_sections;
-	  core_ops.to_sections_end = target->to_sections_end;
-	}
-      new_target_sect_ptr = target->to_sections + old;
-      new_target_sect_ptr->addr = args->addr + bfd_section_vma (abfd, sect);
-      new_target_sect_ptr->endaddr = args->addr + bfd_section_vma (abfd, sect) +
-	bfd_section_size (abfd, sect);;
-      new_target_sect_ptr->the_bfd_section = sect;
-      new_target_sect_ptr->bfd = abfd;
-    }
-}
+	/* Update the to_sections field in the core_ops structure
+	   if needed.  */
+	if (update_coreops)
+	  {
+	    core_ops.to_sections = target->to_sections;
+	    core_ops.to_sections_end = target->to_sections_end;
+	  }
+	new_target_sect_ptr = target->to_sections + old;
+	new_target_sect_ptr->addr = args->addr + bfd_section_vma (abfd, sect);
+	new_target_sect_ptr->endaddr = args->addr + bfd_section_vma (abfd, sect) +
+	  bfd_section_size (abfd, sect);;
+	new_target_sect_ptr->the_bfd_section = sect;
+	new_target_sect_ptr->bfd = abfd;
+      }
+  }
 
-static int
-dll_code_sections_add (const char *dll_name, int base_addr, struct target_ops *target)
+  static int
+  dll_code_sections_add (const char *dll_name, int base_addr, struct target_ops *target)
 {
   bfd *dll_bfd;
   map_code_section_args map_args;

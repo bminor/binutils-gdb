@@ -502,6 +502,35 @@ sparc_elf_lox10_reloc (abfd,
   return bfd_reloc_ok;
 }
 
+/* Support for core dump NOTE sections.  */
+
+static bfd_boolean
+elf32_sparc_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
+{
+  switch (note->descsz)
+    {
+    default:
+      return FALSE;
+
+    case 260:			/* Solaris prpsinfo_t.  */
+      elf_tdata (abfd)->core_program
+	= _bfd_elfcore_strndup (abfd, note->descdata + 84, 16);
+      elf_tdata (abfd)->core_command
+	= _bfd_elfcore_strndup (abfd, note->descdata + 100, 80);
+      break;
+
+    case 336:			/* Solaris psinfo_t.  */
+      elf_tdata (abfd)->core_program
+	= _bfd_elfcore_strndup (abfd, note->descdata + 88, 16);
+      elf_tdata (abfd)->core_command
+	= _bfd_elfcore_strndup (abfd, note->descdata + 104, 80);
+      break;
+    }
+
+  return TRUE;
+}
+
+
 /* Functions for the SPARC ELF linker.  */
 
 /* The name of the dynamic interpreter.  This is put in the .interp
@@ -3451,6 +3480,7 @@ elf32_sparc_reloc_type_class (rela)
 					elf32_sparc_final_write_processing
 #define elf_backend_gc_mark_hook	elf32_sparc_gc_mark_hook
 #define elf_backend_gc_sweep_hook       elf32_sparc_gc_sweep_hook
+#define elf_backend_grok_psinfo		elf32_sparc_grok_psinfo
 #define elf_backend_reloc_type_class	elf32_sparc_reloc_type_class
 
 #define elf_backend_can_gc_sections 1

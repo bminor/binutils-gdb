@@ -70,8 +70,7 @@ _bfd_new_bfd (void)
   nbfd->direction = no_direction;
   nbfd->iostream = NULL;
   nbfd->where = 0;
-  if (!bfd_hash_table_init_n (&nbfd->section_htab,
-			      bfd_section_hash_newfunc,
+  if (!bfd_hash_table_init_n (& nbfd->section_htab, bfd_section_hash_newfunc,
 			      251))
     {
       free (nbfd);
@@ -923,7 +922,7 @@ find_separate_debug_file (bfd *abfd, const char *debug_file_directory)
   for (i = strlen (dir) - 1; i >= 0; i--)
     if (IS_DIR_SEPARATOR (dir[i]))
       break;
-  
+
   dir[i + 1] = '\0';
   BFD_ASSERT (dir[i] == '/' || dir[0] == '\0')
 
@@ -996,23 +995,26 @@ SYNOPSIS
 DESCRIPTION
 
 	Takes a BFD and searches it for a .gnu_debuglink section.  If this
-	section is found, examines the section for the name and checksum of
-	a '.debug' file containing auxiliary debugging
-	information. Searches filesystem for .debug file in some standard
+	section is found, it examines the section for the name and checksum
+	of a '.debug' file containing auxiliary debugging information.  It
+	then searches the filesystem for this .debug file in some standard
 	locations, including the directory tree rooted at @var{dir}, and if
-	found returns the full filename. If @var{dir} is NULL, will search
-	default path configured into libbfd at build time.
+	found returns the full filename.
+
+	If @var{dir} is NULL, it will search a default path configured into
+	libbfd at build time.  [XXX this feature is not currently
+	implemented].
 
 RETURNS
 	<<NULL>> on any errors or failure to locate the .debug file,
 	otherwise a pointer to a heap-allocated string containing the
-	filename. The caller is responsible for freeing this string.
+	filename.  The caller is responsible for freeing this string.
 */
 
 char *
 bfd_follow_gnu_debuglink (bfd *abfd, const char *dir)
 {
-#if 0 /* Disabled until DEBUGDIR can be defined by configure.in  */
+#if 0 /* Disabled until DEBUGDIR can be defined by configure.in.  */
   if (dir == NULL)
     dir = DEBUGDIR;
 #endif

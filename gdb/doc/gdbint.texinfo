@@ -8,7 +8,7 @@
 
 @ifinfo
 This file documents the internals of the GNU debugger @value{GDBN}.
-Copyright 1990,1991,1992,1993,1994,1996,1998,1999,2000,2001,2002,2003
+Copyright 1990,1991,1992,1993,1994,1996,1998,1999,2000,2001,2002,2003,2004
    Free Software Foundation, Inc.
 Contributed by Cygnus Solutions.  Written by John Gilmore.
 Second Edition by Stan Shebs.
@@ -48,7 +48,7 @@ Free Documentation License''.
 
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1990,1991,1992,1993,1994,1996,1998,1999,2000,2001,
-   2002, 2003  Free Software Foundation, Inc.
+   2002, 2003, 2004  Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
@@ -479,13 +479,6 @@ two macros can use them for their internal purposes.
 @item target_stopped_data_address ()
 If the inferior has some watchpoint that triggered, return the address
 associated with that watchpoint.  Otherwise, return zero.
-
-@findex DECR_PC_AFTER_HW_BREAK
-@item DECR_PC_AFTER_HW_BREAK
-If defined, @value{GDBN} decrements the program counter by the value
-of @code{DECR_PC_AFTER_HW_BREAK} after a hardware break-point.  This
-overrides the value of @code{DECR_PC_AFTER_BREAK} when a breakpoint
-that breaks is a hardware-assisted breakpoint.
 
 @findex HAVE_STEPPABLE_WATCHPOINT
 @item HAVE_STEPPABLE_WATCHPOINT
@@ -2245,12 +2238,6 @@ This macro is used as the argument to @code{lseek} (or, most commonly,
 @code{bfd_seek}).  FIXME, should be replaced by SEEK_SET instead,
 which is the POSIX equivalent.
 
-@item MMAP_BASE_ADDRESS
-When using HAVE_MMAP, the first mapping should go at this address.
-
-@item MMAP_INCREMENT
-when using HAVE_MMAP, this is the increment between mappings.
-
 @item NORETURN
 If defined, this should be one or more tokens, such as @code{volatile},
 that can be used in both the declaration and definition of functions to
@@ -2263,37 +2250,6 @@ If defined, this should be one or more tokens, such as
 of functions to indicate that they never return.  The default is already
 set correctly if compiling with GCC.  This will almost never need to be
 defined.
-
-@item USE_MMALLOC
-@findex mmalloc
-@value{GDBN} will use the @code{mmalloc} library for memory allocation
-for symbol reading if this symbol is defined.  Be careful defining it
-since there are systems on which @code{mmalloc} does not work for some
-reason.  One example is the DECstation, where its RPC library can't
-cope with our redefinition of @code{malloc} to call @code{mmalloc}.
-When defining @code{USE_MMALLOC}, you will also have to set
-@code{MMALLOC} in the Makefile, to point to the @code{mmalloc} library.  This
-define is set when you configure with @samp{--with-mmalloc}.
-
-@item NO_MMCHECK
-@findex mmcheck
-Define this if you are using @code{mmalloc}, but don't want the overhead
-of checking the heap with @code{mmcheck}.  Note that on some systems,
-the C runtime makes calls to @code{malloc} prior to calling @code{main}, and if
-@code{free} is ever called with these pointers after calling
-@code{mmcheck} to enable checking, a memory corruption abort is certain
-to occur.  These systems can still use @code{mmalloc}, but must define
-@code{NO_MMCHECK}.
-
-@item MMCHECK_FORCE
-Define this to 1 if the C runtime allocates memory prior to
-@code{mmcheck} being called, but that memory is never freed so we don't
-have to worry about it triggering a memory corruption abort.  The
-default is 0, which means that @code{mmcheck} will only install the heap
-checking functions if there has not yet been any memory allocation
-calls, and if it fails to install the functions, @value{GDBN} will issue a
-warning.  This is currently defined if you configure using
-@samp{--with-mmalloc}.
 
 @item NO_SIGINTERRUPT
 @findex siginterrupt
@@ -3161,10 +3117,6 @@ Define this to be the amount by which to decrement the PC after the
 program encounters a breakpoint.  This is often the number of bytes in
 @code{BREAKPOINT}, though not always.  For most targets this value will be 0.
 
-@item DECR_PC_AFTER_HW_BREAK
-@findex DECR_PC_AFTER_HW_BREAK
-Similarly, for hardware breakpoints.
-
 @item DISABLE_UNSETTABLE_BREAK (@var{addr})
 @findex DISABLE_UNSETTABLE_BREAK
 If defined, this should evaluate to 1 if @var{addr} is in a shared
@@ -3714,13 +3666,6 @@ be the number (greater than or equal to zero) of that register.
 
 This should only need to be defined if @code{TARGET_READ_PC} and
 @code{TARGET_WRITE_PC} are not defined.
-
-@item DEPRECATED_NPC_REGNUM
-@findex DEPRECATED_NPC_REGNUM
-The number of the ``next program counter'' register, if defined.
-
-@code{DEPRECATED_NPC_REGNUM} has been replaced by @code{TARGET_WRITE_PC}
-(@pxref{TARGET_WRITE_PC}).
 
 @item PARM_BOUNDARY
 @findex PARM_BOUNDARY
@@ -5132,6 +5077,23 @@ This warning includes uses of the assignment operator within an
 @item -Wpointer-arith
 
 @item -Wuninitialized
+
+@item -Wunused-label
+This warning has the additional benefit of detecting the absence of the
+@code{case} reserved word in a switch statement:
+@smallexample
+enum @{ FD_SCHEDULED, NOTHING_SCHEDULED @} sched;
+@dots{}
+switch (sched)
+  @{
+  case FD_SCHEDULED:
+    @dots{};
+    break;
+  NOTHING_SCHEDULED:
+    @dots{};
+    break;
+  @}
+@end smallexample
 @end table
 
 @emph{Pragmatics: Due to the way that @value{GDBN} is implemented most

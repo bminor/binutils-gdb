@@ -1,6 +1,6 @@
 /* Perform non-arithmetic operations on values, for GDB.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -2650,6 +2650,7 @@ value_maybe_namespace_elt (const struct type *curtype,
 			   const char *name,
 			   enum noside noside)
 {
+
   const char *namespace_name = TYPE_TAG_NAME (curtype);
   const struct symbol *sym;
 

@@ -2,8 +2,8 @@
    process.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
-   Foundation, Inc.
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -60,9 +60,6 @@ static void resume_cleanups (void *);
 static int hook_stop_stub (void *);
 
 static void delete_breakpoint_current_contents (void *);
-
-static void set_follow_fork_mode_command (char *arg, int from_tty,
-					  struct cmd_list_element *c);
 
 static int restore_selected_frame (void *);
 
@@ -340,12 +337,10 @@ static struct
 }
 pending_follow;
 
-static const char follow_fork_mode_ask[] = "ask";
 static const char follow_fork_mode_child[] = "child";
 static const char follow_fork_mode_parent[] = "parent";
 
 static const char *follow_fork_mode_kind_names[] = {
-  follow_fork_mode_ask,
   follow_fork_mode_child,
   follow_fork_mode_parent,
   NULL
@@ -357,16 +352,7 @@ static const char *follow_fork_mode_string = follow_fork_mode_parent;
 static int
 follow_fork (void)
 {
-  const char *follow_mode = follow_fork_mode_string;
-  int follow_child = (follow_mode == follow_fork_mode_child);
-
-  /* Or, did the user not know, and want us to ask? */
-  if (follow_fork_mode_string == follow_fork_mode_ask)
-    {
-      internal_error (__FILE__, __LINE__,
-		      "follow_inferior_fork: \"ask\" mode not implemented");
-      /* follow_mode = follow_fork_mode_...; */
-    }
+  int follow_child = (follow_fork_mode_string == follow_fork_mode_child);
 
   return target_follow_fork (follow_child);
 }
@@ -987,6 +973,7 @@ struct execution_control_state
 
 void init_execution_control_state (struct execution_control_state *ecs);
 
+static void handle_step_into_function (struct execution_control_state *ecs);
 void handle_inferior_event (struct execution_control_state *ecs);
 
 static void check_sigtramp2 (struct execution_control_state *ecs);
@@ -1236,6 +1223,95 @@ pc_in_sigtramp (CORE_ADDR pc)
   return PC_IN_SIGTRAMP (pc, name);
 }
 
+/* Handle the inferior event in the cases when we just stepped
+   into a function.  */
+
+static void
+handle_step_into_function (struct execution_control_state *ecs)
+{
+  CORE_ADDR real_stop_pc;
+
+  if ((step_over_calls == STEP_OVER_NONE)
+      || ((step_range_end == 1)
+          && in_prologue (prev_pc, ecs->stop_func_start)))
+    {
+      /* I presume that step_over_calls is only 0 when we're
+         supposed to be stepping at the assembly language level
+         ("stepi").  Just stop.  */
+      /* Also, maybe we just did a "nexti" inside a prolog,
+         so we thought it was a subroutine call but it was not.
+         Stop as well.  FENN */
+      stop_step = 1;
+      print_stop_reason (END_STEPPING_RANGE, 0);
+      stop_stepping (ecs);
+      return;
+    }
+
+  if (step_over_calls == STEP_OVER_ALL || IGNORE_HELPER_CALL (stop_pc))
+    {
+      /* We're doing a "next".  */
+
+      if (pc_in_sigtramp (stop_pc)
+          && frame_id_inner (step_frame_id,
+                             frame_id_build (read_sp (), 0)))
+        /* We stepped out of a signal handler, and into its
+           calling trampoline.  This is misdetected as a
+           subroutine call, but stepping over the signal
+           trampoline isn't such a bad idea.  In order to do that,
+           we have to ignore the value in step_frame_id, since
+           that doesn't represent the frame that'll reach when we
+           return from the signal trampoline.  Otherwise we'll
+           probably continue to the end of the program.  */
+        step_frame_id = null_frame_id;
+
+      step_over_function (ecs);
+      keep_going (ecs);
+      return;
+    }
+
+  /* If we are in a function call trampoline (a stub between
+     the calling routine and the real function), locate the real
+     function.  That's what tells us (a) whether we want to step
+     into it at all, and (b) what prologue we want to run to
+     the end of, if we do step into it.  */
+  real_stop_pc = skip_language_trampoline (stop_pc);
+  if (real_stop_pc == 0)
+    real_stop_pc = SKIP_TRAMPOLINE_CODE (stop_pc);
+  if (real_stop_pc != 0)
+    ecs->stop_func_start = real_stop_pc;
+
+  /* If we have line number information for the function we
+     are thinking of stepping into, step into it.
+
+     If there are several symtabs at that PC (e.g. with include
+     files), just want to know whether *any* of them have line
+     numbers.  find_pc_line handles this.  */
+  {
+    struct symtab_and_line tmp_sal;
+
+    tmp_sal = find_pc_line (ecs->stop_func_start, 0);
+    if (tmp_sal.line != 0)
+      {
+        step_into_function (ecs);
+        return;
+      }
+  }
+
+  /* If we have no line number and the step-stop-if-no-debug
+     is set, we stop the step so that the user has a chance to
+     switch in assembly mode.  */
+  if (step_over_calls == STEP_OVER_UNDEBUGGABLE && step_stop_if_no_debug)
+    {
+      stop_step = 1;
+      print_stop_reason (END_STEPPING_RANGE, 0);
+      stop_stepping (ecs);
+      return;
+    }
+
+  step_over_function (ecs);
+  keep_going (ecs);
+  return;
+}
 
 /* Given an execution control state that has been freshly filled in
    by an event from the inferior, figure out what it means and take
@@ -1244,7 +1320,6 @@ pc_in_sigtramp (CORE_ADDR pc)
 void
 handle_inferior_event (struct execution_control_state *ecs)
 {
-  CORE_ADDR real_stop_pc;
   /* NOTE: cagney/2003-03-28: If you're looking at this code and
      thinking that the variable stepped_after_stopped_by_watchpoint
      isn't used, then you're wrong!  The macro STOPPED_BY_WATCHPOINT,
@@ -2226,7 +2301,7 @@ process_event_stop_test:
 	     gdb of events.  This allows the user to get control
 	     and place breakpoints in initializer routines for
 	     dynamically loaded objects (among other things).  */
-	  if (stop_on_solib_events)
+	  if (stop_on_solib_events || stop_stack_dummy)
 	    {
 	      stop_stepping (ecs);
 	      return;
@@ -2479,88 +2554,8 @@ process_event_stop_test:
       || ecs->stop_func_name == 0)
     {
       /* It's a subroutine call.  */
-
-      if ((step_over_calls == STEP_OVER_NONE)
-	  || ((step_range_end == 1)
-	      && in_prologue (prev_pc, ecs->stop_func_start)))
-	{
-	  /* I presume that step_over_calls is only 0 when we're
-	     supposed to be stepping at the assembly language level
-	     ("stepi").  Just stop.  */
-	  /* Also, maybe we just did a "nexti" inside a prolog,
-	     so we thought it was a subroutine call but it was not.
-	     Stop as well.  FENN */
-	  stop_step = 1;
-	  print_stop_reason (END_STEPPING_RANGE, 0);
-	  stop_stepping (ecs);
-	  return;
-	}
-
-      if (step_over_calls == STEP_OVER_ALL || IGNORE_HELPER_CALL (stop_pc))
-	{
-	  /* We're doing a "next".  */
-
-	  if (pc_in_sigtramp (stop_pc)
-	      && frame_id_inner (step_frame_id,
-				 frame_id_build (read_sp (), 0)))
-	    /* We stepped out of a signal handler, and into its
-	       calling trampoline.  This is misdetected as a
-	       subroutine call, but stepping over the signal
-	       trampoline isn't such a bad idea.  In order to do that,
-	       we have to ignore the value in step_frame_id, since
-	       that doesn't represent the frame that'll reach when we
-	       return from the signal trampoline.  Otherwise we'll
-	       probably continue to the end of the program.  */
-	    step_frame_id = null_frame_id;
-
-	  step_over_function (ecs);
-	  keep_going (ecs);
-	  return;
-	}
-
-      /* If we are in a function call trampoline (a stub between
-         the calling routine and the real function), locate the real
-         function.  That's what tells us (a) whether we want to step
-         into it at all, and (b) what prologue we want to run to
-         the end of, if we do step into it.  */
-      real_stop_pc = skip_language_trampoline (stop_pc);
-      if (real_stop_pc == 0)
-	real_stop_pc = SKIP_TRAMPOLINE_CODE (stop_pc);
-      if (real_stop_pc != 0)
-	ecs->stop_func_start = real_stop_pc;
-
-      /* If we have line number information for the function we
-         are thinking of stepping into, step into it.
-
-         If there are several symtabs at that PC (e.g. with include
-         files), just want to know whether *any* of them have line
-         numbers.  find_pc_line handles this.  */
-      {
-	struct symtab_and_line tmp_sal;
-
-	tmp_sal = find_pc_line (ecs->stop_func_start, 0);
-	if (tmp_sal.line != 0)
-	  {
-	    step_into_function (ecs);
-	    return;
-	  }
-      }
-
-      /* If we have no line number and the step-stop-if-no-debug
-         is set, we stop the step so that the user has a chance to
-         switch in assembly mode.  */
-      if (step_over_calls == STEP_OVER_UNDEBUGGABLE && step_stop_if_no_debug)
-	{
-	  stop_step = 1;
-	  print_stop_reason (END_STEPPING_RANGE, 0);
-	  stop_stepping (ecs);
-	  return;
-	}
-
-      step_over_function (ecs);
-      keep_going (ecs);
+      handle_step_into_function (ecs);
       return;
-
     }
 
   /* We've wandered out of the step range.  */
@@ -2582,7 +2577,7 @@ process_event_stop_test:
   if (IN_SOLIB_RETURN_TRAMPOLINE (stop_pc, ecs->stop_func_name))
     {
       /* Determine where this trampoline returns.  */
-      real_stop_pc = SKIP_TRAMPOLINE_CODE (stop_pc);
+      CORE_ADDR real_stop_pc = SKIP_TRAMPOLINE_CODE (stop_pc);
 
       /* Only proceed through if we know where it's going.  */
       if (real_stop_pc)
@@ -2761,6 +2756,29 @@ step_into_function (struct execution_control_state *ecs)
       && ecs->sal.pc != ecs->stop_func_start
       && ecs->sal.end < ecs->stop_func_end)
     ecs->stop_func_start = ecs->sal.end;
+
+  /* Architectures which require breakpoint adjustment might not be able
+     to place a breakpoint at the computed address.  If so, the test
+     ``ecs->stop_func_start == stop_pc'' will never succeed.  Adjust
+     ecs->stop_func_start to an address at which a breakpoint may be
+     legitimately placed.
+     
+     Note:  kevinb/2004-01-19:  On FR-V, if this adjustment is not
+     made, GDB will enter an infinite loop when stepping through
+     optimized code consisting of VLIW instructions which contain
+     subinstructions corresponding to different source lines.  On
+     FR-V, it's not permitted to place a breakpoint on any but the
+     first subinstruction of a VLIW instruction.  When a breakpoint is
+     set, GDB will adjust the breakpoint address to the beginning of
+     the VLIW instruction.  Thus, we need to make the corresponding
+     adjustment here when computing the stop address.  */
+     
+  if (gdbarch_adjust_breakpoint_address_p (current_gdbarch))
+    {
+      ecs->stop_func_start
+	= gdbarch_adjust_breakpoint_address (current_gdbarch,
+	                                     ecs->stop_func_start);
+    }
 
   if (ecs->stop_func_start == stop_pc)
     {
@@ -2945,17 +2963,6 @@ keep_going (struct execution_control_state *ecs)
       if (stop_signal == TARGET_SIGNAL_TRAP && !signal_program[stop_signal])
 	stop_signal = TARGET_SIGNAL_0;
 
-#ifdef SHIFT_INST_REGS
-      /* I'm not sure when this following segment applies.  I do know,
-         now, that we shouldn't rewrite the regs when we were stopped
-         by a random signal from the inferior process.  */
-      /* FIXME: Shouldn't this be based on the valid bit of the SXIP?
-         (this is only used on the 88k).  */
-
-      if (!bpstat_explains_signal (stop_bpstat)
-	  && (stop_signal != TARGET_SIGNAL_CHLD) && !stopped_by_random_signal)
-	SHIFT_INST_REGS ();
-#endif /* SHIFT_INST_REGS */
 
       resume (currently_stepping (ecs), stop_signal);
     }
@@ -4066,31 +4073,12 @@ to the user would be loading/unloading of a new library.\n", &setlist), &showlis
   c = add_set_enum_cmd ("follow-fork-mode",
 			class_run,
 			follow_fork_mode_kind_names, &follow_fork_mode_string,
-/* ??rehrauer:  The "both" option is broken, by what may be a 10.20
-   kernel problem.  It's also not terribly useful without a GUI to
-   help the user drive two debuggers.  So for now, I'm disabling
-   the "both" option.  */
-/*                      "Set debugger response to a program call of fork \
-   or vfork.\n\
-   A fork or vfork creates a new process.  follow-fork-mode can be:\n\
-   parent  - the original process is debugged after a fork\n\
-   child   - the new process is debugged after a fork\n\
-   both    - both the parent and child are debugged after a fork\n\
-   ask     - the debugger will ask for one of the above choices\n\
-   For \"both\", another copy of the debugger will be started to follow\n\
-   the new child process.  The original debugger will continue to follow\n\
-   the original parent process.  To distinguish their prompts, the\n\
-   debugger copy's prompt will be changed.\n\
-   For \"parent\" or \"child\", the unfollowed process will run free.\n\
-   By default, the debugger will follow the parent process.",
- */
 			"Set debugger response to a program call of fork \
 or vfork.\n\
 A fork or vfork creates a new process.  follow-fork-mode can be:\n\
   parent  - the original process is debugged after a fork\n\
   child   - the new process is debugged after a fork\n\
-  ask     - the debugger will ask for one of the above choices\n\
-For \"parent\" or \"child\", the unfollowed process will run free.\n\
+The unfollowed process will continue to run.\n\
 By default, the debugger will follow the parent process.", &setlist);
   add_show_from_set (c, &showlist);
 

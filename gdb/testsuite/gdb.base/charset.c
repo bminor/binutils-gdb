@@ -2,6 +2,7 @@
    Jim Blandy <jimb@cygnus.com> --- December 2001 */
 
 #include <stdio.h>
+#include <string.h>
 
 
 /* X_string is a null-terminated string in the X charset whose

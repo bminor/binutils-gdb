@@ -1,6 +1,6 @@
 /* BFD back-end for Renesas H8/300 COFF binaries.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003
+   2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Steve Chamberlain, <sac@cygnus.com>.
 
@@ -265,8 +265,8 @@ static reloc_howto_type howto_table[] = {
      the function vector's entry in the jsr instruction.  */
   HOWTO (R_MEM_INDIRECT, 0, 0, 8, FALSE, 0, complain_overflow_bitfield, special, "8/indirect", FALSE, 0x000000ff, 0x000000ff, FALSE),
 
-  /* Internal reloc for relaxing.  This is created when a 16bit pc-relative
-     branch is turned into an 8bit pc-relative branch.  */
+  /* Internal reloc for relaxing.  This is created when a 16-bit pc-relative
+     branch is turned into an 8-bit pc-relative branch.  */
   HOWTO (R_PCRWORD_B, 0, 0, 8, TRUE, 0, complain_overflow_bitfield, special, "relaxed bCC:16", FALSE, 0x000000ff, 0x000000ff, FALSE),
 
   HOWTO (R_MOVL1, 0, 2, 32, FALSE, 0, complain_overflow_bitfield,special, "32/24 relaxable move", FALSE, 0xffffffff, 0xffffffff, FALSE),
@@ -458,8 +458,8 @@ h8300_reloc16_estimate (bfd *abfd, asection *input_section, arelent *reloc,
   /* Only examine the relocs which might be relaxable.  */
   switch (reloc->howto->type)
     {
-      /* This is the 16/24 bit absolute branch which could become an 8 bit
-	 pc-relative branch.  */
+      /* This is the 16-/24-bit absolute branch which could become an
+	 8-bit pc-relative branch.  */
     case R_JMP1:
     case R_JMPL1:
       /* Get the address of the target of this branch.  */
@@ -547,7 +547,7 @@ h8300_reloc16_estimate (bfd *abfd, asection *input_section, arelent *reloc,
 	}
       break;
 
-    /* This is the 16 bit pc-relative branch which could become an 8 bit
+    /* This is the 16-bit pc-relative branch which could become an 8-bit
        pc-relative branch.  */
     case R_PCRWORD:
       /* Get the address of the target of this branch, add one to the value
@@ -575,8 +575,8 @@ h8300_reloc16_estimate (bfd *abfd, asection *input_section, arelent *reloc,
 	}
       break;
 
-    /* This is a 16 bit absolute address in a mov.b insn, which can
-       become an 8 bit absolute address if it's in the right range.  */
+    /* This is a 16-bit absolute address in a mov.b insn, which can
+       become an 8-bit absolute address if it's in the right range.  */
     case R_MOV16B1:
       /* Get the address of the data referenced by this mov.b insn.  */
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
@@ -595,9 +595,9 @@ h8300_reloc16_estimate (bfd *abfd, asection *input_section, arelent *reloc,
 	}
       break;
 
-    /* Similarly for a 24 bit absolute address in a mov.b.  Note that
-       if we can't relax this into an 8 bit absolute, we'll fall through
-       and try to relax it into a 16bit absolute.  */
+    /* Similarly for a 24-bit absolute address in a mov.b.  Note that
+       if we can't relax this into an 8-bit absolute, we'll fall through
+       and try to relax it into a 16-bit absolute.  */
     case R_MOV24B1:
       /* Get the address of the data referenced by this mov.b insn.  */
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
@@ -616,11 +616,11 @@ h8300_reloc16_estimate (bfd *abfd, asection *input_section, arelent *reloc,
 	  break;
 	}
 
-      /* FALLTHROUGH and try to turn the 32/24 bit reloc into a 16 bit
+      /* FALLTHROUGH and try to turn the 24-/32-bit reloc into a 16-bit
 	 reloc.  */
 
-    /* This is a 24/32 bit absolute address in a mov insn, which can
-       become an 16 bit absolute address if it's in the right range.  */
+    /* This is a 24-/32-bit absolute address in a mov insn, which can
+       become an 16-bit absolute address if it's in the right range.  */
     case R_MOVL1:
       /* Get the address of the data referenced by this mov insn.  */
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
@@ -666,10 +666,11 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
   bfd_vma value;
   bfd_vma dot;
   int gap, tmp;
+  unsigned char temp_code;
 
   switch (reloc->howto->type)
     {
-    /* Generic 8bit pc-relative relocation.  */
+    /* Generic 8-bit pc-relative relocation.  */
     case R_PCRBYTE:
       /* Get the address of the target of this branch.  */
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
@@ -699,7 +700,7 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       /* All done.  */
       break;
 
-    /* Generic 16bit pc-relative relocation.  */
+    /* Generic 16-bit pc-relative relocation.  */
     case R_PCRWORD:
       /* Get the address of the target of this branch.  */
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
@@ -730,7 +731,7 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       /* All done.  */
       break;
 
-    /* Generic 8bit absolute relocation.  */
+    /* Generic 8-bit absolute relocation.  */
     case R_RELBYTE:
       /* Get the address of the object referenced by this insn.  */
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
@@ -742,7 +743,7 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       /* All done.  */
       break;
 
-    /* Various simple 16bit absolute relocations.  */
+    /* Various simple 16-bit absolute relocations.  */
     case R_MOV16B1:
     case R_JMP1:
     case R_RELWORD:
@@ -752,7 +753,7 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       src_address += 2;
       break;
 
-    /* Various simple 24/32bit absolute relocations.  */
+    /* Various simple 24-/32-bit absolute relocations.  */
     case R_MOV24B1:
     case R_MOVL1:
     case R_RELLONG:
@@ -763,7 +764,7 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       src_address += 4;
       break;
 
-    /* Another 24/32bit absolute relocation.  */
+    /* Another 24-/32-bit absolute relocation.  */
     case R_JMPL1:
       /* Get the address of the target of this branch.  */
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
@@ -775,8 +776,15 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       src_address += 4;
       break;
 
-    /* A 16bit absolute relocation that was formerly a 24/32bit
-       absolute relocation.  */
+      /* This is a 24-/32-bit absolute address in one of the following
+	 instructions:
+
+	   "band", "bclr", "biand", "bild", "bior", "bist", "bixor",
+	   "bld", "bnot", "bor", "bset", "bst", "btst", "bxor", and
+	   "mov.[bwl]"
+
+	 We may relax this into an 16-bit absolute address if it's in
+	 the right range.  */
     case R_MOVL2:
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
       value = bfd_h8300_pad_address (abfd, value);
@@ -784,11 +792,12 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       /* Sanity check.  */
       if (value <= 0x7fff || value >= 0xffff8000u)
 	{
-	  /* Insert the 16bit value into the proper location.  */
+	  /* Insert the 16-bit value into the proper location.  */
 	  bfd_put_16 (abfd, value, data + dst_address);
 
-	  /* Fix the opcode.  For all the move insns, we simply
-	     need to turn off bit 0x20 in the previous byte.  */
+	  /* Fix the opcode.  For all the instructions that belong to
+	     this relaxation, we simply need to turn off bit 0x20 in
+	     the previous byte.  */
 	  data[dst_address - 1] &= ~0x20;
 	  dst_address += 2;
 	  src_address += 4;
@@ -803,7 +812,7 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
 	}
       break;
 
-    /* A 16bit absolute branch that is now an 8-bit pc-relative branch.  */
+    /* A 16-bit absolute branch that is now an 8-bit pc-relative branch.  */
     case R_JMP2:
       /* Get the address of the target of this branch.  */
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
@@ -833,7 +842,7 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
 	  bfd_put_8 (abfd, 0x55, data + dst_address - 1);
 	  break;
 	case 0x5a:
-	  /* jmp ->bra */
+	  /* jmp -> bra */
 	  bfd_put_8 (abfd, 0x40, data + dst_address - 1);
 	  break;
 
@@ -841,7 +850,7 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
 	  abort ();
 	}
 
-      /* Write out the 8bit value.  */
+      /* Write out the 8-bit value.  */
       bfd_put_8 (abfd, gap, data + dst_address);
 
       dst_address += 1;
@@ -849,7 +858,7 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
 
       break;
 
-    /* A 16bit pc-relative branch that is now an 8-bit pc-relative branch.  */
+    /* A 16-bit pc-relative branch that is now an 8-bit pc-relative branch.  */
     case R_PCRWORD_B:
       /* Get the address of the target of this branch.  */
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
@@ -876,12 +885,15 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
 	{
 	case 0x58:
 	  /* bCC:16 -> bCC:8 */
-	  /* Get the condition code from the original insn.  */
+	  /* Get the second byte of the original insn, which contains
+	     the condition code.  */
 	  tmp = data[dst_address - 1];
+
+	  /* Compute the fisrt byte of the relaxed instruction.  The
+	     original sequence 0x58 0xX0 is relaxed to 0x4X, where X
+	     represents the condition code.  */
 	  tmp &= 0xf0;
 	  tmp >>= 4;
-
-	  /* Now or in the high nibble of the opcode.  */
 	  tmp |= 0x40;
 
 	  /* Write it.  */
@@ -900,13 +912,13 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       /* Output the target.  */
       bfd_put_8 (abfd, gap, data + dst_address - 1);
 
-      /* We don't advance dst_address -- the 8bit reloc is applied at
+      /* We don't advance dst_address -- the 8-bit reloc is applied at
 	 dst_address - 1, so the next insn should begin at dst_address.  */
       src_address += 2;
 
       break;
 
-    /* Similarly for a 24bit absolute that is now 8 bits.  */
+    /* Similarly for a 24-bit absolute that is now 8 bits.  */
     case R_JMPL2:
       /* Get the address of the target of this branch.  */
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
@@ -939,22 +951,51 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
 
       break;
 
-    /* A 16bit absolute mov.b that is now an 8bit absolute mov.b.  */
+      /* This is a 16-bit absolute address in one of the following
+	 instructions:
+
+	   "band", "bclr", "biand", "bild", "bior", "bist", "bixor",
+	   "bld", "bnot", "bor", "bset", "bst", "btst", "bxor", and
+	   "mov.b"
+
+	 We may relax this into an 8-bit absolute address if it's in
+	 the right range.  */
     case R_MOV16B2:
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
 
-      /* Sanity check.  */
+      /* All instructions with R_H8_DIR16B2 start with 0x6a.  */
       if (data[dst_address - 2] != 0x6a)
 	abort ();
 
+      temp_code = data[src_address - 1];
+
+      /* If this is a mov.b instruction, clear the lower nibble, which
+	 contains the source/destination register number.  */
+      if ((temp_code & 0x10) != 0x10)
+	temp_code &= 0xf0;
+
       /* Fix up the opcode.  */
-      switch (data[src_address - 1] & 0xf0)
+      switch (temp_code)
 	{
 	case 0x00:
+	  /* This is mov.b @aa:16,Rd.  */
 	  data[dst_address - 2] = (data[src_address - 1] & 0xf) | 0x20;
 	  break;
 	case 0x80:
+	  /* This is mov.b Rs,@aa:16.  */
 	  data[dst_address - 2] = (data[src_address - 1] & 0xf) | 0x30;
+	  break;
+	case 0x18:
+	  /* This is a bit-maniputation instruction that stores one
+	     bit into memory, one of "bclr", "bist", "bnot", "bset",
+	     and "bst".  */
+	  data[dst_address - 2] = 0x7f;
+	  break;
+	case 0x10:
+	  /* This is a bit-maniputation instruction that loads one bit
+	     from memory, one of "band", "biand", "bild", "bior",
+	     "bixor", "bld", "bor", "btst", and "bxor".  */
+	  data[dst_address - 2] = 0x7e;
 	  break;
 	default:
 	  abort ();
@@ -964,22 +1005,51 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       src_address += 2;
       break;
 
-    /* Similarly for a 24bit mov.b  */
+      /* This is a 24-bit absolute address in one of the following
+	 instructions:
+
+	   "band", "bclr", "biand", "bild", "bior", "bist", "bixor",
+	   "bld", "bnot", "bor", "bset", "bst", "btst", "bxor", and
+	   "mov.b"
+
+	 We may relax this into an 8-bit absolute address if it's in
+	 the right range.  */
     case R_MOV24B2:
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
 
-      /* Sanity check.  */
+      /* All instructions with R_MOV24B2 start with 0x6a.  */
       if (data[dst_address - 2] != 0x6a)
 	abort ();
 
+      temp_code = data[src_address - 1];
+
+      /* If this is a mov.b instruction, clear the lower nibble, which
+	 contains the source/destination register number.  */
+      if ((temp_code & 0x30) != 0x30)
+	temp_code &= 0xf0;
+
       /* Fix up the opcode.  */
-      switch (data[src_address - 1] & 0xf0)
+      switch (temp_code)
 	{
 	case 0x20:
+	  /* This is mov.b @aa:24/32,Rd.  */
 	  data[dst_address - 2] = (data[src_address - 1] & 0xf) | 0x20;
 	  break;
 	case 0xa0:
+	  /* This is mov.b Rs,@aa:24/32.  */
 	  data[dst_address - 2] = (data[src_address - 1] & 0xf) | 0x30;
+	  break;
+	case 0x38:
+	  /* This is a bit-maniputation instruction that stores one
+	     bit into memory, one of "bclr", "bist", "bnot", "bset",
+	     and "bst".  */
+	  data[dst_address - 2] = 0x7f;
+	  break;
+	case 0x30:
+	  /* This is a bit-maniputation instruction that loads one bit
+	     from memory, one of "band", "biand", "bild", "bior",
+	     "bixor", "bld", "bor", "btst", and "bxor".  */
+	  data[dst_address - 2] = 0x7e;
 	  break;
 	default:
 	  abort ();
@@ -1025,7 +1095,7 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       src_address += 4;
       break;
 
-    /* An 8bit memory indirect instruction (jmp/jsr).
+    /* An 8-bit memory indirect instruction (jmp/jsr).
 
        There's several things that need to be done to handle
        this relocation.

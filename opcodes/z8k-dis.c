@@ -26,7 +26,7 @@
 #include "z8k-opc.h"
 
 #include <setjmp.h>
-
+
 typedef struct
 {
   /* These are all indexed by nibble number (i.e only every other entry
@@ -472,12 +472,53 @@ unpack_instr (instr_data_s *instr_data, int is_segmented, disassemble_info *info
     }
 }
 
-static char *intr_names[] = {
-  "all",    /* 0 */
-  "vi",     /* 1 */
-  "nvi",    /* 2 */
-  "none"    /* 3 */
-};
+static void
+print_intr(char *tmp_str, unsigned long interrupts)
+{
+  int comma = 0;
+
+  *tmp_str = 0;
+  if (! (interrupts & 2))
+    {
+      strcat (tmp_str, "vi");
+      comma = 1;
+    }
+  if (! (interrupts & 1))
+    {
+      if (comma) strcat (tmp_str, ",");
+      strcat (tmp_str, "nvi");
+    }
+}
+
+static void
+print_flags(char *tmp_str, unsigned long flags)
+{
+  int comma = 0;
+
+  *tmp_str = 0;
+  if (flags & 8)
+    {
+      strcat (tmp_str, "c");
+      comma = 1;
+    }
+  if (flags & 4)
+    {
+      if (comma) strcat (tmp_str, ",");
+      strcat (tmp_str, "z");
+      comma = 1;
+    }
+  if (flags & 2)
+    {
+      if (comma) strcat (tmp_str, ",");
+      strcat (tmp_str, "s");
+      comma = 1;
+    }
+  if (flags & 1)
+    {
+      if (comma) strcat (tmp_str, ",");
+      strcat (tmp_str, "p");
+    }
+}
 
 static void
 unparse_instr (instr_data_s *instr_data, int is_segmented)
@@ -529,12 +570,12 @@ unparse_instr (instr_data_s *instr_data, int is_segmented)
 	  strcat (out_str, tmp_str);
 	  break;
 	case CLASS_IMM:
-          if (datum_value == ARG_IMM2)  /* True with EI/DI instructions only.  */
-            {
-              sprintf (tmp_str, "%s", intr_names[instr_data->interrupts]);
-              strcat (out_str, tmp_str);
-              break;
-            }
+	  if (datum_value == ARG_IMM2)	/* True with EI/DI instructions only.  */
+	    {
+	      print_intr (tmp_str, instr_data->interrupts);
+	      strcat (out_str, tmp_str);
+	      break;
+	    }
 	  sprintf (tmp_str, "#0x%0lx", instr_data->immediate);
 	  strcat (out_str, tmp_str);
 	  break;
@@ -563,7 +604,7 @@ unparse_instr (instr_data_s *instr_data, int is_segmented)
 	  strcat (out_str, tmp_str);
 	  break;
 	case CLASS_FLAGS:
-	  sprintf (tmp_str, "0x%0lx", instr_data->flags);
+	  print_flags(tmp_str, instr_data->flags);
 	  strcat (out_str, tmp_str);
 	  break;
 	case CLASS_REG_BYTE:

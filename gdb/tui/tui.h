@@ -1,5 +1,8 @@
 /* External/Public TUI Header File.
-   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1998, 1999, 2000, 2001, 2004 Free Software Foundation,
+   Inc.
+
    Contributed by Hewlett-Packard Company.
 
    This file is part of GDB.
@@ -53,7 +56,7 @@ Opaque (*OpaqueFuncPtr) (va_list);
 extern void strcat_to_buf (char *, int, const char *);
 
 /* Types of error returns */
-     typedef enum
+     typedef enum tui_status
        {
 	 TUI_SUCCESS,
 	 TUI_FAILURE
@@ -61,7 +64,7 @@ extern void strcat_to_buf (char *, int, const char *);
 TuiStatus, *TuiStatusPtr;
 
 /* Types of windows */
-     typedef enum
+typedef enum tui_win_type
        {
 	 SRC_WIN = 0,
 	 DISASSEM_WIN,
@@ -135,7 +138,7 @@ extern void tui_show_source (const char *file, int line);
 extern struct ui_out *tui_out_new (struct ui_file *stream);
 
 /* tuiLayout.c */
-extern TuiStatus tui_set_layout (const char *);
+extern enum tui_status tui_set_layout_for_display_command (const char *name);
 
 /* tuiSourceWin.c */
 extern void tuiUpdateAllExecInfos (void);

@@ -1,7 +1,7 @@
 /* Target-dependent code for the Matsushita MN10300 for GDB, the GNU debugger.
 
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
-   Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -128,13 +128,6 @@ mn10300_extract_return_value (struct type *type, char *regbuf, char *valbuf)
     memcpy (valbuf, regbuf + DEPRECATED_REGISTER_BYTE (4), TYPE_LENGTH (type));
   else
     memcpy (valbuf, regbuf + DEPRECATED_REGISTER_BYTE (0), TYPE_LENGTH (type));
-}
-
-static CORE_ADDR
-mn10300_extract_struct_value_address (char *regbuf)
-{
-  return extract_unsigned_integer (regbuf + DEPRECATED_REGISTER_BYTE (4),
-				   DEPRECATED_REGISTER_RAW_SIZE (4));
 }
 
 static void
@@ -1173,8 +1166,6 @@ mn10300_gdbarch_init (struct gdbarch_info info,
 
   /* Breakpoints.  */
   set_gdbarch_breakpoint_from_pc (gdbarch, mn10300_breakpoint_from_pc);
-  set_gdbarch_function_start_offset (gdbarch, 0);
-  set_gdbarch_decr_pc_after_break (gdbarch, 0);
 
   /* Stack unwinding.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
@@ -1184,8 +1175,6 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_frame_chain (gdbarch, mn10300_frame_chain);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, mn10300_frame_saved_pc);
   set_gdbarch_deprecated_extract_return_value (gdbarch, mn10300_extract_return_value);
-  set_gdbarch_deprecated_extract_struct_value_address
-    (gdbarch, mn10300_extract_struct_value_address);
   set_gdbarch_deprecated_store_return_value (gdbarch, mn10300_store_return_value);
   set_gdbarch_deprecated_store_struct_return (gdbarch, mn10300_store_struct_return);
   set_gdbarch_deprecated_pop_frame (gdbarch, mn10300_pop_frame);
@@ -1219,6 +1208,5 @@ void
 _initialize_mn10300_tdep (void)
 {
 /*  printf("_initialize_mn10300_tdep\n"); */
-
-  register_gdbarch_init (bfd_arch_mn10300, mn10300_gdbarch_init);
+  gdbarch_register (bfd_arch_mn10300, mn10300_gdbarch_init, mn10300_dump_tdep);
 }

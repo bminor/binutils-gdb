@@ -3590,6 +3590,15 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
   if (info->relocatable)
     return TRUE;
 
+  /* Don't do anything special with non-loaded, non-alloced sections.
+     In particular, any relocs in such sections should not affect GOT
+     and PLT reference counting (ie. we don't allow them to create GOT
+     or PLT entries), there's no possibility or desire to optimize TLS
+     relocs, and there's not much point in propagating relocs to shared
+     libs that the dynamic linker won't relocate.  */
+  if ((sec->flags & SEC_ALLOC) == 0)
+    return TRUE;
+
   htab = ppc_hash_table (info);
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
 
@@ -3947,10 +3956,6 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  if (NO_OPD_RELOCS && opd_sym_map != NULL)
 	    break;
 
-	  /* Don't propagate relocs that the dynamic linker won't relocate.  */
-	  if ((sec->flags & SEC_ALLOC) == 0)
-	    break;
-
 	  /* If we are creating a shared library, and this is a reloc
 	     against a global symbol, or a non PC relative reloc
 	     against a local symbol, then we need to copy the reloc
@@ -4165,6 +4170,9 @@ ppc64_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
   struct elf_link_hash_entry **sym_hashes;
   struct got_entry **local_got_ents;
   const Elf_Internal_Rela *rel, *relend;
+
+  if ((sec->flags & SEC_ALLOC) == 0)
+    return TRUE;
 
   elf_section_data (sec)->local_dynrel = NULL;
 
@@ -6001,7 +6009,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	}
 
       /* .plt is in the bss section.  We don't initialise it.  */
-      if ((s->flags & SEC_LOAD) == 0)
+      if (s == htab->plt)
 	continue;
 
       /* Allocate memory for the section contents.  We use bfd_zalloc

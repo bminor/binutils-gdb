@@ -1,7 +1,8 @@
 /* Target-dependent code for the HP PA architecture, for GDB.
 
    Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+   Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
@@ -193,7 +194,6 @@ int hppa32_use_struct_convention (int gcc_p, struct type *type);
 int hppa64_use_struct_convention (int gcc_p, struct type *type);
 void hppa32_store_return_value (struct type *type, char *valbuf);
 void hppa64_store_return_value (struct type *type, char *valbuf);
-CORE_ADDR hppa_extract_struct_value_address (char *regbuf);
 int hppa_cannot_store_register (int regnum);
 void hppa_init_extra_frame_info (int fromleaf, struct frame_info *frame);
 CORE_ADDR hppa_frame_chain (struct frame_info *frame);
@@ -2608,7 +2608,7 @@ hppa_target_write_pc (CORE_ADDR v, ptid_t ptid)
     write_register_pid (31, v | 0x3, ptid);
 
   write_register_pid (PC_REGNUM, v, ptid);
-  write_register_pid (DEPRECATED_NPC_REGNUM, v + 4, ptid);
+  write_register_pid (PCOQ_TAIL_REGNUM, v + 4, ptid);
 }
 
 /* return the alignment of a type in bytes. Structures have the maximum
@@ -5005,26 +5005,6 @@ hppa_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
   write_register (28, addr);
 }
-
-CORE_ADDR
-hppa_extract_struct_value_address (char *regbuf)
-{
-  /* Extract from an array REGBUF containing the (raw) register state
-     the address in which a function should return its structure value,
-     as a CORE_ADDR (or an expression that can be used as one).  */
-  /* FIXME: brobecker 2002-12-26.
-     The current implementation is historical, but we should eventually
-     implement it in a more robust manner as it relies on the fact that
-     the address size is equal to the size of an int* _on the host_...
-     One possible implementation that crossed my mind is to use
-     extract_address.  */
-  /* FIXME: cagney/2003-09-27: This function can probably go.  ELZ
-     writes: We cannot assume on the pa that r28 still contains the
-     address of the returned structure. Usually this will be
-     overwritten by the callee.  */
-  return (*(int *)(regbuf + DEPRECATED_REGISTER_BYTE (28)));
-}
-
 /* Return True if REGNUM is not a register available to the user
    through ptrace().  */
 
@@ -5060,6 +5040,41 @@ hppa_fetch_pointer_argument (struct frame_info *frame, int argi,
   get_frame_register (frame, R0_REGNUM + 26 - argi, &addr);
   return addr;
 }
+
+/* Here is a table of C type sizes on hppa with various compiles
+   and options.  I measured this on PA 9000/800 with HP-UX 11.11
+   and these compilers:
+
+     /usr/ccs/bin/cc    HP92453-01 A.11.01.21
+     /opt/ansic/bin/cc  HP92453-01 B.11.11.28706.GP
+     /opt/aCC/bin/aCC   B3910B A.03.45
+     gcc                gcc 3.3.2 native hppa2.0w-hp-hpux11.11
+
+     cc            : 1 2 4 4 8 : 4 8 -- : 4 4
+     ansic +DA1.1  : 1 2 4 4 8 : 4 8 16 : 4 4
+     ansic +DA2.0  : 1 2 4 4 8 : 4 8 16 : 4 4
+     ansic +DA2.0W : 1 2 4 8 8 : 4 8 16 : 8 8
+     acc   +DA1.1  : 1 2 4 4 8 : 4 8 16 : 4 4
+     acc   +DA2.0  : 1 2 4 4 8 : 4 8 16 : 4 4
+     acc   +DA2.0W : 1 2 4 8 8 : 4 8 16 : 8 8
+     gcc           : 1 2 4 4 8 : 4 8 16 : 4 4
+
+   Each line is:
+
+     compiler and options
+     char, short, int, long, long long
+     float, double, long double
+     char *, void (*)()
+
+   So all these compilers use either ILP32 or LP64 model.
+   TODO: gcc has more options so it needs more investigation.
+
+   For floating point types, see:
+
+     http://docs.hp.com/hpux/pdf/B3906-90006.pdf
+     HP-UX floating-point guide, hpux 11.00
+
+   -- chastain 2003-12-18  */
 
 static struct gdbarch *
 hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
@@ -5141,12 +5156,16 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_register_bytes
     (gdbarch, gdbarch_num_regs (gdbarch) * tdep->bytes_per_address);
   set_gdbarch_long_bit (gdbarch, tdep->bytes_per_address * TARGET_CHAR_BIT);
-  set_gdbarch_long_long_bit (gdbarch, 64);
   set_gdbarch_ptr_bit (gdbarch, tdep->bytes_per_address * TARGET_CHAR_BIT);
+
+  /* The following gdbarch vector elements are the same in both ILP32
+     and LP64, but might show differences some day.  */
+  set_gdbarch_long_long_bit (gdbarch, 64);
+  set_gdbarch_long_double_bit (gdbarch, 128);
+  set_gdbarch_long_double_format (gdbarch, &floatformat_ia64_quad_big);
 
   /* The following gdbarch vector elements do not depend on the address
      size, or in any other gdbarch element previously set.  */
-  set_gdbarch_function_start_offset (gdbarch, 0);
   set_gdbarch_skip_prologue (gdbarch, hppa_skip_prologue);
   set_gdbarch_skip_trampoline_code (gdbarch, hppa_skip_trampoline_code);
   set_gdbarch_in_solib_call_trampoline (gdbarch, hppa_in_solib_call_trampoline);
@@ -5154,21 +5173,17 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
                                           hppa_in_solib_return_trampoline);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, hppa_saved_pc_after_call);
   set_gdbarch_inner_than (gdbarch, hppa_inner_than);
-  set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_deprecated_register_size (gdbarch, tdep->bytes_per_address);
   set_gdbarch_deprecated_fp_regnum (gdbarch, 3);
   set_gdbarch_sp_regnum (gdbarch, 30);
   set_gdbarch_fp0_regnum (gdbarch, 64);
   set_gdbarch_pc_regnum (gdbarch, PCOQ_HEAD_REGNUM);
-  set_gdbarch_deprecated_npc_regnum (gdbarch, PCOQ_TAIL_REGNUM);
   set_gdbarch_deprecated_register_raw_size (gdbarch, hppa_register_raw_size);
   set_gdbarch_deprecated_register_byte (gdbarch, hppa_register_byte);
   set_gdbarch_deprecated_register_virtual_size (gdbarch, hppa_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, tdep->bytes_per_address);
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 8);
   set_gdbarch_deprecated_store_struct_return (gdbarch, hppa_store_struct_return);
-  set_gdbarch_deprecated_extract_struct_value_address
-    (gdbarch, hppa_extract_struct_value_address);
   set_gdbarch_cannot_store_register (gdbarch, hppa_cannot_store_register);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, hppa_init_extra_frame_info);
   set_gdbarch_deprecated_frame_chain (gdbarch, hppa_frame_chain);

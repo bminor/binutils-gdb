@@ -37,15 +37,15 @@
 #include <setjmp.h>
 #include "defs.h"
 #include "gdbcmd.h"
-#include "tui.h"
-#include "tuiData.h"
-#include "tuiLayout.h"
-#include "tuiIO.h"
-#include "tuiRegs.h"
-#include "tuiStack.h"
-#include "tuiWin.h"
-#include "tuiSourceWin.h"
-#include "tuiDataWin.h"
+#include "tui/tui.h"
+#include "tui/tui-data.h"
+#include "tui/tui-layout.h"
+#include "tui/tui-io.h"
+#include "tui/tui-regs.h"
+#include "tui/tui-stack.h"
+#include "tui/tui-win.h"
+#include "tui/tui-winsource.h"
+#include "tui/tui-windata.h"
 #include "readline/readline.h"
 #include "target.h"
 #include "frame.h"
@@ -170,7 +170,7 @@ tui_rl_change_windows (int notused1, int notused2)
 	  new_layout = SRC_COMMAND;
 	  break;
 	}
-      tuiSetLayout (new_layout, regs_type);
+      tui_set_layout (new_layout, regs_type);
     }
   return 0;
 }
@@ -205,7 +205,7 @@ tui_rl_delete_other_windows (int notused1, int notused2)
 	  new_layout = DISASSEM_COMMAND;
 	  break;
 	}
-      tuiSetLayout (new_layout, regs_type);
+      tui_set_layout (new_layout, regs_type);
     }
   return 0;
 }
@@ -389,7 +389,7 @@ tui_enable (void)
       def_prog_mode ();
 
       tuiShowFrameInfo (0);
-      tuiSetLayout (SRC_COMMAND, TUI_UNDEFINED_REGS);
+      tui_set_layout (SRC_COMMAND, TUI_UNDEFINED_REGS);
       tuiSetWinFocusTo (srcWin);
       keypad (cmdWin->generic.handle, TRUE);
       wrefresh (cmdWin->generic.handle);
@@ -563,7 +563,7 @@ tui_show_source (const char *file, int line)
 {
   struct symtab_and_line cursal = get_current_source_symtab_and_line ();
   /* make sure that the source window is displayed */
-  tuiAddWinToLayout (SRC_WIN);
+  tui_add_win_to_layout (SRC_WIN);
 
   tuiUpdateSourceWindowsWithLine (cursal.symtab, line);
   tuiUpdateLocatorFilename (file);
@@ -572,7 +572,7 @@ tui_show_source (const char *file, int line)
 void
 tui_show_assembly (CORE_ADDR addr)
 {
-  tuiAddWinToLayout (DISASSEM_WIN);
+  tui_add_win_to_layout (DISASSEM_WIN);
   tuiUpdateSourceWindowsWithAddr (addr);
 }
 

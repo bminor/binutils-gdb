@@ -1,3 +1,15 @@
+2003-12-19  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+        * configure.in: Changed for dummy simulator of m32r-linux.
+	* configure: Regenerate.
+        * Makefile.in: Added traps-linux.o for dummy simulator of m32r-linux.
+        * traps-linux.c: Added for dummy simulator of m32r-linux.
+        * syscall.h: Ditto.
+        * sim-if.c (sim_create_inferior): Changed to setup SP for dummy
+        simulator for m32r-linux.
+        * sim-main.h (M32R_DEFAULT_MEM_SIZE): Changed for dummy simulator of
+        m32r-linux.
+
 2003-12-11  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
 
 	* Makefile.in: Add support for new machine m32r2.

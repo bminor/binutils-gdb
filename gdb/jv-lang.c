@@ -1,5 +1,5 @@
 /* Java language support routines for GDB, the GNU debugger.
-   Copyright 1997, 1998, 1999, 2000, 2003 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 1999, 2000, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -59,7 +59,6 @@ static void java_demangled_signature_copy (char *, const char *);
 static struct symtab *get_java_class_symtab (void);
 static char *get_java_utf8_name (struct obstack *obstack, struct value *name);
 static int java_class_is_primitive (struct value *clas);
-static struct type *java_lookup_type (char *signature);
 static struct value *java_value_string (char *ptr, int len);
 
 static void java_emit_char (int c, struct ui_file * stream, int quoter);
@@ -774,19 +773,6 @@ java_demangle_type_signature (const char *signature)
   return result;
 }
 
-struct type *
-java_lookup_type (char *signature)
-{
-  switch (signature[0])
-    {
-    case 'L':
-    case '[':
-      error ("java_lookup_type not fully implemented");
-    default:
-      return java_primitive_type (signature[0]);
-    }
-}
-
 /* Return the type of TYPE followed by DIMS pairs of [ ].
    If DIMS == 0, TYPE is returned. */
 
@@ -1070,6 +1056,7 @@ const struct language_defn java_language_defn =
   NULL,				/* Language specific skip_trampoline */
   value_of_this,		/* value_of_this */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
+  basic_lookup_transparent_type,/* lookup_transparent_type */
   java_demangle,		/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */

@@ -400,6 +400,7 @@ gdb_expect {
     -re ".*bss.*$gdb_prompt $"      { fail "maint info sections .text" }
     -re ".*data.*$gdb_prompt $"     { fail "maint info sections .text" }
     -re ".* .text .*$gdb_prompt $"  { pass "maint info sections .text" }
+    -re ".*$gdb_prompt $"           { fail "maint info sections .text" }
     timeout               { fail "(timeout) maint info sections .text" }
 }
 
@@ -409,6 +410,7 @@ send_gdb "maint info sections CODE\n"
 gdb_expect {
     -re ".* .data .*$gdb_prompt $" { fail "maint info sections CODE" }
     -re ".* .text .*$gdb_prompt $" { pass "maint info sections CODE" }
+    -re ".*$gdb_prompt $"          { fail "maint info sections CODE" }
     timeout              { fail "(timeout) maint info sections CODE" }
 }
 
@@ -418,6 +420,7 @@ send_gdb "maint info sections DATA\n"
 gdb_expect {
     -re ".* .text .*$gdb_prompt $" { fail "maint info sections DATA" }
     -re ".* .data .*$gdb_prompt $" { pass "maint info sections DATA" }
+    -re ".*$gdb_prompt $"          { fail "maint info sections DATA" }
     timeout              { fail "(timeout) maint info sections DATA" }
 }
 

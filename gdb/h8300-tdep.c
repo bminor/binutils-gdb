@@ -1323,11 +1323,6 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
    */
   /* Stack grows up. */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  /* PC stops zero byte after a trap instruction
-     (which means: exactly on trap instruction). */
-  set_gdbarch_decr_pc_after_break (gdbarch, 0);
-  /* This value is almost never non-zero... */
-  set_gdbarch_function_start_offset (gdbarch, 0);
   /* This value is almost never non-zero... */
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation (gdbarch,

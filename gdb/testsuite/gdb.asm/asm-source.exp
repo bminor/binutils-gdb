@@ -1,4 +1,4 @@
-# Copyright 1998, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+# Copyright 1998, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -118,13 +118,17 @@ if { "${asm-arch}" == "" } {
     gdb_suppress_entire_file "Assembly source test -- not implemented for this target."
 }
 
-# On FreeBSD and NetBSD, crt1.o the final link will fail because of
+# On FreeBSD and NetBSD, the final link will fail because of
 # unresolved symbols.  It turns out that libc.so references symbols
 # that are normally provided by crt1.o, which isn't linked in since we
 # specify -nostartfiles.  Using -nostdlib doesn't help since
 # target_compile automatically adds -lm.  Linking statically avoids
 # this mess.
-if {[istarget "*-*-freebsd*"] || [istarget "*-*-netbsd*"]} then {
+#
+# On Solaris, linking dynamically results in a binary that dumps core.
+#
+if {[istarget "*-*-freebsd*"] || [istarget "*-*-netbsd*"]
+    || [istarget "*-*-solaris2*"]} then {
     append link-flags " -static"
 }
 

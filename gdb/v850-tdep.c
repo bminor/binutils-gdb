@@ -1,6 +1,7 @@
 /* Target-dependent code for the NEC V850 for GDB, the GNU debugger.
-   Copyright 1996, 1998, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+
+   Copyright 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -245,16 +246,6 @@ v850_register_raw_size (int regnum)
   /* Only the PC has 4 Byte, all other registers 2 Byte. */
   else
     return v850_reg_size;
-}
-
-/* Function: v850_register_virtual_size
-   Returns the number of bytes occupied by the register as represented
-   internally by gdb. */
-
-static int
-v850_register_virtual_size (int regnum)
-{
-  return v850_register_raw_size (regnum);
 }
 
 /* Function: v850_reg_virtual_type 
@@ -1088,13 +1079,6 @@ v850_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
   return breakpoint;
 }
 
-static CORE_ADDR
-v850_extract_struct_value_address (char *regbuf)
-{
-  return extract_unsigned_integer (regbuf + v850_register_byte (E_V0_REGNUM),
-				   v850_register_raw_size (E_V0_REGNUM));
-}
-
 static void
 v850_store_return_value (struct type *type, char *valbuf)
 {
@@ -1259,11 +1243,6 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
    */
   /* Stack grows up. */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  /* PC stops zero byte after a trap instruction
-     (which means: exactly on trap instruction). */
-  set_gdbarch_decr_pc_after_break (gdbarch, 0);
-  /* This value is almost never non-zero... */
-  set_gdbarch_function_start_offset (gdbarch, 0);
   /* This value is almost never non-zero... */
   set_gdbarch_frame_args_skip (gdbarch, 0);
 
@@ -1277,7 +1256,6 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_pop_frame (gdbarch, v850_pop_frame);
   set_gdbarch_deprecated_store_struct_return (gdbarch, v850_store_struct_return);
   set_gdbarch_deprecated_store_return_value (gdbarch, v850_store_return_value);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, v850_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, v850_use_struct_convention);
   set_gdbarch_deprecated_call_dummy_words (gdbarch, call_dummy_nil);
   set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, 0);

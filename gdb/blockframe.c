@@ -2,8 +2,8 @@
    functions and pc values.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
-   Foundation, Inc.
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -73,17 +73,12 @@ deprecated_inside_entry_file (CORE_ADDR addr)
 }
 
 /* Test whether PC is in the range of addresses that corresponds to
-   the "main" function.
-
-   A PC of zero is always considered to be the bottom of the stack.  */
+   the "main" function.  */
 
 int
 inside_main_func (CORE_ADDR pc)
 {
   struct minimal_symbol *msymbol;
-
-  if (pc == 0)
-    return 1;
 
   if (symfile_objfile == 0)
     return 0;
@@ -161,31 +156,27 @@ inside_main_func (CORE_ADDR pc)
 	  && symfile_objfile->ei.main_func_highpc > pc);
 }
 
-/* Test a specified PC value to see if it is in the range of addresses
-   that correspond to the process entry point function.  See comments
-   in objfiles.h for why we might want to do this.
-
-   Typically called from DEPRECATED_FRAME_CHAIN_VALID.
-
-   A PC of zero is always considered to be the bottom of the stack. */
+/* Test whether PC is inside the range of addresses that corresponds
+   to the process entry point function.  */
 
 int
 inside_entry_func (CORE_ADDR pc)
 {
-  if (pc == 0)
-    return 1;
   if (symfile_objfile == 0)
     return 0;
+
   if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
     {
-      /* Do not stop backtracing if the pc is in the call dummy
-         at the entry point.  */
-      /* FIXME: Won't always work with zeros for the last two arguments */
+      /* Do not stop backtracing if the program counter is in the call
+         dummy at the entry point.  */
+      /* FIXME: This won't always work with zeros for the last two
+         arguments.  */
       if (DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0))
 	return 0;
     }
-  return (symfile_objfile->ei.entry_func_lowpc <= pc &&
-	  symfile_objfile->ei.entry_func_highpc > pc);
+
+  return (symfile_objfile->ei.entry_func_lowpc <= pc
+	  && symfile_objfile->ei.entry_func_highpc > pc);
 }
 
 /* Return nonzero if the function for this frame lacks a prologue.  Many

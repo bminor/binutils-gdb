@@ -1,7 +1,8 @@
 /* Target-dependent code for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996,
+   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1247,6 +1248,14 @@ ran_out_of_registers_for_arguments:
       space = (space + 15) & -16;
       sp -= space;
 
+      /* This is another instance we need to be concerned about
+         securing our stack space. If we write anything underneath %sp
+         (r1), we might conflict with the kernel who thinks he is free
+         to use this area.  So, update %sp first before doing anything
+         else.  */
+
+      regcache_raw_write_signed (regcache, SP_REGNUM, sp);
+
       /* If the last argument copied into the registers didn't fit there 
          completely, push the rest of it into stack.  */
 
@@ -1288,15 +1297,17 @@ ran_out_of_registers_for_arguments:
 	}
     }
 
-  /* set back chain properly */
+  /* Set the stack pointer.  According to the ABI, the SP is meant to
+     be set _before_ the corresponding stack space is used.  On AIX,
+     this even applies when the target has been completely stopped!
+     Not doing this can lead to conflicts with the kernel which thinks
+     that it still has control over this not-yet-allocated stack
+     region.  */
+  regcache_raw_write_signed (regcache, SP_REGNUM, sp);
+
+  /* Set back chain properly.  */
   store_unsigned_integer (tmp_buffer, 4, saved_sp);
   write_memory (sp, tmp_buffer, 4);
-
-  /* Set the stack pointer.  According to the ABI, the SP is meant to
-     be set _before_ the corresponding stack space is used.  No need
-     for that here though - the target has been completely stopped -
-     it isn't possible for an exception handler to stomp on the stack.  */
-  regcache_raw_write_signed (regcache, SP_REGNUM, sp);
 
   /* Point the inferior function call's return address at the dummy's
      breakpoint.  */
@@ -2886,8 +2897,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_skip_prologue (gdbarch, rs6000_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  set_gdbarch_decr_pc_after_break (gdbarch, 0);
-  set_gdbarch_function_start_offset (gdbarch, 0);
   set_gdbarch_breakpoint_from_pc (gdbarch, rs6000_breakpoint_from_pc);
 
   /* Handle the 64-bit SVR4 minimal-symbol convention of using "FN"

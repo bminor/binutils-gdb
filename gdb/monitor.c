@@ -1516,33 +1516,6 @@ monitor_write_memory (CORE_ADDR memaddr, char *myaddr, int len)
 
 
 static int
-monitor_write_even_block (CORE_ADDR memaddr, char *myaddr, int len)
-{
-  unsigned int val;
-  int written = 0;;
-  /* Enter the sub mode */
-  monitor_printf (current_monitor->setmem.cmdl, memaddr);
-  monitor_expect_prompt (NULL, 0);
-
-  while (len)
-    {
-      val = extract_unsigned_integer (myaddr, 4);	/* REALLY */
-      monitor_printf ("%x\r", val);
-      myaddr += 4;
-      memaddr += 4;
-      written += 4;
-      monitor_debug (" @ %s\n", paddr (memaddr));
-      /* If we wanted to, here we could validate the address */
-      monitor_expect_prompt (NULL, 0);
-    }
-  /* Now exit the sub mode */
-  monitor_printf (current_monitor->getreg.term_cmd);
-  monitor_expect_prompt (NULL, 0);
-  return written;
-}
-
-
-static int
 monitor_write_memory_bytes (CORE_ADDR memaddr, char *myaddr, int len)
 {
   unsigned char val;
@@ -1692,17 +1665,6 @@ monitor_write_memory_block (CORE_ADDR memaddr, char *myaddr, int len)
   if ((len > 8) && (((len & 0x07)) == 0) && current_monitor->setmem.cmdll)
     {
       return monitor_write_memory_longlongs (memaddr, myaddr, len);
-    }
-#endif
-#if 0
-  if (len > 4)
-    {
-      int sublen;
-      written = monitor_write_even_block (memaddr, myaddr, len);
-      /* Adjust calling parameters by written amount */
-      memaddr += written;
-      myaddr += written;
-      len -= written;
     }
 #endif
   written = monitor_write_memory_bytes (memaddr, myaddr, len);

@@ -1,6 +1,6 @@
 /* Output generating routines for GDB.
 
-   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2004 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions.
    Written by Fernando Nasser for Cygnus.
@@ -268,8 +268,6 @@ static int get_next_header (struct ui_out *uiout, int *colno, int *width,
 static void clear_header_list (struct ui_out *uiout);
 static void verify_field (struct ui_out *uiout, int *fldno, int *width,
 			  int *align);
-
-static void init_ui_out_state (struct ui_out *uiout);
 
 /* exported functions (ui_out API) */
 

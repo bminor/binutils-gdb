@@ -6,6 +6,9 @@
 /* Define if your struct reg has r_fs.  */
 #undef HAVE_STRUCT_REG_R_FS
 
+/* Define if your struct stat has st_blocks.  */
+#undef HAVE_STRUCT_STAT_ST_BLOCKS
+
 /* Define if your struct reg has r_gs.  */
 #undef HAVE_STRUCT_REG_R_GS
 
@@ -104,15 +107,6 @@
 
 /* Define if you have HPUX threads */
 #undef HAVE_HPUX_THREAD_SUPPORT
-
-/* Define if you want to use the memory mapped malloc package (mmalloc). */
-#undef USE_MMALLOC
-
-/* Define if the runtime uses a routine from mmalloc before gdb has a chance
-   to initialize mmalloc, and we want to force checking to be used anyway.
-   This may cause spurious memory corruption messages if the runtime tries
-   to explicitly deallocate that memory when gdb calls exit. */
-#undef MMCHECK_FORCE
 
 /* Define to 1 if NLS is requested.  */
 #undef ENABLE_NLS

@@ -220,7 +220,10 @@ _rl_get_screen_size (tty, ignore_env)
       if (ignore_env == 0 && (ss = sh_get_env_value ("COLUMNS")))
 	_rl_screenwidth = atoi (ss);
 
-#if !defined (__DJGPP__)
+#if defined (__DJGPP__)
+      if (_rl_screenwidth <= 0)
+	_rl_screenwidth = ScreenCols ();
+#else
       if (_rl_screenwidth <= 0 && term_string_buffer)
 	_rl_screenwidth = tgetnum ("co");
 #endif
@@ -233,7 +236,10 @@ _rl_get_screen_size (tty, ignore_env)
       if (ignore_env == 0 && (ss = sh_get_env_value ("LINES")))
 	_rl_screenheight = atoi (ss);
 
-#if !defined (__DJGPP__)
+#if defined (__DJGPP__)
+      if (_rl_screenheight <= 0)
+	_rl_screenheight = ScreenRows ();
+#else
       if (_rl_screenheight <= 0 && term_string_buffer)
 	_rl_screenheight = tgetnum ("li");
 #endif
@@ -382,12 +388,19 @@ _rl_init_terminal_io (terminal_name)
     term = "dumb";
 
 #ifdef __MSDOS__
-  term_im = term_ei = term_ic = term_IC = (char *)NULL;
-  term_up = term_dc = term_DC = visible_bell = (char *)NULL;
-  term_ku = term_kd = term_kl = term_kr = (char *)NULL;
-  term_mm = term_mo = (char *)NULL;
-  terminal_can_insert = term_has_meta = _rl_term_autowrap = 0;
-  term_cr = "\r";
+  _rl_term_im = _rl_term_ei = _rl_term_ic = _rl_term_IC = (char *)NULL;
+  _rl_term_up = _rl_term_dc = _rl_term_DC = _rl_visible_bell = (char *)NULL;
+  _rl_term_ku = _rl_term_kd = _rl_term_kl = _rl_term_kr = (char *)NULL;
+  _rl_term_mm = _rl_term_mo = (char *)NULL;
+  _rl_terminal_can_insert = term_has_meta = _rl_term_autowrap = 0;
+  _rl_term_cr = "\r";
+  _rl_term_clreol = _rl_term_clrpag = _rl_term_backspace = (char *)NULL;
+  _rl_term_goto = _rl_term_pc = _rl_term_ip = (char *)NULL;
+  _rl_term_ks = _rl_term_ke =_rl_term_vs = _rl_term_ve = (char *)NULL;
+  _rl_term_kh = _rl_term_kH = _rl_term_at7 = _rl_term_kI = (char *)NULL;
+#if defined(HACK_TERMCAP_MOTION)
+  _rl_term_forward_char = (char *)NULL;
+#endif
 
   _rl_get_screen_size (tty, 0);
 #else  /* !__MSDOS__ */
@@ -677,6 +690,7 @@ void
 _rl_set_cursor (im, force)
      int im, force;
 {
+#ifndef __MSDOS__
   if (_rl_term_ve && _rl_term_vs)
     {
       if (force || im != rl_insert_mode)
@@ -687,4 +701,5 @@ _rl_set_cursor (im, force)
 	    tputs (_rl_term_ve, 1, _rl_output_character_function);
 	}
     }
+#endif
 }

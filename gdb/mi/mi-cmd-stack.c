@@ -1,5 +1,5 @@
 /* MI Command Set - stack commands.
-   Copyright 2000, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2000, 2002, 2003, 2004 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -29,6 +29,7 @@
 #include "block.h"
 #include "stack.h"
 #include "dictionary.h"
+#include "gdb_string.h"
 
 static void list_args_or_locals (int locals, int values, struct frame_info *fi);
 
@@ -137,10 +138,26 @@ mi_cmd_stack_info_depth (char *command, char **argv, int argc)
 enum mi_cmd_result
 mi_cmd_stack_list_locals (char *command, char **argv, int argc)
 {
+  struct frame_info *frame;
+  enum print_values print_values;
+
   if (argc != 1)
     error ("mi_cmd_stack_list_locals: Usage: PRINT_VALUES");
 
-  list_args_or_locals (1, atoi (argv[0]), deprecated_selected_frame);
+   frame = get_selected_frame ();
+
+   if (strcmp (argv[0], "0") == 0
+       || strcmp (argv[0], "--no-values") == 0)
+     print_values = PRINT_NO_VALUES;
+   else if (strcmp (argv[0], "1") == 0
+	    || strcmp (argv[0], "--all-values") == 0)
+     print_values = PRINT_ALL_VALUES;
+   else if (strcmp (argv[0], "2") == 0
+	    || strcmp (argv[0], "--simple-values") == 0)
+     print_values = PRINT_SIMPLE_VALUES;
+   else
+     error ("Unknown value for PRINT_VALUES: must be: 0 or \"--no-values\", 1 or \"--all-values\", 2 or \"--simple-values\"");
+  list_args_or_locals (1, print_values, frame);
   return MI_CMD_DONE;
 }
 
@@ -218,6 +235,7 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
   int nsyms;
   struct cleanup *cleanup_list;
   static struct ui_stream *stb = NULL;
+  struct type *type;
 
   stb = ui_out_stream_new (uiout);
 
@@ -268,24 +286,39 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 	  if (print_me)
 	    {
 	      struct cleanup *cleanup_tuple = NULL;
-	      if (values)
-		cleanup_tuple = 
+	      struct symbol *sym2;
+	      if (values != PRINT_NO_VALUES)
+		cleanup_tuple =
 		  make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
-	      ui_out_field_string (uiout, "name", DEPRECATED_SYMBOL_NAME (sym));
+	      ui_out_field_string (uiout, "name", SYMBOL_PRINT_NAME (sym));
 
-	      if (values)
-		{
-		  struct symbol *sym2;
-		  if (!locals)
-		    sym2 = lookup_symbol (DEPRECATED_SYMBOL_NAME (sym),
-					  block, VAR_DOMAIN,
-					  (int *) NULL,
-					  (struct symtab **) NULL);
-		  else
+	      if (!locals)
+		sym2 = lookup_symbol (SYMBOL_NATURAL_NAME (sym),
+				      block, VAR_DOMAIN,
+				      (int *) NULL,
+				      (struct symtab **) NULL);
+	      else
 		    sym2 = sym;
+	      switch (values)
+		{
+		case PRINT_SIMPLE_VALUES:
+		  type = check_typedef (sym2->type);
+		  type_print (sym2->type, "", stb->stream, -1);
+		  ui_out_field_stream (uiout, "type", stb);
+		  if (TYPE_CODE (type) != TYPE_CODE_ARRAY
+		      && TYPE_CODE (type) != TYPE_CODE_STRUCT
+		      && TYPE_CODE (type) != TYPE_CODE_UNION)
+		    {
+		      print_variable_value (sym2, fi, stb->stream);
+		      ui_out_field_stream (uiout, "value", stb);
+		    }
+		  do_cleanups (cleanup_tuple);
+		  break;
+		case PRINT_ALL_VALUES:
 		  print_variable_value (sym2, fi, stb->stream);
 		  ui_out_field_stream (uiout, "value", stb);
 		  do_cleanups (cleanup_tuple);
+		  break;
 		}
 	    }
 	}

@@ -5052,7 +5052,7 @@ sim_load (SIM_DESC sd, char *prog, bfd *abfd, int from_tty)
   if (abfd != NULL)
     prog_bfd = abfd;
   else
-    prog_bfd = bfd_openr (prog, "coff-h8300");
+    prog_bfd = bfd_openr (prog, NULL);
   if (prog_bfd != NULL)
     {
       /* Set the cpu type.  We ignore failure from bfd_check_format

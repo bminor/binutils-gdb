@@ -1,4 +1,4 @@
-# Copyright 1992, 1994, 1995, 1996, 1997, 1999, 2000, 2002, 2003
+# Copyright 1992, 1994, 1995, 1996, 1997, 1999, 2000, 2002, 2003, 2004
 # Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -37,7 +37,6 @@ set binfile ${objdir}/${subdir}/${testfile}
 if [get_compiler_info ${binfile} "c++"] {
     return -1
 }
-source ${binfile}.ci
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++}] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
@@ -54,6 +53,9 @@ proc test_ptype_of_templates {} {
     send_gdb "ptype T5<int>\n"
     gdb_expect {
 	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;${ws}T5<int> & operator=\\(T5<int> const ?&\\);${ws}T5\\(int\\);${ws}T5\\((T5<int> const|const T5<int>) ?&\\);${ws}~T5\\((void|)\\);${ws}static void \\* operator new\\(unsigned( int| long)?\\);${ws}static void operator delete\\(void ?\\*\\);${ws}int value\\((void|)\\);${ws}\}\r\n$gdb_prompt $" {
+	    pass "ptype T5<int>"
+	}
+	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;${ws}T5\\(int\\);${ws}T5\\((T5<int> const|const T5<int>) ?&\\);${ws}~T5\\((void|)\\);${ws}static void \\* operator new\\(unsigned( int| long)?\\);${ws}static void operator delete\\(void ?\\*\\);${ws}int value\\((void|)\\);${ws}T5<int> & operator=\\(T5<int> const ?&\\);${ws}\}\r\n$gdb_prompt $" {
 	    pass "ptype T5<int>"
 	}
 	-re "type = class T5<int> \\{${ws}public:${ws}static int X;${ws}int x;${ws}int val;${ws}${ws}T5 \\(int\\);${ws}T5 \\(const class T5<int> &\\);${ws}void ~T5 \\(int\\);${ws}static void \\* new \\(unsigned int\\);${ws}static void delete \\(void ?\\*\\);${ws}int value \\((void|)\\);${ws}\\}${ws}$gdb_prompt $" { pass "ptype T5<int> -- new with unsigned int" }
@@ -82,6 +84,9 @@ proc test_ptype_of_templates {} {
             pass "ptype t5i"
         }
 	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;${ws}T5<int> & operator=\\(T5<int> const ?&\\);${ws}T5\\(int\\);${ws}T5\\((T5<int> const|const T5<int>) ?&\\);${ws}~T5\\((void|)\\);${ws}static void \\* operator new\\(unsigned( int| long)?\\);${ws}static void operator delete\\(void ?\\*\\);${ws}int value\\((void|)\\);${ws}\}\r\n$gdb_prompt $" {
+	    pass "ptype t5i"
+	}
+	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;${ws}T5\\(int\\);${ws}T5\\((T5<int> const|const T5<int>) ?&\\);${ws}~T5\\((void|)\\);${ws}static void \\* operator new\\(unsigned( int| long)?\\);${ws}static void operator delete\\(void ?\\*\\);${ws}int value\\((void|)\\);${ws}T5<int> & operator=\\(T5<int> const ?&\\);${ws}\}\r\n$gdb_prompt $" {
 	    pass "ptype t5i"
 	}
 	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;((${ws}T5<int> & operator=\\(T5<int> const ?&\\);)|(${ws}T5\\(int\\);)|(${ws}T5\\(T5<int> const ?&\\);)|(${ws}~T5\\((void|)\\);)|(${ws}static void \\* operator new\\(unsigned( int| long)?\\);)|(${ws}static void operator delete\\(void ?\\*\\);)|(${ws}int value\\((void|)\\);))*${ws}\}\r\n$gdb_prompt $" {
@@ -197,7 +202,6 @@ proc do_tests {} {
     global srcdir
     global binfile
     global gdb_prompt
-    global supports_template_debugging
 
     set prms_id 0
     set bug_id 0
@@ -208,11 +212,6 @@ proc do_tests {} {
     gdb_start
     gdb_reinitialize_dir $srcdir/$subdir
     gdb_load $binfile
-
-    if { !$supports_template_debugging } {
-	warning "compiler lacks debugging info for templates; tests suppressed." 0
-	return
-    }
 
     runto_main
 
@@ -294,6 +293,7 @@ gdb_expect {
 send_gdb "ptype fint\n"   
 gdb_expect {   
    -re "type = (class |)Foo<int> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*.*int foo\\(int, int\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype fint" }
+   -re "type = (class |)Foo<int> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*int foo\\(int, int\\);.*\r\n\\}\r\n$gdb_prompt $" { pass "ptype fint" }
    -re "$gdb_prompt $"                     { fail "ptype fint" }
    timeout                             { fail "(timeout) ptype fint" }
 }
@@ -303,6 +303,7 @@ gdb_expect {
 send_gdb "ptype fchar\n"   
 gdb_expect {   
    -re "type = (class |)Foo<char> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*char t;\r\n\r\n\[ \t\]*.*char foo\\(int, char\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype fchar" }
+   -re "type = (class |)Foo<char> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*char t;\r\n\r\n\[ \t\]*char foo\\(int, char\\);.*\r\n\\}\r\n$gdb_prompt $" { pass "ptype fchar" }
    -re "$gdb_prompt $"                     { fail "ptype fchar" }
    timeout                             { fail "(timeout) ptype fchar" }
 }
@@ -312,7 +313,10 @@ gdb_expect {
 send_gdb "ptype fvpchar\n"   
 gdb_expect {   
    -re "type = (class |)Foo<volatile char ?\\*> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*.*char.*\\*t;\r\n\r\n\[ \t\]*.*char \\* foo\\(int,.*char.*\\*\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype fvpchar" }
-   -re "type = class Foo<char volatile\\*> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*.*char.*\\*t;\r\n\r\n\[ \t\]*.*char \\* foo\\(int,.*char.*\\*\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype fvpchar" }
+   -re "type = (class |)Foo<volatile char ?\\*> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*.*char.*\\*t;\r\n\r\n\[ \t\]*.*char \\* foo\\(int,.*char.*\\*\\);.*\r\n\\}\r\n$gdb_prompt $" { pass "ptype fvpchar" }
+   -re "type = (class |)Foo<char volatile ?\\*> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*.*char.*\\*t;\r\n\r\n\[ \t\]*.*char \\* foo\\(int,.*char.*\\*\\);\r\n\\}\r\n$gdb_prompt $" {
+       kfail "gdb/1512" "ptype fvpchar"
+   }
    -re "$gdb_prompt $"                     { fail "ptype fvpchar" }
    timeout                             { fail "(timeout) ptype fvpchar" }
 }
@@ -327,8 +331,10 @@ gdb_expect {
     -re "\\$\[0-9\]* = \\{.*char \\*\\((class |)Foo<volatile char ?\\*> \\*(| const), int, .*char \\*\\)\\} $hex <Foo<.*char.*\\*>::foo\\(int, .*char.*\\*\\)>\r\n$gdb_prompt $" { pass "print Foo<volatile char *>::foo" }
     -re "No symbol \"Foo<volatile char \\*>\" in current context.\r\n$gdb_prompt $"
     {
-	# This used to be a kfail gdb/33, but it shouldn't occur any more now.
-	fail "print Foo<volatile char *>::foo"
+	# This used to be a kfail gdb/33.  That problem has been
+	# fixed, but now gdb/931 and gdb/1512 are rearing their ugly
+	# heads.
+	kfail "gdb/931" "print Foo<volatile char *>::foo"
     }
     -re "$gdb_prompt $"                     { fail "print Foo<volatile char *>::foo" }
     timeout                             { fail "(timeout) print Foo<volatile char *>::foo" }
@@ -339,8 +345,10 @@ gdb_expect {
     -re "\\$\[0-9\]* = \\{.*char \\*\\((class |)Foo<volatile char ?\\*> \\*(| const), int, .*char \\*\\)\\} $hex <Foo<.*char.*\\*>::foo\\(int, .*char.*\\*\\)>\r\n$gdb_prompt $" { pass "print Foo<volatile char*>::foo" }
     -re "No symbol \"Foo<volatile char\\*>\" in current context.\r\n$gdb_prompt $"
     {
-	# This used to be a kfail gdb/33, but it shouldn't occur any more now.
-	fail "print Foo<volatile char *>::foo"
+	# This used to be a kfail gdb/33.  That problem has been
+	# fixed, but now gdb/931 and gdb/1512 are rearing their ugly
+	# heads.
+	kfail "gdb/931" "print Foo<volatile char*>::foo"
     }
     -re "$gdb_prompt $"                     { fail "print Foo<volatile char*>::foo" }
     timeout                             { fail "(timeout) print Foo<volatile char*>::foo" }
@@ -369,6 +377,7 @@ gdb_expect {
 send_gdb "ptype bint\n"   
 gdb_expect {   
    -re "type = (class |)Bar<int, ?(\\(int\\)|)33> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*.*int bar\\(int, int\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype bint" }
+   -re "type = (class |)Bar<int,(\\(int\\)|)33> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*int bar\\(int, int\\);.*\r\n\\}\r\n$gdb_prompt $" { pass "ptype bint" }
    -re "$gdb_prompt $"                     { fail "ptype bint" }
    timeout                             { fail "(timeout) ptype bint" }
 }
@@ -378,6 +387,7 @@ gdb_expect {
 send_gdb "ptype bint2\n"   
 gdb_expect {   
    -re "type = (class |)Bar<int, ?(\\(int\\)|)1> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*.*int bar\\(int, int\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype bint2" }
+   -re "type = (class |)Bar<int,(\\(int\\)|)1> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*int bar\\(int, int\\);.*\r\n\\}\r\n$gdb_prompt $" { pass "ptype bint2" }
    -re "$gdb_prompt $"                     { fail "ptype bint2" }
    timeout                             { fail "(timeout) ptype bint2" }
 }
@@ -387,10 +397,13 @@ gdb_expect {
 # Same as Foo, for g++
 send_gdb "ptype Baz\n"   
 gdb_expect {   
-    -re "type = template <(class |)T, (class |)sz> (class |)Baz \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*T t;\r\n\\}\r\ntemplate instantiations:\r\n\[ \t\]*(class |)Baz<char,(\\(char\\)|)97>\r\n\[ \t\]*(class |)Baz<int,(\\(char\\)|)115>\r\n$gdb_prompt $" { pass "ptype Baz" }
-    -re "type = <(class |)T, (class |)sz> (class |)Baz \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*T t;\r\n\\}\r\n$gdb_prompt $" { xfail "ptype Baz" }
-    -re "type = class Baz<int,'s'> {\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*int baz\\(int, int\\);\r\n}\r\n$gdb_prompt $"
+    -re "type = template <(class |)T, ?(class |)sz> (class |)Baz \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*T t;\r\n\\}\r\ntemplate instantiations:\r\n\[ \t\]*(class |)Baz<char,(\\(char\\)|)97>\r\n\[ \t\]*(class |)Baz<int,(\\(char\\)|)115>\r\n$gdb_prompt $" { pass "ptype Baz" }
+    -re "type = <(class |)T, ?(class |)sz> (class |)Baz \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*T t;\r\n\\}\r\n$gdb_prompt $" { xfail "ptype Baz" }
+    -re "type = class Baz<int, ?'s'> {\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*int baz\\(int, int\\);\r\n}\r\n$gdb_prompt $"
     { # GCC 3.1, DWARF-2 output.
+	kfail "gdb/57" "ptype Baz" }
+    -re "type = class Baz<int, ?115> {\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*int baz\\(int, int\\);\r\n}\r\n$gdb_prompt $"
+    { # GCC 3.x, DWARF-2 output, running into gdb/57 and gdb/1512.
 	kfail "gdb/57" "ptype Baz" }
     -re "No symbol \"Baz\" in current context.\r\n$gdb_prompt $"
     { # GCC 2.95.3, stabs+ output.
@@ -405,6 +418,7 @@ gdb_expect {
 send_gdb "ptype bazint\n"   
 gdb_expect {   
    -re "type = (class |)Baz<int, ?(\\(char\\)|)(115|\\'s\\')> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*.*int baz\\(int, int\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype bazint" }
+   -re "type = (class |)Baz<int,(\\(char\\)|)(115|\\'s\\')> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*int baz\\(int, int\\).*;\r\n\\}\r\n$gdb_prompt $" { pass "ptype bazint" }
    -re "$gdb_prompt $"                     { fail "ptype bazint" }
    timeout                             { fail "(timeout) ptype bazint" }
 }
@@ -414,6 +428,7 @@ gdb_expect {
 send_gdb "ptype bazint2\n"   
 gdb_expect {   
    -re "type = (class |)Baz<char, ?(\\(char\\)|)(97|\\'a\\')> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*char t;\r\n\r\n\[ \t\]*.*char baz\\(int, char\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype bazint2" }
+   -re "type = (class |)Baz<char,(\\(char\\)|)(97|\\'a\\')> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*char t;\r\n\r\n\[ \t\]*char baz\\(int, char\\);.*\r\n\\}\r\n$gdb_prompt $" { pass "ptype bazint2" }
    -re "$gdb_prompt $"                     { fail "ptype bazint2" }
    timeout                             { fail "(timeout) ptype bazint2" }
 }
@@ -422,10 +437,13 @@ gdb_expect {
 # Same as Foo for g++
 send_gdb "ptype Qux\n"   
 gdb_expect {   
-    -re "type = template <(class |)T, (class |)sz> (class |)Qux \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*T t;\r\n\\}\r\ntemplate instantiations:\r\n\[ \t\]*(class |)Qux<int,&string>\r\n\[ \t\]*(class |)Qux<char,&string>\r\n$gdb_prompt $" { pass "ptype Qux" }
-    -re ".*type = template <(class |)T.*, (class |)sz> (class |)Qux \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*T t;\r\n\\}.*$gdb_prompt $" { pass "ptype Qux" }
-    -re "type = class Qux<char,&string> {\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*char t;\r\n\r\n\[ \t\]*char qux\\(int, char\\);\r\n}\r\n$gdb_prompt $"
+    -re "type = template <(class |)T, ?(class |)sz> (class |)Qux \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*T t;\r\n\\}\r\ntemplate instantiations:\r\n\[ \t\]*(class |)Qux<int,&string>\r\n\[ \t\]*(class |)Qux<char,&string>\r\n$gdb_prompt $" { pass "ptype Qux" }
+    -re ".*type = template <(class |)T.*, ?(class |)sz> (class |)Qux \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*T t;\r\n\\}.*$gdb_prompt $" { pass "ptype Qux" }
+    -re "type = class Qux<char, ?&string> {\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*char t;\r\n\r\n\[ \t\]*char qux\\(int, char\\);\r\n}\r\n$gdb_prompt $"
     { # GCC 3.1, DWARF-2 output.
+	kfail "gdb/57" "ptype Qux" }
+    -re "type = class Qux<char, ?&\\(string\\)> {\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*char t;\r\n\r\n\[ \t\]*char qux\\(int, char\\);\r\n}\r\n$gdb_prompt $"
+    { # GCC 3.x, DWARF-2 output; gdb/57 + gdb/1512.
 	kfail "gdb/57" "ptype Qux" }
     -re "No symbol \"Qux\" in current context.\r\n$gdb_prompt $"
     { # GCC 2.95.3, stabs+ output.
@@ -438,7 +456,11 @@ gdb_expect {
 
 send_gdb "ptype quxint\n"   
 gdb_expect {   
-   -re "type = class Qux<int, ?&\\(?string\\)?> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*.*int qux\\(int, int\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype quxint" }
+   -re "type = class Qux<int, ?&string> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*.*int qux\\(int, int\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype quxint" }
+   -re "type = class Qux<int, ?&string> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*int qux\\(int, int\\);.*\r\n\\}\r\n$gdb_prompt $" { pass "ptype quxint" }
+   -re "type = class Qux<int, ?&\\(string\\)> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*int qux\\(int, int\\);.*\r\n\\}\r\n$gdb_prompt $" {
+       kfail "gdb/1512" "ptype quxint"
+   }
    -re "$gdb_prompt $"                     { fail "ptype quxint" }
    timeout                             { fail "(timeout) ptype quxint" }
 }
@@ -476,6 +498,7 @@ gdb_expect {
 send_gdb "ptype siip\n"   
 gdb_expect {   
    -re "type = class Spec<int, ?int ?\\*> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\r\n\[ \t\]*.*int spec\\(int ?\\*\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype siip" }
+   -re "type = class Spec<int,int ?\\*> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\r\n\[ \t\]*int spec\\(int ?\\*\\);.*\r\n\\}\r\n$gdb_prompt $" { pass "ptype siip" }
    -re "$gdb_prompt $"                     { fail "ptype siip" }
    timeout                             { fail "(timeout) ptype siip" }
 }
@@ -485,6 +508,7 @@ gdb_expect {
 send_gdb "ptype Garply<int>\n"   
 gdb_expect {   
    -re "type = class Garply<int> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*.*int garply\\(int, int\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype Garply<int>" }
+   -re "type = class Garply<int> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*int garply\\(int, int\\);.*\r\n\\}\r\n$gdb_prompt $" { pass "ptype Garply<int>" }
    -re "$gdb_prompt $"                     { fail "ptype Garply<int>" }
    timeout                             { fail "(timeout) ptype Garply<int>" }
 }
@@ -494,6 +518,7 @@ gdb_expect {
 send_gdb "ptype Garply<Garply<char> >\n"   
 gdb_expect {   
    -re "type = (class |)Garply<Garply<char> > \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*.*(class |)Garply<char> t;\r\n\r\n\[ \t\]*.*(class |)Garply<char> garply\\(int, (class |)Garply<char>\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype Garply<Garply<char> >" }
+   -re "type = (class |)Garply<Garply<char> > \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*.*(class |)Garply<char> t;\r\n\r\n\[ \t\]*(class |)Garply<char> garply\\(int, (class |)Garply<char>\\);.*\r\n\\}\r\n$gdb_prompt $" { pass "ptype Garply<Garply<char> >" }
    -re "$gdb_prompt $"                     { fail "ptype Garply<Garply<char> >" }
    timeout                             { fail "(timeout) ptype Garply<Garply<char> >" }
 }
