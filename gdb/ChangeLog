@@ -1,3 +1,8 @@
+2004-04-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* m68k-tdep.h: Tweak comments.
+	* m68k-tdep.c: Tweak comment.
+
 2004-04-17  Randolph Chung  <tausq@debian.org>
 
 	* Makefile.in (hppa-hpux-tdep.o): Add $(hppa_tdep_h).
