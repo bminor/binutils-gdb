@@ -1,5 +1,7 @@
 Tue Aug  6 17:16:15 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 
+	* Makefile: use doc/Makefile for doc targets
+
 	* doc/Makefile: GDB documentation now has its own Makefile
 	  doc/refcard.tex: renamed from "gdbrc.tex"
 	  doc/.Sanitize: add Makefile; recognize renamed refcard.tex
