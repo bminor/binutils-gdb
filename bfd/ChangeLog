@@ -1,3 +1,7 @@
+Wed Dec 13 10:52:14 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-config.in: Match on mips-*-* instead of mips-idt-ecoff.
+
 Wed Dec 13 11:07:45 1995  Kim Knuttila  <krk@cygnus.com>
 
 	* coff-ppc.c (coff_ppc_relocate_section): removed debugging code.
