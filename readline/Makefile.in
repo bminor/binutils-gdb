@@ -130,7 +130,7 @@ all: libreadline.a
 check:
 installcheck:
 
-info dvi install-info clean-info: force
+info dvi install-info clean-info clean-dvi: force
 	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
 subdir_do: force
@@ -203,7 +203,7 @@ clean: local-clean
 distclean: local-distclean
 	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
-realclean: local-realclean
+realclean: local-distclean
 	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
 $(DESTDIR)/libreadline.a: libreadline.a
