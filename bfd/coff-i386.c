@@ -156,16 +156,20 @@ coff_i386_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 }
 
 #ifdef COFF_WITH_PE
-/* Return true if this relocation should
-   appear in the output .reloc section. */
 
-static boolean in_reloc_p(abfd, howto)
-     bfd * abfd ATTRIBUTE_UNUSED;
+/* Return true if this relocation should appear in the output .reloc
+   section.  */
+
+static boolean in_reloc_p PARAMS ((bfd *, reloc_howto_type *));
+
+static boolean in_reloc_p (abfd, howto)
+     bfd *abfd ATTRIBUTE_UNUSED;
      reloc_howto_type *howto;
 {
   return ! howto->pc_relative && howto->type != R_IMAGEBASE;
 }     
-#endif
+
+#endif /* COFF_WITH_PE */
 
 #ifndef PCRELOFFSET
 #define PCRELOFFSET false
@@ -606,14 +610,11 @@ const bfd_target
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
 
-#ifndef COFF_WITH_PE
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC /* section flags */
-   | SEC_CODE | SEC_DATA),
-#else
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC /* section flags */
-   | SEC_CODE | SEC_DATA
-   | SEC_LINK_ONCE | SEC_LINK_DUPLICATES),
+#ifdef COFF_WITH_PE
+   | SEC_LINK_ONCE | SEC_LINK_DUPLICATES
 #endif
+   | SEC_CODE | SEC_DATA),
 
 #ifdef TARGET_UNDERSCORE
   TARGET_UNDERSCORE,		/* leading underscore */
