@@ -1,3 +1,18 @@
+2002-11-19  Klee Dienes  <kdienes@apple.com>
+
+	* config/tc-h8300.c (struct h8_instruction): New type, used to
+	wrap h8_opcodes with length, noperands, idx, and size fields
+	(computed at run-time).
+	(h8_instructions): New variable.
+	(md_begin): Allocate the storage for h8_instructions.  Fill
+	h8_instructions with pointers to the appropriate opcode and the
+	correct value for the additional fields.
+	(clever_message): Update to use h8_instructions instead of
+	h8_opcodes.
+	(build_bytes): Ditto.
+	(get_specific): Ditto.
+	(md_assemble): Ditto.
+	
 2002-11-19  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* config/tc-s390.c (tc_s390_fix_adjustable): Re-add patch to prevent

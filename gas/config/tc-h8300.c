@@ -53,6 +53,17 @@ int Smode;
 
 int bsize = L_8;		/* default branch displacement */
 
+struct h8_instruction
+{
+  int length;
+  int noperands;
+  int idx;
+  int size;
+  const struct h8_opcode *opcode;
+};
+
+struct h8_instruction *h8_instructions;
+
 void
 h8300hmode (arg)
      int arg ATTRIBUTE_UNUSED;
@@ -134,7 +145,9 @@ static struct hash_control *opcode_hash_control;	/* Opcode mnemonics.  */
 void
 md_begin ()
 {
-  struct h8_opcode *opcode;
+  unsigned int nopcodes;
+  const struct h8_opcode *p;
+  struct h8_instruction *pi;
   char prev_buffer[100];
   int idx = 0;
 
@@ -146,22 +159,27 @@ md_begin ()
   opcode_hash_control = hash_new ();
   prev_buffer[0] = 0;
 
-  for (opcode = h8_opcodes; opcode->name; opcode++)
+  nopcodes = sizeof (h8_opcodes) / sizeof (struct h8_opcode);
+  
+  h8_instructions = (struct h8_instruction *)
+    xmalloc (nopcodes * sizeof (struct h8_instruction));
+
+  for (p = h8_opcodes, pi = h8_instructions; p->name; p++, pi++)
     {
       /* Strip off any . part when inserting the opcode and only enter
          unique codes into the hash table.  */
-      char *src = opcode->name;
+      char *src = p->name;
       unsigned int len = strlen (src);
       char *dst = malloc (len + 1);
       char *buffer = dst;
 
-      opcode->size = 0;
+      pi->size = 0;
       while (*src)
 	{
 	  if (*src == '.')
 	    {
 	      src++;
-	      opcode->size = *src;
+	      pi->size = *src;
 	      break;
 	    }
 	  *dst++ = *src++;
@@ -169,22 +187,31 @@ md_begin ()
       *dst++ = 0;
       if (strcmp (buffer, prev_buffer))
 	{
-	  hash_insert (opcode_hash_control, buffer, (char *) opcode);
+	  hash_insert (opcode_hash_control, buffer, (char *) pi);
 	  strcpy (prev_buffer, buffer);
 	  idx++;
 	}
-      opcode->idx = idx;
+      pi->idx = idx;
 
       /* Find the number of operands.  */
-      opcode->noperands = 0;
-      while (opcode->args.nib[opcode->noperands] != E)
-	opcode->noperands++;
+      pi->noperands = 0;
+      while (p->args.nib[pi->noperands] != E)
+	pi->noperands++;
 
       /* Find the length of the opcode in bytes.  */
-      opcode->length = 0;
-      while (opcode->data.nib[opcode->length * 2] != E)
-	opcode->length++;
+      pi->length = 0;
+      while (p->data.nib[pi->length * 2] != E)
+	pi->length++;
+
+      pi->opcode = p;
     }
+
+  /* Add entry for the NULL vector terminator.  */
+  pi->length = 0;
+  pi->noperands = 0;
+  pi->idx = 0;
+  pi->size = 0;
+  pi->opcode = p;
 
   linkrelax = 1;
 }
@@ -206,11 +233,11 @@ struct h8_op
   expressionS exp;
 };
 
-static void clever_message PARAMS ((struct h8_opcode *, struct h8_op *));
-static void build_bytes    PARAMS ((struct h8_opcode *, struct h8_op *));
+static void clever_message PARAMS ((const struct h8_instruction *, struct h8_op *));
+static void build_bytes    PARAMS ((const struct h8_instruction *, struct h8_op *));
 static void do_a_fix_imm   PARAMS ((int, struct h8_op *, int));
 static void check_operand  PARAMS ((struct h8_op *, unsigned int, char *));
-static struct h8_opcode * get_specific PARAMS ((struct h8_opcode *, struct h8_op *, int));
+static const struct h8_instruction * get_specific PARAMS ((const struct h8_instruction *, struct h8_op *, int));
 static char * get_operands PARAMS ((unsigned, char *, struct h8_op *));
 static void   get_operand  PARAMS ((char **, struct h8_op *, unsigned, int));
 static char * skip_colonthing PARAMS ((char *, expressionS *, int *));
@@ -694,32 +721,32 @@ get_operands (noperands, op_end, operand)
    addressing modes, return the opcode which matches the opcodes
    provided.  */
 
-static struct h8_opcode *
-get_specific (opcode, operands, size)
-     struct h8_opcode *opcode;
+static const struct h8_instruction *
+get_specific (instruction, operands, size)
+     const struct h8_instruction *instruction;
      struct h8_op *operands;
      int size;
 {
-  struct h8_opcode *this_try = opcode;
+  const struct h8_instruction *this_try = instruction;
   int found = 0;
-  int this_index = opcode->idx;
+  int this_index = instruction->idx;
 
   /* There's only one ldm/stm and it's easier to just
      get out quick for them.  */
-  if (strcmp (opcode->name, "stm.l") == 0
-      || strcmp (opcode->name, "ldm.l") == 0)
+  if (strcmp (instruction->opcode->name, "stm.l") == 0
+      || strcmp (instruction->opcode->name, "ldm.l") == 0)
     return this_try;
 
-  while (this_index == opcode->idx && !found)
+  while (this_index == instruction->idx && !found)
     {
       found = 1;
 
-      this_try = opcode++;
+      this_try = instruction++;
       if (this_try->noperands == 0)
 	{
 	  int this_size;
 
-	  this_size = this_try->how & SN;
+	  this_size = this_try->opcode->how & SN;
 	  if (this_size != size && (this_size != SB || size != SN))
 	    found = 0;
 	}
@@ -729,7 +756,7 @@ get_specific (opcode, operands, size)
 
 	  for (i = 0; i < this_try->noperands && found; i++)
 	    {
-	      op_type op = this_try->args.nib[i];
+	      op_type op = this_try->opcode->args.nib[i];
 	      int x = operands[i].mode;
 
 	      if ((op & (DISP | REG)) == (DISP | REG)
@@ -964,12 +991,12 @@ do_a_fix_imm (offset, operand, relaxmode)
 
 static void
 build_bytes (this_try, operand)
-     struct h8_opcode *this_try;
+     const struct h8_instruction *this_try;
      struct h8_op *operand;
 {
   int i;
   char *output = frag_more (this_try->length);
-  op_type *nibble_ptr = this_try->data.nib;
+  op_type *nibble_ptr = this_try->opcode->data.nib;
   op_type c;
   unsigned int nibble_count = 0;
   int absat = 0;
@@ -979,9 +1006,9 @@ build_bytes (this_try, operand)
   char asnibbles[30];
   char *p = asnibbles;
 
-  if (!(this_try->inbase || Hmode))
+  if (!(this_try->opcode->inbase || Hmode))
     as_warn (_("Opcode `%s' with these operand types not available in H8/300 mode"),
-	     this_try->name);
+	     this_try->opcode->name);
 
   while (*nibble_ptr != E)
     {
@@ -1076,15 +1103,15 @@ build_bytes (this_try, operand)
 
   /* Disgusting.  Why, oh why didn't someone ask us for advice
      on the assembler format.  */
-  if (strcmp (this_try->name, "stm.l") == 0
-      || strcmp (this_try->name, "ldm.l") == 0)
+  if (strcmp (this_try->opcode->name, "stm.l") == 0
+      || strcmp (this_try->opcode->name, "ldm.l") == 0)
     {
       int high, low;
-      high = (operand[this_try->name[0] == 'l' ? 1 : 0].reg >> 8) & 0xf;
-      low = operand[this_try->name[0] == 'l' ? 1 : 0].reg & 0xf;
+      high = (operand[this_try->opcode->name[0] == 'l' ? 1 : 0].reg >> 8) & 0xf;
+      low = operand[this_try->opcode->name[0] == 'l' ? 1 : 0].reg & 0xf;
 
       asnibbles[2] = high - low;
-      asnibbles[7] = (this_try->name[0] == 'l') ? high : low;
+      asnibbles[7] = (this_try->opcode->name[0] == 'l') ? high : low;
     }
 
   for (i = 0; i < this_try->length; i++)
@@ -1092,7 +1119,7 @@ build_bytes (this_try, operand)
 
   /* Note if this is a movb instruction -- there's a special relaxation
      which only applies to them.  */
-  if (strcmp (this_try->name, "mov.b") == 0)
+  if (strcmp (this_try->opcode->name, "mov.b") == 0)
     movb = 1;
 
   /* Output any fixes.  */
@@ -1186,21 +1213,21 @@ build_bytes (this_try, operand)
    detect errors.  */
 
 static void
-clever_message (opcode, operand)
-     struct h8_opcode *opcode;
+clever_message (instruction, operand)
+     const struct h8_instruction *instruction;
      struct h8_op *operand;
 {
   /* Find out if there was more than one possible opcode.  */
 
-  if ((opcode + 1)->idx != opcode->idx)
+  if ((instruction + 1)->idx != instruction->idx)
     {
       int argn;
 
       /* Only one opcode of this flavour, try to guess which operand
          didn't match.  */
-      for (argn = 0; argn < opcode->noperands; argn++)
+      for (argn = 0; argn < instruction->noperands; argn++)
 	{
-	  switch (opcode->args.nib[argn])
+	  switch (instruction->opcode->args.nib[argn])
 	    {
 	    case RD16:
 	      if (operand[argn].mode != RD16)
@@ -1259,8 +1286,8 @@ md_assemble (str)
   char *op_start;
   char *op_end;
   struct h8_op operand[2];
-  struct h8_opcode *opcode;
-  struct h8_opcode *prev_opcode;
+  const struct h8_instruction *instruction;
+  const struct h8_instruction *prev_instruction;
 
   char *dot = 0;
   char c;
@@ -1292,10 +1319,10 @@ md_assemble (str)
 
   *op_end = 0;
 
-  opcode = (struct h8_opcode *) hash_find (opcode_hash_control,
-					   op_start);
+  instruction = (const struct h8_instruction *)
+    hash_find (opcode_hash_control, op_start);
 
-  if (opcode == NULL)
+  if (instruction == NULL)
     {
       as_bad (_("unknown opcode"));
       return;
@@ -1304,9 +1331,9 @@ md_assemble (str)
   /* We used to set input_line_pointer to the result of get_operands,
      but that is wrong.  Our caller assumes we don't change it.  */
 
-  (void) get_operands (opcode->noperands, op_end, operand);
+  (void) get_operands (instruction->noperands, op_end, operand);
   *op_end = c;
-  prev_opcode = opcode;
+  prev_instruction = instruction;
 
   size = SN;
   if (dot)
@@ -1326,28 +1353,28 @@ md_assemble (str)
 	  break;
 	}
     }
-  opcode = get_specific (opcode, operand, size);
+  instruction = get_specific (instruction, operand, size);
 
-  if (opcode == 0)
+  if (instruction == 0)
     {
       /* Couldn't find an opcode which matched the operands.  */
       char *where = frag_more (2);
 
       where[0] = 0x0;
       where[1] = 0x0;
-      clever_message (prev_opcode, operand);
+      clever_message (prev_instruction, operand);
 
       return;
     }
-  if (opcode->size && dot)
+  if (instruction->size && dot)
     {
-      if (opcode->size != *dot)
+      if (instruction->size != *dot)
 	{
 	  as_warn (_("mismatch between opcode size and operand size"));
 	}
     }
 
-  build_bytes (opcode, operand);
+  build_bytes (instruction, operand);
 }
 
 #ifndef BFD_ASSEMBLER
