@@ -196,7 +196,11 @@ if {   [istarget "i*86-*-*pe*"] \
 }
 
 run_dump_test sleb128
-run_dump_test quad
+
+# .quad is 16 bytes on i960.
+if { ![istarget "i960-*-*"] } {
+    run_dump_test quad
+}
 
 load_lib gas-dg.exp
 dg-init

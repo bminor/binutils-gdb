@@ -1,5 +1,9 @@
+2005-02-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/all/gas.exp (quad): Don't run on i960.
+
 2005-02-15  Nigel Stephens  <nigel@mips.com>
-            Maciej W. Rozycki  <macro@mips.com>
+	    Maciej W. Rozycki  <macro@mips.com>
 
 	* gas/mips/mips16-hilo.d: New test for the R_MIPS16_HI16 and
 	R_MIPS16_LO16 relocs.
@@ -14,7 +18,8 @@
 
 2005-02-15  Jan Beulich  <jbeulich@novell.com>
 
-	* gas/ia64/dv-raw-err.l: Expect specific resource for RAW violation on b0.
+	* gas/ia64/dv-raw-err.l: Expect specific resource for RAW
+	violation on b0.
 	* gas/ia64/regval.[ls]: New.
 	* gas/ia64/ia64.exp: Run new test.
 
@@ -196,7 +201,7 @@
 
 2005-01-09  Andreas Schwab  <schwab@suse.de>
 
-	* gas/i386/intel16.d: Ignore trailing text with #pass. 
+	* gas/i386/intel16.d: Ignore trailing text with #pass.
 	* gas/i386/intelok.d: Likewise.
 	* gas/i386/prefix.d: Likewise.
 	* gas/i386/sub.d: Likewise.
@@ -214,12 +219,12 @@
 
 2004-12-21  Tomer Levi  <Tomer.Levi@nsc.com>
 
-	* gas/crx/beq_insn.d: Update reference file according to 
+	* gas/crx/beq_insn.d: Update reference file according to
 	disassembler printing method.
-	* gas/crx/bit_insn.d: Likewise. 
-	* gas/crx/br_insn.d: Likewise. 
-	* gas/crx/cmpbr_insn.d: Likewise. 
-	* gas/crx/cop_insn.d: Likewise. 
+	* gas/crx/bit_insn.d: Likewise.
+	* gas/crx/br_insn.d: Likewise.
+	* gas/crx/cmpbr_insn.d: Likewise.
+	* gas/crx/cop_insn.d: Likewise.
 	* gas/crx/load_stor_insn.d: Likewise.
 
 2004-12-21  Hans-Peter Nilsson  <hp@axis.com>
@@ -356,7 +361,7 @@
 
 	* gas/iq2000/allinsn.exp: Remove IQ10 tests.
 	* gas/iq2000/q10allinsn.d: Delete.
-	* gas/iq2000/q10allinsn.s: Delete.	
+	* gas/iq2000/q10allinsn.s: Delete.
 	* gas/iq2000/q10hazard4.s: Delete.
 	* gas/iq2000/q10hazard5.s: Delete.
 	* gas/iq2000/q10load-hazards.exp: Delete.
@@ -407,7 +412,7 @@
 
 	* gas/arc/ld.s: Add check of load of a long immediate.
 	* gas/arc/ld.d: Add expected disassembly.
-	
+
 2004-11-22  Hans-Peter Nilsson  <hp@axis.com>
 
 	* gas/all/gas.exp: Run dg-runtest for all err-*.s and warn-*.s.
