@@ -53,7 +53,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
    Set by sim_resume.  */
 struct sim_state *current_state;
 
-/* Allocate zero filled memory with xmalloc.  */
+/* Allocate zero filled memory with xmalloc - xmalloc aborts of the
+   allocation fails.  */
 
 void *
 zalloc (unsigned long size)
@@ -72,10 +73,16 @@ zfree (void *data)
 /* Allocate a sim_state struct.  */
 
 SIM_DESC
-sim_state_alloc (void)
+sim_state_alloc (SIM_OPEN_KIND kind,
+		 host_callback *callback)
 {
-  SIM_DESC sd = zalloc (sizeof (struct sim_state));
-  sd->base.magic = SIM_MAGIC_NUMBER;
+  int cpu_nr;
+  SIM_DESC sd = ZALLOC (struct sim_state);
+  STATE_MAGIC (sd) = SIM_MAGIC_NUMBER;
+  STATE_CALLBACK (sd) = callback;
+  STATE_OPEN_KIND (sd) = kind;
+  for (cpu_nr = 0; cpu_nr < MAX_NR_PROCESSORS; cpu_nr++)
+    CPU_STATE (STATE_CPU (sd, cpu_nr)) = sd;
   return sd;
 }
 

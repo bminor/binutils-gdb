@@ -1,3 +1,8 @@
+Mon Sep  1 11:06:30 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-calls.c (sim_open): Use sim_state_alloc
+	(simulation): Delete.
+
 Sat Aug 30 09:40:47 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* insns (do_trap): Unsigned `i' for unsigned iterator.

@@ -44,21 +44,13 @@
 
 #define SIM_ADDR unsigned
 
-/* Structures used by the simulator, for gdb just have static structures */
-
-struct sim_state simulation = { 0 };
-
-
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind,
 	  host_callback *callback,
 	  struct _bfd *abfd,
 	  char **argv)
 {
-  SIM_DESC sd = &simulation;
-  STATE_OPEN_KIND (sd) = kind;
-  STATE_MAGIC (sd) = SIM_MAGIC_NUMBER;
-  STATE_CALLBACK (&simulation) = callback;
+  SIM_DESC sd = sim_state_alloc (kind, callback);
 
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
     return 0;

@@ -21,24 +21,22 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* Simulator state pseudo baseclass.
 
-   Each simulator is required to have a sim-main.h file that includes
-   sim-basics.h, defines the base type sim_cia (the data type that
-   contains the complete current instruction address information), and
-   then sim-base.h:
+   Each simulator is required to have the file ``sim-main.h''.  That
+   file includes ``sim-basics.h'', defines the base type ``sim_cia''
+   (the data type that contains complete current instruction address
+   information), include ``sim-base.h'':
 
      #include "sim-basics.h"
      typedef address_word sim_cia;
      #include "sim-base.h"
    
-   and defines two key simulator structures.  Firstly, struct
-   _sim_cpu:
+   finally, two data types ``struct _sim_cpu' and ``struct sim_state'
+   are defined:
 
      struct _sim_cpu {
         ... simulator specific members ...
         sim_cpu_base base;
      };
-
-   and secondly, struct sim_state (which uses the sim_cpu structure):
 
      struct sim_state {
        sim_cpu cpu[MAX_NR_PROCESSORS];
@@ -63,6 +61,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* typedef <target-dependant> sim_cia; */
 #ifndef NULL_CIA
 #define NULL_CIA ((sim_cia) 0)
+#endif
+#ifndef INVALID_INSTRUCTION_ADDRESS
+#define INVALID_INSTRUCTION_ADDRESS ((address_word)0 - 1)
 #endif
 typedef struct _sim_cpu sim_cpu;
 
@@ -258,7 +259,7 @@ typedef struct {
 
 
 /* Functions for allocating/freeing a sim_state.  */
-SIM_DESC sim_state_alloc PARAMS ((void));
+SIM_DESC sim_state_alloc PARAMS ((SIM_OPEN_KIND kind, host_callback *callback));
 void sim_state_free PARAMS ((SIM_DESC));
 
 

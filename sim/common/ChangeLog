@@ -1,3 +1,13 @@
+Mon Sep  1 10:50:11 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-utils.c (sim_state_alloc): Set CPU backlinks, callback and
+ 	kind.
+  	
+	* sim-base.h (sim_state_alloc): Add callback and kind arguments.
+	
+	* sim-base.h (INVALID_INSTRUCTION_ADDRESS): Add default
+ 	definition.
+
 Sat Aug 30 09:47:21 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-fpu.c (DP_GARDMSB, ...): Make unsigned.
