@@ -876,7 +876,7 @@ typedef struct sec
            standard data. */
 #define SEC_CONSTRUCTOR 0x100
 
-         /* The section is a constuctor, and should be placed at the
+         /* The section is a constructor, and should be placed at the
           end of the text, data, or bss section(?). */
 #define SEC_CONSTRUCTOR_TEXT 0x1100
 #define SEC_CONSTRUCTOR_DATA 0x2100
@@ -1186,6 +1186,7 @@ enum bfd_architecture
 #define bfd_mach_m68030 5
 #define bfd_mach_m68040 6
 #define bfd_mach_m68060 7
+#define bfd_mach_cpu32  8
   bfd_arch_vax,        /* DEC Vax */   
   bfd_arch_i960,       /* Intel 960 */
      /* The order of the following is important.
@@ -1317,6 +1318,10 @@ enum bfd_architecture
   /* end-sanitize-m32rx */
   bfd_arch_mn10200,    /* Matsushita MN10200 */
   bfd_arch_mn10300,    /* Matsushita MN10300 */
+#define bfd_mach_mn10300               300
+  /* start-sanitize-am33 */
+#define bfd_mach_am33          330
+  /* end-sanitize-am33 */
   bfd_arch_last
   };
 

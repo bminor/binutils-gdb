@@ -1,3 +1,18 @@
+Fri Jun 26 10:48:23 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* archures.c (bfd_mach_mn10300): Define.
+	* elf-m10300.c: Include elf/mn10300.h
+	(elf_mn10300_mach): New function.
+	(_bfd_mn10300_elf_final_write_processing): Likewise.
+	(_bfd_mn10300_elf_object_p): Likewise.
+	(elf_backendfinal_write_processing): Define.
+	(elf_backend_object_p): Likewise.
+start-sanitize-am33
+	* archures.c (bfd_mach_am33): Define.
+	* cpu-m10300.c (bfd_am33_arch): New arch info structure.  Link it
+	into the NEXT field of bfd_mn10300_arch.
+end-sanitize-am33
+
 Thu Jun 25 18:31:08 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-v850.c (v850_elf_perform_relocation): Fix HI16_S
