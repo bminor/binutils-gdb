@@ -127,6 +127,7 @@ ALL_EMULATIONS = \
 	eelf_i386.o \
 	egld960.o \
 	egld960coff.o \
+	efr30.o \
 	ego32.o \
 	eh8300.o \
 	eh8300h.o \
@@ -273,7 +274,7 @@ earcelf.c: $(srcdir)/emulparams/arcelf.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} arcelf "$(tdir_arcelf)"
 earmelf.c: $(srcdir)/emulparams/armelf.sh \
-  $(srcdir)/emultempl/armelf.em $(srcdir)/scripttempl/elfarm.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/armelf.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} armelf "$(tdir_armelf)"
 earmaoutb.c:	$(srcdir)/emulparams/armaoutb.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/armaout.sc ${GEN_DEPENDS}
@@ -308,6 +309,9 @@ edelta68.c: $(srcdir)/emulparams/delta68.sh \
 eebmon29k.c: $(srcdir)/emulparams/ebmon29k.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/ebmon29k.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} ebmon29k "$(tdir_ebmon29k)"
+efr30.c: $(srcdir)/emulparams/fr30.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/fr30.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} fr30 "$(tdir_fr30)"
 em32relf.c: $(srcdir)/emulparams/m32relf.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m32relf "$(tdir_m32r)"

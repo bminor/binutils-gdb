@@ -1,3 +1,11 @@
+Wed Nov  4 16:39:18 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* Makefile.am: Add support for FR30 target.
+	* configure.tgt: Add support for FR30 target.
+	* Makefile.in: Regenerate.
+	* emulparams/fr30.sh: New file.
+	* scripttemp/fr30.sc: New file.
+	
 Mon Nov  2 14:47:15 1998  Catherine Moore  <clm@cygnus.com>
 
         * ldmain.c (main):  Don't report error for dynamic links and

@@ -113,11 +113,15 @@ a29k-*-*)		targ_emul=a29k ;;
 arm-*-aout | armel-*-aout) targ_emul=armaoutl ;;
 armeb-*-aout)		targ_emul=armaoutb ;;
 arm-*-coff)		targ_emul=armcoff ;;
+arm-*-elf)		targ_emul=armelf ;;
 thumb-*-coff)		targ_emul=armcoff ;;
+thumb-*-elf)		targ_emul=armelf ;;
 thumb-*-pe)		targ_emul=armpe ;;
-h8300-*-hms)		targ_emul=h8300; targ_extra_emuls="h8300h h8300s"
+h8300-*-hms* | h8300-*-coff*)
+			targ_emul=h8300; targ_extra_emuls="h8300h h8300s"
 			;;
-h8500-*-hms)		targ_emul=h8500
+h8500-*-hms* | h8500-*-coff*)
+			targ_emul=h8500
 			targ_extra_emuls="h8500s h8500b h8500m h8500c"
 			;;
 sh-*-elf*)		targ_emul=shelf
@@ -226,6 +230,7 @@ v850e-*-*)		targ_emul=v850 ;;
 v850ea-*-*)		targ_emul=v850 ;;
 # end-sanitize-v850e
 w65-*-*)		targ_emul=w65 ;;
+fr30-*-*)		targ_emul=fr30 ;;
 *-*-aout)		targ_emul=${target_cpu}-${target_vendor} ;;
 *-*-coff)		targ_emul=${target_cpu}-${target_vendor} ;;
 *-*-netware)		targ_emul=${target_cpu}-nw ;;
