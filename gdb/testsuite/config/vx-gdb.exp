@@ -80,7 +80,7 @@ proc gdb_start { } {
     if $reboot then {
 	verbose "Rebooting VxWorks, Please wait...\n"
 
-	send -i $shell_id "\CX"
+	send -i $shell_id "\030"
 	set timeout 120
 	expect {
 	    -i $shell_id -re "Connection closed.*$" {

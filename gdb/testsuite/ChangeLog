@@ -1,5 +1,8 @@
 Thu Mar  2 05:31:34 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* config/vx-gdb.exp (gdb_start): Use \030, not \CX.  tcl doesn't
+	support the latter anymore.
+
 	* gdb.base/Makefile.in: Try compiling callfuncs.c, if that fails try
 	-DNO_PROTOTYPES.
 	* gdb.base/callfuncs.c: Control use of prototypes based on
