@@ -1,3 +1,9 @@
+Mon Feb  9 14:48:37 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* genmloop.sh (@cpu@_engine_run): Delete `current_state'.
+	(engine_resume): Likewise.  Make `engine' volatile.  Save copy
+	of cpu pointer in volatile object.
+
 Thu Feb  5 13:27:04 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen-sim.h (EX_FN_NAME): _exc_ -> _ex_.
