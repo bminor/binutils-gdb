@@ -1,3 +1,21 @@
+start-sanitize-sky
+Mon Mar 23 09:45:04 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* dvp-opc.c (vif_operand_datalen_special): New global.
+
+end-sanitize-sky
+start-sanitize-r5900
+Sun Mar 22 13:00:14 1998  Jeffrey A Law  (law@cygnus.com)
+
+        * vu0.h (vcallms): Use 'O' for call target operand.
+        * mips-dis.c (print_insn_arg): Handle 'O'.
+
+end-sanitize-r5900
+Fri Mar 20 18:55:18 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Use AM_DISABLE_SHARED.
+	* aclocal.m4, configure: Rebuild with libtool 1.2.
+
 start-sanitize-r5900
 Fri Mar 20 09:01:31 1998  Jeffrey A Law  (law@cygnus.com)
 
