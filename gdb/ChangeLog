@@ -1,3 +1,7 @@
+Thu Mar 24 07:12:09 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* dbxread.c (end_psymtab): Add comment about empty psymtabs.
+
 Wed Mar 23 07:50:33 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* main.c (complete_command): New command, from Rick Sladkey

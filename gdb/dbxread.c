@@ -206,6 +206,10 @@ static void
 dbx_psymtab_to_symtab_1 PARAMS ((struct partial_symtab *));
 
 static void
+read_dbx_dynamic_symtab PARAMS ((struct section_offsets *,
+				 struct objfile *objfile));
+
+static void
 read_dbx_symtab PARAMS ((struct section_offsets *, struct objfile *,
 			 CORE_ADDR, int));
 
@@ -508,6 +512,11 @@ dbx_symfile_read (objfile, section_offsets, mainline)
   read_dbx_symtab (section_offsets, objfile,
 		   bfd_section_vma  (sym_bfd, DBX_TEXT_SECT (objfile)),
 		   bfd_section_size (sym_bfd, DBX_TEXT_SECT (objfile)));
+
+  /* Add the dynamic symbols if we are reading the main symbol table.  */
+
+  if (mainline)
+    read_dbx_dynamic_symtab (section_offsets, objfile);
 
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile. */
@@ -825,6 +834,169 @@ free_bincl_list (objfile)
   bincls_allocated = 0;
 }
 
+/* Scan a SunOs dynamic symbol table for symbols of interest and
+   add them to the minimal symbol table.  */
+
+static void
+read_dbx_dynamic_symtab (section_offsets, objfile)
+     struct section_offsets *section_offsets;
+     struct objfile *objfile;
+{
+  bfd *abfd = objfile->obfd;
+  int counter;
+  bfd_size_type dynsym_count = 0;
+  struct external_nlist *dynsyms = NULL;
+  char *dynstrs = NULL;
+  bfd_size_type dynstr_size;
+  struct external_nlist *ext_symptr;
+  bfd_byte *ext_relptr;
+  bfd_size_type dynrel_count = 0;
+  PTR dynrels = NULL;
+  CORE_ADDR sym_value;
+  bfd_vma strx;
+  char *namestring;
+
+  /* Check that the symbol file has dynamic symbols that we know about.
+     bfd_arch_unknown can happen if we are reading a sun3 symbol file
+     on a sun4 host (and vice versa) and bfd is not configured
+     --with-target=all.  This would trigger an assertion in bfd/sunos.c,
+     so we ignore the dynamic symbols in this case.  */
+  if (bfd_get_flavour (abfd) != bfd_target_aout_flavour
+      || (bfd_get_file_flags (abfd) & DYNAMIC) == 0
+      || bfd_get_arch (abfd) == bfd_arch_unknown
+      || aout_backend_info (abfd)->read_dynamic_symbols == NULL)
+    return;
+
+  dynsym_count = ((*aout_backend_info (abfd)->read_dynamic_symbols)
+		  (abfd, &dynsyms, &dynstrs, &dynstr_size));
+  if (dynsym_count == (bfd_size_type) -1)
+    return;
+
+  /* Enter dynamic symbols into the minimal symbol table
+     if this is a stripped executable.  */
+  if (bfd_get_symcount (abfd) <= 0)
+    {
+      ext_symptr = dynsyms;
+      for (counter = 0; counter < dynsym_count; counter++, ext_symptr++)
+	{
+	  int type = bfd_h_get_8 (abfd, ext_symptr->e_type);
+
+	  switch (type)
+	    {
+	    case N_TEXT | N_EXT:
+	      sym_value = bfd_h_get_32 (abfd, ext_symptr->e_value)
+			  + ANOFFSET (section_offsets, SECT_OFF_TEXT);
+	      break;
+
+	    case N_DATA:
+	    case N_DATA | N_EXT:
+	      sym_value = bfd_h_get_32 (abfd, ext_symptr->e_value)
+			  + ANOFFSET (section_offsets, SECT_OFF_DATA);
+	      break;
+
+	    case N_BSS:
+	    case N_BSS | N_EXT:
+	      sym_value = bfd_h_get_32 (abfd, ext_symptr->e_value)
+			  + ANOFFSET (section_offsets, SECT_OFF_BSS);
+	      break;
+
+	    default:
+	      continue;
+	    }
+
+	  strx = bfd_h_get_32 (abfd, ext_symptr->e_strx);
+	  if (strx >= dynstr_size)
+	    {
+	      complain (&string_table_offset_complaint, counter);
+	      namestring = "<bad dynamic string table offset>";
+	    }
+	  else
+	    namestring = strx + dynstrs;
+	  record_minimal_symbol (namestring, sym_value, type, objfile);
+	}
+    }
+
+  /* Symbols from shared libraries have a dynamic relocation entry
+     that points to the associated slot in the procedure linkage table.
+     We make a mininal symbol table entry with type mst_solib_trampoline
+     at the address in the procedure linkage table.  */
+  if (aout_backend_info (abfd)->read_dynamic_relocs == NULL)
+    return;
+
+  dynrel_count = ((*aout_backend_info (abfd)->read_dynamic_relocs)
+		  (abfd, &dynrels));
+  if (dynrel_count == (bfd_size_type) -1)
+    return;
+
+  for (counter = 0, ext_relptr = (bfd_byte *) dynrels;
+       counter < dynrel_count;
+       counter++, ext_relptr += obj_reloc_entry_size (abfd))
+    {
+      int r_index;
+
+      if (bfd_get_arch (abfd) == bfd_arch_sparc)
+	{
+	  struct reloc_ext_external *rptr =
+	    (struct reloc_ext_external *) ext_relptr;
+	  int r_type;
+
+	  r_type = (rptr->r_type[0] & RELOC_EXT_BITS_TYPE_BIG)
+		    >> RELOC_EXT_BITS_TYPE_SH_BIG;
+
+	  if (r_type != RELOC_JMP_SLOT)
+	    continue;
+
+	  r_index = (rptr->r_index[0] << 16)
+		    | (rptr->r_index[1] << 8)
+		    | rptr->r_index[2];
+
+	  sym_value = bfd_h_get_32 (abfd, rptr->r_address);
+	}
+      else if (bfd_get_arch (abfd) == bfd_arch_m68k)
+	{
+	  struct reloc_std_external *rptr =
+	    (struct reloc_std_external *) ext_relptr;
+
+	  if ((rptr->r_type[0] & RELOC_STD_BITS_JMPTABLE_BIG) == 0)
+	    continue;
+
+	  r_index = (rptr->r_index[0] << 16)
+		    | (rptr->r_index[1] << 8)
+		    | rptr->r_index[2];
+
+	  /* Adjust address in procedure linkage table to point to
+	     the start of the bsr instruction.  */
+	  sym_value = bfd_h_get_32 (abfd, rptr->r_address) - 2;
+	}
+      else
+	{
+	  continue;
+	}
+
+      if (r_index >= dynsym_count)
+	continue;
+      ext_symptr = dynsyms + r_index;
+      if (bfd_h_get_8 (abfd, ext_symptr->e_type) != N_EXT)
+	continue;
+
+      strx = bfd_h_get_32 (abfd, ext_symptr->e_strx);
+      if (strx >= dynstr_size)
+	{
+	  complain (&string_table_offset_complaint, r_index);
+	  namestring = "<bad dynamic string table offset>";
+	}
+      else
+	namestring = strx + dynstrs;
+
+      prim_record_minimal_symbol (obsavestring (namestring,
+						strlen (namestring),
+						&objfile -> symbol_obstack),
+				  sym_value,
+				  mst_solib_trampoline,
+				  objfile);
+    }
+}
+
 /* Given pointers to an a.out symbol table in core containing dbx
    style data, setup partial_symtab's describing each source file for
    which debugging information is available.
@@ -931,7 +1103,7 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
   if (((unsigned)bufp->n_strx + file_string_table_offset) >=		\
       DBX_STRINGTAB_SIZE (objfile)) {					\
     complain (&string_table_offset_complaint, symnum);			\
-    namestring = "foo";							\
+    namestring = "<bad string table offset>";				\
   } else								\
     namestring = bufp->n_strx + file_string_table_offset +		\
 		 DBX_STRINGTAB (objfile)
@@ -1187,30 +1359,36 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
   free_named_symtabs (pst->filename);
 
   if (num_includes == 0
-   && number_dependencies == 0
-   && pst->n_global_syms == 0
-   && pst->n_static_syms == 0) {
-    /* Throw away this psymtab, it's empty.  We can't deallocate it, since
-       it is on the obstack, but we can forget to chain it on the list.  */
-    struct partial_symtab *prev_pst;
+      && number_dependencies == 0
+      && pst->n_global_syms == 0
+      && pst->n_static_syms == 0)
+    {
+      /* Throw away this psymtab, it's empty.  We can't deallocate it, since
+	 it is on the obstack, but we can forget to chain it on the list.  */
+      /* Empty psymtabs happen as a result of header files which don't have
+	 any symbols in them.  There can be a lot of them.  But this check
+	 is wrong, in that a psymtab with N_SLINE entries but nothing else
+	 is not empty, but we don't realize that.  Fixing that without slowing
+	 things down might be tricky.  */
+      struct partial_symtab *prev_pst;
 
-    /* First, snip it out of the psymtab chain */
+      /* First, snip it out of the psymtab chain */
 
-    if (pst->objfile->psymtabs == pst)
-      pst->objfile->psymtabs = pst->next;
-    else
-      for (prev_pst = pst->objfile->psymtabs; prev_pst; prev_pst = pst->next)
-	if (prev_pst->next == pst)
-	  prev_pst->next = pst->next;
+      if (pst->objfile->psymtabs == pst)
+	pst->objfile->psymtabs = pst->next;
+      else
+	for (prev_pst = pst->objfile->psymtabs; prev_pst; prev_pst = pst->next)
+	  if (prev_pst->next == pst)
+	    prev_pst->next = pst->next;
 
-    /* Next, put it on a free list for recycling */
+      /* Next, put it on a free list for recycling */
 
-    pst->next = pst->objfile->free_psymtabs;
-    pst->objfile->free_psymtabs = pst;
+      pst->next = pst->objfile->free_psymtabs;
+      pst->objfile->free_psymtabs = pst;
 
-    /* Indicate that psymtab was thrown away.  */
-    pst = (struct partial_symtab *)NULL;
-  }
+      /* Indicate that psymtab was thrown away.  */
+      pst = (struct partial_symtab *)NULL;
+    }
   return pst;
 }
 
