@@ -1,3 +1,38 @@
+Tue Sep  5 14:46:38 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* configure.in: When testing for a free() declaration in system
+	header files, cast the address to a function pointer, not to an
+	integer.
+
+	* write.c (fix_new_internal): Call TC_INIT_FIX_DATA if TC_FIX_TYPE
+	is defined.  Don't initialize fx_bsr.  Verify that fx_size field
+	is wide enough to hold stored value.
+	* write.h (struct fix): Change tc_fix_data to type TC_FIX_TYPE if
+	that is defined, otherwise omit it.  Delete fx_bsr.  Change
+	fx_size to unsigned char.
+	* config/tc-i960.h (TC_FIX_TYPE, fx_bsr, TC_INIT_FIX_DATA): New
+	macros.
+	* config/tc-ns32k.h (TC_FIX_TYPE, fx_bsr, TC_INIT_FIX_DATA): New
+	macros.
+	* config/tc-hppa.h (TC_FIX_TYPE): Define as PTR.
+
+	* config/tc-i860.c (md_apply_fix): Delete code for checking
+	fx_im_disp, and for handling non-zero values, since it never gets
+	set after being initialized to zero.
+
+	* write.h (struct fix): Make fx_im_disp always 2 bits, since the
+	only tc-* files actually using it need that much.
+
+	NS32K changes from Ian Dall:
+	* configure.in: Treat ns32k-pc532-ux* like ns32k-pc532-mach*, and
+	ns32k-pc532-lites* like ns32k-pc532-netbsd*.
+	* config/tc-ns32k.h (LOCAL_LABELS_FB): Define to 1.
+
+Fri Sep  1 17:02:15 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* write.c (fixup_segment): Get TC_FORCE_RELOCATION up the
+	right way!
+
 Fri Sep  1 08:20:19 1995  James G. Smith  <jsmith@beauty.cygnus.com>
 
         * config/tc-mips.c (md_parse_option, md_begin, md_show_usage):
