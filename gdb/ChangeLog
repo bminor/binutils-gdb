@@ -1,3 +1,15 @@
+2003-05-28  Jim Blandy  <jimb@redhat.com>
+
+	* configure.host, configure.tgt: Add entries for
+	powerpc64-*-linux, selecting powerpc/ppc64-linux.mh and
+	powerpc/linux.mt.
+	* config/powerpc/ppc64-linux.mh, config/powerpc/nm-ppc64-linux.mh:
+	New files.
+
+	* ppc-linux-nat.c (ppc_register_u_addr, fill_gregset): If PT_MQ
+	isn't #defined, assume the register doesn't exist: act as if
+	tdep->ppc_mq_regnum were -1.
+
 2003-05-26  Elena Zannoni  <ezannoni@redhat.com>
 
 	* stabsread.c (dbx_lookup_type): Make static.
