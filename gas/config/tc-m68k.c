@@ -1,7 +1,7 @@
-/* tc-m68k.c  All the m68020 specific stuff in one convenient, huge,
-   slow to compile, easy to find file.
+/* All the m68k specific stuff in one convenient, huge, slow to
+   compile, easy to find file.
 
-   Copyright (C) 1987, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -22,14 +22,10 @@
 #include <ctype.h>
 #define  NO_RELOC 0
 #include "as.h"
-
-/* need TARGET_CPU */
-#include "config.h"
-
 #include "obstack.h"
 
-/* The opcode table is too big for gcc, which (currently) requires
-   exponential space at compile time for initialized arrays.  */
+/* The opcode table is too big for some versions of gcc, which require
+   exponential(?) space at compile time for initialized arrays.  */
 #ifdef __GNUC__
 #define DO_BREAK_UP_BIG_DECL
 #define BREAK_UP_BIG_DECL	}; struct m68k_opcode m68k_opcodes_2[] = {
@@ -232,9 +228,6 @@ enum _register
     ADDR6,
     ADDR7,
 
-    /* Note that COP0==processor #1 -- COP0+7==#8, which stores as 000 */
-    /* I think. . .  */
-
     FP0,			/* Eight FP registers */
     FP1,
     FP2,
@@ -243,6 +236,9 @@ enum _register
     FP5,
     FP6,
     FP7,
+
+    /* Note that COP0==processor #1 -- COP0+7==#8, which stores as 000 */
+    /* I think. . .  */
 
     COP0,			/* Co-processor #1-#8 */
     COP1,
@@ -338,6 +334,7 @@ static const enum _register m68060_control_regs[] = {
   USP, VBR, URP, SRP, PCR,
   0
 };
+#define cpu32_control_regs m68010_control_regs
 
 static const enum _register *control_regs;
 
@@ -481,6 +478,35 @@ static void s_proc PARAMS ((int));
 
 static int current_architecture;
 
+struct m68k_cpu {
+  unsigned long arch;
+  const char *name;
+};
+
+static const struct m68k_cpu archs[] = {
+  { m68000, "68000" },
+  { m68010, "68010" },
+  { m68020, "68020" },
+  { m68030, "68030" },
+  { m68040, "68040" },
+  { m68060, "68060" },
+  { cpu32,  "cpu32" },
+  { m68881, "68881" },
+  { m68851, "68851" },
+  /* Aliases (effectively, so far as gas is concerned) for the above
+     cpus.  */
+  { m68020, "68k" },
+  { m68000, "68302" },
+  { m68000, "68008" },
+  { cpu32,  "68331" },
+  { cpu32,  "68332" },
+  { cpu32,  "68333" },
+  { cpu32,  "68340" },
+  { m68881, "68882" },
+};
+
+static const int n_archs = sizeof (archs) / sizeof (archs[0]);
+
 /* BCC68000 is for patching in an extra jmp instruction for long offsets
    on the 68000.  The 68000 doesn't support long branches with branchs */
 
@@ -569,15 +595,15 @@ extern void obj_coff_section ();
 CONST pseudo_typeS mote_pseudo_table[] =
 {
 
-  {"dc.l", cons, 4},
+  {"dcl", cons, 4},
   {"dc", cons, 2},
-  {"dc.w", cons, 2},
-  {"dc.b", cons, 1},
+  {"dcw", cons, 2},
+  {"dcb", cons, 1},
 
-  {"ds.l", s_space, 4},
+  {"dsl", s_space, 4},
   {"ds", s_space, 2},
-  {"ds.w", s_space, 2},
-  {"ds.b", s_space, 1},
+  {"dsw", s_space, 2},
+  {"dsb", s_space, 1},
 
   {"xdef", s_globl, 0},
   {"align", s_align_ptwo, 0},
@@ -605,21 +631,12 @@ enum
     OK = 1,
   };
 
-/* JF these tables here are for speed at the expense of size */
-/* You can replace them with the #if 0 versions if you really
-   need space and don't mind it running a bit slower */
-
 static char mklower_table[256];
 #define mklower(c) (mklower_table[(unsigned char)(c)])
 static char notend_table[256];
 static char alt_notend_table[256];
 #define notend(s) ( !(notend_table[(unsigned char)(*s)] || (*s==':' &&\
 							    alt_notend_table[(unsigned char)(s[1])])))
-
-#if 0
-#define mklower(c)	(isupper(c) ? tolower(c) : c)
-#endif
-
 
 /* JF modified this to handle cases where the first part of a symbol name
    looks like a register */
@@ -1278,35 +1295,7 @@ m68k_ip_op (str, opP)
 	      break;
 	    }
 	}
-#if 0
-      if (str[-3]==':')
-	{
-	  int siz;
-
-	  switch (str[-2])
-	    {
-	    case 'b':
-	    case 'B':
-	      siz=1;
-	      break;
-	    case 'w':
-	    case 'W':
-	      siz=2;
-	      break;
-	    case 'l':
-	    case 'L':
-	      siz=3;
-	      break;
-	    default:
-	      opP->error="Specified size isn't :w or :l";
-	      return FAIL;
-	    }
-	  opP->con1=add_exp(beg_str,str-4);
-	  opP->con1->e_siz=siz;
-	}
-      else
-#endif
-	opP->con1 = add_exp (beg_str, str - 2);
+      opP->con1 = add_exp (beg_str, str - 2);
       /* Should be offset,reg */
       if (str[-1] == ',')
 	{
@@ -1435,7 +1424,7 @@ m68k_ip_op (str, opP)
       return FAIL;
     }
   return (OK);
-}				/* m68k_ip_op() */
+}
 
 
 #if defined (M68KCOFF) && !defined (BFD_ASSEMBLER)
@@ -2128,23 +2117,6 @@ m68k_ip (instring)
 		default:
 		  {
 		    int got_one = 0, idx;
-		    static const struct
-		      {
-			int arch;
-			const char *name;
-		      }
-		    archs[] =
-		    {
-		      { m68000, "68000" },
-		      { m68010, "68010" },
-		      { m68020, "68020" },
-		      { m68030, "68030" },
-		      { m68040, "68040" },
-		      { m68060, "68060" },
-		      { cpu32,  "cpu32" },
-		      { m68881, "68881" },
-		      { m68851, "68851" }
-		    };
 		    for (idx = 0; idx < sizeof (archs) / sizeof (archs[0]); idx++)
 		      {
 			if (archs[idx].arch & ok_arch)
@@ -2324,7 +2296,8 @@ m68k_ip (instring)
 	      if (!issword (nextword)
 		  || (isvar (opP->con1)
 		      && ((opP->con1->e_siz == 0
-			   && flag_short_refs == 0)
+			   && flag_short_refs == 0
+			   && cpu_of_arch (current_architecture) >= m68020)
 			  || opP->con1->e_siz == 3)))
 		{
 
@@ -2436,6 +2409,7 @@ m68k_ip (instring)
 		      && opP->reg != FAIL
 		      && opP->reg != ZPC
 		      && (siz1 == 1
+			  || cpu_of_arch (current_architecture) < m68020
 			  || (issbyte (baseo)
 			      && !isvar (opP->con1))))
 		    {
@@ -2706,7 +2680,8 @@ m68k_ip (instring)
 		 where opnd is absolute (it needs
 		 to use the 68000 hack since no
 		 conditional abs jumps).  */
-	      if (((cpu_of_arch (current_architecture) < m68020) || (0 == adds (opP->con1)))
+	      if (((cpu_of_arch (current_architecture) < m68020)
+		   || (0 == adds (opP->con1)))
 		  && (the_ins.opcode[0] >= 0x6200)
 		  && (the_ins.opcode[0] <= 0x6f00))
 		{
@@ -2726,7 +2701,8 @@ m68k_ip (instring)
 		    {
 		      /* size varies if patch */
 		      /* needed for long form */
-		      add_frag (adds (opP->con1), offs (opP->con1), TAB (DBCC, SZ_UNDEF));
+		      add_frag (adds (opP->con1), offs (opP->con1),
+				TAB (DBCC, SZ_UNDEF));
 		      break;
 		    }
 #endif
@@ -3423,25 +3399,6 @@ crack_operand (str, opP)
   return str;
 }
 
-/* See the comment up above where the #define notend(... is */
-#if 0
-notend (s)
-     char *s;
-{
-  if (*s == ',')
-    return 0;
-  if (*s == '{' || *s == '}')
-    return 0;
-  if (*s != ':')
-    return 1;
-  /* This kludge here is for the division cmd, which is a kludge */
-  if (index ("aAdD#", s[1]))
-    return 0;
-  return 1;
-}
-
-#endif
-
 /* This is the guts of the machine-dependent assembler.  STR points to a
    machine dependent instruction.  This function is supposed to emit
    the frags/bytes it assembles to.
@@ -3763,7 +3720,7 @@ md_assemble (str)
 }
 
 /* See BREAK_UP_BIG_DECL definition, above.  */
-static struct m68k_opcode *
+static const struct m68k_opcode *
 opcode_ptr (i)
      int i;
 {
@@ -3789,7 +3746,7 @@ md_begin ()
      my lord ghod hath spoken, so we do it this way.  Excuse the ugly var
      names.  */
 
-  register CONST struct m68k_opcode *ins;
+  register const struct m68k_opcode *ins;
   register struct m68k_incant *hack, *slak;
   register const char *retval = 0;	/* empty string, or error msg text */
   register unsigned int i;
@@ -3826,7 +3783,19 @@ md_begin ()
 
       retval = hash_insert (op_hash, ins->name, (char *) hack);
       if (retval)
-	as_bad ("Internal Error:  Can't hash %s: %s", ins->name, retval);
+	as_fatal ("Internal Error:  Can't hash %s: %s", ins->name, retval);
+    }
+
+  for (i = 0; i < numaliases; i++)
+    {
+      const char *name = m68k_opcode_aliases[i].primary;
+      const char *alias = m68k_opcode_aliases[i].alias;
+      PTR val = hash_find (op_hash, name);
+      if (!val)
+	as_fatal ("Internal Error: Can't find %s in hash table", name);
+      retval = hash_insert (op_hash, alias, val);
+      if (retval)
+	as_fatal ("Internal Error: Can't hash %s: %s", alias, retval);
     }
 
   for (i = 0; i < sizeof (mklower_table); i++)
@@ -3877,44 +3846,24 @@ m68k_init_after_args ()
 {
   if (cpu_of_arch (current_architecture) == 0)
     {
-      int cpu_type;
+      int cpu_type, i;
+      const char *default_cpu = TARGET_CPU;
 
-      if (strcmp (TARGET_CPU, "m68000") == 0
-	  || strcmp (TARGET_CPU, "m68302") == 0)
-	cpu_type = m68000;
-      else if (strcmp (TARGET_CPU, "m68010") == 0)
-	cpu_type = m68010;
-      else if (strcmp (TARGET_CPU, "m68020") == 0
-	       || strcmp (TARGET_CPU, "m68k") == 0)
-	cpu_type = m68020;
-      else if (strcmp (TARGET_CPU, "m68030") == 0)
-	cpu_type = m68030;
-      else if (strcmp (TARGET_CPU, "m68040") == 0)
-	cpu_type = m68040;
-      else if (strcmp (TARGET_CPU, "m68060") == 0)
-	cpu_type = m68060;
-      else if (strcmp (TARGET_CPU, "cpu32") == 0
-	       || strcmp (TARGET_CPU, "m68331") == 0
-	       || strcmp (TARGET_CPU, "m68332") == 0
-	       || strcmp (TARGET_CPU, "m68333") == 0
-	       || strcmp (TARGET_CPU, "m68340") == 0)
-	cpu_type = cpu32;
+      if (*default_cpu == 'm')
+	default_cpu++;
+      for (i = 0; i < n_archs; i++)
+	if (!strcmp (default_cpu, archs[i].name))
+	  break;
+      if (i == n_archs)
+	{
+	  as_bad ("unrecognized default cpu `%s' ???", TARGET_CPU);
+	  current_architecture |= m68020;
+	}
       else
-	cpu_type = m68020;
-
-      current_architecture |= cpu_type;
+	current_architecture |= archs[i].arch;
     }
-#if 0				/* Could be doing emulation.  */
-  if (current_architecture & m68881)
-    {
-      if (current_architecture & m68000)
-	as_bad ("incompatible processors 68000 and 68881/2 specified");
-      if (current_architecture & m68010)
-	as_bad ("incompatible processors 68010 and 68881/2 specified");
-      if (current_architecture & m68040)
-	as_bad ("incompatible processors 68040 and 68881/2 specified");
-    }
-#endif
+  /* Permit m68881 specification with all cpus; those that can't work
+     with a coprocessor could be doing emulation.  */
   if (current_architecture & m68851)
     {
       if (current_architecture & m68040)
@@ -3974,16 +3923,13 @@ m68k_init_after_args ()
     case m68060:
       control_regs = m68060_control_regs;
       break;
+    case cpu32:
+      control_regs = cpu32_control_regs;
+      break;
     default:
       abort ();
     }
 }
-
-#if 0
-#define notend(s) ((*s == ',' || *s == '}' || *s == '{' \
-		    || (*s == ':' && strchr("aAdD#", s[1]))) \
-		   ? 0 : 1)
-#endif
 
 /* Equal to MAX_PRECISION in atof-ieee.c */
 #define MAX_LITTLENUMS 6
@@ -4077,16 +4023,18 @@ md_apply_fix_2 (fixP, val)
 
   switch (fixP->fx_size)
     {
+      /* The cast to offsetT below are necessary to make code correct for
+	 machines where ints are smaller than offsetT */
     case 1:
       *buf++ = val;
       upper_limit = 0x7f;
-      lower_limit = -0x80;
+      lower_limit = - (offsetT) 0x80;
       break;
     case 2:
       *buf++ = (val >> 8);
       *buf++ = val;
       upper_limit = 0x7fff;
-      lower_limit = -0x8000;
+      lower_limit = - (offsetT) 0x8000;
       break;
     case 4:
       *buf++ = (val >> 24);
@@ -4094,7 +4042,7 @@ md_apply_fix_2 (fixP, val)
       *buf++ = (val >> 8);
       *buf++ = val;
       upper_limit = 0x7fffffff;
-      lower_limit = -(offsetT)0x80000000;
+      lower_limit = - (offsetT) 0x7fffffff - 1;	/* avoid constant overflow */
       break;
     default:
       BAD_CASE (fixP->fx_size);
@@ -4421,7 +4369,9 @@ md_estimate_size_before_relax (fragP, segment)
 
     case TAB (PCREL, SZ_UNDEF):
       {
-	if (S_GET_SEGMENT (fragP->fr_symbol) == segment || flag_short_refs)
+	if (S_GET_SEGMENT (fragP->fr_symbol) == segment
+	    || flag_short_refs
+	    || cpu_of_arch (current_architecture) < m68020)
 	  {
 	    fragP->fr_subtype = TAB (PCREL, SHORT);
 	    fragP->fr_var += 2;
@@ -4519,7 +4469,9 @@ md_estimate_size_before_relax (fragP, segment)
 
     case TAB (PCLEA, SZ_UNDEF):
       {
-	if ((S_GET_SEGMENT (fragP->fr_symbol)) == segment || flag_short_refs)
+	if ((S_GET_SEGMENT (fragP->fr_symbol)) == segment
+	    || flag_short_refs
+	    || cpu_of_arch (current_architecture) < m68020)
 	  {
 	    fragP->fr_subtype = TAB (PCLEA, SHORT);
 	    fragP->fr_var += 2;
@@ -4955,16 +4907,7 @@ s_proc (ignore)
  *	-pic	Indicates PIC.
  *	-k	Indicates PIC.  (Sun 3 only.)
  *
- * MAYBE_FLOAT_TOO is defined below so that specifying a processor type
- * (e.g. m68020) also requests that float instructions be included.  This
- * is the default setup, mostly to avoid hassling users.  A better
- * rearrangement of this structure would be to add an option to DENY
- * floating point opcodes, for people who want to really know there's none
- * of that funny floaty stuff going on.  FIXME-later.
  */
-#ifndef MAYBE_FLOAT_TOO
-#define	MAYBE_FLOAT_TOO	/* m68881 */ 0	/* this is handled later */
-#endif
 
 CONST char *md_shortopts = "lSA:m:k";
 struct option md_longopts[] = {
@@ -4982,6 +4925,9 @@ md_parse_option (c, arg)
      int c;
      char *arg;
 {
+  int i;
+  unsigned long arch;
+
   switch (c)
     {
     case 'l':			/* -l means keep external to 2 bit offset
@@ -4999,85 +4945,73 @@ md_parse_option (c, arg)
  	arg++;
       /* intentional fall-through */
     case 'm':
-      if (*arg == 'c')
- 	arg++;
 
-      if (!strcmp (arg, "68000")
-	  || !strcmp (arg, "68008")
-	  || !strcmp (arg, "68302"))
+      if (arg[0] == 'n' && arg[1] == 'o' && arg[2] == '-')
 	{
-	  current_architecture &=~ m68000up;
-	  current_architecture |= m68000;
-	}
-      else if (!strcmp (arg, "68010"))
-	{
-	  current_architecture &=~ m68000up;
-	  current_architecture |= m68010;
-	}
-      else if (!strcmp (arg, "68020"))
-	{
-	  current_architecture &=~ m68000up;
-	  current_architecture |= m68020 | MAYBE_FLOAT_TOO;
-	}
-      else if (!strcmp (arg, "68030"))
-	{
-	  current_architecture &=~ m68000up;
-	  current_architecture |= m68030 | MAYBE_FLOAT_TOO;
-	}
-      else if (!strcmp (arg, "68040"))
-	{
-	  current_architecture &=~ m68000up;
-	  current_architecture |= m68040 | MAYBE_FLOAT_TOO;
-	}
-      else if (!strcmp (arg, "68060"))
-	{
-	  current_architecture &=~ m68000up;
-	  current_architecture |= m68060 | MAYBE_FLOAT_TOO;
-	}
-#ifndef NO_68881
-      else if (!strcmp (arg, "68881"))
-	{
-	  current_architecture |= m68881;
-	  no_68881 = 0;
-	}
-      else if (!strcmp (arg, "68882"))
-	{
-	  current_architecture |= m68882;
-	  no_68881 = 0;
-	}
-#endif /* NO_68881 */
-      /* Even if we aren't configured to support the processor,
-	 it should still be possible to assert that the user
-	 doesn't have it...  */
-      else if (!strcmp (arg, "no-68881")
-	       || !strcmp (arg, "no-68882"))
-	{
-	  no_68881 = 1;
-	}
-#ifndef NO_68851
-      else if (!strcmp (arg, "68851"))
-	{
-	  current_architecture |= m68851;
-	  no_68851 = 0;
-	}
-#endif /* NO_68851 */
-      else if (!strcmp (arg, "no-68851"))
-	{
-	  no_68851 = 1;
-	}
-      else if (!strcmp (arg, "pu32") /* "cpu32" minus 'c' */
-	       || !strcmp (arg, "68331")
-	       || !strcmp (arg, "68332")
-	       || !strcmp (arg, "68333")
-	       || !strcmp (arg, "68340"))
-	{
-	  current_architecture &=~ m68000up;
-	  current_architecture |= cpu32;
+	  int i, arch;
+	  const char *oarg = arg;
+
+	  arg += 3;
+	  if (*arg == 'm')
+	    {
+	      arg++;
+	      if (arg[0] == 'c' && arg[1] == '6')
+		arg++;
+	    }
+	  for (i = 0; i < n_archs; i++)
+	    if (!strcmp (arg, archs[i].name))
+	      break;
+	  if (i == n_archs)
+	    {
+	    unknown:
+	      as_bad ("unrecognized option `%s'", oarg);
+	      return 0;
+	    }
+	  arch = archs[i].arch;
+	  if (arch == m68881)
+	    no_68881 = 1;
+	  else if (arch == m68851)
+	    no_68851 = 1;
+	  else
+	    goto unknown;
 	}
       else
 	{
-	  as_bad ("invalid architecture %s", arg);
-	  return 0;
+	  int i;
+
+	  if (arg[0] == 'c' && arg[1] == '6')
+	    arg++;
+
+	  for (i = 0; i < n_archs; i++)
+	    if (!strcmp (arg, archs[i].name))
+	      {
+		unsigned long arch = archs[i].arch;
+		if (cpu_of_arch (arch))
+		  /* It's a cpu spec.  */
+		  {
+		    current_architecture &= ~m68000up;
+		    current_architecture |= arch;
+		  }
+		else if (arch == m68881)
+		  {
+		    current_architecture |= m68881;
+		    no_68881 = 0;
+		  }
+		else if (arch == m68851)
+		  {
+		    current_architecture |= m68851;
+		    no_68851 = 0;
+		  }
+		else
+		  /* ??? */
+		  abort ();
+		break;
+	      }
+	  if (i == n_archs)
+	    {
+	      as_bad ("unrecognized architecture specification `%s'", arg);
+	      return 0;
+	    }
 	}
       break;
 
@@ -5217,17 +5151,6 @@ md_undefined_symbol (name)
      char *name;
 {
   return 0;
-}
-
-/* Parse an operand that is machine-specific.
-   We just return without modifying the expression if we have nothing
-   to do.  */
-
-/* ARGSUSED */
-void
-md_operand (expressionP)
-     expressionS *expressionP;
-{
 }
 
 /* Round up a section size to the appropriate boundary.  */
