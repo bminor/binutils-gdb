@@ -1,3 +1,8 @@
+Thu Mar 26 10:37:22 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* dv-pal.c (enum hw_pal_address_mask): From Stu Grossman, was
+ 	0x2f needs to be 0x3f.
+
 Thu Mar 26 09:10:56 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* hw-tree.c (hw_tree_find_property): Return NULL when device is
