@@ -1,5 +1,5 @@
 /* Disassemble D10V instructions.
-   Copyright (C) 1996 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,6 +20,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "opcode/d10v.h" 
 #include "dis-asm.h"
+
+/* the PC wraps at 18 bits, except for the segment number */
+/* so use this mask to keep the parts we want */
+#define PC_MASK	0x03003FFF
 
 static void dis_2_short PARAMS ((unsigned long insn, bfd_vma memaddr, 
 				 struct disassemble_info *info, int order));
@@ -145,14 +149,14 @@ print_operand (oper, insn, op, memaddr, info)
 	  max = (1 << (oper->bits - 1));
 	  if (num & max)
 	    {
-	      num = -num & (max-1);
+	      num = -num & ((1 << oper->bits)-1);
 	      neg = 1;
 	    }
 	  num = num<<2;
 	  if (neg)
-	    (*info->print_address_func) (memaddr - num, info); 
+	    (*info->print_address_func) ((memaddr - num) & PC_MASK, info);
 	  else
-	    (*info->print_address_func) (memaddr + num, info); 
+	    (*info->print_address_func) ((memaddr + num) & PC_MASK, info);
 	}
       else
 	{
@@ -161,8 +165,7 @@ print_operand (oper, insn, op, memaddr, info)
 	      int max = (1 << (oper->bits - 1));
 	      if (num & max)
 		{
-		  num = -num;
-		  num &= (max-1);
+		  num = -num & ((1 << oper->bits)-1);
 		  (*info->fprintf_func) (info->stream, "-");
 		}
 	    }
@@ -183,11 +186,13 @@ dis_long (insn, memaddr, info)
   struct d10v_opcode *op = (struct d10v_opcode *)d10v_opcodes;
   struct d10v_operand *oper;
   int need_paren = 0;
+  int match = 0;
 
   while (op->name)
     {
       if ((op->format & LONG_OPCODE) && ((op->mask & insn) == op->opcode))
 	{
+	  match = 1;
 	  (*info->fprintf_func) (info->stream, "%s\t", op->name);   
 	  for ( i=0; op->operands[i]; i++)
 	    {
@@ -204,6 +209,10 @@ dis_long (insn, memaddr, info)
 	}
       op++;
     }
+
+  if (!match)
+    (*info->fprintf_func) (info->stream, ".long\t0x%08x",insn);   
+
   if (need_paren)
     (*info->fprintf_func) (info->stream, ")");   
 }
