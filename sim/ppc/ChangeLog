@@ -1,3 +1,8 @@
+2004-06-28  Jim Blandy  <jimb@redhat.com>
+
+	* e500_registers.h (EVR): Cast the 32-bit value of the GPR to an
+	unsigned type before or-ing it with a 64-bit value.
+
 2004-06-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* hw_htab.c (htab_sum_binary(bfd): Use bfd_get_section_size
