@@ -1,3 +1,23 @@
+start-sanitize-arc
+Thu Feb  9 19:19:23 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* arc-dis.c (print_insn_arc): Rename to print_insn and make static.
+	New argument `cpu', pass it to arc_opcode_init_tables.
+	Document byte order dependencies.  Ignore unsupported insns.
+	(arc_disassembler): New function.
+	(print_insn_arc_base, print_insn_arc_host, print_insn_arc_graphics,
+	print_insn_arc_audio): New functions.
+	* arc-opc.c (MULTSHIFT operand): Delete.
+	(UNSIGNED, SATURATION): New operands.
+	(mac, mul, mul64, mulu64): New insns.
+	(ext. asl, asr, lsr, ror): Only available on host and graphics cpus.
+	(padc, padd, pmov, pand, psbc, psub, swap): New insns.
+	(host,graphics,audio extended and auxiliary regs): Define.
+	(ss, sc, mh, ml): New suffixes.
+	(arc_opcode_supported, arc_opval_supported): New functions.
+	(insert_multshift, extract_multshift): Deleted.
+end-sanitize-arc
+
 Thu Feb  9 12:28:13 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* i960-dis.c (struct tabent, struct sparse_tabent): Change the
