@@ -124,6 +124,11 @@ stage3: force
 	-mkdir stage3
 	-mv $(STAGESTUFF) stage3
 
+against=stage2
+
+comparison: force
+	for i in $(STAGESTUFF) ; do cmp $$i $(against)/$$i ; done
+
 de-stage1: force
 	- (cd stage1 ; mv -f * ..)
 	- rmdir stage1

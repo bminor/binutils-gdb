@@ -153,6 +153,9 @@ stage3:	force
 	- mv -f $(STAGESTUFF) stage3
 	- (cd stage3 ; ln -s $(LD_PROG) ld)
 
+comparison: force
+	for i in $(STAGESTUFF) ; do cmp $$i $(against)/$$i ; done
+
 de-stage1: force
 	- (cd stage1 ; mv -f * ..)
 	- rm ld
