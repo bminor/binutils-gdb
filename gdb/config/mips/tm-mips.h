@@ -265,28 +265,32 @@ extern void mips_do_registers_info PARAMS ((int, int));
 	 ? builtin_type_float : builtin_type_int)
 #endif
 
-#if HOST_BYTE_ORDER == BIG_ENDIAN
 /* All mips targets store doubles in a register pair with the least
    significant register in the lower numbered register.
-   If the host is big endian, double register values need conversion between
-   memory and register formats.  */
+   If the target is big endian, double register values need conversion
+   between memory and register formats.  */
 
 #define REGISTER_CONVERT_TO_TYPE(n, type, buffer)			\
-  do {if ((n) >= FP0_REGNUM && (n) < FP0_REGNUM + 32 && 		\
-	  TYPE_CODE(type) == TYPE_CODE_FLT && TYPE_LENGTH(type) == 8) { \
+  do {if (TARGET_BYTE_ORDER == BIG_ENDIAN				\
+	  && REGISTER_RAW_SIZE (n) == 4					\
+	  && (n) >= FP0_REGNUM && (n) < FP0_REGNUM + 32			\
+	  && TYPE_CODE(type) == TYPE_CODE_FLT				\
+	  && TYPE_LENGTH(type) == 8) {					\
         char __temp[4];							\
 	memcpy (__temp, ((char *)(buffer))+4, 4);			\
 	memcpy (((char *)(buffer))+4, (buffer), 4); 			\
 	memcpy (((char *)(buffer)), __temp, 4); }} while (0)
 
 #define REGISTER_CONVERT_FROM_TYPE(n, type, buffer)			\
-  do {if ((n) >= FP0_REGNUM && (n) < FP0_REGNUM + 32 &&			\
-	  TYPE_CODE(type) == TYPE_CODE_FLT && TYPE_LENGTH(type) == 8) { \
+  do {if (TARGET_BYTE_ORDER == BIG_ENDIAN				\
+	  && REGISTER_RAW_SIZE (n) == 4					\
+	  && (n) >= FP0_REGNUM && (n) < FP0_REGNUM + 32			\
+	  && TYPE_CODE(type) == TYPE_CODE_FLT				\
+	  && TYPE_LENGTH(type) == 8) {					\
         char __temp[4];							\
 	memcpy (__temp, ((char *)(buffer))+4, 4);			\
 	memcpy (((char *)(buffer))+4, (buffer), 4); 			\
 	memcpy (((char *)(buffer)), __temp, 4); }} while (0)
-#endif
 
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  Handled by mips_push_arguments.  */

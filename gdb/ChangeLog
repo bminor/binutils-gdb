@@ -1,3 +1,13 @@
+Sun Mar 23 16:19:20 1997  Mark Alexander  <marka@cygnus.com>
+
+Fixes from Peter Schauer:
+	* config/mips/tm-mips.h (REGISTER_CONVERT_TO_TYPE,
+	REGISTER_CONVERT_FROM_TYPE): Swap words if target, not host,
+	is big-endian and if registers are 32 bits.
+	* mips-tdep.c (mips_print_register, mips_extract_return_value,
+	mips_store_return_value): Fix floating-point word-order problems on
+	little-endian targets introduced by changes of Mar 21.
+
 Sun Mar 23 15:43:27 1997  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* remote.c (target_resume_hook, target_wait_loop_hook): New
