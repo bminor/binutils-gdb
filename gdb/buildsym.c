@@ -1,6 +1,5 @@
 /* Support routines for building symbol tables in GDB's internal format.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1995, 1996
-             Free Software Foundation, Inc.
+   Copyright 1986-1999 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -1114,7 +1113,6 @@ merge_symbol_lists (srclist, targetlist)
   struct pending ** targetlist;
 {
   register int i;
-  register struct pending * link;
 
   if (!srclist || !*srclist)
     return;
@@ -1155,11 +1153,4 @@ void
 buildsym_new_init ()
 {
   buildsym_init ();
-}
-
-/* Initializer for this module */
-
-void
-_initialize_buildsym ()
-{
 }
