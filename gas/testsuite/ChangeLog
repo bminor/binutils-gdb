@@ -1,3 +1,8 @@
+Fri Mar  1 12:01:48 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/all/gas.exp: xfail difference of two undefined symbols
+	and difference of forward references for the h8300.
+
 Thu Feb 22 16:40:31 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/mips/lb-xgot.d: Correct.
@@ -19,7 +24,9 @@ Wed Feb 14 13:49:59 1996  Ian Lance Taylor  <ian@cygnus.com>
 Sat Jan 27 13:27:45 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* lib/gas-dg.exp (gas-dg-test): Delete default_flags and libs args.
+start-sanitize-arc
 	* gas/arc/warn.exp: Delete libs arg in call to dg-runtest.
+end-sanitize-arc
 
 Fri Jan 26 14:24:01 1996  Jeffrey A Law  (law@cygnus.com)
 
