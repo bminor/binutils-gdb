@@ -463,7 +463,7 @@ the other fields; see the definition in @file{expr.h} for the possibilities.
 
 An @code{operatorT} value of @code{O_big} indicates either a floating point
 number, stored in the global variable @code{generic_floating_point_number}, or
-an integer to large to store in an @code{offsetT} type, stored in the global
+an integer too large to store in an @code{offsetT} type, stored in the global
 array @code{generic_bignum}.  This rather inflexible approach makes it
 impossible to use floating point numbers or large expressions in complex
 expressions.
