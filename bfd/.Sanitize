@@ -88,6 +88,7 @@ configure.in
 core.c
 cpu-a29k.c
 cpu-alpha.c
+cpu-arm.c
 cpu-h8300.c
 cpu-h8500.c
 cpu-hppa.c
@@ -189,6 +190,7 @@ pc532-mach.c
 ptrace-core.c
 reloc.c
 reloc16.c
+riscix.c
 rs6000-core.c
 section.c
 som.c

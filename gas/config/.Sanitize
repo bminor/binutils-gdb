@@ -91,6 +91,8 @@ tc-a29k.c
 tc-a29k.h
 tc-alpha.c
 tc-alpha.h
+tc-arm.c
+tc-arm.h
 tc-generic.c
 tc-generic.h
 tc-h8300.c
