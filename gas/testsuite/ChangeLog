@@ -1,3 +1,29 @@
+Wed Sep 28 13:25:10 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* gas/mips/beq.d, gas/mips/beq.s: Test that unconditional branch
+	overflows are correctly converted to jumps.
+
+Mon Sep 26 17:41:43 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* gas/mips: Add test cases for PIC code, both SVR4 style and
+	-membedded-pic style.
+
+Fri Sep 23 14:45:42 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* gas/mips: New directory with MIPS specific test cases.
+
+	* lib/gas-defs.exp (run_dump_test): Permit the .d file to specify
+	the name of the source file to assemble.
+	(regexp_diff): Put the reason for failure in the log file.
+
+Wed Sep 21 13:44:21 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* lib/gas-defs.exp: Don't try to use shell redirection, since TCL
+	doesn't support it.  Redirect stdout using > instead of 1>, and
+	don't bother to redirect stderr since TCL redirects it anyhow.
+	(run_dump_test): Pass appropriate arguments to program, defaulting
+	to -r.
+
 Sat Sep 17 01:04:56 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* gas/vax: New directory.
@@ -12,7 +38,7 @@ Mon Sep 12 22:19:11 1994  Jeff Law  (law@snake.cs.utah.edu)
 	* gas/hppa/reloc/reloc.exp (do_function_reloc_bug): Update
 	expected output.
 
-Sun Sep 04 17:58:10 1994	Richard Earnshaw (rwe@pegasus.esprit.ec.org)
+Sun Sep 04 17:58:10 1994  Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 
 	* gas/arm/*: New subtree.  Add ARM tests.
 
