@@ -1,3 +1,9 @@
+Wed Nov 20 05:04:40 1991  Fred Fish  (fnf at cygnus.com)
+
+	* dwarfread.c:  Recognize obsolete form of AT_element_list
+	attribute still used by at least one AT&T compiler, and possibly
+	more.
+
 Tue Nov 19 07:53:55 1991  Fred Fish  (fnf at cygnus.com)
 
 	* dwarfread.c (enum_type, struct_type):  Ignore names invented by

@@ -96,6 +96,17 @@ typedef unsigned int DIEREF;	/* Reference to a DIE */
 
 #define STREQ(a,b)		(strcmp(a,b)==0)
 
+/* The Amiga SVR4 header file <dwarf.h> defines AT_element_list as a
+   FORM_BLOCK2, and this is the value emitted by the AT&T compiler.
+   However, the Issue 2 DWARF specification from AT&T defines it as
+   a FORM_BLOCK4, as does the latest specification from UI/PLSIG.
+   For backwards compatibility with the AT&T compiler produced executables
+   we define AT_short_element_list for this variant. */
+
+#define	AT_short_element_list	 (0x00f0|FORM_BLOCK2)
+
+/* External variables referenced. */
+
 extern CORE_ADDR startup_file_start;	/* From blockframe.c */
 extern CORE_ADDR startup_file_end;	/* From blockframe.c */
 extern CORE_ADDR entry_scope_lowpc;	/* From blockframe.c */
@@ -172,6 +183,7 @@ struct dieinfo {
   short		at_prototyped;
   unsigned int	has_at_low_pc:1;
   unsigned int	has_at_stmt_list:1;
+  unsigned int	short_element_list:1;
 };
 
 static int diecount;	/* Approximate count of dies for compilation unit */
@@ -1319,7 +1331,8 @@ DEFUN(enum_type, (dip), struct dieinfo *dip)
   char *tpart3;
   char *scan;
   char *listend;
-  long temp;
+  long ltemp;
+  short stemp;
   
   if ((type = lookup_utype (dip -> dieref)) == NULL)
     {
@@ -1347,9 +1360,18 @@ DEFUN(enum_type, (dip), struct dieinfo *dip)
   TYPE_NAME (type) = concat (tpart1, tpart2, tpart3, NULL);
   if ((scan = dip -> at_element_list) != NULL)
     {
-      (void) memcpy (&temp, scan, sizeof (temp));
-      listend = scan + temp + sizeof (temp);
-      scan += sizeof (temp);
+      if (dip -> short_element_list)
+	{
+	  (void) memcpy (&stemp, scan, sizeof (stemp));
+	  listend = scan + stemp + sizeof (stemp);
+	  scan += sizeof (stemp);
+	}
+      else
+	{
+	  (void) memcpy (&ltemp, scan, sizeof (ltemp));
+	  listend = scan + ltemp + sizeof (ltemp);
+	  scan += sizeof (ltemp);
+	}
       while (scan < listend)
 	{
 	  new = (struct nextfield *) alloca (sizeof (struct nextfield));
@@ -3472,6 +3494,11 @@ DEFUN(completedieinfo, (dip), struct dieinfo *dip)
 	  break;
 	case AT_element_list:
 	  dip -> at_element_list = diep;
+	  dip -> short_element_list = 0;
+	  break;
+	case AT_short_element_list:
+	  dip -> at_element_list = diep;
+	  dip -> short_element_list = 1;
 	  break;
 	case AT_discr_value:
 	  dip -> at_discr_value = diep;
