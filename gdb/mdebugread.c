@@ -786,12 +786,6 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
       SYMBOL_VALUE (s) = svalue;
       SYMBOL_TYPE (s) = parse_type (cur_fd, ax, sh->index, 0, bigend, name);
       add_symbol (s, top_stack->cur_block);
-#if 0
-      /* FIXME:  This has not been tested.  See dbxread.c */
-      /* Add the type of this parameter to the function/procedure
-		   type of this block. */
-      add_param_to_type (&top_stack->cur_block->function->type, s);
-#endif
       break;
 
     case stLabel:		/* label, goes into current block */

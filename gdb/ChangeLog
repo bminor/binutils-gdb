@@ -28,6 +28,12 @@ Sun Feb 12 10:02:16 1995  Per Bothner  <bothner@cygnus.com>
 
 	* valops.c (value_cast):  Do COERCE_VARYING_ARRAY after COERCE_REF.
 
+	* symtab.c (add_param_to_type):  Remove (commented-out) function,
+	since that functionality has been re-written.
+	* coffread.c:  Remove commented-out add_param_to_type support.
+	* mdebugread.c (parse_symbol):  Likewise.
+	* stabsread.c (define_symbol):  Likewise.
+
 Sun Feb 12 09:03:47 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* buildsym.c (start_subfile): Set language for f2c like for cfront.

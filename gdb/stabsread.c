@@ -777,23 +777,7 @@ define_symbol (valu, string, desc, type, objfile)
 	 We need to convert this to the function-returning-type-X type
 	 in GDB.  E.g. "int" is converted to "function returning int".  */
       if (TYPE_CODE (SYMBOL_TYPE (sym)) != TYPE_CODE_FUNC)
-	{
-#if 0
-	  /* This code doesn't work -- it needs to realloc and can't.  */
-	  /* Attempt to set up to record a function prototype... */
-	  struct type *new = alloc_type (objfile);
-
-	  /* Generate a template for the type of this function.  The 
-	     types of the arguments will be added as we read the symbol 
-	     table. */
-	  *new = *lookup_function_type (SYMBOL_TYPE(sym));
-	  SYMBOL_TYPE(sym) = new;
-	  TYPE_OBJFILE (new) = objfile;
-	  in_function_type = new;
-#else
-	  SYMBOL_TYPE (sym) = lookup_function_type (SYMBOL_TYPE (sym));
-#endif
-	}
+	SYMBOL_TYPE (sym) = lookup_function_type (SYMBOL_TYPE (sym));
       /* fall into process_prototype_types */
 
     process_prototype_types:
@@ -864,10 +848,6 @@ define_symbol (valu, string, desc, type, objfile)
       SYMBOL_CLASS (sym) = DBX_PARM_SYMBOL_CLASS (type);
       SYMBOL_VALUE (sym) = valu;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
-#if 0
-      /* This doesn't work yet.  */
-      add_param_to_type (&in_function_type, sym);
-#endif
       add_symbol_to_list (sym, &local_symbols);
 
       if (TARGET_BYTE_ORDER != BIG_ENDIAN)
