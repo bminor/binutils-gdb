@@ -1,3 +1,14 @@
+Tue Mar 18 22:40:09 1997  H.J. Lu  <hjl@lucon.org>
+
+	* Many files: Add function prototypes.
+	* cpu-m68k.c (bfd_default_scan_num_mach): Don't declare.
+	* ecofflink.c: Include "libcoff.h" and "libecoff.h".
+	* elf32-ppc.c (ppc_elf_fake_sections): Make static.
+	* opncls.c (bfd_openstreamr): Change stream parameter to PTR.
+	* peicode.h: Change several void * parameters to PTR.
+	* srec.c (srec_get_symbol_info): Make static.
+	* syms.c (bfd_symbol_is_absolute): Remove.
+
 Tue Mar 18 12:58:08 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 start-sanitize-m32r

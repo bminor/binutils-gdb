@@ -1,5 +1,5 @@
 /* Alpha specific support for 64-bit ELF
-   Copyright 1996 Free Software Foundation, Inc.
+   Copyright 1996, 1997 Free Software Foundation, Inc.
    Contributed by Richard Henderson <rth@tamu.edu>.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -46,6 +46,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ECOFF_64
 #include "ecoffswap.h"
 
+static boolean elf64_alpha_mkobject PARAMS ((bfd *));
 static struct bfd_hash_entry * elf64_alpha_link_hash_newfunc
   PARAMS((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
 static struct bfd_link_hash_table * elf64_alpha_bfd_link_hash_table_create
@@ -80,8 +81,8 @@ static boolean elf64_alpha_create_dynamic_sections
 
 static boolean elf64_alpha_read_ecoff_info
   PARAMS((bfd *, asection *, struct ecoff_debug_info *));
-static boolean elf64_alpha_is_local_label
-  PARAMS((bfd *, asymbol *));
+static boolean elf64_alpha_is_local_label_name
+  PARAMS((bfd *, const char *));
 static boolean elf64_alpha_find_nearest_line
   PARAMS((bfd *, asection *, asymbol **, bfd_vma, const char **,
 	  const char **, unsigned int *));
@@ -97,7 +98,14 @@ static boolean elf64_alpha_can_merge_gots
   PARAMS((bfd *, bfd *));
 static void elf64_alpha_merge_gots
   PARAMS((bfd *, bfd *));
-
+static boolean elf64_alpha_calc_got_offsets_for_symbol
+  PARAMS ((struct alpha_elf_link_hash_entry *, PTR));
+static void elf64_alpha_calc_got_offsets PARAMS ((struct bfd_link_info *));
+static void elf64_alpha_strip_section_from_output PARAMS ((asection *));
+static boolean elf64_alpha_always_size_sections
+  PARAMS ((bfd *, struct bfd_link_info *));
+static boolean elf64_alpha_calc_dynrel_sizes
+  PARAMS ((struct alpha_elf_link_hash_entry *, struct bfd_link_info *));
 static boolean elf64_alpha_check_relocs
   PARAMS((bfd *, struct bfd_link_info *, asection *sec,
 	  const Elf_Internal_Rela *));
@@ -211,7 +219,7 @@ struct alpha_elf_link_hash_table
 /* Should we do dynamic things to this symbol?  */
 
 #define alpha_elf_dynamic_symbol_p(h, info) 				\
-  (((info)->shared && !(info)->symbolic)  				\
+  (((info)->shared && !(info)->symbolic && (h)->dynindx != -1)		\
    || (((h)->elf_link_hash_flags					\
 	& (ELF_LINK_HASH_DEF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR))	\
        == (ELF_LINK_HASH_DEF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR)))
@@ -1216,11 +1224,11 @@ elf64_alpha_read_ecoff_info (abfd, section, debug)
 /* Alpha ELF local labels start with '$'.  */
 
 static boolean
-elf64_alpha_is_local_label (abfd, symbol)
+elf64_alpha_is_local_label_name (abfd, name)
      bfd *abfd;
-     asymbol *symbol;
+     const char *name;
 {
-  return symbol->name[0] == '$';
+  return name[0] == '$';
 }
 
 /* Alpha ELF follows MIPS ELF in using a special find_nearest_line
@@ -2280,11 +2288,14 @@ elf64_alpha_size_dynamic_sections (output_bfd, info)
 
 	  if (!strip)
 	    {
+	      const char *outname;
 	      asection *target;
 
 	      /* If this relocation section applies to a read only
 		 section, then we probably need a DT_TEXTREL entry.  */
-	      target = bfd_get_section_by_name (output_bfd, name + 5);
+	      outname = bfd_get_section_name (output_bfd,
+					      s->output_section);
+	      target = bfd_get_section_by_name (output_bfd, outname + 5);
 	      if (target != NULL
 		  && (target->flags & SEC_READONLY) != 0)
 		reltext = true;
@@ -3714,8 +3725,8 @@ elf64_alpha_ecoff_debug_swap =
 #define elf_backend_additional_program_headers \
   elf64_alpha_additional_program_headers
 
-#define bfd_elf64_bfd_is_local_label \
-  elf64_alpha_is_local_label
+#define bfd_elf64_bfd_is_local_label_name \
+  elf64_alpha_is_local_label_name
 #define bfd_elf64_find_nearest_line \
   elf64_alpha_find_nearest_line
 
