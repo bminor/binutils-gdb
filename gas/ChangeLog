@@ -1,3 +1,9 @@
+Wed Nov 29 13:00:20 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-ppc.c (md_apply_fix3): Don't adjust the value for 32
+	bit relocs converted to PC relative relocs.  This turned out to
+	add the offset from the beginning of .text twice.
+
 Tue Nov 28 10:42:36 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* stabs.c (s_stab_generic): In 's' case, free string from

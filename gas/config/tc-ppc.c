@@ -4184,10 +4184,8 @@ md_apply_fix3 (fixp, valuep, seg)
 	case BFD_RELOC_32:
 	case BFD_RELOC_CTOR:
 	  if (fixp->fx_pcrel)
-	    {
-	      fixp->fx_r_type = BFD_RELOC_32_PCREL;
-	      value += fixp->fx_frag->fr_address + fixp->fx_where;
-	    }			/* fall through */
+	    fixp->fx_r_type = BFD_RELOC_32_PCREL;
+					/* fall through */
 
 	case BFD_RELOC_RVA:
 	case BFD_RELOC_32_PCREL:
