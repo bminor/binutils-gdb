@@ -5988,6 +5988,9 @@ Print the data type of @code{$}, the last value in the value history.
 @kindex ptype
 Print a description of data type @var{typename}.  @var{typename} may be
 the name of a type, or for C code it may have the form
+@ifclear CONLY
+@samp{class @var{class-name}},
+@end ifclear
 @samp{struct @var{struct-tag}}, @samp{union @var{union-tag}} or
 @samp{enum @var{enum-tag}}.
 
