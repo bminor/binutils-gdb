@@ -1,3 +1,10 @@
+2003-09-13  Christopher Faylor  <cgf@redhat.com>
+
+	* win32-nat.c: Just rely on CONTEXT_EXTENDED_REGISTER being defined for
+	SSE registers since gdb will not operate correctly without this.
+	Restore include file ordering munged in previous change.
+	* config/i386/tm-cygwin.h: Remove HAVE_SSE_REGS define.
+
 2003-09-12  Christopher Faylor  <cgf@redhat.com>
 
 	* win32-nat.c: Reorganize so that defines used by target headers are
