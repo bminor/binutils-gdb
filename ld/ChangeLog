@@ -1,3 +1,9 @@
+Wed Jun 25 12:48:41 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* configure.host (m68*-*-linux*libc1*): Renamed from
+	`m68*-*-linux*'.
+	(m68*-*-linux*): New configuration for use with GNU libc 2.
+
 Mon Jun 16 19:18:21 1997  Geoff Keating  <geoffk@ozemail.com.au>
 
 	* scripttempl/elfppc.sc: Correct .rela.sdata entries.
