@@ -624,44 +624,6 @@ done # for each host
 exit 0
 
 #
-# $Log$
-# Revision 1.41  1991/10/01 03:11:29  rich
-# Trivial cleanup.
-#
-# Revision 1.40  1991/10/01  02:44:32  rich
-# * use aliases as directory names.
-# * put aliases AND parsed triples into Makefiles.
-# * config.status is a shell script.
-# * remove formfeeds from resulting Makefile.
-#
-# Revision 1.36  1991/08/31  03:54:36  rich
-# Welcome emacs to the mess.
-#
-# Revision 1.35  1991/08/26  04:29:31  rich
-# Welcome cvs to the big time.
-#
-# Revision 1.34  1991/08/25  23:40:23  rich
-# rcs enters the soup.
-#
-# Revision 1.33  1991/08/25  21:48:38  rich
-# Adding diff to the fray.
-#
-# Revision 1.32  1991/08/25  20:18:20  rich
-# Adding grep to the fray.
-#
-# Revision 1.31  1991/08/23  04:50:57  rich
-# Minor config polish.
-#
-# Revision 1.22  1991/08/23  03:31:43  rich
-# Minor polish & config mapping.
-#
-#
-# Revision 1.3  1991/04/11  02:41:54  rich
-# Cut 2 config.  Subdirs.
-#
-#
-
-#
 # Local Variables:
 # fill-column: 131
 # End:
