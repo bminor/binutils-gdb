@@ -1,5 +1,5 @@
-/* Macro defintions for an Apollo 68k in BSD mode
-   Copyright (C) 1992 Free Software Foundation, Inc.
+/* Macro defintions for an Apollo.
+   Copyright (C) 1986, 1987, 1989, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -17,8 +17,4 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#define HOST_BYTE_ORDER BIG_ENDIAN
-
-#define ALIGN_STACK_ON_STARTUP
-
-extern char *strdup();
+#define	FETCH_INFERIOR_REGISTERS

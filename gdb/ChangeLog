@@ -1,5 +1,15 @@
 Tue Oct 27 17:08:45 1992  K. Richard Pixley  (rich@cygnus.com)
 
+	Apollo native support (untested).
+
+	* a68v-nat.c, nm-apollo68[bv].h: new files.
+	* xm-apollo68[bv].h (FETCH_INFERIOR_REGISTERS): removed.
+	* xm-apollo68b.h (PTRACE_IN_WRONG_PLACE): removed.
+	* a68v-xdep.c: removed.
+	* config/apollo68[bv].mh (XDEPFILES): removed infptrace.o
+	  inftarg.o fork-child.o a68v-xdep.o.
+	  (NAT_FILE, NATDEPFILES): new macros.
+
 	* defs.h: include nm.h.
 	* coredep.c, infptrace.c, procfs.c, rs6000-nat.c, sparc-nat.c,
 	  sparc-tdep.c, : do not include nm.h.
