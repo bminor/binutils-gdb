@@ -991,7 +991,7 @@ target_xfer_memory_partial (CORE_ADDR memaddr, char *myaddr, int len,
       if (write_p)
 	{
 	  *err = EIO;
-	  return 0;
+	  return -1;
 	}
       break;
 
@@ -999,7 +999,7 @@ target_xfer_memory_partial (CORE_ADDR memaddr, char *myaddr, int len,
       if (write_p)
 	{
 	  *err = EIO;
-	  return 0;
+	  return -1;
 	}
       break;
     }

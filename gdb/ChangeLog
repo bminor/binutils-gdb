@@ -1,3 +1,8 @@
+2001-01-25  J.T. Conklin  <jtc@redback.com>
+
+	* target.c (target_xfer_memory_partial): Return -1 on failure due
+ 	to invalid access mode attribute.
+
 2001-01-25  Christopher Faylor  <cgf@cygnus.com>
 
 	* win32-nat.c (_initialize_core_win32): Prototype correctly.
