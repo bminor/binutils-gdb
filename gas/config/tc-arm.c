@@ -6310,13 +6310,13 @@ arm_frob_label (sym)
    ARM ones.  */
 
 #ifdef OBJ_ELF
-#define S_GET_STORAGE_CLASS(S)   (elf_symbol ((S)->bsym)->internal_elf_sym.st_other)
-#define S_SET_STORAGE_CLASS(S,V) (elf_symbol ((S)->bsym)->internal_elf_sym.st_other = (V))
+#define S_GET_STORAGE_CLASS(S)   (elf_symbol ((S)->bsym)->internal_elf_sym.st_info)
+#define S_SET_STORAGE_CLASS(S,V) (elf_symbol ((S)->bsym)->internal_elf_sym.st_info = (V))
 #endif
+#ifdef OBJ_COFF
 void
 arm_adjust_symtab ()
 {
-#if defined OBJ_COFF || defined OBJ_ELF
   symbolS * sym;
 
   for (sym = symbol_rootP; sym != NULL; sym = symbol_next (sym))
@@ -6329,6 +6329,7 @@ arm_adjust_symtab ()
 	      if (   S_GET_STORAGE_CLASS (sym) == C_STAT
 		  || S_GET_STORAGE_CLASS (sym) == C_LABEL) /* This can happen! */
 		S_SET_STORAGE_CLASS (sym, C_THUMBSTATFUNC);
+
 	      else if (S_GET_STORAGE_CLASS (sym) == C_EXT)
 		S_SET_STORAGE_CLASS (sym, C_THUMBEXTFUNC);
 	      else
@@ -6350,13 +6351,35 @@ arm_adjust_symtab ()
             }
         }
 
-#ifdef OBJ_COFF
       if (ARM_IS_INTERWORK (sym))
 	coffsymbol(sym->bsym)->native->u.syment.n_flags = 0xFF;
-#endif
     }
-#endif
 }
+#endif
+#ifdef OBJ_ELF
+void
+armelf_adjust_symtab ()
+{
+  symbolS * sym;
+  elf_symbol_type *elf_sym;
+  char bind;
+
+  for (sym = symbol_rootP; sym != NULL; sym = symbol_next (sym))
+    {
+      if (ARM_IS_THUMB (sym))
+        {
+	  if (THUMB_IS_FUNC (sym))
+	    {
+            elf_sym = elf_symbol(sym->bsym);
+            bind = ELF_ST_BIND(elf_sym);
+            elf_sym->internal_elf_sym.st_info = ELF_ST_INFO(bind, STT_ARM_TFUNC);
+            }
+
+         }
+     }
+}
+
+#endif
 
 #ifdef OBJ_ELF
 void
@@ -6367,6 +6390,7 @@ armelf_frob_symbol (symp, puntp)
 {
    elf_frob_symbol (symp, puntp);
 
+/*
    if (S_IS_EXTERNAL (symp))
       S_SET_STORAGE_CLASS(symp, C_EXT);
 
@@ -6378,6 +6402,7 @@ armelf_frob_symbol (symp, puntp)
           else
             S_SET_STORAGE_CLASS (symp, C_STAT);
       }
+*/
 } 
 #endif
 int

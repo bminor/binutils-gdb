@@ -150,8 +150,13 @@ char *arm_canonicalize_symbol_name PARAMS ((char *));
 #endif
 
 /* Finish processing the entire symbol table:  */
-#define tc_adjust_symtab() arm_adjust_symtab ()
+#ifdef OBJ_ELF
+#define obj_adjust_symtab() armelf_adjust_symtab ()
+extern void armelf_adjust_symtab PARAMS ((void));
+#else
+#define obj_adjust_symtab() arm_adjust_symtab ()
 extern void arm_adjust_symtab PARAMS ((void));
+#endif
 
 #if 0
 #define tc_crawl_symbol_chain(a)	{;}	/* not used */

@@ -1,3 +1,12 @@
+Mon Aug 31 10:58:06 1998  Catherine Moore  <clm@cygnus.com>
+
+        * config/tc-arm.c:  Remove OBJ_ELF definitions for 
+        S_GET_STORAGE_CLASS and S_SET_STORAGE_CLASS.  Only
+        use arm_adjust_symtab for OBJ_COFF.
+        (armelf_adjust_symtab):  New Routine.
+        * config/tc-arm.h:  Define obj_adjust_symtab to
+        armelf_adjust_symtab for OBJ_ELF.
+        
 Sat Aug 29 22:18:51 1998  Richard Henderson  <rth@cygnus.com>
 
 	* configure.in: Make all i386-elf targets use bfd_gas.
