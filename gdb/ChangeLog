@@ -1,6 +1,11 @@
 Wed Sep  8 13:01:10 1993  K. Richard Pixley  (rich@cygnus.com)
 
 	Gcc lint.
+	* findvar.c (value_from_register): initialize first_addr.
+	* gdbtypes.c (lookup_struct_elt_type): localize use of temporary
+	  variable typename.
+	* infcmd.c (run_stack_dummy): return zero rather than simple
+	  return.
 	* infrun.c (wait_for_inferior): initialize stop_sp, prologue_pc.
 	  remove symtab, appears unused.
 	  (restore_selected_frame): return 1.
