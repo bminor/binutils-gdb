@@ -1,3 +1,7 @@
+2004-04-21  Hans-Peter Nilsson  <hp@axis.com>
+
+	* NEWS: Mention change in DEFINED semantics.
+
 2004-04-21  Eric Botcazou  <ebotcazou@act-europe.fr>
 
 	* scripttempl/elf.sc (.text): Add KEEP for .text.*personality*.
