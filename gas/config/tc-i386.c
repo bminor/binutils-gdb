@@ -4213,8 +4213,10 @@ symbolS *
 md_undefined_symbol (name)
      char *name;
 {
-  if (*name == '_' && *(name+1) == 'G'
-      && strcmp(name, GLOBAL_OFFSET_TABLE_NAME) == 0)
+  if (name[0] == GLOBAL_OFFSET_TABLE_NAME[0]
+      && name[1] == GLOBAL_OFFSET_TABLE_NAME[1]
+      && name[2] == GLOBAL_OFFSET_TABLE_NAME[2]
+      && strcmp (name, GLOBAL_OFFSET_TABLE_NAME) == 0)
     {
       if (!GOT_symbol)
 	{
