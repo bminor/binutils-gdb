@@ -1,3 +1,15 @@
+2003-09-08  Dave Brolley  <brolley@redhat.com>
+
+	On behalf of Doug Evans <dje@sebabeach.org>
+	* Makefile.am (run-cgen): Pass new args archfile and opcfile
+	to cgen.sh.
+	(stamp-ip2k,stamp-m32r,stamp-fr30,stamp-frv,stamp-openrisc,
+	stamp-iq2000,stamp-xstormy16): Pass paths of .cpu and .opc files
+	to cgen.sh.
+	(stamp-frv): Delete hardcoded path spec workaround.
+	* Makefile.in: Regenerate.
+	* cgen.sh: New args archfile and opcfile.  Pass on to cgen.
+
 2003-09-04  Nick Clifton  <nickc@redhat.com>
 
 	* v850-dis.c (disassemble): Accept bfd_mach_v850e1.

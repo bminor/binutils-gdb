@@ -875,8 +875,8 @@ uninstall_libopcodes:
 
 run-cgen:
 	$(SHELL) $(srcdir)/cgen.sh opcodes $(srcdir) $(CGEN) \
-	  $(CGENDIR) "$(CGENFLAGS)" $(arch) $(prefix) \
-	  "$(options)" $(extrafiles)
+	  $(CGENDIR) "$(CGENFLAGS)" $(arch) $(prefix) $(archfile) $(opcfile) \
+	  "$(options)" "$(extrafiles)"
 	touch stamp-${prefix}
 .PHONY: run-cgen
 
@@ -892,44 +892,47 @@ run-cgen-all:
 $(srcdir)/ip2k-desc.h $(srcdir)/ip2k-desc.c $(srcdir)/ip2k-opc.h $(srcdir)/ip2k-opc.c $(srcdir)/ip2k-ibld.c $(srcdir)/ip2k-asm.c $(srcdir)/ip2k-dis.c: $(IP2K_DEPS)
 	@true
 stamp-ip2k: $(CGENDEPS) $(CPUDIR)/ip2k.cpu $(CPUDIR)/ip2k.opc
-	$(MAKE) run-cgen arch=ip2k prefix=ip2k options= extrafiles=
+	$(MAKE) run-cgen arch=ip2k prefix=ip2k options= \
+		archfile=$(CPUDIR)/ip2k.cpu opcfile=$(CPUDIR)/ip2k.opc extrafiles=
 
 $(srcdir)/m32r-desc.h $(srcdir)/m32r-desc.c $(srcdir)/m32r-opc.h $(srcdir)/m32r-opc.c $(srcdir)/m32r-ibld.c $(srcdir)/m32r-opinst.c $(srcdir)/m32r-asm.c $(srcdir)/m32r-dis.c: $(M32R_DEPS)
 	@true
 stamp-m32r: $(CGENDEPS) $(CPUDIR)/m32r.cpu $(CPUDIR)/m32r.opc
-	$(MAKE) run-cgen arch=m32r prefix=m32r options=opinst extrafiles=opinst
+	$(MAKE) run-cgen arch=m32r prefix=m32r options=opinst \
+		archfile=$(CPUDIR)/m32r.cpu opcfile=$(CPUDIR)/m32r.opc extrafiles=opinst
 
 $(srcdir)/fr30-desc.h $(srcdir)/fr30-desc.c $(srcdir)/fr30-opc.h $(srcdir)/fr30-opc.c $(srcdir)/fr30-ibld.c $(srcdir)/fr30-asm.c $(srcdir)/fr30-dis.c: $(FR30_DEPS)
 	@true
 stamp-fr30: $(CGENDEPS) $(CPUDIR)/fr30.cpu $(CPUDIR)/fr30.opc
-	$(MAKE) run-cgen arch=fr30 prefix=fr30 options= extrafiles=
+	$(MAKE) run-cgen arch=fr30 prefix=fr30 options= \
+		archfile=$(CPUDIR)/fr30.cpu opcfile=$(CPUDIR)/fr30.opc extrafiles=
 
 $(srcdir)/frv-desc.h $(srcdir)/frv-desc.c $(srcdir)/frv-opc.h $(srcdir)/frv-opc.c $(srcdir)/frv-ibld.c $(srcdir)/frv-asm.c $(srcdir)/frv-dis.c: $(FRV_DEPS)
 	@true
 # .cpu and .opc files for frv are kept in a different directory, but cgen has no switch to specify that location, so
 # copy those file to the regular place.
 stamp-frv: $(CGENDEPS) $(srcdir)/../cpu/frv.cpu $(srcdir)/../cpu/frv.opc
-	cp -fp $(srcdir)/../cpu/frv.cpu $(CPUDIR)/frv.cpu
-	cp -fp $(srcdir)/../cpu/frv.opc $(CPUDIR)/frv.opc
-	$(MAKE) run-cgen arch=frv prefix=frv options= extrafiles=
-	rm -f $(CPUDIR)/frv.cpu
-	rm -f $(CPUDIR)/frv.opc
+	$(MAKE) run-cgen arch=frv prefix=frv options= \
+		archfile=$(srcdir)/../cpu/frv.cpu opcfile=$(srcdir)/../cpu/frv.opc extrafiles=
 
 $(srcdir)/openrisc-desc.h $(srcdir)/openrisc-desc.c $(srcdir)/openrisc-opc.h $(srcdir)/openrisc-opc.c $(srcdir)/openrisc-ibld.c $(srcdir)/openrisc-asm.c $(srcdir)/openrisc-dis.c: $(OPENRISC_DEPS)
 	@true
 stamp-openrisc: $(CGENDEPS) $(CPUDIR)/openrisc.cpu $(CPUDIR)/openrisc.opc
-	$(MAKE) run-cgen arch=openrisc prefix=openrisc options= extrafiles=
+	$(MAKE) run-cgen arch=openrisc prefix=openrisc options= \
+		archfile=$(CPUDIR)/openrisc.cpu opcfile=$(CPUDIR)/openrisc.opc extrafiles=
 
 $(srcdir)/iq2000-desc.h $(srcdir)/iq2000-desc.c $(srcdir)/iq2000-opc.h $(srcdir)/iq2000-opc.c $(srcdir)/iq2000-ibld.c $(srcdir)/iq2000-asm.c $(srcdir)/iq2000-dis.c: $(IQ2000_DEPS)
 	@true
 stamp-iq2000: $(CGENDEPS) $(CPUDIR)/iq2000.cpu $(CPUDIR)/iq2000.opc \
 	$(CPUDIR)/iq2000m.cpu $(CPUDIR)/iq10.cpu
-	$(MAKE) run-cgen arch=iq2000 prefix=iq2000 options= extrafiles=
+	$(MAKE) run-cgen arch=iq2000 prefix=iq2000 options= \
+		archfile=$(CPUDIR)/iq2000.cpu opcfile=$(CPUDIR)/iq2000.opc extrafiles=
 
 $(srcdir)/xstormy16-desc.h $(srcdir)/xstormy16-desc.c $(srcdir)/xstormy16-opc.h $(srcdir)/xstormy16-opc.c $(srcdir)/xstormy16-ibld.c $(srcdir)/xstormy16-asm.c $(srcdir)/xstormy16-dis.c: $(XSTORMY16_DEPS)
 	@true
 stamp-xstormy16: $(CGENDEPS) $(CPUDIR)/xstormy16.cpu $(CPUDIR)/xstormy16.opc
-	$(MAKE) run-cgen arch=xstormy16 prefix=xstormy16 options= extrafiles=
+	$(MAKE) run-cgen arch=xstormy16 prefix=xstormy16 options= \
+		archfile=$(CPUDIR)/xstormy16.cpu opcfile=$(CPUDIR)/xstormy16.opc extrafiles=
 
 ia64-gen: ia64-gen.o
 	$(LINK) ia64-gen.o $(LIBIBERTY)
