@@ -49,6 +49,7 @@ mh-irix6
 mh-lynxos
 mh-lynxrs6k
 mh-m68kpic
+mh-mingw32
 mh-ncr3000
 mh-ncrsvr43
 mh-necv4
