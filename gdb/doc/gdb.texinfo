@@ -683,7 +683,7 @@ context where it stops.
 
 Breakpoint 1, m4_changequote (argc=3, argv=0x33c70) 
     at builtin.c:879
-879         if (bad_argc(TOKEN_DATA_TEXT(argv[0]), argc, 1, 3))
+879         if (bad_argc(TOKEN_DATA_TEXT(argv[0]),argc,1,3))
 @end smallexample
 
 @noindent
@@ -3947,8 +3947,8 @@ Cause _GDBN__ to print structures in a compact format, like this:
 
 @smallexample
 @group
-$1 = @{next = 0x0, flags = @{sweet = 1, sour = 1@}, meat \
-= 0x54 "Pork"@}
+$1 = @{next = 0x0, flags = @{sweet = 1, sour = 1@}, \
+meat = 0x54 "Pork"@}
 @end group
 @end smallexample
 
@@ -5984,7 +5984,7 @@ the two-stage strategy for COFF yet.
 @cindex symbols, reading immediately
 @kindex mapped
 @cindex memory-mapped symbol file
-@cindex saving symbol table with memory mapping
+@cindex saving symbol table
 You can override the _GDBN__ two-stage strategy for reading symbol
 tables by using the @samp{-readnow} option with any of the commands that
 load symbol table information, if you want to be sure _GDBN__ has the
@@ -7656,10 +7656,10 @@ make
 where @var{host} is an identifier such as @samp{sun4} or
 @samp{decstation}, that identifies the platform where GDB will run.
 
-This sequence of @code{configure} and @code{make} builds the @file{bfd},
-@file{readline}, @file{mmalloc}, and @file{libiberty} libraries, then
-@code{gdb} itself.  The configured source files, and the binaries, are
-left in the corresponding source directories.
+Running @samp{configure @var{host}} followed by @code{make} builds the
+@file{bfd}, @file{readline}, @file{mmalloc}, and @file{libiberty}
+libraries, then @code{gdb} itself.  The configured source files, and the
+binaries, are left in the corresponding source directories.
 
 @code{configure} is a Bourne-shell (@code{/bin/sh}) script; if your
 system does not recognize this automatically when you run a different
@@ -7740,7 +7740,7 @@ the example, you'd find the Sun 4 library @file{libiberty.a} in the
 directory @file{gdb-sun4/libiberty}, and GDB itself in
 @file{gdb-sun4/gdb}.
 
-One popular use for building several GDB configurations in separate
+One popular reason to build several GDB configurations in separate
 directories is to configure GDB for cross-compiling (where GDB
 runs on one machine---the host---while debugging programs that run on
 another machine---the target).  You specify a cross-debugging target by
@@ -7777,12 +7777,14 @@ For example, you can use the alias @code{sun4} as a @var{host} argument
 or in a @code{--target=@var{target}} option, but the equivalent full name
 is @samp{sparc-sun-sunos4}.
 
+@c @group would be better, if it worked
+@page
 The following table shows all the architectures, hosts, and OS
 prefixes that @code{configure} recognizes in GDB version _GDB_VN__.  Entries
 in the ``OS prefix'' column ending in a @samp{*} may be followed by a
 release number.
 
-@c FIXME! Update for gdb 4.4
+@c FIXME! Update for most recent gdb
 @c TEXI2ROFF-KILL
 @ifinfo
 @c END TEXI2ROFF-KILL
