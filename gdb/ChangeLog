@@ -1,3 +1,13 @@
+2002-03-10  Daniel Jacobowitz  <drow@mvista.com>
+	    Don Howard <dhoward@redhat.com>
+
+	* mips-tdep.c (ST0_FR): Define.
+	(mips2_fp_compat): New function, temporarily disabled.
+	(mips_read_fp_register_single): New function.
+	(mips_read_fp_register_double): New function.
+	(mips_print_register): Use them.
+	(do_fp_register_row): Likewise.
+
 2002-03-09  Andrew Cagney  <ac131313@redhat.com>
 
 	* MAINTAINERS: Add Jim Ingham and Klee Dienes to ``write after

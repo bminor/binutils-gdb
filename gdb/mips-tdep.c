@@ -44,6 +44,10 @@
 #include "elf-bfd.h"
 #include "symcat.h"
 
+/* A useful bit in the CP0 status register (PS_REGNUM).  */
+/* This bit is set if we are emulating 32-bit FPRs on a 64-bit chip.  */
+#define ST0_FR (1 << 26)
+
 /* The sizes of floating point registers.  */
 
 enum
@@ -174,6 +178,31 @@ mips_saved_regsize (void)
     return 4;
 }
 
+/* Determine if a MIPS3 or later cpu is operating in MIPS{1,2} FPU
+   compatiblity mode.  A return value of 1 means that we have
+   physical 64-bit registers, but should treat them as 32-bit registers.  */
+
+static int
+mips2_fp_compat (void)
+{
+  /* MIPS1 and MIPS2 have only 32 bit FPRs, and the FR bit is not
+     meaningful.  */
+  if (REGISTER_RAW_SIZE (FP0_REGNUM) == 4)
+    return 0;
+
+#if 0
+  /* FIXME drow 2002-03-10: This is disabled until we can do it consistently,
+     in all the places we deal with FP registers.  PR gdb/413.  */
+  /* Otherwise check the FR bit in the status register - it controls
+     the FP compatiblity mode.  If it is clear we are in compatibility
+     mode.  */
+  if ((read_register (PS_REGNUM) & ST0_FR) == 0)
+    return 1;
+#endif
+  
+  return 0;
+}
+
 /* Indicate that the ABI makes use of double-precision registers
    provided by the FPU (rather than combining pairs of registers to
    form double-precision values).  Do not use "TARGET_IS_MIPS64" to
@@ -256,6 +285,9 @@ find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame, int cur_frame);
 
 static CORE_ADDR after_prologue (CORE_ADDR pc,
 				 mips_extra_func_info_t proc_desc);
+
+static void mips_read_fp_register_single (int regno, char *rare_buffer);
+static void mips_read_fp_register_double (int regno, char *rare_buffer);
 
 /* This value is the model of MIPS in use.  It is derived from the value
    of the PrID register.  */
@@ -2676,6 +2708,104 @@ mips_pop_frame (void)
     }
 }
 
+/* Floating point register management.
+
+   Background: MIPS1 & 2 fp registers are 32 bits wide.  To support
+   64bit operations, these early MIPS cpus treat fp register pairs
+   (f0,f1) as a single register (d0).  Later MIPS cpu's have 64 bit fp
+   registers and offer a compatibility mode that emulates the MIPS2 fp
+   model.  When operating in MIPS2 fp compat mode, later cpu's split
+   double precision floats into two 32-bit chunks and store them in
+   consecutive fp regs.  To display 64-bit floats stored in this
+   fashion, we have to combine 32 bits from f0 and 32 bits from f1.
+   Throw in user-configurable endianness and you have a real mess.
+
+   The way this works is:
+     - If we are in 32-bit mode or on a 32-bit processor, then a 64-bit
+       double-precision value will be split across two logical registers.
+       The lower-numbered logical register will hold the low-order bits,
+       regardless of the processor's endianness.
+     - If we are on a 64-bit processor, and we are looking for a
+       single-precision value, it will be in the low ordered bits
+       of a 64-bit GPR (after mfc1, for example) or a 64-bit register
+       save slot in memory.
+     - If we are in 64-bit mode, everything is straightforward.
+
+   Note that this code only deals with "live" registers at the top of the
+   stack.  We will attempt to deal with saved registers later, when
+   the raw/cooked register interface is in place. (We need a general
+   interface that can deal with dynamic saved register sizes -- fp
+   regs could be 32 bits wide in one frame and 64 on the frame above
+   and below).  */
+
+/* Copy a 32-bit single-precision value from the current frame
+   into rare_buffer.  */
+
+static void
+mips_read_fp_register_single (int regno, char *rare_buffer)
+{
+  int raw_size = REGISTER_RAW_SIZE (regno);
+  char *raw_buffer = alloca (raw_size);
+
+  if (read_relative_register_raw_bytes (regno, raw_buffer))
+    error ("can't read register %d (%s)", regno, REGISTER_NAME (regno));
+  if (raw_size == 8)
+    {
+      /* We have a 64-bit value for this register.  Find the low-order
+	 32 bits.  */
+      int offset;
+
+      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+	offset = 4;
+      else
+	offset = 0;
+
+      memcpy (rare_buffer, raw_buffer + offset, 4);
+    }
+  else
+    {
+      memcpy (rare_buffer, raw_buffer, 4);
+    }
+}
+
+/* Copy a 64-bit double-precision value from the current frame into
+   rare_buffer.  This may include getting half of it from the next
+   register.  */
+
+static void
+mips_read_fp_register_double (int regno, char *rare_buffer)
+{
+  int raw_size = REGISTER_RAW_SIZE (regno);
+
+  if (raw_size == 8 && !mips2_fp_compat ())
+    {
+      /* We have a 64-bit value for this register, and we should use
+	 all 64 bits.  */
+      if (read_relative_register_raw_bytes (regno, rare_buffer))
+	error ("can't read register %d (%s)", regno, REGISTER_NAME (regno));
+    }
+  else
+    {
+      if ((regno - FP0_REGNUM) & 1)
+	internal_error (__FILE__, __LINE__,
+			"mips_read_fp_register_double: bad access to "
+			"odd-numbered FP register");
+
+      /* mips_read_fp_register_single will find the correct 32 bits from
+	 each register.  */
+      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+	{
+	  mips_read_fp_register_single (regno, rare_buffer + 4);
+	  mips_read_fp_register_single (regno + 1, rare_buffer);
+	}
+      else      
+	{
+	  mips_read_fp_register_single (regno, rare_buffer);
+	  mips_read_fp_register_single (regno + 1, rare_buffer + 4);
+	}
+    }
+}
+
 static void
 mips_print_register (int regnum, int all)
 {
@@ -2688,22 +2818,23 @@ mips_print_register (int regnum, int all)
       return;
     }
 
-  /* If an even floating point register, also print as double. */
+  /* If we have a actual 32-bit floating point register (or we are in
+     32-bit compatibility mode), and the register is even-numbered,
+     also print it as a double (spanning two registers).  */
   if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT
+      && (REGISTER_RAW_SIZE (regnum) == 4
+	  || mips2_fp_compat ())
       && !((regnum - FP0_REGNUM) & 1))
-    if (REGISTER_RAW_SIZE (regnum) == 4)	/* this would be silly on MIPS64 or N32 (Irix 6) */
-      {
-	char dbuffer[2 * MAX_REGISTER_RAW_SIZE];
+    {
+      char dbuffer[2 * MAX_REGISTER_RAW_SIZE];
 
-	read_relative_register_raw_bytes (regnum, dbuffer);
-	read_relative_register_raw_bytes (regnum + 1, dbuffer + MIPS_REGSIZE);
-	REGISTER_CONVERT_TO_TYPE (regnum, builtin_type_double, dbuffer);
+      mips_read_fp_register_double (regnum, dbuffer);
 
-	printf_filtered ("(d%d: ", regnum - FP0_REGNUM);
-	val_print (builtin_type_double, dbuffer, 0, 0,
-		   gdb_stdout, 0, 1, 0, Val_pretty_default);
-	printf_filtered ("); ");
-      }
+      printf_filtered ("(d%d: ", regnum - FP0_REGNUM);
+      val_print (builtin_type_double, dbuffer, 0, 0,
+		 gdb_stdout, 0, 1, 0, Val_pretty_default);
+      printf_filtered ("); ");
+    }
   fputs_filtered (REGISTER_NAME (regnum), gdb_stdout);
 
   /* The problem with printing numeric register names (r26, etc.) is that
@@ -2717,8 +2848,10 @@ mips_print_register (int regnum, int all)
 
   /* If virtual format is floating, print it that way.  */
   if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
-    if (FP_REGISTER_DOUBLE)
-      {				/* show 8-byte floats as float AND double: */
+    if (REGISTER_RAW_SIZE (regnum) == 8 && !mips2_fp_compat ())
+      {
+	/* We have a meaningful 64-bit value in this register.  Show
+	   it as a 32-bit float and a 64-bit double.  */
 	int offset = 4 * (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG);
 
 	printf_filtered (" (float) ");
@@ -2753,35 +2886,25 @@ mips_print_register (int regnum, int all)
 static int
 do_fp_register_row (int regnum)
 {				/* do values for FP (float) regs */
-  char *raw_buffer[2];
-  char *dbl_buffer;
-  /* use HI and LO to control the order of combining two flt regs */
-  int HI = (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG);
-  int LO = (TARGET_BYTE_ORDER != BFD_ENDIAN_BIG);
+  char *raw_buffer;
   double doub, flt1, flt2;	/* doubles extracted from raw hex data */
   int inv1, inv2, inv3;
 
-  raw_buffer[0] = (char *) alloca (REGISTER_RAW_SIZE (FP0_REGNUM));
-  raw_buffer[1] = (char *) alloca (REGISTER_RAW_SIZE (FP0_REGNUM));
-  dbl_buffer = (char *) alloca (2 * REGISTER_RAW_SIZE (FP0_REGNUM));
+  raw_buffer = (char *) alloca (2 * REGISTER_RAW_SIZE (FP0_REGNUM));
 
-  /* Get the data in raw format.  */
-  if (read_relative_register_raw_bytes (regnum, raw_buffer[HI]))
-    error ("can't read register %d (%s)", regnum, REGISTER_NAME (regnum));
-  if (REGISTER_RAW_SIZE (regnum) == 4)
+  if (REGISTER_RAW_SIZE (regnum) == 4 || mips2_fp_compat ())
     {
-      /* 4-byte registers: we can fit two registers per row. */
-      /* Also print every pair of 4-byte regs as an 8-byte double. */
-      if (read_relative_register_raw_bytes (regnum + 1, raw_buffer[LO]))
-	error ("can't read register %d (%s)",
-	       regnum + 1, REGISTER_NAME (regnum + 1));
+      /* 4-byte registers: we can fit two registers per row.  */
+      /* Also print every pair of 4-byte regs as an 8-byte double.  */
+      mips_read_fp_register_single (regnum, raw_buffer);
+      flt1 = unpack_double (builtin_type_float, raw_buffer, &inv1);
 
-      /* copy the two floats into one double, and unpack both */
-      memcpy (dbl_buffer, raw_buffer, 2 * REGISTER_RAW_SIZE (FP0_REGNUM));
-      flt1 = unpack_double (builtin_type_float, raw_buffer[HI], &inv1);
-      flt2 = unpack_double (builtin_type_float, raw_buffer[LO], &inv2);
-      doub = unpack_double (builtin_type_double, dbl_buffer, &inv3);
+      mips_read_fp_register_single (regnum + 1, raw_buffer);
+      flt2 = unpack_double (builtin_type_float, raw_buffer, &inv2);
 
+      mips_read_fp_register_double (regnum, raw_buffer);
+      doub = unpack_double (builtin_type_double, raw_buffer, &inv3);
+      
       printf_filtered (" %-5s", REGISTER_NAME (regnum));
       if (inv1)
 	printf_filtered (": <invalid float>");
@@ -2805,14 +2928,14 @@ do_fp_register_row (int regnum)
       regnum += 2;
     }
   else
-    {				/* eight byte registers: print each one as float AND as double. */
-      int offset = 4 * (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG);
+    {
+      /* Eight byte registers: print each one as float AND as double.  */
+      mips_read_fp_register_single (regnum, raw_buffer);
+      flt1 = unpack_double (builtin_type_double, raw_buffer, &inv1);
 
-      memcpy (dbl_buffer, raw_buffer[HI], 2 * REGISTER_RAW_SIZE (FP0_REGNUM));
-      flt1 = unpack_double (builtin_type_float,
-			    &raw_buffer[HI][offset], &inv1);
-      doub = unpack_double (builtin_type_double, dbl_buffer, &inv3);
-
+      mips_read_fp_register_double (regnum, raw_buffer);
+      doub = unpack_double (builtin_type_double, raw_buffer, &inv3);
+      
       printf_filtered (" %-5s: ", REGISTER_NAME (regnum));
       if (inv1)
 	printf_filtered ("<invalid float>");
