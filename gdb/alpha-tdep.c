@@ -666,9 +666,17 @@ alpha_heuristic_proc_start (CORE_ADDR pc)
   CORE_ADDR last_non_nop = pc;
   CORE_ADDR fence = pc - heuristic_fence_post;
   CORE_ADDR orig_pc = pc;
+  CORE_ADDR func;
 
   if (pc == 0)
     return 0;
+
+  /* First see if we can find the start of the function from minimal
+     symbol information.  This can succeed with a binary that doesn't
+     have debug info, but hasn't been stripped.  */
+  func = get_pc_function_start (pc);
+  if (func)
+    return func;
 
   if (heuristic_fence_post == UINT_MAX
       || fence < tdep->vm_min_address)
@@ -725,7 +733,7 @@ Otherwise, you told GDB there was a function where there isn't one, or\n\
   return 0;
 }
 
-struct alpha_heuristic_unwind_cache *
+static struct alpha_heuristic_unwind_cache *
 alpha_heuristic_frame_unwind_cache (struct frame_info *next_frame,
 				    void **this_prologue_cache,
 				    CORE_ADDR start_pc)
@@ -882,7 +890,7 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *next_frame,
 /* Given a GDB frame, determine the address of the calling function's
    frame.  This will be used to create a new GDB frame struct.  */
 
-void
+static void
 alpha_heuristic_frame_this_id (struct frame_info *next_frame,
 				 void **this_prologue_cache,
 				 struct frame_id *this_id)
@@ -890,12 +898,17 @@ alpha_heuristic_frame_this_id (struct frame_info *next_frame,
   struct alpha_heuristic_unwind_cache *info
     = alpha_heuristic_frame_unwind_cache (next_frame, this_prologue_cache, 0);
 
+  /* This is meant to halt the backtrace at "_start".  Make sure we
+     don't halt it at a generic dummy frame. */
+  if (inside_entry_file (info->start_pc))
+    return;
+
   *this_id = frame_id_build (info->vfp, info->start_pc);
 }
 
 /* Retrieve the value of REGNUM in FRAME.  Don't give up!  */
 
-void
+static void
 alpha_heuristic_frame_prev_register (struct frame_info *next_frame,
 				     void **this_prologue_cache,
 				     int regnum, int *optimizedp,
@@ -954,7 +967,7 @@ alpha_heuristic_frame_p (CORE_ADDR pc)
   return &alpha_heuristic_frame_unwind;
 }
 
-CORE_ADDR
+static CORE_ADDR
 alpha_heuristic_frame_base_address (struct frame_info *next_frame,
 				    void **this_prologue_cache)
 {

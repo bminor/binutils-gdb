@@ -99,19 +99,7 @@ struct gdbarch_tdep
 
 extern unsigned int alpha_read_insn (CORE_ADDR pc);
 extern void alpha_software_single_step (enum target_signal, int);
-
-/* Let other files poke at the heuristic unwinder.  */
 extern CORE_ADDR alpha_after_prologue (CORE_ADDR pc);
-extern struct alpha_heuristic_unwind_cache *
-  alpha_heuristic_frame_unwind_cache (struct frame_info *, void **, CORE_ADDR);
-extern void alpha_heuristic_frame_this_id (struct frame_info *, void **,
-					   struct frame_id *);
-extern void alpha_heuristic_frame_prev_register (struct frame_info *,
-						 void **, int, int *,
-						 enum lval_type *,
-						 CORE_ADDR *, int *, void *);
-extern CORE_ADDR alpha_heuristic_frame_base_address (struct frame_info *,
-						     void **);
 
 extern void alpha_mdebug_init_abi (struct gdbarch_info, struct gdbarch *);
 
