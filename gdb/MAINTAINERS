@@ -227,6 +227,7 @@ readline/		Master version: ftp://ftp.cwru.edu/pub/bash/
 
 		Write After Approval
 
+David Anderson					davea@sgi.com
 Jim Kingdon					kingdon@redhat.com
 Jason Molenda					jsm@cygnus.com
 H.J. Lu						hjl@lucon.org
@@ -237,7 +238,6 @@ Gary Thomas					gthomas@redhat.com
 Pierre Muller					muller@sourceware.cygnus.com
 Kazu Hirata					kazu@hxi.com
 Tom Tromey					tromey@cygnus.com
-David Anderson					davea@sgi.com
 
 
 * Indicates folks we need to get Kerberos/SSH accounts ready so they
