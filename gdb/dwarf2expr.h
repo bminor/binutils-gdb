@@ -36,13 +36,8 @@ struct dwarf_expr_context
      to all of the callback functions.  */
   void *baton;
 
-  /* Return the value of register number REGNUM.  LVALP will be set
-     to the kind of lval this register is (generally lval_register
-     for the current frame's registers or lval_memory for a register
-     saved to the stack).  For lval_memory ADDRP will be set to the
-     saved location of the register.  */
-  CORE_ADDR (*read_reg) (void *baton, int regnum, enum lval_type *lvalp,
-			 CORE_ADDR *addrp);
+  /* Return the value of register number REGNUM.  */
+  CORE_ADDR (*read_reg) (void *baton, int regnum);
 
   /* Read LENGTH bytes at ADDR into BUF.  */
   void (*read_mem) (void *baton, char *buf, CORE_ADDR addr,
@@ -77,12 +72,8 @@ struct dwarf_expr_context
   int recursion_depth, max_recursion_depth;
 
   /* Non-zero if the result is in a register.  The register number
-     will be in REGNUM, and the result will be the contents of the
-     register.  */
+     will be on the expression stack.  */
   int in_reg;
-
-  /* If the result is in a register, the register number.  */
-  int regnum;
 };
 
 struct dwarf_expr_context *new_dwarf_expr_context ();

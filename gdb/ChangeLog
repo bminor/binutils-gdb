@@ -1,5 +1,19 @@
 2003-04-13  Daniel Jacobowitz  <drow@mvista.com>
 
+	* dwarf2expr.h (struct dwarf_expr_context): Remove extra arguments
+	to read_reg and update its comment.  Remove regnum member.
+	* dwarf2expr.c (execute_stack_op): Remove memaddr and expr_lval.
+	Don't call read_reg when setting in_reg.  Call read_reg to get
+	the frame base if it's in a register.  Return the register number
+	on the stack instead of in the context.  Remove extra arguments
+	to read_reg.
+	* dwarf2loc.c (dwarf_expr_read_reg): Remove extra arguments.
+	(dwarf2_evaluate_loc_desc): Call value_from_register.  Expect
+	the register number on the expression stack.
+	(needs_frame_read_reg): Remove extra arguments.
+
+2003-04-13  Daniel Jacobowitz  <drow@mvista.com>
+
 	* dwarf2expr.c (dwarf2_read_address): Renamed from read_address;
 	made non-static.
 	(execute_stack_op): All callers updated.

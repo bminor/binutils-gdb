@@ -110,11 +110,11 @@ struct dwarf_expr_baton
    type will be returned in LVALP, and for lval_memory the register
    save address will be returned in ADDRP.  */
 static CORE_ADDR
-dwarf_expr_read_reg (void *baton, int dwarf_regnum, enum lval_type *lvalp,
-		     CORE_ADDR *addrp)
+dwarf_expr_read_reg (void *baton, int dwarf_regnum)
 {
   struct dwarf_expr_baton *debaton = (struct dwarf_expr_baton *) baton;
-  CORE_ADDR result;
+  CORE_ADDR result, save_addr;
+  enum lval_type lval_type;
   char *buf;
   int optimized, regnum, realnum, regsize;
 
@@ -122,8 +122,8 @@ dwarf_expr_read_reg (void *baton, int dwarf_regnum, enum lval_type *lvalp,
   regsize = register_size (current_gdbarch, regnum);
   buf = (char *) alloca (regsize);
 
-  frame_register (debaton->frame, regnum, &optimized, lvalp, addrp, &realnum,
-		  buf);
+  frame_register (debaton->frame, regnum, &optimized, &lval_type, &save_addr,
+		  &realnum, buf);
   result = extract_address (buf, regsize);
 
   return result;
@@ -220,21 +220,15 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
   ctx->get_tls_address = dwarf_expr_tls_address;
 
   dwarf_expr_eval (ctx, data, size);
-
-  retval = allocate_value (SYMBOL_TYPE (var));
-  VALUE_BFD_SECTION (retval) = SYMBOL_BFD_SECTION (var);
+  result = dwarf_expr_fetch (ctx, 0);
 
   if (ctx->in_reg)
-    {
-      store_unsigned_integer (VALUE_CONTENTS_RAW (retval),
-			      TYPE_LENGTH (SYMBOL_TYPE (var)),
-			      dwarf_expr_fetch (ctx, 0));
-      VALUE_LVAL (retval) = lval_register;
-      VALUE_REGNO (retval) = ctx->regnum;
-    }
+    retval = value_from_register (SYMBOL_TYPE (var), result, frame);
   else
     {
-      result = dwarf_expr_fetch (ctx, 0);
+      retval = allocate_value (SYMBOL_TYPE (var));
+      VALUE_BFD_SECTION (retval) = SYMBOL_BFD_SECTION (var);
+
       VALUE_LVAL (retval) = lval_memory;
       VALUE_LAZY (retval) = 1;
       VALUE_ADDRESS (retval) = result;
@@ -258,8 +252,7 @@ struct needs_frame_baton
 
 /* Reads from registers do require a frame.  */
 static CORE_ADDR
-needs_frame_read_reg (void *baton, int regnum, enum lval_type *lvalp,
-			    CORE_ADDR *addrp)
+needs_frame_read_reg (void *baton, int regnum)
 {
   struct needs_frame_baton *nf_baton = baton;
   nf_baton->needs_frame = 1;
