@@ -1,3 +1,8 @@
+2002-07-23  Nick Clifton  <nickc@redhat.com>
+
+	* CONTRIBUTORS: Ken Raeburn is no longer the maintainer for
+	GAS.
+
 2002-07-19  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (mips_need_elf_addend_fixup): Use S_IS_EXTERNAL
