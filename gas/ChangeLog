@@ -1,5 +1,11 @@
 Tue Jan 11 13:01:20 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* config/obj-elf.c: If TC_MIPS, include elf/mips.h.
+	(special_sections): Define.
+	(obj_elf_special_section): Get default types and attributes from
+	list of special sections.
+	* config/tc-mips.c (ELF_TC_SPECIAL_SECTIONS): Define.
+
 	* config/obj-ecoff.c (ecoff_frob_file): Force .sdata and .sbss
 	sections to be close together.
 
