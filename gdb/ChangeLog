@@ -1,3 +1,11 @@
+Sun Jul  5 09:43:28 1992  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (VERSION):  Bump to 4.5.7.
+	* cplus-dem.c (demangle_args):  Validate index for previously
+	seen type to guard against bogus values from malformed manglings.
+	* valops.c (value_struct_elt_for_reference):  Guard against
+	blindly using NULL return value from lookup_symbol.
+
 Sun Jul  5 09:46:43 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* cadillac.c, cadillac-patches:  Rename to energize.c and

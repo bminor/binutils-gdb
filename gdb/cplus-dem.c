@@ -1578,7 +1578,9 @@ demangle_args (declp, type, work)
 #ifdef ARM_DEMANGLING
 	  t--;
 #endif
-	  if (t >= work -> ntypes)
+	  /* Validate the type index.  Protect against illegal indices from
+	     malformed type strings. */
+	  if ((t < 0) || (t >= work -> ntypes))
 	    {
 	      return (0);
 	    }
