@@ -1605,6 +1605,17 @@ i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 }
 
 
+/* Get the ith function argument for the current function.  */
+CORE_ADDR
+i386_fetch_pointer_argument (struct frame_info *frame, int argi, 
+			     struct type *type)
+{
+  CORE_ADDR stack;
+  frame_read_register (frame, SP_REGNUM, &stack);
+  return read_memory_unsigned_integer (stack + (4 * (argi + 1)), 4);
+}
+
+
 static struct gdbarch *
 i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
@@ -1714,6 +1725,9 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Add the i386 register groups.  */
   i386_add_reggroups (gdbarch);
   set_gdbarch_register_reggroup_p (gdbarch, i386_register_reggroup_p);
+
+  /* Helper for function argument information.  */
+  set_gdbarch_fetch_pointer_argument (gdbarch, i386_fetch_pointer_argument);
 
   /* Hook in the DWARF CFI frame unwinder.  */
   frame_unwind_append_predicate (gdbarch, dwarf2_frame_p);

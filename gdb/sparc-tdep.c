@@ -3243,6 +3243,15 @@ sparc_return_value_on_stack (struct type *type)
     return 0;
 }
 
+/* Get the ith function argument for the current function.  */
+CORE_ADDR
+sparc_fetch_pointer_argument (struct frame_info *frame, int argi, struct type *type)
+{
+  CORE_ADDR addr;
+  frame_read_register (frame, O0_REGNUM + argi, &addr);
+  return addr;
+}
+
 /*
  * Gdbarch "constructor" function.
  */
@@ -3353,6 +3362,9 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sp_regnum (gdbarch, SPARC_SP_REGNUM);
   set_gdbarch_deprecated_use_generic_dummy_frames (gdbarch, 0);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
+
+  /* Helper for function argument information.  */
+  set_gdbarch_fetch_pointer_argument (gdbarch, sparc_fetch_pointer_argument);
 
   /*
    * Settings that depend only on 32/64 bit word size 

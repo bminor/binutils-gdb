@@ -230,6 +230,16 @@ rs6000_saved_pc_after_call (struct frame_info *fi)
   return read_register (gdbarch_tdep (current_gdbarch)->ppc_lr_regnum);
 }
 
+/* Get the ith function argument for the current function.  */
+CORE_ADDR
+rs6000_fetch_pointer_argument (struct frame_info *frame, int argi, 
+			       struct type *type)
+{
+  CORE_ADDR addr;
+  frame_read_register (frame, 3 + argi, &addr);
+  return addr;
+}
+
 /* Calculate the destination of a branch/jump.  Return -1 if not a branch.  */
 
 static CORE_ADDR
@@ -2990,6 +3000,9 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_address (gdbarch, rs6000_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, rs6000_frame_args_address);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, rs6000_saved_pc_after_call);
+
+  /* Helpers for function argument information.  */
+  set_gdbarch_fetch_pointer_argument (gdbarch, rs6000_fetch_pointer_argument);
 
   /* We can't tell how many args there are
      now that the C compiler delays popping them.  */

@@ -4993,6 +4993,16 @@ hppa_smash_text_address (CORE_ADDR addr)
   return (addr &= ~0x3);
 }
 
+/* Get the ith function argument for the current function.  */
+CORE_ADDR
+hppa_fetch_pointer_argument (struct frame_info *frame, int argi, 
+			     struct type *type)
+{
+  CORE_ADDR addr;
+  frame_read_register (frame, R0_REGNUM + 26 - argi, &addr);
+  return addr;
+}
+
 static struct gdbarch *
 hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
@@ -5070,6 +5080,9 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_read_pc (gdbarch, hppa_target_read_pc);
   set_gdbarch_write_pc (gdbarch, hppa_target_write_pc);
   set_gdbarch_deprecated_target_read_fp (gdbarch, hppa_target_read_fp);
+
+  /* Helper for function argument information.  */
+  set_gdbarch_fetch_pointer_argument (gdbarch, hppa_fetch_pointer_argument);
 
   return gdbarch;
 }

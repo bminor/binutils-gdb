@@ -1,3 +1,16 @@
+2003-06-01  Adam Fedor  <fedor@gnu.org>
+
+	* gdbarch.sh (function_list): Add FETCH_POINTER_ARGUMENT.
+	* gdbarch.[ch]: Regenerate.
+	* hppa-tdep.c (hppa_fetch_pointer_argument): New function.
+	(hppa_gdbarch_init): Set it in the gdbarch vector.
+	* i386-tdep.c (i386_fetch_pointer_argument): New
+	(i386_gdbarch_init): Set it into gdbarch.
+	* rs6000-tdep.c (rs6000_fetch_pointer_argument): New.
+	(rs6000_gdbarch_init): Set it in gdbarch.
+	* sparc-tdep.c (sparc_fetch_pointer_argument): New
+	(sparc_gdbarch_init): Set it in gdbarch.
+
 2003-06-01  Andrew Cagney  <cagney@redhat.com>
 
 	* defs.h (extract_address): Delete declaration.

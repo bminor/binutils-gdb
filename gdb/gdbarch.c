@@ -280,6 +280,7 @@ struct gdbarch
   gdbarch_address_class_type_flags_to_name_ftype *address_class_type_flags_to_name;
   gdbarch_address_class_name_to_type_flags_ftype *address_class_name_to_type_flags;
   gdbarch_register_reggroup_p_ftype *register_reggroup_p;
+  gdbarch_fetch_pointer_argument_ftype *fetch_pointer_argument;
 };
 
 
@@ -446,6 +447,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   default_register_reggroup_p,
+  0,
   /* startup_gdbarch() */
 };
 
@@ -762,6 +764,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of address_class_type_flags_to_name, has predicate */
   /* Skip verify of address_class_name_to_type_flags, has predicate */
   /* Skip verify of register_reggroup_p, invalid_p == 0 */
+  /* Skip verify of fetch_pointer_argument, has predicate */
   buf = ui_file_xstrdup (log, &dummy);
   make_cleanup (xfree, buf);
   if (strlen (buf) > 0)
@@ -1692,6 +1695,26 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: EXTRACT_STRUCT_VALUE_ADDRESS = <0x%08lx>\n",
                         (long) current_gdbarch->extract_struct_value_address
                         /*EXTRACT_STRUCT_VALUE_ADDRESS ()*/);
+#endif
+#ifdef FETCH_POINTER_ARGUMENT_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "FETCH_POINTER_ARGUMENT_P()",
+                      XSTRING (FETCH_POINTER_ARGUMENT_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: FETCH_POINTER_ARGUMENT_P() = %d\n",
+                      FETCH_POINTER_ARGUMENT_P ());
+#endif
+#ifdef FETCH_POINTER_ARGUMENT
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "FETCH_POINTER_ARGUMENT(frame, argi, type)",
+                      XSTRING (FETCH_POINTER_ARGUMENT (frame, argi, type)));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: FETCH_POINTER_ARGUMENT = <0x%08lx>\n",
+                        (long) current_gdbarch->fetch_pointer_argument
+                        /*FETCH_POINTER_ARGUMENT ()*/);
 #endif
 #ifdef FP0_REGNUM
   fprintf_unfiltered (file,
@@ -5689,6 +5712,32 @@ set_gdbarch_register_reggroup_p (struct gdbarch *gdbarch,
                                  gdbarch_register_reggroup_p_ftype register_reggroup_p)
 {
   gdbarch->register_reggroup_p = register_reggroup_p;
+}
+
+int
+gdbarch_fetch_pointer_argument_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->fetch_pointer_argument != 0;
+}
+
+CORE_ADDR
+gdbarch_fetch_pointer_argument (struct gdbarch *gdbarch, struct frame_info *frame, int argi, struct type *type)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->fetch_pointer_argument == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_fetch_pointer_argument invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_fetch_pointer_argument called\n");
+  return gdbarch->fetch_pointer_argument (frame, argi, type);
+}
+
+void
+set_gdbarch_fetch_pointer_argument (struct gdbarch *gdbarch,
+                                    gdbarch_fetch_pointer_argument_ftype fetch_pointer_argument)
+{
+  gdbarch->fetch_pointer_argument = fetch_pointer_argument;
 }
 
 
