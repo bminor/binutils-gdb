@@ -186,7 +186,7 @@ static CORE_ADDR
 dwarf_expr_tls_address (void *baton, CORE_ADDR offset)
 {
   struct dwarf_expr_baton *debaton = (struct dwarf_expr_baton *) baton;
-  CORE_ADDR addr;
+  CORE_ADDR addr = 0;
 
   if (target_get_thread_local_address_p ())
     {

@@ -355,7 +355,7 @@ gnuv3_virtual_fn_field (struct value **value_p,
 
    -1 is returned on error. */
 static int
-gnuv3_baseclass_offset (struct type *type, int index, char *valaddr,
+gnuv3_baseclass_offset (struct type *type, int index, const bfd_byte *valaddr,
 			CORE_ADDR address)
 {
   struct type *vtable_type = gdbarch_data (current_gdbarch,
