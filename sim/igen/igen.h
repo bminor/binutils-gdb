@@ -86,6 +86,8 @@ typedef struct _igen_trace_options igen_trace_options;
 struct _igen_trace_options {
   int rule_selection;
   int rule_rejection;
+  int insn_insertion;
+  int insn_expansion;
   int entries;
   int combine;
 };

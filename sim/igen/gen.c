@@ -73,8 +73,8 @@ print_gen_entry_path (line_ref *line,
 {
   if (table->parent == NULL)
     {
-      if (table->top->processor != NULL)
-	print (line, "%s", table->top->processor);
+      if (table->top->model != NULL)
+	print (line, "%s", table->top->model->name);
       else
 	print (line, "");
     }
@@ -282,9 +282,9 @@ insn_list_insert (insn_list **cur_insn_ptr,
 		  /* two instructions with the same constant field
 		     values across all words and bits */
 		  warning (insn->line,
-			   "Location of second (duplicated?) instruction");
+			   "Two instructions with identical constant fields\n");
 		  error ((*cur_insn_ptr)->insn->line,
-			 "Two instructions with identical constant fields\n");
+			 "Location of second (duplicated?) instruction\n");
 		case merge_duplicate_insns:
 		  /* Add the opcode path to the instructions list */
 		  if (opcodes != NULL)
@@ -382,19 +382,19 @@ gen_entry_traverse_tree (lf *file,
 static gen_list *
 make_table (insn_table *isa,
 	    decode_table *rules,
-	    char *processor)
+	    model_entry *model)
 {
   insn_entry *insn;
   gen_list *entry = ZALLOC (gen_list);
   entry->table = ZALLOC (gen_entry);
   entry->table->top = entry;
-  entry->processor = processor;
+  entry->model = model;
   entry->isa = isa;
   for (insn = isa->insns; insn != NULL; insn = insn->next)
     {
-      if (processor == NULL
+      if (model == NULL
 	  || insn->processors == NULL
-	  || filter_is_member (insn->processors, processor))
+	  || filter_is_member (insn->processors, model->name))
 	{
 	  insn_list_insert (&entry->table->insns,
 			    &entry->table->nr_insns,
@@ -420,18 +420,21 @@ make_gen_tables (insn_table *isa,
   if (options.gen.multi_sim)
     {
       gen_list **last = &gen->tables;
-      char *processor;
+      model_entry *model;
       filter *processors;
       if (options.model_filter != NULL)
 	processors = options.model_filter;
       else
 	processors = isa->model->processors;
-      for (processor = filter_next (processors, "");
-	   processor != NULL;
-	   processor = filter_next (processors, processor))
+      for (model = isa->model->models;
+	   model != NULL;
+	   model = model->next)
 	{
-	  *last = make_table (isa, rules, processor);
-	  last = &(*last)->next;
+	  if (filter_is_member (processors, model->name))
+	    {
+	      *last = make_table (isa, rules, model);
+	      last = &(*last)->next;
+	    }
 	}
     }
   else
@@ -495,12 +498,18 @@ insns_bit_useless (insn_list *insns,
   insn_list *entry;
   int value = -1;
   int is_useless = 1; /* cleared if something actually found */
+
+  /* check the instructions for some constant value in at least one of
+     the bit fields */
   for (entry = insns; entry != NULL; entry = entry->next)
     {
       insn_word_entry *word = entry->insn->word[rule->word_nr];
       insn_bit_entry *bit = word->bit[bit_nr];
       switch (bit->field->type)
 	{
+	case insn_field_invalid:
+	  ASSERT (0);
+	  break;
 	case insn_field_wild:
 	case insn_field_reserved:
 	  /* neither useless or useful - ignore */
@@ -514,7 +523,9 @@ insns_bit_useless (insn_list *insns,
 	    case decode_find_constants:
 	    case decode_find_mixed:
 	      /* an integer is useful if its value isn't the same
-                 between all instructions? */
+                 between all instructions.  The first time through the
+                 value is saved, the second time through (if the
+                 values differ) it is marked as useful. */
 	      if (value < 0)
 		value = bit->value;
 	      else if (value != bit->value)
@@ -531,9 +542,9 @@ insns_bit_useless (insn_list *insns,
 	      break;
 	    case decode_find_constants:
 	    case decode_find_mixed:
-	      /* a string field forced to constant */
 	      if (filter_is_member (rule->constant_field_names,
 				    bit->field->val_string))
+		/* a string field forced to constant? */
 		is_useless = 0;
 	      else if (rule->search == decode_find_constants)
 		/* the string field isn't constant */
@@ -542,6 +553,77 @@ insns_bit_useless (insn_list *insns,
 	    }
 	}
     }
+
+  /* Given only one constant value has been found, check through all
+     the instructions to see if at least one conditional makes it
+     usefull */
+  if (value >= 0 && is_useless)
+    {
+      for (entry = insns; entry != NULL; entry = entry->next)
+	{
+	  insn_word_entry *word = entry->insn->word[rule->word_nr];
+	  insn_bit_entry *bit = word->bit[bit_nr];
+	  switch (bit->field->type)
+	    {
+	    case insn_field_invalid:
+	      ASSERT (0);
+	      break;
+	    case insn_field_wild:
+	    case insn_field_reserved:
+	    case insn_field_int:
+	      /* already processed */
+	      break;
+	    case insn_field_string:
+	      switch (rule->search)
+		{
+		case decode_find_strings:
+		case decode_find_constants:
+		  /* already processed */
+		  break;
+		case decode_find_mixed:
+		  /* string field with conditions.  If this condition
+                     eliminates the value then the compare is useful */
+		  if (bit->field->conditions != NULL)
+		    {
+		      insn_field_cond *condition;
+		      int shift = bit->field->last - bit_nr;
+		      for (condition = bit->field->conditions;
+			   condition != NULL;
+			   condition = condition->next)
+			{
+			printf ("useless %s%s\n",
+				(condition->type == insn_field_cond_eq ? "=" : "!"),
+				condition->string);
+			  switch (condition->type)
+			    {
+			    case insn_field_cond_value:
+			      switch (condition->test)
+				{
+				case insn_field_cond_ne:
+				  if (((condition->value >> shift) & 1) == value)
+				    /* conditional field excludes the
+                                       current value */
+				    is_useless = 0;
+				  break;
+				case insn_field_cond_eq:
+				  if (((condition->value >> shift) & 1) != value)
+				    /* conditional field requires the
+                                       current value */
+				    is_useless = 0;
+				  break;
+				}
+			      break;
+			    case insn_field_cond_field:
+			      /* are these handled separatly? */
+			      break;
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+
   return is_useless;
 }
 
@@ -753,6 +835,15 @@ gen_entry_expand_opcode (gen_entry *table,
     {
       /* Only include the hardwired bit information with an entry IF
          that entry (and hence its functions) are being duplicated.  */
+      if (options.trace.insn_expansion)
+	{
+	  print_gen_entry_path (table->opcode_rule->line, table, notify);
+	  notify (NULL, ": insert %d - %s.%s%s\n",
+		  opcode_nr,
+		  instruction->format_name,
+		  instruction->name,
+		  (table->opcode_rule->with_duplicates ? " (duplicated)" : ""));
+	}
       if (table->opcode_rule->with_duplicates)
 	{
 	  gen_entry_insert_insn (table, instruction,
@@ -762,6 +853,10 @@ gen_entry_expand_opcode (gen_entry *table,
 	}
       else
 	{
+	  if (options.trace.insn_insertion)
+	    {
+	      
+	    }
 	  gen_entry_insert_insn (table, instruction,
 				 table->opcode->word_nr,
 				 table->nr_prefetched_words,
@@ -773,9 +868,11 @@ gen_entry_expand_opcode (gen_entry *table,
       insn_word_entry *word = instruction->word[table->opcode->word_nr];
       insn_field_entry *field = word->bit[bit_nr]->field;
       int last_pos = ((field->last < table->opcode->last)
-		      ? field->last : table->opcode->last);
+		      ? field->last
+		      : table->opcode->last);
       int first_pos = ((field->first > table->opcode->first)
-		       ? field->first : table->opcode->first);
+		       ? field->first
+		       : table->opcode->first);
       int width = last_pos - first_pos + 1;
       switch (field->type)
 	{
@@ -800,21 +897,77 @@ gen_entry_expand_opcode (gen_entry *table,
 	      {
 		int val;
 		int last_val = (table->opcode->is_boolean
-				? 2 : (1 << width));
+				? 2
+				: (1 << width));
 		for (val = 0; val < last_val; val++)
 		  {
-		    /* check to see if the value has been limited */
-		    insn_field_exclusion *exclusion;
-		    for (exclusion = field->exclusions;
-			 exclusion != NULL;
-			 exclusion = exclusion->next)
+		    /* check to see if the value has been precluded
+                       (by a conditional) in some way */
+		    int is_precluded;
+		    insn_field_cond *condition;
+		    for (condition = field->conditions, is_precluded = 0;
+			 condition != NULL && !is_precluded;
+			 condition = condition->next)
 		      {
-			int value = sub_val (exclusion->value, field,
-					     first_pos, last_pos);
-			if (value == val)
-			  break;
+			switch (condition->type)
+			  {
+			  case insn_field_cond_value:
+			    {
+			      int value = sub_val (condition->value, field,
+						   first_pos, last_pos);
+			      switch (condition->test)
+				{
+				case insn_field_cond_ne:
+				  if (value == val)
+				    is_precluded = 1;
+				  break;
+				case insn_field_cond_eq:
+				  if (value != val)
+				    is_precluded = 1;
+				  break;
+				}
+			      break;
+			    }
+			  case insn_field_cond_field:
+			    {
+			      int value;
+			      /* Find a value for the conditional by
+                                 looking back through the previously
+                                 defined bits for the specified
+                                 conditonal field */
+			      opcode_bits *bit = bits;
+			      for (bit = bits;
+				   bit != NULL;
+				   bit = bit->next)
+				{
+				  if (bit->field == condition->field
+				      && (bit->last - bit->first + 1 == condition->field->width))
+				    /* the bit field fully specified
+                                       the conditional field's value */
+				    break;
+				}
+			      if (bit == NULL)
+				error (instruction->line,
+				       "Conditional `%s' of field `%s' isn't expanded",
+				       condition->string, field->val_string);
+			      value = sub_val (bit->value, field,
+					       first_pos, last_pos);
+			      switch (condition->test)
+				{
+				case insn_field_cond_ne:
+				  if (value == val)
+				    is_precluded = 1;
+				  break;
+				case insn_field_cond_eq:
+				  if (value != val)
+				    is_precluded = 1;
+				  break;
+				}
+			      break;
+			    }
+			  }
 		      }
-		    if (exclusion == NULL)
+		    if (!is_precluded)
 		      {
 			/* Only add additional hardwired bit
                            information if the entry is not going to
@@ -985,10 +1138,10 @@ gen_entry_expand_insns (gen_entry *table)
        opcode_rule = opcode_rule->next)
     {
       char *discard_reason;
-      if (table->top->processor != NULL
+      if (table->top->model != NULL
 	  && opcode_rule->model_names != NULL
 	  && !filter_is_member (opcode_rule->model_names,
-				table->top->processor))
+				table->top->model->name))
 	{
 	  /* the rule isn't applicable to this processor */
 	  discard_reason = "wrong model";
@@ -1075,15 +1228,7 @@ gen_entry_expand_insns (gen_entry *table)
       table->opcode->parent = table->parent->opcode;
     }
 
-  /* expand the raw instructions according to the opcode */
-  {
-    insn_list *entry;
-    for (entry = table->insns; entry != NULL; entry = entry->next)
-      {
-	gen_entry_insert_expanding (table, entry->insn);
-      }
-  }
-
+  /* report the rule being used to expand the instructions */
   if (options.trace.rule_selection)
     {
       print_gen_entry_path (table->opcode_rule->line, table, notify);
@@ -1097,6 +1242,22 @@ gen_entry_expand_insns (gen_entry *table)
 	      table->opcode->nr_opcodes,
 	      table->nr_entries);
     }
+
+  /* expand the raw instructions according to the opcode */
+  {
+    insn_list *entry;
+    for (entry = table->insns; entry != NULL; entry = entry->next)
+      {
+	if (options.trace.insn_expansion)
+	  {
+	    print_gen_entry_path (table->opcode_rule->line, table, notify);
+	    notify (NULL, ": expand - %s.%s\n",
+		    entry->insn->format_name,
+		    entry->insn->name);
+	  }
+	gen_entry_insert_expanding (table, entry->insn);
+      }
+  }
 
   /* dump the results */
   if (options.trace.entries)

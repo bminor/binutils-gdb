@@ -118,36 +118,69 @@ parse_insn_word (line_ref *line,
     if (strlen_val == 0)
       error (line, "Empty value field\n");
     
-    /* break out any conditional fields - { "!" <value> } */
-    while (*chp == '!')
+    /* break out any conditional fields - { [ "!" | "=" [ <value> | <field-name> } */
+    while (*chp == '!' || *chp == '=')
       {
 	char *start;
+	char *end;
 	int len;
-	insn_field_exclusion *new_exclusion = ZALLOC (insn_field_exclusion);
-	insn_field_exclusion **last;
+	insn_field_cond *new_cond = ZALLOC (insn_field_cond);
+	insn_field_cond **last;
 	
-	/* what type of conditional field */
+	/* determine the conditional test */
+	switch (*chp)
+	  {
+	  case '=':
+	    new_cond->test = insn_field_cond_eq;
+	    break;
+	  case '!':
+	    new_cond->test = insn_field_cond_ne;
+	    break;
+	  default:
+	    ASSERT (0);
+	  }
+	  
+	/* save the value */
 	chp++; 
 	chp = skip_spaces (chp);
-	/* the value */
 	start = chp;
-	chp = skip_digits (chp);
-	len = chp - start;
+	chp = skip_to_separator (chp, "+,:");
+	end = back_spaces (start, chp);
+	len = end - start;
 	if (len == 0)
 	  error (line, "Missing or invalid conditional value\n");
-	/* fill in the entry */
-	new_exclusion->string = NZALLOC (char, len + 1);
-	strncpy (new_exclusion->string, start, len);
-	new_exclusion->value = a2i (new_exclusion->string);
+	new_cond->string = NZALLOC (char, len + 1);
+	strncpy (new_cond->string, start, len);
+
+	/* determine the conditional type */
+	if (isdigit (*start))
+	  {
+	    /* [ "!" | "=" ] <value> */
+	    new_cond->type = insn_field_cond_value;
+	    new_cond->value = a2i (new_cond->string);
+	  }
+	else
+	  {
+	    /* [ "!" | "=" ] <field>  - check field valid */
+	    new_cond->type = insn_field_cond_field;
+	    /* new_cond->field is determined in later */
+	  }
+	  
+	/* Only a single `=' is permitted. */
+	if ((new_cond->test == insn_field_cond_eq
+	     && new_field->conditions != NULL)
+	    || (new_field->conditions != NULL
+		&& new_field->conditions->test == insn_field_cond_eq))
+	  error (line, "Only single conditional when `=' allowed\n");
+
 	/* insert it */
-	last = &new_field->exclusions;
+	last = &new_field->conditions;
 	while (*last != NULL)
 	  last = &(*last)->next;
-	*last = new_exclusion;
-	chp = skip_spaces (chp);
+	*last = new_cond;
       }
 
-    /* NOW verify that the field ws finished */
+    /* NOW verify that the field was finished */
     if (*chp == ',')
       {
 	chp = skip_spaces (chp + 1);
@@ -156,7 +189,7 @@ parse_insn_word (line_ref *line,
       }
     else if (*chp != '\0')
       {
-	error (line, "Missing field separator");
+	error (line, "Missing field separator\n");
       }
 
     /* copy the value */
@@ -203,8 +236,8 @@ parse_insn_word (line_ref *line,
 	filter_parse (&word->field_names, new_field->val_string);
       }
     if (new_field->type != insn_field_string
-	&& new_field->exclusions != NULL)
-      error (line, "Exclusions only apply to name fields\n");
+	&& new_field->conditions != NULL)
+      error (line, "Conditionals can only be applied to named fields\n");
 
     /* the copy the position */
     new_field->pos_string = NZALLOC (char, strlen_pos + 1);
@@ -281,6 +314,9 @@ parse_insn_word (line_ref *line,
 	    word->bit[i]->field = field;
 	    switch (field->type)
 	      {
+	      case insn_field_invalid:
+		ASSERT (0);
+		break;
 	      case insn_field_int:
 		word->bit[i]->mask = 1;
 		word->bit[i]->value = ((field->val_int
@@ -290,6 +326,51 @@ parse_insn_word (line_ref *line,
 	      case insn_field_wild:
 	      case insn_field_string:
 		break;
+	      }
+	  }
+      }
+  }
+
+  /* go over all fields that have conditionals refering to other
+     fields.  Link the fields up.  Verify that the two fields have the
+     same size. Verify that the two fields are different */
+  {
+    insn_field_entry *f;
+    for (f = word->first;
+	 f->last < options.insn_bit_size;
+	 f = f->next)
+      {
+	insn_field_cond *cond;
+	for (cond = f->conditions;
+	     cond != NULL;
+	     cond = cond->next)
+	  {
+	    if (cond->type == insn_field_cond_field)
+	      {
+		insn_field_entry *field;
+		if (strcmp (cond->string, f->val_string) == 0)
+		  error (line, "Conditional of field `%s' refers to its self\n",
+			 f->val_string);
+		for (field = word->first;
+		     field != NULL;
+		     field = field->next)
+		  {
+		    if (field->type == insn_field_string
+			&& strcmp (field->val_string, cond->string) == 0)
+		      {
+			/* found field being refered to by conditonal */
+			cond->field = field;
+			/* check refered to and this field are the
+                           same size */
+			if (f->width != field->width)
+			  error (line, "Conditional `%s' of field `%s' has different size\n",
+				 field->width, f->width);
+			break;
+		      }
+		  }
+		if (cond->field == NULL)
+		  error (line, "Condition field refers to non-existant field `%s'\n",
+			 cond->string);
 	      }
 	  }
       }
@@ -635,7 +716,8 @@ parse_function_record (table *file,
 		       table_entry *record,
 		       function_entry **list,
 		       function_entry **list_entry,
-		       int is_internal)
+		       int is_internal,
+		       model_table *model)
 {
   function_entry *new_function;
   new_function = ZALLOC (function_entry);
@@ -669,8 +751,12 @@ parse_function_record (table *file,
   while (record != NULL
 	 && record_prefix_is (record, '*', nr_function_model_fields))
     {
-      filter_parse (&new_function->models,
-		    record->field[function_model_name_field] + 1 /*skip `*'*/);
+      char *model_name = record->field[function_model_name_field] + 1; /*skip `*'*/
+      filter_parse (&new_function->models, model_name);
+      if (!filter_is_subset (model->processors, new_function->models))
+	{
+	  error (record->line, "machine model `%s' undefined\n", model_name);
+	}
       record = table_read (file);
     }
   /* parse the function body */
@@ -683,12 +769,15 @@ parse_function_record (table *file,
   if (!filter_is_subset (options.flags_filter, new_function->flags))
     {
       if (options.warn.discard)
-	notify (new_function->line, "Discarding function entry - filter flags\n");
+	notify (new_function->line, "Discarding function %s - filter flags\n",
+		new_function->name);
     }
-  else if (!filter_is_subset (options.model_filter, new_function->models))
+  else if (new_function->models != NULL
+	   && !filter_is_common (options.model_filter, new_function->models))
     {
       if (options.warn.discard)
-	notify (new_function->line, "Discarding function entry - filter models\n");
+	notify (new_function->line, "Discarding function %s - filter models\n",
+		new_function->name);
     }
   else
     {
@@ -803,6 +892,34 @@ parse_insn_mnemonic_record (table *file,
 }
 
 
+static table_entry *
+parse_macro_record (table *file,
+		    table_entry *record)
+{
+#if 1
+  error (record->line, "Macros are not implemented");
+#else
+  /* parse the define record */
+  if (record->nr_fields < nr_define_fields)
+    error (record->line, "Incorrect nr fields for define record\n");
+  /* process it */
+  if (!is_filtered_out (options.flags_filter,
+			record->field[record_filter_flags_field])
+      && !is_filtered_out (options.model_filter,
+			   record->field[record_filter_models_field]))
+    {
+      table_define (file,
+		    record->line,
+		    record->field[macro_name_field],
+		    record->field[macro_args_field],
+		    record->field[macro_expr_field]);
+    }  
+  record = table_read (file);
+#endif
+  return record;
+}
+
+
 insn_table *
 load_insn_table (char *file_name,
 		 cache_entry *cache)
@@ -842,7 +959,8 @@ load_insn_table (char *file_name,
 	    record = parse_function_record (file, record,
 					    &isa->functions,
 					    &function,
-					    0/*is-internal*/);
+					    0/*is-internal*/,
+					    model);
 	    /* convert a string function record into an internal function */
 	    if (function != NULL)
 	      {
@@ -863,7 +981,8 @@ load_insn_table (char *file_name,
 	    record = parse_function_record (file, record,
 					    &isa->functions,
 					    NULL,
-					    0/*is-internal*/);
+					    0/*is-internal*/,
+					    model);
 	    break;
 	  }
 
@@ -874,7 +993,8 @@ load_insn_table (char *file_name,
 	    record = parse_function_record (file, record,
 					    &isa->functions,
 					    &function,
-					    1/*is-internal*/);
+					    1/*is-internal*/,
+					    model);
 	    /* check what was inserted to see if a pseudo-instruction
                entry also needs to be created */
 	    if (function != NULL)
@@ -1015,21 +1135,24 @@ load_insn_table (char *file_name,
 	  record = parse_function_record (file, record,
 					  &model->statics,
 					  NULL,
-					  0/*is internal*/);
+					  0/*is internal*/,
+					  model);
 	  break;
 	  
 	case model_internal_record:
 	  record = parse_function_record (file, record,
 					  &model->internals,
 					  NULL,
-					  1/*is internal*/);
+					  1/*is internal*/,
+					  model);
 	  break;
 	  
 	case model_function_record:
 	  record = parse_function_record (file, record,
 					  &model->functions,
 					  NULL,
-					  0/*is internal*/);
+					  0/*is internal*/,
+					  model);
 	  break;
 	  
 	case insn_record: /* instruction records */
@@ -1118,8 +1241,11 @@ load_insn_table (char *file_name,
 	    break;
 	  }
       
-	case unknown_record:
 	case define_record:
+	  record = parse_macro_record (file, record);
+	  break;
+
+	case unknown_record:
 	case code_record:
 	  error (record->line, "Unknown or unexpected entry\n");
 
@@ -1148,6 +1274,9 @@ print_insn_words (lf *file,
 		lf_printf (file, "%d.", i2target (options.hi_bit_nr, field->first));
 	      switch (field->type)
 		{
+		case insn_field_invalid:
+		  ASSERT (0);
+		  break;
 		case insn_field_int:
 		  lf_printf (file, "0x%lx", (long) field->val_int);
 		  break;
@@ -1397,6 +1526,7 @@ insn_field_type_to_str (insn_field_type type)
 {
   switch (type)
     {
+    case insn_field_invalid: ASSERT (0); return "(invalid)";
     case insn_field_int: return "int";
     case insn_field_reserved: return "reserved";
     case insn_field_wild: return "wild";
@@ -1423,6 +1553,9 @@ dump_insn_field (lf *file,
       lf_printf (file, "%s(type %s)", sep, insn_field_type_to_str (field->type));
       switch (field->type)
 	{
+	case insn_field_invalid:
+	  ASSERT (0);
+	  break;
 	case insn_field_int:
 	  lf_printf (file, "%s(val 0x%lx)", sep, (long) field->val_int);
 	  break;

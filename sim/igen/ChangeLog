@@ -1,3 +1,41 @@
+Tue Apr 14 08:44:53 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* igen.h (struct igen_trace_options): Add members insn_expansion
+ 	and insn_insertion.
+
+	* igen.c (main): Add options -Gtrace-insn-expansion,
+ 	-Gtrace-insn-insertion and -Gtrace-all.
+
+	* gen.c (gen_entry_expand_insns): Trace each instruction as it is
+ 	selected for expansion.
+	(gen_entry_expand_opcode): Trace each expanded instruction as it
+ 	is inserted into the table.
+	
+Mon Apr 13 19:21:47 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ld-insn.c (parse_insn_word): Parse conditional operators.
+	(parse_insn_word): Verify field conditionals.
+
+	* ld-insn.h: Extend syntax to allow macros and field equality.
+	(struct insn_field_cond): Rename insn_field_exclusion, add type.
+
+	* gen.c (gen_entry_expand_opcode): Check type of conditional.
+	(insns_bit_useless): Ditto.
+
+	* ld-insn.c (parse_macro_record): New function.
+
+Mon Apr 13 22:37:47 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ld-insn.h (enum insn_field_type): Add insn_field_invalid.
+
+	* ld-insn.c (parse_insn_word): Check instruction field type
+ 	correctly initialized.
+	(print_insn_words): Ditto.
+	(insn_field_type_to_str): Ditto.
+	(dump_insn_field): Ditto.
+
+	* gen.c (insns_bit_useless): Ditto.
+
 Fri Apr  3 18:08:16 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gen.h, igen.c (print_include_inline, print_includes,

@@ -1101,14 +1101,17 @@ main (int argc,
       printf ("\t trace-entries          - report entries after a rules application\n");
       printf ("\t trace-rule-rejection   - report each rule as rejected\n");
       printf ("\t trace-rule-selection   - report each rule as selected\n");
+      printf ("\t trace-insn-insertion   - report each instruction as it is inserted into a decode table\n");
+      printf ("\t trace-rule-expansion   - report each instruction as it is expanded (before insertion into a decode table)\n");
+      printf ("\t trace-all              - enable all trace options\n");
       printf ("\n");
-      printf ("\t field-widths          - instruction formats specify widths (depreciated)\n");
-      printf ("\t                         By default, an instruction format specifies bit\n");
-      printf ("\t                         positions\n");
-      printf ("\t                         This option can now be set directly in the\n");
-      printf ("\t                         instruction table\n");
-      printf ("\t jumps                 - use jumps instead of function calls\n");
-      printf ("\t omit-line-numbers     - do not include line number information in the output\n");
+      printf ("\t field-widths           - instruction formats specify widths (depreciated)\n");
+      printf ("\t                          By default, an instruction format specifies bit\n");
+      printf ("\t                          positions\n");
+      printf ("\t                          This option can now be set directly in the\n");
+      printf ("\t                          instruction table\n");
+      printf ("\t jumps                  - use jumps instead of function calls\n");
+      printf ("\t omit-line-numbers      - do not include line number information in the output\n");
       printf ("\n");
       printf ("Input options:\n");
       printf ("\n");
@@ -1426,6 +1429,10 @@ main (int argc,
 	      {
 		options.gen.nia = nia_is_void;
 	      }
+	    else if (strcmp (argp, "trace-all") == 0)
+	      {
+		memset (&options.trace, enable_p, sizeof (options.trace));
+	      }
 	    else if (strcmp (argp, "trace-combine") == 0)
 	      {
 		options.trace.combine = enable_p;
@@ -1441,6 +1448,14 @@ main (int argc,
 	    else if (strcmp (argp, "trace-rule-selection") == 0)
 	      {
 		options.trace.rule_selection = enable_p;
+	      }
+	    else if (strcmp (argp, "trace-insn-insertion") == 0)
+	      {
+		options.trace.insn_insertion = enable_p;
+	      }
+	    else if (strcmp (argp, "trace-insn-expansion") == 0)
+	      {
+		options.trace.insn_expansion = enable_p;
 	      }
 	    else if (strcmp (argp, "jumps") == 0)
 	      {
