@@ -1,3 +1,10 @@
+start-sanitize-v850
+Tue Dec 31 15:05:41 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* v850.h (V850_OPERAND_ADJUST_SHORT_MEMORY): New flag to adjust
+	type IV instruction offsets.
+
+end-sanitize-v850
 start-sanitize-tic80
 Fri Dec 27 22:23:10 1996  Fred Fish  <fnf@cygnus.com>
 
