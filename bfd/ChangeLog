@@ -1,3 +1,10 @@
+Wed Oct  4 18:15:02 1995  Jeff Law  (law@hurl.cygnus.com)
+
+	* rs6000-core.c (CORE_VERSION_1): Use CORE_VERSION_1 instead
+	of ALTERNATE_AIX_CORE_FORMAT.
+	* configure.in (aix4): No longer need CORE_FLAGS.
+	* configure: Updated.
+
 Wed Oct  4 15:36:36 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	NS32k changes from Ian Dall:
@@ -41,7 +48,7 @@ Tue Oct  3 16:28:32 1995  steve chamberlain  <sac@slash.cygnus.com>
 	(coff_swap_scnhdr_in): Swap bss size into the right place.
 	(pe_print_private_bfd_data): Add some newlines.
 
-Tue Oct  3 11:53:04 1995  Jeff Law  (law@hurl)
+Tue Oct  3 11:53:04 1995  Jeff Law  (law@hurl.cygnus.com)
 
 	* som.c (setup_sections): Don't die if a space has no subspaces.
 
@@ -52,7 +59,7 @@ Mon Oct  2 14:08:55 1995  Ian Lance Taylor  <ian@cygnus.com>
 	type if they have been set and the new symbol is not a definition.
 	Warn if the size or type changes.
 
-Sun Oct  1 01:34:41 1995  Jeff Law  (law@hurl.cygnus.com
+Sun Oct  1 01:34:41 1995  Jeff Law  (law@hurl.cygnus.com)
 
         * som.c (som_begin_writing): Don't write the symbol table or
 	symbol	strings.
