@@ -61,6 +61,7 @@ if test "${target}" = "${host}"; then
   hppa*-*-hiux*)	COREFILE=hpux-core.o ;;
   hppa*-*-bsd*)		COREFILE="hpux-core.o hppabsd-core.o"
 			COREFLAG="-DHPUX_CORE -DHPPABSD_CORE" ;;
+changequote(,)dnl
   i[345]86-sequent-bsd*) COREFILE=trad-core.o ;;
   i[345]86-sequent-sysv4*) ;;
   i[345]86-sequent-sysv*) COREFILE=trad-core.o ;;
@@ -73,6 +74,7 @@ if test "${target}" = "${host}"; then
   i[345]86-*-linux*)	COREFILE=trad-core.o ;;
   i[345]86-*-isc*)	COREFILE=trad-core.o ;;
   i[345]86-*-aix*)	COREFILE=aix386-core.o ;;
+changequote([,])dnl
   mips-dec-bsd*)	COREFILE=trad-core.o ;;
   mips-dec-mach3*)	COREFILE=trad-core.o ;;
   mips-dec-*)		COREFILE=trad-core.o ;;

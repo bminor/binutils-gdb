@@ -1,3 +1,8 @@
+Mon Sep  4 03:13:28 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* configure.in: Put changequote lines around "i[345]86" patterns
+	section of core file support.
+
 Sun Sep  3 11:31:58 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* som.c (som_bfd_print_private_bfd_data): Define to use the
