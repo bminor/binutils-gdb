@@ -38,6 +38,12 @@ mv Makefile.tem ${Makefile}
 
 # Add default definitions for all, install, clean, etc.
 # if the Makefile uses them.
+#
+# ??? The variables will be undefined when they're not used
+# (eg: native libiberty) and things will work just fine, but some may argue
+# that's not clean.  We can always revisit this as necessary (probably by
+# defining all the relevant vars as empty and then instead of prepending
+# corrected values we can modify them in place).
 
 if grep ALL_MULTI ${Makefile} >/dev/null 2>/dev/null
 then
