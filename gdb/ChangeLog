@@ -1,3 +1,7 @@
+Sat Jan 18 17:17:45 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* Makefile.in (HFILES):  Add partial-stab.h.
+
 Sat Jan 18 16:45:01 1992  Fred Fish  (fnf at cygnus.com)
 
 	* config/mh-stratus, config/mt-stratus, i860-opcode.h,
