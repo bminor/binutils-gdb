@@ -1,5 +1,10 @@
 Fri Feb 17 11:45:38 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coffgen.c (coff_real_object_p): Set start address and flags
+	before calling coff_mkobject_hook.  Restore them on failure.
+	* ecoff.c (_bfd_ecoff_mkobject_hook): If not ECOFF_AOUT_ZMAGIC,
+	clear D_PAGED.
+
 	* coffgen.c: Reindented.
 
 Thu Feb 16 14:37:23 1995  Doug Evans  <dje@cygnus.com>
