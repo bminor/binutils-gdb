@@ -93,6 +93,7 @@ STAGESTUFF = $(PROGS) *.o
 
 BASEDIR = $(srcdir)/..
 LIBDIR  = ./../bfd
+OPCODEDIR = ./../opcodes
 
 #### host and target dependant Makefile fragments come in here.
 ###
@@ -130,6 +131,7 @@ BULIBS = bucomm.o version.o filemode.o
 ADDL_LIBS = $(MALLOC) $(BULIBS) $(BFD) $(LIBIBERTY)
 
 BFD = $(LIBDIR)/libbfd.a
+OPCODES = $(OPCODEDIR)/libopcodes.a
 #
 ## The rules
 
@@ -158,7 +160,7 @@ $(STRIP_PROG): $(ADDL_LIBS) copy.o is-strip.o $(BFD)
 $(NM_PROG): $(ADDL_LIBS) nm.o $(BFD)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $(NM_PROG) nm.o $(ADDL_LIBS) $(LOADLIBES)
 
-$(OBJDUMP_PROG): $(ADDL_LIBS) size.o objdump.o $(DISASMS) $(BFD)
+$(OBJDUMP_PROG): $(ADDL_LIBS) size.o objdump.o $(DISASMS) $(BFD) $(OPCODES)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $(OBJDUMP_PROG) objdump.o $(DISASMS) $(ADDL_LIBS) $(LOADLIBES)
 
 arparse.c:arparse.y
