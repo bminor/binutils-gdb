@@ -27,7 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bfdlink.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
-#include "elf/ppc.h"
+#include "elf/ppc64.h"
 #include "elf64-ppc.h"
 
 static void ppc_howto_init
@@ -126,7 +126,7 @@ static bfd_boolean ppc64_elf_merge_private_bfd_data
 #define ONES(n) (((bfd_vma) 1 << ((n) - 1) << 1) - 1)
 
 /* Relocation HOWTO's.  */
-static reloc_howto_type *ppc64_elf_howto_table[(int) R_PPC_max];
+static reloc_howto_type *ppc64_elf_howto_table[(int) R_PPC64_max];
 
 static reloc_howto_type ppc64_elf_howto_raw[] = {
   /* This reloc does nothing.  */
@@ -667,9 +667,8 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  /* Like R_PPC64_REL24 without touching the two least significant
-     bits.  Should have been named R_PPC64_REL30!  */
-  HOWTO (R_PPC64_ADDR30,	/* type */
+  /* Like R_PPC64_REL24 without touching the two least significant bits.  */
+  HOWTO (R_PPC64_REL30,		/* type */
 	 2,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 30,			/* bitsize */
@@ -677,7 +676,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
-	 "R_PPC64_ADDR30",	/* name */
+	 "R_PPC64_REL30",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xfffffffc,		/* dst_mask */
@@ -1207,7 +1206,7 @@ ppc64_elf_reloc_type_lookup (abfd, code)
      bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
-  enum elf_ppc_reloc_type ppc_reloc = R_PPC_NONE;
+  enum elf_ppc64_reloc_type ppc_reloc = R_PPC64_NONE;
 
   if (!ppc64_elf_howto_table[R_PPC64_ADDR32])
     /* Initialize howto table if needed.  */
@@ -1365,7 +1364,7 @@ ppc64_elf_info_to_howto (abfd, cache_ptr, dst)
   cache_ptr->howto = ppc64_elf_howto_table[type];
 }
 
-/* Handle the R_PPC_ADDR16_HA and similar relocs.  */
+/* Handle the R_PPC64_ADDR16_HA and similar relocs.  */
 
 static bfd_reloc_status_type
 ppc64_elf_ha_reloc (abfd, reloc_entry, symbol, data,
@@ -1404,7 +1403,7 @@ ppc64_elf_brtaken_reloc (abfd, reloc_entry, symbol, data,
      char **error_message;
 {
   long insn;
-  enum elf_ppc_reloc_type r_type;
+  enum elf_ppc64_reloc_type r_type;
   bfd_size_type octets;
   /* Disabled until we sort out how ld should choose 'y' vs 'at'.  */
   bfd_boolean is_power4 = FALSE;
@@ -1419,7 +1418,7 @@ ppc64_elf_brtaken_reloc (abfd, reloc_entry, symbol, data,
   octets = reloc_entry->address * bfd_octets_per_byte (abfd);
   insn = bfd_get_32 (abfd, (bfd_byte *) data + octets);
   insn &= ~(0x01 << 21);
-  r_type = (enum elf_ppc_reloc_type) reloc_entry->howto->type;
+  r_type = (enum elf_ppc64_reloc_type) reloc_entry->howto->type;
   if (r_type == R_PPC64_ADDR14_BRTAKEN
       || r_type == R_PPC64_REL14_BRTAKEN)
     insn |= 0x01 << 21; /* 'y' or 't' bit, lowest bit of BO field.  */
@@ -1771,7 +1770,7 @@ struct ppc_dyn_relocs
 #define IS_ABSOLUTE_RELOC(RTYPE)		\
   ((RTYPE) != R_PPC64_REL32			\
    && (RTYPE) != R_PPC64_REL64			\
-   && (RTYPE) != R_PPC64_ADDR30)
+   && (RTYPE) != R_PPC64_REL30)
 
 /* Section name for stubs is the associated section name plus this
    string.  */
@@ -2579,7 +2578,7 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
     {
       unsigned long r_symndx;
       struct elf_link_hash_entry *h;
-      enum elf_ppc_reloc_type r_type;
+      enum elf_ppc64_reloc_type r_type;
 
       r_symndx = ELF64_R_SYM (rel->r_info);
       if (r_symndx < symtab_hdr->sh_info)
@@ -2587,7 +2586,7 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
       else
 	h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 
-      r_type = (enum elf_ppc_reloc_type) ELF64_R_TYPE (rel->r_info);
+      r_type = (enum elf_ppc64_reloc_type) ELF64_R_TYPE (rel->r_info);
       switch (r_type)
 	{
 	  /* GOT16 relocations */
@@ -2723,7 +2722,7 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 	  if (opd_sym_map != NULL
 	      && h == NULL
 	      && rel + 1 < rel_end
-	      && ((enum elf_ppc_reloc_type) ELF64_R_TYPE ((rel + 1)->r_info)
+	      && ((enum elf_ppc64_reloc_type) ELF64_R_TYPE ((rel + 1)->r_info)
 		  == R_PPC64_TOC))
 	    {
 	      asection *s;
@@ -2737,8 +2736,9 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 	    }
 	  /* Fall through.  */
 
-	case R_PPC64_REL64:
+	case R_PPC64_REL30:
 	case R_PPC64_REL32:
+	case R_PPC64_REL64:
 	case R_PPC64_ADDR14:
 	case R_PPC64_ADDR14_BRNTAKEN:
 	case R_PPC64_ADDR14_BRTAKEN:
@@ -2753,7 +2753,6 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 	case R_PPC64_ADDR16_LO:
 	case R_PPC64_ADDR16_LO_DS:
 	case R_PPC64_ADDR24:
-	case R_PPC64_ADDR30:
 	case R_PPC64_ADDR32:
 	case R_PPC64_UADDR16:
 	case R_PPC64_UADDR32:
@@ -2912,10 +2911,10 @@ ppc64_elf_gc_mark_hook (sec, info, rel, h, sym)
 
   if (h != NULL)
     {
-      enum elf_ppc_reloc_type r_type;
+      enum elf_ppc64_reloc_type r_type;
       struct ppc_link_hash_entry *fdh;
 
-      r_type = (enum elf_ppc_reloc_type) ELF64_R_TYPE (rel->r_info);
+      r_type = (enum elf_ppc64_reloc_type) ELF64_R_TYPE (rel->r_info);
       switch (r_type)
 	{
 	case R_PPC64_GNU_VTINHERIT:
@@ -2993,11 +2992,11 @@ ppc64_elf_gc_sweep_hook (abfd, info, sec, relocs)
   for (rel = relocs; rel < relend; rel++)
     {
       unsigned long r_symndx;
-      enum elf_ppc_reloc_type r_type;
+      enum elf_ppc64_reloc_type r_type;
       struct elf_link_hash_entry *h;
 
       r_symndx = ELF64_R_SYM (rel->r_info);
-      r_type = (enum elf_ppc_reloc_type) ELF64_R_TYPE (rel->r_info);
+      r_type = (enum elf_ppc64_reloc_type) ELF64_R_TYPE (rel->r_info);
       switch (r_type)
 	{
 	case R_PPC64_GOT16:
@@ -3044,6 +3043,7 @@ ppc64_elf_gc_sweep_hook (abfd, info, sec, relocs)
 	    }
 	  break;
 
+	case R_PPC64_REL30:
 	case R_PPC64_REL32:
 	case R_PPC64_REL64:
 	  if (r_symndx >= symtab_hdr->sh_info)
@@ -3081,7 +3081,6 @@ ppc64_elf_gc_sweep_hook (abfd, info, sec, relocs)
 	case R_PPC64_ADDR16_LO:
 	case R_PPC64_ADDR16_LO_DS:
 	case R_PPC64_ADDR24:
-	case R_PPC64_ADDR30:
 	case R_PPC64_ADDR32:
 	case R_PPC64_ADDR64:
 	case R_PPC64_UADDR16:
@@ -3443,8 +3442,8 @@ ppc64_elf_adjust_dynamic_symbol (info, h)
      both the dynamic object and the regular object will refer to the
      same memory location for the variable.  */
 
-  /* We must generate a R_PPC_COPY reloc to tell the dynamic linker to
-     copy the initial value out of the dynamic object and into the
+  /* We must generate a R_PPC64_COPY reloc to tell the dynamic linker
+     to copy the initial value out of the dynamic object and into the
      runtime process image.  We need to remember the offset into the
      .rela.bss section we are going to use.  */
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0)
@@ -3599,7 +3598,7 @@ ppc64_elf_edit_opd (obfd, info)
       relend = relstart + sec->reloc_count;
       for (rel = relstart; rel < relend; rel++)
 	{
-	  enum elf_ppc_reloc_type r_type;
+	  enum elf_ppc64_reloc_type r_type;
 	  unsigned long r_symndx;
 	  asection *sym_sec;
 	  struct elf_link_hash_entry *h;
@@ -3608,7 +3607,7 @@ ppc64_elf_edit_opd (obfd, info)
 	  /* .opd contains a regular array of 24 byte entries.  We're
 	     only interested in the reloc pointing to a function entry
 	     point.  */
-	  r_type = (enum elf_ppc_reloc_type) ELF64_R_TYPE (rel->r_info);
+	  r_type = (enum elf_ppc64_reloc_type) ELF64_R_TYPE (rel->r_info);
 	  if (r_type == R_PPC64_TOC)
 	    continue;
 
@@ -3623,7 +3622,7 @@ ppc64_elf_edit_opd (obfd, info)
 
 	  if (rel + 1 >= relend)
 	    continue;
-	  r_type = (enum elf_ppc_reloc_type) ELF64_R_TYPE ((rel + 1)->r_info);
+	  r_type = (enum elf_ppc64_reloc_type) ELF64_R_TYPE ((rel + 1)->r_info);
 	  if (r_type != R_PPC64_TOC)
 	    continue;
 
@@ -4914,7 +4913,7 @@ ppc64_elf_size_stubs (output_bfd, stub_bfd, info, group_size,
 		  r_type = ELF64_R_TYPE (irela->r_info);
 		  r_indx = ELF64_R_SYM (irela->r_info);
 
-		  if (r_type >= (unsigned int) R_PPC_max)
+		  if (r_type >= (unsigned int) R_PPC64_max)
 		    {
 		      bfd_set_error (bfd_error_bad_value);
 		      goto error_ret_free_internal;
@@ -5312,7 +5311,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   relend = relocs + input_section->reloc_count;
   for (; rel < relend; rel++)
     {
-      enum elf_ppc_reloc_type r_type;
+      enum elf_ppc64_reloc_type r_type;
       bfd_vma offset;
       bfd_vma addend;
       bfd_reloc_status_type r;
@@ -5330,7 +5329,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       bfd_vma max_br_offset;
       bfd_vma from;
 
-      r_type = (enum elf_ppc_reloc_type) ELF64_R_TYPE (rel->r_info);
+      r_type = (enum elf_ppc64_reloc_type) ELF64_R_TYPE (rel->r_info);
       r_symndx = ELF64_R_SYM (rel->r_info);
       offset = rel->r_offset;
       addend = rel->r_addend;
@@ -5537,8 +5536,8 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  continue;
 
 	case R_PPC64_NONE:
-	case R_PPC_GNU_VTINHERIT:
-	case R_PPC_GNU_VTENTRY:
+	case R_PPC64_GNU_VTINHERIT:
+	case R_PPC64_GNU_VTENTRY:
 	  continue;
 
 	  /* GOT16 relocations.  Like an ADDR16 using the symbol's
@@ -5707,6 +5706,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  /* Relocations that may need to be propagated if this is a
 	     dynamic object.  */
+	case R_PPC64_REL30:
 	case R_PPC64_REL32:
 	case R_PPC64_REL64:
 	case R_PPC64_ADDR14:
@@ -5723,7 +5723,6 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_PPC64_ADDR16_LO:
 	case R_PPC64_ADDR16_LO_DS:
 	case R_PPC64_ADDR24:
-	case R_PPC64_ADDR30:
 	case R_PPC64_ADDR32:
 	case R_PPC64_ADDR64:
 	case R_PPC64_UADDR16:
@@ -6176,9 +6175,9 @@ static enum elf_reloc_type_class
 ppc64_elf_reloc_type_class (rela)
      const Elf_Internal_Rela *rela;
 {
-  enum elf_ppc_reloc_type r_type;
+  enum elf_ppc64_reloc_type r_type;
 
-  r_type = (enum elf_ppc_reloc_type) ELF64_R_TYPE (rela->r_info);
+  r_type = (enum elf_ppc64_reloc_type) ELF64_R_TYPE (rela->r_info);
   switch (r_type)
     {
     case R_PPC64_RELATIVE:

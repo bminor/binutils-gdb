@@ -1,3 +1,15 @@
+2003-01-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c: Include elf/ppc64.h rather than elf/ppc.h.
+	(R_PPC_*): Rename all occurrences to R_PPC64_*.
+	(R_PPC64_ADDR30): Rename all occurrences to R_PPC64_REL30.
+	(enum elf_ppc_reloc_type): Ditto to enum elf_ppc64_reloc_type.
+	(ppc64_elf_gc_sweep_hook): Handle R_PPC64_REL30 along with other
+	relative relocs, not with absolute ones.
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
 2003-01-15  Andreas Schwab  <schwab@suse.de>
 
 	* elf32-ppc.c (ppc_elf_check_relocs): Don't set DF_TEXTREL for a
