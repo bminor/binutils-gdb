@@ -55,6 +55,7 @@ breakpoint.h
 coffread.c
 command.c
 command.h
+config.sub
 configure
 configure.in
 convex-pinsn.c
