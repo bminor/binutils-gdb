@@ -97,7 +97,7 @@ void DMA_enable(void) {
 void start_DMA_ch1_source_chain(void* data) {
     *DMA_D_CTRL  = 0x01; /* DMA enable */
     *DMA_D1_QWC  = 0x00;
-    *DMA_D1_MADR = (int)data; 
+    *DMA_D1_TADR = (int)data; 
     *DMA_D1_CHCR = MODE_CHAIN | DMA_START | DMA_Dn_CHCR__TTE;
 
 }
