@@ -63,12 +63,6 @@ static boolean ppc64_elf_section_from_shdr
   PARAMS ((bfd *, Elf64_Internal_Shdr *, char *));
 
 
-/* Mask to set RA in memory instructions.  */
-#define RA_REGISTER_MASK 0x001f0000
-
-/* Value to shift register by to insert RA.  */
-#define RA_REGISTER_SHIFT 16
-
 /* The name of the dynamic interpreter.  This is put in the .interp
    section.  */
 #define ELF_DYNAMIC_INTERPRETER "/usr/lib/ld.so.1"
@@ -482,7 +476,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 0,			/* rightshift */
 	 4,			/* size (0=byte, 1=short, 2=long, 4=64 bits) */
 	 64,			/* bitsize */
-	 true,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
@@ -490,7 +484,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xffffffffffffffff,	/* dst_mask */
-	 true),			/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   /* Like R_PPC64_ADDR32, but may be unaligned.  */
   HOWTO (R_PPC64_UADDR32,	/* type */

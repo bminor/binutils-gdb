@@ -1,5 +1,9 @@
 2002-05-09  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (RA_REGISTER_MASK, RA_REGISTER_SHIFT): Delete.
+	(ppc64_elf_howto_raw <R_PPC64_RELATIVE>): Not pc_relative or
+	pcrel_offset.
+
 	* elf32-i386.c (elf_howto_table): Comments.
 	(elf_i386_relocate_section): Handle more relocs for relocatable
 	linking and against SEC_MERGE sections.
@@ -117,7 +121,7 @@
 	(elf32_hppa_size_stubs): Adjust for split out functions.  Look for
 	stubs on undefined syms too.
 	(elf32_hppa_set_gp): Use bfd_link_hash* instead of elf_link_hash*.
-	Only access htab elf fields when we have and elf hash table.
+	Only access htab elf fields when we have an elf hash table.
 	* elf32-hppa.h (elf32_hppa_setup_section_lists): Declare.
 	(elf32_hppa_next_input_section): Declare.
 
