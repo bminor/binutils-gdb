@@ -48,18 +48,7 @@ INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
 
-AR = ar
-AR_FLAGS = qv
-RANLIB = ranlib
-
-# If you are compiling with GCC, make sure that either 1) You use the
-# -traditional flag, or 2) You have the fixed include files where GCC
-# can reach them.  Otherwise the ioctl calls in inflow.c
-# will be incorrectly compiled.  The "fixincludes" script in the gcc
-# distribution will fix your include files up.
-#CC=cc
-#CC=gcc -traditional
-GCC=gcc
+CC = @CC@
 
 # Directory containing source files.  Don't clean up the spacing,
 # this exact string is matched for by the "configure" script.
@@ -106,7 +95,8 @@ GLOBAL_CFLAGS = ${MT_CFLAGS} ${MH_CFLAGS}
 
 # CFLAGS is specifically reserved for setting from the command line
 # when running make.  I.E.  "make CFLAGS=-Wmissing-prototypes".
-CFLAGS = -g
+CFLAGS = @CFLAGS@
+
 # INTERNAL_CFLAGS is the aggregate of all other *CFLAGS macros.
 INTERNAL_CFLAGS = ${CFLAGS} ${GLOBAL_CFLAGS} ${PROFILE_CFLAGS} \
 	${INCLUDE_CFLAGS} ${BFD_CFLAGS} -DGDBSERVER
