@@ -1,3 +1,9 @@
+Sun Mar 13 09:45:51 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* target.h (enum target_signal): Add TARGET_SIGNAL_FIRST, for
+	looping through all of the enums.
+	* infrun.c (signals_info): Use it.
+
 Fri Mar 11 08:08:50 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* main.c (main): When printing warning about bad baud rate, don't
