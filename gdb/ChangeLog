@@ -1,5 +1,15 @@
 Sat Jan  2 12:16:41 1993  Fred Fish  (fnf@cygnus.com)
 
+	**** start-sanitize-chill ****
+	* ch-exp.y (FLOAT_LITERAL):  Add token.
+	* ch-exp.y (literal):  Add FLOAT_LITERAL.
+	* ch-exp.y (match_float_literal):  New lexer routine.
+	* ch-exp.y (convert_float):  Remove.
+	* ch-exp.y (yylex):  Call match_float_literal.
+	* ch-exp.y (yylex):  Match single '.' after trying
+	to match floating point literals.
+	**** end-sanitize-chill ****
+
 	* eval.c (evaluate_subexp):  Add case MULTI_SUBSCRIPT.
 	* expprint.c (print_subexp):  Rename BINOP_MULTI_SUBSCRIPT to
 	MULTI_SUBSCRIPT.

@@ -144,6 +144,7 @@ yyerror PARAMS ((char *));
 %token <typed_val>	INTEGER_LITERAL
 %token <ulval>		BOOLEAN_LITERAL
 %token <typed_val>	CHARACTER_LITERAL
+%token <dval>		FLOAT_LITERAL
 %token <ssym>		GENERAL_PROCEDURE_NAME
 %token <ssym>		LOCATION_NAME
 %token <voidval>	SET_LITERAL
@@ -456,6 +457,13 @@ literal		:	INTEGER_LITERAL
 			  write_exp_elt_type ($1.type);
 			  write_exp_elt_longcst ((LONGEST) ($1.val));
 			  write_exp_elt_opcode (OP_LONG);
+			}
+		|	FLOAT_LITERAL
+			{
+			  write_exp_elt_opcode (OP_DOUBLE);
+			  write_exp_elt_type (builtin_type_double);
+			  write_exp_elt_dblcst ($1);
+			  write_exp_elt_opcode (OP_DOUBLE);
 			}
 		|	SET_LITERAL
 			{
@@ -1005,6 +1013,141 @@ decode_integer_literal (valptr, tokptrptr)
     }
 }
 
+/*  If it wasn't for the fact that floating point values can contain '_'
+    characters, we could just let strtod do all the hard work by letting it
+    try to consume as much of the current token buffer as possible and
+    find a legal conversion.  Unfortunately we need to filter out the '_'
+    characters before calling strtod, which we do by copying the other
+    legal chars to a local buffer to be converted.  However since we also
+    need to keep track of where the last unconsumed character in the input
+    buffer is, we have transfer only as many characters as may compose a
+    legal floating point value. */
+    
+static int
+match_float_literal ()
+{
+  char *tokptr = lexptr;
+  char *buf;
+  char *copy;
+  char ch;
+  double dval;
+  extern double strtod ();
+  
+  /* Make local buffer in which to build the string to convert.  This is
+     required because underscores are valid in chill floating point numbers
+     but not in the string passed to strtod to convert.  The string will be
+     no longer than our input string. */
+     
+  copy = buf = (char *) alloca (strlen (tokptr) + 1);
+
+  /* Transfer all leading digits to the conversion buffer, discarding any
+     underscores. */
+
+  while (isdigit (*tokptr) || *tokptr == '_')
+    {
+      if (*tokptr != '_')
+	{
+	  *copy++ = *tokptr;
+	}
+      tokptr++;
+    }
+
+  /* Now accept either a '.', or one of [eEdD].  Dot is legal regardless
+     of whether we found any leading digits, and we simply accept it and
+     continue on to look for the fractional part and/or exponent.  One of
+     [eEdD] is legal only if we have seen digits, and means that there
+     is no fractional part.  If we find neither of these, then this is
+     not a floating point number, so return failure. */
+
+  switch (*tokptr++)
+    {
+      case '.':
+        /* Accept and then look for fractional part and/or exponent. */
+	*copy++ = '.';
+	break;
+
+      case 'e':
+      case 'E':
+      case 'd':
+      case 'D':
+	if (copy == buf)
+	  {
+	    return (0);
+	  }
+	*copy++ = 'e';
+	goto collect_exponent;
+	break;
+
+      default:
+	return (0);
+        break;
+    }
+
+  /* We found a '.', copy any fractional digits to the conversion buffer, up
+     to the first nondigit, non-underscore character. */
+
+  while (isdigit (*tokptr) || *tokptr == '_')
+    {
+      if (*tokptr != '_')
+	{
+	  *copy++ = *tokptr;
+	}
+      tokptr++;
+    }
+
+  /* Look for an exponent, which must start with one of [eEdD].  If none
+     is found, jump directly to trying to convert what we have collected
+     so far. */
+
+  switch (*tokptr)
+    {
+      case 'e':
+      case 'E':
+      case 'd':
+      case 'D':
+	*copy++ = 'e';
+	tokptr++;
+	break;
+      default:
+	goto convert_float;
+	break;
+    }
+
+  /* Accept an optional '-' or '+' following one of [eEdD]. */
+
+  collect_exponent:
+  if (*tokptr == '+' || *tokptr == '-')
+    {
+      *copy++ = *tokptr++;
+    }
+
+  /* Now copy an exponent into the conversion buffer.  Note that at the 
+     moment underscores are *not* allowed in exponents. */
+
+  while (isdigit (*tokptr))
+    {
+      *copy++ = *tokptr++;
+    }
+
+  /* If we transfered any chars to the conversion buffer, try to interpret its
+     contents as a floating point value.  If any characters remain, then we
+     must not have a valid floating point string. */
+
+  convert_float:
+  *copy = '\0';
+  if (copy != buf)
+      {
+        dval = strtod (buf, &copy);
+        if (*copy == '\0')
+	  {
+	    yylval.dval = dval;
+	    lexptr = tokptr;
+	    return (FLOAT_LITERAL);
+	  }
+      }
+  return (0);
+}
+
 /* Recognize a character literal.  A character literal is single character
    or a control sequence, enclosed in single quotes.  A control sequence
    is a comma separated list of one or more integer literals, enclosed
@@ -1229,48 +1372,6 @@ match_dollar_tokens ()
   return (GDB_LAST);
 }
 
-#if 0
-static void convert_float ()
-{
-    extern double strtod ();
-    double d;
-    char	tmp[256];
-    char	*p = yytext, *p1 = tmp;
-    char	c;
-    
-    while (c = *p++)
-    {
-	switch (c)
-	{
-	case '_':
-	    break;
-	case 'E':
-	case 'd':
-	case 'D':
-	    *p1++ = 'e';
-	    break;
-	default:
-	    *p1++ = c;
-	    break;
-	}
-    }
-    *p1 = '\0';
-    d = strtod (tmp, &p1);
-    if (*p1)
-    {
-	/* add error handling here */
-	;
-    }
-    yylval.dval = d;
-}
-#endif
-
-/* Take care of parsing a number (anything that starts with a digit).
-   Set yylval and return the token type; update lexptr.
-   LEN is the number of characters in it.  */
-
-/*** Needs some error checking for the float case ***/
-
 struct token
 {
   char *operator;
@@ -1329,7 +1430,6 @@ yylex ()
 	    case '\0':
 	        return (0);
 	    case ',':
-	    case '.':
 	    case '=':
 	    case ';':
 	    case '!':
@@ -1425,6 +1525,13 @@ yylex ()
 	    lexptr += 5;
 	    return (BOOLEAN_LITERAL);
 	}
+    /* Look for a float literal before looking for an integer literal, so
+       we match as much of the input stream as possible. */
+    token = match_float_literal ();
+    if (token != 0)
+	{
+	    return (token);
+	}
     token = match_integer_literal ();
     if (token != 0)
 	{
@@ -1479,6 +1586,15 @@ yylex ()
 	  {
 	    error ("No symbol \"%s\" in current context.", simplename);
 	  }
+      }
+
+    /* Catch single character tokens which are not part of some
+       longer token. */
+
+    switch (*lexptr)
+      {
+	case '.':			/* Not float for example. */
+	  return (*lexptr++);
       }
 
     return (ILLEGAL_TOKEN);
