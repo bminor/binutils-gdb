@@ -20,12 +20,12 @@ if { ![istarget "powerpc*-*-*"]	} {
     return
 }
 
-# ELF only at the moment.
+# powerpc 32 bit ELF only at the moment.
 
 if { [istarget "*-*-macos*"] || [istarget "*-*-netware*"]
      || [istarget "*-*-pe"] || [istarget "*-*-winnt*"]
      || [istarget "*-*-cygwin*"] || [istarget "*-*-aix*"]
-     || [istarget "*-*-beos*"] } {
+     || [istarget "*-*-beos*"] || [istarget "powerpc64*-*-*"] } {
     return
 }
 

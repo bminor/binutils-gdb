@@ -1,5 +1,9 @@
 2002-09-30  Alan Modra  <amodra@bigpond.net.au>
 
+	* ld-powerpc/powerpc.exp: Restrict to 32 bit ELF.
+
+2002-09-30  Alan Modra  <amodra@bigpond.net.au>
+
 	* ld-powerpc/reloc.s, ld-powerpc/reloc.d: New.
 	* ld-powerpc/powerpc.exp: New.
 
