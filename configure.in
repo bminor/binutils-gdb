@@ -1124,6 +1124,12 @@ if [ x${enable_multilib} = x ]; then
   targargs="--enable-multilib ${targargs}"
 fi
 
+# Pass --with-newlib if appropriate.  Note that target_configdirs has
+# changed from the earlier setting of with_newlib.
+if [ x${with_newlib} != xno ] && echo " ${target_configdirs} " | grep " newlib " > /dev/null 2>&1 && [ -d ${srcdir}/newlib ] ; then
+  targargs="--with-newlib ${targargs}"
+fi
+
 targargs="--host=${target_alias} --build=${build_alias} ${targargs}"
 sed -e "s:^TARGET_CONFIGDIRS[ 	]*=.*$:TARGET_CONFIGDIRS = ${target_configdirs}:" \
     -e "s%^CONFIG_ARGUMENTS[ 	]*=.*$%CONFIG_ARGUMENTS = ${targargs}%" \
