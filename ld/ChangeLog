@@ -1,3 +1,13 @@
+Thu Dec 12 17:04:55 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/gld960c.em: Include <ctype.h>.
+ 	(gld960_set_output_arch): Get the machine type from the -A option
+	if there is one, rather than always using core.
+
+Sat Dec  7 10:07:51 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* emulparms/mn10300.sh: Handle leading underscores.
+
 Thu Dec  5 13:45:58 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_place_section): Only
