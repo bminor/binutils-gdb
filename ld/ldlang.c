@@ -785,9 +785,10 @@ sort_def_symbol (hash_entry, info)
 	}
       else if  (!ud->map_symbol_def_tail)
 	ud->map_symbol_def_tail = &ud->map_symbol_def_head;
+      
       def = obstack_alloc (&map_obstack, sizeof *def);
       def->entry = hash_entry;
-      *ud->map_symbol_def_tail = def;
+      *(ud->map_symbol_def_tail) = def;
       ud->map_symbol_def_tail = &def->next;
     }
   return TRUE;
@@ -807,6 +808,7 @@ init_os (lang_output_section_statement_type *s)
     einfo (_("%P%F: Illegal use of `%s' section\n"), DISCARD_SECTION_NAME);
 
   new = stat_alloc (SECTION_USERDATA_SIZE);
+  memset (new, 0, SECTION_USERDATA_SIZE);
 
   s->bfd_section = bfd_get_section_by_name (output_bfd, s->name);
   if (s->bfd_section == NULL)

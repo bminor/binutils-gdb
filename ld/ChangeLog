@@ -1,3 +1,8 @@
+2004-07-21  Nick Clifton  <nickc@redhat.com>
+
+	* ldlang.c (init_os): Make sure that the newly allocated userdata
+	structure is zeroed out.
+
 2004-07-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention the new --add-needed/--no-add-needed and
