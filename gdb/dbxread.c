@@ -165,6 +165,11 @@ static int block_address_function_relative = 0;
    reflect the address it will be loaded at).  */
 static CORE_ADDR lowest_text_address;
 
+/* Non-zero if there is any line number info in the objfile.  Prevents
+   end_psymtab from discarding an otherwise empty psymtab.  */
+
+static int has_line_numbers;
+
 /* Complaints about the symbols we have encountered.  */
 
 struct complaint lbrac_complaint = 
@@ -794,21 +799,29 @@ static struct cont_elem *cont_list = 0;
 static int cont_limit = 0;
 static int cont_count = 0;
 
+/* Arrange for function F to be called with arguments SYM and P later
+   in the stabs reading process.  */
 void 
 process_later (sym, p, f)
-  struct symbol * sym;
-  char * p;
+  struct symbol *sym;
+  char *p;
   int (*f) PARAMS ((struct objfile *, struct symbol *, char *));
 {
+
+  /* Allocate more space for the deferred list.  */
   if (cont_count >= cont_limit - 1)
     {
       cont_limit += 32;	/* chunk size */
-      cont_list = (struct cont_elem *) realloc (cont_list, 
-					cont_limit * sizeof (struct cont_elem));
+
+      cont_list
+	= (struct cont_elem *) xrealloc (cont_list, 
+					  (cont_limit
+					   * sizeof (struct cont_elem)));
       if (!cont_list)
         error ("Virtual memory exhausted\n");
     }
-  /* save state so we can process these stabs later */
+
+  /* Save state variables so we can process these stabs later.  */
   cont_list[cont_count].sym_idx = symbuf_idx;
   cont_list[cont_count].sym_end = symbuf_end;
   cont_list[cont_count].symnum = symnum;
@@ -818,40 +831,49 @@ process_later (sym, p, f)
   cont_count++;
 }
 
+/* Call deferred funtions in CONT_LIST.  */
+
 static void 
 process_now (objfile) 
-  struct objfile * objfile;
+  struct objfile *objfile;
 {
   int i;
-  /* save original state */
-  int save_symbuf_idx = symbuf_idx;
-  int save_symbuf_end = symbuf_end;
-  int save_symnum = symnum;
+  int save_symbuf_idx;
+  int save_symbuf_end;
+  int save_symnum;
   struct symbol *sym;
   char *stabs;
   int err;
   int (*func) PARAMS ((struct objfile *, struct symbol *, char *));
 
-  for (i=0; i<cont_count; i++) 
+  /* Save the state of our caller, we'll want to restore it before
+     returning.  */
+  save_symbuf_idx = symbuf_idx;
+  save_symbuf_end = symbuf_end;
+  save_symnum = symnum;
+
+  /* Iterate over all the deferred stabs.  */
+  for (i = 0; i < cont_count; i++)
     {
-      /* Set state as if we were parsing stabs strings 
-         for this symbol */
-      symbuf_idx = cont_list[i].sym_idx;   /* statics used by gdb */
+      /* Restore the state for this deferred stab.  */
+      symbuf_idx = cont_list[i].sym_idx;
       symbuf_end = cont_list[i].sym_end;  
       symnum = cont_list[i].symnum;  
       sym = cont_list[i].sym;
       stabs = cont_list[i].stabs;
       func = cont_list[i].func;
 
+      /* Call the function to handle this deferrd stab.  */
       err = (*func) (objfile, sym, stabs);
       if (err)
 	error ("Internal error: unable to resolve stab.\n");
     }
-  /* restore original state */
+
+  /* Restore our caller's state.  */
   symbuf_idx = save_symbuf_idx;
   symbuf_end = save_symbuf_end;
   symnum = save_symnum;
-  cont_count=0;  /* reset for next run */
+  cont_count = 0;
 }
 
 
@@ -1243,6 +1265,7 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
   symbuf_end = symbuf_idx = 0;
   next_symbol_text_func = dbx_next_symbol_text;
   textlow_not_set = 1;
+  has_line_numbers = 0;
 
   for (symnum = 0; symnum < DBX_SYMCOUNT (objfile); symnum++)
     {
@@ -1256,7 +1279,10 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
        * Special case to speed up readin.
        */
       if (bfd_h_get_8 (abfd, bufp->e_type) == N_SLINE)
-	continue;
+	{
+	  has_line_numbers = 1;
+	  continue;
+	}
 
       INTERNALIZE_SYMBOL (nlist, bufp, abfd);
       OBJSTAT (objfile, n_stabs++);
@@ -1517,7 +1543,8 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
   if (num_includes == 0
       && number_dependencies == 0
       && pst->n_global_syms == 0
-      && pst->n_static_syms == 0)
+      && pst->n_static_syms == 0
+      && has_line_numbers == 0)
     {
       /* Throw away this psymtab, it's empty.  We can't deallocate it, since
 	 it is on the obstack, but we can forget to chain it on the list.  */
@@ -1815,7 +1842,7 @@ read_ofile_symtab (pst)
   pst->symtab = end_symtab (text_offset + text_size, objfile, SECT_OFF_TEXT);
 
   /* Process items which we had to "process_later" due to dependancies 
-     on other stabs. */
+     on other stabs.  */
   process_now (objfile);	
 
   end_stabs ();
@@ -2370,23 +2397,33 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
       break;
     }
 
-  /* Special GNU C extension for referencing names.  */
+  /* '#' is a GNU C extension to allow one symbol to refer to another
+     related symbol.
+
+     Generally this is used so that an alias can refer to its main
+     symbol.  */  
   if (name[0] == '#')
     {
       /* Initialize symbol reference names and determine if this is 
          a definition.  If symbol reference is being defined, go 
          ahead and add it.  Otherwise, just return sym. */
+
       char *s;
       int refnum;
+
       /* If defined, store away a pointer to the symbol;
 	 we'll use it later when we resolve references in
 	 "resolve_symbol_reference". */
 
-      s = name;
+      /* If this stab defines a new reference ID that is not on the
+	 reference list, then put it on the reference list.
+
+	 We go ahead and advance NAME past the reference, even though
+	 it is not strictly necessary at this time.  */
       if (refnum = symbol_reference_defined (&s), refnum)
 	if (!ref_search (refnum))
 	  ref_add (refnum, 0, name, valu);
-      name = s;		/* Advance past refid. */
+      name = s;
     }
 
 

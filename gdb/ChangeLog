@@ -1,4 +1,9 @@
-Wed Oct 22 12:15:37 1997  Jeffrey A Law  (law@cygnus.com)
+Wed Oct 22 13:04:52 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* dbxread.c: Fix various violations of the GNU coding and
+	formatting standards.  Update/add comments to make code
+	clearer.
+	(process_later): Use xrealloc instead of realloc.  
 
 	* symtab.c: Include inferior.h.
 
