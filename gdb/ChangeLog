@@ -1,3 +1,8 @@
+2003-07-07  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c (get_prev_frame): Enable check for identical frames.
+	Update comments.  Update error messages.
+
 2003-07-07  Joel Brobecker  <brobecker@gnat.com>
 
         * hpread.c (hpread_psymtab_to_symtab_1): Fix compilation failure.
