@@ -556,7 +556,11 @@ _bfd_elf_link_hash_newfunc (entry, table, string)
       ret->plt_offset = (bfd_vma) -1;
       ret->linker_section_pointer = (elf_linker_section_pointers_t *)0;
       ret->type = STT_NOTYPE;
-      ret->elf_link_hash_flags = 0;
+      /* Assume that we have been called by a non-ELF symbol reader.
+         This flag is then reset by the code which reads an ELF input
+         file.  This ensures that a symbol created by a non-ELF symbol
+         reader will have the flag set correctly.  */
+      ret->elf_link_hash_flags = ELF_LINK_NON_ELF;
     }
 
   return (struct bfd_hash_entry *) ret;

@@ -1,5 +1,14 @@
 Thu Feb  1 16:04:06 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf-bfd.h (ELF_LINK_NON_ELF): Define.
+	* elf.c (_bfd_elf_link_hash_newfunc): Set elf_link_hash_flags to
+	ELF_LINK_NON_ELF.
+	* elflink.h (elf_link_add_object_symbols): Reset ELF_LINK_NON_ELF
+	flag for a newly defined symbol.
+	(NAME(bfd_elf,record_link_assignment)): Likewise.
+	(elf_adjust_dynamic_symbol): If ELF_LINK_NON_ELF is set, try to
+	set the DEF or REF_REGULAR flags correctly.
+
 	* Makefile.in (bfd-in2.h): Make bfd.h, not protos, in docdir.
 	(libbfd.h, libcoff.h): Corresponding change.
 
