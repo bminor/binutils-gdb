@@ -1,5 +1,10 @@
 2001-12-17  Jim Blandy  <jimb@redhat.com>
 
+	* gdb.base/completion.exp: On some systems, there is, in fact, a
+	variable named `b' in scope, since GDB treats all static
+        variables as being in scope.  So use `no_var_named_this'
+        instead of `b'.
+
 	* gdb.base/corefile.exp: Recognize the message saying that GDB
  	can't find the core file's registers as a failure.
 

@@ -468,105 +468,146 @@ gdb_expect {
 }
 
 
-send_gdb "p b-a\t"
+# These tests used to try completing the shorter "p b-a".
+# Unfortunately, on some systems, there are .o files in system
+# libraries which declare static variables named `b'.  Of course,
+# those variables aren't really in scope, as far as the compiler is
+# concerned.  But GDB deliberately tries to be more liberal: if you
+# enter an identifier that doesn't have any binding in scope, GDB will
+# search all the program's compilation units for a static variable of
+# the given name.
+#
+# This behavior can help avoid a lot of pedantry, so it's usually a
+# good thing.  But in this test case, it causes GDB to print the value
+# of some random variable, instead of giving us the "No symbol..."
+# error we were expecting.
+#
+# For example, on S/390 linux, the file s_atan.c in libm.a declares a
+# `b', which is a structure containing an int and a float, so GDB says
+# ``Argument to arithmetic operation not a number or boolean'' instead
+# of ``No symbol ...''.
+#
+# So, I'm hoping that there is no system with a static library variable named
+# `no_var_by_this_name'.
+send_gdb "p no_var_named_this-a\t"
 sleep 1
 gdb_expect {
-    -re "^p b-a\\\x07$" {
+    -re "^p no_var_named_this-a\\\x07$" {
         send_gdb "\n"
         gdb_expect {
-            -re "No symbol \"b\" in current context\\..*$gdb_prompt $" {
-                pass "complete 'p b-a'"
+            -re "No symbol \"no_var_named_this\" in current context\\..*$gdb_prompt $" {
+                pass "complete 'p no_var_named_this-a'"
             }
             -re ".*$gdb_prompt $" {
-                fail "complete 'p b-a'"
+                fail "complete 'p no_var_named_this-a'"
             }
             timeout {
-                fail "(timeout) complete 'p b-a'"
+                fail "(timeout) complete 'p no_var_named_this-a'"
             }
         }
     }
     -re ".*$gdb_prompt $" {
-        fail "complete 'p b-a'"
+        fail "complete 'p no_var_named_this-a'"
     }
     timeout {
-        fail "(timeout) complete 'p b-a'"
+        fail "(timeout) complete 'p no_var_named_this-a'"
     }
 }
 
-send_gdb "p b-a\t"
+send_gdb "p no_var_named_this-a\t"
 sleep 1
 gdb_expect {
-    -re "^p b-a\\\x07$" {
+    -re "^p no_var_named_this-a\\\x07$" {
 	send_gdb "\t"
 	gdb_expect {
-	    -re ".*argv.*$gdb_prompt p b-a$" {
+	    -re ".*argv.*$gdb_prompt p no_var_named_this-a$" {
 		send_gdb "\n"
 		gdb_expect {
-		    -re "No symbol \"b\" in current context\\..*$gdb_prompt $" {
-			pass "complete (2) 'p b-a'"
+		    -re "No symbol \"no_var_named_this\" in current context\\..*$gdb_prompt $" {
+			pass "complete (2) 'p no_var_named_this-a'"
 		    }
-		    -re ".*$gdb_prompt $" { fail "complete (2) 'p b-a'" }
-		    timeout { fail "(timeout) complete (2) 'p b-a'" }
+		    -re ".*$gdb_prompt $" {
+                        fail "complete (2) 'p no_var_named_this-a'"
+                    }
+		    timeout {
+                        fail "(timeout) complete (2) 'p no_var_named_this-a'"
+                    }
 		}
 	    }
 	    -re "(There are $decimal possibilities\\.  Do you really\r\nwish to see them all.|Display all $decimal possibilities.) \\(y or n\\)$" {
 		send_gdb "n"
 		gdb_expect {
-		    -re "\\(gdb\\) p b-a$" {
+		    -re "\\(gdb\\) p no_var_named_this-a$" {
 			send_gdb "\n"
 			gdb_expect {
-			    -re "No symbol \"b\" in current context\\..*$gdb_prompt $" {
-				pass "complete (2) 'p b-a'"
+			    -re "No symbol \"no_var_named_this\" in current context\\..*$gdb_prompt $" {
+				pass "complete (2) 'p no_var_named_this-a'"
 			    }
 			    -re ".*$gdb_prompt $" {
-				fail "complete (2) 'p b-a'"
+				fail "complete (2) 'p no_var_named_this-a'"
 			    }
-			    timeout { fail "(timeout) complete (2) 'p b-a'" }
+			    timeout {
+                                fail "(timeout) complete (2) 'p no_var_named_this-a'"
+                            }
 			}
 		    }
-		    -re ".*$gdb_prompt $" { fail "complete (2) 'p b-a'" }
-		    timeout { fail "(timeout) complete (2) 'p b-a'" }
+		    -re ".*$gdb_prompt $" {
+                        fail "complete (2) 'p no_var_named_this-a'"
+                    }
+		    timeout {
+                        fail "(timeout) complete (2) 'p no_var_named_this-a'"
+                    }
 		}
 	    }
-	    -re ".*$gdb_prompt $" { fail "complete (2) 'p b-a'" }
-	    timeout { fail "(timeout) complete (2) 'p b-a'" }
+	    -re ".*$gdb_prompt $" {
+                fail "complete (2) 'p no_var_named_this-a'"
+            }
+	    timeout { fail "(timeout) complete (2) 'p no_var_named_this-a'" }
         }
     }
-    -re ".*$gdb_prompt $" { fail "complete (2) 'p b-a'" }
-    timeout { fail "(timeout) complete (2) 'p b-a'" }
+    -re ".*$gdb_prompt $" { fail "complete (2) 'p no_var_named_this-a'" }
+    timeout { fail "(timeout) complete (2) 'p no_var_named_this-a'" }
 }
 
-send_gdb "p b-\t"
+send_gdb "p no_var_named_this-\t"
 sleep 1
 gdb_expect  {
-    -re "^p b-\\\x07$" {
+    -re "^p no_var_named_this-\\\x07$" {
 	send_gdb "\t"
 	gdb_expect {
 	    -re "(There are $decimal possibilities\\.  Do you really\r\nwish to see them all.|Display all $decimal possibilities.) \\(y or n\\)$" {
 		send_gdb "n"
 		gdb_expect {
-		    -re "\\(gdb\\) p b-$" {
+		    -re "\\(gdb\\) p no_var_named_this-$" {
 			send_gdb "\n"
 			gdb_expect {
-			    -re "No symbol \"b\" in current context\\..*$gdb_prompt $" {
-				pass "complete (2) 'p b-'"
+			    -re "No symbol \"no_var_named_this\" in current context\\..*$gdb_prompt $" {
+				pass "complete (2) 'p no_var_named_this-'"
 			    }
 			    -re ".*$gdb_prompt $" {
-				fail "complete (2) 'p b-'"
+				fail "complete (2) 'p no_var_named_this-'"
 			    }
-			    timeout { fail "(timeout) complete (2) 'p b-'" }
+			    timeout {
+                                fail "(timeout) complete (2) 'p no_var_named_this-'"
+                            }
 			}
 		    }
-		    -re ".*$gdb_prompt $" { fail "complete (2) 'p b-'" }
-		    timeout { fail "(timeout) complete (2) 'p b-'" }
+		    -re ".*$gdb_prompt $" {
+                        fail "complete (2) 'p no_var_named_this-'"
+                    }
+		    timeout {
+                        fail "(timeout) complete (2) 'p no_var_named_this-'"
+                    }
 		}
 	    }
-	    -re ".*$gdb_prompt $" { fail "complete (2) 'p b-'" }
-	    timeout { fail "(timeout) complete (2) 'p b-'" }
+	    -re ".*$gdb_prompt $" {
+                fail "complete (2) 'p no_var_named_this-'"
+            }
+	    timeout { fail "(timeout) complete (2) 'p no_var_named_this-'" }
 	}
     }
-    -re ".*$gdb_prompt $" { fail "complete (2) 'p b-'" }
-    timeout { fail "(timeout) complete (2) 'p b-'" }
+    -re ".*$gdb_prompt $" { fail "complete (2) 'p no_var_named_this-'" }
+    timeout { fail "(timeout) complete (2) 'p no_var_named_this-'" }
 }
 
 send_gdb "file ${objdir}/Make\t"
