@@ -1,5 +1,11 @@
 2000-06-08  Fernando Nasser  <fnasser@cygnus.com>
 
+	* configure.in: Replace misplaced CONFIG_ADD by the correct
+	CONFIG_CLEAN.
+	* configure, config.in: Regenerate.
+
+2000-06-08  Fernando Nasser  <fnasser@cygnus.com>
+
 	* values.c (value_primitive_field): Copy VALUE_REGNO as well.
 	With typed registers we may have the location information in this field,
 	in addition to VALUE_ADDRESS (which was already being copied).

@@ -822,7 +822,7 @@ if test "${enable_gdbtk}" = "yes"; then
 	   CONFIG_OBS="${CONFIG_OBS} gdbtk.o gdbtk-cmds.o gdbtk-hooks.o gdbtk-varobj.o gdbtk-wrapper.o"
 	   CONFIG_INITS="${CONFIG_INITS} gdbtk/generic/gdbtk.c gdbtk/generic/gdbtk-cmds.c gdbtk/generic/gdbtk-hooks.c gdbtk/generic/gdbtk-varobj.c gdbtk/generic/gdbtk-wrapper.c"
 	   CONFIG_ALL="${CONFIG_ALL} \$(SUBDIR_GDBTK_ALL)"
-	   CONFIG_CLEAN="${CONFIG_ALL} \$(SUBDIR_GDBTK_CLEAN)"
+	   CONFIG_CLEAN="${CONFIG_CLEAN} \$(SUBDIR_GDBTK_CLEAN)"
 	   CONFIG_INSTALL="${CONFIG_INSTALL} \$(SUBDIR_GDBTK_INSTALL)"
 	   CONFIG_UNINSTALL="${CONFIG_UNINSTALL} \$(SUBDIR_GDBTK_UNINSTALL)"
 
