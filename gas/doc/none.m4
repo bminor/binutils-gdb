@@ -14,8 +14,12 @@ _define__(<_VAX__>,<0>)
 
 Text:
 
-Name for assembler; individual configs may override
+Default names for assembler, compiler, linker, debugger; 
+	individual configs may override
 _define__(<_AS__>,<as>)
+_define__(<_GCC__>,<gcc>)
+_define__(<_LD__>,<ld>)
+_define__(<_GDB__>,<gdb>)
 
 Text for host; individual configs *should* override, but this may
 catch some flubs
