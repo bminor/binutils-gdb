@@ -2,6 +2,7 @@
 
 	* syscall.c (cb_syscall) <case CB_SYS_lstat>: New case.
 	* callback.c (os_lstat): New function.
+	(cb_syscall) <case CB_SYS_rename>: New case.
 
 2004-12-08  Hans-Peter Nilsson  <hp@axis.com>
 

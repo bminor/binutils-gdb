@@ -400,6 +400,33 @@ cb_syscall (cb, sc)
       }
       break;
 
+    case CB_SYS_rename :
+      {
+	char *path1, *path2;
+
+	errcode = get_path (cb, sc, sc->arg1, &path1);
+	if (errcode != 0)
+	  {
+	    result = -1;
+	    errcode = EFAULT;
+	    goto FinishSyscall;
+	  }
+	errcode = get_path (cb, sc, sc->arg2, &path2);
+	if (errcode != 0)
+	  {
+	    result = -1;
+	    errcode = EFAULT;
+	    free (path1);
+	    goto FinishSyscall;
+	  }
+	result = (*cb->rename) (cb, path1, path2);
+	free (path1);
+	free (path2);
+	if (result < 0)
+	  goto ErrorFinish;
+      }
+      break;
+
     case CB_SYS_stat :
       {
 	char *path,*buf;
