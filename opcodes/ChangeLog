@@ -1,3 +1,7 @@
+2003-08-06  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+
 2003-08-05  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in (ALL_LINGUAS): Add nl.

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GNU gas 2.14rel030712\n"
 "POT-Creation-Date: 2003-07-11 13:57+0930\n"
-"PO-Revision-Date: 2003-07-24 08:00-0500\n"
+"PO-Revision-Date: 2003-08-05 08:00-0500\n"
 "Last-Translator: Michel Robitaille <robitail@IRO.UMontreal.CA>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "MIME-Version: 1.0\n"
@@ -564,7 +564,7 @@ msgstr ".eb ne concorde pas"
 
 #: config/obj-coff.c:1254 config/obj-coff.c:3054
 msgid "C_EFCN symbol out of scope"
-msgstr "symbole C_EFCN hors gamme"
+msgstr "symbole C_EFCN hors limite"
 
 #. STYP_INFO
 #. STYP_LIB
@@ -688,7 +688,7 @@ msgstr "virgule attendue après un nom de symbole"
 #: config/obj-elf.c:326
 #, c-format
 msgid ".COMMon length (%ld) out of range, ignored."
-msgstr "longueur de .COMMon (%ld.) hors gamme, ignoré."
+msgstr "longueur de .COMMon (%ld.) hors limite, ignoré."
 
 #: config/obj-elf.c:335 ecoff.c:3397 read.c:1406 read.c:1507 read.c:2145
 #: read.c:2234 read.c:2863 read.c:4968 symbols.c:367 symbols.c:466
@@ -906,7 +906,7 @@ msgstr "ERREUR d'E/S lors de l'écriture du fichier objet VMS"
 
 #: config/obj-vms.c:1292
 #, c-format
-msgid "Couldn't find source file \"%s\", status=%%X%x"
+msgid "Couldn't find source file \"%s\", dUmMy=%%X%x"
 msgstr "Ne peut repérer le fichier source « %s », état=%%X%x"
 
 #: config/obj-vms.c:1790 config/obj-vms.c:2967
@@ -1275,7 +1275,7 @@ msgstr "Numéro de séquence erroné: !%s!%s"
 #: config/tc-alpha.c:2378
 #, c-format
 msgid "operand out of range (%s not between %d and %d)"
-msgstr "opérande hors gamme (%s n'est pas entre %d et %d)"
+msgstr "opérande hors limite (%s n'est pas entre %d et %d)"
 
 #: config/tc-alpha.c:2490 config/tc-alpha.c:2514 config/tc-d10v.c:634
 #: config/tc-d30v.c:639 config/tc-mn10200.c:995 config/tc-mn10300.c:1888
@@ -1844,7 +1844,7 @@ msgstr "expression erronée"
 #: config/tc-arm.c:8389 config/tc-arm.c:8424 config/tc-arm.c:8434
 #: config/tc-z8k.c:1161 config/tc-z8k.c:1173
 msgid "immediate value out of range"
-msgstr "valeur immediate est hors gamme"
+msgstr "valeur immediate est hors limite"
 
 #: config/tc-arm.c:4833
 msgid "only r15 allowed here"
@@ -1960,7 +1960,7 @@ msgstr "instruction post-indexée attendue"
 
 #: config/tc-arm.c:6548
 msgid "bad range in register list"
-msgstr "hors gamme dans la liste de registres"
+msgstr "hors limite dans la liste de registres"
 
 #: config/tc-arm.c:6556 config/tc-arm.c:6565 config/tc-arm.c:6607
 #, c-format
@@ -2119,7 +2119,7 @@ msgstr "immédiat attendu, opérande de 7 bits"
 
 #: config/tc-arm.c:9356
 msgid "immediate out of range"
-msgstr "valeur immediate est hors gamme"
+msgstr "valeur immediate est hors limite"
 
 #: config/tc-arm.c:9399
 msgid "offset expected"
@@ -2127,7 +2127,7 @@ msgstr "décalage attendu"
 
 #: config/tc-arm.c:9408 config/tc-pj.c:537 config/tc-sh.c:3593
 msgid "offset out of range"
-msgstr "décalage hors gamme"
+msgstr "décalage hors limite"
 
 #: config/tc-arm.c:9545
 msgid "Rs and Rd must be different in MUL"
@@ -2226,7 +2226,7 @@ msgstr "GAS ne peut traiter la destination d'un branchement d'une même section >
 
 #: config/tc-arm.c:10932
 msgid "out of range branch"
-msgstr "branchement hors gamme"
+msgstr "branchement hors limite"
 
 #: config/tc-arm.c:10965 config/tc-arm.c:10981
 msgid "branch out of range"
@@ -2234,7 +2234,7 @@ msgstr "branchement hors gammme"
 
 #: config/tc-arm.c:11005
 msgid "branch with link out of range"
-msgstr "branchement avec un lien hors gamme"
+msgstr "branchement avec un lien hors limite"
 
 #: config/tc-arm.c:11074
 msgid "illegal value for co-processor offset"
@@ -2821,7 +2821,7 @@ msgstr "opérande d'adresse impaire: %ld"
 #: config/tc-msp430.c:1463
 #, c-format
 msgid "operand out of range: %ld"
-msgstr "opérande hors gamme: %ld"
+msgstr "opérande hors limite: %ld"
 
 #: config/tc-avr.c:1007 config/tc-d10v.c:1793 config/tc-d30v.c:1973
 #: config/tc-msp430.c:1481
@@ -2867,11 +2867,11 @@ msgstr "« ) » requis"
 #: config/tc-avr.c:1216
 #, c-format
 msgid "constant out of 8-bit range: %d"
-msgstr "constante hors gamme pour les bornes de 8 bits: %d"
+msgstr "constante hors limite pour les bornes de 8 bits: %d"
 
 #: config/tc-avr.c:1219
 msgid "expression possibly out of 8-bit range"
-msgstr "expression possiblement hors gamme pour 8 bits"
+msgstr "expression possiblement hors limite pour 8 bits"
 
 #: config/tc-avr.c:1290 config/tc-avr.c:1297
 #, c-format
@@ -3133,7 +3133,7 @@ msgstr "opérande n'est pas un immédiat"
 #: config/tc-d10v.c:675
 #, c-format
 msgid "operand out of range: %lu"
-msgstr "opérande hors gamme: %lu"
+msgstr "opérande hors limite: %lu"
 
 #: config/tc-d10v.c:736
 msgid "Instruction must be executed in parallel with another instruction."
@@ -3224,7 +3224,7 @@ msgstr "opcode ou opérandes erronés"
 
 #: config/tc-d10v.c:1503 config/tc-m68k.c:4305
 msgid "value out of range"
-msgstr "valeur hors gamme"
+msgstr "valeur hors limite"
 
 #: config/tc-d10v.c:1579
 msgid "illegal operand - register name found where none expected"
@@ -3635,7 +3635,7 @@ msgstr "pas de concordance entre la taille du opcode et celle de l'opérande"
 #: config/tc-h8300.c:1316
 #, c-format
 msgid "operand %s0x%lx out of range."
-msgstr "opérande %s0x%lx hors gamme."
+msgstr "opérande %s0x%lx hors limite."
 
 #: config/tc-h8300.c:1415
 msgid "Can't work out size of operand.\n"
@@ -3788,7 +3788,7 @@ msgstr "opérandes invalides pour opcode"
 #: config/tc-hppa.c:1156 config/tc-hppa.c:1170
 #, c-format
 msgid "Field out of range [%d..%d] (%d)."
-msgstr "Champ hors gamme [%d..%d] (%d)."
+msgstr "Champ hors limite [%d..%d] (%d)."
 
 #. Simple alignment checking for FIELD againt ALIGN (a power of two).
 #. IGNORE is used to suppress the error message.
@@ -4425,7 +4425,7 @@ msgstr "escamotage des préfixes sur cette instruction"
 
 #: config/tc-i386.c:3150
 msgid "16-bit jump out of range"
-msgstr "saut de 16 bits hors gamme"
+msgstr "saut de 16 bits hors limite"
 
 #: config/tc-i386.c:3159
 #, c-format
@@ -5292,7 +5292,7 @@ msgstr ""
 "  -mlong-double           utiliser l'ABI double de 64 bits\n"
 "  --force-long-branchs    toujours convertir les branchements relatifs en absolus\n"
 "  -S,--short-branchs      ne pas convertir les branchements relatifs en absolus\n"
-"                          lorsque le décalage est hors gamme\n"
+"                          lorsque le décalage est hors limite\n"
 "  --strict-direct-mode    ne pas convertir le mode direct en mode étendu\n"
 "                          lorsque l'instruction ne supporte pas le mode direct\n"
 "  --print-insn-syntax     afficher la syntaxe de l'instruction en cas d'erreur\n"
@@ -5429,7 +5429,7 @@ msgstr "Mode indexé indirect invalide."
 #: config/tc-m68hc11.c:1417
 #, c-format
 msgid "Trap id `%ld' is out of range."
-msgstr "Identificateur de la trappe « %ld » est hors gamme."
+msgstr "Identificateur de la trappe « %ld » est hors limite."
 
 #: config/tc-m68hc11.c:1421
 msgid "Trap id must be within [0x30..0x39] or [0x40..0xff]."
@@ -5438,7 +5438,7 @@ msgstr "Identificateur de la trappe doit être entre [0x30..0x39] ou [0x40..0xff]
 #: config/tc-m68hc11.c:1428
 #, c-format
 msgid "Operand out of 8-bit range: `%ld'."
-msgstr "Opérande hors gamme en 8 bits: « %ld »."
+msgstr "Opérande hors limite en 8 bits: « %ld »."
 
 #: config/tc-m68hc11.c:1435
 msgid "The trap id must be a constant."
@@ -5452,7 +5452,7 @@ msgstr "Opérande « %x » n'est pas reconnue dans le fixup8."
 #: config/tc-m68hc11.c:1490 config/tc-m68hc11.c:1542
 #, c-format
 msgid "Operand out of 16-bit range: `%ld'."
-msgstr "Opérande hors gamme en 16 bits: « %ld »."
+msgstr "Opérande hors limite en 16 bits: « %ld »."
 
 #: config/tc-m68hc11.c:1522 config/tc-m68hc11.c:1558
 #, c-format
@@ -5467,7 +5467,7 @@ msgstr "Conversion inattendu de branchement avec « %x »"
 #: config/tc-m68hc11.c:1671 config/tc-m68hc11.c:1812
 #, c-format
 msgid "Operand out of range for a relative branch: `%ld'"
-msgstr "Opérande hors gamme pour un branchement relatif: « %ld »"
+msgstr "Opérande hors limite pour un branchement relatif: « %ld »"
 
 #: config/tc-m68hc11.c:1780
 msgid "Invalid register for dbcc/tbcc instruction."
@@ -5476,7 +5476,7 @@ msgstr "Registre invalide pour un instruction dbcc/tbcc."
 #: config/tc-m68hc11.c:1871
 #, c-format
 msgid "Increment/decrement value is out of range: `%ld'."
-msgstr "Valeur d'incrémentation/décrémentation est hors gamme: « %ld »."
+msgstr "Valeur d'incrémentation/décrémentation est hors limite: « %ld »."
 
 #: config/tc-m68hc11.c:1882
 msgid "Expecting a register."
@@ -5493,12 +5493,12 @@ msgstr "Registre invalide."
 #: config/tc-m68hc11.c:1934
 #, c-format
 msgid "Offset out of 16-bit range: %ld."
-msgstr "Décalage hors gamme en 16 bits: %ld"
+msgstr "Décalage hors limite en 16 bits: %ld"
 
 #: config/tc-m68hc11.c:1939
 #, c-format
 msgid "Offset out of 5-bit range for movw/movb insn: %ld."
-msgstr "Décalage hors gamme en 5 bits pour movw/movb: %ld."
+msgstr "Décalage hors limite en 5 bits pour movw/movb: %ld."
 
 #: config/tc-m68hc11.c:2020
 msgid "Expecting register D for indexed indirect mode."
@@ -5592,7 +5592,7 @@ msgstr "Expression trop complexe."
 
 #: config/tc-m68hc11.c:3322
 msgid "Value out of 16-bit range."
-msgstr "Valeur de 16 bits hors gamme."
+msgstr "Valeur de 16 bits hors limite."
 
 #: config/tc-m68hc11.c:3346
 #, c-format
@@ -5602,7 +5602,7 @@ msgstr "Valeur %ld trop grande pour un branchement de 8 bits relatif au PC"
 #: config/tc-m68hc11.c:3353
 #, c-format
 msgid "Auto increment/decrement offset '%ld' is out of range."
-msgstr "Décalage auto incrémenté/décrémenté « %ld » est hors gamme."
+msgstr "Décalage auto incrémenté/décrémenté « %ld » est hors limite."
 
 #: config/tc-m68hc11.c:3371
 #, c-format
@@ -5682,7 +5682,7 @@ msgstr "opérandes ne concordent pas"
 #: config/tc-m68k.c:1939 config/tc-m68k.c:1945 config/tc-m68k.c:1951
 #: config/tc-mmix.c:2464 config/tc-mmix.c:2488
 msgid "operand out of range"
-msgstr "Opérande hors gamme"
+msgstr "Opérande hors limite"
 
 #: config/tc-m68k.c:2008
 #, c-format
@@ -5707,7 +5707,7 @@ msgstr "A forcé un déplacement d'octet"
 
 #: config/tc-m68k.c:2246
 msgid "byte displacement out of range"
-msgstr "Déplacement d'octet hors gamme"
+msgstr "Déplacement d'octet hors limite"
 
 #: config/tc-m68k.c:2293 config/tc-m68k.c:2331
 msgid "invalid operand mode for this architecture; needs 68020 or higher"
@@ -5728,7 +5728,7 @@ msgstr "opérande inconnue/incorrecte"
 #: config/tc-m68k.c:2475 config/tc-m68k.c:2483 config/tc-m68k.c:2490
 #: config/tc-m68k.c:2497
 msgid "out of range"
-msgstr "hors gamme"
+msgstr "hors limite"
 
 #: config/tc-m68k.c:2543
 msgid "Can't use long branches on 68000/68010/5200"
@@ -5736,7 +5736,7 @@ msgstr "Ne peut utiliser de longs branchements sur 68000/68010/5200"
 
 #: config/tc-m68k.c:2653
 msgid "Expression out of range, using 0"
-msgstr "Expression hors gamme, utilise 0"
+msgstr "Expression hors limite, utilise 0"
 
 #: config/tc-m68k.c:2765 config/tc-m68k.c:2781
 msgid "Floating point register in register list"
@@ -5824,11 +5824,11 @@ msgstr "branchement short avec un décalage zéro: utiliser :w"
 
 #: config/tc-m68k.c:4827 config/tc-m68k.c:4838
 msgid "expression out of range: defaulting to 1"
-msgstr "expression hors gamme: utilise 1 par défaut"
+msgstr "expression hors limite: utilise 1 par défaut"
 
 #: config/tc-m68k.c:4870
 msgid "expression out of range: defaulting to 0"
-msgstr "expression hors gamme: utilise 0 par défaut"
+msgstr "expression hors limite: utilise 0 par défaut"
 
 #: config/tc-m68k.c:4903 config/tc-m68k.c:4915
 #, c-format
@@ -6571,7 +6571,7 @@ msgstr "Ne peut utiliser une virgule flottante insn dans cette section"
 
 #: config/tc-mips.c:9100
 msgid "expression out of range"
-msgstr "expression hors gamme"
+msgstr "expression hors limite"
 
 #: config/tc-mips.c:9140
 msgid "lui expression not in range 0..65535"
@@ -6627,7 +6627,7 @@ msgstr "valeur d'opérande non étendue invalide"
 
 #: config/tc-mips.c:9942
 msgid "operand value out of range for instruction"
-msgstr "valeur d'opérande hors gamme pour l'instruction"
+msgstr "valeur d'opérande hors limite pour l'instruction"
 
 #: config/tc-mips.c:10340
 #, c-format
@@ -6856,7 +6856,7 @@ msgstr "Ne peut représenter la relocalisation %s dans ce format de fichier objet
 
 #: config/tc-mips.c:13429
 msgid "relaxed out-of-range branch into a jump"
-msgstr "relâche d'un branchement hors gamme dans le saut (jump)"
+msgstr "relâche d'un branchement hors limite dans le saut (jump)"
 
 #: config/tc-mips.c:13902
 msgid "missing .end at end of assembly"
@@ -7150,7 +7150,7 @@ msgstr "expression locale manquante"
 
 #: config/tc-mmix.c:2363
 msgid "operand out of range, instruction expanded"
-msgstr "opérande hors gamme, instruction a été étendue"
+msgstr "opérande hors limite, instruction a été étendue"
 
 #. The BFD_RELOC_MMIX_LOCAL-specific message is supposed to be
 #. user-friendly, though a little bit non-substantial.
@@ -7293,7 +7293,7 @@ msgstr "ne peut résoudre `%s' {section %s} - `%s' {section %s}"
 #: config/tc-v850.c:1607
 #, c-format
 msgid "operand out of range (%s not between %ld and %ld)"
-msgstr "opérande hors gamme (%s n'est pas entre %ld et %ld)"
+msgstr "opérande hors limite (%s n'est pas entre %ld et %ld)"
 
 #: config/tc-mn10300.c:690
 msgid ""
@@ -7419,7 +7419,7 @@ msgstr "ce mode d'adressage n'est pas applicable pour la cible de l'opérande"
 #: config/tc-msp430.c:944
 #, c-format
 msgid "value %ld out of range. Use #lo() or #hi()"
-msgstr "valeur %ld est hors gamme. Utiliser #lo() ou #hi()"
+msgstr "valeur %ld est hors limite. Utiliser #lo() ou #hi()"
 
 #: config/tc-msp430.c:1040
 #, c-format
@@ -7434,7 +7434,7 @@ msgstr "opérande inconnue %s"
 #: config/tc-msp430.c:1111 config/tc-msp430.c:1242
 #, c-format
 msgid "value out of range: %d"
-msgstr "valeur hors gamme: %d"
+msgstr "valeur hors limite: %d"
 
 #: config/tc-msp430.c:1120 config/tc-msp430.c:1259
 #, c-format
@@ -7638,7 +7638,7 @@ msgstr "ERREUR de logique interne.  ligne %d, fichier \"%s\""
 
 #: config/tc-ns32k.c:1936
 msgid "Bit field out of range"
-msgstr "Champ de bits hors gamme"
+msgstr "Champ de bits hors limite"
 
 #: config/tc-ns32k.c:2183
 #, c-format
@@ -7687,7 +7687,7 @@ msgstr "trop d'opérandes: %s"
 
 #: config/tc-or32.c:603 config/tc-or32.c:819
 msgid "call/jmp target out of range (1)"
-msgstr "call/jmp cible hors gamme (1)"
+msgstr "call/jmp cible hors limite (1)"
 
 #: config/tc-or32.c:1016 config/tc-or32.c:1133
 msgid "the linker will not handle this relocation correctly (1)"
@@ -7695,11 +7695,11 @@ msgstr "l'éditeur de liens ne traitera pas cette relocalisation correctement (1)
 
 #: config/tc-or32.c:1025 config/tc-or32.c:1142
 msgid "call/jmp target out of range (2)"
-msgstr "call/jmp cible hors gamme (2)"
+msgstr "call/jmp cible hors limite (2)"
 
 #: config/tc-or32.c:1433
 msgid "register out of range"
-msgstr "registre hors gamme"
+msgstr "registre hors limite"
 
 #: config/tc-or32.c:1478
 msgid "invalid register in & expression"
@@ -8492,7 +8492,7 @@ msgstr "opérande invalide n'est pas une valeur non signée de 16 bits: %d"
 
 #: config/tc-sh64.c:1573
 msgid "operand out of range for PT, PTA and PTB"
-msgstr "opérande hors gamme pour PT, PTA et PTB"
+msgstr "opérande hors limite pour PT, PTA et PTB"
 
 #: config/tc-sh64.c:1575
 #, c-format
@@ -8873,7 +8873,7 @@ msgstr ": numéro ASI invalide"
 
 #: config/tc-sparc.c:2615
 msgid "OPF immediate operand out of range (0-0x1ff)"
-msgstr "Opérande immédiate OPF est hors gamme (0-0x1ff)"
+msgstr "Opérande immédiate OPF est hors limite (0-0x1ff)"
 
 #: config/tc-sparc.c:2620
 msgid "non-immediate OPF operand, ignored"
@@ -8946,7 +8946,7 @@ msgstr "Virgule attendue après un nom de symbole"
 #: config/tc-sparc.c:3788 read.c:1392
 #, c-format
 msgid ".COMMon length (%lu) out of range ignored"
-msgstr "longueur de .COMMon (%lu.) hors gamme, ignoré."
+msgstr "longueur de .COMMon (%lu.) hors limite, ignoré."
 
 #: config/tc-sparc.c:3807 config/tc-v850.c:266
 #, c-format
@@ -9310,7 +9310,7 @@ msgstr ".tag cible « %s » qui est indéfini"
 #: config/tc-tic54x.c:1018
 #, c-format
 msgid ".field count '%d' out of range (1 <= X <= 32)"
-msgstr "compte .field « %d » hors gamme (1 <= X <= 32)"
+msgstr "compte .field « %d » hors limite (1 <= X <= 32)"
 
 #: config/tc-tic54x.c:1046
 #, c-format
@@ -9465,7 +9465,7 @@ msgstr "Format non reconnu d'adresse indirecte « %s »"
 #: config/tc-tic54x.c:3960
 #, c-format
 msgid "Operand '%s' out of range (%d <= x <= %d)"
-msgstr "Opérande « %s » est hors gamme (%d <= x <= %d)"
+msgstr "Opérande « %s » est hors limite (%d <= x <= %d)"
 
 #: config/tc-tic54x.c:3980
 msgid "Error in relocation handling"
@@ -9518,7 +9518,7 @@ msgstr "Accumulateur Destination accumulator for each part of this parallel inst
 #: config/tc-tic54x.c:4200
 #, c-format
 msgid "Memory mapped register \"%s\" out of range"
-msgstr "Registre de projection mémoire « %s » hors gamme"
+msgstr "Registre de projection mémoire « %s » hors limite"
 
 #: config/tc-tic54x.c:4239
 msgid "Invalid operand (use 1, 2, or 3)"
@@ -9541,7 +9541,7 @@ msgstr "Registre d'état invalide « %s »"
 #: config/tc-tic54x.c:4309
 #, c-format
 msgid "Operand \"%s\" out of range (use 1 or 2)"
-msgstr "Opérande « %s » est hors gamme (utiliser 1 ou 2)"
+msgstr "Opérande « %s » est hors limite (utiliser 1 ou 2)"
 
 #: config/tc-tic54x.c:4517
 #, c-format
@@ -9746,7 +9746,7 @@ msgstr "bits prédéfinis de symbole non traités"
 #: config/tc-tic80.c:983
 #, c-format
 msgid "PC offset 0x%lx outside range 0x%lx-0x%lx"
-msgstr "Décalage PC 0x%lx hors gamme 0x%lx-0x%lx"
+msgstr "Décalage PC 0x%lx hors limite 0x%lx-0x%lx"
 
 #: config/tc-tic80.c:998
 msgid "unhandled relocation type in fixup"
@@ -10213,7 +10213,7 @@ msgstr "Numéro de registre erroné: %s"
 
 #: config/tc-xtensa.c:1724
 msgid "register number out of range"
-msgstr "numéro de registre hors gamme"
+msgstr "numéro de registre hors limite"
 
 #: config/tc-xtensa.c:1836
 msgid "too many arguments"
@@ -10237,7 +10237,7 @@ msgstr "numéro de registre pour `%s' n'est pas constante"
 #: config/tc-xtensa.c:1978
 #, c-format
 msgid "register number (%ld) for `%s' is out of range"
-msgstr "numéro de registre (%ld) pour `%s' est hors gamme"
+msgstr "numéro de registre (%ld) pour `%s' est hors limite"
 
 #: config/tc-xtensa.c:2464
 #, c-format
@@ -10566,7 +10566,7 @@ msgstr "multiples sections remappés à la section de sortie %s"
 #: config/tc-z8k.c:314
 #, c-format
 msgid "register rr%d out of range"
-msgstr "registre rr%d hors gamme"
+msgstr "registre rr%d hors limite"
 
 #: config/tc-z8k.c:316
 #, c-format
@@ -10576,17 +10576,17 @@ msgstr "registre rr%d n'existe pas"
 #: config/tc-z8k.c:326
 #, c-format
 msgid "register rh%d out of range"
-msgstr "registre rh%d hors gamme"
+msgstr "registre rh%d hors limite"
 
 #: config/tc-z8k.c:336
 #, c-format
 msgid "register rl%d out of range"
-msgstr "registre rl%d hors gamme"
+msgstr "registre rl%d hors limite"
 
 #: config/tc-z8k.c:347
 #, c-format
 msgid "register rq%d out of range"
-msgstr "registre rq%d hors gamme"
+msgstr "registre rq%d hors limite"
 
 #: config/tc-z8k.c:349
 #, c-format
@@ -10596,7 +10596,7 @@ msgstr "registre rq%d n'existe pas"
 #: config/tc-z8k.c:359
 #, c-format
 msgid "register r%d out of range"
-msgstr "registre r%d hors gamme"
+msgstr "registre r%d hors limite"
 
 #: config/tc-z8k.c:404
 #, c-format
@@ -10629,7 +10629,7 @@ msgstr "taille de registre indirect invalide"
 #: config/tc-z8k.c:971
 #, c-format
 msgid "operand %s0x%x out of range"
-msgstr "opérande %s0x%x hors gamme"
+msgstr "opérande %s0x%x hors limite"
 
 #: config/tc-z8k.c:1099
 msgid "immediate must be 1 or 2"
@@ -10674,15 +10674,15 @@ msgstr "ne peut brancher vers une adresse impaire"
 
 #: config/tc-z8k.c:1479 config/tc-z8k.c:1490
 msgid "relative jump out of range"
-msgstr "saut relatif hors gamme"
+msgstr "saut relatif hors limite"
 
 #: config/tc-z8k.c:1497
 msgid "relative call out of range"
-msgstr "appel relatif hors gamme"
+msgstr "appel relatif hors limite"
 
 #: config/tc-z8k.c:1523
 msgid "relative address out of range"
-msgstr "adresse relative hors gamme"
+msgstr "adresse relative hors limite"
 
 #: config/tc-z8k.c:1543
 #, c-format
@@ -11684,7 +11684,7 @@ msgstr "tentative arrière sur les directives .org/.space? (%ld)"
 
 #: write.c:1002 write.c:1074
 msgid "relocation out of range"
-msgstr "relocalisation hors gamme"
+msgstr "relocalisation hors limite"
 
 #: write.c:1005 write.c:1077
 #, c-format
@@ -11750,528 +11750,3 @@ msgstr "valeur de %s est trop grande pour le champ de %d octets à %s"
 #, c-format
 msgid "signed .word overflow; switch may be too large; %ld at 0x%lx"
 msgstr "débordement de .word signé; commutation peut être trop grande; %ld à 0x%lx"
-
-#~ msgid "subsegment index too high"
-#~ msgstr "index de sous-segments trop grand"
-
-#~ msgid ".COMMon length (%d.) <0! Ignored."
-#~ msgstr "longueur de .common (%d.) <0! Ignoré."
-
-#~ msgid "operand out of range: %d"
-#~ msgstr "opérande hors gamme: %d"
-
-#~ msgid "expect :8 or :16 here"
-#~ msgstr "attendu :8 ou :16 ici"
-
-#~ msgid "md_number_to_disp\n"
-#~ msgstr "md_number_to_disp\n"
-
-#~ msgid "i860_number_to_field\n"
-#~ msgstr "i860_number_to_field\n"
-
-#~ msgid "callj to difference of two symbols"
-#~ msgstr "appel de callj pour différencier deux symboles"
-
-#~ msgid "md_number_to_disp not defined"
-#~ msgstr "md_number_to_disp non défini"
-
-#~ msgid "md_number_to_field not defined"
-#~ msgstr "md_number_to_field non défini"
-
-#~ msgid "MIPS internal Error"
-#~ msgstr "ERREUR interne MIPS"
-
-#~ msgid "rotate count too large"
-#~ msgstr "compteur de rotation trop grand"
-
-#~ msgid "bad composition of relocations"
-#~ msgstr "composition erronée des relocalisations"
-
-#~ msgid "16 bit expression not in range 0..65535"
-#~ msgstr "expression 16 bit n'est pas dans les bornes 0..65535"
-
-#~ msgid "16 bit expression not in range -32768..32767"
-#~ msgstr "expression 16 bit n'est pas dans les bornes -32768..32767"
-
-#~ msgid "invalid architecture -mtune=%s"
-#~ msgstr "architecture invalide -mtune=%s"
-
-#~ msgid "invalid architecture -march=%s"
-#~ msgstr "architecture invalide -march=%s"
-
-#~ msgid "invalid architecture -mcpu=%s"
-#~ msgstr "architecture invalide -mcpu=%s"
-
-#~ msgid "A different -mtune= was already specified, is now -mtune=%s"
-#~ msgstr "Un choix différent pour -mtune a déjà été spécifié, est maintenant -mtune=%s"
-
-#~ msgid "A different -march= was already specified, is now -march=%s"
-#~ msgstr "L'option -march= a déjà été spécifiée, est maintenant -march=%s"
-
-#~ msgid "A different -march= or -mtune= was already specified, is now -m4650"
-#~ msgstr "L'option -march= ou -mtune= a déjà été spécifiée, est maintenant -m4650"
-
-#~ msgid "A different -march= or -mtune= was already specified, is now -m4010"
-#~ msgstr "L'option -march= ou -mtune= a déjà été spécifiée, est maintenant -m4010"
-
-#~ msgid "A different -march= or -mtune= was already specified, is now -m4100"
-#~ msgstr "L'option -march= ou -mtune= a déjà été spécifiée, est maintenant -m4100"
-
-#~ msgid "A different -march= or -mtune= was already specified, is now -m3900"
-#~ msgstr "L'option -march= ou -mtune= a déjà été spécifiée, est maintenant -m3900"
-
-#~ msgid "The -mcpu option can't be used together with -march. Use -mtune instead of -mcpu."
-#~ msgstr "L'option -mcpu ne peut être utilisée ensemble avec -march. Utiliser -mtune au lieu de -mcpu."
-
-#~ msgid "The -mcpu option can't be used together with -mtune. Use -march instead of -mcpu."
-#~ msgstr "L'option -mcpu ne peut être utilisée ensemble avec -mtune. Utiliser -march au lieu de -mcpu."
-
-#~ msgid "The -mcpu option is deprecated.  Please use -march and -mtune instead."
-#~ msgstr "L'option -mcpu est dépréciée. SVP utiliser -march et -mtune à la place."
-
-#~ msgid "The -march option is incompatible to -mipsN and therefore ignored."
-#~ msgstr "L'option -march est incompatible avec -mipsN et est alors ignorée."
-
-#~ msgid "Byte displacement out of range.  line number not valid"
-#~ msgstr "Déplacement d'octets hors gamme. Numéro de ligne invalide"
-
-#~ msgid "Word displacement out of range.  line number not valid"
-#~ msgstr "Déplacement de mots hors gamme. Numéro de ligne invalide"
-
-#~ msgid "unresolved fx_subsy symbol that must be resolved"
-#~ msgstr "symbole fx_subsy non résolu qui doit être résolu"
-
-#~ msgid "  -mv850ea                  The code is targeted at the v850ea\n"
-#~ msgstr "  -mv850ea                  le code vise le v850ea\n"
-
-#~ msgid "call to tc_Nout_fix_to_chars \n"
-#~ msgstr "appel à tc_Nout_fix_to_chars \n"
-
-#~ msgid ""
-#~ "Z8K options:\n"
-#~ "-z8001\t\t\tgenerate segmented code\n"
-#~ "-z8002\t\t\tgenerate unsegmented code\n"
-#~ msgstr ""
-#~ "Options Z8K:\n"
-#~ "-z8001                    générer du code segmenté\n"
-#~ "-z8002                    générer du code non segmenté\n"
-
-#~ msgid "redefinition not allowed\n"
-#~ msgstr "redéfinition non permise\n"
-
-#~ msgid "the %c operator cannot take non-absolute arguments.\n"
-#~ msgstr "l'opérateur %c ne peut accepter d'arguments non absolus.\n"
-
-#~ msgid "string where expression expected.\n"
-#~ msgstr "chaîne alors qu'une expression est attendue.\n"
-
-#~ msgid "can't find primary in expression.\n"
-#~ msgstr "ne peut trouver un primaire dans l'expression.\n"
-
-#~ msgid "attempt to divide by zero.\n"
-#~ msgstr "tentative de division par zéro.\n"
-
-#~ msgid "can't add two relocatable expressions\n"
-#~ msgstr "ne peut additionner deux expressions relocalisables\n"
-
-#~ msgid "unreasonable nesting.\n"
-#~ msgstr "imbrications déraisonnables.\n"
-
-#~ msgid "End of file not at start of line.\n"
-#~ msgstr "Fin du fichier n'est pas au début de ligne.\n"
-
-#~ msgid "Illegal base character %c.\n"
-#~ msgstr "Caractère de base illégal %c.\n"
-
-#~ msgid "radix is %c must be one of b, q, d or h"
-#~ msgstr "radix est %c doit être b, q, d ou h"
-
-#~ msgid "size must be one of b, w or l, is %c.\n"
-#~ msgstr "la taille %c doit être  b, w ou l\n"
-
-#~ msgid "datab repeat must be constant.\n"
-#~ msgstr "répétition datab doit être une constante.\n"
-
-#~ msgid "datab data must be absolute.\n"
-#~ msgstr "données datab doivent être absolues.\n"
-
-#~ msgid "align needs absolute expression.\n"
-#~ msgstr "align a besoin d'une expression absolue.\n"
-
-#~ msgid ".align needs absolute fill value.\n"
-#~ msgstr ".align a besoin d'une valeur absolue de remplissage.\n"
-
-#~ msgid "res needs absolute expression for fill count.\n"
-#~ msgstr "res a besoin d'une expression absolu pour un compteur de remplissage.\n"
-
-#~ msgid "form LIN= needs absolute expresssion.\n"
-#~ msgstr "forme LIN= a besoin d'une expression absolue.\n"
-
-#~ msgid "COL="
-#~ msgstr "COL="
-
-#~ msgid "form COL= needs absolute expresssion.\n"
-#~ msgstr "forme COL= a besoin d'une expresssion absolue.\n"
-
-#~ msgid "misplaced ( .\n"
-#~ msgstr ") mal positionné .\n"
-
-#~ msgid "misplaced ).\n"
-#~ msgstr ") mal positionné.\n"
-
-#~ msgid ".instr needs absolute expresson.\n"
-#~ msgstr ".instr a besoin d'une expresson absolue.\n"
-
-#~ msgid "need absolute position.\n"
-#~ msgstr "a besoin d'une position absolue.\n"
-
-#~ msgid "need absolute length.\n"
-#~ msgstr "a besoin d'une longueur absolue.\n"
-
-#~ msgid "END missing from end of file.\n"
-#~ msgstr "END manquant de la fin du fichier.\n"
-
-#~ msgid ".ASSIGNA needs constant expression argument.\n"
-#~ msgstr ".ASSIGNA a besoin d'un argument d'expression de constante.\n"
-
-#~ msgid ".ASSIGNA without label.\n"
-#~ msgstr ".ASSIGNA sans étiquette.\n"
-
-#~ msgid ".ASSIGNS without label.\n"
-#~ msgstr ".ASSIGNS sans étiquette.\n"
-
-#~ msgid "Can't find preprocessor variable %s.\n"
-#~ msgstr "Ne peut repérer la variable du pré-processeur %s.\n"
-
-#~ msgid "Comparison operator must be one of EQ, NE, LT, LE, GT or GE.\n"
-#~ msgstr "L'opérateur de comparaison doit être un de EQ, NE, LT, LE, GT ou GE.\n"
-
-#~ msgid "Comparison operator for strings must be EQ or NE\n"
-#~ msgstr "L'opérateur de comparaison de chaînes doit être un de EQ ou NE.\n"
-
-#~ msgid "Conditional operator must have absolute operands.\n"
-#~ msgstr "L'opérateur de conditionnel doit utiliser des opérandes absolues.\n"
-
-#~ msgid "String compared against expression.\n"
-#~ msgstr "Chaîne comparée à une expression.\n"
-
-#~ msgid "AIF nesting unreasonable.\n"
-#~ msgstr "Imbrication AIF non raisonnable.\n"
-
-#~ msgid "Multiple AELSEs in AIF.\n"
-#~ msgstr "AELSE multiples dans AIF.\n"
-
-#~ msgid "AENDI without AIF.\n"
-#~ msgstr "AENDI sans AIF.\n"
-
-#~ msgid "IF nesting unreasonable.\n"
-#~ msgstr "Imbrications IF non raisonnables.\n"
-
-#~ msgid "Bad format for IF or IFNC.\n"
-#~ msgstr "Format erroné pour IF ou IFNC.\n"
-
-#~ msgid "AENDR without a AREPEAT.\n"
-#~ msgstr "AENDR sans un AREPEAT.\n"
-
-#~ msgid "ENDR without a REPT.\n"
-#~ msgstr "ENDR sans un REPT.\n"
-
-#~ msgid "AWHILE without a AENDW at %d.\n"
-#~ msgstr "AWHILE sans un AENDW à %d.\n"
-
-#~ msgid "AENDW without a AENDW.\n"
-#~ msgstr "AENDW sans un AENDW.\n"
-
-#~ msgid "AREPEAT must have absolute operand.\n"
-#~ msgstr "AREPEAT doit utiliser une opérande absolue.\n"
-
-#~ msgid "AREPEAT without a AENDR at %d.\n"
-#~ msgstr "AREPEAT sans un AENDR à %d.\n"
-
-#~ msgid ".ENDM without a matching .MACRO.\n"
-#~ msgstr ".ENDM sans un .MACRO concordant.\n"
-
-#~ msgid "LOCAL outside of MACRO"
-#~ msgstr "LOCAL en dehors de MACRO"
-
-#~ msgid "macro at line %d: %s\n"
-#~ msgstr "macro à la ligne %d: %s\n"
-
-#~ msgid "macro expansion"
-#~ msgstr "expansion macro"
-
-#~ msgid "Character code in string must be absolute expression.\n"
-#~ msgstr "Code de caractère dans la chaîne doit être une expression absolue.\n"
-
-#~ msgid "Missing > for character code.\n"
-#~ msgstr "> manquant pour le code de caractère.\n"
-
-#~ msgid "string for SDATAC longer than 255 characters (%d).\n"
-#~ msgstr "chaîne pour SDATAC est plus longue que 255 caractères (%d).\n"
-
-#~ msgid "illegal character in SDATA line (0x%x).\n"
-#~ msgstr "caractère illégal dans la ligne SDATA (0x%x).\n"
-
-#~ msgid "Must have absolute SDATAB repeat count.\n"
-#~ msgstr "Doit avoir un compteur de répétition absolu SDATAB.\n"
-
-#~ msgid "Must have positive SDATAB repeat count (%d).\n"
-#~ msgstr "Doit avoir un compteur de répétition positif SDATAB (%d).\n"
-
-#~ msgid "Unreasonable include depth (%ld).\n"
-#~ msgstr "Profondeur d'inclusion déraisonnable (%ld).\n"
-
-#~ msgid "Can't open include file `%s'.\n"
-#~ msgstr "Ne peut ouvrir le fichier d'inclusion « %s ».\n"
-
-#~ msgid "Unreasonable expansion (-u turns off check).\n"
-#~ msgstr "Expansion non raisonnable (-u désactive la vérification).\n"
-
-#~ msgid "Unrecognised pseudo op `%s'.\n"
-#~ msgstr "Pseudo opérateur non reconnu « %s ».\n"
-
-#~ msgid "ORG command not allowed.\n"
-#~ msgstr "Commande « ORG » non permise.\n"
-
-#~ msgid "Invalid expression on command line.\n"
-#~ msgstr "Expression invalide sur la ligne de commande.\n"
-
-#~ msgid ""
-#~ "Usage: %s \n"
-#~ "  [-a]      [--alternate]         enter alternate macro mode\n"
-#~ "  [-c char] [--commentchar char]  change the comment character from !\n"
-#~ "  [-d]      [--debug]             print some debugging info\n"
-#~ "  [-h]      [--help]              print this message\n"
-#~ "  [-M]      [--mri]               enter MRI compatibility mode\n"
-#~ "  [-o out]  [--output out]        set the output file\n"
-#~ "  [-p]      [--print]             print line numbers\n"
-#~ msgstr ""
-#~ "Usage: %s \n"
-#~ "  [-a]      [--alternate]         entrer en mode macro alternatif\n"
-#~ "  [-c char] [--commentchar car]   utiliser un caractère de commentaire différent\n"
-#~ "  [-d]      [--debug]             afficher des informations de débug\n"
-#~ "  [-h]      [--help]              afficher l'aide mémoire\n"
-#~ "  [-M]      [--mri]               entrer en mode compatibilité MRI\n"
-#~ "  [-o F]    [--output F]          produire un Fichier de sortie\n"
-#~ "  [-p]      [--print]             afficher les numéros de ligne\n"
-
-#~ msgid ""
-#~ "  [-s]      [--copysource]        copy source through as comments \n"
-#~ "  [-u]      [--unreasonable]      allow unreasonable nesting\n"
-#~ "  [-v]      [--version]           print the program version\n"
-#~ "  [-Dname=value]                  create preprocessor variable called name, with value\n"
-#~ "  [-Ipath]                        add to include path list\n"
-#~ "  [in-file]\n"
-#~ msgstr ""
-#~ "  [-s]      [--copysource]        copier la source comme des commentaires\n"
-#~ "  [-u]      [--unreasonable]      permette une imbrication raisonnable\n"
-#~ "  [-v]      [--version]           afficher la version du programme\n"
-#~ "  [-Dnom=valeur]                  créer une variable pré-processeur appelée nom,\n"
-#~ "                                  initialisé avec la valeur\n"
-#~ "  [-Ipath]                        ajouter le le chemin pour inclusion à la liste\n"
-#~ "  [in-file]\n"
-
-#~ msgid "%s: Gnu Assembler Macro Preprocessor\n"
-#~ msgstr "%s: Pré-processeur Macro Assembleur Gnu\n"
-
-#~ msgid "GNU assembler pre-processor %s\n"
-#~ msgstr "Pré-processeur de l'assembleur GNU %s\n"
-
-#~ msgid "Copyright 1996 Free Software Foundation, Inc.\n"
-#~ msgstr "Copyright 1996 Free Software Foundation, Inc.\n"
-
-#~ msgid "%s: Can't open output file `%s'.\n"
-#~ msgstr "%s: ne peut ouvrir le fichier de sortie « %s ».\n"
-
-#~ msgid "%s: Can't open input file `%s'.\n"
-#~ msgstr "%s: ne peut ouvrir le fichier d'entrée « %s ».\n"
-
-#~ msgid "Internal error, aborting at %s line %d"
-#~ msgstr "erreur interne, abandon à %s ligne %d"
-
-#~ msgid ""
-#~ "\n"
-#~ "Please report this bug.\n"
-#~ msgstr ""
-#~ "\n"
-#~ "SVP rapporter cette anomalie.\n"
-
-#~ msgid "invalid section for operation"
-#~ msgstr "section invalide pour l'opération"
-
-#~ msgid "%s:%u: bad return from bfd_install_relocation"
-#~ msgstr "%s:%u: retour erroné de bfd_install_relocation"
-
-#~ msgid "negative of non-absolute symbol `%s'"
-#~ msgstr "négatif d'un symbole non absolu « %s »"
-
-#~ msgid "subtraction of two symbols in different sections `%s' {%s section} - `%s' {%s section} at file address %s"
-#~ msgstr ""
-#~ "soustraction de deux symboles de différentes sections « %s» {%s section} - «%s »\n"
-#~ " {%s section} dans le fichier à l'adresse %s."
-
-#~ msgid "64bit operations available only in 64bit modes."
-#~ msgstr "opérations 64 bits disponibles seulement en mode 64 bits."
-
-#~ msgid "unrecognised APCS switch -m%s"
-#~ msgstr "commutateur APCS non reconnue -m%s"
-
-#~ msgid "invalid architecture variant -m%s"
-#~ msgstr "variante d'architecture invalide -m%s"
-
-#~ msgid "invalid processor variant -m%s"
-#~ msgstr "variante de processor invalide -m%s"
-
-#~ msgid ""
-#~ " ARM Specific Assembler Options:\n"
-#~ "  -m[arm][<processor name>] select processor variant\n"
-#~ "  -m[arm]v[2|2a|3|3m|4|4t|5[t][e]] select architecture variant\n"
-#~ "  -marm9e                   allow Cirrus/DSP instructions\n"
-#~ "  -mthumb                   only allow Thumb instructions\n"
-#~ "  -mthumb-interwork         mark the assembled code as supporting interworking\n"
-#~ "  -mall                     allow any instruction\n"
-#~ "  -mfpa10, -mfpa11          select floating point architecture\n"
-#~ "  -mfpe-old                 don't allow floating-point multiple instructions\n"
-#~ "  -mvfpxd                   allow vfp single-precision instructions\n"
-#~ "  -mvfp                     allow all vfp instructions\n"
-#~ "  -mno-fpu                  don't allow any floating-point instructions.\n"
-#~ "  -k                        generate PIC code.\n"
-#~ msgstr ""
-#~ " Options spécifique de l'assembleur ARM:\n"
-#~ "  -m[arm][<nom-du-processeur>]     sélectionner la variante du processeur\n"
-#~ "  -m[arm]v[2|2a|3|3m|4|4t|5[t][e]] sélectionner la variante d'architecture\n"
-#~ "  -marm9e                          permettre les instructions Cirrus/DSP\n"
-#~ "  -mthumb                          permettre seulement des instruction « Thumb »\n"
-#~ "  -mthumb-interwork                marquer le code assemblé comme supportant\n"
-#~ "                                   l'inter-réseautage\n"
-#~ "  -mall                            permettre n'importe quelle instruction\n"
-#~ "  -mfpa10, -mfpa11                 sélectionner l'architecture en virgule flottante\n"
-#~ "  -mfpe-old                        ne peut permettre les instructions multiples\n"
-#~ "                                   en virgule flotttante\n"
-#~ "  -mno-fpu                         ne pas permettre aucune instruction en virgule\n"
-#~ "                                   flottante\n"
-#~ "  -k                               générer code indépendant de la position PIC\n"
-
-#~ msgid ""
-#~ "  -mapcs-32, -mapcs-26      specify which ARM Procedure Calling Standard to use\n"
-#~ "  -matpcs                   use ARM/Thumb Procedure Calling Standard\n"
-#~ "  -mapcs-float              floating point args are passed in FP regs\n"
-#~ "  -mapcs-reentrant          the code is position independent/reentrant\n"
-#~ msgstr ""
-#~ "  -mapcs-32, -mapcs-26      spécifier le type d'appel de procédure standard ARM\n"
-#~ "                            à utiliser\n"
-#~ "  -matpcs                   utiliser l'appel de procédure stanard ARM/Thumb\n"
-#~ "  -mapcs-float              passer les arguments en virgule flottante dans\n"
-#~ "                            les registres FP\n"
-#~ "  -mapcs-reentrant          le code est indépendant de la position/ré-entrant\n"
-
-#~ msgid "  -moabi                    support the old ELF ABI\n"
-#~ msgstr "  -moabi                    supporter l'ancien ABI ELF\n"
-
-#~ msgid "EOF in Comment: Newline inserted"
-#~ msgstr "EOF dans le commentaire: nouvelle ligne insérée"
-
-#~ msgid ".else without matching .if - ignored"
-#~ msgstr ".else sans concordance avec .if - ignoré"
-
-#~ msgid "Unrecognized section type"
-#~ msgstr "type de section non reconnu"
-
-#~ msgid "Missing section name"
-#~ msgstr "Nom de section manquant"
-
-#~ msgid "Cannot use !%s!%d with %s"
-#~ msgstr "Ne peut utiliser !%s!%d avec %s"
-
-#~ msgid "bad instruction format for lda !%s!%ld"
-#~ msgstr "format d'instruction erroné pour lda !%s!%ld"
-
-#~ msgid "Instruction should not have flags"
-#~ msgstr "L'instruction ne devrait pas avoir de fanions"
-
-#~ msgid "bad instruction '%.100s'"
-#~ msgstr "instruction erronée '%.100s'"
-
-#~ msgid "Constant expression expected"
-#~ msgstr "Expression de constante attendu"
-
-#~ msgid "Processor does not support halfwords or signed bytes"
-#~ msgstr "Le processeur ne supporte pas les demi-mots ou les octets signés"
-
-#~ msgid "Invalid offset"
-#~ msgstr "Décalage invalide"
-
-#~ msgid "dest and source1 one must be the same register"
-#~ msgstr "dest et source1 doivent être le même registre"
-
-#~ msgid "Expression too complex"
-#~ msgstr "Expression trop complexe"
-
-#~ msgid "Opcode `%s' must have suffix from list: <%s>"
-#~ msgstr "opcode `%s' doit avoir un suffixe dans la liste: <%s>"
-
-#~ msgid "Warning: Use of the 'nv' conditional is deprecated\n"
-#~ msgstr "AVERTISSEMENT: utilisation du conditionnal 'nv' est déprécié\n"
-
-#~ msgid "Opcode `%s' is unconditional\n"
-#~ msgstr "opcode `%s' est inconditionnel\n"
-
-#~ msgid "Opcode `%s' must have suffix from <%s>\n"
-#~ msgstr "opcode `%s' doit avoir une suffixe dans <%s>\n"
-
-#~ msgid "Invalid Compare/Subtract Condition: %c"
-#~ msgstr "Condition comparaison/soustraction invalide: %c"
-
-#~ msgid "Extended register `%%%s' available only in 64bit mode."
-#~ msgstr "Registre étendu `%%%s' disponible seulement en mode 64 bits."
-
-#~ msgid "bad reloc specifier in expression"
-#~ msgstr "spécificateur de relocalisation erroné dans l'expression"
-
-#~ msgid "Ignoring attempt to re-define symbol %s."
-#~ msgstr "Tentative ignorée de re-définition du symboles %s."
-
-#~ msgid "Unsupported reloc size %d"
-#~ msgstr "taille de relocalisation non supportée %d"
-
-#~ msgid "Bad COFF debugging info"
-#~ msgstr "Info de débug COFF erroné"
-
-#~ msgid "Ignoring attempt to redefine symbol `%s'."
-#~ msgstr "Ignoré la tentative de redéfinir le symbole `%s'."
-
-#~ msgid "Missing '%c' assumed"
-#~ msgstr "'%c' manquant est assumé"
-
-#~ msgid "Bad expression"
-#~ msgstr "Expression erronée"
-
-#~ msgid "Partial line at end of file ignored"
-#~ msgstr "Ligne partielle à la fin du fichier est ignorée"
-
-#~ msgid "Alignment not a power of 2"
-#~ msgstr "Alignement n'est pas une puissance de 2"
-
-#~ msgid "attempt to re-define symbol `%s'"
-#~ msgstr "tentative de redéfinition du symbole `%s'"
-
-#~ msgid "Missing alignment"
-#~ msgstr "alignement manquant"
-
-#~ msgid "invalid segment \"%s\"; segment \"%s\" assumed"
-#~ msgstr "segment invalide \"%s\"; segment \"%s\" assumé"
-
-#~ msgid "illegal expression; zero assumed"
-#~ msgstr "expression illégale; zéro assumé"
-
-#~ msgid "missing expression; zero assumed"
-#~ msgstr "expression manquante; zéro assumé"
-
-#~ msgid "Unresolvable or nonpositive repeat count; using 1"
-#~ msgstr "compte de répétitions non positie ou sans résolution; utilise 1"
-
-#~ msgid ".stabs: Missing comma"
-#~ msgstr ".stabs: virgule manquante"
-
-#~ msgid "Symbol %s already defined."
-#~ msgstr "Symbole %s est déjà défini."
