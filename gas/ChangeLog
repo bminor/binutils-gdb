@@ -1,5 +1,8 @@
 Mon Mar 30 12:46:48 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-i386.h, config/tc-i386.c: Revert March 24
+	LinearAddress patch.
+
 	* configure.in: Set version to 2.9.1.
 	* configure: Rebuild.
 
