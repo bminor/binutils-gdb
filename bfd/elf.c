@@ -2344,16 +2344,18 @@ elf_sort_sections (arg1, arg2)
   const asection *sec1 = *(const asection **) arg1;
   const asection *sec2 = *(const asection **) arg2;
 
-  if (sec1->vma < sec2->vma)
-    return -1;
-  else if (sec1->vma > sec2->vma)
-    return 1;
-
-  /* Sort by LMA.  Normally the LMA and the VMA will be the same, and
-     this will do nothing.  */
+  /* Sort by LMA first, since this is the address used to
+     place the section into a segment.  */
   if (sec1->lma < sec2->lma)
     return -1;
   else if (sec1->lma > sec2->lma)
+    return 1;
+
+  /* Sort by VMA.  Normally the LMA and the VMA will be the same, and
+     this will do nothing.  */
+  if (sec1->vma < sec2->vma)
+    return -1;
+  else if (sec1->vma > sec2->vma)
     return 1;
 
   /* Put !SEC_LOAD sections after SEC_LOAD ones.  */

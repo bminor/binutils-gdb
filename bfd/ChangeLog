@@ -1,5 +1,8 @@
 Fri Jun  5 17:21:51 1998  Nick Clifton  <nickc@cygnus.com>
 
+	* elf.c (elf_sort_sections): Sort by LMA first then VMA, since the
+	LMA is used to order sections in a segment.
+
 	* elf32-v850.c: Add prototypes for static functions.
 	Change type of addend parameter to bfd_vma in various functions.
 
