@@ -25,7 +25,6 @@ Do-first:
 
 Things-to-keep:
 
-ChangeLog
 Makefile.in
 configure.in
 a29k-coff.m4
@@ -52,7 +51,10 @@ Do-last:
 #
 #
 # $Log$
-# Revision 1.7  1993/02/13 10:12:26  zoo
+# Revision 1.8  1993/03/02 17:57:05  raeburn
+# ChangeLog is gone
+#
+# Revision 1.7  1993/02/13  10:12:26  zoo
 # removing excess verbosity
 #
 # Revision 1.6  1992/12/08  09:39:03  raeburn
