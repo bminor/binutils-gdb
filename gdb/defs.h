@@ -100,6 +100,13 @@ inside_entry_file PARAMS ((CORE_ADDR addr));
 extern int
 inside_main_func PARAMS ((CORE_ADDR pc));
 
+/* start-sanitize-chill */
+/* From ch-lang.c, for the moment. (FIXME) */
+
+extern char *
+chill_demangle PARAMS ((const char *));
+/* end-sanitize-chill */
+
 /* From libiberty.a */
 
 extern char *
@@ -235,9 +242,6 @@ n_spaces PARAMS ((int));
 
 extern void
 gdb_printchar PARAMS ((int, FILE *, int));
-
-extern char *
-strdup_demangled PARAMS ((const char *));
 
 extern void
 fprint_symbol PARAMS ((FILE *, char *));

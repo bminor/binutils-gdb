@@ -1345,22 +1345,7 @@ add_psymbol_to_list (name, namelength, namespace, class, list, val, language,
   SYMBOL_LANGUAGE (psym) = language;
   PSYMBOL_NAMESPACE (psym) = namespace;
   PSYMBOL_CLASS (psym) = class;
-  if (language == language_cplus)
-    {
-      demangled_name =
-	cplus_demangle (SYMBOL_NAME (psym), DMGL_PARAMS | DMGL_ANSI);
-      if (demangled_name == NULL)
-	{
-	  SYMBOL_DEMANGLED_NAME (psym) = NULL;
-	}
-      else
-	{
-	  SYMBOL_DEMANGLED_NAME (psym) =
-	    obsavestring (demangled_name, strlen (demangled_name),
-			  &objfile->psymbol_obstack);
-	  free (demangled_name);
-	}
-    }	
+  SYMBOL_INIT_DEMANGLED_NAME (psym, &objfile->psymbol_obstack);
 }
 
 /* Add a symbol with a CORE_ADDR value to a psymtab. */
@@ -1394,22 +1379,7 @@ add_psymbol_addr_to_list (name, namelength, namespace, class, list, val,
   SYMBOL_LANGUAGE (psym) = language;
   PSYMBOL_NAMESPACE (psym) = namespace;
   PSYMBOL_CLASS (psym) = class;
-  if (language == language_cplus)
-    {
-      demangled_name =
-	cplus_demangle (SYMBOL_NAME (psym), DMGL_PARAMS | DMGL_ANSI);
-      if (demangled_name == NULL)
-	{
-	  SYMBOL_DEMANGLED_NAME (psym) = NULL;
-	}
-      else
-	{
-	  SYMBOL_DEMANGLED_NAME (psym) =
-	    obsavestring (demangled_name, strlen (demangled_name),
-			  &objfile->psymbol_obstack);
-	  free (demangled_name);
-	}
-    }	
+  SYMBOL_INIT_DEMANGLED_NAME (psym, &objfile->psymbol_obstack);
 }
 
 #endif /* !INLINE_ADD_PSYMBOL */

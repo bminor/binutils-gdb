@@ -264,12 +264,7 @@ prim_record_minimal_symbol (name, address, ms_type)
     }
   msymbol = &msym_bunch -> contents[msym_bunch_index];
   SYMBOL_NAME (msymbol) = (char *) name;
-  /* Note that SYMBOL_LANGUAGE and SYMBOL_DEMANGLED_NAME are not initialized
-     to their final values until the minimal symbols are actually added to
-     the minimal symbol table.  We just set them to a known state here so
-     random values won't confuse anyone debugging the debugger. */
-  SYMBOL_LANGUAGE (msymbol) = language_unknown;
-  SYMBOL_DEMANGLED_NAME (msymbol) = NULL;
+  SYMBOL_INIT_LANGUAGE_SPECIFIC (msymbol, language_unknown);
   SYMBOL_VALUE_ADDRESS (msymbol) = address;
   MSYMBOL_TYPE (msymbol) = ms_type;
   /* FIXME:  This info, if it remains, needs its own field.  */
@@ -300,12 +295,7 @@ prim_record_minimal_symbol_and_info (name, address, ms_type, info)
     }
   msymbol = &msym_bunch -> contents[msym_bunch_index];
   SYMBOL_NAME (msymbol) = (char *) name;
-  /* Note that SYMBOL_LANGUAGE and SYMBOL_DEMANGLED_NAME are not initialized
-     to their final values until the minimal symbols are actually added to
-     the minimal symbol table.  We just set them to a known state here so
-     random values won't confuse anyone debugging the debugger. */
-  SYMBOL_LANGUAGE (msymbol) = language_unknown;
-  SYMBOL_DEMANGLED_NAME (msymbol) = NULL;
+  SYMBOL_INIT_LANGUAGE_SPECIFIC (msymbol, language_unknown);
   SYMBOL_VALUE_ADDRESS (msymbol) = address;
   MSYMBOL_TYPE (msymbol) = ms_type;
   /* FIXME:  This info, if it remains, needs its own field.  */
@@ -539,8 +529,7 @@ install_minimal_symbols (objfile)
       SYMBOL_VALUE_ADDRESS (&msymbols[mcount]) = 0;
       MSYMBOL_INFO (&msymbols[mcount]) = NULL;
       MSYMBOL_TYPE (&msymbols[mcount]) = mst_unknown;
-      SYMBOL_LANGUAGE (&msymbols[mcount]) = language_unknown;
-      SYMBOL_DEMANGLED_NAME (&msymbols[mcount]) = NULL;
+      SYMBOL_INIT_LANGUAGE_SPECIFIC (&msymbols[mcount], language_unknown);
 
       /* Attach the minimal symbol table to the specified objfile.
 	 The strings themselves are also located in the symbol_obstack
@@ -554,24 +543,7 @@ install_minimal_symbols (objfile)
 
       for ( ; mcount-- > 0 ; msymbols++)
 	{
-	  if (SYMBOL_LANGUAGE (msymbols) == language_auto)
-	    {
-	      demangled_name = cplus_demangle (SYMBOL_NAME (msymbols),
-					       DMGL_PARAMS | DMGL_ANSI);
-	      if (demangled_name == NULL)
-		{
-		  SYMBOL_LANGUAGE (msymbols) = language_unknown;
-		}
-	      else
-		{
-		  SYMBOL_LANGUAGE (msymbols) = language_cplus;
-		  SYMBOL_DEMANGLED_NAME (msymbols) =
-		    obsavestring (demangled_name, strlen (demangled_name),
-				  &objfile->symbol_obstack);
-					  
-		  free (demangled_name);
-		}
-	    }
+	  SYMBOL_INIT_DEMANGLED_NAME (msymbols, &objfile->symbol_obstack);
 	}
     }
 }

@@ -513,18 +513,7 @@ define_symbol (valu, string, desc, type, objfile)
 	 space tradeoff, that was decided in favor of time because it sped up
 	 C++ symbol lookups by a factor of about 20. */
 
-      if (SYMBOL_LANGUAGE (sym) == language_cplus)
-	{
-	  char *demangled =
-	    cplus_demangle (SYMBOL_NAME (sym), DMGL_PARAMS | DMGL_ANSI);
-	  if (demangled != NULL)
-	    {
-	      SYMBOL_DEMANGLED_NAME (sym) = 
-		obsavestring (demangled, strlen (demangled),
-			      &objfile -> symbol_obstack);
-	      free (demangled);
-	    }
-	}
+      SYMBOL_INIT_DEMANGLED_NAME (sym, &objfile->symbol_obstack);
     }
   p++;
 

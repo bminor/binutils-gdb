@@ -1,3 +1,51 @@
+Fri Jan  1 11:56:23 1993  Fred Fish  (fnf@cygnus.com)
+
+	* tm-sun4sol2.h (CPLUS_MARKER):  Remove, now set in tm-sysv4.h.
+	* tm-sysv4.h (CPLUS_MARKER):  By default, g++ uses '.' as the
+	CPLUS_MARKER for all SVR4 systems, so follow suit.
+	* defs.h (strdup_demangled):  Remove prototype.
+	* dwarfread.c (enum_type, synthesize_typedef):  Use new macro
+	SYMBOL_INIT_LANGUAGE_SPECIFIC.
+	* dwarfread.c (new_symbol):  Use SYMBOL_INIT_DEMANGLED_NAME.
+	* minsyms.c (install_minimal_symbols, prim_record_minimal_symbol,
+	prim_record_minimal_symbol_and_info):  Use new macro
+	SYMBOL_INIT_LANGUAGE_SPECIFIC.
+	* minsyms.c (install_minimal_symbols):  Use new macro
+	SYMBOL_INIT_DEMANGLED_NAME.
+	* stabsread.c (define_symbol):  Use new macro
+	SYMBOL_INIT_DEMANGLED_NAME.
+	* symfile.c (add_psymbol_to_list, add_psymbol_addr_to_list):
+	Use new macro SYMBOL_INIT_DEMANGLED_NAME.
+	* symfile.h (ADD_PSYMBOL_VT_TO_LIST):  Use new macro
+	SYMBOL_INIT_DEMANGLED_NAME.
+	* symmisc.c (dump_msymbols, dump_symtab, print_partial_symbol):
+	SYMBOL_DEMANGLED_NAME now tests language itself.
+	* symtab.c (COMPLETION_LIST_ADD_SYMBOL):  SYMBOL_DEMANGLED_NAME
+	now tests language itself.
+	* symtab.h (SYMBOL_CPLUS_DEMANGLED_NAME):  New macro that does
+	what SYMBOL_DEMANGLED_NAME used to do, directly access the C++
+	mangled name member in the language dependent portion of a symbol.
+	* symtab.h (SYMBOL_DEMANGLED_NAME):  New macro that returns the
+	mangled name member appropriate for a symbol's language.
+	* symtab.h (SYMBOL_SOURCE_NAME, SYMBOL_LINKAGE_NAME,
+	SYMBOL_MATCHES_NAME, SYMBOL_MATCHES_REGEXP):
+	SYMBOL_DEMANGLED_NAME now tests language itself.
+	* symtab.h (SYMBOL_INIT_LANGUAGE_SPECIFIC):  New macro that
+	initializes language dependent portion of symbol.
+	* symtab.h (SYMBOL_INIT_DEMANGLED_NAME):  New macro that
+	demangles and caches the demangled form of symbol names.
+	* utils.c (fputs_demangled, fprint_symbol):  Use current language
+	to select an appropriate demangling algorithm.
+	* utils.c (strdup_demangled):  Remove, no longer used.
+	**** start-sanitize-chill ****
+	* symtab.h (SYMBOL_CHILL_DEMANGLED_NAME):  New macro that directly
+	access the Chill mangled name member in the language dependent
+	portion of a symbol.
+	* ch-lang.c (chill_demangle):  New function, simple demangler.
+	* defs.h (chill_demangle):  Add prototype.
+	* symtab.h (language_dependent_info):  Add struct for Chill.	
+	**** end-sanitize-chill ****
+
 Thu Dec 31 11:06:38 1992  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (BISON):  Add comment that when bison is used, it

@@ -37,11 +37,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define	SUN_FIXED_LBRAC_BUG
 
-/* Assembler doesn't grok dollar signs in identifiers, so we use dots instead.
-   This item must be coordinated with G++. */
-#undef CPLUS_MARKER
-#define CPLUS_MARKER '.'
-
 #if 0		/* Setjmp/longjmp are not as well doc'd in SunOS 5.x yet */
 
 /* Offsets into jmp_buf.  Not defined by Sun, but at least documented in a

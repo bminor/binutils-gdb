@@ -1737,8 +1737,7 @@ enum_type (dip, objfile)
 	  memset (sym, 0, sizeof (struct symbol));
 	  SYMBOL_NAME (sym) = create_name (list -> field.name,
 					   &objfile->symbol_obstack);
-	  SYMBOL_LANGUAGE (sym) = cu_language;
-	  SYMBOL_DEMANGLED_NAME (sym) = NULL;
+	  SYMBOL_INIT_LANGUAGE_SPECIFIC (sym, cu_language);
 	  SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
 	  SYMBOL_CLASS (sym) = LOC_CONST;
 	  SYMBOL_TYPE (sym) = type;
@@ -2939,19 +2938,7 @@ new_symbol (dip, objfile)
 	 C++ symbol lookups by a factor of about 20. */
 
       SYMBOL_LANGUAGE (sym) = cu_language;
-      if (SYMBOL_LANGUAGE (sym) == language_cplus)
-	{
-	  char *demangled =
-	    cplus_demangle (SYMBOL_NAME (sym), DMGL_PARAMS | DMGL_ANSI);
-	  if (demangled != NULL)
-	    {
-	      SYMBOL_DEMANGLED_NAME (sym) = 
-		obsavestring (demangled, strlen (demangled),
-			      &objfile -> symbol_obstack);
-	      free (demangled);
-	    }
-	}
-
+      SYMBOL_INIT_DEMANGLED_NAME (sym, &objfile -> symbol_obstack);
       switch (dip -> die_tag)
 	{
 	case TAG_label:
@@ -3080,8 +3067,7 @@ synthesize_typedef (dip, objfile, type)
       memset (sym, 0, sizeof (struct symbol));
       SYMBOL_NAME (sym) = create_name (dip -> at_name,
 				       &objfile->symbol_obstack);
-      SYMBOL_LANGUAGE (sym) = cu_language;
-      SYMBOL_DEMANGLED_NAME (sym) = NULL;
+      SYMBOL_INIT_LANGUAGE_SPECIFIC (sym, cu_language);
       SYMBOL_TYPE (sym) = type;
       SYMBOL_CLASS (sym) = LOC_TYPEDEF;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;

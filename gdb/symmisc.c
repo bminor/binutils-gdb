@@ -227,8 +227,7 @@ dump_msymbols (objfile, outfile)
 	}
       fprintf_filtered (outfile, "[%2d] %c %#10x %s", index, ms_type,
 			SYMBOL_VALUE_ADDRESS (msymbol), SYMBOL_NAME (msymbol));
-      if (SYMBOL_LANGUAGE (msymbol) == language_cplus &&
-	  SYMBOL_DEMANGLED_NAME (msymbol) != NULL)
+      if (SYMBOL_DEMANGLED_NAME (msymbol) != NULL)
 	{
 	  fprintf_filtered (outfile, "  %s", SYMBOL_DEMANGLED_NAME (msymbol));
 	}
@@ -333,8 +332,7 @@ dump_symtab (objfile, symtab, outfile)
       if (BLOCK_FUNCTION (b))
 	{
 	  fprintf (outfile, " %s", SYMBOL_NAME (BLOCK_FUNCTION (b)));
-	  if (SYMBOL_LANGUAGE (BLOCK_FUNCTION (b)) == language_cplus &&
-	      SYMBOL_DEMANGLED_NAME (BLOCK_FUNCTION (b)) != NULL)
+	  if (SYMBOL_DEMANGLED_NAME (BLOCK_FUNCTION (b)) != NULL)
 	    {
 	      fprintf (outfile, " %s",
 		       SYMBOL_DEMANGLED_NAME (BLOCK_FUNCTION (b)));
@@ -604,8 +602,7 @@ print_partial_symbol (p, count, what, outfile)
   while (count-- > 0)
     {
       fprintf_filtered (outfile, "    `%s'", SYMBOL_NAME(p));
-      if (SYMBOL_LANGUAGE (p) == language_cplus &&
-	  SYMBOL_DEMANGLED_NAME (p) != NULL)
+      if (SYMBOL_DEMANGLED_NAME (p) != NULL)
 	{
 	  fprintf_filtered (outfile, "  `%s'", SYMBOL_DEMANGLED_NAME (p));
 	}

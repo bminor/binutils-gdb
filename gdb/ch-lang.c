@@ -25,6 +25,30 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "language.h"
 #include "ch-lang.h"
 
+
+/* For now, Chill uses a simple mangling algorithm whereby you simply
+   discard everything after the occurance of two successive CPLUS_MARKER
+   characters to derive the demangled form. */
+
+char *
+chill_demangle (mangled)
+     const char *mangled;
+{
+  char *joiner;
+  char *demangled;
+
+  joiner = strchr (mangled, CPLUS_MARKER);
+  if (joiner != NULL && *(joiner + 1) == CPLUS_MARKER)
+    {
+      demangled = savestring (mangled, joiner - mangled);
+    }
+  else
+    {
+      demangled = NULL;
+    }
+  return (demangled);
+}
+
 static void
 chill_printchar (c, stream)
      register int c;
