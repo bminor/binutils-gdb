@@ -687,6 +687,35 @@ else
 	done
 fi
 
+dsp_files="ChangeLog Makefile.in configure.in"
+if ( echo $* | grep keep\-dsp > /dev/null ) ; then
+        for i in $dsp_files ; do
+                if test ! -d $i && (grep sanitize-dsp $i > /dev/null) ; then
+                        if [ -n "${verbose}" ] ; then
+                                echo Keeping dsp stuff in $i
+                        fi
+                fi
+        done
+else
+        for i in * ; do
+                if test ! -d $i && (grep sanitize-dsp $i > /dev/null) ; then
+                        if [ -n "${verbose}" ] ; then
+                                echo Removing traces of \"dsp\" from $i...
+                        fi
+                        cp $i new
+                        sed '/start\-sanitize\-dsp/,/end-\sanitize\-dsp/d' < $i > new
+                        if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+                                if [ -n "${verbose}" ] ; then
+                                        echo Caching $i in .Recover...
+                                fi
+                                mv $i .Recover
+                        fi
+                        mv new $i
+                fi
+        done
+fi
+
+
 beos_files="ChangeLog configure.in"
 if ( echo $* | grep keep\-beos > /dev/null ) ; then
 	for i in $beos_files ; do
