@@ -1,3 +1,9 @@
+2003-07-06  Christopher Faylor  <cgf@redhat.com>
+
+	* win32-nat.c (solib_symbols_add): Use one variable for all section
+	address stuff.  Pass variable rather than address of variable to
+	safe_symbol_file_add.
+
 2003-07-06  Andreas Schwab  <schwab@suse.de>
 
 	* m68klinux-nat.c (fill_fpregset): Fix use of loop index.
