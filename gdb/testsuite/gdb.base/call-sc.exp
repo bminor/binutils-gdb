@@ -115,7 +115,7 @@ proc start_scalars_test { type } {
     set test "ptype; ${testfile}"
     set foo_t "xxx"
     gdb_test_multiple "ptype ${type}" "${test}" {
-	-re "type = (\[^\\r\\n\]*).*$gdb_prompt $" {
+	-re "type = (\[^\r\n\]*)\r\n$gdb_prompt $" {
 	    set foo_t "$expect_out(1,string)"
 	    pass "$test (${foo_t})"
 	}

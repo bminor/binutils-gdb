@@ -1,3 +1,8 @@
+2004-04-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/call-sc.exp (start_scalars_test): Fix regular
+	expression that checks the return type.
+
 2004-04-23  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.base/call-sc.exp: New test of scalar call/return values.
