@@ -1684,79 +1684,18 @@ Fri Mar 12 18:06:21 1999  Stan Shebs  <shebs@andros.cygnus.com>
  	commands.  They're not germane to this test, and they don't work
  	that way on remote targets.
 
-1999-03-03  James Ingham  <jingham@cygnus.com>
-
-	* browser.test: Fixed up to match the new function browser.
-	This is not done yet...
-
-	* srcwin.test: Check for errors when the bbox is called for a text 
-	item that is not on screen (so bbox is "").  Return something more 
-	useful.
-
 1999-03-01  James Ingham  <jingham@cygnus.com>
 
 	* Changelog entries merged over from gdb development branch.
-
-       1999-01-12  Martin Hunt  <hunt@cygnus.com>
-
-	       * gdb.gdbtk/srcwin.test: Add a bunch of tests for the source
-	       window filename and function comboboxes.  Add in stack tests.
-
-       1999-01-11  Martin Hunt  <hunt@cygnus.com>
-
-	       * gdb.gdbtk/srcwin.test: New file. Source Window tests.
-	       * gdb.gdbtk/srcwin.exp: New file. Source Window tests.
-
-       Wed Jan  6 09:22:52 1999  Keith Seitz  <keiths@cygnus.com>
-
-	       * gdb.gdbtk/c_variable.test (c_variable-1.9): Add new
-	       test to check for creation of a variable that is really a type.
-	       (c_variable-7.81): Use "output" instead of "print" to get PC.
-	       Include missing bits of test.
-
-	       * gdb.gdbtk/cpp_variable.test (cpp_variable-1.6): Default format
-	       is now "natural", not "hexadecimal"
-	       (cpp_variable-2.22): Ditto.
-	       (cpp_variable-2.24): Force format to hex before getting value.
-
-	       * gdb.gdbtk/cpp_variable.exp: Supply missing arg to gdbtk_analyze_results.
-
-       Tue Jan  5 12:40:52 1999  Keith Seitz  <keiths@cygnus.com>
-
-	       * gdb.gdbtk/c_variable.c, c_variable.test, c_variable.exp: New C
-	       language tests for variable object interface.
-
-	       * gdb.gdbtk/cpp_variable.h, cpp_variable.cc, cpp_variable.test,
-	       cpp_variable.exp: New C++ language tests for variable object
-	       interface.
-
-	       * gdb.gdbtk/Makefile.in (EXECUTABLES): Add c_variable and cpp_variable.
 
        Tue Jan  5 12:33:47 1999  Keith Seitz  <keiths@cygnus.com>
 
 	       * lib/gdb.exp (gdbtk_analyze_results): Generic function
 	       for outputting results of test run.
 
-	       * gdb.gdbtk/defs (gdbtk_test): Handle xpass and xfail.
-	       (gdbtk_test_error): New proc which handles error aborts.
-
-	       * gdb.gdbtk/console.exp: Use gdbtk_analyze_results.
-	       Check if we have a valid DISPLAY before running.
-	       * gdb.gdbtk/browser.exp: Ditto.
-
-       1998-12-07  Martin M. Hunt  <hunt@cygnus.com>
+	1998-12-07  Martin M. Hunt  <hunt@cygnus.com>
 
 	       * lib/gdb.exp (gdbtk_start): Fix path for itcl library.
-	       * gdb.gdbtk/browser.test: Change "manage open" to ManagedWin::open.
-	       * gdb.gdbtk/console.test: Same.
-	       * gdb.gdbtk/*: Update from devo.
-
-       Fri Jul 24 14:57:19 1998  Keith Seitz  <keiths@cygnus.com>
-
-	       * gdb.gdbtk/Makefile.in: Add new example program "stack".
-	       * gdb.gdbtk/browser.test,browser.exp: Add browser window
-		 tests.
-	       * gdb.gdbtk/stack1.c,stack2.c: Test case for browser window.
 
 1999-02-25  Felix Lee  <flee@cygnus.com>
 
@@ -2286,11 +2225,6 @@ Thurs Jul 9 11:08:31 1998  Dawn Perchik  <dawn@cygnus.com>
 	* gdb.base/commands.exp: Break up infrun_breakpoint_command_test 
 	into two parts to get around a synchronization problem in expect.
 
-Sun Jun 28 22:34:34 1998  Martin M. Hunt  <hunt@cygnus.com>
-
-	* gdb.gdbtk/simple.c (main): Make main return an
-	int so compiler will stop complaining.
-
 Fri Jun 26 14:27:13 1998  Keith Seitz  <keiths@cygnus.com>
 
 	* lib/gdb.exp (gdbtk_start): Add startup for gdbtk.
@@ -2300,9 +2234,6 @@ Fri Jun 26 14:27:13 1998  Keith Seitz  <keiths@cygnus.com>
 	* configure: Regenerate.
 
 	* gdb.gdbtk: New directory to hold gdbtk tests.
-
-	* gdb.gdbtk/console.{exp, test}: New console window tests.
-
 
 Fri Jun 26 14:52:47 1998  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
