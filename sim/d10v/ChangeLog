@@ -1,9 +1,16 @@
+Tue Dec  2 15:38:34 1997  Fred Fish  <fnf@cygnus.com>
+
+	* interp.c (sim_resume): Call do_2_short with LEFT_FIRST or
+	RIGHT_FIRST, as appropriate, instead of hardcoded ints that
+	don't match enum values.
+
 Tue Dec  2 15:01:08 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* simops.c (OP_3A00): For "macu", perform multiply stage using 32
  	bit rather than 16 bit precision.
 	(OP_3C00): For "mulxu", store unsigned product in ACC.
 	(OP_3800): For "msbu", subtract unsigned product from ACC,
+	(OP_0): For "sub", compute carry by comparing inputs.
 
 Tue Dec  2 11:04:37 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 

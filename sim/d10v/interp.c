@@ -619,14 +619,7 @@ pc_addr()
 }
 
 
-static int stop_simulator;
-
-static void
-sim_ctrl_c()
-{
-  stop_simulator = 1;
-}
-
+static int stop_simulator = 0;
 
 int
 sim_stop (sd)
@@ -643,13 +636,12 @@ sim_resume (sd, step, siggnal)
      SIM_DESC sd;
      int step, siggnal;
 {
-  void (*prev) ();
   uint32 inst;
 
 /*   (*d10v_callback->printf_filtered) (d10v_callback, "sim_resume (%d,%d)  PC=0x%x\n",step,siggnal,PC); */
   State.exception = 0;
-  prev = signal(SIGINT, sim_ctrl_c);
-  stop_simulator = step;
+  if (step)
+    sim_stop (sd);
 
   do
     {
@@ -664,37 +656,43 @@ sim_resume (sd, step, siggnal)
 	  break;
 	case 0x80000000:
 	  /* R -> L */
-	  do_2_short ( inst & 0x7FFF, (inst & 0x3FFF8000) >> 15, 0);
+	  do_2_short ( inst & 0x7FFF, (inst & 0x3FFF8000) >> 15, RIGHT_FIRST);
 	  break;
 	case 0x40000000:
 	  /* L -> R */
-	  do_2_short ((inst & 0x3FFF8000) >> 15, inst & 0x7FFF, 1);
+	  do_2_short ((inst & 0x3FFF8000) >> 15, inst & 0x7FFF, LEFT_FIRST);
 	  break;
 	case 0:
 	  do_parallel ((inst & 0x3FFF8000) >> 15, inst & 0x7FFF);
 	  break;
 	}
       
-      if (State.RP && PC == RPT_E)
+      /* calculate the next PC */
+      if (!State.pc_changed)
 	{
-	  RPT_C -= 1;
-	  if (RPT_C == 0)
+	  if (State.RP && PC == RPT_E)
 	    {
-	      State.RP = 0;
-	      PC++;
+	      /* Note: The behavour of a branch instruction at RPT_E
+                 is implementation dependant, this simulator takes the
+                 branch.  Branching to RPT_E is valid, the instruction
+                 must be executed before the loop is taken.  */
+	      RPT_C -= 1;
+	      if (RPT_C == 0)
+		{
+		  State.RP = 0;
+		  PC++;
+		}
+	      else
+		PC = RPT_S;
 	    }
 	  else
-	    PC = RPT_S;
+	    PC++;
 	}
-      else if (!State.pc_changed)
-	PC++;
-    } 
+    }
   while ( !State.exception && !stop_simulator);
   
   if (step && !State.exception)
     State.exception = SIGTRAP;
-
-  signal(SIGINT, prev);
 }
 
 int
@@ -876,9 +874,14 @@ sim_stop_reason (sd, reason, sigrc)
 
     default:				/* some signal */
       *reason = sim_stopped;
-      *sigrc = State.exception;
+      if (stop_simulator && !State.exception)
+	*sigrc = SIGINT;
+      else
+	*sigrc = State.exception;
       break;
-    } 
+    }
+
+  stop_simulator = 0;
 }
 
 void
