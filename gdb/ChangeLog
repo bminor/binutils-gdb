@@ -1,3 +1,11 @@
+Thu Jul 11 21:13:21 1996  Mark Alexander  <marka@cygnus.com>
+
+	* monitor.c (monitor_write_memory, monitor_read_memory_single):
+	Disable use of "long long" memory read/write commands; can't
+	use them because we hold the values to read/write in an int
+	variable, and because strtoul fails on values that exceed the
+	size of a long.  This fixes breakpoint problems on MON960.
+
 Thu Jul 11 11:39:31 1996  Fred Fish  <fnf@cygnus.com>
 
 	* config/m68k/xm-hp300hpux.h (HAVE_MMAP): Remove definition.
