@@ -254,7 +254,6 @@ proc test_scalar_returns { } {
     set test "return foo; ${tests}"
     set return_value_unknown 0
     set return_value_unimplemented 0
-    setup_kfails call-sc-tld i*86-*-* gdb/1623
     gdb_test_multiple "return foo" "${test}" {
 	-re "The location" {
 	    # Ulgh, a struct return, remember this (still need prompt).
@@ -294,9 +293,6 @@ proc test_scalar_returns { } {
     setup_kfails call-sc-tll x86_64-*-* gdb/1624
     setup_kfails call-sc-tld x86_64-*-* gdb/1624
     setup_kfails call-sc-te x86_64-*-* gdb/1624
-    setup_kfails call-sc-tf i*86-*-* gdb/1623
-    setup_kfails call-sc-td i*86-*-* gdb/1623
-    setup_kfails call-sc-tld i*86-*-* gdb/1623
     gdb_test_multiple "p/c L" "${test}" {
 	-re " = 49 '1'.*${gdb_prompt} $" {
 	    if $return_value_unknown {
