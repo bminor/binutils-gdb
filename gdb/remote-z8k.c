@@ -40,12 +40,7 @@ extern int stop_soon_quietly;           /* for wait_for_inferior */
 /* Forward data declarations */
 extern struct target_ops sim_ops;		/* Forward declaration */
 
-/* Forward function declarations */
-static void sim_fetch_registers ();
-static void sim_close ();
-
 void sim_store_register();
-
 void sim_set_oc();
 
 
@@ -55,10 +50,11 @@ sim_write_inferior_memory (memaddr, myaddr, len)
      unsigned char *myaddr;
      int len;
 {
-return  sim_write(memaddr, myaddr, len);
+  sim_write(memaddr, myaddr, len);
+  return 1;
 }
 
-static int
+static void
 store_register(regno)
 int regno;
 {
@@ -71,7 +67,6 @@ int regno;
   {
     sim_store_register(regno,read_register(regno));
   }
-  return 0;
 }
 
 
@@ -144,14 +139,13 @@ int	fromtty;
 
 /* This is called not only when we first attach, but also when the
    user types "run" after having attached.  */
-void
+static void
 sim_create_inferior (execfile, args, env)
      char *execfile;
      char *args;
      char **env;
 {
   int entry_pt;
-  char buffer[100];    
 
   if (args && *args)
    error ("Can't pass arguments to remote sim process.");
@@ -161,15 +155,10 @@ sim_create_inferior (execfile, args, env)
 
   entry_pt = (int) bfd_get_start_address (exec_bfd);
 
-
-
   sim_kill(NULL,NULL);	 
   sim_clear_breakpoints();
   init_wait_for_inferior ();
-
-
-
-  insert_breakpoints ();	/* Needed to get correct instruction in cache */
+  insert_breakpoints ();
   proceed(entry_pt, -1, 0);
 }
 
@@ -200,19 +189,13 @@ static void
 sim_close (quitting)
      int quitting;
 {
-
-
-  /* Clear any break points */
   sim_clear_breakpoints();
-
-  /* Put this port back into REMOTE mode */ 
-  sleep(1);			/* Let any output make it all the way back */
 }
 
 /* Terminate the open connection to the remote debugger.
    Use this when you want to detach and do something else
    with your gdb.  */
-int
+static void
 sim_detach (args,from_tty)
      char *args;
      int from_tty;
@@ -222,7 +205,6 @@ sim_detach (args,from_tty)
   pop_target();			/* calls sim_close to do the real work */
   if (from_tty)
    printf_filtered ("Ending remote %s debugging\n", target_shortname);
-  return 0;
 }
  
 /* Tell the remote machine to resume.  */
@@ -235,25 +217,9 @@ int
 sim_wait (status)
      WAITTYPE *status;
 {
-
-*status = sim_stop_signal();
-return 0;
+  *status = sim_stop_signal();
+  return 0;
 }
-
-/* Return the name of register number REGNO
-   in the form input and output by sim.
-
-   Returns a pointer to a static buffer containing the answer.  */
-static char *
-get_reg_name (regno)
-     int regno;
-{
-  static  char *rn[NUM_REGS]= REGISTER_NAMES;
-  return rn[regno];
-}
-
-
-
 
 
 /* Get ready to modify the registers array.  On machines which store
@@ -262,29 +228,10 @@ get_reg_name (regno)
    that registers contains all the registers from the program being
    debugged.  */
 
-void
+static void
 sim_prepare_to_store ()
 {
   /* Do nothing, since we can store individual regs */
-}
-
-static CORE_ADDR 
-translate_addr(addr)
-CORE_ADDR addr;
-{
-
-	return(addr);
-
-}
-
-/* Read a word from remote address ADDR and return it.
- * This goes through the data cache.
- */
-int
-sim_fetch_word (addr)
-     CORE_ADDR addr;
-{
-/*	return dcache_fetch (addr);*/
 }
 
 
@@ -359,45 +306,23 @@ if (exec_bfd)
 void
 sim_before_main_loop ()
 {
-  char ttyname[100];
-  char *p, *p2;
-  extern FILE *instream;
-  extern jmp_buf to_top_level;
-
   push_target (&sim_ops);
 }
 
 
-#define MAX_BREAKS	16
-static int num_brkpts=0;
-static int
-sim_insert_breakpoint(addr, save)
-CORE_ADDR	addr;
-char		*save;	/* Throw away, let sim save instructions */
-{
-  abort();
-}
-static int
-sim_remove_breakpoint(addr, save)
-CORE_ADDR	addr;
-char		*save;	/* Throw away, let sim save instructions */
-{
-  abort();
-}
-
 /* Clear the sims notion of what the break points are */
-static int
+static void
 sim_mourn() 
 { 
   sim_clear_breakpoints();
   generic_mourn_inferior ();
-  return 0;
 }
 
-static int rem_resume(a,b)
+static void rem_resume(a,b)
+int a;
+int b;
 {
   sim_resume(a,b);
-  return 0;
 }
 
 /* Define the target subroutine names */
