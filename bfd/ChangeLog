@@ -1,5 +1,7 @@
 Fri Jun  9 07:54:29 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
+	* versados.c (struct esd, get_4): Lint; use unsigned chars.
+
 	* coff-i960.c (coff_i960_relocate):  Compare output section names
 	when converting for vxworks.
 
