@@ -1,5 +1,10 @@
 2004-05-13  J. Brobecker  <brobecker@gnat.com>
 
+	* aix-thread.c: s/ppc_floating_point_p/ppc_floating_point_unit_p/.
+	Fixes a link link failure.
+
+2004-05-13  J. Brobecker  <brobecker@gnat.com>
+
 	* aix-thread.c (store_regs_kernel_thread): Fix a little obvious
 	error that was causing the build to fail.
 

@@ -1027,7 +1027,7 @@ supply_fprs (double *vals)
 
   /* This function should never be called on architectures without
      floating-point registers.  */
-  gdb_assert (ppc_floating_point_p (current_gdbarch));
+  gdb_assert (ppc_floating_point_unit_p (current_gdbarch));
 
   for (regno = 0; regno < ppc_num_fprs; regno++)
     supply_register (regno + tdep->ppc_fp0_regnum, (char *) (vals + regno));
@@ -1122,7 +1122,7 @@ fetch_regs_user_thread (pthdb_pthread_t pdtid)
 
   /* Floating-point registers.  */
 
-  if (ppc_floating_point_p (current_gdbarch))
+  if (ppc_floating_point_unit_p (current_gdbarch))
     supply_fprs (ctx.fpr);
 
   /* Special registers.  */
@@ -1284,7 +1284,7 @@ fill_fprs (double *vals)
 
   /* This function should never be called on architectures without
      floating-point registers.  */
-  gdb_assert (ppc_floating_point_p (current_gdbarch));
+  gdb_assert (ppc_floating_point_unit_p (current_gdbarch));
 
   for (regno = tdep->ppc_fp0_regnum;
        regno < tdep->ppc_fp0_regnum + ppc_num_fprs;
@@ -1408,7 +1408,7 @@ store_regs_user_thread (pthdb_pthread_t pdtid)
       }
 
   /* Collect floating-point register values from the regcache.  */
-  if (ppc_floating_point_p (current_gdbarch))
+  if (ppc_floating_point_unit_p (current_gdbarch))
     fill_fprs (ctx.fpr);
 
   /* Special registers (always kept in ctx as 64 bits).  */
