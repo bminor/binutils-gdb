@@ -32,13 +32,10 @@ AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
 
-# Directories that need to be configured in all configurations.
-configdirs=
-
 # Add HP-specific tests when appropriate.
 case $target in
   hppa*-*-hpux*)
-    configdirs="$configdirs gdb.hp" ;;
+    AC_CONFIG_SUBDIRS(gdb.hp) ;;
 esac
 
 # With stabs.
@@ -63,7 +60,7 @@ esac])
 
 # Add stabs tests when appropriate.
 if test $with_stabs = yes; then
-  configdirs="$configdirs gdb.stabs"
+   AC_CONFIG_SUBDIRS(gdb.stabs)
 fi
 
 # Enable gdbtk.
@@ -82,7 +79,7 @@ esac
 
 # Add gdbtk tests when appropriate.
 if test $enable_gdbtk = yes; then
-  configdirs="$configdirs gdb.gdbtk"
+   AC_CONFIG_SUBDIRS(gdb.gdbtk)
 fi
 
 # Enable shared libraries.
@@ -117,7 +114,6 @@ AC_CHECK_HEADERS(pthread.h)
 
 AC_EXEEXT
 
-AC_CONFIG_SUBDIRS($configdirs)
 AC_OUTPUT([Makefile \
   gdb.ada/Makefile gdb.ada/gnat_ada.gpr:gdb.ada/gnat_ada.gin \
   gdb.arch/Makefile gdb.asm/Makefile gdb.base/Makefile \

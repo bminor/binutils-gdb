@@ -1,3 +1,9 @@
+2005-01-07  Andrew Cagney  <cagney@gnu.org>
+
+	* configure.in: Replace configdirs with multiple references to
+	AC_CONFIG_SUBDIRS.
+	* configure: Re-generate.
+	
 2005-01-04  Andrew Cagney  <cagney@gnu.org>
 
 	* gdbint.texinfo (Versions and Branches): Make the date (YYYYMMDD)

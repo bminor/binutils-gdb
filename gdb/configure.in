@@ -118,7 +118,6 @@ AC_DEFINE_DIR(DEBUGDIR, debugdir,
 #AC_DEFINE_UNQUOTED(DEBUGDIR, "$debugdir"),
 
 AC_CONFIG_SUBDIRS(doc testsuite)
-configdirs=
 
 . $srcdir/configure.host
 
@@ -1328,7 +1327,7 @@ if test "${enable_gdbtk}" = "yes"; then
 	fi
     fi
 
-    configdirs="${configdirs} gdbtk"
+    AC_CONFIG_SUBDIRS(gdbtk)
 fi
 
 AC_SUBST(X_CFLAGS)
@@ -1475,21 +1474,19 @@ AC_ARG_ENABLE(multi-ice,
     *) AC_MSG_ERROR([bad value $enableval for --enable-multi-ice]) ;;
   esac])
 if test "x$enable_multi_ice" = xyes; then
-  configdirs="$configdirs multi-ice"
+   AC_CONFIG_SUBDIRS(multi-ice)
 fi
 
 # We only build gdbserver automatically if host and target are the same.
 if test "x$target" = "x$host"; then
   AC_MSG_CHECKING(whether gdbserver is supported on this host)
   if test "x$build_gdbserver" = xyes; then
-    configdirs="$configdirs gdbserver"
     AC_MSG_RESULT(yes)
+    AC_CONFIG_SUBDIRS(gdbserver)
   else
     AC_MSG_RESULT(no)
   fi
 fi
-
-AC_CONFIG_SUBDIRS($configdirs)
 
 # If hostfile (XM_FILE) and/or targetfile (DEPRECATED_TM_FILE) and/or
 # nativefile (NAT_FILE) is not set in config/*/*.m[ht] files, we link
