@@ -9,8 +9,8 @@ if [istarget mips*-*-*] then {
     set gpr_ilocks [expr [istarget mipstx39*-*-*]]
 
 # start-sanitize-tx19
-    set ilocks [expr ilocks || [istarget mipstx19*-*-*]]
-    set gpr_ilocks [expr gpr_ilocks || [istarget mipstx19*-*-*]]
+    set ilocks [expr $ilocks || [istarget mipstx19*-*-*]]
+    set gpr_ilocks [expr $gpr_ilocks || [istarget mipstx19*-*-*]]
 # end-sanitize-tx19
 
     run_dump_test "abs"
