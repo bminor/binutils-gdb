@@ -2717,7 +2717,6 @@ coff_set_section_contents (abfd, section, location, offset, count)
 	recend = rec + count;
 	while (rec < recend)
 	  {
-	    BFD_ASSERT (bfd_get_32 (abfd, rec + 4) == 2);
 	    ++section->lma;
 	    rec += bfd_get_32 (abfd, rec) * 4;
 	  }
