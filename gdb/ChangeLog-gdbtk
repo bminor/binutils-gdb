@@ -1,3 +1,8 @@
+1999-02-02  Martin Hunt  <hunt@cygnus.com>
+
+	* gdbtk-cmds.c (get_register): For RAW display, concat all the
+	pieces together before calling fputs.
+
 1999-02-01  Martin Hunt  <hunt@cygnus.com>
 
 	* gdbtk-cmds.c: (gdb_set_bp): Change the "type" argument

@@ -1711,13 +1711,18 @@ get_register (regnum, fp)
   if (format == 'r')
     {
       int j;
-      printf_filtered ("0x");
+      char *ptr, buf[1024];
+
+      strcpy (buf, "0x");
+      ptr = buf + 2;      
       for (j = 0; j < REGISTER_RAW_SIZE (regnum); j++)
         {
           register int idx = TARGET_BYTE_ORDER == BIG_ENDIAN ? j
             : REGISTER_RAW_SIZE (regnum) - 1 - j;
-          printf_filtered ("%02x", (unsigned char)raw_buffer[idx]);
+          sprintf(ptr, "%02x", (unsigned char)raw_buffer[idx]);
+	  ptr += 2;
         }
+      fputs_filtered (buf, gdb_stdout);
     }
   else
     val_print (REGISTER_VIRTUAL_TYPE (regnum), virtual_buffer, 0, 0,
