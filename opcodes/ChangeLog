@@ -1,4 +1,10 @@
 start-sanitize-sky
+Fri Jan 30 17:39:21 1998  Ian Carmichael  <iancarm@cygnus.com>
+
+	* dvp-opc.c, fixed encoding of a bunch of instructions to
+	be consistent with the asmvu assembler (and inconsistent
+	with the specification).
+
 Thu Jan 29 18:14:56 1998  Ian Carmichael  <iancarm@cygnus.com>
 
 	* dvp-opc.c, fixed order of pkemscal/pkemscalf instructions
