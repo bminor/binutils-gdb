@@ -1,11 +1,60 @@
+#
+# Makefile
+#   Copyright (C) 1990, 1991 Cygnus Support
+#
+# This file is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+#
+
 srcdir = .
 
-ddestdir = /usr/local
-idestdir = $(ddestdir)
+prefix = /usr/local
+
+bindir = $(prefix)/bin
+datadir = $(prefix)/lib
+libdir = $(prefix)/lib
+mandir = $(datadir)/man
+man1dir = $(mandir)/man1
+man2dir = $(mandir)/man2
+man3dir = $(mandir)/man3
+man4dir = $(mandir)/man4
+man5dir = $(mandir)/man5
+man6dir = $(mandir)/man6
+man7dir = $(mandir)/man7
+man8dir = $(mandir)/man8
+man9dir = $(mandir)/man9
+infodir = $(prefix)/info
+includedir = $(prefix)/include
+docdir = $(datadir)/doc
+
 MKDOC=$(srcdir)/chew
 SHELL = /bin/sh
 
+INSTALL = install -c
+INSTALL_PROGRAM = $(INSTALL)
+INSTALL_DATA = $(INSTALL)
+
+AR = ar
+AR_FLAGS = qv
+BISON = bison
 MAKEINFO = makeinfo
+RANLIB = ranlib
+
+#### Host, target, and site specific Makefile fragments come in here.
+###
+
+CFLAGS = $(H_CFLAGS) -I$(srcdir)/.. -I$(srcdir)/../../include 
 
 # main GDB source directory
 
@@ -51,20 +100,16 @@ STAGESTUFF = $(DOCFILES) *.info*
 
 all install:
 
-all-info: bfd.info
+info: bfd.info
 
-install-info: all-info
+install-info: info
 	for i in *.info* ; do \
-		echo Installing $$i... ; \
-		(cp $$i $(idestdir)/info/$$i.new \
-			&& mv -f $(idestdir)/info/$$i.new $(idestdir)/info/$$i) \
-		|| exit 1 ; \
+		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
 	done
 
 docs: chew protos bfd.info bfd.dvi bfd.ps
 
-chew:chew.c
-	gcc -o chew -I$(srcdir)/.. -I$(srcdir)/../../include chew.c
+chew: chew.c
 
 protos: libbfd.h libcoff.h bfd.h
 
@@ -172,7 +217,8 @@ bfd.h: $(srcdir)/../bfd-in.h 		\
 	$(MKDOC) -g<$(srcdir)/../archive.c >>bfd.h
 	$(MKDOC) -g<$(srcdir)/../core.c >>bfd.h
 	$(MKDOC) -g<$(srcdir)/../targets.c >>bfd.h
-	$(MKDOC) -g<$(srcdir)/../format.c >>bfd.h
+	$(MKDOC) -g<$(srcdir)/../format.c >>bfd.h	
+	echo "#endif" >>bfd.h
 
 
 clean:

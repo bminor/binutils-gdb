@@ -1,0 +1,12 @@
+Fri Dec  6 22:57:12 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* Makefile.in: added standards.text support, host/site/target
+	  inclusion hooks, install using INSTALL_DATA rather than cp,
+	  don't echo on install.
+
+Thu Dec  5 22:46:17 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* Makefile.in: idestdir and ddestdir go away.  Added copyrights
+	  and shift gpl to v2.  Added ChangeLog if it didn't exist. docdir
+	  and mandir now keyed off datadir by default.
+
