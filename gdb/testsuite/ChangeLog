@@ -1,3 +1,9 @@
+Mon Aug 29 14:20:44 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	First part of Fortran test suite.
+	* gdb.fortran: New directory.
+	* gdb.fortran/exprs.exp, gdb.fortran/types.exp: New files.
+
 Sat Aug 27 23:32:43 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.base/default.exp:  Update expect pattern for load command
