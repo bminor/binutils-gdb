@@ -70,8 +70,6 @@ static struct fn_field *find_method_list (value_ptr * argp, char *method,
 
 void _initialize_valops (void);
 
-#define VALUE_SUBSTRING_START(VAL) VALUE_FRAME(VAL)
-
 /* Flag for whether we want to abandon failed expression evals by default.  */
 
 #if 0
