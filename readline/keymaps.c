@@ -27,12 +27,12 @@
 #endif
 
 /* Remove these declarations when we have a complete libgnu.a. */
-#define STATIC_MALLOC
-#ifndef STATIC_MALLOC
+/* #define STATIC_MALLOC */
+#if !defined (STATIC_MALLOC)
 extern char *xmalloc (), *xrealloc ();
 #else
 static char *xmalloc (), *xrealloc ();
-#endif
+#endif /* STATIC_MALLOC */
 
 /* **************************************************************** */
 /*								    */
@@ -86,8 +86,7 @@ rl_copy_keymap (map)
 Keymap
 rl_make_keymap ()
 {
-  extern rl_insert (), rl_rubout (), rl_do_lowercase_version ();
-  extern rl_digit_argument ();
+  extern rl_insert (), rl_rubout ();
   register int i;
   Keymap newmap;
 
@@ -99,6 +98,7 @@ rl_make_keymap ()
 
   newmap[TAB].function = rl_insert;
   newmap[RUBOUT].function = rl_rubout;
+  newmap[CTRL('H')].function = rl_rubout;
 
   return (newmap);
 }
@@ -156,7 +156,12 @@ xrealloc (pointer, bytes)
      char *pointer;
      int bytes;
 {
-  char *temp = (char *)realloc (pointer, bytes);
+  char *temp;
+
+  if (!pointer)
+    temp = (char *)malloc (bytes);
+  else
+    temp = (char *)realloc (pointer, bytes);
 
   if (!temp)
     memory_error_and_abort ();
