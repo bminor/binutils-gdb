@@ -1,3 +1,7 @@
+2003-11-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/m68k/mcf-mov3q.d: Support 64bit BFD.
+
 2003-11-03  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gas/arm/arm7t.d: Replace '-#' with '#-'.
