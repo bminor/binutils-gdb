@@ -483,7 +483,7 @@ void EXFUN (c_dot_file_symbol, (char *filename));
 void EXFUN (obj_extra_stuff, (object_headers * headers));
 void EXFUN (stack_delete, (stack * st));
 
-
+segT EXFUN (s_get_segment,(struct symbol * ptr));
 
 void EXFUN (c_section_header, (
 

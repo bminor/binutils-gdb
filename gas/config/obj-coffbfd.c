@@ -451,13 +451,13 @@ DEFUN (do_relocs_for, (abfd, h, file_cursor),
 	      /* Fill in section header info.  */
 	      segment_info[idx].scnhdr.s_relptr = *file_cursor;
 	      *file_cursor += external_reloc_size;
+	      segment_info[idx].scnhdr.s_nreloc = nrelocs;
 	    }
 	  else
 	    {
 	      /* No relocs */
 	      segment_info[idx].scnhdr.s_relptr = 0;
 	    }
-	  segment_info[idx].scnhdr.s_nreloc = 0;
 	}
     }
   /* Set relocation_size field in file headers */
