@@ -1,78 +1,74 @@
-:option::insn-bit-size:16
-:option::hi-bit-nr:15
+:option:::insn-bit-size:16
+:option:::hi-bit-nr:15
 
 
-:option::format-names:I,II,III,IV,V,VI,VII,VIII,IX,X
+:option:::format-names:I,II,III,IV,V,VI,VII,VIII,IX,X
 # start-sanitize-v850e
-:option::format-names:XI,XII,XIII
+:option:::format-names:XI,XII,XIII
+:option:::format-names:XIV,XV
 # end-sanitize-v850e
-# start-sanitize-v850eq
-:option::format-names:XIV,XV
-# end-sanitize-v850eq
-:option::format-names:Z
+:option:::format-names:Z
 
 
-:model::v850:v850:
+:model:::v850:v850:
 
 # start-sanitize-v850e
-:option::multi-sim:true
-:model::v850e:v850e:
-# end-sanitize-v850e
+:option:::multi-sim:true
+:model:::v850e:v850e:
 
-# start-sanitize-v850eq
-:option::multi-sim:true
-:model::v850eq:v850eq:
-# end-sanitize-v850eq
+:option:::multi-sim:true
+:model:::v850eq:v850eq:
+# end-sanitize-v850e
 
 
 
 // Cache macros
 
-:cache::unsigned:reg1:RRRRR:(RRRRR)
-:cache::unsigned:reg2:rrrrr:(rrrrr)
-:cache::unsigned:reg3:wwwww:(wwwww)
+:cache:::unsigned:reg1:RRRRR:(RRRRR)
+:cache:::unsigned:reg2:rrrrr:(rrrrr)
+:cache:::unsigned:reg3:wwwww:(wwwww)
 
-:cache::unsigned:disp4:dddd:(dddd)
+:cache:::unsigned:disp4:dddd:(dddd)
 # start-sanitize-v850e
-:cache::unsigned:disp5:dddd:(dddd << 1)
+:cache:::unsigned:disp5:dddd:(dddd << 1)
 # end-sanitize-v850e
-:cache::unsigned:disp7:ddddddd:ddddddd
-:cache::unsigned:disp8:ddddddd:(ddddddd << 1)
-:cache::unsigned:disp8:dddddd:(dddddd << 2)
-:cache::unsigned:disp9:ddddd,ddd:SEXT32 ((ddddd << 4) + (ddd << 1), 9 - 1)
-:cache::unsigned:disp16:dddddddddddddddd:EXTEND16 (dddddddddddddddd)
-:cache::unsigned:disp16:ddddddddddddddd: EXTEND16 (ddddddddddddddd << 1)
-:cache::unsigned:disp22:dddddd,ddddddddddddddd: SEXT32 ((dddddd << 16) + (ddddddddddddddd << 1), 22 - 1)
+:cache:::unsigned:disp7:ddddddd:ddddddd
+:cache:::unsigned:disp8:ddddddd:(ddddddd << 1)
+:cache:::unsigned:disp8:dddddd:(dddddd << 2)
+:cache:::unsigned:disp9:ddddd,ddd:SEXT32 ((ddddd << 4) + (ddd << 1), 9 - 1)
+:cache:::unsigned:disp16:dddddddddddddddd:EXTEND16 (dddddddddddddddd)
+:cache:::unsigned:disp16:ddddddddddddddd: EXTEND16 (ddddddddddddddd << 1)
+:cache:::unsigned:disp22:dddddd,ddddddddddddddd: SEXT32 ((dddddd << 16) + (ddddddddddddddd << 1), 22 - 1)
 
-:cache::unsigned:imm5:iiiii:SEXT32 (iiiii, 4)
-:cache::unsigned:imm6:iiiiii:iiiiii
-:cache::unsigned:imm9:iiiii,IIII:SEXT ((IIII << 5) + iiiii, 9 - 1)
-# start-sanitize-v850eq
-:cache::unsigned:imm5:iiii:(32 - (iiii << 1))
-# end-sanitize-v850eq
-:cache::unsigned:simm16:iiiiiiiiiiiiiiii:EXTEND16 (iiiiiiiiiiiiiiii)
-:cache::unsigned:uimm16:iiiiiiiiiiiiiiii:iiiiiiiiiiiiiiii
-:cache::unsigned:imm32:iiiiiiiiiiiiiiii,IIIIIIIIIIIIIIII:(iiiiiiiiiiiiiiii < 16 + IIIIIIIIIIIIIIII)
+:cache:::unsigned:imm5:iiiii:SEXT32 (iiiii, 4)
+:cache:::unsigned:imm6:iiiiii:iiiiii
+:cache:::unsigned:imm9:iiiii,IIII:SEXT ((IIII << 5) + iiiii, 9 - 1)
 # start-sanitize-v850e
-:cache::unsigned:uimm32:iiiiiiiiiiiiiiii,dddddddddddddddd:((iiiiiiiiiiiiiiii << 16) + dddddddddddddddd)
+:cache:::unsigned:imm5:iiii:(32 - (iiii << 1))
 # end-sanitize-v850e
-
-:cache::unsigned:vector:iiiii:iiiii
-
+:cache:::unsigned:simm16:iiiiiiiiiiiiiiii:EXTEND16 (iiiiiiiiiiiiiiii)
+:cache:::unsigned:uimm16:iiiiiiiiiiiiiiii:iiiiiiiiiiiiiiii
+:cache:::unsigned:imm32:iiiiiiiiiiiiiiii,IIIIIIIIIIIIIIII:(iiiiiiiiiiiiiiii < 16 + IIIIIIIIIIIIIIII)
 # start-sanitize-v850e
-:cache::unsigned:list12:L,LLLLLLLLLLL:((L << 11) + LLLLLLLLLLL)
-:cache::unsigned:list18:LLLL,LLLLLLLLLLLL:((LLLL << 12) + LLLLLLLLLLLL)
+:cache:::unsigned:uimm32:iiiiiiiiiiiiiiii,dddddddddddddddd:((iiiiiiiiiiiiiiii << 16) + dddddddddddddddd)
 # end-sanitize-v850e
 
-:cache::unsigned:bit3:bbb:bbb
+:cache:::unsigned:vector:iiiii:iiiii
+
+# start-sanitize-v850e
+:cache:::unsigned:list12:L,LLLLLLLLLLL:((L << 11) + LLLLLLLLLLL)
+:cache:::unsigned:list18:LLLL,LLLLLLLLLLLL:((LLLL << 12) + LLLLLLLLLLLL)
+# end-sanitize-v850e
+
+:cache:::unsigned:bit3:bbb:bbb
 
 
 // What do we do with an illegal instruction?
-:internal:::illegal
+:internal::::illegal:
 {
   sim_io_eprintf (SD, "Illegal instruction at address 0x%lx\n",
 		  (unsigned long) cia);
-  sim_engine_halt (SD, CPU, NULL, cia, sim_signalled, SIGILL);
+  sim_engine_halt (SD, CPU, NULL, cia, sim_signalled, SIM_SIGILL);
 }
 
 
@@ -121,7 +117,7 @@ rrrrr,110110,RRRRR + iiiiiiiiiiiiiiii:VI:::andi
 
 
 // Map condition code to a string
-:%s:::cccc:int cccc
+:%s::::cccc:int cccc
 {
   switch (cccc)
     {
@@ -172,9 +168,7 @@ ddddd,1011,ddd,cccc:III:::Bcond
 // BSH
 rrrrr,11111100000 + wwwww,01101000010:XII:::bsh
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "bsh r<reg2>, r<reg3>"
 {
   unsigned32 value;
@@ -194,16 +188,10 @@ rrrrr,11111100000 + wwwww,01101000010:XII:::bsh
   TRACE_ALU_RESULT (GR[reg3]);
 }
 
-
-
-// end-sanitize-v850e
-// start-sanitize-v850e
 // BSW
 rrrrr,11111100000 + wwwww,01101000000:XII:::bsw
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "bsw r<reg2>, r<reg3>"
 {
 #define WORDHASNULLBYTE(x) (((x) - 0x01010101) & ~(x)&0x80808080)
@@ -226,16 +214,10 @@ rrrrr,11111100000 + wwwww,01101000000:XII:::bsw
   TRACE_ALU_RESULT (GR[reg3]);
 }
 
-
-
-// end-sanitize-v850e
-// start-sanitize-v850e
 // CALLT
 0000001000,iiiiii:II:::callt
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "callt <imm6>"
 {
   unsigned32 adr;
@@ -248,9 +230,8 @@ rrrrr,11111100000 + wwwww,01101000000:XII:::bsw
   TRACE_BRANCH3 (adr, CTBP, off);
 }
 
-
-
 // end-sanitize-v850e
+
 // CLR1
 10,bbb,111110,RRRRR + dddddddddddddddd:VIII:::clr1
 "clr1 <bit3>, <disp16>[r<reg1>]"
@@ -261,24 +242,17 @@ rrrrr,11111100000 + wwwww,01101000000:XII:::bsw
 // start-sanitize-v850e
 rrrrr,111111,RRRRR + 0000000011100100:IX:::clr1
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "clr1 r<reg2>, [r<reg1>]"
 {
   COMPAT_2 (OP_E407E0 ());
 }
 
 
-
-// end-sanitize-v850e
-// start-sanitize-v850e
 // CTRET
 0000011111100000 + 0000000101000100:X:::ctret
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "ctret"
 {
   nia  = (CTPC & ~1);
@@ -286,16 +260,10 @@ rrrrr,111111,RRRRR + 0000000011100100:IX:::clr1
   TRACE_BRANCH1 (PSW);
 }
 
-
-
-// end-sanitize-v850e
-// start-sanitize-v850e
 // CMOV
 rrrrr,111111,RRRRR + wwwww,011001,cccc,0:XI:::cmov
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "cmov %s<cccc>, r<reg1>, r<reg2>, r<reg3>"
 {
   int cond = condition_met (cccc);
@@ -304,13 +272,9 @@ rrrrr,111111,RRRRR + wwwww,011001,cccc,0:XI:::cmov
   TRACE_ALU_RESULT (GR[reg3]);
 }
 
-// end-sanitize-v850e
-// start-sanitize-v850e
 rrrrr,111111,iiiii + wwwww,011000,cccc,0:XII:::cmov
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "cmov %s<cccc>, <imm5>, r<reg2>, r<reg3>"
 {
   int cond = condition_met (cccc);
@@ -319,9 +283,9 @@ rrrrr,111111,iiiii + wwwww,011000,cccc,0:XII:::cmov
   TRACE_ALU_RESULT (GR[reg3]);
 }
 
-
-
 // end-sanitize-v850e
+
+
 // CMP
 rrrrr,001111,RRRRR:I:::cmp
 "cmp r<reg1>, r<reg2>"
@@ -352,9 +316,7 @@ rrrrr,010011,iiiii:II:::cmp
 // "dispose <imm5>, <list12>"
 0000011001,iiiii,L + LLLLLLLLLLL,RRRRR:XIII:::dispose
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "dispose <imm5>, <list12>":RRRRR == 0
 "dispose <imm5>, <list12>, [reg1]"
 {
@@ -383,9 +345,6 @@ rrrrr,010011,iiiii:II:::cmp
 }
 
 
-
-// end-sanitize-v850e
-// start-sanitize-v850e
 // DIV
 rrrrr,111111,RRRRR + wwwww,01011000000:XI:::div
 *v850e
@@ -395,11 +354,10 @@ rrrrr,111111,RRRRR + wwwww,01011000000:XI:::div
 }
 
 
-
-
 // end-sanitize-v850e
+
 // DIVH
-rrrrr!0,000010,RRRRR!0:I:::divh
+rrrrr!0,000010,RRRRR:I:::divh
 "divh r<reg1>, r<reg2>"
 {
   COMPAT_1 (OP_40 ());
@@ -414,9 +372,6 @@ rrrrr,111111,RRRRR + wwwww,01010000000:XI:::divh
 }
 
 
-
-// end-sanitize-v850e
-// start-sanitize-v850e
 // DIVHU
 rrrrr,111111,RRRRR + wwwww,01010000010:XI:::divhu
 *v850e
@@ -426,9 +381,6 @@ rrrrr,111111,RRRRR + wwwww,01010000010:XI:::divhu
 }
 
 
-
-// end-sanitize-v850e
-// start-sanitize-v850e
 // DIVU
 rrrrr,111111,RRRRR + wwwww,01011000010:XI:::divu
 *v850e
@@ -437,9 +389,9 @@ rrrrr,111111,RRRRR + wwwww,01011000010:XI:::divu
   COMPAT_2 (OP_2C207E0 ());
 }
 
-
-
 // end-sanitize-v850e
+
+
 // EI
 1000011111100000 + 0000000101100000:X:::ei
 "ei"
@@ -462,9 +414,7 @@ rrrrr,111111,RRRRR + wwwww,01011000010:XI:::divu
 // HSW
 rrrrr,11111100000 + wwwww,01101000100:XII:::hsw
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "hsw r<reg2>, r<reg3>"
 {
   unsigned32 value;
@@ -541,21 +491,15 @@ rrrrr,111001,RRRRR + ddddddddddddddd,1:VII:::ld.w
 // start-sanitize-v850e
 rrrrr!0,11110,b,RRRRR + ddddddddddddddd,1:VII:::ld.bu
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "ld.bu <disp16>[r<reg1>], r<reg2>"
 {
   COMPAT_2 (OP_10780 ());
 }
 
-// end-sanitize-v850e
-// start-sanitize-v850e
 rrrrr!0,111111,RRRRR + ddddddddddddddd,1:VII:::ld.hu
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "ld.hu <disp16>[r<reg1>], r<reg2>"
 {
   COMPAT_2 (OP_107E0 ());
@@ -598,9 +542,7 @@ rrrrr!0,010000,iiiii:II:::mov
 // start-sanitize-v850e
 00000110001,RRRRR + iiiiiiiiiiiiiiii + IIIIIIIIIIIIIIII:VI:::mov
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "mov <imm32>, r<reg1>"
 {
   SAVE_2;
@@ -636,29 +578,23 @@ rrrrr!0,110010,RRRRR + iiiiiiiiiiiiiiii:VI:::movhi
 // MUL
 rrrrr,111111,RRRRR + wwwww,01000100000:XI:::mul
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "mul r<reg1>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_22007E0 ());
 }
 
-// end-sanitize-v850e
-// start-sanitize-v850e
 rrrrr,111111,iiiii + wwwww,01001,IIII,00:XII:::mul
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "mul <imm9>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_24007E0 ());
 }
 
-
-
 // end-sanitize-v850e
+
+
 // MULH
 rrrrr!0,000111,RRRRR:I:::mulh
 "mulh r<reg1>, r<reg2>"
@@ -687,9 +623,7 @@ rrrrr!0,110111,RRRRR + iiiiiiiiiiiiiiii:VI:::mulhi
 // MULU
 rrrrr,111111,RRRRR + wwwww,01000100010:XI:::mulu
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "mulu r<reg1>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_22207E0 ());
@@ -697,9 +631,7 @@ rrrrr,111111,RRRRR + wwwww,01000100010:XI:::mulu
 
 rrrrr,111111,iiiii + wwwww,01001,IIII,10:XII:::mulu
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "mulu <imm9>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_24207E0 ());
@@ -736,9 +668,7 @@ rrrrr,000001,RRRRR:I:::not
 // start-sanitize-v850e
 rrrrr,111111,RRRRR + 0000000011100010:IX:::not1
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "not1 r<reg2>, r<reg1>"
 {
   COMPAT_2 (OP_E207E0 ());
@@ -769,9 +699,7 @@ rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
 // PREPARE
 0000011110,iiiii,L + LLLLLLLLLLL,00001:XIII:::prepare
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "prepare <list12>, <imm5>"
 {
   int  i;
@@ -796,9 +724,7 @@ rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
 
 0000011110,iiiii,L + LLLLLLLLLLL,00011:XIII:::prepare00
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "prepare <list12>, <imm5>, sp"
 {
   COMPAT_2 (OP_30780 ());
@@ -806,9 +732,7 @@ rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
 
 0000011110,iiiii,L + LLLLLLLLLLL,01011 + iiiiiiiiiiiiiiii:XIII:::prepare01
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "prepare <list12>, <imm5>, <uimm16>"
 {
   COMPAT_2 (OP_B0780 ());
@@ -816,9 +740,7 @@ rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
 
 0000011110,iiiii,L + LLLLLLLLLLL,10011 + iiiiiiiiiiiiiiii:XIII:::prepare10
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "prepare <list12>, <imm5>, <uimm16>"
 {
   COMPAT_2 (OP_130780 ());
@@ -826,9 +748,7 @@ rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
 
 0000011110,iiiii,L + LLLLLLLLLLL,11011 + iiiiiiiiiiiiiiii + dddddddddddddddd:XIII:::prepare11
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "prepare <list12>, <imm5>, <uimm32>"
 {
   COMPAT_2 (OP_1B0780 ());
@@ -880,9 +800,7 @@ rrrrr,010101,iiiii:II:::sar
 // SASF
 rrrrr,1111110,cccc + 0000001000000000:IX:::sasf
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "sasf %s<cccc>, r<reg2>"
 {
   COMPAT_2 (OP_20007E0 ());
@@ -953,9 +871,7 @@ rrrrr,1111110,cccc + 0000000000000000:IX:::setf
 // start-sanitize-v850e
 rrrrr,111111,RRRRR + 0000000011100000:IX:::set1
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "set1 r<reg2>, [r<reg1>]"
 {
   COMPAT_2 (OP_E007E0 ());
@@ -996,14 +912,11 @@ rrrrr,010100,iiiii:II:::shr
 
 // SLD
 rrrrr,0110,ddddddd:IV:::sld.b
-// start-sanitize-v850eq
 "sld.bu <disp7>[ep], r<reg2>":(PSW & PSW_US)
-// end-sanitize-v850eq
 "sld.b <disp7>[ep], r<reg2>"
 {
   unsigned32 addr = EP + disp7;
   unsigned32 result = load_mem (addr, 1);
-  /* start-sanitize-v850eq */
   if (PSW & PSW_US)
     {
       GR[reg2] = result;
@@ -1011,24 +924,18 @@ rrrrr,0110,ddddddd:IV:::sld.b
     }
   else
     {
-/* end-sanitize-v850eq */
-  result = EXTEND8 (result);
-  GR[reg2] = result;
-  TRACE_LD (addr, result);
-/* start-sanitize-v850eq */
+      result = EXTEND8 (result);
+      GR[reg2] = result;
+      TRACE_LD (addr, result);
     }
-/* end-sanitize-v850eq */
 }
 
 rrrrr,1000,ddddddd:IV:::sld.h
-// start-sanitize-v850eq
 "sld.hu <disp8>[ep], r<reg2>":(PSW & PSW_US)
-// end-sanitize-v850eq
 "sld.h <disp8>[ep], r<reg2>"
 {
   unsigned32 addr = EP + disp8;
   unsigned32 result = load_mem (addr, 2);
-  /* start-sanitize-v850eq */
   if (PSW & PSW_US)
     {
       GR[reg2] = result;
@@ -1036,13 +943,10 @@ rrrrr,1000,ddddddd:IV:::sld.h
     }
   else
     {
-/* end-sanitize-v850eq */
-  result = EXTEND16 (result);
-  GR[reg2] = result;
-  TRACE_LD (addr, result);
-/* start-sanitize-v850eq */
+      result = EXTEND16 (result);
+      GR[reg2] = result;
+      TRACE_LD (addr, result);
     }
-/* end-sanitize-v850eq */
 }
 
 rrrrr,1010,dddddd,0:IV:::sld.w
@@ -1057,15 +961,12 @@ rrrrr,1010,dddddd,0:IV:::sld.w
 // start-sanitize-v850e
 rrrrr!0,0000110,dddd:IV:::sld.bu
 *v850e
-// start-sanitize-v850eq
 *v850eq
 "sld.b <disp4>[ep], r<reg2>":(PSW & PSW_US)
-// end-sanitize-v850eq
 "sld.bu <disp4>[ep], r<reg2>"
 {
   unsigned32 addr = EP + disp4;
   unsigned32 result = load_mem (addr, 1);
-  /* start-sanitize-v850eq */
   if (PSW & PSW_US)
     {
       result = EXTEND8 (result);
@@ -1074,27 +975,19 @@ rrrrr!0,0000110,dddd:IV:::sld.bu
     }
   else
     {
-  /* end-sanitize-v850eq */
-  GR[reg2] = result;
-  TRACE_LD (addr, result);
-  /* start-sanitize-v850eq */
+      GR[reg2] = result;
+      TRACE_LD (addr, result);
     }
-  /* end-sanitize-v850eq */
 }
 
-// end-sanitize-v850e
-// start-sanitize-v850e
 rrrrr!0,0000111,dddd:IV:::sld.hu
 *v850e
-// start-sanitize-v850eq
 *v850eq
 "sld.h <disp5>[ep], r<reg2>":(PSW & PSW_US)
-// end-sanitize-v850eq
 "sld.hu <disp5>[ep], r<reg2>"
 {
   unsigned32 addr = EP + disp5;
   unsigned32 result = load_mem (addr, 2);
-  /* start-sanitize-v850eq */
   if (PSW & PSW_US)
     {
       result = EXTEND16 (result);
@@ -1103,12 +996,9 @@ rrrrr!0,0000111,dddd:IV:::sld.hu
     }
   else
     {
-/* end-sanitize-v850eq */
-  GR[reg2] = result;
-  TRACE_LD (addr, result);
-/* start-sanitize-v850eq */
+      GR[reg2] = result;
+      TRACE_LD (addr, result);
     }
-/* end-sanitize-v850eq */
 }
 
 // end-sanitize-v850e
@@ -1189,9 +1079,7 @@ rrrrr,001100,RRRRR:I:::subr
 // SWITCH
 00000000010,RRRRR:I:::switch
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "switch r<reg1>"
 {
   unsigned long adr;
@@ -1203,15 +1091,10 @@ rrrrr,001100,RRRRR:I:::subr
 }
 
 
-
-// end-sanitize-v850e
-// start-sanitize-v850e
 // SXB
 00000000101,RRRRR:I:::sxb
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "sxb r<reg1>"
 {
   TRACE_ALU_INPUT1 (GR[reg1]);
@@ -1219,16 +1102,10 @@ rrrrr,001100,RRRRR:I:::subr
   TRACE_ALU_RESULT (GR[reg1]);
 }
 
-
-
-// end-sanitize-v850e
-// start-sanitize-v850e
 // SXH
 00000000111,RRRRR:I:::sxh
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "sxh r<reg1>"
 {
   TRACE_ALU_INPUT1 (GR[reg1]);
@@ -1267,9 +1144,7 @@ rrrrr,001011,RRRRR:I:::tst
 // start-sanitize-v850e
 rrrrr,111111,RRRRR + 0000000011100110:IX:::tst1
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "tst1 r<reg2>, [r<reg1>]"
 {
   COMPAT_2 (OP_E607E0 ());
@@ -1300,9 +1175,7 @@ rrrrr,110101,RRRRR + iiiiiiiiiiiiiiii:VI:::xori
 // ZXB
 00000000100,RRRRR:I:::zxb
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "zxb r<reg1>"
 {
   TRACE_ALU_INPUT1 (GR[reg1]);
@@ -1310,16 +1183,10 @@ rrrrr,110101,RRRRR + iiiiiiiiiiiiiiii:VI:::xori
   TRACE_ALU_RESULT (GR[reg1]);
 }
 
-
-
-// end-sanitize-v850e
-// start-sanitize-v850e
 // ZXH
 00000000110,RRRRR:I:::zxh
 *v850e
-// start-sanitize-v850eq
 *v850eq
-// end-sanitize-v850eq
 "zxh r<reg1>"
 {
   TRACE_ALU_INPUT1 (GR[reg1]);
@@ -1327,28 +1194,18 @@ rrrrr,110101,RRRRR + iiiiiiiiiiiiiiii:VI:::xori
   TRACE_ALU_RESULT (GR[reg1]);
 }
 
-
-
 // end-sanitize-v850e
-// Special - breakpoint - illegal
-// Hopefully, in the future, this instruction will go away
-1111111111111111 + 1111111111111111:Z:::breakpoint
-*v850
+
+
+// First field must be zero
+00000,000010,00000:I:::break
 {
-  sim_engine_halt (SD, CPU, NULL, cia, sim_stopped, SIGTRAP);
+  sim_engine_halt (SD, CPU, NULL, cia, sim_stopped, SIM_SIGTRAP);
 }
+
+
 
 // start-sanitize-v850e
-// First field could be any nonzero value.
-11111,000010,00000:I:::break
-{
-  sim_engine_halt (SD, CPU, NULL, cia, sim_stopped, SIGTRAP);
-}
-
-// end-sanitize-v850e
-
-
-// start-sanitize-v850eq
 // DIVHN
 rrrrr,111111,RRRRR + wwwww,01010,iiii,00:XI:::divhn
 *v850eq
@@ -1601,5 +1458,4 @@ rrrrr,111111,RRRRR + wwwww,00111,iiii,10:XI:::sdivun
   COMPAT_2 (OP_307F0 ());
 }
 
-
-// end-sanitize-v850eq
+// end-sanitize-v850e

@@ -1,3 +1,26 @@
+Wed Dec  3 17:27:19 1997  Nick Clifton  <nickc@cygnus.com>
+
+start-sanitize-v850e
+	* v850.igen: Added missing sanitization markers.
+end-sanitize-v850e
+	* v850.igen: Make break have a zero first field, since otherwise
+	it clashes with the DIVH instruction.
+
+Sat Nov 22 21:32:07 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* simops.c (OP_10007E0): Rename SIGABRT -> SIM_SIGABRT. Give
+ 	sim_stopped instead of sim_signalled.
+
+	* v850.igen (BREAK), simops.c (OP_12007E0): Rename SIGTRAP to
+ 	SIM_SIGTRAP.
+	(illegal): Rename SIGILL to SIM_SIGILL.
+	
+	* sim-main.h, simops.c, interp.c: Do not include signal.h.
+
+	* sim-main.h: Include sim-signal.h instead of signal.h.
+	(SIGTRAP, SIGQUIT): Delete definition.
+	(SIG_V850_EXIT): Delete definition.
+
 Tue Nov 18 15:33:48 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* Makefile.in (SIM_OBJS): Use $(SIM_NEW_COMMON_OBJS).
@@ -5,7 +28,7 @@ Tue Nov 18 15:33:48 1997  Doug Evans  <devans@canuck.cygnus.com>
 Fri Oct 31 10:33:40 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (sim_open): Check state magic number.
-	(sim.assert.h): Include.
+	(sim-assert.h): Include.
 
 Tue Oct 28 11:06:47 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
