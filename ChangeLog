@@ -1,3 +1,8 @@
+Mon Oct  3 12:40:54 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* config.sub: Remove extraneous differences between config.sub and
+	gcc/config.sub.
+
 Sat Oct  1 00:23:12 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* Makefile.in (DISTSTUFFDIRS): Add gas.
