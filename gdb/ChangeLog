@@ -1,3 +1,10 @@
+Mon Nov 11 14:32:38 1996  Mark Alexander  <marka@cygnus.com>
+
+	* utils.c (get_cell): Fix off-by-one bug.
+	* mips-tdep.c (get_frame_pointer, fix_sign_extension):
+	New functions to consolidate common code.
+	(mips_frame_chain, init_extra_frame_info): Use new functions
+	to fix problems with backtrace and finish commands on ddb board.
 
 Mon Nov 11 12:59:00 1996  Dawn Perchik <dawn@critters.cygnus.com>
 
