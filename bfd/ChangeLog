@@ -1,3 +1,10 @@
+2000-04-03  Kevin Buettner  <kevinb@redhat.com>
+
+        * configure.in: Added corefile support for AIX 4.3.  In particular,
+        AIX_CORE_DUMPX_CORE will be defined in addition to AIX_CORE when
+        compiling rs6000-core.c.
+        * configure: Regenerated.
+
 2000-04-03  H.J. Lu  <hjl@gnu.org>
 
 	* cache.c (bfd_open_file): Unlink the output file only if

@@ -265,6 +265,12 @@ changequote([,])dnl
 	COREFILE=netbsd-core.lo
 	;;
   rs6000-*-lynx*)	COREFILE=lynx-core.lo ;;
+changequote(,)dnl
+  rs6000-*-aix4.[3-9]* | powerpc-*-aix4.[3-9]*)
+changequote([,])dnl
+        COREFILE=rs6000-core.lo
+	COREFLAG="$COREFLAG -DAIX_CORE_DUMPX_CORE"
+	;;
   rs6000-*-aix4*)	COREFILE=rs6000-core.lo ;;
   rs6000-*-*)		COREFILE=rs6000-core.lo ;;
   powerpc-*-*bsd*)	COREFILE=netbsd-core.lo ;;
