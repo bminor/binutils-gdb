@@ -1010,6 +1010,15 @@ parse_symbol (sh, ax, ext_sh, bigend)
 	if (type_code == TYPE_CODE_ENUM)
 	  {
 	    /* This is a non-empty enum. */
+
+	    /* c89 has the number of enumerators in the sh.value field,
+	       not the type length, so we have to compensate for that
+	       incompatibility quirk.
+	       This might do the wrong thing for an enum with one or two
+	       enumerators and gcc -gcoff -fshort-enums, but these cases
+	       are hopefully rare enough.  */
+	    if (TYPE_LENGTH (t) == TYPE_NFIELDS (t))
+	      TYPE_LENGTH (t) = TARGET_INT_BIT / HOST_CHAR_BIT;
 	    for (ext_tsym = ext_sh + external_sym_size;
 		 ;
 		 ext_tsym += external_sym_size)
@@ -3222,6 +3231,10 @@ add_line (lt, lineno, adr, last)
      CORE_ADDR adr;
      int last;
 {
+  /* DEC c89 sometimes produces zero linenos which confuse gdb.
+     Change them to something sensible. */
+  if (lineno == 0)
+    lineno = 1;
   if (last == 0)
     last = -2;			/* make sure we record first line */
 

@@ -1,3 +1,11 @@
+Fri Jan  7 12:42:45 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* config/i386/tm-i386v.h, config/m68k/tm-m68k.h, config/mips/tm-mips.h,
+	config/vax/tm-vax.h (CALL_DUMMY_BREAKPOINT_OFFSET):  Define.
+	* mdebugread.c (parse_symbol):  Handle enum sh.type produced by
+	DEC c89. 
+	* mdebugread.c (add_line):  Handle zero linenos produced by DEC c89.
+
 Fri Jan  7 12:55:25 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* utils.c (print_sys_errmsg): Call gdb_flush (gdb_stdout) before
