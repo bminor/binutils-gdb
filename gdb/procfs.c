@@ -154,6 +154,8 @@ init_procfs_ops ()
   procfs_ops.to_thread_alive       = procfs_thread_alive;
   procfs_ops.to_pid_to_str         = procfs_pid_to_str;
 
+  procfs_ops.to_has_all_memory    = 1;
+  procfs_ops.to_has_memory        = 1;
   procfs_ops.to_has_execution      = 1;
   procfs_ops.to_has_stack          = 1;
   procfs_ops.to_has_registers      = 1;

@@ -28,24 +28,6 @@ release of GDB.
 
 --
 
-Solaris/x86 - which? (Nick Duffek, Peter Schauer, Michael Snyder?)
-
-Nick D's working through patches from Michael Snyder and Peter S.
-
---
-
-
-RFA: procfs.c: init_procfs_ops should set
-procfs_ops.to_has_[all]_memory (Peter Schauer, Andrew Cagney?)
-
-I am pretty sure that this is caused by some accidental deletion, but
-procfs.c:init_procfs_ops no longer sets procfs_ops.to_has_memory and
-procfs_ops.to_has_all_memory.
-
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg01057.html
-
---
-
 GDB 5.0: Nice to have
 ---------------------
 
