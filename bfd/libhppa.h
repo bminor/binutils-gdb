@@ -26,14 +26,13 @@
 #define BYTES_IN_WORD 4
 #define PA_PAGESIZE 0x1000
 
-#ifndef HINLINE
+#ifndef INLINE
 #ifdef __GNUC__
-#define HINLINE extern inline
+#define INLINE inline
 #else
-/* INLINE is defined in bfd.h.  */
-#define HINLINE static INLINE
+#define INLINE
 #endif /* GNU C? */
-#endif /* HINLINE */
+#endif /* INLINE */
 
 /* The PA instruction set variants.  */
 enum pa_arch {pa10 = 10, pa11 = 11, pa20 = 20};
@@ -154,14 +153,14 @@ enum hppa_reloc_expr_type_alt
 #define HPPA_R_ADDEND(r,c)	(((r) << 22) + ((c) & 0x3FFFFF))
 
 /* Some functions to manipulate PA instructions.  */
-HINLINE unsigned int
+static INLINE unsigned int
 assemble_3 (x)
      unsigned int x;
 {
   return (((x & 1) << 2) | ((x & 6) >> 1)) & 7;
 }
 
-HINLINE void
+static INLINE void
 dis_assemble_3 (x, r)
      unsigned int x;
      unsigned int *r;
@@ -169,14 +168,14 @@ dis_assemble_3 (x, r)
   *r = (((x & 4) >> 2) | ((x & 3) << 1)) & 7;
 }
 
-HINLINE unsigned int
+static INLINE unsigned int
 assemble_12 (x, y)
      unsigned int x, y;
 {
   return (((y & 1) << 11) | ((x & 1) << 10) | ((x & 0x7fe) >> 1)) & 0xfff;
 }
 
-HINLINE void
+static INLINE void
 dis_assemble_12 (as12, x, y)
      unsigned int as12;
      unsigned int *x, *y;
@@ -185,7 +184,7 @@ dis_assemble_12 (as12, x, y)
   *x = ((as12 & 0x3ff) << 1) | ((as12 & 0x400) >> 10);
 }
 
-HINLINE unsigned long
+static INLINE unsigned long
 assemble_17 (x, y, z)
      unsigned int x, y, z;
 {
@@ -198,7 +197,7 @@ assemble_17 (x, y, z)
   return temp & 0x1ffff;
 }
 
-HINLINE void
+static INLINE void
 dis_assemble_17 (as17, x, y, z)
      unsigned int as17;
      unsigned int *x, *y, *z;
@@ -209,7 +208,7 @@ dis_assemble_17 (as17, x, y, z)
   *y = (((as17 & 0x00400) >> 10) | ((as17 & 0x3ff) << 1)) & 0x7ff;
 }
 
-HINLINE unsigned long
+static INLINE unsigned long
 assemble_21 (x)
      unsigned int x;
 {
@@ -223,7 +222,7 @@ assemble_21 (x)
   return temp & 0x1fffff;
 }
 
-HINLINE void
+static INLINE void
 dis_assemble_21 (as21, x)
      unsigned int as21, *x;
 {
@@ -238,14 +237,14 @@ dis_assemble_21 (as21, x)
   *x = temp;
 }
 
-HINLINE unsigned long
+static INLINE unsigned long
 sign_extend (x, len)
      unsigned int x, len;
 {
   return (int)(x >> (len - 1) ? (-1 << len) | x : x);
 }
 
-HINLINE unsigned int
+static INLINE unsigned int
 ones (n)
      int n;
 {
@@ -263,7 +262,7 @@ ones (n)
   return len_ones;
 }
 
-HINLINE void
+static INLINE void
 sign_unext (x, len, result)
      unsigned int x, len;
      unsigned int *result;
@@ -275,14 +274,14 @@ sign_unext (x, len, result)
   *result = x & len_ones;
 }
 
-HINLINE unsigned long
+static INLINE unsigned long
 low_sign_extend (x, len)
      unsigned int x, len;
 {
   return (int)((x & 0x1 ? (-1 << (len - 1)) : 0) | x >> 1);
 }
 
-HINLINE void
+static INLINE void
 low_sign_unext (x, len, result)
      unsigned int x, len;
      unsigned int *result;
@@ -308,7 +307,7 @@ low_sign_unext (x, len, result)
 
 /* Handle field selectors for PA instructions.  */
 
-HINLINE unsigned long
+static INLINE unsigned long
 hppa_field_adjust (value, constant_value, r_field)
      unsigned long value;
      unsigned long constant_value;
@@ -426,7 +425,7 @@ hppa_field_adjust (value, constant_value, r_field)
    FIXME:  opcodes which do not map to a known format
    should return an error of some sort.  */
 
-HINLINE char
+static INLINE char
 bfd_hppa_insn2fmt (insn)
      unsigned long insn;
 {
@@ -485,7 +484,7 @@ bfd_hppa_insn2fmt (insn)
 /* Insert VALUE into INSN using R_FORMAT to determine exactly what
    bits to change.  */
    
-HINLINE unsigned long
+static INLINE unsigned long
 hppa_rebuild_insn (abfd, insn, value, r_format)
      bfd *abfd;
      unsigned long insn;
