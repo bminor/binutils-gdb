@@ -1030,6 +1030,7 @@ fi
 
 
 
+
 echo $ac_n "checking how to run the C preprocessor""... $ac_c" 1>&6
 # On Suns, sometimes $CPP names a directory.
 if test -n "$CPP" && test -d "$CPP"; then
@@ -1045,13 +1046,13 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 1049 "configure"
+#line 1050 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1055: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1056: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   :
@@ -1060,13 +1061,13 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 1064 "configure"
+#line 1065 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1070: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1071: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   :
@@ -1094,12 +1095,12 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1098 "configure"
+#line 1099 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1103: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1104: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1173,7 +1174,7 @@ if test x${all_targets} = xfalse ; then
 	bfd_arm_arch)		ta="$ta arm-dis.o" ;;
 	bfd_convex_arch)	;;
 # start-sanitize-d10v
-	bfd_d10v_arch)		ta="$ta d10v-dis.o d10v-opc.o " ;;
+	bfd_d10v_arch)		ta="$ta d10v-dis.o d10v-opc.o" ;;
 # end-sanitize-d10v
 	bfd_h8300_arch)		ta="$ta h8300-dis.o" ;;
 	bfd_h8500_arch)		ta="$ta h8500-dis.o" ;;
@@ -1184,6 +1185,7 @@ if test x${all_targets} = xfalse ; then
 	bfd_m68k_arch)		ta="$ta m68k-dis.o m68k-opc.o" ;;
 	bfd_m88k_arch)		ta="$ta m88k-dis.o" ;;
 	bfd_mips_arch)		ta="$ta mips-dis.o mips-opc.o" ;;
+	bfd_mn10x00_arch)	ta="$ta mn10x00-dis.o mn10x00-opc.o" ;;
 	bfd_ns32k_arch)		ta="$ta ns32k-dis.o" ;;
 	bfd_powerpc_arch)	ta="$ta ppc-dis.o ppc-opc.o" ;;
 	bfd_pyramid_arch)	;;
@@ -1192,6 +1194,9 @@ if test x${all_targets} = xfalse ; then
 	bfd_sh_arch)		ta="$ta sh-dis.o" ;;
 	bfd_sparc_arch)		ta="$ta sparc-dis.o sparc-opc.o" ;;
 	bfd_tahoe_arch)		;;
+# start-sanitize-v850
+	bfd_v850_arch)		ta="$ta v850-opc.o v850-dis.o" ;;
+# end-sanitize-v850
 	bfd_vax_arch)		;;
 	bfd_w65_arch)		ta="$ta w65-dis.o" ;;
 	bfd_we32k_arch)		;;
@@ -1379,6 +1384,7 @@ s%@COMMON_SHLIB@%$COMMON_SHLIB%g
 s%@SHLIB_DEP@%$SHLIB_DEP%g
 s%@BFD_PICLIST@%$BFD_PICLIST%g
 s%@SHLINK@%$SHLINK%g
+s%@INSTALL_SHLIB@%$INSTALL_SHLIB%g
 s%@CPP@%$CPP%g
 s%@archdefs@%$archdefs%g
 s%@BFD_MACHINES@%$BFD_MACHINES%g

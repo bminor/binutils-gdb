@@ -111,6 +111,7 @@ AC_SUBST(COMMON_SHLIB)
 AC_SUBST(SHLIB_DEP)
 AC_SUBST(BFD_PICLIST)
 AC_SUBST(SHLINK)
+AC_SUBST(INSTALL_SHLIB)
 
 AC_CHECK_HEADERS(string.h strings.h)
 
@@ -174,6 +175,7 @@ if test x${all_targets} = xfalse ; then
 	bfd_m68k_arch)		ta="$ta m68k-dis.o m68k-opc.o" ;;
 	bfd_m88k_arch)		ta="$ta m88k-dis.o" ;;
 	bfd_mips_arch)		ta="$ta mips-dis.o mips-opc.o" ;;
+	bfd_mn10x00_arch)	ta="$ta mn10x00-dis.o mn10x00-opc.o" ;;
 	bfd_ns32k_arch)		ta="$ta ns32k-dis.o" ;;
 	bfd_powerpc_arch)	ta="$ta ppc-dis.o ppc-opc.o" ;;
 	bfd_pyramid_arch)	;;
@@ -182,6 +184,9 @@ if test x${all_targets} = xfalse ; then
 	bfd_sh_arch)		ta="$ta sh-dis.o" ;;
 	bfd_sparc_arch)		ta="$ta sparc-dis.o sparc-opc.o" ;;
 	bfd_tahoe_arch)		;;
+# start-sanitize-v850
+	bfd_v850_arch)		ta="$ta v850-opc.o v850-dis.o" ;;
+# end-sanitize-v850
 	bfd_vax_arch)		;;
 	bfd_w65_arch)		ta="$ta w65-dis.o" ;;
 	bfd_we32k_arch)		;;

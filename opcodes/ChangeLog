@@ -1,3 +1,12 @@
+Wed Oct  2 23:28:42 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10x00-opc.c, mn10x00-dis.c: New files for Matsushita
+	MN10x00 processors.
+	* disassemble (ARCH_mn10x00): Define.
+	(disassembler): Handle bfd_arch_mn10x00.
+	* configure.in: Recognize bfd_mn10x00_arch.
+	* configure: Rebuilt.
+
 Tue Oct  1 10:49:11 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* i386-dis.c (op_rtn): Change to be a pointer.  Adjust uses
