@@ -1,5 +1,12 @@
 Thu Jun 25 15:18:42 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* dbxread.c (dbx_symfile_init):  Move more code under hp9000s800
+	conditional.
+	* hppabsd-core.c:  Don't include "param.h", include <sys/param.h>
+	instead.
+	* remote.c (remote_wait):  Cast signal to void * to avoid warning
+	from busted HP compiler.
+
 	* partial-stab.h (N_SO):  Rearrange code a little so that all SO
 	stabs cause end_psymtab to be called.
 

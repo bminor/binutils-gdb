@@ -420,7 +420,7 @@ remote_wait (status)
 
   WSETEXIT ((*status), 0);
 
-  ofunc = signal (SIGINT, remote_interrupt);
+  ofunc = (void (*)) signal (SIGINT, remote_interrupt);
   getpkt ((char *) buf);
   signal (SIGINT, ofunc);
 

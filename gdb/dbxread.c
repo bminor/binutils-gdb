@@ -588,11 +588,11 @@ dbx_symfile_init (objfile)
   if (!DBX_TEXT_SECT (objfile))
     error ("Can't find .text section in symbol file");
 
-  DBX_SYMBOL_SIZE   (objfile) = obj_symbol_entry_size (sym_bfd);
 #ifdef hp9000s800
   HP_SYMCOUNT (objfile) = obj_hp_sym_count (sym_bfd);
   DBX_SYMCOUNT (objfile) = obj_dbx_sym_count (sym_bfd);
 #else
+  DBX_SYMBOL_SIZE (objfile) = obj_symbol_entry_size (sym_bfd);
   DBX_SYMCOUNT (objfile) = bfd_get_symcount (sym_bfd);
 #endif
   DBX_SYMTAB_OFFSET (objfile) = SYMBOL_TABLE_OFFSET;
