@@ -1,3 +1,8 @@
+Wed Jul  5 21:06:39 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/i386/fbsd.mh (NATDEPFILES): Keep NATDEPFILES to a single
+ 	line.  configure.in assumes this.
+
 Wed Jul  5 20:48:22 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (SER_HARDWIRE): When go32 or DJGPP, set to
