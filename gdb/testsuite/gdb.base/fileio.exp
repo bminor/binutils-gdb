@@ -218,10 +218,10 @@ gdb_test continue \
 send_gdb "tbreak 388\n" ; gdb_expect -re "$gdb_prompt $"
 set test "Renaming a directory to a non-empty directory returns ENOTEMPTY or EEXIST"
 gdb_test_multiple continue "${test}" {
-    -re "Continuing\\..*rename 3:.*(ENOTEMPTY|EEXIST).*test_rename \\(\\) at.*$srcfile:388.*" {
+    -re "Continuing\\..*rename 3:.*(ENOTEMPTY|EEXIST).*test_rename \\(\\) at.*$srcfile:388.*$gdb_prompt $" {
 	pass "${test}"
     }
-    -re "Continuing\\..*rename 3:.*EBUSY.*test_rename \\(\\) at.*$srcfile:388.*" {
+    -re "Continuing\\..*rename 3:.*EBUSY.*test_rename \\(\\) at.*$srcfile:388.*$gdb_prompt $" {
 	# At least version <= 2.6/2004-01-08 of the Linux Kernel gets
 	# this wrong (reporting EBUSY) when the file system is NFS
 	# mounted.

@@ -1,5 +1,8 @@
 2004-01-18  Mark Kettenis  <kettenis@gnu.org>
 
+	* gdb.base/fileio.exp: Add "$gdb_prompt $" anchors to patterns
+	used with gdb_test_multiple.
+
 	* gdb.base/gdb1476.exp: Accept alternat pattern for failed memory
 	read at address 0.  This fixes PR testsuite/1504.
 
