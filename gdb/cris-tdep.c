@@ -1148,8 +1148,7 @@ cris_frameless_function_invocation (struct frame_info *fi)
 
 /* See frame.h.  Determines the address of all registers in the current stack
    frame storing each in frame->saved_regs.  Space for frame->saved_regs shall
-   be allocated by FRAME_INIT_SAVED_REGS using either frame_saved_regs_zalloc
-   or frame_obstack_alloc.  */
+   be allocated by FRAME_INIT_SAVED_REGS using frame_saved_regs_zalloc.  */
 
 void
 cris_frame_init_saved_regs (struct frame_info *fi)

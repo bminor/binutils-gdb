@@ -1,5 +1,17 @@
 2003-01-09  Andrew Cagney  <ac131313@redhat.com>
 
+	* frame.h (frame_obstack_zalloc): Replace frame_obstack_alloc.
+	Update comments.
+	* frame.c (frame_obstack_zalloc): Replace frame_obstack_alloc.
+	(frame_saved_regs_zalloc): Update.
+	(frame_saved_regs_register_unwind): Update.
+	(create_new_frame): Update.
+	(get_prev_frame): Update.
+	(frame_extra_info_zalloc): Update.
+	(deprecated_get_frame_saved_regs): Update.
+	* dwarf2cfi.c (cfi_init_extra_frame_info): Update.
+	* cris-tdep.c: Update comment.
+
 	* somsolib.h: Fix function indentation.
 	* disasm.c, buildsym.c, buildsym.h: Eliminate PTR.
 	* gnu-v2-abi.c, f-typeprint.c, x86-64-linux-tdep.c: Eliminate STREQ.

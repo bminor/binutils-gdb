@@ -1770,9 +1770,9 @@ cfi_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   unwind_tmp_obstack_init ();
 
   fs = frame_state_alloc ();
-  deprecated_set_frame_context (fi, frame_obstack_alloc (sizeof (struct context)));
+  deprecated_set_frame_context (fi, frame_obstack_zalloc (sizeof (struct context)));
   UNWIND_CONTEXT (fi)->reg =
-    frame_obstack_alloc (sizeof (struct context_reg) * NUM_REGS);
+    frame_obstack_zalloc (sizeof (struct context_reg) * NUM_REGS);
   memset (UNWIND_CONTEXT (fi)->reg, 0,
 	  sizeof (struct context_reg) * NUM_REGS);
 

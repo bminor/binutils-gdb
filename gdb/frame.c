@@ -456,17 +456,18 @@ static struct frame_info *current_frame;
 static struct obstack frame_cache_obstack;
 
 void *
-frame_obstack_alloc (unsigned long size)
+frame_obstack_zalloc (unsigned long size)
 {
-  return obstack_alloc (&frame_cache_obstack, size);
+  void *data = obstack_alloc (&frame_cache_obstack, size);
+  memset (data, 0, size);
+  return data;
 }
 
 CORE_ADDR *
 frame_saved_regs_zalloc (struct frame_info *fi)
 {
   fi->saved_regs = (CORE_ADDR *)
-    frame_obstack_alloc (SIZEOF_FRAME_SAVED_REGS);
-  memset (fi->saved_regs, 0, SIZEOF_FRAME_SAVED_REGS);
+    frame_obstack_zalloc (SIZEOF_FRAME_SAVED_REGS);
   return fi->saved_regs;
 }
 
@@ -605,14 +606,13 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
 		{
 		  int sizeof_cache = ((NUM_REGS + NUM_PSEUDO_REGS)
 				      * sizeof (void *));
-		  regs = frame_obstack_alloc (sizeof_cache);
-		  memset (regs, 0, sizeof_cache);
+		  regs = frame_obstack_zalloc (sizeof_cache);
 		  (*cache) = regs;
 		}
 	      if (regs[regnum] == NULL)
 		{
 		  regs[regnum]
-		    = frame_obstack_alloc (REGISTER_RAW_SIZE (regnum));
+		    = frame_obstack_zalloc (REGISTER_RAW_SIZE (regnum));
 		  read_memory (frame->saved_regs[regnum], regs[regnum],
 			       REGISTER_RAW_SIZE (regnum));
 		}
@@ -847,12 +847,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
   struct frame_info *fi;
   enum frame_type type;
 
-  fi = (struct frame_info *)
-    obstack_alloc (&frame_cache_obstack,
-		   sizeof (struct frame_info));
-
-  /* Zero all fields by default.  */
-  memset (fi, 0, sizeof (struct frame_info));
+  fi = frame_obstack_zalloc (sizeof (struct frame_info));
 
   fi->frame = addr;
   fi->pc = pc;
@@ -1018,10 +1013,7 @@ get_prev_frame (struct frame_info *next_frame)
     return 0;
 
   /* Create an initially zero previous frame.  */
-  prev = (struct frame_info *)
-    obstack_alloc (&frame_cache_obstack,
-		   sizeof (struct frame_info));
-  memset (prev, 0, sizeof (struct frame_info));
+  prev = frame_obstack_zalloc (sizeof (struct frame_info));
 
   /* Link it in.  */
   next_frame->prev = prev;
@@ -1250,7 +1242,7 @@ deprecated_get_frame_saved_regs (struct frame_info *frame,
   if (frame->saved_regs == NULL)
     {
       frame->saved_regs = (CORE_ADDR *)
-	frame_obstack_alloc (SIZEOF_FRAME_SAVED_REGS);
+	frame_obstack_zalloc (SIZEOF_FRAME_SAVED_REGS);
     }
   if (saved_regs_addr == NULL)
     {
@@ -1275,8 +1267,7 @@ get_frame_extra_info (struct frame_info *fi)
 struct frame_extra_info *
 frame_extra_info_zalloc (struct frame_info *fi, long size)
 {
-  fi->extra_info = frame_obstack_alloc (size);
-  memset (fi->extra_info, 0, size);
+  fi->extra_info = frame_obstack_zalloc (size);
   return fi->extra_info;
 }
 

@@ -310,7 +310,7 @@ extern struct frame_id frame_id_unwind (struct frame_info *frame);
 
    UNWIND_CACHE is provided as mechanism for implementing a per-frame
    local cache.  It's initial value being NULL.  Memory for that cache
-   should be allocated using frame_obstack_alloc().
+   should be allocated using frame_obstack_zalloc().
 
    Register window architectures (eg SPARC) should note that REGNUM
    identifies the register for the previous frame.  For instance, a
@@ -413,7 +413,7 @@ struct frame_info
 
     /* Anything extra for this structure that may have been defined
        in the machine dependent files. */
-    /* Allocated by frame_obstack_alloc () which is called /
+    /* Allocated by frame_extra_info_zalloc () which is called /
        initialized by INIT_EXTRA_FRAME_INFO */
     struct frame_extra_info *extra_info;
 
@@ -472,7 +472,11 @@ enum print_what
 #define SIZEOF_FRAME_SAVED_REGS \
         (sizeof (CORE_ADDR) * (NUM_REGS+NUM_PSEUDO_REGS))
 
-extern void *frame_obstack_alloc (unsigned long size);
+/* Allocate zero initialized memory from the frame cache obstack.
+   Appendices to the frame info (such as the unwind cache) should
+   allocate memory using this method.  */
+
+extern void *frame_obstack_zalloc (unsigned long size);
 
 /* If FRAME_CHAIN_VALID returns zero it means that the given frame
    is the outermost one and has no caller.  */
