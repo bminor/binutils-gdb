@@ -763,7 +763,7 @@ DEFUN_VOID (cg_print_function_ordering)
 {
   unsigned long index, used, unused, scratch_index;
   unsigned long  unplaced_arc_count, high_arc_count, scratch_arc_count;
-#ifdef __GNU_C__
+#ifdef __GNUC__
   unsigned long long total_arcs, tmp_arcs_count;
 #else
   unsigned long total_arcs, tmp_arcs_count;
@@ -979,7 +979,7 @@ order_and_dump_functions_by_arcs (arcs, numarcs, all,
      Arc **unplaced_arcs;
      unsigned long *unplaced_arc_count;
 {
-#ifdef __GNU_C__
+#ifdef __GNUC__
   unsigned long long tmp_arcs, total_arcs;
 #else
   unsigned long tmp_arcs, total_arcs;

@@ -1,3 +1,9 @@
+Wed Mar 20 18:15:47 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* cg_print.c (cg_print_function_ordering): Fix __GNUC__ misspelled
+	as __GNU_C__.
+	(order_and_dump_functions_by_arcs): Likewise.
+
 Tue Mar 12 12:19:50 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Rebuild with autoconf 2.8.
