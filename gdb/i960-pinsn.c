@@ -213,9 +213,9 @@ ctrl( memaddr, word1, word2 )
 		return;
 	}
 
-	fputs( ctrl_tab[i].name, stream );
+	fputs_filtered( ctrl_tab[i].name, stream );
 	if ( word1 & 2 ){		/* Predicts branch not taken */
-		fputs( ".f", stream );
+		fputs_filtered ( ".f", stream );
 	}
 
 	if ( ctrl_tab[i].numops == 1 ){
@@ -224,7 +224,7 @@ ctrl( memaddr, word1, word2 )
 		if ( word1 & 0x00800000 ){		/* Sign bit is set */
 			word1 |= (-1 & ~0xffffff);	/* Sign extend */
 		}
-		putc( '\t', stream );
+		fputs_filtered ( "\t", stream );
 		print_addr( word1 + memaddr );
 	}
 }
@@ -284,24 +284,24 @@ cobr( memaddr, word1, word2 )
 
 	fputs( cobr_tab[i].name, stream );
 	if ( word1 & 2 ){		/* Predicts branch not taken */
-		fputs( ".f", stream );
+		fputs_filtered ( ".f", stream );
 	}
-	putc( '\t', stream );
+	fputs_filtered ( "\t", stream, 0 );
 
 	src1 = (word1 >> 19) & 0x1f;
 	src2 = (word1 >> 14) & 0x1f;
 
 	if ( word1 & 0x02000 ){		/* M1 is 1 */
-		fprintf( stream, "%d", src1 );
+		fprintf_filtered ( stream, "%d", src1 );
 	} else {			/* M1 is 0 */
-		fputs( reg_names[src1], stream );
+		fputs_filtered ( reg_names[src1], stream );
 	}
 
 	if ( cobr_tab[i].numops > 1 ){
 		if ( word1 & 1 ){		/* S2 is 1 */
-			fprintf( stream, ",sf%d,", src2 );
+			fprintf_filtered ( stream, ",sf%d,", src2 );
 		} else {			/* S1 is 0 */
-			fprintf( stream, ",%s,", reg_names[src2] );
+			fprintf_filtered ( stream, ",%s,", reg_names[src2] );
 		}
 
 		/* Extract displacement and convert to address
@@ -397,7 +397,7 @@ mem( memaddr, word1, word2, noprint )
 		return len;
 	}
 
-	fprintf( stream, "%s\t", mem_tab[i].name );
+	fprintf_filtered ( stream, "%s\t", mem_tab[i].name );
 
 	reg1 = reg_names[ (word1 >> 19) & 0x1f ];	/* MEMB only */
 	reg2 = reg_names[ (word1 >> 14) & 0x1f ];
@@ -409,24 +409,24 @@ mem( memaddr, word1, word2, noprint )
 	case 2: /* LOAD INSTRUCTION */
 		if ( mode & 4 ){			/* MEMB FORMAT */
 			ea( memaddr, mode, reg2, reg3, word1, word2 );
-			fprintf( stream, ",%s", reg1 );
+			fprintf_filtered ( stream, ",%s", reg1 );
 		} else {				/* MEMA FORMAT */
 			fprintf( stream, "0x%x", offset );
 			if (mode & 8) {
-				fprintf( stream, "(%s)", reg2 );
+				fprintf_filtered ( stream, "(%s)", reg2 );
 			}
-			fprintf( stream, ",%s", reg1 );
+			fprintf_filtered ( stream, ",%s", reg1 );
 		}
 		break;
 
 	case -2: /* STORE INSTRUCTION */
 		if ( mode & 4 ){			/* MEMB FORMAT */
-			fprintf( stream, "%s,", reg1 );
+			fprintf_filtered ( stream, "%s,", reg1 );
 			ea( memaddr, mode, reg2, reg3, word1, word2 );
 		} else {				/* MEMA FORMAT */
-			fprintf( stream, "%s,0x%x", reg1, offset );
+			fprintf_filtered ( stream, "%s,0x%x", reg1, offset );
 			if (mode & 8) {
-				fprintf( stream, "(%s)", reg2 );
+				fprintf_filtered ( stream, "(%s)", reg2 );
 			}
 		}
 		break;
@@ -435,9 +435,9 @@ mem( memaddr, word1, word2, noprint )
 		if ( mode & 4 ){			/* MEMB FORMAT */
 			ea( memaddr, mode, reg2, reg3, word1, word2 );
 		} else {				/* MEMA FORMAT */
-			fprintf( stream, "0x%x", offset );
+			fprintf_filtered ( stream, "0x%x", offset );
 			if (mode & 8) {
-				fprintf( stream, "(%s)", reg2 );
+				fprintf_filtered( stream, "(%s)", reg2 );
 			}
 		}
 		break;
@@ -652,7 +652,7 @@ reg( word1 )
 		fp = 0;
 	}
 
-	fputs( mnemp, stream );
+	fputs_filtered( mnemp, stream );
 
 	s1   = (word1 >> 5)  & 1;
 	s2   = (word1 >> 6)  & 1;
@@ -664,7 +664,7 @@ reg( word1 )
 	dst  = (word1 >> 19) & 0x1f;
 
 	if  ( reg_tab[i].numops != 0 ){
-		putc( '\t', stream );
+		fputs_filtered( "\t", stream, 0 );
 
 		switch ( reg_tab[i].numops ){
 		case 1:
@@ -675,19 +675,19 @@ reg( word1 )
 			break;
 		case 2:
 			regop( m1, s1, src, fp );
-			putc( ',', stream );
+			fputs_filtered( ",", stream );
 			regop( m2, s2, src2, fp );
 			break;
 		case -2:
 			regop( m1, s1, src, fp );
-			putc( ',', stream );
+			fputs_filtered( ",", stream );
 			dstop( m3, dst, fp );
 			break;
 		case 3:
 			regop( m1, s1, src, fp );
-			putc( ',', stream );
+			fputs_filtered( ",", stream );
 			regop( m2, s2, src2, fp );
-			putc( ',', stream );
+			fputs_filtered( ",", stream );
 			dstop( m3, dst, fp );
 			break;
 		}
@@ -717,16 +717,16 @@ ea( memaddr, mode, reg2, reg3, word1, word2 )
 
 	switch (mode) {
 	case 4:	 					/* (reg) */
-		fprintf( stream, "(%s)", reg2 );
+		fprintf_filtered( stream, "(%s)", reg2 );
 		break;
 	case 5:						/* displ+8(ip) */
 		print_addr( word2+8+memaddr );
 		break;
 	case 7:						/* (reg)[index*scale] */
 		if (scale == 1) {
-			fprintf( stream, "(%s)[%s]", reg2, reg3 );
+			fprintf_filtered( stream, "(%s)[%s]", reg2, reg3 );
 		} else {
-			fprintf( stream, "(%s)[%s*%d]",reg2,reg3,scale);
+			fprintf_filtered( stream, "(%s)[%s*%d]",reg2,reg3,scale);
 		}
 		break;
 	case 12:					/* displacement */
@@ -734,22 +734,22 @@ ea( memaddr, mode, reg2, reg3, word1, word2 )
 		break;
 	case 13:					/* displ(reg) */
 		print_addr( word2 );
-		fprintf( stream, "(%s)", reg2 );
+		fprintf_filtered( stream, "(%s)", reg2 );
 		break;
 	case 14:					/* displ[index*scale] */
 		print_addr( word2 );
 		if (scale == 1) {
-			fprintf( stream, "[%s]", reg3 );
+			fprintf_filtered( stream, "[%s]", reg3 );
 		} else {
-			fprintf( stream, "[%s*%d]", reg3, scale );
+			fprintf_filtered( stream, "[%s*%d]", reg3, scale );
 		}
 		break;
 	case 15:				/* displ(reg)[index*scale] */
 		print_addr( word2 );
 		if (scale == 1) {
-			fprintf( stream, "(%s)[%s]", reg2, reg3 );
+			fprintf_filtered( stream, "(%s)[%s]", reg2, reg3 );
 		} else {
-			fprintf( stream, "(%s)[%s*%d]",reg2,reg3,scale );
+			fprintf_filtered( stream, "(%s)[%s*%d]",reg2,reg3,scale );
 		}
 		break;
 	default:
@@ -769,25 +769,25 @@ regop( mode, spec, reg, fp )
 	if ( fp ){				/* FLOATING POINT INSTRUCTION */
 		if ( mode == 1 ){			/* FP operand */
 			switch ( reg ){
-			case 0:  fputs( "fp0", stream );	break;
-			case 1:  fputs( "fp1", stream );	break;
-			case 2:  fputs( "fp2", stream );	break;
-			case 3:  fputs( "fp3", stream );	break;
-			case 16: fputs( "0f0.0", stream );	break;
-			case 22: fputs( "0f1.0", stream );	break;
-			default: putc( '?', stream );		break;
+			case 0:  fputs_filtered( "fp0", stream );	break;
+			case 1:  fputs_filtered( "fp1", stream );	break;
+			case 2:  fputs_filtered( "fp2", stream );	break;
+			case 3:  fputs_filtered( "fp3", stream );	break;
+			case 16: fputs_filtered( "0f0.0", stream );	break;
+			case 22: fputs_filtered( "0f1.0", stream );	break;
+			default: fputs_filtered( "?", stream );		break;
 			}
 		} else {				/* Non-FP register */
-			fputs( reg_names[reg], stream );
+			fputs_filtered( reg_names[reg], stream );
 		}
 	} else {				/* NOT FLOATING POINT */
 		if ( mode == 1 ){			/* Literal */
-			fprintf( stream, "%d", reg );
+			fprintf_filtered( stream, "%d", reg );
 		} else {				/* Register */
 			if ( spec == 0 ){
-				fputs( reg_names[reg], stream );
+				fputs_filtered( reg_names[reg], stream );
 			} else {
-				fprintf( stream, "sf%d", reg );
+				fprintf_filtered( stream, "sf%d", reg );
 			}
 		}
 	}
@@ -816,7 +816,7 @@ static void
 invalid( word1 )
     int word1;
 {
-	fprintf( stream, ".word\t0x%08x", word1 );
+	fprintf_filtered( stream, ".word\t0x%08x", word1 );
 }	
 
 static void
@@ -849,9 +849,9 @@ put_abs( word1, word2 )
 	}
 
 	if ( len == 8 ){
-		fprintf( stream, "%08x %08x\t", word1, word2 );
+		fprintf_filtered( stream, "%08x %08x\t", word1, word2 );
 	} else {
-		fprintf( stream, "%08x         \t", word1 );
+		fprintf_filtered( stream, "%08x         \t", word1 );
 	}
 ;
 
