@@ -1,3 +1,8 @@
+Thu Jun  3 03:34:49 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* target.c (target_read_memory_partial):  Don't deref errnoptr
+	when checking for null pointer.
+
 Wed Jun  2 19:58:46 1993  John Gilmore  (gnu@cygnus.com)
 
 	* remote-es1800.c:  Fix typo.
