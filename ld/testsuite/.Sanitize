@@ -26,9 +26,9 @@ Things-to-keep:
 ChangeLog
 config
 lib
-ld.bootstrap
-ld.cdtest
-ld.scripts
+ld-bootstrap
+ld-cdtest
+ld-scripts
 
 Things-to-lose:
 
