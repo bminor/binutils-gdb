@@ -10,7 +10,7 @@ cat >e${EMULATION_NAME}.c <<EOF
 
 /* SunOS emulation code for ${EMULATION_NAME}
    Copyright 1991, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2002,
-   2003, 2004 Free Software Foundation, Inc.
+   2003, 2004, 2005 Free Software Foundation, Inc.
    Written by Steve Chamberlain <sac@cygnus.com>
    SunOS shared library support by Ian Lance Taylor <ian@cygnus.com>
 
@@ -917,7 +917,7 @@ gld${EMULATION_NAME}_set_need (lang_input_statement_type *inp)
 	  bfd_put_32 (output_bfd, (bfd_vma) 0, need_pinfo + 4);
 	  bfd_put_16 (output_bfd, (bfd_vma) 0, need_pinfo + 8);
 	  bfd_put_16 (output_bfd, (bfd_vma) 0, need_pinfo + 10);
-	  strcpy (need_pnames, inp->filename);
+	  strcpy ((char *) need_pnames, inp->filename);
 	}
       else
 	{
@@ -932,7 +932,7 @@ gld${EMULATION_NAME}_set_need (lang_input_statement_type *inp)
 	    sscanf (verstr, ".so.%d.%d", &maj, &min);
 	  bfd_put_16 (output_bfd, (bfd_vma) maj, need_pinfo + 8);
 	  bfd_put_16 (output_bfd, (bfd_vma) min, need_pinfo + 10);
-	  strcpy (need_pnames, inp->local_sym_name + 2);
+	  strcpy ((char *) need_pnames, inp->local_sym_name + 2);
 	}
 
       c = (need_pinfo - need_contents) / NEED_ENTRY_SIZE;
@@ -943,7 +943,7 @@ gld${EMULATION_NAME}_set_need (lang_input_statement_type *inp)
 		    need_pinfo + 12);
 
       need_pinfo += NEED_ENTRY_SIZE;
-      need_pnames += strlen (need_pnames) + 1;
+      need_pnames += strlen ((char *) need_pnames) + 1;
     }
 }
 

@@ -1,5 +1,5 @@
 /* Routines to help build PEI-format DLLs (Win32 etc)
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
    Written by DJ Delorie <dj@cygnus.com>
 
@@ -920,7 +920,7 @@ fill_edata (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
   unsigned char *eaddresses;
   unsigned char *enameptrs;
   unsigned char *eordinals;
-  unsigned char *enamestr;
+  char *enamestr;
   time_t now;
 
   time (&now);
@@ -932,7 +932,7 @@ fill_edata (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
   eaddresses = edata_d + 40;
   enameptrs = eaddresses + 4 * export_table_size;
   eordinals = enameptrs + 4 * count_exported_byname;
-  enamestr = eordinals + 2 * count_exported_byname;
+  enamestr = (char *) eordinals + 2 * count_exported_byname;
 
 #define ERVA(ptr) (((unsigned char *)(ptr) - edata_d) \
 		   + edata_s->output_section->vma - image_base)
@@ -1671,7 +1671,7 @@ make_tail (bfd *parent)
   bfd_set_section_size (abfd, id7, len);
   d7 = xmalloc (len);
   id7->contents = d7;
-  strcpy (d7, dll_filename);
+  strcpy ((char *) d7, dll_filename);
 
   bfd_set_symtab (abfd, symtab, symptr);
 
@@ -1894,7 +1894,7 @@ make_one (def_file_export *exp, bfd *parent)
       memset (d6, 0, len);
       d6[0] = exp->hint & 0xff;
       d6[1] = exp->hint >> 8;
-      strcpy (d6 + 2, exp->name);
+      strcpy ((char *) d6 + 2, exp->name);
     }
 
   bfd_set_symtab (abfd, symtab, symptr);
@@ -2427,7 +2427,8 @@ pe_implied_import_dll (const char *filename)
   unsigned long pe_header_offset, opthdr_ofs, num_entries, i;
   unsigned long export_rva, export_size, nsections, secptr, expptr;
   unsigned long exp_funcbase;
-  unsigned char *expdata, *erva;
+  unsigned char *expdata;
+  char *erva;
   unsigned long name_rvas, ordinals, nexp, ordbase;
   const char *dll_name;
   /* Initialization with start > end guarantees that is_data
@@ -2537,7 +2538,7 @@ pe_implied_import_dll (const char *filename)
   expdata = xmalloc (export_size);
   bfd_seek (dll, (file_ptr) expptr, SEEK_SET);
   bfd_bread (expdata, (bfd_size_type) export_size, dll);
-  erva = expdata - export_rva;
+  erva = (char *) expdata - export_rva;
 
   if (pe_def_file == 0)
     pe_def_file = def_file_empty ();
@@ -2550,7 +2551,7 @@ pe_implied_import_dll (const char *filename)
 
   /* Use internal dll name instead of filename
      to enable symbolic dll linking.  */
-  dll_name = pe_as32 (expdata + 12) + erva;
+  dll_name = erva + pe_as32 (expdata + 12);
 
   /* Check to see if the dll has already been added to
      the definition list and if so return without error.

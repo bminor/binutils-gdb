@@ -1,3 +1,8 @@
+2005-02-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* pe-dll.c: Warning fixes.
+	* emultempl/sunos.em: Likewise.
+
 2005-02-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ldlang.c (section_already_linked): Don't call
