@@ -247,7 +247,3 @@ mi_cmd_break_watch (char *command, char **argv, int argc)
     }
   return MI_CMD_DONE;
 }
-
-/* Local variables: */
-/* change-log-default-name: "ChangeLog-mi" */
-/* End: */

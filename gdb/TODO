@@ -235,14 +235,6 @@ http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00814.html
 
 --
 
-ChangeLog.mi vs ChangeLog-mi (Andrew Cagney)
-Needs further debate.
-
-Re: [PATCH] Add change-log variables to more MI files
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00811.html
-
---
-
 Re: Various C++ things
 
 value_headof/value_from_vtable_info are worthless, and should be removed.

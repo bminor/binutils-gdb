@@ -1508,7 +1508,3 @@ _initialize_mi_main ()
   /* FIXME: Should we notify main that we are here as a possible
      interpreter? */
 }
-
-/* Local variables: */
-/* change-log-default-name: "ChangeLog-mi" */
-/* End: */

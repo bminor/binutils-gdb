@@ -395,7 +395,3 @@ _initialize_mi_out ()
 {
   /* nothing happens here */
 }
-
-/* Local variables: */
-/* change-log-default-name: "ChangeLog-mi" */
-/* End: */

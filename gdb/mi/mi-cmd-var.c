@@ -499,7 +499,3 @@ varobj_update_one (struct varobj *var)
     }
   return 1;
 }
-
-/* Local variables: */
-/* change-log-default-name: "ChangeLog-mi" */
-/* End: */

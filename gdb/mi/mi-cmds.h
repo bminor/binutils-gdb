@@ -123,7 +123,3 @@ extern int mi_debug_p;
 extern struct ui_file *raw_stdout;
 
 #endif
-
-/* Local variables: */
-/* change-log-default-name: "ChangeLog-mi" */
-/* End: */
