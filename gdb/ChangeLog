@@ -1,3 +1,13 @@
+2002-03-20  Daniel Jacobowitz  <drow@mvista.com>
+
+	Fix PR gdb/422.
+	* c-lang.c (c_create_fundamental_type): Handle FT_COMPLEX,
+	FT_DBL_PREC_COMPLEX, and FT_EXT_PREC_COMPLEX.
+	* dwarf2read.c (read_base_type): Set TYPE_TARGET_TYPE for
+	complex types.
+	* stabsread.c (rs6000_builtin_type): Likewise.
+	(read_sun_floating_type): Likewise.
+
 2002-03-19  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* stabsread.c (read_member_functions): Remove skip code for duplicate

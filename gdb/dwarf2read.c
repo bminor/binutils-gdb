@@ -2979,6 +2979,18 @@ read_base_type (struct die_info *die, struct objfile *objfile)
       type = init_type (code, size, type_flags, DW_STRING (attr), objfile);
       if (encoding == DW_ATE_address)
 	TYPE_TARGET_TYPE (type) = dwarf2_fundamental_type (objfile, FT_VOID);
+      else if (encoding == DW_ATE_complex_float)
+	{
+	  if (size == 32)
+	    TYPE_TARGET_TYPE (type)
+	      = dwarf2_fundamental_type (objfile, FT_EXT_PREC_FLOAT);
+	  else if (size == 16)
+	    TYPE_TARGET_TYPE (type)
+	      = dwarf2_fundamental_type (objfile, FT_DBL_PREC_FLOAT);
+	  else if (size == 8)
+	    TYPE_TARGET_TYPE (type)
+	      = dwarf2_fundamental_type (objfile, FT_FLOAT);
+	}
     }
   else
     {

@@ -2978,10 +2978,14 @@ rs6000_builtin_type (int typenum)
     case 25:
       /* Complex type consisting of two IEEE single precision values.  */
       rettype = init_type (TYPE_CODE_COMPLEX, 8, 0, "complex", NULL);
+      TYPE_TARGET_TYPE (rettype) = init_type (TYPE_CODE_FLT, 4, 0, "float",
+					      NULL);
       break;
     case 26:
       /* Complex type consisting of two IEEE double precision values.  */
       rettype = init_type (TYPE_CODE_COMPLEX, 16, 0, "double complex", NULL);
+      TYPE_TARGET_TYPE (rettype) = init_type (TYPE_CODE_FLT, 8, 0, "double",
+					      NULL);
       break;
     case 27:
       rettype = init_type (TYPE_CODE_INT, 1, 0, "integer*1", NULL);
@@ -4491,6 +4495,7 @@ read_sun_floating_type (char **pp, int typenums[2], struct objfile *objfile)
   int nbits;
   int details;
   int nbytes;
+  struct type *rettype;
 
   /* The first number has more details about the type, for example
      FN_COMPLEX.  */
@@ -4505,9 +4510,12 @@ read_sun_floating_type (char **pp, int typenums[2], struct objfile *objfile)
 
   if (details == NF_COMPLEX || details == NF_COMPLEX16
       || details == NF_COMPLEX32)
-    /* This is a type we can't handle, but we do know the size.
-       We also will be able to give it a name.  */
-    return init_type (TYPE_CODE_COMPLEX, nbytes, 0, NULL, objfile);
+    {
+      rettype = init_type (TYPE_CODE_COMPLEX, nbytes, 0, NULL, objfile);
+      TYPE_TARGET_TYPE (rettype)
+	= init_type (TYPE_CODE_FLT, nbytes / 2, 0, NULL, objfile);
+      return rettype;
+    }
 
   return init_type (TYPE_CODE_FLT, nbytes, 0, NULL, objfile);
 }
