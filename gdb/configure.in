@@ -26,6 +26,7 @@ AC_CONFIG_HEADER(config.h:config.in)
 AM_MAINTAINER_MODE
 
 AC_PROG_CC
+AC_GNU_SOURCE
 AC_AIX
 AC_ISC_POSIX
 AM_PROG_CC_STDC
@@ -307,6 +308,7 @@ AC_FUNC_MMAP
 AC_FUNC_VFORK
 AC_CHECK_FUNCS(canonicalize_file_name realpath)
 AC_CHECK_FUNCS(poll)
+AC_CHECK_FUNCS(pread64)
 AC_CHECK_FUNCS(sbrk)
 AC_CHECK_FUNCS(setpgid setpgrp)
 AC_CHECK_FUNCS(sigaction sigprocmask sigsetmask)
@@ -824,23 +826,6 @@ fi
 if test "x$gdb_cv_thread_db_h_has_td_notalloc" = "xyes"; then
   AC_DEFINE(THREAD_DB_HAS_TD_NOTALLOC, 1,
             [Define if <thread_db.h> has the TD_NOTALLOC error code.])
-fi
-
-dnl linux-proc.c wants to use pread64, which may require special CFLAGS
-dnl -D_BSD_SOURCE is normally assumed but we have to specify it because of
-dnl -D_XOPEN_SOURCE=500.
-if test $host = $target; then
-  case $target in
-    *-linux*)
-      save_CFLAGS=$CFLAGS
-      CFLAGS="$CFLAGS -D_BSD_SOURCE -D_XOPEN_SOURCE=500 -D_LARGEFILE64_SOURCE"
-      AC_TRY_LINK([#include <unistd.h>],
-		  [pread64 (0, NULL, 0, 0);],
-		  [ENABLE_CFLAGS="$ENABLE_CFLAGS -D_BSD_SOURCE -D_XOPEN_SOURCE=500 -D_LARGEFILE64_SOURCE"
-		   AC_DEFINE(HAVE_PREAD64)], [])
-      CFLAGS=$save_CFLAGS
-      ;;
-  esac
 fi
 
 dnl Handle optional features that can be enabled.

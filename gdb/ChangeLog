@@ -1,3 +1,12 @@
+2003-01-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.in: Call AC_GNU_SOURCE.  Check for pread64 using
+	AC_CHECK_FUNCS and remove the old check for pread64.
+	* acinclude.m4 (AC_GNU_SOURCE): New macro.
+	* acconfig.h (_GNU_SOURCE): Add.
+	(HAVE_PREAD64): Remove.
+	* configure, aclocal.m4, config.in: Regenerated.
+
 2003-01-03  Andrew Cagney  <ac131313@redhat.com>
 
 	* alpha-tdep.c: Use get_frame_saved_regs.

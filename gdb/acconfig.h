@@ -1,3 +1,8 @@
+/* Enable GNU extensions on systems that have them.  */
+#ifndef _GNU_SOURCE
+# undef _GNU_SOURCE
+#endif
+
 /* Define if your struct reg has r_fs.  */
 #undef HAVE_STRUCT_REG_R_FS
 
@@ -45,9 +50,6 @@
 
 /* Define if <sys/procfs.h> has pr_siginfo64_t */
 #undef HAVE_PR_SIGINFO64_T
-
-/* Define if the pread64 function is available.  */
-#undef HAVE_PREAD64
 
 /* Define if <link.h> exists and defines struct link_map which has
    members with an ``l_'' prefix.  (For Solaris, SVR4, and

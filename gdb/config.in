@@ -71,14 +71,16 @@
 /* Define vfork as fork if vfork does not work.  */
 #undef vfork
 
+/* Enable GNU extensions on systems that have them.  */
+#ifndef _GNU_SOURCE
+# undef _GNU_SOURCE
+#endif
+
 /* Define if your struct reg has r_fs.  */
 #undef HAVE_STRUCT_REG_R_FS
 
 /* Define if your struct reg has r_gs.  */
 #undef HAVE_STRUCT_REG_R_GS
-
-/* Define if the pread64 function is available.  */
-#undef HAVE_PREAD64
 
 /* Define if <link.h> exists and defines struct link_map which has
    members with an ``l_'' prefix.  (For Solaris, SVR4, and
@@ -203,6 +205,9 @@
 
 /* Define if you have the poll function.  */
 #undef HAVE_POLL
+
+/* Define if you have the pread64 function.  */
+#undef HAVE_PREAD64
 
 /* Define if you have the putenv function.  */
 #undef HAVE_PUTENV

@@ -918,3 +918,12 @@ size_t iconv();
   fi
   AC_SUBST(LIBICONV)
 ])
+
+# AC_GNU_SOURCE
+# -------------
+# FIXME: Remove thise once we start using Autoconf 2.5x (x>=4).
+AC_DEFUN([AC_GNU_SOURCE],
+[AC_BEFORE([$0], [AC_TRY_COMPILE])dnl
+AC_BEFORE([$0], [AC_TRY_RUN])dnl
+AC_DEFINE([_GNU_SOURCE])
+])
