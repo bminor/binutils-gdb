@@ -1,3 +1,17 @@
+Wed Nov 15 12:19:28 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* binutils-all/objcopy.exp: If assembly fails, call unresolved.
+	Test running objcopy and strip on a final executable.
+	* binutils-all/testprog.c: New file.
+	* config/default.exp (STRIP, STRIPFLAGS): Define.
+	(binutils_compile): New procedure.
+	* lib/utils-lib.exp (default_binutils_compile): New procedure.
+
+Fri Nov  3 13:22:33 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* lib/utils-lib.exp (default_binutils_run): Don't use verbose
+	-log, reverting part of Oct 2 change.
+
 Wed Nov  1 15:09:57 1995  Manfred Hollstein KS/EF4A 60/1F/110 #40283  <manfred@lts.sel.alcatel.de>
 
 	* binutils-all/objcopy.exp: Add setup_xfails for

@@ -30,6 +30,7 @@ nm.exp
 objcopy.exp
 objdump.exp
 size.exp
+testprog.c
 
 Things-to-lose:
 
