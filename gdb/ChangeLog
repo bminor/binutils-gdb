@@ -1,5 +1,11 @@
 2004-01-03  J. Brobecker  <brobecker@gnat.com>
 
+	* infrun.c (handle_step_into_function): New function.
+	(handle_inferior_event): Extract out some code into the new
+	function above.
+
+2004-01-03  J. Brobecker  <brobecker@gnat.com>
+
 	* infrun.c (handle_inferior_event): Move the declaration of
 	real_stop_pc inside the if blocks where it is used.
 
