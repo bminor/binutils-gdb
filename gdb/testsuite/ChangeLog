@@ -1,3 +1,8 @@
+2004-01-13  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/derivation.exp: Add XFAIL for bug with protected
+	inheritance.  PR gdb/1498, PR gcc/13539.
+
 2004-01-13  Elena Zannoni  <ezannoni@redhat.com>
 
          * gdb.threads/gcore-thread.exp: Prefix name of binary with
