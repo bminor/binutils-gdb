@@ -445,6 +445,25 @@ print_insn_arm (pc, info, given)
 		      }
 		      break;
 
+		    case 'I':
+		      /* Print a Cirrus/DSP shift immediate.  */
+		      /* Immediates are 7bit signed ints with bits 0..3 in
+			 bits 0..3 of opcode and bits 4..6 in bits 5..7
+			 of opcode.  */
+		      {
+			int imm;
+
+			imm = (given & 0xf) | ((given & 0xe0) >> 1);
+
+			/* Is ``imm'' a negative number?  */
+			if (imm & 0x40)
+			  imm |= (-1 << 7);
+
+			func (stream, "%d", imm);
+		      }
+
+		      break;
+
 		    case 'C':
 		      func (stream, "_");
 		      if (given & 0x80000)
