@@ -1,5 +1,26 @@
 2000-09-05  Kevin Buettner  <kevinb@redhat.com>
 
+	* config/arm/tm-linux.h (arm_linux_sigcontext_register_address,
+	arm_linux_in_sigtramp): Declare.
+	(IN_SIGTRAMP, SIGCONTEXT_REGISTER_ADDRESS): Define.
+	* arm-tdep.c (SIGCONTEXT_REGISTER_ADDRESS): Define to be 0
+	if not already defined by tm.h.
+	(arm_scan_prologue): Don't assume that the prologue instructions
+	will be in a contiguous clump.
+	(arm_init_extra_frame_info): Add support for sigtramp frames.
+	(arm_pc_is_thumb, arm_pc_is_thumb_dummy): Change type of
+	`memaddr' from bfd_vma to CORE_ADDR.
+	* arm-linux-tdep.c (gdbcore.h, frame.h): Include.
+	(arm_pc_is_thumb): Declare.
+	(arm_linux_skip_solib_resolver): Fix printf() statement.  [Which
+	shouldn't be there anyway.]
+	(ARM_LINUX_SIGRETURN_INSTR, ARM_LINUX_RT_SIGRETURN_INSTR): New
+	defines.
+	(arm_linux_in_sigtramp, arm_linux_sigcontext_register_address):
+	New functions.
+
+2000-09-05  Kevin Buettner  <kevinb@redhat.com>
+
 	* i386aix-nat.c (fetch_core_registers): Protoize.
 	* hpux-thread.c (hpux_thread_xfer_memory): Protoize.
 

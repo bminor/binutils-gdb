@@ -23,11 +23,17 @@
 #include "value.h"
 #include "gdbtypes.h"
 #include "floatformat.h"
+#include "gdbcore.h"
+#include "frame.h"
 
 /* For arm_linux_skip_solib_resolver.  */
 #include "symtab.h"
 #include "symfile.h"
 #include "objfiles.h"
+
+/* FIXME: Put in common header file shared between arm-tdep.c and
+   arm-linux-tdep.c */
+int arm_pc_is_thumb (CORE_ADDR memaddr);
 
 #ifdef GET_LONGJMP_TARGET
 
@@ -425,12 +431,93 @@ arm_linux_skip_solib_resolver (CORE_ADDR pc)
 
   /* Plug in functions for other kinds of resolvers here.  */
   result = skip_hurd_resolver (pc);
-  printf ("Result = 0x%08x\n");
+  printf ("Result = 0x%08lx\n", result);
   if (result)
     return result;
 
   
   return 0;
+}
+
+/* The constants below were determined by examining the following files
+   in the linux kernel sources:
+
+      arch/arm/kernel/signal.c
+	  - see SWI_SYS_SIGRETURN and SWI_SYS_RT_SIGRETURN
+      include/asm-arm/unistd.h
+	  - see __NR_sigreturn, __NR_rt_sigreturn, and __NR_SYSCALL_BASE */
+
+#define ARM_LINUX_SIGRETURN_INSTR	0xef900077
+#define ARM_LINUX_RT_SIGRETURN_INSTR	0xef9000ad
+
+/* arm_linux_in_sigtramp determines if PC points at one of the
+   instructions which cause control to return to the Linux kernel upon
+   return from a signal handler.  FUNC_NAME is unused.  */
+
+int
+arm_linux_in_sigtramp (CORE_ADDR pc, char *func_name)
+{
+  unsigned long inst;
+
+  inst = read_memory_integer (pc, 4);
+
+  return (inst == ARM_LINUX_SIGRETURN_INSTR
+	  || inst == ARM_LINUX_RT_SIGRETURN_INSTR);
+
+}
+
+/* arm_linux_sigcontext_register_address returns the address in the
+   sigcontext of register REGNO given a stack pointer value SP and
+   program counter value PC.  The value 0 is returned if PC is not
+   pointing at one of the signal return instructions or if REGNO is
+   not saved in the sigcontext struct.  */
+
+CORE_ADDR
+arm_linux_sigcontext_register_address (CORE_ADDR sp, CORE_ADDR pc, int regno)
+{
+  unsigned long inst;
+  CORE_ADDR reg_addr = 0;
+
+  inst = read_memory_integer (pc, 4);
+
+  if (inst == ARM_LINUX_SIGRETURN_INSTR || inst == ARM_LINUX_RT_SIGRETURN_INSTR)
+    {
+      CORE_ADDR sigcontext_addr;
+
+      /* The sigcontext structure is at different places for the two
+         signal return instructions.  For ARM_LINUX_SIGRETURN_INSTR,
+	 it starts at the SP value.  For ARM_LINUX_RT_SIGRETURN_INSTR,
+	 it is at SP+8.  For the latter instruction, it may also be
+	 the case that the address of this structure may be determined
+	 by reading the 4 bytes at SP, but I'm not convinced this is
+	 reliable.
+
+	 In any event, these magic constants (0 and 8) may be
+	 determined by examining struct sigframe and struct
+	 rt_sigframe in arch/arm/kernel/signal.c in the Linux kernel
+	 sources.  */
+
+      if (inst == ARM_LINUX_RT_SIGRETURN_INSTR)
+	sigcontext_addr = sp + 8;
+      else /* inst == ARM_LINUX_SIGRETURN_INSTR */
+        sigcontext_addr = sp + 0;
+
+      /* The layout of the sigcontext structure for ARM GNU/Linux is
+         in include/asm-arm/sigcontext.h in the Linux kernel sources.
+
+	 There are three 4-byte fields which precede the saved r0
+	 field.  (This accounts for the 12 in the code below.)  The
+	 sixteen registers (4 bytes per field) follow in order.  The
+	 PSR value follows the sixteen registers which accounts for
+	 the constant 19 below. */
+
+      if (0 <= regno && regno <= PC_REGNUM)
+	reg_addr = sigcontext_addr + 12 + (4 * regno);
+      else if (regno == PS_REGNUM)
+	reg_addr = sigcontext_addr + 19 * 4;
+    }
+
+  return reg_addr;
 }
 
 void

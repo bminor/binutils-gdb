@@ -30,6 +30,31 @@
 #include "dis-asm.h"		/* For register flavors. */
 #include <ctype.h>		/* for isupper () */
 
+/* Each OS has a different mechanism for accessing the various
+   registers stored in the sigcontext structure.
+
+   SIGCONTEXT_REGISTER_ADDRESS should be defined to the name (or
+   function pointer) which may be used to determine the addresses
+   of the various saved registers in the sigcontext structure.
+
+   For the ARM target, there are three parameters to this function. 
+   The first is the pc value of the frame under consideration, the
+   second the stack pointer of this frame, and the last is the
+   register number to fetch.  
+
+   If the tm.h file does not define this macro, then it's assumed that
+   no mechanism is needed and we define SIGCONTEXT_REGISTER_ADDRESS to
+   be 0. 
+   
+   When it comes time to multi-arching this code, see the identically
+   named machinery in ia64-tdep.c for an example of how it could be
+   done.  It should not be necessary to modify the code below where
+   this macro is used.  */
+
+#ifndef SIGCONTEXT_REGISTER_ADDRESS
+#define SIGCONTEXT_REGISTER_ADDRESS 0
+#endif
+
 extern void _initialize_arm_tdep (void);
 
 /* Number of different reg name sets (options). */
@@ -226,7 +251,7 @@ static int caller_is_thumb;
    function.  */
 
 int
-arm_pc_is_thumb (bfd_vma memaddr)
+arm_pc_is_thumb (CORE_ADDR memaddr)
 {
   struct minimal_symbol *sym;
 
@@ -250,7 +275,7 @@ arm_pc_is_thumb (bfd_vma memaddr)
    dummy being called from a Thumb function.  */
 
 int
-arm_pc_is_thumb_dummy (bfd_vma memaddr)
+arm_pc_is_thumb_dummy (CORE_ADDR memaddr)
 {
   CORE_ADDR sp = read_sp ();
 
@@ -725,14 +750,42 @@ arm_scan_prologue (struct frame_info *fi)
      the symbol table, peek in the stack frame to find the PC.  */
   if (find_pc_partial_function (fi->pc, NULL, &prologue_start, &prologue_end))
     {
-      /* Assume the prologue is everything between the first instruction
-         in the function and the first source line.  */
-      struct symtab_and_line sal = find_pc_line (prologue_start, 0);
+      /* One way to find the end of the prologue (which works well
+         for unoptimized code) is to do the following:
 
-      if (sal.line == 0)	/* no line info, use current PC */
-	prologue_end = fi->pc;
-      else if (sal.end < prologue_end)	/* next line begins after fn end */
-	prologue_end = sal.end;	/* (probably means no prologue)  */
+	    struct symtab_and_line sal = find_pc_line (prologue_start, 0);
+
+	    if (sal.line == 0)
+	      prologue_end = fi->pc;
+	    else if (sal.end < prologue_end)
+	      prologue_end = sal.end;
+
+	 This mechanism is very accurate so long as the optimizer
+	 doesn't move any instructions from the function body into the
+	 prologue.  If this happens, sal.end will be the last
+	 instruction in the first hunk of prologue code just before
+	 the first instruction that the scheduler has moved from
+	 the body to the prologue.
+
+	 In order to make sure that we scan all of the prologue
+	 instructions, we use a slightly less accurate mechanism which
+	 may scan more than necessary.  To help compensate for this
+	 lack of accuracy, the prologue scanning loop below contains
+	 several clauses which'll cause the loop to terminate early if
+	 an implausible prologue instruction is encountered.  
+	 
+	 The expression
+	 
+	      prologue_start + 64
+	    
+	 is a suitable endpoint since it accounts for the largest
+	 possible prologue plus up to five instructions inserted by
+	 the scheduler. */
+         
+      if (prologue_end > prologue_start + 64)
+	{
+	  prologue_end = prologue_start + 64;	/* See above. */
+	}
     }
   else
     {
@@ -740,10 +793,7 @@ arm_scan_prologue (struct frame_info *fi)
          PC is the address of the stmfd + 8.  */
       prologue_start = ADDR_BITS_REMOVE (read_memory_integer (fi->frame, 4))
 	- 8;
-      prologue_end = prologue_start + 64;	/* This is all the insn's
-						   that could be in the prologue,
-						   plus room for 5 insn's inserted
-						   by the scheduler.  */
+      prologue_end = prologue_start + 64;	/* See above. */
     }
 
   /* Now search the prologue looking for instructions that set up the
@@ -833,6 +883,10 @@ arm_scan_prologue (struct frame_info *fi)
 		  fi->fsr.regs[fp_start_reg++] = sp_offset;
 		}
 	    }
+	  else if ((insn & 0xf0000000) != 0xe0000000)
+	    break;	/* Condition not true, exit early */
+	  else if ((insn & 0xfe200000) == 0xe8200000) /* ldm? */
+	    break;	/* Don't scan past a block load */
 	  else
 	    /* The optimizer might shove anything into the prologue,
 	       so we just skip what we don't recognize. */
@@ -973,6 +1027,40 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
     }
   else
 #endif
+
+  /* Determine whether or not we're in a sigtramp frame. 
+     Unfortunately, it isn't sufficient to test
+     fi->signal_handler_caller because this value is sometimes set
+     after invoking INIT_EXTRA_FRAME_INFO.  So we test *both*
+     fi->signal_handler_caller and IN_SIGTRAMP to determine if we need
+     to use the sigcontext addresses for the saved registers.
+
+     Note: If an ARM IN_SIGTRAMP method ever needs to compare against
+     the name of the function, the code below will have to be changed
+     to first fetch the name of the function and then pass this name
+     to IN_SIGTRAMP. */
+
+  if (SIGCONTEXT_REGISTER_ADDRESS 
+      && (fi->signal_handler_caller || IN_SIGTRAMP (fi->pc, 0)))
+    {
+      CORE_ADDR sp;
+
+      if (!fi->next)
+	sp = read_sp();
+      else
+	sp = fi->next->frame - fi->next->frameoffset + fi->next->framesize;
+
+      for (reg = 0; reg < NUM_REGS; reg++)
+	fi->fsr.regs[reg] = SIGCONTEXT_REGISTER_ADDRESS (sp, fi->pc, reg);
+
+      /* FIXME: What about thumb mode? */
+      fi->framereg = SP_REGNUM;
+      fi->frame = read_memory_integer (fi->fsr.regs[fi->framereg], 4);
+      fi->framesize = 0;
+      fi->frameoffset = 0;
+
+    }
+  else
     {
       arm_scan_prologue (fi);
 
