@@ -21,6 +21,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "arch-utils.h"
 #include "gdb_string.h"
 #include <errno.h>
 #include <signal.h>
@@ -37,9 +38,12 @@
 #include "gdbcore.h"
 #include "gdbthread.h"
 #include "regcache.h"
+#include "regset.h"
 #include "symfile.h"
 #include "exec.h"
 #include <readline/readline.h>
+
+#include "gdb_assert.h"
 
 #ifndef O_BINARY
 #define O_BINARY 0
@@ -55,6 +59,11 @@ static struct core_fns *core_file_fns = NULL;
    file currently open on core_bfd. */
 
 static struct core_fns *core_vec = NULL;
+
+/* FIXME: kettenis/20031023: Eventually this variable should
+   disappear.  */
+
+struct gdbarch *core_gdbarch = NULL;
 
 static void core_files_info (struct target_ops *);
 
@@ -124,6 +133,10 @@ sniff_core_bfd (bfd *abfd)
   struct core_fns *cf;
   struct core_fns *yummy = NULL;
   int matches = 0;;
+
+  /* Don't sniff if we have support for register sets in CORE_GDBARCH.  */
+  if (core_gdbarch && gdbarch_regset_from_core_section_p (core_gdbarch))
+    return NULL;
 
   for (cf = core_file_fns; cf != NULL; cf = cf->next)
     {
@@ -209,6 +222,7 @@ core_close (int quitting)
 	}
     }
   core_vec = NULL;
+  core_gdbarch = NULL;
 }
 
 static void
@@ -310,6 +324,14 @@ core_open (char *filename, int from_tty)
   unpush_target (&core_ops);
   core_bfd = temp_bfd;
   old_chain = make_cleanup (core_close_cleanup, 0 /*ignore*/);
+
+  /* FIXME: kettenis/20031023: This is very dangerous.  The
+     CORE_GDBARCH that results from this call may very well be
+     different from CURRENT_GDBARCH.  However, its methods may only
+     work if it is selected as the current architecture, because they
+     rely on swapped data (see gdbarch.c).  We should get rid of that
+     swapped data.  */
+  core_gdbarch = gdbarch_from_bfd (core_bfd);
 
   /* Find a suitable core file handler to munch on core_bfd */
   core_vec = sniff_core_bfd (core_bfd);
@@ -437,6 +459,24 @@ get_core_register_section (char *name,
       return;
     }
 
+  if (core_gdbarch && gdbarch_regset_from_core_section_p (core_gdbarch))
+    {
+      const struct regset *regset;
+
+      regset = gdbarch_regset_from_core_section (core_gdbarch, name, size);
+      if (regset == NULL)
+	{
+	  if (required)
+	    warning ("Couldn't recognize %s registers in core file.\n",
+		     human_name);
+	  return;
+	}
+
+      regset->supply_regset (regset, current_regcache, -1, contents, size);
+      return;
+    }
+
+  gdb_assert (core_vec);
   core_vec->core_read_registers (contents, size, which, 
 				 ((CORE_ADDR)
 				  bfd_section_vma (core_bfd, section)));
@@ -454,8 +494,8 @@ get_core_registers (int regno)
 {
   int status;
 
-  if (core_vec == NULL
-      || core_vec->core_read_registers == NULL)
+  if (!(core_gdbarch && gdbarch_regset_from_core_section_p (core_gdbarch))
+      && (core_vec == NULL || core_vec->core_read_registers == NULL))
     {
       fprintf_filtered (gdb_stderr,
 		     "Can't fetch registers from this type of core file\n");
