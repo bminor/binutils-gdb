@@ -1,3 +1,16 @@
+Tue Oct 24 10:57:20 1995  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/hppa/basic/basic.exp: Test lci and syncdma instructions.
+	* gas/hppa/basic/system.s: Corresponding changes.
+
+Fri Oct  6 17:13:35 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* gas/m68k/operands.d: Don't require a fixed number of leading
+	zeros in any number.
+
+	* gas/m68k/operands.s, gas/m68k/bitfield.s: Use "&" instead of "#"
+	for immediate values.
+
 Fri Oct  6 10:54:13 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* gas/arm/arm.exp: Renamed from gas.exp.
