@@ -1,5 +1,11 @@
 2003-03-01  Andrew Cagney  <cagney@redhat.com>
 
+	* main.c (captured_main): Add OPT_WINDOWS and OPT_NOWINDOWS to
+	option enum and switch.  When no windows, set the interpreter to
+	INTERP_CONSOLE.
+	
+2003-03-01  Andrew Cagney  <cagney@redhat.com>
+
 	* main.c (captured_main): Replace magic option characters with an
 	enum.
 

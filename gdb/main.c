@@ -242,7 +242,9 @@ captured_main (void *data)
       OPT_CD,
       OPT_ANNOTATE,
       OPT_STATISTICS,
-      OPT_TUI
+      OPT_TUI,
+      OPT_NOWINDOWS,
+      OPT_WINDOWS
     };
     static struct option long_options[] =
     {
@@ -299,10 +301,10 @@ captured_main (void *data)
       {"tty", required_argument, 0, 't'},
       {"baud", required_argument, 0, 'b'},
       {"b", required_argument, 0, 'b'},
-      {"nw", no_argument, &use_windows, 0},
-      {"nowindows", no_argument, &use_windows, 0},
-      {"w", no_argument, &use_windows, 1},
-      {"windows", no_argument, &use_windows, 1},
+      {"nw", no_argument, NULL, OPT_NOWINDOWS},
+      {"nowindows", no_argument, NULL, OPT_NOWINDOWS},
+      {"w", no_argument, NULL, OPT_WINDOWS},
+      {"windows", no_argument, NULL, OPT_WINDOWS},
       {"statistics", no_argument, 0, OPT_STATISTICS},
       {"write", no_argument, &write_files, 1},
       {"args", no_argument, &set_args, 1},
@@ -347,6 +349,17 @@ captured_main (void *data)
 	    /* --tui is equivalent to -i=tui.  */
 	    xfree (interpreter_p);
 	    interpreter_p = xstrdup ("tui");
+	    break;
+	  case OPT_WINDOWS:
+	    /* FIXME: cagney/2003-03-01: Not sure if this option is
+               actually useful, and if it is, what it should do.  */
+	    use_windows = 1;
+	    break;
+	  case OPT_NOWINDOWS:
+	    /* -nw is equivalent to -i=console.  */
+	    xfree (interpreter_p);
+	    interpreter_p = xstrdup (INTERP_CONSOLE);
+	    use_windows = 0;
 	    break;
 	  case 'f':
 	    annotation_level = 1;
