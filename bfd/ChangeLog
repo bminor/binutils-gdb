@@ -1,3 +1,9 @@
+Tue Apr 21 13:38:18 1998 Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* elfcore.h (bfd_prstatus):  Copy core_prstatus from the first
+	NT_PRSTATUS note section encountered, it contains the status of
+	the currently executing thread when the core file was written.
+
 Tue Apr 21 10:00:12 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* libcoff.h: Add extra parameter to
