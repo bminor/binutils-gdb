@@ -1,3 +1,8 @@
+2003-10-15  Kevin Buettner  <kevinb@redhat.com> 
+
+	From Anthony Green  <green@redhat.com>:
+        * gdb.texinfo (Breakpoints related warnings): Insert into menu.
+
 2003-10-14  Kevin Buettner  <kevinb@redhat.com>
 
  	* gdb.texinfo (Breakpoint related warnings): New node.

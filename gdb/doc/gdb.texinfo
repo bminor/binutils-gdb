@@ -2441,6 +2441,7 @@ all breakpoint in that range are operated on.
 * Break Commands::              Breakpoint command lists
 * Breakpoint Menus::            Breakpoint menus
 * Error in Breakpoints::        ``Cannot insert breakpoints''
+* Breakpoint related warnings:: ``Breakpoint address adjusted...''
 @end menu
 
 @node Set Breaks
