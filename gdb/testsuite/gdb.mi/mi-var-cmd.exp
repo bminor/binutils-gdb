@@ -59,14 +59,14 @@ mi_gdb_test "111-var-create global_simple * global_simple" \
 # Desc: Create non-existent variable
 
 mi_gdb_test "112-var-create bogus_unknown_variable * bogus_unknown_variable" \
-	"&\"No symbol \\\\\"bogus_unknown_variable\\\\\" in current context.\\\\n\".*112\\^error,msg=\"No symbol \\\\\"bogus_unknown_variable\\\\\" in current context.\"" \
+	"&\"mi_cmd_var_create: unable to create variable object\\\\n\".*112\\^error,msg=\"mi_cmd_var_create: unable to create variable object\"" \
 	"create non-existent variable"
 
 # Test: c_variable-1.3
 # Desc: Create out of scope variable
 
 mi_gdb_test "113-var-create argc * argc" \
-	"&\"No symbol \\\\\"argc\\\\\" in current context.\\\\n\".*113\\^error,msg=\"No symbol \\\\\"argc\\\\\" in current context.\"" \
+	"&\"mi_cmd_var_create: unable to create variable object\\\\n\".*113\\^error,msg=\"mi_cmd_var_create: unable to create variable object\"" \
 	"create out of scope variable"
 
 mi_gdb_test "200-break-insert do_locals_tests" \
@@ -192,7 +192,7 @@ gdb_expect {
 # Test: c_variable-2.2
 # Desc: check whether only linteger changed values
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\{name=\"linteger\"\}" \
+	"\\^done,changelist=\{name=\"linteger\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars: linteger changed"
 
 # Step over "lpinteger = &linteger;"
@@ -209,7 +209,7 @@ gdb_expect {
 # Test: c_variable-2.3
 # Desc: check whether only lpinteger changed
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\{name=\"lpinteger\"\}" \
+	"\\^done,changelist=\{name=\"lpinteger\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars: lpinteger changed"
 
 # Step over "lcharacter = 'a';"
@@ -226,7 +226,7 @@ gdb_expect {
 # Test: c_variable-2.4
 # Desc: check whether only lcharacter changed
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\{name=\"lcharacter\"\}" \
+	"\\^done,changelist=\{name=\"lcharacter\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars: lcharacter changed"
 
 # Step over "lpcharacter = &lcharacter;"
@@ -243,7 +243,7 @@ gdb_expect {
 # Test: c_variable-2.5
 # Desc: check whether only lpcharacter changed
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\{name=\"lpcharacter\"\}" \
+	"\\^done,changelist=\{name=\"lpcharacter\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars: lpcharacter changed"
 
 
@@ -272,7 +272,7 @@ gdb_expect {
 # Desc: check whether llong, lplong, lfloat, lpfloat, ldouble, lpdouble, lsimple.integer,
 #       lsimple.unsigned_character lsimple.integer lsimple.character changed
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\{name=\"lsimple.integer\",name=\"lsimple->integer\",name=\"lsimple.character\",name=\"lpdouble\",name=\"ldouble\",name=\"lpfloat\",name=\"lfloat\",name=\"lplong\",name=\"llong\"\}" \
+	"\\^done,changelist=\{name=\"lsimple.integer\",in_scope=\"true\",type_changed=\"false\",name=\"lsimple->integer\",in_scope=\"true\",type_changed=\"false\",name=\"lsimple.character\",in_scope=\"true\",type_changed=\"false\",name=\"lpdouble\",in_scope=\"true\",type_changed=\"false\",name=\"ldouble\",in_scope=\"true\",type_changed=\"false\",name=\"lpfloat\",in_scope=\"true\",type_changed=\"false\",name=\"lfloat\",in_scope=\"true\",type_changed=\"false\",name=\"lplong\",in_scope=\"true\",type_changed=\"false\",name=\"llong\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars: many changed"
 
 # Step over:
@@ -294,7 +294,7 @@ gdb_expect {
 # Test: c_variable-2.7
 # Desc: check whether (lsimple.signed_character, lsimple.char_ptr) lpsimple, func changed
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\{name=\"func\",name=\"lpsimple\"\}" \
+	"\\^done,changelist=\{name=\"func\",in_scope=\"true\",type_changed=\"false\",name=\"lpsimple\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars: func and lpsimple changed"
 
 # Step over
@@ -323,7 +323,7 @@ gdb_expect {
 # Note: this test also checks that lpsimple->integer and lsimple.integer have
 #       changed (they are the same)
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\{name=\"lsimple.integer\",name=\"lsimple->integer\",name=\"lsimple.character\",name=\"ldouble\",name=\"lfloat\",name=\"llong\",name=\"lcharacter\",name=\"linteger\"\}" \
+	"\\^done,changelist=\{name=\"lsimple.integer\",in_scope=\"true\",type_changed=\"false\",name=\"lsimple->integer\",in_scope=\"true\",type_changed=\"false\",name=\"lsimple.character\",in_scope=\"true\",type_changed=\"false\",name=\"ldouble\",in_scope=\"true\",type_changed=\"false\",name=\"lfloat\",in_scope=\"true\",type_changed=\"false\",name=\"llong\",in_scope=\"true\",type_changed=\"false\",name=\"lcharacter\",in_scope=\"true\",type_changed=\"false\",name=\"linteger\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars: func and lpsimple changed"
 
 
@@ -454,7 +454,7 @@ mi_gdb_test "-var-create l * l" \
 # Test: c_variable-2.11
 # Desc: create do_locals_tests local in subroutine1
 mi_gdb_test "-var-create linteger * linteger" \
-	"&\"No symbol \\\\\"linteger\\\\\" in current context.\\\\n\".*\\^error,msg=\"No symbol \\\\\"linteger\\\\\" in current context.\"" \
+	"&\"mi_cmd_var_create: unable to create variable object\\\\n\".*\\^error,msg=\"mi_cmd_var_create: unable to create variable object\"" \
 	"create linteger"
 
 send_gdb "-exec-step\n"
@@ -471,10 +471,14 @@ gdb_expect {
 # Desc: change global_simple.integer
 # Note: This also tests whether we are reporting changes in structs properly.
 #       gdb normally would say that global_simple has changed, but we
-#       special case that, since it is not what a human expects to see.
+#       special case that, since it is not what a human expects to
+#       see.
+
+setup_xfail *-*-*
 mi_gdb_test "-var-update *" \
 	"\\^done,changelist=\{FIXME: WHAT IS CORRECT HERE\}" \
 	"update all vars: changed FIXME"
+clear_xfail *-*-*
 
 send_gdb "-exec-step\n"
 gdb_expect {
@@ -487,7 +491,7 @@ gdb_expect {
 # Test: c_variable-2.13
 # Desc: change subroutine1 local i
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\{name=\"i\"\}" \
+	"\\^done,changelist=\{name=\"i\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars: i changed"
 
 send_gdb "-exec-step\n"
@@ -501,7 +505,7 @@ gdb_expect {
 # Test: c_variable-2.14
 # Desc: change do_locals_tests local llong
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\{name=\"llong\"\}" \
+	"\\^done,changelist=\{name=\"llong\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars: llong changed"
 
 send_gdb "-exec-next\n"
@@ -515,8 +519,8 @@ gdb_expect {
 # Test: c_variable-2.15
 # Desc: check for out of scope subroutine1 locals
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\{\}" \
-	"update all vars: none changed"
+	"\\^done,changelist=\{name=\"l\",in_scope=\"false\",name=\"i\",in_scope=\"false\"\}" \
+	"update all vars: all now out of scope"
 
 # Done with locals/globals tests. Erase all variables
 #delete_all_variables

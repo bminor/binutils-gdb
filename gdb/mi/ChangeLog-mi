@@ -1,3 +1,10 @@
+2000-03-13  James Ingham  <jingham@leda.cygnus.com>
+
+	* mi-cmd-var.c (mi_cmd_var_create): Add special frame cookie "@"
+	to indicate an "USE_CURRENT_FRAME" variable.
+	(varobj_update_one): Add "in_scope" and "type_changed" to the
+	result.
+
 2000-03-06  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* mi-cmds.h: Export mi_cmd_data_write_register_values.

@@ -1,3 +1,11 @@
+2000-03-13  James Ingham  <jingham@leda.cygnus.com>
+
+	* mi-var-block.exp: The error report from varobj_create changed
+	since I am now trapping parse_exp_1 errors.  Change the tests to
+	match the new error message.
+	* mi-var-child.exp: Ditto.
+	* mi-var-cmd.exp: Ditto.
+
 2000-03-06  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* mi-disassemble.exp: Don't assume numbers for the offset

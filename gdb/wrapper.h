@@ -22,6 +22,10 @@
 /* Use this struct used to pass arguments to wrapper routines. */
 struct gdb_wrapper_arguments;
 
+extern int gdb_parse_exp_1 PARAMS ((char **, struct block *, 
+			     int, struct expression **));
+extern int wrap_parse_exp_1 PARAMS ((char *));
+
 extern int gdb_evaluate_expression PARAMS ((struct expression *, value_ptr *));
 extern int wrap_evaluate_expression PARAMS ((char *));
 

@@ -56,6 +56,10 @@ struct varobj_root
     /* The frame for this expression */
     CORE_ADDR frame;
 
+    /* If 1, "update" always recomputes the frame & valid block
+       using the currently selected frame. */
+    int use_selected_frame;
+
     /* Language info for this variable and its children */
     struct language_specific *lang;
 
@@ -204,7 +208,8 @@ static char *name_of_variable PARAMS ((struct varobj *));
 
 static char *name_of_child PARAMS ((struct varobj *, int));
 
-static value_ptr value_of_root PARAMS ((struct varobj * var));
+static value_ptr value_of_root PARAMS ((struct varobj ** var_handle,
+					int *));
 
 static value_ptr value_of_child PARAMS ((struct varobj * parent, int index));
 
@@ -224,7 +229,7 @@ static char *c_name_of_variable PARAMS ((struct varobj * parent));
 
 static char *c_name_of_child PARAMS ((struct varobj * parent, int index));
 
-static value_ptr c_value_of_root PARAMS ((struct varobj * var));
+static value_ptr c_value_of_root PARAMS ((struct varobj ** var_handle));
 
 static value_ptr c_value_of_child PARAMS ((struct varobj * parent, int index));
 
@@ -244,7 +249,7 @@ static char *cplus_name_of_variable PARAMS ((struct varobj * parent));
 
 static char *cplus_name_of_child PARAMS ((struct varobj * parent, int index));
 
-static value_ptr cplus_value_of_root PARAMS ((struct varobj * var));
+static value_ptr cplus_value_of_root PARAMS ((struct varobj ** var_handle));
 
 static value_ptr cplus_value_of_child PARAMS ((struct varobj * parent, int index));
 
@@ -262,7 +267,7 @@ static char *java_name_of_variable PARAMS ((struct varobj * parent));
 
 static char *java_name_of_child PARAMS ((struct varobj * parent, int index));
 
-static value_ptr java_value_of_root PARAMS ((struct varobj * var));
+static value_ptr java_value_of_root PARAMS ((struct varobj ** var_handle));
 
 static value_ptr java_value_of_child PARAMS ((struct varobj * parent, int index));
 
@@ -290,7 +295,7 @@ struct language_specific
     char *(*name_of_child) PARAMS ((struct varobj * parent, int index));
 
     /* The value_ptr of the root variable ROOT. */
-      value_ptr (*value_of_root) PARAMS ((struct varobj * root));
+      value_ptr (*value_of_root) PARAMS ((struct varobj ** root_handle));
 
     /* The value_ptr of the INDEX'th child of PARENT. */
       value_ptr (*value_of_child) PARAMS ((struct varobj * parent, int index));
@@ -401,7 +406,8 @@ static struct vlist **varobj_table;
 
 struct varobj *
 varobj_create (char *objname,
-	       char *expression, CORE_ADDR frame)
+	       char *expression, CORE_ADDR frame,
+	       enum varobj_type type)
 {
   struct varobj *var;
   struct frame_info *fi, *old_fi;
@@ -421,10 +427,15 @@ varobj_create (char *objname,
          of the variable's data as possible */
 
       /* Allow creator to specify context of variable */
-      if (frame == (CORE_ADDR) -1)
+      if ((type == USE_CURRENT_FRAME)
+	  || (type == USE_SELECTED_FRAME))
 	fi = selected_frame;
       else
 	fi = find_frame_addr_in_frame_chain (frame);
+
+      /* frame = -2 means always use selected frame */
+      if (type == USE_SELECTED_FRAME)
+	var->root->use_selected_frame = 1;
 
       block = NULL;
       if (fi != NULL)
@@ -432,8 +443,12 @@ varobj_create (char *objname,
 
       p = expression;
       innermost_block = NULL;
-      /* Callee may longjump */
-      var->root->exp = parse_exp_1 (&p, block, 0);
+      /* Wrap the call to parse expression, so we can 
+         return a sensible error. */
+      if (!gdb_parse_exp_1 (&p, block, 0, &var->root->exp))
+	{
+	  return NULL;
+	}
 
       /* Don't allow variables to be created for types. */
       if (var->root->exp->elts[0].opcode == OP_TYPE)
@@ -486,7 +501,10 @@ varobj_create (char *objname,
 	select_frame (old_fi, -1);
     }
 
-  if (var != NULL)
+  /* If the variable object name is null, that means this
+     is a temporary variable, so don't install it. */
+
+  if ((var != NULL) && (objname != NULL))
     {
       var->obj_name = savestring (objname, strlen (objname));
 
@@ -845,6 +863,10 @@ varobj_list (struct varobj ***varlist)
    expression to see if it's changed.  Then go all the way
    through its children, reconstructing them and noting if they've
    changed.
+   Return value:
+    -1 if there was an error updating the varobj
+    -2 if the type changed
+    Otherwise it is the number of children + parent changed
 
    Only root variables can be updated... */
 
@@ -852,6 +874,7 @@ int
 varobj_update (struct varobj *var, struct varobj ***changelist)
 {
   int changed = 0;
+  int type_changed;
   int i;
   int vleft;
   int error2;
@@ -878,19 +901,27 @@ varobj_update (struct varobj *var, struct varobj ***changelist)
 
   /* Update the root variable. value_of_root can return NULL
      if the variable is no longer around, i.e. we stepped out of
-     the frame in which a local existed. */
-  new = value_of_root (var);
+     the frame in which a local existed. We are letting the 
+     value_of_root variable dispose of the varobj if the type
+     has changed. */
+  type_changed = 1;
+  new = value_of_root (&var, &type_changed);
   if (new == NULL)
-    return -1;
+    {
+      var->error = 1;
+      return -1;
+    }
 
   /* Initialize a stack for temporary results */
   vpush (&result, NULL);
 
-  if (!my_value_equal (var->value, new, &error2))
+  if (type_changed || !my_value_equal (var->value, new, &error2))
     {
       /* Note that it's changed   There a couple of exceptions here,
-         though. We don't want some types to be reported as "changed". */
-      if (type_changeable (var))
+         though. We don't want some types to be reported as 
+	 "changed". The exception to this is if this is a 
+	 "use_selected_frame" varobj, and its type has changed. */
+      if (type_changed || type_changeable (var))
 	{
 	  vpush (&result, var);
 	  changed++;
@@ -984,7 +1015,10 @@ varobj_update (struct varobj *var, struct varobj ***changelist)
   /* Restore selected frame */
   select_frame (old_fi, -1);
 
-  return changed;
+  if (type_changed)
+    return -2;
+  else
+    return changed;
 }
 
 
@@ -1039,9 +1073,9 @@ delete_variable_1 (resultp, delcountp, var,
     return;
 
   /* Otherwise, add it to the list of deleted ones and proceed to do so */
-  if (var->obj_name == NULL)
-    warning ("Assertion failed: NULL var->obj_name unexpectdly found");
-  else
+  /* If the name is null, this is a temporary variable, that has not
+     yet been installed, don't report it, it belongs to the caller... */
+  if (var->obj_name != NULL)
     {
       cppush (resultp, strdup (var->obj_name));
       *delcountp = *delcountp + 1;
@@ -1057,8 +1091,9 @@ delete_variable_1 (resultp, delcountp, var,
     {
       remove_child_from_parent (var->parent, var);
     }
-
-  uninstall_variable (var);
+  
+  if (var->obj_name != NULL)
+    uninstall_variable (var);
 
   /* Free memory associated with this variable */
   free_variable (var);
@@ -1315,6 +1350,7 @@ new_root_variable (void)
   var->root->exp = NULL;
   var->root->valid_block = NULL;
   var->root->frame = (CORE_ADDR) -1;
+  var->root->use_selected_frame = 0;
   var->root->rootvar = NULL;
 
   return var;
@@ -1578,12 +1614,74 @@ name_of_child (var, index)
   return (*var->root->lang->name_of_child) (var, index);
 }
 
-/* What is the value_ptr of the root variable VAR? */
+/* What is the value_ptr of the root variable VAR? 
+   TYPE_CHANGED controls what to do if the type of a
+   use_selected_frame = 1 variable changes.  On input,
+   TYPE_CHANGED = 1 means discard the old varobj, and replace
+   it with this one.  TYPE_CHANGED = 0 means leave it around.
+   NB: In both cases, var_handle will point to the new varobj,
+   so if you use TYPE_CHANGED = 0, you will have to stash the
+   old varobj pointer away somewhere before calling this.
+   On return, TYPE_CHANGED will be 1 if the type has changed, and 
+   0 otherwise. */
 static value_ptr
-value_of_root (var)
-     struct varobj *var;
+value_of_root (var_handle, type_changed)
+     struct varobj ** var_handle;
+     int *type_changed;
 {
-  return (*var->root->lang->value_of_root) (var);
+  struct varobj *var;
+
+  if (var_handle == NULL)
+    return NULL;
+
+  var = *var_handle;
+
+  /* This should really be an exception, since this should
+     only get called with a root variable. */
+
+  if (var->root->rootvar != var)
+    return NULL;
+
+  if (var->root->use_selected_frame)
+    {
+      struct varobj *tmp_var;
+      char *old_type, *new_type;
+      old_type = varobj_get_type (var);
+      tmp_var = varobj_create (NULL, var->name, (CORE_ADDR) 0,
+			       USE_SELECTED_FRAME);
+      if (tmp_var == NULL)
+	{
+	  return NULL;
+	}
+      new_type = varobj_get_type (tmp_var);
+      if (strcmp(old_type, new_type) == 0)
+	{
+	  varobj_delete (tmp_var, NULL, 0);
+	  *type_changed = 0;
+	}
+      else
+	{
+	  if (*type_changed)
+	    {
+	      tmp_var->obj_name = 
+		savestring (var->obj_name, strlen (var->obj_name));
+	      uninstall_variable (var);
+	    }
+	  else
+	    {
+	      tmp_var->obj_name = varobj_gen_name ();  
+	    }
+	  install_variable (tmp_var);
+	  *var_handle = tmp_var;
+	  *type_changed = 1;
+	}
+    }
+  else
+    {
+      *type_changed = 0;
+    }
+
+  return (*var->root->lang->value_of_root) (var_handle);
 }
 
 /* What is the value_ptr for the INDEX'th child of PARENT? */
@@ -1790,38 +1888,51 @@ c_name_of_child (parent, index)
 }
 
 static value_ptr
-c_value_of_root (var)
-     struct varobj *var;
+c_value_of_root (var_handle)
+     struct varobj **var_handle;
 {
   value_ptr new_val;
+  struct varobj *var = *var_handle;
   struct frame_info *fi;
   int within_scope;
 
+  /*  Only root variables can be updated... */
+  if (var->root->rootvar != var)
+    /* Not a root var */
+    return NULL;
+
+  
   /* Determine whether the variable is still around. */
   if (var->root->valid_block == NULL)
     within_scope = 1;
   else
     {
       reinit_frame_cache ();
+      
+      
       fi = find_frame_addr_in_frame_chain (var->root->frame);
+      
       within_scope = fi != NULL;
       /* FIXME: select_frame could fail */
       if (within_scope)
 	select_frame (fi, -1);
     }
-
+  
   if (within_scope)
     {
-      /* We need to catch errors here, because if evaluate expression fails
-         we just want to make val->error = 1 and go on */
+      /* We need to catch errors here, because if evaluate
+	 expression fails we just want to make val->error = 1 and
+	 go on */
       if (gdb_evaluate_expression (var->root->exp, &new_val))
 	{
 	  if (VALUE_LAZY (new_val))
 	    {
-	      /* We need to catch errors because if value_fetch_lazy fails we
-	         still want to continue (after making val->error = 1) */
-	      /* FIXME: Shouldn't be using VALUE_CONTENTS?  The comment on
-	         value_fetch_lazy() says it is only called from the macro... */
+	      /* We need to catch errors because if
+		 value_fetch_lazy fails we still want to continue
+		 (after making val->error = 1) */
+	      /* FIXME: Shouldn't be using VALUE_CONTENTS?  The
+		 comment on value_fetch_lazy() says it is only
+		 called from the macro... */
 	      if (!gdb_value_fetch_lazy (new_val))
 		var->error = 1;
 	      else
@@ -1830,7 +1941,7 @@ c_value_of_root (var)
 	}
       else
 	var->error = 1;
-
+      
       release_value (new_val);
       return new_val;
     }
@@ -2194,10 +2305,10 @@ cplus_name_of_child (parent, index)
 }
 
 static value_ptr
-cplus_value_of_root (var)
-     struct varobj *var;
+cplus_value_of_root (var_handle)
+     struct varobj **var_handle;
 {
-  return c_value_of_root (var);
+  return c_value_of_root (var_handle);
 }
 
 static value_ptr
@@ -2367,10 +2478,10 @@ java_name_of_child (parent, index)
 }
 
 static value_ptr
-java_value_of_root (var)
-     struct varobj *var;
+java_value_of_root (var_handle)
+     struct varobj **var_handle;
 {
-  return cplus_value_of_root (var);
+  return cplus_value_of_root (var_handle);
 }
 
 static value_ptr

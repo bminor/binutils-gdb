@@ -1,3 +1,27 @@
+2000-03-13  James Ingham  <jingham@leda.cygnus.com>
+
+	Add support for a variable object that tries to evaluate itself in 
+	the currently selected frame, rather than in a fixed frame.
+	
+	* wrapper.c,h (gdb_parse_exp_1): Added a wrapper for
+ 	gdb_parse_exp_1.
+	* varobj.h: Added USE_CURRENT_FRAME to varobj_type & changed def'n 
+	of varobj_create.
+	* varobj.c (varobj_list): Return type indicates whether the
+	variable's type has changed (for current frame variables).
+	(varobj_update): Handle the case where the variable's type has
+	changed.
+	(delete_variable_1): Allow for deletion of variables that have not 
+	been installed yet.
+	(new_root_variable): Initialize use_selected_frame variable.
+	(value_of_root): This is where most of the work to handle "current 
+	frame" variables was added.  Most of the complexity involves
+	handling the case where the type of the variable has changed.
+	(varobj_create): Add a "type" argument, to tell if the
+	variable is one of these "current frame" variables.  Also protect
+	call to parse_exp_1 from long jumping.
+	
+
 2000-03-13  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* go32-nat.c (struct env387): Remove declaration.

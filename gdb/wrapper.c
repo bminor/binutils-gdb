@@ -33,6 +33,10 @@ struct gdb_wrapper_arguments
     char *args[10];
   };
 
+int gdb_parse_exp_1 PARAMS ((char **, struct block *, 
+			     int, struct expression **));
+int wrap_parse_exp_1 PARAMS ((char *));
+
 int gdb_evaluate_expression PARAMS ((struct expression *, value_ptr *));
 int wrap_evaluate_expression PARAMS ((char *));
 
@@ -44,6 +48,42 @@ int wrap_value_equal PARAMS ((char *));
 
 int gdb_value_ind PARAMS ((value_ptr val, value_ptr * rval));
 int wrap_value_ind PARAMS ((char *opaque_arg));
+
+int
+gdb_parse_exp_1 (stringptr, block, comma, expression)
+     char **stringptr;
+     struct block *block;
+     int comma;
+     struct expression **expression;
+{
+  struct gdb_wrapper_arguments args;
+  args.args[0] = (char *) stringptr;
+  args.args[1] = (char *) block;
+  args.args[2] = (char *) comma;
+
+  if (!catch_errors ((catch_errors_ftype *) wrap_parse_exp_1, &args,
+		     "", RETURN_MASK_ERROR))
+    {
+      /* An error occurred */
+      return 0;
+    }
+
+  *expression = (struct expression *) args.result;
+  return 1;
+  
+}
+
+int
+wrap_parse_exp_1 (argptr)
+     char *argptr;
+{
+  struct gdb_wrapper_arguments *args 
+    = (struct gdb_wrapper_arguments *) argptr;
+  args->result = (char *) parse_exp_1((char **) args->args[0],
+				      (struct block *) args->args[1],
+				      (int) args->args[2]);
+  return 1;
+}
 
 int
 gdb_evaluate_expression (exp, value)
@@ -163,3 +203,4 @@ wrap_value_ind (opaque_arg)
   (args)->result = (char *) value_ind (val);
   return 1;
 }
+

@@ -34,20 +34,21 @@
 
 extern int varobjdebug;		/* defined in varobj.c */
 
-static void varobj_update_one (struct varobj *var);
+static int varobj_update_one (struct varobj *var);
 
 /* VAROBJ operations */
 
 enum mi_cmd_result
 mi_cmd_var_create (char *command, char **argv, int argc)
 {
-  CORE_ADDR frameaddr;
+  CORE_ADDR frameaddr = 0;
   struct varobj *var;
   char *name;
   char *frame;
   char *expr;
   char *type;
   struct cleanup *old_cleanups;
+  enum varobj_type var_type;
 
   if (argc != 3)
     {
@@ -77,16 +78,21 @@ mi_cmd_var_create (char *command, char **argv, int argc)
     error ("mi_cmd_var_create: name of object must begin with a letter");
 
   if (strcmp (frame, "*") == 0)
-    frameaddr = -1;
+    var_type = USE_CURRENT_FRAME;
+  else if (strcmp (frame, "@") == 0)
+    var_type = USE_SELECTED_FRAME;  
   else
-    frameaddr = parse_and_eval_address (frame);
+    {
+      var_type = USE_SPECIFIED_FRAME;
+      frameaddr = parse_and_eval_address (frame);
+    }
 
   if (varobjdebug)
     fprintf_unfiltered (gdb_stdlog,
 		    "Name=\"%s\", Frame=\"%s\" (0x%s), Expression=\"%s\"\n",
 			name, frame, paddr (frameaddr), expr);
 
-  var = varobj_create (name, expr, frameaddr);
+  var = varobj_create (name, expr, frameaddr, var_type);
 
   if (var == NULL)
     error ("mi_cmd_var_create: unable to create variable object");
@@ -443,12 +449,14 @@ mi_cmd_var_update (char *command, char **argv, int argc)
       varobj_update_one (var);
       ui_out_list_end (uiout);
     }
-  return MI_CMD_DONE;
+    return MI_CMD_DONE;
 }
 
-/* Helper for mi_cmd_var_update() */
+/* Helper for mi_cmd_var_update() Returns 0 if the update for
+   the variable fails (usually because the variable is out of
+   scope), and 1 if it succeeds. */
 
-static void
+static int
 varobj_update_one (struct varobj *var)
 {
   struct varobj **changelist;
@@ -457,16 +465,41 @@ varobj_update_one (struct varobj *var)
 
   nc = varobj_update (var, &changelist);
 
-  if (nc <= 0)
-    return;
-
-  cc = changelist;
-  while (*cc != NULL)
+  /* nc == 0 means that nothing has changed.
+     nc == -1 means that an error occured in updating the variable.
+     nc == -2 means the variable has changed type. */
+  
+  if (nc == 0)
+    return 1;
+  else if (nc == -1)
     {
-      ui_out_field_string (uiout, "name", varobj_get_objname (*cc));
-      cc++;
+      ui_out_field_string (uiout, "name", varobj_get_objname(var));
+      ui_out_field_string (uiout, "in_scope", "false");
+      return -1;
     }
-  free (changelist);
+  else if (nc == -2)
+    {
+      ui_out_field_string (uiout, "name", varobj_get_objname (var));
+      ui_out_field_string (uiout, "in_scope", "true");
+      ui_out_field_string (uiout, "new_type", varobj_get_type(var));
+      ui_out_field_int (uiout, "new_num_children", 
+			   varobj_get_num_children(var));
+    }
+  else
+    {
+      
+      cc = changelist;
+      while (*cc != NULL)
+	{
+	  ui_out_field_string (uiout, "name", varobj_get_objname (*cc));
+	  ui_out_field_string (uiout, "in_scope", "true");
+	  ui_out_field_string (uiout, "type_changed", "false");
+	  cc++;
+	}
+      free (changelist);
+      return 1;
+    }
+  return 1;
 }
 
 /* Local variables: */
