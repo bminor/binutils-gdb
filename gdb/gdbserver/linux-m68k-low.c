@@ -1,5 +1,5 @@
 /* GNU/Linux/m68k specific low level interface, for the remote server for GDB.
-   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002
+   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -26,7 +26,7 @@
 #include <sys/reg.h>
 #endif
 
-#define m68k_num_regs 31
+#define m68k_num_regs 29
 
 /* This table must line up with REGISTER_NAMES in tm-m68k.h */
 static int m68k_regmap[] =

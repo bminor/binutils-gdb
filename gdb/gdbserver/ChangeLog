@@ -1,3 +1,7 @@
+2003-01-04  Andreas Schwab  <schwab@suse.de>
+
+	* linux-m68k-low.c (m68k_num_regs): Define to 29 instead of 31.
+
 2003-01-02  Andrew Cagney  <ac131313@redhat.com>
 
 	* Makefile.in: Remove obsolete code.
