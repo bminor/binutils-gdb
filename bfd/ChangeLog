@@ -1,3 +1,22 @@
+Fri Feb 12 08:28:56 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* coffcode.h (coff_set_arch_mach_hook): *FIXME* the H8/300 is always
+	relaxable.  Should be moved somewhere else.
+
+Thu Feb 11 14:09:42 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* aout-mipsbsd.c: Eliminated uses of DEFUN.
+	(aout_mips_*_vec): Added seclet_link element.
+
+	* Makefile.in (BFD_BACKENDS, CFILES, aout-mipsbsd.o): Added
+	support for aout-mipsbsd target.
+
+	* bout.c (get_value): Don't truncate 32-bit addend to 16 bits.
+
+Fri Feb  5 08:08:43 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* cpu-h8500.c (scan_mach): return false if it's not an H8/500
+
 Thu Feb  4 12:52:40 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	Add support for the H8/500
@@ -13,7 +32,7 @@ Thu Feb  4 12:35:02 1993  Ian Lance Taylor  (ian@cygnus.com)
 	call it.  If there is ever another ECOFF target, this and the
 	swapping functions should be accessed via an ECOFF specific target
 	vector.
-	Makefile.in (coff-mips.o): Depends on libecoff.h.
+	* Makefile.in (coff-mips.o): Depends on libecoff.h.
 
 Wed Feb  3 09:14:36 1993  Ian Lance Taylor  (ian@cygnus.com)
 
@@ -32,15 +51,38 @@ Tue Feb  2 15:36:55 1993  Per Bothner  (bothner@cygnus.com)
 	reading more robust:  Fail if string index is out of string
 	table range.
 
+Tue Feb  2 11:43:25 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* bout.c (b_out_get_relocated_section_contents, cases PCREL24 and
+	PCREL13): Don't take dst_address into account; the input file has
+	already taken care of that.
+
 Tue Feb  2 11:41:06 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* coff-mips.c: Completed support for linker and binutils.
+
+Mon Feb  1 14:45:38 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* bout.c (b_out_get_relocated_section_contents, case ABS32): Keep
+	original addend from section contents.
 
 Thu Jan 28 21:01:37 1993  John Gilmore  (gnu@cygnus.com)
 
 	Fix minor bugs reported by Carl Greco, <cgreco@parrot.creighton.edu>:
 	* hosts/delta88.h (strtol):  Fix prototype.
 	* config/m88k-coff.mt (SELECT_ARCHITECTURES):  Fix name.
+
+Wed Jan 27 17:16:51 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* elf.c: Get rid of "#ifdef sparc".
+	(RELOC_TYPE_NAMES): Never used (currently), so don't include it.
+	(elf_sparc_howto_table): Renamed from elf_howto_table, and always
+	used.
+	(elf_info_to_howto): Use runtime conditionals on CPU type, not
+	compile type conditionals on host CPU.
+	(elf_little_vec, elf_big_vec): Use bfd_default_reloc_type_lookup,
+	not null pointer.
+	(reloc_type, RELOC_TYPE_NAMES): Include i386 values.
 
 Tue Jan 26 11:43:14 1993  Ian Lance Taylor  (ian@cygnus.com)
 
@@ -65,6 +107,20 @@ Mon Jan 25 15:27:36 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* coffswap.h (coff_swap_aouthdr_in, coff_swap_aouthdr_in): Swap
 	additional MIPS ECOFF fields.
+
+Sat Jan 23 18:36:20 PST 1993  Ralph Campbell  (ralphc@pyramid.com)
+
+	* configure.host: added mips-dec-bsd*
+	* configure.in: added mips-dec-bsd*
+	* aout-mipsbsd.c: new file for mips-dec-bsd*
+	* aout-target.h: don't define '' if 'MY_BFD_TARGET' is defined.
+	* aoutx.h: added mips support.
+	* archures.c: added mips support to bfd_default_scan().
+	* cpu-mips.c: added support for R4000 (untested).
+	* libaout.h: added MIPS1 & MIPS2 magic numbers.
+	* reloc.c: fix typo's in comments. Added BFD_RELOC entries which I
+		hope will make it into include/bfd.h.
+	* targets.c: added aout_mips_*_vec.
 
 Wed Jan 20 17:15:52 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 

@@ -905,6 +905,15 @@ DEFUN (coff_set_arch_mach_hook, (abfd, filehdr),
   case H8300MAGIC:
     arch = bfd_arch_h8300;
     machine = 0;
+    /* !! FIXME this probably isn't the right place for this */
+    abfd->flags |= BFD_IS_RELAXABLE;
+    break;
+#endif
+
+#ifdef H8500MAGIC
+  case H8500MAGIC:
+    arch = bfd_arch_h8500;
+    machine = 0;
     break;
 #endif
 
@@ -1094,6 +1103,12 @@ DEFUN(coff_set_flags,(abfd, magicp, flagsp),
 #ifdef H8300MAGIC
     case bfd_arch_h8300:
       *magicp = H8300MAGIC;
+      return true;
+      break;
+#endif
+#ifdef H8500MAGIC
+    case bfd_arch_h8500:
+      *magicp = H8500MAGIC;
       return true;
       break;
 #endif
