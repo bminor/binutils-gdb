@@ -1,3 +1,8 @@
+2001-06-22  Matthew Wilcox  <willy@ldl.fc.hp.com>
+
+	* config/tc-hppa.c: Add %mrp (millicode return pointer) alias
+	for %r2 or %r31, depending on 32 or 64 bit architecture.
+
 2001-06-21  Philip Blundell  <philb@gnu.org>
 
 	* config/tc-arm.c (cplong_flag): Rename to long_flag.  All uses

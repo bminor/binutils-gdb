@@ -954,6 +954,11 @@ static const struct pd_reg pre_defined_registers[] =
   {"%isr",   20},
   {"%itmr",  16},
   {"%iva",   14},
+#if TARGET_ARCH_SIZE == 64
+  {"%mrp",    2},
+#else
+  {"%mrp",   31},
+#endif
   {"%pcoq",  18},
   {"%pcsq",  17},
   {"%pidr1",  8},
