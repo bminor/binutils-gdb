@@ -1,3 +1,8 @@
+1998-12-30  Michael Meissner  <meissner@cygnus.com>
+
+	* Makefile.in (install): Only try to copy libreadline.a and
+	libhistory.a if they exist.
+
 Tue Dec 29 23:49:20 1998  Christopher Faylor <cgf@cygnus.com>
 
 	* cross-build/cygwin.cache: Add a couple more known settings.
