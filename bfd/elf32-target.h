@@ -38,7 +38,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 
 /* Ordinary section reading and writing */
-#define bfd_elf32_new_section_hook		_bfd_dummy_new_section_hook
 #define bfd_elf32_get_section_contents	bfd_generic_get_section_contents
 #define	bfd_elf32_close_and_cleanup		bfd_generic_close_and_cleanup
 
