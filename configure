@@ -1117,12 +1117,12 @@ EOF
             # reset prefix, exec_prefix, srcdir, SUBDIRS, NONSUBDIRS,
             # remove any form feeds.
             if [ -z "${subdirs}" ]; then
-                rm -f ${subdir}/Makefile.tem2
+                rm -f ${subdir}/Makefile.tm2
                 sed -e "s:^SUBDIRS[ 	]*=.*$:SUBDIRS = ${configdirs}:" \
                     -e "s:^NONSUBDIRS[ 	]*=.*$:NONSUBDIRS = ${noconfigdirs}:" \
-                    ${subdir}/Makefile.tem > ${subdir}/Makefile.tem2
+                    ${subdir}/Makefile.tem > ${subdir}/Makefile.tm2
                 rm -f ${subdir}/Makefile.tem
-                mv ${subdir}/Makefile.tem2 ${subdir}/Makefile.tem
+                mv ${subdir}/Makefile.tm2 ${subdir}/Makefile.tem
 	    fi
 	    sed     -e "s|^prefix[ 	]*=.*$|prefix = ${prefix}|" \
                     -e "s|^exec_prefix[ 	]*=.*$|exec_prefix = ${exec_prefix}|" \
