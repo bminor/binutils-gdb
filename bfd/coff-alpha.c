@@ -2359,6 +2359,7 @@ static const struct ecoff_backend_data alpha_ecoff_backend_data =
 /* Relaxing sections is generic.  */
 #define _bfd_ecoff_bfd_relax_section bfd_generic_relax_section
 #define _bfd_ecoff_bfd_gc_sections bfd_generic_gc_sections
+#define _bfd_ecoff_bfd_merge_sections bfd_generic_merge_sections
 
 const bfd_target ecoffalpha_little_vec =
 {

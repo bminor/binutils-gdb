@@ -1,3 +1,55 @@
+2001-05-11  Jakub Jelinek  <jakub@redhat.com>
+
+	* merge.c (struct sec_merge_hash_entry): Add u.entsize and u.suffix
+	fields, change sec into secinfo.
+	(struct sec_merge_info): Add chain, remove last fields.
+	(struct sec_merge_sec_info): Add next, sec, psecinfo fields.
+	(sec_merge_hash_lookup): If lookup could not use a string only
+	because it has bad alignment, mark the old string for deletion.
+	(sec_merge_add): Add secinfo argument. Don't compute entry's
+	position, instead record the section.
+	(sec_merge_emit): Update for the sec into secinfo change in
+	struct sec_merge_hash_entry.
+	(_bfd_merge_section): Only record the section for merging, defer
+	putting strings into the hash table.
+	(cmplengthentry, last4_eq, last_eq, record_section, merge_strings,
+	_bfd_merge_sections): New functions.
+	(_bfd_merged_section_offset): Update for the sec_merge_hash_entry
+	changes.
+	* libbfd-in.h (_bfd_merge_sections): Add prototype.
+	(_bfd_nolink_bfd_merge_sections): Define.
+	* libbfd.h: Likewise.
+	(bfd_generic_merge_sections): Add prototype.
+	* targets.c (BFD_JUMP_TABLE_LINK): Add _bfd_merge_sections.
+	(struct bfd_target): Likewise.
+	* bfd.c (bfd_merge_sections): Define.
+	* bfd-in2.h: Rebuilt.
+	* elf.c (_bfd_elf_merge_sections): New function.
+	* elf-bfd.h (_bfd_elf_merge_sections): Add prototype.
+	* elfxx-target.h (bfd_elfNN_bfd_merge_sections): Define.
+	* reloc.c (bfd_generic_merge_sections): New function.
+	* vms.c (vms_bfd_merge_sections): New function.
+	* aout-adobe.c (aout_32_bfd_merge_sections): Define.
+	* aout-target.h (MY_bfd_merge_sections): Define.
+	* aout-tic30.c (MY_bfd_merge_sections): Define.
+	* binary.c (binary_bfd_merge_sections): Define.
+	* bout.c (b_out_bfd_merge_sections): Define.
+	* coff-alpha.c (_bfd_ecoff_bfd_merge_sections): Define.
+	* coffcode.c (coff_bfd_merge_sections): Define.
+	* coff-mips.c (_bfd_ecoff_bfd_merge_sections): Define.
+	* i386msdos.c (msdos_bfd_merge_sections): Define.
+	* i386os9k.c (os9k_bfd_merge_sections): Define.
+	* ieee.c (ieee_bfd_merge_sections): Define.
+	* ihex.c (ihex_bfd_merge_sections): Define.
+	* nlm-target.h (nlm_bfd_merge_sections): Define.
+	* oasys.c (oasys_bfd_merge_sections): Define.
+	* ppcboot.c (ppcboot_bfd_merge_sections): Define.
+	* som.c (som_bfd_merge_sections): Define.
+	* srec.c (srec_bfd_merge_sections): Define.
+	* tekhex.c (tekhex_bfd_merge_sections): Define.
+	* versados.c (versados_bfd_merge_sections): Define.
+	* xcoff-target.h (_bfd_xcoff_bfd_merge_sections): Define.
+
 2001-05-11  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* dwarf1.c (_bfd_dwarf1_find_nearest_line): Change type of 'addr'

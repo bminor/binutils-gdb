@@ -1006,6 +1006,9 @@ extern boolean _bfd_elf_link_hash_table_init
 				       const char *)));
 extern boolean _bfd_elf_slurp_version_tables PARAMS ((bfd *));
 
+extern boolean _bfd_elf_merge_sections
+  PARAMS ((bfd *, struct bfd_link_info *));
+
 extern boolean _bfd_elf_copy_private_symbol_data
   PARAMS ((bfd *, asymbol *, bfd *, asymbol *));
 extern boolean _bfd_elf_copy_private_section_data

@@ -5258,6 +5258,10 @@ static const bfd_coff_backend_data bfd_coff_std_swap_table =
 #define coff_bfd_gc_sections		    bfd_generic_gc_sections
 #endif
 
+#ifndef coff_bfd_merge_sections
+#define coff_bfd_merge_sections		    bfd_generic_merge_sections
+#endif
+
 #define CREATE_BIG_COFF_TARGET_VEC(VAR, NAME, EXTRA_O_FLAGS, EXTRA_S_FLAGS, UNDER, ALTERNATIVE)	\
 const bfd_target VAR =							\
 {									\

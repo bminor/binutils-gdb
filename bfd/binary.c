@@ -345,6 +345,7 @@ binary_sizeof_headers (abfd, exec)
   bfd_generic_get_relocated_section_contents
 #define binary_bfd_relax_section bfd_generic_relax_section
 #define binary_bfd_gc_sections bfd_generic_gc_sections
+#define binary_bfd_merge_sections bfd_generic_merge_sections
 #define binary_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define binary_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define binary_bfd_final_link _bfd_generic_final_link

@@ -3229,6 +3229,9 @@ bfd_set_private_flags PARAMS ((bfd *abfd, flagword flags));
 #define bfd_gc_sections(abfd, link_info) \
        BFD_SEND (abfd, _bfd_gc_sections, (abfd, link_info))
 
+#define bfd_merge_sections(abfd, link_info) \
+       BFD_SEND (abfd, _bfd_merge_sections, (abfd, link_info))
+
 #define bfd_link_hash_table_create(abfd) \
        BFD_SEND (abfd, _bfd_link_hash_table_create, (abfd))
 
@@ -3525,7 +3528,8 @@ CAT(NAME,_bfd_link_hash_table_create),\
 CAT(NAME,_bfd_link_add_symbols),\
 CAT(NAME,_bfd_final_link),\
 CAT(NAME,_bfd_link_split_section),\
-CAT(NAME,_bfd_gc_sections)
+CAT(NAME,_bfd_gc_sections),\
+CAT(NAME,_bfd_merge_sections)
   int        (*_bfd_sizeof_headers) PARAMS ((bfd *, boolean));
   bfd_byte * (*_bfd_get_relocated_section_contents) PARAMS ((bfd *,
                     struct bfd_link_info *, struct bfd_link_order *,
@@ -3551,6 +3555,9 @@ CAT(NAME,_bfd_gc_sections)
 
   /* Remove sections that are not referenced from the output.  */
   boolean (*_bfd_gc_sections) PARAMS ((bfd *, struct bfd_link_info *));
+
+  /* Attempt to merge SEC_MERGE sections.  */
+  boolean (*_bfd_merge_sections) PARAMS ((bfd *, struct bfd_link_info *));
 
   /* Routines to handle dynamic symbols and relocs.  */
 #define BFD_JUMP_TABLE_DYNAMIC(NAME)\

@@ -507,6 +507,9 @@ MY_bfd_final_link (abfd, info)
 #ifndef MY_bfd_gc_sections
 #define MY_bfd_gc_sections bfd_generic_gc_sections
 #endif
+#ifndef MY_bfd_merge_sections
+#define MY_bfd_merge_sections bfd_generic_merge_sections
+#endif
 #ifndef MY_bfd_reloc_type_lookup
 #define MY_bfd_reloc_type_lookup NAME(aout,reloc_type_lookup)
 #endif

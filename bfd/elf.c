@@ -558,6 +558,18 @@ bfd_elf_generic_reloc (abfd,
   return bfd_reloc_continue;
 }
 
+/* Finish SHF_MERGE section merging.  */
+
+boolean
+_bfd_elf_merge_sections (abfd, info)
+     bfd *abfd;
+     struct bfd_link_info *info;
+{
+  if (elf_hash_table (info)->merge_info)
+    _bfd_merge_sections (abfd, elf_hash_table (info)->merge_info);
+  return true;
+}
+
 /* Print out the program headers.  */
 
 boolean

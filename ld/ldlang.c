@@ -4130,6 +4130,12 @@ lang_process ()
   if (command_line.gc_sections)
     lang_gc_sections ();
 
+  /* If there were any SEC_MERGE sections, finish their merging, so that
+     section sizes can be computed.  This has to be done after GC of sections,
+     so that GCed sections are not merged, but before assigning output
+     sections, since removing whole input sections is hard then.  */
+  bfd_merge_sections (output_bfd, &link_info);
+
   /* Size up the common data.  */
   lang_common ();
 

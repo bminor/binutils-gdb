@@ -323,6 +323,10 @@ extern boolean _bfd_generic_set_section_contents
   ((boolean (*) \
     PARAMS ((bfd *, struct bfd_link_info *))) \
    bfd_false)
+#define _bfd_nolink_bfd_merge_sections \
+  ((boolean (*) \
+    PARAMS ((bfd *, struct bfd_link_info *))) \
+   bfd_false)
 #define _bfd_nolink_bfd_link_hash_table_create \
   ((struct bfd_link_hash_table *(*) PARAMS ((bfd *))) bfd_nullvoidptr)
 #define _bfd_nolink_bfd_link_add_symbols \
@@ -466,6 +470,11 @@ extern bfd_vma _bfd_stab_section_offset
 
 extern boolean _bfd_merge_section
   PARAMS ((bfd *, PTR *, asection *, PTR *));
+
+/* Attempt to merge SEC_MERGE sections.  */
+
+extern boolean _bfd_merge_sections
+  PARAMS ((bfd *, PTR));
 
 /* Write out a merged section.  */
 

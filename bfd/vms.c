@@ -110,6 +110,8 @@ static boolean vms_bfd_relax_section
 	   boolean *again));
 static boolean vms_bfd_gc_sections
   PARAMS ((bfd *abfd, struct bfd_link_info *link_info));
+static boolean vms_bfd_merge_sections
+  PARAMS ((bfd *abfd, struct bfd_link_info *link_info));
 static struct bfd_link_hash_table *vms_bfd_link_hash_table_create
   PARAMS ((bfd *abfd));
 static boolean vms_bfd_link_add_symbols
@@ -1780,6 +1782,17 @@ vms_bfd_gc_sections (abfd, link_info)
 {
 #if VMS_DEBUG
   vms_debug (1, "vms_bfd_gc_sections(%p, %p)\n", abfd, link_info);
+#endif
+  return true;
+}
+
+static boolean
+vms_bfd_merge_sections (abfd, link_info)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *link_info ATTRIBUTE_UNUSED;
+{
+#if VMS_DEBUG
+  vms_debug (1, "vms_bfd_merge_sections(%p, %p)\n", abfd, link_info);
 #endif
   return true;
 }

@@ -3254,6 +3254,28 @@ bfd_generic_gc_sections (abfd, link_info)
 
 /*
 INTERNAL_FUNCTION
+	bfd_generic_merge_sections
+
+SYNOPSIS
+	boolean bfd_generic_merge_sections
+	 (bfd *, struct bfd_link_info *);
+
+DESCRIPTION
+	Provides default handling for SEC_MERGE section merging for back ends
+	which don't have SEC_MERGE support -- i.e., does nothing.
+*/
+
+/*ARGSUSED*/
+boolean
+bfd_generic_merge_sections (abfd, link_info)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *link_info ATTRIBUTE_UNUSED;
+{
+  return true;
+}
+
+/*
+INTERNAL_FUNCTION
 	bfd_generic_get_relocated_section_contents
 
 SYNOPSIS
