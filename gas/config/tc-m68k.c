@@ -26,12 +26,14 @@
 #include "opcode/m68k.h"
 #include "m68k-parse.h"
 
-/* This array holds the chars that always start a comment.  If the
-   pre-processor is disabled, these aren't very useful */
+/* This string holds the chars that always start a comment.  If the
+   pre-processor is disabled, these aren't very useful.  The macro
+   tc_comment_chars points to this.  We use this, rather than the
+   usual comment_chars, so that the --bitwise-or option will work.  */
 #if (defined (OBJ_ELF) && ! defined (TE_PSOS) && ! defined (TE_LINUX)) || defined (TE_DELTA)
-const char comment_chars[] = "|#";
+const char *m68k_comment_chars = "|#";
 #else
-const char comment_chars[] = "|";
+const char *m68k_comment_chars = "|";
 #endif
 
 /* This array holds the chars that only start a comment at the beginning of
@@ -158,6 +160,11 @@ static const enum m68k_register m68060_control_regs[] = {
   USP, VBR, URP, SRP, PCR,
   0
 };
+static const enum m68k_register mcf5200_control_regs[] = {
+  CACR, TC, ITT0, ITT1, DTT0, DTT1, VBR, ROMBAR, 
+  RAMBAR0, RAMBAR1, MBAR,
+  0
+};
 #define cpu32_control_regs m68010_control_regs
 
 static const enum m68k_register *control_regs;
@@ -211,7 +218,7 @@ struct m68k_it
   reloc[5];			/* Five is enough??? */
 };
 
-#define cpu_of_arch(x)		((x) & m68000up)
+#define cpu_of_arch(x)		((x) & (m68000up|mcf5200))
 #define float_of_arch(x)	((x) & mfloat)
 #define mmu_of_arch(x)		((x) & mmmu)
 
@@ -339,6 +346,7 @@ static const struct m68k_cpu archs[] = {
   { cpu32,  "cpu32", 0 },
   { m68881, "68881", 0 },
   { m68851, "68851", 0 },
+  { mcf5200, "5200", 0 },
   /* Aliases (effectively, so far as gas is concerned) for the above
      cpus.  */
   { m68020, "68k", 1 },
@@ -350,6 +358,7 @@ static const struct m68k_cpu archs[] = {
   { m68020, "68ec020", 1 },
   { m68030, "68ec030", 1 },
   { m68040, "68ec040", 1 },
+  { m68060, "68ec060", 1 },
   { cpu32,  "68330", 1 },
   { cpu32,  "68331", 1 },
   { cpu32,  "68332", 1 },
@@ -1331,7 +1340,9 @@ m68k_ip (instring)
 		  break;
 
 		case 'O':
-		  if (opP->mode != DREG && opP->mode != IMMED)
+		  if (opP->mode != DREG
+		      && opP->mode != IMMED
+		      && opP->mode != ABSL)
 		    losing++;
 		  break;
 
@@ -1848,13 +1859,13 @@ m68k_ip (instring)
 		      || opP->index.size == SIZE_LONG)
 		    nextword |= 0x800;
 
-		  if (cpu_of_arch (current_architecture) < m68020)
+		  if ((opP->index.scale != 1 
+		       && cpu_of_arch (current_architecture) < m68020)
+		      || (opP->index.scale == 8 
+			  && current_architecture == mcf5200))
 		    {
-		      if (opP->index.scale != 1)
-			{
-			  opP->error =
-			    "scale factor invalid on this architecture; needs 68020 or higher";
-			}
+		      opP->error =
+			"scale factor invalid on this architecture; needs cpu32 or 68020 or higher";
 		    }
 
 		  switch (opP->index.scale)
@@ -1986,6 +1997,8 @@ m68k_ip (instring)
 	      /* Figure out innner displacement stuff */
 	      if (opP->mode == POST || opP->mode == PRE)
 		{
+		  if (cpu_of_arch (current_architecture) & cpu32)
+		    opP->error = "invalid operand mode for this architecture; needs 68020 or higher";
 		  switch (siz2)
 		    {
 		    case SIZE_UNSPEC:
@@ -2358,6 +2371,18 @@ m68k_ip (instring)
 	      break;
 	    case PCR:
 	      tmpreg = 0x808;
+	      break;
+            case ROMBAR:
+	      tmpreg = 0xC00;
+	      break;
+	    case RAMBAR0:
+	      tmpreg = 0xC04;
+	      break;
+	    case RAMBAR1:
+	      tmpreg = 0xC05;
+	      break;
+	    case MBAR:
+	      tmpreg = 0xC0F;
 	      break;
 	    default:
 	      abort ();
@@ -2940,28 +2965,51 @@ static const struct init_entry init_table[] =
   { "ccr", CCR },
   { "cc", CCR },
 
-  { "usp", USP },
-  { "isp", ISP },
-  { "sfc", SFC },
+  /* control registers */
+  { "sfc", SFC },		/* Source Function Code */
   { "sfcr", SFC },
-  { "dfc", DFC },
+  { "dfc", DFC },		/* Destination Function Code */
   { "dfcr", DFC },
-  { "cacr", CACR },
-  { "caar", CAAR },
+  { "cacr", CACR },		/* Cache Control Register */
+  { "caar", CAAR },		/* Cache Address Register */
 
-  { "vbr", VBR },
+  { "usp", USP },		/* User Stack Pointer */
+  { "vbr", VBR },		/* Vector Base Register */
+  { "msp", MSP },		/* Master Stack Pointer */
+  { "isp", ISP },		/* Interrupt Stack Pointer */
 
-  { "msp", MSP },
-  { "itt0", ITT0 },
-  { "itt1", ITT1 },
-  { "dtt0", DTT0 },
-  { "dtt1", DTT1 },
-  { "mmusr", MMUSR },
-  { "tc", TC },
-  { "srp", SRP },
-  { "urp", URP },
+  { "itt0", ITT0 },		/* Instruction Transparent Translation Reg 0 */
+  { "itt1", ITT1 },		/* Instruction Transparent Translation Reg 1 */
+  { "dtt0", DTT0 },		/* Data Transparent Translation Register 0 */
+  { "dtt1", DTT1 },		/* Data Transparent Translation Register 1 */
+
+  /* 68ec040 versions of same */
+  { "iacr0", ITT0 },		/* Instruction Access Control Register 0 */
+  { "iacr1", ITT1 },		/* Instruction Access Control Register 0 */
+  { "dacr0", DTT0 },		/* Data Access Control Register 0 */
+  { "dacr1", DTT1 },		/* Data Access Control Register 0 */
+
+  /* mcf5200 versions of same */
+  { "acr2", ITT0 },		/* Access Control Unit 2 */
+  { "acr3", ITT1 },		/* Access Control Unit 3 */
+  { "acr0", DTT0 },		/* Access Control Unit 0 */
+  { "acr1", DTT1 },		/* Access Control Unit 1 */
+
+  { "tc", TC },			/* MMU Translation Control Register */
+  { "tcr", TC },
+
+  { "mmusr", MMUSR },		/* MMU Status Register */
+  { "srp", SRP },		/* User Root Pointer */
+  { "urp", URP },		/* Supervisor Root Pointer */
+
   { "buscr", BUSCR },
   { "pcr", PCR },
+
+  { "rombar", ROMBAR },		/* ROM Base Address Register */
+  { "rambar0", RAMBAR0 },	/* ROM Base Address Register */
+  { "rambar1", RAMBAR1 },	/* ROM Base Address Register */
+  { "mbar", MBAR },		/* Module Base Address Register */
+  /* end of control registers */
 
   { "ac", AC },
   { "bc", BC },
@@ -3375,6 +3423,20 @@ md_begin ()
      */
   alt_notend_table['@'] = 1;
 
+  /* We need to put digits in alt_notend_table to handle
+       bfextu %d0{24:1},%d0
+     */
+  alt_notend_table['0'] = 1;
+  alt_notend_table['1'] = 1;
+  alt_notend_table['2'] = 1;
+  alt_notend_table['3'] = 1;
+  alt_notend_table['4'] = 1;
+  alt_notend_table['5'] = 1;
+  alt_notend_table['6'] = 1;
+  alt_notend_table['7'] = 1;
+  alt_notend_table['8'] = 1;
+  alt_notend_table['9'] = 1;
+
 #ifndef MIT_SYNTAX_ONLY
   /* Insert pseudo ops, these have to go into the opcode table since
      gas expects pseudo ops to start with a dot */
@@ -3486,6 +3548,9 @@ m68k_init_after_args ()
       break;
     case cpu32:
       control_regs = cpu32_control_regs;
+      break;
+    case mcf5200:
+      control_regs = mcf5200_control_regs;
       break;
     default:
       abort ();
@@ -6129,6 +6194,9 @@ s_mri_endw (ignore)
  *	-pic	Indicates PIC.
  *	-k	Indicates PIC.  (Sun 3 only.)
  *
+ *	--bitwise-or
+ *		Permit `|' to be used in expressions.
+ *
  */
 
 #ifdef OBJ_ELF
@@ -6143,6 +6211,8 @@ struct option md_longopts[] = {
 #define OPTION_REGISTER_PREFIX_OPTIONAL (OPTION_MD_BASE + 1)
   {"register-prefix-optional", no_argument, NULL,
      OPTION_REGISTER_PREFIX_OPTIONAL},
+#define OPTION_BITWISE_OR (OPTION_MD_BASE + 2)
+  {"bitwise-or", no_argument, NULL, OPTION_BITWISE_OR},
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof(md_longopts);
@@ -6260,6 +6330,21 @@ md_parse_option (c, arg)
     case 'Q':
       break;
 
+    case OPTION_BITWISE_OR:
+      {
+	char *n, *t;
+	const char *s;
+
+	n = (char *) xmalloc (strlen (m68k_comment_chars) + 1);
+	t = n;
+	for (s = m68k_comment_chars; *s != '\0'; s++)
+	  if (*s != '|')
+	    *t++ = *s;
+	*t = '\0';
+	m68k_comment_chars = n;
+      }
+      break;
+
     default:
       return 0;
     }
@@ -6276,7 +6361,7 @@ md_show_usage (stream)
 -l			use 1 word for refs to undefined symbols [default 2]\n\
 -m68000 | -m68008 | -m68010 | -m68020 | -m68030 | -m68040 | -m68060\n\
  | -m68302 | -m68331 | -m68332 | -m68333 | -m68340 | -m68360\n\
- | -mcpu32\n\
+ | -mcpu32 | -mcf5200\n\
 			specify variant of 680X0 architecture [default 68020]\n\
 -m68881 | -m68882 | -mno-68881 | -mno-68882\n\
 			target has/lacks floating-point coprocessor\n\
@@ -6288,7 +6373,8 @@ md_show_usage (stream)
 -pic, -k		generate position independent code\n\
 -S			turn jbsr into jsr\n\
 --register-prefix-optional\n\
-			recognize register names without prefix character\n");
+			recognize register names without prefix character\n\
+--bitwise-or		do not treat `|' as a comment character\n");
 }
 
 #ifdef TEST2
