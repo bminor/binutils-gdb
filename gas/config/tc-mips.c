@@ -114,6 +114,9 @@ static int mips_isa = -1;
 /* MIPS ISA we are using for this output file.  */
 static int file_mips_isa;
 
+/* The CPU type as a number: 2000, 3000, 4000, 4400, etc.  */
+static int mips_cpu;
+
 /* MIPS PIC level.  */
 
 enum mips_pic_level
@@ -249,6 +252,12 @@ static int prev_insn_unreordered;
 /* Non-zero if the previous previous instruction was in a .set
    noreorder.  */
 static int prev_prev_insn_unreordered;
+
+/* The number of instructions since the last instruction which
+   accesses the data cache.  The instruction itself counts as 1, so 0
+   means no information.  This is used to work around a bug on the
+   r4600 (ORION) chip.  */
+static int insns_since_cache_access;
 
 /* Since the MIPS does not have multiple forms of PC relative
    instructions, we do not have to do relaxing as is done on other
@@ -500,17 +509,55 @@ md_begin ()
 
   if (mips_isa == -1)
     {
-      if (strcmp (TARGET_CPU, "mips") == 0)
-	mips_isa = 1;
-      else if (strcmp (TARGET_CPU, "r6000") == 0
-	       || strcmp (TARGET_CPU, "mips2") == 0)
-	mips_isa = 2;
-      else if (strcmp (TARGET_CPU, "mips64") == 0
-	       || strcmp (TARGET_CPU, "r4000") == 0
-	       || strcmp (TARGET_CPU, "mips3") == 0)
-	mips_isa = 3;
+      const char *cpu;
+      char *a = NULL;
+
+      cpu = TARGET_CPU;
+      if (strcmp (cpu + (sizeof TARGET_CPU) - 3, "el") == 0)
+	{
+	  a = xmalloc (sizeof TARGET_CPU);
+	  strcpy (a, TARGET_CPU);
+	  a[(sizeof TARGET_CPU) - 3] = '\0';
+	  cpu = a;
+	}
+
+      if (strcmp (cpu, "mips") == 0)
+	{
+	  mips_isa = 1;
+	  mips_cpu = 3000;
+	}
+      else if (strcmp (cpu, "r6000") == 0
+	       || strcmp (cpu, "mips2") == 0)
+	{
+	  mips_isa = 2;
+	  mips_cpu = 6000;
+	}
+      else if (strcmp (cpu, "mips64") == 0
+	       || strcmp (cpu, "r4000") == 0
+	       || strcmp (cpu, "mips3") == 0)
+	{
+	  mips_isa = 3;
+	  mips_cpu = 4000;
+	}
+      else if (strcmp (cpu, "r4400") == 0)
+	{
+	  mips_isa = 3;
+	  mips_cpu = 4400;
+	}
+      else if (strcmp (cpu, "mips64orion") == 0
+	       || strcmp (cpu, "r4600") == 0)
+	{
+	  mips_isa = 3;
+	  mips_cpu = 4600;
+	}
       else
-	mips_isa = 1;
+	{
+	  mips_isa = 1;
+	  mips_cpu = 3000;
+	}
+
+      if (a != NULL)
+	free (a);
     }
 
   if (mips_isa < 2 && mips_trap)
@@ -866,6 +913,18 @@ append_insn (place, ip, address_expr, reloc_type)
 		  && (pinfo & INSN_WRITE_HI))))
 	++nops;
 
+      /* The r4600 (ORION) chip has a bug: at least four instructions
+	 are required between an instruction which accesses memory and
+	 a certain set of CACHE instructions.  Handle that now.  */
+      if (mips_cpu == 4600
+	  && insns_since_cache_access != 0
+	  && 5 - insns_since_cache_access > nops
+	  && ((ip->insn_opcode & 0xffff0000) == 0xbc0d0000
+	      || (ip->insn_opcode & 0xffff0000) == 0xbc110000
+	      || (ip->insn_opcode & 0xfc1f0000) == 0xbc150000
+	      || (ip->insn_opcode & 0xffff0000) == 0xbc190000))
+	nops = 5 - insns_since_cache_access;
+
       /* If we are being given a nop instruction, don't bother with
 	 one of the nops we would otherwise output.  This will only
 	 happen when a nop instruction is used with mips_optimize set
@@ -876,8 +935,9 @@ append_insn (place, ip, address_expr, reloc_type)
       /* Now emit the right number of NOP instructions.  */
       if (nops > 0)
 	{
-	  emit_nop ();
-	  if (nops > 1)
+	  int i;
+
+	  for (i = 0; i < nops; i++)
 	    emit_nop ();
 	  if (listing)
 	    listing_prev_line ();
@@ -1168,6 +1228,11 @@ append_insn (place, ip, address_expr, reloc_type)
       prev_insn_where = f - frag_now->fr_literal;
       prev_insn_fixp = fixp;
       prev_insn_valid = 1;
+      if ((pinfo & INSN_LOAD_MEMORY_DELAY) != 0
+	  || (pinfo & INSN_STORE_MEMORY) != 0)
+	insns_since_cache_access = 1;
+      else if (insns_since_cache_access != 0)
+	++insns_since_cache_access;
     }
 
   /* We just output an insn, so the next one doesn't have a label.  */
@@ -4999,14 +5064,17 @@ md_parse_option (c, arg)
 
     case OPTION_MIPS1:
       mips_isa = 1;
+      mips_cpu = 3000;
       break;
 
     case OPTION_MIPS2:
       mips_isa = 2;
+      mips_cpu = 6000;
       break;
 
     case OPTION_MIPS3:
       mips_isa = 3;
+      mips_cpu = 4000;
       break;
 
     case OPTION_MCPU:
@@ -5030,35 +5098,58 @@ md_parse_option (c, arg)
 		if (strcmp (p, "2000") == 0
 		    || strcmp (p, "2k") == 0
 		    || strcmp (p, "2K") == 0)
-		  mips_isa = 1;
+		  {
+		    mips_isa = 1;
+		    mips_cpu = 2000;
+		  }
 		break;
 
 	      case '3':
 		if (strcmp (p, "3000") == 0
 		    || strcmp (p, "3k") == 0
 		    || strcmp (p, "3K") == 0)
-		  mips_isa = 1;
+		  {
+		    mips_isa = 1;
+		    mips_cpu = 3000;
+		  }
 		break;
 
 	      case '4':
 		if (strcmp (p, "4000") == 0
 		    || strcmp (p, "4k") == 0
-		    || strcmp (p, "4K") == 0
-		    || strcmp (p, "4400") == 0
-		    || strcmp (p, "4600") == 0)
-		  mips_isa = 3;
+		    || strcmp (p, "4K") == 0)
+		  {
+		    mips_isa = 3;
+		    mips_cpu = 4000;
+		  }
+		else if (strcmp (p, "4400") == 0)
+		  {
+		    mips_isa = 3;
+		    mips_cpu = 4400;
+		  }
+		else if (strcmp (p, "4600") == 0)
+		  {
+		    mips_isa = 3;
+		    mips_cpu = 4600;
+		  }
 		break;
 
 	      case '6':
 		if (strcmp (p, "6000") == 0
 		    || strcmp (p, "6k") == 0
 		    || strcmp (p, "6K") == 0)
-		  mips_isa = 2;
+		  {
+		    mips_isa = 2;
+		    mips_cpu = 6000;
+		  }
 		break;
 
 	      case 'o':
 		if (strcmp (p, "orion") == 0)
-		  mips_isa = 3;
+		  {
+		    mips_isa = 3;
+		    mips_cpu = 4600;
+		  }
 		break;
 	      }
 
