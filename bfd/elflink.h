@@ -1456,15 +1456,22 @@ elf_link_add_object_symbols (abfd, info)
 			 & (ELF_LINK_HASH_REF_DYNAMIC
 			    | ELF_LINK_HASH_REF_REGULAR));
 
-		      /* Copy over the global table offset entry.
-			 This may have been already set up by a
-			 check_relocs routine.  */
+		      /* Copy over the global and procedure linkage table
+			 offset entries.  These may have been already set
+			 up by a check_relocs routine.  */
 		      if (ht->got.offset == (bfd_vma) -1)
 			{
 			  ht->got.offset = hi->got.offset;
 			  hi->got.offset = (bfd_vma) -1;
 			}
 		      BFD_ASSERT (hi->got.offset == (bfd_vma) -1);
+
+		      if (ht->plt.offset == (bfd_vma) -1)
+			{
+			  ht->plt.offset = hi->plt.offset;
+			  hi->plt.offset = (bfd_vma) -1;
+			}
+		      BFD_ASSERT (hi->plt.offset == (bfd_vma) -1);
 
 		      if (ht->dynindx == -1)
 			{
@@ -1557,13 +1564,20 @@ elf_link_add_object_symbols (abfd, info)
 			     & (ELF_LINK_HASH_REF_DYNAMIC
 				| ELF_LINK_HASH_REF_REGULAR));
 
-			  /* Copy over the global table offset entry.
-                             This may have been already set up by a
-                             check_relocs routine.  */
+			  /* Copy over the global and procedure linkage
+                             table offset entries.  These may have been
+                             already set up by a check_relocs routine.  */
 			  if (h->got.offset == (bfd_vma) -1)
 			    {
 			      h->got.offset = hi->got.offset;
 			      hi->got.offset = (bfd_vma) -1;
+			    }
+			  BFD_ASSERT (hi->got.offset == (bfd_vma) -1);
+
+			  if (h->plt.offset == (bfd_vma) -1)
+			    {
+			      h->plt.offset = hi->plt.offset;
+			      hi->plt.offset = (bfd_vma) -1;
 			    }
 			  BFD_ASSERT (hi->got.offset == (bfd_vma) -1);
 
@@ -2839,7 +2853,10 @@ elf_fix_symbol_flags (h, eif)
       && eif->info->shared
       && eif->info->symbolic
       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
-    h->elf_link_hash_flags &=~ ELF_LINK_HASH_NEEDS_PLT;
+    {
+      h->elf_link_hash_flags &=~ ELF_LINK_HASH_NEEDS_PLT;
+      h->plt.offset = (bfd_vma) -1;
+    }
 
   return true;
 }
@@ -2877,7 +2894,10 @@ elf_adjust_dynamic_symbol (h, data)
 	  || (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0
 	  || ((h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0
 	      && (h->weakdef == NULL || h->weakdef->dynindx == -1))))
-    return true;
+    {
+      h->plt.offset = (bfd_vma) -1;
+      return true;
+    }
 
   /* If we've already adjusted this symbol, don't do it again.  This
      can happen via a recursive call.  */
@@ -3162,6 +3182,7 @@ elf_link_assign_sym_version (h, data)
 			      h->elf_link_hash_flags &=~
 				ELF_LINK_HASH_NEEDS_PLT;
 			      h->dynindx = -1;
+			      h->plt.offset = (bfd_vma) -1;
 			      /* FIXME: The name of the symbol has
 				 already been recorded in the dynamic
 				 string table section.  */
@@ -3276,6 +3297,7 @@ elf_link_assign_sym_version (h, data)
 			  h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
 			  h->elf_link_hash_flags &=~ ELF_LINK_HASH_NEEDS_PLT;
 			  h->dynindx = -1;
+			  h->plt.offset = (bfd_vma) -1;
 			  /* FIXME: The name of the symbol has already
 			     been recorded in the dynamic string table
 			     section.  */
@@ -3300,6 +3322,7 @@ elf_link_assign_sym_version (h, data)
 	      h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
 	      h->elf_link_hash_flags &=~ ELF_LINK_HASH_NEEDS_PLT;
 	      h->dynindx = -1;
+	      h->plt.offset = (bfd_vma) -1;
 	      /* FIXME: The name of the symbol has already been
 		 recorded in the dynamic string table section.  */
 	    }
@@ -5518,6 +5541,8 @@ elf_gc_sweep (info, gc_sweep_hook)
 
     elf_hash_table (info)->dynsymcount = i;
   }
+
+  return true;
 }
 
 /* Sweep symbols in swept sections.  Called via elf_link_hash_traverse.  */
@@ -5777,39 +5802,43 @@ elf_gc_common_finalize_got_offsets (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
-  if (elf_hash_table (info)->dynamic_sections_created)
+  bfd *i;
+  bfd_vma off[2], gotoff = 0;
+
+  /* Do the local .got entries first.  */
+  for (i = info->input_bfds; i; i = i->link_next)
     {
-      bfd *i;
-      bfd_vma off[2], gotoff = 0;
+      bfd_signed_vma *local_got = elf_local_got_refcounts (i);
+      bfd_size_type j, locsymcount;
+      Elf_Internal_Shdr *symtab_hdr;
 
-      /* Do the local .got entries first.  */
-      for (i = info->input_bfds; i; i = i->link_next)
+      if (!local_got)
+	continue;
+
+      symtab_hdr = &elf_tdata (i)->symtab_hdr;
+      if (elf_bad_symtab (i))
+	locsymcount = symtab_hdr->sh_size / sizeof (Elf_External_Sym);
+      else
+	locsymcount = symtab_hdr->sh_info;
+
+      for (j = 0; j < locsymcount; ++j)
 	{
-	  bfd_signed_vma *local_got = elf_local_got_refcounts (i);
-	  bfd_size_type j, locsymcount;
-	  Elf_Internal_Shdr *symtab_hdr;
-
-	  if (!local_got)
-	    continue;
-
-	  symtab_hdr = &elf_tdata (i)->symtab_hdr;
-	  if (elf_bad_symtab (i))
-	    locsymcount = symtab_hdr->sh_size / sizeof (Elf_External_Sym);
+	  if (local_got[j] > 0)
+	    {
+	      local_got[j] = gotoff;
+	      gotoff += ARCH_SIZE / 8;
+	    }
 	  else
-	    locsymcount = symtab_hdr->sh_info;
-
-	  for (j = 0; j < locsymcount; ++j)
-	    local_got[j] = (local_got[j] > 0 ? gotoff++ : (bfd_vma) - 1);
+	    local_got[j] = (bfd_vma) -1;
 	}
-
-      /* Then the global .got and .plt entries.  */
-      off[0] = gotoff;
-      off[1] = 0;
-      elf_link_hash_traverse (elf_hash_table (info),
-			      elf_gc_allocate_got_offsets,
-			      (PTR) off);
     }
 
+  /* Then the global .got and .plt entries.  */
+  off[0] = gotoff;
+  off[1] = 0;
+  elf_link_hash_traverse (elf_hash_table (info),
+			  elf_gc_allocate_got_offsets,
+			  (PTR) off);
   return true;
 }
 
@@ -5823,7 +5852,13 @@ elf_gc_allocate_got_offsets (h, offarg)
 {
   bfd_vma *off = (bfd_vma *) offarg;
 
-  h->got.offset = (h->got.refcount > 0 ? off[0]++ : (bfd_vma) - 1);
+  if (h->got.refcount > 0)
+    {
+      h->got.offset = off[0];
+      off[0] += ARCH_SIZE / 8;
+    }
+  else
+    h->got.offset = (bfd_vma) -1;
 
   return true;
 }

@@ -1,4 +1,45 @@
+Tue Jul 14 11:22:21 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* elf32-m68k.c (elf_m68k_check_relocs): Also reference count
+	R_68K_PCxx and R_68K_xx relocations.  Make sure that
+	ELF_LINK_HASH_NEEDS_PLT is always set for a PLT reloc reference.
+	(elf_m68k_gc_sweep_hook): Also reference count R_68K_PCxx and
+	R_68K_xx relocations.
+	(elf_m68k_adjust_dynamic_symbol): Reset the plt offset of a symbol
+	that has no plt entry.
+	(elf_m68k_relocate_section): Ignore the plt offset in a static
+	link.
+	* elflink.h (elf_adjust_dynamic_symbol): Reset the plt offset for
+	an ignored symbol.
+	(elf_gc_common_finalize_got_offsets): Set the got offsets also in
+	a static link.
+
+	* elf32-m68k.c (R_68K_GNU_VTINHERIT, R_68K_GNU_VTENTRY): New reloc
+	types.
+	(howto_table, reloc_map): Add entries for them.
+	(elf_m68k_check_relocs): Handle them.  Implement reference
+	counting for got and plt entries.
+	(elf_m68k_gc_mark_hook, elf_m68k_gc_sweep_hook): New functions.
+	(elf_m68k_adjust_dynamic_symbol): Handle unreferenced plt
+	symbols.
+	(rtype_to_howto_rel, elf_info_to_howto_rel): Delete.
+	(elf_m68k_relocate_section): Handle the new reloc types.
+	(bfd_elf32_bfd_final_link, elf_backend_gc_mark_hook,
+	elf_backend_gc_sweep_hook, elf_backend_can_gc_sections): Define.
+	* elflink.h (elf_link_add_object_symbols): When creating an
+	indirect reference for symbol versioning also copy the plt
+	offset.
+	(elf_fix_symbol_flags): When clearing the ELF_LINK_HASH_NEEDS_PLT
+	flag also reset the plt offset.
+	(elf_link_assign_sym_version): Likewise.
+	(elf_gc_common_finalize_got_offsets): Increment the got offset by
+	the size of the entry in bytes.
+	(elf_gc_allocate_got_offsets): Likewise.
+
 Tue Jul 14 11:18:14 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.h (elf_gc_sections): Return true rather than falling off
+	the bottom.
 
 	* coffgen.c (bfd_coff_set_symbol_class): Call bfd_alloc, not
 	xmalloc.
