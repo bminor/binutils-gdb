@@ -264,8 +264,9 @@ vax_find_call (parent, p_lowpc, p_highpc)
 	   *      skip the count of the number of arguments.
 	   */
 	  DBG (CALLDEBUG,
-	       printf ("[findcall]\t0x%x:calls",
-		       instructp - (unsigned char *) core_text_space));
+	       printf ("[findcall]\t0x%lx:calls",
+		       ((unsigned long)
+			(instructp - (unsigned char *) core_text_space))));
 	  firstmode = vax_operandmode ((struct modebyte *) (instructp + length));
 	  switch (firstmode)
 	    {

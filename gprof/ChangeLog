@@ -1,3 +1,11 @@
+2000-02-22  Ian Lance Taylor  <ian@zembu.com>
+
+	From Brad Lucier <lucier@math.purdue.edu>:
+	* i386.c (i386_find_call): Add cast to ensure that printf argument
+	matches format.
+	* tahoe.c (tahoe_find_call): Likewise.
+	* vax.c (vax_find_call): Likewise.
+
 2000-01-27  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* utils.c (print_name_only): Don't pass error strings to

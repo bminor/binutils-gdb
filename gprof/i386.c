@@ -67,8 +67,8 @@ i386_find_call (parent, p_lowpc, p_highpc)
       if (i386_iscall (instructp))
 	{
 	  DBG (CALLDEBUG,
-	       printf ("[findcall]\t0x%x:call",
-		       instructp - (unsigned char *) delta));
+	       printf ("[findcall]\t0x%lx:call",
+		       (unsigned long) (instructp - (unsigned char *) delta)));
 	  /*
 	   *  regular pc relative addressing
 	   *    check that this is the address of 

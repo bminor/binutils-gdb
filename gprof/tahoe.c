@@ -260,8 +260,10 @@ tahoe_find_call (parent, p_lowpc, p_highpc)
 	   *    maybe a callf, better check it out.
 	   *      skip the count of the number of arguments.
 	   */
-	  DBG (CALLDEBUG, printf ("[findcall]\t0x%x:callf",
-				  instructp - (unsigned char *) core_text_space));
+	  DBG (CALLDEBUG, printf ("[findcall]\t0x%lx:callf",
+				  ((unsigned long)
+				   (instructp
+				    - (unsigned char *) core_text_space))));
 	  firstmode = tahoe_operandmode (instructp + length);
 	  switch (firstmode)
 	    {
