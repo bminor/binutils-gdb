@@ -31,6 +31,8 @@
  *
  *  Modified for SPARC by Stu Grossman, Cygnus Support.
  *
+ *  This code has been extensively tested on the Fujitsu SPARClite demo board.
+ *
  *  To enable debugger support, two things need to happen.  One, a
  *  call to set_debug_traps() is necessary in order to allow any breakpoints
  *  or error conditions to be properly intercepted and reported to gdb.
