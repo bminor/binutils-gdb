@@ -177,6 +177,9 @@ struct ppc_elf_dyn_relocs
 
   /* Total number of relocs copied for the input section.  */
   bfd_size_type count;
+
+  /* Number of pc-relative relocs copied for the input section.  */
+  bfd_size_type pc_count;
 };
 
 /* PPC ELF linker hash entry.  */
@@ -341,6 +344,7 @@ ppc_elf_copy_indirect_symbol (bed, dir, ind)
 	      for (q = edir->dyn_relocs; q != NULL; q = q->next)
 		if (q->sec == p->sec)
 		  {
+		    q->pc_count += p->pc_count;
 		    q->count += p->count;
 		    *pp = p->next;
 		    break;
@@ -2433,6 +2437,12 @@ ppc_elf_create_dynamic_sections (abfd, info)
   return bfd_set_section_flags (abfd, s, flags);
 }
 
+/* If ELIMINATE_COPY_RELOCS is non-zero, the linker will try to avoid
+   copying dynamic variables from a shared lib into an app's dynbss
+   section, and instead use a dynamic relocation to point into the
+   shared lib.  */
+#define ELIMINATE_COPY_RELOCS 1
+
 /* Adjust a symbol defined by a dynamic object and referenced by a
    regular object.  The current definition is in some section of the
    dynamic object, but we're not including those sections.  We have to
@@ -2518,6 +2528,25 @@ ppc_elf_adjust_dynamic_symbol (info, h)
   if ((h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0)
     return TRUE;
 
+  if (ELIMINATE_COPY_RELOCS)
+    {
+      struct ppc_elf_dyn_relocs *p;
+      for (p = ppc_elf_hash_entry (h)->dyn_relocs; p != NULL; p = p->next)
+	{
+	  s = p->sec->output_section;
+	  if (s != NULL && (s->flags & SEC_READONLY) != 0)
+	    break;
+	}
+
+      /* If we didn't find any dynamic relocs in read-only sections, then
+	 we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
+      if (p == NULL)
+	{
+	  h->elf_link_hash_flags &= ~ELF_LINK_NON_GOT_REF;
+	  return TRUE;
+	}
+    }
+
   /* We must allocate the symbol in our .dynbss section, which will
      become part of the .bss section of the executable.  There will be
      an entry for this symbol in the .dynsym section.  The dynamic
@@ -2584,12 +2613,23 @@ ppc_elf_adjust_dynamic_symbol (info, h)
    called from elflink.h.  If elflink.h doesn't call our
    finish_dynamic_symbol routine, we'll need to do something about
    initializing any .plt and .got entries in relocate_section.  */
-#define WILL_CALL_FINISH_DYNAMIC_SYMBOL(DYN, INFO, H) \
+#define WILL_CALL_FINISH_DYNAMIC_SYMBOL(DYN, SHARED, H) \
   ((DYN)								\
-   && ((INFO)->shared							\
+   && ((SHARED)								\
        || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)	\
    && ((H)->dynindx != -1						\
        || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0))
+
+/* Of those relocs that might be copied as dynamic relocs, this macro
+   selects those that must be copied when linking a shared library,
+   even when the symbol is local.  */
+
+#define MUST_BE_DYN_RELOC(RTYPE)		\
+  ((RTYPE) != R_PPC_REL24			\
+   && (RTYPE) != R_PPC_REL14			\
+   && (RTYPE) != R_PPC_REL14_BRTAKEN		\
+   && (RTYPE) != R_PPC_REL14_BRNTAKEN		\
+   && (RTYPE) != R_PPC_REL32)
 
 /* Allocate space in associated reloc sections for dynamic relocs.  */
 
@@ -2624,7 +2664,8 @@ allocate_dynrelocs (h, inf)
 	    return FALSE;
 	}
 
-      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info, h))
+      if (info->shared
+	  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, 0, h))
 	{
 	  asection *s = htab->plt;
 
@@ -2706,7 +2747,8 @@ allocate_dynrelocs (h, inf)
 	  else
 	    htab->got->_raw_size += 4;
 	  dyn = htab->elf.dynamic_sections_created;
-	  if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, &eh->elf))
+	  if (info->shared
+	      || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, &eh->elf))
 	    {
 	      /* All the entries we allocated need relocs.  */
 	      htab->relgot->_raw_size
@@ -2721,6 +2763,64 @@ allocate_dynrelocs (h, inf)
   else
     eh->elf.got.offset = (bfd_vma) -1;
 
+  if (eh->dyn_relocs == NULL)
+    return TRUE;
+
+  /* In the shared -Bsymbolic case, discard space allocated for
+     dynamic pc-relative relocs against symbols which turn out to be
+     defined in regular objects.  For the normal shared case, discard
+     space for relocs that have become local due to symbol visibility
+     changes.  */
+  if (info->shared)
+    {
+      if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
+	  && ((h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0
+	      || info->symbolic))
+	{
+	  struct ppc_elf_dyn_relocs **pp;
+
+	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+	    {
+	      p->count -= p->pc_count;
+	      p->pc_count = 0;
+	      if (p->count == 0)
+		*pp = p->next;
+	      else
+		pp = &p->next;
+	    }
+	}
+    }
+  else if (ELIMINATE_COPY_RELOCS)
+    {
+      /* For the non-shared case, discard space for relocs against
+	 symbols which turn out to need copy relocs or are not
+	 dynamic.  */
+
+      if ((h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0
+	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
+	{
+	  /* Make sure this symbol is output as a dynamic symbol.
+	     Undefined weak syms won't yet be marked as dynamic.  */
+	  if (h->dynindx == -1
+	      && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
+	    {
+	      if (! bfd_elf64_link_record_dynamic_symbol (info, h))
+		return FALSE;
+	    }
+
+	  /* If that succeeded, we know we'll be keeping all the
+	     relocs.  */
+	  if (h->dynindx != -1)
+	    goto keep;
+	}
+
+      eh->dyn_relocs = NULL;
+
+    keep: ;
+    }
+
+  /* Finally, allocate space.  */
   for (p = eh->dyn_relocs; p != NULL; p = p->next)
     {
       asection *sreloc = elf_section_data (p->sec)->sreloc;
@@ -3363,8 +3463,43 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 	      /* We may need a copy reloc too.  */
 	      h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
 	    }
+
 	dodyn:
-	  if (info->shared)
+	  /* If we are creating a shared library, and this is a reloc
+	     against a global symbol, or a non PC relative reloc
+	     against a local symbol, then we need to copy the reloc
+	     into the shared library.  However, if we are linking with
+	     -Bsymbolic, we do not need to copy a reloc against a
+	     global symbol which is defined in an object we are
+	     including in the link (i.e., DEF_REGULAR is set).  At
+	     this point we have not seen all the input files, so it is
+	     possible that DEF_REGULAR is not set now but will be set
+	     later (it is never cleared).  In case of a weak definition,
+	     DEF_REGULAR may be cleared later by a strong definition in
+	     a shared library.  We account for that possibility below by
+	     storing information in the dyn_relocs field of the hash
+	     table entry.  A similar situation occurs when creating
+	     shared libraries and symbol visibility changes render the
+	     symbol local.
+
+	     If on the other hand, we are creating an executable, we
+	     may need to keep relocations for symbols satisfied by a
+	     dynamic library if we manage to avoid copy relocs for the
+	     symbol.  */
+	  if ((info->shared
+	       && (MUST_BE_DYN_RELOC (r_type)
+		   || (h != NULL
+		       && (! info->symbolic
+			   || h->root.type == bfd_link_hash_defweak
+			   || (h->elf_link_hash_flags
+			       & ELF_LINK_HASH_DEF_REGULAR) == 0))))
+	      || (ELIMINATE_COPY_RELOCS
+		  && !info->shared
+		  && (sec->flags & SEC_ALLOC) != 0
+		  && h != NULL
+		  && (h->root.type == bfd_link_hash_defweak
+		      || (h->elf_link_hash_flags
+			  & ELF_LINK_HASH_DEF_REGULAR) == 0)))
 	    {
 	      struct ppc_elf_dyn_relocs *p;
 	      struct ppc_elf_dyn_relocs **head;
@@ -3421,9 +3556,8 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 		     easily.  Oh well.  */
 
 		  asection *s;
-		  s = (bfd_section_from_r_symndx
-		       (abfd, &ppc_elf_hash_table (info)->sym_sec,
-			sec, r_symndx));
+		  s = bfd_section_from_r_symndx (abfd, &htab->sym_sec,
+						 sec, r_symndx);
 		  if (s == NULL)
 		    return FALSE;
 
@@ -3442,9 +3576,12 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 		  *head = p;
 		  p->sec = sec;
 		  p->count = 0;
+		  p->pc_count = 0;
 		}
 
-	      p->count++;
+	      p->count += 1;
+	      if (!MUST_BE_DYN_RELOC (r_type))
+		p->pc_count += 1;
 	    }
 
 	  break;
@@ -4170,7 +4307,6 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       unsigned long r_symndx;
       bfd_vma relocation;
       bfd_vma branch_bit, insn, from;
-      bfd_boolean will_become_local;
       bfd_boolean unresolved_reloc;
       bfd_boolean warned;
       unsigned int tls_type, tls_mask, tls_gd;
@@ -4189,8 +4325,6 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  sym_name = bfd_elf_local_sym_name (input_bfd, sym);
 
 	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
-	  /* Relocs to local symbols are always resolved.  */
-	  will_become_local = TRUE;
 	}
       else
 	{
@@ -4200,8 +4334,6 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	  sym_name = h->root.root.string;
 
-	  /* Can this relocation be resolved immediately?  */
-	  will_become_local = SYMBOL_REFERENCES_LOCAL (info, h);
 	  relocation = 0;
 	  if (h->root.type == bfd_link_hash_defined
 	      || h->root.type == bfd_link_hash_defweak)
@@ -4561,7 +4693,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      {
 		bfd_boolean dyn;
 		dyn = htab->elf.dynamic_sections_created;
-		if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, h)
+		if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
 		    || (info->shared
 			&& SYMBOL_REFERENCES_LOCAL (info, h)))
 		  /* This is actually a static link, or it is a
@@ -4751,8 +4883,29 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_PPC_UADDR32:
 	case R_PPC_UADDR16:
 	case R_PPC_DTPMOD32:
+	  /* r_symndx will be zero only for relocs against symbols
+	     from removed linkonce sections, or sections discarded by
+	     a linker script.  */
 	dodyn:
-	  if (info->shared && r_symndx != 0)
+	  if (r_symndx == 0)
+	    break;
+	  /* Fall thru.  */
+
+	  if ((info->shared
+	       && (MUST_BE_DYN_RELOC (r_type)
+		   || (h != NULL
+		       && h->dynindx != -1
+		       && (!info->symbolic
+			   || (h->elf_link_hash_flags
+			       & ELF_LINK_HASH_DEF_REGULAR) == 0))))
+	      || (ELIMINATE_COPY_RELOCS
+		  && !info->shared
+		  && (input_section->flags & SEC_ALLOC) != 0
+		  && h != NULL
+		  && h->dynindx != -1
+		  && (h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0
+		  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+		  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0))
 	    {
 	      int skip;
 
@@ -4799,7 +4952,8 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		memset (&outrel, 0, sizeof outrel);
 	      /* h->dynindx may be -1 if this symbol was marked to
                  become local.  */
-	      else if (! will_become_local)
+	      else if (h != NULL
+		       && !SYMBOL_REFERENCES_LOCAL (info, h))
 		{
 		  unresolved_reloc = FALSE;
 		  outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
@@ -4814,16 +4968,6 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  else
 		    {
 		      long indx;
-
-		      if (h == NULL)
-			sec = local_sections[r_symndx];
-		      else
-			{
-			  BFD_ASSERT (h->root.type == bfd_link_hash_defined
-				      || (h->root.type
-					  == bfd_link_hash_defweak));
-			  sec = h->root.u.def.section;
-			}
 
 		      if (bfd_is_abs_section (sec))
 			indx = 0;
