@@ -157,25 +157,14 @@ default_gcore_target (void)
     return bfd_get_target (exec_bfd);
 }
 
-/*
- * Default method for stack segment (preemptable by target).
- */
+/* Function: derive_stack_segment
 
-static int (*override_derive_stack_segment) (bfd_vma *, bfd_vma *);
-
-extern void
-preempt_derive_stack_segment (int (*override_func) (bfd_vma *, bfd_vma *))
-{
-  override_derive_stack_segment = override_func;
-}
-
-/* Function: default_derive_stack_segment
    Derive a reasonable stack segment by unwinding the target stack. 
    
    Returns 0 for failure, 1 for success.  */
 
 static int 
-default_derive_stack_segment (bfd_vma *bottom, bfd_vma *top)
+derive_stack_segment (bfd_vma *bottom, bfd_vma *top)
 {
   bfd_vma tmp_vma;
   struct frame_info *fi, *tmp_fi;
@@ -214,36 +203,15 @@ default_derive_stack_segment (bfd_vma *bottom, bfd_vma *top)
   return 1;	/* success */
 }
 
-static int
-derive_stack_segment (bfd_vma *bottom, bfd_vma *top)
-{
-  if (override_derive_stack_segment)
-    return override_derive_stack_segment (bottom, top);
-  else
-    return default_derive_stack_segment (bottom, top);
-}
+/* Function: derive_heap_segment
 
-/*
- * Default method for heap segment (preemptable by target).
- */
-
-static int (*override_derive_heap_segment) (bfd *, bfd_vma *, bfd_vma *);
-
-extern void
-preempt_derive_heap_segment (int (*override_func) (bfd *, 
-						   bfd_vma *, bfd_vma *))
-{
-  override_derive_heap_segment = override_func;
-}
-
-/* Function: default_derive_heap_segment
    Derive a reasonable heap segment by looking at sbrk and
    the static data sections.
    
    Returns 0 for failure, 1 for success.  */
 
 static int 
-default_derive_heap_segment (bfd *abfd, bfd_vma *bottom, bfd_vma *top)
+derive_heap_segment (bfd *abfd, bfd_vma *bottom, bfd_vma *top)
 {
   bfd_vma top_of_data_memory = 0;
   bfd_vma top_of_heap = 0;
@@ -305,15 +273,6 @@ default_derive_heap_segment (bfd *abfd, bfd_vma *bottom, bfd_vma *top)
     }
   else
     return 0;	/* No additional heap space needs to be saved. */
-}
-
-static int
-derive_heap_segment (bfd *abfd, bfd_vma *bottom, bfd_vma *top)
-{
-  if (override_derive_heap_segment)
-    return override_derive_heap_segment (abfd, bottom, top);
-  else
-    return default_derive_heap_segment (abfd, bottom, top);
 }
 
 /* ARGSUSED */

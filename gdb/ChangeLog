@@ -1,3 +1,14 @@
+2002-08-08  Andrew Cagney  <cagney@redhat.com>
+
+	* gcore.c (override_derive_stack_segment): Delete variable.
+	(preempt_derive_stack_segment): Delete function.
+	(derive_stack_segment): Delete function.
+	(default_derive_stack_segment): Renamed to derive_stack_segment.
+	(override_derive_heap_segment): Delete variable.
+	(preempt_derive_heap_segment): Delete function.
+	(derive_heap_segment): Delete function.
+	(default_derive_heap_segment): Rename to derive_heap_segment.
+
 2002-08-06  Michael Snyder  <msnyder@redhat.com>
 
 	* config/mips/tm-mips.h: Remove #define USE_STRUCT_CONVENTION.
