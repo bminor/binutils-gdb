@@ -1,3 +1,9 @@
+2003-11-27  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-sh.c (sh_elf_cons): If md_cons_align is defined
+	call it to make sure that the constants that are going to be
+	emitted are correctly aligned.
+
 2003-11-27  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-frv.c (md_pcrel_from_section): Don't adjust when

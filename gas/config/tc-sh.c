@@ -801,6 +801,10 @@ sh_elf_cons (register int nbytes)
       return;
     }
 
+#ifdef md_cons_align
+  md_cons_align (nbytes);
+#endif
+
   do
     {
       expression (&exp);
