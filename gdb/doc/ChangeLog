@@ -1,3 +1,8 @@
+2000-07-07  Nicholas Duffek  <nsd@redhat.com>
+
+	* stabs.texinfo: Fix spelling errors.
+	(String Field): FILE-NUMBER starts from 0, not 1.
+
 2000-07-05  Eli Zaretskii <eliz@is.elta.co.il>
 
 	* refcard.tex: Remove \centerline from the blurb.  Patch from
