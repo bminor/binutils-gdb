@@ -29,14 +29,13 @@ MN10300_OBJS = \
 	sim-reason.o \
 	sim-stop.o \
 	dv-sockser.o
-MN10300_INTERP_DEP = 
 
 SIM_OBJS = $(MN10300_OBJS) interp.o
 
 # List of main object files for `run'.
 SIM_RUN_OBJS = nrun.o
 
-SIM_EXTRA_CLEAN = clean-extra
+SIM_EXTRA_CLEAN = clean-igen
 # Extra dependencies for "sim-main.h"
 SIM_EXTRA_DEPS = mn10300_sim.h itable.h idecode.h
 
@@ -50,28 +49,7 @@ SIM_EXTRA_CFLAGS = -DPOLL_QUIT_INTERVAL=0x20
 
 ## COMMON_POST_CONFIG_FRAG
 
-
-#
-# Old generator (default)
-#
-
-simops.h: gencode
-	./gencode -h >$@
-
-table.c: gencode simops.h
-	./gencode >$@
-
-gencode.o: gencode.c $(INCLUDE)
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/gencode.c
-
-m10300-opc.o: $(srcdir)/../../opcodes/m10300-opc.c
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/../../opcodes/m10300-opc.c
-
-gencode: gencode.o m10300-opc.o
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -o gencode gencode.o m10300-opc.o $(BUILD_LIB)
-
-idecode.o op_utils.o semantics.o simops.o: targ-vals.h
-
+idecode.o op_utils.o semantics.o: targ-vals.h
 
 BUILT_SRC_FROM_IGEN = \
 	icache.h \
@@ -145,10 +123,4 @@ tmp-igen: $(IGEN_INSN) $(IGEN_DC) ../igen/igen
 	$(SHELL) $(srcdir)/../../move-if-change tmp-irun.c irun.c
 	touch tmp-igen
 
-
-interp.o: interp.c $(MN10300_INTERP_DEP) $(INCLUDE)
-simops.o: simops.c simops.h $(INCLUDE)
-table.o: table.c
-
-clean-extra: clean-igen
-	rm -f table.c simops.h gencode
+interp.o: interp.c $(INCLUDE)

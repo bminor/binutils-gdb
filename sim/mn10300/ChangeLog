@@ -1,5 +1,8 @@
 2004-06-26  Alexandre Oliva  <aoliva@redhat.com>
 
+	* gencode.c, simops.c: Delete.
+	* Makefile.in: Remove non-COMMON dependencies and commands.
+
 	* configure.in: Use common simulator always.  Don't subst sim_gen
 	nor mn10300_common.
 	* configure: Rebuilt.
