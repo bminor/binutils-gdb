@@ -1489,8 +1489,20 @@ coff_frob_section (sec)
 #if !defined(TICOFF)
   if (size & mask)
     {
-      size = (size + mask) & ~mask;
-      bfd_set_section_size (stdoutput, sec, size);
+      bfd_vma new_size;
+      fragS *last;
+      
+      new_size = (size + mask) & ~mask;
+      bfd_set_section_size (stdoutput, sec, new_size);
+
+      /* If the size had to be rounded up, add some padding in
+         the last non-empty frag.  */
+      fragp = seg_info (sec)->frchainP->frch_root;
+      last = seg_info (sec)->frchainP->frch_last;
+      while (fragp->fr_next != last)
+        fragp = fragp->fr_next;
+      last->fr_address = size;
+      fragp->fr_offset += new_size - size;
     }
 #endif
 
