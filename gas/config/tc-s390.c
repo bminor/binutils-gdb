@@ -1,5 +1,5 @@
 /* tc-s390.c -- Assemble for the S390
-   Copyright 2000, 2001 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
    Contributed by Martin Schwidefsky (schwidefsky@de.ibm.com).
 
    This file is part of GAS, the GNU Assembler.
@@ -373,6 +373,12 @@ md_parse_option (c, arg)
       else if (arg != NULL && strcmp (arg, "warn-areg-zero") == 0)
 	warn_areg_zero = TRUE;
 
+      else if (arg != NULL && strcmp (arg, "31") == 0)
+	s390_arch_size = 31;
+
+      else if (arg != NULL && strcmp (arg, "64") == 0)
+	s390_arch_size = 64;
+
       else
 	{
 	  as_bad (_("invalid switch -m%s"), arg);
@@ -382,15 +388,9 @@ md_parse_option (c, arg)
 
     case 'A':
       if (arg != NULL && strcmp (arg, "esa") == 0)
-	{
-	  current_architecture = S390_OPCODE_ESA;
-	  s390_arch_size = 32;
-	}
+	current_architecture = S390_OPCODE_ESA;
       else if (arg != NULL && strcmp (arg, "esame") == 0)
-	{
-	  current_architecture = S390_OPCODE_ESAME;
-	  s390_arch_size = 64;
-	}
+	current_architecture = S390_OPCODE_ESAME;
       else
 	as_bad ("invalid architecture -A%s", arg);
       current_arch_mask = 1 << current_architecture;
@@ -422,7 +422,9 @@ md_show_usage (stream)
         S390 options:\n\
         -mregnames        Allow symbolic names for registers\n\
         -mwarn-areg-zero  Warn about zero base/index registers\n\
-        -mno-regnames     Do not allow symbolic names for registers\n"));
+        -mno-regnames     Do not allow symbolic names for registers\n\
+        -m31              Set file format to 31 bit format\n\
+        -m64              Set file format to 64 bit format\n"));
   fprintf (stream, _("\
         -V                print assembler version number\n\
         -Qy, -Qn          ignored\n"));
@@ -439,6 +441,10 @@ md_begin ()
   const struct s390_opcode *op_end;
   boolean dup_insn = false;
   const char *retval;
+
+  /* Give a warning if the combination -m64-bit and -Aesa is used.  */
+  if (s390_arch_size == 64 && current_arch_mask == (1 << S390_OPCODE_ESA))
+    as_warn ("The 64 bit file format is used without esame instructions.");
 
   /* Set the ELF flags if desired.  */
   if (s390_flags)
@@ -487,9 +493,9 @@ void
 s390_md_end ()
 {
   if (s390_arch_size == 64)
-    bfd_set_arch_mach (stdoutput, bfd_arch_s390, bfd_mach_s390_esame);
+    bfd_set_arch_mach (stdoutput, bfd_arch_s390, bfd_mach_s390_64);
   else
-    bfd_set_arch_mach (stdoutput, bfd_arch_s390, bfd_mach_s390_esa);
+    bfd_set_arch_mach (stdoutput, bfd_arch_s390, bfd_mach_s390_31);
 }
 
 void
@@ -1623,6 +1629,10 @@ tc_s390_fix_adjustable(fixP)
   if (S_IS_EXTERN (fixP->fx_addsy))
     return 0;
   if (S_IS_WEAK (fixP->fx_addsy))
+    return 0;
+  /* Don't adjust pc-relative references to merge sections.  */
+  if ((S_GET_SEGMENT(fixP->fx_addsy)->flags & SEC_MERGE) != 0 
+      && fixP->fx_pcrel)
     return 0;
   /* adjust_reloc_syms doesn't know about the GOT.  */
   if (   fixP->fx_r_type == BFD_RELOC_32_GOTOFF

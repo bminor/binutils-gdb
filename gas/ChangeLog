@@ -1,6 +1,25 @@
 2002-04-27  Alan Modra  <amodra@bigpond.net.au>
 
 	Merge from mainline.
+	2002-04-17  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+	* config/tc-s390.c (tc_s390_fix_adjustable): Prevent adjustments to
+	symbols in merge sections.
+
+	2002-02-19  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+	* config/tc-s390.c (md_parse_option): Add switches -m31 and -m64.
+	Make bit size independent of architecture switch.
+	(md_begin): Add warning for -m64 with -Aesa.
+	(s390_md_end): Use renamed architecture defines.
+
+	2002-02-19  Tom Tromey  <tromey@redhat.com>
+	* config/tc-xstormy16.h (DWARF2_LINE_MIN_INSN_LENGTH): Define.
+
+	Tue Apr  9 16:45:48 2002  J"orn Rennecke <joern.rennecke@superh.com>
+	* config/tc-sh.h (TC_FIX_ADJUSTABLE): Disable adjusting if
+	symbol_used_in_reloc_p is true.
+	* config/tc-sh.c (md_apply_fix3): Don't zero relocations on big
+	endian hosts.
+
 	2002-04-03  Alan Modra  <amodra@bigpond.net.au>
 	* symbols.c (resolve_symbol_value <O_uminus, O_bit_not,
 	O_logical_not>): Derive final_seg from add_symbol.

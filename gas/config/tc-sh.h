@@ -68,7 +68,12 @@ extern boolean sh_fix_adjustable PARAMS ((struct fix *));
 
 /* This arranges for gas/write.c to not apply a relocation if
    obj_fix_adjustable() says it is not adjustable.  */
-#define TC_FIX_ADJUSTABLE(fixP) obj_fix_adjustable (fixP)
+/* ??? fixups with symbols in SEC_MERGE sections are marked with
+   obj_fix_adjustable and have a non-section symbol, as in
+   "vwxyz"+1 in execute/string-opt-6.c .  Maybe the test of
+   (symbol_used_in_reloc_p should be done in the machine-independent code.  */
+#define TC_FIX_ADJUSTABLE(fixP) \
+  (! symbol_used_in_reloc_p (fixP->fx_addsy) && obj_fix_adjustable (fixP))
 #endif
 
 #define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section (FIXP, SEC)
