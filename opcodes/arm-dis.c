@@ -46,6 +46,8 @@
 #define NUM_ELEM(a)     (sizeof (a) / sizeof (a)[0])
 #endif
 
+#define WORD_ADDRESS(pc) ((pc) & ~0x3)
+
 static char * arm_conditional[] =
 {"eq", "ne", "cs", "cc", "mi", "pl", "vs", "vc",
  "hi", "ls", "ge", "lt", "gt", "le", "", "nv"};
@@ -1253,7 +1255,7 @@ print_insn (pc, info, little)
   unsigned char      b[4];
   long               given;
   int                status;
-  int                is_thumb;
+  int                is_thumb, second_half_valid = 1;
 
   if (info->disassembler_options)
     {
@@ -1299,6 +1301,7 @@ print_insn (pc, info, little)
       if (status != 0 && is_thumb)
 	{
 	  info->bytes_per_chunk = 2;
+	  second_half_valid = 0;
 
 	  status = info->read_memory_func (pc, (bfd_byte *) b, 2, info);
 	  b[3] = b[2] = 0;
@@ -1315,10 +1318,10 @@ print_insn (pc, info, little)
   else
     {
       status = info->read_memory_func
-	(pc & ~ 0x3, (bfd_byte *) &b[0], 4, info);
+	(WORD_ADDRESS (pc), (bfd_byte *) &b[0], 4, info);
       if (status != 0)
 	{
-	  info->memory_error_func (status, pc, info);
+	  info->memory_error_func (status, WORD_ADDRESS (pc), info);
 	  return -1;
 	}
 
@@ -1329,14 +1332,11 @@ print_insn (pc, info, little)
 	      given = (b[2] << 8) | b[3];
 
 	      status = info->read_memory_func
-		((pc + 4) & ~ 0x3, (bfd_byte *) b, 4, info);
+		(WORD_ADDRESS (pc + 4), (bfd_byte *) b, 4, info);
 	      if (status != 0)
-		{
-		  info->memory_error_func (status, pc + 4, info);
-		  return -1;
-		}
-
-	      given |= (b[0] << 24) | (b[1] << 16);
+		second_half_valid = 0;
+	      else
+		given |= (b[0] << 24) | (b[1] << 16);
 	    }
 	  else
 	    given = (b[0] << 8) | b[1] | (b[2] << 24) | (b[3] << 16);
@@ -1357,6 +1357,12 @@ print_insn (pc, info, little)
     status = print_insn_thumb (pc, info, given);
   else
     status = print_insn_arm (pc, info, given);
+
+  if (is_thumb && status == 4 && second_half_valid == 0)
+    {
+      info->memory_error_func (status, WORD_ADDRESS (pc + 4), info);
+      return -1;
+    }
 
   return status;
 }

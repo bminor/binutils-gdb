@@ -78,8 +78,11 @@ arm_elf_set_bfd_for_interworking (lang_statement_union_type *statement)
 
       ASSERT (output_section->owner == output_bfd);
 
+      /* Don't attach the interworking stubs to a dynamic object, to
+	 an empty section, etc.  */
       if ((output_section->flags & SEC_HAS_CONTENTS) != 0
 	  && (i->flags & SEC_NEVER_LOAD) == 0
+	  && ! (i->owner->flags & DYNAMIC)
 	  && ! i->owner->output_has_begun)
 	{
 	  bfd_for_interwork = i->owner;

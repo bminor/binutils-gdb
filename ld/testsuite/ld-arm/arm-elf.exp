@@ -47,6 +47,16 @@ set armelftests {
     {"Non-pcrel function reference" "tmpdir/arm-lib.so" "" {arm-app-abs32.s}
      {{objdump -fdw arm-app-abs32.d} {objdump -Rw arm-app-abs32.r}}
      "arm-app-abs32"}
+    {"Mixed ARM/Thumb shared library" "-shared -T arm-lib.ld" ""
+     {mixed-lib.s}
+     {{objdump -fdw mixed-lib.d} {objdump -Rw mixed-lib.r}
+      {readelf -Ds mixed-lib.sym}}
+     "mixed-lib.so"}
+    {"Mixed ARM/Thumb dynamic application" "tmpdir/mixed-lib.so -T arm-dyn.ld" ""
+     {mixed-app.s}
+     {{objdump -fdw mixed-app.d} {objdump -Rw mixed-app.r}
+      {readelf -Ds mixed-app.sym}}
+     "mixed-app"}
     {"target1-abs" "-static --target1-abs -T arm.ld" "" {arm-target1.s}
      {{objdump -s arm-target1-abs.d}}
      "arm-target1-abs"}

@@ -1,3 +1,32 @@
+2004-11-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf32-arm.c (PLT_THUMB_STUB_SIZE): Define.
+	(elf32_arm_plt_thumb_stub): New.
+	(struct elf32_arm_link_hash_entry): Add plt_thumb_refcount
+	and plt_got_offset.
+	(elf32_arm_link_hash_traverse): Fix typo.
+	(elf32_arm_link_hash_table): Add obfd.
+	(elf32_arm_link_hash_newfunc): Initialize new fields.
+	(elf32_arm_copy_indirect_symbol): Copy plt_thumb_refcount.
+	(elf32_arm_link_hash_table_create): Initialize obfd.
+	(record_arm_to_thumb_glue): Mark the glue as a local ARM function.
+	(record_thumb_to_arm_glue): Mark the glue as a local Thumb function.
+	(bfd_elf32_arm_get_bfd_for_interworking): Verify that the
+	interworking BFD is not dynamic.
+	(bfd_elf32_arm_process_before_allocation): Handle R_ARM_PLT32.  Do
+	not emit glue for PLT references.
+	(elf32_arm_final_link_relocate): Handle Thumb functions.  Do not
+	emit glue for PLT references.  Support the Thumb PLT prefix.
+	(elf32_arm_gc_sweep_hook): Handle R_ARM_THM_PC22 and
+	plt_thumb_refcount.
+	(elf32_arm_check_relocs): Likewise.
+	(elf32_arm_adjust_dynamic_symbol): Handle Thumb functions and
+	plt_thumb_refcount.
+	(allocate_dynrelocs): Handle Thumb PLT references.
+	(elf32_arm_finish_dynamic_symbol): Likewise.
+	(elf32_arm_symbol_processing): New function.
+	(elf_backend_symbol_processing): Define.
+
 2004-11-16  Richard Sandiford  <rsandifo@redhat.com>
 
 	* elf-bfd.h (eh_cie_fde): Add new fields: add_augmentation_size and

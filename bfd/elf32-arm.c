@@ -1063,6 +1063,14 @@ static const bfd_vma elf32_arm_plt_entry [] =
 
 #endif
 
+/* An initial stub used if the PLT entry is referenced from Thumb code.  */
+#define PLT_THUMB_STUB_SIZE 4
+static const bfd_vma elf32_arm_plt_thumb_stub [] =
+  {
+    0x4778,		/* bx pc */
+    0x46c0		/* nop   */
+  };
+
 /* The entries in a PLT when using a DLL-based target with multiple
    address spaces.  */
 static const bfd_vma elf32_arm_symbian_plt_entry [] = 
@@ -1116,13 +1124,22 @@ struct elf32_arm_link_hash_entry
 
     /* Number of PC relative relocs copied for this symbol.  */
     struct elf32_arm_relocs_copied * relocs_copied;
+
+    /* We reference count Thumb references to a PLT entry separately,
+       so that we can emit the Thumb trampoline only if needed.  */
+    bfd_signed_vma plt_thumb_refcount;
+
+    /* Since PLT entries have variable size if the Thumb prologue is
+       used, we need to record the index into .got.plt instead of
+       recomputing it from the PLT offset.  */
+    bfd_signed_vma plt_got_offset;
   };
 
 /* Traverse an arm ELF linker hash table.  */
 #define elf32_arm_link_hash_traverse(table, func, info)			\
   (elf_link_hash_traverse						\
    (&(table)->root,							\
-    (bfd_boolean (*) (struct elf_link_hash_entry *, void *))) (func), \
+    (bfd_boolean (*) (struct elf_link_hash_entry *, void *)) (func),	\
     (info)))
 
 /* Get the ARM elf linker hash table from a link_info structure.  */
@@ -1178,6 +1195,9 @@ struct elf32_arm_link_hash_table
 
     /* Small local sym to section mapping cache.  */
     struct sym_sec_cache sym_sec;
+
+    /* For convenience in allocate_dynrelocs.  */
+    bfd * obfd;
   };
 
 /* Create an entry in an ARM ELF linker hash table.  */
@@ -1202,7 +1222,11 @@ elf32_arm_link_hash_newfunc (struct bfd_hash_entry * entry,
 	 _bfd_elf_link_hash_newfunc ((struct bfd_hash_entry *) ret,
 				     table, string));
   if (ret != NULL)
-    ret->relocs_copied = NULL;
+    {
+      ret->relocs_copied = NULL;
+      ret->plt_thumb_refcount = 0;
+      ret->plt_got_offset = -1;
+    }
 
   return (struct bfd_hash_entry *) ret;
 }
@@ -1315,6 +1339,17 @@ elf32_arm_copy_indirect_symbol (const struct elf_backend_data *bed,
       eind->relocs_copied = NULL;
     }
 
+  /* If the direct symbol already has an associated PLT entry, the
+     indirect symbol should not.  If it doesn't, swap refcount information
+     from the indirect symbol.  */
+  if (edir->plt_thumb_refcount == 0)
+    {
+      edir->plt_thumb_refcount = eind->plt_thumb_refcount;
+      eind->plt_thumb_refcount = 0;
+    }
+  else
+    BFD_ASSERT (eind->plt_thumb_refcount == 0);
+
   _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
 }
 
@@ -1360,6 +1395,7 @@ elf32_arm_link_hash_table_create (bfd *abfd)
 #endif
   ret->symbian_p = 0;
   ret->sym_sec.abfd = NULL;
+  ret->obfd = abfd;
 
   return &ret->root.root;
 }
@@ -1559,6 +1595,10 @@ record_arm_to_thumb_glue (struct bfd_link_info * link_info,
 				    tmp_name, BSF_GLOBAL, s, val,
 				    NULL, TRUE, FALSE, &bh);
 
+  myh = (struct elf_link_hash_entry *) bh;
+  myh->type = ELF_ST_INFO (STB_LOCAL, STT_FUNC);
+  myh->forced_local = 1;
+
   free (tmp_name);
 
   globals->arm_glue_size += ARM2THUMB_GLUE_SIZE;
@@ -1576,7 +1616,6 @@ record_thumb_to_arm_glue (struct bfd_link_info *link_info,
   struct elf_link_hash_entry *myh;
   struct bfd_link_hash_entry *bh;
   struct elf32_arm_link_hash_table *hash_table;
-  char bind;
   bfd_vma val;
 
   hash_table = elf32_arm_hash_table (link_info);
@@ -1614,8 +1653,8 @@ record_thumb_to_arm_glue (struct bfd_link_info *link_info,
 
   /* If we mark it 'Thumb', the disassembler will do a better job.  */
   myh = (struct elf_link_hash_entry *) bh;
-  bind = ELF_ST_BIND (myh->type);
-  myh->type = ELF_ST_INFO (bind, STT_ARM_TFUNC);
+  myh->type = ELF_ST_INFO (STB_LOCAL, STT_ARM_TFUNC);
+  myh->forced_local = 1;
 
   free (tmp_name);
 
@@ -1713,6 +1752,9 @@ bfd_elf32_arm_get_bfd_for_interworking (bfd *abfd, struct bfd_link_info *info)
   if (info->relocatable)
     return TRUE;
 
+  /* Make sure we don't attach the glue sections to a dynamic object.  */
+  BFD_ASSERT (!(abfd->flags & DYNAMIC));
+
   globals = elf32_arm_hash_table (info);
 
   BFD_ASSERT (globals != NULL);
@@ -1796,6 +1838,7 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
 
 	  /* These are the only relocation types we care about.  */
 	  if (   r_type != R_ARM_PC24
+	      && r_type != R_ARM_PLT32
 #ifndef OLD_ARM_ABI
 	      && r_type != R_ARM_CALL
 	      && r_type != R_ARM_JUMP24
@@ -1832,6 +1875,11 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
 	  /* If the relocation is against a static symbol it must be within
 	     the current section and so cannot be a cross ARM/Thumb relocation.  */
 	  if (h == NULL)
+	    continue;
+
+	  /* If the call will go through a PLT entry then we do not need
+	     glue.  */
+	  if (globals->splt != NULL && h->plt.offset != (bfd_vma) -1)
 	    continue;
 
 	  switch (r_type)
@@ -2374,6 +2422,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 
 	      /* This symbol is local, or marked to become local.  */
 	      relocate = TRUE;
+	      if (sym_flags == STT_ARM_TFUNC)
+		value |= 1;
 	      if (globals->symbian_p)
 		{
 		  /* On Symbian OS, the data segment and text segement
@@ -2652,8 +2702,11 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	  {
 	    /* If it is not a call to Thumb, assume call to Arm.
 	       If it is a call relative to a section name, then it is not a
-	       function call at all, but rather a long jump.  */
-	    if (sym_flags != STT_ARM_TFUNC && sym_flags != STT_SECTION)
+	       function call at all, but rather a long jump.  Calls through
+	       the PLT do not require stubs.  */
+	    if (sym_flags != STT_ARM_TFUNC && sym_flags != STT_SECTION
+		&& (h == NULL || splt == NULL
+		    || h->plt.offset == (bfd_vma) -1))
 	      {
 		if (elf32_thumb_to_arm_stub
 		    (info, sym_name, input_bfd, output_bfd, input_section,
@@ -2662,6 +2715,16 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		else
 		  return bfd_reloc_dangerous;
 	      }
+	  }
+
+	/* Handle calls via the PLT.  */
+	if (h != NULL && splt != NULL && h->plt.offset != (bfd_vma) -1)
+	  {
+	    value = (splt->output_section->vma
+		     + splt->output_offset
+		     + h->plt.offset);
+	    /* Target the Thumb stub before the ARM PLT entry.  */
+	    value -= 4;
 	  }
 
 	relocation = value + signed_addend;
@@ -2911,6 +2974,13 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	    off &= ~1;
 	  else
 	    {
+	      /* If we are addressing a Thumb function, we need to
+		 adjust the address by one, so that attempts to
+		 call the function pointer will correctly
+		 interpret it as Thumb code.  */
+	      if (sym_flags == STT_ARM_TFUNC)
+		value |= 1;
+
 	      bfd_put_32 (output_bfd, value, sgot->contents + off);
 
 	      if (info->shared)
@@ -3876,6 +3946,9 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd ATTRIBUTE_UNUSED,
 	case R_ARM_JUMP24:
 	case R_ARM_PREL31:
 #endif
+	case R_ARM_THM_PC22:
+	  /* Should the interworking branches be here also?  */
+
 	  r_symndx = ELF32_R_SYM (rel->r_info);
 	  if (r_symndx >= symtab_hdr->sh_info)
 	    {
@@ -3884,15 +3957,18 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd ATTRIBUTE_UNUSED,
 	      struct elf32_arm_relocs_copied *p;
 
 	      h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	      eh = (struct elf32_arm_link_hash_entry *) h;
 
 	      if (h->plt.refcount > 0)
-		h->plt.refcount -= 1;
+		{
+		  h->plt.refcount -= 1;
+		  if (ELF32_R_TYPE (rel->r_info) == R_ARM_THM_PC22)
+		    eh->plt_thumb_refcount--;
+		}
 
 	      if (r_type == R_ARM_ABS32
 		  || r_type == R_ARM_REL32)
 		{
-		  eh = (struct elf32_arm_link_hash_entry *) h;
-
 		  for (pp = &eh->relocs_copied; (p = *pp) != NULL;
 		       pp = &p->next)
 		  if (p->section == sec)
@@ -3951,6 +4027,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
   for (rel = relocs; rel < rel_end; rel++)
     {
       struct elf_link_hash_entry *h;
+      struct elf32_arm_link_hash_entry *eh;
       unsigned long r_symndx;
       int r_type;
 
@@ -3963,6 +4040,8 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
         h = NULL;
       else
         h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+
+      eh = (struct elf32_arm_link_hash_entry *) h;
 
       switch (r_type)
         {
@@ -4018,6 +4097,8 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  case R_ARM_JUMP24:
 	  case R_ARM_PREL31:
 #endif
+	  case R_ARM_THM_PC22:
+	    /* Should the interworking branches be listed here?  */
 	    if (h != NULL)
 	      {
 		/* If this reloc is in a read-only section, we might
@@ -4039,12 +4120,16 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		    || r_type == R_ARM_JUMP24
 		    || r_type == R_ARM_PREL31
 #endif
-		    || r_type == R_ARM_PLT32)
+		    || r_type == R_ARM_PLT32
+		    || r_type == R_ARM_THM_PC22)
 		  h->needs_plt = 1;
 
 		/* If we create a PLT entry, this relocation will reference
 		   it, even if it's an ABS32 relocation.  */
 		h->plt.refcount += 1;
+
+		if (r_type == R_ARM_THM_PC22)
+		  eh->plt_thumb_refcount += 1;
 	      }
 
 	    /* If we are creating a shared library, and this is a reloc
@@ -4068,7 +4153,8 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		     && r_type != R_ARM_JUMP24
 		     && r_type != R_ARM_PREL31
 #endif
-		     && r_type != R_ARM_REL32)
+		     && r_type != R_ARM_REL32
+		     && r_type != R_ARM_THM_PC22)
 		    || (h != NULL
 			&& (! info->symbolic
 			    || !h->def_regular))))
@@ -4317,6 +4403,7 @@ elf32_arm_adjust_dynamic_symbol (struct bfd_link_info * info,
   bfd * dynobj;
   asection * s;
   unsigned int power_of_two;
+  struct elf32_arm_link_hash_entry * eh;
 
   dynobj = elf_hash_table (info)->dynobj;
 
@@ -4328,10 +4415,12 @@ elf32_arm_adjust_dynamic_symbol (struct bfd_link_info * info,
 		      && h->ref_regular
 		      && !h->def_regular)));
 
+  eh = (struct elf32_arm_link_hash_entry *) h;
+
   /* If this is a function, put it in the procedure linkage table.  We
      will fill in the contents of the procedure linkage table later,
      when we know the address of the .got section.  */
-  if (h->type == STT_FUNC
+  if (h->type == STT_FUNC || h->type == STT_ARM_TFUNC
       || h->needs_plt)
     {
       if (h->plt.refcount <= 0
@@ -4345,18 +4434,22 @@ elf32_arm_adjust_dynamic_symbol (struct bfd_link_info * info,
 	     such a case, we don't actually need to build a procedure
 	     linkage table, and we can just do a PC24 reloc instead.  */
 	  h->plt.offset = (bfd_vma) -1;
+	  eh->plt_thumb_refcount = 0;
 	  h->needs_plt = 0;
 	}
 
       return TRUE;
     }
   else
-    /* It's possible that we incorrectly decided a .plt reloc was
-       needed for an R_ARM_PC24 or similar reloc to a non-function sym
-       in check_relocs.  We can't decide accurately between function
-       and non-function syms in check-relocs; Objects loaded later in
-       the link may change h->type.  So fix it now.  */
-    h->plt.offset = (bfd_vma) -1;
+    {
+      /* It's possible that we incorrectly decided a .plt reloc was
+	 needed for an R_ARM_PC24 or similar reloc to a non-function sym
+	 in check_relocs.  We can't decide accurately between function
+	 and non-function syms in check-relocs; Objects loaded later in
+	 the link may change h->type.  So fix it now.  */
+      h->plt.offset = (bfd_vma) -1;
+      eh->plt_thumb_refcount = 0;
+    }
 
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
@@ -4441,6 +4534,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   struct elf32_arm_link_hash_entry *eh;
   struct elf32_arm_relocs_copied *p;
 
+  eh = (struct elf32_arm_link_hash_entry *) h;
+
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
 
@@ -4477,6 +4572,14 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 
 	  h->plt.offset = s->size;
 
+	  /* If we will insert a Thumb trampoline before this PLT, leave room
+	     for it.  */
+	  if (!htab->symbian_p && eh->plt_thumb_refcount > 0)
+	    {
+	      h->plt.offset += PLT_THUMB_STUB_SIZE;
+	      s->size += PLT_THUMB_STUB_SIZE;
+	    }
+
 	  /* If this symbol is not defined in a regular file, and we are
 	     not generating a shared library, then set the symbol to this
 	     location in the .plt.  This is required to make function
@@ -4487,15 +4590,24 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	    {
 	      h->root.u.def.section = s;
 	      h->root.u.def.value = h->plt.offset;
+
+	      /* Make sure the function is not marked as Thumb, in case
+		 it is the target of an ABS32 relocation, which will
+		 point to the PLT entry.  */
+	      if (ELF_ST_TYPE (h->type) == STT_ARM_TFUNC)
+		h->type = ELF_ST_INFO (ELF_ST_BIND (h->type), STT_FUNC);
 	    }
 
 	  /* Make room for this entry.  */
 	  s->size += htab->plt_entry_size;
 
 	  if (!htab->symbian_p)
-	    /* We also need to make an entry in the .got.plt section, which
-	       will be placed in the .got section by the linker script.  */
-	    htab->sgotplt->size += 4;
+	    {
+	      /* We also need to make an entry in the .got.plt section, which
+		 will be placed in the .got section by the linker script.  */
+	      eh->plt_got_offset = htab->sgotplt->size;
+	      htab->sgotplt->size += 4;
+	    }
 
 	  /* We also need to make an entry in the .rel.plt section.  */
 	  htab->srelplt->size += sizeof (Elf32_External_Rel);
@@ -4542,7 +4654,6 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   else
     h->got.offset = (bfd_vma) -1;
 
-  eh = (struct elf32_arm_link_hash_entry *) h;
   if (eh->relocs_copied == NULL)
     return TRUE;
 
@@ -4867,9 +4978,11 @@ elf32_arm_finish_dynamic_symbol (bfd * output_bfd, struct bfd_link_info * info,
 {
   bfd * dynobj;
   struct elf32_arm_link_hash_table *htab;
+  struct elf32_arm_link_hash_entry *eh;
 
   dynobj = elf_hash_table (info)->dynobj;
   htab = elf32_arm_hash_table (info);
+  eh = (struct elf32_arm_link_hash_entry *) h;
 
   if (h->plt.offset != (bfd_vma) -1)
     {
@@ -4888,13 +5001,6 @@ elf32_arm_finish_dynamic_symbol (bfd * output_bfd, struct bfd_link_info * info,
       srel = bfd_get_section_by_name (dynobj, ".rel.plt");
       BFD_ASSERT (splt != NULL && srel != NULL);
 
-      /* Get the index in the procedure linkage table which
-	 corresponds to this symbol.  This is the index of this symbol
-	 in all the symbols for which we are making plt entries.  The
-	 first entry in the procedure linkage table is reserved.  */
-      plt_index = ((h->plt.offset - htab->plt_header_size) 
-		   / htab->plt_entry_size);
-
       /* Fill in the entry in the procedure linkage table.  */
       if (htab->symbian_p)
 	{
@@ -4909,6 +5015,13 @@ elf32_arm_finish_dynamic_symbol (bfd * output_bfd, struct bfd_link_info * info,
 			  + splt->output_offset
 			  + h->plt.offset + 4 * (i - 1));
 	  rel.r_info = ELF32_R_INFO (h->dynindx, R_ARM_GLOB_DAT);
+
+	  /* Get the index in the procedure linkage table which
+	     corresponds to this symbol.  This is the index of this symbol
+	     in all the symbols for which we are making plt entries.  The
+	     first entry in the procedure linkage table is reserved.  */
+	  plt_index = ((h->plt.offset - htab->plt_header_size) 
+		       / htab->plt_entry_size);
 	}
       else
 	{
@@ -4919,13 +5032,21 @@ elf32_arm_finish_dynamic_symbol (bfd * output_bfd, struct bfd_link_info * info,
 	  sgot = bfd_get_section_by_name (dynobj, ".got.plt");
 	  BFD_ASSERT (sgot != NULL);
 
-	  /* Get the offset into the .got table of the entry that
-	     corresponds to this function.  Each .got entry is 4 bytes.
-	     The first three are reserved.  */
-	  got_offset = (plt_index + 3) * 4;
+	  /* Get the offset into the .got.plt table of the entry that
+	     corresponds to this function.  */
+	  got_offset = eh->plt_got_offset;
+
+	  /* Get the index in the procedure linkage table which
+	     corresponds to this symbol.  This is the index of this symbol
+	     in all the symbols for which we are making plt entries.  The
+	     first three entries in .got.plt are reserved; after that
+	     symbols appear in the same order as in .plt.  */
+	  plt_index = (got_offset - 12) / 4;
 
 	  /* Calculate the displacement between the PLT slot and the
-	     entry in the GOT.  */
+	     entry in the GOT.  The eight-byte offset accounts for the
+	     value produced by adding to pc in the first instruction
+	     of the PLT stub.  */
 	  got_displacement = (sgot->output_section->vma
 			      + sgot->output_offset
 			      + got_offset
@@ -4935,6 +5056,14 @@ elf32_arm_finish_dynamic_symbol (bfd * output_bfd, struct bfd_link_info * info,
 			      - 8);
 
 	  BFD_ASSERT ((got_displacement & 0xf0000000) == 0);
+
+	  if (eh->plt_thumb_refcount > 0)
+	    {
+	      bfd_put_16 (output_bfd, elf32_arm_plt_thumb_stub[0],
+			  splt->contents + h->plt.offset - 4);
+	      bfd_put_16 (output_bfd, elf32_arm_plt_thumb_stub[1],
+			  splt->contents + h->plt.offset - 2);
+	    }
 
 	  bfd_put_32 (output_bfd, elf32_arm_plt_entry[0] | ((got_displacement & 0x0ff00000) >> 20),
 		      splt->contents + h->plt.offset + 0);
@@ -5521,6 +5650,18 @@ elf32_arm_write_section (bfd *output_bfd ATTRIBUTE_UNUSED, asection *sec,
   return FALSE;
 }
 
+/* Display STT_ARM_TFUNC symbols as functions.  */
+
+static void
+elf32_arm_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
+			     asymbol *asym)
+{
+  elf_symbol_type *elfsym = (elf_symbol_type *) asym;
+
+  if (ELF_ST_TYPE (elfsym->internal_elf_sym.st_info) == STT_ARM_TFUNC)
+    elfsym->symbol.flags |= BSF_FUNCTION;
+}
+
 #define ELF_ARCH			bfd_arch_arm
 #define ELF_MACHINE_CODE		EM_ARM
 #ifdef __QNXTARGET__
@@ -5559,6 +5700,7 @@ elf32_arm_write_section (bfd *output_bfd ATTRIBUTE_UNUSED, asection *sec,
 #define elf_backend_section_from_shdr  		elf32_arm_section_from_shdr
 #define elf_backend_final_write_processing      elf32_arm_final_write_processing
 #define elf_backend_copy_indirect_symbol        elf32_arm_copy_indirect_symbol
+#define elf_backend_symbol_processing		elf32_arm_symbol_processing
 
 #define elf_backend_can_refcount    1
 #define elf_backend_can_gc_sections 1
@@ -5691,4 +5833,3 @@ elf32_arm_symbian_modify_segment_map (bfd *abfd,
 #define elf_backend_want_got_plt 0
 
 #include "elf32-target.h"
-

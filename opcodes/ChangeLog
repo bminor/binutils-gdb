@@ -1,3 +1,8 @@
+2004-11-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arm-dis.c (WORD_ADDRESS): Define.
+	(print_insn): Use it.  Correct big-endian end-of-section handling.
+
 2004-11-08  Inderpreet Singh   <inderpreetb@nioda.hcltech.com>
 	    Vineet Sharma      <vineets@noida.hcltech.com>
 

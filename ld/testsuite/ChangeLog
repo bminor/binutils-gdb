@@ -1,3 +1,15 @@
+2004-11-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ld-arm/mixed-app.d, ld-arm/mixed-app.r, ld-arm/mixed-app.s,
+	ld-arm/mixed-app.sym, ld-arm/mixed-lib.d, ld-arm/mixed-lib.r,
+	ld-arm/mixed-lib.s, ld-arm/mixed-lib.sym, ld-arm/arm-dyn.ld,
+	ld-arm/arm-lib.ld: New files.
+	* ld-arm/arm-app-abs32.d, ld-arm/arm-app-abs32.r, ld-arm/arm-app.d,
+	ld-arm/arm-app.r, ld-arm/arm-lib-plt32.d, ld-arm/arm-lib-plt32.r,
+	ld-arm/arm-lib.d, ld-arm/arm-lib.r, ld-arm/arm-static-app.d,
+	ld-arm/arm-static-app.r: Update for big-endian.
+	* ld-arm/arm-elf.exp: Run the new tests.
+
 2004-11-16  Richard Sandiford  <rsandifo@redhat.com>
 
 	* ld-mips-elf/eh-frame1.{s,ld},

@@ -1,3 +1,8 @@
+2004-11-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gas/arm/mapping.d: Expect F markers for Thumb code.
+	* gas/arm/unwind.d: Update big-endian pattern.
+
 2004-11-12  Nick Clifton  <nickc@redhat.com>
 
 	* gas/mn10300/basic.exp: Add relax test.
