@@ -1,5 +1,9 @@
 2000-11-28  Hans-Peter Nilsson  <hp@axis.com>
 
+	* Makefile.am (CPU_OBJ_VALID): Add case to filter out invalid coff
+	targets.  Remove i860 from valid a.out targets.
+	* Makefile.in: Regenerate.
+
 	* config/tc-cris.c: Include dwarf2dbg.h.
  	(md_pseudo_table): Add .file and .loc.
 	(md_assemble): Call dwarf2_emit_insn if generating ELF.

@@ -213,14 +213,18 @@ CPU_OBJ_VALID = \
 	case $$o in \
 	aout) \
 	  case $$c in \
-	  a29k | arm | cris | i386 | i860 | m68k | mips | ns32k | sparc | tahoe | tic30 | vax) \
+	  a29k | arm | cris | i386 | m68k | mips | ns32k | sparc | tahoe | tic30 | vax) \
 	    valid=yes ;; \
 	  esac ;; \
 	bout) \
 	  case $$c in \
 	  i960) valid=yes ;; \
 	  esac ;; \
-	coff) valid=yes ;; \
+	coff) valid=yes; \
+	  case $$c in \
+	  cris | i860) \
+	    valid= ;; \
+	  esac ;; \
 	ecoff) \
 	  case $$c in \
 	  mips | alpha) valid=yes ;; \
@@ -690,11 +694,6 @@ DEPTC_cris_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-cris.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h subsegs.h $(INCDIR)/obstack.h \
   $(INCDIR)/opcode/cris.h dwarf2dbg.h
 
-DEPTC_cris_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-cris.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/cris.h \
-  dwarf2dbg.h
-
 DEPTC_cris_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-cris.h subsegs.h \
@@ -1144,10 +1143,6 @@ DEPOBJ_cris_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-cris.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/obstack.h
 
-DEPOBJ_cris_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-cris.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/obstack.h subsegs.h
-
 DEPOBJ_cris_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-cris.h subsegs.h \
@@ -1549,9 +1544,6 @@ DEP_avr_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
 
 DEP_cris_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-cris.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h
-
-DEP_cris_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-cris.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
 
 DEP_cris_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
