@@ -1,6 +1,6 @@
 #objdump: -Dr
 
-.* elf32-frv
+.* elf32-frv(|fdpic)
 
 Disassembly.*\.text:
 

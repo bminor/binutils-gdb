@@ -1,7 +1,7 @@
 #as: -mcpu=fr450
 #objdump: -dr
 
-.*:     file format elf32-frv
+.*:     file format elf32-frv(|fdpic)
 
 Disassembly of section \.text:
 
