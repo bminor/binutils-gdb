@@ -1,3 +1,11 @@
+2005-02-16  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (load_address): Fix formatting.
+	(macro): Don't use AT if .set noat is in effect. Fix formatting.
+	Catch macros which are unexpandable without AT. Remove duplicate
+	zeroing of used_at.
+	(macro2): Remove duplicate zeroing of used_at.
+
 2005-02-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* dw2gencfi.c (output_cie, output_fde): Use DW_CFA_nop rather

@@ -3877,7 +3877,7 @@ load_address (int reg, expressionS *ep, int *used_at)
 	     It used not to be possible with the original relaxation code,
 	     but it could be done now.  */
 
-	  if (*used_at == 0 && ! mips_opts.noat)
+	  if (*used_at == 0 && !mips_opts.noat)
 	    {
 	      macro_build (ep, "lui", "t,u", reg, BFD_RELOC_MIPS_HIGHEST);
 	      macro_build (ep, "lui", "t,u", AT, BFD_RELOC_HI16_S);
@@ -4907,7 +4907,7 @@ macro (struct mips_cl_insn *ip)
 	  return;
 	}
 
-      if (treg == breg)
+      if (!mips_opts.noat && (treg == breg))
 	{
 	  tempreg = AT;
 	  used_at = 1;
@@ -4915,7 +4915,6 @@ macro (struct mips_cl_insn *ip)
       else
 	{
 	  tempreg = treg;
-	  used_at = 0;
 	}
 
       if (offset_expr.X_op != O_symbol
@@ -4963,7 +4962,7 @@ macro (struct mips_cl_insn *ip)
 		 these macros.  It used not to be possible with the
 		 original relaxation code, but it could be done now.  */
 
-	      if (used_at == 0 && ! mips_opts.noat)
+	      if (used_at == 0 && !mips_opts.noat)
 		{
 		  macro_build (&offset_expr, "lui", "t,u",
 			       tempreg, BFD_RELOC_MIPS_HIGHEST);
@@ -5484,7 +5483,7 @@ macro (struct mips_cl_insn *ip)
 	  macro_build (NULL, s, "d,v,t", treg, tempreg, breg);
 	}
 
-      if (! used_at)
+      if (!used_at)
 	return;
 
       break;
@@ -5762,10 +5761,18 @@ macro (struct mips_cl_insn *ip)
     case M_LWU_AB:
       s = "lwu";
     ld:
-      if (breg == treg || coproc || lr)
+      /* XXX Why don't we try to use AT for all expansions? */
+      if (!mips_opts.noat && (breg == treg || coproc || lr))
 	{
 	  tempreg = AT;
 	  used_at = 1;
+	}
+      else if (breg == treg
+	       && (offset_expr.X_op != O_constant
+		   || (offset_expr.X_add_number > 0x7fff
+		       || offset_expr.X_add_number < -0x8000)))
+	{
+	  as_bad(_("load expansion needs $at register"));
 	}
       else
 	{
@@ -5840,8 +5847,23 @@ macro (struct mips_cl_insn *ip)
     case M_SDR_AB:
       s = "sdr";
     st:
-      tempreg = AT;
-      used_at = 1;
+      if (!mips_opts.noat)
+	{
+	  tempreg = AT;
+	  used_at = 1;
+	}
+      else if (breg == treg
+	       && (offset_expr.X_op != O_constant
+		   || (offset_expr.X_add_number > 0x7fff
+		       || offset_expr.X_add_number < -0x8000)))
+	{
+	  as_bad(_("store expansion needs $at register"));
+	}
+      else
+	{
+	  tempreg = treg;
+	  used_at = 0;
+	}
     ld_st:
       /* Itbl support may require additional care here.  */
       if (mask == M_LWC1_AB
@@ -5973,7 +5995,7 @@ macro (struct mips_cl_insn *ip)
 		 these macros.  It used not to be possible with the
 		 original relaxation code, but it could be done now.  */
 
-	      if (used_at == 0 && ! mips_opts.noat)
+	      if (used_at == 0 && !mips_opts.noat)
 		{
 		  macro_build (&offset_expr, "lui", "t,u", tempreg,
 			       BFD_RELOC_MIPS_HIGHEST);
@@ -6006,6 +6028,9 @@ macro (struct mips_cl_insn *ip)
 			       BFD_RELOC_LO16, tempreg);
 		}
 
+	      if (used_at)
+		break;
+
 	      return;
 	    }
 
@@ -6022,7 +6047,6 @@ macro (struct mips_cl_insn *ip)
 		  macro_build (&offset_expr, s, fmt, treg, BFD_RELOC_GPREL16,
 			       mips_gp_register);
 		  relax_switch ();
-		  used_at = 0;
 		}
 	      macro_build_lui (&offset_expr, tempreg);
 	      macro_build (&offset_expr, s, fmt, treg,
@@ -6086,7 +6110,7 @@ macro (struct mips_cl_insn *ip)
 	      macro_build (&offset_expr, s, fmt, treg,
 			   BFD_RELOC_MIPS_GOT_OFST, tempreg);
 
-	      if (! used_at)
+	      if (!used_at)
 		return;
 
 	      break;
@@ -6200,7 +6224,7 @@ macro (struct mips_cl_insn *ip)
       else
 	abort ();
 
-      if (! used_at)
+      if (!used_at)
 	return;
 
       break;
@@ -6504,7 +6528,6 @@ macro (struct mips_cl_insn *ip)
 	      if (breg == 0)
 		{
 		  tempreg = mips_gp_register;
-		  used_at = 0;
 		}
 	      else
 		{
@@ -6690,7 +6713,7 @@ macro (struct mips_cl_insn *ip)
       else
 	abort ();
 
-      if (! used_at)
+      if (!used_at)
 	return;
 
       break;
@@ -6897,7 +6920,6 @@ macro2 (struct mips_cl_insn *ip)
 	  else
 	    {
 	      tempreg = dreg;
-	      used_at = 0;
 	    }
 	  macro_build (NULL, "dnegu", "d,w", tempreg, treg);
 	  macro_build (NULL, "drorv", "d,t,s", dreg, sreg, tempreg);
@@ -6922,7 +6944,6 @@ macro2 (struct mips_cl_insn *ip)
 	  else
 	    {
 	      tempreg = dreg;
-	      used_at = 0;
 	    }
 	  macro_build (NULL, "negu", "d,w", tempreg, treg);
 	  macro_build (NULL, "rorv", "d,t,s", dreg, sreg, tempreg);
@@ -7113,7 +7134,6 @@ macro2 (struct mips_cl_insn *ip)
 	  && imm_expr.X_add_number < 0x10000)
 	{
 	  macro_build (&imm_expr, "xori", "t,r,i", dreg, sreg, BFD_RELOC_LO16);
-	  used_at = 0;
 	}
       else if (imm_expr.X_op == O_constant
 	       && imm_expr.X_add_number > -0x8000
@@ -7122,7 +7142,6 @@ macro2 (struct mips_cl_insn *ip)
 	  imm_expr.X_add_number = -imm_expr.X_add_number;
 	  macro_build (&imm_expr, HAVE_32BIT_GPRS ? "addiu" : "daddiu",
 		       "t,r,j", dreg, sreg, BFD_RELOC_LO16);
-	  used_at = 0;
 	}
       else
 	{
@@ -7153,7 +7172,6 @@ macro2 (struct mips_cl_insn *ip)
 	{
 	  macro_build (&imm_expr, mask == M_SGE_I ? "slti" : "sltiu", "t,r,j",
 		       dreg, sreg, BFD_RELOC_LO16);
-	  used_at = 0;
 	}
       else
 	{
@@ -7263,7 +7281,6 @@ macro2 (struct mips_cl_insn *ip)
 	  && imm_expr.X_add_number < 0x10000)
 	{
 	  macro_build (&imm_expr, "xori", "t,r,i", dreg, sreg, BFD_RELOC_LO16);
-	  used_at = 0;
 	}
       else if (imm_expr.X_op == O_constant
 	       && imm_expr.X_add_number > -0x8000
@@ -7272,7 +7289,6 @@ macro2 (struct mips_cl_insn *ip)
 	  imm_expr.X_add_number = -imm_expr.X_add_number;
 	  macro_build (&imm_expr, HAVE_32BIT_GPRS ? "addiu" : "daddiu",
 		       "t,r,j", dreg, sreg, BFD_RELOC_LO16);
-	  used_at = 0;
 	}
       else
 	{
