@@ -111,7 +111,7 @@ install-dir.info:
 
 # clib send_pr
 #	all-libgcc
-all.normal: .stmp-libiberty .stmp-texinfo .stmp-bison .stmp-byacc
+all.normal: .stmp-libiberty .stmp-texinfo .stmp-bison .stmp-byacc \
 	.stmp-bfd .stmp-ld .stmp-gas .stmp-gcc .stmp-binutils \
 	.stmp-libg++ .stmp-readline .stmp-gdb .stmp-make .stmp-cvs \
 	.stmp-grep .stmp-patch .stmp-emacs .stmp-ispell .stmp-fileutils \
