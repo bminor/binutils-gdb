@@ -114,8 +114,8 @@ typedef unsigned HOST_64_BIT uint64_type;
 #if !defined (uint64_type) && defined (__GNUC__)
 #define uint64_type unsigned long long
 #define int64_type long long
-#define uint64_typeLOW(x) (unsigned long)(((x) & 0xffffffff))
-#define uint64_typeHIGH(x) (unsigned long)(((x) >> 32) & 0xffffffff)
+#define uint64_typeLOW(x) ((unsigned long)(((x) & 0xffffffff)))
+#define uint64_typeHIGH(x) ((unsigned long)(((x) >> 32) & 0xffffffff))
 #endif
 
 typedef unsigned HOST_64_BIT bfd_vma;
@@ -123,9 +123,9 @@ typedef HOST_64_BIT bfd_signed_vma;
 typedef unsigned HOST_64_BIT bfd_size_type;
 typedef unsigned HOST_64_BIT symvalue;
 #define fprintf_vma(s,x) \
-		fprintf(s,"%08x%08x", uint64_typeHIGH(x), uint64_typeLOW(x))
+		fprintf(s,"%08lx%08lx", uint64_typeHIGH(x), uint64_typeLOW(x))
 #define sprintf_vma(s,x) \
-		sprintf(s,"%08x%08x", uint64_typeHIGH(x), uint64_typeLOW(x))
+		sprintf(s,"%08lx%08lx", uint64_typeHIGH(x), uint64_typeLOW(x))
 #else /* not BFD64  */
 
 /* Represent a target address.  Also used as a generic unsigned type
