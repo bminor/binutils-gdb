@@ -1,3 +1,8 @@
+Thu Jun 27 20:39:40 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* config/tc-mips.c (append_insn): Parenthesize
+	cop_interlocks expressions.
+
 Thu Jun 27 12:18:26 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* as.h (struct frag): Remove unused align_mask and align_offset
