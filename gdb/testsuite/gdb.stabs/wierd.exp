@@ -218,8 +218,14 @@ if ![file exists $binfile] then {
 	# xcoffread.c wrongly bitches about the lack of a text section.
 	setup_xfail "rs*-*-aix*"
 	send "file $binfile\n"
+	# If $binfile is very long, a \r (but not a \n) will echo in the
+	# middle of the echo of the command.  So to match the echo, we
+	# would like to match anything not containing \n
+	# (we would prefer to be sure not to match any warning message).
+	# But \[^\n\]* doesn't seem to work, so instead use the heuristic
+	# that a filename won't contain a space and a warning message will.
 	expect {
-		-re "^file $binfile\r*\nReading symbols from $binfile\.\.\.done\.\r*\n$prompt $" {
+		-re "^file \[^ \]*\r*\nReading symbols from $binfile\.\.\.done\.\r*\n$prompt $" {
 			pass "wierd.o read without error"
 		}
 		-re ".*$prompt $" {
