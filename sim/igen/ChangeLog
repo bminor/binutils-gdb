@@ -1,3 +1,10 @@
+2002-03-23  Andrew Cagney  <ac131313@redhat.com>
+
+ 	* gen.c (format_name_cmp): New function.
+	(insn_list_insert): Use the instruction field name as an
+	additional key.  Different field names indicate different
+	semantics.
+
 2002-03-07  Chris Demetriou  <cgd@broadcom.com>
 
 	* igen.c (print_itrace_format): Add support for a new "%#lx" format.
