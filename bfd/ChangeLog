@@ -1,3 +1,9 @@
+1998-12-01  Ulrich Drepper  <drepper@cygnus.com>
+
+	* elf32-i386.c (i386_check_relocs) [R_386_32]: Don't emit
+	relocation for section which does not get loaded.
+	(elf_i386_relocate_section) [R_386_32]: Likewise.
+
 Tue Dec  1 11:33:33 1998  Jim Wilson  <wilson@cygnus.com>
 
 	* coff-h8300.c (h8300_bfd_link_add_symbols): Make reloc_size,
@@ -45,10 +51,10 @@ Tue Nov 24 10:25:27 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-v850.c (v850_elf_relocate_section): Reset hi16s reloc
 	chain to empty.
-	
+
 	The following changes are based on a patch submitted by Gianluca
 	Moro <glctr@abc.it>:
-	
+
 	(v850_elf_perform_relocation): Only update a hi16s reloc if it has
 	not already been updated.
 	(find_remembered_hi16s_reloc): New parameter 'already_found'
@@ -71,7 +77,7 @@ Tue Nov 24 10:25:27 1998  Nick Clifton  <nickc@cygnus.com>
 Fri Nov 20 14:21:36 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-fr30.c (fr30_elf_relocate_section): Remove spurious
-	warnings. 
+	warnings.
 
 Thu Nov 19 14:42:15 1998  Geoffrey Noer  <noer@cygnus.com>
 
@@ -148,7 +154,7 @@ Tue Nov 10 13:37:36 1998  Felix Lee  <flee@cygnus.com>
  	BFD_HAVE_SYS_PROCFS_TYPE_MEMBER): didn't define macro when value
  	was cached.
 	* aclocal.m4, configure: regenerated.
-	
+
 Tue Nov 10 14:31:01 1998  Catherine Moore  <clm@cygnus.com>
 
         * elf32-d10v.c (reloc_type):  Add R_D10V_GNU_VTINHERIT and
@@ -178,13 +184,13 @@ Wed Nov  4 15:58:48 1998  Nick Clifton  <nickc@cygnus.com>
 	* config.bfd: Add support for FR30.
 	* configure.in: Add support for FR30.
 	* reloc.c: Add support for FR30 relocations.
-	* targets.c: Add support for FR30 relocations.	
+	* targets.c: Add support for FR30 relocations.
 	* bfd-in2.h: Regenerate.
 	* configure: Regenerate.
 	* libbfd.h:  Regenerate.
 	* cpu-fr30.c: New file.
 	* elf32-fr30.c: New file.
-	
+
 Mon Nov  2 14:59:33 1998  Geoffrey Noer  <noer@cygnus.com>
 
 	* configure.in: detect cygwin* instead of cygwin32*
