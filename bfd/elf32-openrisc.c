@@ -469,11 +469,11 @@ openrisc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 static asection *
 openrisc_elf_gc_mark_hook (abfd, info, rel, h, sym)
-     bfd *abfd ATTRIBUTE_UNUSED;
+     bfd *abfd;
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
-     Elf_Internal_Rela *rel ATTRIBUTE_UNUSED;
-     struct elf_link_hash_entry *h ATTRIBUTE_UNUSED;
-     Elf_Internal_Sym *sym ATTRIBUTE_UNUSED;
+     Elf_Internal_Rela *rel;
+     struct elf_link_hash_entry *h;
+     Elf_Internal_Sym *sym;
 {
   if (h != NULL)
     {

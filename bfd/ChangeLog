@@ -1,3 +1,11 @@
+2002-06-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-openrisc.c (openrisc_elf_gc_mark_hook): Remove
+	ATTRIBUTE_UNUSED on used params.
+	* elf32-vax.c (elf_vax_gc_mark_hook): Remove unnecessary checks
+	before calling bfd_section_from_elf_index on local syms.
+	* elf64-sh64.c (sh_elf64_gc_mark_hook): Likewise.
+
 2002-06-04  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* Makefile.am (BFD32_BACKENDS): Add elf32-sh64-nbsd.lo.

@@ -2481,11 +2481,7 @@ sh_elf64_gc_mark_hook (abfd, info, rel, h, sym)
     }
   else
     {
-      if (!(elf_bad_symtab (abfd)
-	    && ELF_ST_BIND (sym->st_info) != STB_LOCAL)
-	  && ! ((sym->st_shndx <= 0 || sym->st_shndx >= SHN_LORESERVE)
-		&& sym->st_shndx != SHN_COMMON))
-	return bfd_section_from_elf_index (abfd, sym->st_shndx);
+      return bfd_section_from_elf_index (abfd, sym->st_shndx);
     }
 
   return NULL;
