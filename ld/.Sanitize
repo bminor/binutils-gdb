@@ -56,6 +56,8 @@ configure.bat
 configure.host
 configure.in
 configure.tgt
+deffile.h
+deffilep.y
 dep-in.sed
 emulparams
 emultempl
@@ -98,6 +100,7 @@ mpw-idtmips.c
 mpw-make.sed
 mri.c
 mri.h
+pe-dll.c
 po
 scripttempl
 stamp-h.in

@@ -7,8 +7,10 @@
 # following shell variables:
 #  targ_emul		name of linker emulation to use
 #  targ_extra_emuls	additional linker emulations to provide
+#  targ_extra_ofiles	additional objects needed by the emulation
 
 targ_extra_emuls=
+targ_extra_ofiles=
 
 case "${targ}" in
 arm-*-pe)		targ_emul=armpe ;;
@@ -99,7 +101,8 @@ i[3456]86-*-msdos*)	targ_emul=i386msdos; targ_extra_emuls=i386aout ;;
 i[3456]86-*-moss*)	targ_emul=i386moss; targ_extra_emuls=i386msdos ;;
 i[3456]86-*-winnt*)	targ_emul=i386pe ;;
 i[3456]86-*-pe)		targ_emul=i386pe ;;
-i[3456]86-*-cygwin32*)	targ_emul=i386pe ;;
+i[3456]86-*-cygwin32*)	targ_emul=i386pe ;
+			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 i[3456]86-*-mingw32*)	targ_emul=i386pe ;;
 # start-sanitize-beos
 i[3456]86-*-beospe*)    targ_emul=i386beos ;;

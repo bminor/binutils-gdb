@@ -5,7 +5,7 @@ AC_INIT(ldmain.c)
 
 AC_CANONICAL_SYSTEM
 
-AM_INIT_AUTOMAKE(ld, 2.9.1)
+AM_INIT_AUTOMAKE(ld, 2.9.4)
 
 AM_PROG_LIBTOOL
 
@@ -73,6 +73,7 @@ BFD_NEED_DECLARATION(getenv)
 all_targets=
 EMUL=
 all_emuls=
+all_emul_extras=
 
 dnl We need to get an arbitrary number of tdir definitions into
 dnl Makefile.  We can't do it using AC_SUBST, because autoconf does
@@ -110,6 +111,15 @@ do
 	  ;;
 	esac
     done
+
+    for i in $targ_extra_ofiles; do
+	case " $all_emul_extras " in
+	*" ${i} "*) ;;
+	*)
+	  all_emul_extras="$all_emul_extras ${i}"
+	  ;;
+	esac
+    done
   fi
 done
 
@@ -127,10 +137,13 @@ if test x${all_targets} = xtrue; then
   else
     EMULATION_OFILES='$(ALL_EMULATIONS)'
   fi
+  EMUL_EXTRA_OFILES=''
 else
   EMULATION_OFILES=$all_emuls
+  EMUL_EXTRA_OFILES=$all_emul_extras
 fi
 AC_SUBST(EMULATION_OFILES)
+AC_SUBST(EMUL_EXTRA_OFILES)
 
 if test x${enable_static} = xno; then
   TESTBFDLIB="--rpath ../bfd/.libs ../bfd/.libs/libbfd.so"

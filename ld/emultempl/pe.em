@@ -42,6 +42,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "ldfile.h"
 #include "coff/internal.h"
 #include "../bfd/libcoff.h"
+#include "deffile.h"
 
 #define TARGET_IS_${EMULATION_NAME}
 
@@ -60,6 +61,14 @@ static int gld_${EMULATION_NAME}_parse_args PARAMS ((int, char **));
 static struct internal_extra_pe_aouthdr pe;
 static int dll;
 static int support_old_code = 0;
+def_file *pe_def_file = 0;
+static lang_assignment_statement_type *image_base_statement = 0;
+
+static char *pe_out_def_filename = 0;
+int pe_dll_export_everything = 0;
+int pe_dll_do_default_excludes = 1;
+int pe_dll_kill_ats = 0;
+int pe_dll_stdcall_aliases = 0;
 
 extern const char *output_filename;
 
@@ -68,6 +77,9 @@ gld_${EMULATION_NAME}_before_parse()
 {
   output_filename = "a.exe";
   ldfile_output_architecture = bfd_arch_${ARCH};
+#ifdef TARGET_IS_i386pe
+  config.has_shared = 1;
+#endif
 }
 
 /* PE format extra command line options.  */
@@ -88,6 +100,11 @@ gld_${EMULATION_NAME}_before_parse()
 #define OPTION_SUBSYSTEM                (OPTION_STACK + 1)
 #define OPTION_HEAP			(OPTION_SUBSYSTEM + 1)
 #define OPTION_SUPPORT_OLD_CODE		(OPTION_HEAP + 1)
+#define OPTION_OUT_DEF			(OPTION_SUPPORT_OLD_CODE + 1)
+#define OPTION_EXPORT_ALL		(OPTION_OUT_DEF + 1)
+#define OPTION_EXCLUDE_SYMBOLS		(OPTION_EXPORT_ALL + 1)
+#define OPTION_KILL_ATS			(OPTION_EXCLUDE_SYMBOLS + 1)
+#define OPTION_STDCALL_ALIASES		(OPTION_KILL_ATS + 1)
 
 static struct option longopts[] =
 {
@@ -107,6 +124,14 @@ static struct option longopts[] =
   {"stack", required_argument, NULL, OPTION_STACK},
   {"subsystem", required_argument, NULL, OPTION_SUBSYSTEM},
   {"support-old-code", no_argument, NULL, OPTION_SUPPORT_OLD_CODE},
+  /* getopt allows abbreviations, so we do this to stop it from treating -o
+     as an abbreviation for this option */
+  {"output-def", required_argument, NULL, OPTION_OUT_DEF},
+  {"output-def", required_argument, NULL, OPTION_OUT_DEF},
+  {"export-all-symbols", no_argument, NULL, OPTION_EXPORT_ALL},
+  {"exclude-symbols", required_argument, NULL, OPTION_EXCLUDE_SYMBOLS},
+  {"kill-at", no_argument, NULL, OPTION_KILL_ATS},
+  {"add-stdcall-alias", no_argument, NULL, OPTION_STDCALL_ALIASES},
   {NULL, no_argument, NULL, 0}
 };
 
@@ -366,6 +391,21 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
     case OPTION_SUPPORT_OLD_CODE:
       support_old_code = 1;
       break;
+    case OPTION_OUT_DEF:
+      pe_out_def_filename = xstrdup (optarg);
+      break;
+    case OPTION_EXPORT_ALL:
+      pe_dll_export_everything = 1;
+      break;
+    case OPTION_EXCLUDE_SYMBOLS:
+      pe_dll_add_excludes (optarg);
+      break;
+    case OPTION_KILL_ATS:
+      pe_dll_kill_ats = 1;
+      break;
+    case OPTION_STDCALL_ALIASES:
+      pe_dll_stdcall_aliases = 1;
+      break;
     }
   return 1;
 }
@@ -385,7 +425,7 @@ gld_${EMULATION_NAME}_set_symbols ()
     {
       if (link_info.relocateable)
 	init[IMAGEBASEOFF].value = 0;
-      else if (init[DLLOFF].value)
+      else if (init[DLLOFF].value || link_info.shared)
 	init[IMAGEBASEOFF].value = NT_DLL_IMAGE_BASE;
       else
 	init[IMAGEBASEOFF].value = NT_EXE_IMAGE_BASE;
@@ -403,7 +443,8 @@ gld_${EMULATION_NAME}_set_symbols ()
   for (j = 0; init[j].ptr; j++)
     {
       long val = init[j].value;
-      lang_add_assignment (exp_assop ('=' ,init[j].symbol, exp_intop (val)));
+      lang_assignment_statement_type *rv;
+      rv = lang_add_assignment (exp_assop ('=' ,init[j].symbol, exp_intop (val)));
       if (init[j].size == sizeof(short))
 	*(short *)init[j].ptr = val;
       else if (init[j].size == sizeof(int))
@@ -414,6 +455,8 @@ gld_${EMULATION_NAME}_set_symbols ()
       else if (init[j].size == sizeof(bfd_vma))
 	*(bfd_vma *)init[j].ptr = val;
       else	abort();
+      if (j == IMAGEBASEOFF)
+	image_base_statement = rv;
     }
   /* Restore the pointer. */
   stat_ptr = save;
@@ -447,6 +490,66 @@ gld_${EMULATION_NAME}_after_parse ()
   ldlang_add_undef (entry_symbol);
 }
 
+static struct bfd_link_hash_entry *pe_undef_found_sym;
+
+static boolean
+pe_undef_cdecl_match (h, string)
+  struct bfd_link_hash_entry *h;
+  PTR string;
+{
+  int sl = strlen (string);
+  if (h->type == bfd_link_hash_defined
+      && strncmp (h->root.string, string, sl) == 0
+      && h->root.string[sl] == '@')
+  {
+    pe_undef_found_sym = h;
+    return false;
+  }
+  return true;
+}
+
+static void
+pe_fixup_stdcalls ()
+{
+  struct bfd_link_hash_entry *undef, *sym;
+  char *at;
+  for (undef = link_info.hash->undefs; undef; undef=undef->next)
+    if (undef->type == bfd_link_hash_undefined)
+    {
+      at = strchr (undef->root.string, '@');
+      if (at)
+      {
+	/* The symbol is a stdcall symbol, so let's look for a cdecl
+	   symbol with the same name and resolve to that */
+	char *cname = xstrdup (undef->root.string);
+	at = strchr (cname, '@');
+	*at = 0;
+	sym = bfd_link_hash_lookup (link_info.hash, cname, 0, 0, 1);
+	if (sym && sym->type == bfd_link_hash_defined)
+	{
+	  undef->type = bfd_link_hash_defined;
+	  undef->u.def.value = sym->u.def.value;
+	  undef->u.def.section = sym->u.def.section;
+	}
+      }
+      else
+      {
+	/* The symbol is a cdecl symbol, so we don't look for stdcall
+	   symbols - you should have included the right header */
+	pe_undef_found_sym = 0;
+	bfd_link_hash_traverse (link_info.hash, pe_undef_cdecl_match,
+				(PTR) undef->root.string);
+	sym = pe_undef_found_sym;
+	if (sym)
+	{
+	  undef->type = bfd_link_hash_defined;
+	  undef->u.def.value = sym->u.def.value;
+	  undef->u.def.section = sym->u.def.section;
+	}
+      }
+    }
+}
+
 static void
 gld_${EMULATION_NAME}_after_open ()
 {
@@ -459,6 +562,13 @@ gld_${EMULATION_NAME}_after_open ()
 
   pe_data (output_bfd)->pe_opthdr = pe;
   pe_data (output_bfd)->dll = init[DLLOFF].value;
+
+  pe_fixup_stdcalls ();
+
+#ifdef TARGET_IS_i386pe
+  if (link_info.shared)
+    pe_dll_build_sections (output_bfd, &link_info);
+#endif
 
 #ifdef TARGET_IS_armpe
   {
@@ -516,6 +626,91 @@ gld_${EMULATION_NAME}_before_allocation()
   bfd_arm_allocate_interworking_sections (& link_info);
 #endif /* TARGET_IS_armpe */
 }
+
+
+/* This is called when an input file isn't recognized as a BFD.  We
+   check here for .DEF files and pull them in automatically. */
+
+static int
+saw_option(char *option)
+{
+  int i;
+  for (i=0; init[i].ptr; i++)
+    if (strcmp (init[i].symbol, option) == 0)
+      return init[i].inited;
+  return 0;
+}
+
+static boolean
+gld_${EMULATION_NAME}_unrecognized_file(entry)
+  lang_input_statement_type *entry;
+{
+#ifdef TARGET_IS_i386pe
+  const char *ext = entry->filename + strlen (entry->filename) - 4;
+
+  if (strcmp (ext, ".def") == 0 || strcmp (ext, ".DEF") == 0)
+  {
+    if (pe_def_file == 0)
+      pe_def_file = def_file_empty ();
+    def_file_parse (entry->filename, pe_def_file);
+    if (pe_def_file)
+    {
+      /* def_file_print (stdout, pe_def_file); */
+      if (pe_def_file->is_dll == 1)
+	link_info.shared = 1;
+
+      if (pe_def_file->base_address != (bfd_vma)(-1))
+      {
+	pe.ImageBase =
+	pe_data (output_bfd)->pe_opthdr.ImageBase =
+	init[IMAGEBASEOFF].value = pe_def_file->base_address;
+	init[IMAGEBASEOFF].inited = 1;
+	if (image_base_statement)
+	  image_base_statement->exp =
+	    exp_assop ('=', "__image_base__", exp_intop (pe.ImageBase));
+      }
+
+#if 0
+      /* Not sure if these *should* be set */
+      if (pe_def_file->version_major != -1)
+      {
+	pe.MajorImageVersion = pe_def_file->version_major;
+	pe.MinorImageVersion = pe_def_file->version_minor;
+      }
+#endif
+      if (pe_def_file->stack_reserve != -1
+	  && ! saw_option ("__size_of_stack_reserve__"))
+      {
+	pe.SizeOfStackReserve = pe_def_file->stack_reserve;
+	if (pe_def_file->stack_commit != -1)
+	  pe.SizeOfStackCommit = pe_def_file->stack_commit;
+      }
+      if (pe_def_file->heap_reserve != -1
+	  && ! saw_option ("__size_of_heap_reserve__"))
+      {
+	pe.SizeOfHeapReserve = pe_def_file->heap_reserve;
+	if (pe_def_file->heap_commit != -1)
+	  pe.SizeOfHeapCommit = pe_def_file->heap_commit;
+      }
+      return true;
+    }
+  }
+#endif
+  return false;
+  
+}
+
+static void
+gld_${EMULATION_NAME}_finish ()
+{
+#ifdef TARGET_IS_i386pe
+  if (link_info.shared)
+    pe_dll_fill_sections (output_bfd, &link_info);
+  if (pe_out_def_filename)
+    pe_dll_generate_def_file (pe_out_def_filename);
+#endif
+}
+
 
 /* Place an orphan section.
 
@@ -712,10 +907,12 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
 
       lang_list_init (&list);
       wild_doit (&list, s, hold_use, file);
-      ASSERT (list.head != NULL && list.head->next == NULL);
-
-      list.head->next = *pl;
-      *pl = list.head;
+      if (list.head != NULL)
+	{
+	  ASSERT (list.head->next == NULL);
+	  list.head->next = *pl;
+	  *pl = list.head;
+	}
     }
 
   free (hold_section_name);
@@ -793,13 +990,13 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   gld_${EMULATION_NAME}_get_script,
   "${EMULATION_NAME}",
   "${OUTPUT_FORMAT}",
-  NULL, /* finish */
+  gld_${EMULATION_NAME}_finish, /* finish */
   NULL, /* create output section statements */
   NULL, /* open dynamic archive */
   gld_${EMULATION_NAME}_place_orphan,
   gld_${EMULATION_NAME}_set_symbols,
   gld_${EMULATION_NAME}_parse_args,
-  NULL, /* unrecognised file */
+  gld_${EMULATION_NAME}_unrecognized_file,
   gld_${EMULATION_NAME}_list_options
 };
 EOF
