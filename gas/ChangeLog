@@ -1,3 +1,13 @@
+Fri Feb 16 16:53:31 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/obj-coff.h (SF_ADJ_LNNOPTR): Define (non BFD_ASSEMBLER).
+	(SF_GET_ADJ_LNNOPTR): Define (non BFD_ASSEMBLER).
+	(SF_SET_ADJ_LNNOPTR): Define (non BFD_ASSEMBLER).
+	* config/obj-coff.c (obj_coff_endef): Set ADJ_LNNOPTR when LNNOPTR
+	is set.
+	(w_symbols): If ADJ_LNNOPTR is set, add the section lnnoptr field
+	to the symbol lnnoptr field, to get the correct file offset.
+
 Thu Feb 15 14:48:38 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/obj-elf.c (elf_frob_symbol): On the PowerPC, force all
