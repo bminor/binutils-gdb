@@ -1,5 +1,5 @@
 /* tc-txvu.c -- Assembler for the TX VU.
-   Copyright (C) 1997 Free Software Foundation.
+   Copyright (C) 1997, 1998 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -40,7 +40,7 @@ const char FLT_CHARS[] = "dD";
 /* Non-zero if in vu-mode.  */
 static int vu_mode_p;
 
-/* Non-zero if packing pke instructions with dma tags.  */
+/* Non-zero if packing pke instructions in dma tags.  */
 static int dma_pack_pke_p;
 
 const char *md_shortopts = "";
@@ -121,6 +121,8 @@ md_begin ()
   vu_mode_p = 0;
   dma_pack_pke_p = 0;
 }
+
+enum cputype { CPU_VUUP, CPU_VULO, CPU_DMA, CPU_PKE, CPU_GPUIF };
 
 /* We need to keep a list of fixups.  We can't simply generate them as
    we go, because that would require us to first create the frag, and
@@ -135,16 +137,30 @@ struct txvu_fixup
 
 #define MAX_FIXUPS 5
 
+static int fixup_count;
+static struct txvu_fixup fixups[MAX_FIXUPS];
+
 static void assemble_dma PARAMS ((char *));
 static void assemble_gpuif PARAMS ((char *));
 static void assemble_pke PARAMS ((char *));
 static void assemble_vu PARAMS ((char *));
-static char * assemble_vu_insn PARAMS ((char *, int, char *));
+static char * assemble_vu_insn PARAMS ((enum cputype,
+					const struct txvu_opcode *,
+					const struct txvu_operand *,
+					char *, char *));
+static char * assemble_one_insn PARAMS ((enum cputype,
+					 const struct txvu_opcode *,
+					 const struct txvu_operand *,
+					 char *, TXVU_INSN *));
 
 void
 md_assemble (str)
      char *str;
 {
+  /* Skip leading white space.  */
+  while (isspace (*str))
+    str++;
+
   if (! vu_mode_p)
     {
       if (strncasecmp (str, "dma", 3) == 0)
@@ -158,28 +174,43 @@ md_assemble (str)
     assemble_vu (str);
 }
 
-/* Subroutine of assemble_dpg to assemble DMA instructions.  */
+/* Subroutine of md_assemble to assemble DMA instructions.  */
 
 static void
 assemble_dma (str)
      char *str;
 {
+  TXVU_INSN buf[4];
+
+  assemble_one_insn (CPU_DMA,
+		     dma_opcode_lookup_asm (str), dma_operands,
+		     str, buf);
 }
 
-/* Subroutine of assemble_dpg to assemble GPUIF instructions.  */
-
-static void
-assemble_gpuif (str)
-     char *str;
-{
-}
-
-/* Subroutine of assemble_dpg to assemble PKE instructions.  */
+/* Subroutine of md_assemble to assemble PKE instructions.  */
 
 static void
 assemble_pke (str)
      char *str;
 {
+  TXVU_INSN buf[4];
+
+  assemble_one_insn (CPU_PKE,
+		     pke_opcode_lookup_asm (str), pke_operands,
+		     str, buf);
+}
+
+/* Subroutine of md_assemble to assemble GPUIF instructions.  */
+
+static void
+assemble_gpuif (str)
+     char *str;
+{
+  TXVU_INSN buf[4];
+
+  assemble_one_insn (CPU_GPUIF,
+		     gpuif_opcode_lookup_asm (str), gpuif_operands,
+		     str, buf);
 }
 
 /* Subroutine of md_assemble to assemble VU instructions.  */
@@ -203,54 +234,98 @@ assemble_vu (str)
     }
 
   *p = 0;
-  assemble_vu_insn (str, 0, f + 4);
+  assemble_vu_insn (CPU_VUUP,
+		    txvu_upper_opcode_lookup_asm (str), txvu_operands,
+		    str, f + 4);
   *p = '|';
-  assemble_vu_insn (p + 1, 1, f);
+  assemble_vu_insn (CPU_VULO,
+		    txvu_lower_opcode_lookup_asm (str), txvu_operands,
+		    p + 1, f);
 #else
-  str = assemble_vu_insn (str, 0, f + 4);
+  str = assemble_vu_insn (CPU_VUUP,
+			  txvu_upper_opcode_lookup_asm (str), txvu_operands,
+			  str, f + 4);
   /* Don't assemble next one if we couldn't assemble the first.  */
   if (str)
-    assemble_vu_insn (str, 1, f);
+    assemble_vu_insn (CPU_VULO,
+		      txvu_lower_opcode_lookup_asm (str), txvu_operands,
+		      str, f);
 #endif
 }
 
-/* Assemble one instruction.
-   LOWER_P is non-zero if assembling in the lower insn slot.
-   The result is a pointer to beyond the end of the scanned insn
-   or NULL if an error occured.
-   If this is the upper insn, the caller can pass back to result to us
-   parse the lower insn.  */
-
 static char *
-assemble_vu_insn (str, lower_p, buf)
+assemble_vu_insn (cpu, opcode, operand_table, str, buf)
+     enum cputype cpu;
+     const struct txvu_opcode *opcode;
+     const struct txvu_operand *operand_table;
      char *str;
-     int lower_p;
      char *buf;
 {
-  const struct txvu_opcode *opcode;
-  char *start;
+  int i;
   TXVU_INSN insn;
 
-  /* Skip leading white space.  */
-  while (isspace (*str))
-    str++;
+  str = assemble_one_insn (cpu, opcode, operand_table, str, &insn);
+  if (str == NULL)
+    return NULL;
 
-  /* The instructions are stored in lists hashed by the first letter (though
-     we needn't care how they're hashed).  Get the first in the list.  */
+  /* Write out the instruction.
+     Reminder: it is important to fetch enough space in one call to
+     `frag_more'.  We use (f - frag_now->fr_literal) to compute where
+     we are and we don't want frag_now to change between calls.  */
+  md_number_to_chars (buf, insn, 4);
 
-  if (lower_p)
-    opcode = txvu_lower_opcode_lookup_asm (str);
-  else
-    opcode = txvu_upper_opcode_lookup_asm (str);
+  /* Create any fixups.  */
+  for (i = 0; i < fixup_count; ++i)
+    {
+      int op_type, reloc_type;
+      const struct txvu_operand *operand;
+
+      /* Create a fixup for this operand.
+	 At this point we do not use a bfd_reloc_code_real_type for
+	 operands residing in the insn, but instead just use the
+	 operand index.  This lets us easily handle fixups for any
+	 operand type, although that is admittedly not a very exciting
+	 feature.  We pick a BFD reloc type in md_apply_fix.  */
+
+      op_type = fixups[i].opindex;
+      reloc_type = op_type + (int) BFD_RELOC_UNUSED;
+      operand = &txvu_operands[op_type];
+      fix_new_exp (frag_now, buf - frag_now->fr_literal, 4,
+		   &fixups[i].exp,
+		   (operand->flags & TXVU_OPERAND_RELATIVE_BRANCH) != 0,
+		   (bfd_reloc_code_real_type) reloc_type);
+    }
+
+  /* All done.  */
+  return str;
+}
+
+/* Assemble one instruction.
+   CPU indicates what component we're assembling for.
+   The assembled instruction is stored in INSN_BUF.
+
+   The result is a pointer to beyond the end of the scanned insn
+   or NULL if an error occured.  This is to handle the VU where two
+   instructions appear on one line.  If this is the upper insn, the caller
+   can pass back to result to us parse the lower insn.  */
+
+static char *
+assemble_one_insn (cpu, opcode, operand_table, str, insn_buf)
+     enum cputype cpu;
+     const struct txvu_opcode *opcode;
+     const struct txvu_operand *operand_table;
+     char *str;
+     TXVU_INSN *insn_buf;
+{
+  char *start;
 
   /* Keep looking until we find a match.  */
 
   start = str;
   for ( ; opcode != NULL; opcode = TXVU_OPCODE_NEXT_ASM (opcode))
     {
-      int past_opcode_p, fc, num_suffixes, num_operands;
+      int past_opcode_p, num_suffixes, num_operands;
       const unsigned char *syn;
-      struct txvu_fixup fixups[MAX_FIXUPS];
 
       /* Ensure the mnemonic part matches.  */
       for (str = start, syn = opcode->mnemonic; *syn != '\0'; ++str, ++syn)
@@ -262,8 +337,8 @@ assemble_vu_insn (str, lower_p, buf)
       /* Scan the syntax string.  If it doesn't match, try the next one.  */
 
       txvu_opcode_init_parse ();
-      insn = opcode->value;
-      fc = 0;
+      *insn_buf = opcode->value;
+      fixup_count = 0;
       past_opcode_p = 0;
       num_suffixes = 0;
       num_operands = 0;
@@ -296,20 +371,20 @@ assemble_vu_insn (str, lower_p, buf)
 	  /* We have a suffix or an operand.  Pick out any modifiers.  */
 	  mods = 0;
 	  index = TXVU_OPERAND_INDEX (*syn);
-	  while (TXVU_MOD_P (txvu_operands[index].flags))
+	  while (TXVU_MOD_P (operand_table[index].flags))
 	    {
-	      mods |= txvu_operands[index].flags & TXVU_MOD_BITS;
+	      mods |= operand_table[index].flags & TXVU_MOD_BITS;
 	      ++syn;
 	      index = TXVU_OPERAND_INDEX (*syn);
 	    }
-	  operand = txvu_operands + index;
+	  operand = operand_table + index;
 
 	  if (operand->flags & TXVU_OPERAND_FAKE)
 	    {
 	      if (operand->insert)
 		{
 		  errmsg = NULL;
-		  insn = (*operand->insert) (insn, operand, mods, 0, &errmsg);
+		  (*operand->insert) (insn_buf, operand, mods, 0, &errmsg);
 		  /* If we get an error, go on to try the next insn.  */
 		  if (errmsg)
 		    break;
@@ -345,6 +420,7 @@ assemble_vu_insn (str, lower_p, buf)
 		continue;
 	      c = *t;
 	      *t = '\0';
+	      errmsg = NULL;
 	      suf_value = (*operand->parse) (&s, &errmsg);
 	      *t = c;
 	      if (errmsg)
@@ -357,10 +433,10 @@ assemble_vu_insn (str, lower_p, buf)
 		}
 	      /* Insert the suffix's value into the insn.  */
 	      if (operand->insert)
-		insn = (*operand->insert) (insn, operand,
-					   mods, suf_value, NULL);
+		(*operand->insert) (insn_buf, operand,
+				    mods, suf_value, NULL);
 	      else
-		insn |= suf_value << operand->shift;
+		*insn_buf |= suf_value << operand->shift;
 
 	      str = t;
 	      ++syn;
@@ -397,6 +473,7 @@ assemble_vu_insn (str, lower_p, buf)
 	      /* Parse the operand.  */
 	      if (operand->parse)
 		{
+		  errmsg = NULL;
 		  value = (*operand->parse) (&str, &errmsg);
 		  if (errmsg)
 		    break;
@@ -419,11 +496,11 @@ assemble_vu_insn (str, lower_p, buf)
 		  else
 		    {
 		      /* We need to generate a fixup for this expression.  */
-		      if (fc >= MAX_FIXUPS)
+		      if (fixup_count >= MAX_FIXUPS)
 			as_fatal ("too many fixups");
-		      fixups[fc].exp = exp;
-		      fixups[fc].opindex = index;
-		      ++fc;
+		      fixups[fixup_count].exp = exp;
+		      fixups[fixup_count].opindex = index;
+		      ++fixup_count;
 		      value = 0;
 		    }
 		}
@@ -432,13 +509,13 @@ assemble_vu_insn (str, lower_p, buf)
 	      if (operand->insert)
 		{
 		  const char *errmsg = NULL;
-		  insn = (*operand->insert) (insn, operand, mods,
-					     value, &errmsg);
+		  (*operand->insert) (insn_buf, operand, mods,
+				      value, &errmsg);
 		  if (errmsg != (const char *) NULL)
 		    break;
 		}
 	      else
-		insn |= (value & ((1 << operand->bits) - 1)) << operand->shift;
+		*insn_buf |= (value & ((1 << operand->bits) - 1)) << operand->shift;
 
 	      ++syn;
 	      ++num_operands;
@@ -461,40 +538,13 @@ assemble_vu_insn (str, lower_p, buf)
 
 	  if (*str != '\0'
 #ifndef VERTICAL_BAR_SEPARATOR
-	      && lower_p
+	      && cpu != CPU_VUUP
 #endif
 	      )
 	    as_bad ("junk at end of line: `%s'", str);
 
-	  /* Write out the instruction.
-	     Reminder: it is important to fetch enough space in one call to
-	     `frag_more'.  We use (f - frag_now->fr_literal) to compute where
-	     we are and we don't want frag_now to change between calls.  */
-	  md_number_to_chars (buf, insn, 4);
-
-	  /* Create any fixups.  */
-	  for (i = 0; i < fc; ++i)
-	    {
-	      int op_type, reloc_type;
-	      const struct txvu_operand *operand;
-
-	      /* Create a fixup for this operand.
-		 At this point we do not use a bfd_reloc_code_real_type for
-		 operands residing in the insn, but instead just use the
-		 operand index.  This lets us easily handle fixups for any
-		 operand type, although that is admittedly not a very exciting
-		 feature.  We pick a BFD reloc type in md_apply_fix.  */
-
-	      op_type = fixups[i].opindex;
-	      reloc_type = op_type + (int) BFD_RELOC_UNUSED;
-	      operand = &txvu_operands[op_type];
-	      fix_new_exp (frag_now, buf - frag_now->fr_literal, 4,
-			   &fixups[i].exp,
-			   (operand->flags & TXVU_OPERAND_RELATIVE_BRANCH) != 0,
-			   (bfd_reloc_code_real_type) reloc_type);
-	    }
-
-	  /* All done.  */
+	  /* It's now up to the caller to emit the instruction and any
+	     relocations.  */
 	  return str;
 	}
 
@@ -844,7 +894,7 @@ txvu_insert_operand (insn, operand, mods, val, file, line)
   if (operand->insert)
     {
       const char *errmsg = NULL;
-      insn = (*operand->insert) (insn, operand, mods, (long) val, &errmsg);
+      (*operand->insert) (&insn, operand, mods, (long) val, &errmsg);
       if (errmsg != (const char *) NULL)
 	as_warn (errmsg);
     }
@@ -856,12 +906,14 @@ txvu_insert_operand (insn, operand, mods, val, file, line)
 }
 
 static void
-s_dmadata (int ignore)
+s_dmadata (ignore)
+     int ignore;
 {
 }
 
 static void
-s_dmapackpke (int ignore)
+s_dmapackpke (ignore)
+     int ignore;
 {
   /* Syntax: .dmapackpke 0|1 */
   if (*input_line_pointer == '0')
@@ -876,34 +928,40 @@ s_dmapackpke (int ignore)
 }
 
 static void
-s_enddirect (int ignore)
+s_enddirect (ignore)
+     int ignore;
 {
 }
 
 static void
-s_enddmadata (int ignore)
+s_enddmadata (ignore)
+     int ignore;
 {
 }
 
 static void
-s_endgpuif (int ignore)
+s_endgpuif (ignore)
+     int ignore;
 {
 }
 
 static void
-s_endmpg (int ignore)
-{
-  vu_mode_p = 0;
-}
-
-static void
-s_endunpack (int ignore)
+s_endmpg (ignore)
+     int ignore;
 {
   vu_mode_p = 0;
 }
 
 static void
-s_vu (int enable_p)
+s_endunpack (ignore)
+     int ignore;
+{
+  vu_mode_p = 0;
+}
+
+static void
+s_vu (enable_p)
+     int enable_p;
 {
   vu_mode_p = enable_p;
 }

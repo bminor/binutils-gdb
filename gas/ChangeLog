@@ -1,3 +1,12 @@
+start-sanitize-sky
+Mon Jan 26 16:29:49 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* tc-txvu.c: First pass at dma/pke/gpuif support.
+	(assemble_one_insn): Renamed from assemble_insn.
+	Initialize errmsg = NULL before calling parse fn.
+	(fixups,fixup_count): Make static globals.
+
+end-sanitize-sky
 Mon Jan 26 13:07:41 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-m32r.c: Detect if explicitly parallel instructions
