@@ -550,9 +550,9 @@ m32r_cgen_assemble_insn (cd, str, fields, buf, errmsg)
 
   {
     static char errbuf[150];
+#ifdef CGEN_VERBOSE_ASSEMBLER_ERRORS
     const char *tmp_errmsg;
 
-#ifdef CGEN_VERBOSE_ASSEMBLER_ERRORS
     /* If requesting verbose error messages, use insert_errmsg.
        Failing that, use parse_errmsg */
     tmp_errmsg = (insert_errmsg ? insert_errmsg :

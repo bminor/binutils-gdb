@@ -1,3 +1,13 @@
+2001-05-04  Frank Ch. Eigler  <fche@redhat.com>
+
+	* m32r-dis.c, -asm.c, -ibld.c: Regenerated with disassembler fixes.
+
+2001-05-04  Frank Ch. Eigler  <fche@redhat.com>
+
+	* cgen-dis.in (print_insn): Remove call to read_insn.  Instead,
+	assume incoming buffer already has the base insn loaded.  Handle
+	case of smaller-than-base instructions for variable-length case.
+
 2001-05-04  Alan Modra  <amodra@one.net.au>
 
 	* i386-dis.c (Ev, Ed): Remove duplicate define.
