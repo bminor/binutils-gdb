@@ -26,6 +26,7 @@ Do-first:
 Things-to-keep:
 
 soc2udip.c
+udiids.h
 udi2mtip.c
 udip2soc.c
 udiphcfg.h
