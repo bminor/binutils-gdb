@@ -1,3 +1,10 @@
+Fri Apr 17 12:22:22 1998  Bob Manson  <manson@charmed.cygnus.com>
+
+	* Makefile.in: Add libstub.
+
+	* configure.in: Ditto. Build libstub for targets that have cygmon
+	support.
+
 Tue Apr 14 18:01:55 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Don't set PICFLAG on ix86-cygwin32.

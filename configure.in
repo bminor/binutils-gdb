@@ -89,7 +89,7 @@ native_only="autoconf automake libtool cvssrc emacs emacs19 fileutils find gawk 
 
 # directories to be built in a cross environment only
 #
-cross_only="target-libgloss target-newlib target-cygmon target-opcodes"
+cross_only="target-libgloss target-newlib target-cygmon target-opcodes target-libstub"
 
 ## All tools belong in one of the four categories, and are assigned above
 ## We assign ${configdirs} this way to remove all embedded newlines.  This
@@ -739,17 +739,17 @@ case "${target}" in
     ;;
   sparc-*-elf*)
     if [ x${is_cross_compiler} != xno ] ; then
-	   target_configdirs="${target_configdirs} target-cygmon"
+	   target_configdirs="${target_configdirs} target-libstub target-cygmon"
     fi
     ;;
   sparc64-*-elf*)
     if [ x${is_cross_compiler} != xno ] ; then
-	   target_configdirs="${target_configdirs} target-cygmon"
+	   target_configdirs="${target_configdirs} target-libstub target-cygmon"
     fi
     ;;
   sparclite-*-aout*)
     if [ x${is_cross_compiler} != xno ] ; then
-	   target_configdirs="${target_configdirs} target-cygmon"
+	   target_configdirs="${target_configdirs} target-libstub target-cygmon"
     fi
     ;;
   sparc-*-sunos4*)

@@ -163,7 +163,7 @@ OTHERS =
 
 # This is set by the configure script to the list of directories which
 # should be built using the target tools.
-TARGET_CONFIGDIRS = libiberty libgloss newlib libio librx libstdc++ libg++ winsup opcodes cygmon
+TARGET_CONFIGDIRS = libiberty libgloss newlib libio librx libstdc++ libg++ winsup opcodes libstub cygmon
 
 # Target libraries are put under this directory:
 # Changed by configure to $(target_alias) if cross.
@@ -770,6 +770,7 @@ ALL_TARGET_MODULES = \
 	all-target-libiberty \
 	all-target-gperf \
 	all-target-examples \
+	all-target-libstub \
 	all-target-cygmon
 
 # This is a list of the configure targets for all of the modules which
@@ -785,6 +786,7 @@ CONFIGURE_TARGET_MODULES = \
 	configure-target-libiberty \
 	configure-target-gperf \
 	configure-target-examples \
+	configure-target-libstub \
 	configure-target-cygmon
 
 # This is a list of the check targets for all of the modules which are
@@ -899,6 +901,7 @@ CLEAN_TARGET_MODULES = \
 	clean-target-libiberty \
 	clean-target-gperf \
 	clean-target-examples \
+	clean-target-libstub \
 	clean-target-cygmon
 
 # All of the x11 modules that can be cleaned
@@ -1480,7 +1483,7 @@ all-bison: all-texinfo
 all-byacc:
 all-cvssrc:
 configure-target-cygmon: $(ALL_GCC)
-all-target-cygmon: configure-target-cygmon all-gas all-ld all-gcc all-target-libiberty all-target-newlib all-target-libio
+all-target-cygmon: configure-target-cygmon all-gas all-ld all-gcc all-target-libiberty all-target-newlib all-target-libio all-target-libstub
 all-db:
 all-dejagnu: all-tcl all-expect all-tk
 all-diff: all-libiberty
@@ -1545,6 +1548,8 @@ configure-target-librx: $(ALL_GCC) configure-target-newlib
 all-target-librx: configure-target-librx
 configure-target-libstdc++: $(ALL_GCC)
 all-target-libstdc++: configure-target-libstdc++ all-gas all-ld all-gcc all-target-libiberty all-target-newlib all-target-libio
+configure-target-libstub: $(ALL_GCC)
+all-target-libstub: configure-target-libstub
 all-libtool:
 all-m4: all-libiberty
 all-make: all-libiberty
