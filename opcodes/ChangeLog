@@ -1,3 +1,10 @@
+Fri Jan 16 15:29:11 1998  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Move 4010's "addciu"
+ 	instruction after the 4650's "mul" instruction; nobody's using the
+ 	4010 these days.  If object files someday indicate which processor
+	variant they're intended for, we can do a better job at this.
+
 start-sanitize-r5900
 Tue Jan 13 09:21:56 1998  Jeffrey A Law  (law@cygnus.com)
 
