@@ -1,3 +1,7 @@
+Thu Oct 21 12:23:12 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* sh-tdep.c (sim_load): Add function.
+
 Thu Oct 21 15:58:48 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
 
 	* remote-mips.c (mips_wait): add pid argument.
@@ -24,6 +28,7 @@ Thu Oct 21 12:23:12 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	* environ.c: Include gdbcore.h.  Only include defs.h once.
 	(set_in_environ): Cast const char * to char * when passing to
 	set_gnutarget.
+	* Makefile.in: Update dependencies to reflect all these new includes.
 	Remove unused variables:
 	* printcmd.c (printf_command): args_to_vprintf.
 	* coffread.c (coff_symfile_init): strsection.
