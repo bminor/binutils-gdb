@@ -27,6 +27,7 @@ ChangeLog
 config
 lib
 ld.bootstrap
+ld.cdtest
 
 Things-to-lose:
 
