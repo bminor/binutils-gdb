@@ -1,5 +1,9 @@
 2000-07-19  H.J. Lu  <hjl@gnu.org>
 
+	* readelf.c (get_dynamic_type): Fix DT_CHECKSUM.
+
+2000-07-19  H.J. Lu  <hjl@gnu.org>
+
 	* readelf.c (get_dynamic_type): Change DT_FEATURE_1 to
 	DT_FEATURE.
 	(process_dynamic_segment): Likewise.

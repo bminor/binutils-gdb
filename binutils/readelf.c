@@ -1070,6 +1070,7 @@ get_dynamic_type (type)
     case DT_PREINIT_ARRAY: return "PREINIT_ARRAY";
     case DT_PREINIT_ARRAYSZ: return "PREINIT_ARRAYSZ";
 
+    case DT_CHECKSUM:	return "CHECKSUM";
     case DT_PLTPADSZ:	return "PLTPADSZ";
     case DT_MOVEENT:	return "MOVEENT";
     case DT_MOVESZ:	return "MOVESZ";
@@ -1099,10 +1100,6 @@ get_dynamic_type (type)
     case DT_AUXILIARY:	return "AUXILARY";
     case DT_USED:	return "USED";
     case DT_FILTER:	return "FILTER";
-
-#if DT_CHECKSUM != 0
-    case DT_CHECKSUM:	return "CHECKSUM";
-#endif
 
     default:
       if ((type >= DT_LOPROC) && (type <= DT_HIPROC))
