@@ -11,16 +11,16 @@
 #include <stdio.h>
 
 #ifndef DONTDECLARE_MALLOC
-extern PTR EXFUN(malloc,(unsigned));
+extern PTR  EXFUN(malloc,(unsigned));
 extern PTR  EXFUN(realloc, (PTR, unsigned));
 #endif
-extern int EXFUN( abort,(void));
-extern int EXFUN( free,(PTR));
-extern void EXFUN( bcopy,(char*,char*,int));
-extern void EXFUN( exit,(int));
-extern int strtol();
-extern void EXFUN( bzero,(char *, int));
+extern int  EXFUN(abort,(void));
+extern int  EXFUN(free,(PTR));
+extern void EXFUN(bcopy,(char*,char*,int));
+extern void EXFUN(exit,(int));
+extern void EXFUN(bzero,(char *, int));
 
+extern int strtol();
 /* EXACT TYPES */
 typedef char int8e_type;
 typedef unsigned char uint8e_type;

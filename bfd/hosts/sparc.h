@@ -12,42 +12,45 @@
 #define SEEK_SET 0
 #define SEEK_CUR 1
 
-char *EXFUN(mktemp,(CONST char*));
-extern int EXFUN(fflush,(FILE *));
-extern int EXFUN(write,(int, CONST char *, int));
-extern int EXFUN(index,(CONST char *, char c));
-extern void EXFUN(abort,(void));
-extern int EXFUN(close,(int));
-extern int EXFUN(fcntl,(int des, int cmd, int e));
-extern int EXFUN(fprintf,(FILE *,char *,...));
-extern int EXFUN(printf,(char *,...));
-extern int EXFUN(qsort,(void *data,int els, int siz, int func()));
-extern void EXFUN(exit,(int));
-extern int EXFUN(fseek,(FILE*, int, int));
-extern int EXFUN(fclose,(FILE*));
-extern void EXFUN(bcopy,(char*,char*,int));
-extern int EXFUN(bcmp,(char *, char *, int));
-extern void EXFUN(bzero,(char *, int));
+extern char *EXFUN(mktemp,(CONST char*));
+extern int   EXFUN(fflush,(FILE *));
+extern int   EXFUN(write,(int, CONST char *, int));
+extern int   EXFUN(index,(CONST char *, char c));
+extern void  EXFUN(abort,(void));
+extern int   EXFUN(close,(int));
+extern int   EXFUN(fcntl,(int des, int cmd, int e));
+extern int   EXFUN(fprintf,(FILE *,char *,...));
+extern int   EXFUN(printf,(char *,...));
+extern int   EXFUN(qsort,(void *data,int els, int siz, int func()));
+extern void  EXFUN(exit,(int));
+extern int   EXFUN(fseek,(FILE*, int, int));
+extern int   EXFUN(fclose,(FILE*));
+extern void  EXFUN(bcopy,(char*,char*,int));
+extern int   EXFUN(bcmp,(char *, char *, int));
+extern void  EXFUN(bzero,(char *, int));
+extern PTR   EXFUN(memset,(PTR, int, int));
+extern void  EXFUN(puts,(CONST char*));
+extern void  EXFUN(fputs,(CONST char*,FILE*));
+extern int   EXFUN(rmdir,(CONST char *));
+extern int   EXFUN(getuid,(void));
+extern int   EXFUN(getgid,(void));
+extern int   EXFUN(rename,(CONST char *, CONST char*));
+extern int   EXFUN(etuid,());
+extern int   EXFUN(etgid,());
+extern void  EXFUN(perror,(CONST char *));
+#ifndef DONTDECLARE_MALLOC
+extern PTR   EXFUN(malloc,(unsigned));
+extern PTR   EXFUN(realloc, (PTR, unsigned));
+#endif
+
 #ifndef __GNUC__
-PTR EXFUN(memcpy,(PTR,CONST PTR,unsigned int));
+extern PTR   EXFUN(memcpy,(PTR,CONST PTR,unsigned int));
 #else
 /* char * EXFUN( memcpy,(char *,CONST char *,unsigned int)); */
 #endif
 
-PTR EXFUN(memset,(PTR, int, int));
-void EXFUN( puts,(CONST char*));
-void EXFUN(fputs,(CONST char*,FILE*));
 
-int EXFUN(rmdir,(CONST char *));
-
-int EXFUN(getuid,(void));
-int EXFUN(getgid,(void));
-int EXFUN(rename,(CONST char *, CONST char*));
-
-extern int EXFUN(etuid,());
-extern int EXFUN(etgid,());
 extern char * strchr();
-extern void EXFUN(perror,(CONST char *));
 extern char *getenv();
 extern char *memchr();
 extern char *strrchr();
@@ -58,11 +61,6 @@ extern int fwrite();
 extern int sscanf();
 extern int stat();
 extern int strtol();
-#ifndef DONTDECLARE_MALLOC
-extern PTR EXFUN(malloc,(unsigned));
-extern PTR  EXFUN(realloc, (PTR, unsigned));
-#endif
-
 extern int EXFUN(free,(PTR));
 
 

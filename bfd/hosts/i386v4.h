@@ -19,18 +19,18 @@
 #define POSIX_UTIME
 #define HAVE_PROCFS	/* This host has /proc support */
 
-extern void EXFUN( abort,(void));
-extern int EXFUN(  close,(int));
-extern void EXFUN( exit,(int));
-extern int EXFUN(  fclose,(FILE*));
-extern void EXFUN( free,(PTR));
-extern int EXFUN(  fseek,(FILE*, long, int));
-extern int EXFUN(  getgid,());
-extern int EXFUN(  getuid,());
-extern PTR EXFUN(  malloc,(unsigned));
-extern void EXFUN( perror,(CONST char *));
-extern int EXFUN(  qsort,(void *data,int els, int siz, int func()));
-extern PTR EXFUN(  realloc, (PTR, unsigned));
+extern void EXFUN(abort,(void));
+extern int  EXFUN(close,(int));
+extern void EXFUN(exit,(int));
+extern int  EXFUN(fclose,(FILE*));
+extern void EXFUN(free,(PTR));
+extern int  EXFUN(fseek,(FILE*, long, int));
+extern int  EXFUN(getgid,());
+extern int  EXFUN(getuid,());
+extern PTR  EXFUN(malloc,(unsigned));
+extern void EXFUN(perror,(CONST char *));
+extern int  EXFUN(qsort,(void *data,int els, int siz, int func()));
+extern PTR  EXFUN(realloc, (PTR, unsigned));
 
 extern char *getenv();
 extern int chmod();

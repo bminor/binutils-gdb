@@ -44,9 +44,9 @@
  */
 
 #ifndef DONTDECLARE_MALLOC
-extern PTR EXFUN(malloc,(unsigned));
+extern PTR  EXFUN(malloc,(unsigned));
 extern PTR  EXFUN(realloc, (PTR, unsigned));
-extern void EXFUN( free,(PTR));
+extern void EXFUN(free,(PTR));
 #endif
 
 /* EXACT TYPES */

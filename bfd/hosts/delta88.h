@@ -11,36 +11,33 @@
 #include <stdio.h>
 
 #ifndef DONTDECLARE_MALLOC
-extern PTR EXFUN(malloc,(unsigned));
+extern PTR  EXFUN(malloc,(unsigned));
 extern PTR  EXFUN(realloc, (PTR, unsigned));
 #endif
-extern int EXFUN( abort,(void));
-extern int EXFUN( free,(PTR));
-extern void EXFUN( bcopy,(char*,char*,int));
-extern void EXFUN( exit,(int));
-extern int strtol();
-extern void EXFUN( bzero,(char *, int));
+extern int  EXFUN(abort,(void));
+extern int  EXFUN(free,(PTR));
+extern void EXFUN(bcopy,(char*,char*,int));
+extern void EXFUN(exit,(int));
+extern int  EXFUN(strtol());
+extern void EXFUN(bzero,(char *, int));
 #define NO_STDARG 1
-
-
-
-extern int EXFUN( abort,(void));
-extern int EXFUN( close,(int));
-extern int EXFUN( fcntl,(int des, int cmd, int e));
-
-
-extern int EXFUN( qsort,(void *data,int els, int siz, int func()));
+extern int  EXFUN(abort,(void));
+extern int  EXFUN(close,(int));
+extern int  EXFUN(fcntl,(int des, int cmd, int e));
+extern int  EXFUN(qsort,(void *data,int els, int siz, int func()));
+extern int  EXFUN(fseek,(FILE*, int, int));
+extern int  EXFUN(fclose,(FILE*));
+extern void EXFUN(bcopy,(char*,char*,int));
+extern int  EXFUN(bcmp,(char *, char *, int));
+extern void EXFUN(bzero,(char *, int));
+extern void EXFUN(perror,(CONST char *));
+extern PTR  EXFUN(memchr,(const void *, int, unsigned ));
 extern unsigned short EXFUN(getuid,(void));
 extern unsigned short EXFUN(getgid,(void));
-extern int EXFUN( fseek,(FILE*, int, int));
-extern int EXFUN( fclose,(FILE*));
-extern void EXFUN( bcopy,(char*,char*,int));
-extern int EXFUN( bcmp,(char *, char *, int));
-extern void EXFUN( bzero,(char *, int));
+
 extern char * strchr();
-extern void EXFUN( perror,(CONST char *));
+
 extern char *getenv();
-extern PTR EXFUN( memchr,(const void *, int, unsigned ));
 extern char *strrchr();
 extern int chmod();
 extern int fread();
