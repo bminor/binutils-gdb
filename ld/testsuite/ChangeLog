@@ -1,3 +1,7 @@
+2004-12-13  Richard Sandiford  <rsandifo@redhat.com>
+
+	* ld-mips-elf/mips-elf.exp: Only run jalbal if n32 is supported.
+
 2004-12-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-mmix/bpo-1.d: Update for changed section syms.
