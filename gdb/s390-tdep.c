@@ -1159,19 +1159,45 @@ s390_push_dummy_frame ()
   write_register (S390_SP_REGNUM, new_sp);
 }
 
-/* pop the innermost frame, go back to the caller.
-    Used in `call_function_by_hand' to remove an artificial stack
-     frame.  */
+
+static void
+s390_pop_frame_regular (struct frame_info *frame)
+{
+  int regnum;
+
+  write_register (S390_PC_REGNUM, FRAME_SAVED_PC (frame));
+
+  /* Restore any saved registers.  */
+  for (regnum = 0; regnum < NUM_REGS; regnum++)
+    if (frame->saved_regs[regnum] != 0)
+      {
+        ULONGEST value;
+
+        value = read_memory_unsigned_integer (frame->saved_regs[regnum],
+                                              REGISTER_RAW_SIZE (regnum));
+        write_register (regnum, value);
+      }
+
+  /* Actually cut back the stack.  */
+  write_register (S390_SP_REGNUM, FRAME_FP (frame));
+
+  /* Throw away any cached frame information.  */
+  flush_cached_frames ();
+}
+
+
+/* Destroy the innermost (Top-Of-Stack) stack frame, restoring the 
+   machine state that was in effect before the frame was created. 
+   Used in the contexts of the "return" command, and of 
+   target function calls from the debugger.  */
 void
 s390_pop_frame ()
 {
-  CORE_ADDR new_sp = read_register (S390_SP_REGNUM), orig_sp;
-  void *saved_regs = alloca (REGISTER_BYTES);
-
-
-  read_memory (new_sp + S390_GPR_SIZE, (char *) saved_regs, REGISTER_BYTES);
-  write_register_bytes (0, (char *) &saved_regs, REGISTER_BYTES);
+  /* This function checks for and handles generic dummy frames, and
+     calls back to our function for ordinary frames.  */
+  generic_pop_current_frame (s390_pop_frame_regular);
 }
+
 
 /* used by call function by hand
   struct_return indicates that this function returns a structure &

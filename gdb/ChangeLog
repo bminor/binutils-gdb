@@ -1,5 +1,12 @@
 2001-11-13  Jim Blandy  <jimb@redhat.com>
 
+	* s390-tdep.c (s390_pop_frame): Call generic_pop_current_frame, to
+	interact correctly with generic dummy frames.
+	(s390_pop_frame_regular): Move the guts of the frame-popping code
+	to here, to be called by generic_pop_current_frame.  Use the
+	frame's saved_regs array; this works for `return' as well as
+	inferior function calls.
+
 	* s390-tdep.c (s390_gdbarch_init): Register the function
 	`standard_coerce_float_to_double', since GCC for the S/390 follows
 	the standard rules for passing floats.
