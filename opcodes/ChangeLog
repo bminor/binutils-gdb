@@ -1,7 +1,12 @@
+Fri Sep 18 02:04:24 1992  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in (make):  Remove obsolete crud.
+	(sparc-opc.o):  Avoid Sun Make VPATH bug.
+
 Tue Sep  8 17:29:27 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* Makefile.in: since there are no SUBDIRS, remove rule and
-	  references of subdir_do.
+	references of subdir_do.
 
 Tue Sep  8 17:02:58 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
