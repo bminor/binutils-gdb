@@ -1,3 +1,7 @@
+Fri Jul 30 19:46:55 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t17/interrupt.exp: Add xfail for hppa.
+
 Fri Jul 30 12:54:11 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.t02/whatis.exp, gdb.t03/ptype.exp, gdb.t08/opaque.exp,
@@ -6,8 +10,8 @@ Fri Jul 30 12:54:11 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 	to determine signed-ness of bitfields and use the result to setup
 	the xfail.
 	* gdb.t15/gdbme.c:  Add comments to the two indirect call0a lines.
-	* gdb.t15/funcargs.exp:  Use them to step until the second indirect call
-	line is reached if necessary.
+	* gdb.t15/funcargs.exp:  Use them to step until the second indirect
+	call line is reached if necessary.
 
 Thu Jul 29 20:33:08 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
