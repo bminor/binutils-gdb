@@ -1,5 +1,16 @@
 Fri Mar 28 13:08:33 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (struct mips_set_options): Define.
+	(mips_opts): New static variable.
+	(mips_isa): Remove.  Now a field in mips_opts.  Change all
+	references.
+	(mips16, mips16_autoextend, mips_warn_about_macros): Likewise.
+	(mips_noreorder, mips_nomove, mips_noat, mips_nobopt): Likewise.
+	(struct mips_option_stack): Define.
+	(mips_opts_stack): New static variable.
+	(s_mipsset): Add support for .set push and .set pop.
+	* doc/c-mips.texi: Document .set push and .set pop.
+
 	* config/obj-elf.c (obj_elf_section_change_hook): New function.
 	* config/obj-elf.h (obj_elf_section_change_hook): Declare it.
 	* config/tc-mips.c (s_change_sec): Call it if OBJ_ELF.
