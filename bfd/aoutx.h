@@ -270,6 +270,7 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
       bfd_target *(*callback_to_real_object_p) ())
 {
   struct container *rawptr;
+  bfd_target *result;
 
   rawptr = (struct container *) bfd_zalloc (abfd, sizeof (struct container));
   if (rawptr == NULL) {
@@ -286,8 +287,7 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
   abfd->flags = NO_FLAGS;
   if (execp->a_drsize || execp->a_trsize)
     abfd->flags |= HAS_RELOC;
-  if (execp->a_entry) 
-    abfd->flags |= EXEC_P;
+  /* Setting of EXEC_P has been deferred to the bottom of this function */
   if (execp->a_syms) 
     abfd->flags |= HAS_LINENO | HAS_DEBUG | HAS_SYMS | HAS_LOCALS;
 
@@ -399,7 +399,20 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
      header, should cope with them in this callback as well.  */
 #endif				/* DOCUMENTATION */
 
-  return (*callback_to_real_object_p)(abfd);
+  result = (*callback_to_real_object_p)(abfd);
+
+  /* Now that the segment addresses have been worked out, take a better
+     guess at whether the file is executable.  If the entry point
+     is within the text segment, assume it is.  (This makes files
+     executable even if their entry point address is 0, as long as
+     their text starts at zero.)  
+
+     At some point we should probably break down and stat the file and
+     declare it executable if (one of) its 'x' bits are on...  */
+  if ((execp->a_entry >= obj_textsec(abfd)->vma) &&
+      (execp->a_entry < obj_textsec(abfd)->vma + obj_textsec(abfd)->size))
+    abfd->flags |= EXEC_P;
+  return result;
 }
 
 /*doc*

@@ -1,5 +1,9 @@
 Fri Nov 22 08:11:42 1991  John Gilmore  (gnu at cygnus.com)
 
+	* aoutx.h (some_aout_object_p):  Set the `executable' bit
+	if the entry point is contained in the text segment, even if the
+	text segment is at location 0.
+
 	* coff-mips.c, coffcode.h:  Peter Schauer's patch to kludge in
 	nonstandard MIPS sections (.rdata, .sdata, etc).
 
