@@ -32,14 +32,14 @@ extern bfd *stdoutput;
    bfd internal coff headerfile. */
 
 #define internal_lineno bfd_internal_lineno
-#include "internalcoff.h"
+#include "coff/internal.h"
 #undef internal_lineno
 
 #if defined(TC_H8300)
-#include "coff-h8300.h"
+#include "coff/h8300.h"
 #define TARGET_FORMAT "coff-h8300"
 #elif defined(TC_A29K)
-#include "coff-a29k.h"
+#include "coff/a29k.h"
 #define TARGET_FORMAT "coff-a29k-big"
 #else
 help me

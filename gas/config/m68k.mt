@@ -1,1 +1,1 @@
-TARG_CPU_DEPENDENTS=$(srcdir)/../include/m68k-opcode.h
+TARG_CPU_DEPENDENTS=$(srcdir)/../include/opcode/m68k.h

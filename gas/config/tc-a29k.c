@@ -25,7 +25,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
  
 #include "as.h"
 
-#include "a29k-opcode.h"
+#include "opcode/a29k.h"
 
 /* Make it easier to clone this machine desc into another one.  */
 #define	machine_opcode	a29k_opcode
