@@ -1,3 +1,8 @@
+2002-08-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-discard/discard.exp: xfail m6812.
+	* ld-scripts/map-address.d: Adjust for extras emitted by pe targets.
+
 2002-08-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-mmix/b-nosym.d: Revert last change.
