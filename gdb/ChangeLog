@@ -1,3 +1,8 @@
+2002-05-29  Jim Blandy  <jimb@redhat.com>
+
+	* macroscope.c (default_macro_scope): Put `void' in empty argument
+	list.
+
 2002-05-29  Andrew Cagney  <ac131313@redhat.com>
 
 	* Makefile.in (arch-utils.o): Add $(sim_regno_h).
