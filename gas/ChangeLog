@@ -1,3 +1,8 @@
+Tue Oct 22 17:09:32 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-d10v.c (parallel_ok): Don't allow illegal combinations
+	of instructions.
+
 Tue Oct 22 11:28:39 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* obj.h (struct format_ops): Add frob_file_after_relocs field.
