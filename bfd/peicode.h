@@ -29,13 +29,14 @@ Most of this hacked by  Steve Chamberlain,
 #define coff_mkobject pe_mkobject
 #define coff_mkobject_hook pe_mkobject_hook
 
-
 #ifndef GET_FCN_LNNOPTR
-#define GET_FCN_LNNOPTR(abfd, ext)  bfd_h_get_32(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_fcn.x_lnnoptr)
+#define GET_FCN_LNNOPTR(abfd, ext) \
+     bfd_h_get_32(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_fcn.x_lnnoptr)
 #endif
 
 #ifndef GET_FCN_ENDNDX
-#define GET_FCN_ENDNDX(abfd, ext)  bfd_h_get_32(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_fcn.x_endndx)
+#define GET_FCN_ENDNDX(abfd, ext)  \
+	bfd_h_get_32(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_fcn.x_endndx)
 #endif
 
 #ifndef PUT_FCN_LNNOPTR
@@ -228,11 +229,25 @@ coff_swap_filehdr_in (abfd, src, dst)
   filehdr_dst->f_magic = bfd_h_get_16(abfd, (bfd_byte *) filehdr_src->f_magic);
   filehdr_dst->f_nscns = bfd_h_get_16(abfd, (bfd_byte *)filehdr_src-> f_nscns);
   filehdr_dst->f_timdat = bfd_h_get_32(abfd, (bfd_byte *)filehdr_src-> f_timdat);
-  filehdr_dst->f_symptr =
-    bfd_h_get_32 (abfd, (bfd_byte *) filehdr_src->f_symptr);
+
   filehdr_dst->f_nsyms = bfd_h_get_32(abfd, (bfd_byte *)filehdr_src-> f_nsyms);
-  filehdr_dst->f_opthdr = bfd_h_get_16(abfd, (bfd_byte *)filehdr_src-> f_opthdr);
   filehdr_dst->f_flags = bfd_h_get_16(abfd, (bfd_byte *)filehdr_src-> f_flags);
+  filehdr_dst->f_symptr = bfd_h_get_32 (abfd, (bfd_byte *) filehdr_src->f_symptr);
+
+  /* Other people's tools sometimes generate headers
+     with an nsyms but a zero symptr. */
+  if (filehdr_dst->f_nsyms && filehdr_dst->f_symptr)
+    {
+      filehdr_dst->f_flags |= HAS_SYMS;
+    }
+  else 
+    {
+      filehdr_dst->f_symptr = 0;
+      filehdr_dst->f_nsyms = 0;
+      filehdr_dst->f_flags &= ~HAS_SYMS;
+    }
+
+  filehdr_dst->f_opthdr = bfd_h_get_16(abfd, (bfd_byte *)filehdr_src-> f_opthdr);
 }
 
 #ifdef COFF_IMAGE_WITH_PE
@@ -751,7 +766,7 @@ static void add_data_entry (abfd, aout, idx, name, base)
   if (sec != NULL)
     {
       aout->DataDirectory[idx].VirtualAddress = sec->lma - base;
-      aout->DataDirectory[idx].Size = sec->_raw_size;
+      aout->DataDirectory[idx].Size = sec->_cooked_size;
       sec->flags |= SEC_DATA;
     }
 }
@@ -817,13 +832,14 @@ coff_swap_aouthdr_out (abfd, in, out)
 
   extra->SizeOfHeaders = abfd->sections->filepos;
   bfd_h_put_16(abfd, aouthdr_in->magic, (bfd_byte *) aouthdr_out->standard.magic);
-  bfd_h_put_16(abfd, aouthdr_in->vstamp, (bfd_byte *) aouthdr_out->standard.vstamp);
+  bfd_h_put_16(abfd, 2  + 55 * 256, (bfd_byte *) aouthdr_out->standard.vstamp);
   PUT_AOUTHDR_TSIZE (abfd, aouthdr_in->tsize, (bfd_byte *) aouthdr_out->standard.tsize);
   PUT_AOUTHDR_DSIZE (abfd, aouthdr_in->dsize, (bfd_byte *) aouthdr_out->standard.dsize);
   PUT_AOUTHDR_BSIZE (abfd, aouthdr_in->bsize, (bfd_byte *) aouthdr_out->standard.bsize);
   PUT_AOUTHDR_ENTRY (abfd, aouthdr_in->entry, (bfd_byte *) aouthdr_out->standard.entry);
   PUT_AOUTHDR_TEXT_START (abfd, aouthdr_in->text_start,
 			  (bfd_byte *) aouthdr_out->standard.text_start);
+
   PUT_AOUTHDR_DATA_START (abfd, aouthdr_in->data_start,
 			  (bfd_byte *) aouthdr_out->standard.data_start);
 
@@ -1096,16 +1112,19 @@ pe_mkobject (abfd)
      bfd * abfd;
 {
   pe_data_type *pe;
-
   abfd->tdata.pe_obj_data = 
     (struct pe_tdata *) bfd_zalloc (abfd, sizeof (pe_data_type));
+
   if (abfd->tdata.pe_obj_data == 0)
     {
       bfd_set_error (bfd_error_no_memory);
       return false;
     }
-  pe =pe_data (abfd);
+
+  pe = pe_data (abfd);
+
   pe->coff.pe = 1;
+  pe->in_reloc_p = in_reloc_p;
   return true;
 }
 
@@ -1123,9 +1142,7 @@ pe_mkobject_hook (abfd, filehdr, aouthdr)
     return NULL;
 
   pe = pe_data (abfd);
-
   pe->coff.sym_filepos = internal_f->f_symptr;
-
   /* These members communicate important constants about the symbol
      table to GDB's symbol-reading code.  These `constants'
      unfortunately vary among coff implementations...  */
@@ -1141,8 +1158,12 @@ pe_mkobject_hook (abfd, filehdr, aouthdr)
     obj_conv_table_size (abfd) =
       internal_f->f_nsyms;
 
+
 #ifdef COFF_IMAGE_WITH_PE
-  pe->pe_opthdr = ((struct internal_aouthdr *)aouthdr)->pe;
+  if (aouthdr) 
+    {
+      pe->pe_opthdr = ((struct internal_aouthdr *)aouthdr)->pe;
+    }
 #endif
 
   return (PTR) pe;
@@ -1168,5 +1189,3 @@ pe_bfd_copy_private_bfd_data (ibfd, obfd)
 
   return true;
 }
-
-

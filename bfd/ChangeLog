@@ -1,3 +1,11 @@
+Sat Oct 28 01:25:34 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* cofflink.c (_bfd_coff_generic_relocate_section): Make
+	callback decide what goes in .relocs.
+	* pe[i]-i386.c (TARGET_UNDERSCORE): Define.
+	* peicode.h (pe_mkobject_hook): Only copy aouthdr if
+	there is one.
+
 Sat Oct 28 01:51:02 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* xcofflink.c (xcoff_link_add_symbols): Handle csects in the
