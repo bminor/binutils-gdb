@@ -16,8 +16,6 @@
 
 2002-06-15  Mark Kettenis  <kettenis@gnu.org>
 
-	* i386-tdep.c (i386_gdbarch_init): Tewak
-
 	* i386v4-nat.c: Include "i386-tdep.h".  Reformat and tweak various
 	comments.
 	(fill_gregset, supply_gregset, supply_fpregset, fill_fpregset):

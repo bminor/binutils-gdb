@@ -106,14 +106,6 @@ i386_register_raw_size (int reg)
   return i386_register_size[reg];
 }
 
-/* Return the size in bytes of the virtual type of register REG.  */
-
-int
-i386_register_virtual_size (int reg)
-{
-  return TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (reg));
-}
-
 /* Convert stabs register number REG to the appropriate register
    number used by GDB.  */
 
@@ -905,7 +897,7 @@ i386_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
-      if (NUM_FREGS == 0)
+      if (FP0_REGNUM == 0)
 	{
 	  warning ("Cannot find floating-point return value.");
 	  memset (valbuf, 0, len);
@@ -959,7 +951,7 @@ i386_store_return_value (struct type *type, char *valbuf)
       unsigned int fstat;
       char buf[FPU_REG_RAW_SIZE];
 
-      if (NUM_FREGS == 0)
+      if (FP0_REGNUM == 0)
 	{
 	  warning ("Cannot set floating-point return value.");
 	  return;
@@ -1340,8 +1332,8 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->osabi = osabi;
 
   /* The i386 default settings don't include the SSE registers.
-     FIXME: kettenis/20020509: They do include the FPU registers for
-     now, which is not quite right.  */
+     FIXME: kettenis/20020614: They do include the FPU registers for
+     now, which probably is not quite right.  */
   tdep->num_xmm_regs = 0;
 
   tdep->jb_pc_offset = -1;
@@ -1361,6 +1353,35 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      bits, a `long double' actually takes up 96, probably to enforce
      alignment.  */
   set_gdbarch_long_double_bit (gdbarch, 96);
+
+  /* NOTE: tm-i386aix.h, tm-i386bsd.h, tm-i386os9k.h, tm-ptx.h,
+     tm-symmetry.h currently override this.  Sigh.  */
+  set_gdbarch_num_regs (gdbarch, I386_NUM_GREGS + I386_NUM_FREGS);
+  
+  set_gdbarch_sp_regnum (gdbarch, 4);
+  set_gdbarch_fp_regnum (gdbarch, 5);
+  set_gdbarch_pc_regnum (gdbarch, 8);
+  set_gdbarch_ps_regnum (gdbarch, 9);
+  set_gdbarch_fp0_regnum (gdbarch, 16);
+
+  /* Use the "default" register numbering scheme for stabs and COFF.  */
+  set_gdbarch_stab_reg_to_regnum (gdbarch, i386_stab_reg_to_regnum);
+  set_gdbarch_sdb_reg_to_regnum (gdbarch, i386_stab_reg_to_regnum);
+
+  /* Use the DWARF register numbering scheme for DWARF and DWARF 2.  */
+  set_gdbarch_dwarf_reg_to_regnum (gdbarch, i386_dwarf_reg_to_regnum);
+  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, i386_dwarf_reg_to_regnum);
+
+  /* We don't define ECOFF_REG_TO_REGNUM, since ECOFF doesn't seem to
+     be in use on any of the supported i386 targets.  */
+
+  set_gdbarch_register_name (gdbarch, i386_register_name);
+  set_gdbarch_register_size (gdbarch, 4);
+  set_gdbarch_register_bytes (gdbarch, I386_SIZEOF_GREGS + I386_SIZEOF_FREGS);
+  set_gdbarch_register_byte (gdbarch, i386_register_byte);
+  set_gdbarch_register_raw_size (gdbarch, i386_register_raw_size);
+  set_gdbarch_max_register_raw_size (gdbarch, 16);
+  set_gdbarch_max_register_virtual_size (gdbarch, 16);
 
   set_gdbarch_get_longjmp_target (gdbarch, i386_get_longjmp_target);
 
@@ -1390,26 +1411,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_saved_pc (gdbarch, i386_frame_saved_pc);
   set_gdbarch_saved_pc_after_call (gdbarch, i386_saved_pc_after_call);
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_pc_in_sigtramp);
-
-  /* NOTE: tm-i386aix.h, tm-i386bsd.h, tm-i386os9k.h, tm-ptx.h,
-     tm-symmetry.h currently override this.  Sigh.  */
-  set_gdbarch_num_regs (gdbarch, I386_NUM_GREGS + I386_NUM_FREGS);
-
-  /* Use the "default" register numbering scheme for stabs and COFF.  */
-  set_gdbarch_stab_reg_to_regnum (gdbarch, i386_stab_reg_to_regnum);
-  set_gdbarch_sdb_reg_to_regnum (gdbarch, i386_stab_reg_to_regnum);
-
-  /* Use the DWARF register numbering scheme for DWARF and DWARF 2.  */
-  set_gdbarch_dwarf_reg_to_regnum (gdbarch, i386_dwarf_reg_to_regnum);
-  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, i386_dwarf_reg_to_regnum);
-
-  /* We don't define ECOFF_REG_TO_REGNUM, since ECOFF doesn't seem to
-     be in use on any of the supported i386 targets.  */
-
-  set_gdbarch_register_bytes (gdbarch, I386_SIZEOF_GREGS + I386_SIZEOF_FREGS);
-  set_gdbarch_register_name (gdbarch, i386_register_name);
-  set_gdbarch_register_byte (gdbarch, i386_register_byte);
-  set_gdbarch_register_raw_size (gdbarch, i386_register_raw_size);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch, osabi);
