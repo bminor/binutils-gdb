@@ -1,3 +1,7 @@
+2004-12-01  Andrew Cagney  <cagney@gnu.org>
+
+	* i960: Delete directory.
+
 2004-11-12  Andrew Cagney  <cagney@gnu.org>
 
 	* d30v, fr30, mn10200, z8k: Delete directory.
