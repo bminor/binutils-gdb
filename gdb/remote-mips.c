@@ -497,7 +497,7 @@ mips_error (char *string,...)
   printf_unfiltered ("Ending remote MIPS debugging.\n");
   target_mourn_inferior ();
 
-  throw_reason (RETURN_ERROR);
+  deprecated_throw_reason (RETURN_ERROR);
 }
 
 /* putc_readable - print a character, displaying non-printable chars in
@@ -2148,7 +2148,7 @@ Give up (and stop debugging it)? "))
 	  printf_unfiltered ("Ending remote MIPS debugging.\n");
 	  target_mourn_inferior ();
 
-	  throw_reason (RETURN_QUIT);
+	  deprecated_throw_reason (RETURN_QUIT);
 	}
 
       target_terminal_inferior ();

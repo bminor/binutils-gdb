@@ -779,7 +779,7 @@ NORETURN void
 internal_verror (const char *file, int line, const char *fmt, va_list ap)
 {
   internal_vproblem (&internal_error_problem, file, line, fmt, ap);
-  throw_reason (RETURN_ERROR);
+  deprecated_throw_reason (RETURN_ERROR);
 }
 
 NORETURN void
@@ -920,7 +920,7 @@ quit (void)
     fprintf_unfiltered (gdb_stderr,
 			"Quit (expect signal SIGINT when the program is resumed)\n");
 #endif
-  throw_reason (RETURN_QUIT);
+  deprecated_throw_reason (RETURN_QUIT);
 }
 
 /* Control C comes here */

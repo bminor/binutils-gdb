@@ -85,12 +85,15 @@ extern void exception_fprintf (struct ui_file *file, struct exception e,
    Wombat.  */
 
 extern NORETURN void throw_exception (struct exception exception) ATTR_NORETURN;
-extern NORETURN void throw_reason (enum return_reason reason) ATTR_NORETURN;
 extern NORETURN void throw_verror (enum errors, const char *fmt,
 				   va_list ap) ATTR_NORETURN;
 extern NORETURN void throw_vfatal (const char *fmt, va_list ap) ATTR_NORETURN;
 extern NORETURN void throw_error (enum errors error, const char *fmt,
 				  ...) ATTR_NORETURN ATTR_FORMAT (printf, 2, 3);
+
+/* Instead of deprecated_throw_reason, code should use catch_exception
+   and throw_exception.  */
+extern NORETURN void deprecated_throw_reason (enum return_reason reason) ATTR_NORETURN;
 
 /* Call FUNC(UIOUT, FUNC_ARGS) but wrapped within an exception
    handler.  If an exception (enum return_reason) is thrown using

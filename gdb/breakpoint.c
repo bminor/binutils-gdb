@@ -5144,7 +5144,7 @@ break_command_1 (char *arg, int flag, int from_tty, struct breakpoint *pending_b
 	     error.  */
 
 	  if (pending_break_support == AUTO_BOOLEAN_FALSE)
-	    throw_reason (RETURN_ERROR);
+	    deprecated_throw_reason (RETURN_ERROR);
 
           /* If pending breakpoint support is auto query and the user
 	     selects no, then simply return the error code.  */

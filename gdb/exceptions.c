@@ -239,7 +239,7 @@ throw_exception (struct exception exception)
 static char *last_message;
 
 NORETURN void
-throw_reason (enum return_reason reason)
+deprecated_throw_reason (enum return_reason reason)
 {
   struct exception exception;
   memset (&exception, 0, sizeof exception);

@@ -1,5 +1,17 @@
 2005-01-19  Andrew Cagney  <cagney@gnu.org>
 
+	* exceptions.h (deprecated_throw_reason): Rename throw_reason.
+	* exceptions.c (deprecated_throw_reason): Rename throw_reason.
+	* utils.c (internal_verror, quit): Update.
+	* remote-sds.c (interrupt_query): Update.
+	* remote-mips.c (mips_error, mips_kill): Update.
+	* remote-fileio.c (remote_fileio_ctrl_c_signal_handler): Update.
+	* remote.c (interrupt_query): Update.
+	* ocd.c (interrupt_query): Update.
+	* nto-procfs.c (interrupt_query): Update.
+	* monitor.c (monitor_interrupt_query): Update.
+	* breakpoint.c (break_command_1): Update.
+
 	* infrun.c: (resume, proceed, wait_for_inferior)
 	(handle_inferior_event, stop_stepping)
 	(prepare_to_wait): Write debug output to gdb_stdlog.
