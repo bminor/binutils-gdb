@@ -1,3 +1,8 @@
+2003-06-11  David Carlton  <carlton@bactrian.org>
+
+	* mi-cmd-stack.c: Include dictionary.h.
+	(list_args_or_locals): Update use of ALL_BLOCK_SYMBOLS.
+
 2003-06-11  Andrew Cagney  <cagney@redhat.com>
 
 	* mi-main.c (get_register): Replace REGISTER_CONVERTIBLE with

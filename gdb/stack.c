@@ -42,6 +42,7 @@
 #include "block.h"
 #include "stack.h"
 #include "gdb_assert.h"
+#include "dictionary.h"
 
 /* Prototypes for exported functions. */
 
@@ -211,7 +212,7 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
 {
   struct block *b = NULL;
   int first = 1;
-  register int i;
+  struct dict_iterator iter;
   register struct symbol *sym;
   struct value *val;
   /* Offset of next stack argument beyond the one we have seen that is
@@ -230,11 +231,8 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
   if (func)
     {
       b = SYMBOL_BLOCK_VALUE (func);
-      /* Function blocks are order sensitive, and thus should not be
-	 hashed.  */
-      gdb_assert (BLOCK_HASHTABLE (b) == 0);
 
-      ALL_BLOCK_SYMBOLS (b, i, sym)
+      ALL_BLOCK_SYMBOLS (b, iter, sym)
         {
 	  QUIT;
 
@@ -1311,14 +1309,15 @@ backtrace_full_command (char *arg, int from_tty)
    Return 1 if any variables were printed; 0 otherwise.  */
 
 static int
-print_block_frame_locals (struct block *b, register struct frame_info *fi,
-			  int num_tabs, register struct ui_file *stream)
+print_block_frame_locals (struct block *b, struct frame_info *fi,
+			  int num_tabs, struct ui_file *stream)
 {
-  register int i, j;
-  register struct symbol *sym;
-  register int values_printed = 0;
+  struct dict_iterator iter;
+  int j;
+  struct symbol *sym;
+  int values_printed = 0;
 
-  ALL_BLOCK_SYMBOLS (b, i, sym)
+  ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
       switch (SYMBOL_CLASS (sym))
 	{
@@ -1350,11 +1349,11 @@ static int
 print_block_frame_labels (struct block *b, int *have_default,
 			  register struct ui_file *stream)
 {
-  register int i;
+  struct dict_iterator iter;
   register struct symbol *sym;
   register int values_printed = 0;
 
-  ALL_BLOCK_SYMBOLS (b, i, sym)
+  ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
       if (STREQ (DEPRECATED_SYMBOL_NAME (sym), "default"))
 	{
@@ -1532,7 +1531,7 @@ print_frame_arg_vars (register struct frame_info *fi,
 {
   struct symbol *func = get_frame_function (fi);
   register struct block *b;
-  register int i;
+  struct dict_iterator iter;
   register struct symbol *sym, *sym2;
   register int values_printed = 0;
 
@@ -1543,7 +1542,7 @@ print_frame_arg_vars (register struct frame_info *fi,
     }
 
   b = SYMBOL_BLOCK_VALUE (func);
-  ALL_BLOCK_SYMBOLS (b, i, sym)
+  ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
       switch (SYMBOL_CLASS (sym))
 	{

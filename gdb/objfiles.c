@@ -43,6 +43,7 @@
 
 #include "breakpoint.h"
 #include "block.h"
+#include "dictionary.h"
 
 /* Prototypes for local functions */
 
@@ -657,13 +658,13 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
 	{
 	  struct block *b;
 	  struct symbol *sym;
-	  int j;
+	  struct dict_iterator iter;
 
 	  b = BLOCKVECTOR_BLOCK (bv, i);
 	  BLOCK_START (b) += ANOFFSET (delta, s->block_line_section);
 	  BLOCK_END (b) += ANOFFSET (delta, s->block_line_section);
 
-	  ALL_BLOCK_SYMBOLS (b, j, sym)
+	  ALL_BLOCK_SYMBOLS (b, iter, sym)
 	    {
 	      fixup_symbol_section (sym, objfile);
 

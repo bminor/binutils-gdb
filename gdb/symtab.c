@@ -46,6 +46,7 @@
 
 #include "gdb_obstack.h"
 #include "block.h"
+#include "dictionary.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -1633,21 +1634,18 @@ lookup_block_symbol (register const struct block *block, const char *name,
 		     const char *linkage_name,
 		     const domain_enum domain)
 {
-  register int bot, top, inc;
-  register struct symbol *sym;
-  register struct symbol *sym_found = NULL;
+  struct dict_iterator iter;
+  struct symbol *sym;
 
-  if (BLOCK_HASHTABLE (block))
+  if (!BLOCK_FUNCTION (block))
     {
-      unsigned int hash_index;
-      hash_index = msymbol_hash_iw (name);
-      hash_index = hash_index % BLOCK_BUCKETS (block);
-      for (sym = BLOCK_BUCKET (block, hash_index); sym; sym = sym->hash_next)
+      for (sym = dict_iter_name_first (BLOCK_DICT (block), name, &iter);
+	   sym != NULL;
+	   sym = dict_iter_name_next (name, &iter))
 	{
-	  if (SYMBOL_DOMAIN (sym) == domain 
-	      && (linkage_name
-		  ? strcmp (DEPRECATED_SYMBOL_NAME (sym), linkage_name) == 0
-		  : SYMBOL_MATCHES_NATURAL_NAME (sym, name)))
+	  if (SYMBOL_DOMAIN (sym) == domain
+	      && (linkage_name != NULL
+		  ? strcmp (SYMBOL_LINKAGE_NAME (sym), linkage_name) == 0 : 1))
 	    return sym;
 	}
       return NULL;
@@ -1659,15 +1657,16 @@ lookup_block_symbol (register const struct block *block, const char *name,
 	 parameter symbols first; it only uses parameter symbols as a
 	 last resort.  Note that this only takes up extra computation
 	 time on a match.  */
-      top = BLOCK_NSYMS (block);
-      bot = 0;
-      while (bot < top)
+
+      struct symbol *sym_found = NULL;
+
+      for (sym = dict_iter_name_first (BLOCK_DICT (block), name, &iter);
+	   sym != NULL;
+	   sym = dict_iter_name_next (name, &iter))
 	{
-	  sym = BLOCK_SYM (block, bot);
 	  if (SYMBOL_DOMAIN (sym) == domain
-	      && (linkage_name
-		  ? strcmp (DEPRECATED_SYMBOL_NAME (sym), linkage_name) == 0
-		  : SYMBOL_MATCHES_NATURAL_NAME (sym, name)))
+	      && (linkage_name != NULL
+		  ? strcmp (SYMBOL_LINKAGE_NAME (sym), linkage_name) == 0 : 1))
 	    {
 	      /* If SYM has aliases, then use any alias that is active
 	         at the current PC.  If no alias is active at the current
@@ -1676,18 +1675,18 @@ lookup_block_symbol (register const struct block *block, const char *name,
 	         ?!? Is checking the current pc correct?  Is this routine
 	         ever called to look up a symbol from another context?
 
-		 FIXME: No, it's not correct.  If someone sets a
-		 conditional breakpoint at an address, then the
-		 breakpoint's `struct expression' should refer to the
-		 `struct symbol' appropriate for the breakpoint's
-		 address, which may not be the PC.
+	         FIXME: No, it's not correct.  If someone sets a
+	         conditional breakpoint at an address, then the
+	         breakpoint's `struct expression' should refer to the
+	         `struct symbol' appropriate for the breakpoint's
+	         address, which may not be the PC.
 
-		 Even if it were never called from another context,
-		 it's totally bizarre for lookup_symbol's behavior to
-		 depend on the value of the inferior's current PC.  We
-		 should pass in the appropriate PC as well as the
-		 block.  The interface to lookup_symbol should change
-		 to require the caller to provide a PC.  */
+	         Even if it were never called from another context,
+	         it's totally bizarre for lookup_symbol's behavior to
+	         depend on the value of the inferior's current PC.  We
+	         should pass in the appropriate PC as well as the
+	         block.  The interface to lookup_symbol should change
+	         to require the caller to provide a PC.  */
 
 	      if (SYMBOL_ALIASES (sym))
 		sym = find_active_alias (sym, read_pc ());
@@ -1704,10 +1703,8 @@ lookup_block_symbol (register const struct block *block, const char *name,
 		  break;
 		}
 	    }
-	  bot++;
 	}
-
-      return (sym_found);		/* Will be NULL if not found. */
+      return (sym_found);	/* Will be NULL if not found. */
     }
 }
 
@@ -1811,16 +1808,16 @@ find_pc_sect_symtab (CORE_ADDR pc, asection *section)
 	  }
 	if (section != 0)
 	  {
-	    int i;
+	    struct dict_iterator iter;
 	    struct symbol *sym = NULL;
 
-	    ALL_BLOCK_SYMBOLS (b, i, sym)
+	    ALL_BLOCK_SYMBOLS (b, iter, sym)
 	      {
 		fixup_symbol_section (sym, objfile);
 		if (section == SYMBOL_BFD_SECTION (sym))
 		  break;
 	      }
-	    if ((i >= BLOCK_BUCKETS (b)) && (sym == NULL))
+	    if (sym == NULL)
 	      continue;		/* no symbol in this symtab matches section */
 	  }
 	distance = BLOCK_END (b) - BLOCK_START (b);
@@ -2757,7 +2754,7 @@ search_symbols (char *regexp, domain_enum kind, int nfiles, char *files[],
   struct blockvector *prev_bv = 0;
   register struct block *b;
   register int i = 0;
-  register int j;
+  struct dict_iterator iter;
   register struct symbol *sym;
   struct partial_symbol **psym;
   struct objfile *objfile;
@@ -2946,7 +2943,7 @@ search_symbols (char *regexp, domain_enum kind, int nfiles, char *files[],
 	  struct symbol_search *prevtail = tail;
 	  int nfound = 0;
 	  b = BLOCKVECTOR_BLOCK (bv, i);
-	  ALL_BLOCK_SYMBOLS (b, j, sym)
+	  ALL_BLOCK_SYMBOLS (b, iter, sym)
 	    {
 	      QUIT;
 	      if (file_matches (s->filename, files, nfiles)
@@ -3407,13 +3404,14 @@ language_search_unquoted_string (char *text, char *p)
 char **
 make_symbol_completion_list (char *text, char *word)
 {
-  register struct symbol *sym;
-  register struct symtab *s;
-  register struct partial_symtab *ps;
-  register struct minimal_symbol *msymbol;
-  register struct objfile *objfile;
-  register struct block *b, *surrounding_static_block = 0;
-  register int i, j;
+  struct symbol *sym;
+  struct symtab *s;
+  struct partial_symtab *ps;
+  struct minimal_symbol *msymbol;
+  struct objfile *objfile;
+  struct block *b, *surrounding_static_block = 0;
+  struct dict_iterator iter;
+  int j;
   struct partial_symbol **psym;
   /* The symbol we are completing on.  Points in same buffer as text.  */
   char *sym_text;
@@ -3536,7 +3534,7 @@ make_symbol_completion_list (char *text, char *word)
       /* Also catch fields of types defined in this places which match our
          text string.  Only complete on types visible from current context. */
 
-      ALL_BLOCK_SYMBOLS (b, i, sym)
+      ALL_BLOCK_SYMBOLS (b, iter, sym)
 	{
 	  QUIT;
 	  COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
@@ -3567,7 +3565,7 @@ make_symbol_completion_list (char *text, char *word)
   {
     QUIT;
     b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
-    ALL_BLOCK_SYMBOLS (b, i, sym)
+    ALL_BLOCK_SYMBOLS (b, iter, sym)
       {
 	COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
       }
@@ -3580,7 +3578,7 @@ make_symbol_completion_list (char *text, char *word)
     /* Don't do this block twice.  */
     if (b == surrounding_static_block)
       continue;
-    ALL_BLOCK_SYMBOLS (b, i, sym)
+    ALL_BLOCK_SYMBOLS (b, iter, sym)
       {
 	COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
       }
@@ -3598,7 +3596,7 @@ make_file_symbol_completion_list (char *text, char *word, char *srcfile)
   register struct symbol *sym;
   register struct symtab *s;
   register struct block *b;
-  register int i;
+  struct dict_iterator iter;
   /* The symbol we are completing on.  Points in same buffer as text.  */
   char *sym_text;
   /* Length of sym_text.  */
@@ -3677,13 +3675,13 @@ make_file_symbol_completion_list (char *text, char *word, char *srcfile)
      symbols which match.  */
 
   b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
-  ALL_BLOCK_SYMBOLS (b, i, sym)
+  ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
       COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
     }
 
   b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
-  ALL_BLOCK_SYMBOLS (b, i, sym)
+  ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
       COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
     }
@@ -4034,7 +4032,7 @@ make_symbol_overload_list (struct symbol *fsym)
   register struct partial_symtab *ps;
   register struct objfile *objfile;
   register struct block *b, *surrounding_static_block = 0;
-  register int i;
+  struct dict_iterator iter;
   /* The name we are completing on. */
   char *oload_name = NULL;
   /* Length of name.  */
@@ -4091,7 +4089,7 @@ make_symbol_overload_list (struct symbol *fsym)
       /* Also catch fields of types defined in this places which match our
          text string.  Only complete on types visible from current context. */
 
-      ALL_BLOCK_SYMBOLS (b, i, sym)
+      ALL_BLOCK_SYMBOLS (b, iter, sym)
 	{
 	  overload_list_add_symbol (sym, oload_name);
 	}
@@ -4104,7 +4102,7 @@ make_symbol_overload_list (struct symbol *fsym)
   {
     QUIT;
     b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
-    ALL_BLOCK_SYMBOLS (b, i, sym)
+    ALL_BLOCK_SYMBOLS (b, iter, sym)
       {
 	overload_list_add_symbol (sym, oload_name);
       }
@@ -4117,7 +4115,7 @@ make_symbol_overload_list (struct symbol *fsym)
     /* Don't do this block twice.  */
     if (b == surrounding_static_block)
       continue;
-    ALL_BLOCK_SYMBOLS (b, i, sym)
+    ALL_BLOCK_SYMBOLS (b, iter, sym)
       {
 	overload_list_add_symbol (sym, oload_name);
       }

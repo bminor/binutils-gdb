@@ -801,10 +801,10 @@ struct symtab
   }
   free_code;
 
-  /* Pointer to one block of storage to be freed, if nonzero.  */
-  /* This is IN ADDITION to the action indicated by free_code.  */
+  /* A function to call to free space, if necessary.  This is IN
+     ADDITION to the action indicated by free_code.  */
 
-  char *free_ptr;
+  void (*free_func)(struct symtab *symtab);
 
   /* Total number of lines found in source file.  */
 

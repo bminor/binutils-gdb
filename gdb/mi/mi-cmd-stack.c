@@ -28,6 +28,7 @@
 #include "symtab.h"
 #include "block.h"
 #include "stack.h"
+#include "dictionary.h"
 
 static void list_args_or_locals (int locals, int values, struct frame_info *fi);
 
@@ -213,7 +214,8 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 {
   struct block *block;
   struct symbol *sym;
-  int i, nsyms;
+  struct dict_iterator iter;
+  int nsyms;
   struct cleanup *cleanup_list;
   static struct ui_stream *stb = NULL;
 
@@ -225,7 +227,7 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 
   while (block != 0)
     {
-      ALL_BLOCK_SYMBOLS (block, i, sym)
+      ALL_BLOCK_SYMBOLS (block, iter, sym)
 	{
           int print_me = 0;
 

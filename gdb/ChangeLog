@@ -1,3 +1,92 @@
+2003-06-11  David Carlton  <carlton@bactrian.org>
+
+	* dictionary.h: New.
+	* dictionary.c: New.
+	* block.h: Add opaque declaration for struct dictionary.
+	(struct block): Add 'dict' member; delete 'hashtable', 'nsyms',
+	'sym' members.
+	(BLOCK_DICT): New macro.
+	Delete macros BLOCK_HASHTABLE, BLOCK_NSYMS, BLOCK_SYM,
+	BLOCK_BUCKETS, BLOCK_BUCKET, BLOCK_HASHTABLE_SIZE,
+	BLOCK_SHOULD_SORT.
+	(ALL_BLOCK_SYMBOLS): Update definition.
+	* Makefile.in (SFILES): Add dictionary.c.
+	(dictionary_h): New.
+	(COMMON_OBS): Add dictionary.o.
+	(dictionary.o): New.
+	(ada-lang.o): Depend on dictionary_h.
+	(buildsym.o, coffread.o, jv-lang.o, mdebugread.o, objfiles.o)
+	(stack.o, symmisc.o, symtab.o, tracepoint.o, valops.o)
+	(mi-cmd-stack.o): Ditto.
+	(gdbtk-cmds.o): Update dependencies.
+	(gdbtk-stack.o): Ditto.
+	* ada-lang.c: Include dictionary.h.
+	(symtab_for_sym): Update uses of ALL_BLOCK_SYMBOLS.
+	(fill_in_ada_prototype, debug_print_block): Ditto.
+	(ada_add_block_symbols): Update uses of ALL_BLOCK_SYMBOLS; replace
+	explicit iteration by use of ALL_BLOCK_SYMBOLS.  Delete variable
+	'is_sorted'.
+	* mdebugread.c: Include dictionary.h.
+	(struct parse_stack): Delete 'maxsyms' member.
+	(parse_symbol): Update calls to new_block.  Delete calls to
+	shrink_block.  Use dictionary methods.
+	(psymtab_to_symtab_1): Delete calls to sort_symtab_syms.
+	Update calls to new_symtab.  Don't maintain maxsyms data.
+	(mylookup_symbol): Update use of ALL_BLOCK_SYMBOLS.
+	(add_symbol): Just call dict_add_symbol.
+	(new_symtab): Delete 'maxsyms' argument.
+	(new_symtab): Update calls to new_block.
+	(new_block): Delete 'maxsyms' argument; add 'function' argument.
+	(shrink_block): Delete function.
+	(fixup_sigtramp): Update call to new_block.  Add symbol via
+	dict_add_symbol.
+	* jv-lang.c: Include dictionary.h.
+	(get_java_class_symtab): Set the BLOCK_DICT of the blocks
+	appropriately.  Set class_symtab->free_func.  Make sure the
+	blockvector is big enough to hold two blocks.
+	(add_class_symtab_symbol): Use dictionary methods.
+	(free_class_block): New function.
+	(type_from_class): Replace explicit iteration by
+	ALL_BLOCK_SYMBOLS.
+	* symtab.h (struct symtab): Replace 'free_ptr' method by
+	'free_func'.
+	* dwarf2read.c (psymtab_to_symtab_1): Delete call to
+	sort_symtab_syms.
+	* dwarfread.c (psymtab_to_symtab_1): Delete call to
+	sort_symtab_syms.
+	* coffread.c (coff_symfile_read): Delete call to sort_symtab_syms.
+	Include dictionary.h.
+	(patch_opaque_types): Update use of ALL_BLOCK_SYMBOLS.
+	* dbxread.c (dbx_psymtab_to_symtab_1): Delete call to
+	sort_symtab_syms.
+	* objfiles.c: Include dictionary.h.
+	(objfile_relocate): Update use of ALL_BLOCK_SYMBOLS.
+	* buildsym.c: Include dictionary.h.
+	(finish_block): Use dictionary methods.
+	(end_symtab): Set free_func to NULL, not free_ptr.
+	* tracepoint.c: Include dictionary.h.
+	(add_local_symbols): Update use of ALL_BLOCK_SYMBOLS.
+	(scope_info): Ditto.
+	* stack.c: Include dictionary.h.
+	(print_block_frame_locals): Update use of ALL_BLOCK_SYMBOLS.
+	(print_block_frame_labels, print_frame_arg_vars)
+	(print_frame_args): Ditto.
+	* symmisc.c (free_symtab_block): Use dictionary methods.
+	(dump_symtab): Ditto.
+	(free_symtab): Replace use of 'free_ptr' by 'free_func'.
+	Include	dictionary.h.
+	* symfile.h: Delete declarations of sort_block_syms,
+	sort_symtab_syms.
+	* symfile.c (sort_block_syms): Delete.
+	(sort_symtab_syms): Delete.
+	* symtab.c: Include dictionary.h.
+	(lookup_block_symbol): Use dictionary iterators.
+	(find_pc_sect_symtab): Update use of ALL_BLOCK_SYMBOLS.
+	(search_symbols, make_symbol_completion_list): Ditto.
+	(make_symbol_overload_list): Ditto.
+	* valops.c (value_of_local): Use dict_empty.
+	Include dictionary.h.
+
 2003-06-11  J. Brobecker  <brobecker@gnat.com>
 
 	* win32-nat.c (solib_symbols_add): Fix a small compilation error.
