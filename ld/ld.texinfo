@@ -202,7 +202,12 @@ augments the main linker script used for the link (either the default
 linker script or the one specified by using @samp{-T}).  This feature
 permits the linker to link against a file which appears to be an object
 or an archive, but actually merely defines some symbol values, or uses
-@code{INPUT} or @code{GROUP} to load other objects.  @xref{Commands}.
+@code{INPUT} or @code{GROUP} to load other objects.  Note that
+specifying a script in this way should only be used to augment the main
+linker script; if you want to use some command that logically can only
+appear once, such as the @code{SECTIONS} or @code{MEMORY} command, you
+must replace the default linker script using the @samp{-T} option.
+@xref{Commands}.
 
 For options whose names are a single letter,
 option arguments must either follow the option letter without intervening
@@ -336,14 +341,32 @@ to the specified name.  This tells the dynamic linker that the symbol
 table of the shared object should be used as an auxiliary filter on the
 symbol table of the shared object @var{name}.
 
+If you later link a program against this filter object, then, when you
+run the program, the dynamic linker will see the DT_AUXILIARY field.  If
+the dynamic linker resolves any symbols from the filter object, it will
+first check whether there is a definition in the shared object
+@var{name}.  If there is one, it will be used instead of the definition
+in the filter object.  The shared object @var{name} need not exist.
+Thus the shared object @var{name} may be used to provide an alternative
+implementation of certain functions, perhaps for debugging or for
+machine specific performance.
+
 @kindex -F
 @kindex --filter
 @item -F @var{name}
 @itemx --filter @var{name}
 When creating an ELF shared object, set the internal DT_FILTER field to
 the specified name.  This tells the dynamic linker that the symbol table
-of the shared object should be used as a filter on the symbol table of
-the shared object @var{name}.
+of the shared object which is being created should be used as a filter
+on the symbol table of the shared object @var{name}.
+
+If you later link a program against this filter object, then, when you
+run the program, the dynamic linker will see the DT_FILTER field.  The
+dynamic linker will resolve symbols according to the symbol table of the
+filter object as usual, but it will actually link to the definitions
+found in the shared object @var{name}.  Thus the filter object can be
+used to select a subset of the symbols provided by the object
+@var{name}.
 
 Some older linkers used the @code{-F} option throughout a compilation
 toolchain for specifying object-file format for both input and output
@@ -555,11 +578,14 @@ Print the names of the input files as @code{ld} processes them.
 @item -T @var{commandfile}
 @itemx --script=@var{commandfile}
 Read link commands from the file @var{commandfile}.  These commands
-replace @code{ld}'s default link script (rather than adding
-to it), so @var{commandfile} must specify everything necessary to describe
-the target format.  @xref{Commands}.  If @var{commandfile} does not
-exist, @code{ld} looks for it in the directories specified by any
-preceding @samp{-L} options.  Multiple @samp{-T} options accumulate.
+replace @code{ld}'s default link script (rather than adding to it), so
+@var{commandfile} must specify everything necessary to describe the
+target format.  You must use this option if you want to use a command
+which can only appear once in a linker script, such as the
+@code{SECTIONS} or @code{MEMORY} command.  @xref{Commands}.  If
+@var{commandfile} does not exist, @code{ld} looks for it in the
+directories specified by any preceding @samp{-L} options.  Multiple
+@samp{-T} options accumulate.
 
 @kindex -u @var{symbol}
 @kindex --undefined=@var{symbol}

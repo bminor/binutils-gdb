@@ -1,6 +1,12 @@
+Thu Jan 16 17:07:52 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld.texinfo (Options): Improve documentation of --filter and
+	--auxiliary.
+
 Tue Jan 14 15:44:28 1997  Ian Lance Taylor  <ian@cygnus.com>
 
-	* ld.texinfo (Commands): Clarify that the normal usage is -T.
+	* ld.texinfo (Options): Clarify that the normal usage is -T.
+	(Commands): Likewise.
 
 Thu Jan  9 11:26:27 1997  Ian Lance Taylor  <ian@cygnus.com>
 
