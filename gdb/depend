@@ -136,7 +136,7 @@ mach386-xdep.o : mach386-xdep.c defs.h tm.h config.status xm.h config.status fra
 main.o : main.c defs.h tm.h config.status xm.h config.status gdbcmd.h command.h symtab.h \
   ${srcdir}/../include/obstack.h inferior.h breakpoint.h value.h frame.h signals.h \
   target.h ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h language.h \
-  ${srcdir}/../include/getopt.h ${srcdir}/../readline/readline.h ${srcdir}/../readline/sysdep.h \
+  ${srcdir}/../include/getopt.h ${srcdir}/../readline/readline.h \
   ${srcdir}/../readline/keymaps.h ${srcdir}/../readline/chardefs.h ${srcdir}/../readline/history.h 
 mem-break.o : mem-break.c defs.h tm.h config.status xm.h config.status 
 mips-pinsn.o : mips-pinsn.c defs.h tm.h config.status xm.h config.status symtab.h \
