@@ -23,6 +23,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "target.h"
 
+#include "xcoffsolib.h"
+
 #include <sys/param.h>
 #include <sys/dir.h>
 #include <sys/user.h>
@@ -52,9 +54,6 @@ static struct sstep_breaks {
 } stepBreaks[2];
 
 /* Static function prototypes */
-
-static void
-add_text_to_loadinfo PARAMS ((CORE_ADDR textaddr, CORE_ADDR dataaddr));
 
 static CORE_ADDR
 find_toc_address PARAMS ((CORE_ADDR pc));
@@ -1179,7 +1178,7 @@ xcoff_add_toc_to_loadinfo (unsigned long tocoff)
 }
 
 
-static void
+void
 add_text_to_loadinfo (textaddr, dataaddr)
      CORE_ADDR textaddr;
      CORE_ADDR dataaddr;

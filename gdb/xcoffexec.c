@@ -40,6 +40,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "objfiles.h"
 
 #include "libbfd.h"		/* BFD internals (sigh!)  FIXME */
+#include "bfd.h"
 #include "xcoffsolib.h"
 
 /* Prototypes for local functions */
@@ -49,6 +50,9 @@ file_command PARAMS ((char *, int));
 
 static void
 exec_close PARAMS ((int));
+
+static struct vmap *
+map_vmap PARAMS ((bfd *, bfd *));
 
 struct section_table *exec_sections, *exec_sections_end;
 
@@ -64,38 +68,6 @@ extern char *getenv();
 extern void add_syms_addr_command ();
 extern void symbol_file_command ();
 static void exec_files_info();
-extern struct objfile *lookup_objfile_bfd ();
-
-#if 0
-/*
- * the vmap struct is used to describe the virtual address space of
- * the target we are manipulating.  The first entry is always the "exec"
- * file.  Subsequent entries correspond to other objects that are
- * mapped into the address space of a process created from the "exec" file.
- * These are either in response to exec()ing the file, in which case all
- * shared libraries are loaded, or a "load" system call, followed by the
- * user's issuance of a "load" command.
- */
-struct vmap {
-	struct vmap *nxt;	/* ^ to next in chain			*/
-	bfd *bfd;		/* BFD for mappable object library	*/
-	char *name;		/* ^ to object file name		*/
-	char *member;		/* ^ to member name			*/
-	CORE_ADDR tstart;	/* virtual addr where member is mapped	*/
-	CORE_ADDR tend;		/* virtual upper bound of member	*/
-	CORE_ADDR tadj;		/* heuristically derived adjustment	*/
-	CORE_ADDR dstart;	/* virtual address of data start	*/
-	CORE_ADDR dend;		/* vitrual address of data end		*/
-};
-
-
-struct vmap_and_bfd {
-  bfd *pbfd;
-  struct vmap *pvmap;
-};
-
-static struct vmap *vmap;	/* current vmap				*/
-#endif /* 0 */
 
 struct vmap *vmap;		/* current vmap */
 
@@ -117,11 +89,14 @@ exec_close(quitting)
       /* if there is an objfile associated with this bfd,
 	 free_objfile() will do proper cleanup of objfile *and* bfd. */
 		   
-      if (obj = lookup_objfile_bfd (vp->bfd))
-	free_objfile (obj);
+      if (vp->objfile)
+	free_objfile (vp->objfile);
       else
 	bfd_close(vp->bfd);
-      
+
+      /* FIXME: This routine is #if 0'd in symfile.c.  What should we
+	 be doing here?  Should we just free everything in
+	 vp->objfile->symtabs?  Should free_objfile do that?  */
       free_named_symtabs(vp->name);
       free(vp);
     }
@@ -265,21 +240,7 @@ build_section_table (some_bfd, start, end)
   /* We could realloc the table, but it probably loses for most files.  */
   return 0;
 }
-
-/*
- * lookup_symtab_bfd -	find if we currently have any symbol tables from bfd
- */
-struct objfile *
-lookup_objfile_bfd(bfd *bfd) {
-	register struct objfile *s;
-
-	for (s = object_files; s; s = s->next)
-		if (s->obfd == bfd)
-			return s;
-	return 0;
-}
-
-
+
 void
 sex_to_vmap(bfd *bf, sec_ptr sex, struct vmap_and_bfd *vmap_bfd) 
 {
@@ -313,8 +274,8 @@ sex_to_vmap(bfd *bf, sec_ptr sex, struct vmap_and_bfd *vmap_bfd)
 }
 
 /* Make a vmap for the BFD "bf", which might be a member of the archive
-   BFD "arch".  If we have not yet read in symbols for this file, do so.  */
-
+   BFD "arch".  Return the new vmap.  */
+struct vmap *
 map_vmap (bfd *bf, bfd *arch)
 {
   struct vmap_and_bfd vmap_bfd;
@@ -332,24 +293,12 @@ map_vmap (bfd *bf, bfd *arch)
   vmap_bfd.pvmap = vp;
   bfd_map_over_sections (bf, sex_to_vmap, &vmap_bfd);
 
-#if 0
-  /* This is only needed if we want to load shared libraries no matter what.
-     Since we provide the choice of incremental loading of shared objects
-     now, we do not have to load them as default anymore. */
-    
-  obj = lookup_objfile_bfd (bf);
-  if (exec_bfd && !obj) {
-    obj = allocate_objfile (bf, 0);
-
-    syms_from_objfile (obj, 0, 0, 0);
-    new_symfile_objfile (obj, 0, 0);
-  }
-#endif
-
   /* find the end of the list, and append. */
   for (vpp = &vmap; *vpp; vpp = &(*vpp)->nxt)
   ;
   *vpp = vp;
+
+  return vp;
 }
 
 
@@ -369,48 +318,18 @@ struct stat *vip;
   register struct objfile *objfile;
   register struct minimal_symbol *msymbol;
   
-  /*
-   * for each symbol table generated from the vp->bfd
-   */
-  ALL_OBJFILES (objfile)
+  objfile = vp->objfile;
+  if (objfile == NULL)
     {
-      for (s = objfile -> symtabs; s != NULL; s = s -> next) {
-	
-	/* skip over if this is not relocatable and doesn't have a line table */
-	if (s->nonreloc && !LINETABLE (s))
-	  continue;
-	
-	/* matching the symbol table's BFD and the *vp's BFD is hairy.
-	   exec_file creates a seperate BFD for possibly the
-	   same file as symbol_file.FIXME ALL THIS MUST BE RECTIFIED. */
-	
-	if (objfile->obfd == vp->bfd) {
-	  /* if they match, we luck out. */
-	  ;
-	} else if (vp->member[0]) {
-	  /* no match, and member present, not this one. */
-	  continue;
-	} else if (vip) {
-	  /* No match, and no member. need to be sure.
-	     If we were given a stat structure, see if the open file
-	     underlying this BFD matches.  */
-	  struct stat si;
-	  FILE *io;
-	  
-	  io = bfd_cache_lookup(objfile->obfd);
-	  if (!io)
-	    fatal("cannot find BFD's iostream for sym");
+      /* OK, it's not an objfile we opened ourselves.
+	 Currently, that can only happen with the exec file, so
+	 relocate the symbols for the symfile.  */
+      if (symfile_objfile == NULL)
+	return;
+      objfile = symfile_objfile;
+    }
 
-	  /* see if we are referring to the same file */
-	  if (fstat(fileno(io), &si) < 0)
-	    fatal("cannot fstat BFD for sym");
-	  
-	  if ((si.st_dev != vip->st_dev
-	      || si.st_ino != vip->st_ino))
-	    continue;
-	} else {
-          continue;	/* No stat struct: no way to match it */
-	}
+  s = objfile->symtabs;
 
 	if (vp->tstart != old_start) {
 
@@ -422,12 +341,16 @@ struct stat *vip;
 	    if (!s->nonreloc || LINETABLE(s))
 		vmap_symtab_1(s, vp, old_start);
 
-#if 0 
+#if 1
+	  /* I believe trampoline entries now have a name like
+	     <trampoline>.  In any event, if something needs to be changed,
+	     it should be changed in ALL_MSYMBOLS, so it works everywhere.  */
+	  /*
 	  Himm.., recently we nullified trampoline entry names in order not
 	  to confuse them with real symbols.  Appearently this turned into a
 	  problem, and msymbol vector did not get relocated properly.  If
 	  msymbols have to have non-null names, then we should name
-	  trampoline entries with empty strings. 
+	  trampoline entries with empty strings. */
 
 	  ALL_MSYMBOLS (objfile, msymbol)
 #else
@@ -438,10 +361,7 @@ struct stat *vip;
 	      if (SYMBOL_VALUE_ADDRESS (msymbol) < TEXT_SEGMENT_BASE)
 		SYMBOL_VALUE_ADDRESS (msymbol) += vp->tstart - old_start;
 
-	   break;
 	}
-      }
-    }
 
   if (vp->tstart != old_start) {
     /* breakpoints need to be relocated as well. */
@@ -545,13 +465,22 @@ CORE_ADDR old_start;
     }
 }
 
-/*
- * add_vmap -	add a new vmap entry based on ldinfo() information
- */
+static struct vmap *add_vmap PARAMS ((struct ld_info *));
+
+/* Add a new vmap entry based on ldinfo() information.
+
+   If ldi->ldinfo_fd is not valid (e.g. this struct ld_info is from a
+   core file), the caller should set it to -1, and we will open the file.
+
+   Return the vmap new entry.  */
+static struct vmap *
 add_vmap(ldi)
-register struct ld_info *ldi; {
+     register struct ld_info *ldi; 
+{
 	bfd *bfd, *last;
 	register char *mem, *objname;
+	struct objfile *obj;
+	struct vmap *vp;
 
 	/* This ldi structure was allocated using alloca() in 
 	   xcoff_relocate_symtab(). Now we need to have persistent object 
@@ -561,7 +490,12 @@ register struct ld_info *ldi; {
 	mem = savestring (mem, strlen (mem));
 	objname = savestring (ldi->ldinfo_filename, strlen (ldi->ldinfo_filename));
 
-	bfd = bfd_fdopenr(objname, NULL, ldi->ldinfo_fd);
+	if (ldi->ldinfo_fd < 0)
+	  /* Note that this opens it once for every member; a possible
+	     enhancement would be to only open it once for every object.  */
+	  bfd = bfd_openr (objname, NULL);
+	else
+	  bfd = bfd_fdopenr(objname, NULL, ldi->ldinfo_fd);
 	if (!bfd)
 	  error("Could not open `%s' as an executable file: %s",
 					objname, bfd_errmsg(bfd_error));
@@ -570,7 +504,7 @@ register struct ld_info *ldi; {
 	/* make sure we have an object file */
 
 	if (bfd_check_format(bfd, bfd_object))
-	  map_vmap (bfd, 0);
+	  vp = map_vmap (bfd, 0);
 
 	else if (bfd_check_format(bfd, bfd_archive)) {
 		last = 0;
@@ -593,16 +527,25 @@ register struct ld_info *ldi; {
 			goto obj_err;
 		}
 
-		map_vmap (last, bfd);
+		vp = map_vmap (last, bfd);
 	}
 	else {
 	    obj_err:
 		bfd_close(bfd);
-/* FIXME -- should be error */
-		warning("\"%s\": not in executable format: %s."
-		      , objname, bfd_errmsg(bfd_error));
-		return;
+		error ("\"%s\": not in executable format: %s.",
+		       objname, bfd_errmsg(bfd_error));
+		/*NOTREACHED*/
 	}
+	obj = allocate_objfile (vp->bfd, 0);
+	vp->objfile = obj;
+
+#ifndef SOLIB_SYMBOLS_MANUAL
+	syms_from_objfile (obj, 0, 0, 0);
+	new_symfile_objfile (obj, 0, 0);
+	vmap_symtab (vp, 0, 0);
+	vp->loaded = 1;
+#endif
+	return vp;
 }
 
 
@@ -643,7 +586,8 @@ vmap_exec ()
     }
 }
 
-
+#if 0
+/* This was for the old, half-assed, core file support.  */
 int
 text_adjustment (abfd)
 bfd *abfd;
@@ -663,7 +607,7 @@ bfd *abfd;
 
   return adjustment;
 }
-
+#endif
 
 /*
  * vmap_ldinfo -	update VMAP info with ldinfo() information
@@ -1005,7 +949,130 @@ Specify the filename of the executable file.",
 	0, 0,			/* section pointers */
 	OPS_MAGIC,		/* Always the last thing */
 };
+
+/* Core file stuff.  */
 
+/* Relocate symtabs and read in shared library info, based on symbols
+   from the core file.  */
+void
+xcoff_relocate_core ()
+{
+/* Offset of member MEMBER in a struct of type TYPE.  */
+#ifndef offsetof
+#define offsetof(TYPE, MEMBER) ((int) &((TYPE *)0)->MEMBER)
+#endif
+
+/* Size of a struct ld_info except for the variable-length filename.  */
+#define LDINFO_SIZE (offsetof (struct ld_info, ldinfo_filename))
+
+  sec_ptr ldinfo_sec;
+  int offset = 0;
+  struct ld_info *ldip;
+  struct vmap *vp;
+  
+  /* Allocated size of buffer.  */
+  int buffer_size = LDINFO_SIZE;
+  char *buffer = xmalloc (buffer_size);
+  struct cleanup *old = make_cleanup (free_current_contents, &buffer);
+    
+  ldinfo_sec = bfd_get_section_by_name (core_bfd, ".ldinfo");
+  if (ldinfo_sec == NULL)
+    {
+bfd_err:
+      fprintf_filtered (stderr, "Couldn't get ldinfo from core file: %s\n",
+			bfd_errmsg (bfd_error));
+      do_cleanups (old);
+      return;
+    }
+  do
+    {
+      int i;
+      int names_found = 0;
+
+      /* Read in everything but the name.  */
+      if (bfd_get_section_contents (core_bfd, ldinfo_sec, buffer,
+				    offset, LDINFO_SIZE) == 0)
+	goto bfd_err;
+
+      /* Now the name.  */
+      i = LDINFO_SIZE;
+      do
+	{
+	  if (i == buffer_size)
+	    {
+	      buffer_size *= 2;
+	      buffer = xrealloc (buffer, buffer_size);
+	    }
+	  if (bfd_get_section_contents (core_bfd, ldinfo_sec, &buffer[i],
+					offset + i, 1) == 0)
+	    goto bfd_err;
+	  if (buffer[i++] == '\0')
+	    ++names_found;
+	} while (names_found < 2);
+
+      ldip = (struct ld_info *)buffer;
+
+      /* Can't use a file descriptor from the core file; need to open it.  */
+      ldip->ldinfo_fd = -1;
+      
+      /* The first ldinfo is for the exec file, allocated elsewhere.  */
+      if (offset == 0)
+	vp = vmap;
+      else
+	vp = add_vmap (ldip);
+
+      offset += ldip->ldinfo_next;
+
+      vp->tstart = ldip->ldinfo_textorg;
+      vp->tend = vp->tstart + ldip->ldinfo_textsize;
+      vp->dstart = ldip->ldinfo_dataorg;
+      vp->dend = vp->dstart + ldip->ldinfo_datasize;
+
+      if (vp->tadj != 0) {
+	vp->tstart += vp->tadj;
+	vp->tend += vp->tadj;
+      }
+
+      /* Unless this is the exec file,
+	 add our sections to the section table for the core target.  */
+      if (vp != vmap)
+	{
+	  int count;
+	  struct section_table *stp;
+	  
+	  count = core_ops.to_sections_end - core_ops.to_sections;
+	  count += 2;
+	  core_ops.to_sections = (struct section_table *)
+	    xrealloc (core_ops.to_sections,
+		      sizeof (struct section_table) * count);
+	  core_ops.to_sections_end = core_ops.to_sections + count;
+	  stp = core_ops.to_sections_end - 2;
+
+	  /* "Why do we add bfd_section_vma?", I hear you cry.
+	     Well, the start of the section in the file is actually
+	     that far into the section as the struct vmap understands it.
+	     So for text sections, bfd_section_vma tends to be 0x200,
+	     and if vp->tstart is 0xd0002000, then the first byte of
+	     the text section on disk corresponds to address 0xd0002200.  */
+	  stp->bfd = vp->bfd;
+	  stp->sec_ptr = bfd_get_section_by_name (stp->bfd, ".text");
+	  stp->addr = bfd_section_vma (stp->bfd, stp->sec_ptr) + vp->tstart;
+	  stp->endaddr = bfd_section_vma (stp->bfd, stp->sec_ptr) + vp->tend;
+	  stp++;
+	  
+	  stp->bfd = vp->bfd;
+	  stp->sec_ptr = bfd_get_section_by_name (stp->bfd, ".data");
+	  stp->addr = bfd_section_vma (stp->bfd, stp->sec_ptr) + vp->dstart;
+	  stp->endaddr = bfd_section_vma (stp->bfd, stp->sec_ptr) + vp->dend;
+	}
+
+      vmap_symtab (vp, 0, 0);
+
+      add_text_to_loadinfo (ldip->ldinfo_textorg, ldip->ldinfo_dataorg);
+    } while (ldip->ldinfo_next != 0);
+  vmap_exec ();
+  do_cleanups (old);
+}
 
 void
 _initialize_exec()

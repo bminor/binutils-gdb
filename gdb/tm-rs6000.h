@@ -29,8 +29,9 @@ extern int	symtab_relocated;
    if symbol table relocation wasn't done yet. */
 
 #define	CORE_NEEDS_RELOCATION(PC)	\
-  if (!symtab_relocated && !inferior_pid && (PC) >  TEXT_SEGMENT_BASE)	\
-    (PC) -= ( TEXT_SEGMENT_BASE + text_adjustment (exec_bfd));
+  if (!symtab_relocated && !inferior_pid)	\
+    xcoff_relocate_core ();
+extern void xcoff_relocate_core PARAMS ((void));
 
 /* Load segment of a given pc value. */
 

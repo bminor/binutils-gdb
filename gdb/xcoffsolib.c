@@ -25,6 +25,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "xcoffsolib.h"
 
+#ifdef SOLIB_SYMBOLS_MANUAL
+
 extern struct symtab *current_source_symtab;
 extern int	      current_source_line;
 
@@ -87,6 +89,9 @@ solib_add (arg_string, from_tty, target)
 	  vp->name);
       fflush (stdout);
 
+      /* This is gross and doesn't work.  If this code is re-enabled,
+	 just stick a objfile member into the struct vmap; that's the
+	 way solib.c (for SunOS/SVR4) does it.  */
 	obj = lookup_objfile_bfd (vp->bfd);
 	if (!obj) {
 	  warning ("\nObj structure for the shared object not found. Loading failed.");
@@ -115,7 +120,7 @@ solib_add (arg_string, from_tty, target)
   else if (!matched)
     printf ("No matching shared object found.\n");
 }
-
+#endif /* SOLIB_SYMBOLS_MANUAL */
 
 /* Return the module name of a given text address. Note that returned buffer
    is not persistent. */
@@ -172,7 +177,7 @@ Text Range		Data Range		Syms	Shared Object Library\n");
    }
 }
 
-
+#ifdef SOLIB_SYMBOLS_MANUAL
 void
 sharedlibrary_command (args, from_tty)
   char *args;
@@ -181,13 +186,16 @@ sharedlibrary_command (args, from_tty)
   dont_repeat();
   solib_add (args, from_tty, (struct target_ops *)0);
 }
+#endif /* SOLIB_SYMBOLS_MANUAL */
 
 void
 _initialize_solib()
 {
 
+#ifdef SOLIB_SYMBOLS_MANUAL
   add_com("sharedlibrary", class_files, sharedlibrary_command,
 	   "Load shared object library symbols for files matching REGEXP.");
+#endif
   add_info("sharedlibrary", solib_info, 
 	   "Status of loaded shared object libraries");
 }

@@ -438,7 +438,11 @@ static unsigned first_fun_bf;
 
 typedef struct _inclTable {
   char		*name;				/* include filename */
-  int		begin, end;			/* offsets to the line table */
+
+  /* Offsets to the line table.  end points to the last entry which is
+     part of this include file.  */
+  int		begin, end;
+  
   struct subfile *subfile;
   unsigned	funStartLine;			/* start line # of its function */
 } InclTable;
@@ -670,7 +674,10 @@ aix_process_linenos ()
 /* Enter a given range of lines into the line vector.
    can be called in the following two ways:
      enter_line_range (subfile, beginoffset, endoffset, startaddr, 0, firstLine)  or
-     enter_line_range (subfile, beginoffset, 0, startaddr, endaddr, firstLine) */
+     enter_line_range (subfile, beginoffset, 0, startaddr, endaddr, firstLine)
+
+   endoffset points to the last line table entry that we should pay
+   attention to.  */
 
 static void
 enter_line_range (subfile, beginoffset, endoffset, startaddr, endaddr, firstLine)
@@ -688,6 +695,13 @@ enter_line_range (subfile, beginoffset, endoffset, startaddr, endaddr, firstLine
 #define	P_LINESYM(PP)	    (*(long*)((struct external_lineno*)(PP))->l_addr.l_symndx)
 
   pp = &linetab [beginoffset - linetab_offset];
+  if (endoffset != 0 && endoffset - linetab_offset >= linetab_size)
+    {
+      static struct complaint msg =
+	{"Bad line table offset in C_EINCL directive", 0, 0};
+      complain (&msg);
+      return;
+    }
   limit = endoffset ? &linetab [endoffset - linetab_offset]
   		      : &linetab [linetab_size -1];
 
@@ -732,9 +746,10 @@ retrieve_tracebackinfo (abfd, textsec, cs)
   struct coff_symbol *cs;
 {
 #define TBTABLE_BUFSIZ  2000
-#define	MIN_TBTABSIZ	50		/* minimum buffer size to hold a
-					   traceback table. */
 
+  /* Minimum buffer size to hold a traceback table.  */
+#define	MIN_TBTABSIZ	50
+				
   static TracebackInfo tbInfo;
   struct tbtable *ptb;
 
@@ -751,13 +766,16 @@ retrieve_tracebackinfo (abfd, textsec, cs)
   /* keep reading blocks of data from the text section, until finding a zero
      word and a traceback table. */
 
-  while (
-	bufferbytes = (
-		(TBTABLE_BUFSIZ < (textsec->_raw_size - functionstart - bytesread)) ? 
-		 TBTABLE_BUFSIZ : (textsec->_raw_size - functionstart - bytesread))
-
-	&& bfd_get_section_contents (abfd, textsec, buffer, 
-				(file_ptr)(functionstart + bytesread), bufferbytes))
+  /* Note: The logical thing way to write this code would be to assign
+     to bufferbytes within the while condition.  But that triggers a
+     compiler (xlc in AIX 3.2) bug, so simplify it...  */
+  bufferbytes = 
+    (TBTABLE_BUFSIZ < (textsec->_raw_size - functionstart - bytesread) ? 
+     TBTABLE_BUFSIZ : (textsec->_raw_size - functionstart - bytesread));
+  while (bufferbytes 
+	 && (bfd_get_section_contents
+	     (abfd, textsec, buffer, 
+	      (file_ptr)(functionstart + bytesread), bufferbytes)))
   {
     bytesread += bufferbytes;
     pinsn = (int*) buffer;
@@ -796,6 +814,7 @@ retrieve_tracebackinfo (abfd, textsec, cs)
 
       if (!tbInfo.framesize)
         return NULL;      
+
     }
 
     /* look for a zero word. */
@@ -839,6 +858,9 @@ retrieve_tracebackinfo (abfd, textsec, cs)
       tbInfo.parminfo = ptb->tb_ext.parminfo;
       return &tbInfo;
     }
+    bufferbytes = 
+      (TBTABLE_BUFSIZ < (textsec->_raw_size - functionstart - bytesread) ? 
+       TBTABLE_BUFSIZ : (textsec->_raw_size - functionstart - bytesread));
   }
   return NULL;
 }
@@ -1918,7 +1940,9 @@ process_xcoff_symbol (cs, objfile)
   return sym2;
 }
 
-
+/* FIXME: Somewhere in here we should check to see that symno is a
+   valid number, so that we can print an error message on corrupt input
+   files rather than dumping core.  */
 static int
 read_symbol_nvalue (symtable, symno)
      char *symtable;

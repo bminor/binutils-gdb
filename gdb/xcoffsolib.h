@@ -37,6 +37,9 @@ struct vmap {
 	CORE_ADDR dstart;	/* virtual address of data start	*/
 	CORE_ADDR dend;		/* vitrual address of data end		*/
 
+	/* This is NULL for the exec-file.  */
+	struct objfile *objfile;
+
 	CORE_ADDR ostart;	/* objext start ???			*/
 	unsigned  loaded:1;	/* True if symbols are loaded		*/
 	unsigned  reloced:1;	/* True, if symbols relocated		*/
@@ -50,3 +53,7 @@ struct vmap_and_bfd {
 };
 
 extern struct vmap *vmap;
+
+void
+add_text_to_loadinfo PARAMS ((CORE_ADDR textaddr, CORE_ADDR dataaddr));
+
