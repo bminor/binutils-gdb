@@ -176,7 +176,7 @@ Create the files needed to build and use Dynamic Link Libraries
 @cindex archives
 @cindex collections of files
 @smallexample
-ar [-]@var{p}[@var{mod} [@var{relpos}]] @var{archive} [@var{member}@dots{}]
+ar [-]@var{p}[@var{mod} [@var{relpos}] [@var{count}]] @var{archive} [@var{member}@dots{}]
 ar -M [ <mri-script ]
 @end smallexample
 
@@ -234,7 +234,7 @@ program.
 @section Controlling @code{ar} on the command line
 
 @smallexample
-ar [-]@var{p}[@var{mod} [@var{relpos}]] @var{archive} [@var{member}@dots{}]
+ar [-]@var{p}[@var{mod} [@var{relpos}] [@var{count}]] @var{archive} [@var{member}@dots{}]
 @end smallexample
 
 @cindex Unix compatibility, @code{ar}
@@ -387,14 +387,6 @@ not compatible with the native @code{ar} program on some systems.  If
 this is a concern, the @samp{f} modifier may be used to truncate file
 names when putting them in the archive.
 
-@item P
-Use the full path name when matching names in the archive.  @sc{gnu}
-@code{ar} can not create an archive with a full path name (such archives
-are not POSIX complaint), but other archive creators can.  This option
-will cause @sc{gnu} @code{ar} to match file names using a complete path
-name, which can be convenient when extracting a single file from an
-archive created by another tool.
-
 @item i
 Insert new files @emph{before} an existing member of the
 archive.  If you use the modifier @samp{i}, the name of an existing archive
@@ -406,11 +398,24 @@ This modifier is accepted but not used.
 @c whaffor ar l modifier??? presumably compat; with
 @c what???---doc@@cygnus.com, 25jan91 
 
+@item N
+Uses the @var{count} parameter.  This is used if there are multiple
+entries in the archive with the same name.  Extract or delete instance
+@var{count} of the given name from the archive.
+
 @item o
 @cindex dates in archive
 Preserve the @emph{original} dates of members when extracting them.  If
 you do not specify this modifier, files extracted from the archive
 are stamped with the time of extraction.
+
+@item P
+Use the full path name when matching names in the archive.  @sc{gnu}
+@code{ar} can not create an archive with a full path name (such archives
+are not POSIX complaint), but other archive creators can.  This option
+will cause @sc{gnu} @code{ar} to match file names using a complete path
+name, which can be convenient when extracting a single file from an
+archive created by another tool.
 
 @item s
 @cindex writing archive index

@@ -1,5 +1,13 @@
 1999-09-12  Donn Terry  <donn@interix.com>
 
+	* ar.c (counted_name_mode): New static variable.
+	(counted_name_counter): New static variable.
+	(map_over_members): Handle counted mode.
+	(usage): Mention N modifier.
+	(main): Handle N modifier.
+	(delete_members): Handle counted mode.
+	* binutils.texi, ar.1: Document N modifier.
+
 	* ar.c (print_contents): Change printing of member name for
 	POSIX.2 conformance.
 
@@ -14,6 +22,7 @@
 	(usage): Mention P modifier.
 	(normalize): If full_pathname is true, don't do anything.
 	(main): Accept P modifier.
+	(delete_members): Call normalize on command line parameter.
 	* binutils.texi, ar.1: Document P modifier.
 
 1999-09-09  Andreas Schwab  <schwab@suse.de>

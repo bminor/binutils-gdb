@@ -147,6 +147,11 @@ enum pos
 static bfd **
 get_pos_bfd PARAMS ((bfd **, enum pos, const char *));
 
+/* For extract/delete only.  If COUNTED_NAME_MODE is true, we only
+   extract the COUNTED_NAME_COUNTER instance of that name.  */
+static boolean counted_name_mode = 0;
+static int counted_name_counter = 0;
+
 /* Whether to truncate names of files stored in the archive.  */
 static boolean ar_truncate = false;
 
@@ -176,6 +181,7 @@ map_over_members (arch, function, files, count)
      int count;
 {
   bfd *head;
+  int match_count;
 
   if (count == 0)
     {
@@ -186,6 +192,7 @@ map_over_members (arch, function, files, count)
 	}
       return;
     }
+
   /* This may appear to be a baroque way of accomplishing what we want.
      However we have to iterate over the filenames in order to notice where
      a filename is requested but does not exist in the archive.  Ditto
@@ -196,6 +203,7 @@ map_over_members (arch, function, files, count)
     {
       boolean found = false;
 
+      match_count = 0;
       for (head = arch->next; head; head = head->next)
 	{
 	  PROGRESS (1);
@@ -209,6 +217,15 @@ map_over_members (arch, function, files, count)
 	  if ((head->filename != NULL) &&
 	      (!strcmp (normalize (*files, arch), head->filename)))
 	    {
+	      ++match_count;
+	      if (counted_name_mode
+		  && match_count != counted_name_counter) 
+		{
+		  /* Counting, and didn't match on count; go on to the
+                     next one.  */
+		  continue;
+		}
+
 	      found = true;
 	      function (head);
 	    }
@@ -232,7 +249,8 @@ usage (help)
   if (! is_ranlib)
     {
       /* xgettext:c-format */
-      fprintf (s, _("Usage: %s [-]{dmpqrstx}[abcilosSuvV] [member-name] archive-file file...\n"), program_name);
+      fprintf (s, _("Usage: %s [-]{dmpqrstx}[abcfilNoPsSuvV] [member-name] [count] archive-file file...\n"),
+	       program_name);
       /* xgettext:c-format */
       fprintf (s, _("       %s -M [<mri-script]\n"), program_name);
       fprintf (s, _(" commands:\n"));
@@ -246,6 +264,7 @@ usage (help)
       fprintf (s, _(" command specific modifiers:\n"));
       fprintf (s, _("  [a]          - put file(s) after [member-name]\n"));
       fprintf (s, _("  [b]          - put file(s) before [member-name] (same as [i])\n"));
+      fprintf (s, _("  [N]          - use instance [count] of name\n"));
       fprintf (s, _("  [f]          - truncate inserted file names\n"));
       fprintf (s, _("  [P]          - use full path names when matching\n"));
       fprintf (s, _("  [o]          - preserve original dates\n"));
@@ -340,6 +359,7 @@ main (argc, argv)
     } operation = none;
   int arg_index;
   char **files;
+  int file_count;
   char *inarch_filename;
   int show_version;
 
@@ -507,6 +527,9 @@ main (argc, argv)
 	case 'M':
 	  mri_mode = 1;
 	  break;
+	case 'N':
+	  counted_name_mode = true;
+	  break;
 	case 'f':
 	  ar_truncate = true;
 	  break;
@@ -557,9 +580,19 @@ main (argc, argv)
       if (postype != pos_default)
 	posname = argv[arg_index++];
 
+      if (counted_name_mode) 
+	{
+          if (operation != extract && operation != delete) 
+	     fatal (_("`N' is only meaningful with the `x' and 'd' options."));
+	  counted_name_counter = atoi (argv[arg_index++]);
+          if (counted_name_counter <= 0)
+	    fatal (_("Value for `N' must be positive."));
+	}
+
       inarch_filename = argv[arg_index++];
 
       files = arg_index < argc ? argv + arg_index : NULL;
+      file_count = argc - arg_index;
 
 #if 0
       /* We don't use do_quick_append any more.  Too many systems
@@ -600,15 +633,15 @@ main (argc, argv)
       switch (operation)
 	{
 	case print_table:
-	  map_over_members (arch, print_descr, files, argc - 3);
+	  map_over_members (arch, print_descr, files, file_count);
 	  break;
 
 	case print_files:
-	  map_over_members (arch, print_contents, files, argc - 3);
+	  map_over_members (arch, print_contents, files, file_count);
 	  break;
 
 	case extract:
-	  map_over_members (arch, extract_file, files, argc - 3);
+	  map_over_members (arch, extract_file, files, file_count);
 	  break;
 
 	case delete:
@@ -1089,6 +1122,8 @@ delete_members (arch, files_to_delete)
   bfd **current_ptr_ptr;
   boolean found;
   boolean something_changed = false;
+  int match_count;
+
   for (; *files_to_delete != NULL; ++files_to_delete)
     {
       /* In a.out systems, the armap is optional.  It's also called
@@ -1105,23 +1140,33 @@ delete_members (arch, files_to_delete)
 	}
 
       found = false;
+      match_count = 0;
       current_ptr_ptr = &(arch->next);
       while (*current_ptr_ptr)
 	{
-	  if (strcmp (*files_to_delete, (*current_ptr_ptr)->filename) == 0)
+	  if (strcmp (normalize (*files_to_delete, arch),
+		      (*current_ptr_ptr)->filename) == 0)
 	    {
-	      found = true;
-	      something_changed = true;
-	      if (verbose)
-		printf ("d - %s\n",
-			*files_to_delete);
-	      *current_ptr_ptr = ((*current_ptr_ptr)->next);
-	      goto next_file;
+	      ++match_count;
+	      if (counted_name_mode
+		  && match_count != counted_name_counter) 
+		{
+		  /* Counting, and didn't match on count; go on to the
+                     next one.  */
+		}
+	      else
+		{
+		  found = true;
+		  something_changed = true;
+		  if (verbose)
+		    printf ("d - %s\n",
+			    *files_to_delete);
+		  *current_ptr_ptr = ((*current_ptr_ptr)->next);
+		  goto next_file;
+		}
 	    }
-	  else
-	    {
-	      current_ptr_ptr = &((*current_ptr_ptr)->next);
-	    }
+
+	  current_ptr_ptr = &((*current_ptr_ptr)->next);
 	}
 
       if (verbose && found == false)
