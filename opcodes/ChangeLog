@@ -1,3 +1,7 @@
+2003-07-24  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+
 2003-07-18  Nick Clifton  <nickc@redhat.com>
 
 	* arm-dis.c (parse_arm_disassembler_option): Do not expect
