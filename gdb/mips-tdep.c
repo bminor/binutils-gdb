@@ -888,13 +888,45 @@ after_prologue (CORE_ADDR pc)
   mips_extra_func_info_t proc_desc;
   struct symtab_and_line sal;
   CORE_ADDR func_addr, func_end;
+  CORE_ADDR startaddr = 0;
 
-  /* Pass a NULL next_frame to find_proc_desc.  We should not attempt
-     to read the stack pointer from the current machine state, because
-     the current machine state has nothing to do with the information
-     we need from the proc_desc; and the process may or may not exist
-     right now.  */
-  proc_desc = find_proc_desc (pc, NULL);
+  /* Pass a NULL next_frame to heuristic_proc_desc.  We should not
+     attempt to read the stack pointer from the current machine state,
+     because the current machine state has nothing to do with the
+     information we need from the proc_desc; and the process may or
+     may not exist right now.  */
+  proc_desc = non_heuristic_proc_desc (pc, &startaddr);
+  if (proc_desc)
+    {
+      /* IF this is the topmost frame AND (this proc does not have
+	 debugging information OR the PC is in the procedure prologue)
+	 THEN create a "heuristic" proc_desc (by analyzing the actual
+	 code) to replace the "official" proc_desc.  */
+      struct symtab_and_line val;
+      struct symbol *proc_symbol =
+	PROC_DESC_IS_DUMMY (proc_desc) ? 0 : PROC_SYMBOL (proc_desc);
+
+      if (proc_symbol)
+	{
+	  val = find_pc_line (BLOCK_START
+			      (SYMBOL_BLOCK_VALUE (proc_symbol)), 0);
+	  val.pc = val.end ? val.end : pc;
+	}
+      if (!proc_symbol || pc < val.pc)
+	{
+	  mips_extra_func_info_t found_heuristic =
+	    heuristic_proc_desc (PROC_LOW_ADDR (proc_desc), pc, NULL);
+	  if (found_heuristic)
+	    proc_desc = found_heuristic;
+	}
+    }
+  else
+    {
+      if (startaddr == 0)
+	startaddr = heuristic_proc_start (pc);
+
+      proc_desc = heuristic_proc_desc (startaddr, pc, NULL);
+    }
 
   if (proc_desc)
     {
@@ -3115,38 +3147,7 @@ find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame)
   CORE_ADDR startaddr = 0;
 
   proc_desc = non_heuristic_proc_desc (pc, &startaddr);
-
-  if (proc_desc)
-    {
-      /* IF this is the topmost frame AND
-       * (this proc does not have debugging information OR
-       * the PC is in the procedure prologue)
-       * THEN create a "heuristic" proc_desc (by analyzing
-       * the actual code) to replace the "official" proc_desc.
-       */
-      if (next_frame == NULL)
-	{
-	  struct symtab_and_line val;
-	  struct symbol *proc_symbol =
-	    PROC_DESC_IS_DUMMY (proc_desc) ? 0 : PROC_SYMBOL (proc_desc);
-
-	  if (proc_symbol)
-	    {
-	      val = find_pc_line (BLOCK_START
-				  (SYMBOL_BLOCK_VALUE (proc_symbol)), 0);
-	      val.pc = val.end ? val.end : pc;
-	    }
-	  if (!proc_symbol || pc < val.pc)
-	    {
-	      mips_extra_func_info_t found_heuristic =
-		heuristic_proc_desc (PROC_LOW_ADDR (proc_desc),
-				     pc, next_frame);
-	      if (found_heuristic)
-		proc_desc = found_heuristic;
-	    }
-	}
-    }
-  else
+  if (proc_desc == NULL)
     {
       if (startaddr == 0)
 	startaddr = heuristic_proc_start (pc);

@@ -1,5 +1,9 @@
 2004-09-03  Andrew Cagney  <cagney@gnu.org>
 
+	* mips-tdep.c (find_proc_desc): Inline call to find_proc_desc.
+	Simplify as NEXT_FRAME is NULL.
+	(find_proc_desc): Simplify as NEXT_FRAME is non-NULL.
+
 	* mips-tdep.c (after_prologue): Replace proc_desc parameter with
 	local variable.
 	(mips_skip_prologue): Update.
