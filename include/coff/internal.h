@@ -9,8 +9,34 @@
 #endif
 
 /********************** FILE HEADER **********************/
+
 struct internal_filehdr
 {
+  /* DOS header data follows for PE stuff */
+  unsigned short e_magic;      /* Magic number, 0x5a4d */
+  unsigned short e_cblp;       /* Bytes on last page of file, 0x90 */
+  unsigned short e_cp;         /* Pages in file, 0x3 */
+  unsigned short e_crlc;       /* Relocations, 0x0 */
+  unsigned short e_cparhdr;    /* Size of header in paragraphs, 0x4 */
+  unsigned short e_minalloc;   /* Minimum extra paragraphs needed, 0x0 */
+  unsigned short e_maxalloc;   /* Maximum extra paragraphs needed, 0xFFFF */
+  unsigned short e_ss;         /* Initial (relative) SS value, 0x0 */
+  unsigned short e_sp;         /* Initial SP value, 0xb8 */
+  unsigned short e_csum;       /* Checksum, 0x0 */
+  unsigned short e_ip;         /* Initial IP value, 0x0 */
+  unsigned short e_cs;         /* Initial (relative) CS value, 0x0 */
+  unsigned short e_lfarlc;     /* File address of relocation table, 0x40 */
+  unsigned short e_ovno;       /* Overlay number, 0x0 */
+  unsigned short e_res[4];     /* Reserved words, all 0x0 */
+  unsigned short e_oemid;      /* OEM identifier (for e_oeminfo), 0x0 */
+  unsigned short e_oeminfo;    /* OEM information; e_oemid specific, 0x0 */
+  unsigned short e_res2[10];   /* Reserved words, all 0x0 */
+  bfd_vma  e_lfanew;           /* File address of new exe header, 0x80 */
+  unsigned long dos_message[16]; /* text which always follows dos header */
+  bfd_vma  nt_signature;   	/* required NT signature, 0x4550 */ 
+
+
+  /* standard coff  internal info */
   unsigned short f_magic;	/* magic number			*/
   unsigned short f_nscns;	/* number of sections		*/
   long f_timdat;		/* time & date stamp		*/
@@ -19,6 +45,7 @@ struct internal_filehdr
   unsigned short f_opthdr;	/* sizeof(optional hdr)		*/
   unsigned short f_flags;	/* flags			*/
 };
+
 
 /* Bits for f_flags:
  *	F_RELFLG	relocation info stripped from file
@@ -41,6 +68,18 @@ struct internal_filehdr
 #define	F_AR32W     	(0x0200)
 #define	F_DYNLOAD	(0x1000)
 #define	F_SHROBJ	(0x2000)
+
+/* extra structure which is used in the optional header */
+typedef struct _IMAGE_DATA_DIRECTORY 
+{
+  bfd_vma VirtualAddress;
+  long    Size;
+}  IMAGE_DATA_DIRECTORY;
+#define IMAGE_NUMBEROF_DIRECTORY_ENTRIES  16
+
+/* default image base for NT */
+#define NT_IMAGE_BASE 0x400000
+
 
 /********************** AOUT "OPTIONAL HEADER" **********************/
 struct internal_aouthdr
@@ -78,10 +117,46 @@ struct internal_aouthdr
   unsigned long fprmask;	/* Floating pointer registers used.  */
 
   /* Apollo stuff */
-  long o_inlib;
-  long o_sri;
-  long vid[2];
+  long o_inlib;			/* inlib data */
+  long o_sri;			/* Static Resource Information */
+  long vid[2];			/* Version id */
+
+
+  /* PE stuff  */
+  bfd_vma ImageBase;          /* address of specific location in memory that
+                                 file is located, NT default 0x10000 */
+  bfd_vma SectionAlignment;   /* section alignment default 0x1000 */
+  bfd_vma FileAlignment;      /* file alignment default 0x200 */
+  short   MajorOperatingSystemVersion;  /* minimum version of the operating */
+  short   MinorOperatingSystemVersion;  /* system req'd for exe, default to 1*/
+  short   MajorImageVersion;  /* user defineable field to store version of */
+  short   MinorImageVersion;  /* exe or dll being created, default to 0 */ 
+  short   MajorSubsystemVersion; /* minimum subsystem version required to */
+  short   MinorSubsystemVersion; /* run exe; default to 3.1 */
+  long    Reserved1;  /* seems to be 0 */
+  long    SizeOfImage; /* size of region from image base to end last section */
+  long    SizeOfHeaders; /* size of PE header and section table */
+  long    CheckSum;  /* set to 0 */
+  short   Subsystem; /* type of subsystem exe uses for user interface,
+                        possible values:
+                        1 - NATIVE   Doesn't require a subsystem
+                        2 - WINDOWS_GUI runs in Windows GUI subsystem
+                        3 - WINDOWS_CUI runs in Windows char sub. (console app)
+                        5 - OS2_CUI runs in OS/2 character subsystem
+                        7 - POSIX_CUI runs in Posix character subsystem */
+  short   DllCharacteristics; /* flags for DLL init, use 0 */
+  bfd_vma SizeOfStackReserve; /* amount of memory to reserve, def. 0x100000 */
+  bfd_vma SizeOfStackCommit; /* amount of memory initially committed for 
+                                initial thread's stack, default is 0x1000 */
+  bfd_vma SizeOfHeapReserve; /* amount of virtual memory to reserve and */
+  bfd_vma SizeOfHeapCommit;  /* commit, don't know what to defaut it to */
+  long    LoaderFlags; /* can probably set to 0 */
+  long    NumberOfRvaAndSizes; /* number of entries in next entry, 16 */
+  IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
+
+
 };
+
 
 /********************** STORAGE CLASSES **********************/
 
@@ -115,6 +190,9 @@ struct internal_aouthdr
 #define C_LINE		104	/* line # reformatted as symbol table entry */
 #define C_ALIAS	 	105	/* duplicate tag		*/
 #define C_HIDDEN	106	/* ext symbol in dmert public lib */
+
+/* New storage classes for WINDOWS_NT   */
+#define C_SECTION       104     /* section name */
 
  /* New storage classes for 80960 */
 
@@ -198,6 +276,9 @@ struct internal_scnhdr
 									     beginning on a word boundary. */
 
 #define STYP_LIT	0x8020	/* Literal data (like STYP_TEXT) */
+
+
+
 /********************** LINE NUMBERS **********************/
 
 /* 1 line number entry for every "breakpointable" source line in a section.
@@ -365,7 +446,11 @@ union internal_auxent
    ******************************************/
   struct
   {
-    long x_scnlen;		/* csect length */
+    union
+      {				/* csect length or enclosing csect */
+	long l;
+	struct coff_ptr_struct *p;
+      } x_scnlen;
     long x_parmhash;		/* parm type hash index */
     unsigned short x_snhash;	/* sect num with parm hash */
     unsigned char x_smtyp;	/* symbol align and type */
@@ -535,4 +620,22 @@ struct internal_reloc
 #define R_SH_PCRELIMM8BY4   23
 #define R_SH_IMM16      24    		/* 16 bit immediate */
 
+
+
+/* W65 modes */
+
+#define R_W65_ABS8	1  /* addr & 0xff 		*/
+#define R_W65_ABS16	2  /* addr & 0xffff 		*/
+#define R_W65_ABS24	3  /* addr & 0xffffff 		*/
+
+#define R_W65_ABS8S8    4  /* (addr >> 8) & 0xff 	*/
+#define R_W65_ABS8S16   5  /* (addr >> 16) & 0xff 	*/
+
+#define R_W65_ABS16S8   6  /* (addr >> 8) & 0ffff 	*/
+#define R_W65_ABS16S16  7  /* (addr >> 16) & 0ffff 	*/
+
+#define R_W65_PCR8	8
+#define R_W65_PCR16	9
+
+#define R_W65_DP       10  /* direct page 8 bits only   */
 

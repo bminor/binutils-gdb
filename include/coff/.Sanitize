@@ -25,9 +25,10 @@ Do-first:
 Things-to-keep:
 
 ChangeLog
-alpha.h
 a29k.h
+alpha.h
 apollo.h
+arm.h
 ecoff.h
 h8300.h
 h8500.h
@@ -43,8 +44,8 @@ sh.h
 sparc.h
 sym.h
 symconst.h
-we32k.h
 w65.h
+we32k.h
 z8k.h
 
 Things-to-lose:
