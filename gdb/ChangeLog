@@ -1,3 +1,15 @@
+Mon Jan 18 16:40:50 1999  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* target.c (dummy_target): Don't initialize statically.
+	(init_dummy_target): New function, fills in dummy_target.
+	(initialize_targets): Use it.
+	* hpux-thread.c (hpux_thread_ops): Don't initialize statically.
+	(init_hpux_thread_ops): New function, fills in hpux_thread_ops.
+	(_initialize_hpux_thread): Use it.
+	* m3-nat.c (m3_ops): Don't initialize statically.
+	(init_m3_ops): New function, fills in m3_ops.
+	(_initialize_m3): Use it.
+
 1999-01-18  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
 	* sol-thread.c: delete compile time initialization of target_ops

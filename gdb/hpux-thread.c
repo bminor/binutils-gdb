@@ -1,5 +1,5 @@
 /* Low level interface for debugging HPUX/DCE threads for GDB, the GNU debugger.
-   Copyright 1996 Free Software Foundation, Inc.
+   Copyright 1996, 1999 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -43,10 +43,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <sys/stat.h>
 #include "gdbcore.h"
 
-extern struct target_ops hpux_thread_ops; /* Forward declaration */
-
 extern int child_suppress_run;
 extern struct target_ops child_ops; /* target vector for inftarg.c */
+
+extern void _initialize_hpux_thread PARAMS ((void));
 
 struct string_map
 {
@@ -62,9 +62,15 @@ static CORE_ADDR P_cma__g_known_threads;
 static CORE_ADDR P_cma__g_current_thread;
 
 static struct cleanup * save_inferior_pid PARAMS ((void));
+
 static void restore_inferior_pid PARAMS ((int pid));
+
 static void hpux_thread_resume PARAMS ((int pid, int step,
 					enum target_signal signo));
+
+static void init_hpux_thread_ops PARAMS ((void));
+
+static struct target_ops hpux_thread_ops;
 
 /*
 
@@ -586,80 +592,49 @@ hpux_pid_to_str (pid)
   return buf;
 }
 
-struct target_ops hpux_thread_ops = {
-  "hpux-threads",		/* to_shortname */
-  "HPUX threads and pthread.", /* to_longname */
-  "HPUX threads and pthread support.", /* to_doc */
-  hpux_thread_open,		/* to_open */
-  0,				/* to_close */
-  hpux_thread_attach,		/* to_attach */
-  NULL,                         /* to_post_attach */
-  NULL,                         /* to_require_attach */
-  hpux_thread_detach, 		/* to_detach */
-  NULL,                         /* to_require_detach */
-  hpux_thread_resume,		/* to_resume */
-  hpux_thread_wait,		/* to_wait */
-  NULL,                         /* to_post_wait */
-  hpux_thread_fetch_registers,	/* to_fetch_registers */
-  hpux_thread_store_registers,	/* to_store_registers */
-  hpux_thread_prepare_to_store,	/* to_prepare_to_store */
-  hpux_thread_xfer_memory,	/* to_xfer_memory */
-  hpux_thread_files_info,	/* to_files_info */
-  memory_insert_breakpoint,	/* to_insert_breakpoint */
-  memory_remove_breakpoint,	/* to_remove_breakpoint */
-  terminal_init_inferior,	/* to_terminal_init */
-  terminal_inferior, 		/* to_terminal_inferior */
-  terminal_ours_for_output,	/* to_terminal_ours_for_output */
-  terminal_ours,		/* to_terminal_ours */
-  child_terminal_info,		/* to_terminal_info */
-  hpux_thread_kill_inferior,	/* to_kill */
-  0,				/* to_load */
-  0,				/* to_lookup_symbol */
-  hpux_thread_create_inferior,	/* to_create_inferior */
-  NULL,                         /* to_post_startup_inferior */
-  NULL,                         /* to_acknowledge_created_inferior */
-  NULL,                         /* to_clone_and_follow_inferior */
-  NULL,                         /* to_post_follow_inferior_by_clone */
-  NULL,                         /* to_insert_fork_catchpoint */
-  NULL,                         /* to_remove_fork_catchpoint */
-  NULL,                         /* to_insert_vfork_catchpoint */
-  NULL,                         /* to_remove_vfork_catchpoint */
-  NULL,                         /* to_has_forked */
-  NULL,                         /* to_has_vforked */
-  NULL,                         /* to_can_follow_vfork_prior_to_exec */
-  NULL,                         /* to_post_follow_fork */
-  hpux_thread_mourn_inferior,	/* to_mourn_inferior */
-  NULL,                         /* to_insert_exec_catchpoint */
-  NULL,                         /* to_remove_exec_catchpoint */
-  NULL,                         /* to_has_execd */
-  NULL,                         /* to_reported_exec_events_per_exec_call */
-  NULL,                         /* to_has_syscall_event */
-  NULL,                         /* to_has_exited */
-  hpux_thread_can_run,		/* to_can_run */
-  hpux_thread_notice_signals,	/* to_notice_signals */
-  hpux_thread_alive,		/* to_thread_alive */
-  hpux_thread_stop,		/* to_stop */
-  0,				/* to_query */
-  NULL,                         /* to_enable_exception_callback */
-  NULL,                         /* to_get_current_exception_event */
-  NULL,                         /* to_pid_to_exec_file */
-  NULL,                         /* to_core_file_to_sym_file */
-  process_stratum,		/* to_stratum */
-  0,				/* to_next */
-  1,				/* to_has_all_memory */
-  1,				/* to_has_memory */
-  1,				/* to_has_stack */
-  1,				/* to_has_registers */
-  1,				/* to_has_execution */
-  tc_none,			/* to_has_thread_control */
-  0,				/* sections */
-  0,				/* sections_end */
-  OPS_MAGIC			/* to_magic */
-};
+static void
+init_hpux_thread_ops ()
+{
+  hpux_thread_ops.to_shortname = "hpux-threads";
+  hpux_thread_ops.to_longname = "HPUX threads and pthread.";
+  hpux_thread_ops.to_doc = "HPUX threads and pthread support.";
+  hpux_thread_ops.to_open = hpux_thread_open;
+  hpux_thread_ops.to_attach = hpux_thread_attach;
+  hpux_thread_ops.to_detach = hpux_thread_detach;
+  hpux_thread_ops.to_resume = hpux_thread_resume;
+  hpux_thread_ops.to_wait = hpux_thread_wait;
+  hpux_thread_ops.to_fetch_registers = hpux_thread_fetch_registers;
+  hpux_thread_ops.to_store_registers = hpux_thread_store_registers;
+  hpux_thread_ops.to_prepare_to_store = hpux_thread_prepare_to_store;
+  hpux_thread_ops.to_xfer_memory = hpux_thread_xfer_memory;
+  hpux_thread_ops.to_files_info = hpux_thread_files_info;
+  hpux_thread_ops.to_insert_breakpoint = memory_insert_breakpoint;
+  hpux_thread_ops.to_remove_breakpoint = memory_remove_breakpoint;
+  hpux_thread_ops.to_terminal_init = terminal_init_inferior;
+  hpux_thread_ops.to_terminal_inferior = terminal_inferior;
+  hpux_thread_ops.to_terminal_ours_for_output = terminal_ours_for_output;
+  hpux_thread_ops.to_terminal_ours = terminal_ours;
+  hpux_thread_ops.to_terminal_info = child_terminal_info;
+  hpux_thread_ops.to_kill = hpux_thread_kill_inferior;
+  hpux_thread_ops.to_create_inferior = hpux_thread_create_inferior;
+  hpux_thread_ops.to_mourn_inferior = hpux_thread_mourn_inferior;
+  hpux_thread_ops.to_can_run = hpux_thread_can_run;
+  hpux_thread_ops.to_notice_signals = hpux_thread_notice_signals;
+  hpux_thread_ops.to_thread_alive = hpux_thread_thread_alive;
+  hpux_thread_ops.to_stop = hpux_thread_stop;
+  hpux_thread_ops.to_stratum = process_stratum;
+  hpux_thread_ops.to_has_all_memory = 1;
+  hpux_thread_ops.to_has_memory = 1;
+  hpux_thread_ops.to_has_stack = 1;
+  hpux_thread_ops.to_has_registers = 1;
+  hpux_thread_ops.to_has_execution = 1;
+  hpux_thread_ops.to_magic = OPS_MAGIC;
+}
 
 void
 _initialize_hpux_thread ()
 {
+  init_hpux_thread_ops ();
   add_target (&hpux_thread_ops);
 
   child_suppress_run = 1;

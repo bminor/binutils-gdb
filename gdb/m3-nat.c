@@ -1,7 +1,7 @@
 /* Interface GDB to Mach 3.0 operating systems.
    (Most) Mach 3.0 related routines live in this file.
 
-   Copyright (C) 1992, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1992, 1996, 1999 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -260,7 +260,8 @@ int must_suspend_thread = 0;
 struct cleanup *cleanup_step = NULL_CLEANUP;
 
 
-extern struct target_ops m3_ops;
+static struct target_ops m3_ops;
+
 static void m3_kill_inferior ();
 
 #if 0
@@ -4534,79 +4535,50 @@ int  pid;
   return NULL;  /* To keep all compilers happy. */
 }
 
-struct target_ops m3_ops = {
-  "mach",			/* to_shortname */
-  "Mach child process",	/* to_longname */
-  "Mach child process (started by the \"run\" command).",	/* to_doc */
-  m3_open,			/* to_open */
-  0,				/* to_close */
-  m3_attach,			/* to_attach */
-  NULL,                         /* to_post_attach */
-  NULL,                       /* to_require_attach */
-  m3_detach, 		/* to_detach */
-  NULL,                       /* to_require_detach */
-  m3_resume,			/* to_resume */
-  mach_really_wait,			/* to_wait */
-  NULL,                         /* to_post_wait */
-  fetch_inferior_registers,	/* to_fetch_registers */
-  store_inferior_registers,	/* to_store_registers */
-  m3_prepare_to_store,	/* to_prepare_to_store */
-  m3_xfer_memory,		/* to_xfer_memory */
-  m3_files_info,		/* to_files_info */
-  memory_insert_breakpoint,	/* to_insert_breakpoint */
-  memory_remove_breakpoint,	/* to_remove_breakpoint */
-  terminal_init_inferior,	/* to_terminal_init */
-  terminal_inferior, 		/* to_terminal_inferior */
-  terminal_ours_for_output,	/* to_terminal_ours_for_output */
-  terminal_ours,		/* to_terminal_ours */
-  child_terminal_info,		/* to_terminal_info */
-  m3_kill_inferior,		/* to_kill */
-  0,				/* to_load */
-  0,				/* to_lookup_symbol */
-  m3_create_inferior,	/* to_create_inferior */
-  NULL,                         /* to_post_startup_inferior */
-  NULL,                         /* to_acknowledge_created_inferior */
-  NULL,                         /* to_clone_and_follow_inferior */
-  NULL,                         /* to_post_follow_inferior_by_clone */
-  NULL,                         /* to_insert_fork_catchpoint */
-  NULL,                         /* to_remove_fork_catchpoint */
-  NULL,                         /* to_insert_vfork_catchpoint */
-  NULL,                         /* to_remove_vfork_catchpoint */
-  NULL,                         /* to_has_forked */
-  NULL,                         /* to_has_vforked */
-  NULL,                         /* to_can_follow_vfork_prior_to_exec */
-  NULL,                         /* to_post_follow_vfork */
-  NULL,                         /* to_insert_exec_catchpoint */
-  NULL,                         /* to_remove_exec_catchpoint */
-  NULL,                         /* to_has_execd */
-  NULL,                         /* to_reported_exec_events_per_exec_call */
-  NULL,                         /* to_has_exited */
-  m3_mourn_inferior,	/* to_mourn_inferior */
-  m3_can_run,		/* to_can_run */
-  0,				/* to_notice_signals */
-  0,				/* to_thread_alive */
-  m3_stop,			/* to_stop */
-  0,				/* to_query */
-  m3_pid_to_exec_file,          /* to_pid_to_exec_file */
-  NULL,                         /* to_core_file_to_sym_file */
-  process_stratum,		/* to_stratum */
-  0,				/* to_next */
-  1,				/* to_has_all_memory */
-  1,				/* to_has_memory */
-  1,				/* to_has_stack */
-  1,				/* to_has_registers */
-  1,				/* to_has_execution */
-  tc_none,			/* to_has_thread_control */
-  0,				/* sections */
-  0,				/* sections_end */
-  OPS_MAGIC			/* to_magic */
-};
+static void
+init_m3_ops ()
+{
+  m3_ops.to_shortname = "mach";
+  m3_ops.to_longname = "Mach child process";
+  m3_ops.to_doc = "Mach child process (started by the \"run\" command).";
+  m3_ops.to_open = m3_open;
+  m3_ops.to_attach = m3_attach;
+  m3_ops.to_detach = m3_detach;
+  m3_ops.to_resume = m3_resume;
+  m3_ops.to_wait = mach_really__wait;
+  m3_ops.to_fetch_registers = fetch_inferior_registers;
+  m3_ops.to_store_registers = store_inferior_registers;
+  m3_ops.to_prepare_to_store = m3_prepare_to_store;
+  m3_ops.to_xfer_memory = m3_xfer_memory;
+  m3_ops.to_files_info = m3_files_info;
+  m3_ops.to_insert_breakpoint = memory_insert_breakpoint;
+  m3_ops.to_remove_breakpoint = memory_remove_breakpoint;
+  m3_ops.to_terminal_init = terminal_init_inferior;
+  m3_ops.to_terminal_inferior = terminal_inferior;
+  m3_ops.to_terminal_ours_for_output = terminal_ours_for_output;
+  m3_ops.to_terminal_ours = terminal_ours;
+  m3_ops.to_terminal_info = child_terminal_info;
+  m3_ops.to_kill = m3_kill_inferior;
+  m3_ops.to_create_inferior = m3_create_inferior;
+  m3_ops.to_mourn_inferior = m3_mourn_inferior;
+  m3_ops.to_can_run = m3_can_run;
+  m3_ops.to_stop = m3_stop;
+  m3_ops.to_pid_to_exec_file = m3_pid_to_exec_file;
+  m3_ops.to_stratum = process_stratum;
+  m3_ops.to_has_all_memory = 1;
+  m3_ops.to_has_memory = 1;
+  m3_ops.to_has_stack = 1;
+  m3_ops.to_has_registers = 1;
+  m3_ops.to_has_execution = 1;
+  m3_ops.to_magic = OPS_MAGIC;
+}
 
 void
 _initialize_m3_nat ()
 {
   kern_return_t ret;
 
+  init_m3_ops ();
   add_target (&m3_ops);
 
   ret = mach_port_allocate(mach_task_self(), 
