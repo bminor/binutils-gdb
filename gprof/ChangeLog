@@ -1,3 +1,8 @@
+Mon Jun 16 15:31:39 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (INCLUDES): Add -DDEBUG.
+	* Makefile.in: Rebuild.
+
 Tue Apr 15 14:19:30 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	Change to use automake:

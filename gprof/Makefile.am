@@ -5,7 +5,7 @@ AUTOMAKE_OPTIONS = foreign
 
 SUFFIXES = .m
 
-INCLUDES = -D_GNU_SOURCE -DTARGET_$(MY_TARGET) -DMACHINE_H=\"$(MY_TARGET).h\" -I../bfd -I$(srcdir)/../include -I$(srcdir)/../bfd
+INCLUDES = -D_GNU_SOURCE -DDEBUG -DTARGET_$(MY_TARGET) -DMACHINE_H=\"$(MY_TARGET).h\" -I../bfd -I$(srcdir)/../include -I$(srcdir)/../bfd
 
 LINK = $(HLDENV) $(CC) $(LDFLAGS) -o $@
 
