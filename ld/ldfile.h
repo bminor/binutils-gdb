@@ -52,5 +52,5 @@ extern FILE *ldfile_find_command_file
   PARAMS ((const char *name, const char *extend));
 extern void ldfile_set_output_arch PARAMS ((CONST char *));
 extern boolean ldfile_open_file_search
-  PARAMS ((const char *arch, lang_input_statement_type *,
+  PARAMS ((const char *arch, struct lang_input_statement_struct *,
 	   const char *lib, const char *suffix));
