@@ -1,3 +1,7 @@
+Wed Mar  9 19:43:05 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo (Symbol Descriptors): Add OS9000 symbol descriptor s.
+
 Tue Mar  1 17:04:43 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* stabs.texinfo (Type Descriptors): Add OS9000 type descriptors c,

@@ -3332,6 +3332,9 @@ Register variable; see @ref{Register Variables}.
 @item S
 File scope variable; see @ref{Statics}.
 
+@item s
+Local variable (OS9000).
+
 @item t
 Type name; see @ref{Typedefs}.
 
