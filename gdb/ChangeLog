@@ -1,3 +1,22 @@
+2002-11-05  Andrew Cagney  <ac131313@redhat.com>
+
+	* sparc-tdep.c (sparc_print_register_hook): Make static.
+	(sparc_print_registers_info): New function.
+	(sparc_do_registers_info): New function.
+	(sparclet_print_registers_info): New function.
+	(sparclet_do_registers_info): New function.
+	(do_sparc_print_registers_info): New function.
+	(sparc_print_registers): New static function, clone of infcmd.c's
+	default_print_registers_info.
+	* config/sparc/tm-sparclet.h (PRINT_REGISTER_HOOK): Delete macro.
+	(sparclet_do_registers_info): Declare.
+	(DEPRECATED_DO_REGISTERS_INFO): Re-define.
+	* config/sparc/tm-sparc.h (DEPRECATED_DO_REGISTERS_INFO):
+	Re-define.
+	(sparc_do_registers_info): Declare.
+	(PRINT_REGISTER_HOOK): Delete macro.
+	(sparc_print_register_hook): Delete declaration.
+
 2002-11-05  David Carlton  <carlton@math.stanford.edu>
 
 	* symtab.c (lookup_symbol_aux): Move chunks of code into separate

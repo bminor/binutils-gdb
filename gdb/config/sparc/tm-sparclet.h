@@ -127,8 +127,10 @@ enum {
 
 #endif /* GDB_MULTI_ARCH */
 
-#undef PRINT_REGISTER_HOOK
-#define PRINT_REGISTER_HOOK(regno)
+extern void sparclet_do_registers_info (int regnum, int all);
+#undef DEPRECATED_DO_REGISTERS_INFO
+#define DEPRECATED_DO_REGISTERS_INFO(REGNUM,ALL) sparclet_do_registers_info (REGNUM, ALL)
+
 
 /* Offsets into jmp_buf.  Not defined by Sun, but at least documented in a
    comment in <machine/setjmp.h>! */
