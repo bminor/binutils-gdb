@@ -1,3 +1,18 @@
+2002-02-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (STFD_FR0_0R1, LFD_FR0_0R1, BLR): Define.
+	(struct ppc_link_hash_table): Add sfpr.
+	(ppc64_elf_link_hash_table_create): Init it.
+	(ppc64_elf_create_dynamic_sections): Split creation of .stub and
+	.glink out to..
+	(create_linkage_sections): ..here.  Make .sfpr too.
+	(ppc64_elf_check_relocs): Call create_linkage_sections, and set
+	dynobj early.
+	(MIN_SAVE_FPR, MAX_SAVE_FPR): Define.
+	(ppc64_elf_func_desc_adjust): Look for missing ._savef* and
+	._restf* functions, and create as needed.
+	(func_desc_adjust): Only force_local for shared libs.
+
 2002-02-18  David O'Brien  <obrien@FreeBSD.org>
 
 	* configure.in: Bump version number post 2.12 branching.

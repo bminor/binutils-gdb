@@ -1,3 +1,7 @@
+2002-02-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* emulparams/elf64ppc.sh (OTHER_TEXT_SECTIONS): Define.
+
 2002-02-18  David O'Brien  <obrien@FreeBSD.org>
 
 	* Makefile.in: Add new files earmelf_fbsd, eelf32ppc_fbsd,
