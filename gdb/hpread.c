@@ -3230,7 +3230,7 @@ hpread_read_function_type (dnttpointer hp_type, union dnttentry *dn_bufp,
       else			/* expect DNTT_TYPE_FUNC_TEMPLATE */
 	type1 = lookup_function_type (hpread_type_lookup (dn_bufp->dfunc_template.retval,
 							  objfile));
-      memcpy ((char *) type, (char *) type1, sizeof (struct type));
+      replace_type (type, type1);
 
       /* Mark it -- in the middle of processing */
       TYPE_FLAGS (type) |= TYPE_FLAG_INCOMPLETE;
@@ -3407,7 +3407,7 @@ hpread_read_doc_function_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	  dn_bufp->dblock.kind == DNTT_TYPE_DOC_MEMFUNC)
 	type1 = lookup_function_type (hpread_type_lookup (dn_bufp->ddocfunc.retval,
 							  objfile));
-      memcpy ((char *) type, (char *) type1, sizeof (struct type));
+      replace_type (type, type1);
 
       /* Mark it -- in the middle of processing */
       TYPE_FLAGS (type) |= TYPE_FLAG_INCOMPLETE;
@@ -3968,23 +3968,28 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 		  fn_p->field.fn_fields[ix].type = memtype;
 
 		  /* The argument list */
-		  fn_p->field.fn_fields[ix].type->type_specific.arg_types =
-		    (struct type **) obstack_alloc (&objfile->type_obstack,
-			   sizeof (struct type *) * (memtype->nfields + 1));
-		  for (i = 0; i < memtype->nfields; i++)
-		    fn_p->field.fn_fields[ix].type->type_specific.arg_types[i] = memtype->fields[i].type;
+		  TYPE_TYPE_SPECIFIC (fn_p->field.fn_fields[ix].type).arg_types
+		    = (struct type **) obstack_alloc (&objfile->type_obstack,
+						      (sizeof (struct type *)
+						       * (TYPE_NFIELDS (memtype)
+							  + 1)));
+		  for (i = 0; i < TYPE_NFIELDS (memtype); i++)
+		    TYPE_TYPE_SPECIFIC (fn_p->field.fn_fields[ix].type)
+		      .arg_types[i] = TYPE_FIELDS (memtype)[i].type;
 		  /* void termination */
-		  fn_p->field.fn_fields[ix].type->type_specific.arg_types[memtype->nfields] = builtin_type_void;
+		  TYPE_TYPE_SPECIFIC (fn_p->field.fn_fields[ix].type)
+		    .arg_types[TYPE_NFIELDS (memtype)] = builtin_type_void;
 
 		  /* pai: It's not clear why this args field has to be set.  Perhaps
 		   * it should be eliminated entirely. */
 		  fn_p->field.fn_fields[ix].args =
 		    (struct type **) obstack_alloc (&objfile->type_obstack,
-			   sizeof (struct type *) * (memtype->nfields + 1));
-		  for (i = 0; i < memtype->nfields; i++)
-		    fn_p->field.fn_fields[ix].args[i] = memtype->fields[i].type;
+			   sizeof (struct type *) * (TYPE_NFIELDS (memtype) + 1));
+		  for (i = 0; i < TYPE_NFIELDS (memtype); i++)
+		    fn_p->field.fn_fields[ix].args[i]
+		      = TYPE_FIELDS (memtype)[i].type;
 		  /* null-terminated, unlike arg_types above e */
-		  fn_p->field.fn_fields[ix].args[memtype->nfields] = NULL;
+		  fn_p->field.fn_fields[ix].args[TYPE_NFIELDS (memtype)] = NULL;
 		}
 	      /* For virtual functions, fill in the voffset field with the
 	       * virtual table offset. (This is just copied over from the
@@ -4428,7 +4433,7 @@ fix_static_member_physnames (struct type *type, char *class_name,
 	if (TYPE_FIELD_STATIC_PHYSNAME (type, i))
 	  return;		/* physnames are already set */
 
-	SET_FIELD_PHYSNAME (type->fields[i],
+	SET_FIELD_PHYSNAME (TYPE_FIELDS (type)[i],
 			    obstack_alloc (&objfile->type_obstack,
 	     strlen (class_name) + strlen (TYPE_FIELD_NAME (type, i)) + 3));
 	strcpy (TYPE_FIELD_STATIC_PHYSNAME (type, i), class_name);
@@ -4465,23 +4470,23 @@ fixup_class_method_type (struct type *class, struct type *method,
 	  /* Set the method type */
 	  TYPE_FN_FIELD_TYPE (TYPE_FN_FIELDLIST1 (class, i), j) = method;
 	  /* The argument list */
-	  (TYPE_FN_FIELD_TYPE (TYPE_FN_FIELDLIST1 (class, i), j))->type_specific.arg_types
+	  TYPE_TYPE_SPECIFIC (TYPE_FN_FIELD_TYPE (TYPE_FN_FIELDLIST1 (class, i), j)).arg_types
 	    = (struct type **) obstack_alloc (&objfile->type_obstack,
-			    sizeof (struct type *) * (method->nfields + 1));
-	  for (k = 0; k < method->nfields; k++)
-	    (TYPE_FN_FIELD_TYPE (TYPE_FN_FIELDLIST1 (class, i), j))->type_specific.arg_types[k] = method->fields[k].type;
+			    sizeof (struct type *) * (TYPE_NFIELDS (method) + 1));
+	  for (k = 0; k < TYPE_NFIELDS (method); k++)
+	    TYPE_TYPE_SPECIFIC (TYPE_FN_FIELD_TYPE (TYPE_FN_FIELDLIST1 (class, i), j)).arg_types[k] = TYPE_FIELDS (method)[k].type;
 	  /* void termination */
-	  (TYPE_FN_FIELD_TYPE (TYPE_FN_FIELDLIST1 (class, i), j))->type_specific.arg_types[method->nfields] = builtin_type_void;
+	  TYPE_TYPE_SPECIFIC (TYPE_FN_FIELD_TYPE (TYPE_FN_FIELDLIST1 (class, i), j)).arg_types[TYPE_NFIELDS (method)] = builtin_type_void;
 
 	  /* pai: It's not clear why this args field has to be set.  Perhaps
 	   * it should be eliminated entirely. */
 	  (TYPE_FN_FIELD (TYPE_FN_FIELDLIST1 (class, i), j)).args
 	    = (struct type **) obstack_alloc (&objfile->type_obstack,
-			    sizeof (struct type *) * (method->nfields + 1));
-	  for (k = 0; k < method->nfields; k++)
-	    (TYPE_FN_FIELD (TYPE_FN_FIELDLIST1 (class, i), j)).args[k] = method->fields[k].type;
+			    sizeof (struct type *) * (TYPE_NFIELDS (method) + 1));
+	  for (k = 0; k < TYPE_NFIELDS (method); k++)
+	    (TYPE_FN_FIELD (TYPE_FN_FIELDLIST1 (class, i), j)).args[k] = TYPE_FIELDS (method)[k].type;
 	  /* null-terminated, unlike arg_types above */
-	  (TYPE_FN_FIELD (TYPE_FN_FIELDLIST1 (class, i), j)).args[method->nfields] = NULL;
+	  (TYPE_FN_FIELD (TYPE_FN_FIELDLIST1 (class, i), j)).args[TYPE_NFIELDS (method)] = NULL;
 
 	  /* Break out of both loops -- only one method to fix up in a class */
 	  goto finish;
@@ -4850,7 +4855,7 @@ hpread_type_lookup (dnttpointer hp_type, struct objfile *objfile)
 	  }
 
 	/* Build the correct name.  */
-	structtype->name
+	TYPE_NAME (structtype)
 	  = (char *) obstack_alloc (&objfile->type_obstack,
 				    strlen (prefix) + strlen (suffix) + 1);
 	TYPE_NAME (structtype) = strcpy (TYPE_NAME (structtype), prefix);

@@ -1037,7 +1037,7 @@ d10v_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       struct type *type = check_typedef (VALUE_TYPE (arg));
       char *contents = VALUE_CONTENTS (arg);
       int len = TYPE_LENGTH (type);
-      /* printf ("push: type=%d len=%d\n", type->code, len); */
+      /* printf ("push: type=%d len=%d\n", TYPE_CODE (type), len); */
 	{
 	  int aligned_regnum = (regnum + 1) & ~1;
 	  if (len <= 2 && regnum <= ARGN_REGNUM)
@@ -1091,7 +1091,7 @@ d10v_extract_return_value (struct type *type, char regbuf[REGISTER_BYTES],
 			   char *valbuf)
 {
   int len;
-  /*    printf("RET: TYPE=%d len=%d r%d=0x%x\n",type->code, TYPE_LENGTH (type), RET1_REGNUM - R0_REGNUM, (int) extract_unsigned_integer (regbuf + REGISTER_BYTE(RET1_REGNUM), REGISTER_RAW_SIZE (RET1_REGNUM)));  */
+  /*    printf("RET: TYPE=%d len=%d r%d=0x%x\n", TYPE_CODE (type), TYPE_LENGTH (type), RET1_REGNUM - R0_REGNUM, (int) extract_unsigned_integer (regbuf + REGISTER_BYTE(RET1_REGNUM), REGISTER_RAW_SIZE (RET1_REGNUM)));  */
     {
       len = TYPE_LENGTH (type);
       if (len == 1)

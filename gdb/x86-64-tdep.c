@@ -372,18 +372,18 @@ classify_argument (struct type *type,
 	  case TYPE_CODE_STRUCT:
 	    {
 	      int j;
-	      for (j = 0; j < type->nfields; ++j)
+	      for (j = 0; j < TYPE_NFIELDS (type); ++j)
 		{
-		  int num = classify_argument (type->fields[j].type,
+		  int num = classify_argument (TYPE_FIELDS (type)[j].type,
 					       subclasses,
-					       (type->fields[j].loc.bitpos
+					       (TYPE_FIELDS (type)[j].loc.bitpos
 						+ bit_offset) % 256);
 		  if (!num)
 		    return 0;
 		  for (i = 0; i < num; i++)
 		    {
 		      int pos =
-			(type->fields[j].loc.bitpos + bit_offset) / 8 / 8;
+			(TYPE_FIELDS (type)[j].loc.bitpos + bit_offset) / 8 / 8;
 		      classes[i + pos] =
 			merge_classes (subclasses[i], classes[i + pos]);
 		    }
@@ -394,7 +394,7 @@ classify_argument (struct type *type,
 	    {
 	      int num;
 
-	      num = classify_argument (type->target_type,
+	      num = classify_argument (TYPE_TARGET_TYPE (type),
 				       subclasses, bit_offset);
 	      if (!num)
 		return 0;
@@ -413,10 +413,10 @@ classify_argument (struct type *type,
 	    {
 	      int j;
 	      {
-		for (j = 0; j < type->nfields; ++j)
+		for (j = 0; j < TYPE_NFIELDS (type); ++j)
 		  {
 		    int num;
-		    num = classify_argument (type->fields[j].type,
+		    num = classify_argument (TYPE_FIELDS (type)[j].type,
 					     subclasses, bit_offset);
 		    if (!num)
 		      return 0;

@@ -705,17 +705,6 @@ dst_sym_addr (dst_sect_ref_t *ref)
     + ref->sect_offset;
 }
 
-static struct type *
-create_new_type (struct objfile *objfile)
-{
-  struct type *type;
-
-  type = (struct type *)
-    obstack_alloc (&objfile->symbol_obstack, sizeof (struct type));
-  memset (type, 0, sizeof (struct type));
-  return type;
-}
-
 static struct symbol *
 create_new_symbol (struct objfile *objfile, char *name)
 {
@@ -865,7 +854,7 @@ decode_dst_structure (struct objfile *objfile, dst_rec_ptr_t entry, int code,
       xfree (name);
       return type;
     }
-  type = create_new_type (objfile);
+  type = alloc_type (objfile);
   TYPE_NAME (type) = obstack_copy0 (&objfile->symbol_obstack,
 				    name, strlen (name));
   xfree (name);
@@ -1306,10 +1295,10 @@ process_dst_function (struct objfile *objfile, dst_rec_ptr_t entry, char *name,
 
   if (!type->function_type)
     {
-      ftype = create_new_type (objfile);
+      ftype = alloc_type (objfile);
       type->function_type = ftype;
-      ftype->target_type = type;
-      ftype->code = TYPE_CODE_FUNC;
+      TYPE_TARGET_TYPE (ftype) = type;
+      TYPE_CODE (ftype) = TYPE_CODE_FUNC;
     }
   SYMBOL_TYPE (sym) = type->function_type;
 

@@ -1488,7 +1488,7 @@ hand_function_call (struct value *function, int nargs, struct value **args)
 	if (param_type)
 	  /* if this parameter is a pointer to function */
 	  if (TYPE_CODE (param_type) == TYPE_CODE_PTR)
-	    if (TYPE_CODE (param_type->target_type) == TYPE_CODE_FUNC)
+	    if (TYPE_CODE (TYPE_TARGET_TYPE (param_type)) == TYPE_CODE_FUNC)
 	      /* elz: FIXME here should go the test about the compiler used
 	         to compile the target. We want to issue the error
 	         message only if the compiler used was HP's aCC.

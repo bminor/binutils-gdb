@@ -1,3 +1,34 @@
+2002-05-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* ax-gdb.c (gen_sign_extend, gen_fetch, gen_usual_unary)
+	(gen_cast, gen_scale, gen_add, gen_sub, gen_binop, gen_deref)
+	(gen_address_of, gen_struct_ref, gen_repeat): Use type
+	access macros.
+	* c-typeprint.c (cp_type_print_method_args): Likewise.
+	(c_type_print_args): Likewise.
+	* d10v-tdep.c (d10v_push_arguments): Likewise.
+	(d10v_extract_return_value): Likewise.
+	* expprint.c (print_subexp): Likewise.
+	* gdbtypes.c (lookup_primitive_typename): Likewise.
+	(lookup_template_type, add_mangled_type, print_arg_types): Likewise.
+	* gdbtypes.h (TYPE_UNSIGNED, TYPE_NOSIGN, TYPE_STUB)
+	(TYPE_TARGET_STUB, TYPE_STATIC, TYPE_CONST, TYPE_VOLATILE)
+	(TYPE_PROTOTYPED, TYPE_INCOMPLETE, TYPE_CODE_SPACE, TYPE_VARARGS)
+	(TYPE_VECTOR): Likewise.
+	* hpread.c (hpread_read_struct_type)
+	(fix_static_member_physnames, fixup_class_method_type)
+	(hpread_type_lookup): Likewise.
+	* mdebugread.c (parse_symbol, parse_type): Likewise.
+	* p-lang.c (is_pascal_string_type): Likewise.
+	* valops.c (hand_function_call): Likewise.
+	* x86-64-tdep.c (classify_argument): Likewise.
+
+	* hpread.c (hpread_read_function_type)
+	(hpread_read_doc_function_type): Call replace_type.
+	* dstread.c (create_new_type): Delete.
+	(decode_dst_structure, process_dst_function): Call alloc_type.
+	Use type access macros.
+
 2002-05-12  Mark Kettenis  <kettenis@gnu.org>
 
 	* i387-tdep.c (i387_supply_fxsave): Skip the SSE registers if

@@ -936,7 +936,7 @@ lookup_primitive_typename (char *name)
 
   for (p = current_language->la_builtin_type_vector; *p != NULL; p++)
     {
-      if (STREQ ((**p)->name, name))
+      if (STREQ (TYPE_NAME (**p), name))
 	{
 	  return (**p);
 	}
@@ -1081,10 +1081,10 @@ struct type *
 lookup_template_type (char *name, struct type *type, struct block *block)
 {
   struct symbol *sym;
-  char *nam = (char *) alloca (strlen (name) + strlen (type->name) + 4);
+  char *nam = (char *) alloca (strlen (name) + strlen (TYPE_NAME (type)) + 4);
   strcpy (nam, name);
   strcat (nam, "<");
-  strcat (nam, type->name);
+  strcat (nam, TYPE_NAME (type));
   strcat (nam, " >");		/* FIXME, extra space still introduced in gcc? */
 
   sym = lookup_symbol (nam, block, VAR_NAMESPACE, 0, (struct symtab **) NULL);
@@ -1511,8 +1511,8 @@ add_mangled_type (struct extra *pextras, struct type *t)
 	complain (&msg, tcode);
       }
     }
-  if (t->target_type)
-    add_mangled_type (pextras, t->target_type);
+  if (TYPE_TARGET_TYPE (t))
+    add_mangled_type (pextras, TYPE_TARGET_TYPE (t));
 }
 
 #if 0
@@ -2713,7 +2713,7 @@ print_arg_types (struct type **args, int spaces)
       while (*args != NULL)
 	{
 	  recursive_dump_type (*args, spaces + 2);
-	  if ((*args++)->code == TYPE_CODE_VOID)
+	  if (TYPE_CODE (*args++) == TYPE_CODE_VOID)
 	    {
 	      break;
 	    }

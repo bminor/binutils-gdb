@@ -158,7 +158,7 @@ cp_type_print_method_args (struct type **args, char *prefix, char *varstring,
   fprintf_symbol_filtered (stream, prefix, language_cplus, DMGL_ANSI);
   fprintf_symbol_filtered (stream, varstring, language_cplus, DMGL_ANSI);
   fputs_filtered ("(", stream);
-  if (args && args[!staticp] && args[!staticp]->code != TYPE_CODE_VOID)
+  if (args && args[!staticp] && TYPE_CODE (args[!staticp]) != TYPE_CODE_VOID)
     {
       i = !staticp;		/* skip the class variable */
       while (1)
@@ -169,7 +169,7 @@ cp_type_print_method_args (struct type **args, char *prefix, char *varstring,
 	      fprintf_filtered (stream, " ...");
 	      break;
 	    }
-	  else if (args[i]->code != TYPE_CODE_VOID)
+	  else if (TYPE_CODE (args[i]) != TYPE_CODE_VOID)
 	    {
 	      fprintf_filtered (stream, ", ");
 	    }
@@ -346,7 +346,7 @@ c_type_print_args (struct type *type, struct ui_file *stream)
 	{
 	  fprintf_filtered (stream, "...");
 	}
-      else if ((args[1]->code == TYPE_CODE_VOID) &&
+      else if ((TYPE_CODE (args[1]) == TYPE_CODE_VOID) &&
 	       (current_language->la_language == language_cplus))
 	{
 	  fprintf_filtered (stream, "void");
@@ -354,7 +354,7 @@ c_type_print_args (struct type *type, struct ui_file *stream)
       else
 	{
 	  for (i = 1;
-	       args[i] != NULL && args[i]->code != TYPE_CODE_VOID;
+	       args[i] != NULL && TYPE_CODE (args[i]) != TYPE_CODE_VOID;
 	       i++)
 	    {
 	      c_print_type (args[i], "", stream, -1, 0);
@@ -362,7 +362,7 @@ c_type_print_args (struct type *type, struct ui_file *stream)
 		{
 		  fprintf_filtered (stream, "...");
 		}
-	      else if (args[i + 1]->code != TYPE_CODE_VOID)
+	      else if (TYPE_CODE (args[i + 1]) != TYPE_CODE_VOID)
 		{
 		  fprintf_filtered (stream, ",");
 		  wrap_here ("    ");
