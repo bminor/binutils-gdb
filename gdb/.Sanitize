@@ -106,6 +106,7 @@ convex-tdep.c
 convex-xdep.c
 copying.awk
 copying.c
+core-sol2.c
 core-svr4.c
 core.c
 coredep.c
