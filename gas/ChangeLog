@@ -1,3 +1,7 @@
+2002-11-29  Jakub Jelinek  <jakub@redhat.com>
+
+	* config/tc-ia64.c (md_apply_fix3): Add default case.
+
 2002-11-28  Jakub Jelinek  <jakub@redhat.com>
 
 	* symbols.c (S_SET_THREAD_LOCAL): New function.

@@ -10435,6 +10435,9 @@ md_apply_fix3 (fix, valP, seg)
 	case BFD_RELOC_IA64_LTOFF_DTPREL22:
 	  S_SET_THREAD_LOCAL (fix->fx_addsy);
 	  break;
+
+	default:
+	  break;
 	}
 
       /* ??? This is a hack copied from tc-i386.c to make PCREL relocs
