@@ -1,3 +1,10 @@
+Mon May 25 12:41:38 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips.igen (do_store_left, do_load_left): Compute nr of left and
+ 	right bits and then re-align left hand bytes to correct byte
+ 	lanes.  Fix incorrect computation in do_store_left when loading
+ 	bytes from second word.
+
 start-sanitize-tx3904
 Fri May 22 13:34:20 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
