@@ -1,6 +1,6 @@
 /* Simulator instruction extractor for m32r.
 
-This file is machine generated with CGEN.
+THIS FILE IS MACHINE GENERATED WITH CGEN.
 
 Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
 
@@ -257,7 +257,7 @@ EX_FN_NAME (m32r,fmt_bc8) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF 
   EXTRACT_FMT_BC8_CODE
 
   /* Record the fields for the semantic handler.  */
-  RECORD_IADDR (FLD (f_disp8), (pc & -4L) + f_disp8);
+  FLD (f_disp8) = (pc & -4L) + f_disp8;
   TRACE_EXTRACT (current_cpu, (current_cpu, pc, "fmt_bc8", "disp8 0x%x", 'x', f_disp8, (char *) 0));
 
   abuf->length = length;
@@ -274,7 +274,7 @@ EX_FN_NAME (m32r,fmt_bc24) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF
   EXTRACT_FMT_BC24_CODE
 
   /* Record the fields for the semantic handler.  */
-  RECORD_IADDR (FLD (f_disp24), pc + f_disp24);
+  FLD (f_disp24) = pc + f_disp24;
   TRACE_EXTRACT (current_cpu, (current_cpu, pc, "fmt_bc24", "disp24 0x%x", 'x', f_disp24, (char *) 0));
 
   abuf->length = length;
@@ -293,7 +293,7 @@ EX_FN_NAME (m32r,fmt_beq) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF 
   /* Record the fields for the semantic handler.  */
   FLD (f_r1) = & CPU (h_gr)[f_r1];
   FLD (f_r2) = & CPU (h_gr)[f_r2];
-  RECORD_IADDR (FLD (f_disp16), pc + f_disp16);
+  FLD (f_disp16) = pc + f_disp16;
   TRACE_EXTRACT (current_cpu, (current_cpu, pc, "fmt_beq", "src1 0x%x", 'x', f_r1, "src2 0x%x", 'x', f_r2, "disp16 0x%x", 'x', f_disp16, (char *) 0));
 
   abuf->length = length;
@@ -319,7 +319,7 @@ EX_FN_NAME (m32r,fmt_beqz) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF
 
   /* Record the fields for the semantic handler.  */
   FLD (f_r2) = & CPU (h_gr)[f_r2];
-  RECORD_IADDR (FLD (f_disp16), pc + f_disp16);
+  FLD (f_disp16) = pc + f_disp16;
   TRACE_EXTRACT (current_cpu, (current_cpu, pc, "fmt_beqz", "src2 0x%x", 'x', f_r2, "disp16 0x%x", 'x', f_disp16, (char *) 0));
 
   abuf->length = length;
@@ -344,7 +344,7 @@ EX_FN_NAME (m32r,fmt_bl8) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF 
   EXTRACT_FMT_BL8_CODE
 
   /* Record the fields for the semantic handler.  */
-  RECORD_IADDR (FLD (f_disp8), (pc & -4L) + f_disp8);
+  FLD (f_disp8) = (pc & -4L) + f_disp8;
   TRACE_EXTRACT (current_cpu, (current_cpu, pc, "fmt_bl8", "disp8 0x%x", 'x', f_disp8, (char *) 0));
 
   abuf->length = length;
@@ -369,7 +369,7 @@ EX_FN_NAME (m32r,fmt_bl24) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF
   EXTRACT_FMT_BL24_CODE
 
   /* Record the fields for the semantic handler.  */
-  RECORD_IADDR (FLD (f_disp24), pc + f_disp24);
+  FLD (f_disp24) = pc + f_disp24;
   TRACE_EXTRACT (current_cpu, (current_cpu, pc, "fmt_bl24", "disp24 0x%x", 'x', f_disp24, (char *) 0));
 
   abuf->length = length;
@@ -394,7 +394,7 @@ EX_FN_NAME (m32r,fmt_bra8) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF
   EXTRACT_FMT_BRA8_CODE
 
   /* Record the fields for the semantic handler.  */
-  RECORD_IADDR (FLD (f_disp8), (pc & -4L) + f_disp8);
+  FLD (f_disp8) = (pc & -4L) + f_disp8;
   TRACE_EXTRACT (current_cpu, (current_cpu, pc, "fmt_bra8", "disp8 0x%x", 'x', f_disp8, (char *) 0));
 
   abuf->length = length;
@@ -411,7 +411,7 @@ EX_FN_NAME (m32r,fmt_bra24) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBU
   EXTRACT_FMT_BRA24_CODE
 
   /* Record the fields for the semantic handler.  */
-  RECORD_IADDR (FLD (f_disp24), pc + f_disp24);
+  FLD (f_disp24) = pc + f_disp24;
   TRACE_EXTRACT (current_cpu, (current_cpu, pc, "fmt_bra24", "disp24 0x%x", 'x', f_disp24, (char *) 0));
 
   abuf->length = length;
