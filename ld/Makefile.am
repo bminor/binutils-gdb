@@ -103,6 +103,8 @@ ALL_EMULATIONS = \
 	ed10velf.o \
 	$(start-sanitize-d30v) \
 	ed30velf.o \
+	ed30v_e.o \
+	ed30v_o.o \
 	$(end-sanitize-d30v) \
 	edelta68.o \
 	eebmon29k.o \
@@ -270,6 +272,12 @@ start-sanitize-d30v:
 ed30velf.c: $(srcdir)/emulparams/d30velf.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elfd30v.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} d30velf "$(tdir_d30v)"
+ed30v_o.c: $(srcdir)/emulparams/d30v_o.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elfd30v.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} d30v_o "$(tdir_d30v)"
+ed30v_e.c: $(srcdir)/emulparams/d30v_e.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elfd30v.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} d30v_e "$(tdir_d30v)"
 end-sanitize-d30v:
 edelta68.c: $(srcdir)/emulparams/delta68.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/delta68.sc ${GEN_DEPENDS}
@@ -513,6 +521,11 @@ etic80coff.c: $(srcdir)/emulparams/tic80coff.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/tic80coff.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} tic80coff "$(tdir_tic80coff)"
 end-sanitize-tic80:
+start-sanitize-sky:
+etxvuelf.c: $(srcdir)/emulparams/txvuelf.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} txvuelf "$(tdir_txvu)"
+end-sanitize-sky:
 evanilla.c: $(srcdir)/emulparams/vanilla.sh \
   $(srcdir)/emultempl/vanilla.em $(srcdir)/scripttempl/vanilla.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} vanilla "$(tdir_vanilla)"

@@ -1,3 +1,18 @@
+start-sanitize-sky
+Mon Dec 22 16:54:39 1997  Doug Evans  <devans@canuck.cygnus.com>
+
+	* Makefile.am (etxvuelf.c): Add rule for.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* configure.tgt (txvu-*-*): Recognize.
+	* emulparams/txvuelf.sh: New file.
+
+end-sanitize-sky
+Sun Dec 21 12:51:49 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldexp.c (fold_name): Don't crash if the symbol is defined in a
+	section with no output section, such as a shared library section.
+
 Wed Dec 17 12:14:11 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* lexsup.c (parse_args): Keep track of where we are in the option
