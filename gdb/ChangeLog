@@ -1,3 +1,14 @@
+2003-04-11  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c (get_frame_id): Return this frame's "id".
+	(legacy_get_prev_frame): Set prev's frame ID code_addr to the
+	function start.
+	(legacy_saved_regs_this_id): Replace function body with
+	internal-error.
+	(deprecated_frame_xmalloc): Mark the frame ID as valid, use
+	FRAME_OBSTACK_ZALLOC.
+	(create_new_frame): Mark the frame ID as valid.
+
 2003-04-11  Alexandre Oliva  <aoliva@redhat.com>
 
 	* Makefile.in (libbfd_h): Added missing setting.

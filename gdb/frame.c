@@ -145,7 +145,7 @@ get_frame_id (struct frame_info *fi)
 	  fprintf_unfiltered (gdb_stdlog, " }\n");
 	}
     }
-  return frame_id_build (fi->this_id.value.stack_addr, get_frame_pc (fi));
+  return fi->this_id.value;
 }
 
 const struct frame_id null_frame_id; /* All zeros.  */
@@ -921,70 +921,9 @@ legacy_saved_regs_this_id (struct frame_info *next_frame,
 			   void **this_prologue_cache,
 			   struct frame_id *id)
 {
-  int fromleaf;
-  CORE_ADDR base;
-  CORE_ADDR pc;
-
-  if (frame_relative_level (next_frame) < 0)
-    {
-      /* FIXME: cagney/2003-03-14: We've got the extra special case of
-	 unwinding a sentinel frame, the PC of which is pointing at a
-	 stack dummy.  Fake up the dummy frame's ID using the same
-	 sequence as is found a traditional unwinder.  */
-      (*id) = frame_id_build (read_fp (), read_pc ());
-      return;
-    }
-
-  /* Start out by assuming it's NULL.  */
-  (*id) = null_frame_id;
-
-  if (frame_relative_level (next_frame) <= 0)
-    /* FIXME: 2002-11-09: Frameless functions can occure anywhere in
-       the frame chain, not just the inner most frame!  The generic,
-       per-architecture, frame code should handle this and the below
-       should simply be removed.  */
-    fromleaf = FRAMELESS_FUNCTION_INVOCATION (next_frame);
-  else
-    fromleaf = 0;
-
-  if (fromleaf)
-    /* A frameless inner-most frame.  The `FP' (which isn't an
-       architecture frame-pointer register!) of the caller is the same
-       as the callee.  */
-    /* FIXME: 2002-11-09: There isn't any reason to special case this
-       edge condition.  Instead the per-architecture code should hande
-       it locally.  */
-    base = get_frame_base (next_frame);
-  else
-    {
-      /* Two macros defined in tm.h specify the machine-dependent
-         actions to be performed here.
-
-         First, get the frame's chain-pointer.
-
-         If that is zero, the frame is the outermost frame or a leaf
-         called by the outermost frame.  This means that if start
-         calls main without a frame, we'll return 0 (which is fine
-         anyway).
-
-         Nope; there's a problem.  This also returns when the current
-         routine is a leaf of main.  This is unacceptable.  We move
-         this to after the ffi test; I'd rather have backtraces from
-         start go curfluy than have an abort called from main not show
-         main.  */
-      gdb_assert (DEPRECATED_FRAME_CHAIN_P ());
-      base = DEPRECATED_FRAME_CHAIN (next_frame);
-
-      if (!legacy_frame_chain_valid (base, next_frame))
-	return;
-    }
-  if (base == 0)
-    return;
-
-  /* FIXME: cagney/2002-06-08: This should probably return the frame's
-     function and not the PC (a.k.a. resume address).  */
-  pc = frame_pc_unwind (next_frame);
-  (*id) = frame_id_build (base, pc);
+  /* legacy_get_prev_frame() always sets ->this_id.p, hence this is
+     never needed.  */
+  internal_error (__FILE__, __LINE__, "legacy_saved_regs_this_id() called");
 }
 	
 const struct frame_unwind legacy_saved_regs_unwinder = {
@@ -1147,6 +1086,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
   else
     fi->type = frame_type_from_pc (pc);
 
+  fi->this_id.p = 1;
   deprecated_update_frame_base_hack (fi, addr);
   deprecated_update_frame_pc_hack (fi, pc);
 
@@ -1370,6 +1310,11 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 	{
 	  DEPRECATED_INIT_EXTRA_FRAME_INFO (0, prev);
 	}
+
+      if (prev->type == NORMAL_FRAME)
+	prev->this_id.value.code_addr
+	  = get_pc_function_start (prev->this_id.value.code_addr);
+
       if (frame_debug)
 	{
 	  fprintf_unfiltered (gdb_stdlog, "-> ");
@@ -1578,6 +1523,9 @@ legacy_get_prev_frame (struct frame_info *this_frame)
   if (prev->unwind->type != UNKNOWN_FRAME)
     {
       prev->type = prev->unwind->type;
+      if (prev->type == NORMAL_FRAME)
+	prev->this_id.value.code_addr
+	  = get_pc_function_start (prev->this_id.value.code_addr);
       if (frame_debug)
 	{
 	  fprintf_unfiltered (gdb_stdlog, "-> ");
@@ -1619,6 +1567,10 @@ legacy_get_prev_frame (struct frame_info *this_frame)
          moved to the start of this function, all this nastness will
          go away.  */
     }
+
+  if (prev->type == NORMAL_FRAME)
+    prev->this_id.value.code_addr
+      = get_pc_function_start (prev->this_id.value.code_addr);
 
   if (frame_debug)
     {
@@ -2111,8 +2063,8 @@ deprecated_set_frame_context (struct frame_info *fi,
 struct frame_info *
 deprecated_frame_xmalloc (void)
 {
-  struct frame_info *frame = XMALLOC (struct frame_info);
-  memset (frame, 0, sizeof (struct frame_info));
+  struct frame_info *frame = FRAME_OBSTACK_ZALLOC (struct frame_info);
+  frame->this_id.p = 1;
   return frame;
 }
 
