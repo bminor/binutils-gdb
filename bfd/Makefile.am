@@ -485,9 +485,10 @@ SOURCE_CFILES = \
 	$(BFD64_BACKENDS_CFILES) \
 	$(OPTIONAL_BACKENDS_CFILES)
 
-CFILES = \
-	$(SOURCE_CFILES) \
+BUILD_CFILES = \
 	elf32-ia64.c elf64-ia64.c peigen.c pepigen.c
+
+CFILES = $(SOURCE_CFILES) $(BUILD_CFILES)
 
 ## This is a list of all .h files which are in the source tree.
 SOURCE_HFILES = \
@@ -498,15 +499,32 @@ SOURCE_HFILES = \
 	libieee.h libnlm.h liboasys.h libpei.h netbsd.h nlm-target.h \
 	nlmcode.h nlmswap.h ns32k.h peicode.h som.h vms.h xcoff-target.h
 
-HFILES = \
-	elf32-target.h elf64-target.h targmatch.h \
-	$(SOURCE_HFILES)
+## ... and all .h files which are in the build tree.
+BUILD_HFILES = \
+	elf32-target.h elf64-target.h targmatch.h
 
-POTFILES = $(CFILES) $(HFILES)
+HFILES = $(SOURCE_HFILES) $(BUILD_HFILES)
 
-po/POTFILES.in: @MAINT@ Makefile $(POTFILES)
-	for file in $(POTFILES); do echo $$file; done | sort > tmp \
-	  && mv tmp $(srcdir)/po/POTFILES.in
+SRC_POTFILES = $(SOURCE_CFILES) $(SOURCE_HFILES)
+BLD_POTFILES = $(BUILD_CFILES) $(BUILD_HFILES)
+
+po/SRC-POTFILES.in: @MAINT@ Makefile $(SRC_POTFILES)
+	for file in $(SRC_POTFILES); do echo $$file; done | sort > tmp \
+	  && mv tmp $(srcdir)/po/SRC-POTFILES.in
+
+po/BLD-POTFILES.in: @MAINT@ Makefile $(BLD_POTFILES)
+	for file in $(BLD_POTFILES); do echo $$file; done | sort > tmp \
+	  && mv tmp $(srcdir)/po/BLD-POTFILES.in
+
+# The following target is retained for upgrade purposes.
+# This target used to exist in older versions of this makefile, and was
+# referenced by <builddir>/po/Makefile (which is created from <srcdir>/po/Make-in)
+# So old versions of <builddir>/po/Makefile will try to regenerate themselves
+# when make is next run, but that dependency cannot be completed without a build
+# of po/POTFILES.in.  Hence the presence of this rule.  This rule will be deleted
+# once it is no longer needed - probably in the fall of 2001.
+po/POTFILES.in:
+
 
 diststuff: info
 
@@ -714,11 +732,12 @@ stmp-lcoff-h: $(LIBCOFF_H_FILES)
 	$(SHELL) $(srcdir)/../move-if-change libcoff.h-new $(srcdir)/libcoff.h
 	touch stmp-lcoff-h
 
-MOSTLYCLEANFILES = elf32-target.h elf64-target.h ofiles stamp-ofiles \
-	targmatch.h
+MOSTLYCLEANFILES = ofiles stamp-ofiles
 
 CLEANFILES = bfd.h dep.sed stmp-bfd-h DEP DEPA DEP1 DEP2 libbfd.a stamp-lib \
 	stmp-bin2-h stmp-lbfd-h stmp-lcoff-h
+
+DISTCLEANFILES = $(BUILD_CFILES) $(BUILD_HFILES)
 
 # We want to rerun configure if config.bfd or configure.host change.
 config.status: $(srcdir)/configure $(srcdir)/config.bfd $(srcdir)/configure.host

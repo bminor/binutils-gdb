@@ -1,3 +1,32 @@
+2001-03-23  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.am (BUILD_CFILES): New variable: List of C source
+        files created in build directory.
+        (BUILD_HFILES): New variable: List of header files created in
+        build directory.
+        (POTFILES): Delete.
+        (po/POTFILES.in): Replace rule with empty entry.
+        (po/SRC-POTFILES.in): New rule: Create a list of source files
+        in the source directory.
+        (po/BLD-POTFILES.in): New rule: Create a list of source files
+        in the build directory.
+        (MOSTLYCLEAN): Do not delete source files created in build
+        directory.
+        * Makefile.in: Regenerate.
+        * configure.in: Insert SRC-POTFILES.in and BLD-POTFILES.in
+        into po/Makefile.
+        * configure: Regenerate.
+
+        * po/Make-in: Replace occurrences of POTFILES with SRC-POTFILES
+        and BLD_POTFILES.
+	Add .. to the search path when building bfd.pot.
+        Delete POTFILES when performing distclean.
+        Add comment describing why distclean is broken in maintainer mode.
+	* po/POTFILES.in: Delete.
+	* po/SRC-POTFILES.in: New file.
+	* po/BLD-POTFILES.in: New file.
+        * po/bfd.pot: Regenerate.
+
 2001-03-22  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c: Shlib and PIC support.  PCREL tweaks.
