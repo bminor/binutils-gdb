@@ -100,21 +100,25 @@ solib_open (char *in_pathname, char **found_pathname)
   int found_file = -1;
   char *temp_pathname = NULL;
 
-  if (solib_absolute_prefix != NULL &&
-      ROOTED_P (in_pathname))
+  if (ROOTED_P (in_pathname))
     {
-      int  prefix_len = strlen (solib_absolute_prefix);
+      if (solib_absolute_prefix == NULL)
+        temp_pathname = in_pathname;
+      else
+	{
+	  int  prefix_len = strlen (solib_absolute_prefix);
 
-      /* Remove trailing slashes from absolute prefix.  */
-      while (prefix_len > 0 && SLASH_P (solib_absolute_prefix[prefix_len - 1]))
-	prefix_len--;
+	  /* Remove trailing slashes from absolute prefix.  */
+	  while (prefix_len > 0 && SLASH_P (solib_absolute_prefix[prefix_len - 1]))
+	    prefix_len--;
 
-      /* Cat the prefixed pathname together.  */
-      temp_pathname = alloca (prefix_len + strlen (in_pathname) + 1);
-      strncpy (temp_pathname, solib_absolute_prefix, prefix_len);
-      temp_pathname[prefix_len] = '\0';
-      strcat (temp_pathname, in_pathname);
+	  /* Cat the prefixed pathname together.  */
+	  temp_pathname = alloca (prefix_len + strlen (in_pathname) + 1);
+	  strncpy (temp_pathname, solib_absolute_prefix, prefix_len);
+	  temp_pathname[prefix_len] = '\0';
+	  strcat (temp_pathname, in_pathname);
 
+	}
       /* Now see if we can open it.  */
       found_file = open (temp_pathname, O_RDONLY, 0);
     }
@@ -137,7 +141,7 @@ solib_open (char *in_pathname, char **found_pathname)
 
   /* Done.  If not found, tough luck.  Return found_file and 
      (optionally) found_pathname.  */
-  if (found_pathname != NULL)
+  if (found_pathname != NULL && temp_pathname != NULL)
     *found_pathname = strsave (temp_pathname);
   return found_file;
 }
