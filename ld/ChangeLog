@@ -1,3 +1,8 @@
+2003-06-05  Roland McGrath  <roland@redhat.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_list_options): Remove
+	extra \t in -z noexecstack line.
+
 2003-05-23  Jakub Jelinek  <jakub@redhat.com>
 
 	* ldgram.y (phdr_type): Grok PT_GNU_STACK.
@@ -112,7 +117,7 @@
 	* configure.tgt: Add armeb-elf and arm*b-*-linux-gnu.
 
 2003-05-09  Nick Clifton  <nickc@redhat.com>
-	
+
 	* ldlang.c (lang_size_sections_1): Default to generating a
 	fatal error message if a loadable section is not allocated
 	to a memory region when regions are defined.
