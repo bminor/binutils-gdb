@@ -1,3 +1,8 @@
+Tue Feb 20 08:26:27 1996  Fred Fish  <fnf@phydeaux.cygnus.com>
+
+	* coff-alpha.c (alpha_ecoff_get_relocated_section_contents):
+	Remove duplicate definition of gp.
+
 Mon Feb 19 12:37:41 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coff-alpha.c (alpha_ecoff_get_relocated_section_contents): Don't
