@@ -223,7 +223,7 @@ static void remote_fetch_registers PARAMS ((int regno));
 static void remote_resume PARAMS ((int pid, int step,
 				   enum target_signal siggnal));
 
-static int remote_start_remote PARAMS ((char *dummy));
+static int remote_start_remote PARAMS ((PTR));
 
 static void remote_open PARAMS ((char *name, int from_tty));
 
@@ -1354,7 +1354,7 @@ get_offsets ()
 
 static int
 remote_start_remote (dummy)
-     char *dummy;
+     PTR dummy;
 {
   immediate_quit = 1;		/* Allow user to interrupt it */
 
@@ -1471,7 +1471,7 @@ serial device is attached to the remote system (e.g. /dev/ttya).");
   /* Start the remote connection; if error (0), discard this target.
      In particular, if the user quits, be sure to discard it
      (we'd be in an inconsistent state otherwise).  */
-  if (!catch_errors (remote_start_remote, (char *)0, 
+  if (!catch_errors (remote_start_remote, NULL, 
 		     "Couldn't establish connection to remote target\n", 
 		     RETURN_MASK_ALL))
     {
@@ -2379,7 +2379,9 @@ print_packet (buf)
 
 
 /* Send a packet to the remote machine, with error checking.  The data
-   of the packet is in BUF.  */
+   of the packet is in BUF.  The string in BUF can be at most  PBUFSIZ - 5
+   to account for the $, # and checksum, and for a possible /0 if we are
+   debugging (remote_debug) and want to print the sent packet as a string */
 
 int
 putpkt (buf)
@@ -2682,7 +2684,7 @@ remote_kill ()
 
   /* Use catch_errors so the user can quit from gdb even when we aren't on
      speaking terms with the remote system.  */
-  catch_errors (putpkt, "k", "", RETURN_MASK_ERROR);
+  catch_errors ((catch_errors_ftype*) putpkt, "k", "", RETURN_MASK_ERROR);
 
   /* Don't wait for it to die.  I'm not really sure it matters whether
      we do or not.  For the existing stubs, kill is a noop.  */
@@ -3016,9 +3018,10 @@ remote_query (query_type, buf, outbuf, bufsiz)
 
   /* we used one buffer char for the remote protocol q command and another
      for the query type.  As the remote protocol encapsulation uses 4 chars
-     we have PBUFZIZ -6 left to pack the query string */
+     plus one extra in case we are debugging (remote_debug),
+     we have PBUFZIZ - 7 left to pack the query string */
   i = 0;
-  while ( buf[i] && (i < (PBUFSIZ - 7)) )
+  while ( buf[i] && (i < (PBUFSIZ - 8)) )
     {
       /* bad caller may have sent forbidden characters */
       if ( (!isprint(buf[i])) || (buf[i] == '$') || (buf[i] == '#') )

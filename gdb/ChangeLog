@@ -1,3 +1,9 @@
+Tue Jan 26 16:53:54 1999  Fernando Nasser  <fnasser@cygnus.com>
+
+	* remote.c (remote_query): fix maximum packet size to account for
+	  remote_debug use.
+	  (putpkt): add comment to alert about extra byte need.
+
 Mon Jan 25 19:55:30 1999  Mark Alexander  <marka@cygnus.com>
 
 	* sh-tdep.c (sh_target_architecture_hook): Return immediately
