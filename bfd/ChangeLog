@@ -1,3 +1,17 @@
+Wed Feb  1 01:32:14 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_object_setup): More heruistics to detect the
+	braindamaged HP OSF1 linker. 
+	(setup_sections): Don't forget to free subspace_sections if we get
+	an error.
+	(som_slurp_string_table): Allocate strings on this bfd's obstack
+	rather than directly out of the heap.
+	(som_slurp_symbol_table): Likewise for the saved copy of the
+	canonical symbols.
+	(som_slurp_reloc_table): Likewise for the saved copy of the
+	canonical relocations.  Free the native relocations when we're
+	done with them.
+
 Tue Jan 31 21:53:28 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* libelf.h (struct elf_obj_tdata): New member program_header_size.

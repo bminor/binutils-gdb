@@ -213,10 +213,11 @@ static unsigned char * som_reloc_call PARAMS ((bfd *, unsigned char *,
 static unsigned long som_count_spaces PARAMS ((bfd *));
 static unsigned long som_count_subspaces PARAMS ((bfd *));
 static int compare_syms PARAMS ((const void *, const void *));
+static int compare_subspaces PARAMS ((const void *, const void *));
 static unsigned long som_compute_checksum PARAMS ((bfd *));
 static boolean som_prep_headers PARAMS ((bfd *));
 static int som_sizeof_headers PARAMS ((bfd *, boolean));
-static boolean som_write_headers PARAMS ((bfd *));
+static boolean som_finish_writing PARAMS ((bfd *));
 static boolean som_build_and_write_symbol_table PARAMS ((bfd *));
 static void som_prep_for_fixups PARAMS ((bfd *, asymbol **, unsigned long));
 static boolean som_write_fixups PARAMS ((bfd *, unsigned long, unsigned int *));
@@ -1571,6 +1572,9 @@ som_object_setup (abfd, file_hdrp, aux_hdrp)
      struct header *file_hdrp;
      struct som_exec_auxhdr *aux_hdrp;
 {
+  asection *section;
+  int found;
+
   /* som_mkobject will set bfd_error if som_mkobject fails.  */
   if (som_mkobject (abfd) != true)
     return 0;
@@ -1627,7 +1631,18 @@ som_object_setup (abfd, file_hdrp, aux_hdrp)
      The new approach examines the entry field.  If it's zero or not 4
      byte aligned then it's not a proper code address and we guess it's
      really the executable flags.  */
-  if (aux_hdrp->exec_entry == 0 || (aux_hdrp->exec_entry & 0x3) != 0)
+  found = 0;
+  for (section = abfd->sections; section; section = section->next)
+    {
+      if ((section->flags & SEC_CODE) == 0)
+	continue;
+      if (aux_hdrp->exec_entry >= section->vma
+	  && aux_hdrp->exec_entry < section->vma + section->_cooked_size)
+	found = 1;
+    }
+  if (aux_hdrp->exec_entry == 0
+      || (aux_hdrp->exec_entry & 0x3) != 0
+      || ! found)
     {
       bfd_get_start_address (abfd) = aux_hdrp->exec_flags;
       obj_som_exec_data (abfd)->exec_flags = aux_hdrp->exec_entry;
@@ -1668,8 +1683,9 @@ setup_sections (abfd, file_hdr)
      struct header *file_hdr;
 {
   char *space_strings;
-  int space_index;
+  unsigned int space_index, i;
   unsigned int total_subspaces = 0;
+  asection **subspace_sections, *section;
 
   /* First, read in space names */
 
@@ -1779,8 +1795,17 @@ setup_sections (abfd, file_hdr)
 						 subspace.quadrant) == false)
 	    goto error_return;
 
-	  /* Keep an easy mapping between subspaces and sections.  */
-	  subspace_asect->target_index = total_subspaces++;
+	  /* Keep an easy mapping between subspaces and sections. 
+	     Note we do not necessarily read the subspaces in the
+	     same order in which they appear in the object file.
+
+	     So to make the target index come out correctly, we
+	     store the location of the subspace header in target
+	     index, then sort using the location of the subspace
+	     header as the key.  Then we can assign correct
+	     subspace indices.  */
+	  total_subspaces++;
+	  subspace_asect->target_index = bfd_tell (abfd) - sizeof (subspace);
 
 	  /* Set SEC_READONLY and SEC_CODE/SEC_DATA as specified
 	     by the access_control_bits in the subspace header.  */
@@ -1873,13 +1898,43 @@ setup_sections (abfd, file_hdr)
       space_asect->_raw_size = save_subspace.file_loc_init_value
 	- space_asect->filepos + save_subspace.initialization_length;
     }
+  /* Now that we've read in all the subspace records, we need to assign
+     a target index to each subspace.  */
+  subspace_sections = (asection **) malloc (total_subspaces
+					    * sizeof (asection *));
+  if (subspace_sections == NULL)
+    goto error_return;
+
+  for (i = 0, section = abfd->sections; section; section = section->next)
+    {
+      if (!som_is_subspace (section))
+	continue;
+
+      subspace_sections[i] = section;
+      i++;
+    }
+  qsort (subspace_sections, total_subspaces,
+	 sizeof (asection *), compare_subspaces);
+  
+  /* subspace_sections is now sorted in the order in which the subspaces
+     appear in the object file.  Assign an index to each one now.  */
+  for (i = 0; i < total_subspaces; i++)
+    subspace_sections[i]->target_index = i;
+
   if (space_strings != NULL)
     free (space_strings);
+
+  if (subspace_sections != NULL)
+    free (subspace_sections);
+
   return true;
 
  error_return:
   if (space_strings != NULL)
     free (space_strings);
+
+  if (subspace_sections != NULL)
+    free (subspace_sections);
   return false;
 }
 
@@ -2136,7 +2191,9 @@ som_is_space (section)
 
   /* If the containing space isn't the same as the given section,
      then this isn't a space.  */
-  if (som_section_data (section)->copy_data->container != section)
+  if (som_section_data (section)->copy_data->container != section
+      && (som_section_data (section)->copy_data->container->output_section
+	  != section))
     return false;
 
   /* OK.  Must be a space.  */
@@ -2156,7 +2213,9 @@ som_is_subspace (section)
 
   /* If the containing space is the same as the given section,
      then this isn't a subspace.  */
-  if (som_section_data (section)->copy_data->container == section)
+  if (som_section_data (section)->copy_data->container == section
+      || (som_section_data (section)->copy_data->container->output_section
+	  == section))
     return false;
 
   /* OK.  Must be a subspace.  */
@@ -2171,7 +2230,9 @@ static boolean
 som_is_container (space, subspace)
      asection *space, *subspace;
 {
-  return som_section_data (subspace)->copy_data->container == space;
+  return (som_section_data (subspace)->copy_data->container == space
+	  || (som_section_data (subspace)->copy_data->container->output_section
+	      == space));
 }
 
 /* Count and return the number of spaces attached to the given BFD.  */
@@ -2238,6 +2299,27 @@ compare_syms (arg1, arg2)
   else if (count1 > count2)
     return -1;
   return 0;
+}
+
+/* Return -1, 0, 1 indicating the relative ordering of subspace1
+   and subspace.  */
+
+static int
+compare_subspaces (arg1, arg2)
+     const PTR arg1;
+     const PTR arg2;
+
+{
+  asection **subspace1 = (asection **) arg1;
+  asection **subspace2 = (asection **) arg2;
+  unsigned int count1, count2;
+  
+  if ((*subspace1)->target_index < (*subspace2)->target_index)
+    return -1;
+  else if ((*subspace2)->target_index < (*subspace1)->target_index)
+    return 1;
+  else
+    return 0;
 }
 
 /* Perform various work in preparation for emitting the fixup stream.  */
@@ -2953,23 +3035,6 @@ som_begin_writing (abfd)
   obj_som_file_hdr (abfd)->symbol_total = num_syms;
   current_offset += num_syms * sizeof (struct symbol_dictionary_record);
 
-  /* Do prep work before handling fixups.  */
-  som_prep_for_fixups (abfd, syms, num_syms);
-
-  /* Next comes the fixup stream which starts on a word boundary.  */
-  if (current_offset % 4)
-    current_offset += (4 - (current_offset % 4)); 
-  obj_som_file_hdr (abfd)->fixup_request_location = current_offset;
-
-  /* Write the fixups and update fields in subspace headers which
-     relate to the fixup stream.  */
-  if (som_write_fixups (abfd, current_offset, &total_reloc_size) == false)
-    return false;
-
-  /* Record the total size of the fixup stream in the file header.  */
-  obj_som_file_hdr (abfd)->fixup_request_total = total_reloc_size;
-  current_offset += total_reloc_size;
-
   /* Next are the symbol strings.
      Align them to a word boundary.  */
   if (current_offset % 4)
@@ -2977,8 +3042,7 @@ som_begin_writing (abfd)
   obj_som_file_hdr (abfd)->symbol_strings_location = current_offset;
 
   /* Scribble out the symbol strings.  */
-  if (som_write_symbol_strings (abfd, current_offset,
-				obj_som_sorted_syms (abfd),
+  if (som_write_symbol_strings (abfd, current_offset, syms,
 				num_syms, &strings_size)
       == false)
     return false;
@@ -3185,7 +3249,7 @@ som_begin_writing (abfd)
   obj_som_file_hdr (abfd)->loader_fixup_location = 0;
   obj_som_file_hdr (abfd)->loader_fixup_total = 0;
 
-  /* Done.  Store the total size of the SOM.  */
+  /* Done.  Store the total size of the SOM so far.  */
   obj_som_file_hdr (abfd)->som_length = current_offset;
 
   return true;
@@ -3194,7 +3258,7 @@ som_begin_writing (abfd)
 /* Finally, scribble out the various headers to the disk.  */
 
 static boolean
-som_write_headers (abfd)
+som_finish_writing (abfd)
      bfd *abfd;
 {
   int num_spaces = som_count_spaces (abfd);
@@ -3202,6 +3266,36 @@ som_write_headers (abfd)
   int subspace_index = 0;
   file_ptr location;
   asection *section;
+  unsigned long current_offset;
+  unsigned int total_reloc_size;
+
+  /* Do prep work before handling fixups.  */
+  som_prep_for_fixups (abfd,
+		       bfd_get_outsymbols (abfd),
+		       bfd_get_symcount (abfd));
+
+  current_offset = obj_som_file_hdr (abfd)->som_length;
+
+  /* At the end of the file is the fixup stream which starts on a
+     word boundary.  */
+  if (current_offset % 4)
+    current_offset += (4 - (current_offset % 4)); 
+  obj_som_file_hdr (abfd)->fixup_request_location = current_offset;
+
+  /* Write the fixups and update fields in subspace headers which
+     relate to the fixup stream.  */
+  if (som_write_fixups (abfd, current_offset, &total_reloc_size) == false)
+    return false;
+
+  /* Record the total size of the fixup stream in the file header.  */
+  obj_som_file_hdr (abfd)->fixup_request_total = total_reloc_size;
+
+  obj_som_file_hdr (abfd)->som_length += total_reloc_size;
+ 
+  /* Now that the symbol table information is complete, build and
+     write the symbol table.  */
+  if (som_build_and_write_symbol_table (abfd) == false)
+    return false;
 
   /* Subspaces are written first so that we can set up information
      about them in their containing spaces as the subspace is written.  */
@@ -3503,11 +3597,10 @@ som_bfd_derive_misc_symbol_info (abfd, sym, info)
   /* Now handle the symbol's scope.  Exported data which is not
      in the common section has scope SS_UNIVERSAL.  Note scope
      of common symbols was handled earlier!  */
-  if (sym->flags & BSF_EXPORT && ! bfd_is_com_section (sym->section))
-    info->symbol_scope = SS_UNIVERSAL;
-  /* Any undefined symbol at this point has a scope SS_UNSAT.  */
-  else if (bfd_is_und_section (sym->section))
+  if (bfd_is_und_section (sym->section))
     info->symbol_scope = SS_UNSAT;
+  else if (sym->flags & BSF_EXPORT && ! bfd_is_com_section (sym->section))
+    info->symbol_scope = SS_UNIVERSAL;
   /* Anything else which is not in the common section has scope
      SS_LOCAL.  */
   else if (! bfd_is_com_section (sym->section))
@@ -3609,12 +3702,7 @@ som_write_object_contents (abfd)
       som_begin_writing (abfd);
     }
 
-  /* Now that the symbol table information is complete, build and
-     write the symbol table.  */
-  if (som_build_and_write_symbol_table (abfd) == false)
-    return false;
-
-  return (som_write_headers (abfd));
+  return (som_finish_writing (abfd));
 }
 
 
@@ -3640,7 +3728,7 @@ som_slurp_string_table (abfd)
     }
 
   /* Allocate and read in the string table.  */
-  stringtab = malloc (obj_som_stringtab_size (abfd));
+  stringtab = bfd_zalloc (abfd, obj_som_stringtab_size (abfd));
   if (stringtab == NULL)
     {
       bfd_set_error (bfd_error_no_memory);
@@ -3747,7 +3835,7 @@ som_slurp_symbol_table (abfd)
   stringtab = obj_som_stringtab (abfd);
 
   symbase = (som_symbol_type *)
-    malloc (symbol_count * sizeof (som_symbol_type));
+    bfd_zalloc (abfd, symbol_count * sizeof (som_symbol_type));
   if (symbase == NULL)
     {
       bfd_set_error (bfd_error_no_memory);
@@ -4158,6 +4246,73 @@ som_set_reloc_info (fixup, end, internal_relocs, section, symbols, just_count)
 	      if (! just_count)
 		rptr->sym_ptr_ptr = &symbols[c];
 	      break;
+	    /* Argument relocation bits for a function call.  */
+	    case 'R':
+	      if (! just_count)
+		{
+		  unsigned int tmp = var ('R');
+		  rptr->addend = 0;
+
+		  if ((som_hppa_howto_table[op].type == R_PCREL_CALL
+		       && R_PCREL_CALL + 10 > op)
+		      || (som_hppa_howto_table[op].type == R_ABS_CALL
+			  && R_ABS_CALL + 10 > op))
+		    {
+		      /* Simple encoding.  */
+		      if (tmp > 4)
+			{
+			  tmp -= 5;
+			  rptr->addend |= 1;
+			}
+		      if (tmp == 4)
+			rptr->addend |= 1 << 8 | 1 << 6 | 1 << 4 | 1 << 2;
+		      else if (tmp == 3)
+			rptr->addend |= 1 << 8 | 1 << 6 | 1 << 4;
+		      else if (tmp == 2)
+			rptr->addend |= 1 << 8 | 1 << 6;
+		      else if (tmp == 1)
+			rptr->addend |= 1 << 8;
+		    }
+		  else
+		    {
+		      unsigned int tmp1, tmp2;
+
+		      /* First part is easy -- low order two bits are
+			 directly copied, then shifted away.  */
+		      rptr->addend = tmp & 0x3;
+		      tmp >>= 2;
+
+		      /* Diving the result by 10 gives us the second
+			 part.  If it is 9, then the first two words
+			 are a double precision paramater, else it is
+			 3 * the first arg bits + the 2nd arg bits.  */
+		      tmp1 = tmp / 10;
+		      tmp -= tmp1 * 10;
+		      if (tmp1 == 9)
+			rptr->addend += (0xe << 6);
+		      else
+			{
+			  /* Get the two pieces.  */
+			  tmp2 = tmp1 / 3;
+			  tmp1 -= tmp2 * 3;
+			  /* Put them in the addend.  */
+			  rptr->addend += (tmp2 << 8) + (tmp1 << 6);
+			}
+
+		      /* What's left is the third part.  It's unpacked
+			 just like the second.  */
+		      if (tmp == 9)
+			rptr->addend += (0xe << 2);
+		      else
+			{
+			  tmp2 = tmp / 3;
+			  tmp -= tmp2 * 3;
+			  rptr->addend += (tmp2 << 4) + (tmp << 2);
+			}
+		    }
+		  rptr->addend = HPPA_R_ADDEND (rptr->addend, 0);
+		}
+	      break;
 	    /* Handle the linker expression stack.  */
 	    case 'O':
 	      switch (op)
@@ -4210,6 +4365,9 @@ som_set_reloc_info (fixup, end, internal_relocs, section, symbols, just_count)
 		rptr->addend = var ('T');
 	      else if (som_hppa_howto_table[op].type == R_EXIT)
 		rptr->addend = var ('U');
+	      else if (som_hppa_howto_table[op].type == R_PCREL_CALL
+		       || som_hppa_howto_table[op].type == R_ABS_CALL)
+		;
 	      else
 		rptr->addend = var ('V');
 	      rptr++;
@@ -4292,7 +4450,8 @@ som_slurp_reloc_table (abfd, section, symbols, just_count)
   if (section->relocation != (arelent *) NULL)
     return true;
 
-  internal_relocs = (arelent *) malloc (num_relocs * sizeof (arelent));
+  internal_relocs = (arelent *) 
+    bfd_zalloc (abfd, (num_relocs * sizeof (arelent)));
   if (internal_relocs == (arelent *) NULL)
     {
       bfd_set_error (bfd_error_no_memory);
@@ -4302,6 +4461,9 @@ som_slurp_reloc_table (abfd, section, symbols, just_count)
   /* Process and internalize the relocations.  */
   som_set_reloc_info (external_relocs, fixup_stream_size,
 		      internal_relocs, section, symbols, false);
+
+  /* We're done with the external relocations.  Free them.  */
+  free (external_relocs);
 
   /* Save our results and return success.  */
   section->relocation = internal_relocs;
