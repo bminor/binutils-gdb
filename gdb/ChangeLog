@@ -1,3 +1,10 @@
+start-sanitize-d10v
+Tue Oct 22 10:25:29 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* d10v-tdep.c, config/d10v/tm-d10v.h: Changes to allow stack
+ 	backtraces and inferior function calls.
+
+end-sanitize-d10v	
 Tue Oct 22 10:32:46 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-make.sed: Update init.c editing to work with Oct 8 change.
