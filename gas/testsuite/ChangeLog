@@ -1,4 +1,9 @@
 2005-04-01  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/i386/bss.[sd]: New.
+	* gas/i386/i386.exp: Run new test.
+
+2005-04-01  Jan Beulich  <jbeulich@novell.com>
 	* gas/i386/x86-64-pcrel.[sd]: New.
 	* gas/i386/i386.exp: Run new test.
 

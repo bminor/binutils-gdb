@@ -5307,6 +5307,10 @@ s_bss (ignore)
 {
   int temp;
 
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+  if (IS_ELF)
+    obj_elf_section_change_hook ();
+#endif
   temp = get_absolute_expression ();
   subseg_set (bss_section, (subsegT) temp);
   demand_empty_rest_of_line ();

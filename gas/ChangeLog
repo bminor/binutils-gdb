@@ -1,5 +1,9 @@
 2005-04-01  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-i386.c (s_bss): Call obj_elf_section_change_hook.
+
+2005-04-01  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-i386.c (md_apply_fix3): Also handle BFD_RELOC_X86_64_32S.
 	(tc_gen_reloc): Handle BFD_RELOC_X86_64_32S in the default case.
 
