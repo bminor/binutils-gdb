@@ -1,3 +1,8 @@
+1999-09-13  Donn Terry  <donn@interix.com>
+
+	* coffcode.h (coff_write_object_contents): Don't check reloc_count
+	when determining whether to set F_RELFLG.
+
 1999-09-13  Philip Blundell  <pb@nexus.co.uk>
 
 	* elf32-arm.h (elf32_arm_final_link_relocate): Don't range-check

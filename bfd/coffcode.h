@@ -3072,8 +3072,11 @@ coff_write_object_contents (abfd)
       section.s_lnnoptr = current->line_filepos;
       section.s_nreloc = current->reloc_count;
       section.s_nlnno = current->lineno_count;
+#ifndef COFF_IMAGE_WITH_PE
+      /* In PEI, relocs come in the .reloc section.  */
       if (current->reloc_count != 0)
 	hasrelocs = true;
+#endif
       if (current->lineno_count != 0)
 	haslinno = true;
       if ((current->flags & SEC_DEBUGGING) != 0
