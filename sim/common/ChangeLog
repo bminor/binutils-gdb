@@ -1,3 +1,8 @@
+Tue Jul 22 10:35:37 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sim-n-core.h (sim_core_write_unaligned_N): Add missing break
+	to FORCED_ALIGNMENT case.
+
 Thu Jun  5 13:48:37 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* callback.c (target_to_host_open): Handle hosts with O_BINARY.
