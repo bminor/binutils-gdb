@@ -1,1 +1,25 @@
+
+# don't build gnulib
+INSTALL_GNULIB = 
+INSTALL_HEADERS = 
+# don't do the cplus stuff 
+INSTALL_4_CPLUS=
+BUILD_4_CPLUS=
+# or the shared library stuff
+BUILD_4_SO =
+INSTALL_4_SO = 
+
+# and only build C
+LANGUAGES = c 
+
+# This is a hack.  since the makefile uses a tmp directory to build
+# gnulib, any relative path ar needs to be slewed.
+AR = $(srcdir)/../../binutils.a29k$(subdir)/ar
+AR_FLAGS = cqs
+RANLIB = echo
 ALL = all.xclib
+
+# Turn off focred include mangling
+INSTALL_FIXED_INCLUDES= nothing
+INSTALL_USR_LOCAL = nothing
+
