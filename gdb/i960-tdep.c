@@ -636,6 +636,7 @@ print_fault( siggnal )
 
 /* Initialization stub */
 
+void
 _initialize_i960_tdep ()
 {
   check_host ();

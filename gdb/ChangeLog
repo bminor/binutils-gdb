@@ -1,5 +1,20 @@
 Thu Oct 21 12:23:12 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* Makefile.in (init.c): Generate using the source, not munch.  This
+	cleans up all kinds of hassles (which nm to use in munch, etc).  The
+	new formatting conventions (mostly already followed) are that
+	the name of the _initialize_* routines must start in column zero,
+	and must not be inside #if.
+	* munch: Removed.
+	* Makefile.in: Remove references to munch.
+	* serial.c, remote.c, infptrace.c, maint.c, convex-tdep.c,
+	alpha-tdep.c, hp300ux-nat.c, hppab-nat.c, osfsolib.c, remote-es.c,
+	procfs.c, remote-udi.c, ser-go32.c, ultra3-xdep.c, sh-tdep.c,
+	i960-tdep.c, hppa-tdep.c, h8500-tdep.c, dpx2-nat.c, delta68-nat.c,
+	z8k-tdep.c: Make sure the above conventions are followed.  Make
+	sure they are all declared as returning void.  Clean up
+	miscellaneous comments and such.
+
 	* sh-tdep.c (sim_load): Add function.
 
 Thu Oct 21 15:58:48 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)

@@ -254,6 +254,7 @@ char *prog;
   return sim_load_standard (abfd); 
 }
 
+void
 _initialize_sh_tdep ()
 {
   extern int sim_memory_size;

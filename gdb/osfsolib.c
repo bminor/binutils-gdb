@@ -130,9 +130,6 @@ xfer_link_map_member PARAMS ((struct so_list *, struct link_map *));
 static void
 solib_map_sections PARAMS ((struct so_list *));
 
-void
-_initialize_solib PARAMS ((void));
-
 /*
 
 LOCAL FUNCTION

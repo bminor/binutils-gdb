@@ -379,6 +379,7 @@ static struct serial_ops go32_ops =
   go32_setbaudrate,
 };
 
+void
 _initialize_ser_go32 ()
 {
   serial_add_interface (&go32_ops);

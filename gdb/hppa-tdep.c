@@ -1218,13 +1218,14 @@ unwind_command (exp, from_tty)
   printf ("%08x\n%08X\n%08X\n%08X\n", xxx.foo[0], xxx.foo[1], xxx.foo[2],
 	  xxx.foo[3]);
 }
+#endif /* MAINTENANCE_CMDS */
 
 void
 _initialize_hppa_tdep ()
 {
+#ifdef MAINTENANCE_CMDS
   add_cmd ("unwind", class_maintenance, unwind_command,
 	   "Print unwind table entry at given address.",
 	   &maintenanceprintlist);
-}
-
 #endif /* MAINTENANCE_CMDS */
+}

@@ -217,27 +217,12 @@ maintenance_print_command (arg, from_tty)
   help_list (maintenanceprintlist, "maintenance print ", -1, stdout);
 }
 
-/*
-
-GLOBAL FUNCTION
-
-	_initialize_maint_cmds -- initialize the process file system stuff
-
-SYNOPSIS
-
-	void _initialize_maint_cmds (void)
-
-DESCRIPTION
-
-	Do required initializations during gdb startup for using the
-	/proc file system interface.
-
-*/
-
+#endif	/* MAINTENANCE_CMDS */
 
 void
 _initialize_maint_cmds ()
 {
+#if MAINTENANCE_CMDS	/* Entire file goes away if not including maint cmds */
   add_prefix_cmd ("maintenance", class_maintenance, maintenance_command,
 		  "Commands for use by GDB maintainers.\n\
 Includes commands to dump specific internal GDB structures in\n\
@@ -301,7 +286,5 @@ If a SOURCE file is specified, dump only that file's partial symbols.",
   add_cmd ("objfiles", class_maintenance, maintenance_print_objfiles,
 	   "Print dump of current object file definitions.",
 	   &maintenanceprintlist);
-
-}
-
 #endif	/* MAINTENANCE_CMDS */
+}

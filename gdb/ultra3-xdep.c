@@ -119,6 +119,7 @@ unsigned int sigmask;
 
 /* Initialization code for this module.  */
 
+void
 _initialize_ultra3 ()
 {
 #ifdef SYM1

@@ -1259,10 +1259,12 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",  /* to_doc */
   NULL,				/* sections_end */
   OPS_MAGIC			/* to_magic */
 };
+#endif /* Use remote.  */
 
 void
 _initialize_remote ()
 {
+#if !defined(DONT_USE_REMOTE)
   add_target (&remote_ops);
-}
 #endif
+}

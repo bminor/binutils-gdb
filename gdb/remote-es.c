@@ -2250,8 +2250,6 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
   OPS_MAGIC			/* to_magic (always last) */
 };
 
-/* _initialize_es1800 ()  */
-
 void
 _initialize_es1800 ()
 {

@@ -55,11 +55,6 @@ RANLIB = ranlib
 # This can be overridden in the host Makefile fragment file.
 TERMCAP = -ltermcap
 
-# System V: If you compile gdb with a compiler which uses the coff
-# encapsulation feature (this is a function of the compiler used, NOT
-# of the m-?.h file selected by config.gdb), you must make sure that
-# the GNU nm is the one that is used by munch.
-
 # If you are compiling with GCC, make sure that either 1) You have the
 # fixed include files where GCC can reach them, or 2) You use the
 # -traditional flag.  Otherwise the ioctl calls in inflow.c
@@ -314,7 +309,7 @@ SFILES = blockframe.c breakpoint.c buildsym.c c-exp.y c-lang.c \
 # Files that are not source code, but need to go into
 # gdb-$(VERSION).tar.Z.
 
-NONSRC = Makefile.in munch configure.in ChangeLog ChangeLog-9091 \
+NONSRC = Makefile.in configure.in ChangeLog ChangeLog-9091 \
 	ChangeLog-92 ChangeLog-3.x gdb.1 refcard.ps README TODO TAGS NEWS \
 	Projects .gdbinit COPYING $(YYFILES) copying.c copying.awk \
 	saber.suppress standalone.c stuff.c kdb-start.c gcc.patch \
@@ -483,9 +478,33 @@ uninstall: force
 	rm -f $(bindir)/gdb $(man1dir)/gdb.1
 	@$(MAKE) DO=uninstall "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 
 
-init.c: munch $(OBS) $(TSOBS)
-	$(srcdir)/munch $(MUNCH_DEFINE) $(OBS) $(TSOBS) > init.c-new
-	mv init.c-new init.c
+# We do this by grepping through sources.  If that turns out to be too slow,
+# maybe we could just require every .o file to have an initialization routine
+# of a given name (remote-udi.o -> _initialize_remote_udi, etc.).
+init.c: $(OBS) $(TSOBS)
+	@echo Making init.c
+	@rm -f init.c-tmp
+	@echo '/* Do not modify this file.  */' >init.c-tmp
+	@echo '/* It is created automatically by the Makefile.  */'>>init.c-tmp
+	@echo 'void initialize_all_files () {' >>init.c-tmp
+	@for i in $(OBS) $(TSOBS); do \
+	  filename=`echo $$i | sed \
+	    -e '/^Onindy.o/d' \
+	    -e '/^nindy.o/d' \
+	    -e '/ttyflush.o/d' \
+	    -e '/xdr_ld.o/d' \
+	    -e '/xdr_ptrace.o/d' \
+	    -e '/xdr_rdb.o/d' \
+	    -e '/udr.o/d' \
+	    -e '/udip2soc.o/d' \
+	    -e '/version.o/d' \
+	    -e '/[a-z0-9A-Z_]*-exp.tab.o/d' \
+	    -e 's/\.o/.c/'` ; \
+	  sed <$(srcdir)/$$filename >>init.c-tmp -n \
+	    -e '/^_initialize_[a-z_0-9A-Z]* *(/s/^\([a-z_0-9A-Z]*\).*/  {extern void \1 (); \1 ();}/p' ; \
+	done
+	@echo '}' >>init.c-tmp
+	@mv init.c-tmp init.c
 
 .PRECIOUS: init.c
 
@@ -654,7 +673,7 @@ make-proto-testsuite.dir: force_update
 
 clean:
 	@$(MAKE) $(FLAGS_TO_PASS) DO=clean "DODIRS=$(SUBDIRS)" subdir_do 
-	rm -f *.o $(ADD_FILES) *~
+	rm -f *.o $(ADD_FILES) *~ init.c-tmp
 	rm -f init.c version.c
 	rm -f gdb core make.log
 	rm -f gdb[0-9]

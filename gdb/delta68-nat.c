@@ -62,7 +62,8 @@ Internal error: invalid register number %d in REGISTER_U_ADDR\n",
 CORE_ADDR kernel_u_addr;
 
 /* Read the value of the u area from the kernel.  */
-void _initialize_kernel_u_addr ()
+void
+_initialize_delta68_nat ()
 {
   stuct nlist nl[2];
 

@@ -858,6 +858,7 @@ psw_info (arg)
     }
 }
 
+void
 _initialize_convex_dep ()
 {
   add_com ("alias", class_support, alias_command,

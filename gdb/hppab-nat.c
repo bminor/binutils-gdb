@@ -135,7 +135,8 @@ struct hpnlist {
 static struct hpnlist nl[] = {{ "_u", -1, }, { (char *) 0, }};
 
 /* read the value of the u area from the hp-ux kernel */
-void _initialize_kernel_u_addr ()
+void
+_initialize_kernel_u_addr ()
 {
     struct user u;
     nlist ("/hp-ux", &nl);

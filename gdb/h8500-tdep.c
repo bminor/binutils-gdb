@@ -764,6 +764,7 @@ h8500_set_trapped_internalvar (var, newval, bitpos, bitsize, offset)
   parse_and_eval (expression);
 }
 
+void
 _initialize_h8500_tdep ()
 {
   add_prefix_cmd ("memory", no_class, set_memory,

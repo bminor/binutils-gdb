@@ -1589,7 +1589,8 @@ Arguments are\n\
 	OPS_MAGIC,		/* Always the last thing */
 };
 
-void _initialize_remote_udi()
+void
+_initialize_remote_udi ()
 {
   add_target (&udi_ops);
 }

@@ -250,12 +250,14 @@ connect_command (args, fromtty)
 	}
     }
 }
+#endif /* 0 */
 
 void
 _initialize_serial ()
 {
+#if 0
   add_com ("connect", class_obscure, connect_command,
 	   "Connect the terminal directly up to the command monitor.\n\
 Use <CR>~. or <CR>~^D to break out.");
-}
 #endif /* 0 */
+}

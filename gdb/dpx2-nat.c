@@ -72,7 +72,7 @@ dpx2_register_u_addr (blockend, regnum)
 CORE_ADDR kernel_u_addr;
 
 void
-_initialize_kernel_u_addr ()
+_initialize_dpx2_nat ()
 {
   struct utsname uts;
 

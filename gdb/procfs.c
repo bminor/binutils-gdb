@@ -3537,23 +3537,6 @@ struct target_ops procfs_ops = {
   OPS_MAGIC			/* to_magic */
 };
 
-/*
-
-GLOBAL FUNCTION
-
-	_initialize_procfs -- initialize the process file system stuff
-
-SYNOPSIS
-
-	void _initialize_procfs (void)
-
-DESCRIPTION
-
-	Do required initializations during gdb startup for using the
-	/proc file system interface.
-
-*/
-
 void
 _initialize_procfs ()
 {

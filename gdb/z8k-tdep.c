@@ -461,6 +461,7 @@ set_memory (args, from_tty)
   help_list (setmemorylist, "set memory ", -1, stdout);
 }
 
+void
 _initialize_z8ktdep ()
 {
   add_prefix_cmd ("memory", no_class, set_memory,

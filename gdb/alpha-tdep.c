@@ -51,9 +51,6 @@ alpha_in_lenient_prologue PARAMS ((CORE_ADDR, CORE_ADDR));
 static void
 reinit_frame_cache_sfunc PARAMS ((char *, int, struct cmd_list_element *));
 
-void
-_initialize_alpha_tdep PARAMS ((void));
-
 /* Heuristic_proc_start may hunt through the text section for a long
    time across a 2400 baud serial line.  Allows the user to limit this
    search.  */
