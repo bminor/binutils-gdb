@@ -1,5 +1,8 @@
 Fri May  3 10:47:41 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* aoutx.h (translate_from_native_sym_flags): Set the section for
+	BSF_CONSTRUCTOR symbols.
+
 	* cofflink.c (_bfd_coff_link_input_bfd): Correct setting of
 	last_bf_index.
 
