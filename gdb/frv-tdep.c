@@ -994,12 +994,10 @@ frv_frame_this_id (struct frame_info *next_frame,
   /* The FUNC is easy.  */
   func = frame_func_unwind (next_frame);
 
-#if 0
   /* This is meant to halt the backtrace at "_start".  Make sure we
      don't halt it at a generic dummy frame. */
   if (inside_entry_func (func))
     return;
-#endif
 
   /* Check if the stack is empty.  */
   msym_stack = lookup_minimal_symbol ("_stack", NULL, NULL);
