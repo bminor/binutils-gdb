@@ -1,3 +1,11 @@
+Wed May  8 09:17:34 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* ppcboot.c (ppcboot_object_p): Check for type 0x41 in partition
+	table.  Call BFD_ASSERT to validate header size, instead of
+	calling fatal.
+	(ppcboot_bfd_print_private_bfd_data): Put quotes around partition
+	name.
+
 Tue May  7 16:10:19 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* ppcboot.c: New target for looking at PPCbug boot records.
