@@ -11,7 +11,7 @@
 
 # The lines between the "Do-first:" line and the "Things-to-keep:"
 # line are executed as a /bin/sh shell script before anything else is
-# done in this 
+# done in this directory.
 
 Do-first:
 
@@ -66,7 +66,6 @@ objcopy.1
 objcopy.c
 objdump.1
 objdump.c
-objdump.h
 ranlib.1
 ranlib.sh
 sanity.sh
