@@ -19,7 +19,7 @@
 #define POSIX_UTIME
 #define HAVE_PROCFS	/* This host has /proc support */
 
-extern PROTO(int,  abort,(void));
+extern PROTO(void, abort,(void));
 extern PROTO(int,  close,(int));
 extern PROTO(void, exit,(int));
 extern PROTO(int,  fclose,(FILE*));
