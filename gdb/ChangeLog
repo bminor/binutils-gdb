@@ -1,5 +1,13 @@
 2003-04-19  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_num_register_names): New variable.
+	(i386_num_mmx_regs): Renamed from mmx_num_regs.
+	(MM0_REGNUM): Remove redundant parentheses in define.
+	(i386_mmx_regnum_p): Use i386_mmx_regnum instead of mmx_num_regs.
+	(i386_fp_regnum_p, i386_fpc_regnum_p, i386_sse_regnum_p,
+	i386_mxcsr_regnum_p): Remove redundant parentheses.
+	(i386_register_name): Use i386_num_register_names.
+	
 	* i386-tdep.c (i386_extract_return_value,
 	i386_store_return_value): Correct check for availability of
 	floating-point registers.

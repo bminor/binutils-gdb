@@ -46,6 +46,7 @@
 
 /* Names of the registers.  The first 10 registers match the register
    numbering scheme used by GCC for stabs and DWARF.  */
+
 static char *i386_register_names[] =
 {
   "eax",   "ecx",    "edx",   "ebx",
@@ -61,6 +62,9 @@ static char *i386_register_names[] =
   "mxcsr"
 };
 
+static const int i386_num_register_names =
+  (sizeof (i386_register_names) / sizeof (*i386_register_names));
+
 /* MMX registers.  */
 
 static char *i386_mmx_names[] =
@@ -68,14 +72,17 @@ static char *i386_mmx_names[] =
   "mm0", "mm1", "mm2", "mm3",
   "mm4", "mm5", "mm6", "mm7"
 };
-static const int mmx_num_regs = (sizeof (i386_mmx_names)
-				 / sizeof (i386_mmx_names[0]));
-#define MM0_REGNUM (NUM_REGS)
+
+static const int i386_num_mmx_regs =
+  (sizeof (i386_mmx_names) / sizeof (i386_mmx_names[0]));
+
+#define MM0_REGNUM NUM_REGS
 
 static int
-i386_mmx_regnum_p (int reg)
+i386_mmx_regnum_p (int regnum)
 {
-  return (reg >= MM0_REGNUM && reg < MM0_REGNUM + mmx_num_regs);
+  return (regnum >= MM0_REGNUM
+	  && regnum < MM0_REGNUM + i386_num_mmx_regs);
 }
 
 /* FP register?  */
@@ -84,14 +91,14 @@ int
 i386_fp_regnum_p (int regnum)
 {
   return (regnum < NUM_REGS
-	  && (FP0_REGNUM && FP0_REGNUM <= (regnum) && (regnum) < FPC_REGNUM));
+	  && (FP0_REGNUM && FP0_REGNUM <= regnum && regnum < FPC_REGNUM));
 }
 
 int
 i386_fpc_regnum_p (int regnum)
 {
   return (regnum < NUM_REGS
-	  && (FPC_REGNUM <= (regnum) && (regnum) < XMM0_REGNUM));
+	  && (FPC_REGNUM <= regnum && regnum < XMM0_REGNUM));
 }
 
 /* SSE register?  */
@@ -100,14 +107,14 @@ int
 i386_sse_regnum_p (int regnum)
 {
   return (regnum < NUM_REGS
-	  && (XMM0_REGNUM <= (regnum) && (regnum) < MXCSR_REGNUM));
+	  && (XMM0_REGNUM <= regnum && regnum < MXCSR_REGNUM));
 }
 
 int
 i386_mxcsr_regnum_p (int regnum)
 {
   return (regnum < NUM_REGS
-	  && (regnum == MXCSR_REGNUM));
+	  && regnum == MXCSR_REGNUM);
 }
 
 /* Return the name of register REG.  */
@@ -115,14 +122,13 @@ i386_mxcsr_regnum_p (int regnum)
 const char *
 i386_register_name (int reg)
 {
-  if (reg < 0)
-    return NULL;
+  if (reg >= 0 && reg < i386_num_register_names)
+    return i386_register_names[reg];
+
   if (i386_mmx_regnum_p (reg))
     return i386_mmx_names[reg - MM0_REGNUM];
-  if (reg >= sizeof (i386_register_names) / sizeof (*i386_register_names))
-    return NULL;
 
-  return i386_register_names[reg];
+  return NULL;
 }
 
 /* Convert stabs register number REG to the appropriate register
