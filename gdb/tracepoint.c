@@ -99,7 +99,6 @@ static struct symtab_and_line traceframe_sal;
 
 /* Tracing command lists */
 static struct cmd_list_element *tfindlist;
-static struct cmd_list_element *tracelist;
 
 /* ======= Important command functions: ======= */
 static void trace_command                 PARAMS ((char *, int));
@@ -723,26 +722,28 @@ static char *parse_and_eval_memrange PARAMS ((char *,
 					      long *));
 
 /* The three functions:
-   	collect_pseudocom, while_stepping_pseudocom, and end_pseudocom
+   	collect_pseudocommand, 
+	while_stepping_pseudocommand, and 
+	end_actions_pseudocommand
    are placeholders for "commands" that are actually ONLY to be used
    within a tracepoint action list.  If the actual function is ever called,
    it means that somebody issued the "command" at the top level,
    which is always an error.  */
 
 static void 
-end_pseudocom (args, from_tty)
+end_actions_pseudocommand (args, from_tty)
 {
   error ("This command cannot be used at the top level.");
 }
 
 static void
-while_stepping_pseudocom (args, from_tty)
+while_stepping_pseudocommand (args, from_tty)
 {
   error ("This command can only be used in a tracepoint actions list.");
 }
 
 static void
-collect_pseudocom (args, from_tty)
+collect_pseudocommand (args, from_tty)
 {
   error ("This command can only be used in a tracepoint actions list.");
 }
@@ -870,9 +871,10 @@ validate_actionline (line, t)
      char *line;
      struct tracepoint *t;
 {
-  char *p;
+  struct cmd_list_element *c;
   struct expression *exp;
   value_ptr temp, temp2;
+  char *p;
 
   for (p = line; isspace (*p); )
     p++;
@@ -880,9 +882,16 @@ validate_actionline (line, t)
   /* symbol lookup etc. */
   if (*p == '\0')	/* empty line: just prompt for another line. */
     return BADLINE;
-  else if (0 == strncasecmp (p, "collect", 7))
+
+  c = lookup_cmd (&p, cmdlist, "", -1, 1);
+  if (c == 0)
     {
-      p += 7;
+      warning ("'%s' is not an action that I know, or is ambiguous.", p);
+      return BADLINE;
+    }
+    
+  if (c->function.cfunc == collect_pseudocommand)
+    {
       do {			/* repeat over a comma-separated list */
 	while (isspace (*p))
 	  p++;
@@ -910,7 +919,7 @@ validate_actionline (line, t)
 	      /*exp->elts[0].opcode != UNOP_CAST    && */
 		exp->elts[0].opcode != OP_REGISTER)
 	      {
-		warning ("collect: enter variable name or register.\n");
+		warning ("collect requires a variable or register name.\n");
 		return BADLINE;
 	      }
 	    if (exp->elts[0].opcode == OP_VAR_VALUE)
@@ -931,11 +940,10 @@ validate_actionline (line, t)
       } while (p && *p++ == ',');
       return GENERIC;
     }
-  else if (0 == strncasecmp (p, "while-stepping", 14))
+  else if (c->function.cfunc == while_stepping_pseudocommand)
     {
       char *steparg;	/* in case warning is necessary */
 
-      p += 14;
       while (isspace (*p))
 	p++;
       steparg = p;
@@ -953,11 +961,11 @@ validate_actionline (line, t)
 	t->step_count = -1;
       return STEPPING;
     }
-  else if (0 == strncasecmp (p, "end", 3))
+  else if (c->function.cfunc == end_actions_pseudocommand)
     return END;
   else
     {
-      warning ("'%s' is not a supported tracepoint action.", p);
+      warning ("'%s' is not a supported tracepoint action.", line);
       return BADLINE;
     }
 }
@@ -1374,13 +1382,14 @@ encode_actions (t, tdp_actions, step_count, stepping_actions)
      unsigned long      *step_count;
      char              **stepping_actions;
 {
-  struct expression  *exp;
   static char        tdp_buff[2048], step_buff[2048];
-  struct action_line *action;
   char               *action_exp;
+  struct expression  *exp;
+  struct action_line *action;
   bfd_signed_vma      offset;
   long                i;
-  struct collection_list *collect;
+  struct collection_list  *collect;
+  struct cmd_list_element *cmd;
 
   clear_collection_list (&tracepoint_list);
   clear_collection_list (&stepping_list);
@@ -1395,9 +1404,12 @@ encode_actions (t, tdp_actions, step_count, stepping_actions)
       while (isspace (*action_exp))
 	action_exp++;
 
-      if (0 == strncasecmp (action_exp, "collect", 7))
+      cmd = lookup_cmd (&action_exp, cmdlist, "", -1, 1);
+      if (cmd == 0)
+	error ("Bad action list item: %s", action_exp);
+
+      if (cmd->function.cfunc == collect_pseudocommand)
 	{
-	  action_exp = action_exp + 7;
 	  do {	/* repeat over a comma-separated list */
 	    while (isspace (*action_exp))
 	      action_exp++;
@@ -1469,11 +1481,11 @@ encode_actions (t, tdp_actions, step_count, stepping_actions)
 	      }
 	  } while (action_exp && *action_exp++ == ',');
 	}
-      else if (0 == strncasecmp (action_exp, "while-stepping", 14))
+      else if (cmd->function.cfunc == while_stepping_pseudocommand)
 	{
 	  collect = &stepping_list;
 	}
-      else if (0 == strncasecmp (action_exp, "end", 3))
+      else if (cmd->function.cfunc == end_actions_pseudocommand)
 	{
 	  if (collect == &stepping_list)	/* end stepping actions */
 	    collect = &tracepoint_list;
@@ -2052,14 +2064,19 @@ tracepoint_save_command (args, from_tty)
 	  indent = i1;
 	  for (line = tp->actions; line; line = line->next)
 	    {
+	      struct cmd_list_element *cmd;
+
 	      actionline = line->action;
 	      while (isspace(*actionline))
 		actionline++;
 
 	      fprintf (fp, "%s%s\n", indent, actionline);
-	      if (0 == strncasecmp (actionline, "while-stepping", 14))
+	      cmd = lookup_cmd (&actionline, cmdlist, "", -1, 1);
+	      if (cmd == 0)
+		error ("Bad action list item: %s", actionline);
+	      if (cmd->function.cfunc == while_stepping_pseudocommand)
 		indent = i2;
-	      else if (0 == strncasecmp (actionline, "end", 3))
+	      else if (cmd->function.cfunc == end_actions_pseudocommand)
 		indent = i1;
 	    }
 	}
@@ -2255,6 +2272,8 @@ trace_dump_command (args, from_tty)
 
   for (action = t->actions; action; action = action->next)
     {
+      struct cmd_list_element *cmd;
+
       action_exp = action->action;
       while (isspace (*action_exp))
 	action_exp++;
@@ -2262,11 +2281,15 @@ trace_dump_command (args, from_tty)
       /* The collection actions to be done while stepping are
 	 bracketed by the commands "while-stepping" and "end".  */
 
-      if (0 == strncasecmp (action_exp, "while-stepping", 14))
+      cmd = lookup_cmd (&action_exp, cmdlist, "", -1, 1);
+      if (cmd == 0)
+	error ("Bad action list item: %s", action_exp);
+
+      if (cmd->function.cfunc == while_stepping_pseudocommand)
 	stepping_actions = 1;
-      else if (0 == strncasecmp (action_exp, "end", 3))
+      else if (cmd->function.cfunc == end_actions_pseudocommand)
 	stepping_actions = 0;
-      else if (0 == strncasecmp (action_exp, "collect", 7))
+      else if (cmd->function.cfunc == collect_pseudocommand)
 	{
 	  /* Display the collected data.
 	     For the trap frame, display only what was collected at the trap.
@@ -2275,7 +2298,6 @@ trace_dump_command (args, from_tty)
 	     STEPPING_FRAME and STEPPING_ACTIONS should be equal.  */
 	  if (stepping_frame == stepping_actions)
 	    {
-	      action_exp += 7;
 	      do { /* repeat over a comma-separated list */
 		QUIT;
 		if (*action_exp == ',')
@@ -2420,14 +2442,14 @@ The trace will end when the tracepoint has been passed 'count' times.\n\
 Usage: passcount COUNT TPNUM, where TPNUM may also be \"all\";\n\
 if TPNUM is omitted, passcount refers to the last tracepoint defined.");
 
-  add_com ("end", class_trace, end_pseudocom,
+  add_com ("end", class_trace, end_actions_pseudocommand,
 	   "Ends a list of commands or actions.\n\
 Several GDB commands allow you to enter a list of commands or actions.\n\
 Entering \"end\" on a line by itself is the normal way to terminate\n\
 such a list.\n\n\
 Note: the \"end\" command cannot be used at the gdb prompt.");
 
-  add_com ("while-stepping", class_trace, while_stepping_pseudocom,
+  add_com ("while-stepping", class_trace, while_stepping_pseudocommand,
 	   "Specify single-stepping behavior at a tracepoint.\n\
 Argument is number of instructions to trace in single-step mode\n\
 following the tracepoint.  This command is normally followed by\n\
@@ -2435,7 +2457,10 @@ one or more \"collect\" commands, to specify what to collect\n\
 while single-stepping.\n\n\
 Note: this command can only be used in a tracepoint \"actions\" list.");
 
-  add_com ("collect", class_trace, collect_pseudocom, 
+  add_com_alias ("ws",         "while-stepping", class_alias, 0);
+  add_com_alias ("stepping",   "while-stepping", class_alias, 0);
+
+  add_com ("collect", class_trace, collect_pseudocommand, 
 	   "Specify one or more data items to be collected at a tracepoint.\n\
 Accepts a comma-separated list of (one or more) arguments.\n\
 Things that may be collected include registers, variables, plus\n\
