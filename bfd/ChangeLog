@@ -1,5 +1,8 @@
 Mon Nov  1 14:30:09 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* elfcode.h (elf_slurp_reloca_table, elf_slurp_reloc_table):
+	Handle symbol number of zero.
+
 	* reloc.c (enum bfd_reloc_code_real): Added
 	BFD_RELOC_MIPS_LITERAL, BFD_RELOC_MIPS_GOT16,
 	BFD_RELOC_MIPS_CALL16, BFD_RELOC_MIPS_GPREL32.
