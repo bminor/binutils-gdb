@@ -15,11 +15,11 @@ TREE	= devo
 
 NATIVE  = native
 
-DATE	= 930204
+DATE	= 930211
 
 TAG	= latest-$(DATE)
 
-INSTALLDIR = /justice/devo-test/$(TAG)
+INSTALLDIR = /bang/installed-progressive/$(TAG)
 
 GCC = gcc -O -g
 CFLAGS = -g
