@@ -43,7 +43,7 @@ register_addr (regno, blockend)
   if (regno >= 0 && regno < sizeof(sysv68reg) / sizeof(sysv68reg[0]))
     return blockend + sysv68reg[regno] * 4; 
   else if (regno < FPC_REGNUM)
-    return offsetof (struct user, u_fpu.regs.reg[regno - FP0_REGNUM][0]
+    return offsetof (struct user, u_fpu.regs.reg[regno - FP0_REGNUM][0]);
   else if (regno == FPC_REGNUM)
     return offsetof (struct user, u_fpu.regs.control);
   else if (regno == FPS_REGNUM)
@@ -65,7 +65,7 @@ CORE_ADDR kernel_u_addr;
 void
 _initialize_delta68_nat ()
 {
-  stuct nlist nl[2];
+  struct nlist nl[2];
 
   nl[0].n_name = "u";
   nl[1].n_name = NULL;
