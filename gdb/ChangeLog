@@ -1,3 +1,10 @@
+Wed May 17 16:48:36 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From 2000-04-14 Gary Thomas <gthomas@redhat.com>:
+	* config/v850/tm-v850.h: Change breakpoint sequence to be
+	'br *' since there is no 16bit "illegal" instruction on this
+	processor.
+
 Tue May 16 18:57:14 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* TODO: Review.  Delete anything that is no longer applicable.
