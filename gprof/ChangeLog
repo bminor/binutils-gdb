@@ -1,3 +1,8 @@
+2003-02-21  K Schutte  <schutte@fel.tno.nl>
+
+	* corefile.c (core_create_line_syms): Check for a NULL sentinel
+	value before using it.
+
 2002-12-02  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in (LINGUAS): Add pt_BR.

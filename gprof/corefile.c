@@ -1,6 +1,6 @@
 /* corefile.c
 
-   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -736,13 +736,16 @@ core_create_line_syms (cbfd)
   /* Update sentinels.  */
   sentinel = sym_lookup (&symtab, (bfd_vma) 0);
 
-  if (strcmp (sentinel->name, "<locore>") == 0
+  if (sentinel
+      && strcmp (sentinel->name, "<locore>") == 0
       && min_vma <= sentinel->end_addr)
     sentinel->end_addr = min_vma - 1;
 
   sentinel = sym_lookup (&symtab, ~(bfd_vma) 0);
 
-  if (strcmp (sentinel->name, "<hicore>") == 0 && max_vma >= sentinel->addr)
+  if (sentinel
+      && strcmp (sentinel->name, "<hicore>") == 0
+      && max_vma >= sentinel->addr)
     sentinel->addr = max_vma + 1;
 
   /* Copy in function symbols.  */
