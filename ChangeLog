@@ -1,5 +1,10 @@
 start-sanitize-d10v
-	Wed Jul 17 14:33:09 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+Thu Jul 18 12:55:40 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in (d10v-*-*): Don't configure ld or gdb until the
+	d10v support is added.
+
+Wed Jul 17 14:33:09 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* configure.in (d10v-*-*): New target.
 end-sanitize-d10v

@@ -128,7 +128,7 @@ changequote([,])dnl
       arm-*-pe)             fmt=coff targ=armcoff em=pe ;;
 
 # start-sanitize-d10v
-      d10v-*-elf*)           fmt=elf bfd_gas=yes ;;
+      d10v-*-*)		    fmt=elf bfd_gas=yes ;;
 # end-sanitize-d10v
 
       hppa-*-*elf*)         fmt=elf em=hppa ;;
