@@ -111,6 +111,8 @@ struct elf_link_hash_entry
 #define ELF_LINK_HASH_DEF_DYNAMIC_MULTIPLE 040
   /* Dynamic symbol has been adjustd.  */
 #define ELF_LINK_HASH_DYNAMIC_ADJUSTED 0100
+  /* Symbol is defined as weak.  */
+#define ELF_LINK_HASH_DEFINED_WEAK 0200
 };
 
 /* ELF linker hash table.  */

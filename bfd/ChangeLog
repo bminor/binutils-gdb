@@ -1,5 +1,11 @@
 Sat Jul 16 21:10:39 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* libelf.h (ELF_LINK_HASH_DEFINED_WEAK): Define.
+	* elfcode.h (elf_link_add_object_symbols): If symbol is defined as
+	weak, set ELF_LINK_HASH_DEFINED_WEAK.
+	(elf_link_output_extsym): If symbol is defined as weak, mark it
+	STB_WEAK.
+
 	* libelf.h (struct bfd_elf_section_data): Add relocs field.
 	(shdr_name): Remove; unused.
 	* elfcode.h (elf_slurp_reloc_table): Rewrote to handle both REL
