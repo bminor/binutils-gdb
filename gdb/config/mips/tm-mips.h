@@ -262,14 +262,14 @@ extern void mips_do_registers_info PARAMS ((int, int));
 #define REGISTER_BYTE(N) ((N) * MIPS_REGSIZE)
 
 /* Number of bytes of storage in the actual machine representation
-   for register N.  On mips, all regs are the same size.  */
+   for register N. */
 
-#define REGISTER_RAW_SIZE(N) MIPS_REGSIZE
+#define REGISTER_RAW_SIZE(N) REGISTER_VIRTUAL_SIZE(N)
 
 /* Number of bytes of storage in the program's representation
-   for register N.  On mips, all regs are the same size.  */
+   for register N. */
 
-#define REGISTER_VIRTUAL_SIZE(N) MIPS_REGSIZE
+#define REGISTER_VIRTUAL_SIZE(N) TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (N))
 
 /* Largest value REGISTER_RAW_SIZE can have.  */
 
@@ -279,13 +279,15 @@ extern void mips_do_registers_info PARAMS ((int, int));
 
 #define MAX_REGISTER_VIRTUAL_SIZE 8
 
-/* Return the GDB type object for the "standard" data type
-   of data in register N.  */
+/* Return the GDB type object for the "standard" data type of data in
+   register N.  */
 
 #ifndef REGISTER_VIRTUAL_TYPE
 #define REGISTER_VIRTUAL_TYPE(N) \
-	(((N) >= FP0_REGNUM && (N) < FP0_REGNUM+32)  \
-	 ? builtin_type_float : builtin_type_int)
+	(((N) >= FP0_REGNUM && (N) < FP0_REGNUM+32) ? builtin_type_float \
+	 : ((N) == 32 /*SR*/) ? builtin_type_uint32 \
+	 : ((N) >= 70 && (N) <= 89) ? builtin_type_uint32 \
+	 : builtin_type_int)
 #endif
 
 /* All mips targets store doubles in a register pair with the least

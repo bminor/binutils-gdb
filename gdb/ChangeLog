@@ -1,3 +1,12 @@
+Wed Apr  1 23:13:23 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/mips/tm-mips.h (REGISTER_VIRTUAL_TYPE): Handle 32 bit SR,
+ 	FSR and FIR registers.
+	(REGISTER_VIRTUAL_SIZE): Compute using REGISTER_VIRTUAL_TYPE.
+	(REGISTER_RAW_SIZE): Define using REGISTER_VIRTUAL_SIZE.
+
+	* config/mips/tm-mips64.h: Ditto.
+
 Tue Mar 31 21:30:39 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* arm-tdep.c (gdb_print_insn_arm): Attach a fake Thumb symbol

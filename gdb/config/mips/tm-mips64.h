@@ -25,8 +25,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* define 8 byte register type */
 #define REGISTER_VIRTUAL_TYPE(N) \
-        (((N) >= FP0_REGNUM && (N) < FP0_REGNUM+32)  \
-         ? builtin_type_double : builtin_type_long_long) \
+        (((N) >= FP0_REGNUM && (N) < FP0_REGNUM+32) ? builtin_type_double \
+	 : ((N) == 32 /*SR*/) ? builtin_type_uint32 \
+	 : ((N) >= 70 && (N) <= 89) ? builtin_type_uint32 \
+	 : builtin_type_long_long)
 
 /* Load double words in CALL_DUMMY.  */
 #define OP_LDFPR 065	/* ldc1 */
