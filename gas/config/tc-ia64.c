@@ -252,6 +252,25 @@ static struct
 				       the current DV-checking block.  */
     int maxpaths;                   /* size currently allocated for
 				       entry_labels */
+    /* Support for hardware errata workarounds.  */
+
+    /* Record data about the last three insn groups.  */
+    struct group
+    {
+      /* B-step workaround.
+	 For each predicate register, this is set if the corresponding insn
+	 group conditionally sets this register with one of the affected
+	 instructions.  */
+      int p_reg_set[64];
+      /* B-step workaround.
+	 For each general register, this is set if the corresponding insn
+	 a) is conditional one one of the predicate registers for which
+	    P_REG_SET is 1 in the corresponding entry of the previous group,
+	 b) sets this general register with one of the affected
+	    instructions.  */
+      int g_reg_set_conditionally[128];
+    } last_groups[3];
+    int group_idx;
   }
 md;
 
@@ -5159,6 +5178,95 @@ parse_operands (idesc)
   return idesc;
 }
 
+/* Keep track of state necessary to determine whether a NOP is necessary
+   to avoid an erratum in A and B step Itanium chips, and return 1 if we
+   detect a case where additional NOPs may be necessary.  */
+static int
+errata_nop_necessary_p (slot, insn_unit)
+     struct slot *slot;
+     enum ia64_unit insn_unit;
+{
+  int i;
+  struct group *this_group = md.last_groups + md.group_idx;
+  struct group *prev_group = md.last_groups + (md.group_idx + 2) % 3;
+  struct ia64_opcode *idesc = slot->idesc;
+
+  /* Test whether this could be the first insn in a problematic sequence.  */
+  if (insn_unit == IA64_UNIT_F)
+    {
+      for (i = 0; i < idesc->num_outputs; i++)
+	if (idesc->operands[i] == IA64_OPND_P1
+	    || idesc->operands[i] == IA64_OPND_P2)
+	  {
+	    int regno = slot->opnd[i].X_add_number - REG_P;
+	    if (regno > 16)
+	      abort ();
+	    this_group->p_reg_set[regno] = 1;
+	  }
+    }
+
+  /* Test whether this could be the second insn in a problematic sequence.  */
+  if (insn_unit == IA64_UNIT_M && slot->qp_regno > 0
+      && prev_group->p_reg_set[slot->qp_regno])
+    {
+      for (i = 0; i < idesc->num_outputs; i++)
+	if (idesc->operands[i] == IA64_OPND_R1
+	    || idesc->operands[i] == IA64_OPND_R2
+	    || idesc->operands[i] == IA64_OPND_R3)
+	  {
+	    int regno = slot->opnd[i].X_add_number - REG_GR;
+	    if (regno > 128)
+	      abort ();
+	    if (strncmp (idesc->name, "add", 3) != 0
+		&& strncmp (idesc->name, "sub", 3) != 0
+		&& strncmp (idesc->name, "shladd", 6) != 0
+		&& (idesc->flags & IA64_OPCODE_POSTINC) == 0)
+	      this_group->g_reg_set_conditionally[regno] = 1;
+	  }
+    }
+
+  /* Test whether this could be the third insn in a problematic sequence.  */
+  for (i = 0; i < NELEMS (idesc->operands) && idesc->operands[i]; i++)
+    {
+      if (/* For fc, ptc, ptr, tak, thash, tpa, ttag, probe, ptr, ptc.  */
+	  idesc->operands[i] == IA64_OPND_R3
+	  /* For mov indirect.  */
+	  || idesc->operands[i] == IA64_OPND_RR_R3
+	  || idesc->operands[i] == IA64_OPND_DBR_R3
+	  || idesc->operands[i] == IA64_OPND_IBR_R3
+	  || idesc->operands[i] == IA64_OPND_PKR_R3
+	  || idesc->operands[i] == IA64_OPND_PMC_R3
+	  || idesc->operands[i] == IA64_OPND_PMD_R3
+	  || idesc->operands[i] == IA64_OPND_MSR_R3
+	  || idesc->operands[i] == IA64_OPND_CPUID_R3
+	  /* For itr.  */
+	  || idesc->operands[i] == IA64_OPND_ITR_R3
+	  || idesc->operands[i] == IA64_OPND_DTR_R3
+	  /* Normal memory addresses (load, store, xchg, cmpxchg, etc.).  */
+	  || idesc->operands[i] == IA64_OPND_MR3)
+	{
+	  int regno = slot->opnd[i].X_add_number - REG_GR;
+	  if (regno > 128)
+	    abort ();
+	  if (idesc->operands[i] == IA64_OPND_R3)
+	    {
+	      if (strcmp (idesc->name, "fc") != 0
+		  && strcmp (idesc->name, "tak") != 0
+		  && strcmp (idesc->name, "thash") != 0
+		  && strcmp (idesc->name, "tpa") != 0
+		  && strcmp (idesc->name, "ttag") != 0
+		  && strncmp (idesc->name, "ptr", 3) != 0
+		  && strncmp (idesc->name, "ptc", 3) != 0
+		  && strncmp (idesc->name, "probe", 5) != 0)
+	      return 0;
+	    }
+	  if (prev_group->g_reg_set_conditionally[regno]) 
+	    return 1;
+	}
+    }
+  return 0;
+}
+
 static void
 build_insn (slot, insnp)
      struct slot *slot;
@@ -5549,6 +5657,9 @@ emit_one_bundle ()
 	  dwarf2_gen_line_info (addr, &md.slot[curr].debug_line);
 	}
 
+      if (errata_nop_necessary_p (md.slot + curr, insn_unit))
+	as_warn (_("Additional NOP may be necessary to workaround Itanium processor A/B step errata"));
+
       build_insn (md.slot + curr, insn + i);
 
       /* Set slot counts for non prologue/body unwind records.  */
@@ -5594,6 +5705,12 @@ emit_one_bundle ()
 	}
 
       end_of_insn_group = md.slot[curr].end_of_insn_group;
+
+      if (end_of_insn_group)
+	{
+	  md.group_idx = (md.group_idx + 1) % 3;
+	  memset (md.last_groups + md.group_idx, 0, sizeof md.last_groups[0]);
+	}
 
       /* clear slot:  */
       ia64_free_opcode (md.slot[curr].idesc);

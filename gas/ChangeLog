@@ -1,3 +1,10 @@
+2000-11-15  Bernd Schmidt  <bernds@redhat.com>
+
+	* tc-ia64.c (struct md): New entries LAST_GROUPS, GROUP_IDX.
+	(errata_nops_necessary_p): New function.
+	(emit_one_bundle): Call it.  Update the GROUP_IDX field in struct
+	md.
+
 2000-11-14  Jim Wilson  <wilson@redhat.com>
 
 	* config/tc-ia64.c (ia64_target_format): If EF_IA_64_BE not set, then
