@@ -1,3 +1,8 @@
+2004-10-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* objdump.c (dump_symbols): Fix thinko last change.  Improve error
+	messages.
+
 2004-10-08  Nick Clifton  <nickc@redhat.com>
 
 	* nm.c: Add a new switch --special-syms which, if enabled, will

@@ -2280,17 +2280,14 @@ dump_symbols (bfd *abfd ATTRIBUTE_UNUSED, bfd_boolean dynamic)
       bfd *cur_bfd;
 
       if (*current == NULL)
-	printf (_("no information for the %ld'th symbol"), count);
+	printf (_("no information for symbol number %ld\n"), count);
 
       else if ((cur_bfd = bfd_asymbol_bfd (*current)) == NULL)
-	printf (_("could not determine the type of the %ld'th symbol"),
+	printf (_("could not determine the type of symbol number %ld\n"),
 		count);
 
-      else if (! dump_special_syms
-	       && bfd_is_target_special_symbol (cur_bfd, *current))
-	continue;
-
-      else
+      else if (dump_special_syms
+	       || !bfd_is_target_special_symbol (cur_bfd, *current))
 	{
 	  const char *name = (*current)->name;
 
@@ -2311,9 +2308,8 @@ dump_symbols (bfd *abfd ATTRIBUTE_UNUSED, bfd_boolean dynamic)
 	  else
 	    bfd_print_symbol (cur_bfd, stdout, *current,
 			      bfd_print_symbol_all);
+	  printf ("\n");
 	}
-
-      printf ("\n");
       current++;
     }
   printf ("\n\n");
