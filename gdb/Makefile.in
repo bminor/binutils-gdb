@@ -227,21 +227,6 @@ HFILES=	breakpoint.h buildsym.h command.h defs.h environ.h \
 	target.h terminal.h tm-68k.h tm-i960.h tm-sunos.h tm-sysv4.h \
 	xm-m68k.h xm-sysv4.h language.h parser-defs.h value.h
 
-# Header files for machine opcode tables.
-# when OPCODE_DIR changes to ../include, remove the whole $(OPCODES)
-# business, since they will be put into the GDB release files by somebody else.
-OPCODE_DIR1 = ../include/opcode/
-OPCODE_DIR2 = ./
-OPCODES = $(OPCODE_DIR1)pn.h  $(OPCODE_DIR1)np1.h \
-	$(OPCODE_DIR1)sparc.h $(OPCODE_DIR1)vax.h \
-	$(OPCODE_DIR1)m68k.h  $(OPCODE_DIR2)ns32k-opcode.h \
-	$(OPCODE_DIR2)convx-opcode.h $(OPCODE_DIR1)pyr.h \
-	$(OPCODE_DIR1)mips.h  $(OPCODE_DIR2)am29k-opcode.h \
-	$(OPCODE_DIR1)arm.h   $(OPCODE_DIR1)m88k.h \
-	$(OPCODE_DIR1)tahoe.h $(OPCODE_DIR2)rs6k-opcode.h \
-	$(OPCODE_DIR1)h8300.h $(OPCODE_DIR1)i960.h \
-	$(OPCODE_DIR1)i386.h  $(OPCODE_DIR1)i860.h
-
 REMOTE_EXAMPLES = m68k-stub.c i386-stub.c rem-multi.shar
 
 MALLOCSRC = gmalloc.c mcheck.c mtrace.c mtrace.awk \
@@ -270,9 +255,9 @@ INFOFILES = gdb.info*
 DEPFILES= ${TDEPFILES} ${XDEPFILES}
 
 SOURCES=$(SFILES) $(ALLDEPFILES) $(YYFILES)
-TAGFILES = $(SOURCES) ${HFILES} ${OPCODES} ${ALLPARAM} ${POSSLIBS} 
+TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS} 
 TAGFILES_MAINDIR = $(SFILES_MAINDIR) $(ALLDEPFILES_MAINDIR) \
-             ${HFILES} ${OPCODES} ${ALLPARAM} ${POSSLIBS_MAINDIR} 
+             ${HFILES} ${ALLPARAM} ${POSSLIBS_MAINDIR} 
 TARFILES = ${TAGFILES_MAINDIR} ${OTHERS} ${REMOTE_EXAMPLES}
 
 OBS = main.o blockframe.o breakpoint.o findvar.o stack.o source.o \
