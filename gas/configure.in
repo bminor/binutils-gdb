@@ -263,10 +263,10 @@ case ${need_bfd} in
     ;;
 esac
 
-if [ x${host} = x${target} ] ; then
+if [ x${host} != x${target} ] ; then
     rm -f Makefile.tem
     mv Makefile Makefile.tem
-    echo CROSS=-DCROSS_COMPILE
+    echo CROSS=-DCROSS_COMPILE > Makefile
     cat Makefile.tem >> Makefile
     rm -f Makefile.tem
 else
