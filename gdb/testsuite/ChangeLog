@@ -1,5 +1,8 @@
 Wed May 21 21:23:16 1997  Bob Manson  <manson@charmed.cygnus.com>
 
+	* gdb.base/watchpoint.exp: Don't run the test_stepping
+	tests if gdb can't call functions on the target.
+
 	* gdb.base/setshow.exp: Don't run the set prompt tests if
 	the board has gdb_prompt set.
 

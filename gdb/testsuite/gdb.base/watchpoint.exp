@@ -305,6 +305,7 @@ proc test_stepping {} {
 	    clear_xfail "hppa*-*-*bsd*"
 	    # It works with the generic inferior function calling code too.
 	    clear_xfail "mn10200*-*-*"
+	    clear_xfail "mn10300*-*-*"
 	    gdb_test "p func1 ()" "= 73" \
 		"calling function with watchpoint enabled"
 	}
@@ -527,15 +528,17 @@ if [initialize] then {
 	initialize
     }
 
-    test_stepping
+    if ![target_info exsts gdb,cannot_call_functions] {
+	test_stepping
 
-    # See above.
-    if [istarget "mips-idt-*"] then {
-	gdb_exit
-	gdb_start
-	gdb_reinitialize_dir $srcdir/$subdir
-	gdb_load $binfile
-	initialize
+	# See above.
+	if [istarget "mips-idt-*"] then {
+	    gdb_exit
+	    gdb_start
+	    gdb_reinitialize_dir $srcdir/$subdir
+	    gdb_load $binfile
+	    initialize
+	}
     }
 
     # Only enabled for some targets merely because it has not been tested 
