@@ -1192,7 +1192,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	i386-tdep.c i386b-nat.c i386mach-nat.c i386v-nat.c i386-linux-nat.c \
 	i386aix-nat.c i386m3-nat.c i386v4-nat.c i386ly-tdep.c \
 	i386bsd-nat.c i386bsd-tdep.c i386fbsd-nat.c \
-	i387-tdep.c i387-nat.c \
+	i387-tdep.c \
 	i386-linux-tdep.c i386-nat.c \
 	i960-tdep.c \
 	ia64-linux-nat.c ia64-linux-tdep.c ia64-tdep.c \
@@ -1557,7 +1557,7 @@ gdbtypes.o: gdbtypes.c $(bfd_h) $(complaints_h) $(defs_h) $(expression_h) \
 	$(target_h) $(value_h) $(gdb_string_h) $(wrapper_h) $(cp_abi_h)
 
 go32-nat.o: go32-nat.c $(defs_h) $(inferior_h) gdb_wait.h $(gdbcore_h) \
-	$(command_h) $(floatformat_h) $(target_h) i387-nat.h $(regcache_h)
+	$(command_h) $(floatformat_h) $(target_h) i387-tdep.h $(regcache_h)
 
 gnu-nat.o: process_reply_S.h exc_request_S.h notify_S.h msg_reply_S.h \
 	exc_request_U.h msg_U.h gnu-nat.h
@@ -1633,9 +1633,6 @@ i386v4-nat.o: i386v4-nat.c $(defs_h) $(regcache_h)
 
 i387-tdep.o: i387-tdep.c $(floatformat_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) $(language_h) $(regcache_h) $(doublest_h) i386-tdep.h
-
-i387-nat.o: i387-nat.c $(defs_h) $(inferior_h) $(value_h) $(regcache_h) \
-	i387-nat.h
 
 i960-tdep.o: i960-tdep.c $(floatformat_h) $(defs_h) $(expression_h) \
 	$(frame_h) $(gdbtypes_h) $(symtab_h) $(value_h) $(gdbcore_h) \
@@ -2162,7 +2159,7 @@ x86-64-tdep.o : x86-64-tdep.c $(defs_h) $(inferior_h) $(gdbcore_h) $(gdbcmd_h) \
 	$(dwarf2cfi_h) gdb_assert.h
 
 x86-64-linux-nat.o : x86-64-linux-nat.c $(defs_h) $(inferior_h) \
-	$(gdbcore_h) $(regcache_h) i387-nat.h gdb_assert.h x86-64-tdep.h \
+	$(gdbcore_h) $(regcache_h) i387-tdep.h gdb_assert.h x86-64-tdep.h \
 	i386-tdep.h
 
 win32-nat.o: win32-nat.c $(gdbcmd_h) $(gdbcore_h) $(inferior_h) $(defs_h) \

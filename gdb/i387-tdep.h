@@ -1,4 +1,4 @@
-/* Native-dependent code for the i387.
+/* Target-dependent code for the i387.
    Copyright 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -18,8 +18,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef I387_NAT_H
-#define I387_NAT_H
+#ifndef I387_TDEP_H
+#define I387_TDEP_H
 
 /* Fill register REGNUM in GDB's register array with the appropriate
    value from *FSAVE.  This function masks off any of the reserved
@@ -53,4 +53,4 @@ extern void i387_supply_fxsave (char *fxsave);
 
 extern void i387_fill_fxsave (char *fxsave, int regnum);
 
-#endif /* i387-nat.h */
+#endif /* i387-tdep.h */

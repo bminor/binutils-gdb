@@ -25,7 +25,7 @@
 #include "inferior.h"
 #include "gdbcore.h"
 #include "regcache.h"
-#include "i387-nat.h"
+#include "i387-tdep.h"
 #include "gdb_assert.h"
 #include "x86-64-tdep.h"
 

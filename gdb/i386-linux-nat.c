@@ -57,7 +57,7 @@
 #include "gregset.h"
 
 /* Prototypes for i387_supply_fsave etc.  */
-#include "i387-nat.h"
+#include "i387-tdep.h"
 
 /* Defines for XMM0_REGNUM etc. */
 #include "i386-tdep.h"

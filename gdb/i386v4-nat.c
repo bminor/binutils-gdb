@@ -27,7 +27,7 @@
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
 #endif
-#include "i387-nat.h"
+#include "i387-tdep.h"
 
 
 #ifdef HAVE_SYS_PROCFS_H

@@ -1,5 +1,33 @@
 2002-05-11  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* Makefile.in (ALLDEPFILES): Remove i387-nat.c.
+	(i387-nat.o): Delete dependency list.
+	(go32-nat.o): Change i387-nat.h to i387-tdep.h.
+	(x86-64-linux-nat.o): Likewise.
+	* i387-nat.c: Delete file, moving contents to...
+	* i387-tdep.c: ...here.
+	* i387-nat.h: Rename...
+	* i387-tdep.h: ...to this.
+	* go32-nat.c: Include i387-tdep.h instead of i387-nat.h.
+	* i386-linux-nat.c: Likewise.
+	* i386bsd-nat.c: Likewise.
+	* i386gnu-nat.c: Likewise.
+	* i386nbsd-nat.c: Likewise.
+	* i386v4-nat.c: Likewise.
+	* x86-64-linux-nat.c: Likewise.
+	* config/i386/fbsd.mh (NATDEPFILES): Remove i387-nat.o.
+	* config/i386/go32.mh (NATDEPFILES): Likewise.
+	* config/i386/i386gnu.mh (NATDEPFILES): Likewise.
+	* config/i386/i386sol2.mh (NATDEPFILES): Likewise.
+	* config/i386/i386v42mp.mh (NATDEPFILES): Likewise.
+	* config/i386/linux.mh (NATDEPFILES): Likewise.
+	* config/i386/nbsd.mh (NATDEPFILES): Likewise.
+	* config/i386/nbsdelf.mh (NATDEPFILES): Likewise.
+	* config/i386/obsd.mh (NATDEPFILES): Likewise.
+	* config/i386/x86-64linux.mh (NATDEPFILES): Likewise.
+
+2002-05-11  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* Makefile.in (ALLDEPFILES): Add alphabsd-tdep.c.
 	(alphabsd-nat.o): Depend on alphabsd-tdep.h.
 	(alphanbsd-nat.o): Likewise.

@@ -148,7 +148,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
       regcache_collect (i, REG_ADDR (gregsetp, i));
 }
 
-#include "i387-nat.h"
+#include "i387-tdep.h"
 
 /* Fill GDB's register array with the floating-point register values
    in *FPREGSETP.  */

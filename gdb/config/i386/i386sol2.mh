@@ -4,5 +4,5 @@ XM_FILE= xm-i386v4.h
 XM_CLIBS= -lsocket -lnsl
 
 NAT_FILE= nm-i386sol2.h
-NATDEPFILES= core-regset.o fork-child.o i386v4-nat.o i387-nat.o corelow.o \
+NATDEPFILES= core-regset.o fork-child.o i386v4-nat.o corelow.o \
 	procfs.o proc-api.o proc-events.o proc-flags.o proc-why.o gcore.o

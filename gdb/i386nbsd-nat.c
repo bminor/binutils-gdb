@@ -39,7 +39,7 @@ typedef struct fpreg fpregset_t;
 #include "gregset.h"
 
 /* Prototypes for i387_supply_fsave etc.  */
-#include "i387-nat.h"  
+#include "i387-tdep.h"  
 
 struct md_core
 {
