@@ -145,6 +145,8 @@ static int elf_section_from_bfd_section PARAMS ((bfd *, struct sec *));
 
 static long elf_slurp_symbol_table PARAMS ((bfd *, asymbol **, boolean));
 
+static boolean elf_slurp_reloc_table PARAMS ((bfd *, asection *, asymbol **));
+
 static int elf_symbol_from_bfd_symbol PARAMS ((bfd *,
 					     struct symbol_cache_entry **));
 
@@ -2899,105 +2901,120 @@ elf_get_reloc_upper_bound (abfd, asect)
   return (asect->reloc_count + 1) * sizeof (arelent *);
 }
 
+/* Read in and swap the external relocs.  */
+
 static boolean
-elf_slurp_reloca_table (abfd, asect, symbols)
+elf_slurp_reloc_table (abfd, asect, symbols)
      bfd *abfd;
-     sec_ptr asect;
+     asection *asect;
      asymbol **symbols;
 {
-  Elf_External_Rela *native_relocs;
-  arelent *reloc_cache;
-  arelent *cache_ptr;
+  struct elf_backend_data * const ebd = get_elf_backend_data (abfd);
+  struct bfd_elf_section_data * const d = elf_section_data (asect);
+  PTR allocated = NULL;
+  bfd_byte *native_relocs;
+  arelent *relents;
+  arelent *relent;
+  unsigned int i;
+  int entsize;
 
-  unsigned int idx;
-
-  if (asect->relocation)
-    return true;
-  if (asect->reloc_count == 0)
-    return true;
-  if (asect->flags & SEC_CONSTRUCTOR)
+  if (asect->relocation != NULL)
     return true;
 
-  if (bfd_seek (abfd, asect->rel_filepos, SEEK_SET) != 0)
-    return false;
-  native_relocs = (Elf_External_Rela *)
-    bfd_alloc (abfd, asect->reloc_count * sizeof (Elf_External_Rela));
-  if (!native_relocs)
+  BFD_ASSERT (asect->rel_filepos == d->rel_hdr.sh_offset
+	      && (asect->reloc_count
+		  == d->rel_hdr.sh_size / d->rel_hdr.sh_entsize));
+
+  native_relocs = (bfd_byte *) elf_section_data (asect)->relocs;
+  if (native_relocs == NULL)
+    {
+      allocated = (PTR) malloc (d->rel_hdr.sh_size);
+      if (allocated == NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  goto error_return;
+	}
+
+      if (bfd_seek (abfd, asect->rel_filepos, SEEK_SET) != 0
+	  || (bfd_read (allocated, 1, d->rel_hdr.sh_size, abfd)
+	      != d->rel_hdr.sh_size))
+	goto error_return;
+
+      native_relocs = (bfd_byte *) allocated;
+    }
+
+  relents = ((arelent *)
+	     bfd_alloc (abfd, asect->reloc_count * sizeof (arelent)));
+  if (relents == NULL)
     {
       bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
-  if (bfd_read ((PTR) native_relocs,
-		sizeof (Elf_External_Rela), asect->reloc_count, abfd)
-      != sizeof (Elf_External_Rela) * asect->reloc_count)
-    return false;
-
-  reloc_cache = (arelent *)
-    bfd_alloc (abfd, (size_t) (asect->reloc_count * sizeof (arelent)));
-
-  if (!reloc_cache)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
+      goto error_return;
     }
 
-  for (idx = 0; idx < asect->reloc_count; idx++)
+  entsize = d->rel_hdr.sh_entsize;
+  BFD_ASSERT (entsize == sizeof (Elf_External_Rel)
+	      || entsize == sizeof (Elf_External_Rela));
+
+  for (i = 0, relent = relents;
+       i < asect->reloc_count;
+       i++, relent++, native_relocs += entsize)
     {
-      Elf_Internal_Rela dst;
-      Elf_External_Rela *src;
+      Elf_Internal_Rela rela;
+      Elf_Internal_Rel rel;
 
-      cache_ptr = reloc_cache + idx;
-      src = native_relocs + idx;
-      elf_swap_reloca_in (abfd, src, &dst);
-
-#ifdef RELOC_PROCESSING
-      RELOC_PROCESSING (cache_ptr, &dst, symbols, abfd, asect);
-#else
-      if (asect->flags & SEC_RELOC)
-	{
-	  /* relocatable, so the offset is off of the section */
-	  cache_ptr->address = dst.r_offset + asect->vma;
-	}
+      if (entsize == sizeof (Elf_External_Rela))
+	elf_swap_reloca_in (abfd, (Elf_External_Rela *) native_relocs, &rela);
       else
 	{
-	  /* non-relocatable, so the offset a virtual address */
-	  cache_ptr->address = dst.r_offset;
+	  elf_swap_reloc_in (abfd, (Elf_External_Rel *) native_relocs, &rel);
+	  rela.r_offset = rel.r_offset;
+	  rela.r_info = rel.r_info;
+	  rela.r_addend = 0;
 	}
 
-      /* ELF_R_SYM(dst.r_info) is the symbol table offset.  An offset
-	 of zero points to the dummy symbol, which was not read into
-	 the symbol table SYMBOLS.  */
-      if (ELF_R_SYM (dst.r_info) == 0)
-	cache_ptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
+      /* The address of an ELF reloc is section relative for an object
+	 file, and absolute for an executable file or shared library.
+	 The address of a BFD reloc is always section relative.  */
+      if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0)
+	relent->address = rela.r_offset;
+      else
+	relent->address = rela.r_offset - asect->vma;
+
+      if (ELF_R_SYM (rela.r_info) == 0)
+	relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
       else
 	{
-	  asymbol *s;
+	  asymbol **ps, *s;
 
-	  cache_ptr->sym_ptr_ptr = symbols + ELF_R_SYM (dst.r_info) - 1;
+	  ps = symbols + ELF_R_SYM (rela.r_info) - 1;
+	  s = *ps;
 
-	  /* Translate any ELF section symbol into a BFD section
-	     symbol.  */
-	  s = *(cache_ptr->sym_ptr_ptr);
-	  if (s->flags & BSF_SECTION_SYM)
-	    {
-	      cache_ptr->sym_ptr_ptr = s->section->symbol_ptr_ptr;
-	      s = *cache_ptr->sym_ptr_ptr;
-	      if (s->name == 0 || s->name[0] == 0)
-		abort ();
-	    }
+	  /* Canonicalize ELF section symbols.  FIXME: Why?  */
+	  if ((s->flags & BSF_SECTION_SYM) == 0)
+	    relent->sym_ptr_ptr = ps;
+	  else
+	    relent->sym_ptr_ptr = s->section->symbol_ptr_ptr;
 	}
-      cache_ptr->addend = dst.r_addend;
 
-      /* Fill in the cache_ptr->howto field from dst.r_type */
-      {
-	struct elf_backend_data *ebd = get_elf_backend_data (abfd);
-	(*ebd->elf_info_to_howto) (abfd, cache_ptr, &dst);
-      }
-#endif
+      relent->addend = rela.r_addend;
+
+      if (entsize == sizeof (Elf_External_Rela))
+	(*ebd->elf_info_to_howto) (abfd, relent, &rela);
+      else
+	(*ebd->elf_info_to_howto_rel) (abfd, relent, &rel);
     }
 
-  asect->relocation = reloc_cache;
+  asect->relocation = relents;
+
+  if (allocated != NULL)
+    free (allocated);
+
   return true;
+
+ error_return:
+  if (allocated != NULL)
+    free (allocated);
+  return false;
 }
 
 #ifdef DEBUG
@@ -3045,129 +3062,7 @@ elf_debug_file (ehdrp)
 }
 #endif
 
-static boolean
-elf_slurp_reloc_table (abfd, asect, symbols)
-     bfd *abfd;
-     sec_ptr asect;
-     asymbol **symbols;
-{
-  Elf_External_Rel *native_relocs;
-  arelent *reloc_cache;
-  arelent *cache_ptr;
-  Elf_Internal_Shdr *data_hdr;
-  bfd_vma data_off;
-  unsigned long data_max;
-  char buf[4];			/* FIXME -- might be elf64 */
-
-  unsigned int idx;
-
-  if (asect->relocation)
-    return true;
-  if (asect->reloc_count == 0)
-    return true;
-  if (asect->flags & SEC_CONSTRUCTOR)
-    return true;
-
-  if (bfd_seek (abfd, asect->rel_filepos, SEEK_SET) != 0)
-    return false;
-  native_relocs = (Elf_External_Rel *)
-    bfd_alloc (abfd, asect->reloc_count * sizeof (Elf_External_Rel));
-  if (!native_relocs)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
-  if (bfd_read ((PTR) native_relocs,
-		sizeof (Elf_External_Rel), asect->reloc_count, abfd)
-      != sizeof (Elf_External_Rel) * asect->reloc_count)
-    return false;
-
-  reloc_cache = (arelent *)
-    bfd_alloc (abfd, (size_t) (asect->reloc_count * sizeof (arelent)));
-
-  if (!reloc_cache)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
-
-  /* Get the offset of the start of the segment we are relocating to read in
-     the implicit addend.  */
-  data_hdr = &elf_section_data (asect)->this_hdr;
-  data_off = data_hdr->sh_offset;
-  data_max = data_hdr->sh_size - sizeof (buf) + 1;
-
-#if DEBUG & 2
-  elf_debug_section ("data section", -1, data_hdr);
-#endif
-
-  for (idx = 0; idx < asect->reloc_count; idx++)
-    {
-#ifdef RELOC_PROCESSING
-      Elf_Internal_Rel dst;
-      Elf_External_Rel *src;
-
-      cache_ptr = reloc_cache + idx;
-      src = native_relocs + idx;
-      elf_swap_reloc_in (abfd, src, &dst);
-
-      RELOC_PROCESSING (cache_ptr, &dst, symbols, abfd, asect);
-#else
-      Elf_Internal_Rel dst;
-      Elf_External_Rel *src;
-
-      cache_ptr = reloc_cache + idx;
-      src = native_relocs + idx;
-
-      elf_swap_reloc_in (abfd, src, &dst);
-
-      if (asect->flags & SEC_RELOC)
-	{
-	  /* relocatable, so the offset is off of the section */
-	  cache_ptr->address = dst.r_offset + asect->vma;
-	}
-      else
-	{
-	  /* non-relocatable, so the offset a virtual address */
-	  cache_ptr->address = dst.r_offset;
-	}
-
-      /* ELF_R_SYM(dst.r_info) is the symbol table offset.  An offset
-	 of zero points to the dummy symbol, which was not read into
-	 the symbol table SYMBOLS.  */
-      if (ELF_R_SYM (dst.r_info) == 0)
-	cache_ptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
-      else
-	{
-	  asymbol *s;
-
-	  cache_ptr->sym_ptr_ptr = symbols + ELF_R_SYM (dst.r_info) - 1;
-
-	  /* Translate any ELF section symbol into a BFD section
-	     symbol.  */
-	  s = *(cache_ptr->sym_ptr_ptr);
-	  if (s->flags & BSF_SECTION_SYM)
-	    {
-	      cache_ptr->sym_ptr_ptr = s->section->symbol_ptr_ptr;
-	      s = *cache_ptr->sym_ptr_ptr;
-	      if (s->name == 0 || s->name[0] == 0)
-		abort ();
-	    }
-	}
-      BFD_ASSERT (dst.r_offset <= data_max);
-      cache_ptr->addend = 0;
-
-      /* Fill in the cache_ptr->howto field from dst.r_type */
-      {
-	struct elf_backend_data *ebd = get_elf_backend_data (abfd);
-	(*ebd->elf_info_to_howto_rel) (abfd, cache_ptr, &dst);
-      }
-#endif
-    }
-
-  asect->relocation = reloc_cache;
-  return true;
-}
+/* Canonicalize the relocs.  */
 
 long
 elf_canonicalize_reloc (abfd, section, relptr, symbols)
@@ -3176,28 +3071,18 @@ elf_canonicalize_reloc (abfd, section, relptr, symbols)
      arelent **relptr;
      asymbol **symbols;
 {
-  arelent *tblptr = section->relocation;
-  unsigned int count = 0;
-  int use_rela_p = get_elf_backend_data (abfd)->use_rela_p;
+  arelent *tblptr;
+  unsigned int i;
 
-  /* snarfed from coffcode.h */
-  if (use_rela_p)
-    {
-      if (! elf_slurp_reloca_table (abfd, section, symbols))
-	return -1;
-    }
-  else
-    {
-      if (! elf_slurp_reloc_table (abfd, section, symbols))
-	return -1;
-    }
+  if (! elf_slurp_reloc_table (abfd, section, symbols))
+    return -1;
 
   tblptr = section->relocation;
-
-  for (; count++ < section->reloc_count;)
+  for (i = 0; i < section->reloc_count; i++)
     *relptr++ = tblptr++;
 
-  *relptr = 0;
+  *relptr = NULL;
+
   return section->reloc_count;
 }
 
@@ -6041,12 +5926,21 @@ elf_link_input_bfd (finfo, input_bfd)
 
       if ((o->flags & SEC_RELOC) != 0)
 	{
-	  /* Read in the relocs.  */
-	  input_rel_hdr = &elf_section_data (o)->rel_hdr;
-	  if (bfd_seek (input_bfd, input_rel_hdr->sh_offset, SEEK_SET) != 0
-	      || bfd_read (finfo->external_relocs, 1, input_rel_hdr->sh_size,
-			   input_bfd) != input_rel_hdr->sh_size)
-	    return false;
+	  PTR external_relocs;
+
+	  /* Get the external relocs.  They may have been cached.  */
+	  external_relocs = elf_section_data (o)->relocs;
+	  if (external_relocs == NULL)
+	    {
+	      input_rel_hdr = &elf_section_data (o)->rel_hdr;
+	      if ((bfd_seek (input_bfd, input_rel_hdr->sh_offset, SEEK_SET)
+		   != 0)
+		  || (bfd_read (finfo->external_relocs, 1,
+			       input_rel_hdr->sh_size, input_bfd)
+		      != input_rel_hdr->sh_size))
+		return false;
+	      external_relocs = finfo->external_relocs;
+	    }
 
 	  /* Swap in the relocs.  For convenience, we always produce
 	     an Elf_Internal_Rela array; if the relocs are Rel, we set
@@ -6057,7 +5951,7 @@ elf_link_input_bfd (finfo, input_bfd)
 	      Elf_External_Rel *erelend;
 	      Elf_Internal_Rela *irela;
 
-	      erel = (Elf_External_Rel *) finfo->external_relocs;
+	      erel = (Elf_External_Rel *) external_relocs;
 	      erelend = erel + o->reloc_count;
 	      irela = finfo->internal_relocs;
 	      for (; erel < erelend; erel++, irela++)
@@ -6079,7 +5973,7 @@ elf_link_input_bfd (finfo, input_bfd)
 	      BFD_ASSERT (input_rel_hdr->sh_entsize
 			  == sizeof (Elf_External_Rela));
 
-	      erela = (Elf_External_Rela *) finfo->external_relocs;
+	      erela = (Elf_External_Rela *) external_relocs;
 	      erelaend = erela + o->reloc_count;
 	      irela = finfo->internal_relocs;
 	      for (; erela < erelaend; erela++, irela++)

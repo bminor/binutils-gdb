@@ -1,3 +1,15 @@
+Sat Jul 16 21:10:39 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* libelf.h (struct bfd_elf_section_data): Add relocs field.
+	(shdr_name): Remove; unused.
+	* elfcode.h (elf_slurp_reloc_table): Rewrote to handle both REL
+	and RELA relocs.  Free up the unswapped relocs.  Permit the relocs
+	to be cached in the section_data.  Correct the reloc address.
+	(elf_slurp_reloca_table): Remove.
+	(elf_canonicalize_reloc): Rewrote.
+	(elf_link_input_bfd): Permit the relocs to be cached in the
+	section data.
+
 Sat Jul 16 13:55:38 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* config.bfd (m88*-harris-cxux*): Recognize.

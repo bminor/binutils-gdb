@@ -375,14 +375,29 @@ struct elf_sym_extra
 
 typedef struct elf_sym_extra Elf_Sym_Extra;
 
+/* Information stored for each BFD section in an ELF file.  This
+   structure is allocated by elf_new_section_hook.  */
+
 struct bfd_elf_section_data {
+  /* The ELF header for this section.  */
   Elf_Internal_Shdr this_hdr;
+  /* The ELF header for the reloc section associated with this
+     section, if any.  */
   Elf_Internal_Shdr rel_hdr;
-  int this_idx, rel_idx;
+  /* The ELF section number of this section.  Only used for an output
+     file.  */
+  int this_idx;
+  /* The ELF section number of the reloc section associated with this
+     section, if any.  Only used for an output file.  */
+  int rel_idx;
+  /* Used by the backend linker to store the symbol hash table entries
+     associated with relocs against global symbols.  */
   struct elf_link_hash_entry **rel_hashes;
+  /* A pointer to the unswapped external relocs; this may be NULL.  */
+  PTR relocs;
 };
+
 #define elf_section_data(sec)  ((struct bfd_elf_section_data*)sec->used_by_bfd)
-#define shdr_name(abfd,shdr)	(elf_shstrtab (abfd)->tab + (shdr)->sh_name)
 
 #define get_elf_backend_data(abfd) \
   ((struct elf_backend_data *) (abfd)->xvec->backend_data)
