@@ -1639,7 +1639,7 @@ parse_stab_type (dhandle, info, typename, pp, slotp)
   if (size != -1)
     {
       if (! debug_record_type_size (dhandle, dtype, (unsigned int) size))
-	return false;
+	return DEBUG_TYPE_NULL;
     }
 
   return dtype;
@@ -3131,7 +3131,7 @@ parse_stab_array_type (dhandle, info, pp, stringp)
   /* If the index type is type 0, we take it as int.  */
   p = *pp;
   if (! parse_stab_type_number (&p, typenums))
-    return false;
+    return DEBUG_TYPE_NULL;
   if (typenums[0] == 0 && typenums[1] == 0 && **pp != '=')
     {
       index_type = debug_find_named_type (dhandle, "int");
@@ -3139,7 +3139,7 @@ parse_stab_array_type (dhandle, info, pp, stringp)
 	{
 	  index_type = debug_make_int_type (dhandle, 4, false);
 	  if (index_type == DEBUG_TYPE_NULL)
-	    return false;
+	    return DEBUG_TYPE_NULL;
 	}
       *pp = p;
     }
@@ -3168,7 +3168,7 @@ parse_stab_array_type (dhandle, info, pp, stringp)
   if (**pp != ';')
     {
       bad_stab (orig);
-      return false;
+      return DEBUG_TYPE_NULL;
     }
   ++*pp;
 
@@ -3182,14 +3182,14 @@ parse_stab_array_type (dhandle, info, pp, stringp)
   if (**pp != ';')
     {
       bad_stab (orig);
-      return false;
+      return DEBUG_TYPE_NULL;
     }
   ++*pp;
 
   element_type = parse_stab_type (dhandle, info, (const char *) NULL, pp,
 				  (debug_type **) NULL);
   if (element_type == DEBUG_TYPE_NULL)
-    return false;
+    return DEBUG_TYPE_NULL;
 
   if (adjustable)
     {

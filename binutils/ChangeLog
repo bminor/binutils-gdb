@@ -1,3 +1,11 @@
+2000-01-15  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* debug.c (debug_name_type): Return DEBUG_TYPE_NULL rather than
+	false.
+	(debug_tag_type): Here too.
+	* ieee.c (ieee_builtin_type): And here.
+	* stabs.c (parse_stab_type, parse_stab_array_type): And here.
+
 2000-01-13  Nick Clifton  <nickc@cygnus.com>
 
 	* readelf.c (get_machine_name): Change EM_S370 to return "IBM

@@ -779,7 +779,7 @@ ieee_builtin_type (info, p, indx)
 
     case builtin_bcd_float:
       ieee_error (info, p, _("BCD float type not supported"));
-      return false;
+      return DEBUG_TYPE_NULL;
     }
 
   if (name != NULL)

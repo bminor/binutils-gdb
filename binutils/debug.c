@@ -1988,7 +1988,7 @@ debug_name_type (handle, name, type)
   nm = debug_add_to_namespace (info, &info->current_file->globals, name,
 			       DEBUG_OBJECT_TYPE, DEBUG_LINKAGE_NONE);
   if (nm == NULL)
-    return false;
+    return DEBUG_TYPE_NULL;
 
   nm->u.type = t;
 
@@ -2044,7 +2044,7 @@ debug_tag_type (handle, name, type)
   nm = debug_add_to_namespace (info, &info->current_file->globals, name,
 			       DEBUG_OBJECT_TAG, DEBUG_LINKAGE_NONE);
   if (nm == NULL)
-    return false;
+    return DEBUG_TYPE_NULL;
 
   nm->u.tag = t;
 
