@@ -1,3 +1,8 @@
+2000-03-22  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* printcmd.c (print_scalar_formatted):  Truncate addresses to the
+	size of a target pointer before passing them to print_address.
+
 2000-03-22  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/tm-i386aix.h (I386_AIX_TARGET): Remove.

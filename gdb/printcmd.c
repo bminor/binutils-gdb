@@ -443,7 +443,14 @@ print_scalar_formatted (valaddr, type, format, size, stream)
       break;
 
     case 'a':
-      print_address (unpack_pointer (type, valaddr), stream);
+      {
+	/* Truncate address to the size of a target pointer, avoiding
+	   shifts larger or equal than the width of a CORE_ADDR.  */
+	CORE_ADDR addr = unpack_pointer (type, valaddr);
+	if (TARGET_PTR_BIT < (sizeof (CORE_ADDR) * HOST_CHAR_BIT))
+	  addr &= ((CORE_ADDR) 1 << TARGET_PTR_BIT) - 1;
+	print_address (addr, stream);
+      }
       break;
 
     case 'c':
