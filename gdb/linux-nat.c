@@ -25,6 +25,8 @@
 #include "gdb_wait.h"
 #include <sys/ptrace.h>
 
+#include "linux-nat.h"
+
 /* If the system headers did not provide the constants, hard-code the normal
    values.  */
 #ifndef PTRACE_EVENT_FORK

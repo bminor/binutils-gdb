@@ -35,6 +35,8 @@
 #include "cli/cli-decode.h"	/* for add_info */
 #include "gdb_string.h"
 
+#include "linux-nat.h"
+
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
 #endif
@@ -171,13 +173,13 @@ linux_do_thread_registers (bfd *obfd, ptid_t ptid,
 #ifdef FILL_FPXREGSET
   gdb_fpxregset_t fpxregs;
 #endif
-  unsigned long merged_pid = ptid_get_tid (ptid) << 16 | ptid_get_pid (ptid);
+  unsigned long lwp = ptid_get_lwp (ptid);
 
   fill_gregset (&gregs, -1);
   note_data = (char *) elfcore_write_prstatus (obfd,
 					       note_data,
 					       note_size,
-					       merged_pid,
+					       lwp,
 					       stop_signal, &gregs);
 
   fill_fpregset (&fpregs, -1);
@@ -210,7 +212,7 @@ struct linux_corefile_thread_data
  */
 
 static int
-linux_corefile_thread_callback (struct thread_info *ti, void *data)
+linux_corefile_thread_callback (struct lwp_info *ti, void *data)
 {
   struct linux_corefile_thread_data *args = data;
   ptid_t saved_ptid = inferior_ptid;
@@ -268,7 +270,7 @@ linux_make_note_section (bfd *obfd, int *note_size)
   thread_args.note_data = note_data;
   thread_args.note_size = note_size;
   thread_args.num_notes = 0;
-  iterate_over_threads (linux_corefile_thread_callback, &thread_args);
+  iterate_over_lwps (linux_corefile_thread_callback, &thread_args);
   if (thread_args.num_notes == 0)
     {
       /* iterate_over_threads didn't come up with any threads;

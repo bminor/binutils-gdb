@@ -40,6 +40,8 @@
 static int debug_lin_lwp;
 extern char *strsignal (int sig);
 
+#include "linux-nat.h"
+
 /* On GNU/Linux there are no real LWP's.  The closest thing to LWP's
    are processes sharing the same VM space.  A multi-threaded process
    is basically a group of such processes.  However, such a grouping
@@ -72,43 +74,6 @@ extern char *strsignal (int sig);
      When debugged a multi-threaded process that spawns a lot of
      threads will run out of processes, even if the threads exit,
      because the "zombies" stay around.  */
-
-/* Structure describing a LWP.  */
-struct lwp_info
-{
-  /* The process id of the LWP.  This is a combination of the LWP id
-     and overall process id.  */
-  ptid_t ptid;
-
-  /* Non-zero if this LWP is cloned.  In this context "cloned" means
-     that the LWP is reporting to its parent using a signal other than
-     SIGCHLD.  */
-  int cloned;
-
-  /* Non-zero if we sent this LWP a SIGSTOP (but the LWP didn't report
-     it back yet).  */
-  int signalled;
-
-  /* Non-zero if this LWP is stopped.  */
-  int stopped;
-
-  /* Non-zero if this LWP will be/has been resumed.  Note that an LWP
-     can be marked both as stopped and resumed at the same time.  This
-     happens if we try to resume an LWP that has a wait status
-     pending.  We shouldn't let the LWP run until that wait status has
-     been processed, but we should not report that wait status if GDB
-     didn't try to let the LWP run.  */
-  int resumed;
-
-  /* If non-zero, a pending wait status.  */
-  int status;
-
-  /* Non-zero if we were stepping this LWP.  */
-  int step;
-
-  /* Next LWP in list.  */
-  struct lwp_info *next;
-};
 
 /* List of known LWPs.  */
 static struct lwp_info *lwp_list;

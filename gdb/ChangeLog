@@ -1,3 +1,16 @@
+2003-06-19  Michael Snyder  <msnyder@redhat.com>
+
+	* linux-nat.h: New file.
+	* linux-nat.c: Include linux-nat.h.
+	* lin-lwp.c: Include linux-nat.h.  
+	Move struct lwp_info def to linux-nat.h.
+	* linux-proc.c: Include linux-nat.h.  
+	(linux_make_note_section): Iterate over lwps instead of threads.
+	(linux_do_thread_registers): Use lwp instead of merged pid.
+	* config/nm-linux.h: Move miscelaneous def'ns to linux-nat.h.
+	* Makefile.in (lin-lwp.o, linux-proc.o, linux-nat.o): 
+	Add dependency on linux_nat_h.
+
 2003-06-19  Theodore A. Roth  <troth@openavr.org>
 
 	* avr-tdep.c (avr_extract_return_value): Delete debugging fprintf.

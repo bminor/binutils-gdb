@@ -685,6 +685,7 @@ jv_lang_h = jv-lang.h
 kod_h = kod.h
 language_h = language.h
 linespec_h = linespec.h
+linux_nat_h = linux-nat.h
 m2_lang_h = m2-lang.h
 m68k_tdep_h = m68k-tdep.h
 macroexp_h = macroexp.h
@@ -1912,14 +1913,16 @@ language.o: language.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(value_h) $(gdbcmd_h) $(expression_h) $(language_h) $(target_h) \
 	$(parser_defs_h) $(jv_lang_h) $(demangle_h)
 lin-lwp.o: lin-lwp.c $(defs_h) $(gdb_assert_h) $(gdb_string_h) $(gdb_wait_h) \
-	$(gdbthread_h) $(inferior_h) $(target_h) $(regcache_h) $(gdbcmd_h)
+	$(gdbthread_h) $(inferior_h) $(target_h) $(regcache_h) $(gdbcmd_h) \
+	$(linux_nat_h)
 linespec.o: linespec.c $(defs_h) $(symtab_h) $(frame_h) $(command_h) \
 	$(symfile_h) $(objfiles_h) $(source_h) $(demangle_h) $(value_h) \
 	$(completer_h) $(cp_abi_h) $(parser_defs_h) $(block_h) $(objc_lang_h)
-linux-nat.o: linux-nat.c $(defs_h) $(inferior_h) $(target_h) $(gdb_wait_h)
+linux-nat.o: linux-nat.c $(defs_h) $(inferior_h) $(target_h) $(gdb_wait_h) \
+	$(linux_nat_h)
 linux-proc.o: linux-proc.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(gregset_h) $(gdbcore_h) $(gdbthread_h) $(elf_bfd_h) \
-	$(cli_decode_h) $(gdb_string_h)
+	$(cli_decode_h) $(gdb_string_h) $(linux_nat_h)
 lynx-nat.o: lynx-nat.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
 	$(gdbcore_h) $(regcache_h)
 m2-lang.o: m2-lang.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
