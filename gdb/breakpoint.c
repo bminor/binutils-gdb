@@ -2220,6 +2220,8 @@ breakpoint_re_set_one (bint)
 	      if (b->cond_string != NULL)
 		{
 		  s = b->cond_string;
+		  if (b->cond)
+		    free ((PTR)b->cond);
 		  b->cond = parse_exp_1 (&s, block_for_pc (sals.sals[i].pc), 0);
 		}
 	  
@@ -2408,6 +2410,7 @@ enable_breakpoint (bpt)
 	  printf_filtered ("\
 Cannot enable watchpoint %d because the block in which its expression\n\
 is valid is not currently in scope.\n", bpt->number);
+	  bpt->enable = disabled;
 	  return;
 	}
 

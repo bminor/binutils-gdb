@@ -502,8 +502,8 @@ mips_push_dummy_frame()
 	write_memory (save_address, (char *)&buffer, sizeof(REGISTER_TYPE));
 	save_address -= 4;
       }
-  /* save floating-points registers */
-  save_address = sp + PROC_FREG_OFFSET(proc_desc);
+  /* save floating-points registers starting with high order word */
+  save_address = sp + PROC_FREG_OFFSET(proc_desc) + 4;
   for (ireg = 32; --ireg >= 0; )
     if (PROC_FREG_MASK(proc_desc) & (1 << ireg))
       {
@@ -713,9 +713,10 @@ isa_NAN(p, len)
   else return 1;
 }
 
-/* To skip prologues, I use this predicate. Returns either PC
-   itself if the code at PC does not look like a function prologue,
-   PC+4 if it does (our caller does not need anything more fancy). */
+/* To skip prologues, I use this predicate.  Returns either PC
+   itself if the code at PC does not look like a function prologue;
+   otherwise returns an address that (if we're lucky) follows
+   the prologue. */
 
 CORE_ADDR
 mips_skip_prologue(pc)
@@ -725,6 +726,7 @@ mips_skip_prologue(pc)
     struct block *b;
     unsigned long inst;
     int offset;
+    int seen_sp_adjust = 0;
 
     /* For -g modules and most functions anyways the
        first instruction adjusts the stack.
@@ -733,10 +735,14 @@ mips_skip_prologue(pc)
     for (offset = 0; offset < 100; offset += 4) {
 	inst = read_memory_integer(pc + offset, 4);
 	if ((inst & 0xffff0000) == 0x27bd0000) /* addiu $sp,$sp,offset */
-	    return pc + offset + 4;
-	if ((inst & 0xFFE00000) != 0xAFA00000) /* sw reg,n($sp) */
-	    break;
+	    seen_sp_adjust = 1;
+	else if ((inst & 0xFFE00000) == 0xAFA00000) /* sw reg,n($sp) */
+	    continue;
+	else
+	  break;
     }
+    if (seen_sp_adjust)
+      return pc + offset;
 
     /* Well, it looks like a frameless. Let's make sure.
        Note that we are not called on the current PC,

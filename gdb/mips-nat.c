@@ -125,7 +125,7 @@ store_inferior_registers (regno)
 	      || regno == FCRIR_REGNUM || regno == FP_REGNUM
 	      || (regno >= FIRST_EMBED_REGNUM && regno <= LAST_EMBED_REGNUM))
 	    continue;
-	  regaddr = register_addr (regno, 1);
+	  regaddr = REGISTER_PTRACE_ADDR (regno);
 	  errno = 0;
 	  ptrace (6, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
 		  read_register (regno));
