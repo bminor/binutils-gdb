@@ -1,3 +1,8 @@
+2002-01-10  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/djgpp/fnchange.lst: Add renames for bfd/ChangeLog-0001
+	and bfd/elf32-sh-nbsd.c.
+
 2002-01-10  Michael Snyder  <msnyder@redhat.com>
 
 	* Makefile.in: Add rules for gcore.o and linux-proc.o.
