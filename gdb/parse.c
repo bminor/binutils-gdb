@@ -471,8 +471,7 @@ write_dollar_variable (struct stoken str)
       /* This code is not enabled on non HP-UX systems, since worst case 
 	 symbol table lookup performance is awful, to put it mildly. */
 
-      sym = lookup_symbol (copy_name (str), (struct block *) NULL,
-			   VAR_NAMESPACE, (int *) NULL, (struct symtab **) NULL);
+      sym = lookup_symbol_linkage (copy_name (str));
       if (sym)
 	{
 	  write_exp_elt_opcode (OP_VAR_VALUE);

@@ -591,7 +591,7 @@ print_symbol (PTR args)
   print_spaces (depth, outfile);
   if (SYMBOL_NAMESPACE (symbol) == LABEL_NAMESPACE)
     {
-      fprintf_filtered (outfile, "label %s at ", SYMBOL_SOURCE_NAME (symbol));
+      fprintf_filtered (outfile, "label %s at ", SYMBOL_PRINT_NAME (symbol));
       print_address_numeric (SYMBOL_VALUE_ADDRESS (symbol), 1, outfile);
       if (SYMBOL_BFD_SECTION (symbol))
 	fprintf_filtered (outfile, " section %s\n",
@@ -626,14 +626,14 @@ print_symbol (PTR args)
       if (SYMBOL_TYPE (symbol))
 	{
 	  /* Print details of types, except for enums where it's clutter.  */
-	  LA_PRINT_TYPE (SYMBOL_TYPE (symbol), SYMBOL_SOURCE_NAME (symbol),
+	  LA_PRINT_TYPE (SYMBOL_TYPE (symbol), SYMBOL_PRINT_NAME (symbol),
 			 outfile,
 			 TYPE_CODE (SYMBOL_TYPE (symbol)) != TYPE_CODE_ENUM,
 			 depth);
 	  fprintf_filtered (outfile, "; ");
 	}
       else
-	fprintf_filtered (outfile, "%s ", SYMBOL_SOURCE_NAME (symbol));
+	fprintf_filtered (outfile, "%s ", SYMBOL_PRINT_NAME (symbol));
 
       switch (SYMBOL_CLASS (symbol))
 	{

@@ -194,7 +194,7 @@ nlm_symfile_read (struct objfile *objfile, int mainline)
   stabsect_build_psymtabs (objfile, mainline, ".stab",
 			   ".stabstr", ".text");
 
-  mainsym = lookup_symbol (main_name (), NULL, VAR_NAMESPACE, NULL, NULL);
+  mainsym = lookup_symbol_linkage (main_name ());
 
   if (mainsym
       && SYMBOL_CLASS (mainsym) == LOC_BLOCK)

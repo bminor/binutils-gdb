@@ -67,7 +67,7 @@ typedef_print (struct type *type, struct symbol *new, struct ui_file *stream)
       type_print (type, "", stream, 0);
       if (TYPE_NAME ((SYMBOL_TYPE (new))) == 0
 	  || !STREQ (TYPE_NAME ((SYMBOL_TYPE (new))), SYMBOL_NAME (new)))
-	fprintf_filtered (stream, " %s", SYMBOL_SOURCE_NAME (new));
+	fprintf_filtered (stream, " %s", SYMBOL_PRINT_NAME (new));
       break;
 #endif
 #ifdef _LANG_m2
@@ -75,7 +75,7 @@ typedef_print (struct type *type, struct symbol *new, struct ui_file *stream)
       fprintf_filtered (stream, "TYPE ");
       if (!TYPE_NAME (SYMBOL_TYPE (new)) ||
 	  !STREQ (TYPE_NAME (SYMBOL_TYPE (new)), SYMBOL_NAME (new)))
-	fprintf_filtered (stream, "%s = ", SYMBOL_SOURCE_NAME (new));
+	fprintf_filtered (stream, "%s = ", SYMBOL_PRINT_NAME (new));
       else
 	fprintf_filtered (stream, "<builtin> = ");
       type_print (type, "", stream, 0);
@@ -84,7 +84,7 @@ typedef_print (struct type *type, struct symbol *new, struct ui_file *stream)
 #ifdef _LANG_pascal
     case language_pascal:
       fprintf_filtered (stream, "type ");
-      fprintf_filtered (stream, "%s = ", SYMBOL_SOURCE_NAME (new));
+      fprintf_filtered (stream, "%s = ", SYMBOL_PRINT_NAME (new));
       type_print (type, "", stream, 0);
       break;
 #endif
@@ -93,7 +93,7 @@ typedef_print (struct type *type, struct symbol *new, struct ui_file *stream)
       /* OBSOLETE   fprintf_filtered (stream, "SYNMODE "); */
       /* OBSOLETE   if (!TYPE_NAME (SYMBOL_TYPE (new)) || */
       /* OBSOLETE       !STREQ (TYPE_NAME (SYMBOL_TYPE (new)), SYMBOL_NAME (new))) */
-      /* OBSOLETE     fprintf_filtered (stream, "%s = ", SYMBOL_SOURCE_NAME (new)); */
+      /* OBSOLETE     fprintf_filtered (stream, "%s = ", SYMBOL_PRINT_NAME (new)); */
       /* OBSOLETE   else */
       /* OBSOLETE     fprintf_filtered (stream, "<builtin> = "); */
       /* OBSOLETE   type_print (type, "", stream, 0); */

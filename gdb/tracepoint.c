@@ -516,7 +516,7 @@ tracepoints_info (char *tpnum_exp, int from_tty)
 	  if (sym)
 	    {
 	      fputs_filtered ("in ", gdb_stdout);
-	      fputs_filtered (SYMBOL_SOURCE_NAME (sym), gdb_stdout);
+	      fputs_filtered (SYMBOL_PRINT_NAME (sym), gdb_stdout);
 	      wrap_here (wrap_indent);
 	      fputs_filtered (" at ", gdb_stdout);
 	    }

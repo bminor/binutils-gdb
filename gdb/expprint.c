@@ -105,12 +105,12 @@ print_subexp (register struct expression *exp, register int *pos,
 	b = exp->elts[pc + 1].block;
 	if (b != NULL
 	    && BLOCK_FUNCTION (b) != NULL
-	    && SYMBOL_SOURCE_NAME (BLOCK_FUNCTION (b)) != NULL)
+	    && SYMBOL_PRINT_NAME (BLOCK_FUNCTION (b)) != NULL)
 	  {
-	    fputs_filtered (SYMBOL_SOURCE_NAME (BLOCK_FUNCTION (b)), stream);
+	    fputs_filtered (SYMBOL_PRINT_NAME (BLOCK_FUNCTION (b)), stream);
 	    fputs_filtered ("::", stream);
 	  }
-	fputs_filtered (SYMBOL_SOURCE_NAME (exp->elts[pc + 2].symbol), stream);
+	fputs_filtered (SYMBOL_PRINT_NAME (exp->elts[pc + 2].symbol), stream);
       }
       return;
 

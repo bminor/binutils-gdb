@@ -875,7 +875,7 @@ locate_var_value (register struct symbol *var, struct frame_info *frame)
 
   lazy_value = read_var_value (var, frame);
   if (lazy_value == 0)
-    error ("Address of \"%s\" is unknown.", SYMBOL_SOURCE_NAME (var));
+    error ("Address of \"%s\" is unknown.", SYMBOL_PRINT_NAME (var));
 
   if (VALUE_LAZY (lazy_value)
       || TYPE_CODE (type) == TYPE_CODE_FUNC)
@@ -896,7 +896,7 @@ locate_var_value (register struct symbol *var, struct frame_info *frame)
 	            && *REGISTER_NAME (VALUE_REGNO (lazy_value)) != '\0');
       error("Address requested for identifier "
 	    "\"%s\" which is in register $%s",
-            SYMBOL_SOURCE_NAME (var), 
+            SYMBOL_PRINT_NAME (var), 
 	    REGISTER_NAME (VALUE_REGNO (lazy_value)));
       break;
 
@@ -905,13 +905,13 @@ locate_var_value (register struct symbol *var, struct frame_info *frame)
 	            && *REGISTER_NAME (VALUE_FRAME_REGNUM (lazy_value)) != '\0');
       error("Address requested for identifier "
 	    "\"%s\" which is in frame register $%s",
-            SYMBOL_SOURCE_NAME (var), 
+            SYMBOL_PRINT_NAME (var), 
 	    REGISTER_NAME (VALUE_FRAME_REGNUM (lazy_value)));
       break;
 
     default:
       error ("Can't take address of \"%s\" which isn't an lvalue.",
-	     SYMBOL_SOURCE_NAME (var));
+	     SYMBOL_PRINT_NAME (var));
       break;
     }
   return 0;			/* For lint -- never reached */

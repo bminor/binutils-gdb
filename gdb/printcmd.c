@@ -652,8 +652,8 @@ build_address_symbolic (CORE_ADDR addr,  /* IN */
   if (symbol)
     {
       name_location = BLOCK_START (SYMBOL_BLOCK_VALUE (symbol));
-      if (do_demangle)
-	name_temp = SYMBOL_SOURCE_NAME (symbol);
+      if (do_demangle || asm_demangle)
+	name_temp = SYMBOL_PRINT_NAME (symbol);
       else
 	name_temp = SYMBOL_LINKAGE_NAME (symbol);
     }
@@ -667,8 +667,8 @@ build_address_symbolic (CORE_ADDR addr,  /* IN */
 	  symbol = 0;
 	  symtab = 0;
 	  name_location = SYMBOL_VALUE_ADDRESS (msymbol);
-	  if (do_demangle)
-	    name_temp = SYMBOL_SOURCE_NAME (msymbol);
+	  if (do_demangle || asm_demangle)
+	    name_temp = SYMBOL_PRINT_NAME (msymbol);
 	  else
 	    name_temp = SYMBOL_LINKAGE_NAME (msymbol);
 	}
@@ -1064,10 +1064,10 @@ sym_info (char *arg, int from_tty)
 	offset = sect_addr - SYMBOL_VALUE_ADDRESS (msymbol);
 	if (offset)
 	  printf_filtered ("%s + %u in ",
-			   SYMBOL_SOURCE_NAME (msymbol), offset);
+			   SYMBOL_PRINT_NAME (msymbol), offset);
 	else
 	  printf_filtered ("%s in ",
-			   SYMBOL_SOURCE_NAME (msymbol));
+			   SYMBOL_PRINT_NAME (msymbol));
 	if (pc_in_unmapped_range (addr, sect))
 	  printf_filtered ("load address range of ");
 	if (section_is_overlay (sect))
@@ -1903,7 +1903,7 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
 	  annotate_arg_begin ();
 
 	  list_chain = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
-	  fprintf_symbol_filtered (stb->stream, SYMBOL_SOURCE_NAME (sym),
+	  fprintf_symbol_filtered (stb->stream, SYMBOL_PRINT_NAME (sym),
 				   SYMBOL_LANGUAGE (sym), DMGL_PARAMS | DMGL_ANSI);
 	  ui_out_field_stream (uiout, "name", stb);
 	  annotate_arg_name_end ();

@@ -484,7 +484,7 @@ maintenance_translate_address (char *arg, int from_tty)
 
   if (sym)
     printf_filtered ("%s+%s\n",
-		     SYMBOL_SOURCE_NAME (sym),
+		     SYMBOL_PRINT_NAME (sym),
 		     paddr_u (address - SYMBOL_VALUE_ADDRESS (sym)));
   else if (sect)
     printf_filtered ("no symbol at %s:0x%s\n", sect->name, paddr (address));

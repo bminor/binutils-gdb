@@ -2616,7 +2616,7 @@ user_select_syms (struct symbol *syms[], struct block *blocks[], int nsyms,
 	  struct symtab_and_line sal = find_function_start_sal (syms[i], 1);
 	  printf_unfiltered ("[%d] %s at %s:%d\n",
 			     i + first_choice,
-			     SYMBOL_SOURCE_NAME (syms[i]),
+			     SYMBOL_PRINT_NAME (syms[i]),
 			     sal.symtab == NULL
 			     ? "<no source file available>"
 			     : sal.symtab->filename, sal.line);
@@ -2633,28 +2633,28 @@ user_select_syms (struct symbol *syms[], struct block *blocks[], int nsyms,
 	  if (SYMBOL_LINE (syms[i]) != 0 && symtab != NULL)
 	    printf_unfiltered ("[%d] %s at %s:%d\n",
 			       i + first_choice,
-			       SYMBOL_SOURCE_NAME (syms[i]),
+			       SYMBOL_PRINT_NAME (syms[i]),
 			       symtab->filename, SYMBOL_LINE (syms[i]));
 	  else if (is_enumeral && TYPE_NAME (SYMBOL_TYPE (syms[i])) != NULL)
 	    {
 	      printf_unfiltered ("[%d] ", i + first_choice);
 	      ada_print_type (SYMBOL_TYPE (syms[i]), NULL, gdb_stdout, -1, 0);
 	      printf_unfiltered ("'(%s) (enumeral)\n",
-				 SYMBOL_SOURCE_NAME (syms[i]));
+				 SYMBOL_PRINT_NAME (syms[i]));
 	    }
 	  else if (symtab != NULL)
 	    printf_unfiltered (is_enumeral
 			       ? "[%d] %s in %s (enumeral)\n"
 			       : "[%d] %s at %s:?\n",
 			       i + first_choice,
-			       SYMBOL_SOURCE_NAME (syms[i]),
+			       SYMBOL_PRINT_NAME (syms[i]),
 			       symtab->filename);
 	  else
 	    printf_unfiltered (is_enumeral
 			       ? "[%d] %s (enumeral)\n"
 			       : "[%d] %s at ?\n",
 			       i + first_choice,
-			       SYMBOL_SOURCE_NAME (syms[i]));
+			       SYMBOL_PRINT_NAME (syms[i]));
 	}
     }
 
@@ -4416,7 +4416,7 @@ ada_finish_decode_line_1 (char **spec, struct symtab *file_table,
       for (i = 0; i < selected.nelts; i += 1)
 	(*canonical)[i] =
 	  extended_canonical_line_spec (selected.sals[i],
-					SYMBOL_SOURCE_NAME (symbols[i]));
+					SYMBOL_BEST_NAME (symbols[i]));
     }
 
   discard_cleanups (old_chain);

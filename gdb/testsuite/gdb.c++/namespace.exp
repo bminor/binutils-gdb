@@ -269,12 +269,10 @@ gdb_test "ptype C::OtherFileClass" "No symbol \"Class\" in namespace \"C::C\"."
 gdb_test "print cX" "\\$\[0-9\].* = 6"
 gdb_test "print 'F::cXf'" "\\$\[0-9\].* = 7"
 gdb_test "print F::cXf" "\\$\[0-9\].* = 7"
-gdb_test "print 'F::cXfX'" "\\$\[0-9\].* = 8"
 gdb_test "print F::cXfX" "\\$\[0-9\].* = 8"
 gdb_test "print X" "\\$\[0-9\].* = 9"
 gdb_test "print 'G::Xg'" "\\$\[0-9\].* = 10"
 gdb_test "print G::Xg" "\\$\[0-9\].* = 10"
-gdb_test "print 'G::XgX'" "\\$\[0-9\].* = 11"
 gdb_test "print G::XgX" "\\$\[0-9\].* = 11"
 
 # Test namespace renaming.

@@ -812,7 +812,7 @@ value_static_field (struct type *type, int fieldno)
   else
     {
       char *phys_name = TYPE_FIELD_STATIC_PHYSNAME (type, fieldno);
-      struct symbol *sym = lookup_symbol (phys_name, 0, VAR_NAMESPACE, 0, NULL);
+      struct symbol *sym = lookup_symbol_linkage (phys_name);
       if (sym == NULL)
 	{
 	  /* With some compilers, e.g. HP aCC, static data members are reported
@@ -986,7 +986,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f, int j, struct type *ty
   struct symbol *sym;
   struct minimal_symbol *msym;
 
-  sym = lookup_symbol (physname, 0, VAR_NAMESPACE, 0, NULL);
+  sym = lookup_symbol_linkage (physname);
   if (sym != NULL)
     {
       msym = NULL;

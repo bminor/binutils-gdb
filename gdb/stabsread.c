@@ -1815,7 +1815,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	{
 	  complain (&reg_value_complaint, SYMBOL_VALUE (sym),
 		    NUM_REGS + NUM_PSEUDO_REGS,
-		    SYMBOL_SOURCE_NAME (sym));
+		    SYMBOL_PRINT_NAME (sym));
 	  SYMBOL_VALUE (sym) = SP_REGNUM;	/* Known safe, though useless */
 	}
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
@@ -1831,7 +1831,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	{
 	  complain (&reg_value_complaint, SYMBOL_VALUE (sym),
 		    NUM_REGS + NUM_PSEUDO_REGS,
-		    SYMBOL_SOURCE_NAME (sym));
+		    SYMBOL_PRINT_NAME (sym));
 	  SYMBOL_VALUE (sym) = SP_REGNUM;	/* Known safe, though useless */
 	}
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
@@ -2085,7 +2085,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	{
 	  complain (&reg_value_complaint, SYMBOL_VALUE (sym),
 		    NUM_REGS + NUM_PSEUDO_REGS,
-		    SYMBOL_SOURCE_NAME (sym));
+		    SYMBOL_PRINT_NAME (sym));
 	  SYMBOL_VALUE (sym) = SP_REGNUM;	/* Known safe, though useless */
 	}
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;

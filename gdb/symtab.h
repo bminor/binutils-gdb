@@ -138,7 +138,6 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
    functions, unless the callers are changed to pass in the ginfo
    field only, instead of the SYMBOL parameter.  */
 
-#define SYMBOL_NAME(symbol)		(symbol)->ginfo.name
 #define SYMBOL_VALUE(symbol)		(symbol)->ginfo.value.ivalue
 #define SYMBOL_VALUE_ADDRESS(symbol)	(symbol)->ginfo.value.address
 #define SYMBOL_VALUE_BYTES(symbol)	(symbol)->ginfo.value.bytes
@@ -147,6 +146,14 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
 #define SYMBOL_LANGUAGE(symbol)		(symbol)->ginfo.language
 #define SYMBOL_SECTION(symbol)		(symbol)->ginfo.section
 #define SYMBOL_BFD_SECTION(symbol)	(symbol)->ginfo.bfd_section
+
+/* FIXME: carlton/2002-12-20: The situation with all of these names is
+   a mess.  As a first step, try to avoid using SYMBOL_NAME to access
+   the name of a symbol: use SYMBOL_BEST_NAME or SYMBOL_LINKAGE_NAME
+   instead, depending on which one you want.  I'll try to add some
+   initialization functions later, too.  */
+
+#define SYMBOL_NAME(symbol)		(symbol)->ginfo.name
 
 #define SYMBOL_CPLUS_DEMANGLED_NAME(symbol)	\
   (symbol)->ginfo.language_specific.cplus_specific.demangled_name
@@ -171,18 +178,18 @@ extern const char *symbol_demangled_name (const struct general_symbol_info
 					  *symbol);
 
 /* Macro that returns the demangled name of the symbol if if possible
-   and the symbol name if not possible.  This is like
-   SYMBOL_SOURCE_NAME except that it doesn't depend on the value of
-   'demangle' (and is hence more suitable for internal usage).  The
-   result should never be NULL.  */
-
-/* FIXME: carlton/2002-09-26: Probably the situation with this and
-   SYMBOL_SOURCE_NAME should be rethought.  */
+   and the symbol name if not possible.  The result should never be
+   NULL.  */
 
 #define SYMBOL_BEST_NAME(symbol)					\
   (SYMBOL_DEMANGLED_NAME (symbol) != NULL				\
    ? SYMBOL_DEMANGLED_NAME (symbol)					\
    : SYMBOL_NAME (symbol))
+
+/* Use this if you want to get at the linkage name of a symbol (which
+   might be mangled).  */
+
+#define SYMBOL_LINKAGE_NAME(symbol)	SYMBOL_NAME (symbol)
 
 /* OBSOLETE #define SYMBOL_CHILL_DEMANGLED_NAME(symbol) */
 /* OBSOLETE (symbol)->ginfo.language_specific.chill_specific.demangled_name */
@@ -190,26 +197,17 @@ extern const char *symbol_demangled_name (const struct general_symbol_info
 #define SYMBOL_OBJC_DEMANGLED_NAME(symbol)				\
    (symbol)->ginfo.language_specific.objc_specific.demangled_name
 
-/* Macro that returns the "natural source name" of a symbol.  In C++ this is
-   the "demangled" form of the name if demangle is on and the "mangled" form
-   of the name if demangle is off.  In other languages this is just the
-   symbol name.  The result should never be NULL. */
+/* Macro that returns the name of a name of a symbol that we want to
+   print.  In C++ this is the "demangled" form of the name if demangle
+   is on and the "mangled" form of the name if demangle is off.  In
+   other languages this is just the symbol name.  The result should
+   never be NULL. */
 
 /* NOTE: carlton/2002-09-26: For external use only; in many
    situations, SYMBOL_BEST_NAME is more appropriate.  */
 
-#define SYMBOL_SOURCE_NAME(symbol)					\
-  (demangle ? SYMBOL_BEST_NAME (symbol) : SYMBOL_NAME (symbol))
-
-/* Macro that returns the "natural assembly name" of a symbol.  In C++ this is
-   the "mangled" form of the name if demangle is off, or if demangle is on and
-   asm_demangle is off.  Otherwise if asm_demangle is on it is the "demangled"
-   form.  In other languages this is just the symbol name.  The result should
-   never be NULL. */
-
-#define SYMBOL_LINKAGE_NAME(symbol)					\
-  (demangle && asm_demangle ? SYMBOL_BEST_NAME (symbol)			\
-   : SYMBOL_NAME (symbol))
+#define SYMBOL_PRINT_NAME(symbol)					\
+  (demangle ? SYMBOL_BEST_NAME (symbol) : SYMBOL_LINKAGE_NAME (symbol))
 
 /* Macro that tests a symbol for a match against a specified name string.
    First test the unencoded name, then looks for and test a C++ encoded
@@ -953,6 +951,15 @@ extern struct symbol *lookup_symbol_namespace (const char *namespace_name,
 					       namespace_enum name_space,
 					       struct symtab **symtab);
 
+/* Lookup the symbol associated to a minimal symbol.  */
+
+extern struct symbol *lookup_symbol_minsym (const struct minimal_symbol
+					    *minsym);
+
+/* Lookup the symbol with a given linkage name.  */
+
+extern struct symbol *lookup_symbol_linkage (const char *linkage_name);
+
 /* Lookup a type within a class or a namespace.  */
 
 extern struct type *lookup_nested_type (struct type *parent_type,
@@ -1096,6 +1103,8 @@ extern void install_minimal_symbols (struct objfile *);
 /* Sort all the minimal symbols in OBJFILE.  */
 
 extern void msymbols_sort (struct objfile *objfile);
+
+int minsym_static (const struct minimal_symbol *minsym);
 
 struct symtab_and_line
 {

@@ -1275,19 +1275,9 @@ symbol *lookup_symbol_aux_using_loop (const char *name,
 
 /* This tries to look up NAME in the namespace given by the initial
    substring of NAMESPACE_NAME of length NAMESPACE_LEN.  It applies
-   the using directives that are active in BLOCK.
-
-   For example, assume that we have using directives adding A to the
-   global namespace, adding A::inner to namespace A, and adding B to
-   the global namespace.  Then, when looking up a symbol "foo", we
-   want to recurse by looking up stuff in A::foo and seeing which
-   using directives still apply.  The only one that still applies
-   converts that to A::inner::foo: we _don't_ want to then look at
-   B::A::foo (let alone A::A::foo!).  So we end up just looking at
-   A::foo, A::inner::foo, and B::foo.  (Though if the original caller
-   to lookup_symbol had specified A::foo, we would want to look up
-   stuff in A::A::foo, A::inner::A::foo, A::inner::foo, and
-   B::A::foo).  */
+   the using directives that are active in BLOCK.  It doesn't look
+   into NAME at all, so if NAME happens to contain some namespaces, it
+   won't apply using directives to those namespaces.  */
 
 /* FIXME: carlton/2002-11-27: Currently, there's no way to specify
    that additional using directives are active.  When we get around to
@@ -1310,53 +1300,32 @@ lookup_symbol_namespace (const char *namespace_name,
   const struct using_direct *current;
   struct symbol *sym;
 
+  /* First, go through the using directives.  If any of them add new
+     names to the namespace we're searching in, see if we can find a
+     match by applying them.  */
+
   for (current = block_using_iterator_first (block, &iter);
        current != NULL;
        current = block_using_iterator_next (&iter))
     {
-      /* First, see if the namespace matches the start of this using
-	 directive.  */
-      if (namespace_len <= current->outer_length
+      if (namespace_len == current->outer_length
 	  && strncmp (namespace_name, current->name, namespace_len) == 0)
 	{
-	  /* Great, it matches: now does the rest of the using
-	     directive match the rest of the name?  */
-	  
-	  const char *rest_of_outer = current->name + namespace_len;
-	  int rest_of_outer_len
-	    = current->outer_length - namespace_len;
-	  /* Should we skip some colons?  Should be true unless
-	     NAMESPACE_LEN is zero (and hence we're in the global
-	     namespace) or we've finished all of outer.  */
-	  if (rest_of_outer_len != 0 && *rest_of_outer == ':')
-	    {
-	      rest_of_outer += 2;
-	      rest_of_outer_len -= 2;
-	    }
-	  if (strncmp (rest_of_outer, name, rest_of_outer_len) == 0)
-	    {
-	      /* Everything matches!  Yippee!  So apply the using
-		 directive and recurse.  */
-	      const char *new_name = name + rest_of_outer_len;
-	      if (*new_name == ':')
-		new_name += 2;
-
-	      sym = lookup_symbol_namespace (current->name,
-					     current->inner_length,
-					     new_name,
-					     mangled_name,
-					     block,
-					     name_space,
-					     symtab);
-	      if (sym != NULL)
-		return sym;
-	    }
+	  sym = lookup_symbol_namespace (current->name,
+					 current->inner_length,
+					 name,
+					 mangled_name,
+					 block,
+					 name_space,
+					 symtab);
+	  if (sym != NULL)
+	    return sym;
 	}
     }
 
   /* We didn't find anything by applying any of the using directives
      that are still applicable; so let's see if we've got a match
-     using the current name.  */
+     using the current namespace.  */
   
   if (namespace_len == 0)
     {
@@ -1378,10 +1347,8 @@ lookup_symbol_namespace (const char *namespace_name,
     }
 }
 
-/* Check for the possibility of the symbol being a function or a
-   mangled variable that is stored in one of the minimal symbol
-   tables.  Eventually, all global symbols might be resolved in this
-   way.  */
+/* Check for the possibility of the symbol being a function that is
+   stored in one of the minimal symbol tables.  */
 
 static struct symbol *
 lookup_symbol_aux_minsyms (int block_index, const char *name,
@@ -1421,14 +1388,13 @@ lookup_symbol_aux_minsyms (int block_index, const char *name,
 	     that's okay: this is only called with block_index equal
 	     to STATIC_BLOCK if a global search has failed.  */
 
-	  switch (MSYMBOL_TYPE (msymbol))
+	  if (minsym_static (msymbol))
 	    {
-	    case mst_file_text:
-	    case mst_file_data:
-	    case mst_file_bss:
 	      if (block_index == GLOBAL_BLOCK)
 		return NULL;
-	    default:
+	    }
+	  else
+	    {
 	      if (block_index == STATIC_BLOCK)
 		return NULL;
 	    }
@@ -1453,16 +1419,6 @@ lookup_symbol_aux_minsyms (int block_index, const char *name,
 	      sym =
 		lookup_block_symbol (block, name, mangled_name, namespace);
 
-	      /* FIXME: carlton/2002-10-28: this next comment dates
-		 from when this code was part of lookup_symbol_aux, so
-		 this return could return NULL from lookup_symbol_aux.
-		 Are there really situations where we want a minimal
-		 symbol lookup to be able to force a NULL return from
-		 lookup_symbol?  If so, maybe the thing to do would be
-		 to have lookup_symbol_aux_minsym to set a
-		 minsym_found flag, and to have lookup_symbol_aux only
-		 do the psymtab search if that flag is zero.  */
-
 	      /* sym == 0 if symbol was found in the minimal symbol table
 	         but not in the symtab.
 	         Return 0 to use the msymbol definition of "foo_".
@@ -1480,23 +1436,75 @@ lookup_symbol_aux_minsyms (int block_index, const char *name,
 		*symtab = s;
 	      return fixup_symbol_section (sym, s->objfile);
 	    }
-	  else if (MSYMBOL_TYPE (msymbol) != mst_text
-		   && MSYMBOL_TYPE (msymbol) != mst_file_text
-		   && strcmp (name, SYMBOL_NAME (msymbol)) != 0)
-	    {
-	      /* This is a mangled variable, look it up by its
-	         mangled name.  */
-	      return lookup_symbol_aux_nonlocal (block_index,
-						 SYMBOL_NAME (msymbol),
-						 mangled_name,
-						 namespace,
-						 symtab);
-	    }
 	}
     }
 
   return NULL;
 }
+
+/* Lookup the symbol associated to a minimal symbol, if there is one.  */
+
+/* FIXME: carlton/2002-12-20: This is now implemented in a way that
+   doesn't work very well and that may, in fact return the wrong
+   symbol.  For now, we're in a transition period where I want to
+   replace some calls to lookup_symbol by calls to
+   lookup_symbol_minsym, so it's okay for lookup_symbol_minsym to get
+   the answer wrong in circumstances where lookup_symbol would have
+   screwed it up, too; later, I'll fix lookup_symbol_minsym to get it
+   right as quickly and easily as possible.  */
+
+struct symbol *
+lookup_symbol_minsym (const struct minimal_symbol *minsym)
+{
+  int block_index = minsym_static (minsym) ? STATIC_BLOCK : GLOBAL_BLOCK;
+
+  return lookup_symbol_aux_nonlocal (block_index,
+				     SYMBOL_BEST_NAME (minsym),
+				     SYMBOL_LINKAGE_NAME (minsym),
+				     VAR_NAMESPACE,
+				     NULL);
+}
+
+/* Lookup the symbol with a given linkage name.  */
+
+struct symbol *
+lookup_symbol_linkage (const char *linkage_name)
+{
+  const char *name;
+  char *demangled_name = NULL;
+  struct symbol *sym;
+
+  name = linkage_name;
+
+  /* If we are using C++, then the linkage name might be a mangled C++
+     name; lookup_symbol_aux_nonlocal expects the name to be
+     demangled.  */
+
+  if (current_language->la_language == language_cplus)
+    {
+      demangled_name = cplus_demangle (name, DMGL_ANSI | DMGL_PARAMS);
+      if (demangled_name != NULL)
+	{
+	  name = demangled_name;
+	}
+    }
+
+  sym = lookup_symbol_aux_nonlocal (GLOBAL_BLOCK, name, linkage_name,
+				    VAR_NAMESPACE, NULL);
+
+  if (sym != NULL)
+    {
+      xfree (demangled_name);
+      return sym;
+    }
+
+  sym = lookup_symbol_aux_nonlocal (STATIC_BLOCK, name, linkage_name,
+				    VAR_NAMESPACE, NULL);
+
+  xfree (demangled_name);
+  return sym;
+}
+
 
 /* Look up a type named NESTED_NAME that is nested inside the C++
    class or namespace given by PARENT_TYPE, from within the context
@@ -1588,7 +1596,7 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 	    {
 	      do_linear_search = 1;
 	    }
-	  if (strcmp (SYMBOL_SOURCE_NAME (*center), name) >= 0)
+	  if (strcmp (SYMBOL_BEST_NAME (*center), name) >= 0)
 	    {
 	      top = center;
 	    }
@@ -1786,8 +1794,8 @@ find_main_psymtab (void)
    symbol (language_cplus set) has both the encoded and non-encoded names
    tested for a match.
 
-   If MANGLED_NAME is non-NULL, verify that any symbol we find has this
-   particular mangled name.
+   If LINKAGE_NAME is non-NULL, verify that any symbol we find has
+   this particular linkage name.
 */
 
 /* FIXME: carlton/2002-09-26: I've slightly changed the semantics: I
@@ -1803,7 +1811,7 @@ find_main_psymtab (void)
 
 struct symbol *
 lookup_block_symbol (register const struct block *block, const char *name,
-		     const char *mangled_name, const namespace_enum namespace)
+		     const char *linkage_name, const namespace_enum namespace)
 {
   struct dict_iterator iter;
   struct symbol *sym;
@@ -1814,8 +1822,8 @@ lookup_block_symbol (register const struct block *block, const char *name,
 	   sym; sym = dict_iter_name_next (name, &iter))
 	{
 	  if (SYMBOL_NAMESPACE (sym) == namespace
-	      && (mangled_name
-		  ? strcmp (SYMBOL_NAME (sym), mangled_name) == 0 : 1))
+	      && (linkage_name
+		  ? strcmp (SYMBOL_LINKAGE_NAME (sym), linkage_name) == 0 : 1))
 	    return sym;
 	}
       return NULL;
@@ -1834,8 +1842,8 @@ lookup_block_symbol (register const struct block *block, const char *name,
 	   sym; sym = dict_iter_name_next (name, &iter))
 	{
 	  if (SYMBOL_NAMESPACE (sym) == namespace
-	      && (mangled_name
-		  ? strcmp (SYMBOL_NAME (sym), mangled_name) == 0 : 1))
+	      && (linkage_name
+		  ? strcmp (SYMBOL_LINKAGE_NAME (sym), linkage_name) == 0 : 1))
 	    {
 	      /* If SYM has aliases, then use any alias that is active
 	         at the current PC.  If no alias is active at the current
@@ -2860,8 +2868,8 @@ compare_search_syms (const void *sa, const void *sb)
   struct symbol_search **sym_a = (struct symbol_search **) sa;
   struct symbol_search **sym_b = (struct symbol_search **) sb;
 
-  return strcmp (SYMBOL_SOURCE_NAME ((*sym_a)->symbol),
-		 SYMBOL_SOURCE_NAME ((*sym_b)->symbol));
+  return strcmp (SYMBOL_BEST_NAME ((*sym_a)->symbol),
+		 SYMBOL_BEST_NAME ((*sym_b)->symbol));
 }
 
 /* Sort the ``nfound'' symbols in the list after prevtail.  Leave
@@ -3063,7 +3071,7 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
      The symbol will then be found during the scan of symtabs below.
 
      For functions, find_pc_symtab should succeed if we have debug info
-     for the function, for variables we have to call lookup_symbol
+     for the function, for variables we have to call lookup_symbol_minsym
      to determine if the variable has debug info.
      If the lookup fails, set found_misc so that we will rescan to print
      any matching symbols without debug info.
@@ -3084,10 +3092,7 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
 		if (0 == find_pc_symtab (SYMBOL_VALUE_ADDRESS (msymbol)))
 		  {
 		    if (kind == FUNCTIONS_NAMESPACE
-			|| lookup_symbol (SYMBOL_NAME (msymbol),
-					  (struct block *) NULL,
-					  VAR_NAMESPACE,
-					  0, (struct symtab **) NULL) == NULL)
+			|| lookup_symbol_minsym (msymbol) == NULL)
 		      found_misc = 1;
 		  }
 	      }
@@ -3181,9 +3186,7 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
 		    (0 == find_pc_symtab (SYMBOL_VALUE_ADDRESS (msymbol))))
 		  {
 		    /* Variables/Absolutes:  Look up by name */
-		    if (lookup_symbol (SYMBOL_NAME (msymbol),
-				       (struct block *) NULL, VAR_NAMESPACE,
-				       0, (struct symtab **) NULL) == NULL)
+		    if (lookup_symbol_minsym (msymbol) == NULL)
 		      {
 			/* match */
 			psr =
@@ -3242,7 +3245,7 @@ print_symbol_info (namespace_enum kind, struct symtab *s, struct symbol *sym,
     {
       type_print (SYMBOL_TYPE (sym),
 		  (SYMBOL_CLASS (sym) == LOC_TYPEDEF
-		   ? "" : SYMBOL_SOURCE_NAME (sym)), gdb_stdout, 0);
+		   ? "" : SYMBOL_PRINT_NAME (sym)), gdb_stdout, 0);
 
       printf_filtered (";\n");
     }
@@ -3261,7 +3264,7 @@ print_msymbol_info (struct minimal_symbol *msymbol)
 				   & (CORE_ADDR) 0xffffffff, "08l");
   else
     tmp = local_hex_string_custom (SYMBOL_VALUE_ADDRESS (msymbol), "016l");
-  printf_filtered ("%s  %s\n", tmp, SYMBOL_SOURCE_NAME (msymbol));
+  printf_filtered ("%s  %s\n", tmp, SYMBOL_PRINT_NAME (msymbol));
 }
 
 /* This is the guts of the commands "info functions", "info types", and
@@ -3369,7 +3372,7 @@ rbreak_command (char *regexp, int from_tty)
 	{
 	  break_command (SYMBOL_NAME (p->msymbol), from_tty);
 	  printf_filtered ("<function, no debug info> %s;\n",
-			   SYMBOL_SOURCE_NAME (p->msymbol));
+			   SYMBOL_PRINT_NAME (p->msymbol));
 	}
     }
 

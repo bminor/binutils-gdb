@@ -846,11 +846,11 @@ find_method (int funfirstline, char ***canonical, char *saved_arg,
       if (tmp[0] == '~')
 	cplusplus_error (saved_arg,
 			 "the class `%s' does not have destructor defined\n",
-			 SYMBOL_SOURCE_NAME (class_sym));
+			 SYMBOL_PRINT_NAME (class_sym));
       else
 	cplusplus_error (saved_arg,
 			 "the class %s does not have any method named %s\n",
-			 SYMBOL_SOURCE_NAME (class_sym), tmp);
+			 SYMBOL_PRINT_NAME (class_sym), tmp);
     }
 
   return values;
@@ -876,8 +876,7 @@ count_methods (struct type *class_type, char *method,
 	  struct fn_field *f = TYPE_FN_FIELDLIST1 (class_type, m_index);
 	  
 	  sym_arr[count] =
-	    lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, f_index),
-			   NULL, VAR_NAMESPACE, NULL, NULL);
+	    lookup_symbol_linkage (TYPE_FN_FIELD_PHYSNAME (f, f_index));
 	  if (sym_arr[count])
 	    count++;
 	}
@@ -1016,8 +1015,7 @@ add_matching_methods (int method_counter, struct type *class_type,
       if (is_destructor_name (phys_name) != 0)
 	continue;
 
-      sym_arr[count] = lookup_symbol (phys_name, NULL, VAR_NAMESPACE,
-				      NULL, NULL);
+      sym_arr[count] = lookup_symbol_linkage (phys_name);
       if (sym_arr[count])
 	count++;
       else
@@ -1071,8 +1069,7 @@ add_constructors (int method_counter, struct type *class_type,
 
       /* If this method is actually defined, include it in the
 	 list.  */
-      sym_arr[count] = lookup_symbol (phys_name, NULL, VAR_NAMESPACE,
-				      NULL, NULL);
+      sym_arr[count] = lookup_symbol_linkage (phys_name);
       if (sym_arr[count])
 	count++;
     }
@@ -1117,7 +1114,7 @@ select_symbols (struct symbol **sym_arr, int nelts, int funfirstline,
 	  values.sals[i] = find_function_start_sal (sym_arr[i], funfirstline);
 	  printf_unfiltered ("[%d] %s at %s:%d\n",
 			     (i + 2),
-			     SYMBOL_SOURCE_NAME (sym_arr[i]),
+			     SYMBOL_PRINT_NAME (sym_arr[i]),
 			     values.sals[i].symtab->filename,
 			     values.sals[i].line);
 	}

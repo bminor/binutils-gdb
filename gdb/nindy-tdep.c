@@ -60,8 +60,7 @@ nindy_frame_chain_valid (CORE_ADDR chain, struct frame_info *curframe)
       return 0;
     }
 
-  sym = lookup_symbol (sf, 0, VAR_NAMESPACE, (int *) NULL,
-		       (struct symtab **) NULL);
+  sym = lookup_symbol_linkage (sf);
   if (sym != 0)
     {
       a = SYMBOL_VALUE (sym);

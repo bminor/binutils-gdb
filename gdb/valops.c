@@ -856,9 +856,9 @@ value_of_variable (const struct symbol *var, const struct block *b)
       if (!frame)
 	{
 	  if (BLOCK_FUNCTION (b)
-	      && SYMBOL_SOURCE_NAME (BLOCK_FUNCTION (b)))
+	      && SYMBOL_PRINT_NAME (BLOCK_FUNCTION (b)))
 	    error ("No frame is currently executing in block %s.",
-		   SYMBOL_SOURCE_NAME (BLOCK_FUNCTION (b)));
+		   SYMBOL_PRINT_NAME (BLOCK_FUNCTION (b)));
 	  else
 	    error ("No frame is currently executing in specified block");
 	}
@@ -866,7 +866,7 @@ value_of_variable (const struct symbol *var, const struct block *b)
 
   val = read_var_value (var, frame);
   if (!val)
-    error ("Address of symbol \"%s\" is unknown.", SYMBOL_SOURCE_NAME (var));
+    error ("Address of symbol \"%s\" is unknown.", SYMBOL_PRINT_NAME (var));
 
   return val;
 }
@@ -1757,7 +1757,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
     symbol = find_pc_function (funaddr);
     if (symbol)
       {
-	name = SYMBOL_SOURCE_NAME (symbol);
+	name = SYMBOL_PRINT_NAME (symbol);
       }
     else
       {
@@ -1766,7 +1766,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 
 	if (msymbol)
 	  {
-	    name = SYMBOL_SOURCE_NAME (msymbol);
+	    name = SYMBOL_PRINT_NAME (msymbol);
 	  }
       }
     if (name == NULL)
@@ -3229,8 +3229,8 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	    }
 	  else
 	    {
-	      struct symbol *s = lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, j),
-						0, VAR_NAMESPACE, 0, NULL);
+	      struct symbol *s
+		= lookup_symbol_linkage (TYPE_FN_FIELD_PHYSNAME (f, j));
 	      if (s == NULL)
 		{
 		  v = 0;

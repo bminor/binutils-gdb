@@ -808,8 +808,8 @@ compare_selectors (void *a, void *b)
 {
   char *aname, *bname;
 
-  aname = SYMBOL_SOURCE_NAME (*(struct symbol **) a);
-  bname = SYMBOL_SOURCE_NAME (*(struct symbol **) b);
+  aname = SYMBOL_BEST_NAME (*(struct symbol **) a);
+  bname = SYMBOL_BEST_NAME (*(struct symbol **) b);
   if (aname == NULL || bname == NULL)
     error ("internal: compare_selectors(1)");
 
@@ -966,8 +966,8 @@ compare_classes (void *a, void *b)
 {
   char *aname, *bname;
 
-  aname = SYMBOL_SOURCE_NAME (*(struct symbol **) a);
-  bname = SYMBOL_SOURCE_NAME (*(struct symbol **) b);
+  aname = SYMBOL_BEST_NAME (*(struct symbol **) a);
+  bname = SYMBOL_BEST_NAME (*(struct symbol **) b);
   if (aname == NULL || bname == NULL)
     error ("internal: compare_classes(1)");
 

@@ -508,7 +508,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
     {
       if (symbol)
 	{
-	  complain (&block_end_complaint, SYMBOL_SOURCE_NAME (symbol));
+	  complain (&block_end_complaint, SYMBOL_PRINT_NAME (symbol));
 	}
       else
 	{
@@ -539,7 +539,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	      if (symbol)
 		{
 		  complain (&innerblock_complaint,
-			    SYMBOL_SOURCE_NAME (symbol));
+			    SYMBOL_PRINT_NAME (symbol));
 		}
 	      else
 		{

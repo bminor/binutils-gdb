@@ -4742,16 +4742,16 @@ fixup_sigtramp (void)
   /* We have to handle the following cases here:
      a) The Mips library has a sigtramp label within sigvec.
      b) Irix has a _sigtramp which we want to use, but it also has sigvec.  */
-  s = lookup_symbol ("sigvec", 0, VAR_NAMESPACE, 0, NULL);
+  s = lookup_symbol_linkage ("sigvec");
   if (s != 0)
     {
       b0 = SYMBOL_BLOCK_VALUE (s);
-      s = lookup_symbol ("sigtramp", b0, VAR_NAMESPACE, 0, NULL);
+      s = lookup_symbol_linkage ("sigtramp");
     }
   if (s == 0)
     {
       /* No sigvec or no sigtramp inside sigvec, try _sigtramp.  */
-      s = lookup_symbol ("_sigtramp", 0, VAR_NAMESPACE, 0, NULL);
+      s = lookup_symbol_linkage ("_sigtramp");
     }
 
   /* But maybe this program uses its own version of sigvec */

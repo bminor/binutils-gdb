@@ -1,3 +1,85 @@
+2002-12-20  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.c (lookup_symbol_aux_minsyms): Don't call
+	lookup_symbol_aux from within this.
+	* values.c (value_static_field): lookup_symbol_linkage.
+	(value_fn_field): lookup_symbol_linkage.
+	* valops.c (value_struct_elt_for_reference): lookup_symbol_linkage.
+	* blockframe.c (inside_main_func): lookup_symbol_linkage.
+	* source.c (select_source_symtab): lookup_symbol_linkage.
+	* nlmread.c (nlm_symfile_read): Call lookup_symbol_linkage.
+	* nindy-tdep.c (nindy_frame_chain_valid): Call
+	lookup_symbol_linkage.
+	* linespec.c (count_methods): Call lookup_symbol_linkage.
+	(add_matching_methods): Ditto.
+	(add_constructors): Ditto.
+	* hppa-tdep.c (find_stub_with_shl_get): Call
+	lookup_symbol_linkage.  Delete symbol2.
+	(initialize_hp_cxx_exception_support): Call lookup_symbol_linkage.
+	* cli/cli-cmds.c (edit_command): SYMBOL_PRINT_NAME.
+	(list_command): SYMBOL_PRINT_NAME.
+	* valops.c (value_of_variable): SYMBOL_PRINT_NAME
+	(hand_function_call): SYMBOL_PRINT_NAME.
+	* typeprint.c (typedef_print): SYMBOL_PRINT_NAME.
+	* tracepoint.c (tracepoints_info): SYMBOL_PRINT_NAME.
+	* symtab.c (lookup_partial_symbol): SYMBOL_BEST_NAME.
+	(compare_search_syms): SYMBOL_BEST_NAME.
+	(print_symbol_info): SYMBOL_PRINT_NAME.
+	(print_msymbol_info): SYMBOL_PRINT_NAME.
+	(rbreak_command): SYMBOL_PRINT_NAME.
+	* symmisc.c (print_symbol): SYMBOL_PRINT_NAME.
+	* stack.c (print_frame): SYMBOL_PRINT_NAME.
+	(frame_info): SYMBOL_PRINT_NAME.
+	(print_block_frame_locals): SYMBOL_PRINT_NAME.
+	(print_block_frame_labels): SYMBOL_PRINT_NAME.
+	(print_frame_arg_vars): SYMBOL_PRINT_NAME.
+	(return_command): SYMBOL_PRINT_NAME.
+	* stabsread.c (define_symbol): SYMBOL_PRINT_NAME.
+	* p-valprint.c (pascal_val_print): SYMBOL_PRINT_NAME.
+	* printcmd.c (build_address_symbolic): SYMBOL_PRINT_NAME.
+	(sym_info): SYMBOL_PRINT_NAME.
+	(print_frame_args): SYMBOL_PRINT_NAME.
+	* objc-lang.c (compare_selectors): SYMBOL_BEST_NAME.
+	(compare_classes): SYMBOL_BEST_NAME.
+	* maint.c (maintenance_translate_address): SYMBOL_PRINT_NAME.
+	* linespec.c (find_method): SYMBOL_PRINT_NAME.
+	(select_symbols): SYMBOL_PRINT_NAME.
+	* infcmd.c (jump_command): SYMBOL_PRINT_NAME.
+	* findvar.c (locate_var_value): SYMBOL_PRINT_NAME.
+	* expprint.c (print_subexp): SYMBOL_PRINT_NAME.
+	* c-valprint.c (c_val_print): SYMBOL_PRINT_NAME.
+	* buildsym.c (finish_block): SYMBOL_PRINT_NAME.
+	* breakpoint.c (print_one_breakpoint): SYMBOL_PRINT_NAME.
+	* ax-gdb.c (gen_var_ref): SYMBOL_PRINT_NAME.
+	* ada-typeprint.c (ada_typedef_print): SYMBOL_PRINT_NAME.
+	* ada-lang.c (user_select_syms): Use SYMBOL_PRINT_NAME instead of
+	SYMBOL_SOURCE_NAME.
+	(user_select_syms): 
+	(ada_finish_decode_line_1): Use SYMBOL_BEST_NAME instead of
+	SYMBOL_SOURCE_NAME.
+	* symtab.h (SYMBOL_PRINT_NAME): Rename from SYMBOL_SOURCE_NAME.
+	* symfile.c (compare_symbols): Use SYMBOL_BEST_NAME, not
+	SYMBOL_SOURCE_NAME.
+	(compare_psymbols): Ditto.
+	* symtab.c (lookup_symbol_linkage): New function.
+	* symtab.h: Declare lookup_symbol_linkage.
+	* c-valprint.c (c_val_print): Call lookup_symbol_minsym.
+	* symtab.c (lookup_symbol_aux_minsyms): Call minsym_static.
+	* minsyms.c (minsym_static): New function.
+	* symtab.h: Declare minsym_static.
+	* symtab.c (lookup_symbol_minsym): New function.
+	(search_symbols): Call lookup_symbol_minsym instead of
+	lookup_symbol.
+	(lookup_symbol_namespace): Don't take apart NAME.
+	* symtab.h: Declare lookup_symbol_minsym.
+	* printcmd.c (build_address_symbolic): Don't use old version of
+	SYMBOL_LINKAGE_NAME.
+	* symtab.c (lookup_block_symbol): Change mangled names to linkage
+	name, and use SYMBOL_LINKAGE_NAME as appropriate.
+	* symtab.h (SYMBOL_LINKAGE_NAME): New macro, with a different
+	meaning from the old macro of the same name.  Also, add comments
+	about proper uses of names.
+
 2002-12-18  David Carlton  <carlton@math.stanford.edu>
 
 	* symtab.c (lookup_symbol_aux_file): Call

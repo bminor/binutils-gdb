@@ -124,8 +124,8 @@ ada_typedef_print (struct type *type, struct symbol *new,
 		   struct ui_file *stream)
 {
   fprintf_filtered (stream, "type %.*s is ",
-		    ada_name_prefix_len (SYMBOL_SOURCE_NAME (new)),
-		    SYMBOL_SOURCE_NAME (new));
+		    ada_name_prefix_len (SYMBOL_PRINT_NAME (new)),
+		    SYMBOL_PRINT_NAME (new));
   type_print (type, "", stream, 1);
 }
 

@@ -204,7 +204,7 @@ compare_symbols (const void *s1p, const void *s2p)
 
   s1 = (struct symbol **) s1p;
   s2 = (struct symbol **) s2p;
-  return (strcmp (SYMBOL_SOURCE_NAME (*s1), SYMBOL_SOURCE_NAME (*s2)));
+  return (strcmp (SYMBOL_BEST_NAME (*s1), SYMBOL_BEST_NAME (*s2)));
 }
 
 /*
@@ -237,8 +237,8 @@ compare_psymbols (const void *s1p, const void *s2p)
 
   s1 = (struct partial_symbol **) s1p;
   s2 = (struct partial_symbol **) s2p;
-  st1 = SYMBOL_SOURCE_NAME (*s1);
-  st2 = SYMBOL_SOURCE_NAME (*s2);
+  st1 = SYMBOL_BEST_NAME (*s1);
+  st2 = SYMBOL_BEST_NAME (*s2);
 
 
   if ((st1[0] - st2[0]) || !st1[0])

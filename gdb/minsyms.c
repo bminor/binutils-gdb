@@ -985,3 +985,19 @@ find_solib_trampoline_target (CORE_ADDR pc)
     }
   return 0;
 }
+
+/* Test whether or not MINSYM corresponnds to a static symbol (i.e. is
+   file-local) or not.  */
+int
+minsym_static (const struct minimal_symbol *minsym)
+{
+  switch (MSYMBOL_TYPE (minsym))
+    {
+    case mst_file_text:
+    case mst_file_data:
+    case mst_file_bss:
+      return 1;
+    default:
+      return 0;
+    }
+}

@@ -3390,7 +3390,7 @@ print_one_breakpoint (struct breakpoint *b,
 	    {
 	      ui_out_text (uiout, "in ");
 	      ui_out_field_string (uiout, "func",
-				   SYMBOL_SOURCE_NAME (sym));
+				   SYMBOL_PRINT_NAME (sym));
 	      ui_out_wrap_hint (uiout, wrap_indent);
 	      ui_out_text (uiout, " at ");
 	    }

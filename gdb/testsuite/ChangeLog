@@ -1,3 +1,8 @@
+2002-12-20  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/namespace.exp: Delete tests that try to apply using
+	directives to quoted namespaces.
+
 2002-12-17  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb.c++/m-data.cc: Whitespace cleanup, to match mainline patch.

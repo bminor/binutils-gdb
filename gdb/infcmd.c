@@ -846,7 +846,7 @@ jump_command (char *arg, int from_tty)
   if (fn != NULL && sfn != fn)
     {
       if (!query ("Line %d is not in `%s'.  Jump anyway? ", sal.line,
-		  SYMBOL_SOURCE_NAME (fn)))
+		  SYMBOL_PRINT_NAME (fn)))
 	{
 	  error ("Not confirmed.");
 	  /* NOTREACHED */

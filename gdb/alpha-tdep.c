@@ -856,6 +856,7 @@ find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame)
 	   symbol reading.  */
 	sym = NULL;
       else
+
 	sym = lookup_symbol (MIPS_EFI_SYMBOL_NAME, b, LABEL_NAMESPACE,
 			     0, NULL);
     }

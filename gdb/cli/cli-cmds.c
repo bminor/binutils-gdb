@@ -604,7 +604,7 @@ edit_command (char *arg, int from_tty)
 	    {
 	      print_address_numeric (sal.pc, 1, gdb_stdout);
 	      printf_filtered (" is in ");
-	      fputs_filtered (SYMBOL_SOURCE_NAME (sym), gdb_stdout);
+	      fputs_filtered (SYMBOL_PRINT_NAME (sym), gdb_stdout);
 	      printf_filtered (" (%s:%d).\n", sal.symtab->filename, sal.line);
 	    }
           else
@@ -771,7 +771,7 @@ list_command (char *arg, int from_tty)
 	{
 	  print_address_numeric (sal.pc, 1, gdb_stdout);
 	  printf_filtered (" is in ");
-	  fputs_filtered (SYMBOL_SOURCE_NAME (sym), gdb_stdout);
+	  fputs_filtered (SYMBOL_PRINT_NAME (sym), gdb_stdout);
 	  printf_filtered (" (%s:%d).\n", sal.symtab->filename, sal.line);
 	}
       else
