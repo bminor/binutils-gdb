@@ -1,5 +1,9 @@
 2004-09-02  Andrew Cagney  <cagney@gnu.org>
 
+	* acconfig.h (GDB_MULTI_ARCH): Delete undef.
+	* defs.h (GDB_MULTI_ARCH_PARTIAL, GDB_MULTI_ARCH_TM) 
+	(GDB_MULTI_ARCH_PURE, GDB_MULTI_ARCH): Delete macros.
+
 	* gdbarch.sh: Instead of GDB_MULTI_ARCH print GDB_NM_FILE,
 	GDB_TM_FILE and GDB_XM_FILE.
 	* gdbarch.c: Re-generate.	

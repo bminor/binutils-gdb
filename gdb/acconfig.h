@@ -154,9 +154,6 @@
 /* Define if libunwind library is being used.  */
 #undef HAVE_LIBUNWIND
 
-/* Multi-arch enabled. */
-#undef GDB_MULTI_ARCH
-
 /* hostfile */
 #undef GDB_XM_FILE
 

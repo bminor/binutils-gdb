@@ -66,29 +66,6 @@
 /* For BFD64 and bfd_vma.  */
 #include "bfd.h"
 
-
-/* The target is partially multi-arched.  Both "tm.h" and the
-   multi-arch vector provide definitions.  "tm.h" normally overrides
-   the multi-arch vector (but there are a few exceptions).  */
-
-#define GDB_MULTI_ARCH_PARTIAL 1
-
-/* The target is partially multi-arched. Both the multi-arch vector
-   and "tm.h" provide definitions. "tm.h" cannot override a definition
-   provided by the multi-arch vector.  It is detected as a compilation
-   error.
-
-   This setting is only useful during a multi-arch conversion. */
-
-#define GDB_MULTI_ARCH_TM 2
-
-/* The target is pure multi-arch.  The MULTI-ARCH vector provides all
-   definitions.  "tm.h" is linked to an empty file. */
-
-#define GDB_MULTI_ARCH_PURE 3
-
-
-
 /* An address in the program being debugged.  Host byte order.  Rather
    than duplicate all the logic in BFD which figures out what type
    this is (long, long long, etc.) and whether it needs to be 64
@@ -1111,15 +1088,6 @@ extern void *alloca ();
 #endif /* Not HAVE_ALLOCA_H */
 #endif /* Not GNU C */
 #endif /* alloca not defined */
-
-/* Is GDB multi-arch?  If there's a "tm.h" file, it is not.  */
-#ifndef GDB_MULTI_ARCH
-#ifdef GDB_TM_FILE
-#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
-#else
-#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PURE
-#endif
-#endif
 
 /* Dynamic target-system-dependent parameters for GDB. */
 #include "gdbarch.h"
