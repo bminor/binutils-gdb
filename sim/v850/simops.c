@@ -3,11 +3,6 @@
 #include "simops.h"
 
 void
-OP_220 ()
-{
-}
-
-void
 OP_10760 ()
 {
 }
@@ -637,6 +632,177 @@ OP_7E0 ()
   State.regs[OP[1]] = result;
 }
 
+/* satadd reg,reg */
+void
+OP_C0 ()
+{
+  unsigned int op0, op1, result, z, s, cy, ov, sat;
+
+  /* Compute the result.  */
+  op0 = State.regs[OP[0]];
+  op1 = State.regs[OP[1]];
+  result = op0 + op1;
+
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+  cy = (result < op0 || result < op1);
+  ov = ((op0 & 0x80000000) == (op1 & 0x80000000)
+	&& (op0 & 0x80000000) != (result & 0x80000000));
+  sat = ov;
+
+  /* Store the result and condition codes.  */
+  State.regs[OP[1]] = result;
+  State.psw &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0)
+		| (sat ? PSW_SAT : 0));
+
+  /* Handle saturated results.  */
+  if (sat && (op0 & 0x80000000))
+    State.regs[OP[1]] = 0x80000000;
+  else if (sat)
+    State.regs[OP[1]] = 0x7fffffff;
+}
+
+/* satadd sign_extend(imm5), reg */
+void
+OP_220 ()
+{
+  unsigned int op0, op1, result, z, s, cy, ov, sat;
+
+  int temp;
+
+  /* Compute the result.  */
+  temp = (OP[0] & 0x1f);
+  temp = (temp << 27) >> 27;
+  op0 = temp;
+  op1 = State.regs[OP[1]];
+  result = op0 + op1;
+
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+  cy = (result < op0 || result < op1);
+  ov = ((op0 & 0x80000000) == (op1 & 0x80000000)
+	&& (op0 & 0x80000000) != (result & 0x80000000));
+  sat = ov;
+
+  /* Store the result and condition codes.  */
+  State.regs[OP[1]] = result;
+  State.psw &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0)
+		| (sat ? PSW_SAT : 0));
+
+  /* Handle saturated results.  */
+  if (sat && (op0 & 0x80000000))
+    State.regs[OP[1]] = 0x80000000;
+  else if (sat)
+    State.regs[OP[1]] = 0x7fffffff;
+}
+
+/* satsub reg1, reg2 */
+void
+OP_A0 ()
+{
+  unsigned int op0, op1, result, z, s, cy, ov, sat;
+
+  /* Compute the result.  */
+  op0 = State.regs[OP[0]];
+  op1 = State.regs[OP[1]];
+  result = op1 - op0;
+
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+  cy = (result < -op0);
+  ov = ((op1 & 0x80000000) != (op0 & 0x80000000)
+	&& (op1 & 0x80000000) != (result & 0x80000000));
+  sat = ov;
+
+  /* Store the result and condition codes.  */
+  State.regs[OP[1]] = result;
+  State.psw &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0)
+		| (sat ? PSW_SAT : 0));
+
+  /* Handle saturated results.  */
+  if (sat && (op1 & 0x80000000))
+    State.regs[OP[1]] = 0x80000000;
+  else if (sat)
+    State.regs[OP[1]] = 0x7fffffff;
+}
+
+/* satsubi sign_extend(imm16), reg */
+void
+OP_660 ()
+{
+  unsigned int op0, op1, result, z, s, cy, ov, sat;
+  int temp;
+
+  /* Compute the result.  */
+  temp = (OP[0] & 0xffff);
+  temp = (temp << 16) >> 16;
+  op0 = temp;
+  op1 = State.regs[OP[1]];
+  result = op1 - op0;
+
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+  cy = (result < -op0);
+  ov = ((op1 & 0x80000000) != (op0 & 0x80000000)
+	&& (op1 & 0x80000000) != (result & 0x80000000));
+  sat = ov;
+
+  /* Store the result and condition codes.  */
+  State.regs[OP[1]] = result;
+  State.psw &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0)
+		| (sat ? PSW_SAT : 0));
+
+  /* Handle saturated results.  */
+  if (sat && (op1 & 0x80000000))
+    State.regs[OP[1]] = 0x80000000;
+  else if (sat)
+    State.regs[OP[1]] = 0x7fffffff;
+}
+
+void
+OP_80 ()
+{
+  unsigned int op0, op1, result, z, s, cy, ov, sat;
+
+  /* Compute the result.  */
+  op0 = State.regs[OP[0]];
+  op1 = State.regs[OP[1]];
+  result = op0 - op1;
+
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+  cy = (result < -op0);
+  ov = ((op1 & 0x80000000) != (op0 & 0x80000000)
+	&& (op1 & 0x80000000) != (result & 0x80000000));
+  sat = ov;
+
+  /* Store the result and condition codes.  */
+  State.regs[OP[1]] = result;
+  State.psw &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0)
+		| (sat ? PSW_SAT : 0));
+
+  /* Handle saturated results.  */
+  if (sat && (op0 & 0x80000000))
+    State.regs[OP[1]] = 0x80000000;
+  else if (sat)
+    State.regs[OP[1]] = 0x7fffffff;
+}
+
 /* tst reg,reg */
 void
 OP_160 ()
@@ -728,17 +894,7 @@ OP_1687E0 ()
 }
 
 void
-OP_A0 ()
-{
-}
-
-void
 OP_740 ()
-{
-}
-
-void
-OP_80 ()
 {
 }
 
@@ -1027,11 +1183,6 @@ OP_20 ()
 }
 
 void
-OP_C0 ()
-{
-}
-
-void
 OP_480 ()
 {
 }
@@ -1102,11 +1253,6 @@ OP_400 ()
 
 void
 OP_700 ()
-{
-}
-
-void
-OP_660 ()
 {
 }
 

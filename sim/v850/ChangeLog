@@ -1,5 +1,7 @@
 Thu Aug 29 13:53:29 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* simops.c: Handle "satadd", "satsub", "satsubi", "satsubr".
+
 	* interp.c (do_format_5): Get operands correctly and
 	call the target function.
 	(sim_resume): Don't do a PC update for format 5 instructions.
