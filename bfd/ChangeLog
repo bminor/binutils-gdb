@@ -1,3 +1,9 @@
+Thu Dec 11 17:48:11 1997  Richard Henderson  <rth@cygnus.com>
+
+	* linker.c (generic_link_add_symbol_list): Always init udata.p so
+	that the generic relaxation code can function when input and output
+	file formats are mismatched.
+
 Thu Dec 11 01:02:18 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coff-sh.c (bfd_coff_small_swap_table): Initialize new fields.
