@@ -4407,6 +4407,13 @@ coff_slurp_line_table (abfd, asect)
 
   amt = (bfd_size_type) bfd_coff_linesz (abfd) * asect->lineno_count;
   native_lineno = (LINENO *) buy_and_read (abfd, asect->line_filepos, amt);
+  if (native_lineno == NULL)
+    {
+      (*_bfd_error_handler)
+        (_("%s: warning: line number table read failed"),
+	 bfd_archive_filename (abfd));
+      return FALSE;
+    }
   amt = ((bfd_size_type) asect->lineno_count + 1) * sizeof (alent);
   lineno_cache = (alent *) bfd_alloc (abfd, amt);
   if (lineno_cache == NULL)
