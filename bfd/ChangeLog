@@ -1,3 +1,12 @@
+2000-08-21  H.J. Lu  <hjl@gnu.org>
+
+	* elf32-i386.c (elf_i386_size_dynamic_sections): Zero out the
+	dynamic allocated content space.  Add a comment to remind us that
+	one day this ought to be fixed.
+	* elf32-m68k.c (elf_m68k_size_dynamic_sections): Likewise.
+	* elf32-sparc.c (elf32_sparc_size_dynamic_sections): Likewise.
+	* elf64-hppa.c (elf64_hppa_size_dynamic_sections): Likewise.
+
 2000-08-21  Jason Eckhardt  <jle@cygnus.com>
 
 	* elf32-i860.c (elf32_i860_relocate_pc16): Just write the immediate
