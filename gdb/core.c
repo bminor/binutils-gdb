@@ -170,7 +170,7 @@ dis_asm_read_memory (memaddr, myaddr, len, info)
      int len;
      disassemble_info *info;
 {
-  return target_read_memory (memaddr, myaddr, len);
+  return target_read_memory (memaddr, (char *) myaddr, len);
 }
 
 /* Like memory_error with slightly different parameters.  */
