@@ -1,3 +1,8 @@
+Mon Mar  2 10:20:06 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* sim-core.c (sim_core_attach): Use xmalloc instead of zalloc.
+	(sim_core_map_detach): Use free instead of zfree.
+
 Fri Feb 27 19:09:57 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* sim-module.c (*): Fix typos in assertion tests.
