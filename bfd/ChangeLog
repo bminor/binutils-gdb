@@ -1,3 +1,7 @@
+2001-06-05  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
+
+	* configure.host (mips64*-*-linux*): Define.
+
 2001-06-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-i386.c (elf_i386_discard_copies): Rename to
