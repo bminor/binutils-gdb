@@ -1,3 +1,7 @@
+Tue Oct 29 14:59:20 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* TODO: Add item suggesting an "info bfd" command.
+
 start-sanitize-d10v
 Tue Oct 29 12:48:04 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
