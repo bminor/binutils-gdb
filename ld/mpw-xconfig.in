@@ -7,3 +7,8 @@ echo '  &ld_mipsidt_emulation, \' >>ldemul-list.h
 echo '  0' >>ldemul-list.h
 
 forward-include "{srcdir}"mpw-em.c em_mipsidt.c
+
+# Set the name of the default emulation - this will get pasted into
+# the Makefile.
+
+Set emulname mipsidt
