@@ -59,6 +59,7 @@ static boolean MY(write_object_contents) PARAMS ((bfd *abfd));
 
 #define MY_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define MY_bfd_link_add_symbols _bfd_generic_link_add_symbols
+#define MY_final_link_callback unused
 #define MY_bfd_final_link _bfd_generic_final_link
 
 #define MY_backend_data &MY(backend_data)
@@ -379,6 +380,12 @@ static CONST struct aout_backend_data MY(backend_data) = {
   PAGE_SIZE,			/* text vma */
   MY_set_sizes,
   0,				/* text size includes exec header */
+  0,				/* add_dynamic_symbols */
+  0,				/* add_one_symbol */
+  0,				/* link_dynamic_object */
+  0,				/* write_dynamic_symbol */
+  0,				/* check_dynamic_reloc */
+  0				/* finish_dynamic_link */
 };
 
 bfd_target aout_mips_little_vec =

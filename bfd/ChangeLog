@@ -1,5 +1,7 @@
 Mon Jun 20 11:06:27 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* mipsbsd.c (MY_final_link_callback): Define to avoid warning.
+
 	* hp300hpux.c (MY_final_link_callback): Define to avoid warning.
 	(BMAGIC, QMAGIC): Define; used by aoutx.h.
 	(MY(slurp_symbol_table)): Change translate_from_native_sym_flags
