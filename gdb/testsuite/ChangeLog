@@ -1,3 +1,33 @@
+Tue May 18 17:13:20 1993  Fred Fish  (fnf@cygnus.com)
+
+	* gdb.t21/demangle.exp:  Add a couple of new patterns.  Ensure
+	that all setup_xfails are immediately followed by clear_xfails.
+
+Tue May 11 09:10:47 1993  Fred Fish  (fnf@cygnus.com)
+
+	* config/unix-gdb.exp, gdb.t00/echo.exp, gdb.t00/help.exp,
+	gdb.t00/teststrategy.exp, gdb.t00/gdbvars.exp, gdb.t01/run.exp,
+	gdb.t01/term.exp, gdb.t02/whatis.exp, gdb.t03/ptype.exp,
+	gdb.t04/setvar.exp, gdb.t05/expr.exp, gdb.t06/break.exp,
+	gdb.t07/watchpoint.exp, gdb.t08/opaque.exp, gdb.t09/corefile.exp,
+	gdb.t10/crossload.exp, gdb.t11/list.exp, gdb.t12/scope.exp,
+	gdb.t13/bitfields.exp, gdb.t15/funcargs.exp, gdb.t16/printcmds.exp,
+	gdb.t17/callfuncs.exp, gdb.t20/misc.exp, gdb.t20/inherit.exp,
+	gdb.t20/classes.exp, gdb.t21/demangle.exp, gdb.t21/cplusfuncs.exp,
+	gdb.t22/virtfunc.exp, gdb.t23/templates.exp, gdb.t30/chexp.exp,
+	gdb.t31/chillvars.exp, lib/gdb.exp:
+	Change place to report bugs from bug-dejagnu@prep.ai.mit.edu to
+	bug-gdb@prep.ai.mit.edu.
+
+Fri May  7 09:15:35 1993  Fred Fish  (fnf@cygnus.com)
+
+	* gdb.t17/callfuncs.exp (do_function_calls):  Call t_double_values
+	with 0.0, not integer 0.
+
+Fri Apr 30 13:17:24 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* gdb.t06/break.exp: Update for "Kill the program" message change.
+
 Fri Apr 30 09:42:57 1993  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (GDBFLAGS):  Set to -nx.
