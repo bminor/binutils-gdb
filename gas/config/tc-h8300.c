@@ -311,7 +311,7 @@ parse_exp (s, op)
 static char *
 skip_colonthing (ptr, exp, mode)
      char *ptr;
-     expressionS *exp;
+     expressionS *exp ATTRIBUTE_UNUSED;
      int *mode;
 {
   if (*ptr == ':')
@@ -399,7 +399,7 @@ static void
 get_operand (ptr, op, dst, direction)
      char **ptr;
      struct h8_op *op;
-     unsigned int dst;
+     unsigned int dst ATTRIBUTE_UNUSED;
      int direction;
 {
   char *src = *ptr;
@@ -1343,21 +1343,21 @@ md_assemble (str)
 
 void
 tc_crawl_symbol_chain (headers)
-     object_headers * headers;
+     object_headers * headers ATTRIBUTE_UNUSED;
 {
   printf (_("call to tc_crawl_symbol_chain \n"));
 }
 
 symbolS *
 md_undefined_symbol (name)
-     char *name;
+     char *name ATTRIBUTE_UNUSED;
 {
   return 0;
 }
 
 void
 tc_headers_hook (headers)
-     object_headers * headers;
+     object_headers * headers ATTRIBUTE_UNUSED;
 {
   printf (_("call to tc_headers_hook \n"));
 }
@@ -1433,15 +1433,15 @@ size_t md_longopts_size = sizeof(md_longopts);
 
 int
 md_parse_option (c, arg)
-     int c;
-     char *arg;
+     int c ATTRIBUTE_UNUSED;
+     char *arg ATTRIBUTE_UNUSED;
 {
   return 0;
 }
 
 void
 md_show_usage (stream)
-     FILE *stream;
+     FILE *stream ATTRIBUTE_UNUSED;
 {
 }
 
@@ -1454,9 +1454,9 @@ tc_aout_fix_to_chars ()
 
 void
 md_convert_frag (headers, seg, fragP)
-     object_headers *headers;
-     segT seg;
-     fragS *fragP;
+     object_headers *headers ATTRIBUTE_UNUSED;
+     segT seg ATTRIBUTE_UNUSED;
+     fragS *fragP ATTRIBUTE_UNUSED;
 {
   printf (_("call to md_convert_frag \n"));
   abort ();
@@ -1500,8 +1500,8 @@ md_apply_fix (fixP, val)
 
 int
 md_estimate_size_before_relax (fragP, segment_type)
-     register fragS *fragP;
-     register segT segment_type;
+     register fragS *fragP ATTRIBUTE_UNUSED;
+     register segT segment_type ATTRIBUTE_UNUSED;
 {
   printf (_("call tomd_estimate_size_before_relax \n"));
   abort ();
@@ -1519,7 +1519,7 @@ md_number_to_chars (ptr, use, nbytes)
 }
 long
 md_pcrel_from (fixP)
-     fixS *fixP;
+     fixS *fixP ATTRIBUTE_UNUSED;
 {
   abort ();
 }
