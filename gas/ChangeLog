@@ -6,6 +6,7 @@ Tue Oct 31 16:34:28 1995  David Mosberger-Tang  <davidm@azstarnet.com>
 	(ecoff_directive_weakext): New function.
 	(ecoff_build_symbols): Handle weak symbols.
 	(ecoff_setup_ext): Likewise.
+	(ecoff_frob_symbol): Warn about weak common symbols.
 	* ecoff.h (ecoff_directive_extern): Declare.
 	(ecoff_directive_weakext): Declare.
 	* symbols.c (S_IS_WEAK): New function.
