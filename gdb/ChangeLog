@@ -1,3 +1,11 @@
+2003-02-03  Kevin Buettner  <kevinb@redhat.com>
+
+	* s390-tdep.c (s390_address_class_type_flags)
+	(s390_address_class_type_flags_to_name)
+	(s390_address_class_name_to_type_flags): New functions.
+	(s390_gdbarch_init): Define ADDRESS_CLASS_TYPE_FLAGS_TO_NAME,
+	ADDRESS_CLASS_NAME_TO_TYPE_FLAGS, and ADDRESS_CLASS_TYPE_FLAGS.
+
 2003-02-03  Michael Snyder  <msnyder@redhat.com>
 
 	* arm-tdep.c: Fix spell-o in comment.
