@@ -259,6 +259,20 @@ solib_map_sections (so)
 
 #ifndef SVR4_SHARED_LIBS
 
+/* This routine can be a real performance hog.  According to some gprof data
+   which mtranle@paris.IntelliCorp.COM (Minh Tran-Le) sent, almost all the
+   time spend in solib_add (up to 20 minutes with 35 shared libraries) is
+   spent here, with 5/6 in lookup_minimal_symbol and 1/6 in read_memory.
+
+   Possible solutions:
+
+   * Hash the minimal symbols.
+
+   * Just record the name of the minimal symbol and lazily patch the
+   addresses.
+
+   * Tell everyone to switch to Solaris2.  */
+
 static void
 solib_add_common_symbols (rtc_symp, objfile)
     struct rtc_symb *rtc_symp;

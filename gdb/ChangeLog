@@ -1,3 +1,7 @@
+Sun Jun 20 00:24:41 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* solib.c (solib_add_common_symbols): Add comment about performance.
+
 Fri Jun 18 12:37:36 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/mips/{{x,n}m-riscos.h,riscos.mh}: New files.
