@@ -1,3 +1,14 @@
+Fri Oct 13 11:04:37 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* deflex.l: Allow quoting of IDs.
+	* defparse.y (%union): string deleted.
+	(command): DESCRIPTION takes ID.
+	* dlltool.c (gen_def_file): Quote outgoing name if
+	necessary.  Preserve NONAME.
+	(gen_lib_file): Run ranlib.
+	(workout_prefix): Deleted.
+	(main, usage, long_options): Add --as, --ranlib, --ar options.
+
 Wed Oct 11 13:36:13 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* dlltool.c (mtable): HOW_ALIGN_LONG, new.
