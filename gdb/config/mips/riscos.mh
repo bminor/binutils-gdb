@@ -1,3 +1,7 @@
 NATDEPFILES= infptrace.o inftarg.o fork-child.o coredep.o corelow.o mips-nat.o
 NM_FILE= nm-riscos.h
 XM_FILE= xm-riscos.h
+REGEX= regex.o
+REGEX1= regex.o
+MUNCH_DEFINE=-B
+MH_CFLAGS=-Wf,-XNh10000

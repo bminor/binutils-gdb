@@ -1,3 +1,7 @@
+Fri Jun 25 11:22:28 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config/mips/riscos.mh (REGEX{,1}, MUNCH_DEFINE, MH_CFLAGS): Define.
+
 Thu Jun 24 14:52:45 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* main.c (filename_completer): Don't complete to files ending in ~.
