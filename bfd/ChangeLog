@@ -1,3 +1,13 @@
+2000-06-18  Ulf Carlsson  <ulfc@engr.sgi.com>
+
+	* elf_bfd.h (struct elf_backend_data): Add info argument to
+	elf_backend_hide_symbol.
+	(_bfd_elf_link_hash_hide_symbol): Likewise.
+	* elf.c (_bfd_elf_link_hash_hide_symbol): Likewise.
+	* elf64-ia64.c (elf64_ia64_hash_hide_symbol): Likewise.
+	* elflink.h (elf_link_add_object_symbols): Likewise.
+	(elf_link_assign_sym_version): Likewise.
+	
 2000-06-18  H.J. Lu  <hjl@gnu.org>
 
 	* coff-i386.c (coff_i386_reloc): Don't return in case of

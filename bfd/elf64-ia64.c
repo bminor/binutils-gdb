@@ -1307,7 +1307,8 @@ elf64_ia64_hash_copy_indirect (xdir, xind)
 }
 
 static void
-elf64_ia64_hash_hide_symbol (xh)
+elf64_ia64_hash_hide_symbol (info, xh)
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      struct elf_link_hash_entry *xh;
 {
   struct elf64_ia64_link_hash_entry *h;

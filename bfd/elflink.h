@@ -1860,7 +1860,7 @@ elf_link_add_object_symbols (abfd, info)
 	      case STV_INTERNAL:
 	      case STV_HIDDEN:  
 		h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
-		(*bed->elf_backend_hide_symbol) (h);
+		(*bed->elf_backend_hide_symbol) (info, h);
 		break;
 	      }
 	}
@@ -3707,7 +3707,7 @@ elf_link_assign_sym_version (h, data)
 			      && ! sinfo->export_dynamic)
 			    {
 			      h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
-			      (*bed->elf_backend_hide_symbol) (h);
+			      (*bed->elf_backend_hide_symbol) (info, h);
 			      /* FIXME: The name of the symbol has
 				 already been recorded in the dynamic
 				 string table section.  */
@@ -3819,7 +3819,7 @@ elf_link_assign_sym_version (h, data)
 			  && ! sinfo->export_dynamic)
 			{
 			  h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
-			  (*bed->elf_backend_hide_symbol) (h);
+			  (*bed->elf_backend_hide_symbol) (info, h);
 			  /* FIXME: The name of the symbol has already
 			     been recorded in the dynamic string table
 			     section.  */
@@ -3841,7 +3841,7 @@ elf_link_assign_sym_version (h, data)
 	      && ! sinfo->export_dynamic)
 	    {
 	      h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
-	      (*bed->elf_backend_hide_symbol) (h);
+	      (*bed->elf_backend_hide_symbol) (info, h);
 	      /* FIXME: The name of the symbol has already been
 		 recorded in the dynamic string table section.  */
 	    }

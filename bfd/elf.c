@@ -954,7 +954,8 @@ _bfd_elf_link_hash_copy_indirect (dir, ind)
 }
 
 void
-_bfd_elf_link_hash_hide_symbol(h)
+_bfd_elf_link_hash_hide_symbol(info, h)
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      struct elf_link_hash_entry *h;
 {
   h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;

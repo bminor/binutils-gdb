@@ -601,7 +601,7 @@ struct elf_backend_data
   /* Modify any information related to dynamic linking such that the
      symbol is not exported.  */
   void (*elf_backend_hide_symbol)
-    PARAMS ((struct elf_link_hash_entry *));
+    PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 
   /* The swapping table to use when dealing with ECOFF information.
      Used for the MIPS ELF .mdebug section.  */
@@ -970,7 +970,7 @@ extern struct bfd_link_hash_table *_bfd_elf_link_hash_table_create
 extern void _bfd_elf_link_hash_copy_indirect
   PARAMS ((struct elf_link_hash_entry *, struct elf_link_hash_entry *));
 extern void _bfd_elf_link_hash_hide_symbol
-  PARAMS ((struct elf_link_hash_entry *));
+  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 extern boolean _bfd_elf_link_hash_table_init
   PARAMS ((struct elf_link_hash_table *, bfd *,
 	   struct bfd_hash_entry *(*) (struct bfd_hash_entry *,
