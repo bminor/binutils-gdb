@@ -174,10 +174,9 @@ pke_attach(SIM_DESC sd, struct pke_device* me)
       {
 	me->fifo_trace_file = fopen(trace_filename, "w");
 	if(me->fifo_trace_file == NULL)
-	  {
 	    perror("VIF FIFO trace error on fopen");
-	  }
-	setvbuf(me->fifo_trace_file, NULL, _IOLBF, 0);
+	else
+	  setvbuf(me->fifo_trace_file, NULL, _IOLBF, 0);
       }
   }
 }
@@ -272,14 +271,14 @@ pke_io_read_buffer(device *me_,
 	  /* copy the bits */
 	  memcpy(dest, ((unsigned_1*) &result) + reg_byte, nr_bytes);
 	  /* okay */
-	  return nr_bytes;
 	}
       else
 	{
-	  /* error */
-	  return 0;
+	  /* return zero bits */
+	  memset(dest, 0, nr_bytes);
 	} 
 
+      return nr_bytes;
       /* NOTREACHED */
     }
   else if(addr >= my_fifo_addr &&
@@ -344,7 +343,7 @@ pke_io_write_buffer(device *me_,
 	case PKE_REG_FBRST:
 	  /* Order these tests from least to most overriding, in case
              multiple bits are set. */
-	  if(BIT_MASK_GET(input[0], 2, 2)) /* STC bit */
+	  if(BIT_MASK_GET(input[0], PKE_REG_FBRST_STC_B, PKE_REG_FBRST_STC_E))
 	    {
 	      /* clear a bunch of status bits */
 	      PKE_REG_MASK_SET(me, STAT, PSS, 0);
@@ -356,15 +355,15 @@ pke_io_write_buffer(device *me_,
 	      me->flags &= ~PKE_FLAG_PENDING_PSS;
 	      /* will allow resumption of possible stalled instruction */
 	    }
-	  if(BIT_MASK_GET(input[0], 2, 2)) /* STP bit */
+	  if(BIT_MASK_GET(input[0], PKE_REG_FBRST_STP_B, PKE_REG_FBRST_STP_E))
 	    {
 	      me->flags |= PKE_FLAG_PENDING_PSS;
 	    }
-	  if(BIT_MASK_GET(input[0], 1, 1)) /* FBK bit */
+	  if(BIT_MASK_GET(input[0], PKE_REG_FBRST_FBK_B, PKE_REG_FBRST_FBK_E))
 	    {
 	      PKE_REG_MASK_SET(me, STAT, PFS, 1);
 	    }
-	  if(BIT_MASK_GET(input[0], 0, 0)) /* RST bit */
+	  if(BIT_MASK_GET(input[0], PKE_REG_FBRST_RST_B, PKE_REG_FBRST_RST_E))
 	    {
 	      /* clear FIFO by skipping to word after PC: also
                  prevents re-execution attempt of possible stalled
@@ -426,16 +425,12 @@ pke_io_write_buffer(device *me_,
 	}
 
       /* perform return */
-      if(writeable) 
+      if(! writeable) 
 	{
-	  /* okay */
-	  return nr_bytes;
-	}
-      else
-	{
-	  /* error */
-	  return 0;
+	  ; /* error */
 	} 
+
+      return nr_bytes;
 
       /* NOTREACHED */
     }
@@ -546,14 +541,6 @@ pke_issue(SIM_DESC sd, struct pke_device* me)
      (PKE_REG_MASK_GET(me, STAT, PIS) && !PKE_REG_MASK_GET(me, ERR, MII)))
     {
       /* try again next cycle; no state change */
-
-      /* trace command */
-      if(me->fifo_trace_file != NULL)
-	{
-	  fprintf(me->fifo_trace_file, "# stalled STAT: %08lx\n",
-		  (unsigned long) me->regs[PKE_REG_STAT][0]);
-	}
-
       return;
     }
 
@@ -654,10 +641,11 @@ pke_pc_advance(struct pke_device* me, int num_words)
 {
   int num = num_words;
   struct fifo_quadword* fq = NULL;
-  int skipped = 0;
   ASSERT(num_words >= 0);
 
-  do
+  /* printf("pke %d pc_advance num_words %d\n", me->pke_number, num_words); */
+
+  while(1)
     {
       fq = & me->fifo[me->fifo_pc];
 
@@ -666,49 +654,46 @@ pke_pc_advance(struct pke_device* me, int num_words)
 	{
 	  /* skip by going around loop an extra time */
 	  num ++;
-	  skipped = 1;
 	}
-      else
-	skipped = 0;
+      
+      /* nothing left to skip / no DMA tag here */
+      if(num == 0)
+	break;
 
-      if(num > 0) /* increment PC */
+      /* one word skipped */
+      num --;
+      
+      /* point to next word */
+      me->qw_pc ++;
+      if(me->qw_pc == 4)
 	{
-	  /* one word skipped */
-	  num --;
+	  me->qw_pc = 0;
+	  me->fifo_pc ++;
 	  
-	  /* point to next word */
-	  me->qw_pc ++;
-	  if(me->qw_pc == 4)
+	  /* trace the consumption of the FIFO quadword we just skipped over */
+	  /* fq still points to it */
+	  if(me->fifo_trace_file != NULL)
 	    {
-	      me->qw_pc = 0;
-	      me->fifo_pc ++;
+	      /* assert complete classification */
+	      ASSERT(fq->word_class[3] != wc_unknown);
+	      ASSERT(fq->word_class[2] != wc_unknown);
+	      ASSERT(fq->word_class[1] != wc_unknown);
+	      ASSERT(fq->word_class[0] != wc_unknown);
 	      
-	      /* trace the consumption of this FIFO quadword */
-	      if(me->fifo_trace_file != NULL)
-		{
-		  /* assert complete classification */
-		  ASSERT(fq->word_class[3] != wc_unknown);
-		  ASSERT(fq->word_class[2] != wc_unknown);
-		  ASSERT(fq->word_class[1] != wc_unknown);
-		  ASSERT(fq->word_class[0] != wc_unknown);
-
-		  /* print trace record */
-		  fprintf(me->fifo_trace_file,
-			  "%d 0x%08x_%08x_%08x_%08x 0x%08x %c%c%c%c\n",
-			  (me->pke_number == 0 ? 0 : 1),
-			  (unsigned) fq->data[3], (unsigned) fq->data[2],
-			  (unsigned) fq->data[1], (unsigned) fq->data[0],
-			  (unsigned) fq->source_address,
-			  fq->word_class[3], fq->word_class[2],
-			  fq->word_class[1], fq->word_class[0]);
-		}
-
-	      /* XXX: zap old entries in FIFO */
-
-	    } /* next quadword */
-	} /* increment PC */
-    } /* eat num words */
-  while(num > 0 || skipped);
+	      /* print trace record */
+	      fprintf(me->fifo_trace_file,
+		      "%d 0x%08x_%08x_%08x_%08x 0x%08x %c%c%c%c\n",
+		      (me->pke_number == 0 ? 0 : 1),
+		      (unsigned) fq->data[3], (unsigned) fq->data[2],
+		      (unsigned) fq->data[1], (unsigned) fq->data[0],
+		      (unsigned) fq->source_address,
+		      fq->word_class[3], fq->word_class[2],
+		      fq->word_class[1], fq->word_class[0]);
+	    }
+	  
+	  /* XXX: zap old entries in FIFO */
+	} /* next quadword */
+    }
 
   /* clear FQC if FIFO is now empty */ 
   if(me->fifo_num_elements == me->fifo_pc)
@@ -717,6 +702,7 @@ pke_pc_advance(struct pke_device* me, int num_words)
     }
   else /* annote the word where the PC lands as an PKEcode */
     {
+      fq = & me->fifo[me->fifo_pc];
       ASSERT(fq->word_class[me->qw_pc] == wc_pkecode ||
 	     fq->word_class[me->qw_pc] == wc_unknown);
       fq->word_class[me->qw_pc] = wc_pkecode;
@@ -742,6 +728,8 @@ pke_pc_fifo(struct pke_device* me, int operand_num, unsigned_4** operand)
   /* snapshot current pointers */
   new_fifo_pc = me->fifo_pc;
   new_qw_pc = me->qw_pc;
+
+  /* printf("pke %d pc_fifo operand_num %d\n", me->pke_number, operand_num); */
 
   do
     {
@@ -1002,8 +990,29 @@ pke_code_stmod(struct pke_device* me, unsigned_4 pkecode)
 void
 pke_code_mskpath3(struct pke_device* me, unsigned_4 pkecode)
 {
-  ASSERT(0);
-  /* XXX: no easy interface toward GPUIF for this purpose */
+#if 0
+  /* XXX: pending on patrickm support code */
+  int imm = BIT_MASK_GET(pkecode, PKE_OPCODE_IMM_B, PKE_OPCODE_IMM_E);
+  unsigned_4 gif_mode;
+
+  /* read old GIF control register */
+  ASSERT(sizeof(unsigned_4) == 4);
+  PKE_MEM_READ(me, GIF_REG_MODE, & gif_mode, 4);
+
+  /* mask appropriate bit */
+  if(BIT_MASK_GET(imm, PKE_REG_MSKPATH3_B, PKE_REG_MSKPATH3_E) != 0)
+    gif_mode |= GIF_REG_MODE_M3R_MASK;
+  else
+    gif_mode &= ~GIF_REG_MODE_M3R_MASK;
+
+  /* write back modified register */
+  PKE_MEM_WRITE(me, GIF_REG_MODE, & gif_mode, 4);
+
+#endif
+
+  /* done */
+  pke_pc_advance(me, 1);
+  PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
 }
 
 
@@ -1427,7 +1436,7 @@ pke_code_mpg(struct pke_device* me, unsigned_4 pkecode)
 	      /* VU*_MEM0_TRACK : source-addr tracking table */
 	      vutrack_addr_base = (me->pke_number == 0) ?
 		VU0_MEM0_SRCADDR_START : VU1_MEM0_SRCADDR_START;
-	      vutrack_addr = vu_addr_base + (imm + i) * 4;
+	      vutrack_addr = vutrack_addr_base + (imm + i) * 4;
 
 	      /* Fetch operand words; assume they are already little-endian for VU imem */
 	      fq = pke_pc_fifo(me, i*2 + 1, & operand);
@@ -1435,14 +1444,14 @@ pke_code_mpg(struct pke_device* me, unsigned_4 pkecode)
 	      vu_upper_opcode = *pke_pc_operand(me, i*2 + 2);
 	      
 	      /* write data into VU memory */
-	      /* upper (vector) opcode comes in first word */
-	      ASSERT(sizeof(unsigned_4) == 4);
+	      /* lower (scalar) opcode comes in first word */
 	      PKE_MEM_WRITE(me, vu_addr,
-			    & vu_upper_opcode,
-			    4);
-	      /* lower (scalar) opcode comes in next word */
-	      PKE_MEM_WRITE(me, vu_addr + 4,
 			    & vu_lower_opcode,
+			    4);
+	      /* upper (vector) opcode comes in second word */
+	      ASSERT(sizeof(unsigned_4) == 4);
+	      PKE_MEM_WRITE(me, vu_addr + 4,
+			    & vu_upper_opcode,
 			    4);
 	      
 	      /* write tracking address in target byte-order */
@@ -1617,8 +1626,8 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
 	  if(cl >= wl)
 	    {
 	      /* map zero to max+1 */
-	      if(wl == 0) wl = 0x0100;
-	      vu_addr = vu_addr_base + 16*(cl*(vector_num_out/wl) + (vector_num_out%wl));
+	      int addrwl = (wl == 0) ? 0x0100 : wl;
+	      vu_addr = vu_addr_base + 16*(cl*(vector_num_out/addrwl) + (vector_num_out%addrwl));
 	    }
 	  else
 	    vu_addr = vu_addr_base + 16*vector_num_out;
@@ -1642,7 +1651,8 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
 	  
 	  /* For cyclic unpack, next operand quadword may come from instruction stream
 	     or be zero. */
-	  if((cl < wl) && ((vector_num_out % wl) >= cl)) /* wl != 0, set above */
+	  if((num == 0 && cl == 0 && wl == 0) || /* shortcut clear */
+	     ((cl < wl) && ((vector_num_out % wl) >= cl))) /* wl != 0, set above */
 	    {
 	      /* clear operand - used only in a "indeterminate" state */
 	      for(i = 0; i < 4; i++)
@@ -1701,7 +1711,8 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
 	  if(m) /* use mask register? */
 	    {
 	      /* compute index into mask register for this word */
-	      int mask_index = PKE_LIMIT(vector_num_out % wl, 3);  /* wl != 0, set above */
+	      int addrwl = (wl == 0) ? 0x0100 : wl;
+	      int mask_index = PKE_LIMIT(vector_num_out % addrwl, 3);
 	      
 	      for(i=0; i<4; i++) /* loop over columns */
 		{

@@ -244,6 +244,20 @@ typedef unsigned_4 quadword[4];
 #define PKE_REG_ERR_MII_E 0
 #define PKE_REG_ERR_MII_B 0
 
+/* FBRST command bitfields */
+#define PKE_REG_FBRST_STC_E 3
+#define PKE_REG_FBRST_STC_B 3
+#define PKE_REG_FBRST_STP_E 2
+#define PKE_REG_FBRST_STP_B 2
+#define PKE_REG_FBRST_FBK_E 1
+#define PKE_REG_FBRST_FBK_B 1
+#define PKE_REG_FBRST_RST_E 0
+#define PKE_REG_FBRST_RST_B 0
+
+/* MSKPATH3 command bitfields */
+#define PKE_REG_MSKPATH3_E 15
+#define PKE_REG_MSKPATH3_B 15
+
 
 /* UNPACK opcodes */
 #define PKE_UNPACK(vn,vl) ((vn) << 2 | (vl))
@@ -396,15 +410,6 @@ struct pke_device
 	sim_core_read_aligned_##size(cpu, CIA_GET(cpu), sim_core_read_map, \
 				     (SIM_ADDR)(addr)); \
       memcpy((unsigned_##size*) (data), (void*) & value, size); \
-      if(me->fifo_trace_file != NULL) \
-	{ \
-	  int i; \
-	  fprintf((me)->fifo_trace_file, "# Read  %2d bytes from ", size); \
-	  fprintf((me)->fifo_trace_file, "0x%08lx: ", (unsigned long)(addr)); \
-	  for(i=0; i<size; i++) \
-	    fprintf((me)->fifo_trace_file, " %02x", ((unsigned_1*)(& value))[i]); \
-	  fprintf((me)->fifo_trace_file, "\n"); \
-	} \
      } while(0)
 
 #define PKE_MEM_WRITE(me,addr,data,size) \
