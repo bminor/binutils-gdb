@@ -142,6 +142,8 @@ setup_xfail "sh64-*-*"
 # the function. Therefore the line number in the error message is 8 instead
 # of 9. On 64 bit s/390 this works because of the new brasl instruction that
 # doesn't need a literal pool entry.
+# With gcc 3.1 s/390 uses dwarf-2 and the test will fail on 64 bit as well.
 setup_xfail s390-*-*
+setup_xfail s390x-*-*
 
 checkund $ml $testline

@@ -1,3 +1,7 @@
+2002-06-11  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* ld-undefined/undefined.exp: Add s390x to dwarf2 xfails.
+
 2002-06-10  Richard Sandiford  <rsandifo@redhat.com>
 
 	* ld-mips-elf/region1a.s,
