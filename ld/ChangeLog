@@ -1,3 +1,11 @@
+Thu Oct 26 22:22:49 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-config.in: Add PowerMac target support, generate config.h.
+	* mac-ld.r: New file, Mac resources.
+	* mpw-make.sed: New file, edits Makefile.in into MPW syntax.
+	* mpw-make.in: Remove.
+	* mpw-eppcmacos.c: Prebuilt version of PowerMac linking script.
+
 Thu Oct 26 14:11:26 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/aix.em (gld${EMULATION_NAME}_parse_args): Treat
