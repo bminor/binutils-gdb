@@ -1102,13 +1102,13 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load $objdir/$subdir/$binfile
 
 if [istarget "hppa*-*-*"] then {
-#    all_integer_memory_tests
-#    all_immediate_tests
-#    all_branch_tests
-#    all_integer_computational_tests
-#    all_system_control_tests
-#    all_fpu_memory_tests
-#    all_fpu_computational_tests
-#    all_fpu_comparison_tests
+    all_integer_memory_tests
+    all_immediate_tests
+    all_branch_tests
+    all_integer_computational_tests
+    all_system_control_tests
+    all_fpu_memory_tests
+    all_fpu_computational_tests
+    all_fpu_comparison_tests
     all_special_tests
 }
