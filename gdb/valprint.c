@@ -1205,12 +1205,13 @@ _initialize_valprint (void)
   add_alias_cmd ("p", "print", no_class, 1, &showlist);
   add_alias_cmd ("pr", "print", no_class, 1, &showlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("elements", no_class, var_uinteger, (char *) &print_max,
-		  "Set limit on string chars or array elements to print.\n\
-\"set print elements 0\" causes there to be no limit.",
-		  &setprintlist),
-     &showprintlist);
+  add_setshow_uinteger_cmd ("elements", no_class, &print_max, _("\
+Set limit on string chars or array elements to print."), _("\
+Show limit on string chars or array elements to print."), _("\
+\"set print elements 0\" causes there to be no limit."),
+			    NULL,
+			    NULL, /* FIXME: i18n: */
+			    &setprintlist, &showprintlist);
 
   add_setshow_boolean_cmd ("null-stop", no_class, &stop_print_at_null, _("\
 Set printing of char arrays to stop at first null char."), _("\
@@ -1219,13 +1220,14 @@ Show printing of char arrays to stop at first null char."), NULL,
 			   NULL, /* FIXME: i18n: */
 			   &setprintlist, &showprintlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("repeats", no_class, var_uinteger,
-		  (char *) &repeat_count_threshold,
-		  "Set threshold for repeated print elements.\n\
-\"set print repeats 0\" causes all elements to be individually printed.",
-		  &setprintlist),
-     &showprintlist);
+  add_setshow_uinteger_cmd ("repeats", no_class,
+			    &repeat_count_threshold, _("\
+Set threshold for repeated print elements."), _("\
+Show threshold for repeated print elements."), _("\
+\"set print repeats 0\" causes all elements to be individually printed."),
+			    NULL,
+			    NULL, /* FIXME: i18n: */
+			    &setprintlist, &showprintlist);
 
   add_setshow_boolean_cmd ("pretty", class_support, &prettyprint_structs, _("\
 Set prettyprinting of structures."), _("\
@@ -1255,19 +1257,19 @@ Show printing of addresses."), NULL,
 			   NULL, /* FIXME: i18n: */
 			   &setprintlist, &showprintlist);
 
-  c = add_set_cmd ("input-radix", class_support, var_uinteger,
-		   (char *) &input_radix,
-		   "Set default input radix for entering numbers.",
-		   &setlist);
-  deprecated_add_show_from_set (c, &showlist);
-  set_cmd_sfunc (c, set_input_radix);
+  add_setshow_uinteger_cmd ("input-radix", class_support, &input_radix, _("\
+Set default input radix for entering numbers."), _("\
+Show default input radix for entering numbers."), NULL,
+			    set_input_radix,
+			    NULL, /* FIXME: i18n: */
+			    &setlist, &showlist);
 
-  c = add_set_cmd ("output-radix", class_support, var_uinteger,
-		   (char *) &output_radix,
-		   "Set default output radix for printing of values.",
-		   &setlist);
-  deprecated_add_show_from_set (c, &showlist);
-  set_cmd_sfunc (c, set_output_radix);
+  add_setshow_uinteger_cmd ("output-radix", class_support, &output_radix, _("\
+Set default output radix for printing of values."), _("\
+Show default output radix for printing of values."), NULL,
+			    set_output_radix,
+			    NULL, /* FIXME: i18n: */
+			    &setlist, &showlist);
 
   /* The "set radix" and "show radix" commands are special in that
      they are like normal set and show commands but allow two normally

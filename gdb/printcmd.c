@@ -2128,12 +2128,13 @@ Same as \"print\" command, except that if you are running in the epoch\n\
 environment, the value is printed in its own window."));
   set_cmd_completer (c, location_completer);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("max-symbolic-offset", no_class, var_uinteger,
-		  (char *) &max_symbolic_offset,
-       "Set the largest offset that will be printed in <symbol+1234> form.",
-		  &setprintlist),
-     &showprintlist);
+  add_setshow_uinteger_cmd ("max-symbolic-offset", no_class,
+			    &max_symbolic_offset, _("\
+Set the largest offset that will be printed in <symbol+1234> form."), _("\
+Show the largest offset that will be printed in <symbol+1234> form."), NULL,
+			    NULL,
+			    NULL, /* FIXME: i18n: */
+			    &setprintlist, &showprintlist);
   add_setshow_boolean_cmd ("symbol-filename", no_class,
 			   &print_symbol_filename, _("\
 Set printing of source filename and line number with <symbol>."), _("\

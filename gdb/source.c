@@ -1633,10 +1633,10 @@ The matching line number is also stored as the value of \"$_\"."));
       add_com_alias ("?", "reverse-search", class_files, 0);
     }
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("listsize", class_support, var_uinteger,
-		  (char *) &lines_to_list,
-		  "Set number of source lines gdb will list by default.",
-		  &setlist),
-     &showlist);
+  add_setshow_uinteger_cmd ("listsize", class_support, &lines_to_list, _("\
+Set number of source lines gdb will list by default."), _("\
+Show number of source lines gdb will list by default."), NULL,
+			    NULL,
+			    NULL, /* FIXME: i18n: */
+			    &setlist, &showlist);
 }

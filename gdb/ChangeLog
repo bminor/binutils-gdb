@@ -1,5 +1,8 @@
 2005-02-18  Andrew Cagney  <cagney@gnu.org>
 
+	Use add_setshow_uinteger_cmd through out.
+	* printcmd.c, source.c, utils.c, valprint.c: Update.
+
 	Use add_setshow_zinteger_cmd through out.  Re-sync gdbarch.sh
 	and gdbarch.c.
 	* breakpoint.c, frame.c, gdb-events.sh, gdbarch.sh: Update.

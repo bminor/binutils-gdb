@@ -2446,16 +2446,19 @@ initialize_utils (void)
 {
   struct cmd_list_element *c;
 
-  c = add_set_cmd ("width", class_support, var_uinteger, &chars_per_line,
-		   "Set number of characters gdb thinks are in a line.",
-		   &setlist);
-  deprecated_add_show_from_set (c, &showlist);
-  set_cmd_sfunc (c, set_width_command);
+  add_setshow_uinteger_cmd ("width", class_support, &chars_per_line, _("\
+Set number of characters gdb thinks are in a line."), _("\
+Show number of characters gdb thinks are in a line."), NULL,
+			    set_width_command,
+			    NULL, /* FIXME: i18n: */
+			    &setlist, &showlist);
 
-  c = add_set_cmd ("height", class_support, var_uinteger, &lines_per_page,
-		   "Set number of lines gdb thinks are in a page.", &setlist);
-  deprecated_add_show_from_set (c, &showlist);
-  set_cmd_sfunc (c, set_height_command);
+  add_setshow_uinteger_cmd ("height", class_support, &lines_per_page, _("\
+Set number of lines gdb thinks are in a page."), _("\
+Show number of lines gdb thinks are in a page."), NULL,
+			    set_height_command,
+			    NULL, /* FIXME: i18n: */
+			    &setlist, &showlist);
 
   init_page_info ();
 
