@@ -1,10 +1,15 @@
 Wed Jul 21 14:28:42 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
+	* genscripts.sh: If this is the default emulation, set
+	COMPILE_IN.
+	* emultempl/*.em: Use it to determine whether to compile in the
+	scripts.
+
 	* Makefile.in (GENSCRIPTS): Pass the default emulation name to
 	genscripts.sh.  Pass the current emulation name without ".sh" on
 	the end.
 	* genscripts.sh: Take an default emulation arg.
-	Use the emulparams file name as EMULATION_NAME.
+	Use the current emulation name as EMULATION_NAME.
 	Make default lib path for cross-compiling ':', not null.
 	* emulparams/*.sh: Don't set EMULATION_NAME.
 	* ldemul.c (ldemul_get_script): Take isfile arg.

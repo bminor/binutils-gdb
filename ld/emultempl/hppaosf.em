@@ -86,7 +86,7 @@ hppaosf_get_script(isfile)
      int *isfile;
 EOF
 
-if test "$DEFAULT_EMULATION" = "$EMULATION_NAME"
+if test -n "$COMPILE_IN"
 then
 # Scripts compiled in.
 
