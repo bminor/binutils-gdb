@@ -480,13 +480,6 @@ two macros can use them for their internal purposes.
 If the inferior has some watchpoint that triggered, return the address
 associated with that watchpoint.  Otherwise, return zero.
 
-@findex DECR_PC_AFTER_HW_BREAK
-@item DECR_PC_AFTER_HW_BREAK
-If defined, @value{GDBN} decrements the program counter by the value
-of @code{DECR_PC_AFTER_HW_BREAK} after a hardware break-point.  This
-overrides the value of @code{DECR_PC_AFTER_BREAK} when a breakpoint
-that breaks is a hardware-assisted breakpoint.
-
 @findex HAVE_STEPPABLE_WATCHPOINT
 @item HAVE_STEPPABLE_WATCHPOINT
 If defined to a non-zero value, it is not necessary to disable a
@@ -3160,10 +3153,6 @@ non-standard form.
 Define this to be the amount by which to decrement the PC after the
 program encounters a breakpoint.  This is often the number of bytes in
 @code{BREAKPOINT}, though not always.  For most targets this value will be 0.
-
-@item DECR_PC_AFTER_HW_BREAK
-@findex DECR_PC_AFTER_HW_BREAK
-Similarly, for hardware breakpoints.
 
 @item DISABLE_UNSETTABLE_BREAK (@var{addr})
 @findex DISABLE_UNSETTABLE_BREAK
