@@ -41,7 +41,6 @@ man8dir = $(mandir)/man8
 man9dir = $(mandir)/man9
 infodir = $(prefix)/info
 includedir = $(prefix)/include
-docdir = $(datadir)/doc
 GDB_NLM_DEPS = 
 
 SHELL = /bin/sh
@@ -413,6 +412,7 @@ GCC_FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_GCC_FLAGS)
 ALL_MODULES = \
 	all-apache \
 	all-autoconf \
+	all-bash \
 	all-bfd \
 	all-binutils \
 	all-byacc \
@@ -462,8 +462,6 @@ ALL_MODULES = \
 
 # This is a list of the check targets for all of the modules which are
 # compiled using $(FLAGS_TO_PASS).
-# This is a list of the check targets for all of the modules which are
-# compiled using $(FLAGS_TO_PASS).
 #
 # The list is in two parts.  The first lists those tools which
 # are tested as part of the host's native tool-chain, and not
@@ -475,6 +473,7 @@ NATIVE_CHECK_MODULES = \
 CROSS_CHECK_MODULES = \
 	check-apache \
 	check-autoconf \
+	check-bash \
 	check-bfd \
 	check-binutils \
 	check-cvs \
@@ -524,6 +523,7 @@ CHECK_MODULES=$(NATIVE_CHECK_MODULES) $(CROSS_CHECK_MODULES)
 INSTALL_MODULES = \
 	install-apache \
 	install-autoconf \
+	install-bash \
 	install-bfd \
 	install-binutils \
 	install-byacc \
@@ -656,6 +656,7 @@ INSTALL_TARGET_MODULES = \
 CLEAN_MODULES = \
 	clean-apache \
 	clean-autoconf \
+	clean-bash \
 	clean-bfd \
 	clean-binutils \
 	clean-byacc \
@@ -1236,6 +1237,7 @@ install-dosrel-fake:
 # This is a list of inter-dependencies among modules.
 all-apache:
 all-autoconf: all-m4
+all-bash:
 all-bfd:
 all-binutils: all-libiberty all-opcodes all-bfd all-flex all-byacc
 all-byacc:

@@ -1,3 +1,9 @@
+Wed Jul 10 18:56:59 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in (ALL_MODULES,CROSS_CHECK_MODULES,INSTALL_MODULES,
+	CLEAN_MODULES): Add bash.
+	(all-bash): New target.
+
 Mon Jul  8 17:33:14 1996  Jim Wilson  <wilson@cygnus.com>
 
 	* configure.in (mips-sgi-irix6*): Use mh-irix6 instead of mh-irix5.
