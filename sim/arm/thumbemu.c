@@ -489,7 +489,7 @@ tdstate ARMul_ThumbDecode (state, pc, tinstr, ainstr)
 	     if r14 is not suitably initialised.  */
 	  {
 	    ARMword tmp = (pc + 2);
-	    
+
 	    state->Reg[15] = ((state->Reg[14] + ((tinstr & 0x07FF) << 1))
 			      & 0xFFFFFFFC);
 	    CLEART;
@@ -509,8 +509,9 @@ tdstate ARMul_ThumbDecode (state, pc, tinstr, ainstr)
          second half of this BL, and if it is we simulate it
          immediately.  */
       state->Reg[14] = state->Reg[15] \
-	+(((tinstr & 0x07FF) << 12) \
-	  |((tinstr & (1 << 10)) ? 0xFF800000 : 0));
+	+ (((tinstr & 0x07FF) << 12) \
+	   | ((tinstr & (1 << 10)) ? 0xFF800000 : 0));
+
       valid = t_branch;		/* in-case we don't have the 2nd half */
       tinstr = next_instr;	/* move the instruction down */
       pc += 2;			/* point the pc at the 2nd half */
@@ -543,7 +544,8 @@ tdstate ARMul_ThumbDecode (state, pc, tinstr, ainstr)
          the simulation of it on its own, with undefined results if
          r14 is not suitably initialised.  */
       {
-	ARMword tmp = (pc + 2);
+	ARMword tmp = pc;
+
 	state->Reg[15] = (state->Reg[14] + ((tinstr & 0x07FF) << 1));
 	state->Reg[14] = (tmp | 1);
 	valid = t_branch;

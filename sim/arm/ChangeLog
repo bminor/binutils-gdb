@@ -1,3 +1,8 @@
+2002-05-27  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* thumbemu.c (ARMul_ThumbDecode, Case 31): Do not set LR to pc +
+	2, it has already been advanced.
+
 2002-05-23  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* thumbemu.c (ARMul_ThumbDecode): When decoding a BLX(1)
