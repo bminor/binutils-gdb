@@ -67,6 +67,35 @@
      ((__m_num) >= _PA_RISC1_1_ID && (__m_num) <= _PA_RISC_MAXID))
 #endif /* _PA_RISC_ID */
 
+/* SOM allows any one of the four previous relocations to be reused
+   with a "R_PREV_FIXUP" relocation entry.  Since R_PREV_FIXUP
+   relocations are always a single byte, using a R_PREV_FIXUP instead
+   of some multi-byte relocation makes object files smaller. 
+
+   Note one side effect of using a R_PREV_FIXUP is the relocation that
+   is being repeated moves to the front of the queue.  */
+struct reloc_queue
+  {
+    unsigned char *reloc;
+    unsigned int size;
+  } reloc_queue[4];
+
+/* This fully describes the symbol types which may be attached to
+   an EXPORT or IMPORT directive.  Only SOM uses this formation
+   (ELF has no need for it).  */
+typedef enum
+{
+  SYMBOL_TYPE_UNKNOWN,
+  SYMBOL_TYPE_ABSOLUTE,
+  SYMBOL_TYPE_CODE,
+  SYMBOL_TYPE_DATA,
+  SYMBOL_TYPE_ENTRY,
+  SYMBOL_TYPE_MILLICODE,
+  SYMBOL_TYPE_PLABEL,
+  SYMBOL_TYPE_PRI_PROG,
+  SYMBOL_TYPE_SEC_PROG,
+} pa_symbol_type;
+
 /* Forward declarations */
 
 static boolean som_mkobject PARAMS ((bfd *));
