@@ -4930,6 +4930,8 @@ set_h8300h (unsigned long machine)
      This function being replaced by a sim_open:ARGV configuration
      option.  */
 
+  h8300hmode = h8300smode = h8300sxmode = h8300_normal_mode = 0;
+
   if (machine == bfd_mach_h8300sx || machine == bfd_mach_h8300sxn)
     h8300sxmode = 1;
 

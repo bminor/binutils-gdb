@@ -1,3 +1,7 @@
+2003-12-11  Dhananjay Deshpande  <dhananjayd@kpitcummins.com>
+
+        * compile.c (set_h8300h): Initialize globals to zero.
+
 2003-10-17  Shrinivas Atre  <shrinivasa@KPITCummins.com>
 
 	* compile.c (h8300_normal_mode): New.

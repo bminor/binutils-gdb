@@ -1,3 +1,26 @@
+2003-12-11  Dhananjay Deshpande  <dhananjayd@kpitcummins.com>
+
+        * config/h8300/tm-h8300.h (h8300hmode): Remove.
+        (h8300hmode): Likewise.
+        (h8300smode): Likewise.
+        (h8300sxmode): Likewise.
+        (h8300_normal_mode): Likewise.
+        (GDB_TARGET_IS_H8300): Likewise.
+        (NUM_REALREGS): Use TARGET_ARCHITECTURE->mach instead of global.
+        * h8300-tdep.c (is_h8300hmode): New function.
+        (is_h8300smode): New function.
+        (is_h8300sxmode): New function.
+        (is_h8300_normal_mode): New function.
+        (BINWORD): Use new functions.
+        (h8300_examine_prologue): Likewise.
+        (h8300_print_register): Likewise.
+        (h8300_print_registers_info): Likewise.
+        (h8300_register_type): Likewise.
+        (h8300_gdbarch_init): Remove use of globals like h8300hmode.
+        * remote-e7000.c (e7000_open): Remove use of GDB_TARGET_IS_H8300.
+        (e7000_fetch_registers): Use TARGET_ARCHITECTURE->mach instead.
+        (e7000_wait): Use TARGET_ARCHITECTURE->mach instead of global.
+
 2003-12-10  J. Brobecker  <brobecker@gnat.com>
 
 	* frame.c (select_frame): Get the current frame PC using
