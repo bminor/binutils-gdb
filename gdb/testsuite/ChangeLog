@@ -1,3 +1,8 @@
+Wed Apr 26 07:36:03 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.base/scope.exp: Make test names unique.  Use gdb_test.  Make
+	each test pass or fail.
+
 Sun Apr 23 21:32:32 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.base/opaque.exp: Remove xfails for aix; print a warning if
