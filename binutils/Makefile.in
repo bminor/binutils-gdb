@@ -135,7 +135,7 @@ LIBIBERTY = $(LIBIBERTY_BIN_DIR)/libiberty.a
 # Code shared by all the binutils.
 BULIBS = bucomm.o version.o filemode.o
 
-ADDL_LIBS = $(MALLOC) $(BULIBS) $(BFD) $(LIBIBERTY)
+ADDL_LIBS = $(MALLOC) $(BULIBS) $(BFD) $(LIBIBERTY) 
 
 BFD = $(LIBDIR)/libbfd.a
 OPCODES = $(OPCODEDIR)/libopcodes.a
@@ -184,19 +184,19 @@ dvi: binutils.dvi
 #	(cd $(LIBDIR); make)
 
 $(SIZE_PROG): $(ADDL_LIBS) size.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(SIZE_PROG) size.o $(ADDL_LIBS) $(LOADLIBES)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(SIZE_PROG) size.o $(ADDL_LIBS) $(EXTRALIBS)
 
 $(OBJCOPY_PROG): $(ADDL_LIBS) objcopy.o not-strip.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(OBJCOPY_PROG) objcopy.o not-strip.o $(ADDL_LIBS) $(LOADLIBES)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(OBJCOPY_PROG) objcopy.o not-strip.o $(ADDL_LIBS) $(EXTRALIBS)
 
 $(STRIP_PROG): $(ADDL_LIBS) objcopy.o is-strip.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(STRIP_PROG) objcopy.o is-strip.o $(ADDL_LIBS) $(LOADLIBES)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(STRIP_PROG) objcopy.o is-strip.o $(ADDL_LIBS) $(EXTRALIBS)
 
 $(NM_PROG): $(ADDL_LIBS) nm.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(NM_PROG) nm.o $(ADDL_LIBS) $(LOADLIBES)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(NM_PROG) nm.o $(ADDL_LIBS) $(EXTRALIBS)
 
 $(OBJDUMP_PROG): $(ADDL_LIBS) size.o objdump.o $(BFD) $(OPCODES)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(OBJDUMP_PROG) objdump.o $(OPCODES) $(ADDL_LIBS) $(LOADLIBES)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(OBJDUMP_PROG) objdump.o $(OPCODES) $(ADDL_LIBS) $(EXTRALIBS)
 
 underscore.c:
 	echo "int xxy_us_dummy;" >dummy.c
@@ -213,7 +213,7 @@ cplus-dem.o: $(LIBIBERTY_SRC_DIR)/cplus-dem.c
 	$(CC) -c -DMAIN $(CFLAGS) $(INCLUDES) $(HDEFINES) $(TDEFINES) $(LIBIBERTY_SRC_DIR)/cplus-dem.c
 
 $(DEMANGLER_PROG): cplus-dem.o $(LIBIBERTY) underscore.o
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(DEMANGLER_PROG) cplus-dem.o $(LIBIBERTY) $(LOADLIBES) underscore.o
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(DEMANGLER_PROG) cplus-dem.o $(LIBIBERTY) $(EXTRALIBS) underscore.o
 
 arparse.c:arparse.y
 	$(BISON) $(BISONFLAGS)  $(srcdir)/arparse.y
@@ -226,10 +226,10 @@ arlex.c: arlex.l
 	mv lex.yy.c arlex.c
 
 $(AR_PROG): $(ADDL_LIBS) ar.o arparse.o arlex.o not-ranlib.o $(BFD) arsup.o
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(AR_PROG) ar.o arparse.o arlex.o arsup.o not-ranlib.o $(ADDL_LIBS) $(LOADLIBES)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(AR_PROG) ar.o arparse.o arlex.o arsup.o not-ranlib.o $(ADDL_LIBS) $(EXTRALIBS)
 
 $(RANLIB_PROG): $(ADDL_LIBS) ar.o is-ranlib.o arparse.o arlex.o arsup.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(RANLIB_PROG) ar.o arparse.o arlex.o arsup.o is-ranlib.o $(ADDL_LIBS) $(LOADLIBES)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(RANLIB_PROG) ar.o arparse.o arlex.o arsup.o is-ranlib.o $(ADDL_LIBS) $(EXTRALIBS)
 
 # This rule creates a single binary that switches between ar and ranlib
 # by looking at argv[0].  Use this kludge to save some disk space.
@@ -239,14 +239,14 @@ $(RANLIB_PROG): $(ADDL_LIBS) ar.o is-ranlib.o arparse.o arlex.o arsup.o $(BFD)
 # Alternatively, you can install ranlib.sh as ranlib.
 
 ar_with_ranlib: $(ADDL_LIBS) ar.o maybe-ranlib.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(AR_PROG) ar.o maybe-ranlib.o $(ADDL_LIBS) $(LOADLIBES)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(AR_PROG) ar.o maybe-ranlib.o $(ADDL_LIBS) $(EXTRALIBS)
 	-rm -f $(RANLIB_PROG)
 	-ln $(AR_PROG) $(RANLIB_PROG)
 
 # objcopy and strip in one binary that uses argv[0] to decide its action.
 
 objcopy_with_strip: $(ADDL_LIBS) objcopy.o maybe-strip.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(OBJCOPY_PROG) objcopy.o maybe-strip.o $(ADDL_LIBS) $(LOADLIBES)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(OBJCOPY_PROG) objcopy.o maybe-strip.o $(ADDL_LIBS) $(EXTRALIBS)
 	-rm -f $(STRIP_PROG)
 	-ln $(OBJCOPY_PROG) $(STRIP_PROG)
 
@@ -380,7 +380,7 @@ install: all
 	done
 	-if [ -d $(tooldir) ]; then \
 	   if [ -d $(tooldir)/bin ] ; then true ; else mkdir $(tooldir)/bin ; fi; \
-	   for i in nm strip ; do \
+	   for i in nm strip ar ranlib; do \
 	     rm -f $(tooldir)/bin/$$i; \
 	     ln $(bindir)/`t='$(program_transform_name)'; echo $$i | sed -e "" $$t` $(tooldir)/bin/$$i \
 	      || $(INSTALL_PROGRAM) $$i $(tooldir)/bin/$$i; \
