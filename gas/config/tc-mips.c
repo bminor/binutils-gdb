@@ -1838,13 +1838,15 @@ load_register (counter, reg, ep, dbl)
 		       (int) BFD_RELOC_LO16);
 	  return;
 	}
-      else if (((ep->X_add_number &~ (offsetT) 0x7fffffff) == 0
-		|| ((ep->X_add_number &~ (offsetT) 0x7fffffff)
-		    == ~ (offsetT) 0x7fffffff))
-	       && (! dbl
-		   || ! ep->X_unsigned
-		   || sizeof (ep->X_add_number) > 4
-		   || (ep->X_add_number & 0x80000000) == 0))
+      else if ((((ep->X_add_number &~ (offsetT) 0x7fffffff) == 0
+		 || ((ep->X_add_number &~ (offsetT) 0x7fffffff)
+		     == ~ (offsetT) 0x7fffffff))
+		&& (! dbl
+		    || ! ep->X_unsigned
+		    || sizeof (ep->X_add_number) > 4
+		    || (ep->X_add_number & 0x80000000) == 0))
+	       || (mips_isa < 3
+		   && (ep->X_add_number &~ 0xffffffff) == 0))
 	{
 	  /* 32 bit values require an lui.  */
 	  macro_build ((char *) NULL, counter, ep, "lui", "t,u", reg,

@@ -1,3 +1,8 @@
+Fri May 31 01:08:06 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (load_register): If mips_isa < 3, permit a 32
+	bit value with the high bit set.
+
 Thu May 30 19:00:19 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* read.c (s_lcomm): Set section flags for .sbss section.
@@ -13,12 +18,8 @@ Thu May 30 19:00:19 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 Thu May 30 10:36:19 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
-	* config/tc-ppc.c (comment_chars): Under Solaris, make '!' a
-	comment character.
-	(ppc_elf_rdata): Add support for .rdata and .rodata to go to the
-	.rodata section.
-
-	* config/ppc-sol.mt (TDEFINES): Define TARGET_SOLARIS_COMMENT.
+	* config/tc-ppc.c (comment_chars): Make '!' a comment character
+	for Solaris compatibility.
 
 	* stabs.c (s_stab_generic): Under PowerPC Solaris, convert a
 	.stabd with 4 arguments into a .stabn.
