@@ -3551,6 +3551,9 @@ static const struct init_entry init_table[] =
   { "fpsr", FPS },
   { "fpc", FPC },
   { "fpcr", FPC },
+  { "control", FPC },
+  { "status", FPS },
+  { "iaddr", FPI },
 
   { "cop0", COP0 },
   { "cop1", COP1 },
@@ -3570,7 +3573,9 @@ static const struct init_entry init_table[] =
   { "usp", USP },
   { "isp", ISP },
   { "sfc", SFC },
+  { "sfcr", SFC },
   { "dfc", DFC },
+  { "dfcr", DFC },
   { "cacr", CACR },
   { "caar", CAAR },
 
@@ -3836,6 +3841,9 @@ md_begin ()
   register unsigned int i;
   register char c;
 
+  if (flag_mri)
+    flag_reg_prefix_optional = 1;
+
   op_hash = hash_new ();
 
   obstack_begin (&robyn, 4000);
@@ -3931,7 +3939,7 @@ m68k_init_after_args ()
 {
   if (cpu_of_arch (current_architecture) == 0)
     {
-      int cpu_type, i;
+      int i;
       const char *default_cpu = TARGET_CPU;
 
       if (*default_cpu == 'm')
@@ -4402,9 +4410,9 @@ md_convert_frag_1 (fragP)
 #ifndef BFD_ASSEMBLER
 
 void
-md_convert_frag (headers, seg, fragP)
+md_convert_frag (headers, sec, fragP)
      object_headers *headers;
-     segT seg;
+     segT sec;
      fragS *fragP;
 {
   md_convert_frag_1 (fragP);
@@ -5082,9 +5090,6 @@ md_parse_option (c, arg)
      int c;
      char *arg;
 {
-  int i;
-  unsigned long arch;
-
   switch (c)
     {
     case 'l':			/* -l means keep external to 2 bit offset
@@ -5105,7 +5110,8 @@ md_parse_option (c, arg)
 
       if (arg[0] == 'n' && arg[1] == 'o' && arg[2] == '-')
 	{
-	  int i, arch;
+	  int i;
+	  unsigned long arch;
 	  const char *oarg = arg;
 
 	  arg += 3;
@@ -5357,6 +5363,7 @@ tc_coff_sizemachdep (frag)
       return 4;
     default:
       abort ();
+      return 0;
     }
 }
 #endif
