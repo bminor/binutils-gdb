@@ -5,6 +5,11 @@ Tue Feb 20 16:22:44 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 Tue Feb 20 16:50:02 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* sunos.c (SUNOS_CONSTRUCTOR): Define.
+	(sunos_add_one_symbol): Don't let a symbol from a dynamic object
+	override a constructor symbol.  Set SUNOS_CONSTRUCTOR when
+	appropriate.
+
 	* bout.c (b_out_squirt_out_relocs): Use udata.i rather than flags
 	to get the symbol index, matching 14 Jul 95 change.
 

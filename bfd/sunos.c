@@ -1,5 +1,5 @@
 /* BFD backend for SunOS binaries.
-   Copyright (C) 1990, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -620,9 +620,11 @@ struct sunos_link_hash_entry
   /* Symbol is defined by a regular object.  */
 #define SUNOS_DEF_REGULAR 02
   /* Symbol is referenced by a dynamic object.  */
-#define SUNOS_REF_DYNAMIC 010
+#define SUNOS_REF_DYNAMIC 04
   /* Symbol is defined by a dynamic object.  */
-#define SUNOS_DEF_DYNAMIC 020
+#define SUNOS_DEF_DYNAMIC 010
+  /* Symbol is a constructor symbol in a regular object.  */
+#define SUNOS_CONSTRUCTOR 020
 };
 
 /* The SunOS linker hash table.  */
@@ -1077,6 +1079,29 @@ sunos_add_one_symbol (info, abfd, name, flags, section, value, string,
 	}
     }
 
+  if ((abfd->flags & DYNAMIC) != 0
+      && abfd->xvec == info->hash->creator
+      && (h->flags & SUNOS_CONSTRUCTOR) != 0)
+    {
+      /* The existing symbol is a constructor symbol, and this symbol
+         is from a dynamic object.  A constructor symbol is actually a
+         definition, although the type will be bfd_link_hash_undefined
+         at this point.  We want to ignore the definition from the
+         dynamic object.  */
+      section = bfd_und_section_ptr;
+    }
+  else if ((flags & BSF_CONSTRUCTOR) != 0
+	   && (abfd->flags & DYNAMIC) == 0
+	   && h->root.root.type == bfd_link_hash_defined
+	   && h->root.root.u.def.section->owner != NULL
+	   && (h->root.root.u.def.section->owner->flags & DYNAMIC) != 0)
+    {
+      /* The existing symbol is defined by a dynamic object, and this
+         is a constructor symbol.  As above, we want to force the use
+         of the constructor symbol from the regular object.  */
+      h->root.root.type = bfd_link_hash_new;
+    }
+
   /* Do the usual procedure for adding a symbol.  */
   if (! _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section,
 					  value, string, copy, collect,
@@ -1112,6 +1137,10 @@ sunos_add_one_symbol (info, abfd, name, flags, section, value, string,
 	  ++sunos_hash_table (info)->dynsymcount;
 	  h->dynindx = -2;
 	}
+
+      if ((flags & BSF_CONSTRUCTOR) != 0
+	  && (abfd->flags & DYNAMIC) == 0)
+	h->flags |= SUNOS_CONSTRUCTOR;
     }
 
   return true;
