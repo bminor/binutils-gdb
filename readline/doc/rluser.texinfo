@@ -1,8 +1,3 @@
-@comment %**start of header (This is for running Texinfo on a region.)
-@setfilename rluser.info
-@comment %**end of header (This is for running Texinfo on a region.)
-@setchapternewpage odd
-
 @ignore
 This file documents the end user interface to the GNU command line
 editing feautres.  It is to be an appendix to manuals for programs which
