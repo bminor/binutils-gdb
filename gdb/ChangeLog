@@ -1,3 +1,11 @@
+Fri Feb  6 17:42:22 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/d10v/tm-d10v.h (D10V_CONVERT_IADDR_TO_RAW,
+ 	D10V_CONVERT_DADDR_TO_RAW): Define.
+
+	* d10v-tdep.c (d10v_push_arguments): Re-write.  Pass arguments in
+ 	registers, regardless of their size, when they fit.
+
 Thu Feb  5 13:16:36 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* d10v-tdep.c (d10v_extract_return_value): For function pointers

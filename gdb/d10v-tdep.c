@@ -536,99 +536,78 @@ d10v_push_arguments (nargs, args, sp, struct_return, struct_addr)
      int struct_return;
      CORE_ADDR struct_addr;
 {
-  int i, len;
-  int index;
+  int i;
   int regnum = ARG1_REGNUM;
-  char buffer[4], *contents;
-  LONGEST val;
-  CORE_ADDR ptrs[10];
-
-
-  /* Pass 1. Put all large args on stack, pass pointers */
-  index = 0;
+  
+  /* Fill in registers and arg lists */
   for (i = 0; i < nargs; i++)
     {
       value_ptr arg = args[i];
-      struct type *arg_type = check_typedef (VALUE_TYPE (arg));
-      len = TYPE_LENGTH (arg_type);
-      contents = VALUE_CONTENTS(arg);
-      if (len > 4)
+      struct type *type = check_typedef (VALUE_TYPE (arg));
+      char *contents = VALUE_CONTENTS (arg);
+      int len = TYPE_LENGTH (type);
+      /* printf ("push: type=%d len=%d\n", type->code, len); */
+      if (TYPE_CODE (type) == TYPE_CODE_PTR)
 	{
-	  /* put on word aligned stack and pass pointers */
-	  sp = (sp - len) & ~1;
-	  write_memory (sp, contents, len);
-	  ptrs[index++] = sp;
-	}
-    }
-
-  /* Pass 2. Fill in registers and arg lists */
-  index = 0;
-  for (i = 0; i < nargs; i++)
-    {
-      value_ptr arg = args[i];
-      struct type *arg_type = check_typedef (VALUE_TYPE (arg));
-      len = TYPE_LENGTH (arg_type);
-      if (len > 4)
-	{
-	  /* pass pointer to previously saved data */
-	  if (regnum <= ARGN_REGNUM)
-	    write_register (regnum++, ptrs[index++]);
+	  /* pointers require special handling - first convert and
+	     then store */
+	  long val = extract_signed_integer (contents, len);
+	  len = 2;
+	  if (TYPE_TARGET_TYPE (type)
+	      && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC))
+	    {
+	      /* function pointer */
+	      val = D10V_CONVERT_IADDR_TO_RAW (val);
+	    }
+	  else if (D10V_IADDR_P (val))
+	    {
+	      /* also function pointer! */
+	      val = D10V_CONVERT_DADDR_TO_RAW (val);
+	    }
 	  else
 	    {
-	      /* no more registers available.  put it on the stack */
+	      /* data pointer */
+	      val &= 0xFFFF;
+	    }
+	  if (regnum <= ARGN_REGNUM)
+	    write_register (regnum++, val & 0xffff);
+	  else
+	    {
+	      char ptr[2];
 	      sp -= 2;
-	      store_address (buffer, 2, ptrs[index++]);
-	      write_memory (sp, buffer, 2);
+	      store_address (ptr, val & 0xffff, 2);
+	      write_memory (sp, ptr, 2);
 	    }
 	}
       else
 	{
-	  int even_regnum = (regnum + 1) & ~1;
-	  contents = VALUE_CONTENTS(arg);
-	  val = extract_signed_integer (contents, len);
-	  /*	  printf("push: type=%d len=%d val=0x%x\n",arg_type->code,len,val);  */
-	  if (arg_type->code == TYPE_CODE_PTR)
+	  int aligned_regnum = (regnum + 1) & ~1;
+	  if (len <= 2 && regnum <= ARGN_REGNUM)
+	    /* fits in a single register, do not align */
 	    {
-	      if ( (val & 0x3000000) == 0x1000000)
+	      long val = extract_unsigned_integer (contents, len);
+	      write_register (regnum++, val);
+	    }
+	  else if (len <= (ARGN_REGNUM - aligned_regnum + 1) * 2)
+	    /* value fits in remaining registers, store keeping left
+               aligned */
+	    {
+	      int b;
+	      regnum = aligned_regnum;
+	      for (b = 0; b < (len & ~1); b += 2)
 		{
-		  /* function pointer */
-		  val = (val & 0x3FFFF) >> 2;
-		  len = 2;
+		  long val = extract_unsigned_integer (&contents[b], 2);
+		  write_register (regnum++, val);
 		}
-	      else
+	      if (b < len)
 		{
-		  /* data pointer */
-		  val &= 0xFFFF;
-		  len = 2;
+		  long val = extract_unsigned_integer (&contents[b], 1);
+		  write_register (regnum++, (val << 8));
 		}
-	    }
-	  
-	  if (regnum <= ARGN_REGNUM && len == 1)
-	    {
-	      write_register (regnum++, val & 0xff);
-	    }
-	  if (regnum <= ARGN_REGNUM && len == 2)
-	    {
-	      write_register (regnum++, val & 0xffff);
-	    }
-	  else if (even_regnum <= ARGN_REGNUM - 1 && len == 3)
-	    {
-	      /* next even reg and space for two */
-	      /* TARGET_BYTE_ORDER == BIG_ENDIAN */
-	      regnum = even_regnum;
-	      write_register (regnum++, (val >> 8) & 0xffff);
-	      write_register (regnum++, (val & 0xff) << 8);
-	    }
-	  else if (even_regnum <= ARGN_REGNUM - 1 && len == 4)
-	    {
-	      /* next even reg and space for two */
-	      /* TARGET_BYTE_ORDER == BIG_ENDIAN */
-	      regnum = even_regnum;
-	      write_register (regnum++, (val >> 16) & 0xffff);
-	      write_register (regnum++, val & 0xffff);
 	    }
 	  else
 	    {
+	      /* arg goes straight on stack */
 	      regnum = ARGN_REGNUM + 1;
 	      sp = (sp - len) & ~1;
 	      write_memory (sp, contents, len);

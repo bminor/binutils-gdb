@@ -143,8 +143,11 @@ extern CORE_ADDR d10v_skip_prologue ();
 #define D10V_MAKE_DADDR(x) ( (x) & 0x3000000 ? (x) : ((x) | DMEM_START))
 #define D10V_MAKE_IADDR(x) ( (x) & 0x3000000 ? (x) : (((x) << 2) | IMEM_START))
 
-#define D10V_DADDR_P(x) ( ((x) & 0x3000000) == DMEM_START)
-#define D10V_IADDR_P(x) ( ((x) & 0x3000000) == IMEM_START))
+#define D10V_DADDR_P(X) (((X) & 0x3000000) == DMEM_START)
+#define D10V_IADDR_P(X) (((X) & 0x3000000) == IMEM_START)
+
+#define D10V_CONVERT_IADDR_TO_RAW(X) (((X) & ~0x3000000) >> 2)
+#define D10V_CONVERT_DADDR_TO_RAW(X) (((X) & ~0x3000000))
 
 #define ARG1_REGNUM R0_REGNUM
 #define ARGN_REGNUM 3
