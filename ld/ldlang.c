@@ -1236,7 +1236,7 @@ print_output_section_statement (output_section_statement)
       fprintf (config.map_file, "Output address   %08x\n", b);
     }
   if (output_section_statement->section_alignment >= 0
-      || output_section_statement->section_alignment >= 0) 
+      || output_section_statement->subsection_alignment >= 0) 
   {
     fprintf (config.map_file, "\t\t\t\t\tforced alignment ");
     if (output_section_statement->section_alignment >= 0) 
@@ -2259,9 +2259,9 @@ lang_common ()
     bfd_link_hash_traverse (link_info.hash, lang_one_common, (PTR) NULL);
   else
     {
-      unsigned int power;
+      int power;
 
-      for (power = 1; power < 4; power++)
+      for (power = 4; power >= 0; power--)
 	bfd_link_hash_traverse (link_info.hash, lang_one_common,
 				(PTR) &power);
     }
@@ -2285,8 +2285,7 @@ lang_one_common (h, info)
   power_of_two = h->u.c.p->alignment_power;
 
   if (config.sort_common
-      && power_of_two < *(unsigned int *) info
-      && *(unsigned int *) info < 4)
+      && power_of_two < *(int *) info)
     return true;
 
   section = h->u.c.p->section;

@@ -1,3 +1,9 @@
+Wed May  3 12:56:32 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* ldlang.c (print_output_section_statement): Check
+	subsection_alignment, instead of checking section_alignment twice.
+	Noticed by Alan Modra <alan@spri.levels.unisa.edu.au>.
+
 Tue May  2 16:36:07 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* configure.in (hppa*-*-lites*): Handle like hppa*-*-*elf*.
