@@ -1,9 +1,13 @@
+Mon Sep 16 17:00:52 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Use a single line for host_tools and native_only.
+
 start-sanitize-m32r
 Mon Sep  9 12:21:30 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* config.sub, configure.in: Add entries for m32r.
-end-sanitize-m32r
 
+end-sanitize-m32r
 Thu Sep  5 13:52:47 1996  Tom Tromey  <tromey@creche.cygnus.com>
 
 	* Makefile.in (inet-install): Don't run install-gzip.

@@ -49,11 +49,7 @@ fi
 
 # these tools are built for the host environment
 #
-host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch
-	    prms send-pr gprof gdbtest tgas etc expect dejagnu sim bash
-            m4 autoconf ispell grep diff rcs cvs fileutils shellutils time
-	    textutils wdiff find emacs emacs19 uudecode hello tar gzip indent
-	    recode release sed utils guile perl apache inet gawk"
+host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch prms send-pr gprof gdbtest tgas etc expect dejagnu sim bash m4 autoconf ispell grep diff rcs cvs fileutils shellutils time textutils wdiff find emacs emacs19 uudecode hello tar gzip indent recode release sed utils guile perl apache inet gawk"
 
 
 # these libraries are built for the target environment, and are built after
@@ -81,10 +77,9 @@ target_tools="target-examples target-groff"
 
 # directories to be built in the native environment only
 #
-native_only="autoconf cvs emacs emacs19 fileutils find gawk grep gzip hello
-	     indent ispell m4 rcs recode sed shellutils tar textutils gash
-	     uudecode wdiff gprof target-groff guile perl apache inet time
-	     bash prms"
+# This must be a single line because of the way it is searched by grep in
+# the code below.
+native_only="autoconf cvs emacs emacs19 fileutils find gawk grep gzip hello indent ispell m4 rcs recode sed shellutils tar textutils gash uudecode wdiff gprof target-groff guile perl apache inet time bash prms"
 
 # directories to be built in a cross environment only
 #
