@@ -1047,7 +1047,7 @@ ldemul.o: ldemul.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
 ldexp.o: ldexp.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/bfdlink.h \
   ld.h $(INCDIR)/bin-bugs.h ldmain.h ldmisc.h ldexp.h \
-  ldgram.h ldlang.h
+  ldgram.h ldlang.h $(INCDIR)/libiberty.h
 ldfile.o: ldfile.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/bfdlink.h \
   ld.h $(INCDIR)/bin-bugs.h ldmisc.h ldexp.h ldlang.h \
