@@ -1,3 +1,7 @@
+Wed Sep  2 00:26:32 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* Makefile.in:  Added mostlyclean/clean/distclean rules.
+
 Tue Sep  1 13:38:40 1992  Per Bothner  (bothner@cygnus.com)
 
 	* targets.c (target_vector):  Take out oasys (unless that is

@@ -173,13 +173,22 @@ tags etags: TAGS
 TAGS: force
 	etags $(INCDIR)/*.h $(srcdir)/*.h $(srcdir)/*.c
 
-clean:
-	rm -f *.[oa] *~ core *.E *.p *.ip aout-params.h gen-aout
-	$(MAKE) subdir_do DO=clean "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
-
-clobber realclean: clean
+do_mostlyclean:
+	rm -f *.o *~ core *.E *.p *.ip aout-params.h gen-aout
+do_clean: do_mostlyclean:
 	rm -f libbfd.a TAGS
-	$(MAKE) subdir_do DO=clobber "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
+do_distclean: do_clean
+	rm -f Makefile config.status
+do_realclean: do_distclean
+
+mostlyclean: do_mostlyclean
+	$(MAKE) subdir_do DO=mostlyclean "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
+clean: do_clean:
+	$(MAKE) subdir_do DO=clean "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
+distclean: do_distclean
+	$(MAKE) subdir_do DO=distclean "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
+clobber realclean: do_readlclean
+	$(MAKE) subdir_do DO=realclean "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
 
 # Mark everything as depending on config.status, since the timestamp on
 # sysdep.h might actually move backwards if we reconfig and relink it
