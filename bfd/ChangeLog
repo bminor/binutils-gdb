@@ -1,3 +1,7 @@
+Wed Jun  1 14:37:50 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* hosts/sun3.h: Don't declare qsort, malloc or realloc.
+
 Thu May 26 13:56:03 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* nlmcode.h (nlm_swap_auxiliary_headers_in): Cast bfd_byte pointer

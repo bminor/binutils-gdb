@@ -21,7 +21,6 @@ extern int	free	PARAMS ((PTR));
 extern void	abort	PARAMS ((void));
 extern int	close	PARAMS ((int));
 extern int	fprintf	PARAMS ((FILE *,CONST char *,...));
-extern int	qsort	PARAMS ((void *data, int els, int siz, int func()));
 extern void	exit	PARAMS ((int));
 extern int	fclose	PARAMS ((FILE*));
 extern void	bcopy	PARAMS ((char*,char*,int));
@@ -36,10 +35,6 @@ extern int chmod();
 extern int fstat();
 extern int stat();
 extern int strtol();
-#ifndef	DONTDECLARE_MALLOC
-extern PTR	malloc	PARAMS ((unsigned));
-extern PTR	realloc	PARAMS ((PTR, unsigned));
-#endif
 
 extern char *strrchr();
 extern char *ctime();
