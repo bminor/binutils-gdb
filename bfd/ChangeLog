@@ -9,6 +9,8 @@ Tue Dec 31 14:44:50 1996  Ian Lance Taylor  <ian@cygnus.com>
 	* configure.in: Check ac_cv_func_mmap_fixed_mapped, not
 	ac_cv_func_mmap.
 	* configure: Rebuild.
+	* configure.host: Use ac_cv_func_mmap_fixed_mapped instead of
+	ac_cv_func_mmap in bfd/configure.host.
 
 	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Add
 	filter_shlib and auxiliary_filter_shlib parameters.
