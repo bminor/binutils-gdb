@@ -273,7 +273,11 @@ init_remote_state (struct gdbarch *gdbarch)
       r->pnum = regnum;
       r->regnum = regnum;
       r->offset = REGISTER_BYTE (regnum);
+#ifdef GPACKET_UPPER_BOUND_HACK
+      r->in_g_packet = (regnum < GPACKET_UPPER_BOUND_HACK (gdbarch));
+#else
       r->in_g_packet = (regnum < NUM_REGS);
+#endif
       /* ...size = REGISTER_RAW_SIZE (regnum); */
       /* ...name = REGISTER_NAME (regnum); */
     }
@@ -3416,6 +3420,65 @@ got_status:
 
 static int register_bytes_found;
 
+/* Helper for remote_fetch_registers.  Fetch a register using the
+   ``p'' packet.  */
+
+static void
+fetch_register_using_p (int regnum)
+{
+  struct remote_state *rs = get_remote_state ();
+  char *regs;
+  char *buf;
+  int i;
+  char *p;
+
+  buf = alloca (rs->remote_packet_size);
+  sprintf (buf, "p%x", regnum);
+  remote_send (buf, rs->remote_packet_size);
+
+  /* We can get out of synch in various cases.  If the first character
+     in the buffer is not a hex character, assume that has happened
+     and try to fetch another packet to read.  */
+  while ((buf[0] < '0' || buf[0] > '9')
+	 && (buf[0] < 'a' || buf[0] > 'f')
+	 && buf[0] != 'x')	/* New: unavailable register value */
+    {
+      if (remote_debug)
+	fprintf_unfiltered (gdb_stdlog,
+			    "Bad register packet; fetching a new packet\n");
+      getpkt (buf, rs->remote_packet_size, 0);
+    }
+
+  /* Reply describes registers byte by byte, each byte encoded as two
+     hex characters.  Suck them all up, then supply them to the
+     register cacheing/storage mechanism.  */
+
+  regs = alloca (REGISTER_RAW_SIZE (regnum));
+  memset (regs, REGISTER_RAW_SIZE (regnum), 0);
+  p = buf;
+  for (i = 0; i < REGISTER_RAW_SIZE (regnum); i++)
+    {
+      if (p[0] == 0)
+	break;
+      if (p[1] == 0)
+	{
+	  warning ("Remote reply is of odd length: %s", buf);
+	  /* Don't change register_bytes_found in this case, and don't
+	     print a second warning.  */
+	  break;
+	}
+      if (p[0] == 'x' && p[1] == 'x')
+	regs[i] = 0;		/* 'x' */
+      else
+	regs[i] = fromhex (p[0]) * 16 + fromhex (p[1]);
+      p += 2;
+    }
+
+  supply_register (regnum, &regs[0]);
+  if (buf[0] == 'x')
+    register_valid[i] = -1;	/* register value not available */
+}
+
 /* Read the remote registers into the block REGS.  */
 /* Currently we just read all the registers, so we don't use regnum.  */
 
@@ -3435,10 +3498,18 @@ remote_fetch_registers (int regnum)
     {
       struct packet_reg *reg = packet_reg_from_regnum (rs, regnum);
       gdb_assert (reg != NULL);
+#if 1
+      if (!reg->in_g_packet)
+	{
+	  fetch_register_using_p (regnum);
+	  return;
+	}
+#else
       if (!reg->in_g_packet)
 	internal_error (__FILE__, __LINE__,
 			"Attempt to fetch a non G-packet register when this "
 			"remote.c does not support the p-packet.");
+#endif
     }
 
   sprintf (buf, "g");

@@ -166,6 +166,19 @@ extern CORE_ADDR i386_pe_skip_trampoline_code (CORE_ADDR pc, char *name);
 /* Return the name of register REG.  */
 extern char const *i386_register_name (int reg);
 
+/* Return the type of the register REG.  */
+extern struct type *i386_register_virtual_type (int reg);
+
+extern void i386_pseudo_register_write (struct gdbarch *gdbarch,
+					struct regcache *regcache, int regnum,
+					const void *buf);
+extern void i386_pseudo_register_read (struct gdbarch *gdbarch,
+				       struct regcache *regcache,
+				       int regnum, void *buf);
+
+extern int i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
+				     struct reggroup *group);
+
 /* Initialize a basic ELF architecture variant.  */
 extern void i386_elf_init_abi (struct gdbarch_info, struct gdbarch *);
 

@@ -46,6 +46,8 @@ enum gdb_osabi
   GDB_OSABI_ARM_EABI_V2,
   GDB_OSABI_ARM_APCS,
 
+  GDB_OSABI_REDBOOT,
+
   GDB_OSABI_INVALID		/* keep this last */
 };
 

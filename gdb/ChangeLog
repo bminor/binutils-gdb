@@ -1,3 +1,29 @@
+2002-08-28  Andrew Cagney  <cagney@redhat.com>
+
+	* osabi.c (gdbarch_init_osabi): Allow a NULL abfd.
+	(gdb_osabi_names): Add "RedBoot".
+	* osabi.h (gdb_osabi): Add GDB_OSABI_REDBOOT.
+	* i386-tdep.c (i386_gdbarch_init): Force RedBoot OSABI.
+
+	* i386-tdep.h (i386_pseudo_register_read): Declare.
+	(i386_pseudo_register_write): Declare.
+	(i386_register_virtual_type): Declare.
+	(i386_register_reggroup_p): Declare.
+	* i386-tdep.c (i386_pseudo_register_read): Make global.
+	(i386_pseudo_register_write): Make global.
+	(i386_register_reggroup_p): Make global.
+	(i386_register_virtual_type): Make global.
+
+	* config/i386/embed.mt (TDEPFILES): Add i386-rb-tdep.c.
+	(TM_FILE): Set to tm-embed.h.
+	* config/i386/tm-embed.h: New file.
+	* i386-rb-tdep.c: New file.  Based on code by Fernando Nasser.
+
+	* remote.c (remote_fetch_registers): Call fetch_register_using_p.
+	(fetch_register_using_p): New function.
+	(init_remote_state): If defined, use GPACKET_UPPER_BOUND_HACK to
+	identify a register that isn't in the G packet.
+
 2002-08-28  Andrew Cagney  <ac131313@redhat.com>
 
 	* infcmd.c (registers_info): Pass start, instead of addr_exp, to

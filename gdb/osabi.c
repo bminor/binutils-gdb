@@ -49,6 +49,8 @@ static const char * const gdb_osabi_names[] =
   "ARM EABI v2",
   "ARM APCS",
 
+  "RedBoot",
+
   "<invalid>"
 };
 
@@ -240,7 +242,7 @@ gdbarch_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch,
   for (handler = gdb_osabi_handler_list; handler != NULL;
        handler = handler->next)
     {
-      if (handler->arch == bfd_get_arch (abfd)
+      if ((abfd == NULL || handler->arch == bfd_get_arch (abfd))
 	  && handler->osabi == osabi)
 	{
 	  (*handler->init_osabi) (info, gdbarch);

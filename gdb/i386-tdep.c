@@ -1097,7 +1097,7 @@ i386_use_struct_convention (int gcc_p, struct type *type)
    register REGNUM.  Perhaps %esi and %edi should go here, but
    potentially they could be used for things other than address.  */
 
-static struct type *
+struct type *
 i386_register_virtual_type (int regnum)
 {
   if (regnum == PC_REGNUM || regnum == FP_REGNUM || regnum == SP_REGNUM)
@@ -1132,7 +1132,7 @@ mmx_regnum_to_fp_regnum (struct regcache *regcache, int regnum)
   return (FP0_REGNUM + fpi);
 }
 
-static void
+void
 i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 			   int regnum, void *buf)
 {
@@ -1148,7 +1148,7 @@ i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
     regcache_raw_read (regcache, regnum, buf);
 }
 
-static void
+void
 i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 			    int regnum, const void *buf)
 {
@@ -1439,7 +1439,7 @@ i386_add_reggroups (struct gdbarch *gdbarch)
   reggroup_add (gdbarch, system_reggroup);
 }
 
-static int
+int
 i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 			  struct reggroup *group)
 {
@@ -1467,6 +1467,9 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Try to determine the OS ABI of the object we're loading.  */
   if (info.abfd != NULL)
     osabi = gdbarch_lookup_osabi (info.abfd);
+  /* Hack, force redboot.  */
+  if (osabi == GDB_OSABI_UNKNOWN)
+    osabi = GDB_OSABI_REDBOOT;
 
   /* Find a candidate among extant architectures.  */
   for (arches = gdbarch_list_lookup_by_info (arches, &info);
