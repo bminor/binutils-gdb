@@ -510,7 +510,12 @@ literal		:	INTEGER_LITERAL
 			}
 		|	EMPTINESS_LITERAL
 			{
-			  $$ = 0;	/* FIXME */
+			  struct type *void_ptr_type
+			    = lookup_pointer_type (builtin_type_void);
+			  write_exp_elt_opcode (OP_LONG);
+			  write_exp_elt_type (void_ptr_type);
+			  write_exp_elt_longcst (0);
+			  write_exp_elt_opcode (OP_LONG);
 			}
 		|	CHARACTER_STRING_LITERAL
 			{
@@ -528,9 +533,28 @@ literal		:	INTEGER_LITERAL
 
 /* Z.200, 5.2.5 */
 
-tuple		:	FIXME_04
+tuple	:	'['
+			{ start_arglist (); }
+		expression_list ']'
 			{
-			  $$ = 0;	/* FIXME */
+			  write_exp_elt_opcode (OP_ARRAY);
+			  write_exp_elt_longcst ((LONGEST) 0);
+			  write_exp_elt_longcst ((LONGEST) end_arglist () - 1);
+			  write_exp_elt_opcode (OP_ARRAY);
+			}
+		|
+		mode_name '['
+			{ start_arglist (); }
+		expression_list ']'
+			{
+			  write_exp_elt_opcode (OP_ARRAY);
+			  write_exp_elt_longcst ((LONGEST) 0);
+			  write_exp_elt_longcst ((LONGEST) end_arglist () - 1);
+			  write_exp_elt_opcode (OP_ARRAY);
+
+			  write_exp_elt_opcode (UNOP_CAST);
+			  write_exp_elt_type ($1.type);
+			  write_exp_elt_opcode (UNOP_CAST);
 			}
 		;
 
@@ -637,7 +661,7 @@ conditional_expression : IF boolean_expression then_alternative else_alternative
 			{
 			  $$ = 0;	/* FIXME */
 			}
-		|	CASE case_selector_list OF value_case_alternative '[' ELSE sub_expression ']' ESAC
+		|	CASE case_selector_list OF value_case_alternative ELSE sub_expression ESAC
 			{
 			  $$ = 0;	/* FIXME */
 			}
@@ -1706,7 +1730,8 @@ static const struct token idtokentab[] =
     { "xor", LOGXOR },
     { "and", LOGAND },
     { "in", IN },
-    { "or", LOGIOR }
+    { "or", LOGIOR },
+    { "null", EMPTINESS_LITERAL }
 };
 
 static const struct token tokentab2[] =

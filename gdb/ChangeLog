@@ -1,5 +1,12 @@
 Tue Jan  3 16:52:03 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
+	* ch-exp.y (literal):  Recognize NULL.
+	(tuple):  Parse simple unlabelled tuples.
+	* eval.c (evaluate_subexp case OP_ARRAY):  Use expect_type to
+	evaluate brace-initializer-expressions depending on context.
+	(evaluate_subexp case UNOP_CAST):  Pass the target type as
+	expected type when evaluating the expression.
+
 	* ch-typeprint.c (chill_type_print_base):  Get names of PTR and
 	BOOL from TYPE_NAME.
 	* ch-valprint.c (chill_print_type_scalar):  New function, to handle
