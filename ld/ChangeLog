@@ -1,3 +1,9 @@
+2003-12-03  Dmitry Diky  <diwil@mail.ru>
+	
+	* scripttempl/elf32msp430.sc (HEAP_SECTION_MSP430): New section for
+	forthcoming devices.
+	(_etext): provide this defenition for all scripts.
+
 2003-12-02  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* emultempl/beos.em: Remove ARGSUSED.
