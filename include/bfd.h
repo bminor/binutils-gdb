@@ -1031,7 +1031,8 @@ for archive members, or from file system if we have been called
 before); else determine modify time, cache it, and return it.  
 
 */
-PROTO(long, bfd_get_mtime, (bfd *));#define bfd_sizeof_headers(abfd, reloc) \
+PROTO(long, bfd_get_mtime, (bfd *));
+#define bfd_sizeof_headers(abfd, reloc) \
      BFD_SEND (abfd, _bfd_sizeof_headers, (abfd, reloc))
 
 #define bfd_find_nearest_line(abfd, section, symbols, offset, filename_ptr, func, line_ptr) \
@@ -1063,13 +1064,10 @@ PROTO(long, bfd_get_mtime, (bfd *));#define bfd_sizeof_headers(abfd, reloc) \
 PROTO(symindex, bfd_get_next_mapent, (bfd *, symindex, carsym **));
 /* Used whilst processing archives. Sets the head of the chain of bfds
 contained in an archive to @var{new_head}. (see chapter on archives)
-
 */
 PROTO(boolean, bfd_set_archive_head, (bfd *output, bfd *new_head));
-/* Hmm
+/* *;PROTO(bfd *, bfd_get_elt_at_index, (bfd *, int));*/
 
-*/
-PROTO(bfd *, bfd_get_elt_at_index, (bfd *, int));
 /* Initially provided a bfd containing an archive and NULL, opens a bfd
 on the first contained element and returns that. Subsequent calls to
 bfd_openr_next_archived_file should pass the archive and the previous
