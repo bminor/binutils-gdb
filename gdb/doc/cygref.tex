@@ -1,6 +1,5 @@
 %This file is TeX source for a reference card describing GDB, the GNU debugger.
-%$Id$
-%Copyright (C) 1991 Free Software Foundation, Inc.
+%Copyright (C) 1991, 1992, 1993 Free Software Foundation, Inc.
 %Permission is granted to make and distribute verbatim copies of
 %this reference provided the copyright notices and permission notices
 %are preserved on all copies.
@@ -46,22 +45,110 @@
 % share omitted due to obsolescence
 % set check range/type omitted at least til code is in GDB.
 %
+%
+% 22-AUG-1993 Andreas Vogel
+%
+%   Modifications made in order to handle different papersizes correctly.
+%   You only have to set the total width and height of the paper, the
+%   horizontal and vertical margin space measured from *paper edge*
+%   and the interline and interspec spacing.
+%   In order to support a new papersize, you have to fiddle with the
+%   latter four dimensions. Just try out a few values.
+%   All other values will be computed at process time so it should be
+%   quite easy to support different paper sizes - only four values to
+%   guess :-)
+%
+%   To find the configuration places, just search for the string
+%   "CONFIGURATION".
+%
+%   Andreas Vogel (av@ssw.de)
+%
+%
+%
+%
 \input epsf
 \epsfxsize=1.75in
-{%
-\def\$#1${{#1}}%   Kluge: collect RCS revision info without $...$
-\xdef\manvers{\$Revision$}%
-}%
 %-------------------- Three column format -----------------------
 
 %%%% --- To disable three column format, comment out this entire section
 
-% Three-column format for landscape printing on 8.5x11 paper
+% Three-column format for landscape printing
 
-% We want output .25 inch *from paper edge*; i.e. -.75in from TeX default
-\hoffset=-0.8in \voffset=-0.75in
-\newdimen\fullhsize
-\fullhsize=10.5in \hsize=3.3in
+%-------- Papersize defs:
+
+\newdimen\totalwidth \newdimen\totalheight
+\newdimen\hmargin    \newdimen\vmargin
+\newdimen\secskip    \newdimen\lskip
+\newdimen\barwidth   \newdimen\barheight
+\newdimen\intersecwidth
+
+%%
+%%  START CONFIGURATION - PAPERSIZE DEFINITIONS
+%------- Papersize params:
+%%  US letter paper (8.5x11in)
+%%
+\totalwidth=11in    % total width of paper
+\totalheight=8.5in  % total height of paper
+\hmargin=.25in      % horizontal margin width
+\vmargin=.25in      % vertical margin width
+\secskip=1pc        % space between refcard secs
+\lskip=2pt          % extra skip between \sec entries
+%------- end papersize params
+%%
+%%  change according to personal taste, not papersize dependent
+%%
+\barwidth=.1pt       % width of the cropmark bar
+\barheight=2pt       % height of the cropmark bar
+\intersecwidth=0.5em % width between \itmwid and \dfnwid
+%%
+%%  END CONFIGURATION - PAPERSIZE DEFINITIONS
+%%
+
+%%
+%%  values to be computed - nothing to configure
+%%
+\newdimen\fullhsize     % width of area without margins
+\newdimen\itmwid        % width of item column
+\newdimen\dfnwid        % width of definition column
+\newdimen\temp          % only for temporary use
+
+%%
+%%  adjust the offsets so the margins are measured *from paper edge*
+%%
+\hoffset=-1in \advance \hoffset by \hmargin
+\voffset=-1in \advance \voffset by \vmargin
+
+%%
+%%  fullhsize = totalwidth - (2 * hmargin)
+%%
+\fullhsize=\totalwidth
+\temp=\hmargin \multiply \temp by 2 \advance \fullhsize by -\temp
+
+%%
+%%  hsize = (fullhsize - (4 * hmargin) - (2 * barwidth)) / 3
+%%
+\hsize=\fullhsize
+\temp=\hmargin \multiply \temp by 4 \advance \hsize by -\temp
+\temp=\barwidth \multiply \temp by 2 \advance \hsize by -\temp
+\divide \hsize by 3
+
+%%
+%%  vsize = totalheight - (2 * vmargin)
+%%
+\vsize=\totalheight
+\temp=\vmargin \multiply \temp by 2 \advance \vsize by -\temp
+
+%%
+%%  itmwid = (hsize - intersecwidth) * 1/3
+%%  dfnwid = (hsize - intersecwidth) * 2/3
+%%
+\temp=\hsize \advance \temp by -\intersecwidth \divide \temp by 3
+\itmwid=\temp
+\dfnwid=\hsize \advance \dfnwid by -\itmwid
+
+%-------- end papersize defs
+
+
 \def\fulline{\hbox to \fullhsize}
 \let\lcr=L \newbox\leftcolumn\newbox\centercolumn
 \output={\if L\lcr
@@ -74,27 +161,35 @@
          \fi
 %         \ifnum\outputpenalty>-20000 \else\dosupereject\fi
       }
-%
-%ALTERNATIVE FOLDING GUIDES:
-%
-%For NO printed folding guide, comment out other \def\vdecor's and uncomment:
-%\def\vdecor{\hskip .2in plus1fil}
-%
-%For SOLID LINE folding guide, comment out other \def\vdecor's and uncomment:
-%\def\vdecor{\hskip .1in plus1fil \vrule width .1pt \hskip .1in plus1fil}
-%
-%For SMALL MARKS NEAR TOP AND BOTTOM as folding guide,
-%comment out other \def\vdecor's and uncomment:
-\def\vdecor{\hskip .1in plus1fil 
-\vbox to \vsize{\hbox to .1pt{\vrule height 2pt width .1pt}\vfill
-\hbox to .1pt{\vrule height 2pt width .1pt}}
-\hskip .1in plus1fil}
-%
-%END OF ALTERNATIVES FOR FOLDING GUIDES
-%
+
+%%
+%%  START CONFIGURATION - ALTERNATIVE FOLDING GUIDES
+%%
+%%  For NO printed folding guide,
+%%  comment out other \def\vdecor's and uncomment:
+
+%\def\vdecor{\hskip\hmargin plus1fil\hskip\barwidth plus1fil\hskip\hmargin plus1fil}
+
+%%  For SOLID LINE folding guide,
+%%  comment out other \def\vdecor's and uncomment:
+
+%\def\vdecor{\hskip\hmargin plus1fil \vrule width \barwidth \hskip\hmargin plus1fil}
+
+%%  For SMALL MARKS NEAR TOP AND BOTTOM as folding guide,
+%%  comment out other \def\vdecor's and uncomment:
+
+\def\vdecor{\hskip\hmargin plus1fil
+\vbox to \vsize{\hbox to \barwidth{\vrule height\barheight width\barwidth}\vfill
+\hbox to \barwidth{\vrule height\barheight width\barwidth}}%THIS PERCENT SIGN IS ESSENTIAL
+\hskip\hmargin plus1fil}
+
+%%
+%%  END CONFIGURATION - ALTERNATIVES FOR FOLDING GUIDES
+%%
+
 \def\tripleformat{\shipout\vbox{\fulline{\box\leftcolumn\vdecor
-                                         \box\centercolumn\vdecor
-                                         \columnbox}
+					 \box\centercolumn\vdecor
+					 \columnbox}
 			       }
                  \advancepageno}
 \def\columnbox{\leftline{\pagebody}}
@@ -119,7 +214,6 @@
 %-------------------- end font defs ---------------------------------
 
 %
-\vsize=8in
 \hyphenpenalty=5000\tolerance=2000\raggedright\raggedbottom
 \normalbaselineskip=9pt\baselineskip=9pt
 %
@@ -131,16 +225,16 @@
 \def\opt#1{{\brm[{\rm #1}]}}
 \def\xtra#1{\noalign{\smallskip{\tt#1}}}
 %
-\long\def\sec#1;#2\endsec{\vskip 1pc
+\long\def\sec#1;#2\endsec{\vskip \secskip
 \halign{%
 %COL 1 (of halign):
-\vtop{\hsize=1.1in\tt
-##\par\vskip 2pt }\hfil
+\vtop{\hsize=\itmwid\tt
+##\par\vskip \lskip }\hfil
 %COL 2 (of halign):
-&\vtop{\hsize=2.1in\hangafter=1\hangindent=0.5em
-\rm ##\par\vskip 2pt}\cr
+&\vtop{\hsize=\dfnwid\hangafter=1\hangindent=\intersecwidth
+\rm ##\par\vskip \lskip}\cr
 %Tail of \long\def fills in halign body with \sec args:
-\noalign{{\bbf #1}\vskip 2pt}
+\noalign{{\bbf #1}\vskip \lskip}
 #2
 }
 }
@@ -196,7 +290,7 @@ set args {\it arglist}&specify {\it arglist} for next
 set args&specify empty argument list\cr
 show args&display argument list\cr
 \cr
-show environment&show all environment variables\cr
+show env&show all environment variables\cr
 show env {\it var}&show value of environment variable {\it var}\cr
 set env {\it var} {\it string}&set environment variable {\it var}\cr
 unset env {\it var}&remove {\it var} from environment\cr
@@ -215,8 +309,8 @@ shell {\it cmd}&execute arbitrary shell command string\cr
 break \opt{\it file\tt:}{\it line}\par
 b \opt{\it file\tt:}{\it line}&set breakpoint at {\it line} number \opt{in \it file}\par 
 eg:\quad{\tt break main.c:37}\quad\cr
-break \opt{\it file\tt:}{\it function}&set breakpoint at {\it
-function} \opt{in \it file}\cr
+break \opt{\it file\tt:}{\it func}&set breakpoint at {\it
+func} \opt{in \it file}\cr
 break +{\it offset}\par
 break -{\it offset}&set break at {\it offset} lines from current stop\cr
 break *{\it addr}&set breakpoint at address {\it addr}\cr
@@ -283,7 +377,7 @@ info catch&exception handlers active in selected frame\cr
 \line{\smrm \opt{ } surround optional arguments.\hfil $\ldots$ show
 one or more arguments}
 \vskip\baselineskip
-\centerline{\smrm \copyright 1991, 1992 Free Software Foundation, Inc.\qquad Permissions on back}
+\centerline{\smrm \copyright 1991, 1992, 1993 Free Software Foundation, Inc.\qquad Permissions on back}
 \eject
 \sec Execution Control;
 continue \opt{\it count}\par
@@ -377,7 +471,7 @@ $\tt\{${\it type}$\tt\}${\it addr}&read memory at {\it addr} as specified
 \cr
 show values \opt{{\it n}}&show last 10 values \opt{or surrounding
 \${\it n}}\cr
-show convenience&display all convenience variables\cr
+show conv&display all convenience variables\cr
 \endsec
 
 \sec Symbol Table;
@@ -429,7 +523,7 @@ detach&release target from GDB control\cr
 set {\it param} {\it value}&set one of GDB's internal parameters\cr
 show {\it param}&display current setting of parameter\cr
 \xtra{\rm Parameters understood by {\tt set} and {\tt show}:}
-\quad complaints {\it limit}&number of messages on unusual symbols\cr
+\quad complaint {\it limit}&number of messages on unusual symbols\cr
 \quad confirm {\it on/off}&enable or disable cautionary queries\cr
 \quad editing {\it on/off}&control {\tt readline} command-line editing\cr
 \quad height {\it lpp}&number of lines before pause in display\cr
@@ -498,8 +592,8 @@ show dir&show current source path\cr
 \cr
 list&show next ten lines of source\cr
 list -&show previous ten lines\cr
-list {\it lines}&display source centered around {\it lines}, 
-specified as one of:\cr
+list {\it lines}&display source surrounding {\it lines}, 
+specified as:\cr
 \quad{\opt{\it file\tt:}\it num}&line number \opt{in named file}\cr
 \quad{\opt{\it file\tt:}\it function}&beginning of function \opt{in
 named file}\cr
@@ -538,8 +632,8 @@ statement.\cr
 
 \vfill
 {\smrm\parskip=6pt
-\centerline{Copyright \copyright 1991, 1992 Free Software Foundation, Inc.}
-\centerline{Roland Pesch (pesch@cygnus.com), January 1992---\manvers}
+\centerline{Copyright \copyright 1991, 1992, 1993 Free Software Foundation, Inc.}
+\centerline{Roland Pesch (pesch@cygnus.com)}
 \centerline{The author assumes no responsibility for any errors on this card.}
 
 This card may be freely distributed under the terms of the GNU
