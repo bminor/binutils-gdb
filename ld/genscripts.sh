@@ -133,11 +133,11 @@ if [ "x${LIB_PATH}" = "x" ] && [ "x${USE_LIBPATH}" = xyes ] ; then
   if [ "x${use_sysroot}" != "xyes" ] ; then
     case " ${libs} " in
       *" ${libdir} "*) ;;
-      *) libs="${libdir} ${libs}"
+      *) libs="${libdir} ${libs}" ;;
     esac
     case " ${libs} " in
       *" ${tool_lib} "*) ;;
-      *) libs="${tool_lib} ${libs}"
+      *) libs="${tool_lib} ${libs}" ;;
     esac
   fi
 
