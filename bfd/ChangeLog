@@ -1,3 +1,8 @@
+Mon Nov 16 10:57:06 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-v850.c (hi16s_location): Replaced fixed size array with
+	linked list.
+
 Sun Nov 15 20:28:25 1998  Richard Henderson  <rth@cygnus.com>
 
 	* elf64-alpha.c (elf64_alpha_relax_section): Search for the proper

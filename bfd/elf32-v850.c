@@ -51,7 +51,7 @@ static bfd_reloc_status_type v850_elf_perform_relocation
 static boolean v850_elf_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *));
 static void remember_hi16s_reloc
-  PARAMS ((bfd_vma, bfd_byte *));
+  PARAMS ((bfd *, bfd_vma, bfd_byte *));
 static bfd_byte * find_remembered_hi16s_reloc
   PARAMS ((bfd_vma addend));
 static bfd_reloc_status_type v850_elf_final_link_relocate
@@ -436,6 +436,36 @@ static reloc_howto_type v850_elf_howto_table[] =
 	 false),			/* pcrel_offset */
 
 /* end-sanitize-v850e */
+  /* GNU extension to record C++ vtable hierarchy */
+  HOWTO (R_V850_GNU_VTINHERIT, /* type */
+         0,                     /* rightshift */
+         2,                     /* size (0 = byte, 1 = short, 2 = long) */
+         0,                     /* bitsize */
+         false,                 /* pc_relative */
+         0,                     /* bitpos */
+         complain_overflow_dont, /* complain_on_overflow */
+         NULL,                  /* special_function */
+         "R_V850_GNU_VTINHERIT", /* name */
+         false,                 /* partial_inplace */
+         0,                     /* src_mask */
+         0,                     /* dst_mask */
+         false),                /* pcrel_offset */
+
+  /* GNU extension to record C++ vtable member usage */
+  HOWTO (R_V850_GNU_VTENTRY,     /* type */
+         0,                     /* rightshift */
+         2,                     /* size (0 = byte, 1 = short, 2 = long) */
+         0,                     /* bitsize */
+         false,                 /* pc_relative */
+         0,                     /* bitpos */
+         complain_overflow_dont, /* complain_on_overflow */
+         _bfd_elf_rel_vtable_reloc_fn,  /* special_function */
+         "R_V850_GNU_VTENTRY",   /* name */
+         false,                 /* partial_inplace */
+         0,                     /* src_mask */
+         0,                     /* dst_mask */
+         false),                /* pcrel_offset */
+ 
 };
 
 /* Map BFD reloc types to V850 ELF reloc types.  */
@@ -473,6 +503,9 @@ static const struct v850_elf_reloc_map v850_elf_reloc_map[] =
   { BFD_RELOC_V850_CALLT_6_7_OFFSET,       R_V850_CALLT_6_7_OFFSET       },
   { BFD_RELOC_V850_CALLT_16_16_OFFSET,     R_V850_CALLT_16_16_OFFSET     },
 /* end-sanitize-v850e */
+  { BFD_RELOC_VTABLE_INHERIT,               R_V850_GNU_VTINHERIT },
+  { BFD_RELOC_VTABLE_ENTRY,                 R_V850_GNU_VTENTRY },
+
 };
 
 
@@ -596,6 +629,20 @@ v850_elf_check_relocs (abfd, info, sec, relocs)
 /* end-sanitize-v850e */
 	  break;
 
+        /* This relocation describes the C++ object vtable hierarchy.
+           Reconstruct it for later use during GC.  */
+        case R_V850_GNU_VTINHERIT:
+          if (!_bfd_elf32_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
+            return false;
+          break;
+
+        /* This relocation describes which C++ vtable entries are actually
+           used.  Record for later use during GC.  */
+        case R_V850_GNU_VTENTRY:
+          if (!_bfd_elf32_gc_record_vtentry (abfd, sec, h, rel->r_addend))
+            return false;
+          break;
+
 /* start-sanitize-v850e */
 	case R_V850_SDA_16_16_SPLIT_OFFSET:
 /* end-sanitize-v850e */
@@ -688,56 +735,46 @@ v850_elf_check_relocs (abfd, info, sec, relocs)
   return ret;
 }
 
-typedef struct
+typedef struct hi16s_location
 {
   bfd_vma       addend;
   bfd_byte *    address;
   unsigned long counter;
+  struct hi16s_location * next;
 }
 hi16s_location;
 
-static hi16s_location  previous_hi16s[ 10 ]; /* XXX is this enough ? */
-static unsigned long   hi16s_counter;
+static hi16s_location *  previous_hi16s;
+static hi16s_location *  free_hi16s;
+static unsigned long     hi16s_counter;
 
 static void
-remember_hi16s_reloc (addend, address)
+remember_hi16s_reloc (abfd, addend, address)
+     bfd *      abfd;
      bfd_vma    addend;
      bfd_byte * address;
 {
-  hi16s_location * oldest = NULL;
-  int              i;
+  hi16s_location * entry = NULL;
   
-  /* Find a free slot.  */
-  for (i = sizeof (previous_hi16s) / sizeof (previous_hi16s[0]); i--;)
-    {
-      hi16s_location * entry = previous_hi16s + i;
-      
-      if (entry->addend == 0 && entry->address == 0)
-	{
-	  /* Use this entry.  */
-	  oldest = entry;
-	  break;
-	}
+  /* Find a free structure.  */
+  if (free_hi16s == NULL)
+    free_hi16s = (hi16s_location *) bfd_zalloc (abfd, sizeof (* free_hi16s));
 
-      /* Remember the least recently added entry.  */
-      if (oldest == NULL || oldest->counter > entry->counter)
-	oldest = entry;
-    }
-
-  oldest->addend  = addend;
-  oldest->address = address;
-  oldest->counter = hi16s_counter ++;
-
+  entry = free_hi16s;
+  free_hi16s = free_hi16s->next;
+  
+  entry->addend  = addend;
+  entry->address = address;
+  entry->counter = hi16s_counter ++;
+  entry->next    = previous_hi16s;
+  previous_hi16s = entry;
+  
   /* Cope with wrap around of our counter.  */
   if (hi16s_counter == 0)
     {
       /* XXX - Assume that all counter entries differ only in their low 16 bits.  */
-      for (i = sizeof (previous_hi16s) / sizeof (previous_hi16s[0]); i--;)
-	{
-	  hi16s_location * entry = previous_hi16s + i;
-
-	  entry->counter &= 0xffff;
-	}
+      for (entry = previous_hi16s; entry != NULL; entry = entry->next)
+	entry->counter &= 0xffff;
 
       hi16s_counter = 0x10000;
     }
@@ -750,36 +787,50 @@ find_remembered_hi16s_reloc (addend)
      bfd_vma addend;
 {
   hi16s_location * match = NULL;
+  hi16s_location * entry;
+  hi16s_location * previous = NULL;
+  hi16s_location * prev;
   int              i;
+  bfd_byte *       addr;
   
   /* Search the table.  Record the most recent entry that matches.  */
-  for (i = sizeof (previous_hi16s) / sizeof (previous_hi16s[0]); i--;)
+  for (entry = previous_hi16s; entry; entry = entry->next)
     {
-      hi16s_location * entry = previous_hi16s + i;
-
       if (entry->addend == addend)
 	{
 	  if (match == NULL || match->counter < entry->counter)
-	    match = entry;
+	    {
+	      previous = prev;
+	      match    = entry;
+	    }
 	}
+	  
+      prev = entry;
     }
 
-  if (match != NULL)
-    {
-      bfd_byte * addr;
+  if (match == NULL)
+    return NULL;
 
-      /* Empty the table entry.  */
-      match->addend = 0;
-      
-      addr = match->address;
-      match->address = NULL;
-      
-      return addr;
-    }
+  /* Extract the address.  */
+  addr = match->address;
   
-  return NULL;
+  /* Attach the entry to the free list.  */
+  if (previous)
+    previous->next = match->next;
+  else
+    previous_hi16s = match->next;
+  
+  match->next = free_hi16s->next;
+  free_hi16s  = match;
+  
+  match->addend  = 0;
+  match->address = NULL;
+  
+  return addr;
 }     
 
+/* FIXME:  The code here probably ought to be removed and the code in reloc.c
+   allowed to do its  stuff instead.  At least for most of the relocs, anwyay.  */
 static bfd_reloc_status_type
 v850_elf_perform_relocation (abfd, r_type, addend, address)
      bfd *      abfd;
@@ -788,6 +839,7 @@ v850_elf_perform_relocation (abfd, r_type, addend, address)
      bfd_byte * address;
 {
   unsigned long insn;
+  bfd_signed_vma saddend = (bfd_signed_vma) addend;
   
   switch (r_type)
     {
@@ -796,12 +848,11 @@ v850_elf_perform_relocation (abfd, r_type, addend, address)
       return bfd_reloc_notsupported;
       
     case R_V850_32:
-      addend += bfd_get_32 (abfd, address);
       bfd_put_32 (abfd, addend, address);
       return bfd_reloc_ok;
       
     case R_V850_22_PCREL:
-      if (addend > 0x1fffff || addend < -0x200000)
+      if (saddend > 0x1fffff || saddend < -0x200000)
 	return bfd_reloc_overflow;
       
       if ((addend % 2) != 0)
@@ -814,7 +865,7 @@ v850_elf_perform_relocation (abfd, r_type, addend, address)
       return bfd_reloc_ok;
       
     case R_V850_9_PCREL:
-      if (addend > 0xff || addend < -0x100)
+      if (saddend > 0xff || saddend < -0x100)
 	return bfd_reloc_overflow;
       
       if ((addend % 2) != 0)
@@ -833,13 +884,13 @@ v850_elf_perform_relocation (abfd, r_type, addend, address)
       
     case R_V850_HI16_S:
       /* Remember where this relocation took place.  */
-      remember_hi16s_reloc (addend, address);
+      remember_hi16s_reloc (abfd, addend, address);
 
       addend += (bfd_get_16 (abfd, address) << 16);
       addend = (addend >> 16) + ((addend & 0x8000) != 0);
       
       /* This relocation cannot overflow. */
-      if (addend > 0x7fff || addend < -0x8000)
+      if (addend > 0x7fff)
 	addend = 0;
       
       insn = addend;
@@ -1025,7 +1076,9 @@ v850_elf_perform_relocation (abfd, r_type, addend, address)
     case R_V850_8:
       addend += (char) bfd_get_8 (abfd, address);
 
-      if (addend > 0x7f || addend < -0x80)
+      saddend = (bfd_signed_vma) addend;
+      
+      if (saddend > 0x7f || saddend < -0x80)
 	return bfd_reloc_overflow;
 
       bfd_put_8 (abfd, addend, address);
@@ -1035,7 +1088,9 @@ v850_elf_perform_relocation (abfd, r_type, addend, address)
     case R_V850_CALLT_16_16_OFFSET:
       addend += bfd_get_16 (abfd, address);
       
-      if (addend > 0xffff || addend < 0)
+      saddend = (bfd_signed_vma) addend;
+      
+      if (saddend > 0xffff || saddend < 0)
 	return bfd_reloc_overflow;
 
       insn = addend;
@@ -1050,7 +1105,9 @@ v850_elf_perform_relocation (abfd, r_type, addend, address)
     case R_V850_TDA_16_16_OFFSET:
       addend += bfd_get_16 (abfd, address);
       
-      if (addend > 0x7fff || addend < -0x8000)
+      saddend = (bfd_signed_vma) addend;
+      
+      if (saddend > 0x7fff || saddend < -0x8000)
 	return bfd_reloc_overflow;
 
       insn = addend;
@@ -1061,7 +1118,9 @@ v850_elf_perform_relocation (abfd, r_type, addend, address)
       insn = bfd_get_16 (abfd, address);
       addend += (insn & 0xfffe);
       
-      if (addend > 0x7ffe || addend < -0x8000)
+      saddend = (bfd_signed_vma) addend;
+      
+      if (saddend > 0x7ffe || saddend < -0x8000)
 	return bfd_reloc_overflow;
       
       if (addend & 1)
@@ -1074,7 +1133,9 @@ v850_elf_perform_relocation (abfd, r_type, addend, address)
       insn = bfd_get_16 (abfd, address);
       addend += ((insn & 0x7e) << 1);
       
-      if (addend > 0xfc || addend < 0)
+      saddend = (bfd_signed_vma) addend;
+      
+      if (saddend > 0xfc || saddend < 0)
 	return bfd_reloc_overflow;
       
       if (addend & 3)
@@ -1088,7 +1149,9 @@ v850_elf_perform_relocation (abfd, r_type, addend, address)
       insn = bfd_get_16 (abfd, address);
       addend += ((insn & 0x7f) << 1);
       
-      if (addend > 0xfe || addend < 0)
+      saddend = (bfd_signed_vma) addend;
+      
+      if (saddend > 0xfe || saddend < 0)
 	return bfd_reloc_overflow;
       
       if (addend & 1)
@@ -1102,7 +1165,9 @@ v850_elf_perform_relocation (abfd, r_type, addend, address)
       insn = bfd_get_16 (abfd, address);
       addend += insn & 0x7f;
 	
-      if (addend > 0x7f || addend < 0)
+      saddend = (bfd_signed_vma) addend;
+      
+      if (saddend > 0x7f || saddend < 0)
 	return bfd_reloc_overflow;
       
       insn &= 0xff80;
@@ -1114,7 +1179,9 @@ v850_elf_perform_relocation (abfd, r_type, addend, address)
       insn = bfd_get_16 (abfd, address);
       addend += ((insn & 0xf) << 1);
       
-      if (addend > 0x1e || addend < 0)
+      saddend = (bfd_signed_vma) addend;
+      
+      if (saddend > 0x1e || saddend < 0)
 	return bfd_reloc_overflow;
       
       if (addend & 1)
@@ -1128,7 +1195,9 @@ v850_elf_perform_relocation (abfd, r_type, addend, address)
       insn = bfd_get_16 (abfd, address);
       addend += insn & 0xf;
       
-      if (addend > 0xf || addend < 0)
+      saddend = (bfd_signed_vma) addend;
+      
+      if (saddend > 0xf || saddend < 0)
 	return bfd_reloc_overflow;
       
       insn &= 0xfff0;
@@ -1140,7 +1209,9 @@ v850_elf_perform_relocation (abfd, r_type, addend, address)
       insn = bfd_get_32 (abfd, address);
       addend += ((insn & 0xfffe0000) >> 16) + ((insn & 0x20) >> 5);
       
-      if (addend > 0x7fff || addend < -0x8000)
+      saddend = (bfd_signed_vma) addend;
+      
+      if (saddend > 0x7fff || saddend < -0x8000)
 	return bfd_reloc_overflow;
       
       insn &= 0x0001ffdf;
@@ -1154,7 +1225,9 @@ v850_elf_perform_relocation (abfd, r_type, addend, address)
       insn = bfd_get_16 (abfd, address);
       addend += ((insn & 0x3f) << 1);
       
-      if (addend > 0x7e || addend < 0)
+      saddend = (bfd_signed_vma) addend;
+      
+      if (saddend > 0x7e || saddend < 0)
 	return bfd_reloc_overflow;
       
       if (addend & 1)
@@ -1164,6 +1237,11 @@ v850_elf_perform_relocation (abfd, r_type, addend, address)
       insn |= (addend >> 1);
       break;
 /* end-sanitize-v850e */
+
+    case R_V850_GNU_VTINHERIT:
+    case R_V850_GNU_VTENTRY:
+      return bfd_reloc_ok;
+
     }
 
   bfd_put_16 (abfd, insn, address);
@@ -1409,6 +1487,8 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
 /* end-sanitize-v850e */
       
     case R_V850_NONE:
+    case R_V850_GNU_VTINHERIT:
+    case R_V850_GNU_VTENTRY:
       return bfd_reloc_ok;
 
     default:
@@ -1456,6 +1536,11 @@ v850_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       r_type   = ELF32_R_TYPE (rel->r_info);
+
+      if (r_type == R_V850_GNU_VTENTRY
+          || r_type == R_V850_GNU_VTINHERIT)
+        continue;
+
       howto    = v850_elf_howto_table + r_type;
 
       if (info->relocateable)
@@ -1620,6 +1705,57 @@ fprintf (stderr, "unknown: name: %s\n", h->root.root.string);
   return true;
 }
 
+static boolean
+v850_elf_gc_sweep_hook (abfd, info, sec, relocs)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     asection *sec;
+     const Elf_Internal_Rela *relocs;
+{
+  /* No got and plt entries for v850-elf */
+  return true;
+}
+
+static asection *
+v850_elf_gc_mark_hook (abfd, info, rel, h, sym)
+       bfd *abfd;
+       struct bfd_link_info *info;
+       Elf_Internal_Rela *rel;
+       struct elf_link_hash_entry *h;
+       Elf_Internal_Sym *sym;
+{
+  if (h != NULL)
+    {
+      switch (ELF32_R_TYPE (rel->r_info))
+      {
+      case R_V850_GNU_VTINHERIT:
+      case R_V850_GNU_VTENTRY:
+        break;
+
+      default:
+        switch (h->root.type)
+          {
+          case bfd_link_hash_defined:
+          case bfd_link_hash_defweak:
+            return h->root.u.def.section;
+
+          case bfd_link_hash_common:
+            return h->root.u.c.p->section;
+          }
+       }
+     }
+   else
+     {
+       if (!(elf_bad_symtab (abfd)
+           && ELF_ST_BIND (sym->st_info) != STB_LOCAL)
+         && ! ((sym->st_shndx <= 0 || sym->st_shndx >= SHN_LORESERVE)
+                && sym->st_shndx != SHN_COMMON))
+          {
+            return bfd_section_from_elf_index (abfd, sym->st_shndx);
+          }
+      }
+  return NULL;
+}
 /* Set the right machine number.  */
 static boolean
 v850_elf_object_p (abfd)
@@ -1804,21 +1940,15 @@ v850_elf_section_from_bfd_section (abfd, hdr, sec, retval)
      int *                 retval;
 {
   if (strcmp (bfd_get_section_name (abfd, sec), ".scommon") == 0)
-    {
-      *retval = SHN_V850_SCOMMON;
-      return true;
-    }
-  if (strcmp (bfd_get_section_name (abfd, sec), ".tcommon") == 0)
-    {
-      *retval = SHN_V850_TCOMMON;
-      return true;
-    }
-  if (strcmp (bfd_get_section_name (abfd, sec), ".zcommon") == 0)
-    {
-      *retval = SHN_V850_ZCOMMON;
-      return true;
-    }
-  return false;
+    *retval = SHN_V850_SCOMMON;
+  else if (strcmp (bfd_get_section_name (abfd, sec), ".tcommon") == 0)
+    *retval = SHN_V850_TCOMMON;
+  else if (strcmp (bfd_get_section_name (abfd, sec), ".zcommon") == 0)
+    *retval = SHN_V850_ZCOMMON;
+  else
+    return false;
+  
+  return true;
 }
 
 /* Handle the special V850 section numbers that a symbol may use.  */
@@ -1829,8 +1959,36 @@ v850_elf_symbol_processing (abfd, asym)
      asymbol * asym;
 {
   elf_symbol_type * elfsym = (elf_symbol_type *) asym;
+  unsigned short index;
+  
+  index = elfsym->internal_elf_sym.st_shndx;
 
-  switch (elfsym->internal_elf_sym.st_shndx)
+  /* If the section index is an "ordinary" index, then it may
+     refer to a v850 specific section created by the assembler.
+     Check the section's type and change the index it matches.
+     
+     FIXME: Should we alter the st_shndx field as well ?  */
+  
+  if (index < elf_elfheader(abfd)[0].e_shnum)
+    switch (elf_elfsections(abfd)[index]->sh_type)
+      {
+      case SHT_V850_SCOMMON:
+	index = SHN_V850_SCOMMON;
+	break;
+	
+      case SHT_V850_TCOMMON:
+	index = SHN_V850_TCOMMON;
+	break;
+	
+      case SHT_V850_ZCOMMON:
+	index = SHN_V850_ZCOMMON;
+	break;
+	
+      default:
+	break;
+      }
+  
+  switch (index)
     {
     case SHN_V850_SCOMMON:
       if (v850_elf_scom_section.name == NULL)
@@ -1889,7 +2047,7 @@ v850_elf_symbol_processing (abfd, asym)
 }
 
 /* Hook called by the linker routine which adds symbols from an object
-   file.  We must handle the special MIPS section numbers here.  */
+   file.  We must handle the special v850 section numbers here.  */
 
 /*ARGSUSED*/
 static boolean
@@ -1902,7 +2060,34 @@ v850_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      asection **              secp;
      bfd_vma *                valp;
 {
-  switch (sym->st_shndx)
+  int index = sym->st_shndx;
+  
+  /* If the section index is an "ordinary" index, then it may
+     refer to a v850 specific section created by the assembler.
+     Check the section's type and change the index it matches.
+     
+     FIXME: Should we alter the st_shndx field as well ?  */
+  
+  if (index < elf_elfheader(abfd)[0].e_shnum)
+    switch (elf_elfsections(abfd)[index]->sh_type)
+      {
+      case SHT_V850_SCOMMON:
+	index = SHN_V850_SCOMMON;
+	break;
+	
+      case SHT_V850_TCOMMON:
+	index = SHN_V850_TCOMMON;
+	break;
+	
+      case SHT_V850_ZCOMMON:
+	index = SHN_V850_ZCOMMON;
+	break;
+	
+      default:
+	break;
+      }
+  
+  switch (index)
     {
     case SHN_V850_SCOMMON:
       *secp = bfd_make_section_old_way (abfd, ".scommon");
@@ -2027,6 +2212,11 @@ v850_elf_fake_sections (abfd, hdr, sec)
 #define elf_backend_link_output_symbol_hook 	v850_elf_link_output_symbol_hook
 #define elf_backend_section_from_shdr		v850_elf_section_from_shdr
 #define elf_backend_fake_sections		v850_elf_fake_sections
+#define elf_backend_gc_mark_hook                v850_elf_gc_mark_hook
+#define elf_backend_gc_sweep_hook               v850_elf_gc_sweep_hook
+
+#define elf_backend_can_gc_sections 1
+
 
 #define bfd_elf32_bfd_is_local_label_name	v850_elf_is_local_label_name
 #define bfd_elf32_bfd_reloc_type_lookup		v850_elf_reloc_type_lookup
