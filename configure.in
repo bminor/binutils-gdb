@@ -535,6 +535,23 @@ for dir in . $skipdirs $noconfigdirs ; do
   fi
 done
 
+# Sometimes the tools are distributed with libiberty but with no other
+# libraries.  In that case, we don't want to build target-libiberty.
+if [ -n "${target_configdirs}" ]; then
+  others=
+  for i in ${target_configdirs}; do
+    if [ "$i" != "libiberty" ]; then
+      if [ -r $srcdir/$i/configure ] || [ -r $srcdir/$i/configure.in ]; then
+	others=yes;
+	break;
+      fi
+    fi
+  done
+  if [ -z "${others}" ]; then
+    target_configdirs=
+  fi
+fi
+
 # Deconfigure all subdirectories, in case we are changing the
 # configuration from one where a subdirectory is supported to one where it
 # is not.

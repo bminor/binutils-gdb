@@ -1,3 +1,10 @@
+Wed Nov  1 12:23:20 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: If the only directory in target_configdirs which
+	actually exists is libiberty, then set target_configdirs to empty,
+	to avoid trying to build a target libiberty in a gas or gdb
+	distribution.
+
 Tue Oct 31 17:52:39 1995  J.T. Conklin  <jtc@slave.cygnus.com>
 
 	* configure.in (host_makefile_frag): Use m68k-sun-sunos* instead
