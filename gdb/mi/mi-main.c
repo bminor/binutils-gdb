@@ -1040,7 +1040,7 @@ mi_cmd_data_write_memory (char *command, char **argv, int argc)
    to perfrom after the given command has executed (display/supress
    prompt, display error). */
 
-static int
+static void
 captured_mi_execute_command (struct ui_out *uiout, void *data)
 {
   struct captured_mi_execute_command_args *args =
@@ -1095,7 +1095,7 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
 	    {
 	      mi_out_rewind (uiout);
 	      args->action = EXECUTE_COMMAND_DISPLAY_ERROR;
-	      return 1;
+	      return;
 	    }
 	  else
 	    mi_out_rewind (uiout);
@@ -1105,7 +1105,7 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
 	  /* Don't print the prompt. We are executing the target in
 	     synchronous mode. */
 	  args->action = EXECUTE_COMMAND_SUPRESS_PROMPT;
-	  return 1;
+	  return;
 	}
       break;
 
@@ -1137,7 +1137,7 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
 
     }
 
-  return 1;
+  return;
 }
 
 
@@ -1147,7 +1147,6 @@ mi_execute_command (char *cmd, int from_tty)
   struct mi_parse *command;
   struct captured_mi_execute_command_args args;
   struct ui_out *saved_uiout = uiout;
-  int result;
 
   /* This is to handle EOF (^D). We just quit gdb. */
   /* FIXME: we should call some API function here. */
@@ -1158,11 +1157,12 @@ mi_execute_command (char *cmd, int from_tty)
 
   if (command != NULL)
     {
+      struct exception result;
       /* FIXME: cagney/1999-11-04: Can this use of catch_exceptions either
          be pushed even further down or even eliminated? */
       args.command = command;
-      result = catch_exceptions (uiout, captured_mi_execute_command, &args, "",
-				 RETURN_MASK_ALL);
+      result = catch_exception (uiout, captured_mi_execute_command, &args,
+				RETURN_MASK_ALL);
 
       if (args.action == EXECUTE_COMMAND_SUPRESS_PROMPT)
 	{
@@ -1171,9 +1171,10 @@ mi_execute_command (char *cmd, int from_tty)
 	  mi_parse_free (command);
 	  return;
 	}
-      if (args.action == EXECUTE_COMMAND_DISPLAY_ERROR || result < 0)
+      if (args.action == EXECUTE_COMMAND_DISPLAY_ERROR
+	  || result.reason < 0)
 	{
-	  char *msg = error_last_message ();
+	  char *msg = result.message;
 	  struct cleanup *cleanup = make_cleanup (xfree, msg);
 	  /* The command execution failed and error() was called
 	     somewhere */

@@ -1,3 +1,9 @@
+2005-01-13  Andrew Cagney  <cagney@gnu.org>
+
+	* mi/mi-main.c (mi_execute_command): Use catch_exception,
+	eliminate call to error_last_message.
+	(captured_mi_execute_command): Change return type to void.
+
 2005-01-12  Andrew Cagney  <cagney@gnu.org>
 
 	* exceptions.c (exception_none): New variable.
