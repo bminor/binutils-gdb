@@ -8,6 +8,8 @@ set screen_top 0
 set screen_bot 0
 set current_output_win .cmd.text
 set cfunc NIL
+set line_numbers 1
+
 #option add *Foreground Black
 #option add *Background White
 #option add *Font -*-*-medium-r-normal--18-*-*-*-m-*-*-1
@@ -44,6 +46,11 @@ proc gdbtk_tcl_fputs {arg} {
 
 	$current_output_win insert end "$arg"
 	$current_output_win yview -pickplace end
+}
+
+proc gdbtk_tcl_fputs_error {arg} {
+	.cmd.text insert end "$arg"
+	.cmd.text yview -pickplace end
 }
 
 #
@@ -354,43 +361,52 @@ proc delete_breakpoint_tag {win line} {
 }
 
 proc gdbtk_tcl_busy {} {
-	.src.start configure -state disabled
-	.src.stop configure -state normal
-	.src.step configure -state disabled
-	.src.next configure -state disabled
-	.src.continue configure -state disabled
-	.src.finish configure -state disabled
-	.src.up configure -state disabled
-	.src.down configure -state disabled
-	.src.bottom configure -state disabled
-	.asm.stepi configure -state disabled
-	.asm.nexti configure -state disabled
-	.asm.continue configure -state disabled
-	.asm.finish configure -state disabled
-	.asm.up configure -state disabled
-	.asm.down configure -state disabled
-	.asm.bottom configure -state disabled
-	.asm.close configure -state disabled
+	if [winfo exists .src] {
+		.src.start configure -state disabled
+		.src.stop configure -state normal
+		.src.step configure -state disabled
+		.src.next configure -state disabled
+		.src.continue configure -state disabled
+		.src.finish configure -state disabled
+		.src.up configure -state disabled
+		.src.down configure -state disabled
+		.src.bottom configure -state disabled
+	}
+	if [winfo exists .asm] {
+		.asm.stepi configure -state disabled
+		.asm.nexti configure -state disabled
+		.asm.continue configure -state disabled
+		.asm.finish configure -state disabled
+		.asm.up configure -state disabled
+		.asm.down configure -state disabled
+		.asm.bottom configure -state disabled
+		.asm.close configure -state disabled
+	}
 }
 
 proc gdbtk_tcl_idle {} {
-	.src.start configure -state normal
-	.src.stop configure -state disabled
-	.src.step configure -state normal
-	.src.next configure -state normal
-	.src.continue configure -state normal
-	.src.finish configure -state normal
-	.src.up configure -state normal
-	.src.down configure -state normal
-	.src.bottom configure -state normal
-	.asm.stepi configure -state normal
-	.asm.nexti configure -state normal
-	.asm.continue configure -state normal
-	.asm.finish configure -state normal
-	.asm.up configure -state normal
-	.asm.down configure -state normal
-	.asm.bottom configure -state normal
-	.asm.close configure -state normal
+	if [winfo exists .src] {
+		.src.start configure -state normal
+		.src.stop configure -state disabled
+		.src.step configure -state normal
+		.src.next configure -state normal
+		.src.continue configure -state normal
+		.src.finish configure -state normal
+		.src.up configure -state normal
+		.src.down configure -state normal
+		.src.bottom configure -state normal
+	}
+
+	if [winfo exists .asm] {
+		.asm.stepi configure -state normal
+		.asm.nexti configure -state normal
+		.asm.continue configure -state normal
+		.asm.finish configure -state normal
+		.asm.up configure -state normal
+		.asm.down configure -state normal
+		.asm.bottom configure -state normal
+		.asm.close configure -state normal
+	}
 }
 
 #
@@ -732,6 +748,7 @@ proc display_expression {expression} {
 proc create_file_win {filename debug_file} {
 	global breakpoint_file
 	global breakpoint_line
+	global line_numbers
 
 # Replace all the dirty characters in $filename with clean ones, and generate
 # a unique name for the text widget.
@@ -767,25 +784,32 @@ proc create_file_win {filename debug_file} {
 	bind $win <1> do_nothing
 	bind $win <B1-Motion> do_nothing
 
-	bind $win n {gdb_cmd next ; update_ptr}
-	bind $win s {gdb_cmd step ; update_ptr}
-	bind $win c {gdb_cmd continue ; update_ptr}
-	bind $win f {gdb_cmd finish ; update_ptr}
-	bind $win u {gdb_cmd up ; update_ptr}
-	bind $win d {gdb_cmd down ; update_ptr}
+	bind $win n {catch {gdb_cmd next} ; update_ptr}
+	bind $win s {catch {gdb_cmd step} ; update_ptr}
+	bind $win c {catch {gdb_cmd continue} ; update_ptr}
+	bind $win f {catch {gdb_cmd finish} ; update_ptr}
+	bind $win u {catch {gdb_cmd up} ; update_ptr}
+	bind $win d {catch {gdb_cmd down} ; update_ptr}
 
 	$win delete 0.0 end
 	$win insert 0.0 [read $fh]
 	close $fh
 
-# Add margins (for annotations) and a line number to each line
+# Add margins (for annotations) and a line number to each line (if requested)
 
 	set numlines [$win index end]
 	set numlines [lindex [split $numlines .] 0]
-	for {set i 1} {$i <= $numlines} {incr i} {
-		$win insert $i.0 [format "   %4d " $i]
-		$win tag add source $i.8 "$i.0 lineend"
-		}
+	if $line_numbers {
+		for {set i 1} {$i <= $numlines} {incr i} {
+			$win insert $i.0 [format "   %4d " $i]
+			$win tag add source $i.8 "$i.0 lineend"
+			}
+	} else {
+		for {set i 1} {$i <= $numlines} {incr i} {
+			$win insert $i.0 "        "
+			$win tag add source $i.8 "$i.0 lineend"
+			}
+	}
 
 # Add the breakdots
 
@@ -873,12 +897,12 @@ proc create_asm_win {funcname pc} {
 	bind $win <Enter> {focus %W}
 	bind $win <1> {asm_window_button_1 %W %X %Y %x %y}
 	bind $win <B1-Motion> do_nothing
-	bind $win n {gdb_cmd nexti ; update_ptr}
-	bind $win s {gdb_cmd stepi ; update_ptr}
-	bind $win c {gdb_cmd continue ; update_ptr}
-	bind $win f {gdb_cmd finish ; update_ptr}
-	bind $win u {gdb_cmd up ; update_ptr}
-	bind $win d {gdb_cmd down ; update_ptr}
+	bind $win n {catch {gdb_cmd nexti} ; update_ptr}
+	bind $win s {catch {gdb_cmd stepi} ; update_ptr}
+	bind $win c {catch {gdb_cmd continue} ; update_ptr}
+	bind $win f {catch {gdb_cmd finish} ; update_ptr}
+	bind $win u {catch {gdb_cmd up} ; update_ptr}
+	bind $win d {catch {gdb_cmd down} ; update_ptr}
 
 # Disassemble the code, and read it into the new text widget
 
@@ -1090,23 +1114,23 @@ proc create_asm_window {} {
 		frame .asm.row2
 
 		button .asm.stepi -width 6 -text Stepi \
-			-command {gdb_cmd stepi ; update_ptr}
+			-command {catch {gdb_cmd stepi} ; update_ptr}
 		button .asm.nexti -width 6 -text Nexti \
-			-command {gdb_cmd nexti ; update_ptr}
+			-command {catch {gdb_cmd nexti} ; update_ptr}
 		button .asm.continue -width 6 -text Cont \
-			-command {gdb_cmd continue ; update_ptr}
+			-command {catch {gdb_cmd continue} ; update_ptr}
 		button .asm.finish -width 6 -text Finish \
-			-command {gdb_cmd finish ; update_ptr}
-		button .asm.up -width 6 -text Up -command {gdb_cmd up ; update_ptr}
+			-command {catch {gdb_cmd finish} ; update_ptr}
+		button .asm.up -width 6 -text Up -command {catch {gdb_cmd up} ; update_ptr}
 		button .asm.down -width 6 -text Down \
-			-command {gdb_cmd down ; update_ptr}
+			-command {catch {gdb_cmd down} ; update_ptr}
 		button .asm.bottom -width 6 -text Bottom \
-			-command {gdb_cmd {frame 0} ; update_ptr}
+			-command {catch {gdb_cmd {frame 0}} ; update_ptr}
 
 		pack .asm.stepi .asm.continue .asm.up .asm.bottom -side left -padx 3 -pady 5 -in .asm.row1
 		pack .asm.nexti .asm.finish .asm.down -side left -padx 3 -pady 5 -in .asm.row2
 
-		pack .asm.row1 .asm.row2 -side top -anchor w
+		pack .asm.row2 .asm.row1 -side bottom -anchor w -before .asm.info
 
 		update
 
@@ -1127,9 +1151,23 @@ proc reg_config_menu {} {
 	set regnames [gdb_regnames]
 	set num_regs [llength $regnames]
 
-	button .reg.config.done -text Done -command {destroy .reg.config}
+	frame .reg.config.buts
 
-	pack .reg.config.done -side bottom -fill x
+	button .reg.config.done -text " Done " -command "
+		recompute_reg_display_list $num_regs
+		populate_reg_window
+		update_registers all
+		destroy .reg.config "
+
+	button .reg.config.update -text Update -command "
+		recompute_reg_display_list $num_regs
+		populate_reg_window
+		update_registers all "
+
+	pack .reg.config.buts -side bottom -fill x
+
+	pack .reg.config.done -side left -fill x -expand yes -in .reg.config.buts
+	pack .reg.config.update -side right -fill x -expand yes -in .reg.config.buts
 
 # Since there can be lots of registers, we build the window with no more than
 # 32 rows, and as many columns as needed.
@@ -1151,10 +1189,7 @@ proc reg_config_menu {} {
 	for {set regnum 0} {$regnum < $num_regs} {incr regnum} {
 		set regname [lindex $regnames $regnum]
 		checkbutton .reg.config.col$col.$row -text $regname -pady 0 \
-			-variable regena($regnum) -relief flat -anchor w -bd 1 \
-			-command "recompute_reg_display_list $num_regs
-				  populate_reg_window
-				  update_registers all"
+			-variable regena($regnum) -relief flat -anchor w -bd 1
 
 		pack .reg.config.col$col.$row -side top -fill both
 
@@ -1199,44 +1234,38 @@ proc create_registers_window {} {
 
 	build_framework .reg Registers
 
-	.reg.menubar.view.menu add command -label Natural
-	.reg.menubar.view.menu add command -label Config -command {
-		reg_config_menu }
+# First, delete all the old menu entries
+
+	.reg.menubar.view.menu delete 0 last
 
 # Hex menu item
-	.reg.menubar.view.menu entryconfigure 0 -command {
-		global reg_format
+	.reg.menubar.view.menu add radiobutton -variable reg_format \
+		-label Hex -value x -command {update_registers all}
 
-		set reg_format x
-		update_registers all
-	}
 # Decimal menu item
-	.reg.menubar.view.menu entryconfigure 1 -command {
-		global reg_format
+	.reg.menubar.view.menu add radiobutton -variable reg_format \
+		-label Decimal -value d -command {update_registers all}
 
-		set reg_format d
-		update_registers all
-	}
 # Octal menu item
-	.reg.menubar.view.menu entryconfigure 2 -command {
-		global reg_format
+	.reg.menubar.view.menu add radiobutton -variable reg_format \
+		-label Octal -value o -command {update_registers all}
 
-		set reg_format o
-		update_registers all
-	}
 # Natural menu item
-	.reg.menubar.view.menu entryconfigure 3 -command {
-		global reg_format
+	.reg.menubar.view.menu add radiobutton -variable reg_format \
+		-label Natural -value {} -command {update_registers all}
 
-		set reg_format {}
-		update_registers all
-	}
+# Config menu item
+	.reg.menubar.view.menu add separator
+
+	.reg.menubar.view.menu add command -label Config -command {
+		reg_config_menu }
 
 	destroy .reg.label
 
 # Install the reg names
 
 	populate_reg_window
+	update_registers all
 }
 
 # Convert regena into a list of the enabled $regnums
@@ -1534,7 +1563,7 @@ proc build_framework {win {title GDBtk} {label {}}} {
 	${win}.menubar.file.menu add command -label Close \
 		-command "destroy ${win}"
 	${win}.menubar.file.menu add command -label Quit \
-		-command {gdb_cmd quit}
+		-command {catch {gdb_cmd quit}}
 
 	menubutton ${win}.menubar.view -padx 12 -text View \
 		-menu ${win}.menubar.view.menu -underline 0
@@ -1598,36 +1627,53 @@ proc create_source_window {} {
 
 	build_framework .src Source "*No file*"
 
+# First, delete all the old view menu entries
+
+	.src.menubar.view.menu delete 0 last
+
+# Line numbers enable/disable menu item
+	.src.menubar.view.menu add checkbutton -variable line_numbers \
+		-label "Line numbers" -onvalue 1 -offvalue 0 -command {
+		foreach source [array names wins] {
+			if {$source == "Blank"} continue
+			destroy $wins($source)
+			unset wins($source)
+			}
+		set cfile Blank
+		update_listing [gdb_loc]
+		}
+
 	frame .src.row1
 	frame .src.row2
 
 	button .src.start -width 6 -text Start -command \
-		{gdb_cmd {break main}
-		 gdb_cmd {enable delete $bpnum}
-		 gdb_cmd run
+		{catch {gdb_cmd {break main}}
+		 catch {gdb_cmd {enable delete $bpnum}}
+		 catch {gdb_cmd run}
 		 update_ptr }
 	button .src.stop -width 6 -text Stop -fg red -activeforeground red \
 		-state disabled -command gdb_stop
 	button .src.step -width 6 -text Step \
-		-command {gdb_cmd step ; update_ptr}
+		-command {catch {gdb_cmd step} ; update_ptr}
 	button .src.next -width 6 -text Next \
-		-command {gdb_cmd next ; update_ptr}
+		-command {catch {gdb_cmd next} ; update_ptr}
 	button .src.continue -width 6 -text Cont \
-		-command {gdb_cmd continue ; update_ptr}
+		-command {catch {gdb_cmd continue} ; update_ptr}
 	button .src.finish -width 6 -text Finish \
-		-command {gdb_cmd finish ; update_ptr}
-	button .src.up -width 6 -text Up -command {gdb_cmd up ; update_ptr}
+		-command {catch {gdb_cmd finish} ; update_ptr}
+	button .src.up -width 6 -text Up \
+		-command {catch {gdb_cmd up} ; update_ptr}
 	button .src.down -width 6 -text Down \
-		-command {gdb_cmd down ; update_ptr}
+		-command {catch {gdb_cmd down} ; update_ptr}
 	button .src.bottom -width 6 -text Bottom \
-		-command {gdb_cmd {frame 0} ; update_ptr}
+		-command {catch {gdb_cmd {frame 0}} ; update_ptr}
 
 	pack .src.start .src.step .src.continue .src.up .src.bottom \
 		-side left -padx 3 -pady 5 -in .src.row1
 	pack .src.stop .src.next .src.finish .src.down -side left -padx 3 \
 		-pady 5 -in .src.row2
 
-	pack .src.row1 .src.row2 -side top -anchor w
+	pack .src.row2 .src.row1 -side bottom -anchor w -before .src.info
 
 	$wins($cfile) insert 0.0 "  This page intentionally left blank."
 	$wins($cfile) configure -width 88 -state disabled \
@@ -1667,7 +1713,7 @@ proc create_command_window {} {
 
 		%W insert end \n
 		%W yview -pickplace end
-		gdb_cmd $command_line
+		catch "gdb_cmd {$command_line}"
 		set command_line {}
 		update_ptr
 		%W insert end "(gdb) "

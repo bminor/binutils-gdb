@@ -33,6 +33,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* libiberty.h can't declare this one, but evidently we can.  */
 extern char *strsignal PARAMS ((int));
 
+#include "mmalloc.h"
+
 /* For BFD64 and bfd_vma.  */
 #include "bfd.h"
 
@@ -137,28 +139,6 @@ extern int inside_main_func PARAMS ((CORE_ADDR pc));
 /* From ch-lang.c, for the moment. (FIXME) */
 
 extern char *chill_demangle PARAMS ((const char *));
-
-/* From libiberty.a */
-
-extern char *cplus_demangle PARAMS ((const char *, int));
-
-extern char *cplus_mangle_opname PARAMS ((char *, int));
-
-/* From libmmalloc.a (memory mapped malloc library) */
-
-extern PTR mmalloc_attach PARAMS ((int, PTR));
-
-extern PTR mmalloc_detach PARAMS ((PTR));
-
-extern PTR mmalloc PARAMS ((PTR, long));
-
-extern PTR mrealloc PARAMS ((PTR, PTR, long));
-
-extern void mfree PARAMS ((PTR, PTR));
-
-extern int mmalloc_setkey PARAMS ((PTR, int, PTR));
-
-extern PTR mmalloc_getkey PARAMS ((PTR, int));
 
 /* From utils.c */
 
@@ -544,19 +524,9 @@ extern PTR xmmalloc PARAMS ((PTR, long));
 
 extern PTR xmrealloc PARAMS ((PTR, PTR, long));
 
-extern PTR mmalloc PARAMS ((PTR, long));
-
-extern PTR mrealloc PARAMS ((PTR, PTR, long));
-
-extern void mfree PARAMS ((PTR, PTR));
-
-extern int mmcheck PARAMS ((PTR, void (*) (void)));
-
-extern int mmtrace PARAMS ((void));
-
 extern int parse_escape PARAMS ((char **));
 
-extern const char * const reg_names[];
+extern char *reg_names[];
 
 /* Message to be printed before the error message, when an error occurs.  */
 
@@ -862,7 +832,7 @@ extern CORE_ADDR push_word PARAMS ((CORE_ADDR, unsigned LONGEST));
 
 extern void (*init_ui_hook) PARAMS ((void));
 extern void (*command_loop_hook) PARAMS ((void));
-extern void (*fputs_unfiltered_hook) PARAMS ((const char *linebuffer));
+extern void (*fputs_unfiltered_hook) PARAMS ((const char *linebuffer, FILE *stream));
 extern void (*print_frame_info_listing_hook) PARAMS ((struct symtab *s, int line,
 					       int stopline, int noerror));
 extern int (*query_hook) PARAMS (());
@@ -883,6 +853,8 @@ extern int (*target_wait_hook) PARAMS ((int pid,
 
 extern void (*call_command_hook) PARAMS ((struct cmd_list_element *c,
 					  char *cmd, int from_tty));
+
+extern NORETURN void (*error_hook) PARAMS (());
 
 /* Inhibit window interface if non-zero. */
 

@@ -41,6 +41,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 
 /* Temporary variable for SET_TOP_LEVEL.  */
+
 static int top_level_val;
 
 /* Do a setjmp on error_return and quit_return.  catch_errors is
@@ -51,6 +52,14 @@ static int top_level_val;
   (((top_level_val = setjmp (error_return)) \
     ? (PTR) 0 : (PTR) memcpy (quit_return, error_return, sizeof (jmp_buf))) \
    , top_level_val)
+
+/* If nonzero, display time usage both at startup and for each command.  */
+
+int display_time;
+
+/* If nonzero, display space usage both at startup and for each command.  */
+
+int display_space;
 
 extern void gdb_init PARAMS ((void));
 
@@ -92,6 +101,8 @@ main (argc, argv)
   char *homedir, *homeinit;
 
   register int i;
+
+  long time_at_startup = get_run_time ();
 
 /* start-sanitize-mpw */
 #ifdef MPW
@@ -174,13 +185,16 @@ main (argc, argv)
 	{"tty", required_argument, 0, 't'},
 	{"baud", required_argument, 0, 'b'},
 	{"b", required_argument, 0, 'b'},
-	{"nw", no_argument, &no_windows, 1},
-	{"nowindows", no_argument, &no_windows, 1},
+	{"nw", no_argument, &use_windows, 0},
+	{"nowindows", no_argument, &use_windows, 0},
+	{"w", no_argument, &use_windows, 1},
+	{"windows", no_argument, &use_windows, 1},
+	{"statistics", no_argument, 0, 13},
 /* Allow machine descriptions to add more options... */
 #ifdef ADDITIONAL_OPTIONS
 	ADDITIONAL_OPTIONS
 #endif
-	{0, no_argument, 0, 0},
+	{0, no_argument, 0, 0}
       };
 
     while (1)
@@ -211,6 +225,11 @@ main (argc, argv)
 	  case 12:
 	    /* FIXME: what if the syntax is wrong (e.g. not digits)?  */
 	    annotation_level = atoi (optarg);
+	    break;
+	  case 13:
+	    /* Enable the display of both time and space usage.  */
+	    display_time = 1;
+	    display_space = 1;
 	    break;
 	  case 'f':
 	    annotation_level = 1;
@@ -522,6 +541,25 @@ GDB manual (available as on-line info or a printed manual).\n", gdb_stdout);
   BEFORE_MAIN_LOOP_HOOK;
 #endif
 
+  /* Show time and/or space usage.  */
+
+  if (display_time)
+    {
+      long init_time = get_run_time () - time_at_startup;
+
+      printf_unfiltered ("Startup time: %ld.%06ld\n",
+			 init_time / 1000000, init_time % 1000000);
+    }
+
+  if (display_space)
+    {
+      extern char **environ;
+      char *lim = (char *) sbrk (0);
+
+      printf_unfiltered ("Startup size: data size %ld\n",
+			 (long) (lim - (char *) &environ));
+    }
+
   /* The command loop.  */
 
   while (1)
@@ -570,7 +608,12 @@ fputs_unfiltered (linebuffer, stream)
 {
   if (fputs_unfiltered_hook)
     {
-      fputs_unfiltered_hook (linebuffer);
+      /* FIXME: I think we should only be doing this for stdout or stderr.
+	 Either that or we should be passing stream to the hook so it can
+	 deal with it.  If that is cleaned up, this function can go back
+	 into utils.c and the fputs_unfiltered_hook can replace the current
+	 ability to avoid this function by not linking with main.c.  */
+      fputs_unfiltered_hook (linebuffer, stream);
       return;
     }
 

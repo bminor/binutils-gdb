@@ -354,7 +354,7 @@ void (*command_loop_hook) PARAMS ((void));
 
 /* Called instead of fputs for all output.  */
 
-void (*fputs_unfiltered_hook) PARAMS ((const char *linebuffer));
+void (*fputs_unfiltered_hook) PARAMS ((const char *linebuffer, FILE *stream));
 
 /* Called from print_frame_info to list the line we stopped in.  */
 
@@ -391,6 +391,12 @@ int (*target_wait_hook) PARAMS ((int pid, struct target_waitstatus *status));
 
 void (*call_command_hook) PARAMS ((struct cmd_list_element *c, char *cmd,
 				   int from_tty));
+
+/* Takes control from error ().  Typically used to prevent longjmps out of the
+   middle of the GUI.  Usually used in conjunction with a catch routine.  */
+
+NORETURN void (*error_hook) PARAMS (());
+
 
 /* Where to go for return_to_top_level (RETURN_ERROR).  */
 jmp_buf error_return;

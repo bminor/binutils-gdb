@@ -31,6 +31,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <signal.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <setjmp.h>
+#include "top.h"
 
 /* Non-zero means that we're doing the gdbtk interface. */
 int gdbtk = 0;
@@ -53,6 +55,70 @@ null_routine(arg)
 {
 }
 
+static char *saved_output_buf = NULL; /* Start of output buffer */
+static char *saved_output_data_end = NULL; /* Ptr to nul at end of data */
+static int saved_output_buf_free = 0; /* Amount of free space in buffer */
+static char saved_output_static_buf[200]; /* Default buffer */
+
+static void
+start_saving_output ()
+{
+  if (saved_output_buf)
+    abort ();			/* Should always be zero at this point */
+
+  saved_output_buf = saved_output_static_buf;
+  saved_output_data_end = saved_output_buf;
+  *saved_output_data_end = '\000';
+  saved_output_buf_free = sizeof saved_output_static_buf - 1;
+}
+
+static void
+save_output (ptr)
+     const char *ptr;
+{
+  int len;
+  int needed, data_len;
+
+  len = strlen (ptr);
+
+  if (len <= saved_output_buf_free)
+    {
+      strcpy (saved_output_data_end, ptr);
+      saved_output_data_end += len;
+      saved_output_buf_free -= len;
+      return;
+    }
+
+  data_len = saved_output_data_end - saved_output_buf;
+  needed = (data_len + len + 1) * 2;
+
+  if (saved_output_buf == saved_output_static_buf)
+    {
+      char *tmp;
+
+      tmp = xmalloc (needed);
+      strcpy (tmp, saved_output_buf);
+      saved_output_buf = tmp;
+    }
+  else
+    saved_output_buf = xrealloc (saved_output_buf, needed);
+
+  saved_output_data_end = saved_output_buf + data_len;
+  saved_output_buf_free = (needed - data_len) - 1;
+
+  save_output (ptr);
+}
+
+#define get_saved_output() saved_output_buf
+
+static void
+finish_saving_output ()
+{
+  if (saved_output_buf != saved_output_static_buf)
+    free (saved_output_buf);
+
+  saved_output_buf = NULL;
+}
 
 /* This routine redirects the output of fputs_unfiltered so that
    the user can see what's going on in his debugger window. */
@@ -76,16 +142,36 @@ static void
 gdbtk_flush (stream)
      FILE *stream;
 {
+  if (stream != gdb_stdout || saved_output_buf)
+    return;
+
+  /* Flush output from C to tcl land.  */
+
   flush_holdbuf ();
+
+  /* Force immediate screen update */
 
   Tcl_VarEval (interp, "gdbtk_tcl_flush", NULL);
 }
 
 static void
-gdbtk_fputs (ptr)
+gdbtk_fputs (ptr, stream)
      const char *ptr;
+     FILE *stream;
 {
   int len;
+
+  if (stream != gdb_stdout)
+    {
+      Tcl_VarEval (interp, "gdbtk_tcl_fputs_error ", "{", ptr, "}", NULL);
+      return;
+    }
+
+  if (saved_output_buf)
+    {
+      save_output (ptr);
+      return;
+    }
 
   len = strlen (ptr) + 1;
 
@@ -121,43 +207,6 @@ gdbtk_query (args)
   val = atol (interp->result);
   return val;
 }
-
-#if 0
-static char *
-full_filename(symtab)
-     struct symtab *symtab;
-{
-  int pathlen;
-  char *filename;
-
-  if (!symtab)
-    return NULL;
-
-  if (symtab->fullname)
-    return savestring(symtab->fullname, strlen(symtab->fullname));
-
-  if (symtab->filename[0] == '/')
-    return savestring(symtab->filename, strlen(symtab->filename));
-
-  if (symtab->dirname)
-    pathlen = strlen(symtab->dirname);
-  else
-    pathlen = 0;
-  if (symtab->filename)
-    pathlen += strlen(symtab->filename);
-
-  filename = xmalloc(pathlen+1);
-
-  if (symtab->dirname)
-    strcpy(filename, symtab->dirname);
-  else
-    *filename = '\000';
-  if (symtab->filename)
-    strcat(filename, symtab->filename);
-
-  return filename;
-}
-#endif
 
 static void
 breakpoint_notify(b, action)
@@ -420,22 +469,6 @@ gdb_regnames (clientData, interp, argc, argv)
   return map_arg_registers (argc, argv, get_register_name, 0);
 }
 
-static char reg_value[200];
-static char *reg_valp = reg_value;
-
-static void
-save_reg_value (ptr)
-     const char *ptr;
-{
-  int len;
-
-  len = strlen (ptr);
-
-  strncpy (reg_valp, ptr, len + 1);
-
-  reg_valp += len;
-}
-
 #ifndef REGISTER_CONVERTIBLE
 #define REGISTER_CONVERTIBLE(x) (0 != 0)
 #endif
@@ -462,9 +495,7 @@ get_register (regnum, fp)
       return;
     }
 
-  fputs_unfiltered_hook = save_reg_value;
-  flush_hook = 0;
-  reg_valp = reg_value;
+  start_saving_output ();	/* Start collecting stdout */
 
   /* Convert raw data to virtual format if necessary.  */
 
@@ -479,10 +510,9 @@ get_register (regnum, fp)
   val_print (REGISTER_VIRTUAL_TYPE (regnum), virtual_buffer, 0,
 	     gdb_stdout, format, 1, 0, Val_pretty_default);
 
-  fputs_unfiltered_hook = gdbtk_fputs;
-  flush_hook = gdbtk_flush;
+  Tcl_AppendElement (interp, get_saved_output ());
 
-  Tcl_AppendElement (interp, reg_value);
+  finish_saving_output ();	/* Set stdout back to normal */
 }
 
 static int
@@ -552,15 +582,6 @@ gdb_changed_register_list (clientData, interp, argc, argv)
   return map_arg_registers (argc, argv, register_changed_p, NULL);
 }
 
-static int
-gdb_cmd_stub (cmd)
-     char *cmd;
-{
-  execute_command (cmd, 1);
-
-  return 1;			/* Indicate success */
-}
-
 /* This implements the TCL command `gdb_cmd', which sends it's argument into
    the GDB command scanner.  */
 
@@ -571,38 +592,70 @@ gdb_cmd (clientData, interp, argc, argv)
      int argc;
      char *argv[];
 {
-  int val;
-  struct cleanup *old_chain;
-
   if (argc != 2)
     {
       Tcl_SetResult (interp, "wrong # args", TCL_STATIC);
       return TCL_ERROR;
     }
 
-  old_chain = make_cleanup (null_routine, 0);
-
-  val = catch_errors (gdb_cmd_stub, argv[1], "", RETURN_MASK_ERROR);
-
-  /* In case of an error, we may need to force the GUI into idle mode because
-     gdbtk_call_command may have bombed out while in the command routine.  */
-
-  if (val == 0)
-    Tcl_VarEval (interp, "gdbtk_tcl_idle", NULL);
+  execute_command (argv[1], 1);
 
   bpstat_do_actions (&stop_bpstat);
-  do_cleanups (old_chain);
 
   /* Drain all buffered command output */
 
-  gdb_flush (gdb_stderr);
   gdb_flush (gdb_stdout);
 
-  /* We could base the return value on val, but that would require most users
-     to use catch.  Since GDB errors are already being handled elsewhere, I
-     see no reason to pass them up to the caller. */
-
   return TCL_OK;
+}
+
+/* This routine acts as a top-level for all GDB code called by tcl/Tk.  It
+   handles cleanups, and calls to return_to_top_level (usually via error).
+   This is necessary in order to prevent a longjmp out of the bowels of Tk,
+   possibly leaving things in a bad state.  Since this routine can be called
+   recursively, it needs to save and restore the contents of the jmp_buf as
+   necessary.  */
+
+static int
+call_wrapper (clientData, interp, argc, argv)
+     ClientData clientData;
+     Tcl_Interp *interp;
+     int argc;
+     char *argv[];
+{
+  int val;
+  struct cleanup *saved_cleanup_chain;
+  Tcl_CmdProc *func;
+  jmp_buf saved_error_return;
+
+  func = (Tcl_CmdProc *)clientData;
+  memcpy (saved_error_return, error_return, sizeof (jmp_buf));
+
+  saved_cleanup_chain = save_cleanups ();
+
+  if (!setjmp (error_return))
+    val = func (clientData, interp, argc, argv);
+  else
+    {
+      val = TCL_ERROR;		/* Flag an error for TCL */
+
+      finish_saving_output ();	/* Restore stdout to normal */
+
+      gdb_flush (gdb_stderr);	/* Flush error output */
+
+/* In case of an error, we may need to force the GUI into idle mode because
+   gdbtk_call_command may have bombed out while in the command routine.  */
+
+      Tcl_VarEval (interp, "gdbtk_tcl_idle", NULL);
+    }
+
+  do_cleanups (ALL_CLEANUPS);
+
+  restore_cleanups (saved_cleanup_chain);
+
+  memcpy (error_return, saved_error_return, sizeof (jmp_buf));
+
+  return val;
 }
 
 static int
@@ -740,16 +793,18 @@ gdbtk_init ()
   if (Tk_Init(interp) != TCL_OK)
     error ("Tk_Init failed: %s", interp->result);
 
-  Tcl_CreateCommand (interp, "gdb_cmd", gdb_cmd, NULL, NULL);
-  Tcl_CreateCommand (interp, "gdb_loc", gdb_loc, NULL, NULL);
-  Tcl_CreateCommand (interp, "gdb_sourcelines", gdb_sourcelines, NULL, NULL);
-  Tcl_CreateCommand (interp, "gdb_listfiles", gdb_listfiles, NULL, NULL);
-  Tcl_CreateCommand (interp, "gdb_stop", gdb_stop, NULL, NULL);
-  Tcl_CreateCommand (interp, "gdb_regnames", gdb_regnames, NULL, NULL);
-  Tcl_CreateCommand (interp, "gdb_fetch_registers", gdb_fetch_registers, NULL,
+  Tcl_CreateCommand (interp, "gdb_cmd", call_wrapper, gdb_cmd, NULL);
+  Tcl_CreateCommand (interp, "gdb_loc", call_wrapper, gdb_loc, NULL);
+  Tcl_CreateCommand (interp, "gdb_sourcelines", call_wrapper, gdb_sourcelines,
 		     NULL);
-  Tcl_CreateCommand (interp, "gdb_changed_register_list",
-		     gdb_changed_register_list, NULL, NULL);
+  Tcl_CreateCommand (interp, "gdb_listfiles", call_wrapper, gdb_listfiles,
+		     NULL);
+  Tcl_CreateCommand (interp, "gdb_stop", call_wrapper, gdb_stop, NULL);
+  Tcl_CreateCommand (interp, "gdb_regnames", call_wrapper, gdb_regnames, NULL);
+  Tcl_CreateCommand (interp, "gdb_fetch_registers", call_wrapper,
+		     gdb_fetch_registers, NULL);
+  Tcl_CreateCommand (interp, "gdb_changed_register_list", call_wrapper,
+		     gdb_changed_register_list, NULL);
 
   gdbtk_filename = getenv ("GDBTK_FILENAME");
   if (!gdbtk_filename)
