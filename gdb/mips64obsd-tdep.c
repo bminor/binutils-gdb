@@ -140,8 +140,6 @@ mips64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tramp_frame_prepend_unwinder (gdbarch, &mips64obsd_sigframe);
 
-  set_gdbarch_software_single_step (gdbarch, mips_software_single_step);
-
   /* OpenBSD/mips64 has SVR4-style shared libraries.  */
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_lp64_fetch_link_map_offsets);
