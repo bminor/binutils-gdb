@@ -1091,29 +1091,19 @@ get_rtsl_operands (char *ptr, struct h8_op *operand)
       as_bad (_("expected register"));
       return;
     }
-  if (type == 1)
+  ptr += len;
+  if (*ptr == '-')
     {
-      ptr += len;
-      if (*ptr++ != '-')
-	{
-	  as_bad (_("expected register list"));
-	  return;
-	}
-      len = parse_reg (ptr, &mode, &num2, SRC);
+      len = parse_reg (++ptr, &mode, &num2, SRC);
       if (len == 0 || (mode & MODE) != REG)
 	{
 	  as_bad (_("expected register"));
 	  return;
 	}
       ptr += len;
-      if (*ptr++ != ')')
-	{
-	  as_bad (_("expected closing paren"));
-	  return;
-	}
       /* CONST_xxx are used as placeholders in the opcode table.  */
       num = num2 - num;
-      if (num < 1 || num > 3)
+      if (num < 0 || num > 3)
 	{
 	  as_bad (_("invalid register list"));
 	  return;
@@ -1121,6 +1111,11 @@ get_rtsl_operands (char *ptr, struct h8_op *operand)
     }
   else
     num2 = num, num = 0;
+  if (type == 1 && *ptr++ != ')')
+    {
+      as_bad (_("expected closing paren"));
+      return;
+    }
   operand[0].mode = RS32;
   operand[1].mode = RD32;
   operand[0].reg = num;

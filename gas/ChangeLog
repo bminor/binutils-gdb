@@ -1,5 +1,10 @@
 2003-06-10  Richard Sandiford  <rsandifo@redhat.com>
 
+	* config/tc-h8300.c (get_rtsl_operands): Accept unbracketed register
+	lists.  Allow single-register ranges.
+
+2003-06-10  Richard Sandiford  <rsandifo@redhat.com>
+
 	* config/tc-h8300.c (h8300sxnmode): New.
 	(md_pseudo_table): Add .h8300sxn entry.
 

@@ -1,5 +1,10 @@
 2003-06-10  Richard Sandiford  <rsandifo@redhat.com>
 
+	* gas/h8300/h8sx_rtsl.[sd]: New test.
+	* gas/h8300/h8300.exp: Run it.
+
+2003-06-10  Richard Sandiford  <rsandifo@redhat.com>
+
 	* gas/h8300/h8sx_disp2.[sd]: New test.
 	* gas/h8300/h8300.exp: Run it.
 
