@@ -1,3 +1,15 @@
+Wed Mar 30 00:31:49 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.t02/whatis.exp, gdb.t08/opaque.exp:  Add XFAILs for
+	sequent dynix.
+	* gdb.t06/signals.exp:  Add clear_xfail for sequent dynix.
+	* gdb.t15/funcargs.exp:  Conditionally step again to really
+	finish from marker_call_with_trampolines. Handle the case where
+	the first step from within call_with_trampolines already steps
+	us back to main.
+	* gdb.t15/gdbme.c:  Add comment to closing brace of
+	call_with_trampolines for funcargs.exp.
+
 Tue Mar 29 23:55:27 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gdb.t07/watchpoint.exp (test_watchpoint_triggered_in_syscall): 
