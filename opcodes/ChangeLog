@@ -1,3 +1,29 @@
+start-sanitize-arc
+Mon Dec 19 12:35:51 1994  Doug Evans  <dje@canuck.cygnus.com>
+
+	* arc-opc.c (insertion fns): Pass pointer to value's table entry.
+	All uses changed.
+	(extraction fns): Insn argument now array of two words.  Return pointer
+	to value's table entry.  All uses changed.
+	(arc_opcode_lookup_suffix): Exported for arc-dis.c.
+	(insert_multshift, extract_multshift): New fns.
+	(arc_operands): Add support for cache bypass suffix.  Add support for
+	predefined aux regs.  Modifier bits moved to flags field.
+	(arc_opcodes): Likewise.
+	Add mul/mulu/shift insns.  Syntax of zero/sign extension insns changed.
+	New insn rlc.  Update to syntax in programmer's manual.
+	(arc_reg_names): Fix typo in lp_count.  Add predefined aux regs.
+	(arc_suffixes): New synonyms lo,hs for cs,cc.  New suffix for cache
+	bypass.
+	(arc_opcode_init_tables): New argument to indicate cpu type.
+	(insert_reg): Handle predefined aux regs.
+	(extract_reg): Likewise.
+	(lookup_register): New fn.
+	* arc-dis.c (arc_condition_codes): Deleted.
+	(print_insn_arc): Handle insns with 32 bit immediate constants better.
+	Clean up modifier handling.  Handle predefined aux regs.
+end-sanitize-arc
+
 Thu Dec  8 18:23:31 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* alpha-dis.c (print_insn_alpha): Handle call_pal instruction, and
