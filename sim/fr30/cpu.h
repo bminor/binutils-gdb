@@ -2,9 +2,9 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright (C) 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+Copyright 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
 
-This file is part of the GNU Simulators.
+This file is part of the GNU simulators.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -206,33 +206,33 @@ union sem_fields {
   } sfmt_call;
   struct { /*  */
     SI f_s10;
-    unsigned char in_h_gr_15;
-    unsigned char out_h_gr_15;
+    unsigned char in_h_gr_SI_15;
+    unsigned char out_h_gr_SI_15;
   } sfmt_addsp;
   struct { /*  */
     USI f_dir10;
-    unsigned char in_h_gr_15;
-    unsigned char out_h_gr_15;
+    unsigned char in_h_gr_SI_15;
+    unsigned char out_h_gr_SI_15;
   } sfmt_dmovr15pi;
   struct { /*  */
     UINT f_dir8;
-    unsigned char in_h_gr_13;
-    unsigned char out_h_gr_13;
+    unsigned char in_h_gr_SI_13;
+    unsigned char out_h_gr_SI_13;
   } sfmt_dmovr13pib;
   struct { /*  */
     USI f_dir9;
-    unsigned char in_h_gr_13;
-    unsigned char out_h_gr_13;
+    unsigned char in_h_gr_SI_13;
+    unsigned char out_h_gr_SI_13;
   } sfmt_dmovr13pih;
   struct { /*  */
     USI f_dir10;
-    unsigned char in_h_gr_13;
-    unsigned char out_h_gr_13;
+    unsigned char in_h_gr_SI_13;
+    unsigned char out_h_gr_SI_13;
   } sfmt_dmovr13pi;
   struct { /*  */
     UINT f_Rs2;
-    unsigned char in_h_gr_15;
-    unsigned char out_h_gr_15;
+    unsigned char in_h_gr_SI_15;
+    unsigned char out_h_gr_SI_15;
   } sfmt_ldr15dr;
   struct { /*  */
     SI* i_Ri;
@@ -266,79 +266,79 @@ union sem_fields {
   } sfmt_ldi8;
   struct { /*  */
     USI f_u10;
-    unsigned char in_h_gr_14;
-    unsigned char in_h_gr_15;
-    unsigned char out_h_gr_14;
-    unsigned char out_h_gr_15;
+    unsigned char in_h_gr_SI_14;
+    unsigned char in_h_gr_SI_15;
+    unsigned char out_h_gr_SI_14;
+    unsigned char out_h_gr_SI_15;
   } sfmt_enter;
   struct { /*  */
     SI* i_Ri;
     UINT f_Ri;
     unsigned char in_Ri;
-    unsigned char in_h_gr_15;
-    unsigned char out_h_gr_15;
+    unsigned char in_h_gr_SI_15;
+    unsigned char out_h_gr_SI_15;
   } sfmt_str15gr;
   struct { /*  */
     SI* i_Ri;
     UINT f_Ri;
     USI f_udisp6;
     unsigned char in_Ri;
-    unsigned char in_h_gr_15;
+    unsigned char in_h_gr_SI_15;
   } sfmt_str15;
   struct { /*  */
     SI* i_Ri;
     INT f_disp8;
     UINT f_Ri;
     unsigned char in_Ri;
-    unsigned char in_h_gr_14;
+    unsigned char in_h_gr_SI_14;
   } sfmt_str14b;
   struct { /*  */
     SI* i_Ri;
     SI f_disp9;
     UINT f_Ri;
     unsigned char in_Ri;
-    unsigned char in_h_gr_14;
+    unsigned char in_h_gr_SI_14;
   } sfmt_str14h;
   struct { /*  */
     SI* i_Ri;
     SI f_disp10;
     UINT f_Ri;
     unsigned char in_Ri;
-    unsigned char in_h_gr_14;
+    unsigned char in_h_gr_SI_14;
   } sfmt_str14;
   struct { /*  */
     SI* i_Ri;
     UINT f_Ri;
-    unsigned char in_h_gr_15;
+    unsigned char in_h_gr_SI_15;
     unsigned char out_Ri;
-    unsigned char out_h_gr_15;
+    unsigned char out_h_gr_SI_15;
   } sfmt_ldr15gr;
   struct { /*  */
     SI* i_Ri;
     UINT f_Ri;
     USI f_udisp6;
-    unsigned char in_h_gr_15;
+    unsigned char in_h_gr_SI_15;
     unsigned char out_Ri;
   } sfmt_ldr15;
   struct { /*  */
     SI* i_Ri;
     INT f_disp8;
     UINT f_Ri;
-    unsigned char in_h_gr_14;
+    unsigned char in_h_gr_SI_14;
     unsigned char out_Ri;
   } sfmt_ldr14ub;
   struct { /*  */
     SI* i_Ri;
     SI f_disp9;
     UINT f_Ri;
-    unsigned char in_h_gr_14;
+    unsigned char in_h_gr_SI_14;
     unsigned char out_Ri;
   } sfmt_ldr14uh;
   struct { /*  */
     SI* i_Ri;
     SI f_disp10;
     UINT f_Ri;
-    unsigned char in_h_gr_14;
+    unsigned char in_h_gr_SI_14;
     unsigned char out_Ri;
   } sfmt_ldr14;
   struct { /*  */
@@ -362,7 +362,7 @@ union sem_fields {
     UINT f_Rj;
     unsigned char in_Ri;
     unsigned char in_Rj;
-    unsigned char in_h_gr_13;
+    unsigned char in_h_gr_SI_13;
   } sfmt_str13;
   struct { /*  */
     SI* i_Ri;
@@ -370,7 +370,7 @@ union sem_fields {
     UINT f_Ri;
     UINT f_Rj;
     unsigned char in_Rj;
-    unsigned char in_h_gr_13;
+    unsigned char in_h_gr_SI_13;
     unsigned char out_Ri;
   } sfmt_ldr13;
   struct { /*  */
@@ -384,53 +384,53 @@ union sem_fields {
   } sfmt_add;
   struct { /*  */
     UINT f_reglist_hi_st;
-    unsigned char in_h_gr_10;
-    unsigned char in_h_gr_11;
-    unsigned char in_h_gr_12;
-    unsigned char in_h_gr_13;
-    unsigned char in_h_gr_14;
-    unsigned char in_h_gr_15;
-    unsigned char in_h_gr_8;
-    unsigned char in_h_gr_9;
-    unsigned char out_h_gr_15;
+    unsigned char in_h_gr_SI_10;
+    unsigned char in_h_gr_SI_11;
+    unsigned char in_h_gr_SI_12;
+    unsigned char in_h_gr_SI_13;
+    unsigned char in_h_gr_SI_14;
+    unsigned char in_h_gr_SI_15;
+    unsigned char in_h_gr_SI_8;
+    unsigned char in_h_gr_SI_9;
+    unsigned char out_h_gr_SI_15;
   } sfmt_stm1;
   struct { /*  */
     UINT f_reglist_hi_ld;
-    unsigned char in_h_gr_15;
-    unsigned char out_h_gr_10;
-    unsigned char out_h_gr_11;
-    unsigned char out_h_gr_12;
-    unsigned char out_h_gr_13;
-    unsigned char out_h_gr_14;
-    unsigned char out_h_gr_15;
-    unsigned char out_h_gr_8;
-    unsigned char out_h_gr_9;
+    unsigned char in_h_gr_SI_15;
+    unsigned char out_h_gr_SI_10;
+    unsigned char out_h_gr_SI_11;
+    unsigned char out_h_gr_SI_12;
+    unsigned char out_h_gr_SI_13;
+    unsigned char out_h_gr_SI_14;
+    unsigned char out_h_gr_SI_15;
+    unsigned char out_h_gr_SI_8;
+    unsigned char out_h_gr_SI_9;
   } sfmt_ldm1;
   struct { /*  */
     UINT f_reglist_low_st;
-    unsigned char in_h_gr_0;
-    unsigned char in_h_gr_1;
-    unsigned char in_h_gr_15;
-    unsigned char in_h_gr_2;
-    unsigned char in_h_gr_3;
-    unsigned char in_h_gr_4;
-    unsigned char in_h_gr_5;
-    unsigned char in_h_gr_6;
-    unsigned char in_h_gr_7;
-    unsigned char out_h_gr_15;
+    unsigned char in_h_gr_SI_0;
+    unsigned char in_h_gr_SI_1;
+    unsigned char in_h_gr_SI_15;
+    unsigned char in_h_gr_SI_2;
+    unsigned char in_h_gr_SI_3;
+    unsigned char in_h_gr_SI_4;
+    unsigned char in_h_gr_SI_5;
+    unsigned char in_h_gr_SI_6;
+    unsigned char in_h_gr_SI_7;
+    unsigned char out_h_gr_SI_15;
   } sfmt_stm0;
   struct { /*  */
     UINT f_reglist_low_ld;
-    unsigned char in_h_gr_15;
-    unsigned char out_h_gr_0;
-    unsigned char out_h_gr_1;
-    unsigned char out_h_gr_15;
-    unsigned char out_h_gr_2;
-    unsigned char out_h_gr_3;
-    unsigned char out_h_gr_4;
-    unsigned char out_h_gr_5;
-    unsigned char out_h_gr_6;
-    unsigned char out_h_gr_7;
+    unsigned char in_h_gr_SI_15;
+    unsigned char out_h_gr_SI_0;
+    unsigned char out_h_gr_SI_1;
+    unsigned char out_h_gr_SI_15;
+    unsigned char out_h_gr_SI_2;
+    unsigned char out_h_gr_SI_3;
+    unsigned char out_h_gr_SI_4;
+    unsigned char out_h_gr_SI_5;
+    unsigned char out_h_gr_SI_6;
+    unsigned char out_h_gr_SI_7;
   } sfmt_ldm0;
 #if WITH_SCACHE_PBB
   /* Writeback handler.  */
@@ -768,7 +768,7 @@ struct scache {
   f_op3 = EXTRACT_MSB0_UINT (insn, 16, 8, 4); \
   f_CRj = (0|(EXTRACT_MSB0_UINT (word_1, 16, 8, 4) << 0)); \
   f_u4c = EXTRACT_MSB0_UINT (insn, 16, 12, 4); \
-  f_CRi = (0|(EXTRACT_MSB0_UINT (word_1, 16, 12, 16) << 0)); \
+  f_CRi = (0|(EXTRACT_MSB0_UINT (word_1, 16, 12, 4) << 0)); \
 
 #define EXTRACT_IFMT_COPLD_VARS \
   UINT f_op1; \
@@ -790,7 +790,7 @@ struct scache {
   f_op3 = EXTRACT_MSB0_UINT (insn, 16, 8, 4); \
   f_Rjc = (0|(EXTRACT_MSB0_UINT (word_1, 16, 8, 4) << 0)); \
   f_u4c = EXTRACT_MSB0_UINT (insn, 16, 12, 4); \
-  f_CRi = (0|(EXTRACT_MSB0_UINT (word_1, 16, 12, 16) << 0)); \
+  f_CRi = (0|(EXTRACT_MSB0_UINT (word_1, 16, 12, 4) << 0)); \
 
 #define EXTRACT_IFMT_COPST_VARS \
   UINT f_op1; \
@@ -812,7 +812,7 @@ struct scache {
   f_op3 = EXTRACT_MSB0_UINT (insn, 16, 8, 4); \
   f_CRj = (0|(EXTRACT_MSB0_UINT (word_1, 16, 8, 4) << 0)); \
   f_u4c = EXTRACT_MSB0_UINT (insn, 16, 12, 4); \
-  f_Ric = (0|(EXTRACT_MSB0_UINT (word_1, 16, 12, 16) << 0)); \
+  f_Ric = (0|(EXTRACT_MSB0_UINT (word_1, 16, 12, 4) << 0)); \
 
 #define EXTRACT_IFMT_ADDSP_VARS \
   UINT f_op1; \

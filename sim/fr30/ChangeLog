@@ -1,3 +1,16 @@
+2001-11-14  Dave Brolley  <brolley@redhat.com>
+
+	* arch.c: Regenerate.
+	* arch.h: Regenerate.
+	* cpu.c: Regenerate.
+	* cpu.h: Regenerate.
+	* cpuall.h: Regenerate.
+	* decode.c: Regenerate.
+	* decode.h: Regenerate.
+	* model.c: Regenerate.
+	* sem-switch.c: Regenerate.
+	* sem.c: Regenerate.
+
 2001-07-05  Ben Elliston  <bje@redhat.com>
 
 	* Makefile.in (stamp-arch): Use $(CGEN_CPU_DIR).

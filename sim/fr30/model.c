@@ -2,9 +2,9 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright (C) 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+Copyright 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
 
-This file is part of the GNU Simulators.
+This file is part of the GNU simulators.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -3984,7 +3984,7 @@ fr30_init_cpu (SIM_CPU *cpu)
   CPU_PC_FETCH (cpu) = fr30bf_h_pc_get;
   CPU_PC_STORE (cpu) = fr30bf_h_pc_set;
   CPU_GET_IDATA (cpu) = fr30bf_get_idata;
-  CPU_MAX_INSNS (cpu) = FR30BF_INSN_MAX;
+  CPU_MAX_INSNS (cpu) = FR30BF_INSN_XCHB + 1;
   CPU_INSN_NAME (cpu) = cgen_insn_name;
   CPU_FULL_ENGINE_FN (cpu) = fr30bf_engine_run_full;
 #if WITH_FAST
