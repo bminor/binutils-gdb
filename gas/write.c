@@ -1017,7 +1017,6 @@ write_relocs (abfd, sec, xxx)
   for (fixp = seginfo->fix_root; fixp != (fixS *) NULL; fixp = fixp->fx_next)
     {
       arelent **reloc;
-      char *data;
       bfd_reloc_status_type s;
       symbolS *sym;
       int j;
@@ -1053,7 +1052,6 @@ write_relocs (abfd, sec, xxx)
 	  relocs[i++] = reloc[j];
 	  assert (i <= n);
 	}
-      data = fixp->fx_frag->fr_literal + fixp->fx_where;
       if (fixp->fx_where + fixp->fx_size
 	  > fixp->fx_frag->fr_fix + fixp->fx_frag->fr_offset)
 	as_bad_where (fixp->fx_file, fixp->fx_line,
