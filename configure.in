@@ -58,7 +58,7 @@ esac
 case "${target_cpu}" in
 	mips)  configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
 	;;
-	rs6000)configdirs=`echo ${configdirs} | sed -e 's/gas//'`
+	rs6000)configdirs=`echo ${configdirs} | sed -e 's/gas//;s/binutils//;s/ld//'`
 esac
 
 target_makefile_frag=config/mt-${bfd_target}
@@ -68,3 +68,4 @@ target_makefile_frag=config/mt-${bfd_target}
 # fill-column: 131
 # End:
 #
+
