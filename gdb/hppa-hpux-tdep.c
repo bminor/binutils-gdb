@@ -24,6 +24,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "osabi.h"
 #include "gdb_string.h"
 #include "frame.h"
+#include "frame-unwind.h"
+#include "trad-frame.h"
 #include "symtab.h"
 #include "objfiles.h"
 #include "inferior.h"
@@ -32,6 +34,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include <dl.h>
 #include <machine/save_state.h>
+
+#ifndef offsetof
+#define offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
+#endif
 
 /* Forward declarations.  */
 extern void _initialize_hppa_hpux_tdep (void);
@@ -44,125 +50,6 @@ typedef struct
     CORE_ADDR return_val;
   }
 args_for_find_stub;
-
-/* FIXME: brobecker 2002-12-25.  The following functions will eventually
-   become static, after the multiarching conversion is done.  */
-int hppa_hpux_pc_in_sigtramp (CORE_ADDR pc, char *name);
-void hppa32_hpux_frame_saved_pc_in_sigtramp (struct frame_info *fi,
-                                             CORE_ADDR *tmp);
-void hppa32_hpux_frame_base_before_sigtramp (struct frame_info *fi,
-                                             CORE_ADDR *tmp);
-void hppa32_hpux_frame_find_saved_regs_in_sigtramp (struct frame_info *fi,
-                                                    CORE_ADDR *fsr);
-void hppa64_hpux_frame_saved_pc_in_sigtramp (struct frame_info *fi,
-                                             CORE_ADDR *tmp);
-void hppa64_hpux_frame_base_before_sigtramp (struct frame_info *fi,
-                                             CORE_ADDR *tmp);
-void hppa64_hpux_frame_find_saved_regs_in_sigtramp (struct frame_info *fi,
-                                                    CORE_ADDR *fsr);
-
-int
-hppa_hpux_pc_in_sigtramp (CORE_ADDR pc, char *name)
-{
-  /* Actually, for a PA running HPUX the kernel calls the signal handler
-     without an intermediate trampoline.  Luckily the kernel always sets
-     the return pointer for the signal handler to point to _sigreturn.  */
-  return (name && (strcmp ("_sigreturn", name) == 0));
-}
-
-/* For hppa32_hpux_frame_saved_pc_in_sigtramp, 
-   hppa32_hpux_frame_base_before_sigtramp and
-   hppa32_hpux_frame_find_saved_regs_in_sigtramp:
-
-   The signal context structure pointer is always saved at the base
-   of the frame which "calls" the signal handler.  We only want to find
-   the hardware save state structure, which lives 10 32bit words into
-   sigcontext structure.
-
-   Within the hardware save state structure, registers are found in the
-   same order as the register numbers in GDB.
-
-   At one time we peeked at %r31 rather than the PC queues to determine
-   what instruction took the fault.  This was done on purpose, but I don't
-   remember why.  Looking at the PC queues is really the right way, and
-   I don't remember why that didn't work when this code was originally
-   written.  */
-
-void
-hppa32_hpux_frame_saved_pc_in_sigtramp (struct frame_info *fi, CORE_ADDR *tmp)
-{
-  *tmp = read_memory_integer (get_frame_base (fi) + (43 * 4), 4);
-}
-
-void
-hppa32_hpux_frame_base_before_sigtramp (struct frame_info *fi,
-                                        CORE_ADDR *tmp)
-{
-  *tmp = read_memory_integer (get_frame_base (fi) + (40 * 4), 4);
-}
-
-void
-hppa32_hpux_frame_find_saved_regs_in_sigtramp (struct frame_info *fi,
-					       CORE_ADDR *fsr)
-{
-  int i;
-  const CORE_ADDR tmp = get_frame_base (fi) + (10 * 4);
-
-  for (i = 0; i < NUM_REGS; i++)
-    {
-      if (i == HPPA_SP_REGNUM)
-	fsr[HPPA_SP_REGNUM] = read_memory_integer (tmp + HPPA_SP_REGNUM * 4, 4);
-      else
-	fsr[i] = tmp + i * 4;
-    }
-}
-
-/* For hppa64_hpux_frame_saved_pc_in_sigtramp, 
-   hppa64_hpux_frame_base_before_sigtramp and
-   hppa64_hpux_frame_find_saved_regs_in_sigtramp:
-
-   These functions are the PA64 ABI equivalents of the 32bits counterparts
-   above. See the comments there.
-
-   For PA64, the save_state structure is at an offset of 24 32-bit words
-   from the sigcontext structure. The 64 bit general registers are at an
-   offset of 640 bytes from the beginning of the save_state structure,
-   and the floating pointer register are at an offset of 256 bytes from
-   the beginning of the save_state structure.  */
-
-void
-hppa64_hpux_frame_saved_pc_in_sigtramp (struct frame_info *fi, CORE_ADDR *tmp)
-{
-  *tmp = read_memory_integer
-           (get_frame_base (fi) + (24 * 4) + 640 + (33 * 8), 8);
-}
-
-void
-hppa64_hpux_frame_base_before_sigtramp (struct frame_info *fi,
-                                        CORE_ADDR *tmp)
-{
-  *tmp = read_memory_integer
-           (get_frame_base (fi) + (24 * 4) + 640 + (30 * 8), 8);
-}
-
-void
-hppa64_hpux_frame_find_saved_regs_in_sigtramp (struct frame_info *fi,
-					       CORE_ADDR *fsr)
-{
-  int i;
-  const CORE_ADDR tmp1 = get_frame_base (fi) + (24 * 4) + 640;
-  const CORE_ADDR tmp2 = get_frame_base (fi) + (24 * 4) + 256;
-
-  for (i = 0; i < NUM_REGS; i++)
-    {
-      if (i == HPPA_SP_REGNUM)
-        fsr[HPPA_SP_REGNUM] = read_memory_integer (tmp1 + HPPA_SP_REGNUM * 8, 8);
-      else if (i >= HPPA_FP0_REGNUM)
-        fsr[i] = tmp2 + (i - HPPA_FP0_REGNUM) * 8;
-      else
-        fsr[i] = tmp1 + i * 8;
-    }
-}
 
 /* Return one if PC is in the call path of a trampoline, else return zero.
 
@@ -1222,6 +1109,155 @@ child_get_current_exception_event (void)
   return &current_ex_event;
 }
 
+/* Signal frames.  */
+struct hppa_hpux_sigtramp_unwind_cache
+{
+  CORE_ADDR base;
+  struct trad_frame_saved_reg *saved_regs;
+};
+
+static int hppa_hpux_tramp_reg[] = {
+  HPPA_SAR_REGNUM,
+  HPPA_PCOQ_HEAD_REGNUM,
+  HPPA_PCSQ_HEAD_REGNUM,
+  HPPA_PCOQ_TAIL_REGNUM,
+  HPPA_PCSQ_TAIL_REGNUM,
+  HPPA_EIEM_REGNUM,
+  HPPA_IIR_REGNUM,
+  HPPA_ISR_REGNUM,
+  HPPA_IOR_REGNUM,
+  HPPA_IPSW_REGNUM,
+  -1,
+  HPPA_SR4_REGNUM,
+  HPPA_SR4_REGNUM + 1,
+  HPPA_SR4_REGNUM + 2,
+  HPPA_SR4_REGNUM + 3,
+  HPPA_SR4_REGNUM + 4,
+  HPPA_SR4_REGNUM + 5,
+  HPPA_SR4_REGNUM + 6,
+  HPPA_SR4_REGNUM + 7,
+  HPPA_RCR_REGNUM,
+  HPPA_PID0_REGNUM,
+  HPPA_PID1_REGNUM,
+  HPPA_CCR_REGNUM,
+  HPPA_PID2_REGNUM,
+  HPPA_PID3_REGNUM,
+  HPPA_TR0_REGNUM,
+  HPPA_TR0_REGNUM + 1,
+  HPPA_TR0_REGNUM + 2,
+  HPPA_CR27_REGNUM
+};
+
+static struct hppa_hpux_sigtramp_unwind_cache *
+hppa_hpux_sigtramp_frame_unwind_cache (struct frame_info *next_frame,
+				       void **this_cache)
+
+{
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  struct hppa_hpux_sigtramp_unwind_cache *info;
+  unsigned int flag;
+  CORE_ADDR sp, scptr;
+  int i, incr, off, szoff;
+
+  if (*this_cache)
+    return *this_cache;
+
+  info = FRAME_OBSTACK_ZALLOC (struct hppa_hpux_sigtramp_unwind_cache);
+  *this_cache = info;
+  info->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+
+  sp = frame_unwind_register_unsigned (next_frame, HPPA_SP_REGNUM);
+
+  scptr = sp - 1352;
+  off = scptr;
+
+  /* See /usr/include/machine/save_state.h for the structure of the save_state_t
+     structure. */
+  
+  flag = read_memory_unsigned_integer(scptr, 4);
+    
+  if (!(flag & 0x40))
+    {
+      /* Narrow registers. */
+      off = scptr + offsetof (save_state_t, ss_narrow);
+      incr = 4;
+      szoff = 0;
+    }
+  else
+    {
+      /* Wide registers. */
+      off = scptr + offsetof (save_state_t, ss_wide) + 8;
+      incr = 8;
+      szoff = (tdep->bytes_per_address == 4 ? 4 : 0);
+    }
+
+  for (i = 1; i < 32; i++)
+    {
+      info->saved_regs[HPPA_R0_REGNUM + i].addr = off + szoff;
+      off += incr;
+    }
+
+  for (i = 0; 
+       i < sizeof(hppa_hpux_tramp_reg) / sizeof(hppa_hpux_tramp_reg[0]);
+       i++)
+    {
+      if (hppa_hpux_tramp_reg[i] > 0)
+        info->saved_regs[hppa_hpux_tramp_reg[i]].addr = off + szoff;
+      off += incr;
+    }
+
+  /* TODO: fp regs */
+
+  info->base = frame_unwind_register_unsigned (next_frame, HPPA_SP_REGNUM);
+
+  return info;
+}
+
+static void
+hppa_hpux_sigtramp_frame_this_id (struct frame_info *next_frame,
+				   void **this_prologue_cache,
+				   struct frame_id *this_id)
+{
+  struct hppa_hpux_sigtramp_unwind_cache *info
+    = hppa_hpux_sigtramp_frame_unwind_cache (next_frame, this_prologue_cache);
+  *this_id = frame_id_build (info->base, frame_pc_unwind (next_frame));
+}
+
+static void
+hppa_hpux_sigtramp_frame_prev_register (struct frame_info *next_frame,
+					 void **this_prologue_cache,
+					 int regnum, int *optimizedp,
+					 enum lval_type *lvalp, 
+					 CORE_ADDR *addrp,
+					 int *realnump, void *valuep)
+{
+  struct hppa_hpux_sigtramp_unwind_cache *info
+    = hppa_hpux_sigtramp_frame_unwind_cache (next_frame, this_prologue_cache);
+  hppa_frame_prev_register_helper (next_frame, info->saved_regs, regnum,
+		                   optimizedp, lvalp, addrp, realnump, valuep);
+}
+
+static const struct frame_unwind hppa_hpux_sigtramp_frame_unwind = {
+  SIGTRAMP_FRAME,
+  hppa_hpux_sigtramp_frame_this_id,
+  hppa_hpux_sigtramp_frame_prev_register
+};
+
+static const struct frame_unwind *
+hppa_hpux_sigtramp_unwind_sniffer (struct frame_info *next_frame)
+{
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  char *name;
+
+  find_pc_partial_function (pc, &name, NULL, NULL);
+
+  if (name && strcmp(name, "_sigreturn") == 0)
+    return &hppa_hpux_sigtramp_frame_unwind;
+
+  return NULL;
+}
+
 static void
 hppa_hpux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -1237,6 +1273,8 @@ hppa_hpux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_in_solib_return_trampoline (gdbarch,
 					  hppa_hpux_in_solib_return_trampoline);
   set_gdbarch_skip_trampoline_code (gdbarch, hppa_hpux_skip_trampoline_code);
+
+  frame_unwind_append_sniffer (gdbarch, hppa_hpux_sigtramp_unwind_sniffer);
 }
 
 static void

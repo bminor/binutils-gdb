@@ -1,5 +1,24 @@
 2004-05-25  Randolph Chung  <tausq@debian.org>
 
+	* hppa-hpux-tdep.c (offsetof): Define.
+	(hppa_hpux_pc_in_sigtramp, hppa32_hpux_frame_saved_pc_in_sigtramp)
+	(hppa32_hpux_frame_base_before_sigtramp)
+	(hppa32_hpux_frame_find_saved_regs_in_sigtramp)
+	(hppa64_hpux_frame_saved_pc_in_sigtramp)
+	(hppa64_hpux_frame_base_before_sigtramp)
+	(hppa64_hpux_frame_find_saved_regs_in_sigtramp): Remove unused 
+	functions.
+	(struct hppa_hpux_sigtramp_unwind_cache, hppa_hpux_tramp_reg)
+	(hppa_hpux_sigtramp_frame_unwind_cache)
+	(hppa_hpux_sigtramp_frame_this_id)
+	(hppa_hpux_sigtramp_frame_prev_register)
+	(hppa_hpux_sigtramp_frame_unwind)
+	(hppa_hpux_sigtramp_unwind_sniffer): New signal trampoline unwinder.
+	(hppa_hpux_init_abi): Register sigtramp unwinder.
+	* Makefile.in (hppa-hpux-tdep.o): Update dependencies.
+
+2004-05-25  Randolph Chung  <tausq@debian.org>
+
 	* hppa-tdep.c (hppa_fallback_frame_cache): Handle stack adjustment,
 	and multiple stack unwinds.
 	(hppa_stub_unwind_sniffer): Handle unwind from pc == 0.
