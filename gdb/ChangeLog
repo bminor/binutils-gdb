@@ -14,6 +14,10 @@
 	(arm_target_read_fp, arm_frame_init_saved_regs, arm_push_dummy_frame)
 	(arm_pop_frame, arm_get_next_pc, arm_pc_is_thumb)
 	(arm_pc_is_thumb_dummy): Delete declarations.
+	(INIT_EXTRA_FRAME_INFO, TARGET_READ_FP, FRAME_CHAIN)
+	(FRAMELESS_FUNCTION_INVOCATION, FRAME_SAVED_PC, FRAME_ARGS_ADDRESS)
+	(FRAME_LOCALS_ADDRESS, FRAME_NUM_ARGS, FRAME_ARGS_SKIP)
+	(FRAME_INIT_SAVED_REGS, PUSH_DUMMY_FRAME, POP_FRAME): Delete.
 
 2002-02-10  Daniel Jacobowitz  <drow@mvista.com>
 
