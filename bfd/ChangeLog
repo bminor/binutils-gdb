@@ -1,3 +1,9 @@
+Tue Mar 12 12:41:17 1996  David Mosberger-Tang  <davidm@koala.azstarnet.com>
+
+	* coff-alpha.c (alpha_relocate_section): Use
+	info->callbacks_warning, rather than _bfd_error_handler, for
+	"multiple gp" warning.
+
 Tue Mar 12 12:10:55 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Rebuild with autoconf 2.8.
