@@ -35,6 +35,10 @@ PARAMS ((bfd *abfd, arelent *reloc_entry,
          asymbol *symbol, PTR data, asection *input_section,
          bfd *output_bfd, char **error_message));
 
+boolean _bfd_m68hc11_elf_merge_private_bfd_data PARAMS ((bfd*, bfd*));
+boolean _bfd_m68hc11_elf_set_private_flags PARAMS ((bfd*, flagword));
+boolean _bfd_m68hc11_elf_print_private_bfd_data PARAMS ((bfd*, PTR));
+
 /* Use REL instead of RELA to save space */
 #define USE_REL
 
@@ -329,6 +333,138 @@ m68hc11_info_to_howto_rel (abfd, cache_ptr, dst)
   cache_ptr->howto = &elf_m68hc11_howto_table[r_type];
 }
 
+
+/* Set and control ELF flags in ELF header.  */
+
+boolean
+_bfd_m68hc11_elf_set_private_flags (abfd, flags)
+     bfd *abfd;
+     flagword flags;
+{
+  BFD_ASSERT (!elf_flags_init (abfd)
+	      || elf_elfheader (abfd)->e_flags == flags);
+
+  elf_elfheader (abfd)->e_flags = flags;
+  elf_flags_init (abfd) = true;
+  return true;
+}
+
+/* Merge backend specific data from an object file to the output
+   object file when linking.  */
+
+boolean
+_bfd_m68hc11_elf_merge_private_bfd_data (ibfd, obfd)
+     bfd *ibfd;
+     bfd *obfd;
+{
+  flagword old_flags;
+  flagword new_flags;
+  boolean ok = true;
+
+  /* Check if we have the same endianess */
+  if (_bfd_generic_verify_endian_match (ibfd, obfd) == false)
+    return false;
+
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+    return true;
+
+  new_flags = elf_elfheader (ibfd)->e_flags;
+  elf_elfheader (obfd)->e_flags |= new_flags & EF_M68HC11_ABI;
+  old_flags = elf_elfheader (obfd)->e_flags;
+
+  if (! elf_flags_init (obfd))
+    {
+      elf_flags_init (obfd) = true;
+      elf_elfheader (obfd)->e_flags = new_flags;
+      elf_elfheader (obfd)->e_ident[EI_CLASS]
+	= elf_elfheader (ibfd)->e_ident[EI_CLASS];
+
+      if (bfd_get_arch (obfd) == bfd_get_arch (ibfd)
+	  && bfd_get_arch_info (obfd)->the_default)
+	{
+	  if (! bfd_set_arch_mach (obfd, bfd_get_arch (ibfd),
+				   bfd_get_mach (ibfd)))
+	    return false;
+	}
+
+      return true;
+    }
+
+  /* Check ABI compatibility.  */
+  if ((new_flags & E_M68HC11_I32) != (old_flags & E_M68HC11_I32))
+    {
+      (*_bfd_error_handler)
+	(_("%s: linking files compiled for 16-bit integers (-mshort) "
+           "and others for 32-bit integers"),
+	 bfd_archive_filename (ibfd));
+      ok = false;
+    }
+  if ((new_flags & E_M68HC11_F64) != (old_flags & E_M68HC11_F64))
+    {
+      (*_bfd_error_handler)
+	(_("%s: linking files compiled for 32-bit double (-fshort-double) "
+           "and others for 64-bit double"),
+	 bfd_archive_filename (ibfd));
+      ok = false;
+    }
+  new_flags &= ~EF_M68HC11_ABI;
+  old_flags &= ~EF_M68HC11_ABI;
+
+  /* Warn about any other mismatches */
+  if (new_flags != old_flags)
+    {
+      (*_bfd_error_handler)
+	(_("%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"),
+	 bfd_archive_filename (ibfd), (unsigned long) new_flags,
+	 (unsigned long) old_flags);
+      ok = false;
+    }
+
+  if (! ok)
+    {
+      bfd_set_error (bfd_error_bad_value);
+      return false;
+    }
+
+  return true;
+}
+
+boolean
+_bfd_m68hc11_elf_print_private_bfd_data (abfd, ptr)
+     bfd *abfd;
+     PTR ptr;
+{
+  FILE *file = (FILE *) ptr;
+
+  BFD_ASSERT (abfd != NULL && ptr != NULL);
+
+  /* Print normal ELF private data.  */
+  _bfd_elf_print_private_bfd_data (abfd, ptr);
+
+  /* xgettext:c-format */
+  fprintf (file, _("private flags = %lx:"), elf_elfheader (abfd)->e_flags);
+
+  if (elf_elfheader (abfd)->e_flags & E_M68HC11_I32)
+    fprintf (file, _("[abi=32-bit int,"));
+  else
+    fprintf (file, _("[abi=16-bit int,"));
+
+  if (elf_elfheader (abfd)->e_flags & E_M68HC11_F64)
+    fprintf (file, _(" 64-bit double]"));
+  else
+    fprintf (file, _(" 32-bit double]"));
+
+  if (elf_elfheader (abfd)->e_flags & E_M68HC12_BANKS)
+    fprintf (file, _(" [memory=bank-model]"));
+  else
+    fprintf (file, _(" [memory=flat]"));
+
+  fputc ('\n', file);
+
+  return true;
+}
+
 /* Below is the only difference between elf32-m68hc12.c and elf32-m68hc11.c.
    The Motorola spec says to use a different Elf machine code.  */
 #define ELF_ARCH		bfd_arch_m68hc11
@@ -342,5 +478,11 @@ m68hc11_info_to_howto_rel (abfd, cache_ptr, dst)
 #define elf_info_to_howto_rel	m68hc11_info_to_howto_rel
 #define elf_backend_object_p	0
 #define elf_backend_final_write_processing	0
+
+#define bfd_elf32_bfd_merge_private_bfd_data \
+					_bfd_m68hc11_elf_merge_private_bfd_data
+#define bfd_elf32_bfd_set_private_flags	_bfd_m68hc11_elf_set_private_flags
+#define bfd_elf32_bfd_print_private_bfd_data \
+					_bfd_m68hc11_elf_print_private_bfd_data
 
 #include "elf32-target.h"
