@@ -112,7 +112,7 @@ sim_load_file (sd, myname, callback, prog, prog_bfd, verbose_p, lma_p, do_write)
 	{
 	  bfd_size_type size;
 
-	  size = bfd_get_section_size_before_reloc (s);
+	  size = bfd_get_section_size (s);
 	  if (size > 0)
 	    {
 	      char *buffer;
