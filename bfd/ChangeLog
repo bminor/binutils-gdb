@@ -1,3 +1,8 @@
+2001-06-24  H.J. Lu  <hjl@gnu.org>
+
+	* cpu-i960.c (scan_960_mach): Don't modify const char *. Use
+	strncasecmp/strcasecmp instead of strncmp/strcmp.
+
 2001-06-23  H.J. Lu  <hjl@gnu.org>
 
 	* elf32-i386.c (elf_i386_relocate_section): Check the

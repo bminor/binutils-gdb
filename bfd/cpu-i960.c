@@ -33,14 +33,10 @@ scan_960_mach (ap, string)
      const char *string;
 {
   unsigned long machine;
-  int i;
   int fail_because_not_80960 = false;
 
-  for (i = 0; i < strlen (string); i ++)
-    string[i] = tolower (string[i]);
-
   /* Look for the string i960 at the front of the string.  */
-  if (strncmp ("i960", string, 4) == 0)
+  if (strncasecmp ("i960", string, 4) == 0)
     {
       string += 4;
 
@@ -74,9 +70,9 @@ scan_960_mach (ap, string)
   if (string[0] == 'c' && string[1] == 'o' && string[2] == 'r' &&
       string[3] == 'e' && string[4] == '\0')
     machine = bfd_mach_i960_core;
-  else if (strcmp (string, "ka_sa") == 0)
+  else if (strcasecmp (string, "ka_sa") == 0)
     machine = bfd_mach_i960_ka_sa;
-  else if (strcmp (string, "kb_sb") == 0)
+  else if (strcasecmp (string, "kb_sb") == 0)
     machine = bfd_mach_i960_kb_sb;
   else if (string[1] == '\0' || string[2] != '\0') /* rest are 2-char.  */
     return false;
