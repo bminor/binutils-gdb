@@ -1,3 +1,7 @@
+2000-11-10  Christopher Faylor <cgf@cygnus.com>
+
+	* gdb.texinfo: Document new 'set step-mode' command.
+
 2000-10-16  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* gdb.texinfo (Contributors, MIPS Embedded): Minor spelling

@@ -3323,6 +3323,23 @@ The @code{next} command only stops at the first instruction of a
 source line.  This prevents multiple stops that could otherwise occur in
 switch statements, for loops, etc.
 
+@kindex set step-mode
+@item set step-mode
+@cindex functions without line info, and stepping
+@cindex stepping into functions with no line info
+@itemx set step-mode on
+The @code{set step-mode on} command causes the @code{step} command to to
+stop at the first instruction of a function which contains no debug line
+information rather than stepping over it.
+
+This is useful in cases where you may be interested in inspecting the assembly
+language of a function which has no symbolic info and do not want @value{GDBN}
+to automatically skip over this function.
+
+@item set step-mode off
+Causes the step command to step over any functions which contains no
+debug information.  This is the default.
+
 @kindex finish
 @item finish
 Continue running until just after function in the selected stack frame
