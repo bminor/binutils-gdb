@@ -491,7 +491,7 @@ struct default_space_dict
 struct hppa_fix_struct
 {
     /* The field selector.  */
-    int fx_r_field;
+    enum hppa_reloc_field_selector_type fx_r_field;
 
     /* Type of fixup.  */
     int fx_r_type;
@@ -606,7 +606,8 @@ static unsigned int pa_subspace_start PARAMS ((sd_chain_struct *, int));
 static void pa_ip PARAMS ((char *));
 static void fix_new_hppa PARAMS ((fragS *, int, short int, symbolS *,
 				  long, expressionS *, int,
-				  bfd_reloc_code_real_type, long,
+				  bfd_reloc_code_real_type,
+				  enum hppa_reloc_field_selector_type,
 				  int, long, char *));
 static void md_apply_fix_1 PARAMS ((fixS *, long));
 static int is_end_of_statement PARAMS ((void));
@@ -1320,7 +1321,7 @@ fix_new_hppa (frag, where, size, add_symbol, offset, exp, pcrel,
      expressionS *exp;
      int pcrel;
      bfd_reloc_code_real_type r_type;
-     long r_field;
+     enum hppa_reloc_field_selector_type r_field;
      int r_format;
      long arg_reloc;
      char *unwind_desc;
@@ -2857,7 +2858,6 @@ tc_gen_reloc (section, fixp)
       reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
       reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
       reloc->address = fixp->fx_frag->fr_address + fixp->fx_where ;
-      reloc->addend = 0;
 
       switch (code)
 	{
@@ -2865,6 +2865,17 @@ tc_gen_reloc (section, fixp)
 	case R_ABS_CALL:
 	  reloc->addend = HPPA_R_ADDEND (hppa_fixp->fx_arg_reloc, 0);
 	  break;
+
+	case R_DATA_PLABEL:
+	case R_CODE_PLABEL:
+	  /* For plabel relocations, the addend of the
+	     relocation should be either 0 (no static link) or 2
+	     (static link required).
+
+	     FIXME: We always assume no static link!  */
+	  reloc->addend = 0;
+	  break;
+
 	default:
 	  reloc->addend = fixp->fx_addnumber;
 	  break;
@@ -3037,7 +3048,9 @@ md_apply_fix_1 (fixP, val)
 	      && fixP->fx_subsy->bsym->section == &bfd_und_section))
 	return;
 
-      if (fmt != 0 && fmt != 32)
+      if (fmt != 0 && hppa_fixP->fx_r_field != R_HPPA_PSEL
+	  && hppa_fixP->fx_r_field != R_HPPA_LPSEL
+	  && hppa_fixP->fx_r_field != R_HPPA_RPSEL)
 	new_val = hppa_field_adjust (val, 0, hppa_fixP->fx_r_field);
       else
 	new_val = 0;

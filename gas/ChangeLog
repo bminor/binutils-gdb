@@ -1,8 +1,17 @@
-Thu Nov 11 15:49:08 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+Fri Nov 12 14:52:17 1993  Jeffrey A. Law  (law@snake.cs.utah.edu
+
+	* config/tc-hppa.c (hppa_fix_struct): Use a real type for the
+	field selector, rather than an int.  All uses of field selectors
+	fixed.
+	(tc_gen_reloc): For SOM PLABELs, always set addend to zero for now.
+	(md_apply_fix_1): Do not call hppa_field_adjust for any PLABEL
+	field.
+
+	Thu Nov 11 15:49:08 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (pa_type_args): For .import statements,
 	silently ignore attempt	to change the symbol type for a function
-	from ST_ENTRY to ST_CODE on .import
+	from ST_ENTRY to ST_CODE on .import.
 
 Wed Nov 10 16:19:13 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
