@@ -1,3 +1,26 @@
+2003-11-06  Daniel Jacobowitz  <drow@mvista.com>
+
+	* breakpoint.h (enum bp_loc_type, struct bp_location): New.
+	(struct breakpoint): Remove address, shadow_contents, inserted,
+	and duplicate.  Add a struct bp_location.
+	* breakpoint.c (condition_command, read_memory_nobpt)
+	(insert_breakpoints, remove_breakpoints, remove_hw_watchpoints)
+	(reattach_breakpoints, update_breakpoints_after_exec)
+	(detach_breakpoints, remove_breakpoint, mark_breakpoints_out)
+	(breakpoint_init_inferior, breakpoint_here_p)
+	(breakpoint_inserted_here_p, deprecated_frame_in_dummy)
+	(breakpoint_thread_match, bpstat_stop_status)
+	(bpstat_have_active_hw_watchpoints, print_one_breakpoint)
+	(describe_other_breakpoints, check_duplicates)
+	(make_breakpoint_permanent, create_thread_event_breakpoint)
+	(disable_breakpoints_in_shlibs, re_enable_berakpoints_in_shlibs)
+	(set_longjmp_resume_breakpoint, mention, create_breakpoints)
+	(watch_command_1, print_one_exception_catchpoint)
+	(clear_command, breakpoint_re_set_one): Adjust member accesses to
+	use the breakpoint's ->loc.
+	(set_raw_breakpoint): Likewise.  Initialize ->loc.
+	(delete_breakpoint): Likewise.  Free ->loc.
+
 2003-11-05  Andrew Cagney  <cagney@redhat.com>
 
 	* config/sparc/tm-sparc.h (FRAME_STRUCT_ARGS_ADDRESS): Delete
