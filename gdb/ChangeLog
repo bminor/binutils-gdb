@@ -1,5 +1,15 @@
 2000-03-19  Eli Zaretskii  <eliz@is.elta.co.il>
 
+	Support for building GDB with DJGPP, and running the test suite on
+	it:
+	* config/djgpp/djconfig.sh: New file.
+	* config/djgpp/config.sed: New file.
+	* config/djgpp/README: New file.
+	* config/djgpp/fnchange.lst: New file.
+	* config/djgpp/djcheck.sh: New file.
+
+2000-03-19  Eli Zaretskii  <eliz@is.elta.co.il>
+
 	* ser-go32.c (ports): Make the initializers complete, to pacify
 	GCC 2.9X.
 
