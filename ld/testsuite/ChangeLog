@@ -1,3 +1,13 @@
+2003-06-02  Fabrizio Gennari  <fabrizio.ge@tiscalinet.it>
+
+	* ld-cygwin: New directory.
+	* ld-cygwin/exe-export.exp: New test script.  Checks building
+	cygwin executables with an export table.
+	* ld-cygwin/testdll.def: New source file.
+	* ld-cygwin/testexe.def: New source file.
+	* ld-cygwin/testdll.c: New source file.
+	* ld-cygwin/testexe.c: New source file.
+
 2003-05-30  H.J. Lu <hongjiu.lu@intel.com>
 
 	* config/default.exp: Load tmpdir/libpath.exp.
