@@ -46,10 +46,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    They are here for kernel debuggers, etc.  */
 /* FIXME: icc and xcc are currently considered separate registers.
    This may have to change and consider them as just one (ccr).
-   Let's postpone this as long as we can.  */
+   Let's postpone this as long as we can.  It's nice to be able to set
+   them individually.  */
 /* FIXME: fcc0-3 are currently separate, even though they are also part of
    fsr.  May have to remove them but let's postpone this as long as
-   possible.  */
+   possible.  It's nice to be able to set them individually.  */
 /* FIXME: Whether to include f33, f35, etc. here is not clear.
    There are advantages and disadvantages.  */
 
@@ -67,7 +68,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
   "f32", "f34", "f36", "f38", "f40", "f42", "f44", "f46",	\
   "f48", "f50", "f52", "f54", "f56", "f58", "f60", "f62",	\
                                                                 \
-  "pc", "npc, "ccr", "fsr", fprs", "y", "asi",			\
+  "pc", "npc", "ccr", "fsr", "fprs", "y", "asi",		\
   "ver", "tick", "pil", "pstate",				\
   "tstate", "tba", "tl", "tt", "tpc", "tnpc", "wstate",		\
   "cwp", "cansave", "canrestore", "cleanwin", "otherwin",	\
