@@ -1,5 +1,10 @@
 2005-03-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* c-valprint.c (c_value_print): Fix up some formatting.  Use
+	check_typedef.
+
+2005-03-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* arm-linux-nat.c (store_register, store_regs): Handle
 	ARM_PS_REGNUM.
 

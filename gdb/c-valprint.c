@@ -491,8 +491,7 @@ int
 c_value_print (struct value *val, struct ui_file *stream, int format,
 	       enum val_prettyprint pretty)
 {
-  struct type *type = value_type (val);
-  struct type *real_type;
+  struct type *type, *real_type;
   int full, top, using_enc;
 
   /* If it is a pointer, indicate what it points to.
@@ -501,15 +500,18 @@ c_value_print (struct value *val, struct ui_file *stream, int format,
 
      C++: if it is a member pointer, we will take care
      of that when we print it.  */
-  if (TYPE_CODE (type) == TYPE_CODE_PTR ||
-      TYPE_CODE (type) == TYPE_CODE_REF)
+
+  type = check_typedef (value_type (val));
+
+  if (TYPE_CODE (type) == TYPE_CODE_PTR
+      || TYPE_CODE (type) == TYPE_CODE_REF)
     {
       /* Hack:  remove (char *) for char strings.  Their
          type is indicated by the quoted string anyway. */
-      if (TYPE_CODE (type) == TYPE_CODE_PTR &&
-	  TYPE_NAME (type) == NULL &&
-	  TYPE_NAME (TYPE_TARGET_TYPE (type)) != NULL &&
-	  strcmp (TYPE_NAME (TYPE_TARGET_TYPE (type)), "char") == 0)
+      if (TYPE_CODE (type) == TYPE_CODE_PTR
+	  && TYPE_NAME (type) == NULL
+	  && TYPE_NAME (TYPE_TARGET_TYPE (type)) != NULL
+	  && strcmp (TYPE_NAME (TYPE_TARGET_TYPE (type)), "char") == 0)
 	{
 	  /* Print nothing */
 	}
@@ -556,11 +558,12 @@ c_value_print (struct value *val, struct ui_file *stream, int format,
 	{
 	  /* normal case */
 	  fprintf_filtered (stream, "(");
-	  type_print (type, "", stream, -1);
+	  type_print (value_type (val), "", stream, -1);
 	  fprintf_filtered (stream, ") ");
 	}
     }
-  if (objectprint && (TYPE_CODE (value_type (val)) == TYPE_CODE_CLASS))
+
+  if (objectprint && (TYPE_CODE (type) == TYPE_CODE_CLASS))
     {
       /* Attempt to determine real type of object */
       real_type = value_rtti_type (val, &full, &top, &using_enc);
@@ -578,7 +581,7 @@ c_value_print (struct value *val, struct ui_file *stream, int format,
           /* Note: When we look up RTTI entries, we don't get any information on
              const or volatile attributes */
 	}
-      else if (type != value_enclosing_type (val))
+      else if (type != check_typedef (value_enclosing_type (val)))
 	{
 	  /* No RTTI information, so let's do our best */
 	  fprintf_filtered (stream, "(%s ?) ",

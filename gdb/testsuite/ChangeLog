@@ -1,3 +1,7 @@
+2005-03-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/ptr-typedef.exp, gdb.base/ptr-typedef.c: New files.
+
 2005-03-27  Andreas Schwab  <schwab@suse.de>
 
 	* gdb.base/bigcore.c (main): Add missing mode argument in open
