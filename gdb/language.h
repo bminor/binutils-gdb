@@ -185,7 +185,19 @@ struct language_defn
 
 /* Pointer to the language_defn for our current language.  This pointer
    always points to *some* valid struct; it can be used without checking
-   it for validity.  */
+   it for validity.
+
+   The current language affects expression parsing and evaluation
+   (FIXME: it might be cleaner to make the evaluation-related stuff
+   separate exp_opcodes for each different set of semantics.  We
+   should at least think this through more clearly with respect to
+   what happens if the language is changed between parsing and
+   evaluation) and printing of things like types and arrays.  It does
+   *not* affect symbol-reading-- each source file in a symbol-file has
+   its own language and we should keep track of that regardless of the
+   language when symbols are read.  If we want some manual setting for
+   the language of symbol files (e.g. detecting when ".c" files are
+   C++), it should be a seprate setting from the current_language.  */
 
 extern const struct language_defn *current_language;
 

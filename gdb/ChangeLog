@@ -1,5 +1,7 @@
 Thu Sep  2 00:07:36 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* language.h: Add comment about current_language.
+
 	* mips-tdep.c (_initialize_mips_tdep): Change heuristic-fence-post
 	from var_uinteger to var_zinteger.
 
