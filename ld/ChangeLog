@@ -1,3 +1,9 @@
+2000-05-03  Alan Modra  <alan@linuxcare.com.au>
+
+	From Ulf Carlsson <ulfc@engr.sgi.com> and Andreas Jaeger <aj@suse.de>
+	* lexsup.c (set_section_start): Use bfd_scan_vma rather than
+	strtoul.
+
 Mon May  1 17:34:34 2000  Jim Wilson  <wilson@cygnus.com>
 
 	* configure.host (ia64-*-linux-gnu*): Change gcc to ${CC}.

@@ -1,5 +1,5 @@
 /* Parse options for the GNU linker.
-   Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
@@ -1050,8 +1050,8 @@ static void
 set_section_start (sect, valstr)
      char *sect, *valstr;
 {
-  char *end;
-  unsigned long val = strtoul (valstr, &end, 16);
+  const char *end;
+  bfd_vma val = bfd_scan_vma (valstr, &end, 16);
   if (*end)
     einfo (_("%P%F: invalid hex number `%s'\n"), valstr);
   lang_section_start (sect, exp_intop (val));
