@@ -110,6 +110,8 @@ static void gdbtk_post_add_symbol PARAMS ((void));
 static void pc_changed PARAMS ((void));
 static void tracepoint_notify PARAMS ((struct tracepoint *, const char *));
 static void gdbtk_selected_frame_changed PARAMS ((int));
+static void gdbtk_context_change PARAMS ((int));
+void (*context_hook) PARAMS ((int));
 
 /*
  * gdbtk_fputs can't be static, because we need to call it in gdbtk.c.
@@ -157,7 +159,7 @@ gdbtk_add_hooks(void)
   modify_tracepoint_hook = gdbtk_modify_tracepoint;
   pc_changed_hook = pc_changed;
   selected_frame_level_changed_hook = gdbtk_selected_frame_changed;
-  
+  context_hook = gdbtk_context_change;
 }
 
 /* These control where to put the gdb output which is created by
@@ -689,4 +691,13 @@ gdbtk_selected_frame_changed (level)
      int level;
 {
   Tcl_UpdateLinkedVar (gdbtk_interp, "gdb_selected_frame_level");
+}
+
+/* Called when the current thread changes. */
+/* gdb_context is linked to the tcl variable "gdb_context_id" */
+static void
+gdbtk_context_change (num)
+     int num;
+{
+  gdb_context = num;
 }

@@ -120,6 +120,9 @@ typedef struct gdbtk_result {
    
 extern gdbtk_result *result_ptr;
 
+/* GDB context identifier */
+extern int gdb_context;
+
 /*
  * These functions are used in all the modules of Gdbtk.
  * 

@@ -102,21 +102,21 @@ Tcl_Interp *gdbtk_interp = NULL;
 
 static int gdbtk_timer_going = 0;
 
+/* linked variable used to tell tcl what the current thread is */
+int gdb_context = 0;
+
 /* This variable is true when the inferior is running.  See note in
  * gdbtk.h for details.
  */
-
 int running_now;
 
 /* This variable determines where memory used for disassembly is read from.
  * See note in gdbtk.h for details.
  */
-
 int disassemble_from_exec = -1;
 
 /* This variable holds the name of a Tcl file which should be sourced by the
    interpreter when it goes idle at startup. Used with the testsuite. */
-
 static char *gdbtk_source_filename = NULL;
 
 #ifndef _WIN32

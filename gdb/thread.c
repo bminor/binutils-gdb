@@ -518,7 +518,8 @@ see the IDs of currently known threads.", num);
     error ("Thread ID %d has terminated.\n", num);
 
   switch_to_thread (tp->pid);
-
+  if (context_hook)
+    context_hook (num);
   printf_filtered ("[Switching to %s]\n", target_pid_to_str (inferior_pid));
   print_stack_frame (selected_frame, selected_frame_level, 1);
 }

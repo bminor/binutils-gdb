@@ -1,3 +1,21 @@
+Sun Aug 30 00:49:18 1998  Martin M. Hunt  <hunt@cygnus.com>
+
+	* gdbtk-cmds.c (Gdbtk_Init): Link C variable gdb_context
+	with tcl variable gdb_context_id.
+
+	* gdbtk-hooks.c (gdbtk_context_change): Implement new hook called 
+	context_hook.  Called when threads change.
+
+	* gdbtk.c: Initialize gdb_context.
+
+	* gdbtk.h: Declare gdb_context.
+
+	* infrun (wait_for_inferior): Call context_hook.
+
+	* thread.c (thread_command): Call context_hook.
+
+	* defs.h: Declare context_hook.
+	
 Fri Aug 28 12:14:49 1998  Martin M. Hunt  <hunt@cygnus.com>
 
 	* gdbtk-cmds.c (gdb_loadfile): Open the file after doing

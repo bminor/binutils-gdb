@@ -304,8 +304,13 @@ Gdbtk_Init (interp)
                         call_wrapper, gdb_get_trace_frame_num,  NULL);  
   Tcl_CreateObjCommand (interp, "gdb_stack", call_wrapper, gdb_stack, NULL);
 
-  Tcl_LinkVar (interp, "gdb_selected_frame_level", 
+  Tcl_LinkVar (interp, "gdb_selected_frame_level",
                (char *) &selected_frame_level,
+               TCL_LINK_INT | TCL_LINK_READ_ONLY);
+
+  /* gdb_context is used for debugging multiple threads or tasks */
+  Tcl_LinkVar (interp, "gdb_context_id",
+               (char *) &gdb_context,
                TCL_LINK_INT | TCL_LINK_READ_ONLY);
 
   Tcl_PkgProvide(interp, "Gdbtk", GDBTK_VERSION);
