@@ -1872,8 +1872,10 @@ sparc_target_architecture_hook (ap)
 {
   int i, j;
 
+#ifdef TARGET_BYTE_ORDER_SELECTABLE
   if (ap->mach == bfd_mach_sparc_sparclite_le)
     target_byte_order = LITTLE_ENDIAN;
+#endif
   return 1;
 }
 
