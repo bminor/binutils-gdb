@@ -1,3 +1,12 @@
+Wed Apr 26 15:54:10 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	Support for more portable alignment handling in assembly code,
+	based on patches from Bryan Ford <baford@schirf.cs.utah.edu>:
+	* read.c (potable): Added balign and p2align, for aligning by
+	bytes or powers of two independent of what ".align" does for a
+	given target.
+	* doc/as.texinfo: Document them.
+
 Tue Apr 25 11:12:04 1995  Rob Savoye  <rob@thepub.cygnus.com>
 
 	* configure, configure.in: Look for m68k-*-vxworks* rather than

@@ -195,6 +195,7 @@ static const pseudo_typeS potable[] =
   {"align", s_align_ptwo, 0},
   {"ascii", stringer, 0},
   {"asciz", stringer, 1},
+  {"balign", s_align_bytes, 0},
 /* block */
   {"byte", cons, 1},
   {"comm", s_comm, 0},
@@ -238,6 +239,7 @@ static const pseudo_typeS potable[] =
   {"nolist", listing_list, 0},	/* Turn listing off */
   {"octa", cons, 16},
   {"org", s_org, 0},
+  {"p2align", s_align_ptwo, 0},
   {"psize", listing_psize, 0},	/* set paper size */
 /* print */
   {"quad", cons, 8},
@@ -988,11 +990,18 @@ s_app_line (ignore)
 
   /* The given number is that of the next line.  */
   l = get_absolute_expression () - 1;
-  new_logical_line ((char *) NULL, l);
+  if (l < 0)
+    /* Some of the back ends can't deal with non-positive line numbers.
+       Besides, it's silly.  */
+    as_warn ("Line numbers must be positive; line number %d rejected.", l+1);
+  else
+    {
+      new_logical_line ((char *) NULL, l);
 #ifdef LISTING
-  if (listing)
-    listing_source_line (l);
+      if (listing)
+	listing_source_line (l);
 #endif
+    }
   demand_empty_rest_of_line ();
 }
 
@@ -1426,14 +1435,12 @@ s_space (mult)
      int mult;
 {
   expressionS exp;
-  long temp_repeat, temp_fill;
+  long temp_fill;
   char *p = 0;
 
   /* Just like .fill, but temp_size = 1 */
   expression (&exp);
-  if (exp.X_op == O_constant
-      /* for testing purposes */
-      && 0)
+  if (exp.X_op == O_constant)
     {
       long repeat;
 
@@ -1450,7 +1457,7 @@ s_space (mult)
 
       if (!need_pass_2)
 	p = frag_var (rs_fill, 1, 1, (relax_substateT) 0, (symbolS *) 0,
-		      temp_repeat, (char *) 0);
+		      repeat, (char *) 0);
     }
   else
     {
@@ -1458,13 +1465,14 @@ s_space (mult)
 	p = frag_var (rs_space, 1, 1, (relax_substateT) 0,
 		      make_expr_symbol (&exp), 0L, (char *) 0);
     }
-  if (get_absolute_expression_and_terminator (&temp_repeat) == ',')
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer == ',')
     {
+      input_line_pointer++;
       temp_fill = get_absolute_expression ();
     }
   else
     {
-      input_line_pointer--;	/* Backup over what was not a ','. */
       temp_fill = 0;
     }
   if (p)
