@@ -1,3 +1,9 @@
+Sat Oct 25 16:51:40 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* gencode.c (build_instruction): Follow sim_write's lead in using
+	BigEndianMem instead of !ByteSwapMem.
+
+
 Fri Oct 24 17:41:49 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (sim_gen): Dependent on target, select type of
