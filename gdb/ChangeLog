@@ -1,5 +1,15 @@
 2002-04-10  Andrew Cagney  <ac131313@redhat.com>
 
+	* stack.c (select_frame): Check that selected_frame and the
+	specified level are as expected.
+	* blockframe.c (get_prev_frame): Set the `level' from next_frame.
+	Update copyright.
+	* frame.h (struct frame_info): Add field `level'.  Update
+	copyright.
+	Work-in-progress PR gdb/464.
+
+2002-04-10  Andrew Cagney  <ac131313@redhat.com>
+
 	* maint.c (maint_print_section_info): Rename print_section_info.
 	(print_bfd_section_info, print_objfile_section_info): Update.
 	* inferior.h (struct gdbarch): Add opaque declaration.

@@ -1,7 +1,9 @@
-/* Get info from stack frames;
-   convert between frames, blocks, functions and pc values.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+/* Get info from stack frames; convert between frames, blocks,
+   functions and pc values.
+
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -393,6 +395,7 @@ get_prev_frame (struct frame_info *next_frame)
     next_frame->prev = prev;
   prev->next = next_frame;
   prev->frame = address;
+  prev->level = next_frame->level + 1;
 
 /* This change should not be needed, FIXME!  We should
    determine whether any targets *need* INIT_FRAME_PC to happen

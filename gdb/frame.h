@@ -1,6 +1,7 @@
 /* Definitions for dealing with stack frames, for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1996, 1997,
-   1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1996,
+   1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -62,6 +63,17 @@ struct frame_info
        For the innermost frame, it's the current pc.
        For other frames, it is a pc saved in the next frame.  */
     CORE_ADDR pc;
+
+    /* Level of this frame.  The inner-most (youngest) frame is at
+       level 0.  As you move towards the outer-most (oldest) frame,
+       the level increases.  This is a cached value.  It could just as
+       easily be computed by counting back from the selected frame to
+       the inner most frame.  */
+    /* NOTE: cagney/2002-04-05: Perhaphs a level of ``-1'' should be
+       reserved to indicate a bogus frame - one that has been created
+       just to keep GDB happy (GDB always needs a frame).  For the
+       moment leave this as speculation.  */
+    int level;
 
     /* Nonzero if this is a frame associated with calling a signal handler.
 
