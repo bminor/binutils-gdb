@@ -230,7 +230,6 @@ news-xdep.c
 nindy-share
 nindy-tdep.c
 nlmread.c
-ns32k-opcode.h
 ns32k-pinsn.c
 ns32km3-nat.c
 objfiles.c
