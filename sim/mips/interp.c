@@ -1402,9 +1402,8 @@ sim_do_command (sd,cmd)
 
 /* Read a null terminated string from memory, return in a buffer */
 static char *
-fetch_str (sd, addr)
-     SIM_DESC sd;
-     address_word addr;
+fetch_str (SIM_DESC sd,
+	   address_word addr)
 {
   char *buf;
   int nr = 0;
@@ -1417,7 +1416,7 @@ fetch_str (sd, addr)
 }
 
 /* Simple monitor interface (currently setup for the IDT and PMON monitors) */
-void
+static void
 sim_monitor (SIM_DESC sd,
 	     sim_cpu *cpu,
 	     address_word cia,
@@ -3486,8 +3485,7 @@ convert (SIM_DESC sd,
 /*-- co-processor support routines ------------------------------------------*/
 
 static int UNUSED
-CoProcPresent(coproc_number)
-     unsigned int coproc_number;
+CoProcPresent(unsigned int coproc_number)
 {
   /* Return TRUE if simulator provides a model for the given co-processor number */
   return(0);
@@ -4302,7 +4300,7 @@ sim_engine_run (sd, next_cpu_nr, nr_cpus, siggnal)
 #define NUMCELLS 16
 #define CELLSIZE 32
 static char*
-get_cell()
+get_cell (void)
 {
   static char buf[NUMCELLS][CELLSIZE];
   static int cell=0;

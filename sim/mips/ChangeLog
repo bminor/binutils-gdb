@@ -1,3 +1,8 @@
+Mon Nov 23 17:07:37 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (get_cell, sim_monitor, fetch_str, CoProcPresent):
+ 	Pacify GCC.
+
 start-sanitize-tx19
 Mon Nov 23 16:51:02 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
