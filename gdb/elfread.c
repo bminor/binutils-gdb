@@ -171,32 +171,13 @@ record_minimal_symbol_and_info (char *name, CORE_ADDR address,
 				enum minimal_symbol_type ms_type, char *info,	/* FIXME, is this really char *? */
 				asection *bfd_section, struct objfile *objfile)
 {
-  int section;
-
-  /* Guess the section from the type.  This is likely to be wrong in
-     some cases.  */
-  switch (ms_type)
-    {
-    case mst_text:
-    case mst_file_text:
-      section = bfd_section->index;
 #ifdef SMASH_TEXT_ADDRESS
-      SMASH_TEXT_ADDRESS (address);
+  if (ms_type == mst_text || ms_type == mst_file_text)
+    SMASH_TEXT_ADDRESS (address);
 #endif
-      break;
-    case mst_data:
-    case mst_file_data:
-    case mst_bss:
-    case mst_file_bss:
-      section = bfd_section->index;
-      break;
-    default:
-      section = -1;
-      break;
-    }
 
   return prim_record_minimal_symbol_and_info
-    (name, address, ms_type, info, section, bfd_section, objfile);
+    (name, address, ms_type, info, bfd_section->index, bfd_section, objfile);
 }
 
 /*
@@ -423,7 +404,7 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 		}
 	      else if (sym->section->flags & SEC_ALLOC)
 		{
-		  if (sym->flags & BSF_GLOBAL)
+		  if (sym->flags & (BSF_GLOBAL | BSF_WEAK))
 		    {
 		      if (sym->section->flags & SEC_LOAD)
 			{

@@ -1,3 +1,10 @@
+2000-12-04  Kevin Buettner  <kevinb@redhat.com>
+
+	* elfread.c (record_minimal_symbol_and_info): Don't guess
+	at the section index; instead just always use the bfd index.
+	(elf_symtab_read): Handle weak symbols appearing in data
+	sections.
+
 Mon Dec  4 14:36:39 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbarch.sh (STAB_REG_TO_REGNUM, ECOFF_REG_TO_REGNUM,
