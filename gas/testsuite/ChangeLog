@@ -1,3 +1,8 @@
+2002-10-23  Hans-Peter Nilsson  <hp@axis.com>
+
+	* gas/cris/rd-pcrel1.d, gas/cris/rd-pcrel1.s,
+	gas/cris/rd-pcrel2.d, gas/cris/rd-pcrel2.s: New tests.
+
 2002-10-21  Richard Sandiford  <rsandifo@redhat.com>
 
 	* gas/mips/elf-rel7.[sd]: New test.
