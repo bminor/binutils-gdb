@@ -430,16 +430,16 @@ Drag the word behind the cursor past the word in front of the cursor
 moving the cursor over that word as well.
 
 @item upcase-word (@key{M-u})
-Uppercase the current (or following) word.  With a negative argument,
-do the previous word, but do not move point.
+Uppercase all letters in the current (or following) word.  With a
+negative argument, do the previous word, but do not move point.
 
 @item downcase-word (@key{M-l})
-Lowercase the current (or following) word.  With a negative argument,
-do the previous word, but do not move point.
+Lowercase all letters in the current (or following) word.  With a
+negative argument, do the previous word, but do not move point.
 
 @item capitalize-word (@key{M-c})
-Uppercase the current (or following) word.  With a negative argument,
-do the previous word, but do not move point.
+Uppercase the first letter in the current (or following) word.  With a
+negative argument, do the previous word, but do not move point.
 
 @end ftable
 
@@ -516,10 +516,15 @@ Read in the contents of your @file{~/.inputrc} file, and incorporate
 any bindings found there.
 
 @item abort (@key{C-g})
-Ding!  Stops things.
+Stop running the current editing command.
 
+@ignore
+@c I have no idea what this means, and can't figure it out by
+@c experiment, and can't find it in the readline source.
+@c pesch@cygnus.com, 20may1993.
 @item do-uppercase-version (@key{M-a}, @key{M-b}, ...)
 Run the command that is bound to your uppercase brother.
+@end ignore
 
 @item prefix-meta (ESC)
 Make the next character that you type be metafied.  This is for people
