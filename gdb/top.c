@@ -1,5 +1,5 @@
 /* Top level stuff for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -398,6 +398,11 @@ void (*disable_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
    check for stop buttons, etc... */
 
 void (*interactive_hook) PARAMS ((void));
+
+/* Called when the registers have changed, as a hint to a GUI
+   to minimize window update. */
+
+void (*registers_changed_hook) PARAMS ((void));
 
 /* Called when going to wait for the target.  Usually allows the GUI to run
    while waiting for target events.  */

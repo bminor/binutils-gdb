@@ -1,3 +1,30 @@
+Sun Jan 15 14:36:19 1995  Steve Chamberlain  <sac@splat>
+
+	* breakpoint.h (disable_breakpoint, enable_breakpoint):
+	New declarations.
+	(enum bpdisp): Change name of 'delete' member to 'del'.
+	(struct bpstat): Changed name to 'bpstats'.
+	* breakpoint.c (disable_breakpoint, enable_breakpoint,
+	breakpoint_chain): Made globally visible.
+	(bpstat_stop_status): Use new name for bpstat.
+	(break_command_1, watch_command_1, catch_command_1,
+	breakpoint_auto_delete, denable_delete_breakpoint): Use 'del'
+	instead of 'delete'.
+	(set_breakpoint_sal): New function.
+	* defs.h (registers_changed_hook): New declaration.
+	* infcmd.c (run_stack_dummy): 'delete' is now 'del'.
+	* inflow.c (new_tty): Treat WIN32 in same way as __GO32__	
+	* main.c (main): Don't scan options when in WIN32 and exit
+	without entering main loop.
+	* m2-exp.y (m2_elx): Member 'class' is now 'aclass'.
+	* symtab.h (struct symbol, struct partial_symbol): Changed name of
+	member 'class' to 'aclass'. 
+	(SYMBOL_CLASS, PSYMBOL_CLASS): Reflect change.
+	* top.c (registers_changed_hook): New definition.
+	* utils.c (quit, notice_quit, initialize_utils): Treate WIN32
+	in same way as __GO32__.
+	* value.h (c_typedef_print): Rename 'new' argument.
+
 Sat Jan 14 11:18:11 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
 
 	* infcmd.c (signal_command): For "signal 0", pass (CORE_ADDR)-1,

@@ -1,5 +1,5 @@
 /* Basic, host-specific, and target-specific definitions for GDB.
-   Copyright (C) 1986, 1989, 1991, 1992, 1993, 1994
+   Copyright (C) 1986, 1989, 1991, 1992, 1993, 1994, 1995
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -855,6 +855,7 @@ extern void (*delete_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
 extern void (*enable_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
 extern void (*disable_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
 extern void (*interactive_hook) PARAMS ((void));
+extern void (*registers_changed_hook) PARAMS ((void));
 extern int (*dis_asm_read_memory_hook) PARAMS ((bfd_vma memaddr,
 						bfd_byte *myaddr, int len,
 						disassemble_info *info));

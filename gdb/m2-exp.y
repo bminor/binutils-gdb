@@ -1,5 +1,5 @@
 /* YACC grammar for Modula-2 expressions, for GDB.
-   Copyright (C) 1986, 1989, 1990, 1991, 1993, 1994
+   Copyright (C) 1986, 1989, 1990, 1991, 1993, 1994, 1995
    Free Software Foundation, Inc.
    Generated from expread.y (now c-exp.y) and contributed by the Department
    of Computer Science at the State University of New York at Buffalo, 1991.
@@ -1087,7 +1087,7 @@ yylex ()
 
     if(sym)
     {
-       switch(sym->class)
+       switch(sym->aclass)
        {
        case LOC_STATIC:
        case LOC_REGISTER:
