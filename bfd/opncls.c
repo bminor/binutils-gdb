@@ -18,25 +18,23 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* $Id$ */
-
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
 #include "obstack.h"
-extern void bfd_cache_init();
-FILE *bfd_open_file();
+extern void bfd_cache_init PARAMS ((bfd *));
+FILE *bfd_open_file PARAMS ((bfd *));
 
 /* fdopen is a loser -- we should use stdio exclusively.  Unfortunately
    if we do that we can't use fcntl.  */
 
 
-#define obstack_chunk_alloc bfd_xmalloc
+#define obstack_chunk_alloc bfd_xmalloc_by_size_t
 #define obstack_chunk_free free
 
 /* Return a new BFD.  All BFD's are allocated through this routine.  */
 
-bfd *new_bfd()
+bfd *new_bfd PARAMS ((void))
 {
   bfd *nbfd;
 
@@ -55,7 +53,7 @@ bfd *new_bfd()
   nbfd->sections = (asection *)NULL;
   nbfd->format = bfd_unknown;
   nbfd->my_archive = (bfd *)NULL;
-  nbfd->origin = 0;				   
+  nbfd->origin = 0;				
   nbfd->opened_once = false;
   nbfd->output_has_begun = false;
   nbfd->section_count = 0;
@@ -65,7 +63,7 @@ bfd *new_bfd()
   nbfd->flags = NO_FLAGS;
   nbfd->mtime_set = false;
 
-  
+
   return nbfd;
 }
 
@@ -124,7 +122,7 @@ DEFUN(bfd_openr, (filename, target),
   }
 
   nbfd->filename = filename;
-  nbfd->direction = read_direction; 
+  nbfd->direction = read_direction;
 
   if (bfd_open_file (nbfd) == NULL) {
     bfd_error = system_call_error;	/* File didn't exist, or some such */
@@ -153,7 +151,18 @@ SYNOPSIS
 DESCRIPTION
          bfd_fdopenr is to bfd_fopenr much like  fdopen is to fopen.
 	 It opens a BFD on a file already described by the @var{fd}
-	 supplied. 
+	 supplied.
+
+	 When the file is later bfd_closed, the file descriptor will be closed.
+
+	 If the caller desires that this file descriptor be cached by BFD
+	 (opened as needed, closed as needed to free descriptors for
+	 other opens), with the supplied @var{fd} used as an initial
+	 file descriptor (but subject to closure at any time), set
+	 bfd->cacheable nonzero in the returned BFD.  The default is to
+	 assume no cacheing; the file descriptor will remain open until
+	 bfd_close, and will not be affected by BFD operations on other
+	 files.
 
          Possible errors are no_memory, invalid_target and system_call
 	 error.
@@ -170,7 +179,7 @@ DEFUN(bfd_fdopenr,(filename, target, fd),
   int fdflags;
 
   bfd_error = system_call_error;
-  
+
 #ifdef NO_FCNTL
   fdflags = O_RDWR;			/* Assume full access */
 #else
@@ -190,18 +199,22 @@ DEFUN(bfd_fdopenr,(filename, target, fd),
     bfd_error = invalid_target;
     return NULL;
   }
-
-#ifdef FASCIST_FDOPEN
-  nbfd->iostream = (char *) fdopen (fd, FOPEN_RB); 
+#if defined(VMS) || defined(__GO32__)
+  nbfd->iostream = (char *)fopen(filename, FOPEN_RB);
 #else
-  /* if the fd were open for read only, this still would not hurt: */
-  nbfd->iostream = (char *) fdopen (fd, FOPEN_RUB); 
+  /* (O_ACCMODE) parens are to avoid Ultrix header file bug */
+  switch (fdflags & (O_ACCMODE)) {
+  case O_RDONLY: nbfd->iostream = (char *) fdopen (fd, FOPEN_RB);   break;
+  case O_WRONLY: nbfd->iostream = (char *) fdopen (fd, FOPEN_RUB);  break;
+  case O_RDWR:   nbfd->iostream = (char *) fdopen (fd, FOPEN_RUB);  break;
+  default: abort ();
+  }
 #endif
   if (nbfd->iostream == NULL) {
     (void) obstack_free (&nbfd->memory, (PTR)0);
     return NULL;
   }
-  
+
   /* OK, put everything where it belongs */
 
   nbfd->filename = filename;
@@ -212,11 +225,11 @@ DEFUN(bfd_fdopenr,(filename, target, fd),
   /* (O_ACCMODE) parens are to avoid Ultrix header file bug */
   switch (fdflags & (O_ACCMODE)) {
   case O_RDONLY: nbfd->direction = read_direction; break;
-  case O_WRONLY: nbfd->direction = write_direction; break;  
+  case O_WRONLY: nbfd->direction = write_direction; break;
   case O_RDWR: nbfd->direction = both_direction; break;
   default: abort ();
   }
-				   
+				
   bfd_cache_init (nbfd);
 
   return nbfd;
@@ -239,7 +252,7 @@ DESCRIPTION
 	file format @var{target}, and returns a pointer to it.
 
 	Possible errors are system_call_error, no_memory,
-	invalid_target. 
+	invalid_target.
 */
 
 bfd *
@@ -249,7 +262,7 @@ DEFUN(bfd_openw,(filename, target),
 {
   bfd *nbfd;
   bfd_target *target_vec;
-  
+
   bfd_error = system_call_error;
 
   /* nbfd has to point to head of malloc'ed block so that bfd_close may
@@ -290,7 +303,10 @@ DESCRIPTION
 	and closed. If the created file is executable, then
 	<<chmod>> is called to mark it as such.
 
-	All memory attached to the BFD's obstacks is released. 
+	All memory attached to the BFD's obstacks is released.
+
+	The file descriptor associated with the BFD is closed (even
+	if it was passed in to BFD by bfd_fdopenr).
 
 RETURNS
 	<<true>> is returned if all is ok, otherwise <<false>>.
@@ -301,17 +317,20 @@ boolean
 DEFUN(bfd_close,(abfd),
       bfd *abfd)
 {
+  boolean ret;
+
   if (!bfd_read_p(abfd))
     if (BFD_SEND_FMT (abfd, _bfd_write_contents, (abfd)) != true)
       return false;
 
   if (BFD_SEND (abfd, _close_and_cleanup, (abfd)) != true) return false;
 
-  bfd_cache_close(abfd);
+  ret = bfd_cache_close(abfd);
 
   /* If the file was open for writing and is now executable,
      make it so */
-  if (abfd->direction == write_direction 
+  if (ret == true
+      && abfd->direction == write_direction
       && abfd->flags & EXEC_P) {
     struct stat buf;
     stat(abfd->filename, &buf);
@@ -329,7 +348,7 @@ DEFUN(bfd_close,(abfd),
   }
   (void) obstack_free (&abfd->memory, (PTR)0);
   (void) free(abfd);
-  return true;
+  return ret;
 }
 
 /*
@@ -348,7 +367,7 @@ DESCRIPTION
 	If the created file is executable, then <<chmod>> is called
 	to mark it as such.
 
-	All memory attached to the BFD's obstacks is released. 
+	All memory attached to the BFD's obstacks is released.
 
 RETURNS
 	<<true>> is returned if all is ok, otherwise <<false>>.
@@ -359,11 +378,14 @@ boolean
 DEFUN(bfd_close_all_done,(abfd),
       bfd *abfd)
 {
-  bfd_cache_close(abfd);
+  boolean ret;
+
+  ret = bfd_cache_close(abfd);
 
   /* If the file was open for writing and is now executable,
      make it so */
-  if (abfd->direction == write_direction 
+  if (ret == true
+      && abfd->direction == write_direction
       && abfd->flags & EXEC_P) {
     struct stat buf;
     stat(abfd->filename, &buf);
@@ -381,7 +403,7 @@ DEFUN(bfd_close_all_done,(abfd),
   }
   (void) obstack_free (&abfd->memory, (PTR)0);
   (void) free(abfd);
-  return true;
+  return ret;
 }
 
 
@@ -424,7 +446,7 @@ DESCRIPTION
 	This routine creates a new BFD in the manner of
 	<<bfd_openw>>, but without opening a file. The new BFD
 	takes the target from the target used by @var{template}. The
-	format is always set to <<bfd_object>>. 
+	format is always set to <<bfd_object>>.
 
 */
 
@@ -447,7 +469,7 @@ DEFUN(bfd_create,(filename, template),
   return nbfd;
 }
 
-/* 
+/*
 INTERNAL_FUNCTION
 	bfd_alloc_by_size_t
 
@@ -460,7 +482,7 @@ DESCRIPTION
 */
 
 
-PTR 
+PTR
 DEFUN(bfd_alloc_by_size_t,(abfd, size),
       bfd *abfd AND
       size_t size)
@@ -472,9 +494,9 @@ DEFUN(bfd_alloc_by_size_t,(abfd, size),
 DEFUN(void bfd_alloc_grow,(abfd, ptr, size),
       bfd *abfd AND
       PTR ptr AND
-      bfd_size_type size)
+      size_t size)
 {
-  (void)   obstack_grow(&(abfd->memory), ptr, size);
+  (void) obstack_grow(&(abfd->memory), ptr, size);
 }
 DEFUN(PTR bfd_alloc_finish,(abfd),
       bfd *abfd)
@@ -484,16 +506,17 @@ DEFUN(PTR bfd_alloc_finish,(abfd),
 
 DEFUN(PTR bfd_alloc, (abfd, size),
       bfd *abfd AND
-      bfd_size_type size)
+      size_t size)
 {
   return bfd_alloc_by_size_t(abfd, (size_t)size);
 }
 
 DEFUN(PTR bfd_zalloc,(abfd, size),
       bfd *abfd AND
-      bfd_size_type size)
+      size_t size)
 {
-  PTR res = bfd_alloc(abfd, size);
+  PTR res;
+  res = bfd_alloc(abfd, size);
   memset(res, 0, (size_t)size);
   return res;
 }
@@ -501,19 +524,9 @@ DEFUN(PTR bfd_zalloc,(abfd, size),
 DEFUN(PTR bfd_realloc,(abfd, old, size),
       bfd *abfd AND
       PTR old AND
-      bfd_size_type size)
+      size_t size)
 {
   PTR res = bfd_alloc(abfd, size);
   memcpy(res, old, (size_t)size);
   return res;
 }
-
-
-
-
-
-
-
-
-
-

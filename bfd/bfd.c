@@ -157,6 +157,7 @@ CODE_FRAGMENT
 .      struct trad_core_struct *trad_core_data;
 .      struct hppa_data_struct *hppa_data;
 .      struct hppa_core_struct *hppa_core_data;
+.      struct sgi_core_struct *sgi_core_data;
 .      PTR any;
 .      } tdata;
 .  
@@ -292,15 +293,15 @@ bfd_errmsg (error_tag)
   return bfd_errmsgs [(int)error_tag];
 }
 
-
-void bfd_default_error_trap(error_tag)
-bfd_ec error_tag;
+void
+DEFUN (bfd_default_error_trap, (error_tag),
+       bfd_ec error_tag)
 {
   printf("bfd assert fail (%s)\n", bfd_errmsg(error_tag));
 }
 
-void (*bfd_error_trap)() = bfd_default_error_trap;
-void (*bfd_error_nonrepresentabltrap)() = bfd_default_error_trap;
+void (*bfd_error_trap) PARAMS ((bfd_ec)) = bfd_default_error_trap;
+void (*bfd_error_nonrepresentabltrap) PARAMS ((bfd_ec)) = bfd_default_error_trap;
 
 void
 DEFUN(bfd_perror,(message),
