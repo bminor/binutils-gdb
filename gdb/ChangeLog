@@ -1,5 +1,9 @@
 2003-10-26  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.h (FPU_REG_RAW_SIZE): Remove define.
+	* x86-64-tdep.c (x86_64_store_return_value): Use
+	I386_MAX_REGISTER_SIZE instead of FPU_REG_RAW_SIZE.
+
 	Change register numbers to enumartion values.
 	* i386-tdep.h (enum i386_regnum): New.
 	(I386_EAX_REGNUM, I386_EDX_REGNUM, I386_ESP_REGNUM,

@@ -761,7 +761,7 @@ x86_64_store_return_value (struct type *type, struct regcache *regcache,
   if (TYPE_CODE_FLT == TYPE_CODE (type) && len == 16)
     {
       ULONGEST fstat;
-      char buf[FPU_REG_RAW_SIZE];
+      char buf[I386_MAX_REGISTER_SIZE];
 
       /* Returning floating-point values is a bit tricky.  Apart from
          storing the return value in %st(0), we have to simulate the
