@@ -143,7 +143,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC64_NONE",	/* name */
 	 false,			/* partial_inplace */
-	 0xff,			/* src_mask */
+	 0,			/* src_mask */
 	 0,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -174,7 +174,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC64_ADDR24",	/* name */
 	 false,			/* partial_inplace */
-	 0xfc000003,		/* src_mask */
+	 0,			/* src_mask */
 	 0x03fffffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -251,7 +251,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC64_ADDR14",	/* name */
 	 false,			/* partial_inplace */
-	 0xffff0003,		/* src_mask */
+	 0,			/* src_mask */
 	 0x0000fffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -268,7 +268,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 ppc64_elf_brtaken_reloc, /* special_function */
 	 "R_PPC64_ADDR14_BRTAKEN",/* name */
 	 false,			/* partial_inplace */
-	 0xffff0003,		/* src_mask */
+	 0,			/* src_mask */
 	 0x0000fffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -285,7 +285,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 ppc64_elf_brtaken_reloc, /* special_function */
 	 "R_PPC64_ADDR14_BRNTAKEN",/* name */
 	 false,			/* partial_inplace */
-	 0xffff0003,		/* src_mask */
+	 0,			/* src_mask */
 	 0x0000fffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -300,7 +300,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC64_REL24",	/* name */
 	 false,			/* partial_inplace */
-	 0xfc000003,		/* src_mask */
+	 0,			/* src_mask */
 	 0x03fffffc,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -315,7 +315,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC64_REL14",	/* name */
 	 false,			/* partial_inplace */
-	 0xffff0003,		/* src_mask */
+	 0,			/* src_mask */
 	 0x0000fffc,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -332,7 +332,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 ppc64_elf_brtaken_reloc, /* special_function */
 	 "R_PPC64_REL14_BRTAKEN", /* name */
 	 false,			/* partial_inplace */
-	 0xffff0003,		/* src_mask */
+	 0,			/* src_mask */
 	 0x0000fffc,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -349,7 +349,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 ppc64_elf_brtaken_reloc, /* special_function */
 	 "R_PPC64_REL14_BRNTAKEN",/* name */
 	 false,			/* partial_inplace */
-	 0xffff0003,		/* src_mask */
+	 0,			/* src_mask */
 	 0x0000fffc,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -682,7 +682,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_PPC64_ADDR30",	/* name */
 	 false,			/* partial_inplace */
-	 0x00000003,		/* src_mask */
+	 0,			/* src_mask */
 	 0xfffffffc,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -998,7 +998,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC64_ADDR16_DS",	/* name */
 	 false,			/* partial_inplace */
-	 0x0003,		/* src_mask */
+	 0,			/* src_mask */
 	 0xfffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1013,7 +1013,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC64_ADDR16_LO_DS",/* name */
 	 false,			/* partial_inplace */
-	 0x0003,		/* src_mask */
+	 0,			/* src_mask */
 	 0xfffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1028,7 +1028,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_GOT16_DS",	/* name */
 	 false,			/* partial_inplace */
-	 0x0003,		/* src_mask */
+	 0,			/* src_mask */
 	 0xfffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1043,7 +1043,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_GOT16_LO_DS",	/* name */
 	 false,			/* partial_inplace */
-	 0x0003,		/* src_mask */
+	 0,			/* src_mask */
 	 0xfffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1058,7 +1058,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_PLT16_LO_DS",	/* name */
 	 false,			/* partial_inplace */
-	 0x0003,		/* src_mask */
+	 0,			/* src_mask */
 	 0xfffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1073,7 +1073,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 ppc64_elf_sectoff_reloc, /* special_function */
 	 "R_PPC64_SECTOFF_DS",	/* name */
 	 false,			/* partial_inplace */
-	 0x0003,		/* src_mask */
+	 0,			/* src_mask */
 	 0xfffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1088,7 +1088,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 ppc64_elf_sectoff_reloc, /* special_function */
 	 "R_PPC64_SECTOFF_LO_DS",/* name */
 	 false,			/* partial_inplace */
-	 0x0003,		/* src_mask */
+	 0,			/* src_mask */
 	 0xfffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1103,7 +1103,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 ppc64_elf_toc_reloc,	/* special_function */
 	 "R_PPC64_TOC16_DS",	/* name */
 	 false,			/* partial_inplace */
-	 0x0003,		/* src_mask */
+	 0,			/* src_mask */
 	 0xfffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1118,7 +1118,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 ppc64_elf_toc_reloc,	/* special_function */
 	 "R_PPC64_TOC16_LO_DS",	/* name */
 	 false,			/* partial_inplace */
-	 0x0003,		/* src_mask */
+	 0,			/* src_mask */
 	 0xfffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1134,7 +1134,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_PLTGOT16_DS",	/* name */
 	 false,			/* partial_inplace */
-	 0x0003,		/* src_mask */
+	 0,			/* src_mask */
 	 0xfffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -1150,7 +1150,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_PLTGOT16_LO_DS",/* name */
 	 false,			/* partial_inplace */
-	 0x0003,		/* src_mask */
+	 0,			/* src_mask */
 	 0xfffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -3758,7 +3758,23 @@ edit_opd (obfd, info)
 		    }
 
 		  skip = sym_sec->output_section == bfd_abs_section_ptr;
-		  if (!skip)
+		  if (skip)
+		    {
+		      if (h != NULL)
+			{
+			  /* Arrange for the function descriptor sym
+			     to be dropped.  */
+			  struct elf_link_hash_entry *fdh;
+			  struct ppc_link_hash_entry *fh;
+
+			  fh = (struct ppc_link_hash_entry *) h;
+			  BFD_ASSERT (fh->is_func);
+			  fdh = fh->oh;
+			  fdh->root.u.def.value = 0;
+			  fdh->root.u.def.section = sym_sec;
+			}
+		    }
+		  else
 		    {
 		      /* We'll be keeping this opd entry.  */
 

@@ -128,6 +128,9 @@ CODE_FRAGMENT
 .  {* Symbol table for output BFD (with symcount entries).  *}
 .  struct symbol_cache_entry  **outsymbols;
 .
+.  {* Used for slurped dynamic symbol tables.  *}
+.  unsigned int dynsymcount;
+.
 .  {* Pointer to structure which contains architecture information.  *}
 .  const struct bfd_arch_info *arch_info;
 .
@@ -1334,27 +1337,27 @@ FUNCTION
 	bfd_alt_mach_code
 
 SYNOPSIS
-	boolean bfd_alt_mach_code(bfd *abfd, int index);
+	boolean bfd_alt_mach_code(bfd *abfd, int alternative);
 
 DESCRIPTION
 
 	When more than one machine code number is available for the
 	same machine type, this function can be used to switch between
-	the preferred one (index == 0) and any others.  Currently,
+	the preferred one (alternative == 0) and any others.  Currently,
 	only ELF supports this feature, with up to two alternate
 	machine codes.
 */
 
 boolean
-bfd_alt_mach_code (abfd, index)
+bfd_alt_mach_code (abfd, alternative)
      bfd *abfd;
-     int index;
+     int alternative;
 {
   if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
     {
       int code;
 
-      switch (index)
+      switch (alternative)
 	{
 	case 0:
 	  code = get_elf_backend_data (abfd)->elf_machine_code;

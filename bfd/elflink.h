@@ -343,7 +343,7 @@ elf_link_add_archive_symbols (abfd, info)
 					false, false, false);
 
 	      if (h == NULL)
-	        {
+		{
 		  /* We also need to check references to the symbol
 		     without the version.  */
 
@@ -899,19 +899,19 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
 
 /* This function is called to create an indirect symbol from the
    default for the symbol with the default version if needed. The
-   symbol is described by H, NAME, SYM, SEC, VALUE, and OVERRIDE.  We
+   symbol is described by H, NAME, SYM, PSEC, VALUE, and OVERRIDE.  We
    set DYNSYM if the new indirect symbol is dynamic. DT_NEEDED
    indicates if it comes from a DT_NEEDED entry of a shared object.  */
 
 static boolean
-elf_add_default_symbol (abfd, info, h, name, sym, sec, value,
+elf_add_default_symbol (abfd, info, h, name, sym, psec, value,
 			dynsym, override, dt_needed)
      bfd *abfd;
      struct bfd_link_info *info;
      struct elf_link_hash_entry *h;
      const char *name;
      Elf_Internal_Sym *sym;
-     asection **sec;
+     asection **psec;
      bfd_vma *value;
      boolean *dynsym;
      boolean override;
@@ -926,6 +926,7 @@ elf_add_default_symbol (abfd, info, h, name, sym, sec, value,
   boolean dynamic;
   char *p;
   size_t len, shortlen;
+  asection *sec;
 
   /* If this symbol has a version, and it is the default version, we
      create an indirect symbol from the default name to the fully
@@ -970,7 +971,8 @@ elf_add_default_symbol (abfd, info, h, name, sym, sec, value,
      actually going to define an indirect symbol.  */
   type_change_ok = false;
   size_change_ok = false;
-  if (! elf_merge_symbol (abfd, info, shortname, sym, sec, value,
+  sec = *psec;
+  if (! elf_merge_symbol (abfd, info, shortname, sym, &sec, value,
 			  &hi, &override, &type_change_ok,
 			  &size_change_ok, dt_needed))
     return false;
@@ -1077,7 +1079,8 @@ elf_add_default_symbol (abfd, info, h, name, sym, sec, value,
   /* Once again, merge with any existing symbol.  */
   type_change_ok = false;
   size_change_ok = false;
-  if (! elf_merge_symbol (abfd, info, shortname, sym, sec, value,
+  sec = *psec;
+  if (! elf_merge_symbol (abfd, info, shortname, sym, &sec, value,
 			  &hi, &override, &type_change_ok,
 			  &size_change_ok, dt_needed))
     return false;
@@ -1085,10 +1088,13 @@ elf_add_default_symbol (abfd, info, h, name, sym, sec, value,
   if (override)
     {
       /* Here SHORTNAME is a versioned name, so we don't expect to see
-	 the type of override we do in the case above.  */
-      (*_bfd_error_handler)
-	(_("%s: warning: unexpected redefinition of `%s'"),
-	 bfd_archive_filename (abfd), shortname);
+	 the type of override we do in the case above unless it is
+	 overridden by a versioned definiton.  */
+      if (hi->root.type != bfd_link_hash_defined
+	  && hi->root.type != bfd_link_hash_defweak)
+	(*_bfd_error_handler)
+	  (_("%s: warning: unexpected redefinition of indirect versioned symbol `%s'"),
+	   bfd_archive_filename (abfd), shortname);
     }
   else
     {
@@ -2765,9 +2771,9 @@ compute_bucket_count (info)
   elf_link_hash_traverse (elf_hash_table (info),
 			  elf_collect_hash_codes, &hashcodesp);
 
-/* We have a problem here.  The following code to optimize the table
-   size requires an integer type with more the 32 bits.  If
-   BFD_HOST_U_64_BIT is set we know about such a type.  */
+  /* We have a problem here.  The following code to optimize the table
+     size requires an integer type with more the 32 bits.  If
+     BFD_HOST_U_64_BIT is set we know about such a type.  */
 #ifdef BFD_HOST_U_64_BIT
   if (info->optimize)
     {
@@ -2938,6 +2944,9 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       struct elf_info_failed eif;
       struct elf_link_hash_entry *h;
       asection *dynstr;
+      struct bfd_elf_version_tree *t;
+      struct bfd_elf_version_expr *d;
+      boolean all_defined;
 
       *sinterpptr = bfd_get_section_by_name (dynobj, ".interp");
       BFD_ASSERT (*sinterpptr != NULL || info->shared);
@@ -3018,6 +3027,57 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	    return false;
 	}
 
+      /* Make all global versions with definiton.  */
+      for (t = verdefs; t != NULL; t = t->next)
+	for (d = t->globals; d != NULL; d = d->next)
+	  if (!d->symver && strchr (d->pattern, '*') == NULL)
+	    {
+	      const char *verstr, *name;
+	      size_t namelen, verlen, newlen;
+	      char *newname, *p;
+	      struct elf_link_hash_entry *newh;
+
+	      name = d->pattern;
+	      namelen = strlen (name);
+	      verstr = t->name;
+	      verlen = strlen (verstr);
+	      newlen = namelen + verlen + 3; 
+
+	      newname = (char *) bfd_malloc ((bfd_size_type) newlen);
+	      if (newname == NULL)
+		return false;
+	      memcpy (newname, name, namelen);
+
+	      /* Check the hidden versioned definition.  */
+	      p = newname + namelen;
+	      *p++ = ELF_VER_CHR;
+	      memcpy (p, verstr, verlen + 1);
+	      newh = elf_link_hash_lookup (elf_hash_table (info),
+					   newname, false, false,
+					   false);
+	      if (newh == NULL
+		  || (newh->root.type != bfd_link_hash_defined
+		      && newh->root.type != bfd_link_hash_defweak))
+		{
+		  /* Check the default versioned definition.  */
+		  *p++ = ELF_VER_CHR;
+		  memcpy (p, verstr, verlen + 1);
+		  newh = elf_link_hash_lookup (elf_hash_table (info),
+					       newname, false, false,
+					       false);
+		}
+	      free (newname);
+
+	      /* Mark this version if there is a definition and it is
+		 not defined in a shared object.  */
+	      if (newh != NULL
+		  && ((newh->elf_link_hash_flags
+		       & ELF_LINK_HASH_DEF_DYNAMIC) == 0)
+		  && (newh->root.type == bfd_link_hash_defined
+		      || newh->root.type == bfd_link_hash_defweak))
+		d->symver = 1;
+	    }
+
       /* Attach all the symbols to their version information.  */
       asvinfo.output_bfd = output_bfd;
       asvinfo.info = info;
@@ -3029,6 +3089,28 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 			      (PTR) &asvinfo);
       if (asvinfo.failed)
 	return false;
+
+      if (!info->allow_undefined_version)
+	{
+	  /* Check if all global versions have a definiton.  */
+	  all_defined = true;
+	  for (t = verdefs; t != NULL; t = t->next)
+	    for (d = t->globals; d != NULL; d = d->next)
+	      if (!d->symver && !d->script
+		  && strchr (d->pattern, '*') == NULL)
+		{
+		  (*_bfd_error_handler)
+		    (_("%s: undefined version: %s"),
+		     d->pattern, t->name);
+		  all_defined = false;
+		}
+
+	  if (!all_defined)
+	    {
+	      bfd_set_error (bfd_error_bad_value);
+	      return false;
+	    }
+	}
 
       /* Find all symbols which were defined in a dynamic object and make
 	 the backend pick a reasonable value for them.  */
@@ -3085,7 +3167,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 		    {
 		      (*_bfd_error_handler)
 			(_("%s: .preinit_array section is not allowed in DSO"),
-			  bfd_archive_filename (sub));
+			 bfd_archive_filename (sub));
 		      break;
 		    }
 
@@ -3941,7 +4023,7 @@ elf_adjust_dynamic_symbol (h, data)
       && (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) == 0)
     (*_bfd_error_handler)
       (_("warning: type and size of dynamic symbol `%s' are not defined"),
-	 h->root.root.string);
+       h->root.root.string);
 
   dynobj = elf_hash_table (eif->info)->dynobj;
   bed = get_elf_backend_data (dynobj);
@@ -4001,7 +4083,7 @@ elf_export_symbol (h, data)
 
       if (!eif->verdefs)
 	{
-doit:
+	doit:
 	  if (! _bfd_elf_link_record_dynamic_symbol (eif->info, h))
 	    {
 	      eif->failed = true;
@@ -4258,7 +4340,6 @@ elf_link_assign_sym_version (h, data)
 	    (_("%s: undefined versioned symbol name %s"),
 	     bfd_get_filename (sinfo->output_bfd), h->root.root.string);
 	  bfd_set_error (bfd_error_bad_value);
-error_return:
 	  sinfo->failed = true;
 	  return false;
 	}
@@ -4272,45 +4353,58 @@ error_return:
   if (h->verinfo.vertree == NULL && sinfo->verdefs != NULL)
     {
       struct bfd_elf_version_tree *t;
-      struct bfd_elf_version_tree *deflt;
+      struct bfd_elf_version_tree *local_ver;
       struct bfd_elf_version_expr *d;
 
       /* See if can find what version this symbol is in.  If the
 	 symbol is supposed to be local, then don't actually register
 	 it.  */
-      deflt = NULL;
+      local_ver = NULL;
       for (t = sinfo->verdefs; t != NULL; t = t->next)
 	{
 	  if (t->globals != NULL)
 	    {
+	      boolean matched;
+
+	      matched = false;
 	      for (d = t->globals; d != NULL; d = d->next)
 		{
 		  if ((*d->match) (d, h->root.root.string))
 		    {
-		      h->verinfo.vertree = t;
-		      break;
+		      if (d->symver)
+			matched = true;
+		      else
+			{
+			  /* There is a version without definition.  Make
+			     the symbol the default definition for this
+			     version.  */
+			  h->verinfo.vertree = t;
+			  local_ver = NULL;
+			  d->script = 1;
+			  break;
+			}
 		    }
 		}
 
 	      if (d != NULL)
 		break;
+	      else if (matched)
+		/* There is no undefined version for this symbol. Hide the
+		   default one.  */
+		(*bed->elf_backend_hide_symbol) (info, h, true);
 	    }
 
 	  if (t->locals != NULL)
 	    {
 	      for (d = t->locals; d != NULL; d = d->next)
 		{
+		  /* If the match is "*", keep looking for a more
+		     explicit, perhaps even global, match.  */
 		  if (d->pattern[0] == '*' && d->pattern[1] == '\0')
-		    deflt = t;
+		    local_ver = t;
 		  else if ((*d->match) (d, h->root.root.string))
 		    {
-		      h->verinfo.vertree = t;
-		      if (h->dynindx != -1
-			  && info->shared
-			  && ! info->export_dynamic)
-			{
-			  (*bed->elf_backend_hide_symbol) (info, h, true);
-			}
+		      local_ver = t;
 		      break;
 		    }
 		}
@@ -4320,52 +4414,15 @@ error_return:
 	    }
 	}
 
-      if (deflt != NULL && h->verinfo.vertree == NULL)
+      if (local_ver != NULL)
 	{
-	  h->verinfo.vertree = deflt;
+	  h->verinfo.vertree = local_ver;
 	  if (h->dynindx != -1
 	      && info->shared
 	      && ! info->export_dynamic)
 	    {
 	      (*bed->elf_backend_hide_symbol) (info, h, true);
 	    }
-	}
-
-      /* We need to check if a hidden versioned definition should
-	 hide the default one.  */
-      if (h->dynindx != -1 && h->verinfo.vertree != NULL)
-	{
-	  const char *verstr, *name;
-	  size_t namelen, verlen, newlen;
-	  char *newname;
-	  struct elf_link_hash_entry *newh;
-
-	  name = h->root.root.string;
-	  namelen = strlen (name);
-	  verstr = h->verinfo.vertree->name;
-	  verlen = strlen (verstr);
-	  newlen = namelen + verlen + 2;
-
-	  newname = (char *) bfd_malloc ((bfd_size_type) newlen);
-	  if (newname == NULL)
-	    goto error_return;
-	  memcpy (newname, name, namelen);
-
-	  /* Check the hidden versioned definition.  */
-	  p = newname + namelen;
-	  *p++ = ELF_VER_CHR;
-	  memcpy (p, verstr, verlen + 1);
-	  newh = elf_link_hash_lookup (elf_hash_table (info), newname,
-				    false, false, false);
-
-	  if (newh
-	      && (newh->root.type == bfd_link_hash_defined
-		  || newh->root.type == bfd_link_hash_defweak))
-	    /* We find a hidden versioned definition. Hide the default
-	       one.  */
-	    (*bed->elf_backend_hide_symbol) (info, h, true);
-
-	  free (newname);
 	}
     }
 
@@ -4576,7 +4633,7 @@ elf_link_adjust_relocs (abfd, rel_hdr, count, rel_hash)
 
 	  for (j = 0; j < bed->s->int_rels_per_ext_rel; j++)
 	    irela[j].r_info = ELF_R_INFO ((*rel_hash)->indx,
-				       ELF_R_TYPE (irela[j].r_info));
+					  ELF_R_TYPE (irela[j].r_info));
 
 	  if (bed->s->swap_reloca_out)
 	    (*bed->s->swap_reloca_out) (abfd, irela, (bfd_byte *) erela);
@@ -4589,10 +4646,12 @@ elf_link_adjust_relocs (abfd, rel_hdr, count, rel_hash)
   free (irela);
 }
 
-struct elf_link_sort_rela {
+struct elf_link_sort_rela
+{
   bfd_vma offset;
   enum elf_reloc_type_class type;
-  union {
+  union
+  {
     Elf_Internal_Rel rel;
     Elf_Internal_Rela rela;
   } u;
@@ -5266,7 +5325,7 @@ elf_bfd_final_link (abfd, info)
 	      size = 0;
 	      for (o = sec->link_order_head; o != NULL; o = o->next)
 		if (size < o->offset + o->size)
-	      size = o->offset + o->size;
+		  size = o->offset + o->size;
 	    }
 	  end = sec->vma + size;
 	}
@@ -5405,8 +5464,8 @@ elf_bfd_final_link (abfd, info)
 	      sym = e->isym;
 
 	      if (e->isym.st_shndx != SHN_UNDEF
-		   && (e->isym.st_shndx < SHN_LORESERVE
-		       || e->isym.st_shndx > SHN_HIRESERVE))
+		  && (e->isym.st_shndx < SHN_LORESERVE
+		      || e->isym.st_shndx > SHN_HIRESERVE))
 		{
 		  s = bfd_section_from_elf_index (e->input_bfd,
 						  e->isym.st_shndx);
@@ -6343,7 +6402,7 @@ elf_link_output_extsym (h, data)
 
   /* If we're stripping it, then it was just a dynamic symbol, and
      there's nothing else to do.  */
-  if (strip)
+  if (strip || (input_sec->flags & SEC_EXCLUDE) != 0)
     return true;
 
   h->indx = bfd_get_symcount (finfo->output_bfd);
@@ -6395,19 +6454,19 @@ elf_link_output_relocs (output_bfd, input_section, input_rel_hdr,
     }
   else
     {
-      (*_bfd_error_handler) (
-        _("%s: relocation size mismatch in %s section %s"),
-        bfd_get_filename (output_bfd),
-        bfd_archive_filename (input_section->owner),
-        input_section->name);
+      (*_bfd_error_handler)
+	(_("%s: relocation size mismatch in %s section %s"),
+	 bfd_get_filename (output_bfd),
+	 bfd_archive_filename (input_section->owner),
+	 input_section->name);
       bfd_set_error (bfd_error_wrong_object_format);
       return false;
     }
 
   bed = get_elf_backend_data (output_bfd);
   irela = internal_relocs;
-  irelaend = irela + NUM_SHDR_ENTRIES (input_rel_hdr)
-		     * bed->s->int_rels_per_ext_rel;
+  irelaend = irela + (NUM_SHDR_ENTRIES (input_rel_hdr)
+		      * bed->s->int_rels_per_ext_rel);
 
   if (input_rel_hdr->sh_entsize == sizeof (Elf_External_Rel))
     {
@@ -7043,7 +7102,6 @@ elf_link_input_bfd (finfo, input_bfd)
 					  internal_relocs))
 		    return false;
 		}
-
 	    }
 	}
 
@@ -7560,28 +7618,27 @@ elf_finish_pointer_linker_section (output_bfd, input_bfd, info, lsect, h,
 /* Garbage collect unused sections.  */
 
 static boolean elf_gc_mark
-  PARAMS ((struct bfd_link_info *info, asection *sec,
-	   asection * (*gc_mark_hook)
-	     PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
-		      struct elf_link_hash_entry *, Elf_Internal_Sym *))));
+  PARAMS ((struct bfd_link_info *, asection *,
+	   asection * (*) (asection *, struct bfd_link_info *,
+			   Elf_Internal_Rela *, struct elf_link_hash_entry *,
+			   Elf_Internal_Sym *)));
 
 static boolean elf_gc_sweep
-  PARAMS ((struct bfd_link_info *info,
-	   boolean (*gc_sweep_hook)
-	     PARAMS ((bfd *abfd, struct bfd_link_info *info, asection *o,
-		      const Elf_Internal_Rela *relocs))));
+  PARAMS ((struct bfd_link_info *,
+	   boolean (*) (bfd *, struct bfd_link_info *, asection *,
+			const Elf_Internal_Rela *)));
 
 static boolean elf_gc_sweep_symbol
-  PARAMS ((struct elf_link_hash_entry *h, PTR idxptr));
+  PARAMS ((struct elf_link_hash_entry *, PTR));
 
 static boolean elf_gc_allocate_got_offsets
-  PARAMS ((struct elf_link_hash_entry *h, PTR offarg));
+  PARAMS ((struct elf_link_hash_entry *, PTR));
 
 static boolean elf_gc_propagate_vtable_entries_used
-  PARAMS ((struct elf_link_hash_entry *h, PTR dummy));
+  PARAMS ((struct elf_link_hash_entry *, PTR));
 
 static boolean elf_gc_smash_unused_vtentry_relocs
-  PARAMS ((struct elf_link_hash_entry *h, PTR dummy));
+  PARAMS ((struct elf_link_hash_entry *, PTR));
 
 /* The mark phase of garbage collection.  For a given section, mark
    it and any sections in this section's group, and all the sections
@@ -7591,9 +7648,10 @@ static boolean
 elf_gc_mark (info, sec, gc_mark_hook)
      struct bfd_link_info *info;
      asection *sec;
-     asection * (*gc_mark_hook)
-       PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
-		struct elf_link_hash_entry *, Elf_Internal_Sym *));
+     asection * (*gc_mark_hook) PARAMS ((asection *, struct bfd_link_info *,
+					 Elf_Internal_Rela *,
+					 struct elf_link_hash_entry *,
+					 Elf_Internal_Sym *));
 {
   boolean ret;
   asection *group_sec;
@@ -7705,9 +7763,8 @@ elf_gc_mark (info, sec, gc_mark_hook)
 static boolean
 elf_gc_sweep (info, gc_sweep_hook)
      struct bfd_link_info *info;
-     boolean (*gc_sweep_hook)
-       PARAMS ((bfd *abfd, struct bfd_link_info *info, asection *o,
-		const Elf_Internal_Rela *relocs));
+     boolean (*gc_sweep_hook) PARAMS ((bfd *, struct bfd_link_info *,
+				       asection *, const Elf_Internal_Rela *));
 {
   bfd *sub;
 
@@ -8422,7 +8479,12 @@ elf_bfd_discard_info (output_bfd, info)
 	  if (_bfd_elf_discard_section_eh_frame (abfd, info, eh, ehdr,
 						 elf_reloc_symbol_deleted_p,
 						 &cookie))
-	    ret = true;
+	    {
+	      /* Relocs have been edited.  Ensure edited version is
+		 used later in relocate_section.  */
+	      elf_section_data (eh)->relocs = cookie.rels;
+	      ret = true;
+	    }
 	  if (cookie.rels && elf_section_data (eh)->relocs != cookie.rels)
 	    free (cookie.rels);
 	}

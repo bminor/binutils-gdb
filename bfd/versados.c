@@ -612,6 +612,7 @@ versados_object_p (abfd)
 {
   struct ext_vheader ext;
   unsigned char len;
+  tdata_type *tdata_save;
 
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
     return NULL;
@@ -642,9 +643,12 @@ versados_object_p (abfd)
 
   /* OK, looks like a record, build the tdata and read in.  */
 
-  if (!versados_mkobject (abfd)
-      || !versados_scan (abfd))
-    return NULL;
+  tdata_save = abfd->tdata.versados_data;
+  if (!versados_mkobject (abfd) || !versados_scan (abfd))
+    {
+      abfd->tdata.versados_data = tdata_save;
+      return NULL;
+    }
 
   return abfd->xvec;
 }

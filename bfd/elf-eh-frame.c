@@ -627,11 +627,11 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
 	    goto free_no_table;
 	  if ((*reloc_symbol_deleted_p) (buf - ehbuf, cookie))
 	    {
-	      cookie->rel = rel;
 	      /* This is a FDE against discarded section, it should
 		 be deleted.  */
 	      new_size -= hdr.length + 4;
 	      sec_info->entry[sec_info->count].removed = 1;
+	      memset (rel, 0, sizeof (*rel));
 	    }
 	  else
 	    {

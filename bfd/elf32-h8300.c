@@ -782,7 +782,7 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 	  Elf_Internal_Sym *isym;
 	  asection *sym_sec;
 
-	  isym = isymbuf + ELF64_R_SYM (irel->r_info);
+	  isym = isymbuf + ELF32_R_SYM (irel->r_info);
 	  sym_sec = bfd_section_from_elf_index (abfd, isym->st_shndx);
 	  symval = (isym->st_value
 		    + sym_sec->output_section->vma

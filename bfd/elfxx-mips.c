@@ -1446,15 +1446,18 @@ mips_elf_global_got_index (abfd, h)
   bfd_vma index;
   asection *sgot;
   struct mips_got_info *g;
+  long global_got_dynindx = 0;
 
   g = mips_elf_got_info (abfd, &sgot);
+  if (g->global_gotsym != NULL)
+    global_got_dynindx = g->global_gotsym->dynindx;
 
   /* Once we determine the global GOT entry with the lowest dynamic
      symbol table index, we must put all dynamic symbols with greater
      indices into the GOT.  That makes it easy to calculate the GOT
      offset.  */
-  BFD_ASSERT (h->dynindx >= g->global_gotsym->dynindx);
-  index = ((h->dynindx - g->global_gotsym->dynindx + g->local_gotno)
+  BFD_ASSERT (h->dynindx >= global_got_dynindx);
+  index = ((h->dynindx - global_got_dynindx + g->local_gotno)
 	   * MIPS_ELF_GOT_SIZE (abfd));
   BFD_ASSERT (index < sgot->_raw_size);
 

@@ -292,23 +292,23 @@ _bfd_vms_get_record (abfd)
 
   if (PRIV (buf_size) == 0)
     {
+      bfd_size_type amt;
+
       if (PRIV (is_vax))
 	{
-	  PRIV (vms_buf) = (unsigned char *) malloc (OBJ_S_C_MAXRECSIZ);
-	  PRIV (buf_size) = OBJ_S_C_MAXRECSIZ;
+	  amt = OBJ_S_C_MAXRECSIZ;
 	  PRIV (file_format) = FF_VAX;
 	}
       else
-	PRIV (vms_buf) = (unsigned char *) malloc (6);
+	amt = 6;
+      PRIV (vms_buf) = (unsigned char *) bfd_malloc (amt);
+      PRIV (buf_size) = amt;
     }
 
   vms_buf = PRIV (vms_buf);
 
   if (vms_buf == 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return -1;
-    }
+    return -1;
 
   switch (PRIV (file_format))
     {
@@ -371,7 +371,7 @@ _bfd_vms_get_record (abfd)
   if (PRIV (is_vax))
     {
       PRIV (rec_length) = bfd_bread (vms_buf, (bfd_size_type) PRIV (buf_size),
-				    abfd);
+				     abfd);
       if (PRIV (rec_length) <= 0)
 	{
 	  bfd_set_error (bfd_error_file_truncated);
@@ -383,7 +383,7 @@ _bfd_vms_get_record (abfd)
     {
       /* extract vms record length  */
 
-      _bfd_vms_get_header_values (abfd, vms_buf+test_start, NULL,
+      _bfd_vms_get_header_values (abfd, vms_buf + test_start, NULL,
 				  &PRIV (rec_length));
 
       if (PRIV (rec_length) <= 0)
@@ -405,13 +405,11 @@ _bfd_vms_get_record (abfd)
       if (PRIV (rec_length) > PRIV (buf_size))
 	{
 	  PRIV (vms_buf) = ((unsigned char *)
-			    realloc (vms_buf, (size_t) PRIV (rec_length)));
+			    bfd_realloc (vms_buf,
+					 (bfd_size_type) PRIV (rec_length)));
 	  vms_buf = PRIV (vms_buf);
 	  if (vms_buf == 0)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      return -1;
-	    }
+	    return -1;
 	  PRIV (buf_size) = PRIV (rec_length);
 	}
 
@@ -593,7 +591,8 @@ add_new_contents (abfd, section)
   if (sptr != NULL)
     return sptr;
 
-  newptr = (vms_section *) bfd_malloc ((bfd_size_type) sizeof (vms_section));
+  newptr = (vms_section *) bfd_alloc (abfd,
+				      (bfd_size_type) sizeof (vms_section));
   if (newptr == (vms_section *) NULL)
     return NULL;
   newptr->contents = (unsigned char *) bfd_alloc (abfd, section->_raw_size);

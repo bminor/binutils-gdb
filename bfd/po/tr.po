@@ -4,171 +4,171 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: bfd 2.12-pre020121\n"
-"POT-Creation-Date: 2002-01-17 12:55+0000\n"
-"PO-Revision-Date: 2002-01-24 13:11EET\n"
+"Project-Id-Version: bfd 2.12.91\n"
+"POT-Creation-Date: 2002-07-23 15:55-0400\n"
+"PO-Revision-Date: 2002-08-10 13:11EET\n"
 "Last-Translator: Deniz Akkus Kanca <deniz@arayan.com>\n"
 "Language-Team: Turkish <gnu-tr-u12a@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=ISO-8859-9\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: KBabel 0.9.5\n"
 
-#: aout-adobe.c:196
+#: aout-adobe.c:197
 #, c-format
 msgid "%s: Unknown section type in a.out.adobe file: %x\n"
-msgstr "%s: a.out.adobe dosyasında bilinmeyen bölüm türü: %x\n"
+msgstr "%s: a.out.adobe dosyasÄ±nda bilinmeyen bÃ¶lÃ¼m tÃ¼rÃ¼: %x\n"
 
 #: aout-cris.c:208
 #, c-format
 msgid "%s: Invalid relocation type exported: %d"
-msgstr "%s: Geçersiz yer değiştirme türü ihraç edilmiş: %d"
+msgstr "%s: GeÃ§ersiz yer deÄŸiÅŸtirme tÃ¼rÃ¼ ihraÃ§ edilmiÅŸ: %d"
 
 #: aout-cris.c:252
 #, c-format
 msgid "%s: Invalid relocation type imported: %d"
-msgstr "%s: Geçersiz yer değiştirme türü ithal edilmiş: %d"
+msgstr "%s: GeÃ§ersiz yer deÄŸiÅŸtirme tÃ¼rÃ¼ ithal edilmiÅŸ: %d"
 
 #: aout-cris.c:263
 #, c-format
 msgid "%s: Bad relocation record imported: %d"
-msgstr "%s: Geçersiz yer değiştirme kaydı ithal edilmiş: %d"
+msgstr "%s: GeÃ§ersiz yer deÄŸiÅŸtirme kaydÄ± ithal edilmiÅŸ: %d"
 
 #: aoutx.h:1282 aoutx.h:1699
 #, c-format
 msgid "%s: can not represent section `%s' in a.out object file format"
-msgstr "%s: `%s' bölümü a.out nesne dosya biçeminde gösterilemez"
+msgstr "%s: `%s' bÃ¶lÃ¼mÃ¼ a.out nesne dosya biÃ§eminde gÃ¶sterilemez"
 
 #: aoutx.h:1669
 #, c-format
 msgid "%s: can not represent section for symbol `%s' in a.out object file format"
-msgstr "%s: `%s' sembol bölümü a.out nesne dosyasında gösterilemez"
+msgstr "%s: `%s' sembol bÃ¶lÃ¼mÃ¼ a.out nesne dosyasÄ±nda gÃ¶sterilemez"
 
 #: aoutx.h:1671
 msgid "*unknown*"
 msgstr "*bilinmeyen*"
 
-#: aoutx.h:3735
+#: aoutx.h:3732
 #, c-format
 msgid "%s: relocateable link from %s to %s not supported"
-msgstr "%s: %s'dan %s'ya yeri değiştirilebilen bağ desteklenmiyor"
+msgstr "%s: %s'dan %s'ya yeri deÄŸiÅŸtirilebilen baÄŸ desteklenmiyor"
 
 #: archive.c:1826
 msgid "Warning: writing archive was slow: rewriting timestamp\n"
-msgstr "Uyarı: arşiv yazma işlemi yavaş: zaman damgası yeniden yazılıyor\n"
+msgstr "UyarÄ±: arÅŸiv yazma iÅŸlemi yavaÅŸ: zaman damgasÄ± yeniden yazÄ±lÄ±yor\n"
 
 #: archive.c:2093
 msgid "Reading archive file mod timestamp"
-msgstr "Arşiv dosyası değişim zaman damgası okunuyor"
+msgstr "ArÅŸiv dosyasÄ± deÄŸiÅŸim zaman damgasÄ± okunuyor"
 
 #. FIXME: bfd can't call perror.
 #: archive.c:2120
 msgid "Writing updated armap timestamp"
-msgstr "Güncellenmiş armap zaman damgası yazılıyor"
+msgstr "GÃ¼ncellenmiÅŸ armap zaman damgasÄ± yazÄ±lÄ±yor"
 
-#: bfd.c:281
+#: bfd.c:274
 msgid "No error"
 msgstr "Hata yok"
 
-#: bfd.c:282
+#: bfd.c:275
 msgid "System call error"
-msgstr "Sistem çağrı hatası"
+msgstr "Sistem Ã§aÄŸrÄ± hatasÄ±"
 
-#: bfd.c:283
+#: bfd.c:276
 msgid "Invalid bfd target"
-msgstr "Geçersiz bfd hedefi"
+msgstr "GeÃ§ersiz bfd hedefi"
 
-#: bfd.c:284
+#: bfd.c:277
 msgid "File in wrong format"
-msgstr "Dosya yanlış biçemde"
+msgstr "Dosya yanlÄ±ÅŸ biÃ§emde"
 
-#: bfd.c:285
+#: bfd.c:278
 msgid "Archive object file in wrong format"
-msgstr "Arşiv nesne dosyası yanlış biçemde"
+msgstr "ArÅŸiv nesne dosyasÄ± yanlÄ±ÅŸ biÃ§emde"
 
-#: bfd.c:286
+#: bfd.c:279
 msgid "Invalid operation"
-msgstr "Geçersiz işlem"
+msgstr "GeÃ§ersiz iÅŸlem"
 
-#: bfd.c:287
+#: bfd.c:280
 msgid "Memory exhausted"
-msgstr "Bellek tükendi"
+msgstr "Bellek tÃ¼kendi"
 
-#: bfd.c:288
+#: bfd.c:281
 msgid "No symbols"
 msgstr "Sembol yok"
 
-#: bfd.c:289
+#: bfd.c:282
 msgid "Archive has no index; run ranlib to add one"
-msgstr "Arşivin indeksi yok; ranlib çalıştırarak indeks ekleyin"
+msgstr "ArÅŸivin indeksi yok; ranlib Ã§alÄ±ÅŸtÄ±rarak indeks ekleyin"
+
+#: bfd.c:283
+msgid "No more archived files"
+msgstr "BaÅŸka arÅŸivlenmiÅŸ dosya yok"
+
+#: bfd.c:284
+msgid "Malformed archive"
+msgstr "Bozuk arÅŸiv"
+
+#: bfd.c:285
+msgid "File format not recognized"
+msgstr "Dosya biÃ§emi tanÄ±nmÄ±yor"
+
+#: bfd.c:286
+msgid "File format is ambiguous"
+msgstr "Dosya biÃ§emi belirsiz"
+
+#: bfd.c:287
+msgid "Section has no contents"
+msgstr "BÃ¶lÃ¼mde iÃ§erik yok"
+
+#: bfd.c:288
+msgid "Nonrepresentable section on output"
+msgstr "Ã‡Ä±ktÄ±da gÃ¶sterilemeyen bÃ¶lÃ¼m"
+
+#: bfd.c:289
+msgid "Symbol needs debug section which does not exist"
+msgstr "Sembol, olmayan hata ayÄ±klama bÃ¶lÃ¼mÃ¼nÃ¼ istiyor"
 
 #: bfd.c:290
-msgid "No more archived files"
-msgstr "Başka arşivlenmiş dosya yok"
+msgid "Bad value"
+msgstr "GeÃ§ersiz deÄŸer"
 
 #: bfd.c:291
-msgid "Malformed archive"
-msgstr "Bozuk arşiv"
+msgid "File truncated"
+msgstr "Dosya budandÄ±"
 
 #: bfd.c:292
-msgid "File format not recognized"
-msgstr "Dosya biçemi tanınmıyor"
+msgid "File too big"
+msgstr "Dosya fazla bÃ¼yÃ¼k"
 
 #: bfd.c:293
-msgid "File format is ambiguous"
-msgstr "Dosya biçemi belirsiz"
-
-#: bfd.c:294
-msgid "Section has no contents"
-msgstr "Bölümde içerik yok"
-
-#: bfd.c:295
-msgid "Nonrepresentable section on output"
-msgstr "Çıktıda gösterilemeyen bölüm"
-
-#: bfd.c:296
-msgid "Symbol needs debug section which does not exist"
-msgstr "Sembol, olmayan hata ayıklama bölümünü istiyor"
-
-#: bfd.c:297
-msgid "Bad value"
-msgstr "Geçersiz değer"
-
-#: bfd.c:298
-msgid "File truncated"
-msgstr "Dosya budandı"
-
-#: bfd.c:299
-msgid "File too big"
-msgstr "Dosya fazla büyük"
-
-#: bfd.c:300
 msgid "#<Invalid error code>"
-msgstr "#<Geçersiz hata kodu>"
+msgstr "#<GeÃ§ersiz hata kodu>"
 
-#: bfd.c:707
+#: bfd.c:700
 #, c-format
 msgid "BFD %s assertion fail %s:%d"
-msgstr "BFD %s, olumlama başarısız %s:%d"
+msgstr "BFD %s, olumlama baÅŸarÄ±sÄ±z %s:%d"
 
-#: bfd.c:726
+#: bfd.c:719
 #, c-format
 msgid "BFD %s internal error, aborting at %s line %d in %s\n"
-msgstr "BFD %s iç hatası, %s'da, %d satırı, %s içerisinde işlem durduruldu\n"
+msgstr "BFD %s iÃ§ hatasÄ±, %s'da, %d satÄ±rÄ±, %s iÃ§erisinde iÅŸlem durduruldu\n"
 
-#: bfd.c:730
+#: bfd.c:723
 #, c-format
-msgid "BFD %sinternal error, aborting at %s line %d\n"
-msgstr "BFD %s iç hatası, %s, %d satırında işlem durduruldu\n"
+msgid "BFD %s internal error, aborting at %s line %d\n"
+msgstr "BFD %s iÃ§ hatasÄ±, %s, %d satÄ±rÄ±nda iÅŸlem durduruldu\n"
 
-#: bfd.c:732
+#: bfd.c:725
 msgid "Please report this bug.\n"
-msgstr "Lütfen bu hatayı bildirin.\n"
+msgstr "LÃ¼tfen bu hatayÄ± bildirin.\n"
 
 #: binary.c:306
 #, c-format
 msgid "Warning: Writing section `%s' to huge (ie negative) file offset 0x%lx."
-msgstr "Uyarı: `%s' bölümü çok büyük (negatif) dosya göreli konumu 0x%lx'e yazılıyor."
+msgstr "UyarÄ±: `%s' bÃ¶lÃ¼mÃ¼ Ã§ok bÃ¼yÃ¼k (negatif) dosya gÃ¶reli konumu 0x%lx'e yazÄ±lÄ±yor."
 
 #: coff-a29k.c:119
 msgid "Missing IHCONST"
@@ -178,1337 +178,1584 @@ msgstr "IHCONST yok"
 msgid "Missing IHIHALF"
 msgstr "IHIHALF yok"
 
-#: coff-a29k.c:212
+#: coff-a29k.c:212 coff-or32.c:229
 msgid "Unrecognized reloc"
-msgstr "Tanınmayan yer değiştirme"
+msgstr "TanÄ±nmayan yer deÄŸiÅŸtirme"
 
 #: coff-a29k.c:408
 msgid "missing IHCONST reloc"
-msgstr "eksik IHCONST yer değiştirmesi"
+msgstr "eksik IHCONST yer deÄŸiÅŸtirmesi"
 
 #: coff-a29k.c:498
 msgid "missing IHIHALF reloc"
-msgstr "eksik IHIHALF yer değiştirmesi"
+msgstr "eksik IHIHALF yer deÄŸiÅŸtirmesi"
 
-#: coff-alpha.c:881 coff-alpha.c:918
+#: coff-alpha.c:881 coff-alpha.c:918 coff-alpha.c:1989 coff-mips.c:1432
 msgid "GP relative relocation used when GP not defined"
-msgstr "GP tanımlanmamışken GP göreli yer değiştirmesi kullanılmış"
+msgstr "GP tanÄ±mlanmamÄ±ÅŸken GP gÃ¶reli yer deÄŸiÅŸtirmesi kullanÄ±lmÄ±ÅŸ"
 
 #: coff-alpha.c:1485
 msgid "using multiple gp values"
-msgstr "birden fazla gp değeri kullanılıyor"
+msgstr "birden fazla gp deÄŸeri kullanÄ±lÄ±yor"
 
-#: coff-alpha.c:1989 coff-mips.c:1433
-msgid "GP relative relocation when GP not defined"
-msgstr "GP tanımlanmamışken GP göreli yer değiştirmesi"
-
-#: coff-arm.c:1051 elf32-arm.h:285
+#: coff-arm.c:1066 elf32-arm.h:285
 #, c-format
 msgid "%s: unable to find THUMB glue '%s' for `%s'"
-msgstr "%1$s: `%3$s' için THUMB birleştiricisi '%2$s' bulunamadı "
+msgstr "%1$s: `%3$s' iÃ§in THUMB birleÅŸtiricisi '%2$s' bulunamadÄ± "
 
-#: coff-arm.c:1080 elf32-arm.h:320
+#: coff-arm.c:1096 elf32-arm.h:320
 #, c-format
 msgid "%s: unable to find ARM glue '%s' for `%s'"
-msgstr "%1$s: `%3$s' için ARM birleştiricisi '%2$s' bulunamadı"
+msgstr "%1$s: `%3$s' iÃ§in ARM birleÅŸtiricisi '%2$s' bulunamadÄ±"
 
-#: coff-arm.c:1375 coff-arm.c:1470 elf32-arm.h:886 elf32-arm.h:990
+#: coff-arm.c:1391 coff-arm.c:1486 elf32-arm.h:887 elf32-arm.h:991
 #, c-format
 msgid "%s(%s): warning: interworking not enabled."
-msgstr "%s(%s): uyarı: beraber çalışma kipi etkin değil."
+msgstr "%s(%s): uyarÄ±: beraber Ã§alÄ±ÅŸma kipi etkin deÄŸil."
 
-#: coff-arm.c:1379 elf32-arm.h:993
+#: coff-arm.c:1395 elf32-arm.h:994
 #, c-format
 msgid "  first occurrence: %s: arm call to thumb"
-msgstr "  ilk ortaya çıkış: %s: thumb'a arm'dan çağrı"
+msgstr "  ilk ortaya Ã§Ä±kÄ±ÅŸ: %s: thumb'a arm'dan Ã§aÄŸrÄ±"
 
-#: coff-arm.c:1474 elf32-arm.h:889
+#: coff-arm.c:1490 elf32-arm.h:890
 #, c-format
 msgid "  first occurrence: %s: thumb call to arm"
-msgstr "  ilk ortaya çıkış: %s: arm'a thumb'dan çağrı"
+msgstr "  ilk ortaya Ã§Ä±kÄ±ÅŸ: %s: arm'a thumb'dan Ã§aÄŸrÄ±"
 
-#: coff-arm.c:1477
+#: coff-arm.c:1493
 msgid "  consider relinking with --support-old-code enabled"
-msgstr "  --support-old-code seçeneği ile yeniden bağlamayı deneyin"
+msgstr "  --support-old-code seÃ§eneÄŸi ile yeniden baÄŸlamayÄ± deneyin"
 
-#: coff-arm.c:1767 coff-tic80.c:686 cofflink.c:3017
+#: coff-arm.c:1785 coff-tic80.c:686 cofflink.c:3031
 #, c-format
 msgid "%s: bad reloc address 0x%lx in section `%s'"
-msgstr "%1$s:  `%3$s' bölümünde geçersiz yer değiştirme adresi 0x%2$lx"
+msgstr "%1$s:  `%3$s' bÃ¶lÃ¼mÃ¼nde geÃ§ersiz yer deÄŸiÅŸtirme adresi 0x%2$lx"
 
-#: coff-arm.c:2107
+#: coff-arm.c:2127
 #, c-format
 msgid "%s: illegal symbol index in reloc: %d"
-msgstr "%s: yer değiştirmede geçersiz sembol indeksi: %d"
+msgstr "%s: yer deÄŸiÅŸtirmede geÃ§ersiz sembol indeksi: %d"
 
-#: coff-arm.c:2235
+#: coff-arm.c:2255
 #, c-format
-msgid "%s: ERROR: compiled for APCS-%d whereas target %s uses APCS-%d"
-msgstr "%s: HATA: APCS-%d için derlenmiş fakat hedef %s APCS-%d kullanıyor"
+msgid "ERROR: %s is compiled for APCS-%d, whereas %s is compiled for APCS-%d"
+msgstr "Hata: %s APCS-%d iÃ§in derlenmiÅŸ, fakat %s APCS-%d iÃ§in derlenmiÅŸ"
 
-#: coff-arm.c:2250
+#: coff-arm.c:2270 elf32-arm.h:2297
 #, c-format
-msgid "%s: ERROR: passes floats in float registers whereas target %s uses integer registers"
-msgstr "%s: HATA: kayan sayıları kayan yazmaçlarda geçiriyor fakat hedef %s tamsayı yazmaç kullanıyor"
+msgid "ERROR: %s passes floats in float registers, whereas %s passes them in integer registers"
+msgstr ""
+"Hata: %s kayan sayÄ±larÄ± kayan sayÄ± yazmaÃ§larÄ±nda geÃ§iriyor, \n"
+"      fakat %s tamsayÄ± yazmaÃ§larÄ±nda geÃ§iriyor"
 
-#: coff-arm.c:2253
+#: coff-arm.c:2273 elf32-arm.h:2302
 #, c-format
-msgid "%s: ERROR: passes floats in integer registers whereas target %s uses float registers"
-msgstr "%s: HATA: kayan sayıları tamsayı yazmaçlarda geçiriyor fakat hedef %s kayan yazmaç kullanıyor"
+msgid "ERROR: %s passes floats in integer registers, whereas %s passes them in float registers"
+msgstr ""
+"Hata: %s kayan sayÄ±larÄ± tamsayÄ± yazmaÃ§larÄ±nda geÃ§iriyor, \n"
+"      fakat %s kayan sayÄ± yazmaÃ§larÄ±nda geÃ§iriyor"
 
-#: coff-arm.c:2268
+#: coff-arm.c:2288
 #, c-format
-msgid "%s: ERROR: compiled as position independent code, whereas target %s is absolute position"
-msgstr "%s: HATA: yerden bağımsız kod olarak derlendi, fakat hedef %s yere bağımlı"
+msgid "ERROR: %s is compiled as position independent code, whereas target %s is absolute position"
+msgstr "HATA: %s yerden baÄŸÄ±msÄ±z kod olarak derlendi, fakat hedef %s yere baÄŸÄ±mlÄ±"
 
-#: coff-arm.c:2271
+#: coff-arm.c:2291
 #, c-format
-msgid "%s: ERROR: compiled as absolute position code, whereas target %s is position independent"
-msgstr "%s: HATA: yere bağımlı kod olarak derlendi, fakat hedef %s yerden bağımsız"
+msgid "ERROR: %s is compiled as absolute position code, whereas target %s is position independent"
+msgstr "HATA: %s yere baÄŸÄ±mlÄ± kod olarak derlendi, fakat hedef %s yerden baÄŸÄ±msÄ±z"
 
-#: coff-arm.c:2300
+#: coff-arm.c:2320 elf32-arm.h:2358
 #, c-format
-msgid "Warning: input file %s supports interworking, whereas %s does not."
-msgstr "Uyarı: %s girdi dosyası beraber çalışmayı destekliyor, fakat %s desteklemiyor."
+msgid "Warning: %s supports interworking, whereas %s does not"
+msgstr "UyarÄ±: %s girdi dosyasÄ± beraber Ã§alÄ±ÅŸmayÄ± destekliyor, fakat %s desteklemiyor."
 
-#: coff-arm.c:2303
+#: coff-arm.c:2323 elf32-arm.h:2365
 #, c-format
-msgid "Warning: input file %s does not support interworking, whereas %s does."
-msgstr "Uyarı: %s girdi dosyası beraber çalışmayı desteklemiyor, fakat %s destekliyor."
+msgid "Warning: %s does not support interworking, whereas %s does"
+msgstr "UyarÄ±: %s girdi dosyasÄ± beraber Ã§alÄ±ÅŸmayÄ± desteklemiyor, fakat %s destekliyor."
 
-#: coff-arm.c:2330
+#: coff-arm.c:2350
 #, c-format
 msgid "private flags = %x:"
-msgstr "özel bayraklar = %x:"
+msgstr "Ã¶zel bayraklar = %x:"
 
-#: coff-arm.c:2338 elf32-arm.h:2408
+#: coff-arm.c:2358 elf32-arm.h:2418
 msgid " [floats passed in float registers]"
-msgstr " [kayan sayılar kayan yazmaçlarda geçirildi]"
+msgstr " [kayan sayÄ±lar kayan yazmaÃ§larda geÃ§irildi]"
 
-#: coff-arm.c:2340
+#: coff-arm.c:2360
 msgid " [floats passed in integer registers]"
-msgstr " [kayan sayılar tamsayı yazmaçlarda geçirildi]"
+msgstr " [kayan sayÄ±lar tamsayÄ± yazmaÃ§larda geÃ§irildi]"
 
-#: coff-arm.c:2343 elf32-arm.h:2411
+#: coff-arm.c:2363 elf32-arm.h:2421
 msgid " [position independent]"
-msgstr " [yerden bağımsız]"
+msgstr " [yerden baÄŸÄ±msÄ±z]"
 
-#: coff-arm.c:2345
+#: coff-arm.c:2365
 msgid " [absolute position]"
-msgstr " [yere bağımlı]"
+msgstr " [yere baÄŸÄ±mlÄ±]"
 
-#: coff-arm.c:2349
+#: coff-arm.c:2369
 msgid " [interworking flag not initialised]"
-msgstr " [beraber çalışma bayrağına öndeğer atanmamış]"
+msgstr " [beraber Ã§alÄ±ÅŸma bayraÄŸÄ±na Ã¶ndeÄŸer atanmamÄ±ÅŸ]"
 
-#: coff-arm.c:2351
+#: coff-arm.c:2371
 msgid " [interworking supported]"
-msgstr " [beraber çalışma destekleniyor]"
+msgstr " [beraber Ã§alÄ±ÅŸma destekleniyor]"
 
-#: coff-arm.c:2353
+#: coff-arm.c:2373
 msgid " [interworking not supported]"
-msgstr " [beraber çalışma desteklenmiyor]"
+msgstr " [beraber Ã§alÄ±ÅŸma desteklenmiyor]"
 
-#: coff-arm.c:2401
+#: coff-arm.c:2421 elf32-arm.h:2124
 #, c-format
-msgid "Warning: Not setting interworking flag of %s, since it has already been specified as non-interworking"
-msgstr "Uyarı: %s beraber çalışma bayrağı atanmadı, çünkü beraber çalışma olmayacağı önceden belirtilmiş"
+msgid "Warning: Not setting interworking flag of %s since it has already been specified as non-interworking"
+msgstr "UyarÄ±: %s beraber Ã§alÄ±ÅŸma bayraÄŸÄ± atanmadÄ±, Ã§Ã¼nkÃ¼ beraber Ã§alÄ±ÅŸma olmayacaÄŸÄ± Ã¶nceden belirtilmiÅŸ"
 
-#: coff-arm.c:2405
+#: coff-arm.c:2425 elf32-arm.h:2128
 #, c-format
 msgid "Warning: Clearing the interworking flag of %s due to outside request"
-msgstr "Uyarı: %s beraber çalışma bayrağı dış istek üzerine temizlendi"
+msgstr "UyarÄ±: %s beraber Ã§alÄ±ÅŸma bayraÄŸÄ± dÄ±ÅŸ istek Ã¼zerine temizlendi"
 
 #: coff-i960.c:136 coff-i960.c:485
 msgid "uncertain calling convention for non-COFF symbol"
-msgstr "COFF olmayan sembol için belirsiz çağrı davranışı"
+msgstr "COFF olmayan sembol iÃ§in belirsiz Ã§aÄŸrÄ± davranÄ±ÅŸÄ±"
 
-#: coff-m68k.c:481 coff-mips.c:2431 elf32-m68k.c:2212
+#: coff-m68k.c:481 coff-mips.c:2429 elf32-m68k.c:2157 elf32-mips.c:1844
 msgid "unsupported reloc type"
-msgstr "desteklenmeyen yer değiştirme türü"
+msgstr "desteklenmeyen yer deÄŸiÅŸtirme tÃ¼rÃ¼"
 
-#: coff-mips.c:875 elf32-mips.c:1987 elf64-mips.c:1739
+#: coff-mips.c:874 elf32-mips.c:1062 elf64-mips.c:1609
 msgid "GP relative relocation when _gp not defined"
-msgstr "_gp tanımsız iken GP göreli yer değiştirmesi"
+msgstr "_gp tanÄ±msÄ±z iken GP gÃ¶reli yer deÄŸiÅŸtirmesi"
 
 #. No other sections should appear in -membedded-pic
 #. code.
-#: coff-mips.c:2468
+#: coff-mips.c:2466
 msgid "reloc against unsupported section"
-msgstr "desteklenmeyen bölümde yer değiştirme"
+msgstr "desteklenmeyen bÃ¶lÃ¼mde yer deÄŸiÅŸtirme"
 
-#: coff-mips.c:2476
+#: coff-mips.c:2474
 msgid "reloc not properly aligned"
-msgstr "yer değiştirme doğru hizalanmamış"
+msgstr "yer deÄŸiÅŸtirme doÄŸru hizalanmamÄ±ÅŸ"
 
-#: coff-rs6000.c:2710 coff64-rs6000.c:1164
+#: coff-rs6000.c:2766
 #, c-format
 msgid "%s: unsupported relocation type 0x%02x"
-msgstr "%s: desteklenmeyen yükleyici yerdeğişimi 0x%02x"
+msgstr "%s: desteklenmeyen yÃ¼kleyici yerdeÄŸiÅŸimi 0x%02x"
 
-#: coff-rs6000.c:2756 coff64-rs6000.c:1210
+#: coff-rs6000.c:2859
 #, c-format
 msgid "%s: TOC reloc at 0x%x to symbol `%s' with no TOC entry"
-msgstr "%s: 0x%x'da TOC girdisi olmayan `%s' sembolüne TOC yerdeğişimi"
+msgstr "%s: 0x%x'da TOC girdisi olmayan `%s' sembolÃ¼ne TOC yerdeÄŸiÅŸimi"
 
-#: coff-rs6000.c:3006 coff64-rs6000.c:2060
+#: coff-rs6000.c:3590 coff64-rs6000.c:2091
 #, c-format
 msgid "%s: symbol `%s' has unrecognized smclas %d"
-msgstr "%s: `%s' sembolünde bilinmeyen %d var"
+msgstr "%s: `%s' sembolÃ¼nde bilinmeyen %d var"
 
 #: coff-tic54x.c:279 coff-tic80.c:449
 #, c-format
 msgid "Unrecognized reloc type 0x%x"
-msgstr "Bilinmeyen yer değiştirme türü 0x%x"
+msgstr "Bilinmeyen yer deÄŸiÅŸtirme tÃ¼rÃ¼ 0x%x"
 
-#: coff-tic54x.c:390 coffcode.h:4847
+#: coff-tic54x.c:390 coffcode.h:4974
 #, c-format
 msgid "%s: warning: illegal symbol index %ld in relocs"
-msgstr "%s: uyarı: yer değiştirmelerde geçersiz sembol indeksi %ld"
+msgstr "%s: uyarÄ±: yer deÄŸiÅŸtirmelerde geÃ§ersiz sembol indeksi %ld"
 
 #: coff-w65.c:363
 #, c-format
 msgid "ignoring reloc %s\n"
-msgstr "yer değiştirme %s yoksayıldı\n"
+msgstr "yer deÄŸiÅŸtirme %s yoksayÄ±ldÄ±\n"
 
-#: coffcode.h:1081
+#: coffcode.h:1086
 #, c-format
 msgid "%s (%s): Section flag %s (0x%x) ignored"
-msgstr "%s (%s): Bölüm bayrağı %s (0x%x) yoksayıldı"
+msgstr "%s (%s): BÃ¶lÃ¼m bayraÄŸÄ± %s (0x%x) yoksayÄ±ldÄ±"
 
-#: coffcode.h:2125
+#: coffcode.h:2143
 #, c-format
 msgid "Unrecognized TI COFF target id '0x%x'"
-msgstr "Tanınmayan TI COFF hedef kimliği '0x%x'"
+msgstr "TanÄ±nmayan TI COFF hedef kimliÄŸi '0x%x'"
 
-#: coffcode.h:4236
+#: coffcode.h:4365
 #, c-format
 msgid "%s: warning: illegal symbol index %ld in line numbers"
-msgstr "%s: uyarı: satır numaralarında geçersiz sembol indeksi %ld"
+msgstr "%s: uyarÄ±: satÄ±r numaralarÄ±nda geÃ§ersiz sembol indeksi %ld"
 
-#: coffcode.h:4250
+#: coffcode.h:4379
 #, c-format
 msgid "%s: warning: duplicate line number information for `%s'"
-msgstr "%s: uyarı: `%s' için tekrarlanmış satır numarası bilgisi"
+msgstr "%s: uyarÄ±: `%s' iÃ§in tekrarlanmÄ±ÅŸ satÄ±r numarasÄ± bilgisi"
 
-#: coffcode.h:4609
+#: coffcode.h:4736
 #, c-format
 msgid "%s: Unrecognized storage class %d for %s symbol `%s'"
-msgstr "%1$s: %3$s sembolü `%4$s' için bilinmeyen saklama sınıfı %2$d"
+msgstr "%1$s: %3$s sembolÃ¼ `%4$s' iÃ§in bilinmeyen saklama sÄ±nÄ±fÄ± %2$d"
 
-#: coffcode.h:4740
+#: coffcode.h:4867
 #, c-format
 msgid "warning: %s: local symbol `%s' has no section"
-msgstr "uyarı: %s: `%s' yerel sembolünün bölümü yok"
+msgstr "uyarÄ±: %s: `%s' yerel sembolÃ¼nÃ¼n bÃ¶lÃ¼mÃ¼ yok"
 
-#: coffcode.h:4885
+#: coffcode.h:5012
 #, c-format
 msgid "%s: illegal relocation type %d at address 0x%lx"
-msgstr "%1$s: 0x%3$lx adresinde geçersiz yer değiştirme türü %2$d"
+msgstr "%1$s: 0x%3$lx adresinde geÃ§ersiz yer deÄŸiÅŸtirme tÃ¼rÃ¼ %2$d"
 
 #: coffgen.c:1661
 #, c-format
 msgid "%s: bad string table size %lu"
-msgstr "%s: geçersiz dizge tablo boyu %lu"
+msgstr "%s: geÃ§ersiz dizge tablo boyu %lu"
 
-#: coffgen.c:2138
-#, c-format
-msgid "AUX tagndx %ld ttlsiz 0x%lx lnnos %ld next %ld"
-msgstr "AUX tagndx %ld ttlsiz 0x%lx lnnos %ld sonraki %ld"
-
-#: cofflink.c:536 elflink.h:1967
+#: cofflink.c:534 elflink.h:1912
 #, c-format
 msgid "Warning: type of symbol `%s' changed from %d to %d in %s"
-msgstr "Uyarı: %4$s içerisinde `%1$s' sembolünün türü %2$d'den %3$d'e değiştirildi"
+msgstr "UyarÄ±: %4$s iÃ§erisinde `%1$s' sembolÃ¼nÃ¼n tÃ¼rÃ¼ %2$d'den %3$d'e deÄŸiÅŸtirildi"
 
-#: cofflink.c:2317
+#: cofflink.c:2321
 #, c-format
 msgid "%s: relocs in section `%s', but it has no contents"
-msgstr "%s: `%s' bölümünde yer değiştirmeler mevcut, fakat içi boş"
+msgstr "%s: `%s' bÃ¶lÃ¼mÃ¼nde yer deÄŸiÅŸtirmeler mevcut, fakat iÃ§i boÅŸ"
 
-#: cofflink.c:2653 coffswap.h:889
+#: cofflink.c:2664 coffswap.h:877
 #, c-format
 msgid "%s: %s: reloc overflow: 0x%lx > 0xffff"
-msgstr "%s: %s: yer değiştirme taşması: 0x%lx > 0xffff"
+msgstr "%s: %s: yer deÄŸiÅŸtirme taÅŸmasÄ±: 0x%lx > 0xffff"
 
-#: cofflink.c:2662 coffswap.h:876
+#: cofflink.c:2673 coffswap.h:864
 #, c-format
 msgid "%s: warning: %s: line number overflow: 0x%lx > 0xffff"
-msgstr "%s: uyarı: %s: satır numarası taşması: 0x%lx > 0xffff"
+msgstr "%s: uyarÄ±: %s: satÄ±r numarasÄ± taÅŸmasÄ±: 0x%lx > 0xffff"
 
-#: dwarf2.c:381
+#: dwarf2.c:382
 msgid "Dwarf Error: Can't find .debug_str section."
-msgstr "Dwarf Hatası: .debug_str bölümü bulunamadı."
+msgstr "Dwarf HatasÄ±: .debug_str bÃ¶lÃ¼mÃ¼ bulunamadÄ±."
 
-#: dwarf2.c:398
+#: dwarf2.c:399
 #, c-format
-msgid "Dwarf Error: DW_FORM_strp offset (%u) greater than or equal to .debug_str size (%u)."
+msgid "Dwarf Error: DW_FORM_strp offset (%lu) greater than or equal to .debug_str size (%lu)."
 msgstr ""
-"Dwarf Hatası: DW_FORM_strp göreli konumu (%u) .debug_str boyutundan (%u) \n"
-"              daha büyük veya eşit."
+"Dwarf HatasÄ±: DW_FORM_strp gÃ¶reli konumu (%lu) .debug_str boyutundan (%lu) \n"
+"              daha bÃ¼yÃ¼k veya eÅŸit."
 
-#: dwarf2.c:542
+#: dwarf2.c:543
 msgid "Dwarf Error: Can't find .debug_abbrev section."
-msgstr "Dwarf Hatası: .debug_abbrev bölümü bulunamadı."
+msgstr "Dwarf HatasÄ±: .debug_abbrev bÃ¶lÃ¼mÃ¼ bulunamadÄ±."
 
-#: dwarf2.c:559
+#: dwarf2.c:560
 #, c-format
-msgid "Dwarf Error: Abbrev offset (%u) greater than or equal to abbrev size (%u)."
+msgid "Dwarf Error: Abbrev offset (%lu) greater than or equal to .debug_abbrev size (%lu)."
 msgstr ""
-"Dwarf Hatası: Kısaltma göreli konumu (%u) kısaltma boyutundan (%u) \n"
-"              daha büyük veya eşit."
+"Dwarf HatasÄ±: KÄ±saltma gÃ¶reli konumu (%lu) kÄ±saltma boyutundan (%lu) \n"
+"              daha bÃ¼yÃ¼k veya eÅŸit."
 
-#: dwarf2.c:756
+#: dwarf2.c:757
 #, c-format
-msgid "Dwarf Error: Invalid or unhandled FORM value: %d."
-msgstr "Dwarf Hatası: Geçersiz veya desteklenmeyen FORM değeri: %d."
+msgid "Dwarf Error: Invalid or unhandled FORM value: %u."
+msgstr "Dwarf HatasÄ±: GeÃ§ersiz veya desteklenmeyen FORM deÄŸeri: %u."
 
-#: dwarf2.c:843
+#: dwarf2.c:852
 msgid "Dwarf Error: mangled line number section (bad file number)."
-msgstr "Dwarf Hatası: bozulmuş satır numarası bölümü (geçersiz dosya numarası)."
+msgstr "Dwarf HatasÄ±: bozulmuÅŸ satÄ±r numarasÄ± bÃ¶lÃ¼mÃ¼ (geÃ§ersiz dosya numarasÄ±)."
 
-#: dwarf2.c:929
+#: dwarf2.c:938
 msgid "Dwarf Error: Can't find .debug_line section."
-msgstr "Dwarf Hatası: .debug_line bölümü bulunamadı."
+msgstr "Dwarf HatasÄ±: .debug_line bÃ¶lÃ¼mÃ¼ bulunamadÄ±."
 
-#: dwarf2.c:952
+#: dwarf2.c:961
 #, c-format
-msgid "Dwarf Error: Line offset (%u) greater than or equal to line size (%u)."
+msgid "Dwarf Error: Line offset (%lu) greater than or equal to .debug_line size (%lu)."
 msgstr ""
-"Dwarf Hatası: Satır göreli konumu (%u) satır boyutundan (%u)\n"
-"              daha büyük veya eşit."
+"Dwarf HatasÄ±: SatÄ±r gÃ¶reli konumu (%lu) satÄ±r boyutundan (%lu)\n"
+"              daha bÃ¼yÃ¼k veya eÅŸit."
 
-#: dwarf2.c:1143
+#: dwarf2.c:1159
 msgid "Dwarf Error: mangled line number section."
-msgstr "Dwarf Hatası: bozuk satır numarası bölümü."
+msgstr "Dwarf HatasÄ±: bozuk satÄ±r numarasÄ± bÃ¶lÃ¼mÃ¼."
 
-#: dwarf2.c:1318 dwarf2.c:1532
+#: dwarf2.c:1355 dwarf2.c:1566
 #, c-format
-msgid "Dwarf Error: Could not find abbrev number %d."
-msgstr "Dwarf Hatası: Kısaltma numarası %d bulunamadı."
+msgid "Dwarf Error: Could not find abbrev number %u."
+msgstr "Dwarf HatasÄ±: KÄ±saltma numarasÄ± %u bulunamadÄ±."
 
-#: dwarf2.c:1493
+#: dwarf2.c:1527
 #, c-format
-msgid "Dwarf Error: found dwarf version '%hu', this reader only handles version 2 information."
-msgstr "Dwarf Hatası: dwarf sürümü '%hu' bulundu, bu okuyucu yalnızca sürüm 2 bilgisini anlayabiliyor."
+msgid "Dwarf Error: found dwarf version '%u', this reader only handles version 2 information."
+msgstr "Dwarf HatasÄ±: dwarf sÃ¼rÃ¼mÃ¼ '%u' bulundu, bu okuyucu yalnÄ±zca sÃ¼rÃ¼m 2 bilgisini anlayabiliyor."
 
-#: dwarf2.c:1500
+#: dwarf2.c:1534
 #, c-format
 msgid "Dwarf Error: found address size '%u', this reader can not handle sizes greater than '%u'."
-msgstr "Dwarf Hatası: adres boyu '%u' bulundu, bu okuyucu '%u'dan daha büyük boyları okuyamıyor."
+msgstr "Dwarf HatasÄ±: adres boyu '%u' bulundu, bu okuyucu '%u'dan daha bÃ¼yÃ¼k boylarÄ± okuyamÄ±yor."
 
-#: dwarf2.c:1523
+#: dwarf2.c:1557
 #, c-format
-msgid "Dwarf Error: Bad abbrev number: %d."
-msgstr "Dwarf Hatası: Geçersiz kısaltma numarası: %d."
+msgid "Dwarf Error: Bad abbrev number: %u."
+msgstr "Dwarf HatasÄ±: GeÃ§ersiz kÄ±saltma numarasÄ±: %u."
 
-#: ecoff.c:1328
+#: ecoff.c:1318
 #, c-format
 msgid "Unknown basic type %d"
-msgstr "Bilinmeyen temel tür %d"
+msgstr "Bilinmeyen temel tÃ¼r %d"
 
-#: ecoff.c:1597
+#: ecoff.c:1578
 #, c-format
-msgid "\n      End+1 symbol: %ld"
-msgstr "\n      Son+1 sembolü: %ld"
+msgid ""
+"\n"
+"      End+1 symbol: %ld"
+msgstr ""
+"\n"
+"      Son+1 sembolÃ¼: %ld"
 
-#: ecoff.c:1604 ecoff.c:1607
+#: ecoff.c:1585 ecoff.c:1588
 #, c-format
-msgid "\n      First symbol: %ld"
-msgstr "\n      İlk sembol: %ld"
+msgid ""
+"\n"
+"      First symbol: %ld"
+msgstr ""
+"\n"
+"      Ä°lk sembol: %ld"
 
-#: ecoff.c:1619
+#: ecoff.c:1600
 #, c-format
-msgid "\n      End+1 symbol: %-7ld   Type:  %s"
-msgstr "\n      Son+1 sembolü: %-7ld   Tür:  %s"
+msgid ""
+"\n"
+"      End+1 symbol: %-7ld   Type:  %s"
+msgstr ""
+"\n"
+"      Son+1 sembolÃ¼: %-7ld   TÃ¼r:  %s"
 
-#: ecoff.c:1626
+#: ecoff.c:1607
 #, c-format
-msgid "\n      Local symbol: %ld"
-msgstr "\n      Yerel sembol: %ld"
+msgid ""
+"\n"
+"      Local symbol: %ld"
+msgstr ""
+"\n"
+"      Yerel sembol: %ld"
 
-#: ecoff.c:1634
+#: ecoff.c:1615
 #, c-format
-msgid "\n      struct; End+1 symbol: %ld"
-msgstr "\n      yapı; Son+1 sembolü: %ld"
+msgid ""
+"\n"
+"      struct; End+1 symbol: %ld"
+msgstr ""
+"\n"
+"      yapÄ±; Son+1 sembolÃ¼: %ld"
 
-#: ecoff.c:1639
+#: ecoff.c:1620
 #, c-format
-msgid "\n      union; End+1 symbol: %ld"
-msgstr "\n      birleşim; Son+1 sembolü: %ld"
+msgid ""
+"\n"
+"      union; End+1 symbol: %ld"
+msgstr ""
+"\n"
+"      birleÅŸim; Son+1 sembolÃ¼: %ld"
 
-#: ecoff.c:1644
+#: ecoff.c:1625
 #, c-format
-msgid "\n      enum; End+1 symbol: %ld"
-msgstr "\n      enum; Son+1 sembolü: %ld"
+msgid ""
+"\n"
+"      enum; End+1 symbol: %ld"
+msgstr ""
+"\n"
+"      enum; Son+1 sembolÃ¼: %ld"
 
-#: ecoff.c:1650
+#: ecoff.c:1631
 #, c-format
-msgid "\n      Type: %s"
-msgstr "\n      Tür: %s"
+msgid ""
+"\n"
+"      Type: %s"
+msgstr ""
+"\n"
+"      TÃ¼r: %s"
 
-#: elf-hppa.h:1366 elf-hppa.h:1399 elf32-ppc.c:3062 elf32-sh.c:3201
-#: elf64-x86-64.c:1275
+#: elf-hppa.h:1476 elf-hppa.h:1509 elf32-ppc.c:3091 elf32-sh.c:4213
+#: elf64-sh64.c:1659
 #, c-format
 msgid "%s: warning: unresolvable relocation against symbol `%s' from %s section"
-msgstr "%1$s: uyarı: %3$s bölümünden `%2$s' sembolüne çözümlenemeyen yer değişimi"
+msgstr "%1$s: uyarÄ±: %3$s bÃ¶lÃ¼mÃ¼nden `%2$s' sembolÃ¼ne Ã§Ã¶zÃ¼mlenemeyen yer deÄŸiÅŸimi"
 
-#: elf-m10200.c:463 elf-m10300.c:673 elf32-arm.h:2074 elf32-avr.c:835
-#: elf32-cris.c:1392 elf32-d10v.c:482 elf32-fr30.c:653 elf32-h8300.c:547
-#: elf32-i860.c:1048 elf32-m32r.c:1281 elf32-openrisc.c:455 elf32-v850.c:1691
-#: elf64-mmix.c:1164
+#: elf-m10200.c:446 elf-m10300.c:656 elf32-arm.h:2084 elf32-avr.c:833
+#: elf32-cris.c:1403 elf32-d10v.c:481 elf32-fr30.c:635 elf32-frv.c:809
+#: elf32-h8300.c:548 elf32-i860.c:1031 elf32-m32r.c:1278 elf32-openrisc.c:439
+#: elf32-v850.c:1691 elf32-xstormy16.c:933 elf64-mmix.c:1302
 msgid "internal error: out of range error"
-msgstr "iç hata: kapsam dışı hatası"
+msgstr "iÃ§ hata: kapsam dÄ±ÅŸÄ± hatasÄ±"
 
-#: elf-m10200.c:467 elf-m10300.c:677 elf32-arm.h:2078 elf32-avr.c:839
-#: elf32-cris.c:1396 elf32-d10v.c:486 elf32-fr30.c:657 elf32-h8300.c:551
-#: elf32-i860.c:1052 elf32-m32r.c:1285 elf32-mips.c:7565 elf32-openrisc.c:459
-#: elf32-v850.c:1695 elf64-mips.c:4464 elf64-mmix.c:1168
+#: elf-m10200.c:450 elf-m10300.c:660 elf32-arm.h:2088 elf32-avr.c:837
+#: elf32-cris.c:1407 elf32-d10v.c:485 elf32-fr30.c:639 elf32-frv.c:813
+#: elf32-h8300.c:552 elf32-i860.c:1035 elf32-m32r.c:1282 elf32-openrisc.c:443
+#: elf32-v850.c:1695 elf32-xstormy16.c:937 elf64-mmix.c:1306 elfxx-mips.c:5264
 msgid "internal error: unsupported relocation error"
-msgstr "iç hata: desteklenmeyen yer değişim hatası"
+msgstr "iÃ§ hata: desteklenmeyen yer deÄŸiÅŸim hatasÄ±"
 
-#: elf-m10200.c:471 elf-m10300.c:681 elf32-arm.h:2082 elf32-d10v.c:490
-#: elf32-h8300.c:555 elf32-m32r.c:1289
+#: elf-m10200.c:454 elf-m10300.c:664 elf32-arm.h:2092 elf32-d10v.c:489
+#: elf32-h8300.c:556 elf32-m32r.c:1286
 msgid "internal error: dangerous error"
-msgstr "iç hata: ölümcül hata"
+msgstr "iÃ§ hata: Ã¶lÃ¼mcÃ¼l hata"
 
-#: elf-m10200.c:475 elf-m10300.c:685 elf32-arm.h:2086 elf32-avr.c:847
-#: elf32-cris.c:1404 elf32-d10v.c:494 elf32-fr30.c:665 elf32-h8300.c:559
-#: elf32-i860.c:1060 elf32-m32r.c:1293 elf32-openrisc.c:467 elf32-v850.c:1715
-#: elf64-mmix.c:1176
+#: elf-m10200.c:458 elf-m10300.c:668 elf32-arm.h:2096 elf32-avr.c:845
+#: elf32-cris.c:1415 elf32-d10v.c:493 elf32-fr30.c:647 elf32-frv.c:821
+#: elf32-h8300.c:560 elf32-i860.c:1043 elf32-m32r.c:1290 elf32-openrisc.c:451
+#: elf32-v850.c:1715 elf32-xstormy16.c:945 elf64-mmix.c:1314
 msgid "internal error: unknown error"
-msgstr "iç hata: bilinmeyen hata"
+msgstr "iÃ§ hata: bilinmeyen hata"
 
-#: elf.c:345
+#: elf.c:343
 #, c-format
 msgid "%s: invalid string offset %u >= %lu for section `%s'"
-msgstr "%1$s: `%4$s' bölümünde geçersiz dizge göreli konumu  %2$u >= %3$lu"
+msgstr "%1$s: `%4$s' bÃ¶lÃ¼mÃ¼nde geÃ§ersiz dizge gÃ¶reli konumu  %2$u >= %3$lu"
 
-#: elf.c:450
+#: elf.c:589
 #, c-format
 msgid "%s: invalid SHT_GROUP entry"
-msgstr "%s: geçersiz SHT_GROUP girdisi"
+msgstr "%s: geÃ§ersiz SHT_GROUP girdisi"
 
-#: elf.c:531
+#: elf.c:660
 #, c-format
 msgid "%s: no group info for section %s"
-msgstr "%s: %s bölümünde grup bilgisi yok"
+msgstr "%s: %s bÃ¶lÃ¼mÃ¼nde grup bilgisi yok"
 
-#: elf.c:842
-msgid "\nProgram Header:\n"
-msgstr "\nYazılım Başlığı:\n"
+#: elf.c:1023
+msgid ""
+"\n"
+"Program Header:\n"
+msgstr ""
+"\n"
+"YazÄ±lÄ±m BaÅŸlÄ±ÄŸÄ±:\n"
 
-#: elf.c:891
-msgid "\nDynamic Section:\n"
-msgstr "\nDinamik Bölüm:\n"
+#: elf.c:1073
+msgid ""
+"\n"
+"Dynamic Section:\n"
+msgstr ""
+"\n"
+"Dinamik BÃ¶lÃ¼m:\n"
 
-#: elf.c:1020
-msgid "\nVersion definitions:\n"
-msgstr "\nSürüm tanımları:\n"
+#: elf.c:1202
+msgid ""
+"\n"
+"Version definitions:\n"
+msgstr ""
+"\n"
+"SÃ¼rÃ¼m tanÄ±mlarÄ±:\n"
 
-#: elf.c:1043
-msgid "\nVersion References:\n"
-msgstr "\nSürüm Referansları:\n"
+#: elf.c:1225
+msgid ""
+"\n"
+"Version References:\n"
+msgstr ""
+"\n"
+"SÃ¼rÃ¼m ReferanslarÄ±:\n"
 
-#: elf.c:1048
+#: elf.c:1230
 #, c-format
 msgid "  required from %s:\n"
 msgstr "  %s'den isteniyor:\n"
 
-#: elf.c:1675
+#: elf.c:1902
 #, c-format
 msgid "%s: invalid link %lu for reloc section %s (index %u)"
-msgstr "%1$s: yerdeğişim bölümü %3$s (indeks %4$u) için geçersiz bağ %2$lu"
+msgstr "%1$s: yerdeÄŸiÅŸim bÃ¶lÃ¼mÃ¼ %3$s (indeks %4$u) iÃ§in geÃ§ersiz baÄŸ %2$lu"
 
-#: elf.c:3289
+#: elf.c:3603
 #, c-format
 msgid "%s: Not enough room for program headers (allocated %u, need %u)"
-msgstr "%s: Yazılım başlıkları için yeterli yer yok (%u ayrıldı, %u gerekli)"
+msgstr "%s: YazÄ±lÄ±m baÅŸlÄ±klarÄ± iÃ§in yeterli yer yok (%u ayrÄ±ldÄ±, %u gerekli)"
 
-#: elf.c:3393
+#: elf.c:3708
 #, c-format
 msgid "%s: Not enough room for program headers, try linking with -N"
-msgstr "%s: yazılım başlıkları için gerekli yer yok, -N ile bağlamayı deneyin"
+msgstr "%s: yazÄ±lÄ±m baÅŸlÄ±klarÄ± iÃ§in gerekli yer yok, -N ile baÄŸlamayÄ± deneyin"
 
-#: elf.c:3518
+#: elf.c:3833
 #, c-format
 msgid "Error: First section in segment (%s) starts at 0x%x whereas the segment starts at 0x%x"
-msgstr "Hata: Parçadaki (%s) ilk bölüm 0x%x'de, parça ise 0x%x'de başlıyor"
+msgstr "Hata: ParÃ§adaki (%s) ilk bÃ¶lÃ¼m 0x%x'de, parÃ§a ise 0x%x'de baÅŸlÄ±yor"
 
-#: elf.c:3804
+#: elf.c:4148
 #, c-format
 msgid "%s: warning: allocated section `%s' not in segment"
-msgstr "%s: uyarı: ayrılmış `%s' bölümü parça içinde değil"
+msgstr "%s: uyarÄ±: ayrÄ±lmÄ±ÅŸ `%s' bÃ¶lÃ¼mÃ¼ parÃ§a iÃ§inde deÄŸil"
 
-#: elf.c:4138
+#: elf.c:4472
 #, c-format
 msgid "%s: symbol `%s' required but not present"
-msgstr "%s: `%s' sembolü gerekli fakat mevcut değil"
+msgstr "%s: `%s' sembolÃ¼ gerekli fakat mevcut deÄŸil"
 
-#: elf.c:4147
+#: elf.c:4749
 #, c-format
-msgid "elf_symbol_from_bfd_symbol 0x%.8lx, name = %s, sym num = %d, flags = 0x%.8lx%s\n"
-msgstr "bfd sembolünden elf sembolü:0x%.8lx, isim= %s, sem num = %d, bayrak = 0x%.8lx%s\n"
+msgid "%s: warning: Empty loadable segment detected, is this intentional ?\n"
+msgstr "%s: uyarÄ±: BoÅŸ yÃ¼klenebilir parÃ§a bulundu, bu isteyerek mi yapÄ±lÄ±yor?\n"
 
-#: elf.c:4391
-#, c-format
-msgid "%s: warning: Empty loadable segment detected\n"
-msgstr "%s: uyarı: Boş yüklenebilir parça bulundu\n"
-
-#: elf.c:5804
+#: elf.c:6193
 #, c-format
 msgid "%s: unsupported relocation type %s"
-msgstr "%s: desteklenmeyen yerdeğişim türü %s"
+msgstr "%s: desteklenmeyen yerdeÄŸiÅŸim tÃ¼rÃ¼ %s"
 
-#: elf32-arm.h:1224
+#: elf32-arm.h:1221
 #, c-format
 msgid "%s: Warning: Arm BLX instruction targets Arm function '%s'."
-msgstr "%s: Uyarı: Arm BLX işlemi Arm işlevi '%s' hedefliyor."
+msgstr "%s: UyarÄ±: Arm BLX iÅŸlemi Arm iÅŸlevi '%s' hedefliyor."
 
-#: elf32-arm.h:1420
+#: elf32-arm.h:1417
 #, c-format
 msgid "%s: Warning: Thumb BLX instruction targets thumb function '%s'."
-msgstr "%s: Uyarı: Thumb BLX işlemi thumb işlevi '%s'ı hedefliyor."
+msgstr "%s: UyarÄ±: Thumb BLX iÅŸlemi thumb iÅŸlevi '%s'Ä± hedefliyor."
 
-#: elf32-arm.h:1904 elf32-i386.c:1776 elf32-sh.c:3133
+#: elf32-arm.h:1914 elf32-sh.c:4125
 #, c-format
 msgid "%s(%s+0x%lx): %s relocation against SEC_MERGE section"
-msgstr "%s(%s+0x%lx): SEC_MERGE bölümüne %s yerdeğişimi"
+msgstr "%s(%s+0x%lx): SEC_MERGE bÃ¶lÃ¼mÃ¼ne %s yerdeÄŸiÅŸimi"
 
-#: elf32-arm.h:1998
+#: elf32-arm.h:2008
 #, c-format
 msgid "%s: warning: unresolvable relocation %d against symbol `%s' from %s section"
-msgstr "%1$s: uyarı: %4$s bölümünden `%3$s' sembolüne çözümlenemeyen %2$d yer değişimi"
+msgstr "%1$s: uyarÄ±: %4$s bÃ¶lÃ¼mÃ¼nden `%3$s' sembolÃ¼ne Ã§Ã¶zÃ¼mlenemeyen %2$d yer deÄŸiÅŸimi"
 
-#: elf32-arm.h:2114
+#: elf32-arm.h:2176
 #, c-format
-msgid "Warning: Not setting interwork flag of %s since it has already been specified as non-interworking"
-msgstr "Uyarı: beraber çalışmaz diye önceden belirtilmiş olduğundan %s'nin beraber çalışma bayrağı atanmadı"
+msgid "Warning: Clearing the interworking flag of %s because non-interworking code in %s has been linked with it"
+msgstr "UyarÄ±: %2$s'deki beraber Ã§alÄ±ÅŸmaz kod ona baÄŸlandÄ±ÄŸÄ± iÃ§in %1$s'nin beraber Ã§alÄ±ÅŸma bayraÄŸÄ± temizlendi"
 
-#: elf32-arm.h:2118
+#: elf32-arm.h:2271
 #, c-format
-msgid "Warning: Clearing the interwork flag of %s due to outside request"
-msgstr "Uyarı: Dış isteğe uyularak %s'nin beraber çalışma bayrağı temizlendi"
+msgid "ERROR: %s is compiled for EABI version %d, whereas %s is compiled for version %d"
+msgstr "Hata: %s EABI sÃ¼rÃ¼m %d iÃ§in derlenmiÅŸ, fakat %s %d sÃ¼rÃ¼mÃ¼ iÃ§in derlenmiÅŸ"
 
-#: elf32-arm.h:2166
+#: elf32-arm.h:2285
 #, c-format
-msgid "Warning: Clearing the interwork flag in %s because non-interworking code in %s has been linked with it"
-msgstr "Uyarı: %2$s'deki beraber çalışmaz kod ona bağlandığı için %1$s'nin beraber çalışma bayrağı temizlendi"
+msgid "ERROR: %s is compiled for APCS-%d, whereas target %s uses APCS-%d"
+msgstr "HATA: %s, APCS-%d iÃ§in derlenmiÅŸ fakat hedef %s APCS-%d kullanÄ±yor"
 
-#: elf32-arm.h:2261
+#: elf32-arm.h:2313
 #, c-format
-msgid "Error: %s compiled for EABI version %d, whereas %s is compiled for version %d"
-msgstr "Hata: %s EABI sürüm %d için derlenmiş, fakat %s %d sürümü için derlenmiş"
+msgid "ERROR: %s uses VFP instructions, whereas %s uses FPA instructions"
+msgstr "Hata: %s VFP iÅŸlemi kullanÄ±yor, fakat %s FPA iÅŸlemi kullanÄ±yor"
 
-#: elf32-arm.h:2275
+#: elf32-arm.h:2318
 #, c-format
-msgid "Error: %s compiled for APCS-%d, whereas %s is compiled for APCS-%d"
-msgstr "Hata: %s APCS-%d için derlenmiş, fakat %s APCS-%d için derlenmiş"
+msgid "ERROR: %s uses FPA instructions, whereas %s uses VFP instructions"
+msgstr "Hata: %s FPA iÅŸlemi kullanÄ±yor, fakat %s VFP iÅŸlemi kullanÄ±yor"
 
-#: elf32-arm.h:2287
+#: elf32-arm.h:2338
 #, c-format
-msgid "Error: %s passes floats in FP registers, whereas %s passes them in integer registers"
+msgid "ERROR: %s uses software FP, whereas %s uses hardware FP"
 msgstr ""
-"Hata: %s kayan sayıları kayan sayı yazmaçlarında geçiriyor, \n"
-"      fakat %s tamsayı yazmaçlarında geçiriyor"
+"Hata: %s yazÄ±lÄ±mda kayan sayÄ± kullanÄ±yor,\n"
+"      fakat %s donanÄ±mda kayan sayÄ± kullanÄ±yor"
 
-#: elf32-arm.h:2292
+#: elf32-arm.h:2343
 #, c-format
-msgid "Error: %s passes floats in integer registers, whereas %s passes them in FP registers"
+msgid "ERROR: %s uses hardware FP, whereas %s uses software FP"
 msgstr ""
-"Hata: %s kayan sayıları tamsayı yazmaçlarında geçiriyor, \n"
-"      fakat %s kayan sayı yazmaçlarında geçiriyor"
-
-#: elf32-arm.h:2303
-#, c-format
-msgid "Error: %s uses VFP instructions, whereas %s FPA instructions"
-msgstr "Hata: %s VFP işlemi kullanıyor, fakat %s FPA işlemi kullanıyor"
-
-#: elf32-arm.h:2308
-#, c-format
-msgid "Error: %s uses FPA instructions, whereas %s VFP instructions"
-msgstr "Hata: %s FPA işlemi kullanıyor, fakat %s VFP işlemi kullanıyor"
-
-#: elf32-arm.h:2328
-#, c-format
-msgid "Error: %s uses software FP, whereas %s uses hardware FP"
-msgstr ""
-"Hata: %s yazılımda kayan sayı kullanıyor,\n"
-"      fakat %s donanımda kayan sayı kullanıyor"
-
-#: elf32-arm.h:2333
-#, c-format
-msgid "Error: %s uses hardware FP, whereas %s uses software FP"
-msgstr ""
-"Hata: %s donanımda kayan sayı kullanıyor,\n"
-"      fakat %s yazılımda kayan sayı kullanıyor"
-
-#: elf32-arm.h:2348
-#, c-format
-msgid "Warning: %s supports interworking, whereas %s does not"
-msgstr "Uyarı: %s girdi dosyası beraber çalışmayı destekliyor, fakat %s desteklemiyor."
-
-#: elf32-arm.h:2355
-#, c-format
-msgid "Warning: %s does not support interworking, whereas %s does"
-msgstr "Uyarı: %s girdi dosyası beraber çalışmayı desteklemiyor, fakat %s destekliyor."
+"Hata: %s donanÄ±mda kayan sayÄ± kullanÄ±yor,\n"
+"      fakat %s yazÄ±lÄ±mda kayan sayÄ± kullanÄ±yor"
 
 #. Ignore init flag - it may not be set, despite the flags field
 #. containing valid data.
-#: elf32-arm.h:2386 elf32-cris.c:2970 elf32-m68k.c:410 elf32-mips.c:3232
+#: elf32-arm.h:2396 elf32-cris.c:2988 elf32-m68k.c:410 elf32-vax.c:543
+#: elfxx-mips.c:7756
 #, c-format
 msgid "private flags = %lx:"
-msgstr "özel bayraklar = %lx:"
-
-#: elf32-arm.h:2395
-msgid " [interworking enabled]"
-msgstr " [beraber çalışma etkinleştirilmiş]"
-
-#: elf32-arm.h:2398
-msgid " [APCS-26]"
-msgstr " [APCS-26]"
-
-#: elf32-arm.h:2400
-msgid " [APCS-32]"
-msgstr " [APCS-32]"
-
-#: elf32-arm.h:2403
-msgid " [VFP float format]"
-msgstr " [VFP kayan nokta biçemi]"
+msgstr "Ã¶zel bayraklar = %lx:"
 
 #: elf32-arm.h:2405
-msgid " [FPA float format]"
-msgstr " [FPA kayan nokta biçemi]"
+msgid " [interworking enabled]"
+msgstr " [beraber Ã§alÄ±ÅŸma etkinleÅŸtirilmiÅŸ]"
 
-#: elf32-arm.h:2414
+#: elf32-arm.h:2413
+msgid " [VFP float format]"
+msgstr " [VFP kayan nokta biÃ§emi]"
+
+#: elf32-arm.h:2415
+msgid " [FPA float format]"
+msgstr " [FPA kayan nokta biÃ§emi]"
+
+#: elf32-arm.h:2424
 msgid " [new ABI]"
 msgstr " [yeni ABI]"
 
-#: elf32-arm.h:2417
+#: elf32-arm.h:2427
 msgid " [old ABI]"
 msgstr " [eski ABI]"
 
-#: elf32-arm.h:2420
+#: elf32-arm.h:2430
 msgid " [software FP]"
-msgstr " [yazılım FP]"
+msgstr " [yazÄ±lÄ±m FP]"
 
-#: elf32-arm.h:2428
+#: elf32-arm.h:2438
 msgid " [Version1 EABI]"
-msgstr " [Sürüm1 EABI]"
+msgstr " [SÃ¼rÃ¼m1 EABI]"
 
-#: elf32-arm.h:2431 elf32-arm.h:2442
+#: elf32-arm.h:2441 elf32-arm.h:2452
 msgid " [sorted symbol table]"
-msgstr " [sıralanmış sembol tablosu]"
+msgstr " [sÄ±ralanmÄ±ÅŸ sembol tablosu]"
 
-#: elf32-arm.h:2433 elf32-arm.h:2444
+#: elf32-arm.h:2443 elf32-arm.h:2454
 msgid " [unsorted symbol table]"
-msgstr " [sıralanmamış sembol tablosu]"
+msgstr " [sÄ±ralanmamÄ±ÅŸ sembol tablosu]"
 
-#: elf32-arm.h:2439
+#: elf32-arm.h:2449
 msgid " [Version2 EABI]"
-msgstr " [Sürüm2 EABI]"
-
-#: elf32-arm.h:2447
-msgid " [dynamic symbols use segment index]"
-msgstr " [dinamik semboller bölüm indeksini kullanıyor]"
-
-#: elf32-arm.h:2450
-msgid " [mapping symbols precede others]"
-msgstr " [eşleşme sembolleri diğerlerinden önceliklidir]"
+msgstr " [SÃ¼rÃ¼m2 EABI]"
 
 #: elf32-arm.h:2457
-msgid " <EABI version unrecognised>"
-msgstr " <EABI sürümü bilinmiyor>"
+msgid " [dynamic symbols use segment index]"
+msgstr " [dinamik semboller bÃ¶lÃ¼m indeksini kullanÄ±yor]"
 
-#: elf32-arm.h:2464
-msgid " [relocatable executable]"
-msgstr " [yer değiştirebilir uygulama]"
+#: elf32-arm.h:2460
+msgid " [mapping symbols precede others]"
+msgstr " [eÅŸleÅŸme sembolleri diÄŸerlerinden Ã¶nceliklidir]"
 
 #: elf32-arm.h:2467
+msgid " <EABI version unrecognised>"
+msgstr " <EABI sÃ¼rÃ¼mÃ¼ bilinmiyor>"
+
+#: elf32-arm.h:2474
+msgid " [relocatable executable]"
+msgstr " [yer deÄŸiÅŸtirebilir uygulama]"
+
+#: elf32-arm.h:2477
 msgid " [has entry point]"
-msgstr " [girdi noktası var]"
+msgstr " [girdi noktasÄ± var]"
 
-#: elf32-arm.h:2472
+#: elf32-arm.h:2482
 msgid "<Unrecognised flag bits set>"
-msgstr "<Bilinmeyen bayrak bitleri atanmış>"
+msgstr "<Bilinmeyen bayrak bitleri atanmÄ±ÅŸ>"
 
-#: elf32-avr.c:843 elf32-cris.c:1400 elf32-fr30.c:661 elf32-i860.c:1056
-#: elf32-openrisc.c:463 elf32-v850.c:1699 elf64-mmix.c:1172
+#: elf32-avr.c:841 elf32-cris.c:1411 elf32-fr30.c:643 elf32-frv.c:817
+#: elf32-i860.c:1039 elf32-openrisc.c:447 elf32-v850.c:1699
+#: elf32-xstormy16.c:941 elf64-mmix.c:1310
 msgid "internal error: dangerous relocation"
-msgstr "iç hata: tehlikeli yer değişim"
+msgstr "iÃ§ hata: tehlikeli yer deÄŸiÅŸim"
 
 #: elf32-cris.c:949
 #, c-format
 msgid "%s: unresolvable relocation %s against symbol `%s' from %s section"
-msgstr "%1$s: uyarı: %4$s bölümünden `%3$s' sembolüne çözümlenemeyen %2$s yer değişimi"
+msgstr "%1$s: uyarÄ±: %4$s bÃ¶lÃ¼mÃ¼nden `%3$s' sembolÃ¼ne Ã§Ã¶zÃ¼mlenemeyen %2$s yer deÄŸiÅŸimi"
 
 #: elf32-cris.c:1012
 #, c-format
 msgid "%s: No PLT nor GOT for relocation %s against symbol `%s' from %s section"
-msgstr "%1$s: %4$s bölümünden `%3$s' sembolüne %2$s yer değişimi için PLT veya GOT yok"
+msgstr "%1$s: %4$s bÃ¶lÃ¼mÃ¼nden `%3$s' sembolÃ¼ne %2$s yer deÄŸiÅŸimi iÃ§in PLT veya GOT yok"
 
-#: elf32-cris.c:1015 elf32-cris.c:1142
+#: elf32-cris.c:1015 elf32-cris.c:1141
 msgid "[whose name is lost]"
-msgstr "[adı kaybolmuş]"
+msgstr "[adÄ± kaybolmuÅŸ]"
 
-#: elf32-cris.c:1131
+#: elf32-cris.c:1130
 #, c-format
 msgid "%s: relocation %s with non-zero addend %d against local symbol from %s section"
 msgstr ""
-"%1$s: %4$s bölümünden yerel sembol sıfır olmayan %3$d eklemesi ile\n"
-"      %2$s yerdeğişimi"
+"%1$s: %4$s bÃ¶lÃ¼mÃ¼nden yerel sembol sÄ±fÄ±r olmayan %3$d eklemesi ile\n"
+"      %2$s yerdeÄŸiÅŸimi"
 
-#: elf32-cris.c:1138
+#: elf32-cris.c:1137
 #, c-format
 msgid "%s: relocation %s with non-zero addend %d against symbol `%s' from %s section"
-msgstr "%1$s: %5$s bölümünden `%4$s' sembolüne sıfır olmayan %3$d eklemesi ile       %2$s yerdeğişimi"
+msgstr "%1$s: %5$s bÃ¶lÃ¼mÃ¼nden `%4$s' sembolÃ¼ne sÄ±fÄ±r olmayan %3$d eklemesi ile       %2$s yerdeÄŸiÅŸimi"
 
-#: elf32-cris.c:1156
+#: elf32-cris.c:1155
 #, c-format
 msgid "%s: relocation %s is not allowed for global symbol: `%s' from %s section"
-msgstr "%1$s: %4$s bölümünden %3$s evrensel sembolü için %2$s yerdeğişimi yapılamaz"
+msgstr "%1$s: %4$s bÃ¶lÃ¼mÃ¼nden %3$s evrensel sembolÃ¼ iÃ§in %2$s yerdeÄŸiÅŸimi yapÄ±lamaz"
 
-#: elf32-cris.c:1275
+#: elf32-cris.c:1170
+#, c-format
+msgid "%s: relocation %s in section %s with no GOT created"
+msgstr "%1$s: `%3$s' bÃ¶lÃ¼mÃ¼nde %2$s yer deÄŸiÅŸtirmesi mevcut, fakat GOT oluÅŸturulmamÄ±ÅŸ"
+
+#: elf32-cris.c:1288
 #, c-format
 msgid "%s: Internal inconsistency; no relocation section %s"
-msgstr "%s: İç tutarsızlık; %s yerdeğişim bölümü yok"
+msgstr "%s: Ä°Ã§ tutarsÄ±zlÄ±k; %s yerdeÄŸiÅŸim bÃ¶lÃ¼mÃ¼ yok"
 
-#: elf32-cris.c:2508
+#: elf32-cris.c:2514
 #, c-format
 msgid ""
 "%s, section %s:\n"
 "  relocation %s should not be used in a shared object; recompile with -fPIC"
 msgstr ""
-"%s, %s bölümü:\n"
-"  %s yer değişimi paylaşımlı nesne oluştururken kullanılamaz;\n"
+"%s, %s bÃ¶lÃ¼mÃ¼:\n"
+"  %s yer deÄŸiÅŸimi paylaÅŸÄ±mlÄ± nesne oluÅŸtururken kullanÄ±lamaz;\n"
 "  -fPIC ile yeniden derleyin"
 
-#: elf32-cris.c:2973
+#: elf32-cris.c:2991
 msgid " [symbols have a _ prefix]"
-msgstr " [semboller _ önekine sahip]"
+msgstr " [semboller _ Ã¶nekine sahip]"
 
-#: elf32-cris.c:3012
+#: elf32-cris.c:3030
 #, c-format
 msgid "%s: uses _-prefixed symbols, but writing file with non-prefixed symbols"
-msgstr "%s: _-önekli sembolleri kullanıyor, fakat dosyaya öneksiz sembolleri yazıyor"
+msgstr "%s: _-Ã¶nekli sembolleri kullanÄ±yor, fakat dosyaya Ã¶neksiz sembolleri yazÄ±yor"
 
-#: elf32-cris.c:3013
+#: elf32-cris.c:3031
 #, c-format
 msgid "%s: uses non-prefixed symbols, but writing file with _-prefixed symbols"
-msgstr "%s: öneksiz sembolleri kullanıyor, fakat dosyaya _-önekli sembolleri yazıyor"
+msgstr "%s: Ã¶neksiz sembolleri kullanÄ±yor, fakat dosyaya _-Ã¶nekli sembolleri yazÄ±yor"
+
+#: elf32-frv.c:1217
+#, c-format
+msgid "%s: compiled with %s and linked with modules that use non-pic relocations"
+msgstr "%s: %s ile derlendi ve normal derlenmiÅŸ modÃ¼llerle baÄŸlandÄ±"
+
+#: elf32-frv.c:1267
+#, c-format
+msgid "%s: compiled with %s and linked with modules compiled with %s"
+msgstr "%s: %s ile derlendi ve %s ile derlenmiÅŸ modÃ¼llerle baÄŸlandÄ±"
+
+#: elf32-frv.c:1279
+#, c-format
+msgid "%s: uses different unknown e_flags (0x%lx) fields than previous modules (0x%lx)"
+msgstr "%s: Ã¶nceki modÃ¼llerden farklÄ± bilinmeyen e_flags (0x%lx)  alanlarÄ± kullanÄ±lÄ±yor (0x%lx)"
+
+#: elf32-frv.c:1315
+#, c-format
+msgid "private flags = 0x%lx:"
+msgstr "Ã¶zel bayraklar = 0x%lx:"
 
 #: elf32-gen.c:82 elf64-gen.c:82
 #, c-format
 msgid "%s: Relocations in generic ELF (EM: %d)"
-msgstr "%s: Normal ELF'de yerdeğişimler (EM: %d)"
+msgstr "%s: Normal ELF'de yerdeÄŸiÅŸimler (EM: %d)"
 
-#: elf32-hppa.c:646
+#: elf32-hppa.c:671 elf64-ppc.c:2323
 #, c-format
 msgid "%s: cannot create stub entry %s"
-msgstr "%s: koçan girişi %s oluşturulamadı"
+msgstr "%s: koÃ§an giriÅŸi %s oluÅŸturulamadÄ±"
 
-#: elf32-hppa.c:937 elf32-hppa.c:3540
+#: elf32-hppa.c:956 elf32-hppa.c:3555
 #, c-format
 msgid "%s(%s+0x%lx): cannot reach %s, recompile with -ffunction-sections"
-msgstr "%s(%s+0x%lx): %s'e ulaşılamadı, -ffunction-sections ile derleyin"
+msgstr "%s(%s+0x%lx): %s'e ulaÅŸÄ±lamadÄ±, -ffunction-sections ile derleyin"
 
-#: elf32-hppa.c:1312
+#: elf32-hppa.c:1338 elf64-x86-64.c:673
 #, c-format
 msgid "%s: relocation %s can not be used when making a shared object; recompile with -fPIC"
-msgstr "%s: %s yer değişimi paylaşımlı nesne oluşturulurken kullanılamaz; -fPIC ile yeniden derleyin"
+msgstr "%s: %s yer deÄŸiÅŸimi paylaÅŸÄ±mlÄ± nesne oluÅŸturulurken kullanÄ±lamaz; -fPIC ile yeniden derleyin"
 
-#: elf32-hppa.c:1332
+#: elf32-hppa.c:1358
 #, c-format
 msgid "%s: relocation %s should not be used when making a shared object; recompile with -fPIC"
-msgstr "%s: %s yer değişimi paylaşımlı nesne oluştururken kullanılamaz; -fPIC ile yeniden derleyin"
+msgstr "%s: %s yer deÄŸiÅŸimi paylaÅŸÄ±mlÄ± nesne oluÅŸtururken kullanÄ±lamaz; -fPIC ile yeniden derleyin"
 
-#: elf32-hppa.c:1525
+#: elf32-hppa.c:1551
 #, c-format
 msgid "Could not find relocation section for %s"
-msgstr "%s için yer değiştirme bölümü bulunamadı"
+msgstr "%s iÃ§in yer deÄŸiÅŸtirme bÃ¶lÃ¼mÃ¼ bulunamadÄ±"
 
-#: elf32-hppa.c:2862
+#: elf32-hppa.c:2855
 #, c-format
 msgid "%s: duplicate export stub %s"
-msgstr "%s: birden fazla ihraç koçanı %s"
+msgstr "%s: birden fazla ihraÃ§ koÃ§anÄ± %s"
 
-#: elf32-hppa.c:3424
+#: elf32-hppa.c:3433
 #, c-format
 msgid "%s(%s+0x%lx): fixing %s"
-msgstr "%s(%s+0x%lx): %s düzeltiliyor"
+msgstr "%s(%s+0x%lx): %s dÃ¼zeltiliyor"
 
-#: elf32-hppa.c:4064
+#: elf32-hppa.c:4080
 #, c-format
 msgid "%s(%s+0x%lx): cannot handle %s for %s"
-msgstr "%1$s(%2$s+0x%3$lx): %5$s için %4$s işlenemedi"
+msgstr "%1$s(%2$s+0x%3$lx): %5$s iÃ§in %4$s iÅŸlenemedi"
 
-#: elf32-hppa.c:4403
+#: elf32-hppa.c:4393
 msgid ".got section not immediately after .plt section"
-msgstr ".got bölümü .plt bölümünün hemen arkasında değil"
+msgstr ".got bÃ¶lÃ¼mÃ¼ .plt bÃ¶lÃ¼mÃ¼nÃ¼n hemen arkasÄ±nda deÄŸil"
 
-#: elf32-i386.c:298
+#: elf32-i386.c:379
 #, c-format
 msgid "%s: invalid relocation type %d"
-msgstr "%s: geçersiz yer değişim türü %d"
+msgstr "%s: geÃ§ersiz yer deÄŸiÅŸim tÃ¼rÃ¼ %d"
 
-#: elf32-i386.c:718 elf32-s390.c:636 elf64-s390.c:595
+#: elf32-i386.c:876 elf32-s390.c:649 elf64-s390.c:595 elf64-x86-64.c:591
 #, c-format
 msgid "%s: bad symbol index: %d"
-msgstr "%s: geçersiz sembol indeksi: %d"
+msgstr "%s: geÃ§ersiz sembol indeksi: %d"
 
-#: elf32-i386.c:863 elf32-s390.c:790 elf64-ppc.c:2085 elf64-s390.c:759
+#: elf32-i386.c:948
+#, c-format
+msgid "%s: `%s' accessed both as normal and thread local symbol"
+msgstr "%s: `%s'a hem normal, hem de dal yerel sembolÃ¼ olarak eriÅŸildi"
+
+#: elf32-i386.c:1072 elf32-s390.c:808 elf64-ppc.c:2827 elf64-s390.c:759
+#: elf64-x86-64.c:761
 #, c-format
 msgid "%s: bad relocation section name `%s'"
-msgstr "%s: geçersiz yerdeğişim bölümü adı `%s'"
+msgstr "%s: geÃ§ersiz yerdeÄŸiÅŸim bÃ¶lÃ¼mÃ¼ adÄ± `%s'"
 
-#: elf32-i386.c:2067 elf32-s390.c:1949 elf64-ppc.c:3908 elf64-s390.c:1953
+#: elf32-i386.c:1159 elf64-alpha.c:4768
+#, c-format
+msgid "%s: TLS local exec code cannot be linked into shared objects"
+msgstr "%s: TLS yerel Ã§alÄ±ÅŸtÄ±rma kodu paylaÅŸÄ±mlÄ± nesnelere baÄŸlanamaz"
+
+#: elf32-i386.c:2747 elf32-s390.c:1981 elf32-sparc.c:1571 elf64-ppc.c:5918
+#: elf64-s390.c:1945 elf64-sparc.c:2578 elf64-x86-64.c:1948
 #, c-format
 msgid "%s(%s+0x%lx): unresolvable relocation against symbol `%s'"
-msgstr "%s(%s+0x%lx): `%s' sembolüne çözümlenemeyen yer değişimi"
+msgstr "%s(%s+0x%lx): `%s' sembolÃ¼ne Ã§Ã¶zÃ¼mlenemeyen yer deÄŸiÅŸimi"
 
-#: elf32-i386.c:2105 elf32-s390.c:1987 elf64-s390.c:1991
+#: elf32-i386.c:2784 elf32-s390.c:2019 elf64-ppc.c:5977 elf64-s390.c:1983
+#: elf64-x86-64.c:1986
 #, c-format
 msgid "%s(%s+0x%lx): reloc against `%s': error %d"
-msgstr "%s(%s+0x%lx): %s'e yer değişimi: %d hatası"
+msgstr "%s(%s+0x%lx): %s'e yer deÄŸiÅŸimi: %d hatasÄ±"
 
 #: elf32-m32r.c:924
 msgid "SDA relocation when _SDA_BASE_ not defined"
-msgstr "_SDA_BASE_ tanımlanmamış iken SDA yer değişimi"
+msgstr "_SDA_BASE_ tanÄ±mlanmamÄ±ÅŸ iken SDA yer deÄŸiÅŸimi"
 
-#: elf32-ia64.c:3538 elf32-m32r.c:1008 elf32-ppc.c:2930 elf64-ia64.c:3538
+#: elf32-ia64.c:3687 elf32-m32r.c:1013 elf32-ppc.c:2987 elf64-alpha.c:4185
+#: elf64-alpha.c:4313 elf64-ia64.c:3687
 #, c-format
 msgid "%s: unknown relocation type %d"
-msgstr "%s: bilinmeyen yer değişim türü %d"
+msgstr "%s: bilinmeyen yer deÄŸiÅŸim tÃ¼rÃ¼ %d"
 
-#: elf32-m32r.c:1224
+#: elf32-m32r.c:1221
 #, c-format
 msgid "%s: The target (%s) of an %s relocation is in the wrong section (%s)"
-msgstr "%1$s: Bir %3$s yer değişiminin hedefi (%2$s) yanlış bölümde (%4$s)"
+msgstr "%1$s: Bir %3$s yer deÄŸiÅŸiminin hedefi (%2$s) yanlÄ±ÅŸ bÃ¶lÃ¼mde (%4$s)"
 
-#: elf32-m32r.c:2001
+#: elf32-m32r.c:1947
 #, c-format
 msgid "%s: Instruction set mismatch with previous modules"
-msgstr "%s: Önceki modüllerle işlem uyuşmazlığı"
+msgstr "%s: Ã–nceki modÃ¼llerle iÅŸlem uyuÅŸmazlÄ±ÄŸÄ±"
 
-#: elf32-m32r.c:2024
+#: elf32-m32r.c:1970
 #, c-format
 msgid "private flags = %lx"
-msgstr "özel bayraklar = %lx"
+msgstr "Ã¶zel bayraklar = %lx"
 
-#: elf32-m32r.c:2029
+#: elf32-m32r.c:1975
 msgid ": m32r instructions"
-msgstr ": m32r işlemleri"
+msgstr ": m32r iÅŸlemleri"
 
-#: elf32-m32r.c:2030
+#: elf32-m32r.c:1976
 msgid ": m32rx instructions"
-msgstr ": m32rx işlemleri"
+msgstr ": m32rx iÅŸlemleri"
 
 #: elf32-m68k.c:413
 msgid " [cpu32]"
 msgstr " [cpu32]"
 
-#: elf32-mcore.c:353 elf32-mcore.c:479
+#: elf32-m68k.c:416
+msgid " [m68000]"
+msgstr " [m68000]"
+
+#: elf32-mcore.c:354 elf32-mcore.c:457
 #, c-format
 msgid "%s: Relocation %s (%d) is not currently supported.\n"
-msgstr "%s: %s (%d) yer değişimi henüz desteklenmiyor.\n"
+msgstr "%s: %s (%d) yer deÄŸiÅŸimi henÃ¼z desteklenmiyor.\n"
 
-#: elf32-mcore.c:438
+#: elf32-mcore.c:442
 #, c-format
 msgid "%s: Unknown relocation type %d\n"
-msgstr "%s: Bilinmeyen yer değişim türü %d\n"
+msgstr "%s: Bilinmeyen yer deÄŸiÅŸim tÃ¼rÃ¼ %d\n"
 
-#: elf32-mips.c:2146 elf64-mips.c:1972
+#: elf32-mips.c:1152 elf64-mips.c:1783
 msgid "32bits gp relative relocation occurs for an external symbol"
-msgstr "32 bitlik gp göreceli yer değişim bir dış sembol için yapılıyor"
+msgstr "32 bitlik gp gÃ¶receli yer deÄŸiÅŸim bir dÄ±ÅŸ sembol iÃ§in yapÄ±lÄ±yor"
 
-#: elf32-mips.c:2295
+#: elf32-mips.c:1301
 #, c-format
 msgid "Linking mips16 objects into %s format is not supported"
-msgstr "mips16 nesnelerini %s biçemine bağlamak desteklenmiyor"
+msgstr "mips16 nesnelerini %s biÃ§emine baÄŸlamak desteklenmiyor"
 
-#: elf32-mips.c:3119
-#, c-format
-msgid "%s: linking PIC files with non-PIC files"
-msgstr "%s: PIC dosyaları PIC olmayan dosyalarla bağlanıyor"
-
-#: elf32-mips.c:3129
-#, c-format
-msgid "%s: linking abicalls files with non-abicalls files"
-msgstr "%s: abicalls dosyaları abicalls olmayan dosyalarla bağlanıyor"
-
-#: elf32-mips.c:3158
-#, c-format
-msgid "%s: ISA mismatch (-mips%d) with previous modules (-mips%d)"
-msgstr "%1$s: Önceki modüllerle (-mips%3$d) ile ISA uyumsuzluğu (-mips%2$d)"
-
-#: elf32-mips.c:3167
-#, c-format
-msgid "%s: ISA mismatch (%d) with previous modules (%d)"
-msgstr "%1$s: Önceki modüllerle (%3$d) ile ISA uyumsuzluğu (%2$d)"
-
-#: elf32-mips.c:3190
-#, c-format
-msgid "%s: ABI mismatch: linking %s module with previous %s modules"
-msgstr "%s: ABI uyumsuzluğu: %s modülü önceki %s modülle bağlanıyor"
-
-#: elf32-mips.c:3204 elf32-ppc.c:1470 elf64-ppc.c:1538 elf64-sparc.c:3033
-#, c-format
-msgid "%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"
-msgstr "%1$s: önceki modüllerden (0x%3$lx) farklı e_flags (0x%2$lx) alanları kullanılıyor"
-
-#: elf32-mips.c:3235
-msgid " [abi=O32]"
-msgstr " [abi=O32]"
-
-#: elf32-mips.c:3237
-msgid " [abi=O64]"
-msgstr " [abi=O64]"
-
-#: elf32-mips.c:3239
-msgid " [abi=EABI32]"
-msgstr " [abi=EABI32]"
-
-#: elf32-mips.c:3241
-msgid " [abi=EABI64]"
-msgstr " [abi=EABI64]"
-
-#: elf32-mips.c:3243
-msgid " [abi unknown]"
-msgstr " [abi bilinmiyor]"
-
-#: elf32-mips.c:3245
-msgid " [abi=N32]"
-msgstr " [abi=N32]"
-
-#: elf32-mips.c:3247
-msgid " [abi=64]"
-msgstr " [abi=64]"
-
-#: elf32-mips.c:3249
-msgid " [no abi set]"
-msgstr " [abi atanmamış]"
-
-#: elf32-mips.c:3252
-msgid " [mips1]"
-msgstr " [mips1]"
-
-#: elf32-mips.c:3254
-msgid " [mips2]"
-msgstr " [mips2]"
-
-#: elf32-mips.c:3256
-msgid " [mips3]"
-msgstr " [mips3]"
-
-#: elf32-mips.c:3258
-msgid " [mips4]"
-msgstr " [mips4]"
-
-#: elf32-mips.c:3260
-msgid " [mips5]"
-msgstr " [mips5]"
-
-#: elf32-mips.c:3262
-msgid " [mips32]"
-msgstr " [mips32]"
-
-#: elf32-mips.c:3264
-msgid " [mips64]"
-msgstr " [mips64]"
-
-#: elf32-mips.c:3266
-msgid " [unknown ISA]"
-msgstr " [bilinmeyen ISA]"
-
-#: elf32-mips.c:3269
-msgid " [32bitmode]"
-msgstr " [32bitkipi]"
-
-#: elf32-mips.c:3271
-msgid " [not 32bitmode]"
-msgstr " [32bitkipi değil]"
-
-#: elf32-mips.c:4947
-msgid "static procedure (no name)"
-msgstr "statik altyordam (isimsiz)"
-
-#: elf32-mips.c:5565 elf64-mips.c:6694
-#, c-format
-msgid "%s: illegal section name `%s'"
-msgstr "%s: geçersiz bölüm adı `%s'"
-
-#: elf32-mips.c:6132 elf64-mips.c:3150
-msgid "not enough GOT space for local GOT entries"
-msgstr "yerel GOT girdileri için yeterli GOT yeri yok"
-
-#: elf32-mips.c:7238 elf64-mips.c:4203
-#, c-format
-msgid "%s: %s+0x%lx: jump to stub routine which is not jal"
-msgstr "%s: %s+0x%lx: jal olmayan koçan yordamına sıçrama"
-
-#: elf32-mips.c:8237 elf64-mips.c:5891
-#, c-format
-msgid "%s: Malformed reloc detected for section %s"
-msgstr "%s: %s bölümü için geçersiz yer değişim bulundu"
-
-#: elf32-mips.c:8315 elf64-mips.c:5969
-#, c-format
-msgid "%s: CALL16 reloc at 0x%lx not against global symbol"
-msgstr "%s: 0x%lx'deki CALL16 yerdeğişimi evrensel sembole göre değil"
-
-#: elf32-ppc.c:1436 elf64-ppc.c:1503
+#: elf32-ppc.c:1460
 #, c-format
 msgid "%s: compiled with -mrelocatable and linked with modules compiled normally"
-msgstr "%s: -mrelocatable ile derlendi ve normal derlenmiş modüllerle bağlandı"
+msgstr "%s: -mrelocatable ile derlendi ve normal derlenmiÅŸ modÃ¼llerle baÄŸlandÄ±"
 
-#: elf32-ppc.c:1444 elf64-ppc.c:1511
+#: elf32-ppc.c:1468
 #, c-format
 msgid "%s: compiled normally and linked with modules compiled with -mrelocatable"
-msgstr "%s: normal derlendi ve -mrelocatable ile derlenmiş modüllere bağlandı"
+msgstr "%s: normal derlendi ve -mrelocatable ile derlenmiÅŸ modÃ¼llere baÄŸlandÄ±"
 
-#: elf32-ppc.c:1568
+#: elf32-ppc.c:1494 elf64-sparc.c:2989 elfxx-mips.c:7713
+#, c-format
+msgid "%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"
+msgstr "%1$s: Ã¶nceki modÃ¼llerden (0x%3$lx) farklÄ± e_flags (0x%2$lx) alanlarÄ± kullanÄ±lÄ±yor"
+
+#: elf32-ppc.c:1592
 #, c-format
 msgid "%s: Unknown special linker type %d"
-msgstr "%s: Bilinmeyen özel bağlayıcı türü %d"
+msgstr "%s: Bilinmeyen Ã¶zel baÄŸlayÄ±cÄ± tÃ¼rÃ¼ %d"
 
-#: elf32-ppc.c:2218 elf32-ppc.c:2252 elf32-ppc.c:2287
+#: elf32-ppc.c:2273 elf32-ppc.c:2307 elf32-ppc.c:2342
 #, c-format
 msgid "%s: relocation %s cannot be used when making a shared object"
-msgstr "%s: %s yerdeğişimi paylaşımlı nesne oluşturulurken kullanılamaz"
+msgstr "%s: %s yerdeÄŸiÅŸimi paylaÅŸÄ±mlÄ± nesne oluÅŸturulurken kullanÄ±lamaz"
 
-#: elf32-ppc.c:3097 elf64-ppc.c:3500
+#: elf32-ppc.c:3126 elf64-ppc.c:5473
 #, c-format
 msgid "%s: unknown relocation type %d for symbol %s"
-msgstr "%1$s: %3$s sembolü için bilinmeyen %2$d türünde yerdeğişimi"
+msgstr "%1$s: %3$s sembolÃ¼ iÃ§in bilinmeyen %2$d tÃ¼rÃ¼nde yerdeÄŸiÅŸimi"
 
-#: elf32-ppc.c:3452 elf32-ppc.c:3473 elf32-ppc.c:3523
+#: elf32-ppc.c:3482 elf32-ppc.c:3503 elf32-ppc.c:3553
 #, c-format
 msgid "%s: The target (%s) of a %s relocation is in the wrong output section (%s)"
-msgstr "%1$s: %3$s yerdeğişiminin hedefi (%2$s) yanlış çıktı bölümünde (%4$s)"
+msgstr "%1$s: %3$s yerdeÄŸiÅŸiminin hedefi (%2$s) yanlÄ±ÅŸ Ã§Ä±ktÄ± bÃ¶lÃ¼mÃ¼nde (%4$s)"
 
-#: elf32-ppc.c:3589
+#: elf32-ppc.c:3619
 #, c-format
 msgid "%s: Relocation %s is not yet supported for symbol %s."
-msgstr "%s: %s yerdeğişimi %s sembolü için henüz desteklenmiyor."
+msgstr "%s: %s yerdeÄŸiÅŸimi %s sembolÃ¼ iÃ§in henÃ¼z desteklenmiyor."
 
-#: elf32-sh.c:1101
+#: elf32-sh.c:1964
 #, c-format
 msgid "%s: 0x%lx: warning: bad R_SH_USES offset"
-msgstr "%s: 0x%lx: uyarı: hatalı R_SH_USES göreli konumu"
+msgstr "%s: 0x%lx: uyarÄ±: hatalÄ± R_SH_USES gÃ¶reli konumu"
 
-#: elf32-sh.c:1113
+#: elf32-sh.c:1976
 #, c-format
 msgid "%s: 0x%lx: warning: R_SH_USES points to unrecognized insn 0x%x"
-msgstr "%s: 0x%lx: uyarı: R_SH_USES bilinmeyen insn 0x%x'ı imliyor"
+msgstr "%s: 0x%lx: uyarÄ±: R_SH_USES bilinmeyen insn 0x%x'Ä± imliyor"
 
-#: elf32-sh.c:1130
+#: elf32-sh.c:1993
 #, c-format
 msgid "%s: 0x%lx: warning: bad R_SH_USES load offset"
-msgstr "%s: 0x%lx: uyarı: hatalı R_SH_USES yükleme göreli konumu"
+msgstr "%s: 0x%lx: uyarÄ±: hatalÄ± R_SH_USES yÃ¼kleme gÃ¶reli konumu"
 
-#: elf32-sh.c:1145
+#: elf32-sh.c:2008
 #, c-format
 msgid "%s: 0x%lx: warning: could not find expected reloc"
-msgstr "%s: 0x%lx: uyarı: beklenen yerdeğişim bulunamadı"
+msgstr "%s: 0x%lx: uyarÄ±: beklenen yerdeÄŸiÅŸim bulunamadÄ±"
 
-#: elf32-sh.c:1202
+#: elf32-sh.c:2036
 #, c-format
 msgid "%s: 0x%lx: warning: symbol in unexpected section"
-msgstr "%s: 0x%lx: uyarı: beklenmeyen bölümde sembol"
+msgstr "%s: 0x%lx: uyarÄ±: beklenmeyen bÃ¶lÃ¼mde sembol"
 
-#: elf32-sh.c:1323
+#: elf32-sh.c:2153
 #, c-format
 msgid "%s: 0x%lx: warning: could not find expected COUNT reloc"
-msgstr "%s: 0x%lx: uyarı: beklenen COUNT yerdeğişimi bulunamadı"
+msgstr "%s: 0x%lx: uyarÄ±: beklenen COUNT yerdeÄŸiÅŸimi bulunamadÄ±"
 
-#: elf32-sh.c:1332
+#: elf32-sh.c:2162
 #, c-format
 msgid "%s: 0x%lx: warning: bad count"
-msgstr "%s: 0x%lx: uyarı: hatalı sayım"
+msgstr "%s: 0x%lx: uyarÄ±: hatalÄ± sayÄ±m"
 
-#: elf32-sh.c:1741 elf32-sh.c:2132
+#: elf32-sh.c:2550 elf32-sh.c:2926
 #, c-format
 msgid "%s: 0x%lx: fatal: reloc overflow while relaxing"
-msgstr "%s: 0x%lx: ölümcül: gevşetilirken yerdeğişim taşması"
+msgstr "%s: 0x%lx: Ã¶lÃ¼mcÃ¼l: gevÅŸetilirken yerdeÄŸiÅŸim taÅŸmasÄ±"
 
-#: elf32-sh.c:3267
+#: elf32-sh.c:4073 elf64-sh64.c:1576
+msgid "Unexpected STO_SH5_ISA32 on local symbol is not handled"
+msgstr "Yerel sembolde STO_SH5_ISA32 desteklenmiyor"
+
+#: elf32-sh.c:4284
 #, c-format
 msgid "%s: 0x%lx: fatal: unaligned branch target for relax-support relocation"
-msgstr "%s: 0x%lx: ölümcül: gevşetme destek yerdeğişimi için hizalanmamış dal"
+msgstr "%s: 0x%lx: Ã¶lÃ¼mcÃ¼l: gevÅŸetme destek yerdeÄŸiÅŸimi iÃ§in hizalanmamÄ±ÅŸ dal"
 
-#: elf32-sparc.c:1554 elf64-sparc.c:2286
+#: elf32-sh64.c:203 elf64-sh64.c:2364
+#, c-format
+msgid "%s: compiled as 32-bit object and %s is 64-bit"
+msgstr "%s: 32 bitlik sistem iÃ§in derlenmiÅŸ ve %s 64 bit"
+
+#: elf32-sh64.c:206 elf64-sh64.c:2367
+#, c-format
+msgid "%s: compiled as 64-bit object and %s is 32-bit"
+msgstr "%s: 64 bitlik sistem iÃ§in derlenmiÅŸ ve %s 32 bit"
+
+#: elf32-sh64.c:208 elf64-sh64.c:2369
+#, c-format
+msgid "%s: object size does not match that of target %s"
+msgstr "%s: nesne boyu hedef %s'nin boyuyla eÅŸleÅŸmiyor"
+
+#: elf32-sh64.c:440 elf64-sh64.c:2941
+#, c-format
+msgid "%s: encountered datalabel symbol in input"
+msgstr "%s: girdide veri etiketi sembolÃ¼ne rastlandÄ±"
+
+#: elf32-sh64.c:523
+msgid "PTB mismatch: a SHmedia address (bit 0 == 1)"
+msgstr "PTB uyumsuzluÄŸu: SHmedia adresi (bit 0 == 1)"
+
+#: elf32-sh64.c:526
+msgid "PTA mismatch: a SHcompact address (bit 0 == 0)"
+msgstr "PTA uyumsuzluÄŸu: SHcompact adresi (bit 0 == 0)"
+
+#: elf32-sh64.c:544
+#, c-format
+msgid "%s: GAS error: unexpected PTB insn with R_SH_PT_16"
+msgstr "%s: GAS hatasÄ±: R_SH_PT_16 iÃ§eren PTB yÃ¶nergesi beklenmiyordu"
+
+#: elf32-sh64.c:593 elf64-sh64.c:1703
+#, c-format
+msgid "%s: error: unaligned relocation type %d at %08x reloc %08x\n"
+msgstr "%1$s: %3$08x ve %4$08x yerdeÄŸiÅŸtirmesinde hizalanmamÄ±ÅŸ yer deÄŸiÅŸtirme tÃ¼rÃ¼ %2$d\n"
+
+#: elf32-sh64.c:677
+#, c-format
+msgid "%s: could not write out added .cranges entries"
+msgstr "%s: eklenen .cranges girdileri yazÄ±lamadÄ±"
+
+#: elf32-sh64.c:739
+#, c-format
+msgid "%s: could not write out sorted .cranges entries"
+msgstr "%s: sÄ±ralanmÄ±ÅŸ .cranges girdileri yazÄ±lamadÄ±"
+
+#: elf32-sparc.c:1535 elf64-sparc.c:2224
 #, c-format
 msgid "%s: probably compiled without -fPIC?"
-msgstr "%s: acaba -fPIC olmaksızın mı derlenmiş?"
+msgstr "%s: acaba -fPIC olmaksÄ±zÄ±n mÄ± derlenmiÅŸ?"
 
-#: elf32-sparc.c:2007
+#: elf32-sparc.c:2002
 #, c-format
 msgid "%s: compiled for a 64 bit system and target is 32 bit"
-msgstr "%s: 64 bitlik sistem için derlenmiş ve hedef 32 bit"
+msgstr "%s: 64 bitlik sistem iÃ§in derlenmiÅŸ ve hedef 32 bit"
 
-#: elf32-sparc.c:2021
+#: elf32-sparc.c:2016
 #, c-format
 msgid "%s: linking little endian files with big endian files"
-msgstr "%s: küçük sonlu dosyalar büyük sonlu dosyalarla bağlanıyor"
+msgstr "%s: kÃ¼Ã§Ã¼k sonlu dosyalar bÃ¼yÃ¼k sonlu dosyalarla baÄŸlanÄ±yor"
 
 #: elf32-v850.c:682
 #, c-format
 msgid "Variable `%s' cannot occupy in multiple small data regions"
-msgstr "`%s' değişkeni birden fazla küçük veri sahasını kapsayamaz"
+msgstr "`%s' deÄŸiÅŸkeni birden fazla kÃ¼Ã§Ã¼k veri sahasÄ±nÄ± kapsayamaz"
 
 #: elf32-v850.c:685
 #, c-format
 msgid "Variable `%s' can only be in one of the small, zero, and tiny data regions"
-msgstr "`%s' değişkeni küçük, sıfır ve ufak veri sahalarından yalnız birinde olabilir"
+msgstr "`%s' deÄŸiÅŸkeni kÃ¼Ã§Ã¼k, sÄ±fÄ±r ve ufak veri sahalarÄ±ndan yalnÄ±z birinde olabilir"
 
 #: elf32-v850.c:688
 #, c-format
 msgid "Variable `%s' cannot be in both small and zero data regions simultaneously"
-msgstr "`%s' değişkeni aynı anda hem küçük hem sıfır veri sahalarında bulunamaz"
+msgstr "`%s' deÄŸiÅŸkeni aynÄ± anda hem kÃ¼Ã§Ã¼k hem sÄ±fÄ±r veri sahalarÄ±nda bulunamaz"
 
 #: elf32-v850.c:691
 #, c-format
 msgid "Variable `%s' cannot be in both small and tiny data regions simultaneously"
-msgstr "`%s' değişkeni aynı anda hem küçük hem ufak veri sahalarında bulunamaz"
+msgstr "`%s' deÄŸiÅŸkeni aynÄ± anda hem kÃ¼Ã§Ã¼k hem ufak veri sahalarÄ±nda bulunamaz"
 
 #: elf32-v850.c:694
 #, c-format
 msgid "Variable `%s' cannot be in both zero and tiny data regions simultaneously"
-msgstr "`%s' değişkeni aynı anda hem sıfır hem ufak veri sahalarında bulunamaz"
+msgstr "`%s' deÄŸiÅŸkeni aynÄ± anda hem sÄ±fÄ±r hem ufak veri sahalarÄ±nda bulunamaz"
 
 #: elf32-v850.c:1072
 msgid "FAILED to find previous HI16 reloc\n"
-msgstr "önceki HI16 yerdeğişimi BULUNAMADI\n"
+msgstr "Ã¶nceki HI16 yerdeÄŸiÅŸimi BULUNAMADI\n"
 
 #: elf32-v850.c:1703
 msgid "could not locate special linker symbol __gp"
-msgstr "özel bağlayıcı sembolü __gp bulunamadı"
+msgstr "Ã¶zel baÄŸlayÄ±cÄ± sembolÃ¼ __gp bulunamadÄ±"
 
 #: elf32-v850.c:1707
 msgid "could not locate special linker symbol __ep"
-msgstr "özel bağlayıcı sembolü __ep bulunamadı"
+msgstr "Ã¶zel baÄŸlayÄ±cÄ± sembolÃ¼ __ep bulunamadÄ±"
 
 #: elf32-v850.c:1711
 msgid "could not locate special linker symbol __ctbp"
-msgstr "özel bağlayıcı sembolü __ctbp bulunamadı"
+msgstr "Ã¶zel baÄŸlayÄ±cÄ± sembolÃ¼ __ctbp bulunamadÄ±"
 
-#: elf32-v850.c:1877
+#: elf32-v850.c:1875
 #, c-format
 msgid "%s: Architecture mismatch with previous modules"
-msgstr "%s: Önceki modüllerle platform uyumsuzluğu"
+msgstr "%s: Ã–nceki modÃ¼llerle platform uyumsuzluÄŸu"
 
-#: elf32-v850.c:1897
+#: elf32-v850.c:1895
 #, c-format
 msgid "private flags = %lx: "
-msgstr "özel bayraklar = %lx:"
+msgstr "Ã¶zel bayraklar = %lx:"
 
-#: elf32-v850.c:1902
+#: elf32-v850.c:1900
 msgid "v850 architecture"
 msgstr "v850 platformu"
 
-#: elf32-v850.c:1903
+#: elf32-v850.c:1901
 msgid "v850e architecture"
 msgstr "v850e platformu"
 
-#: elf32-v850.c:1904
+#: elf32-v850.c:1902
 msgid "v850ea architecture"
 msgstr "v850ea platformu"
 
-#: elf64-alpha.c:858
-msgid "GPDISP relocation did not find ldah and lda instructions"
-msgstr "GPDISP yerdeğişimi ldah ve lda işlemlerini bulamadı"
+#: elf32-vax.c:546
+msgid " [nonpic]"
+msgstr " [nonpic]"
 
-#: elf64-alpha.c:2934
+#: elf32-vax.c:549
+msgid " [d-float]"
+msgstr " [d-float]"
+
+#: elf32-vax.c:552
+msgid " [g-float]"
+msgstr " [g-float]"
+
+#: elf32-vax.c:674
+#, c-format
+msgid "%s: warning: GOT addend of %ld to `%s' does not match previous GOT addend of %ld"
+msgstr "%1$s: uyarÄ±: `%3$s'ye GOT %2$ld eklentisi bir Ã¶nceki %4$ld GOT eklentisiyle eÅŸleÅŸmiyor"
+
+#: elf32-vax.c:1679
+#, c-format
+msgid "%s: warning: PLT addend of %d to `%s' from %s section ignored"
+msgstr "%1$s: uyarÄ±: %4$s bÃ¶lÃ¼mÃ¼nden `%3$s' sembolÃ¼ne PLT eklentisi %2$d yok sayÄ±ldÄ±"
+
+#: elf32-vax.c:1814
+#, c-format
+msgid "%s: warning: %s relocation against symbol `%s' from %s section"
+msgstr "%1$s: uyarÄ±: %4$s bÃ¶lÃ¼mÃ¼nden `%3$s' sembolÃ¼ne %2$s yer deÄŸiÅŸimi"
+
+#: elf32-vax.c:1820
+#, c-format
+msgid "%s: warning: %s relocation to 0x%x from %s section"
+msgstr "%1$s: uyarÄ±: %4$s bÃ¶lÃ¼mÃ¼nden 0x%3$x'e %2$s yer deÄŸiÅŸimi"
+
+#: elf32-ia64.c:2280 elf32-xstormy16.c:414 elf64-ia64.c:2280
+msgid "non-zero addend in @fptr reloc"
+msgstr "@fptr yerdeÄŸiÅŸiminde sÄ±fÄ±r olmayan eklenti"
+
+#: elf64-alpha.c:1097
+msgid "GPDISP relocation did not find ldah and lda instructions"
+msgstr "GPDISP yerdeÄŸiÅŸimi ldah ve lda iÅŸlemlerini bulamadÄ±"
+
+#: elf64-alpha.c:3675
 #, c-format
 msgid "%s: .got subsegment exceeds 64K (size %d)"
-msgstr "%s: .got alt parçası 64K'yı aşıyor (boy %d)"
+msgstr "%s: .got alt parÃ§asÄ± 64K'yÄ± aÅŸÄ±yor (boy %d)"
 
-#: elf64-alpha.c:3518 elf64-alpha.c:3530
+#: elf64-alpha.c:4498 elf64-alpha.c:4510
 #, c-format
 msgid "%s: gp-relative relocation against dynamic symbol %s"
-msgstr "%s: %s dinamik sembolüne gp göreceli yer değişimi"
+msgstr "%s: %s dinamik sembolÃ¼ne gp gÃ¶receli yer deÄŸiÅŸimi"
 
-#: elf64-hppa.c:2070
+#: elf64-alpha.c:4536 elf64-alpha.c:4676
+#, c-format
+msgid "%s: pc-relative relocation against dynamic symbol %s"
+msgstr "%s: %s dinamik sembolÃ¼ne pc gÃ¶receli yer deÄŸiÅŸimi"
+
+#: elf64-alpha.c:4564
+#, c-format
+msgid "%s: change in gp: BRSGP %s"
+msgstr "%s: gp iÃ§inde deÄŸiÅŸiklik: BRSGP %s"
+
+#: elf64-alpha.c:4589
+msgid "<unknown>"
+msgstr "<bilinmeyen>"
+
+#: elf64-alpha.c:4594
+#, c-format
+msgid "%s: !samegp reloc against symbol without .prologue: %s"
+msgstr "%s: .prologue olmaksÄ±zÄ±n sembole !samegp yerdeÄŸiÅŸimi: %s"
+
+#: elf64-alpha.c:4639
+#, c-format
+msgid "%s: unhandled dynamic relocation against %s"
+msgstr "%s: %s'e desteklenmeyen dinamik yerdeÄŸiÅŸim"
+
+#: elf64-alpha.c:4752
+#, c-format
+msgid "%s: dtp-relative relocation against dynamic symbol %s"
+msgstr "%s: %s dinamik sembolÃ¼ne dtp gÃ¶receli yer deÄŸiÅŸimi"
+
+#: elf64-alpha.c:4775
+#, c-format
+msgid "%s: tp-relative relocation against dynamic symbol %s"
+msgstr "%s: %s dinamik sembolÃ¼ne tp gÃ¶receli yer deÄŸiÅŸimi"
+
+#: elf64-hppa.c:2080
 #, c-format
 msgid "stub entry for %s cannot load .plt, dp offset = %ld"
-msgstr "%s için koçan girdisi .plt'yi yükleyemedi, dp görecesi = %ld"
+msgstr "%s iÃ§in koÃ§an girdisi .plt'yi yÃ¼kleyemedi, dp gÃ¶recesi = %ld"
 
-#: elf64-mmix.c:1268
+#: elf64-mmix.c:1002
+#, c-format
+msgid ""
+"%s: Internal inconsistency error for value for\n"
+" linker-allocated global register: linked: 0x%lx%08lx != relaxed: 0x%lx%08lx\n"
+msgstr ""
+"%s: baÄŸlayÄ±cÄ± tarafÄ±ndan ayrÄ±lmÄ±ÅŸ global yazmaÃ§ deÄŸeri iÃ§in iÃ§ tutarsÄ±zlÄ±k hatasÄ±:\n"
+" 0x%lx%08lx != gevÅŸetilmiÅŸ: 0x%lx%08lx\n"
+
+#: elf64-mmix.c:1386
+#, c-format
+msgid "%s: base-plus-offset relocation against register symbol: (unknown) in %s"
+msgstr "%s: yazmaÃ§ sembolÃ¼ne temel artÄ± gÃ¶rece yerdeÄŸiÅŸimi: %s iÃ§inde (bilinmeyen)"
+
+#: elf64-mmix.c:1391
+#, c-format
+msgid "%s: base-plus-offset relocation against register symbol: %s in %s"
+msgstr "%1$s: yazmaÃ§ sembolÃ¼ne temel artÄ± gÃ¶rece yerdeÄŸiÅŸimi: %3$s iÃ§inde %2$s"
+
+#: elf64-mmix.c:1435
+#, c-format
+msgid "%s: register relocation against non-register symbol: (unknown) in %s"
+msgstr "%s: yazmaÃ§ olmayan sembole yazmaÃ§ yerdeÄŸiÅŸimi: %s iÃ§inde (bilinmeyen)"
+
+#: elf64-mmix.c:1440
 #, c-format
 msgid "%s: register relocation against non-register symbol: %s in %s"
-msgstr "%1$s: yazmaç olmayan sembole yazmaç yerdeğişimi: %3$s içinde %2$s"
+msgstr "%1$s: yazmaÃ§ olmayan sembole yazmaÃ§ yerdeÄŸiÅŸimi: %3$s iÃ§inde %2$s"
 
-#: elf64-mmix.c:1270
-msgid "(unknown)"
-msgstr "(bilinmeyen)"
-
-#: elf64-mmix.c:1305
+#: elf64-mmix.c:1477
 #, c-format
 msgid "%s: directive LOCAL valid only with a register or absolute value"
-msgstr "%s: YEREL (LOCAL) yönergesi yalnız bir yazmaç veya kesin değerle geçerlidir"
+msgstr "%s: YEREL (LOCAL) yÃ¶nergesi yalnÄ±z bir yazmaÃ§ veya kesin deÄŸerle geÃ§erlidir"
 
-#: elf64-mmix.c:1333
+#: elf64-mmix.c:1505
 #, c-format
 msgid "%s: LOCAL directive: Register $%ld is not a local register.  First global register is $%ld."
 msgstr ""
-"%s: YEREL (LOCAL) yönergesi: $%ld yazmacı yerel yazmaç değil.\n"
-"    İlk evrensel yazmaç: $%ld."
+"%s: YEREL (LOCAL) yÃ¶nergesi: $%ld yazmacÄ± yerel yazmaÃ§ deÄŸil.\n"
+"    Ä°lk evrensel yazmaÃ§: $%ld."
 
-#: elf64-mmix.c:1609
+#: elf64-mmix.c:1965
 #, c-format
 msgid "%s: Error: multiple definition of `%s'; start of %s is set in a earlier linked file\n"
 msgstr ""
-"%s: Hata: `%s' birden fazla defa tanımlanmış; %s'nin başlangıcı daha önce\n"
-"    bağlanan bir dosyada.\n"
+"%s: Hata: `%s' birden fazla defa tanÄ±mlanmÄ±ÅŸ; %s'nin baÅŸlangÄ±cÄ± daha Ã¶nce\n"
+"    baÄŸlanan bir dosyada.\n"
 
-#: elf64-mmix.c:1668
+#: elf64-mmix.c:2024
 msgid "Register section has contents\n"
-msgstr "Yazmaç bölümünde içerik yok\n"
+msgstr "YazmaÃ§ bÃ¶lÃ¼mÃ¼nde iÃ§erik yok\n"
 
-#: elf64-ppc.c:1466 libbfd.c:1436
+#: elf64-mmix.c:2186
+#, c-format
+msgid ""
+"Internal inconsistency: remaining %u != max %u.\n"
+"  Please report this bug."
+msgstr ""
+"Ä°Ã§ uyumsuzluk: kalan %u != maksimum %u. \n"
+"  LÃ¼tfen bu hatayÄ± bildirin."
+
+#: elf64-ppc.c:1669 libbfd.c:1435
 #, c-format
 msgid "%s: compiled for a big endian system and target is little endian"
-msgstr "%s: büyük sonlu sistem için derlenmiş ve hedef küçük sonlu"
+msgstr "%s: bÃ¼yÃ¼k sonlu sistem iÃ§in derlenmiÅŸ ve hedef kÃ¼Ã§Ã¼k sonlu"
 
-#: elf64-ppc.c:1468 libbfd.c:1438
+#: elf64-ppc.c:1671 libbfd.c:1437
 #, c-format
 msgid "%s: compiled for a little endian system and target is big endian"
-msgstr "%s: küçük sonlu sistem için derlenmiş ve hedef büyük sonlu"
+msgstr "%s: kÃ¼Ã§Ã¼k sonlu sistem iÃ§in derlenmiÅŸ ve hedef bÃ¼yÃ¼k sonlu"
 
-#: elf64-ppc.c:3166
+#: elf64-ppc.c:3610
 #, c-format
-msgid "linkage table overflow against `%s'"
-msgstr "`%s'ye bağlama tablosu taşması"
+msgid "%s: unexpected reloc type %u in .opd section"
+msgstr "%s: opd bÃ¶lÃ¼mÃ¼nde beklenmeyen yerdeÄŸiÅŸim tÃ¼rÃ¼ %u"
 
-#: elf64-ppc.c:3244
-msgid "stub section size doesn't match calculated size"
-msgstr "koçan bölümü boyu hesaplanan boyla eşleşmiyor"
+#: elf64-ppc.c:3630
+#, c-format
+msgid "%s: .opd is not a regular array of opd entries"
+msgstr "%s: opd, opd girdilerinin dÃ¼zenli dizisi deÄŸil"
 
-#: elf64-ppc.c:3845
+#: elf64-ppc.c:3672
+#, c-format
+msgid "%s: undefined sym `%s' in .opd section"
+msgstr "%s: opd bÃ¶lÃ¼mÃ¼nde tanÄ±mlanmamÄ±ÅŸ `%s' sembolÃ¼"
+
+#: elf64-ppc.c:4397
+#, c-format
+msgid "can't find branch stub `%s'"
+msgstr "`%s' dal koÃ§anÄ± bulunamadÄ±"
+
+#: elf64-ppc.c:4436 elf64-ppc.c:4501
+#, c-format
+msgid "linkage table error against `%s'"
+msgstr "`%s'ye baÄŸlama tablosu hatasÄ±"
+
+#: elf64-ppc.c:4573
+#, c-format
+msgid "can't build branch stub `%s'"
+msgstr "`%s' dal koÃ§anÄ± derlenemedi"
+
+#: elf64-ppc.c:5179
+msgid "stubs don't match calculated size"
+msgstr "koÃ§anlar hesaplanan boyla eÅŸleÅŸmiyor"
+
+#: elf64-ppc.c:5828
 #, c-format
 msgid "%s: Relocation %s is not supported for symbol %s."
-msgstr "%s: %s yerdeğişimi %s sembolü için henüz desteklenmiyor."
+msgstr "%s: %s yerdeÄŸiÅŸimi %s sembolÃ¼ iÃ§in henÃ¼z desteklenmiyor."
 
-#: elf64-ppc.c:3889
+#: elf64-ppc.c:5872
 #, c-format
 msgid "%s: error: relocation %s not a multiple of 4"
-msgstr "%s: hata: %s yerdeğişimi 4'ün katı değil"
+msgstr "%s: hata: %s yerdeÄŸiÅŸimi 4'Ã¼n katÄ± deÄŸil"
 
-#: elf64-sparc.c:1277
+#: elf64-sparc.c:1280
 #, c-format
 msgid "%s: check_relocs: unhandled reloc type %d"
-msgstr "%s: check_relocs: desteklenmeyen yerdeğişim türü %d"
+msgstr "%s: check_relocs: desteklenmeyen yerdeÄŸiÅŸim tÃ¼rÃ¼ %d"
 
-#: elf64-sparc.c:1314
+#: elf64-sparc.c:1317
 #, c-format
 msgid "%s: Only registers %%g[2367] can be declared using STT_REGISTER"
-msgstr "%s: Yalnız %%g[2367] yazmaçları STT_REGISTER ile bildirilebilir"
+msgstr "%s: YalnÄ±z %%g[2367] yazmaÃ§larÄ± STT_REGISTER ile bildirilebilir"
 
-#: elf64-sparc.c:1334
+#: elf64-sparc.c:1337
 #, c-format
-msgid "Register %%g%d used incompatibly: %s in %s"
-msgstr "%%g%1$d yazmacı uyumsuz kullanılmış: %3$s içinde %2$s"
+msgid "Register %%g%d used incompatibly: %s in %s, previously %s in %s"
+msgstr "%%g%1$d yazmacÄ± uyumsuz kullanÄ±lmÄ±ÅŸ: %3$s iÃ§inde %2$s, daha Ã¶nce %5$s iÃ§inde %4$s idi"
 
-#: elf64-sparc.c:1338 elf64-sparc.c:1362 elf64-sparc.c:1411
+#: elf64-sparc.c:1360
 #, c-format
-msgid "  previously %s in %s"
-msgstr "  daha önce %2$s içinde %1$s"
+msgid "Symbol `%s' has differing types: REGISTER in %s, previously %s in %s"
+msgstr "`%1$s' sembolÃ¼nÃ¼n farklÄ± tÃ¼rleri var: %2$s iÃ§inde REGISTER (yazmaÃ§), daha Ã¶nce %4$s iÃ§inde %3$s"
 
-#: elf64-sparc.c:1359 elf64-sparc.c:1408
+#: elf64-sparc.c:1406
 #, c-format
-msgid "Symbol `%s' has differing types: %s in %s"
-msgstr "`%1$s' sembolünün farklı türleri var: %3$s içinde %2$s"
+msgid "Symbol `%s' has differing types: %s in %s, previously REGISTER in %s"
+msgstr ""
+"`%1$s' sembolÃ¼nÃ¼n farklÄ± tÃ¼rleri var: %3$s iÃ§inde %2$s, \n"
+"  daha Ã¶nce %4$s iÃ§inde REGISTER (yazmaÃ§)"
 
-#: elf64-sparc.c:3014
+#: elf64-sparc.c:2970
 #, c-format
 msgid "%s: linking UltraSPARC specific with HAL specific code"
-msgstr "%s: UltraSPARC'a özel kod HAL'e özel kod ile bağlanıyor"
+msgstr "%s: UltraSPARC'a Ã¶zel kod HAL'e Ã¶zel kod ile baÄŸlanÄ±yor"
 
-#: elfcode.h:1218
+#: elfcode.h:1198
 #, c-format
 msgid "%s: version count (%ld) does not match symbol count (%ld)"
-msgstr "%s: sürüm sayısı (%ld) sembol sayısı (%ld) ile eşleşmiyor"
+msgstr "%s: sÃ¼rÃ¼m sayÄ±sÄ± (%ld) sembol sayÄ±sÄ± (%ld) ile eÅŸleÅŸmiyor"
 
-#: elflink.c:434
+#: elflink.c:440
 #, c-format
 msgid "%s: Section %s is too large to add hole of %ld bytes"
-msgstr "%s: %s bölümü içine %ld baytlık bir delik koymak için fazla büyük"
+msgstr "%s: %s bÃ¶lÃ¼mÃ¼ iÃ§ine %ld baytlÄ±k bir delik koymak iÃ§in fazla bÃ¼yÃ¼k"
 
-#: elflink.h:1113
+#: elflink.h:1090
 #, c-format
 msgid "%s: warning: unexpected redefinition of `%s'"
-msgstr "%s: uyarı: `%s' için beklenmeyen yeniden tanımlama"
+msgstr "%s: uyarÄ±: `%s' iÃ§in beklenmeyen yeniden tanÄ±mlama"
 
-#: elflink.h:1784
+#: elflink.h:1727
 #, c-format
 msgid "%s: %s: invalid version %u (max %d)"
-msgstr "%s: %s: geçersiz sürüm %u (maksimum %d)"
+msgstr "%s: %s: geÃ§ersiz sÃ¼rÃ¼m %u (maksimum %d)"
 
-#: elflink.h:1825
+#: elflink.h:1768
 #, c-format
 msgid "%s: %s: invalid needed version %d"
-msgstr "%s: %s: geçersiz gerekli sürüm %d"
+msgstr "%s: %s: geÃ§ersiz gerekli sÃ¼rÃ¼m %d"
 
-#: elflink.h:1945
+#: elflink.h:1890
 #, c-format
 msgid "Warning: size of symbol `%s' changed from %lu to %lu in %s"
-msgstr "Uyarı: `%s' sembolünün boyu %lu'dan %lu'ya %s içerisinde değişti"
+msgstr "UyarÄ±: `%s' sembolÃ¼nÃ¼n boyu %lu'dan %lu'ya %s iÃ§erisinde deÄŸiÅŸti"
 
-#: elflink.h:4020
+#: elflink.h:3174
+#, c-format
+msgid "%s: .preinit_array section is not allowed in DSO"
+msgstr "%s: DSO iÃ§inde preinit_array'e izin verilmiyor"
+
+#: elflink.h:4030
 #, c-format
 msgid "warning: type and size of dynamic symbol `%s' are not defined"
-msgstr "uyarı: `%s' dinamik sembolünün türü ve boyu tanımlı değil"
+msgstr "uyarÄ±: `%s' dinamik sembolÃ¼nÃ¼n tÃ¼rÃ¼ ve boyu tanÄ±mlÄ± deÄŸil"
 
-#: elflink.h:4329
+#: elflink.h:4345
 #, c-format
 msgid "%s: undefined versioned symbol name %s"
-msgstr "%s: sürümlü sembol ismi %s tanımlı değil"
+msgstr "%s: sÃ¼rÃ¼mlÃ¼ sembol ismi %s tanÄ±mlÄ± deÄŸil"
 
-#: elflink.h:4559 elflink.h:4567 elflink.h:6218 elflink.h:7295
+#: elflink.h:4611 elflink.h:4619 elflink.h:6508 elflink.h:7600
 msgid "Error: out of memory"
-msgstr "Hata: bellek tükendi"
+msgstr "Hata: bellek tÃ¼kendi"
 
-#: elflink.h:4729
+#: elflink.h:4781
 msgid "Not enough memory to sort relocations"
-msgstr "Yerdeğişimleri sıralamak için gerekli bellek yok"
+msgstr "YerdeÄŸiÅŸimleri sÄ±ralamak iÃ§in gerekli bellek yok"
 
-#: elflink.h:5995
+#: elflink.h:5682 elflink.h:5725
+#, c-format
+msgid "%s: could not find output section %s"
+msgstr "%s: Ã§Ä±ktÄ± bÃ¶lÃ¼mÃ¼ %s bulunamadÄ±"
+
+#: elflink.h:5688
+#, c-format
+msgid "warning: %s section has zero size"
+msgstr "uyarÄ±: %s bÃ¶lÃ¼mÃ¼ sÄ±fÄ±r boyunda"
+
+#: elflink.h:6275
 #, c-format
 msgid "%s: could not find output section %s for input section %s"
-msgstr "%1$s: girdi bölümü %3$s için çıktı bölümü %2$s bulunamadı"
+msgstr "%1$s: girdi bÃ¶lÃ¼mÃ¼ %3$s iÃ§in Ã§Ä±ktÄ± bÃ¶lÃ¼mÃ¼ %2$s bulunamadÄ±"
 
-#: elflink.h:6568
+#: elflink.h:6486
+#, c-format
+msgid "%s: relocation size mismatch in %s section %s"
+msgstr "%1$s: %3$s bÃ¶lÃ¼mÃ¼nde %2$s iÃ§inde yerdeÄŸiÅŸim boy uyuÅŸmazlÄ±ÄŸÄ±"
+
+#: elflink.h:6849
 msgid "warning: relocation against removed section; zeroing"
-msgstr "uyarı: silinmiş bölüme yer değişim; sıfırlandı"
+msgstr "uyarÄ±: silinmiÅŸ bÃ¶lÃ¼me yer deÄŸiÅŸim; sÄ±fÄ±rlandÄ±"
 
-#: elflink.h:6598
+#: elflink.h:6879
 msgid "warning: relocation against removed section"
-msgstr "%1$s: silinmiş bölüme yerdeğişim"
+msgstr "%1$s: silinmiÅŸ bÃ¶lÃ¼me yerdeÄŸiÅŸim"
 
-#: elflink.h:6611
+#: elflink.h:6892
 #, c-format
 msgid "local symbols in discarded section %s"
-msgstr "atılmış %s bölümünde yerel semboller"
+msgstr "atÄ±lmÄ±ÅŸ %s bÃ¶lÃ¼mÃ¼nde yerel semboller"
 
-#: i386linux.c:455 m68klinux.c:459 sparclinux.c:456
+#: elfxx-mips.c:734
+msgid "static procedure (no name)"
+msgstr "statik altyordam (isimsiz)"
+
+#: elfxx-mips.c:1601
+msgid "not enough GOT space for local GOT entries"
+msgstr "yerel GOT girdileri iÃ§in yeterli GOT yeri yok"
+
+#: elfxx-mips.c:2750
+#, c-format
+msgid "%s: %s+0x%lx: jump to stub routine which is not jal"
+msgstr "%s: %s+0x%lx: jal olmayan koÃ§an yordamÄ±na sÄ±Ã§rama"
+
+#: elfxx-mips.c:4270
+#, c-format
+msgid "%s: Malformed reloc detected for section %s"
+msgstr "%s: %s bÃ¶lÃ¼mÃ¼ iÃ§in geÃ§ersiz yer deÄŸiÅŸim bulundu"
+
+#: elfxx-mips.c:4348
+#, c-format
+msgid "%s: CALL16 reloc at 0x%lx not against global symbol"
+msgstr "%s: 0x%lx'deki CALL16 yerdeÄŸiÅŸimi evrensel sembole gÃ¶re deÄŸil"
+
+#: elfxx-mips.c:7301
+#, c-format
+msgid "%s: illegal section name `%s'"
+msgstr "%s: geÃ§ersiz bÃ¶lÃ¼m adÄ± `%s'"
+
+#: elfxx-mips.c:7615
+#, c-format
+msgid "%s: linking PIC files with non-PIC files"
+msgstr "%s: PIC dosyalarÄ± PIC olmayan dosyalarla baÄŸlanÄ±yor"
+
+#: elfxx-mips.c:7625
+#, c-format
+msgid "%s: linking abicalls files with non-abicalls files"
+msgstr "%s: abicalls dosyalarÄ± abicalls olmayan dosyalarla baÄŸlanÄ±yor"
+
+#: elfxx-mips.c:7654
+#, c-format
+msgid "%s: ISA mismatch (-mips%d) with previous modules (-mips%d)"
+msgstr "%1$s: Ã–nceki modÃ¼llerle (-mips%3$d) ile ISA uyumsuzluÄŸu (-mips%2$d)"
+
+#: elfxx-mips.c:7676
+#, c-format
+msgid "%s: ISA mismatch (%d) with previous modules (%d)"
+msgstr "%1$s: Ã–nceki modÃ¼llerle (%3$d) ile ISA uyumsuzluÄŸu (%2$d)"
+
+#: elfxx-mips.c:7699
+#, c-format
+msgid "%s: ABI mismatch: linking %s module with previous %s modules"
+msgstr "%s: ABI uyumsuzluÄŸu: %s modÃ¼lÃ¼ Ã¶nceki %s modÃ¼lle baÄŸlanÄ±yor"
+
+#: elfxx-mips.c:7759
+msgid " [abi=O32]"
+msgstr " [abi=O32]"
+
+#: elfxx-mips.c:7761
+msgid " [abi=O64]"
+msgstr " [abi=O64]"
+
+#: elfxx-mips.c:7763
+msgid " [abi=EABI32]"
+msgstr " [abi=EABI32]"
+
+#: elfxx-mips.c:7765
+msgid " [abi=EABI64]"
+msgstr " [abi=EABI64]"
+
+#: elfxx-mips.c:7767
+msgid " [abi unknown]"
+msgstr " [abi bilinmiyor]"
+
+#: elfxx-mips.c:7769
+msgid " [abi=N32]"
+msgstr " [abi=N32]"
+
+#: elfxx-mips.c:7771
+msgid " [abi=64]"
+msgstr " [abi=64]"
+
+#: elfxx-mips.c:7773
+msgid " [no abi set]"
+msgstr " [abi atanmamÄ±ÅŸ]"
+
+#: elfxx-mips.c:7776
+msgid " [mips1]"
+msgstr " [mips1]"
+
+#: elfxx-mips.c:7778
+msgid " [mips2]"
+msgstr " [mips2]"
+
+#: elfxx-mips.c:7780
+msgid " [mips3]"
+msgstr " [mips3]"
+
+#: elfxx-mips.c:7782
+msgid " [mips4]"
+msgstr " [mips4]"
+
+#: elfxx-mips.c:7784
+msgid " [mips5]"
+msgstr " [mips5]"
+
+#: elfxx-mips.c:7786
+msgid " [mips32]"
+msgstr " [mips32]"
+
+#: elfxx-mips.c:7788
+msgid " [mips64]"
+msgstr " [mips64]"
+
+#: elfxx-mips.c:7790
+msgid " [unknown ISA]"
+msgstr " [bilinmeyen ISA]"
+
+#: elfxx-mips.c:7793
+msgid " [mdmx]"
+msgstr " [mdmx]"
+
+#: elfxx-mips.c:7796
+msgid " [mips16]"
+msgstr " [mips16]"
+
+#: elfxx-mips.c:7799
+msgid " [32bitmode]"
+msgstr " [32bitkipi]"
+
+#: elfxx-mips.c:7801
+msgid " [not 32bitmode]"
+msgstr " [32bitkipi deÄŸil]"
+
+#: i386linux.c:458 m68klinux.c:462 sparclinux.c:459
 #, c-format
 msgid "Output file requires shared library `%s'\n"
-msgstr "Çıktı dosyası için paylaşımlı kitaplık `%s' gerekli\n"
+msgstr "Ã‡Ä±ktÄ± dosyasÄ± iÃ§in paylaÅŸÄ±mlÄ± kitaplÄ±k `%s' gerekli\n"
 
-#: i386linux.c:463 m68klinux.c:467 sparclinux.c:464
+#: i386linux.c:466 m68klinux.c:470 sparclinux.c:467
 #, c-format
 msgid "Output file requires shared library `%s.so.%s'\n"
-msgstr "Çıktı dosyası için paylaşımlı kitaplık `%s.so.%s' gerekli\n"
+msgstr "Ã‡Ä±ktÄ± dosyasÄ± iÃ§in paylaÅŸÄ±mlÄ± kitaplÄ±k `%s.so.%s' gerekli\n"
 
-#: i386linux.c:653 i386linux.c:703 m68klinux.c:660 m68klinux.c:708
-#: sparclinux.c:655 sparclinux.c:705
+#: i386linux.c:655 i386linux.c:705 m68klinux.c:662 m68klinux.c:710
+#: sparclinux.c:657 sparclinux.c:707
 #, c-format
 msgid "Symbol %s not defined for fixups\n"
-msgstr "%s sembolü düzeltmeler için tanımlı değil\n"
+msgstr "%s sembolÃ¼ dÃ¼zeltmeler iÃ§in tanÄ±mlÄ± deÄŸil\n"
 
-#: i386linux.c:727 m68klinux.c:732 sparclinux.c:729
+#: i386linux.c:729 m68klinux.c:734 sparclinux.c:731
 msgid "Warning: fixup count mismatch\n"
-msgstr "Uyarı: düzeltme sayı uyumsuzluğu\n"
+msgstr "UyarÄ±: dÃ¼zeltme sayÄ± uyumsuzluÄŸu\n"
 
 #: ieee.c:235
 #, c-format
@@ -1518,261 +1765,261 @@ msgstr "%s: dizge fazla uzun (%d karakter, en fazla 65535)"
 #: ieee.c:365
 #, c-format
 msgid "%s: unrecognized symbol `%s' flags 0x%x"
-msgstr "%s: bilinmeyen `%s' sembol bayrakları 0x%x"
+msgstr "%s: bilinmeyen `%s' sembol bayraklarÄ± 0x%x"
 
 #: ieee.c:877
 #, c-format
-msgid "%s: unimplemented ATI record  %u for symbol %u"
-msgstr "%1$s: %3$u için desteklenmeyen ATI kaydı %2$u"
+msgid "%s: unimplemented ATI record %u for symbol %u"
+msgstr "%1$s: %3$u sembolÃ¼ iÃ§in desteklenmeyen ATI kaydÄ± %2$u"
 
 #: ieee.c:902
 #, c-format
 msgid "%s: unexpected ATN type %d in external part"
-msgstr "%s: dış parçada beklenmeyen ATN türü %d"
+msgstr "%s: dÄ±ÅŸ parÃ§ada beklenmeyen ATN tÃ¼rÃ¼ %d"
 
 #: ieee.c:924
 #, c-format
 msgid "%s: unexpected type after ATN"
-msgstr "%s: ATN'den sonra beklenmeyen tür"
+msgstr "%s: ATN'den sonra beklenmeyen tÃ¼r"
 
 #: ihex.c:258
 #, c-format
 msgid "%s:%d: unexpected character `%s' in Intel Hex file\n"
-msgstr "%s:%d: Intel Onaltılık dosyasında beklenmeyen `%s' karakteri\n"
+msgstr "%s:%d: Intel OnaltÄ±lÄ±k dosyasÄ±nda beklenmeyen `%s' karakteri\n"
 
-#: ihex.c:368
+#: ihex.c:366
 #, c-format
 msgid "%s:%u: bad checksum in Intel Hex file (expected %u, found %u)"
 msgstr ""
-"%s:%u: Intel Onaltılık dosyasında hatalı sağlama toplamı\n"
+"%s:%u: Intel OnaltÄ±lÄ±k dosyasÄ±nda hatalÄ± saÄŸlama toplamÄ±\n"
 "       (%u beklendi, %u bulundu)"
 
-#: ihex.c:422
+#: ihex.c:420
 #, c-format
 msgid "%s:%u: bad extended address record length in Intel Hex file"
-msgstr "%s:%u: Intel Onaltılık dosyasında hatalı uzun adres kaydı uzunluğu"
+msgstr "%s:%u: Intel OnaltÄ±lÄ±k dosyasÄ±nda hatalÄ± uzun adres kaydÄ± uzunluÄŸu"
 
-#: ihex.c:439
+#: ihex.c:437
 #, c-format
 msgid "%s:%u: bad extended start address length in Intel Hex file"
-msgstr "%s:%u: Intel Onaltılık dosyasında hatalı uzun başlangıç adresi uzunluğu"
+msgstr "%s:%u: Intel OnaltÄ±lÄ±k dosyasÄ±nda hatalÄ± uzun baÅŸlangÄ±Ã§ adresi uzunluÄŸu"
 
-#: ihex.c:456
+#: ihex.c:454
 #, c-format
 msgid "%s:%u: bad extended linear address record length in Intel Hex file"
-msgstr "%s:%u: Intel Onaltılık dosyasında hatalı uzun lineer adres kaydı uzunluğu"
+msgstr "%s:%u: Intel OnaltÄ±lÄ±k dosyasÄ±nda hatalÄ± uzun lineer adres kaydÄ± uzunluÄŸu"
 
-#: ihex.c:473
+#: ihex.c:471
 #, c-format
 msgid "%s:%u: bad extended linear start address length in Intel Hex file"
-msgstr "%s:%u: Intel Onaltılık dosyasında hatalı uzun lineer başlangıç adres uzunluğu"
+msgstr "%s:%u: Intel OnaltÄ±lÄ±k dosyasÄ±nda hatalÄ± uzun lineer baÅŸlangÄ±Ã§ adres uzunluÄŸu"
 
-#: ihex.c:490
+#: ihex.c:488
 #, c-format
 msgid "%s:%u: unrecognized ihex type %u in Intel Hex file\n"
-msgstr "%s:%u: Intel Onaltılık dosyasında bilinmeyen onaltılık türü %u\n"
+msgstr "%s:%u: Intel OnaltÄ±lÄ±k dosyasÄ±nda bilinmeyen onaltÄ±lÄ±k tÃ¼rÃ¼ %u\n"
 
-#: ihex.c:610
+#: ihex.c:607
 #, c-format
 msgid "%s: internal error in ihex_read_section"
-msgstr "%s: ihex_read_section'da iç hata"
+msgstr "%s: ihex_read_section'da iÃ§ hata"
 
-#: ihex.c:645
+#: ihex.c:642
 #, c-format
 msgid "%s: bad section length in ihex_read_section"
-msgstr "%s: ihex_read_section'da hatalı bölüm uzunluğu"
+msgstr "%s: ihex_read_section'da hatalÄ± bÃ¶lÃ¼m uzunluÄŸu"
 
-#: ihex.c:863
+#: ihex.c:860
 #, c-format
-msgid "%s: address 0x%s out of range for Intex Hex file"
-msgstr "%s: Intex Onaltılık dosyası için 0x%s adresi kapsamdışı"
+msgid "%s: address 0x%s out of range for Intel Hex file"
+msgstr "%s: Intex OnaltÄ±lÄ±k dosyasÄ± iÃ§in 0x%s adresi kapsamdÄ±ÅŸÄ±"
 
 #: libbfd.c:492
 #, c-format
 msgid "not mapping: data=%lx mapped=%d\n"
-msgstr "eşlenmeyen: veri=%lx eşleşen=%d\n"
+msgstr "eÅŸlenmeyen: veri=%lx eÅŸleÅŸen=%d\n"
 
 #: libbfd.c:495
 msgid "not mapping: env var not set\n"
-msgstr "eşlenmeyen: çevre değişkeni atanmamış\n"
+msgstr "eÅŸlenmeyen: Ã§evre deÄŸiÅŸkeni atanmamÄ±ÅŸ\n"
 
-#: libbfd.c:1463
+#: libbfd.c:1466
 #, c-format
-msgid "Deprecated %s called"
-msgstr "Geçerliliği kalkmış %s çağrıldı"
+msgid "Deprecated %s called at %s line %d in %s\n"
+msgstr "GeÃ§ersizleÅŸmiÅŸ %s, %s'da, %d satÄ±rÄ±, %s iÃ§erisinde Ã§aÄŸrÄ±ldÄ±\n"
 
-#: libbfd.c:1465
+#: libbfd.c:1469
 #, c-format
-msgid " at %s line %d in %s\n"
-msgstr "%s, %d satırı, %s içerisinde\n"
+msgid "Deprecated %s called\n"
+msgstr "GeÃ§erliliÄŸi kalkmÄ±ÅŸ %s Ã§aÄŸrÄ±ldÄ±\n"
 
-#: linker.c:1849
+#: linker.c:1873
 #, c-format
 msgid "%s: indirect symbol `%s' to `%s' is a loop"
-msgstr "%1$s: `%3$s'den endirekt sembol `%2$s'e çevrim"
+msgstr "%1$s: `%3$s'den endirekt sembol `%2$s'e Ã§evrim"
 
-#: linker.c:2745
+#: linker.c:2776
 #, c-format
 msgid "Attempt to do relocateable link with %s input and %s output"
-msgstr "%s girdi ve %s çıktısı ile yerdeğişimli bağ deneniyor"
+msgstr "%s girdi ve %s Ã§Ä±ktÄ±sÄ± ile yerdeÄŸiÅŸimli baÄŸ deneniyor"
 
-#: merge.c:897
+#: merge.c:892
 #, c-format
 msgid "%s: access beyond end of merged section (%ld + %ld)"
-msgstr "%s: karıştırılmış bölümün sonundan ileride erişim (%ld + %ld)"
+msgstr "%s: karÄ±ÅŸtÄ±rÄ±lmÄ±ÅŸ bÃ¶lÃ¼mÃ¼n sonundan ileride eriÅŸim (%ld + %ld)"
 
 #: mmo.c:460
 #, c-format
 msgid "%s: No core to allocate section name %s\n"
-msgstr "%s: %s bölüm adını ayıracak `core' yok\n"
+msgstr "%s: %s bÃ¶lÃ¼m adÄ±nÄ± ayÄ±racak `core' yok\n"
 
-#: mmo.c:537
+#: mmo.c:536
 #, c-format
 msgid "%s: No core to allocate a symbol %d bytes long\n"
-msgstr "%s: %d bayt uzunluğunda bir sembole yer ayırmak için `core' yok\n"
+msgstr "%s: %d bayt uzunluÄŸunda bir sembole yer ayÄ±rmak iÃ§in `core' yok\n"
 
-#: mmo.c:1190
+#: mmo.c:1245
 #, c-format
 msgid "%s: invalid mmo file: initialization value for $255 is not `Main'\n"
-msgstr "%s: geçersiz mmo dosyası: $255 için başlangıç değeri `Main' değil\n"
+msgstr "%s: geÃ§ersiz mmo dosyasÄ±: $255 iÃ§in baÅŸlangÄ±Ã§ deÄŸeri `Main' deÄŸil\n"
 
-#: mmo.c:1336
+#: mmo.c:1391
 #, c-format
 msgid "%s: unsupported wide character sequence 0x%02X 0x%02X after symbol name starting with `%s'\n"
 msgstr ""
-"%1$s: `%4$s' ile başlayan sembol adından sonra desteklenmeyen\n"
-"    geniş karakter dizisi 0x%2$02X 0x%3$02X\n"
+"%1$s: `%4$s' ile baÅŸlayan sembol adÄ±ndan sonra desteklenmeyen\n"
+"    geniÅŸ karakter dizisi 0x%2$02X 0x%3$02X\n"
 
-#: mmo.c:1571
+#: mmo.c:1633
 #, c-format
 msgid "%s: invalid mmo file: unsupported lopcode `%d'\n"
-msgstr "%s: geçersiz mmo dosyası: desteklenmeyen lopkod `%d'\n"
+msgstr "%s: geÃ§ersiz mmo dosyasÄ±: desteklenmeyen lopkod `%d'\n"
 
-#: mmo.c:1581
+#: mmo.c:1643
 #, c-format
 msgid "%s: invalid mmo file: expected YZ = 1 got YZ = %d for lop_quote\n"
-msgstr "%s: geçersiz mmo dosyası: YZ = 1 beklendi, lop_quote için YZ = %d bulundu\n"
+msgstr "%s: geÃ§ersiz mmo dosyasÄ±: YZ = 1 beklendi, lop_quote iÃ§in YZ = %d bulundu\n"
 
-#: mmo.c:1617
+#: mmo.c:1679
 #, c-format
 msgid "%s: invalid mmo file: expected z = 1 or z = 2, got z = %d for lop_loc\n"
 msgstr ""
-"%s: geçersiz mmo dosyası: z = 1 veya z = 2 beklendi, \n"
-"    lop_loc için z = %d bulundu\n"
+"%s: geÃ§ersiz mmo dosyasÄ±: z = 1 veya z = 2 beklendi, \n"
+"    lop_loc iÃ§in z = %d bulundu\n"
 
-#: mmo.c:1663
+#: mmo.c:1725
 #, c-format
 msgid "%s: invalid mmo file: expected z = 1 or z = 2, got z = %d for lop_fixo\n"
-msgstr "%s: geçersiz mmo dosyası: z = 1 veya z = 2 beklendi;     lop_fixo için z = %d bulundu\n"
+msgstr "%s: geÃ§ersiz mmo dosyasÄ±: z = 1 veya z = 2 beklendi;     lop_fixo iÃ§in z = %d bulundu\n"
 
-#: mmo.c:1702
+#: mmo.c:1764
 #, c-format
 msgid "%s: invalid mmo file: expected y = 0, got y = %d for lop_fixrx\n"
-msgstr "%s: geçersiz mmo dosyası: y = 0 beklendi; lop_fixrx için y = %d bulundu\n"
+msgstr "%s: geÃ§ersiz mmo dosyasÄ±: y = 0 beklendi; lop_fixrx iÃ§in y = %d bulundu\n"
 
-#: mmo.c:1711
+#: mmo.c:1773
 #, c-format
 msgid "%s: invalid mmo file: expected z = 16 or z = 24, got z = %d for lop_fixrx\n"
 msgstr ""
-"%s: geçersiz mmo dosyası: z = 16 veya z = 24 beklendi;\n"
-"    lop_fixrx için z = %d bulundu\n"
+"%s: geÃ§ersiz mmo dosyasÄ±: z = 16 veya z = 24 beklendi;\n"
+"    lop_fixrx iÃ§in z = %d bulundu\n"
 
-#: mmo.c:1734
+#: mmo.c:1796
 #, c-format
 msgid "%s: invalid mmo file: leading byte of operand word must be 0 or 1, got %d for lop_fixrx\n"
 msgstr ""
-"%s: geçersiz mmo dosyası: işlenen word'un ilk baytı 0 veya 1 olmalı; \n"
-"    lop_fixrx için %d bulundu\n"
+"%s: geÃ§ersiz mmo dosyasÄ±: iÅŸlenen word'un ilk baytÄ± 0 veya 1 olmalÄ±; \n"
+"    lop_fixrx iÃ§in %d bulundu\n"
 
-#: mmo.c:1757
+#: mmo.c:1819
 #, c-format
 msgid "%s: cannot allocate file name for file number %d, %d bytes\n"
-msgstr "%s: %d sayılı dosya için dosya adı ayrılamadı, %d bayt\n"
+msgstr "%s: %d sayÄ±lÄ± dosya iÃ§in dosya adÄ± ayrÄ±lamadÄ±, %d bayt\n"
 
-#: mmo.c:1777
+#: mmo.c:1839
 #, c-format
 msgid "%s: invalid mmo file: file number %d `%s', was already entered as `%s'\n"
-msgstr "%s: geçersiz mmo dosyası: %d sayılı dosya, `%s', zaten `%s' olarak girilmiş\n"
+msgstr "%s: geÃ§ersiz mmo dosyasÄ±: %d sayÄ±lÄ± dosya, `%s', zaten `%s' olarak girilmiÅŸ\n"
 
-#: mmo.c:1790
+#: mmo.c:1852
 #, c-format
 msgid "%s: invalid mmo file: file name for number %d was not specified before use\n"
 msgstr ""
-"%s: geçersiz mmo dosyası: %d sayısı için dosya adı kullanımdan\n"
-"    önce belirtilmemiş\n"
+"%s: geÃ§ersiz mmo dosyasÄ±: %d sayÄ±sÄ± iÃ§in dosya adÄ± kullanÄ±mdan\n"
+"    Ã¶nce belirtilmemiÅŸ\n"
 
-#: mmo.c:1896
+#: mmo.c:1958
 #, c-format
 msgid "%s: invalid mmo file: fields y and z of lop_stab non-zero, y: %d, z: %d\n"
 msgstr ""
-"%s: geçersiz mmo dosyası: lop_stab'in y ve z alanları sıfır değil;\n"
+"%s: geÃ§ersiz mmo dosyasÄ±: lop_stab'in y ve z alanlarÄ± sÄ±fÄ±r deÄŸil;\n"
 "    y: %d, z: %d\n"
 
-#: mmo.c:1932
+#: mmo.c:1994
 #, c-format
 msgid "%s: invalid mmo file: lop_end not last item in file\n"
-msgstr "%s: geçersiz mmo dosyası: lop_end dosyadaki son girdi değil\n"
+msgstr "%s: geÃ§ersiz mmo dosyasÄ±: lop_end dosyadaki son girdi deÄŸil\n"
 
-#: mmo.c:1945
+#: mmo.c:2007
 #, c-format
 msgid "%s: invalid mmo file: YZ of lop_end (%ld) not equal to the number of tetras to the preceding lop_stab (%ld)\n"
 msgstr ""
-"%s: geçersiz mmo dosyası: lop_end'in YZ'si (%ld); bir önceki \n"
-"    lop_stab'in (%ld) dörtlü sayısına eşit değil\n"
+"%s: geÃ§ersiz mmo dosyasÄ±: lop_end'in YZ'si (%ld); bir Ã¶nceki \n"
+"    lop_stab'in (%ld) dÃ¶rtlÃ¼ sayÄ±sÄ±na eÅŸit deÄŸil\n"
 
-#: mmo.c:2610
+#: mmo.c:2670
 #, c-format
 msgid "%s: invalid symbol table: duplicate symbol `%s'\n"
-msgstr "%s: geçersiz sembol tablosu: tekrarlanmış sembol `%s'\n"
+msgstr "%s: geÃ§ersiz sembol tablosu: tekrarlanmÄ±ÅŸ sembol `%s'\n"
 
-#: mmo.c:2898
+#: mmo.c:2921
 #, c-format
 msgid "%s: Bad symbol definition: `Main' set to %s rather than the start address %s\n"
 msgstr ""
-"%1$s: Hatalı sembol tanımı: `Main' başlangıç adresi %3$s yerine \n"
-"    %2$s olarak tanımlanmış\n"
+"%1$s: HatalÄ± sembol tanÄ±mÄ±: `Main' baÅŸlangÄ±Ã§ adresi %3$s yerine \n"
+"    %2$s olarak tanÄ±mlanmÄ±ÅŸ\n"
 
-#: mmo.c:2932
+#: mmo.c:3011
 #, c-format
 msgid "%s: warning: symbol table too large for mmo, larger than 65535 32-bit words: %d.  Only `Main' will be emitted.\n"
 msgstr ""
-"%s: uyarı: sembol tablosu mmo için fazla büyük, 65535 32-bit word'den\n"
-"    fazla: %d. Yalnız `Main' üretilecek. \n"
+"%s: uyarÄ±: sembol tablosu mmo iÃ§in fazla bÃ¼yÃ¼k, 65535 32-bit word'den\n"
+"    fazla: %d. YalnÄ±z `Main' Ã¼retilecek. \n"
 
-#: mmo.c:2977
+#: mmo.c:3056
 #, c-format
 msgid "%s: internal error, symbol table changed size from %d to %d words\n"
-msgstr "%s: iç hata, sembol tablosu büyüklüğü %d'den %d word'e değişti\n"
+msgstr "%s: iÃ§ hata, sembol tablosu bÃ¼yÃ¼klÃ¼ÄŸÃ¼ %d'den %d word'e deÄŸiÅŸti\n"
 
-#: mmo.c:3032
+#: mmo.c:3111
 #, c-format
 msgid "%s: internal error, internal register section %s had contents\n"
-msgstr "%s: iç hata, %s iç yazmaç bölümü içerik taşıyor\n"
+msgstr "%s: iÃ§ hata, %s iÃ§ yazmaÃ§ bÃ¶lÃ¼mÃ¼ iÃ§erik taÅŸÄ±yor\n"
 
-#: mmo.c:3084
+#: mmo.c:3163
 #, c-format
 msgid "%s: no initialized registers; section length 0\n"
-msgstr "%s: ilklenen yazmaç yok; bölüm uzunluğu 0\n"
+msgstr "%s: ilklenen yazmaÃ§ yok; bÃ¶lÃ¼m uzunluÄŸu 0\n"
 
-#: mmo.c:3090
+#: mmo.c:3169
 #, c-format
 msgid "%s: too many initialized registers; section length %ld\n"
-msgstr "%s: çok fazla ilklenmiş yazmaç; bölüm uzunluğu %ld\n"
+msgstr "%s: Ã§ok fazla ilklenmiÅŸ yazmaÃ§; bÃ¶lÃ¼m uzunluÄŸu %ld\n"
 
-#: mmo.c:3095
+#: mmo.c:3174
 #, c-format
 msgid "%s: invalid start address for initialized registers of length %ld: 0x%lx%08lx\n"
-msgstr "%s: %ld uzunluğunda ilklenmiş yazmaçlar için hatalı başlangıç adresi: 0x%lx%08lx\n"
+msgstr "%s: %ld uzunluÄŸunda ilklenmiÅŸ yazmaÃ§lar iÃ§in hatalÄ± baÅŸlangÄ±Ã§ adresi: 0x%lx%08lx\n"
 
-#: oasys.c:1036
+#: oasys.c:1029
 #, c-format
 msgid "%s: can not represent section `%s' in oasys"
-msgstr "%s: oasys'de `%s' bölümü gösterilemiyor"
+msgstr "%s: oasys'de `%s' bÃ¶lÃ¼mÃ¼ gÃ¶sterilemiyor"
 
 #: osf-core.c:132
 #, c-format
 msgid "Unhandled OSF/1 core file section type %d\n"
-msgstr "Desteklenmeyen OSF/1 core dosyası bölüm türü %d\n"
+msgstr "Desteklenmeyen OSF/1 core dosyasÄ± bÃ¶lÃ¼m tÃ¼rÃ¼ %d\n"
 
 #: pe-mips.c:658
 #, c-format
@@ -1787,62 +2034,66 @@ msgstr "%s: `ld -r' PE MIPS nesneleri ile birlikte desteklenmiyor\n"
 #: pe-mips.c:794
 #, c-format
 msgid "%s: unimplemented %s\n"
-msgstr "%s: tamamlanmamış %s\n"
+msgstr "%s: tamamlanmamÄ±ÅŸ %s\n"
 
 #: pe-mips.c:820
 #, c-format
 msgid "%s: jump too far away\n"
-msgstr "%s: sıçrama fazla uzak\n"
+msgstr "%s: sÄ±Ã§rama fazla uzak\n"
 
 #: pe-mips.c:847
 #, c-format
 msgid "%s: bad pair/reflo after refhi\n"
-msgstr "%s: refhi'den sonra hatalı çift/reflo\n"
+msgstr "%s: refhi'den sonra hatalÄ± Ã§ift/reflo\n"
 
 #. XXX code yet to be written.
 #: peicode.h:785
 #, c-format
 msgid "%s: Unhandled import type; %x"
-msgstr "%s: Desteklenmeyen ithal türü; %x"
+msgstr "%s: Desteklenmeyen ithal tÃ¼rÃ¼; %x"
 
 #: peicode.h:790
 #, c-format
 msgid "%s: Unrecognised import type; %x"
-msgstr "%s: Tanınmayan ithal türü; %x"
+msgstr "%s: TanÄ±nmayan ithal tÃ¼rÃ¼; %x"
 
 #: peicode.h:804
 #, c-format
 msgid "%s: Unrecognised import name type; %x"
-msgstr "%s: Tanınmayan ithal isim türü; %x"
+msgstr "%s: TanÄ±nmayan ithal isim tÃ¼rÃ¼; %x"
 
 #: peicode.h:1162
 #, c-format
 msgid "%s: Unrecognised machine type (0x%x) in Import Library Format archive"
-msgstr "%s: İthal Kitaplık Biçem (ILF) arşivinde tanınmayan makina türü (0x%x) "
+msgstr "%s: Ä°thal KitaplÄ±k BiÃ§em (ILF) arÅŸivinde tanÄ±nmayan makina tÃ¼rÃ¼ (0x%x) "
 
 #: peicode.h:1174
 #, c-format
 msgid "%s: Recognised but unhandled machine type (0x%x) in Import Library Format archive"
-msgstr "%s: İthal Kitaplık Biçem (ILF) arşivinde bilinen fakat desteklenmeyen makina türü (0x%x)"
+msgstr "%s: Ä°thal KitaplÄ±k BiÃ§em (ILF) arÅŸivinde bilinen fakat desteklenmeyen makina tÃ¼rÃ¼ (0x%x)"
 
 #: peicode.h:1191
 #, c-format
 msgid "%s: size field is zero in Import Library Format header"
-msgstr "%s: İthal Kitaplık Biçem (ILF) başlığında boy alanı sıfır"
+msgstr "%s: Ä°thal KitaplÄ±k BiÃ§em (ILF) baÅŸlÄ±ÄŸÄ±nda boy alanÄ± sÄ±fÄ±r"
 
 #: peicode.h:1219
 #, c-format
 msgid "%s: string not null terminated in ILF object file."
-msgstr "%s: ILF nesne dosyasında dizge boş değerle sonlanmamış."
+msgstr "%s: ILF nesne dosyasÄ±nda dizge boÅŸ deÄŸerle sonlanmamÄ±ÅŸ."
 
 #: ppcboot.c:416
-msgid "\nppcboot header:\n"
-msgstr "\nppcboot başlığı:\n"
+msgid ""
+"\n"
+"ppcboot header:\n"
+msgstr ""
+"\n"
+"ppcboot baÅŸlÄ±ÄŸÄ±:\n"
 
 #: ppcboot.c:417
 #, c-format
 msgid "Entry offset        = 0x%.8lx (%ld)\n"
-msgstr "Girdi göreli konumu = 0x%.8lx (%ld)\n"
+msgstr "Girdi gÃ¶reli konumu = 0x%.8lx (%ld)\n"
 
 #: ppcboot.c:418
 #, c-format
@@ -1852,702 +2103,807 @@ msgstr "Uzunluk             = 0x%.8lx (%ld)\n"
 #: ppcboot.c:421
 #, c-format
 msgid "Flag field          = 0x%.2x\n"
-msgstr "Bayrak alanı        = 0x%.2x\n"
+msgstr "Bayrak alanÄ±        = 0x%.2x\n"
 
 #: ppcboot.c:427
 #, c-format
 msgid "Partition name      = \"%s\"\n"
-msgstr "Bölüm adı           = \"%s\"\n"
+msgstr "BÃ¶lÃ¼m adÄ±           = \"%s\"\n"
 
 #: ppcboot.c:446
 #, c-format
-msgid "\nPartition[%d] start  = { 0x%.2x, 0x%.2x, 0x%.2x, 0x%.2x }\n"
-msgstr "\nBölüm[%d] başlangıcı  = { 0x%.2x, 0x%.2x, 0x%.2x, 0x%.2x }\n"
+msgid ""
+"\n"
+"Partition[%d] start  = { 0x%.2x, 0x%.2x, 0x%.2x, 0x%.2x }\n"
+msgstr ""
+"\n"
+"BÃ¶lÃ¼m[%d] baÅŸlangÄ±cÄ±  = { 0x%.2x, 0x%.2x, 0x%.2x, 0x%.2x }\n"
 
 #: ppcboot.c:452
 #, c-format
 msgid "Partition[%d] end    = { 0x%.2x, 0x%.2x, 0x%.2x, 0x%.2x }\n"
-msgstr "Bölüm[%d] sonu    = { 0x%.2x, 0x%.2x, 0x%.2x, 0x%.2x }\n"
+msgstr "BÃ¶lÃ¼m[%d] sonu    = { 0x%.2x, 0x%.2x, 0x%.2x, 0x%.2x }\n"
 
 #: ppcboot.c:458
 #, c-format
 msgid "Partition[%d] sector = 0x%.8lx (%ld)\n"
-msgstr "Bölüm[%d] sektörü = 0x%.8lx (%ld)\n"
+msgstr "BÃ¶lÃ¼m[%d] sektÃ¶rÃ¼ = 0x%.8lx (%ld)\n"
 
 #: ppcboot.c:459
 #, c-format
 msgid "Partition[%d] length = 0x%.8lx (%ld)\n"
-msgstr "Bölüm[%d] uzunluğu = 0x%.8lx (%ld)\n"
+msgstr "BÃ¶lÃ¼m[%d] uzunluÄŸu = 0x%.8lx (%ld)\n"
 
-#: som.c:5402
+#: som.c:5398
 msgid "som_sizeof_headers unimplemented"
-msgstr "som_sizeof_headers tamamlanmamış"
+msgstr "som_sizeof_headers tamamlanmamÄ±ÅŸ"
 
 #: srec.c:301
 #, c-format
 msgid "%s:%d: Unexpected character `%s' in S-record file\n"
-msgstr "%s:%d: S-kayıt dosyasında beklenmeyen `%s' karakteri\n"
+msgstr "%s:%d: S-kayÄ±t dosyasÄ±nda beklenmeyen `%s' karakteri\n"
 
-#: syms.c:996
+#: stabs.c:319
+#, c-format
+msgid "%s(%s+0x%lx): Stabs entry has invalid string index."
+msgstr "%s(%s+0x%lx): Stabs girdisinde geÃ§ersiz dizge indeksi."
+
+#: syms.c:1044
 msgid "Unsupported .stab relocation"
-msgstr "Desteklenmeyen .stab yerdeğişimi"
+msgstr "Desteklenmeyen .stab yerdeÄŸiÅŸimi"
 
 #: vms-gsd.c:356
 #, c-format
 msgid "bfd_make_section (%s) failed"
-msgstr "bfd_make_section (%s) başarısız"
+msgstr "bfd_make_section (%s) baÅŸarÄ±sÄ±z"
 
 #: vms-gsd.c:371
 #, c-format
 msgid "bfd_set_section_flags (%s, %x) failed"
-msgstr "bfd_set_section_flags (%s, %x) başarısız"
+msgstr "bfd_set_section_flags (%s, %x) baÅŸarÄ±sÄ±z"
 
 #: vms-gsd.c:407
 #, c-format
 msgid "Size mismatch section %s=%lx, %s=%lx"
-msgstr "Boy uyumsuzluğu bölümü %s=%lx, %s=%lx"
+msgstr "Boy uyumsuzluÄŸu bÃ¶lÃ¼mÃ¼ %s=%lx, %s=%lx"
 
-#: vms-gsd.c:704
+#: vms-gsd.c:702
 #, c-format
 msgid "unknown gsd/egsd subtype %d"
-msgstr "bilinmeyen gsd/egsd alt türü %d"
+msgstr "bilinmeyen gsd/egsd alt tÃ¼rÃ¼ %d"
 
 #: vms-hdr.c:406
 msgid "Object module NOT error-free !\n"
-msgstr "Nesne modülü hatasız DEĞİL !\n"
+msgstr "Nesne modÃ¼lÃ¼ hatasÄ±z DEÄÄ°L !\n"
 
 #: vms-misc.c:543
 #, c-format
 msgid "Stack overflow (%d) in _bfd_vms_push"
-msgstr "_bfd_vms_push'da yığıt taşması (%d)"
+msgstr "_bfd_vms_push'da yÄ±ÄŸÄ±t taÅŸmasÄ± (%d)"
 
 #: vms-misc.c:561
 msgid "Stack underflow in _bfd_vms_pop"
-msgstr "_bfd_vms_pop'da yığıt alt taşması"
+msgstr "_bfd_vms_pop'da yÄ±ÄŸÄ±t alt taÅŸmasÄ±"
 
 #: vms-misc.c:919
 msgid "_bfd_vms_output_counted called with zero bytes"
-msgstr "_bfd_vms_output_counted sıfır bayt ile çağrıldı"
+msgstr "_bfd_vms_output_counted sÄ±fÄ±r bayt ile Ã§aÄŸrÄ±ldÄ±"
 
 #: vms-misc.c:924
 msgid "_bfd_vms_output_counted called with too many bytes"
-msgstr "_bfd_vms_output_counted fazla bayt ile çağrıldı"
+msgstr "_bfd_vms_output_counted fazla bayt ile Ã§aÄŸrÄ±ldÄ±"
 
 #: vms-misc.c:1055
 #, c-format
 msgid "Symbol %s replaced by %s\n"
-msgstr "%s sembolü %s ile değiştirildi\n"
+msgstr "%s sembolÃ¼ %s ile deÄŸiÅŸtirildi\n"
 
 #: vms-misc.c:1117
 #, c-format
 msgid "failed to enter %s"
-msgstr "%s'e giriş başarısız"
+msgstr "%s'e giriÅŸ baÅŸarÄ±sÄ±z"
 
-#: vms-tir.c:78
+#: vms-tir.c:81
 msgid "No Mem !"
-msgstr "Hafıza Yok !"
+msgstr "HafÄ±za Yok !"
 
-#: vms-tir.c:313
-msgid "Bad section index in ETIR_S_C_STA_PQ"
-msgstr "ETIR_S_C_STA_PQ'de hatalı bölüm indeksi"
-
-#: vms-tir.c:328
+#: vms-tir.c:362
 #, c-format
-msgid "Unsupported STA cmd %d"
-msgstr "Desteklenmeyen STA komutu %d"
+msgid "bad section index in %s"
+msgstr "%s iÃ§inde hatalÄ± bÃ¶lÃ¼m indeksi"
 
-#: vms-tir.c:333 vms-tir.c:1301
+#: vms-tir.c:375
 #, c-format
-msgid "Reserved STA cmd %d"
-msgstr "Ayrılmış STA komutu %d"
+msgid "unsupported STA cmd %s"
+msgstr "Desteklenmeyen STA komutu %s"
 
-#: vms-tir.c:443
+#: vms-tir.c:380 vms-tir.c:1240
 #, c-format
-msgid "ETIR_S_C_STO_GBL: no symbol \"%s\""
-msgstr "ETIR_S_C_STO_GBL: sembol yok \"%s\""
+msgid "reserved STA cmd %d"
+msgstr "AyrÄ±lmÄ±ÅŸ STA komutu %d"
 
-#: vms-tir.c:465
+#: vms-tir.c:491 vms-tir.c:514
 #, c-format
-msgid "ETIR_S_C_STO_CA: no symbol \"%s\""
-msgstr "ETIR_S_C_STO_CA: sembol yok \"%s\""
+msgid "%s: no symbol \"%s\""
+msgstr "%s: \"%s\" sembolÃ¼ yok"
 
-#: vms-tir.c:478
-msgid "ETIR_S_C_STO_RB/AB: Not supported"
-msgstr "ETIR_S_C_STO_RB/AB: Desteklenmiyor"
-
-#: vms-tir.c:538
-msgid "ETIR_S_C_STO_LP_PSB: Not supported"
-msgstr "ETIR_S_C_STO_LP_PSB: Desteklenmiyor"
-
-#: vms-tir.c:544
-msgid "ETIR_S_C_STO_HINT_GBL: not implemented"
-msgstr "ETIR_S_C_STO_HINT_GBL: tamamlanmamış"
-
-#: vms-tir.c:550
-msgid "ETIR_S_C_STO_HINT_PS: not implemented"
-msgstr "ETIR_S_C_STO_HINT_PS: tamamlanmamış"
-
-#: vms-tir.c:554 vms-tir.c:1473
+#. unsigned shift
+#. rotate
+#. Redefine symbol to current location.
+#. Define a literal.
+#: vms-tir.c:581 vms-tir.c:693 vms-tir.c:803 vms-tir.c:821 vms-tir.c:829
+#: vms-tir.c:838 vms-tir.c:1563
 #, c-format
-msgid "Reserved STO cmd %d"
-msgstr "Ayrılmış STO komutu %d"
+msgid "%s: not supported"
+msgstr "%s: desteklenmiyor"
 
-#: vms-tir.c:667
-msgid "ETIR_S_C_OPR_INSV: Not supported"
-msgstr "ETIR_S_C_OPR_INSV: Desteklenmiyor"
-
-#: vms-tir.c:685
-msgid "ETIR_S_C_OPR_USH: Not supported"
-msgstr "ETIR_S_C_OPR_USH: Desteklenmiyor"
-
-#: vms-tir.c:691
-msgid "ETIR_S_C_OPR_ROT: Not supported"
-msgstr "ETIR_S_C_OPR_ROT: Desteklenmiyor"
-
-#: vms-tir.c:710
-msgid "ETIR_S_C_OPR_REDEF: Not supported"
-msgstr "ETIR_S_C_OPR_REDEF: Desteklenmiyor"
-
-#: vms-tir.c:716
-msgid "ETIR_S_C_OPR_DFLIT: Not supported"
-msgstr "ETIR_S_C_OPR_DFLIT: Desteklenmiyor"
-
-#: vms-tir.c:720 vms-tir.c:1668
+#: vms-tir.c:586 vms-tir.c:1418
 #, c-format
-msgid "Reserved OPR cmd %d"
-msgstr "Ayrılmış OPR komutu %d"
+msgid "%s: not implemented"
+msgstr "%s: tamamlanmamÄ±ÅŸ"
 
-#: vms-tir.c:788 vms-tir.c:1737
+#: vms-tir.c:590 vms-tir.c:1422
 #, c-format
-msgid "Reserved CTL cmd %d"
-msgstr "Ayrılmış CTL komutu %d"
+msgid "reserved STO cmd %d"
+msgstr "AyrÄ±lmÄ±ÅŸ STO komutu %d"
 
-#: vms-tir.c:816
-msgid "ETIR_S_C_STC_LP: not supported"
-msgstr "ETIR_S_C_STC_LP: desteklenmiyor"
+#: vms-tir.c:708 vms-tir.c:1568
+#, c-format
+msgid "reserved OPR cmd %d"
+msgstr "AyrÄ±lmÄ±ÅŸ OPR komutu %d"
 
-#: vms-tir.c:834
-msgid "ETIR_S_C_STC_GBL: not supported"
-msgstr "ETIR_S_C_STC_GBL: desteklenmiyor"
+#: vms-tir.c:776 vms-tir.c:1632
+#, c-format
+msgid "reserved CTL cmd %d"
+msgstr "AyrÄ±lmÄ±ÅŸ CTL komutu %d"
 
-#: vms-tir.c:842
-msgid "ETIR_S_C_STC_GCA: not supported"
-msgstr "ETIR_S_C_STC_GCA: desteklenmiyor"
+#. stack byte from image
+#. arg: none.
+#: vms-tir.c:1148
+msgid "stack-from-image not implemented"
+msgstr "GÃ¶rÃ¼ntÃ¼den-yÄ±ÄŸÄ±t tamamlanmamÄ±ÅŸ"
 
-#: vms-tir.c:851
-msgid "ETIR_S_C_STC_PS: not supported"
-msgstr "ETIR_S_C_STC_PS: desteklenmiyor"
+#: vms-tir.c:1166
+msgid "stack-entry-mask not fully implemented"
+msgstr "YÄ±ÄŸÄ±n girdi maskÄ± tamamlanmamÄ±ÅŸ"
 
+#. compare procedure argument
+#. arg: cs	symbol name
+#. by	argument index
+#. da	argument descriptor
 #.
-#. * stack byte from image
-#. * arg: -
-#. *
-#.
-#: vms-tir.c:1199
-msgid "Stack-from-image not implemented"
-msgstr "Görüntüden-yığıt tamamlanmamış"
-
-#: vms-tir.c:1219
-msgid "Stack-entry-mask not fully implemented"
-msgstr "Yığın girdi maskı tamamlanmamış"
-
-#.
-#. * compare procedure argument
-#. * arg: cs	symbol name
-#. *	by	argument index
-#. *	da	argument descriptor
-#. *
-#. * compare argument descriptor with symbol argument (ARG$V_PASSMECH)
-#. * and stack TRUE (args match) or FALSE (args dont match) value
-#.
-#: vms-tir.c:1235
+#. compare argument descriptor with symbol argument (ARG$V_PASSMECH)
+#. and stack TRUE (args match) or FALSE (args dont match) value.
+#: vms-tir.c:1180
 msgid "PASSMECH not fully implemented"
-msgstr "PASSMECH tamamlanmamış"
+msgstr "PASSMECH tamamlanmamÄ±ÅŸ"
 
-#: vms-tir.c:1256
-msgid "Stack-local-symbol not fully implemented"
-msgstr "Yerel sembol yığıtı tamamlanmamış"
+#: vms-tir.c:1199
+msgid "stack-local-symbol not fully implemented"
+msgstr "Yerel sembol yÄ±ÄŸÄ±tÄ± tamamlanmamÄ±ÅŸ"
 
-#: vms-tir.c:1271
-msgid "Stack-literal not fully implemented"
-msgstr "Yığıt sabiti tamamlanmamış"
+#: vms-tir.c:1212
+msgid "stack-literal not fully implemented"
+msgstr "YÄ±ÄŸÄ±t sabiti tamamlanmamÄ±ÅŸ"
 
-#: vms-tir.c:1294
-msgid "Stack-local-symbol-entry-point-mask not fully implemented"
-msgstr "Yığın yerel sembol girdi nokta maskı tamamlanmamış"
+#: vms-tir.c:1233
+msgid "stack-local-symbol-entry-point-mask not fully implemented"
+msgstr "YÄ±ÄŸÄ±n yerel sembol girdi noktasÄ± maskÄ± tamamlanmamÄ±ÅŸ"
 
-#: vms-tir.c:1469
+#: vms-tir.c:1510 vms-tir.c:1522 vms-tir.c:1534 vms-tir.c:1546 vms-tir.c:1611
+#: vms-tir.c:1619 vms-tir.c:1627
 #, c-format
-msgid "Unimplemented STO cmd %d"
-msgstr "Tamamlanmamış STO komutu %d"
+msgid "%s: not fully implemented"
+msgstr "%s: tamamlanmamÄ±ÅŸ"
 
-#: vms-tir.c:1608
-msgid "TIR_S_C_OPR_ASH incomplete"
-msgstr "TIR_S_C_OPR_ASH tamamlanmamış"
-
-#: vms-tir.c:1622
-msgid "TIR_S_C_OPR_USH incomplete"
-msgstr "TIR_S_C_OPR_USH tamamlanmamış"
-
-#: vms-tir.c:1636
-msgid "TIR_S_C_OPR_ROT incomplete"
-msgstr "TIR_S_C_OPR_ROT tamamlanmamış"
-
-#.
-#. * redefine symbol to current location
-#.
-#: vms-tir.c:1657
-msgid "TIR_S_C_OPR_REDEF not supported"
-msgstr "TIR_S_C_OPR_REDEF desteklenmiyor"
-
-#.
-#. * define a literal
-#.
-#: vms-tir.c:1664
-msgid "TIR_S_C_OPR_DFLIT not supported"
-msgstr "TIR_S_C_OPR_DFLIT desteklenmiyor"
-
-#: vms-tir.c:1718
-msgid "TIR_S_C_CTL_DFLOC not fully implemented"
-msgstr "TIR_S_C_CTL_DFLOC tamamlanmamış"
-
-#: vms-tir.c:1726
-msgid "TIR_S_C_CTL_STLOC not fully implemented"
-msgstr "TIR_S_C_CTL_STLOC tamamlanmamış"
-
-#: vms-tir.c:1734
-msgid "TIR_S_C_CTL_STKDL not fully implemented"
-msgstr "TIR_S_C_CTL_STKDL tamamlanmamış"
-
-#: vms-tir.c:1791
+#: vms-tir.c:1684
 #, c-format
-msgid "Obj code %d not found"
-msgstr "Nesne kodu %d bulunmadı"
+msgid "obj code %d not found"
+msgstr "Nesne kodu %d bulunmadÄ±"
 
-#: vms-tir.c:2137
+#: vms-tir.c:2019
 #, c-format
 msgid "SEC_RELOC with no relocs in section %s"
-msgstr "%s bölümünde yerdeğişim olmaksızın SEC_RELOC"
+msgstr "%s bÃ¶lÃ¼mÃ¼nde yerdeÄŸiÅŸim olmaksÄ±zÄ±n SEC_RELOC"
 
-#: vms-tir.c:2424
+#: vms-tir.c:2307
 #, c-format
 msgid "Unhandled relocation %s"
-msgstr "Desteklenmeyen yerdeğişim %s"
+msgstr "Desteklenmeyen yerdeÄŸiÅŸim %s"
 
-#: xcofflink.c:1241
+#: xcofflink.c:1243
 #, c-format
 msgid "%s: `%s' has line numbers but no enclosing section"
-msgstr "%s: `%s' satır numaralarına sahip fakat onu içeren bölümü yok"
+msgstr "%s: `%s' satÄ±r numaralarÄ±na sahip fakat onu iÃ§eren bÃ¶lÃ¼mÃ¼ yok"
 
-#: xcofflink.c:1294
+#: xcofflink.c:1296
 #, c-format
 msgid "%s: class %d symbol `%s' has no aux entries"
-msgstr "%s: sınıf %d sembol `%s'un alternatif girdileri yok"
+msgstr "%s: sÄ±nÄ±f %d sembol `%s'un alternatif girdileri yok"
 
-#: xcofflink.c:1317
+#: xcofflink.c:1319
 #, c-format
 msgid "%s: symbol `%s' has unrecognized csect type %d"
-msgstr "%s: `%s' sembolünde bilinmeyen csect türü %d var"
+msgstr "%s: `%s' sembolÃ¼nde bilinmeyen csect tÃ¼rÃ¼ %d var"
 
-#: xcofflink.c:1329
+#: xcofflink.c:1331
 #, c-format
 msgid "%s: bad XTY_ER symbol `%s': class %d scnum %d scnlen %d"
-msgstr "%s: hatalı XTY_ER sembolü `%s': sınıf %d scnum %d scnlen %d"
+msgstr "%s: hatalÄ± XTY_ER sembolÃ¼ `%s': sÄ±nÄ±f %d scnum %d scnlen %d"
 
-#: xcofflink.c:1365
+#: xcofflink.c:1367
 #, c-format
 msgid "%s: XMC_TC0 symbol `%s' is class %d scnlen %d"
-msgstr "%s: XMC_TC0 sembolü `%s': sınıf %d scnlen %d"
+msgstr "%s: XMC_TC0 sembolÃ¼ `%s': sÄ±nÄ±f %d scnlen %d"
 
-#: xcofflink.c:1517
+#: xcofflink.c:1519
 #, c-format
 msgid "%s: csect `%s' not in enclosing section"
-msgstr "%s: csect `%s' onu içeren bölümde değil"
+msgstr "%s: csect `%s' onu iÃ§eren bÃ¶lÃ¼mde deÄŸil"
 
-#: xcofflink.c:1624
+#: xcofflink.c:1626
 #, c-format
 msgid "%s: misplaced XTY_LD `%s'"
-msgstr "%s: XTY_LD `%s'yanlış yerde"
+msgstr "%s: XTY_LD `%s'yanlÄ±ÅŸ yerde"
 
-#: xcofflink.c:1948
+#: xcofflink.c:1957
 #, c-format
 msgid "%s: reloc %s:%d not in csect"
-msgstr "%s: yerdeğişim %s:%d csect içinde değil"
+msgstr "%s: yerdeÄŸiÅŸim %s:%d csect iÃ§inde deÄŸil"
 
-#: xcofflink.c:2083
+#: xcofflink.c:2092
 #, c-format
 msgid "%s: XCOFF shared object when not producing XCOFF output"
-msgstr "%s: XCOFF çıktısı oluşturulmazken XCOFF paylaşımlı nesnesi"
+msgstr "%s: XCOFF Ã§Ä±ktÄ±sÄ± oluÅŸturulmazken XCOFF paylaÅŸÄ±mlÄ± nesnesi"
 
-#: xcofflink.c:2104
+#: xcofflink.c:2113
 #, c-format
 msgid "%s: dynamic object with no .loader section"
-msgstr "%s: .loader bölümü olmayan dinamik nesne"
+msgstr "%s: .loader bÃ¶lÃ¼mÃ¼ olmayan dinamik nesne"
 
-#: xcofflink.c:2749
+#: xcofflink.c:2758
 #, c-format
 msgid "%s: no such symbol"
-msgstr "%s: böyle bir sembol yok"
+msgstr "%s: bÃ¶yle bir sembol yok"
 
-#: xcofflink.c:2890
+#: xcofflink.c:2891
 msgid "error: undefined symbol __rtinit"
-msgstr "hata: tanımlanmamış sembol __rtinit"
+msgstr "hata: tanÄ±mlanmamÄ±ÅŸ sembol __rtinit"
 
-#: xcofflink.c:3458
+#: xcofflink.c:3453
 #, c-format
 msgid "warning: attempt to export undefined symbol `%s'"
-msgstr "uyarı: tanımlanmamış `%s' sembolünü ihraç denemesi"
+msgstr "uyarÄ±: tanÄ±mlanmamÄ±ÅŸ `%s' sembolÃ¼nÃ¼ ihraÃ§ denemesi"
 
-#: xcofflink.c:4452
+#: xcofflink.c:4447
 #, c-format
 msgid "TOC overflow: 0x%lx > 0x10000; try -mminimal-toc when compiling"
-msgstr "TOC taşması: 0x%lx > 0x10000; -mminimal-toc ile derlemeyi deneyin"
+msgstr "TOC taÅŸmasÄ±: 0x%lx > 0x10000; -mminimal-toc ile derlemeyi deneyin"
 
-#: xcofflink.c:5292 xcofflink.c:5754 xcofflink.c:5816 xcofflink.c:6117
+#: xcofflink.c:5287 xcofflink.c:5756 xcofflink.c:5818 xcofflink.c:6119
 #, c-format
 msgid "%s: loader reloc in unrecognized section `%s'"
-msgstr "%s: bilinmeyen `%s' bölümünde yükleyici yerdeğişimi"
+msgstr "%s: bilinmeyen `%s' bÃ¶lÃ¼mÃ¼nde yÃ¼kleyici yerdeÄŸiÅŸimi"
 
-#: xcofflink.c:5314 xcofflink.c:6128
+#: xcofflink.c:5309 xcofflink.c:6130
 #, c-format
 msgid "%s: `%s' in loader reloc but not loader sym"
-msgstr "%s: `%s' yükleyici yerdeğişiminde fakat yükleyici sembolü değil"
+msgstr "%s: `%s' yÃ¼kleyici yerdeÄŸiÅŸiminde fakat yÃ¼kleyici sembolÃ¼ deÄŸil"
 
-#: xcofflink.c:5329
+#: xcofflink.c:5324
 #, c-format
 msgid "%s: loader reloc in read-only section %s"
-msgstr "%s: %s salt-okunur bölümünde yükleyici yerdeğişimi"
+msgstr "%s: %s salt-okunur bÃ¶lÃ¼mÃ¼nde yÃ¼kleyici yerdeÄŸiÅŸimi"
 
-#: elf32-ia64.c:2190 elf64-ia64.c:2190
+#: elf32-ia64.c:2222 elf64-ia64.c:2222
 msgid "@pltoff reloc against local symbol"
 msgstr "yerel sembole @pltoff yerdegisimi"
 
-#: elf32-ia64.c:2248 elf64-ia64.c:2248
-msgid "non-zero addend in @fptr reloc"
-msgstr "@fptr yerdeğişiminde sıfır olmayan eklenti"
-
-#: elf32-ia64.c:3414 elf64-ia64.c:3414
+#: elf32-ia64.c:3562 elf64-ia64.c:3562
 #, c-format
 msgid "%s: short data segment overflowed (0x%lx >= 0x400000)"
-msgstr "%s: kısa veri bölümünde taşma (0x%lx >= 0x400000)"
+msgstr "%s: kÄ±sa veri bÃ¶lÃ¼mÃ¼nde taÅŸma (0x%lx >= 0x400000)"
 
-#: elf32-ia64.c:3425 elf64-ia64.c:3425
+#: elf32-ia64.c:3573 elf64-ia64.c:3573
 #, c-format
 msgid "%s: __gp does not cover short data segment"
-msgstr "%s: __gp kısa veri bölümünü kapsamıyor"
+msgstr "%s: __gp kÄ±sa veri bÃ¶lÃ¼mÃ¼nÃ¼ kapsamÄ±yor"
 
-#: elf32-ia64.c:3729 elf64-ia64.c:3729
+#: elf32-ia64.c:3858 elf64-ia64.c:3858
 #, c-format
 msgid "%s: linking non-pic code in a shared library"
-msgstr "%s: pic olmayan kod paylaşmalı kitaplıkta bağlanıyor"
+msgstr "%s: pic olmayan kod paylaÅŸmalÄ± kitaplÄ±kta baÄŸlanÄ±yor"
 
-#: elf32-ia64.c:3762 elf64-ia64.c:3762
+#: elf32-ia64.c:3891 elf64-ia64.c:3891
 #, c-format
 msgid "%s: @gprel relocation against dynamic symbol %s"
-msgstr "%s: %s dinamik sembolüne @gprel yerdeğişimi"
+msgstr "%s: %s dinamik sembolÃ¼ne @gprel yerdeÄŸiÅŸimi"
 
-#: elf32-ia64.c:3901 elf64-ia64.c:3901
+#: elf32-ia64.c:4030 elf64-ia64.c:4030
 #, c-format
 msgid "%s: dynamic relocation against speculation fixup"
-msgstr "%s: kuşkulu düzeltmeye dinamik yerdeğişim"
+msgstr "%s: kuÅŸkulu dÃ¼zeltmeye dinamik yerdeÄŸiÅŸim"
 
-#: elf32-ia64.c:3909 elf64-ia64.c:3909
+#: elf32-ia64.c:4038 elf64-ia64.c:4038
 #, c-format
 msgid "%s: speculation fixup against undefined weak symbol"
-msgstr "%s: tanımlanmamış gevşek sembole tartışmalı düzeltme"
+msgstr "%s: tanÄ±mlanmamÄ±ÅŸ gevÅŸek sembole tartÄ±ÅŸmalÄ± dÃ¼zeltme"
 
-#: elf32-ia64.c:4093 elf64-ia64.c:4093
+#: elf32-ia64.c:4271 elf64-ia64.c:4271
 msgid "unsupported reloc"
-msgstr "desteklenmeyen yerdeğişim"
+msgstr "desteklenmeyen yerdeÄŸiÅŸim"
 
-#: elf32-ia64.c:4373 elf64-ia64.c:4373
+#: elf32-ia64.c:4551 elf64-ia64.c:4551
 #, c-format
 msgid "%s: linking trap-on-NULL-dereference with non-trapping files"
-msgstr "%s: NULL-halinde-tuzakla karşı-başvurusu tuzaklamayan dosyalarla bağlandı"
+msgstr "%s: NULL-halinde-tuzakla karÅŸÄ±-baÅŸvurusu tuzaklamayan dosyalarla baÄŸlandÄ±"
 
-#: elf32-ia64.c:4382 elf64-ia64.c:4382
+#: elf32-ia64.c:4560 elf64-ia64.c:4560
 #, c-format
 msgid "%s: linking big-endian files with little-endian files"
-msgstr "%s: büyük sonlu dosyalar küçük sonlu dosyalarla bağlanıyor"
+msgstr "%s: bÃ¼yÃ¼k sonlu dosyalar kÃ¼Ã§Ã¼k sonlu dosyalarla baÄŸlanÄ±yor"
 
-#: elf32-ia64.c:4391 elf64-ia64.c:4391
+#: elf32-ia64.c:4569 elf64-ia64.c:4569
 #, c-format
 msgid "%s: linking 64-bit files with 32-bit files"
-msgstr "%s: 64 bitlik dosyalar 32 bitlik dosyalarla bağlanıyor"
+msgstr "%s: 64 bitlik dosyalar 32 bitlik dosyalarla baÄŸlanÄ±yor"
 
-#: elf32-ia64.c:4400 elf64-ia64.c:4400
+#: elf32-ia64.c:4578 elf64-ia64.c:4578
 #, c-format
 msgid "%s: linking constant-gp files with non-constant-gp files"
-msgstr "%s: constant-gp dosyaları constant-gp olmayan dosyalarla bağlanıyor"
+msgstr "%s: constant-gp dosyalarÄ± constant-gp olmayan dosyalarla baÄŸlanÄ±yor"
 
-#: elf32-ia64.c:4410 elf64-ia64.c:4410
+#: elf32-ia64.c:4588 elf64-ia64.c:4588
 #, c-format
 msgid "%s: linking auto-pic files with non-auto-pic files"
-msgstr "%s: auto-pic dosyaları auto-pic olmayan dosyalarla bağlanıyor"
+msgstr "%s: auto-pic dosyalarÄ± auto-pic olmayan dosyalarla baÄŸlanÄ±yor"
 
-#: peigen.c:964 pepigen.c:964
+#: peigen.c:962 pepigen.c:962
 #, c-format
 msgid "%s: line number overflow: 0x%lx > 0xffff"
-msgstr "%s: satır numarası taşması: 0x%lx > 0xffff"
+msgstr "%s: satÄ±r numarasÄ± taÅŸmasÄ±: 0x%lx > 0xffff"
 
-#: peigen.c:981 pepigen.c:981
+#: peigen.c:979 pepigen.c:979
 #, c-format
 msgid "%s: reloc overflow 1: 0x%lx > 0xffff"
-msgstr "%s: yerdeğişim taşması 1: 0x%lx > 0xffff"
+msgstr "%s: yerdeÄŸiÅŸim taÅŸmasÄ± 1: 0x%lx > 0xffff"
+
+#: peigen.c:993 pepigen.c:993
+msgid "Export Directory [.edata (or where ever we found it)]"
+msgstr "Ä°hraÃ§ Dizini [.edata (veya nerede bulundu ise)]"
+
+#: peigen.c:994 pepigen.c:994
+msgid "Import Directory [parts of .idata]"
+msgstr "Ä°thal Dizini [.idata'nÄ±n parÃ§alarÄ±]"
 
 #: peigen.c:995 pepigen.c:995
-msgid "Export Directory [.edata (or where ever we found it)]"
-msgstr "İhraç Dizini [.edata (veya nerede bulundu ise)]"
-
-#: peigen.c:996 pepigen.c:996
-msgid "Import Directory [parts of .idata]"
-msgstr "İthal Dizini [.idata'nın parçaları]"
-
-#: peigen.c:997 pepigen.c:997
 msgid "Resource Directory [.rsrc]"
 msgstr "Kaynak Dizini [.rsrc]"
 
-#: peigen.c:998 pepigen.c:998
+#: peigen.c:996 pepigen.c:996
 msgid "Exception Directory [.pdata]"
-msgstr "İstisna Dizini [.pdata]"
+msgstr "Ä°stisna Dizini [.pdata]"
+
+#: peigen.c:997 pepigen.c:997
+msgid "Security Directory"
+msgstr "GÃ¼venlik Dizini"
+
+#: peigen.c:998 pepigen.c:998
+msgid "Base Relocation Directory [.reloc]"
+msgstr "Temel YerdeÄŸiÅŸim Dizini [.reloc]"
 
 #: peigen.c:999 pepigen.c:999
-msgid "Security Directory"
-msgstr "Güvenlik Dizini"
+msgid "Debug Directory"
+msgstr "Hata AyÄ±klama Dizini"
 
 #: peigen.c:1000 pepigen.c:1000
-msgid "Base Relocation Directory [.reloc]"
-msgstr "Temel Yerdeğişim Dizini [.reloc]"
+msgid "Description Directory"
+msgstr "AÃ§Ä±klama Dizini"
 
 #: peigen.c:1001 pepigen.c:1001
-msgid "Debug Directory"
-msgstr "Hata Ayıklama Dizini"
+msgid "Special Directory"
+msgstr "Ã–zel Dizin"
 
 #: peigen.c:1002 pepigen.c:1002
-msgid "Description Directory"
-msgstr "Açıklama Dizini"
-
-#: peigen.c:1003 pepigen.c:1003
-msgid "Special Directory"
-msgstr "Özel Dizin"
-
-#: peigen.c:1004 pepigen.c:1004
 msgid "Thread Storage Directory [.tls]"
 msgstr "Dal Saklama Dizini [.tls]"
 
-#: peigen.c:1005 pepigen.c:1005
+#: peigen.c:1003 pepigen.c:1003
 msgid "Load Configuration Directory"
-msgstr "Ayar Yükleme Dizini"
+msgstr "Ayar YÃ¼kleme Dizini"
+
+#: peigen.c:1004 pepigen.c:1004
+msgid "Bound Import Directory"
+msgstr "SÄ±nÄ±r Ä°thal Dizini"
+
+#: peigen.c:1005 pepigen.c:1005
+msgid "Import Address Table Directory"
+msgstr "Adres Tablosu Ä°thal Dizini"
 
 #: peigen.c:1006 pepigen.c:1006
-msgid "Bound Import Directory"
-msgstr "Sınır İthal Dizini"
-
-#: peigen.c:1007 pepigen.c:1007
-msgid "Import Address Table Directory"
-msgstr "Adres Tablosu İthal Dizini"
-
-#: peigen.c:1008 pepigen.c:1008
 msgid "Delay Import Directory"
-msgstr "Gecikmeli İthal Dizini"
+msgstr "Gecikmeli Ä°thal Dizini"
 
-#: peigen.c:1009 peigen.c:1010 pepigen.c:1009 pepigen.c:1010
+#: peigen.c:1007 peigen.c:1008 pepigen.c:1007 pepigen.c:1008
 msgid "Reserved"
-msgstr "Ayrılmış"
+msgstr "AyrÄ±lmÄ±ÅŸ"
 
-#: peigen.c:1073 pepigen.c:1073
-msgid "\nThere is an import table, but the section containing it could not be found\n"
-msgstr "\nBir ithal tablosu var, fakat onu içeren bölüm bulunamadı\n"
+#: peigen.c:1071 pepigen.c:1071
+msgid ""
+"\n"
+"There is an import table, but the section containing it could not be found\n"
+msgstr ""
+"\n"
+"Bir ithal tablosu var, fakat onu iÃ§eren bÃ¶lÃ¼m bulunamadÄ±\n"
 
-#: peigen.c:1078 pepigen.c:1078
+#: peigen.c:1076 pepigen.c:1076
 #, c-format
-msgid "\nThere is an import table in %s at 0x%lx\n"
-msgstr "\n%s içerisinde 0x%lx'de bir ithal tablosu var\n"
+msgid ""
+"\n"
+"There is an import table in %s at 0x%lx\n"
+msgstr ""
+"\n"
+"%s iÃ§erisinde 0x%lx'de bir ithal tablosu var\n"
 
-#: peigen.c:1115 pepigen.c:1115
+#: peigen.c:1113 pepigen.c:1113
 #, c-format
-msgid "\nFunction descriptor located at the start address: %04lx\n"
-msgstr "\nBaşlangıç adresinde işlev betimleyicisi bulundu: %04lx\n"
+msgid ""
+"\n"
+"Function descriptor located at the start address: %04lx\n"
+msgstr ""
+"\n"
+"BaÅŸlangÄ±Ã§ adresinde iÅŸlev betimleyicisi bulundu: %04lx\n"
 
-#: peigen.c:1118 pepigen.c:1118
+#: peigen.c:1116 pepigen.c:1116
 #, c-format
 msgid "\tcode-base %08lx toc (loadable/actual) %08lx/%08lx\n"
-msgstr "\tkod temeli %08lx toc (yüklenebilir/gerçek) %08lx/%08lx\n"
+msgstr "\tkod temeli %08lx toc (yÃ¼klenebilir/gerÃ§ek) %08lx/%08lx\n"
 
-#: peigen.c:1124 pepigen.c:1124
-msgid "\nNo reldata section! Function descriptor not decoded.\n"
-msgstr "\nReldata bölümü yok! İşlev betimleyicisi çözümlenemedi.\n"
+#: peigen.c:1122 pepigen.c:1122
+msgid ""
+"\n"
+"No reldata section! Function descriptor not decoded.\n"
+msgstr ""
+"\n"
+"Reldata bÃ¶lÃ¼mÃ¼ yok! Ä°ÅŸlev betimleyicisi Ã§Ã¶zÃ¼mlenemedi.\n"
 
-#: peigen.c:1129 pepigen.c:1129
+#: peigen.c:1127 pepigen.c:1127
 #, c-format
-msgid "\nThe Import Tables (interpreted %s section contents)\n"
-msgstr "\nİthal Tabloları (%s bölüm içeriği çözümlendi)\n"
+msgid ""
+"\n"
+"The Import Tables (interpreted %s section contents)\n"
+msgstr ""
+"\n"
+"Ä°thal TablolarÄ± (%s bÃ¶lÃ¼m iÃ§eriÄŸi Ã§Ã¶zÃ¼mlendi)\n"
 
-#: peigen.c:1132 pepigen.c:1132
-msgid " vma:            Hint    Time      Forward  DLL       First\n"
-msgstr " vma:            İpucu   Zaman     İleri    DLL       İlk\n"
+#: peigen.c:1130 pepigen.c:1130
+msgid ""
+" vma:            Hint    Time      Forward  DLL       First\n"
+"                 Table   Stamp     Chain    Name      Thunk\n"
+msgstr ""
+" vma:            Ä°pucu   Zaman     Ä°leri    DLL       Ä°lk\n"
+"                 Tablo   Damga     Zincir   Ä°sim      ParÃ§a\n"
 
-#: peigen.c:1134 pepigen.c:1134
-msgid "                 Table   Stamp     Chain    Name      Thunk\n"
-msgstr "                 Tablo   Damga     Zincir   İsim      Parça\n"
-
-#: peigen.c:1182 pepigen.c:1182
+#: peigen.c:1181 pepigen.c:1181
 #, c-format
-msgid "\n\tDLL Name: %s\n"
-msgstr "\n\tDLL Adı: %s\n"
+msgid ""
+"\n"
+"\tDLL Name: %s\n"
+msgstr ""
+"\n"
+"\tDLL AdÄ±: %s\n"
 
-#: peigen.c:1186 peigen.c:1249 pepigen.c:1186 pepigen.c:1249
-msgid "\tvma:  Hint/Ord Member-Name\n"
-msgstr "\tvma:  İpucu/Sıra Üye-Adı\n"
+#: peigen.c:1192 pepigen.c:1192
+msgid "\tvma:  Hint/Ord Member-Name Bound-To\n"
+msgstr "\tvma:  Ä°pucu/SÄ±ra Ãœye-AdÄ± SÄ±nÄ±r\n"
 
-#: peigen.c:1248 pepigen.c:1248
-msgid "\tThe Import Address Table (difference found)\n"
-msgstr "\tİthal Adres Tablosu (fark bulundu)\n"
+#: peigen.c:1217 pepigen.c:1217
+msgid ""
+"\n"
+"There is a first thunk, but the section containing it could not be found\n"
+msgstr ""
+"\n"
+"Bir ilk parÃ§a var, fakat onu iÃ§eren bÃ¶lÃ¼m bulunamadÄ±\n"
 
-#: peigen.c:1255 pepigen.c:1255
-msgid "\t>>> Ran out of IAT members!\n"
-msgstr "\t>>> IAT üyeleri bitti!\n"
+#: peigen.c:1357 pepigen.c:1357
+msgid ""
+"\n"
+"There is an export table, but the section containing it could not be found\n"
+msgstr ""
+"\n"
+"Bir ihraÃ§ tablosu var, fakat onu iÃ§eren bÃ¶lÃ¼m bulunamadÄ±\n"
 
-#: peigen.c:1273 pepigen.c:1273
-msgid "\tThe Import Address Table is identical\n"
-msgstr "\tİthal Adres Tablosu aynı\n"
-
-#: peigen.c:1345 pepigen.c:1345
-msgid "\nThere is an export table, but the section containing it could not be found\n"
-msgstr "\nBir ihraç tablosu var, fakat onu içeren bölüm bulunamadı\n"
-
-#: peigen.c:1350 pepigen.c:1350
+#: peigen.c:1362 pepigen.c:1362
 #, c-format
-msgid "\nThere is an export table in %s at 0x%lx\n"
-msgstr "\n%s içinde 0x%lx'de bir ihraç tablosu var\n"
+msgid ""
+"\n"
+"There is an export table in %s at 0x%lx\n"
+msgstr ""
+"\n"
+"%s iÃ§inde 0x%lx'de bir ihraÃ§ tablosu var\n"
 
-#: peigen.c:1381 pepigen.c:1381
+#: peigen.c:1393 pepigen.c:1393
 #, c-format
-msgid "\nThe Export Tables (interpreted %s section contents)\n\n"
-msgstr "\nİhraç Tabloları (%s bölüm içeriği çözümlendi)\n\n"
+msgid ""
+"\n"
+"The Export Tables (interpreted %s section contents)\n"
+"\n"
+msgstr ""
+"\n"
+"Ä°hraÃ§ TablolarÄ± (%s bÃ¶lÃ¼m iÃ§eriÄŸi Ã§Ã¶zÃ¼mlendi)\n"
+"\n"
 
-#: peigen.c:1385 pepigen.c:1385
+#: peigen.c:1397 pepigen.c:1397
 #, c-format
 msgid "Export Flags \t\t\t%lx\n"
-msgstr "İhraç Bayrakları \t\t\t%lx\n"
-
-#: peigen.c:1388 pepigen.c:1388
-#, c-format
-msgid "Time/Date stamp \t\t%lx\n"
-msgstr "Saat/Tarih damgası \t\t%lx\n"
-
-#: peigen.c:1391 pepigen.c:1391
-#, c-format
-msgid "Major/Minor \t\t\t%d/%d\n"
-msgstr "Majör/Minör \t\t\t%d/%d\n"
-
-#: peigen.c:1394 pepigen.c:1394
-msgid "Name \t\t\t\t"
-msgstr "İsim \t\t\t\t"
+msgstr "Ä°hraÃ§ BayraklarÄ± \t\t\t%lx\n"
 
 #: peigen.c:1400 pepigen.c:1400
+#, c-format
+msgid "Time/Date stamp \t\t%lx\n"
+msgstr "Saat/Tarih damgasÄ± \t\t%lx\n"
+
+#: peigen.c:1403 pepigen.c:1403
+#, c-format
+msgid "Major/Minor \t\t\t%d/%d\n"
+msgstr "MajÃ¶r/MinÃ¶r \t\t\t%d/%d\n"
+
+#: peigen.c:1406 pepigen.c:1406
+msgid "Name \t\t\t\t"
+msgstr "Ä°sim \t\t\t\t"
+
+#: peigen.c:1412 pepigen.c:1412
 #, c-format
 msgid "Ordinal Base \t\t\t%ld\n"
 msgstr "Onluk Sistem \t\t\t%ld\n"
 
-#: peigen.c:1403 pepigen.c:1403
+#: peigen.c:1415 pepigen.c:1415
 msgid "Number in:\n"
-msgstr "Sayı içinde:\n"
+msgstr "SayÄ± iÃ§inde:\n"
 
-#: peigen.c:1406 pepigen.c:1406
+#: peigen.c:1418 pepigen.c:1418
 #, c-format
 msgid "\tExport Address Table \t\t%08lx\n"
-msgstr "\tİhraç Adres Tablosu \t\t%08lx\n"
+msgstr "\tÄ°hraÃ§ Adres Tablosu \t\t%08lx\n"
 
-#: peigen.c:1410 pepigen.c:1410
+#: peigen.c:1422 pepigen.c:1422
 #, c-format
 msgid "\t[Name Pointer/Ordinal] Table\t%08lx\n"
-msgstr "\t[İsim Gösterge/Onluk] Tablo\t%08lx\n"
+msgstr "\t[Ä°sim GÃ¶sterge/Onluk] Tablo\t%08lx\n"
 
-#: peigen.c:1413 pepigen.c:1413
+#: peigen.c:1425 pepigen.c:1425
 msgid "Table Addresses\n"
 msgstr "Tablo Adresleri\n"
 
-#: peigen.c:1416 pepigen.c:1416
+#: peigen.c:1428 pepigen.c:1428
 msgid "\tExport Address Table \t\t"
-msgstr "\tİhraç Adres Tablosu \t\t"
+msgstr "\tÄ°hraÃ§ Adres Tablosu \t\t"
 
-#: peigen.c:1421 pepigen.c:1421
+#: peigen.c:1433 pepigen.c:1433
 msgid "\tName Pointer Table \t\t"
-msgstr "\tİsim Gösterge Tablosu \t\t"
+msgstr "\tÄ°sim GÃ¶sterge Tablosu \t\t"
 
-#: peigen.c:1426 pepigen.c:1426
+#: peigen.c:1438 pepigen.c:1438
 msgid "\tOrdinal Table \t\t\t"
 msgstr "\tOnluk Tablo \t\t\t"
 
-#: peigen.c:1441 pepigen.c:1441
+#: peigen.c:1453 pepigen.c:1453
 #, c-format
-msgid "\nExport Address Table -- Ordinal Base %ld\n"
-msgstr "\nİhraç Adres Tablosu -- Onluk Sistem %ld\n"
+msgid ""
+"\n"
+"Export Address Table -- Ordinal Base %ld\n"
+msgstr ""
+"\n"
+"Ä°hraÃ§ Adres Tablosu -- Onluk Sistem %ld\n"
 
-#: peigen.c:1460 pepigen.c:1460
+#: peigen.c:1472 pepigen.c:1472
 msgid "Forwarder RVA"
-msgstr "RVA Yönlendiricisi"
+msgstr "RVA YÃ¶nlendiricisi"
 
-#: peigen.c:1471 pepigen.c:1471
+#: peigen.c:1483 pepigen.c:1483
 msgid "Export RVA"
-msgstr "RVA İhracı"
+msgstr "RVA Ä°hracÄ±"
 
-#: peigen.c:1478 pepigen.c:1478
-msgid "\n[Ordinal/Name Pointer] Table\n"
-msgstr "\n[Onluk/İsim Gösterge] Tablosu\n"
-
-#: peigen.c:1533 pepigen.c:1533
-#, c-format
-msgid "Warning, .pdata section size (%ld) is not a multiple of %d\n"
-msgstr "Uyarı, .pdata bölüm boyu (%ld) %d'nin katı değil\n"
-
-#: peigen.c:1537 pepigen.c:1537
-msgid "\nThe Function Table (interpreted .pdata section contents)\n"
-msgstr "\nİşlev Tablosu (.pdata bölüm içeriği çözümlendi)\n"
-
-#: peigen.c:1540 pepigen.c:1540
-msgid " vma:\t\t\tBegin Address    End Address      Unwind Info\n"
-msgstr " vma:\t\t\tBaşlangıç Adresi Sonlanma Adresi  Geri Al Bilgisi\n"
-
-#: peigen.c:1543 pepigen.c:1543
-msgid " vma:\t\tBegin    End      EH       EH       PrologEnd  Exception\n"
-msgstr " vma:\t\tBaşl.    Son      EH       EH       PrologSon  İstisna\n"
+#: peigen.c:1490 pepigen.c:1490
+msgid ""
+"\n"
+"[Ordinal/Name Pointer] Table\n"
+msgstr ""
+"\n"
+"[Onluk/Ä°sim GÃ¶sterge] Tablosu\n"
 
 #: peigen.c:1545 pepigen.c:1545
-msgid "     \t\tAddress  Address  Handler  Data     Address    Mask\n"
-msgstr "     \t\tAdres    Adres    Yön.     Veri     Adres      Mask\n"
+#, c-format
+msgid "Warning, .pdata section size (%ld) is not a multiple of %d\n"
+msgstr "UyarÄ±, .pdata bÃ¶lÃ¼m boyu (%ld) %d'nin katÄ± deÄŸil\n"
 
-#: peigen.c:1613 pepigen.c:1613
+#: peigen.c:1549 pepigen.c:1549
+msgid ""
+"\n"
+"The Function Table (interpreted .pdata section contents)\n"
+msgstr ""
+"\n"
+"Ä°ÅŸlev Tablosu (.pdata bÃ¶lÃ¼m iÃ§eriÄŸi Ã§Ã¶zÃ¼mlendi)\n"
+
+#: peigen.c:1552 pepigen.c:1552
+msgid " vma:\t\t\tBegin Address    End Address      Unwind Info\n"
+msgstr " vma:\t\t\tBaÅŸlangÄ±Ã§ Adresi Sonlanma Adresi  Geri Al Bilgisi\n"
+
+#: peigen.c:1554 pepigen.c:1554
+msgid ""
+" vma:\t\tBegin    End      EH       EH       PrologEnd  Exception\n"
+"     \t\tAddress  Address  Handler  Data     Address    Mask\n"
+msgstr ""
+" vma:\t\tBaÅŸl.    Son      EH       EH       PrologSon  Ä°stisna\n"
+"     \t\tAdres    Adres    Yakalay  Veri     Adres      Maske\n"
+
+#: peigen.c:1624 pepigen.c:1624
 msgid " Register save millicode"
 msgstr " Yazma milikodunu kaydet"
 
-#: peigen.c:1616 pepigen.c:1616
+#: peigen.c:1627 pepigen.c:1627
 msgid " Register restore millicode"
 msgstr " Geri alma milikodunu kaydet"
 
-#: peigen.c:1619 pepigen.c:1619
+#: peigen.c:1630 pepigen.c:1630
 msgid " Glue code sequence"
-msgstr " Birleştirici kod dizisi"
+msgstr " BirleÅŸtirici kod dizisi"
 
-#: peigen.c:1671 pepigen.c:1671
-msgid "\n\nPE File Base Relocations (interpreted .reloc section contents)\n"
-msgstr "\n\nPE Dosya Temel Yerdeğişimi (.reloc bölüm içeriği çözümlendi)\n"
+#: peigen.c:1682 pepigen.c:1682
+msgid ""
+"\n"
+"\n"
+"PE File Base Relocations (interpreted .reloc section contents)\n"
+msgstr ""
+"\n"
+"\n"
+"PE Dosya Temel YerdeÄŸiÅŸimi (.reloc bÃ¶lÃ¼m iÃ§eriÄŸi Ã§Ã¶zÃ¼mlendi)\n"
 
-#: peigen.c:1701 pepigen.c:1701
+#: peigen.c:1712 pepigen.c:1712
 #, c-format
-msgid "\nVirtual Address: %08lx Chunk size %ld (0x%lx) Number of fixups %ld\n"
-msgstr "\nSanal Adres: %08lx Parça boyu %ld (0x%lx) Düzeltme Sayısı %ld\n"
+msgid ""
+"\n"
+"Virtual Address: %08lx Chunk size %ld (0x%lx) Number of fixups %ld\n"
+msgstr ""
+"\n"
+"Sanal Adres: %08lx ParÃ§a boyu %ld (0x%lx) DÃ¼zeltme SayÄ±sÄ± %ld\n"
 
-#: peigen.c:1714 pepigen.c:1714
+#: peigen.c:1725 pepigen.c:1725
 #, c-format
 msgid "\treloc %4d offset %4x [%4lx] %s"
-msgstr "\tyer değişim %4d göreli konum %4x [%4lx] %s"
+msgstr "\tyer deÄŸiÅŸim %4d gÃ¶reli konum %4x [%4lx] %s"
 
 #. The MS dumpbin program reportedly ands with 0xff0f before
 #. printing the characteristics field.  Not sure why.  No reason to
 #. emulate it here.
-#: peigen.c:1754 pepigen.c:1754
+#: peigen.c:1765 pepigen.c:1765
 #, c-format
-msgid "\nCharacteristics 0x%x\n"
-msgstr "\nÖzellikler 0x%x\n"
+msgid ""
+"\n"
+"Characteristics 0x%x\n"
+msgstr ""
+"\n"
+"Ã–zellikler 0x%x\n"
+
+#~ msgid "GP relative relocation when GP not defined"
+#~ msgstr "GP tanÄ±mlanmamÄ±ÅŸken GP gÃ¶reli yer deÄŸiÅŸtirmesi"
+
+#~ msgid "%s: ERROR: passes floats in float registers whereas target %s uses integer registers"
+#~ msgstr "%s: HATA: kayan sayÄ±larÄ± kayan yazmaÃ§larda geÃ§iriyor fakat hedef %s tamsayÄ± yazmaÃ§ kullanÄ±yor"
+
+#~ msgid "%s: ERROR: passes floats in integer registers whereas target %s uses float registers"
+#~ msgstr "%s: HATA: kayan sayÄ±larÄ± tamsayÄ± yazmaÃ§larda geÃ§iriyor fakat hedef %s kayan yazmaÃ§ kullanÄ±yor"
+
+#~ msgid "Warning: input file %s supports interworking, whereas %s does not."
+#~ msgstr "UyarÄ±: %s girdi dosyasÄ± beraber Ã§alÄ±ÅŸmayÄ± destekliyor, fakat %s desteklemiyor."
+
+#~ msgid "Warning: input file %s does not support interworking, whereas %s does."
+#~ msgstr "UyarÄ±: %s girdi dosyasÄ± beraber Ã§alÄ±ÅŸmayÄ± desteklemiyor, fakat %s destekliyor."
+
+#~ msgid "AUX tagndx %ld ttlsiz 0x%lx lnnos %ld next %ld"
+#~ msgstr "AUX tagndx %ld ttlsiz 0x%lx lnnos %ld sonraki %ld"
+
+#~ msgid "elf_symbol_from_bfd_symbol 0x%.8lx, name = %s, sym num = %d, flags = 0x%.8lx%s\n"
+#~ msgstr "bfd sembolÃ¼nden elf sembolÃ¼:0x%.8lx, isim= %s, sem num = %d, bayrak = 0x%.8lx%s\n"
+
+#~ msgid "Warning: Not setting interwork flag of %s since it has already been specified as non-interworking"
+#~ msgstr "UyarÄ±: beraber Ã§alÄ±ÅŸmaz diye Ã¶nceden belirtilmiÅŸ olduÄŸundan %s'nin beraber Ã§alÄ±ÅŸma bayraÄŸÄ± atanmadÄ±"
+
+#~ msgid "Warning: Clearing the interwork flag of %s due to outside request"
+#~ msgstr "UyarÄ±: DÄ±ÅŸ isteÄŸe uyularak %s'nin beraber Ã§alÄ±ÅŸma bayraÄŸÄ± temizlendi"
+
+#~ msgid " [APCS-26]"
+#~ msgstr " [APCS-26]"
+
+#~ msgid " [APCS-32]"
+#~ msgstr " [APCS-32]"
+
+#~ msgid "(unknown)"
+#~ msgstr "(bilinmeyen)"
+
+#~ msgid "  previously %s in %s"
+#~ msgstr "  daha Ã¶nce %2$s iÃ§inde %1$s"
+
+#~ msgid "ETIR_S_C_STO_GBL: no symbol \"%s\""
+#~ msgstr "ETIR_S_C_STO_GBL: sembol yok \"%s\""
+
+#~ msgid "ETIR_S_C_STO_CA: no symbol \"%s\""
+#~ msgstr "ETIR_S_C_STO_CA: sembol yok \"%s\""
+
+#~ msgid "ETIR_S_C_STO_RB/AB: Not supported"
+#~ msgstr "ETIR_S_C_STO_RB/AB: Desteklenmiyor"
+
+#~ msgid "ETIR_S_C_STO_LP_PSB: Not supported"
+#~ msgstr "ETIR_S_C_STO_LP_PSB: Desteklenmiyor"
+
+#~ msgid "ETIR_S_C_STO_HINT_GBL: not implemented"
+#~ msgstr "ETIR_S_C_STO_HINT_GBL: tamamlanmamÄ±ÅŸ"
+
+#~ msgid "ETIR_S_C_STO_HINT_PS: not implemented"
+#~ msgstr "ETIR_S_C_STO_HINT_PS: tamamlanmamÄ±ÅŸ"
+
+#~ msgid "ETIR_S_C_OPR_INSV: Not supported"
+#~ msgstr "ETIR_S_C_OPR_INSV: Desteklenmiyor"
+
+#~ msgid "ETIR_S_C_OPR_USH: Not supported"
+#~ msgstr "ETIR_S_C_OPR_USH: Desteklenmiyor"
+
+#~ msgid "ETIR_S_C_OPR_ROT: Not supported"
+#~ msgstr "ETIR_S_C_OPR_ROT: Desteklenmiyor"
+
+#~ msgid "ETIR_S_C_OPR_REDEF: Not supported"
+#~ msgstr "ETIR_S_C_OPR_REDEF: Desteklenmiyor"
+
+#~ msgid "ETIR_S_C_OPR_DFLIT: Not supported"
+#~ msgstr "ETIR_S_C_OPR_DFLIT: Desteklenmiyor"
+
+#~ msgid "ETIR_S_C_STC_GBL: not supported"
+#~ msgstr "ETIR_S_C_STC_GBL: desteklenmiyor"
+
+#~ msgid "ETIR_S_C_STC_GCA: not supported"
+#~ msgstr "ETIR_S_C_STC_GCA: desteklenmiyor"
+
+#~ msgid "ETIR_S_C_STC_PS: not supported"
+#~ msgstr "ETIR_S_C_STC_PS: desteklenmiyor"
+
+#~ msgid "Unimplemented STO cmd %d"
+#~ msgstr "TamamlanmamÄ±ÅŸ STO komutu %d"
+
+#~ msgid "TIR_S_C_OPR_ASH incomplete"
+#~ msgstr "TIR_S_C_OPR_ASH tamamlanmamÄ±ÅŸ"
+
+#~ msgid "TIR_S_C_OPR_USH incomplete"
+#~ msgstr "TIR_S_C_OPR_USH tamamlanmamÄ±ÅŸ"
+
+#~ msgid "TIR_S_C_OPR_ROT incomplete"
+#~ msgstr "TIR_S_C_OPR_ROT tamamlanmamÄ±ÅŸ"
+
+#~ msgid "TIR_S_C_OPR_REDEF not supported"
+#~ msgstr "TIR_S_C_OPR_REDEF desteklenmiyor"
+
+#~ msgid "TIR_S_C_OPR_DFLIT not supported"
+#~ msgstr "TIR_S_C_OPR_DFLIT desteklenmiyor"
+
+#~ msgid "TIR_S_C_CTL_DFLOC not fully implemented"
+#~ msgstr "TIR_S_C_CTL_DFLOC tamamlanmamÄ±ÅŸ"
+
+#~ msgid "TIR_S_C_CTL_STLOC not fully implemented"
+#~ msgstr "TIR_S_C_CTL_STLOC tamamlanmamÄ±ÅŸ"
+
+#~ msgid "TIR_S_C_CTL_STKDL not fully implemented"
+#~ msgstr "TIR_S_C_CTL_STKDL tamamlanmamÄ±ÅŸ"
+
+#~ msgid " vma:            Hint    Time      Forward  DLL       First\n"
+#~ msgstr " vma:            Ä°pucu   Zaman     Ä°leri    DLL       Ä°lk\n"
+
+#~ msgid "\tThe Import Address Table (difference found)\n"
+#~ msgstr "\tÄ°thal Adres Tablosu (fark bulundu)\n"
+
+#~ msgid "\t>>> Ran out of IAT members!\n"
+#~ msgstr "\t>>> IAT Ã¼yeleri bitti!\n"
+
+#~ msgid "\tThe Import Address Table is identical\n"
+#~ msgstr "\tÄ°thal Adres Tablosu aynÄ±\n"
+
+#~ msgid "     \t\tAddress  Address  Handler  Data     Address    Mask\n"
+#~ msgstr "     \t\tAdres    Adres    YÃ¶n.     Veri     Adres      Mask\n"

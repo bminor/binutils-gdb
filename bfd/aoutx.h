@@ -533,7 +533,7 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
   obj_aout_sym_hashes (abfd) = NULL;
 
   if (! NAME(aout,make_sections) (abfd))
-    return NULL;
+    goto error_ret;
 
   obj_datasec (abfd)->_raw_size = execp->a_data;
   obj_bsssec (abfd)->_raw_size = execp->a_bss;
@@ -655,13 +655,13 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
       obj_textsec (abfd)->next = obj_datasec (abfd);
       obj_datasec (abfd)->next = obj_bsssec (abfd);
 #endif
+      return result;
     }
-  else
-    {
-      free (rawptr);
-      abfd->tdata.aout_data = oldrawptr;
-    }
-  return result;
+
+ error_ret:
+  bfd_release (abfd, rawptr);
+  abfd->tdata.aout_data = oldrawptr;
+  return NULL;
 }
 
 /*
@@ -4186,7 +4186,8 @@ aout_link_write_symbols (finfo, input_bfd)
 
 	  /* Use the name from the hash table, in case the symbol was
              wrapped.  */
-	  if (h != NULL)
+	  if (h != NULL
+	      && h->root.type != bfd_link_hash_warning)
 	    name = h->root.root.string;
 
 	  /* If this is an indirect or warning symbol, then change
@@ -4208,7 +4209,6 @@ aout_link_write_symbols (finfo, input_bfd)
 
 	  /* If the symbol has already been written out, skip it.  */
 	  if (h != (struct aout_link_hash_entry *) NULL
-	      && h->root.type != bfd_link_hash_warning
 	      && h->written)
 	    {
 	      if ((type & N_TYPE) == N_INDR
