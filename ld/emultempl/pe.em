@@ -516,7 +516,8 @@ gld_${EMULATION_NAME}_after_parse ()
      opened, so registering the symbol as undefined will make a
      difference.  */
 
-  ldlang_add_undef (entry_symbol);
+  if (entry_symbol)
+    ldlang_add_undef (entry_symbol);
 }
 
 static struct bfd_link_hash_entry *pe_undef_found_sym;
