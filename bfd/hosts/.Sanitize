@@ -30,6 +30,7 @@ Things-to-keep:
 h-dec3100.h
 h-dgux.h
 h-hp9000.h
+h-hp300bsd.h
 h-i386v.h
 h-rs6000.h
 h-rtbsd.h
@@ -47,7 +48,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.2  1991/07/24 00:59:57  gnu
+# Revision 1.3  1991/08/22 08:01:20  gnu
+# Add hp 300 BSD.
+#
+# Revision 1.2  1991/07/24  00:59:57  gnu
 # Add h-rtbsd.h.
 #
 # Revision 1.1  1991/05/23  16:56:36  rich
