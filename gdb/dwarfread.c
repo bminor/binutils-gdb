@@ -1553,30 +1553,39 @@ read_tag_string_type (dip)
   unsigned long lowbound = 0;
   unsigned long highbound;
 
-  if ((utype = lookup_utype (dip -> die_ref)) != NULL)
+  if (dip -> has_at_byte_size)
     {
-      /* Ack, someone has stuck a type in the slot we want.  Complain
-	 about it. */
-      complain (&dup_user_type_definition, DIE_ID, DIE_NAME);
+      /* A fixed bounds string */
+      highbound = dip -> at_byte_size - 1;
     }
   else
     {
-      if (dip -> has_at_byte_size)
-	{
-	  /* A fixed bounds string */
-	  highbound = dip -> at_byte_size - 1;
-	}
-      else
-	{
-	  /* A varying length string.  Stub for now.  (FIXME) */
-	  highbound = 1;
-	}
-      indextype = dwarf_fundamental_type (current_objfile, FT_INTEGER);
-      rangetype = create_range_type ((struct type *) NULL, indextype,
-				     lowbound, highbound);
-      utype = create_string_type ((struct type *) NULL, rangetype);
-      alloc_utype (dip -> die_ref, utype);
+      /* A varying length string.  Stub for now.  (FIXME) */
+      highbound = 1;
     }
+  indextype = dwarf_fundamental_type (current_objfile, FT_INTEGER);
+  rangetype = create_range_type ((struct type *) NULL, indextype, lowbound,
+				 highbound);
+      
+  utype = lookup_utype (dip -> die_ref);
+  if (utype == NULL)
+    {
+      /* No type defined, go ahead and create a blank one to use. */
+      utype = alloc_utype (dip -> die_ref, (struct type *) NULL);
+    }
+  else
+    {
+      /* Already a type in our slot due to a forward reference. Make sure it
+	 is a blank one.  If not, complain and leave it alone. */
+      if (TYPE_CODE (utype) != TYPE_CODE_UNDEF)
+	{
+	  complain (&dup_user_type_definition, DIE_ID, DIE_NAME);
+	  return;
+	}
+    }
+
+  /* Create the string type using the blank type we either found or created. */
+  utype = create_string_type (utype, rangetype);
 }
 
 /*

@@ -223,10 +223,14 @@ chill_create_fundamental_type (objfile, typeid)
       case FT_UNSIGNED_SHORT:		/* Chill ints are 2 bytes */
 	type = init_type (TYPE_CODE_INT, 2, TYPE_FLAG_UNSIGNED, "UINT", objfile);
 	break;
-      case FT_INTEGER:			/* Chill longs are 4 bytes */
+      case FT_INTEGER:			/* FIXME? */
+      case FT_SIGNED_INTEGER:		/* FIXME? */
+      case FT_LONG:			/* Chill longs are 4 bytes */
+      case FT_SIGNED_LONG:		/* Chill longs are 4 bytes */
 	type = init_type (TYPE_CODE_INT, 4, TYPE_FLAG_SIGNED, "LONG", objfile);
 	break;
-      case FT_UNSIGNED_INTEGER:		/* Chill longs are 4 bytes */
+      case FT_UNSIGNED_INTEGER:		/* FIXME? */
+      case FT_UNSIGNED_LONG:		/* Chill longs are 4 bytes */
 	type = init_type (TYPE_CODE_INT, 4, TYPE_FLAG_UNSIGNED, "ULONG", objfile);
 	break;
       case FT_FLOAT:
