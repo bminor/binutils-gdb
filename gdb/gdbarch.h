@@ -232,6 +232,11 @@ extern void set_gdbarch_ieee_float (struct gdbarch *gdbarch, int ieee_float);
 #endif
 #endif
 
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (TARGET_READ_PC)
+#define TARGET_READ_PC(pid) (generic_target_read_pc (pid))
+#endif
+
 typedef CORE_ADDR (gdbarch_read_pc_ftype) (int pid);
 extern CORE_ADDR gdbarch_read_pc (struct gdbarch *gdbarch, int pid);
 extern void set_gdbarch_read_pc (struct gdbarch *gdbarch, gdbarch_read_pc_ftype *read_pc);
@@ -239,6 +244,11 @@ extern void set_gdbarch_read_pc (struct gdbarch *gdbarch, gdbarch_read_pc_ftype 
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_READ_PC)
 #define TARGET_READ_PC(pid) (gdbarch_read_pc (current_gdbarch, pid))
 #endif
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (TARGET_WRITE_PC)
+#define TARGET_WRITE_PC(val, pid) (generic_target_write_pc (val, pid))
 #endif
 
 typedef void (gdbarch_write_pc_ftype) (CORE_ADDR val, int pid);
@@ -250,6 +260,11 @@ extern void set_gdbarch_write_pc (struct gdbarch *gdbarch, gdbarch_write_pc_ftyp
 #endif
 #endif
 
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (TARGET_READ_FP)
+#define TARGET_READ_FP() (generic_target_read_fp ())
+#endif
+
 typedef CORE_ADDR (gdbarch_read_fp_ftype) (void);
 extern CORE_ADDR gdbarch_read_fp (struct gdbarch *gdbarch);
 extern void set_gdbarch_read_fp (struct gdbarch *gdbarch, gdbarch_read_fp_ftype *read_fp);
@@ -257,6 +272,11 @@ extern void set_gdbarch_read_fp (struct gdbarch *gdbarch, gdbarch_read_fp_ftype 
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_READ_FP)
 #define TARGET_READ_FP() (gdbarch_read_fp (current_gdbarch))
 #endif
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (TARGET_WRITE_FP)
+#define TARGET_WRITE_FP(val) (generic_target_write_fp (val))
 #endif
 
 typedef void (gdbarch_write_fp_ftype) (CORE_ADDR val);
@@ -268,6 +288,11 @@ extern void set_gdbarch_write_fp (struct gdbarch *gdbarch, gdbarch_write_fp_ftyp
 #endif
 #endif
 
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (TARGET_READ_SP)
+#define TARGET_READ_SP() (generic_target_read_sp ())
+#endif
+
 typedef CORE_ADDR (gdbarch_read_sp_ftype) (void);
 extern CORE_ADDR gdbarch_read_sp (struct gdbarch *gdbarch);
 extern void set_gdbarch_read_sp (struct gdbarch *gdbarch, gdbarch_read_sp_ftype *read_sp);
@@ -275,6 +300,11 @@ extern void set_gdbarch_read_sp (struct gdbarch *gdbarch, gdbarch_read_sp_ftype 
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_READ_SP)
 #define TARGET_READ_SP() (gdbarch_read_sp (current_gdbarch))
 #endif
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (TARGET_WRITE_SP)
+#define TARGET_WRITE_SP(val) (generic_target_write_sp (val))
 #endif
 
 typedef void (gdbarch_write_sp_ftype) (CORE_ADDR val);

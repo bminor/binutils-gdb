@@ -383,6 +383,12 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->long_double_bit = 2*TARGET_DOUBLE_BIT;
   gdbarch->ptr_bit = TARGET_INT_BIT;
   gdbarch->bfd_vma_bit = TARGET_ARCHITECTURE->bits_per_address;
+  gdbarch->read_pc = generic_target_read_pc;
+  gdbarch->write_pc = generic_target_write_pc;
+  gdbarch->read_fp = generic_target_read_fp;
+  gdbarch->write_fp = generic_target_write_fp;
+  gdbarch->read_sp = generic_target_read_sp;
+  gdbarch->write_sp = generic_target_write_sp;
   gdbarch->num_regs = -1;
   gdbarch->sp_regnum = -1;
   gdbarch->fp_regnum = -1;
@@ -465,24 +471,12 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of ptr_bit, invalid_p == 0 */
   /* Skip verify of bfd_vma_bit, invalid_p == 0 */
   /* Skip verify of ieee_float, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH >= 1)
-      && (gdbarch->read_pc == 0))
-    internal_error ("gdbarch: verify_gdbarch: read_pc invalid");
-  if ((GDB_MULTI_ARCH >= 1)
-      && (gdbarch->write_pc == 0))
-    internal_error ("gdbarch: verify_gdbarch: write_pc invalid");
-  if ((GDB_MULTI_ARCH >= 1)
-      && (gdbarch->read_fp == 0))
-    internal_error ("gdbarch: verify_gdbarch: read_fp invalid");
-  if ((GDB_MULTI_ARCH >= 1)
-      && (gdbarch->write_fp == 0))
-    internal_error ("gdbarch: verify_gdbarch: write_fp invalid");
-  if ((GDB_MULTI_ARCH >= 1)
-      && (gdbarch->read_sp == 0))
-    internal_error ("gdbarch: verify_gdbarch: read_sp invalid");
-  if ((GDB_MULTI_ARCH >= 1)
-      && (gdbarch->write_sp == 0))
-    internal_error ("gdbarch: verify_gdbarch: write_sp invalid");
+  /* Skip verify of read_pc, invalid_p == 0 */
+  /* Skip verify of write_pc, invalid_p == 0 */
+  /* Skip verify of read_fp, invalid_p == 0 */
+  /* Skip verify of write_fp, invalid_p == 0 */
+  /* Skip verify of read_sp, invalid_p == 0 */
+  /* Skip verify of write_sp, invalid_p == 0 */
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->num_regs == -1))
     internal_error ("gdbarch: verify_gdbarch: num_regs invalid");

@@ -200,11 +200,6 @@ default_get_saved_register (char *raw_buffer,
     *addrp = addr;
 }
 
-#if !defined (GET_SAVED_REGISTER)
-#define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
-  default_get_saved_register(raw_buffer, optimized, addrp, frame, regnum, lval)
-#endif
-
 void
 get_saved_register (char *raw_buffer,
 		    int *optimized,
@@ -715,10 +710,6 @@ supply_register (int regno, char *val)
    eliminate the intermediate read_pc_pid().  The client would call
    TARGET_READ_PC directly. (cagney). */
 
-#ifndef TARGET_READ_PC
-#define TARGET_READ_PC generic_target_read_pc
-#endif
-
 CORE_ADDR
 generic_target_read_pc (int pid)
 {
@@ -754,10 +745,6 @@ read_pc (void)
 {
   return read_pc_pid (inferior_pid);
 }
-
-#ifndef TARGET_WRITE_PC
-#define TARGET_WRITE_PC generic_target_write_pc
-#endif
 
 void
 generic_target_write_pc (CORE_ADDR pc, int pid)
@@ -796,10 +783,6 @@ write_pc (CORE_ADDR pc)
 
 /* Cope with strage ways of getting to the stack and frame pointers */
 
-#ifndef TARGET_READ_SP
-#define TARGET_READ_SP generic_target_read_sp
-#endif
-
 CORE_ADDR
 generic_target_read_sp (void)
 {
@@ -815,10 +798,6 @@ read_sp (void)
 {
   return TARGET_READ_SP ();
 }
-
-#ifndef TARGET_WRITE_SP
-#define TARGET_WRITE_SP generic_target_write_sp
-#endif
 
 void
 generic_target_write_sp (CORE_ADDR val)
@@ -839,10 +818,6 @@ write_sp (CORE_ADDR val)
   TARGET_WRITE_SP (val);
 }
 
-#ifndef TARGET_READ_FP
-#define TARGET_READ_FP generic_target_read_fp
-#endif
-
 CORE_ADDR
 generic_target_read_fp (void)
 {
@@ -858,10 +833,6 @@ read_fp (void)
 {
   return TARGET_READ_FP ();
 }
-
-#ifndef TARGET_WRITE_FP
-#define TARGET_WRITE_FP generic_target_write_fp
-#endif
 
 void
 generic_target_write_fp (CORE_ADDR val)

@@ -324,15 +324,14 @@ v::TARGET_PTR_BIT:int:ptr_bit::::8 * sizeof (void*):TARGET_INT_BIT::0
 # Number of bits in a BFD_VMA for the target object file format.
 v::TARGET_BFD_VMA_BIT:int:bfd_vma_bit::::8 * sizeof (void*):TARGET_ARCHITECTURE->bits_per_address::0
 #
-v:1:IEEE_FLOAT:int:ieee_float::::0:0::0:::
+v::IEEE_FLOAT:int:ieee_float::::0:0::0:::
 #
-f:1:TARGET_READ_PC:CORE_ADDR:read_pc:int pid:pid::0:0
-f:1:TARGET_WRITE_PC:void:write_pc:CORE_ADDR val, int pid:val, pid::0:0
-f:1:TARGET_READ_FP:CORE_ADDR:read_fp:void:::0:0
-f:1:TARGET_WRITE_FP:void:write_fp:CORE_ADDR val:val::0:0
-f:1:TARGET_READ_SP:CORE_ADDR:read_sp:void:::0:0
-f:1:TARGET_WRITE_SP:void:write_sp:CORE_ADDR val:val::0:0
-#
+f::TARGET_READ_PC:CORE_ADDR:read_pc:int pid:pid::0:generic_target_read_pc::0
+f::TARGET_WRITE_PC:void:write_pc:CORE_ADDR val, int pid:val, pid::0:generic_target_write_pc::0
+f::TARGET_READ_FP:CORE_ADDR:read_fp:void:::0:generic_target_read_fp::0
+f::TARGET_WRITE_FP:void:write_fp:CORE_ADDR val:val::0:generic_target_write_fp::0
+f::TARGET_READ_SP:CORE_ADDR:read_sp:void:::0:generic_target_read_sp::0
+f::TARGET_WRITE_SP:void:write_sp:CORE_ADDR val:val::0:generic_target_write_sp::0
 #
 v:2:NUM_REGS:int:num_regs::::0:-1
 # This macro gives the number of pseudo-registers that live in the

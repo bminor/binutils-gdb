@@ -1,3 +1,11 @@
+2000-08-10  Andrew Cagney  <cagney@ops1.cygnus.com>
+
+	* regcache.c (TARGET_WRITE_PC, TARGET_READ_PC, TARGET_READ_FP,
+	TARGET_WRITE_FP, TARGET_READ_SP, TARGET_WRITE_SP): Move
+	initialization from here.
+	* gdbarch.sh: To here.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
 Thu Aug 10 18:58:04 2000  Andrew Cagney  <cagney@makita.cygnus.com>
 
 	* defs.h (TARGET_BFD_VMA_BIT, TARGET_SHORT_BIT, TARGET_INT_BIT,
