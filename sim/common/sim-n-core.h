@@ -211,7 +211,7 @@ sim_core_read_unaligned_N(sim_cpu *cpu,
 			  XSTRING (sim_core_read_unaligned_N));
 	/* to keep some compilers happy, we return a dummy */
 	{
-	  unsigned_M val[1] = { };
+	  unsigned_M val[1] = { 0 };
 	  return val[0];
 	}
       }

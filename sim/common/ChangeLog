@@ -1,3 +1,9 @@
+1997-11-13  Felix Lee  <flee@cygnus.com>
+
+	* sim-n-core.h (sim_core_read_unaligned_N): illegal empty
+	initializer.
+	* sim-types.h (unsigned128,signed128): fix typo for MSVC.
+
 Wed Nov 12 12:18:08 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* aclocal.m4 (SIM_AC_OPTION_SCACHE): Fix typo.
