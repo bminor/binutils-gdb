@@ -1,4 +1,4 @@
-2003-10-11  Alan Modra  <alan@modra.org>
+2003-10-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* corefile.c (core_create_function_syms): Don't refer directly to
 	_cooked_size and vma;  Use bfd_section_size and bfd_get_section_vma.
@@ -348,9 +348,9 @@
 2002-01-26  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* mips.c: New file.
-	* Makefile.am (sources): Add mips.c. 
+	* Makefile.am (sources): Add mips.c.
 	(mips.o): New rule.
-	* Makefile.in: Regenerate. 
+	* Makefile.in: Regenerate.
 	* corefile.c: Update copyright years.
 	(find_call): Call mips_find_call for bfd_arch_mips.
 
@@ -438,11 +438,11 @@
 
 2001-06-18  H.J. Lu <hjl@gnu.org>
 
-        * Makefile.am (diststuff): Add $(MANS).
-        (gprof.1): Remove the prefix `$(srcdir)/'.
-        * Makefile.in: Regenerated.
+	* Makefile.am (diststuff): Add $(MANS).
+	(gprof.1): Remove the prefix `$(srcdir)/'.
+	* Makefile.in: Regenerated.
 
-        * gprof.1: Removed.
+	* gprof.1: Removed.
 
 2001-06-12  Ben Elliston  <bje@redhat.com>
 
@@ -561,7 +561,7 @@
 	* configure: Regenerate.
 	* aclocal.m4: Regenerate.
 	* config.in: Regenerate.
-	
+
 2000-08-31  Alexandre Oliva  <aoliva@redhat.com>
 
 	* acinclude.m4: Include libtool and gettext macros from the
@@ -570,7 +570,7 @@
 
 2000-07-26  Nick Clifton  <nickc@cygnus.com>
 
-	* bb_exit_func.c: Assign copyright to FSF.  Note that David 
+	* bb_exit_func.c: Assign copyright to FSF.  Note that David
 	Mosberger-Tang <David.Mosberger@acm.org> continuted this code.
 
 2000-07-24  Nick Clifton  <nickc@cygnus.com>
@@ -599,8 +599,8 @@
 
 2000-07-05  Kenneth Block  <krblock@computer.org>
 
-        * gprof.c: Add optional style to demangle switch
-        * gprof.texi: Document optional style to demangle switch.
+	* gprof.c: Add optional style to demangle switch
+	* gprof.texi: Document optional style to demangle switch.
 
 2000-06-05  DJ Delorie  <dj@redhat.com>
 
@@ -691,9 +691,9 @@
 	HAVE_SYSCONF, try setitimer and fall back on sysconf.
 
 2000-04-07  Andrew Cagney  <cagney@b1.cygnus.com>
- 
+
 	* configure.in (WARN_CFLAGS): Set to -W -Wall by default.  Add
- 	--enable-build-warnings option.
+	--enable-build-warnings option.
 	* Makefile.am (AM_CFLAGS, WARN_CFLAGS): Add definitions.
 	* Makefile.in, configure, aclocal.m4: Re-generate.
 
@@ -729,10 +729,10 @@
 
 1999-09-29  Mark Kettenis  <kettenis@gnu.org>
 
-        * hertz.h [MACH] (hertz): Remove macro.  The
-        <machine/mach_param.h> include doesn't exist on al Mach based
-        systems, and the definition of hertz breaks compilation of hertz.c
-        anyway.
+	* hertz.h [MACH] (hertz): Remove macro.  The
+	<machine/mach_param.h> include doesn't exist on al Mach based
+	systems, and the definition of hertz breaks compilation of hertz.c
+	anyway.
 
 2000-02-22  Ian Lance Taylor  <ian@zembu.com>
 
@@ -838,8 +838,8 @@ Tue Feb 16 17:01:33 1999  Ian Lance Taylor  <ian@cygnus.com>
 
 1998-11-02  Geoffrey Noer  <noer@cygnus.com>
 
-        * configure.in: detect cygwin* instead of cygwin32*
-        * configure: regenerate
+	* configure.in: detect cygwin* instead of cygwin32*
+	* configure: regenerate
 
 Wed Aug 12 14:59:06 1998  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -1011,7 +1011,7 @@ Tue Feb  3 14:25:25 1998  Brent Baccala  <baccala@freesoft.org>
 	use a non-function as a main listing item.
 
 	* call_graph.c (cg_tally): When using line by line profiling, use
- 	the function symbol as the child.
+	the function symbol as the child.
 
 	* symtab.h (NBBS): Define.
 	(Sym): Add bb_addr and bb_calls fields.
@@ -1160,8 +1160,8 @@ Thu Mar 27 17:15:23 1997  Ian Lance Taylor  <ian@cygnus.com>
 Mon Mar 24 11:12:26 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (.c.o): Define TARGET_$(MY_TARGET) when compiling.
-  	* gmon.h: Use bytes counts rather than sizeof in struct raw_phdr
- 	and struct raw_arc.
+	* gmon.h: Use bytes counts rather than sizeof in struct raw_phdr
+	and struct raw_arc.
 
 Mon Mar 17 10:54:47 1997  David Mosberger-Tang  <davidm@azstarnet.com>
 
@@ -1314,7 +1314,7 @@ Tue Mar 12 12:19:50 1996  Ian Lance Taylor  <ian@cygnus.com>
 Sun Feb 18 15:06:18 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Check for 'do not mix' from native linker before
- 	trying to use -rpath.
+	trying to use -rpath.
 	* configure: Rebuild.
 
 Tue Feb 13 15:32:53 1996  Ian Lance Taylor  <ian@cygnus.com>
@@ -1498,7 +1498,7 @@ Mon Mar 13 21:44:24 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* All *.c: More cleanup towards GNU format.
 
-	* gmon_out.h (struct gmon_hist_hdr, struct gmon_cg_arc_record): 
+	* gmon_out.h (struct gmon_hist_hdr, struct gmon_cg_arc_record):
 	replaced sizeof (bfd_vma) by size (char*) because Ken tells me
 	that bfd_vma is only guaranteed to be at least as big as a pointer.
 
@@ -1543,7 +1543,7 @@ Sun Feb  5 16:19:46 1995  David Mosberger-Tang  <davidm@piston.cs.arizona.edu>
 	(usage): update to reflect new options.
 
 	* gmon_io.c: replaced "old_file_format" by more general
-        "file_format" option
+	"file_format" option
 
 	* gmon.h (struct raw_phdr): fixed declaration for OSF/1.
 
@@ -1556,9 +1556,9 @@ Sun Feb  5 16:19:46 1995  David Mosberger-Tang  <davidm@piston.cs.arizona.edu>
 
 	(core_create_function_syms): get_src_info() calls are currently
 	enabled for OSF/1 only.  It appears to work allright for SunOS
-        4.1.x as well, but on SPARCs it gets painfully slow with the
-        current implementation of aout_32_find_nearest_line();
-        unfortunately, this means that static functions will not have their
+	4.1.x as well, but on SPARCs it gets painfully slow with the
+	current implementation of aout_32_find_nearest_line();
+	unfortunately, this means that static functions will not have their
 	filename printed in the call-graph function index; line-level
 	profiling should still work, but requires some patience
 
@@ -1763,7 +1763,7 @@ Tue Jan 31 16:18:18 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	  (aka name-list entry) for each line of source code, instead
 	   of one per function)
 
-	+ support for a new gmon.out file format; the new format 
+	+ support for a new gmon.out file format; the new format
 	  consists of a header with a magic and a version number,
 	  followed by a sequence of profile data; profile data
 	  can any of: (a) PC histogram, (b) call-graph arcs, or
@@ -1901,7 +1901,7 @@ Fri May 27 12:24:57 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 Tue May 17 15:30:22 1994  E. Michael Smith (ems@cygnus.com)
 
-	* Makefile.in (.m.c:):  Added .SUFFIXES : .m 
+	* Makefile.in (.m.c:):  Added .SUFFIXES : .m
 	so flat_bl.c would make from flat_bl.m file.
 
 Thu May  5 19:23:24 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
@@ -1941,7 +1941,7 @@ Wed Dec 15 20:16:40 1993  david d `zoo' zuhn  (zoo@andros.cygnus.com)
 
 Wed Dec  8 16:55:06 1993  david d `zoo' zuhn  (zoo@andros.cygnus.com)
 
-	* gprof.c (VERSION): defined a version macro, print the value 
+	* gprof.c (VERSION): defined a version macro, print the value
 	when the -v option is used
 
 Tue Jul  6 10:11:56 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
@@ -2037,7 +2037,7 @@ Mon Oct  5 17:50:16 1992  Per Bothner  (bothner@cygnus.com)
 	* Makefile.in: Use gen-cprog.awk to generate *_bl.c files
 	from *_bl.m files.  Also, improve *clean rules.
 	* printgprof.c (printgprof):  Usw new function names from *_bl.c.
-	
+
 
 Sun Aug 30 19:54:53 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
@@ -2074,10 +2074,10 @@ Wed Aug 12 15:14:14 1992  Mark Eichin  (eichin@cygnus.com)
 Sun Jul 19 17:34:01 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* Makefile.in:  removed installation of the now useless
-	call.{flag,callg} files.  
+	call.{flag,callg} files.
 
 	* gprof.1: now uses the standard man macros instead of the new BSD
-	mandoc macros. 
+	mandoc macros.
 
 Sun Jul 12 19:06:00 1992  John Gilmore  (gnu at cygnus.com)
 
