@@ -47,10 +47,10 @@ into another language, under the above conditions for modified versions.
 
 @setchapternewpage odd
 @settitle GNU Binary Utilities
-@titlepage
-@finalout
 @c @smallbook
 @c @cropmarks
+@titlepage
+@finalout
 @title The GNU Binary Utilities
 @subtitle Version 1.97
 @sp 1
