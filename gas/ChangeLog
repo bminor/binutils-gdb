@@ -1,5 +1,10 @@
 2000-02-10  Timothy Wall  <twall@redhat.com>
 
+	* read.c (read_a_source_file): If TC_START_LABEL_WITHOUT_COLON is
+	defined, use it to verify the symbol just read should be a label.
+
+2000-02-10  Timothy Wall  <twall@redhat.com>
+
 	* app.c (do_scrub_chars): Handle "||" for parallel instructions
 	when DOUBLEBAR_PARALLEL is defined.  Avoid stripping whitespace
 	around colons when KEEP_WHITE_AROUND_COLON is defined.

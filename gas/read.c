@@ -599,7 +599,12 @@ read_a_source_file (name)
 		      /* In MRI mode, we need to handle the MACRO
                          pseudo-op specially: we don't want to put the
                          symbol in the symbol table.  */
-		      if (! mri_line_macro)
+		      if (! mri_line_macro 
+#ifdef TC_START_LABEL_WITHOUT_COLON
+                          && TC_START_LABEL_WITHOUT_COLON(c, 
+                                                          input_line_pointer)
+#endif
+                          )
 			line_label = colon (line_start);
 		      else
 			line_label = symbol_create (line_start,
