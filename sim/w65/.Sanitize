@@ -32,7 +32,6 @@ interp.c
 gencode.c
 interp.h
 run.c
-w65.mt
 
 Things-to-lose:
 
