@@ -19,6 +19,9 @@ Boston, MA 02111-1307, USA.  */
 
 /* This file exports two functions: choose_temp_base and make_temp_file.  */
 
+/* This file lives in at least two places: libiberty and gcc.
+   Don't change one without the other.  */
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -48,7 +51,7 @@ Boston, MA 02111-1307, USA.  */
 extern int mkstemps ();
 
 #ifndef IN_GCC
-#if defined (__MSDOS__) || (defined (_WIN32) && ! defined (__CYGWIN__) && ! defined (_UWIN))
+#if defined (__MSDOS__) || defined (_WIN32)
 #define DIR_SEPARATOR '\\'
 #endif
 #endif
@@ -145,7 +148,7 @@ choose_temp_base ()
 
 char *
 make_temp_file (suffix)
-     const char *suffix;
+     char *suffix;
 {
   char *base = 0;
   char *temp_filename;

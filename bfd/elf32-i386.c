@@ -231,14 +231,11 @@ elf_i386_info_to_howto_rel (abfd, cache_ptr, dst)
     cache_ptr->howto = &elf32_i386_vtinherit_howto;
   else if (type == R_386_GNU_VTENTRY)
     cache_ptr->howto = &elf32_i386_vtentry_howto;
-  else if (type < R_386_max
-	   && (type < FIRST_INVALID_RELOC || type > LAST_INVALID_RELOC))
-    cache_ptr->howto = &elf_howto_table[(int) type];
   else
     {
-      (*_bfd_error_handler) (_("%s: invalid relocation type %d"),
-			     bfd_get_filename (abfd), (int) type);
-      cache_ptr->howto = &elf_howto_table[(int) R_386_NONE];
+      BFD_ASSERT (type < R_386_max);
+      BFD_ASSERT (type < FIRST_INVALID_RELOC || type > LAST_INVALID_RELOC);
+      cache_ptr->howto = &elf_howto_table[(int) type];
     }
 }
 
@@ -1088,7 +1085,7 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 
       if (strip)
 	{
-	  _bfd_strip_section_from_output (info, s);
+	  _bfd_strip_section_from_output (s);
 	  continue;
 	}
 
@@ -1319,8 +1316,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd,
-		      input_section, rel->r_offset,
-		      (!info->shared || info->no_undefined))))
+		      input_section, rel->r_offset)))
 		return false;
 	      relocation = 0;
 	    }

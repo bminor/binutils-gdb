@@ -40,7 +40,7 @@
 #include "defs.h"
 #include "gdbcore.h"
 #include "target.h"
-#include "gdb_wait.h"
+#include "wait.h"
 #include <signal.h>
 #include <ctype.h>
 #include "gdb_string.h"
@@ -50,7 +50,7 @@
 #include "monitor.h"
 #include "gdbcmd.h"
 #include "inferior.h"
-#include "gdb_regex.h"
+#include "gnu-regex.h"
 #include "dcache.h"
 #include "srec.h"
 
@@ -2410,11 +2410,15 @@ When enabled, a hashmark \'#\' is displayed.",
 				  &setlist),
 		     &showlist);
 
+#if 0
+  /* FIXME: cagney/1999-10-07: Wait until there is a generic ``set
+     debug ...'' rather than another ``set ...debug'' command. */
   add_show_from_set
-    (add_set_cmd ("monitor", no_class, var_zinteger,
+    (add_set_cmd ("monitordebug", no_class, var_zinteger,
 		  (char *) &monitor_debug_p,
 		  "Set debugging of remote monitor communication.\n\
 When enabled, communication between GDB and the remote monitor\n\
-is displayed.", &setdebuglist),
-     &showdebuglist);
+is displayed.", &setlist),
+     &showlist);
+#endif
 }

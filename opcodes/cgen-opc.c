@@ -1,6 +1,6 @@
 /* CGEN generic opcode support.
 
-   Copyright (C) 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils and GDB, the GNU debugger.
 
@@ -594,28 +594,4 @@ cgen_lookup_get_insn_operands (cd, insn, insn_int_value, insn_bytes_value,
 
   cgen_get_insn_operands (cd, insn, fields, indices);
   return insn;
-}
-
-/* Allow signed overflow of instruction fields.  */
-void
-cgen_set_signed_overflow_ok (cd)
-     CGEN_CPU_DESC cd;
-{
-  cd->signed_overflow_ok_p = 1;
-}
-
-/* Generate an error message if a signed field in an instruction overflows.  */
-void
-cgen_clear_signed_overflow_ok (cd)
-     CGEN_CPU_DESC cd;
-{
-  cd->signed_overflow_ok_p = 0;
-}
-
-/* Will an error message be generated if a signed field in an instruction overflows ? */
-unsigned int
-cgen_signed_overflow_ok_p (cd)
-     CGEN_CPU_DESC cd;
-{
-  return cd->signed_overflow_ok_p;
 }

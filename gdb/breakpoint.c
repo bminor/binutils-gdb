@@ -918,7 +918,6 @@ insert_breakpoints ()
 	      b->type == bp_read_watchpoint ||
 	      b->type == bp_access_watchpoint)
 	     && b->enable == enabled
-	     && b->disposition != del_at_next_stop
 	     && !b->inserted
 	     && !b->duplicate)
       {
@@ -974,39 +973,24 @@ insert_breakpoints ()
 		if (VALUE_LVAL (v) == lval_memory
 		    && ! VALUE_LAZY (v))
 		  {
-		    struct type *vtype = check_typedef (VALUE_TYPE (v));
+		    CORE_ADDR addr;
+		    int len, type;
 
-		    /* We only watch structs and arrays if user asked
-		       for it explicitly, never if they just happen to
-		       appear in the middle of some value chain.  */
-		    if (v == b->val_chain
-			|| (TYPE_CODE (vtype) != TYPE_CODE_STRUCT
-			    && TYPE_CODE (vtype) != TYPE_CODE_ARRAY))
+		    addr = VALUE_ADDRESS (v) + VALUE_OFFSET (v);
+		    len = TYPE_LENGTH (VALUE_TYPE (v));
+		    type   = hw_write;
+		    if (b->type == bp_read_watchpoint)
+		      type = hw_read;
+		    else if (b->type == bp_access_watchpoint)
+		      type = hw_access;
+
+		    val = target_insert_watchpoint (addr, len, type);
+		    if (val == -1)
 		      {
-			CORE_ADDR addr;
-			int len, type;
-
-			addr = VALUE_ADDRESS (v) + VALUE_OFFSET (v);
-			len = TYPE_LENGTH (VALUE_TYPE (v));
-			type   = hw_write;
-			if (b->type == bp_read_watchpoint)
-			  type = hw_read;
-			else if (b->type == bp_access_watchpoint)
-			  type = hw_access;
-
-			val = target_insert_watchpoint (addr, len, type);
-			if (val == -1)
-			  {
-			    /* Don't exit the loop, try to insert
-			       every value on the value chain.  That's
-			       because we will be removing all the
-			       watches below, and removing a
-			       watchpoint we didn't insert could have
-			       adverse effects.  */
-			    b->inserted = 0;
-			  }
-			val = 0;
+			b->inserted = 0;
+			break;
 		      }
+		    val = 0;
 		  }
 	      }
 	    /* Failure to insert a watchpoint on any memory value in the
@@ -1021,7 +1005,7 @@ insert_breakpoints ()
 	  }
 	else
 	  {
-	    printf_filtered ("Hardware watchpoint %d deleted ", b->number);
+	    printf_filtered ("Hardware watchpoint %d deleted", b->number);
 	    printf_filtered ("because the program has left the block \n");
 	    printf_filtered ("in which its expression is valid.\n");
 	    if (b->related_breakpoint)
@@ -1032,7 +1016,7 @@ insert_breakpoints ()
 	/* Restore the frame and level.  */
 	if ((saved_frame != selected_frame) ||
 	    (saved_level != selected_frame_level))
-	  select_frame (saved_frame, saved_level);
+	  select_and_print_frame (saved_frame, saved_level);
 
 	if (val)
 	  return_val = val;	/* remember failure */
@@ -1086,27 +1070,6 @@ remove_breakpoints ()
   ALL_BREAKPOINTS (b)
   {
     if (b->inserted)
-      {
-	val = remove_breakpoint (b, mark_uninserted);
-	if (val != 0)
-	  return val;
-      }
-  }
-  return 0;
-}
-
-int
-remove_hw_watchpoints (void)
-{
-  register struct breakpoint *b;
-  int val;
-
-  ALL_BREAKPOINTS (b)
-  {
-    if (b->inserted
-	&& (b->type == bp_hardware_watchpoint
-	    || b->type == bp_read_watchpoint
-	    || b->type == bp_access_watchpoint))
       {
 	val = remove_breakpoint (b, mark_uninserted);
 	if (val != 0)
@@ -1363,28 +1326,21 @@ remove_breakpoint (b, is)
 	  if (VALUE_LVAL (v) == lval_memory
 	      && ! VALUE_LAZY (v))
 	    {
-	      struct type *vtype = check_typedef (VALUE_TYPE (v));
+	      CORE_ADDR addr;
+	      int len, type;
 
-	      if (v == b->val_chain
-		  || (TYPE_CODE (vtype) != TYPE_CODE_STRUCT
-		      && TYPE_CODE (vtype) != TYPE_CODE_ARRAY))
-		{
-		  CORE_ADDR addr;
-		  int len, type;
+	      addr = VALUE_ADDRESS (v) + VALUE_OFFSET (v);
+	      len = TYPE_LENGTH (VALUE_TYPE (v));
+	      type   = hw_write;
+	      if (b->type == bp_read_watchpoint)
+		type = hw_read;
+	      else if (b->type == bp_access_watchpoint)
+		type = hw_access;
 
-		  addr = VALUE_ADDRESS (v) + VALUE_OFFSET (v);
-		  len = TYPE_LENGTH (VALUE_TYPE (v));
-		  type   = hw_write;
-		  if (b->type == bp_read_watchpoint)
-		    type = hw_read;
-		  else if (b->type == bp_access_watchpoint)
-		    type = hw_access;
-
-		  val = target_remove_watchpoint (addr, len, type);
-		  if (val == -1)
-		    b->inserted = 1;
-		  val = 0;
-		}
+	      val = target_remove_watchpoint (addr, len, type);
+	      if (val == -1)
+		b->inserted = 1;
+	      val = 0;
 	    }
 	}
       /* Failure to remove any of the hardware watchpoints comes here.  */
@@ -1953,8 +1909,6 @@ print_it_typical (bs)
 #ifdef UI_OUT
       annotate_breakpoint (bs->breakpoint_at->number);
       ui_out_text (uiout, "\nBreakpoint ");
-      if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
-	ui_out_field_string (uiout, "reason", "breakpoint-hit");
       ui_out_field_int (uiout, "bkptno", bs->breakpoint_at->number);
       ui_out_text (uiout, ", ");
       return PRINT_SRC_AND_LOC;
@@ -2098,8 +2052,6 @@ print_it_typical (bs)
 	{
 	  annotate_watchpoint (bs->breakpoint_at->number);
 #ifdef UI_OUT
-	  if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
-	    ui_out_field_string (uiout, "reason", "watchpoint-trigger");
 	  mention (bs->breakpoint_at);
 	  ui_out_list_begin (uiout, "value");
 	  ui_out_text (uiout, "\nOld value = ");
@@ -2128,8 +2080,6 @@ print_it_typical (bs)
 
     case bp_read_watchpoint:
 #ifdef UI_OUT
-      if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
-	ui_out_field_string (uiout, "reason", "read-watchpoint-trigger");
       mention (bs->breakpoint_at);
       ui_out_list_begin (uiout, "value");
       ui_out_text (uiout, "\nValue = ");
@@ -2152,8 +2102,6 @@ print_it_typical (bs)
       if (bs->old_val != NULL)     
 	{
 	  annotate_watchpoint (bs->breakpoint_at->number);
-	  if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
-	    ui_out_field_string (uiout, "reason", "access-watchpoint-trigger");
 	  mention (bs->breakpoint_at);
 	  ui_out_list_begin (uiout, "value");
 	  ui_out_text (uiout, "\nOld value = ");
@@ -2166,8 +2114,6 @@ print_it_typical (bs)
       else 
 	{
 	  mention (bs->breakpoint_at);
-	  if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
-	    ui_out_list_begin (uiout, "value");
 	  ui_out_field_string (uiout, "reason", "access-watchpoint-trigger");
 	  ui_out_text (uiout, "\nValue = ");
 	}
@@ -2202,18 +2148,10 @@ print_it_typical (bs)
        here. */
 
     case bp_finish:
-#ifdef UI_OUT
-      if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
-	ui_out_field_string (uiout, "reason", "function-finished");
-#endif
       return PRINT_UNKNOWN;
       break;
 
     case bp_until:
-#ifdef UI_OUT
-      if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
-	ui_out_field_string (uiout, "reason", "location-reached");
-#endif
       return PRINT_UNKNOWN;
       break;
 
@@ -2422,8 +2360,6 @@ watchpoint_check (p)
 	 will be deleted already. So we have no choice but print the
 	 information here. */
 #ifdef UI_OUT
-      if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
-	ui_out_field_string (uiout, "reason", "watchpoint-scope");
       ui_out_text (uiout, "\nWatchpoint ");
       ui_out_field_int (uiout, "wpnum", bs->breakpoint_at->number);
       ui_out_text (uiout, " deleted because the program has left the block in\n\
@@ -2614,21 +2550,14 @@ bpstat_stop_status (pc, not_a_breakpoint)
 	    if (VALUE_LVAL (v) == lval_memory
 		&& ! VALUE_LAZY (v))
 	      {
-		struct type *vtype = check_typedef (VALUE_TYPE (v));
+		CORE_ADDR vaddr;
 
-		if (v == b->val_chain
-		    || (TYPE_CODE (vtype) != TYPE_CODE_STRUCT
-			&& TYPE_CODE (vtype) != TYPE_CODE_ARRAY))
-		  {
-		    CORE_ADDR vaddr;
-
-		    vaddr = VALUE_ADDRESS (v) + VALUE_OFFSET (v);
-		    /* Exact match not required.  Within range is
-                       sufficient.  */
-		    if (addr >= vaddr &&
-			addr < vaddr + TYPE_LENGTH (VALUE_TYPE (v)))
-		      found = 1;
-		  }
+		vaddr = VALUE_ADDRESS (v) + VALUE_OFFSET (v);
+		/* Exact match not required.  Within range is sufficient.  
+		 */
+		if (addr >= vaddr &&
+		    addr < vaddr + TYPE_LENGTH (VALUE_TYPE (v)))
+		  found = 1;
 	      }
 	  }
 	if (found)
@@ -2641,17 +2570,6 @@ bpstat_stop_status (pc, not_a_breakpoint)
 	      /* Stop.  */
 	      break;
 	    case WP_VALUE_CHANGED:
-	      if (b->type == bp_read_watchpoint)
-		{
-		  /* Don't stop: read watchpoints shouldn't fire if
-		     the value has changed.  This is for targets which
-		     cannot set read-only watchpoints.  */
-		  bs->print_it = print_it_noop;
-		  bs->stop = 0;
-		  continue;
-		}
-	      ++(b->hit_count);
-	      break;
 	    case WP_VALUE_NOT_CHANGED:
 	      /* Stop.  */
 	      ++(b->hit_count);
@@ -3528,13 +3446,6 @@ print_one_breakpoint (struct breakpoint *b,
 #endif
     }
   
-#ifdef UI_OUT
-  /* Output the count also if it is zero, but only if this is
-     mi. FIXME: Should have a better test for this. */
-  if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
-    if (show_breakpoint_hit_counts && b->hit_count == 0)
-      ui_out_field_int (uiout, "times", b->hit_count);
-#endif
 
   if (b->ignore_count)
     {
@@ -4535,24 +4446,10 @@ mention (b)
       break;
 #endif
     case bp_breakpoint:
-#ifdef UI_OUT
-      if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
-	{
-	  say_where = 0;
-	  break;
-	}
-#endif
       printf_filtered ("Breakpoint %d", b->number);
       say_where = 1;
       break;
     case bp_hardware_breakpoint:
-#ifdef UI_OUT
-      if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
-	{
-	  say_where = 0;
-	  break;
-	}
-#endif
       printf_filtered ("Hardware assisted breakpoint %d", b->number);
       say_where = 1;
       break;
@@ -4608,10 +4505,6 @@ mention (b)
     }
 #ifdef UI_OUT
   do_cleanups (old_chain);
-#endif
-#ifdef UI_OUT
-  if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
-    return;
 #endif
   printf_filtered ("\n");
 }
@@ -5576,7 +5469,6 @@ can_use_hardware_watchpoint (v)
      struct value *v;
 {
   int found_memory_cnt = 0;
-  struct value *head = v;
 
   /* Did the user specifically forbid us to use hardware watchpoints? */
   if (!can_use_hw_watchpoints)
@@ -5614,23 +5506,13 @@ can_use_hardware_watchpoint (v)
 	    {
 	      /* Ahh, memory we actually used!  Check if we can cover
                  it with hardware watchpoints.  */
-	      struct type *vtype = check_typedef (VALUE_TYPE (v));
+	      CORE_ADDR vaddr = VALUE_ADDRESS (v) + VALUE_OFFSET (v);
+	      int       len   = TYPE_LENGTH (VALUE_TYPE (v));
 
-	      /* We only watch structs and arrays if user asked for it
-		 explicitly, never if they just happen to appear in a
-		 middle of some value chain.  */
-	      if (v == head
-		  || (TYPE_CODE (vtype) != TYPE_CODE_STRUCT
-		      && TYPE_CODE (vtype) != TYPE_CODE_ARRAY))
-		{
-		  CORE_ADDR vaddr = VALUE_ADDRESS (v) + VALUE_OFFSET (v);
-		  int       len   = TYPE_LENGTH (VALUE_TYPE (v));
-
-		  if (!TARGET_REGION_OK_FOR_HW_WATCHPOINT (vaddr, len))
-		    return 0;
-		  else
-		    found_memory_cnt++;
-		}
+	      if (!TARGET_REGION_OK_FOR_HW_WATCHPOINT (vaddr, len))
+		return 0;
+	      else
+		found_memory_cnt++;
 	    }
 	}
       else if (v->lval != not_lval && v->modifiable == 0)
@@ -5708,7 +5590,7 @@ until_break_command_continuation (struct continuation_arg *arg)
 {
   struct cleanup *cleanups;
 
-  cleanups = (struct cleanup *) arg->data.pointer;
+  cleanups = (struct cleanup *) arg->data;
   do_exec_cleanups (cleanups);
 }
 
@@ -5772,8 +5654,8 @@ until_break_command (arg, from_tty)
          the exec_cleanup_chain. */
       arg1 =
 	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-      arg1->next         = NULL;
-      arg1->data.pointer = old_chain;
+      arg1->next = NULL;
+      arg1->data = (PTR) old_chain;
 
       add_continuation (until_break_command_continuation, arg1);
     }
@@ -7609,7 +7491,8 @@ have been allocated for other watchpoints.\n", bpt->number);
 	}
 
       if (save_selected_frame_level >= 0)
-	select_frame (save_selected_frame, save_selected_frame_level);
+	select_and_print_frame (save_selected_frame,
+				save_selected_frame_level);
       value_free_to_mark (mark);
     }
   if (modify_breakpoint_hook)

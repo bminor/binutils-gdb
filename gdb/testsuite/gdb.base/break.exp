@@ -92,15 +92,6 @@ gdb_test "break $srcfile:factorial" \
 #
 # test break at line number
 #
-# Note that the default source file is the last one whose source text
-# was printed.  For native debugging, before we've executed the
-# program, this is the file containing main, but for remote debugging,
-# it's wherever the processor was stopped when we connected to the
-# board.  So, to be sure, we do a list command.
-#
-gdb_test "list main" \
-    ".*main \\(argc, argv, envp\\).*" \
-    "use `list' to establish default source file"
 gdb_test "break 79" \
     "Breakpoint.*at.* file .*$srcfile, line 79\\." \
     "breakpoint line number"
@@ -800,79 +791,6 @@ proc test_next_with_recursion {} {
 
 test_clear_command
 test_next_with_recursion
-
-
-#********
-
-# build a new file with optimization enabled so that we can try breakpoints
-# on targets with optimized prologues
-
-set binfileo2 ${objdir}/${subdir}/${testfile}o2
-
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfileo2}" executable {debug additional_flags="-O2" }] != "" } {
-    gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
-}
-
-if [get_compiler_info ${binfileo2}] {
-    return -1
-}
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfileo2}
-
-if [target_info exists gdb_stub] {
-    gdb_step_for_stub;
-}
-
-#
-# test break at function
-#
-gdb_test "break main" \
-    "Breakpoint.*at.* file .*$srcfile, line.*" \
-    "breakpoint function, optimized file"
-
-#
-# test break at function
-#
-gdb_test "break marker4" \
-    "Breakpoint.*at.* file .*$srcfile, line.*" \
-    "breakpoint small function, optimized file"
-
-#
-# run until the breakpoint at main is hit. For non-stubs-using targets.
-#
-if ![target_info exists use_gdb_stub] {
-  if [istarget "*-*-vxworks*"] then {
-    send_gdb "run vxmain \"2\"\n"
-    set timeout 120
-    verbose "Timeout is now $timeout seconds" 2
-  } else {
-	send_gdb "run\n"
-  }
-  gdb_expect {
-    -re "The program .* has been started already.*y or n. $" {
-	send_gdb "y\n"
-	exp_continue
-    }
-    -re "Starting program.*Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$srcfile:75.*75\[\t \]+if .argc.* \{.*$gdb_prompt $"\
-	                    { pass "run until function breakpoint, optimized file" }
-    -re ".*$gdb_prompt $"       { fail "run until function breakpoint, optimized file" }
-    timeout	            { fail "run until function breakpoint, optimized file (timeout)" }
-  }
-} else {
-    if ![target_info exists gdb_stub] {
-	gdb_test continue ".*Continuing\\..*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:75.*75\[\t \]+if .argc.*\{.*" "stub continue, optimized file"
-    }
-}
-
-#
-# run until the breakpoint at a small function
-#
-gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, marker4 \\(d=177601976\\) at .*$srcfile:51.*51\[\t \]+void.*marker4.*" \
-			"run until breakpoint set at small function, optimized file"
-
 
 # Reset the default arguments for VxWorks
 if [istarget "*-*-vxworks*"] {

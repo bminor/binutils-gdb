@@ -24,7 +24,7 @@
 #include "frame.h"		/* required by inferior.h */
 #include "inferior.h"
 #include "target.h"
-#include "gdb_wait.h"
+#include "wait.h"
 #include "gdbcore.h"
 #include "terminal.h"
 #include "gdbthread.h"

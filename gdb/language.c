@@ -394,8 +394,7 @@ set_lang_str ()
 {
   char *prefix = "";
 
-  if (language)
-    free (language);
+  free (language);
   if (language_mode == language_mode_auto)
     prefix = "auto; currently ";
 
@@ -407,8 +406,7 @@ set_type_str ()
 {
   char *tmp = NULL, *prefix = "";
 
-  if (type)
-    free (type);
+  free (type);
   if (type_mode == type_mode_auto)
     prefix = "auto; currently ";
 
@@ -453,8 +451,7 @@ set_range_str ()
       error ("Unrecognized range check setting.");
     }
 
-  if (range)
-    free (range);
+  free (range);
   range = concat (pref, tmp, NULL);
 }
 
@@ -548,11 +545,6 @@ local_hex_format_custom (pre)
   return form;
 }
 
-#if 0
-/* FIXME: cagney/2000-03-04: This function does not appear to be used.
-   It can be deleted once 5.0 has been released. */
-/* FIXME: cagney/2000-03-04: This code assumes that the compiler
-   supports ``long long''. */
 /* Converts a number to hexadecimal (without leading "0x") and stores it in a
    static string.  Returns a pointer to this string. */
 
@@ -570,7 +562,6 @@ longest_raw_hex_string (num)
   sprintf (res_longest_raw_hex_string, "%llx", ll);
   return res_longest_raw_hex_string;
 }
-#endif
 
 /* Converts a number to hexadecimal and stores it in a static
    string.  Returns a pointer to this string. */
@@ -633,7 +624,9 @@ longest_local_hex_string_custom (num, width)
      can use local_hex_string_custom 
    */
   return local_hex_string_custom ((unsigned long) num, width);
-#elif defined (PRINTF_HAS_LONG_LONG)
+#endif
+
+#if defined (PRINTF_HAS_LONG_LONG)
   /* Just use printf.  */
   strcpy (format, local_hex_format_prefix ());	/* 0x */
   strcat (format, "%");

@@ -140,16 +140,6 @@ read_history_range (filename, from, to)
   input = history_filename (filename);
   file = open (input, O_RDONLY|O_BINARY, 0666);
 
-
-#ifdef __MSDOS__
-  /* MSDOS doesn't allow leading dots in file names.  Try again
-     with the dot replaced by an underscore.  */
-  if (file < 0 && !filename)
-    {
-      input[strlen (input) - 8] = '_';
-      file = open (input, O_RDONLY|O_BINARY, 0666);
-    }
-#endif
   if ((file < 0) || (fstat (file, &finfo) == -1))
     goto error_and_exit;
 
@@ -243,16 +233,6 @@ history_truncate_file (fname, lines)
   filename = history_filename (fname);
   file = open (filename, O_RDONLY|O_BINARY, 0666);
 
-#ifdef __MSDOS__
-  /* MSDOS doesn't allow leading dots in file names.  Try again
-     with the dot replaced by an underscore.  */
-  if (file < 0 && !fname)
-    {
-      filename[strlen (filename) - 8] = '_';
-      file = open (filename, O_RDONLY|O_BINARY, 0666);
-    }
-#endif
-
   if (file == -1 || fstat (file, &finfo) == -1)
     goto truncate_exit;
 
@@ -334,23 +314,8 @@ history_do_write (filename, nelements, overwrite)
 
   if ((file = open (output, mode, 0600)) == -1)
     {
-#ifdef __MSDOS__
-      /* MSDOS doesn't allow leading dots in file names.  If this is
-	 the default file name, try again with the dot replaced by an
-	 underscore.  */
-      if (!filename)
-	{
-	  output[strlen (output) - 8] = '_';
-	  if ((file = open (output, mode, 0600)) == -1)
-	    {
-	      FREE (output);
-	      return (errno);
-	    }
-	}
-#else
       FREE (output);
       return (errno);
-#endif
     }
 
   if (nelements > history_length)

@@ -27,6 +27,7 @@
 
 #include "defs.h"
 #include "bfd.h"
+#include "elf-bfd.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "symfile.h"
@@ -545,6 +546,15 @@ static struct complaint dwarf2_unsupported_const_value_attr =
    whatever scope is currently getting read. */
 static int address_size;
 
+/* Some elf32 object file formats while linked for a 32 bit address
+   space contain debug information that has assumed 64 bit
+   addresses. Eg 64 bit MIPS target produced by GCC/GAS/LD where the
+   symbol table contains 32bit address values while its .debug_info
+   section contains 64 bit address values.
+   ADDRESS_SIGNIFICANT_SIZE specifies the number significant bits in
+   the ADDRESS_SIZE bytes read from the file */
+static int address_significant_size;
+
 /* Externals references.  */
 extern int info_verbose;	/* From main.c; nonzero => verbose */
 
@@ -610,8 +620,6 @@ static void set_cu_language PARAMS ((unsigned int));
 
 static struct attribute *dwarf_attr PARAMS ((struct die_info *,
 					     unsigned int));
-
-static int die_is_declaration (struct die_info *);
 
 static void dwarf_decode_lines PARAMS ((unsigned int, char *, bfd *));
 
@@ -927,6 +935,9 @@ dwarf2_build_psymtabs_hard (objfile, mainline)
   int comp_unit_has_pc_info;
   CORE_ADDR lowpc, highpc;
 
+  /* Number of bytes of any addresses that are signficant */
+  address_significant_size = get_elf_backend_data (abfd)->s->arch_size / 8;
+
   info_ptr = dwarf_info_buffer;
   abbrev_ptr = dwarf_abbrev_buffer;
 
@@ -967,6 +978,13 @@ dwarf2_build_psymtabs_hard (objfile, mainline)
 		 (long) (beg_of_comp_unit - dwarf_info_buffer));
 	  return;
 	}
+      if (address_size < address_significant_size)
+	{
+	  error ("Dwarf Error: bad address size (%ld) in compilation unit header (offset 0x%lx + 11).",
+		 (long) cu_header.addr_size,
+		 (long) (beg_of_comp_unit - dwarf_info_buffer));
+	}
+
       /* Read the abbrevs for this compilation unit into a table */
       dwarf2_read_abbrevs (abfd, cu_header.abbrev_offset);
       make_cleanup (dwarf2_empty_abbrev_table, NULL);
@@ -2184,7 +2202,7 @@ read_structure_scope (die, objfile)
      type within the structure itself. */
   die->type = type;
 
-  if (die->has_children && ! die_is_declaration (die))
+  if (die->has_children)
     {
       struct field_info fi;
       struct die_info *child_die;
@@ -3467,9 +3485,6 @@ read_address (abfd, buf)
 
   switch (address_size)
     {
-    case 2:
-      retval = bfd_get_16 (abfd, (bfd_byte *) buf);
-      break;
     case 4:
       retval = bfd_get_32 (abfd, (bfd_byte *) buf);
       break;
@@ -3480,8 +3495,17 @@ read_address (abfd, buf)
       /* *THE* alternative is 8, right? */
       abort ();
     }
-
- return retval;
+  /* If the address being read is larger than the address that is
+     applicable for the object file format then mask it down to the
+     correct size.  Take care to avoid unnecessary shift or shift
+     overflow */
+  if (address_size > address_significant_size
+      && address_significant_size < sizeof (CORE_ADDR))
+    {
+      CORE_ADDR mask = ((CORE_ADDR) 0) - 1;
+      retval &= ~(mask << (address_significant_size * 8));
+    }
+  return retval;
 }
 
 static char *
@@ -3674,13 +3698,6 @@ dwarf_attr (die, name)
     }
 
   return NULL;
-}
-
-static int
-die_is_declaration (struct die_info *die)
-{
-  return (dwarf_attr (die, DW_AT_declaration)
-	  && ! dwarf_attr (die, DW_AT_specification));
 }
 
 /* Decode the line number information for the compilation unit whose

@@ -57,8 +57,10 @@ static int read_relative_register_raw_bytes_for_frame PARAMS ((int regnum, char 
 you lose
 #endif
 
-LONGEST
-extract_signed_integer (void *addr, int len)
+  LONGEST
+extract_signed_integer (addr, len)
+     PTR addr;
+     int len;
 {
   LONGEST retval;
   unsigned char *p;
@@ -92,7 +94,9 @@ That operation is not available on integers of more than %d bytes.",
 }
 
 ULONGEST
-extract_unsigned_integer (void *addr, int len)
+extract_unsigned_integer (addr, len)
+     PTR addr;
+     int len;
 {
   ULONGEST retval;
   unsigned char *p;
@@ -126,7 +130,10 @@ That operation is not available on integers of more than %d bytes.",
    function returns 1 and sets *PVAL.  Otherwise it returns 0.  */
 
 int
-extract_long_unsigned_integer (void *addr, int orig_len, LONGEST *pval)
+extract_long_unsigned_integer (addr, orig_len, pval)
+     PTR addr;
+     int orig_len;
+     LONGEST *pval;
 {
   char *p, *first_addr;
   int len;
@@ -170,7 +177,9 @@ extract_long_unsigned_integer (void *addr, int orig_len, LONGEST *pval)
 }
 
 CORE_ADDR
-extract_address (void *addr, int len)
+extract_address (addr, len)
+     PTR addr;
+     int len;
 {
   /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
      whether we want this to be true eventually.  */
@@ -178,7 +187,10 @@ extract_address (void *addr, int len)
 }
 
 void
-store_signed_integer (void *addr, int len, LONGEST val)
+store_signed_integer (addr, len, val)
+     PTR addr;
+     int len;
+     LONGEST val;
 {
   unsigned char *p;
   unsigned char *startaddr = (unsigned char *) addr;
@@ -205,7 +217,10 @@ store_signed_integer (void *addr, int len, LONGEST val)
 }
 
 void
-store_unsigned_integer (void *addr, int len, ULONGEST val)
+store_unsigned_integer (addr, len, val)
+     PTR addr;
+     int len;
+     ULONGEST val;
 {
   unsigned char *p;
   unsigned char *startaddr = (unsigned char *) addr;
@@ -235,7 +250,10 @@ store_unsigned_integer (void *addr, int len, ULONGEST val)
    gdb-local memory pointed to by "addr"
    for "len" bytes. */
 void
-store_address (void *addr, int len, LONGEST val)
+store_address (addr, len, val)
+     PTR addr;
+     int len;
+     LONGEST val;
 {
   store_unsigned_integer (addr, len, val);
 }
@@ -249,11 +267,13 @@ store_address (void *addr, int len, LONGEST val)
    dirty work.  */
 
 DOUBLEST
-extract_floating (void *addr, int len)
+extract_floating (addr, len)
+     PTR addr;
+     int len;
 {
   DOUBLEST dretval;
 
-  if (len * TARGET_CHAR_BIT == TARGET_FLOAT_BIT)
+  if (len == sizeof (float))
     {
       if (HOST_FLOAT_FORMAT == TARGET_FLOAT_FORMAT)
 	{
@@ -265,7 +285,7 @@ extract_floating (void *addr, int len)
       else
 	floatformat_to_doublest (TARGET_FLOAT_FORMAT, addr, &dretval);
     }
-  else if (len * TARGET_CHAR_BIT == TARGET_DOUBLE_BIT)
+  else if (len == sizeof (double))
     {
       if (HOST_DOUBLE_FORMAT == TARGET_DOUBLE_FORMAT)
 	{
@@ -277,7 +297,7 @@ extract_floating (void *addr, int len)
       else
 	floatformat_to_doublest (TARGET_DOUBLE_FORMAT, addr, &dretval);
     }
-  else if (len * TARGET_CHAR_BIT == TARGET_LONG_DOUBLE_BIT)
+  else if (len == sizeof (DOUBLEST))
     {
       if (HOST_LONG_DOUBLE_FORMAT == TARGET_LONG_DOUBLE_FORMAT)
 	{
@@ -289,6 +309,10 @@ extract_floating (void *addr, int len)
       else
 	floatformat_to_doublest (TARGET_LONG_DOUBLE_FORMAT, addr, &dretval);
     }
+#ifdef TARGET_EXTRACT_FLOATING
+  else if (TARGET_EXTRACT_FLOATING (addr, len, &dretval))
+    return dretval;
+#endif
   else
     {
       error ("Can't deal with a floating point number of %d bytes.", len);
@@ -298,9 +322,12 @@ extract_floating (void *addr, int len)
 }
 
 void
-store_floating (void *addr, int len, DOUBLEST val)
+store_floating (addr, len, val)
+     PTR addr;
+     int len;
+     DOUBLEST val;
 {
-  if (len * TARGET_CHAR_BIT == TARGET_FLOAT_BIT)
+  if (len == sizeof (float))
     {
       if (HOST_FLOAT_FORMAT == TARGET_FLOAT_FORMAT)
 	{
@@ -311,7 +338,7 @@ store_floating (void *addr, int len, DOUBLEST val)
       else
 	floatformat_from_doublest (TARGET_FLOAT_FORMAT, &val, addr);
     }
-  else if (len * TARGET_CHAR_BIT == TARGET_DOUBLE_BIT)
+  else if (len == sizeof (double))
     {
       if (HOST_DOUBLE_FORMAT == TARGET_DOUBLE_FORMAT)
 	{
@@ -322,13 +349,17 @@ store_floating (void *addr, int len, DOUBLEST val)
       else
 	floatformat_from_doublest (TARGET_DOUBLE_FORMAT, &val, addr);
     }
-  else if (len * TARGET_CHAR_BIT == TARGET_LONG_DOUBLE_BIT)
+  else if (len == sizeof (DOUBLEST))
     {
       if (HOST_LONG_DOUBLE_FORMAT == TARGET_LONG_DOUBLE_FORMAT)
 	memcpy (addr, &val, sizeof (val));
       else
 	floatformat_from_doublest (TARGET_LONG_DOUBLE_FORMAT, &val, addr);
     }
+#ifdef TARGET_STORE_FLOATING
+  else if (TARGET_STORE_FLOATING (addr, len, val))
+    return;
+#endif 
   else
     {
       error ("Can't deal with a floating point number of %d bytes.", len);
@@ -975,7 +1006,7 @@ supply_register (regno, val)
 #endif
 
 CORE_ADDR
-generic_target_read_pc (int pid)
+generic_target_read_pc (pid)
 {
 #ifdef PC_REGNUM
   if (PC_REGNUM >= 0)

@@ -1,5 +1,5 @@
 /* Main header file for the bfd library -- portable access to object files.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
@@ -626,20 +626,6 @@ extern boolean bfd_elf64_size_dynamic_sections
 extern void bfd_elf_set_dt_needed_name PARAMS ((bfd *, const char *));
 extern const char *bfd_elf_get_dt_soname PARAMS ((bfd *));
 
-/* Return an upper bound on the number of bytes required to store a
-   copy of ABFD's program header table entries.  Return -1 if an error
-   occurs; bfd_get_error will return an appropriate code.  */
-extern long bfd_get_elf_phdr_upper_bound PARAMS ((bfd *abfd));
-
-/* Copy ABFD's program header table entries to *PHDRS.  The entries
-   will be stored as an array of Elf_Internal_Phdr structures, as
-   defined in include/elf/internal.h.  To find out how large the
-   buffer needs to be, call bfd_get_elf_phdr_upper_bound.
-
-   Return the number of program header table entries read, or -1 if an
-   error occurs; bfd_get_error will return an appropriate code.  */
-extern int bfd_get_elf_phdrs PARAMS ((bfd *abfd, void *phdrs));
-
 /* SunOS shared library support routines for the linker.  */
 
 extern struct bfd_link_needed_list *bfd_sunos_get_needed_list
@@ -726,16 +712,6 @@ extern boolean bfd_arm_process_before_allocation
   PARAMS ((bfd *, struct bfd_link_info *, int));
 
 extern boolean bfd_arm_get_bfd_for_interworking
-  PARAMS ((bfd *, struct bfd_link_info *));
-
-/* PE ARM Interworking support.  Called from linker.  */
-extern boolean bfd_arm_pe_allocate_interworking_sections
-  PARAMS ((struct bfd_link_info *));
-
-extern boolean bfd_arm_pe_process_before_allocation
-  PARAMS ((bfd *, struct bfd_link_info *, int));
-
-extern boolean bfd_arm_pe_get_bfd_for_interworking
   PARAMS ((bfd *, struct bfd_link_info *));
 
 /* ELF ARM Interworking support.  Called from linker.  */
@@ -1057,16 +1033,6 @@ typedef struct sec
           executables or shared objects.  */
 #define SEC_SHARED 0x4000000
 
-        /* When a section with this flag is being linked, then if the size of
-           the input section is less than a page, it should not cross a page
-           boundary.  If the size of the input section is one page or more, it
-           should be aligned on a page boundary.  */
-#define SEC_BLOCK 0x8000000
-
-        /* Conditionally link this section; do not link if there are no
-          references found to any symbol in the section.  */
-#define SEC_CLINK 0x10000000
-
         /*  End of section flags.  */
 
         /* Some internal packed boolean fields.  */
@@ -1118,7 +1084,7 @@ typedef struct sec
            target).  In most cases, if this was going to start at the
            100th octet (8-bit quantity) in the output section, this value
            would be 100.  However, if the target byte size is 16 bits
-           (bfd_octets_per_byte is "2"), this value would be 50. */
+           (bfd_octets_per_byte is "2"), this value would be 50. */ 
 
    bfd_vma output_offset;
 
@@ -1239,11 +1205,9 @@ extern const struct symbol_cache_entry * const bfd_com_symbol;
 extern const struct symbol_cache_entry * const bfd_und_symbol;
 extern const struct symbol_cache_entry * const bfd_ind_symbol;
 #define bfd_get_section_size_before_reloc(section) \
-     ((section)->reloc_done ? (abort (), (bfd_size_type) 1) \
-                            : (section)->_raw_size)
+     (section->reloc_done ? (abort(),1): (section)->_raw_size)
 #define bfd_get_section_size_after_reloc(section) \
-     ((section)->reloc_done ? (section)->_cooked_size \
-                            : (abort (), (bfd_size_type) 1))
+     ((section->reloc_done) ? (section)->_cooked_size: (abort(),1))
 asection *
 bfd_get_section_by_name PARAMS ((bfd *abfd, CONST char *name));
 
@@ -1290,7 +1254,7 @@ bfd_copy_private_section_data PARAMS ((bfd *ibfd, asection *isec, bfd *obfd, ase
                (ibfd, isection, obfd, osection))
 void 
 _bfd_strip_section_from_output
- PARAMS ((struct bfd_link_info *info, asection *section));
+ PARAMS ((asection *section));
 
 enum bfd_architecture 
 {
@@ -1361,7 +1325,6 @@ enum bfd_architecture
   bfd_arch_we32k,      /* AT&T WE32xxx */
   bfd_arch_tahoe,      /* CCI/Harris Tahoe */
   bfd_arch_i860,       /* Intel 860 */
-  bfd_arch_i370,       /* IBM 360/370 Mainframes */
   bfd_arch_romp,       /* IBM ROMP PC/RT */
   bfd_arch_alliant,    /* Alliant */
   bfd_arch_convex,     /* Convex */
@@ -1385,12 +1348,8 @@ enum bfd_architecture
   bfd_arch_h8500,      /* Hitachi H8/500 */
   bfd_arch_sh,         /* Hitachi SH */
 #define bfd_mach_sh            0
-#define bfd_mach_sh2        0x20
-#define bfd_mach_sh_dsp     0x2d
 #define bfd_mach_sh3        0x30
-#define bfd_mach_sh3_dsp    0x3d
 #define bfd_mach_sh3e       0x3e
-#define bfd_mach_sh4        0x40
   bfd_arch_alpha,      /* Dec Alpha */
 #define bfd_mach_alpha_ev4  0x10
 #define bfd_mach_alpha_ev5  0x20
@@ -1407,7 +1366,6 @@ enum bfd_architecture
   bfd_arch_ns32k,      /* National Semiconductors ns32000 */
   bfd_arch_w65,        /* WDC 65816 */
   bfd_arch_tic30,      /* Texas Instruments TMS320C30 */
-  bfd_arch_tic54x,     /* Texas Instruments TMS320C54X */
   bfd_arch_tic80,      /* TI TMS320c80 (MVP) */
   bfd_arch_v850,       /* NEC V850 */
 #define bfd_mach_v850          0
@@ -1421,16 +1379,11 @@ enum bfd_architecture
   bfd_arch_mn10200,    /* Matsushita MN10200 */
   bfd_arch_mn10300,    /* Matsushita MN10300 */
 #define bfd_mach_mn10300               300
-#define bfd_mach_am33          330
+#define bfd_mach_am33               330
   bfd_arch_fr30,
 #define bfd_mach_fr30          0x46523330
   bfd_arch_mcore,
   bfd_arch_pj,
-  bfd_arch_avr,        /* Atmel AVR microcontrollers */
-#define bfd_mach_avr1          1
-#define bfd_mach_avr2          2
-#define bfd_mach_avr3          3
-#define bfd_mach_avr4          4
   bfd_arch_last
   };
 
@@ -1496,12 +1449,12 @@ const char *
 bfd_printable_arch_mach
  PARAMS ((enum bfd_architecture arch, unsigned long machine));
 
-unsigned int 
+int 
 bfd_octets_per_byte PARAMS ((bfd *abfd));
 
-unsigned int 
+int 
 bfd_arch_mach_octets_per_byte PARAMS ((enum bfd_architecture arch,
-    unsigned long machine));
+                                       unsigned long machine));
 
 typedef enum bfd_reloc_status
 {
@@ -1621,26 +1574,13 @@ struct reloc_howto_struct
         /* The textual name of the relocation type. */
   char *name;
 
-        /* Some formats record a relocation addend in the section contents
-          rather than with the relocation.  For ELF formats this is the
-          distinction between USE_REL and USE_RELA (though the code checks
-          for USE_REL == 1/0).  The value of this field is TRUE if the
-          addend is recorded with the section contents; when performing a
-          partial link (ld -r) the section contents (the data) will be
-          modified.  The value of this field is FALSE if addends are
-          recorded with the relocation (in arelent.addend); when performing
-          a partial link the relocation will be modified.
-          All relocations for all ELF USE_RELA targets should set this field
-          to FALSE (values of TRUE should be looked on with suspicion).
-          However, the converse is not true: not all relocations of all ELF
-          USE_REL targets set this field to TRUE.  Why this is so is peculiar
-          to each particular target.  For relocs that aren't used in partial
-          links (e.g. GOT stuff) it doesn't matter what this is set to.  */
+        /* When performing a partial link, some formats must modify the
+          relocations rather than the data - this flag signals this.*/
   boolean partial_inplace;
 
         /* The src_mask selects which parts of the read in data
           are to be used in the relocation sum.  E.g., if this was an 8 bit
-          byte of data which we read and relocated, this would be
+          bit of data which we read and relocated, this would be
           0x000000ff. When we have relocs which have an addend, such as
           sun4 extended relocs, the value in the offset part of a
           relocating field is garbage so we never use it. In this case
@@ -2037,9 +1977,6 @@ to compensate for the borrow when the low bits are added. */
   BFD_RELOC_PPC_EMB_BIT_FLD,
   BFD_RELOC_PPC_EMB_RELSDA,
 
-/* IBM 370/390 relocations */
-  BFD_RELOC_I370_D12,
-
 /* The type of reloc used to build a contructor table - at the moment
 probably a 32 bit wide absolute relocation, but the target can choose.
 It generally does map to one of the other relocation types. */
@@ -2048,16 +1985,6 @@ It generally does map to one of the other relocation types. */
 /* ARM 26 bit pc-relative branch.  The lowest two bits must be zero and are
 not stored in the instruction. */
   BFD_RELOC_ARM_PCREL_BRANCH,
-
-/* ARM 26 bit pc-relative branch.  The lowest bit must be zero and is
-not stored in the instruction.  The 2nd lowest bit comes from a 1 bit
-field in the instruction. */
-  BFD_RELOC_ARM_PCREL_BLX,
-
-/* Thumb 22 bit pc-relative branch.  The lowest bit must be zero and is
-not stored in the instruction.  The 2nd lowest bit comes from a 1 bit
-field in the instruction. */
-  BFD_RELOC_THUMB_PCREL_BLX,
 
 /* These relocs are only used within the ARM assembler.  They are not
 (at present) written to any object files. */
@@ -2107,8 +2034,6 @@ field in the instruction. */
   BFD_RELOC_SH_CODE,
   BFD_RELOC_SH_DATA,
   BFD_RELOC_SH_LABEL,
-  BFD_RELOC_SH_LOOP_START,
-  BFD_RELOC_SH_LOOP_END,
 
 /* Thumb 23-, 12- and 9-bit pc-relative branches.  The lowest bit must
 be zero and is not stored in the instruction. */
@@ -2151,39 +2076,39 @@ assumed to be 0. */
 This is a 6-bit absolute reloc. */
   BFD_RELOC_D30V_6,
 
-/* This is a 6-bit pc-relative reloc with
+/* This is a 6-bit pc-relative reloc with 
 the right 3 bits assumed to be 0. */
   BFD_RELOC_D30V_9_PCREL,
 
-/* This is a 6-bit pc-relative reloc with
+/* This is a 6-bit pc-relative reloc with 
 the right 3 bits assumed to be 0. Same
 as the previous reloc but on the right side
 of the container. */
   BFD_RELOC_D30V_9_PCREL_R,
 
-/* This is a 12-bit absolute reloc with the
+/* This is a 12-bit absolute reloc with the 
 right 3 bitsassumed to be 0. */
   BFD_RELOC_D30V_15,
 
-/* This is a 12-bit pc-relative reloc with
+/* This is a 12-bit pc-relative reloc with 
 the right 3 bits assumed to be 0. */
   BFD_RELOC_D30V_15_PCREL,
 
-/* This is a 12-bit pc-relative reloc with
+/* This is a 12-bit pc-relative reloc with 
 the right 3 bits assumed to be 0. Same
 as the previous reloc but on the right side
 of the container. */
   BFD_RELOC_D30V_15_PCREL_R,
 
-/* This is an 18-bit absolute reloc with
+/* This is an 18-bit absolute reloc with 
 the right 3 bits assumed to be 0. */
   BFD_RELOC_D30V_21,
 
-/* This is an 18-bit pc-relative reloc with
+/* This is an 18-bit pc-relative reloc with 
 the right 3 bits assumed to be 0. */
   BFD_RELOC_D30V_21_PCREL,
 
-/* This is an 18-bit pc-relative reloc with
+/* This is an 18-bit pc-relative reloc with 
 the right 3 bits assumed to be 0. Same
 as the previous reloc but on the right side
 of the container. */
@@ -2292,29 +2217,6 @@ significant 8 bits of a 24 bit word are placed into the least
 significant 8 bits of the opcode. */
   BFD_RELOC_TIC30_LDP,
 
-/* This is a 7bit reloc for the tms320c54x, where the least
-significant 7 bits of a 16 bit word are placed into the least
-significant 7 bits of the opcode. */
-  BFD_RELOC_TIC54X_PARTLS7,
-
-/* This is a 9bit DP reloc for the tms320c54x, where the most
-significant 9 bits of a 16 bit word are placed into the least
-significant 9 bits of the opcode. */
-  BFD_RELOC_TIC54X_PARTMS9,
-
-/* This is an extended address 23-bit reloc for the tms320c54x. */
-  BFD_RELOC_TIC54X_23,
-
-/* This is a 16-bit reloc for the tms320c54x, where the least 
-significant 16 bits of a 23-bit extended address are placed into 
-the opcode. */
-  BFD_RELOC_TIC54X_16_OF_23,
-
-/* This is a reloc for the tms320c54x, where the most
-significant 7 bits of a 23-bit extended address are placed into 
-the opcode. */
-  BFD_RELOC_TIC54X_MS7_OF_23,
-
 /* This is a 48 bit reloc for the FR30 that stores 32 bits. */
   BFD_RELOC_FR30_48,
 
@@ -2354,75 +2256,7 @@ short offset into 11 bits. */
   BFD_RELOC_MCORE_PCREL_JSR_IMM11BY2,
   BFD_RELOC_MCORE_RVA,
 
-/* This is a 16 bit reloc for the AVR that stores 8 bit pc relative
-short offset into 7 bits. */
-  BFD_RELOC_AVR_7_PCREL,
-
-/* This is a 16 bit reloc for the AVR that stores 13 bit pc relative
-short offset into 12 bits. */
-  BFD_RELOC_AVR_13_PCREL,
-
-/* This is a 16 bit reloc for the AVR that stores 17 bit value (usually
-program memory address) into 16 bits. */
-  BFD_RELOC_AVR_16_PM,
-
-/* This is a 16 bit reloc for the AVR that stores 8 bit value (usually
-data memory address) into 8 bit immediate value of LDI insn. */
-  BFD_RELOC_AVR_LO8_LDI,
-
-/* This is a 16 bit reloc for the AVR that stores 8 bit value (high 8 bit
-of data memory address) into 8 bit immediate value of LDI insn. */
-  BFD_RELOC_AVR_HI8_LDI,
-
-/* This is a 16 bit reloc for the AVR that stores 8 bit value (most high 8 bit
-of program memory address) into 8 bit immediate value of LDI insn. */
-  BFD_RELOC_AVR_HH8_LDI,
-
-/* This is a 16 bit reloc for the AVR that stores negated 8 bit value
-(usually data memory address) into 8 bit immediate value of SUBI insn. */
-  BFD_RELOC_AVR_LO8_LDI_NEG,
-
-/* This is a 16 bit reloc for the AVR that stores negated 8 bit value
-(high 8 bit of data memory address) into 8 bit immediate value of
-SUBI insn. */
-  BFD_RELOC_AVR_HI8_LDI_NEG,
-
-/* This is a 16 bit reloc for the AVR that stores negated 8 bit value
-(most high 8 bit of program memory address) into 8 bit immediate value
-of LDI or SUBI insn. */
-  BFD_RELOC_AVR_HH8_LDI_NEG,
-
-/* This is a 16 bit reloc for the AVR that stores 8 bit value (usually
-command address) into 8 bit immediate value of LDI insn. */
-  BFD_RELOC_AVR_LO8_LDI_PM,
-
-/* This is a 16 bit reloc for the AVR that stores 8 bit value (high 8 bit
-of command address) into 8 bit immediate value of LDI insn. */
-  BFD_RELOC_AVR_HI8_LDI_PM,
-
-/* This is a 16 bit reloc for the AVR that stores 8 bit value (most high 8 bit
-of command address) into 8 bit immediate value of LDI insn. */
-  BFD_RELOC_AVR_HH8_LDI_PM,
-
-/* This is a 16 bit reloc for the AVR that stores negated 8 bit value
-(usually command address) into 8 bit immediate value of SUBI insn. */
-  BFD_RELOC_AVR_LO8_LDI_PM_NEG,
-
-/* This is a 16 bit reloc for the AVR that stores negated 8 bit value
-(high 8 bit of 16 bit command address) into 8 bit immediate value
-of SUBI insn. */
-  BFD_RELOC_AVR_HI8_LDI_PM_NEG,
-
-/* This is a 16 bit reloc for the AVR that stores negated 8 bit value
-(high 6 bit of 22 bit command address) into 8 bit immediate
-value of SUBI insn. */
-  BFD_RELOC_AVR_HH8_LDI_PM_NEG,
-
-/* This is a 32 bit reloc for the AVR that stores 23 bit value
-into 22 bits. */
-  BFD_RELOC_AVR_CALL,
-
-/* These two relocations are used by the linker to determine which of
+/* These two relocations are used by the linker to determine which of 
 the entries in a C++ virtual function table are actually used.  When
 the --gc-sections option is given, the linker will zero out the entries
 that are not used, so that the code for those functions need not be
@@ -2436,7 +2270,7 @@ relocation should be located at the child vtable.
 VTABLE_ENTRY is a zero-space relocation that describes the use of a
 virtual function table entry.  The reloc's symbol should refer to the
 table of the class mentioned in the code.  Off of that base, an offset
-describes the entry that is being used.  For Rela hosts, this offset
+describes the entry that is being used.  For Rela hosts, this offset 
 is stored in the reloc's addend.  For Rel hosts, we are forced to put
 this offset in the reloc's section offset. */
   BFD_RELOC_VTABLE_INHERIT,
@@ -2599,8 +2433,8 @@ bfd_print_symbol_vandf PARAMS ((PTR file, asymbol *symbol));
 int 
 bfd_decode_symclass PARAMS ((asymbol *symbol));
 
-boolean 
-bfd_is_undefined_symclass  PARAMS ((int symclass));
+boolean
+bfd_is_undefined_symclass PARAMS ((int symclass));
 
 void 
 bfd_symbol_info PARAMS ((asymbol *symbol, symbol_info *ret));
@@ -3270,6 +3104,22 @@ bfd_set_format PARAMS ((bfd *abfd, bfd_format format));
 
 CONST char *
 bfd_format_string PARAMS ((bfd_format format));
+
+
+/* Return an upper bound on the number of bytes required to store a
+   copy of ABFD's program header table entries.  Return -1 if an error
+   occurs; bfd_get_error will return an appropriate code.  */
+extern long bfd_get_elf_phdr_upper_bound PARAMS ((bfd *abfd));
+
+/* Copy ABFD's program header table entries to *PHDRS.  The entries
+   will be stored as an array of Elf_Internal_Phdr structures, as
+   defined in include/elf/internal.h.  To find out how large the
+   buffer needs to be, call bfd_get_elf_phdr_upper_bound.
+
+   Return the number of program header table entries read, or -1 if an
+   error occurs; bfd_get_error will return an appropriate code.  */
+extern int bfd_get_elf_phdrs PARAMS ((bfd *abfd, void *phdrs));
+
 
 #ifdef __cplusplus
 }

@@ -104,11 +104,6 @@ d10v_frame_chain_valid (chain, frame)
   return ((chain) != 0 && (frame) != 0 && (frame)->pc > IMEM_START);
 }
 
-CORE_ADDR
-d10v_stack_align (CORE_ADDR len)
-{
-  return (len + 1) & ~1;
-}
 
 /* Should we use EXTRACT_STRUCT_VALUE_ADDRESS instead of
    EXTRACT_RETURN_VALUE?  GCC_P is true if compiled with gcc

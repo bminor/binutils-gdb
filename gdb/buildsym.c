@@ -34,8 +34,6 @@
 #include "gdbtypes.h"
 #include "complaints.h"
 #include "gdb_string.h"
-#include "expression.h"		/* For "enum exp_opcode" used by... */
-#include "language.h"		/* For "longest_local_hex_string_custom" */
 
 /* Ask buildsym.h to define the vars it normally declares `extern'.  */
 #define	EXTERN
@@ -83,24 +81,10 @@ struct complaint innerblock_anon_complaint =
 {"inner block (0x%lx-0x%lx) not inside outer block (0x%lx-0x%lx)", 0, 0};
 
 struct complaint blockvector_complaint =
-{"block at %s out of order", 0, 0};
+{"block at 0x%lx out of order", 0, 0};
 
 /* maintain the lists of symbols and blocks */
 
-/* Add a pending list to free_pendings. */
-void
-add_free_pendings (struct pending *list)
-{
-  register struct pending *link = list;
-
-  if (list)
-    {
-      while (link->next) link = link->next;
-      link->next = free_pendings;
-      free_pendings = list;
-    }
-}
-      
 /* Add a symbol to one of the lists of symbols.  */
 
 void
@@ -503,11 +487,17 @@ make_blockvector (struct objfile *objfile)
 	  if (BLOCK_START (BLOCKVECTOR_BLOCK (blockvector, i - 1))
 	      > BLOCK_START (BLOCKVECTOR_BLOCK (blockvector, i)))
 	    {
-	      CORE_ADDR start
-		= BLOCK_START (BLOCKVECTOR_BLOCK (blockvector, i));
+
+	      /* FIXME-32x64: loses if CORE_ADDR doesn't fit in a
+	         long.  Possible solutions include a version of
+	         complain which takes a callback, a
+	         sprintf_address_numeric to match
+	         print_address_numeric, or a way to set up a UI_FILE
+	         which causes sprintf rather than fprintf to be
+	         called.  */
 
 	      complain (&blockvector_complaint,
-			longest_local_hex_string ((LONGEST) start));
+			(unsigned long) BLOCK_START (BLOCKVECTOR_BLOCK (blockvector, i)));
 	    }
 	}
     }
@@ -543,7 +533,6 @@ start_subfile (char *name, char *dirname)
      source file.  */
 
   subfile = (struct subfile *) xmalloc (sizeof (struct subfile));
-  memset ((char *) subfile, 0, sizeof (struct subfile));
   subfile->next = subfiles;
   subfiles = subfile;
   current_subfile = subfile;

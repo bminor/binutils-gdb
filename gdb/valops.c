@@ -34,11 +34,20 @@
 #include <errno.h>
 #include "gdb_string.h"
 
+/* Default to coercing float to double in function calls only when there is
+   no prototype.  Otherwise on targets where the debug information is incorrect
+   for either the prototype or non-prototype case, we can force it by defining
+   COERCE_FLOAT_TO_DOUBLE in the target configuration file. */
+
+#ifndef COERCE_FLOAT_TO_DOUBLE
+#define COERCE_FLOAT_TO_DOUBLE (param_type == NULL)
+#endif
+
 /* Flag indicating HP compilers were used; needed to correctly handle some
    value operations with HP aCC code/runtime. */
 extern int hp_som_som_object_present;
 
-extern int overload_debug;
+
 /* Local functions.  */
 
 static int typecmp PARAMS ((int staticp, struct type * t1[], value_ptr t2[]));
@@ -75,13 +84,6 @@ static int auto_abandon = 0;
 #endif
 
 int overload_resolution = 0;
-
-/* This boolean tells what gdb should do if a signal is received while in
-   a function called from gdb (call dummy).  If set, gdb unwinds the stack
-   and restore the context to what as it was before the call.
-   The default is to stop in the frame where the signal was received. */
-
-int unwind_on_signal_p = 0;
 
 
 
@@ -324,12 +326,6 @@ value_cast (type, arg2)
 		      value_ptr v2 = value_ind (arg2);
 		      VALUE_ADDRESS (v2) -= VALUE_ADDRESS (v)
 			+ VALUE_OFFSET (v);
-
-                      /* JYG: adjust the new pointer value and
-			 embedded offset. */
-                      v2->aligner.contents[0] -=  VALUE_EMBEDDED_OFFSET (v);
-                      VALUE_EMBEDDED_OFFSET (v2) = 0;
-
 		      v2 = value_addr (v2);
 		      VALUE_TYPE (v2) = type;
 		      return v2;
@@ -417,14 +413,14 @@ value_zero (type, lv)
   return val;
 }
 
-/* Return a value with type TYPE located at ADDR.
+/* Return a value with type TYPE located at ADDR.  
 
    Call value_at only if the data needs to be fetched immediately;
    if we can be 'lazy' and defer the fetch, perhaps indefinately, call
    value_at_lazy instead.  value_at_lazy simply records the address of
-   the data and sets the lazy-evaluation-required flag.  The lazy flag
-   is tested in the VALUE_CONTENTS macro, which is used if and when
-   the contents are actually required.
+   the data and sets the lazy-evaluation-required flag.  The lazy flag 
+   is tested in the VALUE_CONTENTS macro, which is used if and when 
+   the contents are actually required. 
 
    Note: value_at does *NOT* handle embedded offsets; perform such
    adjustments before or after calling it. */
@@ -497,9 +493,9 @@ value_at_lazy (type, addr, sect)
   return val;
 }
 
-/* Called only from the VALUE_CONTENTS and VALUE_CONTENTS_ALL macros,
-   if the current data for a variable needs to be loaded into
-   VALUE_CONTENTS(VAL).  Fetches the data from the user's process, and
+/* Called only from the VALUE_CONTENTS and VALUE_CONTENTS_ALL macros, 
+   if the current data for a variable needs to be loaded into 
+   VALUE_CONTENTS(VAL).  Fetches the data from the user's process, and 
    clears the lazy flag to indicate that the data in the buffer is valid.
 
    If the value is zero-length, we avoid calling read_memory, which would
@@ -1128,46 +1124,6 @@ default_push_arguments (nargs, args, sp, struct_return, struct_addr)
 }
 
 
-/* If we're calling a function declared without a prototype, should we
-   promote floats to doubles?  FORMAL and ACTUAL are the types of the
-   arguments; FORMAL may be NULL.
-
-   If we have no definition for this macro, either from the target or
-   from gdbarch, provide a default.  */
-#ifndef COERCE_FLOAT_TO_DOUBLE
-#define COERCE_FLOAT_TO_DOUBLE(formal, actual) \
-  (default_coerce_float_to_double ((formal), (actual)))
-#endif
-
-
-/* A default function for COERCE_FLOAT_TO_DOUBLE: do the coercion only
-   when we don't have any type for the argument at hand.  This occurs
-   when we have no debug info, or when passing varargs.
-
-   This is an annoying default: the rule the compiler follows is to do
-   the standard promotions whenever there is no prototype in scope,
-   and almost all targets want this behavior.  But there are some old
-   architectures which want this odd behavior.  If you want to go
-   through them all and fix them, please do.  Modern gdbarch-style
-   targets may find it convenient to use standard_coerce_float_to_double.  */
-int
-default_coerce_float_to_double (struct type *formal, struct type *actual)
-{
-  return formal == NULL;
-}
-
-
-/* Always coerce floats to doubles when there is no prototype in scope.
-   If your architecture follows the standard type promotion rules for
-   calling unprototyped functions, your gdbarch init function can pass
-   this function to set_gdbarch_coerce_float_to_double to use its logic.  */
-int
-standard_coerce_float_to_double (struct type *formal, struct type *actual)
-{
-  return 1;
-}
-
-
 /* Perform the standard coercions that are specified
    for arguments to be passed to C functions.
 
@@ -1215,7 +1171,7 @@ value_arg_coerce (arg, param_type, is_prototyped)
          non-prototyped case.  As many debugging formats include
          no information about prototyping, we have to live with
          COERCE_FLOAT_TO_DOUBLE for now.  */
-      if (!is_prototyped && COERCE_FLOAT_TO_DOUBLE (param_type, arg_type))
+      if (!is_prototyped && COERCE_FLOAT_TO_DOUBLE)
 	{
 	  if (TYPE_LENGTH (type) < TYPE_LENGTH (builtin_type_double))
 	    type = builtin_type_double;
@@ -1250,7 +1206,7 @@ value_arg_coerce (arg, param_type, is_prototyped)
   return value_cast (type, arg);
 }
 
-/* Determine a function's address and its return type from its value.
+/* Determine a function's address and its return type from its value. 
    Calls error() if the function is not valid for calling.  */
 
 static CORE_ADDR
@@ -1341,7 +1297,7 @@ hand_function_call (function, nargs, args)
   /* CALL_DUMMY is an array of words (REGISTER_SIZE), but each word
      is in host byte order.  Before calling FIX_CALL_DUMMY, we byteswap it
      and remove any extra bytes which might exist because ULONGEST is
-     bigger than REGISTER_SIZE.
+     bigger than REGISTER_SIZE.  
 
      NOTE: This is pretty wierd, as the call dummy is actually a
      sequence of instructions.  But CISC machines will have
@@ -1490,13 +1446,13 @@ hand_function_call (function, nargs, args)
 	  args[i] = value_arg_coerce (args[i], param_type, is_prototyped);
 	}
 
-      /*elz: this code is to handle the case in which the function to be called
-         has a pointer to function as parameter and the corresponding actual argument
+      /*elz: this code is to handle the case in which the function to be called 
+         has a pointer to function as parameter and the corresponding actual argument 
          is the address of a function and not a pointer to function variable.
          In aCC compiled code, the calls through pointers to functions (in the body
          of the function called by hand) are made via $$dyncall_external which
-         requires some registers setting, this is taken care of if we call
-         via a function pointer variable, but not via a function address.
+         requires some registers setting, this is taken care of if we call 
+         via a function pointer variable, but not via a function address. 
          In cc this is not a problem. */
 
       if (using_gcc == 0)
@@ -1504,10 +1460,10 @@ hand_function_call (function, nargs, args)
 	  /* if this parameter is a pointer to function */
 	  if (TYPE_CODE (param_type) == TYPE_CODE_PTR)
 	    if (TYPE_CODE (param_type->target_type) == TYPE_CODE_FUNC)
-	      /* elz: FIXME here should go the test about the compiler used
+	      /* elz: FIXME here should go the test about the compiler used 
 	         to compile the target. We want to issue the error
-	         message only if the compiler used was HP's aCC.
-	         If we used HP's cc, then there is no problem and no need
+	         message only if the compiler used was HP's aCC. 
+	         If we used HP's cc, then there is no problem and no need 
 	         to return at this point */
 	      if (using_gcc == 0)	/* && compiler == aCC */
 		/* go see if the actual parameter is a variable of type
@@ -1617,7 +1573,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 
 /* elz: on HPPA no need for this extra alignment, maybe it is needed
    on other architectures. This is because all the alignment is taken care
-   of in the above code (ifdef REG_STRUCT_HAS_ADDR) and in
+   of in the above code (ifdef REG_STRUCT_HAS_ADDR) and in 
    hppa_push_arguments */
 #ifndef NO_EXTRA_ALIGNMENT_NEEDED
 
@@ -1648,7 +1604,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
      function.  Since this doesn't actually involve executing a JSR/BSR
      instruction, the return address must be set up by hand, either by
      pushing onto the stack or copying into a return-address register
-     as appropriate.  Formerly this has been done in PUSH_ARGUMENTS,
+     as appropriate.  Formerly this has been done in PUSH_ARGUMENTS, 
      but that's overloading its functionality a bit, so I'm making it
      explicit to do it here.  */
   sp = PUSH_RETURN_ADDRESS (real_pc, sp);
@@ -1683,7 +1639,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
      it doesn't cost us anything but space and if the function is pcc
      it will ignore this value, we will make that assumption.
 
-     Also note that on some machines (like the sparc) pcc uses a
+     Also note that on some machines (like the sparc) pcc uses a 
      convention like gcc's.  */
 
   if (struct_return)
@@ -1739,42 +1695,16 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	/* We stopped inside the FUNCTION because of a random signal.
 	   Further execution of the FUNCTION is not allowed. */
 
-        if (unwind_on_signal_p)
-	  {
-	    /* The user wants the context restored. */
+	/* In this case, we must do the cleanups because we don't
+	   want the dummy anymore (the dummy frame has been poped already. */
+	do_cleanups (old_chain);
 
-            /* We must get back to the frame we were before the dummy call. */
-            POP_FRAME;
-
-	    /* FIXME: Insert a bunch of wrap_here; name can be very long if it's
-	       a C++ name with arguments and stuff.  */
-	    error ("\
-The program being debugged was signaled while in a function called from GDB.\n\
-GDB has restored the context to what it was before the call.\n\
-To change this behavior use \"set unwindonsignal off\"\n\
+	/* FIXME: Insert a bunch of wrap_here; name can be very long if it's
+	   a C++ name with arguments and stuff.  */
+	error ("\
+The program being debugged stopped while in a function called from GDB.\n\
 Evaluation of the expression containing the function (%s) will be abandoned.",
-		   name);
-	  }
-	else
-	  {
-	    /* The user wants to stay in the frame where we stopped (default).*/
-
-	    /* If we did the cleanups, we would print a spurious error
-	       message (Unable to restore previously selected frame),
-	       would write the registers from the inf_status (which is
-	       wrong), and would do other wrong things.  */
-	    discard_cleanups (old_chain);
-	    discard_inferior_status (inf_status);
-
-	    /* FIXME: Insert a bunch of wrap_here; name can be very long if it's
-	       a C++ name with arguments and stuff.  */
-	    error ("\
-The program being debugged was signaled while in a function called from GDB.\n\
-GDB remains in the frame where the signal was received.\n\
-To change this behavior use \"set unwindonsignal on\"\n\
-Evaluation of the expression containing the function (%s) will be abandoned.",
-		   name);
-	  }
+	       name);
       }
 
     if (rc == 2)
@@ -2074,7 +2004,7 @@ search_struct_field (name, arg1, offset, type, looking_for_baseclass)
       {
 	char *t_field_name = TYPE_FIELD_NAME (type, i);
 
-	if (t_field_name && (strcmp_iw (t_field_name, name) == 0))
+	if (t_field_name && STREQ (t_field_name, name))
 	  {
 	    value_ptr v;
 	    if (TYPE_FIELD_STATIC (type, i))
@@ -2089,7 +2019,7 @@ search_struct_field (name, arg1, offset, type, looking_for_baseclass)
 	if (t_field_name
 	    && (t_field_name[0] == '\0'
 		|| (TYPE_CODE (type) == TYPE_CODE_UNION
-		    && (strcmp_iw (t_field_name, "else") == 0))))
+		    && STREQ (t_field_name, "else"))))
 	  {
 	    struct type *field_type = TYPE_FIELD_TYPE (type, i);
 	    if (TYPE_CODE (field_type) == TYPE_CODE_UNION
@@ -2134,7 +2064,7 @@ search_struct_field (name, arg1, offset, type, looking_for_baseclass)
          is not yet filled in.  */
       int found_baseclass = (looking_for_baseclass
 			     && TYPE_BASECLASS_NAME (type, i) != NULL
-			     && (strcmp_iw (name, TYPE_BASECLASS_NAME (type, i)) == 0));
+			     && STREQ (name, TYPE_BASECLASS_NAME (type, i)));
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
@@ -2276,7 +2206,7 @@ find_rt_vbase_offset (type, basetype, valaddr, offset, boffset_p, skip_p)
    * virtual base entries.  Offset is negative -- virtual base entries
    * appear _before_ the address point of the virtual table. */
 
-  /* pai: FIXME -- 32x64 problem, if word = 8 bytes, change multiplier
+  /* pai: FIXME -- 32x64 problem, if word = 8 bytes, change multiplier 
      & use long type */
 
   /* epstein : FIXME -- added param for overlay section. May not be correct */
@@ -2320,7 +2250,7 @@ search_struct_method (name, arg1p, args, offset, static_memfuncp, type)
 	  else if (cplus_demangle_opname (t_field_name, dem_opname, 0))
 	    t_field_name = dem_opname;
 	}
-      if (t_field_name && (strcmp_iw (t_field_name, name) == 0))
+      if (t_field_name && STREQ (t_field_name, name))
 	{
 	  int j = TYPE_FN_FIELDLIST_LENGTH (type, i) - 1;
 	  struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
@@ -2576,7 +2506,7 @@ find_method_list (argp, method, offset, static_memfuncp, type, num_fns, basetype
     {
       /* pai: FIXME What about operators and type conversions? */
       char *fn_field_name = TYPE_FN_FIELDLIST_NAME (type, i);
-      if (fn_field_name && (strcmp_iw (fn_field_name, method) == 0))
+      if (fn_field_name && STREQ (fn_field_name, method))
 	{
 	  *num_fns = TYPE_FN_FIELDLIST_LENGTH (type, i);
 	  *basetype = type;
@@ -2746,9 +2676,6 @@ find_overload_match (arg_types, nargs, name, method, lax, obj, fsym, valp, symp,
   /* Get the list of overloaded methods or functions */
   if (method)
     {
-      int i;
-      int len;
-      struct type *domain;
       obj_type_name = TYPE_NAME (VALUE_TYPE (obj));
       /* Hack: evaluate_subexp_standard often passes in a pointer
          value rather than the object itself, so try again */
@@ -2765,26 +2692,6 @@ find_overload_match (arg_types, nargs, name, method, lax, obj, fsym, valp, symp,
 	       obj_type_name,
 	       (obj_type_name && *obj_type_name) ? "::" : "",
 	       name);
-      domain = TYPE_DOMAIN_TYPE (fns_ptr[0].type);
-      len = TYPE_NFN_FIELDS (domain);
-      /* NOTE: dan/2000-03-10: This stuff is for STABS, which won't
-         give us the info we need directly in the types. We have to
-         use the method stub conversion to get it. Be aware that this
-         is by no means perfect, and if you use STABS, please move to
-         DWARF-2, or something like it, because trying to improve
-         overloading using STABS is really a waste of time. */
-      for (i = 0; i < len; i++)
-	{
-	  int j;
-	  struct fn_field *f = TYPE_FN_FIELDLIST1 (domain, i);
-	  int len2 = TYPE_FN_FIELDLIST_LENGTH (domain, i);
-
-	  for (j = 0; j < len2; j++)
-	    {
-	      if (TYPE_FN_FIELD_STUB (f, j) && (!strcmp_iw (TYPE_FN_FIELDLIST_NAME (domain,i),name)))
-		check_stub_method (domain, i, j);
-	    }
-	}
     }
   else
     {
@@ -2811,30 +2718,15 @@ find_overload_match (arg_types, nargs, name, method, lax, obj, fsym, valp, symp,
   /* Consider each candidate in turn */
   for (ix = 0; ix < num_fns; ix++)
     {
-      if (method)
-	{
-	  /* For static member functions, we won't have a this pointer, but nothing
-	     else seems to handle them right now, so we just pretend ourselves */
-	  nparms=0;
-
-	  if (TYPE_FN_FIELD_ARGS(fns_ptr,ix))
-	    {
-	      while (TYPE_CODE(TYPE_FN_FIELD_ARGS(fns_ptr,ix)[nparms]) != TYPE_CODE_VOID)
-		nparms++;
-	    }
-	}
-      else
-	{
-	  /* If it's not a method, this is the proper place */
-	  nparms=TYPE_NFIELDS(SYMBOL_TYPE(oload_syms[ix]));
-	}
+      /* Number of parameters for current candidate */
+      nparms = method ? TYPE_NFIELDS (fns_ptr[ix].type)
+	: TYPE_NFIELDS (SYMBOL_TYPE (oload_syms[ix]));
 
       /* Prepare array of parameter types */
       parm_types = (struct type **) xmalloc (nparms * (sizeof (struct type *)));
       for (jj = 0; jj < nparms; jj++)
-	parm_types[jj] = (method
-			  ? (TYPE_FN_FIELD_ARGS (fns_ptr, ix)[jj])
-			  : TYPE_FIELD_TYPE (SYMBOL_TYPE (oload_syms[ix]), jj));
+	parm_types[jj] = method ? TYPE_FIELD_TYPE (fns_ptr[ix].type, jj)
+	  : TYPE_FIELD_TYPE (SYMBOL_TYPE (oload_syms[ix]), jj);
 
       /* Compare parameter types to supplied argument types */
       bv = rank_function (parm_types, nparms, arg_types, nargs);
@@ -2869,22 +2761,17 @@ find_overload_match (arg_types, nargs, name, method, lax, obj, fsym, valp, symp,
 	    break;
 	  }
       free (parm_types);
-if (overload_debug)
-{
+#ifdef DEBUG_OLOAD
       if (method)
-	fprintf_filtered (gdb_stderr,"Overloaded method instance %s, # of parms %d\n", fns_ptr[ix].physname, nparms);
+	printf ("Overloaded method instance %s, # of parms %d\n", fns_ptr[ix].physname, nparms);
       else
-	fprintf_filtered (gdb_stderr,"Overloaded function instance %s # of parms %d\n", SYMBOL_DEMANGLED_NAME (oload_syms[ix]), nparms);
-      for (jj = 0; jj < nargs; jj++)
-	fprintf_filtered (gdb_stderr,"...Badness @ %d : %d\n", jj, bv->rank[jj]);
-      fprintf_filtered (gdb_stderr,"Overload resolution champion is %d, ambiguous? %d\n", oload_champ, oload_ambiguous);
-}
+	printf ("Overloaded function instance %s # of parms %d\n", SYMBOL_DEMANGLED_NAME (oload_syms[ix]), nparms);
+      for (jj = 0; jj <= nargs; jj++)
+	printf ("...Badness @ %d : %d\n", jj, bv->rank[jj]);
+      printf ("Overload resolution champion is %d, ambiguous? %d\n", oload_champ, oload_ambiguous);
+#endif
     }				/* end loop over all candidates */
-  /* NOTE: dan/2000-03-10: Seems to be a better idea to just pick one
-     if they have the exact same goodness. This is because there is no
-     way to differentiate based on return type, which we need to in
-     cases like overloads of .begin() <It's both const and non-const> */
-#if 0
+
   if (oload_ambiguous)
     {
       if (method)
@@ -2896,7 +2783,6 @@ if (overload_debug)
 	error ("Cannot resolve overloaded function %s to unique instance; disambiguate by specifying function signature",
 	       func_name);
     }
-#endif
 
   /* Check how bad the best match is */
   for (ix = 1; ix <= nargs; ix++)
@@ -2993,7 +2879,7 @@ check_field_in (type, name)
   for (i = TYPE_NFIELDS (type) - 1; i >= TYPE_N_BASECLASSES (type); i--)
     {
       char *t_field_name = TYPE_FIELD_NAME (type, i);
-      if (t_field_name && (strcmp_iw (t_field_name, name) == 0))
+      if (t_field_name && STREQ (t_field_name, name))
 	return 1;
     }
 
@@ -3010,7 +2896,7 @@ check_field_in (type, name)
 
   for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; --i)
     {
-      if (strcmp_iw (TYPE_FN_FIELDLIST_NAME (type, i), name) == 0)
+      if (STREQ (TYPE_FN_FIELDLIST_NAME (type, i), name))
 	return 1;
     }
 
@@ -3211,8 +3097,11 @@ value_struct_elt_for_reference (domain, offset, curtype, name, intype)
  * USING_ENC is the flag that distinguishes the two cases.
  * If it is 1, then the offset is for the enclosing object,
  * otherwise for the embedded object.
- *
- */
+ * 
+ * This currently works only for RTTI information generated
+ * by the HP ANSI C++ compiler (aCC).  g++ today (1997-06-10)
+ * does not appear to support RTTI. This function returns a
+ * NULL value for objects in the g++ runtime model. */
 
 struct type *
 value_rtti_type (v, full, top, using_enc)
@@ -3242,184 +3131,87 @@ value_rtti_type (v, full, top, using_enc)
   /* RTTI works only or class objects */
   if (TYPE_CODE (known_type) != TYPE_CODE_CLASS)
     return NULL;
-  if (TYPE_HAS_VTABLE(known_type))
+
+  /* If neither the declared type nor the enclosing type of the
+   * value structure has a HP ANSI C++ style virtual table,
+   * we can't do anything. */
+  if (!TYPE_HAS_VTABLE (known_type))
     {
-      /* If neither the declared type nor the enclosing type of the
-       * value structure has a HP ANSI C++ style virtual table,
-       * we can't do anything. */
-      if (!TYPE_HAS_VTABLE (known_type))
-	{
-	  known_type = VALUE_ENCLOSING_TYPE (v);
-	  CHECK_TYPEDEF (known_type);
-	  if ((TYPE_CODE (known_type) != TYPE_CODE_CLASS) ||
-	      !TYPE_HAS_VTABLE (known_type))
-	    return NULL;		/* No RTTI, or not HP-compiled types */
-	  CHECK_TYPEDEF (known_type);
-	  using_enclosing = 1;
-	}
+      known_type = VALUE_ENCLOSING_TYPE (v);
+      CHECK_TYPEDEF (known_type);
+      if ((TYPE_CODE (known_type) != TYPE_CODE_CLASS) ||
+	  !TYPE_HAS_VTABLE (known_type))
+	return NULL;		/* No RTTI, or not HP-compiled types */
+      CHECK_TYPEDEF (known_type);
+      using_enclosing = 1;
+    }
 
-      if (using_enclosing && using_enc)
-	*using_enc = 1;
+  if (using_enclosing && using_enc)
+    *using_enc = 1;
 
-      /* First get the virtual table address */
-      coreptr = *(CORE_ADDR *) ((VALUE_CONTENTS_ALL (v))
-				+ VALUE_OFFSET (v)
-				+ (using_enclosing ? 0 : VALUE_EMBEDDED_OFFSET (v)));
-      if (coreptr == 0)
-	return NULL;		/* return silently -- maybe called on gdb-generated value */
+  /* First get the virtual table address */
+  coreptr = *(CORE_ADDR *) ((VALUE_CONTENTS_ALL (v))
+			    + VALUE_OFFSET (v)
+		       + (using_enclosing ? 0 : VALUE_EMBEDDED_OFFSET (v)));
+  if (coreptr == 0)
+    return NULL;		/* return silently -- maybe called on gdb-generated value */
 
-      /* Fetch the top offset of the object */
-      /* FIXME possible 32x64 problem with pointer size & arithmetic */
-      vp = value_at (builtin_type_int,
-		     coreptr + 4 * HP_ACC_TOP_OFFSET_OFFSET,
-		     VALUE_BFD_SECTION (v));
-      top_offset = value_as_long (vp);
-      if (top)
-	*top = top_offset;
+  /* Fetch the top offset of the object */
+  /* FIXME possible 32x64 problem with pointer size & arithmetic */
+  vp = value_at (builtin_type_int,
+		 coreptr + 4 * HP_ACC_TOP_OFFSET_OFFSET,
+		 VALUE_BFD_SECTION (v));
+  top_offset = value_as_long (vp);
+  if (top)
+    *top = top_offset;
 
-      /* Fetch the typeinfo pointer */
-      /* FIXME possible 32x64 problem with pointer size & arithmetic */
-      vp = value_at (builtin_type_int, coreptr + 4 * HP_ACC_TYPEINFO_OFFSET, VALUE_BFD_SECTION (v));
-      /* Indirect through the typeinfo pointer and retrieve the pointer
-       * to the string name */
-      coreptr = *(CORE_ADDR *) (VALUE_CONTENTS (vp));
-      if (!coreptr)
-	error ("Retrieved null typeinfo pointer in trying to determine run-time type");
-      vp = value_at (builtin_type_int, coreptr + 4, VALUE_BFD_SECTION (v));		/* 4 -> offset of name field */
-      /* FIXME possible 32x64 problem */
+  /* Fetch the typeinfo pointer */
+  /* FIXME possible 32x64 problem with pointer size & arithmetic */
+  vp = value_at (builtin_type_int, coreptr + 4 * HP_ACC_TYPEINFO_OFFSET, VALUE_BFD_SECTION (v));
+  /* Indirect through the typeinfo pointer and retrieve the pointer
+   * to the string name */
+  coreptr = *(CORE_ADDR *) (VALUE_CONTENTS (vp));
+  if (!coreptr)
+    error ("Retrieved null typeinfo pointer in trying to determine run-time type");
+  vp = value_at (builtin_type_int, coreptr + 4, VALUE_BFD_SECTION (v));		/* 4 -> offset of name field */
+  /* FIXME possible 32x64 problem */
 
-      coreptr = *(CORE_ADDR *) (VALUE_CONTENTS (vp));
+  coreptr = *(CORE_ADDR *) (VALUE_CONTENTS (vp));
 
-      read_memory_string (coreptr, rtti_type_name, 256);
+  read_memory_string (coreptr, rtti_type_name, 256);
 
-      if (strlen (rtti_type_name) == 0)
-	error ("Retrieved null type name from typeinfo");
+  if (strlen (rtti_type_name) == 0)
+    error ("Retrieved null type name from typeinfo");
 
-      /* search for type */
-      rtti_type = lookup_typename (rtti_type_name, (struct block *) 0, 1);
+  /* search for type */
+  rtti_type = lookup_typename (rtti_type_name, (struct block *) 0, 1);
 
-      if (!rtti_type)
-	error ("Could not find run-time type: invalid type name %s in typeinfo??", rtti_type_name);
-      CHECK_TYPEDEF (rtti_type);
-#if 0
-      printf ("RTTI type name %s, tag %s, full? %d\n", TYPE_NAME (rtti_type), TYPE_TAG_NAME (rtti_type), full ? *full : -1);
+  if (!rtti_type)
+    error ("Could not find run-time type: invalid type name %s in typeinfo??", rtti_type_name);
+  CHECK_TYPEDEF (rtti_type);
+
+#if 0				/* debugging */
+  printf ("RTTI type name %s, tag %s, full? %d\n", TYPE_NAME (rtti_type), TYPE_TAG_NAME (rtti_type), full ? *full : -1);
 #endif
-      /* Check whether we have the entire object */
-      if (full			/* Non-null pointer passed */
-	  &&
-	  /* Either we checked on the whole object in hand and found the
-	     top offset to be zero */
-	  (((top_offset == 0) &&
-	    using_enclosing &&
-	    TYPE_LENGTH (known_type) == TYPE_LENGTH (rtti_type))
-	   ||
-	   /* Or we checked on the embedded object and top offset was the
-	      same as the embedded offset */
-	   ((top_offset == VALUE_EMBEDDED_OFFSET (v)) &&
-	    !using_enclosing &&
-	    TYPE_LENGTH (VALUE_ENCLOSING_TYPE (v)) == TYPE_LENGTH (rtti_type))))
 
-	*full = 1;
-    }
-  else
-    /*
-      Right now this is G++ RTTI. Plan on this changing in the
-      future as i get around to setting the vtables properly for G++
-      compiled stuff. Also, i'll be using the type info functions, 
-      which are always right. Deal with it until then.
-    */
-    {
-      CORE_ADDR vtbl;
-      struct minimal_symbol *minsym;
-      struct symbol *sym;
-      char *demangled_name;
-      struct type *btype;
-      /* If the type has no vptr fieldno, try to get it filled in */
-      if (TYPE_VPTR_FIELDNO(known_type) < 0)
-	fill_in_vptr_fieldno(known_type);
+  /* Check whether we have the entire object */
+  if (full			/* Non-null pointer passed */
 
-      /* If we still can't find one, give up */
-      if (TYPE_VPTR_FIELDNO(known_type) < 0)
-	return NULL;
+      &&
+  /* Either we checked on the whole object in hand and found the
+     top offset to be zero */
+      (((top_offset == 0) &&
+	using_enclosing &&
+	TYPE_LENGTH (known_type) == TYPE_LENGTH (rtti_type))
+       ||
+  /* Or we checked on the embedded object and top offset was the
+     same as the embedded offset */
+       ((top_offset == VALUE_EMBEDDED_OFFSET (v)) &&
+	!using_enclosing &&
+	TYPE_LENGTH (VALUE_ENCLOSING_TYPE (v)) == TYPE_LENGTH (rtti_type))))
 
-      /* Make sure our basetype and known type match, otherwise, cast
-	 so we can get at the vtable properly.
-      */
-      btype = TYPE_VPTR_BASETYPE (known_type);
-      CHECK_TYPEDEF (btype);
-      if (btype != known_type )
-	{
-	  v = value_cast (btype, v);
-	  if (using_enc)
-	    *using_enc=1;
-	}
-      /*
-	We can't use value_ind here, because it would want to use RTTI, and 
-	we'd waste a bunch of time figuring out we already know the type.
-        Besides, we don't care about the type, just the actual pointer
-      */
-      if (VALUE_ADDRESS (value_field (v, TYPE_VPTR_FIELDNO (known_type))) == 0)
-	return NULL;
+    *full = 1;
 
-      /*
-	 If we are enclosed by something that isn't us, adjust the
-	 address properly and set using_enclosing.
-      */
-      if (VALUE_ENCLOSING_TYPE(v) != VALUE_TYPE(v))
-	{
-	  value_ptr tempval;
-	  tempval=value_field(v,TYPE_VPTR_FIELDNO(known_type));
-	  VALUE_ADDRESS(tempval)+=(TYPE_BASECLASS_BITPOS(known_type,TYPE_VPTR_FIELDNO(known_type))/8);
-	  vtbl=value_as_pointer(tempval);
-	  using_enclosing=1;
-	}
-      else
-	{
-	  vtbl=value_as_pointer(value_field(v,TYPE_VPTR_FIELDNO(known_type)));
-	  using_enclosing=0;
-	}
-
-      /* Try to find a symbol that is the vtable */
-      minsym=lookup_minimal_symbol_by_pc(vtbl);
-      if (minsym==NULL || (demangled_name=SYMBOL_NAME(minsym))==NULL || !VTBL_PREFIX_P(demangled_name))
-	return NULL;
-
-      /* If we just skip the prefix, we get screwed by namespaces */
-      demangled_name=cplus_demangle(demangled_name,DMGL_PARAMS|DMGL_ANSI);
-      *(strchr(demangled_name,' '))=0;
-
-      /* Lookup the type for the name */
-      rtti_type=lookup_typename(demangled_name, (struct block *)0,1);
-
-      if (rtti_type==NULL)
-	return NULL;
-
-      if (TYPE_N_BASECLASSES(rtti_type) > 1 &&  full && (*full) != 1)
-	{
-	  if (top)
-	    *top=TYPE_BASECLASS_BITPOS(rtti_type,TYPE_VPTR_FIELDNO(rtti_type))/8;
-	  if (top && ((*top) >0))
-	    {
-	      if (TYPE_LENGTH(rtti_type) > TYPE_LENGTH(known_type))
-		{
-		  if (full)
-		    *full=0;
-		}
-	      else
-		{
-		  if (full)
-		    *full=1;
-		}
-	    }
-	}
-      else
-	{
-	  if (full)
-	    *full=1;
-	}
-      if (using_enc)
-	*using_enc=using_enclosing;
-    }
   return rtti_type;
 }
 
@@ -3666,10 +3458,10 @@ varying_to_slice (varray)
   return value_slice (value_primitive_field (varray, 0, 1, vtype), 0, length);
 }
 
-/* Create a value for a FORTRAN complex number.  Currently most of
-   the time values are coerced to COMPLEX*16 (i.e. a complex number
-   composed of 2 doubles.  This really should be a smarter routine
-   that figures out precision inteligently as opposed to assuming
+/* Create a value for a FORTRAN complex number.  Currently most of 
+   the time values are coerced to COMPLEX*16 (i.e. a complex number 
+   composed of 2 doubles.  This really should be a smarter routine 
+   that figures out precision inteligently as opposed to assuming 
    doubles. FIXME: fmb */
 
 value_ptr
@@ -3739,13 +3531,4 @@ _initialize_valops ()
      &showlist);
   overload_resolution = 1;
 
-  add_show_from_set (
-  add_set_cmd ("unwindonsignal", no_class, var_boolean,
-	       (char *) &unwind_on_signal_p,
-"Set unwinding of stack if a signal is received while in a call dummy.\n\
-The unwindonsignal lets the user determine what gdb should do if a signal\n\
-is received while in a function called from gdb (call dummy).  If set, gdb\n\
-unwinds the stack and restore the context to what as it was before the call.\n\
-The default is to stop in the frame where the signal was received.", &setlist),
-		     &showlist);
 }

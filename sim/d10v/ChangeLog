@@ -1,8 +1,3 @@
-Tue Feb 22 18:24:56 2000  Andrew Cagney  <cagney@b1.cygnus.com>
-
-	* Makefile.in (SIM_EXTRA_CFLAGS): Define SIM_HAVE_ENVIRONMENT.
-	* interp.c (sim_set_trace): Replace sim_trace.  Enable tracing.
-
 Mon Jan  3 02:06:07 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (lookup_hash): Stop the update of the PC when there was
@@ -16,11 +11,6 @@ Mon Jan  3 00:14:33 2000  Andrew Cagney  <cagney@b1.cygnus.com>
  	OP_6C1F, OP_6801, OP_6C01, OP_36010000, OP_35000000, OP_6A00,
  	OP_6E1F, OP_6A01, OP_6E01, OP_37010000): For "ld", "ld2w", "st"
  	and "st2w" check that the address is aligned.
-
-1999-12-30  Chandra Chavva   <cchavva@cygnus.com>
-	
-	* d10v_sim.h (INC_ADDR): Added code to assign
-	proper address for loads with predec operations.
 
 1999-11-25  Nick Clifton  <nickc@cygnus.com>
 

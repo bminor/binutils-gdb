@@ -289,7 +289,7 @@ int
 dis_asm_read_memory (memaddr, myaddr, len, info)
      bfd_vma memaddr;
      bfd_byte *myaddr;
-     unsigned int len;
+     int len;
      disassemble_info *info;
 {
   return target_read_memory (memaddr, (char *) myaddr, len);

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-04-04 23:21+0930\n"
+"POT-Creation-Date: 1999-07-11 22:05-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -48,32 +48,15 @@ msgstr ""
 msgid "branch address not on 4 byte boundary"
 msgstr ""
 
-#: arm-dis.c:470
+#: arm-dis.c:407
 msgid "<illegal precision>"
-msgstr ""
-
-#: arm-dis.c:882
-#, c-format
-msgid "Unrecognised register name set: %s\n"
-msgstr ""
-
-#: arm-dis.c:889
-#, c-format
-msgid "Unrecognised disassembler option: %s\n"
-msgstr ""
-
-#: arm-dis.c:1053
-msgid ""
-"\n"
-"The following ARM specific disassembler options are supported for use with\n"
-"the -M switch:\n"
 msgstr ""
 
 #: cgen-asm.c:224
 msgid "unrecognized keyword/register name"
 msgstr ""
 
-#: cgen-asm.c:332 fr30-ibld.c:223 m32r-ibld.c:227
+#: cgen-asm.c:332 fr30-ibld.c:223 m32r-ibld.c:223
 #, c-format
 msgid "operand out of range (%ld not between %ld and %ld)"
 msgstr ""
@@ -89,84 +72,83 @@ msgid "<unknown register %d>"
 msgstr ""
 
 #. Can't happen.
-#: dis-buf.c:56
+#: dis-buf.c:50
 #, c-format
 msgid "Unknown error %d\n"
 msgstr ""
 
-#: dis-buf.c:61
+#: dis-buf.c:55
 #, c-format
 msgid "Address 0x%x is out of bounds.\n"
 msgstr ""
 
-#: fr30-asm.c:305 m32r-asm.c:313
+#: fr30-asm.c:303 m32r-asm.c:299
 #, c-format
 msgid "Unrecognized field %d while parsing.\n"
 msgstr ""
 
 #. We couldn't parse it.
-#: fr30-asm.c:369 fr30-asm.c:373 fr30-asm.c:447 m32r-asm.c:377 m32r-asm.c:381
-#: m32r-asm.c:455
+#: fr30-asm.c:367 fr30-asm.c:436 m32r-asm.c:363 m32r-asm.c:432
 msgid "unrecognized instruction"
 msgstr ""
 
 #. Syntax char didn't match.  Can't be this insn.
 #. FIXME: would like to return something like
 #. "expected char `c'"
-#: fr30-asm.c:415 m32r-asm.c:423
+#: fr30-asm.c:404 m32r-asm.c:400
 msgid "syntax error"
 msgstr ""
 
-#: fr30-asm.c:441 m32r-asm.c:449
+#: fr30-asm.c:430 m32r-asm.c:426
 msgid "junk at end of line"
 msgstr ""
 
-#: fr30-asm.c:534 m32r-asm.c:552
+#: fr30-asm.c:523 m32r-asm.c:519
 #, c-format
 msgid "bad instruction `%.50s...'"
 msgstr ""
 
-#: fr30-asm.c:537 m32r-asm.c:555
+#: fr30-asm.c:526 m32r-asm.c:522
 #, c-format
 msgid "bad instruction `%.50s'"
 msgstr ""
 
-#: fr30-dis.c:300 m32r-dis.c:239
+#: fr30-dis.c:300 m32r-dis.c:227
 #, c-format
 msgid "Unrecognized field %d while printing insn.\n"
 msgstr ""
 
-#: fr30-ibld.c:210 m32r-ibld.c:211
+#: fr30-ibld.c:210 m32r-ibld.c:210
 #, c-format
 msgid "operand out of range (%lu not between 0 and %lu)"
 msgstr ""
 
-#: fr30-ibld.c:745 m32r-ibld.c:679
+#: fr30-ibld.c:749 m32r-ibld.c:659
 #, c-format
 msgid "Unrecognized field %d while building insn.\n"
 msgstr ""
 
-#: fr30-ibld.c:947 m32r-ibld.c:809
+#: fr30-ibld.c:952 m32r-ibld.c:770
 #, c-format
 msgid "Unrecognized field %d while decoding insn.\n"
 msgstr ""
 
-#: fr30-ibld.c:1091 m32r-ibld.c:914
+#: fr30-ibld.c:1096 m32r-ibld.c:863
 #, c-format
 msgid "Unrecognized field %d while getting int operand.\n"
 msgstr ""
 
-#: fr30-ibld.c:1220 m32r-ibld.c:1004
+#: fr30-ibld.c:1225 m32r-ibld.c:941
 #, c-format
 msgid "Unrecognized field %d while getting vma operand.\n"
 msgstr ""
 
-#: fr30-ibld.c:1349 m32r-ibld.c:1097
+#: fr30-ibld.c:1358 m32r-ibld.c:1023
 #, c-format
 msgid "Unrecognized field %d while setting int operand.\n"
 msgstr ""
 
-#: fr30-ibld.c:1471 m32r-ibld.c:1183
+#: fr30-ibld.c:1484 m32r-ibld.c:1098
 #, c-format
 msgid "Unrecognized field %d while setting vma operand.\n"
 msgstr ""
@@ -202,7 +184,7 @@ msgstr ""
 msgid "unknown\t0x%04lx"
 msgstr ""
 
-#: m10300-dis.c:680
+#: m10300-dis.c:546
 #, c-format
 msgid "unknown\t0x%04x"
 msgstr ""

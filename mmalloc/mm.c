@@ -4,7 +4,7 @@
    behavior.  It should also still be possible to build the library
    as a standard library with multiple objects.
 
-   Copyright 1996, 2000 Free Software Foundation
+   Copyright 1996 Free Software Foundation
 
 The GNU C Library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Library General Public License as
@@ -21,9 +21,6 @@ License along with the GNU C Library; see the file COPYING.LIB.  If
 not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA. */
 
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>	/* Prototypes for lseek, sbrk (maybe) */
-#endif
 #include "mcalloc.c"
 #include "mfree.c"
 #include "mmalloc.c"

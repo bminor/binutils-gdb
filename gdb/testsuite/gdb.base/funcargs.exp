@@ -289,7 +289,7 @@ proc pointer_args {} {
     setup_xfail "a29k-*-udi"
     gdb_run_cmd
     gdb_expect {
-	 -re ".* call3a \\(cp=$hex \"a.*\", sp=$hex, ip=$hex, lp=$hex\\) .*$gdb_prompt $" { pass "run to call3a" }
+	 -re ".* call3a \\(cp=$hex \"a\", sp=$hex, ip=$hex, lp=$hex\\) .*$gdb_prompt $" { pass "run to call3a" }
 	 -re "$gdb_prompt $" { fail "run to call3a" ; gdb_suppress_tests; }
 	 timeout { fail "(timeout) run to call3a" ; gdb_suppress_tests; }
     }
@@ -301,7 +301,7 @@ proc pointer_args {} {
 
     # Continue; should stop at call3b and print actual arguments.
     # Try dereferencing the arguments.
-    if [gdb_test "cont" ".* call3b \\(ucp=$hex \"b.*\", usp=$hex, uip=$hex, ulp=$hex\\) .*" "continue to call3b"] {
+    if [gdb_test "cont" ".* call3b \\(ucp=$hex \"b\", usp=$hex, uip=$hex, ulp=$hex\\) .*" "continue to call3b"] {
 	gdb_suppress_tests;
     }
 

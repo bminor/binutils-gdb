@@ -95,14 +95,14 @@ struct bcache {
   struct obstack cache;
 
   /* How many hash buckets we're using.  */
-  unsigned int num_buckets;
+  int num_buckets;
   
   /* Hash buckets.  This table is allocated using malloc, so when we
      grow the table we can return the old table to the system.  */
   struct bstring **bucket;
 
   /* Statistics.  */
-  unsigned long unique_count;	/* number of unique strings */
+  long unique_count;	/* number of unique strings */
   long total_count;	/* total number of strings cached, including dups */
   long unique_size;	/* size of unique strings, in bytes */
   long total_size;      /* total number of bytes cached, including dups */

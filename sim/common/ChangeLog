@@ -1,43 +1,3 @@
-2000-03-30  Dave Brolley  <brolley@redhat.com>
-
-	* aclocal.m4 (cgen): Use guile to run cgen.
-
-2000-03-23  Dave Brolley  <brolley@redhat.com>
-
-	* cgen-fpu.h: Rename extsfdf to fextsfdf. Rename truncdfsf to
-	ftruncdfsf.
-	* cgen-accfp.c (fextsfdf): New function.
-	(ftruncdfsf): New function.
-	(cgen_init_accurate_fpu): Initialize fextsfdf and ftruncdfsf.
-
-2000-03-13  Jeff Johnston <jjohnstn@cygnus.com>
-
-	* cgen-ops.h: Added TRUNCSISI.
-
-2000-03-08  Dave Brolley  <brolley@redhat.com>
-
-	* cgen-par.h (cgen_write_queue_kind): Add CGEN_FN_SF_WRITE.
-	(CGEN_WRITE_QUEUE_ELEMENT): Add fn_sf_write.
-	(sim_queue_fn_si_write): Last argument is has type USI.
-	(sim_queue_fn_sf_write): New function.
-	* cgen-par.c (sim_queue_fn_si_write): Declare 'value' as USI.
-	(sim_queue_fn_sf_write): New function.
-	(cgen_write_queue_element_execute): Handle CGEN_FN_SF_WRITE.
-
-Tue Feb 22 16:45:09 2000  Andrew Cagney  <cagney@b1.cygnus.com>
-
-	* run.c (main): When SIM_HAVE_ENVIRONMENT enable tracing with
- 	sim_set_trace and run simulator using sim_resume.
-	(main): Add option ``-o'' - operating environment.  Only continue
- 	after a signal when operating environment.
-	(main): Always set REASON and SIGRC using sim_stop_reason.
-	(sim_trace): Delete extern declaration.
-
-2000-02-08  Nick Clifton  <nickc@cygnus.com>
-
-	* callback.c: Fix compile time warning messages.
-	* run.c: Fix compile time warning messages.
-     
 1999-12-17  Dave Brolley  <brolley@cygnus.com>
 
 	* sim-profile.h: (set_profile_option_mask): Add prototype.
@@ -185,11 +145,6 @@ Mon Sep 20 21:44:06 1999  Geoffrey Keating  <geoffk@cygnus.com>
 
         * sim-fpu.c (i2fpu): Keep the guard bits sticky when converting
         large values.
-
-Tue Feb  8 16:33:48 2000  Andrew Cagney  <cagney@b1.cygnus.com>
-
-	* run.c (main): Check the sim_stop_reason and only halt simulation
- 	when a valid stop condition is identified.
 
 Wed Sep 15 14:12:37 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 

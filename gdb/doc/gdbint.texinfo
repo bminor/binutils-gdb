@@ -332,20 +332,8 @@ to the @code{set_thread_cmd_list}.
 
 To add commands in general, use @code{add_cmd}.  @code{add_com} adds to
 the main command list, and should be used for those commands.  The usual
-place to add commands is in the @code{_initialize_@var{xyz}} routines at
-the ends of most source files. 
-
-Before removing commands from the command set it is a good idea to
-deprecate them for some time.  Use @code{deprecate_cmd} on commands or
-aliases to set the deprecated flag.  @code{deprecate_cmd} takes a
-@code{struct cmd_list_element} as it's first argument.  You can use the
-return value from @code{add_com} or @code{add_cmd} to deprecate the
-command immediately after it is created.
-
-The first time a comamnd is used the user will be warned and offered a
-replacement (if one exists). Note that the replacement string passed to
-@code{deprecate_cmd} should be the full name of the command, i.e. the
-entire string the user should type at the command line.
+place to add commands is in the @code{_initialize_@var{xyz}} routines at the
+ends of most source files.
 
 @section Console Printing
 
@@ -1153,97 +1141,6 @@ in the @code{REGISTER_NAME} and related macros.
 
 GDB can handle big-endian, little-endian, and bi-endian architectures.
 
-@section Using Different Register and Memory Data Representations
-@cindex raw representation
-@cindex virtual representation
-@cindex representations, raw and virtual
-@cindex register data formats, converting
-@cindex @code{struct value}, converting register contents to
-
-Some architectures use one representation for a value when it lives in a
-register, but use a different representation when it lives in memory.
-In GDB's terminology, the @dfn{raw} representation is the one used in
-the target registers, and the @dfn{virtual} representation is the one
-used in memory, and within GDB @code{struct value} objects.
-
-For almost all data types on almost all architectures, the virtual and
-raw representations are identical, and no special handling is needed.
-However, they do occasionally differ.  For example:
-
-@itemize @bullet
-
-@item
-The x86 architecture supports an 80-bit long double type.  However, when
-we store those values in memory, they occupy twelve bytes: the
-floating-point number occupies the first ten, and the final two bytes
-are unused.  This keeps the values aligned on four-byte boundaries,
-allowing more efficient access.  Thus, the x86 80-bit floating-point
-type is the raw representation, and the twelve-byte loosely-packed
-arrangement is the virtual representation.
-
-@item
-Some 64-bit MIPS targets present 32-bit registers to GDB as 64-bit
-registers, with garbage in their upper bits.  GDB ignores the top 32
-bits.  Thus, the 64-bit form, with garbage in the upper 32 bits, is the
-raw representation, and the trimmed 32-bit representation is the
-virtual representation.
-
-@end itemize
-
-In general, the raw representation is determined by the architecture, or
-GDB's interface to the architecture, while the virtual representation
-can be chosen for GDB's convenience.  GDB's register file,
-@code{registers}, holds the register contents in raw format, and the GDB
-remote protocol transmits register values in raw format.
-
-Your architecture may define the following macros to request raw /
-virtual conversions:
-
-@deftypefn {Target Macro} int REGISTER_CONVERTIBLE (int @var{reg})
-Return non-zero if register number @var{reg}'s value needs different raw
-and virtual formats.
-@end deftypefn
-
-@deftypefn {Target Macro} int REGISTER_RAW_SIZE (int @var{reg})
-The size of register number @var{reg}'s raw value.  This is the number
-of bytes the register will occupy in @code{registers}, or in a GDB
-remote protocol packet.
-@end deftypefn
-
-@deftypefn {Target Macro} int REGISTER_VIRTUAL_SIZE (int @var{reg})
-The size of register number @var{reg}'s value, in its virtual format.
-This is the size a @code{struct value}'s buffer will have, holding that
-register's value.
-@end deftypefn
-
-@deftypefn {Target Macro} struct type *REGISTER_VIRTUAL_TYPE (int @var{reg})
-This is the type of the virtual representation of register number
-@var{reg}.  Note that there is no need for a macro giving a type for the
-register's raw form; once the register's value has been obtained, GDB
-always uses the virtual form.
-@end deftypefn
-
-@deftypefn {Target Macro} void REGISTER_CONVERT_TO_VIRTUAL (int @var{reg}, struct type *@var{type}, char *@var{from}, char *@var{to})
-Convert the value of register number @var{reg} to @var{type}, which
-should always be @code{REGISTER_VIRTUAL_TYPE (@var{reg})}.  The buffer
-at @var{from} holds the register's value in raw format; the macro should
-convert the value to virtual format, and place it at @var{to}.
-
-Note that REGISTER_CONVERT_TO_VIRTUAL and REGISTER_CONVERT_TO_RAW take
-their @var{reg} and @var{type} arguments in different orders.
-@end deftypefn
-
-@deftypefn {Target Macro} void REGISTER_CONVERT_TO_RAW (struct type *@var{type}, int @var{reg}, char *@var{from}, char *@var{to})
-Convert the value of register number @var{reg} to @var{type}, which
-should always be @code{REGISTER_VIRTUAL_TYPE (@var{reg})}.  The buffer
-at @var{from} holds the register's value in raw format; the macro should
-convert the value to virtual format, and place it at @var{to}.
-
-Note that REGISTER_CONVERT_TO_VIRTUAL and REGISTER_CONVERT_TO_RAW take
-their @var{reg} and @var{type} arguments in different orders.
-@end deftypefn
-
-
 @section Frame Interpretation
 
 @section Inferior Call Setup
@@ -1410,29 +1307,6 @@ and to cancel any deferred stores.
 
 Currently only implemented correctly for native Sparc configurations?
 
-@item COERCE_FLOAT_TO_DOUBLE (@var{formal}, @var{actual})
-If we are calling a function by hand, and the function was declared
-(according to the debug info) without a prototype, should we
-automatically promote floats to doubles?  This macro must evaluate to
-non-zero if we should, or zero if we should leave the value alone.
-
-The argument @var{actual} is the type of the value we want to pass to
-the function.  The argument @var{formal} is the type of this argument,
-as it appears in the function's definition.  Note that @var{formal} may
-be zero if we have no debugging information for the function, or if
-we're passing more arguments than are officially declared (for example,
-varargs).  This macro is never invoked if the function definitely has a
-prototype.
-
-The default behavior is to promote only when we have no type information
-for the formal parameter.  This is different from the obvious behavior,
-which would be to promote whenever we have no prototype, just as the
-compiler does.  It's annoying, but some older targets rely on this.  If
-you want GDB to follow the typical compiler behavior --- to always
-promote when there is no prototype in scope --- your gdbarch init
-function can call @code{set_gdbarch_coerce_float_to_double} and select
-the @code{standard_coerce_float_to_double} function.
-
 @item CPLUS_MARKER
 Define this to expand into the character that G++ uses to distinguish
 compiler-generated identifiers from programmer-specified identifiers.
@@ -1542,20 +1416,6 @@ For some COFF targets, the @code{x_sym.x_misc.x_fsize} field of the
 function end symbol is 0.  For such targets, you must define
 @code{FUNCTION_EPILOGUE_SIZE} to expand into the standard size of a
 function's epilogue.
-
-@item FUNCTION_START_OFFSET
-An integer, giving the offset in bytes from a function's address (as
-used in the values of symbols, function pointers, etc.), and the
-function's first genuine instruction.
-
-This is zero on almost all machines: the function's address is usually
-the address of its first instruction.  However, on the VAX, for example,
-each function starts with two bytes containing a bitmask indicating
-which registers to save upon entry to the function.  The VAX @code{call}
-instructions check this value, and save the appropriate registers
-automatically.  Thus, since the offset from the function's address to
-its first instruction is two bytes, @code{FUNCTION_START_OFFSET} would
-be 2 on the VAX.
 
 @item GCC_COMPILED_FLAG_SYMBOL
 @item GCC2_COMPILED_FLAG_SYMBOL
@@ -1674,30 +1534,6 @@ text section.  (Seems dubious.)
 
 @item NO_HIF_SUPPORT
 (Specific to the a29k.)
-
-@item REGISTER_CONVERTIBLE (@var{reg})
-Return non-zero if @var{reg} uses different raw and virtual formats.
-@xref{Using Different Target and Host Data Representations}.
-
-@item REGISTER_RAW_SIZE (@var{reg})
-Return the raw size of @var{reg}.
-@xref{Using Different Target and Host Data Representations}.
-
-@item REGISTER_VIRTUAL_SIZE (@var{reg})
-Return the virtual size of @var{reg}.
-@xref{Using Different Target and Host Data Representations}.
-
-@item REGISTER_VIRTUAL_TYPE (@var{reg})
-Return the virtual type of @var{reg}.
-@xref{Using Different Target and Host Data Representations}.
-
-@item REGISTER_CONVERT_TO_VIRTUAL(@var{reg}, @var{type}, @var{from}, @var{to})
-Convert the value of register @var{reg} from its raw form to its virtual
-form.  @xref{Using Different Target and Host Data Representations}.
-
-@item REGISTER_CONVERT_TO_RAW(@var{type}, @var{reg}, @var{from}, @var{to})
-Convert the value of register @var{reg} from its virtual form to its raw
-form.  @xref{Using Different Target and Host Data Representations}.
 
 @item SOFTWARE_SINGLE_STEP_P
 Define this as 1 if the target does not have a hardware single-step

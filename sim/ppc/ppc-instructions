@@ -4282,7 +4282,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	  }
 	    /* G|R|X == zero from above */
 	    while (exp < -126) {
-	      exp = exp + 1;
+	      exp = exp - 1;
 	      frac_grx = (INSERTED64(EXTRACTED64(frac_grx, 0, 54), 1, 55)
 	                  | MASKED64(frac_grx, 55, 55));
 	    }

@@ -96,7 +96,7 @@ extern Keymap _rl_keymap;
 
 extern int _rl_convert_meta_chars_to_ascii;
 
-#if defined (__GO32__) && !defined (HAVE_SELECT)
+#if defined (__GO32__)
 #  include <pc.h>
 #endif /* __GO32__ */
 
@@ -176,7 +176,7 @@ rl_unget_char (key)
 static void
 rl_gather_tyi ()
 {
-#if defined (__GO32__) && !defined (HAVE_SELECT)
+#if defined (__GO32__)
   char input;
 
   if (isatty (0) && kbhit () && ibuffer_space ())
@@ -397,7 +397,7 @@ rl_getc (stream)
   int result, flags;
   unsigned char c;
 
-#if defined (__GO32__) && !defined (HAVE_TERMIOS_H)
+#if defined (__GO32__)
   if (isatty (0))
     return (getkey () & 0x7F);
 #endif /* __GO32__ */
@@ -448,7 +448,7 @@ rl_getc (stream)
 	}
 #endif /* _POSIX_VERSION && EAGAIN && O_NONBLOCK */
 
-#if !defined (__GO32__) || defined (HAVE_TERMIOS_H)
+#if !defined (__GO32__)
       /* If the error that we received was SIGINT, then try again,
 	 this is simply an interrupted system call to read ().
 	 Otherwise, some error ocurred, also signifying EOF. */

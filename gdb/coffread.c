@@ -219,7 +219,7 @@ static void read_one_sym PARAMS ((struct coff_symbol *,
 				  struct internal_syment *,
 				  union internal_auxent *));
 
-static void coff_symtab_read PARAMS ((long, unsigned int, struct objfile *));
+static void coff_symtab_read PARAMS ((long, int, struct objfile *));
 
 static void find_linenos PARAMS ((bfd *, sec_ptr, PTR));
 
@@ -605,7 +605,7 @@ coff_symfile_read (objfile, mainline)
   coff_data_type *cdata = coff_data (abfd);
   char *name = bfd_get_filename (abfd);
   register int val;
-  unsigned int num_symbols;
+  int num_symbols;
   int symtab_offset;
   int stringtab_offset;
   struct cleanup *back_to;
@@ -755,7 +755,7 @@ coff_symfile_finish (objfile)
 static void
 coff_symtab_read (symtab_offset, nsyms, objfile)
      long symtab_offset;
-     unsigned int nsyms;
+     int nsyms;
      struct objfile *objfile;
 {
   register struct context_stack *new;

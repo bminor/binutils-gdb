@@ -710,9 +710,9 @@ dump_prefix_expression (exp, stream, note)
     print_expression (exp, stream);
   else
     fprintf_filtered (stream, "Type printing not yet supported....");
-  fprintf_filtered (stream, "'\n\tLanguage %s, %d elements, %ld bytes each.\n",
+  fprintf_filtered (stream, "'\n\tLanguage %s, %d elements, %d bytes each.\n",
 		    exp->language_defn->la_name, exp->nelts,
-		    (long) sizeof (union exp_element));
+		    sizeof (union exp_element));
   fprintf_filtered (stream, "\t%5s  %20s  %16s  %s\n", "Index", "Opcode",
 		    "Hex Value", "String Value");
   for (elt = 0; elt < exp->nelts; elt++)
@@ -986,9 +986,9 @@ dump_postfix_expression (exp, stream, note)
     print_expression (exp, stream);
   else
     fputs_filtered ("Type printing not yet supported....", stream);
-  fprintf_filtered (stream, "'\n\tLanguage %s, %d elements, %ld bytes each.\n",
+  fprintf_filtered (stream, "'\n\tLanguage %s, %d elements, %d bytes each.\n",
 		    exp->language_defn->la_name, exp->nelts,
-		    (long) sizeof (union exp_element));
+		    sizeof (union exp_element));
   fputs_filtered ("\n", stream);
 
   for (elt = 0; elt < exp->nelts;)

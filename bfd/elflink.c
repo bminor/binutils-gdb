@@ -234,7 +234,7 @@ _bfd_elf_link_record_dynamic_symbol (info, h)
 	      const char * name = h->root.root.string;
 	      
 	      (*info->callbacks->undefined_symbol)
-		(info, name, abfd, bfd_und_section_ptr, 0, true);
+		(info, name, abfd, bfd_und_section_ptr, 0);
 	    }
 	  
 	  h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;

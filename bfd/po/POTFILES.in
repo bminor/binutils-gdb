@@ -12,7 +12,6 @@ aoutf1.h
 aoutx.h
 archive.c
 archures.c
-armnetbsd.c
 bfd.c
 binary.c
 bout.c
@@ -62,7 +61,6 @@ cpu-fr30.c
 cpu-h8300.c
 cpu-h8500.c
 cpu-hppa.c
-cpu-i370.c
 cpu-i386.c
 cpu-i860.c
 cpu-i960.c
@@ -74,7 +72,6 @@ cpu-m88k.c
 cpu-mcore.c
 cpu-mips.c
 cpu-ns32k.c
-cpu-pj.c
 cpu-powerpc.c
 cpu-rs6000.c
 cpu-sh.c
@@ -87,7 +84,6 @@ cpu-w65.c
 cpu-we32k.c
 cpu-z8k.c
 demo64.c
-dwarf1.c
 dwarf2.c
 ecoff.c
 ecofflink.c
@@ -97,12 +93,12 @@ elf-m10200.c
 elf-m10300.c
 elf.c
 elf32-arc.c
-elf32-arm.h
 elf32-d10v.c
 elf32-d30v.c
 elf32-fr30.c
 elf32-gen.c
-elf32-i370.c
+elf32-hppa.c
+elf32-hppa.h
 elf32-i386.c
 elf32-i860.c
 elf32-i960.c
@@ -111,7 +107,6 @@ elf32-m68k.c
 elf32-m88k.c
 elf32-mcore.c
 elf32-mips.c
-elf32-pj.c
 elf32-ppc.c
 elf32-sh.c
 elf32-sparc.c
@@ -125,18 +120,14 @@ elf64.c
 elfarm-nabi.c
 elfarm-oabi.c
 elfcode.h
-elfcore.h
 elflink.c
-elflink.h
-epoc-pe-arm.c
-epoc-pei-arm.c
 format.c
-freebsd.h
 genlink.h
 go32stub.h
 hash.c
 hp300bsd.c
 hp300hpux.c
+hppa_stubs.h
 hpux-core.c
 i386aout.c
 i386bsd.c
@@ -161,7 +152,6 @@ libhppa.h
 libieee.h
 libnlm.h
 liboasys.h
-libpei.h
 linker.c
 lynx-core.c
 m68k4knetbsd.c
@@ -181,7 +171,6 @@ nlm32-sparc.c
 nlm32.c
 nlm64.c
 nlmcode.h
-nlmswap.h
 ns32k.h
 ns32knetbsd.c
 oasys.c
@@ -196,8 +185,6 @@ pei-arm.c
 pei-i386.c
 pei-mcore.c
 pei-ppc.c
-peicode.h
-peigen.c
 ppcboot.c
 reloc.c
 reloc16.c

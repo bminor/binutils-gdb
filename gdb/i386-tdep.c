@@ -51,8 +51,8 @@ void _initialize_i386_tdep PARAMS ((void));
    i386_register_raw_size.  */
 int i386_register_byte[MAX_NUM_REGS];
 
-/* i386_register_raw_size[i] is the number of bytes of storage in
-   GDB's register array occupied by register i.  */
+/* i386_register_raw_size[i] is the number of bytes of storage in the
+   actual machine representation for register i.  */
 int i386_register_raw_size[MAX_NUM_REGS] = {
    4,  4,  4,  4,
    4,  4,  4,  4,
@@ -475,8 +475,9 @@ i386_frame_num_args (fi)
  */
 
 void
-i386_frame_init_saved_regs (fip)
+i386_frame_find_saved_regs (fip, fsrp)
      struct frame_info *fip;
+     struct frame_saved_regs *fsrp;
 {
   long locals = -1;
   unsigned char op;
@@ -485,10 +486,7 @@ i386_frame_init_saved_regs (fip)
   CORE_ADDR pc;
   int i;
 
-  if (fip->saved_regs)
-    return;
-
-  frame_saved_regs_zalloc (fip);
+  memset (fsrp, 0, sizeof *fsrp);
 
   /* if frame is the end of a dummy, compute where the
    * beginning would be
@@ -503,7 +501,7 @@ i386_frame_init_saved_regs (fip)
       for (i = 0; i < NUM_REGS; i++)
 	{
 	  adr -= REGISTER_RAW_SIZE (i);
-	  fip->saved_regs[i] = adr;
+	  fsrp->regs[i] = adr;
 	}
       return;
     }
@@ -522,16 +520,16 @@ i386_frame_init_saved_regs (fip)
 	    break;
 #ifdef I386_REGNO_TO_SYMMETRY
 	  /* Dynix uses different internal numbering.  Ick.  */
-	  fip->saved_regs[I386_REGNO_TO_SYMMETRY (op - 0x50)] = adr;
+	  fsrp->regs[I386_REGNO_TO_SYMMETRY (op - 0x50)] = adr;
 #else
-	  fip->saved_regs[op - 0x50] = adr;
+	  fsrp->regs[op - 0x50] = adr;
 #endif
 	  adr -= 4;
 	}
     }
 
-  fip->saved_regs[PC_REGNUM] = fip->frame + 4;
-  fip->saved_regs[FP_REGNUM] = fip->frame;
+  fsrp->regs[PC_REGNUM] = fip->frame + 4;
+  fsrp->regs[FP_REGNUM] = fip->frame;
 }
 
 /* return pc of first real instruction */
@@ -642,15 +640,15 @@ i386_pop_frame ()
   struct frame_info *frame = get_current_frame ();
   CORE_ADDR fp;
   int regnum;
+  struct frame_saved_regs fsr;
   char regbuf[MAX_REGISTER_RAW_SIZE];
 
   fp = FRAME_FP (frame);
-  i386_frame_init_saved_regs (frame);
-
+  get_frame_saved_regs (frame, &fsr);
   for (regnum = 0; regnum < NUM_REGS; regnum++)
     {
       CORE_ADDR adr;
-      adr = frame->saved_regs[regnum];
+      adr = fsr.regs[regnum];
       if (adr)
 	{
 	  read_memory (adr, regbuf, REGISTER_RAW_SIZE (regnum));
@@ -698,95 +696,56 @@ get_longjmp_target (pc)
 
 #endif /* GET_LONGJMP_TARGET */
 
-/* These registers are used for returning integers (and on some
-   targets also for returning `struct' and `union' values when their
-   size and alignment match an integer type.  */
-#define LOW_RETURN_REGNUM 0	/* %eax */
-#define HIGH_RETURN_REGNUM 2	/* %edx */
-
-/* Extract from an array REGBUF containing the (raw) register state, a
-   function return value of TYPE, and copy that, in virtual format,
-   into VALBUF.  */
-
 void
-i386_extract_return_value (struct type *type, char *regbuf, char *valbuf)
+i386_extract_return_value (type, regbuf, valbuf)
+     struct type *type;
+     char regbuf[REGISTER_BYTES];
+     char *valbuf;
 {
-  int len = TYPE_LENGTH (type);
-
+  /* On AIX and i386 GNU/Linux, floating point values are returned in
+     floating point registers.  */
+#if defined(I386_AIX_TARGET) || defined(I386_GNULINUX_TARGET)
   if (TYPE_CODE_FLT == TYPE_CODE (type))
     {
-      if (NUM_FREGS == 0)
-	{
-	  warning ("Cannot find floating-point return value.");
-	  memset (valbuf, 0, len);
-	}
+      double d;
+      /* 387 %st(0), gcc uses this */
+      floatformat_to_double (&floatformat_i387_ext,
+#if defined(FPDATA_REGNUM)
+			     &regbuf[REGISTER_BYTE (FPDATA_REGNUM)],
+#else /* !FPDATA_REGNUM */
+			     &regbuf[REGISTER_BYTE (FP0_REGNUM)],
+#endif /* FPDATA_REGNUM */
 
-      /* Floating-point return values can be found in %st(0).  */
-      if (len == TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT
-	  && TARGET_LONG_DOUBLE_FORMAT == &floatformat_i387_ext)
-	{
-	  /* Copy straight over, but take care of the padding.  */
-	  memcpy (valbuf, &regbuf[REGISTER_BYTE (FP0_REGNUM)],
-		  FPU_REG_RAW_SIZE);
-	  memset (valbuf + FPU_REG_RAW_SIZE, 0, len - FPU_REG_RAW_SIZE);
-	}
-      else
-	{
-	  /* Convert the extended floating-point number found in
-             %st(0) to the desired type.  This is probably not exactly
-             how it would happen on the target itself, but it is the
-             best we can do.  */
-	  DOUBLEST val;
-	  floatformat_to_doublest (&floatformat_i387_ext,
-				   &regbuf[REGISTER_BYTE (FP0_REGNUM)], &val);
-	  store_floating (valbuf, TYPE_LENGTH (type), val);
-	}
+			     &d);
+      store_floating (valbuf, TYPE_LENGTH (type), d);
     }
   else
+#endif /* I386_AIX_TARGET || I386_GNULINUX_TARGET*/
     {
+#if defined(LOW_RETURN_REGNUM)
+      int len = TYPE_LENGTH (type);
       int low_size = REGISTER_RAW_SIZE (LOW_RETURN_REGNUM);
       int high_size = REGISTER_RAW_SIZE (HIGH_RETURN_REGNUM);
 
       if (len <= low_size)
-	memcpy (valbuf, &regbuf[REGISTER_BYTE (LOW_RETURN_REGNUM)], len);
+	memcpy (valbuf, regbuf + REGISTER_BYTE (LOW_RETURN_REGNUM), len);
       else if (len <= (low_size + high_size))
 	{
 	  memcpy (valbuf,
-		  &regbuf[REGISTER_BYTE (LOW_RETURN_REGNUM)], low_size);
+		  regbuf + REGISTER_BYTE (LOW_RETURN_REGNUM),
+		  low_size);
 	  memcpy (valbuf + low_size,
-		  &regbuf[REGISTER_BYTE (HIGH_RETURN_REGNUM)], len - low_size);
+		  regbuf + REGISTER_BYTE (HIGH_RETURN_REGNUM),
+		  len - low_size);
 	}
       else
-	internal_error ("Cannot extract return value of %d bytes long.", len);
+	error ("GDB bug: i386-tdep.c (i386_extract_return_value): Don't know how to find a return value %d bytes long", len);
+#else /* !LOW_RETURN_REGNUM */
+      memcpy (valbuf, regbuf, TYPE_LENGTH (type));
+#endif /* LOW_RETURN_REGNUM */
     }
 }
 
-/* Convert data from raw format for register REGNUM in buffer FROM to
-   virtual format with type TYPE in buffer TO.  In principle both
-   formats are identical except that the virtual format has two extra
-   bytes appended that aren't used.  We set these to zero.  */
-
-void
-i386_register_convert_to_virtual (int regnum, struct type *type,
-				  char *from, char *to)
-{
-  /* Copy straight over, but take care of the padding.  */
-  memcpy (to, from, FPU_REG_RAW_SIZE);
-  memset (to + FPU_REG_RAW_SIZE, 0, TYPE_LENGTH (type) - FPU_REG_RAW_SIZE);
-}
-
-/* Convert data from virtual format with type TYPE in buffer FROM to
-   raw format for register REGNUM in buffer TO.  Simply omit the two
-   unused bytes.  */
-
-void
-i386_register_convert_to_raw (struct type *type, int regnum,
-			      char *from, char *to)
-{
-  memcpy (to, from, FPU_REG_RAW_SIZE);
-}
-
-     
 #ifdef I386V4_SIGTRAMP_SAVED_PC
 /* Get saved user PC for sigtramp from the pushed ucontext on the stack
    for all three variants of SVR4 sigtramps.  */
@@ -815,6 +774,139 @@ i386v4_sigtramp_saved_pc (frame)
 }
 #endif /* I386V4_SIGTRAMP_SAVED_PC */
 
+#ifdef I386_LINUX_SIGTRAMP
+
+/* When the i386 Linux kernel calls a signal handler, the return
+   address points to a bit of code on the stack.  This function
+   returns whether the PC appears to be within this bit of code.
+
+   The instruction sequence is
+       pop    %eax
+       mov    $0x77,%eax
+       int    $0x80
+   or 0x58 0xb8 0x77 0x00 0x00 0x00 0xcd 0x80.
+
+   Checking for the code sequence should be somewhat reliable, because
+   the effect is to call the system call sigreturn.  This is unlikely
+   to occur anywhere other than a signal trampoline.
+
+   It kind of sucks that we have to read memory from the process in
+   order to identify a signal trampoline, but there doesn't seem to be
+   any other way.  The IN_SIGTRAMP macro in tm-linux.h arranges to
+   only call us if no function name could be identified, which should
+   be the case since the code is on the stack.  */
+
+#define LINUX_SIGTRAMP_INSN0 (0x58)	/* pop %eax */
+#define LINUX_SIGTRAMP_OFFSET0 (0)
+#define LINUX_SIGTRAMP_INSN1 (0xb8)	/* mov $NNNN,%eax */
+#define LINUX_SIGTRAMP_OFFSET1 (1)
+#define LINUX_SIGTRAMP_INSN2 (0xcd)	/* int */
+#define LINUX_SIGTRAMP_OFFSET2 (6)
+
+static const unsigned char linux_sigtramp_code[] =
+{
+  LINUX_SIGTRAMP_INSN0,					/* pop %eax */
+  LINUX_SIGTRAMP_INSN1, 0x77, 0x00, 0x00, 0x00,		/* mov $0x77,%eax */
+  LINUX_SIGTRAMP_INSN2, 0x80				/* int $0x80 */
+};
+
+#define LINUX_SIGTRAMP_LEN (sizeof linux_sigtramp_code)
+
+/* If PC is in a sigtramp routine, return the address of the start of
+   the routine.  Otherwise, return 0.  */
+
+static CORE_ADDR
+i386_linux_sigtramp_start (pc)
+     CORE_ADDR pc;
+{
+  unsigned char buf[LINUX_SIGTRAMP_LEN];
+
+  /* We only recognize a signal trampoline if PC is at the start of
+     one of the three instructions.  We optimize for finding the PC at
+     the start, as will be the case when the trampoline is not the
+     first frame on the stack.  We assume that in the case where the
+     PC is not at the start of the instruction sequence, there will be
+     a few trailing readable bytes on the stack.  */
+
+  if (read_memory_nobpt (pc, (char *) buf, LINUX_SIGTRAMP_LEN) != 0)
+    return 0;
+
+  if (buf[0] != LINUX_SIGTRAMP_INSN0)
+    {
+      int adjust;
+
+      switch (buf[0])
+	{
+	case LINUX_SIGTRAMP_INSN1:
+	  adjust = LINUX_SIGTRAMP_OFFSET1;
+	  break;
+	case LINUX_SIGTRAMP_INSN2:
+	  adjust = LINUX_SIGTRAMP_OFFSET2;
+	  break;
+	default:
+	  return 0;
+	}
+
+      pc -= adjust;
+
+      if (read_memory_nobpt (pc, (char *) buf, LINUX_SIGTRAMP_LEN) != 0)
+	return 0;
+    }
+
+  if (memcmp (buf, linux_sigtramp_code, LINUX_SIGTRAMP_LEN) != 0)
+    return 0;
+
+  return pc;
+}
+
+/* Return whether PC is in a Linux sigtramp routine.  */
+
+int
+i386_linux_sigtramp (pc)
+     CORE_ADDR pc;
+{
+  return i386_linux_sigtramp_start (pc) != 0;
+}
+
+/* Assuming FRAME is for a Linux sigtramp routine, return the saved
+   program counter.  The Linux kernel will set up a sigcontext
+   structure immediately before the sigtramp routine on the stack.  */
+
+CORE_ADDR
+i386_linux_sigtramp_saved_pc (frame)
+     struct frame_info *frame;
+{
+  CORE_ADDR pc;
+
+  pc = i386_linux_sigtramp_start (frame->pc);
+  if (pc == 0)
+    error ("i386_linux_sigtramp_saved_pc called when no sigtramp");
+  return read_memory_integer ((pc
+			       - LINUX_SIGCONTEXT_SIZE
+			       + LINUX_SIGCONTEXT_PC_OFFSET),
+			      4);
+}
+
+/* Assuming FRAME is for a Linux sigtramp routine, return the saved
+   stack pointer.  The Linux kernel will set up a sigcontext structure
+   immediately before the sigtramp routine on the stack.  */
+
+CORE_ADDR
+i386_linux_sigtramp_saved_sp (frame)
+     struct frame_info *frame;
+{
+  CORE_ADDR pc;
+
+  pc = i386_linux_sigtramp_start (frame->pc);
+  if (pc == 0)
+    error ("i386_linux_sigtramp_saved_sp called when no sigtramp");
+  return read_memory_integer ((pc
+			       - LINUX_SIGCONTEXT_SIZE
+			       + LINUX_SIGCONTEXT_SP_OFFSET),
+			      4);
+}
+
+#endif /* I386_LINUX_SIGTRAMP */
 
 #ifdef STATIC_TRANSFORM_NAME
 /* SunPRO encodes the static variables.  This is not related to C++ mangling,

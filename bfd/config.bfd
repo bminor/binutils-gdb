@@ -33,10 +33,8 @@ arm*)	targ_archs=bfd_arm_arch ;;
 strongarm*) targ_archs=bfd_arm_arch ;;
 thumb*)	targ_archs=bfd_arm_arch ;;
 c30*)	targ_archs=bfd_tic30_arch ;;
-c54x*)	targ_archs=bfd_tic54x_arch ;;
 hppa*)	targ_archs=bfd_hppa_arch ;;
 i[3456]86) targ_archs=bfd_i386_arch ;;
-i370)   targ_archs=bfd_i370_arch ;;
 m68*)	targ_archs=bfd_m68k_arch ;;
 m88*)	targ_archs=bfd_m88k_arch ;;
 mips*)	targ_archs=bfd_mips_arch ;;
@@ -98,12 +96,6 @@ case "${targ}" in
     targ_defvec=arm_epoc_pe_little_vec
     targ_selvecs="arm_epoc_pe_little_vec arm_epoc_pe_big_vec arm_epoc_pei_little_vec arm_epoc_pei_big_vec"
     targ_underscore=no
-    ;;
-  arm-wince-pe | arm-*-wince)
-    targ_defvec=armpe_little_vec
-    targ_selvecs="armpe_little_vec armpe_big_vec armpei_little_vec armpei_big_vec"
-    targ_underscore=no
-    targ_cflags=-DARM_WINCE
     ;;
   arm-*-pe*)
     targ_defvec=armpe_little_vec
@@ -176,21 +168,11 @@ case "${targ}" in
     targ_underscore=yes
     ;;
 
-  avr-*-*)
-    targ_defvec=bfd_elf32_avr_vec
-    ;;
-
   c30-*-*aout* | tic30-*-*aout*)
     targ_defvec=tic30_aout_vec
     ;;
   c30-*-*coff* | tic30-*-*coff*)
     targ_defvec=tic30_coff_vec
-    ;;
-
-  c54x*-*-*coff* | tic54x-*-*coff*)
-    targ_defvec=tic54x_coff1_vec
-    targ_selvecs="tic54x_coff1_beh_vec tic54x_coff2_vec tic54x_coff2_beh_vec tic54x_coff0_vec tic54x_coff0_beh_vec"
-    targ_underscore=yes
     ;;
 
   d10v-*-*)
@@ -216,33 +198,23 @@ case "${targ}" in
     targ_underscore=yes
     ;;
 
-#if 0 /* HPPA ELF does not work currently.  */
   hppa*-*-*elf* | hppa*-*-linux-gnu* | hppa*-*-lites* | hppa*-*-sysv4* | hppa*-*-rtems*)
     targ_defvec=bfd_elf32_hppa_vec
     ;;
-#endif
 #if defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD) || defined (HOST_HPPAOSF) || defined (HOST_HPPAMPEIX)
-#if 0 /* HPPA ELF does not work currently.  */
   hppa*-*-bsd*)
     targ_defvec=som_vec
     targ_selvecs=bfd_elf32_hppa_vec
     ;;
-#endif
   hppa*-*-hpux* | hppa*-*-hiux* | hppa*-*-mpeix*)
     targ_defvec=som_vec
     ;;
-#if 0 /* HPPA ELF does not work currently.  */
   hppa*-*-osf*)
     targ_defvec=som_vec
     targ_selvecs=bfd_elf32_hppa_vec
     ;;
-#endif
 #endif /* defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD) || defined (HOST_HPPAOSF) */
 
-  i370-*-*) 
-    targ_defvec=bfd_elf32_i370_vec
-    targ_selvecs="bfd_elf32_i370_vec"
-    ;;
   i[3456]86-*-sco3.2v5*coff)
     targ_defvec=i386coff_vec
     targ_selvecs=bfd_elf32_i386_vec
@@ -547,11 +519,6 @@ case "${targ}" in
     targ_defvec=aout_mips_little_vec
     targ_cflags=-DSTAT_FOR_EXEC
     ;;
-  mips*-*-pe*)
-    targ_defvec=mipslpe_vec
-    targ_selvecs="mipslpei_vec mipslpei_vec ecoff_little_vec ecoff_big_vec"
-    targ_underscore=yes
-    ;;
   mips*-*-sysv4*)
     targ_defvec=bfd_elf32_bigmips_vec
     targ_selvecs="bfd_elf32_littlemips_vec ecoff_big_vec ecoff_little_vec"
@@ -645,11 +612,6 @@ case "${targ}" in
     targ_selvecs="bfd_elf32_shl_vec shcoff_vec shlcoff_vec shcoff_small_vec shlcoff_small_vec"
     targ_underscore=yes
     ;;
-  sh-*-pe)
-    targ_defvec=shlpe_vec
-    targ_selvecs="shlpe_vec shlpei_vec"
-    targ_underscore=yes
-    ;;
   sh-*-* | sh-*-rtems*)
     targ_defvec=shcoff_vec
     targ_selvecs="shcoff_vec shlcoff_vec shcoff_small_vec shlcoff_small_vec"
@@ -675,7 +637,7 @@ case "${targ}" in
     ;;
   sparc-*-linux-gnu*)
     targ_defvec=bfd_elf32_sparc_vec
-    targ_selvecs="sparclinux_vec bfd_elf64_sparc_vec sunos_big_vec"
+    targ_selvecs="sparclinux_vec sunos_big_vec"
     ;;
   sparc-*-lynxos*)
     targ_defvec=sparclynx_coff_vec
@@ -694,16 +656,10 @@ case "${targ}" in
     targ_defvec=sparcnetbsd_vec
     targ_underscore=yes
     ;;
-  sparc-*-elf* | sparc-*-solaris2.[0-6] | sparc-*-solaris2.[0-6].*)
+  sparc-*-elf* | sparc-*-solaris2*)
     targ_defvec=bfd_elf32_sparc_vec
     targ_selvecs=sunos_big_vec
     ;;
-#ifdef BFD64
-  sparc-*-solaris2* | sparcv9-*-solaris2* | sparc64-*-solaris2*)
-    targ_defvec=bfd_elf32_sparc_vec
-    targ_selvecs="bfd_elf64_sparc_vec sunos_big_vec"
-    ;;
-#endif
   sparc-*-sysv4*)
     targ_defvec=bfd_elf32_sparc_vec
     ;;

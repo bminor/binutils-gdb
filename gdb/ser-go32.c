@@ -127,11 +127,14 @@
 #define	MSR_DDSR	0x02
 #define	MSR_DCTS	0x01
 
-#include <string.h>
 #include <dos.h>
 #include <go32.h>
 #include <dpmi.h>
 typedef unsigned long u_long;
+
+/* DPMI Communication */
+static union REGS dpmi_regs;
+static struct SREGS dpmi_sregs;
 
 /* 16550 rx fifo trigger point */
 #define FIFO_TRIGGER	FIFO_TRIGGER_4
@@ -214,19 +217,19 @@ static struct dos_ttystate
 ports[4] =
 {
   {
-    COM1ADDR, 4, 0, NULL, 0, 0, "", 0, 0, 0, 0, 0, 0, 0, 0
+    COM1ADDR, 4
   }
   ,
   {
-    COM2ADDR, 3, 0, NULL, 0, 0, "", 0, 0, 0, 0, 0, 0, 0, 0
+    COM2ADDR, 3
   }
   ,
   {
-    COM3ADDR, 4, 0, NULL, 0, 0, "", 0, 0, 0, 0, 0, 0, 0, 0
+    COM3ADDR, 4
   }
   ,
   {
-    COM4ADDR, 3, 0, NULL, 0, 0, "", 0, 0, 0, 0, 0, 0, 0, 0
+    COM4ADDR, 3
   }
 };
 
@@ -488,10 +491,6 @@ dos_open (scb, name)
       return -1;
     }
 
-  /* FIXME: this is a Bad Idea (tm)!  One should *never* invent file
-     handles, since they might be already used by other files/devices.
-     The Right Way to do this is to create a real handle by dup()'ing
-     some existing one.  */
   fd = name[3] - '1';
   port = &ports[fd];
   if (port->refcnt++ > 0)
@@ -613,13 +612,15 @@ dos_close (scb)
 
 
 static int
-dos_noop (serial_t scb ATTRIBUTE_UNUSED)
+dos_noop (scb)
+     serial_t scb;
 {
   return 0;
 }
 
 static void
-dos_raw (serial_t scb ATTRIBUTE_UNUSED)
+dos_raw (scb)
+     serial_t scb;
 {
   /* Always in raw mode */
 }
@@ -652,19 +653,6 @@ dos_get_tty_state (scb)
   struct dos_ttystate *port = &ports[scb->fd];
   struct dos_ttystate *state;
 
-  /* Are they asking about a port we opened?  */
-  if (port->refcnt <= 0)
-    {
-      /* We've never heard about this port.  We should fail this call,
-	 unless they are asking about one of the 3 standard handles,
-	 in which case we pretend the handle was open by us if it is
-	 connected to a terminal device.  This is beacuse Unix
-	 terminals use the serial interface, so GDB expects the
-	 standard handles to go through here.  */
-      if (scb->fd >= 3 || !isatty (scb->fd))
-	return NULL;
-    }
-
   state = (struct dos_ttystate *) xmalloc (sizeof *state);
   *state = *port;
   return (serial_ttystate) state;
@@ -683,8 +671,10 @@ dos_set_tty_state (scb, ttystate)
 }
 
 static int
-dos_noflush_set_tty_state (serial_t scb, serial_ttystate new_ttystate,
-			   serial_ttystate old_ttystate ATTRIBUTE_UNUSED)
+dos_noflush_set_tty_state (scb, new_ttystate, old_ttystate)
+     serial_t scb;
+     serial_ttystate new_ttystate;
+     serial_ttystate old_ttystate;
 {
   struct dos_ttystate *state;
 
@@ -703,13 +693,12 @@ dos_flush_input (scb)
   if (port->fifo)
     outb (port, com_fifo, FIFO_ENABLE | FIFO_RCV_RST | FIFO_TRIGGER);
   enable ();
-  return 0;
 }
 
 static void
-dos_print_tty_state (serial_t scb ATTRIBUTE_UNUSED,
-		     serial_ttystate ttystate ATTRIBUTE_UNUSED,
-		     struct ui_file *stream ATTRIBUTE_UNUSED)
+dos_print_tty_state (serial_t scb,
+		     serial_ttystate ttystate,
+		     struct ui_file *stream)
 {
   /* Nothing to print */
   return;
@@ -879,23 +868,22 @@ static struct serial_ops dos_ops =
   dos_setbaudrate,
   dos_setstopbits,
   dos_noop,			/* wait for output to drain */
-  (void (*)(serial_t, int))NULL	/* change into async mode */
 };
 
 
 static void
-dos_info (char *arg ATTRIBUTE_UNUSED, int from_tty ATTRIBUTE_UNUSED)
+dos_info (arg, from_tty)
+     char *arg;
+     int from_tty;
 {
   struct dos_ttystate *port;
-#ifdef DOS_STATS
   int i;
-#endif
 
   for (port = ports; port < &ports[4]; port++)
     {
       if (port->baudrate == 0)
 	continue;
-      printf_filtered ("Port:\tCOM%ld (%sactive)\n", (long)(port - ports) + 1,
+      printf_filtered ("Port:\tCOM%d (%sactive)\n", port - ports + 1,
 		       port->intrupt ? "" : "not ");
       printf_filtered ("Addr:\t0x%03x (irq %d)\n", port->base, port->irq);
       printf_filtered ("16550:\t%s\n", port->fifo ? "yes" : "no");
@@ -916,6 +904,8 @@ dos_info (char *arg ATTRIBUTE_UNUSED, int from_tty ATTRIBUTE_UNUSED)
 void
 _initialize_ser_dos ()
 {
+  struct cmd_list_element *c;
+
   serial_add_interface (&dos_ops);
 
   /* Save original interrupt mask register. */

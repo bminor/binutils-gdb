@@ -24,6 +24,8 @@
 /* Get generic NetBSD native definitions. */
 #include "nm-nbsd.h"
 
+/* #define FLOAT_INFO   { i386_float_info(); } */
+
 #define REGISTER_U_ADDR(addr, blockend, regno) \
 	(addr) = i386_register_u_addr ((blockend),(regno));
 

@@ -108,10 +108,8 @@ static void bfd_mips_elf32_swap_gptab_in
   PARAMS ((bfd *, const Elf32_External_gptab *, Elf32_gptab *));
 static void bfd_mips_elf32_swap_gptab_out
   PARAMS ((bfd *, const Elf32_gptab *, Elf32_External_gptab *));
-#if 0
 static void bfd_mips_elf_swap_msym_in 
   PARAMS ((bfd *, const Elf32_External_Msym *, Elf32_Internal_Msym *));
-#endif
 static void bfd_mips_elf_swap_msym_out
   PARAMS ((bfd *, const Elf32_Internal_Msym *, Elf32_External_Msym *));
 static boolean mips_elf_sym_is_global PARAMS ((bfd *, asymbol *));
@@ -159,9 +157,8 @@ static boolean mips_elf_record_global_got_symbol
 	   struct mips_got_info *));
 static bfd_vma mips_elf_got_page
   PARAMS ((bfd *, struct bfd_link_info *, bfd_vma, bfd_vma *));
-static const Elf_Internal_Rela *mips_elf_next_relocation
-  PARAMS ((unsigned int, const Elf_Internal_Rela *, 
-	   const Elf_Internal_Rela *));
+static const Elf_Internal_Rela *mips_elf_next_lo16_relocation
+  PARAMS ((const Elf_Internal_Rela *, const Elf_Internal_Rela *));
 static bfd_reloc_status_type mips_elf_calculate_relocation
   PARAMS ((bfd *, bfd *, asection *, struct bfd_link_info *,
 	   const Elf_Internal_Rela *, bfd_vma, reloc_howto_type *,
@@ -615,7 +612,7 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 true,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 true),			/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   /* 16 bit call through global offset table.  */
   HOWTO (R_MIPS_CALL16,		/* type */
@@ -944,87 +941,6 @@ static reloc_howto_type elf_mips16_gprel_howto =
 	 0x07ff001f,	        /* dst_mask */
 	 false);		/* pcrel_offset */
 
-
-/* GNU extensions for embedded-pic.  */
-/* High 16 bits of symbol value, pc-relative.  */
-static reloc_howto_type elf_mips_gnu_rel_hi16 =
-  HOWTO (R_MIPS_GNU_REL_HI16,	/* type */
-	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 16,			/* bitsize */
-	 true,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 _bfd_mips_elf_hi16_reloc,	/* special_function */
-	 "R_MIPS_GNU_REL_HI16",	/* name */
-	 true,			/* partial_inplace */
-	 0xffff,		/* src_mask */
-	 0xffff,		/* dst_mask */
-	 true);			/* pcrel_offset */
-
-/* Low 16 bits of symbol value, pc-relative.  */
-static reloc_howto_type elf_mips_gnu_rel_lo16 =
-  HOWTO (R_MIPS_GNU_REL_LO16,	/* type */
-	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 16,			/* bitsize */
-	 true,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 _bfd_mips_elf_lo16_reloc,	/* special_function */
-	 "R_MIPS_GNU_REL_LO16",	/* name */
-	 true,			/* partial_inplace */
-	 0xffff,		/* src_mask */
-	 0xffff,		/* dst_mask */
-	 true);			/* pcrel_offset */
-
-/* 16 bit offset for pc-relative branches.  */
-static reloc_howto_type elf_mips_gnu_rel16_s2 =
-  HOWTO (R_MIPS_GNU_REL16_S2,	/* type */
-	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 16,			/* bitsize */
-	 true,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_signed, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_MIPS_GNU_REL16_S2",	/* name */
-	 true,			/* partial_inplace */
-	 0xffff,		/* src_mask */
-	 0xffff,		/* dst_mask */
-	 true);			/* pcrel_offset */
-
-/* 64 bit pc-relative.  */
-static reloc_howto_type elf_mips_gnu_pcrel64 =
-  HOWTO (R_MIPS_PC64,		/* type */
-	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
-	 64,			/* bitsize */
-	 true,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_signed, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_MIPS_PC64",		/* name */
-	 true,			/* partial_inplace */
-	 MINUS_ONE,		/* src_mask */
-	 MINUS_ONE,		/* dst_mask */
-	 true);			/* pcrel_offset */
-
-/* 32 bit pc-relative.  */
-static reloc_howto_type elf_mips_gnu_pcrel32 =
-  HOWTO (R_MIPS_PC32,		/* type */
-	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize */
-	 true,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_signed, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_MIPS_PC32",		/* name */
-	 true,			/* partial_inplace */
-	 0xffffffff,		/* src_mask */
-	 0xffffffff,		/* dst_mask */
-	 true);			/* pcrel_offset */
 
 /* GNU extension to record C++ vtable hierarchy */
 static reloc_howto_type elf_mips_gnu_vtinherit_howto =
@@ -1964,16 +1880,6 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
       return &elf_mips_gnu_vtinherit_howto;
     case BFD_RELOC_VTABLE_ENTRY:
       return &elf_mips_gnu_vtentry_howto;
-    case BFD_RELOC_PCREL_HI16_S:
-      return &elf_mips_gnu_rel_hi16;
-    case BFD_RELOC_PCREL_LO16:
-      return &elf_mips_gnu_rel_lo16;
-    case BFD_RELOC_16_PCREL_S2:
-      return &elf_mips_gnu_rel16_s2;
-    case BFD_RELOC_64_PCREL:
-      return &elf_mips_gnu_pcrel64;
-    case BFD_RELOC_32_PCREL:
-      return &elf_mips_gnu_pcrel32;
     }
 }
 
@@ -1996,21 +1902,6 @@ mips_rtype_to_howto (r_type)
       break;
     case R_MIPS_GNU_VTENTRY:
       return &elf_mips_gnu_vtentry_howto;
-      break;
-    case R_MIPS_GNU_REL_HI16:
-      return &elf_mips_gnu_rel_hi16;
-      break;
-    case R_MIPS_GNU_REL_LO16:
-      return &elf_mips_gnu_rel_lo16;
-      break;
-    case R_MIPS_GNU_REL16_S2:
-      return &elf_mips_gnu_rel16_s2;
-      break;
-    case R_MIPS_PC64:
-      return &elf_mips_gnu_pcrel64;
-      break;
-    case R_MIPS_PC32:
-      return &elf_mips_gnu_pcrel32;
       break;
 
     default:
@@ -2224,7 +2115,7 @@ bfd_mips_elf_swap_options_out (abfd, in, ex)
   bfd_h_put_16 (abfd, in->section, ex->section);
   bfd_h_put_32 (abfd, in->info, ex->info);
 }
-#if 0
+
 /* Swap in an MSYM entry.  */
 
 static void
@@ -2236,7 +2127,7 @@ bfd_mips_elf_swap_msym_in (abfd, ex, in)
   in->ms_hash_value = bfd_h_get_32 (abfd, ex->ms_hash_value);
   in->ms_info = bfd_h_get_32 (abfd, ex->ms_info);
 }
-#endif
+
 /* Swap out an MSYM entry.  */
 
 static void
@@ -5469,7 +5360,7 @@ mips_elf_got_page (abfd, info, value, offsetp)
   struct mips_got_info *g;
   bfd_byte *entry;
   bfd_byte *last_entry;
-  bfd_vma index = 0;
+  bfd_vma index;
   bfd_vma address;
 
   g = mips_elf_got_info (elf_hash_table (info)->dynobj, &sgot);
@@ -5518,7 +5409,7 @@ mips_elf_got16_entry (abfd, info, value)
   struct mips_got_info *g;
   bfd_byte *entry;
   bfd_byte *last_entry;
-  bfd_vma index = 0;
+  bfd_vma index;
   bfd_vma address;
 
   /* Although the ABI says that it is "the high-order 16 bits" that we
@@ -5551,12 +5442,11 @@ mips_elf_got16_entry (abfd, info, value)
   return index;
 }
 
-/* Returns the first relocation of type r_type found, beginning with
+/* Returns the first R_MIPS_LO16 relocation found, beginning with
    RELOCATION.  RELEND is one-past-the-end of the relocation table.  */
 
 static const Elf_Internal_Rela *
-mips_elf_next_relocation (r_type, relocation, relend)
-     unsigned int r_type;
+mips_elf_next_lo16_relocation (relocation, relend)
      const Elf_Internal_Rela *relocation;
      const Elf_Internal_Rela *relend;
 {
@@ -5568,7 +5458,7 @@ mips_elf_next_relocation (r_type, relocation, relend)
      extension in general, as that is useful for GCC.  */
   while (relocation < relend)
     {
-      if (ELF32_R_TYPE (relocation->r_info) == r_type)
+      if (ELF32_R_TYPE (relocation->r_info) == R_MIPS_LO16)
 	return relocation;
 
       ++relocation;
@@ -5945,12 +5835,10 @@ mips_elf_calculate_relocation (abfd,
 	}
       else
 	{
-	  if (! ((*info->callbacks->undefined_symbol)
-		 (info, h->root.root.root.string, input_bfd,
-		  input_section, relocation->r_offset,
-		  (!info->shared || info->no_undefined))))
-	    return bfd_reloc_undefined;
-	  symbol = 0;
+	  (*info->callbacks->undefined_symbol)
+	    (info, h->root.root.root.string, input_bfd,
+	     input_section, relocation->r_offset);
+	  return bfd_reloc_undefined;
 	}
 
       target_is_16_bit_code_p = (h->root.other == STO_MIPS16);
@@ -6111,24 +5999,6 @@ mips_elf_calculate_relocation (abfd,
 	  else
 	    value = addend;
 	}
-      value &= howto->dst_mask;
-      break;
-
-    case R_MIPS_PC32:
-    case R_MIPS_PC64:
-    case R_MIPS_GNU_REL_LO16:
-      value = symbol + addend - p;
-      value &= howto->dst_mask;
-      break;
-
-    case R_MIPS_GNU_REL16_S2:
-      value = symbol + mips_elf_sign_extend (addend << 2, 18) - p;
-      overflowed_p = mips_elf_overflow_p (value, 18);
-      value = (value >> 2) & howto->dst_mask;
-      break;
-
-    case R_MIPS_GNU_REL_HI16:
-      value = mips_elf_high (addend + symbol - p);
       value &= howto->dst_mask;
       break;
 
@@ -6543,7 +6413,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 {
   Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *relend;
-  bfd_vma addend = 0;
+  bfd_vma addend;
   boolean use_saved_addend_p = false;
   struct elf_backend_data *bed;
 
@@ -6610,7 +6480,6 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		 combination of the addend stored in two different
 		 relocations.   */
 	      if (r_type == R_MIPS_HI16
-		  || r_type == R_MIPS_GNU_REL_HI16
 		  || (r_type == R_MIPS_GOT16
 		      && mips_elf_local_relocation_p (input_bfd, rel,
 						      local_sections)))
@@ -6618,7 +6487,6 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  bfd_vma l;
 		  const Elf_Internal_Rela *lo16_relocation;
 		  reloc_howto_type *lo16_howto;
-		  int lo;
 
 		  /* The combined value is the sum of the HI16 addend,
 		     left-shifted by sixteen bits, and the LO16
@@ -6626,18 +6494,15 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		     a `lui' of the HI16 value, and then an `addiu' of
 		     the LO16 value.)  
 
-		     Scan ahead to find a matching LO16 relocation.  */
-		  if (r_type == R_MIPS_GNU_REL_HI16)
-		    lo = R_MIPS_GNU_REL_LO16;
-		  else
-		    lo = R_MIPS_LO16;
+		     Scan ahead to find a matching R_MIPS_LO16
+		     relocation.  */
 		  lo16_relocation 
-		    = mips_elf_next_relocation (lo, rel, relend); 
+		    = mips_elf_next_lo16_relocation (rel, relend); 
 		  if (lo16_relocation == NULL)
 		    return false;
 
 		  /* Obtain the addend kept there.  */
-		  lo16_howto = mips_rtype_to_howto (lo);
+		  lo16_howto = mips_rtype_to_howto (R_MIPS_LO16);
 		  l = mips_elf_obtain_contents (lo16_howto,
 						lo16_relocation,
 						input_bfd, contents);
@@ -6668,10 +6533,6 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  Elf_Internal_Sym *sym;
 	  unsigned long r_symndx;
 
-	  if (r_type == R_MIPS_64 && !ABI_64_P (output_bfd)
-	      && bfd_big_endian (input_bfd))
-	    rel->r_offset -= 4;
-
 	  /* Since we're just relocating, all we need to do is copy
 	     the relocations back out to the object file, unless
 	     they're against a section symbol, in which case we need
@@ -6689,8 +6550,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      || r_type == R_MIPS_LITERAL)
 	    addend -= (_bfd_get_gp_value (output_bfd)
 		       - _bfd_get_gp_value (input_bfd));
-	  else if (r_type == R_MIPS_26 || r_type == R_MIPS16_26
-		   || r_type == R_MIPS_GNU_REL16_S2)
+	  else if (r_type == R_MIPS_26 || r_type == R_MIPS16_26)
 	    /* The addend is stored without its two least
 	       significant bits (which are always zero.)  In a
 	       non-relocateable link, calculate_relocation will do
@@ -6706,19 +6566,17 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  /* If the relocation is for a R_MIPS_HI16 or R_MIPS_GOT16,
 	     then we only want to write out the high-order 16 bits.
 	     The subsequent R_MIPS_LO16 will handle the low-order bits.  */
-	  if (r_type == R_MIPS_HI16 || r_type == R_MIPS_GOT16
-	      || r_type == R_MIPS_GNU_REL_HI16)
+	  if (r_type == R_MIPS_HI16 || r_type == R_MIPS_GOT16)
 	    addend = mips_elf_high (addend);
 	  /* If the relocation is for an R_MIPS_26 relocation, then
 	     the two low-order bits are not stored in the object file;
 	     they are implicitly zero.  */
-	  else if (r_type == R_MIPS_26 || r_type == R_MIPS16_26
-		   || r_type == R_MIPS_GNU_REL16_S2)
+	  else if (r_type == R_MIPS_26 || r_type == R_MIPS16_26)
 	    addend >>= 2;
 
 	  if (rela_relocation_p)
 	    /* If this is a RELA relocation, just update the addend.
-	       We have to cast away constness for REL.  */
+               We have to cast away constness for REL.  */
 	    rel->r_addend = addend;
 	  else
 	    {
@@ -6728,43 +6586,6 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		 writing will be source of the addend in the final
 		 link.  */
 	      addend &= howto->src_mask;
-
-	      if (r_type == R_MIPS_64 && !ABI_64_P (output_bfd))
-		/* See the comment above about using R_MIPS_64 in the 32-bit
-		   ABI.  Here, we need to update the addend.  It would be
-		   possible to get away with just using the R_MIPS_32 reloc
-		   but for endianness.  */
-		{
-		  bfd_vma sign_bits;
-		  bfd_vma low_bits;
-		  bfd_vma high_bits;
-		  
-		  if (addend & 0x80000000u)
-		    sign_bits = 0xffffffffu;
-		  else
-		    sign_bits = 0;
-		  
-		  /* If we don't know that we have a 64-bit type,
-		     do two separate stores.  */
-		  if (bfd_big_endian (input_bfd))
-		    {
-		      /* Store the sign-bits (which are most significant)
-			 first.  */
-		      low_bits = sign_bits;
-		      high_bits = addend;
-		    }
-		  else
-		    {
-		      low_bits = addend;
-		      high_bits = sign_bits;
-		    }
-		  bfd_put_32 (input_bfd, low_bits, 
-			      contents + rel->r_offset);
-		  bfd_put_32 (input_bfd, high_bits, 
-			      contents + rel->r_offset + 4);
-		  continue;
-		}
-
 	      if (!mips_elf_perform_relocation (info, howto, rel, addend,
 						input_bfd,  input_section, 
 						contents, false))
@@ -6806,7 +6627,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	case bfd_reloc_undefined:
 	  /* mips_elf_calculate_relocation already called the
-	     undefined_symbol callback.  There's no real point in
+             undefined_symbol callback.  There's no real point in
 	     trying to perform the relocation at this point, so we
 	     just skip ahead to the next relocation.  */
 	  continue;
@@ -6859,13 +6680,13 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  bfd_vma low_bits;
 	  bfd_vma high_bits;
 
-	  if (value & 0x80000000u)
-	    sign_bits = 0xffffffffu;
+	  if (value & 0x80000000)
+	    sign_bits = 0xffffffff;
 	  else
 	    sign_bits = 0;
 
-	  /* If we don't know that we have a 64-bit type,
-	     do two separate stores.  */
+	  /* If only a 32-bit VMA is available do two separate
+	     stores.  */
 	  if (bfd_big_endian (input_bfd))
 	    {
 	      /* Undo what we did above.  */
@@ -8099,7 +7920,7 @@ _bfd_mips_elf_size_dynamic_sections (output_bfd, info)
 
       if (strip)
 	{
-	  _bfd_strip_section_from_output (info, s);
+	  _bfd_strip_section_from_output (s);
 	  continue;
 	}
 
@@ -8894,8 +8715,7 @@ elf32_mips_get_relocated_section_contents (abfd, link_info, link_order, data,
 		case bfd_reloc_undefined:
 		  if (!((*link_info->callbacks->undefined_symbol)
 			(link_info, bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
-			 input_bfd, input_section, (*parent)->address,
-			 true)))
+			 input_bfd, input_section, (*parent)->address)))
 		    goto error_return;
 		  break;
 		case bfd_reloc_dangerous:

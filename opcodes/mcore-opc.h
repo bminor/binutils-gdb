@@ -1,5 +1,5 @@
 /* Assembler instructions for Motorola's Mcore processor
-   Copyright (C) 1999, 2000 Free Software Foundation, Inc.
+   Copyright (C) 1999 Free Software Foundation, Inc.
 
    
 This program is free software; you can redistribute it and/or modify
@@ -24,7 +24,6 @@ typedef enum
   OMa,   SI,   I7,   LS,   BR,    BL,    LR,    LJ,
   RM,    RQ,   JSR,  JMP,  OBRa,  OBRb,  OBRc,  OBR2,
   O1R1,  OMb,  OMc,  SIa,
-  MULSH, OPSR,
   JC,    JU,   JL,   RSI,  DO21,  OB2
 }
 mcore_opclass;
@@ -49,7 +48,6 @@ mcore_opcode_info mcore_table[] =
   { "stop",	O0,	0,	0x0004 },
   { "wait",	O0,	0,	0x0005 },
   { "doze",	O0,	0,	0x0006 },
-  { "idly4",    O0,     0,      0x0007 },
   { "trap",	OT,	0,	0x0008 },
 /* SPACE:                       0x000C - 0x000F */
 /* SPACE:                       0x0010 - 0x001F */
@@ -101,8 +99,6 @@ mcore_opcode_info mcore_table[] =
   { "tst",	O2,	0,	0x0E00 },
   { "cmpne",	O2,	0,	0x0F00 },
   { "mfcr",	OC,	0,	0x1000 },
-  { "psrclr",	OPSR,	0,	0x11F0 },
-  { "psrset",	OPSR,	0,	0x11F8 },
   { "mov",	O2,	0,	0x1200 },
   { "bgenr",	O2,	0,	0x1300 },
   { "rsub",	O2,	0,	0x1400 },
@@ -151,8 +147,6 @@ mcore_opcode_info mcore_table[] =
   { "movi",	I7,	0,	0x6000 },
 #define MCORE_INST_BMASKI_ALT	0x6000
 #define MCORE_INST_BGENI_ALT	0x6000
-  { "mulsh",    MULSH,  0,      0x6800 },
-  { "muls.h",   MULSH,  0,      0x6800 },
 /* SPACE:                       0x6900 - 0x6FFF */
   { "jmpi",	LJ,	1,	0x7000 },
   { "jsri",	LJ,	0,	0x7F00 },

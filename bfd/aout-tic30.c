@@ -1,5 +1,5 @@
 /* BFD back-end for TMS320C30 a.out binaries.
-   Copyright (C) 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright (C) 1998, 1999 Free Software Foundation, Inc.
    Contributed by Steven Haworth (steve@pm.cse.rmit.edu.au)
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -610,8 +610,11 @@ tic30_aout_write_object_contents (abfd)
   struct external_exec exec_bytes;
   struct internal_exec *execp = exec_hdr (abfd);
 
+#if CHOOSE_RELOC_SIZE
+  CHOOSE_RELOC_SIZE (abfd);
+#else
   obj_reloc_entry_size (abfd) = RELOC_STD_SIZE;
-
+#endif
   {
     bfd_size_type text_size;	/* dummy vars */
     file_ptr text_end;

@@ -274,7 +274,7 @@ bfd_read (ptr, size, nitems, abfd)
       get = size * nitems;
       if (abfd->where + get > bim->size)
 	{
-	  if (bim->size < (bfd_size_type) abfd->where)
+	  if (bim->size < abfd->where)
 	    get = 0;
 	  else
 	    get = bim->size - abfd->where;
@@ -689,7 +689,7 @@ bfd_seek (abfd, position, direction)
       else
 	abfd->where += position;
       
-      if ((bfd_size_type) abfd->where > bim->size)
+      if (abfd->where > bim->size)
 	{
 	  abfd->where = bim->size;
 	  bfd_set_error (bfd_error_file_truncated);

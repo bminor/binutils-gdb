@@ -3031,13 +3031,7 @@
       else if ((FS & 0x1) == 0)
 	PENDING_FILL(RT,(SET64HI(FGR[FS+1]) | FGR[FS]));
       else
-	{
-	  if (STATE_VERBOSE_P(SD))
-	    sim_io_eprintf (SD, 
-	      "Warning: PC 0x%x: semantic_DMxC1_COP1Sa 32-bit use of odd FPR number\n",
-	      CIA);
-	  PENDING_FILL(RT,SET64HI(0xDEADC0DE) | 0xBAD0BAD0);
-	}
+	PENDING_FILL(RT,SET64HI(0xDEADC0DE) | 0xBAD0BAD0);
     }
 }
 010001,00,X,01,5.RT,5.FS,00000000000:COP1Sb:64::DMxC1
@@ -3061,12 +3055,7 @@
       else if ((FS & 0x1) == 0)
 	GPR[RT] = SET64HI (FGR[FS+1]) | FGR[FS];
       else
-	{
-	  if (STATE_VERBOSE_P(SD))
-	    sim_io_eprintf (SD, 
-	      "Warning: PC 0x%x: DMxC1 32-bit use of odd FPR number\n", CIA);
-	  GPR[RT] = SET64HI (0xDEADC0DE) | 0xBAD0BAD0;
-	}
+	GPR[RT] = SET64HI (0xDEADC0DE) | 0xBAD0BAD0;
     }
 }
 
@@ -3205,12 +3194,7 @@
   if (X)
     { /*MTC1*/
       if (SizeFGR() == 64)
-	{
-	  if (STATE_VERBOSE_P(SD))
-	    sim_io_eprintf (SD, 
-	      "Warning:  PC 0x%x: MTC1 not DMTC1 with 64 bit regs\n", CIA);
-	  PENDING_FILL ((FS + FGRIDX), (SET64HI(0xDEADC0DE) | VL4_8(GPR[RT])));
-	}
+	PENDING_FILL ((FS + FGRIDX), (SET64HI(0xDEADC0DE) | VL4_8(GPR[RT])));
       else
 	PENDING_FILL ((FS + FGRIDX), VL4_8(GPR[RT]));
     }

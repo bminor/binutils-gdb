@@ -23,7 +23,6 @@ fun, and definign VAILDATE will define SWI 1 to enter SVC mode, and SWI
 0x11 to halt the emulator. */
 
 #include "config.h"
-#include "ansidecl.h"
 
 #include <time.h>
 #include <errno.h>
@@ -95,6 +94,11 @@ extern ARMword ARMul_Debug (ARMul_State * state, ARMword pc, ARMword instr);
 #endif
 #define UNIQUETEMPS 256
 
+#ifndef NOOS
+static void UnwindDataAbort (ARMul_State * state, ARMword addr);
+static void getstring (ARMul_State * state, ARMword from, char *to);
+#endif
+
 /***************************************************************************\
 *                          OS private Information                           *
 \***************************************************************************/
@@ -123,9 +127,9 @@ struct OSblock
 #define FIXCRLF(t,c) c
 #endif
 
-static ARMword softvectorcode[] =
-{	/* basic: swi tidyexception + event; mov pc, lr;
-	   ldmia r11,{r11,pc}; swi generateexception  + event.  */
+static ARMword softvectorcode[] = {	/* basic: swi tidyexception + event; mov pc, lr;
+					   ldmia r11,{r11,pc}; swi generateexception + event
+					 */
   0xef000090, 0xe1a0e00f, 0xe89b8800, 0xef000080,	/*Reset */
   0xef000091, 0xe1a0e00f, 0xe89b8800, 0xef000081,	/*Undef */
   0xef000092, 0xe1a0e00f, 0xe89b8800, 0xef000082,	/*SWI  */
@@ -133,8 +137,8 @@ static ARMword softvectorcode[] =
   0xef000094, 0xe1a0e00f, 0xe89b8800, 0xef000084,	/*Data abort */
   0xef000095, 0xe1a0e00f, 0xe89b8800, 0xef000085,	/*Address exception */
   0xef000096, 0xe1a0e00f, 0xe89b8800, 0xef000086, /*IRQ*/
-  0xef000097, 0xe1a0e00f, 0xe89b8800, 0xef000087, /*FIQ*/
-  0xef000098, 0xe1a0e00f, 0xe89b8800, 0xef000088,	/*Error */
+    0xef000097, 0xe1a0e00f, 0xe89b8800, 0xef000087, /*FIQ*/
+    0xef000098, 0xe1a0e00f, 0xe89b8800, 0xef000088,	/*Error */
   0xe1a0f00e			/* default handler */
 };
 
@@ -203,7 +207,7 @@ ARMul_OSInit (ARMul_State * state)
   ARMul_WriteWord (state, 4, FPENEWVECT (ARMul_ReadWord (state, i - 4)));	/* install new vector */
   ARMul_ConsolePrint (state, ", FPE");
 
-/* #endif  ASIM */
+/* #endif /* ASIM */
 #endif /* VALIDATE */
 #endif /* NOOS */
 
@@ -225,6 +229,9 @@ ARMword ARMul_OSLastErrorP (ARMul_State * state)
 {
   return ((struct OSblock *) state->OSptr)->ErrorP;
 }
+
+#if 1				/* CYGNUS LOCAL */
+/* This is the cygnus way of doing it, which makes it simple to do our tests */
 
 static int translate_open_mode[] = {
   O_RDONLY,			/* "r"   */
@@ -276,7 +283,7 @@ SWIopen (ARMul_State * state, ARMword name, ARMword SWIflags)
   int flags;
   int i;
 
-  for (i = 0; (dummy[i] = ARMul_ReadByte (state, name + i)); i++)
+  for (i = 0; dummy[i] = ARMul_ReadByte (state, name + i); i++)
     ;
 
   /* Now we need to decode the Demon open mode */
@@ -307,7 +314,7 @@ SWIread (ARMul_State * state, ARMword f, ARMword ptr, ARMword len)
 
   if (local == NULL)
     {
-      fprintf (stderr, "sim: Unable to read 0x%ulx bytes - out of memory\n",
+      fprintf (stderr, "sim: Unable to read 0x%x bytes - out of memory\n",
 	       len);
       return;
     }
@@ -326,13 +333,13 @@ SWIwrite (ARMul_State * state, ARMword f, ARMword ptr, ARMword len)
 {
   struct OSblock *OSptr = (struct OSblock *) state->OSptr;
   int res;
-  ARMword i;
+  int i;
   char *local = malloc (len);
 
   if (local == NULL)
     {
-      fprintf (stderr, "sim: Unable to write 0x%lx bytes - out of memory\n",
-	       (long) len);
+      fprintf (stderr, "sim: Unable to write 0x%x bytes - out of memory\n",
+	       len);
       return;
     }
 
@@ -359,9 +366,13 @@ SWIflen (ARMul_State * state, ARMword fh)
     }
 
   addr = lseek (fh, 0, SEEK_CUR);
-
-  state->Reg[0] = lseek (fh, 0L, SEEK_END);
-  (void) lseek (fh, addr, SEEK_SET);
+  if (addr < 0)
+    state->Reg[0] = -1L;
+  else
+    {
+      state->Reg[0] = lseek (fh, 0L, SEEK_END);
+      (void) lseek (fh, addr, SEEK_SET);
+    }
 
   OSptr->ErrorNo = errno;
 }
@@ -374,7 +385,9 @@ SWIflen (ARMul_State * state, ARMword fh)
 unsigned
 ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 {
-  ARMword addr, temp;
+  ARMword addr, temp, fildes;
+  char buffer[BUFFERSIZE], *cptr;
+  FILE *fptr;
   struct OSblock *OSptr = (struct OSblock *) state->OSptr;
 
   switch (number)
@@ -549,7 +562,7 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	  else
 	    state->Reg[0] = -1;
 	  state->Emulate = FALSE;
-	  return TRUE;
+	  return (TRUE);
 
 	case ADP_Stopped_ApplicationExit:
 	  state->Reg[0] = 0;
@@ -592,6 +605,535 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
     }
 }
 
+#else /* CYGNUS LOCAL: #if 1 */
+
+unsigned
+ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
+{
+#ifdef NOOS
+  return (FALSE);
+#else
+#ifdef VALIDATE
+  switch (number)
+    {
+    case 0x11:
+      state->Emulate = FALSE;
+      return (TRUE);
+    case 0x01:
+      if (ARM32BITMODE)
+	ARMul_SetCPSR (state, (ARMul_GetCPSR (state) & 0xffffffc0) | 0x13);
+      else
+	ARMul_SetCPSR (state, (ARMul_GetCPSR (state) & 0xffffffc0) | 0x3);
+      return (TRUE);
+    default:
+      return (FALSE);
+    }
+#else
+  ARMword addr, temp;
+  char buffer[BUFFERSIZE], *cptr;
+  FILE *fptr;
+  struct OSblock *OSptr = (struct OSblock *) state->OSptr;
+
+  switch (number)
+    {
+    case SWI_WriteC:
+      (void) fputc ((int) state->Reg[0], stderr);
+      OSptr->ErrorNo = errno;
+      return (TRUE);
+
+    case SWI_Write0:
+      addr = state->Reg[0];
+      while ((temp = ARMul_ReadByte (state, addr++)) != 0)
+	fputc ((char) temp, stderr);
+      OSptr->ErrorNo = errno;
+      return (TRUE);
+
+    case SWI_ReadC:
+      state->Reg[0] = (ARMword) fgetc (stdin);
+      OSptr->ErrorNo = errno;
+      return (TRUE);
+
+    case SWI_CLI:
+      addr = state->Reg[0];
+      getstring (state, state->Reg[0], buffer);
+      state->Reg[0] = (ARMword) system (buffer);
+      OSptr->ErrorNo = errno;
+      return (TRUE);
+
+    case SWI_GetEnv:
+      state->Reg[0] = ADDRCMDLINE;
+      if (state->MemSize)
+	state->Reg[1] = state->MemSize;
+      else
+	state->Reg[1] = ADDRUSERSTACK;
+
+      addr = state->Reg[0];
+      cptr = state->CommandLine;
+      if (cptr == NULL)
+	cptr = "\0";
+      do
+	{
+	  temp = (ARMword) * cptr++;
+	  ARMul_WriteByte (state, addr++, temp);
+	}
+      while (temp != 0);
+      return (TRUE);
+
+    case SWI_Exit:
+#ifdef ASIM
+      simkernel1_abort_run ();
+#else
+      state->Emulate = FALSE;
+#endif
+      return (TRUE);
+
+    case SWI_EnterOS:
+      if (ARM32BITMODE)
+	ARMul_SetCPSR (state, (ARMul_GetCPSR (state) & 0xffffffc0) | 0x13);
+      else
+	ARMul_SetCPSR (state, (ARMul_GetCPSR (state) & 0xffffffc0) | 0x3);
+      return (TRUE);
+
+    case SWI_GetErrno:
+      state->Reg[0] = OSptr->ErrorNo;
+      return (TRUE);
+
+    case SWI_Clock:
+      /* return muber of centi-seconds... */
+      state->Reg[0] =
+#ifdef CLOCKS_PER_SEC
+	(CLOCKS_PER_SEC >= 100)
+	? (ARMword) (clock () / (CLOCKS_PER_SEC / 100))
+	: (ARMword) ((clock () * 100) / CLOCKS_PER_SEC);
+#else
+	/* presume unix... clock() returns microseconds */
+	(ARMword) (clock () / 10000);
+#endif
+      OSptr->ErrorNo = errno;
+      return (TRUE);
+
+    case SWI_Time:
+      state->Reg[0] = (ARMword) time (NULL);
+      OSptr->ErrorNo = errno;
+      return (TRUE);
+
+    case SWI_Remove:
+      getstring (state, state->Reg[0], buffer);
+      state->Reg[0] = unlink (buffer);
+      OSptr->ErrorNo = errno;
+      return (TRUE);
+
+    case SWI_Rename:
+      {
+	char buffer2[BUFFERSIZE];
+
+	getstring (state, state->Reg[0], buffer);
+	getstring (state, state->Reg[1], buffer2);
+	state->Reg[0] = rename (buffer, buffer2);
+	OSptr->ErrorNo = errno;
+	return (TRUE);
+      }
+
+    case SWI_Open:
+      {
+#if 0
+	/* It seems to me that these are in the wrong order
+	   sac@cygnus.com, so I've redone it to use the
+	   flags instead, with the functionality which was already
+	   there -- ahh, perhaps the TRUNC bit is in a different
+	   place on the original host ? */
+	static char *fmode[] = { "r", "rb", "r+", "r+b",
+	  "w", "wb", "w+", "w+b",
+	  "a", "ab", "a+", "a+b",
+	  "r", "r", "r", "r"
+	} /* last 4 are illegal */ ;
+#endif
+
+	unsigned type;
+
+	type = (unsigned) (state->Reg[1] & 3L);
+	getstring (state, state->Reg[0], buffer);
+	if (strcmp (buffer, ":tt") == 0 && (type == O_RDONLY))	/* opening tty "r" */
+	  fptr = stdin;
+	else if (strcmp (buffer, ":tt") == 0 && (type == O_WRONLY))	/* opening tty "w" */
+	  fptr = stderr;
+	else
+	  {
+	    switch (type)
+	      {
+	      case O_RDONLY:
+		fptr = fopen (buffer, "r");
+		break;
+	      case O_WRONLY:
+		fptr = fopen (buffer, "w");
+		break;
+	      case O_RDWR:
+		fptr = fopen (buffer, "rw");
+		break;
+	      }
+	  }
+
+	state->Reg[0] = 0;
+	if (fptr != NULL)
+	  {
+	    for (temp = 0; temp < FOPEN_MAX; temp++)
+	      if (OSptr->FileTable[temp] == NULL)
+		{
+		  OSptr->FileTable[temp] = fptr;
+		  OSptr->FileFlags[temp] = type & 1;	/* preserve the binary bit */
+		  state->Reg[0] = (ARMword) (temp + 1);
+		  break;
+		}
+	    if (state->Reg[0] == 0)
+	      OSptr->ErrorNo = EMFILE;	/* too many open files */
+	    else
+	      OSptr->ErrorNo = errno;
+	  }
+	else
+	  OSptr->ErrorNo = errno;
+	return (TRUE);
+      }
+
+    case SWI_Close:
+      temp = state->Reg[0];
+      if (temp == 0 || temp > FOPEN_MAX || OSptr->FileTable[temp - 1] == 0)
+	{
+	  OSptr->ErrorNo = EBADF;
+	  state->Reg[0] = -1L;
+	  return (TRUE);
+	}
+      temp--;
+      fptr = OSptr->FileTable[temp];
+      if (fptr == stdin || fptr == stderr)
+	state->Reg[0] = 0;
+      else
+	state->Reg[0] = fclose (fptr);
+      OSptr->FileTable[temp] = NULL;
+      OSptr->ErrorNo = errno;
+      return (TRUE);
+
+    case SWI_Write:
+      {
+	unsigned size, upto, type;
+	char ch;
+
+	temp = state->Reg[0];
+	if (temp == 0 || temp > FOPEN_MAX || OSptr->FileTable[temp - 1] == 0)
+	  {
+	    OSptr->ErrorNo = EBADF;
+	    state->Reg[0] = -1L;
+	    return (TRUE);
+	  }
+	temp--;
+	fptr = OSptr->FileTable[temp];
+	type = OSptr->FileFlags[temp];
+	addr = state->Reg[1];
+	size = (unsigned) state->Reg[2];
+
+	if (type & READOP)
+	  fseek (fptr, 0L, SEEK_CUR);
+	OSptr->FileFlags[temp] = (type & BINARY) | WRITEOP;;
+	while (size > 0)
+	  {
+	    if (size >= BUFFERSIZE)
+	      upto = BUFFERSIZE;
+	    else
+	      upto = size;
+	    for (cptr = buffer; (cptr - buffer) < upto; cptr++)
+	      {
+		ch = (char) ARMul_ReadByte (state, (ARMword) addr++);
+		*cptr = FIXCRLF (type, ch);
+	      }
+	    temp = fwrite (buffer, 1, upto, fptr);
+	    if (temp < upto)
+	      {
+		state->Reg[0] = (ARMword) (size - temp);
+		OSptr->ErrorNo = errno;
+		return (TRUE);
+	      }
+	    size -= upto;
+	  }
+	state->Reg[0] = 0;
+	OSptr->ErrorNo = errno;
+	return (TRUE);
+      }
+
+    case SWI_Read:
+      {
+	unsigned size, upto, type;
+	char ch;
+
+	temp = state->Reg[0];
+	if (temp == 0 || temp > FOPEN_MAX || OSptr->FileTable[temp - 1] == 0)
+	  {
+	    OSptr->ErrorNo = EBADF;
+	    state->Reg[0] = -1L;
+	    return (TRUE);
+	  }
+	temp--;
+	fptr = OSptr->FileTable[temp];
+	addr = state->Reg[1];
+	size = (unsigned) state->Reg[2];
+	type = OSptr->FileFlags[temp];
+
+	if (type & WRITEOP)
+	  fseek (fptr, 0L, SEEK_CUR);
+	OSptr->FileFlags[temp] = (type & BINARY) | READOP;;
+	while (size > 0)
+	  {
+	    if (isatty_ (fptr))
+	      {
+		upto = (size >= BUFFERSIZE) ? BUFFERSIZE : size + 1;
+		if (fgets (buffer, upto, fptr) != 0)
+		  temp = strlen (buffer);
+		else
+		  temp = 0;
+		upto--;		/* 1 char used for terminating null */
+	      }
+	    else
+	      {
+		upto = (size >= BUFFERSIZE) ? BUFFERSIZE : size;
+		temp = fread (buffer, 1, upto, fptr);
+	      }
+	    for (cptr = buffer; (cptr - buffer) < temp; cptr++)
+	      {
+		ch = *cptr;
+		ARMul_WriteByte (state, (ARMword) addr++, FIXCRLF (type, ch));
+	      }
+	    if (temp < upto)
+	      {
+		state->Reg[0] = (ARMword) (size - temp);
+		OSptr->ErrorNo = errno;
+		return (TRUE);
+	      }
+	    size -= upto;
+	  }
+	state->Reg[0] = 0;
+	OSptr->ErrorNo = errno;
+	return (TRUE);
+      }
+
+    case SWI_Seek:
+      if (state->Reg[0] == 0 || state->Reg[0] > FOPEN_MAX
+	  || OSptr->FileTable[state->Reg[0] - 1] == 0)
+	{
+	  OSptr->ErrorNo = EBADF;
+	  state->Reg[0] = -1L;
+	  return (TRUE);
+	}
+      fptr = OSptr->FileTable[state->Reg[0] - 1];
+      state->Reg[0] = fseek (fptr, (long) state->Reg[1], SEEK_SET);
+      OSptr->ErrorNo = errno;
+      return (TRUE);
+
+    case SWI_Flen:
+      if (state->Reg[0] == 0 || state->Reg[0] > FOPEN_MAX
+	  || OSptr->FileTable[state->Reg[0] - 1] == 0)
+	{
+	  OSptr->ErrorNo = EBADF;
+	  state->Reg[0] = -1L;
+	  return (TRUE);
+	}
+      fptr = OSptr->FileTable[state->Reg[0] - 1];
+      addr = (ARMword) ftell (fptr);
+      if (fseek (fptr, 0L, SEEK_END) < 0)
+	state->Reg[0] = -1;
+      else
+	{
+	  state->Reg[0] = (ARMword) ftell (fptr);
+	  (void) fseek (fptr, addr, SEEK_SET);
+	}
+      OSptr->ErrorNo = errno;
+      return (TRUE);
+
+    case SWI_IsTTY:
+      if (state->Reg[0] == 0 || state->Reg[0] > FOPEN_MAX
+	  || OSptr->FileTable[state->Reg[0] - 1] == 0)
+	{
+	  OSptr->ErrorNo = EBADF;
+	  state->Reg[0] = -1L;
+	  return (TRUE);
+	}
+      fptr = OSptr->FileTable[state->Reg[0] - 1];
+      state->Reg[0] = isatty_ (fptr);
+      OSptr->ErrorNo = errno;
+      return (TRUE);
+
+    case SWI_TmpNam:
+      {
+	ARMword size;
+
+	addr = state->Reg[0];
+	temp = state->Reg[1] & 0xff;
+	size = state->Reg[2];
+	if (OSptr->tempnames[temp] == NULL)
+	  {
+	    if ((OSptr->tempnames[temp] = malloc (L_tmpnam)) == NULL)
+	      {
+		state->Reg[0] = 0;
+		return (TRUE);
+	      }
+	    (void) tmpnam (OSptr->tempnames[temp]);
+	  }
+	cptr = OSptr->tempnames[temp];
+	if (strlen (cptr) > state->Reg[2])
+	  state->Reg[0] = 0;
+	else
+	  do
+	    {
+	      ARMul_WriteByte (state, addr++, *cptr);
+	    }
+	  while (*cptr++ != 0);
+	OSptr->ErrorNo = errno;
+	return (TRUE);
+      }
+
+    case SWI_InstallHandler:
+      {
+	ARMword handlerp = ADDRSOFHANDLERS + state->Reg[0] * 8;
+	ARMword oldr1 = ARMul_ReadWord (state, handlerp),
+	  oldr2 = ARMul_ReadWord (state, handlerp + 4);
+	ARMul_WriteWord (state, handlerp, state->Reg[1]);
+	ARMul_WriteWord (state, handlerp + 4, state->Reg[2]);
+	state->Reg[1] = oldr1;
+	state->Reg[2] = oldr2;
+	return (TRUE);
+      }
+
+    case SWI_GenerateError:
+      ARMul_Abort (state, ARMSWIV);
+      if (state->Emulate)
+	ARMul_SetR15 (state,
+		      ARMul_ReadWord (state, ADDRSOFTVECTORS + ARMErrorV));
+      return (TRUE);
+
+/* SWI's 0x9x unwind the state of the CPU after an abort of type x */
+
+    case 0x90:			/* Branch through zero */
+      {
+	ARMword oldpsr = ARMul_GetCPSR (state);
+	ARMul_SetCPSR (state, (oldpsr & 0xffffffc0) | 0x13);
+	ARMul_SetSPSR (state, SVC32MODE, oldpsr);
+	state->Reg[14] = 0;
+	goto TidyCommon;
+      }
+
+    case 0x98:			/* Error */
+      {
+	ARMword errorp = state->Reg[0], regp = state->Reg[1];
+	unsigned i;
+	ARMword errorpsr = ARMul_ReadWord (state, regp + 16 * 4);
+	for (i = 0; i < 15; i++)
+	  ARMul_SetReg (state, errorpsr, i,
+			ARMul_ReadWord (state, regp + i * 4L));
+	state->Reg[14] = ARMul_ReadWord (state, regp + 15 * 4L);
+	state->Reg[10] = errorp;
+	ARMul_SetSPSR (state, state->Mode, errorpsr);
+	OSptr->ErrorP = errorp;
+	goto TidyCommon;
+      }
+
+    case 0x94:			/* Data abort */
+      {
+	ARMword addr = state->Reg[14] - 8;
+	ARMword cpsr = ARMul_GetCPSR (state);
+	if (ARM26BITMODE)
+	  addr = addr & 0x3fffffc;
+	ARMul_SetCPSR (state, ARMul_GetSPSR (state, cpsr));
+	UnwindDataAbort (state, addr);
+	if (addr >= FPESTART && addr < FPEEND)
+	  {			/* in the FPE */
+	    ARMword sp, spsr;
+	    unsigned i;
+
+	    sp = state->Reg[13];
+	    state->Reg[13] += 64;	/* fix the aborting mode sp */
+	    state->Reg[14] = ARMul_ReadWord (state, sp + 60);	/* and its lr */
+	    spsr = ARMul_GetSPSR (state, state->Mode);
+	    state->Mode = ARMul_SwitchMode (state, state->Mode, spsr);
+	    for (i = 0; i < 15; i++)
+	      {
+		ARMul_SetReg (state, spsr, i, ARMul_ReadWord (state, sp));
+		sp += 4;
+	      }
+	    ARMul_SetCPSR (state, cpsr);
+	    state->Reg[14] = ARMul_ReadWord (state, sp) + 4;	/* botch it */
+	    ARMul_SetSPSR (state, state->Mode, spsr);
+	  }
+	else
+	  ARMul_SetCPSR (state, cpsr);
+
+	/* and fall through to correct r14 */
+      }
+    case 0x95:			/* Address Exception */
+      state->Reg[14] -= 4;
+    case 0x91:			/* Undefined instruction */
+    case 0x92:			/* SWI */
+    case 0x93:			/* Prefetch abort */
+    case 0x96:			/* IRQ */
+    case 0x97:			/* FIQ */
+      state->Reg[14] -= 4;
+    TidyCommon:
+      if (state->VectorCatch & (1 << (number - 0x90)))
+	{
+	  ARMul_SetR15 (state, state->Reg[14] + 8);	/* the 8 is the pipelining the the RDI will undo */
+	  ARMul_SetCPSR (state, ARMul_GetSPSR (state, ARMul_GetCPSR (state)));
+	  if (number == 0x90)
+	    state->EndCondition = 10;	/* Branch through Zero Error */
+	  else
+	    state->EndCondition = (unsigned) number - 0x8f;
+	  state->Emulate = FALSE;
+	}
+      else
+	{
+	  ARMword sp = state->Reg[13];
+	  ARMul_WriteWord (state, sp - 4, state->Reg[14]);
+	  ARMul_WriteWord (state, sp - 8, state->Reg[12]);
+	  ARMul_WriteWord (state, sp - 12, state->Reg[11]);
+	  ARMul_WriteWord (state, sp - 16, state->Reg[10]);
+	  state->Reg[13] = sp - 16;
+	  state->Reg[11] = ADDRSOFHANDLERS + 8 * (number - 0x90);
+	}
+      return (TRUE);
+
+/* SWI's 0x8x pass an abort of type x to the debugger if a handler returns */
+
+    case 0x80:
+    case 0x81:
+    case 0x82:
+    case 0x83:
+    case 0x84:
+    case 0x85:
+    case 0x86:
+    case 0x87:
+    case 0x88:
+      {
+	ARMword sp = state->Reg[13];
+	state->Reg[10] = ARMul_ReadWord (state, sp);
+	state->Reg[11] = ARMul_ReadWord (state, sp + 4);
+	state->Reg[12] = ARMul_ReadWord (state, sp + 8);
+	state->Reg[14] = ARMul_ReadWord (state, sp + 12);
+	state->Reg[13] = sp + 16;
+	ARMul_SetR15 (state, state->Reg[14] + 8);	/* the 8 is the pipelining the the RDI will undo */
+	ARMul_SetCPSR (state, ARMul_GetSPSR (state, ARMul_GetCPSR (state)));
+	if (number == 0x80)
+	  state->EndCondition = 10;	/* Branch through Zero Error */
+	else
+	  state->EndCondition = (unsigned) number - 0x7f;
+	state->Emulate = FALSE;
+	return (TRUE);
+      }
+
+    default:
+      state->Emulate = FALSE;
+      return (FALSE);
+    }
+#endif
+#endif
+}
+
+#endif /* CYGNUS LOCAL: #if 1 */
+
 #ifndef NOOS
 #ifndef ASIM
 
@@ -603,12 +1145,64 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 \***************************************************************************/
 
 unsigned
-ARMul_OSException (ARMul_State * state ATTRIBUTE_UNUSED, ARMword vector ATTRIBUTE_UNUSED, ARMword pc ATTRIBUTE_UNUSED)
+ARMul_OSException (ARMul_State * state, ARMword vector, ARMword pc)
 {				/* don't use this here */
   return (FALSE);
 }
 
 #endif
 
+/***************************************************************************\
+*                            Unwind a data abort                            *
+\***************************************************************************/
+
+static void
+UnwindDataAbort (ARMul_State * state, ARMword addr)
+{
+  ARMword instr = ARMul_ReadWord (state, addr);
+  ARMword rn = BITS (16, 19);
+  ARMword itype = BITS (24, 27);
+  ARMword offset;
+  if (rn == 15)
+    return;
+  if (itype == 8 || itype == 9)
+    {
+      /* LDM or STM */
+      unsigned long regs = BITS (0, 15);
+      offset = 0;
+      if (!BIT (21))
+	return;			/* no wb */
+      for (; regs != 0; offset++)
+	regs ^= (regs & -regs);
+      if (offset == 0)
+	offset = 16;
+    }
+  else if (itype == 12 ||	/* post-indexed CPDT */
+	   (itype == 13 && BIT (21)))
+    {				/* pre_indexed CPDT with WB */
+      offset = BITS (0, 7);
+    }
+  else
+    return;
+
+  if (BIT (23))
+    state->Reg[rn] -= offset * 4;
+  else
+    state->Reg[rn] += offset * 4;
+}
+
+/***************************************************************************\
+*           Copy a string from the debuggee's memory to the host's          *
+\***************************************************************************/
+
+static void
+getstring (ARMul_State * state, ARMword from, char *to)
+{
+  do
+    {
+      *to = (char) ARMul_ReadByte (state, from++);
+    }
+  while (*to++ != '\0');
+}
 
 #endif /* NOOS */

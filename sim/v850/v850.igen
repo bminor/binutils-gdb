@@ -1152,13 +1152,6 @@ rrrrr,110101,RRRRR + iiiiiiiiiiiiiiii:VI:::xori
 }
 
 
-// New breakpoint: 0x7E0 0x7E0
-00000,111111,00000 + 00000,11111,100000:X:::ilgop
-{
-  sim_engine_halt (SD, CPU, NULL, cia, sim_stopped, SIM_SIGTRAP);
-}
-
-
 
 // DIVHN
 rrrrr,111111,RRRRR + wwwww,01010,iiii,00:XI:::divhn

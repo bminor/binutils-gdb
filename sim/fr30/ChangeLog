@@ -1,7 +1,3 @@
-2000-03-30  Dave Brolley  <brolley@redhat.com>
-
-	* configure: Regenerated.
-
 1999-10-04  Doug Evans  <devans@casey.cygnus.com>
 
 	* sem.c,sem-switch.c: Rebuild.

@@ -53,17 +53,11 @@ unsigned char ctable2[] = {
   'a','a','a','a','a','a','a','a','a','a','a','a','a','X','X','X',
   'a','a','a','a','a','a','a','a','a','a','a','a','a','a','X','X',
   'a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','X',
-  'a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a', 0
+  'a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a'
 };
 
 /* Single and multidimensional arrays to test access and printing of array
    members. */
-
-typedef int ArrayInt [10];
-ArrayInt a1 = {2,4,6,8,10,12,14,16,18,20};
-
-typedef char ArrayChar [5];
-ArrayChar a2 = {'a','b','c','d','\0'};
 
 int int1dim[12] = {0,1,2,3,4,5,6,7,8,9,10,11};
 int int2dim[3][4] = {{0,1,2,3},{4,5,6,7},{8,9,10,11}};
@@ -103,5 +97,5 @@ int main ()
   /* Prevent AIX linker from removing variables.  */
   return ctable1[0] + ctable2[0] + int1dim[0] + int2dim[0][0]
     + int3dim[0][0][0] + int4dim[0][0][0][0] + teststring[0] +
-      *parrays -> array1 + a1[0] + a2[0];
+      *parrays -> array1;
 }

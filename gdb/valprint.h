@@ -31,11 +31,6 @@ extern int objectprint;		/* Controls looking up an object's derived type
 
 extern unsigned int print_max;	/* Max # of chars for strings/vectors */
 
-/* Print repeat counts if there are more than this many repetitions of an
-   element in an array.  Referenced by the low level language dependent
-   print routines. */
-extern unsigned int repeat_count_threshold;
-
 extern int output_format;
 
 extern int stop_print_at_null;	/* Stop printing at null char? */

@@ -62,10 +62,6 @@ extern int errno;
 extern char *strchr (), *strrchr ();
 #endif /* !strchr && !__STDC__ */
 
-#ifndef O_BINARY
-# define O_BINARY 0
-#endif
-
 extern int _rl_horizontal_scroll_mode;
 extern int _rl_mark_modified_lines;
 extern int _rl_bell_preference;
@@ -650,7 +646,7 @@ _rl_read_file (filename, sizep)
   char *buffer;
   int i, file;
 
-  if ((stat (filename, &finfo) < 0) || (file = open (filename, O_RDONLY | O_BINARY, 0666)) < 0)
+  if ((stat (filename, &finfo) < 0) || (file = open (filename, O_RDONLY, 0666)) < 0)
     return ((char *)NULL);
 
   file_size = (size_t)finfo.st_size;
@@ -671,7 +667,7 @@ _rl_read_file (filename, sizep)
   i = read (file, buffer, file_size);
   close (file);
 
-#if 1
+#if 0
   if (i < file_size)
 #else
   if (i < 0)
@@ -682,30 +678,6 @@ _rl_read_file (filename, sizep)
     }
 
   buffer[file_size] = '\0';
-
-#if O_BINARY
-  {
-    /* Systems which distinguish between text and binary files need
-       to strip the CR characters before each Newline, otherwise the
-       parsing functions won't work.  */
-    char *s, *d;
-    size_t removed = 0;
-
-    for (s = buffer, d = buffer; s < buffer + file_size; s++)
-      {
-	if (removed)
-	  *d = *s;
-	if (*s != '\r' || s[1] != '\n')
-	  d++;
-	else
-	  removed++;
-      }
-
-    file_size -= removed;
-    buffer[file_size] = '\0';
-  }
-#endif
-
   if (sizep)
     *sizep = file_size;
   return (buffer);
@@ -727,7 +699,6 @@ rl_re_read_init_file (count, ignore)
      1. the filename used for the previous call
      2. the value of the shell variable `INPUTRC'
      3. ~/.inputrc
-     4. (for __MSDOS__ only) ~/_inputrc
    If the file existed and could be opened and read, 0 is returned,
    otherwise errno is returned. */
 int
@@ -746,20 +717,6 @@ rl_read_init_file (filename)
 
   if (*filename == 0)
     filename = DEFAULT_INPUTRC;
-
-#ifdef __MSDOS__
-  {
-    /* DOS doesn't allow leading dots in file names.  If the original
-       name fails (it could work if we are on Windows), fall back to
-       ~/_inputrc.  */
-    int retval = _rl_read_init_file (filename, 0);
-
-    if (retval == 0)
-      return retval;
-    else if (strcmp (filename, "~/.inputrc") == 0)
-      filename = "~/_inputrc";
-  }
-#endif
 
   return (_rl_read_init_file (filename, 0));
 }

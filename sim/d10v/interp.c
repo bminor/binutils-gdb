@@ -965,25 +965,6 @@ sim_resume (sd, step, siggnal)
   if (step)
     sim_stop (sd);
 
-  switch (siggnal)
-    {
-    case 0:
-      break;
-#ifdef SIGBUS
-    case SIGBUS:
-#endif
-    case SIGSEGV:
-      SET_BPC (PC);
-      SET_BPSW (PSW);
-      SET_HW_PSW ((PSW & (PSW_F0_BIT | PSW_F1_BIT | PSW_C_BIT)));
-      JMP (AE_VECTOR_START);
-      SLOT_FLUSH ();
-      break;
-    default:
-      /* just ignore it */
-      break;
-    }
-
   do
     {
       iaddr = imem_addr ((uint32)PC << 2);
@@ -1072,12 +1053,15 @@ sim_resume (sd, step, siggnal)
     State.exception = SIGTRAP;
 }
 
-void
-sim_set_trace (void)
+int
+sim_trace (sd)
+     SIM_DESC sd;
 {
 #ifdef DEBUG
   d10v_debug = DEBUG;
 #endif
+  sim_resume (sd, 0, 0);
+  return 1;
 }
 
 void
@@ -1281,15 +1265,6 @@ sim_stop_reason (sd, reason, sigrc)
     case SIG_D10V_EXIT:			/* exit trap */
       *reason = sim_exited;
       *sigrc = GPR (0);
-      break;
-
-    case SIG_D10V_BUS:
-      *reason = sim_stopped;
-#ifdef SIGBUS
-      *sigrc = SIGBUS;
-#else
-      *sigrc = SIGSEGV;
-#endif
       break;
 
     default:				/* some signal */

@@ -1197,7 +1197,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.root.string, input_bfd, input_section,
-		      rel->r_vaddr - input_section->vma, true)))
+		      rel->r_vaddr - input_section->vma)))
 		return false;
 	    }
 	}

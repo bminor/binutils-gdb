@@ -28,7 +28,7 @@
 #include "target.h"
 #include <sys/ptrace.h>
 #include "gdbcore.h"
-#include "gdb_wait.h"
+#include <wait.h>
 #include <signal.h>
 
 extern CORE_ADDR text_end;

@@ -284,30 +284,6 @@ gesf (CGEN_FPU* fpu, SF x, SF y)
   return sim_fpu_is_ge (&op1, &op2);
 }
 
-static DF
-fextsfdf (CGEN_FPU* fpu, SF x)
-{
-  sim_fpu op1;
-  unsigned64 res;
-
-  sim_fpu_32to (&op1, x);
-  sim_fpu_to64 (&res, &op1);
-
-  return res;
-}
-
-static SF
-ftruncdfsf (CGEN_FPU* fpu, DF x)
-{
-  sim_fpu op1;
-  unsigned32 res;
-
-  sim_fpu_64to (&op1, x);
-  sim_fpu_to32 (&res, &op1);
-
-  return res;
-}
-
 static SF
 floatsisf (CGEN_FPU* fpu, SI x)
 {
@@ -695,8 +671,6 @@ cgen_init_accurate_fpu (SIM_CPU* cpu, CGEN_FPU* fpu, CGEN_FPU_ERROR_FN* error)
   o->ledf = ledf;
   o->gtdf = gtdf;
   o->gedf = gedf;
-  o->fextsfdf = fextsfdf;
-  o->ftruncdfsf = ftruncdfsf;
   o->floatsisf = floatsisf;
   o->floatsidf = floatsidf;
   o->ufloatsisf = ufloatsisf;

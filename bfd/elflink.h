@@ -1,5 +1,5 @@
 /* ELF linker support.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -83,7 +83,7 @@ elf_bfd_link_add_symbols (abfd, info)
 /* Return true iff this is a non-common definition of a symbol.  */
 static boolean
 is_global_symbol_definition (abfd, sym)
-     bfd * abfd ATTRIBUTE_UNUSED;
+     bfd * abfd;
      Elf_Internal_Sym * sym;
 {
   /* Local symbols do not count, but target specific ones might.  */
@@ -890,11 +890,9 @@ elf_link_add_object_symbols (abfd, info)
   struct elf_link_hash_entry *weaks;
   Elf_External_Sym *esym;
   Elf_External_Sym *esymend;
-  struct elf_backend_data *bed;
 
-  bed = get_elf_backend_data (abfd);
-  add_symbol_hook = bed->elf_add_symbol_hook;
-  collect = bed->collect;
+  add_symbol_hook = get_elf_backend_data (abfd)->elf_add_symbol_hook;
+  collect = get_elf_backend_data (abfd)->collect;
 
   if ((abfd->flags & DYNAMIC) == 0)
     dynamic = false;
@@ -1444,11 +1442,7 @@ elf_link_add_object_symbols (abfd, info)
 		  strcpy (newname, name);
 		  p = newname + namelen;
 		  *p++ = ELF_VER_CHR;
-		  /* If this is a defined non-hidden version symbol,
-		     we add another @ to the name.  This indicates the
-		     default version of the symbol.  */
-		  if ((iver.vs_vers & VERSYM_HIDDEN) == 0
-		      && sym.st_shndx != SHN_UNDEF)
+		  if ((iver.vs_vers & VERSYM_HIDDEN) == 0)
 		    *p++ = ELF_VER_CHR;
 		  strcpy (p, verstr);
 
@@ -1740,7 +1734,45 @@ elf_link_add_object_symbols (abfd, info)
 				  == 0);
 
 		      ht = (struct elf_link_hash_entry *) hi->root.u.i.link;
-		      (*bed->elf_backend_copy_indirect_symbol) (ht, hi);
+
+		      /* Copy down any references that we may have
+			 already seen to the symbol which just became
+			 indirect.  */
+		      ht->elf_link_hash_flags |=
+			(hi->elf_link_hash_flags
+			 & (ELF_LINK_HASH_REF_DYNAMIC
+			    | ELF_LINK_HASH_REF_REGULAR
+			    | ELF_LINK_HASH_REF_REGULAR_NONWEAK
+			    | ELF_LINK_NON_GOT_REF));
+
+		      /* Copy over the global and procedure linkage table
+			 offset entries.  These may have been already set
+			 up by a check_relocs routine.  */
+		      if (ht->got.offset == (bfd_vma) -1)
+			{
+			  ht->got.offset = hi->got.offset;
+			  hi->got.offset = (bfd_vma) -1;
+			}
+		      BFD_ASSERT (hi->got.offset == (bfd_vma) -1);
+
+		      if (ht->plt.offset == (bfd_vma) -1)
+			{
+			  ht->plt.offset = hi->plt.offset;
+			  hi->plt.offset = (bfd_vma) -1;
+			}
+		      BFD_ASSERT (hi->plt.offset == (bfd_vma) -1);
+
+		      if (ht->dynindx == -1)
+			{
+			  ht->dynindx = hi->dynindx;
+			  ht->dynstr_index = hi->dynstr_index;
+			  hi->dynindx = -1;
+			  hi->dynstr_index = 0;
+			}
+		      BFD_ASSERT (hi->dynindx == -1);
+
+		      /* FIXME: There may be other information to copy
+			 over for particular targets.  */
 
 		      /* See if the new flags lead us to realize that
 			 the symbol must be dynamic.  */
@@ -1813,7 +1845,44 @@ elf_link_add_object_symbols (abfd, info)
 					  | ELF_LINK_HASH_DEF_REGULAR))
 				      == 0);
 
-		          (*bed->elf_backend_copy_indirect_symbol) (h, hi);
+			  /* Copy down any references that we may have
+                             already seen to the symbol which just
+                             became indirect.  */
+			  h->elf_link_hash_flags |=
+			    (hi->elf_link_hash_flags
+			     & (ELF_LINK_HASH_REF_DYNAMIC
+				| ELF_LINK_HASH_REF_REGULAR
+				| ELF_LINK_HASH_REF_REGULAR_NONWEAK
+				| ELF_LINK_NON_GOT_REF));
+
+			  /* Copy over the global and procedure linkage
+                             table offset entries.  These may have been
+                             already set up by a check_relocs routine.  */
+			  if (h->got.offset == (bfd_vma) -1)
+			    {
+			      h->got.offset = hi->got.offset;
+			      hi->got.offset = (bfd_vma) -1;
+			    }
+			  BFD_ASSERT (hi->got.offset == (bfd_vma) -1);
+
+			  if (h->plt.offset == (bfd_vma) -1)
+			    {
+			      h->plt.offset = hi->plt.offset;
+			      hi->plt.offset = (bfd_vma) -1;
+			    }
+			  BFD_ASSERT (hi->got.offset == (bfd_vma) -1);
+
+			  if (h->dynindx == -1)
+			    {
+			      h->dynindx = hi->dynindx;
+			      h->dynstr_index = hi->dynstr_index;
+			      hi->dynindx = -1;
+			      hi->dynstr_index = 0;
+			    }
+			  BFD_ASSERT (hi->dynindx == -1);
+
+			  /* FIXME: There may be other information to
+                             copy over for particular targets.  */
 
 			  /* See if the new flags lead us to realize
                              that the symbol must be dynamic.  */
@@ -2912,7 +2981,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       verdefs = asvinfo.verdefs;
 
       if (verdefs == NULL)
-	_bfd_strip_section_from_output (info, s);
+	_bfd_strip_section_from_output (s);
       else
 	{
 	  unsigned int cdefs;
@@ -3088,7 +3157,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 				(PTR) &sinfo);
 
 	if (elf_tdata (output_bfd)->verref == NULL)
-	  _bfd_strip_section_from_output (info, s);
+	  _bfd_strip_section_from_output (s);
 	else
 	  {
 	    Elf_Internal_Verneed *t;
@@ -3192,7 +3261,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       if (dynsymcount == 0
 	  || (verdefs == NULL && elf_tdata (output_bfd)->verref == NULL))
 	{
-	  _bfd_strip_section_from_output (info, s);
+	  _bfd_strip_section_from_output (s);
 	  /* The DYNSYMCOUNT might have changed if we were going to
 	     output a dynamic symbol table entry for S.  */
 	  dynsymcount = _bfd_elf_link_renumber_dynsyms (output_bfd, info);
@@ -3604,7 +3673,6 @@ elf_link_assign_sym_version (h, data)
   struct elf_assign_sym_version_info *sinfo =
     (struct elf_assign_sym_version_info *) data;
   struct bfd_link_info *info = sinfo->info;
-  struct elf_backend_data *bed;
   struct elf_info_failed eif;
   char *p;
 
@@ -3623,7 +3691,6 @@ elf_link_assign_sym_version (h, data)
   if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
     return true;
 
-  bed = get_elf_backend_data (sinfo->output_bfd);
   p = strchr (h->root.root.string, ELF_VER_CHR);
   if (p != NULL && h->verinfo.vertree == NULL)
     {
@@ -3691,7 +3758,10 @@ elf_link_assign_sym_version (h, data)
 			      && ! sinfo->export_dynamic)
 			    {
 			      h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
-			      (*bed->elf_backend_hide_symbol) (h);
+			      h->elf_link_hash_flags &=~
+				ELF_LINK_HASH_NEEDS_PLT;
+			      h->dynindx = -1;
+			      h->plt.offset = (bfd_vma) -1;
 			      /* FIXME: The name of the symbol has
 				 already been recorded in the dynamic
 				 string table section.  */
@@ -3803,7 +3873,9 @@ elf_link_assign_sym_version (h, data)
 			  && ! sinfo->export_dynamic)
 			{
 			  h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
-			  (*bed->elf_backend_hide_symbol) (h);
+			  h->elf_link_hash_flags &=~ ELF_LINK_HASH_NEEDS_PLT;
+			  h->dynindx = -1;
+			  h->plt.offset = (bfd_vma) -1;
 			  /* FIXME: The name of the symbol has already
 			     been recorded in the dynamic string table
 			     section.  */
@@ -3825,7 +3897,9 @@ elf_link_assign_sym_version (h, data)
 	      && ! sinfo->export_dynamic)
 	    {
 	      h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
-	      (*bed->elf_backend_hide_symbol) (h);
+	      h->elf_link_hash_flags &=~ ELF_LINK_HASH_NEEDS_PLT;
+	      h->dynindx = -1;
+	      h->plt.offset = (bfd_vma) -1;
 	      /* FIXME: The name of the symbol has already been
 		 recorded in the dynamic string table section.  */
 	    }
@@ -4395,11 +4469,9 @@ elf_bfd_final_link (abfd, info)
     }
 
   /* That wrote out all the local symbols.  Finish up the symbol table
-     with the global symbols. Even if we want to strip everything we
-     can, we still need to deal with those global symbols that got
-     converted to local in a version script. */
+     with the global symbols.  */
 
-  if (info->shared)
+  if (info->strip != strip_all && info->shared)
     {
       /* Output any global symbols that got converted to local in a
          version script.  We do this in a separate step since ELF
@@ -4906,7 +4978,7 @@ elf_link_output_extsym (h, data)
     {
       if (! ((*finfo->info->callbacks->undefined_symbol)
 	     (finfo->info, h->root.root.string, h->root.u.undef.abfd,
-	      (asection *) NULL, 0, true)))
+	      (asection *) NULL, 0)))
 	{
 	  eoinfo->failed = true;
 	  return false;
@@ -4934,10 +5006,8 @@ elf_link_output_extsym (h, data)
     strip = false;
 
   /* If we're stripping it, and it's not a dynamic symbol, there's
-     nothing else to do unless it is a forced local symbol.  */
-  if (strip
-      && h->dynindx == -1
-      && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
+     nothing else to do.  */
+  if (strip && h->dynindx == -1)
     return true;
 
   sym.st_value = 0;
@@ -6210,9 +6280,6 @@ elf_gc_sweep (info, gc_sweep_hook)
     {
       asection *o;
 
-      if (bfd_get_flavour (sub) != bfd_target_elf_flavour)
-	continue;
-
       for (o = sub->sections; o != NULL; o = o->next)
 	{
 	  /* Keep special sections.  Keep .debug sections.  */
@@ -6427,10 +6494,6 @@ elf_gc_sections (abfd, info)
   for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
     {
       asection *o;
-
-      if (bfd_get_flavour (sub) != bfd_target_elf_flavour)
-	continue;
-
       for (o = sub->sections; o != NULL; o = o->next)
 	{
 	  if (o->flags & SEC_KEEP)
@@ -6586,14 +6649,10 @@ elf_gc_common_finalize_got_offsets (abfd, info)
   /* Do the local .got entries first.  */
   for (i = info->input_bfds; i; i = i->link_next)
     {
-      bfd_signed_vma *local_got;
+      bfd_signed_vma *local_got = elf_local_got_refcounts (i);
       bfd_size_type j, locsymcount;
       Elf_Internal_Shdr *symtab_hdr;
 
-      if (bfd_get_flavour (i) != bfd_target_elf_flavour)
-	continue;
-
-      local_got = elf_local_got_refcounts (i);
       if (!local_got)
 	continue;
 

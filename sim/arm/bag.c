@@ -25,7 +25,6 @@
 /********************************************************************/
 
 #include "bag.h"
-#include <stdlib.h>
 
 #define HASH_TABLE_SIZE 256
 #define hash(x) (((x)&0xff)^(((x)>>8)&0xff)^(((x)>>16)&0xff)^(((x)>>24)&0xff))
@@ -66,8 +65,8 @@ killwholelist (Hashentry * p)
     }
 }
 
-static void
-removefromlist (Hashentry ** p, long first)
+void
+removefromlist (Hashentry ** p, long first, long second)
 {
   Hashentry *q;
 
@@ -135,8 +134,8 @@ BAG_killpair_byfirst (long first)
 
   if (BAG_getsecond (first, &second) == NO_SUCH_PAIR)
     return NO_SUCH_PAIR;
-  removefromlist (&lookupbyfirst[hash (first)], first);
-  removefromlist (&lookupbysecond[hash (second)], first);
+  removefromlist (&lookupbyfirst[hash (first)], first, second);
+  removefromlist (&lookupbysecond[hash (second)], first, second);
   return NO_ERROR;
 }
 
@@ -147,8 +146,8 @@ BAG_killpair_bysecond (long second)
 
   if (BAG_getfirst (&first, second) == NO_SUCH_PAIR)
     return NO_SUCH_PAIR;
-  removefromlist (&lookupbyfirst[hash (first)], first);
-  removefromlist (&lookupbysecond[hash (second)], first);
+  removefromlist (&lookupbyfirst[hash (first)], first, second);
+  removefromlist (&lookupbysecond[hash (second)], first, second);
   return NO_ERROR;
 }
 

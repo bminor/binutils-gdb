@@ -375,32 +375,6 @@ proc test_command_prompt_position {} {
 }
 
 
-
-proc deprecated_command_test {} {
-    
-    
-    gdb_test "maintenance deprecate blah" "Can't find command.*" \
-          "tried to deprecate non-existsing command"
-
-    gdb_test "maintenance deprecate p \"new_p\"" ""
-    gdb_test "p 5" "Warning: 'p', an alias for the command 'print' is deprecated.*Use 'new_p'.*" "p deprecated warning, with replacement"
-    gdb_test "p 5" ".\[0-9\]* = 5.*" "Deprecated warning goes away"
-
-    gdb_test "maintenance deprecate p \"new_p\"" ""
-    gdb_test "maintenance deprecate print \"new_print\"" ""
-    gdb_test "p 5" "Warning: command 'print' \\(p\\) is deprecated.*Use 'new_print'.*" "both alias and command are deprecated"
-    gdb_test "p 5" ".\[0-9\]* = 5.*" "Deprecated warning goes away"
-
-    gdb_test "maintenance deprecate set endian big \"seb\" " "" "deprecate long comamnd"
-    gdb_test "set endian big" "Warning: command 'set endian big' is deprecated.*Use 'seb'.*" "long command deprecated"
-
-    gdb_test "maintenance deprecate set endian big" "" "deprecate long comamnd"
-    gdb_test "set endian big" "Warning: command 'set endian big' is deprecated.*No alternative known.*" "long command deprecated with no alternative."
-
-    gdb_test "maintenance deprecate" "\"maintenance deprecate\".*" "deprecate with no arguments"
-}
-
-
 gdbvar_simple_if_test
 gdbvar_simple_while_test
 gdbvar_complex_if_while_test
@@ -413,4 +387,7 @@ breakpoint_command_test
 user_defined_command_test
 watchpoint_command_test
 test_command_prompt_position
-deprecated_command_test
+
+
+
+

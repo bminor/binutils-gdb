@@ -235,7 +235,7 @@ splay_tree_new (compare_fn, delete_key_fn, delete_value_fn)
      splay_tree_delete_key_fn delete_key_fn;
      splay_tree_delete_value_fn delete_value_fn;
 {
-  splay_tree sp = (splay_tree) xmalloc (sizeof (struct splay_tree_s));
+  splay_tree sp = (splay_tree) xmalloc (sizeof (struct splay_tree));
   sp->root = 0;
   sp->comp = compare_fn;
   sp->delete_key = delete_key_fn;
@@ -256,9 +256,9 @@ splay_tree_delete (sp)
 
 /* Insert a new node (associating KEY with DATA) into SP.  If a
    previous node with the indicated KEY exists, its data is replaced
-   with the new value.  Returns the new node.  */
+   with the new value.  */
 
-splay_tree_node
+void 
 splay_tree_insert (sp, key, value)
      splay_tree sp;
      splay_tree_key key;
@@ -284,7 +284,7 @@ splay_tree_insert (sp, key, value)
       /* Create a new node, and insert it at the root.  */
       splay_tree_node node;
       
-      node = (splay_tree_node) xmalloc (sizeof (struct splay_tree_node_s));
+      node = (splay_tree_node) xmalloc (sizeof (struct splay_tree_node));
       node->key = key;
       node->value = value;
       
@@ -305,49 +305,6 @@ splay_tree_insert (sp, key, value)
 
     sp->root = node;
   }
-
-  return sp->root;
-}
-
-/* Remove KEY from SP.  It is not an error if it did not exist.  */
-
-void
-splay_tree_remove (sp, key)
-     splay_tree sp;
-     splay_tree_key key;
-{
-  splay_tree_splay (sp, key);
-
-  if (sp->root && (*sp->comp) (sp->root->key, key) == 0)
-    {
-      splay_tree_node left, right;
-
-      left = sp->root->left;
-      right = sp->root->right;
-
-      /* Delete the root node itself.  */
-      if (sp->delete_value)
-	(*sp->delete_value) (sp->root->value);
-      free (sp->root);
-
-      /* One of the children is now the root.  Doesn't matter much
-	 which, so long as we preserve the properties of the tree.  */
-      if (left)
-	{
-	  sp->root = left;
-
-	  /* If there was a right child as well, hang it off the 
-	     right-most leaf of the left child.  */
-	  if (right)
-	    {
-	      while (left->right)
-		left = left->right;
-	      left->right = right;
-	    }
-	}
-      else
-	sp->root = right;
-    }
 }
 
 /* Lookup KEY in SP, returning VALUE if present, and NULL 

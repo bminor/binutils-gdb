@@ -24,9 +24,7 @@ Boston, MA 02111-1307, USA.  */
    it out. */
 
 static size_t cache_pagesize;
-#if NEED_DECLARATION_GETPAGESIZE
 extern int getpagesize PARAMS ((void));
-#endif
 
 PTR
 mvalloc (md, size)

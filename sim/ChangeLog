@@ -1,6 +1,7 @@
-Sat Mar  4 16:48:54 2000  Andrew Cagney  <cagney@b1.cygnus.com>
-
-	* MAINTAINERS: New file.  Blank.
+1999-12-30  Chandra Chavva   <cchavva@cygnus.com>
+	
+	* d10v/d10v_sim.h (INC_ADDR): Added code to assign
+	proper address for loads with predec operations.
 
 1999-11-18  Ben Elliston  <bje@cygnus.com>
 
@@ -54,8 +55,8 @@ Fri Sep 25 10:12:19 1998  Christopher Faylor <cgf@cygnus.com>
 
 Thu May 28 14:59:46 1998 Jillian Ye <jillian@cygnus.com>
 
-	* Makefile.in: Take RUNTEST out of FLAGS_TO_PASS so that make
-	check can be invoked recursively.
+        * Makefile.in: Take RUNTEST out of FLAGS_TO_PASS so that make
+ 	check can be invoked recursively.
 
 Wed Apr 29 12:38:53 1998  Mark Alexander  <marka@cygnus.com>
 

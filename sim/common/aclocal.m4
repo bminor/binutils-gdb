@@ -1196,7 +1196,7 @@ AC_DEFUN(SIM_AC_OPTION_CGEN_MAINT,
 [
 cgen_maint=no
 dnl Default is to use one in build tree.
-cgen=guile
+cgen=../../cgen/cgen
 cgendir='$(srcdir)/../../cgen'
 dnl Having --enable-maintainer-mode take arguments is another way to go.
 dnl ??? One can argue --with is more appropriate if one wants to specify
@@ -1213,7 +1213,7 @@ AC_ARG_ENABLE(cgen-maint,
 	# Having a `share' directory might be more appropriate for the .scm,
 	# .cpu, etc. files.
 	cgendir=${cgen_maint}/lib/cgen
-	cgen=guile
+	cgen=${cgendir}/bin/cgen
 	;;
 esac])dnl
 dnl AM_CONDITIONAL(CGEN_MAINT, test x${cgen_maint} != xno)

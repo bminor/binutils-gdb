@@ -40,9 +40,9 @@
 #  include <sys/ioctl.h>
 #endif /* GWINSZ_IN_SYS_IOCTL */
 
-#if defined (__GO32__) && !defined(__DJGPP__)
+#if defined (__GO32__)
 #  undef HANDLE_SIGNALS
-#endif /* __GO32__  && !__DJGPP__ */
+#endif /* __GO32__ */
 
 #if defined (HANDLE_SIGNALS)
 /* Some standard library routines. */
@@ -93,9 +93,7 @@ int rl_catch_sigwinch = 1;
 #endif
 
 static int signals_set_flag;
-#ifdef SIGWINCH
 static int sigwinch_set_flag;
-#endif
 
 /* **************************************************************** */
 /*					        		    */

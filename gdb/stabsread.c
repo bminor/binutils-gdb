@@ -294,7 +294,7 @@ static void
 os9k_init_type_vector (tv)
      struct type **tv;
 {
-  unsigned int i;
+  int i;
   for (i = 0; i < sizeof (os9k_type_vector) / sizeof (struct type **); i++)
     tv[i] = (os9k_type_vector[i] == 0 ? 0 : *(os9k_type_vector[i]));
 }

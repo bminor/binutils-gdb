@@ -26,7 +26,7 @@
 #include "bfd.h"
 #include "symfile.h"
 #include "target.h"
-#include "gdb_wait.h"
+#include "wait.h"
 #include "gdbcmd.h"
 #include "objfiles.h"
 #include "gdb-stabs.h"
@@ -462,7 +462,6 @@ arm_rdi_close (quitting)
       closed_already = 1;
       inferior_pid = 0;
       Adp_CloseDevice ();
-      generic_mourn_inferior ();
     }
 }
 

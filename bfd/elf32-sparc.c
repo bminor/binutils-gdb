@@ -1,6 +1,5 @@
 /* SPARC-specific support for 32-bit ELF
-   Copyright (C) 1993, 94, 95, 96, 97, 98, 99, 2000
-   Free Software Foundation, Inc.
+   Copyright (C) 1993, 94, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -1011,7 +1010,7 @@ elf32_sparc_size_dynamic_sections (output_bfd, info)
 
       if (strip)
 	{
-	  _bfd_strip_section_from_output (info, s);
+	  _bfd_strip_section_from_output (s);
 	  continue;
 	}
 
@@ -1219,8 +1218,7 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd,
-		      input_section, rel->r_offset,
-		      (!info->shared || info->no_undefined))))
+		      input_section, rel->r_offset)))
 		return false;
 	      relocation = 0;
 	    }
@@ -1873,11 +1871,8 @@ elf32_sparc_merge_private_bfd_data (ibfd, obfd)
 	(_("%s: compiled for a 64 bit system and target is 32 bit"),
 	 bfd_get_filename (ibfd));
     }
-  else if ((ibfd->flags & DYNAMIC) == 0)
-    {
-      if (bfd_get_mach (obfd) < bfd_get_mach (ibfd))
-	bfd_set_arch_mach (obfd, bfd_arch_sparc, bfd_get_mach (ibfd));
-    }
+  else if (bfd_get_mach (obfd) < bfd_get_mach (ibfd))
+    bfd_set_arch_mach (obfd, bfd_arch_sparc, bfd_get_mach (ibfd));
 #endif
 
   if (((elf_elfheader (ibfd)->e_flags & EF_SPARC_LEDATA)

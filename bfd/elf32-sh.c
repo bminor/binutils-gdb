@@ -1,5 +1,5 @@
 /* Hitachi SH specific support for 32-bit ELF
-   Copyright 1996, 97, 98, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
    Contributed by Ian Lance Taylor, Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -33,14 +33,6 @@ static reloc_howto_type *sh_elf_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 static void sh_elf_info_to_howto
   PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
-static boolean sh_elf_set_private_flags
-  PARAMS ((bfd *, flagword));
-static boolean sh_elf_copy_private_data
-  PARAMS ((bfd *, bfd *));
-static boolean sh_elf_merge_private_data
-  PARAMS ((bfd *, bfd *));
-boolean sh_elf_set_mach_from_flags
-  PARAMS ((bfd *));
 static boolean sh_elf_relax_section
   PARAMS ((bfd *, asection *, struct bfd_link_info *, boolean *));
 static boolean sh_elf_relax_delete_bytes
@@ -66,7 +58,7 @@ static reloc_howto_type sh_elf_howto_table[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 sh_elf_ignore_reloc,	/* special_function */
+	 sh_elf_reloc,		/* special_function */
 	 "R_SH_NONE",		/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -97,7 +89,7 @@ static reloc_howto_type sh_elf_howto_table[] =
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 sh_elf_ignore_reloc,	/* special_function */
+	 sh_elf_reloc,		/* special_function */
 	 "R_SH_REL32",		/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -112,7 +104,7 @@ static reloc_howto_type sh_elf_howto_table[] =
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 sh_elf_ignore_reloc,	/* special_function */
+	 sh_elf_reloc,		/* special_function */
 	 "R_SH_DIR8WPN",	/* name */
 	 true,			/* partial_inplace */
 	 0xff,			/* src_mask */
@@ -142,7 +134,7 @@ static reloc_howto_type sh_elf_howto_table[] =
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_unsigned, /* complain_on_overflow */
-	 sh_elf_ignore_reloc,	/* special_function */
+	 sh_elf_reloc,		/* special_function */
 	 "R_SH_DIR8WPL",	/* name */
 	 true,			/* partial_inplace */
 	 0xff,			/* src_mask */
@@ -157,7 +149,7 @@ static reloc_howto_type sh_elf_howto_table[] =
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_unsigned, /* complain_on_overflow */
-	 sh_elf_ignore_reloc,	/* special_function */
+	 sh_elf_reloc,		/* special_function */
 	 "R_SH_DIR8WPZ",	/* name */
 	 true,			/* partial_inplace */
 	 0xff,			/* src_mask */
@@ -174,7 +166,7 @@ static reloc_howto_type sh_elf_howto_table[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_unsigned, /* complain_on_overflow */
-	 sh_elf_ignore_reloc,	/* special_function */
+	 sh_elf_reloc,		/* special_function */
 	 "R_SH_DIR8BP",		/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -191,7 +183,7 @@ static reloc_howto_type sh_elf_howto_table[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_unsigned, /* complain_on_overflow */
-	 sh_elf_ignore_reloc,	/* special_function */
+	 sh_elf_reloc,		/* special_function */
 	 "R_SH_DIR8W",		/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -208,7 +200,7 @@ static reloc_howto_type sh_elf_howto_table[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_unsigned, /* complain_on_overflow */
-	 sh_elf_ignore_reloc,	/* special_function */
+	 sh_elf_reloc,		/* special_function */
 	 "R_SH_DIR8L",		/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -420,147 +412,9 @@ static reloc_howto_type sh_elf_howto_table[] =
          0,                     /* dst_mask */
          false),                /* pcrel_offset */
 
-  /* 8 bit PC relative divided by 2 - but specified in a very odd way.  */
-  HOWTO (R_SH_LOOP_START,	/* type */
-	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
-	 8,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_signed, /* complain_on_overflow */
-	 sh_elf_ignore_reloc,	/* special_function */
-	 "R_SH_LOOP_START",	/* name */
-	 true,			/* partial_inplace */
-	 0xff,			/* src_mask */
-	 0xff,			/* dst_mask */
-	 true),			/* pcrel_offset */
-
-  /* 8 bit PC relative divided by 2 - but specified in a very odd way.  */
-  HOWTO (R_SH_LOOP_END,		/* type */
-	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
-	 8,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_signed, /* complain_on_overflow */
-	 sh_elf_ignore_reloc,	/* special_function */
-	 "R_SH_LOOP_END",	/* name */
-	 true,			/* partial_inplace */
-	 0xff,			/* src_mask */
-	 0xff,			/* dst_mask */
-	 true),			/* pcrel_offset */
-
 };
 
-static bfd_reloc_status_type
-sh_elf_reloc_loop (r_type, input_bfd, input_section, contents, addr,
-                   symbol_section, start, end)
-     int r_type;
-     bfd *input_bfd;
-     asection *input_section;
-     bfd_byte *contents;
-     bfd_vma addr;
-     asection *symbol_section;
-     bfd_vma start, end;
-{
-  static bfd_vma last_addr;
-  asection *last_symbol_section;
-  bfd_byte *free_contents = NULL;
-  bfd_byte *start_ptr, *ptr, *last_ptr;
-  int diff, cum_diff;
-  bfd_signed_vma x;
-  int insn;
-
-  /* Sanity check the address.  */
-  if (addr > input_section->_raw_size)
-    return bfd_reloc_outofrange;
-
-  /* We require the start and end relocations to be processed consecutively -
-     although we allow then to be processed forwards or backwards.  */
-  if (! last_addr)
-    {
-      last_addr = addr;
-      last_symbol_section = symbol_section;
-      return bfd_reloc_ok;
-    }
-  if (last_addr != addr)
-    abort ();
-  last_addr = 0;
-
-  if (! symbol_section || last_symbol_section != symbol_section || end < start)
-    return bfd_reloc_outofrange;
-
-  /* Get the symbol_section contents.  */
-  if (symbol_section != input_section)
-    {
-      if (elf_section_data (symbol_section)->this_hdr.contents != NULL)
-	contents = elf_section_data (symbol_section)->this_hdr.contents;
-      else
-	{
-	  free_contents = contents
-	    = (bfd_byte *) bfd_malloc (symbol_section->_raw_size);
-	  if (contents == NULL)
-	    return bfd_reloc_outofrange;
-	  if (! bfd_get_section_contents (input_bfd, symbol_section, contents,
-					  (file_ptr) 0,
-					  symbol_section->_raw_size))
-	    {
-	      free (contents);
-	      return bfd_reloc_outofrange;
-	    }
-	}
-    }
-#define IS_PPI(PTR) ((bfd_get_16 (input_bfd, (PTR)) & 0xfc00) == 0xf800)
-  start_ptr = contents + start;
-  for (cum_diff = -6, ptr = contents + end; cum_diff < 0 && ptr > start_ptr;)
-    {
-      for (last_ptr = ptr, ptr -= 4; ptr >= start_ptr && IS_PPI (ptr);)
-	ptr -= 2;
-      ptr += 2;
-      diff = last_ptr - ptr >> 1;
-      cum_diff += diff & 1;
-      cum_diff += diff;
-    }
-  /* Calculate the start / end values to load into rs / re minus four -
-     so that will cancel out the four we would otherwise have to add to
-     addr to get the value to subtract in order to get relative addressing.  */
-  if (cum_diff >= 0)
-    {
-      start -= 4;
-      end = (ptr + cum_diff * 2) - contents;
-    }
-  else
-    {
-      bfd_vma start0 = start - 4;
-
-      while (start0 >= 0 && IS_PPI (contents + start0))
-	start0 -= 2;
-      start0 = start - 2 - ((start - start0) & 2);
-      start = start0 - cum_diff - 2;
-      end = start0;
-    }
-
-  if (free_contents)
-    free (free_contents);
-
-  insn = bfd_get_16 (input_bfd, contents + addr);
-
-  x = (insn & 0x200 ? end : start) - addr;
-  if (input_section != symbol_section)
-    x += ((symbol_section->output_section->vma + symbol_section->output_offset)
-	  - (input_section->output_section->vma
-	     + input_section->output_offset));
-  x >>= 1;
-  if (x < -128 || x > 127)
-    return bfd_reloc_overflow;
-
-  x = insn & ~0xff | x & 0xff;
-  bfd_put_16 (input_bfd, x, contents + addr);
-
-  return bfd_reloc_ok;
-}
-
-/* This function is used for normal relocs.  This used to be like the COFF
+/* This function is used for normal relocs.  This is like the COFF
    function, and is almost certainly incorrect for other ELF targets.  */
 
 static bfd_reloc_status_type
@@ -591,7 +445,9 @@ sh_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 
   /* Almost all relocs have to do with relaxing.  If any work must be
      done for them, it has been done in sh_relax_section.  */
-  if (r_type == R_SH_IND12W && (symbol_in->flags & BSF_LOCAL) != 0)
+  if (r_type != R_SH_DIR32
+      && (r_type != R_SH_IND12W
+	  || (symbol_in->flags & BSF_LOCAL) != 0))
     return bfd_reloc_ok;
 
   if (symbol_in != NULL
@@ -685,8 +541,6 @@ static const struct elf_reloc_map sh_reloc_map[] =
   { BFD_RELOC_SH_LABEL, R_SH_LABEL },
   { BFD_RELOC_VTABLE_INHERIT, R_SH_GNU_VTINHERIT },
   { BFD_RELOC_VTABLE_ENTRY, R_SH_GNU_VTENTRY },
-  { BFD_RELOC_SH_LOOP_START, R_SH_LOOP_START },
-  { BFD_RELOC_SH_LOOP_END, R_SH_LOOP_END },
 };
 
 /* Given a BFD reloc code, return the howto structure for the
@@ -1872,13 +1726,11 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
       /* Many of the relocs are only used for relaxing, and are
          handled entirely by the relaxation code.  */
-      if (r_type > (int) R_SH_LAST_INVALID_RELOC
-	  && r_type < (int) R_SH_LOOP_START)
+      if (r_type > (int) R_SH_LAST_INVALID_RELOC)
 	continue;
 
       if (r_type < 0
-	  || (r_type >= (int) R_SH_FIRST_INVALID_RELOC
-	      && r_type <= (int) R_SH_LAST_INVALID_RELOC))
+	  || r_type >= (int) R_SH_FIRST_INVALID_RELOC)
 	{
 	  bfd_set_error (bfd_error_bad_value);
 	  return false;
@@ -1887,9 +1739,7 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       /* FIXME: This is certainly incorrect.  However, it is how the
          COFF linker works.  */
       if (r_type != (int) R_SH_DIR32
-	  && r_type != (int) R_SH_IND12W
-	  && r_type != (int) R_SH_LOOP_START
-	  && r_type != (int) R_SH_LOOP_END)
+	  && r_type != (int) R_SH_IND12W)
 	continue;
 
       howto = sh_elf_howto_table + r_type;
@@ -1931,7 +1781,7 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd,
-		      input_section, rel->r_offset, true)))
+		      input_section, rel->r_offset)))
 		return false;
 	      relocation = 0;
 	    }
@@ -1945,31 +1795,14 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	case (int)R_SH_DIR32:
 	  addend = rel->r_addend;
-	  /* Fall through.  */
-	default:
-	  /* COFF relocs don't use the addend. The addend is used for
-	     R_SH_DIR32 to be compatible with other compilers. */
-	  r = _bfd_final_link_relocate (howto, input_bfd, input_section,
-					contents, rel->r_offset,
-					relocation, addend);
 	  break;
-	case R_SH_LOOP_START:
-	  {
-	    static bfd_vma start, end;
-
-	    start = (relocation + rel->r_addend
-		     - (sec->output_section->vma + sec->output_offset));
-	    r = sh_elf_reloc_loop (r_type, input_bfd, input_section, contents,
-				   rel->r_offset, sec, start, end);
-	    break;
-	case R_SH_LOOP_END:
-	    end = (relocation + rel->r_addend
-		   - (sec->output_section->vma + sec->output_offset));
-	    r = sh_elf_reloc_loop (r_type, input_bfd, input_section, contents,
-				   rel->r_offset, sec, start, end);
-	    break;
-	  }
 	}
+
+      /* COFF relocs don't use the addend. The addend is used for R_SH_DIR32 
+	 to be compatible with other compilers. */
+      r = _bfd_final_link_relocate (howto, input_bfd, input_section,
+				    contents, rel->r_offset,
+				    relocation, addend);
 
       if (r != bfd_reloc_ok)
 	{
@@ -2254,109 +2087,6 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
   return true;
 }
 
-boolean
-sh_elf_set_mach_from_flags (abfd)
-     bfd *    abfd;
-{
-  flagword flags = elf_elfheader (abfd)->e_flags;
-
-  switch (flags & EF_SH_MACH_MASK)
-    {
-    case EF_SH1:
-      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh);
-      break;
-    case EF_SH2:
-      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh2);
-      break;
-    case EF_SH_DSP:
-      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh_dsp);
-      break;
-    case EF_SH3:
-      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh3);
-      break;
-    case EF_SH3_DSP:
-      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh3_dsp);
-      break;
-    case EF_SH3E:
-      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh3e);
-      break;
-    case EF_SH_UNKNOWN:
-    case EF_SH4:
-      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh4);
-      break;
-    default:
-      return false;
-    }
-  return true;
-}
-
-/* Function to keep SH specific file flags. */
-static boolean
-sh_elf_set_private_flags (abfd, flags)
-     bfd *    abfd;
-     flagword flags;
-{
-  BFD_ASSERT (! elf_flags_init (abfd)
-	      || elf_elfheader (abfd)->e_flags == flags);
-
-  elf_elfheader (abfd)->e_flags = flags;
-  elf_flags_init (abfd) = true;
-  return sh_elf_set_mach_from_flags (abfd);
-}
-
-/* Copy backend specific data from one object module to another */
-static boolean
-sh_elf_copy_private_data (ibfd, obfd)
-     bfd * ibfd;
-     bfd * obfd;
-{
-  if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return true;
-
-  return sh_elf_set_private_flags (obfd, elf_elfheader (ibfd)->e_flags);
-}
-
-/* This routine checks for linking big and little endian objects
-   together, and for linking sh-dsp with sh3e / sh4 objects.  */
-
-static boolean
-sh_elf_merge_private_data (ibfd, obfd)
-     bfd *ibfd;
-     bfd *obfd;
-{
-  flagword old_flags, new_flags;
-
-  if (_bfd_generic_verify_endian_match (ibfd, obfd) == false)
-    return false;
-
-  if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return true;
-
-  if (! elf_flags_init (obfd))
-    {
-      elf_flags_init (obfd) = true;
-      elf_elfheader (obfd)->e_flags = 0;
-    }
-  old_flags = elf_elfheader (obfd)->e_flags;
-  new_flags = elf_elfheader (ibfd)->e_flags;
-  if ((EF_SH_HAS_DSP (old_flags) && EF_SH_HAS_FP (new_flags))
-      || (EF_SH_HAS_DSP (new_flags) && EF_SH_HAS_FP (old_flags)))
-    {
-      (*_bfd_error_handler)
-	("%s: uses %s instructions while previous modules use %s instructions",
-	 bfd_get_filename (ibfd),
-	 EF_SH_HAS_DSP (new_flags) ? "dsp" : "floating point",
-	 EF_SH_HAS_DSP (new_flags) ? "floating point" : "dsp");
-      bfd_set_error (bfd_error_bad_value);
-      return false;
-    }
-  elf_elfheader (obfd)->e_flags = EF_SH_MERGE_MACH (old_flags, new_flags);
-
-  return sh_elf_set_mach_from_flags (obfd);
-}
-
 #define TARGET_BIG_SYM		bfd_elf32_sh_vec
 #define TARGET_BIG_NAME		"elf32-sh"
 #define TARGET_LITTLE_SYM	bfd_elf32_shl_vec
@@ -2373,13 +2103,8 @@ sh_elf_merge_private_data (ibfd, obfd)
 #define elf_backend_relocate_section	sh_elf_relocate_section
 #define bfd_elf32_bfd_get_relocated_section_contents \
 					sh_elf_get_relocated_section_contents
-#define elf_backend_object_p		sh_elf_set_mach_from_flags
-#define bfd_elf32_bfd_set_private_bfd_flags \
-					sh_elf_set_private_flags
-#define bfd_elf32_bfd_copy_private_bfd_data \
-					sh_elf_copy_private_data
 #define bfd_elf32_bfd_merge_private_bfd_data \
-					sh_elf_merge_private_data
+					_bfd_generic_verify_endian_match
 
 #define elf_backend_gc_mark_hook        sh_elf_gc_mark_hook
 #define elf_backend_gc_sweep_hook       sh_elf_gc_sweep_hook

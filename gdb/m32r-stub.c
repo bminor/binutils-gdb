@@ -425,7 +425,7 @@ handle_exception(int exceptionVector)
 		strcpy (remcomOutBuffer, "OK");
 		break;
 	      }
-	  strcpy (remcomOutBuffer, "E01");
+	  strcpy (remcomOutBuffer, "P01");
 	  break;
 	}
       case 'G': /* set the value of the CPU registers - return OK */

@@ -26,8 +26,14 @@
 #include "ui-out.h"
 #endif
 
-#include "gdb_wait.h"
-#include "gnu-regex.h"
+#if HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#elif HAVE_WAIT_H
+#include <wait.h>
+#endif
+
+#include "wait.h"
+
 /* FIXME: this should be auto-configured!  */
 #ifdef __MSDOS__
 # define CANT_FORK
@@ -54,10 +60,6 @@ static struct cmd_list_element *find_cmd PARAMS ((char *command,
 					    struct cmd_list_element * clist,
 						  int ignore_help_classes,
 						  int *nfound));
-static void apropos_cmd_helper (struct ui_file *, struct cmd_list_element *, 
-		    		struct re_pattern_buffer *, char *);
-
-void apropos_command (char *, int);
 
 void _initialize_command PARAMS ((void));
 
@@ -112,8 +114,6 @@ add_cmd (name, class, fun, doc, list)
   c->class = class;
   c->function.cfunc = fun;
   c->doc = doc;
-  c->flags = 0;
-  c->replacement = NULL;
   c->hook = NULL;
   c->prefixlist = NULL;
   c->prefixname = NULL;
@@ -130,33 +130,6 @@ add_cmd (name, class, fun, doc, list)
 
   return c;
 }
-
-
-/* Deprecates a command CMD.
-   REPLACEMENT is the name of the command which should be used in place
-   of this command, or NULL if no such command exists.
-
-   This function does not check to see if command REPLACEMENT exists
-   since gdb may not have gotten around to adding REPLACEMENT when this
-   function is called.
-
-   Returns a pointer to the deprecated command.  */
-
-struct cmd_list_element *
-deprecate_cmd (cmd, replacement)
-     struct cmd_list_element *cmd;
-     char *replacement;
-{
-  cmd->flags |= (CMD_DEPRECATED | DEPRECATED_WARN_USER);
-
-  if (replacement != NULL)
-    cmd->replacement = replacement;
-  else
-    cmd->replacement = NULL;
-
-  return cmd;
-}
-
 
 /* Same as above, except that the abbrev_flag is set. */
 
@@ -403,87 +376,6 @@ delete_cmd (name, list)
 	  c = c->next;
       }
 }
-/* Recursively walk the commandlist structures, and print out the
-   documentation of commands that match our regex in either their
-   name, or their documentation.
-*/
-static void 
-apropos_cmd_helper (struct ui_file *stream, struct cmd_list_element *commandlist,
-			 struct re_pattern_buffer *regex, char *prefix)
-{
-  register struct cmd_list_element *c;
-  int returnvalue=1; /*Needed to avoid double printing*/
-  /* Walk through the commands */
-  for (c=commandlist;c;c=c->next)
-    {
-      if (c->name != NULL)
-	{
-	  /* Try to match against the name*/
-	  returnvalue=re_search(regex,c->name,strlen(c->name),0,strlen(c->name),NULL);
-	  if (returnvalue >= 0)
-	    {
-	      /* Stolen from help_cmd_list. We don't directly use
-	       * help_cmd_list because it doesn't let us print out
-	       * single commands
-	       */
-	      fprintf_filtered (stream, "%s%s -- ", prefix, c->name);
-	      print_doc_line (stream, c->doc);
-	      fputs_filtered ("\n", stream);
-	      returnvalue=0; /*Set this so we don't print it again.*/
-	    }
-	}
-      if (c->doc != NULL && returnvalue != 0)
-	{
-	  /* Try to match against documentation */
-	  if (re_search(regex,c->doc,strlen(c->doc),0,strlen(c->doc),NULL) >=0)
-	    {
-	      /* Stolen from help_cmd_list. We don't directly use
-	       * help_cmd_list because it doesn't let us print out
-	       * single commands
-	       */
-	      fprintf_filtered (stream, "%s%s -- ", prefix, c->name);
-	      print_doc_line (stream, c->doc);
-	      fputs_filtered ("\n", stream);
-	    }
-	}
-      /* Check if this command has subcommands */
-      if (c->prefixlist != NULL)
-	{
-	  /* Recursively call ourselves on the subcommand list,
-	     passing the right prefix in.
-	  */
-	  apropos_cmd_helper(stream,*c->prefixlist,regex,c->prefixname);
-	}
-    }
-}
-/* Search through names of commands and documentations for a certain
-   regular expression.
-*/
-void 
-apropos_command (char *searchstr, int from_tty)
-{
-  extern struct cmd_list_element *cmdlist; /*This is the main command list*/
-  regex_t pattern;
-  char *pattern_fastmap;
-  char errorbuffer[512];
-  pattern_fastmap=calloc(256,sizeof(char));
-  if (searchstr == NULL)
-      error("REGEXP string is empty");
-
-  if (regcomp(&pattern,searchstr,REG_ICASE) == 0)
-    {
-      pattern.fastmap=pattern_fastmap;
-      re_compile_fastmap(&pattern);
-      apropos_cmd_helper(gdb_stdout,cmdlist,&pattern,"");
-    }
-  else
-    {
-      regerror(regcomp(&pattern,searchstr,REG_ICASE),NULL,errorbuffer,512);
-      error("Error in regular expression:%s",errorbuffer);
-    }
-  free(pattern_fastmap);
-}
-
 
 /* This command really has to deal with two things:
  *     1) I want documentation on *this string* (usually called by
@@ -759,7 +651,6 @@ lookup_cmd_1 (text, clist, result_list, ignore_help_classes)
   char *p, *command;
   int len, tmp, nfound;
   struct cmd_list_element *found, *c;
-  char *line = *text;
 
   while (**text == ' ' || **text == '\t')
     (*text)++;
@@ -829,19 +720,11 @@ lookup_cmd_1 (text, clist, result_list, ignore_help_classes)
 
   *text = p;
 
+  /* If this was an abbreviation, use the base command instead.  */
+
   if (found->cmd_pointer)
-    {
-      /* We drop the alias (abbreviation) in favor of the command it is
-       pointing to.  If the alias is deprecated, though, we need to
-       warn the user about it before we drop it.  Note that while we
-       are warning about the alias, we may also warn about the command
-       itself and we will adjust the appropriate DEPRECATED_WARN_USER
-       flags */
-      
-      if (found->flags & DEPRECATED_WARN_USER)
-      deprecated_cmd_warning (&line);
-      found = found->cmd_pointer;
-    }
+    found = found->cmd_pointer;
+
   /* If we found a prefix command, keep looking.  */
 
   if (found->prefixlist)
@@ -1019,208 +902,6 @@ lookup_cmd (line, list, cmdtype, allow_unknown, ignore_help_classes)
     }
   return 0;
 }
-
-/* We are here presumably because an alias or command in *TEXT is 
-   deprecated and a warning message should be generated.  This function
-   decodes *TEXT and potentially generates a warning message as outlined
-   below.
-   
-   Example for 'set endian big' which has a fictitious alias 'seb'.
-   
-   If alias wasn't used in *TEXT, and the command is deprecated:
-   "warning: 'set endian big' is deprecated." 
-   
-   If alias was used, and only the alias is deprecated:
-   "warning: 'seb' an alias for the command 'set endian big' is deprecated."
-   
-   If alias was used and command is deprecated (regardless of whether the
-   alias itself is deprecated:
-   
-   "warning: 'set endian big' (seb) is deprecated."
-
-   After the message has been sent, clear the appropriate flags in the
-   command and/or the alias so the user is no longer bothered.
-   
-*/
-void
-deprecated_cmd_warning (char **text)
-{
-  struct cmd_list_element *alias = NULL;
-  struct cmd_list_element *prefix_cmd = NULL;
-  struct cmd_list_element *cmd = NULL;
-  struct cmd_list_element *c;
-  char *type;
- 
-  if (!lookup_cmd_composition (*text, &alias, &prefix_cmd, &cmd))
-    /* return if text doesn't evaluate to a command */
-    return;
-
-  if (!((alias ? (alias->flags & DEPRECATED_WARN_USER) : 0)
-      || (cmd->flags & DEPRECATED_WARN_USER) ) ) 
-    /* return if nothing is deprecated */
-    return;
-  
-  printf_filtered ("Warning:");
-  
-  if (alias && !(cmd->flags & CMD_DEPRECATED))
-    printf_filtered (" '%s', an alias for the", alias->name);
-    
-  printf_filtered (" command '");
-  
-  if (prefix_cmd)
-    printf_filtered ("%s", prefix_cmd->prefixname);
-  
-  printf_filtered ("%s", cmd->name);
-
-  if (alias && (cmd->flags & CMD_DEPRECATED))
-    printf_filtered ("' (%s) is deprecated.\n", alias->name);
-  else
-    printf_filtered ("' is deprecated.\n"); 
-  
-
-  /* if it is only the alias that is deprecated, we want to indicate the
-     new alias, otherwise we'll indicate the new command */
-
-  if (alias && !(cmd->flags & CMD_DEPRECATED))
-    {
-      if (alias->replacement)
-      printf_filtered ("Use '%s'.\n\n", alias->replacement);
-      else
-      printf_filtered ("No alternative known.\n\n");
-     }  
-  else
-    {
-      if (cmd->replacement)
-      printf_filtered ("Use '%s'.\n\n", cmd->replacement);
-      else
-      printf_filtered ("No alternative known.\n\n");
-    }
-
-  /* We've warned you, now we'll keep quiet */
-  if (alias)
-    alias->flags &= ~DEPRECATED_WARN_USER;
-  
-  cmd->flags &= ~DEPRECATED_WARN_USER;
-}
-
-
-
-/* Look up the contents of LINE as a command in the command list 'cmdlist'. 
-   Return 1 on success, 0 on failure.
-   
-   If LINE refers to an alias, *alias will point to that alias.
-   
-   If LINE is a postfix command (i.e. one that is preceeded by a prefix
-   command) set *prefix_cmd.
-   
-   Set *cmd to point to the command LINE indicates.
-   
-   If any of *alias, *prefix_cmd, or *cmd cannot be determined or do not 
-   exist, they are NULL when we return.
-   
-*/
-int
-lookup_cmd_composition (char *text,
-                      struct cmd_list_element **alias,
-                      struct cmd_list_element **prefix_cmd, 
-                      struct cmd_list_element **cmd)
-{
-  char *p, *command;
-  int len, tmp, nfound;
-  struct cmd_list_element *cur_list;
-  struct cmd_list_element *prev_cmd;
-  *alias = NULL;
-  *prefix_cmd = NULL;
-  *cmd = NULL;
-  
-  cur_list = cmdlist;
-  
-  while (1)
-    { 
-      /* Go through as many command lists as we need to 
-       to find the command TEXT refers to. */
-      
-      prev_cmd = *cmd;
-      
-      while (*text == ' ' || *text == '\t')
-      (text)++;
-      
-      /* Treating underscores as part of command words is important
-       so that "set args_foo()" doesn't get interpreted as
-       "set args _foo()".  */
-      for (p = text;
-         *p && (isalnum (*p) || *p == '-' || *p == '_' ||
-                (tui_version &&
-                 (*p == '+' || *p == '<' || *p == '>' || *p == '$')) ||
-                (xdb_commands && (*p == '!' || *p == '/' || *p == '?')));
-         p++)
-      ;
-      
-      /* If nothing but whitespace, return.  */
-      if (p == text)
-      return 0;
-      
-      len = p - text;
-      
-      /* text and p now bracket the first command word to lookup (and
-       it's length is len).  We copy this into a local temporary */
-      
-      command = (char *) alloca (len + 1);
-      for (tmp = 0; tmp < len; tmp++)
-      {
-        char x = text[tmp];
-        command[tmp] = x;
-      }
-      command[len] = '\0';
-      
-      /* Look it up.  */
-      *cmd = 0;
-      nfound = 0;
-      *cmd = find_cmd (command, len, cur_list, 1, &nfound);
-      
-      /* We didn't find the command in the entered case, so lower case it
-       and search again.
-      */
-      if (!*cmd || nfound == 0)
-      {
-        for (tmp = 0; tmp < len; tmp++)
-          {
-            char x = command[tmp];
-            command[tmp] = isupper (x) ? tolower (x) : x;
-          }
-        *cmd = find_cmd (command, len, cur_list, 1, &nfound);
-      }
-      
-      if (*cmd == (struct cmd_list_element *) -1)
-      {
-        return 0;              /* ambiguous */
-      }
-      
-      if (*cmd == NULL)
-      return 0;                /* nothing found */
-      else
-      {
-        if ((*cmd)->cmd_pointer)
-          {
-            /* cmd was actually an alias, we note that an alias was used 
-               (by assigning *alais) and we set *cmd. 
-             */
-            *alias = *cmd;
-            *cmd = (*cmd)->cmd_pointer;
-          }
-        *prefix_cmd = prev_cmd;
-      }
-      if ((*cmd)->prefixlist)
-      cur_list = *(*cmd)->prefixlist;
-      else
-      return 1;
-      
-      text = p;
-    }
-}
-
-
-
 
 #if 0
 /* Look up the contents of *LINE as a command in the command list LIST.
@@ -2003,12 +1684,6 @@ _initialize_command ()
 	   "Execute the rest of the line as a shell command.  \n\
 With no arguments, run an inferior shell.");
 
-  /* NOTE: cagney/2000-03-20: Being able to enter ``(gdb) !ls'' would
-     be a really useful feature.  Unfortunatly, the below wont do
-     this.  Instead it adds support for the form ``(gdb) ! ls''
-     (i.e. the space is required).  If the ``!'' command below is
-     added the complains about no ``!'' command would be replaced by
-     complains about how the ``!'' command is broken :-) */
   if (xdb_commands)
     add_com_alias ("!", "shell", class_support, 0);
 
@@ -2018,5 +1693,4 @@ With no arguments, run an inferior shell.");
 	   "Show definitions of user defined commands.\n\
 Argument is the name of the user defined command.\n\
 With no argument, show definitions of all user defined commands.", &showlist);
-  add_com ("apropos", class_support, apropos_command, "Search for commands matching a REGEXP");
 }

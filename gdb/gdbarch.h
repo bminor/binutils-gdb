@@ -1,5 +1,3 @@
-/* *INDENT-OFF* */ /* THIS FILE IS GENERATED */
-
 /* Dynamic architecture support for GDB, the GNU debugger.
    Copyright 1998-1999, Free Software Foundation, Inc.
 
@@ -19,6 +17,8 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
+
+/* *INDENT-OFF* */ /* ``typedef (f)();'' confuses indent */
 
 /* This file was created with the aid of ``gdbarch.sh''.
 
@@ -465,15 +465,6 @@ extern void set_gdbarch_believe_pcc_promotion_type (struct gdbarch *gdbarch, int
 #endif
 #endif
 
-typedef int (gdbarch_coerce_float_to_double_ftype) (struct type *formal, struct type *actual);
-extern int gdbarch_coerce_float_to_double (struct gdbarch *gdbarch, struct type *formal, struct type *actual);
-extern void set_gdbarch_coerce_float_to_double (struct gdbarch *gdbarch, gdbarch_coerce_float_to_double_ftype *coerce_float_to_double);
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > 1) || !defined (COERCE_FLOAT_TO_DOUBLE)
-#define COERCE_FLOAT_TO_DOUBLE(formal, actual) (gdbarch_coerce_float_to_double (current_gdbarch, formal, actual))
-#endif
-#endif
-
 typedef void (gdbarch_get_saved_register_ftype) (char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval);
 extern void gdbarch_get_saved_register (struct gdbarch *gdbarch, char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval);
 extern void set_gdbarch_get_saved_register (struct gdbarch *gdbarch, gdbarch_get_saved_register_ftype *get_saved_register);
@@ -909,10 +900,6 @@ extern struct gdbarch_list *gdbarch_list_lookup_by_info (struct gdbarch_list *ar
 extern struct gdbarch *gdbarch_alloc (const struct gdbarch_info *info, struct gdbarch_tdep *tdep);
 
 
-/* Helper function.  Free a partially-constructed ``struct gdbarch''.  */
-extern void gdbarch_free (struct gdbarch *);
-
-
 /* Helper function. Force an update of the current architecture.  Used
    by legacy targets that have added their own target specific
    architecture manipulation commands.
@@ -1038,7 +1025,7 @@ extern int (*target_architecture_hook) (const struct bfd_arch_info *);
 #include "dis-asm.h"		/* Get defs for disassemble_info */
 
 extern int dis_asm_read_memory (bfd_vma memaddr, bfd_byte *myaddr,
-				unsigned int len, disassemble_info *info);
+				int len, disassemble_info *info);
 
 extern void dis_asm_memory_error (int status, bfd_vma memaddr,
 				  disassemble_info *info);

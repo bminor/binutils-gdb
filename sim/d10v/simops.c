@@ -118,6 +118,16 @@ move_to_cr (int cr, reg_t mask, reg_t val, int psw_hw_p)
   return val;
 }
 
+/* Modify registers according to an AE - address exception. */
+static void
+address_exception (void)
+{
+  SET_BPC (PC);
+  SET_BPSW (PSW);
+  SET_HW_PSW ((PSW & (PSW_F0_BIT | PSW_F1_BIT | PSW_C_BIT)));
+  JMP (AE_VECTOR_START);
+}
+
 #ifdef DEBUG
 static void trace_input_func PARAMS ((char *name,
 				      enum op_types in1,
@@ -1317,8 +1327,7 @@ OP_30000000 ()
   trace_input ("ld", OP_REG_OUTPUT, OP_MEMREF2, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
+      address_exception ();
       trace_output_void ();
       return;
     }
@@ -1336,8 +1345,7 @@ OP_6401 ()
   trace_input ("ld", OP_REG_OUTPUT, OP_POSTDEC, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
+      address_exception ();
       trace_output_void ();
       return;
     }
@@ -1357,8 +1365,7 @@ OP_6001 ()
   trace_input ("ld", OP_REG_OUTPUT, OP_POSTINC, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
+      address_exception ();
       trace_output_void ();
       return;
     }
@@ -1378,8 +1385,7 @@ OP_6000 ()
   trace_input ("ld", OP_REG_OUTPUT, OP_MEMREF, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
+      address_exception ();
       trace_output_void ();
       return;
     }
@@ -1397,8 +1403,7 @@ OP_32010000 ()
   trace_input ("ld", OP_REG_OUTPUT, OP_MEMREF3, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
+      address_exception ();
       trace_output_void ();
       return;
     }
@@ -1416,8 +1421,7 @@ OP_31000000 ()
   trace_input ("ld2w", OP_REG_OUTPUT, OP_MEMREF2, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
+      address_exception ();
       trace_output_void ();
       return;
     }
@@ -1435,8 +1439,7 @@ OP_6601 ()
   trace_input ("ld2w", OP_REG_OUTPUT, OP_POSTDEC, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
+      address_exception ();
       trace_output_void ();
       return;
     }
@@ -1456,8 +1459,7 @@ OP_6201 ()
   trace_input ("ld2w", OP_REG_OUTPUT, OP_POSTINC, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
+      address_exception ();
       trace_output_void ();
       return;
     }
@@ -1477,8 +1479,7 @@ OP_6200 ()
   trace_input ("ld2w", OP_REG_OUTPUT, OP_MEMREF, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
+      address_exception ();
       trace_output_void ();
       return;
     }
@@ -1496,8 +1497,7 @@ OP_33010000 ()
   trace_input ("ld2w", OP_REG_OUTPUT, OP_MEMREF3, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
+      address_exception ();
       trace_output_void ();
       return;
     }
@@ -2741,8 +2741,7 @@ OP_34000000 ()
   trace_input ("st", OP_REG, OP_MEMREF2, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
+      address_exception ();
       trace_output_void ();
       return;
     }
@@ -2758,8 +2757,7 @@ OP_6800 ()
   trace_input ("st", OP_REG, OP_MEMREF, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
+      address_exception ();
       trace_output_void ();
       return;
     }
@@ -2782,8 +2780,7 @@ OP_6C1F ()
     }
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
+      address_exception ();
       trace_output_void ();
       return;
     }
@@ -2800,8 +2797,7 @@ OP_6801 ()
   trace_input ("st", OP_REG, OP_POSTINC, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
+      address_exception ();
       trace_output_void ();
       return;
     }
@@ -2824,8 +2820,7 @@ OP_6C01 ()
     }
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
+      address_exception ();
       trace_output_void ();
       return;
     }
@@ -2842,8 +2837,7 @@ OP_36010000 ()
   trace_input ("st", OP_REG, OP_MEMREF3, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
+      address_exception ();
       trace_output_void ();
       return;
     }
@@ -2859,8 +2853,7 @@ OP_35000000 ()
   trace_input ("st2w", OP_DREG, OP_MEMREF2, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
+      address_exception ();
       trace_output_void ();
       return;
     }
@@ -2877,8 +2870,7 @@ OP_6A00 ()
   trace_input ("st2w", OP_DREG, OP_MEMREF, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
+      address_exception ();
       trace_output_void ();
       return;
     }
@@ -2901,8 +2893,7 @@ OP_6E1F ()
     }
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
+      address_exception ();
       trace_output_void ();
       return;
     }
@@ -2920,8 +2911,7 @@ OP_6A01 ()
   trace_input ("st2w", OP_DREG, OP_POSTINC, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
+      address_exception ();
       trace_output_void ();
       return;
     }
@@ -2945,8 +2935,7 @@ OP_6E01 ()
     }
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
+      address_exception ();
       trace_output_void ();
       return;
     }
@@ -2964,8 +2953,7 @@ OP_37010000 ()
   trace_input ("st2w", OP_DREG, OP_MEMREF3, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
+      address_exception ();
       trace_output_void ();
       return;
     }

@@ -129,17 +129,17 @@ struct prompts the_prompts;
    handlers mark these functions as ready to be executed and the event
    loop, in a later iteration, calls them. See the function
    invoke_async_signal_handler. */
-void *sigint_token;
+PTR sigint_token;
 #ifdef SIGHUP
-void *sighup_token;
+PTR sighup_token;
 #endif
-void *sigquit_token;
-void *sigfpe_token;
+PTR sigquit_token;
+PTR sigfpe_token;
 #if defined(SIGWINCH) && defined(SIGWINCH_HANDLER)
-void *sigwinch_token;
+PTR sigwinch_token;
 #endif
 #ifdef STOP_SIGNAL
-void *sigtstp_token;
+PTR sigtstp_token;
 #endif
 
 /* Structure to save a partially entered command.  This is used when
@@ -245,13 +245,6 @@ display_gdb_prompt (char *new_prompt)
 {
   int prompt_length = 0;
   char *gdb_prompt = get_prompt ();
-
-#ifdef UI_OUT
-  /* When an alternative interpreter has been installed, do not
-     display the comand prompt. */
-  if (interpreter_p)
-    return;
-#endif
 
   if (target_executing && sync_execution)
     {
@@ -525,8 +518,8 @@ command_handler (char *command)
 	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
       arg1->next = arg2;
       arg2->next = NULL;
-      arg1->data.integer = time_at_cmd_start;
-      arg2->data.integer = space_at_cmd_start;
+      arg1->data = (PTR) time_at_cmd_start;
+      arg2->data = (PTR) space_at_cmd_start;
       add_continuation (command_line_handler_continuation, arg1);
     }
 
@@ -572,8 +565,8 @@ command_line_handler_continuation (struct continuation_arg *arg)
   extern int display_time;
   extern int display_space;
 
-  long time_at_cmd_start  = arg->data.longint;
-  long space_at_cmd_start = arg->next->data.longint;
+  long time_at_cmd_start = (long) arg->data;
+  long space_at_cmd_start = (long) arg->next->data;
 
   bpstat_do_actions (&stop_bpstat);
   /*do_cleanups (old_chain); *//*?????FIXME????? */
@@ -957,7 +950,7 @@ async_init_signals (void)
 }
 
 void
-mark_async_signal_handler_wrapper (void *token)
+mark_async_signal_handler_wrapper (PTR token)
 {
   mark_async_signal_handler ((struct async_signal_handler *) token);
 }
@@ -1133,25 +1126,9 @@ _initialize_event_loop (void)
 {
   if (event_loop_p)
     {
-      /* If the input stream is connected to a terminal, turn on
-         editing.  */
-      if (ISATTY (instream))
-	{
-	  /* Tell gdb that we will be using the readline library. This
-	     could be overwritten by a command in .gdbinit like 'set
-	     editing on' or 'off'. */
-	  async_command_editing_p = 1;
-	  
-	  /* When a character is detected on instream by select or
-	     poll, readline will be invoked via this callback
-	     function. */
-	  call_readline = rl_callback_read_char_wrapper;
-	}
-      else
-	{
-	  async_command_editing_p = 0;
-	  call_readline = gdb_readline2;
-	}
+      /* When a character is detected on instream by select or poll,
+         readline will be invoked via this callback function. */
+      call_readline = rl_callback_read_char_wrapper;
 
       /* When readline has read an end-of-line character, it passes
          the complete line to gdb for processing. command_line_handler
@@ -1176,5 +1153,10 @@ _initialize_event_loop (void)
          only when it actually exists (I.e. after we say 'run' or
          after we connect to a remote target. */
       add_file_handler (input_fd, stdin_event_handler, 0);
+
+      /* Tell gdb that we will be using the readline library. This
+         could be overwritten by a command in .gdbinit like 'set
+         editing on' or 'off'. */
+      async_command_editing_p = 1;
     }
 }

@@ -47,17 +47,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    linuxthreads package heavily relies on wait() synchronization to keep
    them correct.  */
 
-#include "defs.h"
 #include <sys/types.h> /* for pid_t */
 #include <sys/ptrace.h> /* for PT_* flags */
-#include "gdb_wait.h" /* for WUNTRACED and __WCLONE flags */
+#include <sys/wait.h> /* for WUNTRACED and __WCLONE flags */
 #include <signal.h> /* for struct sigaction and NSIG */
 #include <sys/utsname.h>
 
+#include "defs.h"
 #include "target.h"
 #include "inferior.h"
 #include "gdbcore.h"
 #include "gdbthread.h"
+#include "wait.h"
 #include "gdbcmd.h"
 #include "breakpoint.h"
 
@@ -378,22 +379,25 @@ linuxthreads_find_trap (pid, stop)
 
 /* Cleanup stub for save_inferior_pid.  */
 static void
-restore_inferior_pid (void *arg)
+restore_inferior_pid (arg)
+    void *arg;
 {
-  int *saved_pid_ptr = arg;
-  inferior_pid = *saved_pid_ptr;
-  free (arg);
+#if TARGET_PTR_BIT > TARGET_INT_BIT
+  inferior_pid = (int) ((long) arg);
+#else
+  inferior_pid = (int) arg;
+#endif
 }
 
 /* Register a cleanup to restore the value of inferior_pid.  */
 static struct cleanup *
-save_inferior_pid (void)
+save_inferior_pid ()
 {
-  int *saved_pid_ptr;
-  
-  saved_pid_ptr = xmalloc (sizeof (int));
-  *saved_pid_ptr = inferior_pid;
-  return make_cleanup (restore_inferior_pid, saved_pid_ptr);
+#if TARGET_PTR_BIT > TARGET_INT_BIT
+  return make_cleanup (restore_inferior_pid, (void *) ((long) inferior_pid));
+#else
+  return make_cleanup (restore_inferior_pid, (void *) inferior_pid);
+#endif
 }
 
 static void
@@ -1126,7 +1130,7 @@ linuxthreads_attach (args, from_tty)
   linuxthreads_breakpoints_inserted = 1;
   linuxthreads_breakpoint_last = -1;
   linuxthreads_wait_last = -1;
-  WSETSTOP (linuxthreads_exit_status, 0);
+  linuxthreads_exit_status = __W_STOPCODE(0);
 
   child_ops.to_attach (args, from_tty);
 
@@ -1186,7 +1190,7 @@ linuxthreads_detach (args, from_tty)
 	  linuxthreads_find_trap (inferior_pid, 1);
 
 	  linuxthreads_wait_last = -1;
-	  WSETSTOP (linuxthreads_exit_status, 0);
+	  linuxthreads_exit_status = __W_STOPCODE(0);
 	}
 
       linuxthreads_inferior_pid = 0;
@@ -1598,7 +1602,7 @@ Use the \"file\" or \"exec-file\" command.");
   linuxthreads_breakpoints_inserted = 1;
   linuxthreads_breakpoint_last = -1;
   linuxthreads_wait_last = -1;
-  WSETSTOP (linuxthreads_exit_status, 0);
+  linuxthreads_exit_status = __W_STOPCODE(0);
   
   if (linuxthreads_max)
     linuxthreads_attach_pending = 1;

@@ -32,7 +32,16 @@
 #include <sys/types.h>
 #include <fcntl.h>
 
-#include "gdb_wait.h"
+#ifdef HAVE_WAIT_H
+#include <wait.h>
+#else
+#ifdef HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
+#endif
+
+/* "wait.h" fills in the gaps left by <wait.h> */
+#include "wait.h"
 
 extern struct symtab_and_line *
   child_enable_exception_callback PARAMS ((enum exception_event_kind, int));

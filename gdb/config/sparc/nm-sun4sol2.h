@@ -30,31 +30,3 @@
 
 #define PRSVADDR_BROKEN
 
-#ifdef NEW_PROC_API	/* Solaris 6 and above can do HW watchpoints */
-
-#define TARGET_HAS_HARDWARE_WATCHPOINTS
-
-/* The man page for proc4 on solaris 6 and 7 says that the system
-   can support "thousands" of hardware watchpoints, but gives no
-   method for finding out how many.  So just tell GDB 'yes'.  */
-#define TARGET_CAN_USE_HARDWARE_WATCHPOINT(TYPE, CNT, OT) 1
-
-/* When a hardware watchpoint fires off the PC will be left at the
-   instruction following the one which caused the watchpoint.  
-   It will *NOT* be necessary for GDB to step over the watchpoint. */
-#define HAVE_CONTINUABLE_WATCHPOINT
-
-extern int procfs_stopped_by_watchpoint PARAMS ((int));
-#define STOPPED_BY_WATCHPOINT(W) \
-  procfs_stopped_by_watchpoint(inferior_pid)
-
-/* Use these macros for watchpoint insertion/deletion.  */
-/* type can be 0: write watch, 1: read watch, 2: access watch (read/write) */
-
-extern int procfs_set_watchpoint PARAMS ((int, CORE_ADDR, int, int, int));
-#define target_insert_watchpoint(ADDR, LEN, TYPE) \
-        procfs_set_watchpoint (inferior_pid, ADDR, LEN, TYPE, 1)
-#define target_remove_watchpoint(ADDR, LEN, TYPE) \
-        procfs_set_watchpoint (inferior_pid, ADDR, 0, 0, 0)
-
-#endif /* NEW_PROC_API */

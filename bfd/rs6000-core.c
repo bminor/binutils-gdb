@@ -1,5 +1,5 @@
 /* IBM RS/6000 "XCOFF" back-end for BFD.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 2000
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 1998
    Free Software Foundation, Inc.
    FIXME: Can someone provide a transliteration of this name into ASCII?
    Using the following chars caused a compiler warning on HIUX (so I replaced
@@ -81,47 +81,26 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define	core_hdr(bfd)		(((Rs6kCorData*)(bfd->tdata.any))->hdr)
 
 /* AIX 4.1 Changed the names and locations of a few items in the core file,
-   this seems to be the quickest/easiest way to deal with it. 
+   this seems to be the quickest easiet way to deal with it. 
 
    Note however that encoding magic addresses (STACK_END_ADDR) is going
    to be _very_ fragile.  But I don't see any easy way to get that info
-   right now.
-   
-   AIX 4.3 defines an entirely new structure (core_dumpx).  Yet the
-   basic logic stays the same and we can still use our macro
-   redefinition mechanism to effect the necessary changes.  */
-
-#ifdef AIX_CORE_DUMPX_CORE
-#define CORE_DATA_SIZE_FIELD c_dataorg
-#define CORE_COMM_FIELD c_u.U_proc.pi_comm
-#define SAVE_FIELD c_flt.hctx.r32
-#define STACK_END_ADDR coredata.c_stackorg + coredata.c_size
-#define LOADER_OFFSET_FIELD c_loader
-#define LOADER_REGION_SIZE coredata.c_lsize
-#define CORE_DUMP core_dumpx
-#else
+   right now.  */
 #ifdef CORE_VERSION_1
 #define CORE_DATA_SIZE_FIELD c_u.U_dsize
 #define CORE_COMM_FIELD c_u.U_comm
 #define SAVE_FIELD c_mst
 #define	STACK_END_ADDR 0x2ff23000
-#define LOADER_OFFSET_FIELD c_tab
-#define LOADER_REGION_SIZE 0x7ffffff
-#define CORE_DUMP core_dump
 #else
 #define CORE_DATA_SIZE_FIELD c_u.u_dsize
 #define CORE_COMM_FIELD c_u.u_comm
 #define SAVE_FIELD c_u.u_save
 #define	STACK_END_ADDR 0x2ff80000
-#define LOADER_OFFSET_FIELD c_tab
-#define LOADER_REGION_SIZE 0x7ffffff
-#define CORE_DUMP core_dump
-#endif
 #endif
 
 /* These are stored in the bfd's tdata */
 typedef struct {
-  struct CORE_DUMP hdr;		/* core file header */
+  struct core_dump hdr;		/* core file header */
 } Rs6kCorData;
 
 static asection *make_bfd_asection PARAMS ((bfd *, CONST char *, flagword,
@@ -158,7 +137,7 @@ const bfd_target *
 rs6000coff_core_p (abfd)
      bfd *abfd;
 {
-  struct CORE_DUMP coredata;
+  struct core_dump coredata;
   struct stat statbuf;
   bfd_size_type nread;
   char *tmpptr;
@@ -166,8 +145,8 @@ rs6000coff_core_p (abfd)
   if (bfd_seek (abfd, 0, SEEK_SET) != 0)
     return NULL;
 
-  nread = bfd_read (&coredata, 1, sizeof (struct CORE_DUMP), abfd);
-  if (nread != sizeof (struct CORE_DUMP))
+  nread = bfd_read (&coredata, 1, sizeof (struct core_dump), abfd);
+  if (nread != sizeof (struct core_dump))
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);
@@ -218,15 +197,6 @@ rs6000coff_core_p (abfd)
       return NULL;
     }
 
-#ifdef AIX_CORE_DUMPX_CORE
-  /* For the core_dumpx format, make sure c_entries == 0  If it does
-     not, the core file uses the old format */
-  if (coredata.c_entries != 0)
-    {
-      bfd_set_error (bfd_error_wrong_format);
-      return NULL;
-    }
-#else
   /* Sanity check on the c_tab field.  */
   if ((u_long) coredata.c_tab < sizeof coredata ||
       (u_long) coredata.c_tab >= statbuf.st_size ||
@@ -235,7 +205,6 @@ rs6000coff_core_p (abfd)
       bfd_set_error (bfd_error_wrong_format);
       return NULL;
     }
-#endif
 
   /* Issue warning if the core file was truncated during writing.  */
   if (coredata.c_flag & CORE_TRUNC)
@@ -284,9 +253,9 @@ rs6000coff_core_p (abfd)
      See if we can just fake it.  */
   if (!make_bfd_asection (abfd, ".ldinfo",
   			  SEC_HAS_CONTENTS,
-			  (bfd_size_type) LOADER_REGION_SIZE,
+			  (bfd_size_type) 0x7fffffff,
 			  (bfd_vma) 0,
-			  (file_ptr) coredata.LOADER_OFFSET_FIELD))
+			  (file_ptr) coredata.c_tab))
     return NULL;
 
 #ifndef CORE_VERSION_1
@@ -315,7 +284,7 @@ rs6000coff_core_p (abfd)
   {
     struct ld_info ldinfo;
     bfd_size_type ldinfo_size;
-    file_ptr ldinfo_offset = (file_ptr) coredata.LOADER_OFFSET_FIELD;
+    file_ptr ldinfo_offset = (file_ptr) coredata.c_tab;
 
     /* .data section from executable.  */
     if (coredata.c_datasize)
@@ -391,7 +360,7 @@ rs6000coff_core_file_matches_executable_p (core_bfd, exec_bfd)
      bfd *core_bfd;
      bfd *exec_bfd;
 {
-  struct CORE_DUMP coredata;
+  struct core_dump coredata;
   struct ld_info ldinfo;
   bfd_size_type size;
   char *path, *s;
@@ -403,7 +372,7 @@ rs6000coff_core_file_matches_executable_p (core_bfd, exec_bfd)
       || bfd_read (&coredata, sizeof coredata, 1, core_bfd) != sizeof coredata)
     return false;
 
-  if (bfd_seek (core_bfd, (long) coredata.LOADER_OFFSET_FIELD, SEEK_SET) != 0)
+  if (bfd_seek (core_bfd, (long) coredata.c_tab, SEEK_SET) != 0)
     return false;
 
   size = (char *) &ldinfo.ldinfo_filename[0] - (char *) &ldinfo.ldinfo_next;

@@ -24,7 +24,7 @@
 #include "inferior.h"
 #include "target.h"
 #include "gdb_string.h"
-#include "gdb_wait.h"
+#include "wait.h"
 #include "command.h"
 
 /* Some hackery to work around a use of the #define name NO_FLAGS

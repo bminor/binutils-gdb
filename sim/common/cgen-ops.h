@@ -271,7 +271,6 @@ extern DI ZEXTSIDI (SI);
 #define TRUNCSIBI(x) ((BI) (SI) (x))
 #define TRUNCSIQI(x) ((QI) (SI) (x))
 #define TRUNCSIHI(x) ((HI) (SI) (x))
-#define TRUNCSISI(x) ((SI) (SI) (x))
 #if defined (DI_FN_SUPPORT)
 extern BI TRUNCDIBI (DI);
 #else

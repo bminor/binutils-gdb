@@ -1,5 +1,5 @@
 /* Support for the generic parts of most COFF variants, for BFD.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -398,11 +398,7 @@ sec_to_styp_flags (sec_name, sec_flags)
     }
   else if (!strncmp (sec_name, ".stab", 5))
     {
-#ifdef COFF_ALIGN_IN_S_FLAGS
-      styp_flags = STYP_DSECT;
-#else
       styp_flags = STYP_INFO;
-#endif
     }
 #ifdef RS6000COFF_C
   else if (!strcmp (sec_name, _PAD))
@@ -439,16 +435,6 @@ sec_to_styp_flags (sec_name, sec_flags)
     {
       styp_flags = STYP_BSS;
     }
-
-#ifdef STYP_CLINK
-  if (sec_flags & SEC_CLINK)
-    styp_flags |= STYP_CLINK;
-#endif
-
-#ifdef STYP_BLOCK
-  if (sec_flags & SEC_BLOCK)
-    styp_flags |= STYP_BLOCK;
-#endif
 
 #ifdef STYP_NOLOAD
   if ((sec_flags & (SEC_NEVER_LOAD | SEC_COFF_SHARED_LIBRARY)) != 0)
@@ -546,16 +532,6 @@ styp_to_sec_flags (abfd, hdr, name, section)
   struct internal_scnhdr *internal_s = (struct internal_scnhdr *) hdr;
   long styp_flags = internal_s->s_flags;
   flagword sec_flags = 0;
-
-#ifdef STYP_BLOCK
-  if (styp_flags & STYP_BLOCK)
-      sec_flags |= SEC_BLOCK;
-#endif  
-
-#ifdef STYP_CLINK
-  if (styp_flags & STYP_CLINK)
-      sec_flags |= SEC_CLINK;
-#endif  
 
 #ifdef STYP_NOLOAD
   if (styp_flags & STYP_NOLOAD)
@@ -784,7 +760,7 @@ styp_to_sec_flags (abfd, hdr, name, section)
 	{
 	  bfd_byte *esymstart, *esym, *esymend;
 	  int seen_state = 0;
-	  char *target_name = NULL;
+	  char *target_name;
 
 	  esymstart = esym = (bfd_byte *) obj_coff_external_syms (abfd);
 	  esymend = esym + obj_raw_syment_count (abfd) * bfd_coff_symesz (abfd);
@@ -1524,11 +1500,8 @@ coff_set_alignment_hook (abfd, section, scnhdr)
       break;
 #endif
 #ifdef TIC80COFF
-  /* TI tools puts the alignment power in bits 8-11 */
+  /* TI tools hijack bits 8-11 for the alignment */
   i = (hdr->s_flags >> 8) & 0xF ;
-#endif
-#ifdef COFF_DECODE_ALIGNMENT
-  i = COFF_DECODE_ALIGNMENT(hdr->s_flags);
 #endif
   section->alignment_power = i;
 }
@@ -1792,8 +1765,6 @@ coff_set_arch_mach_hook (abfd, filehdr)
 #endif
 #ifdef ARMMAGIC
     case ARMMAGIC:
-    case ARMPEMAGIC:
-    case THUMBPEMAGIC:
       arch = bfd_arch_arm;
       switch (internal_f->f_flags & F_ARM_ARCHITECTURE_MASK)
 	{
@@ -1909,23 +1880,17 @@ coff_set_arch_mach_hook (abfd, filehdr)
 	      cputype = 0;
 	    else
 	      {
-		bfd_byte *buf;
+		bfd_byte buf[bfd_coff_symesz (abfd)];
 		struct internal_syment sym;
 
-		buf = (bfd_byte *) bfd_malloc (bfd_coff_symesz (abfd));
 		if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0
-		    || (bfd_read (buf, 1, bfd_coff_symesz (abfd), abfd) 
-			!= bfd_coff_symesz (abfd)))
-		  {
-		    free (buf);
-		    return false;
-		  }
+		    || bfd_read (buf, 1, bfd_coff_symesz (abfd), abfd) != bfd_coff_symesz (abfd))
+		  return false;
 		coff_swap_sym_in (abfd, (PTR) buf, (PTR) &sym);
 		if (sym.n_sclass == C_FILE)
 		  cputype = sym.n_type & 0xff;
 		else
 		  cputype = 0;
-		free (buf);
 	      }
 	  }
 
@@ -2004,17 +1969,7 @@ coff_set_arch_mach_hook (abfd, filehdr)
 #ifdef SH_ARCH_MAGIC_BIG
     case SH_ARCH_MAGIC_BIG:
     case SH_ARCH_MAGIC_LITTLE:
-#ifdef COFF_WITH_PE
-    case SH_ARCH_MAGIC_WINCE:
-#endif
       arch = bfd_arch_sh;
-      machine = 0;
-      break;
-#endif
-
-#ifdef MIPS_ARCH_MAGIC_WINCE
-    case MIPS_ARCH_MAGIC_WINCE:
-      arch = bfd_arch_mips;
       machine = 0;
       break;
 #endif
@@ -2039,36 +1994,6 @@ coff_set_arch_mach_hook (abfd, filehdr)
 #ifdef TIC30MAGIC
     case TIC30MAGIC:
       arch = bfd_arch_tic30;
-      break;
-#endif
-
-#ifdef TICOFF0MAGIC
-#ifdef TICOFF_TARGET_ARCH
-      /* this TI COFF section should be used by all new TI COFF v0 targets */
-    case TICOFF0MAGIC:
-      arch = TICOFF_TARGET_ARCH;
-      break;
-#endif
-#endif
-
-#ifdef TICOFF1MAGIC
-      /* this TI COFF section should be used by all new TI COFF v1/2 targets */
-      /* TI COFF1 and COFF2 use the target_id field to specify which arch */
-    case TICOFF1MAGIC:
-    case TICOFF2MAGIC:
-      switch (internal_f->f_target_id)
-        {
-#ifdef TI_TARGET_ID
-        case TI_TARGET_ID:
-          arch = TICOFF_TARGET_ARCH;
-          break;
-#endif
-        default:
-          (*_bfd_error_handler)
-            (_("Unrecognized TI COFF target id '0x%x'"), 
-             internal_f->f_target_id);
-          break;
-        }
       break;
 #endif
 
@@ -2343,11 +2268,7 @@ coff_write_relocs (abfd, first_undef)
 #endif
 	    if (q->sym_ptr_ptr)
 	      {
-#ifdef SECTION_RELATIVE_ABSOLUTE_SYMBOL_P
-                if (SECTION_RELATIVE_ABSOLUTE_SYMBOL_P (q,s))
-#else
 		if (q->sym_ptr_ptr == bfd_abs_section_ptr->symbol_ptr_ptr)
-#endif
 		  /* This is a relocation relative to the absolute symbol.  */
 		  n.r_symndx = -1;
 		else
@@ -2464,33 +2385,6 @@ coff_set_flags (abfd, magicp, flagsp)
       *magicp = TIC30MAGIC;
       return true;
 #endif
-
-#ifdef TICOFF_DEFAULT_MAGIC
-    case TICOFF_TARGET_ARCH:
-      /* if there's no indication of which version we want, use the default */
-      if (!abfd->xvec )
-        *magicp = TICOFF_DEFAULT_MAGIC;
-      else
-        {
-          /* we may want to output in a different COFF version */
-          switch (abfd->xvec->name[4])
-            {
-            case '0':
-              *magicp = TICOFF0MAGIC;
-              break;
-            case '1':
-              *magicp = TICOFF1MAGIC;
-              break;
-            case '2':
-              *magicp = TICOFF2MAGIC;
-              break;
-            default:
-              return false;
-            }
-        }
-      return true;
-#endif
-
 #ifdef TIC80_ARCH_MAGIC
     case bfd_arch_tic80:
       *magicp = TIC80_ARCH_MAGIC;
@@ -2498,11 +2392,7 @@ coff_set_flags (abfd, magicp, flagsp)
 #endif
 #ifdef ARMMAGIC
     case bfd_arch_arm:
-#ifdef ARM_WINCE
-      * magicp = ARMPEMAGIC;
-#else
       * magicp = ARMMAGIC;
-#endif
       * flagsp = 0;
       if (APCS_SET (abfd))
 	{
@@ -2597,21 +2487,10 @@ coff_set_flags (abfd, magicp, flagsp)
 
 #ifdef SH_ARCH_MAGIC_BIG
     case bfd_arch_sh:
-#ifdef COFF_IMAGE_WITH_PE
-      *magicp = SH_ARCH_MAGIC_WINCE;
-#else
       if (bfd_big_endian (abfd))
 	*magicp = SH_ARCH_MAGIC_BIG;
       else
 	*magicp = SH_ARCH_MAGIC_LITTLE;
-#endif
-      return true;
-      break;
-#endif
-
-#ifdef MIPS_ARCH_MAGIC_WINCE
-    case bfd_arch_mips:
-      *magicp = MIPS_ARCH_MAGIC_WINCE;
       return true;
       break;
 #endif
@@ -2725,7 +2604,7 @@ sort_by_secaddr (arg1, arg2)
 #ifndef I960
 #define ALIGN_SECTIONS_IN_FILE
 #endif
-#if defined(TIC80COFF) || defined(TICOFF)
+#ifdef TIC80COFF
 #undef ALIGN_SECTIONS_IN_FILE
 #endif
 
@@ -3317,13 +3196,10 @@ coff_write_object_contents (abfd)
       section.s_align = (current->alignment_power
 			 ? 1 << current->alignment_power
 			 : 0);
-#endif
-#ifdef TIC80COFF 
-      /* TI COFF puts the alignment power in bits 8-11 of the flags */
+#else
+#ifdef TIC80COFF
       section.s_flags |= (current->alignment_power & 0xF) << 8;
 #endif
-#ifdef COFF_ENCODE_ALIGNMENT
-      COFF_ENCODE_ALIGNMENT(section, current->alignment_power);
 #endif
 
 #ifdef COFF_IMAGE_WITH_PE
@@ -3513,11 +3389,6 @@ coff_write_object_contents (abfd)
     internal_f.f_flags |= F_AR32W;
 #endif
 
-#ifdef TI_TARGET_ID
-  /* target id is used in TI COFF v1 and later; COFF0 won't use this field,
-     but it doesn't hurt to set it internally */
-  internal_f.f_target_id = TI_TARGET_ID;
-#endif
 #ifdef TIC80_TARGET_ID
   internal_f.f_target_id = TIC80_TARGET_ID;
 #endif
@@ -3559,10 +3430,6 @@ coff_write_object_contents (abfd)
       internal_a.magic = NMAGIC; /* Assume separate i/d */
 #define __A_MAGIC_SET__
 #endif /* A29K */
-#ifdef TICOFF_AOUT_MAGIC
-    internal_a.magic = TICOFF_AOUT_MAGIC;
-#define __A_MAGIC_SET__
-#endif
 #ifdef TIC80COFF
     internal_a.magic = TIC80_ARCH_MAGIC;
 #define __A_MAGIC_SET__
@@ -3639,16 +3506,6 @@ coff_write_object_contents (abfd)
     internal_a.magic = (abfd->flags & D_PAGED) ? RS6K_AOUTHDR_ZMAGIC :
     (abfd->flags & WP_TEXT) ? RS6K_AOUTHDR_NMAGIC :
     RS6K_AOUTHDR_OMAGIC;
-#endif
-
-#if defined(SH) && defined(COFF_WITH_PE)
-#define __A_MAGIC_SET__
-    internal_a.magic = SH_PE_MAGIC;
-#endif
-
-#if defined(MIPS) && defined(COFF_WITH_PE)
-#define __A_MAGIC_SET__
-    internal_a.magic = MIPS_PE_MAGIC;
 #endif
 
 #ifndef __A_MAGIC_SET__
@@ -4296,8 +4153,7 @@ coff_slurp_symbol_table (abfd)
 #endif
 	    case C_REGPARM:	/* register parameter		 */
 	    case C_REG:	/* register variable		 */
-              /* C_AUTOARG conflictes with TI COFF C_UEXT */
-#if !defined (TIC80COFF) && !defined (TICOFF)
+#ifndef TIC80COFF
 #ifdef C_AUTOARG
 	    case C_AUTOARG:	/* 960-specific storage class */
 #endif
@@ -4401,11 +4257,6 @@ coff_slurp_symbol_table (abfd)
 #endif
 	      break;
 
-	    case C_STATLAB:	/* Static load time label */
-              dst->symbol.value = src->u.syment.n_value;
-              dst->symbol.flags = BSF_GLOBAL;
-              break;
-
 	    case C_NULL:
 	      /* PE DLLs sometimes have zeroed out symbols for some
                  reason.  Just ignore them without a warning.  */
@@ -4424,10 +4275,11 @@ coff_slurp_symbol_table (abfd)
 	      /* NT uses 0x67 for a weak symbol, not C_ALIAS.  */
 	    case C_ALIAS:	/* duplicate tag		 */
 #endif
-	      /* New storage classes for TI COFF */ 
-#if defined(TIC80COFF) || defined(TICOFF)
+	      /* New storage classes for TIc80 */
+#ifdef TIC80COFF
 	    case C_UEXT:	/* Tentative external definition */
 #endif
+	    case C_STATLAB:	/* Static load time label */
 	    case C_EXTLAB:	/* External load time label */
 	    case C_HIDDEN:	/* ext symbol in dmert public lib */
 	    default:

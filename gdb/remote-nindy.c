@@ -109,7 +109,7 @@
 #include "command.h"
 #include "floatformat.h"
 
-#include "gdb_wait.h"
+#include "wait.h"
 #include <sys/file.h>
 #include <ctype.h>
 #include "serial.h"

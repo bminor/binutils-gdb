@@ -1,6 +1,5 @@
 /* Target dependent code for the Motorola 68000 series.
-   Copyright (C) 1990, 1992, 1993, 1994, 1995, 1996, 1999, 2000
-   Free Software Foundation, Inc.
+   Copyright (C) 1990, 1992 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,18 +27,6 @@
 #include "inferior.h"
 
 
-#define P_LINKL_FP	0x480e
-#define P_LINKW_FP	0x4e56
-#define P_PEA_FP	0x4856
-#define P_MOVL_SP_FP	0x2c4f
-#define P_MOVL		0x207c
-#define P_JSR		0x4eb9
-#define P_BSR		0x61ff
-#define P_LEAL		0x43fb
-#define P_MOVML		0x48ef
-#define P_FMOVM		0xf237
-#define P_TRAP		0x4e40
-
 /* The only reason this is here is the tm-altos.h reference below.  It
    was moved back here from tm-m68k.h.  FIXME? */
 
@@ -48,9 +35,9 @@ altos_skip_prologue (pc)
      CORE_ADDR pc;
 {
   register int op = read_memory_integer (pc, 2);
-  if (op == P_LINKW_FP)
+  if (op == 0047126)
     pc += 4;			/* Skip link #word */
-  else if (op == P_LINKL_FP)
+  else if (op == 0044016)
     pc += 6;			/* Skip link #long */
   /* Not sure why branches are here.  */
   /* From tm-isi.h, tm-altos.h */
@@ -71,9 +58,9 @@ isi_skip_prologue (pc)
      CORE_ADDR pc;
 {
   register int op = read_memory_integer (pc, 2);
-  if (op == P_LINKW_FP)
+  if (op == 0047126)
     pc += 4;			/* Skip link #word */
-  else if (op == P_LINKL_FP)
+  else if (op == 0044016)
     pc += 6;			/* Skip link #long */
   /* Not sure why branches are here.  */
   /* From tm-isi.h, tm-altos.h */
@@ -84,41 +71,6 @@ isi_skip_prologue (pc)
   else if ((op & 0177400) == 0060000)
     pc += 2;			/* skip bra #char */
   return pc;
-}
-
-int
-delta68_in_sigtramp (pc, name)
-     CORE_ADDR pc;
-     char *name;
-{
-  return strcmp (name, "_sigcode") == 0;
-}
-
-CORE_ADDR
-delta68_frame_args_address (frame_info)
-     struct frame_info * frame_info;
-{
-  /* we assume here that the only frameless functions are the system calls
-     or other functions who do not put anything on the stack. */
-  if (frame_info->signal_handler_caller)
-    return frame_info->frame + 12;
-  else if (frameless_look_for_prologue (frame_info))
-    {
-    /* Check for an interrupted system call */
-    if (frame_info->next && frame_info->next->signal_handler_caller)
-      return frame_info->next->frame + 16;
-    else
-      return frame_info->frame + 4;
-    }
-  else
-    return frame_info->frame;
-}
-
-CORE_ADDR
-delta68_frame_saved_pc (frame_info)
-     struct frame_info * frame_info;
-{
-  return read_memory_integer (delta68_frame_args_address (frame_info) + 4, 4);
 }
 
 /* Return number of args passed to a frame.
@@ -294,6 +246,16 @@ m68k_pop_frame ()
 
  */
 
+#define P_LINK_L	0x480e
+#define P_LINK_W	0x4e56
+#define P_MOV_L		0x207c
+#define P_JSR		0x4eb9
+#define P_BSR		0x61ff
+#define P_LEA_L		0x43fb
+#define P_MOVM_L	0x48ef
+#define P_FMOVM		0xf237
+#define P_TRAP		0x4e40
+
 CORE_ADDR
 m68k_skip_prologue (ip)
      CORE_ADDR ip;
@@ -313,20 +275,30 @@ m68k_skip_prologue (ip)
       op = read_memory_integer (ip, 2);
       op &= 0xFFFF;
 
-      if (op == P_LINKW_FP)
-	ip += 4;		/* Skip link.w */
-      else if (op == P_PEA_FP)
+      if (op == P_LINK_W)
+	{
+	  ip += 4;		/* Skip link.w */
+	}
+      else if (op == 0x4856)
 	ip += 2;		/* Skip pea %fp */
-      else if (op == P_MOVL_SP_FP)
+      else if (op == 0x2c4f)
 	ip += 2;		/* Skip move.l %sp, %fp */
-      else if (op == P_LINKL_FP)
-	ip += 6;		/* Skip link.l */
-      else if (op == P_MOVML)
-	ip += 6;		/* Skip movm.l */
+      else if (op == P_LINK_L)
+	{
+	  ip += 6;		/* Skip link.l */
+	}
+      else if (op == P_MOVM_L)
+	{
+	  ip += 6;		/* Skip movm.l */
+	}
       else if (op == P_FMOVM)
-	ip += 10;		/* Skip fmovm */
+	{
+	  ip += 10;		/* Skip fmovm */
+	}
       else
-	break;		/* Found unknown code, bail out. */
+	{
+	  break;		/* Found unknown code, bail out. */
+	}
     }
   return (ip);
 }
@@ -363,31 +335,26 @@ m68k_find_saved_regs (frame_info, saved_regs)
     {
       pc = get_pc_function_start ((frame_info)->pc);
 
-      nextinsn = read_memory_integer (pc, 2);
-      if (P_PEA_FP == nextinsn
-	  && P_MOVL_SP_FP == read_memory_integer (pc + 2, 2))
+      if (0x4856 == read_memory_integer (pc, 2)
+	  && 0x2c4f == read_memory_integer (pc + 2, 2))
 	{
-	  /* pea %fp
+	  /*
+	     pea %fp
 	     move.l %sp, %fp */
-	  next_addr = frame_info->frame;
+
 	  pc += 4;
+	  next_addr = frame_info->frame;
 	}
-      else if (P_LINKL_FP == nextinsn)
+      else if (044016 == read_memory_integer (pc, 2))
 	/* link.l %fp */
 	/* Find the address above the saved   
 	   regs using the amount of storage from the link instruction.  */
-	{
-	  next_addr = (frame_info)->frame + read_memory_integer (pc + 2, 4);
-	  pc += 6;
-	}
-      else if (P_LINKW_FP == nextinsn)
+	next_addr = (frame_info)->frame + read_memory_integer (pc += 2, 4), pc += 4;
+      else if (047126 == read_memory_integer (pc, 2))
 	/* link.w %fp */
 	/* Find the address above the saved   
 	   regs using the amount of storage from the link instruction.  */
-	{
-	  next_addr = (frame_info)->frame + read_memory_integer (pc + 2, 2);
-	  pc += 4;
-	}
+	next_addr = (frame_info)->frame + read_memory_integer (pc += 2, 2), pc += 2;
       else
 	goto lose;
 
@@ -395,99 +362,66 @@ m68k_find_saved_regs (frame_info, saved_regs)
       if ((0177777 & read_memory_integer (pc, 2)) == 0157774)
 	next_addr += read_memory_integer (pc += 2, 4), pc += 4;
     }
+  regmask = read_memory_integer (pc + 2, 2);
 
-  for ( ; ; )
+  /* Here can come an fmovem.  Check for it.  */
+  nextinsn = 0xffff & read_memory_integer (pc, 2);
+  if (0xf227 == nextinsn
+      && (regmask & 0xff00) == 0xe000)
     {
-      nextinsn = 0xffff & read_memory_integer (pc, 2);
+      pc += 4;			/* Regmask's low bit is for register fp7, the first pushed */
+      for (regnum = FP0_REGNUM + 7; regnum >= FP0_REGNUM; regnum--, regmask >>= 1)
+	if (regmask & 1)
+	  saved_regs->regs[regnum] = (next_addr -= 12);
       regmask = read_memory_integer (pc + 2, 2);
-      /* fmovemx to -(sp) */
-      if (0xf227 == nextinsn && (regmask & 0xff00) == 0xe000)
-	{
-	  /* Regmask's low bit is for register fp7, the first pushed */
-	  for (regnum = FP0_REGNUM + 8; --regnum >= FP0_REGNUM; regmask >>= 1)
-	    if (regmask & 1)
-	      saved_regs->regs[regnum] = (next_addr -= 12);
-	  pc += 4;
-	}
-      /* fmovemx to (fp + displacement) */
-      else if (0171056 == nextinsn && (regmask & 0xff00) == 0xf000)
-	{
-	  register CORE_ADDR addr;
-
-	  addr = (frame_info)->frame + read_memory_integer (pc + 4, 2);
-	  /* Regmask's low bit is for register fp7, the first pushed */
-	  for (regnum = FP0_REGNUM + 8; --regnum >= FP0_REGNUM; regmask >>= 1)
-	    if (regmask & 1)
-	      {
-		saved_regs->regs[regnum] = addr;
-		addr += 12;
-	      }
-	  pc += 6;
-	}
-      /* moveml to (sp) */
-      else if (0044327 == nextinsn)
-	{
-	  /* Regmask's low bit is for register 0, the first written */
-	  for (regnum = 0; regnum < 16; regnum++, regmask >>= 1)
-	    if (regmask & 1)
-	      {
-		saved_regs->regs[regnum] = next_addr;
-		next_addr += 4;
-	      }
-	  pc += 4;
-	}
-      /* moveml to (fp + displacement) */
-      else if (0044356 == nextinsn)
-	{
-	  register CORE_ADDR addr;
-
-	  addr = (frame_info)->frame + read_memory_integer (pc + 4, 2);
-	  /* Regmask's low bit is for register 0, the first written */
-	  for (regnum = 0; regnum < 16; regnum++, regmask >>= 1)
-	    if (regmask & 1)
-	      {
-		saved_regs->regs[regnum] = addr;
-		addr += 4;
-	      }
-	  pc += 6;
-	}
-      /* moveml to -(sp) */
-      else if (0044347 == nextinsn)
-	{
-	  /* Regmask's low bit is for register 15, the first pushed */
-	  for (regnum = 16; --regnum >= 0; regmask >>= 1)
-	    if (regmask & 1)
-	      saved_regs->regs[regnum] = (next_addr -= 4);
-	  pc += 4;
-	}
-      /* movl r,-(sp) */
-      else if (0x2f00 == (0xfff0 & nextinsn))
-	{
-	  regnum = 0xf & nextinsn;
-	  saved_regs->regs[regnum] = (next_addr -= 4);
-	  pc += 2;
-	}
-      /* fmovemx to index of sp */
-      else if (0xf236 == nextinsn && (regmask & 0xff00) == 0xf000)
-	{
-	  /* Regmask's low bit is for register fp0, the first written */
-	  for (regnum = FP0_REGNUM + 8; --regnum >= FP0_REGNUM; regmask >>= 1)
-	    if (regmask & 1)
-	      {
-		saved_regs->regs[regnum] = next_addr;
-		next_addr += 12;
-	      }
-	  pc += 10;
-	}
-      /* clrw -(sp); movw ccr,-(sp) */
-      else if (0x4267 == nextinsn && 0x42e7 == regmask)
-	{
-	  saved_regs->regs[PS_REGNUM] = (next_addr -= 4);
-	  pc += 4;
-	}
-      else
-	break;
     }
+
+  /* next should be a moveml to (sp) or -(sp) or a movl r,-(sp) */
+  if (0044327 == read_memory_integer (pc, 2))
+    {
+      pc += 4;			/* Regmask's low bit is for register 0, the first written */
+      for (regnum = 0; regnum < 16; regnum++, regmask >>= 1)
+	if (regmask & 1)
+	  saved_regs->regs[regnum] = (next_addr += 4) - 4;
+    }
+  else if (0044347 == read_memory_integer (pc, 2))
+    {
+      pc += 4;			/* Regmask's low bit is for register 15, the first pushed */
+      for (regnum = 15; regnum >= 0; regnum--, regmask >>= 1)
+	if (regmask & 1)
+	  saved_regs->regs[regnum] = (next_addr -= 4);
+    }
+  else if (0x2f00 == (0xfff0 & read_memory_integer (pc, 2)))
+    {
+      regnum = 0xf & read_memory_integer (pc, 2);
+      pc += 2;
+      saved_regs->regs[regnum] = (next_addr -= 4);
+      /* gcc, at least, may use a pair of movel instructions when saving
+         exactly 2 registers.  */
+      if (0x2f00 == (0xfff0 & read_memory_integer (pc, 2)))
+	{
+	  regnum = 0xf & read_memory_integer (pc, 2);
+	  pc += 2;
+	  saved_regs->regs[regnum] = (next_addr -= 4);
+	}
+    }
+
+  /* fmovemx to index of sp may follow.  */
+  regmask = read_memory_integer (pc + 2, 2);
+  nextinsn = 0xffff & read_memory_integer (pc, 2);
+  if (0xf236 == nextinsn
+      && (regmask & 0xff00) == 0xf000)
+    {
+      pc += 10;			/* Regmask's low bit is for register fp0, the first written */
+      for (regnum = FP0_REGNUM + 7; regnum >= FP0_REGNUM; regnum--, regmask >>= 1)
+	if (regmask & 1)
+	  saved_regs->regs[regnum] = (next_addr += 12) - 12;
+      regmask = read_memory_integer (pc + 2, 2);
+    }
+
+  /* clrw -(sp); movw ccr,-(sp) may follow.  */
+  if (0x426742e7 == read_memory_integer (pc, 4))
+    saved_regs->regs[PS_REGNUM] = (next_addr -= 4);
 lose:;
   saved_regs->regs[SP_REGNUM] = (frame_info)->frame + 8;
   saved_regs->regs[FP_REGNUM] = (frame_info)->frame;

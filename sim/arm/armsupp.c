@@ -17,7 +17,6 @@
 
 #include "armdefs.h"
 #include "armemu.h"
-#include "ansidecl.h"
 
 /***************************************************************************\
 *                    Definitions for the support routines                   *
@@ -34,8 +33,10 @@ void ARMul_SetR15 (ARMul_State * state, ARMword value);
 
 ARMword ARMul_GetCPSR (ARMul_State * state);
 void ARMul_SetCPSR (ARMul_State * state, ARMword value);
+void ARMul_FixCPSR (ARMul_State * state, ARMword instr, ARMword rhs);
 ARMword ARMul_GetSPSR (ARMul_State * state, ARMword mode);
 void ARMul_SetSPSR (ARMul_State * state, ARMword mode, ARMword value);
+void ARMul_FixSPSR (ARMul_State * state, ARMword instr, ARMword rhs);
 
 void ARMul_CPSRAltered (ARMul_State * state);
 void ARMul_R15Altered (ARMul_State * state);
@@ -61,6 +62,7 @@ void ARMul_STC (ARMul_State * state, ARMword instr, ARMword address);
 void ARMul_MCR (ARMul_State * state, ARMword instr, ARMword source);
 ARMword ARMul_MRC (ARMul_State * state, ARMword instr);
 void ARMul_CDP (ARMul_State * state, ARMword instr);
+void ARMul_UndefInstr (ARMul_State * state, ARMword instr);
 unsigned IntPending (ARMul_State * state);
 
 ARMword ARMul_Align (ARMul_State * state, ARMword address, ARMword data);
@@ -415,7 +417,7 @@ ARMul_SwitchMode (ARMul_State * state, ARMword oldmode, ARMword newmode)
 \***************************************************************************/
 
 static ARMword
-ModeToBank (ARMul_State * state ATTRIBUTE_UNUSED, ARMword mode)
+ModeToBank (ARMul_State * state, ARMword mode)
 {
   static ARMword bankofmode[] = { USERBANK, FIQBANK, IRQBANK, SVCBANK,
     DUMMYBANK, DUMMYBANK, DUMMYBANK, DUMMYBANK,
@@ -738,7 +740,7 @@ ARMul_CDP (ARMul_State * state, ARMword instr)
 \***************************************************************************/
 
 void
-ARMul_UndefInstr (ARMul_State * state, ARMword instr ATTRIBUTE_UNUSED)
+ARMul_UndefInstr (ARMul_State * state, ARMword instr)
 {
   ARMul_Abort (state, ARMul_UndefinedInstrV);
 }
@@ -776,13 +778,9 @@ IntPending (ARMul_State * state)
 \***************************************************************************/
 
 ARMword
-ARMul_Align (state, address, data)
-     ARMul_State * state ATTRIBUTE_UNUSED;
-     ARMword address;
-     ARMword data;
-{
-  /* This code assumes the address is really unaligned,
-     as a shift by 32 is undefined in C.  */
+ARMul_Align (ARMul_State * state, ARMword address, ARMword data)
+{				/* this code assumes the address is really unaligned,
+				   as a shift by 32 is undefined in C */
 
   address = (address & 3) << 3;	/* get the word address */
   return ((data >> address) | (data << (32 - address)));	/* rot right */

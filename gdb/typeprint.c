@@ -82,7 +82,6 @@ whatis_exp (exp, show)
   register value_ptr val;
   register struct cleanup *old_chain = NULL;
   struct type *real_type = NULL;
-  struct type *type;
   int full = 0;
   int top = -1;
   int using_enc = 0;
@@ -97,40 +96,17 @@ whatis_exp (exp, show)
   else
     val = access_value_history (0);
 
-  type = VALUE_TYPE (val);
-
-  if (objectprint)
-    {
-      if (((TYPE_CODE (type) == TYPE_CODE_PTR) ||
-           (TYPE_CODE (type) == TYPE_CODE_REF))
-          &&
-          (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_CLASS))
-        {
-          real_type = value_rtti_target_type (val, &full, &top, &using_enc);
-          if (real_type)
-            {
-              if (TYPE_CODE (type) == TYPE_CODE_PTR)
-                real_type = lookup_pointer_type (real_type);
-              else
-                real_type = lookup_reference_type (real_type);
-            }
-        }
-      else if (TYPE_CODE (type) == TYPE_CODE_CLASS)
   real_type = value_rtti_type (val, &full, &top, &using_enc);
-    }
 
   printf_filtered ("type = ");
 
-  if (real_type)
-    {
-      printf_filtered ("/* real type = ");
-      type_print (real_type, "", gdb_stdout, -1);
-      if (! full)
-        printf_filtered (" (incomplete object)");
-      printf_filtered (" */\n");    
-    }
+  if (real_type && objectprint)
+    printf_filtered ("/* real type = %s%s */\n",
+		     TYPE_NAME (real_type),
+		     full ? "" : " (incomplete object)");
+  /* FIXME: maybe better to use type_print (real_type, "", gdb_stdout, -1); */
 
-  type_print (type, "", gdb_stdout, show);
+  type_print (VALUE_TYPE (val), "", gdb_stdout, show);
   printf_filtered ("\n");
 
   if (exp)

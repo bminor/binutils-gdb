@@ -1,5 +1,5 @@
 /*  armcopro.c -- co-processor interface:  ARM6 Instruction Emulator.
-    Copyright (C) 1994, 2000 Advanced RISC Machines Ltd.
+    Copyright (C) 1994 Advanced RISC Machines Ltd.
  
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@
     Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #include "armdefs.h"
-#include "ansidecl.h"
 
 extern unsigned ARMul_CoProInit (ARMul_State * state);
 extern void ARMul_CoProExit (ARMul_State * state);
@@ -62,7 +61,7 @@ MMUInit (ARMul_State * state)
 }
 
 static unsigned
-MMUMRC (ARMul_State * state ATTRIBUTE_UNUSED, unsigned type ATTRIBUTE_UNUSED, ARMword instr, ARMword * value)
+MMUMRC (ARMul_State * state, unsigned type, ARMword instr, ARMword * value)
 {
   int reg = BITS (16, 19) & 7;
 
@@ -74,7 +73,7 @@ MMUMRC (ARMul_State * state ATTRIBUTE_UNUSED, unsigned type ATTRIBUTE_UNUSED, AR
 }
 
 static unsigned
-MMUMCR (ARMul_State * state, unsigned type ATTRIBUTE_UNUSED, ARMword instr, ARMword value)
+MMUMCR (ARMul_State * state, unsigned type, ARMword instr, ARMword value)
 {
   int reg = BITS (16, 19) & 7;
 
@@ -92,7 +91,7 @@ MMUMCR (ARMul_State * state, unsigned type ATTRIBUTE_UNUSED, ARMword instr, ARMw
 
 
 static unsigned
-MMURead (ARMul_State * state ATTRIBUTE_UNUSED, unsigned reg, ARMword * value)
+MMURead (ARMul_State * state, unsigned reg, ARMword * value)
 {
   if (reg == 0)
     *value = 0x41440110;
@@ -132,7 +131,7 @@ I, C and F cyles) */
 static ARMword ValReg[16];
 
 static unsigned
-ValLDC (ARMul_State * state ATTRIBUTE_UNUSED, unsigned type, ARMword instr, ARMword data)
+ValLDC (ARMul_State * state, unsigned type, ARMword instr, ARMword data)
 {
   static unsigned words;
 
@@ -157,7 +156,7 @@ ValLDC (ARMul_State * state ATTRIBUTE_UNUSED, unsigned type, ARMword instr, ARMw
 }
 
 static unsigned
-ValSTC (ARMul_State * state ATTRIBUTE_UNUSED, unsigned type, ARMword instr, ARMword * data)
+ValSTC (ARMul_State * state, unsigned type, ARMword instr, ARMword * data)
 {
   static unsigned words;
 
@@ -182,14 +181,14 @@ ValSTC (ARMul_State * state ATTRIBUTE_UNUSED, unsigned type, ARMword instr, ARMw
 }
 
 static unsigned
-ValMRC (ARMul_State * state ATTRIBUTE_UNUSED, unsigned type ATTRIBUTE_UNUSED, ARMword instr, ARMword * value)
+ValMRC (ARMul_State * state, unsigned type, ARMword instr, ARMword * value)
 {
   *value = ValReg[BITS (16, 19)];
   return (ARMul_DONE);
 }
 
 static unsigned
-ValMCR (ARMul_State * state ATTRIBUTE_UNUSED, unsigned type ATTRIBUTE_UNUSED, ARMword instr, ARMword value)
+ValMCR (ARMul_State * state, unsigned type, ARMword instr, ARMword value)
 {
   ValReg[BITS (16, 19)] = value;
   return (ARMul_DONE);
@@ -393,29 +392,19 @@ ARMul_CoProDetach (ARMul_State * state, unsigned number)
 \***************************************************************************/
 
 static unsigned
-NoCoPro3R (ARMul_State * state ATTRIBUTE_UNUSED,
-	   unsigned a ATTRIBUTE_UNUSED,
-	   ARMword b ATTRIBUTE_UNUSED)
+NoCoPro3R (ARMul_State * state, unsigned a, ARMword b)
 {
   return (ARMul_CANT);
 }
 
 static unsigned
-NoCoPro4R (
-	   ARMul_State * state ATTRIBUTE_UNUSED,
-	   unsigned a ATTRIBUTE_UNUSED,
-	   ARMword b ATTRIBUTE_UNUSED,
-	   ARMword c ATTRIBUTE_UNUSED)
+NoCoPro4R (ARMul_State * state, unsigned a, ARMword b, ARMword c)
 {
   return (ARMul_CANT);
 }
 
 static unsigned
-NoCoPro4W (
-	   ARMul_State * state ATTRIBUTE_UNUSED,
-	   unsigned a ATTRIBUTE_UNUSED,
-	   ARMword b ATTRIBUTE_UNUSED,
-	   ARMword * c ATTRIBUTE_UNUSED)
+NoCoPro4W (ARMul_State * state, unsigned a, ARMword b, ARMword * c)
 {
   return (ARMul_CANT);
 }

@@ -22,11 +22,6 @@
 #include "sparc/tm-sparc.h"
 #include "tm-sysv4.h"
 
-/* With Sol2 it is no longer necessary to enable software single-step,
-   since the /proc interface can take care of it for us in hardware.  */
-#undef SOFTWARE_SINGLE_STEP
-#undef SOFTWARE_SINGLE_STEP_P
-
 /* There are two different signal handler trampolines in Solaris2.  */
 #define IN_SIGTRAMP(pc, name) \
   ((name) \
@@ -38,7 +33,7 @@
    ucbsigvechandler.  */
 #define SIGCONTEXT_PC_OFFSET 44
 
-#if 0	/* FIXME Setjmp/longjmp are not as well doc'd in SunOS 5.x yet */
+#if 0				/* FIXME Setjmp/longjmp are not as well doc'd in SunOS 5.x yet */
 
 /* Offsets into jmp_buf.  Not defined by Sun, but at least documented in a
    comment in <machine/setjmp.h>! */
@@ -81,6 +76,6 @@ extern char *sunpro_static_transform_name PARAMS ((char *));
 #define HANDLE_SVR4_EXEC_EMULATORS
 
 /* Macros to extract process id and thread id from a composite pid/tid */
-#define PIDGET(PID)		(((PID) & 0xffff))
-#define TIDGET(PID)		(((PID) & 0x7fffffff) >> 16)
-#define MERGEPID(PID, TID)	(((PID) & 0xffff) | ((TID) << 16))
+#define PIDGET(pid) ((pid) & 0xffff)
+#define TIDGET(pid) (((pid) >> 16) & 0xffff)
+#define MERGEPID(pid, tid) (((tid) << 16) | (pid))

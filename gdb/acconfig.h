@@ -1,6 +1,3 @@
-/* Define if compiling on Solaris 7. */
-#undef _MSE_INT_H
-
 /* Define if pstatus_t type is available */
 #undef HAVE_PSTATUS_T
 
@@ -85,9 +82,6 @@
 
 /* Set to true if the save_state_t structure has the ss_wide member */
 #undef HAVE_STRUCT_MEMBER_SS_WIDE
-
-/* Define if <sys/ptrace.h> defines the PTRACE_GETREGS request.  */
-#undef HAVE_PTRACE_GETREGS
 
 /* Define if <sys/ptrace.h> defines the PTRACE_GETXFPREGS request.  */
 #undef HAVE_PTRACE_GETXFPREGS

@@ -1617,31 +1617,29 @@ proc gdbtk_start {test} {
     }
   }
 
-  
   set wd [pwd]
-  cd $srcdir
-  set abs_srcdir [pwd]
-  cd [file join $abs_srcdir .. gdbtk library]
+  cd [file join $srcdir .. gdbtcl2]
   set env(GDBTK_LIBRARY) [pwd]
-  cd [file join $abs_srcdir .. .. tcl library]
+  cd [file join $srcdir .. .. tcl library]
   set env(TCL_LIBRARY) [pwd]
-  cd [file join $abs_srcdir .. .. tk library]
+  cd [file join $srcdir .. .. tk library]
   set env(TK_LIBRARY) [pwd]
-  cd [file join $abs_srcdir .. .. tix library]
+  cd [file join $srcdir .. .. tix library]
   set env(TIX_LIBRARY) [pwd]
-  cd [file join $abs_srcdir .. .. itcl itcl library]
+  cd [file join $srcdir .. .. itcl itcl library]
   set env(ITCL_LIBRARY) [pwd]
-  cd [file join .. $abs_srcdir .. .. libgui library]
+  cd [file join .. $srcdir .. .. libgui library]
   set env(CYGNUS_GUI_LIBRARY) [pwd]
   cd $wd
-  cd [file join $abs_srcdir $subdir]
+  cd [file join $srcdir $subdir]
   set env(DEFS) [file join [pwd] defs]
   cd $wd
   cd [file join $objdir $subdir]
   set env(OBJDIR) [pwd]
   cd $wd
-
-  set env(SRCDIR) $abs_srcdir
+  cd $srcdir
+  set env(SRCDIR) [pwd]
+  cd $wd
   set env(GDBTK_VERBOSE) 1
   set env(GDBTK_LOGFILE) [file join $objdir gdb.log]
   set env(GDBTK_TEST_RUNNING) 1

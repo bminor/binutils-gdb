@@ -30,7 +30,7 @@
 #include "objfiles.h"
 #include "gdbcmd.h"
 #include "call-cmds.h"
-#include "gdb_regex.h"
+#include "gnu-regex.h"
 #include "expression.h"
 #include "language.h"
 #include "demangle.h"
@@ -4512,6 +4512,7 @@ make_symbol_overload_list (fsym)
   register struct symtab *s;
   register struct partial_symtab *ps;
   register struct objfile *objfile;
+  register struct minimal_symbol *msymbol;
   register struct block *b, *surrounding_static_block = 0;
   register int i;
   /* The name we are completing on. */

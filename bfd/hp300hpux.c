@@ -1,5 +1,5 @@
 /* BFD backend for hp-ux 9000/300
-   Copyright (C) 1990, 91, 94, 95, 97, 99, 2000 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 94, 95, 97, 1999 Free Software Foundation, Inc.
    Written by Glenn Engel.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -270,8 +270,11 @@ MY (write_object_contents) (abfd)
   file_ptr text_end;
 
   memset (&exec_bytes, 0, sizeof (exec_bytes));
-
+#if CHOOSE_RELOC_SIZE
+  CHOOSE_RELOC_SIZE (abfd);
+#else
   obj_reloc_entry_size (abfd) = RELOC_STD_SIZE;
+#endif
 
   if (adata (abfd).magic == undecided_magic)
     NAME (aout,adjust_sizes_and_vmas) (abfd, &text_size, &text_end);

@@ -1,5 +1,5 @@
 /* Generic target-file-type support for the BFD library.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -506,7 +506,6 @@ extern const bfd_target arm_epoc_pei_big_vec;
 extern const bfd_target b_out_vec_big_host;
 extern const bfd_target b_out_vec_little_host;
 extern const bfd_target bfd_elf64_alpha_vec;
-extern const bfd_target bfd_elf32_avr_vec;
 extern const bfd_target bfd_elf32_bigarc_vec;
 extern const bfd_target bfd_elf32_bigarm_vec;
 extern const bfd_target bfd_elf32_bigarm_oabi_vec;
@@ -519,7 +518,6 @@ extern const bfd_target bfd_elf64_bigmips_vec;
 extern const bfd_target bfd_elf32_d10v_vec;
 extern const bfd_target bfd_elf32_d30v_vec;
 extern const bfd_target bfd_elf32_hppa_vec;
-extern const bfd_target bfd_elf32_i370_vec;
 extern const bfd_target bfd_elf32_i386_vec;
 extern const bfd_target bfd_elf32_i860_vec;
 extern const bfd_target bfd_elf32_i960_vec;
@@ -591,8 +589,6 @@ extern const bfd_target m68ksysvcoff_vec;
 extern const bfd_target m68k4knetbsd_vec;
 extern const bfd_target m88kbcs_vec;
 extern const bfd_target m88kmach3_vec;
-extern const bfd_target mipslpe_vec;
-extern const bfd_target mipslpei_vec;
 extern const bfd_target mcore_pe_big_vec;
 extern const bfd_target mcore_pe_little_vec;
 extern const bfd_target mcore_pei_big_vec;
@@ -613,8 +609,6 @@ extern const bfd_target shcoff_vec;
 extern const bfd_target shlcoff_vec;
 extern const bfd_target shcoff_small_vec;
 extern const bfd_target shlcoff_small_vec;
-extern const bfd_target shlpe_vec;
-extern const bfd_target shlpei_vec;
 extern const bfd_target sparcle_aout_vec;
 extern const bfd_target sparclinux_vec;
 extern const bfd_target sparclynx_aout_vec;
@@ -625,12 +619,6 @@ extern const bfd_target sunos_big_vec;
 extern const bfd_target tekhex_vec;
 extern const bfd_target tic30_aout_vec;
 extern const bfd_target tic30_coff_vec;
-extern const bfd_target tic54x_coff0_vec;
-extern const bfd_target tic54x_coff0_beh_vec;
-extern const bfd_target tic54x_coff1_vec;
-extern const bfd_target tic54x_coff1_beh_vec;
-extern const bfd_target tic54x_coff2_vec;
-extern const bfd_target tic54x_coff2_beh_vec;
 extern const bfd_target tic80coff_vec;
 extern const bfd_target vaxnetbsd_vec;
 extern const bfd_target versados_vec;
@@ -697,7 +685,6 @@ const bfd_target * const bfd_target_vector[] = {
 #ifdef BFD64
 	&bfd_elf64_alpha_vec,
 #endif
-	&bfd_elf32_avr_vec,
 	&bfd_elf32_bigarc_vec,
         &bfd_elf32_bigarm_vec,
         &bfd_elf32_bigarm_oabi_vec,
@@ -707,10 +694,7 @@ const bfd_target * const bfd_target_vector[] = {
 #endif
 	&bfd_elf32_d10v_vec,
 	&bfd_elf32_d30v_vec,
-#if 0
 	&bfd_elf32_hppa_vec,
-#endif
-	&bfd_elf32_i370_vec,
 	&bfd_elf32_i386_vec,
 	&bfd_elf32_i860_vec,
 	&bfd_elf32_i960_vec,
@@ -868,12 +852,6 @@ const bfd_target * const bfd_target_vector[] = {
 	&aout0_big_vec,
 	&tic30_aout_vec,
 	&tic30_coff_vec,
-	&tic54x_coff0_vec,
-	&tic54x_coff0_beh_vec,
-	&tic54x_coff1_vec,
-	&tic54x_coff1_beh_vec,
-	&tic54x_coff2_vec,
-	&tic54x_coff2_beh_vec,
 	&tic80coff_vec,
 	&vaxnetbsd_vec,
 	&versados_vec,

@@ -224,6 +224,8 @@ extern int proc_iterate_over_mappings PARAMS ((int (*)(int, CORE_ADDR)));
 
 extern int procfs_first_available PARAMS ((void));
 
+extern int procfs_get_pid_fd PARAMS ((int));
+
 /* From fork-child.c */
 
 extern void fork_inferior PARAMS ((char *, char *, char **,

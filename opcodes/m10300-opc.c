@@ -1,5 +1,5 @@
 /* Assemble Matsushita MN10300 instructions.
-   Copyright (C) 1996, 1997, 1998, 2000 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -88,7 +88,7 @@ const struct mn10300_operand mn10300_operands[] = {
 #define IMM16_PCREL    (IMM16+1)
   {16, 0, MN10300_OPERAND_PCREL | MN10300_OPERAND_RELAX | MN10300_OPERAND_SIGNED},
 
-/* 16bit unsigned displacement in a memory operation which
+/* 16bit unsigned dispacement in a memory operation which
    may promote to a 32bit displacement.  */
 #define IMM16_MEM    (IMM16_PCREL+1)
   {16, 0, MN10300_OPERAND_PROMOTE | MN10300_OPERAND_MEMADDR},
@@ -151,11 +151,11 @@ const struct mn10300_operand mn10300_operands[] = {
 #define DI (MDR+1)
   {2, 2, MN10300_OPERAND_DREG},
 
-/* 8 bit signed displacement, may promote to 16bit signed displacement.  */
+/* 8 bit signed displacement, may promote to 16bit signed dispacement.  */
 #define SD8    (DI+1)
   {8, 0, MN10300_OPERAND_SIGNED | MN10300_OPERAND_PROMOTE},
 
-/* 16 bit signed displacement, may promote to 32bit displacement.  */
+/* 16 bit signed displacement, may promote to 32bit dispacement.  */
 #define SD16    (SD8+1)
   {16, 0, MN10300_OPERAND_SIGNED | MN10300_OPERAND_PROMOTE},
 
@@ -279,7 +279,7 @@ const struct mn10300_operand mn10300_operands[] = {
 #define RD2      (RD0+1)
   {4, -4, MN10300_OPERAND_RREG},
 
-/* 8 unsigned displacement in a memory operation which
+/* 8 unsigned dispacement in a memory operation which
    may promote to a 32bit displacement.  */
 #define IMM8_MEM    (RD2+1)
   {8, 0, MN10300_OPERAND_PROMOTE | MN10300_OPERAND_MEMADDR},
@@ -288,7 +288,7 @@ const struct mn10300_operand mn10300_operands[] = {
 #define RI (IMM8_MEM+1)
   {4, 4, MN10300_OPERAND_RREG},
 
-/* 24 bit signed displacement, may promote to 32bit displacement.  */
+/* 24 bit signed displacement, may promote to 32bit dispacement.  */
 #define SD24    (RI+1)
   {8, 0, MN10300_OPERAND_24BIT | MN10300_OPERAND_SIGNED | MN10300_OPERAND_PROMOTE},
 
@@ -302,12 +302,12 @@ const struct mn10300_operand mn10300_operands[] = {
 #define SIMM24    (IMM24+1)
   {8, 0, MN10300_OPERAND_24BIT | MN10300_OPERAND_PROMOTE | MN10300_OPERAND_SIGNED},
 
-/* 24bit unsigned displacement in a memory operation which
+/* 16bit unsigned dispacement in a memory operation which
    may promote to a 32bit displacement.  */
 #define IMM24_MEM    (SIMM24+1)
   {8, 0, MN10300_OPERAND_24BIT | MN10300_OPERAND_PROMOTE | MN10300_OPERAND_MEMADDR},
-/* 32bit immediate, high 8 bits in the main instruction
-   word, 24 in the extension word.
+/* 32bit immediate, high 24 bits in the main instruction
+   word, 8 in the extension word.
 
    The "bits" field indicates how many bits are in the
    main instruction word for MN10300_OPERAND_SPLIT!  */
@@ -439,10 +439,10 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "mov",	0xfb8e0000,  0xffff000f,  0,    FMT_D7, AM33,	{MEM2(RI, RM0), RD2}},
 { "mov",	0xfb1a0000,  0xffff0000,  0,    FMT_D7, AM33,	{RM2, MEM2(SD8, RN0)}},
 { "mov",	0xfd1a0000,  0xffff0000,  0,    FMT_D8, AM33,	{RM2, MEM2(SD24, RN0)}},
-{ "mov",	0xfb8a0000,  0xffff0f00,  0,    FMT_D7, AM33,	{MEM2(IMM8, SP), RN2}},
-{ "mov",	0xfd8a0000,  0xffff0f00,  0,    FMT_D8, AM33,	{MEM2(IMM24, SP), RN2}},
-{ "mov",	0xfb9a0000,  0xffff0f00,  0,    FMT_D7, AM33,	{RM2, MEM2(IMM8, SP)}},
-{ "mov",	0xfd9a0000,  0xffff0f00,  0,    FMT_D8, AM33,	{RM2, MEM2(IMM24, SP)}},
+{ "mov",	0xfb8a0000,  0xffff0f00,  0,    FMT_D7, AM33,	{MEM2(SD8, SP), RN2}},
+{ "mov",	0xfd8a0000,  0xffff0f00,  0,    FMT_D8, AM33,	{MEM2(SD24, SP), RN2}},
+{ "mov",	0xfb9a0000,  0xffff0f00,  0,    FMT_D7, AM33,	{RM2, MEM2(SD8, SP)}},
+{ "mov",	0xfd9a0000,  0xffff0f00,  0,    FMT_D8, AM33,	{RM2, MEM2(SD24, SP)}},
 { "mov",	0xfb9e0000,  0xffff000f,  0,    FMT_D7, AM33,	{RD2, MEM2(RI, RN0)}},
 { "mov",	0xfb6a0000,  0xffff0000,  0x22, FMT_D7, AM33,	{MEMINC2 (RM0, SIMM8), RN2}},
 { "mov",	0xfb7a0000,  0xffff0000,  0,	FMT_D7, AM33,	{RM2, MEMINC2 (RN0, SIMM8)}},
@@ -574,10 +574,10 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "movbu",	0xfd2a0000,  0xffff0000,  0,    FMT_D8, AM33,	{MEM2(SD24, RM0), RN2}},
 { "movbu",	0xfb3a0000,  0xffff0000,  0,    FMT_D7, AM33,	{RM2, MEM2(SD8, RN0)}},
 { "movbu",	0xfd3a0000,  0xffff0000,  0,    FMT_D8, AM33,	{RM2, MEM2(SD24, RN0)}},
-{ "movbu",	0xfbaa0000,  0xffff0f00,  0,    FMT_D7, AM33,	{MEM2(IMM8, SP), RN2}},
-{ "movbu",	0xfdaa0000,  0xffff0f00,  0,    FMT_D8, AM33,	{MEM2(IMM24, SP), RN2}},
-{ "movbu",	0xfbba0000,  0xffff0f00,  0,    FMT_D7, AM33,	{RM2, MEM2(IMM8, SP)}},
-{ "movbu",	0xfdba0000,  0xffff0f00,  0,    FMT_D8, AM33,	{RM2, MEM2(IMM24, SP)}},
+{ "movbu",	0xfbaa0000,  0xffff0f00,  0,    FMT_D7, AM33,	{MEM2(SD8, SP), RN2}},
+{ "movbu",	0xfdaa0000,  0xffff0f00,  0,    FMT_D8, AM33,	{MEM2(SD24, SP), RN2}},
+{ "movbu",	0xfbba0000,  0xffff0f00,  0,    FMT_D7, AM33,	{RM2, MEM2(SD8, SP)}},
+{ "movbu",	0xfdba0000,  0xffff0f00,  0,    FMT_D8, AM33,	{RM2, MEM2(SD24, SP)}},
 { "movbu",	0xfb2e0000,  0xffff0f00,  0,    FMT_D7, AM33,	{MEM(IMM8_MEM), RN2}},
 { "movbu",	0xfd2e0000,  0xffff0f00,  0,    FMT_D8, AM33,	{MEM(IMM24_MEM), RN2}},
 { "movbu",	0xfb3e0000,  0xffff0f00,  0,    FMT_D7, AM33,	{RM2, MEM(IMM8_MEM)}},
@@ -623,10 +623,10 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "movhu",	0xfd4a0000,  0xffff0000,  0,    FMT_D8, AM33,	{MEM2(SD24, RM0), RN2}},
 { "movhu",	0xfb5a0000,  0xffff0000,  0,    FMT_D7, AM33,	{RM2, MEM2(SD8, RN0)}},
 { "movhu",	0xfd5a0000,  0xffff0000,  0,    FMT_D8, AM33,	{RM2, MEM2(SD24, RN0)}},
-{ "movhu",	0xfbca0000,  0xffff0f00,  0,    FMT_D7, AM33,	{MEM2(IMM8, SP), RN2}},
-{ "movhu",	0xfdca0000,  0xffff0f00,  0,    FMT_D8, AM33,	{MEM2(IMM24, SP), RN2}},
-{ "movhu",	0xfbda0000,  0xffff0f00,  0,    FMT_D7, AM33,	{RM2, MEM2(IMM8, SP)}},
-{ "movhu",	0xfdda0000,  0xffff0f00,  0,    FMT_D8, AM33,	{RM2, MEM2(IMM24, SP)}},
+{ "movhu",	0xfbca0000,  0xffff0f00,  0,    FMT_D7, AM33,	{MEM2(SD8, SP), RN2}},
+{ "movhu",	0xfdca0000,  0xffff0f00,  0,    FMT_D8, AM33,	{MEM2(SD24, SP), RN2}},
+{ "movhu",	0xfbda0000,  0xffff0f00,  0,    FMT_D7, AM33,	{RM2, MEM2(SD8, SP)}},
+{ "movhu",	0xfdda0000,  0xffff0f00,  0,    FMT_D8, AM33,	{RM2, MEM2(SD24, SP)}},
 { "movhu",	0xfb4e0000,  0xffff0f00,  0,    FMT_D7, AM33,	{MEM(IMM8_MEM), RN2}},
 { "movhu",	0xfd4e0000,  0xffff0f00,  0,    FMT_D8, AM33,	{MEM(IMM24_MEM), RN2}},
 { "movhu",	0xfbce0000,  0xffff000f,  0,    FMT_D7, AM33,	{MEM2(RI, RM0), RD2}},

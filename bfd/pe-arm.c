@@ -40,8 +40,4 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 	bfd_arm_pe_process_before_allocation
 #endif
 	
-#ifdef ARM_WINCE
-#define TARGET_UNDERSCORE 0
-#endif
-
 #include "coff-arm.c"

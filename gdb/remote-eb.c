@@ -32,7 +32,7 @@
 #include "inferior.h"
 #include "bfd.h"
 #include "symfile.h"
-#include "gdb_wait.h"
+#include "wait.h"
 #include "value.h"
 #include <ctype.h>
 #include <fcntl.h>

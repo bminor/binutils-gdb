@@ -117,23 +117,8 @@ extern int core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs);
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #endif
 
-/* Macros to do string compares.
-
-   NOTE: cagney/2000-03-14:
-
-   While old code can continue to refer to these macros, new code is
-   probably better off using strcmp() directly vis: ``strcmp() == 0''
-   and ``strcmp() != 0''.
-
-   This is because modern compilers can directly inline strcmp()
-   making the original justification for these macros - avoid function
-   call overhead by pre-testing the first characters
-   (``*X==*Y?...:0'') - redundant.
-
-   ``Even if [...] testing the first character does have a modest
-   performance improvement, I'd rather that whenever a performance
-   issue is found that we spend the effort on algorithmic
-   optimizations than micro-optimizing.'' J.T. */
+/* Gdb does *lots* of string compares.  Use macros to speed them up by
+   avoiding function calls if the first characters are not the same. */
 
 #define STRCMP(a,b) (*(a) == *(b) ? strcmp ((a), (b)) : (int)*(a) - (int)*(b))
 #define STREQ(a,b) (*(a) == *(b) ? !strcmp ((a), (b)) : 0)
@@ -167,13 +152,6 @@ extern int immediate_quit;
 extern int sevenbit_strings;
 
 extern void quit (void);
-
-/* FIXME: cagney/2000-03-13: It has been suggested that the peformance
-   benefits of having a ``QUIT'' macro rather than a function are
-   marginal.  If the overhead of a QUIT function call is proving
-   significant then its calling frequency should probably be reduced
-   [kingdon].  A profile analyzing the current situtation is
-   needed. */
 
 #ifdef QUIT
 /* do twice to force compiler warning */
@@ -315,36 +293,24 @@ extern void discard_final_cleanups (struct cleanup *);
 extern void discard_exec_error_cleanups (struct cleanup *);
 extern void discard_my_cleanups (struct cleanup **, struct cleanup *);
 
-/* DEPRECATED: cagney/2000-03-04: Do not use this typedef to cast
-   function pointers so that they match the argument to the various
-   cleanup functions.  Post GDB 5.0, this typedef will be
-   deleted. [Editors note: cagney was the person that added most of
-   those type casts] */
 typedef void (*make_cleanup_func) (void *);
 
-/* NOTE: cagney/2000-03-04: This typedef is strictly for the
-   make_cleanup function declarations below. Do not use this typedef
-   as a cast when passing functions into the make_cleanup() code.
-   Instead either use a bounce function or add a wrapper function.
-   Calling a f(char*) function with f(void*) is non-portable. */
-typedef void (make_cleanup_ftype) (void *);
-
-extern struct cleanup *make_cleanup (make_cleanup_ftype *, void *);
+extern struct cleanup *make_cleanup (make_cleanup_func, void *);
 
 extern struct cleanup *make_cleanup_freeargv (char **);
 
 struct ui_file;
 extern struct cleanup *make_cleanup_ui_file_delete (struct ui_file *);
 
-extern struct cleanup *make_final_cleanup (make_cleanup_ftype *, void *);
+extern struct cleanup *make_final_cleanup (make_cleanup_func, void *);
 
 extern struct cleanup *make_my_cleanup (struct cleanup **,
-					make_cleanup_ftype *, void *);
+					make_cleanup_func, void *);
 
-extern struct cleanup *make_run_cleanup (make_cleanup_ftype *, void *);
+extern struct cleanup *make_run_cleanup (make_cleanup_func, void *);
 
-extern struct cleanup *make_exec_cleanup (make_cleanup_ftype *, void *);
-extern struct cleanup *make_exec_error_cleanup (make_cleanup_ftype *, void *);
+extern struct cleanup *make_exec_cleanup (make_cleanup_func, void *);
+extern struct cleanup *make_exec_error_cleanup (make_cleanup_func, void *);
 
 extern struct cleanup *save_cleanups (void);
 extern struct cleanup *save_final_cleanups (void);
@@ -356,17 +322,14 @@ extern void restore_my_cleanups (struct cleanup **, struct cleanup *);
 
 extern void free_current_contents (char **);
 
-extern void null_cleanup (void *);
+extern void null_cleanup (PTR);
 
 extern int myread (int, char *, int);
 
 extern int query (char *, ...) ATTR_FORMAT (printf, 1, 2);
 
 #if !defined (USE_MMALLOC)
-/* NOTE: cagney/2000-03-04: The mmalloc functions need to use PTR
-   rather than void* so that they are consistent with
-   ../mmalloc/mmalloc.h. */
-extern PTR mcalloc (PTR, size_t, size_t);
+extern PTR mcalloc (void *, size_t, size_t);
 extern PTR mmalloc (PTR, size_t);
 extern PTR mrealloc (PTR, PTR, size_t);
 extern void mfree (PTR, PTR);
@@ -650,11 +613,7 @@ extern void free_command_lines (struct command_line **);
 struct continuation_arg
   {
     struct continuation_arg *next;
-    union continuation_data {
-      void *pointer;
-      int   integer;
-      long  longint;
-    } data;
+    PTR data;
   };
 
 struct continuation
@@ -842,24 +801,21 @@ extern NORETURN void internal_error (char *, ...) ATTR_NORETURN;
 
 extern NORETURN void nomem (long) ATTR_NORETURN;
 
-/* Reasons for calling return_to_top_level.  Note: enum value 0 is
-   reserved for internal use as the return value from an initial
-   setjmp().  */
+/* Reasons for calling return_to_top_level.  */
 
 enum return_reason
   {
     /* User interrupt.  */
-    RETURN_QUIT = 1,
+    RETURN_QUIT,
     /* Any other error.  */
     RETURN_ERROR
   };
 
 #define	ALL_CLEANUPS	((struct cleanup *)0)
 
-#define RETURN_MASK(reason)	(1 << (int)(reason))
-#define RETURN_MASK_QUIT	RETURN_MASK (RETURN_QUIT)
-#define RETURN_MASK_ERROR	RETURN_MASK (RETURN_ERROR)
-#define RETURN_MASK_ALL		(RETURN_MASK_QUIT | RETURN_MASK_ERROR)
+#define RETURN_MASK_QUIT (1 << (int)RETURN_QUIT)
+#define RETURN_MASK_ERROR (1 << (int)RETURN_ERROR)
+#define RETURN_MASK_ALL (RETURN_MASK_QUIT | RETURN_MASK_ERROR)
 typedef int return_mask;
 
 extern NORETURN void return_to_top_level (enum return_reason) ATTR_NORETURN;
@@ -1067,11 +1023,11 @@ extern int extract_long_unsigned_integer (void *, int, LONGEST *);
 
 extern CORE_ADDR extract_address (void *, int);
 
-extern void store_signed_integer (void *, int, LONGEST);
+extern void store_signed_integer (PTR, int, LONGEST);
 
-extern void store_unsigned_integer (void *, int, ULONGEST);
+extern void store_unsigned_integer (PTR, int, ULONGEST);
 
-extern void store_address (void *, int, LONGEST);
+extern void store_address (PTR, int, LONGEST);
 
 /* Setup definitions for host and target floating point formats.  We need to
    consider the format for `float', `double', and `long double' for both target
@@ -1165,16 +1121,6 @@ extern CORE_ADDR push_word (CORE_ADDR, ULONGEST);
 extern int watchdog;
 
 /* Hooks for alternate command interfaces.  */
-
-#ifdef UI_OUT
-/* The name of the interpreter if specified on the command line. */
-extern char *interpreter_p;
-#endif
-
-/* If a given interpreter matches INTERPRETER_P then it should update
-   command_loop_hook and init_ui_hook with the per-interpreter
-   implementation. */
-/* FIXME: command_loop_hook and init_ui_hook should be moved here. */
 
 struct target_waitstatus;
 struct cmd_list_element;
@@ -1272,7 +1218,6 @@ extern int use_windows;
 #ifndef PIDGET
 #define PIDGET(PID) (PID)
 #define TIDGET(PID) 0
-#define MERGEPID(PID, TID) (PID)
 #endif
 
 /* If under Cygwin, provide backwards compatibility with older

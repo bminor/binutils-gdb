@@ -357,21 +357,10 @@ struct minimal_symbol
 	mst_file_bss		/* Static version of mst_bss */
       }
     type BYTE_BITFIELD;
-
-    /* Minimal symbols with the same hash key are kept on a linked
-       list.  This is the link.  */
-
-    struct minimal_symbol *hash_next;
-
-    /* Minimal symbols are stored in two different hash tables.  This is
-       the `next' pointer for the demangled hash table.  */
-
-    struct minimal_symbol *demangled_hash_next;
   };
 
 #define MSYMBOL_INFO(msymbol)		(msymbol)->info
 #define MSYMBOL_TYPE(msymbol)		(msymbol)->type
-
 
 
 /* All of the name-scope contours of the program
@@ -837,6 +826,27 @@ struct section_offsets
   (sizeof (struct section_offsets) \
    + sizeof (((struct section_offsets *) 0)->offsets) * (SECT_OFF_MAX-1))
 
+/* Define an array of addresses to accommodate non-contiguous dynamic
+   loading of modules.  This is for use when entering commands, so we
+   can keep track of the section names until we read the file and
+   can map them to bfd sections. */
+ 
+#define MAX_SECTIONS 12
+struct section_addr_info 
+{
+  /* Sections whose names are always known to gdb. */
+  CORE_ADDR text_addr;
+  CORE_ADDR data_addr;
+  CORE_ADDR bss_addr;
+  /* Sections whose names are file format dependant. */
+  struct other_sections
+  {
+    CORE_ADDR addr;
+    char *name;
+    int sectindex;
+  } other[MAX_SECTIONS];
+};
+
 /* Each source file or header is represented by a struct symtab. 
    These objects are chained through the `next' field.  */
 
@@ -1233,14 +1243,6 @@ extern CORE_ADDR find_stab_function_addr PARAMS ((char *,
 						  struct objfile *));
 #endif
 
-extern unsigned int msymbol_hash_iw PARAMS ((const char *));
-
-extern unsigned int msymbol_hash PARAMS ((const char *));
-
-extern void
-add_minsym_to_hash_table (struct minimal_symbol *sym,
-			  struct minimal_symbol **table);
-
 extern struct minimal_symbol *
   lookup_minimal_symbol PARAMS ((const char *, const char *, struct objfile *));
 
@@ -1415,6 +1417,9 @@ extern struct symtab *
 
 extern void
 clear_solib PARAMS ((void));
+
+extern struct objfile *
+symbol_file_add PARAMS ((char *, int, struct section_addr_info *, int, int));
 
 /* source.c */
 

@@ -1336,7 +1336,7 @@ ieee_archive_p (abfd)
   if (this_byte (&(ieee->h)) != Module_Beginning)
     {
       abfd->tdata.ieee_ar_data = save;
-      goto got_wrong_format_error;
+      goto error_return;
     }
 
   next_byte (&(ieee->h));
@@ -1345,7 +1345,7 @@ ieee_archive_p (abfd)
     {
       bfd_release (abfd, ieee);
       abfd->tdata.ieee_ar_data = save;
-      goto got_wrong_format_error;
+      goto error_return;
     }
   /* Throw away the filename */
   read_id (&(ieee->h));
@@ -1448,8 +1448,6 @@ ieee_archive_p (abfd)
 
   return abfd->xvec;
 
- got_wrong_format_error:
-  bfd_set_error (bfd_error_wrong_format);
  error_return:
   if (elts != NULL)
     free (elts);

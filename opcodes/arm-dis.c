@@ -66,7 +66,7 @@ static arm_regname regnames[] =
     { "a1", "a2", "a3", "a4", "v1", "v2", "v3", "v4", "v5", "v6", "sl",  "fp",  "ip",  "sp",  "lr",  "pc" }},
   { "atpcs", "Select register names used in the ATPCS",
     { "a1", "a2", "a3", "a4", "v1", "v2", "v3", "v4", "v5", "v6", "v7",  "v8",  "IP",  "SP",  "LR",  "PC" }},
-  { "special-atpcs", "Select special register names used in the ATPCS",
+  { "atpcs-special", "Select special register names used in the ATPCS",
     { "a1", "a2", "a3", "a4", "v1", "v2", "v3", "WR", "v5", "SB", "SL",  "FP",  "IP",  "SP",  "LR",  "PC" }}
 };
 
@@ -90,38 +90,8 @@ static int  print_insn_arm   PARAMS ((bfd_vma, struct disassemble_info *, long))
 static int  print_insn_thumb PARAMS ((bfd_vma, struct disassemble_info *, long));
 static void parse_disassembler_options PARAMS ((char *));
 static int  print_insn       PARAMS ((bfd_vma, struct disassemble_info *, boolean));
-int get_arm_regname_num_options (void);
-int set_arm_regname_option (int option);
-int get_arm_regnames (int option, const char **setname,
-		      const char **setdescription,
-		      const char ***register_names);
 
 /* Functions. */
-int
-get_arm_regname_num_options (void)
-{
-  return NUM_ARM_REGNAMES;
-}
-
-int
-set_arm_regname_option (int option)
-{
-  int old = regname_selected;
-  regname_selected = option;
-  return old;
-}
-
-int
-get_arm_regnames (int option, const char **setname,
-		  const char **setdescription,
-                  const char ***register_names)
-{
-  *setname = regnames[option].name;
-  *setdescription = regnames[option].description;
-  *register_names = regnames[option].reg_names;
-  return 16;
-}
-
 static void
 arm_decode_shift (given, func, stream)
      long given;
@@ -652,8 +622,7 @@ print_insn_thumb (pc, info, given)
 	      info->bytes_per_chunk = 4;
 	      info->bytes_per_line  = 4;
 	      
-                func (stream, "bl\t");
-		
+              func (stream, "bl\t");
               info->print_address_func (BDISP23 (given) * 2 + pc + 4, info);
               return 4;
             }
@@ -737,14 +706,14 @@ print_insn_thumb (pc, info, given)
                                 if (started)
                                   func (stream, ", ");
                                 started = 1;
-                                func (stream, arm_regnames[14] /* "lr" */);
+                                func (stream, "lr");
                               }
 
                             if (domaskpc)
                               {
                                 if (started)
                                   func (stream, ", ");
-                                func (stream, arm_regnames[15] /* "pc" */);
+                                func (stream, "pc");
                               }
 
                             func (stream, "}");
@@ -858,8 +827,8 @@ print_insn_thumb (pc, info, given)
 }
 
 /* Parse an individual disassembler option.  */
-void
-parse_arm_disassembler_option (option)
+static void
+parse_disassembler_option (option)
      char * option;
 {
   if (option == NULL)
@@ -908,12 +877,12 @@ parse_disassembler_options (options)
       if (space)
 	{
 	  * space = '\0';
-	  parse_arm_disassembler_option (options);
+	  parse_disassembler_option (options);
 	  * space = ' ';
 	  options = space + 1;
 	}
       else
-	parse_arm_disassembler_option (options);
+	parse_disassembler_option (options);
     }
   while (space);
 }

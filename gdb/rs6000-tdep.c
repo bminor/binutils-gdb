@@ -1,5 +1,5 @@
 /* Target-dependent code for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 2000
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -305,43 +305,37 @@ rs6000_software_single_step (signal, insert_breakpoints_p)
 #define GET_SRC_REG(x) (((x) >> 21) & 0x1f)
 
 CORE_ADDR
-skip_prologue (CORE_ADDR pc, struct rs6000_framedata *fdata)
+skip_prologue (pc, fdata)
+     CORE_ADDR pc;
+     struct rs6000_framedata *fdata;
 {
   CORE_ADDR orig_pc = pc;
-  CORE_ADDR last_prologue_pc;
   char buf[4];
   unsigned long op;
   long offset = 0;
-  int lr_reg = -1;
-  int cr_reg = -1;
+  int lr_reg = 0;
+  int cr_reg = 0;
   int reg;
   int framep = 0;
   int minimal_toc_loaded = 0;
-  int prev_insn_was_prologue_insn = 1;
+  static struct rs6000_framedata zero_frame;
 
-  memset (fdata, 0, sizeof (struct rs6000_framedata));
+  *fdata = zero_frame;
   fdata->saved_gpr = -1;
   fdata->saved_fpr = -1;
   fdata->alloca_reg = -1;
   fdata->frameless = 1;
   fdata->nosavedpc = 1;
 
+  if (target_read_memory (pc, buf, 4))
+    return pc;			/* Can't access it -- assume no prologue. */
+
+  /* Assume that subsequent fetches can fail with low probability.  */
   pc -= 4;
   for (;;)
     {
       pc += 4;
-
-      /* Sometimes it isn't clear if an instruction is a prologue
-         instruction or not.  When we encounter one of these ambiguous
-	 cases, we'll set prev_insn_was_prologue_insn to 0 (false).
-	 Otherwise, we'll assume that it really is a prologue instruction. */
-      if (prev_insn_was_prologue_insn)
-	last_prologue_pc = pc;
-      prev_insn_was_prologue_insn = 1;
-
-      if (target_read_memory (pc, buf, 4))
-	break;
-      op = extract_signed_integer (buf, 4);
+      op = read_memory_integer (pc, 4);
 
       if ((op & 0xfc1fffff) == 0x7c0802a6)
 	{			/* mflr Rx */
@@ -381,16 +375,6 @@ skip_prologue (CORE_ADDR pc, struct rs6000_framedata *fdata)
 	  continue;
 
 	}
-      else if ((op & 0xffff0000) == 0x60000000)
-        {
-	  			/* nop */
-	  /* Allow nops in the prologue, but do not consider them to
-	     be part of the prologue unless followed by other prologue
-	     instructions. */
-	  prev_insn_was_prologue_insn = 0;
-	  continue;
-
-	}
       else if ((op & 0xffff0000) == 0x3c000000)
 	{			/* addis 0,0,NUM, used
 				   for >= 32k frames */
@@ -407,7 +391,7 @@ skip_prologue (CORE_ADDR pc, struct rs6000_framedata *fdata)
 	  continue;
 
 	}
-      else if (lr_reg != -1 && (op & 0xffff0000) == lr_reg)
+      else if ((op & 0xffff0000) == lr_reg)
 	{			/* st Rx,NUM(r1) 
 				   where Rx == lr */
 	  fdata->lr_offset = SIGNED_SHORT (op) + offset;
@@ -416,7 +400,7 @@ skip_prologue (CORE_ADDR pc, struct rs6000_framedata *fdata)
 	  continue;
 
 	}
-      else if (cr_reg != -1 && (op & 0xffff0000) == cr_reg)
+      else if ((op & 0xffff0000) == cr_reg)
 	{			/* st Rx,NUM(r1) 
 				   where Rx == cr */
 	  fdata->cr_offset = SIGNED_SHORT (op) + offset;
@@ -497,16 +481,6 @@ skip_prologue (CORE_ADDR pc, struct rs6000_framedata *fdata)
 	  minimal_toc_loaded = 1;
 	  continue;
 
-	  /* move parameters from argument registers to local variable
-             registers */
- 	}
-      else if ((op & 0xfc0007fe) == 0x7c000378 &&	/* mr(.)  Rx,Ry */
-               (((op >> 21) & 31) >= 3) &&              /* R3 >= Ry >= R10 */
-               (((op >> 21) & 31) <= 10) &&
-               (((op >> 16) & 31) >= fdata->saved_gpr)) /* Rx: local var reg */
-	{
-	  continue;
-
 	  /* store parameters in stack */
 	}
       else if ((op & 0xfc1f0000) == 0x90010000 ||	/* st rx,NUM(r1) */
@@ -580,27 +554,25 @@ skip_prologue (CORE_ADDR pc, struct rs6000_framedata *fdata)
 #endif /* 0 */
 
   fdata->offset = -fdata->offset;
-  return last_prologue_pc;
+  return pc;
 }
 
 
 /*************************************************************************
-  Support for creating pushing a dummy frame into the stack, and popping
+  Support for creating pushind a dummy frame into the stack, and popping
   frames, etc. 
 *************************************************************************/
 
 /* The total size of dummy frame is 436, which is;
 
-   32 gpr's           - 128 bytes
-   32 fpr's           - 256 bytes
-   7  the rest        -  28 bytes
-   callee's link area -  24 bytes
-   padding            -  12 bytes
+   32 gpr's     - 128 bytes
+   32 fpr's     - 256   "
+   7  the rest  - 28    "
+   and 24 extra bytes for the callee's link area. The last 24 bytes
+   for the link area might not be necessary, since it will be taken
+   care of by push_arguments(). */
 
-   Note that the last 24 bytes for the link area might not be necessary,
-   since it will be taken care of by push_arguments(). */
-
-#define DUMMY_FRAME_SIZE 448
+#define DUMMY_FRAME_SIZE 436
 
 #define	DUMMY_FRAME_ADDR_SIZE 10
 
@@ -862,39 +834,28 @@ rs6000_fix_call_dummy (dummyname, pc, fun, nargs, args, type, gcc_p)
   int ii;
   CORE_ADDR target_addr;
 
-  if (USE_GENERIC_DUMMY_FRAMES)
+  if (find_toc_address_hook != NULL)
     {
-      if (find_toc_address_hook != NULL)
-	{
-	  CORE_ADDR tocvalue = (*find_toc_address_hook) (fun);
-	  write_register (TOC_REGNUM, tocvalue);
-	}
+      CORE_ADDR tocvalue;
+
+      tocvalue = (*find_toc_address_hook) (fun);
+      ii = *(int *) ((char *) dummyname + TOC_ADDR_OFFSET);
+      ii = (ii & 0xffff0000) | (tocvalue >> 16);
+      *(int *) ((char *) dummyname + TOC_ADDR_OFFSET) = ii;
+
+      ii = *(int *) ((char *) dummyname + TOC_ADDR_OFFSET + 4);
+      ii = (ii & 0xffff0000) | (tocvalue & 0x0000ffff);
+      *(int *) ((char *) dummyname + TOC_ADDR_OFFSET + 4) = ii;
     }
-  else
-    {
-      if (find_toc_address_hook != NULL)
-	{
-	  CORE_ADDR tocvalue;
 
-	  tocvalue = (*find_toc_address_hook) (fun);
-	  ii = *(int *) ((char *) dummyname + TOC_ADDR_OFFSET);
-	  ii = (ii & 0xffff0000) | (tocvalue >> 16);
-	  *(int *) ((char *) dummyname + TOC_ADDR_OFFSET) = ii;
+  target_addr = fun;
+  ii = *(int *) ((char *) dummyname + TARGET_ADDR_OFFSET);
+  ii = (ii & 0xffff0000) | (target_addr >> 16);
+  *(int *) ((char *) dummyname + TARGET_ADDR_OFFSET) = ii;
 
-	  ii = *(int *) ((char *) dummyname + TOC_ADDR_OFFSET + 4);
-	  ii = (ii & 0xffff0000) | (tocvalue & 0x0000ffff);
-	  *(int *) ((char *) dummyname + TOC_ADDR_OFFSET + 4) = ii;
-	}
-
-      target_addr = fun;
-      ii = *(int *) ((char *) dummyname + TARGET_ADDR_OFFSET);
-      ii = (ii & 0xffff0000) | (target_addr >> 16);
-      *(int *) ((char *) dummyname + TARGET_ADDR_OFFSET) = ii;
-
-      ii = *(int *) ((char *) dummyname + TARGET_ADDR_OFFSET + 4);
-      ii = (ii & 0xffff0000) | (target_addr & 0x0000ffff);
-      *(int *) ((char *) dummyname + TARGET_ADDR_OFFSET + 4) = ii;
-    }
+  ii = *(int *) ((char *) dummyname + TARGET_ADDR_OFFSET + 4);
+  ii = (ii & 0xffff0000) | (target_addr & 0x0000ffff);
+  *(int *) ((char *) dummyname + TARGET_ADDR_OFFSET + 4) = ii;
 }
 
 /* Pass the arguments in either registers, or in the stack. In RS6000,
@@ -967,7 +928,6 @@ rs6000_push_arguments (nargs, args, sp, struct_return, struct_addr)
 
   for (argno = 0, argbytes = 0; argno < nargs && ii < 8; ++ii)
     {
-      int reg_size = REGISTER_RAW_SIZE (ii + 3);
 
       arg = args[argno];
       type = check_typedef (VALUE_TYPE (arg));
@@ -990,18 +950,17 @@ rs6000_push_arguments (nargs, args, sp, struct_return, struct_addr)
 	  ++f_argno;
 	}
 
-      if (len > reg_size)
+      if (len > 4)
 	{
 
 	  /* Argument takes more than one register. */
 	  while (argbytes < len)
 	    {
-	      memset (&registers[REGISTER_BYTE (ii + 3)], 0, reg_size);
+	      memset (&registers[REGISTER_BYTE (ii + 3)], 0, sizeof (int));
 	      memcpy (&registers[REGISTER_BYTE (ii + 3)],
 		      ((char *) VALUE_CONTENTS (arg)) + argbytes,
-		      (len - argbytes) > reg_size
-		        ? reg_size : len - argbytes);
-	      ++ii, argbytes += reg_size;
+		      (len - argbytes) > 4 ? 4 : len - argbytes);
+	      ++ii, argbytes += 4;
 
 	      if (ii >= 8)
 		goto ran_out_of_registers_for_arguments;
@@ -1011,10 +970,8 @@ rs6000_push_arguments (nargs, args, sp, struct_return, struct_addr)
 	}
       else
 	{			/* Argument can fit in one register. No problem. */
-	  int adj = TARGET_BYTE_ORDER == BIG_ENDIAN ? reg_size - len : 0;
-	  memset (&registers[REGISTER_BYTE (ii + 3)], 0, reg_size);
-	  memcpy ((char *)&registers[REGISTER_BYTE (ii + 3)] + adj, 
-	          VALUE_CONTENTS (arg), len);
+	  memset (&registers[REGISTER_BYTE (ii + 3)], 0, sizeof (int));
+	  memcpy (&registers[REGISTER_BYTE (ii + 3)], VALUE_CONTENTS (arg), len);
 	}
       ++argno;
     }
@@ -1024,16 +981,6 @@ ran_out_of_registers_for_arguments:
   if (USE_GENERIC_DUMMY_FRAMES)
     {
       saved_sp = read_sp ();
-#ifndef ELF_OBJECT_FORMAT
-      /* location for 8 parameters are always reserved. */
-      sp -= 4 * 8;
-
-      /* another six words for back chain, TOC register, link register, etc. */
-      sp -= 24;
-
-      /* stack pointer must be quadword aligned */
-      sp &= -16;
-#endif
     }
   else
     {
@@ -1042,9 +989,6 @@ ran_out_of_registers_for_arguments:
 
       /* another six words for back chain, TOC register, link register, etc. */
       sp -= 24;
-
-      /* stack pointer must be quadword aligned */
-      sp &= -16;
     }
 
   /* if there are more arguments, allocate space for them in 
@@ -1069,7 +1013,7 @@ ran_out_of_registers_for_arguments:
 	}
 
       /* add location required for the rest of the parameters */
-      space = (space + 15) & -16;
+      space = (space + 7) & -8;
       sp -= space;
 
       /* This is another instance we need to be concerned about securing our
@@ -1139,7 +1083,7 @@ ran_out_of_registers_for_arguments:
   target_store_registers (-1);
   return sp;
 }
-/* #ifdef ELF_OBJECT_FORMAT */
+#ifdef ELF_OBJECT_FORMAT
 
 /* Function: ppc_push_return_address (pc, sp)
    Set up the return address for the inferior function call. */
@@ -1153,7 +1097,7 @@ ppc_push_return_address (pc, sp)
   return sp;
 }
 
-/* #endif */
+#endif
 
 /* a given return value in `regbuf' with a type `valtype', extract and copy its
    value into `valbuf' */
@@ -1254,7 +1198,8 @@ skip_trampoline_code (pc)
 /* Determines whether the function FI has a frame on the stack or not.  */
 
 int
-rs6000_frameless_function_invocation (struct frame_info *fi)
+frameless_function_invocation (fi)
+     struct frame_info *fi;
 {
   CORE_ADDR func_start;
   struct rs6000_framedata fdata;
@@ -1288,7 +1233,8 @@ rs6000_frameless_function_invocation (struct frame_info *fi)
 /* Return the PC saved in a frame */
 
 unsigned long
-rs6000_frame_saved_pc (struct frame_info *fi)
+frame_saved_pc (fi)
+     struct frame_info *fi;
 {
   CORE_ADDR func_start;
   struct rs6000_framedata fdata;
@@ -1316,13 +1262,14 @@ rs6000_frame_saved_pc (struct frame_info *fi)
       if (fi->next->signal_handler_caller)
 	return read_memory_integer (fi->next->frame + SIG_FRAME_LR_OFFSET, 4);
       else
-	return read_memory_integer (FRAME_CHAIN (fi) + DEFAULT_LR_SAVE, 4);
+	return read_memory_integer (rs6000_frame_chain (fi) + DEFAULT_LR_SAVE,
+				    4);
     }
 
   if (fdata.lr_offset == 0)
     return read_register (LR_REGNUM);
 
-  return read_memory_integer (FRAME_CHAIN (fi) + fdata.lr_offset, 4);
+  return read_memory_integer (rs6000_frame_chain (fi) + fdata.lr_offset, 4);
 }
 
 /* If saved registers of frame FI are not known yet, read and cache them.
@@ -1493,7 +1440,7 @@ rs6000_frame_chain (thisframe)
     fp = read_memory_integer (thisframe->frame + SIG_FRAME_FP_OFFSET, 4);
   else if (thisframe->next != NULL
 	   && thisframe->next->signal_handler_caller
-	   && FRAMELESS_FUNCTION_INVOCATION (thisframe))
+	   && frameless_function_invocation (thisframe))
     /* A frameless function interrupted by a signal did not change the
        frame pointer.  */
     fp = FRAME_FP (thisframe);

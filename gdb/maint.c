@@ -57,8 +57,6 @@ static void maintenance_info_sections PARAMS ((char *, int));
 
 static void maintenance_print_command PARAMS ((char *, int));
 
-static void maintenance_do_deprecate (char *, int);
-
 /* Set this to the maximum number of seconds to wait instead of waiting forever
    in target_wait().  If this timer times out, then it generates an error and
    the command is aborted.  This replaces most of the need for timeouts in the
@@ -122,13 +120,13 @@ maintenance_internal_error (char *args, int from_tty)
   internal_error ("internal maintenance");
 }
 
-/* Someday we should allow demangling for things other than just
-   explicit strings.  For example, we might want to be able to specify
-   the address of a string in either GDB's process space or the
-   debuggee's process space, and have gdb fetch and demangle that
-   string.  If we have a char* pointer "ptr" that points to a string,
-   we might want to be able to given just the name and have GDB
-   demangle and print what it points to, etc.  (FIXME) */
+/*  Someday we should allow demangling for things other than just
+   explicit strings.  For example, we might want to be able to
+   specify the address of a string in either GDB's process space
+   or the debuggee's process space, and have gdb fetch and demangle
+   that string.  If we have a char* pointer "ptr" that points to
+   a string, we might want to be able to given just the name and
+   have GDB demangle and print what it points to, etc.  (FIXME) */
 
 static void
 maintenance_demangle (args, from_tty)
@@ -182,9 +180,9 @@ maintenance_space_display (args, from_tty)
     display_space = strtol (args, NULL, 10);
 }
 
-/* The "maintenance info" command is defined as a prefix, with
-   allow_unknown 0.  Therefore, its own definition is called only for
-   "maintenance info" with no args.  */
+/* The "maintenance info" command is defined as a prefix, with allow_unknown 0.
+   Therefore, its own definition is called only for "maintenance info" with
+   no args.  */
 
 /* ARGSUSED */
 static void
@@ -283,9 +281,9 @@ maintenance_print_statistics (args, from_tty)
   print_symbol_bcache_statistics ();
 }
 
-/* The "maintenance print" command is defined as a prefix, with
-   allow_unknown 0.  Therefore, its own definition is called only for
-   "maintenance print" with no args.  */
+/* The "maintenance print" command is defined as a prefix, with allow_unknown
+   0.  Therefore, its own definition is called only for "maintenance print"
+   with no args.  */
 
 /* ARGSUSED */
 static void
@@ -359,124 +357,6 @@ maintenance_translate_address (arg, from_tty)
 
   return;
 }
-
-
-/* When a comamnd is deprecated the user will be warned the first time
-   the command is used.  If possible, a replacement will be
-   offered. */
-
-static void
-maintenance_deprecate (char *args, int from_tty)
-{
-  if (args == NULL || *args == '\0')
-    {
-      printf_unfiltered ("\"maintenance deprecate\" takes an argument, \n\
-the command you want to deprecate, and optionally the replacement command \n\
-enclosed in quotes.\n");
-    }
-
-  maintenance_do_deprecate (args, 1);
-
-}
-
-
-static void
-maintenance_undeprecate (char *args, int from_tty)
-{
-  if (args == NULL || *args == '\0')
-    {
-      printf_unfiltered ("\"maintenance undeprecate\" takes an argument, \n\
-the command you want to undeprecate.\n");
-    }
-
-  maintenance_do_deprecate (args, 0);
-
-}
-
-/* You really shouldn't be using this. It is just for the testsuite.
-   Rather, you should use deprecate_cmd() when the command is created
-   in _initialize_blah().
-
-   This function deprecates a command and optionally assigns it a
-   replacement.  */
-
-static void
-maintenance_do_deprecate (char *text, int deprecate)
-{
-
-  struct cmd_list_element *alias = NULL;
-  struct cmd_list_element *prefix_cmd = NULL;
-  struct cmd_list_element *cmd = NULL;
-
-  char *start_ptr = NULL;
-  char *end_ptr = NULL;
-  int len;
-  char *replacement = NULL;
-
-  if (text == NULL)
-    return;
-
-  if (!lookup_cmd_composition (text, &alias, &prefix_cmd, &cmd))
-    {
-      printf_filtered ("Can't find command '%s' to deprecate.\n", text);
-      return;
-    }
-
-  if (deprecate)
-    {
-      /* look for a replacement command */
-      start_ptr = strchr (text, '\"');
-      if (start_ptr != NULL)
-	{
-	  start_ptr++;
-	  end_ptr = strrchr (start_ptr, '\"');
-	  if (end_ptr != NULL)
-	    {
-	      len = end_ptr - start_ptr;
-	      start_ptr[len] = '\0';
-	      replacement = xstrdup (start_ptr);
-	    }
-	}
-    }
-
-  if (!start_ptr || !end_ptr)
-    replacement = NULL;
-
-
-  /* If they used an alias, we only want to deprecate the alias.
-
-     Note the MALLOCED_REPLACEMENT test.  If the command's replacement
-     string was allocated at compile time we don't want to free the
-     memory. */
-  if (alias)
-    {
-
-      if (alias->flags & MALLOCED_REPLACEMENT)
-	free (alias->replacement);
-
-      if (deprecate)
-	alias->flags |= (DEPRECATED_WARN_USER | CMD_DEPRECATED);
-      else
-	alias->flags &= ~(DEPRECATED_WARN_USER | CMD_DEPRECATED);
-      alias->replacement = replacement;
-      alias->flags |= MALLOCED_REPLACEMENT;
-      return;
-    }
-  else if (cmd)
-    {
-      if (cmd->flags & MALLOCED_REPLACEMENT)
-	free (cmd->replacement);
-
-      if (deprecate)
-	cmd->flags |= (DEPRECATED_WARN_USER | CMD_DEPRECATED);
-      else
-	cmd->flags &= ~(DEPRECATED_WARN_USER | CMD_DEPRECATED);
-      cmd->replacement = replacement;
-      cmd->flags |= MALLOCED_REPLACEMENT;
-      return;
-    }
-}
-
 
 void
 _initialize_maint_cmds ()
@@ -574,19 +454,6 @@ If a SOURCE file is specified, dump only that file's partial symbols.",
 
   add_cmd ("translate-address", class_maintenance, maintenance_translate_address,
 	   "Translate a section name and address to a symbol.",
-	   &maintenancelist);
-
-  add_cmd ("deprecate", class_maintenance, maintenance_deprecate,
-	   "Deprecate a command.  Note that this is just in here so the \n\
-testsuite can check the comamnd deprecator. You probably shouldn't use this,\n\
-rather you should use the C function deprecate_cmd().  If you decide you \n\
-want to use it: maintenance deprecate 'commandname' \"replacement\". The \n\
-replacement is optional.", &maintenancelist);
-
-  add_cmd ("undeprecate", class_maintenance, maintenance_undeprecate,
-	   "Undeprecate a command.  Note that this is just in here so the \n\
-testsuite can check the comamnd deprecator. You probably shouldn't use this,\n\
-If you decide you want to use it: maintenance undeprecate 'commandname'",
 	   &maintenancelist);
 
   add_show_from_set (

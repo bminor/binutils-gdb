@@ -33,7 +33,6 @@
 #include "demangle.h"
 #include "complaints.h"
 #include "gdbcmd.h"
-#include "wrapper.h"
 
 /* These variables point to the objects
    representing the predefined C data types.  */
@@ -76,7 +75,7 @@ struct type *builtin_type_CORE_ADDR;
 struct type *builtin_type_bfd_vma;
 
 int opaque_type_resolution = 1;
-int overload_debug = 0;
+
 
 struct extra
   {
@@ -995,7 +994,7 @@ lookup_struct_elt_type (type, name, noerr)
     {
       char *t_field_name = TYPE_FIELD_NAME (type, i);
 
-      if (t_field_name && (strcmp_iw (t_field_name, name) == 0))
+      if (t_field_name && STREQ (t_field_name, name))
 	{
 	  return TYPE_FIELD_TYPE (type, i);
 	}
@@ -1423,30 +1422,6 @@ cfront_mangle_name (type, i, j)
 #undef ADD_EXTRA
 /* End of new code added to support parsing of Cfront stabs strings */
 
-/* Parse a type expression in the string [P..P+LENGTH).  If an error occurs,
-   silently return builtin_type_void. */
-
-struct type *
-safe_parse_type (char *p, int length)
-{
-  struct ui_file *saved_gdb_stderr;
-  struct type *type;
-
-  /* Suppress error messages. */
-  saved_gdb_stderr = gdb_stderr;
-  gdb_stderr = ui_file_new ();
-
-  /* Call parse_and_eval_type() without fear of longjmp()s. */
-  if (!gdb_parse_and_eval_type (p, length, &type))
-    type = builtin_type_void;
-
-  /* Stop suppressing error messages. */
-  ui_file_delete (gdb_stderr);
-  gdb_stderr = saved_gdb_stderr;
-
-  return type;
-}
-
 /* Ugly hack to convert method stubs into method types.
 
    He ain't kiddin'.  This demangles the name of the method into a string
@@ -1484,11 +1459,11 @@ check_stub_method (type, method_id, signature_id)
   argtypetext = p;
   while (*p)
     {
-      if (*p == '(' || *p == '<')
+      if (*p == '(')
 	{
 	  depth += 1;
 	}
-      else if (*p == ')' || *p == '>')
+      else if (*p == ')')
 	{
 	  depth -= 1;
 	}
@@ -1521,17 +1496,17 @@ check_stub_method (type, method_id, signature_id)
 	      if (strncmp (argtypetext, "...", p - argtypetext) != 0)
 		{
 		  argtypes[argcount] =
-		    safe_parse_type (argtypetext, p - argtypetext);
+		    parse_and_eval_type (argtypetext, p - argtypetext);
 		  argcount += 1;
 		}
 	      argtypetext = p + 1;
 	    }
 
-	  if (*p == '(' || *p == '<')
+	  if (*p == '(')
 	    {
 	      depth += 1;
 	    }
-	  else if (*p == ')' || *p == '>')
+	  else if (*p == ')')
 	    {
 	      depth -= 1;
 	    }
@@ -2162,7 +2137,7 @@ rank_function (parms, nparms, args, nargs)
 
   /* Now rank all the parameters of the candidate function */
   for (i = 1; i <= min_len; i++)
-    bv->rank[i] = rank_one_type (parms[i-1], args[i-1]);
+    bv->rank[i] = rank_one_type (parms[i - 1], args[i - 1]);
 
   /* If more arguments than parameters, add dummy entries */
   for (i = min_len + 1; i <= nargs; i++)
@@ -2199,32 +2174,15 @@ rank_one_type (parm, arg)
   if (TYPE_CODE (arg) == TYPE_CODE_TYPEDEF)
     arg = check_typedef (arg);
 
-  /*
-     Well, damnit, if the names are exactly the same,
-     i'll say they are exactly the same. This happens when we generate
-     method stubs. The types won't point to the same address, but they
-     really are the same.
-  */
-
-  if (TYPE_NAME (parm) == TYPE_NAME (arg))
-      return 0;
-
   /* Check if identical after resolving typedefs */
   if (parm == arg)
     return 0;
 
-  /* See through references, since we can almost make non-references
-     references. */
-  if (TYPE_CODE (arg) == TYPE_CODE_REF)
-    return (rank_one_type (TYPE_TARGET_TYPE (arg), parm)
-	    + REFERENCE_CONVERSION_BADNESS);
-  if (TYPE_CODE (parm) == TYPE_CODE_REF)
-    return (rank_one_type (arg, TYPE_TARGET_TYPE (parm))
-	    + REFERENCE_CONVERSION_BADNESS);
-  if (overload_debug)
-  /* Debugging only. */
-    fprintf_filtered (gdb_stderr,"------ Arg is %s [%d], parm is %s [%d]\n",
-        TYPE_NAME (arg), TYPE_CODE (arg), TYPE_NAME (parm), TYPE_CODE (parm));
+#if 0
+  /* Debugging only */
+  printf ("------ Arg is %s [%d], parm is %s [%d]\n",
+      TYPE_NAME (arg), TYPE_CODE (arg), TYPE_NAME (parm), TYPE_CODE (parm));
+#endif
 
   /* x -> y means arg of type x being supplied for parameter of type y */
 
@@ -2288,16 +2246,16 @@ rank_one_type (parm, arg)
 		{
 		  if (TYPE_UNSIGNED (arg))
 		    {
-		      if (!strcmp_iw (TYPE_NAME (parm), TYPE_NAME (arg)))
+		      if (!strcmp (TYPE_NAME (parm), TYPE_NAME (arg)))
 			return 0;	/* unsigned int -> unsigned int, or unsigned long -> unsigned long */
-		      else if (!strcmp_iw (TYPE_NAME (arg), "int") && !strcmp_iw (TYPE_NAME (parm), "long"))
+		      else if (!strcmp (TYPE_NAME (arg), "int") && !strcmp (TYPE_NAME (parm), "long"))
 			return INTEGER_PROMOTION_BADNESS;	/* unsigned int -> unsigned long */
 		      else
 			return INTEGER_COERCION_BADNESS;	/* unsigned long -> unsigned int */
 		    }
 		  else
 		    {
-		      if (!strcmp_iw (TYPE_NAME (arg), "long") && !strcmp_iw (TYPE_NAME (parm), "int"))
+		      if (!strcmp (TYPE_NAME (arg), "long") && !strcmp (TYPE_NAME (parm), "int"))
 			return INTEGER_COERCION_BADNESS;	/* signed long -> unsigned int */
 		      else
 			return INTEGER_CONVERSION_BADNESS;	/* signed int/long -> unsigned int/long */
@@ -2305,9 +2263,9 @@ rank_one_type (parm, arg)
 		}
 	      else if (!TYPE_NOSIGN (arg) && !TYPE_UNSIGNED (arg))
 		{
-		  if (!strcmp_iw (TYPE_NAME (parm), TYPE_NAME (arg)))
+		  if (!strcmp (TYPE_NAME (parm), TYPE_NAME (arg)))
 		    return 0;
-		  else if (!strcmp_iw (TYPE_NAME (arg), "int") && !strcmp_iw (TYPE_NAME (parm), "long"))
+		  else if (!strcmp (TYPE_NAME (arg), "int") && !strcmp (TYPE_NAME (parm), "long"))
 		    return INTEGER_PROMOTION_BADNESS;
 		  else
 		    return INTEGER_COERCION_BADNESS;
@@ -3049,7 +3007,6 @@ extern void _initialize_gdbtypes PARAMS ((void));
 void
 _initialize_gdbtypes ()
 {
-  struct cmd_list_element *c;
   build_gdbtypes ();
 
   /* FIXME - For the moment, handle types by swapping them in and out.
@@ -3090,11 +3047,4 @@ _initialize_gdbtypes ()
   REGISTER_GDBARCH_SWAP (builtin_type_CORE_ADDR);
   REGISTER_GDBARCH_SWAP (builtin_type_bfd_vma);
   register_gdbarch_swap (NULL, 0, build_gdbtypes);
-
-  add_show_from_set (
-		     add_set_cmd ("overload", no_class, var_zinteger, (char *) &overload_debug,
-				  "Set debugging of C++ overloading.\n\
-			  When enabled, ranking of the functions\n\
-			  is displayed.", &setdebuglist),
-		     &showdebuglist);
 }

@@ -1,5 +1,5 @@
 /* 32-bit ELF support for ARM
-   Copyright 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1998, 1999 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -775,10 +775,10 @@ error_return:
    moves the computed address into the PC, so it must be the second one
    in the sequence.  The problem, however is that whilst little endian code
    stores the instructions in HI then LOW order, big endian code does the
-   reverse.  nickc@cygnus.com.  */
+   reverse.  nickc@cygnus.com  */
 
-#define LOW_HI_ORDER      0xF800F000
-#define HI_LOW_ORDER      0xF000F800
+#define LOW_HI_ORDER 0xF800F000
+#define HI_LOW_ORDER 0xF000F800
 
 static insn32
 insert_thumb_branch (br_insn, rel_off)
@@ -791,9 +791,9 @@ insert_thumb_branch (br_insn, rel_off)
 
   BFD_ASSERT ((rel_off & 1) != 1);
 
-  rel_off >>= 1;				/* Half word aligned address.  */
-  low_bits = rel_off & 0x000007FF;		/* The bottom 11 bits.  */
-  high_bits = (rel_off >> 11) & 0x000007FF;	/* The top 11 bits.  */
+  rel_off >>= 1;		/* half word aligned address */
+  low_bits = rel_off & 0x000007FF;	/* the bottom 11 bits */
+  high_bits = (rel_off >> 11) & 0x000007FF;	/* the top 11 bits */
 
   if ((br_insn & LOW_HI_ORDER) == LOW_HI_ORDER)
     br_insn = LOW_HI_ORDER | (low_bits << 16) | high_bits;
@@ -803,7 +803,7 @@ insert_thumb_branch (br_insn, rel_off)
     abort ();			/* error - not a valid branch instruction form */
 
   /* FIXME: abort is probably not the right call. krk@cygnus.com */
-  
+
   return br_insn;
 }
 
@@ -1062,9 +1062,6 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
     case R_ARM_PC24:
     case R_ARM_ABS32:
     case R_ARM_REL32:
-#ifndef OLD_ARM_ABI
-    case R_ARM_XPC25:
-#endif
       /* When generating a shared object, these relocations are copied
 	 into the output file to be resolved at run time. */
 
@@ -1174,33 +1171,16 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	}
       else switch (r_type)
 	{
-#ifndef OLD_ARM_ABI
-	case R_ARM_XPC25:	  /* Arm BLX instruction.  */
-#endif
-	case R_ARM_PC24:	  /* Arm B/BL instruction */
-#ifndef OLD_ARM_ABI
-	  if (r_type == R_ARM_XPC25)
+	case R_ARM_PC24:
+	  /* Arm B/BL instruction */
+
+	  /* Check for arm calling thumb function.  */
+	  if (sym_flags == STT_ARM_TFUNC)
 	    {
-	      /* Check for Arm calling Arm function.  */
-	      /* FIXME: Should we translate the instruction into a BL
-		 instruction instead ?  */
-	      if (sym_flags != STT_ARM_TFUNC)
-		_bfd_error_handler (_("\
-%s: Warning: Arm BLX instruction targets Arm function '%s'."),
-				    bfd_get_filename (input_bfd),
-				    h->root.root.string);
-	    }
-	  else
-#endif
-	    {
-	      /* Check for Arm calling Thumb function.  */
-	      if (sym_flags == STT_ARM_TFUNC)
-		{
-		  elf32_arm_to_thumb_stub (info, sym_name, input_bfd, output_bfd,
-					   input_section, hit_data, sym_sec, rel->r_offset,
-					   signed_addend, value);
-		  return bfd_reloc_ok;
-		}
+	      elf32_arm_to_thumb_stub (info, sym_name, input_bfd, output_bfd,
+				       input_section, hit_data, sym_sec, rel->r_offset,
+				       signed_addend, value);
+	      return bfd_reloc_ok;
 	    }
 
 	  if (   strcmp (bfd_get_target (input_bfd), "elf32-littlearm-oabi") == 0
@@ -1341,11 +1321,8 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
       bfd_put_16 (input_bfd, value, hit_data);
       return bfd_reloc_ok;
 
-#ifndef OLD_ARM_ABI
-    case R_ARM_THM_XPC22:
-#endif
     case R_ARM_THM_PC22:
-      /* Thumb BL (branch long instruction).  */
+      /* Thumb BL (branch long instruction). */
       {
 	bfd_vma        relocation;
 	boolean        overflow = false;
@@ -1367,33 +1344,18 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	  signed_addend = addend;
 	}
 #endif
-#ifndef OLD_ARM_ABI
-	if (r_type == R_ARM_THM_XPC22)
+
+        /* If it is not a call to thumb, assume call to arm.
+	   If it is a call relative to a section name, then it is not a
+	   function call at all, but rather a long jump.  */
+	if (sym_flags != STT_ARM_TFUNC && sym_flags != STT_SECTION)
 	  {
-	    /* Check for Thumb to Thumb call.  */
-	    /* FIXME: Should we translate the instruction into a BL
-	       instruction instead ?  */
-	    if (sym_flags == STT_ARM_TFUNC)
-	      _bfd_error_handler (_("\
-%s: Warning: Thumb BLX instruction targets thumb function '%s'."),
-				  bfd_get_filename (input_bfd),
-				  h->root.root.string);
-	  }
-	else
-#endif
-	  {
-	    /* If it is not a call to Thumb, assume call to Arm.
-	       If it is a call relative to a section name, then it is not a
-	       function call at all, but rather a long jump.  */
-	    if (sym_flags != STT_ARM_TFUNC && sym_flags != STT_SECTION)
-	      {
-		if (elf32_thumb_to_arm_stub
-		    (info, sym_name, input_bfd, output_bfd, input_section,
-		     hit_data, sym_sec, rel->r_offset, signed_addend, value))
-		  return bfd_reloc_ok;
-		else
-		  return bfd_reloc_dangerous;
-	      }
+	    if (elf32_thumb_to_arm_stub
+		(info, sym_name, input_bfd, output_bfd, input_section,
+		 hit_data, sym_sec, rel->r_offset, signed_addend, value))
+	      return bfd_reloc_ok;
+	    else
+	      return bfd_reloc_dangerous;
 	  }
 
 	relocation = value + signed_addend;
@@ -1844,8 +1806,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      if (!((*info->callbacks->undefined_symbol)
 		    (info, h->root.root.string, input_bfd,
-		     input_section, rel->r_offset,
-		     (!info->shared || info->no_undefined))))
+		     input_section, rel->r_offset)))
 		return false;
 	      relocation = 0;
 	    }
@@ -1883,7 +1844,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	    case bfd_reloc_undefined:
 	      if (!((*info->callbacks->undefined_symbol)
 		    (info, name, input_bfd, input_section,
-		     rel->r_offset, true)))
+		     rel->r_offset)))
 		return false;
 	      break;
 
@@ -1916,7 +1877,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
   return true;
 }
 
-/* Function to keep ARM specific flags in the ELF header.  */
+/* Function to keep ARM specific flags in the ELF header. */
 static boolean
 elf32_arm_set_private_flags (abfd, flags)
      bfd *abfd;
@@ -1925,17 +1886,14 @@ elf32_arm_set_private_flags (abfd, flags)
   if (elf_flags_init (abfd)
       && elf_elfheader (abfd)->e_flags != flags)
     {
-      if (EF_ARM_EABI_VERSION (flags) == EF_ARM_EABI_UNKNOWN)
-	{
-	  if (flags & EF_INTERWORK)
-	    _bfd_error_handler (_ ("\
+      if (flags & EF_INTERWORK)
+	_bfd_error_handler (_ ("\
 Warning: Not setting interwork flag of %s since it has already been specified as non-interworking"),
-				bfd_get_filename (abfd));
-	  else
-	    _bfd_error_handler (_ ("\
+			    bfd_get_filename (abfd));
+      else
+	_bfd_error_handler (_ ("\
 Warning: Clearing the interwork flag of %s due to outside request"),
-				bfd_get_filename (abfd));
-	}
+			    bfd_get_filename (abfd));
     }
   else
     {
@@ -1946,7 +1904,7 @@ Warning: Clearing the interwork flag of %s due to outside request"),
   return true;
 }
 
-/* Copy backend specific data from one object module to another.  */
+/* Copy backend specific data from one object module to another */
 static boolean
 elf32_arm_copy_private_bfd_data (ibfd, obfd)
      bfd *ibfd;
@@ -1955,16 +1913,14 @@ elf32_arm_copy_private_bfd_data (ibfd, obfd)
   flagword in_flags;
   flagword out_flags;
 
-  if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return true;
 
-  in_flags  = elf_elfheader (ibfd)->e_flags;
+  in_flags = elf_elfheader (ibfd)->e_flags;
   out_flags = elf_elfheader (obfd)->e_flags;
 
-  if (elf_flags_init (obfd)
-      && EF_ARM_EABI_VERSION (out_flags) == EF_ARM_EABI_UNKNOWN
-      && in_flags != out_flags)
+  if (elf_flags_init (obfd) && in_flags != out_flags)
     {
       /* Cannot mix PIC and non-PIC code.  */
       if ((in_flags & EF_PIC) != (out_flags & EF_PIC))
@@ -2001,8 +1957,8 @@ Warning: Clearing the interwork flag in %s because non-interworking code in %s h
    object file when linking.  */
 static boolean
 elf32_arm_merge_private_bfd_data (ibfd, obfd)
-     bfd * ibfd;
-     bfd * obfd;
+     bfd *ibfd;
+     bfd *obfd;
 {
   flagword out_flags;
   flagword in_flags;
@@ -2061,18 +2017,6 @@ elf32_arm_merge_private_bfd_data (ibfd, obfd)
     return true;
 
   /* Complain about various flag mismatches.  */
-  if (EF_ARM_EABI_VERSION (in_flags) != EF_ARM_EABI_VERSION (out_flags))
-    {
-      _bfd_error_handler (_("\
-Error: %s compiled for EABI version %d, whereas %s is compiled for version %d"),
-			 bfd_get_filename (ibfd),
-			 (in_flags & EF_ARM_EABIMASK) >> 24,
-			 bfd_get_filename (obfd),
-			 (out_flags & EF_ARM_EABIMASK) >> 24);
-    }
-  else if (EF_ARM_EABI_VERSION (in_flags) != EF_ARM_EABI_UNKNOWN)
-    /* Not sure what needs to be checked for EABI versions >= 1.  */
-    return true;
 
   if ((in_flags & EF_APCS_26) != (out_flags & EF_APCS_26))
     _bfd_error_handler (_ ("\
@@ -2118,82 +2062,38 @@ elf32_arm_print_private_bfd_data (abfd, ptr)
      bfd *abfd;
      PTR ptr;
 {
-  FILE * file = (FILE *) ptr;
-  unsigned long flags;
+  FILE *file = (FILE *) ptr;
 
   BFD_ASSERT (abfd != NULL && ptr != NULL);
 
   /* Print normal ELF private data.  */
   _bfd_elf_print_private_bfd_data (abfd, ptr);
 
-  flags = elf_elfheader (abfd)->e_flags;
   /* Ignore init flag - it may not be set, despite the flags field containing valid data.  */
 
   /* xgettext:c-format */
   fprintf (file, _ ("private flags = %lx:"), elf_elfheader (abfd)->e_flags);
 
-  switch (EF_ARM_EABI_VERSION (flags))
-    {
-    case EF_ARM_EABI_UNKNOWN:
-      /* The following flag bits are GNU extenstions and not part of the
-	 official ARM ELF extended ABI.  Hence they are only decoded if
-	 the EABI version is not set.  */
-      if (flags & EF_INTERWORK)
-	fprintf (file, _ (" [interworking enabled]"));
-      
-      if (flags & EF_APCS_26)
-	fprintf (file, _ (" [APCS-26]"));
-      else
-	fprintf (file, _ (" [APCS-32]"));
-      
-      if (flags & EF_APCS_FLOAT)
-	fprintf (file, _ (" [floats passed in float registers]"));
-      
-      if (flags & EF_PIC)
-	fprintf (file, _ (" [position independent]"));
+  if (elf_elfheader (abfd)->e_flags & EF_INTERWORK)
+    fprintf (file, _ (" [interworking enabled]"));
+  else
+    fprintf (file, _ (" [interworking not enabled]"));
 
-      if (flags & EF_NEW_ABI)
-	fprintf (file, _ (" [new ABI]"));
-		 
-      if (flags & EF_OLD_ABI)
-	fprintf (file, _ (" [old ABI]"));
-		 
-      if (flags & EF_SOFT_FLOAT)
-	fprintf (file, _ (" [software FP]"));
-		 
-      flags &= ~(EF_INTERWORK | EF_APCS_26 | EF_APCS_FLOAT | EF_PIC
-		 | EF_NEW_ABI | EF_OLD_ABI | EF_SOFT_FLOAT);
-      break;
-      
-    case EF_ARM_EABI_VER1:
-      fprintf (file, _ (" [Version1 EABI]"));
-      
-      if (flags & EF_ARM_SYMSARESORTED)
-	fprintf (file, _ (" [sorted symbol table]"));
-      else
-	fprintf (file, _ (" [unsorted symbol table]"));
-      
-      flags &= ~ EF_ARM_SYMSARESORTED;
-      break;
-      
-    default:
-      fprintf (file, _ (" <EABI version unrecognised>"));
-      break;
-    }
+  if (elf_elfheader (abfd)->e_flags & EF_APCS_26)
+    fprintf (file, _ (" [APCS-26]"));
+  else
+    fprintf (file, _ (" [APCS-32]"));
 
-  flags &= ~ EF_ARM_EABIMASK;
+  if (elf_elfheader (abfd)->e_flags & EF_APCS_FLOAT)
+    fprintf (file, _ (" [floats passed in float registers]"));
+  else
+    fprintf (file, _ (" [floats passed in integer registers]"));
 
-  if (flags & EF_ARM_RELEXEC)
-    fprintf (file, _ (" [relocatable executable]"));
+  if (elf_elfheader (abfd)->e_flags & EF_PIC)
+    fprintf (file, _ (" [position independent]"));
+  else
+    fprintf (file, _ (" [absolute position]"));
 
-  if (flags & EF_ARM_HASENTRY)
-    fprintf (file, _ (" [has entry point]"));
-
-  flags &= ~ (EF_ARM_RELEXEC | EF_ARM_HASENTRY);
-
-  if (flags)
-    fprintf (file, _ ("<Unrecognised flag bits set>"));
-  
   fputc ('\n', file);
 
   return true;
@@ -2208,7 +2108,7 @@ elf32_arm_get_symbol_type (elf_sym, type)
     {
     case STT_ARM_TFUNC:
       return ELF_ST_TYPE (elf_sym->st_info);
-
+      break;
     case STT_ARM_16BIT:
       /* If the symbol is not an object, return the STT_ARM_16BIT flag.
 	 This allows us to distinguish between data used by Thumb instructions
@@ -2216,9 +2116,6 @@ elf32_arm_get_symbol_type (elf_sym, type)
 	 executable.  */
       if (type != STT_OBJECT)
 	return ELF_ST_TYPE (elf_sym->st_info);
-      break;
-      
-    default:
       break;
     }
 

@@ -51,7 +51,6 @@ alpha*-*-linux*)	gdb_target=alpha-linux ;;
 
 arc-*-*)		gdb_target=arc ;;
 
-arm*-wince-pe)		gdb_target=wince ;;
 arm*-*-linux*)		gdb_target=linux ;;
 arm*-*-* | thumb*-*-* | strongarm*-*-*)
 			gdb_target=embed
@@ -87,8 +86,7 @@ i[3456]86-*-elf*)	gdb_target=embed ;;
 i[3456]86-*-aix*)	gdb_target=i386aix ;;
 i[3456]86-*-bsd*)	gdb_target=i386bsd ;;
 i[3456]86-*-freebsd*)	gdb_target=fbsd ;;
-i[3456]86-*-netbsd*)	gdb_target=nbsd 
-		configdirs="${configdirs} gdbserver" ;;
+i[3456]86-*-netbsd*)	gdb_target=nbsd ;;
 i[3456]86-*-os9k)	gdb_target=i386os9k ;;
 i[3456]86-*-go32*)	gdb_target=i386aout ;;
 i[3456]86-*-msdosdjgpp*) gdb_target=go32 ;;
@@ -125,8 +123,6 @@ i960-nindy-elf*)	gdb_target=nindy960 ;;
 i960-*-elf*)		gdb_target=mon960 ;;
 i960-*-nindy*)		gdb_target=nindy960 ;;
 i960-*-vxworks*)	gdb_target=vxworks960 ;;
-
-ia64-*-linux*)		gdb_target=linux ;;
 
 m32r-*-elf*)		gdb_target=m32r ;;
 
@@ -174,7 +170,7 @@ mips64*-big-*)		gdb_target=bigmips64 ;;
 mips*-big-*)		gdb_target=bigmips ;;
 mips*-dec-mach3*)	gdb_target=mach3 ;;
 mips*-dec-*)		gdb_target=decstation ;;
-mips*-*-pe)		gdb_target=wince ;;
+mips*-*-pe)		gdb_target=mips-pe ;;
 mips64*el-*-ecoff*)	gdb_target=embedl64 ;;
 mips64*-*-ecoff*)	gdb_target=embed64 ;;
 mips64*vr4xxx*el-*-elf*)gdb_target=vr4xxxel ;;
@@ -227,7 +223,7 @@ powerpc-*-netware*)	gdb_target=ppc-nw
 powerpc-*-aix*)		gdb_target=aix ;;
 powerpcle-*-cygwin*)	gdb_target=cygwin ;;
 powerpcle-*-solaris*)	gdb_target=solaris ;;
-powerpc-*-eabi* | powerpc-*-sysv* | powerpc-*-elf*)
+powerpc-*-eabi* | powerpc-*-linux* | powerpc-*-sysv* | powerpc-*-elf*)
 			if test -f ../sim/ppc/Makefile; then
 			  gdb_target=ppc-sim
 			else
@@ -239,7 +235,6 @@ powerpcle-*-eabi* | powerpcle-*-sysv* | powerpcle-*-elf*)
 			else
 			  gdb_target=ppcle-eabi
 			fi ;;
-powerpc-*-linux*)	gdb_target=linux ;;
 powerpc-*-vxworks*)	gdb_target=vxworks ;;
 
 # OBSOLETE pyramid-*-*)		gdb_target=pyramid ;;
@@ -248,7 +243,6 @@ rs6000-*-lynxos*)	gdb_target=rs6000lynx ;;
 rs6000-*-aix4*)		gdb_target=aix4 ;;
 rs6000-*-*)		gdb_target=rs6000 ;;
 
-sh*-*-pe)		gdb_target=wince ;;
 sh-*-*)			gdb_target=sh ;;
 
 sparc-*-aout*)		gdb_target=sparc-em ;;

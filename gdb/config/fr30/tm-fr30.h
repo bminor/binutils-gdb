@@ -234,4 +234,4 @@ extern CORE_ADDR
    should be true on any system where you can rely on the prototyping
    information.  When this is true, value_arg_coerce will promote
    floats to doubles iff the function is not prototyped.  */
-#define COERCE_FLOAT_TO_DOUBLE(formal, actual) (1)
+#define COERCE_FLOAT_TO_DOUBLE 1

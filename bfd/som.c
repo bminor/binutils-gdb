@@ -148,7 +148,6 @@ struct som_misc_symbol_info
   unsigned int symbol_info;
   unsigned int symbol_value;
   unsigned int priv_level;
-  unsigned int secondary_def;
 };
 
 /* Forward declarations */
@@ -783,9 +782,6 @@ static const int comp3_opcodes[] =
 #ifndef R_COMMENT
 #define R_COMMENT 0xdd
 #endif
-
-#define SOM_HOWTO(TYPE, NAME)	\
-  HOWTO(TYPE, 0, 0, 32, false, 0, 0, hppa_som_reloc, NAME, false, 0, 0, false)
 
 static reloc_howto_type som_hppa_howto_table[] =
 {
@@ -4056,13 +4052,6 @@ som_bfd_derive_misc_symbol_info (abfd, sym, info)
 
   /* Set the symbol's value.  */
   info->symbol_value = sym->value + sym->section->vma;
-
-  /* The secondary_def field is for weak symbols.  */
-  if (sym->flags & BSF_WEAK)
-    info->secondary_def = true;
-  else
-    info->secondary_def = false;
-
 }
 
 /* Build and write, in one big chunk, the entire symbol table for
@@ -4106,7 +4095,6 @@ som_build_and_write_symbol_table (abfd)
       som_symtab[i].symbol_info = info.symbol_info;
       som_symtab[i].xleast = 3;
       som_symtab[i].symbol_value = info.symbol_value | info.priv_level;
-      som_symtab[i].secondary_def = info.secondary_def;
     }
 
   /* Everything is ready, seek to the right location and
@@ -4393,10 +4381,6 @@ som_slurp_symbol_table (abfd)
 	  sym->symbol.value -= sym->symbol.section->vma;
 	  break;
 	}
-
-      /* Check for a weak symbol.  */
-      if (bufp->secondary_def)
-        sym->symbol.flags |= BSF_WEAK;
 
       /* Mark section symbols and symbols used by the debugger.
 	 Note $START$ is a magic code symbol, NOT a section symbol.  */
@@ -5940,7 +5924,7 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst, elength)
 
 	  /* Fill in the lst symbol record.  */
 	  curr_lst_sym->hidden = 0;
-	  curr_lst_sym->secondary_def = info.secondary_def;
+	  curr_lst_sym->secondary_def = 0;
 	  curr_lst_sym->symbol_type = info.symbol_type;
 	  curr_lst_sym->symbol_scope = info.symbol_scope;
 	  curr_lst_sym->check_level = 0;

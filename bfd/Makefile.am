@@ -4,16 +4,13 @@ AUTOMAKE_OPTIONS = cygnus
 
 INCDIR = $(srcdir)/../include
 CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
-MKDEP = gcc -MM
+MKDEP = mkdep
 
 SUBDIRS = doc po
 
 docdir = doc
 
 lib_LTLIBRARIES = libbfd.la
-
-WARN_CFLAGS = @WARN_CFLAGS@
-AM_CFLAGS = $(WARN_CFLAGS)
 
 # bfd.h goes here, for now
 BFD_H = bfd.h
@@ -44,14 +41,12 @@ ALL_MACHINES = \
 	cpu-alpha.lo \
 	cpu-arc.lo \
 	cpu-arm.lo \
-	cpu-avr.lo \
 	cpu-d10v.lo \
 	cpu-d30v.lo \
 	cpu-fr30.lo \
 	cpu-h8300.lo \
 	cpu-h8500.lo \
 	cpu-hppa.lo \
-	cpu-i370.lo \
 	cpu-i386.lo \
 	cpu-i860.lo \
 	cpu-i960.lo \
@@ -69,7 +64,6 @@ ALL_MACHINES = \
 	cpu-sh.lo \
 	cpu-sparc.lo \
 	cpu-tic30.lo \
-	cpu-tic54x.lo \
 	cpu-tic80.lo \
 	cpu-v850.lo \
 	cpu-vax.lo \
@@ -82,14 +76,12 @@ ALL_MACHINES_CFILES = \
 	cpu-alpha.c \
 	cpu-arc.c \
 	cpu-arm.c \
-	cpu-avr.c \
 	cpu-d10v.c \
 	cpu-d30v.c \
 	cpu-fr30.c \
 	cpu-h8300.c \
 	cpu-h8500.c \
 	cpu-hppa.c \
-	cpu-i370.c \
 	cpu-i386.c \
 	cpu-i860.c \
 	cpu-i960.c \
@@ -107,7 +99,6 @@ ALL_MACHINES_CFILES = \
 	cpu-sh.c \
 	cpu-sparc.c \
 	cpu-tic30.c \
-	cpu-tic54x.c \
 	cpu-tic80.c \
 	cpu-v850.c \
 	cpu-vax.c \
@@ -150,7 +141,6 @@ BFD32_BACKENDS = \
 	coff-stgo32.lo \
 	coff-svm68k.lo \
 	coff-tic30.lo \
-	coff-tic54x.lo \
 	coff-tic80.lo \
 	coff-u68k.lo \
 	coff-we32k.lo \
@@ -165,12 +155,11 @@ BFD32_BACKENDS = \
 	elf32-arc.lo \
 	elfarm-oabi.lo \
 	elfarm-nabi.lo \
-	elf32-avr.lo \
 	elf32-d10v.lo \
 	elf32-d30v.lo \
 	elf32-fr30.lo \
 	elf32-gen.lo \
-	elf32-i370.lo \
+	elf32-hppa.lo \
 	elf32-i386.lo \
 	elf32-i860.lo \
 	elf32-i960.lo \
@@ -227,10 +216,6 @@ BFD32_BACKENDS = \
 	pei-mcore.lo \
 	pe-ppc.lo \
 	pei-ppc.lo \
-	pe-sh.lo \
-	pei-sh.lo \
-	pe-mips.lo \
-	pei-mips.lo \
 	peigen.lo \
 	ppcboot.lo \
 	reloc16.lo \
@@ -281,7 +266,6 @@ BFD32_BACKENDS_CFILES = \
 	coff-stgo32.c \
 	coff-svm68k.c \
 	coff-tic30.c \
-	coff-tic54x.c \
 	coff-tic80.c \
 	coff-u68k.c \
 	coff-we32k.c \
@@ -296,12 +280,11 @@ BFD32_BACKENDS_CFILES = \
 	elf32-arc.c \
 	elfarm-oabi.c \
 	elfarm-nabi.c \
-	elf32-avr.c \
 	elf32-d10v.c \
 	elf32-d30v.c \
 	elf32-fr30.c \
 	elf32-gen.c \
-	elf32-i370.c \
+	elf32-hppa.c \
 	elf32-i386.c \
 	elf32-i860.c \
 	elf32-i960.c \
@@ -358,10 +341,6 @@ BFD32_BACKENDS_CFILES = \
 	pei-mcore.c \
 	pe-ppc.c \
 	pei-ppc.c \
-	pe-sh.c \
-	pei-sh.c \
-	pe-mips.c \
-	pei-mips.c \
 	peigen.c \
 	ppcboot.c \
 	reloc16.c \
@@ -446,8 +425,8 @@ CFILES = \
 ## This is a list of all .h files which are in the source tree.
 SOURCE_HFILES = \
 	aout-target.h aoutf1.h aoutx.h coffcode.h coffswap.h \
-	ecoffswap.h elf32-arm.h elfcode.h elfcore.h \
-	elflink.h freebsd.h genlink.h go32stub.h libaout.h \
+	ecoffswap.h elf32-arm.h elf32-hppa.h elfcode.h elfcore.h \
+	elflink.h freebsd.h genlink.h go32stub.h hppa_stubs.h libaout.h \
 	libbfd.h libcoff.h libecoff.h elf-bfd.h libhppa.h libieee.h \
 	libnlm.h liboasys.h libpei.h netbsd.h nlm-target.h nlmcode.h \
 	nlmswap.h ns32k.h peicode.h som.h vms.h
@@ -499,9 +478,8 @@ noinst_LIBRARIES = libbfd.a
 libbfd_a_SOURCES =
 
 stamp-lib: libbfd.la
-	libtooldir=`$(LIBTOOL) --config | sed -n -e 's/^objdir=//p'`; \
-	if [ -f $$libtooldir/libbfd.a ]; then \
-	  cp $$libtooldir/libbfd.a libbfd.tmp; \
+	if [ -f .libs/libbfd.a ]; then \
+	  cp .libs/libbfd.a libbfd.tmp; \
 	  $(SHELL) $(srcdir)/../move-if-change libbfd.tmp libbfd.a; \
 	else true; fi
 	touch stamp-lib
@@ -553,15 +531,22 @@ install-data-local: $(BFD_H)
 # Have to get rid of DEP1 here so that "$?" later includes all of $(CFILES).
 DEP: dep.sed $(CFILES) $(HFILES) bfd.h
 	rm -f DEP1
-	$(MAKE) MKDEP="$(MKDEP)" DEP1
-	sed -f dep.sed < DEP1 > $@
-	echo '# IF YOU PUT ANYTHING HERE IT WILL GO AWAY' >> $@
+	$(MAKE) MKDEP=$(MKDEP) DEP1
+	sed -f dep.sed <DEP1 >DEP
 
+# This rule really wants a mkdep that runs "gcc -MM".
+# The NetBSD mkdep overwrites any existing file contents, and doesn't insert
+# the "DO NOT DELETE" line.
+# Other mkdep versions require a file that already exists, and do insert it.
+# Hence the weirdness....
 DEP1: $(CFILES)
+	rm -f DEP2 DEP2a
 	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > DEP2
-	echo '# DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.' >> DEP2
-	$(MKDEP) $(INCLUDES) $(CFLAGS) $? >> DEP2
-	mv -f DEP2 $@
+	echo > DEP2a
+	$(MKDEP) -f DEP2a $(INCLUDES) $(CFLAGS) $?
+	sed -e '/DO NOT DELETE/d' -e '/^$$/d' < DEP2a >> DEP2
+	rm -f DEP2a
+	$(SHELL) $(srcdir)/../move-if-change DEP2 DEP1
 
 dep.sed: dep-in.sed config.status
 	sed <$(srcdir)/dep-in.sed >dep.sed	\
@@ -644,7 +629,7 @@ stmp-lcoff-h: $(LIBCOFF_H_FILES)
 MOSTLYCLEANFILES = elf32-target.h elf64-target.h ofiles stamp-ofiles \
 	targmatch.h
 
-CLEANFILES = bfd.h dep.sed stmp-bfd-h DEP DEP1 DEP2 libbfd.a stamp-lib \
+CLEANFILES = bfd.h dep.sed stmp-bfd-h DEP DEP1 libbfd.a stamp-lib \
 	stmp-bin2-h stmp-lbfd-h stmp-lcoff-h
 
 # We want to rerun configure if config.bfd or configure.host change.
@@ -656,6 +641,7 @@ elfarm-oabi.lo: elfarm-oabi.c elf32-arm.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h elf32-target.h
 
+# What appears below is generated by a hacked mkdep using gcc -MM.
 elfarm-nabi.lo: elfarm-nabi.c elf32-arm.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h elf32-target.h
@@ -696,14 +682,12 @@ cpu-a29k.lo: cpu-a29k.c
 cpu-alpha.lo: cpu-alpha.c
 cpu-arc.lo: cpu-arc.c
 cpu-arm.lo: cpu-arm.c
-cpu-avr.lo: cpu-avr.c
 cpu-d10v.lo: cpu-d10v.c
 cpu-d30v.lo: cpu-d30v.c
 cpu-fr30.lo: cpu-fr30.c
 cpu-h8300.lo: cpu-h8300.c
 cpu-h8500.lo: cpu-h8500.c
 cpu-hppa.lo: cpu-hppa.c
-cpu-i370.lo: cpu-i370.c
 cpu-i386.lo: cpu-i386.c
 cpu-i860.lo: cpu-i860.c
 cpu-i960.lo: cpu-i960.c
@@ -722,7 +706,6 @@ cpu-sh.lo: cpu-sh.c
 cpu-sparc.lo: cpu-sparc.c
 cpu-tic30.lo: cpu-tic30.c
 cpu-tic80.lo: cpu-tic80.c
-cpu-tic54x.lo: cpu-tic54x.c
 cpu-v850.lo: cpu-v850.c
 cpu-vax.lo: cpu-vax.c
 cpu-we32k.lo: cpu-we32k.c
@@ -817,8 +800,6 @@ coff-tic30.lo: coff-tic30.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/tic30.h \
   $(INCDIR)/coff/internal.h libcoff.h coffcode.h coffswap.h
 coff-tic80.lo: coff-tic80.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/tic80.h \
   $(INCDIR)/coff/internal.h libcoff.h coffcode.h coffswap.h
-coff-tic54x.lo: coff-tic54x.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/tic54x.h \
-  $(INCDIR)/coff/internal.h libcoff.h coffcode.h coffswap.h
 coff-u68k.lo: coff-u68k.c coff-m68k.c $(INCDIR)/coff/m68k.h \
   $(INCDIR)/coff/internal.h libcoff.h $(INCDIR)/bfdlink.h \
   coffcode.h coffswap.h
@@ -851,7 +832,7 @@ elf.lo: elf.c $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
 elf32-arc.lo: elf32-arc.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/arc.h $(INCDIR)/elf/reloc-macros.h elf32-target.h
-elfarm-oabi.lo: elfarm-oabi.c $(INCDIR)/elf/arm.h \
+elfarm-oabi.lo: elfarm-oabi.c $(INCDIR)/elf/arm-oabi.h \
   $(INCDIR)/elf/reloc-macros.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   elf32-arm.h elf32-target.h
@@ -859,9 +840,6 @@ elfarm-nabi.lo: elfarm-nabi.c $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h elf32-arm.h \
   elf32-target.h
-elf32-avr.lo: elf32-avr.c elf-bfd.h $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/elf/avr.h $(INCDIR)/elf/reloc-macros.h elf32-target.h
 elf32-d10v.lo: elf32-d10v.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   elf32-target.h
@@ -874,9 +852,10 @@ elf32-fr30.lo: elf32-fr30.c elf-bfd.h $(INCDIR)/elf/common.h \
 elf32-gen.lo: elf32-gen.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   elf32-target.h
-elf32-i370.lo: elf32-i370.c $(INCDIR)/bfdlink.h elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/elf/i370.h elf32-target.h
+elf32-hppa.lo: elf32-hppa.c elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/elf/hppa.h $(INCDIR)/elf/reloc-macros.h libhppa.h \
+  elf32-hppa.h elf-hppa.h hppa_stubs.h elf32-target.h
 elf32-i386.lo: elf32-i386.c $(INCDIR)/bfdlink.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/i386.h $(INCDIR)/elf/reloc-macros.h elf32-target.h
@@ -1040,18 +1019,6 @@ pe-ppc.lo: pe-ppc.c coff-ppc.c $(INCDIR)/coff/powerpc.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
   $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
 pei-ppc.lo: pei-ppc.c coff-ppc.c $(INCDIR)/coff/powerpc.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
-  $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
-pe-sh.lo: pe-sh.c coff-sh.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/sh.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
-  coffcode.h peicode.h libpei.h
-pei-sh.lo: pei-sh.c coff-sh.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/sh.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
-  coffcode.h peicode.h libpei.h
-pe-mips.lo: pe-mips.c $(INCDIR)/coff/mipspe.h $(INCDIR)/coff/internal.h \
-  $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h coffcode.h \
-  peicode.h libpei.h
-pei-mips.lo: pei-mips.c pe-mips.c $(INCDIR)/coff/mipspe.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
   $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
 peigen.lo: peigen.c $(INCDIR)/coff/internal.h $(INCDIR)/coff/i386.h \

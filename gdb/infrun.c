@@ -25,7 +25,7 @@
 #include "frame.h"
 #include "inferior.h"
 #include "breakpoint.h"
-#include "gdb_wait.h"
+#include "wait.h"
 #include "gdbcore.h"
 #include "gdbcmd.h"
 #include "target.h"
@@ -294,13 +294,6 @@ a command like `return' or `jump' to continue execution.\n");
 #else
 #undef  HAVE_CONTINUABLE_WATCHPOINT
 #define HAVE_CONTINUABLE_WATCHPOINT 1
-#endif
-
-#ifndef CANNOT_STEP_HW_WATCHPOINTS
-#define CANNOT_STEP_HW_WATCHPOINTS 0
-#else
-#undef  CANNOT_STEP_HW_WATCHPOINTS
-#define CANNOT_STEP_HW_WATCHPOINTS 1
 #endif
 
 /* Tables of how to react to signals; the user sets them.  */
@@ -802,18 +795,6 @@ resume (int step, enum target_signal sig)
   if (step && breakpoints_inserted && breakpoint_here_p (read_pc ()))
     step = 0;
 #endif
-
-  /* Some targets (e.g. Solaris x86) have a kernel bug when stepping
-     over an instruction that causes a page fault without triggering
-     a hardware watchpoint. The kernel properly notices that it shouldn't
-     stop, because the hardware watchpoint is not triggered, but it forgets
-     the step request and continues the program normally.
-     Work around the problem by removing hardware watchpoints if a step is
-     requested, GDB will check for a hardware watchpoint trigger after the
-     step anyway.  */
-  if (CANNOT_STEP_HW_WATCHPOINTS && step && breakpoints_inserted)
-    remove_hw_watchpoints ();
-     
 
   /* Normally, by the time we reach `resume', the breakpoints are either
      removed or inserted, as appropriate.  The exception is if we're sitting
@@ -1555,12 +1536,12 @@ handle_inferior_event (struct execution_control_state *ecs)
 	stop_signal = ecs->ws.value.sig;
 	target_terminal_ours ();	/* Must do this before mourn anyway */
 
-	/* Note: By definition of TARGET_WAITKIND_SIGNALLED, we shouldn't
-	   reach here unless the inferior is dead.  However, for years
-	   target_kill() was called here, which hints that fatal signals aren't
-	   really fatal on some systems.  If that's true, then some changes
-	   may be needed. */
-	target_mourn_inferior ();
+	/* This looks pretty bogus to me.  Doesn't TARGET_WAITKIND_SIGNALLED
+	   mean it is already dead?  This has been here since GDB 2.8, so
+	   perhaps it means rms didn't understand unix waitstatuses?
+	   For the moment I'm just kludging around this in remote.c
+	   rather than trying to change it here --kingdon, 5 Dec 1994.  */
+	target_kill ();		/* kill mourns as well */
 
 	print_stop_reason (SIGNAL_EXITED, stop_signal);
 	singlestep_breakpoints_inserted_p = 0;	/*SOFTWARE_SINGLE_STEP_P */
@@ -3242,13 +3223,6 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
     case END_STEPPING_RANGE:
       /* We are done with a step/next/si/ni command. */
       /* For now print nothing. */
-#ifdef UI_OUT
-      /* Print a message only if not in the middle of doing a "step n"
-	 operation for n > 1 */
-      if (!step_multi || !stop_step)
-	if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
-	  ui_out_field_string (uiout, "reason", "end-stepping-range");
-#endif
       break;
     case BREAKPOINT_HIT:
       /* We found a breakpoint. */
@@ -3258,8 +3232,6 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
       /* The inferior was terminated by a signal. */
 #ifdef UI_OUT
       annotate_signalled ();
-      if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
-	ui_out_field_string (uiout, "reason", "exited-signalled");
       ui_out_text (uiout, "\nProgram terminated with signal ");
       annotate_signal_name ();
       ui_out_field_string (uiout, "signal-name", target_signal_to_name (stop_info));
@@ -3292,16 +3264,12 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
       annotate_exited (stop_info);
       if (stop_info)
 	{
-	  if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
-	    ui_out_field_string (uiout, "reason", "exited");
 	  ui_out_text (uiout, "\nProgram exited with code ");
 	  ui_out_field_fmt (uiout, "exit-code", "0%o", (unsigned int) stop_info);
 	  ui_out_text (uiout, ".\n");
 	}
       else
 	{
-	  if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
-	    ui_out_field_string (uiout, "reason", "exited-normally");
 	  ui_out_text (uiout, "\nProgram exited normally.\n");
 	}
 #else
@@ -3448,8 +3416,7 @@ The same program may be running in another process.\n");
          bpstat_print() contains the logic deciding in detail
          what to print, based on the event(s) that just occurred. */
 
-      if (stop_print_frame
-	  && selected_frame)
+      if (stop_print_frame)
 	{
 	  int bpstat_ret;
 	  int source_flag;
@@ -3478,17 +3445,7 @@ The same program may be running in another process.\n");
 	    default:
 	      internal_error ("Unknown value.");
 	    }
-#ifdef UI_OUT
-	  /* For mi, have the same behavior every time we stop:
-             print everything but the source line. */
-	  if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
-	    source_flag = LOC_AND_ADDRESS;
-#endif
 
-#ifdef UI_OUT
-	  if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
-	    ui_out_field_int (uiout, "thread-id", pid_to_thread_id (inferior_pid));
-#endif
 	  /* The behavior of this routine with respect to the source
 	     flag is:
 	     SRC_LINE: Print only source line

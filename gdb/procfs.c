@@ -154,8 +154,6 @@ init_procfs_ops ()
   procfs_ops.to_thread_alive       = procfs_thread_alive;
   procfs_ops.to_pid_to_str         = procfs_pid_to_str;
 
-  procfs_ops.to_has_all_memory    = 1;
-  procfs_ops.to_has_memory        = 1;
   procfs_ops.to_has_execution      = 1;
   procfs_ops.to_has_stack          = 1;
   procfs_ops.to_has_registers      = 1;
@@ -295,8 +293,6 @@ typedef prstatus_t gdb_lwpstatus_t;
 #ifndef PIDGET
 #define PIDGET(PID)		(PID)
 #define TIDGET(PID)		(PID)
-#endif
-#ifndef MERGEPID
 #define MERGEPID(PID, TID)	(PID)
 #endif
 
@@ -2581,8 +2577,8 @@ proc_parent_pid (pi)
 
 int
 proc_set_watchpoint (pi, addr, len, wflags)
-     procinfo  *pi;
-     CORE_ADDR addr;
+     procinfo *pi;
+     void     *addr;
      int       len;
      int       wflags;
 {
@@ -5253,6 +5249,23 @@ procfs_first_available ()
 {
   if (procinfo_list)
     return procinfo_list->pid;
+  else
+    return -1;
+}
+
+int
+procfs_get_pid_fd (pid)
+     int pid;
+{
+  procinfo *pi;
+
+  if (pid == -1 && inferior_pid != 0)
+    pi = find_procinfo (PIDGET (inferior_pid), 0);
+  else
+    pi = find_procinfo (PIDGET (pid), 0);
+
+  if (pi)
+    return pi->ctl_fd;
   else
     return -1;
 }

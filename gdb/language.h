@@ -362,15 +362,11 @@ extern char *
 extern char *
   local_hex_format_custom PARAMS ((char *));	/* language.c */
 
-#if 0
-/* FIXME: cagney/2000-03-04: This function does not appear to be used.
-   It can be deleted once 5.0 has been released. */
 /* Return a string that contains the hex digits of the number.  No preceeding
    "0x" */
 
 extern char *
   longest_raw_hex_string PARAMS ((LONGEST));
-#endif
 
 /* Return a string that contains a number formatted in one of the local
    (language-specific) formats.  Result is static and is overwritten by

@@ -1,12 +1,3 @@
-2000-04-09  Alexandre Oliva  <aoliva@cygnus.com>
-
-	* am33.igen: Make SP-relative offsets unsigned.  Add `*am33' for
-	some instructions that were missing it.
-
-2000-03-03  Alexandre Oliva  <oliva@lsd.ic.unicamp.br>
-
-	* Makefile.in (IGEN_INSN): Added am33.igen.
-
 Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

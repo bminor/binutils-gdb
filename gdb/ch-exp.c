@@ -2192,8 +2192,8 @@ ch_lex ()
 	    case LOC_OPTIMIZED_OUT:
 	      error ("Symbol \"%s\" names no location.", inputname);
 	      break;
-	    default:
-	      internal_error ("unhandled SYMBOL_CLASS in ch_lex()");
+	    case LOC_UNRESOLVED:
+	      error ("unhandled SYMBOL_CLASS in ch_lex()");
 	      break;
 	    }
 	}

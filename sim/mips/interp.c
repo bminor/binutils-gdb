@@ -456,18 +456,17 @@ sim_open (kind, cb, abfd, argv)
 			   0xA8000000 + (i * size));
 	}
 
-      /* Dummy memory regions for unsimulated devices - sorted by address */
+      /* Dummy memory regions for unsimulated devices */
 
+      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xFFFFE000, 0x01c); /* EBIF */
+      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xFFFF9000, 0x200); /* EBIF */
+      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xFFFFF500, 0x300); /* PIO */
+      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xFFFF8000, 0x804); /* DRAMC */
       sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xB1000000, 0x400); /* ISA I/O */
       sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xB2100000, 0x004); /* ISA ctl */
       sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xB2500000, 0x004); /* LED/switch */
       sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xB2700000, 0x004); /* RTC */
       sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xB3C00000, 0x004); /* RTC */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xFFFF8000, 0x900); /* DRAMC */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xFFFF9000, 0x200); /* EBIF */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xFFFFE000, 0x01c); /* EBIF */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xFFFFF500, 0x300); /* PIO */
-
 
       /* --- simulated devices --- */
       sim_hw_parse (sd, "/tx3904irc@0xffffc000/reg 0xffffc000 0x20");
@@ -2079,9 +2078,6 @@ store_fpr (SIM_DESC sd,
 	fmt = fmt_uninterpreted;
       case fmt_single :
       case fmt_word :
-       if (STATE_VERBOSE_P(SD))
-         sim_io_eprintf (SD, "Warning: PC 0x%s: interp.c store_fpr DEADCODE\n",
-	   pr_addr(cia));
        FGR[fpr] = (((uword64)0xDEADC0DE << 32) | (value & 0xFFFFFFFF));
        FPR_STATE[fpr] = fmt;
        break;
@@ -3229,10 +3225,6 @@ decode_coproc (SIM_DESC sd,
 		/* 28 = TagLo              R4000   VR4100  VR4300 */
 		/* 29 = TagHi              R4000   VR4100  VR4300 */
 		/* 30 = ErrorEPC           R4000   VR4100  VR4300 */
-		if (STATE_VERBOSE_P(SD))
-		  sim_io_eprintf (SD, 
-				  "Warning: PC 0x%lx:interp.c decode_coproc DEADC0DE\n",
-				  (unsigned long)cia);
 		GPR[rt] = 0xDEADC0DE; /* CPR[0,rd] */
 		/* CPR[0,rd] = GPR[rt]; */
 	      default:

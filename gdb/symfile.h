@@ -54,29 +54,6 @@ struct psymbol_allocation_list
     int size;
   };
 
-/* Define an array of addresses to accommodate non-contiguous dynamic
-   loading of modules.  This is for use when entering commands, so we
-   can keep track of the section names until we read the file and
-   can map them to bfd sections.  This structure is also used by
-   solib.c to communicate the section addresses in shared objects to
-   symbol_file_add (). */
- 
-#define MAX_SECTIONS 40
-struct section_addr_info 
-{
-  /* Sections whose names are always known to gdb. */
-  CORE_ADDR text_addr;
-  CORE_ADDR data_addr;
-  CORE_ADDR bss_addr;
-  /* Sections whose names are file format dependant. */
-  struct other_sections
-  {
-    CORE_ADDR addr;
-    char *name;
-    int sectindex;
-  } other[MAX_SECTIONS];
-};
-
 /* Structure to keep track of symbol reading functions for various
    object file types.  */
 
@@ -185,23 +162,6 @@ syms_from_objfile PARAMS ((struct objfile *, struct section_addr_info *, int, in
 
 extern void
 new_symfile_objfile PARAMS ((struct objfile *, int, int));
-
-extern struct objfile *
-symbol_file_add PARAMS ((char *, int, struct section_addr_info *, int, int));
-
-/* Build (allocate and populate) a section_addr_info struct from
-   an existing section table. */
-
-struct section_table;
-extern struct section_addr_info *
-build_section_addr_info_from_section_table (const struct section_table *start,
-                                            const struct section_table *end);
-
-/* Free all memory allocated by build_section_addr_info_from_section_table. */
-
-extern void
-free_section_addr_info (struct section_addr_info *);
-
 
 extern struct partial_symtab *
   start_psymtab_common PARAMS ((struct objfile *, struct section_offsets *,

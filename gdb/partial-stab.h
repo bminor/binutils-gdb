@@ -393,7 +393,7 @@ switch (CUR_SYMBOL_TYPE)
 
 #ifdef DBXREAD_ONLY
     /* See if this is an end of function stab.  */
-    if (pst && CUR_SYMBOL_TYPE == N_FUN && *namestring == '\000')
+    if (CUR_SYMBOL_TYPE == N_FUN && *namestring == '\000')
       {
 	unsigned long valu;
 

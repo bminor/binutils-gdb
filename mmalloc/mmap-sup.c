@@ -1,5 +1,5 @@
 /* Support for an sbrk-like function that uses mmap.
-   Copyright 1992, 2000 Free Software Foundation, Inc.
+   Copyright 1992 Free Software Foundation, Inc.
 
    Contributed by Fred Fish at Cygnus Support.   fnf@cygnus.com
 
@@ -22,9 +22,6 @@ Boston, MA 02111-1307, USA.  */
 
 #if defined(HAVE_MMAP)
 
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>	/* Prototypes for lseek */
-#endif
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/mman.h>
@@ -41,9 +38,7 @@ Boston, MA 02111-1307, USA.  */
    it out. */
 
 static size_t pagesize;
-#if NEED_DECLARATION_GETPAGESIZE
 extern int getpagesize PARAMS ((void));
-#endif
 
 #define PAGE_ALIGN(addr) (caddr_t) (((long)(addr) + pagesize - 1) & \
 				    ~(pagesize - 1))

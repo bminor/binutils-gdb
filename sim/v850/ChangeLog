@@ -1,7 +1,3 @@
-2000-03-24  Frank Ch. Eigler  <fche@redhat.com>
-
-	* v850.igen (ilgop): New insn pattern for four-byte breakpoints.
-
 Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

@@ -2012,7 +2012,7 @@ ppc_elf_size_dynamic_sections (output_bfd, info)
 
       if (strip)
 	{
-	  _bfd_strip_section_from_output (info, s);
+	  _bfd_strip_section_from_output (s);
 	  continue;
 	}
 
@@ -3109,9 +3109,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 							 h->root.root.string,
 							 input_bfd,
 							 input_section,
-							 rel->r_offset,
-							 (!info->shared
-							  || info->no_undefined)))
+							 rel->r_offset))
 		return false;
 	      relocation = 0;
 	    }
@@ -3141,8 +3139,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 							  h->root.root.string,
 							  input_bfd,
 							  input_section,
-							  rel->r_offset,
-							  true))
+							  rel->r_offset))
 		return false;
 	      continue;
 	    }

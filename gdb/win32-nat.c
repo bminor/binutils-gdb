@@ -1,6 +1,6 @@
 /* Target-vector operations for controlling win32 child processes, for GDB.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
-   Contributed by Cygnus Solutions, A Red Hat Company.
+   Copyright 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
+   Contributed by Cygnus Support.
 
    This file is part of GDB.
 
@@ -28,6 +28,7 @@
 #include "frame.h"		/* required by inferior.h */
 #include "inferior.h"
 #include "target.h"
+#include "wait.h"
 #include "gdbcore.h"
 #include "command.h"
 #include <signal.h>
@@ -600,11 +601,6 @@ handle_exception (struct target_waitstatus *ourstatus)
       DEBUG_EXCEPT (("gdb: Target exception SINGLE_STEP at 0x%08x\n",
 	       current_event.u.Exception.ExceptionRecord.ExceptionAddress));
       ourstatus->value.sig = TARGET_SIGNAL_TRAP;
-      break;
-    case EXCEPTION_ILLEGAL_INSTRUCTION:
-      DEBUG_EXCEPT (("gdb: Target exception SINGLE_ILL at 0x%08x\n",
-	       current_event.u.Exception.ExceptionRecord.ExceptionAddress));
-      ourstatus->value.sig = TARGET_SIGNAL_ILL;
       break;
     default:
       /* This may be a structured exception handling exception.  In
@@ -1277,4 +1273,61 @@ cygwin_pid_to_str (int pid)
   else
     sprintf (buf, "thread %d.0x%x", current_event.dwProcessId, pid);
   return buf;
+}
+
+static LPVOID __stdcall
+sfta(HANDLE h, DWORD d)
+{
+  return NULL;
+}
+
+static DWORD __stdcall
+sgmb(HANDLE h, DWORD d)
+{
+#if 0
+  return 4;
+#else
+  return SymGetModuleBase (h, d) ?: 4;
+#endif
+}
+
+CORE_ADDR
+child_frame_chain(struct frame_info *f)
+{
+  STACKFRAME *sf = (STACKFRAME *) f->extra_info;
+  if (!StackWalk (IMAGE_FILE_MACHINE_I386, current_process_handle,
+		  current_thread->h, sf, NULL, NULL, SymFunctionTableAccess, sgmb, NULL) ||
+      !sf->AddrReturn.Offset)
+    return 0;
+  return sf->AddrFrame.Offset;
+}
+
+CORE_ADDR
+child_frame_saved_pc(struct frame_info *f)
+{
+  STACKFRAME *sf = (STACKFRAME *) f->extra_info;
+  return sf->AddrReturn.Offset;
+}
+
+void
+child_init_frame(int leaf, struct frame_info *f)
+{
+  STACKFRAME *sf;
+
+  if (f->next && f->next->extra_info)
+    f->extra_info = f->next->extra_info;
+  else if (f->prev && f->prev->extra_info)
+    f->extra_info = f->prev->extra_info;
+  else
+    {
+      sf = (STACKFRAME *) frame_obstack_alloc (sizeof (*sf));
+      f->extra_info = (struct frame_extra_info *) sf;
+      memset (sf, 0, sizeof(*sf));
+      sf->AddrPC.Offset = f->pc;
+      sf->AddrPC.Mode = AddrModeFlat;
+      sf->AddrStack.Offset = current_thread->context.Esp;
+      sf->AddrStack.Mode = AddrModeFlat;
+      sf->AddrFrame.Offset = f->frame;
+      sf->AddrFrame.Mode = AddrModeFlat;
+    }
 }

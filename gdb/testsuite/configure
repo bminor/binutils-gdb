@@ -654,7 +654,6 @@ configdirs="gdb.asm \
             gdb.c++ \
             gdb.disasm \
             gdb.chill \
-            gdb.mi \
             gdb.threads \
             gdb.trace"
 

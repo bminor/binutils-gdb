@@ -28,7 +28,6 @@
 #include "parser-defs.h"
 #include "language.h"
 #include "f-lang.h"
-#include "valprint.h"
 
 /* The built-in types of F77.  FIXME: integer*4 is missing, plain
    logical is missing (builtin_type_logical is logical*4).  */
@@ -176,6 +175,8 @@ f_printstr (stream, string, length, width, force_ellipses)
   int in_quotes = 0;
   int need_comma = 0;
   extern int inspect_it;
+  extern int repeat_count_threshold;
+  extern int print_max;
 
   if (length == 0)
     {

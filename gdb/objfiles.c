@@ -370,11 +370,9 @@ unlink_objfile (objfile)
 	{
 	  *objpp = (*objpp)->next;
 	  objfile->next = NULL;
-	  return;
+	  break;
 	}
     }
-
-  internal_error ("objfiles.c (unlink_objfile): objfile already unlinked");
 }
 
 
@@ -438,6 +436,17 @@ free_objfile (objfile)
      is unknown, but we play it safe for now and keep each action until
      it is shown to be no longer needed. */
 
+#if defined (CLEAR_SOLIB)
+  CLEAR_SOLIB ();
+  /* CLEAR_SOLIB closes the bfd's for any shared libraries.  But
+     the to_sections for a core file might refer to those bfd's.  So
+     detach any core file.  */
+  {
+    struct target_ops *t = find_core_target ();
+    if (t != NULL)
+      (t->to_detach) (NULL, 0);
+  }
+#endif
   /* I *think* all our callers call clear_symtab_users.  If so, no need
      to call this here.  */
   clear_pc_function_cache ();
@@ -856,7 +865,7 @@ open_mapped_file (filename, mtime, flags)
     {
       free (symsfilename);
       symsfilename = concat (filename, ".syms", (char *) NULL);
-      fd = open_existing_mapped_file (symsfilename, mtime, flags);
+      fd = open_existing_mapped_file (symsfilename, mtime, mapped);
     }
 
   /* If we don't have an open file by now, then either the file does not
@@ -868,7 +877,7 @@ open_mapped_file (filename, mtime, flags)
      By default the file is rw for everyone, with the user's umask taking
      care of turning off the permissions the user wants off. */
 
-  if ((fd < 0) && (flags & OBJF_MAPPED))
+  if ((fd < 0) && mapped)
     {
       free (symsfilename);
       symsfilename = concat ("./", basename (filename), ".syms",

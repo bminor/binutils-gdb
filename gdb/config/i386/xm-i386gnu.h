@@ -20,7 +20,5 @@
 
 #define HOST_BYTE_ORDER LITTLE_ENDIAN
 
-#define HOST_LONG_DOUBLE_FORMAT &floatformat_i387_ext
-
 /* Do implement the attach and detach commands.  */
 #define ATTACH_DETACH	1

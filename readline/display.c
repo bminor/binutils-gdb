@@ -1126,10 +1126,8 @@ _rl_move_vert (to)
   {
     int row, col;
 
-    i = fflush (rl_outstream);	/* make sure the cursor pos is current! */
     ScreenGetCursor (&row, &col);
     ScreenSetCursor ((row + to - _rl_last_v_pos), col);
-    delta = i;
   }
 #else /* !__GO32__ */
 
@@ -1379,10 +1377,7 @@ space_to_eol (count)
 void
 _rl_clear_screen ()
 {
-#if defined (__GO32__)
-  ScreenClear ();	/* FIXME: only works in text modes */
-  ScreenSetCursor (0, 0);  /* term_clrpag is "cl" which homes the cursor */
-#else
+#if !defined (__GO32__)
   if (term_clrpag)
     tputs (term_clrpag, 1, _rl_output_character_function);
   else
@@ -1397,7 +1392,6 @@ insert_some_chars (string, count)
      int count;
 {
 #if defined (__GO32__)
-#ifndef __DJGPP__
   int row, col, width;
   char *row_start;
 
@@ -1406,7 +1400,7 @@ insert_some_chars (string, count)
   row_start = ScreenPrimary + (row * width);
 
   memcpy (row_start + col + count, row_start + col, width - col - count);
-#endif /* !__DJGPP__ */
+
   /* Place the text on the screen. */
   _rl_output_some_chars (string, count);
 #else /* !_GO32 */
@@ -1451,7 +1445,6 @@ static void
 delete_chars (count)
      int count;
 {
-#if !defined (__DJGPP__)
 #if defined (__GO32__)
   int row, col, width;
   char *row_start;
@@ -1480,7 +1473,6 @@ delete_chars (count)
 	  tputs (term_dc, 1, _rl_output_character_function);
     }
 #endif /* !__GO32__ */
-#endif /* !__DJGPP__ */
 }
 
 void

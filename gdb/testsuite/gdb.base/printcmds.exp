@@ -552,22 +552,6 @@ proc test_print_int_arrays {} {
 	" = {{{{0, 1}, {2, 3}, {4, 5}}, {{6, 7}, {8, 9}, {10, 11}}}}"
 }
 
-proc test_print_typedef_arrays {} {
-    global gdb_prompt
-
-    gdb_test "set print elements 24" ""
-
-    gdb_test "p a1" \
-	" = {2, 4, 6, 8, 10, 12, 14, 16, 18, 20}"
-    gdb_test "p a1\[0\]" " = 2"
-    gdb_test "p a1\[9\]" " = 20"
-
-    gdb_test "p a2" \
-	" = \"abcd\""
-    gdb_test "p a2\[0\]" " = 97 'a'"
-    gdb_test "p a2\[3\]" " = 100 'd'"
-}
-
 proc test_artificial_arrays {} {
     # Send \026@ instead of just @ in case the kill character is @.
     gdb_test "p int1dim\[0\]\026@2" " = {0, 1}" {p int1dim[0]@2}
@@ -707,7 +691,6 @@ if [set_lang_c] then {
 	test_print_repeats_10
 	test_print_strings
 	test_print_int_arrays
-	test_print_typedef_arrays
 	test_artificial_arrays
 	test_print_char_arrays
 # We used to do the runto main here.

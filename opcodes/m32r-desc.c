@@ -252,7 +252,6 @@ const CGEN_HW_ENTRY m32r_cgen_hw_table[] =
 const CGEN_IFLD m32r_cgen_ifld_table[] =
 {
   { M32R_F_NIL, "f-nil", 0, 0, 0, 0, { 0, { (1<<MACH_BASE) } }  },
-  { M32R_F_ANYOF, "f-anyof", 0, 0, 0, 0, { 0, { (1<<MACH_BASE) } }  },
   { M32R_F_OP1, "f-op1", 0, 32, 0, 4, { 0, { (1<<MACH_BASE) } }  },
   { M32R_F_OP2, "f-op2", 0, 32, 8, 4, { 0, { (1<<MACH_BASE) } }  },
   { M32R_F_COND, "f-cond", 0, 32, 4, 4, { 0, { (1<<MACH_BASE) } }  },
@@ -1016,7 +1015,7 @@ static const CGEN_IBASE m32r_cgen_insn_table[MAX_INSNS] =
 /* pcmpbz $src2 */
   {
     M32R_INSN_PCMPBZ, "pcmpbz", "pcmpbz", 16,
-    { 0|A(SPECIAL), { (1<<MACH_M32RX), PIPE_OS } }
+    { 0, { (1<<MACH_M32RX), PIPE_OS } }
   },
 /* sadd */
   {
@@ -1338,9 +1337,6 @@ m32r_cgen_cpu_open (enum cgen_cpu_open_arg arg_type, ...)
   cd->rebuild_tables = m32r_cgen_rebuild_tables;
   m32r_cgen_rebuild_tables (cd);
 
-  /* Initialise flags.  */
-  cd->signed_overflow_ok_p = 0;
-  
   return (CGEN_CPU_DESC) cd;
 }
 

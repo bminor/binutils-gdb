@@ -73,8 +73,7 @@ Thumb specific format options:
 /* Note: There is a partial ordering in this table - it must be searched from
    the top to obtain a correct match. */
 
-static struct arm_opcode arm_opcodes[] =
-{
+static struct arm_opcode arm_opcodes[] = {
     /* ARM instructions */
     {0xe1a00000, 0xffffffff, "nop\t\t\t(mov r0,r0)"},
     {0x012FFF10, 0x0ffffff0, "bx%c\t%0-3r"},
@@ -164,8 +163,7 @@ static struct arm_opcode arm_opcodes[] =
     {0x0e000010, 0x0f100010, "mcr%c\t%8-11d, %21-23d, %12-15r, cr%16-19d, cr%0-3d, {%5-7d}"},
     {0x0c000000, 0x0e100000, "stc%c%22'l\t%8-11d, cr%12-15d, %A"},
     {0x0c100000, 0x0e100000, "ldc%c%22'l\t%8-11d, cr%12-15d, %A"},
-    
-    /* The rest.  */
+    /* the rest */
     {0x00000000, 0x00000000, "undefined instruction %0-31x"},
     {0x00000000, 0x00000000, 0}
 };
@@ -267,7 +265,7 @@ static struct thumb_opcode thumb_opcodes[] =
   {0xDC00, 0xFF00, "bgt\t%0-7B"},
   {0xDD00, 0xFF00, "ble\t%0-7B"},
   /* format 17 */
-  {0xDE00, 0xFF00, "bal\t%0-7B"},
+  {0xDE00, 0xFF00, "undefined"},
   {0xDF00, 0xFF00, "swi\t%0-7d"},
   /* format 9 */
   {0x6000, 0xF800, "str\t%0-2r, [%3-5r, #%6-10W]"},

@@ -32,13 +32,6 @@ enum varobj_display_formats
     FORMAT_OCTAL		/* Octal display                     */
   };
 
-enum varobj_type
-  {
-    USE_SPECIFIED_FRAME,        /* Use the frame passed to varobj_create */
-    USE_CURRENT_FRAME,          /* Use the current frame */
-    USE_SELECTED_FRAME          /* Always reevaluate in selected frame */
-  };
-    
 /* String representations of gdb's format codes (defined in varobj.c) */
 extern char *varobj_format_string[];
 
@@ -57,8 +50,7 @@ struct varobj;
 /* API functions */
 
 extern struct varobj *varobj_create (char *objname,
-				     char *expression, CORE_ADDR frame,
-				     enum varobj_type type);
+				     char *expression, CORE_ADDR frame);
 
 extern char *varobj_gen_name (void);
 

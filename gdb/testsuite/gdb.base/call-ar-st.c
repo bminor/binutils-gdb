@@ -625,8 +625,8 @@ three_char, five_char,int_char_combo, d1, d2,d3,f1,f2,f3)
      init_struct_rep(struct3, 5);
      init_struct_rep(struct4, 6);
      init_one_double ( d1, 10.5); 
-     init_one_double ( d2, -3.375); 
-     init_one_double ( d3, 675.09375); 
+     init_one_double ( d2, -3.34); 
+     init_one_double ( d3, 675.09123); 
      init_two_floats ( f1, 45.234, 43.6); 
      init_two_floats ( f2, 78.01, 122.10); 
      init_two_floats ( f3, -1232.345, -199.21); 
@@ -1276,8 +1276,8 @@ int main ()  {
 
   /* Print a very long arg list 
    */
-  a = 22.25;
-  b = 33.375;
+  a = 22.22;
+  b = 33.333;
   c = 0;
   d = -25;
   e = 100;

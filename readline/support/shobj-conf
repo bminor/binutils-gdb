@@ -305,12 +305,6 @@ dgux*)
 
 	SHLIB_LIBVERSION='$(SHLIB_LIBSUFF).$(SHLIB_MAJOR)'
 	;;
-
-msdosdjgpp*)
-	SHOBJ_STATUS=unsupported
-	SHLIB_STATUS=unsupported
-	;;
-
 #
 # Rely on correct gcc configuration for everything else
 #

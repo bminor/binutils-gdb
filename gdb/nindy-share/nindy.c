@@ -78,7 +78,7 @@
 #include "ttycntl.h"
 #endif
 #include "block_io.h"
-#include "gdb_wait.h"
+#include "wait.h"
 #include "env.h"
 
 #define DLE	0x10	/* ^P */

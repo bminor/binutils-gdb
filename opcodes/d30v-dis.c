@@ -1,5 +1,5 @@
 /* Disassemble D30V instructions.
-   Copyright (C) 1997, 1998, 2000 Free Software Foundation, Inc.
+   Copyright (C) 1997, 1998 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -305,41 +305,38 @@ print_insn ( info, memaddr, num, insn, is_long, show_ext )
 		(info->stream, _("<unknown register %d>"), val & 0x3F);	      
 	    }
 	}
-      /* repeati has a relocation, but its first argument is a plain
-	 immediate.  OTOH instructions like djsri have a pc-relative
-	 delay target, but a absolute jump target.  Therefore, a test
-	 of insn->op->reloc_flag is not specific enough; we must test
-	 if the actual operand we are handling now is pc-relative.  */
-      else if (oper->flags & OPERAND_PCREL)
+      else if (insn->op->reloc_flag == RELOC_PCREL || 
+	       (opind == 1 && (insn->form->form == SHORT_D2 || insn->form->form == LONG_D)))
 	{
-	  int neg = 0;
-	  
-	  /* IMM6S3 is unsigned.  */
-	  if (oper->flags & OPERAND_SIGNED || bits == 32)
+	  long max;
+	  int neg=0;
+	  max = (1 << (bits - 1));
+	  if (val & max)
 	    {
-	      long max;
-	      max = (1 << (bits - 1));
-	      if (val & max)
-		{
-		  if (bits == 32)
-		    val = -val;
-		  else
-		    val = -val & ((1 << bits)-1);
-		  neg = 1;
-		}
+	      if (bits == 32)
+		val = -val;
+	      else
+		val = -val & ((1 << bits)-1);
+	      neg = 1;
 	    }
-	  if (neg)
+	  if (opind == 1 && (insn->form->form == SHORT_D2 || insn->form->form == LONG_D))
 	    {
-	      (*info->fprintf_func) (info->stream, "-%x\t(",val);
-	      (*info->print_address_func) ((memaddr - val) & PC_MASK, info);
-	      (*info->fprintf_func) (info->stream, ")");
+	      (*info->fprintf_func) (info->stream, "%x",val);
 	    }
-	  else
-	    {
-	      (*info->fprintf_func) (info->stream, "%x\t(",val);
-	      (*info->print_address_func) ((memaddr + val) & PC_MASK, info);
-	      (*info->fprintf_func) (info->stream, ")");
-	    }
+	  else {
+	    if (neg)
+	      {
+		(*info->fprintf_func) (info->stream, "-%x\t(",val);
+		(*info->print_address_func) ((memaddr - val) & PC_MASK, info);
+		(*info->fprintf_func) (info->stream, ")");
+	      }
+	    else
+	      {
+		(*info->fprintf_func) (info->stream, "%x\t(",val);
+		(*info->print_address_func) ((memaddr + val) & PC_MASK, info);
+		(*info->fprintf_func) (info->stream, ")");
+	      }
+	  }
 	}
       else if (insn->op->reloc_flag == RELOC_ABS)
 	{

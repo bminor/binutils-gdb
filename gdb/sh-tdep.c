@@ -88,11 +88,9 @@ static char *sh3e_reg_names[] = {
 };
 /* *INDENT-ON* */
 
-#ifdef _WIN32_WCE
-char **sh_register_names = sh3_reg_names;
-#else
+
+
 char **sh_register_names = sh_generic_reg_names;
-#endif
 
 struct
   {
@@ -106,15 +104,15 @@ sh_processor_type_table[] =
   }
   ,
   {
-    sh_reg_names, bfd_mach_sh2
-  }
-  ,
-  {
     sh3_reg_names, bfd_mach_sh3
   }
   ,
   {
     sh3e_reg_names, bfd_mach_sh3e
+  }
+  ,
+  {
+    sh3e_reg_names, bfd_mach_sh4
   }
   ,
   {
@@ -637,6 +635,10 @@ sh_show_regs (args, from_tty)
     cpu = TARGET_ARCHITECTURE->mach;
   else
     cpu = 0;
+
+  /* FIXME: sh4 has more registers */
+  if (cpu == bfd_mach_sh4)
+    cpu = bfd_mach_sh3;
 
   printf_filtered ("PC=%s SR=%08lx PR=%08lx MACH=%08lx MACHL=%08lx\n",
 		   paddr (read_register (PC_REGNUM)),

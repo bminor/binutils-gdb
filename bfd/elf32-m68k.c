@@ -847,8 +847,8 @@ elf_m68k_gc_sweep_hook (abfd, info, sec, relocs)
   unsigned long r_symndx;
   struct elf_link_hash_entry *h;
   bfd *dynobj;
-  asection *sgot = NULL;
-  asection *srelgot = NULL;
+  asection *sgot;
+  asection *srelgot;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
@@ -1262,7 +1262,7 @@ elf_m68k_size_dynamic_sections (output_bfd, info)
 
       if (strip)
 	{
-	  _bfd_strip_section_from_output (info, s);
+	  _bfd_strip_section_from_output (s);
 	  continue;
 	}
 
@@ -1485,8 +1485,7 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      if (!(info->callbacks->undefined_symbol
 		    (info, h->root.root.string, input_bfd,
-		     input_section, rel->r_offset,
-		     (!info->shared || info->no_undefined))))
+		     input_section, rel->r_offset)))
 		return false;
 	      relocation = 0;
 	    }

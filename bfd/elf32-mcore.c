@@ -454,7 +454,7 @@ mcore_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       Elf_Internal_Sym *           sym = (Elf_Internal_Sym *) 0;
       unsigned long                r_symndx;
       struct elf_link_hash_entry * h = (struct elf_link_hash_entry *) 0;
-      unsigned short               oldinst = 0;
+      unsigned short               oldinst;
       
       /* Unknown relocation handling */
       if ((unsigned) r_type >= (unsigned) R_MCORE_max
@@ -538,7 +538,7 @@ mcore_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 			(info, h->root.root.string, input_bfd,
-		 	 input_section, rel->r_offset, true)))
+		 	 input_section, rel->r_offset)))
 		return false;
 
 	      ret = false;

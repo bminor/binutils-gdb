@@ -1,5 +1,5 @@
 /* DWARF 2 support.
-   Copyright 1994, 95, 96, 97, 98, 99, 2000 Free Software Foundation, Inc.
+   Copyright 1994, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
 
    Adapted from gdb/dwarf2read.c by Gavin Koch of Cygnus Solutions
    (gavin@cygnus.com).
@@ -102,9 +102,6 @@ struct dwarf2_debug {
 
   /* Buffer for decode_line_info.  */
   char *dwarf_line_buffer;
-
-  /* Length of the loaded .debug_line section.  */
-  unsigned long dwarf_line_size;
 };
 
 struct arange {
@@ -339,17 +336,15 @@ read_address (unit, buf)
      struct comp_unit* unit;
      char *buf;
 {
-  switch (unit->addr_size)
+  bfd_vma retval = 0;
+
+  if (unit->addr_size == 4)
     {
-    case 8:
-      return bfd_get_64 (unit->abfd, (bfd_byte *) buf);
-    case 4:
-      return bfd_get_32 (unit->abfd, (bfd_byte *) buf);
-    case 2:
-      return bfd_get_16 (unit->abfd, (bfd_byte *) buf);
-    default:
-      abort ();
+      retval = bfd_get_32 (unit->abfd, (bfd_byte *) buf);
+    } else {
+      retval = bfd_get_64 (unit->abfd, (bfd_byte *) buf);
     }
+  return retval;
 }
 
 
@@ -434,7 +429,7 @@ read_abbrevs (abfd, offset)
 	  return 0;
 	}
       
-      stash->dwarf_abbrev_size = msec->_raw_size;
+      stash->dwarf_abbrev_size = bfd_get_section_size_before_reloc (msec);
       stash->dwarf_abbrev_buffer = (char*) bfd_alloc (abfd, stash->dwarf_abbrev_size);
       if (! stash->dwarf_abbrev_buffer)
 	  return 0;
@@ -786,6 +781,7 @@ decode_line_info (unit)
   if (! stash->dwarf_line_buffer)
     {
       asection *msec;
+      unsigned long size;
 
       msec = bfd_get_section_by_name (abfd, ".debug_line");
       if (! msec)
@@ -795,29 +791,18 @@ decode_line_info (unit)
 	  return 0;
 	}
       
-      stash->dwarf_line_size = msec->_raw_size;
-      stash->dwarf_line_buffer = (char *) bfd_alloc (abfd, stash->dwarf_line_size);
+      size = bfd_get_section_size_before_reloc (msec);
+      stash->dwarf_line_buffer = (char *) bfd_alloc (abfd, size);
       if (! stash->dwarf_line_buffer)
 	return 0;
 
       if (! bfd_get_section_contents (abfd, msec, 
 				      stash->dwarf_line_buffer, 0,
-				      stash->dwarf_line_size))
+				      size))
 	return 0;
 
       /* FIXME: We ought to apply the relocs against this section before
 	 we process it.... */
-    }
-
-  /* Since we are using un-relocated data, it is possible to get a bad value
-     for the line_offset.  Validate it here so that we won't get a segfault
-     below.  */
-  if (unit->line_offset >= stash->dwarf_line_size)
-    {
-      (*_bfd_error_handler) (_("Dwarf Error: Line offset (%u) bigger than line size (%u)."),
-			     unit->line_offset, stash->dwarf_line_size);
-      bfd_set_error (bfd_error_bad_value);
-      return 0;
     }
 
   table = (struct line_info_table*) bfd_alloc (abfd, 
@@ -1292,9 +1277,9 @@ parse_comp_unit (abfd, info_ptr, end_ptr, abbrev_length)
       return 0;
     }
 
-  if (addr_size != 2 && addr_size != 4 && addr_size != 8)
+  if (addr_size != 4 && addr_size != 8)
     {
-      (*_bfd_error_handler) ("Dwarf Error: found address size '%u', this reader can only handle address sizes '2', '4' and '8'.", addr_size );
+      (*_bfd_error_handler) ("Dwarf Error: found address size '%u', this reader can only handle address sizes '4' and '8'.", addr_size );
       bfd_set_error (bfd_error_bad_value);
       return 0;
     }
@@ -1531,7 +1516,7 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
 	  return false;
 	}
 
-      size = msec->_raw_size;
+      size = bfd_get_section_size_before_reloc (msec);
       if (size == 0)
 	return false;
       

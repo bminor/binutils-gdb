@@ -623,7 +623,7 @@ mn10300_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.root.string, input_bfd,
-		      input_section, rel->r_offset, true)))
+		      input_section, rel->r_offset)))
 		return false;
 	      relocation = 0;
 	    }
@@ -662,7 +662,7 @@ mn10300_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    case bfd_reloc_undefined:
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, name, input_bfd, input_section,
-		      rel->r_offset, true)))
+		      rel->r_offset)))
 		return false;
 	      break;
 
@@ -849,7 +849,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	    {
 	      struct elf32_mn10300_link_hash_entry *hash;
 	      Elf_Internal_Sym *sym;
-	      asection *sym_sec = NULL;
+	      asection *sym_sec;
 	      const char *sym_name;
 	      char *new_name;
 
@@ -930,7 +930,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 			    sym_sec = bfd_abs_section_ptr;
 			  else if (isym.st_shndx == SHN_COMMON)
 			    sym_sec = bfd_com_section_ptr;
-			  
+
 			  sym_name = bfd_elf_string_from_elf_section (input_bfd,
 							   symtab_hdr->sh_link,
 							   isym.st_name);
@@ -1193,7 +1193,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		{
 		  Elf_Internal_Sym isym;
 		  struct elf32_mn10300_link_hash_entry *sym_hash;
-		  asection *sym_sec = NULL;
+		  asection *sym_sec;
 		  const char *sym_name;
 		  char *new_name;
 
@@ -1211,9 +1211,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		    sym_sec = bfd_abs_section_ptr;
 		  else if (isym.st_shndx == SHN_COMMON)
 		    sym_sec = bfd_com_section_ptr;
-		  else
-		    abort ();
-		  
+
 		  sym_name = bfd_elf_string_from_elf_section (input_bfd,
 							symtab_hdr->sh_link,
 							isym.st_name);
@@ -1463,7 +1461,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
       if (ELF32_R_SYM (irel->r_info) < symtab_hdr->sh_info)
 	{
 	  Elf_Internal_Sym isym;
-	  asection *sym_sec = NULL;
+	  asection *sym_sec;
 	  const char *sym_name;
 	  char *new_name;
 
@@ -1480,9 +1478,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	    sym_sec = bfd_abs_section_ptr;
 	  else if (isym.st_shndx == SHN_COMMON)
 	    sym_sec = bfd_com_section_ptr;
-	  else
-	    abort ();
-	  
+
 	  symval = (isym.st_value
 		    + sym_sec->output_section->vma
 		    + sym_sec->output_offset);

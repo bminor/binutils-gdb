@@ -576,27 +576,27 @@ static void
 step_1_continuation (arg)
      struct continuation_arg *arg;
 {
-  int count;
-  int skip_subroutines;
-  int single_inst;
+ int count;
+ int skip_subroutines;
+ int single_inst;
 
-  skip_subroutines = arg->data.integer;
-  single_inst      = arg->next->data.integer;
-  count            = arg->next->next->data.integer;
+ skip_subroutines = (int) arg->data;
+ single_inst = (int) (arg->next)->data;
+ count = (int) ((arg->next)->next)->data;
 
-  if (stop_step)
-    {
-      /* FIXME: On nexti, this may have already been done (when we hit the
-	 step resume break, I think).  Probably this should be moved to
-	 wait_for_inferior (near the top).  */
+ if (stop_step)
+   {
+     /* FIXME: On nexti, this may have already been done (when we hit the
+	step resume break, I think).  Probably this should be moved to
+	wait_for_inferior (near the top).  */
 #if defined (SHIFT_INST_REGS)
-      SHIFT_INST_REGS ();
+     SHIFT_INST_REGS ();
 #endif
-      step_once (skip_subroutines, single_inst, count - 1);
-    }
-  else
-    if (!single_inst || skip_subroutines)
-      do_exec_cleanups (ALL_CLEANUPS);
+     step_once (skip_subroutines, single_inst, count - 1);
+   }
+ else
+   if (!single_inst || skip_subroutines)
+     do_exec_cleanups (ALL_CLEANUPS);
 }
 
 /* Do just one step operation. If count >1 we will have to set up a
@@ -662,11 +662,11 @@ which has no line number information.\n", name);
       arg3 =
 	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
       arg1->next = arg2;
-      arg1->data.integer = skip_subroutines;
+      arg1->data = (PTR) skip_subroutines;
       arg2->next = arg3;
-      arg2->data.integer = single_inst;
+      arg2->data = (PTR) single_inst;
       arg3->next = NULL;
-      arg3->data.integer = count;
+      arg3->data = (PTR) count;
       add_intermediate_continuation (step_1_continuation, arg1);
       proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
     }
@@ -926,12 +926,20 @@ run_stack_dummy (addr, buffer)
 
   discard_cleanups (old_cleanups);
 
-  /* We can stop during an inferior call because a signal is received. */
   if (stopped_by_random_signal)
-    return 1;
+    {
+      /* If the inferior execution fails we need to restore our
+         stack.  It is not done by proceed() in this case. */
+      /* Pop the empty frame that contains the stack dummy.
+         POP_FRAME ends with a setting of the current frame, so we
+         can use that next. */
+      POP_FRAME;
+      return 1;
+    }
     
   /* We may also stop prematurely because we hit a breakpoint in the
-     called routine. */
+     called routine.  We do not pop the frame as the user may wish
+     to single step or continue from there. */
   if (!stop_stack_dummy)
     return 2;
 
@@ -1108,9 +1116,9 @@ finish_command_continuation (arg)
   struct breakpoint *breakpoint;
   struct cleanup *cleanups;
 
-  breakpoint = (struct breakpoint *) arg->data.pointer;
-  function   = (struct symbol *)     arg->next->data.pointer;
-  cleanups   = (struct cleanup *)    arg->next->next->data.pointer;
+  breakpoint = (struct breakpoint *) arg->data;
+  function = (struct symbol *) (arg->next)->data;
+  cleanups = (struct cleanup *) (arg->next->next)->data;
 
   if (bpstat_find_breakpoint (stop_bpstat, breakpoint) != NULL
       && function != 0)
@@ -1225,9 +1233,9 @@ finish_command (arg, from_tty)
       arg1->next = arg2;
       arg2->next = arg3;
       arg3->next = NULL;
-      arg1->data.pointer = breakpoint;
-      arg2->data.pointer = function;
-      arg3->data.pointer = old_chain;
+      arg1->data = (PTR) breakpoint;
+      arg2->data = (PTR) function;
+      arg3->data = (PTR) old_chain;
       add_continuation (finish_command_continuation, arg1);
     }
 

@@ -336,16 +336,6 @@ CODE_FRAGMENT
 .	   executables or shared objects.  *}
 .#define SEC_SHARED 0x4000000
 .
-.	{* When a section with this flag is being linked, then if the size of
-.          the input section is less than a page, it should not cross a page
-.          boundary.  If the size of the input section is one page or more, it
-.          should be aligned on a page boundary.  *}
-.#define SEC_BLOCK 0x8000000
-.
-.	{* Conditionally link this section; do not link if there are no
-.          references found to any symbol in the section.  *}
-.#define SEC_CLINK 0x10000000
-.
 .	{*  End of section flags.  *}
 .
 .	{* Some internal packed boolean fields.  *}
@@ -518,11 +508,9 @@ CODE_FRAGMENT
 .extern const struct symbol_cache_entry * const bfd_und_symbol;
 .extern const struct symbol_cache_entry * const bfd_ind_symbol;
 .#define bfd_get_section_size_before_reloc(section) \
-.     ((section)->reloc_done ? (abort (), (bfd_size_type) 1) \
-.                            : (section)->_raw_size)
+.     (section->reloc_done ? (abort(),1): (section)->_raw_size)
 .#define bfd_get_section_size_after_reloc(section) \
-.     ((section)->reloc_done ? (section)->_cooked_size \
-.                            : (abort (), (bfd_size_type) 1))
+.     ((section->reloc_done) ? (section)->_cooked_size: (abort(),1))
 */
 
 /* We use a macro to initialize the static asymbol structures because
@@ -1112,28 +1100,20 @@ FUNCTION
 
 SYNOPSIS
 	void _bfd_strip_section_from_output
-	(struct bfd_link_info *info, asection *section);
+	(asection *section);
 
 DESCRIPTION
-	Remove @var{section} from the output.  If the output section
-	becomes empty, remove it from the output bfd.  @var{info} may
-	be NULL; if it is not, it is used to decide whether the output
-	section is empty.
+	Remove @var{section} from the output.  If the output section becomes
+	empty, remove it from the output bfd.
 */
 void
-_bfd_strip_section_from_output (info, s)
-     struct bfd_link_info *info;
+_bfd_strip_section_from_output (s)
      asection *s;
 {
   asection **spp, *os;
   struct bfd_link_order *p, *pp;
-  boolean keep_os;
 
-  /* Excise the input section from the link order.
-
-     FIXME: For all calls that I can see to this function, the link
-     orders have not yet been set up.  So why are we checking them? --
-     Ian */
+  /* Excise the input section from the link order.  */
   os = s->output_section;
   for (p = os->link_order_head, pp = NULL; p != NULL; pp = p, p = p->next)
     if (p->type == bfd_indirect_link_order
@@ -1148,30 +1128,10 @@ _bfd_strip_section_from_output (info, s)
 	break;
       }
 
-  keep_os = os->link_order_head != NULL;
-
-  if (! keep_os && info != NULL)
-    {
-      bfd *abfd;
-      for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link_next)
-	{
-	  asection *is;
-	  for (is = abfd->sections; is != NULL; is = is->next)
-	    {
-	      if (is != s && is->output_section == os)
-		break;
-	    }
-	  if (is != NULL)
-	    break;
-	}
-      if (abfd != NULL)
-	keep_os = true;
-    }
-
   /* If the output section is empty, remove it too.  Careful about sections
      that have been discarded in the link script -- they are mapped to 
      bfd_abs_section, which has no owner.  */
-  if (!keep_os && os->owner != NULL)
+  if (!os->link_order_head && os->owner)
     {
       for (spp = &os->owner->sections; *spp; spp = &(*spp)->next)
 	if (*spp == os)

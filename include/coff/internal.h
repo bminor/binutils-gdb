@@ -53,7 +53,7 @@ struct internal_filehdr
   long f_nsyms;			/* number of symtab entries	*/
   unsigned short f_opthdr;	/* sizeof(optional hdr)		*/
   unsigned short f_flags;	/* flags			*/
-  unsigned short f_target_id;	/* (TI COFF specific)		*/
+  unsigned short f_target_id;	/* (TIc80 specific)		*/
 };
 
 
@@ -222,7 +222,7 @@ struct internal_aouthdr
 
 #define C_WEAKEXT	127	/* weak symbol -- GNU extension */
 
-/* New storage classes for TI COFF */
+/* New storage classes for TIc80 */
 #define C_UEXT		19	/* Tentative external definition */
 #define C_STATLAB	20	/* Static load time label */
 #define C_EXTLAB	21	/* External load time label */
@@ -671,7 +671,7 @@ struct internal_reloc
 #define R_MOVL1    	0x4c
 
 /* This reloc identifies mov.[wl] insns which formerlly had
-   a 32/24bit absolute address and now have a 16bit absolute address.  */
+   a 32/24bit absolute address and how have a 16bit absolute address.  */
 #define R_MOVL2 	0x4d
 
 /* This reloc identifies a bCC:8 which will have it's condition

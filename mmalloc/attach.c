@@ -1,5 +1,5 @@
 /* Initialization for access to a mmap'd malloc managed region.
-   Copyright 1992, 2000 Free Software Foundation, Inc.
+   Copyright 1992 Free Software Foundation, Inc.
 
    Contributed by Fred Fish at Cygnus Support.   fnf@cygnus.com
 
@@ -24,9 +24,6 @@ Boston, MA 02111-1307, USA.  */
 #include <fcntl.h> /* After sys/types.h, at least for dpx/2.  */
 #include <sys/stat.h>
 #include <string.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>	/* Prototypes for lseek */
-#endif
 #include "mmprivate.h"
 
 #ifndef SEEK_SET

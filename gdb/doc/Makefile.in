@@ -40,10 +40,6 @@ TEXIDIR=${gdbdir}/../texinfo
 # where to find makeinfo, preferably one designed for texinfo-2
 MAKEINFO=makeinfo
 
-# Note that texinfo 4.0's makeinfo --html can only generate a
-# single file, which would be too large, so continue to use
-# texi2html. -sts 2000-03-28
-
 MAKEHTML = texi2html
 MAKEHTMLFLAGS = -glossary -menu -split_chapter
 
@@ -87,7 +83,7 @@ TEXINDEX = texindex
 DVIPS = dvips
 
 # Main GDB manual's source files
-SFILES_INCLUDED = gdb-cfg.texi $(srcdir)/annotate.texi
+SFILES_INCLUDED = gdb-cfg.texi
 
 SFILES_LOCAL = $(srcdir)/gdb.texinfo GDBvn.texi $(SFILES_INCLUDED)
 
@@ -104,10 +100,8 @@ dvi: gdb.dvi gdbint.dvi stabs.dvi refcard.dvi
 ps: gdb.ps gdbint.ps stabs.ps refcard.ps
 html: gdb_toc.html gdbint_toc.html stabs_toc.html
 all-doc: info dvi ps
-diststuff: info
 
 install-info: info
-	$(SHELL) $(srcdir)/../../mkinstalldirs $(infodir)
 	for i in *.info* ; do \
 		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
 	done

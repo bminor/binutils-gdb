@@ -500,7 +500,6 @@ extern struct frame_info *setup_arbitrary_frame PARAMS ((int, CORE_ADDR *));
 
 #define ECOFF_REG_TO_REGNUM(num) ((num) < 32 ? (num) : (num)+FP0_REGNUM-32)
 
-#if !GDB_MULTI_ARCH
 /* If the current gcc for for this target does not produce correct debugging
    information for float parameters, both prototyped and unprototyped, then
    define this macro.  This forces gdb to  always assume that floats are
@@ -513,8 +512,7 @@ extern struct frame_info *setup_arbitrary_frame PARAMS ((int, CORE_ADDR *));
    for C and break the prototyped case, since the non-prototyped case is
    probably much more common.  (FIXME). */
 
-#define COERCE_FLOAT_TO_DOUBLE(formal, actual) (current_language -> la_language == language_c)
-#endif
+#define COERCE_FLOAT_TO_DOUBLE (current_language -> la_language == language_c)
 
 /* Select the default mips disassembler */
 

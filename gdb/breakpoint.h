@@ -693,8 +693,4 @@ extern struct breakpoint *set_breakpoint_sal PARAMS ((struct symtab_and_line));
    deletes all breakpoints. */
 extern void delete_command (char *arg, int from_tty);
 
-/* Pull all H/W watchpoints from the target. Return non-zero if the
-   remove fails. */
-extern int remove_hw_watchpoints (void);
-
 #endif /* !defined (BREAKPOINT_H) */

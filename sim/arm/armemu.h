@@ -170,8 +170,8 @@ extern ARMword isize;
                         ASSIGNV((state->Reg[15] & VBIT) != 0) ; \
                         } \
                      else { \
-                        state->Reg[15] = R15PC | ((s) & (CCBITS | R15INTBITS | R15MODEBITS)) ; \
-                        ARMul_R15Altered (state) ; \
+                        state->Reg[15] = R15PC | (s) & (CCBITS | R15INTBITS | R15MODEBITS) ; \
+                        ARMul_R15Altered(state) ; \
                         }
 #define SETABORT(i,m) state->Cpsr = ECC | EINT | (i) | (m)
 

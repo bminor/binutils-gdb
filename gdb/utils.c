@@ -31,10 +31,6 @@
 #include <term.h>
 #endif
 
-#ifdef __GO32__
-#include <pc.h>
-#endif
-
 /* SunOS's curses.h has a '#define reg register' in it.  Thank you Sun. */
 #ifdef reg
 #undef reg
@@ -160,31 +156,41 @@ int pagination_enabled = 1;
    Args are FUNCTION to clean up with, and ARG to pass to it.  */
 
 struct cleanup *
-make_cleanup (make_cleanup_ftype *function, void *arg)
+make_cleanup (function, arg)
+     void (*function) PARAMS ((PTR));
+     PTR arg;
 {
   return make_my_cleanup (&cleanup_chain, function, arg);
 }
 
 struct cleanup *
-make_final_cleanup (make_cleanup_ftype *function, void *arg)
+make_final_cleanup (function, arg)
+     void (*function) PARAMS ((PTR));
+     PTR arg;
 {
   return make_my_cleanup (&final_cleanup_chain, function, arg);
 }
 
 struct cleanup *
-make_run_cleanup (make_cleanup_ftype *function, void *arg)
+make_run_cleanup (function, arg)
+     void (*function) PARAMS ((PTR));
+     PTR arg;
 {
   return make_my_cleanup (&run_cleanup_chain, function, arg);
 }
 
 struct cleanup *
-make_exec_cleanup (make_cleanup_ftype *function, void *arg)
+make_exec_cleanup (function, arg)
+     void (*function) PARAMS ((PTR));
+     PTR arg;
 {
   return make_my_cleanup (&exec_cleanup_chain, function, arg);
 }
 
 struct cleanup *
-make_exec_error_cleanup (make_cleanup_ftype *function, void *arg)
+make_exec_error_cleanup (function, arg)
+     void (*function) PARAMS ((PTR));
+     PTR arg;
 {
   return make_my_cleanup (&exec_error_cleanup_chain, function, arg);
 }
@@ -216,8 +222,10 @@ make_cleanup_ui_file_delete (struct ui_file *arg)
 }
 
 struct cleanup *
-make_my_cleanup (struct cleanup **pmy_chain, make_cleanup_ftype *function,
-		 void *arg)
+make_my_cleanup (pmy_chain, function, arg)
+     struct cleanup **pmy_chain;
+     void (*function) PARAMS ((PTR));
+     PTR arg;
 {
   register struct cleanup *new
   = (struct cleanup *) xmalloc (sizeof (struct cleanup));
@@ -316,7 +324,7 @@ discard_my_cleanups (pmy_chain, old_chain)
   while ((ptr = *pmy_chain) != old_chain)
     {
       *pmy_chain = ptr->next;
-      free (ptr);
+      free ((PTR) ptr);
     }
 }
 
@@ -390,7 +398,8 @@ free_current_contents (location)
 
 /* ARGSUSED */
 void
-null_cleanup (void *arg)
+null_cleanup (arg)
+     PTR arg;
 {
 }
 
@@ -456,7 +465,7 @@ discard_all_continuations ()
     }
 }
 
-/* Add a continuation to the continuation list, the global list
+/* Add a continuation to the continuation list, the gloabl list
    intermediate_continuation. The new continuation will be added at the front.*/
 void
 add_intermediate_continuation (continuation_hook, arg_list)
@@ -919,8 +928,8 @@ request_quit (signo)
 
 #if !defined (USE_MMALLOC)
 
-PTR
-mcalloc (PTR md, size_t number, size_t size)
+void *
+mcalloc (void *md, size_t number, size_t size)
 {
   return calloc (number, size);
 }
@@ -958,7 +967,8 @@ mfree (md, ptr)
 #if !defined (USE_MMALLOC) || defined (NO_MMCHECK)
 
 void
-init_malloc (void *md)
+init_malloc (md)
+     PTR md;
 {
 }
 
@@ -990,7 +1000,8 @@ malloc_botch ()
 #endif
 
 void
-init_malloc (void *md)
+init_malloc (md)
+     PTR md;
 {
   if (!mmcheckf (md, malloc_botch, MMCHECK_FORCE))
     {
@@ -1147,7 +1158,10 @@ savestring (ptr, size)
 }
 
 char *
-msavestring (void *md, const char *ptr, int size)
+msavestring (md, ptr, size)
+     PTR md;
+     const char *ptr;
+     int size;
 {
   register char *p = (char *) xmmalloc (md, size + 1);
   memcpy (p, ptr, size);
@@ -1166,7 +1180,9 @@ strsave (ptr)
 }
 
 char *
-mstrsave (void *md, const char *ptr)
+mstrsave (md, ptr)
+     PTR md;
+     const char *ptr;
 {
   return (msavestring (md, ptr, strlen (ptr)));
 }
@@ -2722,8 +2738,7 @@ floatformat_from_doublest (fmt, from, to)
   unsigned char *uto = (unsigned char *) to;
 
   memcpy (&dfrom, from, sizeof (dfrom));
-  memset (uto, 0, (fmt->totalsize + FLOATFORMAT_CHAR_BIT - 1) 
-                    / FLOATFORMAT_CHAR_BIT);
+  memset (uto, 0, fmt->totalsize / FLOATFORMAT_CHAR_BIT);
   if (dfrom == 0)
     return;			/* Result is zero */
   if (dfrom != dfrom)		/* Result is NaN */
@@ -2772,7 +2787,7 @@ floatformat_from_doublest (fmt, from, to)
       mant_bits = mant_bits_left < 32 ? mant_bits_left : 32;
 
       mant *= 4294967296.0;
-      mant_long = ((unsigned long) mant) & 0xffffffffL;
+      mant_long = (unsigned long) mant;
       mant -= mant_long;
 
       /* If the integer bit is implicit, then we need to discard it.
@@ -2783,7 +2798,6 @@ floatformat_from_doublest (fmt, from, to)
 	  && fmt->intbit == floatformat_intbit_no)
 	{
 	  mant_long <<= 1;
-	  mant_long &= 0xffffffffL;
 	  mant_bits -= 1;
 	}
 

@@ -1,21 +1,3 @@
-Mon Apr 10 00:07:09 2000  Andrew Cagney  <cagney@b1.cygnus.com>
-
-	* interp.c (decode_coproc): Output long using %lx and not %s.
-
-2000-03-21  Frank Ch. Eigler  <fche@redhat.com>
-
-	* interp.c (sim_open): Sort & extend dummy memory regions for
-	--board=jmr3904 for eCos.
-
-2000-03-02  Frank Ch. Eigler  <fche@redhat.com>
-
-	* configure: Regenerated.
-
-Tue Feb  8 18:35:01 2000  Donald Lindsay  <dlindsay@hound.cygnus.com>
-
-	* interp.c, mips.igen: all 5 DEADC0DE situations now have sim_io_eprintf
-	calls, conditional on the simulator being in verbose mode.
-
 Fri Feb  4 09:45:15 2000  Donald Lindsay  <dlindsay@cygnus.com>
 
 	* sim-main.c (cache_op): Added case arm so that CACHE ops to a secondary

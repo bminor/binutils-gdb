@@ -102,7 +102,16 @@
 #include "inferior.h"
 #include "gdbcmd.h"
 
-#include "gdb_wait.h"
+#ifdef HAVE_WAIT_H
+#include <wait.h>
+#else
+#ifdef HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
+#endif
+
+/* "wait.h" fills in the gaps left by <wait.h> */
+#include "wait.h"
 
 #include <time.h>
 
@@ -658,19 +667,21 @@ init_thread_db_library ()
 static struct cleanup *
 save_inferior_pid (void)
 {
-  int *saved_pid_ptr;
-  
-  saved_pid_ptr = xmalloc (sizeof (int));
-  *saved_pid_ptr = inferior_pid;
-  return make_cleanup (restore_inferior_pid, saved_pid_ptr);
+#if TARGET_PTR_BIT > TARGET_INT_BIT
+  return make_cleanup (restore_inferior_pid, (void *) ((long) inferior_pid));
+#else
+  return make_cleanup (restore_inferior_pid, (void *) inferior_pid);
+#endif
 }
 
 static void
-restore_inferior_pid (void *arg)
+restore_inferior_pid (void *saved_pid)
 {
-  int *saved_pid_ptr = arg;
-  inferior_pid = *saved_pid_ptr;
-  free (arg);
+#if TARGET_PTR_BIT > TARGET_INT_BIT
+  inferior_pid = (int) ((long) saved_pid);
+#else
+  inferior_pid = (int) saved_pid;
+#endif
 }
 
 /*

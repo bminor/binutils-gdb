@@ -23,7 +23,6 @@
 #include "defs.h"
 #include "ui-out.h"
 #include "cli-out.h"
-#include "gdb_string.h"
 
 /* Convenience macro for allocting typesafe memory. */
 
@@ -133,7 +132,7 @@ void
 cli_table_header (uiout, width, alignment, colhdr)
      struct ui_out *uiout;
      int width;
-     enum ui_align alignment;
+     int alignment;
      char *colhdr;
 {
   cli_field_string (uiout, 0, width, alignment, 0, colhdr);
@@ -165,7 +164,7 @@ cli_field_int (uiout, fldno, width, alignment, fldname, value)
      struct ui_out *uiout;
      int fldno;
      int width;
-     enum ui_align alignment;
+     int alignment;
      char *fldname;
      int value;
 {
@@ -182,7 +181,7 @@ cli_field_skip (uiout, fldno, width, alignment, fldname)
      struct ui_out *uiout;
      int fldno;
      int width;
-     enum ui_align alignment;
+     int alignment;
      char *fldname;
 {
   cli_field_string (uiout, fldno, width, alignment, fldname, "");
@@ -195,7 +194,7 @@ void
 cli_field_string (struct ui_out *uiout,
 		  int fldno,
 		  int width,
-		  enum ui_align align,
+		  int align,
 		  char *fldname,
 		  const char *string)
 {

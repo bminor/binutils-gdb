@@ -1,6 +1,5 @@
 /* BFD library support routines for architectures.
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999, 2000
-   Free Software Foundation, Inc.
+   Copyright (C) 1990, 91-98, 1999 Free Software Foundation, Inc.
    Hacked by John Gilmore and Steve Chamberlain of Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -135,7 +134,6 @@ DESCRIPTION
 .  bfd_arch_we32k,     {* AT&T WE32xxx *}
 .  bfd_arch_tahoe,     {* CCI/Harris Tahoe *}
 .  bfd_arch_i860,      {* Intel 860 *}
-.  bfd_arch_i370,      {* IBM 360/370 Mainframes *}
 .  bfd_arch_romp,      {* IBM ROMP PC/RT *}
 .  bfd_arch_alliant,   {* Alliant *}
 .  bfd_arch_convex,    {* Convex *}
@@ -159,12 +157,8 @@ DESCRIPTION
 .  bfd_arch_h8500,     {* Hitachi H8/500 *}
 .  bfd_arch_sh,        {* Hitachi SH *}
 .#define bfd_mach_sh            0
-.#define bfd_mach_sh2        0x20
-.#define bfd_mach_sh_dsp     0x2d
 .#define bfd_mach_sh3        0x30
-.#define bfd_mach_sh3_dsp    0x3d
 .#define bfd_mach_sh3e       0x3e
-.#define bfd_mach_sh4        0x40
 .  bfd_arch_alpha,     {* Dec Alpha *}
 .#define bfd_mach_alpha_ev4  0x10
 .#define bfd_mach_alpha_ev5  0x20
@@ -181,7 +175,6 @@ DESCRIPTION
 .  bfd_arch_ns32k,     {* National Semiconductors ns32000 *}
 .  bfd_arch_w65,       {* WDC 65816 *}
 .  bfd_arch_tic30,     {* Texas Instruments TMS320C30 *}
-.  bfd_arch_tic54x,    {* Texas Instruments TMS320C54X *}
 .  bfd_arch_tic80,     {* TI TMS320c80 (MVP) *}
 .  bfd_arch_v850,      {* NEC V850 *}
 .#define bfd_mach_v850          0
@@ -200,11 +193,6 @@ DESCRIPTION
 .#define bfd_mach_fr30		0x46523330
 .  bfd_arch_mcore,
 .  bfd_arch_pj,
-.  bfd_arch_avr,       {* Atmel AVR microcontrollers *}
-.#define bfd_mach_avr1		1
-.#define bfd_mach_avr2		2
-.#define bfd_mach_avr3		3
-.#define bfd_mach_avr4		4
 .  bfd_arch_last
 .  };
 
@@ -252,7 +240,6 @@ extern const bfd_arch_info_type bfd_d30v_arch;
 extern const bfd_arch_info_type bfd_h8300_arch;
 extern const bfd_arch_info_type bfd_h8500_arch;
 extern const bfd_arch_info_type bfd_hppa_arch;
-extern const bfd_arch_info_type bfd_i370_arch;
 extern const bfd_arch_info_type bfd_i386_arch;
 extern const bfd_arch_info_type bfd_i860_arch;
 extern const bfd_arch_info_type bfd_i960_arch;
@@ -268,7 +255,6 @@ extern const bfd_arch_info_type bfd_pj_arch;
 extern const bfd_arch_info_type bfd_sh_arch;
 extern const bfd_arch_info_type bfd_sparc_arch;
 extern const bfd_arch_info_type bfd_tic30_arch;
-extern const bfd_arch_info_type bfd_tic54x_arch;
 extern const bfd_arch_info_type bfd_tic80_arch;
 extern const bfd_arch_info_type bfd_vax_arch;
 extern const bfd_arch_info_type bfd_we32k_arch;
@@ -278,7 +264,6 @@ extern const bfd_arch_info_type bfd_w65_arch;
 extern const bfd_arch_info_type bfd_v850_arch;
 extern const bfd_arch_info_type bfd_fr30_arch;
 extern const bfd_arch_info_type bfd_mcore_arch;
-extern const bfd_arch_info_type bfd_avr_arch;
 
 static const bfd_arch_info_type * const bfd_archures_list[] =
 {
@@ -294,7 +279,6 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
   &bfd_h8300_arch,
   &bfd_h8500_arch,
   &bfd_hppa_arch,
-  &bfd_i370_arch,
   &bfd_i386_arch,
   &bfd_i860_arch,
   &bfd_i960_arch,
@@ -309,7 +293,6 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
   &bfd_sh_arch,
   &bfd_sparc_arch,
   &bfd_tic30_arch,
-  &bfd_tic54x_arch,
   &bfd_tic80_arch,
   &bfd_vax_arch,
   &bfd_we32k_arch,
@@ -318,8 +301,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
   &bfd_w65_arch,
   &bfd_v850_arch,
   &bfd_fr30_arch,
-  &bfd_mcore_arch,
-  &bfd_avr_arch,
+  & bfd_mcore_arch,
 #endif
   0
 };
@@ -823,26 +805,6 @@ bfd_default_scan (info, string)
       arch = bfd_arch_rs6000;
       break;
 
-    case 7410:
-      arch = bfd_arch_sh;
-      number = bfd_mach_sh_dsp;
-      break;
-
-    case 7708:
-      arch = bfd_arch_sh;
-      number = bfd_mach_sh3;
-      break;
-
-    case 7729:
-      arch = bfd_arch_sh;
-      number = bfd_mach_sh3_dsp;
-      break;
-
-    case 7750:
-      arch = bfd_arch_sh;
-      number = bfd_mach_sh4;
-      break;
-
     default:  
       return false;
     }
@@ -947,7 +909,7 @@ FUNCTION
 	bfd_octets_per_byte
 
 SYNOPSIS
-	unsigned int bfd_octets_per_byte(bfd *abfd);
+	int bfd_octets_per_byte(bfd *abfd);
 
 DESCRIPTION
 	Return the number of octets (8-bit quantities) per target byte
@@ -956,7 +918,7 @@ DESCRIPTION
 
 */
 
-unsigned int
+int
 bfd_octets_per_byte (abfd)
      bfd * abfd;
 {
@@ -969,8 +931,8 @@ FUNCTION
 	bfd_arch_mach_octets_per_byte
 
 SYNOPSIS
-	unsigned int bfd_arch_mach_octets_per_byte(enum bfd_architecture arch,
-                                                   unsigned long machine);
+	int bfd_arch_mach_octets_per_byte(enum bfd_architecture arch,
+                                          unsigned long machine);
 
 DESCRIPTION
 	See bfd_octets_per_byte.
@@ -979,7 +941,7 @@ DESCRIPTION
         available
 */
 
-unsigned int
+int
 bfd_arch_mach_octets_per_byte (arch, mach)
     enum bfd_architecture arch;
     unsigned long mach;
@@ -990,3 +952,4 @@ bfd_arch_mach_octets_per_byte (arch, mach)
       return ap->bits_per_byte / 8;
     return 1;
 }
+

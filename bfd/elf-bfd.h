@@ -1,5 +1,5 @@
 /* BFD back-end data structures for ELF files.
-   Copyright (C) 1992, 93, 94, 95, 96, 97, 98, 1999, 2000 Free Software
+   Copyright (C) 1992, 93, 94, 95, 96, 97, 98, 1999 Free Software
    Foundation, Inc.
    Written by Cygnus Support.
 
@@ -593,16 +593,6 @@ struct elf_backend_data
 	    boolean (*) PARAMS ((PTR, const char *,
              Elf_Internal_Sym *, asection *))));
 
-  /* Copy any information related to dynamic linking from a pre-existing
-     symbol IND to a newly created symbol DIR.  */
-  void (*elf_backend_copy_indirect_symbol)
-    PARAMS ((struct elf_link_hash_entry *, struct elf_link_hash_entry *));
-
-  /* Modify any information related to dynamic linking such that the
-     symbol is not exported.  */
-  void (*elf_backend_hide_symbol)
-    PARAMS ((struct elf_link_hash_entry *));
-
   /* The swapping table to use when dealing with ECOFF information.
      Used for the MIPS ELF .mdebug section.  */
   const struct ecoff_debug_swap *elf_backend_ecoff_debug_swap;
@@ -967,10 +957,6 @@ extern struct bfd_hash_entry *_bfd_elf_link_hash_newfunc
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
 extern struct bfd_link_hash_table *_bfd_elf_link_hash_table_create
   PARAMS ((bfd *));
-extern void _bfd_elf_link_hash_copy_indirect
-  PARAMS ((struct elf_link_hash_entry *, struct elf_link_hash_entry *));
-extern void _bfd_elf_link_hash_hide_symbol
-  PARAMS ((struct elf_link_hash_entry *));
 extern boolean _bfd_elf_link_hash_table_init
   PARAMS ((struct elf_link_hash_table *, bfd *,
 	   struct bfd_hash_entry *(*) (struct bfd_hash_entry *,
@@ -1301,9 +1287,5 @@ extern boolean _bfd_mips_elf_modify_segment_map PARAMS ((bfd *));
 extern boolean _bfd_mips_elf_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
-
-/* SH ELF specific routine.  */
-
-extern boolean _sh_elf_set_mach_from_flags PARAMS ((bfd *));
 
 #endif /* _LIBELF_H_ */

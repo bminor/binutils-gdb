@@ -53,7 +53,7 @@
 #include "value.h"
 #include "language.h"
 #include "target.h"
-#include "gdb_wait.h"
+#include "wait.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
 

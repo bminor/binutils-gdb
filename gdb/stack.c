@@ -1111,12 +1111,6 @@ backtrace_command_1 (count_exp, show_locals, from_tty)
      printing.  Second, it must set the variable count to the number
      of frames which we should print, or -1 if all of them.  */
   trailing = get_current_frame ();
-
-  /* The target can be in a state where there is no valid frames
-     (e.g., just connected). */
-  if (trailing == NULL)
-    error ("No stack.");
-
   trailing_level = 0;
   if (count_exp)
     {
@@ -1210,7 +1204,7 @@ backtrace_command (arg, from_tty)
       argc = 0;
       for (i = 0; (argv[i] != (char *) NULL); i++)
 	{
-	  unsigned int j;
+	  int j;
 
 	  for (j = 0; (j < strlen (argv[i])); j++)
 	    argv[i][j] = tolower (argv[i][j]);

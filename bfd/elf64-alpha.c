@@ -125,10 +125,6 @@ static boolean elf64_alpha_finish_dynamic_sections
   PARAMS((bfd *, struct bfd_link_info *));
 static boolean elf64_alpha_final_link
   PARAMS((bfd *, struct bfd_link_info *));
-static boolean elf64_alpha_merge_ind_symbols
-  PARAMS((struct alpha_elf_link_hash_entry *, PTR));
-static Elf_Internal_Rela * elf64_alpha_find_reloc_at_ofs
-  PARAMS ((Elf_Internal_Rela *, Elf_Internal_Rela *, bfd_vma, int));
 
 
 struct alpha_elf_link_hash_entry
@@ -2581,10 +2577,9 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
 	      else
 		rent->count++;
 	    }
-	  else if (info->shared && (sec->flags & SEC_ALLOC))
+	  else if (info->shared)
 	    {
-	      /* If this is a shared library, and the section is to be
-		 loaded into memory, we need a RELATIVE reloc.  */
+	      /* If this is a shared library, we need a RELATIVE reloc.  */
 	      sreloc->_raw_size += sizeof (Elf64_External_Rela);
 	    }
 	  break;
@@ -3268,7 +3263,7 @@ elf64_alpha_size_dynamic_sections (output_bfd, info)
 	}
 
       if (strip)
-	_bfd_strip_section_from_output (info, s);
+	_bfd_strip_section_from_output (s);
       else
 	{
 	  /* Allocate memory for the section contents.  */
@@ -3481,8 +3476,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      if (!((*info->callbacks->undefined_symbol)
 		    (info, h->root.root.root.string, input_bfd,
-		     input_section, rel->r_offset,
-		     (!info->shared || info->no_undefined))))
+		     input_section, rel->r_offset)))
 		return false;
 	      relocation = 0;
 	    }
@@ -3624,7 +3618,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 		outrel.r_addend = addend;
 		addend = 0, relocation = 0;
 	      }
-	    else if (info->shared && (input_section->flags & SEC_ALLOC))
+	    else if (info->shared)
 	      {
 		outrel.r_info = ELF64_R_INFO(0, R_ALPHA_RELATIVE);
 		outrel.r_addend = 0;

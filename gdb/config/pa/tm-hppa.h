@@ -793,7 +793,7 @@ PARAMS ((CORE_ADDR, int))
    for C and break the prototyped case, since the non-prototyped case is
    probably much more common.  (FIXME). */
 
-#define COERCE_FLOAT_TO_DOUBLE(formal, actual) (current_language -> la_language == language_c)
+#define COERCE_FLOAT_TO_DOUBLE (current_language -> la_language == language_c)
 
 /* Here's how to step off a permanent breakpoint.  */
 #define SKIP_PERMANENT_BREAKPOINT (hppa_skip_permanent_breakpoint)
