@@ -1,5 +1,10 @@
 2003-06-03  J. Brobecker  <brobecker@gnat.com>
 
+	* config/alpha/alpha-osf1.mt (TDEPFILES): Add alpha-mdebug-tdep.o.
+	* alpha-osf1-tdep.c (alpha_osf1_init_abi): Enable the mdebug module.
+
+2003-06-03  J. Brobecker  <brobecker@gnat.com>
+
 	* alpha-osf1-tdep.c (alpha_osf1_sigcontext_addr): Replace
 	references to struct frame_info fields by calls to the equivalent
 	accessors. Necessary now that frame_info is opaque.
