@@ -1,3 +1,11 @@
+2000-08-01  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+        * gdbarch.sh: Multiarch DO_REGISTERS_INFO macro.
+        * gdbarch.h, gdbarch.c: Regenerate.
+        * infcmd.c (do_registers_info): Make not static and
+        unconditionalize.
+        * inferior.h (do_registers_info): Export.
+
 2000-08-01  Kazu Hirata  <kazu@hxi.com>
 
 	* MAINTAINERS: Add myself to "Write After Approval" list.
@@ -78,6 +86,8 @@ Tue Aug  1 14:50:55 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* ppc-linux-tdep.c (ppc_linux_frame_saved_pc): Likewise.
 
 2000-07-31  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+        * sh-tdep.c (sh_push_arguments): Make header match prototype.
 
 	* remote-e7000.c (e7000_start_remote): Use void *, not char * as
  	parameter to avoid compiler warning.

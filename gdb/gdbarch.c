@@ -161,6 +161,7 @@ struct gdbarch
   gdbarch_register_virtual_size_ftype *register_virtual_size;
   int max_register_virtual_size;
   gdbarch_register_virtual_type_ftype *register_virtual_type;
+  gdbarch_do_registers_info_ftype *do_registers_info;
   int use_generic_dummy_frames;
   int call_dummy_location;
   gdbarch_call_dummy_address_ftype *call_dummy_address;
@@ -296,6 +297,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
+  0,
   generic_get_saved_register,
   0,
   0,
@@ -381,6 +383,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->register_bytes = -1;
   gdbarch->max_register_raw_size = -1;
   gdbarch->max_register_virtual_size = -1;
+  gdbarch->do_registers_info = do_registers_info;
   gdbarch->use_generic_dummy_frames = -1;
   gdbarch->call_dummy_start_offset = -1;
   gdbarch->call_dummy_breakpoint_offset = -1;
@@ -523,6 +526,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->register_virtual_type == 0))
     internal_error ("gdbarch: verify_gdbarch: register_virtual_type invalid");
+  /* Skip verify of do_registers_info, invalid_p == 0 */
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->use_generic_dummy_frames == -1))
     internal_error ("gdbarch: verify_gdbarch: use_generic_dummy_frames invalid");
@@ -868,6 +872,13 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: %s # %s\n",
                       "REGISTER_VIRTUAL_TYPE(reg_nr)",
                       XSTRING (REGISTER_VIRTUAL_TYPE (reg_nr)));
+#endif
+#if defined (DO_REGISTERS_INFO) && GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DO_REGISTERS_INFO(reg_nr, fpregs)",
+                      XSTRING (DO_REGISTERS_INFO (reg_nr, fpregs)));
 #endif
 #ifdef USE_GENERIC_DUMMY_FRAMES
   fprintf_unfiltered (file,
@@ -1465,6 +1476,13 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: REGISTER_VIRTUAL_TYPE = 0x%08lx\n",
                         (long) current_gdbarch->register_virtual_type
                         /*REGISTER_VIRTUAL_TYPE ()*/);
+#endif
+#ifdef DO_REGISTERS_INFO
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DO_REGISTERS_INFO = 0x%08lx\n",
+                        (long) current_gdbarch->do_registers_info
+                        /*DO_REGISTERS_INFO ()*/);
 #endif
 #ifdef USE_GENERIC_DUMMY_FRAMES
   fprintf_unfiltered (file,
@@ -2481,6 +2499,23 @@ set_gdbarch_register_virtual_type (struct gdbarch *gdbarch,
                                    gdbarch_register_virtual_type_ftype register_virtual_type)
 {
   gdbarch->register_virtual_type = register_virtual_type;
+}
+
+void
+gdbarch_do_registers_info (struct gdbarch *gdbarch, int reg_nr, int fpregs)
+{
+  if (gdbarch->do_registers_info == 0)
+    internal_error ("gdbarch: gdbarch_do_registers_info invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_do_registers_info called\n");
+  gdbarch->do_registers_info (reg_nr, fpregs);
+}
+
+void
+set_gdbarch_do_registers_info (struct gdbarch *gdbarch,
+                               gdbarch_do_registers_info_ftype do_registers_info)
+{
+  gdbarch->do_registers_info = do_registers_info;
 }
 
 int
@@ -3693,7 +3728,8 @@ init_gdbarch_data (struct gdbarch *gdbarch)
    data-pointer. */
 
 void *
-gdbarch_data (struct gdbarch_data *data)
+gdbarch_data (data)
+     struct gdbarch_data *data;
 {
   if (data->index >= current_gdbarch->nr_data)
     internal_error ("gdbarch_data: request for non-existant data.");
@@ -4085,7 +4121,7 @@ disassemble_info tm_print_insn_info;
 extern void _initialize_gdbarch (void);
 
 void
-_initialize_gdbarch (void)
+_initialize_gdbarch ()
 {
   struct cmd_list_element *c;
 

@@ -72,10 +72,6 @@ static void detach_command (char *, int);
 
 static void interrupt_target_command (char *args, int from_tty);
 
-#if !defined (DO_REGISTERS_INFO)
-static void do_registers_info (int, int);
-#endif
-
 static void unset_environment_command (char *, int);
 
 static void set_environment_command (char *, int);
@@ -1445,11 +1441,7 @@ char *gdb_register_names[] = REGISTER_NAMES;
    all the registers, define the macro DO_REGISTERS_INFO(regnum, fp)
    to provide that format.  */
 
-#if !defined (DO_REGISTERS_INFO)
-
-#define DO_REGISTERS_INFO(regnum, fp) do_registers_info(regnum, fp)
-
-static void
+void
 do_registers_info (int regnum, int fpregs)
 {
   register int i;
@@ -1552,7 +1544,6 @@ do_registers_info (int regnum, int fpregs)
       printf_filtered ("\n");
     }
 }
-#endif /* no DO_REGISTERS_INFO.  */
 
 void
 registers_info (char *addr_exp, int fpregs)

@@ -186,6 +186,8 @@ extern void resume (int, enum target_signal);
 
 /* From misc files */
 
+extern void do_registers_info (int, int);
+
 extern void store_inferior_registers (int);
 
 extern void fetch_inferior_registers (int);

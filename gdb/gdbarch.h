@@ -396,6 +396,20 @@ extern void set_gdbarch_register_virtual_type (struct gdbarch *gdbarch, gdbarch_
 #endif
 #endif
 
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (DO_REGISTERS_INFO)
+#define DO_REGISTERS_INFO(reg_nr, fpregs) (do_registers_info (reg_nr, fpregs))
+#endif
+
+typedef void (gdbarch_do_registers_info_ftype) (int reg_nr, int fpregs);
+extern void gdbarch_do_registers_info (struct gdbarch *gdbarch, int reg_nr, int fpregs);
+extern void set_gdbarch_do_registers_info (struct gdbarch *gdbarch, gdbarch_do_registers_info_ftype *do_registers_info);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DO_REGISTERS_INFO)
+#define DO_REGISTERS_INFO(reg_nr, fpregs) (gdbarch_do_registers_info (current_gdbarch, reg_nr, fpregs))
+#endif
+#endif
+
 extern int gdbarch_use_generic_dummy_frames (struct gdbarch *gdbarch);
 extern void set_gdbarch_use_generic_dummy_frames (struct gdbarch *gdbarch, int use_generic_dummy_frames);
 #if GDB_MULTI_ARCH
