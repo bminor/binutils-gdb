@@ -1,5 +1,9 @@
 2004-02-15  Andrew Cagney  <cagney@redhat.com>
 
+	* solib.c (solib_map_sections): Use bfd_set_cacheable instead of
+	poking .cacheable directly.
+	* symfile.c (symfile_bfd_open): Ditto.
+
 	* Makefile.in: Update all dependencies.
 
 	* Makefile.in: (.SUFFIXES): Add ".l" and ".y".
