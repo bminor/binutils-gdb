@@ -1,3 +1,8 @@
+Sun Apr 23 21:32:32 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.base/opaque.exp: Remove xfails for aix; print a warning if
+	xlc not gcc.
+
 Fri Apr 21 15:44:02 1995  Stu Grossman  (grossman@rtl.cygnus.com)
 
 	* cpu32bug.exp est.exp rom68k.exp:  Delete.  Unify into monitor.exp.
