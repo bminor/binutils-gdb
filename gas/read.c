@@ -269,6 +269,7 @@ static const pseudo_typeS potable[] =
   {"ds.s", s_space, 4},
   {"ds.w", s_space, 2},
   {"ds.x", s_space, 12},
+  {"debug", s_ignore, 0},
 #ifdef S_SET_DESC
   {"desc", s_desc, 0},
 #endif
@@ -283,7 +284,7 @@ static const pseudo_typeS potable[] =
   {"endif", s_endif, 0},
 /* endef */
   {"equ", s_set, 0},
-/* err */
+  {"err", s_err, 0},
   {"exitm", s_mexit, 0},
 /* extend */
   {"extern", s_ignore, 0},	/* We treat all undef as ext */
@@ -314,7 +315,9 @@ static const pseudo_typeS potable[] =
   {"include", s_include, 0},
   {"int", cons, 4},
   {"irp", s_irp, 0},
+  {"irep", s_irp, 0},
   {"irpc", s_irp, 1},
+  {"irepc", s_irp, 1},
   {"lcomm", s_lcomm, 0},
   {"lflags", listing_flags, 0},	/* Listing flags */
   {"list", listing_list, 1},	/* Turn listing on */
@@ -332,9 +335,11 @@ static const pseudo_typeS potable[] =
   {"p2align", s_align_ptwo, 0},
   {"page", listing_eject, 0},
   {"plen", listing_psize, 0},
+  {"print", s_print, 0},
   {"psize", listing_psize, 0},	/* set paper size */
-/* print */
+  {"purgem", s_purgem, 0},
   {"quad", cons, 8},
+  {"rep", s_rept, 0},
   {"rept", s_rept, 0},
   {"rva", s_rva, 4},
   {"sbttl", listing_title, 1},	/* Subtitle of listing */
@@ -638,7 +643,11 @@ read_a_source_file (name)
 		  }
 #endif
 
-		  if (flag_mri
+#ifndef MRI_MODE_NEEDS_PSEUDO_DOT
+#define MRI_MODE_NEEDS_PSEUDO_DOT 0
+#endif
+
+		  if ((flag_mri && ! MRI_MODE_NEEDS_PSEUDO_DOT)
 #ifdef NO_PSEUDO_DOT
 		      || 1
 #endif
@@ -652,7 +661,8 @@ read_a_source_file (name)
 		    }
 
 		  if (pop != NULL
-		      || (! flag_mri && *s == '.'))
+		      || ((! flag_mri || MRI_MODE_NEEDS_PSEUDO_DOT)
+			  && *s == '.'))
 		    {
 		      /*
 		       * PSEUDO - OP.
@@ -956,12 +966,17 @@ read_a_source_file (name)
 /* For most MRI pseudo-ops, the line actually ends at the first
    nonquoted space.  This function looks for that point, stuffs a null
    in, and sets *STOPCP to the character that used to be there, and
-   returns the location.  */
+   returns the location.
+
+   Until I hear otherwise, I am going to assume that this is only true
+   for the m68k MRI assembler.  */
 
 char *
 mri_comment_field (stopcp)
      char *stopcp;
 {
+#ifdef TC_M68K
+
   char *s;
   int inquote = 0;
 
@@ -978,6 +993,19 @@ mri_comment_field (stopcp)
   *stopcp = *s;
   *s = '\0';
   return s;
+
+#else
+
+  char *s;
+
+  for (s = input_line_pointer; ! is_end_of_line[(unsigned char) *s]; s++)
+    ;
+  *stopcp = *s;
+  *s = '\0';
+  return s;
+
+#endif
+
 }
 
 /* Skip to the end of an MRI comment field.  */
@@ -1412,6 +1440,16 @@ s_end (ignore)
     }
 }
 
+/* Handle the .err pseudo-op.  */
+
+void
+s_err (ignore)
+     int ignore;
+{
+  as_bad (".err encountered");
+  demand_empty_rest_of_line ();
+}
+
 /* Handle the MRI fail pseudo-op.  */
 
 void
@@ -1805,7 +1843,8 @@ get_line_sb (line)
 
   while (! is_end_of_line[(unsigned char) *input_line_pointer])
     sb_add_char (line, *input_line_pointer++);
-  while (is_end_of_line[(unsigned char) *input_line_pointer])
+  while (input_line_pointer < buffer_limit
+	 && is_end_of_line[(unsigned char) *input_line_pointer])
     {
       if (*input_line_pointer == '\n')
 	{
@@ -1909,15 +1948,17 @@ s_org (ignore)
   expressionS exp;
   register long temp_fill;
 
-  /* The MRI assembler has a different meaning for .org.  It means to
-     create an absolute section at a given address.  We can't support
-     that--use a linker script instead.  */
+#ifdef TC_M68K
+  /* The m68k MRI assembler has a different meaning for .org.  It
+     means to create an absolute section at a given address.  We can't
+     support that--use a linker script instead.  */
   if (flag_mri)
     {
       as_bad ("MRI style ORG pseudo-op not supported");
       ignore_rest_of_line ();
       return;
     }
+#endif
 
   /* Don't believe the documentation of BSD 4.2 AS.  There is no such
      thing as a sub-segment-relative origin.  Any absolute origin is
@@ -1957,6 +1998,8 @@ void
 s_mri_sect (type)
      char *type;
 {
+#ifdef TC_M68K
+
   char *name;
   char c;
   segT seg;
@@ -2031,6 +2074,132 @@ s_mri_sect (type)
   if (*input_line_pointer == ',')
     input_line_pointer += 2;
 
+  demand_empty_rest_of_line ();
+
+#else /* ! TC_M68K */
+#ifdef TC_I960
+
+  char *name;
+  char c;
+  segT seg;
+
+  SKIP_WHITESPACE ();
+
+  name = input_line_pointer;
+  c = get_symbol_end ();
+
+  name = strdup (name);
+  if (name == NULL)
+    as_fatal ("virtual memory exhausted");
+
+  *input_line_pointer = c;
+
+  seg = subseg_new (name, 0);
+
+  if (*input_line_pointer != ',')
+    *type = 'C';
+  else
+    {
+      char *sectype;
+
+      ++input_line_pointer;
+      SKIP_WHITESPACE ();
+      sectype = input_line_pointer;
+      c = get_symbol_end ();
+      if (*sectype == '\0')
+	*type = 'C';
+      else if (strcasecmp (sectype, "text") == 0)
+	*type = 'C';
+      else if (strcasecmp (sectype, "data") == 0)
+	*type = 'D';
+      else if (strcasecmp (sectype, "romdata") == 0)
+	*type = 'R';
+      else
+	as_warn ("unrecognized section type `%s'", sectype);
+      *input_line_pointer = c;
+    }
+
+  if (*input_line_pointer == ',')
+    {
+      char *seccmd;
+
+      ++input_line_pointer;
+      SKIP_WHITESPACE ();
+      seccmd = input_line_pointer;
+      c = get_symbol_end ();
+      if (strcasecmp (seccmd, "absolute") == 0)
+	{
+	  as_bad ("absolute sections are not supported");
+	  *input_line_pointer = c;
+	  ignore_rest_of_line ();
+	  return;
+	}
+      else if (strcasecmp (seccmd, "align") == 0)
+	{
+	  int align;
+
+	  *input_line_pointer = c;
+	  align = get_absolute_expression ();
+	  record_alignment (seg, align);
+	}
+      else
+	{
+	  as_warn ("unrecognized section command `%s'", seccmd);
+	  *input_line_pointer = c;
+	}
+    }
+
+  demand_empty_rest_of_line ();	  
+
+#else /* ! TC_I960 */
+  /* The MRI assembler seems to use different forms of .sect for
+     different targets.  */
+  abort ();
+#endif /* ! TC_I960 */
+#endif /* ! TC_M68K */
+}
+
+/* Handle the .print pseudo-op.  */
+
+void
+s_print (ignore)
+     int ignore;
+{
+  char *s;
+  int len;
+
+  s = demand_copy_C_string (&len);
+  printf ("%s\n", s);
+  demand_empty_rest_of_line ();
+}
+
+/* Handle the .purgem pseudo-op.  */
+
+void
+s_purgem (ignore)
+     int ignore;
+{
+  if (is_it_end_of_statement ())
+    {
+      demand_empty_rest_of_line ();
+      return;
+    }
+
+  do
+    {
+      char *name;
+      char c;
+
+      SKIP_WHITESPACE ();
+      name = input_line_pointer;
+      c = get_symbol_end ();
+      delete_macro (name);
+      *input_line_pointer = c;
+      SKIP_WHITESPACE ();
+    }
+  while (*input_line_pointer++ == ',');
+
+  --input_line_pointer;
   demand_empty_rest_of_line ();
 }
 
@@ -3605,8 +3774,8 @@ demand_copy_string (lenP)
 	  obstack_1grow (&notes, c);
 	  len++;
 	}
-      /* JF this next line is so demand_copy_C_string will return a null
-		   termanated string. */
+      /* JF this next line is so demand_copy_C_string will return a
+	 null terminated string. */
       obstack_1grow (&notes, '\0');
       retval = obstack_finish (&notes);
     }
@@ -3703,6 +3872,8 @@ s_include (arg)
 	}
       obstack_1grow (&notes, '\0');
       filename = obstack_finish (&notes);
+      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+	++input_line_pointer;
     }
   demand_empty_rest_of_line ();
   path = xmalloc ((unsigned long) i + include_dir_maxlen + 5 /* slop */ );
