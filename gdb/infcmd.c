@@ -1998,6 +1998,7 @@ use \"set args\" without arguments.");
   add_info ("registers", nofp_registers_info,
 	    "List of integer registers and their contents, for selected stack frame.\n\
 Register name as argument means describe only that register.");
+  add_info_alias ("r", "registers", 1);
 
   if (xdb_commands)
     add_com ("lr", class_info, nofp_registers_info,

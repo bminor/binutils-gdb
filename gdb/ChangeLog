@@ -1,3 +1,8 @@
+2000-03-27  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+        * infcmd.c (_initialize_infcmd):  Add `info r' alias for
+        `info registers'.
+
 Wed Apr 19 17:03:07 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From Philippe De Muyter <phdm@macqel.be>:
