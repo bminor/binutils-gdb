@@ -1,3 +1,8 @@
+Sun Jan 15 21:58:26 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
+
+	* TODO: Remove items about corefile.exp testing new exec-file and
+	backtrace; both are now done.  Add items about printing enums.
+
 Sat Jan 14 11:25:28 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
 
 	* gdb.base/sigall.exp (test_one_sig): Attempt to recover if
@@ -1420,7 +1425,7 @@ Wed Aug 11 12:09:32 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 Tue Aug 10 15:49:35 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
-	* gdb.t24/demangle.exp: Add lucid test for _vtbl__3foo__vt_cc_main_.
+	* gdb.t24/demangle.exp: Add lucid test for __vtbl__3foo__vt_cc_main_.
 
 Tue Aug 10 15:45:25 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
