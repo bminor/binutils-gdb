@@ -15,9 +15,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
 
-# Please email any bugs, comments, and/or additions to this file to:
-# bug-gdb@prep.ai.mit.edu
-
 # This file was written by Rob Savoye. (rob@cygnus.com)
 
 if $tracelevel then {
@@ -243,13 +240,14 @@ proc test_with_self { executable } {
     set oldtimeout $timeout
     set timeout 600
     verbose "Timeout is now $timeout seconds" 2
-    if {[gdb_load $executable] <0} then {
-	set timeout $oldtimeout
-	verbose "Timeout is now $timeout seconds" 2
-	return -1
-    }
+
+    set result [gdb_load $executable]
     set timeout $oldtimeout
     verbose "Timeout is now $timeout seconds" 2
+
+    if { [lindex $result 0] != "" } then {
+	return -1
+    }
 
     # disassemble yourself
     gdb_test "x/10i main" \

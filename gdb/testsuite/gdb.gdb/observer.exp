@@ -46,13 +46,14 @@ proc setup_test { executable } {
     set oldtimeout $timeout
     set timeout 600
     verbose "Timeout is now $timeout seconds" 2
-    if {[gdb_load $executable] <0} then {
-	set timeout $oldtimeout
-	verbose "Timeout is now $timeout seconds" 2
-	return -1
-    }
+
+    set result [gdb_load $executable]
     set timeout $oldtimeout
     verbose "Timeout is now $timeout seconds" 2
+
+    if { [lindex $result 0] != "" } then {
+	return -1
+    }
 
     # Set a breakpoint at main
     gdb_test "break captured_main" \

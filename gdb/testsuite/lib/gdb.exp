@@ -180,7 +180,8 @@ proc gdb_run_cmd {args} {
 	if [target_info exists gdb,do_reload_on_run] {
 	    # Specifying no file, defaults to the executable
 	    # currently being debugged.
-	    if { [gdb_load ""] < 0 } {
+	    set status [gdb_load ""]
+	    if { [lindex $status 0] != "" } {
 		return;
 	    }
 	    send_gdb "continue\n";
@@ -225,7 +226,8 @@ proc gdb_run_cmd {args} {
 		    send_gdb "y\n"
 		}
 		-re "The program is not being run.*$gdb_prompt $" {
-		    if { [gdb_load ""] < 0 } {
+		    set status [gdb_load ""]
+		    if { [lindex $status 0] != ""] } {
 			return;
 		    }
 		    send_gdb "jump *$start\n";
@@ -247,7 +249,8 @@ proc gdb_run_cmd {args} {
     }
 
     if [target_info exists gdb,do_reload_on_run] {
-	if { [gdb_load ""] < 0 } {
+	set status [gdb_load ""]
+	if { [lindex $status 0] != "" } {
 	    return;
 	}
     }
@@ -953,35 +956,49 @@ proc default_gdb_exit {} {
     unset gdb_spawn_id
 }
 
+# Load a file into the debugger.
+# The return value is a list with the following information:
 #
-# load a file into the debugger.
-# return a -1 if anything goes wrong.
+#  { message word ... }
+# 
+# MESSAGE has the following values:
 #
+#   ""     file was loaded successfully
+#   "..."  file was not loaded successfully.
+#          A perror has been generated with MESSAGE.
+#
+# If the MESSAGE is "", then there is an optional set of words.
+# The words may be:
+#
+#  nodebug  this file does not contain debug information
+#
+# TODO: gdb.base/sepdebug.exp and gdb.stabs/weird.exp might
+# be able to use this if they can get more information
+# in the return value.
+
 proc gdb_file_cmd { arg } {
-    global verbose
-    global loadpath
-    global loadfile
-    global GDB
     global gdb_prompt
-    upvar timeout timeout
+    global verbose
+    global GDB
 
     if [is_remote host] {
-	set arg [remote_download host $arg];
+	set arg [remote_download host $arg]
 	if { $arg == "" } {
-	    error "download failed"
-	    return -1;
+	    set message "download failed"
+	    perror $message
+	    return { $message }
 	}
     }
 
     send_gdb "file $arg\n"
     gdb_expect 120 {
+	-re "Reading symbols from.*no debugging symbols found.*done.*$gdb_prompt $" {
+	    verbose "\t\tLoaded $arg into the $GDB with no debugging symbols"
+	    return { "" nodebug }
+	}
         -re "Reading symbols from.*done.*$gdb_prompt $" {
             verbose "\t\tLoaded $arg into the $GDB"
-            return 0
-        }
-        -re "has no symbol-table.*$gdb_prompt $" {
-            perror "$arg wasn't compiled with \"-g\""
-            return -1
+	    return { "" }
         }
         -re "A program is being debugged already.*Kill it.*y or n. $" {
             send_gdb "y\n"
@@ -993,32 +1010,37 @@ proc gdb_file_cmd { arg } {
             gdb_expect 120 {
                 -re "Reading symbols from.*done.*$gdb_prompt $" {
                     verbose "\t\tLoaded $arg with new symbol table into $GDB"
-                    return 0
+		    return { "" }
                 }
                 timeout {
-                    perror "(timeout) Couldn't load $arg, other program already loaded."
-                    return -1
+                    set message "(timeout) Couldn't load $arg, other program already loaded."
+		    perror $message
+		    return { $message }
                 }
             }
 	}
         -re "No such file or directory.*$gdb_prompt $" {
-            perror "($arg) No such file or directory\n"
-            return -1
+            set message "($arg) No such file or directory"
+            perror $message
+	    return { $message }
         }
         -re "$gdb_prompt $" {
-            perror "couldn't load $arg into $GDB."
-            return -1
+            set message "couldn't load $arg into $GDB."
+            perror $message
+	    return { $message }
             }
         timeout {
-            perror "couldn't load $arg into $GDB (timed out)."
-            return -1
+            set message "couldn't load $arg into $GDB (timed out)."
+	    perror $message
+	    return { $message }
         }
         eof {
             # This is an attempt to detect a core dump, but seems not to
             # work.  Perhaps we need to match .* followed by eof, in which
             # gdb_expect does not seem to have a way to do that.
-            perror "couldn't load $arg into $GDB (end of file)."
-            return -1
+            set message "couldn't load $arg into $GDB (end of file)."
+	    perror $message
+	    return { $message }
         }
     }
 }
@@ -1633,7 +1655,6 @@ proc gdb_exit { } {
 
 #
 # gdb_load -- load a file into the debugger.
-#             return a -1 if anything goes wrong.
 #
 proc gdb_load { arg } {
     return [gdb_file_cmd $arg]

@@ -1,3 +1,16 @@
+2004-08-27  Michael Chastain  <mec.gnu@mindspring.com>
+
+	With code from Manoj Iyer <manjo@austin.ibm.com>:
+	* lib/gdb.exp (gdb_file_cmd): Return more information in the
+	return value.  Add an arm for "no debugging symbols found".
+	Change a stray "error" to "perror".
+	(gdb_run_cmd): Adapt to new return value.
+	* gdb.base/remote.exp: Adapt to new return value.
+	* gdb.gdb/complaints.exp: Likewise.
+	* gdb.gdb/observer.exp: Likewise.
+	* gdb.gdb/selftest.exp: Likewise.
+	* gdb.gdb/xfullpath.exp: Likewise.
+
 2004-08-27  Joel Brobecker  <brobecker@gnat.com>
 
 	* gdb.threads/bp_in_thread.exp: New testcase.
