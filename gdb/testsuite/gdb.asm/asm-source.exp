@@ -87,9 +87,8 @@ set binfile ${objdir}/${subdir}/${testfile}
 set src1 ${srcdir}/${subdir}/asmsrc1.s
 set src2 ${srcdir}/${subdir}/asmsrc2.s
 
-set insn_file ${srcdir}/${subdir}/${asm-arch}.inc
-remote_exec build "rm -f ${objdir}/${subdir}/arch.inc"
-remote_exec build "ln -s ${insn_file} ${objdir}/${subdir}/arch.inc"
+remote_exec build "rm -f ${subdir}/arch.inc"
+remote_download host ${srcdir}/${subdir}/${asm-arch}.inc ${subdir}/arch.inc
 
 if { "${asm-flags}" == "" } {
     #set asm-flags "-Wa,-gstabs,-I${srcdir}/${subdir},-I${objdir}/${subdir}"
@@ -278,3 +277,4 @@ gdb_test "print staticvar" ".* = 5" "look at static variable"
 gdb_test "disassem foostatic" ".*<foostatic>:.*End of assembler dump." \
 	"look at static function"
 
+remote_exec build "rm -f ${subdir}/arch.inc"

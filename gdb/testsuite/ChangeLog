@@ -1,3 +1,9 @@
+2002-04-19  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.asm/asm-source.exp: Don't use a symlink, just copy the
+	instruction file directly into the build tree.  Clean up at end of
+	test.
+
 2002-04-18  David S. Miller  <davem@redhat.com>
 
 	* gdb.base/annota1.exp: Expect addresses as $hex + whitespace to
