@@ -1,5 +1,7 @@
 2002-02-17  Hans-Peter Nilsson  <hp@bitrange.com>
 
+	* ld-mmix/bpo-22.d: New test.
+
 	* ld-mmix/local12.d (Sections): Match any LMA for .data, .sbss,
 	and .bss.
 
