@@ -23,20 +23,24 @@ Things-to-keep:
 
 merlin.mh
 merlin.mt
+nbsd.mh
+nbsd.mt
+nm-nbsd.h
 nm-umax.h
 ns32km3.mh
 ns32km3.mt
 tm-merlin.h
+tm-nbsd.h
 tm-ns32km3.h
 tm-umax.h
 umax.mh
 umax.mt
 xm-merlin.h
+xm-nbsd.h
 xm-ns32km3.h
 xm-umax.h
 
 Things-to-lose:
-
 
 Do-last:
 

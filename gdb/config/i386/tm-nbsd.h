@@ -1,5 +1,5 @@
-/* Native-dependent definitions for Sparc running NetBSD, for GDB.
-   Copyright 1986, 1987, 1989, 1992 Free Software Foundation, Inc.
+/* Macro definitions for Sparc running under NetBSD.
+   Copyright 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -17,12 +17,10 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#ifndef NM_NBSD_H
-#define NM_NBSD_H
+#ifndef TM_NBSD_H
+#define TM_NBSD_H
 
-/* Get generic NetBSD native definitions. */
-#include "nm-nbsd.h"
+#include "i386/tm-i386bsd.h"
+#include "tm-nbsd.h"
 
-#define FETCH_INFERIOR_REGISTERS
-
-#endif /* NM_NBSD_H */
+#endif /* TM_NBSD_H */

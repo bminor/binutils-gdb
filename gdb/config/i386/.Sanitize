@@ -50,6 +50,8 @@ i386v4.mh
 i386v4.mt
 linux.mh
 linux.mt
+nbsd.mh
+nbsd.mt
 ncr3000.mh
 ncr3000.mt
 nm-i386aix.h
@@ -83,6 +85,7 @@ tm-i386os9k.h
 tm-i386v.h
 tm-i386v4.h
 tm-linux.h
+tm-nbsd.h
 tm-ptx.h
 tm-ptx4.h
 tm-sun386.h
@@ -99,6 +102,7 @@ xm-i386v.h
 xm-i386v32.h
 xm-i386v4.h
 xm-linux.h
+xm-nbsd.h
 xm-ptx.h
 xm-ptx4.h
 xm-sun386.h

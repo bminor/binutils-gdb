@@ -38,6 +38,7 @@ mips
 nm-empty.h
 nm-lynx.h
 nm-m3.h
+nm-nbsd.h
 nm-sysv4.h
 none
 ns32k

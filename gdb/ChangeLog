@@ -1,4 +1,26 @@
+Fri Sep 23 14:58:49 1994  J.T. Conklin  (jtc@rtl.cygnus.com)
+
+	* solib.c: *BSD systems need <a.out.h> to be included before
+	  <link.h>.
+
+	* i386b-nat.c: Add i386_float_info(), etc.
+	* config/i386/nm-nbsd.h: #define FLOAT_INFO.
+
+	* config/nm-nbsd.h: New file, for generic NetBSD native support.
+	* config/i386/nm-nbsd.h: Use it.
+	* config/sparc/nm-nbsd.h: Use it.
+	* config/ns32k/nm-nbsd.h: Use it.
+
+	* configure.in (i386-*-netbsd): Use config/i386/nbsd.m[ht].
+	  (ns32k-*-netbsd): Use config/ns32k/nbsd.m[ht].
+	* config/i386/{nbsd.mh,nbsd.mt,nm-nbsd.h,tm-nbsd.h,xm-nbsd.h}:
+	  New files, support for NetBSD/i386.
+	* config/ns32k/{nbsd.mh,nbsd.mh,nm-nbsd.h,tm-nbsd.h,xm-nbsd.h}:
+     	  New files, support for NetBSD/ns32k.
+
 Tue Sep 20 11:34:27 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* .gdbinit: Add list-objfiles command.
 
 	* TODO: Reword item regarding NO_STD_REGS.
 

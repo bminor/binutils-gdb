@@ -1,5 +1,5 @@
-/* Native-dependent definitions for Sparc running NetBSD, for GDB.
-   Copyright 1986, 1987, 1989, 1992 Free Software Foundation, Inc.
+/* Parameters for execution on a ns32k running NetBSD, for GDB.
+   Copyright 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -17,12 +17,5 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#ifndef NM_NBSD_H
-#define NM_NBSD_H
-
-/* Get generic NetBSD native definitions. */
-#include "nm-nbsd.h"
-
-#define FETCH_INFERIOR_REGISTERS
-
-#endif /* NM_NBSD_H */
+/* Get generic NetBSD host definitions. */
+#include "xm-nbsd.h"

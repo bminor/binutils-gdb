@@ -1,5 +1,5 @@
-/* Native-dependent definitions for Sparc running NetBSD, for GDB.
-   Copyright 1986, 1987, 1989, 1992 Free Software Foundation, Inc.
+/* Native-dependent definitions for Intel 386 running NetBSD, for GDB.
+   Copyright 1986, 1987, 1989, 1992, 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -23,6 +23,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Get generic NetBSD native definitions. */
 #include "nm-nbsd.h"
 
-#define FETCH_INFERIOR_REGISTERS
+#define FLOAT_INFO	{ i386_float_info(); }
+
+#define REGISTER_U_ADDR(addr, blockend, regno) \
+	(addr) = i386_register_u_addr ((blockend),(regno));
+
+extern int
+i386_register_u_addr PARAMS ((int, int));
 
 #endif /* NM_NBSD_H */

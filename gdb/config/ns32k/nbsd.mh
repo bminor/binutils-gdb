@@ -1,0 +1,4 @@
+# Host: PC532 running NetBSD
+XM_FILE= xm-nbsd.h
+NAT_FILE= nm-nbsd.h
+NATDEPFILES= exec.o fork-child.o infptrace.o inftarg.o corelow.o coredep.o ns32k-nat.o
