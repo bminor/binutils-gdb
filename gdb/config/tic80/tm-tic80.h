@@ -36,58 +36,68 @@ struct frame_saved_regs;
 
 #define NAMES_HAVE_UNDERSCORE
 
-#define NUM_REGS 35
+#define NUM_REGS 37
 
 #define REGISTER_NAMES \
 { "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", \
   "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15", \
   "r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23", \
   "r24", "r25", "r26", "r27", "r28", "r29", "r30", "r31", \
-  "pc", "a0", "a1" \
+  "pc", "npc", \
+  "a0", "a1", "a2", "a3", \
 }
 
-/* Various dedicated register numbers */
+/* Various dedicated register numbers
+   FIXME: Shadow updates in sim/tic80/sim-calls.c */
 
 #define SP_REGNUM 1		/* Contains address of top of stack */
 #define FP_REGNUM 31		/* Contains address of executing stack frame */
 #define PC_REGNUM 32		/* Contains program counter (FIXME?) */
-#define A0_REGNUM 33		/* Accumulator register 0 */
-#define A1_REGNUM 34		/* Accumulator register 1 */
+#define NPC_REGNUM 33		/* Contains the next program counter (FIXME?) */
+#define A0_REGNUM 34		/* Accumulator register 0 */
+#define A3_REGNUM 37		/* Accumulator register 1 */
+
+#define R0_REGNUM 0             /* General Purpose Register 0 - for sim */
+#define Rn_REGNUM 31            /* Last General Purpose Register - for sim */
+#define An_REGNUM A3_REGNUM     /* Last Accumulator register - for sim */
 
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.  */
 
-#define REGISTER_BYTES (((NUM_REGS - 2) * 4) + (2 * 8))
+#define REGISTER_BYTES (((NUM_REGS - 4) * 4) + (4 * 8))
 
 /* Index within `registers' of the first byte of the space for
    register N.  */
 
 #define REGISTER_BYTE(N) \
-   (((N) > A0_REGNUM) ? (((N) - A0_REGNUM) * 8 + A0_REGNUM * 4) : ((N) * 4))
+   (((N) >= A0_REGNUM) ? (((N) - A0_REGNUM) * 8 + A0_REGNUM * 4) : ((N) * 4))
+
+/* Most registers are 4 bytes */
 
 #define REGISTER_SIZE 4
 
-/* All regs are 4 bytes.  */
+/* Some registers are 8 bytes.  */
 
-#define REGISTER_RAW_SIZE(N) (4)
+#define REGISTER_RAW_SIZE(N) \
+     (((N) >= A0_REGNUM) ? 8 : 4)
 
 /* Largest value REGISTER_RAW_SIZE can have.  */
 
-#define MAX_REGISTER_RAW_SIZE 4
+#define MAX_REGISTER_RAW_SIZE (8)
 
 /* All regs are 4 bytes.  */
 
-#define REGISTER_VIRTUAL_SIZE(N) (4)
+#define REGISTER_VIRTUAL_SIZE(N) (REGISTER_RAW_SIZE(N))
 
 /* Largest value REGISTER_VIRTUAL_SIZE can have.  */
 
-#define MAX_REGISTER_VIRTUAL_SIZE (4)
+#define MAX_REGISTER_VIRTUAL_SIZE (MAX_REGISTER_RAW_SIZE)
 
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
 
 #define REGISTER_VIRTUAL_TYPE(N) /* FIXME? */ \
-	(((N) == A0_REGNUM || (N) == A1_REGNUM) ? builtin_type_float : builtin_type_int)
+	(((N) >= A0_REGNUM) ? builtin_type_float : builtin_type_int)
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */

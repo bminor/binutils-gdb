@@ -1,3 +1,14 @@
+start-sanitize-tic80
+Thu Apr 24 16:11:47 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/tic80/tm-tic80.h (NUM_REGS): Four 64bit accumulators.
+	(REGISTER_BYTE, REGISTER_RAW_SIZE, REGISTER_SIZE,
+ 	MAX_REGISTER_RAW_SIZE, REGISTER_VIRTUAL_TYPE): Adjust.
+	(NPC_REGNUM): Tic80 has a delay slot.
+	(R0_REGNUM, Rn_REGNUM, An_REGNUM): For sim, provide base/bound for
+ 	register blocks.
+
+end-sanitize-tic80
 Wed Apr 23 11:18:45 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* config/mn10200/tm-mn10200.h (STORE_RETURN_VALUE): Pointers are
