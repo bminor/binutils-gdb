@@ -1,3 +1,8 @@
+Wed Jun 25 12:47:22 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* ld-shared/shared.exp: Add setup_xfail for m68k-linux on tests
+	with non PIC shared libraries.
+
 Fri Jun  6 17:35:47 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld-elfvers/vers6.ver: Update for recent elflink.h patch to
