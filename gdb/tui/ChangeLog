@@ -1,3 +1,10 @@
+2001-07-19  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* tuiDisassem.c (tuiVerticalDisassemScroll): Use CORE_ADDR.
+	(tuiVerticalDisassemScroll): Likewise.
+	(tuiShowDisassemAndUpdateSource): Check for null symtab to
+	prevent a crash.
+
 2001-07-18  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* tuiIO.c (_tuiHandleResizeDuringIO): Call tuiRefreshAll.

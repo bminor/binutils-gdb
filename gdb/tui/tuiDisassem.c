@@ -178,9 +178,14 @@ tuiShowDisassemAndUpdateSource (CORE_ADDR startAddr)
          ** note that it follows what is in the disassembly window and visa-versa
        */
       sal = find_pc_line (startAddr, 0);
-      current_source_symtab = sal.symtab;
-      tuiUpdateSourceWindow (srcWin, sal.symtab, (Opaque) sal.line, TRUE);
-      tuiUpdateLocatorFilename (sal.symtab->filename);
+      tuiUpdateSourceWindow (srcWin, sal.symtab, sal.line, TRUE);
+      if (sal.symtab)
+	{
+	  current_source_symtab = sal.symtab;
+	  tuiUpdateLocatorFilename (sal.symtab->filename);
+	}
+      else
+	tuiUpdateLocatorFilename ("?");
     }
 
   return;
@@ -248,7 +253,7 @@ tuiVerticalDisassemScroll (TuiScrollDirection scrollDirection,
 {
   if (disassemWin->generic.content != (OpaquePtr) NULL)
     {
-      Opaque pc, lowAddr;
+      CORE_ADDR pc, lowAddr;
       TuiWinContent content;
       struct symtab *s;
 
@@ -259,15 +264,13 @@ tuiVerticalDisassemScroll (TuiScrollDirection scrollDirection,
 	s = current_source_symtab;
 
       pc = content[0]->whichElement.source.lineOrAddr.addr;
-      if (find_pc_partial_function ((CORE_ADDR) pc,
-				    (char **) NULL,
-				    (CORE_ADDR *) & lowAddr,
-				    (CORE_ADDR) NULL) == 0)
-	error ("No function contains prgram counter for selected frame.\n");
+      if (find_pc_partial_function (pc, (char **) NULL, &lowAddr,
+				    (CORE_ADDR) 0) == 0)
+	error ("No function contains program counter for selected frame.\n");
       else
 	{
 	  register int line = 0;
-	  register Opaque newLow;
+	  register CORE_ADDR newLow;
 	  bfd_byte buffer[4];
 
 	  newLow = pc;
