@@ -2077,7 +2077,6 @@ gdbtk_init ( argv0 )
       */
 
       Tcl_SetVar (interp, "GDBTK_IDE", "1", 0);
-      Tcl_SetVar (interp, "IDE", "1", TCL_GLOBAL_ONLY);
     }
   /* end-sanitize-ide */
 #else
