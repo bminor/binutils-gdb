@@ -1,3 +1,8 @@
+Mon Dec  4 10:22:50 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* config.guess: Recognize HP model 816 machines as having
+	a PA1.1 processor.
+
 Mon Dec  4 12:38:15 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Ignore new autoconf configure options.
