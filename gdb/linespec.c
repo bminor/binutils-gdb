@@ -87,6 +87,11 @@ static struct symtabs_and_lines decode_dollar (char *copy,
 					       char ***canonical,
 					       struct symtab *s);
 
+static struct symtabs_and_lines decode_variable (char *copy,
+						 int funfirstline,
+						 char ***canonical,
+						 struct symtab *s);
+
 static struct
 symtabs_and_lines symbol_found (int funfirstline,
 				char ***canonical,
@@ -558,11 +563,6 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   char *q;
   struct symtab *s = NULL;
 
-  struct symbol *sym;
-  /* The symtab that SYM was found in.  */
-  struct symtab *sym_symtab;
-
-  struct minimal_symbol *msymbol;
   char *copy;
   /* This is NULL if there are no parens in *ARGPTR, or a pointer to
      the closing parenthesis if there are parens.  */
@@ -713,24 +713,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   /* Look up that token as a variable.
      If file specified, use that file's per-file block to start with.  */
 
-  sym = lookup_symbol (copy,
-		       (s ? BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK)
-			: get_selected_block (0)),
-		       VAR_NAMESPACE, 0, &sym_symtab);
-
-  if (sym != NULL)
-    return symbol_found (funfirstline, canonical, copy, sym, s, sym_symtab);
-
-  msymbol = lookup_minimal_symbol (copy, NULL, NULL);
-
-  if (msymbol != NULL)
-    return minsym_found (funfirstline, msymbol);
-
-  if (!have_full_symbols () &&
-      !have_partial_symbols () && !have_minimal_symbols ())
-    error ("No symbol table is loaded.  Use the \"file\" command.");
-
-  error ("Function \"%s\" not defined.", copy);
+  return decode_variable (copy, funfirstline, canonical, s);
 }
 
 
@@ -1386,6 +1369,42 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
 
   return values;
 }
+
+
+
+/* Decode a linespec that's a variable.  If S is non-NULL,
+   look in that symtab's static variables first.  */
+
+static struct symtabs_and_lines
+decode_variable (char *copy, int funfirstline, char ***canonical,
+		 struct symtab *s)
+{
+  struct symbol *sym;
+  /* The symtab that SYM was found in.  */
+  struct symtab *sym_symtab;
+
+  struct minimal_symbol *msymbol;
+
+  sym = lookup_symbol (copy,
+		       (s ? BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK)
+			: get_selected_block (0)),
+		       VAR_NAMESPACE, 0, &sym_symtab);
+
+  if (sym != NULL)
+    return symbol_found (funfirstline, canonical, copy, sym, s, sym_symtab);
+
+  msymbol = lookup_minimal_symbol (copy, NULL, NULL);
+
+  if (msymbol != NULL)
+    return minsym_found (funfirstline, msymbol);
+
+  if (!have_full_symbols () &&
+      !have_partial_symbols () && !have_minimal_symbols ())
+    error ("No symbol table is loaded.  Use the \"file\" command.");
+
+  error ("Function \"%s\" not defined.", copy);
+}
+
 
 
 

@@ -1,3 +1,8 @@
+2003-01-08  David Carlton  <carlton@math.stanford.edu>
+
+	* linespec.c (decode_line_1): Move code into decode_variable.
+	(decode_variable): New function.
+
 2003-01-08  Andrew Cagney  <ac131313@redhat.com>
 
 	* mn10300-tdep.c (analyze_dummy_frame): Fix typo.
