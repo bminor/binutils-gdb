@@ -211,7 +211,15 @@ static void cons_worker PARAMS ((int, int));
 static int scrub_from_string PARAMS ((char **));
 static void do_align PARAMS ((int, char *, int, int));
 static void s_align PARAMS ((int, int));
+static void s_lcomm_internal PARAMS ((int, int));
 static int hex_float PARAMS ((int, char *));
+static inline int sizeof_sleb128 PARAMS ((offsetT));
+static inline int sizeof_uleb128 PARAMS ((valueT));
+static inline int output_sleb128 PARAMS ((char *, offsetT));
+static inline int output_uleb128 PARAMS ((char *, valueT));
+static inline int output_big_sleb128 PARAMS ((char *, LITTLENUM_TYPE *, int));
+static inline int output_big_uleb128 PARAMS ((char *, LITTLENUM_TYPE *, int));
+static int output_big_leb128 PARAMS ((char *, LITTLENUM_TYPE *, int, int));
 static void do_org PARAMS ((segT, expressionS *, int));
 char *demand_copy_string PARAMS ((int *lenP));
 static segT get_segmented_expression PARAMS ((expressionS *expP));
@@ -4207,7 +4215,7 @@ output_leb128 (p, value, sign)
    we don't output for NULL values of P.  It isn't really as critical as
    for "normal" values that this be streamlined.  */
 
-static int
+static inline int
 output_big_sleb128 (p, bignum, size)
      char *p;
      LITTLENUM_TYPE *bignum;
@@ -4253,7 +4261,7 @@ output_big_sleb128 (p, bignum, size)
   return p - orig;
 }
 
-static int
+static inline int
 output_big_uleb128 (p, bignum, size)
      char *p;
      LITTLENUM_TYPE *bignum;
@@ -4295,7 +4303,7 @@ output_big_uleb128 (p, bignum, size)
   return p - orig;
 }
 
-static inline int
+static int
 output_big_leb128 (p, bignum, size, sign)
      char *p;
      LITTLENUM_TYPE *bignum;
