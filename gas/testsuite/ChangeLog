@@ -1,3 +1,9 @@
+Mon Mar  2 13:30:40 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* gas/m32r/allinsn.[sd] (ldi8a,ldi16a): Delete.
+	(ldi16): Improve test.
+	(nop): Fix test.
+
 start-sanitize-vr5400
 Mon Feb 23 10:31:05 1998  Jeffrey A Law  (law@cygnus.com)
 
