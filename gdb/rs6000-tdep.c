@@ -244,7 +244,8 @@ CORE_ADDR pc;
       op = read_memory_integer (pc, 4);
     }
 
-  if (op == 0x603f0000) {			/* oril r31, r1, 0x0 */
+  if (op == 0x603f0000				/* oril r31, r1, 0x0 */
+      || op == 0x7c3f0b78) {			/* mr r31, r1 */
     pc += 4;					/* this happens if r31 is used as */
     op = read_memory_integer (pc, 4);		/* frame ptr. (gcc does that)	  */
 

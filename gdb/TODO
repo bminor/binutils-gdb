@@ -277,11 +277,6 @@ solution).
 investigate "x/s 0" (right now stops early) (I think maybe GDB is
 using a 0 address for bad purposes internally).
 
-Play with RS/6000 shared libraries (using shared library tests
-listed in testsuite/TODO as a guide).  (Schauer has done shared
-library stuff on most other platforms but has not touched the
-RS/6000).
-
 Make "info path" and path_command work again (but independent of the
 environment either of gdb or that we'll pass to the inferior).
 
