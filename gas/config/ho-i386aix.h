@@ -21,6 +21,4 @@
 
 #include "ho-sysv.h"
 
-#define KEEP_RELOC_INFO
-
 /* end of ho-i386aix.h */

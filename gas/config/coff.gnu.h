@@ -17,8 +17,6 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/*** coff information for 80960.  Origins: Intel, AMD, etc., natch. */
-
 /*
  * At this point I'm sure this file is right for i960 and I'm pretty sure it's
  * right for a29k, although it hasn't been tested rigorously.  Please feel free
@@ -97,6 +95,17 @@ struct filehdr {
 #define	SIPRBOMAGIC	(0x17b)	/* Am29000 (Byte 0 is LSB - Little Endian) */
 
 #define A29KBADMAG(x)	(((x).f_magic != SIPFBOMAGIC) && ((x).f_magic != SIPRBOMAGIC))
+
+#ifdef TE_I386AIX
+# define I386MAGIC	(0x175)	/* Danbury AIX C compiler 	*/
+# define I386SVMAGIC	(0x14c)	/* System V C Compiler 		*/
+# define I386BADMAG(x)  (((x).f_magic!=I386MAGIC) && \
+			 ((x).f_magic!=I386SVMAGIC))
+#else /* not TE_I386AIX */
+# define I386MAGIC	0x14c
+# define I386BADMAG(x) (((x).f_magic!=I386MAGIC))
+#endif /* not TE_I386AIX */
+ 
 
 #define	FILHDR	struct filehdr
 #define	FILHSZ	sizeof(FILHDR)
@@ -245,9 +254,13 @@ struct scnhdr {
 /*
  * names of "special" sections
  */
-#define _TEXT	".text"
-#define _DATA	".data"
-#define _BSS	".bss"
+#define _TEXT    ".text"		/* executable code section	*/
+#define _DATA    ".data"		/* initialized data		*/
+#define _BSS     ".bss"			/* un-initialized data		*/
+#define _DEBUG   ".debug"		/* special section used by dbx	*/
+#define _COMMENT ".comment"		/* version info			*/
+#define _LIB     ".lib"			/* shared lib info section	*/
+#define _TV      ".tv"
 
 /*
  * s_flags "type"
@@ -521,6 +534,8 @@ struct reloc {
 #define RELOC struct reloc
 #define RELSZ sizeof(RELOC)
 
+#define	R_ABS		(0x00) /* reference is absolute */
+
 #ifdef TC_I960
 #define R_RELLONG	(0x11)	/* Direct 32-bit relocation */
 #define R_IPRSHORT	(0x18)
@@ -552,7 +567,6 @@ struct reloc {
  * constant fields of the instruction are set to zero.
  */
 
-#define	R_ABS		(0x00) /* reference is absolute */
 #define	R_IREL		(0x18) /* instruction relative (jmp/call) */
 #define	R_IABS		(0x19) /* instruction absolute (jmp/call) */
 #define	R_ILOHALF	(0x1a) /* instruction low half  (const)  */
@@ -573,6 +587,192 @@ struct reloc {
 #define DEFAULT_TEXT_SECTION_ALIGNMENT 16
 /* For new sections we haven't heard of before */
 #define DEFAULT_SECTION_ALIGNMENT 4
+
+#if defined(TC_I386)
+/*
+ * X86 generic
+ *	8-bit offset reference in 8-bits
+ *	8-bit offset reference in 16-bits 
+ *	12-bit segment reference
+ *	auxiliary relocation entry
+ */
+#define	R_OFF8		07
+#define R_OFF16		010
+#define	R_SEG12		011
+#define	R_AUX		013
+
+/*
+ * B16 and X86 generics
+ *	16-bit direct reference
+ *	16-bit "relative" reference
+ *	16-bit "indirect" (TV) reference
+ */
+#define  R_DIR16	01
+#define  R_REL16	02
+#define  R_IND16	03
+
+/*
+ * 3B generic
+ *	24-bit direct reference
+ *	24-bit "relative" reference
+ *	16-bit optimized "indirect" TV reference
+ *	24-bit "indirect" TV reference
+ *	32-bit "indirect" TV reference
+ */
+#define  R_DIR24	04
+#define  R_REL24	05
+#define  R_OPT16	014
+#define  R_IND24	015
+#define  R_IND32	016
+
+/* 
+ * XL generics
+ *	10-bit direct reference
+ *	10-bit "relative" reference
+ *	32-bit "relative" reference
+ */
+#define	R_DIR10		025
+#define R_REL10		026
+#define R_REL32		027
+
+/*
+ * 3B and M32 generics
+ *	32-bit direct reference
+ */
+#define  R_DIR32	06
+
+/*
+ * M32 generic
+ *	32-bit direct reference with bytes swapped
+ */
+#define  R_DIR32S	012
+ 
+#endif /* TC_I386 */
+
+#if defined(TE_I386AIX)
+
+#define UINFOSIZ        64      /* size of user info buffer */
+typedef char uinfo_t[UINFOSIZ];
+
+struct env387 {
+  unsigned short control;
+  unsigned short r0;
+  unsigned short status;
+  unsigned short r1;
+  unsigned short tag;
+  unsigned short r2;
+  unsigned long eip;
+  unsigned short code_seg;
+  unsigned short opcode;
+  unsigned long operand;
+  unsigned short operand_seg;
+  unsigned short r3;
+  unsigned char regs[8][10];
+};
+
+#define	CD_NAMELEN 16	/* length of most names in this header */
+#define	CORHDRSIZ	2048 /* size to which header is padded out */
+#define	MAX_CORE_SEGS	32 /* maximum segments in a core dump */
+#define NUM_FREGS	1 /* # of saved FP regs */
+
+/*
+ * These are defined such that 286 and 386 kernels can produce
+ * compatible dumps.
+ */
+#define CD_AX	0
+#define CD_BX	1
+#define CD_CX	2
+#define CD_DX	3
+#define CD_SI	4
+#define CD_DI	5
+#define CD_BP	6
+#define CD_SP	7
+#define CD_FL	8
+#define CD_IP	9
+#define CD_CS	10
+#define CD_DS	11
+#define CD_ES	12
+#define CD_FS	13
+#define CD_GS	14
+#define CD_SS	15
+#define NUM_REGS	16
+
+#ifndef SPATHLEN
+# define SPATHLEN 16 /* sys/param.h */
+#endif
+#ifndef NSIG
+# define NSIG 63 /* sys/signal.h */
+# define SIGSETSZ ((NSIG+31)/32)
+typedef struct ksigmask {
+	unsigned long sigs[SIGSETSZ];
+} ksigmask_t;
+#endif
+
+struct corehdr {
+	char cd_magic[4];		/* COR_MAGIC = "core" */
+	
+	/* general information about the dump itself */
+	struct dumpseg { /* table of contents for dump */
+		long cs_type; /* seg. type; see below */
+		long cs_len; /* length (in bytes) of segment */
+		long cs_offset;	/* offset (in dump) of segment */
+		long cs_address; /* address segment had in mem */
+	} cd_segs[MAX_CORE_SEGS];
+	
+	/* general information about the process */
+	char cd_comm[CD_NAMELEN]; /* command being run */
+	char cd_mach[CD_NAMELEN]; /* type of machine it ran on */
+	char cd_site[CD_NAMELEN]; /* name of site it ran on */
+	long cd_ldtype;	/* type of load module running */
+	char cd_intsize; /* sizeof(int) */
+	char cd_dptrsize; /* sizeof(char *) */
+	char cd_tptrsize; /* sizeof(int (*)()) */
+	char cd_unused;
+	
+	/* user-mode program state */
+	long cd_regs[NUM_REGS];	/* user-mode general registers	*/
+	struct env387 cd_fpregs; /* user-mode floating-point state */
+	
+	/* kernel-mode program state */
+	int (*cd_sig[NSIG])(); /* disposition of signals */
+	ksigmask_t cd_sigmask; /* signals to be blocked	*/
+	ksigmask_t cd_sigpend; /* signals currently pending */
+	long cd_cursig;	/* signal that caused the dump */
+	
+	long cd_pid; /* process ID of the corpse */
+	long cd_ppid; /* parent process ID of corpse */
+	short cd_uid; /* process effective user ID */
+	short cd_ruid; /* process real user ID */
+	short cd_gid; /* process effective group ID */
+	short cd_rgid; /* process real group ID	*/
+	
+	uinfo_t	cd_uinfo; /* buffer of user information	*/
+	char cd_locname[32]; /* name of /local */
+	char cd_uvers[CD_NAMELEN]; /* user version string */
+	unsigned short cd_spath[SPATHLEN]; /* sitepath */
+};
+
+#ifndef NOCHECKS
+/* this will generate an error if sizeof(struct corehdr) > CORHDRSIZ */
+struct { char xxcdxx[CORHDRSIZ+1-sizeof(struct corehdr)]; };
+#endif	/* ! NOCHECKS */
+
+/*
+ * segment types (in cs_type)
+ *	each segment in the address space appears here, whether or not it
+ *	is actually dumped.  Read/only segments will not actually be dumped.
+ *	A segment that is not in the dump will have a cs_offset of zero.
+ */
+#define	COR_TYPE_CODE		'x'	/* process code - NOT IN DUMP	*/
+#define	COR_TYPE_DATA		'd'	/* process data segment		*/
+#define	COR_TYPE_STACK		's'	/* process stack segment	*/
+#define COR_TYPE_LIBCODE	'X'	/* shared lib code - NOT IN DUMP*/
+#define COR_TYPE_LIBDATA	'D'	/* shared lib data		*/
+#define COR_TYPE_READ		'r'	/* other read/only - NOT IN DUMP*/
+#define COR_TYPE_WRITE		'w'	/* other writeable		*/
+#define	COR_TYPE_MSC		'?'	/* other, mapped in segment	*/
+
+#endif /* TE_I386AIX */
 
 /*
  * Local Variables:
