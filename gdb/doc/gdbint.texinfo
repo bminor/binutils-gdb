@@ -1,6 +1,15 @@
 \input texinfo
 @setfilename gdbint.info
 @c $Id$
+
+@ifinfo
+@format
+START-INFO-DIR-ENTRY
+* Gdb Internals: (gdbint).	The GNU debugger internals.
+END-INFO-DIR-ENTRY
+@end format
+@end ifinfo
+
 @ifinfo
 This file documents the internals of the GNU debugger GDB.
 
@@ -87,6 +96,12 @@ and targets.
 
 @heading What is considered ``host-dependent'' versus ``target-dependent''?
 
+@dfn{Host} refers to attributes of the system where GDB runs.
+@dfn{Target} refers to the system where the program being debugged
+executes.   In most cases they are the same machine; unfortunately, that
+means you must add @emph{both} host and target support for new machines
+in this category.
+
 The @file{xconfig/*}, @file{xm-*.h} and @file{*-xdep.c} files are for
 host support.  Similarly, the @file{tconfig/*}, @file{tm-*.h} and
 @file{*-tdep.c} files are for target support.  The question is, what
@@ -123,7 +138,7 @@ sensible soon.  Let's say your new host is called an @var{xxx} (e.g.
 @code{@var{xarch}-@var{xvend}-@var{xos}} (e.g.  @samp{sparc-sun-sunos4}).  In
 particular:
 
-At the top level, edit @file{config.sub} and add @var{xarch},
+In the top level directory, edit @file{config.sub} and add @var{xarch},
 @var{xvend}, and @var{xos} to the lists of supported architectures,
 vendors, and operating systems near the bottom of the file.  Also, add
 @var{xxx} as an alias that maps to
@@ -142,45 +157,34 @@ and
 which should both respond with @code{@var{xarch}-@var{xvend}-@var{xos}}
 and no error messages.
 
-Then edit @file{include/sysdep.h}.  Add a new @code{#define} for
-@samp{@var{xxx}_SYS}, with a numeric value not already in use.  Add a
-new section that says
-
-@example
-#if HOST_SYS==@var{xxx}_SYS
-#include <sys/h-@var{xxx}.h>
-#endif
-@end example
-
-Now create a new file @file{include/sys/h-@var{xxx}.h}.  Examine the
+Now, go to the @file{bfd} directory and 
+create a new file @file{bfd/hosts/h-@var{xxx}.h}.  Examine the
 other @file{h-*.h} files as templates, and create one that brings in the
 right include files for your system, and defines any host-specific
 macros needed by GDB.
 
-Now, go to the @file{bfd} directory and edit @file{bfd/configure.in}.
-Add shell script code to recognize your
+Then edit @file{bfd/configure.in}.  Add shell script code to recognize your
 @code{@var{xarch}-@var{xvend}-@var{xos}} configuration, and set
-@code{bfd_host} to @var{xxx} when you recognize it.  Now create a file
-@file{bfd/config/hmake-@var{xxx}}, which includes the line:
+@code{my_host} to @var{xxx} when you recognize it.  This will cause your
+file @file{h-@var{xxx}.h} to be linked to @file{sysdep.h} at configuration
+time.
 
-@example
-HDEFINES=-DHOST_SYS=@var{xxx}_SYS
-@end example
+Also, if this host requires any changes to the Makefile, create a file
+@file{bfd/config/hm-@var{xxx}}, which includes the required lines.
 
-(If you have the binary utilities in the same tree, you'll have to do
-the same thing to in the @file{binutils} directory as you've done in the
-@file{bfd} directory.)
+(If you have the binary utilities and/or GNU ld in the same tree,
+you'll also have to edit @file{binutils/configure.in} or
+@file{ld/configure.in} to match what you've done in the @file{bfd}
+directory.)
 
 It's likely that the @file{libiberty} and @file{readline} directories
 won't need any changes for your configuration, but if they do, you can
 change the @file{configure.in} file there to recognize your system and
-map to an @file{hmake-@var{xxx}} file.  Then add @file{hmake-@var{xxx}}
+map to an @file{hm-@var{xxx}} file.  Then add @file{hm-@var{xxx}}
 to the @file{config/} subdirectory, to set any makefile variables you
 need.  The only current options in there are things like @samp{-DSYSV}.
 
-Aha!  Now to configure GDB itself!  You shouldn't edit the
-@code{configure} script itself to add hosts or targets; instead, edit
-the script fragments in the file @code{configure.in}.  Modify
+Aha!  Now to configure GDB itself!  Edit
 @file{gdb/configure.in} to recognize your system and set @code{gdb_host}
 to @var{xxx}, and (unless your desired target is already available) also
 set @code{gdb_target} to something appropriate (for instance,
@@ -190,17 +194,7 @@ per-target}.
 @c Would it be simpler to just use different per-host and per-target
 @c *scripts*, and call them from {configure} ?
 
-Then fold your changes into the @code{configure} script by using the
-@code{+template} option, and specifying @code{configure} itself as the
-template:
-@example
-configure +template=configure
-@end example
-@c If "configure" is the only workable option value for +template, it's
-@c kind of silly to insist that it be provided.  If it isn't, somebody
-@c please fill in here what are others... (then delete this comment!)
-
-Finally, you'll need to specify and define the host- and
+Finally, you'll need to specify and define GDB's host- and
 target-dependent files used for your configuration; the next two
 chapters discuss those.
 
@@ -217,7 +211,7 @@ system that's already supported, you are done.
 
 If you want to use GDB to debug programs that run on the new machine,
 you have to get it to understand the machine's object files, symbol
-files, and interfaces to processes.  @pxref{Target}
+files, and interfaces to processes.  @pxref{Target,,Adding a New Target}
 
 Several files control GDB's configuration for host systems:
 
@@ -292,16 +286,8 @@ as the value of @samp{TM_FILE} in @file{tconfig/@var{xxx}}.  You can
 also define @samp{TM_CFLAGS}, @samp{TM_CLIBS}, and @samp{TM_CDEPS} in
 there; see @file{Makefile.in}.
 
-Now, from the top level (above @file{bfd}, @file{gdb}, etc), run:
-
-@example
-./configure -template=./configure
-@end example
-
-This will rebuild all your configure scripts, using the new
-@file{configure.in} files that you modified.  (You can also run this command
-at any subdirectory level.)  You are now ready to try configuring
-GDB to compile for your system.  Do:
+Now, you are now ready to try configuring GDB to compile for your system.
+From the top level (above @file{bfd}, @file{gdb}, etc), do:
 
 @example
 ./configure @var{xxx} +target=vxworks960
@@ -337,13 +323,14 @@ section information basically delimits areas in the core file in a
 standard way, which the section-reading routines in BFD know how to seek
 around in.
 
-Then back in GDB, you need a matching routine called @code{fetch_core_registers()}.
-If you can use the generic one, it's in @file{core-dep.c}; if not, it's in
-your @file{@var{xxx}-xdep.c} file.  It will be passed a char pointer
-to the entire ``registers'' segment, its length, and a zero; or a char
-pointer to the entire ``regs2'' segment, its length, and a 2.  The
-routine should suck out the supplied register values and install them into
-GDB's ``registers'' array.  (@xref{New Architectures}
+Then back in GDB, you need a matching routine called
+@code{fetch_core_registers()}.  If you can use the generic one, it's in
+@file{core-dep.c}; if not, it's in your @file{@var{xxx}-xdep.c} file.
+It will be passed a char pointer to the entire ``registers'' segment,
+its length, and a zero; or a char pointer to the entire ``regs2''
+segment, its length, and a 2.  The routine should suck out the supplied
+register values and install them into GDB's ``registers'' array.
+(@xref{New Architectures,,Defining a New Host or Target Architecture},
 for more info about this.)
 
 
@@ -470,6 +457,16 @@ the various parsers from defining the same global names:
 #define yynerrs  	@var{lang}_nerrs
 @end example
 
+At the bottom of your parser, define a @code{struct language_defn} and
+initialize it with the right values for your language.  Define an
+@code{initialize_@var{lang}} routine and have it call
+@samp{add_language(@var{lang}_language_defn)} to tell the rest of GDB
+that your language exists.  You'll need some other supporting variables
+and functions, which will be used via pointers from your
+@code{@var{lang}_language_defn}.  See the declaration of @code{struct
+language_defn} in @file{language.h}, and the other @file{*-exp.y} files,
+for more information.
+
 @item Add any evaluation routines, if necessary
 
 If you need new opcodes (that represent the operations of the language),
@@ -498,12 +495,13 @@ Update the function @code{_initialize_language} to include your language.  This
 function picks the default language upon startup, so is dependent upon
 which languages that GDB is built for.
 
-Update @code{symfile.c} and/or symbol-reading code so that the language of
-each symtab (source file) is set properly.  This is used to determine the
-language to use at each stack frame level.  Currently, the language
-is set based upon the extension of the source file.  If the language
-can be better inferred from the symbol information, please set the
-language of the symtab in the symbol-reading code.
+Update @code{allocate_symtab} in @file{symfile.c} and/or symbol-reading
+code so that the language of each symtab (source file) is set properly.
+This is used to determine the language to use at each stack frame level.
+Currently, the language is set based upon the extension of the source
+file.  If the language can be better inferred from the symbol
+information, please set the language of the symtab in the symbol-reading
+code.
 
 Add helper code to @code{expprint.c:print_subexp()} to handle any new
 expression opcodes you have added to @file{expression.h}.  Also, add the
@@ -542,17 +540,26 @@ distribution!
 @node Releases, BFD support for GDB, Languages, Top
 @chapter Configuring GDB for Release
 
-GDB should be released after doing @samp{./configure none} in the top
-level directory.  This will leave a makefile there, but no @file{tm-*}
-or @file{xm-*} files.  The makefile is needed, for example, for
-@samp{make gdb.tar.Z}@dots{} If you have @file{tm-*} or @file{xm-*}
-files in the main source directory, C's include rules cause them to be
-used in preference to @file{tm-*} and @file{xm-*} files in the
-subdirectories where the user will actually configure and build the
-binaries.
+From the top level directory (containing @file{gdb}, @file{bfd},
+@file{libiberty}, and so on):
+@example
+make gdb.tar.Z
+@end example
 
-@samp{./configure none} is also a good way to rebuild the top level @file{Makefile}
-after changing @file{Makefile.in}, @file{alldeps.mak}, etc.
+This will properly configure, clean, rebuild any files that are
+distributed pre-built (e.g. @file{c-exp.tab.c} or @file{refcard.ps}),
+and will then make a tarfile.
+
+This procedure requires:
+@itemize @bullet
+@item symbolic links
+@item @code{makeinfo} (texinfo2 level)
+@item @TeX{}
+@item @code{dvips}
+@item @code{yacc} or @code{bison}
+@end itemize
+@noindent
+@dots{} and the usual slew of utilities (@code{sed}, @code{tar}, etc.).
 
 @subheading TEMPORARY RELEASE PROCEDURE FOR DOCUMENTATION
 
@@ -599,7 +606,8 @@ symbols, but GDB uses BFD's cached information to find the symbols,
 string table, etc.
 @end table
 
-@c The interface for symbol reading is described in @ref{Symbol Reading}.
+@c The interface for symbol reading is described in @ref{Symbol
+@c Reading,,Symbol Reading}.
 
 
 @node Symbol Reading, Cleanups, BFD support for GDB, Top

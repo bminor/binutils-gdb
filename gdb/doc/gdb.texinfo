@@ -11,6 +11,15 @@ _dnl__ Copyright (c) 1988 1989 1990 1991 Free Software Foundation, Inc.
 @c preprocessing; if you don't, you have the source configured for
 @c _HOST__ architectures (and you can of course get the full source,
 @c with all configurations, from wherever you got this).
+
+@ifinfo
+@format
+START-INFO-DIR-ENTRY
+* Gdb: (gdb).			The GNU debugger.
+END-INFO-DIR-ENTRY
+@end format
+@end ifinfo
+
 _if__(0)
 
 THIS IS THE SOURCE PRIOR TO PREPROCESSING.  The full source needs to
