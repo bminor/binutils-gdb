@@ -1,3 +1,9 @@
+2003-12-03  Andrew Cagney  <cagney@redhat.com>
+
+	* ppc-linux-nat.c (store_register, fetch_register): Convert
+	between ptrace and regcache's wordsize.
+	(ppc_register_u_addr): Use the ptrace wordsize.
+
 2003-12-02  Kevin Buettner  <kevinb@redhat.com>
 
 	* frv-tdep.c (frv_gdbarch_init): Add case for fr550.
