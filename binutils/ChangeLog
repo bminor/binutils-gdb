@@ -1,3 +1,8 @@
+2000-10-31  Nick Clifton  <nickc@redhat.com>
+
+	* MAINTAINERS: Add Jim Wilson as the maintainer for the IA64
+	code.
+
 2000-10-12  Roger Sayle  <roger@metaphorics.com>
 
 	* Make comma after string after icon/control optional.
@@ -1535,8 +1540,8 @@ Thu May 27 11:58:33 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
 1999-05-05  Catherine Moore  <clm@cygnus.com>
 
-        * readelf.c (get_machine_flags):  Check for EF_CPU32.
-        (get_data_encoding): Fix typo.
+	* readelf.c (get_machine_flags):  Check for EF_CPU32.
+	(get_data_encoding): Fix typo.
 
 1999-04-26  Tom Tromey  <tromey@cygnus.com>
 
@@ -1686,7 +1691,7 @@ Wed Mar 10 15:10:14 1999  Stan Cox  <scox@cygnus.com>
 
 1999-02-17  DJ Delorie  <dj@cygnus.com>
 
-        * resbin.c (res_to_bin_versioninfo): Instead of entering a value
+	* resbin.c (res_to_bin_versioninfo): Instead of entering a value
 	length of zero in a version info string, enter the appropriate
 	length.
 
@@ -1712,7 +1717,7 @@ Tue Feb 16 16:00:33 1999  Ian Lance Taylor  <ian@cygnus.com>
 
 Mon Feb  1 12:38:01 1999  Catherine Moore  <clm@cygnus.com>
 
-        * readelf.c (dump_relocations):  Handle EM_ARM as REL.
+	* readelf.c (dump_relocations):  Handle EM_ARM as REL.
 
 1999-01-29  Nick Clifton  <nickc@cygnus.com>
 
@@ -1839,8 +1844,8 @@ Wed Nov  4 16:25:55 1998  Nick Clifton  <nickc@cygnus.com>
 
 Mon Nov  2 14:59:33 1998  Geoffrey Noer  <noer@cygnus.com>
 
-        * configure.in: detect cygwin* instead of cygwin32*
-        * configure: regenerate
+	* configure.in: detect cygwin* instead of cygwin32*
+	* configure: regenerate
 
 Fri Oct 30 15:14:49 1998  Geoffrey Noer  <noer@cygnus.com>
 
