@@ -1,4 +1,4 @@
-#objdump: -dr
+#objdump: -dr -m mips:4120
 #name: MIPS VR4120
 #as: -march=vr4120
 
@@ -26,4 +26,4 @@ Disassembly of section \.text:
  +4c:	00a62428 	maccs	a0,a1,a2
  +50:	00a62068 	maccu	a0,a1,a2
  +54:	00a62468 	maccus	a0,a1,a2
-#...
+#pass
