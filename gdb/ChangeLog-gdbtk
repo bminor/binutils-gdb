@@ -1,3 +1,23 @@
+Wed Jan 22  10:37:02 1998  Keith Seitz  <keiths@onions.cygnus.com>
+
+	* symfile.c: Define two new hooks for symbol reading: "pre_add_symbol_hook"
+ 	and "post_add_symbol_hook". These hooks are called before we begin reading
+	symbols, and after we finish.
+	(generic_load): Use new symbol reading hooks and get rid of compiler warning.
+
+	* gdbtk.c (gdbtk_init): Add hooks for pre- and post-symbol reading.
+	(gdbtk_pre_add_symbol): New function: the pre-add-symbol hook.
+	(gdbtk_post_add_symbol): New function: the post-add-symbol hook.
+	(find_file_in_dir): New function. Moved the guts of gdb_find_file_command
+	into here to allow its use by others.
+	(gdb_loc): Use find_file_in_dir to return the real path to the file
+	(or "N/A" if we can't find it).
+
+	* configure.in (TIX_LIB_EXT): Define new variable for those special cases
+	when TCL_SHLIB_SUFFIX is not enough to specify the dependency.
+
+	* configure: Regenerate.
+
 Fri Jan 23 07:47:06 1998  Fred Fish  <fnf@cygnus.com>
 
 	* Makefile.in (uninstall): Remove installed gdbtcl dir, if one

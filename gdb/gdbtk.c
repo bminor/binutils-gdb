@@ -88,6 +88,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 int gdbtk_load_hash PARAMS ((char *, unsigned long));
 int (*ui_load_progress_hook) PARAMS ((char *, unsigned long));
+void (*pre_add_symbol_hook) PARAMS ((char *));
+void (*post_add_symbol_hook) PARAMS ((void));
 
 static void null_routine PARAMS ((int));
 static void gdbtk_flush PARAMS ((FILE *));
@@ -142,10 +144,13 @@ static int gdb_get_tracepoint_info PARAMS ((ClientData, Tcl_Interp *, int, Tcl_O
 static int gdb_actions_command PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 static int gdb_prompt_command PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 static int gdb_find_file_command PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
+static char *find_file_in_dir PARAMS ((char *));
 static int gdb_get_tracepoint_list PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 static void gdbtk_create_tracepoint PARAMS ((struct tracepoint *));
 static void gdbtk_delete_tracepoint PARAMS ((struct tracepoint *));
 static void tracepoint_notify PARAMS ((struct tracepoint *, const char *));
+void gdbtk_pre_add_symbol PARAMS ((char *));
+void gdbtk_post_add_symbol PARAMS ((void));
 
 /* Handle for TCL interpreter */
 
@@ -484,7 +489,7 @@ gdb_get_breakpoint_info (clientData, interp, argc, argv)
 
   filename = symtab_to_filename (sal.symtab);
   if (filename == NULL)
-    filename = "N/A";
+    filename = "";
   Tcl_DStringAppendElement (result_ptr, filename);
   find_pc_partial_function (b->address, &funcname, NULL, NULL);
   Tcl_DStringAppendElement (result_ptr, funcname);
@@ -613,7 +618,9 @@ gdb_loc (clientData, interp, argc, argv)
   find_pc_partial_function (pc, &funcname, NULL, NULL);
   Tcl_DStringAppendElement (result_ptr, funcname);
 
+  /* Would it be better to use "find_file_in_dir"? */
   filename = symtab_to_filename (sal.symtab);
+
   if (filename == NULL)
     filename = "N/A";
   Tcl_DStringAppendElement (result_ptr, filename);
@@ -1955,6 +1962,8 @@ gdbtk_init ( argv0 )
   readline_hook = gdbtk_readline;
   readline_end_hook = gdbtk_readline_end;
   ui_load_progress_hook = gdbtk_load_hash;
+  pre_add_symbol_hook   = gdbtk_pre_add_symbol;
+  post_add_symbol_hook  = gdbtk_post_add_symbol;
   create_tracepoint_hook = gdbtk_create_tracepoint;
   delete_tracepoint_hook = gdbtk_delete_tracepoint;
 
@@ -2688,7 +2697,6 @@ gdb_find_file_command (clientData, interp, objc, objv)
   Tcl_Obj *CONST objv[];
 {
   char *file, *filename;
-  struct symtab *st = NULL;
 
   if (objc != 2)
     {
@@ -2698,28 +2706,59 @@ gdb_find_file_command (clientData, interp, objc, objv)
       return TCL_ERROR;
     }
 
-  /* try something simple first */
   file  = Tcl_GetStringFromObj (objv[1], NULL);
-  if (access (file, R_OK) == 0)
-    {
-      Tcl_SetObjResult (interp, Tcl_NewStringObj (file, -1));
-      return TCL_OK;
-    }
+  filename = find_file_in_dir (file);
+  
+  if (filename == NULL)
+    Tcl_SetResult (interp, "", TCL_STATIC);
+  else
+    Tcl_SetObjResult (interp, Tcl_NewStringObj (filename, -1));
 
-  /* We really need a symtab for this to work... */
-  st = lookup_symtab (file);
-  if (st != NULL)
+  return TCL_OK;
+}
+
+static char *
+find_file_in_dir (file)
+     char *file;
+{
+  struct symtab *st = NULL;
+
+  if (file != NULL)
     {
-      filename = symtab_to_filename (st);
-      if (filename != NULL)
+      /* try something simple first */
+      if (access (file, R_OK) == 0)
+        return file;
+      
+      /* We really need a symtab for this to work... */
+      st = lookup_symtab (file);
+      if (st != NULL)
         {
-          Tcl_SetObjResult (interp, Tcl_NewStringObj (filename, -1));
-          return TCL_OK;
+          file = symtab_to_filename (st);
+          if (file != NULL)
+            return file;
         }
     }
+  
+  return NULL;
+}
 
-  Tcl_SetResult (interp, "", TCL_STATIC);
-  return TCL_OK;
+/* This hook is called whenever we are ready to load a symbol file so that
+   the UI can notify the user... */
+void
+gdbtk_pre_add_symbol (name)
+  char *name;
+{
+  char command[256];
+
+  sprintf (command, "gdbtk_tcl_pre_add_symbol %s", name);
+  Tcl_Eval (interp, command);
+}
+
+/* This hook is called whenever we finish loading a symbol file. */
+void
+gdbtk_post_add_symbol ()
+{
+  Tcl_Eval (interp, "gdbtk_tcl_post_add_symbol");
 }
 
 /* Come here during initialize_all_files () */
