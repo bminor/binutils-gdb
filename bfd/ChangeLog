@@ -1,3 +1,8 @@
+2003-05-05  Daniel Jacobowitz  <drow@mvista.com>
+
+	* configure.in: Bump version to 2.13.91 for prerelease.
+	* configure: Regenerated.
+
 2003-05-04  H.J. Lu <hjl@gnu.org>
 
 	* elflink.h (elf_merge_symbol): Correctly handle weak definiton.
