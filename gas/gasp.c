@@ -26,30 +26,47 @@ This program translates the input macros and stuff into a form
 suitable for gas to consume.
 
 
-  gasp [-c] [-o <outfile>] <infile>*
+  gasp [-sdhau] [-c char] [-o <outfile>] <infile>*
 
-  -c copy source to output
+  -s copy source to output
+  -c <char> comments are started with <char> instead of !
+  -u allow unreasonable stuff
+  -p print line numbers
+  -d print debugging stats
+  -s semi colons start comments
+  -a use alternate syntax
+     Pseudo ops can start with or without a .
+     Labels have to be in first column.
+    Macro arg parameters subsituted by name, don't need the &.
+     String can start with ' too.
+     Strings can be surrounded by <..>
+     A %<exp> in a string evaluates the expression 
+     Literal char in a string with !
+
 
 */
 
 
 #include <stdio.h>
+#include <getopt.h>
 #include <ctype.h>
+
 #include "host.h"
+
+char *program_version = "1.2";
 
 #define MAX_INCLUDES 30		/* Maximum include depth */
 #define MAX_REASONABLE 1000	/* Maximum number of expansions */
 
 int unreasonable;		/* -u on command line */
-int stats;			/* -s on command line */
+int stats;			/* -d on command line */
 int print_line_number;		/* -p flag on command line */
 int copysource;			/* -c flag on command line */
 int warnings;			/* Number of WARNINGs generated so far. */
 int errors;			/* Number of ERRORs generated so far. */
 int fatals;			/* Number of fatal ERRORs generated so far (either 0 or 1). */
-
-
-
+int alternate = 0;              /* -a on command line */
+char comment_char = '!';
 int radix = 10;			/* Default radix */
 
 int had_end; /* Seen .END */
@@ -131,6 +148,9 @@ int string_count[max_power_two];
 #define NEXTBIT  2
 #define SEPBIT   4
 #define WHITEBIT 8
+#define COMMENTBIT 16
+
+#define ISCOMMENTCHAR(x) (chartype[(unsigned)(x)] & COMMENTBIT)
 #define ISFIRSTCHAR(x)  (chartype[(unsigned)(x)] & FIRSTBIT)
 #define ISNEXTCHAR(x)   (chartype[(unsigned)(x)] & NEXTBIT)
 #define ISSEP(x)        (chartype[(unsigned)(x)] & SEPBIT)
@@ -314,17 +334,6 @@ quit ()
   exit (exitcode);
 }
 
-static
-char *
-xmalloc (x)
-     int x;
-{
-  char *p = malloc (x);
-  if (!p)
-    FATAL ((stderr, "out of memory\n"));
-  memset (p, 0, x);
-  return p;
-}
 
 /* this program is about manipulating strings.
    they are managed in things called `sb's which is an abbreviation
@@ -502,6 +511,16 @@ sb_print (ptr)
     }
 }
 
+static 
+void 
+sb_print_at (idx, ptr)
+int idx;
+sb *ptr;
+{
+  int i;
+  for (i = idx; i < ptr->len; i++)
+    putc (ptr->ptr[i], outfile);
+}
 /* put a null at the end of the sb at in and return the start of the
    string, so that it can be used as an arg to printf %s. */
 
@@ -637,7 +656,10 @@ hash_add_to_string_table (tab, key, name, again)
       if (!again)
 	ERROR ((stderr, "redefintion not allowed"));
     }
+
+  ptr->type = hash_string;
   sb_reset (&ptr->value.s);
+  
   sb_add_sb (&ptr->value.s, name);
 }
 
@@ -733,8 +755,8 @@ sb_strtol (idx, string, base, ptr)
 	dig = ch - '0';
       else if (ch >= 'a' && ch <= 'f')
 	dig = ch - 'a' + 10;
-      else if (ch >= 'a' && ch <= 'f')
-	dig = ch - 'a' + 10;
+      else if (ch >= 'A' && ch <= 'F')
+	dig = ch - 'A' + 10;
       else
 	break;
 
@@ -1059,7 +1081,7 @@ hash_table vars;  /* hash table for  eq variables */
 
 #define in_comment ';'
 
-#if 0
+#if 1
 void
 strip_comments (out)
      sb *out;
@@ -1068,7 +1090,7 @@ strip_comments (out)
   int i = 0;
   for (i = 0; i < out->len; i++)
     {
-      if (s[i] == in_comment)
+      if (ISCOMMENTCHAR(s[i]))
 	{
 	  out->len = i;
 	  return;
@@ -1167,7 +1189,7 @@ get_line (in)
 
   if (copysource)
     {
-      putc ('!', outfile);
+      putc (comment_char, outfile);
       if (print_line_number)
 	include_print_line (outfile);
     }
@@ -1183,11 +1205,13 @@ get_line (in)
 	{
 	  if (online)
 	    {
-	      WARNING ((stderr, "end of file not at start of line.\n"));
+	      WARNING ((stderr, "End of file not at start of line.\n"));
 	      if (copysource)
 		putc ('\n', outfile);
+	      ch = '\n';
 	    }
-	  more = 0;
+	  else
+	    more = 0;
 	  break;
 	}
 
@@ -1205,7 +1229,7 @@ get_line (in)
 	      /* continued line */
 	      if (copysource)
 		{
-		  putc ('!', outfile);
+		  putc (comment_char, outfile);
 		  putc ('+', outfile);
 		}
 	      ch = get ();
@@ -1240,7 +1264,10 @@ grab_label (in, out)
     {
       sb_add_char (out, in->ptr[i]);
       i++;
-      while (ISNEXTCHAR (in->ptr[i]) && i < in->len)
+      while ((ISNEXTCHAR (in->ptr[i]) 
+	      || in->ptr[i] == '\\'
+	      || in->ptr[i] == '&') 
+	     && i < in->len)
 	{
 	  sb_add_char (out, in->ptr[i]);
 	  i++;
@@ -1402,43 +1429,68 @@ int *size;
   if (in->ptr[idx] == '.')
     {
       idx++;
-      switch (in->ptr[idx])
-	{
-	case 'b':
-	case 'B':
-	  *size = 1;
-	  break;
-	case 'w':
-	case 'W':
-	  *size = 2;
-	  break;
-	case 'l':
-	case 'L':
-	  *size = 4;
-	  break;
-	default:
-	  ERROR ((stderr, "size must be one of b, w or l, is %c.\n", in->ptr[idx]));
-	  break;
-	}
-      idx++;
     }
+  switch (in->ptr[idx])
+    {
+    case 'b':
+    case 'B':
+      *size = 1;
+      break;
+    case 'w':
+    case 'W':
+      *size = 2;
+      break;
+    case 'l':
+    case 'L':
+      *size = 4;
+      break;
+    case ' ':
+    case '\t':
+      break;
+    default:
+      ERROR ((stderr, "size must be one of b, w or l, is %c.\n", in->ptr[idx]));
+      break;
+    }
+  idx++;
+
   return idx;
 }
 
-/* .data [.b|.w|.l] <data>* */
+static 
+int eol(idx, line)
+int idx;
+sb *line;
+{
+  idx = sb_skip_white (idx, line);
+  if (idx < line->len 
+      && ISCOMMENTCHAR(line->ptr[idx]))
+    return 1;
+  if (idx >= line->len)
+    return 1;
+  return 0;
+}
+
+/* .data [.b|.w|.l] <data>* 
+    or d[bwl] <data>* */
 
 static void
-do_data (idx, in)
+do_data (idx, in, size)
      int idx;
      sb *in;
+     int size;
 {
   int opsize = 4;
   char *opname;
   sb acc;
   sb_new (&acc);
 
-  idx = get_opsize (idx, in, &opsize);
-
+  if (!size) 
+    {
+      idx = get_opsize (idx, in, &opsize);
+    }
+  else {
+    opsize = size;
+  }
   switch (opsize)
     {
     case 4:
@@ -1452,21 +1504,42 @@ do_data (idx, in)
       break;
     }
 
+
   fprintf (outfile, "%s\t", opname);
-  while (idx < in->len)
+
+  idx =   sb_skip_white (idx, in);
+
+  if (alternate 
+      && idx < in->len 
+      && in->ptr[idx] == '"')
     {
-      exp_t e;
-      idx = exp_parse (idx, in, &e);
-      exp_string (&e, &acc);
-      sb_add_char (&acc, 0);
-      fprintf (outfile, acc.ptr);
-      if (idx < in->len && in->ptr[idx] == ',')
+      int i;
+      idx = getstring (idx, in, &acc);
+      for (i = 0; i < acc.len; i++)
 	{
-	  fprintf (outfile, ",");
-	  idx++;
+	  if (i)
+	    fprintf(outfile,",");
+	  fprintf (outfile, "%d", acc.ptr[i]);
+	}
+    }
+  else 
+    {
+      while (!eol (idx, in))
+	{
+	  exp_t e;
+	  idx = exp_parse (idx, in, &e);
+	  exp_string (&e, &acc);
+	  sb_add_char (&acc, 0);
+	  fprintf (outfile, acc.ptr);
+	  if (idx < in->len && in->ptr[idx] == ',')
+	    {
+	      fprintf (outfile, ",");
+	      idx++;
+	    }
 	}
     }
   sb_kill (&acc);
+  sb_print_at (idx, in);
   fprintf (outfile, "\n");
 }
 
@@ -1520,7 +1593,7 @@ do_res (idx, in, type)
   int count = 0;
 
   idx = get_opsize (idx, in, &size);
-  while (idx < in->len)
+  while (!eol(idx, in))
     {
       idx = sb_skip_white (idx, in);
       if (in->ptr[idx] == ',')
@@ -1626,16 +1699,61 @@ get_any_string (idx, in, out)
      sb *in;
      sb *out;
 {
-  idx = sb_skip_white (idx, in);
-  if (idx < in->len && (in->ptr[idx] == '"'
-			|| in->ptr[idx] == '<'))
-    return getstring (idx, in, out);
-
   sb_reset (out);
+  idx = sb_skip_white (idx, in);
 
-  while (idx < in->len && !ISSEP (in->ptr[idx]))
+
+  if (idx < in->len)
     {
-      sb_add_char (out, in->ptr[idx++]);
+      if (in->ptr[idx] == '%'
+	  && alternate)
+	{
+	  int val;
+	  char buf[20];
+	  /* Turns the next expression into a string */
+	  idx = exp_get_abs ("% operator needs absolute expression",
+			     idx + 1,
+			     in,
+			     &val);
+	  sprintf(buf, "\"%d\"", val);
+	  sb_add_string (out, buf);
+	}
+      else   if (in->ptr[idx] == '"'
+		 || in->ptr[idx] == '<'
+		 || (alternate && in->ptr[idx] == '\''))
+	{
+	  if (alternate)
+	    {
+	      /* Keep the quotes */
+	      sb_add_char (out,  '\"');
+	      idx =  getstring (idx, in, out);
+	      sb_add_char (out,  '\"');
+
+	    }
+	  else {
+	    idx = getstring (idx, in, out);
+	  }
+	}
+      else 
+	{
+	  while (idx < in->len 
+		 && (in->ptr[idx] == '"'
+		     || in->ptr[idx] == '\''
+		     || !ISSEP (in->ptr[idx])))
+	    {
+	      if (in->ptr[idx] == '"' 
+		  || in->ptr[idx] == '\'')
+		{
+		  char tchar = in->ptr[idx];
+		  sb_add_char (out, in->ptr[idx++]);
+		  while (idx < in->len
+			 && in->ptr[idx] != tchar)
+		    sb_add_char (out, in->ptr[idx++]);		    
+		}
+	      sb_add_char (out, in->ptr[idx++]);
+
+	    }
+	}
     }
   return idx;
 }
@@ -1797,7 +1915,12 @@ process_assigns (idx, in, buf)
       if (in->ptr[idx] == '\\'
 	  && in->ptr[idx + 1] == '&')
 	{
-	  idx = condass_lookup_name (in, idx + 2, buf);
+	  idx = condass_lookup_name (in, idx + 2, buf, 1);
+	}
+      else if (in->ptr[idx] == '\\'
+	       && in->ptr[idx + 1] == '$')
+	{
+	  idx = condass_lookup_name (in, idx + 2, buf, 0);
 	}
       else if (idx + 3 < in->len
 	       && in->ptr[idx] == '.'
@@ -1875,13 +1998,14 @@ process_file ()
   sb line;
   sb t1, t2;
   sb acc;
+  sb label_in;
   int more;
 
   sb_new (&line);
   sb_new (&t1);
   sb_new (&t2);
   sb_new(&acc);
-
+  sb_new (&label_in);
   sb_reset (&line);
   more = get_line (&line);
   while (more)
@@ -1895,14 +2019,22 @@ process_file ()
 	}
       else
 	{
+	  l = grab_label (&line, &label_in);
+	  sb_reset (&label);	  	  
+	  if (label_in.len)
+	    {
+	      /* Munge any label */
 
-	  l = grab_label (&line, &label);
+	      
+	      process_assigns (0, &label_in, &label);
+	    }
+
 	  if (line.ptr[l] == ':')
 	    l++;
 	  while (ISWHITE (line.ptr[l]) && l < line.len)
 	    l++;
 
-	  if (line.len)
+	  if (l < line.len)
 	    {
 	      if (process_pseudo_op (l, &line, &acc))
 		{
@@ -1935,6 +2067,13 @@ process_file ()
 		    }
 		}
 	    }
+	  else {
+	    /* Only a label on this line */
+	    if (label.len && condass_on())
+	      {
+		fprintf (outfile, "%s:\n", sb_name (&label));
+	      }
+	  }
 	}
 
       if (had_end)
@@ -1944,7 +2083,7 @@ process_file ()
     }
 
   if (!had_end)
-    WARNING ((stderr, ".END missing from end of file.\n"));
+    WARNING ((stderr, "END missing from end of file.\n"));
 }
 
 
@@ -2039,10 +2178,11 @@ do_reg (idx, in)
 
 
 static int
-condass_lookup_name (inbuf, idx, out)
+condass_lookup_name (inbuf, idx, out, warn)
      sb *inbuf;
      int idx;
      sb *out;
+     int warn;
 {
   hash_entry *ptr;
   sb condass_acc;
@@ -2057,9 +2197,18 @@ condass_lookup_name (inbuf, idx, out)
   if (inbuf->ptr[idx] == '\'')
     idx++;
   ptr = hash_lookup (&vars, &condass_acc);
+
+
   if (!ptr)
     {
-      WARNING ((stderr, "Can't find preprocessor variable %s.\n", sb_name (&condass_acc)));
+      if (warn) 
+	{
+	  WARNING ((stderr, "Can't find preprocessor variable %s.\n", sb_name (&condass_acc)));
+	}
+      else 
+	{
+	  sb_add_string (out, "0");
+	}
     }
   else
     {
@@ -2110,7 +2259,7 @@ whatcond (idx, in, val)
     cond = GE;
   else
     {
-      ERROR ((stderr, "Comparison operator must be one of EQ, NE, LT, LE, GT or GE"));
+      ERROR ((stderr, "Comparison operator must be one of EQ, NE, LT, LE, GT or GE.\n"));
       cond = NEVER;
     }
   idx = sb_skip_white (idx + 2, in);
@@ -2144,7 +2293,7 @@ istrue (idx, in)
 
       if (cond != EQ && cond != NE)
 	{
-	  ERROR ((stderr, "Comparison operator for strings must be EQ or NE"));
+	  ERROR ((stderr, "Comparison operator for strings must be EQ or NE\n"));
 	  res = 0;
 	}
       else
@@ -2273,6 +2422,12 @@ buffer_and_nest (from, to, ptr)
       /* Try and find the first pseudo op on the line */
       int i = line_start;
 
+      if (!alternate) 
+	{
+	  /* With normal syntax we can suck what we want till we get to the dot.
+	     With the alternate, labels have to start in the first column, since
+	     we cant tell what's a label and whats a pseudoop */
+
       /* Skip leading whitespace */
       while (i < ptr->len
 	     && ISWHITE (ptr->ptr[i]))
@@ -2288,14 +2443,17 @@ buffer_and_nest (from, to, ptr)
 	  && ptr->ptr[i] == ':')
 	i++;
 
+    }
       /* Skip trailing whitespace */
       while (i < ptr->len
 	     && ISWHITE (ptr->ptr[i]))
 	i++;
 
-      if (i < ptr->len
-	  && ptr->ptr[i] == '.')
+      if (i < ptr->len && (ptr->ptr[i] == '.' 
+			   || alternate))
 	{
+	  if (ptr->ptr[i] == '.')
+	      i++;
 	  if (strncmp (ptr->ptr + i, from, from_len) == 0)
 	    depth++;
 	  if (strncmp (ptr->ptr + i, to, to_len) == 0)
@@ -2348,7 +2506,7 @@ do_awhile (idx, in)
   process_assigns (idx, in, &exp);
   doit = istrue (0, &exp);
 
-  buffer_and_nest (".AWHILE", ".AENDW", &sub);
+  buffer_and_nest ("AWHILE", "AENDW", &sub);
 
   /* Turn
      	.AWHILE exp
@@ -2429,7 +2587,7 @@ do_arepeat (idx, in)
   sb_new (&sub);
   process_assigns (idx, in, &exp);
   idx = exp_get_abs ("AREPEAT must have absolute operand.\n", 0, &exp, &rc);
-  buffer_and_nest (".AREPEAT", ".AENDR", &sub);
+  buffer_and_nest ("AREPEAT", "AENDR", &sub);
   if (rc > 0)
     {
       /* Push back the text following the repeat, and another repeat block
@@ -2532,6 +2690,35 @@ do_formals (macro, idx, in)
   return idx;
 }
 
+/* Parse off LOCAL n1, n2,... Invent a label name for it */
+static
+void 
+do_local (idx, line)
+     int idx;
+     sb *line;
+{
+  static int ln;
+  sb acc;
+  sb sub;
+  char subs[10];
+  sb_new (&acc);
+  sb_new (&sub);
+  idx = sb_skip_white (idx, line);
+  while (!eol(idx, line))
+    {
+      sb_reset (&acc);
+      sb_reset (&sub);
+      ln++;
+      sprintf(subs, "LL%04x", ln);
+      idx =  get_token(idx, line, &acc);
+      sb_add_string (&sub, subs);
+      hash_add_to_string_table (&assign_hash_table, &acc, &sub, 1);
+      idx = sb_skip_comma (idx, line);
+    }
+  sb_kill (&sub);
+  sb_kill (&acc);
+}
+
 static
 void
 do_macro (idx, in)
@@ -2549,18 +2736,22 @@ do_macro (idx, in)
   macro->formals = 0;
 
   idx = sb_skip_white (idx, in);
-  buffer_and_nest (".MACRO", ".ENDM", &macro->sub);
+  buffer_and_nest ("MACRO", "ENDM", &macro->sub);
   if (label.len)
     {
-      /* It's the label: MACRO (formals,...)  sort */
+
       sb_add_sb (&name, &label);
       if (in->ptr[idx] == '(')
 	{
-	  /* Got some formals */
+	  /* It's the label: MACRO (formals,...)  sort */
 	  idx = do_formals (macro, idx + 1, in);
 	  if (in->ptr[idx] != ')')
 	    ERROR ((stderr, "Missing ) after formals.\n"));
 	}
+      else {
+	/* It's the label: MACRO formals,...  sort */
+	idx = do_formals (macro, idx, in);
+      }
     }
   else
     {
@@ -2608,13 +2799,14 @@ get_apost_token (idx, in, name, kind)
 }
 
 static int
-sub_actual (src, in, t, m, kind, out)
+sub_actual (src, in, t, m, kind, out, copyifnotthere)
      int src;
      sb *in;
      sb *t;
      macro_entry *m;
      int kind;
      sb *out;
+     int copyifnotthere;
 {
   /* This is something to take care of */
   hash_entry *ptr;
@@ -2632,7 +2824,11 @@ sub_actual (src, in, t, m, kind, out)
 	  sb_add_sb (out, &ptr->value.f->def);
 	}
     }
-  else
+  else if (copyifnotthere)
+    {
+      sb_add_sb (out, t);
+    }
+  else 
     {
       sb_add_char (out, '\\');
       sb_add_sb (out, t);
@@ -2652,7 +2848,6 @@ macro_expand (name, idx, in, m)
   sb out;
   hash_entry *ptr;
   formal_entry *f;
-
   int is_positional = 0;
   int is_keyword = 0;
 
@@ -2664,7 +2859,7 @@ macro_expand (name, idx, in, m)
       sb_reset (&f->actual);
   f = m->formals;
   /* Peel off the actuals and store them away in the hash tables' actuals */
-  while (idx < in->len)
+  while (!eol(idx, in))
     {
       int scan;
       idx = sb_skip_white (idx, in);
@@ -2729,6 +2924,7 @@ macro_expand (name, idx, in, m)
 
   {
     int src = 0;
+    int inquote = 0;
     sb *in = &m->sub;
     sb_reset (&out);
 
@@ -2737,12 +2933,12 @@ macro_expand (name, idx, in, m)
 	if (in->ptr[src] == '&')
 	  {
 	    sb_reset (&t);
-	    src = sub_actual (src + 1, in, &t, m, '&', &out);
+	    src = sub_actual (src + 1, in, &t, m, '&', &out, 0);
 	  }
 	else if (in->ptr[src] == '\\')
 	  {
 	    src++;
-	    if (in->ptr[src] == ';')
+	    if (in->ptr[src] == comment_char)
 	      {
 		/* This is a comment, just drop the rest of the line */
 		while (src < in->len
@@ -2783,8 +2979,27 @@ macro_expand (name, idx, in, m)
 	    else
 	      {
 		sb_reset (&t);
-		src = sub_actual (src, in, &t, m, '\'', &out);
+		src = sub_actual (src, in, &t, m, '\'', &out, 0);
 	      }
+	  }
+	else if (ISFIRSTCHAR (in->ptr[src]) && alternate)
+	  {
+		sb_reset (&t);
+		src = sub_actual (src, in, &t, m, '\'', &out, 1);
+	  }
+	else if (ISCOMMENTCHAR (in->ptr[src])
+		 && src + 1 <  in->len
+		 && ISCOMMENTCHAR (in->ptr[src+1])
+		 && !inquote)
+	  {
+	    /* Two comment chars in a row cause the rest of the line to be dropped */
+	    while (src < in->len && in->ptr[src] != '\n')
+	      src++;
+	  }
+	else if (in->ptr[src] == '"') 
+	  {
+	    inquote = !inquote;
+	    sb_add_char (&out, in->ptr[src++]);
 	  }
 	else
 	  {
@@ -2844,37 +3059,71 @@ getstring (idx, in, acc)
   idx = sb_skip_white (idx, in);
 
   while (idx < in->len
-	 && (in->ptr[idx] == '"' || in->ptr[idx] == '<'))
+	 && (in->ptr[idx] == '"' 
+	     || in->ptr[idx] == '<' 
+	     || (in->ptr[idx] == '\'' && alternate)))
     {
       if (in->ptr[idx] == '<')
 	{
-	  int code;
-	  idx++;
-	  idx = exp_get_abs ("Character code in string must be absolute expression.\n",
-			     idx, in, &code);
-	  sb_add_char (acc, code);
+	  if (alternate)
+	    {
+	      int nest = 0;
+	      idx++;
+	      while ((in->ptr[idx] != '>' || nest)
+		     && idx < in->len)
+		{
+		  if (in->ptr[idx] == '!')
+		    {
+		      idx++  ;
+		      sb_add_char (acc, in->ptr[idx++]);
+		    }
+		  else {
+		    if (in->ptr[idx] == '>')
+		      nest--;
+		    if (in->ptr[idx] == '<')
+		      nest++;
+		    sb_add_char (acc, in->ptr[idx++]);
+		  }
+		}
+	      idx++;
+	    }
+	  else {
+	    int code;
+	    idx++;
+	    idx = exp_get_abs ("Character code in string must be absolute expression.\n",
+			       idx, in, &code);
+	    sb_add_char (acc, code);
 
-	  if (in->ptr[idx] != '>')
-	    ERROR ((stderr, "Missing > for character code.\n"));
-	  idx++;
+	    if (in->ptr[idx] != '>')
+	      ERROR ((stderr, "Missing > for character code.\n"));
+	    idx++;
+	  }
 	}
-      else if (in->ptr[idx] == '"')
+      else if (in->ptr[idx] == '"' || in->ptr[idx] == '\'')
 	{
+	  char tchar = in->ptr[idx];
 	  idx++;
 	  while (idx < in->len)
 	    {
-	      if (in->ptr[idx] == '"')
+	      if (alternate && in->ptr[idx] == '!')
 		{
-		  idx++;
-		  if (idx >= in->len || in->ptr[idx] != '"')
-		    break;
+		  idx++  ;
+		  sb_add_char (acc, in->ptr[idx++]);
 		}
-	      sb_add_char (acc, in->ptr[idx]);
-	      idx++;
+	      else {
+		if (in->ptr[idx] == tchar)
+		  {
+		    idx++;
+		    if (idx >= in->len || in->ptr[idx] != tchar)
+		      break;
+		  }
+		sb_add_char (acc, in->ptr[idx]);
+		idx++;
+	      }
 	    }
 	}
     }
-
+  
   return idx;
 }
 
@@ -2888,20 +3137,19 @@ do_sdata (idx, in, type)
      char type;
 {
   int nc = 0;
+  int pidx = -1;
   sb acc;
   sb_new (&acc);
   fprintf (outfile, ".byte\t");
 
-  while (idx < in->len)
+  while (!eol (idx, in))
     {
       int i;
       sb_reset (&acc);
       idx = sb_skip_white (idx, in);
-      while ((in->ptr[idx] == '"'
-	      || in->ptr[idx] == '<')
-	     && idx < in->len)
+      while (!eol (idx, in))
 	{
-	  idx = getstring (idx, in, &acc);
+	  pidx = idx = get_any_string (idx, in, &acc);
 	  if (type == 'c')
 	    {
 	      if (acc.len > 255)
@@ -2928,9 +3176,10 @@ do_sdata (idx, in, type)
 		fprintf (outfile, ",");
 	      fprintf (outfile, "0");
 	    }
-	  idx = sb_skip_white (idx, in);
+	  idx = sb_skip_comma (idx, in);
+	  if (idx == pidx) break;
 	}
-      if (in->ptr[idx] != ',' && idx != in->len)
+      if (!alternate && in->ptr[idx] != ',' && idx != in->len)
 	{
 	  fprintf (outfile, "\n");
 	  ERROR ((stderr, "illegal character in SDATA line (0x%x).\n", in->ptr[idx]));
@@ -3111,8 +3360,12 @@ chartype_init ()
 
       if (x == ' ' || x == '\t')
 	chartype[x] |= WHITEBIT;
+
+      if (x == comment_char)
+	chartype[x] |= COMMENTBIT;
     }
 }
+
 
 
 /* What to do with all the keywords */
@@ -3145,7 +3398,7 @@ chartype_init ()
 #define K_END		PROCESS|25
 #define K_INCLUDE	PROCESS|26
 #define K_IGNORED	PROCESS|27
-#define K_ASSIGNA	28
+#define K_ASSIGNA	PROCESS|28
 #define K_ASSIGNC	29
 #define K_AIF		PROCESS|30
 #define K_AELSE		PROCESS|31
@@ -3158,6 +3411,11 @@ chartype_init ()
 #define K_MACRO		PROCESS|38
 #define K_ENDM		39
 #define K_ALIGN		PROCESS|LAB|40
+#define K_ALTERNATE     41
+#define K_DB		LAB|PROCESS|42
+#define K_DW		LAB|PROCESS|43
+#define K_DL		LAB|PROCESS|44
+#define K_LOCAL		45
 
 
 static struct
@@ -3169,11 +3427,15 @@ static struct
 kinfo[] =
 {
   { "EQU", K_EQU, 0 },
+  { "ALTERNATE", K_ALTERNATE, 0 },
   { "ASSIGN", K_ASSIGN, 0 },
   { "REG", K_REG, 0 },
   { "ORG", K_ORG, 0 },
   { "RADIX", K_RADIX, 0 },
   { "DATA", K_DATA, 0 },
+  { "DB", K_DB, 0 },
+  { "DW", K_DW, 0 },
+  { "DL", K_DL, 0 },
   { "DATAB", K_DATAB, 0 },
   { "SDATA", K_SDATA, 0 },
   { "SDATAB", K_SDATAB, 0 },
@@ -3205,6 +3467,8 @@ kinfo[] =
   { "AWHILE", K_AWHILE, 0 },
   { "ALIGN", K_ALIGN, 0 },
   { "AENDW", K_AENDW, 0 },
+  { "ALTERNATE", K_ALTERNATE, 0 },
+  { "LOCAL", K_LOCAL, 0 },
   { NULL, 0, 0 }
 };
 
@@ -3217,17 +3481,23 @@ process_pseudo_op (idx, line, acc)
      sb *line;
      sb *acc;
 {
-  char *in = line->ptr + idx;
 
-  if (in[0] == '.')
+
+  if (line->ptr[idx] == '.' || alternate)
     {
       /* Scan forward and find pseudo name */
+      char *in;
       hash_entry *ptr;
 
-      char *s = in + 1;
-      char *e = s;
+      char *s;
+      char *e;
+      if (line->ptr[idx] == '.')
+	idx++;
+      in = line->ptr + idx;
+      s = in;
+      e = s;
       sb_reset (acc);
-      idx++;
+
       while (idx < line->len && *e && ISFIRSTCHAR (*e))
 	{
 	  sb_add_char (acc, *e);
@@ -3239,7 +3509,11 @@ process_pseudo_op (idx, line, acc)
 
       if (!ptr)
 	{
+#if 0
+	  /* This one causes lots of pain when trying to preprocess
+	     ordinary code */
 	  WARNING ((stderr, "Unrecognised pseudo op `%s'.\n", sb_name (acc)));
+#endif
 	  return 0;
 	}
       if (ptr->value.i & LAB)
@@ -3255,7 +3529,9 @@ process_pseudo_op (idx, line, acc)
       if (ptr->value.i & PROCESS)
 	{
 	  /* Polish the rest of the line before handling the pseudo op */
-/*	      strip_comments(line);*/
+#if 0
+	  strip_comments(line);
+#endif
 	  sb_reset (acc);
 	  process_assigns (idx, line, acc);
 	  sb_reset(line);
@@ -3279,6 +3555,9 @@ process_pseudo_op (idx, line, acc)
 	{
 	  switch (ptr->value.i)
 	    {
+	    case K_ALTERNATE:
+	      alternate = 1;
+	      return 1;
 	    case K_AELSE:
 	      do_aelse ();
 	      return 1;
@@ -3291,8 +3570,17 @@ process_pseudo_op (idx, line, acc)
 	    case K_RADIX:
 	      do_radix (line);
 	      return 1;
+	    case K_DB:
+	      do_data (idx, line, 1);
+	      return 1;
+	    case K_DW:
+	      do_data (idx, line, 2);
+	      return 1;
+	    case K_DL:
+	      do_data (idx, line, 4);
+	      return 1;
 	    case K_DATA:
-	      do_data (idx, line);
+	      do_data (idx, line, 0);
 	      return 1;
 	    case K_DATAB:
 	      do_datab (idx, line);
@@ -3341,6 +3629,9 @@ process_pseudo_op (idx, line, acc)
 	      return 1;
 	    case K_INCLUDE:
 	      do_include (idx, line);
+	      return 1;
+	    case K_LOCAL:
+	      do_local (idx, line);
 	      return 1;
 	    case K_MACRO:
 	      do_macro (idx, line);
@@ -3423,19 +3714,110 @@ process_init ()
     }
 }
 
+
+static void
+do_define (string)
+char *string;
+{
+  sb label;
+  int res = 1;
+  hash_entry *ptr;
+  sb_new (&label);
+
+
+  while (*string)
+    {
+      if (*string == '=') 
+	{
+	  sb value;
+	  sb_new (&value);
+	  string++;
+	  while (*string)
+	    {
+	      sb_add_char (&value, *string);
+	      string++;
+	    }
+	  exp_get_abs ("Invalid expression on command line.\n", 0, &value, &res);
+	  sb_kill (&value);
+	  break;
+	}
+      sb_add_char (&label, *string);
+
+      string ++;
+    }
+
+  ptr = hash_create (&vars, &label);
+  free_old_entry (ptr);
+  ptr->type = hash_integer;
+  ptr->value.i = res;
+  sb_kill (&label);
+}
+char *program_name;
+
+/* The list of long options.  */
+static struct option long_options[] =
+{
+  { "alternate", no_argument, 0, 'a' },
+  { "commentchar", required_argument, 0, 'c' },
+  { "copysource", no_argument, 0, 's' },
+  { "debug", no_argument, 0, 'd' },
+  { "help", no_argument, 0, 'h' },
+  { "output", required_argument, 0, 'o' },
+  { "print", no_argument, 0, 'p' },
+  { "unreasonable", no_argument, 0, 'u' },
+  { "version", no_argument, 0, 'v' },
+  { "define", required_argument, 0, 'd' },
+  { NULL, no_argument, 0, 0 }
+};
+
+/* Show a usage message and exit.  */
+static void
+show_usage (file, status)
+     FILE *file;
+     int status;
+{
+  fprintf (file, "\
+Usage: %s \n\
+  [-a]      [--alternate]         enter alternate macro mode\n\
+  [-c char] [--commentchar char]  change the comment character from !\n\
+  [-d]      [--debug]             print some debugging info\n\
+  [-h]      [--help]              print this message\n\
+  [-o out]  [--output out]        set the output file\n\
+  [-p]      [--print]             print line numbers\n\
+  [-s]      [--copysource]        copy source through as comments \n\
+  [-u]      [--unreasonable]      allow unreasonable nesting\n\
+  [-v]      [--version]           print the program version\n\
+  [-Dname=value]                  create preprocessor variable called name, with value\n\
+  [in-file]\n",   program_name);
+  exit (status);
+}
+
+/* Display a help message and exit.  */
+static void
+show_help ()
+{
+  printf ("%s: Gnu Assembler Macro Preprocessor\n",
+	  program_name);
+  show_usage (stdout, 0);
+}
+
 int
-main (ac, av)
-     int ac;
-     char **av;
+main (argc, argv)
+     int argc;
+     char **argv;
 {
   int i;
-
+  int opt;
+  char *out_name = 0;
   sp = include_stack;
 
   ifstack[0].on = 1;
   ifi = 0;
 
-  chartype_init ();
+
+
+  program_name = argv[0];
+  xmalloc_set_program_name (program_name);
 
   hash_new_table (101, &macro_table);
   hash_new_table (101, &keyword_hash_table);
@@ -3445,74 +3827,86 @@ main (ac, av)
   sb_new (&label);
   process_init ();
 
-  /* Find the output file */
-  for (i = 1; i < ac; i++)
+  while ((opt = getopt_long (argc, argv, "sdhavc:upo:D:", long_options,
+			     (int *) NULL))
+	 != EOF)
     {
-      if (av[i][0] == '-')
+      switch (opt)
 	{
-	  if (av[i][1] == 'c' && av[i][2] == 0)
-	    {
-	      copysource = 1;
-	    }
-	  else if (av[i][1] == 'p' && av[i][2] == 0)
-	    {
-	      print_line_number = 1;
-	    }
-	  else if (av[i][1] == 'u' && av[i][2] == 0)
-	    {
-	      unreasonable = 1;
-	    }
-	  else if (av[i][1] == 's' && av[i][2] == 0)
-	    {
-	      stats = 1;
-	    }
-	  else if (av[i][1] == 'o' && av[i][2] == 0 & i + 1 < ac)
-	    {
-	      /* Got output file name */
-	      i++;
-	      outfile = fopen (av[i], "w");
-	      if (!outfile)
-		{
-		  fprintf (stderr, "%s: Can't open output file `%s'.\n",
-			   av[0], av[i]);
-		  exit (1);
-		}
-	    }
-	  else
-	    {
-	      fprintf (stderr, "Usage: %s [-o filename] infile1 infile2...\n",
-		       av[0]);
-	      exit (1);
-	    }
+	case 'o':
+	  out_name = optarg;
+	  break;
+	case 'u':
+	  unreasonable = 1;
+	  break;
+	case 'p':
+	  print_line_number = 1;
+	  break;
+	case 'c':
+	  comment_char = optarg[0];
+	  break;
+	case 'a':
+	  alternate = 1;
+	  break;
+	case 's':
+	  copysource = 1;
+	  break;
+	case 'd':
+	  stats = 1;
+	  break;
+	case 'D':
+	  do_define (optarg);
+	  break;
+	case 'h':
+	  show_help ();
+	  /*NOTREACHED*/
+	case 'v':
+	  printf ("GNU %s version %s\n", program_name, program_version);
+	  exit (0);
+	  /*NOTREACHED*/
+	case 0:
+	  break;
+	default:
+	  show_usage (stderr, 1);
+	  /*NOTREACHED*/
 	}
     }
 
+
+  if (out_name) {
+    outfile = fopen (out_name, "w");
+    if (!outfile)
+      {
+	fprintf (stderr, "%s: Can't open output file `%s'.\n",
+		 program_name, out_name);
+	exit (1);
+      }
+  }
+  else  {
+    outfile = stdout;
+  }
+
+  chartype_init ();
   if (!outfile)
     outfile = stdout;
 
   /* Process all the input files */
 
-  for (i = 1; i < ac; i++)
+  while (optind < argc)
     {
-      if (av[i][0] == '-')
+      if (new_file (argv[optind]))
 	{
-	  if (av[i][1] == 'o')
-	    i++;
+	  process_file ();
 	}
       else
 	{
-	  if (new_file (av[i]))
-	    {
-	      process_file ();
-	    }
-	  else
-	    {
-	      fprintf (stderr, "%s: Can't open input file `%s'.\n",
-		       av[0], av[i]);
-	      exit (1);
-	    }
+	  fprintf (stderr, "%s: Can't open input file `%s'.\n",
+		   program_name, argv[optind]);
+	  exit (1);
 	}
+      optind++;
     }
+
   quit ();
   return 0;
 }

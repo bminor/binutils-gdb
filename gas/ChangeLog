@@ -1,3 +1,9 @@
+Wed Apr 27 11:06:32 1994  Steve Chamberlain  (sac@cygnus.com)
+
+	* configure.in (i386-*-go32): Uses coff now.
+	* gasp.c (main): Now takes -D on command line.	
+	(show_usage): Describe new options.
+
 Tue Apr 26 17:10:30 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* listing.c (list_symbol_table): Print "NO DEFINED SYMBOLS" and

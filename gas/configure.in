@@ -167,7 +167,7 @@ case ${generic_target} in
   i386-*-coff | i386-*-sysv* | i386-*-sco* | i386-*-isc*)
 			obj_format=coffbfd gas_target=i386coff ;;
   i386-*-vsta)		obj_format=aout ;;
-  i386-*-go32)		obj_format=aout ;;
+  i386-*-go32)		obj_format=coffbfd gas_target=i386coff ;;
   i386-*-mach*)		obj_format=aout emulation=mach bfd_gas=yes ;;
 
   i960-*-bout)		obj_format=bout ;;
