@@ -1,5 +1,9 @@
 Sun Dec  6 16:30:33 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* mipsbsd.c (MY(set_arch_mach)): Make static.
+	* aoutx.h (NAME(aout,machine_type)): For bfd_arch_mips, use
+	bfd_mach_mips* macros rather than simple numbers.
+
 	COFF weak symbol support, based on patches from Mark Elbrecht
 	<snowball3@usa.net>:
 	* coffcode.h (coff_slurp_symbol_table): Handle C_WEAKEXT.
