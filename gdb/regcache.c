@@ -161,7 +161,12 @@ init_regcache_descr (struct gdbarch *gdbarch)
   /* Construct a strictly RAW register cache.  Don't allow pseudo's
      into the register cache.  */
   descr->nr_raw_registers = NUM_REGS;
-  descr->sizeof_raw_register_valid_p = NUM_REGS;
+
+  /* FIXME: cagney/2002-08-13: Overallocate the register_valid_p
+     array.  This pretects GDB from erant code that accesses elements
+     of the global register_valid_p[] array in the range [NUM_REGS
+     .. NUM_REGS + NUM_PSEUDO_REGS).  */
+  descr->sizeof_raw_register_valid_p = NUM_REGS + NUM_PSEUDO_REGS;
 
   /* Lay out the register cache.  The pseud-registers are included in
      the layout even though their value isn't stored in the register
@@ -431,7 +436,9 @@ register_cached (int regnum)
 void
 set_register_cached (int regnum, int state)
 {
-  register_valid[regnum] = state;
+  gdb_assert (regnum >= 0);
+  gdb_assert (regnum < current_regcache->descr->nr_raw_registers);
+  current_regcache->raw_register_valid_p[regnum] = state;
 }
 
 /* REGISTER_CHANGED
@@ -485,7 +492,7 @@ registers_changed (void)
      gdb gives control to the user (ie watchpoints).  */
   alloca (0);
 
-  for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
+  for (i = 0; i < current_regcache->descr->nr_raw_registers; i++)
     set_register_cached (i, 0);
 
   if (registers_changed_hook)
