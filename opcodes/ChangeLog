@@ -1,3 +1,9 @@
+Mon Sep  8 14:06:59 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* cgen-asm.c (cgen_parse_address): New argument resultp.
+	All callers updated.
+	* m32r-asm.c (parse_h_hi16): Right shift numbers by 16.
+
 Tue Sep  2 18:39:08 1997  Jeffrey A Law  (law@cygnus.com)
 
         * mn10200-dis.c (disassemble): PC relative instructions are
