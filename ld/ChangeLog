@@ -1,3 +1,11 @@
+Thu Nov 12 19:21:57 1998  Dave Brolley  <brolley@cygnus.com>
+
+	* po/ld.pot: Regenerated.
+	* po/POTFILES.in: Regenerated.
+	* configure: Regenerated.
+	* aclocal.m4: Regenerated.
+	* Makefile.in: Regenerated.
+
 Wed Nov 11 18:10:15 1998  DJ Delorie  <dj@cygnus.com>
 
 	* pe-dll.c (generate_reloc): don't output PE relocs for sections
