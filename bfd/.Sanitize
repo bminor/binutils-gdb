@@ -139,6 +139,7 @@ libhppa.h
 libieee.h
 libnlm.h
 liboasys.h
+lynx-core.c
 m68klynx-cf.c
 m68klynx.c
 mipsbsd.c
