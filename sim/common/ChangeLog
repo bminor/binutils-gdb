@@ -1,3 +1,16 @@
+2002-11-22  Andrew Cagney  <ac131313@redhat.com>
+
+	* dv-core.c: Update copyright.  sim/common contributed to the FSF.
+	* dv-glue.c, dv-pal.c, hw-base.c, hw-base.h, hw-device.c: Ditto.
+	* hw-device.h, hw-handles.c, hw-handles.h: Ditto.
+	* hw-instances.c, hw-instances.h, hw-properties.c: Ditto.
+	* hw-properties.h, hw-tree.c, hw-tree.h, sim-alu.h: Ditto.
+	* sim-basics.h, sim-bits.c, sim-bits.h, sim-config.c: Ditto.
+	* sim-config.h, sim-core.c, sim-core.h, sim-endian.c: Ditto.
+	* sim-endian.h, sim-events.c, sim-events.h, sim-inline.c: Ditto.
+	* sim-inline.h, sim-io.c, sim-io.h, sim-n-bits.h: Ditto.
+	* sim-n-core.h, sim-n-endian.h, sim-types.h: Ditto.
+
 2002-08-29  Dave Brolley  <brolley@redhat.com>
 
 	* Make-common.in (CGEN_READ_SCM): Remove ../../cgen/stamp-cgen.
