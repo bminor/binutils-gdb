@@ -3353,6 +3353,11 @@ check_absolute_expr (ip, ex)
            ? 1                          \
            : 0)
 
+/* Is the given value a sign-extended 32-bit value?  */
+#define IS_SEXT_32BIT_NUM(x)						\
+  (((x) &~ (offsetT) 0x7fffffff) == 0					\
+   || (((x) &~ (offsetT) 0x7fffffff) == ~ (offsetT) 0x7fffffff))
+
 /*			load_register()
  *  This routine generates the least number of instructions neccessary to load
  *  an absolute expression value into a register.
@@ -3392,9 +3397,7 @@ load_register (counter, reg, ep, dbl)
 		       (int) BFD_RELOC_LO16);
 	  return;
 	}
-      else if ((((ep->X_add_number &~ (offsetT) 0x7fffffff) == 0
-		 || ((ep->X_add_number &~ (offsetT) 0x7fffffff)
-		     == ~ (offsetT) 0x7fffffff))
+      else if ((IS_SEXT_32BIT_NUM (ep->X_add_number)
 		&& (! dbl
 		    || ! ep->X_unsigned
 		    || sizeof (ep->X_add_number) > 4
@@ -5544,8 +5547,17 @@ macro (ip)
 	       dsll	$tempreg,16
 	       daddu	$tempreg,$tempreg,$breg
 	       <op>	$treg,<sym>($tempreg)	(BFD_RELOC_LO16)
+
+	     If we have 64-bit addresses, as an optimization, for
+	     addresses which are 32-bit constants (e.g. kseg0/kseg1
+	     addresses) we fall back to the 32-bit address generation
+	     mechanism since it is more efficient.  This code should
+	     probably attempt to generate 64-bit constants more
+	     efficiently in general.
 	   */
-	  if (HAVE_64BIT_ADDRESSES)
+	  if (HAVE_64BIT_ADDRESSES
+	      && !(offset_expr.X_op == O_constant
+		   && IS_SEXT_32BIT_NUM (offset_expr.X_add_number)))
 	    {
 	      p = NULL;
 
