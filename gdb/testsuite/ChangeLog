@@ -1,3 +1,8 @@
+Tue Mar 30 08:34:25 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.t16/printcmds.exp:  Remove misplaced xfail that caused an early
+	test termination.
+
 Mon Mar 29 17:37:25 1993  Fred Fish  (fnf@cygnus.com)
 
 	* configure.in (subdirs):  Put back gdb.t17 which mysteriously
