@@ -1,3 +1,18 @@
+Sat Nov 12 21:55:47 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* somsolib.c: Add TODO list.
+	(som_solib_add): Immediately return if $SHLIB_INFO$ sections does
+	not exist or has size zero.  Slightly simplify error handling.
+	Keep an internal list of all the loaded shared libraries and
+	various tidbits of information about the loaded shared libraries.
+	Build section tables for each loaded shared library and add those
+	tables to the core target if necessary.
+	(som_solib_create_inferior_hook): Force re-reading of shared
+	libraries at exec time.
+	(som_sharedlibrary_info_command): New function for dumping
+	information about the currently loaded shared libraries.
+	(_initialize_som_solib): New function.
+
 Sat Nov 12 02:26:50 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* Makefile.in (copying.o, f-exp.tab.o, dpx2-nat.o, dstread.o,
