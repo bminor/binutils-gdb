@@ -14195,18 +14195,6 @@ Shared library events.
 
 @end table
 
-@kindex maint print registers
-@kindex maint print raw-registers
-@kindex maint print cooked-registers
-@item @anchor{maint print registers}maint print registers
-@itemx @anchor{maint print raw-registers}maint print raw-registers
-@itemx @anchor{maint print cooked-registers}maint print cooked-registers
-Print @value{GDBN}'s internal register structure.  @samp{maint print
-raw-registers} includes the raw register cache value while @samp{maint
-print cooked-registers} includes the cooked register value.
-
-Takes an optional file parameter.
-
 @end table
 
 
