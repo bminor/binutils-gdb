@@ -2081,6 +2081,12 @@ m68k_ip (instring)
 #endif
 			       )
 			{
+			  /* The code in md_convert_frag_1 needs to be
+                             able to adjust nextword.  Call frag_grow
+                             to ensure that we have enough space in
+                             the frag obstack to make all the bytes
+                             contiguous.  */
+			  frag_grow (14);
  			  nextword += baseo & 0xff;
  			  addword (nextword);
  			  add_frag (adds (&opP->disp), offs (&opP->disp),
