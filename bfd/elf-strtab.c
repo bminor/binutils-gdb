@@ -57,46 +57,53 @@ struct elf_strtab_hash
   struct elf_strtab_hash_entry **array;
 };
 
+static struct bfd_hash_entry *elf_strtab_hash_newfunc
+  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
+static int cmplengthentry PARAMS ((const PTR, const PTR));
+static int last4_eq PARAMS ((const PTR, const PTR));
+
 /* Routine to create an entry in a section merge hashtab.  */
 
 static struct bfd_hash_entry *
-elf_strtab_hash_newfunc (struct bfd_hash_entry *entry,
-			 struct bfd_hash_table *table,
-			 const char *string)
+elf_strtab_hash_newfunc (entry, table, string)
+     struct bfd_hash_entry *entry;
+     struct bfd_hash_table *table;
+     const char *string;
 {
+  struct elf_strtab_hash_entry *ret = (struct elf_strtab_hash_entry *) entry;
+
   /* Allocate the structure if it has not already been allocated by a
      subclass.  */
-  if (entry == NULL)
-    entry = bfd_hash_allocate (table, sizeof (struct elf_strtab_hash_entry));
-  if (entry == NULL)
+  if (ret == (struct elf_strtab_hash_entry *) NULL)
+    ret = ((struct elf_strtab_hash_entry *)
+	   bfd_hash_allocate (table, sizeof (struct elf_strtab_hash_entry)));
+  if (ret == (struct elf_strtab_hash_entry *) NULL)
     return NULL;
 
   /* Call the allocation method of the superclass.  */
-  entry = bfd_hash_newfunc (entry, table, string);
+  ret = ((struct elf_strtab_hash_entry *)
+	 bfd_hash_newfunc ((struct bfd_hash_entry *) ret, table, string));
 
-  if (entry)
+  if (ret)
     {
       /* Initialize the local fields.  */
-      struct elf_strtab_hash_entry *ret;
-
-      ret = (struct elf_strtab_hash_entry *) entry;
       ret->u.index = -1;
       ret->refcount = 0;
       ret->len = 0;
     }
 
-  return entry;
+  return (struct bfd_hash_entry *)ret;
 }
 
 /* Create a new hash table.  */
 
 struct elf_strtab_hash *
-_bfd_elf_strtab_init (void)
+_bfd_elf_strtab_init ()
 {
   struct elf_strtab_hash *table;
   bfd_size_type amt = sizeof (struct elf_strtab_hash);
 
-  table = bfd_malloc (amt);
+  table = (struct elf_strtab_hash *) bfd_malloc (amt);
   if (table == NULL)
     return NULL;
 
@@ -110,7 +117,8 @@ _bfd_elf_strtab_init (void)
   table->size = 1;
   table->alloced = 64;
   amt = sizeof (struct elf_strtab_hasn_entry *);
-  table->array = bfd_malloc (table->alloced * amt);
+  table->array = (struct elf_strtab_hash_entry **)
+		 bfd_malloc (table->alloced * amt);
   if (table->array == NULL)
     {
       free (table);
@@ -125,7 +133,8 @@ _bfd_elf_strtab_init (void)
 /* Free a strtab.  */
 
 void
-_bfd_elf_strtab_free (struct elf_strtab_hash *tab)
+_bfd_elf_strtab_free (tab)
+     struct elf_strtab_hash *tab;
 {
   bfd_hash_table_free (&tab->table);
   free (tab->array);
@@ -136,9 +145,10 @@ _bfd_elf_strtab_free (struct elf_strtab_hash *tab)
    already present.  */
 
 bfd_size_type
-_bfd_elf_strtab_add (struct elf_strtab_hash *tab,
-		     const char *str,
-		     bfd_boolean copy)
+_bfd_elf_strtab_add (tab, str, copy)
+     struct elf_strtab_hash *tab;
+     const char *str;
+     bfd_boolean copy;
 {
   register struct elf_strtab_hash_entry *entry;
 
@@ -162,7 +172,8 @@ _bfd_elf_strtab_add (struct elf_strtab_hash *tab,
 	{
 	  bfd_size_type amt = sizeof (struct elf_strtab_hash_entry *);
 	  tab->alloced *= 2;
-	  tab->array = bfd_realloc (tab->array, tab->alloced * amt);
+	  tab->array = (struct elf_strtab_hash_entry **)
+		       bfd_realloc (tab->array, tab->alloced * amt);
 	  if (tab->array == NULL)
 	    return (bfd_size_type) -1;
 	}
@@ -174,7 +185,9 @@ _bfd_elf_strtab_add (struct elf_strtab_hash *tab,
 }
 
 void
-_bfd_elf_strtab_addref (struct elf_strtab_hash *tab, bfd_size_type idx)
+_bfd_elf_strtab_addref (tab, idx)
+     struct elf_strtab_hash *tab;
+     bfd_size_type idx;
 {
   if (idx == 0 || idx == (bfd_size_type) -1)
     return;
@@ -184,7 +197,9 @@ _bfd_elf_strtab_addref (struct elf_strtab_hash *tab, bfd_size_type idx)
 }
 
 void
-_bfd_elf_strtab_delref (struct elf_strtab_hash *tab, bfd_size_type idx)
+_bfd_elf_strtab_delref (tab, idx)
+     struct elf_strtab_hash *tab;
+     bfd_size_type idx;
 {
   if (idx == 0 || idx == (bfd_size_type) -1)
     return;
@@ -195,7 +210,8 @@ _bfd_elf_strtab_delref (struct elf_strtab_hash *tab, bfd_size_type idx)
 }
 
 void
-_bfd_elf_strtab_clear_all_refs (struct elf_strtab_hash *tab)
+_bfd_elf_strtab_clear_all_refs (tab)
+     struct elf_strtab_hash *tab;
 {
   bfd_size_type idx;
 
@@ -204,13 +220,16 @@ _bfd_elf_strtab_clear_all_refs (struct elf_strtab_hash *tab)
 }
 
 bfd_size_type
-_bfd_elf_strtab_size (struct elf_strtab_hash *tab)
+_bfd_elf_strtab_size (tab)
+     struct elf_strtab_hash *tab;
 {
   return tab->sec_size ? tab->sec_size : tab->size;
 }
 
 bfd_size_type
-_bfd_elf_strtab_offset (struct elf_strtab_hash *tab, bfd_size_type idx)
+_bfd_elf_strtab_offset (tab, idx)
+     struct elf_strtab_hash *tab;
+     bfd_size_type idx;
 {
   struct elf_strtab_hash_entry *entry;
 
@@ -225,7 +244,9 @@ _bfd_elf_strtab_offset (struct elf_strtab_hash *tab, bfd_size_type idx)
 }
 
 bfd_boolean
-_bfd_elf_strtab_emit (register bfd *abfd, struct elf_strtab_hash *tab)
+_bfd_elf_strtab_emit (abfd, tab)
+     register bfd *abfd;
+     struct elf_strtab_hash *tab;
 {
   bfd_size_type off = 1, i;
 
@@ -243,7 +264,7 @@ _bfd_elf_strtab_emit (register bfd *abfd, struct elf_strtab_hash *tab)
       if (len == 0)
 	continue;
 
-      if (bfd_bwrite (str, len, abfd) != len)
+      if (bfd_bwrite ((PTR) str, (bfd_size_type) len, abfd) != len)
 	return FALSE;
 
       off += len;
@@ -256,10 +277,12 @@ _bfd_elf_strtab_emit (register bfd *abfd, struct elf_strtab_hash *tab)
 /* Compare two elf_strtab_hash_entry structures.  This is called via qsort.  */
 
 static int
-cmplengthentry (const void *a, const void *b)
+cmplengthentry (a, b)
+     const PTR a;
+     const PTR b;
 {
-  struct elf_strtab_hash_entry *A = *(struct elf_strtab_hash_entry **) a;
-  struct elf_strtab_hash_entry *B = *(struct elf_strtab_hash_entry **) b;
+  struct elf_strtab_hash_entry * A = *(struct elf_strtab_hash_entry **) a;
+  struct elf_strtab_hash_entry * B = *(struct elf_strtab_hash_entry **) b;
 
   if (A->len < B->len)
     return 1;
@@ -270,10 +293,12 @@ cmplengthentry (const void *a, const void *b)
 }
 
 static int
-last4_eq (const void *a, const void *b)
+last4_eq (a, b)
+     const PTR a;
+     const PTR b;
 {
-  const struct elf_strtab_hash_entry *A = a;
-  const struct elf_strtab_hash_entry *B = b;
+  struct elf_strtab_hash_entry * A = (struct elf_strtab_hash_entry *) a;
+  struct elf_strtab_hash_entry * B = (struct elf_strtab_hash_entry *) b;
 
   if (memcmp (A->root.string + A->len - 5, B->root.string + B->len - 5, 4)
       != 0)
@@ -293,7 +318,8 @@ last4_eq (const void *a, const void *b)
    merging strings matching suffixes of longer strings if possible.  */
 
 void
-_bfd_elf_strtab_finalize (struct elf_strtab_hash *tab)
+_bfd_elf_strtab_finalize (tab)
+     struct elf_strtab_hash *tab;
 {
   struct elf_strtab_hash_entry **array, **a, **end, *e;
   htab_t last4tab = NULL;
@@ -309,7 +335,7 @@ _bfd_elf_strtab_finalize (struct elf_strtab_hash *tab)
   /* Now sort the strings by length, longest first.  */
   array = NULL;
   amt = tab->size * sizeof (struct elf_strtab_hash_entry *);
-  array = bfd_malloc (amt);
+  array = (struct elf_strtab_hash_entry **) bfd_malloc (amt);
   if (array == NULL)
     goto alloc_failure;
 
@@ -339,7 +365,7 @@ _bfd_elf_strtab_finalize (struct elf_strtab_hash *tab)
       unsigned int c;
       unsigned int j;
       const unsigned char *s;
-      void **p;
+      PTR *p;
 
       e = *a;
       if (e->len > 4)
@@ -359,13 +385,13 @@ _bfd_elf_strtab_finalize (struct elf_strtab_hash *tab)
 	    {
 	      struct elf_strtab_hash_entry *ent;
 
-	      ent = *p;
+	      ent = (struct elf_strtab_hash_entry *) *p;
 	      e->u.suffix = ent;
 	      e->len = 0;
 	      continue;
 	    }
 	  else
-	    *p = e;
+	    *p = (PTR) e;
 	}
       else
 	{

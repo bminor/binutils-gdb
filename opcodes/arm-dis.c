@@ -445,11 +445,9 @@ print_insn_arm (pc, info, given)
 
 		    case 'A':
 		      func (stream, "[%s", arm_regnames [(given >> 16) & 0xf]);
-
-		      if ((given & (1 << 24)) != 0)
+		      if ((given & 0x01000000) != 0)
 			{
 			  int offset = given & 0xff;
-
 			  if (offset)
 			    func (stream, ", %s#%d]%s",
 				  ((given & 0x00800000) == 0 ? "-" : ""),
@@ -461,18 +459,12 @@ print_insn_arm (pc, info, given)
 		      else
 			{
 			  int offset = given & 0xff;
-
-			  func (stream, "]");
-
-			  if (given & (1 << 21))
-			    {
-			      if (offset)
-				func (stream, ", %s#%d",
-				      ((given & 0x00800000) == 0 ? "-" : ""),
-				      offset * 4);
-			    }
+			  if (offset)
+			    func (stream, "], %s#%d",
+				  ((given & 0x00800000) == 0 ? "-" : ""),
+				  offset * 4);
 			  else
-			    func (stream, ", {%d}", offset);
+			    func (stream, "]");
 			}
 		      break;
 

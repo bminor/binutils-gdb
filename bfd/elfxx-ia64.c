@@ -211,7 +211,7 @@ static struct bfd_hash_entry *elfNN_ia64_new_elf_hash_entry
   PARAMS ((struct bfd_hash_entry *entry, struct bfd_hash_table *table,
 	   const char *string));
 static void elfNN_ia64_hash_copy_indirect
-  PARAMS ((const struct elf_backend_data *, struct elf_link_hash_entry *,
+  PARAMS ((struct elf_backend_data *, struct elf_link_hash_entry *,
 	   struct elf_link_hash_entry *));
 static void elfNN_ia64_hash_hide_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *, bfd_boolean));
@@ -1589,7 +1589,7 @@ elfNN_ia64_new_elf_hash_entry (entry, table, string)
 
 static void
 elfNN_ia64_hash_copy_indirect (bed, xdir, xind)
-     const struct elf_backend_data *bed ATTRIBUTE_UNUSED;
+     struct elf_backend_data *bed ATTRIBUTE_UNUSED;
      struct elf_link_hash_entry *xdir, *xind;
 {
   struct elfNN_ia64_link_hash_entry *dir, *ind;
@@ -2162,7 +2162,7 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
 	 this may help reduce memory usage and processing time later.  */
       maybe_dynamic = FALSE;
       if (h && ((!info->executable
-		 && (!info->symbolic || info->unresolved_syms_in_shared_libs == RM_IGNORE))
+		      && (!info->symbolic || info->allow_shlib_undefined))
 		|| ! (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)
 		|| h->root.type == bfd_link_hash_defweak))
 	maybe_dynamic = TRUE;
@@ -3852,19 +3852,52 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
       else
 	{
-	  bfd_boolean unresolved_reloc;
-	  bfd_boolean warned;
+	  long indx;
 
-	  RELOC_FOR_GLOBAL_SYMBOL (h, elf_sym_hashes (input_bfd),
-				   r_symndx,
-				   symtab_hdr, value, sym_sec,
-				   unresolved_reloc, info,
-				   warned);
+	  /* Reloc against global symbol.  */
+	  indx = r_symndx - symtab_hdr->sh_info;
+	  h = elf_sym_hashes (input_bfd)[indx];
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-	  if (h->root.type == bfd_link_hash_undefweak)
+	  value = 0;
+	  if (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
+	    {
+	      sym_sec = h->root.u.def.section;
+
+	      /* Detect the cases that sym_sec->output_section is
+		 expected to be NULL -- all cases in which the symbol
+		 is defined in another shared module.  This includes
+		 PLT relocs for which we've created a PLT entry and
+		 other relocs for which we're prepared to create
+		 dynamic relocations.  */
+	      /* ??? Just accept it NULL and continue.  */
+
+	      if (sym_sec->output_section != NULL)
+		{
+		  value = (h->root.u.def.value
+			   + sym_sec->output_section->vma
+			   + sym_sec->output_offset);
+		}
+	    }
+	  else if (h->root.type == bfd_link_hash_undefweak)
 	    undef_weak_ref = TRUE;
-	  else if (warned)
-	    continue;
+	  else if (! info->executable
+		   && !info->no_undefined
+		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
+	    ;
+	  else
+	    {
+	      if (! ((*info->callbacks->undefined_symbol)
+		     (info, h->root.root.string, input_bfd,
+		      input_section, rel->r_offset,
+		      (!info->shared || info->no_undefined
+		       || ELF_ST_VISIBILITY (h->other)))))
+		return FALSE;
+	      continue;
+	    }
 	}
 
       hit_addr = contents + rel->r_offset;

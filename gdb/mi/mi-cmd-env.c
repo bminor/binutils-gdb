@@ -37,27 +37,23 @@
 #include "gdb_string.h"
 #include "gdb_stat.h"
 
-static void env_cli_command (const char *cli, const char *args);
+static void env_cli_command (const char *cli, char *args);
 static void env_mod_path (char *dirname, char **which_path);
 extern void _initialize_mi_cmd_env (void);
 
 static const char path_var_name[] = "PATH";
 static char *orig_path = NULL;
 
-/* The following is copied from mi-main.c so for m1 and below we can
-   perform old behavior and use cli commands.  If ARGS is non-null,
-   append it to the CMD.  */
+/* The following is copied from mi-main.c so for m1 and below we
+   can perform old behavior and use cli commands.  */
 static void
-env_execute_cli_command (const char *cmd, const char *args)
+env_execute_cli_command (const char *cli, char *args)
 {
-  if (cmd != 0)
+  if (cli != 0)
     {
       struct cleanup *old_cleanups;
       char *run;
-      if (args != NULL)
-	xasprintf (&run, "%s %s", cmd, args);
-      else
-	run = xstrdup (cmd);
+      xasprintf (&run, cli, args);
       old_cleanups = make_cleanup (xfree, run);
       execute_command ( /*ui */ run, 0 /*from_tty */ );
       do_cleanups (old_cleanups);
@@ -94,7 +90,7 @@ mi_cmd_env_cd (char *command, char **argv, int argc)
   if (argc == 0 || argc > 1)
     error ("mi_cmd_env_cd: Usage DIRECTORY");
           
-  env_execute_cli_command ("cd", argv[0]);
+  env_execute_cli_command ("cd %s", argv[0]);
 
   return MI_CMD_DONE;
 }
@@ -135,7 +131,7 @@ mi_cmd_env_path (char *command, char **argv, int argc)
   if (mi_version (uiout) < 2)
     {
       for (i = argc - 1; i >= 0; --i)
-	env_execute_cli_command ("path", argv[i]);
+	env_execute_cli_command ("path %s", argv[i]);
       return MI_CMD_DONE;
     }
 
@@ -207,7 +203,7 @@ mi_cmd_env_dir (char *command, char **argv, int argc)
   if (mi_version (uiout) < 2)
     {
       for (i = argc - 1; i >= 0; --i)
-	env_execute_cli_command ("dir", argv[i]);
+	env_execute_cli_command ("dir %s", argv[i]);
       return MI_CMD_DONE;
     }
 

@@ -580,11 +580,12 @@ op tab[] =
   },
 
   { "nm", "nm", "mac.l @<REG_M>+,@<REG_N>+", "0000nnnnmmmm1111",
-    "macl(&R0,memory,n,m);",
+    "trap (255, R0, PC, memory, maskl, maskw, endianw);",
+    "/* FIXME: mac.l support */",
   },
 
   { "nm", "nm", "mac.w @<REG_M>+,@<REG_N>+", "0100nnnnmmmm1111",
-    "macw(&R0,memory,n,m,endianw);",
+    "macw(R0,memory,n,m,endianw);",
   },
 
   { "n", "", "mov #<imm>,<REG_N>", "1110nnnni8*1....",
@@ -2323,7 +2324,7 @@ gendefines ()
 
 static int ppi_index;
 
-/* Take a ppi code, expand all varying fields in it and fill all the
+/* Take an ppi code, expand all varying fields in it and fill all the
    right entries in 'table' with the opcode index.  */
 
 static void

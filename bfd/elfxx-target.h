@@ -621,7 +621,7 @@ const bfd_target TARGET_BIG_SYM =
 #endif
 
   /* backend_data: */
-  &elfNN_bed
+  (PTR) &elfNN_bed
 };
 #endif
 
@@ -717,6 +717,6 @@ const bfd_target TARGET_LITTLE_SYM =
 #endif
 
   /* backend_data: */
-  &elfNN_bed
+  (PTR) &elfNN_bed
 };
 #endif

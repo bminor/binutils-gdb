@@ -37,6 +37,8 @@
 
 /* Shared library support.  */
 
+#define SVR4_SHARED_LIBS
+
 #include "solib.h"		/* Support for shared libraries. */
 #include "elf/common.h"		/* Additional ELF shared library info. */
 

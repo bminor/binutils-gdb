@@ -439,7 +439,6 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR current_pc,
 			  struct i386_frame_cache *cache)
 {
   unsigned char op;
-  int skip = 0;
 
   if (current_pc <= pc)
     return current_pc;
@@ -457,61 +456,25 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR current_pc,
       if (current_pc <= pc + 1)
 	return current_pc;
 
-      op = read_memory_unsigned_integer (pc + 1, 1);
-
-      /* Check for some special instructions that might be migrated
-	 by GCC into the prologue.  We check for
-
-	    xorl %ebx, %ebx
-	    xorl %ecx, %ecx
-	    xorl %edx, %edx
-
-	 and the equivalent
-
-	    subl %ebx, %ebx
-	    subl %ecx, %ecx
-	    subl %edx, %edx
-
-	 Make sure we only skip these instructions if we later see the
-	 `movl %esp, %ebp' that actually sets up the frame.  */
-      while (op == 0x29 || op == 0x31)
-	{
-	  op = read_memory_unsigned_integer (pc + skip + 2, 1);
-	  switch (op)
-	    {
-	    case 0xdb:	/* %ebx */
-	    case 0xc9:	/* %ecx */
-	    case 0xd2:	/* %edx */
-	      skip += 2;
-	      break;
-	    default:
-	      return pc + 1;
-	    }
-
-	  op = read_memory_unsigned_integer (pc + skip + 1, 1);
-	}
-
       /* Check for `movl %esp, %ebp' -- can be written in two ways.  */
+      op = read_memory_unsigned_integer (pc + 1, 1);
       switch (op)
 	{
 	case 0x8b:
-	  if (read_memory_unsigned_integer (pc + skip + 2, 1) != 0xec)
+	  if (read_memory_unsigned_integer (pc + 2, 1) != 0xec)
 	    return pc + 1;
 	  break;
 	case 0x89:
-	  if (read_memory_unsigned_integer (pc + skip + 2, 1) != 0xe5)
+	  if (read_memory_unsigned_integer (pc + 2, 1) != 0xe5)
 	    return pc + 1;
 	  break;
 	default:
 	  return pc + 1;
 	}
 
-      /* OK, we actually have a frame.  We just don't know how large
-	 it is yet.  Set its size to zero.  We'll adjust it if
-	 necessary.  We also now commit to skipping the special
-	 instructions mentioned before.  */
+      /* OK, we actually have a frame.  We just don't know how large it is
+	 yet.  Set its size to zero.  We'll adjust it if necessary.  */
       cache->locals = 0;
-      pc += skip;
 
       /* If that's all, return now.  */
       if (current_pc <= pc + 3)
@@ -571,22 +534,23 @@ static CORE_ADDR
 i386_analyze_register_saves (CORE_ADDR pc, CORE_ADDR current_pc,
 			     struct i386_frame_cache *cache)
 {
-  CORE_ADDR offset = 0;
-  unsigned char op;
-  int i;
-
-  if (cache->locals > 0)
-    offset -= cache->locals;
-  for (i = 0; i < 8 && pc < current_pc; i++)
+  if (cache->locals >= 0)
     {
-      op = read_memory_unsigned_integer (pc, 1);
-      if (op < 0x50 || op > 0x57)
-	break;
+      CORE_ADDR offset;
+      unsigned char op;
+      int i;
 
-      offset -= 4;
-      cache->saved_regs[op - 0x50] = offset;
-      cache->sp_offset += 4;
-      pc++;
+      offset = - 4 - cache->locals;
+      for (i = 0; i < 8 && pc < current_pc; i++)
+	{
+	  op = read_memory_unsigned_integer (pc, 1);
+	  if (op < 0x50 || op > 0x57)
+	    break;
+
+	  cache->saved_regs[op - 0x50] = offset;
+	  offset -= 4;
+	  pc++;
+	}
     }
 
   return pc;
@@ -831,8 +795,7 @@ i386_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 	  ULONGEST val;
 
 	  /* Clear the direction flag.  */
-	  val = frame_unwind_register_unsigned (next_frame,
-						I386_EFLAGS_REGNUM);
+	  frame_unwind_unsigned_register (next_frame, PS_REGNUM, &val);
 	  val &= ~(1 << 10);
 	  store_unsigned_integer (valuep, 4, val);
 	}
@@ -1035,14 +998,11 @@ i386_get_longjmp_target (CORE_ADDR *pc)
   if (jb_pc_offset == -1)
     return 0;
 
-  /* Don't use I386_ESP_REGNUM here, since this function is also used
-     for AMD64.  */
-  regcache_cooked_read (current_regcache, SP_REGNUM, buf);
-  sp = extract_typed_address (buf, builtin_type_void_data_ptr);
+  sp = read_register (SP_REGNUM);
   if (target_read_memory (sp + len, buf, len))
     return 0;
 
-  jb_addr = extract_typed_address (buf, builtin_type_void_data_ptr);
+  jb_addr = extract_typed_address (buf, builtin_type_void_func_ptr);
   if (target_read_memory (jb_addr + jb_pc_offset, buf, len))
     return 0;
 
@@ -1151,8 +1111,8 @@ i386_extract_return_value (struct type *type, struct regcache *regcache,
     }
   else
     {
-      int low_size = register_size (current_gdbarch, LOW_RETURN_REGNUM);
-      int high_size = register_size (current_gdbarch, HIGH_RETURN_REGNUM);
+      int low_size = REGISTER_RAW_SIZE (LOW_RETURN_REGNUM);
+      int high_size = REGISTER_RAW_SIZE (HIGH_RETURN_REGNUM);
 
       if (len <= low_size)
 	{
@@ -1225,8 +1185,8 @@ i386_store_return_value (struct type *type, struct regcache *regcache,
     }
   else
     {
-      int low_size = register_size (current_gdbarch, LOW_RETURN_REGNUM);
-      int high_size = register_size (current_gdbarch, HIGH_RETURN_REGNUM);
+      int low_size = REGISTER_RAW_SIZE (LOW_RETURN_REGNUM);
+      int high_size = REGISTER_RAW_SIZE (HIGH_RETURN_REGNUM);
 
       if (len <= low_size)
 	regcache_raw_write_part (regcache, LOW_RETURN_REGNUM, 0, len, valbuf);
@@ -1340,7 +1300,7 @@ i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 
       /* Extract (always little endian).  */
       regcache_raw_read (regcache, fpnum, mmx_buf);
-      memcpy (buf, mmx_buf, register_size (gdbarch, regnum));
+      memcpy (buf, mmx_buf, REGISTER_RAW_SIZE (regnum));
     }
   else
     regcache_raw_read (regcache, regnum, buf);
@@ -1358,7 +1318,7 @@ i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       /* Read ...  */
       regcache_raw_read (regcache, fpnum, mmx_buf);
       /* ... Modify ... (always little endian).  */
-      memcpy (mmx_buf, buf, register_size (gdbarch, regnum));
+      memcpy (mmx_buf, buf, REGISTER_RAW_SIZE (regnum));
       /* ... Write.  */
       regcache_raw_write (regcache, fpnum, mmx_buf);
     }
@@ -1462,7 +1422,7 @@ i386_register_to_value (struct frame_info *frame, int regnum,
       gdb_assert (regnum != -1);
       gdb_assert (register_size (current_gdbarch, regnum) == 4);
 
-      get_frame_register (frame, regnum, buf);
+      frame_read_register (frame, regnum, buf);
       regnum = i386_next_regnum (regnum);
       len -= 4;
       buf += 4;
@@ -1730,14 +1690,14 @@ i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 }
 
 
-/* Get the ARGIth function argument for the current function.  */
-
+/* Get the ith function argument for the current function.  */
 static CORE_ADDR
 i386_fetch_pointer_argument (struct frame_info *frame, int argi, 
 			     struct type *type)
 {
-  CORE_ADDR sp = get_frame_register_unsigned  (frame, I386_ESP_REGNUM);
-  return read_memory_unsigned_integer (sp + (4 * (argi + 1)), 4);
+  CORE_ADDR stack;
+  frame_read_register (frame, SP_REGNUM, &stack);
+  return read_memory_unsigned_integer (stack + (4 * (argi + 1)), 4);
 }
 
 
@@ -1756,23 +1716,10 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep = XMALLOC (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
-  /* The i386 default settings now include the SSE registers.
-     I386_NUM_XREGS includes mxcsr, and we don't want to count
-     this as one of the xmm regs -- which is why we subtract one.
-
-     Note: kevinb/2003-07-14: Whatever Mark's concerns are about the
-     FPU registers in the FIXME below apply to the SSE registers as well.
-     The only problem that I see is that these registers will show up
-     in "info all-registers" even on CPUs where they don't exist.  IMO,
-     however, if it's a choice between printing them always (even when
-     they don't exist) or never showing them to the user (even when they
-     do exist), I prefer the former over the latter.  Ideally, of course,
-     we'd somehow autodetect that we have them (or not) and display them
-     when we have them and suppress them when we don't.
-
+  /* The i386 default settings don't include the SSE registers.
      FIXME: kettenis/20020614: They do include the FPU registers for
      now, which probably is not quite right.  */
-  tdep->num_xmm_regs = I386_NUM_XREGS - 1;
+  tdep->num_xmm_regs = 0;
 
   tdep->jb_pc_offset = -1;
   tdep->struct_return = pcc_struct_return;
@@ -1794,9 +1741,9 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      alignment.  */
   set_gdbarch_long_double_bit (gdbarch, 96);
 
-  /* The default ABI includes general-purpose registers, 
-     floating-point registers, and the SSE registers.  */
-  set_gdbarch_num_regs (gdbarch, I386_SSE_NUM_REGS);
+  /* The default ABI includes general-purpose registers and
+     floating-point registers.  */
+  set_gdbarch_num_regs (gdbarch, I386_NUM_GREGS + I386_NUM_FREGS);
   set_gdbarch_register_name (gdbarch, i386_register_name);
   set_gdbarch_register_type (gdbarch, i386_register_type);
 

@@ -334,7 +334,6 @@ gdb_disassemble_info (struct gdbarch *gdbarch, struct ui_file *file)
   di.arch = gdbarch_bfd_arch_info (gdbarch)->arch;
   di.mach = gdbarch_bfd_arch_info (gdbarch)->mach;
   di.endian = gdbarch_byte_order (gdbarch);
-  di.insn_sets = 0;
   return di;
 }
 

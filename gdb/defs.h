@@ -285,15 +285,6 @@ struct cleanup
 #endif
 #endif
 
-/* Be conservative and use enum bitfields only with GCC.
-   This is copied from gcc 3.3.1, system.h.  */
-
-#if defined(__GNUC__) && (__GNUC__ >= 2)
-#define ENUM_BITFIELD(TYPE) enum TYPE
-#else
-#define ENUM_BITFIELD(TYPE) unsigned int
-#endif
-
 /* Needed for various prototypes */
 
 struct symtab;
@@ -863,9 +854,6 @@ extern void xfree (void *);
    fails. */
 extern void xasprintf (char **ret, const char *format, ...) ATTR_FORMAT (printf, 2, 3);
 extern void xvasprintf (char **ret, const char *format, va_list ap);
-
-/* Like asprintf, but return the string, throw an error if no memory.  */
-extern char *xstrprintf (const char *format, ...) ATTR_FORMAT (printf, 1, 2);
 
 extern int parse_escape (char **);
 

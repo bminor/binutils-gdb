@@ -18,7 +18,6 @@ s! config.h!!g
 s! \$(INCDIR)/fopen-[^ ]*\.h!!g
 s! \$(INCDIR)/ansidecl\.h!!g
 s! \$(INCDIR)/symcat\.h!!g
-s! \.\./intl/libintl\.h!!g
 
 s/\\\n */ /g
 

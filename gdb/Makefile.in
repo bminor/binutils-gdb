@@ -430,7 +430,6 @@ FLAGS_TO_PASS = \
 	"datadir=$(datadir)" \
 	"includedir=$(includedir)" \
 	"against=$(against)" \
-	"DESTDIR=$(DESTDIR)" \
 	"AR=$(AR)" \
 	"AR_FLAGS=$(AR_FLAGS)" \
 	"CC=$(CC)" \
@@ -687,7 +686,6 @@ gdb_vfork_h = gdb_vfork.h
 gdb_wait_h = gdb_wait.h
 gnu_nat_h = gnu-nat.h
 gregset_h = gregset.h
-hppa_tdep_h = hppa-tdep.h
 i386_linux_tdep_h = i386-linux-tdep.h
 i386_tdep_h = i386-tdep.h
 i387_tdep_h = i387-tdep.h
@@ -965,7 +963,7 @@ install-only: $(CONFIG_INSTALL)
 		else \
 		  true ; \
 		fi ; \
-		$(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$(bindir) ; \
+		$(SHELL) $(srcdir)/../mkinstalldirs $(bindir) ; \
 		$(INSTALL_PROGRAM) gdb$(EXEEXT) \
 			$(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT) ; \
 		$(SHELL) $(srcdir)/../mkinstalldirs \
@@ -982,8 +980,7 @@ uninstall: force $(CONFIG_UNINSTALL)
 		else \
 		  true ; \
 		fi ; \
-		rm -f $(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT) \
-		      $(DESTDIR)$(man1dir)/$$transformed_name.1
+		rm -f $(bindir)/$$transformed_name$(EXEEXT) $(man1dir)/$$transformed_name.1
 	@$(MAKE) DO=uninstall "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 
 
 # We do this by grepping through sources.  If that turns out to be too slow,
@@ -1322,22 +1319,6 @@ main.o: main.c
 	$(CC) -c $(INTERNAL_CFLAGS) $(TARGET_SYSTEM_ROOT_DEFINE) \
 		-DBINDIR=\"$(bindir)\" $(srcdir)/main.c
 
-# FIXME: cagney/2003-08-10: "monitor.c" gets -Wformat-nonliteral
-# errors.  It turns out that that is the least of monitor.c's
-# problems.  The function print_vsprintf appears to be using
-# va_arg(long) to extract CORE_ADDR parameters - something that
-# definitly will not work.  "monitor.c" needs to be rewritten so that
-# it doesn't use format strings and instead uses callbacks.
-monitor.o: $(srcdir)/monitor.c
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $(srcdir)/monitor.c
-
-# FIXME: cagney/2003-08-10: Do not try to build "printcmd.c" with
-# -Wformat-nonliteral.  It needs to be overhauled so that it doesn't
-# pass user input strings as the format parameter to host printf
-# function calls.
-printcmd.o: $(srcdir)/printcmd.c
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $(srcdir)/printcmd.c
-
 # FIXME: Procfs.o gets -Wformat errors because things like pid_t don't
 # match output format strings.
 procfs.o: $(srcdir)/procfs.c
@@ -1354,12 +1335,6 @@ v850ice.o: $(srcdir)/v850ice.c
 		$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) \
 		$(GDBTK_CFLAGS) \
 		$(srcdir)/v850ice.c
-
-# FIXME: cagney/2003-08-10: Do not try to build "valprint.c" with
-# -Wformat-nonliteral.  It relies on local_hex_format et.al. and
-# that's a mess.  It needs a serious overhaul.
-valprint.o: $(srcdir)/valprint.c
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $(srcdir)/valprint.c
 
 # FIXME: z8k-tdep.c calls _initialize_gdbtypes().  Since that isn't
 # declared -Wimplicit fails. It should be using the GDBARCH framework.
@@ -1701,7 +1676,7 @@ disasm.o: disasm.c $(defs_h) $(target_h) $(value_h) $(ui_out_h) \
 doublest.o: doublest.c $(defs_h) $(doublest_h) $(floatformat_h) \
 	$(gdb_assert_h) $(gdb_string_h) $(gdbtypes_h)
 dpx2-nat.o: dpx2-nat.c $(defs_h) $(gdbcore_h) $(gdb_string_h)
-dsrec.o: dsrec.c $(defs_h) $(serial_h) $(srec_h) $(gdb_assert_h)
+dsrec.o: dsrec.c $(defs_h) $(serial_h) $(srec_h)
 dummy-frame.o: dummy-frame.c $(defs_h) $(dummy_frame_h) $(regcache_h) \
 	$(frame_h) $(inferior_h) $(gdb_assert_h) $(frame_unwind_h) \
 	$(command_h) $(gdbcmd_h)
@@ -1763,8 +1738,8 @@ frame.o: frame.c $(defs_h) $(frame_h) $(target_h) $(value_h) $(inferior_h) \
 	$(command_h) $(gdbcmd_h)
 frame-unwind.o: frame-unwind.c $(defs_h) $(frame_h) $(frame_unwind_h) \
 	$(gdb_assert_h) $(dummy_frame_h)
-frv-tdep.o: frv-tdep.c $(defs_h) $(gdb_string_h) $(inferior_h) $(symfile_h) \
-	$(gdbcore_h) $(arch_utils_h) $(regcache_h)
+frv-tdep.o: frv-tdep.c $(defs_h) $(inferior_h) $(symfile_h) $(gdbcore_h) \
+	$(arch_utils_h) $(regcache_h)
 f-typeprint.o: f-typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) $(symtab_h) \
 	$(gdbtypes_h) $(expression_h) $(value_h) $(gdbcore_h) $(target_h) \
 	$(f_lang_h) $(gdb_string_h)
@@ -1815,7 +1790,7 @@ hppa-tdep.o: hppa-tdep.c $(defs_h) $(frame_h) $(bfd_h) $(inferior_h) \
 	$(value_h) $(regcache_h) $(completer_h) $(language_h) $(osabi_h) \
 	$(gdb_assert_h) $(infttrace_h) $(symtab_h) $(infcall_h) \
 	$(a_out_encap_h) $(gdb_stat_h) $(gdb_wait_h) $(gdbcore_h) \
-	$(gdbcmd_h) $(target_h) $(symfile_h) $(objfiles_h) $(hppa_tdep_h)
+	$(gdbcmd_h) $(target_h) $(symfile_h) $(objfiles_h)
 hpread.o: hpread.c $(defs_h) $(bfd_h) $(gdb_string_h) $(hp_symtab_h) \
 	$(syms_h) $(symtab_h) $(symfile_h) $(objfiles_h) $(buildsym_h) \
 	$(complaints_h) $(gdb_stabs_h) $(gdbtypes_h) $(demangle_h) \
@@ -1843,7 +1818,7 @@ i386-interix-tdep.o: i386-interix-tdep.c $(defs_h) $(arch_utils_h) \
 i386-linux-nat.o: i386-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(regcache_h) $(gdb_assert_h) $(gdb_string_h) $(gregset_h) \
 	$(i387_tdep_h) $(i386_tdep_h) $(i386_linux_tdep_h) \
-	$(gdb_proc_service_h) $(linux_nat_h)
+	$(gdb_proc_service_h)
 i386-linux-tdep.o: i386-linux-tdep.c $(defs_h) $(gdbcore_h) $(frame_h) \
 	$(value_h) $(regcache_h) $(inferior_h) $(reggroups_h) $(symtab_h) \
 	$(symfile_h) $(objfiles_h) $(solib_svr4_h) $(osabi_h) $(i386_tdep_h) \
@@ -2496,7 +2471,7 @@ install-gdbtk:
 	else \
 	  true ; \
 	fi ; \
-	$(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$(bindir); \
+	$(SHELL) $(srcdir)/../mkinstalldirs $(bindir); \
 	$(INSTALL_PROGRAM) insight$(EXEEXT) \
 		$(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT) ; \
 	$(SHELL) $(srcdir)/../mkinstalldirs \

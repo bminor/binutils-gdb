@@ -302,8 +302,8 @@ branch_tests:
 	jmp	@er0
 	jmp	@branch_tests
 	jmp	@@0 (0)
-	bsr	branch_tests:8
-	bsr	branch_tests:16
+	bsr	@branch_tests:8
+	bsr	@branch_tests:16
 	jsr	@er0
 	jsr	@branch_tests
 	jsr	@@0 (0)

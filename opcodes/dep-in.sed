@@ -10,7 +10,6 @@ s!@TOPDIR@/include!$(INCDIR)!g
 s!@BFDDIR@!$(BFDDIR)!g
 s!@TOPDIR@/bfd!$(BFDDIR)!g
 s!@SRCDIR@/!!g
-s! \.\./intl/libintl\.h!!g
 
 s/\\\n */ /g
 

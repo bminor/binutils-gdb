@@ -208,7 +208,6 @@ ptrace_wait (ptid_t ptid, int *status)
   return wstate;
 }
 
-#ifndef KILL_INFERIOR
 void
 kill_inferior (void)
 {
@@ -230,7 +229,6 @@ kill_inferior (void)
   ptrace_wait (null_ptid, &status);
   target_mourn_inferior ();
 }
-#endif /* KILL_INFERIOR */
 
 #ifndef CHILD_RESUME
 

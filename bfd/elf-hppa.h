@@ -44,14 +44,62 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define elf_hppa_final_link elf32_hppa_final_link
 #endif
 
+static void elf_hppa_info_to_howto
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
+
+static void elf_hppa_info_to_howto_rel
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
+
+static reloc_howto_type * elf_hppa_reloc_type_lookup
+  PARAMS ((bfd *, bfd_reloc_code_real_type));
+
+static bfd_boolean elf_hppa_is_local_label_name
+  PARAMS ((bfd *, const char *));
+
+static bfd_boolean elf_hppa_fake_sections
+  PARAMS ((bfd *abfd, Elf_Internal_Shdr *, asection *));
+
+static void elf_hppa_final_write_processing
+  PARAMS ((bfd *, bfd_boolean));
+
+static int hppa_unwind_entry_compare
+  PARAMS ((const PTR, const PTR));
+
+static bfd_boolean elf_hppa_sort_unwind
+  PARAMS ((bfd *));
+
 #if ARCH_SIZE == 64
+static bfd_boolean elf_hppa_add_symbol_hook
+  PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
+	   const char **, flagword *, asection **, bfd_vma *));
+
+static bfd_boolean elf_hppa_unmark_useless_dynamic_symbols
+  PARAMS ((struct elf_link_hash_entry *, PTR));
+
+static bfd_boolean elf_hppa_remark_useless_dynamic_symbols
+  PARAMS ((struct elf_link_hash_entry *, PTR));
+
+static bfd_boolean elf_hppa_is_dynamic_loader_symbol
+  PARAMS ((const char *));
+
+static void elf_hppa_record_segment_addrs
+  PARAMS ((bfd *, asection *, PTR));
+
+static bfd_boolean elf_hppa_final_link
+  PARAMS ((bfd *, struct bfd_link_info *));
+
+static bfd_boolean elf_hppa_relocate_section
+  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *,
+	   bfd_byte *, Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
+
 static bfd_reloc_status_type elf_hppa_final_link_relocate
-  (Elf_Internal_Rela *, bfd *, bfd *, asection *, bfd_byte *, bfd_vma,
-   struct bfd_link_info *, asection *, struct elf_link_hash_entry *,
-   struct elf64_hppa_dyn_hash_entry *);
+  PARAMS ((Elf_Internal_Rela *, bfd *, bfd *, asection *,
+	   bfd_byte *, bfd_vma, struct bfd_link_info *,
+	   asection *, struct elf_link_hash_entry *,
+	   struct elf64_hppa_dyn_hash_entry *));
 
 static int elf_hppa_relocate_insn
-  (int, int, unsigned int);
+  PARAMS ((int, int, unsigned int));
 #endif
 
 /* ELF/PA relocation howto entries.  */
@@ -567,10 +615,11 @@ static reloc_howto_type elf_hppa_howto_table[ELF_HOWTO_TABLE_SIZE] =
    format, and field selector.  */
 
 elf_hppa_reloc_type
-elf_hppa_reloc_final_type (bfd *abfd,
-			   elf_hppa_reloc_type base_type,
-			   int format,
-			   unsigned int field)
+elf_hppa_reloc_final_type (abfd, base_type, format, field)
+     bfd *abfd;
+     elf_hppa_reloc_type base_type;
+     int format;
+     unsigned int field;
 {
   elf_hppa_reloc_type final_type = base_type;
 
@@ -835,25 +884,26 @@ elf_hppa_reloc_final_type (bfd *abfd,
    relocation with modifications based on format and field.  */
 
 elf_hppa_reloc_type **
-_bfd_elf_hppa_gen_reloc_type (bfd *abfd,
-			      elf_hppa_reloc_type base_type,
-			      int format,
-			      unsigned int field,
-			      int ignore ATTRIBUTE_UNUSED,
-			      asymbol *sym ATTRIBUTE_UNUSED)
+_bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
+     bfd *abfd;
+     elf_hppa_reloc_type base_type;
+     int format;
+     unsigned int field;
+     int ignore ATTRIBUTE_UNUSED;
+     asymbol *sym ATTRIBUTE_UNUSED;
 {
   elf_hppa_reloc_type *finaltype;
   elf_hppa_reloc_type **final_types;
   bfd_size_type amt = sizeof (elf_hppa_reloc_type *) * 2;
 
   /* Allocate slots for the BFD relocation.  */
-  final_types = bfd_alloc (abfd, amt);
+  final_types = (elf_hppa_reloc_type **) bfd_alloc (abfd, amt);
   if (final_types == NULL)
     return NULL;
 
   /* Allocate space for the relocation itself.  */
   amt = sizeof (elf_hppa_reloc_type);
-  finaltype = bfd_alloc (abfd, amt);
+  finaltype = (elf_hppa_reloc_type *) bfd_alloc (abfd, amt);
   if (finaltype == NULL)
     return NULL;
 
@@ -869,11 +919,12 @@ _bfd_elf_hppa_gen_reloc_type (bfd *abfd,
 /* Translate from an elf into field into a howto relocation pointer.  */
 
 static void
-elf_hppa_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
-			arelent *bfd_reloc,
-			Elf_Internal_Rela *elf_reloc)
+elf_hppa_info_to_howto (abfd, bfd_reloc, elf_reloc)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     arelent *bfd_reloc;
+     Elf_Internal_Rela *elf_reloc;
 {
-  BFD_ASSERT (ELF_R_TYPE (elf_reloc->r_info)
+  BFD_ASSERT (ELF_R_TYPE(elf_reloc->r_info)
 	      < (unsigned int) R_PARISC_UNIMPLEMENTED);
   bfd_reloc->howto = &elf_hppa_howto_table[ELF_R_TYPE (elf_reloc->r_info)];
 }
@@ -881,9 +932,10 @@ elf_hppa_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 /* Translate from an elf into field into a howto relocation pointer.  */
 
 static void
-elf_hppa_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
-			    arelent *bfd_reloc,
-			    Elf_Internal_Rela *elf_reloc)
+elf_hppa_info_to_howto_rel (abfd, bfd_reloc, elf_reloc)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     arelent *bfd_reloc;
+     Elf_Internal_Rela *elf_reloc;
 {
   BFD_ASSERT (ELF_R_TYPE(elf_reloc->r_info)
 	      < (unsigned int) R_PARISC_UNIMPLEMENTED);
@@ -894,8 +946,9 @@ elf_hppa_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
    relocation for an ARCH machine.  */
 
 static reloc_howto_type *
-elf_hppa_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
-			    bfd_reloc_code_real_type code)
+elf_hppa_reloc_type_lookup (abfd, code)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     bfd_reloc_code_real_type code;
 {
   if ((int) code < (int) R_PARISC_UNIMPLEMENTED)
     {
@@ -908,7 +961,9 @@ elf_hppa_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 /* Return TRUE if SYM represents a local label symbol.  */
 
 static bfd_boolean
-elf_hppa_is_local_label_name (bfd *abfd ATTRIBUTE_UNUSED, const char *name)
+elf_hppa_is_local_label_name (abfd, name)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     const char *name;
 {
   if (name[0] == 'L' && name[1] == '$')
     return 1;
@@ -919,9 +974,12 @@ elf_hppa_is_local_label_name (bfd *abfd ATTRIBUTE_UNUSED, const char *name)
    section name, which is a hack, but ought to work.  */
 
 static bfd_boolean
-elf_hppa_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec)
+elf_hppa_fake_sections (abfd, hdr, sec)
+     bfd *abfd;
+     Elf_Internal_Shdr *hdr;
+     asection *sec;
 {
-  const char *name;
+  register const char *name;
 
   name = bfd_get_section_name (abfd, sec);
 
@@ -959,8 +1017,9 @@ elf_hppa_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec)
 }
 
 static void
-elf_hppa_final_write_processing (bfd *abfd,
-				 bfd_boolean linker ATTRIBUTE_UNUSED)
+elf_hppa_final_write_processing (abfd, linker)
+     bfd *abfd;
+     bfd_boolean linker ATTRIBUTE_UNUSED;
 {
   int mach = bfd_get_mach (abfd);
 
@@ -989,18 +1048,20 @@ elf_hppa_final_write_processing (bfd *abfd,
    final link.  */
 
 static int
-hppa_unwind_entry_compare (const void *a, const void *b)
+hppa_unwind_entry_compare (a, b)
+     const PTR a;
+     const PTR b;
 {
   const bfd_byte *ap, *bp;
   unsigned long av, bv;
 
-  ap = a;
+  ap = (const bfd_byte *) a;
   av = (unsigned long) ap[0] << 24;
   av |= (unsigned long) ap[1] << 16;
   av |= (unsigned long) ap[2] << 8;
   av |= (unsigned long) ap[3];
 
-  bp = b;
+  bp = (const bfd_byte *) b;
   bv = (unsigned long) bp[0] << 24;
   bv |= (unsigned long) bp[1] << 16;
   bv |= (unsigned long) bp[2] << 8;
@@ -1009,7 +1070,8 @@ hppa_unwind_entry_compare (const void *a, const void *b)
   return av < bv ? -1 : av > bv ? 1 : 0;
 }
 
-static bfd_boolean elf_hppa_sort_unwind (bfd *abfd)
+static bfd_boolean elf_hppa_sort_unwind (abfd)
+     bfd *abfd;
 {
   asection *s;
 
@@ -1046,13 +1108,14 @@ static bfd_boolean elf_hppa_sort_unwind (bfd *abfd)
    indices, which we have to handle.  */
 
 static bfd_boolean
-elf_hppa_add_symbol_hook (bfd *abfd,
-			  struct bfd_link_info *info ATTRIBUTE_UNUSED,
-			  const Elf_Internal_Sym *sym,
-			  const char **namep ATTRIBUTE_UNUSED,
-			  flagword *flagsp ATTRIBUTE_UNUSED,
-			  asection **secp,
-			  bfd_vma *valp)
+elf_hppa_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
+     bfd *abfd;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     const Elf_Internal_Sym *sym;
+     const char **namep ATTRIBUTE_UNUSED;
+     flagword *flagsp ATTRIBUTE_UNUSED;
+     asection **secp;
+     bfd_vma *valp;
 {
   int index = sym->st_shndx;
 
@@ -1075,10 +1138,11 @@ elf_hppa_add_symbol_hook (bfd *abfd,
 }
 
 static bfd_boolean
-elf_hppa_unmark_useless_dynamic_symbols (struct elf_link_hash_entry *h,
-					 void *data)
+elf_hppa_unmark_useless_dynamic_symbols (h, data)
+     struct elf_link_hash_entry *h;
+     PTR data;
 {
-  struct bfd_link_info *info = data;
+  struct bfd_link_info *info = (struct bfd_link_info *)data;
 
   if (h->root.type == bfd_link_hash_warning)
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
@@ -1097,7 +1161,7 @@ elf_hppa_unmark_useless_dynamic_symbols (struct elf_link_hash_entry *h,
      linker code.  */
   if (! info->relocatable
       && ! (info->shared
-	    && info->unresolved_syms_in_shared_libs == RM_IGNORE)
+	    && !info->no_undefined)
       && h->root.type == bfd_link_hash_undefined
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) != 0
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0)
@@ -1110,10 +1174,11 @@ elf_hppa_unmark_useless_dynamic_symbols (struct elf_link_hash_entry *h,
 }
 
 static bfd_boolean
-elf_hppa_remark_useless_dynamic_symbols (struct elf_link_hash_entry *h,
-					 void *data)
+elf_hppa_remark_useless_dynamic_symbols (h, data)
+     struct elf_link_hash_entry *h;
+     PTR data;
 {
-  struct bfd_link_info *info = data;
+  struct bfd_link_info *info = (struct bfd_link_info *)data;
 
   if (h->root.type == bfd_link_hash_warning)
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
@@ -1132,7 +1197,7 @@ elf_hppa_remark_useless_dynamic_symbols (struct elf_link_hash_entry *h,
      linker code.  */
   if (! info->relocatable
       && ! (info->shared
-	    && info->unresolved_syms_in_shared_libs == RM_IGNORE)
+	    && !info->no_undefined)
       && h->root.type == bfd_link_hash_undefined
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) == 0
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0
@@ -1146,7 +1211,8 @@ elf_hppa_remark_useless_dynamic_symbols (struct elf_link_hash_entry *h,
 }
 
 static bfd_boolean
-elf_hppa_is_dynamic_loader_symbol (const char *name)
+elf_hppa_is_dynamic_loader_symbol (name)
+     const char * name;
 {
   return (! strcmp (name, "__CPU_REVISION")
 	  || ! strcmp (name, "__CPU_KEYBITS_1")
@@ -1163,14 +1229,15 @@ elf_hppa_is_dynamic_loader_symbol (const char *name)
 
 /* Record the lowest address for the data and text segments.  */
 static void
-elf_hppa_record_segment_addrs (bfd *abfd ATTRIBUTE_UNUSED,
-			       asection *section,
-			       void *data)
+elf_hppa_record_segment_addrs (abfd, section, data)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *section;
+     PTR data;
 {
   struct elf64_hppa_link_hash_table *hppa_info;
   bfd_vma value;
 
-  hppa_info = data;
+  hppa_info = (struct elf64_hppa_link_hash_table *)data;
 
   value = section->vma - section->filepos;
 
@@ -1191,7 +1258,9 @@ elf_hppa_record_segment_addrs (bfd *abfd ATTRIBUTE_UNUSED,
    fall back to the generic ELF final link routine.  */
 
 static bfd_boolean
-elf_hppa_final_link (bfd *abfd, struct bfd_link_info *info)
+elf_hppa_final_link (abfd, info)
+     bfd *abfd;
+     struct bfd_link_info *info;
 {
   bfd_boolean retval;
   struct elf64_hppa_link_hash_table *hppa_info = elf64_hppa_hash_table (info);
@@ -1291,14 +1360,16 @@ elf_hppa_final_link (bfd *abfd, struct bfd_link_info *info)
 /* Relocate an HPPA ELF section.  */
 
 static bfd_boolean
-elf_hppa_relocate_section (bfd *output_bfd,
-			   struct bfd_link_info *info,
-			   bfd *input_bfd,
-			   asection *input_section,
-			   bfd_byte *contents,
-			   Elf_Internal_Rela *relocs,
-			   Elf_Internal_Sym *local_syms,
-			   asection **local_sections)
+elf_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
+			   contents, relocs, local_syms, local_sections)
+     bfd *output_bfd;
+     struct bfd_link_info *info;
+     bfd *input_bfd;
+     asection *input_section;
+     bfd_byte *contents;
+     Elf_Internal_Rela *relocs;
+     Elf_Internal_Sym *local_syms;
+     asection **local_sections;
 {
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Rela *rel;
@@ -1399,8 +1470,7 @@ elf_hppa_relocate_section (bfd *output_bfd,
 		relocation = 0;
 	    }
 	  /* Allow undefined symbols in shared libraries.  */
-	  else if (info->shared
-		   && info->unresolved_syms_in_shared_libs == RM_IGNORE
+	  else if (info->shared && !info->no_undefined
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    {
 	      if (info->symbolic)
@@ -1508,16 +1578,19 @@ elf_hppa_relocate_section (bfd *output_bfd,
    function.  */
 
 static bfd_reloc_status_type
-elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
-			      bfd *input_bfd,
-			      bfd *output_bfd,
-			      asection *input_section,
-			      bfd_byte *contents,
-			      bfd_vma value,
-			      struct bfd_link_info *info,
-			      asection *sym_sec,
-			      struct elf_link_hash_entry *h ATTRIBUTE_UNUSED,
-			      struct elf64_hppa_dyn_hash_entry *dyn_h)
+elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
+			      input_section, contents, value,
+			      info, sym_sec, h, dyn_h)
+     Elf_Internal_Rela *rel;
+     bfd *input_bfd;
+     bfd *output_bfd;
+     asection *input_section;
+     bfd_byte *contents;
+     bfd_vma value;
+     struct bfd_link_info *info;
+     asection *sym_sec;
+     struct elf_link_hash_entry *h ATTRIBUTE_UNUSED;
+     struct elf64_hppa_dyn_hash_entry *dyn_h;
 {
   int insn;
   bfd_vma offset = rel->r_offset;
@@ -2063,7 +2136,10 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
    to insert the relocation into the given instruction.  */
 
 static int
-elf_hppa_relocate_insn (int insn, int sym_value, unsigned int r_type)
+elf_hppa_relocate_insn (insn, sym_value, r_type)
+     int insn;
+     int sym_value;
+     unsigned int r_type;
 {
   switch (r_type)
     {

@@ -1,5 +1,5 @@
 /* Native-dependent code for modern i386 BSD's.
-   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -196,9 +196,9 @@ fetch_inferior_registers (int regno)
 #ifdef HAVE_PT_GETXMMREGS
       char xmmregs[512];
 
-      if (have_ptrace_xmmregs != 0
-	  && ptrace(PT_GETXMMREGS, PIDGET (inferior_ptid),
-		    (PTRACE_ARG3_TYPE) xmmregs, 0) == 0)
+      if (have_ptrace_xmmregs != 0 &&
+	  ptrace(PT_GETXMMREGS, PIDGET (inferior_ptid),
+		 (PTRACE_ARG3_TYPE) xmmregs, 0) == 0)
 	{
 	  have_ptrace_xmmregs = 1;
 	  i387_supply_fxsave (xmmregs);
@@ -252,9 +252,9 @@ store_inferior_registers (int regno)
 #ifdef HAVE_PT_GETXMMREGS
       char xmmregs[512];
 
-      if (have_ptrace_xmmregs != 0
-	  && ptrace(PT_GETXMMREGS, PIDGET (inferior_ptid),
-		    (PTRACE_ARG3_TYPE) xmmregs, 0) == 0)
+      if (have_ptrace_xmmregs != 0 &&
+	  ptrace(PT_GETXMMREGS, PIDGET (inferior_ptid),
+		 (PTRACE_ARG3_TYPE) xmmregs, 0) == 0)
 	{
 	  have_ptrace_xmmregs = 1;
 
@@ -395,15 +395,20 @@ _initialize_i386bsd_nat (void)
      information.  */
 
 #if defined (__FreeBSD_version) && __FreeBSD_version >= 400011
+  extern int i386fbsd4_sc_reg_offset[];
 #define SC_REG_OFFSET i386fbsd4_sc_reg_offset
 #elif defined (__FreeBSD_version) && __FreeBSD_version >= 300005
+  extern int i386fbsd_sc_reg_offset[];
 #define SC_REG_OFFSET i386fbsd_sc_reg_offset
 #elif defined (NetBSD) || defined (__NetBSD_Version__)
+  extern int i386nbsd_sc_reg_offset[];
 #define SC_REG_OFFSET i386nbsd_sc_reg_offset
 #elif defined (OpenBSD)
+  extern int i386obsd_sc_reg_offset[];
 #define SC_REG_OFFSET i386obsd_sc_reg_offset
 #else
-#define SC_REG_OFFSET i386bsd_sc_reg_offset
+  extern int i386bsd_sc_reg_offset[];
+#define SC_PC_OFFSET i386bsd_sc_reg_offset
 #endif
 
   /* We only check the program counter, stack pointer and frame

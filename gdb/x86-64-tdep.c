@@ -144,7 +144,7 @@ x86_64_register_type (struct gdbarch *gdbarch, int regnum)
 static int x86_64_dwarf_regmap[] =
 {
   /* General Purpose Registers RAX, RDX, RCX, RBX, RSI, RDI.  */
-  X86_64_RAX_REGNUM, X86_64_RDX_REGNUM, 2, 1,
+  X86_64_RAX_REGNUM, X86_64_RDX_REGNUM, 3, 2, 
   4, X86_64_RDI_REGNUM,
 
   /* Frame Pointer Register RBP.  */
@@ -172,7 +172,7 @@ static int x86_64_dwarf_regmap[] =
   X86_64_XMM0_REGNUM + 14, X86_64_XMM0_REGNUM + 15,
 
   /* Floating Point Registers 0-7.  */
-  X86_64_ST0_REGNUM + 0, X86_64_ST0_REGNUM + 1,
+  X86_64_ST0_REGNUM + 0, X86_64_ST0_REGNUM + 1,	
   X86_64_ST0_REGNUM + 2, X86_64_ST0_REGNUM + 3,
   X86_64_ST0_REGNUM + 4, X86_64_ST0_REGNUM + 5,
   X86_64_ST0_REGNUM + 6, X86_64_ST0_REGNUM + 7
@@ -613,7 +613,6 @@ x86_64_push_arguments (struct regcache *regcache, int nargs,
   int stack_values_count = 0;
   int *stack_values;
   stack_values = alloca (nargs * sizeof (int));
-
   for (i = 0; i < nargs; i++)
     {
       enum x86_64_reg_class class[MAX_CLASSES];
@@ -1196,14 +1195,6 @@ x86_64_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
   return frame_id_build (fp + 16, frame_pc_unwind (next_frame));
 }
 
-/* 16 byte align the SP per frame requirements.  */
-
-static CORE_ADDR
-x86_64_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
-{
-  return sp & -(CORE_ADDR)16;
-}
-
 void
 x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -1247,8 +1238,6 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Call dummy code.  */
   set_gdbarch_push_dummy_call (gdbarch, x86_64_push_dummy_call);
-  set_gdbarch_frame_align (gdbarch, x86_64_frame_align);
-  set_gdbarch_frame_red_zone_size (gdbarch, 128);
 
   set_gdbarch_convert_register_p (gdbarch, x86_64_convert_register_p);
   set_gdbarch_register_to_value (gdbarch, i387_register_to_value);
