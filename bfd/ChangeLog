@@ -1,5 +1,8 @@
 Thu Nov  2 23:16:39 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* xcofflink.c (_bfd_ppc_xcoff_relocate_section): Don't warn about
+	an undefined symbol in a shared link.
+
 	* linker.c (_bfd_generic_link_add_one_symbol): Correct type of
 	oldtype from bfd_link_order_type to bfd_link_hash_type.  From
 	phdm@info.ucl.ac.be (Philippe De Muyter).

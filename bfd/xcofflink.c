@@ -5172,7 +5172,8 @@ _bfd_ppc_xcoff_relocate_section (output_bfd, info, input_bfd,
 	      /* Every symbol in a shared object is defined somewhere.  */
 	      val = 0;
 	    }
-	  else if (! info->relocateable)
+	  else if (! info->relocateable
+		   && ! info->shared)
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd, input_section,
