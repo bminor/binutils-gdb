@@ -1111,7 +1111,14 @@ DEFUN (translate_from_native_sym_flags, (sym_pointer, cache_ptr, abfd, statep),
 	      /* This symbol is the text of a warning message, the next symbol
 		 is the symbol to associate the warning with */
 	      cache_ptr->symbol.flags = BSF_DEBUGGING | BSF_WARNING;
+
+	      /* @@ Stuffing pointers into integers is a no-no.
+		 We can usually get away with it if the integer is
+		 large enough though.  */
+	      if (sizeof (cache_ptr + 1) > sizeof (bfd_vma))
+		abort ();
 	      cache_ptr->symbol.value = (bfd_vma) ((cache_ptr + 1));
+
 	      /* We furgle with the next symbol in place.
 		 We don't want it to be undefined, we'll trample the type */
 	      (sym_pointer + 1)->e_type[0] = 0xff;
@@ -1125,6 +1132,13 @@ DEFUN (translate_from_native_sym_flags, (sym_pointer, cache_ptr, abfd, statep),
 		 us undefined. This is good, since we want to pull in any files
 		 which define it */
 	      cache_ptr->symbol.flags = BSF_DEBUGGING | BSF_INDIRECT;
+
+	      /* @@ Stuffing pointers into integers is a no-no.
+		 We can usually get away with it if the integer is
+		 large enough though.  */
+	      if (sizeof (cache_ptr + 1) > sizeof (bfd_vma))
+		abort ();
+
 	      cache_ptr->symbol.value = (bfd_vma) ((cache_ptr + 1));
 	      cache_ptr->symbol.section = &bfd_ind_section;
 	      *statep = 1;
