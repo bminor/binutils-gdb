@@ -1,6 +1,12 @@
 #include <signal.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include "d10v_sim.h"
 #include "simops.h"
+#include "syscall.h"
 
 /* #define DEBUG 1 */
 
@@ -1454,8 +1460,6 @@ OP_5201 ()
   else
     tmp = ((State.a[0] << 16) | (State.a[1] & 0xffff)) >> -shift;
   tmp = ( SEXT60(tmp) + 0x8000 ) >> 16;
-  printf("tmp=0x%llx\n",tmp);
-  /*    
   if (tmp > MAX32)
     {
       State.regs[OP[0]] = 0x7fff;
@@ -1469,7 +1473,6 @@ OP_5201 ()
       State.F0 = 1;
     } 
   else
-  */
     {
       State.regs[OP[0]] = (tmp >> 16) & 0xffff;
       State.regs[OP[0]+1] = tmp & 0xffff;
@@ -1492,8 +1495,7 @@ OP_4201 ()
   else
     tmp = SEXT44 (State.a[1]) >> -shift;
   tmp += 0x8000;
-  printf("tmp=0x%llx\n",tmp);
-  /*
+
   if (tmp > MAX32)
     {
       State.regs[OP[0]] = 0x7fff;
@@ -1505,7 +1507,6 @@ OP_4201 ()
       State.F0 = 1;
     }
   else
-  */
     {
       State.regs[OP[0]] = (tmp >> 16) & 0xffff;
       State.F0 = 0;
@@ -2146,17 +2147,192 @@ OP_5F00 ()
   printf("   trap\t%d\n",OP[0]);
 #endif
   
-  /* for now, trap  is used for simulating IO */
+  switch (OP[0])
+    {
+    default:
+      fprintf (stderr, "Unknown trap code %d\n", OP[0]);
+      State.exception = SIGILL;
 
-  if (OP[0] == 0)
-    {
-      char *fstr = State.regs[2] + State.imem;
-      printf (fstr,State.regs[3],State.regs[4],State.regs[5]);
-    }
-  else if (OP[0] == 1 )
-    {
-      char *fstr = State.regs[2] + State.imem;
-      puts (fstr);
+    case 0:
+      /* Trap 0 is used for simulating low-level I/O */
+      {
+	int save_errno = errno;	
+	errno = 0;
+
+/* Registers passed to trap 0 */
+
+#define FUNC   State.regs[2]	/* function number, return value */
+#define PARM1  State.regs[3]	/* optional parm 1 */
+#define PARM2  State.regs[4]	/* optional parm 2 */
+#define PARM3  State.regs[5]	/* optional parm 3 */
+
+/* Registers set by trap 0 */
+
+#define RETVAL State.regs[2]	/* return value */
+#define RETERR State.regs[3]	/* return error code */
+
+/* Turn a pointer in a register into a pointer into real memory. */
+
+#define MEMPTR(x) ((char *)((x) + State.imem))
+
+	switch (FUNC)
+	  {
+#if !defined(__GO32__) && !defined(_WIN32)
+#ifdef SYS_fork
+	  case SYS_fork:
+	    RETVAL = fork ();
+	    break;
+#endif
+#ifdef SYS_execve
+	  case SYS_execve:
+	    RETVAL = execve (MEMPTR (PARM1), (char **) MEMPTR (PARM2),
+			     (char **)MEMPTR (PARM3));
+	    break;
+#endif
+#ifdef SYS_execv
+	  case SYS_execv:
+	    RETVAL = execve (MEMPTR (PARM1), (char **) MEMPTR (PARM2), NULL);
+	    break;
+#endif
+#ifdef SYS_pipe
+	  case SYS_pipe:
+	    {
+	      reg_t buf;
+	      int host_fd[2];
+
+	      buf = PARM1;
+	      RETVAL = pipe (host_fd);
+	      SW (buf, host_fd[0]);
+	      buf += sizeof(uint16);
+	      SW (buf, host_fd[1]);
+	    }
+	  break;
+#endif
+#ifdef SYS_wait
+	  case SYS_wait:
+	    {
+	      int status;
+
+	      RETVAL = wait (&status);
+	      SW (PARM1, status);
+	    }
+	  break;
+#endif
+#endif
+
+#ifdef SYS_read
+	  case SYS_read:
+	    RETVAL = d10v_callback->read (d10v_callback, PARM1, MEMPTR (PARM2),
+					  PARM3);
+	    break;
+#endif
+#ifdef SYS_write
+	  case SYS_write:
+	    if (PARM1 == 1)
+	      RETVAL = (int)d10v_callback->write_stdout (d10v_callback,
+							 MEMPTR (PARM2), PARM3);
+	    else
+	      RETVAL = (int)d10v_callback->write (d10v_callback, PARM1,
+						  MEMPTR (PARM2), PARM3);
+	    break;
+#endif
+#ifdef SYS_lseek
+	  case SYS_lseek:
+	    RETVAL = d10v_callback->lseek (d10v_callback, PARM1, PARM2, PARM3);
+	    break;
+#endif
+#ifdef SYS_close
+	  case SYS_close:
+	    RETVAL = d10v_callback->close (d10v_callback, PARM1);
+	    break;
+#endif
+#ifdef SYS_open
+	  case SYS_open:
+	    RETVAL = d10v_callback->open (d10v_callback, MEMPTR (PARM1), PARM2);
+	    break;
+#endif
+#ifdef SYS_exit
+	  case SYS_exit:
+	    /* EXIT - caller can look in PARM1 to work out the 
+	       reason */
+	    State.exception = SIGQUIT;
+	    break;
+#endif
+
+#ifdef SYS_stat:	/* added at hmsi *
+			   case SYS_stat:	/* added at hmsi */
+	    /* stat system call */
+	    {
+	      struct stat host_stat;
+	      reg_t buf;
+
+	      RETVAL = stat (MEMPTR (PARM1), &host_stat);
+
+	      buf = PARM2;
+
+	      /* The hard-coded offsets and sizes were determined by using
+	       * the D10V compiler on a test program that used struct stat.
+	       */
+	      SW  (buf,    host_stat.st_dev);
+	      SW  (buf+2,  host_stat.st_ino);
+	      SW  (buf+4,  host_stat.st_mode);
+	      SW  (buf+6,  host_stat.st_nlink);
+	      SW  (buf+8,  host_stat.st_uid);
+	      SW  (buf+10, host_stat.st_gid);
+	      SW  (buf+12, host_stat.st_rdev);
+	      SLW (buf+16, host_stat.st_size);
+	      SLW (buf+20, host_stat.st_atime);
+	      SLW (buf+28, host_stat.st_mtime);
+	      SLW (buf+36, host_stat.st_ctime);
+	    }
+	    break;
+#endif
+
+#ifdef SYS_chown
+	  case SYS_chown:
+	    RETVAL = chown (MEMPTR (PARM1), PARM2, PARM3);
+	    break;
+#endif
+#ifdef SYS_chmod
+	  case SYS_chmod:
+	    RETVAL = chmod (MEMPTR (PARM1), PARM2);
+	    break;
+#endif
+#ifdef SYS_utime
+	  case SYS_utime:
+	    /* Cast the second argument to void *, to avoid type mismatch
+	       if a prototype is present.  */
+	    RETVAL = utime (MEMPTR (PARM1), (void *) MEMPTR (PARM2));
+	    break;
+#endif
+	  default:
+	    abort ();
+	  }
+	RETERR = errno;
+	errno = save_errno;
+	break;
+      }
+
+    case 1:
+      /* Trap 1 prints a string */
+      {
+	char *fstr = State.regs[2] + State.imem;
+	fputs (fstr, stdout);
+	break;
+      }
+
+    case 2:
+      /* Trap 2 calls printf */
+      {
+	char *fstr = State.regs[2] + State.imem;
+	printf (fstr,State.regs[3],State.regs[4],State.regs[5]);
+	break;
+      }
+
+    case 3:
+      /* Trap 3 writes a character */
+      putchar (State.regs[2]);
+      break;
     }
 }
 
