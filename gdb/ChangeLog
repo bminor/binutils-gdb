@@ -1,3 +1,8 @@
+2004-03-30  Jim Blandy  <jimb@redhat.com>
+
+	From Ulrich Weigand:
+ 	* utils.c (query): Do not use a va_list variable multiple times.
+
 2004-03-29  Daniel Jacobowitz  <drow@mvista.com>
 
 	* Makefile.in (linux_nat_h): Update dependencies.

@@ -1270,10 +1270,9 @@ query (const char *ctlstr, ...)
   int ans2;
   int retval;
 
-  va_start (args, ctlstr);
-
   if (query_hook)
     {
+      va_start (args, ctlstr);
       return query_hook (ctlstr, args);
     }
 
@@ -1289,7 +1288,9 @@ query (const char *ctlstr, ...)
       if (annotation_level > 1)
 	printf_filtered ("\n\032\032pre-query\n");
 
+      va_start (args, ctlstr);
       vfprintf_filtered (gdb_stdout, ctlstr, args);
+      va_end (args);
       printf_filtered ("(y or n) ");
 
       if (annotation_level > 1)
