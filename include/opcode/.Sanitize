@@ -1,4 +1,4 @@
-# .Sanitize for devo/include/opcode.
+	# .Sanitize for devo/include/opcode.
 
 # Each directory to survive it's way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
@@ -295,6 +295,35 @@ else
 			fi
 			cp $i new
 			sed '/start\-sanitize\-coldfire/,/end-\sanitize\-coldfire/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+
+vr4320_files="ChangeLog mips.h"
+if ( echo $* | grep keep\-vr4320 > /dev/null ) ; then
+	for i in $vr4320_files ; do
+		if test ! -d $i && (grep sanitize-vr4320 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping vr4320 stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $vr4320_files ; do
+		if test ! -d $i && (grep sanitize-vr4320 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"vr4320\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-vr4320/,/end-\sanitize\-vr4320/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...

@@ -1,3 +1,9 @@
+start-sanitize-vr4320
+Tue Mar  3 11:45:09 1998  Gavin Koch  <gavin@cygnus.com>
+
+	* mips.h (INSN_4320) : Added.
+
+end-sanitize-vr4320
 Mon Mar  2 10:44:07 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen.h (CGEN_BOOL_ATTR): New macro.
