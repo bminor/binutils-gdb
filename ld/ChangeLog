@@ -1,3 +1,7 @@
+Mon Apr 22 12:07:32 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emulparams/z8002.sh (ARCH): Set to z8002, not z8k.
+
 Tue Apr 16 16:38:32 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldexp.c (fold_binary): Correct handling of subtraction with
