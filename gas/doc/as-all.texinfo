@@ -4038,7 +4038,8 @@ list of pseudo-ops in this family is:
 
 For the cases of non-PC relative displacements and long displacements on
 the 68000 or 68010, @code{as} will issue a longer code fragment in terms of
-@var{NX}, the opposite condition to @var{XX}:
+@var{NX}, the opposite condition to @var{XX}.  For example, for the
+non-PC relative case:
 @smallexample
     j@var{XX} foo
 @end smallexample
