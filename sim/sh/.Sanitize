@@ -33,7 +33,6 @@ interp.c
 gencode.c
 run.1
 run.c
-sh.mt
 
 Things-to-lose:
 
