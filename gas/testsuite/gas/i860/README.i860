@@ -3,10 +3,12 @@ Testsuite for the i860 version of the GNU assembler
 ---------------------------------------------------
 
 This is a simple testsuite for the i860 assembler.  It currently
-consists of testcases for checking that every instruction is
-parsed correctly and that correct object code is generated.
+consists mostly of testcases for checking that every instruction is
+parsed correctly and that correct object code is generated (these
+are called "blah.s").  The files called "blah-err.s" test for error
+conditions.
 
-It includes testcases for the base i860XR instruction set as well
+The suite includes testcases for the base i860XR instruction set as well
 as the enhanced i860XP instructions and control registers.
 
 The expected results files were generated using the UNIX System V/i860
@@ -17,11 +19,18 @@ way GAS/i860 is tested against a known good assembler.
 TODO:
  - Relocation testing is basically non-existent.
  - pst.d (pixel store) is the only instruction with no testcase.
- - Tests for dual instruction mode: alignment of a dual mode pair,
-   check that dual mode has a proper pair (FLOP/integer) of instructions,
-   known gas defect when handling the d.fnop, etc.
- - All current testcases use the default AT&T/SVR4 syntax; a few simple
-   tests of the Intel syntax should be added to prevent bitrot.
+ - More tests for dual instruction mode: check that dual mode has a
+   proper pair (FLOP/core) of instructions, and other error conditions.
+ - Most current testcases use the default AT&T/SVR4 syntax; a few simple
+   tests of the Intel syntax should be added to prevent bitrot (including
+   relocatable expression syntax, etc).  Test file dual03.s uses Intel
+   syntax lightly (i.e., register names without '%' prefix).
 
 Contact me (Jason Eckhardt, jle@rice.edu) if you'd like to help.
+
+Known failures:
+  - dual01.s: GAS mishandles d.fnop (dual bit erroneously set on next
+      instruction).
+  - dual02-err.s: GAS currently doesn't check that dual mode pairs
+      are properly aligned.
 
