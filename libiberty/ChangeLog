@@ -6,7 +6,7 @@
 	* getopt1.c: Ditto.
 	* md5.c: Ditto.
 	* obstack.c: Ditto.
-	
+
 2000-12-26  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* bsearch.c: New file.
