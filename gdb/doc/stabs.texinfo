@@ -1892,6 +1892,18 @@ is determined by the architecture (normally all enumerations types are
 32 bits).  Type attributes can be used to specify an enumeration type of
 another size for debuggers which support them; see @ref{String Field}.
 
+Enumeration types are unusual in that they define symbols for the
+enumeration values (@code{first}, @code{second}, and @code{third} in the
+above example), and even though these symbols are visible in the file as
+a whole (rather than being in a more local namespace like structure
+member names), they are defined in the type definition for the
+enumeration type rather than each having their own symbol.  In order to
+be fast, GDB will only get symbols from such types (in its initial scan
+of the stabs) if the type is the first thing defined after a @samp{T} or
+@samp{t} symbol descriptor (the above example fulfills this
+requirement).  If the type does not have a name, the compiler should
+emit it in a nameless stab (@pxref{String Field}); GCC does this.
+
 @node Structures
 @section Structures
 

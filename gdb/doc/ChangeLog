@@ -1,3 +1,8 @@
+Thu Feb  3 11:39:59 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo (Enumerations): Document restriction on where
+	enumeration types can appear and still win with GDB.
+
 Wed Feb  2 11:29:17 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo (Negative Type Numbers): Document format for type
