@@ -1792,9 +1792,10 @@ get_prev_frame_1 (struct frame_info *this_frame)
 
   /* Check that this frame's ID isn't inner to (younger, below, next)
      the next frame.  This happens when a frame unwind goes backwards.
-     Since the sentinel frame doesn't really exist, don't compare the
-     inner-most against that sentinel.  */
-  if (this_frame->level > 0
+     Exclude signal trampolines (due to sigaltstack the frame ID can
+     go backwards) and sentinel frames (the test is meaningless).  */
+  if (this_frame->next->level >= 0
+      && this_frame->next->type != SIGTRAMP_FRAME
       && frame_id_inner (get_frame_id (this_frame),
 			 get_frame_id (this_frame->next)))
     error ("Previous frame inner to this frame (corrupt stack?)");

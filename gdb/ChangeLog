@@ -1,5 +1,10 @@
 2004-04-02  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (get_prev_frame_1): Exclude signal trampolines from the
+	"previous frame inner to this frame" test.
+
+2004-04-02  Andrew Cagney  <cagney@redhat.com>
+
 	* frame.c (safe_frame_unwind_memory): New function.
 	* frame.h (safe_frame_unwind_memory): Declare.  Update description
 	of /safe_/ methods.
