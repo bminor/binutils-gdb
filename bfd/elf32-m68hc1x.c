@@ -471,7 +471,8 @@ elf32_m68hc11_size_stubs (bfd *output_bfd, bfd *stub_bfd,
                             hash->root.u.i.link);
 
                   if (hash->root.type == bfd_link_hash_defined
-                      || hash->root.type == bfd_link_hash_defweak)
+                      || hash->root.type == bfd_link_hash_defweak
+                      || hash->root.type == bfd_link_hash_new)
                     {
                       if (!(hash->other & STO_M68HC12_FAR))
                         continue;
