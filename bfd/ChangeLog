@@ -1,3 +1,21 @@
+1999-07-30  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* elf-bfd.h (struct elf_backend_data): Add
+	print_symbol_all and output_arch_syms backend methods.
+	* elfxx-target.h: Likewise.
+	* elf64-sparc.c (sparc64_elf_bfd_link_hash_table_create,
+	sparc64_elf_add_symbol_hook, sparc64_elf_output_arch_syms,
+	sparc64_elf_get_symbol_type, sparc64_elf_symbol_processing): New
+	functions.
+	(sparc64_elf_size_dynamic_sections): Leave space for STT_REGISTER
+	symbols in .dynsym, add their names into .dynstr. Put those symbols
+	into dynlocal.
+	(sparc64_elf_finish_dynamic_sections): Fix up DT_SPARC_REGISTER
+	pointers to STT_REGISTER symbols in dynsym section.
+	(sparc64_elf_print_symbol_all): New function.
+	* elf.c (bfd_elf_print_symbol): Allow special backend symbol
+	printing using the print_symbol_all hook.
+
 1999-07-30  Catherine Moore  <clm@cygnus.com>
 
 	* elf32-arm.h (elf32_arm_check_relocs):  Use r_offset for

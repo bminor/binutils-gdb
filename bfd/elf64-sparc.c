@@ -32,6 +32,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* In case we're on a 32-bit machine, construct a 64-bit "-1" value.  */
 #define MINUS_ONE (~ (bfd_vma) 0)
 
+static struct bfd_link_hash_table * sparc64_elf_bfd_link_hash_table_create
+  PARAMS((bfd *));
 static reloc_howto_type *sparc64_elf_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 static void sparc64_elf_info_to_howto
@@ -51,6 +53,13 @@ static boolean sparc64_elf_adjust_dynamic_symbol
   PARAMS((struct bfd_link_info *, struct elf_link_hash_entry *));
 static boolean sparc64_elf_size_dynamic_sections
   PARAMS((bfd *, struct bfd_link_info *));
+static int sparc64_elf_get_symbol_type
+  PARAMS (( Elf_Internal_Sym *, int));
+static boolean sparc64_elf_add_symbol_hook
+  PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
+        const char **, flagword *, asection **, bfd_vma *));
+static void sparc64_elf_symbol_processing
+  PARAMS ((bfd *, asymbol *));
 
 static boolean sparc64_elf_merge_private_bfd_data
   PARAMS ((bfd *, bfd *));
@@ -595,6 +604,52 @@ sparc64_elf_write_relocs (abfd, sec, data)
       bfd_elf64_swap_reloca_out (abfd, &dst_rela, src_rela);
     }
 }
+
+/* Sparc64 ELF linker hash table.  */
+
+struct sparc64_elf_app_reg
+{
+  unsigned char bind;
+  unsigned short shndx;
+  bfd *abfd;
+  char *name;
+};
+
+struct sparc64_elf_link_hash_table
+{
+  struct elf_link_hash_table root;
+
+  struct sparc64_elf_app_reg app_regs [4];
+};
+
+/* Get the Sparc64 ELF linker hash table from a link_info structure.  */
+
+#define sparc64_elf_hash_table(p) \
+  ((struct sparc64_elf_link_hash_table *) ((p)->hash))
+  
+/* Create a Sparc64 ELF linker hash table.  */
+
+static struct bfd_link_hash_table *
+sparc64_elf_bfd_link_hash_table_create (abfd)
+     bfd *abfd;
+{
+  struct sparc64_elf_link_hash_table *ret;
+
+  ret = ((struct sparc64_elf_link_hash_table *)
+	 bfd_zalloc (abfd, sizeof (struct sparc64_elf_link_hash_table)));
+  if (ret == (struct sparc64_elf_link_hash_table *) NULL)
+    return NULL;
+
+  if (! _bfd_elf_link_hash_table_init (&ret->root, abfd,
+				       _bfd_elf_link_hash_newfunc))
+    {
+      bfd_release (abfd, ret);
+      return NULL;
+    }
+
+  return &ret->root.root;
+}
+
 
 /* Utility for performing the standard initial work of an instruction
    relocation.
@@ -1196,6 +1251,221 @@ sparc64_elf_check_relocs (abfd, info, sec, relocs)
   return true;
 }
 
+/* Hook called by the linker routine which adds symbols from an object
+   file.  We use it for STT_REGISTER symbols.  */
+
+static boolean
+sparc64_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     const Elf_Internal_Sym *sym;
+     const char **namep;
+     flagword *flagsp;
+     asection **secp;
+     bfd_vma *valp;
+{
+  static char *stt_types[] = { "NOTYPE", "OBJECT", "FUNCTION" };
+
+  if (ELF_ST_TYPE (sym->st_info) == STT_REGISTER)
+    {
+      int reg;
+      struct sparc64_elf_app_reg *p;
+      
+      reg = (int)sym->st_value;
+      switch (reg & ~1)
+	{
+	case 2: reg -= 2; break;
+	case 6: reg -= 4; break;
+	default:
+          (*_bfd_error_handler)
+            (_("%s: Only registers %%g[2367] can be declared using STT_REGISTER"),
+             bfd_get_filename (abfd));
+	  return false;
+	}
+
+      if (info->hash->creator != abfd->xvec
+	  || (abfd->flags & DYNAMIC) != 0)
+        {
+	  /* STT_REGISTER only works when linking an elf64_sparc object.
+	     If STT_REGISTER comes from a dynamic object, don't put it into
+	     the output bfd.  The dynamic linker will recheck it.  */
+	  *namep = NULL;
+	  return true;
+        }
+
+      p = sparc64_elf_hash_table(info)->app_regs + reg;
+
+      if (p->name != NULL && strcmp (p->name, *namep))
+	{
+          (*_bfd_error_handler)
+            (_("Register %%g%d used incompatibly: "
+               "previously declared in %s to %s, in %s redefined to %s"),
+             (int)sym->st_value,
+             bfd_get_filename (p->abfd), *p->name ? p->name : "#scratch",
+             bfd_get_filename (abfd), **namep ? *namep : "#scratch");
+	  return false;
+	}
+
+      if (p->name == NULL)
+	{
+	  if (**namep)
+	    {
+	      struct elf_link_hash_entry *h;
+	      
+	      h = (struct elf_link_hash_entry *)
+		bfd_link_hash_lookup (info->hash, *namep, false, false, false);
+
+	      if (h != NULL)
+		{
+		  unsigned char type = h->type;
+
+		  if (type > STT_FUNC) type = 0;
+		  (*_bfd_error_handler)
+		    (_("Symbol `%s' has differing types: "
+		       "previously %s, REGISTER in %s"),
+		     *namep, stt_types [type], bfd_get_filename (abfd));
+		  return false;
+		}
+
+	      p->name = bfd_hash_allocate (&info->hash->table,
+					   strlen (*namep) + 1);
+	      if (!p->name)
+		return false;
+
+	      strcpy (p->name, *namep);
+	    }
+	  else
+	    p->name = "";
+	  p->bind = ELF_ST_BIND (sym->st_info);
+	  p->abfd = abfd;
+	  p->shndx = sym->st_shndx;
+	}
+      else
+	{
+	  if (p->bind == STB_WEAK
+	      && ELF_ST_BIND (sym->st_info) == STB_GLOBAL)
+	    {
+	      p->bind = STB_GLOBAL;
+	      p->abfd = abfd;
+	    }
+	}
+      *namep = NULL;
+      return true;
+    }
+  else if (! *namep || ! **namep)
+    return true;
+  else
+    {
+      int i;
+      struct sparc64_elf_app_reg *p;
+
+      p = sparc64_elf_hash_table(info)->app_regs;
+      for (i = 0; i < 4; i++, p++)
+	if (p->name != NULL && ! strcmp (p->name, *namep))
+	  {
+	    unsigned char type = ELF_ST_TYPE (sym->st_info);
+
+	    if (type > STT_FUNC) type = 0;
+	    (*_bfd_error_handler)
+	      (_("Symbol `%s' has differing types: "
+		 "REGISTER in %s, %s in %s"),
+	       *namep, bfd_get_filename (p->abfd), stt_types [type],
+	       bfd_get_filename (abfd));
+	    return false;
+	  }
+    }
+  return true;
+}
+
+/* This function takes care of emiting STT_REGISTER symbols
+   which we cannot easily keep in the symbol hash table.  */
+
+static boolean
+sparc64_elf_output_arch_syms (output_bfd, info, finfo, func)
+     bfd *output_bfd;
+     struct bfd_link_info *info;
+     PTR finfo;
+     boolean (*func) PARAMS ((PTR, const char *,
+			      Elf_Internal_Sym *, asection *));
+{
+  int reg;
+  struct sparc64_elf_app_reg *app_regs =
+    sparc64_elf_hash_table(info)->app_regs;
+  Elf_Internal_Sym sym;
+
+  /* We arranged in size_dynamic_sections to put the STT_REGISTER entries
+     at the end of the dynlocal list, so they came at the end of the local
+     symbols in the symtab.  Except that they aren't STB_LOCAL, so we need
+     to back up symtab->sh_info.  */
+  if (elf_hash_table (info)->dynlocal)
+    {
+      struct elf_link_local_dynamic_entry *e;
+
+      for (e = elf_hash_table (info)->dynlocal; e ; e = e->next)
+	if (e->input_indx == -1)
+	  break;
+      if (e)
+	{
+	  elf_section_data (dynsymsec->output_section)->this_hdr.sh_info
+	    = e->dynindx;
+	}
+    }
+
+  if (info->strip == strip_all)
+    return true;
+
+  for (reg = 0; reg < 4; reg++)
+    if (app_regs [reg].name != NULL)
+      {
+	if (info->strip == strip_some
+	    && bfd_hash_lookup (info->keep_hash,
+				app_regs [reg].name,
+				false, false) == NULL)
+	  continue;
+
+	sym.st_value = reg < 2 ? reg + 2 : reg + 4;
+	sym.st_size = 0;
+	sym.st_other = 0;
+	sym.st_info = ELF_ST_INFO (app_regs [reg].bind, STT_REGISTER);
+	sym.st_shndx = app_regs [reg].shndx;
+	if (! (*func) (finfo, app_regs [reg].name, &sym,
+		       sym.st_shndx == SHN_ABS
+			 ? bfd_abs_section_ptr : bfd_und_section_ptr))
+	  return false;
+      }
+
+  return true;
+}
+
+static int
+sparc64_elf_get_symbol_type (elf_sym, type)
+     Elf_Internal_Sym * elf_sym;
+     int type;
+{
+  if (ELF_ST_TYPE (elf_sym->st_info) == STT_REGISTER)
+    return STT_REGISTER;
+  else
+    return type;
+}
+
+/* A STB_GLOBAL,STT_REGISTER symbol should be BSF_GLOBAL
+   even in SHN_UNDEF section.  */
+
+static void
+sparc64_elf_symbol_processing (abfd, asym)
+     bfd *abfd;
+     asymbol *asym;
+{
+  elf_symbol_type *elfsym;
+
+  elfsym = (elf_symbol_type *) asym;
+  if (elfsym->internal_elf_sym.st_info
+      == ELF_ST_INFO (STB_GLOBAL, STT_REGISTER))
+    {
+      asym->flags |= BSF_GLOBAL;
+    }
+}
+
 /* Adjust a symbol defined by a dynamic object and referenced by a
    regular object.  The current definition is in some section of the
    dynamic object, but we're not including those sections.  We have to
@@ -1495,6 +1765,11 @@ sparc64_elf_size_dynamic_sections (output_bfd, info)
 	 must add the entries now so that we get the correct size for
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
+      int reg;
+      struct sparc64_elf_app_reg * app_regs;
+      struct bfd_strtab_hash *dynstr;
+      struct elf_link_hash_table *eht = elf_hash_table (info);
+
       if (! info->shared)
 	{
 	  if (! bfd_elf64_add_dynamic_entry (info, DT_DEBUG, 0))
@@ -1521,6 +1796,53 @@ sparc64_elf_size_dynamic_sections (output_bfd, info)
 	  if (! bfd_elf64_add_dynamic_entry (info, DT_TEXTREL, 0))
 	    return false;
 	}
+
+      /* Add dynamic STT_REGISTER symbols and corresponding DT_SPARC_REGISTER
+	 entries if needed.  */
+      app_regs = sparc64_elf_hash_table (info)->app_regs;
+      dynstr = eht->dynstr;
+
+      for (reg = 0; reg < 4; reg++)
+	if (app_regs [reg].name != NULL)
+	  {
+	    struct elf_link_local_dynamic_entry *entry, *e;
+	      
+	    if (! bfd_elf64_add_dynamic_entry (info, DT_SPARC_REGISTER, 0))
+	      return false;
+
+	    entry = (struct elf_link_local_dynamic_entry *)
+	      bfd_hash_allocate (&info->hash->table, sizeof (*entry));
+	    if (entry == NULL)
+	      return false;
+
+	    /* We cheat here a little bit: the symbol will not be local, so we
+	       put it at the end of the dynlocal linked list.  We will fix it
+	       later on, as we have to fix other fields anyway.  */
+	    entry->isym.st_value = reg < 2 ? reg + 2 : reg + 4;
+	    entry->isym.st_size = 0;
+	    if (*app_regs [reg].name != '\0')
+	      entry->isym.st_name
+		= _bfd_stringtab_add (dynstr, app_regs[reg].name, true, false);
+	    else
+	      entry->isym.st_name = 0;
+	    entry->isym.st_other = 0;
+	    entry->isym.st_info = ELF_ST_INFO (app_regs [reg].bind,
+					       STT_REGISTER);
+	    entry->isym.st_shndx = app_regs [reg].shndx;
+	    entry->next = NULL;
+	    entry->input_bfd = output_bfd;
+	    entry->input_indx = -1;
+
+	    if (eht->dynlocal == NULL)
+	      eht->dynlocal = entry;
+	    else
+	      {
+		for (e = eht->dynlocal; e->next; e = e->next)
+		  ;
+		e->next = entry;
+	      }
+	    eht->dynsymcount++;
+	  }
     }
 
   return true;
@@ -2346,6 +2668,7 @@ sparc64_elf_finish_dynamic_sections (output_bfd, info)
      struct bfd_link_info *info;
 {
   bfd *dynobj;
+  int stt_regidx = -1;
   asection *sdyn;
   asection *sgot;
 
@@ -2376,6 +2699,17 @@ sparc64_elf_finish_dynamic_sections (output_bfd, info)
 	    case DT_PLTGOT:   name = ".plt"; size = false; break;
 	    case DT_PLTRELSZ: name = ".rela.plt"; size = true; break;
 	    case DT_JMPREL:   name = ".rela.plt"; size = false; break;
+	    case DT_SPARC_REGISTER:
+	      if (stt_regidx == -1)
+		{
+		  stt_regidx =
+		    _bfd_elf_link_lookup_local_dynindx (info, output_bfd, -1);
+		  if (stt_regidx == -1)
+		    return false;
+		}
+	      dyn.d_un.d_val = stt_regidx++;
+	      bfd_elf64_swap_dyn_out (output_bfd, &dyn, dyncon);
+	      /* fallthrough */
 	    default:	      name = NULL; size = false; break;
 	    }
 
@@ -2505,7 +2839,34 @@ sparc64_elf_merge_private_bfd_data (ibfd, obfd)
     }
   return true;
 }
+
+/* Print a STT_REGISTER symbol to file FILE.  */
 
+static const char *
+sparc64_elf_print_symbol_all (abfd, filep, symbol)
+     bfd *abfd;
+     PTR filep;
+     asymbol *symbol;
+{
+  FILE *file = (FILE *) filep;
+  int reg, type;
+  
+  if (ELF_ST_TYPE (((elf_symbol_type *) symbol)->internal_elf_sym.st_info)
+      != STT_REGISTER)
+    return NULL;
+
+  reg = ((elf_symbol_type *) symbol)->internal_elf_sym.st_value;
+  type = symbol->flags;
+  fprintf (file, "REG_%c%c%11s%c%c    R", "GOLI" [reg / 8], '0' + (reg & 7), "",
+		 ((type & BSF_LOCAL)
+		  ? (type & BSF_GLOBAL) ? '!' : 'l'
+  	          : (type & BSF_GLOBAL) ? 'g' : ' '),
+  	         (type & BSF_WEAK) ? 'w' : ' ');
+  if (symbol->name == NULL || symbol->name [0] == '\0')
+    return "#scratch";
+  else
+    return symbol->name;
+}
 
 /* Set the right machine number for a SPARC64 ELF file.  */
 
@@ -2570,6 +2931,9 @@ const struct elf_size_info sparc64_elf_size_info =
 /* This is the value that we used before the ABI was released.  */
 #define ELF_MACHINE_ALT1 EM_OLD_SPARCV9
 
+#define bfd_elf64_bfd_link_hash_table_create \
+  sparc64_elf_bfd_link_hash_table_create
+  
 #define elf_info_to_howto \
   sparc64_elf_info_to_howto
 #define bfd_elf64_get_reloc_upper_bound \
@@ -2583,6 +2947,12 @@ const struct elf_size_info sparc64_elf_size_info =
 
 #define elf_backend_create_dynamic_sections \
   _bfd_elf_create_dynamic_sections
+#define elf_backend_add_symbol_hook \
+  sparc64_elf_add_symbol_hook
+#define elf_backend_get_symbol_type \
+  sparc64_elf_get_symbol_type
+#define elf_backend_symbol_processing \
+  sparc64_elf_symbol_processing
 #define elf_backend_check_relocs \
   sparc64_elf_check_relocs
 #define elf_backend_adjust_dynamic_symbol \
@@ -2595,6 +2965,10 @@ const struct elf_size_info sparc64_elf_size_info =
   sparc64_elf_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections \
   sparc64_elf_finish_dynamic_sections
+#define elf_backend_print_symbol_all \
+  sparc64_elf_print_symbol_all
+#define elf_backend_output_arch_syms \
+  sparc64_elf_output_arch_syms
 
 #define bfd_elf64_bfd_merge_private_bfd_data \
   sparc64_elf_merge_private_bfd_data

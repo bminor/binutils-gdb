@@ -2116,6 +2116,10 @@ elf_link_record_local_dynamic_symbol (info, input_bfd, input_indx)
   entry->input_indx = input_indx;
   eht->dynsymcount++;
 
+  /* Whatever binding the symbol had before, it's now local.  */
+  entry->isym.st_info
+    = ELF_ST_INFO (STB_LOCAL, ELF_ST_TYPE (entry->isym.st_info));
+
   /* The dynindx will be set at the end of size_dynamic_sections.  */
 
   return true;
@@ -4253,16 +4257,22 @@ elf_bfd_final_link (abfd, info)
                  the original st_name with the dynstr_index.  */
 	      sym.st_name = e->isym.st_name;
 
-	      /* Whatever binding the symbol had before, it's now local.  */
-	      sym.st_info = ELF_ST_INFO (STB_LOCAL,
-					 ELF_ST_TYPE (e->isym.st_info));
+	      if (e->isym.st_shndx == 0 || e->isym.st_shndx >= SHN_LORESERVE)
+		{
+		  sym.st_shndx = e->isym.st_shndx;
+		  sym.st_value = e->isym.st_value;
+		}
+	      else
+		{
+		  s = bfd_section_from_elf_index (e->input_bfd,
+						  e->isym.st_shndx);
 
-	      s = bfd_section_from_elf_index (e->input_bfd, e->isym.st_shndx);
-
-	      sym.st_shndx = elf_section_data (s->output_section)->this_idx;
-	      sym.st_value = (s->output_section->vma
-			      + s->output_offset
-			      + e->isym.st_value);
+		  sym.st_shndx =
+		    elf_section_data (s->output_section)->this_idx;
+		  sym.st_value = (s->output_section->vma
+				  + s->output_offset
+				  + e->isym.st_value);
+		}
 
 	      if (last_local < e->dynindx)
 		last_local = e->dynindx;
@@ -4272,7 +4282,7 @@ elf_bfd_final_link (abfd, info)
 	}
 
       elf_section_data (finfo.dynsym_sec->output_section)
-	->this_hdr.sh_info = last_local;
+	->this_hdr.sh_info = last_local + 1;
     }
 
   /* We get the global symbols from the hash table.  */
@@ -4283,6 +4293,18 @@ elf_bfd_final_link (abfd, info)
 			  (PTR) &eoinfo);
   if (eoinfo.failed)
     return false;
+
+  /* If backend needs to output some symbols not present in the hash
+     table, do it now.  */
+  if (bed->elf_backend_output_arch_syms)
+    {
+      if (! (*bed->elf_backend_output_arch_syms)
+	      (abfd, info, (PTR) &finfo,
+	       (boolean (*) PARAMS ((PTR, const char *,
+	                    Elf_Internal_Sym *, asection *)))
+	       elf_link_output_sym))
+	return false;
+    }      
 
   /* Flush all symbols to the file.  */
   if (! elf_link_flush_output_syms (&finfo))

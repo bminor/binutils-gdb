@@ -758,8 +758,21 @@ bfd_elf_print_symbol (abfd, filep, symbol, how)
     case bfd_print_symbol_all:
       {
 	CONST char *section_name;
+	CONST char *name = NULL;
+	struct elf_backend_data *bed;
+	
 	section_name = symbol->section ? symbol->section->name : "(*none*)";
-	bfd_print_symbol_vandf ((PTR) file, symbol);
+
+	bed = get_elf_backend_data (abfd);
+	if (bed->elf_backend_print_symbol_all)
+	    name = (*bed->elf_backend_print_symbol_all) (abfd, filep, symbol);
+
+	if (name == NULL)
+	  {
+	    name = symbol->name;  
+	    bfd_print_symbol_vandf ((PTR) file, symbol);
+	  }
+
 	fprintf (file, " %s\t", section_name);
 	/* Print the "other" value for a symbol.  For common symbols,
 	   we've already printed the size; now print the alignment.
@@ -827,7 +840,7 @@ bfd_elf_print_symbol (abfd, filep, symbol, how)
 		   ((unsigned int)
 		    ((elf_symbol_type *) symbol)->internal_elf_sym.st_other));
 
-	fprintf (file, " %s", symbol->name);
+	fprintf (file, " %s", name);
       }
       break;
     }

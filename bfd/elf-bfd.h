@@ -581,6 +581,21 @@ struct elf_backend_data
   void (*elf_backend_post_process_headers)
     PARAMS ((bfd *, struct bfd_link_info *));
 
+  /* This function, if defined, prints a symbol to file and returns the
+     name of the symbol to be printed.  It should return NULL to fall
+     back to default symbol printing.  */
+  const char *(*elf_backend_print_symbol_all)
+    PARAMS ((bfd *, PTR, asymbol *));
+
+  /* This function, if defined, is called after all local symbols and
+     global symbols converted to locals are emited into the symtab
+     section.  It allows the backend to emit special global symbols
+     not handled in the hash table.  */
+  boolean (*elf_backend_output_arch_syms)
+    PARAMS ((bfd *, struct bfd_link_info *, PTR,
+	    boolean (*) PARAMS ((PTR, const char *,
+             Elf_Internal_Sym *, asection *))));
+
   /* The swapping table to use when dealing with ECOFF information.
      Used for the MIPS ELF .mdebug section.  */
   const struct ecoff_debug_swap *elf_backend_ecoff_debug_swap;
