@@ -2,6 +2,16 @@
 
 	* Makefile.am (LIBIBERTY): Define.
 
+Fri May 19 12:29:27 EDT 2000	Diego Novillo <dnovillo@redhat.com>
+
+	* mips-dis.c (REGISTER_NAMES): Rename to STD_REGISTER_NAMES.
+	(STD_REGISTER_NAMES): New name for REGISTER_NAMES.
+	(reg_names): Rename to std_reg_names. Change it to a char **
+	static variable.
+	(std_reg_names): New name for reg_names.
+	(set_mips_isa_type): Set reg_names to point to std_reg_names by
+	default.
+
 2000-05-16  Frank Ch. Eigler  <fche@redhat.com>
 
 	* fr30-desc.h: Partially regenerated to account for changed
