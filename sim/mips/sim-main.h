@@ -513,10 +513,11 @@ struct _sim_cpu {
 #ifndef TM_TXVU_H
 
 /* Number of machine registers */
-#define NUM_VU_REGS 153
-#define NUM_VU_INTEGER_REGS 17
+#define NUM_VU_REGS	153
+#define NUM_VU_INTEGER_REGS 16
 
-#define NUM_R5900_REGS 128
+#define FIRST_VEC_REG	25
+#define NUM_R5900_REGS	128
 
 #undef NUM_REGS
 #define NUM_REGS (NUM_R5900_REGS + 2*(NUM_VU_REGS))

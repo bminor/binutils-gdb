@@ -73,12 +73,6 @@ code on the hardware.
 
 #include "sysdep.h"
 
-/* start-sanitize-sky */
-#ifdef TARGET_SKY
-#include "sky-vu.h"
-#endif
-/* end-sanitize-sky */
-
 #ifndef PARAMS
 #define PARAMS(x) 
 #endif
@@ -310,15 +304,6 @@ static void device_init(SIM_DESC sd) {
 #endif
 }
 
-/* start-sanitize-sky */
-#ifdef TARGET_SKY
-static struct {
-  short i[NUM_VU_INTEGER_REGS];
-  int f[NUM_VU_REGS - NUM_VU_INTEGER_REGS];
-} vu_regs[2];
-#endif
-/* end-sanitize-sky */
-
 /*---------------------------------------------------------------------------*/
 /*-- GDB simulator interface ------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
@@ -449,32 +434,11 @@ sim_open (kind, cb, abfd, argv)
     for( rn = 0; rn < NUM_VU_INTEGER_REGS; rn++ ) { 
       cpu->register_widths[rn + NUM_R5900_REGS] = 16;
       cpu->register_widths[rn + NUM_R5900_REGS + NUM_VU_REGS] = 16;
-
-      /* Hack for now - to test gdb interface */
-      vu_regs[0].i[rn] = rn + 0x100;
-      vu_regs[1].i[rn] = rn + 0x200;
     }
 
     for( rn = NUM_VU_INTEGER_REGS; rn < NUM_VU_REGS; rn++ ) { 
-      float f;
-      int first_vec_reg = NUM_VU_INTEGER_REGS + 8;
-
       cpu->register_widths[rn + NUM_R5900_REGS] = 32;
       cpu->register_widths[rn + NUM_R5900_REGS + NUM_VU_REGS] = 32;
-
-      /* Hack for now - to test gdb interface */
-      if( rn < first_vec_reg ) {
-	f = rn - NUM_VU_INTEGER_REGS + 100.0;
-	vu_regs[0].f[rn-NUM_VU_INTEGER_REGS] = *((unsigned *) &f);
-	f = rn - NUM_VU_INTEGER_REGS + 200.0;
-	vu_regs[1].f[rn-NUM_VU_INTEGER_REGS] = *((unsigned *) &f);
-      }
-      else {
-	f = (rn - first_vec_reg)/4 + (rn - first_vec_reg)%4 + 1000.0;
-	vu_regs[0].f[rn-NUM_VU_INTEGER_REGS] = *((unsigned *) &f);
-	f = (rn - first_vec_reg)/4 + (rn - first_vec_reg)%4 + 2000.0;
-	vu_regs[1].f[rn-NUM_VU_INTEGER_REGS] = *((unsigned *) &f);
-      }
     }
 #endif
     /* end-sanitize-sky */
@@ -704,18 +668,84 @@ sim_store_register (sd,rn,memory,length)
       rn = rn - NUM_R5900_REGS;
 
       if (rn < NUM_VU_INTEGER_REGS)
-	size = write_vu_int_reg (& vu0_device.state->regs, rn, memory);
+	size = write_vu_int_reg (&(vu0_device.state->regs), rn, memory);
       else if( rn < NUM_VU_REGS )
-	vu_regs[0].f[rn - NUM_VU_INTEGER_REGS] 
-	  = T2H_4( *(unsigned int *) memory );
+	{
+	  if (rn >= FIRST_VEC_REG)
+	    {
+	      rn -= FIRST_VEC_REG;
+	      size = write_vu_vec_reg (&(vu0_device.state->regs), rn>>2, rn&3,
+				      memory);
+	    }
+	  else switch (rn - NUM_VU_INTEGER_REGS)
+	    {
+	    case 0:
+	      size = write_vu_special_reg (vu0_device.state, VU_REG_CIA,
+				      memory);
+	      break;
+	    case 1:
+	      size = write_vu_misc_reg (&(vu0_device.state->regs), VU_REG_MR,
+				      memory);
+	      break;
+	    case 2: /* VU0 has no P register */
+	      break;
+	    case 3:
+	      size = write_vu_misc_reg (&(vu0_device.state->regs), VU_REG_MI,
+				      memory);
+	      break;
+	    case 4:
+	      size = write_vu_misc_reg (&(vu0_device.state->regs), VU_REG_MQ,
+				      memory);
+	      break;
+	    default:
+	      size = write_vu_acc_reg (&(vu0_device.state->regs), 
+				      rn - (NUM_VU_INTEGER_REGS + 5),
+				      memory);
+	      break;
+	    }
+	}
       else {
 	rn = rn - NUM_VU_REGS;
 
 	if( rn < NUM_VU_INTEGER_REGS ) 
-	  size = write_vu_int_reg (& vu1_device.state->regs, rn, memory);
+	  size = write_vu_int_reg (&(vu1_device.state->regs), rn, memory);
 	else if( rn < NUM_VU_REGS )
-	  vu_regs[1].f[rn - NUM_VU_INTEGER_REGS] 
-	    = T2H_4( *(unsigned int *) memory );
+	  {
+	    if (rn >= FIRST_VEC_REG)
+	      {
+		rn -= FIRST_VEC_REG;
+		size = write_vu_vec_reg (&(vu1_device.state->regs), 
+					  rn >> 2, rn & 3, memory);
+	      }
+	    else switch (rn - NUM_VU_INTEGER_REGS)
+	      {
+	      case 0:
+		size = write_vu_special_reg (vu1_device.state, VU_REG_CIA,
+					    memory);
+		break;
+	      case 1:
+		size = write_vu_misc_reg (&(vu1_device.state->regs), 
+					 VU_REG_MR, memory);
+		break;
+	      case 2: 
+		size = write_vu_misc_reg (&(vu1_device.state->regs), 
+					 VU_REG_MP, memory);
+		break;
+	      case 3:
+		size = write_vu_misc_reg (&(vu1_device.state->regs), 
+					 VU_REG_MI, memory);
+		break;
+	      case 4:
+		size = write_vu_misc_reg (&(vu1_device.state->regs), 
+					 VU_REG_MQ, memory);
+		break;
+	      default:
+		size = write_vu_acc_reg (&(vu1_device.state->regs), 
+					rn - (NUM_VU_INTEGER_REGS + 5),
+					memory);
+		break;
+	      }
+	  }
 	else
 	  sim_io_eprintf( sd, "Invalid VU register (register store ignored)\n" );
       }
@@ -800,19 +830,86 @@ sim_fetch_register (sd,rn,memory,length)
       rn = rn - NUM_R5900_REGS;
 
       if (rn < NUM_VU_INTEGER_REGS)
-	size = read_vu_int_reg (& vu0_device.state->regs, rn, memory);
+	size = read_vu_int_reg (&(vu0_device.state->regs), rn, memory);
       else if (rn < NUM_VU_REGS)
-	*((unsigned int *) memory) 
-	  = H2T_4( vu_regs[0].f[rn - NUM_VU_INTEGER_REGS] );
-      else 
+	{
+	  if (rn >= FIRST_VEC_REG)
+	    {
+	      rn -= FIRST_VEC_REG;
+	      size = read_vu_vec_reg (&(vu0_device.state->regs), rn>>2, rn & 3,
+				      memory);
+	    }
+	  else switch (rn - NUM_VU_INTEGER_REGS)
+	    {
+	    case 0:
+	      size = read_vu_special_reg (vu0_device.state, VU_REG_CIA,
+				      memory);
+
+	      break;
+	    case 1:
+	      size = read_vu_misc_reg (&(vu0_device.state->regs), VU_REG_MR,
+				      memory);
+	      break;
+	    case 2: /* VU0 has no P register */
+	      break;
+	    case 3:
+	      size = read_vu_misc_reg (&(vu0_device.state->regs), VU_REG_MI,
+				      memory);
+	      break;
+	    case 4:
+	      size = read_vu_misc_reg (&(vu0_device.state->regs), VU_REG_MQ,
+				      memory);
+	      break;
+	    default:
+	      size = read_vu_acc_reg (&(vu0_device.state->regs), 
+				      rn - (NUM_VU_INTEGER_REGS + 5),
+				      memory);
+	      break;
+	    }
+	}
+      else
 	{
 	  rn = rn - NUM_VU_REGS;
 	
 	  if (rn < NUM_VU_INTEGER_REGS) 
-	    size = read_vu_int_reg (& vu1_device.state->regs, rn, memory);
+	    size = read_vu_int_reg (&(vu1_device.state->regs), rn, memory);
 	  else if (rn < NUM_VU_REGS)
-	    (*(unsigned int *) memory) 
-	      = H2T_4( vu_regs[1].f[rn - NUM_VU_INTEGER_REGS] );
+	    {
+	      if (rn >= FIRST_VEC_REG)
+		{
+		  rn -= FIRST_VEC_REG;
+		  size = read_vu_vec_reg (&(vu1_device.state->regs), 
+					  rn >> 2, rn & 3, memory);
+		}
+	      else switch (rn - NUM_VU_INTEGER_REGS)
+		{
+		case 0:
+		  size = read_vu_special_reg (vu1_device.state, VU_REG_CIA,
+					      memory);
+		  break;
+		case 1:
+		  size = read_vu_misc_reg (&(vu1_device.state->regs), 
+					   VU_REG_MR, memory);
+		  break;
+		case 2:
+		  size = read_vu_misc_reg (&(vu1_device.state->regs), 
+					   VU_REG_MP, memory);
+		  break;
+		case 3:
+		  size = read_vu_misc_reg (&(vu1_device.state->regs), 
+					   VU_REG_MI, memory);
+		  break;
+		case 4:
+		  size = read_vu_misc_reg (&(vu1_device.state->regs), 
+					   VU_REG_MQ, memory);
+		  break;
+		default:
+		  size = read_vu_acc_reg (&(vu1_device.state->regs), 
+					  rn - (NUM_VU_INTEGER_REGS + 5),
+					  memory);
+		  break;
+		}
+	    }
 	  else
 	    sim_io_eprintf( sd, "Invalid VU register (register fetch ignored)\n" );
 	}
@@ -3609,7 +3706,7 @@ decode_coproc (SIM_DESC sd,
 
 	    /* compute VU register address */
 	    if(i_25_21 == 0x01) /* QMFC2 */
-	      vu_cr_addr = VU0_VF00 + (id * 16);
+	      vu_cr_addr = VU0_REGISTER_WINDOW_START + (id * 16);
 	    else /* CFC2 */
 	      vu_cr_addr = VU0_MST + (id * 16);
 
@@ -3647,7 +3744,7 @@ decode_coproc (SIM_DESC sd,
 
 	    /* compute VU register address */
 	    if(i_25_21 == 0x05) /* QMTC2 */
-	      vu_cr_addr = VU0_VF00 + (id * 16);
+	      vu_cr_addr = VU0_REGISTER_WINDOW_START + (id * 16);
 	    else /* CTC2 */
 	      vu_cr_addr = VU0_MST + (id * 16);
 
