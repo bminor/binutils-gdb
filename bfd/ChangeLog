@@ -1,3 +1,8 @@
+2003-04-18  Nick Clifton  <nickc@redhat.com>
+
+	* format.c (bfd_check_format_matches): Only check associated
+	vector if the matching_vector has been created.
+
 2003-04-15  Alexandre Oliva  <aoliva@redhat.com>
 
 	* dwarf2.c (_bfd_dwarf2_find_nearest_line): Fix typo in
