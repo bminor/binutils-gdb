@@ -116,7 +116,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define elf_no_info_to_howto_rel	NAME(bfd_elf,no_info_to_howto_rel)
 #define elf_find_section		NAME(bfd_elf,find_section)
 #define elf_bfd_link_add_symbols	NAME(bfd_elf,bfd_link_add_symbols)
-#define elf_add_dynamic_entry		NAME(bfd_elf,add_dynamic_entry)
 #define elf_write_shdrs_and_ehdr	NAME(bfd_elf,write_shdrs_and_ehdr)
 #define elf_write_out_phdrs		NAME(bfd_elf,write_out_phdrs)
 #define elf_write_relocs		NAME(bfd_elf,write_relocs)

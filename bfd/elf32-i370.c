@@ -1,5 +1,5 @@
 /* i370-specific support for 32-bit ELF
-   Copyright 1994, 1995, 1996, 1997, 1998, 2000, 2001, 2002, 2003
+   Copyright 1994, 1995, 1996, 1997, 1998, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
    Hacked by Linas Vepstas for i370 linas@linas.org
@@ -791,7 +791,7 @@ i370_elf_size_dynamic_sections (output_bfd, info)
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
 #define add_dynamic_entry(TAG, VAL) \
-  bfd_elf32_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
       if (!info->shared)
 	{

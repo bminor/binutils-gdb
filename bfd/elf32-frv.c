@@ -1,5 +1,5 @@
 /* FRV-specific support for 32-bit ELF.
-   Copyright 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -3536,20 +3536,20 @@ elf32_frv_size_dynamic_sections (bfd *output_bfd,
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       if (frv_got_section (info)->_raw_size)
-	if (! bfd_elf32_add_dynamic_entry (info, DT_PLTGOT, 0))
+	if (!_bfd_elf_add_dynamic_entry (info, DT_PLTGOT, 0))
 	  return FALSE;
 
       if (frv_pltrel_section (info)->_raw_size)
-	if (! bfd_elf32_add_dynamic_entry (info, DT_PLTRELSZ, 0)
-	    || ! bfd_elf32_add_dynamic_entry (info, DT_PLTREL, DT_REL)
-	    || ! bfd_elf32_add_dynamic_entry (info, DT_JMPREL, 0))
+	if (!_bfd_elf_add_dynamic_entry (info, DT_PLTRELSZ, 0)
+	    || !_bfd_elf_add_dynamic_entry (info, DT_PLTREL, DT_REL)
+	    || !_bfd_elf_add_dynamic_entry (info, DT_JMPREL, 0))
 	  return FALSE;
 
       if (frv_gotrel_section (info)->_raw_size)
-	if (! bfd_elf32_add_dynamic_entry (info, DT_REL, 0)
-	    || ! bfd_elf32_add_dynamic_entry (info, DT_RELSZ, 0)
-	    || ! bfd_elf32_add_dynamic_entry (info, DT_RELENT,
-					      sizeof (Elf32_External_Rel)))
+	if (!_bfd_elf_add_dynamic_entry (info, DT_REL, 0)
+	    || !_bfd_elf_add_dynamic_entry (info, DT_RELSZ, 0)
+	    || !_bfd_elf_add_dynamic_entry (info, DT_RELENT,
+					    sizeof (Elf32_External_Rel)))
 	  return FALSE;
     }
 

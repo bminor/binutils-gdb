@@ -3083,7 +3083,7 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
 	  /* The DT_DEBUG entry is filled in by the dynamic linker and used
 	     by the debugger.  */
 #define add_dynamic_entry(TAG, VAL) \
-  bfd_elfNN_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
 	  if (!add_dynamic_entry (DT_DEBUG, 0))
 	    return FALSE;

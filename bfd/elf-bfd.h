@@ -1593,8 +1593,6 @@ extern void bfd_elf32_write_relocs
   (bfd *, asection *, void *);
 extern bfd_boolean bfd_elf32_slurp_reloc_table
   (bfd *, asection *, asymbol **, bfd_boolean);
-extern bfd_boolean bfd_elf32_add_dynamic_entry
-  (struct bfd_link_info *, bfd_vma, bfd_vma);
 
 extern const bfd_target *bfd_elf64_object_p
   (bfd *);
@@ -1641,8 +1639,15 @@ extern void bfd_elf64_write_relocs
   (bfd *, asection *, void *);
 extern bfd_boolean bfd_elf64_slurp_reloc_table
   (bfd *, asection *, asymbol **, bfd_boolean);
-extern bfd_boolean bfd_elf64_add_dynamic_entry
+
+extern bfd_boolean _bfd_elf_add_dynamic_entry
   (struct bfd_link_info *, bfd_vma, bfd_vma);
+extern int _bfd_elf_add_dt_needed_tag
+  (struct bfd_link_info *, const char *, bfd_boolean);
+extern int _bfd_elf_sort_symbol
+  (const void *, const void *);
+extern bfd_boolean _bfd_elf_finalize_dynstr
+  (bfd *, struct bfd_link_info *);
 
 #define bfd_elf32_link_record_dynamic_symbol \
   _bfd_elf_link_record_dynamic_symbol
@@ -1762,12 +1767,14 @@ extern bfd_boolean _sh_elf_set_mach_from_flags
 	;								\
       else								\
 	{								\
-	  if (! info->callbacks->undefined_symbol			\
-	      (info, h->root.root.string, input_bfd,			\
-	       input_section, rel->r_offset,				\
-	       (info->unresolved_syms_in_objects == RM_GENERATE_ERROR	\
-		|| ELF_ST_VISIBILITY (h->other))			\
-	       ))							\
+	  bfd_boolean err;						\
+	  err = (info->unresolved_syms_in_objects == RM_GENERATE_ERROR	\
+		 || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT);	\
+	  if (!info->callbacks->undefined_symbol (info,			\
+						  h->root.root.string,	\
+						  input_bfd,		\
+						  input_section,	\
+						  rel->r_offset, err))	\
 	    return FALSE;						\
 	  warned = TRUE;						\
 	}								\

@@ -1,5 +1,5 @@
 /* SuperH SH64-specific support for 64-bit ELF
-   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -3728,31 +3728,31 @@ sh64_elf64_size_dynamic_sections (bfd *output_bfd,
 	 dynamic linker and used by the debugger.  */
       if (info->executable)
 	{
-	  if (! bfd_elf64_add_dynamic_entry (info, DT_DEBUG, 0))
+	  if (!_bfd_elf_add_dynamic_entry (info, DT_DEBUG, 0))
 	    return FALSE;
 	}
 
       if (plt)
 	{
-	  if (! bfd_elf64_add_dynamic_entry (info, DT_PLTGOT, 0)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_PLTRELSZ, 0)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_JMPREL, 0))
+	  if (!_bfd_elf_add_dynamic_entry (info, DT_PLTGOT, 0)
+	      || !_bfd_elf_add_dynamic_entry (info, DT_PLTRELSZ, 0)
+	      || !_bfd_elf_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
+	      || !_bfd_elf_add_dynamic_entry (info, DT_JMPREL, 0))
 	    return FALSE;
 	}
 
       if (relocs)
 	{
-	  if (! bfd_elf64_add_dynamic_entry (info, DT_RELA, 0)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_RELASZ, 0)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_RELAENT,
-						sizeof (Elf64_External_Rela)))
+	  if (!_bfd_elf_add_dynamic_entry (info, DT_RELA, 0)
+	      || !_bfd_elf_add_dynamic_entry (info, DT_RELASZ, 0)
+	      || !_bfd_elf_add_dynamic_entry (info, DT_RELAENT,
+					      sizeof (Elf64_External_Rela)))
 	    return FALSE;
 	}
 
       if (reltext)
 	{
-	  if (! bfd_elf64_add_dynamic_entry (info, DT_TEXTREL, 0))
+	  if (!_bfd_elf_add_dynamic_entry (info, DT_TEXTREL, 0))
 	    return FALSE;
 	}
     }

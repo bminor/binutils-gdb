@@ -2585,6 +2585,262 @@ elf_link_is_defined_archive_symbol (bfd * abfd, carsym * symdef)
   return result;
 }
 
+/* Add an entry to the .dynamic table.  */
+
+bfd_boolean
+_bfd_elf_add_dynamic_entry (struct bfd_link_info *info,
+			    bfd_vma tag,
+			    bfd_vma val)
+{
+  struct elf_link_hash_table *hash_table;
+  const struct elf_backend_data *bed;
+  asection *s;
+  bfd_size_type newsize;
+  bfd_byte *newcontents;
+  Elf_Internal_Dyn dyn;
+
+  hash_table = elf_hash_table (info);
+  if (! is_elf_hash_table (hash_table))
+    return FALSE;
+
+  bed = get_elf_backend_data (hash_table->dynobj);
+  s = bfd_get_section_by_name (hash_table->dynobj, ".dynamic");
+  BFD_ASSERT (s != NULL);
+
+  newsize = s->_raw_size + bed->s->sizeof_dyn;
+  newcontents = bfd_realloc (s->contents, newsize);
+  if (newcontents == NULL)
+    return FALSE;
+
+  dyn.d_tag = tag;
+  dyn.d_un.d_val = val;
+  bed->s->swap_dyn_out (hash_table->dynobj, &dyn, newcontents + s->_raw_size);
+
+  s->_raw_size = newsize;
+  s->contents = newcontents;
+
+  return TRUE;
+}
+
+/* Add a DT_NEEDED entry for this dynamic object if DO_IT is true,
+   otherwise just check whether one already exists.  Returns -1 on error,
+   1 if a DT_NEEDED tag already exists, and 0 on success.  */
+
+int
+_bfd_elf_add_dt_needed_tag (struct bfd_link_info *info,
+			    const char *soname,
+			    bfd_boolean do_it)
+{
+  struct elf_link_hash_table *hash_table;
+  bfd_size_type oldsize;
+  bfd_size_type strindex;
+
+  hash_table = elf_hash_table (info);
+  oldsize = _bfd_elf_strtab_size (hash_table->dynstr);
+  strindex = _bfd_elf_strtab_add (hash_table->dynstr, soname, FALSE);
+  if (strindex == (bfd_size_type) -1)
+    return -1;
+
+  if (oldsize == _bfd_elf_strtab_size (hash_table->dynstr))
+    {
+      asection *sdyn;
+      const struct elf_backend_data *bed;
+      bfd_byte *extdyn;
+
+      bed = get_elf_backend_data (hash_table->dynobj);
+      sdyn = bfd_get_section_by_name (hash_table->dynobj, ".dynamic");
+      BFD_ASSERT (sdyn != NULL);
+
+      for (extdyn = sdyn->contents;
+	   extdyn < sdyn->contents + sdyn->_raw_size;
+	   extdyn += bed->s->sizeof_dyn)
+	{
+	  Elf_Internal_Dyn dyn;
+
+	  bed->s->swap_dyn_in (hash_table->dynobj, extdyn, &dyn);
+	  if (dyn.d_tag == DT_NEEDED
+	      && dyn.d_un.d_val == strindex)
+	    {
+	      _bfd_elf_strtab_delref (hash_table->dynstr, strindex);
+	      return 1;
+	    }
+	}
+    }
+
+  if (do_it)
+    {
+      if (!_bfd_elf_add_dynamic_entry (info, DT_NEEDED, strindex))
+	return -1;
+    }
+  else
+    /* We were just checking for existence of the tag.  */
+    _bfd_elf_strtab_delref (hash_table->dynstr, strindex);
+
+  return 0;
+}
+
+/* Sort symbol by value and section.  */
+int
+_bfd_elf_sort_symbol (const void *arg1, const void *arg2)
+{
+  const struct elf_link_hash_entry *h1;
+  const struct elf_link_hash_entry *h2;
+  bfd_signed_vma vdiff;
+
+  h1 = *(const struct elf_link_hash_entry **) arg1;
+  h2 = *(const struct elf_link_hash_entry **) arg2;
+  vdiff = h1->root.u.def.value - h2->root.u.def.value;
+  if (vdiff != 0)
+    return vdiff > 0 ? 1 : -1;
+  else
+    {
+      long sdiff = h1->root.u.def.section - h2->root.u.def.section;
+      if (sdiff != 0)
+	return sdiff > 0 ? 1 : -1;
+    }
+  return 0;
+}
+
+/* This function is used to adjust offsets into .dynstr for
+   dynamic symbols.  This is called via elf_link_hash_traverse.  */
+
+static bfd_boolean
+elf_adjust_dynstr_offsets (struct elf_link_hash_entry *h, void *data)
+{
+  struct elf_strtab_hash *dynstr = data;
+
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+  if (h->dynindx != -1)
+    h->dynstr_index = _bfd_elf_strtab_offset (dynstr, h->dynstr_index);
+  return TRUE;
+}
+
+/* Assign string offsets in .dynstr, update all structures referencing
+   them.  */
+
+bfd_boolean
+_bfd_elf_finalize_dynstr (bfd *output_bfd, struct bfd_link_info *info)
+{
+  struct elf_link_hash_table *hash_table = elf_hash_table (info);
+  struct elf_link_local_dynamic_entry *entry;
+  struct elf_strtab_hash *dynstr = hash_table->dynstr;
+  bfd *dynobj = hash_table->dynobj;
+  asection *sdyn;
+  bfd_size_type size;
+  const struct elf_backend_data *bed;
+  bfd_byte *extdyn;
+
+  _bfd_elf_strtab_finalize (dynstr);
+  size = _bfd_elf_strtab_size (dynstr);
+
+  bed = get_elf_backend_data (dynobj);
+  sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
+  BFD_ASSERT (sdyn != NULL);
+
+  /* Update all .dynamic entries referencing .dynstr strings.  */
+  for (extdyn = sdyn->contents;
+       extdyn < sdyn->contents + sdyn->_raw_size;
+       extdyn += bed->s->sizeof_dyn)
+    {
+      Elf_Internal_Dyn dyn;
+
+      bed->s->swap_dyn_in (dynobj, extdyn, &dyn);
+      switch (dyn.d_tag)
+	{
+	case DT_STRSZ:
+	  dyn.d_un.d_val = size;
+	  break;
+	case DT_NEEDED:
+	case DT_SONAME:
+	case DT_RPATH:
+	case DT_RUNPATH:
+	case DT_FILTER:
+	case DT_AUXILIARY:
+	  dyn.d_un.d_val = _bfd_elf_strtab_offset (dynstr, dyn.d_un.d_val);
+	  break;
+	default:
+	  continue;
+	}
+      bed->s->swap_dyn_out (dynobj, &dyn, extdyn);
+    }
+
+  /* Now update local dynamic symbols.  */
+  for (entry = hash_table->dynlocal; entry ; entry = entry->next)
+    entry->isym.st_name = _bfd_elf_strtab_offset (dynstr,
+						  entry->isym.st_name);
+
+  /* And the rest of dynamic symbols.  */
+  elf_link_hash_traverse (hash_table, elf_adjust_dynstr_offsets, dynstr);
+
+  /* Adjust version definitions.  */
+  if (elf_tdata (output_bfd)->cverdefs)
+    {
+      asection *s;
+      bfd_byte *p;
+      bfd_size_type i;
+      Elf_Internal_Verdef def;
+      Elf_Internal_Verdaux defaux;
+
+      s = bfd_get_section_by_name (dynobj, ".gnu.version_d");
+      p = s->contents;
+      do
+	{
+	  _bfd_elf_swap_verdef_in (output_bfd, (Elf_External_Verdef *) p,
+				   &def);
+	  p += sizeof (Elf_External_Verdef);
+	  for (i = 0; i < def.vd_cnt; ++i)
+	    {
+	      _bfd_elf_swap_verdaux_in (output_bfd,
+					(Elf_External_Verdaux *) p, &defaux);
+	      defaux.vda_name = _bfd_elf_strtab_offset (dynstr,
+							defaux.vda_name);
+	      _bfd_elf_swap_verdaux_out (output_bfd,
+					 &defaux, (Elf_External_Verdaux *) p);
+	      p += sizeof (Elf_External_Verdaux);
+	    }
+	}
+      while (def.vd_next);
+    }
+
+  /* Adjust version references.  */
+  if (elf_tdata (output_bfd)->verref)
+    {
+      asection *s;
+      bfd_byte *p;
+      bfd_size_type i;
+      Elf_Internal_Verneed need;
+      Elf_Internal_Vernaux needaux;
+
+      s = bfd_get_section_by_name (dynobj, ".gnu.version_r");
+      p = s->contents;
+      do
+	{
+	  _bfd_elf_swap_verneed_in (output_bfd, (Elf_External_Verneed *) p,
+				    &need);
+	  need.vn_file = _bfd_elf_strtab_offset (dynstr, need.vn_file);
+	  _bfd_elf_swap_verneed_out (output_bfd, &need,
+				     (Elf_External_Verneed *) p);
+	  p += sizeof (Elf_External_Verneed);
+	  for (i = 0; i < need.vn_cnt; ++i)
+	    {
+	      _bfd_elf_swap_vernaux_in (output_bfd,
+					(Elf_External_Vernaux *) p, &needaux);
+	      needaux.vna_name = _bfd_elf_strtab_offset (dynstr,
+							 needaux.vna_name);
+	      _bfd_elf_swap_vernaux_out (output_bfd,
+					 &needaux,
+					 (Elf_External_Vernaux *) p);
+	      p += sizeof (Elf_External_Vernaux);
+	    }
+	}
+      while (need.vn_next);
+    }
+
+  return TRUE;
+}
+
 /* Add symbols from an ELF archive file to the linker hash table.  We
    don't use _bfd_generic_link_add_archive_symbols because of a
    problem which arises on UnixWare.  The UnixWare libc.so is an
@@ -2808,4 +3064,976 @@ _bfd_elf_link_add_archive_symbols (bfd *abfd,
   if (included != NULL)
     free (included);
   return FALSE;
+}
+
+/* This function will be called though elf_link_hash_traverse to store
+   all hash value of the exported symbols in an array.  */
+
+static bfd_boolean
+elf_collect_hash_codes (struct elf_link_hash_entry *h, void *data)
+{
+  unsigned long **valuep = data;
+  const char *name;
+  char *p;
+  unsigned long ha;
+  char *alc = NULL;
+
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+  /* Ignore indirect symbols.  These are added by the versioning code.  */
+  if (h->dynindx == -1)
+    return TRUE;
+
+  name = h->root.root.string;
+  p = strchr (name, ELF_VER_CHR);
+  if (p != NULL)
+    {
+      alc = bfd_malloc (p - name + 1);
+      memcpy (alc, name, p - name);
+      alc[p - name] = '\0';
+      name = alc;
+    }
+
+  /* Compute the hash value.  */
+  ha = bfd_elf_hash (name);
+
+  /* Store the found hash value in the array given as the argument.  */
+  *(*valuep)++ = ha;
+
+  /* And store it in the struct so that we can put it in the hash table
+     later.  */
+  h->elf_hash_value = ha;
+
+  if (alc != NULL)
+    free (alc);
+
+  return TRUE;
+}
+
+/* Array used to determine the number of hash table buckets to use
+   based on the number of symbols there are.  If there are fewer than
+   3 symbols we use 1 bucket, fewer than 17 symbols we use 3 buckets,
+   fewer than 37 we use 17 buckets, and so forth.  We never use more
+   than 32771 buckets.  */
+
+static const size_t elf_buckets[] =
+{
+  1, 3, 17, 37, 67, 97, 131, 197, 263, 521, 1031, 2053, 4099, 8209,
+  16411, 32771, 0
+};
+
+/* Compute bucket count for hashing table.  We do not use a static set
+   of possible tables sizes anymore.  Instead we determine for all
+   possible reasonable sizes of the table the outcome (i.e., the
+   number of collisions etc) and choose the best solution.  The
+   weighting functions are not too simple to allow the table to grow
+   without bounds.  Instead one of the weighting factors is the size.
+   Therefore the result is always a good payoff between few collisions
+   (= short chain lengths) and table size.  */
+static size_t
+compute_bucket_count (struct bfd_link_info *info)
+{
+  size_t dynsymcount = elf_hash_table (info)->dynsymcount;
+  size_t best_size = 0;
+  unsigned long int *hashcodes;
+  unsigned long int *hashcodesp;
+  unsigned long int i;
+  bfd_size_type amt;
+
+  /* Compute the hash values for all exported symbols.  At the same
+     time store the values in an array so that we could use them for
+     optimizations.  */
+  amt = dynsymcount;
+  amt *= sizeof (unsigned long int);
+  hashcodes = bfd_malloc (amt);
+  if (hashcodes == NULL)
+    return 0;
+  hashcodesp = hashcodes;
+
+  /* Put all hash values in HASHCODES.  */
+  elf_link_hash_traverse (elf_hash_table (info),
+			  elf_collect_hash_codes, &hashcodesp);
+
+  /* We have a problem here.  The following code to optimize the table
+     size requires an integer type with more the 32 bits.  If
+     BFD_HOST_U_64_BIT is set we know about such a type.  */
+#ifdef BFD_HOST_U_64_BIT
+  if (info->optimize)
+    {
+      unsigned long int nsyms = hashcodesp - hashcodes;
+      size_t minsize;
+      size_t maxsize;
+      BFD_HOST_U_64_BIT best_chlen = ~((BFD_HOST_U_64_BIT) 0);
+      unsigned long int *counts ;
+      bfd *dynobj = elf_hash_table (info)->dynobj;
+      const struct elf_backend_data *bed = get_elf_backend_data (dynobj);
+
+      /* Possible optimization parameters: if we have NSYMS symbols we say
+	 that the hashing table must at least have NSYMS/4 and at most
+	 2*NSYMS buckets.  */
+      minsize = nsyms / 4;
+      if (minsize == 0)
+	minsize = 1;
+      best_size = maxsize = nsyms * 2;
+
+      /* Create array where we count the collisions in.  We must use bfd_malloc
+	 since the size could be large.  */
+      amt = maxsize;
+      amt *= sizeof (unsigned long int);
+      counts = bfd_malloc (amt);
+      if (counts == NULL)
+	{
+	  free (hashcodes);
+	  return 0;
+	}
+
+      /* Compute the "optimal" size for the hash table.  The criteria is a
+	 minimal chain length.  The minor criteria is (of course) the size
+	 of the table.  */
+      for (i = minsize; i < maxsize; ++i)
+	{
+	  /* Walk through the array of hashcodes and count the collisions.  */
+	  BFD_HOST_U_64_BIT max;
+	  unsigned long int j;
+	  unsigned long int fact;
+
+	  memset (counts, '\0', i * sizeof (unsigned long int));
+
+	  /* Determine how often each hash bucket is used.  */
+	  for (j = 0; j < nsyms; ++j)
+	    ++counts[hashcodes[j] % i];
+
+	  /* For the weight function we need some information about the
+	     pagesize on the target.  This is information need not be 100%
+	     accurate.  Since this information is not available (so far) we
+	     define it here to a reasonable default value.  If it is crucial
+	     to have a better value some day simply define this value.  */
+# ifndef BFD_TARGET_PAGESIZE
+#  define BFD_TARGET_PAGESIZE	(4096)
+# endif
+
+	  /* We in any case need 2 + NSYMS entries for the size values and
+	     the chains.  */
+	  max = (2 + nsyms) * (bed->s->arch_size / 8);
+
+# if 1
+	  /* Variant 1: optimize for short chains.  We add the squares
+	     of all the chain lengths (which favors many small chain
+	     over a few long chains).  */
+	  for (j = 0; j < i; ++j)
+	    max += counts[j] * counts[j];
+
+	  /* This adds penalties for the overall size of the table.  */
+	  fact = i / (BFD_TARGET_PAGESIZE / (bed->s->arch_size / 8)) + 1;
+	  max *= fact * fact;
+# else
+	  /* Variant 2: Optimize a lot more for small table.  Here we
+	     also add squares of the size but we also add penalties for
+	     empty slots (the +1 term).  */
+	  for (j = 0; j < i; ++j)
+	    max += (1 + counts[j]) * (1 + counts[j]);
+
+	  /* The overall size of the table is considered, but not as
+	     strong as in variant 1, where it is squared.  */
+	  fact = i / (BFD_TARGET_PAGESIZE / (bed->s->arch_size / 8)) + 1;
+	  max *= fact;
+# endif
+
+	  /* Compare with current best results.  */
+	  if (max < best_chlen)
+	    {
+	      best_chlen = max;
+	      best_size = i;
+	    }
+	}
+
+      free (counts);
+    }
+  else
+#endif /* defined (BFD_HOST_U_64_BIT) */
+    {
+      /* This is the fallback solution if no 64bit type is available or if we
+	 are not supposed to spend much time on optimizations.  We select the
+	 bucket count using a fixed set of numbers.  */
+      for (i = 0; elf_buckets[i] != 0; i++)
+	{
+	  best_size = elf_buckets[i];
+	  if (dynsymcount < elf_buckets[i + 1])
+	    break;
+	}
+    }
+
+  /* Free the arrays we needed.  */
+  free (hashcodes);
+
+  return best_size;
+}
+
+/* Set up the sizes and contents of the ELF dynamic sections.  This is
+   called by the ELF linker emulation before_allocation routine.  We
+   must set the sizes of the sections before the linker sets the
+   addresses of the various sections.  */
+
+bfd_boolean
+bfd_elf_size_dynamic_sections (bfd *output_bfd,
+			       const char *soname,
+			       const char *rpath,
+			       const char *filter_shlib,
+			       const char * const *auxiliary_filters,
+			       struct bfd_link_info *info,
+			       asection **sinterpptr,
+			       struct bfd_elf_version_tree *verdefs)
+{
+  bfd_size_type soname_indx;
+  bfd *dynobj;
+  const struct elf_backend_data *bed;
+  struct elf_assign_sym_version_info asvinfo;
+
+  *sinterpptr = NULL;
+
+  soname_indx = (bfd_size_type) -1;
+
+  if (!is_elf_hash_table (info->hash))
+    return TRUE;
+
+  if (info->execstack)
+    elf_tdata (output_bfd)->stack_flags = PF_R | PF_W | PF_X;
+  else if (info->noexecstack)
+    elf_tdata (output_bfd)->stack_flags = PF_R | PF_W;
+  else
+    {
+      bfd *inputobj;
+      asection *notesec = NULL;
+      int exec = 0;
+
+      for (inputobj = info->input_bfds;
+	   inputobj;
+	   inputobj = inputobj->link_next)
+	{
+	  asection *s;
+
+	  if (inputobj->flags & DYNAMIC)
+	    continue;
+	  s = bfd_get_section_by_name (inputobj, ".note.GNU-stack");
+	  if (s)
+	    {
+	      if (s->flags & SEC_CODE)
+		exec = PF_X;
+	      notesec = s;
+	    }
+	  else
+	    exec = PF_X;
+	}
+      if (notesec)
+	{
+	  elf_tdata (output_bfd)->stack_flags = PF_R | PF_W | exec;
+	  if (exec && info->relocatable
+	      && notesec->output_section != bfd_abs_section_ptr)
+	    notesec->output_section->flags |= SEC_CODE;
+	}
+    }
+
+  /* Any syms created from now on start with -1 in
+     got.refcount/offset and plt.refcount/offset.  */
+  elf_hash_table (info)->init_refcount = elf_hash_table (info)->init_offset;
+
+  /* The backend may have to create some sections regardless of whether
+     we're dynamic or not.  */
+  bed = get_elf_backend_data (output_bfd);
+  if (bed->elf_backend_always_size_sections
+      && ! (*bed->elf_backend_always_size_sections) (output_bfd, info))
+    return FALSE;
+
+  dynobj = elf_hash_table (info)->dynobj;
+
+  /* If there were no dynamic objects in the link, there is nothing to
+     do here.  */
+  if (dynobj == NULL)
+    return TRUE;
+
+  if (! _bfd_elf_maybe_strip_eh_frame_hdr (info))
+    return FALSE;
+
+  if (elf_hash_table (info)->dynamic_sections_created)
+    {
+      struct elf_info_failed eif;
+      struct elf_link_hash_entry *h;
+      asection *dynstr;
+      struct bfd_elf_version_tree *t;
+      struct bfd_elf_version_expr *d;
+      bfd_boolean all_defined;
+
+      *sinterpptr = bfd_get_section_by_name (dynobj, ".interp");
+      BFD_ASSERT (*sinterpptr != NULL || !info->executable);
+
+      if (soname != NULL)
+	{
+	  soname_indx = _bfd_elf_strtab_add (elf_hash_table (info)->dynstr,
+					     soname, TRUE);
+	  if (soname_indx == (bfd_size_type) -1
+	      || !_bfd_elf_add_dynamic_entry (info, DT_SONAME, soname_indx))
+	    return FALSE;
+	}
+
+      if (info->symbolic)
+	{
+	  if (!_bfd_elf_add_dynamic_entry (info, DT_SYMBOLIC, 0))
+	    return FALSE;
+	  info->flags |= DF_SYMBOLIC;
+	}
+
+      if (rpath != NULL)
+	{
+	  bfd_size_type indx;
+
+	  indx = _bfd_elf_strtab_add (elf_hash_table (info)->dynstr, rpath,
+				      TRUE);
+	  if (indx == (bfd_size_type) -1
+	      || !_bfd_elf_add_dynamic_entry (info, DT_RPATH, indx))
+	    return FALSE;
+
+	  if  (info->new_dtags)
+	    {
+	      _bfd_elf_strtab_addref (elf_hash_table (info)->dynstr, indx);
+	      if (!_bfd_elf_add_dynamic_entry (info, DT_RUNPATH, indx))
+		return FALSE;
+	    }
+	}
+
+      if (filter_shlib != NULL)
+	{
+	  bfd_size_type indx;
+
+	  indx = _bfd_elf_strtab_add (elf_hash_table (info)->dynstr,
+				      filter_shlib, TRUE);
+	  if (indx == (bfd_size_type) -1
+	      || !_bfd_elf_add_dynamic_entry (info, DT_FILTER, indx))
+	    return FALSE;
+	}
+
+      if (auxiliary_filters != NULL)
+	{
+	  const char * const *p;
+
+	  for (p = auxiliary_filters; *p != NULL; p++)
+	    {
+	      bfd_size_type indx;
+
+	      indx = _bfd_elf_strtab_add (elf_hash_table (info)->dynstr,
+					  *p, TRUE);
+	      if (indx == (bfd_size_type) -1
+		  || !_bfd_elf_add_dynamic_entry (info, DT_AUXILIARY, indx))
+		return FALSE;
+	    }
+	}
+
+      eif.info = info;
+      eif.verdefs = verdefs;
+      eif.failed = FALSE;
+
+      /* If we are supposed to export all symbols into the dynamic symbol
+	 table (this is not the normal case), then do so.  */
+      if (info->export_dynamic)
+	{
+	  elf_link_hash_traverse (elf_hash_table (info),
+				  _bfd_elf_export_symbol,
+				  &eif);
+	  if (eif.failed)
+	    return FALSE;
+	}
+
+      /* Make all global versions with definition.  */
+      for (t = verdefs; t != NULL; t = t->next)
+	for (d = t->globals.list; d != NULL; d = d->next)
+	  if (!d->symver && d->symbol)
+	    {
+	      const char *verstr, *name;
+	      size_t namelen, verlen, newlen;
+	      char *newname, *p;
+	      struct elf_link_hash_entry *newh;
+
+	      name = d->symbol;
+	      namelen = strlen (name);
+	      verstr = t->name;
+	      verlen = strlen (verstr);
+	      newlen = namelen + verlen + 3;
+
+	      newname = bfd_malloc (newlen);
+	      if (newname == NULL)
+		return FALSE;
+	      memcpy (newname, name, namelen);
+
+	      /* Check the hidden versioned definition.  */
+	      p = newname + namelen;
+	      *p++ = ELF_VER_CHR;
+	      memcpy (p, verstr, verlen + 1);
+	      newh = elf_link_hash_lookup (elf_hash_table (info),
+					   newname, FALSE, FALSE,
+					   FALSE);
+	      if (newh == NULL
+		  || (newh->root.type != bfd_link_hash_defined
+		      && newh->root.type != bfd_link_hash_defweak))
+		{
+		  /* Check the default versioned definition.  */
+		  *p++ = ELF_VER_CHR;
+		  memcpy (p, verstr, verlen + 1);
+		  newh = elf_link_hash_lookup (elf_hash_table (info),
+					       newname, FALSE, FALSE,
+					       FALSE);
+		}
+	      free (newname);
+
+	      /* Mark this version if there is a definition and it is
+		 not defined in a shared object.  */
+	      if (newh != NULL
+		  && ((newh->elf_link_hash_flags
+		       & ELF_LINK_HASH_DEF_DYNAMIC) == 0)
+		  && (newh->root.type == bfd_link_hash_defined
+		      || newh->root.type == bfd_link_hash_defweak))
+		d->symver = 1;
+	    }
+
+      /* Attach all the symbols to their version information.  */
+      asvinfo.output_bfd = output_bfd;
+      asvinfo.info = info;
+      asvinfo.verdefs = verdefs;
+      asvinfo.failed = FALSE;
+
+      elf_link_hash_traverse (elf_hash_table (info),
+			      _bfd_elf_link_assign_sym_version,
+			      &asvinfo);
+      if (asvinfo.failed)
+	return FALSE;
+
+      if (!info->allow_undefined_version)
+	{
+	  /* Check if all global versions have a definition.  */
+	  all_defined = TRUE;
+	  for (t = verdefs; t != NULL; t = t->next)
+	    for (d = t->globals.list; d != NULL; d = d->next)
+	      if (!d->symver && !d->script)
+		{
+		  (*_bfd_error_handler)
+		    (_("%s: undefined version: %s"),
+		     d->pattern, t->name);
+		  all_defined = FALSE;
+		}
+
+	  if (!all_defined)
+	    {
+	      bfd_set_error (bfd_error_bad_value);
+	      return FALSE;
+	    }
+	}
+
+      /* Find all symbols which were defined in a dynamic object and make
+	 the backend pick a reasonable value for them.  */
+      elf_link_hash_traverse (elf_hash_table (info),
+			      _bfd_elf_adjust_dynamic_symbol,
+			      &eif);
+      if (eif.failed)
+	return FALSE;
+
+      /* Add some entries to the .dynamic section.  We fill in some of the
+	 values later, in elf_bfd_final_link, but we must add the entries
+	 now so that we know the final size of the .dynamic section.  */
+
+      /* If there are initialization and/or finalization functions to
+	 call then add the corresponding DT_INIT/DT_FINI entries.  */
+      h = (info->init_function
+	   ? elf_link_hash_lookup (elf_hash_table (info),
+				   info->init_function, FALSE,
+				   FALSE, FALSE)
+	   : NULL);
+      if (h != NULL
+	  && (h->elf_link_hash_flags & (ELF_LINK_HASH_REF_REGULAR
+					| ELF_LINK_HASH_DEF_REGULAR)) != 0)
+	{
+	  if (!_bfd_elf_add_dynamic_entry (info, DT_INIT, 0))
+	    return FALSE;
+	}
+      h = (info->fini_function
+	   ? elf_link_hash_lookup (elf_hash_table (info),
+				   info->fini_function, FALSE,
+				   FALSE, FALSE)
+	   : NULL);
+      if (h != NULL
+	  && (h->elf_link_hash_flags & (ELF_LINK_HASH_REF_REGULAR
+					| ELF_LINK_HASH_DEF_REGULAR)) != 0)
+	{
+	  if (!_bfd_elf_add_dynamic_entry (info, DT_FINI, 0))
+	    return FALSE;
+	}
+
+      if (bfd_get_section_by_name (output_bfd, ".preinit_array") != NULL)
+	{
+	  /* DT_PREINIT_ARRAY is not allowed in shared library.  */
+	  if (! info->executable)
+	    {
+	      bfd *sub;
+	      asection *o;
+
+	      for (sub = info->input_bfds; sub != NULL;
+		   sub = sub->link_next)
+		for (o = sub->sections; o != NULL; o = o->next)
+		  if (elf_section_data (o)->this_hdr.sh_type
+		      == SHT_PREINIT_ARRAY)
+		    {
+		      (*_bfd_error_handler)
+			(_("%s: .preinit_array section is not allowed in DSO"),
+			 bfd_archive_filename (sub));
+		      break;
+		    }
+
+	      bfd_set_error (bfd_error_nonrepresentable_section);
+	      return FALSE;
+	    }
+
+	  if (!_bfd_elf_add_dynamic_entry (info, DT_PREINIT_ARRAY, 0)
+	      || !_bfd_elf_add_dynamic_entry (info, DT_PREINIT_ARRAYSZ, 0))
+	    return FALSE;
+	}
+      if (bfd_get_section_by_name (output_bfd, ".init_array") != NULL)
+	{
+	  if (!_bfd_elf_add_dynamic_entry (info, DT_INIT_ARRAY, 0)
+	      || !_bfd_elf_add_dynamic_entry (info, DT_INIT_ARRAYSZ, 0))
+	    return FALSE;
+	}
+      if (bfd_get_section_by_name (output_bfd, ".fini_array") != NULL)
+	{
+	  if (!_bfd_elf_add_dynamic_entry (info, DT_FINI_ARRAY, 0)
+	      || !_bfd_elf_add_dynamic_entry (info, DT_FINI_ARRAYSZ, 0))
+	    return FALSE;
+	}
+
+      dynstr = bfd_get_section_by_name (dynobj, ".dynstr");
+      /* If .dynstr is excluded from the link, we don't want any of
+	 these tags.  Strictly, we should be checking each section
+	 individually;  This quick check covers for the case where
+	 someone does a /DISCARD/ : { *(*) }.  */
+      if (dynstr != NULL && dynstr->output_section != bfd_abs_section_ptr)
+	{
+	  bfd_size_type strsize;
+
+	  strsize = _bfd_elf_strtab_size (elf_hash_table (info)->dynstr);
+	  if (!_bfd_elf_add_dynamic_entry (info, DT_HASH, 0)
+	      || !_bfd_elf_add_dynamic_entry (info, DT_STRTAB, 0)
+	      || !_bfd_elf_add_dynamic_entry (info, DT_SYMTAB, 0)
+	      || !_bfd_elf_add_dynamic_entry (info, DT_STRSZ, strsize)
+	      || !_bfd_elf_add_dynamic_entry (info, DT_SYMENT,
+					      bed->s->sizeof_sym))
+	    return FALSE;
+	}
+    }
+
+  /* The backend must work out the sizes of all the other dynamic
+     sections.  */
+  if (bed->elf_backend_size_dynamic_sections
+      && ! (*bed->elf_backend_size_dynamic_sections) (output_bfd, info))
+    return FALSE;
+
+  if (elf_hash_table (info)->dynamic_sections_created)
+    {
+      bfd_size_type dynsymcount;
+      asection *s;
+      size_t bucketcount = 0;
+      size_t hash_entry_size;
+      unsigned int dtagcount;
+
+      /* Set up the version definition section.  */
+      s = bfd_get_section_by_name (dynobj, ".gnu.version_d");
+      BFD_ASSERT (s != NULL);
+
+      /* We may have created additional version definitions if we are
+	 just linking a regular application.  */
+      verdefs = asvinfo.verdefs;
+
+      /* Skip anonymous version tag.  */
+      if (verdefs != NULL && verdefs->vernum == 0)
+	verdefs = verdefs->next;
+
+      if (verdefs == NULL)
+	_bfd_strip_section_from_output (info, s);
+      else
+	{
+	  unsigned int cdefs;
+	  bfd_size_type size;
+	  struct bfd_elf_version_tree *t;
+	  bfd_byte *p;
+	  Elf_Internal_Verdef def;
+	  Elf_Internal_Verdaux defaux;
+
+	  cdefs = 0;
+	  size = 0;
+
+	  /* Make space for the base version.  */
+	  size += sizeof (Elf_External_Verdef);
+	  size += sizeof (Elf_External_Verdaux);
+	  ++cdefs;
+
+	  for (t = verdefs; t != NULL; t = t->next)
+	    {
+	      struct bfd_elf_version_deps *n;
+
+	      size += sizeof (Elf_External_Verdef);
+	      size += sizeof (Elf_External_Verdaux);
+	      ++cdefs;
+
+	      for (n = t->deps; n != NULL; n = n->next)
+		size += sizeof (Elf_External_Verdaux);
+	    }
+
+	  s->_raw_size = size;
+	  s->contents = bfd_alloc (output_bfd, s->_raw_size);
+	  if (s->contents == NULL && s->_raw_size != 0)
+	    return FALSE;
+
+	  /* Fill in the version definition section.  */
+
+	  p = s->contents;
+
+	  def.vd_version = VER_DEF_CURRENT;
+	  def.vd_flags = VER_FLG_BASE;
+	  def.vd_ndx = 1;
+	  def.vd_cnt = 1;
+	  def.vd_aux = sizeof (Elf_External_Verdef);
+	  def.vd_next = (sizeof (Elf_External_Verdef)
+			 + sizeof (Elf_External_Verdaux));
+
+	  if (soname_indx != (bfd_size_type) -1)
+	    {
+	      _bfd_elf_strtab_addref (elf_hash_table (info)->dynstr,
+				      soname_indx);
+	      def.vd_hash = bfd_elf_hash (soname);
+	      defaux.vda_name = soname_indx;
+	    }
+	  else
+	    {
+	      const char *name;
+	      bfd_size_type indx;
+
+	      name = basename (output_bfd->filename);
+	      def.vd_hash = bfd_elf_hash (name);
+	      indx = _bfd_elf_strtab_add (elf_hash_table (info)->dynstr,
+					  name, FALSE);
+	      if (indx == (bfd_size_type) -1)
+		return FALSE;
+	      defaux.vda_name = indx;
+	    }
+	  defaux.vda_next = 0;
+
+	  _bfd_elf_swap_verdef_out (output_bfd, &def,
+				    (Elf_External_Verdef *) p);
+	  p += sizeof (Elf_External_Verdef);
+	  _bfd_elf_swap_verdaux_out (output_bfd, &defaux,
+				     (Elf_External_Verdaux *) p);
+	  p += sizeof (Elf_External_Verdaux);
+
+	  for (t = verdefs; t != NULL; t = t->next)
+	    {
+	      unsigned int cdeps;
+	      struct bfd_elf_version_deps *n;
+	      struct elf_link_hash_entry *h;
+	      struct bfd_link_hash_entry *bh;
+
+	      cdeps = 0;
+	      for (n = t->deps; n != NULL; n = n->next)
+		++cdeps;
+
+	      /* Add a symbol representing this version.  */
+	      bh = NULL;
+	      if (! (_bfd_generic_link_add_one_symbol
+		     (info, dynobj, t->name, BSF_GLOBAL, bfd_abs_section_ptr,
+		      0, NULL, FALSE,
+		      get_elf_backend_data (dynobj)->collect, &bh)))
+		return FALSE;
+	      h = (struct elf_link_hash_entry *) bh;
+	      h->elf_link_hash_flags &= ~ ELF_LINK_NON_ELF;
+	      h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
+	      h->type = STT_OBJECT;
+	      h->verinfo.vertree = t;
+
+	      if (! _bfd_elf_link_record_dynamic_symbol (info, h))
+		return FALSE;
+
+	      def.vd_version = VER_DEF_CURRENT;
+	      def.vd_flags = 0;
+	      if (t->globals.list == NULL
+		  && t->locals.list == NULL
+		  && ! t->used)
+		def.vd_flags |= VER_FLG_WEAK;
+	      def.vd_ndx = t->vernum + 1;
+	      def.vd_cnt = cdeps + 1;
+	      def.vd_hash = bfd_elf_hash (t->name);
+	      def.vd_aux = sizeof (Elf_External_Verdef);
+	      def.vd_next = 0;
+	      if (t->next != NULL)
+		def.vd_next = (sizeof (Elf_External_Verdef)
+			       + (cdeps + 1) * sizeof (Elf_External_Verdaux));
+
+	      _bfd_elf_swap_verdef_out (output_bfd, &def,
+					(Elf_External_Verdef *) p);
+	      p += sizeof (Elf_External_Verdef);
+
+	      defaux.vda_name = h->dynstr_index;
+	      _bfd_elf_strtab_addref (elf_hash_table (info)->dynstr,
+				      h->dynstr_index);
+	      defaux.vda_next = 0;
+	      if (t->deps != NULL)
+		defaux.vda_next = sizeof (Elf_External_Verdaux);
+	      t->name_indx = defaux.vda_name;
+
+	      _bfd_elf_swap_verdaux_out (output_bfd, &defaux,
+					 (Elf_External_Verdaux *) p);
+	      p += sizeof (Elf_External_Verdaux);
+
+	      for (n = t->deps; n != NULL; n = n->next)
+		{
+		  if (n->version_needed == NULL)
+		    {
+		      /* This can happen if there was an error in the
+			 version script.  */
+		      defaux.vda_name = 0;
+		    }
+		  else
+		    {
+		      defaux.vda_name = n->version_needed->name_indx;
+		      _bfd_elf_strtab_addref (elf_hash_table (info)->dynstr,
+					      defaux.vda_name);
+		    }
+		  if (n->next == NULL)
+		    defaux.vda_next = 0;
+		  else
+		    defaux.vda_next = sizeof (Elf_External_Verdaux);
+
+		  _bfd_elf_swap_verdaux_out (output_bfd, &defaux,
+					     (Elf_External_Verdaux *) p);
+		  p += sizeof (Elf_External_Verdaux);
+		}
+	    }
+
+	  if (!_bfd_elf_add_dynamic_entry (info, DT_VERDEF, 0)
+	      || !_bfd_elf_add_dynamic_entry (info, DT_VERDEFNUM, cdefs))
+	    return FALSE;
+
+	  elf_tdata (output_bfd)->cverdefs = cdefs;
+	}
+
+      if ((info->new_dtags && info->flags) || (info->flags & DF_STATIC_TLS))
+	{
+	  if (!_bfd_elf_add_dynamic_entry (info, DT_FLAGS, info->flags))
+	    return FALSE;
+	}
+      else if (info->flags & DF_BIND_NOW)
+	{
+	  if (!_bfd_elf_add_dynamic_entry (info, DT_BIND_NOW, 0))
+	    return FALSE;
+	}
+
+      if (info->flags_1)
+	{
+	  if (info->executable)
+	    info->flags_1 &= ~ (DF_1_INITFIRST
+				| DF_1_NODELETE
+				| DF_1_NOOPEN);
+	  if (!_bfd_elf_add_dynamic_entry (info, DT_FLAGS_1, info->flags_1))
+	    return FALSE;
+	}
+
+      /* Work out the size of the version reference section.  */
+
+      s = bfd_get_section_by_name (dynobj, ".gnu.version_r");
+      BFD_ASSERT (s != NULL);
+      {
+	struct elf_find_verdep_info sinfo;
+
+	sinfo.output_bfd = output_bfd;
+	sinfo.info = info;
+	sinfo.vers = elf_tdata (output_bfd)->cverdefs;
+	if (sinfo.vers == 0)
+	  sinfo.vers = 1;
+	sinfo.failed = FALSE;
+
+	elf_link_hash_traverse (elf_hash_table (info),
+				_bfd_elf_link_find_version_dependencies,
+				&sinfo);
+
+	if (elf_tdata (output_bfd)->verref == NULL)
+	  _bfd_strip_section_from_output (info, s);
+	else
+	  {
+	    Elf_Internal_Verneed *t;
+	    unsigned int size;
+	    unsigned int crefs;
+	    bfd_byte *p;
+
+	    /* Build the version definition section.  */
+	    size = 0;
+	    crefs = 0;
+	    for (t = elf_tdata (output_bfd)->verref;
+		 t != NULL;
+		 t = t->vn_nextref)
+	      {
+		Elf_Internal_Vernaux *a;
+
+		size += sizeof (Elf_External_Verneed);
+		++crefs;
+		for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
+		  size += sizeof (Elf_External_Vernaux);
+	      }
+
+	    s->_raw_size = size;
+	    s->contents = bfd_alloc (output_bfd, s->_raw_size);
+	    if (s->contents == NULL)
+	      return FALSE;
+
+	    p = s->contents;
+	    for (t = elf_tdata (output_bfd)->verref;
+		 t != NULL;
+		 t = t->vn_nextref)
+	      {
+		unsigned int caux;
+		Elf_Internal_Vernaux *a;
+		bfd_size_type indx;
+
+		caux = 0;
+		for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
+		  ++caux;
+
+		t->vn_version = VER_NEED_CURRENT;
+		t->vn_cnt = caux;
+		indx = _bfd_elf_strtab_add (elf_hash_table (info)->dynstr,
+					    elf_dt_name (t->vn_bfd) != NULL
+					    ? elf_dt_name (t->vn_bfd)
+					    : basename (t->vn_bfd->filename),
+					    FALSE);
+		if (indx == (bfd_size_type) -1)
+		  return FALSE;
+		t->vn_file = indx;
+		t->vn_aux = sizeof (Elf_External_Verneed);
+		if (t->vn_nextref == NULL)
+		  t->vn_next = 0;
+		else
+		  t->vn_next = (sizeof (Elf_External_Verneed)
+				+ caux * sizeof (Elf_External_Vernaux));
+
+		_bfd_elf_swap_verneed_out (output_bfd, t,
+					   (Elf_External_Verneed *) p);
+		p += sizeof (Elf_External_Verneed);
+
+		for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
+		  {
+		    a->vna_hash = bfd_elf_hash (a->vna_nodename);
+		    indx = _bfd_elf_strtab_add (elf_hash_table (info)->dynstr,
+						a->vna_nodename, FALSE);
+		    if (indx == (bfd_size_type) -1)
+		      return FALSE;
+		    a->vna_name = indx;
+		    if (a->vna_nextptr == NULL)
+		      a->vna_next = 0;
+		    else
+		      a->vna_next = sizeof (Elf_External_Vernaux);
+
+		    _bfd_elf_swap_vernaux_out (output_bfd, a,
+					       (Elf_External_Vernaux *) p);
+		    p += sizeof (Elf_External_Vernaux);
+		  }
+	      }
+
+	    if (!_bfd_elf_add_dynamic_entry (info, DT_VERNEED, 0)
+		|| !_bfd_elf_add_dynamic_entry (info, DT_VERNEEDNUM, crefs))
+	      return FALSE;
+
+	    elf_tdata (output_bfd)->cverrefs = crefs;
+	  }
+      }
+
+      /* Assign dynsym indicies.  In a shared library we generate a
+	 section symbol for each output section, which come first.
+	 Next come all of the back-end allocated local dynamic syms,
+	 followed by the rest of the global symbols.  */
+
+      dynsymcount = _bfd_elf_link_renumber_dynsyms (output_bfd, info);
+
+      /* Work out the size of the symbol version section.  */
+      s = bfd_get_section_by_name (dynobj, ".gnu.version");
+      BFD_ASSERT (s != NULL);
+      if (dynsymcount == 0
+	  || (verdefs == NULL && elf_tdata (output_bfd)->verref == NULL))
+	{
+	  _bfd_strip_section_from_output (info, s);
+	  /* The DYNSYMCOUNT might have changed if we were going to
+	     output a dynamic symbol table entry for S.  */
+	  dynsymcount = _bfd_elf_link_renumber_dynsyms (output_bfd, info);
+	}
+      else
+	{
+	  s->_raw_size = dynsymcount * sizeof (Elf_External_Versym);
+	  s->contents = bfd_zalloc (output_bfd, s->_raw_size);
+	  if (s->contents == NULL)
+	    return FALSE;
+
+	  if (!_bfd_elf_add_dynamic_entry (info, DT_VERSYM, 0))
+	    return FALSE;
+	}
+
+      /* Set the size of the .dynsym and .hash sections.  We counted
+	 the number of dynamic symbols in elf_link_add_object_symbols.
+	 We will build the contents of .dynsym and .hash when we build
+	 the final symbol table, because until then we do not know the
+	 correct value to give the symbols.  We built the .dynstr
+	 section as we went along in elf_link_add_object_symbols.  */
+      s = bfd_get_section_by_name (dynobj, ".dynsym");
+      BFD_ASSERT (s != NULL);
+      s->_raw_size = dynsymcount * bed->s->sizeof_sym;
+      s->contents = bfd_alloc (output_bfd, s->_raw_size);
+      if (s->contents == NULL && s->_raw_size != 0)
+	return FALSE;
+
+      if (dynsymcount != 0)
+	{
+	  Elf_Internal_Sym isym;
+
+	  /* The first entry in .dynsym is a dummy symbol.  */
+	  isym.st_value = 0;
+	  isym.st_size = 0;
+	  isym.st_name = 0;
+	  isym.st_info = 0;
+	  isym.st_other = 0;
+	  isym.st_shndx = 0;
+	  bed->s->swap_symbol_out (output_bfd, &isym, s->contents, 0);
+	}
+
+      /* Compute the size of the hashing table.  As a side effect this
+	 computes the hash values for all the names we export.  */
+      bucketcount = compute_bucket_count (info);
+
+      s = bfd_get_section_by_name (dynobj, ".hash");
+      BFD_ASSERT (s != NULL);
+      hash_entry_size = elf_section_data (s)->this_hdr.sh_entsize;
+      s->_raw_size = ((2 + bucketcount + dynsymcount) * hash_entry_size);
+      s->contents = bfd_zalloc (output_bfd, s->_raw_size);
+      if (s->contents == NULL)
+	return FALSE;
+
+      bfd_put (8 * hash_entry_size, output_bfd, bucketcount, s->contents);
+      bfd_put (8 * hash_entry_size, output_bfd, dynsymcount,
+	       s->contents + hash_entry_size);
+
+      elf_hash_table (info)->bucketcount = bucketcount;
+
+      s = bfd_get_section_by_name (dynobj, ".dynstr");
+      BFD_ASSERT (s != NULL);
+
+      _bfd_elf_finalize_dynstr (output_bfd, info);
+
+      s->_raw_size = _bfd_elf_strtab_size (elf_hash_table (info)->dynstr);
+
+      for (dtagcount = 0; dtagcount <= info->spare_dynamic_tags; ++dtagcount)
+	if (!_bfd_elf_add_dynamic_entry (info, DT_NULL, 0))
+	  return FALSE;
+    }
+
+  return TRUE;
 }

@@ -1,3 +1,54 @@
+2004-03-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.h (elf_link_add_object_symbols): Add DT_NEEDED for as-needed
+	and chained shared libs only if dynsym.  Clear dynsym on forced-local.
+	
+	* elf-bfd.h (_bfd_elf_add_dynamic_entry): Declare.
+	(bfd_elf32_add_dynamic_entry, bfd_elf64_add_dynamic_entry): Delete.
+	(_bfd_elf_add_dt_needed_tag): Declare.
+	(_bfd_elf_sort_symbol): Declare.
+	(_bfd_elf_finalize_dynstr): Declare.
+	(RELOC_FOR_GLOBAL_SYM): Formatting.
+	* elfcode.h (elf_add_dynamic_entry): Delete.
+	* elflink.c (_bfd_elf_add_dynamic_entry): New function.  Corresponding
+	elflink.h function converted to use elf_size_info.
+	(_bfd_elf_add_dt_needed_tag): Likewise.
+	(_bfd_elf_sort_symbol): Likewise.
+	(_bfd_elf_finalize_dynstr): Likewise.
+	(compute_bucket_count): Likewise.
+	(bfd_elf_size_dynamic_sections): Likewise.  Check result of
+	_bfd_elf_strtab_add before calling _bfd_elf_strtab_addref.
+	(elf_adjust_dynstr_offsets, elf_collect_hash_codes): Moved from..
+	* elflink.h: ..here.
+	(sort_symbol, add_dt_needed_tag): Delete.
+	(elf_add_dynamic_entry, elf_finalize_dynstr): Delete.
+	(compute_bucket_count, NAME(bfd_elf,size_dynamic_sections)): Delete.
+	Update all users.
+	* elf32-arm.h (add_dynamic_entry): Update.  Remove casts.
+	* elf32-cris.c (add_dynamic_entry): Likewise.
+	* elf32-hppa.c (add_dynamic_entry): Likewise.
+	* elf32-i370.c (add_dynamic_entry): Likewise.
+	* elf32-i386.c (add_dynamic_entry): Likewise.
+	* elf32-m32r.c (add_dynamic_entry): Likewise.
+	* elf32-m68k.c (add_dynamic_entry): Likewise.
+	* elf32-ppc.c (add_dynamic_entry): Likewise.
+	* elf32-s390.c (add_dynamic_entry): Likewise.
+	* elf32-sh.c (add_dynamic_entry): Likewise.
+	* elf32-sparc.c (add_dynamic_entry): Likewise.
+	* elf32-vax.c (add_dynamic_entry): Likewise.
+	* elf32-xtensa.c (add_dynamic_entry): Likewise.
+	* elf64-alpha.c (add_dynamic_entry): Likewise.
+	* elf64-hppa.c (add_dynamic_entry): Likewise.
+	* elf64-ppc.c (add_dynamic_entry): Likewise.
+	* elf64-s390.c (add_dynamic_entry): Likewise.
+	* elf64-sparc.c (add_dynamic_entry): Likewise.
+	* elf64-x86-64.c (add_dynamic_entry): Likewise.
+	* elfxx-ia64.c (add_dynamic_entry): Likewise.
+	* elfxx-mips.c (MIPS_ELF_ADD_DYNAMIC_ENTRY): Likewise.
+	* elf-m10300.c (_bfd_mn10300_elf_size_dynamic_sections): Likewise.
+	* elf32-frv.c (elf32_frv_size_dynamic_sections): Likewise.
+	* elf64-sh64.c (sh64_elf64_size_dynamic_sections): Likewise.
+
 2004-03-23  Paul Brook  <paul@codesourcery.com>
 
 	* elf32-arm.h (arm_print_private_bfd_data): Add EABI v3.

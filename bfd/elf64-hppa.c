@@ -1,5 +1,6 @@
 /* Support for HPPA 64-bit ELF
-   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004
+   Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -1832,7 +1833,7 @@ elf64_hppa_size_dynamic_sections (output_bfd, info)
 	 the PLT, it is how we communicate the __gp value of a load
 	 module to the dynamic linker.  */
 #define add_dynamic_entry(TAG, VAL) \
-  bfd_elf64_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
       if (!add_dynamic_entry (DT_HP_DLD_FLAGS, 0)
 	  || !add_dynamic_entry (DT_PLTGOT, 0))

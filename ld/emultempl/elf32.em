@@ -871,7 +871,7 @@ gld${EMULATION_NAME}_before_allocation (void)
   rpath = command_line.rpath;
   if (rpath == NULL)
     rpath = (const char *) getenv ("LD_RUN_PATH");
-  if (! (bfd_elf${ELFSIZE}_size_dynamic_sections
+  if (! (bfd_elf_size_dynamic_sections
 	 (output_bfd, command_line.soname, rpath,
 	  command_line.filter_shlib,
 	  (const char * const *) command_line.auxiliary_filters,
