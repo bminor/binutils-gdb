@@ -783,9 +783,19 @@ proc test_next_with_recursion {} {
 
     if [istarget "mips*tx39-*"] {
 	set timeout 60
-    } else {
-	set timeout 20
     }
+    # We used to set timeout here for all other targets as well.  This
+    # is almost certainly wrong.  The proper timeout depends on the
+    # target system in use, and how we communicate with it, so there
+    # is no single value appropriate for all targets.  The timeout
+    # should be established by the Dejagnu config file(s) for the
+    # board, and respected by the test suite.
+    #
+    # For example, if I'm running GDB over an SSH tunnel talking to a
+    # portmaster in California talking to an ancient 68k board running
+    # a crummy ROM monitor (a situation I can only wish were
+    # hypothetical), then I need a large timeout.  But that's not the
+    # kind of knowledge that belongs in this file.
 
     gdb_test next "\[0-9\]*\[\t \]+return \\(value\\);.*" \
 	    "next over recursive call"

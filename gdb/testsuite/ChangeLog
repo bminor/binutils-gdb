@@ -1,9 +1,23 @@
+2001-12-07  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/break.exp: (test_next_with_recursion): Don't change the
+	value of `timeout' for targets other than the mips*tx39-*.
+
 2001-12-06  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.asm/asm-source.exp: Add tests for info target, info symbol, 
 	and detect whether the start symbol has a leading underscore.
 
 2001-12-04  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/completion.exp: Rather than completing very long
+	filenames, which can make the readline library produce output we
+	don't recognize, cd to the directory first, and then complete
+	using nice, short relative paths.
+
+	* gdb.base/completion.exp: On some systems, there is, in fact, a
+	variable named `b' in scope (from GDB's point of view).  So use
+	`no_var_named_this' instead of `b'.
 
 	* gdb.base/completion.exp: Clarify indentation.
 
