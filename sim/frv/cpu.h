@@ -30,7 +30,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MAX_LIW_INSNS 1
 
 /* Maximum number of instructions that can be executed in parallel.  */
-#define MAX_PARALLEL_INSNS 4
+#define MAX_PARALLEL_INSNS 8
 
 /* CPU state information.  */
 typedef struct {
@@ -257,6 +257,14 @@ CPU (h_spr[(((index)) + (1472))]) = ANDDI (SRLDI ((x), 32), 255);\
 CPU (h_spr[(((index)) + (1408))]) = TRUNCDISI ((x));\
 }\
 ;} while (0)
+#define GET_H_IACC0(index) ORDI (SLLDI (EXTSIDI (GET_H_SPR (((UINT) 280))), 32), ZEXTSIDI (GET_H_SPR (((UINT) 281))))
+#define SET_H_IACC0(index, x) \
+do { \
+{\
+SET_H_SPR (((UINT) 280), TRUNCDISI (SRLDI ((x), 32)));\
+SET_H_SPR (((UINT) 281), TRUNCDISI ((x)));\
+}\
+;} while (0)
 
 /* Cover fns for register access.  */
 USI frvbf_h_pc_get (SIM_CPU *);
@@ -333,6 +341,8 @@ DI frvbf_h_acc40S_get (SIM_CPU *, UINT);
 void frvbf_h_acc40S_set (SIM_CPU *, UINT, DI);
 UDI frvbf_h_acc40U_get (SIM_CPU *, UINT);
 void frvbf_h_acc40U_set (SIM_CPU *, UINT, UDI);
+DI frvbf_h_iacc0_get (SIM_CPU *, UINT);
+void frvbf_h_iacc0_set (SIM_CPU *, UINT, DI);
 UQI frvbf_h_iccr_get (SIM_CPU *, UINT);
 void frvbf_h_iccr_set (SIM_CPU *, UINT, UQI);
 UQI frvbf_h_fccr_get (SIM_CPU *, UINT);
@@ -347,6 +357,19 @@ extern CPUREG_STORE_FN frvbf_store_register;
 typedef struct {
   int empty;
 } MODEL_FRV_DATA;
+
+typedef struct {
+  DI prev_fr_load;
+  DI prev_fr_complex_1;
+  DI prev_fr_complex_2;
+  DI prev_ccr_complex;
+  DI prev_acc_mmac;
+  DI cur_fr_load;
+  DI cur_fr_complex_1;
+  DI cur_fr_complex_2;
+  SI cur_ccr_complex;
+  DI cur_acc_mmac;
+} MODEL_FR550_DATA;
 
 typedef struct {
   DI prev_fpop;
@@ -549,6 +572,13 @@ union sem_fields {
     unsigned char out_GRdoublek;
   } sfmt_smuli;
   struct { /*  */
+    UINT f_GRj;
+    UINT f_GRk;
+    unsigned char in_GRj;
+    unsigned char in_h_iacc0_DI_0;
+    unsigned char out_GRk;
+  } sfmt_scutss;
+  struct { /*  */
     UINT f_ACC40Si;
     UINT f_FRj;
     UINT f_FRk;
@@ -612,6 +642,14 @@ union sem_fields {
     unsigned char in_GRk;
     unsigned char out_GRk;
   } sfmt_swapi;
+  struct { /*  */
+    UINT f_GRi;
+    UINT f_GRj;
+    unsigned char in_GRi;
+    unsigned char in_GRj;
+    unsigned char in_h_iacc0_DI_0;
+    unsigned char out_h_iacc0_DI_0;
+  } sfmt_smass;
   struct { /*  */
     INT f_s6;
     UINT f_FRi;
@@ -1571,6 +1609,57 @@ struct scache {
   f_ope2 = EXTRACT_LSB0_UINT (insn, 32, 9, 4); \
   f_GRj = EXTRACT_LSB0_UINT (insn, 32, 5, 6); \
 
+#define EXTRACT_IFMT_SMU_VARS \
+  UINT f_pack; \
+  UINT f_rd_null; \
+  UINT f_op; \
+  UINT f_GRi; \
+  UINT f_ope1; \
+  UINT f_GRj; \
+  unsigned int length;
+#define EXTRACT_IFMT_SMU_CODE \
+  length = 4; \
+  f_pack = EXTRACT_LSB0_UINT (insn, 32, 31, 1); \
+  f_rd_null = EXTRACT_LSB0_UINT (insn, 32, 30, 6); \
+  f_op = EXTRACT_LSB0_UINT (insn, 32, 24, 7); \
+  f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6); \
+  f_ope1 = EXTRACT_LSB0_UINT (insn, 32, 11, 6); \
+  f_GRj = EXTRACT_LSB0_UINT (insn, 32, 5, 6); \
+
+#define EXTRACT_IFMT_SLASS_VARS \
+  UINT f_pack; \
+  UINT f_GRk; \
+  UINT f_op; \
+  UINT f_GRi; \
+  UINT f_ope1; \
+  UINT f_GRj; \
+  unsigned int length;
+#define EXTRACT_IFMT_SLASS_CODE \
+  length = 4; \
+  f_pack = EXTRACT_LSB0_UINT (insn, 32, 31, 1); \
+  f_GRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6); \
+  f_op = EXTRACT_LSB0_UINT (insn, 32, 24, 7); \
+  f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6); \
+  f_ope1 = EXTRACT_LSB0_UINT (insn, 32, 11, 6); \
+  f_GRj = EXTRACT_LSB0_UINT (insn, 32, 5, 6); \
+
+#define EXTRACT_IFMT_SCUTSS_VARS \
+  UINT f_pack; \
+  UINT f_GRk; \
+  UINT f_op; \
+  UINT f_rs_null; \
+  UINT f_ope1; \
+  UINT f_GRj; \
+  unsigned int length;
+#define EXTRACT_IFMT_SCUTSS_CODE \
+  length = 4; \
+  f_pack = EXTRACT_LSB0_UINT (insn, 32, 31, 1); \
+  f_GRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6); \
+  f_op = EXTRACT_LSB0_UINT (insn, 32, 24, 7); \
+  f_rs_null = EXTRACT_LSB0_UINT (insn, 32, 17, 6); \
+  f_ope1 = EXTRACT_LSB0_UINT (insn, 32, 11, 6); \
+  f_GRj = EXTRACT_LSB0_UINT (insn, 32, 5, 6); \
+
 #define EXTRACT_IFMT_CADD_VARS \
   UINT f_pack; \
   UINT f_GRk; \
@@ -1799,23 +1888,6 @@ struct scache {
   f_op = EXTRACT_LSB0_UINT (insn, 32, 24, 7); \
   f_misc_null_4 = EXTRACT_LSB0_UINT (insn, 32, 17, 2); \
   f_s16 = EXTRACT_LSB0_INT (insn, 32, 15, 16); \
-
-#define EXTRACT_IFMT_LDSB_VARS \
-  UINT f_pack; \
-  UINT f_GRk; \
-  UINT f_op; \
-  UINT f_GRi; \
-  UINT f_ope1; \
-  UINT f_GRj; \
-  unsigned int length;
-#define EXTRACT_IFMT_LDSB_CODE \
-  length = 4; \
-  f_pack = EXTRACT_LSB0_UINT (insn, 32, 31, 1); \
-  f_GRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6); \
-  f_op = EXTRACT_LSB0_UINT (insn, 32, 24, 7); \
-  f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6); \
-  f_ope1 = EXTRACT_LSB0_UINT (insn, 32, 11, 6); \
-  f_GRj = EXTRACT_LSB0_UINT (insn, 32, 5, 6); \
 
 #define EXTRACT_IFMT_LDBF_VARS \
   UINT f_pack; \
@@ -3056,23 +3128,6 @@ struct scache {
   f_CCi = EXTRACT_LSB0_UINT (insn, 32, 11, 3); \
   f_cond = EXTRACT_LSB0_UINT (insn, 32, 8, 1); \
   f_ope4 = EXTRACT_LSB0_UINT (insn, 32, 7, 2); \
-  f_GRj = EXTRACT_LSB0_UINT (insn, 32, 5, 6); \
-
-#define EXTRACT_IFMT_ICI_VARS \
-  UINT f_pack; \
-  UINT f_rd_null; \
-  UINT f_op; \
-  UINT f_GRi; \
-  UINT f_ope1; \
-  UINT f_GRj; \
-  unsigned int length;
-#define EXTRACT_IFMT_ICI_CODE \
-  length = 4; \
-  f_pack = EXTRACT_LSB0_UINT (insn, 32, 31, 1); \
-  f_rd_null = EXTRACT_LSB0_UINT (insn, 32, 30, 6); \
-  f_op = EXTRACT_LSB0_UINT (insn, 32, 24, 7); \
-  f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6); \
-  f_ope1 = EXTRACT_LSB0_UINT (insn, 32, 11, 6); \
   f_GRj = EXTRACT_LSB0_UINT (insn, 32, 5, 6); \
 
 #define EXTRACT_IFMT_ICEI_VARS \

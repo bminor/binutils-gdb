@@ -58,9 +58,14 @@ static const struct insn_sem frvbf_insn_sem[] =
   { FRV_INSN_NUDIV, FRVBF_INSN_NUDIV, FRVBF_SFMT_SDIV },
   { FRV_INSN_SMUL, FRVBF_INSN_SMUL, FRVBF_SFMT_SMUL },
   { FRV_INSN_UMUL, FRVBF_INSN_UMUL, FRVBF_SFMT_SMUL },
+  { FRV_INSN_SMU, FRVBF_INSN_SMU, FRVBF_SFMT_SMU },
+  { FRV_INSN_SMASS, FRVBF_INSN_SMASS, FRVBF_SFMT_SMASS },
+  { FRV_INSN_SMSSS, FRVBF_INSN_SMSSS, FRVBF_SFMT_SMASS },
   { FRV_INSN_SLL, FRVBF_INSN_SLL, FRVBF_SFMT_ADD },
   { FRV_INSN_SRL, FRVBF_INSN_SRL, FRVBF_SFMT_ADD },
   { FRV_INSN_SRA, FRVBF_INSN_SRA, FRVBF_SFMT_ADD },
+  { FRV_INSN_SLASS, FRVBF_INSN_SLASS, FRVBF_SFMT_ADD },
+  { FRV_INSN_SCUTSS, FRVBF_INSN_SCUTSS, FRVBF_SFMT_SCUTSS },
   { FRV_INSN_SCAN, FRVBF_INSN_SCAN, FRVBF_SFMT_ADD },
   { FRV_INSN_CADD, FRVBF_INSN_CADD, FRVBF_SFMT_CADD },
   { FRV_INSN_CSUB, FRVBF_INSN_CSUB, FRVBF_SFMT_CADD },
@@ -98,6 +103,8 @@ static const struct insn_sem frvbf_insn_sem[] =
   { FRV_INSN_SUBX, FRVBF_INSN_SUBX, FRVBF_SFMT_ADDX },
   { FRV_INSN_ADDXCC, FRVBF_INSN_ADDXCC, FRVBF_SFMT_ADDCC },
   { FRV_INSN_SUBXCC, FRVBF_INSN_SUBXCC, FRVBF_SFMT_ADDCC },
+  { FRV_INSN_ADDSS, FRVBF_INSN_ADDSS, FRVBF_SFMT_ADD },
+  { FRV_INSN_SUBSS, FRVBF_INSN_SUBSS, FRVBF_SFMT_ADD },
   { FRV_INSN_ADDI, FRVBF_INSN_ADDI, FRVBF_SFMT_ADDI },
   { FRV_INSN_SUBI, FRVBF_INSN_SUBI, FRVBF_SFMT_ADDI },
   { FRV_INSN_ANDI, FRVBF_INSN_ANDI, FRVBF_SFMT_ADDI },
@@ -1408,6 +1415,21 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
       case 67 : itype = FRVBF_INSN_NLDUHI; goto extract_sfmt_nldsbi;
       case 68 : itype = FRVBF_INSN_NLDI; goto extract_sfmt_nldsbi;
       case 69 : itype = FRVBF_INSN_NLDDI; goto extract_sfmt_nlddi;
+      case 70 :
+        {
+          unsigned int val = (((insn >> 6) & (7 << 0)));
+          switch (val)
+          {
+          case 0 : itype = FRVBF_INSN_ADDSS; goto extract_sfmt_add;
+          case 1 : itype = FRVBF_INSN_SUBSS; goto extract_sfmt_add;
+          case 2 : itype = FRVBF_INSN_SLASS; goto extract_sfmt_add;
+          case 4 : itype = FRVBF_INSN_SCUTSS; goto extract_sfmt_scutss;
+          case 5 : itype = FRVBF_INSN_SMU; goto extract_sfmt_smu;
+          case 6 : itype = FRVBF_INSN_SMASS; goto extract_sfmt_smass;
+          case 7 : itype = FRVBF_INSN_SMSSS; goto extract_sfmt_smass;
+          default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          }
+        }
       case 71 : itype = FRVBF_INSN_SCANI; goto extract_sfmt_addi;
       case 72 : itype = FRVBF_INSN_NLDBFI; goto extract_sfmt_nldbfi;
       case 73 : itype = FRVBF_INSN_NLDHFI; goto extract_sfmt_nldbfi;
@@ -2290,7 +2312,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
   {
     const IDESC *idesc = &frvbf_insn_data[itype];
     CGEN_INSN_INT insn = entire_insn;
-#define FLD(f) abuf->fields.sfmt_addcc.f
+#define FLD(f) abuf->fields.sfmt_scutss.f
     UINT f_GRk;
     UINT f_GRj;
 
@@ -2372,6 +2394,94 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
       FLD (in_GRi) = f_GRi;
       FLD (in_GRj) = f_GRj;
       FLD (out_GRdoublek) = f_GRk;
+    }
+#endif
+#undef FLD
+    return idesc;
+  }
+
+ extract_sfmt_smu:
+  {
+    const IDESC *idesc = &frvbf_insn_data[itype];
+    CGEN_INSN_INT insn = entire_insn;
+#define FLD(f) abuf->fields.sfmt_smass.f
+    UINT f_GRi;
+    UINT f_GRj;
+
+    f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
+    f_GRj = EXTRACT_LSB0_UINT (insn, 32, 5, 6);
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_GRi) = f_GRi;
+  FLD (f_GRj) = f_GRj;
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_smu", "f_GRi 0x%x", 'x', f_GRi, "f_GRj 0x%x", 'x', f_GRj, (char *) 0));
+
+#if WITH_PROFILE_MODEL_P
+  /* Record the fields for profiling.  */
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      FLD (in_GRi) = f_GRi;
+      FLD (in_GRj) = f_GRj;
+      FLD (out_h_iacc0_DI_0) = 0;
+    }
+#endif
+#undef FLD
+    return idesc;
+  }
+
+ extract_sfmt_smass:
+  {
+    const IDESC *idesc = &frvbf_insn_data[itype];
+    CGEN_INSN_INT insn = entire_insn;
+#define FLD(f) abuf->fields.sfmt_smass.f
+    UINT f_GRi;
+    UINT f_GRj;
+
+    f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
+    f_GRj = EXTRACT_LSB0_UINT (insn, 32, 5, 6);
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_GRi) = f_GRi;
+  FLD (f_GRj) = f_GRj;
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_smass", "f_GRi 0x%x", 'x', f_GRi, "f_GRj 0x%x", 'x', f_GRj, (char *) 0));
+
+#if WITH_PROFILE_MODEL_P
+  /* Record the fields for profiling.  */
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      FLD (in_GRi) = f_GRi;
+      FLD (in_GRj) = f_GRj;
+      FLD (in_h_iacc0_DI_0) = 0;
+      FLD (out_h_iacc0_DI_0) = 0;
+    }
+#endif
+#undef FLD
+    return idesc;
+  }
+
+ extract_sfmt_scutss:
+  {
+    const IDESC *idesc = &frvbf_insn_data[itype];
+    CGEN_INSN_INT insn = entire_insn;
+#define FLD(f) abuf->fields.sfmt_scutss.f
+    UINT f_GRk;
+    UINT f_GRj;
+
+    f_GRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
+    f_GRj = EXTRACT_LSB0_UINT (insn, 32, 5, 6);
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_GRj) = f_GRj;
+  FLD (f_GRk) = f_GRk;
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_scutss", "f_GRj 0x%x", 'x', f_GRj, "f_GRk 0x%x", 'x', f_GRk, (char *) 0));
+
+#if WITH_PROFILE_MODEL_P
+  /* Record the fields for profiling.  */
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      FLD (in_GRj) = f_GRj;
+      FLD (in_h_iacc0_DI_0) = 0;
+      FLD (out_GRk) = f_GRk;
     }
 #endif
 #undef FLD

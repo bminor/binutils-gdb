@@ -1,5 +1,5 @@
 /* frv trap support
-   Copyright (C) 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000, 2001, 2003 Free Software Foundation, Inc.
    Contributed by Red Hat.
 
 This file is part of the GNU simulators.
@@ -29,6 +29,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "bfd.h"
 #include "libiberty.h"
+
+CGEN_ATTR_VALUE_TYPE frv_current_fm_slot;
 
 /* The semantic code invokes this for invalid (unrecognized) instructions.  */
 
@@ -276,9 +278,11 @@ frv_itrap (SIM_CPU *current_cpu, PCADDR pc, USI base, SI offset)
 void
 frv_mtrap (SIM_CPU *current_cpu)
 {
+  SIM_DESC sd = CPU_STATE (current_cpu);
+
   /* Check the status of media exceptions in MSR0.  */
   SI msr = GET_MSR (0);
-  if (GET_MSR_AOVF (msr) || GET_MSR_MTT (msr))
+  if (GET_MSR_AOVF (msr) || GET_MSR_MTT (msr) && STATE_ARCHITECTURE (sd)->mach != bfd_mach_fr550)
     frv_queue_program_interrupt (current_cpu, FRV_MP_EXCEPTION);
 }
 
@@ -584,11 +588,17 @@ frvbf_media_cr_not_aligned (SIM_CPU *current_cpu)
 {
   SIM_DESC sd = CPU_STATE (current_cpu);
 
-  /* On the fr400 this generates an illegal_instruction interrupt.  */
-  if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr400)
-    frv_queue_program_interrupt (current_cpu, FRV_ILLEGAL_INSTRUCTION);
-  else
-    frv_set_mp_exception_registers (current_cpu, MTT_CR_NOT_ALIGNED, 0);
+  /* On some machines this generates an illegal_instruction interrupt.  */
+  switch (STATE_ARCHITECTURE (sd)->mach)
+    {
+    case bfd_mach_fr400:
+    case bfd_mach_fr550:
+      frv_queue_program_interrupt (current_cpu, FRV_ILLEGAL_INSTRUCTION);
+      break;
+    default:
+      frv_set_mp_exception_registers (current_cpu, MTT_CR_NOT_ALIGNED, 0);
+      break;
+    }
 }
 
 /* Record state for media exception: media_acc_not_aligned.  */
@@ -597,11 +607,17 @@ frvbf_media_acc_not_aligned (SIM_CPU *current_cpu)
 {
   SIM_DESC sd = CPU_STATE (current_cpu);
 
-  /* On the fr400 this generates an illegal_instruction interrupt.  */
-  if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr400)
-    frv_queue_program_interrupt (current_cpu, FRV_ILLEGAL_INSTRUCTION);
-  else
-    frv_set_mp_exception_registers (current_cpu, MTT_ACC_NOT_ALIGNED, 0);
+  /* On some machines this generates an illegal_instruction interrupt.  */
+  switch (STATE_ARCHITECTURE (sd)->mach)
+    {
+    case bfd_mach_fr400:
+    case bfd_mach_fr550:
+      frv_queue_program_interrupt (current_cpu, FRV_ILLEGAL_INSTRUCTION);
+      break;
+    default:
+      frv_set_mp_exception_registers (current_cpu, MTT_ACC_NOT_ALIGNED, 0);
+      break;
+    }
 }
 
 /* Record state for media exception: media_register_not_aligned.  */
@@ -610,11 +626,17 @@ frvbf_media_register_not_aligned (SIM_CPU *current_cpu)
 {
   SIM_DESC sd = CPU_STATE (current_cpu);
 
-  /* On the fr400 this generates an illegal_instruction interrupt.  */
-  if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr400)
-    frv_queue_program_interrupt (current_cpu, FRV_ILLEGAL_INSTRUCTION);
-  else
-    frv_set_mp_exception_registers (current_cpu, MTT_INVALID_FR, 0);
+  /* On some machines this generates an illegal_instruction interrupt.  */
+  switch (STATE_ARCHITECTURE (sd)->mach)
+    {
+    case bfd_mach_fr400:
+    case bfd_mach_fr550:
+      frv_queue_program_interrupt (current_cpu, FRV_ILLEGAL_INSTRUCTION);
+      break;
+    default:
+      frv_set_mp_exception_registers (current_cpu, MTT_INVALID_FR, 0);
+      break;
+    }
 }
 
 /* Record state for media exception: media_overflow.  */
@@ -723,6 +745,50 @@ frvbf_check_recovering_store (
 	  break; /* Only consider the first matching register.  */
 	}
     } /* loop over active neear registers.  */
+}
+
+SI
+frvbf_check_acc_range (SIM_CPU *current_cpu, SI regno)
+{
+  /* Only applicable to fr550 */
+  SIM_DESC sd = CPU_STATE (current_cpu);
+  if (STATE_ARCHITECTURE (sd)->mach != bfd_mach_fr550)
+    return;
+
+  /* On the fr550, media insns in slots 0 and 2 can only access
+     accumulators acc0-acc3. Insns in slots 1 and 3 can only access
+     accumulators acc4-acc7 */
+  switch (frv_current_fm_slot)
+    {
+    case UNIT_FM0:
+    case UNIT_FM2:
+      if (regno <= 3)
+	return 1; /* all is ok */
+      break;
+    case UNIT_FM1:
+    case UNIT_FM3:
+      if (regno >= 4)
+	return 1; /* all is ok */
+      break;
+    }
+  
+  /* The specified accumulator is out of range. Queue an illegal_instruction
+     interrupt.  */
+  frv_queue_program_interrupt (current_cpu, FRV_ILLEGAL_INSTRUCTION);
+  return 0;
+}
+
+void
+frvbf_check_swap_address (SIM_CPU *current_cpu, SI address)
+{
+  /* Only applicable to fr550 */
+  SIM_DESC sd = CPU_STATE (current_cpu);
+  if (STATE_ARCHITECTURE (sd)->mach != bfd_mach_fr550)
+    return;
+
+  /* Adress must be aligned on a word boundary.  */
+  if (address & 0x3)
+    frv_queue_data_access_exception_interrupt (current_cpu);
 }
 
 static void

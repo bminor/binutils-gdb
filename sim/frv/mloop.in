@@ -1,5 +1,5 @@
 # Simulator main loop for frv. -*- C -*-
-# Copyright (C) 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+# Copyright (C) 1998, 1999, 2000, 2001, 2003 Free Software Foundation, Inc.
 # Contributed by Red Hat.
 #
 # This file is part of the GNU Simulators.
@@ -395,6 +395,7 @@ static void
       break;
     case bfd_mach_frvtomcat:
     case bfd_mach_fr500:
+    case bfd_mach_fr550:
     case bfd_mach_frv:
       simulate_dual_insn_prefetch (current_cpu, vpc, 16);
       break;
@@ -454,6 +455,7 @@ cat <<EOF
   int first_insn_p = 1;
   int last_insn_p = 0;
   int ninsns;
+  CGEN_ATTR_VALUE_TYPE slot;
 
   /* If the timer is enabled, then enable model profiling.  This is because
      the timer needs accurate cycles counts to work properly.  */
@@ -465,6 +467,7 @@ cat <<EOF
   vliw = CPU_VLIW (current_cpu);
   frv_vliw_reset (vliw, STATE_ARCHITECTURE (CPU_STATE (current_cpu))->mach,
                   CPU_ELF_FLAGS (current_cpu));
+  frv_current_fm_slot = UNIT_NIL;
 
   for (ninsns = 0; ! last_insn_p && ninsns < FRV_VLIW_SIZE; ++ninsns)
     {
@@ -484,6 +487,9 @@ cat <<EOF
       if (! error)
         frv_vliw_setup_insn (current_cpu, insn);
       frv_detect_insn_access_interrupts (current_cpu, sc);
+      slot = (*vliw->current_vliw)[vliw->next_slot - 1];
+      if (slot >= UNIT_FM0 && slot <= UNIT_FM3)
+        frv_current_fm_slot = slot;
 
       vpc = execute (current_cpu, sc, FAST_P);
 

@@ -1,5 +1,5 @@
 /* frv cache model.
-   Copyright (C) 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000, 2001, 2003 Free Software Foundation, Inc.
    Contributed by Red Hat.
 
 This file is part of the GNU simulators.
@@ -38,26 +38,38 @@ frv_cache_init (SIM_CPU *cpu, FRV_CACHE *cache)
   switch (STATE_ARCHITECTURE (sd)->mach)
     {
     case bfd_mach_fr400:
-      if (cache->sets == 0)
-	cache->sets = 128;
-      if (cache->ways == 0)
-	cache->ways = 2;
+      if (cache->configured_sets == 0)
+	cache->configured_sets = 128;
+      if (cache->configured_ways == 0)
+	cache->configured_ways = 2;
       if (cache->line_size == 0)
 	cache->line_size = 32;
       if (cache->memory_latency == 0)
 	cache->memory_latency = 20;
       break;
+    case bfd_mach_fr550:
+      if (cache->configured_sets == 0)
+	cache->configured_sets = 128;
+      if (cache->configured_ways == 0)
+	cache->configured_ways = 4;
+      if (cache->line_size == 0)
+	cache->line_size = 64;
+      if (cache->memory_latency == 0)
+	cache->memory_latency = 20;
+      break;
     default:
-      if (cache->sets == 0)
-	cache->sets = 64;
-      if (cache->ways == 0)
-	cache->ways = 4;
+      if (cache->configured_sets == 0)
+	cache->configured_sets = 64;
+      if (cache->configured_ways == 0)
+	cache->configured_ways = 4;
       if (cache->line_size == 0)
 	cache->line_size = 64;
       if (cache->memory_latency == 0)
 	cache->memory_latency = 20;
       break;
     }
+
+  frv_cache_reconfigure (cpu, cache);
 
   /* First allocate the cache storage based on the given dimensions.  */
   elements = cache->sets * cache->ways;
@@ -95,6 +107,40 @@ frv_cache_term (FRV_CACHE *cache)
   free (cache->pipeline[LD].status.return_buffer.data);
 }
 
+/* Reset the cache configuration based on registers in the cpu.  */
+void
+frv_cache_reconfigure (SIM_CPU *current_cpu, FRV_CACHE *cache)
+{
+  int ihsr8;
+  int icdm;
+  SIM_DESC sd;
+
+  /* Set defaults for fields which are not initialized.  */
+  sd = CPU_STATE (current_cpu);
+  switch (STATE_ARCHITECTURE (sd)->mach)
+    {
+    case bfd_mach_fr550:
+      if (cache == CPU_INSN_CACHE (current_cpu))
+	{
+	  ihsr8 = GET_IHSR8 ();
+	  icdm = GET_IHSR8_ICDM (ihsr8);
+	  /* If IHSR8.ICDM is set, then the cache becomes a one way cache.  */
+	  if (icdm)
+	    {
+	      cache->sets = cache->sets * cache->ways;
+	      cache->ways = 1;
+	      break;
+	    }
+	}
+      /* fall through */
+    default:
+      /* Set the cache to its original settings.  */
+      cache->sets = cache->configured_sets;
+      cache->ways = cache->configured_ways;
+      break;
+    }
+}
+
 /* Determine whether the given cache is enabled.  */
 int
 frv_cache_enabled (FRV_CACHE *cache)
@@ -106,6 +152,44 @@ frv_cache_enabled (FRV_CACHE *cache)
   if (GET_HSR0_DCE (hsr0) && cache == CPU_DATA_CACHE (current_cpu))
     return 1;
   return 0;
+}
+
+/* Determine whether the given address is RAM access, assuming that HSR0.RME
+   is set.  */
+static int
+ram_access (FRV_CACHE *cache, USI address) 
+{
+  int ihsr8;
+  int cwe;
+  USI start, end, way_size;
+  SIM_CPU *current_cpu = cache->cpu;
+  SIM_DESC sd = CPU_STATE (current_cpu);
+
+  switch (STATE_ARCHITECTURE (sd)->mach)
+    {
+    case bfd_mach_fr550:
+      /* IHSR8.DCWE or IHSR8.ICWE deternines which ways get RAM access.  */
+      ihsr8 = GET_IHSR8 ();
+      if (cache == CPU_INSN_CACHE (current_cpu))
+	{
+	  start = 0xfe000000;
+	  end = 0xfe008000;
+	  cwe = GET_IHSR8_ICWE (ihsr8);
+	}
+      else
+	{
+	  start = 0xfe400000;
+	  end = 0xfe408000;
+	  cwe = GET_IHSR8_DCWE (ihsr8);
+	}
+      way_size = (end - start) / 4;
+      end -= way_size * cwe;
+      return address >= start && address < end;
+    default:
+      break;
+    }
+
+  return 1; /* RAM access */
 }
 
 /* Determine whether the given address should be accessed without using
@@ -124,6 +208,17 @@ non_cache_access (FRV_CACHE *cache, USI address)
       if (address >= 0xff000000
 	  || address >= 0xfe000000 && address <= 0xfeffffff)
 	return 1; /* non-cache access */
+    case bfd_mach_fr550:
+      if (address >= 0xff000000
+	  || address >= 0xfeff0000 && address <= 0xfeffffff)
+	return 1; /* non-cache access */
+      if (cache == CPU_INSN_CACHE (current_cpu))
+	{
+	  if (address >= 0xfe000000 && address <= 0xfe007fff)
+	    return 1; /* non-cache access */
+	}
+      else if (address >= 0xfe400000 && address <= 0xfe407fff)
+	return 1; /* non-cache access */
     default:
       if (address >= 0xff000000
 	  || address >= 0xfeff0000 && address <= 0xfeffffff)
@@ -139,7 +234,7 @@ non_cache_access (FRV_CACHE *cache, USI address)
 
   hsr0 = GET_HSR0 ();
   if (GET_HSR0_RME (hsr0))
-    return 1; /* non-cache access */
+    return ram_access (cache, address);
 
   return 0; /* cache-access */
 }
@@ -1531,7 +1626,6 @@ frv_cache_read_passive_SI (FRV_CACHE *cache, SI address, SI *value)
   /* A cache line was available for the data.
      Extract the target data from the line.  */
   offset = address & (cache->line_size - 1);
-  offset &= ~3;
   *value = T2H_4 (*(SI *)(tag->line + offset));
   return 1;
 }

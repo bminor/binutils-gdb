@@ -35,6 +35,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 extern const MACH frv_mach;
+extern const MACH fr550_mach;
 extern const MACH fr500_mach;
 extern const MACH tomcat_mach;
 extern const MACH fr400_mach;

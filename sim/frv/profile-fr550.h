@@ -1,10 +1,8 @@
-/* Simulator support for frv.
+/* Profiling definitions for the fr550 model of the FRV simulator
+   Copyright (C) 2003 Free Software Foundation, Inc.
+   Contributed by Red Hat.
 
-THIS FILE IS MACHINE GENERATED WITH CGEN.
-
-Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
-
-This file is part of the GNU simulators.
+This file is part of the GNU Simulators.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,33 +16,12 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-*/
+#ifndef PROFILE_FR550_H
+#define PROFILE_FR550_H
 
-#include "sim-main.h"
-#include "bfd.h"
+void fr550_model_insn_before (SIM_CPU *, int);
+void fr550_model_insn_after (SIM_CPU *, int, int);
 
-const MACH *sim_machs[] =
-{
-#ifdef HAVE_CPU_FRVBF
-  & frv_mach,
-#endif
-#ifdef HAVE_CPU_FRVBF
-  & fr550_mach,
-#endif
-#ifdef HAVE_CPU_FRVBF
-  & fr500_mach,
-#endif
-#ifdef HAVE_CPU_FRVBF
-  & tomcat_mach,
-#endif
-#ifdef HAVE_CPU_FRVBF
-  & fr400_mach,
-#endif
-#ifdef HAVE_CPU_FRVBF
-  & simple_mach,
-#endif
-  0
-};
-
+#endif /* PROFILE_FR550_H */

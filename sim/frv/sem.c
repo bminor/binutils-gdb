@@ -311,7 +311,7 @@ SEM_FN_NAME (frvbf,xor) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 static SEM_PC
 SEM_FN_NAME (frvbf,not) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.sfmt_addcc.f
+#define FLD(f) abuf->fields.sfmt_scutss.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
@@ -449,6 +449,69 @@ SEM_FN_NAME (frvbf,umul) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
+/* smu: smu$pack $GRi,$GRj */
+
+static SEM_PC
+SEM_FN_NAME (frvbf,smu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smass.f
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
+
+  {
+    DI opval = MULDI (EXTSIDI (GET_H_GR (FLD (f_GRi))), EXTSIDI (GET_H_GR (FLD (f_GRj))));
+    sim_queue_fn_di_write (current_cpu, frvbf_h_iacc0_set, ((UINT) 0), opval);
+    TRACE_RESULT (current_cpu, abuf, "iacc0", 'D', opval);
+  }
+
+  return vpc;
+#undef FLD
+}
+
+/* smass: smass$pack $GRi,$GRj */
+
+static SEM_PC
+SEM_FN_NAME (frvbf,smass) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smass.f
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
+
+  {
+    DI opval = (ANDIF (ANDIF (GTDI (MULDI (EXTSIDI (GET_H_GR (FLD (f_GRi))), EXTSIDI (GET_H_GR (FLD (f_GRj)))), 0), GTDI (GET_H_IACC0 (((UINT) 0)), 0)), LTDI (SUBDI (9223372036854775807, MULDI (EXTSIDI (GET_H_GR (FLD (f_GRi))), EXTSIDI (GET_H_GR (FLD (f_GRj))))), GET_H_IACC0 (((UINT) 0))))) ? (MAKEDI (2147483647, 0xffffffff)) : (ANDIF (ANDIF (LTDI (MULDI (EXTSIDI (GET_H_GR (FLD (f_GRi))), EXTSIDI (GET_H_GR (FLD (f_GRj)))), 0), LTDI (GET_H_IACC0 (((UINT) 0)), 0)), GTDI (SUBDI (9223372036854775808, MULDI (EXTSIDI (GET_H_GR (FLD (f_GRi))), EXTSIDI (GET_H_GR (FLD (f_GRj))))), GET_H_IACC0 (((UINT) 0))))) ? (MAKEDI (0x80000000, 0)) : (ADDDI (GET_H_IACC0 (((UINT) 0)), MULDI (EXTSIDI (GET_H_GR (FLD (f_GRi))), EXTSIDI (GET_H_GR (FLD (f_GRj))))));
+    sim_queue_fn_di_write (current_cpu, frvbf_h_iacc0_set, ((UINT) 0), opval);
+    TRACE_RESULT (current_cpu, abuf, "iacc0", 'D', opval);
+  }
+
+  return vpc;
+#undef FLD
+}
+
+/* smsss: smsss$pack $GRi,$GRj */
+
+static SEM_PC
+SEM_FN_NAME (frvbf,smsss) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smass.f
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
+
+  {
+    DI opval = (ANDIF (ANDIF (LTDI (MULDI (EXTSIDI (GET_H_GR (FLD (f_GRi))), EXTSIDI (GET_H_GR (FLD (f_GRj)))), 0), GTDI (GET_H_IACC0 (((UINT) 0)), 0)), LTDI (ADDDI (9223372036854775807, MULDI (EXTSIDI (GET_H_GR (FLD (f_GRi))), EXTSIDI (GET_H_GR (FLD (f_GRj))))), GET_H_IACC0 (((UINT) 0))))) ? (MAKEDI (2147483647, 0xffffffff)) : (ANDIF (ANDIF (GTDI (MULDI (EXTSIDI (GET_H_GR (FLD (f_GRi))), EXTSIDI (GET_H_GR (FLD (f_GRj)))), 0), LTDI (GET_H_IACC0 (((UINT) 0)), 0)), GTDI (ADDDI (9223372036854775808, MULDI (EXTSIDI (GET_H_GR (FLD (f_GRi))), EXTSIDI (GET_H_GR (FLD (f_GRj))))), GET_H_IACC0 (((UINT) 0))))) ? (MAKEDI (0x80000000, 0)) : (SUBDI (GET_H_IACC0 (((UINT) 0)), MULDI (EXTSIDI (GET_H_GR (FLD (f_GRi))), EXTSIDI (GET_H_GR (FLD (f_GRj))))));
+    sim_queue_fn_di_write (current_cpu, frvbf_h_iacc0_set, ((UINT) 0), opval);
+    TRACE_RESULT (current_cpu, abuf, "iacc0", 'D', opval);
+  }
+
+  return vpc;
+#undef FLD
+}
+
 /* sll: sll$pack $GRi,$GRj,$GRk */
 
 static SEM_PC
@@ -504,6 +567,48 @@ SEM_FN_NAME (frvbf,sra) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
   {
     SI opval = SRASI (GET_H_GR (FLD (f_GRi)), ANDSI (GET_H_GR (FLD (f_GRj)), 31));
+    sim_queue_fn_si_write (current_cpu, frvbf_h_gr_set, FLD (f_GRk), opval);
+    TRACE_RESULT (current_cpu, abuf, "gr", 'x', opval);
+  }
+
+  return vpc;
+#undef FLD
+}
+
+/* slass: slass$pack $GRi,$GRj,$GRk */
+
+static SEM_PC
+SEM_FN_NAME (frvbf,slass) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
+
+  {
+    SI opval = frvbf_shift_left_arith_saturate (current_cpu, GET_H_GR (FLD (f_GRi)), GET_H_GR (FLD (f_GRj)));
+    sim_queue_fn_si_write (current_cpu, frvbf_h_gr_set, FLD (f_GRk), opval);
+    TRACE_RESULT (current_cpu, abuf, "gr", 'x', opval);
+  }
+
+  return vpc;
+#undef FLD
+}
+
+/* scutss: scutss$pack $GRj,$GRk */
+
+static SEM_PC
+SEM_FN_NAME (frvbf,scutss) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_scutss.f
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
+
+  {
+    SI opval = frvbf_iacc_cut (current_cpu, GET_H_IACC0 (((UINT) 0)), GET_H_GR (FLD (f_GRj)));
     sim_queue_fn_si_write (current_cpu, frvbf_h_gr_set, FLD (f_GRk), opval);
     TRACE_RESULT (current_cpu, abuf, "gr", 'x', opval);
   }
@@ -1943,6 +2048,66 @@ if (LTSI (tmp_tmp, 0)) {
     sim_queue_qi_write (current_cpu, & CPU (h_iccr[FLD (f_ICCi_1)]), opval);
     TRACE_RESULT (current_cpu, abuf, "iccr", 'x', opval);
   }
+}
+
+  return vpc;
+#undef FLD
+}
+
+/* addss: addss$pack $GRi,$GRj,$GRk */
+
+static SEM_PC
+SEM_FN_NAME (frvbf,addss) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
+
+{
+  {
+    SI opval = ADDSI (GET_H_GR (FLD (f_GRi)), GET_H_GR (FLD (f_GRj)));
+    sim_queue_fn_si_write (current_cpu, frvbf_h_gr_set, FLD (f_GRk), opval);
+    TRACE_RESULT (current_cpu, abuf, "gr", 'x', opval);
+  }
+if (ADDOFSI (GET_H_GR (FLD (f_GRi)), GET_H_GR (FLD (f_GRj)), 0)) {
+  {
+    SI opval = (GTSI (GET_H_GR (FLD (f_GRi)), 0)) ? (2147483647) : (LTSI (GET_H_GR (FLD (f_GRi)), 0)) ? (0x80000000) : (0);
+    sim_queue_fn_si_write (current_cpu, frvbf_h_gr_set, FLD (f_GRk), opval);
+    TRACE_RESULT (current_cpu, abuf, "gr", 'x', opval);
+  }
+}
+}
+
+  return vpc;
+#undef FLD
+}
+
+/* subss: subss$pack $GRi,$GRj,$GRk */
+
+static SEM_PC
+SEM_FN_NAME (frvbf,subss) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
+
+{
+  {
+    SI opval = SUBSI (GET_H_GR (FLD (f_GRi)), GET_H_GR (FLD (f_GRj)));
+    sim_queue_fn_si_write (current_cpu, frvbf_h_gr_set, FLD (f_GRk), opval);
+    TRACE_RESULT (current_cpu, abuf, "gr", 'x', opval);
+  }
+if (SUBOFSI (GET_H_GR (FLD (f_GRi)), GET_H_GR (FLD (f_GRj)), 0)) {
+  {
+    SI opval = (GTSI (GET_H_GR (FLD (f_GRi)), 0)) ? (2147483647) : (LTSI (GET_H_GR (FLD (f_GRi)), 0)) ? (0x80000000) : (0);
+    sim_queue_fn_si_write (current_cpu, frvbf_h_gr_set, FLD (f_GRk), opval);
+    TRACE_RESULT (current_cpu, abuf, "gr", 'x', opval);
+  }
+}
 }
 
   return vpc;
@@ -7515,6 +7680,7 @@ SEM_FN_NAME (frvbf,swap) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SI tmp_address;
   tmp_tmp = GET_H_GR (FLD (f_GRk));
   tmp_address = ADDSI (GET_H_GR (FLD (f_GRi)), GET_H_GR (FLD (f_GRj)));
+frvbf_check_swap_address (current_cpu, tmp_address);
   {
     SI opval = frvbf_read_mem_WI (current_cpu, pc, tmp_address);
     sim_queue_fn_si_write (current_cpu, frvbf_h_gr_set, FLD (f_GRk), opval);
@@ -7543,6 +7709,7 @@ SEM_FN_NAME (frvbf,swapi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SI tmp_address;
   tmp_tmp = GET_H_GR (FLD (f_GRk));
   tmp_address = ADDSI (GET_H_GR (FLD (f_GRi)), FLD (f_d12));
+frvbf_check_swap_address (current_cpu, tmp_address);
   {
     SI opval = frvbf_read_mem_WI (current_cpu, pc, tmp_address);
     sim_queue_fn_si_write (current_cpu, frvbf_h_gr_set, FLD (f_GRk), opval);
@@ -7572,6 +7739,7 @@ if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
   SI tmp_address;
   tmp_tmp = GET_H_GR (FLD (f_GRk));
   tmp_address = ADDSI (GET_H_GR (FLD (f_GRi)), GET_H_GR (FLD (f_GRj)));
+frvbf_check_swap_address (current_cpu, tmp_address);
   {
     SI opval = frvbf_read_mem_WI (current_cpu, pc, tmp_address);
     sim_queue_fn_si_write (current_cpu, frvbf_h_gr_set, FLD (f_GRk), opval);
@@ -22679,6 +22847,8 @@ SEM_FN_NAME (frvbf,maddaccs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Si))) {
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Si), SUBSI (2, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -22690,7 +22860,7 @@ if (GTDI (tmp_tmp, 549755813887)) {
   {
     DI opval = 549755813887;
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 3);
+    written |= (1 << 4);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
 frvbf_media_overflow (current_cpu, 8);
@@ -22701,7 +22871,7 @@ if (LTDI (tmp_tmp, INVDI (549755813887))) {
   {
     DI opval = INVDI (549755813887);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 3);
+    written |= (1 << 4);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
 frvbf_media_overflow (current_cpu, 8);
@@ -22710,9 +22880,11 @@ frvbf_media_overflow (current_cpu, 8);
   {
     DI opval = tmp_tmp;
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 3);
+    written |= (1 << 4);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
+}
+}
 }
 }
 }
@@ -22734,6 +22906,8 @@ SEM_FN_NAME (frvbf,msubaccs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Si))) {
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Si), SUBSI (2, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -22745,7 +22919,7 @@ if (GTDI (tmp_tmp, 549755813887)) {
   {
     DI opval = 549755813887;
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 3);
+    written |= (1 << 4);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
 frvbf_media_overflow (current_cpu, 8);
@@ -22756,7 +22930,7 @@ if (LTDI (tmp_tmp, INVDI (549755813887))) {
   {
     DI opval = INVDI (549755813887);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 3);
+    written |= (1 << 4);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
 frvbf_media_overflow (current_cpu, 8);
@@ -22765,9 +22939,11 @@ frvbf_media_overflow (current_cpu, 8);
   {
     DI opval = tmp_tmp;
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 3);
+    written |= (1 << 4);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
+}
+}
 }
 }
 }
@@ -22789,6 +22965,8 @@ SEM_FN_NAME (frvbf,mdaddaccs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Si))) {
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Si), SUBSI (4, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -22861,6 +23039,8 @@ frvbf_media_overflow (current_cpu, 4);
     written |= (1 << 7);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
+}
+}
 }
 }
 }
@@ -22884,6 +23064,8 @@ SEM_FN_NAME (frvbf,mdsubaccs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Si))) {
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Si), SUBSI (4, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -22962,6 +23144,8 @@ frvbf_media_overflow (current_cpu, 4);
 }
 }
 }
+}
+}
 
   abuf->written = written;
   return vpc;
@@ -22979,6 +23163,8 @@ SEM_FN_NAME (frvbf,masaccs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Si))) {
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Si), SUBSI (2, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -23057,6 +23243,8 @@ frvbf_media_overflow (current_cpu, 4);
 }
 }
 }
+}
+}
 
   abuf->written = written;
   return vpc;
@@ -23074,6 +23262,8 @@ SEM_FN_NAME (frvbf,mdasaccs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Si))) {
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Si), SUBSI (4, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -23220,6 +23410,8 @@ frvbf_media_overflow (current_cpu, 1);
 }
 }
 }
+}
+}
 
   abuf->written = written;
   return vpc;
@@ -23237,6 +23429,7 @@ SEM_FN_NAME (frvbf,mmulhs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Sk), SUBSI (2, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -23265,6 +23458,7 @@ frvbf_media_acc_not_aligned (current_cpu);
   }
 }
 }
+}
 
   abuf->written = written;
   return vpc;
@@ -23282,6 +23476,7 @@ SEM_FN_NAME (frvbf,mmulhu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Sk), SUBSI (2, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -23310,6 +23505,7 @@ frvbf_media_acc_not_aligned (current_cpu);
   }
 }
 }
+}
 
   abuf->written = written;
   return vpc;
@@ -23327,6 +23523,7 @@ SEM_FN_NAME (frvbf,mmulxhs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Sk), SUBSI (2, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -23355,6 +23552,7 @@ frvbf_media_acc_not_aligned (current_cpu);
   }
 }
 }
+}
 
   abuf->written = written;
   return vpc;
@@ -23372,6 +23570,7 @@ SEM_FN_NAME (frvbf,mmulxhu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Sk), SUBSI (2, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -23400,6 +23599,7 @@ frvbf_media_acc_not_aligned (current_cpu);
   }
 }
 }
+}
 
   abuf->written = written;
   return vpc;
@@ -23417,6 +23617,7 @@ SEM_FN_NAME (frvbf,cmmulhs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Sk), SUBSI (2, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -23444,6 +23645,7 @@ if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
     written |= (1 << 12);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
+}
 }
 }
 }
@@ -23464,6 +23666,7 @@ SEM_FN_NAME (frvbf,cmmulhu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Sk), SUBSI (2, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -23494,6 +23697,7 @@ if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
 }
 }
 }
+}
 
   abuf->written = written;
   return vpc;
@@ -23511,6 +23715,7 @@ SEM_FN_NAME (frvbf,mqmulhs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Sk), SUBSI (4, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -23558,6 +23763,7 @@ frvbf_media_register_not_aligned (current_cpu);
     written |= (1 << 16);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
+}
 }
 }
 }
@@ -23578,6 +23784,7 @@ SEM_FN_NAME (frvbf,mqmulhu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Sk), SUBSI (4, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -23628,6 +23835,7 @@ frvbf_media_register_not_aligned (current_cpu);
 }
 }
 }
+}
 
   abuf->written = written;
   return vpc;
@@ -23645,6 +23853,7 @@ SEM_FN_NAME (frvbf,mqmulxhs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Sk), SUBSI (4, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -23695,6 +23904,7 @@ frvbf_media_register_not_aligned (current_cpu);
 }
 }
 }
+}
 
   abuf->written = written;
   return vpc;
@@ -23712,6 +23922,7 @@ SEM_FN_NAME (frvbf,mqmulxhu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Sk), SUBSI (4, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -23762,6 +23973,7 @@ frvbf_media_register_not_aligned (current_cpu);
 }
 }
 }
+}
 
   abuf->written = written;
   return vpc;
@@ -23779,6 +23991,7 @@ SEM_FN_NAME (frvbf,cmqmulhs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Sk), SUBSI (4, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -23827,6 +24040,7 @@ if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
     written |= (1 << 18);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
+}
 }
 }
 }
@@ -23848,6 +24062,7 @@ SEM_FN_NAME (frvbf,cmqmulhu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Sk), SUBSI (4, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -23900,6 +24115,7 @@ if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
 }
 }
 }
+}
 
   abuf->written = written;
   return vpc;
@@ -23917,6 +24133,7 @@ SEM_FN_NAME (frvbf,mmachs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Sk), SUBSI (2, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -24001,6 +24218,7 @@ frvbf_media_overflow (current_cpu, 4);
 }
 }
 }
+}
 
   abuf->written = written;
   return vpc;
@@ -24018,6 +24236,7 @@ SEM_FN_NAME (frvbf,mmachu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Uk))) {
 if (ANDSI (FLD (f_ACC40Uk), SUBSI (2, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -24102,6 +24321,7 @@ frvbf_media_overflow (current_cpu, 4);
 }
 }
 }
+}
 
   abuf->written = written;
   return vpc;
@@ -24119,6 +24339,7 @@ SEM_FN_NAME (frvbf,mmrdhs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Sk), SUBSI (2, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -24203,6 +24424,7 @@ frvbf_media_overflow (current_cpu, 4);
 }
 }
 }
+}
 
   abuf->written = written;
   return vpc;
@@ -24220,6 +24442,7 @@ SEM_FN_NAME (frvbf,mmrdhu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Uk))) {
 if (ANDSI (FLD (f_ACC40Uk), SUBSI (2, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -24304,6 +24527,7 @@ frvbf_media_overflow (current_cpu, 4);
 }
 }
 }
+}
 
   abuf->written = written;
   return vpc;
@@ -24321,6 +24545,7 @@ SEM_FN_NAME (frvbf,cmmachs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Sk), SUBSI (2, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -24407,6 +24632,7 @@ frvbf_media_overflow (current_cpu, 4);
 }
 }
 }
+}
 
   abuf->written = written;
   return vpc;
@@ -24424,6 +24650,7 @@ SEM_FN_NAME (frvbf,cmmachu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Uk))) {
 if (ANDSI (FLD (f_ACC40Uk), SUBSI (2, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -24510,6 +24737,7 @@ frvbf_media_overflow (current_cpu, 4);
 }
 }
 }
+}
 
   abuf->written = written;
   return vpc;
@@ -24527,6 +24755,7 @@ SEM_FN_NAME (frvbf,mqmachs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Sk), SUBSI (4, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -24689,6 +24918,7 @@ frvbf_media_overflow (current_cpu, 1);
 }
 }
 }
+}
 
   abuf->written = written;
   return vpc;
@@ -24706,6 +24936,7 @@ SEM_FN_NAME (frvbf,mqmachu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Uk))) {
 if (ANDSI (FLD (f_ACC40Uk), SUBSI (4, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -24868,6 +25099,7 @@ frvbf_media_overflow (current_cpu, 1);
 }
 }
 }
+}
 
   abuf->written = written;
   return vpc;
@@ -24885,6 +25117,7 @@ SEM_FN_NAME (frvbf,cmqmachs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Sk), SUBSI (4, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -25042,6 +25275,7 @@ frvbf_media_overflow (current_cpu, 1);
     written |= (1 << 22);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
+}
 }
 }
 }
@@ -25066,6 +25300,7 @@ SEM_FN_NAME (frvbf,cmqmachu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Uk))) {
 if (ANDSI (FLD (f_ACC40Uk), SUBSI (4, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -25230,6 +25465,7 @@ frvbf_media_overflow (current_cpu, 1);
 }
 }
 }
+}
 
   abuf->written = written;
   return vpc;
@@ -25247,6 +25483,7 @@ SEM_FN_NAME (frvbf,mqxmachs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Sk), SUBSI (4, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -25409,6 +25646,7 @@ frvbf_media_overflow (current_cpu, 4);
 }
 }
 }
+}
 
   abuf->written = written;
   return vpc;
@@ -25426,6 +25664,7 @@ SEM_FN_NAME (frvbf,mqxmacxhs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Sk), SUBSI (4, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -25582,6 +25821,7 @@ frvbf_media_overflow (current_cpu, 4);
     written |= (1 << 18);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
+}
 }
 }
 }
@@ -25605,6 +25845,7 @@ SEM_FN_NAME (frvbf,mqmacxhs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Sk), SUBSI (4, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -25767,6 +26008,7 @@ frvbf_media_overflow (current_cpu, 1);
 }
 }
 }
+}
 
   abuf->written = written;
   return vpc;
@@ -25784,6 +26026,7 @@ SEM_FN_NAME (frvbf,mcpxrs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 {
   HI tmp_argihi;
   HI tmp_argilo;
@@ -25806,7 +26049,7 @@ if (GTDI (tmp_tmp1, MAKEDI (127, 0xffffffff))) {
   {
     DI opval = MAKEDI (127, 0xffffffff);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 8);
+    written |= (1 << 9);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
 frvbf_media_overflow (current_cpu, 8);
@@ -25817,7 +26060,7 @@ if (LTDI (tmp_tmp1, MAKEDI (0xffffff80, 0))) {
   {
     DI opval = MAKEDI (0xffffff80, 0);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 8);
+    written |= (1 << 9);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
 frvbf_media_overflow (current_cpu, 8);
@@ -25826,9 +26069,10 @@ frvbf_media_overflow (current_cpu, 8);
   {
     DI opval = tmp_tmp1;
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 8);
+    written |= (1 << 9);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
+}
 }
 }
 }
@@ -25850,6 +26094,7 @@ SEM_FN_NAME (frvbf,mcpxru) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 {
   UHI tmp_argihi;
   UHI tmp_argilo;
@@ -25872,7 +26117,7 @@ if (GTDI (tmp_tmp1, MAKEDI (255, 0xffffffff))) {
   {
     DI opval = MAKEDI (255, 0xffffffff);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 8);
+    written |= (1 << 9);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
 frvbf_media_overflow (current_cpu, 8);
@@ -25883,7 +26128,7 @@ if (LTDI (tmp_tmp1, MAKEDI (0, 0))) {
   {
     DI opval = MAKEDI (0, 0);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 8);
+    written |= (1 << 9);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
 frvbf_media_overflow (current_cpu, 8);
@@ -25892,9 +26137,10 @@ frvbf_media_overflow (current_cpu, 8);
   {
     DI opval = tmp_tmp1;
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 8);
+    written |= (1 << 9);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
+}
 }
 }
 }
@@ -25916,6 +26162,7 @@ SEM_FN_NAME (frvbf,mcpxis) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 {
   HI tmp_argihi;
   HI tmp_argilo;
@@ -25938,7 +26185,7 @@ if (GTDI (tmp_tmp1, MAKEDI (127, 0xffffffff))) {
   {
     DI opval = MAKEDI (127, 0xffffffff);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 8);
+    written |= (1 << 9);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
 frvbf_media_overflow (current_cpu, 8);
@@ -25949,7 +26196,7 @@ if (LTDI (tmp_tmp1, MAKEDI (0xffffff80, 0))) {
   {
     DI opval = MAKEDI (0xffffff80, 0);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 8);
+    written |= (1 << 9);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
 frvbf_media_overflow (current_cpu, 8);
@@ -25958,9 +26205,10 @@ frvbf_media_overflow (current_cpu, 8);
   {
     DI opval = tmp_tmp1;
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 8);
+    written |= (1 << 9);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
+}
 }
 }
 }
@@ -25982,6 +26230,7 @@ SEM_FN_NAME (frvbf,mcpxiu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 {
   UHI tmp_argihi;
   UHI tmp_argilo;
@@ -26004,7 +26253,7 @@ if (GTDI (tmp_tmp1, MAKEDI (255, 0xffffffff))) {
   {
     DI opval = MAKEDI (255, 0xffffffff);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 8);
+    written |= (1 << 9);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
 frvbf_media_overflow (current_cpu, 8);
@@ -26015,7 +26264,7 @@ if (LTDI (tmp_tmp1, MAKEDI (0, 0))) {
   {
     DI opval = MAKEDI (0, 0);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 8);
+    written |= (1 << 9);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
 frvbf_media_overflow (current_cpu, 8);
@@ -26024,9 +26273,10 @@ frvbf_media_overflow (current_cpu, 8);
   {
     DI opval = tmp_tmp1;
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 8);
+    written |= (1 << 9);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
+}
 }
 }
 }
@@ -26049,6 +26299,7 @@ SEM_FN_NAME (frvbf,cmcpxrs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
 if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 {
   HI tmp_argihi;
   HI tmp_argilo;
@@ -26071,7 +26322,7 @@ if (GTDI (tmp_tmp1, MAKEDI (127, 0xffffffff))) {
   {
     DI opval = MAKEDI (127, 0xffffffff);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 10);
+    written |= (1 << 11);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
 frvbf_media_overflow (current_cpu, 8);
@@ -26082,7 +26333,7 @@ if (LTDI (tmp_tmp1, MAKEDI (0xffffff80, 0))) {
   {
     DI opval = MAKEDI (0xffffff80, 0);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 10);
+    written |= (1 << 11);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
 frvbf_media_overflow (current_cpu, 8);
@@ -26091,9 +26342,10 @@ frvbf_media_overflow (current_cpu, 8);
   {
     DI opval = tmp_tmp1;
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 10);
+    written |= (1 << 11);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
+}
 }
 }
 }
@@ -26117,6 +26369,7 @@ SEM_FN_NAME (frvbf,cmcpxru) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
 if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 {
   UHI tmp_argihi;
   UHI tmp_argilo;
@@ -26139,7 +26392,7 @@ if (GTDI (tmp_tmp1, MAKEDI (255, 0xffffffff))) {
   {
     DI opval = MAKEDI (255, 0xffffffff);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 10);
+    written |= (1 << 11);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
 frvbf_media_overflow (current_cpu, 8);
@@ -26150,7 +26403,7 @@ if (LTDI (tmp_tmp1, MAKEDI (0, 0))) {
   {
     DI opval = MAKEDI (0, 0);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 10);
+    written |= (1 << 11);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
 frvbf_media_overflow (current_cpu, 8);
@@ -26159,9 +26412,10 @@ frvbf_media_overflow (current_cpu, 8);
   {
     DI opval = tmp_tmp1;
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 10);
+    written |= (1 << 11);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
+}
 }
 }
 }
@@ -26185,6 +26439,7 @@ SEM_FN_NAME (frvbf,cmcpxis) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
 if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 {
   HI tmp_argihi;
   HI tmp_argilo;
@@ -26207,7 +26462,7 @@ if (GTDI (tmp_tmp1, MAKEDI (127, 0xffffffff))) {
   {
     DI opval = MAKEDI (127, 0xffffffff);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 10);
+    written |= (1 << 11);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
 frvbf_media_overflow (current_cpu, 8);
@@ -26218,7 +26473,7 @@ if (LTDI (tmp_tmp1, MAKEDI (0xffffff80, 0))) {
   {
     DI opval = MAKEDI (0xffffff80, 0);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 10);
+    written |= (1 << 11);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
 frvbf_media_overflow (current_cpu, 8);
@@ -26227,9 +26482,10 @@ frvbf_media_overflow (current_cpu, 8);
   {
     DI opval = tmp_tmp1;
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 10);
+    written |= (1 << 11);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
+}
 }
 }
 }
@@ -26253,6 +26509,7 @@ SEM_FN_NAME (frvbf,cmcpxiu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
 if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 {
   UHI tmp_argihi;
   UHI tmp_argilo;
@@ -26275,7 +26532,7 @@ if (GTDI (tmp_tmp1, MAKEDI (255, 0xffffffff))) {
   {
     DI opval = MAKEDI (255, 0xffffffff);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 10);
+    written |= (1 << 11);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
 frvbf_media_overflow (current_cpu, 8);
@@ -26286,7 +26543,7 @@ if (LTDI (tmp_tmp1, MAKEDI (0, 0))) {
   {
     DI opval = MAKEDI (0, 0);
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 10);
+    written |= (1 << 11);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
 frvbf_media_overflow (current_cpu, 8);
@@ -26295,9 +26552,10 @@ frvbf_media_overflow (current_cpu, 8);
   {
     DI opval = tmp_tmp1;
     sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, FLD (f_ACC40Sk), opval);
-    written |= (1 << 10);
+    written |= (1 << 11);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
+}
 }
 }
 }
@@ -26320,6 +26578,7 @@ SEM_FN_NAME (frvbf,mqcpxrs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Sk), SUBSI (2, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -26414,6 +26673,7 @@ frvbf_media_overflow (current_cpu, 4);
     written |= (1 << 14);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
+}
 }
 }
 }
@@ -26437,6 +26697,7 @@ SEM_FN_NAME (frvbf,mqcpxru) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Sk), SUBSI (2, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -26537,6 +26798,7 @@ frvbf_media_overflow (current_cpu, 4);
 }
 }
 }
+}
 
   abuf->written = written;
   return vpc;
@@ -26554,6 +26816,7 @@ SEM_FN_NAME (frvbf,mqcpxis) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Sk), SUBSI (2, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -26654,6 +26917,7 @@ frvbf_media_overflow (current_cpu, 4);
 }
 }
 }
+}
 
   abuf->written = written;
   return vpc;
@@ -26671,6 +26935,7 @@ SEM_FN_NAME (frvbf,mqcpxiu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+if (frvbf_check_acc_range (current_cpu, FLD (f_ACC40Sk))) {
 if (ANDSI (FLD (f_ACC40Sk), SUBSI (2, 1))) {
 frvbf_media_acc_not_aligned (current_cpu);
 } else {
@@ -26765,6 +27030,7 @@ frvbf_media_overflow (current_cpu, 4);
     written |= (1 << 14);
     TRACE_RESULT (current_cpu, abuf, "acc40S", 'D', opval);
   }
+}
 }
 }
 }
@@ -27833,9 +28099,14 @@ static const struct sem_fn_desc sem_fns[] = {
   { FRVBF_INSN_NUDIV, SEM_FN_NAME (frvbf,nudiv) },
   { FRVBF_INSN_SMUL, SEM_FN_NAME (frvbf,smul) },
   { FRVBF_INSN_UMUL, SEM_FN_NAME (frvbf,umul) },
+  { FRVBF_INSN_SMU, SEM_FN_NAME (frvbf,smu) },
+  { FRVBF_INSN_SMASS, SEM_FN_NAME (frvbf,smass) },
+  { FRVBF_INSN_SMSSS, SEM_FN_NAME (frvbf,smsss) },
   { FRVBF_INSN_SLL, SEM_FN_NAME (frvbf,sll) },
   { FRVBF_INSN_SRL, SEM_FN_NAME (frvbf,srl) },
   { FRVBF_INSN_SRA, SEM_FN_NAME (frvbf,sra) },
+  { FRVBF_INSN_SLASS, SEM_FN_NAME (frvbf,slass) },
+  { FRVBF_INSN_SCUTSS, SEM_FN_NAME (frvbf,scutss) },
   { FRVBF_INSN_SCAN, SEM_FN_NAME (frvbf,scan) },
   { FRVBF_INSN_CADD, SEM_FN_NAME (frvbf,cadd) },
   { FRVBF_INSN_CSUB, SEM_FN_NAME (frvbf,csub) },
@@ -27873,6 +28144,8 @@ static const struct sem_fn_desc sem_fns[] = {
   { FRVBF_INSN_SUBX, SEM_FN_NAME (frvbf,subx) },
   { FRVBF_INSN_ADDXCC, SEM_FN_NAME (frvbf,addxcc) },
   { FRVBF_INSN_SUBXCC, SEM_FN_NAME (frvbf,subxcc) },
+  { FRVBF_INSN_ADDSS, SEM_FN_NAME (frvbf,addss) },
+  { FRVBF_INSN_SUBSS, SEM_FN_NAME (frvbf,subss) },
   { FRVBF_INSN_ADDI, SEM_FN_NAME (frvbf,addi) },
   { FRVBF_INSN_SUBI, SEM_FN_NAME (frvbf,subi) },
   { FRVBF_INSN_ANDI, SEM_FN_NAME (frvbf,andi) },

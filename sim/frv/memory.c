@@ -1,6 +1,6 @@
 /* frv memory model.
-   Copyright (C) 1999, 2000, 2001 Free Software Foundation, Inc.
-   Contributed by Red Hat.
+   Copyright (C) 1999, 2000, 2001, 2003 Free Software Foundation, Inc.
+   Contributed by Red Hat
 
 This file is part of the GNU simulators.
 
@@ -56,6 +56,17 @@ fr500_check_data_read_address (SIM_CPU *current_cpu, SI address, int align_mask)
 }
 
 static SI
+fr550_check_data_read_address (SIM_CPU *current_cpu, SI address, int align_mask)
+{
+  if ((USI)address >= 0xfe800000 && (USI)address <= 0xfefeffff
+      || (align_mask > 0x3
+	  && ((USI)address >= 0xfeff0000 && (USI)address <= 0xfeffffff)))
+    frv_queue_data_access_error_interrupt (current_cpu, address);
+
+  return address;
+}
+
+static SI
 check_data_read_address (SIM_CPU *current_cpu, SI address, int align_mask)
 {
   SIM_DESC sd = CPU_STATE (current_cpu);
@@ -69,6 +80,10 @@ check_data_read_address (SIM_CPU *current_cpu, SI address, int align_mask)
     case bfd_mach_fr500:
     case bfd_mach_frv:
       address = fr500_check_data_read_address (current_cpu, address,
+					       align_mask);
+      break;
+    case bfd_mach_fr550:
+      address = fr550_check_data_read_address (current_cpu, address,
 					       align_mask);
       break;
     default:
@@ -109,6 +124,25 @@ fr500_check_readwrite_address (SIM_CPU *current_cpu, SI address, int align_mask)
 }
 
 static SI
+fr550_check_readwrite_address (SIM_CPU *current_cpu, SI address, int align_mask)
+{
+  /* No alignment restrictions on fr550 */
+
+  if ((USI)address >= 0xfe000000 && (USI)address <= 0xfe3fffff
+      || (USI)address >= 0xfe408000 && (USI)address <= 0xfe7fffff)
+    frv_queue_data_access_exception_interrupt (current_cpu);
+  else
+    {
+      USI hsr0 = GET_HSR0 ();
+      if (! GET_HSR0_RME (hsr0)
+	  && (USI)address >= 0xfe400000 && (USI)address <= 0xfe407fff)
+	frv_queue_data_access_exception_interrupt (current_cpu);
+    }
+
+  return address;
+}
+
+static SI
 check_readwrite_address (SIM_CPU *current_cpu, SI address, int align_mask)
 {
   SIM_DESC sd = CPU_STATE (current_cpu);
@@ -123,6 +157,10 @@ check_readwrite_address (SIM_CPU *current_cpu, SI address, int align_mask)
     case bfd_mach_frv:
       address = fr500_check_readwrite_address (current_cpu, address,
 						    align_mask);
+      break;
+    case bfd_mach_fr550:
+      address = fr550_check_readwrite_address (current_cpu, address,
+					       align_mask);
       break;
     default:
       break;
@@ -175,6 +213,27 @@ fr500_check_insn_read_address (SIM_CPU *current_cpu, PCADDR address,
 }
 
 static PCADDR
+fr550_check_insn_read_address (SIM_CPU *current_cpu, PCADDR address,
+			       int align_mask)
+{
+  address &= ~align_mask;
+
+  if ((USI)address >= 0xfe800000 && (USI)address <= 0xfeffffff)
+    frv_queue_instruction_access_error_interrupt (current_cpu);
+  else if ((USI)address >= 0xfe008000 && (USI)address <= 0xfe7fffff)
+    frv_queue_instruction_access_exception_interrupt (current_cpu);
+  else
+    {
+      USI hsr0 = GET_HSR0 ();
+      if (! GET_HSR0_RME (hsr0)
+	  && (USI)address >= 0xfe000000 && (USI)address <= 0xfe007fff)
+	frv_queue_instruction_access_exception_interrupt (current_cpu);
+    }
+
+  return address;
+}
+
+static PCADDR
 check_insn_read_address (SIM_CPU *current_cpu, PCADDR address, int align_mask)
 {
   SIM_DESC sd = CPU_STATE (current_cpu);
@@ -188,6 +247,10 @@ check_insn_read_address (SIM_CPU *current_cpu, PCADDR address, int align_mask)
     case bfd_mach_fr500:
     case bfd_mach_frv:
       address = fr500_check_insn_read_address (current_cpu, address,
+					       align_mask);
+      break;
+    case bfd_mach_fr550:
+      address = fr550_check_insn_read_address (current_cpu, address,
 					       align_mask);
       break;
     default:
@@ -262,6 +325,16 @@ frvbf_read_mem_UQI (SIM_CPU *current_cpu, IADDR pc, SI address)
   return GETMEMUQI (current_cpu, pc, address);
 }
 
+/* Read a HI which spans two cache lines */
+static HI
+read_mem_unaligned_HI (SIM_CPU *current_cpu, IADDR pc, SI address)
+{
+  HI value = frvbf_read_mem_QI (current_cpu, pc, address);
+  value <<= 8;
+  value |= frvbf_read_mem_UQI (current_cpu, pc, address + 1);
+  return T2H_2 (value);
+}
+
 HI
 frvbf_read_mem_HI (SIM_CPU *current_cpu, IADDR pc, SI address)
 {
@@ -288,6 +361,13 @@ frvbf_read_mem_HI (SIM_CPU *current_cpu, IADDR pc, SI address)
   if (GET_HSR0_DCE (hsr0))
     {
       int cycles;
+      /* Handle access which crosses cache line boundary */
+      SIM_DESC sd = CPU_STATE (current_cpu);
+      if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr550)
+	{
+	  if (DATA_CROSSES_CACHE_LINE (cache, address, 2))
+	    return read_mem_unaligned_HI (current_cpu, pc, address); 
+	}
       cycles = frv_cache_read (cache, 0, address);
       if (cycles != 0)
 	return CACHE_RETURN_DATA (cache, 0, address, HI, 2);
@@ -322,12 +402,57 @@ frvbf_read_mem_UHI (SIM_CPU *current_cpu, IADDR pc, SI address)
   if (GET_HSR0_DCE (hsr0))
     {
       int cycles;
+      /* Handle access which crosses cache line boundary */
+      SIM_DESC sd = CPU_STATE (current_cpu);
+      if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr550)
+	{
+	  if (DATA_CROSSES_CACHE_LINE (cache, address, 2))
+	    return read_mem_unaligned_HI (current_cpu, pc, address); 
+	}
       cycles = frv_cache_read (cache, 0, address);
       if (cycles != 0)
 	return CACHE_RETURN_DATA (cache, 0, address, UHI, 2);
     }
 
   return GETMEMUHI (current_cpu, pc, address);
+}
+
+/* Read a SI which spans two cache lines */
+static SI
+read_mem_unaligned_SI (SIM_CPU *current_cpu, IADDR pc, SI address)
+{
+  FRV_CACHE *cache = CPU_DATA_CACHE (current_cpu);
+  unsigned hi_len = cache->line_size - (address & (cache->line_size - 1));
+  char valarray[4];
+  SI SIvalue;
+  HI HIvalue;
+
+  switch (hi_len)
+    {
+    case 1:
+      valarray[0] = frvbf_read_mem_QI (current_cpu, pc, address);
+      SIvalue = frvbf_read_mem_SI (current_cpu, pc, address + 1);
+      SIvalue = H2T_4 (SIvalue);
+      memcpy (valarray + 1, (char*)&SIvalue, 3);
+      break;
+    case 2:
+      HIvalue = frvbf_read_mem_HI (current_cpu, pc, address);
+      HIvalue = H2T_2 (HIvalue);
+      memcpy (valarray, (char*)&HIvalue, 2);
+      HIvalue = frvbf_read_mem_HI (current_cpu, pc, address + 2);
+      HIvalue = H2T_2 (HIvalue);
+      memcpy (valarray + 2, (char*)&HIvalue, 2);
+      break;
+    case 3:
+      SIvalue = frvbf_read_mem_SI (current_cpu, pc, address - 1);
+      SIvalue = H2T_4 (SIvalue);
+      memcpy (valarray, (char*)&SIvalue, 3);
+      valarray[3] = frvbf_read_mem_QI (current_cpu, pc, address + 3);
+      break;
+    default:
+      abort (); /* can't happen */
+    }
+  return T2H_4 (*(SI*)valarray);
 }
 
 SI
@@ -355,6 +480,13 @@ frvbf_read_mem_SI (SIM_CPU *current_cpu, IADDR pc, SI address)
   if (GET_HSR0_DCE (hsr0))
     {
       int cycles;
+      /* Handle access which crosses cache line boundary */
+      SIM_DESC sd = CPU_STATE (current_cpu);
+      if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr550)
+	{
+	  if (DATA_CROSSES_CACHE_LINE (cache, address, 4))
+	    return read_mem_unaligned_SI (current_cpu, pc, address); 
+	}
       cycles = frv_cache_read (cache, 0, address);
       if (cycles != 0)
 	return CACHE_RETURN_DATA (cache, 0, address, SI, 4);
@@ -367,6 +499,79 @@ SI
 frvbf_read_mem_WI (SIM_CPU *current_cpu, IADDR pc, SI address)
 {
   return frvbf_read_mem_SI (current_cpu, pc, address);
+}
+
+/* Read a SI which spans two cache lines */
+static DI
+read_mem_unaligned_DI (SIM_CPU *current_cpu, IADDR pc, SI address)
+{
+  FRV_CACHE *cache = CPU_DATA_CACHE (current_cpu);
+  unsigned hi_len = cache->line_size - (address & (cache->line_size - 1));
+  DI value, value1;
+
+  switch (hi_len)
+    {
+    case 1:
+      value = frvbf_read_mem_QI (current_cpu, pc, address);
+      value <<= 56;
+      value1 = frvbf_read_mem_DI (current_cpu, pc, address + 1);
+      value1 = H2T_8 (value1);
+      value |= value1 & ((DI)0x00ffffff << 32);
+      value |= value1 & 0xffffffffu;
+      break;
+    case 2:
+      value = frvbf_read_mem_HI (current_cpu, pc, address);
+      value = H2T_2 (value);
+      value <<= 48;
+      value1 = frvbf_read_mem_DI (current_cpu, pc, address + 2);
+      value1 = H2T_8 (value1);
+      value |= value1 & ((DI)0x0000ffff << 32);
+      value |= value1 & 0xffffffffu;
+      break;
+    case 3:
+      value = frvbf_read_mem_SI (current_cpu, pc, address - 1);
+      value = H2T_4 (value);
+      value <<= 40;
+      value1 = frvbf_read_mem_DI (current_cpu, pc, address + 3);
+      value1 = H2T_8 (value1);
+      value |= value1 & ((DI)0x000000ff << 32);
+      value |= value1 & 0xffffffffu;
+      break;
+    case 4:
+      value = frvbf_read_mem_SI (current_cpu, pc, address);
+      value = H2T_4 (value);
+      value <<= 32;
+      value1 = frvbf_read_mem_SI (current_cpu, pc, address + 4);
+      value1 = H2T_4 (value1);
+      value |= value1 & 0xffffffffu;
+      break;
+    case 5:
+      value = frvbf_read_mem_DI (current_cpu, pc, address - 3);
+      value = H2T_8 (value);
+      value <<= 24;
+      value1 = frvbf_read_mem_SI (current_cpu, pc, address + 5);
+      value1 = H2T_4 (value1);
+      value |= value1 & 0x00ffffff;
+      break;
+    case 6:
+      value = frvbf_read_mem_DI (current_cpu, pc, address - 2);
+      value = H2T_8 (value);
+      value <<= 16;
+      value1 = frvbf_read_mem_HI (current_cpu, pc, address + 6);
+      value1 = H2T_2 (value1);
+      value |= value1 & 0x0000ffff;
+      break;
+    case 7:
+      value = frvbf_read_mem_DI (current_cpu, pc, address - 1);
+      value = H2T_8 (value);
+      value <<= 8;
+      value1 = frvbf_read_mem_QI (current_cpu, pc, address + 7);
+      value |= value1 & 0x000000ff;
+      break;
+    default:
+      abort (); /* can't happen */
+    }
+  return T2H_8 (value);
 }
 
 DI
@@ -394,6 +599,13 @@ frvbf_read_mem_DI (SIM_CPU *current_cpu, IADDR pc, SI address)
   if (GET_HSR0_DCE (hsr0))
     {
       int cycles;
+      /* Handle access which crosses cache line boundary */
+      SIM_DESC sd = CPU_STATE (current_cpu);
+      if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr550)
+	{
+	  if (DATA_CROSSES_CACHE_LINE (cache, address, 8))
+	    return read_mem_unaligned_DI (current_cpu, pc, address); 
+	}
       cycles = frv_cache_read (cache, 0, address);
       if (cycles != 0)
 	return CACHE_RETURN_DATA (cache, 0, address, DI, 8);
@@ -427,6 +639,13 @@ frvbf_read_mem_DF (SIM_CPU *current_cpu, IADDR pc, SI address)
   if (GET_HSR0_DCE (hsr0))
     {
       int cycles;
+      /* Handle access which crosses cache line boundary */
+      SIM_DESC sd = CPU_STATE (current_cpu);
+      if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr550)
+	{
+	  if (DATA_CROSSES_CACHE_LINE (cache, address, 8))
+	    return read_mem_unaligned_DI (current_cpu, pc, address); 
+	}
       cycles = frv_cache_read (cache, 0, address);
       if (cycles != 0)
 	return CACHE_RETURN_DATA (cache, 0, address, DF, 8);
@@ -499,6 +718,17 @@ fr500_check_write_address (SIM_CPU *current_cpu, SI address, int align_mask)
 }
 
 static SI
+fr550_check_write_address (SIM_CPU *current_cpu, SI address, int align_mask)
+{
+  if ((USI)address >= 0xfe800000 && (USI)address <= 0xfefeffff
+      || (align_mask > 0x3
+	  && ((USI)address >= 0xfeff0000 && (USI)address <= 0xfeffffff)))
+    frv_queue_program_interrupt (current_cpu, FRV_DATA_STORE_ERROR);
+
+  return address;
+}
+
+static SI
 check_write_address (SIM_CPU *current_cpu, SI address, int align_mask)
 {
   SIM_DESC sd = CPU_STATE (current_cpu);
@@ -511,6 +741,9 @@ check_write_address (SIM_CPU *current_cpu, SI address, int align_mask)
     case bfd_mach_fr500:
     case bfd_mach_frv:
       address = fr500_check_write_address (current_cpu, address, align_mask);
+      break;
+    case bfd_mach_fr550:
+      address = fr550_check_write_address (current_cpu, address, align_mask);
       break;
     default:
       break;
@@ -618,6 +851,16 @@ frvbf_mem_set_QI (SIM_CPU *current_cpu, IADDR pc, SI address, QI value)
     frv_cache_write (cache, address, (char *)&value, sizeof (value));
 }
 
+/* Write a HI which spans two cache lines */
+static void
+mem_set_unaligned_HI (SIM_CPU *current_cpu, IADDR pc, SI address, HI value)
+{
+  FRV_CACHE *cache = CPU_DATA_CACHE (current_cpu);
+  /* value is already in target byte order */
+  frv_cache_write (cache, address, (char *)&value, 1);
+  frv_cache_write (cache, address + 1, ((char *)&value + 1), 1);
+}
+
 void
 frvbf_mem_set_HI (SIM_CPU *current_cpu, IADDR pc, SI address, HI value)
 {
@@ -638,7 +881,30 @@ frvbf_mem_set_HI (SIM_CPU *current_cpu, IADDR pc, SI address, HI value)
 			       (char *)&value, sizeof (value));
     }
   else
-    frv_cache_write (cache, address, (char *)&value, sizeof (value));
+    {
+      /* Handle access which crosses cache line boundary */
+      SIM_DESC sd = CPU_STATE (current_cpu);
+      if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr550)
+	{
+	  if (DATA_CROSSES_CACHE_LINE (cache, address, 2))
+	    {
+	      mem_set_unaligned_HI (current_cpu, pc, address, value); 
+	      return;
+	    }
+	}
+      frv_cache_write (cache, address, (char *)&value, sizeof (value));
+    }
+}
+
+/* Write a SI which spans two cache lines */
+static void
+mem_set_unaligned_SI (SIM_CPU *current_cpu, IADDR pc, SI address, SI value)
+{
+  FRV_CACHE *cache = CPU_DATA_CACHE (current_cpu);
+  unsigned hi_len = cache->line_size - (address & (cache->line_size - 1));
+  /* value is already in target byte order */
+  frv_cache_write (cache, address, (char *)&value, hi_len);
+  frv_cache_write (cache, address + hi_len, (char *)&value + hi_len, 4 - hi_len);
 }
 
 void
@@ -661,7 +927,30 @@ frvbf_mem_set_SI (SIM_CPU *current_cpu, IADDR pc, SI address, SI value)
 			       (char *)&value, sizeof (value));
     }
   else
-    frv_cache_write (cache, address, (char *)&value, sizeof (value));
+    {
+      /* Handle access which crosses cache line boundary */
+      SIM_DESC sd = CPU_STATE (current_cpu);
+      if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr550)
+	{
+	  if (DATA_CROSSES_CACHE_LINE (cache, address, 4))
+	    {
+	      mem_set_unaligned_SI (current_cpu, pc, address, value); 
+	      return;
+	    }
+	}
+      frv_cache_write (cache, address, (char *)&value, sizeof (value));
+    }
+}
+
+/* Write a DI which spans two cache lines */
+static void
+mem_set_unaligned_DI (SIM_CPU *current_cpu, IADDR pc, SI address, DI value)
+{
+  FRV_CACHE *cache = CPU_DATA_CACHE (current_cpu);
+  unsigned hi_len = cache->line_size - (address & (cache->line_size - 1));
+  /* value is already in target byte order */
+  frv_cache_write (cache, address, (char *)&value, hi_len);
+  frv_cache_write (cache, address + hi_len, (char *)&value + hi_len, 8 - hi_len);
 }
 
 void
@@ -684,7 +973,19 @@ frvbf_mem_set_DI (SIM_CPU *current_cpu, IADDR pc, SI address, DI value)
 			       (char *)&value, sizeof (value));
     }
   else
-    frv_cache_write (cache, address, (char *)&value, sizeof (value));
+    {
+      /* Handle access which crosses cache line boundary */
+      SIM_DESC sd = CPU_STATE (current_cpu);
+      if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr550)
+	{
+	  if (DATA_CROSSES_CACHE_LINE (cache, address, 8))
+	    {
+	      mem_set_unaligned_DI (current_cpu, pc, address, value); 
+	      return;
+	    }
+	}
+      frv_cache_write (cache, address, (char *)&value, sizeof (value));
+    }
 }
 
 void
@@ -707,7 +1008,19 @@ frvbf_mem_set_DF (SIM_CPU *current_cpu, IADDR pc, SI address, DF value)
 			       (char *)&value, sizeof (value));
     }
   else
-    frv_cache_write (cache, address, (char *)&value, sizeof (value));
+    {
+      /* Handle access which crosses cache line boundary */
+      SIM_DESC sd = CPU_STATE (current_cpu);
+      if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr550)
+	{
+	  if (DATA_CROSSES_CACHE_LINE (cache, address, 8))
+	    {
+	      mem_set_unaligned_DI (current_cpu, pc, address, value); 
+	      return;
+	    }
+	}
+      frv_cache_write (cache, address, (char *)&value, sizeof (value));
+    }
 }
 
 void

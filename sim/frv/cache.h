@@ -1,5 +1,5 @@
 /* Cache support for the FRV simulator
-   Copyright (C) 1999, 2000 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000, 2003 Free Software Foundation, Inc.
    Contributed by Red Hat.
 
 This file is part of the GNU Simulators.
@@ -165,6 +165,8 @@ typedef struct {
 */
 typedef struct {
   SIM_CPU *cpu;
+  unsigned configured_ways;   /* Number of ways configured in each set.  */
+  unsigned configured_sets;   /* Number of sets configured in the cache.  */
   unsigned ways;              /* Number of ways in each set.  */
   unsigned sets;              /* Number of sets in the cache.  */
   unsigned line_size;         /* Size of each cache line.  */
@@ -200,14 +202,15 @@ typedef struct {
 
 #define CACHE_RETURN_DATA(cache, slot, address, mode, N) (               \
   T2H_##N (*(mode *)(& (cache)->pipeline[slot].status.return_buffer.data \
-		     [((address) & ((cache)->line_size - 1)              \
-		       & ~(sizeof (mode) - 1))]))                        \
+		     [((address) & ((cache)->line_size - 1))]))          \
 )
-
 #define CACHE_RETURN_DATA_ADDRESS(cache, slot, address, N) (              \
   ((void *)& (cache)->pipeline[slot].status.return_buffer.data[(address)  \
-			                       & ((cache)->line_size - 1) \
-				               & ~((N) - 1)])             \
+			                       & ((cache)->line_size - 1)]) \
+)
+
+#define DATA_CROSSES_CACHE_LINE(cache, address, size) ( \
+  ((address) & ((cache)->line_size - 1)) + (size) > (cache)->line_size \
 )
 
 #define CACHE_INITIALIZED(cache) ((cache)->data_storage != NULL)
@@ -217,6 +220,8 @@ void
 frv_cache_init (SIM_CPU *, FRV_CACHE *);
 void
 frv_cache_term (FRV_CACHE *);
+void
+frv_cache_reconfigure (SIM_CPU *, FRV_CACHE *);
 int
 frv_cache_enabled (FRV_CACHE *);
 

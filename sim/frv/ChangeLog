@@ -1,3 +1,13 @@
+2003-10-06  Dave Brolley  <brolley@redhat.com>
+
+	* profile-fr550.[ch]: New files.
+	* configure.in: Move frv handling to alphabetically correct placement.
+	* Makefile.in: Add fr550 support.
+	* frv-sim.h,frv.c,interrups.c,memory.c,mloop.in,pipeline.c,
+	profile.[ch],registers.c,traps.c: Add fr550 support.
+	* arch.c,arch.h,cpu.c,cpu.h,cpuall.h,model.h,decode.c,decode.h,sem.c:
+	Regenerate.
+
 2003-09-25  Dave Brolley  <brolley@redhat.com>
 
 	* reset.c (frv_initialize): Call frv_register_control_init first.

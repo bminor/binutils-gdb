@@ -117,7 +117,7 @@ model_frv_xor (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_frv_not (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.sfmt_addcc.f
+#define FLD(f) abuf->fields.sfmt_scutss.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -227,6 +227,54 @@ model_frv_umul (SIM_CPU *current_cpu, void *sem_arg)
 }
 
 static int
+model_frv_smu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smass.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_frv_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_frv_smass (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smass.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_frv_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_frv_smsss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smass.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_frv_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
 model_frv_sll (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_addcc.f
@@ -262,6 +310,38 @@ static int
 model_frv_sra (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_frv_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_frv_slass (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_frv_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_frv_scutss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_scutss.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -852,6 +932,38 @@ model_frv_addxcc (SIM_CPU *current_cpu, void *sem_arg)
 
 static int
 model_frv_subxcc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_frv_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_frv_addss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_frv_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_frv_subss (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_addcc.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
@@ -11859,6 +11971,16942 @@ model_frv_fnop (SIM_CPU *current_cpu, void *sem_arg)
 }
 
 static int
+model_fr550_add (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_sub (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_and (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_or (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_xor (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_not (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_scutss.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_sdiv (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_idiv (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nsdiv (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_idiv (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_udiv (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_idiv (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nudiv (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_idiv (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_smul (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smulcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRdoublek = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRdoublek = FLD (out_GRdoublek);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_imul (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRdoublek, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_umul (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smulcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRdoublek = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRdoublek = FLD (out_GRdoublek);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_imul (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRdoublek, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_smu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smass.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_smass (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smass.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_smsss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smass.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_sll (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_srl (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_sra (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_slass (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_scutss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_scutss.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_scan (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cadd (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_csub (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cand (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cor (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cxor (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cnot (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_csmul (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_clddu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRdoublek = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRdoublek = FLD (out_GRdoublek);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_imul (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRdoublek, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_csdiv (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_idiv (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cudiv (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_idiv (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_csll (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_csrl (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_csra (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cscan (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_addcc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    out_ICCi_1 = FLD (out_ICCi_1);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_subcc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    out_ICCi_1 = FLD (out_ICCi_1);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_andcc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    out_ICCi_1 = FLD (out_ICCi_1);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_orcc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    out_ICCi_1 = FLD (out_ICCi_1);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_xorcc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    out_ICCi_1 = FLD (out_ICCi_1);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_sllcc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    out_ICCi_1 = FLD (out_ICCi_1);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_srlcc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    out_ICCi_1 = FLD (out_ICCi_1);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_sracc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    out_ICCi_1 = FLD (out_ICCi_1);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_smulcc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smulcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRdoublek = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRdoublek = FLD (out_GRdoublek);
+    out_ICCi_1 = FLD (out_ICCi_1);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_imul (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRdoublek, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_umulcc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smulcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRdoublek = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRdoublek = FLD (out_GRdoublek);
+    out_ICCi_1 = FLD (out_ICCi_1);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_imul (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRdoublek, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_caddcc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_caddcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_csubcc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_caddcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_csmulcc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_csmulcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRdoublek = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRdoublek = FLD (out_GRdoublek);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_imul (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRdoublek, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_candcc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_caddcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_corcc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_caddcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cxorcc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_caddcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_csllcc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_caddcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_csrlcc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_caddcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_csracc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_caddcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_addx (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_subx (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_addxcc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    out_ICCi_1 = FLD (out_ICCi_1);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_subxcc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    out_ICCi_1 = FLD (out_ICCi_1);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_addss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_subss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_addi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_swapi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_subi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_swapi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_andi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_swapi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ori (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_swapi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_xori (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_swapi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_sdivi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_swapi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_idiv (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nsdivi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_swapi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_idiv (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_udivi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_swapi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_idiv (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nudivi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_swapi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_idiv (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_smuli (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smuli.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRdoublek = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRdoublek = FLD (out_GRdoublek);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_imul (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRdoublek, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_umuli (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smuli.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRdoublek = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRdoublek = FLD (out_GRdoublek);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_imul (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRdoublek, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_slli (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_swapi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_srli (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_swapi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_srai (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_swapi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_scani (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_swapi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_addicc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addicc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    out_ICCi_1 = FLD (out_ICCi_1);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_subicc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addicc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    out_ICCi_1 = FLD (out_ICCi_1);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_andicc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addicc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    out_ICCi_1 = FLD (out_ICCi_1);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_oricc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addicc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    out_ICCi_1 = FLD (out_ICCi_1);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_xoricc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addicc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    out_ICCi_1 = FLD (out_ICCi_1);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_smulicc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smulicc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRdoublek = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRdoublek = FLD (out_GRdoublek);
+    out_ICCi_1 = FLD (out_ICCi_1);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_imul (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRdoublek, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_umulicc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smulicc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRdoublek = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRdoublek = FLD (out_GRdoublek);
+    out_ICCi_1 = FLD (out_ICCi_1);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_imul (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRdoublek, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_sllicc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addicc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    out_ICCi_1 = FLD (out_ICCi_1);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_srlicc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addicc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    out_ICCi_1 = FLD (out_ICCi_1);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_sraicc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addicc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    out_ICCi_1 = FLD (out_ICCi_1);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_addxi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addicc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_subxi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addicc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_addxicc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addicc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    out_ICCi_1 = FLD (out_ICCi_1);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_subxicc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addicc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    out_ICCi_1 = FLD (out_ICCi_1);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmpb (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smulcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_ICCi_1 = FLD (out_ICCi_1);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmpba (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smulcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_ICCi_1 = FLD (out_ICCi_1);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_setlo (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_setlo.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT out_GRkhi = -1;
+    INT out_GRklo = -1;
+    out_GRklo = FLD (out_GRklo);
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_set_hilo (current_cpu, idesc, 0, referenced, out_GRkhi, out_GRklo);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_sethi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_sethi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT out_GRkhi = -1;
+    INT out_GRklo = -1;
+    out_GRkhi = FLD (out_GRkhi);
+    referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_set_hilo (current_cpu, idesc, 0, referenced, out_GRkhi, out_GRklo);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_setlos (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_setlos.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldsb (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldub (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldsh (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_lduh (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ld (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldbf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldhf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ldcu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nldsb (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nldub (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nldsh (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nlduh (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nld (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nldbf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_FRintk = FLD (out_FRintk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nldhf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_FRintk = FLD (out_FRintk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nldf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_FRintk = FLD (out_FRintk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldd (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smulcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRdoublek = FLD (out_GRdoublek);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_lddf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_clddfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_FRdoublek = FLD (out_FRdoublek);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_lddc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_lddcu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nldd (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smulcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRdoublek = FLD (out_GRdoublek);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nlddf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_clddfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_FRdoublek = FLD (out_FRdoublek);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldq (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smulcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldqf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstdfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldqc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_stdcu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nldq (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smulcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nldqf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstdfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldsbu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldsbu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldubu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldsbu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldshu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldsbu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_lduhu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldsbu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldsbu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nldsbu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldsbu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 7)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nldubu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldsbu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 7)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nldshu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldsbu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 7)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nlduhu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldsbu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 7)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nldu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldsbu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 7)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldbfu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldhfu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldfu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldcu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ldcu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nldbfu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_FRintk = FLD (out_FRintk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nldhfu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_FRintk = FLD (out_FRintk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nldfu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_FRintk = FLD (out_FRintk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_lddu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_clddu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRdoublek = FLD (out_GRdoublek);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nlddu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_clddu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRdoublek = FLD (out_GRdoublek);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_lddfu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_clddfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_FRdoublek = FLD (out_FRdoublek);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_lddcu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_lddcu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nlddfu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_clddfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_FRdoublek = FLD (out_FRdoublek);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldqu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstdu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nldqu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstdu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldqfu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstdfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldqcu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_stdcu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nldqfu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstdfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldsbi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_swapi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldshi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_swapi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_swapi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldubi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_swapi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_lduhi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_swapi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldbfi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ldbfi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldhfi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ldbfi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldfi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ldbfi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nldsbi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_swapi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nldubi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_swapi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nldshi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_swapi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nlduhi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_swapi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nldi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_swapi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nldbfi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ldbfi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    out_FRintk = FLD (out_FRintk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nldhfi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ldbfi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    out_FRintk = FLD (out_FRintk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nldfi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ldbfi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    out_FRintk = FLD (out_FRintk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_lddi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smuli.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRdoublek = FLD (out_GRdoublek);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_lddfi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_lddfi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    out_FRdoublek = FLD (out_FRdoublek);
+    referenced |= 1 << 0;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nlddi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smuli.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRdoublek = FLD (out_GRdoublek);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nlddfi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_lddfi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    out_FRdoublek = FLD (out_FRdoublek);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldqi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_stdi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ldqfi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_stdfi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nldqfi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_stdfi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_stb (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_GRk = -1;
+    INT in_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_GRk = FLD (in_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_GRk, in_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_sth (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_GRk = -1;
+    INT in_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_GRk = FLD (in_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_GRk, in_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_st (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_GRk = -1;
+    INT in_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_GRk = FLD (in_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_GRk, in_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_stbf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_FRintk = -1;
+    INT in_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FRintk = FLD (in_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_FRintk, in_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_sthf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_FRintk = -1;
+    INT in_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FRintk = FLD (in_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_FRintk, in_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_stf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_FRintk = -1;
+    INT in_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FRintk = FLD (in_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_FRintk, in_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_stc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_stcu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_rstb (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_rsth (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_rst (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_rstbf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_rsthf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_rstf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_std (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstdu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_GRk = -1;
+    INT in_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_GRdoublek = FLD (in_GRdoublek);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_gr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_GRk, in_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_stdf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstdfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_FRintk = -1;
+    INT in_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FRdoublek = FLD (in_FRdoublek);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_fr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_FRintk, in_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_stdc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_stdcu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_rstd (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstdu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_rstdf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstdfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_stq (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smulcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_stqf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstdfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_stqc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_stdcu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_rstq (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smulcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_rstqf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstdfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_stbu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstbu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_GRk = -1;
+    INT in_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_GRk = FLD (in_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_GRk, in_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_sthu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstbu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_GRk = -1;
+    INT in_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_GRk = FLD (in_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_GRk, in_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_stu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstbu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_GRk = -1;
+    INT in_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_GRk = FLD (in_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_GRk, in_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_stbfu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_FRintk = -1;
+    INT in_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FRintk = FLD (in_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_FRintk, in_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_sthfu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_FRintk = -1;
+    INT in_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FRintk = FLD (in_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_FRintk, in_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_stfu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_FRintk = -1;
+    INT in_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FRintk = FLD (in_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_FRintk, in_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_stcu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_stcu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_stdu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstdu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_GRk = -1;
+    INT in_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_GRdoublek = FLD (in_GRdoublek);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_gr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_GRk, in_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_stdfu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstdfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_FRintk = -1;
+    INT in_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FRdoublek = FLD (in_FRdoublek);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_fr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_FRintk, in_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_stdcu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_stdcu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_stqu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstdu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_stqfu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstdfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_stqcu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_stdcu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cldsb (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cldub (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cldsh (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_clduh (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cld (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cldbf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_FRintk = FLD (out_FRintk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cldhf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_FRintk = FLD (out_FRintk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cldf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_FRintk = FLD (out_FRintk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cldd (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_clddu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRdoublek = FLD (out_GRdoublek);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_clddf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_clddfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_FRdoublek = FLD (out_FRdoublek);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cldq (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cldsbu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldsbu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 8)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cldubu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldsbu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 8)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cldshu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldsbu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 8)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_clduhu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldsbu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 8)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cldu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldsbu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 8)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cldbfu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_FRintk = FLD (out_FRintk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cldhfu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_FRintk = FLD (out_FRintk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cldfu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cldbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_FRintk = FLD (out_FRintk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_clddu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_clddu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRdoublek = FLD (out_GRdoublek);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 7)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_clddfu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_clddfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_FRdoublek = FLD (out_FRdoublek);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_fr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cldqu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstdu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cstb (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_GRk = -1;
+    INT in_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_GRk = FLD (in_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_GRk, in_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_csth (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_GRk = -1;
+    INT in_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_GRk = FLD (in_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_GRk, in_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cst (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_GRk = -1;
+    INT in_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_GRk = FLD (in_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_GRk, in_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cstbf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_FRintk = -1;
+    INT in_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FRintk = FLD (in_FRintk);
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_FRintk, in_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_csthf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_FRintk = -1;
+    INT in_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FRintk = FLD (in_FRintk);
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_FRintk, in_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cstf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_FRintk = -1;
+    INT in_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FRintk = FLD (in_FRintk);
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_FRintk, in_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cstd (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstdu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_GRk = -1;
+    INT in_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_GRdoublek = FLD (in_GRdoublek);
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_gr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_GRk, in_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cstdf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstdfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_FRintk = -1;
+    INT in_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FRdoublek = FLD (in_FRdoublek);
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_fr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_FRintk, in_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cstq (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cstbu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstbu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_GRk = -1;
+    INT in_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_GRk = FLD (in_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_GRk, in_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_csthu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstbu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_GRk = -1;
+    INT in_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_GRk = FLD (in_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_GRk, in_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cstu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstbu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_GRk = -1;
+    INT in_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_GRk = FLD (in_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_GRk, in_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cstbfu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_FRintk = -1;
+    INT in_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FRintk = FLD (in_FRintk);
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_FRintk, in_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_csthfu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_FRintk = -1;
+    INT in_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FRintk = FLD (in_FRintk);
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_FRintk, in_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cstfu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstbfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_FRintk = -1;
+    INT in_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FRintk = FLD (in_FRintk);
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_FRintk, in_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cstdu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstdu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_GRk = -1;
+    INT in_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_GRdoublek = FLD (in_GRdoublek);
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_gr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_GRk, in_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cstdfu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cstdfu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_FRintk = -1;
+    INT in_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FRdoublek = FLD (in_FRdoublek);
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_fr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_FRintk, in_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_stbi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_swapi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_GRk = -1;
+    INT in_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRk = FLD (in_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_GRk, in_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_sthi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_swapi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_GRk = -1;
+    INT in_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRk = FLD (in_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_GRk, in_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_sti (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_swapi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_GRk = -1;
+    INT in_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRk = FLD (in_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_gr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_GRk, in_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_stbfi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_stbfi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_FRintk = -1;
+    INT in_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_FRintk = FLD (in_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_FRintk, in_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_sthfi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_stbfi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_FRintk = -1;
+    INT in_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_FRintk = FLD (in_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_FRintk, in_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_stfi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_stbfi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_FRintk = -1;
+    INT in_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_FRintk = FLD (in_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_fr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_FRintk, in_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_stdi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_stdi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_GRk = -1;
+    INT in_GRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRdoublek = FLD (in_GRdoublek);
+    referenced |= 1 << 0;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_gr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_GRk, in_GRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_stdfi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_stdfi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_FRintk = -1;
+    INT in_FRdoublek = -1;
+    in_GRi = FLD (in_GRi);
+    in_FRdoublek = FLD (in_FRdoublek);
+    referenced |= 1 << 0;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_fr_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_FRintk, in_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_stqi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_stdi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_stqfi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_stdfi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_swap (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_swap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_swapi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_swapi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    in_GRi = FLD (in_GRi);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_swap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cswap (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cswap.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_swap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_movgf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmovgfd.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    in_GRj = FLD (in_GRj);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_gr2fr (current_cpu, idesc, 0, referenced, in_GRj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_movfg (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmovfgd.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintk = -1;
+    INT out_GRj = -1;
+    in_FRintk = FLD (in_FRintk);
+    out_GRj = FLD (out_GRj);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_fr2gr (current_cpu, idesc, 0, referenced, in_FRintk, out_GRj);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_movgfd (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmovgfd.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    in_GRj = FLD (in_GRj);
+    out_FRintk = FLD (out_FRintk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_gr2fr (current_cpu, idesc, 0, referenced, in_GRj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_movfgd (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmovfgd.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintk = -1;
+    INT out_GRj = -1;
+    in_FRintk = FLD (in_FRintk);
+    out_GRj = FLD (out_GRj);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_fr2gr (current_cpu, idesc, 0, referenced, in_FRintk, out_GRj);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_movgfq (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_movgfq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_movfgq (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_movfgq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmovgf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmovgfd.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    in_GRj = FLD (in_GRj);
+    out_FRintk = FLD (out_FRintk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_gr2fr (current_cpu, idesc, 0, referenced, in_GRj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmovfg (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmovfgd.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintk = -1;
+    INT out_GRj = -1;
+    in_FRintk = FLD (in_FRintk);
+    out_GRj = FLD (out_GRj);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_fr2gr (current_cpu, idesc, 0, referenced, in_FRintk, out_GRj);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmovgfd (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmovgfd.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRj = -1;
+    INT out_FRintk = -1;
+    in_GRj = FLD (in_GRj);
+    out_FRintk = FLD (out_FRintk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_gr2fr (current_cpu, idesc, 0, referenced, in_GRj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmovfgd (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmovfgd.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintk = -1;
+    INT out_GRj = -1;
+    in_FRintk = FLD (in_FRintk);
+    out_GRj = FLD (out_GRj);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_fr2gr (current_cpu, idesc, 0, referenced, in_FRintk, out_GRj);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_movgs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_movgs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRj = -1;
+    INT out_spr = -1;
+    in_GRj = FLD (in_GRj);
+    out_spr = FLD (out_spr);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_gr2spr (current_cpu, idesc, 0, referenced, in_GRj, out_spr);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_movsg (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_movsg.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_spr = -1;
+    INT out_GRj = -1;
+    in_spr = FLD (in_spr);
+    out_GRj = FLD (out_GRj);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_spr2gr (current_cpu, idesc, 0, referenced, in_spr, out_GRj);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bra (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fbne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bno (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fbne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_beq (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_beq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bne (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_beq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ble (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_beq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bgt (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_beq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_blt (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_beq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bge (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_beq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bls (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_beq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bhi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_beq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_beq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bnc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_beq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bn (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_beq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bp (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_beq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bv (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_beq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bnv (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_beq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fbra (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fbne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fbno (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fbne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fbne (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fbne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fbeq (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fbne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fblg (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fbne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fbue (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fbne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fbul (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fbne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fbge (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fbne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fblt (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fbne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fbuge (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fbne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fbug (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fbne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fble (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fbne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fbgt (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fbne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fbule (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fbne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fbu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fbne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fbo (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fbne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bctrlr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bralr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bnolr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_beqlr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bceqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bnelr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bceqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_blelr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bceqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bgtlr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bceqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bltlr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bceqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bgelr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bceqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_blslr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bceqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bhilr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bceqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bclr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bceqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bnclr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bceqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bnlr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bceqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bplr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bceqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bvlr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bceqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bnvlr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bceqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fbralr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fbnolr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fbeqlr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fbnelr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fblglr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fbuelr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fbullr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fbgelr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fbltlr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fbugelr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fbuglr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fblelr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fbgtlr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fbulelr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fbulr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fbolr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bcralr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bcnolr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bceqlr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bceqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bcnelr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bceqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bclelr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bceqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bcgtlr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bceqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bcltlr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bceqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bcgelr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bceqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bclslr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bceqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bchilr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bceqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bcclr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bceqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bcnclr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bceqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bcnlr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bceqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bcplr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bceqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bcvlr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bceqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bcnvlr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bceqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_ICCi_2 = FLD (in_ICCi_2);
+    referenced |= 1 << 2;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fcbralr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fcbnolr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fcbeqlr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fcbnelr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fcblglr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fcbuelr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fcbullr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fcbgelr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fcbltlr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fcbugelr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fcbuglr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fcblelr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fcbgtlr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fcbulelr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fcbulr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fcbolr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_FCCi_2 = FLD (in_FCCi_2);
+    referenced |= 1 << 3;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_jmpl (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cjmpl.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_calll (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cjmpl.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_jmpil (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_jmpil.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    referenced |= 1 << 0;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_callil (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_jmpil.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_call (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_call.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_rett (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_rett.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_rei (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_empty.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tra (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tno (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_empty.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_teq (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_teq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_ICCi_2 = FLD (in_ICCi_2);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tne (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_teq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_ICCi_2 = FLD (in_ICCi_2);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tle (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_teq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_ICCi_2 = FLD (in_ICCi_2);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tgt (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_teq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_ICCi_2 = FLD (in_ICCi_2);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tlt (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_teq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_ICCi_2 = FLD (in_ICCi_2);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tge (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_teq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_ICCi_2 = FLD (in_ICCi_2);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tls (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_teq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_ICCi_2 = FLD (in_ICCi_2);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_thi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_teq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_ICCi_2 = FLD (in_ICCi_2);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_teq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_ICCi_2 = FLD (in_ICCi_2);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tnc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_teq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_ICCi_2 = FLD (in_ICCi_2);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tn (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_teq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_ICCi_2 = FLD (in_ICCi_2);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tp (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_teq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_ICCi_2 = FLD (in_ICCi_2);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tv (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_teq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_ICCi_2 = FLD (in_ICCi_2);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tnv (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_teq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_ICCi_2 = FLD (in_ICCi_2);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftra (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftno (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_empty.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftne (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FCCi_2 = FLD (in_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fteq (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FCCi_2 = FLD (in_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftlg (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FCCi_2 = FLD (in_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftue (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FCCi_2 = FLD (in_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftul (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FCCi_2 = FLD (in_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftge (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FCCi_2 = FLD (in_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftlt (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FCCi_2 = FLD (in_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftuge (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FCCi_2 = FLD (in_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftug (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FCCi_2 = FLD (in_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftle (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FCCi_2 = FLD (in_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftgt (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FCCi_2 = FLD (in_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftule (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FCCi_2 = FLD (in_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FCCi_2 = FLD (in_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fto (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    in_FCCi_2 = FLD (in_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tira (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftine.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tino (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_empty.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tieq (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_tieq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_ICCi_2 = FLD (in_ICCi_2);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tine (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_tieq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_ICCi_2 = FLD (in_ICCi_2);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tile (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_tieq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_ICCi_2 = FLD (in_ICCi_2);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tigt (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_tieq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_ICCi_2 = FLD (in_ICCi_2);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tilt (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_tieq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_ICCi_2 = FLD (in_ICCi_2);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tige (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_tieq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_ICCi_2 = FLD (in_ICCi_2);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tils (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_tieq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_ICCi_2 = FLD (in_ICCi_2);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tihi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_tieq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_ICCi_2 = FLD (in_ICCi_2);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tic (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_tieq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_ICCi_2 = FLD (in_ICCi_2);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tinc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_tieq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_ICCi_2 = FLD (in_ICCi_2);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tin (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_tieq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_ICCi_2 = FLD (in_ICCi_2);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tip (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_tieq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_ICCi_2 = FLD (in_ICCi_2);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tiv (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_tieq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_ICCi_2 = FLD (in_ICCi_2);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_tinv (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_tieq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_ICCi_2 = FLD (in_ICCi_2);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftira (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftine.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftino (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_empty.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftine (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftine.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_FCCi_2 = FLD (in_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftieq (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftine.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_FCCi_2 = FLD (in_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftilg (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftine.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_FCCi_2 = FLD (in_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftiue (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftine.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_FCCi_2 = FLD (in_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftiul (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftine.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_FCCi_2 = FLD (in_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftige (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftine.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_FCCi_2 = FLD (in_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftilt (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftine.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_FCCi_2 = FLD (in_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftiuge (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftine.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_FCCi_2 = FLD (in_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftiug (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftine.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_FCCi_2 = FLD (in_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftile (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftine.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_FCCi_2 = FLD (in_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftigt (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftine.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_FCCi_2 = FLD (in_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftiule (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftine.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_FCCi_2 = FLD (in_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftiu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftine.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_FCCi_2 = FLD (in_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ftio (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_ftine.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_FCCi_2 = FLD (in_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_trap (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_break (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_break.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mtrap (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_empty.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_andcr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_andcr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_orcr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_andcr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_xorcr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_andcr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nandcr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_andcr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_norcr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_andcr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_andncr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_andcr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_orncr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_andcr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nandncr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_andcr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_norncr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_andcr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_notcr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_andcr.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ckra (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ckno (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ckeq (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_ICCi_3 = FLD (in_ICCi_3);
+    referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ckne (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_ICCi_3 = FLD (in_ICCi_3);
+    referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ckle (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_ICCi_3 = FLD (in_ICCi_3);
+    referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ckgt (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_ICCi_3 = FLD (in_ICCi_3);
+    referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cklt (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_ICCi_3 = FLD (in_ICCi_3);
+    referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ckge (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_ICCi_3 = FLD (in_ICCi_3);
+    referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ckls (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_ICCi_3 = FLD (in_ICCi_3);
+    referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ckhi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_ICCi_3 = FLD (in_ICCi_3);
+    referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ckc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_ICCi_3 = FLD (in_ICCi_3);
+    referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cknc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_ICCi_3 = FLD (in_ICCi_3);
+    referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ckn (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_ICCi_3 = FLD (in_ICCi_3);
+    referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ckp (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_ICCi_3 = FLD (in_ICCi_3);
+    referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ckv (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_ICCi_3 = FLD (in_ICCi_3);
+    referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cknv (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_ICCi_3 = FLD (in_ICCi_3);
+    referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fckra (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fckno (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fckne (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_FCCi_3 = FLD (in_FCCi_3);
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fckeq (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_FCCi_3 = FLD (in_FCCi_3);
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fcklg (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_FCCi_3 = FLD (in_FCCi_3);
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fckue (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_FCCi_3 = FLD (in_FCCi_3);
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fckul (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_FCCi_3 = FLD (in_FCCi_3);
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fckge (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_FCCi_3 = FLD (in_FCCi_3);
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fcklt (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_FCCi_3 = FLD (in_FCCi_3);
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fckuge (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_FCCi_3 = FLD (in_FCCi_3);
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fckug (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_FCCi_3 = FLD (in_FCCi_3);
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fckle (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_FCCi_3 = FLD (in_FCCi_3);
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fckgt (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_FCCi_3 = FLD (in_FCCi_3);
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fckule (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_FCCi_3 = FLD (in_FCCi_3);
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fcku (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_FCCi_3 = FLD (in_FCCi_3);
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fcko (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_FCCi_3 = FLD (in_FCCi_3);
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cckra (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cckno (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cckeq (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_ICCi_3 = FLD (in_ICCi_3);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cckne (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_ICCi_3 = FLD (in_ICCi_3);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cckle (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_ICCi_3 = FLD (in_ICCi_3);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cckgt (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_ICCi_3 = FLD (in_ICCi_3);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ccklt (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_ICCi_3 = FLD (in_ICCi_3);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cckge (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_ICCi_3 = FLD (in_ICCi_3);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cckls (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_ICCi_3 = FLD (in_ICCi_3);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cckhi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_ICCi_3 = FLD (in_ICCi_3);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cckc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_ICCi_3 = FLD (in_ICCi_3);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ccknc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_ICCi_3 = FLD (in_ICCi_3);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cckn (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_ICCi_3 = FLD (in_ICCi_3);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cckp (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_ICCi_3 = FLD (in_ICCi_3);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cckv (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_ICCi_3 = FLD (in_ICCi_3);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ccknv (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cckeq.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_ICCi_3 = FLD (in_ICCi_3);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfckra (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfckno (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfckne (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_FCCi_3 = FLD (in_FCCi_3);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfckeq (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_FCCi_3 = FLD (in_FCCi_3);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfcklg (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_FCCi_3 = FLD (in_FCCi_3);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfckue (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_FCCi_3 = FLD (in_FCCi_3);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfckul (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_FCCi_3 = FLD (in_FCCi_3);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfckge (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_FCCi_3 = FLD (in_FCCi_3);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfcklt (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_FCCi_3 = FLD (in_FCCi_3);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfckuge (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_FCCi_3 = FLD (in_FCCi_3);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfckug (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_FCCi_3 = FLD (in_FCCi_3);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfckle (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_FCCi_3 = FLD (in_FCCi_3);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfckgt (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_FCCi_3 = FLD (in_FCCi_3);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfckule (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_FCCi_3 = FLD (in_FCCi_3);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfcku (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_FCCi_3 = FLD (in_FCCi_3);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfcko (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfckne.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ICCi_3 = -1;
+    INT in_FCCi_3 = -1;
+    in_FCCi_3 = FLD (in_FCCi_3);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_check (current_cpu, idesc, 0, referenced, in_ICCi_3, in_FCCi_3);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cjmpl (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cjmpl.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ccalll (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cjmpl.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_ici (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_icpl.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_ici (current_cpu, idesc, 0, referenced, in_GRi, in_GRj);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_dci (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_icpl.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_dci (current_cpu, idesc, 0, referenced, in_GRi, in_GRj);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_icei (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_icei.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_ici (current_cpu, idesc, 0, referenced, in_GRi, in_GRj);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_dcei (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_icei.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_dci (current_cpu, idesc, 0, referenced, in_GRi, in_GRj);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_dcf (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_icpl.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_dcf (current_cpu, idesc, 0, referenced, in_GRi, in_GRj);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_dcef (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_icei.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_dcf (current_cpu, idesc, 0, referenced, in_GRi, in_GRj);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_witlb (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_empty.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_wdtlb (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_empty.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_itlbi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_empty.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_dtlbi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_empty.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_icpl (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_icpl.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_icpl (current_cpu, idesc, 0, referenced, in_GRi, in_GRj);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_dcpl (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_icpl.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_dcpl (current_cpu, idesc, 0, referenced, in_GRi, in_GRj);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_icul (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_jmpil.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    in_GRi = FLD (in_GRi);
+    referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_icul (current_cpu, idesc, 0, referenced, in_GRi, in_GRj);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_dcul (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_jmpil.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    in_GRi = FLD (in_GRi);
+    referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_dcul (current_cpu, idesc, 0, referenced, in_GRi, in_GRj);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_bar (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_empty.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_membar (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_empty.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cop1 (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_empty.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cop2 (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_empty.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_clrgr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_swapi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRk = -1;
+    in_GRk = FLD (in_GRk);
+    referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_clrgr (current_cpu, idesc, 0, referenced, in_GRk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_clrfr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRk = -1;
+    in_FRk = FLD (in_FRk);
+    referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_clrfr (current_cpu, idesc, 0, referenced, in_FRk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_clrga (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_empty.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRk = -1;
+    cycles += frvbf_model_fr550_u_clrgr (current_cpu, idesc, 0, referenced, in_GRk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_clrfa (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_empty.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRk = -1;
+    cycles += frvbf_model_fr550_u_clrfr (current_cpu, idesc, 0, referenced, in_FRk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_commitgr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_setlos.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRk = -1;
+    INT in_FRk = -1;
+    cycles += frvbf_model_fr550_u_commit (current_cpu, idesc, 0, referenced, in_GRk, in_FRk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_commitfr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mhsethis.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRk = -1;
+    INT in_FRk = -1;
+    cycles += frvbf_model_fr550_u_commit (current_cpu, idesc, 0, referenced, in_GRk, in_FRk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_commitga (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_empty.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRk = -1;
+    INT in_FRk = -1;
+    cycles += frvbf_model_fr550_u_commit (current_cpu, idesc, 0, referenced, in_GRk, in_FRk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_commitfa (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_empty.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRk = -1;
+    INT in_FRk = -1;
+    cycles += frvbf_model_fr550_u_commit (current_cpu, idesc, 0, referenced, in_GRk, in_FRk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fitos (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fditos.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRj = -1;
+    INT in_FRintj = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_FRintj = FLD (in_FRintj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 1;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_float_convert (current_cpu, idesc, 0, referenced, in_FRj, in_FRintj, in_FRdoublej, out_FRk, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fstoi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdstoi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRj = -1;
+    INT in_FRintj = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_FRj = FLD (in_FRj);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_convert (current_cpu, idesc, 0, referenced, in_FRj, in_FRintj, in_FRdoublej, out_FRk, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fitod (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fitod.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRj = -1;
+    INT in_FRintj = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_FRintj = FLD (in_FRintj);
+    out_FRdoublek = FLD (out_FRdoublek);
+    referenced |= 1 << 1;
+    referenced |= 1 << 5;
+    cycles += frvbf_model_fr550_u_float_convert (current_cpu, idesc, 0, referenced, in_FRj, in_FRintj, in_FRdoublej, out_FRk, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fdtoi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdtoi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRj = -1;
+    INT in_FRintj = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_FRdoublej = FLD (in_FRdoublej);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 2;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_convert (current_cpu, idesc, 0, referenced, in_FRj, in_FRintj, in_FRdoublej, out_FRk, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fditos (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fditos.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fdstoi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdstoi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nfditos (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fditos.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nfdstoi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdstoi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfitos (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfitos.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRj = -1;
+    INT in_FRintj = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_FRintj = FLD (in_FRintj);
+    out_FRk = FLD (out_FRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_float_convert (current_cpu, idesc, 0, referenced, in_FRj, in_FRintj, in_FRdoublej, out_FRk, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfstoi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfstoi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRj = -1;
+    INT in_FRintj = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_FRj = FLD (in_FRj);
+    out_FRintk = FLD (out_FRintk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_convert (current_cpu, idesc, 0, referenced, in_FRj, in_FRintj, in_FRdoublej, out_FRk, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nfitos (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fditos.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRj = -1;
+    INT in_FRintj = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_FRintj = FLD (in_FRintj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 1;
+    referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_float_convert (current_cpu, idesc, 0, referenced, in_FRj, in_FRintj, in_FRdoublej, out_FRk, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nfstoi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdstoi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRj = -1;
+    INT in_FRintj = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRintk = -1;
+    INT out_FRdoublek = -1;
+    in_FRj = FLD (in_FRj);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_convert (current_cpu, idesc, 0, referenced, in_FRj, in_FRintj, in_FRdoublej, out_FRk, out_FRintk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fmovs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fmovd (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fmaddd.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT out_FRk = -1;
+    cycles += frvbf_model_fr550_u_fr2fr (current_cpu, idesc, 0, referenced, in_FRi, out_FRk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fdmovs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfmovs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT out_FRk = -1;
+    out_FRk = FLD (out_FRk);
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_fr2fr (current_cpu, idesc, 0, referenced, in_FRi, out_FRk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fnegs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fnegd (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fmaddd.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRdoublej = FLD (in_FRdoublej);
+    out_FRdoublek = FLD (out_FRdoublek);
+    referenced |= 1 << 3;
+    referenced |= 1 << 5;
+    cycles += frvbf_model_fr550_u_float_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fdnegs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfnegs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fabss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fabsd (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fmaddd.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRdoublej = FLD (in_FRdoublej);
+    out_FRdoublek = FLD (out_FRdoublek);
+    referenced |= 1 << 3;
+    referenced |= 1 << 5;
+    cycles += frvbf_model_fr550_u_float_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fdabss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfabss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fsqrts (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRj = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_float_sqrt (current_cpu, idesc, 0, referenced, in_FRj, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fdsqrts (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nfdsqrts (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fsqrtd (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fmaddd.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfsqrts (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRj = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_float_sqrt (current_cpu, idesc, 0, referenced, in_FRj, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nfsqrts (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRj = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_float_sqrt (current_cpu, idesc, 0, referenced, in_FRj, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fadds (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fsubs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fmuls (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fdivs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT out_FRk = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_float_div (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, out_FRk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_faddd (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fmaddd.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fsubd (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fmaddd.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fmuld (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fmaddd.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fdivd (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fmaddd.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfadds (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfsubs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfmuls (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfdivs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT out_FRk = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_float_div (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, out_FRk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nfadds (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nfsubs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nfmuls (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nfdivs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT out_FRk = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_float_div (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, out_FRk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fcmps (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfcmps.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FCCi_2 = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FCCi_2 = FLD (out_FCCi_2);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_compare (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fcmpd (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fcmpd.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfcmps (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfcmps.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FCCi_2 = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FCCi_2 = FLD (out_FCCi_2);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_compare (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fdcmps (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_nfdcmps.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT out_FCCi_2 = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FCCi_2 = FLD (out_FCCi_2);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    if (insn_referenced & (1 << 7)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_float_dual_compare (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, out_FCCi_2);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fmadds (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fmsubs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fmaddd (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fmaddd.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fmsubd (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fmaddd.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fdmadds (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nfdmadds (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfmadds (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfmsubs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nfmadds (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nfmsubs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fmas (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_dual_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fmss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_dual_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fdmas (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmas.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fdmss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmas.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nfdmas (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmas.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nfdmss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmas.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfmas (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmas.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 9)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_dual_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cfmss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cfmas.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 9)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_dual_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fmad (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fmsd (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nfmas (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_dual_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nfmss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_dual_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fdadds (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_dual_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fdsubs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_dual_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fdmuls (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_dual_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fddivs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_dual_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fdsads (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_dual_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fdmulcs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_dual_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nfdmulcs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_dual_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nfdadds (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_dual_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nfdsubs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_dual_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nfdmuls (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_dual_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nfddivs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_dual_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nfdsads (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_fdmadds.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRi = -1;
+    INT in_FRj = -1;
+    INT in_FRdoublei = -1;
+    INT in_FRdoublej = -1;
+    INT out_FRk = -1;
+    INT out_FRdoublek = -1;
+    in_FRi = FLD (in_FRi);
+    in_FRj = FLD (in_FRj);
+    out_FRk = FLD (out_FRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_float_dual_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_nfdcmps (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_nfdcmps.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mhsetlos (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mhsetlos.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT out_FRintk = -1;
+    out_FRintk = FLD (out_FRklo);
+    cycles += frvbf_model_fr550_u_media_set (current_cpu, idesc, 0, referenced, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mhsethis (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mhsethis.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT out_FRintk = -1;
+    out_FRintk = FLD (out_FRkhi);
+    cycles += frvbf_model_fr550_u_media_set (current_cpu, idesc, 0, referenced, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mhdsets (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mhdsets.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT out_FRintk = -1;
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_media_set (current_cpu, idesc, 0, referenced, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mhsetloh (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mhsetloh.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT out_FRintk = -1;
+    out_FRintk = FLD (out_FRklo);
+    cycles += frvbf_model_fr550_u_media_set (current_cpu, idesc, 0, referenced, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mhsethih (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mhsethih.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT out_FRintk = -1;
+    out_FRintk = FLD (out_FRkhi);
+    cycles += frvbf_model_fr550_u_media_set (current_cpu, idesc, 0, referenced, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mhdseth (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mhdseth.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT out_FRintk = -1;
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_media_set (current_cpu, idesc, 0, referenced, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mand (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mwcut.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mor (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mwcut.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mxor (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mwcut.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmand (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmand.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    out_FRintk = FLD (out_FRintk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmor (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmand.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    out_FRintk = FLD (out_FRintk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmxor (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmand.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    out_FRintk = FLD (out_FRintk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mnot (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mcut.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRintj = FLD (in_FRintj);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmnot (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmand.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRintj = FLD (in_FRintj);
+    out_FRintk = FLD (out_FRintk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mrotli (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mwcuti.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRinti = FLD (in_FRinti);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mrotri (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mwcuti.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRinti = FLD (in_FRinti);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mwcut (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mwcut.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mwcuti (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mwcuti.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRinti = FLD (in_FRinti);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mcut (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mcut.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintj = -1;
+    INT in_ACC40Si = -1;
+    INT out_FRintk = -1;
+    in_FRintj = FLD (in_FRintj);
+    in_ACC40Si = FLD (in_ACC40Si);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_3_acc (current_cpu, idesc, 0, referenced, in_FRintj, in_ACC40Si, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mcuti (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mcuti.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintj = -1;
+    INT in_ACC40Si = -1;
+    INT out_FRintk = -1;
+    in_ACC40Si = FLD (in_ACC40Si);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_3_acc (current_cpu, idesc, 0, referenced, in_FRintj, in_ACC40Si, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mcutss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mcut.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintj = -1;
+    INT in_ACC40Si = -1;
+    INT out_FRintk = -1;
+    in_FRintj = FLD (in_FRintj);
+    in_ACC40Si = FLD (in_ACC40Si);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_3_acc (current_cpu, idesc, 0, referenced, in_FRintj, in_ACC40Si, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mcutssi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mcuti.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintj = -1;
+    INT in_ACC40Si = -1;
+    INT out_FRintk = -1;
+    in_ACC40Si = FLD (in_ACC40Si);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_3_acc (current_cpu, idesc, 0, referenced, in_FRintj, in_ACC40Si, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mdcutssi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mdcutssi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ACC40Si = -1;
+    INT out_FRintkeven = -1;
+    in_ACC40Si = FLD (in_ACC40Si);
+    out_FRintkeven = FLD (out_FRintkeven);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media_3_acc_dual (current_cpu, idesc, 0, referenced, in_ACC40Si, out_FRintkeven);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_maveh (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mwcut.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_msllhi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_msllhi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRinti = FLD (in_FRinti);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_msrlhi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_msllhi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRinti = FLD (in_FRinti);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_msrahi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_msllhi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRinti = FLD (in_FRinti);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mdrotli (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mdrotli.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintieven = -1;
+    INT in_FRintjeven = -1;
+    INT out_FRintkeven = -1;
+    in_FRintieven = FLD (in_FRintieven);
+    out_FRintkeven = FLD (out_FRintkeven);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 5)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_quad (current_cpu, idesc, 0, referenced, in_FRintieven, in_FRintjeven, out_FRintkeven);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mcplhi (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mcplhi.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT out_FRintk = -1;
+    in_FRinti = FLD (in_FRinti);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media_3_dual (current_cpu, idesc, 0, referenced, in_FRinti, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mcpli (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mwcuti.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT out_FRintk = -1;
+    in_FRinti = FLD (in_FRinti);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media_3_dual (current_cpu, idesc, 0, referenced, in_FRinti, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_msaths (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmaddhss.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mqsaths (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmqaddhss.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintieven = -1;
+    INT in_FRintjeven = -1;
+    INT out_FRintkeven = -1;
+    in_FRintieven = FLD (in_FRintieven);
+    in_FRintjeven = FLD (in_FRintjeven);
+    out_FRintkeven = FLD (out_FRintkeven);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 14)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_quad (current_cpu, idesc, 0, referenced, in_FRintieven, in_FRintjeven, out_FRintkeven);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_msathu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmaddhss.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mcmpsh (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mcmpsh.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mcmpuh (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mcmpsh.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mabshs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mabshs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRintj = FLD (in_FRintj);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_maddhss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmaddhss.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_maddhus (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmaddhss.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_msubhss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmaddhss.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_msubhus (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmaddhss.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmaddhss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmaddhss.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmaddhus (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmaddhss.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmsubhss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmaddhss.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmsubhus (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmaddhss.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mqaddhss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmqaddhss.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintieven = -1;
+    INT in_FRintjeven = -1;
+    INT out_FRintkeven = -1;
+    in_FRintieven = FLD (in_FRintieven);
+    in_FRintjeven = FLD (in_FRintjeven);
+    out_FRintkeven = FLD (out_FRintkeven);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 14)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_quad (current_cpu, idesc, 0, referenced, in_FRintieven, in_FRintjeven, out_FRintkeven);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mqaddhus (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmqaddhss.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintieven = -1;
+    INT in_FRintjeven = -1;
+    INT out_FRintkeven = -1;
+    in_FRintieven = FLD (in_FRintieven);
+    in_FRintjeven = FLD (in_FRintjeven);
+    out_FRintkeven = FLD (out_FRintkeven);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 14)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_quad (current_cpu, idesc, 0, referenced, in_FRintieven, in_FRintjeven, out_FRintkeven);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mqsubhss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmqaddhss.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintieven = -1;
+    INT in_FRintjeven = -1;
+    INT out_FRintkeven = -1;
+    in_FRintieven = FLD (in_FRintieven);
+    in_FRintjeven = FLD (in_FRintjeven);
+    out_FRintkeven = FLD (out_FRintkeven);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 14)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_quad (current_cpu, idesc, 0, referenced, in_FRintieven, in_FRintjeven, out_FRintkeven);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mqsubhus (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmqaddhss.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintieven = -1;
+    INT in_FRintjeven = -1;
+    INT out_FRintkeven = -1;
+    in_FRintieven = FLD (in_FRintieven);
+    in_FRintjeven = FLD (in_FRintjeven);
+    out_FRintkeven = FLD (out_FRintkeven);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 14)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_quad (current_cpu, idesc, 0, referenced, in_FRintieven, in_FRintjeven, out_FRintkeven);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmqaddhss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmqaddhss.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintieven = -1;
+    INT in_FRintjeven = -1;
+    INT out_FRintkeven = -1;
+    in_FRintieven = FLD (in_FRintieven);
+    in_FRintjeven = FLD (in_FRintjeven);
+    out_FRintkeven = FLD (out_FRintkeven);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 16)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_quad (current_cpu, idesc, 0, referenced, in_FRintieven, in_FRintjeven, out_FRintkeven);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmqaddhus (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmqaddhss.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintieven = -1;
+    INT in_FRintjeven = -1;
+    INT out_FRintkeven = -1;
+    in_FRintieven = FLD (in_FRintieven);
+    in_FRintjeven = FLD (in_FRintjeven);
+    out_FRintkeven = FLD (out_FRintkeven);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 16)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_quad (current_cpu, idesc, 0, referenced, in_FRintieven, in_FRintjeven, out_FRintkeven);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmqsubhss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmqaddhss.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintieven = -1;
+    INT in_FRintjeven = -1;
+    INT out_FRintkeven = -1;
+    in_FRintieven = FLD (in_FRintieven);
+    in_FRintjeven = FLD (in_FRintjeven);
+    out_FRintkeven = FLD (out_FRintkeven);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 16)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_quad (current_cpu, idesc, 0, referenced, in_FRintieven, in_FRintjeven, out_FRintkeven);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmqsubhus (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmqaddhss.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintieven = -1;
+    INT in_FRintjeven = -1;
+    INT out_FRintkeven = -1;
+    in_FRintieven = FLD (in_FRintieven);
+    in_FRintjeven = FLD (in_FRintjeven);
+    out_FRintkeven = FLD (out_FRintkeven);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 16)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_quad (current_cpu, idesc, 0, referenced, in_FRintieven, in_FRintjeven, out_FRintkeven);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_maddaccs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mdasaccs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ACC40Si = -1;
+    INT out_ACC40Sk = -1;
+    in_ACC40Si = FLD (in_ACC40Si);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media_4_acc (current_cpu, idesc, 0, referenced, in_ACC40Si, out_ACC40Sk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_msubaccs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mdasaccs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ACC40Si = -1;
+    INT out_ACC40Sk = -1;
+    in_ACC40Si = FLD (in_ACC40Si);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media_4_acc (current_cpu, idesc, 0, referenced, in_ACC40Si, out_ACC40Sk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mdaddaccs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mdasaccs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ACC40Si = -1;
+    INT out_ACC40Sk = -1;
+    in_ACC40Si = FLD (in_ACC40Si);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media_4_acc_dual (current_cpu, idesc, 0, referenced, in_ACC40Si, out_ACC40Sk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mdsubaccs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mdasaccs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ACC40Si = -1;
+    INT out_ACC40Sk = -1;
+    in_ACC40Si = FLD (in_ACC40Si);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media_4_acc_dual (current_cpu, idesc, 0, referenced, in_ACC40Si, out_ACC40Sk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_masaccs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mdasaccs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ACC40Si = -1;
+    INT out_ACC40Sk = -1;
+    in_ACC40Si = FLD (in_ACC40Si);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media_4_add_sub (current_cpu, idesc, 0, referenced, in_ACC40Si, out_ACC40Sk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mdasaccs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mdasaccs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ACC40Si = -1;
+    INT out_ACC40Sk = -1;
+    in_ACC40Si = FLD (in_ACC40Si);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media_4_add_sub_dual (current_cpu, idesc, 0, referenced, in_ACC40Si, out_ACC40Sk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mmulhs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 9)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4 (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mmulhu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 9)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4 (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mmulxhs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 9)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4 (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mmulxhu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 9)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4 (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmmulhs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 11)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4 (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmmulhu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 11)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4 (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mqmulhs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmqmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintieven = -1;
+    INT in_FRintjeven = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRintieven = FLD (in_FRintieven);
+    in_FRintjeven = FLD (in_FRintjeven);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 13)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4_quad (current_cpu, idesc, 0, referenced, in_FRintieven, in_FRintjeven, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mqmulhu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmqmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintieven = -1;
+    INT in_FRintjeven = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRintieven = FLD (in_FRintieven);
+    in_FRintjeven = FLD (in_FRintjeven);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 13)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4_quad (current_cpu, idesc, 0, referenced, in_FRintieven, in_FRintjeven, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mqmulxhs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmqmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintieven = -1;
+    INT in_FRintjeven = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRintieven = FLD (in_FRintieven);
+    in_FRintjeven = FLD (in_FRintjeven);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 13)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4_quad (current_cpu, idesc, 0, referenced, in_FRintieven, in_FRintjeven, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mqmulxhu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmqmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintieven = -1;
+    INT in_FRintjeven = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRintieven = FLD (in_FRintieven);
+    in_FRintjeven = FLD (in_FRintjeven);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 13)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4_quad (current_cpu, idesc, 0, referenced, in_FRintieven, in_FRintjeven, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmqmulhs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmqmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintieven = -1;
+    INT in_FRintjeven = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRintieven = FLD (in_FRintieven);
+    in_FRintjeven = FLD (in_FRintjeven);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 15)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4_quad (current_cpu, idesc, 0, referenced, in_FRintieven, in_FRintjeven, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmqmulhu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmqmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintieven = -1;
+    INT in_FRintjeven = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRintieven = FLD (in_FRintieven);
+    in_FRintjeven = FLD (in_FRintjeven);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 15)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4_quad (current_cpu, idesc, 0, referenced, in_FRintieven, in_FRintjeven, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mmachs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 11)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4 (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mmachu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmmachu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    out_ACC40Uk = FLD (out_ACC40Uk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 11)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_media_4 (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mmrdhs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 11)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4 (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mmrdhu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmmachu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    out_ACC40Uk = FLD (out_ACC40Uk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 11)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_media_4 (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmmachs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 13)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4 (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmmachu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmmachu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    out_ACC40Uk = FLD (out_ACC40Uk);
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 13)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_media_4 (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mqmachs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmqmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintieven = -1;
+    INT in_FRintjeven = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRintieven = FLD (in_FRintieven);
+    in_FRintjeven = FLD (in_FRintjeven);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 17)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4_quad (current_cpu, idesc, 0, referenced, in_FRintieven, in_FRintjeven, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mqmachu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmqmachu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintieven = -1;
+    INT in_FRintjeven = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRintieven = FLD (in_FRintieven);
+    in_FRintjeven = FLD (in_FRintjeven);
+    out_ACC40Uk = FLD (out_ACC40Uk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 17)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_media_4_quad (current_cpu, idesc, 0, referenced, in_FRintieven, in_FRintjeven, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmqmachs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmqmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintieven = -1;
+    INT in_FRintjeven = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRintieven = FLD (in_FRintieven);
+    in_FRintjeven = FLD (in_FRintjeven);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 19)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4_quad (current_cpu, idesc, 0, referenced, in_FRintieven, in_FRintjeven, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmqmachu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmqmachu.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintieven = -1;
+    INT in_FRintjeven = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRintieven = FLD (in_FRintieven);
+    in_FRintjeven = FLD (in_FRintjeven);
+    out_ACC40Uk = FLD (out_ACC40Uk);
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 3)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 19)) referenced |= 1 << 3;
+    cycles += frvbf_model_fr550_u_media_4_quad (current_cpu, idesc, 0, referenced, in_FRintieven, in_FRintjeven, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mqxmachs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmqmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintieven = -1;
+    INT in_FRintjeven = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRintieven = FLD (in_FRintieven);
+    in_FRintjeven = FLD (in_FRintjeven);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 17)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4_quad (current_cpu, idesc, 0, referenced, in_FRintieven, in_FRintjeven, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mqxmacxhs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmqmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintieven = -1;
+    INT in_FRintjeven = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRintieven = FLD (in_FRintieven);
+    in_FRintjeven = FLD (in_FRintjeven);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 17)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4_quad (current_cpu, idesc, 0, referenced, in_FRintieven, in_FRintjeven, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mqmacxhs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmqmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintieven = -1;
+    INT in_FRintjeven = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRintieven = FLD (in_FRintieven);
+    in_FRintjeven = FLD (in_FRintjeven);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 17)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4_quad (current_cpu, idesc, 0, referenced, in_FRintieven, in_FRintjeven, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mcpxrs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 9)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4 (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mcpxru (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 9)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4 (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mcpxis (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 9)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4 (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mcpxiu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 9)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4 (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmcpxrs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 11)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4 (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmcpxru (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 11)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4 (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmcpxis (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 11)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4 (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmcpxiu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_FRintj = FLD (in_FRintj);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 11)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4 (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mqcpxrs (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmqmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintieven = -1;
+    INT in_FRintjeven = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRintieven = FLD (in_FRintieven);
+    in_FRintjeven = FLD (in_FRintjeven);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 13)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4_quad (current_cpu, idesc, 0, referenced, in_FRintieven, in_FRintjeven, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mqcpxru (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmqmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintieven = -1;
+    INT in_FRintjeven = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRintieven = FLD (in_FRintieven);
+    in_FRintjeven = FLD (in_FRintjeven);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 13)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4_quad (current_cpu, idesc, 0, referenced, in_FRintieven, in_FRintjeven, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mqcpxis (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmqmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintieven = -1;
+    INT in_FRintjeven = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRintieven = FLD (in_FRintieven);
+    in_FRintjeven = FLD (in_FRintjeven);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 13)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4_quad (current_cpu, idesc, 0, referenced, in_FRintieven, in_FRintjeven, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mqcpxiu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmqmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintieven = -1;
+    INT in_FRintjeven = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    in_FRintieven = FLD (in_FRintieven);
+    in_FRintjeven = FLD (in_FRintjeven);
+    out_ACC40Sk = FLD (out_ACC40Sk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 13)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_4_quad (current_cpu, idesc, 0, referenced, in_FRintieven, in_FRintjeven, out_ACC40Sk, out_ACC40Uk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mexpdhw (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmexpdhw.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmexpdhw (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmexpdhw.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mexpdhd (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmexpdhd.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT out_FRintkeven = -1;
+    out_FRintkeven = FLD (out_FRintkeven);
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media_dual_expand (current_cpu, idesc, 0, referenced, in_FRinti, out_FRintkeven);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmexpdhd (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmexpdhd.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT out_FRintkeven = -1;
+    out_FRintkeven = FLD (out_FRintkeven);
+    if (insn_referenced & (1 << 8)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media_dual_expand (current_cpu, idesc, 0, referenced, in_FRinti, out_FRintkeven);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mpackh (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmaddhss.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT out_FRintk = -1;
+    cycles += frvbf_model_fr550_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mdpackh (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mdpackh.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintieven = -1;
+    INT in_FRintjeven = -1;
+    INT out_FRintkeven = -1;
+    in_FRintieven = FLD (in_FRintieven);
+    in_FRintjeven = FLD (in_FRintjeven);
+    out_FRintkeven = FLD (out_FRintkeven);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 12)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_quad (current_cpu, idesc, 0, referenced, in_FRintieven, in_FRintjeven, out_FRintkeven);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_munpackh (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_munpackh.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT out_FRintkeven = -1;
+    in_FRinti = FLD (in_FRinti);
+    out_FRintkeven = FLD (out_FRintkeven);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 7)) referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media_dual_expand (current_cpu, idesc, 0, referenced, in_FRinti, out_FRintkeven);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mdunpackh (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mdunpackh.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mbtoh (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmbtoh.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT out_FRintkeven = -1;
+    out_FRintkeven = FLD (out_FRintkeven);
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media_dual_expand (current_cpu, idesc, 0, referenced, in_FRinti, out_FRintkeven);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmbtoh (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmbtoh.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT out_FRintkeven = -1;
+    out_FRintkeven = FLD (out_FRintkeven);
+    in_FRinti = FLD (in_FRintj);
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media_dual_expand (current_cpu, idesc, 0, referenced, in_FRinti, out_FRintkeven);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mhtob (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmhtob.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT out_FRintk = -1;
+    out_FRintk = FLD (out_FRintk);
+    in_FRinti = FLD (in_FRintjeven);
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media_3_dual (current_cpu, idesc, 0, referenced, in_FRinti, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmhtob (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmhtob.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT out_FRintk = -1;
+    out_FRintk = FLD (out_FRintk);
+    in_FRinti = FLD (in_FRintjeven);
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media_3_dual (current_cpu, idesc, 0, referenced, in_FRinti, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mbtohe (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmbtohe.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_cmbtohe (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmbtohe.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mnop (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_empty.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mclracc_0 (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mdasaccs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_media_3_mclracc (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mclracc_1 (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mdasaccs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_media_3_mclracc (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mrdacc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mcuti.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintj = -1;
+    INT in_ACC40Si = -1;
+    INT out_FRintk = -1;
+    in_ACC40Si = FLD (in_ACC40Si);
+    out_FRintk = FLD (out_FRintk);
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_3_acc (current_cpu, idesc, 0, referenced, in_FRintj, in_ACC40Si, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mrdaccg (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mrdaccg.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRintj = -1;
+    INT in_ACC40Si = -1;
+    INT out_FRintk = -1;
+    out_FRintk = FLD (out_FRintk);
+    in_ACC40Si = FLD (in_ACCGi);
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr550_u_media_3_acc (current_cpu, idesc, 0, referenced, in_FRintj, in_ACC40Si, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mwtacc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_cmmachs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_ACC40Sk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_ACC40Sk = FLD (in_ACC40Sk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr550_u_media_3_wtacc (current_cpu, idesc, 0, referenced, in_FRinti, in_ACC40Sk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mwtaccg (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mwtaccg.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_ACC40Sk = -1;
+    in_FRinti = FLD (in_FRinti);
+    in_ACC40Sk = FLD (in_ACCGk);
+    referenced |= 1 << 0;
+    cycles += frvbf_model_fr550_u_media_3_wtacc (current_cpu, idesc, 0, referenced, in_FRinti, in_ACC40Sk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mcop1 (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_empty.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_mcop2 (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_empty.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr550_fnop (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_empty.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
 model_fr500_add (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_addcc.f
@@ -11991,7 +29039,7 @@ model_fr500_xor (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_fr500_not (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.sfmt_addcc.f
+#define FLD(f) abuf->fields.sfmt_scutss.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -12169,6 +29217,54 @@ model_fr500_umul (SIM_CPU *current_cpu, void *sem_arg)
 }
 
 static int
+model_fr500_smu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smass.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr500_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr500_smass (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smass.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr500_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr500_smsss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smass.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr500_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
 model_fr500_sll (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_addcc.f
@@ -12241,6 +29337,38 @@ model_fr500_sra (SIM_CPU *current_cpu, void *sem_arg)
     referenced |= 1 << 1;
     referenced |= 1 << 2;
     cycles += frvbf_model_fr500_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr500_slass (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr500_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr500_scutss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_scutss.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr500_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -13225,6 +30353,38 @@ model_fr500_subxcc (SIM_CPU *current_cpu, void *sem_arg)
     referenced |= 1 << 2;
     referenced |= 1 << 3;
     cycles += frvbf_model_fr500_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr500_addss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr500_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr500_subss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr500_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -28411,19 +45571,15 @@ model_fr500_mcpxrs (SIM_CPU *current_cpu, void *sem_arg)
     int UNUSED insn_referenced = abuf->written;
     INT in_FRinti = -1;
     INT in_FRintj = -1;
-    INT in_ACC40Si = -1;
-    INT in_ACCGi = -1;
-    INT out_FRintk = -1;
     INT out_ACC40Sk = -1;
     INT out_ACC40Uk = -1;
-    INT out_ACCGk = -1;
     in_FRinti = FLD (in_FRinti);
     in_FRintj = FLD (in_FRintj);
     out_ACC40Sk = FLD (out_ACC40Sk);
-    referenced |= 1 << 0;
-    referenced |= 1 << 1;
-    if (insn_referenced & (1 << 8)) referenced |= 1 << 5;
-    cycles += frvbf_model_fr500_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, in_ACC40Si, in_ACCGi, out_FRintk, out_ACC40Sk, out_ACC40Uk, out_ACCGk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 9)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr500_u_media_dual_mul (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
   }
   return cycles;
 #undef FLD
@@ -28441,19 +45597,15 @@ model_fr500_mcpxru (SIM_CPU *current_cpu, void *sem_arg)
     int UNUSED insn_referenced = abuf->written;
     INT in_FRinti = -1;
     INT in_FRintj = -1;
-    INT in_ACC40Si = -1;
-    INT in_ACCGi = -1;
-    INT out_FRintk = -1;
     INT out_ACC40Sk = -1;
     INT out_ACC40Uk = -1;
-    INT out_ACCGk = -1;
     in_FRinti = FLD (in_FRinti);
     in_FRintj = FLD (in_FRintj);
     out_ACC40Sk = FLD (out_ACC40Sk);
-    referenced |= 1 << 0;
-    referenced |= 1 << 1;
-    if (insn_referenced & (1 << 8)) referenced |= 1 << 5;
-    cycles += frvbf_model_fr500_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, in_ACC40Si, in_ACCGi, out_FRintk, out_ACC40Sk, out_ACC40Uk, out_ACCGk);
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 9)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr500_u_media_dual_mul (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
   }
   return cycles;
 #undef FLD
@@ -28476,9 +45628,9 @@ model_fr500_mcpxis (SIM_CPU *current_cpu, void *sem_arg)
     in_FRinti = FLD (in_FRinti);
     in_FRintj = FLD (in_FRintj);
     out_ACC40Sk = FLD (out_ACC40Sk);
-    referenced |= 1 << 0;
-    referenced |= 1 << 1;
-    if (insn_referenced & (1 << 8)) referenced |= 1 << 2;
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 9)) referenced |= 1 << 2;
     cycles += frvbf_model_fr500_u_media_dual_mul (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
   }
   return cycles;
@@ -28502,9 +45654,9 @@ model_fr500_mcpxiu (SIM_CPU *current_cpu, void *sem_arg)
     in_FRinti = FLD (in_FRinti);
     in_FRintj = FLD (in_FRintj);
     out_ACC40Sk = FLD (out_ACC40Sk);
-    referenced |= 1 << 0;
-    referenced |= 1 << 1;
-    if (insn_referenced & (1 << 8)) referenced |= 1 << 2;
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 9)) referenced |= 1 << 2;
     cycles += frvbf_model_fr500_u_media_dual_mul (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
   }
   return cycles;
@@ -28523,19 +45675,15 @@ model_fr500_cmcpxrs (SIM_CPU *current_cpu, void *sem_arg)
     int UNUSED insn_referenced = abuf->written;
     INT in_FRinti = -1;
     INT in_FRintj = -1;
-    INT in_ACC40Si = -1;
-    INT in_ACCGi = -1;
-    INT out_FRintk = -1;
     INT out_ACC40Sk = -1;
     INT out_ACC40Uk = -1;
-    INT out_ACCGk = -1;
     in_FRinti = FLD (in_FRinti);
     in_FRintj = FLD (in_FRintj);
     out_ACC40Sk = FLD (out_ACC40Sk);
     if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    if (insn_referenced & (1 << 10)) referenced |= 1 << 5;
-    cycles += frvbf_model_fr500_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, in_ACC40Si, in_ACCGi, out_FRintk, out_ACC40Sk, out_ACC40Uk, out_ACCGk);
+    if (insn_referenced & (1 << 11)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr500_u_media_dual_mul (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
   }
   return cycles;
 #undef FLD
@@ -28553,19 +45701,15 @@ model_fr500_cmcpxru (SIM_CPU *current_cpu, void *sem_arg)
     int UNUSED insn_referenced = abuf->written;
     INT in_FRinti = -1;
     INT in_FRintj = -1;
-    INT in_ACC40Si = -1;
-    INT in_ACCGi = -1;
-    INT out_FRintk = -1;
     INT out_ACC40Sk = -1;
     INT out_ACC40Uk = -1;
-    INT out_ACCGk = -1;
     in_FRinti = FLD (in_FRinti);
     in_FRintj = FLD (in_FRintj);
     out_ACC40Sk = FLD (out_ACC40Sk);
     if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    if (insn_referenced & (1 << 10)) referenced |= 1 << 5;
-    cycles += frvbf_model_fr500_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, in_ACC40Si, in_ACCGi, out_FRintk, out_ACC40Sk, out_ACC40Uk, out_ACCGk);
+    if (insn_referenced & (1 << 11)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr500_u_media_dual_mul (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
   }
   return cycles;
 #undef FLD
@@ -28590,7 +45734,7 @@ model_fr500_cmcpxis (SIM_CPU *current_cpu, void *sem_arg)
     out_ACC40Sk = FLD (out_ACC40Sk);
     if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    if (insn_referenced & (1 << 10)) referenced |= 1 << 2;
+    if (insn_referenced & (1 << 11)) referenced |= 1 << 2;
     cycles += frvbf_model_fr500_u_media_dual_mul (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
   }
   return cycles;
@@ -28616,7 +45760,7 @@ model_fr500_cmcpxiu (SIM_CPU *current_cpu, void *sem_arg)
     out_ACC40Sk = FLD (out_ACC40Sk);
     if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    if (insn_referenced & (1 << 10)) referenced |= 1 << 2;
+    if (insn_referenced & (1 << 11)) referenced |= 1 << 2;
     cycles += frvbf_model_fr500_u_media_dual_mul (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
   }
   return cycles;
@@ -29324,7 +46468,7 @@ model_tomcat_xor (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_tomcat_not (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.sfmt_addcc.f
+#define FLD(f) abuf->fields.sfmt_scutss.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -29434,6 +46578,54 @@ model_tomcat_umul (SIM_CPU *current_cpu, void *sem_arg)
 }
 
 static int
+model_tomcat_smu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smass.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_tomcat_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_tomcat_smass (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smass.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_tomcat_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_tomcat_smsss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smass.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_tomcat_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
 model_tomcat_sll (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_addcc.f
@@ -29469,6 +46661,38 @@ static int
 model_tomcat_sra (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_tomcat_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_tomcat_slass (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_tomcat_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_tomcat_scutss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_scutss.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -30059,6 +47283,38 @@ model_tomcat_addxcc (SIM_CPU *current_cpu, void *sem_arg)
 
 static int
 model_tomcat_subxcc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_tomcat_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_tomcat_addss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_tomcat_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_tomcat_subss (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_addcc.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
@@ -41198,7 +58454,7 @@ model_fr400_xor (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_fr400_not (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.sfmt_addcc.f
+#define FLD(f) abuf->fields.sfmt_scutss.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -41376,6 +58632,78 @@ model_fr400_umul (SIM_CPU *current_cpu, void *sem_arg)
 }
 
 static int
+model_fr400_smu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smass.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr400_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr400_smass (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smass.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr400_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr400_smsss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smass.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    cycles += frvbf_model_fr400_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
 model_fr400_sll (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_addcc.f
@@ -41448,6 +58776,38 @@ model_fr400_sra (SIM_CPU *current_cpu, void *sem_arg)
     referenced |= 1 << 1;
     referenced |= 1 << 2;
     cycles += frvbf_model_fr400_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr400_slass (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr400_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr400_scutss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_scutss.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr400_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -42431,6 +59791,58 @@ model_fr400_subxcc (SIM_CPU *current_cpu, void *sem_arg)
     referenced |= 1 << 1;
     referenced |= 1 << 2;
     referenced |= 1 << 3;
+    cycles += frvbf_model_fr400_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr400_addss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr400_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr400_subss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT out_GRk = -1;
+    INT out_ICCi_1 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    out_GRk = FLD (out_GRk);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 2;
     cycles += frvbf_model_fr400_u_integer (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
   }
   return cycles;
@@ -55515,7 +72927,7 @@ model_fr400_maddaccs (SIM_CPU *current_cpu, void *sem_arg)
     in_ACC40Si = FLD (in_ACC40Si);
     out_ACC40Sk = FLD (out_ACC40Sk);
     if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
-    if (insn_referenced & (1 << 3)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 1;
     cycles += frvbf_model_fr400_u_media_2_acc (current_cpu, idesc, 0, referenced, in_ACC40Si, out_ACC40Sk);
   }
   return cycles;
@@ -55537,7 +72949,7 @@ model_fr400_msubaccs (SIM_CPU *current_cpu, void *sem_arg)
     in_ACC40Si = FLD (in_ACC40Si);
     out_ACC40Sk = FLD (out_ACC40Sk);
     if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
-    if (insn_referenced & (1 << 3)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 1;
     cycles += frvbf_model_fr400_u_media_2_acc (current_cpu, idesc, 0, referenced, in_ACC40Si, out_ACC40Sk);
   }
   return cycles;
@@ -56273,9 +73685,9 @@ model_fr400_mcpxrs (SIM_CPU *current_cpu, void *sem_arg)
     in_FRinti = FLD (in_FRinti);
     in_FRintj = FLD (in_FRintj);
     out_ACC40Sk = FLD (out_ACC40Sk);
-    referenced |= 1 << 0;
-    referenced |= 1 << 1;
-    if (insn_referenced & (1 << 8)) referenced |= 1 << 2;
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 9)) referenced |= 1 << 2;
     cycles += frvbf_model_fr400_u_media_2 (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
   }
   return cycles;
@@ -56299,9 +73711,9 @@ model_fr400_mcpxru (SIM_CPU *current_cpu, void *sem_arg)
     in_FRinti = FLD (in_FRinti);
     in_FRintj = FLD (in_FRintj);
     out_ACC40Sk = FLD (out_ACC40Sk);
-    referenced |= 1 << 0;
-    referenced |= 1 << 1;
-    if (insn_referenced & (1 << 8)) referenced |= 1 << 2;
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 9)) referenced |= 1 << 2;
     cycles += frvbf_model_fr400_u_media_2 (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
   }
   return cycles;
@@ -56325,9 +73737,9 @@ model_fr400_mcpxis (SIM_CPU *current_cpu, void *sem_arg)
     in_FRinti = FLD (in_FRinti);
     in_FRintj = FLD (in_FRintj);
     out_ACC40Sk = FLD (out_ACC40Sk);
-    referenced |= 1 << 0;
-    referenced |= 1 << 1;
-    if (insn_referenced & (1 << 8)) referenced |= 1 << 2;
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 9)) referenced |= 1 << 2;
     cycles += frvbf_model_fr400_u_media_2 (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
   }
   return cycles;
@@ -56351,9 +73763,9 @@ model_fr400_mcpxiu (SIM_CPU *current_cpu, void *sem_arg)
     in_FRinti = FLD (in_FRinti);
     in_FRintj = FLD (in_FRintj);
     out_ACC40Sk = FLD (out_ACC40Sk);
-    referenced |= 1 << 0;
-    referenced |= 1 << 1;
-    if (insn_referenced & (1 << 8)) referenced |= 1 << 2;
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 9)) referenced |= 1 << 2;
     cycles += frvbf_model_fr400_u_media_2 (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
   }
   return cycles;
@@ -56379,7 +73791,7 @@ model_fr400_cmcpxrs (SIM_CPU *current_cpu, void *sem_arg)
     out_ACC40Sk = FLD (out_ACC40Sk);
     if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    if (insn_referenced & (1 << 10)) referenced |= 1 << 2;
+    if (insn_referenced & (1 << 11)) referenced |= 1 << 2;
     cycles += frvbf_model_fr400_u_media_2 (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
   }
   return cycles;
@@ -56405,7 +73817,7 @@ model_fr400_cmcpxru (SIM_CPU *current_cpu, void *sem_arg)
     out_ACC40Sk = FLD (out_ACC40Sk);
     if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    if (insn_referenced & (1 << 10)) referenced |= 1 << 2;
+    if (insn_referenced & (1 << 11)) referenced |= 1 << 2;
     cycles += frvbf_model_fr400_u_media_2 (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
   }
   return cycles;
@@ -56431,7 +73843,7 @@ model_fr400_cmcpxis (SIM_CPU *current_cpu, void *sem_arg)
     out_ACC40Sk = FLD (out_ACC40Sk);
     if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    if (insn_referenced & (1 << 10)) referenced |= 1 << 2;
+    if (insn_referenced & (1 << 11)) referenced |= 1 << 2;
     cycles += frvbf_model_fr400_u_media_2 (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
   }
   return cycles;
@@ -56457,7 +73869,7 @@ model_fr400_cmcpxiu (SIM_CPU *current_cpu, void *sem_arg)
     out_ACC40Sk = FLD (out_ACC40Sk);
     if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    if (insn_referenced & (1 << 10)) referenced |= 1 << 2;
+    if (insn_referenced & (1 << 11)) referenced |= 1 << 2;
     cycles += frvbf_model_fr400_u_media_2 (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, out_ACC40Sk, out_ACC40Uk);
   }
   return cycles;
@@ -57107,7 +74519,7 @@ model_simple_xor (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_simple_not (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.sfmt_addcc.f
+#define FLD(f) abuf->fields.sfmt_scutss.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -57217,6 +74629,54 @@ model_simple_umul (SIM_CPU *current_cpu, void *sem_arg)
 }
 
 static int
+model_simple_smu (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smass.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_simple_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_simple_smass (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smass.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_simple_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_simple_smsss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_smass.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_simple_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
 model_simple_sll (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_addcc.f
@@ -57252,6 +74712,38 @@ static int
 model_simple_sra (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_simple_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_simple_slass (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_simple_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_simple_scutss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_scutss.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -57842,6 +75334,38 @@ model_simple_addxcc (SIM_CPU *current_cpu, void *sem_arg)
 
 static int
 model_simple_subxcc (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_simple_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_simple_addss (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_addcc.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_simple_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_simple_subss (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_addcc.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
@@ -68872,9 +86396,14 @@ static const INSN_TIMING frv_timing[] = {
   { FRVBF_INSN_NUDIV, model_frv_nudiv, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_SMUL, model_frv_smul, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_UMUL, model_frv_umul, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SMU, model_frv_smu, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SMASS, model_frv_smass, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SMSSS, model_frv_smsss, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_SLL, model_frv_sll, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_SRL, model_frv_srl, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_SRA, model_frv_sra, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SLASS, model_frv_slass, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SCUTSS, model_frv_scutss, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_SCAN, model_frv_scan, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_CADD, model_frv_cadd, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_CSUB, model_frv_csub, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
@@ -68912,6 +86441,8 @@ static const INSN_TIMING frv_timing[] = {
   { FRVBF_INSN_SUBX, model_frv_subx, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_ADDXCC, model_frv_addxcc, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_SUBXCC, model_frv_subxcc, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_ADDSS, model_frv_addss, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SUBSS, model_frv_subss, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_ADDI, model_frv_addi, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_SUBI, model_frv_subi, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_ANDI, model_frv_andi, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
@@ -69601,6 +87132,763 @@ static const INSN_TIMING frv_timing[] = {
   { FRVBF_INSN_FNOP, model_frv_fnop, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
 };
 
+/* Model timing data for `fr550'.  */
+
+static const INSN_TIMING fr550_timing[] = {
+  { FRVBF_INSN_X_INVALID, 0, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_X_AFTER, 0, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_X_BEFORE, 0, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_X_CTI_CHAIN, 0, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_X_CHAIN, 0, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_X_BEGIN, 0, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_ADD, model_fr550_add, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SUB, model_fr550_sub, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_AND, model_fr550_and, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_OR, model_fr550_or, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_XOR, model_fr550_xor, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_NOT, model_fr550_not, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SDIV, model_fr550_sdiv, { { (int) UNIT_FR550_U_IDIV, 1, 1 } } },
+  { FRVBF_INSN_NSDIV, model_fr550_nsdiv, { { (int) UNIT_FR550_U_IDIV, 1, 1 } } },
+  { FRVBF_INSN_UDIV, model_fr550_udiv, { { (int) UNIT_FR550_U_IDIV, 1, 1 } } },
+  { FRVBF_INSN_NUDIV, model_fr550_nudiv, { { (int) UNIT_FR550_U_IDIV, 1, 1 } } },
+  { FRVBF_INSN_SMUL, model_fr550_smul, { { (int) UNIT_FR550_U_IMUL, 1, 1 } } },
+  { FRVBF_INSN_UMUL, model_fr550_umul, { { (int) UNIT_FR550_U_IMUL, 1, 1 } } },
+  { FRVBF_INSN_SMU, model_fr550_smu, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SMASS, model_fr550_smass, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SMSSS, model_fr550_smsss, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SLL, model_fr550_sll, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SRL, model_fr550_srl, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SRA, model_fr550_sra, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SLASS, model_fr550_slass, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SCUTSS, model_fr550_scutss, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SCAN, model_fr550_scan, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_CADD, model_fr550_cadd, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_CSUB, model_fr550_csub, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_CAND, model_fr550_cand, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_COR, model_fr550_cor, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_CXOR, model_fr550_cxor, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_CNOT, model_fr550_cnot, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_CSMUL, model_fr550_csmul, { { (int) UNIT_FR550_U_IMUL, 1, 1 } } },
+  { FRVBF_INSN_CSDIV, model_fr550_csdiv, { { (int) UNIT_FR550_U_IDIV, 1, 1 } } },
+  { FRVBF_INSN_CUDIV, model_fr550_cudiv, { { (int) UNIT_FR550_U_IDIV, 1, 1 } } },
+  { FRVBF_INSN_CSLL, model_fr550_csll, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_CSRL, model_fr550_csrl, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_CSRA, model_fr550_csra, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_CSCAN, model_fr550_cscan, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_ADDCC, model_fr550_addcc, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SUBCC, model_fr550_subcc, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_ANDCC, model_fr550_andcc, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_ORCC, model_fr550_orcc, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_XORCC, model_fr550_xorcc, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SLLCC, model_fr550_sllcc, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SRLCC, model_fr550_srlcc, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SRACC, model_fr550_sracc, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SMULCC, model_fr550_smulcc, { { (int) UNIT_FR550_U_IMUL, 1, 1 } } },
+  { FRVBF_INSN_UMULCC, model_fr550_umulcc, { { (int) UNIT_FR550_U_IMUL, 1, 1 } } },
+  { FRVBF_INSN_CADDCC, model_fr550_caddcc, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_CSUBCC, model_fr550_csubcc, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_CSMULCC, model_fr550_csmulcc, { { (int) UNIT_FR550_U_IMUL, 1, 1 } } },
+  { FRVBF_INSN_CANDCC, model_fr550_candcc, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_CORCC, model_fr550_corcc, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_CXORCC, model_fr550_cxorcc, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_CSLLCC, model_fr550_csllcc, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_CSRLCC, model_fr550_csrlcc, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_CSRACC, model_fr550_csracc, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_ADDX, model_fr550_addx, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SUBX, model_fr550_subx, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_ADDXCC, model_fr550_addxcc, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SUBXCC, model_fr550_subxcc, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_ADDSS, model_fr550_addss, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SUBSS, model_fr550_subss, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_ADDI, model_fr550_addi, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SUBI, model_fr550_subi, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_ANDI, model_fr550_andi, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_ORI, model_fr550_ori, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_XORI, model_fr550_xori, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SDIVI, model_fr550_sdivi, { { (int) UNIT_FR550_U_IDIV, 1, 1 } } },
+  { FRVBF_INSN_NSDIVI, model_fr550_nsdivi, { { (int) UNIT_FR550_U_IDIV, 1, 1 } } },
+  { FRVBF_INSN_UDIVI, model_fr550_udivi, { { (int) UNIT_FR550_U_IDIV, 1, 1 } } },
+  { FRVBF_INSN_NUDIVI, model_fr550_nudivi, { { (int) UNIT_FR550_U_IDIV, 1, 1 } } },
+  { FRVBF_INSN_SMULI, model_fr550_smuli, { { (int) UNIT_FR550_U_IMUL, 1, 1 } } },
+  { FRVBF_INSN_UMULI, model_fr550_umuli, { { (int) UNIT_FR550_U_IMUL, 1, 1 } } },
+  { FRVBF_INSN_SLLI, model_fr550_slli, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SRLI, model_fr550_srli, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SRAI, model_fr550_srai, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SCANI, model_fr550_scani, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_ADDICC, model_fr550_addicc, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SUBICC, model_fr550_subicc, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_ANDICC, model_fr550_andicc, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_ORICC, model_fr550_oricc, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_XORICC, model_fr550_xoricc, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SMULICC, model_fr550_smulicc, { { (int) UNIT_FR550_U_IMUL, 1, 1 } } },
+  { FRVBF_INSN_UMULICC, model_fr550_umulicc, { { (int) UNIT_FR550_U_IMUL, 1, 1 } } },
+  { FRVBF_INSN_SLLICC, model_fr550_sllicc, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SRLICC, model_fr550_srlicc, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SRAICC, model_fr550_sraicc, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_ADDXI, model_fr550_addxi, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SUBXI, model_fr550_subxi, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_ADDXICC, model_fr550_addxicc, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SUBXICC, model_fr550_subxicc, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_CMPB, model_fr550_cmpb, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_CMPBA, model_fr550_cmpba, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SETLO, model_fr550_setlo, { { (int) UNIT_FR550_U_SET_HILO, 1, 1 } } },
+  { FRVBF_INSN_SETHI, model_fr550_sethi, { { (int) UNIT_FR550_U_SET_HILO, 1, 1 } } },
+  { FRVBF_INSN_SETLOS, model_fr550_setlos, { { (int) UNIT_FR550_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_LDSB, model_fr550_ldsb, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDUB, model_fr550_ldub, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDSH, model_fr550_ldsh, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDUH, model_fr550_lduh, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LD, model_fr550_ld, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDBF, model_fr550_ldbf, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDHF, model_fr550_ldhf, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDF, model_fr550_ldf, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDC, model_fr550_ldc, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_NLDSB, model_fr550_nldsb, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_NLDUB, model_fr550_nldub, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_NLDSH, model_fr550_nldsh, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_NLDUH, model_fr550_nlduh, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_NLD, model_fr550_nld, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_NLDBF, model_fr550_nldbf, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_NLDHF, model_fr550_nldhf, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_NLDF, model_fr550_nldf, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDD, model_fr550_ldd, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDDF, model_fr550_lddf, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDDC, model_fr550_lddc, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_NLDD, model_fr550_nldd, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_NLDDF, model_fr550_nlddf, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDQ, model_fr550_ldq, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_LDQF, model_fr550_ldqf, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_LDQC, model_fr550_ldqc, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_NLDQ, model_fr550_nldq, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_NLDQF, model_fr550_nldqf, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_LDSBU, model_fr550_ldsbu, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDUBU, model_fr550_ldubu, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDSHU, model_fr550_ldshu, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDUHU, model_fr550_lduhu, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDU, model_fr550_ldu, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_NLDSBU, model_fr550_nldsbu, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_NLDUBU, model_fr550_nldubu, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_NLDSHU, model_fr550_nldshu, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_NLDUHU, model_fr550_nlduhu, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_NLDU, model_fr550_nldu, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDBFU, model_fr550_ldbfu, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDHFU, model_fr550_ldhfu, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDFU, model_fr550_ldfu, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDCU, model_fr550_ldcu, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_NLDBFU, model_fr550_nldbfu, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_NLDHFU, model_fr550_nldhfu, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_NLDFU, model_fr550_nldfu, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDDU, model_fr550_lddu, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_NLDDU, model_fr550_nlddu, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDDFU, model_fr550_lddfu, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDDCU, model_fr550_lddcu, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_NLDDFU, model_fr550_nlddfu, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDQU, model_fr550_ldqu, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_NLDQU, model_fr550_nldqu, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_LDQFU, model_fr550_ldqfu, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_LDQCU, model_fr550_ldqcu, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_NLDQFU, model_fr550_nldqfu, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_LDSBI, model_fr550_ldsbi, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDSHI, model_fr550_ldshi, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDI, model_fr550_ldi, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDUBI, model_fr550_ldubi, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDUHI, model_fr550_lduhi, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDBFI, model_fr550_ldbfi, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDHFI, model_fr550_ldhfi, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDFI, model_fr550_ldfi, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_NLDSBI, model_fr550_nldsbi, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_NLDUBI, model_fr550_nldubi, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_NLDSHI, model_fr550_nldshi, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_NLDUHI, model_fr550_nlduhi, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_NLDI, model_fr550_nldi, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_NLDBFI, model_fr550_nldbfi, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_NLDHFI, model_fr550_nldhfi, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_NLDFI, model_fr550_nldfi, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDDI, model_fr550_lddi, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDDFI, model_fr550_lddfi, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_NLDDI, model_fr550_nlddi, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_NLDDFI, model_fr550_nlddfi, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_LDQI, model_fr550_ldqi, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_LDQFI, model_fr550_ldqfi, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_NLDQFI, model_fr550_nldqfi, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_STB, model_fr550_stb, { { (int) UNIT_FR550_U_GR_STORE, 1, 1 } } },
+  { FRVBF_INSN_STH, model_fr550_sth, { { (int) UNIT_FR550_U_GR_STORE, 1, 1 } } },
+  { FRVBF_INSN_ST, model_fr550_st, { { (int) UNIT_FR550_U_GR_STORE, 1, 1 } } },
+  { FRVBF_INSN_STBF, model_fr550_stbf, { { (int) UNIT_FR550_U_FR_STORE, 1, 1 } } },
+  { FRVBF_INSN_STHF, model_fr550_sthf, { { (int) UNIT_FR550_U_FR_STORE, 1, 1 } } },
+  { FRVBF_INSN_STF, model_fr550_stf, { { (int) UNIT_FR550_U_FR_STORE, 1, 1 } } },
+  { FRVBF_INSN_STC, model_fr550_stc, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_RSTB, model_fr550_rstb, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_RSTH, model_fr550_rsth, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_RST, model_fr550_rst, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_RSTBF, model_fr550_rstbf, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_RSTHF, model_fr550_rsthf, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_RSTF, model_fr550_rstf, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_STD, model_fr550_std, { { (int) UNIT_FR550_U_GR_STORE, 1, 1 } } },
+  { FRVBF_INSN_STDF, model_fr550_stdf, { { (int) UNIT_FR550_U_FR_STORE, 1, 1 } } },
+  { FRVBF_INSN_STDC, model_fr550_stdc, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_RSTD, model_fr550_rstd, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_RSTDF, model_fr550_rstdf, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_STQ, model_fr550_stq, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_STQF, model_fr550_stqf, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_STQC, model_fr550_stqc, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_RSTQ, model_fr550_rstq, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_RSTQF, model_fr550_rstqf, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_STBU, model_fr550_stbu, { { (int) UNIT_FR550_U_GR_STORE, 1, 1 } } },
+  { FRVBF_INSN_STHU, model_fr550_sthu, { { (int) UNIT_FR550_U_GR_STORE, 1, 1 } } },
+  { FRVBF_INSN_STU, model_fr550_stu, { { (int) UNIT_FR550_U_GR_STORE, 1, 1 } } },
+  { FRVBF_INSN_STBFU, model_fr550_stbfu, { { (int) UNIT_FR550_U_FR_STORE, 1, 1 } } },
+  { FRVBF_INSN_STHFU, model_fr550_sthfu, { { (int) UNIT_FR550_U_FR_STORE, 1, 1 } } },
+  { FRVBF_INSN_STFU, model_fr550_stfu, { { (int) UNIT_FR550_U_FR_STORE, 1, 1 } } },
+  { FRVBF_INSN_STCU, model_fr550_stcu, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_STDU, model_fr550_stdu, { { (int) UNIT_FR550_U_GR_STORE, 1, 1 } } },
+  { FRVBF_INSN_STDFU, model_fr550_stdfu, { { (int) UNIT_FR550_U_FR_STORE, 1, 1 } } },
+  { FRVBF_INSN_STDCU, model_fr550_stdcu, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_STQU, model_fr550_stqu, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_STQFU, model_fr550_stqfu, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_STQCU, model_fr550_stqcu, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_CLDSB, model_fr550_cldsb, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_CLDUB, model_fr550_cldub, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_CLDSH, model_fr550_cldsh, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_CLDUH, model_fr550_clduh, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_CLD, model_fr550_cld, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_CLDBF, model_fr550_cldbf, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_CLDHF, model_fr550_cldhf, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_CLDF, model_fr550_cldf, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_CLDD, model_fr550_cldd, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_CLDDF, model_fr550_clddf, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_CLDQ, model_fr550_cldq, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_CLDSBU, model_fr550_cldsbu, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_CLDUBU, model_fr550_cldubu, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_CLDSHU, model_fr550_cldshu, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_CLDUHU, model_fr550_clduhu, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_CLDU, model_fr550_cldu, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_CLDBFU, model_fr550_cldbfu, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_CLDHFU, model_fr550_cldhfu, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_CLDFU, model_fr550_cldfu, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_CLDDU, model_fr550_clddu, { { (int) UNIT_FR550_U_GR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_CLDDFU, model_fr550_clddfu, { { (int) UNIT_FR550_U_FR_LOAD, 1, 1 } } },
+  { FRVBF_INSN_CLDQU, model_fr550_cldqu, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_CSTB, model_fr550_cstb, { { (int) UNIT_FR550_U_GR_STORE, 1, 1 } } },
+  { FRVBF_INSN_CSTH, model_fr550_csth, { { (int) UNIT_FR550_U_GR_STORE, 1, 1 } } },
+  { FRVBF_INSN_CST, model_fr550_cst, { { (int) UNIT_FR550_U_GR_STORE, 1, 1 } } },
+  { FRVBF_INSN_CSTBF, model_fr550_cstbf, { { (int) UNIT_FR550_U_FR_STORE, 1, 1 } } },
+  { FRVBF_INSN_CSTHF, model_fr550_csthf, { { (int) UNIT_FR550_U_FR_STORE, 1, 1 } } },
+  { FRVBF_INSN_CSTF, model_fr550_cstf, { { (int) UNIT_FR550_U_FR_STORE, 1, 1 } } },
+  { FRVBF_INSN_CSTD, model_fr550_cstd, { { (int) UNIT_FR550_U_GR_STORE, 1, 1 } } },
+  { FRVBF_INSN_CSTDF, model_fr550_cstdf, { { (int) UNIT_FR550_U_FR_STORE, 1, 1 } } },
+  { FRVBF_INSN_CSTQ, model_fr550_cstq, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_CSTBU, model_fr550_cstbu, { { (int) UNIT_FR550_U_GR_STORE, 1, 1 } } },
+  { FRVBF_INSN_CSTHU, model_fr550_csthu, { { (int) UNIT_FR550_U_GR_STORE, 1, 1 } } },
+  { FRVBF_INSN_CSTU, model_fr550_cstu, { { (int) UNIT_FR550_U_GR_STORE, 1, 1 } } },
+  { FRVBF_INSN_CSTBFU, model_fr550_cstbfu, { { (int) UNIT_FR550_U_FR_STORE, 1, 1 } } },
+  { FRVBF_INSN_CSTHFU, model_fr550_csthfu, { { (int) UNIT_FR550_U_FR_STORE, 1, 1 } } },
+  { FRVBF_INSN_CSTFU, model_fr550_cstfu, { { (int) UNIT_FR550_U_FR_STORE, 1, 1 } } },
+  { FRVBF_INSN_CSTDU, model_fr550_cstdu, { { (int) UNIT_FR550_U_GR_STORE, 1, 1 } } },
+  { FRVBF_INSN_CSTDFU, model_fr550_cstdfu, { { (int) UNIT_FR550_U_FR_STORE, 1, 1 } } },
+  { FRVBF_INSN_STBI, model_fr550_stbi, { { (int) UNIT_FR550_U_GR_STORE, 1, 1 } } },
+  { FRVBF_INSN_STHI, model_fr550_sthi, { { (int) UNIT_FR550_U_GR_STORE, 1, 1 } } },
+  { FRVBF_INSN_STI, model_fr550_sti, { { (int) UNIT_FR550_U_GR_STORE, 1, 1 } } },
+  { FRVBF_INSN_STBFI, model_fr550_stbfi, { { (int) UNIT_FR550_U_FR_STORE, 1, 1 } } },
+  { FRVBF_INSN_STHFI, model_fr550_sthfi, { { (int) UNIT_FR550_U_FR_STORE, 1, 1 } } },
+  { FRVBF_INSN_STFI, model_fr550_stfi, { { (int) UNIT_FR550_U_FR_STORE, 1, 1 } } },
+  { FRVBF_INSN_STDI, model_fr550_stdi, { { (int) UNIT_FR550_U_GR_STORE, 1, 1 } } },
+  { FRVBF_INSN_STDFI, model_fr550_stdfi, { { (int) UNIT_FR550_U_FR_STORE, 1, 1 } } },
+  { FRVBF_INSN_STQI, model_fr550_stqi, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_STQFI, model_fr550_stqfi, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SWAP, model_fr550_swap, { { (int) UNIT_FR550_U_SWAP, 1, 1 } } },
+  { FRVBF_INSN_SWAPI, model_fr550_swapi, { { (int) UNIT_FR550_U_SWAP, 1, 1 } } },
+  { FRVBF_INSN_CSWAP, model_fr550_cswap, { { (int) UNIT_FR550_U_SWAP, 1, 1 } } },
+  { FRVBF_INSN_MOVGF, model_fr550_movgf, { { (int) UNIT_FR550_U_GR2FR, 1, 1 } } },
+  { FRVBF_INSN_MOVFG, model_fr550_movfg, { { (int) UNIT_FR550_U_FR2GR, 1, 1 } } },
+  { FRVBF_INSN_MOVGFD, model_fr550_movgfd, { { (int) UNIT_FR550_U_GR2FR, 1, 1 } } },
+  { FRVBF_INSN_MOVFGD, model_fr550_movfgd, { { (int) UNIT_FR550_U_FR2GR, 1, 1 } } },
+  { FRVBF_INSN_MOVGFQ, model_fr550_movgfq, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_MOVFGQ, model_fr550_movfgq, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_CMOVGF, model_fr550_cmovgf, { { (int) UNIT_FR550_U_GR2FR, 1, 1 } } },
+  { FRVBF_INSN_CMOVFG, model_fr550_cmovfg, { { (int) UNIT_FR550_U_FR2GR, 1, 1 } } },
+  { FRVBF_INSN_CMOVGFD, model_fr550_cmovgfd, { { (int) UNIT_FR550_U_GR2FR, 1, 1 } } },
+  { FRVBF_INSN_CMOVFGD, model_fr550_cmovfgd, { { (int) UNIT_FR550_U_FR2GR, 1, 1 } } },
+  { FRVBF_INSN_MOVGS, model_fr550_movgs, { { (int) UNIT_FR550_U_GR2SPR, 1, 1 } } },
+  { FRVBF_INSN_MOVSG, model_fr550_movsg, { { (int) UNIT_FR550_U_SPR2GR, 1, 1 } } },
+  { FRVBF_INSN_BRA, model_fr550_bra, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BNO, model_fr550_bno, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BEQ, model_fr550_beq, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BNE, model_fr550_bne, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BLE, model_fr550_ble, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BGT, model_fr550_bgt, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BLT, model_fr550_blt, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BGE, model_fr550_bge, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BLS, model_fr550_bls, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BHI, model_fr550_bhi, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BC, model_fr550_bc, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BNC, model_fr550_bnc, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BN, model_fr550_bn, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BP, model_fr550_bp, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BV, model_fr550_bv, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BNV, model_fr550_bnv, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBRA, model_fr550_fbra, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBNO, model_fr550_fbno, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBNE, model_fr550_fbne, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBEQ, model_fr550_fbeq, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBLG, model_fr550_fblg, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBUE, model_fr550_fbue, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBUL, model_fr550_fbul, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBGE, model_fr550_fbge, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBLT, model_fr550_fblt, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBUGE, model_fr550_fbuge, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBUG, model_fr550_fbug, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBLE, model_fr550_fble, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBGT, model_fr550_fbgt, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBULE, model_fr550_fbule, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBU, model_fr550_fbu, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBO, model_fr550_fbo, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BCTRLR, model_fr550_bctrlr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BRALR, model_fr550_bralr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BNOLR, model_fr550_bnolr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BEQLR, model_fr550_beqlr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BNELR, model_fr550_bnelr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BLELR, model_fr550_blelr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BGTLR, model_fr550_bgtlr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BLTLR, model_fr550_bltlr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BGELR, model_fr550_bgelr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BLSLR, model_fr550_blslr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BHILR, model_fr550_bhilr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BCLR, model_fr550_bclr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BNCLR, model_fr550_bnclr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BNLR, model_fr550_bnlr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BPLR, model_fr550_bplr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BVLR, model_fr550_bvlr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BNVLR, model_fr550_bnvlr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBRALR, model_fr550_fbralr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBNOLR, model_fr550_fbnolr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBEQLR, model_fr550_fbeqlr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBNELR, model_fr550_fbnelr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBLGLR, model_fr550_fblglr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBUELR, model_fr550_fbuelr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBULLR, model_fr550_fbullr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBGELR, model_fr550_fbgelr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBLTLR, model_fr550_fbltlr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBUGELR, model_fr550_fbugelr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBUGLR, model_fr550_fbuglr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBLELR, model_fr550_fblelr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBGTLR, model_fr550_fbgtlr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBULELR, model_fr550_fbulelr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBULR, model_fr550_fbulr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FBOLR, model_fr550_fbolr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BCRALR, model_fr550_bcralr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BCNOLR, model_fr550_bcnolr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BCEQLR, model_fr550_bceqlr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BCNELR, model_fr550_bcnelr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BCLELR, model_fr550_bclelr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BCGTLR, model_fr550_bcgtlr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BCLTLR, model_fr550_bcltlr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BCGELR, model_fr550_bcgelr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BCLSLR, model_fr550_bclslr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BCHILR, model_fr550_bchilr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BCCLR, model_fr550_bcclr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BCNCLR, model_fr550_bcnclr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BCNLR, model_fr550_bcnlr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BCPLR, model_fr550_bcplr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BCVLR, model_fr550_bcvlr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_BCNVLR, model_fr550_bcnvlr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FCBRALR, model_fr550_fcbralr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FCBNOLR, model_fr550_fcbnolr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FCBEQLR, model_fr550_fcbeqlr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FCBNELR, model_fr550_fcbnelr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FCBLGLR, model_fr550_fcblglr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FCBUELR, model_fr550_fcbuelr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FCBULLR, model_fr550_fcbullr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FCBGELR, model_fr550_fcbgelr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FCBLTLR, model_fr550_fcbltlr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FCBUGELR, model_fr550_fcbugelr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FCBUGLR, model_fr550_fcbuglr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FCBLELR, model_fr550_fcblelr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FCBGTLR, model_fr550_fcbgtlr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FCBULELR, model_fr550_fcbulelr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FCBULR, model_fr550_fcbulr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_FCBOLR, model_fr550_fcbolr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_JMPL, model_fr550_jmpl, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_CALLL, model_fr550_calll, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_JMPIL, model_fr550_jmpil, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_CALLIL, model_fr550_callil, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_CALL, model_fr550_call, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_RETT, model_fr550_rett, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_REI, model_fr550_rei, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_TRA, model_fr550_tra, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TNO, model_fr550_tno, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TEQ, model_fr550_teq, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TNE, model_fr550_tne, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TLE, model_fr550_tle, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TGT, model_fr550_tgt, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TLT, model_fr550_tlt, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TGE, model_fr550_tge, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TLS, model_fr550_tls, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_THI, model_fr550_thi, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TC, model_fr550_tc, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TNC, model_fr550_tnc, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TN, model_fr550_tn, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TP, model_fr550_tp, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TV, model_fr550_tv, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TNV, model_fr550_tnv, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTRA, model_fr550_ftra, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTNO, model_fr550_ftno, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTNE, model_fr550_ftne, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTEQ, model_fr550_fteq, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTLG, model_fr550_ftlg, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTUE, model_fr550_ftue, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTUL, model_fr550_ftul, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTGE, model_fr550_ftge, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTLT, model_fr550_ftlt, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTUGE, model_fr550_ftuge, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTUG, model_fr550_ftug, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTLE, model_fr550_ftle, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTGT, model_fr550_ftgt, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTULE, model_fr550_ftule, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTU, model_fr550_ftu, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTO, model_fr550_fto, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TIRA, model_fr550_tira, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TINO, model_fr550_tino, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TIEQ, model_fr550_tieq, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TINE, model_fr550_tine, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TILE, model_fr550_tile, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TIGT, model_fr550_tigt, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TILT, model_fr550_tilt, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TIGE, model_fr550_tige, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TILS, model_fr550_tils, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TIHI, model_fr550_tihi, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TIC, model_fr550_tic, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TINC, model_fr550_tinc, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TIN, model_fr550_tin, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TIP, model_fr550_tip, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TIV, model_fr550_tiv, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_TINV, model_fr550_tinv, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTIRA, model_fr550_ftira, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTINO, model_fr550_ftino, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTINE, model_fr550_ftine, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTIEQ, model_fr550_ftieq, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTILG, model_fr550_ftilg, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTIUE, model_fr550_ftiue, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTIUL, model_fr550_ftiul, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTIGE, model_fr550_ftige, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTILT, model_fr550_ftilt, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTIUGE, model_fr550_ftiuge, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTIUG, model_fr550_ftiug, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTILE, model_fr550_ftile, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTIGT, model_fr550_ftigt, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTIULE, model_fr550_ftiule, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTIU, model_fr550_ftiu, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_FTIO, model_fr550_ftio, { { (int) UNIT_FR550_U_TRAP, 1, 1 } } },
+  { FRVBF_INSN_BREAK, model_fr550_break, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_MTRAP, model_fr550_mtrap, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_ANDCR, model_fr550_andcr, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_ORCR, model_fr550_orcr, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_XORCR, model_fr550_xorcr, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_NANDCR, model_fr550_nandcr, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_NORCR, model_fr550_norcr, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_ANDNCR, model_fr550_andncr, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_ORNCR, model_fr550_orncr, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_NANDNCR, model_fr550_nandncr, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_NORNCR, model_fr550_norncr, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_NOTCR, model_fr550_notcr, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_CKRA, model_fr550_ckra, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CKNO, model_fr550_ckno, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CKEQ, model_fr550_ckeq, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CKNE, model_fr550_ckne, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CKLE, model_fr550_ckle, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CKGT, model_fr550_ckgt, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CKLT, model_fr550_cklt, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CKGE, model_fr550_ckge, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CKLS, model_fr550_ckls, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CKHI, model_fr550_ckhi, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CKC, model_fr550_ckc, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CKNC, model_fr550_cknc, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CKN, model_fr550_ckn, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CKP, model_fr550_ckp, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CKV, model_fr550_ckv, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CKNV, model_fr550_cknv, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_FCKRA, model_fr550_fckra, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_FCKNO, model_fr550_fckno, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_FCKNE, model_fr550_fckne, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_FCKEQ, model_fr550_fckeq, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_FCKLG, model_fr550_fcklg, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_FCKUE, model_fr550_fckue, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_FCKUL, model_fr550_fckul, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_FCKGE, model_fr550_fckge, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_FCKLT, model_fr550_fcklt, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_FCKUGE, model_fr550_fckuge, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_FCKUG, model_fr550_fckug, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_FCKLE, model_fr550_fckle, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_FCKGT, model_fr550_fckgt, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_FCKULE, model_fr550_fckule, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_FCKU, model_fr550_fcku, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_FCKO, model_fr550_fcko, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CCKRA, model_fr550_cckra, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CCKNO, model_fr550_cckno, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CCKEQ, model_fr550_cckeq, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CCKNE, model_fr550_cckne, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CCKLE, model_fr550_cckle, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CCKGT, model_fr550_cckgt, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CCKLT, model_fr550_ccklt, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CCKGE, model_fr550_cckge, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CCKLS, model_fr550_cckls, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CCKHI, model_fr550_cckhi, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CCKC, model_fr550_cckc, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CCKNC, model_fr550_ccknc, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CCKN, model_fr550_cckn, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CCKP, model_fr550_cckp, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CCKV, model_fr550_cckv, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CCKNV, model_fr550_ccknv, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CFCKRA, model_fr550_cfckra, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CFCKNO, model_fr550_cfckno, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CFCKNE, model_fr550_cfckne, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CFCKEQ, model_fr550_cfckeq, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CFCKLG, model_fr550_cfcklg, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CFCKUE, model_fr550_cfckue, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CFCKUL, model_fr550_cfckul, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CFCKGE, model_fr550_cfckge, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CFCKLT, model_fr550_cfcklt, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CFCKUGE, model_fr550_cfckuge, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CFCKUG, model_fr550_cfckug, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CFCKLE, model_fr550_cfckle, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CFCKGT, model_fr550_cfckgt, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CFCKULE, model_fr550_cfckule, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CFCKU, model_fr550_cfcku, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CFCKO, model_fr550_cfcko, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
+  { FRVBF_INSN_CJMPL, model_fr550_cjmpl, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
+  { FRVBF_INSN_CCALLL, model_fr550_ccalll, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_ICI, model_fr550_ici, { { (int) UNIT_FR550_U_ICI, 1, 1 } } },
+  { FRVBF_INSN_DCI, model_fr550_dci, { { (int) UNIT_FR550_U_DCI, 1, 1 } } },
+  { FRVBF_INSN_ICEI, model_fr550_icei, { { (int) UNIT_FR550_U_ICI, 1, 1 } } },
+  { FRVBF_INSN_DCEI, model_fr550_dcei, { { (int) UNIT_FR550_U_DCI, 1, 1 } } },
+  { FRVBF_INSN_DCF, model_fr550_dcf, { { (int) UNIT_FR550_U_DCF, 1, 1 } } },
+  { FRVBF_INSN_DCEF, model_fr550_dcef, { { (int) UNIT_FR550_U_DCF, 1, 1 } } },
+  { FRVBF_INSN_WITLB, model_fr550_witlb, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_WDTLB, model_fr550_wdtlb, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_ITLBI, model_fr550_itlbi, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_DTLBI, model_fr550_dtlbi, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_ICPL, model_fr550_icpl, { { (int) UNIT_FR550_U_ICPL, 1, 1 } } },
+  { FRVBF_INSN_DCPL, model_fr550_dcpl, { { (int) UNIT_FR550_U_DCPL, 1, 1 } } },
+  { FRVBF_INSN_ICUL, model_fr550_icul, { { (int) UNIT_FR550_U_ICUL, 1, 1 } } },
+  { FRVBF_INSN_DCUL, model_fr550_dcul, { { (int) UNIT_FR550_U_DCUL, 1, 1 } } },
+  { FRVBF_INSN_BAR, model_fr550_bar, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_MEMBAR, model_fr550_membar, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_COP1, model_fr550_cop1, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_COP2, model_fr550_cop2, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_CLRGR, model_fr550_clrgr, { { (int) UNIT_FR550_U_CLRGR, 1, 1 } } },
+  { FRVBF_INSN_CLRFR, model_fr550_clrfr, { { (int) UNIT_FR550_U_CLRFR, 1, 1 } } },
+  { FRVBF_INSN_CLRGA, model_fr550_clrga, { { (int) UNIT_FR550_U_CLRGR, 1, 1 } } },
+  { FRVBF_INSN_CLRFA, model_fr550_clrfa, { { (int) UNIT_FR550_U_CLRFR, 1, 1 } } },
+  { FRVBF_INSN_COMMITGR, model_fr550_commitgr, { { (int) UNIT_FR550_U_COMMIT, 1, 1 } } },
+  { FRVBF_INSN_COMMITFR, model_fr550_commitfr, { { (int) UNIT_FR550_U_COMMIT, 1, 1 } } },
+  { FRVBF_INSN_COMMITGA, model_fr550_commitga, { { (int) UNIT_FR550_U_COMMIT, 1, 1 } } },
+  { FRVBF_INSN_COMMITFA, model_fr550_commitfa, { { (int) UNIT_FR550_U_COMMIT, 1, 1 } } },
+  { FRVBF_INSN_FITOS, model_fr550_fitos, { { (int) UNIT_FR550_U_FLOAT_CONVERT, 1, 1 } } },
+  { FRVBF_INSN_FSTOI, model_fr550_fstoi, { { (int) UNIT_FR550_U_FLOAT_CONVERT, 1, 1 } } },
+  { FRVBF_INSN_FITOD, model_fr550_fitod, { { (int) UNIT_FR550_U_FLOAT_CONVERT, 1, 1 } } },
+  { FRVBF_INSN_FDTOI, model_fr550_fdtoi, { { (int) UNIT_FR550_U_FLOAT_CONVERT, 1, 1 } } },
+  { FRVBF_INSN_FDITOS, model_fr550_fditos, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_FDSTOI, model_fr550_fdstoi, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_NFDITOS, model_fr550_nfditos, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_NFDSTOI, model_fr550_nfdstoi, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_CFITOS, model_fr550_cfitos, { { (int) UNIT_FR550_U_FLOAT_CONVERT, 1, 1 } } },
+  { FRVBF_INSN_CFSTOI, model_fr550_cfstoi, { { (int) UNIT_FR550_U_FLOAT_CONVERT, 1, 1 } } },
+  { FRVBF_INSN_NFITOS, model_fr550_nfitos, { { (int) UNIT_FR550_U_FLOAT_CONVERT, 1, 1 } } },
+  { FRVBF_INSN_NFSTOI, model_fr550_nfstoi, { { (int) UNIT_FR550_U_FLOAT_CONVERT, 1, 1 } } },
+  { FRVBF_INSN_FMOVS, model_fr550_fmovs, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_FMOVD, model_fr550_fmovd, { { (int) UNIT_FR550_U_FR2FR, 1, 1 } } },
+  { FRVBF_INSN_FDMOVS, model_fr550_fdmovs, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_CFMOVS, model_fr550_cfmovs, { { (int) UNIT_FR550_U_FR2FR, 1, 1 } } },
+  { FRVBF_INSN_FNEGS, model_fr550_fnegs, { { (int) UNIT_FR550_U_FLOAT_ARITH, 1, 1 } } },
+  { FRVBF_INSN_FNEGD, model_fr550_fnegd, { { (int) UNIT_FR550_U_FLOAT_ARITH, 1, 1 } } },
+  { FRVBF_INSN_FDNEGS, model_fr550_fdnegs, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_CFNEGS, model_fr550_cfnegs, { { (int) UNIT_FR550_U_FLOAT_ARITH, 1, 1 } } },
+  { FRVBF_INSN_FABSS, model_fr550_fabss, { { (int) UNIT_FR550_U_FLOAT_ARITH, 1, 1 } } },
+  { FRVBF_INSN_FABSD, model_fr550_fabsd, { { (int) UNIT_FR550_U_FLOAT_ARITH, 1, 1 } } },
+  { FRVBF_INSN_FDABSS, model_fr550_fdabss, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_CFABSS, model_fr550_cfabss, { { (int) UNIT_FR550_U_FLOAT_ARITH, 1, 1 } } },
+  { FRVBF_INSN_FSQRTS, model_fr550_fsqrts, { { (int) UNIT_FR550_U_FLOAT_SQRT, 1, 1 } } },
+  { FRVBF_INSN_FDSQRTS, model_fr550_fdsqrts, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_NFDSQRTS, model_fr550_nfdsqrts, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_FSQRTD, model_fr550_fsqrtd, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_CFSQRTS, model_fr550_cfsqrts, { { (int) UNIT_FR550_U_FLOAT_SQRT, 1, 1 } } },
+  { FRVBF_INSN_NFSQRTS, model_fr550_nfsqrts, { { (int) UNIT_FR550_U_FLOAT_SQRT, 1, 1 } } },
+  { FRVBF_INSN_FADDS, model_fr550_fadds, { { (int) UNIT_FR550_U_FLOAT_ARITH, 1, 1 } } },
+  { FRVBF_INSN_FSUBS, model_fr550_fsubs, { { (int) UNIT_FR550_U_FLOAT_ARITH, 1, 1 } } },
+  { FRVBF_INSN_FMULS, model_fr550_fmuls, { { (int) UNIT_FR550_U_FLOAT_ARITH, 1, 1 } } },
+  { FRVBF_INSN_FDIVS, model_fr550_fdivs, { { (int) UNIT_FR550_U_FLOAT_DIV, 1, 1 } } },
+  { FRVBF_INSN_FADDD, model_fr550_faddd, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_FSUBD, model_fr550_fsubd, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_FMULD, model_fr550_fmuld, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_FDIVD, model_fr550_fdivd, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_CFADDS, model_fr550_cfadds, { { (int) UNIT_FR550_U_FLOAT_ARITH, 1, 1 } } },
+  { FRVBF_INSN_CFSUBS, model_fr550_cfsubs, { { (int) UNIT_FR550_U_FLOAT_ARITH, 1, 1 } } },
+  { FRVBF_INSN_CFMULS, model_fr550_cfmuls, { { (int) UNIT_FR550_U_FLOAT_ARITH, 1, 1 } } },
+  { FRVBF_INSN_CFDIVS, model_fr550_cfdivs, { { (int) UNIT_FR550_U_FLOAT_DIV, 1, 1 } } },
+  { FRVBF_INSN_NFADDS, model_fr550_nfadds, { { (int) UNIT_FR550_U_FLOAT_ARITH, 1, 1 } } },
+  { FRVBF_INSN_NFSUBS, model_fr550_nfsubs, { { (int) UNIT_FR550_U_FLOAT_ARITH, 1, 1 } } },
+  { FRVBF_INSN_NFMULS, model_fr550_nfmuls, { { (int) UNIT_FR550_U_FLOAT_ARITH, 1, 1 } } },
+  { FRVBF_INSN_NFDIVS, model_fr550_nfdivs, { { (int) UNIT_FR550_U_FLOAT_DIV, 1, 1 } } },
+  { FRVBF_INSN_FCMPS, model_fr550_fcmps, { { (int) UNIT_FR550_U_FLOAT_COMPARE, 1, 1 } } },
+  { FRVBF_INSN_FCMPD, model_fr550_fcmpd, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_CFCMPS, model_fr550_cfcmps, { { (int) UNIT_FR550_U_FLOAT_COMPARE, 1, 1 } } },
+  { FRVBF_INSN_FDCMPS, model_fr550_fdcmps, { { (int) UNIT_FR550_U_FLOAT_DUAL_COMPARE, 1, 3 } } },
+  { FRVBF_INSN_FMADDS, model_fr550_fmadds, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_FMSUBS, model_fr550_fmsubs, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_FMADDD, model_fr550_fmaddd, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_FMSUBD, model_fr550_fmsubd, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_FDMADDS, model_fr550_fdmadds, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_NFDMADDS, model_fr550_nfdmadds, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_CFMADDS, model_fr550_cfmadds, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_CFMSUBS, model_fr550_cfmsubs, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_NFMADDS, model_fr550_nfmadds, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_NFMSUBS, model_fr550_nfmsubs, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_FMAS, model_fr550_fmas, { { (int) UNIT_FR550_U_FLOAT_DUAL_ARITH, 1, 3 } } },
+  { FRVBF_INSN_FMSS, model_fr550_fmss, { { (int) UNIT_FR550_U_FLOAT_DUAL_ARITH, 1, 3 } } },
+  { FRVBF_INSN_FDMAS, model_fr550_fdmas, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_FDMSS, model_fr550_fdmss, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_NFDMAS, model_fr550_nfdmas, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_NFDMSS, model_fr550_nfdmss, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_CFMAS, model_fr550_cfmas, { { (int) UNIT_FR550_U_FLOAT_DUAL_ARITH, 1, 3 } } },
+  { FRVBF_INSN_CFMSS, model_fr550_cfmss, { { (int) UNIT_FR550_U_FLOAT_DUAL_ARITH, 1, 3 } } },
+  { FRVBF_INSN_FMAD, model_fr550_fmad, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_FMSD, model_fr550_fmsd, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_NFMAS, model_fr550_nfmas, { { (int) UNIT_FR550_U_FLOAT_DUAL_ARITH, 1, 3 } } },
+  { FRVBF_INSN_NFMSS, model_fr550_nfmss, { { (int) UNIT_FR550_U_FLOAT_DUAL_ARITH, 1, 3 } } },
+  { FRVBF_INSN_FDADDS, model_fr550_fdadds, { { (int) UNIT_FR550_U_FLOAT_DUAL_ARITH, 1, 3 } } },
+  { FRVBF_INSN_FDSUBS, model_fr550_fdsubs, { { (int) UNIT_FR550_U_FLOAT_DUAL_ARITH, 1, 3 } } },
+  { FRVBF_INSN_FDMULS, model_fr550_fdmuls, { { (int) UNIT_FR550_U_FLOAT_DUAL_ARITH, 1, 3 } } },
+  { FRVBF_INSN_FDDIVS, model_fr550_fddivs, { { (int) UNIT_FR550_U_FLOAT_DUAL_ARITH, 1, 3 } } },
+  { FRVBF_INSN_FDSADS, model_fr550_fdsads, { { (int) UNIT_FR550_U_FLOAT_DUAL_ARITH, 1, 3 } } },
+  { FRVBF_INSN_FDMULCS, model_fr550_fdmulcs, { { (int) UNIT_FR550_U_FLOAT_DUAL_ARITH, 1, 3 } } },
+  { FRVBF_INSN_NFDMULCS, model_fr550_nfdmulcs, { { (int) UNIT_FR550_U_FLOAT_DUAL_ARITH, 1, 3 } } },
+  { FRVBF_INSN_NFDADDS, model_fr550_nfdadds, { { (int) UNIT_FR550_U_FLOAT_DUAL_ARITH, 1, 3 } } },
+  { FRVBF_INSN_NFDSUBS, model_fr550_nfdsubs, { { (int) UNIT_FR550_U_FLOAT_DUAL_ARITH, 1, 3 } } },
+  { FRVBF_INSN_NFDMULS, model_fr550_nfdmuls, { { (int) UNIT_FR550_U_FLOAT_DUAL_ARITH, 1, 3 } } },
+  { FRVBF_INSN_NFDDIVS, model_fr550_nfddivs, { { (int) UNIT_FR550_U_FLOAT_DUAL_ARITH, 1, 3 } } },
+  { FRVBF_INSN_NFDSADS, model_fr550_nfdsads, { { (int) UNIT_FR550_U_FLOAT_DUAL_ARITH, 1, 3 } } },
+  { FRVBF_INSN_NFDCMPS, model_fr550_nfdcmps, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_MHSETLOS, model_fr550_mhsetlos, { { (int) UNIT_FR550_U_MEDIA_SET, 1, 1 } } },
+  { FRVBF_INSN_MHSETHIS, model_fr550_mhsethis, { { (int) UNIT_FR550_U_MEDIA_SET, 1, 1 } } },
+  { FRVBF_INSN_MHDSETS, model_fr550_mhdsets, { { (int) UNIT_FR550_U_MEDIA_SET, 1, 1 } } },
+  { FRVBF_INSN_MHSETLOH, model_fr550_mhsetloh, { { (int) UNIT_FR550_U_MEDIA_SET, 1, 1 } } },
+  { FRVBF_INSN_MHSETHIH, model_fr550_mhsethih, { { (int) UNIT_FR550_U_MEDIA_SET, 1, 1 } } },
+  { FRVBF_INSN_MHDSETH, model_fr550_mhdseth, { { (int) UNIT_FR550_U_MEDIA_SET, 1, 1 } } },
+  { FRVBF_INSN_MAND, model_fr550_mand, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_MOR, model_fr550_mor, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_MXOR, model_fr550_mxor, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_CMAND, model_fr550_cmand, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_CMOR, model_fr550_cmor, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_CMXOR, model_fr550_cmxor, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_MNOT, model_fr550_mnot, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_CMNOT, model_fr550_cmnot, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_MROTLI, model_fr550_mrotli, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_MROTRI, model_fr550_mrotri, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_MWCUT, model_fr550_mwcut, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_MWCUTI, model_fr550_mwcuti, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_MCUT, model_fr550_mcut, { { (int) UNIT_FR550_U_MEDIA_3_ACC, 1, 1 } } },
+  { FRVBF_INSN_MCUTI, model_fr550_mcuti, { { (int) UNIT_FR550_U_MEDIA_3_ACC, 1, 1 } } },
+  { FRVBF_INSN_MCUTSS, model_fr550_mcutss, { { (int) UNIT_FR550_U_MEDIA_3_ACC, 1, 1 } } },
+  { FRVBF_INSN_MCUTSSI, model_fr550_mcutssi, { { (int) UNIT_FR550_U_MEDIA_3_ACC, 1, 1 } } },
+  { FRVBF_INSN_MDCUTSSI, model_fr550_mdcutssi, { { (int) UNIT_FR550_U_MEDIA_3_ACC_DUAL, 1, 1 } } },
+  { FRVBF_INSN_MAVEH, model_fr550_maveh, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_MSLLHI, model_fr550_msllhi, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_MSRLHI, model_fr550_msrlhi, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_MSRAHI, model_fr550_msrahi, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_MDROTLI, model_fr550_mdrotli, { { (int) UNIT_FR550_U_MEDIA_QUAD, 1, 1 } } },
+  { FRVBF_INSN_MCPLHI, model_fr550_mcplhi, { { (int) UNIT_FR550_U_MEDIA_3_DUAL, 1, 1 } } },
+  { FRVBF_INSN_MCPLI, model_fr550_mcpli, { { (int) UNIT_FR550_U_MEDIA_3_DUAL, 1, 1 } } },
+  { FRVBF_INSN_MSATHS, model_fr550_msaths, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_MQSATHS, model_fr550_mqsaths, { { (int) UNIT_FR550_U_MEDIA_QUAD, 1, 1 } } },
+  { FRVBF_INSN_MSATHU, model_fr550_msathu, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_MCMPSH, model_fr550_mcmpsh, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_MCMPUH, model_fr550_mcmpuh, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_MABSHS, model_fr550_mabshs, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_MADDHSS, model_fr550_maddhss, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_MADDHUS, model_fr550_maddhus, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_MSUBHSS, model_fr550_msubhss, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_MSUBHUS, model_fr550_msubhus, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_CMADDHSS, model_fr550_cmaddhss, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_CMADDHUS, model_fr550_cmaddhus, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_CMSUBHSS, model_fr550_cmsubhss, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_CMSUBHUS, model_fr550_cmsubhus, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_MQADDHSS, model_fr550_mqaddhss, { { (int) UNIT_FR550_U_MEDIA_QUAD, 1, 1 } } },
+  { FRVBF_INSN_MQADDHUS, model_fr550_mqaddhus, { { (int) UNIT_FR550_U_MEDIA_QUAD, 1, 1 } } },
+  { FRVBF_INSN_MQSUBHSS, model_fr550_mqsubhss, { { (int) UNIT_FR550_U_MEDIA_QUAD, 1, 1 } } },
+  { FRVBF_INSN_MQSUBHUS, model_fr550_mqsubhus, { { (int) UNIT_FR550_U_MEDIA_QUAD, 1, 1 } } },
+  { FRVBF_INSN_CMQADDHSS, model_fr550_cmqaddhss, { { (int) UNIT_FR550_U_MEDIA_QUAD, 1, 1 } } },
+  { FRVBF_INSN_CMQADDHUS, model_fr550_cmqaddhus, { { (int) UNIT_FR550_U_MEDIA_QUAD, 1, 1 } } },
+  { FRVBF_INSN_CMQSUBHSS, model_fr550_cmqsubhss, { { (int) UNIT_FR550_U_MEDIA_QUAD, 1, 1 } } },
+  { FRVBF_INSN_CMQSUBHUS, model_fr550_cmqsubhus, { { (int) UNIT_FR550_U_MEDIA_QUAD, 1, 1 } } },
+  { FRVBF_INSN_MADDACCS, model_fr550_maddaccs, { { (int) UNIT_FR550_U_MEDIA_4_ACC, 1, 1 } } },
+  { FRVBF_INSN_MSUBACCS, model_fr550_msubaccs, { { (int) UNIT_FR550_U_MEDIA_4_ACC, 1, 1 } } },
+  { FRVBF_INSN_MDADDACCS, model_fr550_mdaddaccs, { { (int) UNIT_FR550_U_MEDIA_4_ACC_DUAL, 1, 1 } } },
+  { FRVBF_INSN_MDSUBACCS, model_fr550_mdsubaccs, { { (int) UNIT_FR550_U_MEDIA_4_ACC_DUAL, 1, 1 } } },
+  { FRVBF_INSN_MASACCS, model_fr550_masaccs, { { (int) UNIT_FR550_U_MEDIA_4_ADD_SUB, 1, 1 } } },
+  { FRVBF_INSN_MDASACCS, model_fr550_mdasaccs, { { (int) UNIT_FR550_U_MEDIA_4_ADD_SUB_DUAL, 1, 1 } } },
+  { FRVBF_INSN_MMULHS, model_fr550_mmulhs, { { (int) UNIT_FR550_U_MEDIA_4, 1, 1 } } },
+  { FRVBF_INSN_MMULHU, model_fr550_mmulhu, { { (int) UNIT_FR550_U_MEDIA_4, 1, 1 } } },
+  { FRVBF_INSN_MMULXHS, model_fr550_mmulxhs, { { (int) UNIT_FR550_U_MEDIA_4, 1, 1 } } },
+  { FRVBF_INSN_MMULXHU, model_fr550_mmulxhu, { { (int) UNIT_FR550_U_MEDIA_4, 1, 1 } } },
+  { FRVBF_INSN_CMMULHS, model_fr550_cmmulhs, { { (int) UNIT_FR550_U_MEDIA_4, 1, 1 } } },
+  { FRVBF_INSN_CMMULHU, model_fr550_cmmulhu, { { (int) UNIT_FR550_U_MEDIA_4, 1, 1 } } },
+  { FRVBF_INSN_MQMULHS, model_fr550_mqmulhs, { { (int) UNIT_FR550_U_MEDIA_4_QUAD, 1, 1 } } },
+  { FRVBF_INSN_MQMULHU, model_fr550_mqmulhu, { { (int) UNIT_FR550_U_MEDIA_4_QUAD, 1, 1 } } },
+  { FRVBF_INSN_MQMULXHS, model_fr550_mqmulxhs, { { (int) UNIT_FR550_U_MEDIA_4_QUAD, 1, 1 } } },
+  { FRVBF_INSN_MQMULXHU, model_fr550_mqmulxhu, { { (int) UNIT_FR550_U_MEDIA_4_QUAD, 1, 1 } } },
+  { FRVBF_INSN_CMQMULHS, model_fr550_cmqmulhs, { { (int) UNIT_FR550_U_MEDIA_4_QUAD, 1, 1 } } },
+  { FRVBF_INSN_CMQMULHU, model_fr550_cmqmulhu, { { (int) UNIT_FR550_U_MEDIA_4_QUAD, 1, 1 } } },
+  { FRVBF_INSN_MMACHS, model_fr550_mmachs, { { (int) UNIT_FR550_U_MEDIA_4, 1, 1 } } },
+  { FRVBF_INSN_MMACHU, model_fr550_mmachu, { { (int) UNIT_FR550_U_MEDIA_4, 1, 1 } } },
+  { FRVBF_INSN_MMRDHS, model_fr550_mmrdhs, { { (int) UNIT_FR550_U_MEDIA_4, 1, 1 } } },
+  { FRVBF_INSN_MMRDHU, model_fr550_mmrdhu, { { (int) UNIT_FR550_U_MEDIA_4, 1, 1 } } },
+  { FRVBF_INSN_CMMACHS, model_fr550_cmmachs, { { (int) UNIT_FR550_U_MEDIA_4, 1, 1 } } },
+  { FRVBF_INSN_CMMACHU, model_fr550_cmmachu, { { (int) UNIT_FR550_U_MEDIA_4, 1, 1 } } },
+  { FRVBF_INSN_MQMACHS, model_fr550_mqmachs, { { (int) UNIT_FR550_U_MEDIA_4_QUAD, 1, 1 } } },
+  { FRVBF_INSN_MQMACHU, model_fr550_mqmachu, { { (int) UNIT_FR550_U_MEDIA_4_QUAD, 1, 1 } } },
+  { FRVBF_INSN_CMQMACHS, model_fr550_cmqmachs, { { (int) UNIT_FR550_U_MEDIA_4_QUAD, 1, 1 } } },
+  { FRVBF_INSN_CMQMACHU, model_fr550_cmqmachu, { { (int) UNIT_FR550_U_MEDIA_4_QUAD, 1, 1 } } },
+  { FRVBF_INSN_MQXMACHS, model_fr550_mqxmachs, { { (int) UNIT_FR550_U_MEDIA_4_QUAD, 1, 1 } } },
+  { FRVBF_INSN_MQXMACXHS, model_fr550_mqxmacxhs, { { (int) UNIT_FR550_U_MEDIA_4_QUAD, 1, 1 } } },
+  { FRVBF_INSN_MQMACXHS, model_fr550_mqmacxhs, { { (int) UNIT_FR550_U_MEDIA_4_QUAD, 1, 1 } } },
+  { FRVBF_INSN_MCPXRS, model_fr550_mcpxrs, { { (int) UNIT_FR550_U_MEDIA_4, 1, 1 } } },
+  { FRVBF_INSN_MCPXRU, model_fr550_mcpxru, { { (int) UNIT_FR550_U_MEDIA_4, 1, 1 } } },
+  { FRVBF_INSN_MCPXIS, model_fr550_mcpxis, { { (int) UNIT_FR550_U_MEDIA_4, 1, 1 } } },
+  { FRVBF_INSN_MCPXIU, model_fr550_mcpxiu, { { (int) UNIT_FR550_U_MEDIA_4, 1, 1 } } },
+  { FRVBF_INSN_CMCPXRS, model_fr550_cmcpxrs, { { (int) UNIT_FR550_U_MEDIA_4, 1, 1 } } },
+  { FRVBF_INSN_CMCPXRU, model_fr550_cmcpxru, { { (int) UNIT_FR550_U_MEDIA_4, 1, 1 } } },
+  { FRVBF_INSN_CMCPXIS, model_fr550_cmcpxis, { { (int) UNIT_FR550_U_MEDIA_4, 1, 1 } } },
+  { FRVBF_INSN_CMCPXIU, model_fr550_cmcpxiu, { { (int) UNIT_FR550_U_MEDIA_4, 1, 1 } } },
+  { FRVBF_INSN_MQCPXRS, model_fr550_mqcpxrs, { { (int) UNIT_FR550_U_MEDIA_4_QUAD, 1, 1 } } },
+  { FRVBF_INSN_MQCPXRU, model_fr550_mqcpxru, { { (int) UNIT_FR550_U_MEDIA_4_QUAD, 1, 1 } } },
+  { FRVBF_INSN_MQCPXIS, model_fr550_mqcpxis, { { (int) UNIT_FR550_U_MEDIA_4_QUAD, 1, 1 } } },
+  { FRVBF_INSN_MQCPXIU, model_fr550_mqcpxiu, { { (int) UNIT_FR550_U_MEDIA_4_QUAD, 1, 1 } } },
+  { FRVBF_INSN_MEXPDHW, model_fr550_mexpdhw, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_CMEXPDHW, model_fr550_cmexpdhw, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_MEXPDHD, model_fr550_mexpdhd, { { (int) UNIT_FR550_U_MEDIA_DUAL_EXPAND, 1, 1 } } },
+  { FRVBF_INSN_CMEXPDHD, model_fr550_cmexpdhd, { { (int) UNIT_FR550_U_MEDIA_DUAL_EXPAND, 1, 1 } } },
+  { FRVBF_INSN_MPACKH, model_fr550_mpackh, { { (int) UNIT_FR550_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_MDPACKH, model_fr550_mdpackh, { { (int) UNIT_FR550_U_MEDIA_QUAD, 1, 1 } } },
+  { FRVBF_INSN_MUNPACKH, model_fr550_munpackh, { { (int) UNIT_FR550_U_MEDIA_DUAL_EXPAND, 1, 1 } } },
+  { FRVBF_INSN_MDUNPACKH, model_fr550_mdunpackh, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_MBTOH, model_fr550_mbtoh, { { (int) UNIT_FR550_U_MEDIA_DUAL_EXPAND, 1, 1 } } },
+  { FRVBF_INSN_CMBTOH, model_fr550_cmbtoh, { { (int) UNIT_FR550_U_MEDIA_DUAL_EXPAND, 1, 1 } } },
+  { FRVBF_INSN_MHTOB, model_fr550_mhtob, { { (int) UNIT_FR550_U_MEDIA_3_DUAL, 1, 1 } } },
+  { FRVBF_INSN_CMHTOB, model_fr550_cmhtob, { { (int) UNIT_FR550_U_MEDIA_3_DUAL, 1, 1 } } },
+  { FRVBF_INSN_MBTOHE, model_fr550_mbtohe, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_CMBTOHE, model_fr550_cmbtohe, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_MNOP, model_fr550_mnop, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_MCLRACC_0, model_fr550_mclracc_0, { { (int) UNIT_FR550_U_MEDIA_3_MCLRACC, 1, 1 } } },
+  { FRVBF_INSN_MCLRACC_1, model_fr550_mclracc_1, { { (int) UNIT_FR550_U_MEDIA_3_MCLRACC, 1, 1 } } },
+  { FRVBF_INSN_MRDACC, model_fr550_mrdacc, { { (int) UNIT_FR550_U_MEDIA_3_ACC, 1, 1 } } },
+  { FRVBF_INSN_MRDACCG, model_fr550_mrdaccg, { { (int) UNIT_FR550_U_MEDIA_3_ACC, 1, 1 } } },
+  { FRVBF_INSN_MWTACC, model_fr550_mwtacc, { { (int) UNIT_FR550_U_MEDIA_3_WTACC, 1, 1 } } },
+  { FRVBF_INSN_MWTACCG, model_fr550_mwtaccg, { { (int) UNIT_FR550_U_MEDIA_3_WTACC, 1, 1 } } },
+  { FRVBF_INSN_MCOP1, model_fr550_mcop1, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_MCOP2, model_fr550_mcop2, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_FNOP, model_fr550_fnop, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+};
+
 /* Model timing data for `fr500'.  */
 
 static const INSN_TIMING fr500_timing[] = {
@@ -69622,9 +87910,14 @@ static const INSN_TIMING fr500_timing[] = {
   { FRVBF_INSN_NUDIV, model_fr500_nudiv, { { (int) UNIT_FR500_U_IDIV, 1, 1 } } },
   { FRVBF_INSN_SMUL, model_fr500_smul, { { (int) UNIT_FR500_U_IMUL, 1, 1 } } },
   { FRVBF_INSN_UMUL, model_fr500_umul, { { (int) UNIT_FR500_U_IMUL, 1, 1 } } },
+  { FRVBF_INSN_SMU, model_fr500_smu, { { (int) UNIT_FR500_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SMASS, model_fr500_smass, { { (int) UNIT_FR500_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SMSSS, model_fr500_smsss, { { (int) UNIT_FR500_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_SLL, model_fr500_sll, { { (int) UNIT_FR500_U_INTEGER, 1, 1 } } },
   { FRVBF_INSN_SRL, model_fr500_srl, { { (int) UNIT_FR500_U_INTEGER, 1, 1 } } },
   { FRVBF_INSN_SRA, model_fr500_sra, { { (int) UNIT_FR500_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SLASS, model_fr500_slass, { { (int) UNIT_FR500_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SCUTSS, model_fr500_scutss, { { (int) UNIT_FR500_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_SCAN, model_fr500_scan, { { (int) UNIT_FR500_U_INTEGER, 1, 1 } } },
   { FRVBF_INSN_CADD, model_fr500_cadd, { { (int) UNIT_FR500_U_INTEGER, 1, 1 } } },
   { FRVBF_INSN_CSUB, model_fr500_csub, { { (int) UNIT_FR500_U_INTEGER, 1, 1 } } },
@@ -69662,6 +87955,8 @@ static const INSN_TIMING fr500_timing[] = {
   { FRVBF_INSN_SUBX, model_fr500_subx, { { (int) UNIT_FR500_U_INTEGER, 1, 1 } } },
   { FRVBF_INSN_ADDXCC, model_fr500_addxcc, { { (int) UNIT_FR500_U_INTEGER, 1, 1 } } },
   { FRVBF_INSN_SUBXCC, model_fr500_subxcc, { { (int) UNIT_FR500_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_ADDSS, model_fr500_addss, { { (int) UNIT_FR500_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SUBSS, model_fr500_subss, { { (int) UNIT_FR500_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_ADDI, model_fr500_addi, { { (int) UNIT_FR500_U_INTEGER, 1, 1 } } },
   { FRVBF_INSN_SUBI, model_fr500_subi, { { (int) UNIT_FR500_U_INTEGER, 1, 1 } } },
   { FRVBF_INSN_ANDI, model_fr500_andi, { { (int) UNIT_FR500_U_INTEGER, 1, 1 } } },
@@ -70313,12 +88608,12 @@ static const INSN_TIMING fr500_timing[] = {
   { FRVBF_INSN_MQXMACHS, model_fr500_mqxmachs, { { (int) UNIT_FR500_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_MQXMACXHS, model_fr500_mqxmacxhs, { { (int) UNIT_FR500_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_MQMACXHS, model_fr500_mqmacxhs, { { (int) UNIT_FR500_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_MCPXRS, model_fr500_mcpxrs, { { (int) UNIT_FR500_U_MEDIA, 1, 1 } } },
-  { FRVBF_INSN_MCPXRU, model_fr500_mcpxru, { { (int) UNIT_FR500_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_MCPXRS, model_fr500_mcpxrs, { { (int) UNIT_FR500_U_MEDIA_DUAL_MUL, 1, 1 } } },
+  { FRVBF_INSN_MCPXRU, model_fr500_mcpxru, { { (int) UNIT_FR500_U_MEDIA_DUAL_MUL, 1, 1 } } },
   { FRVBF_INSN_MCPXIS, model_fr500_mcpxis, { { (int) UNIT_FR500_U_MEDIA_DUAL_MUL, 1, 1 } } },
   { FRVBF_INSN_MCPXIU, model_fr500_mcpxiu, { { (int) UNIT_FR500_U_MEDIA_DUAL_MUL, 1, 1 } } },
-  { FRVBF_INSN_CMCPXRS, model_fr500_cmcpxrs, { { (int) UNIT_FR500_U_MEDIA, 1, 1 } } },
-  { FRVBF_INSN_CMCPXRU, model_fr500_cmcpxru, { { (int) UNIT_FR500_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_CMCPXRS, model_fr500_cmcpxrs, { { (int) UNIT_FR500_U_MEDIA_DUAL_MUL, 1, 1 } } },
+  { FRVBF_INSN_CMCPXRU, model_fr500_cmcpxru, { { (int) UNIT_FR500_U_MEDIA_DUAL_MUL, 1, 1 } } },
   { FRVBF_INSN_CMCPXIS, model_fr500_cmcpxis, { { (int) UNIT_FR500_U_MEDIA_DUAL_MUL, 1, 1 } } },
   { FRVBF_INSN_CMCPXIU, model_fr500_cmcpxiu, { { (int) UNIT_FR500_U_MEDIA_DUAL_MUL, 1, 1 } } },
   { FRVBF_INSN_MQCPXRS, model_fr500_mqcpxrs, { { (int) UNIT_FR500_U_MEDIA_QUAD_COMPLEX, 1, 1 } } },
@@ -70372,9 +88667,14 @@ static const INSN_TIMING tomcat_timing[] = {
   { FRVBF_INSN_NUDIV, model_tomcat_nudiv, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_SMUL, model_tomcat_smul, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_UMUL, model_tomcat_umul, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SMU, model_tomcat_smu, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SMASS, model_tomcat_smass, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SMSSS, model_tomcat_smsss, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_SLL, model_tomcat_sll, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_SRL, model_tomcat_srl, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_SRA, model_tomcat_sra, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SLASS, model_tomcat_slass, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SCUTSS, model_tomcat_scutss, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_SCAN, model_tomcat_scan, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_CADD, model_tomcat_cadd, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_CSUB, model_tomcat_csub, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
@@ -70412,6 +88712,8 @@ static const INSN_TIMING tomcat_timing[] = {
   { FRVBF_INSN_SUBX, model_tomcat_subx, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_ADDXCC, model_tomcat_addxcc, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_SUBXCC, model_tomcat_subxcc, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_ADDSS, model_tomcat_addss, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SUBSS, model_tomcat_subss, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_ADDI, model_tomcat_addi, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_SUBI, model_tomcat_subi, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_ANDI, model_tomcat_andi, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
@@ -71122,9 +89424,14 @@ static const INSN_TIMING fr400_timing[] = {
   { FRVBF_INSN_NUDIV, model_fr400_nudiv, { { (int) UNIT_FR400_U_IDIV, 1, 1 } } },
   { FRVBF_INSN_SMUL, model_fr400_smul, { { (int) UNIT_FR400_U_IMUL, 1, 1 } } },
   { FRVBF_INSN_UMUL, model_fr400_umul, { { (int) UNIT_FR400_U_IMUL, 1, 1 } } },
+  { FRVBF_INSN_SMU, model_fr400_smu, { { (int) UNIT_FR400_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SMASS, model_fr400_smass, { { (int) UNIT_FR400_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SMSSS, model_fr400_smsss, { { (int) UNIT_FR400_U_INTEGER, 1, 1 } } },
   { FRVBF_INSN_SLL, model_fr400_sll, { { (int) UNIT_FR400_U_INTEGER, 1, 1 } } },
   { FRVBF_INSN_SRL, model_fr400_srl, { { (int) UNIT_FR400_U_INTEGER, 1, 1 } } },
   { FRVBF_INSN_SRA, model_fr400_sra, { { (int) UNIT_FR400_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SLASS, model_fr400_slass, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SCUTSS, model_fr400_scutss, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_SCAN, model_fr400_scan, { { (int) UNIT_FR400_U_INTEGER, 1, 1 } } },
   { FRVBF_INSN_CADD, model_fr400_cadd, { { (int) UNIT_FR400_U_INTEGER, 1, 1 } } },
   { FRVBF_INSN_CSUB, model_fr400_csub, { { (int) UNIT_FR400_U_INTEGER, 1, 1 } } },
@@ -71162,6 +89469,8 @@ static const INSN_TIMING fr400_timing[] = {
   { FRVBF_INSN_SUBX, model_fr400_subx, { { (int) UNIT_FR400_U_INTEGER, 1, 1 } } },
   { FRVBF_INSN_ADDXCC, model_fr400_addxcc, { { (int) UNIT_FR400_U_INTEGER, 1, 1 } } },
   { FRVBF_INSN_SUBXCC, model_fr400_subxcc, { { (int) UNIT_FR400_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_ADDSS, model_fr400_addss, { { (int) UNIT_FR400_U_INTEGER, 1, 1 } } },
+  { FRVBF_INSN_SUBSS, model_fr400_subss, { { (int) UNIT_FR400_U_INTEGER, 1, 1 } } },
   { FRVBF_INSN_ADDI, model_fr400_addi, { { (int) UNIT_FR400_U_INTEGER, 1, 1 } } },
   { FRVBF_INSN_SUBI, model_fr400_subi, { { (int) UNIT_FR400_U_INTEGER, 1, 1 } } },
   { FRVBF_INSN_ANDI, model_fr400_andi, { { (int) UNIT_FR400_U_INTEGER, 1, 1 } } },
@@ -71872,9 +90181,14 @@ static const INSN_TIMING simple_timing[] = {
   { FRVBF_INSN_NUDIV, model_simple_nudiv, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_SMUL, model_simple_smul, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_UMUL, model_simple_umul, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SMU, model_simple_smu, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SMASS, model_simple_smass, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SMSSS, model_simple_smsss, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_SLL, model_simple_sll, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_SRL, model_simple_srl, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_SRA, model_simple_sra, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SLASS, model_simple_slass, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SCUTSS, model_simple_scutss, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_SCAN, model_simple_scan, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_CADD, model_simple_cadd, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_CSUB, model_simple_csub, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
@@ -71912,6 +90226,8 @@ static const INSN_TIMING simple_timing[] = {
   { FRVBF_INSN_SUBX, model_simple_subx, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_ADDXCC, model_simple_addxcc, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_SUBXCC, model_simple_subxcc, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_ADDSS, model_simple_addss, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_SUBSS, model_simple_subss, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_ADDI, model_simple_addi, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_SUBI, model_simple_subi, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_ANDI, model_simple_andi, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
@@ -72610,6 +90926,12 @@ frv_model_init (SIM_CPU *cpu)
 }
 
 static void
+fr550_model_init (SIM_CPU *cpu)
+{
+  CPU_MODEL_DATA (cpu) = (void *) zalloc (sizeof (MODEL_FR550_DATA));
+}
+
+static void
 fr500_model_init (SIM_CPU *cpu)
 {
   CPU_MODEL_DATA (cpu) = (void *) zalloc (sizeof (MODEL_FR500_DATA));
@@ -72642,6 +90964,12 @@ simple_model_init (SIM_CPU *cpu)
 static const MODEL frv_models[] =
 {
   { "frv", & frv_mach, MODEL_FRV, TIMING_DATA (& frv_timing[0]), frv_model_init },
+  { 0 }
+};
+
+static const MODEL fr550_models[] =
+{
+  { "fr550", & fr550_mach, MODEL_FR550, TIMING_DATA (& fr550_timing[0]), fr550_model_init },
   { 0 }
 };
 
@@ -72718,6 +91046,32 @@ const MACH frv_mach =
   "frv", "frv", MACH_FRV,
   32, 32, & frv_models[0], & frvbf_imp_properties,
   frv_init_cpu,
+  frvbf_prepare_run
+};
+
+static void
+fr550_init_cpu (SIM_CPU *cpu)
+{
+  CPU_REG_FETCH (cpu) = frvbf_fetch_register;
+  CPU_REG_STORE (cpu) = frvbf_store_register;
+  CPU_PC_FETCH (cpu) = frvbf_h_pc_get;
+  CPU_PC_STORE (cpu) = frvbf_h_pc_set;
+  CPU_GET_IDATA (cpu) = frvbf_get_idata;
+  CPU_MAX_INSNS (cpu) = FRVBF_INSN__MAX;
+  CPU_INSN_NAME (cpu) = cgen_insn_name;
+  CPU_FULL_ENGINE_FN (cpu) = frvbf_engine_run_full;
+#if WITH_FAST
+  CPU_FAST_ENGINE_FN (cpu) = frvbf_engine_run_fast;
+#else
+  CPU_FAST_ENGINE_FN (cpu) = frvbf_engine_run_full;
+#endif
+}
+
+const MACH fr550_mach =
+{
+  "fr550", "fr550", MACH_FR550,
+  32, 32, & fr550_models[0], & frvbf_imp_properties,
+  fr550_init_cpu,
   frvbf_prepare_run
 };
 

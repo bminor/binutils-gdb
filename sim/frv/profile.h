@@ -45,6 +45,8 @@ typedef struct
   int idiv_busy[2];      /* Cycles until integer division unit is available.  */
   int fdiv_busy[2];      /* Cycles until float division unit is available.  */
   int fsqrt_busy[2];     /* Cycles until square root unit is available.  */
+  int float_busy[4];     /* Cycles until floating point unit is available.  */
+  int media_busy[4];     /* Cycles until media unit is available.  */
   int branch_penalty;    /* Cycles until branch is complete.  */
 
   int gr_latency[64];    /* Cycles until target GR is available.  */
@@ -72,6 +74,8 @@ typedef struct
   int branch_hint;       /* hint field from branch insn.  */
   USI branch_address;    /* Address of predicted branch.  */
   USI insn_fetch_address;/* Address of sequential insns fetched.  */
+  int mclracc_acc;       /* ACC number of register cleared by mclracc.  */
+  int mclracc_A;         /* A field of mclracc.  */
 
   /* We need to know when the first branch of a vliw insn is taken, so that
      we don't consider the remaining branches in the vliw insn.  */
@@ -117,12 +121,15 @@ void decrease_ACC_busy (SIM_CPU *, INT, int);
 void decrease_FR_busy (SIM_CPU *, INT, int);
 void decrease_GR_busy (SIM_CPU *, INT, int);
 void increase_FR_busy (SIM_CPU *, INT, int);
+void increase_ACC_busy (SIM_CPU *, INT, int);
 void update_ACC_latency (SIM_CPU *, INT, int);
 void update_CCR_latency (SIM_CPU *, INT, int);
 void update_SPR_latency (SIM_CPU *, INT, int);
 void update_idiv_resource_latency (SIM_CPU *, INT, int);
 void update_fdiv_resource_latency (SIM_CPU *, INT, int);
 void update_fsqrt_resource_latency (SIM_CPU *, INT, int);
+void update_float_resource_latency (SIM_CPU *, INT, int);
+void update_media_resource_latency (SIM_CPU *, INT, int);
 void update_branch_penalty (SIM_CPU *, int);
 void update_ACC_ptime (SIM_CPU *, INT, int);
 void update_SPR_ptime (SIM_CPU *, INT, int);
@@ -136,11 +143,14 @@ void vliw_wait_for_SPR (SIM_CPU *, INT);
 void vliw_wait_for_idiv_resource (SIM_CPU *, INT);
 void vliw_wait_for_fdiv_resource (SIM_CPU *, INT);
 void vliw_wait_for_fsqrt_resource (SIM_CPU *, INT);
+void vliw_wait_for_float_resource (SIM_CPU *, INT);
+void vliw_wait_for_media_resource (SIM_CPU *, INT);
 void load_wait_for_GR (SIM_CPU *, INT);
 void load_wait_for_FR (SIM_CPU *, INT);
 void load_wait_for_GRdouble (SIM_CPU *, INT);
 void load_wait_for_FRdouble (SIM_CPU *, INT);
 void enforce_full_fr_latency (SIM_CPU *, INT);
+void enforce_full_acc_latency (SIM_CPU *, INT);
 int post_wait_for_FR (SIM_CPU *, INT);
 int post_wait_for_FRdouble (SIM_CPU *, INT);
 int post_wait_for_ACC (SIM_CPU *, INT);
@@ -148,6 +158,8 @@ int post_wait_for_CCR (SIM_CPU *, INT);
 int post_wait_for_SPR (SIM_CPU *, INT);
 int post_wait_for_fdiv (SIM_CPU *, INT);
 int post_wait_for_fsqrt (SIM_CPU *, INT);
+int post_wait_for_float (SIM_CPU *, INT);
+int post_wait_for_media (SIM_CPU *, INT);
 
 void trace_vliw_wait_cycles (SIM_CPU *);
 void handle_resource_wait (SIM_CPU *);

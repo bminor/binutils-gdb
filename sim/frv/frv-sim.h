@@ -1,6 +1,6 @@
 /* collection of junk waiting time to sort out
    Copyright (C) 1998, 1999, 2000, 2001, 2003 Free Software Foundation, Inc.
-   Contributed by Red Hat.
+   Contributed by Red Hat
 
 This file is part of the GNU Simulators.
 
@@ -104,8 +104,11 @@ extern void frvbf_switch_supervisor_user_context (SIM_CPU *);
 extern QI frvbf_set_icc_for_shift_left  (SIM_CPU *, SI, SI, QI);
 extern QI frvbf_set_icc_for_shift_right (SIM_CPU *, SI, SI, QI);
 
+/* Insn semantics.  */
 extern void frvbf_signed_integer_divide (SIM_CPU *, SI, SI, int, int);
 extern void frvbf_unsigned_integer_divide (SIM_CPU *, USI, USI, int, int);
+extern SI   frvbf_shift_left_arith_saturate (SIM_CPU *, SI, SI);
+extern SI   frvbf_iacc_cut (SIM_CPU *, DI, SI);
 
 extern void frvbf_clear_accumulators (SIM_CPU *, SI, int);
 
@@ -149,6 +152,7 @@ struct _device { int foo; };
 
 /* maintain the address of the start of the previous VLIW insn sequence.  */
 extern IADDR previous_vliw_pc;
+extern CGEN_ATTR_VALUE_TYPE frv_current_fm_slot;
 
 /* Hardware status.  */
 #define GET_HSR0() GET_H_SPR (H_SPR_HSR0)
@@ -174,6 +178,9 @@ extern IADDR previous_vliw_pc;
 
 #define GET_IHSR8() GET_H_SPR (H_SPR_IHSR8)
 #define GET_IHSR8_NBC(ihsr8) ((ihsr8) & 1)
+#define GET_IHSR8_ICDM(ihsr8) (((ihsr8) >>  1) & 1)
+#define GET_IHSR8_ICWE(ihsr8) (((ihsr8) >>  8) & 7)
+#define GET_IHSR8_DCWE(ihsr8) (((ihsr8) >> 12) & 7)
 
 void frvbf_insn_cache_preload (SIM_CPU *, SI, USI, int);
 void frvbf_data_cache_preload (SIM_CPU *, SI, USI, int);
@@ -645,6 +652,9 @@ enum frv_msr_mtt
 #define GET_MSR_EMCI(msr) ( \
   ((msr) >> 24) & 0x1       \
 )
+#define GET_MSR_MPEM(msr) ( \
+  ((msr) >> 27) & 0x1        \
+)
 #define GET_MSR_SRDAV(msr) ( \
   ((msr) >> 28) & 0x1        \
 )
@@ -675,6 +685,15 @@ frv_queue_external_interrupt (SIM_CPU *, enum frv_interrupt_kind);
 
 struct frv_interrupt_queue_element *
 frv_queue_illegal_instruction_interrupt (SIM_CPU *, const CGEN_INSN *);
+
+struct frv_interrupt_queue_element *
+frv_queue_privileged_instruction_interrupt (SIM_CPU *, const CGEN_INSN *);
+
+struct frv_interrupt_queue_element *
+frv_queue_float_disabled_interrupt (SIM_CPU *);
+
+struct frv_interrupt_queue_element *
+frv_queue_media_disabled_interrupt (SIM_CPU *);
 
 struct frv_interrupt_queue_element *
 frv_queue_non_implemented_instruction_interrupt (SIM_CPU *, const CGEN_INSN *);

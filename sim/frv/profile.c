@@ -31,6 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "profile.h"
 #include "profile-fr400.h"
 #include "profile-fr500.h"
+#include "profile-fr550.h"
 
 static void
 reset_gr_flags (SIM_CPU *cpu, INT gr)
@@ -677,6 +678,8 @@ update_latencies (SIM_CPU *cpu, int cycles)
   int *fdiv;
   int *fsqrt;
   int *idiv;
+  int *flt;
+  int *media;
   int *ccr;
   int *gr  = ps->gr_busy;
   int *fr  = ps->fr_busy;
@@ -757,6 +760,16 @@ update_latencies (SIM_CPU *cpu, int cycles)
       ++idiv;
       ++fdiv;
       ++fsqrt;
+    }
+  /* Float and media units can occur in 4 slots on some machines.  */
+  flt = ps->float_busy;
+  media = ps->media_busy;
+  for (i = 0; i < 4; ++i)
+    {
+      *flt = (*flt <= cycles) ? 0 : (*flt - cycles);
+      *media = (*media <= cycles) ? 0 : (*media - cycles);
+      ++flt;
+      ++media;
     }
 }
 
@@ -918,6 +931,9 @@ frvbf_model_insn_before (SIM_CPU *cpu, int first_p)
     case bfd_mach_fr500:
       fr500_model_insn_before (cpu, first_p);
       break;
+    case bfd_mach_fr550:
+      fr550_model_insn_before (cpu, first_p);
+      break;
     default:
       break;
     }
@@ -980,6 +996,9 @@ frvbf_model_insn_after (SIM_CPU *cpu, int last_p, int cycles)
       break;
     case bfd_mach_fr500:
       fr500_model_insn_after (cpu, last_p, cycles);
+      break;
+    case bfd_mach_fr550:
+      fr550_model_insn_after (cpu, last_p, cycles);
       break;
     default:
       break;
@@ -1242,7 +1261,6 @@ decrease_ACC_busy (SIM_CPU *cpu, INT out_ACC, int cycles)
     }
 }
 
-/* start-sanitize-frv */
 void
 increase_ACC_busy (SIM_CPU *cpu, INT out_ACC, int cycles)
 {
@@ -1261,7 +1279,6 @@ enforce_full_acc_latency (SIM_CPU *cpu, INT in_ACC)
   ps->acc_busy_adjust [in_ACC] = -1;
 }
 
-/* end-sanitize-frv */
 void
 decrease_FR_busy (SIM_CPU *cpu, INT out_FR, int cycles)
 {
@@ -1357,6 +1374,27 @@ update_fsqrt_resource_latency (SIM_CPU *cpu, INT in_resource, int cycles)
      be used once in a VLIW insn.  */
   FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (cpu);
   int *r = ps->fsqrt_busy;
+  r[in_resource] = cycles;
+}
+
+/* Set the latency of the given resource to the given number of cycles.  */
+void
+update_float_resource_latency (SIM_CPU *cpu, INT in_resource, int cycles)
+{
+  /* operate directly on the busy cycles since each resource can only
+     be used once in a VLIW insn.  */
+  FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (cpu);
+  int *r = ps->float_busy;
+  r[in_resource] = cycles;
+}
+
+void
+update_media_resource_latency (SIM_CPU *cpu, INT in_resource, int cycles)
+{
+  /* operate directly on the busy cycles since each resource can only
+     be used once in a VLIW insn.  */
+  FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (cpu);
+  int *r = ps->media_busy;
   r[in_resource] = cycles;
 }
 
@@ -1567,6 +1605,46 @@ vliw_wait_for_fsqrt_resource (SIM_CPU *cpu, INT in_resource)
       if (TRACE_INSN_P (cpu))
 	{
 	  sprintf (hazard_name, "Resource hazard for square root in slot F%d:", in_resource);
+	}
+      ps->vliw_wait = r[in_resource];
+    }
+}
+
+/* Check the availability of the given float unit resource and update
+   the number of cycles the current VLIW insn must wait until it is available.
+*/
+void
+vliw_wait_for_float_resource (SIM_CPU *cpu, INT in_resource)
+{
+  FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (cpu);
+  int *r = ps->float_busy;
+  /* If the latency of the resource is greater than the current wait
+     then update the current wait.  */
+  if (r[in_resource] > ps->vliw_wait)
+    {
+      if (TRACE_INSN_P (cpu))
+	{
+	  sprintf (hazard_name, "Resource hazard for floating point unit in slot F%d:", in_resource);
+	}
+      ps->vliw_wait = r[in_resource];
+    }
+}
+
+/* Check the availability of the given media unit resource and update
+   the number of cycles the current VLIW insn must wait until it is available.
+*/
+void
+vliw_wait_for_media_resource (SIM_CPU *cpu, INT in_resource)
+{
+  FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (cpu);
+  int *r = ps->media_busy;
+  /* If the latency of the resource is greater than the current wait
+     then update the current wait.  */
+  if (r[in_resource] > ps->vliw_wait)
+    {
+      if (TRACE_INSN_P (cpu))
+	{
+	  sprintf (hazard_name, "Resource hazard for media unit in slot M%d:", in_resource);
 	}
       ps->vliw_wait = r[in_resource];
     }
@@ -1824,6 +1902,42 @@ post_wait_for_fsqrt (SIM_CPU *cpu, INT slot)
     }
 }
 
+int
+post_wait_for_float (SIM_CPU *cpu, INT slot)
+{
+  FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (cpu);
+  int *flt = ps->float_busy;
+
+  /* Multiple floating point square roots in the same slot need only wait 1
+     extra cycle.  */
+  if (flt[slot] > ps->post_wait)
+    {
+      ps->post_wait = flt[slot];
+      if (TRACE_INSN_P (cpu))
+	{
+	  sprintf (hazard_name, "Resource hazard for floating point unit in slot F%d:", slot);
+	}
+    }
+}
+
+int
+post_wait_for_media (SIM_CPU *cpu, INT slot)
+{
+  FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (cpu);
+  int *media = ps->media_busy;
+
+  /* Multiple floating point square roots in the same slot need only wait 1
+     extra cycle.  */
+  if (media[slot] > ps->post_wait)
+    {
+      ps->post_wait = media[slot];
+      if (TRACE_INSN_P (cpu))
+	{
+	  sprintf (hazard_name, "Resource hazard for media unit in slot M%d:", slot);
+	}
+    }
+}
+
 /* Print cpu-specific profile information.  */
 #define COMMAS(n) sim_add_commas (comma_buf, sizeof (comma_buf), (n))
 
@@ -1863,8 +1977,8 @@ static char *
 slot_names[] =
 {
   "none",
-  "I0", "I1", "I01", "IALL",
-  "FM0", "FM1", "FM01", "FMALL", "FMLOW",
+  "I0", "I1", "I01", "I2", "I3", "IALL",
+  "FM0", "FM1", "FM01", "FM2", "FM3", "FMALL", "FMLOW",
   "B0", "B1", "B01",
   "C"
 };

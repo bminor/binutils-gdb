@@ -235,10 +235,14 @@ frv_queue_illegal_instruction_interrupt (
   SIM_CPU *current_cpu, const CGEN_INSN *insn
 )
 {
-  /* The fr400 does not have the fp_exception.  */
   SIM_DESC sd = CPU_STATE (current_cpu);
-  if (STATE_ARCHITECTURE (sd)->mach != bfd_mach_fr400)
+  switch (STATE_ARCHITECTURE (sd)->mach)
     {
+    case bfd_mach_fr400:
+    case bfd_mach_fr550:
+      break;
+    default:
+      /* Some machines generate fp_exception for this case.  */
       if (frv_is_float_insn (insn) || frv_is_media_insn (insn))
 	{
 	  struct frv_fp_exception_info fp_info = {
@@ -246,9 +250,44 @@ frv_queue_illegal_instruction_interrupt (
 	  };
 	  return frv_queue_fp_exception_interrupt (current_cpu, & fp_info);
 	}
+      break;
     }
 
   return frv_queue_program_interrupt (current_cpu, FRV_ILLEGAL_INSTRUCTION);
+}
+
+struct frv_interrupt_queue_element *
+frv_queue_privileged_instruction_interrupt (SIM_CPU *current_cpu, const CGEN_INSN *insn)
+{
+  /* The fr550 has no privileged instruction interrupt. It uses
+     illegal_instruction.  */
+  SIM_DESC sd = CPU_STATE (current_cpu);
+  if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr550)
+    return frv_queue_program_interrupt (current_cpu, FRV_ILLEGAL_INSTRUCTION);
+
+  return frv_queue_program_interrupt (current_cpu, FRV_PRIVILEGED_INSTRUCTION);
+}
+
+struct frv_interrupt_queue_element *
+frv_queue_float_disabled_interrupt (SIM_CPU *current_cpu)
+{
+  /* The fr550 has no fp_disabled interrupt. It uses illegal_instruction.  */
+  SIM_DESC sd = CPU_STATE (current_cpu);
+  if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr550)
+    return frv_queue_program_interrupt (current_cpu, FRV_ILLEGAL_INSTRUCTION);
+  
+  return frv_queue_program_interrupt (current_cpu, FRV_FP_DISABLED);
+}
+
+struct frv_interrupt_queue_element *
+frv_queue_media_disabled_interrupt (SIM_CPU *current_cpu)
+{
+  /* The fr550 has no mp_disabled interrupt. It uses illegal_instruction.  */
+  SIM_DESC sd = CPU_STATE (current_cpu);
+  if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr550)
+    return frv_queue_program_interrupt (current_cpu, FRV_ILLEGAL_INSTRUCTION);
+  
+  return frv_queue_program_interrupt (current_cpu, FRV_MP_DISABLED);
 }
 
 struct frv_interrupt_queue_element *
@@ -256,11 +295,14 @@ frv_queue_non_implemented_instruction_interrupt (
   SIM_CPU *current_cpu, const CGEN_INSN *insn
 )
 {
-  /* The fr400 does not have the fp_exception, nor does it generate mp_exception
-     for this case.  */
   SIM_DESC sd = CPU_STATE (current_cpu);
-  if (STATE_ARCHITECTURE (sd)->mach != bfd_mach_fr400)
+  switch (STATE_ARCHITECTURE (sd)->mach)
     {
+    case bfd_mach_fr400:
+    case bfd_mach_fr550:
+      break;
+    default:
+      /* Some machines generate fp_exception or mp_exception for this case.  */
       if (frv_is_float_insn (insn))
 	{
 	  struct frv_fp_exception_info fp_info = {
@@ -268,14 +310,13 @@ frv_queue_non_implemented_instruction_interrupt (
 	  };
 	  return frv_queue_fp_exception_interrupt (current_cpu, & fp_info);
 	}
-
       if (frv_is_media_insn (insn))
 	{
 	  frv_set_mp_exception_registers (current_cpu, MTT_UNIMPLEMENTED_MPOP,
 					  0);
 	  return NULL; /* no interrupt queued at this time.  */
 	}
-
+      break;
     }
 
   return frv_queue_program_interrupt (current_cpu, FRV_ILLEGAL_INSTRUCTION);
@@ -364,19 +405,19 @@ frv_detect_insn_access_interrupts (SIM_CPU *current_cpu, SCACHE *sc)
       if (frv_is_float_insn (insn)
 	  || (CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_FR_ACCESS)
 	      && ! GET_H_PSR_EM ()))
-	frv_queue_program_interrupt (current_cpu, FRV_FP_DISABLED);
+	frv_queue_float_disabled_interrupt (current_cpu);
     }
   /* Make sure media support is enabled.  */
   else if (! GET_H_PSR_EM ())
     {
       /* Generate mp_disabled if it is a media insn.  */
       if (frv_is_media_insn (insn) || CGEN_INSN_NUM (insn) == FRV_INSN_MTRAP)
-	frv_queue_program_interrupt (current_cpu, FRV_MP_DISABLED);
+	frv_queue_media_disabled_interrupt (current_cpu);
     }
   /* Check for privileged insns.  */
   else if (CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_PRIVILEGED) &&
 	   ! GET_H_PSR_S ())
-    frv_queue_program_interrupt (current_cpu, FRV_PRIVILEGED_INSTRUCTION);
+    frv_queue_privileged_instruction_interrupt (current_cpu, insn);
 #if 0 /* disable for now until we find out how FSR0.QNE gets reset.  */
   else
     {
@@ -552,6 +593,10 @@ esr_for_data_access_exception (
   SIM_CPU *current_cpu, struct frv_interrupt_queue_element *item
 )
 {
+  SIM_DESC sd = CPU_STATE (current_cpu);
+  if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr550)
+    return 8; /* Use ESR8, EPCR8.  */
+
   if (item->slot == UNIT_I0)
     return 8; /* Use ESR8, EPCR8, EAR8, EDR8.  */
 
@@ -593,7 +638,7 @@ clear_exception_status_registers (SIM_CPU *current_cpu)
       CLEAR_ESR_VALID (esr);
       SET_ESR (i, esr);
     }
-  for (i = 8; i <= 13; ++i)
+  for (i = 8; i <= 15; ++i)
     {
       SI esr = GET_ESR (i);
       CLEAR_ESR_VALID (esr);
@@ -617,10 +662,11 @@ frv_set_mp_exception_registers (
     {
       FRV_VLIW *vliw = CPU_VLIW (current_cpu);
       int slot = vliw->next_slot - 1;
+      SIM_DESC sd = CPU_STATE (current_cpu);
 
       /* If this insn is in the M2 slot, then set MSR1.OVF and MSR1.SIE,
 	 otherwise set MSR0.OVF and MSR0.SIE.  */
-      if ((*vliw->current_vliw)[slot] == UNIT_FM1)
+      if (STATE_ARCHITECTURE (sd)->mach != bfd_mach_fr550 && (*vliw->current_vliw)[slot] == UNIT_FM1)
 	{
 	  SI msr = GET_MSR (1);
 	  OR_MSR_SIE (msr, sie);
@@ -633,8 +679,14 @@ frv_set_mp_exception_registers (
 	  SET_MSR_OVF (msr0);
 	}
 
-      /* Regardless of the slot, set MSR0.AOVF.  */
-      SET_MSR_AOVF (msr0);
+      /* Generate the interrupt now if MSR0.MPEM is set on fr550 */
+      if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr550 && GET_MSR_MPEM (msr0))
+	frv_queue_program_interrupt (current_cpu, FRV_MP_EXCEPTION);
+      else
+	{
+	  /* Regardless of the slot, set MSR0.AOVF.  */
+	  SET_MSR_AOVF (msr0);
+	}
     }
 
   SET_MSR (0, msr0);
@@ -689,6 +741,18 @@ set_fp_exception_registers (
   SI fsr0;
   IADDR pc;
   struct frv_fp_exception_info *fp_info;
+  SIM_DESC sd = CPU_STATE (current_cpu);
+
+  /* No FQ registers on fr550 */
+  if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr550)
+    {
+      /* Update the fsr.  */
+      fp_info = & item->u.fp_info;
+      fsr0 = GET_FSR (0);
+      SET_FSR_FTT (fsr0, fp_info->ftt);
+      SET_FSR (0, fsr0);
+      return;
+    }
 
   /* Select an FQ and update it with the exception information.  */
   fq_index = fq_for_exception (current_cpu, item);
@@ -755,7 +819,9 @@ set_exception_status_registers (
 	SET_ESR_REC (esr, item->u.rec);
       else if (interrupt->kind == FRV_INSTRUCTION_ACCESS_EXCEPTION)
 	SET_ESR_IAEC (esr, item->u.iaec);
-      set_epcr = 1;
+      /* For fr550, don't set epcr for precise interrupts.  */
+      if (STATE_ARCHITECTURE (sd)->mach != bfd_mach_fr550)
+	set_epcr = 1;
     }
   else
     {
@@ -765,14 +831,17 @@ set_exception_status_registers (
 	  set_isr_exception_fields (current_cpu, item);
 	  /* fall thru to set reg_index.  */
 	case FRV_COMMIT_EXCEPTION:
-	  if (item->slot == UNIT_I0)
+	  /* For fr550, always use ESR0.  */
+	  if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr550)
+	    reg_index = 0;
+	  else if (item->slot == UNIT_I0)
 	    reg_index = 0;
 	  else if (item->slot == UNIT_I1)
 	    reg_index = 1;
 	  set_epcr = 1;
 	  break;
 	case FRV_DATA_STORE_ERROR:
-	  reg_index = 14; /* Use ESR15, EPCR15.  */
+	  reg_index = 14; /* Use ESR14.  */
 	  break;
 	case FRV_DATA_ACCESS_ERROR:
 	  reg_index = 15; /* Use ESR15, EPCR15.  */
@@ -787,15 +856,29 @@ set_exception_status_registers (
 	  /* Get the appropriate ESR, EPCR, EAR and EDR.
 	     EAR will be set. EDR will not be set if this is a store insn.  */
 	  set_ear = 1;
-	  if (item->u.data_written.length != 0)
-	    set_edr = 1;
+	  /* For fr550, never use EDRx.  */
+	  if (STATE_ARCHITECTURE (sd)->mach != bfd_mach_fr550)
+	    if (item->u.data_written.length != 0)
+	      set_edr = 1;
 	  reg_index = esr_for_data_access_exception (current_cpu, item);
 	  set_epcr = 1;
 	  break;
 	case FRV_MP_EXCEPTION:
+	  /* For fr550, use EPCR2 and ESR2.  */
+	  if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr550)
+	    {
+	      reg_index = 2;
+	      set_epcr = 1;
+	    }
 	  break; /* MSR0-1, FQ0-9 are already set.  */
 	case FRV_FP_EXCEPTION:
 	  set_fp_exception_registers (current_cpu, item);
+	  /* For fr550, use EPCR2 and ESR2.  */
+	  if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr550)
+	    {
+	      reg_index = 2;
+	      set_epcr = 1;
+	    }
 	  break;
 	default:
 	  {

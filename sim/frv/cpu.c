@@ -620,6 +620,22 @@ frvbf_h_acc40U_set (SIM_CPU *current_cpu, UINT regno, UDI newval)
   SET_H_ACC40U (regno, newval);
 }
 
+/* Get the value of h-iacc0.  */
+
+DI
+frvbf_h_iacc0_get (SIM_CPU *current_cpu, UINT regno)
+{
+  return GET_H_IACC0 (regno);
+}
+
+/* Set a value for h-iacc0.  */
+
+void
+frvbf_h_iacc0_set (SIM_CPU *current_cpu, UINT regno, DI newval)
+{
+  SET_H_IACC0 (regno, newval);
+}
+
 /* Get the value of h-iccr.  */
 
 UQI
