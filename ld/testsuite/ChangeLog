@@ -1,3 +1,7 @@
+2002-02-11  Alexandre Oliva  <aoliva@redhat.com>
+
+	* ld-sh/shared-1.d: Fix relocation addend.
+
 2002-02-09  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ld-mmix/bpo-21.d, ld-mmix/bpo-21m.d, ld-mmix/bpo-11.s: New
