@@ -1,5 +1,5 @@
 /* IBM RS/6000 "XCOFF" back-end for BFD.
-   Copyright (C) 1990, 1991, 1995 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
    FIXME: Can someone provide a transliteration of this name into ASCII?
    Using the following chars caused a compiler warning on HIUX (so I replaced
    them with octal escapes), and isn't useful without an understanding of what
@@ -82,7 +82,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    Note however that encoding magic addresses (STACK_END_ADDR) is going
    to be _very_ fragile.  But I don't see any easy way to get that info
    right now.  */
-#ifdef ALTERNATE_AIX_CORE_FORMAT
+#ifdef CORE_VERSION_1
 #define CORE_DATA_SIZE_FIELD c_u.U_dsize
 #define CORE_COMM_FIELD c_u.U_comm
 #define SAVE_FIELD c_mst
@@ -155,8 +155,7 @@ rs6000coff_core_p (abfd)
      are always set) (this is based on experimentation on AIX 3.2).
      Now, the thing is that GDB users will be surprised
      if segments just silently don't appear (well, maybe they would
-     think to check "info files", I don't know), but we have no way of
-     returning warnings (as opposed to errors).
+     think to check "info files", I don't know).
 
      For the data segment, we have no choice but to keep going if it's
      not there, since the default behavior is not to dump it (regardless
@@ -172,8 +171,7 @@ rs6000coff_core_p (abfd)
       return NULL;
     }
 
-  if ((coredata.c_flag & CORE_TRUNC)
-      || !(coredata.c_flag & USTACK_VALID))
+  if (!(coredata.c_flag & USTACK_VALID))
     {
       bfd_set_error (bfd_error_file_truncated);
       return NULL;
@@ -181,7 +179,7 @@ rs6000coff_core_p (abfd)
 
   /* Don't check the core file size for a full core, AIX 4.1 includes
      additional shared library sections in a full core.  */
-  if (!(coredata.c_flag & FULL_CORE)
+  if (!(coredata.c_flag & (FULL_CORE | CORE_TRUNC))
       && ((bfd_vma)coredata.c_stack + coredata.c_size) != statbuf.st_size)
     {
       /* If the size is wrong, it means we're misinterpreting something.  */
@@ -198,13 +196,15 @@ rs6000coff_core_p (abfd)
       return NULL;
     }
 
+  /* Issue warning if the core file was truncated during writing.  */
+  if (coredata.c_flag & CORE_TRUNC)
+    (*_bfd_error_handler) ("%s: warning core file truncated",
+			   bfd_get_filename (abfd));
+
   /* maybe you should alloc space for the whole core chunk over here!! FIXMEmgo */
   tmpptr = (char*)bfd_zalloc (abfd, sizeof (Rs6kCorData));
   if (!tmpptr)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
       
   set_tdata (abfd, tmpptr);
 
@@ -213,11 +213,8 @@ rs6000coff_core_p (abfd)
 
   /* .stack section. */
   if ((core_stacksec (abfd) = (asection*) bfd_zalloc (abfd, sizeof (asection)))
-       == NULL)  {
-    bfd_set_error (bfd_error_no_memory);
-    /* bfd_release (abfd, ???? ) */
+       == NULL)
     return NULL;
-  }
   core_stacksec (abfd)->name = ".stack";
   core_stacksec (abfd)->flags = SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS;
   core_stacksec (abfd)->_raw_size = coredata.c_size;
@@ -226,11 +223,8 @@ rs6000coff_core_p (abfd)
 
   /* .reg section for GPRs and special registers. */
   if ((core_regsec (abfd) = (asection*) bfd_zalloc (abfd, sizeof (asection)))
-       == NULL)  {
-    bfd_set_error (bfd_error_no_memory);
-    /* bfd_release (abfd, ???? ) */
+       == NULL)
     return NULL;
-  }
   core_regsec (abfd)->name = ".reg";
   core_regsec (abfd)->flags = SEC_HAS_CONTENTS;
   core_regsec (abfd)->_raw_size = (32 + NUM_OF_SPEC_REGS) * 4;
@@ -240,11 +234,8 @@ rs6000coff_core_p (abfd)
 
   /* .reg2 section for FPRs (floating point registers). */
   if ((core_reg2sec (abfd) = (asection*) bfd_zalloc (abfd, sizeof (asection)))
-       == NULL)  {
-    bfd_set_error (bfd_error_no_memory);
-    /* bfd_release (abfd, ???? ) */
+       == NULL)
     return NULL;
-  }
   core_reg2sec (abfd)->name = ".reg2";
   core_reg2sec (abfd)->flags = SEC_HAS_CONTENTS;
   core_reg2sec (abfd)->_raw_size = 8 * 32;			/* 32 FPRs. */
@@ -253,11 +244,8 @@ rs6000coff_core_p (abfd)
   	(char*)&coredata.SAVE_FIELD.fpr[0] - (char*)&coredata;
 
   if ((core_ldinfosec (abfd) = (asection*) bfd_zalloc (abfd, sizeof (asection)))
-       == NULL)  {
-    bfd_set_error (bfd_error_no_memory);
-    /* bfd_release (abfd, ???? ) */
+       == NULL)
     return NULL;
-  }
   core_ldinfosec (abfd)->name = ".ldinfo";
   core_ldinfosec (abfd)->flags = SEC_HAS_CONTENTS;
   /* To actually find out how long this section is in this particular
@@ -280,10 +268,7 @@ rs6000coff_core_p (abfd)
     {
       asection *sec = (asection *) bfd_zalloc (abfd, sizeof (asection));
       if (sec == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return NULL;
-	}
+	return NULL;
       sec->name = ".data";
       sec->flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS;
       sec->_raw_size = coredata.CORE_DATA_SIZE_FIELD;
@@ -306,33 +291,72 @@ rs6000coff_core_file_matches_executable_p (core_bfd, exec_bfd)
      bfd *core_bfd;
      bfd *exec_bfd;
 {
-  FILE *fd;
   struct core_dump coredata;
   struct ld_info ldinfo;
-  char pathname [1024];
+  int size;
+  char *path, *s;
+  size_t alloc;
   const char *str1, *str2;
+  boolean ret;
 
-  /* Use bfd_xxx routines, rather than O/S primitives, do error checking!!
-  								FIXMEmgo */
-  /* Actually should be able to use bfd_get_section_contents now that
-     we have a .ldinfo section.  */
-  fd = fopen (core_bfd->filename, FOPEN_RB);
+  if (bfd_seek (core_bfd, 0, SEEK_SET) != 0
+      || bfd_read (&coredata, sizeof coredata, 1, core_bfd) != sizeof coredata)
+    return false;
 
-  fread (&coredata, sizeof (struct core_dump), 1, fd);
-  fseek (fd, (long)coredata.c_tab, 0);
-  fread (&ldinfo, (char*)&ldinfo.ldinfo_filename[0] - (char*)&ldinfo.ldinfo_next,
-	 1, fd);
-  fscanf (fd, "%s", pathname);
+  if (bfd_seek (core_bfd, (long) coredata.c_tab, SEEK_SET) != 0)
+    return false;
+
+  size = (char *) &ldinfo.ldinfo_filename[0] - (char *) &ldinfo.ldinfo_next;
+  if (bfd_read (&ldinfo, size, 1, core_bfd) != size)
+    return false;
+
+  alloc = 100;
+  path = bfd_malloc (alloc);
+  if (path == NULL)
+    return false;
+  s = path;
+
+  while (1)
+    {
+      if (bfd_read (s, 1, 1, core_bfd) != 1)
+	{
+	  free (path);
+	  return false;
+	}
+      if (*s == '\0')
+	break;
+      ++s;
+      if (s == path + alloc)
+	{
+	  char *n;
+
+	  alloc *= 2;
+	  n = bfd_realloc (path, alloc);
+	  if (n == NULL)
+	    {
+	      free (path);
+	      return false;
+	    }
+	  s = n + (path - s);
+	  path = n;
+	}
+    }
   
-  str1 = strrchr (pathname, '/');
+  str1 = strrchr (path, '/');
   str2 = strrchr (exec_bfd->filename, '/');
 
   /* step over character '/' */
-  str1 = str1 ? str1+1 : &pathname[0];
-  str2 = str2 ? str2+1 : exec_bfd->filename;
+  str1 = str1 != NULL ? str1 + 1 : path;
+  str2 = str2 != NULL ? str2 + 1 : exec_bfd->filename;
 
-  fclose (fd);
-  return strcmp (str1, str2) == 0;
+  if (strcmp (str1, str2) == 0)
+    ret = true;
+  else
+    ret = false;
+
+  free (path);
+
+  return ret;
 }
 
 char *
@@ -377,7 +401,8 @@ rs6000coff_get_section_contents (abfd, section, location, offset, count)
       /* Assert that the only way this code will be executed is reading the
          whole section. */
       if (offset || count != (sizeof(mstatus.gpr) + (4 * NUM_OF_SPEC_REGS)))
-        fprintf (stderr, "ERROR! in rs6000coff_get_section_contents()\n");
+        (*_bfd_error_handler)
+	  ("ERROR! in rs6000coff_get_section_contents()\n");
 
       /* for `.reg' section, `filepos' is a pointer to the `mstsave' structure
          in the core file. */

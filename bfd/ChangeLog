@@ -1,3 +1,8 @@
+Mon Jul 28 02:50:29 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* rs6000-core.c (rs6000coff_core_p):  If CORE_TRUNC is set, print
+	a warning rather than returning an error.
+
 Fri Jul 25 14:50:08 1997  Felix Lee  <flee@cygnus.com>
 
 	* cisco-core.c: define signals for wingdb.
