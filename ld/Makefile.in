@@ -138,7 +138,7 @@ CC_FOR_TARGET = ` \
       echo $$r/../gcc/xgcc -B$$r/../gcc/; \
     fi; \
   else \
-    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+    if [ "@host@" = "@target@" ] ; then \
       echo $(CC); \
     else \
       echo gcc | sed '$(program_transform_name)'; \
@@ -154,7 +154,7 @@ CXX_FOR_TARGET = ` \
       echo $$r/../gcc/xgcc -B$$r/../gcc/; \
     fi; \
   else \
-    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+    if [ "@host@" = "@target@" ] ; then \
       echo $(CXX); \
     else \
       echo gcc | sed '$(program_transform_name)'; \
@@ -203,7 +203,7 @@ ALL_EMULATIONS = ea29k.o ealpha.o earmaoutl.o earmaoutb.o \
 	eriscix.o esa29200.o eshl.o esh.o esparclynx.o esparcnbsd.o \
 	est2000.o esun3.o esun4.o evanilla.o evax.o evsta.o \
 	ez8001.o ez8002.o ei386pe.o earmpe.o eelf32b4300.o eelf32l4300.o \
-	eaixppc.o eaixrs6.o edelta68.o
+	eaixppc.o eaixrs6.o edelta68.o eppcpe.o
 
 CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \
@@ -298,6 +298,9 @@ ehp3hpux.c: $(srcdir)/emulparams/hp3hpux.sh \
 ei386pe.c: $(srcdir)/emulparams/i386pe.sh \
   $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/pe.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} i386pe
+eppcpe.c: $(srcdir)/emulparams/ppcpe.sh \
+  $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/ppcpe.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} ppcpe
 ehppaelf.c: $(srcdir)/emulparams/hppaelf.sh \
   $(srcdir)/emultempl/hppaelf.em $(srcdir)/scripttempl/hppaelf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} hppaelf
@@ -776,7 +779,7 @@ mostlyclean:
 	-rm -f $(STAGESTUFF) ld.?? ld.??? ldlex.[qp] config.log
 	-rm -f ld ld1 ld2 ld3 *.o y.output cdtest cdtest.out cdtest.tmp
 	-rm -f cdtest-ur cdtest-ur.out cdtest-ur.tmp
-	-rm -f $(GENERATED_CFILES) $(GENERATED_HFILES)
+	-rm -f ldemul-list.h
 	-rm -fr tmpdir
 clean: mostlyclean
 	-rm -f $(LD_PROG) configdoc.texi
@@ -787,6 +790,7 @@ distclean: clean
 maintainer-clean realclean: clean distclean
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
+	-rm -f $(GENERATED_CFILES) $(GENERATED_HFILES)
 	-rm -f $(LDDISTSTUFF) *.info*
 
 .PHONY: diststuff mostlyclean clean distclean realclean
