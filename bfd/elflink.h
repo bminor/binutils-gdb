@@ -4620,7 +4620,7 @@ elf_link_output_extsym (h, data)
   /* If a non-weak symbol with non-default visibility is not defined
      locally, it is a fatal error.  */
   if (! finfo->info->relocateable
-      && ELF_ST_VISIBILITY (sym.st_other)
+      && ELF_ST_VISIBILITY (sym.st_other) != STV_DEFAULT
       && ELF_ST_BIND (sym.st_info) != STB_WEAK
       && h->root.type != bfd_link_hash_undefweak
       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)

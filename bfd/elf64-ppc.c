@@ -4505,10 +4505,9 @@ ppc64_elf_adjust_dynamic_symbol (info, h)
 	  break;
       if (!((struct ppc_link_hash_entry *) h)->is_func_descriptor
 	  || ent == NULL
-	  || (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0
-	  || (! info->shared
-	      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0
-	      && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) == 0))
+	  || SYMBOL_CALLS_LOCAL (info, h)
+	  || (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	      && h->root.type == bfd_link_hash_undefweak))
 	{
 	  h->plt.plist = NULL;
 	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
@@ -5496,9 +5495,7 @@ allocate_dynrelocs (h, inf)
 
   if (htab->elf.dynamic_sections_created
       && h->dynindx != -1
-      && WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info->shared, h)
-      && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-	  || h->root.type != bfd_link_hash_undefweak))
+      && WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info->shared, h))
     {
       struct plt_entry *pent;
       bfd_boolean doneone = FALSE;
@@ -5621,12 +5618,12 @@ allocate_dynrelocs (h, inf)
 
   if (info->shared)
     {
-      /* Relocs that use pc_count are those that appear on a call
-	 insn, or certain REL relocs (see MUST_BE_DYN_RELOC) that can
-	 generated via assembly.  We want calls to protected symbols
-	 to resolve directly to the function rather than going via the
-	 plt.  If people want function pointer comparisons to work as
-	 expected then they should avoid writing weird assembly.  */
+      /* Relocs that use pc_count are those that appear on a call insn,
+	 or certain REL relocs (see MUST_BE_DYN_RELOC) that can be
+	 generated via assembly.  We want calls to protected symbols to
+	 resolve directly to the function rather than going via the plt.
+	 If people want function pointer comparisons to work as expected
+	 then they should avoid writing weird assembly.  */
       if (SYMBOL_CALLS_LOCAL (info, h))
 	{
 	  struct ppc_dyn_relocs **pp;

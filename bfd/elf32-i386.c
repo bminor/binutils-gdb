@@ -1390,11 +1390,9 @@ elf_i386_adjust_dynamic_symbol (info, h)
       || (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0)
     {
       if (h->plt.refcount <= 0
-	  || (! info->shared
-	      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0
-	      && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) == 0
-	      && h->root.type != bfd_link_hash_undefweak
-	      && h->root.type != bfd_link_hash_undefined))
+	  || SYMBOL_CALLS_LOCAL (info, h)
+	  || (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	      && h->root.type == bfd_link_hash_undefweak))
 	{
 	  /* This case can occur if we saw a PLT32 reloc in an input
 	     file, but the symbol was never referred to by a dynamic
@@ -1558,9 +1556,7 @@ allocate_dynrelocs (h, inf)
   htab = elf_i386_hash_table (info);
 
   if (htab->elf.dynamic_sections_created
-      && h->plt.refcount > 0
-      && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-	  || h->root.type != bfd_link_hash_undefweak))
+      && h->plt.refcount > 0)
     {
       /* Make sure this symbol is output as a dynamic symbol.
 	 Undefined weak syms won't yet be marked as dynamic.  */

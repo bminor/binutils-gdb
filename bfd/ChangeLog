@@ -1,3 +1,20 @@
+2003-05-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Use SYMBOL_CALLS_LOCAL
+	to trim plt entries.  Move undefweak non-default visibility test..
+	(allocate_dynrelocs): ..from here.
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Don't test
+	dynamic_sections_created here.  Update comment.  Move undefweak
+	non-default visibility test..
+	(allocate_dynrelocs): ..from here.  Fix comment.
+	* elf64-ppc.c (ppc64_elf_adjust_dynamic_symbol): Use SYMBOL_CALLS_LOCAL
+	to trim plt entries.  Move undefweak non-default visibility test..
+	(allocate_dynrelocs): ..from here.  Fix comment.
+	* elflink.h (elf_link_output_extsym): Compare ELF_ST_VISIBILITY with
+	STV_DEFAULT rather than comparing with zero.
+	* elflink.c (_bfd_elf_merge_symbol): Likewise.
+	(_bfd_elf_fix_symbol_flags): Likewise.  Format comment.
+
 2003-05-17  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* bfd.c (_bfd_get_gp_value): Prevent illegal access for abfd null
