@@ -814,6 +814,7 @@ integral_type (type)
       return (TYPE_CODE (type) != TYPE_CODE_INT) &&
 	(TYPE_CODE (type) != TYPE_CODE_ENUM) ? 0 : 1;
     case language_m2:
+    case language_pascal:
       return TYPE_CODE (type) != TYPE_CODE_INT ? 0 : 1;
     case language_chill:
       error ("Missing Chill support in function integral_type.");	/*FIXME */
@@ -849,6 +850,7 @@ character_type (type)
     {
     case language_chill:
     case language_m2:
+    case language_pascal:
       return TYPE_CODE (type) != TYPE_CODE_CHAR ? 0 : 1;
 
     case language_c:
@@ -871,6 +873,7 @@ string_type (type)
     {
     case language_chill:
     case language_m2:
+    case language_pascal:
       return TYPE_CODE (type) != TYPE_CODE_STRING ? 0 : 1;
 
     case language_c:
@@ -935,6 +938,11 @@ structured_type (type)
       return (TYPE_CODE (type) == TYPE_CODE_STRUCT) ||
 	(TYPE_CODE (type) == TYPE_CODE_UNION) ||
 	(TYPE_CODE (type) == TYPE_CODE_ARRAY);
+   case language_pascal:
+      return (TYPE_CODE(type) == TYPE_CODE_STRUCT) ||
+	 (TYPE_CODE(type) == TYPE_CODE_UNION) ||
+	 (TYPE_CODE(type) == TYPE_CODE_SET) ||
+	    (TYPE_CODE(type) == TYPE_CODE_ARRAY);
     case language_m2:
       return (TYPE_CODE (type) == TYPE_CODE_STRUCT) ||
 	(TYPE_CODE (type) == TYPE_CODE_SET) ||
@@ -966,7 +974,11 @@ lang_bool_type ()
 	}
       return builtin_type_f_logical_s2;
     case language_cplus:
-      sym = lookup_symbol ("bool", NULL, VAR_NAMESPACE, NULL, NULL);
+    case language_pascal:
+      if (current_language->la_language==language_cplus)
+        {sym = lookup_symbol ("bool", NULL, VAR_NAMESPACE, NULL, NULL);}
+      else
+        {sym = lookup_symbol ("boolean", NULL, VAR_NAMESPACE, NULL, NULL);}
       if (sym)
 	{
 	  type = SYMBOL_TYPE (sym);
@@ -1158,6 +1170,21 @@ binop_type_check (arg1, arg2, op)
 		type_op_error ("Arguments to %s must be of integral type.", op);
 	      break;
 	    }
+#endif
+
+#ifdef _LANG_pascal
+      case language_pascal:
+	 switch(op)
+	 {
+	 case BINOP_DIV:
+	    if (!float_type(t1) && !float_type(t2))
+	       type_op_error ("Arguments to %s must be floating point numbers.",op);
+	    break;
+	 case BINOP_INTDIV:
+	    if (!integral_type(t1) || !integral_type(t2))
+	       type_op_error ("Arguments to %s must be of integral type.",op);
+	    break;
+	 }
 #endif
 
 #ifdef _LANG_chill

@@ -1,3 +1,10 @@
+2000-06-16  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* defs.h: define language_pascal in language enumeration.
+	* language.h: define _LANG_pascal macro.
+	* language.c: add language_pascal support in all language dependant
+   functions.
+
 Sun Jun 18 01:01:09 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips-tdep.c (mips_debug): New variable.

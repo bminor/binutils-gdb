@@ -196,7 +196,8 @@ enum language
     language_fortran,		/* Fortran */
     language_m2,		/* Modula-2 */
     language_asm,		/* Assembly language */
-    language_scm		/* Scheme / Guile */
+    language_scm,    		/* Scheme / Guile */
+    language_pascal		/* Pascal */
   };
 
 enum precision_type
