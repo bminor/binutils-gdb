@@ -1,3 +1,8 @@
+1999-08-06  Ian Lance Taylor  <ian@zembu.com>
+
+	* section.c (global_syms): Only initialize union field if
+	__STDC__.
+
 1999-08-04  Mark Mitchell  <mark@codesourcery.com>
 
 	* elf32-mips.c (mips_elf_got16_entry): Don't multiply GOT index by

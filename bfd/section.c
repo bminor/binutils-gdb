@@ -481,19 +481,27 @@ CODE_FRAGMENT
 .     ((section->reloc_done) ? (section)->_cooked_size: (abort(),1))
 */
 
+/* We use a macro to initialize the static asymbol structures because
+   traditional C does not permit us to initialize a union member while
+   gcc warns if we don't initialize it.  */
+ /* the_bfd, name, value, attr, section [, udata] */
+#ifdef __STDC__
+#define GLOBAL_SYM_INIT(NAME, SECTION) \
+  { 0, NAME, 0, BSF_SECTION_SYM, (asection *) SECTION, { 0 }}
+#else
+#define GLOBAL_SYM_INIT(NAME, SECTION) \
+  { 0, NAME, 0, BSF_SECTION_SYM, (asection *) SECTION }
+#endif
+
 /* These symbols are global, not specific to any BFD.  Therefore, anything
    that tries to change them is broken, and should be repaired.  */
+
 static const asymbol global_syms[] =
 {
- /* the_bfd, name, value, attr, section [, udata] */
-  {0, BFD_COM_SECTION_NAME, 0, BSF_SECTION_SYM,
-   (asection *) &bfd_com_section, { 0 }},
-  {0, BFD_UND_SECTION_NAME, 0, BSF_SECTION_SYM,
-   (asection *) &bfd_und_section, { 0 }},
-  {0, BFD_ABS_SECTION_NAME, 0, BSF_SECTION_SYM,
-   (asection *) &bfd_abs_section, { 0 }},
-  {0, BFD_IND_SECTION_NAME, 0, BSF_SECTION_SYM,
-   (asection *) &bfd_ind_section, { 0 }},
+  GLOBAL_SYM_INIT (BFD_COM_SECTION_NAME, &bfd_com_section),
+  GLOBAL_SYM_INIT (BFD_UND_SECTION_NAME, &bfd_und_section),
+  GLOBAL_SYM_INIT (BFD_ABS_SECTION_NAME, &bfd_abs_section),
+  GLOBAL_SYM_INIT (BFD_IND_SECTION_NAME, &bfd_ind_section)
 };
 
 #define STD_SECTION(SEC, FLAGS, SYM, NAME, IDX)	\
