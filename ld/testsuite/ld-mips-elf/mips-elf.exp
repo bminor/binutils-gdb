@@ -31,8 +31,11 @@ run_dump_test "mips16-1"
 # MIPS branch offset final link checking.
 run_dump_test "branch-misc-1"
 
-# Test multi-got link.
-run_dump_test "multi-got-1"
+# Test multi-got link.  We only do this on GNU/Linux because it requires
+# the "traditional" emulations.
+if { $linux_gnu } {
+    run_dump_test "multi-got-1"
+}
 
 if $has_newabi {
     run_dump_test "elf-rel-got-n32"

@@ -1,12 +1,13 @@
-# This test is for the official LP64 version of EABI64, which uses a
-# combination of 32-bit objects and 64-bit FDE addresses.
-#
 #name: MIPS eh-frame 3
 #source: eh-frame1.s
 #source: eh-frame1.s
 #as: -EB -mips3 -mabi=eabi --defsym alignment=3 --defsym fill=0 --defsym foo=0x1020304050607080
 #readelf: -wf
-#ld: -melf32ebmip -Teh-frame1.ld
+#ld: -EB -Teh-frame1.ld
+#
+# This test is for the official LP64 version of EABI64, which uses a
+# combination of 32-bit objects and 64-bit FDE addresses.
+#
 
 The section \.eh_frame contains:
 

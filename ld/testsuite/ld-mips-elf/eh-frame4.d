@@ -1,11 +1,12 @@
-# This test is for the semi-official ILP32 variation of EABI64.
-#
 #name: MIPS eh-frame 4
 #source: eh-frame1.s
 #source: eh-frame1.s
 #as: -EB -mips3 -mabi=eabi --defsym alignment=2 --defsym fill=0 --defsym foo=0x50607080
 #readelf: -wf
-#ld: -melf32ebmip -Teh-frame1.ld
+#ld: -EB -Teh-frame1.ld
+#
+# This test is for the semi-official ILP32 variation of EABI64.
+#
 
 The section \.eh_frame contains:
 

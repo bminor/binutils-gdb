@@ -1,3 +1,10 @@
+2005-02-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ld-mips-elf/eh-frame3.d, ld-mips-elf/eh-frame4.d: Move comments
+	after test commands.
+	* ld-mips-elf/mips-elf.exp: Skip multi-got-1 on non-GNU/Linux
+	systems.
+
 2005-02-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/tlsso.r: Update.
