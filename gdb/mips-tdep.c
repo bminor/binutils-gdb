@@ -659,7 +659,7 @@ mips_register_virtual_type (int reg)
 static CORE_ADDR
 mips_read_sp (void)
 {
-  return ADDR_BITS_REMOVE (read_register (SP_REGNUM));
+  return read_signed_register (SP_REGNUM);
 }
 
 /* Should the upper word of 64-bit addresses be zeroed? */
@@ -2442,10 +2442,9 @@ static CORE_ADDR
 get_frame_pointer (struct frame_info *frame,
 		   mips_extra_func_info_t proc_desc)
 {
-  return ADDR_BITS_REMOVE (read_next_frame_reg (frame, 
-						PROC_FRAME_REG (proc_desc)) +
-			   PROC_FRAME_OFFSET (proc_desc) - 
-			   PROC_FRAME_ADJUST (proc_desc));
+  return (read_next_frame_reg (frame, PROC_FRAME_REG (proc_desc))
+	  + PROC_FRAME_OFFSET (proc_desc)
+	  - PROC_FRAME_ADJUST (proc_desc));
 }
 
 static mips_extra_func_info_t cached_proc_desc;
@@ -3753,7 +3752,7 @@ mips_pop_frame (void)
   register int regnum;
   struct frame_info *frame = get_current_frame ();
   CORE_ADDR new_sp = get_frame_base (frame);
-  mips_extra_func_info_t proc_desc = get_frame_extra_info (frame)->proc_desc;
+  mips_extra_func_info_t proc_desc;
 
   if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), 0, 0))
     {
@@ -3762,6 +3761,7 @@ mips_pop_frame (void)
       return;
     }
 
+  proc_desc = get_frame_extra_info (frame)->proc_desc;
   write_register (PC_REGNUM, DEPRECATED_FRAME_SAVED_PC (frame));
   if (get_frame_saved_regs (frame) == NULL)
     DEPRECATED_FRAME_INIT_SAVED_REGS (frame);

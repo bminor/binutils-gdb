@@ -1,5 +1,13 @@
 2003-04-14  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.c (mips_read_sp): Do not apply ADDR_BITS_REMOVE,
+	return the fully sign-extended register value.
+	(get_frame_pointer): Ditto.
+	(mips_pop_frame): Initialize "proc_desc" after checking for a
+	dummy frame.
+
+2003-04-14  Andrew Cagney  <cagney@redhat.com>
+
 	* mips-tdep.c (mips_push_dummy_frame): Delete function.
 	(MASK, PUSH_FP_REGNUM, GEN_REG_SAVE_MASK): Delete macros.
 	(FLOAT_REG_SAVE_MASK, FLOAT_SINGLE_REG_SAVE_MASK): Delete macro.
