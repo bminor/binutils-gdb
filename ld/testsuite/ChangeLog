@@ -1,3 +1,12 @@
+Fri Sep  8 17:15:38 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-cdtest/cdtest.exp: If the compiler does not exist, mark the
+	tests as untested rather than unresolved.
+
+Wed Aug 23 10:46:38 1995  Ian Lance Taylor  (ian@cygnus.com)
+
+	* ld-sh/sh.exp: Call prune_system_crud on the output of cmp.
+
 Tue Aug 15 17:35:35 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld-scripts/script.exp: Split script verification into a proc.
