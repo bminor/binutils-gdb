@@ -1,3 +1,9 @@
+2003-04-28  Adam Fedor  <fedor@gnu.org>
+
+	* symtab.c (symbol_find_demangled_name): Check for and demangle
+	ObjC symbols.
+	(symbol_init_demangled_name): Init for language_objc as well.
+
 2003-04-28  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (DEPRECATED_TARGET_READ_FP): Replace TARGET_READ_FP.
