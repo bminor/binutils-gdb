@@ -189,6 +189,14 @@ struct monitor_ops
 
 #define MO_CLR_BREAK_1_BASED 0x20000
 
+/* If set, then the monitor acks srecords with a plus sign.  */
+
+#define MO_SREC_ACK_PLUS 0x40000
+
+/* If set, then the monitor "acks" srecords with rotating lines.  */
+
+#define MO_SREC_ACK_ROTATE 0x80000
+
 #define SREC_SIZE 160
 
 extern void monitor_open PARAMS ((char *args, struct monitor_ops *ops,

@@ -126,10 +126,10 @@ static char *dink32_regnames[NUM_REGS] =
   "r16",  "r17",  "r18",  "r19",  "r20",  "r21",  "r22",  "r23",
   "r24",  "r25",  "r26",  "r27",  "r28",  "r29",  "r30",  "r31",
 
-  "fr0",  "fr1",  "fr2",  "fr3",  "fr4",  "fr5",  "fr6",  "fr7",
-  "fr8",  "fr9",  "fr10", "fr11", "fr12", "fr13", "fr14", "fr15",
-  "fr16", "fr17", "fr18", "fr19", "fr20", "fr21", "fr22", "fr23",
-  "fr24", "fr25", "fr26", "fr27", "fr28", "fr29", "fr30", "fr31",
+  "f0",   "f1",   "f2",   "f3",   "f4",   "f5",   "f6",   "f7",
+  "f8",   "f9",   "f10",  "f11",  "f12",  "f13",  "f14",  "f15",
+  "f16",  "f17",  "f18",  "f19",  "f20",  "f21",  "f22",  "f23",
+  "f24",  "f25",  "f26",  "f27",  "f28",  "f29",  "f30",  "f31",
 
   "srr0", "msr",  "cr",   "lr",   "ctr",  "xer",  "xer"
 };
@@ -151,13 +151,15 @@ dink32_open (args, from_tty)
 void
 _initialize_dink32_rom ()
 {
-  dink32_cmds.flags = MO_HEX_PREFIX | MO_GETMEM_NEEDS_RANGE | MO_FILL_USES_ADDR | MO_HANDLE_NL | MO_32_REGS_PAIRED | MO_SETREG_INTERACTIVE | MO_SETMEM_INTERACTIVE | MO_GETMEM_16_BOUNDARY | MO_CLR_BREAK_1_BASED;
+  dink32_cmds.flags = MO_HEX_PREFIX | MO_GETMEM_NEEDS_RANGE | MO_FILL_USES_ADDR | MO_HANDLE_NL | MO_32_REGS_PAIRED | MO_SETREG_INTERACTIVE | MO_SETMEM_INTERACTIVE | MO_GETMEM_16_BOUNDARY | MO_CLR_BREAK_1_BASED | MO_SREC_ACK | MO_SREC_ACK_ROTATE;
   dink32_cmds.init = dink32_inits;
   dink32_cmds.cont = "go +\r";
   dink32_cmds.step = "tr +\r";
   dink32_cmds.set_break = "bp 0x%x\r";
   dink32_cmds.clr_break = "bp %d\r";
+#if 0 /* Would need to follow strict alignment rules.. */
   dink32_cmds.fill = "mf %x %x %x\r";
+#endif
   dink32_cmds.setmem.cmdb = "mm -b %x\r";
   dink32_cmds.setmem.cmdw = "mm -w %x\r";
   dink32_cmds.setmem.cmdl = "mm %x\r";
@@ -171,8 +173,12 @@ _initialize_dink32_rom ()
   dink32_cmds.dump_registers = "rd r\r";
   dink32_cmds.register_pattern = "\\(\\w+\\) +=\\([0-9a-fA-F]+\\b\\)";
   dink32_cmds.supply_register = dink32_supply_register;
+  /* S-record download, via "keyboard port".  */
   dink32_cmds.load = "dl -k\r";
+  dink32_cmds.loadresp = "Set Input Port : set to Keyboard Port\r";
+#if 0 /* slow load routine not needed if S-records work... */
   dink32_cmds.load_routine = dink32_load;
+#endif
   dink32_cmds.prompt = "DINK32_603 >>";
   dink32_cmds.line_term = "\r";
   dink32_cmds.target = &dink32_ops;

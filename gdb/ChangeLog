@@ -8,6 +8,13 @@ Tue Sep 16 16:00:01 1997  Stan Shebs  <shebs@andros.cygnus.com>
  	interfaces.
 	(sds_restart): Remove, no longer used.
 
+	* monitor.h (MO_SREC_ACK_PLUS, MO_SREC_ACK_ROTATE): New flags.
+	* monitor.c (monitor_wait_srec_ack): Add DINK32-specific ack code.
+	* dsrec.c (load_srec): Always write a header S-record.
+	* dink32-rom.c (dink32_regnames): Fix the names of float registers.
+	(dink32_cmds): Set to use S-record downloading with acks.
+	* remote-est.c (est_cmds): Add MO_SREC_ACK_PLUS flag.
+
 Tue Sep 16 10:08:27 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* config/v850/tm-v850.h (BREAKPOINT): Set to a truely illegal
