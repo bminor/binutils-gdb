@@ -506,7 +506,7 @@ d10v_skip_prologue (CORE_ADDR pc)
   struct symtab_and_line sal;
 
   /* If we have line debugging information, then the end of the prologue 
-     should the first assembly instruction of the first source line */
+     should be the first assembly instruction of the first source line.  */
   if (find_pc_partial_function (pc, NULL, &func_addr, &func_end))
     {
       sal = find_pc_line (func_addr, 0);
