@@ -29,9 +29,22 @@
 
 #include "bfd.h"
 #include "elf/common.h"
-#include "elf/ppc.h"
+#include "elf/alpha.h"
+#include "elf/arm.h"
+#include "elf/d10v.h"
+/* start-sanitize-d30v */
+#include "elf/d30v.h"
+/* end-sanitize-d30v */
+#include "elf/i386.h"
 #include "elf/m32r.h"
+#include "elf/m68k.h"
 #include "elf/mips.h"
+#include "elf/mn10200.h"
+#include "elf/mn10300.h"
+#include "elf/ppc.h"
+#include "elf/sh.h"
+#include "elf/sparc.h"
+#include "elf/v850.h"
 #include "elf/external.h"
 #include "elf/internal.h"
 
@@ -81,19 +94,22 @@ char 			dump_sects [NUM_DUMP_SECTS];
 /* Forward declarations for dumb compilers.  */
 static const char * get_mips_dynamic_type PARAMS ((unsigned long type));
 static const char * get_dynamic_type PARAMS ((unsigned long type));
-static char * get_i386_rel_type    PARAMS ((unsigned long rtype));
-static char * get_m68k_rel_type    PARAMS ((unsigned long rtype));
-static char * get_sparc_rel_type   PARAMS ((unsigned long rtype));
-static char * get_m32r_rel_type    PARAMS ((unsigned long rtype));
-static char * get_v850_rel_type    PARAMS ((unsigned long rtype));
-static char * get_d10v_rel_type    PARAMS ((unsigned long rtype));
+static const char * get_i386_rel_type    PARAMS ((unsigned long rtype));
+static const char * get_m68k_rel_type    PARAMS ((unsigned long rtype));
+static const char * get_sparc_rel_type   PARAMS ((unsigned long rtype));
+static const char * get_m32r_rel_type    PARAMS ((unsigned long rtype));
+static const char * get_v850_rel_type    PARAMS ((unsigned long rtype));
+static const char * get_d10v_rel_type    PARAMS ((unsigned long rtype));
 /* start-sanitize-d30v */
-static char * get_d30v_rel_type    PARAMS ((unsigned long rtype));
+static const char * get_d30v_rel_type    PARAMS ((unsigned long rtype));
 /* end-sanitize-d30v */
-static char * get_sh_rel_type      PARAMS ((unsigned long rtype));
-static char * get_mn10300_rel_type PARAMS ((unsigned long rtype));
-static char * get_mn10200_rel_type PARAMS ((unsigned long rtype));
-static char * get_ppc_rel_type	   PARAMS ((unsigned long rtype));
+static const char * get_sh_rel_type      PARAMS ((unsigned long rtype));
+static const char * get_mn10300_rel_type PARAMS ((unsigned long rtype));
+static const char * get_mn10200_rel_type PARAMS ((unsigned long rtype));
+static const char * get_ppc_rel_type	 PARAMS ((unsigned long rtype));
+static const char * get_mips_rel_type	 PARAMS ((unsigned long rtype));
+static const char * get_alpha_rel_type	 PARAMS ((unsigned long rtype));
+static const char * get_arm_rel_type     PARAMS ((unsigned long rtype));
 static int    dump_relocations
   PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Sym *, char *));
 static char * get_file_type     PARAMS ((unsigned e_type));
@@ -102,7 +118,8 @@ static char * get_machine_data  PARAMS ((unsigned e_data));
 static char * get_machine_flags PARAMS ((unsigned, unsigned e_machine));
 static const char * get_mips_segment_type PARAMS ((unsigned long type));
 static const char * get_segment_type  PARAMS ((unsigned long p_type));
-static char * get_section_type_name PARAMS ((unsigned int sh_type));
+static const char * get_mips_section_type_name PARAMS ((unsigned int sh_type));
+static const char * get_section_type_name PARAMS ((unsigned int sh_type));
 static char * get_symbol_binding PARAMS ((unsigned int binding));
 static char * get_symbol_type    PARAMS ((unsigned int type));
 static void   usage PARAMS ((void));
@@ -278,351 +295,437 @@ byte_get_big_endian (field, size)
     }
 }
 
-static char *
+static const char *
 get_i386_rel_type (rtype)
      unsigned long rtype;
 {
   switch (rtype)
     {
-    case  0: return "R_386_NONE";
-    case  1: return "R_386_32";
-    case  2: return "R_386_PC32";
-    case  3: return "R_386_GOT32";
-    case  4: return "R_386_PLT32";
-    case  5: return "R_386_COPY";
-    case  6: return "R_386_GLOB_DAT";
-    case  7: return "R_386_JMP_SLOT";
-    case  8: return "R_386_RELATIVE";
-    case  9: return "R_386_GOTOFF";
-    case 10: return "R_386_GOTPC";
-    case 20: return "R_386_16";
-    case 21: return "R_386_PC16";
-    case 22: return "R_386_PC8";
-    case 23: return "R_386_max";
+    case R_386_NONE: return "R_386_NONE";
+    case R_386_32: return "R_386_32";
+    case R_386_PC32: return "R_386_PC32";
+    case R_386_GOT32: return "R_386_GOT32";
+    case R_386_PLT32: return "R_386_PLT32";
+    case R_386_COPY: return "R_386_COPY";
+    case R_386_GLOB_DAT: return "R_386_GLOB_DAT";
+    case R_386_JMP_SLOT: return "R_386_JMP_SLOT";
+    case R_386_RELATIVE: return "R_386_RELATIVE";
+    case R_386_GOTOFF: return "R_386_GOTOFF";
+    case R_386_GOTPC: return "R_386_GOTPC";
+    case R_386_16: return "R_386_16";
+    case R_386_PC16: return "R_386_PC16";
+    case R_386_PC8: return "R_386_PC8";
     default: return _("*INVALID*");
     }
 }
 
-static char *
+static const char *
 get_m68k_rel_type (rtype)
      unsigned long rtype;
 {
   switch (rtype)
     {
-    case  0: return "R_68K_NONE";
-    case  1: return "R_68K_32";
-    case  2: return "R_68K_16";
-    case  3: return "R_68K_8";
-    case  4: return "R_68K_PC32";
-    case  5: return "R_68K_PC16";
-    case  6: return "R_68K_PC8";
-    case  7: return "R_68K_GOT32";
-    case  8: return "R_68K_GOT16";
-    case  9: return "R_68K_GOT8";
-    case 10: return "R_68K_GOT32O";
-    case 11: return "R_68K_GOT16O";
-    case 12: return "R_68K_GOT8O";
-    case 13: return "R_68K_PLT32";
-    case 14: return "R_68K_PLT16";
-    case 15: return "R_68K_PLT8";
-    case 16: return "R_68K_PLT32O";
-    case 17: return "R_68K_PLT16O";
-    case 18: return "R_68K_PLT8O";
-    case 19: return "R_68K_COPY";
-    case 20: return "R_68K_GLOB_DAT";
-    case 21: return "R_68K_JMP_SLOT";
-    case 22: return "R_68K_RELATIVE";
+    case R_68K_NONE: return "R_68K_NONE";
+    case R_68K_32: return "R_68K_32";
+    case R_68K_16: return "R_68K_16";
+    case R_68K_8: return "R_68K_8";
+    case R_68K_PC32: return "R_68K_PC32";
+    case R_68K_PC16: return "R_68K_PC16";
+    case R_68K_PC8: return "R_68K_PC8";
+    case R_68K_GOT32: return "R_68K_GOT32";
+    case R_68K_GOT16: return "R_68K_GOT16";
+    case R_68K_GOT8: return "R_68K_GOT8";
+    case R_68K_GOT32O: return "R_68K_GOT32O";
+    case R_68K_GOT16O: return "R_68K_GOT16O";
+    case R_68K_GOT8O: return "R_68K_GOT8O";
+    case R_68K_PLT32: return "R_68K_PLT32";
+    case R_68K_PLT16: return "R_68K_PLT16";
+    case R_68K_PLT8: return "R_68K_PLT8";
+    case R_68K_PLT32O: return "R_68K_PLT32O";
+    case R_68K_PLT16O: return "R_68K_PLT16O";
+    case R_68K_PLT8O: return "R_68K_PLT8O";
+    case R_68K_COPY: return "R_68K_COPY";
+    case R_68K_GLOB_DAT: return "R_68K_GLOB_DAT";
+    case R_68K_JMP_SLOT: return "R_68K_JMP_SLOT";
+    case R_68K_RELATIVE: return "R_68K_RELATIVE";
     default: return _("*INVALID*");
     }
 }
 
 
-static char *
+static const char *
 get_sparc_rel_type (rtype)
      unsigned long rtype;
 {
   switch (rtype)
     {
-    case  0: return "R_SPARC_NONE";
-    case  1: return "R_SPARC_8";
-    case  2: return "R_SPARC_16";
-    case  3: return "R_SPARC_32";
-    case  4: return "R_SPARC_DISP8";
-    case  5: return "R_SPARC_DISP16";
-    case  6: return "R_SPARC_DISP32";
-    case  7: return "R_SPARC_WDISP30";
-    case  8: return "R_SPARC_WDISP22";
-    case  9: return "R_SPARC_HI22";
-    case 10: return "R_SPARC_22";
-    case 11: return "R_SPARC_13";
-    case 12: return "R_SPARC_LO10";
-    case 13: return "R_SPARC_GOT10";
-    case 14: return "R_SPARC_GOT13";
-    case 15: return "R_SPARC_GOT22";
-    case 16: return "R_SPARC_PC10";
-    case 17: return "R_SPARC_PC22";
-    case 18: return "R_SPARC_WPLT30";
-    case 19: return "R_SPARC_COPY";
-    case 20: return "R_SPARC_GLOB_DAT";
-    case 21: return "R_SPARC_JMP_SLOT";
-    case 22: return "R_SPARC_RELATIVE";
-    case 23: return "R_SPARC_UA32";
-    case 24: return "R_SPARC_10";
-    case 25: return "R_SPARC_11";
-    case 26: return "R_SPARC_64";
-    case 27: return "R_SPARC_OLO10";
-    case 28: return "R_SPARC_HH22";
-    case 29: return "R_SPARC_HM10";
-    case 30: return "R_SPARC_LM22";
-    case 31: return "R_SPARC_PC_HH22";
-    case 32: return "R_SPARC_PC_HM10";
-    case 33: return "R_SPARC_PC_LM22";
-    case 34: return "R_SPARC_WDISP16";
-    case 35: return "R_SPARC_WDISP19";
-    case 36: return "R_SPARC_UNUSED_42";
-    case 37: return "R_SPARC_7";
-    case 38: return "R_SPARC_5";
-    case 39: return "R_SPARC_6";
-    case 40: return "R_SPARC_DISP64";
-    case 41: return "R_SPARC_PLT64";
-    case 42: return "R_SPARC_HIX22";
-    case 43: return "R_SPARC_LOX10";
-    case 44: return "R_SPARC_H44";
-    case 45: return "R_SPARC_M44";
-    case 46: return "R_SPARC_L44";
-    case 47: return "R_SPARC_REGISTER";
-    case 48: return "R_SPARC_UA64";
-    case 49: return "R_SPARC_UA16";
-    case 50: return "R_SPARC_32LE";
+    case R_SPARC_NONE: return "R_SPARC_NONE";
+    case R_SPARC_8: return "R_SPARC_8";
+    case R_SPARC_16: return "R_SPARC_16";
+    case R_SPARC_32: return "R_SPARC_32";
+    case R_SPARC_DISP8: return "R_SPARC_DISP8";
+    case R_SPARC_DISP16: return "R_SPARC_DISP16";
+    case R_SPARC_DISP32: return "R_SPARC_DISP32";
+    case R_SPARC_WDISP30: return "R_SPARC_WDISP30";
+    case R_SPARC_WDISP22: return "R_SPARC_WDISP22";
+    case R_SPARC_HI22: return "R_SPARC_HI22";
+    case R_SPARC_22: return "R_SPARC_22";
+    case R_SPARC_13: return "R_SPARC_13";
+    case R_SPARC_LO10: return "R_SPARC_LO10";
+    case R_SPARC_GOT10: return "R_SPARC_GOT10";
+    case R_SPARC_GOT13: return "R_SPARC_GOT13";
+    case R_SPARC_GOT22: return "R_SPARC_GOT22";
+    case R_SPARC_PC10: return "R_SPARC_PC10";
+    case R_SPARC_PC22: return "R_SPARC_PC22";
+    case R_SPARC_WPLT30: return "R_SPARC_WPLT30";
+    case R_SPARC_COPY: return "R_SPARC_COPY";
+    case R_SPARC_GLOB_DAT: return "R_SPARC_GLOB_DAT";
+    case R_SPARC_JMP_SLOT: return "R_SPARC_JMP_SLOT";
+    case R_SPARC_RELATIVE: return "R_SPARC_RELATIVE";
+    case R_SPARC_UA32: return "R_SPARC_UA32";
+    case R_SPARC_10: return "R_SPARC_10";
+    case R_SPARC_11: return "R_SPARC_11";
+    case R_SPARC_64: return "R_SPARC_64";
+    case R_SPARC_OLO10: return "R_SPARC_OLO10";
+    case R_SPARC_HH22: return "R_SPARC_HH22";
+    case R_SPARC_HM10: return "R_SPARC_HM10";
+    case R_SPARC_LM22: return "R_SPARC_LM22";
+    case R_SPARC_PC_HH22: return "R_SPARC_PC_HH22";
+    case R_SPARC_PC_HM10: return "R_SPARC_PC_HM10";
+    case R_SPARC_PC_LM22: return "R_SPARC_PC_LM22";
+    case R_SPARC_WDISP16: return "R_SPARC_WDISP16";
+    case R_SPARC_WDISP19: return "R_SPARC_WDISP19";
+    case R_SPARC_UNUSED_42: return "R_SPARC_UNUSED_42";
+    case R_SPARC_7: return "R_SPARC_7";
+    case R_SPARC_5: return "R_SPARC_5";
+    case R_SPARC_6: return "R_SPARC_6";
+    case R_SPARC_DISP64: return "R_SPARC_DISP64";
+    case R_SPARC_PLT64: return "R_SPARC_PLT64";
+    case R_SPARC_HIX22: return "R_SPARC_HIX22";
+    case R_SPARC_LOX10: return "R_SPARC_LOX10";
+    case R_SPARC_H44: return "R_SPARC_H44";
+    case R_SPARC_M44: return "R_SPARC_M44";
+    case R_SPARC_L44: return "R_SPARC_L44";
+    case R_SPARC_REGISTER: return "R_SPARC_REGISTER";
+    case R_SPARC_UA64: return "R_SPARC_UA64";
+    case R_SPARC_UA16: return "R_SPARC_UA16";
     default: return _("*INVALID*");
     }
 }
 
 
-static char *
+static const char *
 get_m32r_rel_type (rtype)
      unsigned long rtype;
 {
   switch (rtype)
     {
-    case  0: return "R_M32R_NONE";
-    case  1: return "R_M32R_16";
-    case  2: return "R_M32R_32";
-    case  3: return "R_M32R_24";
-    case  4: return "R_M32R_10_PCREL";
-    case  5: return "R_M32R_18_PCREL";
-    case  6: return "R_M32R_26_PCREL";
-    case  7: return "R_M32R_HI16_ULO";
-    case  8: return "R_M32R_HI16_SLO";
-    case  9: return "R_M32R_LO16";
-    case 10: return "R_M32R_SDA16";
+    case R_M32R_NONE: return "R_M32R_NONE";
+    case R_M32R_16: return "R_M32R_16";
+    case R_M32R_32: return "R_M32R_32";
+    case R_M32R_24: return "R_M32R_24";
+    case R_M32R_10_PCREL: return "R_M32R_10_PCREL";
+    case R_M32R_18_PCREL: return "R_M32R_18_PCREL";
+    case R_M32R_26_PCREL: return "R_M32R_26_PCREL";
+    case R_M32R_HI16_ULO: return "R_M32R_HI16_ULO";
+    case R_M32R_HI16_SLO: return "R_M32R_HI16_SLO";
+    case R_M32R_LO16: return "R_M32R_LO16";
+    case R_M32R_SDA16: return "R_M32R_SDA16";
     default: return _("*INVALID*");
     }
 }
 
 
-static char *
+static const char *
 get_v850_rel_type (rtype)
      unsigned long rtype;
 {
   switch (rtype)
     {
-    case  0: return "R_V850_NONE";
-    case  1: return "R_V850_9_PCREL";
-    case  2: return "R_V850_22_PCREL";
-    case  3: return "R_V850_HI16_S";
-    case  4: return "R_V850_HI16";
-    case  5: return "R_V850_LO16";
-    case  6: return "R_V850_32";
-    case  7: return "R_V850_16";
-    case  8: return "R_V850_8";
-    case  9: return "R_V850_SDA_16_16_OFFSET";
-    case 10: return "R_V850_SDA_15_16_OFFSET";
-    case 11: return "R_V850_ZDA_16_16_OFFSET";
-    case 12: return "R_V850_ZDA_15_16_OFFSET";
-    case 13: return "R_V850_TDA_6_8_OFFSET";
-    case 14: return "R_V850_TDA_7_8_OFFSET";
-    case 15: return "R_V850_TDA_7_7_OFFSET";
-    case 16: return "R_V850_TDA_16_16_OFFSET";
+    case R_V850_NONE: return "R_V850_NONE";
+    case R_V850_9_PCREL: return "R_V850_9_PCREL";
+    case R_V850_22_PCREL: return "R_V850_22_PCREL";
+    case R_V850_HI16_S: return "R_V850_HI16_S";
+    case R_V850_HI16: return "R_V850_HI16";
+    case R_V850_LO16: return "R_V850_LO16";
+    case R_V850_32: return "R_V850_32";
+    case R_V850_16: return "R_V850_16";
+    case R_V850_8: return "R_V850_8";
+    case R_V850_SDA_16_16_OFFSET: return "R_V850_SDA_16_16_OFFSET";
+    case R_V850_SDA_15_16_OFFSET: return "R_V850_SDA_15_16_OFFSET";
+    case R_V850_ZDA_16_16_OFFSET: return "R_V850_ZDA_16_16_OFFSET";
+    case R_V850_ZDA_15_16_OFFSET: return "R_V850_ZDA_15_16_OFFSET";
+    case R_V850_TDA_6_8_OFFSET: return "R_V850_TDA_6_8_OFFSET";
+    case R_V850_TDA_7_8_OFFSET: return "R_V850_TDA_7_8_OFFSET";
+    case R_V850_TDA_7_7_OFFSET: return "R_V850_TDA_7_7_OFFSET";
+    case R_V850_TDA_16_16_OFFSET: return "R_V850_TDA_16_16_OFFSET";
 /* start-sanitize-v850e */
-    case 17: return "R_V850_TDA_4_5_OFFSET";
-    case 18: return "R_V850_TDA_4_4_OFFSET";
-    case 19: return "R_V850_SDA_16_16_SPLIT_OFFSET";
-    case 20: return "R_V850_ZDA_16_16_SPLIT_OFFSET";
-    case 21: return "R_V850_CALLT_6_7_OFFSET";
-    case 22: return "R_V850_CALLT_16_16_OFFSET";
+    case R_V850_TDA_4_5_OFFSET: return "R_V850_TDA_4_5_OFFSET";
+    case R_V850_TDA_4_4_OFFSET: return "R_V850_TDA_4_4_OFFSET";
+    case R_V850_SDA_16_16_SPLIT_OFFSET: return "R_V850_SDA_16_16_SPLIT_OFFSET";
+    case R_V850_ZDA_16_16_SPLIT_OFFSET: return "R_V850_ZDA_16_16_SPLIT_OFFSET";
+    case R_V850_CALLT_6_7_OFFSET: return "R_V850_CALLT_6_7_OFFSET";
+    case R_V850_CALLT_16_16_OFFSET: return "R_V850_CALLT_16_16_OFFSET";
 /* end-sanitize-v850e */
     default: return _("*INVALID*");
     }
 }
 
 
-static char *
+static const char *
 get_d10v_rel_type (rtype)
      unsigned long rtype;
 {
   switch (rtype)
     {
-    case 0: return "R_D10V_NONE";
-    case 1: return "R_D10V_10_PCREL_R";
-    case 2: return "R_D10V_10_PCREL_L";
-    case 3: return "R_D10V_16";
-    case 4: return "R_D10V_18";
-    case 5: return "R_D10V_18_PCREL";
-    case 6: return "R_D10V_32";
+    case R_D10V_NONE: return "R_D10V_NONE";
+    case R_D10V_10_PCREL_R: return "R_D10V_10_PCREL_R";
+    case R_D10V_10_PCREL_L: return "R_D10V_10_PCREL_L";
+    case R_D10V_16: return "R_D10V_16";
+    case R_D10V_18: return "R_D10V_18";
+    case R_D10V_18_PCREL: return "R_D10V_18_PCREL";
+    case R_D10V_32: return "R_D10V_32";
     default: return _("*INVALID*");
     }
 }
 
 /* start-sanitize-d30v */
-static char *
+static const char *
 get_d30v_rel_type (rtype)
      unsigned long rtype;
 {
   switch (rtype)
     {
-    case  0: return "R_D30V_NONE";
-    case  1: return "R_D30V_6";
-    case  2: return "R_D30V_9_PCREL";
-    case  3: return "R_D30V_9_PCREL_R";
-    case  4: return "R_D30V_15";
-    case  5: return "R_D30V_15_PCREL";
-    case  6: return "R_D30V_15_PCREL_R";
-    case  7: return "R_D30V_21";
-    case  8: return "R_D30V_21_PCREL";
-    case  9: return "R_D30V_21_PCREL_R";
-    case 10: return "R_D30V_32";
-    case 11: return "R_D30V_32_PCREL";
-    case 12: return "R_D30V_32_NORMAL";
+    case R_D30V_NONE: return "R_D30V_NONE";
+    case R_D30V_6: return "R_D30V_6";
+    case R_D30V_9_PCREL: return "R_D30V_9_PCREL";
+    case R_D30V_9_PCREL_R: return "R_D30V_9_PCREL_R";
+    case R_D30V_15: return "R_D30V_15";
+    case R_D30V_15_PCREL: return "R_D30V_15_PCREL";
+    case R_D30V_15_PCREL_R: return "R_D30V_15_PCREL_R";
+    case R_D30V_21: return "R_D30V_21";
+    case R_D30V_21_PCREL: return "R_D30V_21_PCREL";
+    case R_D30V_21_PCREL_R: return "R_D30V_21_PCREL_R";
+    case R_D30V_32: return "R_D30V_32";
+    case R_D30V_32_PCREL: return "R_D30V_32_PCREL";
+    case R_D30V_32_NORMAL: return "R_D30V_32_NORMAL";
     default: return _("*INVALID*");
     }
 }
 
 /* end-sanitize-d30v */
-static char *
+static const char *
 get_sh_rel_type (rtype)
      unsigned long rtype;
 {
   switch (rtype)
     {
-    case  0: return "R_SH_NONE";
-    case  1: return "R_SH_DIR32";
-    case  2: return "R_SH_REL32";
-    case  3: return "R_SH_DIR8WPN";
-    case  4: return "R_SH_IND12W";
-    case  5: return "R_SH_DIR8WPL";
-    case  6: return "R_SH_DIR8WPZ";
-    case  7: return "R_SH_DIR8BP";
-    case  8: return "R_SH_DIR8W";
-    case  9: return "R_SH_DIR8L";
-    case 25: return "R_SH_SWITCH16";
-    case 26: return "R_SH_SWITCH32";
-    case 27: return "R_SH_USES";
-    case 28: return "R_SH_COUNT";
-    case 29: return "R_SH_ALIGN";
-    case 30: return "R_SH_CODE";
-    case 31: return "R_SH_DATA";
-    case 32: return "R_SH_LABEL";
+    case R_SH_NONE: return "R_SH_NONE";
+    case R_SH_DIR32: return "R_SH_DIR32";
+    case R_SH_REL32: return "R_SH_REL32";
+    case R_SH_DIR8WPN: return "R_SH_DIR8WPN";
+    case R_SH_IND12W: return "R_SH_IND12W";
+    case R_SH_DIR8WPL: return "R_SH_DIR8WPL";
+    case R_SH_DIR8WPZ: return "R_SH_DIR8WPZ";
+    case R_SH_DIR8BP: return "R_SH_DIR8BP";
+    case R_SH_DIR8W: return "R_SH_DIR8W";
+    case R_SH_DIR8L: return "R_SH_DIR8L";
+    case R_SH_SWITCH16: return "R_SH_SWITCH16";
+    case R_SH_SWITCH32: return "R_SH_SWITCH32";
+    case R_SH_USES: return "R_SH_USES";
+    case R_SH_COUNT: return "R_SH_COUNT";
+    case R_SH_ALIGN: return "R_SH_ALIGN";
+    case R_SH_CODE: return "R_SH_CODE";
+    case R_SH_DATA: return "R_SH_DATA";
+    case R_SH_LABEL: return "R_SH_LABEL";
     default: return _("*INVALID*");
     }
 }
 
 
-static char *
+static const char *
 get_mn10300_rel_type (rtype)
      unsigned long rtype;
 {
   switch (rtype)
     {
-    case 0: return "R_MN10300_NONE";
-    case 1: return "R_MN10300_32";
-    case 2: return "R_MN10300_16";
-    case 3: return "R_MN10300_8";
-    case 4: return "R_MN10300_PCREL32";
-    case 5: return "R_MN10300_PCREL16";
-    case 6: return "R_MN10300_PCREL8";
+    case R_MN10300_NONE: return "R_MN10300_NONE";
+    case R_MN10300_32: return "R_MN10300_32";
+    case R_MN10300_16: return "R_MN10300_16";
+    case R_MN10300_8: return "R_MN10300_8";
+    case R_MN10300_PCREL32: return "R_MN10300_PCREL32";
+    case R_MN10300_PCREL16: return "R_MN10300_PCREL16";
+    case R_MN10300_PCREL8: return "R_MN10300_PCREL8";
     default: return _("*INVALID*");
     }
 }
 
 
-static char *
+static const char *
 get_mn10200_rel_type (rtype)
      unsigned long rtype;
 {
   switch (rtype)
     {
-    case 0: return "R_MN10200_NONE";
-    case 1: return "R_MN10200_32";
-    case 2: return "R_MN10200_16";
-    case 3: return "R_MN10200_8";
-    case 4: return "R_MN10200_24";
-    case 5: return "R_MN10200_PCREL8";
-    case 6: return "R_MN10200_PCREL16";
-    case 7: return "R_MN10200_PCREL24";
+    case R_MN10200_NONE: return "R_MN10200_NONE";
+    case R_MN10200_32: return "R_MN10200_32";
+    case R_MN10200_16: return "R_MN10200_16";
+    case R_MN10200_8: return "R_MN10200_8";
+    case R_MN10200_24: return "R_MN10200_24";
+    case R_MN10200_PCREL8: return "R_MN10200_PCREL8";
+    case R_MN10200_PCREL16: return "R_MN10200_PCREL16";
+    case R_MN10200_PCREL24: return "R_MN10200_PCREL24";
     default: return _("*INVALID*");
     }
 }
 
 
-static char *
+static const char *
 get_ppc_rel_type (rtype)
      unsigned long rtype;
 {
   switch (rtype)
     {
-    case 0:   return "R_PPC_NONE,";
-    case 1:   return "R_PPC_ADDR32,";
-    case 2:   return "R_PPC_ADDR24,";
-    case 3:   return "R_PPC_ADDR16,";
-    case 4:   return "R_PPC_ADDR16_LO,";
-    case 5:   return "R_PPC_ADDR16_HI,";
-    case 6:   return "R_PPC_ADDR16_HA,";
-    case 7:   return "R_PPC_ADDR14,";
-    case 8:   return "R_PPC_ADDR14_BRTAKEN,";
-    case 9:   return "R_PPC_ADDR14_BRNTAKEN,";
-    case 10:  return "R_PPC_REL24,";
-    case 11:  return "R_PPC_REL14,";
-    case 12:  return "R_PPC_REL14_BRTAKEN,";
-    case 13:  return "R_PPC_REL14_BRNTAKEN,";
-    case 14:  return "R_PPC_GOT16,";
-    case 15:  return "R_PPC_GOT16_LO,";
-    case 16:  return "R_PPC_GOT16_HI,";
-    case 17:  return "R_PPC_GOT16_HA,";
-    case 18:  return "R_PPC_PLT24,";
-    case 19:  return "R_PPC_COPY,";
-    case 21:  return "R_PPC_JMP_SLOT,";
-    case 22:  return "R_PPC_RELATIVE,";
-    case 23:  return "R_PPC_LOCAL24PC,";
-    case 24:  return "R_PPC_UADDR32,";
-    case 25:  return "R_PPC_UADDR16,";
-    case 26:  return "R_PPC_REL32,";
-    case 27:  return "R_PPC_PLT32,";
-    case 28:  return "R_PPC_PLTREL32,";
-    case 29:  return "R_PPC_PLT16_LO,";
-    case 30:  return "R_PPC_PLT16_HI,";
-    case 31:  return "R_PPC_PLT16_HA,";
-    case 32:  return "R_PPC_SDAREL,";
-    case 33:  return "R_PPC_SECTOFF,";
-    case 34:  return "R_PPC_SECTOFF_LO,";
-    case 35:  return "R_PPC_SECTOFF_HI,";
-    case 36:  return "R_PPC_SECTOFF_HA,";
-    case 101: return "R_PPC_EMB_NADDR32,";
-    case 102: return "R_PPC_EMB_NADDR16,";
-    case 103: return "R_PPC_EMB_NADDR16_LO,";
-    case 104: return "R_PPC_EMB_NADDR16_HI,";
-    case 105: return "R_PPC_EMB_NADDR16_HA,";
-    case 106: return "R_PPC_EMB_SDAI16,";
-    case 107: return "R_PPC_EMB_SDA2I16,";
-    case 108: return "R_PPC_EMB_SDA2REL,";
-    case 109: return "R_PPC_EMB_SDA21,";
-    case 110: return "R_PPC_EMB_MRKREF,";
-    case 111: return "R_PPC_EMB_RELSEC16,";
-    case 112: return "R_PPC_EMB_RELST_LO,";
-    case 113: return "R_PPC_EMB_RELST_HI,";
-    case 114: return "R_PPC_EMB_RELST_HA,";
-    case 115: return "R_PPC_EMB_BIT_FLD,";
-    case 116: return "R_PPC_EMB_RELSDA,";
+    case R_PPC_NONE: return "R_PPC_NONE";
+    case R_PPC_ADDR32: return "R_PPC_ADDR32";
+    case R_PPC_ADDR24: return "R_PPC_ADDR24";
+    case R_PPC_ADDR16: return "R_PPC_ADDR16";
+    case R_PPC_ADDR16_LO: return "R_PPC_ADDR16_LO";
+    case R_PPC_ADDR16_HI: return "R_PPC_ADDR16_HI";
+    case R_PPC_ADDR16_HA: return "R_PPC_ADDR16_HA";
+    case R_PPC_ADDR14: return "R_PPC_ADDR14";
+    case R_PPC_ADDR14_BRTAKEN: return "R_PPC_ADDR14_BRTAKEN";
+    case R_PPC_ADDR14_BRNTAKEN: return "R_PPC_ADDR14_BRNTAKEN";
+    case R_PPC_REL24: return "R_PPC_REL24";
+    case R_PPC_REL14: return "R_PPC_REL14";
+    case R_PPC_REL14_BRTAKEN: return "R_PPC_REL14_BRTAKEN";
+    case R_PPC_REL14_BRNTAKEN: return "R_PPC_REL14_BRNTAKEN";
+    case R_PPC_GOT16: return "R_PPC_GOT16";
+    case R_PPC_GOT16_LO: return "R_PPC_GOT16_LO";
+    case R_PPC_GOT16_HI: return "R_PPC_GOT16_HI";
+    case R_PPC_GOT16_HA: return "R_PPC_GOT16_HA";
+    case R_PPC_PLTREL24: return "R_PPC_PLTREL24";
+    case R_PPC_COPY: return "R_PPC_COPY";
+    case R_PPC_GLOB_DAT: return "R_PPC_GLOB_DAT";
+    case R_PPC_JMP_SLOT: return "R_PPC_JMP_SLOT";
+    case R_PPC_RELATIVE: return "R_PPC_RELATIVE";
+    case R_PPC_LOCAL24PC: return "R_PPC_LOCAL24PC";
+    case R_PPC_UADDR32: return "R_PPC_UADDR32";
+    case R_PPC_UADDR16: return "R_PPC_UADDR16";
+    case R_PPC_REL32: return "R_PPC_REL32";
+    case R_PPC_PLT32: return "R_PPC_PLT32";
+    case R_PPC_PLTREL32: return "R_PPC_PLTREL32";
+    case R_PPC_PLT16_LO: return "R_PPC_PLT16_LO";
+    case R_PPC_PLT16_HI: return "R_PPC_PLT16_HI";
+    case R_PPC_PLT16_HA: return "R_PPC_PLT16_HA";
+    case R_PPC_SDAREL16: return "R_PPC_SDAREL16";
+    case R_PPC_SECTOFF: return "R_PPC_SECTOFF";
+    case R_PPC_SECTOFF_LO: return "R_PPC_SECTOFF_LO";
+    case R_PPC_SECTOFF_HI: return "R_PPC_SECTOFF_HI";
+    case R_PPC_SECTOFF_HA: return "R_PPC_SECTOFF_HA";
+    case R_PPC_EMB_NADDR32: return "R_PPC_EMB_NADDR32";
+    case R_PPC_EMB_NADDR16: return "R_PPC_EMB_NADDR16";
+    case R_PPC_EMB_NADDR16_LO: return "R_PPC_EMB_NADDR16_LO";
+    case R_PPC_EMB_NADDR16_HI: return "R_PPC_EMB_NADDR16_HI";
+    case R_PPC_EMB_NADDR16_HA: return "R_PPC_EMB_NADDR16_HA";
+    case R_PPC_EMB_SDAI16: return "R_PPC_EMB_SDAI16";
+    case R_PPC_EMB_SDA2I16: return "R_PPC_EMB_SDA2I16";
+    case R_PPC_EMB_SDA2REL: return "R_PPC_EMB_SDA2REL";
+    case R_PPC_EMB_SDA21: return "R_PPC_EMB_SDA21";
+    case R_PPC_EMB_MRKREF: return "R_PPC_EMB_MRKREF";
+    case R_PPC_EMB_RELSEC16: return "R_PPC_EMB_RELSEC16";
+    case R_PPC_EMB_RELST_LO: return "R_PPC_EMB_RELST_LO";
+    case R_PPC_EMB_RELST_HI: return "R_PPC_EMB_RELST_HI";
+    case R_PPC_EMB_RELST_HA: return "R_PPC_EMB_RELST_HA";
+    case R_PPC_EMB_BIT_FLD: return "R_PPC_EMB_BIT_FLD";
+    case R_PPC_EMB_RELSDA: return "R_PPC_EMB_RELSDA";
+    case R_PPC_TOC16: return "R_PPC_TOC16";
+    default: return _("*INVALID*");
+    }
+}
+
+
+static const char *
+get_mips_rel_type (rtype)
+     unsigned long rtype;
+{
+  switch (rtype)
+    {
+    case R_MIPS_NONE: return "R_MIPS_NONE";
+    case R_MIPS_16: return "R_MIPS_16";
+    case R_MIPS_32: return "R_MIPS_32";
+    case R_MIPS_REL32: return "R_MIPS_REL32";
+    case R_MIPS_26: return "R_MIPS_26";
+    case R_MIPS_HI16: return "R_MIPS_HI16";
+    case R_MIPS_LO16: return "R_MIPS_LO16";
+    case R_MIPS_GPREL16: return "R_MIPS_GPREL16";
+    case R_MIPS_LITERAL: return "R_MIPS_LITERAL";
+    case R_MIPS_GOT16: return "R_MIPS_GOT16";
+    case R_MIPS_PC16: return "R_MIPS_PC16";
+    case R_MIPS_CALL16: return "R_MIPS_CALL16";
+    case R_MIPS_GPREL32: return "R_MIPS_GPREL32";
+    default: return _("*INVALID*");
+    }
+}
+
+
+static const char *
+get_alpha_rel_type (rtype)
+     unsigned long rtype;
+{
+  switch (rtype)
+    {
+    case R_ALPHA_NONE: return "R_ALPHA_NONE";
+    case R_ALPHA_REFLONG: return "R_ALPHA_REFLONG";
+    case R_ALPHA_REFQUAD: return "R_ALPHA_REFQUAD";
+    case R_ALPHA_GPREL32: return "R_ALPHA_GPREL32";
+    case R_ALPHA_LITERAL: return "R_ALPHA_LITERAL";
+    case R_ALPHA_LITUSE: return "R_ALPHA_LITUSE";
+    case R_ALPHA_GPDISP: return "R_ALPHA_GPDISP";
+    case R_ALPHA_BRADDR: return "R_ALPHA_BRADDR";
+    case R_ALPHA_HINT: return "R_ALPHA_HINT";
+    case R_ALPHA_SREL16: return "R_ALPHA_SREL16";
+    case R_ALPHA_SREL32: return "R_ALPHA_SREL32";
+    case R_ALPHA_SREL64: return "R_ALPHA_SREL64";
+    case R_ALPHA_OP_PUSH: return "R_ALPHA_OP_PUSH";
+    case R_ALPHA_OP_STORE: return "R_ALPHA_OP_STORE";
+    case R_ALPHA_OP_PSUB: return "R_ALPHA_OP_PSUB";
+    case R_ALPHA_OP_PRSHIFT: return "R_ALPHA_OP_PRSHIFT";
+    case R_ALPHA_GPVALUE: return "R_ALPHA_GPVALUE";
+    case R_ALPHA_GPRELHIGH: return "R_ALPHA_GPRELHIGH";
+    case R_ALPHA_GPRELLOW: return "R_ALPHA_GPRELLOW";
+    case R_ALPHA_IMMED_GP_16: return "R_ALPHA_IMMED_GP_16";
+    case R_ALPHA_IMMED_GP_HI32: return "R_ALPHA_IMMED_GP_HI32";
+    case R_ALPHA_IMMED_SCN_HI32: return "R_ALPHA_IMMED_SCN_HI32";
+    case R_ALPHA_IMMED_BR_HI32: return "R_ALPHA_IMMED_BR_HI32";
+    case R_ALPHA_IMMED_LO32: return "R_ALPHA_IMMED_LO32";
+    case R_ALPHA_COPY: return "R_ALPHA_COPY";
+    case R_ALPHA_GLOB_DAT: return "R_ALPHA_GLOB_DAT";
+    case R_ALPHA_JMP_SLOT: return "R_ALPHA_JMP_SLOT";
+    case R_ALPHA_RELATIVE: return "R_ALPHA_RELATIVE";
+    default: return _("*INVALID*");
+    }
+}
+
+
+static const char *
+get_arm_rel_type (rtype)
+     unsigned long rtype;
+{
+  switch (rtype)
+    {
+    case R_ARM_NONE: return "R_ARM_NONE";
+    case R_ARM_PC24: return "R_ARM_PC24";
+    case R_ARM_ABS32: return "R_ARM_ABS32";
+    case R_ARM_REL32: return "R_ARM_REL32";
+    case R_ARM_COPY: return "R_ARM_COPY";
+    case R_ARM_GLOB_DAT: return "R_ARM_GLOB_DAT";
+    case R_ARM_JUMP_SLOT: return "R_ARM_JUMP_SLOT";
+    case R_ARM_RELATIVE: return "R_ARM_RELATIVE";
+    case R_ARM_GOTOFF: return "R_ARM_GOTOFF";
+    case R_ARM_GOTPC: return "R_ARM_GOTPC";
+    case R_ARM_GOT32: return "R_ARM_GOT32";
+    case R_ARM_PLT32: return "R_ARM_PLT32";
     default: return _("*INVALID*");
     }
 }
@@ -651,6 +754,9 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
     case EM_486:
     case EM_CYGNUS_M32R:
     case EM_CYGNUS_D10V:
+    case EM_MIPS:
+    case EM_MIPS_RS4_BE:
+    case EM_ARM:
       {
 	Elf32_External_Rel * erels;
 
@@ -685,6 +791,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
     case EM_CYGNUS_MN10200:
     case EM_CYGNUS_MN10300:
     case EM_SH:
+    case EM_ALPHA:
       {
 	Elf32_External_Rela * erelas;
 
@@ -717,14 +824,14 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
 
   if (is_rela)
     printf
-      (_("  Offset    Value Type            Symbol's Value  Symbol's Name  Addend\n"));
+      (_("  Offset    Value Type            Symbol's Value  Symbol's Name          Addend\n"));
   else
     printf
       (_("  Offset    Value Type            Symbol's Value  Symbol's Name\n"));
 
   for (i = 0; i < rel_size; i++)
     {
-      char *        rtype;
+      const char *  rtype;
       unsigned long offset;
       unsigned long info;
       int           symtab_index;
@@ -794,6 +901,19 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
 	case EM_PPC:
 	  rtype = get_ppc_rel_type (ELF32_R_TYPE (info));
 	  break;
+
+	case EM_MIPS:
+	case EM_MIPS_RS4_BE:
+	  rtype = get_mips_rel_type (ELF32_R_TYPE (info));
+	  break;
+
+	case EM_ALPHA:
+	  rtype = get_alpha_rel_type (ELF32_R_TYPE (info));
+	  break;
+
+	case EM_ARM:
+	  rtype = get_arm_rel_type (ELF32_R_TYPE (info));
+	  break;
 	}
 
       printf ("%-21.21s", rtype);
@@ -809,12 +929,12 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
 	  printf (" %08lx  ", (unsigned long) psym->st_value);
 
 	  if (psym->st_name == 0)
-	    printf ("%-17.17s",
+	    printf ("%-25.25s",
 		    SECTION_NAME (section_headers + psym->st_shndx));
 	  else if (strtab == NULL)
-	    printf (_("<string table index %d>"), psym->st_name);
+	    printf (_("<string table index %3d>"), psym->st_name);
 	  else
-	    printf ("%-17.17s", strtab + psym->st_name);
+	    printf ("%-25.25s", strtab + psym->st_name);
 
 	  if (is_rela)
 	    printf (" + %lx", (unsigned long) relas [i].r_addend);
@@ -955,11 +1075,11 @@ get_file_type (e_type)
 
   switch (e_type)
     {
-    case ET_NONE:	return _("None");
-    case ET_REL:	return _("Relocatable file");
-    case ET_EXEC:       return _("Executable file");
-    case ET_DYN:        return _("Shared object file");
-    case ET_CORE:       return _("Core file");
+    case ET_NONE:	return _("NONE (None)");
+    case ET_REL:	return _("REL (Relocatable file)");
+    case ET_EXEC:       return _("EXEC (Executable file)");
+    case ET_DYN:        return _("DYN (Shared object file)");
+    case ET_CORE:       return _("CORE (Core file)");
 
     default:
       if ((e_type >= ET_LOPROC) && (e_type <= ET_HIPROC))
@@ -981,14 +1101,14 @@ get_machine_name (e_machine)
     case EM_NONE:        	return _("None");
     case EM_M32:         	return "WE32100";
     case EM_SPARC:       	return "Sparc";
-    case EM_386:         	return "80386";
+    case EM_386:         	return "Intel 80386";
     case EM_68K:         	return "MC68000";
     case EM_88K:         	return "MC88000";
     case EM_486:         	return "Intel 80486";
     case EM_860:         	return "Intel 80860";
     case EM_MIPS:        	return "MIPS R3000 big-endian";
     case EM_S370:        	return "Amdahl";
-    case EM_MIPS_RS4_BE: 	return "MIPS R400 big-endian";
+    case EM_MIPS_RS4_BE: 	return "MIPS R4000 big-endian";
     case EM_OLD_SPARCV9:	return "Sparc v9 (old)";
     case EM_PARISC:      	return "HPPA";
     case EM_PPC_OLD:		return "Power PC (old)";
@@ -1112,14 +1232,16 @@ get_mips_segment_type (type)
   switch (type)
     {
     case PT_MIPS_REGINFO:
-      return "Register Info";
+      return "REGINFO";
     case PT_MIPS_RTPROC:
-      return "Runtime Proc Table";
+      return "RTPROC";
     case PT_MIPS_OPTIONS:
-      return "Options";
+      return "OPTIONS";
     default:
-      return "Processor Specific";
+      break;
     }
+
+  return NULL;
 }
 
 static const char *
@@ -1130,24 +1252,35 @@ get_segment_type (p_type)
 
   switch (p_type)
     {
-    case PT_NULL:       return _("Unused");
-    case PT_LOAD:       return _("Loadable");
-    case PT_DYNAMIC:	return _("Dynamic link info");
-    case PT_INTERP:     return _("Interpreter");
-    case PT_NOTE:       return _("Auxillary Info");
-    case PT_SHLIB:      return _("Shared Library");
-    case PT_PHDR:       return _("Program Header");
+    case PT_NULL:       return "NULL";
+    case PT_LOAD:       return "LOAD";
+    case PT_DYNAMIC:	return "DYNAMIC";
+    case PT_INTERP:     return "INTERP";
+    case PT_NOTE:       return "NOTE";
+    case PT_SHLIB:      return "SHLIB";
+    case PT_PHDR:       return "PHDR";
 
     default:
       if ((p_type >= PT_LOPROC) && (p_type <= PT_HIPROC))
-	switch (elf_header.e_machine)
-	  {
-	  case EM_MIPS:
-	  case EM_MIPS_RS4_BE:
-	    return get_mips_segment_type (p_type);
-	  default:
-	    return "Processor Specific";
-          }
+	{
+	  const char *result;
+	  switch (elf_header.e_machine)
+	    {
+	    case EM_MIPS:
+	    case EM_MIPS_RS4_BE:
+	      result = get_mips_segment_type (p_type);
+	      break;
+	    default:
+	      result = NULL;
+	      break;
+	    }
+	  if (result == NULL)
+	    {
+	      sprintf (buff, "LOPROC+%d", p_type - PT_LOPROC);
+	      result = buff;
+	    }
+	  return result;
+	}
       else
 	{
 	  sprintf (buff, _("<unknown>: %x"), p_type);
@@ -1156,7 +1289,97 @@ get_segment_type (p_type)
     }
 }
 
-static char *
+static const char *
+get_mips_section_type_name (sh_type)
+     unsigned int sh_type;
+{
+  switch (sh_type)
+    {
+    case SHT_MIPS_LIBLIST:
+      return "MIPS_LIBLIST";
+    case SHT_MIPS_MSYM:
+      return "MIPS_MSYM";
+    case SHT_MIPS_CONFLICT:
+      return "MIPS_CONFLICT";
+    case SHT_MIPS_GPTAB:
+      return "MIPS_GPTAB";
+    case SHT_MIPS_UCODE:
+      return "MIPS_UCODE";
+    case SHT_MIPS_DEBUG:
+      return "MIPS_DEBUG";
+    case SHT_MIPS_REGINFO:
+      return "MIPS_REGINFO";
+    case SHT_MIPS_PACKAGE:
+      return "MIPS_PACKAGE";
+    case SHT_MIPS_PACKSYM:
+      return "MIPS_PACKSYM";
+    case SHT_MIPS_RELD:
+      return "MIPS_RELD";
+    case SHT_MIPS_IFACE:
+      return "MIPS_IFACE";
+    case SHT_MIPS_CONTENT:
+      return "MIPS_CONTENT";
+    case SHT_MIPS_OPTIONS:
+      return "MIPS_OPTIONS";
+    case SHT_MIPS_SHDR:
+      return "MIPS_SHDR";
+    case SHT_MIPS_FDESC:
+      return "MIPS_FDESC";
+    case SHT_MIPS_EXTSYM:
+      return "MIPS_EXTSYM";
+    case SHT_MIPS_DENSE:
+      return "MIPS_DENSE";
+    case SHT_MIPS_PDESC:
+      return "MIPS_PDESC";
+    case SHT_MIPS_LOCSYM:
+      return "MIPS_LOCSYM";
+    case SHT_MIPS_AUXSYM:
+      return "MIPS_AUXSYM";
+    case SHT_MIPS_OPTSYM:
+      return "MIPS_OPTSYM";
+    case SHT_MIPS_LOCSTR:
+      return "MIPS_LOCSTR";
+    case SHT_MIPS_LINE:
+      return "MIPS_LINE";
+    case SHT_MIPS_RFDESC:
+      return "MIPS_RFDESC";
+    case SHT_MIPS_DELTASYM:
+      return "MIPS_DELTASYM";
+    case SHT_MIPS_DELTAINST:
+      return "MIPS_DELTAINST";
+    case SHT_MIPS_DELTACLASS:
+      return "MIPS_DELTACLASS";
+    case SHT_MIPS_DWARF:
+      return "MIPS_DWARF";
+    case SHT_MIPS_DELTADECL:
+      return "MIPS_DELTADECL";
+    case SHT_MIPS_SYMBOL_LIB:
+      return "MIPS_SYMBOL_LIB";
+    case SHT_MIPS_EVENTS:
+      return "MIPS_EVENTS";
+    case SHT_MIPS_TRANSLATE:
+      return "MIPS_TRANSLATE";
+    case SHT_MIPS_PIXIE:
+      return "MIPS_PIXIE";
+    case SHT_MIPS_XLATE:
+      return "MIPS_XLATE";
+    case SHT_MIPS_XLATE_DEBUG:
+      return "MIPS_XLATE_DEBUG";
+    case SHT_MIPS_WHIRL:
+      return "MIPS_WHIRL";
+    case SHT_MIPS_EH_REGION:
+      return "MIPS_EH_REGION";
+    case SHT_MIPS_XLATE_OLD:
+      return "MIPS_XLATE_OLD";
+    case SHT_MIPS_PDR_EXCEPTION:
+      return "MIPS_PDR_EXCEPTION";
+    default:
+      break;
+    }
+  return NULL;
+}
+
+static const char *
 get_section_type_name (sh_type)
      unsigned int sh_type;
 {
@@ -1164,21 +1387,21 @@ get_section_type_name (sh_type)
 
   switch (sh_type)
     {
-    case SHT_NULL:		return _("Unused");
-    case SHT_PROGBITS:		return _("Program data");
-    case SHT_SYMTAB:		return _("Symbol table");
-    case SHT_STRTAB:		return _("String table");
-    case SHT_RELA:		return _("Relocations");
-    case SHT_HASH:		return _("Symbol hashes");
-    case SHT_DYNAMIC:		return _("Dynamic info");
-    case SHT_NOTE:		return _("Notes");
-    case SHT_NOBITS:		return _("Space, no data");
-    case SHT_REL:		return _("Relocations");
-    case SHT_SHLIB:		return _("Shared lib info");
-    case SHT_DYNSYM:		return _("Dynamic symbols");
-    case SHT_GNU_verdef:	return _("Version definition");
-    case SHT_GNU_verneed:	return _("Version needs");
-    case SHT_GNU_versym:	return _("Version symbols");
+    case SHT_NULL:		return "NULL";
+    case SHT_PROGBITS:		return "PROGBITS";
+    case SHT_SYMTAB:		return "SYMTAB";
+    case SHT_STRTAB:		return "STRTAB";
+    case SHT_RELA:		return "RELA";
+    case SHT_HASH:		return "HASH";
+    case SHT_DYNAMIC:		return "DYNAMIC";
+    case SHT_NOTE:		return "NOTE";
+    case SHT_NOBITS:		return "NOBITS";
+    case SHT_REL:		return "REL";
+    case SHT_SHLIB:		return "SHLIB";
+    case SHT_DYNSYM:		return "DYNSYM";
+    case SHT_GNU_verdef:	return "VERDEF";
+    case SHT_GNU_verneed:	return "VERNEED";
+    case SHT_GNU_versym:	return "VERSYM";
     case 0x6ffffff0:	        return "VERSYM";
     case 0x6ffffffc:	        return "VERDEF";
     case 0x7ffffffd:		return "AUXILIARY";
@@ -1186,9 +1409,29 @@ get_section_type_name (sh_type)
 
     default:
       if ((sh_type >= SHT_LOPROC) && (sh_type <= SHT_HIPROC))
-	sprintf (buff, _("cpu defined (%d)"), sh_type - SHT_LOPROC);
+	{
+	  const char *result;
+
+	  switch (elf_header.e_machine)
+	    {
+	    case EM_MIPS:
+	    case EM_MIPS_RS4_BE:
+	      result = get_mips_section_type_name (sh_type);
+	      break;
+	    default:
+	      result = NULL;
+	      break;
+	    }
+
+	  if (result == NULL)
+	    {
+	      sprintf (buff, _("SHT_LOPROC+%d"), sh_type - SHT_LOPROC);
+	      result = buff;
+	    }
+	  return result;
+	}
       else if ((sh_type >= SHT_LOUSER) && (sh_type <= SHT_HIUSER))
-	sprintf (buff, _("app defined (%d)"), sh_type - SHT_LOUSER);
+	sprintf (buff, _("SHT_LOUSER+%d"), sh_type - SHT_LOUSER);
       else
 	sprintf (buff, _("<unknown>: %x"), sh_type);
       return buff;
@@ -1476,7 +1719,7 @@ process_program_headers (file)
       printf
 	(_("\nProgram Header%s:\n"), elf_header.e_phnum > 1 ? "s" : "");
       printf
-	(_("  Type             Offset  VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align\n"));
+	(_("  Type        Offset  VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align\n"));
     }
 
   loadaddr = -1;
@@ -1488,7 +1731,7 @@ process_program_headers (file)
     {
       if (do_segments)
 	{
-	  printf ("  %-16.16s ", get_segment_type (segment->p_type));
+	  printf ("  %-11.11s ", get_segment_type (segment->p_type));
 	  printf ("0x%5.5lx ", (unsigned long) segment->p_offset);
 	  printf ("0x%8.8lx ", (unsigned long) segment->p_vaddr);
 	  printf ("0x%8.8lx ", (unsigned long) segment->p_paddr);
@@ -2860,7 +3103,7 @@ process_symbol_table (file)
 	  printf (_("\nSymbol table '%s' contains %d entries:\n"),
 		  SECTION_NAME (section),
 		  section->sh_size / section->sh_entsize);
-	  fputs (_("  Num:    Value  Size Type    Bind   Ot Ndx   Name\n"),
+	  fputs (_("  Num:    Value  Size Type    Bind   Ot  Ndx Name\n"),
 		 stdout);
 
 	  symtab = get_elf_symbols (file, section->sh_offset,
@@ -2893,13 +3136,13 @@ process_symbol_table (file)
 		      psym->st_other);
 
 	      if (psym->st_shndx == 0)
-		fputs ("UND", stdout);
+		fputs (" UND", stdout);
 	      else if ((psym->st_shndx & 0xffff) == 0xfff1)
-		fputs ("ABS", stdout);
+		fputs (" ABS", stdout);
 	      else if ((psym->st_shndx & 0xffff) == 0xfff2)
-		fputs ("COM", stdout);
+		fputs (" COM", stdout);
 	      else
-		printf ("%3d", psym->st_shndx);
+		printf ("%4x", psym->st_shndx);
 
 	      printf (" %s", strtab + psym->st_name);
 
@@ -3412,7 +3655,7 @@ process_mips_specific (file)
 	  len = sizeof (*eopt);
 	  while (len < option->size)
 	    if (((char *) option)[len] >= ' '
-		&& ((char *) option)[len++] < 0x7f)
+		&& ((char *) option)[len] < 0x7f)
 	      printf ("%c", ((char *) option)[len++]);
 	    else
 	      printf ("\\%03o", ((char *) option)[len++]);
