@@ -1,3 +1,20 @@
+Fri Feb 28 15:06:45 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* syms.c (bfd_is_local_label): Return false if the symbol has no
+	name.
+	* coff-i960.c (coff_i960_is_local_label_name): New function.
+	(coff_bfd_is_local_label_name): Define.
+	* coff-m68k.c (m68k_coff_is_local_label_name): New function.
+	(coff_bfd_is_local_label_name): Define.
+	* coff-rs6000.c (xcoff_is_local_label_name): New function.
+	(coff_bfd_is_local_label_name): Define.
+	* elf.c (_bfd_elf_is_local_label_name): Treat symbols beginning
+	with .. or _.L_ as local.
+	* elf32-i386.c (elf_i386_is_local_label_name): New function.
+	(bfd_elf32_bfd_is_local_label_name): Define.
+	* evax-alpha.c (evax_bfd_is_local_label_name): Treat symbols
+	beginning with $ as local.
+
 Thu Feb 27 18:36:23 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aoutx.h (aout_link_write_symbols): Use bfd_is_local_label_name

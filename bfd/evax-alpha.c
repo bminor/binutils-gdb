@@ -1143,7 +1143,7 @@ evax_bfd_is_local_label_name (abfd, name)
 #if EVAX_DEBUG
   evax_debug (1, "evax_bfd_is_local_label_name(%p, %s)\n", abfd, name);
 #endif
-  return false;
+  return name[0] == '$';
 }
 
 
