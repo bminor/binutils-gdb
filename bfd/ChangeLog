@@ -1,3 +1,9 @@
+2004-01-30  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf32-frv.c (elf32_frv_always_size_sections): Initialize pointer
+	to bfd_link_hash_entry passed by reference to
+	_bfd_generic_link_add_one_symbol.
+
 2004-01-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfxx-ia64.c (elfNN_ia64_relocate_section): Disallow imm

@@ -3454,7 +3454,7 @@ elf32_frv_always_size_sections (bfd *output_bfd,
 	  || h->type != STT_OBJECT
 	  || !(h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
 	{
-	  struct bfd_link_hash_entry *bh;
+	  struct bfd_link_hash_entry *bh = NULL;
 
 	  if (!(_bfd_generic_link_add_one_symbol
 		(info, output_bfd, "__stacksize",
