@@ -1,3 +1,41 @@
+Wed Apr  2 14:25:52 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* Makefile.in (autoconf-common-changelog): New target, update
+ 	ChangeLog for all subdirectories - normally used after
+ 	autoconf-common target.
+
+Wed Mar 19 14:26:21 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+start-sanitize-d30v
+	* configure.in (extra_subdirs): Include testsuite for d30v.
+	* configure: Regenerate.
+	
+end-sanitize-d30v
+	* Makefile.in (RUNTEST, RUNTESTFLAGS): Borrow test rules from
+ 	../gdb/Makefile.in
+	(check): New rules - drive the testsuite.
+
+Mon Mar  3 13:01:00 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* configure.in: Add mn10200 configure lines accidentally
+	removed.
+	* configure: Regenerated.
+
+Wed Feb 19 10:34:20 1997  Andrew Cagney  <cagney@critters.cygnus.com>
+
+	* configure.in (extra_subdirs): Generalize common sub directory
+ 	into a list.
+start-sanitize-d30v
+	(extra_subdirs): For d30v add igen to the list to be built.
+
+end-sanitize-d30v
+start-sanitize-d30v
+Sun Feb 16 16:37:47 1997  Andrew Cagney  <cagney@critters.cygnus.com>
+
+	* configure.in (d30v): New target.
+	* configure: Regenerated.
+	
+end-sanitize-d30v
 Wed Feb 19 23:17:13 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* configure.in: Don't require GCC to build the mn10200
