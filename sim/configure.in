@@ -66,14 +66,6 @@ case "${target}" in
 	only_if_gcc=yes
 	extra_subdirs="${extra_subdirs} igen"
 	;;
-# start-sanitize-sky
-  dvp-*-*)
-	# The Sky simulator
-	sim_target=txvu
-	only_if_gcc=yes
-	extra_subdirs="${extra_subdirs} igen"
-	;;
-# end-sanitize-sky
   mn10300*-*-*)
 	# The mn10300 simulator can only be compiled by gcc.
 	sim_target=mn10300

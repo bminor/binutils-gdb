@@ -22,13 +22,6 @@ else
         lose_these_too="${d30v_files} ${lose_these_too}"
 fi
 
-sky_files="txvu"
-if ( echo $* | grep keep\-sky > /dev/null ) ; then
-        keep_these_too="${sky_files} ${keep_these_too}"
-else
-        lose_these_too="${sky_files} ${lose_these_too}"
-fi
-
 tic80_files="tic80"
 if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
         keep_these_too="${tic80_files} ${keep_these_too}"
@@ -147,34 +140,6 @@ else
                         fi
                         cp $i new
                         sed '/start\-sanitize\-v850e/,/end-\sanitize\-v850e/d' < $i > new
-                        if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-                                if [ -n "${verbose}" ] ; then
-                                        echo Caching $i in .Recover...
-                                fi
-                                mv $i .Recover
-                        fi
-                        mv new $i
-                fi
-        done
-fi
-
-txvu_files="configure configure.in ChangeLog"
-if ( echo $* | grep keep\-sky > /dev/null ) ; then
-        for i in $txvu_files ; do
-                if test ! -d $i && (grep sanitize-sky $i > /dev/null) ; then
-                        if [ -n "${verbose}" ] ; then
-                                echo Keeping sky stuff in $i
-                        fi
-                fi
-        done
-else
-        for i in $txvu_files ; do
-                if test ! -d $i && (grep sanitize-sky $i > /dev/null) ; then
-                        if [ -n "${verbose}" ] ; then
-                                echo Removing traces of \"sky\" from $i...
-                        fi
-                        cp $i new
-                        sed '/start\-sanitize\-sky/,/end-\sanitize\-sky/d' < $i > new
                         if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
                                 if [ -n "${verbose}" ] ; then
                                         echo Caching $i in .Recover...
