@@ -1,5 +1,11 @@
 2002-12-16  Christopher Faylor  <cgf@redhat.com>
 
+	* configure.in: Remove --enable-shared option.  It shouldn't be used
+	for gdb.
+	* configure: Regenerate.
+
+2002-12-16  Christopher Faylor  <cgf@redhat.com>
+
 	* config/cygwin.cache: Prime mbstate_t.
 
 2002-12-06  Elena Zannoni  <ezannoni@redhat.com>

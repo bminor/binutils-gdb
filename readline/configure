@@ -672,7 +672,6 @@ if test -n "$ac_init_help"; then
 Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --enable-shared         build shared libraries [default=YES]
   --enable-static         build static libraries [default=YES]
 
 Optional Packages:
@@ -1072,13 +1071,8 @@ if test "$opt_curses" = "yes"; then
 fi
 
 opt_static_libs=yes
-opt_shared_libs=yes
+opt_shared_libs=no
 
-# Check whether --enable-shared or --disable-shared was given.
-if test "${enable_shared+set}" = set; then
-  enableval="$enable_shared"
-  opt_shared_libs=$enableval
-fi;
 # Check whether --enable-static or --disable-static was given.
 if test "${enable_static+set}" = set; then
   enableval="$enable_static"
