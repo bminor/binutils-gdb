@@ -1,3 +1,8 @@
+Sat Nov  9 13:37:57 1991  Fred Fish  (fnf at cygnus.com)
+
+	* elfread.c:  Re-enable compilation of register_addr() stub
+	whenever it is not supplied by coredep.c
+
 Sat Nov  9 00:40:32 1991  John Gilmore  (gnu at cygnus.com)
 
 	Add tracking of object files (that contain symbols) to gdb.
