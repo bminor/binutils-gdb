@@ -1,3 +1,17 @@
+2003-07-01  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* s390-dis.c (s390_extract_operand): Add support for long displacements.
+	* s390-mkopc.c (s390_opcode_cpu_val): Add support for cpu type z990.
+	* s390-opc.c (D20_20): Add define for 20 bit displacements.
+	(INSTR_RRF_R0RR, INSTR_RSL_R0RD, INSTR_RSY_RRRD, INSTR_RSY_RURD,
+	INSTR_RSY_AARD, INSTR_RXY_RRRD, INSTR_RXY_FRRD, INSTR_SIY_URD): Add
+	new instruction formats.
+	(MASK_RRF_R0RR, MASK_RSL_R0RD, MASK_RSY_RRRD, MASK_RSY_RURD,
+	MASK_RSY_AARD, MASK_RXY_RRRD, MASK_RXY_FRRD, MASK_SIY_URD): Likewise.
+	(s390_opformats): Likewise.
+	* s390-opc.txt: Add new instructions for cpu type z990. Add missing
+	hfp instructions. Add missing instructions pgin, pgout and xsch.
+
 2003-06-23  H.J. Lu <hongjiu.lu@intel.com>
 
 	* i386-dis.c (PNI_Fixup): New. Fix up "mwait" and "monitor" in
