@@ -1,3 +1,11 @@
+2004-10-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* solib-sunos.c [HAVE_STRUCT_SO_MAP_WITH_SOM_MEMBERS] (link_map)
+	(lm_addr, lm_name, lm_next, link_dynamic_2, ld_loaded, rtc_symb)
+	(rtc_sp, rtc_next, ld_debug, ldd_in_debugger, ldd_bp_addr)
+	(ldd_bp_inst, ldd_cp, link_dynamic, ld_version, ldd, ld_un, ld_2):
+	New defines.
+
 2004-10-08  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* target.h (to_stopped_data_address): Change prototype to

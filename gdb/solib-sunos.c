@@ -1,7 +1,7 @@
 /* Handle SunOS shared libraries for GDB, the GNU Debugger.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000,
-   2001, 2004
-   Free Software Foundation, Inc.
+
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999,
+   2000, 2001, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,7 +28,7 @@
 #include <sys/param.h>
 #include <fcntl.h>
 
- /* SunOS shared libs need the nlist structure.  */
+/* SunOS shared libs need the nlist structure.  */
 #include <a.out.h>
 #include <link.h>
 
@@ -41,6 +41,50 @@
 #include "solist.h"
 #include "bcache.h"
 #include "regcache.h"
+
+/* The shared library implementation found on BSD a.out systems is
+   very similar to the SunOS implementation.  However, the data
+   structures defined in <link.h> are named very differently.  Make up
+   for those differences here.  */
+
+#ifdef HAVE_STRUCT_SO_MAP_WITH_SOM_MEMBERS
+
+/* FIXME: Temporary until the equivalent defines have been removed
+   from all nm-*bsd*.h files.  */
+#ifndef link_dynamic
+
+/* Map `struct link_map' and its members.  */
+#define link_map	so_map
+#define lm_addr		som_addr
+#define lm_name		som_path
+#define lm_next		som_next
+
+/* Map `struct link_dynamic_2' and its members.  */
+#define link_dynamic_2	section_dispatch_table
+#define ld_loaded	sdt_loaded
+
+/* Map `struct rtc_symb' and its members.  */
+#define rtc_symb	rt_symbol
+#define rtc_sp		rt_sp
+#define rtc_next	rt_next
+
+/* Map `struct ld_debug' and its members.  */
+#define ld_debug	so_debug
+#define ldd_in_debugger	dd_in_debugger
+#define ldd_bp_addr	dd_bpt_addr
+#define ldd_bp_inst	dd_bpt_shadow
+#define ldd_cp		dd_cc
+
+/* Map `struct link_dynamic' and its members.  */
+#define link_dynamic	_dynamic
+#define ld_version	d_version
+#define ldd		d_debug
+#define ld_un		d_un
+#define ld_2		d_sdt
+
+#endif
+
+#endif
 
 /* Link map info to include in an allocated so_list entry */
 
