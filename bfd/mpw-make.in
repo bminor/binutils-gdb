@@ -27,7 +27,7 @@ o = :
 # Default rule that puts each file into separate segment.
 
 .c.o  \Option-f .c
-   {CC}  {DepDir}{Default}.c {ALL_CFLAGS} {SymOptions} -s {Default} -o {TargDir}{Default}.c.o
+   {CC}  {DepDir}{Default}.c {ALL_CFLAGS} -d DEBUG_BFD_SEND {SymOptions} -s {Default} -o {TargDir}{Default}.c.o
 
 HDEFINES =
 TDEFINES =

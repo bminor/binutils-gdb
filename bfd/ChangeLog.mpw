@@ -1,3 +1,8 @@
+Sun Feb 27 15:41:10 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-make.in (DEBUG_BFD_SEND): Define in default compilation
+	rule.
+
 Wed Feb 23 16:52:51 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* hosts/mpw.h (fstat): Declare.
