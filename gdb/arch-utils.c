@@ -220,6 +220,12 @@ generic_register_convertible_not (int num)
 }
   
 
+int
+default_register_sim_regno (int num)
+{
+  return num;
+}
+
 /* Functions to manipulate the endianness of the target.  */
 
 #ifdef TARGET_BYTE_ORDER_SELECTABLE

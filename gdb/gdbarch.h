@@ -410,6 +410,23 @@ extern void set_gdbarch_do_registers_info (struct gdbarch *gdbarch, gdbarch_do_r
 #endif
 #endif
 
+/* MAP a GDB RAW register number onto a simulator register number.  See
+   also include/...-sim.h. */
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (REGISTER_SIM_REGNO)
+#define REGISTER_SIM_REGNO(reg_nr) (default_register_sim_regno (reg_nr))
+#endif
+
+typedef int (gdbarch_register_sim_regno_ftype) (int reg_nr);
+extern int gdbarch_register_sim_regno (struct gdbarch *gdbarch, int reg_nr);
+extern void set_gdbarch_register_sim_regno (struct gdbarch *gdbarch, gdbarch_register_sim_regno_ftype *register_sim_regno);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_SIM_REGNO)
+#define REGISTER_SIM_REGNO(reg_nr) (gdbarch_register_sim_regno (current_gdbarch, reg_nr))
+#endif
+#endif
+
 extern int gdbarch_use_generic_dummy_frames (struct gdbarch *gdbarch);
 extern void set_gdbarch_use_generic_dummy_frames (struct gdbarch *gdbarch, int use_generic_dummy_frames);
 #if GDB_MULTI_ARCH

@@ -55,7 +55,6 @@ struct gdbarch_tdep
     int nr_dmap_regs;
     unsigned long (*dmap_register) (int nr);
     unsigned long (*imap_register) (int nr);
-    int (*register_sim_regno) (int nr);
   };
 
 /* These are the addresses the D10V-EVA board maps data and
@@ -272,12 +271,6 @@ d10v_ts3_register_sim_regno (int nr)
       && nr < TS3_A0_REGNUM + NR_A_REGS)
     return nr - TS3_A0_REGNUM + SIM_D10V_A0_REGNUM;
   return nr;
-}
-
-int
-d10v_register_sim_regno (int nr)
-{
-  return gdbarch_tdep (current_gdbarch)->register_sim_regno (nr);
 }
 
 /* Index within `registers' of the first byte of the space for
@@ -1467,6 +1460,7 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   int d10v_num_regs;
   struct gdbarch_tdep *tdep;
   gdbarch_register_name_ftype *d10v_register_name;
+  gdbarch_register_sim_regno_ftype *d10v_register_sim_regno;
 
   /* Find a candidate among the list of pre-declared architectures. */
   arches = gdbarch_list_lookup_by_info (arches, &info);
@@ -1483,9 +1477,9 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case bfd_mach_d10v_ts2:
       d10v_num_regs = 37;
       d10v_register_name = d10v_ts2_register_name;
+      d10v_register_sim_regno = d10v_ts2_register_sim_regno;
       tdep->a0_regnum = TS2_A0_REGNUM;
       tdep->nr_dmap_regs = TS2_NR_DMAP_REGS;
-      tdep->register_sim_regno = d10v_ts2_register_sim_regno;
       tdep->dmap_register = d10v_ts2_dmap_register;
       tdep->imap_register = d10v_ts2_imap_register;
       break;
@@ -1493,9 +1487,9 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case bfd_mach_d10v_ts3:
       d10v_num_regs = 42;
       d10v_register_name = d10v_ts3_register_name;
+      d10v_register_sim_regno = d10v_ts3_register_sim_regno;
       tdep->a0_regnum = TS3_A0_REGNUM;
       tdep->nr_dmap_regs = TS3_NR_DMAP_REGS;
-      tdep->register_sim_regno = d10v_ts3_register_sim_regno;
       tdep->dmap_register = d10v_ts3_dmap_register;
       tdep->imap_register = d10v_ts3_imap_register;
       break;
@@ -1607,6 +1601,8 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_saved_pc_after_call (gdbarch, d10v_saved_pc_after_call);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_stack_align (gdbarch, d10v_stack_align);
+
+  set_gdbarch_register_sim_regno (gdbarch, d10v_register_sim_regno);
 
   return gdbarch;
 }

@@ -270,10 +270,6 @@ gdb_os_error (host_callback * p, const char *format,...)
     }
 }
 
-#ifndef REGISTER_SIM_REGNO
-#define REGISTER_SIM_REGNO(N) (N)
-#endif
-
 static void
 gdbsim_fetch_register (int regno)
 {

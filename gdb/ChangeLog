@@ -1,3 +1,16 @@
+Wed Aug  2 19:15:34 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* arch-utils.h, gdbarch.c (default_register_sim_regno): New
+ 	function.
+	* gdbarch.sh (REGISTER_SIM_REGNO): Add.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* remote-sim.c (REGISTER_SIM_REGNO): Delete definition.
+
+	* config/d10v/tm-d10v.h (REGISTER_SIM_REGNO): Delete.
+	* d10v-tdep.c (d10v_gdbarch_init): Update.
+	(struct gdbarch_tdep): Delete member register_sim_regno.
+	(d10v_register_sim_regno): Delete function.
+
 Wed Aug  2 14:46:18 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote.c (enum packet_detect, packet_support_enums,

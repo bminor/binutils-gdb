@@ -162,6 +162,7 @@ struct gdbarch
   int max_register_virtual_size;
   gdbarch_register_virtual_type_ftype *register_virtual_type;
   gdbarch_do_registers_info_ftype *do_registers_info;
+  gdbarch_register_sim_regno_ftype *register_sim_regno;
   int use_generic_dummy_frames;
   int call_dummy_location;
   gdbarch_call_dummy_address_ftype *call_dummy_address;
@@ -298,6 +299,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
+  0,
   generic_get_saved_register,
   0,
   0,
@@ -384,6 +386,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->max_register_raw_size = -1;
   gdbarch->max_register_virtual_size = -1;
   gdbarch->do_registers_info = do_registers_info;
+  gdbarch->register_sim_regno = default_register_sim_regno;
   gdbarch->use_generic_dummy_frames = -1;
   gdbarch->call_dummy_start_offset = -1;
   gdbarch->call_dummy_breakpoint_offset = -1;
@@ -527,6 +530,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
       && (gdbarch->register_virtual_type == 0))
     internal_error ("gdbarch: verify_gdbarch: register_virtual_type invalid");
   /* Skip verify of do_registers_info, invalid_p == 0 */
+  /* Skip verify of register_sim_regno, invalid_p == 0 */
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->use_generic_dummy_frames == -1))
     internal_error ("gdbarch: verify_gdbarch: use_generic_dummy_frames invalid");
@@ -879,6 +883,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: %s # %s\n",
                       "DO_REGISTERS_INFO(reg_nr, fpregs)",
                       XSTRING (DO_REGISTERS_INFO (reg_nr, fpregs)));
+#endif
+#ifdef REGISTER_SIM_REGNO
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "REGISTER_SIM_REGNO(reg_nr)",
+                      XSTRING (REGISTER_SIM_REGNO (reg_nr)));
 #endif
 #ifdef USE_GENERIC_DUMMY_FRAMES
   fprintf_unfiltered (file,
@@ -1483,6 +1493,13 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: DO_REGISTERS_INFO = 0x%08lx\n",
                         (long) current_gdbarch->do_registers_info
                         /*DO_REGISTERS_INFO ()*/);
+#endif
+#ifdef REGISTER_SIM_REGNO
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: REGISTER_SIM_REGNO = 0x%08lx\n",
+                        (long) current_gdbarch->register_sim_regno
+                        /*REGISTER_SIM_REGNO ()*/);
 #endif
 #ifdef USE_GENERIC_DUMMY_FRAMES
   fprintf_unfiltered (file,
@@ -2516,6 +2533,23 @@ set_gdbarch_do_registers_info (struct gdbarch *gdbarch,
                                gdbarch_do_registers_info_ftype do_registers_info)
 {
   gdbarch->do_registers_info = do_registers_info;
+}
+
+int
+gdbarch_register_sim_regno (struct gdbarch *gdbarch, int reg_nr)
+{
+  if (gdbarch->register_sim_regno == 0)
+    internal_error ("gdbarch: gdbarch_register_sim_regno invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_register_sim_regno called\n");
+  return gdbarch->register_sim_regno (reg_nr);
+}
+
+void
+set_gdbarch_register_sim_regno (struct gdbarch *gdbarch,
+                                gdbarch_register_sim_regno_ftype register_sim_regno)
+{
+  gdbarch->register_sim_regno = register_sim_regno;
 }
 
 int
@@ -3728,8 +3762,7 @@ init_gdbarch_data (struct gdbarch *gdbarch)
    data-pointer. */
 
 void *
-gdbarch_data (data)
-     struct gdbarch_data *data;
+gdbarch_data (struct gdbarch_data *data)
 {
   if (data->index >= current_gdbarch->nr_data)
     internal_error ("gdbarch_data: request for non-existant data.");
@@ -4121,7 +4154,7 @@ disassemble_info tm_print_insn_info;
 extern void _initialize_gdbarch (void);
 
 void
-_initialize_gdbarch ()
+_initialize_gdbarch (void)
 {
   struct cmd_list_element *c;
 
