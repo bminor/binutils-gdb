@@ -1,5 +1,11 @@
 2000-07-20  H.J. Lu  <hjl@gnu.org>
 
+	* emultempl/elf32.em (longopts): Duplicate "disable-new-dtags"
+	and "disable-new-dtags" to stop getopt from treating -d/-e as
+	abbreviations for these options.
+
+2000-07-20  H.J. Lu  <hjl@gnu.org>
+
 	* ld.texinfo: Add documentation for --disable-new-dtags and
 	--enable-new-dtags.
 

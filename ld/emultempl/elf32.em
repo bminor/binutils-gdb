@@ -1223,7 +1223,11 @@ fi
 
 if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
 cat >>e${EMULATION_NAME}.c <<EOF
+  /* getopt allows abbreviations, so we do this to stop it from
+     treating -d/-e as abbreviations for these options. */
   {"disable-new-dtags", no_argument, NULL, OPTION_DISABLE_NEW_DTAGS},
+  {"disable-new-dtags", no_argument, NULL, OPTION_DISABLE_NEW_DTAGS},
+  {"enable-new-dtags", no_argument, NULL, OPTION_ENABLE_NEW_DTAGS},
   {"enable-new-dtags", no_argument, NULL, OPTION_ENABLE_NEW_DTAGS},
 EOF
 fi
