@@ -26,6 +26,7 @@ Do-first:
 
 Things-to-keep:
 
+fragbug.s
 labeldiffs.s
 locallabel.s
 ss_align.s
