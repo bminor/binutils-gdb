@@ -462,6 +462,36 @@ else
 	done
 fi
 
+nortel_ppc750_files="ChangeLog ppc-opc.c"
+if ( echo $* | grep keep\-nortel-ppc750 > /dev/null ) ; then
+	for i in $nortel_ppc750_files ; do
+		if test -f $i && (grep sanitize-nortel-ppc750 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping m32rx stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $nortel_ppc750_files ; do
+		if test -f $i && (grep sanitize-nortel-ppc750 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"m32rx\" from $i...
+			fi
+			cp $i new
+			# The PIPE sanitization will be much cleaner with redact.
+			sed -e '/start\-sanitize\-nortel-ppc750/,/end\-sanitize\-nortel-ppc750/d' \
+				-e 's/, PIPE_[A-Z]*//g' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
 for i in *; do
   if test ! -d $i && (grep sanitize $i > /dev/null) ; then
     echo '***' Some mentions of Sanitize are still left in opcodes/$i! 1>&2
