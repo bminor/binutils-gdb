@@ -1,3 +1,7 @@
+Thu Oct  3 15:39:42 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
+
+	* Makefile.in (clean): Remove config.log.
+
 Wed Oct  2 15:49:16 1996  Klaus Kaempf  <kkaempf@progis.de>
 
 	* makefile.vms: Bump version date.

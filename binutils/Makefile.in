@@ -516,7 +516,7 @@ binutils.me: $(srcdir)/binutils.texi
 ###
 
 mostlyclean:
-	-rm -f *.o *~ \#* core binutils.?? binutils.??? y.output config.log
+	-rm -f *.o *~ \#* core binutils.?? binutils.??? y.output
 	-rm -rf tmpdir
 clean: mostlyclean
 	-rm -f $(PROGS) $(DEMANGLER_PROG).1 stamp-under
