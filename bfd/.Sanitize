@@ -25,6 +25,7 @@ Do-first:
 
 Things-to-keep:
 COPYING
+PORTING
 doc
 ChangeLog
 Makefile.dos
@@ -125,7 +126,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.40  1992/03/06 08:42:41  gnu
+# Revision 1.41  1992/03/31 04:44:32  grossman
+# Keep PORTING
+#
+# Revision 1.40  1992/03/06  08:42:41  gnu
 # Add rule for coff-msym.
 #
 # Revision 1.39  1992/03/02  06:39:32  bothner
