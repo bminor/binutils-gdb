@@ -22,6 +22,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "param.h"
 #include "command.h"
+#include "gdbcmd.h"
 #include "frame.h"
 
 #ifdef USG
@@ -137,7 +138,7 @@ select_source_symtab (s)
 }
 
 static void
-directories_info ()
+show_directories ()
 {
   printf ("Source directories searched: %s\n", source_path);
 }
@@ -194,7 +195,7 @@ directory_command (dirname, from_tty)
   else
     mod_path (dirname, from_tty, &source_path);
   if (from_tty)
-    directories_info ();
+    show_directories ();
   forget_cached_source_info ();
 }
 
@@ -910,7 +911,7 @@ list_command (arg, from_tty)
   else if (no_end)
     print_source_lines (sal.symtab,
 			max (sal.line - (lines_to_list () / 2), 1),
-			sal.line + 5, 0);
+			sal.line + (lines_to_list() / 2), 0);
   else
     print_source_lines (sal.symtab, sal.line,
 			(dummy_end
@@ -1141,10 +1142,11 @@ DIR can also be $cwd for the current working directory, or $cdir for the\n\
 directory in which the source file was compiled into object code.\n\
 With no argument, reset the search path to $cdir:$cwd, the default.");
 
-  add_info ("directories", directories_info,
-	    "Current search path for finding source files.\n\
+  add_cmd ("directories", no_class, show_directories,
+	   "Current search path for finding source files.\n\
 $cwd in the path means the current working directory.\n\
-$cdir in the path means the compilation directory of the source file.");
+$cdir in the path means the compilation directory of the source file.",
+	   &showlist);
 
   add_info ("source", source_info,
 	    "Information about the current source file.");
