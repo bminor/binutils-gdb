@@ -437,7 +437,7 @@ cris_reloc_type_lookup (abfd, code)
      bfd * abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
-  unsigned int i;
+  int i;
 
   for (i = sizeof (cris_reloc_map) / sizeof (cris_reloc_map[0]);
        --i >= 0;)
