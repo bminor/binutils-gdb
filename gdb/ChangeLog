@@ -1,5 +1,9 @@
 2003-05-05  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_frame_prev_register): Use
+	frame_register_unwind to unwind I386_EAX_REGNUM when that's where
+	the PC lives.
+
 	* dwarf-frame.c (dwarf_frame_prev_register): For the REG_SAVED_REG
 	rule, simply call frame_register_unwind.
 

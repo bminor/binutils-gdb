@@ -819,15 +819,8 @@ i386_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 
   if (regnum == I386_EIP_REGNUM && cache->pc_in_eax)
     {
-      *optimizedp = 0;
-      *lvalp = lval_register;
-      *addrp = 0;
-      *realnump = I386_EAX_REGNUM; /* %eax */
-      if (valuep)
-	{
-	  /* Read the value from the register.  */
-	  frame_unwind_register (next_frame, 0, valuep);
-	}
+      frame_register_unwind (next_frame, I386_EAX_REGNUM,
+			     optimizedp, lvalp, addrp, realnump, valuep);
       return;
     }
 
