@@ -510,6 +510,10 @@ const struct powerpc_operand powerpc_operands[] =
 #define WS_MASK (0x7 << 11)
   { 3, 11, 0, 0, 0 },
 
+  /* The L field in an mtmsrd instruction */
+#define MTMSRD_L WS + 1
+  { 1, 16, 0, 0, PPC_OPERAND_OPTIONAL },
+
 };
 
 /* The functions used to insert and extract complicated operands.  */
@@ -1411,6 +1415,9 @@ extract_tbr (insn, dialect, invalid)
 
 /* An X_MASK with the RA and RB fields fixed.  */
 #define XRARB_MASK (X_MASK | RA_MASK | RB_MASK)
+
+/* An XRARB_MASK, but with the L bit clear. */
+#define XRLARB_MASK (XRARB_MASK & ~((unsigned long) 1 << 16))
 
 /* An X_MASK with the RT and RA fields fixed.  */
 #define XRTRA_MASK (X_MASK | RT_MASK | RA_MASK)
@@ -2950,7 +2957,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "wrteei",  X(31,163),	XE_MASK,	PPC403,		{ E } },
 { "wrteei",  X(31,163),	XE_MASK,	BOOKE,		{ E } },
 
-{ "mtmsrd",  X(31,178),	XRARB_MASK,	PPC64,		{ RS } },
+{ "mtmsrd",  X(31,178),	XRLARB_MASK,	PPC64,		{ RS , MTMSRD_L } },
 
 { "stdux",   X(31,181),	X_MASK,		PPC64,		{ RS, RAS, RB } },
 

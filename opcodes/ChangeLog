@@ -1,3 +1,8 @@
+2002-03-21  Anton Blanchard  <anton@samba.org>
+
+	* ppc-opc.c: Add optional field to mtmsrd.
+	(MTMSRD_L, XRLARB_MASK): Define.
+
 Mon Mar 18 21:10:43 CET 2002  Jan Hubicka  <jh@suse.cz>
 
 	* i386-dis.c (prefix_name): Fix handling of 32bit address prefix
