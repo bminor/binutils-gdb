@@ -1,3 +1,14 @@
+Wed Dec  3 18:08:44 1997  Doug Evans  <devans@canuck.cygnus.com>
+
+	* configure.in (SIM_AC_OPTION_ENVIRONMENT): Call.
+	* configure: Regenerated.
+
+Wed Nov 19 12:17:08 1997  Doug Evans  <devans@canuck.cygnus.com>
+
+	* mem-ops.h: Rename SIM_SIG{ACCESS,ALIGN} to SIM_SIG{SEGV,BUS}.
+	* sim-if.c (sim_open): Call sim_config.
+	(sim_stop_reason): Update call to sim_signal_to_host.
+
 Tue Nov 18 15:33:48 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* Makefile.in (SIM_OBJS): Use $(SIM_NEW_COMMON_OBJS).
