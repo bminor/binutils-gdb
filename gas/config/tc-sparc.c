@@ -451,8 +451,7 @@ s_proc ()
 static void
 s_xword ()
 {
-  md_number_to_chars (frag_more (4), 0, 4);
-  cons (4);
+  big_cons (8);
 }
 
 struct priv_reg_entry
@@ -2221,13 +2220,15 @@ print_insn (insn)
  *		warnings.
  *
  * start-sanitize-v9
+ *	-Av9
+ *		Another architecture switch.
+ *
+ * Note:
  *		Bumping between incompatible architectures is always an
  *		error.  For example, from sparclite to v9.
  * end-sanitize-v9
  */
-/* start-sanitize-v9 */
-/* There is also a -Av9 architecture option.  xoxorich. */
-/* end-sanitize-v9 */
+
 int 
 md_parse_option (argP, cntP, vecP)
      char **argP;
