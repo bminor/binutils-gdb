@@ -1,3 +1,7 @@
+2003-02-14  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2read.c (dwarf2_get_pc_bounds): Offset addresses by base.
+
 2003-02-14  Andrew Cagney  <ac131313@redhat.com>
 
 	* main.c (tui_version): Delete variable.

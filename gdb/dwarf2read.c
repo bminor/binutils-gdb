@@ -2195,6 +2195,9 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
 		  return 0;
 		}
 
+	      range_beginning += base;
+	      range_end += base;
+
 	      /* FIXME: This is recording everything as a low-high
 		 segment of consecutive addresses.  We should have a
 		 data structure for discontiguous block ranges
