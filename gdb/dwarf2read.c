@@ -2314,7 +2314,7 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
 	  unsigned int addr_size = cu_header->addr_size;
 	  CORE_ADDR mask = ~(~(CORE_ADDR)1 << (addr_size * 8 - 1));
 	  /* Value of the DW_AT_ranges attribute is the offset in the
-	     .debug_renges section.  */
+	     .debug_ranges section.  */
 	  unsigned int offset = DW_UNSND (attr);
 	  /* Base address selection entry.  */
 	  CORE_ADDR base;
@@ -2327,6 +2327,14 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
  
 	  found_base = cu_header->base_known;
 	  base = cu_header->base_address;
+
+	  if (offset >= dwarf_ranges_size)
+	    {
+	      complaint (&symfile_complaints,
+	                 "Offset %d out of bounds for DW_AT_ranges attribute",
+			 offset);
+	      return 0;
+	    }
 	  buffer = dwarf_ranges_buffer + offset;
 
 	  /* Read in the largest possible address.  */
