@@ -1,3 +1,13 @@
+2001-02-09  Bo Thorsen  <bo@suse.de>
+
+	* elf64-x86-64.c (elf64_x86_64_check_relocs): Set .rela.got section
+	alignment to 3.
+	(elf64_x86_64_check_relocs): Write R_X86_64_GOTPCREL GOT entry
+	and relocation.
+	(elf64_x86_64_relocate_section): Fix formatting.
+	(elf64_x86_64_relocate_section): Fix addend for relocation of
+	R_X86_64_(8|16|32|PC8|PC16|PC32).
+
 Mon Feb 12 17:44:39 CET 2001  Jan Hubicka  <jh@suse.cz>
 
 	* elf64-x86-64.c (x86_64_elf_howto): Fix name of R_X86_64_GOTPCREL.
