@@ -259,6 +259,7 @@ DECLARE_SIM_CORE_WRITE_N(unaligned,16)
 #define sim_core_write_1 sim_core_write_aligned_1
 #define sim_core_write_2 sim_core_write_aligned_2
 #define sim_core_write_4 sim_core_write_aligned_4
+#define sim_core_write_8 sim_core_write_aligned_8
 #define sim_core_write_16 sim_core_write_aligned_16
 
 #define sim_core_write_unaligned_word XCONCAT2(sim_core_write_unaligned_,WITH_TARGET_WORD_BITSIZE)
