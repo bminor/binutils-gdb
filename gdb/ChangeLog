@@ -1,3 +1,8 @@
+2004-07-14  Andrew Cagney  <cagney@gnu.org>
+
+	* utils.c (internal_warning_problem): Fix typo, "internal-warning"
+	instead of "internal-error".
+
 2004-07-10  Joel Brobecker  <brobecker@gnat.com>
 
 	* hppa-hpux-tdep.c: Fix a compilation failure due to a comment

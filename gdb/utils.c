@@ -838,7 +838,7 @@ internal_error (const char *file, int line, const char *string, ...)
 }
 
 static struct internal_problem internal_warning_problem = {
-  "internal-error", AUTO_BOOLEAN_AUTO, AUTO_BOOLEAN_AUTO
+  "internal-warning", AUTO_BOOLEAN_AUTO, AUTO_BOOLEAN_AUTO
 };
 
 void
