@@ -456,16 +456,16 @@ gdb_expect {
 -re "\\\[0\\\] cancel\r\n\\\[1\\\] all\r\n\\\[2\\\] foo::overload1arg\\(double\\) at.*$srcfile:121\r\n\\\[3\\\] foo::overload1arg\\(float\\) at.*$srcfile:120\r\n\\\[4\\\] foo::overload1arg\\(unsigned long\\) at.*$srcfile:119\r\n\\\[5\\\] foo::overload1arg\\(long\\) at.*$srcfile:118\r\n\\\[6\\\] foo::overload1arg\\(unsigned int\\) at.*$srcfile:117\r\n\\\[7\\\] foo::overload1arg\\(int\\) at.*$srcfile:116\r\n\\\[8\\\] foo::overload1arg\\(unsigned short\\) at.*$srcfile:115\r\n\\\[9\\\] foo::overload1arg\\(short\\) at.*$srcfile:114\r\n\\\[10\\\] foo::overload1arg\\(unsigned char\\) at.*$srcfile:113\r\n\\\[11\\\] foo::overload1arg\\(signed char\\) at.*$srcfile:112\r\n\\\[12\\\] foo::overload1arg\\(char\\) at.*$srcfile:111\r\n\\\[13\\\] foo::overload1arg\\(void\\) at.*$srcfile:110\r\n> $" {
             send_gdb "0\n"
             gdb_expect {
-               -re "cancelled\r\n$gdb_prompt $" {
-                       pass "set bp cancelled" }
+               -re "canceled\r\n$gdb_prompt $" {
+                       pass "set bp canceled" }
                -re ".*$gdb_prompt $" {
-                       fail "set bp cancelled  wrong bp reply" }
+                       fail "set bp canceled  wrong bp reply" }
                timeout           {
-                       fail "(timeout)set bp cancelled wrong bp reply" }
+                       fail "(timeout)set bp canceled wrong bp reply" }
              }
          }
-    -re ".*$gdb_prompt $" { fail "set bp cancelled(wrong menu)" }
-    timeout           { fail "(timeout)set bp cancelled(wrong menu)" }
+    -re ".*$gdb_prompt $" { fail "set bp canceled(wrong menu)" }
+    timeout           { fail "(timeout)set bp canceled(wrong menu)" }
   }
 
 

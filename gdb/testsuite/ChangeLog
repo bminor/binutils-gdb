@@ -1,3 +1,10 @@
+2000-11-09  Fernando Nasser  <fnasser@redhat.com>
+
+	* gdb.c++/templates.exp (test_template_breakpoints): Change Britsh
+	spelling "cancelled" to U.S. spelling "canceled" to match changes
+	made to gdb.
+	* gdb.c++/ovldbreak.exp: Ditto.
+
 2000-11-06  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* gdb.base/callfuncs.c (main):  Moved to end of file, call
