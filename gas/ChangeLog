@@ -1,3 +1,7 @@
+2000-07-04  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-arm.c (psrs): Accept combinations of flags.
+
 2000-07-03  Marek Michalkiewicz  <marekm@linux.org.pl>
 
 	* config/tc-avr.c: Change _ () to _() around all strings marked
