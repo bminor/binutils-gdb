@@ -846,6 +846,7 @@ build_builtin_type_vec64 (void)
   append_composite_type_field (t, "v8_int8", builtin_type_v8_int8);
 
   TYPE_FLAGS (t) |= TYPE_FLAG_VECTOR;
+  TYPE_NAME (t) = "builtin_type_vec64";
   return t;
 }
 
@@ -873,6 +874,7 @@ build_builtin_type_vec64i (void)
   append_composite_type_field (t, "v8_int8", builtin_type_v8_int8);
 
   TYPE_FLAGS (t) |= TYPE_FLAG_VECTOR;
+  TYPE_NAME (t) = "builtin_type_vec64i";
   return t;
 }
 
@@ -902,6 +904,7 @@ build_builtin_type_vec128 (void)
   append_composite_type_field (t, "v16_int8", builtin_type_v16_int8);
 
   TYPE_FLAGS (t) |= TYPE_FLAG_VECTOR;
+  TYPE_NAME (t) = "builtin_type_vec128";
   return t;
 }
 
@@ -921,6 +924,7 @@ build_builtin_type_vec128i (void)
   append_composite_type_field (t, "uint128", builtin_type_int128);
 
   TYPE_FLAGS (t) |= TYPE_FLAG_VECTOR;
+  TYPE_NAME (t) = "builtin_type_vec128i";
   return t;
 }
 
