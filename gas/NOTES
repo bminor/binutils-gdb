@@ -24,8 +24,7 @@ New environments: ???
 
 DOCUMENTATION:
 
-The internals of gas need documenting.  (Actually, there is some documentation
-in doc/as.texinfo, but it's *way* out of date.)
+The internals of gas need documenting.
 
 The documentation should also contain a "Trouble" section similar to gcc's
 manual: real bugs, common problems, incompatibilities, etc.
