@@ -21,6 +21,7 @@ fi
 case "${target_cpu}" in
 sparc*)	my_target=sparc ;;
 i386*)	my_target=i386 ;;
+*)	my_target=dummy ;;
 esac
 
 target_makefile_frag=config/mt-${my_target}

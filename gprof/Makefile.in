@@ -1,17 +1,17 @@
- #	@(#)Makefile	5.17 (Berkeley) 5/11/90
+#	@(#)Makefile	5.17 (Berkeley) 5/11/90
 
-CC=	gcc
-MACHINE=	sparc
+#### host and target dependent Makefile fragments come in here.
+###
+
 PROG=	gprof
 SRCS=	gprof.c arcs.c dfn.c lookup.c ${MACHINE}.c hertz.c \
 	printgprof.c printlist.c
 LIBS = ../bfd/libbfd.a ../libiberty/libiberty.a
 
-#CFLAGS+=-I${.CURDIR}/../../lib/csu.${MACHINE}
-CFLAGS=	-I. -I../include -O -g -DMACHINE_H=\"${MACHINE}.h\"
-
 OBJS=	gprof.o arcs.o dfn.o lookup.o ${MACHINE}.o hertz.o \
 	printgprof.o printlist.o
+
+CFLAGS=	-I. -I../include -DMACHINE_H=\"${MACHINE}.h\" ${TCFLAGS} ${HCFLAGS}
 
 all:	${PROG}
 
@@ -20,6 +20,8 @@ beforeinstall:
 	    ${.CURDIR}/gprof.flat ${.CURDIR}/gprof.callg \
 	    ${DESTDIR}/usr/share/misc
 
-#.include <bsd.prog.mk>
 $(PROG):	$(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(PROG) $(LIBS)
+
+clean:
+	-rm -f $(OBJS) core gprof nohup.out
