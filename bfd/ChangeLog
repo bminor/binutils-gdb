@@ -1,3 +1,12 @@
+Wed Oct 18 13:25:17 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ecoff.c (_bfd_ecoff_find_nearest_line): The offset argument is
+	now relative to the section, not absolute.
+	* ecofflink.c (_bfd_ecoff_locate_line): Use the right symbol to
+	get the file name when there is a N_SO directory name.  When
+	handling stabs, remember that section->vma was added to the
+	offset.
+
 Tue Oct 17 18:24:54 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* sunos.c (struct sunos_link_hash_table): Add needed field.
