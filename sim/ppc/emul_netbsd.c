@@ -22,14 +22,21 @@
 #ifndef _EMUL_NETBSD_C_
 #define _EMUL_NETBSD_C_
 
+#include "emul_generic.h"
+
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
+#endif
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <signal.h>
 #include <fcntl.h>
-#include <string.h>
 #include <sys/errno.h>
 #include <sys/param.h>
 #include <sys/time.h>
@@ -37,6 +44,14 @@
 #include <sys/ioctl.h>
 #include <sys/mount.h>
 #include <sys/dirent.h>
+
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 
 #define WITH_NetBSD_HOST (NetBSD >= 199306)
 #if WITH_NetBSD_HOST /* here NetBSD as that is what we're emulating */
@@ -48,9 +63,6 @@ extern int getdirentries(int fd, char *buf, int nbytes, long *basep);
 #if (BSD < 199306) /* here BSD as just a bug */
 extern int errno;
 #endif
-
-#include "emul_generic.h"
-
 
 #ifndef STATIC_INLINE_EMUL_NETBSD
 #define STATIC_INLINE_EMUL_NETBSD STATIC_INLINE

@@ -22,13 +22,27 @@
  * Imported declarations.
  */
 
-#include <unistd.h>
+#include "config.h"
+
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
+#endif
+
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+
 #include <fcntl.h>
 #include <stdio.h>
 #include <malloc.h>
 #include <ctype.h>
-#include <string.h>
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/ptrace.h>

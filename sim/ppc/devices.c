@@ -26,10 +26,7 @@
 #define STATIC_INLINE_DEVICES STATIC_INLINE
 #endif
 
-#include <unistd.h>
 #include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <stdarg.h>
@@ -37,6 +34,22 @@
 #include "basics.h"
 #include "devices.h"
 #include "events.h"
+
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
+#endif
 
 #include "cpu.h"
 

@@ -20,11 +20,21 @@
 
 
 #include <stdarg.h>
-#include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
 
 #include "psim.h"
+
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
+#endif
 
 extern char **environ;
 extern char *optarg;

@@ -1,10 +1,43 @@
 Thu Nov  2 08:54:04 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
+	* configure.in: Rewrite --enable-sim switch handling to use the
+	autoconf builtins so it works correctly if the configure or
+	Makefile.in files are modified and make decides to rebuild
+	Makefile.  Also document all of the --enable-sim switches
+	supported.  Check whether getrusage and sys/resource.h are
+	supported.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* Makefile.in: Add support for all of the variables set with
+	--enable-sim switches.
+
+	* Makefile.in (clean): make clean now removes all built sources as
+	well.
+	
+	* cpu.c: Use HAVE_STRING_H, HAVE_STRINGS_H, HAVE_UNISTD_H,
+	HAVE_TIME_H, HAVE_SYS_TIMES_H, HAVE_SYS_RESOURCE_H defined in
+	the generated config.h.
+	* debug.c: Ditto.
+	* device_tree.c: Ditto.
+	* devices.c: Ditto.
+	* dgen.c: Ditto.
+	* emul_netbsd.c: Ditto.
+	* igen.c: Ditto.
+	* lf.c: Ditto.
+	* misc.c: Ditto.
+	* psim.c: Ditto.
+	* registers.c: Ditto.
+	* sim_calls.c: Ditt.
+	* table.c: Ditto.
+
+
 	* main.c (main): Call psim_print_info with verbose == 2.
 
 	* mon.c (mon_print_info): Align the cpu number and number of
 	instructions fields.  Do not print an instruction category if the
-	CPU did not execute any of those instructions.
+	CPU did not execute any of those instructions.  Print out number
+	of reads and writes.  If getrusage is supported, print out number
+	of simulated instructins per second.
 	
 	* configure.in: Add support for --enable-sim-opcode=stupid.
 	* configure: Regenerate.

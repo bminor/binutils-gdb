@@ -26,12 +26,22 @@
 #define STATIC_INLINE_DEVICE_TREE STATIC_INLINE
 #endif
 
-#include <string.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "basics.h"
 #include "device_tree.h"
+
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
+#endif
 
 typedef enum {
   node_any = 0,

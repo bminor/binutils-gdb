@@ -21,12 +21,22 @@
 
 #include <signal.h> /* FIXME - should be machine dependant version */
 #include <stdarg.h>
-#include <stdlib.h>
-#include <string.h>
 #include <ctype.h>
 
 #include "basics.h"
 #include "psim.h"
+
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
+#endif
 
 #include "../../gdb/defs.h"
 

@@ -31,6 +31,14 @@
 #include "cpu.h"
 #include "idecode.h"
 
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
+#endif
+
 struct _cpu {
 
   /* the registers */
@@ -49,13 +57,14 @@ struct _cpu {
   int external_exception_pending;
 
   /* the system this processor is contained within */
+  cpu_mon *monitor;
   psim *system;
   event_queue *events;
   int cpu_nr;
 
-  /* if required, a cache to store decoded instructions */
-#if WITH_IDECODE_CACHE
-  idecode_cache icache[IDECODE_CACHE_SIZE];
+#if WITH_IDECODE_CACHE_SIZE
+  /* a cache to store cracked instructions */
+  idecode_cache icache[WITH_IDECODE_CACHE_SIZE];
 #endif
 
   /* address reservation: keep the physical address and the contents
@@ -67,8 +76,6 @@ struct _cpu {
   signed64 decrementer_local_time;
   event_entry_tag decrementer_event;
 
-  /* Counts of number of instructions executed.  */
-  long number_of_insns;
 };
 
 
@@ -76,6 +83,7 @@ INLINE_CPU cpu *
 cpu_create(psim *system,
 	   core *memory,
 	   event_queue *events,
+	   cpu_mon *monitor,
 	   int cpu_nr)
 {
   cpu *processor = ZALLOC(cpu);
@@ -90,8 +98,17 @@ cpu_create(psim *system,
   processor->system = system;
   processor->events = events;
   processor->cpu_nr = cpu_nr;
+  processor->monitor = monitor;
 
   return processor;
+}
+
+
+INLINE_CPU void
+cpu_init(cpu *processor)
+{
+  bzero(&processor->regs, sizeof(processor->regs));
+  /* FIXME - should any of VM be inited also ? */
 }
 
 
@@ -115,6 +132,11 @@ cpu_event_queue(cpu *processor)
   return processor->events;
 }
 
+INLINE_CPU cpu_mon *
+cpu_monitor(cpu *processor)
+{
+  return processor->monitor;
+}
 
 /* The processors local concept of time */
 
@@ -219,12 +241,23 @@ cpu_halt(cpu *processor,
 }
 
 
-#if WITH_IDECODE_CACHE
+#if WITH_IDECODE_CACHE_SIZE
 /* allow access to the cpu's instruction cache */
 INLINE_CPU idecode_cache *
-cpu_icache(cpu *processor)
+cpu_icache_entry(cpu *processor,
+		 unsigned_word cia)
 {
-  return processor->icache;
+  return &processor->icache[cia / 4 % WITH_IDECODE_CACHE_SIZE];
+}
+
+
+INLINE_CPU void
+cpu_flush_icache(cpu *processor)
+{
+  int i;
+  /* force all addresses to 0xff... so that they never hit */
+  for (i = 0; i < WITH_IDECODE_CACHE_SIZE; i++)
+    processor->icache[i].address = MASK(0, 63);
 }
 #endif
 
@@ -264,11 +297,9 @@ cpu_registers(cpu *processor)
 INLINE_CPU void
 cpu_synchronize_context(cpu *processor)
 {
-#if WITH_IDECODE_CACHE
-  /* kill off the contents of the cache */
-  int i;
-  for (i = 0; i < IDECODE_CACHE_SIZE; i++)
-    processor->icache[i].address = MASK(0,63);
+#if (WITH_IDECODE_CACHE)
+  /* kill of the cache */
+  cpu_flush_icache(processor);
 #endif
 
   /* don't allow the processor to change endian modes */
@@ -285,47 +316,11 @@ cpu_synchronize_context(cpu *processor)
 }
 
 
-/* # of instructions counter access */
-
-INLINE_CPU void
-cpu_increment_number_of_insns(cpu *processor)
-{
-  processor->number_of_insns++;
-}
-
-INLINE_CPU long
-cpu_get_number_of_insns(cpu *processor)
-{
-  return processor->number_of_insns;
-}
-
-static INLINE_CPU char *
-cpu_add_commas(char *endbuf, long value)
-{
-  int comma = 3;
-
-  *--endbuf = '\0';
-  do {
-    if (comma-- == 0)
-      {
-	*--endbuf = ',';
-	comma = 2;
-      }
-
-    *--endbuf = (value % 10) + '0';
-  } while ((value /= 10) != 0);
-
-  return endbuf;
-}
+/* might again be useful one day */
 
 INLINE_CPU void
 cpu_print_info(cpu *processor, int verbose)
 {
-  char buffer[20];
-
-  printf_filtered("CPU #%d executed %s instructions.\n",
-		  processor->cpu_nr+1,
-		  cpu_add_commas(buffer + sizeof(buffer), processor->number_of_insns));
 }
 
 #endif /* _CPU_C_ */

@@ -23,7 +23,10 @@
 #define _DEBUG_C_
 
 #include "basics.h"
+
+#ifdef HAVE_STDLIB
 #include <stdlib.h>
+#endif
 
 int ppc_trace[nr_trace_options];
 int print_info;

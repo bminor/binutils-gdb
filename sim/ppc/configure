@@ -11,6 +11,53 @@
 ac_help=
 ac_default_prefix=/usr/local
 # Any additions from configure.in:
+ac_help="$ac_help
+  --enable-sim-cflags=opts	Extra CFLAGS for use in building simulator"
+ac_help="$ac_help
+  --enable-sim-config=file	Override default config file"
+ac_help="$ac_help
+  --enable-sim-opcode=which	Override default opcode lookup."
+ac_help="$ac_help
+  --enable-sim-switch		Use a switch instead of a table for instruction call."
+ac_help="$ac_help
+  --enable-sim-duplicate	Expand (duplicate) semantic functions."
+ac_help="$ac_help
+  --enable-sim-filter=rule	Specify filter rules."
+ac_help="$ac_help
+  --enable-sim-icache=size	Specify instruction cache size."
+ac_help="$ac_help
+  --enable-sim-inline=inlines	Specify which functions should be inlined."
+ac_help="$ac_help
+  --enable-sim-bswap		Use the BSWAP instruction on Intel 486s and Pentiums."
+ac_help="$ac_help
+  --enable-sim-endian=endian	Specify target byte endian orientation."
+ac_help="$ac_help
+  --enable-sim-hostendain=end	Specify host byte endian orientation."
+ac_help="$ac_help
+  --enable-sim-smp=n		Specify number of processors to configure for."
+ac_help="$ac_help
+  --enable-sim-bitsize=n	Specify target bitsize (32 or 64)."
+ac_help="$ac_help
+  --enable-sim-hostbitsize=n	Specify host bitsize (32 or 64)."
+ac_help="$ac_help
+  --enable-sim-env=env		Specify target environment (operating, virtual, user)."
+ac_help="$ac_help
+  --enable-sim-timebase	Specify whether the PPC timebase is supported."
+ac_help="$ac_help
+  --enable-sim-alignment=align	Specify strict or nonstrict alignment.
+case "${enableval}" in
+  yes | strict | STRICT)	sim_alignment="-DWITH_ALIGNMENT=STRICT_ALIGNMENT";;
+  no | nonstrict | NONSTRICT)	sim_alignment="-DWITH_ALIGNMENT=NOSTRICT_ALIGNMENT";;
+  *)				sim_alignment="-DWITH_ALIGNMENT=$enableval";;
+esac"
+ac_help="$ac_help
+  --enable-sim-trace		Specify whether tracing is supported."
+ac_help="$ac_help
+  --enable-sim-assert		Specify whether to perform random assertions."
+ac_help="$ac_help
+  --enable-sim-float		Specify whether to use host floating point or simulate."
+ac_help="$ac_help
+  --enable-sim-monitor=mon	Specify whether to enable monitoring events."
 
 # Initialize some variables set by options.
 # The variables have the same names as the options, with
@@ -399,6 +446,274 @@ fi
 
 
 
+# Check whether --enable-sim-cflags or --disable-sim-cflags was given.
+enableval="$enable_sim_cflags"
+if test -n "$enableval"; then
+  case "${enableval}" in
+  yes)	sim_cflags="-O2 -fomit-frame-pointer";;
+  no)	sim_cflags="";;
+  *)	sim_cflags=`echo "${enableval}" | sed -e "s/,/ /"`;;
+esac
+else
+  sim_cflags=""
+fi
+
+# Check whether --enable-sim-config or --disable-sim-config was given.
+enableval="$enable_sim_config"
+if test -n "$enableval"; then
+  case "${enableval}" in
+  yes)	sim_config="std-config.h";;
+  no)	sim_config="std-config.h";;
+  *)	sim_config="${enableval}";;
+esac
+else
+  sim_config="std-config.h"
+fi
+
+# Check whether --enable-sim-opcode or --disable-sim-opcode was given.
+enableval="$enable_sim_opcode"
+if test -n "$enableval"; then
+  case "${enableval}" in
+  yes)	sim_opcode="ppc-opcode-simple";;
+  no)	sim_opcode="ppc-opcode-simple";;
+  *)	sim_opcode="ppc-opcode-${enableval}";;
+esac
+else
+  sim_opcode="ppc-opcode-simple"
+fi
+
+# Check whether --enable-sim-switch or --disable-sim-switch was given.
+enableval="$enable_sim_switch"
+if test -n "$enableval"; then
+  case "${enableval}" in
+  yes)	sim_switch="-s";;
+  *)	sim_switch="";;
+esac
+else
+  sim_switch=""
+fi
+
+# Check whether --enable-sim-duplicate or --disable-sim-duplicate was given.
+enableval="$enable_sim_duplicate"
+if test -n "$enableval"; then
+  case "${enableval}" in
+   yes)	sim_dup="-e";;
+   *)	sim_dup="";;
+esac
+else
+  sim_dup=""
+fi
+
+# Check whether --enable-sim-filter or --disable-sim-filter was given.
+enableval="$enable_sim_filter"
+if test -n "$enableval"; then
+  case "${enableval}" in
+   yes)	sim_filter="";;
+   *)	sim_filter="-f $enableval";;
+esac
+else
+  sim_filter="-f 64"
+fi
+
+# Check whether --enable-sim-icache or --disable-sim-icache was given.
+enableval="$enable_sim_icache"
+if test -n "$enableval"; then
+  case "${enableval}" in
+   yes)	sim_icache="-r 1024";;
+   *)	sim_icache="";;
+esac
+else
+  sim_icache=""
+fi
+
+# Check whether --enable-sim-inline or --disable-sim-inline was given.
+enableval="$enable_sim_inline"
+if test -n "$enableval"; then
+  sim_inline=""
+case "$enableval" in
+  no)		flags="";;
+  0)		flags="-DDEFAULT_INLINE=0";;
+  yes | 2)	flags="-DDEFAULT_INLINE=2";;
+  1)		flags="-DDEFAULT_INLINE=1";;
+  *) for x in `echo "$enableval" | sed -e "s/,/ /g"`; do
+       new_flag=""
+       case "$x" in
+	 *_INLINE=*)	new_flag="-D$x";;
+	 *_INLINE)	new_flag="-D$x=2";;
+	 *=*)		new_flag=`sed -e "s/=/_INLINE=/" -e "s/^/-D/"`;;
+	 *)		new_flag="-D$x""_INLINE=2";;
+       esac
+       if x"$sim_inline" = x""; then
+	 sim_inline="$new_flag"
+       else
+	 sim_inline="$flags $new_flag"
+       fi
+     done;;
+esac
+else
+  sim_inline=""
+fi
+
+# Check whether --enable-sim-bswap or --disable-sim-bswap was given.
+enableval="$enable_sim_bswap"
+if test -n "$enableval"; then
+  case "${enableval}" in
+  yes)	sim_bswap="-DWITH_BSWAP=1";;
+  no)	sim_bswap="-DWITH_BSWAP=0";;
+  *)	sim_bswap="";;
+esac
+else
+  sim_bswap=""
+fi
+
+# Check whether --enable-sim-endian or --disable-sim-endian was given.
+enableval="$enable_sim_endian"
+if test -n "$enableval"; then
+  case "${enableval}" in
+  yes)	case "$target" in
+	  *powerpc-*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BIG_ENDIAN";;
+	  *powerpcle-*) sim_endian="-DWITH_TARGET_BYTE_ORDER=LITTLE_ENDIAN";;
+	  *) echo "Unknown target $target" 1>&6; sim_endian="-DWITH_TARGET_BYTE_ORDER=0";;
+	esac;;
+  no)	 sim_endian="-DWITH_TARGET_BYTE_ORDER=0";;
+  b*|B*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BIG_ENDIAN";;
+  l*|L*) sim_endian="-DWITH_TARGET_BYTE_ORDER=LITTLE_ENDIAN";;
+  *)	sim_endian="";;
+esac
+else
+  sim_endian=""
+fi
+
+# Check whether --enable-sim-hostendian or --disable-sim-hostendian was given.
+enableval="$enable_sim_hostendian"
+if test -n "$enableval"; then
+  case "${enableval}" in
+  no)	 sim_hostendian="-DWITH_HOST_BYTE_ORDER=0";;
+  b*|B*) sim_hostendian="-DWITH_HOST_BYTE_ORDER=BIG_ENDIAN";;
+  l*|L*) sim_hostendian="-DWITH_HOST_BYTE_ORDER=LITTLE_ENDIAN";;
+  *)	 sim_hostendian="";;
+esac
+else
+  sim_hostendian=""
+fi
+
+# Check whether --enable-sim-smp or --disable-sim-smp was given.
+enableval="$enable_sim_smp"
+if test -n "$enableval"; then
+  case "${enableval}" in
+  yes)	sim_smp="-DWITH_SMP=2";;
+  no)	sim_smp="-DWITH_SMP=0";;
+  *)	sim_smp="-DWITH_SMP=$enableval";;
+esac
+else
+  sim_smp=""
+fi
+
+# Check whether --enable-sim-bitsize or --disable-sim-bitsize was given.
+enableval="$enable_sim_bitsize"
+if test -n "$enableval"; then
+  case "${enableval}" in
+  yes)	sim_bitsize="";;
+  no)	sim_bitsize="";;
+  *)	sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=$enableval";;
+esac
+else
+  sim_bitsize=""
+fi
+
+# Check whether --enable-sim-hostbitsize or --disable-sim-hostbitsize was given.
+enableval="$enable_sim_hostbitsize"
+if test -n "$enableval"; then
+  case "${enableval}" in
+  yes)	sim_hostbitsize="";;
+  no)	sim_hostbitsize="";;
+  *)	sim_hostbitsize="-DWITH_HOST_WORD_BITSIZE=$enableval";;
+esac
+else
+  sim_hostbitsize=""
+fi
+
+# Check whether --enable-sim-env or --disable-sim-env was given.
+enableval="$enable_sim_env"
+if test -n "$enableval"; then
+  case "${enableval}" in
+  operating | os | oea)	sim_env="-DWITH_ENVIRONMENT=OPERATING_ENVIRONMENT";;
+  virtual | vea)	sim_env="-DWITH_ENVIRONMENT=VIRTUAL_ENVIRONMENT";;
+  user | uea)		sim_env="-DWITH_ENVIRONMENT=USER_ENVIRONMENT";;
+  *)			sim_env="";;
+esac
+else
+  sim_env=""
+fi
+
+# Check whether --enable-sim-timebase or --disable-sim-timebase was given.
+enableval="$enable_sim_timebase"
+if test -n "$enableval"; then
+  case "${enableval}" in
+  yes)	sim_timebase="-DWITH_TIME_BASE=1";;
+  no)	sim_timebase="-DWITH_TIME_BASE=0";;
+  *)	sim_timebase="";;
+esac
+else
+  sim_timebase=""
+fi
+
+# Check whether --enable-sim-alignment or --disable-sim-alignment was given.
+enableval="$enable_sim_alignment"
+if test -n "$enableval"; then
+  sim_alignment=""
+fi
+
+# Check whether --enable-sim-trace or --disable-sim-trace was given.
+enableval="$enable_sim_trace"
+if test -n "$enableval"; then
+  case "${enableval}" in
+  yes)	sim_trace="-DWITH_TRACE=1";;
+  no)	sim_trace="-DWITH_TRACE=0";;
+  *)	sim_trace="";;
+esac
+else
+  sim_trace=""
+fi
+
+# Check whether --enable-sim-assert or --disable-sim-assert was given.
+enableval="$enable_sim_assert"
+if test -n "$enableval"; then
+  case "${enableval}" in
+  yes)	sim_assert="-DWITH_ASSERT=1";;
+  no)	sim_assert="-DWITH_ASSERT=0";;
+  *)	sim_assert="";;
+esac
+else
+  sim_assert=""
+fi
+
+# Check whether --enable-sim-float or --disable-sim-float was given.
+enableval="$enable_sim_float"
+if test -n "$enableval"; then
+  case "${enableval}" in
+  yes | hard)	sim_float="-DWITH_FLOATING_POINT=HARD_FLOATING_POINT";;
+  no | soft)	sim_float="-DWITH_FLOATING_POINT=SOFT_FLOATING_POINT";;
+  *)		sim_float="";;
+esac
+else
+  sim_float=""
+fi
+
+# Check whether --enable-sim-monitor or --disable-sim-monitor was given.
+enableval="$enable_sim_monitor"
+if test -n "$enableval"; then
+  case "${enableval}" in
+  yes)		sim_mon="-DWITH_MON='MONITOR_INSTRUCTION_ISSUE | MONITOR_LOAD_STORE_UNIT'";;
+  no)		sim_mon="-DWITH_MON=0";;
+  instruction)	sim_mon="-DWITH_MON=MONITOR_INSTRUCTION_ISSUE";;
+  memory)	sim_mon="-DWITH_MON=MONITOR_LOAD_STORE_UNIT";;
+  *)		sim_mon="-DWITH_MON='$enableval'";;
+esac
+else
+  sim_float=""
+fi
+
 
 
 ac_aux_dir=
@@ -632,6 +947,79 @@ else
 fi
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+for ac_func in getrusage
+do
+echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 979 "configure"
+#include "confdefs.h"
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char $ac_func(); below.  */
+#include <assert.h>
+/* Override any gcc2 internal prototype to avoid an error.  */
+char $ac_func(); 
+
+int main() { return 0; }
+int t() {
+
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_$ac_func) || defined (__stub___$ac_func)
+choke me
+#else
+$ac_func();
+#endif
+
+; return 0; }
+EOF
+if eval $ac_link; then
+  rm -rf conftest*
+  eval "ac_cv_func_$ac_func=yes"
+else
+  rm -rf conftest*
+  eval "ac_cv_func_$ac_func=no"
+fi
+rm -f conftest*
+
+fi
+if eval "test \"`echo '$ac_cv_func_'$ac_func`\" = yes"; then
+  echo "$ac_t""yes" 1>&6
+    ac_tr_func=HAVE_`echo $ac_func | tr '[a-z]' '[A-Z]'`
+  cat >> confdefs.h <<EOF
+#define $ac_tr_func 1
+EOF
+ 
+else
+  echo "$ac_t""no" 1>&6
+fi
+done
+
+
 # Put a plausible default for CC_FOR_BUILD in Makefile.
 # If we cannot run a trivial program, we must be cross compiling.
 echo $ac_n "checking whether cross-compiling""... $ac_c" 1>&6
@@ -642,7 +1030,7 @@ else
   ac_cv_c_cross=yes
 else
 cat > conftest.$ac_ext <<EOF
-#line 646 "configure"
+#line 1034 "configure"
 #include "confdefs.h"
 main(){return(0);}
 EOF
@@ -680,7 +1068,7 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 684 "configure"
+#line 1072 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -694,7 +1082,7 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 698 "configure"
+#line 1086 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -719,7 +1107,7 @@ else
 fi
 echo "$ac_t""$CPP" 1>&6
 
-for ac_hdr in string.h strings.h stdlib.h time.h sys/times.h
+for ac_hdr in string.h strings.h stdlib.h time.h sys/times.h unistd.h sys/resource.h
 do
 ac_safe=`echo "$ac_hdr" | tr './\055' '___'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
@@ -727,7 +1115,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 731 "configure"
+#line 1119 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
@@ -877,6 +1265,27 @@ s%@CC@%$CC%g
 s%@HDEFINES@%$HDEFINES%g
 s%@AR@%$AR%g
 s%@RANLIB@%$RANLIB%g
+s%@sim_cflags@%$sim_cflags%g
+s%@sim_config@%$sim_config%g
+s%@sim_opcode@%$sim_opcode%g
+s%@sim_switch@%$sim_switch%g
+s%@sim_dup@%$sim_dup%g
+s%@sim_filter@%$sim_filter%g
+s%@sim_icache@%$sim_icache%g
+s%@sim_inline@%$sim_inline%g
+s%@sim_bswap@%$sim_bswap%g
+s%@sim_endian@%$sim_endian%g
+s%@sim_hostendian@%$sim_hostendian%g
+s%@sim_smp@%$sim_smp%g
+s%@sim_bitsize@%$sim_bitsize%g
+s%@sim_hostbitsize@%$sim_hostbitsize%g
+s%@sim_env@%$sim_env%g
+s%@sim_timebase@%$sim_timebase%g
+s%@sim_alignment@%$sim_alignment%g
+s%@sim_float@%$sim_float%g
+s%@sim_trace@%$sim_trace%g
+s%@sim_assert@%$sim_assert%g
+s%@sim_monitor@%$sim_monitor%g
 s%@CC_FOR_BUILD@%$CC_FOR_BUILD%g
 s%@CPP@%$CPP%g
 
@@ -1039,118 +1448,3 @@ chmod +x $CONFIG_STATUS
 rm -fr confdefs* $ac_clean_files
 test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
 
-
-if test x"$enable_sim_cflags" != x"" -a x"$enable_sim_cflags" != x"no"; then
-  if test "$enable_sim_cflags" = "yes"; then
-    enable_sim_cflags="-fomit-frame-pointer,-O2"
-  fi
-  echo "Setting SIM_CFLAGS=$enable_sim_cflags" | sed -e "s/,/ /g" 1>&6
-  (echo; echo "# --enable-sim-cflags=$enable_sim_cflags";
-   echo "SIM_CFLAGS = $enable_sim_cflags" | sed -e "s/,/ /g") >> Makefile
-else
-  echo "Setting SIM_CFLAGS=" 1>&6
-  (echo; echo "# no --enable-sim-cflags"; echo "SIM_CFLAGS =") >> Makefile
-fi
-
-$srcdir/config.make Makefile CONFIG_FILE --enable-sim-config "$enable_sim_config" \
-  "" "std-config.h" "no" "std-config.h" "yes" "std-config.h" "*" "$enable_sim_config" 1>&6
-
-$srcdir/config.make Makefile IGEN_OPCODE_RULES --enable-sim-opcode "$enable_sim_opcode" \
-  "" "ppc-opcode-simple" "no" "ppc-opcode-simple" "yes" "ppc-opcode-simple" \
-  "complex" "ppc-opcode-complex" "simple" "ppc-opcode-simple" "stupid" "ppc-opcode-stupid" 1>&6
-
-$srcdir/config.make Makefile DGEN_FLAGS --enable-sim-switch "$enable_sim_switch" \
-  "" "" "no" "" "yes" "-s" 1>&6
-
-$srcdir/config.make Makefile IGEN_DUPLICATE --enable-sim-duplicate "$enable_sim_duplicate" \
-  "" "" "no" "" "yes" "-e" 1>&6
-
-$srcdir/config.make Makefile IGEN_FILTER --enable-sim-filter "$enable_sim_filter" \
-  "" "-f 64" "no" "" "yes" "-f 64" "*" "$enable_sim_filter" 1>&6
-
-$srcdir/config.make Makefile IGEN_ICACHE --enable-sim-icache "$enable_sim_icache" \
-  "" "" "no" "" "yes" "-r 1024" "*" "-r $enable_sim_icache" 1>&6
-
-flags=""
-if test x"$enable_sim_inline" != x""; then
-  case "$enable_sim_inline" in
-    no)		flags="";;
-    0)		flags=" -DDEFAULT_INLINE=0";;
-    yes | 2)	flags=" -DDEFAULT_INLINE=2";;
-    1)		flags=" -DDEFAULT_INLINE=1";;
-    *) for x in `echo "$enable_sim_inline" | sed -e "s/,/ /g"`; do
-	 case "$x" in
-	   *_INLINE=*)	flags="$flags -D$x";;
-	   *_INLINE)	flags="$flags -D$x=2";;
-	   *=*)		x=`sed -e "s/=/_INLINE=/"`; flags="$flags -D$x";;
-	   *)		flags="$flags -D$x""_INLINE=2";;
-	 esac
-       done;;
-  esac
-fi
-if test x"$flags" != x""; then
-  echo "Setting INLINE_CFLAGS=$flags" 1>&6
-  (echo; echo "# --enable-sim-inline=$enable_sim_inline"; echo "INLINE_CFLAGS =$flags") >> Makefile
-else
-  echo "Setting INLINE_CFLAGS=" 1>&6
-  (echo; echo "# no --enable-sim-inline"; echo "INLINE_CFLAGS =") >> Makefile 
-fi
-
-$srcdir/config.hdr config.h WITH_BSWAP --enable-sim-bswap "$enable_sim_bswap" "yes" 1
-
-case "$target" in
-  *powerpc-*) endian="BIG_ENDIAN";;
-  *powerpcle-*) endian="LITTLE_ENDIAN";;
-  *) echo "Unknown $target" 1>&6; endian="0";;
-esac
-
-$srcdir/config.hdr config.h WITH_TARGET_BYTE_ORDER --enable-sim-endian "$enable_sim_endian" \
-  "" "0" "no" "0" "yes" "$endian" \
-  "b" "BIG_ENDIAN" "big" "BIG_ENDIAN" "big-endian" "BIG_ENDIAN" \
-  "B" "BIG_ENDIAN" "BIG" "BIG_ENDIAN" "BIG-ENDIAN" "BIG_ENDIAN" \
-  "l" "LITTLE_ENDIAN" "little" "LITTLE_ENDIAN" "little-endian" "LITTLE_ENDIAN" \
-  "L" "LITTLE_ENDIAN" "little" "LITTLE_ENDIAN" "little-endian" "LITTLE_ENDIAN" 1>&6
-
-$srcdir/config.hdr config.h WITH_HOST_BYTE_ORDER --enable-sim-hostendian "$enable_sim_hostendian" \
-  "b" "BIG_ENDIAN" "big" "BIG_ENDIAN" "big-endian" "BIG_ENDIAN" \
-  "B" "BIG_ENDIAN" "BIG" "BIG_ENDIAN" "BIG-ENDIAN" "BIG_ENDIAN" \
-  "l" "LITTLE_ENDIAN" "little" "LITTLE_ENDIAN" "little-endian" "LITTLE_ENDIAN" \
-  "L" "LITTLE_ENDIAN" "little" "LITTLE_ENDIAN" "little-endian" "LITTLE_ENDIAN" 1>&6
-
-$srcdir/config.hdr config.h WITH_SMP --enable-sim-smp "$enable_sim_smp" \
-  "" "0" "no" "0" "yes" "2" "*" "$enable_sim_smp" 1>&6
-
-$srcdir/config.hdr config.h WITH_TARGET_WORD_BITSIZE --enable-sim-bitsize "$enable_sim_bitsize" \
-  "yes" "32" "32" "32" "32" "64" "64" 1>&6
-
-$srcdir/config.hdr config.h WITH_HOST_WORD_BITSIZE --enable-sim-hostbitsize "$enable_sim_hostbitsize" \
-  "yes" "32" "32" "32" "32" "64" "64" 1>&6
-
-$srcdir/config.hdr config.h WITH_ENVIRONMENT --enable-sim-env "$enable_sim_env" \
-  "yes" "0" \
-  "operating" "OPERATING_ENVIRONMENT" "os" "OPERATING_ENVIRONMENT" "oea" "OPERATING_ENVIRONMENT" \
-  "virtual" "VIRTUAL_ENVIRONMENT" "vea" "VIRTUAL_ENVIRONMENT" \
-  "user" "USER_ENVIRONMENT" "uea" "USER_ENVIRONMENT" \
-  1>&6
-
-$srcdir/config.hdr config.h WITH_TIME_BASE --enable-sim-timebase "$enable_sim_timebase" \
-  "no" "0" "yes" "1" 1>&6
-
-$srcdir/config.hdr config.h WITH_ALIGNMENT --enable-sim-alignment "$enable_sim_alignment" \
-  "no" "NONSTRICT_ALIGNMENT" "nonstrict" "NONSTRICT_ALIGNMENT" \
-  "yes" "STRICT_ALIGNMENT" "strict" "STRICT_ALIGNMENT" 1>&6
-
-$srcdir/config.hdr config.h WITH_FLOATING_POINT --enable-sim-float "$enable_sim_float" \
-  "no" "SOFT_FLOATING_POINT" "soft" "SOFT_FLOATING_POINT" \
-  "yes" "HARD_FLOATING_POINT" "hard" "HARD_FLOATING_POINT" 1>&6
-
-$srcdir/config.hdr config.h WITH_TRACE --enable-sim-trace "$enable_sim_trace" \
-  "no" "0" "yes" "1" 1>&6
-
-$srcdir/config.hdr config.h WITH_ASSERT --enable-sim-assert "$enable_sim_assert" \
-  "no" "0" "yes" "1" 1>&6
-
-$srcdir/config.hdr config.h WITH_MON --enable-sim-monitor "$enable_sim_monitor" \
-  "no" "0" "yes" "MONITOR_INSTRUCTION_ISSUE|MONITOR_LOAD_STORE_UNIT" \
-  "instruction" "MONITOR_INSTRUCTION_ISSUE" \
-  "memory" "MONITOR_LOAD_STORE_UNIT" 1>&6

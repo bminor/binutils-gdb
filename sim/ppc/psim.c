@@ -24,21 +24,31 @@
 
 #include <stdio.h>
 #include <ctype.h>
-#include <stdlib.h>
 
 #include "config.h"
 #include "ppc-config.h"
 #include "inline.h"
 
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
 #ifndef STATIC_INLINE_PSIM
 #define STATIC_INLINE_PSIM STATIC_INLINE
 #endif
 
-#include <string.h>
 #include <setjmp.h>
 
 #include "cpu.h" /* includes psim.h */
 #include "idecode.h"
+
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
+#endif
 
 #include "bfd.h"
 

@@ -66,6 +66,40 @@ BISON = bison
 MAKEINFO = makeinfo
 RANLIB = @RANLIB@
 
+SIM_CFLAGS = @sim_cflags@
+INLINE_CFLAGS = @sim_inline@
+BSWAP_CFLAGS = @sim_bswap@
+ENDIAN_CFLAGS = @sim_endian@
+HOSTENDIAN_CFLAGS = @sim_hostendian@
+SMP_CFLAGS = @sim_smp@
+BITSIZE_CFLAGS = @sim_bitsize@
+HOSTBITSIZE_CFLAGS = @sim_hostbitsize@
+ENV_CFLAGS = @sim_env@
+TIMEBASE_CFLAGS = @sim_timebase@
+ALIGNMENT_CFLAGS = @sim_alignment@
+FLOAT_CFLAGS = @sim_float@
+TRACE_CFLAGS = @sim_trace@
+ASSERT_CFLAGS = @sim_assert@
+MONITOR_CFLAGS = @sim_monitor@
+CONFIG_CFLAGS = $(BSWAP_CFLAGS) \
+  $(ENDIAN_CFLAGS) \
+  $(HOSTENDIAN_CFLAGS) \
+  $(SMP_CFLAGS) \
+  $(BITSIZE_CFLAGS) \
+  $(HOSTBITSIZE_CFLAGS) \
+  $(ENV_CFLAGS) \
+  $(FLOAT_CFLAGS) \
+  $(TRACE_CFLAGS) \
+  $(ASSERT_CFLAGS) \
+  $(MONITOR_CFLAGS)
+
+CONFIG_FILE = @sim_config@
+IGEN_OPCODE_RULES = @sim_opcode@
+IGEN_DUPLICATE = @sim_dup@
+IGEN_FILTER = @sim_filter@
+IGEN_ICACHE = @sim_icache@
+DGEN_FLAGS = @sim_switch@
+
 HDEFINES = @HDEFINES@
 TDEFINES =
 IGEN_FLAGS = $(IGEN_DUPLICATE) $(IGEN_FILTER) $(IGEN_ICACHE)
@@ -86,7 +120,7 @@ TARGETLIB	= libsim.a
 all:	run $(TARGETLIB) $(GDB_OBJ)
 
 .c.o:
-	$(CC) -c $(CFLAGS) $(INLINE_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES) $<
+	$(CC) -c $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES) $<
 
 
 
@@ -327,10 +361,10 @@ TAGS: tmp-igen tmp-dgen config.h ppc-config.h
 	etags $(srcdir)/*.h $(srcdir)/*.c $(BUILT_SRC)
 
 clean mostlyclean:
-	rm -f tmp-* *.[oas] core psim run igen dgen config.log
+	rm -f tmp-* *.[oas] core psim run igen dgen config.log $(BUILT_SRC)
 
 distclean maintainer-clean realclean: clean
-	rm -f TAGS $(BUILT_SRC) Makefile config.cache config.status config.h stamp-h
+	rm -f TAGS Makefile config.cache config.status config.h stamp-h
 
 Makefile: Makefile.in config.status
 	CONFIG_FILES=Makefile CONFIG_HEADERS= $(SHELL) ./config.status
@@ -345,5 +379,3 @@ config.status: configure config.make config.hdr
 install:
 	$(INSTALL_XFORM) run $(bindir)/run
 
-
-# Make variables generated automatically by configure follow this
