@@ -1,3 +1,11 @@
+Mon Apr 22 18:29:01 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* elf32-sparc.c (_bfd_sparc_elf_howto_table): Fix spelling of
+	R_SPARC_GLOB_JMP.
+	* elf64-sparc.c (sparc64_elf_howto_table): Likewise.
+	Add entries for R_SPARC_[56].
+	(sparc_reloc_map): Add entries for R_SPARC_[56].
+
 Mon Apr 22 15:07:24 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	Optimize linking of stabs in sections as used in ELF and COFF.
