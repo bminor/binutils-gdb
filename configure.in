@@ -32,6 +32,10 @@ apollo*)	case "${host_cpu}" in
 			bsd*) host_makefile_frag=config/mh-a68bsd ;;
 			esac;;
 		esac ;;
+ncr*)		case "${host_os}" in
+		sysv4*) host_makefile_frag=config/mh-ncr3000 ;;
+		esac ;;
+			
 esac
 
 # per-target:
