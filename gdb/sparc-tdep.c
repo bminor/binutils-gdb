@@ -141,13 +141,21 @@ sparc_fetch_instruction (CORE_ADDR pc)
 ULONGEST
 sparc_fetch_wcookie (void)
 {
-  /* FIXME: kettenis/20040131: We should fetch the cookie from the
-     target.  For now, return zero, which is right for targets without
-     StackGhost.  */
-  return 0;
-}
+  struct target_ops *ops = &current_target;
+  char buf[8];
+  int len;
 
+  len = target_read_partial (ops, TARGET_OBJECT_WCOOKIE, NULL, buf, 0, 8);
+  if (len == -1)
+    return 0;
+
+  /* We should have either an 32-bit or an 64-bit cookie.  */
+  gdb_assert (len == 4 || len == 8);
+
+  return extract_unsigned_integer (buf, len);
+}
 
+
 /* Return the contents if register REGNUM as an address.  */
 
 static CORE_ADDR

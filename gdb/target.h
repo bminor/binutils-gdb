@@ -228,6 +228,8 @@ enum target_object
   TARGET_OBJECT_UNWIND_TABLE,
   /* Transfer auxilliary vector.  */
   TARGET_OBJECT_AUXV,
+  /* StackGhost cookie.  See "sparc-tdep.c".  */
+  TARGET_OBJECT_WCOOKIE
 
   /* Possible future objects: TARGET_OBJECT_FILE, TARGET_OBJECT_PROC, ... */
 };

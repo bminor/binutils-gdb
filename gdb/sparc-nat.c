@@ -22,7 +22,9 @@
 #include "defs.h"
 #include "inferior.h"
 #include "regcache.h"
+#include "target.h"
 
+#include "gdb_assert.h"
 #include <signal.h>
 #include "gdb_string.h"
 #include <sys/ptrace.h>
@@ -246,8 +248,40 @@ store_inferior_registers (int regnum)
 	return;
     }
 }
-
 
+
+/* Fetch StackGhost Per-Process XOR cookie.  */
+
+LONGEST
+sparc_xfer_wcookie (struct target_ops *ops, enum target_object object,
+		    const char *annex, void *readbuf, const void *writebuf,
+		    ULONGEST offset, LONGEST len)
+{
+  unsigned long wcookie = 0;
+  char *buf = (char *)&wcookie;
+
+  gdb_assert (object == TARGET_OBJECT_WCOOKIE);
+  gdb_assert (readbuf && writebuf == NULL);
+
+  if (offset >= sizeof (unsigned long))
+    return -1;
+
+#ifdef PT_WCOOKIE
+  /* If PT_WCOOKIE is defined (by <sys/ptrace.h>), assume we're
+     running on an OpenBSD release that uses StackGhost (3.1 or
+     later).  As of release 3.4, OpenBSD doesn't use a randomized
+     cookie yet.  */
+  wcookie = 0x3;
+#endif /* PT_WCOOKIE */
+
+  if (len > sizeof (unsigned long) - offset)
+    len = sizeof (unsigned long) - offset;
+
+  memcpy (readbuf, buf + offset, len);
+  return len;
+}
+
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 void _initialize_sparc_nat (void);
 

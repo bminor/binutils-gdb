@@ -1,7 +1,7 @@
 /* Target-vector operations for controlling Unix child processes, for GDB.
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999,
-   2000, 2002, 2003 Free Software Foundation, Inc.
+   2000, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -584,6 +584,13 @@ child_xfer_partial (struct target_ops *ops, enum target_object object,
 #endif
       return NATIVE_XFER_AUXV (ops, object, annex, readbuf, writebuf,
 			       offset, len);
+
+    case TARGET_OBJECT_WCOOKIE:
+#ifndef NATIVE_XFER_WCOOKIE
+#define NATIVE_XFER_WCOOKIE(OPS,OBJECT,ANNEX,WRITEBUF,READBUF,OFFSET,LEN) (-1)
+#endif
+      return NATIVE_XFER_WCOOKIE (ops, object, annex, readbuf, writebuf,
+				  offset, len);
 
     default:
       return -1;
