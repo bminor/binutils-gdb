@@ -109,7 +109,8 @@ changequote([,])dnl
 
       alpha-*-netware*)     fmt=ecoff ;;
       alpha-*-osf*)         fmt=ecoff ;;
-      alpha-*-linux*)       fmt=ecoff ;;
+      alpha-*-linuxecoff*)  fmt=ecoff ;;
+      alpha-*-linux*)       fmt=elf em=linux ;;
 
 # start-sanitize-arc
       arc-*-elf*)           fmt=elf bfd_gas=yes ;;
@@ -252,15 +253,11 @@ changequote([,])dnl
 
       sh-*-coff)            fmt=coff ;;
 
-# start-sanitize-rce
-      rce-*-aout)           fmt=aout ;;
-# end-sanitize-rce
-
       ns32k-pc532-mach* | ns32k-pc532-ux*)    fmt=aout em=pc532mach ;;
       ns32k-pc532-netbsd* | ns32k-pc532-lites*)  fmt=aout em=nbsd532 ;;
 
       sparc-*-sunos4*)      fmt=aout em=sun3 ;;
-      sparc-*-aout | sparc*-*-vxworks)
+      sparc-*-aout | sparc*-*-vxworks*)
 			    fmt=aout ;;
       sparc-*-coff)         fmt=coff ;;
       sparc-*-lynxos*)      fmt=coff em=lynx ;;
@@ -295,6 +292,7 @@ changequote([,])dnl
     esac
 
     case ${cpu_type}-${fmt} in
+      alpha-*)	bfd_gas=yes ;;
       arm-*)	bfd_gas=yes ;;
     # not yet
     # i386-aout)	bfd_gas=preferred ;;
@@ -312,7 +310,7 @@ changequote([,])dnl
 
     # do we need the opcodes library?
     case ${cpu_type} in
-      alpha | vax | i386)
+      vax | i386)
 	;;
       *)
 	need_opcodes=yes

@@ -1,3 +1,19 @@
+Fri Jun 21 16:01:18 1996  Richard Henderson  <rth@tamu.edu>
+
+	* configure.in: Add alpha-*-linuxecoff* target.  Use elf for
+	alpha-*-linux* target.  Force bfd_gas for alpha-*.  Require
+	opcodes library for alpha.
+	* configure: Rebuild with autoconf 2.10.
+	* config/tc-alpha.c: Substantial rewrite to add ELF support and
+	use new opcode table.
+	* config/tc-alpha.h (md_undefined_symbol): Don't define.
+	(LOCAL_LABEL): Define differently if OBJ_ELF.
+	(FAKE_LABEL_NAME): Define if OBJ_ELF.
+	* config/alpha-opcode.h: Remove.
+	* config/obj-elf.h: If TC_ALPHA, define ECOFF_DEBUGGING.
+	* Makefile.in (TARG_CPU_DEP_alpha): Depend upon
+	include/opcode/alpha.h rather than config/alpha-opcode.h.
+
 Thu Jun 20 19:10:28 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/obj-aout.c (obj_emit_relocations): Give an error if the
