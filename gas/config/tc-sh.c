@@ -1429,7 +1429,8 @@ sh_handle_align (frag)
   if (sh_relax
       && frag->fr_type == rs_align
       && frag->fr_address + frag->fr_fix > 0
-      && frag->fr_offset > 1)
+      && frag->fr_offset > 1
+      && now_seg != bss_section)
     fix_new (frag, frag->fr_fix, 2, &abs_symbol, frag->fr_offset, 0,
 	     R_SH_ALIGN);
 }

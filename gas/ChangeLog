@@ -1,3 +1,8 @@
+Tue Feb 20 22:25:55 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-sh.c (sh_handle_align): Don't emit R_SH_ALIGN relocs
+	in bss_section.
+
 Mon Feb 19 14:16:24 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-sparc.h (TC_RELOC_RTSYM_LOC_FIXUP): Check S_IS_WEAK as
