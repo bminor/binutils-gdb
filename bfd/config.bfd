@@ -50,22 +50,22 @@ esac
 case "${targ}" in
 # START OF targmatch.h
 #ifdef BFD64
-  alpha-*-netware*)
+  alpha*-*-netware*)
     targ_defvec=ecoffalpha_little_vec
     targ_selvecs=nlm32_alpha_vec
     ;;
-  alpha-*-linuxecoff*)
+  alpha*-*-linuxecoff*)
     targ_defvec=ecoffalpha_little_vec
     targ_selvecs=bfd_elf64_alpha_vec
     ;;
-  alpha-*-linux* | alpha-*-elf*)
+  alpha*-*-linux* | alpha*-*-elf*)
     targ_defvec=bfd_elf64_alpha_vec
     targ_selvecs=ecoffalpha_little_vec
     ;;
-  alpha-*-*vms*)
+  alpha*-*-*vms*)
     targ_defvec=evax_alpha_vec
     ;;
-  alpha-*-*)
+  alpha*-*-*)
     targ_defvec=ecoffalpha_little_vec
     ;;
 #endif /* BFD64 */
@@ -470,7 +470,7 @@ case "${targ}" in
     targ_defvec=rs6000coff_vec
     ;;
 
-  sh-*-elf*)
+  sh-*-elf* | sh-*-rtems*)
     targ_defvec=bfd_elf32_sh_vec
     targ_selvecs="bfd_elf32_shl_vec shcoff_vec shlcoff_vec"
     targ_underscore=yes
@@ -554,12 +554,10 @@ case "${targ}" in
   v850e-*-*)
     targ_defvec=bfd_elf32_v850_vec
     ;;
-# end-sanitize-v850e
-# start-sanitize-v850eq
   v850eq-*-*)
     targ_defvec=bfd_elf32_v850_vec
     ;;
-# end-sanitize-v850eq
+# end-sanitize-v850e
 #if HAVE_host_aout_vec
   vax-*-bsd* | vax-*-ultrix*)
     targ_defvec=host_aout_vec

@@ -1,3 +1,9 @@
+Fri Oct  3 14:02:17 1997  Richard Henderson  <rth@cygnus.com>
+
+	* config.bfd: Change alpha-*-* to alpha*-*-*; config.guess now
+	recognizes alphaev5 etc.
+	* configure.host: Likewise.
+	
 Fri Oct  3 11:23:47 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	Make ld -s work on AIX:
