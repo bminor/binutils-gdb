@@ -238,10 +238,6 @@ static const struct ld_option ld_options[] =
       'y', N_("SYMBOL"), N_("Trace mentions of SYMBOL"), TWO_DASHES },
   { {NULL, required_argument, NULL, '\0'},
       'Y', N_("PATH"), N_("Default search path for Solaris compatibility"), ONE_DASH },
-#if 0
-  { {NULL, required_argument, NULL, '\0'},
-      'z', N_("KEYWORD"), N_("Ignored for Solaris compatibility"), ONE_DASH },
-#endif
   { {"start-group", no_argument, NULL, '('},
       '(', NULL, N_("Start a group"), TWO_DASHES },
   { {"end-group", no_argument, NULL, ')'},
@@ -1008,13 +1004,6 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	case 'y':
 	  add_ysym (optarg);
 	  break;
-#if 0
-	case 'z':
-	  /* We accept and ignore this option for Solaris
-             compatibility.  Actually, on Solaris, optarg is not
-             ignored.  Someday we should handle it correctly.  FIXME.  */
-	  break;
-#endif
 	case OPTION_SPLIT_BY_RELOC:
 	  config.split_by_reloc = strtoul (optarg, NULL, 0);
 	  break; 
