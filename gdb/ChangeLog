@@ -1,3 +1,22 @@
+2004-12-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* hppa-hpux-tdep.c: Include "regset.h".
+	(HPPA_HPUX_SS_WIDEREGS, HPPA_HPUX_SS_FLAGS_OFFSET)
+	(HPPA_HPUX_SS_NARROW_OFFSET, HPPA_HPUX_SS_FPBLOCK_OFFSET)
+	(HPPA_HPUX_SS_WIDE_OFFSET, HPPA_HPUX_SAVE_STATE_SIZE)
+	(HPPA_HPUX_PA89_SAVE_STATE_SIZE): New defines.
+	(hppa_hpux_supply_ss_narrow, hppa_hpux_supply_ss_fpblock)
+	(hppa_hpux_supply_ss_wide, hppa_hpux_supply_save_state): New
+	functions.
+	(hppa_hpux_regset): New variable.
+	(hppa_hpux_regset_from_core_section): New function.
+	(hppa_hpux_init_abi): Set regset_from_core_section.
+	(hppa_hpux_core_osabi_sniffer): New function.
+	(_initialize_hppa_hpux_tdep): Register
+	hppa_hpux_core_osabi_sniffer.
+	* Makefile.in (hppa-hpux-tdep.o): Update dependencies.
+	* config/pa/hppahpux.mt (TDEPFILES): Add corelow.o.
+
 2004-12-09  Randolph Chung  <tausq@debian.org>
 
 	* solib-pa64.c (pa64_relocate_section_addresses): Properly relocate

@@ -23,7 +23,6 @@
 #include "arch-utils.h"
 #include "gdbcore.h"
 #include "osabi.h"
-#include "gdb_string.h"
 #include "frame.h"
 #include "frame-unwind.h"
 #include "trad-frame.h"
@@ -32,10 +31,14 @@
 #include "inferior.h"
 #include "infcall.h"
 #include "observer.h"
-#include "hppa-tdep.h"
+#include "regset.h"
+
+#include "gdb_string.h"
 
 #include <dl.h>
 #include <machine/save_state.h>
+
+#include "hppa-tdep.h"
 
 #ifndef offsetof
 #define offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
@@ -1418,6 +1421,148 @@ hppa_hpux_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
 
 
 /* Bit in the `ss_flag' member of `struct save_state' that indicates
+   that the 64-bit register values are live.  From
+   <machine/save_state.h>.  */
+#define HPPA_HPUX_SS_WIDEREGS		0x40
+
+/* Offsets of various parts of `struct save_state'.  From
+   <machine/save_state.h>.  */
+#define HPPA_HPUX_SS_FLAGS_OFFSET	0
+#define HPPA_HPUX_SS_NARROW_OFFSET	4
+#define HPPA_HPUX_SS_FPBLOCK_OFFSET 	256
+#define HPPA_HPUX_SS_WIDE_OFFSET        640
+
+/* The size of `struct save_state.  */
+#define HPPA_HPUX_SAVE_STATE_SIZE	1152
+
+/* The size of `struct pa89_save_state', which corresponds to PA-RISC
+   1.1, the lowest common denominator that we support.  */
+#define HPPA_HPUX_PA89_SAVE_STATE_SIZE	512
+
+static void
+hppa_hpux_supply_ss_narrow (struct regcache *regcache,
+			    int regnum, const char *save_state)
+{
+  const char *ss_narrow = save_state + HPPA_HPUX_SS_NARROW_OFFSET;
+  int i, offset = 0;
+
+  for (i = HPPA_R1_REGNUM; i < HPPA_FP0_REGNUM; i++)
+    {
+      if (regnum == i || regnum == -1)
+	regcache_raw_supply (regcache, i, ss_narrow + offset);
+
+      offset += 4;
+    }
+}
+
+static void
+hppa_hpux_supply_ss_fpblock (struct regcache *regcache,
+			     int regnum, const char *save_state)
+{
+  const char *ss_fpblock = save_state + HPPA_HPUX_SS_FPBLOCK_OFFSET;
+  int i, offset = 0;
+
+  /* FIXME: We view the floating-point state as 64 single-precision
+     registers for 32-bit code, and 32 double-precision register for
+     64-bit code.  This distinction is artificial and should be
+     eliminated.  If that ever happens, we should remove the if-clause
+     below.  */
+
+  if (register_size (get_regcache_arch (regcache), HPPA_FP0_REGNUM) == 4)
+    {
+      for (i = HPPA_FP0_REGNUM; i < HPPA_FP0_REGNUM + 64; i++)
+	{
+	  if (regnum == i || regnum == -1)
+	    regcache_raw_supply (regcache, i, ss_fpblock + offset);
+
+	  offset += 4;
+	}
+    }
+  else
+    {
+      for (i = HPPA_FP0_REGNUM; i < HPPA_FP0_REGNUM + 32; i++)
+	{
+	  if (regnum == i || regnum == -1)
+	    regcache_raw_supply (regcache, i, ss_fpblock + offset);
+
+	  offset += 8;
+	}
+    }
+}
+
+static void
+hppa_hpux_supply_ss_wide (struct regcache *regcache,
+			  int regnum, const char *save_state)
+{
+  const char *ss_wide = save_state + HPPA_HPUX_SS_WIDE_OFFSET;
+  int i, offset = 8;
+
+  if (register_size (get_regcache_arch (regcache), HPPA_R1_REGNUM) == 4)
+    offset += 4;
+
+  for (i = HPPA_R1_REGNUM; i < HPPA_FP0_REGNUM; i++)
+    {
+      if (regnum == i || regnum == -1)
+	regcache_raw_supply (regcache, i, ss_wide + offset);
+
+      offset += 8;
+    }
+}
+
+static void
+hppa_hpux_supply_save_state (const struct regset *regset,
+			     struct regcache *regcache,
+			     int regnum, const void *regs, size_t len)
+{
+  const char *proc_info = regs;
+  const char *save_state = proc_info + 8;
+  ULONGEST flags;
+
+  flags = extract_unsigned_integer (save_state + HPPA_HPUX_SS_FLAGS_OFFSET, 4);
+  if (regnum == -1 || regnum == HPPA_FLAGS_REGNUM)
+    {
+      struct gdbarch *arch = get_regcache_arch (regcache);
+      size_t size = register_size (arch, HPPA_FLAGS_REGNUM);
+      char buf[8];
+
+      store_unsigned_integer (buf, size, flags);
+      regcache_raw_supply (regcache, HPPA_FLAGS_REGNUM, buf);
+    }
+
+  /* If the SS_WIDEREGS flag is set, we really do need the full
+     `struct save_state'.  */
+  if (flags & HPPA_HPUX_SS_WIDEREGS && len < HPPA_HPUX_SAVE_STATE_SIZE)
+    error ("Register set contents too small");
+
+  if (flags & HPPA_HPUX_SS_WIDEREGS)
+    hppa_hpux_supply_ss_wide (regcache, regnum, save_state);
+  else
+    hppa_hpux_supply_ss_narrow (regcache, regnum, save_state);
+
+  hppa_hpux_supply_ss_fpblock (regcache, regnum, save_state);
+}
+
+/* HP-UX register set.  */
+
+static struct regset hppa_hpux_regset =
+{
+  NULL,
+  hppa_hpux_supply_save_state
+};
+
+static const struct regset *
+hppa_hpux_regset_from_core_section (struct gdbarch *gdbarch,
+				    const char *sect_name, size_t sect_size)
+{
+  if (strcmp (sect_name, ".reg") == 0
+      && sect_size >= HPPA_HPUX_PA89_SAVE_STATE_SIZE + 8)
+    return &hppa_hpux_regset;
+
+  return NULL;
+}
+
+
+/* Bit in the `ss_flag' member of `struct save_state' that indicates
    the state was saved from a system call.  From
    <machine/save_state.h>.  */
 #define HPPA_HPUX_SS_INSYSCALL	0x02
@@ -1532,6 +1677,9 @@ hppa_hpux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_write_pc (gdbarch, hppa_hpux_write_pc);
   set_gdbarch_unwind_pc (gdbarch, hppa_hpux_unwind_pc);
 
+  set_gdbarch_regset_from_core_section
+    (gdbarch, hppa_hpux_regset_from_core_section);
+
   frame_unwind_append_sniffer (gdbarch, hppa_hpux_sigtramp_unwind_sniffer);
 
   observer_attach_inferior_created (hppa_hpux_inferior_created);
@@ -1557,9 +1705,24 @@ hppa_hpux_elf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   hppa_hpux_init_abi (info, gdbarch);
 }
 
+static enum gdb_osabi
+hppa_hpux_core_osabi_sniffer (bfd *abfd)
+{
+  if (strcmp (bfd_get_target (abfd), "hpux-core") == 0)
+    return GDB_OSABI_HPUX_SOM;
+
+  return GDB_OSABI_UNKNOWN;
+}
+
 void
 _initialize_hppa_hpux_tdep (void)
 {
+  /* BFD doesn't set a flavour for HP-UX style core files.  It doesn't
+     set the architecture either.  */
+  gdbarch_register_osabi_sniffer (bfd_arch_unknown,
+				  bfd_target_unknown_flavour,
+				  hppa_hpux_core_osabi_sniffer);
+
   gdbarch_register_osabi (bfd_arch_hppa, 0, GDB_OSABI_HPUX_SOM,
                           hppa_hpux_som_init_abi);
   gdbarch_register_osabi (bfd_arch_hppa, bfd_mach_hppa20w, GDB_OSABI_HPUX_ELF,

@@ -1975,9 +1975,9 @@ hppa-hpux-nat.o: hppa-hpux-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(target_h) $(gdb_assert_h) $(hppa_tdep_h) $(inf_ptrace_h) \
 	$(inf_ttrace_h)
 hppa-hpux-tdep.o: hppa-hpux-tdep.c $(defs_h) $(arch_utils_h) $(gdbcore_h) \
-	$(osabi_h) $(gdb_string_h) $(frame_h) $(frame_unwind_h) \
-	$(trad_frame_h) $(symtab_h) $(objfiles_h) $(inferior_h) $(infcall_h) \
-	$(observer_h) $(hppa_tdep_h)
+	$(osabi_h) $(frame_h) $(frame_unwind_h) $(trad_frame_h) $(symtab_h) \
+	$(objfiles_h) $(inferior_h) $(infcall_h) $(observer_h) $(regset_h) \
+	$(gdb_string_h) $(hppa_tdep_h)
 hppa-linux-nat.o: hppa-linux-nat.c $(defs_h) $(gdbcore_h) $(regcache_h) \
 	$(gdb_string_h) $(inferior_h) $(hppa_tdep_h) $(gregset_h)
 hppa-linux-tdep.o: hppa-linux-tdep.c $(defs_h) $(gdbcore_h) $(osabi_h) \
