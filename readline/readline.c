@@ -1968,6 +1968,11 @@ static char *term_string_buffer = (char *)NULL;
 /* Non-zero means this terminal can't really do anything. */
 int dumb_term = 0;
 
+/* On Solaris2, sys/types.h brings in sys/reg.h,
+   which screws up the Termcap variable PC, used below.  */
+
+#undef	PC	
+
 char PC;
 char *BC, *UP;
 
