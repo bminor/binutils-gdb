@@ -1,6 +1,10 @@
 Wed Aug 30 13:52:28 1995  Doug Evans  <dje@canuck.cygnus.com>
 
-	* sparc-opc.c (sparc_opcodes, prefetcha insn): Fix.
+	* sparc-opc.c (sparc_opcodes): Delete duplicate wr %y insn.
+	Add clrx, iprefetch, signx, clruw, cas, casl, casx, casxl synthetic
+	sparc64 insns.
+
+	* sparc-opc.c (sparc_opcodes): Fix prefetcha insn.
 	(lookup_{name,value}): New functions.
 	(prefetch_table): New static local.
 	(sparc_{encode,decode}_prefetch): New functions.
