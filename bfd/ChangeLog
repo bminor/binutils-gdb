@@ -1,3 +1,8 @@
+2002-07-01  Andreas Jaeger  <aj@suse.de>
+
+	* elf64-x86-64.c (elf64_x86_64_check_relocs): Certain relocations
+	are not allowed in shared libs code, enforce -fPIC.
+
 2002-06-29  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* mmo.c (mmo_write_loc_chunk): Don't eliminate leading and

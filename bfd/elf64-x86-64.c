@@ -660,11 +660,28 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 	case R_X86_64_8:
 	case R_X86_64_16:
 	case R_X86_64_32:
-	case R_X86_64_64:
 	case R_X86_64_32S:
+	  /* Let's help debug shared library creation.  These relocs
+	     cannot be used in shared libs.  Don't error out for
+	     sections we don't care about, such as debug sections or
+	     non-constant sections.  */
+	  if (info->shared
+	      && (sec->flags & SEC_ALLOC) != 0
+	      && (sec->flags & SEC_READONLY) != 0)
+	    {
+	      (*_bfd_error_handler)
+		(_("%s: relocation %s can not be used when making a shared object; recompile with -fPIC"),
+		 bfd_archive_filename (abfd),
+		 x86_64_elf_howto_table[ELF64_R_TYPE (rel->r_info)].name);
+	      bfd_set_error (bfd_error_bad_value);
+	      return false;
+	    }
+	  /* Fall through.  */
+
 	case R_X86_64_PC8:
 	case R_X86_64_PC16:
 	case R_X86_64_PC32:
+	case R_X86_64_64:
 	  if (h != NULL && !info->shared)
 	    {
 	      /* If this reloc is in a read-only section, we might
