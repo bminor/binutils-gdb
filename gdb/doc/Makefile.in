@@ -75,7 +75,7 @@ TEX = tex
 TEXINDEX = texindex
 
 # Main GDB manual's source files
-SFILES_INCLUDED = gdb-cfg.texi $(srcdir)/gdbinv-s.texi
+SFILES_INCLUDED = gdb-cfg.texi $(srcdir)/remote.texi
 
 SFILES_LOCAL = $(srcdir)/gdb.texinfo GDBvn.texi $(SFILES_INCLUDED)
 

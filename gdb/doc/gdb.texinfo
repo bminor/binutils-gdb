@@ -798,7 +798,7 @@ in sequential order.  The order makes a difference when the
 @end menu
 
 @ifclear GENERIC
-@include gdbinv-s.texi
+@include remote.texi
 @end ifclear
 
 @node File Options
@@ -7068,7 +7068,7 @@ configuration of GDB; use @code{help targets} to list them.
 @end ifset
 @end menu
 
-@include gdbinv-s.texi
+@include remote.texi
 @end ifset
 
 @node Controlling GDB

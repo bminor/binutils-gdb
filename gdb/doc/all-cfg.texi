@@ -84,6 +84,9 @@
 @c Discuss remote serial debugging stub?
 @set REMOTESTUB
 @c
+@c Discuss gdbserver?
+@set GDBSERVER
+@c
 @c Refrain from discussing how to configure sw and format doc?
 @clear PRECONFIGURED
 @c

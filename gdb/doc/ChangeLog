@@ -1,3 +1,16 @@
+Wed Jul 28 15:26:53 1993  Roland H. Pesch  (pesch@el_bosque.cygnus.com)
+
+	* h8-cfg.texi, all-cfg.texi: new flag GDBSERVER
+
+	* Makefile.in: depend on remote.texi rather than gdbinv-s.texi
+
+	* remote.texi: (Server) New node on gdbserver.  (Remote Serial,
+	ST2000 Remote, MIPS Remote): mention `host:port' syntax for TCP.
+
+	* remote.texi: new name for former gdbinv-s.texi
+
+	* gdb.texinfo: use remote.texi rather than gdbinv-s.texi
+
 Wed Jul 28 08:26:24 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* gdbinv-s.texi: Documented timeout and retransmit-timeout
