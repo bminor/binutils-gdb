@@ -1,3 +1,8 @@
+2003-08-30  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.in: Search for gethostbyname in libnsl.
+	* configure: Regenerated.
+
 2003-08-29  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.in: Remove redundant AC_MSG_RESULT in check for

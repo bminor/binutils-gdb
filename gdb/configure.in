@@ -264,6 +264,9 @@ AC_CHECK_LIB(m, main)
 AC_CHECK_FUNC(wctype, [],
   [AC_CHECK_LIB(w, wctype)])
 
+# Some systems (e.g. Solaris) have `gethostbyname' in libnsl.
+AC_SEARCH_LIBS(gethostbyname, nsl)
+
 # Some systems (e.g. Solaris) have `socketpair' in libsocket.
 AC_SEARCH_LIBS(socketpair, socket)
 
