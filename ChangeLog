@@ -1,3 +1,7 @@
+Tue Sep 29 22:45:41 1998  Felix Lee  <flee@cygnus.com>
+
+	* Makefile.in (all-automake): fix dependencies.
+
 start-sanitize-dsp
 Fri Sep 25 18:07:32 1998  Jeff Johnston  <jjohnstn@cygnus.com>
 
@@ -35,12 +39,10 @@ Thu Aug 13 12:49:29 1998  H.J. Lu  <hjl@gnu.org>
 	* Makefile.in (taz): Try "chmod -R og=u ." before 
 	"chmod og=u `find . -print`".
 
-start-sanitize-armelf
 Fri Jul 31 09:38:33 1998  Catherine Moore  <clm@cygnus.com>
 
         * configure.in: Add arm-elf and thumb-elf support.
 
-end-sanitize-armelf
 Mon Jul 27 16:23:58 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* Makefile.in: Undo previous patch.

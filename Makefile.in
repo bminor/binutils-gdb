@@ -163,7 +163,12 @@ OTHERS =
 
 # This is set by the configure script to the list of directories which
 # should be built using the target tools.
-TARGET_CONFIGDIRS = libiberty libgloss newlib libio librx libstdc++ libg++ winsup opcodes libstub cygmon
+
+# start-sanitize-dsp
+SPECIAL_LIBS = libdsp
+# end-sanitize-dsp
+
+TARGET_CONFIGDIRS = libiberty libgloss $(SPECIAL_LIBS) newlib libio librx libstdc++ libg++ winsup opcodes libstub cygmon
 
 # Target libraries are put under this directory:
 # Changed by configure to $(target_alias) if cross.
@@ -191,8 +196,7 @@ INSTALL_TARGET = installdirs \
 	$(INSTALL_MODULES) \
 	$(INSTALL_TARGET_MODULES) \
 	$(INSTALL_X11_MODULES) \
-	$(INSTALL_DOSREL) \
-	$(EXTRA_TARGET_HOST_INSTALL_MODULES)
+	$(INSTALL_DOSREL)
 
 CC_FOR_TARGET = ` \
   if [ -f $$r/gcc/xgcc ] ; then \
@@ -749,7 +753,8 @@ INSTALL_MODULES = \
 	$(start-sanitize-ide) \
 	install-vmake \
 	$(end-sanitize-ide) \
-	install-wdiff
+	install-wdiff \
+	$(EXTRA_TARGET_HOST_INSTALL_MODULES)
 
 # This is a list of the targets for all of the modules which are compiled
 # using $(X11_FLAGS_TO_PASS).
@@ -798,6 +803,9 @@ ALL_TARGET_MODULES = \
 	all-target-libg++ \
 	all-target-newlib \
 	all-target-winsup \
+	$(start-sanitize-dsp) \
+	all-target-libdsp \
+	$(end-sanitize-dsp) \
 	all-target-libgloss \
 	all-target-libiberty \
 	all-target-gperf \
@@ -806,12 +814,16 @@ ALL_TARGET_MODULES = \
 	$(start-sanitize-java) \
 	all-target-libjava \
 	all-target-boehm-gc \
+	all-target-qthreads \
 	$(end-sanitize-java) \
 	all-target-cygmon
 
 # This is a list of the configure targets for all of the modules which
 # are compiled using the target tools.
 CONFIGURE_TARGET_MODULES = \
+	$(start-sanitize-dsp) \
+	configure-target-libdsp \
+	$(end-sanitize-dsp) \
 	configure-target-libio \
 	configure-target-libstdc++ \
 	configure-target-librx \
@@ -826,12 +838,16 @@ CONFIGURE_TARGET_MODULES = \
 	$(start-sanitize-java) \
 	configure-target-libjava \
 	configure-target-boehm-gc \
+	configure-target-qthreads \
 	$(end-sanitize-java) \
 	configure-target-cygmon
 
 # This is a list of the check targets for all of the modules which are
 # compiled using $(TARGET_FLAGS_TO_PASS).
 CHECK_TARGET_MODULES = \
+	$(start-sanitize-dsp) \
+	check-target-libdsp \
+	$(end-sanitize-dsp) \
 	check-target-libio \
 	check-target-libstdc++ \
 	check-target-libg++ \
@@ -841,12 +857,16 @@ CHECK_TARGET_MODULES = \
 	$(start-sanitize-java) \
 	check-target-libjava \
 	check-target-boehm-gc \
+	check-target-qthreads \
 	$(end-sanitize-java) \
 	check-target-gperf
 
 # This is a list of the install targets for all of the modules which are
 # compiled using $(TARGET_FLAGS_TO_PASS).
 INSTALL_TARGET_MODULES = \
+	$(start-sanitize-dsp) \
+	install-target-libdsp \
+	$(end-sanitize-dsp) \
 	install-target-libio \
 	install-target-libstdc++ \
 	install-target-libg++ \
@@ -857,6 +877,7 @@ INSTALL_TARGET_MODULES = \
 	$(start-sanitize-java) \
 	install-target-libjava \
 	install-target-boehm-gc \
+	install-target-qthreads \
 	$(end-sanitize-java) \
 	install-target-gperf
 
@@ -947,6 +968,9 @@ CLEAN_MODULES = \
 
 # All of the target modules that can be cleaned
 CLEAN_TARGET_MODULES = \
+	$(start-sanitize-dsp) \
+	clean-target-libdsp \
+	$(end-sanitize-dsp) \
 	clean-target-libio \
 	clean-target-libstdc++ \
 	clean-target-librx \
@@ -961,6 +985,7 @@ CLEAN_TARGET_MODULES = \
 	$(start-sanitize-java) \
 	clean-target-libjava \
 	clean-target-boehm-gc \
+	clean-target-qthreads \
 	$(end-sanitize-java) \
 	clean-target-cygmon
 
@@ -1172,7 +1197,6 @@ install-no-fixedincludes: \
 	$(INSTALL_MODULES) \
 	$(INSTALL_TARGET_MODULES) \
 	$(INSTALL_X11_MODULES) \
-	$(EXTRA_TARGET_HOST_INSTALL_MODULES) \
 	gcc-no-fixedincludes 
 
 # Install the gcc headers files, but not the fixed include files,
@@ -1215,6 +1239,8 @@ install-foundry:
 	  else \
 	    true; \
 	  fi; \
+	date '+%D %r' > builddate \
+	$(INSTALL_DATA) builddate $(datadir)/builddate ; \
 	done
 # end-sanitize-ide
 
@@ -1537,7 +1563,7 @@ install-dosrel-fake:
 all-apache:
 all-ash:
 all-autoconf: all-m4 all-texinfo
-all-automake:
+all-automake: all-m4 all-texinfo
 all-bash:
 all-bfd: all-libiberty all-intl
 all-binutils: all-libiberty all-opcodes all-bfd all-flex all-bison all-byacc all-intl
@@ -1605,6 +1631,10 @@ all-itcl: all-tcl all-tk
 all-jstools: all-tcl all-tk all-tix all-libgui all-libide all-libidetcl
 # end-sanitize-ide
 all-ld: all-libiberty all-bfd all-opcodes all-bison all-byacc all-flex all-intl
+# start-sanitize-dsp
+all-target-libdsp: configure-target-libdsp configure-target-newlib
+configure-target-libdsp: $(ALL_GCC) 
+# end-sanitize-dsp
 configure-target-libg++: $(ALL_GCC) configure-target-librx
 all-target-libg++: configure-target-libg++ all-gas all-ld all-gcc all-target-libiberty all-target-newlib all-target-libio all-target-librx all-target-libstdc++
 configure-target-libgloss: $(ALL_GCC)
@@ -1619,8 +1649,8 @@ all-libide: all-ilu
 all-libidetcl: all-tcl all-tk all-itcl all-ilu all-libgui all-libide
 # end-sanitize-ide
 # start-sanitize-java
-configure-target-libjava: $(ALL_GCC) configure-target-boehm-gc
-all-target-libjava: configure-target-libjava all-gcc all-target-newlib all-target-boehm-gc
+configure-target-libjava: $(ALL_GCC) configure-target-boehm-gc configure-target-qthreads
+all-target-libjava: configure-target-libjava all-gcc all-target-newlib all-target-boehm-gc all-target-qthreads
 # end-sanitize-java
 configure-target-librx: $(ALL_GCC) configure-target-newlib
 all-target-librx: configure-target-librx
@@ -1638,6 +1668,9 @@ all-opcodes: all-bfd all-libiberty
 all-patch: all-libiberty
 all-perl:
 all-prms: all-libiberty
+# start-sanitize-java
+all-target-qthreads: configure-target-qthreads
+# end-sanitize-java
 all-rcs:
 all-readline:
 all-recode: all-libiberty
@@ -1785,7 +1818,7 @@ taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) \
 	  mkdir proto-toplev/texinfo/util && \
 	  ln -s ../../../texinfo/util/tex3patch	proto-toplev/texinfo/util ; \
 	else true; fi
-	chmod og=u `find . -print`
+	chmod -R og=u . || chmod og=u `find . -print`
 	if grep AM_INIT_AUTOMAKE $(TOOL)/configure.in >/dev/null 2>&1; then \
 	  ver=`sed < $(TOOL)/configure.in -n 's/AM_INIT_AUTOMAKE[^,]*, *\([^)]*\))/\1/p'`; \
 	else \
