@@ -96,14 +96,6 @@ typedef int bfd_boolean;
 #define FALSE 0
 #define TRUE 1
 
-#if 0
-/* Poison.  */
-#undef false
-#undef true
-#define false dont_use_false_in_bfd
-#define true dont_use_true_in_bfd
-#endif
-
 #ifdef BFD64
 
 #ifndef BFD_HOST_64_BIT
