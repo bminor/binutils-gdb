@@ -1,3 +1,8 @@
+Thu Sep  9 15:05:34 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* read.c (get_stab_string_offset, s_stab_generic): If
+	BFD_ASSEMBLER, call subseg_set rather than subseg_new.
+
 Wed Sep  8 15:09:17 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/obj-elf.c (obj_elf_section): Set SEC_LOAD when using

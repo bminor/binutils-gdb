@@ -2745,7 +2745,7 @@ get_stab_string_offset (string, secname)
 /*	free (newsecname);*/
       }
 #ifdef BFD_ASSEMBLER
-      subseg_new ((char *) seg->name, save_subseg);
+      subseg_set (seg, save_subseg);
 #else
 /*      subseg_new (seg, save_subseg);  */
 #endif
@@ -2769,7 +2769,7 @@ get_stab_string_offset (string, secname)
 	  gdb_string_index++;
 	}
 #ifdef BFD_ASSEMBLER
-      subseg_new ((char *) save_seg->name, save_subseg);
+      subseg_set (save_seg, save_subseg);
 #else
 /*      subseg_new (save_seg, save_subseg);  */
 #endif
@@ -2928,12 +2928,16 @@ s_stab_generic (what, secname)
   if (goof)
     {
       ignore_rest_of_line ();
+#ifdef BFD_ASSEMBLER
+      subseg_set (saved_seg, saved_subseg);
+#else
       subseg_new (saved_seg, saved_subseg);
+#endif
       return;
     }
 
 #ifdef BFD_ASSEMBLER
-  subseg_new ((char *) seg->name, subseg);
+  subseg_set (seg, subseg);
 #endif
 
 #if 0  /* needed for elf only? */
@@ -2964,7 +2968,7 @@ s_stab_generic (what, secname)
       md_number_to_chars (p, 0, 4);
     }
 #ifdef BFD_ASSEMBLER
-  subseg_new ((char *) saved_seg->name, subseg);
+  subseg_set (saved_seg, subseg);
 #else
 /*  subseg_new (saved_seg, subseg);  */
 #endif
