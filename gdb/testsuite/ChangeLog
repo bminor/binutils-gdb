@@ -1,3 +1,12 @@
+2000-12-09  Michael Chastain  <chastain@redhat.com>
+
+	* gdb.base/break.exp (test_clear_command): Use a marker function
+	rather than 'main' for the test function.  Also move this
+	test to an execution point where the marker function names are
+	guaranteed to be bound to functions.  (Executing tests after a
+	'finish' from main runs into name conflicts with local names
+	in __libc_start_main).
+
 2000-12-07  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* gdb.base/finish.exp: New test for gdb's "finish" command.

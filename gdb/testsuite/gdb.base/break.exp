@@ -520,6 +520,15 @@ gdb_expect {
   timeout {fail "(timeout) clear current line has no breakpoint disallowed"}
 }
 
+# Verify that we can set and clear multiple breakpoints.
+#
+# We don't test that it deletes the correct breakpoints.  We do at
+# least test that it deletes more than one breakpoint.
+#
+gdb_test "break marker3" "Breakpoint.*at.*" "break marker3 #1"
+gdb_test "break marker3" "Breakpoint.*at.*" "break marker3 #2"
+gdb_test "clear marker3" {Deleted breakpoints [0-9]+ [0-9]+.*}
+
 # Verify that a breakpoint can be set via a convenience variable.
 #
 send_gdb "set \$foo=81\n"
@@ -706,15 +715,6 @@ if [istarget "hppa*-*-hpux*"] then {
 #********
 
 
-proc test_clear_command {} {
-    gdb_test "break main" "Breakpoint.*at.*" "break main #1"
-    gdb_test "break main" "Breakpoint.*at.*" "break main #2"
-
-    # We don't test that it deletes the correct breakpoints.  We do at
-    # least test that it deletes more than one breakpoint.
-    gdb_test "clear main" {Deleted breakpoints [0-9]+ [0-9]+.*}
-}
-
 #
 # Test "next" over recursive function call.
 #
@@ -802,7 +802,6 @@ proc test_next_with_recursion {} {
    gdb_stop_suppressing_tests;
 }
 
-test_clear_command
 test_next_with_recursion
 
 
