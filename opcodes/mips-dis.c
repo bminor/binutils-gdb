@@ -288,6 +288,13 @@ print_insn_arg (d, l, pc, info)
     case 'U':
       (*info->fprintf_func) (info->stream, "ACC");
       break;
+
+    case 'O':
+      delta = (l >> 6) & 0x7fff;
+      delta <<= 3;
+      (*info->print_address_func) (delta, info);
+      break;
+
     /* end-sanitize-r5900 */
 
     case 'T':
@@ -549,7 +556,7 @@ _print_insn_mips (memaddr, word, info)
 		    /* start-sanitize-r5900 */
 		    /* If this is an escape character, go ahead and print the
 		       next character in the arg string verbatim.  */
-		    if (*d == '%')
+		    if (*d == '#')
 		      {
 			d++;
 			(*info->fprintf_func) (info->stream, "%c", *d);

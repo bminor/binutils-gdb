@@ -40,7 +40,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 {"vaddax", "&UK,2K,1#x",	0x4a00003c, 0xfe0007ff,	0, 		T5},
 {"vadday", "&UK,2K,1#y",	0x4a00003d, 0xfe0007ff,	0, 		T5},
 {"vaddaz", "&UK,2K,1#z",	0x4a00003e, 0xfe0007ff,	0, 		T5},
-{"vcallms","p",		0x4a000038, 0xffe0003f,	0, 		T5},
+{"vcallms","O",		0x4a000038, 0xffe0003f,	0, 		T5},
 {"vcallmsr", "9",		0x4a009839, 0xffffffff,	0, 		T5},
 {"vclip","2",		0x4be001ff, 0xffff07ff,	0, 		T5},
 {"vdiv","Q,8,7",	0x4a0003bc, 0xfe0007ff,	0, 		T5},
