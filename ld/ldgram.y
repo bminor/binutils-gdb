@@ -102,8 +102,8 @@ static int error_index;
 %token <integer> SIZEOF NEXT ADDR
 %token STARTUP HLL SYSLIB FLOAT NOFLOAT
 %token ORIGIN FILL
-%token LENGTH CREATE_OBJECT_SYMBOLS INPUT OUTPUT CONSTRUCTORS
-%token ALIGNMOD AT
+%token LENGTH CREATE_OBJECT_SYMBOLS INPUT GROUP OUTPUT CONSTRUCTORS
+%token ALIGNMOD AT PROVIDE
 %type <token> assign_op 
 %type <name>  filename
 %token CHIP LIST SECT ABSOLUTE  LOAD NEWLINE ENDWORD ORDER NAMEWORD
@@ -249,6 +249,10 @@ ifile_p1:
 	|	FORCE_COMMON_ALLOCATION
 		{ command_line.force_common_definition = true ; }
 	|	INPUT '(' input_list ')'
+	|	GROUP
+		  { lang_enter_group (); }
+		    '(' input_list ')'
+		  { lang_leave_group (); }
      	|	MAP '(' filename ')'
 		{ lang_add_map($3); }
 	|	INCLUDE filename 
@@ -402,14 +406,20 @@ end:	';' | ','
 assignment:
 		NAME '=' mustbe_exp
 		{
-		  lang_add_assignment(exp_assop($2,$1,$3));
+		  lang_add_assignment (exp_assop ($2, $1, $3));
 		}
 	|	NAME assign_op mustbe_exp
 		{
-		
-lang_add_assignment(exp_assop('=',$1,exp_binop($2,exp_nameop(NAME,$1),$3)));
+		  lang_add_assignment (exp_assop ('=', $1,
+						  exp_binop ($2,
+							     exp_nameop (NAME,
+									 $1),
+							     $3)));
 		}
-		
+	|	PROVIDE '(' NAME '=' mustbe_exp ')'
+		{
+		  lang_add_assignment (exp_provide ($3, $5));
+		}
 	;
 
 
@@ -564,6 +574,8 @@ exp	:
 			{ $$ = exp_unop(ABSOLUTE, $3); }
 	|	ALIGN_K '(' exp ')'
 			{ $$ = exp_unop(ALIGN_K,$3); }
+	|	BLOCK '(' exp ')'
+			{ $$ = exp_unop(ALIGN_K,$3); }
 	|	NAME
 			{ $$ = exp_nameop(NAME,$1); }
 	;
@@ -618,8 +630,11 @@ void
 yyerror(arg) 
      const char *arg;
 { 
+  if (ldfile_assumed_script)
+    einfo ("%P:%s: file format not recognized; treating as linker script\n",
+	   ldfile_input_filename);
   if (error_index > 0 && error_index < ERROR_NAME_MAX)
-     einfo("%P%F: %S %s in %s\n", arg, error_names[error_index-1]);
+     einfo ("%P%F:%S: %s in %s\n", arg, error_names[error_index-1]);
   else
-     einfo("%P%F: %S %s\n", arg);
+     einfo ("%P%F:%S: %s\n", arg);
 }

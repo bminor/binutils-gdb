@@ -1,3 +1,38 @@
+Tue Sep 13 16:30:11 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* ldlang.c (load_symbols): Check for archive before object.  Use
+	bfd_check_format_matches, and, if ambiguous, print a list of
+	matching formats.  If file format is not recognized, treat file as
+	a linker script.
+	* ldgram.y (yyerror): If assuming an object file is a script,
+	mention that.  Tweak the format of the error messages.
+	* ldlex.l (lex_warn_invalid): If assuming an object is a script,
+	guess that this is not actually a script, and just report that the
+	file format was not recognized.
+	* ld.texinfo (Options): Admit that -( may be used more than once.
+	Add note that unrecognized object files are now treated as linker
+	scripts.
+
+	* ldfile.c (ldfile_input_filename): Make const.
+	(ldfile_assumed_script): New variable.
+	(try_open): Change arguments types to const.
+	(ldfile_find_command_file): Likewise.
+	(ldfile_open_command_file): Likewise.  Also, set lineno to 1.
+	* ldfile.h: Update declarations for ldfile.c changes.
+	* ldlex.l: Include <ctype.h>.
+	(file_name_stack): Change to be const char *.
+	(lineno_stack): New static variable.
+	(<<EOF>>): Set lineno as well as ldfile_input_filename.
+	(lex_push_file): Make name argument const.  Initialize
+	lineno_stack entry.
+	(lex_redirect): Initialize lineno_stack entry.
+	(lex_warn_invalid): Handle non printable characters nicely.
+	* ldlex.h (lex_push_file): Declare second argument as const.
+
+	* ldgram.y (ifile_p1): Recognize GROUP.
+	* ldlex.l: Recognize GROUP.
+	* ld.texinfo (Option Commands): Document GROUP.
+
 Mon Sep 12 17:04:27 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* config/m68klynx.mh: New file.

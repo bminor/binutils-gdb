@@ -72,10 +72,6 @@ static lang_input_statement_type *new_afile
 	   const char *target, boolean add_to_list));
 static void print_flags PARAMS ((int *ignore_flags));
 static void init_os PARAMS ((lang_output_section_statement_type *s));
-static void wild_doit PARAMS ((lang_statement_list_type *ptr,
-			       asection *section,
-			       lang_output_section_statement_type *output,
-			       lang_input_statement_type *file));
 static void wild_section PARAMS ((lang_wild_statement_type *ptr,
 				  const char *section,
 				  lang_input_statement_type *file,
@@ -628,7 +624,7 @@ init_os (s)
 
 */
 
-static void
+void
 wild_doit (ptr, section, output, file)
      lang_statement_list_type * ptr;
      asection * section;
@@ -752,27 +748,59 @@ static void
 load_symbols (entry)
      lang_input_statement_type *entry;
 {
+  char **matching;
+
   if (entry->loaded)
     return;
 
   ldfile_open_file (entry);
 
-  if (bfd_check_format (entry->the_bfd, bfd_object))
+  if (! bfd_check_format (entry->the_bfd, bfd_archive)
+      && ! bfd_check_format_matches (entry->the_bfd, bfd_object, &matching))
+    {
+      bfd_error_type err;
+
+      err = bfd_get_error ();
+      if (err == bfd_error_file_ambiguously_recognized)
+	{
+	  char **p;
+
+	  einfo ("%B: file not recognized: %E\n", entry->the_bfd);
+	  einfo ("%B: matching formats:", entry->the_bfd);
+	  for (p = matching; *p != NULL; p++)
+	    einfo (" %s", *p);
+	  einfo ("%F\n");
+	}
+      else if (err != bfd_error_file_not_recognized)
+	einfo ("%F%B: file not recognized: %E\n", entry->the_bfd);
+
+      /* Try to interpret the file as a linker script.  */
+
+      bfd_close (entry->the_bfd);
+      entry->the_bfd = NULL;
+
+      ldfile_open_command_file (entry->filename);
+
+      ldfile_assumed_script = true;
+      parser_input = input_script;
+      yyparse ();
+      ldfile_assumed_script = false;
+
+      return;
+    }
+
+  /* We don't call ldlang_add_file for an archive.  Instead, the
+     add_symbols entry point will call ldlang_add_file, via the
+     add_archive_element callback, for each element of the archive
+     which is used.  */
+  if (bfd_get_format (entry->the_bfd) == bfd_object)
     {
       ldlang_add_file (entry);
       if (trace_files || trace_file_tries)
 	info_msg ("%I\n", entry);
     }
-  else if (bfd_check_format (entry->the_bfd, bfd_archive))
-    {
-      /* There is nothing to do here; the add_symbols routine will
-	 call ldlang_add_file (via the add_archive_element callback)
-	 for each element of the archive which is used.  */
-    }
-  else
-    einfo ("%F%B: file not recognized: %E\n", entry->the_bfd);
 
-  if (bfd_link_add_symbols (entry->the_bfd, &link_info) == false)
+  if (! bfd_link_add_symbols (entry->the_bfd, &link_info))
     einfo ("%F%B: could not read symbols: %E\n", entry->the_bfd);
 
   entry->loaded = true;
@@ -1155,7 +1183,7 @@ print_output_section_statement (output_section_statement)
   print_nl ();
   if (output_section_statement->load_base)
     {
-      int b = exp_get_value_int(output_section_statement->load_base,
+      int b = exp_get_abs_int(output_section_statement->load_base,
 				0, "output base", lang_final_phase_enum);
       printf("Output address   %08x\n", b);
     }
@@ -1710,11 +1738,6 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 
 	 bfd_set_section_vma (0, os->bfd_section, dot);
 	 
-	 if (os->load_base) {
-	   os->bfd_section->lma 
-	     = exp_get_value_int(os->load_base, 0,"load base", lang_final_phase_enum);
-	 }
-
 	 os->bfd_section->output_offset = 0;
        }
 
@@ -1754,6 +1777,8 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	   }
 
        }
+
+
      }
 
       break;
@@ -1960,6 +1985,11 @@ lang_do_assignments (s, output_section_statement, fill, dot)
 					    os->fill, dot);
 		dot = os->bfd_section->vma + os->bfd_section->_raw_size;
 	      }
+	    if (os->load_base) 
+	      {
+		os->bfd_section->lma 
+		  = exp_get_abs_int(os->load_base, 0,"load base", lang_final_phase_enum);
+	      }
 	  }
 	  break;
 	case lang_wild_statement_enum:
@@ -2119,15 +2149,14 @@ lang_finish ()
     }
 }
 
-/* By now we know the target architecture, and we may have an */
-/* ldfile_output_machine_name */
+/* Check that the architecture of all the input files is compatible
+   with the output file.  */
+
 static void
 lang_check ()
 {
   lang_statement_union_type *file;
   bfd *input_bfd;
-  unsigned long input_machine;
-  enum bfd_architecture input_architecture;
   CONST bfd_arch_info_type *compatible;
 
   for (file = file_chain.head;
@@ -2135,36 +2164,12 @@ lang_check ()
        file = file->input_statement.next)
     {
       input_bfd = file->input_statement.the_bfd;
-
-      input_machine = bfd_get_mach (input_bfd);
-      input_architecture = bfd_get_arch (input_bfd);
-
-
-      /* Inspect the architecture and ensure we're linking like with
-         like */
-
       compatible = bfd_arch_get_compatible (input_bfd,
 					    output_bfd);
- 
-      if (compatible)
-	{
-	  ldfile_output_machine = compatible->mach;
-	  ldfile_output_architecture = compatible->arch;
-	}
-      else
-	{
-
-	  einfo ("%P: warning: %s architecture of input file `%B' is incompatible with %s output\n",
-		bfd_printable_name (input_bfd), input_bfd,
-		bfd_printable_name (output_bfd));
-
-	  if (! bfd_set_arch_mach (output_bfd,
-				   input_architecture,
-				   input_machine))
-	    einfo ("%P%F:%s: can't set architecture: %E\n",
-		   bfd_get_filename (output_bfd));
-	}
-
+      if (compatible == NULL)
+	einfo ("%P: warning: %s architecture of input file `%B' is incompatible with %s output\n",
+	       bfd_printable_name (input_bfd), input_bfd,
+	       bfd_printable_name (output_bfd));
     }
 }
 
@@ -2290,6 +2295,8 @@ lang_place_orphans ()
 				 default_common_section, file);
 		    }
 		}
+	      else if (ldemul_place_orphan (file, s))
+		;
 	      else
 		{
 		  lang_output_section_statement_type *os =

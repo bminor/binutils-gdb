@@ -177,8 +177,8 @@ ld [ -o @var{output} ]  @var{objfile}@dots{}
   [ -Map @var{mapfile} ]  [ -m @var{emulation} ]  [ -N | -n ]
   [ -noinhibit-exec ]  [ -oformat @var{output-format} ]
   [ -R @var{filename} ]  [ -relax ]  [ -retain-symbols-file @var{filename} ]
-  [ -r | -Ur ]  [ -rpath @var{dir} ] [ -S ]  [ -s ]  [ -sort-common ]
-  [ -stats ] [ -T @var{commandfile} ]
+  [ -r | -Ur ]  [ -rpath @var{dir} ] [ -S ]  [ -s ] [ -soname @var{name} ]
+  [ -sort-common ] [ -stats ] [ -T @var{commandfile} ]
   [ -Ttext @var{org} ]  [ -Tdata @var{org} ]
   [ -Tbss @var{org} ]  [ -t ] [ -traditional-format ]
   [ -u @var{symbol}]  [-V]  [-v]  [ -version ]
@@ -211,11 +211,13 @@ option.
 @ifclear SingleFormat
 The exceptions---which may meaningfully be used more than once---are
 @samp{-A}, @samp{-b} (or its synonym @samp{-format}), @samp{-defsym},
-@samp{-L}, @samp{-l}, @samp{-R}, and @samp{-u}.
+@samp{-L}, @samp{-l}, @samp{-R}, @samp{-u}, and @samp{-(} (or its
+synonym @samp{--start-group})..
 @end ifclear
 @ifset SingleFormat
 The exceptions---which may meaningfully be used more than once---are
-@samp{-A}, @samp{-defsym}, @samp{-L}, @samp{-l}, @samp{-R}, and @samp{-u}.
+@samp{-A}, @samp{-defsym}, @samp{-L}, @samp{-l}, @samp{-R}, @samp{-u},
+and @samp{-(} (or its synonym @samp{--start-group}).
 @end ifset
 
 @cindex object files
@@ -229,6 +231,14 @@ specify other forms of binary input files using @samp{-l}, @samp{-R},
 and the script command language.  If @emph{no} binary input files at all
 are specified, the linker does not produce any output, and issues the
 message @samp{No input files}.
+
+If the linker can not recognize the format of an object file, it will
+assume that it is a linker script.  A script specified in this way
+augments the main linker script used for the link (either the default
+linker script or the one specified by using @samp{-T}).  This feature
+permits the linker to link against a file which appears to be an object
+or an archive, but actually merely defines some symbol values, or uses
+@code{INPUT} or @code{GROUP} to load other objects.  @xref{Commands}.
 
 For options whose names are a single letter,
 option arguments must either follow the option letter without intervening
@@ -578,6 +588,17 @@ Omit debugger symbol information (but not all symbols) from the output file.
 @cindex strip all symbols
 @item -s 
 Omit all symbol information from the output file.
+
+@ifset GENERIC
+@item -soname @var{name}
+@cindex runtime library name
+@kindex -soname
+When creating an ELF shared object, set the internal DT_SONAME field to
+the specified name.  When an executable is linked with a shared object
+which has a DT_SONAME field, then when the executable is run the dynamic
+linker will attempt to load the shared object specified by the DT_SONAME
+field rather than the using the file name given to the linker.
+@end ifset
 
 @item -sort-common
 Normally, when @code{ld} places the global common symbols in the
@@ -1211,7 +1232,17 @@ SECTIONS @{ @dots{}
 @kindex Non constant expression
 @noindent
 will cause the error message ``@code{Non constant expression for initial
-address}''. 
+address}''.
+
+@cindex provide
+In some cases, it is desirable for a linker script to define a symbol
+only if it is referenced, and only if it is not defined by any object
+included in the link.  For example, traditional linkers defined the
+symbol @samp{etext}.  However, ANSI C requires that the user be able to
+use @samp{etext} as a function name without encountering an error.
+The @code{PROVIDE} keyword may be used to define a symbol, such as
+@samp{etext}, only if it is referenced but not defined.  The syntax is
+@code{PROVIDE(@var{symbol} = @var{expression})}.
 
 @node Arithmetic Functions
 @subsection Arithmetic Functions
@@ -2018,6 +2049,15 @@ required.
 search path, just as for files you specify on the command line.
 See the description of @samp{-L} in @ref{Options,,Command Line
 Options}.
+
+@kindex GROUP ( @var{files} )
+@cindex grouping input files
+@item GROUP ( @var{file}, @var{file}, @dots{} )
+@itemx GROUP ( @var{file} @var{file} @dots{} )
+This command is like @code{INPUT}, except that the named files should
+all be archives, and they are searched repeatedly until no new undefined
+references are created.  See the description of @samp{-(} in
+@ref{Options,,Command Line Options}.
 
 @ignore
 @item MAP ( @var{name} )
