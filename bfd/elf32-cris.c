@@ -58,7 +58,9 @@ static boolean cris_elf_print_private_bfd_data PARAMS ((bfd *, PTR));
 static boolean cris_elf_merge_private_bfd_data PARAMS ((bfd *, bfd *));
 
 struct elf_cris_link_hash_entry;
-static boolean elf_cris_discard_copies
+static boolean elf_cris_discard_excess_dso_dynamics
+  PARAMS ((struct elf_cris_link_hash_entry *, PTR));
+static boolean elf_cris_discard_excess_program_dynamics
   PARAMS ((struct elf_cris_link_hash_entry *, PTR));
 static boolean elf_cris_adjust_gotplt_to_got
   PARAMS ((struct elf_cris_link_hash_entry *, PTR));
@@ -931,7 +933,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      break;
 	    }
 
-	  /* We didn't make a PLT entry for this symbol, or everything is
+	  /* We didn't make a PLT entry for this symbol.  Maybe everything is
 	     folded into the GOT.  Other than folding, this happens when
 	     statically linking PIC code, or when using -Bsymbolic.  Check
 	     that we instead have a GOT entry as done for us by
@@ -971,14 +973,27 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		BFD_ASSERT (off != (bfd_vma) -1);
 
 		if (!elf_hash_table (info)->dynamic_sections_created
+		    || (! info->shared && h->dynindx == -1)
 		    || (info->shared
 			&& (info->symbolic || h->dynindx == -1)
 			&& (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
 		  {
+		    /* This wasn't checked above for ! info->shared, but
+		       must hold there if we get here; the symbol must not
+		       be used in, or defined by a DSO.  (Note that
+		       checking for ELF_LINK_HASH_DEF_REGULAR doesn't
+		       catch all cases.)  */
+		    BFD_ASSERT (info->shared
+				|| (h->elf_link_hash_flags
+				    & (ELF_LINK_HASH_REF_DYNAMIC
+				       | ELF_LINK_HASH_DEF_DYNAMIC)) == 0);
+
 		    /* This is actually a static link, or it is a
 		       -Bsymbolic link and the symbol is defined
 		       locally, or the symbol was forced to be local
-		       because of a version file.  We must initialize
+		       because of a version file, or we're not creating a
+		       dynamic object and the symbol isn't referred to by
+		       a dynamic object.  We must initialize
 		       this entry in the global offset table.  Since
 		       the offset must always be a multiple of 4, we
 		       use the least significant bit to record whether
@@ -1476,7 +1491,10 @@ elf_cris_finish_dynamic_symbol (output_bfd, info, h, sym)
 	}
     }
 
-  if (h->got.offset != (bfd_vma) -1)
+  /* We don't emit .got relocs for symbols that aren't in the
+     dynamic-symbols table for an ordinary program.  */
+  if (h->got.offset != (bfd_vma) -1
+      && (info->shared || h->dynindx != -1))
     {
       asection *sgot;
       asection *srela;
@@ -1835,10 +1853,10 @@ cris_elf_gc_sweep_hook (abfd, info, sec, relocs)
 
 /* Make sure we emit a GOT entry if the symbol was supposed to have a PLT
    entry but we found we will not create any.  Called when we find we will
-   not have any PLT for this symbol, by elf_cris_adjust_dynamic_symbol
-   when we're doing a proper dynamic link, or
-   elf_cris_size_dynamic_sections if no dynamic sections will be created
-   (we're only linking static objects).  */
+   not have any PLT for this symbol, by for example
+   elf_cris_adjust_dynamic_symbol when we're doing a proper dynamic link,
+   or elf_cris_size_dynamic_sections if no dynamic sections will be
+   created (we're only linking static objects).  */
 
 static boolean
 elf_cris_adjust_gotplt_to_got (h, p)
@@ -1864,9 +1882,7 @@ elf_cris_adjust_gotplt_to_got (h, p)
     }
   else
     {
-      /* No GOT entry for this symbol.  We need to create one.
-	 FIXME: This should be a *local* got, not a global one.
-	 Seriously.  */
+      /* No GOT entry for this symbol.  We need to create one.  */
       asection *sgot = bfd_get_section_by_name (dynobj, ".got");
       asection *srelgot
 	= bfd_get_section_by_name (dynobj, ".rela.got");
@@ -1945,7 +1961,7 @@ elf_cris_try_fold_plt_to_got (h, p)
 
   if (h->gotplt_refcount == h->root.plt.refcount)
     {
-      /* Th only PLT references are GOTPLT references, and there are GOT
+      /* The only PLT references are GOTPLT references, and there are GOT
 	 references.  Convert PLT to GOT references.  */
       if (! elf_cris_adjust_gotplt_to_got (h, info))
 	return false;
@@ -2017,7 +2033,8 @@ elf_cris_adjust_dynamic_symbol (info, h)
 	  /* This case can occur if we saw a PLT reloc in an input file,
 	     but the symbol was never referred to by a dynamic object.  In
 	     such a case, we don't actually need to build a procedure
-	     linkage table, and we can just do a PC reloc instead.  */
+	     linkage table, and we can just do a PC reloc instead, or
+	     change a .got.plt index to a .got index for GOTPLT relocs.  */
 	  BFD_ASSERT ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0);
 	  h->plt.offset = (bfd_vma) -1;
 
@@ -2068,9 +2085,9 @@ elf_cris_adjust_dynamic_symbol (info, h)
 	  h->root.u.def.value = s->_raw_size;
 	}
 
-      /* If there's already a GOT entry, use that, not a .got.plt.  The
-	 GOT fields still have a reference count when we get here; it's
-	 not yet changed to offsets.  */
+      /* If there's already a GOT entry, use that, not a .got.plt.  A
+	 GOT field still has a reference count when we get here; it's
+	 not yet changed to an offset.  */
       if (h->got.refcount > 0)
 	{
 	  h->got.refcount += h->plt.refcount;
@@ -2283,7 +2300,7 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 
       /* Some relocs require a global offset table (but perhaps not a
 	 specific GOT entry).  */
-      switch (ELF32_R_TYPE (rel->r_info))
+      switch (r_type)
 	{
 	case R_CRIS_16_GOT:
 	case R_CRIS_32_GOT:
@@ -2315,7 +2332,7 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 	  break;
 	}
 
-      switch (ELF32_R_TYPE (rel->r_info))
+      switch (r_type)
         {
 	case R_CRIS_16_GOTPLT:
 	case R_CRIS_32_GOTPLT:
@@ -2453,13 +2470,13 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 		   bfd_get_filename (bfd_my_archive (abfd)),
 		   bfd_get_filename (abfd),
 		   sec->name,
-		   cris_elf_howto_table[ELF32_R_TYPE (rel->r_info)].name);
+		   cris_elf_howto_table[r_type].name);
 	      else
 		(*_bfd_error_handler)
 		  (_("%s, section %s:\n  relocation %s should not be used in a shared object; recompile with -fPIC"),
 		   bfd_get_filename (abfd),
 		   sec->name,
-		   cris_elf_howto_table[ELF32_R_TYPE (rel->r_info)].name);
+		   cris_elf_howto_table[r_type].name);
 	    }
 	  /* Fall through.  */
 
@@ -2563,9 +2580,9 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 	     we can discard them again if the symbol is later defined by a
 	     regular object.  We know that h is really a pointer to an
 	     elf_cris_link_hash_entry.  */
-	  if ((ELF32_R_TYPE (rel->r_info) == R_CRIS_8_PCREL
-	       || ELF32_R_TYPE (rel->r_info) == R_CRIS_16_PCREL
-	       || ELF32_R_TYPE (rel->r_info) == R_CRIS_32_PCREL)
+	  if ((r_type == R_CRIS_8_PCREL
+	       || r_type == R_CRIS_16_PCREL
+	       || r_type == R_CRIS_32_PCREL)
 	      && info->symbolic)
 	    {
 	      struct elf_cris_link_hash_entry *eh;
@@ -2606,6 +2623,11 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
           if (!_bfd_elf32_gc_record_vtentry (abfd, sec, h, rel->r_addend))
             return false;
           break;
+
+	default:
+	  /* Other relocs do not appear here.  */
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
         }
     }
 
@@ -2661,10 +2683,15 @@ elf_cris_size_dynamic_sections (output_bfd, info)
      allocated space for them in the check_relocs routine, but we will not
      fill them in in the relocate_section routine.  We also discard space
      for relocs that have become for local symbols due to symbol
-     visibility changes.  */
+     visibility changes.  For programs, we discard space for relocs for
+     symbols not referenced by any dynamic object.  */
   if (info->shared)
     elf_cris_link_hash_traverse (elf_cris_hash_table (info),
-				 elf_cris_discard_copies,
+				 elf_cris_discard_excess_dso_dynamics,
+				 (PTR) info);
+  else
+    elf_cris_link_hash_traverse (elf_cris_hash_table (info),
+				 elf_cris_discard_excess_program_dynamics,
 				 (PTR) info);
 
   /* The check_relocs and adjust_dynamic_symbol entry points have
@@ -2832,7 +2859,7 @@ elf_cris_size_dynamic_sections (output_bfd, info)
    relocate_section routine.  */
 
 static boolean
-elf_cris_discard_copies (h, inf)
+elf_cris_discard_excess_dso_dynamics (h, inf)
      struct elf_cris_link_hash_entry *h;
      PTR inf;
 {
@@ -2847,7 +2874,53 @@ elf_cris_discard_copies (h, inf)
 	  || info->symbolic))
     {
       for (s = h->pcrel_relocs_copied; s != NULL; s = s->next)
-	s->section->_raw_size -= s->count * sizeof (Elf32_External_Rel);
+	s->section->_raw_size -= s->count * sizeof (Elf32_External_Rela);
+    }
+
+  return true;
+}
+
+/* This function is called via elf_cris_link_hash_traverse if we are *not*
+   creating a shared object.  We discard space for relocs for symbols put
+   in the .got, but which we found we do not have to resolve at run-time.  */
+
+static boolean
+elf_cris_discard_excess_program_dynamics (h, inf)
+     struct elf_cris_link_hash_entry *h;
+     PTR inf;
+{
+  struct bfd_link_info *info = (struct bfd_link_info *) inf;
+
+  /* If we're not creating a shared library and have a symbol which is
+     referred to by .got references, but the symbol is defined locally,
+     (or rather, not referred to by a DSO and not defined by a DSO) then
+     lose the reloc for the .got (don't allocate room for it).  */
+  if ((h->root.elf_link_hash_flags
+       & (ELF_LINK_HASH_REF_DYNAMIC | ELF_LINK_HASH_DEF_DYNAMIC)) == 0)
+    {
+      if (h->root.got.refcount > 0
+	  /* The size of this section is only valid and in sync with the
+	     various reference counts if we do dynamic; don't decrement it
+	     otherwise.  */
+	  && elf_hash_table (info)->dynamic_sections_created)
+	{
+	  bfd *dynobj = elf_hash_table (info)->dynobj;
+	  asection *srelgot;
+
+	  BFD_ASSERT (dynobj != NULL);
+	  
+	  srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
+
+	  BFD_ASSERT (srelgot != NULL);
+
+	  srelgot->_raw_size -= sizeof (Elf32_External_Rela);
+	}
+
+      /* If the locally-defined symbol isn't used by a DSO, then we don't
+	 have to export it as a dynamic symbol.  This was already done for
+	 functions; doing this for all symbols would presumably not
+	 introduce new problems.  */
+      h->root.dynindx = -1;
     }
 
   return true;

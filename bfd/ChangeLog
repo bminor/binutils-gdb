@@ -1,3 +1,21 @@
+2001-04-17  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c: Tweak comments related to dynamic linking.
+	(cris_elf_relocate_section): When not creating shared object, fill
+	in the .got table for any symbol not in the dynamic symbol table.
+	(elf_cris_finish_dynamic_symbol): When not creating shared object,
+	only emit a .got.rela reloc if the symbol is in the dynamic symbol
+	table.
+	(cris_elf_check_relocs): Use variable r_type in all places rather
+	than the original expression.  Add default case in switch for
+	reloc types.
+	(elf_cris_size_dynamic_sections): Iterate over
+	elf_cris_discard_excess_program_dynamics when not creating shared
+	library.
+ 	(elf_cris_discard_excess_dso_dynamics): Renamed from
+	elf_cris_discard_copies.  Correct typo, s/Rel/Rela/.
+	(elf_cris_discard_excess_program_dynamics): New.
+
 2001-04-14  Mark Elbrecht  <snowball3@bigfoot.com>
 
 	* coffcode.h (coff_write_object_contents): Use
