@@ -1,3 +1,7 @@
+Fri Jun 10 14:52:56 1994  Kung Hsu  (kung@mexican.cygnus.com)
+
+	* sparclite/Makefile.in: fix INCLUDE_CFLAGS to have {srcdir}/../config.
+
 Fri Jun 10 10:38:15 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* hppa-tdep.c (target_read_pc, target_write_pc): Accept (and
