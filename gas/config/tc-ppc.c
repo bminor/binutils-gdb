@@ -1580,31 +1580,29 @@ ppc_elf_suffix (str_p, exp_p)
 	  }
 
 	if (!ppc_obj64)
+	  if (exp_p->X_add_number != 0
+	      && (reloc == (int) BFD_RELOC_16_GOTOFF
+		  || reloc == (int) BFD_RELOC_LO16_GOTOFF
+		  || reloc == (int) BFD_RELOC_HI16_GOTOFF
+		  || reloc == (int) BFD_RELOC_HI16_S_GOTOFF))
+	    as_warn (_("identifier+constant@got means identifier@got+constant"));
+
+	/* Now check for identifier@suffix+constant.  */
+	if (*str == '-' || *str == '+')
 	  {
-	    if (exp_p->X_add_number != 0
-		&& (reloc == (int) BFD_RELOC_16_GOTOFF
-		    || reloc == (int) BFD_RELOC_LO16_GOTOFF
-		    || reloc == (int) BFD_RELOC_HI16_GOTOFF
-		    || reloc == (int) BFD_RELOC_HI16_S_GOTOFF))
-	      as_warn (_("identifier+constant@got means identifier@got+constant"));
+	    char *orig_line = input_line_pointer;
+	    expressionS new_exp;
 
-	    /* Now check for identifier@suffix+constant.  */
-	    if (*str == '-' || *str == '+')
+	    input_line_pointer = str;
+	    expression (&new_exp);
+	    if (new_exp.X_op == O_constant)
 	      {
-		char *orig_line = input_line_pointer;
-		expressionS new_exp;
-
-		input_line_pointer = str;
-		expression (&new_exp);
-		if (new_exp.X_op == O_constant)
-		  {
-		    exp_p->X_add_number += new_exp.X_add_number;
-		    str = input_line_pointer;
-		  }
-
-		if (&input_line_pointer != str_p)
-		  input_line_pointer = orig_line;
+		exp_p->X_add_number += new_exp.X_add_number;
+		str = input_line_pointer;
 	      }
+
+	    if (&input_line_pointer != str_p)
+	      input_line_pointer = orig_line;
 	  }
 	*str_p = str;
 

@@ -1,3 +1,8 @@
+2003-02-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c (ppc_elf_suffix): Undo part of last change so that
+	x@toc+off works.
+
 2003-02-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.c (mapping): Handle new TLS reloc specs.
