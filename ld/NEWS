@@ -1,6 +1,48 @@
-Changes since version 2.0
+-*- text -*-
+
+Changes since version 2.3:
+
+* New linker code, by Steve Chamberlain and Ian Taylor.  For a.out and ecoff
+  formats (so far), this should result in considerable savings in time
+  and memory used while linking; slightly poorer performance than
+  before for formats not converted yet.
+
+* Irix 5 support.
+
+* Command-line parsing is no longer done with flex.  This means
+  oddball characters in filenames won't get treated as argument
+  separators.
+
+* HP-PA ELF support, by Jeff Law.  (No SOM support yet.)
+
+* PowerPC and RS/6000 support, by Ian Taylor.
+
+* Mach i386 support, by David Mackenzie.
+
+Changes since version 2.2:
+
+* Weak symbols are now supported.
+
+* ELF support has been added.  The linker has been bootstrapped on
+  UnixWare and Solaris.
+
+* Alpha OSF/1 support has been added (non dynamic linking only).
+
+Changes since version 2.1:
+
+* The `bfd' library has been updated to reduce a.out-format string
+  table size.  The effect of this is that files linked from many input
+  files with duplicate symbols (`-g' debugging records, or identical
+  static symbols) should be much smaller.
+
+Changes since version 2.0:
 
 * The ld -ySYMBOL flag (to trace references to SYMBOL) is now implemented.
 
 * There is now support for writing ECOFF files, so ld and the
   other utilities should work on Risc/Ultrix and Irix.
+
+
+Local variables:
+fill-column: 79
+End:
