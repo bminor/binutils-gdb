@@ -1201,7 +1201,7 @@ gdb_print_insn_i386 (bfd_vma memaddr, disassemble_info *info)
 struct gdbarch *
 i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch_tdep *tdep
+  struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
 
   /* For the moment there is only one i386 architecture.  */
