@@ -1114,6 +1114,11 @@ coff_set_arch_mach_hook (abfd, filehdr)
 	}
       break;
 #endif
+#ifdef I860
+    case I860MAGIC:
+      arch = bfd_arch_i860;
+      break;
+#endif
 #ifdef I960
 #ifdef I960ROMAGIC
     case I960ROMAGIC:
@@ -1615,6 +1620,12 @@ coff_set_flags (abfd, magicp, flagsp)
       /* Just overwrite the usual value if we're doing Lynx. */
       *magicp = LYNXCOFFMAGIC;
 #endif
+      return true;
+      break;
+#endif
+#ifdef I860MAGIC
+    case bfd_arch_i860:
+      *magicp = I860MAGIC;
       return true;
       break;
 #endif
@@ -2207,6 +2218,11 @@ coff_write_object_contents (abfd)
       internal_a.magic = NMAGIC; /* Assume separate i/d */
 #define __A_MAGIC_SET__
 #endif /* A29K */
+#ifdef I860
+    /* FIXME: What are the a.out magic numbers for the i860?  */
+    internal_a.magic = 0;
+#define __A_MAGIC_SET__
+#endif /* I860 */
 #ifdef I960
     internal_a.magic = (magic == I960ROMAGIC ? NMAGIC : OMAGIC);
 #define __A_MAGIC_SET__

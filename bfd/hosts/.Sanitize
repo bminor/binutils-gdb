@@ -34,6 +34,7 @@ i386linux.h
 i386mach3.h
 i386nbsd.h
 i386sco.h
+i860mach3.h
 m68knbsd.h
 m88kmach3.h
 mipsbsd.h

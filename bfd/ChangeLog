@@ -1,3 +1,26 @@
+Mon Nov  6 17:13:15 1995  Harry Dolan  <dolan@ssd.intel.com>
+
+	* coff-i860.c: New file, based on coff-i386.c.
+	* cpu-i860.c: New file, based on cpu-i386.c.
+	* hosts/i860mach3.h: New file, based on hosts/i386mach3.h.
+	* config.bfd (i860-*-mach3*, i860-*-osf1*, i860-*-coff*): New
+	targets, using i860coff_vec.
+	* configure.in (i860-*-mach3*, i860-*-osf1*): New hosts, using
+	trad-core.o and hosts/i860mach3.h.
+	(i860coff_vec): Use coff-i860.o and cofflink.o.
+	* configure: Rebuild.
+	* Makefile.in: Rebuild dependencies.
+	(ALL_MACHINES): Add cpu-i860.o.
+	(BFD32_BACKENDS): Add coff-i860.o.
+	(CFILES): Add cpu-i860.c and coff-i860.c.
+	* targets.c (i860coff_vec): Declare.
+	(bfd_target_vector): Add &i860coff_vec.	
+	* archures.c (bfd_i860_arch): Declare.
+	(bfd_archures_list): Add &bfd_i860_arch.
+	* coffcode.h (coff_set_arch_mach_hook): Handle I860 magic number.
+	(coff_set_flags): Handle bfd_arch_i860.
+	(coff_write_object_contents): Handle I860 a.out magic number.
+
 Mon Nov  6 14:34:07 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* xcofflink.c (xcoff_link_add_symbols): Set the alignment power of

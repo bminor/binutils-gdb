@@ -1052,6 +1052,13 @@ EOF
 	;;
   i[345]86-*-isc*)	COREFILE=trad-core.o ;;
   i[345]86-*-aix*)	COREFILE=aix386-core.o ;;
+  i860-*-mach3* | i860-*-osf1*)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/i860mach3.h"
+EOF
+
+	;;
   mips-dec-bsd*)
 	COREFILE=trad-core.o
 	cat >> confdefs.h <<\EOF
@@ -1225,7 +1232,7 @@ EOF
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1229 "configure"
+#line 1236 "configure"
 #include "confdefs.h"
 #include <sys/procfs.h>
 int main() { return 0; }
@@ -1393,6 +1400,7 @@ do
     i386mach3_vec)		tb="$tb i386mach3.o aout32.o stab-syms.o" ;;
     i386netbsd_vec)		tb="$tb i386netbsd.o aout32.o stab-syms.o" ;;
     i386os9k_vec)		tb="$tb i386os9k.o aout32.o stab-syms.o" ;;
+    i860coff_vec)		tb="$tb coff-i860.o cofflink.o" ;;
     icoff_big_vec)		tb="$tb coff-i960.o cofflink.o" ;;
     icoff_little_vec)		tb="$tb coff-i960.o cofflink.o" ;;
     ieee_vec)			tb="$tb ieee.o" ;;
@@ -1510,7 +1518,7 @@ else
   ac_cv_func_mmap=no
 else
 cat > conftest.$ac_ext <<EOF
-#line 1514 "configure"
+#line 1522 "configure"
 #include "confdefs.h"
 
 /* Thanks to Mike Haertel and Jim Avera for this test. */
@@ -1609,7 +1617,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1613 "configure"
+#line 1621 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */

@@ -80,6 +80,7 @@ coff-go32.c
 coff-h8300.c
 coff-h8500.c
 coff-i386.c
+coff-i860.c
 coff-i960.c
 coff-m68k.c
 coff-m88k.c
@@ -111,6 +112,7 @@ cpu-h8300.c
 cpu-h8500.c
 cpu-hppa.c
 cpu-i386.c
+cpu-i860.c
 cpu-i960.c
 cpu-m68k.c
 cpu-m88k.c

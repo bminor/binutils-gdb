@@ -160,6 +160,10 @@ changequote(,)dnl
   i[345]86-*-isc*)	COREFILE=trad-core.o ;;
   i[345]86-*-aix*)	COREFILE=aix386-core.o ;;
 changequote([,])dnl
+  i860-*-mach3* | i860-*-osf1*)
+	COREFILE=trad-core.o
+	AC_DEFINE(TRAD_HEADER,"hosts/i860mach3.h")
+	;;
   mips-dec-bsd*)
 	COREFILE=trad-core.o
 	AC_DEFINE(TRAD_HEADER,"hosts/mipsbsd.h")
@@ -419,6 +423,7 @@ do
     i386mach3_vec)		tb="$tb i386mach3.o aout32.o stab-syms.o" ;;
     i386netbsd_vec)		tb="$tb i386netbsd.o aout32.o stab-syms.o" ;;
     i386os9k_vec)		tb="$tb i386os9k.o aout32.o stab-syms.o" ;;
+    i860coff_vec)		tb="$tb coff-i860.o cofflink.o" ;;
     icoff_big_vec)		tb="$tb coff-i960.o cofflink.o" ;;
     icoff_little_vec)		tb="$tb coff-i960.o cofflink.o" ;;
     ieee_vec)			tb="$tb ieee.o" ;;
