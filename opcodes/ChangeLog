@@ -1,3 +1,9 @@
+2002-08-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* v850-dis.c (disassemble): Remove bfd_mach_v850ea case.
+
+	* mips-dis.c (_print_insn_mips): Don't use hard-coded mach constants.
+
 2002-08-28  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* configure.in: Added bfd_tic4x_arch.

@@ -595,7 +595,7 @@ _print_insn_mips (memaddr, info, endianness)
 #endif
 
 #if SYMTAB_AVAILABLE
-  if (info->mach == 16
+  if (info->mach == bfd_mach_mips16
       || (info->flavour == bfd_target_elf_flavour
 	  && info->symbols != NULL
 	  && ((*(elf_symbol_type **) info->symbols)->internal_elf_sym.st_other
