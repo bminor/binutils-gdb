@@ -2112,11 +2112,11 @@ elf32_arm_set_private_flags (abfd, flags)
 	{
 	  if (flags & EF_ARM_INTERWORK)
 	    (*_bfd_error_handler) (_("\
-Warning: Not setting interwork flag of %s since it has already been specified as non-interworking"),
+Warning: Not setting interworking flag of %s since it has already been specified as non-interworking"),
 				   bfd_archive_filename (abfd));
 	  else
 	    _bfd_error_handler (_("\
-Warning: Clearing the interwork flag of %s due to outside request"),
+Warning: Clearing the interworking flag of %s due to outside request"),
 				bfd_archive_filename (abfd));
 	}
     }
@@ -2164,7 +2164,7 @@ elf32_arm_copy_private_bfd_data (ibfd, obfd)
 	{
 	  if (out_flags & EF_ARM_INTERWORK)
 	    _bfd_error_handler (_("\
-Warning: Clearing the interwork flag in %s because non-interworking code in %s has been linked with it"),
+Warning: Clearing the interworking flag of %s because non-interworking code in %s has been linked with it"),
 				bfd_get_filename (obfd),
 				bfd_archive_filename (ibfd));
 

@@ -2297,10 +2297,10 @@ coff_arm_merge_private_bfd_data (ibfd, obfd)
 
 	      if (INTERWORK_FLAG (ibfd))
 		/* xgettext: c-format */
-		msg = _("Warning: input file %s supports interworking, whereas %s does not.");
+		msg = _("Warning: %s supports interworking, whereas %s does not.");
 	      else
 		/* xgettext: c-format */
-		msg = _("Warning: input file %s does not support interworking, whereas %s does.");
+		msg = _("Warning: %s does not support interworking, whereas %s does.");
 
 	      _bfd_error_handler (msg, bfd_archive_filename (ibfd),
 				  bfd_get_filename (obfd));
@@ -2398,7 +2398,7 @@ _bfd_coff_arm_set_private_flags (abfd, flags)
     {
       if (flag)
 	/* xgettext: c-format */
-	_bfd_error_handler (_("Warning: Not setting interworking flag of %s, since it has already been specified as non-interworking"),
+	_bfd_error_handler (_("Warning: Not setting interworking flag of %s since it has already been specified as non-interworking"),
 			    bfd_archive_filename (abfd));
       else
 	/* xgettext: c-format */
@@ -2461,7 +2461,8 @@ coff_arm_copy_private_bfd_data (src, dest)
 	      if (INTERWORK_FLAG (dest))
 		{
 		  /* xgettext:c-format */
-		  _bfd_error_handler (("Warning: Clearing the interworking bit of %s, because the non-interworking code in %s has been copied into it"),
+		  _bfd_error_handler (("\
+Warning: Clearing the interworking flag of %s because non-interworking code in %s has been linked with it"),
 				      bfd_get_filename (dest),
 				      bfd_archive_filename (src));
 		}
