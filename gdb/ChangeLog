@@ -1,5 +1,9 @@
 2005-03-03  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* remote.c (remote_open_1): Call observer_notify_inferior_created.
+
+2005-03-03  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* arm-tdep.c (arm_make_stub_cache, arm_stub_this_id)
 	(arm_stub_unwind, arm_stub_unwind_sniffer): New.
 	(arm_gdbarch_init): Add arm_stub_unwind_sniffer.

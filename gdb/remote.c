@@ -1,7 +1,7 @@
 /* Remote target communications for serial-line targets in custom GDB protocol
 
    Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -2311,6 +2311,8 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
       remote_check_symbols (symfile_objfile);
     }
 #endif
+
+  observer_notify_inferior_created (&current_target, from_tty);
 }
 
 /* This takes a program previously attached to and detaches it.  After
