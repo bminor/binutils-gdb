@@ -907,8 +907,8 @@ d10v_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   /* If get_frame_pc (fi) is zero, but this is not the outermost frame, 
      then let's snatch the return_pc from the callee, so that
      DEPRECATED_PC_IN_CALL_DUMMY will work.  */
-  if (get_frame_pc (fi) == 0 && fi->level != 0 && fi->next != NULL)
-    deprecated_update_frame_pc_hack (fi, d10v_frame_saved_pc (fi->next));
+  if (get_frame_pc (fi) == 0 && fi->level != 0 && get_next_frame (fi) != NULL)
+    deprecated_update_frame_pc_hack (fi, d10v_frame_saved_pc (get_next_frame (fi)));
 
   /* The call dummy doesn't save any registers on the stack, so we can
      return now.  */

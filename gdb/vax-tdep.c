@@ -170,9 +170,10 @@ vax_sigtramp_saved_pc (struct frame_info *frame)
 
   buf = alloca (ptrbytes);
   /* Get sigcontext address, it is the third parameter on the stack.  */
-  if (frame->next)
+  if (get_next_frame (frame))
     sigcontext_addr = read_memory_typed_address
-      (FRAME_ARGS_ADDRESS (frame->next) + FRAME_ARGS_SKIP + sigcontext_offs,
+      (FRAME_ARGS_ADDRESS (get_next_frame (frame))
+       + FRAME_ARGS_SKIP + sigcontext_offs,
        builtin_type_void_data_ptr);
   else
     sigcontext_addr = read_memory_typed_address
@@ -205,8 +206,8 @@ vax_frame_args_address_correct (struct frame_info *frame)
      (which is one reason that "info frame" exists).  So, return 0 (indicating
      we don't know the address of the arglist) if we don't know what frame
      this frame calls.  */
-  if (frame->next)
-    return (read_memory_integer (get_frame_base (frame->next) + 8, 4));
+  if (get_next_frame (frame))
+    return (read_memory_integer (get_frame_base (get_next_frame (frame)) + 8, 4));
 
   return (0);
 }
@@ -217,8 +218,8 @@ vax_frame_args_address (struct frame_info *frame)
   /* In most of GDB, getting the args address is too important to
      just say "I don't know".  This is sometimes wrong for functions
      that aren't on top of the stack, but c'est la vie.  */
-  if (frame->next)
-    return (read_memory_integer (get_frame_base (frame->next) + 8, 4));
+  if (get_next_frame (frame))
+    return (read_memory_integer (get_frame_base (get_next_frame (frame)) + 8, 4));
 
   return (read_register (VAX_AP_REGNUM));
 }

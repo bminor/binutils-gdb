@@ -992,7 +992,7 @@ arm_find_callers_reg (struct frame_info *fi, int regnum)
   /* NOTE: cagney/2002-05-03: This function really shouldn't be
      needed.  Instead the (still being written) register unwind
      function could be called directly.  */
-  for (; fi; fi = fi->next)
+  for (; fi; fi = get_next_frame (fi))
     {
       if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), 0, 0))
 	{
@@ -1089,24 +1089,24 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   fi->extra_info->frameoffset = 0;
   fi->extra_info->framereg = 0;
 
-  if (fi->next)
-    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (fi->next));
+  if (get_next_frame (fi))
+    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (get_next_frame (fi)));
 
   memset (get_frame_saved_regs (fi), '\000', sizeof get_frame_saved_regs (fi));
 
   /* Compute stack pointer for this frame.  We use this value for both
      the sigtramp and call dummy cases.  */
-  if (!fi->next)
+  if (!get_next_frame (fi))
     sp = read_sp();
-  else if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi->next), 0, 0))
+  else if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (get_next_frame (fi)), 0, 0))
     /* For generic dummy frames, pull the value direct from the frame.
        Having an unwind function to do this would be nice.  */
-    sp = deprecated_read_register_dummy (get_frame_pc (fi->next),
-					 get_frame_base (fi->next),
+    sp = deprecated_read_register_dummy (get_frame_pc (get_next_frame (fi)),
+					 get_frame_base (get_next_frame (fi)),
 					 ARM_SP_REGNUM);
   else
-    sp = (get_frame_base (fi->next) - fi->next->extra_info->frameoffset
-	  + fi->next->extra_info->framesize);
+    sp = (get_frame_base (get_next_frame (fi)) - get_next_frame (fi)->extra_info->frameoffset
+	  + get_next_frame (fi)->extra_info->framesize);
 
   /* Determine whether or not we're in a sigtramp frame.
      Unfortunately, it isn't sufficient to test (get_frame_type (fi)
@@ -1142,13 +1142,13 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
     {
       arm_scan_prologue (fi);
 
-      if (!fi->next)
+      if (!get_next_frame (fi))
 	/* This is the innermost frame?  */
 	deprecated_update_frame_base_hack (fi, read_register (fi->extra_info->framereg));
-      else if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi->next), 0, 0))
+      else if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (get_next_frame (fi)), 0, 0))
 	/* Next inner most frame is a dummy, just grab its frame.
            Dummy frames always have the same FP as their caller.  */
-	deprecated_update_frame_base_hack (fi, get_frame_base (fi->next));
+	deprecated_update_frame_base_hack (fi, get_frame_base (get_next_frame (fi)));
       else if (fi->extra_info->framereg == ARM_FP_REGNUM
 	       || fi->extra_info->framereg == THUMB_FP_REGNUM)
 	{

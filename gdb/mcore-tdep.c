@@ -385,7 +385,7 @@ mcore_analyze_prologue (struct frame_info *fi, CORE_ADDR pc, int skip_prologue)
   if (fi != NULL && IS_RTS (insn))
     {
       mcore_insn_debug (("MCORE: got jmp r15"));
-      if (fi->next == NULL)
+      if (get_next_frame (fi) == NULL)
 	deprecated_update_frame_base_hack (fi, read_sp ());
       return get_frame_pc (fi);
     }
@@ -393,7 +393,7 @@ mcore_analyze_prologue (struct frame_info *fi, CORE_ADDR pc, int skip_prologue)
   /* Check for first insn of prologue */
   if (fi != NULL && get_frame_pc (fi) == func_addr)
     {
-      if (fi->next == NULL)
+      if (get_next_frame (fi) == NULL)
 	deprecated_update_frame_base_hack (fi, read_sp ());
       return get_frame_pc (fi);
     }
@@ -613,7 +613,7 @@ mcore_analyze_prologue (struct frame_info *fi, CORE_ADDR pc, int skip_prologue)
       /* Fix the frame pointer. When gcc uses r8 as a frame pointer,
          it is really an arg ptr. We adjust fi->frame to be a "real"
          frame pointer. */
-      if (fi->next == NULL)
+      if (get_next_frame (fi) == NULL)
 	{
 	  if (fi->extra_info->status & MY_FRAME_IN_SP)
 	    deprecated_update_frame_base_hack (fi, read_sp () + framesize);
@@ -756,7 +756,7 @@ mcore_virtual_frame_pointer (CORE_ADDR pc, int *reg, LONGEST *offset)
 CORE_ADDR
 mcore_find_callers_reg (struct frame_info *fi, int regnum)
 {
-  for (; fi != NULL; fi = fi->next)
+  for (; fi != NULL; fi = get_next_frame (fi))
     {
       if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
 				       get_frame_base (fi)))
@@ -1044,8 +1044,8 @@ mcore_store_return_value (struct type *type, char *valbuf)
 void
 mcore_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
-  if (fi && fi->next)
-    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (fi->next));
+  if (fi && get_next_frame (fi))
+    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (get_next_frame (fi)));
 
   frame_saved_regs_zalloc (fi);
 

@@ -803,8 +803,8 @@ xstormy16_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 	     Fortunately this will never happen from the outermost
 	     frame, so we should be able to get the saved pc from
 	     the next frame. */
-	  if (fi->next)
-	    deprecated_update_frame_pc_hack (fi, xstormy16_frame_saved_pc (fi->next));
+	  if (get_next_frame (fi))
+	    deprecated_update_frame_pc_hack (fi, xstormy16_frame_saved_pc (get_next_frame (fi)));
 	}
 
       /* Take care of the saved_regs right here (non-lazy). */

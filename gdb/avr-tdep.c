@@ -734,8 +734,8 @@ avr_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   int reg;
 
-  if (fi->next)
-    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (fi->next));
+  if (get_next_frame (fi))
+    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (get_next_frame (fi)));
 
   frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
   frame_saved_regs_zalloc (fi);
@@ -757,12 +757,12 @@ avr_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       deprecated_update_frame_base_hack (fi, deprecated_read_register_dummy (get_frame_pc (fi), get_frame_base (fi),
 									     AVR_PC_REGNUM));
     }
-  else if (!fi->next)		/* this is the innermost frame? */
+  else if (!get_next_frame (fi))		/* this is the innermost frame? */
     deprecated_update_frame_base_hack (fi, read_register (fi->extra_info->framereg));
   else if (fi->extra_info->is_main != 1)	/* not the innermost frame, not `main' */
     /* If we have an next frame,  the callee saved it. */
     {
-      struct frame_info *next_fi = fi->next;
+      struct frame_info *next_fi = get_next_frame (fi);
       if (fi->extra_info->framereg == AVR_SP_REGNUM)
 	deprecated_update_frame_base_hack (fi, get_frame_base (next_fi) + 2 /* ret addr */ + next_fi->extra_info->framesize);
       /* FIXME: I don't analyse va_args functions  */
@@ -773,7 +773,7 @@ avr_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 	  unsigned int fp_low, fp_high;
 
 	  /* Scan all frames */
-	  for (; next_fi; next_fi = next_fi->next)
+	  for (; next_fi; next_fi = get_next_frame (next_fi))
 	    {
 	      /* look for saved AVR_FP_REGNUM */
 	      if (get_frame_saved_regs (next_fi)[AVR_FP_REGNUM] && !fp)

@@ -1201,10 +1201,10 @@ cris_frame_init_saved_regs (struct frame_info *fi)
 void
 cris_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
-  if (fi->next)
+  if (get_next_frame (fi))
     {
       /* Called from get_prev_frame.  */
-      deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (fi->next));
+      deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (get_next_frame (fi)));
     }
  
   frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));

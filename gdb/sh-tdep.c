@@ -995,7 +995,7 @@ sh64_frame_chain (struct frame_info *frame)
 static CORE_ADDR
 sh_find_callers_reg (struct frame_info *fi, int regnum)
 {
-  for (; fi; fi = fi->next)
+  for (; fi; fi = get_next_frame (fi))
     if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
 				     get_frame_base (fi)))
       /* When the caller requests PR from the dummy frame, we return PC because
@@ -1019,7 +1019,7 @@ sh64_get_saved_pr (struct frame_info *fi, int pr_regnum)
 {
   int media_mode = 0;
 
-  for (; fi; fi = fi->next)
+  for (; fi; fi = get_next_frame (fi))
     if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
 				     get_frame_base (fi)))
       /* When the caller requests PR from the dummy frame, we return PC because
@@ -1732,8 +1732,8 @@ sh_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
   frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
 
-  if (fi->next)
-    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (fi->next));
+  if (get_next_frame (fi))
+    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (get_next_frame (fi)));
 
   if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
 				   get_frame_base (fi)))
@@ -1764,8 +1764,8 @@ sh64_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
   frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
 
-  if (fi->next) 
-    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (fi->next));
+  if (get_next_frame (fi)) 
+    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (get_next_frame (fi)));
 
   if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
 				   get_frame_base (fi)))
@@ -1823,7 +1823,7 @@ sh64_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
      the current frame itself: otherwise, we would be getting the
      previous frame's registers which were saved by the current frame.  */
 
-  while (frame && ((frame = frame->next) != NULL))
+  while (frame && ((frame = get_next_frame (frame)) != NULL))
     {
       if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
 				       get_frame_base (frame),

@@ -499,7 +499,8 @@ i386_get_frame_setup (CORE_ADDR pc)
 int
 i386_frameless_signal_p (struct frame_info *frame)
 {
-  return (frame->next && get_frame_type (frame->next) == SIGTRAMP_FRAME
+  return (get_next_frame (frame)
+	  && get_frame_type (get_next_frame (frame)) == SIGTRAMP_FRAME
 	  && (frameless_look_for_prologue (frame)
 	      || get_frame_pc (frame) == get_pc_function_start (get_frame_pc (frame))));
 }
@@ -581,7 +582,7 @@ i386_frame_saved_pc (struct frame_info *frame)
 
   if (i386_frameless_signal_p (frame))
     {
-      CORE_ADDR sp = i386_sigtramp_saved_sp (frame->next);
+      CORE_ADDR sp = i386_sigtramp_saved_sp (get_next_frame (frame));
       return read_memory_unsigned_integer (sp, 4);
     }
 
@@ -1370,8 +1371,8 @@ i386_svr4_sigcontext_addr (struct frame_info *frame)
 
   gdb_assert (sigcontext_offset != -1);
 
-  if (frame->next)
-    return get_frame_base (frame->next) + sigcontext_offset;
+  if (get_next_frame (frame))
+    return get_frame_base (get_next_frame (frame)) + sigcontext_offset;
   return read_register (SP_REGNUM) + sigcontext_offset;
 }
 

@@ -296,13 +296,15 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   frame_saved_regs_zalloc (fi);
 
   fi->extra_info->bottom =
-    (fi->next ?
-     (get_frame_base (fi) == get_frame_base (fi->next) ? fi->next->extra_info->bottom : 
-      get_frame_base (fi->next)) : read_sp ());
+    (get_next_frame (fi)
+     ? (get_frame_base (fi) == get_frame_base (get_next_frame (fi))
+	? get_next_frame (fi)->extra_info->bottom
+	: get_frame_base (get_next_frame (fi)))
+     : read_sp ());
 
   /* If fi->next is NULL, then we already set ->frame by passing read_fp()
      to create_new_frame.  */
-  if (fi->next)
+  if (get_next_frame (fi))
     {
       char *buf;
 
@@ -310,15 +312,15 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
       /* Compute ->frame as if not flat.  If it is flat, we'll change
          it later.  */
-      if (fi->next->next != NULL
-	  && ((get_frame_type (fi->next->next) == SIGTRAMP_FRAME)
-	      || deprecated_frame_in_dummy (fi->next->next))
-	  && frameless_look_for_prologue (fi->next))
+      if (get_next_frame (get_next_frame (fi)) != NULL
+	  && ((get_frame_type (get_next_frame (get_next_frame (fi))) == SIGTRAMP_FRAME)
+	      || deprecated_frame_in_dummy (get_next_frame (get_next_frame (fi))))
+	  && frameless_look_for_prologue (get_next_frame (fi)))
 	{
 	  /* A frameless function interrupted by a signal did not change
 	     the frame pointer, fix up frame pointer accordingly.  */
-	  deprecated_update_frame_base_hack (fi, get_frame_base (fi->next));
-	  fi->extra_info->bottom = fi->next->extra_info->bottom;
+	  deprecated_update_frame_base_hack (fi, get_frame_base (get_next_frame (fi)));
+	  fi->extra_info->bottom = get_next_frame (fi)->extra_info->bottom;
 	}
       else
 	{
@@ -415,11 +417,11 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 	    }
 	}
     }
-  if (fi->next && get_frame_base (fi) == 0)
+  if (get_next_frame (fi) && get_frame_base (fi) == 0)
     {
       /* Kludge to cause init_prev_frame_info to destroy the new frame.  */
-      deprecated_update_frame_base_hack (fi, get_frame_base (fi->next));
-      deprecated_update_frame_pc_hack (fi, get_frame_pc (fi->next));
+      deprecated_update_frame_base_hack (fi, get_frame_base (get_next_frame (fi)));
+      deprecated_update_frame_pc_hack (fi, get_frame_pc (get_next_frame (fi)));
     }
 }
 
@@ -483,9 +485,9 @@ sparc_frame_saved_pc (struct frame_info *frame)
       return extract_address (scbuf, sizeof (scbuf));
     }
   else if (frame->extra_info->in_prologue ||
-	   (frame->next != NULL &&
-	    ((get_frame_type (frame->next) == SIGTRAMP_FRAME) ||
-	     deprecated_frame_in_dummy (frame->next)) &&
+	   (get_next_frame (frame) != NULL &&
+	    ((get_frame_type (get_next_frame (frame)) == SIGTRAMP_FRAME) ||
+	     deprecated_frame_in_dummy (get_next_frame (frame))) &&
 	    frameless_look_for_prologue (frame)))
     {
       /* A frameless function interrupted by a signal did not save
@@ -822,7 +824,7 @@ sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
     }
 
 
-  frame1 = frame->next;
+  frame1 = get_next_frame (frame);
 
   /* Get saved PC from the frame info if not in innermost frame.  */
   if (regnum == PC_REGNUM && frame1 != NULL)
@@ -927,7 +929,7 @@ sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 	}
       if (addr != 0)
 	break;
-      frame1 = frame1->next;
+      frame1 = get_next_frame (frame1);
     }
   if (addr != 0)
     {
@@ -1181,7 +1183,7 @@ sparc_frame_find_saved_regs (struct frame_info *fi, CORE_ADDR *saved_regs_addr)
 	  (frame_addr + (regnum - I0_REGNUM) * SPARC_INTREG_SIZE
 	   + FRAME_SAVED_I0);
     }
-  if (fi->next)
+  if (get_next_frame (fi))
     {
       if (fi->extra_info->flat)
 	{
@@ -1191,8 +1193,8 @@ sparc_frame_find_saved_regs (struct frame_info *fi, CORE_ADDR *saved_regs_addr)
 	{
 	  /* Pull off either the next frame pointer or the stack pointer */
 	  CORE_ADDR next_next_frame_addr =
-	  (fi->next->extra_info->bottom ?
-	   fi->next->extra_info->bottom : read_sp ());
+	  (get_next_frame (fi)->extra_info->bottom ?
+	   get_next_frame (fi)->extra_info->bottom : read_sp ());
 	  for (regnum = O0_REGNUM; regnum < O0_REGNUM + 8; regnum++)
 	    saved_regs_addr[regnum] =
 	      (next_next_frame_addr

@@ -1449,7 +1449,8 @@ mips_find_saved_regs (struct frame_info *fci)
 				   a signal, we assume that all registers have been saved.
 				   This assumes that all register saves in a function happen before
 				   the first function call.  */
-       (fci->next == NULL || (get_frame_type (fci->next) == SIGTRAMP_FRAME))
+       (get_next_frame (fci) == NULL
+	|| (get_frame_type (get_next_frame (fci)) == SIGTRAMP_FRAME))
 
   /* In a dummy frame we know exactly where things are saved.  */
        && !PROC_DESC_IS_DUMMY (proc_desc)
@@ -1680,8 +1681,11 @@ mips_init_frame_pc_first (int fromleaf, struct frame_info *prev)
 {
   CORE_ADDR pc, tmp;
 
-  pc = ((fromleaf) ? SAVED_PC_AFTER_CALL (prev->next) :
-	prev->next ? FRAME_SAVED_PC (prev->next) : read_pc ());
+  pc = ((fromleaf)
+	? SAVED_PC_AFTER_CALL (get_next_frame (prev))
+	: get_next_frame (prev)
+	? FRAME_SAVED_PC (get_next_frame (prev))
+	: read_pc ());
   tmp = SKIP_TRAMPOLINE_CODE (pc);
   return tmp ? tmp : pc;
 }
@@ -2466,7 +2470,9 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
 
   /* Use proc_desc calculated in frame_chain */
   mips_extra_func_info_t proc_desc =
-    fci->next ? cached_proc_desc : find_proc_desc (get_frame_pc (fci), fci->next, 1);
+    get_next_frame (fci)
+    ? cached_proc_desc
+    : find_proc_desc (get_frame_pc (fci), get_next_frame (fci), 1);
 
   frame_extra_info_zalloc (fci, sizeof (struct frame_extra_info));
 
@@ -2481,7 +2487,7 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
          interrupted by a signal at it's very start.  */
       if (get_frame_pc (fci) == PROC_LOW_ADDR (proc_desc)
 	  && !PROC_DESC_IS_DUMMY (proc_desc))
-	deprecated_update_frame_base_hack (fci, read_next_frame_reg (fci->next, SP_REGNUM));
+	deprecated_update_frame_base_hack (fci, read_next_frame_reg (get_next_frame (fci), SP_REGNUM));
       else if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fci), 0, 0))
 	/* Do not ``fix'' fci->frame.  It will have the value of the
            generic dummy frame's top-of-stack (since the draft
@@ -2491,7 +2497,7 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
            part of the dummy frames data.  */
 	/* Do nothing.  */;
       else
-	deprecated_update_frame_base_hack (fci, get_frame_pointer (fci->next, proc_desc));
+	deprecated_update_frame_base_hack (fci, get_frame_pointer (get_next_frame (fci), proc_desc));
 
       if (proc_desc == &temp_proc_desc)
 	{

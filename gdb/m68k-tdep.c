@@ -283,8 +283,8 @@ m68k_frame_saved_pc (struct frame_info *frame)
 {
   if (get_frame_type (frame) == SIGTRAMP_FRAME)
     {
-      if (frame->next)
-	return read_memory_unsigned_integer (get_frame_base (frame->next)
+      if (get_next_frame (frame))
+	return read_memory_unsigned_integer (get_frame_base (get_next_frame (frame))
 					     + SIG_PC_FP_OFFSET, 4);
       else
 	return read_memory_unsigned_integer (read_register (SP_REGNUM)
@@ -336,8 +336,8 @@ delta68_frame_args_address (struct frame_info *frame_info)
   else if (frameless_look_for_prologue (frame_info))
     {
       /* Check for an interrupted system call */
-      if (frame_info->next && (get_frame_type (frame_info->next) == SIGTRAMP_FRAME))
-	return get_frame_base (frame_info->next) + 16;
+      if (get_next_frame (frame_info) && (get_frame_type (get_next_frame (frame_info)) == SIGTRAMP_FRAME))
+	return get_frame_base (get_next_frame (frame_info)) + 16;
       else
 	return get_frame_base (frame_info) + 4;
     }

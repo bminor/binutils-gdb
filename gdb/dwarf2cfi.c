@@ -1776,9 +1776,9 @@ cfi_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   memset (UNWIND_CONTEXT (fi)->reg, 0,
 	  sizeof (struct context_reg) * NUM_REGS);
 
-  if (fi->next)
+  if (get_next_frame (fi))
     {
-      context_cpy (UNWIND_CONTEXT (fi), UNWIND_CONTEXT (fi->next));
+      context_cpy (UNWIND_CONTEXT (fi), UNWIND_CONTEXT (get_next_frame (fi)));
       frame_state_for (UNWIND_CONTEXT (fi), fs);
       update_context (UNWIND_CONTEXT (fi), fs, 1);
     }
@@ -1823,7 +1823,7 @@ cfi_get_saved_register (char *raw_buffer,
   if (addrp)			/* default assumption: not found in memory */
     *addrp = 0;
 
-  if (!frame->next)
+  if (!get_next_frame (frame))
     {
       deprecated_read_register_gen (regnum, raw_buffer);
       if (lval != NULL)
@@ -1833,7 +1833,7 @@ cfi_get_saved_register (char *raw_buffer,
     }
   else
     {
-      frame = frame->next;
+      frame = get_next_frame (frame);
       switch (UNWIND_CONTEXT (frame)->reg[regnum].how)
 	{
 	case REG_CTX_UNSAVED:

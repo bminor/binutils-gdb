@@ -537,8 +537,8 @@ h8300_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       
       if (!get_frame_pc (fi))
         {
-	  if (fi->next)
-	    deprecated_update_frame_pc_hack (fi, h8300_frame_saved_pc (fi->next));
+	  if (get_next_frame (fi))
+	    deprecated_update_frame_pc_hack (fi, h8300_frame_saved_pc (get_next_frame (fi)));
 	}
       h8300_frame_init_saved_regs (fi);
     }

@@ -207,7 +207,7 @@ mn10300_breakpoint_from_pc (CORE_ADDR *bp_addr, int *bp_size)
 static void
 fix_frame_pointer (struct frame_info *fi, int stack_size)
 {
-  if (fi && fi->next == NULL)
+  if (fi && get_next_frame (fi) == NULL)
     {
       if (fi->extra_info->status & MY_FRAME_IN_SP)
 	deprecated_update_frame_base_hack (fi, read_sp () - stack_size);
@@ -436,7 +436,7 @@ mn10300_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
      In this case fi->frame is bogus, we need to fix it.  */
   if (fi && buf[0] == 0xf0 && buf[1] == 0xfc)
     {
-      if (fi->next == NULL)
+      if (get_next_frame (fi) == NULL)
 	deprecated_update_frame_base_hack (fi, read_sp ());
       return get_frame_pc (fi);
     }
@@ -445,7 +445,7 @@ mn10300_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
      frame hasn't been allocated yet.  */
   if (fi && get_frame_pc (fi) == func_addr)
     {
-      if (fi->next == NULL)
+      if (get_next_frame (fi) == NULL)
 	deprecated_update_frame_base_hack (fi, read_sp ());
       return get_frame_pc (fi);
     }
@@ -494,7 +494,7 @@ mn10300_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
       if (addr >= stop)
 	{
 	  /* Fix fi->frame since it's bogus at this point.  */
-	  if (fi && fi->next == NULL)
+	  if (fi && get_next_frame (fi) == NULL)
 	    deprecated_update_frame_base_hack (fi, read_sp ());
 
 	  /* Note if/where callee saved registers were saved.  */
@@ -507,7 +507,7 @@ mn10300_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
       if (status != 0)
 	{
 	  /* Fix fi->frame since it's bogus at this point.  */
-	  if (fi && fi->next == NULL)
+	  if (fi && get_next_frame (fi) == NULL)
 	    deprecated_update_frame_base_hack (fi, read_sp ());
 
 	  /* Note if/where callee saved registers were saved.  */
@@ -897,8 +897,8 @@ mn10300_frame_saved_pc (struct frame_info *fi)
 static void
 mn10300_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
-  if (fi->next)
-    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (fi->next));
+  if (get_next_frame (fi))
+    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (get_next_frame (fi)));
 
   frame_saved_regs_zalloc (fi);
   frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));

@@ -316,18 +316,19 @@ s390_get_frame_info (CORE_ADDR pc, struct frame_extra_info *fextra_info,
       if (instr[0] == S390_SYSCALL_OPCODE && test_pc == pc)
 	{
 	  good_prologue = 1;
-	  if (saved_regs && fextra_info && fi->next && fi->next->extra_info
-	      && fi->next->extra_info->sigcontext)
+	  if (saved_regs && fextra_info && get_next_frame (fi)
+	      && get_next_frame (fi)->extra_info
+	      && get_next_frame (fi)->extra_info->sigcontext)
 	    {
 	      /* We are backtracing from a signal handler */
-	      save_reg_addr = fi->next->extra_info->sigcontext +
+	      save_reg_addr = get_next_frame (fi)->extra_info->sigcontext +
 		REGISTER_BYTE (S390_GP0_REGNUM);
 	      for (regidx = 0; regidx < S390_NUM_GPRS; regidx++)
 		{
 		  saved_regs[S390_GP0_REGNUM + regidx] = save_reg_addr;
 		  save_reg_addr += S390_GPR_SIZE;
 		}
-	      save_reg_addr = fi->next->extra_info->sigcontext +
+	      save_reg_addr = get_next_frame (fi)->extra_info->sigcontext +
 		(GDB_TARGET_IS_ESAME ? S390X_SIGREGS_FP0_OFFSET :
 		 S390_SIGREGS_FP0_OFFSET);
 	      for (regidx = 0; regidx < S390_NUM_FPRS; regidx++)
@@ -787,7 +788,7 @@ s390_frameless_function_invocation (struct frame_info *fi)
   struct frame_extra_info fextra_info, *fextra_info_ptr;
   int frameless = 0;
 
-  if (fi->next == NULL)		/* no may be frameless */
+  if (get_next_frame (fi) == NULL)		/* no may be frameless */
     {
       if (fi->extra_info)
 	fextra_info_ptr = fi->extra_info;

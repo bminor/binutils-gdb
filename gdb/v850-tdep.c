@@ -800,7 +800,7 @@ v850_scan_prologue (CORE_ADDR pc, struct prologue_info *pi)
 CORE_ADDR
 v850_find_callers_reg (struct frame_info *fi, int regnum)
 {
-  for (; fi; fi = fi->next)
+  for (; fi; fi = get_next_frame (fi))
     if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
 				     get_frame_base (fi)))
       return deprecated_read_register_dummy (get_frame_pc (fi),
@@ -1130,7 +1130,7 @@ v850_frame_init_saved_regs (struct frame_info *fi)
 
 	  v850_scan_prologue (get_frame_pc (fi), &pi);
 
-	  if (!fi->next && pi.framereg == E_SP_REGNUM)
+	  if (!get_next_frame (fi) && pi.framereg == E_SP_REGNUM)
 	    deprecated_update_frame_base_hack (fi, read_register (pi.framereg) - pi.frameoffset);
 
 	  for (pifsr = pifsrs; pifsr->framereg; pifsr++)
@@ -1164,8 +1164,8 @@ v850_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   struct prologue_info pi;
 
-  if (fi->next)
-    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (fi->next));
+  if (get_next_frame (fi))
+    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (get_next_frame (fi)));
 
   v850_frame_init_saved_regs (fi);
 }

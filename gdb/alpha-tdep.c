@@ -461,14 +461,14 @@ static CORE_ADDR
 alpha_init_frame_pc_first (int fromleaf, struct frame_info *prev)
 {
   return (fromleaf ? SAVED_PC_AFTER_CALL (get_next_frame (prev)) 
-	  : get_next_frame (prev) ? FRAME_SAVED_PC (prev->next)
+	  : get_next_frame (prev) ? FRAME_SAVED_PC (get_next_frame (prev))
 	  : read_pc ());
 }
 
 static CORE_ADDR
 read_next_frame_reg (struct frame_info *fi, int regno)
 {
-  for (; fi; fi = fi->next)
+  for (; fi; fi = get_next_frame (fi))
     {
       /* We have to get the saved sp from the sigcontext
          if it is a signal handler frame.  */
@@ -513,7 +513,7 @@ alpha_saved_pc_after_call (struct frame_info *frame)
   if (tmp != 0)
     pc = tmp;
 
-  proc_desc = find_proc_desc (pc, frame->next);
+  proc_desc = find_proc_desc (pc, get_next_frame (frame));
   pcreg = proc_desc ? PROC_PC_REG (proc_desc) : ALPHA_RA_REGNUM;
 
   if ((get_frame_type (frame) == SIGTRAMP_FRAME))
@@ -980,7 +980,9 @@ alpha_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 {
   /* Use proc_desc calculated in frame_chain */
   alpha_extra_func_info_t proc_desc =
-  frame->next ? cached_proc_desc : find_proc_desc (get_frame_pc (frame), frame->next);
+    get_next_frame (frame)
+    ? cached_proc_desc
+    : find_proc_desc (get_frame_pc (frame), get_next_frame (frame));
 
   frame_extra_info_zalloc (frame, sizeof (struct frame_extra_info));
 
@@ -1010,9 +1012,9 @@ alpha_init_extra_frame_info (int fromleaf, struct frame_info *frame)
          interrupted by a signal at it's very start.  */
       else if (get_frame_pc (frame) == PROC_LOW_ADDR (proc_desc)
 	       && !alpha_proc_desc_is_dyn_sigtramp (proc_desc))
-	deprecated_update_frame_base_hack (frame, read_next_frame_reg (frame->next, SP_REGNUM));
+	deprecated_update_frame_base_hack (frame, read_next_frame_reg (get_next_frame (frame), SP_REGNUM));
       else
-	deprecated_update_frame_base_hack (frame, read_next_frame_reg (frame->next, PROC_FRAME_REG (proc_desc))
+	deprecated_update_frame_base_hack (frame, read_next_frame_reg (get_next_frame (frame), PROC_FRAME_REG (proc_desc))
 					   + PROC_FRAME_OFFSET (proc_desc));
 
       if (proc_desc == &temp_proc_desc)
@@ -1296,7 +1298,7 @@ alpha_pop_frame (void)
   /* we need proc_desc to know how to restore the registers;
      if it is NULL, construct (a temporary) one */
   if (proc_desc == NULL)
-    proc_desc = find_proc_desc (get_frame_pc (frame), frame->next);
+    proc_desc = find_proc_desc (get_frame_pc (frame), get_next_frame (frame));
 
   /* Question: should we copy this proc_desc and save it in
      frame->proc_desc?  If we do, who will free it?

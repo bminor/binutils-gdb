@@ -883,8 +883,8 @@ m68hc11_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
   frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
   
-  if (fi->next)
-    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (fi->next));
+  if (get_next_frame (fi))
+    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (get_next_frame (fi)));
   
   m68hc11_frame_init_saved_regs (fi);
 

@@ -325,9 +325,9 @@ ns32k_sigtramp_saved_pc (struct frame_info *frame)
 
   buf = alloca (ptrbytes);
   /* Get sigcontext address, it is the third parameter on the stack.  */
-  if (frame->next)
+  if (get_next_frame (frame))
     sigcontext_addr = read_memory_typed_address
-      (FRAME_ARGS_ADDRESS (frame->next) + FRAME_ARGS_SKIP + sigcontext_offs,
+      (FRAME_ARGS_ADDRESS (get_next_frame (frame)) + FRAME_ARGS_SKIP + sigcontext_offs,
        builtin_type_void_data_ptr);
   else
     sigcontext_addr = read_memory_typed_address

@@ -91,11 +91,11 @@ x86_64_linux_sigcontext_addr (struct frame_info *frame)
   pc = x86_64_linux_sigtramp_start (get_frame_pc (frame));
   if (pc)
     {
-      if (frame->next)
+      if (get_next_frame (frame))
 	/* If this isn't the top frame, the next frame must be for the
 	   signal handler itself.  The sigcontext structure is part of
 	   the user context. */
-	return get_frame_base (frame->next) + LINUX_SIGINFO_SIZE +
+	return get_frame_base (get_next_frame (frame)) + LINUX_SIGINFO_SIZE +
 	  LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
 
 
@@ -167,7 +167,7 @@ x86_64_linux_frame_chain (struct frame_info *fi)
 	addr = get_frame_base (fi);
     }
   else
-    addr = get_frame_base (fi->next);
+    addr = get_frame_base (get_next_frame (fi));
 
   addr += LINUX_SIGINFO_SIZE + LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
 
@@ -181,7 +181,8 @@ x86_64_init_frame_pc (int fromleaf, struct frame_info *fi)
 {
   CORE_ADDR addr;
 
-  if (get_next_frame (fi) && (get_frame_type (fi->next) == SIGTRAMP_FRAME))
+  if (get_next_frame (fi)
+      && (get_frame_type (get_next_frame (fi)) == SIGTRAMP_FRAME))
     {
       addr = get_frame_base (get_next_frame (get_next_frame (fi)))
 	+ LINUX_SIGINFO_SIZE + LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
