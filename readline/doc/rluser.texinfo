@@ -177,7 +177,8 @@ Kill from the cursor to the end of the current word, or if between
 words, to the end of the next word.
 
 @item M-DEL
-Kill fromthe cursor the start of the previous word, or if between words, to the start of the previous word.
+Kill from the cursor to the start of the previous word, or if between
+words, to the start of the previous word. 
 
 @item C-w
 Kill from the cursor to the previous whitespace.  This is different than
