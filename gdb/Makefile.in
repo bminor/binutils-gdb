@@ -757,7 +757,6 @@ srec_h = srec.h
 stabsread_h = stabsread.h
 stack_h = stack.h
 symfile_h = symfile.h
-symfile_mem_h = symfile-mem.h
 symtab_h = symtab.h
 target_h = target.h $(bfd_h) $(symtab_h) $(dcache_h) $(memattr_h)
 terminal_h = terminal.h
@@ -2446,8 +2445,7 @@ symfile.o: symfile.c $(defs_h) $(bfdlink_h) $(symtab_h) $(gdbtypes_h) \
 	$(hashtab_h) $(readline_h) $(gdb_assert_h) $(block_h) \
 	$(gdb_string_h) $(gdb_stat_h)
 symfile-mem.o: symfile-mem.c $(defs_h) $(symtab_h) $(gdbcore_h) \
-	$(objfiles_h) $(gdbcmd_h) $(target_h) $(value_h) $(symfile_h) \
-	$(symfile_mem_h)
+	$(objfiles_h) $(gdbcmd_h) $(target_h) $(value_h) $(symfile_h)
 symmisc.o: symmisc.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(bfd_h) \
 	$(symfile_h) $(objfiles_h) $(breakpoint_h) $(command_h) \
 	$(gdb_obstack_h) $(language_h) $(bcache_h) $(block_h) $(gdb_regex_h) \

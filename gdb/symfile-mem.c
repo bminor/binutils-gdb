@@ -52,18 +52,17 @@
 #include "target.h"
 #include "value.h"
 #include "symfile.h"
-#include "symfile-mem.h"
 
 
 /* Read inferior memory at ADDR to find the header of a loaded object file
    and read its in-core symbols out of inferior memory.  TEMPL is a bfd
    representing the target's format.  */
-struct objfile *
-symbol_file_add_from_memory (bfd *templ, CORE_ADDR addr, int from_tty)
+static struct objfile *
+symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr, int from_tty)
 {
   struct objfile *objf;
-  bfd *nbfd;
-  asection *sec;
+  struct bfd *nbfd;
+  struct bfd_section *sec;
   bfd_vma loadbase;
   struct section_addr_info *sai;
   unsigned int i;
@@ -74,10 +73,7 @@ symbol_file_add_from_memory (bfd *templ, CORE_ADDR addr, int from_tty)
   nbfd = bfd_elf_bfd_from_remote_memory (templ, addr, &loadbase,
 					 target_read_memory);
   if (nbfd == NULL)
-    {
-      error ("Failed to read a valid object file image from memory.");
-      return NULL;
-    }
+    error ("Failed to read a valid object file image from memory.");
 
   nbfd->filename = xstrdup ("shared object read from target memory");
 
@@ -89,7 +85,6 @@ symbol_file_add_from_memory (bfd *templ, CORE_ADDR addr, int from_tty)
       bfd_close (nbfd);
       error ("Got object file from memory but can't read symbols: %s.",
 	     bfd_errmsg (bfd_get_error ()));
-      return NULL;
     }
 
   sai = alloc_section_addr_info (bfd_count_sections (nbfd));
@@ -118,7 +113,7 @@ static void
 add_symbol_file_from_memory_command (char *args, int from_tty)
 {
   CORE_ADDR addr;
-  bfd *templ;
+  struct bfd *templ;
 
   if (args == NULL)
     error ("add-symbol-file-from-memory requires an expression argument");

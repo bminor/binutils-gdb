@@ -1,3 +1,15 @@
+2004-05-25  Andrew Cagney  <cagney@gnu.org>
+
+	* symfile.h (symbol_file_add_from_memory): Delete declaration.
+	* symfile-mem.h: Delete file.
+	* symfile-mem.c: Do not include "symfile-mem.h".
+	(symbol_file_add_from_memory): Make static. Use "struct bfd" and
+	"struct bfd_section".  When an error do not bother returning NULL.
+	(add_symbol_file_from_memory_command): Use "struct bfd" and
+	"struct bfd_section".
+	* Makefile.in (symfile_mem_h): Delete.
+	(symfile-mem.o): Update dependencies.
+
 2004-05-25  Nick Roberts  <nickrob@gnu.org>
 
 	* gdb-mi.el: New file.
