@@ -1,3 +1,10 @@
+2003-07-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/elf/elf.exp: Add section3 for note section.
+
+	* gas/elf/section3.d: New file.
+	* gas/elf/section3.s: Likewise.
+
 2003-07-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/ppc/altivec.d: Update.

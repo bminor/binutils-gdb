@@ -844,6 +844,8 @@ obj_elf_section_type (str, len)
     return SHT_PROGBITS;
   if (len == 6 && strncmp (str, "nobits", 6) == 0)
     return SHT_NOBITS;
+  if (len == 4 && strncmp (str, "note", 4) == 0)
+    return SHT_NOTE;
 
 #ifdef md_elf_section_type
   {
