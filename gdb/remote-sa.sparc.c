@@ -201,8 +201,8 @@ extern int one_stepped;		/* From machine dependent code */
 static int remote_set_one_stepped;
 
 int
-remote_resume (step, signal)
-     int step, signal;
+remote_resume (pid, step, signal)
+     int pid, step, signal;
 {
   if (step)
     {

@@ -436,8 +436,8 @@ monitor_detach (from_tty)
  * _resume -- Tell the remote machine to resume.
  */
 static void
-monitor_resume (step, sig)
-     int step, sig;
+monitor_resume (pid, step, sig)
+     int pid, step, sig;
 {
 #ifdef LOG_FILE
   fprintf (log_file, "\nIn Resume (step=%d, sig=%d)\n", step, sig);

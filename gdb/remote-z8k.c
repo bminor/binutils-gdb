@@ -310,7 +310,8 @@ sim_mourn ()
 }
 
 static void 
-rem_resume (a, b)
+rem_resume (pid, a, b)
+     int pid;
      int a;
      int b;
 {

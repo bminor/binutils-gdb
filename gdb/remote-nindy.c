@@ -257,8 +257,8 @@ non_dle( buf, n )
 /* Tell the remote machine to resume.  */
 
 void
-nindy_resume (step, siggnal)
-     int step, siggnal;
+nindy_resume (pid, step, siggnal)
+     int pid, step, siggnal;
 {
 	if (siggnal != 0 && siggnal != stop_signal)
 	  error ("Can't send signals to remote NINDY targets.");

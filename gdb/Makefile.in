@@ -162,8 +162,8 @@ INTERNAL_CFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 # you can use 'CLIBS=$(INSTALLED_LIBS)' 'CDEPS='
 INSTALLED_LIBS=-lbfd -lreadline $(TERMCAP) -lopcodes -lmmalloc \
 	-liberty $(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS)
-CLIBS = $(BFD) $(READLINE) $(TERMCAP) $(OPCODES) $(MMALLOC) \
-	$(LIBIBERTY) $(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS)
+CLIBS = $(BFD) $(READLINE) $(OPCODES) $(MMALLOC) \
+	$(LIBIBERTY) $(TERMCAP) $(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS)
 CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) \
 	$(BFD) $(READLINE) $(OPCODES) $(MMALLOC) $(LIBIBERTY)
 
@@ -371,7 +371,7 @@ HFILES = buildsym.h call-cmds.h defs.h environ.h $(gdbcmd_h) \
 	nindy-share/env.h nindy-share/stop.h \
 	vx-share/dbgRpcLib.h vx-share/ptrace.h vx-share/vxTypes.h \
 	vx-share/vxWorks.h vx-share/wait.h vx-share/xdr_ld.h \
-	vx-share/xdr_ptrace.h vx-share/xdr_rdb.h
+	vx-share/xdr_ptrace.h vx-share/xdr_rdb.h thread.h
 
 # GDB "info" files, which should be included in their entirety
 INFOFILES = gdb.info*
@@ -401,7 +401,7 @@ TARFILES = $(SFILES) $(HFILES) $(NONSRC) $(ALLDEPFILES) $(ALLCONFIG) \
 	$(ALLPARAM) $(INFOFILES) $(POSSLIBS) $(REMOTE_EXAMPLES)
 
 
-OBS =	version.o main.o blockframe.o breakpoint.o findvar.o stack.o \
+OBS =	version.o main.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
 	source.o values.o eval.o valops.o valarith.o valprint.o printcmd.o \
 	symtab.o symfile.o symmisc.o infcmd.o infrun.o command.o \
 	utils.o expprint.o environ.o gdbtypes.o copying.o $(DEPFILES) \
@@ -1281,6 +1281,8 @@ tahoe-pinsn.o: tahoe-pinsn.c $(OP_INCLUDE)/tahoe.h $(defs_h) \
 
 target.o: target.c $(bfd_h) $(defs_h) $(gdbcmd_h) $(inferior_h) \
 	objfiles.h symfile.h target.h
+
+thread.o: thread.c $(defs_h) thread.h 
 
 typeprint.o: typeprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) target.h \

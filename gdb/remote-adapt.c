@@ -675,8 +675,8 @@ adapt_detach (args,from_tty)
 /* Tell the remote machine to resume.  */
 
 void
-adapt_resume (step, sig)
-     int step, sig;
+adapt_resume (pid, step, sig)
+     int pid, step, sig;
 {
   if (step)	
     {

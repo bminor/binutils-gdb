@@ -255,12 +255,13 @@ store_inferior_registers (regno)
   return;
 }
 
-/* Resume execution of the inferior process.
+/* Resume execution of process PID.
    If STEP is nonzero, single-step it.
    If SIGNAL is nonzero, give it that signal.  */
 
 void
-child_resume (step, signal)
+child_resume (pid, step, signal)
+     int pid;
      int step;
      int signal;
 {
@@ -271,9 +272,9 @@ child_resume (step, signal)
      written a new PC value to the child.)  */
 
   if (step)
-    ptrace (PT_STEP, inferior_pid, (PTRACE_ARG3_TYPE) 1, signal);
+    ptrace (PT_STEP, pid, (PTRACE_ARG3_TYPE) 1, signal);
   else
-    ptrace (PT_CONTINUE, inferior_pid, (PTRACE_ARG3_TYPE) 1, signal);
+    ptrace (PT_CONTINUE, pid, (PTRACE_ARG3_TYPE) 1, signal);
 
   if (errno)
     perror_with_name ("ptrace");

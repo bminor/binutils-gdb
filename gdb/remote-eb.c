@@ -479,8 +479,8 @@ eb_detach (from_tty)
 /* Tell the remote machine to resume.  */
 
 void
-eb_resume (step, sig)
-     int step, sig;
+eb_resume (pid, step, sig)
+     int pid, step, sig;
 {
   if (step)
     {

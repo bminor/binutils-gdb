@@ -200,12 +200,13 @@ fetch_register (regno)
  error_exit:;
 }
 
-/* Resume execution of the inferior process.
+/* Resume execution of process PID.
    If STEP is nonzero, single-step it.
    If SIGNAL is nonzero, give it that signal.  */
 
 void
-child_resume (step, signal)
+child_resume (pid, step, signal)
+     int pid;
      int step;
      int signal;
 {

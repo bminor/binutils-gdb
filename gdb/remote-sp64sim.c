@@ -311,8 +311,8 @@ simif_detach (args,from_tty)
    to the target, or zero for no signal.  */
 
 static void
-simif_resume (step, siggnal)
-     int step, siggnal;
+simif_resume (pid, step, siggnal)
+     int pid, step, siggnal;
 {
   if (sim_verbose)
     printf_filtered ("simif_resume: step %d, signal %d\n", step, siggnal);

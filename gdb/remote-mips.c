@@ -71,7 +71,7 @@ static void
 mips_detach PARAMS ((char *args, int from_tty));
 
 static void
-mips_resume PARAMS ((int step, int siggnal));
+mips_resume PARAMS ((int pid, int step, int siggnal));
 
 static int
 mips_wait PARAMS ((WAITTYPE *status));
@@ -957,8 +957,8 @@ mips_detach (args, from_tty)
    from the board.  */
 
 static void
-mips_resume (step, siggnal)
-     int step, siggnal;
+mips_resume (pid, step, siggnal)
+     int pid, step, siggnal;
 {
   if (siggnal)
     error ("Can't send signals to a remote system.  Try `handle %d ignore'.",

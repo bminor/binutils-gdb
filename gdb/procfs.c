@@ -1599,9 +1599,9 @@ procfs_attach (args, from_tty)
       exec_file = (char *) get_exec_file (0);
 
       if (exec_file)
-	printf ("Attaching program `%s', pid %d\n", exec_file, pid);
+	printf ("Attaching to program `%s', %s\n", exec_file, target_pid_to_str (pid));
       else
-	printf ("Attaching pid %d\n", pid);
+	printf ("Attaching to %s\n", target_pid_to_str (pid));
 
       fflush (stdout);
     }
@@ -1632,8 +1632,8 @@ procfs_detach (args, from_tty)
       char *exec_file = get_exec_file (0);
       if (exec_file == 0)
 	exec_file = "";
-      printf ("Detaching program: %s pid %d\n",
-	      exec_file, inferior_pid);
+      printf ("Detaching from program: %s %s\n",
+	      exec_file, target_pid_to_str (inferior_pid));
       fflush (stdout);
     }
   if (args)
@@ -1664,8 +1664,8 @@ static void
 procfs_files_info (ignore)
      struct target_ops *ignore;
 {
-  printf ("\tUsing the running image of %s process %d via /proc.\n",
-	  attach_flag? "attached": "child", inferior_pid);
+  printf ("\tUsing the running image of %s %s via /proc.\n",
+	  attach_flag? "attached": "child", target_pid_to_str (inferior_pid));
 }
 
 /* ARGSUSED */
@@ -1761,7 +1761,7 @@ do_attach (pid)
 	}
       else
 	{
-	  printf ("Ok, gdb will wait for process %u to stop.\n", pid);
+	  printf ("Ok, gdb will wait for %s to stop.\n", target_pid_to_str (pid));
 	}
     }
 
@@ -2150,12 +2150,13 @@ set_proc_siginfo (pip, signo)
     }
 }
 
-/* Resume execution of the inferior process.  If STEP is nozero, then
+/* Resume execution of process PID.  If STEP is nozero, then
    just single step it.  If SIGNAL is nonzero, restart it with that
    signal activated.  */
 
 static void
-procfs_resume (step, signo)
+procfs_resume (pid, step, signo)
+     int pid;
      int step;
      int signo;
 {
@@ -2552,7 +2553,8 @@ info_proc_siginfo (pip, summary)
 	    }
 	  if (sip -> si_code <= 0)
 	    {
-	      printf_filtered ("sent by pid %d, uid %d ", sip -> si_pid,
+	      printf_filtered ("sent by %s, uid %d ",
+			       target_pid_to_str (sip -> si_pid),
 			       sip -> si_uid);
 	    }
 	  else
@@ -2567,8 +2569,8 @@ info_proc_siginfo (pip, summary)
 		}
 	      else if ((sip -> si_signo == SIGCHLD))
 		{
-		  printf_filtered ("child pid %u, status %u ",
-				   sip -> si_pid,
+		  printf_filtered ("child %s, status %u ",
+				   target_pid_to_str (sip -> si_pid),
 				   sip -> si_status);
 		}
 	      else if ((sip -> si_signo == SIGPOLL))
@@ -2590,7 +2592,7 @@ info_proc_siginfo (pip, summary)
 	    }
 	  if (sip -> si_code <= 0)
 	    {
-	      printf_filtered ("\t%-16u %s\n", sip -> si_pid,
+	      printf_filtered ("\t%-16u %s\n", sip -> si_pid, /* XXX need target_pid_to_str() */
 			       "PID of process sending signal");
 	      printf_filtered ("\t%-16u %s\n", sip -> si_uid,
 			       "UID of process sending signal");
@@ -2613,7 +2615,7 @@ info_proc_siginfo (pip, summary)
 		}
 	      else if ((sip -> si_signo == SIGCHLD))
 		{
-		  printf_filtered ("\t%-16u %s.\n", sip -> si_pid,
+		  printf_filtered ("\t%-16u %s.\n", sip -> si_pid, /* XXX need target_pid_to_str() */
 				   "Child process ID");
 		  printf_filtered ("\t%-16u %s.\n", sip -> si_status,
 				   "Child process exit value or signal");

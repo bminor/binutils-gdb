@@ -358,8 +358,8 @@ st2000_detach (from_tty)
 /* Tell the remote machine to resume.  */
 
 static void
-st2000_resume (step, sig)
-     int step, sig;
+st2000_resume (pid, step, sig)
+     int pid, step, sig;
 {
   if (step)
     {

@@ -242,6 +242,8 @@ fork_inferior (exec_file, allargs, env, traceme_fun, init_trace_fun)
      initialize anything target-vector-specific that needs initializing.  */
   (*init_trace_fun)(pid);
 
+  init_thread_list();
+
 #ifdef CREATE_INFERIOR_HOOK
   CREATE_INFERIOR_HOOK (pid);
 #endif  

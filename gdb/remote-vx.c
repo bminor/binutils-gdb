@@ -578,7 +578,8 @@ vx_run_files_info ()
 }
 
 static void
-vx_resume (step, siggnal)
+vx_resume (pid, step, siggnal)
+     int pid;
      int step;
      int siggnal;
 {
@@ -592,7 +593,7 @@ vx_resume (step, siggnal)
   bzero ((char *) &ptrace_in, sizeof (ptrace_in));
   bzero ((char *) &ptrace_out, sizeof (ptrace_out));
 
-  ptrace_in.pid = inferior_pid;
+  ptrace_in.pid = pid;
   ptrace_in.addr = 1;	/* Target side insists on this, or it panics.  */
 
   /* XXX change second param to be a proc number */

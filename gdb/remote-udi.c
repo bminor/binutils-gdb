@@ -52,7 +52,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 static int kiodebug;
 extern int stop_soon_quietly;           /* for wait_for_inferior */
 extern struct value *call_function_by_hand();
-static void udi_resume PARAMS ((int step, int sig));
+static void udi_resume PARAMS ((int pid, int step, int sig));
 static void udi_fetch_registers PARAMS ((int regno));
 static void udi_load PARAMS ((char *args, int from_tty));
 static void fetch_register PARAMS ((int regno));
@@ -403,8 +403,8 @@ udi_detach (args,from_tty)
 ** Tell the remote machine to resume.  */
 
 static void
-udi_resume (step, sig)
-     int step, sig;
+udi_resume (pid, step, sig)
+     int pid, step, sig;
 {
   UDIError tip_error;
   UDIUInt32 Steps = 1;

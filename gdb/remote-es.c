@@ -161,7 +161,7 @@ static int
 es1800_wait PARAMS ((WAITTYPE *));
 
 static void
-es1800_resume PARAMS ((int, int));
+es1800_resume PARAMS ((int, int, int));
 
 static void
 es1800_detach PARAMS ((char *, int));
@@ -650,7 +650,8 @@ es1800_detach (args, from_tty)
    siggnal - the signal value to be given to the target (0 = no signal) */
 
 static void
-es1800_resume (step, siggnal)
+es1800_resume (pid, step, siggnal)
+     int pid;
      int step;
      int siggnal;
 {

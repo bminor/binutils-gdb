@@ -1,3 +1,45 @@
+Sun Aug  1 22:58:18 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* Makefile.in (CLIBS):  Reorder to make Lynx ld happy.
+	* (HFILES):  New file thread.h.
+	* (OBS):  New file thread.c.
+	* configure.in:  Host config for Lynx/386.
+	* fork-child.c (fork_inferior):  Call init_thread_list().
+	* infrun.c (resume):  Add pid to invocation of target_resume().
+	* (wait_for_inferior): Pay attention to pid from target_wait().
+	Multi-threading code now uses this to determine what to do.
+	* inftarg.c (child_wait):  Conditionalize based on CHILD_WAIT macro.
+	Use target_pid_to_str() macro throughout when printing pid.
+	* inferior.h (child_resume):  Add pid to prototype.
+	* hppab-nat.c hppah-nat.c infptrace.c (child_resume):  Pass in pid as
+	argument, instead of using inferior_pid.
+	* procfs.c (procfs_resume):  Pass in pid as argument.  Ignored for
+	now.  Use target_pid_to_str() macro throughout for printing process id.
+	* remote-adapt.c (adapt_resume):  Pass in pid as argument.
+	* remote-eb.c (eb_resume):  Pass in pid as argument.
+	* remote-es.c (es1800_resume):  Pass in pid as argument.
+	* remote-hms.c (hms_resume):  Pass in pid as argument.
+	* remote-mips.c (mips_resume):  Pass in pid as argument.
+	* remote-mm.c (mm_resume):  Pass in pid as argument.
+	* remote-monitor.c (monitor_resume):  Pass in pid as argument.
+	* remote-nindy.c (nindy_resume):  Pass in pid as argument.
+	* remote-sa.sparc.c (remote_resume):  Pass in pid as argument.
+	* remote-sim.c (rem_resume):  Pass in pid as argument.
+	* remote-sp64sim.c (simif_resume):  Pass in pid as argument.
+	* remote-st.c (st2000_resume):  Pass in pid as argument.
+	* remote-udi.c (udi_resume):  Pass in pid as argument.
+	* remote-vx.c (vx_resume):  Pass in pid as argument.
+	* remote-z8k.c (rem_resume):  Pass in pid as argument.
+	* remote.c (remote_resume):  Pass in pid as argument.
+	* solib.c (solid_create_inferior_hook):  Pass inferior_pid to
+	target_resume().
+	* target.c (normal_pid_to_str):  New routine to print out process
+	ID normally.
+	* target.h (struct target_ops):  Add pid to prototype at
+	to_resume().  (target_resume):  Add pid argument.
+	* (target_pid_to_str):  Default definition for normal type pids.
+	* thread.c, thread.c:  New modules for multi thread/process control.
+
 Sun Aug  1 13:02:42 1993  John Gilmore  (gnu@cygnus.com)
 
 	* README:  Say that bug-gdb is also the place to send requests

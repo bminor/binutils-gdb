@@ -638,8 +638,8 @@ hms_detach (args, from_tty)
 /* Tell the remote machine to resume.  */
 
 void
-hms_resume (step, sig)
-     int step, sig;
+hms_resume (pid, step, sig)
+     int pid, step, sig;
 {
   dcache_flush ();
 

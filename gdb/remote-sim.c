@@ -242,7 +242,7 @@ sim_before_main_loop ()
 }
 
 
-static void rem_resume(a,b)
+static void rem_resume(pid, a , b)
 {
   sim_resume(a,b);
 }

@@ -498,8 +498,8 @@ mm_detach (args,from_tty)
 ** Tell the remote machine to resume.  */
 
 static void
-mm_resume (step, sig)
-     int step, sig;
+mm_resume (pid, step, sig)
+     int pid, step, sig;
 {
   if (sig)
     error ("Can't send signals to a remote MiniMon system.");
