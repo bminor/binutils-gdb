@@ -1,4 +1,4 @@
-000-12-02  Chris Demetriou  <cgd@sibyte.com>
+2000-12-02  Chris Demetriou  <cgd@sibyte.com>
 
         * gas/mips/elf_e_flags.s: Add padding to the end of the
         file so that objdump output will be consistent.
