@@ -1350,13 +1350,30 @@ macro_build (place, counter, ep, name, fmt, va_alist)
 		  || r == BFD_RELOC_MIPS_LITERAL
 		  || r == BFD_RELOC_LO16
 		  || r == BFD_RELOC_MIPS_GOT16
-		  || r == BFD_RELOC_MIPS_CALL16);
+		  || r == BFD_RELOC_MIPS_CALL16
+		  || (ep->X_op == O_subtract
+		      && now_seg == text_section
+		      && S_GET_SEGMENT (ep->X_op_symbol) == text_section
+		      && r == BFD_RELOC_PCREL_LO16));
 	  continue;
 
 	case 'u':
-	  assert (ep != NULL && ep->X_op == O_constant);
-	  insn.insn_opcode |= (ep->X_add_number >> 16) & 0xffff;
-	  ep = NULL;
+	  r = (bfd_reloc_code_real_type) va_arg (args, int);
+	  assert (ep != NULL
+		  && (ep->X_op == O_constant
+		      || (ep->X_op == O_symbol
+			  && (r == BFD_RELOC_HI16_S
+			      || r == BFD_RELOC_HI16))
+		      || (ep->X_op == O_subtract
+			  && now_seg == text_section
+			  && S_GET_SEGMENT (ep->X_op_symbol) == text_section
+			  && r == BFD_RELOC_PCREL_HI16_S)));
+	  if (ep->X_op == O_constant)
+	    {
+	      insn.insn_opcode |= (ep->X_add_number >> 16) & 0xffff;
+	      ep = NULL;
+	      r = BFD_RELOC_UNUSED;
+	    }
 	  continue;
 
 	case 'p':
@@ -1517,7 +1534,8 @@ load_register (counter, reg, ep)
 	   || ((ep->X_add_number &~ (offsetT) 0x7fffffff)
 	       == ~ (offsetT) 0x7fffffff))
     {
-      macro_build ((char *) NULL, counter, ep, "lui", "t,u", reg);
+      macro_build ((char *) NULL, counter, ep, "lui", "t,u", reg,
+		   (int) BFD_RELOC_HI16);
       if ((ep->X_add_number & 0xffff) != 0)
 	macro_build ((char *) NULL, counter, ep, "ori", "t,r,i", reg, reg,
 		     (int) BFD_RELOC_LO16);
@@ -2206,7 +2224,8 @@ macro (ip)
       else
 	{
 	  expr1.X_add_number = 0x80000000;
-	  macro_build ((char *) NULL, &icnt, &expr1, "lui", "t,u", AT);
+	  macro_build ((char *) NULL, &icnt, &expr1, "lui", "t,u", AT,
+		       (int) BFD_RELOC_HI16);
 	}
       if (mips_trap)
 	macro_build ((char *) NULL, &icnt, NULL, "teq", "s,t", sreg, AT);
@@ -2333,6 +2352,30 @@ macro (ip)
     case M_LA_AB:
       /* Load the address of a symbol into a register.  If breg is not
 	 zero, we then add a base register to it.  */
+
+      /* When generating embedded PIC code, we permit expressions of
+	 the form
+	   la	$4,foo-bar
+	 where bar is an address in the .text section.  These are used
+	 when getting the addresses of functions.  We don't permit
+	 X_add_number to be non-zero, because if the symbol is
+	 external the relaxing code needs to know that any addend is
+	 purely the offset to X_op_symbol.  */
+      if (mips_pic == EMBEDDED_PIC
+	  && offset_expr.X_op == O_subtract
+	  && now_seg == text_section
+	  && S_GET_SEGMENT (offset_expr.X_op_symbol) == text_section
+	  && breg == 0
+	  && offset_expr.X_add_number == 0)
+	{
+	  macro_build ((char *) NULL, &icnt, &offset_expr, "lui", "t,u",
+		       treg, (int) BFD_RELOC_PCREL_HI16_S);
+	  macro_build ((char *) NULL, &icnt, &offset_expr,
+		       mips_isa < 3 ? "addiu" : "daddiu",
+		       "t,r,j", treg, treg, (int) BFD_RELOC_PCREL_LO16);
+	  return;
+	}
+
       if (offset_expr.X_op != O_symbol
 	  && offset_expr.X_op != O_constant)
 	{
@@ -5085,7 +5128,10 @@ mips_force_relocation (fixp)
      fixS *fixp;
 {
   return (mips_pic == EMBEDDED_PIC
-	  && (fixp->fx_pcrel || SWITCH_TABLE (fixp)));
+	  && (fixp->fx_pcrel
+	      || SWITCH_TABLE (fixp)
+	      || fixp->fx_r_type == BFD_RELOC_PCREL_HI16_S
+	      || fixp->fx_r_type == BFD_RELOC_PCREL_LO16));
 }
 
 /* Apply a fixup to the object file.  */
@@ -5116,7 +5162,40 @@ md_apply_fix (fixP, valueP)
     case BFD_RELOC_MIPS_CALL16:
     case BFD_RELOC_MIPS_GOT16:
     case BFD_RELOC_MIPS_GPREL32:
+      if (fixP->fx_pcrel)
+	as_bad ("Invalid PC relative reloc");
       /* Nothing needed to do. The value comes from the reloc entry */
+      break;
+
+    case BFD_RELOC_PCREL_HI16_S:
+      /* The addend for this is tricky if it is internal, so we just
+	 do everything here rather than in bfd_perform_relocation.  */
+      if ((fixP->fx_addsy->bsym->flags & BSF_SECTION_SYM) == 0)
+	{
+	  /* For an external symbol adjust by the address to make it
+	     pcrel_offset.  We use the address of the RELLO reloc
+	     which follows this one.  */
+	  value += (fixP->fx_next->fx_frag->fr_address
+		    + fixP->fx_next->fx_where);
+	}
+      if (value & 0x8000)
+	value += 0x10000;
+      value >>= 16;
+      buf = fixP->fx_frag->fr_literal + fixP->fx_where;
+      if (byte_order == BIG_ENDIAN)
+	buf += 2;
+      md_number_to_chars (buf, value, 2);
+      break;
+
+    case BFD_RELOC_PCREL_LO16:
+      /* The addend for this is tricky if it is internal, so we just
+	 do everything here rather than in bfd_perform_relocation.  */
+      if ((fixP->fx_addsy->bsym->flags & BSF_SECTION_SYM) == 0)
+	value += fixP->fx_frag->fr_address + fixP->fx_where;
+      buf = fixP->fx_frag->fr_literal + fixP->fx_where;
+      if (byte_order == BIG_ENDIAN)
+	buf += 2;
+      md_number_to_chars (buf, value, 2);
       break;
 
     case BFD_RELOC_32:
@@ -5152,6 +5231,7 @@ md_apply_fix (fixP, valueP)
        * might be deleting the relocation entry (i.e., a branch within
        * the current segment).
        */
+      assert (fixP->fx_pcrel);
       if (value & 0x3)
 	as_warn ("Branch to odd address (%lx)", value);
       value >>= 2;
@@ -5962,9 +6042,33 @@ tc_gen_reloc (section, fixp)
 	 subtrahend.  */
       reloc->addend = reloc->address - S_GET_VALUE (fixp->fx_subsy);
 #ifndef OBJ_ECOFF
- #error Double check fx_r_type here
+      as_fatal ("Double check fx_r_type in tc-mips.c:tc_gen_reloc");
 #endif
       fixp->fx_r_type = BFD_RELOC_GPREL32;
+    }
+  else if (fixp->fx_r_type == BFD_RELOC_PCREL_LO16)
+    {
+      /* We use a special addend for an internal RELLO reloc.  */
+      if (fixp->fx_addsy->bsym->flags & BSF_SECTION_SYM)
+	reloc->addend = reloc->address - S_GET_VALUE (fixp->fx_subsy);
+      else
+	reloc->addend = fixp->fx_addnumber + reloc->address;
+    }
+  else if (fixp->fx_r_type == BFD_RELOC_PCREL_HI16_S)
+    {
+      assert (fixp->fx_next != NULL
+	      && fixp->fx_next->fx_r_type == BFD_RELOC_PCREL_LO16);
+      /* We use a special addend for an internal RELHI reloc.  The
+	 reloc is relative to the RELLO; adjust the addend
+	 accordingly.  */
+      if (fixp->fx_addsy->bsym->flags & BSF_SECTION_SYM)
+	reloc->addend = (fixp->fx_next->fx_frag->fr_address
+			 + fixp->fx_next->fx_where
+			 - S_GET_VALUE (fixp->fx_subsy));
+      else
+	reloc->addend = (fixp->fx_addnumber
+			 + fixp->fx_next->fx_frag->fr_address
+			 + fixp->fx_next->fx_where);
     }
   else if (fixp->fx_pcrel == 0)
     reloc->addend = fixp->fx_addnumber;
