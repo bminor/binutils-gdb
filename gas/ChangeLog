@@ -1,3 +1,9 @@
+2000-02-27  Jakub Jelinek  <jakub@redhat.com>
+
+	* config/tc-sparc.c (OPTION_UNDECLARED_REGS): New option.
+	(md_parse_option): Handle it.
+	(md_show_usage): Document it.
+
 2000-02-27  Ian Lance Taylor  <ian@zembu.com>
 
 	* config/tc-alpha.c (md_assemble): Accept `1' and `9' in an

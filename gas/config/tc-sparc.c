@@ -1,5 +1,5 @@
 /* tc-sparc.c -- Assemble for the SPARC
-   Copyright (C) 1989, 90-96, 97, 98, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1989, 90-96, 97, 98, 99, 2000 Free Software Foundation, Inc.
    This file is part of GAS, the GNU Assembler.
 
    GAS is free software; you can redistribute it and/or modify
@@ -412,6 +412,8 @@ struct option md_longopts[] = {
 #ifdef OBJ_ELF
 #define OPTION_NO_UNDECLARED_REGS (OPTION_MD_BASE + 12)
   {"no-undeclared-regs", no_argument, NULL, OPTION_NO_UNDECLARED_REGS},
+#define OPTION_UNDECLARED_REGS (OPTION_MD_BASE + 13)
+  {"undeclared-regs", no_argument, NULL, OPTION_UNDECLARED_REGS},
 #endif
   {NULL, no_argument, NULL, 0}
 };
@@ -566,6 +568,10 @@ md_parse_option (c, arg)
     case OPTION_NO_UNDECLARED_REGS:
       no_undeclared_regs = 1;
       break;
+
+    case OPTION_UNDECLARED_REGS:
+      no_undeclared_regs = 0;
+      break;
 #endif
 
     default:
@@ -619,6 +625,10 @@ md_show_usage (stream)
   fprintf (stream, _("\
 -KPIC			generate PIC\n\
 -V			print assembler version number\n\
+-undeclared-regs	ignore application global register usage without\n\
+			appropriate .register directive (default)\n\
+-no-undeclared-regs	force error on application global register usage\n\
+			without appropriate .register directive\n\
 -q			ignored\n\
 -Qy, -Qn		ignored\n\
 -s			ignored\n"));
