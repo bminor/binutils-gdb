@@ -1,3 +1,13 @@
+Mon Aug  2 14:45:29 1993  John Gilmore  (gnu@cygnus.com)
+
+	* dis-asm.h:  Move enum outside of struct defn to avoid warnings.
+
+Mon Aug  2 08:49:30 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* wait.h (WEXITSTATUS, WSTOPSIG): Mask down to 8 bits.  This is
+	for systems that store stuff into the high 16 bits of a wait
+	status.
+
 Fri Jul 30 18:38:02 1993  John Gilmore  (gnu@cygnus.com)
 
 	* dis-asm.h:  Add new fields insn_info_valid, branch_delay_insns, 
