@@ -2113,14 +2113,13 @@ _GDBN__ itself sometimes sets breakpoints in your program for special
 purposes, such as proper handling of @code{longjmp} (in C programs).
 These internal breakpoints are assigned negative numbers, starting with
 @code{-1}; @samp{info breakpoints} does not display them.
-@ignore
-@c FIXME! Moved to maint; doc when maint details avail.
+
 You can see these breakpoints with the _GDBN__ maintenance command
 @samp{maint info breakpoints}.
 
 @table @code
-@kindex all-breakpoints
-@item info all-breakpoints
+@kindex maint info breakpoints
+@item maint info breakpoints
 Using the same format as @samp{info breakpoints}, display both the
 breakpoints you've set explicitly, and those _GDBN__ is using for
 internal purposes.  Internal breakpoints are shown with negative
@@ -2149,7 +2148,6 @@ Temporary internal breakpoint used by the _GDBN__ @code{finish} command.
 @end table
 
 @end table
-@end ignore
 
 
 @node Set Watchpoints, Exception Handling, Set Breaks, Breakpoints
@@ -5819,32 +5817,28 @@ from the @code{ptype} command can be overwhelming and hard to use.  The
 which match the regular-expression @var{regexp}.
 @end ignore
 
-@ignore
-@c FIXME!! The following have been subsumed into a new "maint" command.
-@c restore descriptions in right place when details of maint available.
-@item printsyms @var{filename}
-@itemx printpsyms @var{filename}
-@itemx printmsyms @var{filename}
-@kindex printsyms
+@item maint print symbols @var{filename}
+@itemx maint print psymbols @var{filename}
+@itemx maint print msymbols @var{filename}
+@kindex maint print symbols
 @cindex symbol dump
-@kindex printsyms
+@kindex maint print psymbols
 @cindex partial symbol dump
 Write a dump of debugging symbol data into the file @var{filename}.
 These commands are used to debug the _GDBN__ symbol-reading code.  Only
-symbols with debugging data are included.  If you use @code{printsyms},
-_GDBN__ includes all the symbols for which it has already collected full
-details: that is, @var{filename} reflects symbols for only those files
-whose symbols _GDBN__ has read.  You can use the command @code{info
-sources} to find out which files these are.  If you use
-@code{printpsyms} instead, the dump shows information about symbols that
-_GDBN__ only knows partially---that is, symbols defined in files that
-_GDBN__ has skimmed, but not yet read completely.  Finally,
-@code{printmsyms} dumps just the minimal symbol information required for
-each object file from which _GDBN__ has read some symbols.  The description of
-@code{symbol-file} explains how _GDBN__ reads symbols; both @code{info
-source} and @code{symbol-file} are described in @ref{Files, ,Commands
-to Specify Files}.
-@end ignore
+symbols with debugging data are included.  If you use @samp{maint print
+symbols}, _GDBN__ includes all the symbols for which it has already
+collected full details: that is, @var{filename} reflects symbols for
+only those files whose symbols _GDBN__ has read.  You can use the
+command @code{info sources} to find out which files these are.  If you
+use @samp{maint print psymbols} instead, the dump shows information about
+symbols that _GDBN__ only knows partially---that is, symbols defined in
+files that _GDBN__ has skimmed, but not yet read completely.  Finally,
+@samp{maint print msymbols} dumps just the minimal symbol information
+required for each object file from which _GDBN__ has read some symbols.
+The description of @code{symbol-file} explains how _GDBN__ reads
+symbols; both @code{info source} and @code{symbol-file} are described in
+@ref{Files, ,Commands to Specify Files}.
 @end table
 
 @node Altering, _GDBN__ Files, Symbols, Top
@@ -6898,15 +6892,8 @@ It will make _GDBN__ tell you when it does a lengthy internal operation, so
 you will not think it has crashed.
 
 Currently, the messages controlled by @code{set verbose} are those
-which announce that the symbol table for a source file is being read
-(@pxref{Files, ,Commands to Specify Files}, in the description of the
-command @code{symbol-file}).
-@c The following is the right way to do it, but emacs 18.55 does not support
-@c @ref, and neither the emacs lisp manual version of texinfmt or makeinfo
-@c is released.
-@ignore
-see @code{symbol-file} in @ref{Files, ,Commands to Specify Files}).
-@end ignore
+which announce that the symbol table for a source file is being read;
+see @code{symbol-file} in @ref{Files, ,Commands to Specify Files}.
 
 @table @code
 @kindex set verbose
@@ -8034,11 +8021,17 @@ directory (@file{gdb-_GDB_VN__}, for version _GDB_VN__).
 @node configure Options, , Config Names, Installing GDB
 @section @code{configure} Options
 
-Here is a summary of all the @code{configure} options and arguments that
-you might use for building GDB:
+Here is a summary of the @code{configure} options and arguments that
+are most often useful for building _GDBN__.  @code{configure} also has
+several other options not listed here.  @inforef{What Configure
+Does,,configure.info}, for a full explanation of @code{configure}.
+@c FIXME: Would this be more, or less, useful as an xref (ref to printed
+@c manual in the printed manual, ref to info file only from the info file)?
 
 @example
-configure @r{[}--srcdir=@var{path}@r{]}
+configure @r{[}--help@r{]}
+          @r{[}--prefix=@var{dir}@r{]}
+          @r{[}--srcdir=@var{path}@r{]}
           @r{[}--norecursion@r{]} @r{[}--rm@r{]}
           @r{[}--target=@var{target}@r{]} @var{host}
 @end example
@@ -8049,6 +8042,13 @@ You may introduce options with a single @samp{-} rather than
 @samp{--}.
 
 @table @code
+@item --help
+Display a quick summary of how to invoke @code{configure}.
+
+@item -prefix=@var{dir}
+Configure the source to install programs and files under directory
+@file{@var{dir}}.
+
 @item --srcdir=@var{path}
 @strong{Warning: using this option requires GNU @code{make}, or another
 @code{make} that implements the @code{VPATH} feature.}@*
