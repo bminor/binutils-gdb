@@ -809,15 +809,19 @@ _bfd_generic_link_add_archive_symbols (abfd, info, checkfn)
   for (arsym = arsyms, indx = 0; arsym < arsym_end; arsym++, indx++)
     {
       struct archive_hash_entry *arh;
-      struct archive_list *l;
+      struct archive_list *l, **pp;
 
       arh = archive_hash_lookup (&arsym_hash, arsym->name, true, false);
       if (arh == (struct archive_hash_entry *) NULL)
 	return false;
       l = (struct archive_list *) alloca (sizeof (struct archive_list));
-      l->next = arh->defs;
-      arh->defs = l;
       l->indx = indx;
+      for (pp = &arh->defs;
+	   *pp != (struct archive_list *) NULL;
+	   pp = &(*pp)->next)
+	;
+      *pp = l;
+      l->next = NULL;
     }
 
   pass = 1;
@@ -1854,6 +1858,7 @@ _bfd_generic_link_write_global_symbol (h, data)
       sym->section = &bfd_und_section;
       sym->value = 0;
       sym->flags |= BSF_WEAK;
+      break;
     case bfd_link_hash_defined:
       sym->section = h->root.u.def.section;
       sym->value = h->root.u.def.value;
