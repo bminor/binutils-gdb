@@ -1,5 +1,8 @@
 Mon Apr 15 12:26:33 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (mips_frob_file): Permit multiple %hi relocs to
+	be associated with a single %lo reloc.
+
 	* config/tc-mips.c (load_address): Cast X_add_number to valueT
 	before comparing against MAX_GPREL_OFFSET, so that negative
 	numbers are handled correctly.
