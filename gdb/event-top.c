@@ -683,7 +683,7 @@ command_line_handler (char *rl)
 
   xfree (rl);			/* Allocated in readline.  */
 
-  if (*(p - 1) == '\\')
+  if (p > linebuffer && *(p - 1) == '\\')
     {
       p--;			/* Put on top of '\'.  */
 
