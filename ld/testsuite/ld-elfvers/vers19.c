@@ -1,3 +1,7 @@
+#include <stdio.h>
+
+extern int show_foo ();
+
 int
 main ()
 {

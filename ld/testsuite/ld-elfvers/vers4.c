@@ -4,6 +4,10 @@
  * the actual symbol is exported.  This is built both with and without
  * -export-dynamic.
  */
+#include <stdio.h>
+
+extern int foo ();
+
 int
 bar()
 {

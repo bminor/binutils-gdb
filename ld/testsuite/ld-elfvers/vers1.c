@@ -6,6 +6,9 @@
 const char * show_bar1 = "asdf";
 const char * show_bar2 = "asdf";
 
+extern int new2_foo();
+extern int bar33();
+
 int
 bar()
 {
@@ -71,7 +74,7 @@ __asm__(".symver hide_new_bogus_foo,show_foo@VERS_2.2");
  * This test is designed to catch a couple of syntactic errors.  The assembler
  * should complain about both of the directives below.
  */
-int
+void
 xyzzz()
 {
   new2_foo();
@@ -87,7 +90,7 @@ __asm__(".symver bar33,bar@@VERS_2.0");
  * This test is designed to catch a couple of syntactic errors.  The assembler
  * should complain about both of the directives below.
  */
-int
+void
 xyzzz()
 {
   new2_foo();

@@ -2,6 +2,7 @@
  * Testcase to make sure that if we externally reference a versioned symbol
  * that we always get the right one.
  */
+#include <stdio.h>
 
 int
 foo_1()

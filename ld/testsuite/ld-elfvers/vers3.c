@@ -1,6 +1,9 @@
 /*
  * Main program for test1, test2.
  */
+#include <stdio.h>
+
+extern int show_foo ();
 
 int
 main()

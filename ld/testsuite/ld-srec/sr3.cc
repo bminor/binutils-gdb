@@ -88,7 +88,7 @@ Foo::Foo ()
   i = ++foos;
 }
 
-Foo::Foo (char* msg)
+Foo::Foo (char*)
 {
   i = ++foos;
 }

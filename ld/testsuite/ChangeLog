@@ -1,3 +1,18 @@
+1999-07-21  H.J. Lu  <hjl@gnu.org>
+
+	* ld-elfvers/vers1.c: Add missing prototypes and include
+	<stdio.h> if necessary.
+	* ld-elfvers/vers15.c: Likewise.
+	* ld-elfvers/vers19.c: Likewise.
+	* ld-elfvers/vers2.c: Likewise.
+	* ld-elfvers/vers3.c: Likewise.
+	* ld-elfvers/vers4.c: Likewise.
+	* ld-elfvers/vers6.c: Likewise.
+	* ld-elfvers/vers7.c: Likewise.
+	* ld-elfvers/vers9.c: Likewise.
+	* ld-shared/main.c: Likewise.
+	* ld-srec/sr3.cc (Foo::Foo): Remove arg name.
+
 Thu Jul 15 18:00:30 1999  Mark P. Mitchell  <mark@codesourcery.com>
 
 	* ld-undefined/undefined.exp: XFAIL on IRIX6 for the usual as
