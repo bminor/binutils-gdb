@@ -1,3 +1,13 @@
+Fri Aug 16 17:49:57 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* complete.c:  Include <pwd.h> if not DOS, and if cygwin32 or not
+	win32.
+	* configure.in:  Add test for *-*-cygwin32* to use config/mh-posix.
+	* readline.c:  Move decl of tgetstr to rldefs.h.
+	* (_rl_set_screen_size):  Remove redundant ifdef MINIMALs.
+	* rldefs.h:  Don't do MINIMAL for cygwin32.  Cygwin32 now uses
+	full-blown readline, except for termcap.
+
 Sun Aug 11 21:06:26 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* rldefs.c:  Get rid of define of SIGALRM if _WIN32 or __MSDOS__.
