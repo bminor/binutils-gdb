@@ -1514,7 +1514,7 @@ mips_initialize ()
 
   /* Clear all breakpoints: */
   if ((mips_monitor == MON_IDT
-       && clear_breakpoint (BREAK_UNUSED, -1, 0) == 0)
+       && clear_breakpoint (-1, 0, BREAK_UNUSED) == 0)
       || mips_monitor == MON_LSI)
     monitor_supports_breakpoints = 1;
   else
@@ -2800,6 +2800,9 @@ common_breakpoint (set, addr, len, type)
 	      break;
 	    case BREAK_ACCESS:		/* read/write */
 	      flags = "rw";
+	      break;
+	    case BREAK_FETCH:		/* fetch */
+	      flags = "f";
 	      break;
 	    default:
 	      abort ();
