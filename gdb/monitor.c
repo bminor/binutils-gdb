@@ -906,7 +906,7 @@ monitor_supply_register (int regno, char *valstr)
     }
   monitor_debug ("Supplying Register %d %s\n", regno, valstr);
 
-  if (*p != '\0')
+  if (val == 0 && valstr == p)
     error ("monitor_supply_register (%d):  bad value from monitor: %s.",
 	   regno, valstr);
 

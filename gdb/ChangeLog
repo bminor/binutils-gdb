@@ -1,3 +1,8 @@
+2001-04-05  Jeff Holcomb  <jeffh@redhat.com>
+
+	* monitor.c (monitor_supply_register): Only report an error if we
+	don't get a valid value.
+
 2001-04-05  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* README: Don't mention gdba.el.
