@@ -1,3 +1,34 @@
+2003-02-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/powerpc.exp (supports_ppc64): New.
+	(ppcelftests): Force 32 bit mode.
+	(ppc64elftests): New.
+	* ld-powerpc/tls.d: New.
+	* ld-powerpc/tls.g: New.
+	* ld-powerpc/tls.s: New.
+	* ld-powerpc/tls.t: New.
+	* ld-powerpc/tlsexe.d: New.
+	* ld-powerpc/tlsexe.g: New.
+	* ld-powerpc/tlsexe.r: New.
+	* ld-powerpc/tlsexe.t: New.
+	* ld-powerpc/tlsexetoc.d: New.
+	* ld-powerpc/tlsexetoc.g: New.
+	* ld-powerpc/tlsexetoc.r: New.
+	* ld-powerpc/tlsexetoc.t: New.
+	* ld-powerpc/tlslib.s: New.
+	* ld-powerpc/tlsso.d: New.
+	* ld-powerpc/tlsso.g: New.
+	* ld-powerpc/tlsso.r: New.
+	* ld-powerpc/tlsso.t: New.
+	* ld-powerpc/tlstoc.d: New.
+	* ld-powerpc/tlstoc.g: New.
+	* ld-powerpc/tlstoc.s: New.
+	* ld-powerpc/tlstoc.t: New.
+	* ld-powerpc/tlstocso.d: New.
+	* ld-powerpc/tlstocso.g: New.
+	* ld-powerpc/tlstocso.r: New.
+	* ld-powerpc/tlstocso.t: New.
+
 2003-01-27  Alexandre Oliva  <aoliva@redhat.com>
 
 	* ld-mips-elf/multi-got-1.d: New.
