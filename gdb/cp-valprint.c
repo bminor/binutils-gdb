@@ -458,7 +458,7 @@ cp_print_value_fields (struct type *type, struct type *real_type, char *valaddr,
 	    }			/* non-RRBC case */
 	  else
 	    {
-	      /* FIXME -- seem comments above */
+	      /* FIXME -- see comments above */
 	      /* RRBC support present; function pointers are found
 	       * by indirection through the class segment entries. */
 
