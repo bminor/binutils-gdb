@@ -169,6 +169,7 @@ dpx2-nat.c
 dsrec.c
 dst.h
 dstread.c
+dve3900-rom.c
 dwarf2read.c
 dwarfread.c
 elfread.c
