@@ -2383,6 +2383,6 @@ struct type *
 builtin_type (ignore)
 char **ignore;
 {
-    fatal ("GDB internal eror: builtin_type called on non-RS/6000!");
+    fatal ("GDB internal error: builtin_type called on non-RS/6000!");
 }
 #endif /* IBM6000_HOST */

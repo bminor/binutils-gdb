@@ -1,3 +1,21 @@
+Sat Aug  8 23:12:22 1992  Fred Fish  (fnf@cygnus.com)
+
+	* dwarfread.c (struct dieinfo):  Add has_at_byte_size.
+	* dwarfread.c (struct_type):  In absence of AT_byte_size for
+	bitfield, use size of object of member's type for the size of
+	the anonymous object containing the bit field.
+	* dwarfread.c (completedieinfo):  Set has_at_byte_size when
+	an AT_byte_size attribute is seen.
+	* mipsread.c (psymtab_to_symtab_1):  Fix misspelled cast to
+	union aux_ext (was aux_ent).
+	* i386-pinsn.c (print_insn):  Cast 2'nd arg to read_memory from
+	unsigned char* to char*, for Lucid compiler.
+	* i386-tdep.c (codestream_fill):  Fix cast of 2'nd arg to read_memory
+	to be correct type (from unsigned char* to char*).
+	* valprint.c (type_print_derivation_info):  Minor tweak to placement
+	of commas in derived class printing.
+	* xcoffread.c (builtin_type):  Fix misspelling in fatal message.
+
 Fri Aug  7 11:18:23 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* xm-go32.h: Define LSEEK_NOT_LINEAR

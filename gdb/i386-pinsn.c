@@ -1890,7 +1890,7 @@ print_insn (memaddr, stream)
 {
   unsigned char buffer[MAXLEN];
   
-  read_memory (memaddr, buffer, MAXLEN);
+  read_memory (memaddr, (char *) buffer, MAXLEN);
   
   return (i386dis ((int)memaddr, buffer, stream));
 }

@@ -204,6 +204,7 @@ struct dieinfo {
   char *		at_prototyped;
   unsigned int		has_at_low_pc:1;
   unsigned int		has_at_stmt_list:1;
+  unsigned int		has_at_byte_size:1;
   unsigned int		short_element_list:1;
 };
 
@@ -807,6 +808,7 @@ struct_type (dip, thisdie, enddie, objfile)
   char *tpart1;
   struct dieinfo mbr;
   char *nextdie;
+  int anonymous_size;
   
   if ((type = lookup_utype (dip -> die_ref)) == NULL)
     {
@@ -841,10 +843,12 @@ struct_type (dip, thisdie, enddie, objfile)
       TYPE_NAME (type) = obconcat (&objfile -> type_obstack,
 				   tpart1, " ", dip -> at_name);
     }
-  if (dip -> at_byte_size != 0)
-    {
-      TYPE_LENGTH (type) = dip -> at_byte_size;
-    }
+  /* Use whatever size is known.  Zero is a valid size.  We might however
+     wish to check has_at_byte_size to make sure that some byte size was
+     given explicitly, but DWARF doesn't specify that explicit sizes of
+     zero have to present, so complaining about missing sizes should 
+     probably not be the default. */
+  TYPE_LENGTH (type) = dip -> at_byte_size;
   thisdie += dip -> die_length;
   while (thisdie < enddie)
     {
@@ -892,8 +896,22 @@ struct_type (dip, thisdie, enddie, objfile)
 	     itself.  The result is the bit offset of the LSB of the field. */
 	  if (mbr.at_bit_size > 0)
 	    {
+	      if (mbr.has_at_byte_size)
+		{
+		  /* The size of the anonymous object containing the bit field
+		     is explicit, so use the indicated size (in bytes). */
+		  anonymous_size = mbr.at_byte_size;
+		}
+	      else
+		{
+		  /* The size of the anonymous object containing the bit field
+		     matches the size of an object of the bit field's type.
+		     DWARF allows at_byte_size to be left out in such cases,
+		     as a debug information size optimization. */
+		  anonymous_size = TYPE_LENGTH (list -> field.type);
+		}
 	      list -> field.bitpos +=
-		mbr.at_byte_size * 8 - mbr.at_bit_offset - mbr.at_bit_size;
+		anonymous_size * 8 - mbr.at_bit_offset - mbr.at_bit_size;
 	    }
 #endif
 	  nfields++;
@@ -3224,6 +3242,7 @@ completedieinfo (dip, objfile)
 	case AT_byte_size:
 	  dip -> at_byte_size = target_to_host (diep, nbytes, GET_UNSIGNED,
 						objfile);
+	  dip -> has_at_byte_size = 1;
 	  break;
 	case AT_bit_size:
 	  dip -> at_bit_size = target_to_host (diep, nbytes, GET_UNSIGNED,
