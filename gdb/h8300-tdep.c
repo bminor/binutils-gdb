@@ -48,7 +48,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define IS_SUB2_SP(x) (x==0x1b87)
 #define IS_MOVK_R5(x) (x==0x7905)
 #define IS_SUB_R5SP(x) (x==0x1957)
-CORE_ADDR examine_prologue ();
+
+static CORE_ADDR examine_prologue ();
 
 void frame_find_saved_regs ();
 CORE_ADDR 
