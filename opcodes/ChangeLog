@@ -1,3 +1,7 @@
+2003-10-30  Falk Hueffner  <falk.hueffner@student.uni-tuebingen.de>
+
+	* alpha-opc.c: Add support for a second argument to RPCC.
+
 2003-10-27  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* m68hc11-dis.c: Convert to ISO C90 prototypes.
