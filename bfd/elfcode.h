@@ -2261,28 +2261,24 @@ elf_sort_hdrs (arg1, arg2)
 
   if ((hdr1->sh_flags & SHF_ALLOC) != 0)
     {
+      int ret;
+
       if ((hdr2->sh_flags & SHF_ALLOC) == 0)
 	return -1;
       if (hdr1->sh_addr < hdr2->sh_addr)
 	return -1;
       else if (hdr1->sh_addr > hdr2->sh_addr)
 	return 1;
-      if (hdr1->sh_size == 0)
-	{
-	  if (hdr2->sh_size == 0)
-	    {
-	      /* Put !SHT_NOBITS sections before SHT_NOBITS ones.
-		 The main loop in map_program_segments requires this. */
-	      return (hdr1->sh_type == SHT_NOBITS) - (hdr2->sh_type == SHT_NOBITS);
-	    }
-	  else
-	    return -1;
-	}
-      else if (hdr2->sh_size == 0)
-	return 1;
       /* Put !SHT_NOBITS sections before SHT_NOBITS ones.
          The main loop in map_program_segments requires this. */
-      return (hdr1->sh_type == SHT_NOBITS) - (hdr2->sh_type == SHT_NOBITS);
+      ret = (hdr1->sh_type == SHT_NOBITS) - (hdr2->sh_type == SHT_NOBITS);
+      if (ret != 0)
+	return ret;
+      if (hdr1->sh_size == 0)
+	return -1;
+      else if (hdr2->sh_size == 0)
+	return 1;
+      return 0;
     }
   else
     {

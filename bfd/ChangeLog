@@ -1,3 +1,8 @@
+Tue Mar  7 12:23:47 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elfcode.h (elf_sort_hdrs): Check SHT_NOBITS before checking
+	sh_size.
+
 Mon Mar  6 23:31:36 1995  Doug Evans  <dje@chestnut.cygnus.com>
 
 	* elfcode.h (elf_sort_hdrs): Keep SHT_NOBITS sections after
