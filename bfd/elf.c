@@ -1503,7 +1503,10 @@ _bfd_elf_link_hash_table_init (table, abfd, newfunc)
 
   table->dynamic_sections_created = false;
   table->dynobj = NULL;
-  table->init_refcount = get_elf_backend_data (abfd)->can_refcount - 1;
+  /* Make sure can_refcount is extended to the width and signedness of
+     init_refcount before we subtract one from it.  */
+  table->init_refcount = get_elf_backend_data (abfd)->can_refcount;
+  --table->init_refcount;
   /* The first dynamic symbol is a dummy.  */
   table->dynsymcount = 1;
   table->dynstr = NULL;
