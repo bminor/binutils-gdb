@@ -1,3 +1,9 @@
+Mon Aug  3 17:10:15 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-sparc.c (elf32_sparc_check_relocs): Permit WPLT30 against
+	a local symbol.
+	(elf32_sparc_relocate_section): Likewise.
+
 Sun Aug  2 03:19:23 1998  Richard Henderson  <rth@cygnus.com>
 
 	* elf32-ppc.c (ppc_elf_check_relocs): Init sgot to NULL.  Create the
