@@ -1,3 +1,23 @@
+Mon Jun 16 14:10:00 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
+
+	* i386.h: Fix pand opcode.
+
+Mon Jun  2 11:35:09 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* mips.h: Widen INSN_ISA and move it to a more convenient
+	bit position.  Add INSN_3900.
+
+Tue May 20 11:25:29 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* mips.h (struct mips_opcode): added new field membership.
+
+Mon May 12 16:26:50 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
+
+	* i386.h (movd): only Reg32 is allowed.
+
+	* i386.h: add fcomp and ud2.  From Wayne Scott
+	<wscott@ichips.intel.com>.
+
 Mon May  5 17:16:21 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* i386.h: Add MMX instructions.
