@@ -2371,11 +2371,11 @@ gdb_get_tracepoint_info (clientData, interp, objc, objv)
      Tcl_Obj  *CONST objv[];
 {
   struct symtab_and_line sal;
-  struct command_line *cmd;
   int tpnum;
   struct tracepoint *tp;
   struct action_line *al;
   Tcl_Obj *list, *action_list;
+  char *filename, *funcname;
   char tmp[19];
   
   if (objc != 2)
@@ -2391,13 +2391,15 @@ gdb_get_tracepoint_info (clientData, interp, objc, objv)
     error ("Tracepoint #%d does not exist", tpnum);
 
   list = Tcl_NewListObj (0, NULL);
-  if (tp->source_file != NULL)
-    Tcl_ListObjAppendElement (interp, list, Tcl_NewStringObj (tp->source_file, -1));
-  else
-    Tcl_ListObjAppendElement (interp, list, Tcl_NewStringObj ("N/A", -1));
-  Tcl_ListObjAppendElement (interp, list, Tcl_NewIntObj (tp->line_number));
-  /* the function part is not currently used by the frontend */
-  Tcl_ListObjAppendElement (interp, list, Tcl_NewStringObj ("function", -1));
+  sal = find_pc_line (tp->address, 0);
+  filename = symtab_to_filename (sal.symtab);
+  if (filename == NULL)
+    filename = "N/A";
+  Tcl_ListObjAppendElement (interp, list,
+                            Tcl_NewStringObj (filename, -1));
+  Tcl_ListObjAppendElement (interp, list, Tcl_NewIntObj (sal.line));
+  find_pc_partial_function (tp->address, &funcname, NULL, NULL);
+  Tcl_ListObjAppendElement (interp, list, Tcl_NewStringObj (funcname, -1));
   sprintf (tmp, "0x%08x", tp->address);
   Tcl_ListObjAppendElement (interp, list, Tcl_NewStringObj (tmp, -1));
   Tcl_ListObjAppendElement (interp, list, Tcl_NewIntObj (tp->enabled));
@@ -2439,17 +2441,19 @@ tracepoint_notify(tp, action)
      const char *action;
 {
   char buf[256];
-  char *source;
   int v;
+  struct symtab_and_line sal;
+  char *filename;
 
   /* We ensure that ACTION contains no special Tcl characters, so we
      can do this.  */
-  if (tp->source_file != NULL)
-    source = tp->source_file;
-  else
-    source = "N/A";
+  sal = find_pc_line (tp->address, 0);
+
+  filename = symtab_to_filename (sal.symtab);
+  if (filename == NULL)
+    filename = "N/A";
   sprintf (buf, "gdbtk_tcl_tracepoint %s %d 0x%lx %d {%s}", action, tp->number, 
-	   (long)tp->address, tp->line_number, source);
+	   (long)tp->address, sal.line, filename);
 
   v = Tcl_Eval (interp, buf);
 
