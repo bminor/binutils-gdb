@@ -580,15 +580,18 @@ DEFUN_VOID(list_symbol_table)
   {
     if (ptr->sy_frag->line) 
     {
-     printf("%20s:%-5d  %2d:%08x %s \n",
-	     ptr->sy_frag->line->file->filename,
-	     ptr->sy_frag->line->line,
-	     S_GET_SEGMENT(ptr),
-	     S_GET_VALUE(ptr),
-	     S_GET_NAME(ptr));
-      on_page++;
-      listing_page(0);
-      
+      if (strlen(S_GET_NAME(ptr))) 
+      {
+	printf("%20s:%-5d  %2d:%08x %s \n",
+	       ptr->sy_frag->line->file->filename,
+	       ptr->sy_frag->line->line,
+	       S_GET_SEGMENT(ptr),
+	       S_GET_VALUE(ptr),
+	       S_GET_NAME(ptr));
+
+	on_page++;
+	listing_page(0);
+      }      
     }
 
   }
@@ -601,11 +604,10 @@ DEFUN_VOID(list_symbol_table)
   
   for (ptr = symbol_rootP; ptr != (symbolS*)NULL; ptr = symbol_next(ptr))
   {
-    if (strlen(S_GET_NAME(ptr)) != 0) 
+    if (ptr && strlen(S_GET_NAME(ptr)) != 0) 
     {
       if (ptr->sy_frag->line == 0) 
       {
-      
 	printf("%s\n",	     S_GET_NAME(ptr));
 	on_page++;
 	listing_page(0);
