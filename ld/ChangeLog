@@ -1,3 +1,10 @@
+2003-02-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/ppc64elf.em (ppc_create_output_section_statements): Check
+	hash creator.
+	(ppc_before_allocation): Don't do optimizations if wrong hash table.
+	(gld${EMULATION_NAME}_finish): Ditto.
+
 2003-02-17  Nick Clifton  <nickc@redhat.com>
 
 	* ldmain.c (main) Default allow_shlib_undefined to true.
@@ -217,7 +224,7 @@
 	* scripttempl/elf32msp430_3.sc: New file.  Linker script for msp430.
 
 2002-12-30  Ralf Habacker  <Ralf.Habacker@freenet.de>
-            Charles Wilson  <cwilson@ece.gatech.edu>
+	    Charles Wilson  <cwilson@ece.gatech.edu>
 
 	* ld/config.in (HAVE_REALPATH): New entry.
 	(HAVE_SYS_STAT_H, HAVE_SYS_TYPES_H): Removed: obsolete.

@@ -67,6 +67,13 @@ static struct bfd_elf_version_expr *gld${EMULATION_NAME}_new_vers_pattern
 static void
 ppc_create_output_section_statements ()
 {
+  extern const bfd_target bfd_elf64_powerpc_vec;
+  extern const bfd_target bfd_elf64_powerpcle_vec;
+
+  if (link_info.hash->creator != &bfd_elf64_powerpc_vec
+      && link_info.hash->creator != &bfd_elf64_powerpcle_vec)
+    return;
+
   stub_file = lang_add_input_file ("linker stubs",
 				   lang_input_file_is_fake_enum,
 				   NULL);
@@ -98,26 +105,29 @@ ppc_after_open ()
 static void
 ppc_before_allocation ()
 {
-  if (!ppc64_elf_edit_opd (output_bfd, &link_info))
+  if (stub_file != NULL)
     {
-      einfo ("%X%P: can not edit opd %E\n");
-      return;
-    }
-
-  if (ppc64_elf_tls_setup (output_bfd, &link_info) && !notlsopt)
-    {
-      /* Size the sections.  This is premature, but we want to know the
-	 TLS segment layout so that certain optimizations can be done.  */
-      lang_size_sections (stat_ptr->head, abs_output_section,
-			  &stat_ptr->head, 0, (bfd_vma) 0, NULL);
-
-      if (!ppc64_elf_tls_optimize (output_bfd, &link_info))
+      if (!ppc64_elf_edit_opd (output_bfd, &link_info))
 	{
-	  einfo ("%X%P: TLS problem %E\n");
+	  einfo ("%X%P: can not edit opd %E\n");
 	  return;
 	}
 
-      lang_reset_memory_regions ();
+      if (ppc64_elf_tls_setup (output_bfd, &link_info) && !notlsopt)
+	{
+	  /* Size the sections.  This is premature, but we want to know the
+	     TLS segment layout so that certain optimizations can be done.  */
+	  lang_size_sections (stat_ptr->head, abs_output_section,
+			      &stat_ptr->head, 0, (bfd_vma) 0, NULL);
+
+	  if (!ppc64_elf_tls_optimize (output_bfd, &link_info))
+	    {
+	      einfo ("%X%P: TLS problem %E\n");
+	      return;
+	    }
+
+	  lang_reset_memory_regions ();
+	}
     }
 
   gld${EMULATION_NAME}_before_allocation ();
@@ -318,7 +328,7 @@ gld${EMULATION_NAME}_finish ()
 
   /* If generating a relocatable output file, then we don't have any
      stubs.  */
-  if (!link_info.relocateable)
+  if (stub_file != NULL && !link_info.relocateable)
     {
       int ret = ppc64_elf_setup_section_lists (output_bfd, &link_info);
       if (ret != 0)
@@ -348,7 +358,7 @@ gld${EMULATION_NAME}_finish ()
   if (need_laying_out)
     ppc_layout_sections_again ();
 
-  if (stub_file->the_bfd->sections != NULL)
+  if (stub_file != NULL && stub_file->the_bfd->sections != NULL)
     {
       if (!ppc64_elf_build_stubs (&link_info))
 	einfo ("%X%P: can not build stubs: %E\n");
