@@ -1,5 +1,10 @@
 2002-11-11  Christopher Faylor  <cgf@redhat.com>
 
+	* configure.in: Use .gdbinit under Cygwin.
+	* configure: Regenerate.
+
+2002-11-11  Christopher Faylor  <cgf@redhat.com>
+
 	* config/tc-i386.h (EXTERN_FORCE_RELOC): Define only if
 	STRICT_PE_FORMAT.
 

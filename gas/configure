@@ -2214,7 +2214,7 @@ fi
 # .gdbinit.
 GDBINIT=".gdbinit"
 case "${host}" in
-  *-*-msdos* | *-*-go32* | *-*-mingw32* | *-*-cygwin* | *-*-windows*)
+  *-*-msdos* | *-*-go32* | *-*-mingw32* | *-*-windows*)
     GDBINIT="gdb.ini"
     ;;
 esac
