@@ -1,3 +1,8 @@
+Wed Jun 21 17:32:45 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* objdump.c (compare_relocs): If relocation entries have the same
+	address, keep them in file order.
+
 Mon Jun 19 09:06:49 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* dlltool.c: Change names of generated files. .*.s-> -*.s
