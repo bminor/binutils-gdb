@@ -17,6 +17,12 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+
+
+/* XXX FIXME: This code is littered with 32bit int, 16bit short, 8bit char
+   dependencies.  As is the gas & simulator code or the v850.  */
+
+
 #include "bfd.h"
 #include "sysdep.h"
 #include "bfdlink.h"
@@ -193,7 +199,7 @@ static reloc_howto_type elf_v850_howto_table[] =
   /* Offset from the short data area pointer.  */
   HOWTO (R_V850_SDA_OFFSET,     /* type */
          0,                     /* rightshift */
-         0,                     /* size (0 = byte, 1 = short, 2 = long) */
+         1,                     /* size (0 = byte, 1 = short, 2 = long) */
          16,                    /* bitsize */
          false,                 /* pc_relative */
          0,                     /* bitpos */
@@ -481,7 +487,7 @@ elf32_v850_bfd_final_link_relocate (howto, input_bfd, output_bfd,
       return bfd_reloc_ok;
       
     case R_V850_HI16_S:
-      value += bfd_get_16 (input_bfd, hit_data);
+      value += (short)bfd_get_16 (input_bfd, hit_data);
       value = (value >> 16) + ((value & 0x8000) != 0);
 
       if ((long)value > 0x7fff || (long)value < -0x8000)
@@ -491,7 +497,7 @@ elf32_v850_bfd_final_link_relocate (howto, input_bfd, output_bfd,
       return bfd_reloc_ok;
 
     case R_V850_HI16:
-      value += bfd_get_16 (input_bfd, hit_data);
+      value += (short)bfd_get_16 (input_bfd, hit_data);
       value >>= 16;
 
       if ((long)value > 0x7fff || (long)value < -0x8000)
@@ -501,7 +507,7 @@ elf32_v850_bfd_final_link_relocate (howto, input_bfd, output_bfd,
       return bfd_reloc_ok;
 
     case R_V850_LO16:
-      value += bfd_get_16 (input_bfd, hit_data);
+      value += (short)bfd_get_16 (input_bfd, hit_data);
       value &= 0xffff;
 
       bfd_put_16 (input_bfd, value, hit_data);
@@ -509,7 +515,7 @@ elf32_v850_bfd_final_link_relocate (howto, input_bfd, output_bfd,
 
     case R_V850_16:
     case R_V850_ZDA_OFFSET:
-      value += bfd_get_16 (input_bfd, hit_data);
+      value += (short)bfd_get_16 (input_bfd, hit_data);
 
       if ((long)value > 0x7fff || (long)value < -0x8000)
 	return bfd_reloc_overflow;
@@ -523,7 +529,7 @@ elf32_v850_bfd_final_link_relocate (howto, input_bfd, output_bfd,
       return bfd_reloc_ok;
 
     case R_V850_8:
-      value += bfd_get_8 (input_bfd, hit_data);
+      value += (char)bfd_get_8 (input_bfd, hit_data);
 
       if ((long)value > 0x7f || (long)value < -0x80)
 	return bfd_reloc_overflow;
@@ -536,7 +542,7 @@ elf32_v850_bfd_final_link_relocate (howto, input_bfd, output_bfd,
 	unsigned long gp;
 	struct bfd_link_hash_entry *h;
 
-	value += bfd_get_16 (input_bfd, hit_data);
+	value += (short)bfd_get_16 (input_bfd, hit_data);
 
 	/* Get the value of __gp.  */
 	h = bfd_link_hash_lookup (info->hash, "__gp", false,
@@ -629,7 +635,7 @@ elf32_v850_bfd_final_link_relocate (howto, input_bfd, output_bfd,
 
 	/* Guess (XXX) that it's a movea instruction or something
 	   similar.  */
-	value += insn;
+	value += (short)insn;
         if ((long)value > 0x7fff || (long)value < -0x8000)
           return bfd_reloc_overflow;
 

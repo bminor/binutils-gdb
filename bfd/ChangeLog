@@ -1,3 +1,14 @@
+start-sanitize-v850
+Wed Oct 23 00:53:16 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* elf32-v850.c: Add comments about assumptions about
+	char, short & long sizes.
+	(elf32_v850_bfd_final_link_relocate): Fix sign extension
+	problems for several relocs.
+
+	* elf32-v850.c (elf32_v850_howto_table): Fix typo in
+	R_V850_SDA_OFFSET entry.
+
 Wed Oct 23 00:20:34 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* xcofflink.c (bfd_xcoff_import_symbol): Don't allocate ldsym.
@@ -9,10 +20,10 @@ start-sanitize-v850
 Tue Oct 22 19:20:38 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* elf32-v850.c (elf_v850_howto_table): Fix ordering of
-	R_V850_ZDAOFFSET and R_V850_TDAOFFSET.  Fix various
-	fields in R_V850_TDAOFFSET.
+	R_V850_ZDA_OFFSET and R_V850_TDA_OFFSET.  Fix various
+	fields in R_V850_TDA_OFFSET.
 	(elf32_v850_bfd_final_link_relocate): Tweak pc-relative
-	relocs to work more like other relocs.  Handle R_V850_TDAOFF
+	relocs to work more like other relocs.  Handle R_V850_TDA_OFFSET
 	relocations.
 
 	* elf32-v850.c: Include bfdlink.h.
