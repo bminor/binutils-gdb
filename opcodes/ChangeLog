@@ -1,3 +1,8 @@
+Tue Sep  2 18:39:08 1997  Jeffrey A Law  (law@cygnus.com)
+
+        * mn10200-dis.c (disassemble): PC relative instructions are
+        relative to the next instruction, not the current instruction.
+
 start-sanitize-v850
 Tue Sep  2 15:41:55 1997  Nick Clifton  <nickc@cygnus.com>
 
