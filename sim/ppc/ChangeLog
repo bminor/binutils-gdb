@@ -1,3 +1,36 @@
+2004-07-06  Jim Blandy  <jimb@redhat.com>
+
+	* Makefile.in: Update all dependency information.
+	(BASICS_H, CPU_H, IDECODE_H, PSIM_H, REGISTERS_H, DEVICE_TABLE_H)
+	(EMUL_GENERIC_H): Values updated.
+	(ACCONFIG_H, ALTIVEC_EXPRESSION_H, ALTIVEC_REGISTERS_H)
+	(ANSIDECL_H, BFD_H, BITS_H, CAP_H, COMMON_SIM_BASE_H)
+	(COMMON_SIM_BASICS_H, COMMON_SIM_FPU_H, COMMON_SIM_INLINE_H)
+	(COMMON_SIM_SIGNAL_H, CONFIG_H, COREFILE_H, COREFILE_N_H, DEBUG_H)
+	(DEFINES_H, DEFS_H, DEVICE_H, E500_EXPRESSION_H, E500_REGISTERS_H)
+	(EMUL_BUGAPI_H, EMUL_CHIRP_H, EMUL_NETBSD_H, EMUL_UNIX_H, EVENTS_H)
+	(FILTER_FILENAME_H, FILTER_H, GDB_CALLBACK_H, GDB_REMOTE_SIM_H)
+	(GEN_ICACHE_H, GEN_IDECODE_H, GEN_ITABLE_H, GEN_MODEL_H)
+	(GEN_SEMANTICS_H, GEN_SUPPORT_H, HW_CPU_H, HW_H, HW_PHB_H)
+	(ICACHE_H, IDECODE_BRANCH_H, IDECODE_EXPRESSION_H)
+	(IDECODE_FIELDS_H, IGEN_H, INLINE_H, INTERRUPTS_H, ITABLE_H)
+	(LD_CACHE_H, LD_DECODE_H, LD_INSN_H, LF_H, MISC_H, MODEL_H, MON_H)
+	(OPTIONS_H, OS_EMUL_H, PK_H, PPC_CONFIG_H, SEMANTICS_H)
+	(SIM_CALLBACKS_H, SIM_ENDIAN_H, SIM_ENDIAN_N_H, SIM_MAIN_H)
+	(SPREG_H, STD_CONFIG_H, SUPPORT_H, TABLE_H, TARG_VALS_H, TCONFIG_H)
+	(TREE_H, VM_H, VM_N_H, WORDS_H): New variables.
+	(callback.o, cap.o, corefile.o, debug.o, device.o, device_table.o)
+	(dgen.o, emul_bugapi.o, emul_chirp.o, emul_netbsd.o, emul_unix.o)
+	(events.o, filter.o, filter_filename.o, filter_host.o)
+	(gen-icache.o, gen-idecode.o, gen-itable.o, gen-model.o)
+	(gen-semantics.o, gen-support.o, hw_core.o, hw_cpu.o, hw_disk.o)
+	(hw_htab.o, hw_init.o, hw_phb.o, hw_register.o, icache.o)
+	(idecode.o, igen.o, interrupts.o, itable.o, ld-cache.o)
+	(ld-decode.o, ld-insn.o, lf.o, main.o, misc.o, model.o, mon.o)
+	(options.o, os_emul.o, pk_disklabel.o, psim.o, registers.o)
+	(semantics.o, sim-endian.o, sim-fpu.o, sim_calls.o, spreg.o)
+	(support.o, table.o, targ-map.o, tree.o, vm.o): Update dependencies.
+
 2004-06-28  Jim Blandy  <jimb@redhat.com>
 
 	* e500_registers.h (EVR): Cast the 32-bit value of the GPR to an
