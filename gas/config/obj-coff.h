@@ -795,6 +795,18 @@ extern void obj_coff_pe_handle_link_once ();
 
 #endif /* not BFD_ASSEMBLER */
 
+/* In COFF, if a symbol is defined using .def/.val SYM/.endef, it's OK
+   to redefine the symbol later on.  This can happen if C symbols use
+   a prefix, and a symbol is defined both with and without the prefix,
+   as in start/_start/__start in gcc/libgcc1-test.c.  */
+#define RESOLVE_SYMBOL_REDEFINITION(sym)		\
+(SF_GET_GET_SEGMENT (sym)				\
+ ? (sym->sy_frag = frag_now,				\
+    S_SET_VALUE (sym, frag_now_fix ()),			\
+    S_SET_SEGMENT (sym, now_seg),			\
+    0)							\
+ : 0)
+
 /* Stabs in a coff file go into their own section.  */
 #define SEPARATE_STAB_SECTIONS 1
 

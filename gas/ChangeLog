@@ -1,3 +1,7 @@
+Wed Jan 28 13:48:08 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/obj-coff.h (RESOLVE_SYMBOL_REDEFINITION): Define.
+
 Fri Jan 28 10:18:06 1998  Bill Moyer <billm@cygnus.com>
 	 
 	* as.h (flag_warn_instructionswap): added new flag variable.
