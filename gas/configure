@@ -594,7 +594,7 @@ case ${generic_target} in
   i386-*-linux*elf*)	obj_format=elf  emulation=linux ;;
   i386-*-linux*coff*)	obj_format=coff emulation=linux
 			 gas_target=i386coff ;;
-  i386-*-linux*)	obj_format=aout emulation=linux bfd_gas=preferred ;;
+  i386-*-linux*)	obj_format=aout emulation=linux ;;
   i386-*-lynxos*)	obj_format=coff gas_target=i386coff
 			 emulation=lynx ;;
   i386-*-sysv4* | i386-*-solaris* | i386-*-elf)
