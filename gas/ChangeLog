@@ -1,7 +1,13 @@
+Sat Nov 30 23:03:59 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* as.h: reloc.h->aout/reloc.h.
+	* a.out.gnu.h: reloc.h->aout/reloc.h
+
 Thu Nov 28 13:21:41 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* config/obj-coff-bfd: made multiple sections with subsections
 	work.
+	* config/tc-h8300.c: made $ statement sep, and int alloc 2 bytes.
 
 
 Mon Nov 25 17:26:22 1991  Steve Chamberlain  (sac at cygnus.com)

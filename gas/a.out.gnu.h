@@ -1,7 +1,7 @@
 #ifndef __A_OUT_GNU_H__
 #define __A_OUT_GNU_H__
 
-#include "reloc.h"
+#include "aout/reloc.h"
 
 #define __GNU_EXEC_MACROS__
 
