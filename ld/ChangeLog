@@ -1,3 +1,14 @@
+Tue Jul 30 14:46:42 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld.h (args_type): Add cref field.
+	* lexsup.c (parse_args): Set command_line.cref.
+	* ldmain.c (main): Check command_line.cref rather than
+	link_info.notice_all.
+	(notice): Likewise.
+
+	* ldcref.c (output_one_cref): Don't crash if a symbol is defined
+	in a section without an owner.
+
 Mon Jul 29 17:23:33 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* fnmatch.h, fnmatch.c: New files.

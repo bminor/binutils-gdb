@@ -115,8 +115,8 @@ static boolean reloc_dangerous PARAMS ((struct bfd_link_info *, const char *,
 static boolean unattached_reloc PARAMS ((struct bfd_link_info *,
 					 const char *, bfd *, asection *,
 					 bfd_vma));
-static boolean notice_ysym PARAMS ((struct bfd_link_info *, const char *,
-				    bfd *, asection *, bfd_vma));
+static boolean notice PARAMS ((struct bfd_link_info *, const char *,
+			       bfd *, asection *, bfd_vma));
 
 static struct bfd_link_callbacks link_callbacks =
 {
@@ -130,7 +130,7 @@ static struct bfd_link_callbacks link_callbacks =
   reloc_overflow,
   reloc_dangerous,
   unattached_reloc,
-  notice_ysym
+  notice
 };
 
 struct bfd_link_info link_info;
@@ -190,6 +190,7 @@ main (argc, argv)
   link_info.create_object_symbols_section = NULL;
   link_info.hash = NULL;
   link_info.keep_hash = NULL;
+  link_info.notice_all = false;
   link_info.notice_hash = NULL;
   link_info.wrap_hash = NULL;
   
@@ -320,6 +321,8 @@ main (argc, argv)
 
   if (config.map_file != NULL)
     lang_map ();
+  if (command_line.cref)
+    output_cref (config.map_file != NULL ? config.map_file : stdout);
 
   /* Even if we're producing relocateable output, some non-fatal errors should
      be reported in the exit status.  (What non-fatal errors, if any, do we
@@ -333,16 +336,57 @@ main (argc, argv)
 		 output_filename);
 	}
 
-      if (output_bfd->iostream)
-	fclose ((FILE *) (output_bfd->iostream));
+      /* The file will be removed by remove_output.  */
 
-      unlink (output_filename);
       xexit (1);
     }
   else
     {
       if (! bfd_close (output_bfd))
 	einfo ("%F%B: final close failed: %E\n", output_bfd);
+
+      /* If the --force-exe-suffix is enabled, and we're making an
+	 executable file and it doesn't end in .exe, copy it to one which does. */
+
+      if (! link_info.relocateable && command_line.force_exe_suffix)
+	{
+	  int len = strlen (output_filename);
+	  if (len < 4 
+	      || (strcasecmp (output_filename + len - 4, ".exe") != 0
+		  && strcasecmp (output_filename + len - 4, ".dll") != 0))
+	    {
+	      FILE *src;
+	      FILE *dst;
+	      const int bsize = 4096;
+	      char *buf = xmalloc (bsize);
+	      int l;
+	      char *dst_name = xmalloc (len + 5);
+	      strcpy (dst_name, output_filename);
+	      strcat (dst_name, ".exe");
+	      src = fopen (output_filename, FOPEN_RB);
+	      dst = fopen (dst_name, FOPEN_WB);
+
+	      if (!src)
+		einfo ("%X%P: unable to open for source of copy `%s'\n", output_filename);
+	      if (!dst)
+		einfo ("%X%P: unable to open for destination of copy `%s'\n", dst_name);
+	      while ((l = fread (buf, 1, bsize, src)) > 0)
+		{
+		  int done = fwrite (buf, 1, l, dst);
+		  if (done != l)
+		    {
+		      einfo ("%P: Error writing file `%s'\n", dst_name);
+		    }
+		}
+	      fclose (src);
+	      if (!fclose (dst))
+		{
+		  einfo ("%P: Error closing file `%s'\n", dst_name);
+		}
+	      free (dst_name);
+	      free (buf);
+	    }
+	}
     }
 
   END_PROGRESS (program_name);
@@ -632,10 +676,9 @@ add_archive_element (info, abfd, name)
 
   /* FIXME: The following fields are not set: header.next,
      header.type, closed, passive_position, symbol_count,
-     next_real_file, is_archive, target, real, common_section,
-     common_output_section, complained.  This bit of code is from the
-     old decode_library_subfile function.  I don't know whether any of
-     those fields matters.  */
+     next_real_file, is_archive, target, real.  This bit of code is
+     from the old decode_library_subfile function.  I don't know
+     whether any of those fields matters.  */
 
   ldlang_add_file (input);
 
@@ -1179,20 +1222,27 @@ unattached_reloc (info, name, abfd, section, address)
   return true;
 }
 
-/* This is called when a symbol in notice_hash is found.  Symbols are
-   put in notice_hash using the -y option.  */
+/* This is called if link_info.notice_all is set, or when a symbol in
+   link_info.notice_hash is found.  Symbols are put in notice_hash
+   using the -y option.  */
 
-/*ARGSUSED*/
 static boolean
-notice_ysym (info, name, abfd, section, value)
+notice (info, name, abfd, section, value)
      struct bfd_link_info *info;
      const char *name;
      bfd *abfd;
      asection *section;
      bfd_vma value;
 {
-  einfo ("%B: %s %s\n", abfd,
-	 bfd_is_und_section (section) ? "reference to" : "definition of",
-	 name);
+  if (! info->notice_all
+      || (info->notice_hash != NULL
+	  && bfd_hash_lookup (info->notice_hash, name, false, false) != NULL))
+    einfo ("%B: %s %s\n", abfd,
+	   bfd_is_und_section (section) ? "reference to" : "definition of",
+	   name);
+
+  if (command_line.cref)
+    add_cref (name, abfd, section, value);
+
   return true;
 }

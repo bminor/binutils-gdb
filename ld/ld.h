@@ -84,6 +84,12 @@ typedef struct
   /* If true, build MIPS embedded PIC relocation tables in the output
      file.  */
   boolean embedded_relocs;
+
+  /* If true, force generation of a file with a .exe file. */
+  boolean force_exe_suffix;
+
+  /* If true, generate a cross reference report.  */
+  boolean cref;
 } args_type;
 
 extern args_type command_line;
@@ -144,5 +150,8 @@ extern boolean force_make_executable;
 extern int parsing_defsym;
 
 extern int yyparse PARAMS ((void));
+
+extern void add_cref PARAMS ((const char *, bfd *, asection *, bfd_vma));
+extern void output_cref PARAMS ((FILE *));
 
 #endif
