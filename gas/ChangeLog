@@ -1,3 +1,10 @@
+start-sanitize-cygnus
+Thu Feb  4 10:35:47 1999  Jeffrey A Law  (law@cygnus.com)
+
+        * config/tc-mn10300.c (md_assemble): "exreg0", "exreg1", "exregother",
+        and "all" are not valid operands when not in am33 mode.
+
+end-sanitize-cygnus
 Wed Feb  3 11:35:47 1999  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-alpha.c (md_show_usage): Document pca56 and ev6 options.
