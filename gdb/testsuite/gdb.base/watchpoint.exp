@@ -1,4 +1,4 @@
-# Copyright (C) 1992, 1994 Free Software Foundation, Inc.
+# Copyright (C) 1992, 1994, 1997 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
 
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@prep.ai.mit.edu
@@ -115,7 +115,7 @@ proc test_simple_watchpoint {} {
 
     gdb_run_cmd
     set timeout 600
-    expect {
+    gdb_expect {
 	-re "Breakpoint 1, marker1 .*$gdb_prompt $" {
 	    pass "run to marker1 in test_simple_watchpoint"
 	}
@@ -145,7 +145,7 @@ proc test_simple_watchpoint {} {
     # Continue until the first change, from -1 to 0
 
     send_gdb "cont\n"
-    expect {
+    gdb_expect {
 	-re "Continuing.*\[Ww\]atchpoint.*ival3.*Old value = -1.*New value = 0.*ival3 = count; ival4 = count;.*$gdb_prompt $" {
 	    pass "watchpoint hit, first time"
 	}
@@ -219,7 +219,7 @@ proc test_disabling_watchpoints {} {
 
     gdb_run_cmd
     set timeout 600
-    expect {
+    gdb_expect {
 	-re "Breakpoint 1, marker1 .*$gdb_prompt $" {
 	    pass "run to marker1 in test_disabling_watchpoints"
 	}
@@ -303,6 +303,8 @@ proc test_stepping {} {
 	    clear_xfail "mips*-*-*"
 	    clear_xfail "sparc-*-*"
 	    clear_xfail "hppa*-*-*bsd*"
+	    # It works with the generic inferior function calling code too.
+	    clear_xfail "mn10200*-*-*"
 	    gdb_test "p func1 ()" "= 73" \
 		"calling function with watchpoint enabled"
 	}
@@ -316,12 +318,12 @@ proc test_stepping {} {
 	#
 
 	send_gdb "finish\n"
-	expect {
+	gdb_expect {
 	    -re "Run.*exit from.*marker1.* at" { }
 	    default { fail "finish from marker1" ; return }
 	}
 
-	expect {
+	gdb_expect {
 	    -re "marker1 \\(\\);.*$gdb_prompt $" {
 		send_gdb "step\n"
 		exp_continue
@@ -349,7 +351,7 @@ proc test_stepping {} {
 	gdb_test "until" "ival1 = count.*" "until to ival1 assignment"
 	gdb_test "until" "ival3 = count.*" "until to ival3 assignment"
 	send_gdb "until\n"
-	expect {
+	gdb_expect {
 	    -re "(for \\(count = 0|\}).*$gdb_prompt $" {
 		gdb_test "until" "ival1 = count; /. Outside loop ./" \
 		    "until out of loop"
@@ -397,7 +399,7 @@ proc test_watchpoint_triggered_in_syscall {} {
 	}
 
 	send_gdb "123\n"
-	expect {
+	gdb_expect {
 	    -re ".*\[Ww\]atchpoint.*buf\\\[0\\\].*Old value = 0.*New value = 49\[^\n\]*\n" { set x [expr $x+1] ; exp_continue }
 	    -re ".*\[Ww\]atchpoint.*buf\\\[1\\\].*Old value = 0.*New value = 50\[^\n\]*\n" { set x [expr $x+1] ; exp_continue }
 	    -re ".*\[Ww\]atchpoint.*buf\\\[2\\\].*Old value = 0.*New value = 51\[^\n\]*\n" { set x [expr $x+1] ; exp_continue }
@@ -409,28 +411,28 @@ proc test_watchpoint_triggered_in_syscall {} {
 	# Examine the values in buf to see how many watchpoints we
 	# should have printed.
 	send_gdb "print buf\[0\]\n"
-	expect {
+	gdb_expect {
 	    -re ".*= 49.*$gdb_prompt $" { set y [expr $y+1]; pass "print buf\[0\]"}
 	    -re ".*= 0.*$gdb_prompt $" { pass "print buf\[0\]"}
 	    -re ".*$gdb_prompt $" { fail "print buf\[0\]"}
 	    default { fail "print buf\[0\]"}
 	}
 	send_gdb "print buf\[1\]\n"
-	expect {
+	gdb_expect {
 	    -re ".*= 50.*$gdb_prompt $" { set y [expr $y+1]; pass "print buf\[1\]"}
 	    -re ".*= 0.*$gdb_prompt $" { pass "print buf\[1\]"}
 	    -re ".*$gdb_prompt $" { fail "print buf\[1\]"}
 	    default { fail "print buf\[1\]"}
 	}
 	send_gdb "print buf\[2\]\n"
-	expect {
+	gdb_expect {
 	    -re ".*= 51.*$gdb_prompt $" { set y [expr $y+1]; pass "print buf\[2\]"}
 	    -re ".*= 0.*$gdb_prompt $" { pass "print buf\[2\]"}
 	    -re ".*$gdb_prompt $" { fail "print buf\[2\]"}
 	    default { fail "print buf\[2\]"}
 	}
 	send_gdb "print buf\[3\]\n"
-	expect {
+	gdb_expect {
 	    -re ".*= 10.*$gdb_prompt $" { set y [expr $y+1]; pass "print buf\[3\]"}
 	    -re ".*= 0.*$gdb_prompt $" { pass "print buf\[3\]"}
 	    -re ".*$gdb_prompt $" { fail "print buf\[3\]" }
@@ -548,7 +550,9 @@ if [initialize] then {
 
     # Only enabled for some targets merely because it has not been tested 
     # elsewhere.
-    if {[istarget "hppa*-*-*"] || [istarget "sparc*-*-sunos*"]} then {
+    if {[istarget "hppa*-*-*"] || \
+	    [istarget "sparc*-*-sunos*"] || \
+	    [istarget "m32r-*-*"]} then {
 	test_complex_watchpoint
     }
 }

@@ -1,3 +1,14 @@
+Thu Apr  3 15:21:26 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* gdb.base/help.exp: update help msg for INFO ADDR; add help test
+	for INFO SYMBOL; add help tests for OVERLAY commands.
+	* gdb.base/default.exp: add tests for INFO SYMBOL command;
+	add tests for OVERLAY commands
+	* gdb.base/overlays.c overlays.exp foo.c bar.c baz.c grbx.c ovlymgr.h
+	d10v.ld m32r.ld d10vovly.c m32rovly.c: add test case for overlays.
+	* gdb.base/sigall.c: add usestubs code frag
+	* gdb.base/watchpoint.exp: turn on complex watchpoint test for M32R.
+	
 Thu Apr  3 09:38:53 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* lib/gdb.exp(gdb_suppress_tests): Add explanation for subsequent
