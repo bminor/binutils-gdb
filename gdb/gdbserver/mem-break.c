@@ -140,7 +140,7 @@ reinsert_breakpoint_by_bp (CORE_ADDR stop_pc, CORE_ADDR stop_at)
 
   set_breakpoint_at (stop_at, reinsert_breakpoint_handler);
 
-  orig_bp = find_breakpoint_at (stop_at);
+  orig_bp = find_breakpoint_at (stop_pc);
   if (orig_bp == NULL)
     error ("Could not find original breakpoint in list.");
 

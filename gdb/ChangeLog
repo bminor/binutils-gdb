@@ -1,3 +1,8 @@
+2002-05-14  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbserver/mem-break.c (reinsert_breakpoint_by_bp): Correct typo
+	stop_at -> stop_pc.
+
 2002-05-14  Andrew Cagney  <ac131313@redhat.com>
 
 	* regcache.c (register_valid): Revise comments refering to "Not
