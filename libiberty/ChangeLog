@@ -1,3 +1,8 @@
+2000-04-21  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	* Makefile.in (*-subdir): Revamp slightly to avoid losing on
+	4.3BSD systems.
+
 2000-04-05  Richard Henderson  <rth@cygnus.com>
 
 	* splay-tree.c (splay_tree_remove): New.
