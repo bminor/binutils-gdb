@@ -1,3 +1,7 @@
+2000-12-25  Kazu Hirata  <kazu@hxi.com>
+
+	* vms-tir.c: Fix formatting.
+
 2000-12-23  Kazu Hirata  <kazu@hxi.com>
 
 	* vms.c: Fix formatting.
