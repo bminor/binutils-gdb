@@ -21,10 +21,10 @@
 
 # COFF based ports do not support selective linking
 if {[istarget "*-*-coff"]} {
-  return
+    return
 }
 if {[istarget "*-*-pe"]} {
-  return
+    return
 }
 
 set test1 "selective1"
@@ -33,7 +33,7 @@ set test3 "selective3"
 set test4 "selective4"
 set test5 "selective5"
 
-set cflags "-w -O2 -ffunction-sections -fdata-sections" 
+set cflags "-w -O2 -ffunction-sections -fdata-sections"
 set cxxflags "-fvtable-gc -fno-exceptions -fno-rtti"
 set ldflags "--gc-sections -Bstatic"
 
@@ -58,20 +58,20 @@ if ![ld_simple_link $ld tmpdir/1.x "$ldflags tmpdir/1.o"] {
 	unresolved $test1
     } else {
 	if {[info exists nm_output(dropme1)]} {
-		send_log "dropme1 == $nm_output(dropme1)\n"
-		verbose "dropme1 == $nm_output(dropme1)"
+	    send_log "dropme1 == $nm_output(dropme1)\n"
+	    verbose "dropme1 == $nm_output(dropme1)"
+	    fail $test1
+	} else {
+	    if {[info exists nm_output(dropme2)]} {
+		send_log "dropme2 == $nm_output(dropme2)\n"
+		verbose "dropme2 == $nm_output(dropme2)"
 		fail $test1
 	    } else {
-		if {[info exists nm_output(dropme2)]} {
-		    send_log "dropme2 == $nm_output(dropme2)\n"
-		    verbose "dropme2 == $nm_output(dropme2)"
-		    fail $test1
-		} else {
-		    pass $test1
-		}
+		pass $test1
 	    }
 	}
     }
+}
 
 if { ![ld_compile "$CC $cflags" $srcdir/$subdir/2.c tmpdir/2.o]} {
     unresolved $test2
@@ -90,9 +90,9 @@ if ![ld_simple_link $ld tmpdir/2.x "$ldflags tmpdir/2.o"] {
             fail $test2
 	} else {
             pass $test2
-	    } 
-	 }
-     }
+	}
+    }
+}
 
 if { ![ld_compile "$CC $cflags" $srcdir/$subdir/2.c tmpdir/2.o]} {
     unresolved $test3
@@ -116,9 +116,9 @@ if ![ld_simple_link $ld tmpdir/2.x "$ldflags -u foo tmpdir/2.o"] {
 		fail $test3
 	    } else {
                 pass $test3
-		}
-	 }
-     }
+	    }
+	}
+    }
 }
 
 setup_xfail "v850*-*-elf"
@@ -136,20 +136,14 @@ if ![ld_simple_link $ld tmpdir/3.x "$ldflags tmpdir/3.o"] {
     if ![ld_nm $nm tmpdir/3.x] {
        unresolved $test4
     } else {
-       if {[info exists nm_output(foo__1B)]} {
-          send_log "foo__1B == $nm_output(foo__1B)\n"
-          verbose "foo__1B == $nm_output(foo__1B)"
-          fail $test4
-       } else {
-           if {[ info exists nm_output(bar__1A)]} {
-              send_log "bar__1A== $nm_output(_bar__1A)\n"
-              verbose "bar__1A == $nm_output(_bar__1A)"
-              fail $test4
-           } else {
-               pass $test4
-             }
-          }
-      }
+	if {[ info exists nm_output(bar__1A)]} {
+	    send_log "bar__1A== $nm_output(_bar__1A)\n"
+	    verbose "bar__1A == $nm_output(_bar__1A)"
+	    fail $test4
+	} else {
+	    pass $test4
+	}
+    }
 }
 
 if { ![ld_compile "$CC $cflags $cxxflags" $srcdir/$subdir/4.cc tmpdir/4.o]} {
@@ -163,18 +157,18 @@ if ![ld_simple_link $ld tmpdir/4.x "$ldflags tmpdir/4.o"] {
     if ![ld_nm $nm tmpdir/4.x] {
 	unresolved $test5
     } else {
-	if {[info exists nm_output(foo__1B)]} { 
+	if {[info exists nm_output(foo__1B)]} {
             send_log "foo__1B == $nm_output(foo__1B)\n"
             verbose "foo__1B == $nm_output(foo__1B)"
 	    fail $test5
 	} else {
-          if {[info exists nm_output(foo__1A)]} {
+	    if {[info exists nm_output(foo__1A)]} {
 	        send_log "foo__1A== $nm_output(foo__1A)\n"
 		verbose "foo__1A == $nm_output(foo__1A)"
 		fail $test5
-          } else {
-	      pass $test5
-             }
+	    } else {
+		pass $test5
+	    }
 	}
     }
 }

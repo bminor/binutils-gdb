@@ -1,3 +1,8 @@
+2000-04-12  Alan Modra  <alan@linuxcare.com.au>
+
+	* ld-selective/selective.exp (test4): Delete incorrect foo__1B
+	test.  White space changes throughout file.
+
 2000-03-13  Nick Clifton  <nickc@cygnus.com>
 
 	* ld-scripts/phdrs.t: Discard all unexpected sections.
