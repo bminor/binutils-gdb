@@ -91,7 +91,7 @@ typedef struct _i386_insn i386_insn;
 
 /* This array holds the chars that always start a comment.  If the
    pre-processor is disabled, these aren't very useful */
-#ifdef TE_I386AIX
+#if defined (TE_I386AIX) || defined (OBJ_ELF)
 const char comment_chars[] = "#/";
 #else
 const char comment_chars[] = "#";
@@ -105,7 +105,11 @@ const char comment_chars[] = "#";
    #NO_APP at the beginning of its output. */
 /* Also note that comments started like this one will always work if
    '/' isn't otherwise defined. */
-const char line_comment_chars[] = "/";	/* removed '#' xoxorich. */
+#if defined (TE_I386AIX) || defined (OBJ_ELF)
+const char line_comment_chars[];
+#else
+const char line_comment_chars[] = "/";
+#endif
 const char line_separator_chars[] = "";
 
 /* Chars that can be used to separate mant from exp in floating point nums */
@@ -631,6 +635,10 @@ reloc (size, pcrel)
       }
   abort ();
 }
+#else
+#define reloc(SIZE,PCREL)	0
+#define BFD_RELOC_32		0
+#define BFD_RELOC_32_PCREL	0
 #endif
 
 /* This is the guts of the machine-dependent assembler.  LINE points to a
@@ -1361,7 +1369,7 @@ md_assemble (line)
 		  {		/* pace */
 		    /* unconditional jump */
 		    p = frag_more (5);
-		    p[0] = 0xe9;
+		    p[0] = (char) 0xe9;
 		    md_number_to_chars (&p[1], n, 4);
 		  }
 		else
@@ -1426,7 +1434,7 @@ md_assemble (line)
 	else
 	  {
 	    fix_new_exp (frag_now, p - frag_now->fr_literal, size,
-			 i.disps[0], 1, NO_RELOC);
+			 i.disps[0], 1, reloc (size, 1));
 	  }
       }
     else if (t->opcode_modifier & JumpInterSegment)
@@ -1437,7 +1445,7 @@ md_assemble (line)
 	  md_number_to_chars (p + 1, i.imms[1]->X_add_number, 4);
 	else
 	  fix_new_exp (frag_now, p + 1 - frag_now->fr_literal, 4,
-		       i.imms[1], 0, NO_RELOC);
+		       i.imms[1], 0, BFD_RELOC_32);
 	if (i.imms[0]->X_op != O_constant)
 	  as_bad ("can't handle non absolute segment in long call/jmp");
 	md_number_to_chars (p + 5, i.imms[0]->X_add_number, 2);
@@ -1527,7 +1535,7 @@ md_assemble (line)
 			/* need a 32-bit fixup (don't support 8bit non-absolute disps) */
 			p = frag_more (4);
 			fix_new_exp (frag_now, p - frag_now->fr_literal, 4,
-				     i.disps[n], 0, NO_RELOC);
+				     i.disps[n], 0, BFD_RELOC_32);
 		      }
 		  }
 	      }
@@ -1573,7 +1581,7 @@ md_assemble (line)
 			  size = 4;
 			p = frag_more (size);
 			fix_new_exp (frag_now, p - frag_now->fr_literal, size,
-				     i.imms[n], 0, NO_RELOC);
+				     i.imms[n], 0, reloc (size, 0));
 		      }
 		  }
 	      }
@@ -1688,7 +1696,7 @@ i386_operand (operand_string)
       exp_seg = expression (exp);
       input_line_pointer = save_input_line_pointer;
 
-      if (exp.X_op == O_absent)
+      if (exp->X_op == O_absent)
 	{
 	  /* missing or bad expr becomes absolute 0 */
 	  as_bad ("missing or invalid immediate expression '%s' taken as 0",
@@ -1699,11 +1707,11 @@ i386_operand (operand_string)
 	  exp->X_op_symbol = (symbolS *) 0;
 	  i.types[this_operand] |= Imm;
 	}
-      else if (exp.X_op == O_constant)
+      else if (exp->X_op == O_constant)
 	{
 	  i.types[this_operand] |= smallest_imm_type (exp->X_add_number);
 	}
-#ifndef I386COFF
+#ifdef OBJ_AOUT
       else if (exp_seg != text_section
 	       && exp_seg != data_section
 	       && exp_seg != bss_section
@@ -1929,7 +1937,7 @@ i386_operand (operand_string)
 	    as_bad ("Ignoring junk '%s' after expression", input_line_pointer);
 	  RESTORE_END_STRING (displacement_string_end);
 	  input_line_pointer = save_input_line_pointer;
-	  if (exp.X_op == O_absent)
+	  if (exp->X_op == O_absent)
 	    {
 	      /* missing expr becomes absolute 0 */
 	      as_bad ("missing or invalid displacement '%s' taken as 0",
@@ -1940,7 +1948,7 @@ i386_operand (operand_string)
 	      exp->X_add_symbol = (symbolS *) 0;
 	      exp->X_op_symbol = (symbolS *) 0;
 	    }
-	  else if (exp.X_op == O_constant)
+	  else if (exp->X_op == O_constant)
 	    {
 	      i.types[this_operand] |= SMALLEST_DISP_TYPE (exp->X_add_number);
 	    }
@@ -1953,7 +1961,7 @@ i386_operand (operand_string)
 	    }
 	  else
 	    {
-#ifdef I386COFF
+#ifndef OBJ_AOUT
 	      i.types[this_operand] |= Disp32;
 #else
 	      goto seg_unimplemented;
@@ -2034,7 +2042,7 @@ md_estimate_size_before_relax (fragP, segment)
 	  fragP->fr_fix += 4;
 	  fix_new (fragP, old_fr_fix, 4,
 		   fragP->fr_symbol,
-		   fragP->fr_offset, 1, NO_RELOC);
+		   fragP->fr_offset, 1, BFD_RELOC_32_PCREL);
 	  break;
 
 	default:
@@ -2045,7 +2053,7 @@ md_estimate_size_before_relax (fragP, segment)
 	  fragP->fr_fix += 1 + 4;	/* we've added an opcode byte */
 	  fix_new (fragP, old_fr_fix + 1, 4,
 		   fragP->fr_symbol,
-		   fragP->fr_offset, 1, NO_RELOC);
+		   fragP->fr_offset, 1, BFD_RELOC_32_PCREL);
 	  break;
 	}
       frag_wane (fragP);
@@ -2088,6 +2096,9 @@ md_convert_frag (abfd, sec, fragP)
 
   /* Address we want to reach in file space. */
   target_address = S_GET_VALUE (fragP->fr_symbol) + fragP->fr_offset;
+#ifdef BFD_ASSEMBLER /* not needed otherwise? */
+  target_address += fragP->fr_symbol->sy_frag->fr_address;
+#endif
 
   /* Address opcode resides at in file space. */
   opcode_address = fragP->fr_address + fragP->fr_fix;
@@ -2177,7 +2188,7 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
       md_number_to_chars (ptr, 0xe9, 1);	/* opcode for long jmp */
       md_number_to_chars (ptr + 1, offset, 4);
       fix_new (frag, (ptr + 1) - frag->fr_literal, 4,
-	       to_symbol, (offsetT) 0, 0, NO_RELOC);
+	       to_symbol, (offsetT) 0, 0, BFD_RELOC_32);
     }
   else
     {
@@ -2185,15 +2196,6 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
       md_number_to_chars (ptr, (long) 0xe9, 1);
       md_number_to_chars (ptr + 1, offset, 4);
     }
-}
-
-int
-md_parse_option (argP, cntP, vecP)
-     char **argP;
-     int *cntP;
-     char ***vecP;
-{
-  return 1;
 }
 
 void				/* Knows about order of bytes in address. */
@@ -2239,6 +2241,17 @@ md_apply_fix_1 (fixP, value)
 {
   register char *p = fixP->fx_where + fixP->fx_frag->fr_literal;
 
+#ifdef BFD_ASSEMBLER
+  /*
+   * This is a hack.  There should be a better way to
+   * handle this.
+   */
+  if (fixP->fx_r_type == BFD_RELOC_32_PCREL && fixP->fx_addsy)
+    {
+      value += fixP->fx_where + fixP->fx_frag->fr_address;
+    }
+#endif
+
   switch (fixP->fx_size)
     {
     case 1:
@@ -2263,7 +2276,7 @@ md_apply_fix_1 (fixP, value)
 int
 md_apply_fix (fixP, valp)
      fixS *fixP;
-     long *valp;
+     valueT *valp;
 {
   md_apply_fix_1 (fixP, *valp);
   return 1;
@@ -2359,9 +2372,9 @@ output_invalid (c)
   return output_invalid_buf;
 }
 
+/* reg_string starts *before* REGISTER_PREFIX */
 static reg_entry *
 parse_register (reg_string)
-     /* reg_string starts *before* REGISTER_PREFIX */
      char *reg_string;
 {
   register char *s = reg_string;
@@ -2410,9 +2423,9 @@ md_section_align (segment, size)
   return size;			/* Byte alignment is fine */
 }
 
-/* Exactly what point is a PC-relative offset relative TO?
-   On the i386, they're relative to the address of the offset, plus
-   its size. (??? Is this right?  FIXME-SOON!) */
+/* Exactly what point is a PC-relative offset relative TO?  On the
+   i386, they're relative to the address of the offset, plus its
+   size. (??? Is this right?  FIXME-SOON!) */
 long
 md_pcrel_from (fixP)
      fixS *fixP;
@@ -2530,8 +2543,6 @@ tc_coff_fix2rtype (fixP)
 	  (fixP->fx_size == 1 ? R_RELBYTE :
 	   fixP->fx_size == 2 ? R_RELWORD :
 	   R_DIR32));
-
-
 }
 
 int
