@@ -6466,8 +6466,13 @@ pa_export (unused)
     }
   else
     {
-      /* OK.  Set the external bits and process argument relocations.  */
+      /* OK.  Set the external bits and process argument relocations.
+         For the HP, weak and global are not mutually exclusive. 
+         S_SET_EXTERNAL will not set BSF_GLOBAL if WEAK is set.
+         Call S_SET_EXTERNAL to get the other processing.  Manually
+         set BSF_GLOBAL when we get back.  */
       S_SET_EXTERNAL (symbol);
+      symbol_get_bfdsym (symbol)->flags |= BSF_GLOBAL;
       p = input_line_pointer;
       *p = c;
       if (!is_end_of_statement ())
