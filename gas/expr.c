@@ -407,6 +407,7 @@ operand (expressionP)
       integer_constant(2, expressionP);
       break;
 
+    case '0':
     case '1':
     case '2':
     case '3':
@@ -542,7 +543,7 @@ operand (expressionP)
       
 
     }
-    
+  case ',':    
   case '\n':
 	/* can't imagine any other kind of operand */
 	expressionP->X_seg = SEG_ABSENT;

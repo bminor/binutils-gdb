@@ -1,5 +1,9 @@
 Tue Feb 25 14:17:15 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 
+	* expr.c: If an expression is single comma, then return with
+	SEG_ABSENT rather than an error - since the sparc front end does
+	really strange things with things like fbge,a 
+
 	* as.h: include bfd.h if using many sections
 	* expr.c: LOCAL_LABELS_FB had been changed to lower case - so
 	local labels didn't work.
