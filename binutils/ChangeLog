@@ -1,3 +1,17 @@
+2001-08-21  Andreas Jaeger  <aj@suse.de>
+
+	* coffgrok.h: Add missing parameter for prototype of coff_grok.
+
+	* sysdump.c: Add missing prototypes.
+	* srconv.c: Likewise.
+	* unwind-ia64.c: Likewise.
+	* coffdump.c: Likewise.
+
+	* sysinfo.y: Print prototypes, include <ansidecl.h>.
+
+	* coffgrok.c: Add missing prototypes, include libiberty.h instead
+	of declaring xcalloc.
+
 2001-08-10  H.J. Lu  <hjl@gnu.org>
 
 	* nm.c (print_value): Add one arg, bfd *.

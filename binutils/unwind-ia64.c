@@ -33,6 +33,12 @@ Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 static bfd_vma unw_rlen = 0;
 
+static void unw_print_brmask PARAMS ((char *, unsigned char));
+static void unw_print_grmask PARAMS ((char *, unsigned char));
+static void unw_print_frmask PARAMS ((char *, long unsigned int));
+static void unw_print_abreg PARAMS ((char *, unsigned char));
+static void unw_print_xyreg PARAMS ((char *, unsigned char, unsigned char));
+
 static void
 unw_print_brmask (cp, mask)
      char * cp;

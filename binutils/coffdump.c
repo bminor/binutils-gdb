@@ -1,5 +1,5 @@
 /* Coff file dumper.
-   Copyright 1994, 1995, 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
 
@@ -33,7 +33,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define PROGRAM_VERSION "1.0"
 
 static int atnl;
-static void dump_coff_scope ();
+
+static void tab PARAMS ((int));
+static void nl PARAMS ((void));
+static void dump_coff_lines PARAMS ((struct coff_line *));
+static void dump_coff_type PARAMS ((struct coff_type *));
+static void dump_coff_where PARAMS ((struct coff_where *));
+static void dump_coff_visible PARAMS ((struct coff_visible *));
+extern void dump_coff_symbol PARAMS ((struct coff_symbol *));
+static void dump_coff_scope PARAMS ((struct coff_scope *));
+static void dump_coff_sfile PARAMS ((struct coff_sfile *));
+static void dump_coff_section PARAMS ((struct coff_section *));
+extern void coff_dump PARAMS ((struct coff_ofile *));
+static void show_usage PARAMS ((FILE *, int));
+static void show_help PARAMS ((void));
+extern int main PARAMS ((int, char **));
 
 static void
 tab (x)

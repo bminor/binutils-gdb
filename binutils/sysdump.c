@@ -1,5 +1,5 @@
 /* Sysroff object format dumper.
-   Copyright 1994, 1995, 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -40,6 +40,30 @@ static int segmented_p;
 static int code;
 static int addrsize = 4;
 static FILE *file;
+
+static void dh PARAMS ((unsigned char *, int));
+static void itheader PARAMS ((char *, int));
+static void p PARAMS ((void));
+static void tabout PARAMS ((void));
+static void pbarray PARAMS ((barray *));
+static int getone PARAMS ((int));
+static int opt PARAMS ((int));
+static void must PARAMS ((int));
+static void tab PARAMS ((int, char *));
+static void dump_symbol_info PARAMS ((void));
+static void derived_type PARAMS ((void));
+static void module PARAMS ((void));
+static void show_usage PARAMS ((FILE *, int));
+static void show_help PARAMS ((void));
+
+extern char *getCHARS PARAMS ((unsigned char *, int *, int, int));
+extern int fillup PARAMS ((char *));
+extern barray getBARRAY PARAMS ((unsigned char *, int *, int, int));
+extern int getINT PARAMS ((unsigned char *, int *, int, int));
+extern int getBITS PARAMS ((char *, int *, int, int));
+extern void sysroff_swap_tr_in PARAMS ((void));
+extern void sysroff_print_tr_out PARAMS ((void));
+extern int main PARAMS ((int, char **));
 
 char *
 getCHARS (ptr, idx, size, max)
@@ -547,8 +571,6 @@ tab (i, s)
       printf ("\n");
     }
 }
-
-static void derived_type ();
 
 static void
 dump_symbol_info ()
