@@ -1,9 +1,14 @@
+Mon Jul 22 12:15:25 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* i960.h (i960_opcodes): "halt" takes an argument.  From Stephen
+	Williams <steve@icarus.com>.
+
 start-sanitize-d10v
-	Wed Jul 17 14:46:38 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+Wed Jul 17 14:46:38 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v.h: New file. 
+
 end-sanitize-d10v
-	
 Thu Jul 11 12:09:15 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* h8300.h (band, bclr): Force high bit of immediate nibble to zero.
