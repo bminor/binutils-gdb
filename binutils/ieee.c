@@ -1833,8 +1833,7 @@ parse_ieee_ty (info, pp)
       break;
 
     case 'x':
-      /* Procedure with compiler dependencies.  FIXME: This is an
-         extern declaration, which we have no way of representing.  */
+      /* Procedure with compiler dependencies.  */
       {
 	struct ieee_var *pv;
 	bfd_vma attr, frame_type, push_mask, nargs, level, father;
@@ -1843,7 +1842,7 @@ parse_ieee_ty (info, pp)
 	boolean varargs;
 	boolean present;
 
-	/* FIXME: We ignore almost all this information.  */
+	/* FIXME: We ignore some of this information.  */
 
 	pv = info->vars.vars + varindx;
 
@@ -3560,6 +3559,19 @@ struct ieee_name_type
   enum debug_type_kind kind;
 };
 
+/* We keep a list of modified versions of types, so that we don't
+   output them more than once.  */
+
+struct ieee_modified_type
+{
+  /* Pointer to this type.  */
+  unsigned int pointer;
+  /* Const version of this type.  */
+  unsigned int const_qualified;
+  /* Volatile version of this type.  */
+  unsigned int volatile_qualified;
+};
+
 /* This is a list of pending function parameter information.  We don't
    output them until we see the first block.  */
 
@@ -3617,6 +3629,10 @@ struct ieee_handle
   struct ieee_name_type *typedefs;
   /* Tags.  */
   struct ieee_name_type *tags;
+  /* Modified versions of types.  */
+  struct ieee_modified_type *modified;
+  /* Number of entries allocated in modified.  */
+  unsigned int modified_alloc;
   /* The depth of block nesting.  This is 0 outside a function, and 1
      just after start_function is called.  */
   unsigned int block_depth;
@@ -3665,6 +3681,8 @@ static boolean ieee_define_type
 static boolean ieee_define_named_type
   PARAMS ((struct ieee_handle *, const char *, boolean, unsigned int,
 	   unsigned int, boolean, struct ieee_buf **));
+static struct ieee_modified_type *ieee_get_modified_info
+  PARAMS ((struct ieee_handle *, unsigned int));
 static boolean ieee_finish_compilation_unit PARAMS ((struct ieee_handle *));
 static boolean ieee_output_pending_parms PARAMS ((struct ieee_handle *));
 static unsigned int ieee_vis_to_flags PARAMS ((enum debug_visibility));
@@ -4246,6 +4264,33 @@ ieee_define_named_type (info, name, tagp, id, size, unsignedp, ppbuf)
 	  && ieee_write_byte (info, 0xce)
 	  && ieee_write_number (info, name_indx));
 }
+
+/* Get an entry to the list of modified versions of a type.  */
+
+static struct ieee_modified_type *
+ieee_get_modified_info (info, indx)
+     struct ieee_handle *info;
+     unsigned int indx;
+{
+  if (indx >= info->modified_alloc)
+    {
+      unsigned int nalloc;
+
+      nalloc = info->modified_alloc;
+      if (nalloc == 0)
+	nalloc = 16;
+      while (indx >= nalloc)
+	nalloc *= 2;
+      info->modified = ((struct ieee_modified_type *)
+			xrealloc (info->modified,
+				  nalloc * sizeof *info->modified));
+      memset (info->modified + info->modified_alloc, 0,
+	      (nalloc - info->modified_alloc) * sizeof *info->modified);
+      info->modified_alloc = nalloc;
+    }
+
+  return info->modified + indx;
+}
 
 /* The general routine to write out IEEE debugging information.  */
 
@@ -4800,6 +4845,7 @@ ieee_pointer_type (p)
 {
   struct ieee_handle *info = (struct ieee_handle *) p;
   unsigned int indx;
+  struct ieee_modified_type *m;
 
   indx = ieee_pop_type (info);
 
@@ -4807,9 +4853,21 @@ ieee_pointer_type (p)
   if (indx < 32)
     return ieee_push_type (info, indx + 32, 0, true);
 
-  return (ieee_define_type (info, 0, true)
-	  && ieee_write_number (info, 'P')
-	  && ieee_write_number (info, indx));
+  m = ieee_get_modified_info (p, indx);
+  if (m == NULL)
+    return false;
+
+  if (m->pointer > 0)
+    return ieee_push_type (info, m->pointer, 0, true);
+
+  if (! ieee_define_type (info, 0, true)
+      || ! ieee_write_number (info, 'P')
+      || ! ieee_write_number (info, indx))
+    return false;
+
+  m->pointer = info->type_stack->type.indx;
+
+  return true;
 }
 
 /* Make a function type.  This will be called for a method, but we
@@ -5020,14 +5078,28 @@ ieee_const_type (p)
   unsigned int size;
   boolean unsignedp;
   unsigned int indx;
+  struct ieee_modified_type *m;
 
   size = info->type_stack->type.size;
   unsignedp = info->type_stack->type.unsignedp;
   indx = ieee_pop_type (info);
-  return (ieee_define_type (info, size, unsignedp)
-	  && ieee_write_number (info, 'n')
-	  && ieee_write_number (info, 1)
-	  && ieee_write_number (info, indx));
+
+  m = ieee_get_modified_info (info, indx);
+  if (m == NULL)
+    return false;
+
+  if (m->const_qualified > 0)
+    return ieee_push_type (info, m->const_qualified, size, unsignedp);
+
+  if (! ieee_define_type (info, size, unsignedp)
+      || ! ieee_write_number (info, 'n')
+      || ! ieee_write_number (info, 1)
+      || ! ieee_write_number (info, indx))
+    return false;
+
+  m->const_qualified = info->type_stack->type.indx;
+
+  return true;
 }
 
 /* Make a volatile qualified type.  */
@@ -5040,14 +5112,28 @@ ieee_volatile_type (p)
   unsigned int size;
   boolean unsignedp;
   unsigned int indx;
+  struct ieee_modified_type *m;
 
   size = info->type_stack->type.size;
   unsignedp = info->type_stack->type.unsignedp;
   indx = ieee_pop_type (info);
-  return (ieee_define_type (info, size, unsignedp)
-	  && ieee_write_number (info, 'n')
-	  && ieee_write_number (info, 2)
-	  && ieee_write_number (info, indx));
+
+  m = ieee_get_modified_info (info, indx);
+  if (m == NULL)
+    return false;
+
+  if (m->volatile_qualified > 0)
+    return ieee_push_type (info, m->volatile_qualified, size, unsignedp);
+
+  if (! ieee_define_type (info, size, unsignedp)
+      || ! ieee_write_number (info, 'n')
+      || ! ieee_write_number (info, 2)
+      || ! ieee_write_number (info, indx))
+    return false;
+
+  m->volatile_qualified = info->type_stack->type.indx;
+
+  return true;
 }
 
 /* Convert an enum debug_visibility into a CXXFLAGS value.  */

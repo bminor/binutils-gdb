@@ -1,5 +1,12 @@
 Wed Jan 24 12:06:05 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ieee.c (struct ieee_modified_type): Define.
+	(struct ieee_handle): Add modified and modified_alloc fields.
+	(ieee_get_modified_info): New static function.
+	(ieee_pointer_type): Cache type index.
+	(ieee_const_type): Likewise.
+	(ieee_volatile_type): Likewise.
+
 	* ieee.c (ieee_define_named_type): When creating a tag for an
 	anonymous struct, copy the name into memory.
 	(ieee_tag_type): Likewise.
