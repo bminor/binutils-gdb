@@ -1,3 +1,80 @@
+Sun May 26 14:14:49 1996  Fred Fish  <fnf@cygnus.com>
+
+	Changes from: David Mosberger-Tang  <davidm@azstarnet.com>
+
+	* NEWS:  Add Alpha Linux as a new native configuration.
+
+	* mdebugread.c (parse_symbol): When we find a malloc() symbol with
+ 	return type VOID, assume no debugging info is available for that
+ 	object file and patch the return value into VOID *.  Otherwise,
+	operations requiring an implicit call to malloc() will fail.
+
+	* infrun.c (wait_for_inferior): The criterion to detect entering a
+ 	sigtramp handler is now: (a) the current pc is inside a sigtramp
+ 	handler, (b) the previous pc is not in a sigtramp handler, and (c)
+ 	the current stack pointer is "inner" than the old one.  Condition
+	(c) is new to avoid mistaking a return from a signal handler into
+ 	sigtramp as a new sigtramp invocation.
+
+	* dcache.c (struct dcache_block): Declare addr as CORE_ADDR.  An
+ 	int may not be big enough to hold an address.
+	(dcache_hit): Ditto.
+	(dcache_peek_byte): Fix indentation.
+
+	* configure.in (alpha-*-linux*): Add target.
+	* configure: Rebuild
+
+	* config/alpha/tm-alpha.h (PROC_DESC_IS_DYN_SIGTRAMP): New macro.
+	(SET_PROC_DESC_IS_DYN_SIGTRAMP): Ditto.
+	(DYNAMIC_SIGTRAMP_OFFSET): Ditto.
+	(SIGCONTEXT_ADDR): Ditto.
+	(FRAME_PAST_SIGTRAMP_FRAME): Ditto.
+
+	* config/alpha/alpha-linux.mh: New file.
+	* config/alpha/alpha-linux.mt: Ditto.
+	* config/alpha/nm-linux.h: Ditto.
+	* config/alpha/tm-alphalinux.h: Ditto.
+	* config/alpha/xm-alphalinux.h: Ditto.
+	* config/alpha/xm-alphaosf.h: Renamed from xm-alpha.h.
+	* config/alpha/alpha-osf1.mh (XM_FILE): Change from xm-alpha.h to
+ 	xm-alphaosf.h.
+	* config/alpha/alpha-osf2.mh: Ditto.
+
+	* blockframe.c (find_pc_partial_function): Pass PC to
+ 	SIGTRAMP_START and SIGTRAMP_END macros for the benefit of systems
+ 	that detect sigtramp code via designated code sequences (as is the
+ 	case for Linux/Alpha, for example).
+	
+	* config/i386/tm-i386bsd.h: Change SIGTRAMP_START and SIGTRAMP_END
+	to ignore new PC argument.
+	* config/m68k/tm-hp300bsd.h: Ditto.
+	* config/vax/tm-vax.h: Ditto.
+
+	* alpha-tdep.c (alpha_linux_sigtramp_offset): New function.
+	(alpha_osf_skip_sigtramp_frame): Ditto.
+	(push_sigtramp_desc): Ditto.
+	(alpha_find_saved_regs): Use SIGCONTEXT_ADDR macro to extract
+ 	sigcontext address from frame.
+	(alpha_saved_pc_after_call): When in sigtramp, use
+ 	alpha_frame_saved_pc() instead of read-register().
+	(after_prologue): When inside a dynamically generated sigtramp
+ 	function, there is no prologue, so return address of first
+ 	instruction.
+	(alpha_in_prologue): Fix typo in comment.
+	(find_proc_desc): Use macro DYNAMIC_SIGTRAMP_OFFSET to determine
+ 	whether we're inside a dynamicaly generated sigtramp function.  If
+ 	so, create and push and appropriate procedure descriptor.
+	(alpha_frame_chain): Use macro FRAME_PAST_SIGTRAMP_FRAME to obtain
+ 	the frame past a sigtramp frame (if the current frame is indeed a
+ 	sigtramp function).
+	(init_extra_frame_info): Don't read next frame register off of
+ 	stack-pointer when inside a dynamiccaly generated sigtramp.
+	(alpha_pop_frame): Also unlink and destroy procedure descriptors
+ 	created for dynamically generated sigtramp functions.
+
+	* alpha-nat.c: When compiling under Linux, include <asm/reg.h> and
+ 	<alpha/ptrace.h> instead of <machine/reg.h>
+
 Thu May 23 15:13:56 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* h8300-tdep.c (IS_PUSH): Refine.

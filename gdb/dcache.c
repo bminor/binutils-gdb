@@ -111,7 +111,7 @@
 struct dcache_block
 {
   struct dcache_block *p;	/* next in list */
-  unsigned int addr;		/* Address for which data is recorded.  */
+  CORE_ADDR addr;		/* Address for which data is recorded.  */
   char data[LINE_SIZE];		/* bytes at given address */
   unsigned char state[LINE_SIZE]; /* what state the data is in */
 
@@ -155,7 +155,7 @@ static int
 dcache_peek_byte PARAMS ((DCACHE *dcache, CORE_ADDR addr, char *ptr));
 
 static struct dcache_block *
-dcache_hit PARAMS ((DCACHE *dcache, unsigned int addr));
+dcache_hit PARAMS ((DCACHE *dcache, CORE_ADDR addr));
 
 static int dcache_write_line PARAMS ((DCACHE *dcache,struct dcache_block *db));
 
@@ -207,7 +207,7 @@ dcache_flush (dcache)
 static struct dcache_block *
 dcache_hit (dcache, addr)
      DCACHE *dcache;
-     unsigned int addr;
+     CORE_ADDR addr;
 {
   register struct dcache_block *db;
 
@@ -338,7 +338,7 @@ dcache_peek_byte (dcache, addr, ptr)
     else
       db = dcache_alloc (dcache);
       immediate_quit++;
-	    db->addr = MASK (addr);
+      db->addr = MASK (addr);
       while (done < LINE_SIZE) 
 	{
 	  int try =

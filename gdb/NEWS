@@ -1,6 +1,12 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
+*** Changes since GDB-4.16:
+
+* New native configurations
+
+Alpha Linux					alpha-*-linux*
+
 *** Changes in GDB-4.16:
 
 * New native configurations

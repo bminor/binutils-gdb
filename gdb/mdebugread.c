@@ -835,7 +835,23 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
       if (sh->sc == scUndefined || sh->sc == scNil)
 	t = mdebug_type_int;
       else
-	t = parse_type (cur_fd, ax, sh->index + 1, 0, bigend, name);
+	{
+	  t = parse_type (cur_fd, ax, sh->index + 1, 0, bigend, name);
+	  if (STREQ(name, "malloc") && t->code == TYPE_CODE_VOID)
+	    {
+	      /* I don't know why, but, at least under Linux/Alpha,
+		 when linking against a malloc without debugging
+		 symbols, its read as a function returning void---this
+		 is bad because it means we cannot call functions with
+		 string arguments interactively; i.e., "call
+		 printf("howdy\n")" would fail with the error message
+		 "program has no memory available".  To avoid this, we
+		 patch up the type and make it void*
+		 instead. (davidm@azstarnet.com)
+		 */
+	      t = t->pointer_type;
+	    }
+	}
       b = top_stack->cur_block;
       if (sh->st == stProc)
 	{

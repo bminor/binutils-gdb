@@ -305,6 +305,7 @@ a29k-*-*)		gdb_host=ultra3 ;;
 alpha-*-osf1*)		gdb_host=alpha-osf1 ;;
 alpha-*-osf2*)		gdb_host=alpha-osf2 ;;
 alpha-*-osf[3456789]*)	gdb_host=alpha-osf3 ;;
+alpha-*-linux*)		gdb_host=alpha-linux ;;
 
 arm-*-*)		gdb_host=arm ;;
 
@@ -460,6 +461,7 @@ a29k-*-udi*)		gdb_target=a29k-udi ;;
 a29k-*-vxworks*)        gdb_target=vx29k ;;
 
 alpha-*-osf*)		gdb_target=alpha-osf1 ;;
+alpha-*-linux*)		gdb_target=alpha-linux ;;
 
 # start-sanitize-arc
 arc-*-*)		gdb_target=arc ;;

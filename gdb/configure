@@ -3194,6 +3194,7 @@ case "${host}" in
 
 a29k-*-*)		gdb_host=ultra3 ;;
 
+alpha-*-linux*)		gdb_host=alpha-linux ;;
 alpha-*-osf1*)		gdb_host=alpha-osf1 ;;
 alpha-*-osf2*)		gdb_host=alpha-osf2 ;;
 alpha-*-osf[3456789]*)	gdb_host=alpha-osf3 ;;
@@ -3351,6 +3352,7 @@ a29k-*-sym1*)		gdb_target=ultra3 ;;
 a29k-*-udi*)		gdb_target=a29k-udi ;;
 a29k-*-vxworks*)        gdb_target=vx29k ;;
 
+alpha-*-linux*)		gdb_target=alpha-linux ;;
 alpha-*-osf*)		gdb_target=alpha-osf1 ;;
 
 # start-sanitize-arc

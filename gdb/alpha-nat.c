@@ -22,7 +22,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbcore.h"
 #include "target.h"
 #include <sys/ptrace.h>
-#include <machine/reg.h>
+#ifdef __linux__
+# include <asm/reg.h>
+# include <alpha/ptrace.h>
+#else
+# include <machine/reg.h>
+#endif
 #include <sys/user.h>
 
 /* Size of elements in jmpbuf */
