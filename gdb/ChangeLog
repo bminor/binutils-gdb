@@ -1,3 +1,21 @@
+Thu Aug 15 13:44:13 1996  Fred Fish  <fnf@cygnus.com>
+
+	* findvar.c (write_register_pid): Only needed when TARGET_WRITE_PC
+	is not defined.
+	(read_register_pid): Only needed when TARGET_READ_PC is not
+	defined.
+	* hppa-tdep.c (frame_saved_pc): Remove prototype.
+	* infptrace.c (udot_info): Prototype when CHILD_XFER_MEMORY is
+	not defined.
+	* config/xm-aix4.h (aix_resizewindow): Convert old style decl
+	to prototype.
+	* xcoffsolib.c (command.h): Include for needed prototypes.
+
+Wed Aug 14 17:54:19 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* config/i386/cygwin32.mh: Set NAT_FILE to nm-empty.h to make
+	native work.
+
 Wed Aug 14 02:03:42 1996  Fred Fish  <fnf@rtl.cygnus.com>
 
 	From Blair MacIntyre <bm@cs.columbia.edu>:

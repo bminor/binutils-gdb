@@ -90,8 +90,6 @@ static int restore_pc_queue PARAMS ((struct frame_saved_regs *));
 
 static int hppa_alignof PARAMS ((struct type *));
 
-CORE_ADDR frame_saved_pc PARAMS ((struct frame_info *));
-
 static int prologue_inst_adjust_sp PARAMS ((unsigned long));
 
 static int is_branch PARAMS ((unsigned long));

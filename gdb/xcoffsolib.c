@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bfd.h"
 #include "xcoffsolib.h"
 #include "inferior.h"
+#include "command.h"
 
 /* Hook to relocate symbols at runtime.  If gdb is build natively, this
    hook is initialized in by rs6000-nat.c.  If not, it is currently left
