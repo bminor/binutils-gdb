@@ -45,6 +45,7 @@ static boolean assign_file_positions_for_segments PARAMS ((bfd *));
 static boolean assign_file_positions_except_relocs PARAMS ((bfd *));
 static boolean prep_headers PARAMS ((bfd *));
 static boolean swap_out_syms PARAMS ((bfd *, struct bfd_strtab_hash **));
+static boolean copy_private_bfd_data PARAMS ((bfd *, bfd *));
 
 /* Standard ELF hash function.  Do not change this function; you will
    cause invalid hash tables to be generated.  (Well, you would if this
@@ -1874,6 +1875,7 @@ assign_file_positions_for_segments (abfd)
 	    {
 	      struct elf_segment_map *mi;
 	      Elf_Internal_Phdr *pi;
+	      struct elf_segment_map *mi_phdr;
 	      Elf_Internal_Phdr *pi_phdr;
 
 	      /* This is the first PT_LOAD segment.  If there is a
@@ -1890,17 +1892,22 @@ assign_file_positions_for_segments (abfd)
 		      p->p_filesz = off;
 		      p->p_memsz = off;
 		      p->p_vaddr -= off;
-		      p->p_paddr -= off;
+		      if (! m->p_paddr_valid)
+			p->p_paddr -= off;
 		    }
 		  if (mi->p_type == PT_PHDR)
-		    pi_phdr = pi;
+		    {
+		      mi_phdr = mi;
+		      pi_phdr = pi;
+		    }
 		}
 
 	      /* Set up the PT_PHDR addresses.  */
 	      if (pi_phdr != NULL)
 		{
 		  pi_phdr->p_vaddr = p->p_vaddr + bed->s->sizeof_ehdr;
-		  pi_phdr->p_paddr = p->p_paddr + bed->s->sizeof_ehdr;
+		  if (! mi_phdr->p_paddr_valid)
+		    pi_phdr->p_paddr = p->p_paddr + bed->s->sizeof_ehdr;
 		}
 
 	      found_load = true;
@@ -2451,6 +2458,93 @@ _bfd_elf_symbol_from_bfd_symbol (abfd, asym_ptr_ptr)
   return idx;
 }
 
+/* Copy private BFD data.  This copies any program header information.  */
+
+static boolean
+copy_private_bfd_data (ibfd, obfd)
+     bfd *ibfd;
+     bfd *obfd;
+{
+  struct elf_segment_map *mfirst;
+  struct elf_segment_map **pm;
+  Elf_Internal_Phdr *p;
+  unsigned int i, c;
+
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+    return true;
+
+  if (elf_tdata (ibfd)->phdr == NULL)
+    return true;
+
+  mfirst = NULL;
+  pm = &mfirst;
+
+  c = elf_elfheader (ibfd)->e_phnum;
+  for (i = 0, p = elf_tdata (ibfd)->phdr; i < c; i++, p++)
+    {
+      struct elf_segment_map *m;
+      unsigned int csecs;
+
+      csecs = 0;
+      if (p->p_type != PT_PHDR)
+	{
+	  asection *s;
+
+	  for (s = ibfd->sections; s != NULL; s = s->next)
+	    if (s->vma >= p->p_vaddr
+		&& s->vma + s->_raw_size <= p->p_vaddr + p->p_memsz
+		&& s->output_section != NULL)
+	      ++csecs;
+	}
+
+      m = ((struct elf_segment_map *)
+	   bfd_alloc (obfd,
+		      (sizeof (struct elf_segment_map)
+		       + (csecs - 1) * sizeof (asection *))));
+      if (m == NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  return false;
+	}
+
+      m->next = NULL;
+      m->p_type = p->p_type;
+      m->p_flags = p->p_flags;
+      m->p_flags_valid = 1;
+      m->p_paddr = p->p_paddr;
+      m->p_paddr_valid = 1;
+
+      if (p->p_type != PT_PHDR)
+	{
+	  asection *s;
+	  unsigned int isec;
+
+	  isec = 0;
+	  for (s = ibfd->sections; s != NULL; s = s->next)
+	    {
+	      if (s->vma >= p->p_vaddr
+		  && s->vma + s->_raw_size <= p->p_vaddr + p->p_memsz
+		  && s->output_section != NULL)
+		{
+		  m->sections[isec] = s->output_section;
+		  ++isec;
+		}
+	    }
+	  qsort (m->sections, (size_t) csecs, sizeof (asection *),
+		 elf_sort_sections);
+	  m->count = csecs;
+	}
+
+      *pm = m;
+      pm = &m->next;
+    }
+
+  elf_tdata (obfd)->segment_map = mfirst;
+
+  return true;
+}
+
 /* Copy private section information.  This copies over the entsize
    field, and sometimes the info field.  */
 
@@ -2466,6 +2560,28 @@ _bfd_elf_copy_private_section_data (ibfd, isec, obfd, osec)
   if (ibfd->xvec->flavour != bfd_target_elf_flavour
       || obfd->xvec->flavour != bfd_target_elf_flavour)
     return true;
+
+  /* Copy over private BFD data if it has not already been copied.
+     This must be done here, rather than in the copy_private_bfd_data
+     entry point, because the latter is called after the section
+     contents have been set, which means that the program headers have
+     already been worked out.  */
+  if (elf_tdata (obfd)->segment_map == NULL
+      && elf_tdata (ibfd)->phdr != NULL)
+    {
+      asection *s;
+
+      /* Only set up the segments when all the sections have been set
+         up.  */
+      for (s = ibfd->sections; s != NULL; s = s->next)
+	if (s->output_section == NULL)
+	  break;
+      if (s == NULL)
+	{
+	  if (! copy_private_bfd_data (ibfd, obfd))
+	    return false;
+	}
+    }
 
   ihdr = &elf_section_data (isec)->this_hdr;
   ohdr = &elf_section_data (osec)->this_hdr;

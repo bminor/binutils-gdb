@@ -1,5 +1,10 @@
 Wed Nov 29 12:42:36 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf.c (assign_file_positions_for_segments): Don't adjust p_paddr
+	if p_paddr_valid is set.
+	(copy_private_bfd_data): New static function.
+	(_bfd_elf_copy_private_section_data): Call copy_private_bfd_data.
+
 	* elf.c (assign_file_positions_for_segments): Fix case where extra
 	program headers were allocated.
 
