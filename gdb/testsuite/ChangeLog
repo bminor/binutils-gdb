@@ -1,3 +1,9 @@
+2002-11-08  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* lib/mi-support.exp (mi_gdb_start): Verify the startup message 
+	for mi1 and current mi is in correct format.  New mi startup message 
+	should be in mi console format.  This is part of fix for PR gdb/604.
+
 2002-09-18  Fernando Nasser  <fnasser@redhat.com>
 
 	* gdb.asm/asm-source.exp: Adjust patter to new disassembler routine
