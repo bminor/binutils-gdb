@@ -1,5 +1,8 @@
 1999-07-19  Ian Lance Taylor  <ian@zembu.com>
 
+	* coff-m88k.c (m88kbcs_vec): Initialize new field of bfd_target
+	structure.
+
 	* elflink.h (elf_merge_symbol): Do merge symbols from the same BFD
 	if they appear to be specially created by the linker.
 
