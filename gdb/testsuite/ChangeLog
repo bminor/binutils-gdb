@@ -1,5 +1,7 @@
 2003-07-23  Michael Snyder  <msnyder@redhat.com>
 
+	* gdb.base/return2.exp: Don't test long-long return.
+
 	* gdb.disasm/t01_mov.s: New file, h8300sx disassembly tests.
 	* gdb.disasm/t01_mov.exp: Ditto.
 	* gdb.disasm/t02_mova.s: Ditto.
