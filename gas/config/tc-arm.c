@@ -12186,6 +12186,20 @@ md_apply_fix3 (fixP, valP, seg)
   switch (fixP->fx_r_type)
     {
     case BFD_RELOC_ARM_IMMEDIATE:
+      /* We claim that this fixup has been processed here,
+	 even if in fact we generate an error because we do
+	 not have a reloc for it, so tc_gen_reloc will reject it.  */
+      fixP->fx_done = 1;
+
+      if (fixP->fx_addsy
+	  && ! S_IS_DEFINED (fixP->fx_addsy))
+	{
+	  as_bad_where (fixP->fx_file, fixP->fx_line,
+			_("undefined symbol %s used as an immediate value"),
+			S_GET_NAME (fixP->fx_addsy));
+	  break;
+	}
+
       newimm = validate_immediate (value);
       temp = md_chars_to_number (buf, INSN_SIZE);
 
@@ -12202,7 +12216,6 @@ md_apply_fix3 (fixP, valP, seg)
 
       newimm |= (temp & 0xfffff000);
       md_number_to_chars (buf, (valueT) newimm, INSN_SIZE);
-      fixP->fx_done = 1;
       break;
 
     case BFD_RELOC_ARM_ADRL_IMMEDIATE:

@@ -1,3 +1,10 @@
+2004-07-02  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (md_apply_fix3:BFD_RELOC_ARM_IMMEDIATE): Do not
+	allow values which have come from undefined symbols.
+	Always consider this fixup to have been processed as a reloc
+	cannot be generated for it.
+
 2004-07-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* frags.h (struct frag): Add has_code and insn_addr fields.
