@@ -216,7 +216,7 @@ i960-dis.o: i960-dis.c $(INCDIR)/dis-asm.h
 w65-dis.o: w65-dis.c
 m68k-dis.o: m68k-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/floatformat.h \
 	$(INCDIR)/opcode/m68k.h
-m68k-opc.o: m68k-opc.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/m68k.h
+m68k-opc.o: m68k-opc.c $(INCDIR)/opcode/m68k.h
 mips-dis.o: mips-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/mips.h
 mips-opc.o: mips-opc.c $(INCDIR)/opcode/mips.h
 mips16-opc.o: mips16-opc.c $(INCDIR)/opcode/mips.h
@@ -228,10 +228,15 @@ z8k-dis.o: z8k-dis.c z8k-opc.h $(INCDIR)/dis-asm.h
 ns32k-dis.o: ns32k-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/ns32k.h
 sh-dis.o: sh-dis.c sh-opc.h $(INCDIR)/dis-asm.h
 alpha-dis.o: alpha-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/alpha.h
-alpha-opc.o: alpha-opc.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/alpha.h
+alpha-opc.o: alpha-opc.c $(INCDIR)/opcode/alpha.h
 hppa-dis.o: hppa-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/hppa.h
 m88k-dis.o: m88k-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/m88k.h
 arm-dis.o: arm-dis.c arm-opc.h $(INCDIR)/dis-asm.h
+# start-sanitize-tic80
+tic80-dis.o: tic80-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/tic80.h
+tic80-opc.o: tic80-opc.c $(INCDIR)/opcode/tic80.h
+# start-sanitize-tic80
+
 
 tags etags: TAGS
 

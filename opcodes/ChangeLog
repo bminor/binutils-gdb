@@ -1,3 +1,10 @@
+Mon Dec 30 17:02:11 1996  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (m68k-opc.o, alpha-opc.o): Remove dis-asm.h dependency.
+start-sanitize-tic80
+	(tic80-dis.o, tic80-opc.o): Add rules per comment in Makefile.in.
+end-sanitize-tic80
+	
 Mon Dec 30 11:38:01 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips16-opc.c: Add "abs".
