@@ -1,3 +1,8 @@
+Sun Aug 24 21:16:59 1997  Geoffrey Noer  <noer@cygnus.com>
+
+        * ocd.c: comment out sections that create and flush wigglers.log
+        log file when using the wiggler.
+
 Thu Aug 21 16:18:08 1997  Geoffrey Noer  <noer@cygnus.com>
 
         * config/powerpc/ppc-eabi.mt:
