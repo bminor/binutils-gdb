@@ -180,7 +180,6 @@ update_time_from_event(event_queue *events)
 	}
     }
   ASSERT(current_time == event_queue_time(events));
-  ASSERT((events->time_from_event >= 0) == (events->queue != NULL));
 }
 
 STATIC_INLINE_EVENTS\
@@ -394,12 +393,15 @@ event_queue_process(event_queue *events)
 			 (long)handler,
 			 (long)data));
     zfree(to_do);
+    /* Always re-compute the time to the next event so that HANDLER()
+       can safely insert new events into the queue. */
+    update_time_from_event(events);
     handler(data);
   }
   events->processing = 0;
 
-  /* re-caculate time for new events */
-  update_time_from_event(events);
+  ASSERT(events->time_from_event > 0);
+  ASSERT(events->queue != NULL); /* always poll event */
 }
 
 
