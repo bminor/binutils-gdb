@@ -1,5 +1,5 @@
 /* ELF support for BFD.
-   Copyright (C) 1991, 1992 Free Software Foundation, Inc.
+   Copyright (C) 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, from information published
    in "UNIX System V Release 4, Programmers Guide: ANSI C and
@@ -19,14 +19,16 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 
 /* This file is part of ELF support for BFD, and contains the portions
    that are common to both the internal and external representations.
    For example, ELFMAG0 is the byte 0x7F in both the internal (in-memory)
    and external (in-file) representations. */
-   
+
+#ifndef _ELF_COMMON_H
+#define _ELF_COMMON_H   
 
 /* Fields in e_ident[] */
 
@@ -69,14 +71,37 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Values for e_machine, which identifies the architecture */
 
-#define EM_NONE		0		/* No machine */
-#define EM_M32		1		/* AT&T WE 32100 */
-#define EM_SPARC	2		/* SUN SPARC */
-#define EM_386		3		/* Intel 80386 */
-#define EM_68K		4		/* Motorola m68k family */
-#define EM_88K		5		/* Motorola m88k family */
-#define EM_860		7		/* Intel 80860 */
-#define EM_MIPS		8		/* MIPS R3000 */
+#define EM_NONE		0	/* No machine */
+#define EM_M32		1	/* AT&T WE 32100 */
+#define EM_SPARC	2	/* SUN SPARC */
+#define EM_386		3	/* Intel 80386 */
+#define EM_68K		4	/* Motorola m68k family */
+#define EM_88K		5	/* Motorola m88k family */
+#define EM_860		7	/* Intel 80860 */
+#define EM_MIPS		8	/* MIPS R3000 (officially, big-endian only) */
+
+#define EM_MIPS_RS4_BE 10	/* MIPS R4000 big-endian */
+
+#define EM_SPARC64     11	/* SPARC v9 (not official) 64-bit */
+
+#define EM_PARISC      15	/* HPPA */
+#define EM_SPARC32PLUS 18	/* Sun's "v8plus" */
+#define EM_PPC	       20	/* PowerPC */
+
+/* If it is necessary to assign new unofficial EM_* values, please pick large
+   random numbers (0x8523, 0xa7f2, etc.) to minimize the chances of collision
+   with official or non-GNU unofficial values.  */
+
+/* Cygnus PowerPC ELF backend.  Written in the absence of an ABI.  */
+#define EM_CYGNUS_POWERPC 0x9025
+
+/* Old version of PowerPC, this should be removed shortly. */
+#define EM_PPC_OLD	17
+
+/* start-sanitize-arc */
+/* Cygnus ARC ELF backend.  Written in the absence of an ABI.  */
+#define EM_CYGNUS_ARC 0x9026
+/* end-sanitize-arc */
 
 /* Values for e_version */
 
@@ -116,11 +141,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define SHT_REL		9		/* Relocation entries, no addends */
 #define SHT_SHLIB	10		/* Reserved, unspecified semantics */
 #define SHT_DYNSYM	11		/* Dynamic linking symbol table */
-#define SHT_BEPROGBITS	12		/* Possibly nonstandard section type
-					   for i860 processors operating in big
-					   endian mode.  This section is used
-					   for code while SHT_PROGBITS is used
-					   for data. */
 #define SHT_LOPROC	0x70000000	/* Processor-specific semantics, lo */
 #define SHT_HIPROC	0x7FFFFFFF	/* Processor-specific semantics, hi */
 #define SHT_LOUSER	0x80000000	/* Application-specific semantics */
@@ -139,6 +159,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define NT_FPREGSET	2		/* Contains copy of fpregset struct */
 #define NT_PRPSINFO	3		/* Contains copy of prpsinfo struct */
 
+/* Values of note segment descriptor types for object files.  */
+/* (Only for hppa right now.  Should this be moved elsewhere?)  */
+
+#define NT_VERSION	1		/* Contains a version string.  */
+
 /* These three macros disassemble and assemble a symbol table st_info field,
    which contains the symbol binding and symbol type.  The STB_ and STT_
    defines identify the binding and type. */
@@ -146,6 +171,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define ELF_ST_BIND(val)		(((unsigned int)(val)) >> 4)
 #define ELF_ST_TYPE(val)		((val) & 0xF)
 #define ELF_ST_INFO(bind,type)		(((bind) << 4) + ((type) & 0xF))
+
+#define STN_UNDEF	0		/* undefined symbol index */
 
 #define STB_LOCAL	0		/* Symbol not visible outside obj */
 #define STB_GLOBAL	1		/* Symbol visible outside obj */
@@ -165,7 +192,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    other places. */
 
 #define SHN_UNDEF	0		/* Undefined section reference */
-#define SHN_LORESERV	0xFF00		/* Begin range of reserved indices */
+#define SHN_LORESERVE	0xFF00		/* Begin range of reserved indices */
 #define SHN_LOPROC	0xFF00		/* Begin range of appl-specific */
 #define SHN_HIPROC	0xFF1F		/* End range of appl-specific */
 #define SHN_ABS		0xFFF1		/* Associated symbol is absolute */
@@ -174,6 +201,41 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* relocation info handling macros */
 
-#define ELF_R_SYM(i)	((i)>>8)
-#define ELF_R_TYPE(i)	((unsigned char)(i))
-#define ELF_R_INFO(s,t)	(((s)<<8)+(unsigned char)(t))
+#define ELF32_R_SYM(i)		((i) >> 8)
+#define ELF32_R_TYPE(i)		((i) & 0xff)
+#define ELF32_R_INFO(s,t)	(((s) << 8) + ((t) & 0xff))
+
+#define ELF64_R_SYM(i)		((i) >> 32)
+#define ELF64_R_TYPE(i)		((i) & 0xffffffff)
+#define ELF64_R_INFO(s,t)	(((bfd_vma) (s) << 32) + (bfd_vma) (t))
+
+/* Dynamic section tags */
+
+#define DT_NULL		0
+#define DT_NEEDED	1
+#define DT_PLTRELSZ	2
+#define DT_PLTGOT	3
+#define DT_HASH		4
+#define DT_STRTAB	5
+#define DT_SYMTAB	6
+#define DT_RELA		7
+#define DT_RELASZ	8
+#define DT_RELAENT	9
+#define DT_STRSZ	10
+#define DT_SYMENT	11
+#define DT_INIT		12
+#define DT_FINI		13
+#define DT_SONAME	14
+#define DT_RPATH	15
+#define DT_SYMBOLIC	16
+#define DT_REL		17
+#define DT_RELSZ	18
+#define DT_RELENT	19
+#define DT_PLTREL	20
+#define DT_DEBUG	21
+#define DT_TEXTREL	22
+#define DT_JMPREL	23
+#define DT_LOPROC	0x70000000
+#define DT_HIPROC	0x7fffffff
+
+#endif /* _ELF_COMMON_H */
