@@ -1,5 +1,10 @@
 2003-06-19  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-sparc.c (sparc64_elf_relocate_section): Ignore R_SPARC_DISP32
+	reloc overflow on discarded eh_frame entries.
+
+2003-06-19  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf64-ppc.c (toc_adjusting_stub_needed): New function.
 	(ppc64_elf_next_input_section): Use it here to set has_gp_reloc.
 	Return error condition.
