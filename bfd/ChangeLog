@@ -1,3 +1,15 @@
+2002-09-02  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-v850.c (v850_elf_final_link_relocate): Use helpful
+	names instead of cryptically overloaded bfd_reloc error
+	codes.
+	(v850_elf_relocate_section): Likewise.
+	(v850_elf_relax_section): Replace caching of external symbols
+	with caching of internal symbols obtained from calling
+	bfd_elf_get_elf_syms().
+        Fixup problems with freeing cached allocated memory blocks.
+
+
 2002-09-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* cpu-pj.c (scan_mach, compatible, arch_info_struct): Remove.
