@@ -634,6 +634,8 @@ DEFUN(detach, (signal),
   attach_flag = 0;
 }
 
+#endif	/* ATTACH_DETACH */
+
 /*
 
 GLOBAL FUNCTION
@@ -873,7 +875,66 @@ DEFUN_VOID(fetch_inferior_registers)
 #endif
 }
 
-#endif	/* ATTACH_DETACH */
+/*
+
+GLOBAL FUNCTION
+
+	fetch_core_registers -- fetch current registers from core file data
+
+SYNOPSIS
+
+	void fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
+				   int which)
+
+DESCRIPTION
+
+	Read the values of either the general register set (WHICH equals 0)
+	or the floating point register set (WHICH equals 2) from the core
+	file data (pointed to by CORE_REG_SECT), and update gdb's idea of
+	their current values.  The CORE_REG_SIZE parameter is ignored.
+
+NOTES
+
+	Use the indicated sizes to validate the gregset and fpregset
+	structures.
+*/
+
+void
+fetch_core_registers (core_reg_sect, core_reg_size, which)
+  char *core_reg_sect;
+  unsigned core_reg_size;
+  int which;
+{
+
+  if (which == 0)
+    {
+      if (core_reg_size != sizeof (pi.gregset))
+	{
+	  warning ("wrong size gregset struct in core file");
+	}
+      else
+	{
+	  (void) memcpy ((char *) &pi.gregset, core_reg_sect,
+			 sizeof (pi.gregset));
+	  supply_gregset (&pi.gregset);
+	}
+    }
+  else if (which == 2)
+    {
+      if (core_reg_size != sizeof (pi.fpregset))
+	{
+	  warning ("wrong size fpregset struct in core file");
+	}
+      else
+	{
+	  (void) memcpy ((char *) &pi.fpregset, core_reg_sect,
+			 sizeof (pi.fpregset));
+#if defined (FP0_REGNUM)
+	  supply_fpregset (&pi.fpregset);
+#endif
+	}
+    }
+}
 
 /*
 

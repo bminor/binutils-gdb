@@ -1,3 +1,15 @@
+Mon Nov 11 19:14:31 1991  Fred Fish  (fnf at cygnus.com)
+
+	* core.c:  Minor rewording of message to user containing name of
+	(and possibly arguments to) the program that generated a core
+	file.
+
+	* elfread.c:  Remove the register_addr() stub now that it is no
+	longer needed.
+
+	* procfs.c:  Move misplaced #endif for ATTACH_DETACH.  Add new
+	fetch_core_registers() function for core file support.
+
 Sat Nov  9 13:37:57 1991  Fred Fish  (fnf at cygnus.com)
 
 	* dwarfread.c (dwarf_psymtab_to_symtab):  Remove leftover call

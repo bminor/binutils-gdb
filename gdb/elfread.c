@@ -63,23 +63,6 @@ struct elfinfo {
   unsigned int lnsize;		/* Size of dwarf line number section */
 };
 
-#ifndef REGISTER_U_ADDR
-
-/* FIXME - crude hack to resolve undefined global.  If REGISTER_U_ADDR
-   is defined, this function gets compiled into coredep.c.  If not,
-   it is left unresolved, so we need to resolve it until corefile
-   support for ELF corefiles is finished. */
-
-unsigned int
-DEFUN(register_addr, (regno, blockend),
-      int regno AND
-      int blockend)
-{
-	error ("Fetching registers from corefiles unimplemented.");
-}
-
-#endif
-
 /* We are called once per section from elf_symfile_read.  We
    need to examine each section we are passed, check to see
    if it is something we are interested in processing, and
