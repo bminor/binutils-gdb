@@ -1,3 +1,9 @@
+2004-03-21  Andrew Cagney  <cagney@redhat.com>
+
+	* infrun.c (handle_inferior_event): For non legacy frames, use the
+	frame ID and frame type to identify a signal trampoline.  Update
+	comments.
+
 2004-03-21  Nathan J. Williams  <nathanw@wasabisystems.com>
 
 	* mipsnbsd-tdep.c: Update copyright. Include "mips-tdep.h".

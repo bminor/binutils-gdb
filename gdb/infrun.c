@@ -2521,22 +2521,19 @@ process_event_stop_test:
      But we can update it every time we leave the step range.  */
   ecs->update_step_sp = 1;
 
-  /* Did we just take a signal?  */
-  if (pc_in_sigtramp (stop_pc)
-      && !pc_in_sigtramp (prev_pc)
-      && INNER_THAN (read_sp (), step_sp))
+  /* Did we just step into a singal trampoline (either by stepping out
+     of a handler, or by taking a signal)?  */
+  /* NOTE: cagney/2004-03-16: Replaced (except for legacy) a check for
+     "pc_in_sigtramp(stop_pc) != pc_in_sigtramp(step_pc)" with
+     frame_type == SIGTRAMP && !frame_id_eq.  The latter is far more
+     robust as it will correctly handle nested signal trampolines.  */
+  if (legacy_frame_p (current_gdbarch)
+      ? (pc_in_sigtramp (stop_pc)
+	 && !pc_in_sigtramp (prev_pc)
+	 && INNER_THAN (read_sp (), step_sp))
+      : (get_frame_type (get_current_frame ()) == SIGTRAMP_FRAME
+	 && !frame_id_eq (get_frame_id (get_current_frame ()), step_frame_id)))
     {
-      /* We've just taken a signal; go until we are back to
-         the point where we took it and one more.  */
-
-      /* Note: The test above succeeds not only when we stepped
-         into a signal handler, but also when we step past the last
-         statement of a signal handler and end up in the return stub
-         of the signal handler trampoline.  To distinguish between
-         these two cases, check that the frame is INNER_THAN the
-         previous one below. pai/1997-09-11 */
-
-
       {
 	struct frame_id current_frame = get_frame_id (get_current_frame ());
 
