@@ -1,5 +1,8 @@
 2001-11-19  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-hppa.c (elf32_hppa_size_stubs): Don't consider undefined
+	millicode syms as candidates for import stubs.
+
 	* elf32-hppa.c (PLABEL_PLT_ENTRY_SIZE): Delete.
 	(allocate_PIC_calls): Rename to allocate_plt_static.
 	(allocate_dynrelocs): Move most of code handling .plt entries to..

@@ -3025,7 +3025,8 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace, group_size,
 			  if (! (info->shared
 				 && !info->no_undefined
 				 && (ELF_ST_VISIBILITY (hash->elf.other)
-				     == STV_DEFAULT)))
+				     == STV_DEFAULT)
+				 && hash->elf.type != STT_PARISC_MILLI))
 			    continue;
 			}
 		      else
