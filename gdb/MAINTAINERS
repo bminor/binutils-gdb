@@ -140,8 +140,7 @@ maintainer works with the native maintainer when resolving API issues.
 	sparc		--target=sparc-elf,sparc64-elf ,-Werror
 			Maintenance only
 
-	tic80		(--target=tic80-coff broken)
-			Maintenance only
+	tic80		Deleted.
 
 	v850		--target=v850-elf ,-Werror
 			Maintenance only
