@@ -1,7 +1,5 @@
 2000-07-24  Nick Clifton  <nickc@cygnus.com>
 
-	* COPYING: New file: Describes GPL.
-	
 	* basic_blocks.c: Add copyright notice.
 	* basic_blocks.h: Add copyright notice.
 	* call_graph.c: Add copyright notice.
