@@ -1,3 +1,8 @@
+Wed Aug 18 12:03:00 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* main.c (gdb_readline): If we read some characters followed by EOF,
+	return them rather than returning NULL.
+
 Tue Aug 17 11:14:25 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* mips-tdep.c: Remove unused #ifndef NUMERIC_REG_NAMES and add comment.
