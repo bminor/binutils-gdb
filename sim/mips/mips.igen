@@ -2282,7 +2282,10 @@
 *vr5000:
 {
   if (GPR[RT] != 0)
-    GPR[RD] = GPR[RS];
+    {
+      GPR[RD] = GPR[RS];
+      TRACE_ALU_RESULT (GPR[RD]);
+    }
 }
 
 
@@ -2296,7 +2299,10 @@
 *vr5000:
 {
   if (GPR[RT] == 0)
-    GPR[RD] = GPR[RS];
+    {
+      GPR[RD] = GPR[RS];
+      TRACE_ALU_RESULT (GPR[RD]);
+    }
 }
 
 
@@ -3438,7 +3444,7 @@
 
 
 000001,5.RS,01110,16.IMMEDIATE:REGIMM:32::TNEI
-"tne r<RS>, <IMMEDIATE>"
+"tnei r<RS>, <IMMEDIATE>"
 *mipsII:
 *mipsIII:
 *mipsIV:
@@ -3787,6 +3793,7 @@
 
 
 010001,10,3.FMT,00000,5.FS,5.FD,001110:COP1:32,f::CEIL.W
+"ceil.w.%s<FMT> f<FD>, f<FS>"
 *mipsII:
 *mipsIII:
 *mipsIV:
@@ -4515,10 +4522,10 @@
 
 
 010001,10,3.FMT,00000,5.FS,5.FD,010110:COP1:32,f::RSQRT.fmt
+"rsqrt.%s<FMT> f<FD>, f<FS>"
 *mipsIV:
 *mipsV:
 *mips64:
-"rsqrt.%s<FMT> f<FD>, f<FS>"
 *vr5000:
 {
   int fmt = FMT;

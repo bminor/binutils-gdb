@@ -1,5 +1,13 @@
 2002-06-12  Chris Demetriou  <cgd@broadcom.com>
 
+	* mips.igen (MOVN, MOVZ): Trace result.
+	(TNEI): Print "tnei" as the opcode name in traces.
+	(CEIL.W): Add disassembly string for traces.
+	(RSQRT.fmt): Make location of disassembly string consistent
+	with other instructions.
+
+2002-06-12  Chris Demetriou  <cgd@broadcom.com>
+
 	* mips.igen (X): Delete unused function.
 
 2002-06-08  Andrew Cagney  <cagney@redhat.com>
