@@ -1,3 +1,8 @@
+2003-11-30  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* symbols.c: Convert to ISO-C.
+	* symbols.h: Likewise.
+
 2003-11-28  Christian Groessler  <chris@groessler.org>
 
 	* config/tc-z8k.c: Convert to ISO-C.
