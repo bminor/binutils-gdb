@@ -1,5 +1,11 @@
 Wed Apr 24 09:45:17 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 
+	* gmalloc.c [!HAVE_GETPAGESIZE]: Try to figure out the pagesize.
+
+	* infun.c (resume, resume_cleanups): New functions.
+	(wait_for_inferior, proceed, child_create_inferior): Use resume
+	not target_resume.
+
 	* remote.c (getpkt): Don't set immediate_quit.
 
 	* blockframe.c, frame.h (reinit_frame_cache): New function.

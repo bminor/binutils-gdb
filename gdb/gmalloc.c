@@ -1093,6 +1093,39 @@ DEFUN(__default_morecore, (size), ptrdiff_t size)
 #include <stdlib.h>
 #endif /* __ONEFILE */
 
+/* Deal with page size.  */
+#ifdef BSD
+#ifndef BSD4_1
+#define HAVE_GETPAGESIZE
+#endif
+#endif
+
+#ifndef HAVE_GETPAGESIZE
+
+#include <sys/param.h>
+
+#if !defined (PAGESIZE)
+#ifdef EXEC_PAGESIZE
+#define PAGESIZE EXEC_PAGESIZE
+#else
+#ifdef NBPG
+#define PAGESIZE NBPG * CLSIZE
+#ifndef CLSIZE
+#define CLSIZE 1
+#endif /* no CLSIZE */
+#else /* no NBPG */
+#define PAGESIZE NBPC
+#endif /* no NBPG */
+#endif /* no EXEC_PAGESIZE */
+#endif /* no PAGESIZE */
+
+size_t
+DEFUN_VOID(__getpagesize)
+{
+  return PAGESIZE;
+}
+#endif /* not HAVE_GETPAGESIZE */
+
 extern size_t EXFUN(__getpagesize, (NOARGS));
 
 static size_t pagesize;
