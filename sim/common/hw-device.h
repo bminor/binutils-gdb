@@ -139,7 +139,12 @@
 
 /* Short cut back to the simulator object */
 
-#define hw_system(hw) ((hw)->system_of_hw + 0)
+#define hw_system(hw) ((hw)->system_of_hw)
+
+/* For requests initiated by a CPU the cpu that initiated the request */
+
+struct _sim_cpu *hw_system_cpu (struct hw *hw);
+
 
 /* Device private data */
 
@@ -213,24 +218,20 @@ typedef unsigned (hw_io_read_buffer_callback)
       void *dest,
       int space,
       unsigned_word addr,
-      unsigned nr_bytes,
-      sim_cpu *processor,
-      sim_cia cia);
+      unsigned nr_bytes);
 
-#define hw_io_read_buffer(hw, dest, space, addr, nr_bytes, processor, cia) \
-((hw)->to_io_read_buffer (hw, dest, space, addr, nr_bytes, processor, cia))
+#define hw_io_read_buffer(hw, dest, space, addr, nr_bytes) \
+((hw)->to_io_read_buffer (hw, dest, space, addr, nr_bytes))
 
 typedef unsigned (hw_io_write_buffer_callback)
      (struct hw *me,
       const void *source,
       int space,
       unsigned_word addr,
-      unsigned nr_bytes,
-      sim_cpu *processor,
-      sim_cia cia);
+      unsigned nr_bytes);
 
-#define hw_io_write_buffer(hw, src, space, addr, nr_bytes, processor, cia) \
-((hw)->to_io_write_buffer (hw, src, space, addr, nr_bytes, processor, cia))
+#define hw_io_write_buffer(hw, src, space, addr, nr_bytes) \
+((hw)->to_io_write_buffer (hw, src, space, addr, nr_bytes))
 
 
 
@@ -367,6 +368,7 @@ extern void *hw_malloc (struct hw *me, unsigned long size);
 extern void hw_free (struct hw *me, void *);
 extern void hw_free_all (struct hw *me);
 
+extern char *hw_strdup (struct hw *me, const char *str);
 
 
 /* Utilities:
@@ -393,15 +395,11 @@ typedef enum {
 
 typedef int (hw_ioctl_callback)
      (struct hw *me,
-      sim_cpu *processor,
-      sim_cia cia,
       hw_ioctl_request request,
       va_list ap);
 
 int hw_ioctl
 (struct hw *me,
- sim_cpu *processor,
- sim_cia cia,
  hw_ioctl_request request,
  ...);
 
@@ -440,10 +438,21 @@ signed64 hw_event_queue_time
 
    */
 
-void volatile NORETURN hw_abort
+void hw_abort
 (struct hw *me,
  const char *fmt,
  ...) __attribute__ ((format (printf, 2, 3)));
+
+void hw_vabort
+(struct hw *me,
+ const char *fmt,
+ va_list ap);
+
+void hw_halt
+(struct hw *me,
+ int reason,
+ int status);
+
 
 #define hw_trace_p(hw) ((hw)->trace_of_hw_p + 0)
 
@@ -489,7 +498,7 @@ struct hw {
 
   /* hot links */
   struct hw *root_of_hw;
-  SIM_DESC system_of_hw;
+  struct sim_state *system_of_hw;
 
   /* identifying data */
   hw_unit unit_address_of_hw;

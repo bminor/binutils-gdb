@@ -43,124 +43,17 @@ hw_unit_address (struct hw *me)
 
 int
 hw_ioctl (struct hw *me,
-	  sim_cpu *processor,
-	  sim_cia cia,
 	  hw_ioctl_request request,
 	  ...)
 {
   int status;
   va_list ap;
   va_start(ap, request);
-  status = me->to_ioctl (me, processor, cia, request, ap);
+  status = me->to_ioctl (me, request, ap);
   va_end(ap);
   return status;
 }
       
-/* I/O */
-
-void volatile
-hw_abort (struct hw *me,
-	  const char *fmt,
-	  ...)
-{
-  SIM_DESC sd;
-  const char *name;
-  va_list ap;
-  va_start(ap, fmt);
-  /* find a system to abort through */
-  if (me == NULL || hw_system (me) == NULL)
-    sd = NULL;
-  else
-    sd = hw_system (me);
-  /* find an identity */
-  if (me != NULL && hw_path (me) != NULL && hw_path (me) [0] != '\0')
-    name = hw_path (me);
-  else if (me != NULL && hw_name (me) != NULL && hw_name (me)[0] != '\0')
-    name = hw_name (me);
-  else if (me != NULL && hw_family (me) != NULL && hw_family (me)[0] != '\0')
-    name = hw_family (me);
-  else
-    name = "device";
-  /* report the problem */
-  sim_io_eprintf (sd, "%s: ", name);
-  sim_io_evprintf (sd, fmt, ap);
-  sim_io_error (sd, "%s", "");
-}
-
-void
-hw_trace (struct hw *me,
-	  const char *fmt,
-	  ...)
-{
-  if (hw_trace_p (me)) /* to be sure, to be sure */
-    {
-      va_list ap;
-      va_start (ap, fmt);
-      sim_io_eprintf (hw_system (me), "%s: ", hw_path (me));
-      sim_io_evprintf (hw_system (me), fmt, ap);
-      sim_io_eprintf (hw_system (me), "\n");
-      va_end (ap);
-    }
-}
-
-
-/* The event queue abstraction (for devices) */
-
-
-struct _hw_event {
-  void *data;
-  struct hw *me;
-  hw_event_handler *handler;
-  sim_event *real;
-};
-
-/* Pass the H/W event onto the real handler */
-
-static void
-bounce_hw_event (SIM_DESC sd,
-		 void *data)
-{
-  hw_event event = * (hw_event*) data;
-  zfree (data);
-  event.handler (event.me, event.data);
-}
-
-
-/* Map onto the event functions */
-
-hw_event *
-hw_event_queue_schedule (struct hw *me,
-			 signed64 delta_time,
-			 hw_event_handler *handler,
-			 void *data)
-{
-  hw_event *event = ZALLOC (hw_event);
-  event->data = data;
-  event->handler = handler;
-  event->me = me;
-  event->real = sim_events_schedule (hw_system (me),
-				     delta_time,
-				     bounce_hw_event,
-				     event);
-  return event;
-}
-
-void
-hw_event_queue_deschedule (struct hw *me,
-			   hw_event *event_to_remove)
-{
-  sim_events_deschedule (hw_system (me),
-			 event_to_remove->real);
-  zfree (event_to_remove);
-}
-
-signed64
-hw_event_queue_time (struct hw *me)
-{
-  return sim_events_time (hw_system (me));
-}
-
-
 /* Mechanism for associating allocated memory regions to a device.
    When a device is deleted any remaining memory regions are also
    reclaimed.
@@ -174,7 +67,7 @@ struct hw_alloc_data {
   struct hw_alloc_data *next;
 };
 
-extern void *
+void *
 hw_zalloc (struct hw *me, unsigned long size)
 {
   struct hw_alloc_data *memory = ZALLOC (struct hw_alloc_data);
@@ -185,7 +78,7 @@ hw_zalloc (struct hw *me, unsigned long size)
   return memory->alloc;
 }
 
-extern void *
+void *
 hw_malloc (struct hw *me, unsigned long size)
 {
   struct hw_alloc_data *memory = ZALLOC (struct hw_alloc_data);
@@ -196,7 +89,7 @@ hw_malloc (struct hw *me, unsigned long size)
   return memory->alloc;
 }
 
-extern void
+void
 hw_free (struct hw *me,
 	 void *alloc)
 {
@@ -220,11 +113,26 @@ hw_free (struct hw *me,
   hw_abort (me, "free of memory not belonging to a device");
 }
 
-extern void
+void
 hw_free_all (struct hw *me)
 {
   while (me->alloc_of_hw != NULL)
     {
       hw_free (me, me->alloc_of_hw->alloc);
+    }
+}
+
+char *
+hw_strdup (struct hw *me, const char *str)
+{
+  if (str != NULL)
+    {
+      char *dup = hw_zalloc (me, strlen (str) + 1);
+      strcpy (dup, str);
+      return dup;
+    }
+  else
+    {
+      return NULL;
     }
 }

@@ -1,3 +1,8 @@
+Mon May 25 16:42:48 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* hw-device.c (hw_ioctl), hw-device.h (hw_ioctl_callback): Drop
+ 	PROCESSOR and CIA arguments.
+
 Fri May 22 12:16:27 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* aclocal.m4 (SIM_AC_OPTION_HW): Add enable / disable argument.
