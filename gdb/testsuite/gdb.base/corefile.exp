@@ -128,6 +128,8 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load $objdir/$subdir/$binfile
 
+source gdb.base/coremaker.ci
+
 # Test basic corefile recognition via core-file command.
 
 setup_xfail "rs6000-*-*"
@@ -146,6 +148,8 @@ $prompt $"			{ pass "core-file command" }
 
 # Haven't investigated this xfail
 setup_xfail "m68k-*-hpux*" "i*86-*-linux*" "i*86-*-sysv4*"
+# Strange that this one depends upon being native compiled.
+if {!$gcc_compiled} then { setup_xfail  "hppa*-*-hpux*" }
 gdb_test "bt" "abort.*func2.*func1.*main.*" "backtrace in corefile.exp"
 
 # test reinit_frame_cache

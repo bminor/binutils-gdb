@@ -1,3 +1,60 @@
+Sun Sep 10 13:14:01 1995  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/scope.exp (text_at_main):  Add "hppa*-*-hpux*"
+	xfails when not gcc compiled for "print foo::funclocal".
+	(test_at_foo):  Add "hppa*-*-hpux*" xfails when not gcc compiled for:
+	"print foo::funclocal at foo",
+	"print 'scope1.c'::foo::funclocal at foo",
+	"print foo::funclocal_bss at foo",
+	"print 'scope1.c'::foo::funclocal_bss at foo",
+	"print foo::funclocal_ro at foo",
+	"print 'scope1.c'::foo::funclocal_ro at foo",
+	"print bar::funclocal at foo" and
+	"print 'scope1.c'::bar::funclocal at foo".
+	(test_at_bar):  Add "hppa*-*-hpux*" xfails when not
+	gcc compiled for "print foo::funclocal at bar".
+	Expand all messages to ensure that they identify that
+	the test is at bar().
+	* gdb.base/opaque.exp: Add "hppa*-*-hpux*" xfails when not
+	gcc compiled for:
+	"ptype on opaque struct pointer (statically)",
+	"ptype on opaque struct tagname (statically)",
+	"ptype on opaque struct pointer (dynamically) 1",
+	"ptype on opaque struct tagname (dynamically) 1",
+	"ptype on opaque struct pointer (dynamically) 2" and
+	"ptype on opaque struct tagname (dynamically) 2
+	* gdb.base/nodebug.exp: Add "hppa*-*-hpux*" xfails when not
+	gcc compiled for:
+	"p datalocal"
+	"whatis datalocal",
+	"ptype datalocal",
+	"p bsslocal",
+	"whatis bsslocal", and
+	"ptype bsslocal".
+	* gdb.base/langs.exp: Add "hppa*-*-hpux*" xfails for
+	"backtrace in langs.exp" and "up to langs0__2do in langs.exp"
+	when not gcc compiled.
+	* gdb.base/funcargs.exp (float_and_integral_args):  Add
+	"hppa*-*-hpux*" xfail for "run to call2a" when not gcc
+	compiled.
+	(discard_and_shuffle):  Add "hppa*-*-hpux*" xfail for
+	"backtrace from call6a" when not gcc compiled.
+	(shuffle_round_robin): Add "hppa*-*-hpux*" xfail for
+	"backtrace from call7a" when not gcc compiled.
+	* gdb.base/callfuncs.exp (do_function_calls):
+	Add "hppa*-*-hpux*" xfail when not gcc compiled for
+	"p t_char_array_values(char_array_val2,char_array_val1)",
+	"p t_char_array_values(char_array_val1,char_array_val2)",
+	"p t_char_array_values("carray 1","carray 2")",
+	"p t_char_array_values("carray 1",char_array_val2)",
+	"p t_char_array_values(char_array_val1,"carray 2")",
+	"p sum_args(1,{2})",
+	"p sum_args(2,{2,3})",
+	"p sum_args(3,{2,3,4})",
+	"p sum_args(4,{2,3,4,5})"
+	* gdb.base/corefile.exp: Add "hppa*-*-hpux*" xfail for
+	"backtrace in corefile.exp" when not gcc compiled.
+
 Sat Sep  9 01:35:39 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.base/signals.exp:  Rewrite `handle all print' test as
