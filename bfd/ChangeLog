@@ -1,3 +1,8 @@
+Fri Jul 14 13:13:55 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-mips.c (mips_elf_find_nearest_line): Set SEC_HAS_CONTENTS
+	in .mdebug section, in case backend linker has cleared it.
+
 Fri Jul 14 11:58:34 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* elf32-ppc.c (ppc_elf_addr16_ha_inner): Rewrite to take just one
