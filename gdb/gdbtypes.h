@@ -146,8 +146,8 @@ enum type_code
 
 /* The target type of this type is a stub type, and this type needs to
    be updated if it gets un-stubbed in check_stub_type.  Currently only
-   used for arrays, in which TYPE_LENGTH of the array gets set based
-   on the TYPE_LENGTH of the target type.  */
+   used for arrays and ranges, in which TYPE_LENGTH of the array/range
+   gets set based on the TYPE_LENGTH of the target type.  */
 
 #define TYPE_FLAG_TARGET_STUB (1 << 3)
 

@@ -1,3 +1,12 @@
+Tue Mar 28 17:04:04 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* gdbtypes.c (create_range_type):  If indextype has TYPE_FLAG_STUB
+	set, set TYPE_FLAG_TARGET_STUB.
+	(check_stub_type):  Recalculate TYPE_LENGTH for range type.
+	* stabsread.c (read_range_type):  If index type number is followed
+	by '=', back up, call read_type. and assume we have a true range.
+	* gdbtypes.h (TYPE_FLAG_TARGET_STUB):  Update comment.
+
 Mon Mar 27 22:51:54 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* alpha-nat.c, irix4-nat.c, irix5-nat.c, mipsv4-nat.c,

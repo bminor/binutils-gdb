@@ -320,7 +320,10 @@ create_range_type (result_type, index_type, low_bound, high_bound)
     }
   TYPE_CODE (result_type) = TYPE_CODE_RANGE;
   TYPE_TARGET_TYPE (result_type) = index_type;
-  TYPE_LENGTH (result_type) = TYPE_LENGTH (index_type);
+  if (TYPE_FLAGS (index_type) & TYPE_FLAG_STUB)
+    TYPE_FLAGS (result_type) |= TYPE_FLAG_TARGET_STUB;
+  else
+    TYPE_LENGTH (result_type) = TYPE_LENGTH (index_type);
   TYPE_NFIELDS (result_type) = 2;
   TYPE_FIELDS (result_type) = (struct field *)
     TYPE_ALLOC (result_type, 2 * sizeof (struct field));
@@ -890,11 +893,12 @@ check_stub_type (type)
       struct type *range_type;
 
       check_stub_type (TYPE_TARGET_TYPE (type));
-      if (!(TYPE_FLAGS (TYPE_TARGET_TYPE (type)) & TYPE_FLAG_STUB)
-	  && TYPE_CODE (type) == TYPE_CODE_ARRAY
-	  && TYPE_NFIELDS (type) == 1
-	  && (TYPE_CODE (range_type = TYPE_FIELD_TYPE (type, 0))
-	      == TYPE_CODE_RANGE))
+      if (TYPE_FLAGS (TYPE_TARGET_TYPE (type)) & TYPE_FLAG_STUB)
+	{ }
+      else if (TYPE_CODE (type) == TYPE_CODE_ARRAY
+	       && TYPE_NFIELDS (type) == 1
+	       && (TYPE_CODE (range_type = TYPE_FIELD_TYPE (type, 0))
+		   == TYPE_CODE_RANGE))
 	{
 	  /* Now recompute the length of the array type, based on its
 	     number of elements and the target type's length.  */
@@ -903,6 +907,11 @@ check_stub_type (type)
 	      - TYPE_FIELD_BITPOS (range_type, 0)
 	      + 1)
 	     * TYPE_LENGTH (TYPE_TARGET_TYPE (type)));
+	  TYPE_FLAGS (type) &= ~TYPE_FLAG_TARGET_STUB;
+	}
+      else if (TYPE_CODE (type) == TYPE_CODE_RANGE)
+	{
+	  TYPE_LENGTH (type) = TYPE_LENGTH (TYPE_TARGET_TYPE (type));
 	  TYPE_FLAGS (type) &= ~TYPE_FLAG_TARGET_STUB;
 	}
     }

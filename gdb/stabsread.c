@@ -3373,12 +3373,13 @@ read_range_type (pp, typenums, objfile)
      int typenums[2];
      struct objfile *objfile;
 {
+  char *orig_pp = *pp;
   int rangenums[2];
   long n2, n3;
   int n2bits, n3bits;
   int self_subrange;
   struct type *result_type;
-  struct type *index_type;
+  struct type *index_type = NULL;
 
   /* First comes a type we are a subrange of.
      In C it is usually 0, 1 or the type being defined.  */
@@ -3388,6 +3389,12 @@ read_range_type (pp, typenums, objfile)
     return error_type (pp);
   self_subrange = (rangenums[0] == typenums[0] &&
 		   rangenums[1] == typenums[1]);
+
+  if (**pp == '=')
+    {
+      *pp = orig_pp;
+      index_type = read_type (pp, objfile);
+    }
 
   /* A semicolon should now follow; skip it.  */
   if (**pp == ';')
@@ -3400,7 +3407,10 @@ read_range_type (pp, typenums, objfile)
 
   if (n2bits == -1 || n3bits == -1)
     return error_type (pp);
-  
+
+  if (index_type)
+    goto handle_true_range;
+
   /* If limits are huge, must be large integral type.  */
   if (n2bits != 0 || n3bits != 0)
     {
@@ -3508,6 +3518,7 @@ read_range_type (pp, typenums, objfile)
 
   /* We have a real range type on our hands.  Allocate space and
      return a real pointer.  */
+ handle_true_range:
 
   /* At this point I don't have the faintest idea how to deal with
      a self_subrange type; I'm going to assume that this is used
