@@ -6099,6 +6099,10 @@ in a memory packet.\n",
 			 show_remote_protocol_e_packet_cmd,
 			 &remote_set_cmdlist, &remote_show_cmdlist,
 			 0);
+  /* Disable by default.  The ``e'' packet has nasty interactions with
+     the threading code - it relies on global state.  */
+  remote_protocol_e.detect = CMD_AUTO_BOOLEAN_FALSE;
+  update_packet_config (&remote_protocol_e);
 
   add_packet_config_cmd (&remote_protocol_E,
 			 "E", "step-over-range-w-signal",
@@ -6106,6 +6110,10 @@ in a memory packet.\n",
 			 show_remote_protocol_E_packet_cmd,
 			 &remote_set_cmdlist, &remote_show_cmdlist,
 			 0);
+  /* Disable by default.  The ``e'' packet has nasty interactions with
+     the threading code - it relies on global state.  */
+  remote_protocol_E.detect = CMD_AUTO_BOOLEAN_FALSE;
+  update_packet_config (&remote_protocol_E);
 
   add_packet_config_cmd (&remote_protocol_P,
 			 "P", "set-register",
