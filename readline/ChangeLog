@@ -1,3 +1,7 @@
+Thu Oct 22 01:08:13 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* configure.in:  Make SCO work again...
+
 Mon Oct 12 15:04:07 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* readline.c (init_terminal_io): if tgetent returns 0, the
