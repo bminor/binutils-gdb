@@ -1,3 +1,8 @@
+2001-10-17  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* write.c (fixup_segment): Handle fixups for SEC_MERGE sections as
+	for undefined symbols.
+
 2001-10-17  Chris Demetriou  <cgd@broadcom.com>
 
 	* doc/as.texinfo (MIPS ISA options):  Added accidentally

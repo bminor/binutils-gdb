@@ -2810,6 +2810,9 @@ fixup_segment (fixP, this_segment_type)
 	      else if (add_symbol_segment == undefined_section
 #ifdef BFD_ASSEMBLER
 		       || bfd_is_com_section (add_symbol_segment)
+		       || (bfd_get_section_flags (stdoutput,
+						  add_symbol_segment)
+			   & SEC_MERGE) != 0
 #endif
 		       )
 		{
