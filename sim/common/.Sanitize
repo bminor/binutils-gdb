@@ -36,6 +36,7 @@ gentvals.sh
 nltvals.def
 run.c
 run.1
+sim-assert.h
 sim-alu.h
 sim-basics.h
 sim-bits.c
@@ -55,6 +56,7 @@ sim-n-bits.h
 sim-n-core.h
 sim-n-endian.h
 sim-types.h
+sim-xcat.h
 tconfig.in
 
 Things-to-lose:
