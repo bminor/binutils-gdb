@@ -51,6 +51,7 @@ SECTIONS
     *(.edata)   ;
   }
 
+  /* See coffcode.h.  These are discarded.  */
   .junk BLOCK(__section_alignment__) : {
     *(.debug\$S)
     *(.debug\$T)
