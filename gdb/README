@@ -449,38 +449,23 @@ Linux.
    There are a number of remote interfaces for talking to existing ROM
 monitors and other hardware:
 
-	remote-adapt.c	 AMD 29000 "Adapt"
 	remote-array.c   Array Tech RAID controller
 	remote-e7000.c	 Hitachi E7000 ICE
-	remote-eb.c	 AMD 29000 "EBMON"
 	remote-es.c	 Ericsson 1800 monitor
 	remote-est.c	 EST emulator
 	remote-hms.c	 Hitachi Micro Systems H8/300 monitor
 	remote-mips.c	 MIPS remote debugging protocol
-	remote-mm.c	 AMD 29000 "minimon"
-	remote-nindy.c   Intel 960 "Nindy"
-	remote-nrom.c	 NetROM ROM emulator
-	remote-os9k.c	 PC running OS/9000
 	remote-rdi.c	 ARM with Angel monitor
 	remote-rdp.c	 ARM with Demon monitor
 	remote-sds.c	 PowerPC SDS monitor
 	remote-sim.c	 Generalized simulator protocol
 	remote-st.c	 Tandem ST-2000 monitor
-	remote-udi.c	 AMD 29000 using the AMD "Universal Debug Interface"
 	remote-vx.c	 VxWorks realtime kernel
 
    Remote-vx.c and the vx-share subdirectory contain a remote
 interface for the VxWorks realtime kernel, which communicates over TCP
 using the Sun RPC library.  This would be a useful starting point for
 other remote- via-ethernet back ends.
-
-   Remote-udi.c and the 29k-share subdirectory contain a remote
-interface for AMD 29000 programs, which uses the AMD "Universal Debug
-Interface".  This allows GDB to talk to software simulators,
-emulators, and/or bare hardware boards, via network or serial
-interfaces.  Note that GDB only provides an interface that speaks UDI,
-not a complete solution.  You will need something on the other end
-that also speaks UDI.
 
 
 Reporting Bugs in GDB

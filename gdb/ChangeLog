@@ -1,3 +1,9 @@
+2003-01-05  Michael Chastain  <mec@shout.net>
+
+	* README: Remove references to deleted remote-*.c files:
+	remote-adapt.c, remote-eb.c, remote-mm.c, remote-nindy.c,
+	remote-nrom.c, remote-os9k.c, remote-udi.c.
+
 2003-01-05  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (i386_get_longjmp_target): Make usable on x86-64.
