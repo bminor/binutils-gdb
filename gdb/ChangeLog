@@ -1,3 +1,8 @@
+2000-12-19  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* sh-tdep.c (sh_gdbarch_init): Move setting of breakpoint_from_pc
+	to before switch statement.
+	
 2000-12-17  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
         * sh-tdep.c (sh_gdbarch_init): Initialize do_registers_info.
