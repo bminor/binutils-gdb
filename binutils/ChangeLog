@@ -1,3 +1,11 @@
+Wed Mar 25 13:05:39 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	Based on patch from H.J. Lu  <hjl@gnu.org>:
+	* Makefile.am (DISTSTUFF): New variable.
+	(diststuff): New target.
+	(DISTCLEANFILES): New variable.
+	* Makefile.in: Rebuild.
+
 Tue Mar 24 19:33:08 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* rclex.l: Accept { and } as synonyms for BEGIN and END.

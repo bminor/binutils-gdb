@@ -1,10 +1,14 @@
 ## Process this file with automake to generate Makefile.in
 
-AUTOMAKE_OPTIONS = dejagnu
+AUTOMAKE_OPTIONS = cygnus dejagnu
 
 tooldir = $(exec_prefix)/$(target_alias)
 
+## These aren't set by automake, because they appear in
+## bfd/acinclude.m4, which is included by binutils/acinclude.m4, and
+## thus is not seen by automake.
 CC_FOR_BUILD = @CC_FOR_BUILD@
+EXEEXT_FOR_BUILD = @EXEEXT_FOR_BUILD@
 
 YACC = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison ; else echo bison -y ; fi`
 YFLAGS = -d
@@ -42,9 +46,7 @@ man_MANS = ar.1 nm.1 objdump.1 ranlib.1 size.1 strings.1 strip.1 objcopy.1 \
 
 PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) $(ADDR2LINE_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@
 
-bin_PROGRAMS = $(SIZE_PROG) $(OBJDUMP_PROG) $(AR_PROG) $(STRINGS_PROG) \
-	$(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) $(ADDR2LINE_PROG) \
-	@BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@
+bin_PROGRAMS = $(SIZE_PROG) $(OBJDUMP_PROG) $(AR_PROG) $(STRINGS_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) $(ADDR2LINE_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@
 
 ## We need a special rule to install the programs which are built with -new
 noinst_PROGRAMS = $(NM_PROG) $(STRIP_PROG)
@@ -108,7 +110,7 @@ CC_FOR_TARGET = ` \
     if [ "@host@" = "@target@" ] ; then \
       echo $(CC); \
     else \
-      echo gcc | sed '$(program_transform_name)'; \
+      echo gcc | sed '$(transform)'; \
     fi; \
   fi`
 
@@ -156,12 +158,6 @@ stamp-under: Makefile
 	$(SHELL) $(srcdir)/../move-if-change underscore.t underscore.c
 	touch stamp-under
 
-version.o: version.c Makefile
-	$(COMPILE) -c -DVERSION='"$(VERSION)"' $(srcdir)/version.c
-
-bucomm.o: bucomm.c Makefile
-	$(COMPILE) -c -DTARGET='"@target@"' $(srcdir)/bucomm.c
-
 cplus-dem.o: $(BASEDIR)/libiberty/cplus-dem.c $(INCDIR)/getopt.h
 	$(COMPILE) -c -DMAIN -DVERSION='"$(VERSION)"' $(BASEDIR)/libiberty/cplus-dem.c
 
@@ -194,15 +190,15 @@ addr2line_SOURCES = addr2line.c $(BULIBS)
 #	-rm -f $(STRIP_PROG)
 #	-ln $(OBJCOPY_PROG) $(STRIP_PROG)
 
-sysroff.c: sysinfo sysroff.info 
-	./sysinfo -c <$(srcdir)/sysroff.info >sysroff.c
-	./sysinfo -i <$(srcdir)/sysroff.info >>sysroff.c
-	./sysinfo -g <$(srcdir)/sysroff.info >>sysroff.c
+sysroff.c: sysinfo$(EXEEXT_FOR_BUILD) sysroff.info 
+	./sysinfo$(EXEEXT_FOR_BUILD) -c <$(srcdir)/sysroff.info >sysroff.c
+	./sysinfo$(EXEEXT_FOR_BUILD) -i <$(srcdir)/sysroff.info >>sysroff.c
+	./sysinfo$(EXEEXT_FOR_BUILD) -g <$(srcdir)/sysroff.info >>sysroff.c
 
-sysroff.h: sysinfo sysroff.info
-	./sysinfo -d <$(srcdir)/sysroff.info >sysroff.h	
+sysroff.h: sysinfo$(EXEEXT_FOR_BUILD) sysroff.info
+	./sysinfo$(EXEEXT_FOR_BUILD) -d <$(srcdir)/sysroff.info >sysroff.h
 
-sysinfo: sysinfo.o syslex.o
+sysinfo$(EXEEXT_FOR_BUILD): sysinfo.o syslex.o
 	$(CC_FOR_BUILD) $(CFLAGS) $(LDFLAGS) -o $@ sysinfo.o syslex.o 
 
 syslex.o: syslex.c sysinfo.h
@@ -234,7 +230,7 @@ sysdump_SOURCES = sysdump.c $(BULIBS)
 # coff/sym.h and coff/ecoff.h won't be found by the automatic dependency
 # scripts, since they are only included conditionally.
 nlmconv.o: nlmconv.c $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h
-	ldname=`echo ld | sed '$(program_transform_name)'`; \
+	ldname=`echo ld | sed '$(transform)'`; \
 	$(COMPILE) -c -DLD_NAME="\"$${ldname}\"" @NLMCONV_DEFS@ $(srcdir)/nlmconv.c
 
 nlmconv_SOURCES = nlmconv.c nlmheader.y $(BULIBS)
@@ -242,6 +238,14 @@ nlmconv_SOURCES = nlmconv.c nlmheader.y $(BULIBS)
 windres_SOURCES = windres.c resrc.c rescoff.c resbin.c rcparse.y rclex.l \
 	$(BULIBS)
 windres_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@
+
+DISTSTUFF = arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h \
+	syslex.c deflex.c
+diststuff: $(DISTSTUFF) info
+
+# FIXME: Shouldn't automake take care of the first four .h files anyhow?
+DISTCLEANFILES = defparse.h arparse.h rcparse.h nlmheader.h \
+	stamp-under sysinfo underscore.c sysroff.c sysroff.h
 
 # Targets to rebuild dependencies in this Makefile.
 # Have to get rid of .dep1 here so that "$?" later includes all of $(CFILES).
@@ -311,8 +315,10 @@ install-exec-local: $(bin_PROGRAMS) $(noinst_PROGRAMS)
 	    j=`echo $$i | sed -e 's/-new//'`; \
 	    rm -f $(tooldir)/bin/$$j$(EXEEXT); \
 	    k=`echo $$j | sed '$(transform)'`; \
-	    ln $(bindir)/$$k$(EXEEXT) $(tooldir)/bin/$$j$(EXEEXT) >/dev/null 2>/dev/null \
-		|| $(INSTALL_PROGRAM) $$i$(EXEEXT) $(tooldir)/bin/$$j$(EXEEXT); \
+	    if [ "$(bindir)/$$k$(EXEEXT)" != "$(tooldir)/bin/$$j$(EXEEXT)" ]; then \
+	      ln $(bindir)/$$k$(EXEEXT) $(tooldir)/bin/$$j$(EXEEXT) >/dev/null 2>/dev/null \
+		|| $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) $$i$(EXEEXT) $(tooldir)/bin/$$j$(EXEEXT); \
+	    fi; \
 	  else true; \
 	  fi; \
 	done
