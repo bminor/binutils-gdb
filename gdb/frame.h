@@ -442,6 +442,32 @@ extern void get_frame_saved_regs (struct frame_info *,
 extern struct block *get_frame_block (struct frame_info *,
                                       CORE_ADDR *addr_in_block);
 
+/* Return the `struct block' that belongs to the selected thread's
+   selected frame.  If the inferior has no state, return NULL.
+
+   NOTE: cagney/2002-11-29:
+
+   No state?  Does the inferior have any execution state (a core file
+   does, an executable does not).  At present the code tests
+   `target_has_stack' but I'm left wondering if it should test
+   `target_has_registers' or, even, a merged target_has_state.
+
+   Should it look at the most recently specified SAL?  If the target
+   has no state, should this function try to extract a block from the
+   most recently selected SAL?  That way `list foo' would give it some
+   sort of reference point.  Then again, perhaphs that would confuse
+   things.
+
+   Calls to this function can be broken down into two categories: Code
+   that uses the selected block as an additional, but optional, data
+   point; Code that uses the selected block as a prop, when it should
+   have the relevant frame/block/pc explicitly passed in.
+
+   The latter can be eliminated by correctly parameterizing the code,
+   the former though is more interesting.  Per the "address" command,
+   it occures in the CLI code and makes it possible for commands to
+   work, even when the inferior has no state.  */
+
 extern struct block *get_selected_block (CORE_ADDR *addr_in_block);
 
 extern struct symbol *get_frame_function (struct frame_info *);

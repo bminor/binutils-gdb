@@ -1,3 +1,7 @@
+2002-11-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* frame.h (get_selected_block): Add comments.
+
 2002-11-28  Andrew Cagney  <ac131313@redhat.com>
 
 	* frame.c (pc_notcurrent): New function.
