@@ -1,3 +1,8 @@
+2004-01-20  Andrew Cagney  <cagney@redhat.com>
+
+	* mi/mi-cmd-stack.c (list_args_or_locals): Move declaration of
+	sym2 to start of block.
+
 2004-01-19  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* MAINTAINERS: Delete mmalloc.
@@ -6,7 +11,8 @@
 	* acconfig.h: Delete USE_MMALLOC, MMCHECK_FORCE.
 	* config.in: Regenerate.
 	* configure: Regenerate.
-	* configure.in: Delete MMALLOC_CFLAGS, MMALLOC, --with-mmalloc, USE_MMALLOC, MMCHECK_FORCE.
+	* configure.in: Delete MMALLOC_CFLAGS, MMALLOC, --with-mmalloc,
+	USE_MMALLOC, MMCHECK_FORCE.
 	* gdbinit.in: Remove mmalloc.
 	* utils.c: Delete USE_MMALLOC, NO_MMCHECK, MMCHECK_FORCE, malloc_botch.
 	* config/alpha/alpha-linux.mh: Delete MMALLOC, MMALLOC_CFLAGS.

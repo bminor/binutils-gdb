@@ -286,12 +286,12 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 	  if (print_me)
 	    {
 	      struct cleanup *cleanup_tuple = NULL;
+	      struct symbol *sym2;
 	      if (values != PRINT_NO_VALUES)
 		cleanup_tuple =
 		  make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 	      ui_out_field_string (uiout, "name", SYMBOL_PRINT_NAME (sym));
 
-	      struct symbol *sym2;
 	      if (!locals)
 		sym2 = lookup_symbol (SYMBOL_NATURAL_NAME (sym),
 				      block, VAR_DOMAIN,
