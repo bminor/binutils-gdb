@@ -17,7 +17,13 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
+#ifdef __STDC__		/* Forward decls for prototypes */
+struct frame_info;
+struct type;
+struct value;
+#endif
 
 /* Minimum possible text address in AIX */
 
@@ -26,6 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Load segment of a given pc value. */
 
 #define	PC_LOAD_SEGMENT(PC)	pc_load_segment_name(PC)
+extern char *pc_load_segment_name PARAMS ((CORE_ADDR));
 
 /* AIX cc seems to get this right.  */
 
@@ -101,6 +108,7 @@ extern CORE_ADDR skip_prologue PARAMS((CORE_ADDR, struct rs6000_framedata *));
    where the function itself actually starts.  If not, return NULL.  */
 
 #define	SKIP_TRAMPOLINE_CODE(pc)	skip_trampoline_code (pc)
+extern CORE_ADDR skip_trampoline_code PARAMS ((CORE_ADDR));
 
 /* Number of trap signals we need to skip over, once the inferior process
    starts running. */
@@ -126,6 +134,7 @@ extern CORE_ADDR skip_prologue PARAMS((CORE_ADDR, struct rs6000_framedata *));
    once, when we are closing the current symbol table in end_symtab(). */
 
 #define	PROCESS_LINENUMBER_HOOK()	aix_process_linenos ()
+extern void aix_process_linenos PARAMS ((void));
    
 /* Immediately after a function call, return the saved pc.
    Can't go through the frames for this because on some machines
@@ -154,6 +163,8 @@ extern CORE_ADDR skip_prologue PARAMS((CORE_ADDR, struct rs6000_framedata *));
 
 #define	PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
   sp = push_arguments(nargs, args, sp, struct_return, struct_addr)
+extern CORE_ADDR push_arguments PARAMS ((int, struct value **, CORE_ADDR,
+					 int, CORE_ADDR));
 
 /* Sequence of bytes for breakpoint instruction.  */
 
@@ -345,6 +356,7 @@ extern CORE_ADDR rs6000_struct_return_address;
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
   extract_return_value(TYPE,REGBUF,VALBUF)
+extern void extract_return_value PARAMS ((struct type *, char [], char *));
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  */
@@ -382,9 +394,6 @@ extern CORE_ADDR rs6000_struct_return_address;
    is the address of a 4-byte word containing the calling frame's address.  */
 
 #define FRAME_CHAIN(thisframe) rs6000_frame_chain (thisframe)
-#ifdef __STDC__
-struct frame_info;
-#endif
 CORE_ADDR rs6000_frame_chain PARAMS ((struct frame_info *));
 
 /* Define other aspects of the stack frame.  */
@@ -434,6 +443,9 @@ extern int frameless_function_invocation PARAMS((struct frame_info *));
 #define SIG_FRAME_PC_OFFSET 96
 #define SIG_FRAME_FP_OFFSET 284
 
+/* Default offset from SP where the LR is stored */
+#define	DEFAULT_LR_SAVE 8
+
 /* Return saved PC from a frame */
 #define FRAME_SAVED_PC(FRAME)  frame_saved_pc (FRAME)
 
@@ -443,6 +455,7 @@ extern unsigned long frame_saved_pc PARAMS ((struct frame_info *));
   (((struct frame_info*)(FI))->initial_sp ?		\
 	((struct frame_info*)(FI))->initial_sp :	\
 	frame_initial_stack_address (FI))
+extern CORE_ADDR frame_initial_stack_address PARAMS ((struct frame_info *));
 
 #define FRAME_LOCALS_ADDRESS(FI)	FRAME_ARGS_ADDRESS(FI)
 
@@ -534,11 +547,13 @@ extern unsigned long frame_saved_pc PARAMS ((struct frame_info *));
 /* Change these names into rs6k_{push, pop}_frame(). FIXMEmgo. */
 
 #define PUSH_DUMMY_FRAME	push_dummy_frame ()
+extern void push_dummy_frame PARAMS ((void));
 
 /* Discard from the stack the innermost frame, 
    restoring all saved registers.  */
 
 #define POP_FRAME	pop_frame ()
+extern void pop_frame PARAMS ((void));
 
 /* This sequence of words is the instructions:
 
@@ -590,7 +605,8 @@ extern unsigned long frame_saved_pc PARAMS ((struct frame_info *));
    into a call sequence of the above form stored at DUMMYNAME.  */
 
 #define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, using_gcc) \
-	fix_call_dummy(dummyname, pc, fun, nargs, type)
+	fix_call_dummy(dummyname, pc, fun, nargs, (int)type)
+extern void fix_call_dummy PARAMS ((char *, CORE_ADDR, CORE_ADDR, int, int));
 
 /* Usually a function pointer's representation is simply the address of
    the function. On the RS/6000 however, a function pointer is represented
@@ -605,7 +621,9 @@ extern unsigned long frame_saved_pc PARAMS ((struct frame_info *));
    To be able to call C++ virtual methods in the inferior (which are called
    via function pointers), find_function_addr uses this macro to
    get the function address from a function pointer.  */
-#define CONVERT_FROM_FUNC_PTR_ADDR(ADDR) read_memory_integer (ADDR, 4)
+#define CONVERT_FROM_FUNC_PTR_ADDR(ADDR) \
+  (is_magic_function_pointer (ADDR) ? read_memory_integer (ADDR, 4) : (ADDR))
+extern int is_magic_function_pointer PARAMS ((CORE_ADDR));
 
 /* Flag for machine-specific stuff in shared files.  FIXME */
 #define IBM6000_TARGET
@@ -613,3 +631,15 @@ extern unsigned long frame_saved_pc PARAMS ((struct frame_info *));
 /* RS6000/AIX does not support PT_STEP.  Has to be simulated.  */
 
 #define NO_SINGLE_STEP
+
+/* If the current gcc for for this target does not produce correct debugging
+   information for float parameters, both prototyped and unprototyped, then
+   define this macro.  This forces gdb to  always assume that floats are
+   passed as doubles and then converted in the callee.
+
+   For the PowerPC, it appears that the debug info marks the parameters as
+   floats regardless of whether the function is prototyped, but the actual
+   values are always passed in as doubles.  Thus by setting this to 1, both
+   types of calls will work. */
+
+#define COERCE_FLOAT_TO_DOUBLE 1
