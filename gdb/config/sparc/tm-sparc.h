@@ -314,8 +314,6 @@ extern int sparc_prologue_frameless_p (CORE_ADDR);
 
 /* Multi-arch the nPC and Y registers.  */
 #define Y_REGNUM              (sparc_y_regnum ())
-extern int sparc_npc_regnum (void);
-extern int sparc_y_regnum (void);
 
 #endif /* GDB_MULTI_ARCH */
 

@@ -1,5 +1,20 @@
 2003-07-07  Daniel Jacobowitz  <drow@mvista.com>
 
+	* Makefile.in (sparc_tdep_h): New.
+	(sparc-linux-nat.o, sparc-nat.o, sparc-tdep.o, sparc64nbsd-nat.o)
+	(sparcnbsd-nat.o, sparcnbsd-tdep.o): Depend on $(sparc_tdep_h).
+	* sparc-linux-nat.c: Include "sparc-tdep.h".
+	* sparc-nat.c: Likewise.
+	* sparc-tdep.c: Likewise.
+	* sparc64nbsd-nat.c: Likewise.
+	* sparcnbsd-nat.c: Likewise.
+	* sparcnbsd-tdep.c: Likewise.
+	* sparc-tdep.h: New file.
+	* config/sparc/tm-sparc.h: Remove prototypes for sparc_y_regnum
+	and sparc_npc_regnum.
+
+2003-07-07  Daniel Jacobowitz  <drow@mvista.com>
+
 	* mips-linux-nat.c (mips_linux_cannot_fetch_register)
 	(mips_linux_cannot_store_register): List supported instead of
 	unsupported registers.

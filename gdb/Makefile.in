@@ -734,6 +734,7 @@ solib_h = solib.h
 solist_h = solist.h
 somsolib_h = somsolib.h
 source_h = source.h
+sparc_tdep_h = sparc-tdep.h
 sparcnbsd_tdep_h = sparcnbsd-tdep.h
 srec_h = srec.h
 stabsread_h = stabsread.h
@@ -2256,15 +2257,17 @@ source.o: source.c $(defs_h) $(symtab_h) $(expression_h) $(language_h) \
 	$(gdb_string_h) $(gdb_stat_h) $(gdbcore_h) $(gdb_regex_h) \
 	$(symfile_h) $(objfiles_h) $(annotate_h) $(gdbtypes_h) $(linespec_h) \
 	$(filenames_h) $(completer_h) $(ui_out_h) $(readline_h)
-sparc-linux-nat.o: sparc-linux-nat.c $(defs_h) $(regcache_h) $(gregset_h)
+sparc-linux-nat.o: sparc-linux-nat.c $(defs_h) $(regcache_h) $(sparc_tdep_h) \
+	$(gregset_h)
 sparc-nat.o: sparc-nat.c $(defs_h) $(inferior_h) $(target_h) $(gdbcore_h) \
-	$(regcache_h) $(gdb_wait_h)
+	$(regcache_h) $(sparc_tdep_h) $(gdb_wait_h)
 sparc-stub.o: sparc-stub.c
 sparc-tdep.o: sparc-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) $(inferior_h) \
 	$(target_h) $(value_h) $(bfd_h) $(gdb_string_h) $(regcache_h) \
-	$(osabi_h) $(gregset_h) $(gdbcore_h) $(gdb_assert_h) $(symfile_h)
+	$(osabi_h) $(gregset_h) $(gdbcore_h) $(gdb_assert_h) $(symfile_h) \
+	$(sparc_tdep_h)
 sparc64nbsd-nat.o: sparc64nbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
-	$(sparcnbsd_tdep_h)
+	$(sparcnbsd_tdep_h) $(sparc_tdep_h)
 sparcl-stub.o: sparcl-stub.c
 sparcl-tdep.o: sparcl-tdep.c $(defs_h) $(gdbcore_h) $(breakpoint_h) \
 	$(target_h) $(serial_h) $(regcache_h)
@@ -2273,10 +2276,10 @@ sparclet-rom.o: sparclet-rom.c $(defs_h) $(gdbcore_h) $(target_h) \
 	$(regcache_h)
 sparclet-stub.o: sparclet-stub.c
 sparcnbsd-nat.o: sparcnbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
-	$(sparcnbsd_tdep_h)
+	$(sparcnbsd_tdep_h) $(sparc_tdep_h)
 sparcnbsd-tdep.o: sparcnbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) \
 	$(target_h) $(value_h) $(osabi_h) $(sparcnbsd_tdep_h) $(nbsd_tdep_h) \
-	$(solib_svr4_h)
+	$(solib_svr4_h) $(sparc_tdep_h)
 stabsread.o: stabsread.c $(defs_h) $(gdb_string_h) $(bfd_h) $(gdb_obstack_h) \
 	$(symtab_h) $(gdbtypes_h) $(expression_h) $(symfile_h) $(objfiles_h) \
 	$(aout_stab_gnu_h) $(libaout_h) $(aout_aout64_h) $(gdb_stabs_h) \

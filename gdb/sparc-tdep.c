@@ -34,6 +34,8 @@
 #include "regcache.h"
 #include "osabi.h"
 
+#include "sparc-tdep.h"
+
 #ifdef	USE_PROC_FS
 #include <sys/procfs.h>
 /* Prototypes for supply_gregset etc. */

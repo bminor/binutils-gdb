@@ -1,6 +1,6 @@
 /* Native-dependent code for GNU/Linux SPARC.
 
-   Copyright 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,6 +21,7 @@
 
 #include "defs.h"
 #include "regcache.h"
+#include "sparc-tdep.h"
    
 #include <sys/procfs.h>
 
