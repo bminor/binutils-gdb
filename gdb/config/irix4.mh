@@ -5,3 +5,4 @@ ALLOCA=alloca.o
 ALLOCA1=alloca.o
 MUNCH_DEFINE=-B
 XM_CLIBS=-lbsd
+INSTALL = cp
