@@ -115,11 +115,6 @@ Mon Jan 27 12:30:38 1992  John Gilmore  (gnu at cygnus.com)
 
 	* ChangeLog, ChangeLog-9091:  Split ChangeLog at 1992.
 
-Mon Jan 27 08:18:17 1992  Fred Fish  (fnf at cygnus.com)
-
-	* i860-tdep.c:  Update with with numerous changes received
-	from current maintainer (Peggy Fieland).
-
 Sun Jan 26 19:05:40 1992  Per Bothner  (bothner at cygnus.com)
 
 	* valprint.c (type_print_base, type_print_method_args):
@@ -172,9 +167,10 @@ Sat Jan 18 17:17:45 1992  Stu Grossman  (grossman at cygnus.com)
 
 Sat Jan 18 16:45:01 1992  Fred Fish  (fnf at cygnus.com)
 
-	* config/mh-stratus, config/mt-stratus, i860-opcode.h,
-	i860-pinsn.c, i860-tdep.c, tm-stratus.h, xm-stratus.h:
-	New files for stratus.
+	* config/mh-stratus, config/mt-stratus, tm-stratus.h, xm-stratus.h:
+	New files for stratus.  Not complete enough to actually build
+	on the Stratus machine; that awaits copyright assignment for
+	i860 changes.
 
 	* Makefile.in (USER_CFLAGS):  Add macro specifically reserved
 	for getting custom flags into CFLAGS when doing makes.
