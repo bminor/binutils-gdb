@@ -1,3 +1,12 @@
+2001-04-02  Philip Blundell  <philb@gnu.org>
+
+	From 2001-03-17  Richard Henderson  <rth@redhat.com>
+	* dwarf2dbg.c (user_filenum, user_filenum_allocated): Remove.
+	(dwarf2_directive_loc): Don't use them.
+	(dwarf2_directive_file): Reject duplicate file definitions.
+	(get_filenum): Zero allocated memory.
+	(out_file_list): Complain about missing file definitions.
+
 2001-03-31  Alan Modra  <alan@linuxcare.com.au>
 
 	* listing.c (listing_listing): Enable listing on EDICT_NOLIST_NEXT

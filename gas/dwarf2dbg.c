@@ -131,11 +131,6 @@ static struct file_entry *files;
 static unsigned int files_in_use;
 static unsigned int files_allocated;
 
-/* Correlate file numbers as given by the user in .file/.loc directives
-   with the file numbers used in the output debug info.  */
-static unsigned int *user_filenum;
-static unsigned int user_filenum_allocated;
-
 /* True when we've seen a .loc directive recently.  Used to avoid
    doing work when there's nothing to do.  */
 static boolean loc_directive_seen;
@@ -305,9 +300,13 @@ get_filenum (filename)
 
   if (i >= files_allocated)
     {
+      unsigned int old = files_allocated;
+
       files_allocated = i + 32;
       files = (struct file_entry *)
 	xrealloc (files, (i + 32) * sizeof (struct file_entry));
+
+      memset (files + old, 0, (i + 32 - old) * sizeof (struct file_entry));
     }
 
   files[i].filename = xstrdup (filename);
@@ -340,25 +339,33 @@ dwarf2_directive_file (dummy)
   filename = demand_copy_C_string (&filename_len);
   demand_empty_rest_of_line ();
 
-  if (num < 0)
+  if (num < 1)
     {
-      as_bad (_("File number less than zero"));
+      as_bad (_("File number less than one"));
       return;
     }
 
-  if (num >= (int) user_filenum_allocated)
+  if (num < files_in_use && files[num].filename != 0)
     {
-      unsigned int old = user_filenum_allocated;
-
-      user_filenum_allocated = num + 16;
-      user_filenum = (unsigned int *)
-	xrealloc (user_filenum, (num + 16) * sizeof (unsigned int));
-
-      /* Zero the new memory.  */
-      memset (user_filenum + old, 0, (num + 16 - old) * sizeof (unsigned int));
+      as_bad (_("File number %d already allocated"), num);
+      return;
     }
 
-  user_filenum[num] = get_filenum (filename);
+  if (num >= (int) files_allocated)
+    {
+      unsigned int old = files_allocated;
+
+      files_allocated = num + 16;
+      files = (struct file_entry *)
+	xrealloc (files, (num + 16) * sizeof (struct file_entry));
+
+      /* Zero the new memory.  */
+      memset (files + old, 0, (num + 16 - old) * sizeof (struct file_entry));
+    }
+
+  files[num].filename = filename;
+  files[num].dir = 0;
+  files_in_use = num + 1;
 }
 
 void
@@ -374,19 +381,18 @@ dwarf2_directive_loc (dummy)
   column = get_absolute_expression ();
   demand_empty_rest_of_line ();
 
-  if (filenum < 0)
+  if (filenum < 1)
     {
-      as_bad (_("File number less than zero"));
+      as_bad (_("File number less than one"));
       return;
     }
-  if (filenum >= (int) user_filenum_allocated
-      || user_filenum[filenum] == 0)
+  if (filenum >= (int) files_in_use || files[filenum].filename == 0)
     {
       as_bad (_("Unassigned file number %ld"), (long) filenum);
       return;
     }
 
-  current.filenum = user_filenum[filenum];
+  current.filenum = filenum;
   current.line = line;
   current.column = column;
   current.flags = DWARF2_FLAG_BEGIN_STMT;
@@ -921,6 +927,12 @@ out_file_list ()
 
   for (i = 1; i < files_in_use; ++i)
     {
+      if (files[i].filename == NULL)
+	{
+	  as_bad (_("Unassigned file number %u"), i);
+	  continue;
+	}
+
       size = strlen (files[i].filename) + 1;
       cp = frag_more (size);
       memcpy (cp, files[i].filename, size);
