@@ -95,4 +95,8 @@ void mpw_abort ();
 
 #define LOSING_TOTALLY
 
+/* Define this so that files will be closed before being unlinked. */
+
+#define CLOSE_BEFORE_UNLINK
+
 #endif /* hosts_mpw_H */
