@@ -23,8 +23,7 @@
 /* The file to write to, or NULL if no dependencies being kept.  */
 static char *dep_file = NULL;
 
-struct dependency
-{
+struct dependency {
   char *file;
   struct dependency *next;
 };

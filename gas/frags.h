@@ -26,24 +26,21 @@
 struct obstack;
 #endif
 
-/*
- * A code fragment (frag) is some known number of chars, followed by some
- * unknown number of chars. Typically the unknown number of chars is an
- * instruction address whose size is yet unknown. We always know the greatest
- * possible size the unknown number of chars may become, and reserve that
- * much room at the end of the frag.
- * Once created, frags do not change address during assembly.
- * We chain the frags in (a) forward-linked list(s). The object-file address
- * of the 1st char of a frag is generally not known until after relax().
- * Many things at assembly time describe an address by {object-file-address
- * of a particular frag}+offset.
+/* A code fragment (frag) is some known number of chars, followed by some
+   unknown number of chars. Typically the unknown number of chars is an
+   instruction address whose size is yet unknown. We always know the greatest
+   possible size the unknown number of chars may become, and reserve that
+   much room at the end of the frag.
+   Once created, frags do not change address during assembly.
+   We chain the frags in (a) forward-linked list(s). The object-file address
+   of the 1st char of a frag is generally not known until after relax().
+   Many things at assembly time describe an address by {object-file-address
+   of a particular frag}+offset.
 
- BUG: it may be smarter to have a single pointer off to various different
- notes for different frag kinds. See how code pans
- */
+   BUG: it may be smarter to have a single pointer off to various different
+   notes for different frag kinds.  See how code pans.   */
 
-struct frag
-{
+struct frag {
   /* Object file address (as an octet offset).  */
   addressT fr_address;
   /* Chain forward; ascending address order.  Rooted in frch_root.  */
@@ -94,7 +91,7 @@ struct frag
 };
 
 #define SIZEOF_STRUCT_FRAG \
-((char *)zero_address_frag.fr_literal-(char *)&zero_address_frag)
+((char *) zero_address_frag.fr_literal - (char *) &zero_address_frag)
 /* We want to say fr_literal[0] above.  */
 
 /* Current frag we are building.  This frag is incomplete.  It is,
@@ -110,18 +107,16 @@ COMMON fragS zero_address_frag;
 COMMON fragS bss_address_frag;
 
 #if 0
-/*
- * A macro to speed up appending exactly 1 char
- * to current frag.
- */
-/* JF changed < 1 to <= 1 to avoid a race conditon */
-#define FRAG_APPEND_1_CHAR(datum)	\
-{					\
-  if (obstack_room( &frags ) <= 1) {\
-    frag_wane (frag_now);	\
-    frag_new (0);		\
-  }				\
-  obstack_1grow( &frags, datum );	\
+/* A macro to speed up appending exactly 1 char to current frag.  */
+/* JF changed < 1 to <= 1 to avoid a race conditon.  */
+#define FRAG_APPEND_1_CHAR(datum)			\
+{							\
+  if (obstack_room (&frags) <= 1)			\
+    {							\
+      frag_wane (frag_now);				\
+      frag_new (0);					\
+    }							\
+  obstack_1grow (&frags, datum);			\
 }
 #else
 extern void frag_append_1_char PARAMS ((int));

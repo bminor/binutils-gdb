@@ -99,11 +99,9 @@
   0,					/* basic_block */	\
   1					/* empty_sequence */
 
-static struct
-  {
+static struct {
     /* state machine state as per DWARF2 manual: */
-    struct dwarf2_sm
-      {
+    struct dwarf2_sm {
 	addressT addr;
 	unsigned int filenum;
 	unsigned int line;
@@ -112,8 +110,7 @@ static struct
 	  is_stmt : 1,
 	  basic_block : 1,
 	  empty_sequence : 1;		/* current code sequence has no DWARF2 directives? */
-      }
-    sm;
+    } sm;
 
     unsigned int
       any_dwarf2_directives : 1;	/* did we emit any DWARF2 line debug directives? */
@@ -125,21 +122,17 @@ static struct
     int last_filename;	/* index of last filename that was used */
     int num_filenames;	/* index of last filename in use */
     int filename_len;	/* length of the filename array */
-    struct
-      {
+    struct {
 	int dir;	/* valid after gen_dir_list() only */
 	char *name; /* full path before gen_dir_list(), filename afterwards */
-      }
-    *file;
+    } *file;
 
     struct dwarf2_line_info current;	/* current source info */
 
     /* counters for statistical purposes */
     unsigned int num_line_entries;
     unsigned int opcode_hist[256];	/* histogram of opcode frequencies */
-  }
-ls =
-  {
+} ls = {
     {
       INITIAL_STATE
     },
@@ -172,7 +165,7 @@ ls =
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     }
-  };
+};
 
 /* Function prototypes.  */
 static void out_uleb128 PARAMS ((addressT));
@@ -252,7 +245,7 @@ gen_addr_line (line_delta, addr_delta)
   tmp += DWARF2_LINE_OPCODE_BASE;
 
   /* Try using a special opcode.  */
-  opcode = tmp + addr_delta*DWARF2_LINE_RANGE;
+  opcode = tmp + addr_delta * DWARF2_LINE_RANGE;
   if (opcode <= 255)
     {
       out_opcode (opcode);
@@ -617,12 +610,11 @@ static void
 print_stats (total_size)
      unsigned long total_size;
 {
-  static const char *opc_name[] =
-    {
-      "extended", "copy", "advance_pc", "advance_line", "set_file",
-      "set_column", "negate_stmt", "set_basic_block", "const_add_pc",
-      "fixed_advance_pc"
-    };
+  static const char *opc_name[] = {
+    "extended", "copy", "advance_pc", "advance_line", "set_file",
+    "set_column", "negate_stmt", "set_basic_block", "const_add_pc",
+    "fixed_advance_pc"
+  };
   size_t i;
   int j;
 

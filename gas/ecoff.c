@@ -952,8 +952,7 @@ typedef struct efdr {
 } efdr_t;
 
 /* Pre-initialized extended file structure.  */
-static const efdr_t init_file =
-{
+static const efdr_t init_file = {
   {			/* FDR structure */
     0,			/* adr:		memory address of beginning of file */
     0,			/* rss:		file name (of source, if known) */
@@ -1111,7 +1110,7 @@ static const type_info_t type_info_init = {
 /* Global hash table for the tags table and global table for file
    descriptors.  */
 
-static varray_t file_desc	= INIT_VARRAY (efdr_t);
+static varray_t file_desc = INIT_VARRAY (efdr_t);
 
 static struct hash_control *tag_hash;
 

@@ -1,3 +1,15 @@
+2000-10-17  Kazu Hirata  <kazu@hxi.com>
+
+	* debug.c: Fix formatting.
+	* depend.c: Likewise.
+	* dwarf2dbg.c: Likewise.
+	* dwarf2dbg.h: Likewise.
+	* ecoff.c: Likewise.
+	* expr.c: Likewise.
+	* expr.h: Likewise.
+	* flonum-konst.c: Likewise.
+	* frags.h: Likewise.
+
 2000-10-17  Chandrakala Chavva  <cchavva@redhat.com>
 
 	* as.c: New option OPTION_TARGET_HELP. Prints all target specific

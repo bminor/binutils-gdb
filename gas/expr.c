@@ -48,8 +48,7 @@ extern const char EXP_CHARS[], FLT_CHARS[];
 /* We keep a mapping of expression symbols to file positions, so that
    we can provide better error messages.  */
 
-struct expr_symbol_line
-{
+struct expr_symbol_line {
   struct expr_symbol_line *next;
   symbolS *sym;
   char *file;
@@ -217,8 +216,8 @@ expr_build_dot ()
    and never write into the early words, thus they'll always be zero.
    I hate Dean's floating-point code.  Bleh.  */
 LITTLENUM_TYPE generic_bignum[SIZE_OF_LARGE_NUMBER + 6];
-FLONUM_TYPE generic_floating_point_number =
-{
+
+FLONUM_TYPE generic_floating_point_number = {
   &generic_bignum[6],		/* low.  (JF: Was 0)  */
   &generic_bignum[SIZE_OF_LARGE_NUMBER + 6 - 1], /* high.  JF: (added +6)  */
   0,				/* leader.  */
@@ -1464,8 +1463,7 @@ static const operatorT op_encoding[256] =
    7	* / % << >>
    8	unary - unary ~
 */
-static operator_rankT op_rank[] =
-{
+static operator_rankT op_rank[] = {
   0,	/* O_illegal */
   0,	/* O_absent */
   0,	/* O_constant */

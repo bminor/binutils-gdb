@@ -39,8 +39,7 @@
 
    NOTE: This enumeration must match the op_rank array in expr.c.  */
 
-typedef enum
-{
+typedef enum {
   /* An illegal expression.  */
   O_illegal,
   /* A nonexistent expression.  */
@@ -111,8 +110,7 @@ typedef enum
   O_max
 } operatorT;
 
-typedef struct expressionS
-{
+typedef struct expressionS {
   /* The main symbol.  */
   symbolS *X_add_symbol;
   /* The second symbol, if needed.  */

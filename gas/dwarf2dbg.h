@@ -26,14 +26,13 @@
 #define DWARF2_FLAG_BEGIN_STMT	(1 << 0)	/* beginning of statement */
 #define DWARF2_FLAG_BEGIN_BLOCK	(1 << 1)	/* beginning of basic block */
 
-struct dwarf2_line_info
-  {
-    char *filename;
-    unsigned int filenum;
-    unsigned int line;
-    unsigned int column;
-    unsigned int flags;
-  };
+struct dwarf2_line_info {
+  char *filename;
+  unsigned int filenum;
+  unsigned int line;
+  unsigned int column;
+  unsigned int flags;
+};
 
 /* Implements the .file FILENO "FILENAME" directive.  FILENO can be 0
    to indicate that no file number has been assigned.  All real file
