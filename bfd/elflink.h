@@ -1524,8 +1524,9 @@ elf_adjust_dynamic_symbol (h, data)
 	h->elf_link_hash_flags |= ELF_LINK_HASH_REF_REGULAR;
       else
 	{
-	  if (bfd_get_flavour (h->root.u.def.section->owner)
-	      == bfd_target_elf_flavour)
+	  if (h->root.u.def.section->owner != NULL
+	      && (bfd_get_flavour (h->root.u.def.section->owner)
+		  == bfd_target_elf_flavour))
 	    h->elf_link_hash_flags |= ELF_LINK_HASH_REF_REGULAR;
 	  else
 	    h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
