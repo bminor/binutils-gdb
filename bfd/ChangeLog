@@ -1,3 +1,9 @@
+2004-03-12  Nick Clifton  <nickc@redhat.com>
+	    Dave Murphy  <wintermute2k4@ntlworld.com>
+	
+	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Skip most checks
+	if the input bfd does not contain any code.
+
 2004-03-09  Steve Ellcey  <sje@cup.hp.com>
 
 	* elfxx-ia64.c (plt_full_entry): Change ld8 to ld8.acq.
