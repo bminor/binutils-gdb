@@ -851,11 +851,34 @@ x86_64_frameless_function_invocation (struct frame_info *frame)
   return 0;
 }
 
+/* We will handle only functions beginning with:
+   55          pushq %rbp
+   48 89 e5    movq %rsp,%rbp
+   Any function that doesn't start with this sequence
+   will be assumed to have no prologue and thus no valid
+   frame pointer in %rbp.  */
+#define PROLOG_BUFSIZE 4
+int
+x86_64_function_has_prologue (CORE_ADDR pc)
+{
+  int i;
+  unsigned char prolog_expect[PROLOG_BUFSIZE] = { 0x55, 0x48, 0x89, 0xe5 },
+    prolog_buf[PROLOG_BUFSIZE];
+
+  read_memory (pc, (char *) prolog_buf, PROLOG_BUFSIZE);
+
+  /* First check, whether pc points to pushq %rbp, movq %rsp,%rbp.  */
+  for (i = 0; i < PROLOG_BUFSIZE; i++)
+    if (prolog_expect[i] != prolog_buf[i])
+      return 0;		/* ... no, it doesn't. Nothing to skip.  */
+  
+  return 1;
+}
+
 /* If a function with debugging information and known beginning
    is detected, we will return pc of the next line in the source 
    code. With this approach we effectively skip the prolog.  */
 
-#define PROLOG_BUFSIZE 4
 CORE_ADDR
 x86_64_skip_prologue (CORE_ADDR pc)
 {
@@ -863,21 +886,9 @@ x86_64_skip_prologue (CORE_ADDR pc)
   struct symtab_and_line v_sal;
   struct symbol *v_function;
   CORE_ADDR endaddr;
-  unsigned char prolog_buf[PROLOG_BUFSIZE];
 
-  /* We will handle only functions starting with: */
-  static unsigned char prolog_expect[PROLOG_BUFSIZE] =
-  {
-    0x55,			/* pushq %rbp */
-    0x48, 0x89, 0xe5		/* movq %rsp, %rbp */
-  };
-
-  read_memory (pc, (char *) prolog_buf, PROLOG_BUFSIZE);
-
-  /* First check, whether pc points to pushq %rbp, movq %rsp, %rbp.  */
-  for (i = 0; i < PROLOG_BUFSIZE; i++)
-    if (prolog_expect[i] != prolog_buf[i])
-      return pc;		/* ... no, it doesn't.  Nothing to skip.  */
+  if (! x86_64_function_has_prologue (pc))
+    return pc;
 
   /* OK, we have found the prologue and want PC of the first
      non-prologue instruction.  */
