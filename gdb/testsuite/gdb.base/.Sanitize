@@ -31,6 +31,7 @@ bar.c
 baz.c
 bitfields.c
 bitfields.exp
+branches.c
 break.c
 break.exp
 callfuncs.c
