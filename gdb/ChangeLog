@@ -1,3 +1,8 @@
+Tue Feb  2 15:30:33 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* mipsread.c (upgrade_type): Build array types correctly, using
+	create_range_type and create_array_type.
+
 Tue Feb  2 00:19:08 1993  John Gilmore  (gnu@cygnus.com)
 
 	* infrun.c (wait_for_inferior):  When rolling back the PC after

@@ -1536,7 +1536,8 @@ upgrade_type(tpp, tq, ax, bigend)
 	/* Used in array processing */
 	int             rf, id;
 	FDR            *fh;
-	struct field   *f;
+	struct type    *range;
+	struct type    *indx;
 	int		lower, upper;
 	RNDXR		rndx;
 
@@ -1552,12 +1553,7 @@ upgrade_type(tpp, tq, ax, bigend)
 		return 0;
 
 	case tqArray:
-		/* We should probably try to use create_range_type and
-		   create_array_type here.  FIXME! */
 		off = 0;
-		t = init_type(TYPE_CODE_ARRAY, 0, 0, (char *) NULL,
-			      (struct objfile *) NULL);
-		TYPE_TARGET_TYPE(t) = *tpp;
 
 		/* Determine and record the domain type (type of index) */
 		ecoff_swap_rndx_in (bigend, ax, &rndx);
@@ -1570,28 +1566,21 @@ upgrade_type(tpp, tq, ax, bigend)
 		}
 		fh = get_rfd(cur_fd, rf);
 
-		/* Fields are kept in an array */
-		/* FIXME - Memory leak! */
-		if (TYPE_NFIELDS(t))
-		    TYPE_FIELDS(t) = (struct field*)
-			xrealloc((PTR) TYPE_FIELDS(t),
-				 (TYPE_NFIELDS(t)+1) * sizeof(struct field));
-		else
-		    TYPE_FIELDS(t) = (struct field*)
-			xzalloc(sizeof(struct field));
-		f = &(TYPE_FIELD(t,TYPE_NFIELDS(t)));
-		TYPE_NFIELDS(t)++;
-		memset((PTR)f, 0, sizeof(struct field));
+		indx = parse_type (id + (union aux_ext *) fh->iauxBase,
+				   (int *) NULL, bigend);
 
-/* XXX */	f->type = parse_type(id + (union aux_ext *)fh->iauxBase,
-				     &f->bitsize, bigend);
-
+		/* Get the bounds, and create the array type.  */
 		ax++;
 		lower = AUX_GET_DNLOW (bigend, ax);
 		ax++;
 		upper = AUX_GET_DNHIGH (bigend, ax);
 		ax++;
 		rf = AUX_GET_WIDTH (bigend, ax);	/* bit size of array element */
+
+		range = create_range_type ((struct type *) NULL, indx,
+					   lower, upper);
+
+		t = create_array_type ((struct type *) NULL, *tpp, range);
 
 		/* Check whether supplied array element bit size matches
 		   the known size of the element type.  If this complaint
@@ -1607,8 +1596,6 @@ upgrade_type(tpp, tq, ax, bigend)
 		if (id != rf)
 			complain (&array_bitsize_complaint, rf);
 
-		TYPE_LENGTH(t) = (upper < 0) ? 0 :
-			(upper - lower + 1) * (rf >> 3);
 		*tpp = t;
 		return 4 + off;
 
