@@ -1,4 +1,17 @@
+Thu Feb 20 10:34:21 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.disasm/mn10200.s: Add "nop" after "main" so that "main"
+	and "add_tests" are not at the same address.
+
+Fri Feb 14 18:47:23 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* gdb.base/ptype.exp: Use gdb_test.
+
 Thu Feb 13 16:09:36 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.disasm/mn10200.s (misc_tests): Fix targets for "jsr" insns.
+	* gdb.disasm/mn10200.exp (misc_tests): Remove bogus line accidentally
+	left in.  No longer expect them to fail.
 
 	* gdb.stabs/*.mt; Deleted, no longer used.
 	* gdb.stabs/configure.in: Remove references to target makefile
