@@ -294,6 +294,9 @@ gdb-internals: gdbint.info
 gdbint.info: gdbint.texinfo
 	$(MAKEINFO) -o gdbint.info $(srcdir)/gdbint.texinfo
 
+stabs.info: stabs.texinfo
+	$(MAKEINFO) -o stabs.info $(srcdir)/stabs.texinfo
+
 force:
 
 Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)

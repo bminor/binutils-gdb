@@ -1,3 +1,8 @@
+Sat Aug 15 20:52:24 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* stabs.texinfo:  Stabs documentation, written by Julia Menapace.
+	First pass at converting it to texinfo.
+
 Sat Aug 15 03:14:59 1992  John Gilmore  (gnu@cygnus.com)
 
 	* gdb.texinfo, refcard.tex:  Document mult args on `info reg'.

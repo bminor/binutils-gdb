@@ -45,6 +45,7 @@ pretex.m4
 psrc.sed
 refcard.tex
 sparc.m4
+stabs.texinfo
 vax.m4
 
 Do-last:
