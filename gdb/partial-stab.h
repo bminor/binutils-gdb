@@ -198,26 +198,34 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 	case N_SO: {
 	  unsigned long valu = CUR_SYMBOL_VALUE;
-	  static int last_so_symnum = -10;
-	  static int dir_so_symnum = -10;
-	  int tmp;
+	  static int prev_so_symnum = -10;
+	  static int first_so_symnum;
 	  char *p;
 	  
+	  past_first_source_file = 1;
+
+	  if (prev_so_symnum != symnum - 1)
+	    {			/* Here if prev stab wasn't N_SO */
+	      first_so_symnum = symnum;
+
+	      if (pst)
+		{
+		  END_PSYMTAB (pst, psymtab_include_list, includes_used,
+			       symnum * symbol_size, valu,
+			       dependency_list, dependencies_used);
+		  pst = (struct partial_symtab *) 0;
+		  includes_used = 0;
+		  dependencies_used = 0;
+		}
+	    }
+
+	  prev_so_symnum = symnum;
+
 	  /* End the current partial symtab and start a new one */
 
 	  SET_NAMESTRING();
 
 	  valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
-
-	  if (pst)
-	    {
-	      END_PSYMTAB (pst, psymtab_include_list, includes_used,
-			   symnum * symbol_size, valu,
-			   dependency_list, dependencies_used);
-	      pst = (struct partial_symtab *) 0;
-	      includes_used = 0;
-	      dependencies_used = 0;
-	    }
 
 	  /* Some compilers (including gcc) emit a pair of initial N_SOs.
 	     The first one is a directory name; the second the file name.
@@ -226,30 +234,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 	  p = strrchr (namestring, '/');
 	  if (p && *(p+1) == '\000')
-	    {
-	      dir_so_symnum = symnum;
-	      continue;		/* Simply ignore directory name SOs */
-	    }
+	    continue;		/* Simply ignore directory name SOs */
 
 	  /* Some other compilers (C++ ones in particular) emit useless
-	     SOs for non-existant .c files. */
+	     SOs for non-existant .c files.  We ignore all subsequent SOs that
+	     immediately follow the first.  */
 
-	  if (last_so_symnum == symnum - 1)
-	    continue;		/* Ignore repeated SOs */
-	  last_so_symnum = symnum;
-
-	  past_first_source_file = 1;
-
-	  if (dir_so_symnum == symnum - 1) /* Was prev. SO a directory? */
-	    tmp = dir_so_symnum;
-	  else
-	    tmp = symnum;
-	  pst = START_PSYMTAB (objfile, section_offsets,
-			       namestring, valu,
-			       tmp * symbol_size,
-			       objfile -> global_psymbols.next,
-			       objfile -> static_psymbols.next);
-	  dir_so_symnum = -10;
+	  if (!pst)
+	    pst = START_PSYMTAB (objfile, section_offsets,
+				 namestring, valu,
+				 first_so_symnum * symbol_size,
+				 objfile -> global_psymbols.next,
+				 objfile -> static_psymbols.next);
 	  continue;
 	}
 

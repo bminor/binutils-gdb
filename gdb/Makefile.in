@@ -168,20 +168,11 @@ DIST=gdb
 LINT=/usr/5bin/lint
 LINTFLAGS= -I${BFD_DIR}
 
-# Select the default C++ demangling style to use.  The default is "auto",
-# which allows gdb to attempt to pick an appropriate demangling style for
-# the executable it has loaded.  It can be set to a specific style ("gnu",
-# "lucid", "cfront", etc) in which case gdb will never attempt to do auto
-# selection of the style unless you do an explicit "set demangle auto".
-# To select one of these as the default, set DEMANGLING_STYLE in the
-# appropriate target dependent makefile fragment.
-DEMANGLING_STYLE = "gnu"
-
-# Select demangler to use.
+# Select demangler to use.  Currently gdb only supports inclusion of a
+# single demangler.  The default demangler (cplus-dem.c) can demangle
+# several different styles that differ in only minor details.  See
+# demangle.c information about selecting styles.
 DEMANGLER = cplus-dem
-
-# Select options to use when compiling ${DEMANGLER}.c.
-DEMANGLE_OPTS = -DDEMANGLING_STYLE=${DEMANGLING_STYLE}
 
 # Host and target-dependent makefile fragments come in here.
 ####
@@ -262,7 +253,7 @@ OTHERS = Makefile.in depend alldeps.mak createtags munch configure.in \
 	 .gdbinit COPYING $(YYFILES) \
 	 copying.c Convex.notes copying.awk \
 	 saber.suppress standalone.c stuff.c kdb-start.c \
-	 putenv.c
+	 putenv.c gcc.patch
 
 # Subdirectories of gdb, which should be included in their entirety in
 # gdb-xxx.tar.Z:
@@ -710,15 +701,10 @@ gdb.cxref: $(SFILES)
 
 force_update:
 
-# Generate the demangler linked in with gdb.  Also create a standalone
-# demangler if so desired ("make demangle").
+# Create a standalone demangler if so desired ("make demangle").
 
-${DEMANGLER}.o:	${DEMANGLER}.c
-	${CC} -c ${INTERNAL_CFLAGS} ${DEMANGLE_OPTS} \
-	  `echo ${srcdir}/${DEMANGLER}.c | sed 's,^\./,,'`
-
-demangle: ${DEMANGLER}.c
-	${CC} -o $@ -DMAIN ${INTERNAL_CFLAGS} ${DEMANGLE_OPTS} \
+demangle: ${srcdir}/${DEMANGLER}.c
+	${CC} -o $@ -DMAIN ${INTERNAL_CFLAGS} \
 	  `echo ${srcdir}/${DEMANGLER}.c | sed 's,^\./,,'`
 
 # GNU Make has an annoying habit of putting *all* the Makefile variables

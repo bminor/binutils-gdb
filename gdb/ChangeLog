@@ -1,3 +1,8 @@
+Thu Jul 16 13:37:09 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* Makefile.in (OTHERS):  Add gcc.patch.
+	* partial-stab.h (N_SO):  Fix handling of redundant SOs (again...)
+
 Thu Jul 16 12:07:40 1992  Fred Fish  (fnf@cygnus.com)
 
 	* dwarfread.c (LCC_PRODUCER):  Change to match current NCR
