@@ -1,5 +1,17 @@
+Fri Oct 16 14:07:45 1998  Catherine Moore  <clm@cygnus.com>
+
+        * elf32-m32r.c:  Add HOWTO entries for R_M32R_GNU_VTINHERIT
+        and R_M32R_GNU_VTENTRY.
+        (elf_backend_can_gc_sections):  Define.
+        (m32r_elf_check_relocs):  New.
+        (m32r_elf_gc_mark_hook):  New.
+        (m32r_elf_gc_sweep_hook):  New.
+        (m32r_elf_relocate_section):  Handle VT relocs.
+
 Mon Oct 12 14:18:40 1998  Nick Clifton  <nickc@cygnus.com>
 
+	* coff-arm.c (arm_relocate_section): Remove redundant test.
+	
 	* bfd-in2.h (struct reloc_howto_struct): Improve comment to make
 	cleat that the 'bitsize' field is the size of the bitfield AFTER
 	relocation not before.
