@@ -1,5 +1,9 @@
 Wed Sep 14 15:06:55 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* libecoff.h (struct ecoff_tdata): Add field find_buffer.
+	* ecoff.c: Include aout/stab_gnu.h.
+	(ecoff_find_nearest_line): Handle stabs debugging information.
+
 	* elfcode.h (elf_link_output_extsym): Keep a symbol marked as weak
 	even if it is referenced by another object.
 
