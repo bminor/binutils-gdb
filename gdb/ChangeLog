@@ -1,3 +1,13 @@
+Tue May 31 20:35:44 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* inftarg.c (child_wait): Call proc_wait, not wait.
+	(child_mourn_inferior): Call proc_remove_foreign.
+	* main.c (gdb_init): Call init_proc.
+	* main.c: Provide dummy versions of init_proc, proc_wait, and
+	proc_remove_foreign for the gdb case (the libgdb case provides its
+	own versions of these functions).
+	* Makefile.in (libgdb-files): Add libproc.a.
+
 Wed Jun  1 11:08:52 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	Hardware watchpoints for Linux, from Rick Sladkey

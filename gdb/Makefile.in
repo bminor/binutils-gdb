@@ -555,8 +555,14 @@ gdb: $(OBS) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o
 	$(CC-LD) $(INTERNAL_LDFLAGS) -o gdb \
 	  init.o $(OBS) $(TSOBS) $(ADD_FILES) $(CLIBS) $(LOADLIBES)
 
-LIBGDBFILES=$(COMMON_OBS) $(LIBGDB_OBS) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o
-libgdb-files: $(LIBGDBFILES) Makefile.in
+# libproc is not listed here because all-libproc is a dependency of all-gui,
+# not all-gdb, and thus might be built after us.
+LIBGDBDEPS=$(COMMON_OBS) $(LIBGDB_OBS) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o
+# libproc needs to be before libiberty for alloca.
+LIBGDBFILES=$(COMMON_OBS) $(LIBGDB_OBS) $(TSOBS) ../libproc/libproc.a \
+  $(ADD_DEPS) $(CDEPS) init.o
+
+libgdb-files: $(LIBGDBDEPS) Makefile.in
 	-rm -f libgdb-files
 	for i in $(LIBGDBFILES); do\
 		echo $$i >> libgdb-files;\

@@ -518,6 +518,8 @@ read_command_file (stream)
   do_cleanups (cleanups);
 }
 
+extern void init_proc ();
+
 void
 gdb_init ()
 {
@@ -527,6 +529,8 @@ gdb_init ()
   initialize_all_files ();
   init_main ();		/* But that omits this file!  Do it now */
   init_signals ();
+
+  init_proc ();
 
   /* We need a default language for parsing expressions, so simple things like
      "set width 0" won't fail if no language is explicitly set in a config file
@@ -1025,6 +1029,25 @@ GDB manual (available as on-line info or a printed manual).\n", gdb_stdout);
 	}
     }
   /* No exit -- exit is through quit_command.  */
+}
+
+void
+init_proc ()
+{
+}
+
+int
+proc_wait (pid, status)
+     int pid;
+     int *status;
+{
+  return wait (status);
+}
+
+void
+proc_remove_foreign (pid)
+     int pid;
+{
 }
 #endif /* MAIN_OVERRIDE */
 
