@@ -6,9 +6,9 @@ use these features.  There is a document entitled "readline.texinfo"
 which contains both end-user and programmer documentation for the GNU
 Readline Library.
 
-Copyright (C) 1988 Free Software Foundation, Inc.
+Copyright (C) 1988, 1991 Free Software Foundation, Inc.
 
-Authored by Brian Fox.
+Written by Brian Fox.
 
 Permission is granted to process this file through Tex and print the
 results, provided the printed document carries copying permission notice
@@ -33,9 +33,19 @@ into another language, under the above conditions for modified versions.
 @appendix Command Line Editing
 
 This appendix describes GNU's command line editing interface.
+Often during an interactive session you will type in a long line of
+text, only to notice that the first word on the line is misspelled.  The
+Readline library gives you a set of commands for manipulating the text
+as you type it in, allowing you to just fix your typo, and not forcing
+you to retype the majority of the line.  Using these editing commands,
+you move the cursor to the place that needs correction, and delete or
+insert the text of the corrections.  Then, when you are satisfied with
+the line, you simply press @key{RETURN}.  You do not have to be at the
+end of the line to press @key{RETURN}; the entire line will be accepted
+in any case.
 
 @menu
-* Introduction and Notation::	Notation used in this appendix.
+* Conventions::			Notation used in this appendix.
 * Basic Line Editing::		The minimum set of commands for editing a line.
 * Movement Commands::		Commands for moving the cursor about the line.
 * Cutting and Pasting::		Deletion and copying of text sections.
@@ -44,10 +54,10 @@ This appendix describes GNU's command line editing interface.
 				 the full text.
 @end menu
 
-@node Introduction and Notation, Basic Line Editing, Command Line Editing, Command Line Editing
-@appendixsec Introduction to Line Editing
+@node Conventions, Basic Line Editing, Command Line Editing, Command Line Editing
+@appendixsec Conventions on Notation
 
-In this appendix a the following notation is used to describe
+In this Appendix, the following notation is used to describe
 keystrokes.
 
 The text @kbd{C-k} is read as `Control-K' and describes the character
@@ -70,17 +80,6 @@ stand for themselves when seen in this text, or in an init file
 @node Readline Interaction, Readline Init File, Readline Introduction, Readline Top
 @appendixsec Readline Interaction
 @cindex interaction, readline
-
-Often during an interactive session you will type in a long line of
-text, only to notice that the first word on the line is misspelled.  The
-Readline library gives you a set of commands for manipulating the text
-as you type it in, allowing you to just fix your typo, and not forcing
-you to retype the majority of the line.  Using these editing commands,
-you move the cursor to the place that needs correction, and delete or
-insert the text of the corrections.  Then, when you are satisfied with
-the line, you simply press @key{RETURN}.  You do not have to be at the
-end of the line to press @key{RETURN}; the entire line will be accepted
-in any case.
 
 @menu
 * Readline Bare Essentials::	The least you need to know about Readline.
@@ -119,8 +118,8 @@ Move forward one character.
 Delete the character to the left of the cursor.
 @item @kbd{C-d}
 Delete the character underneath the cursor.
-@item @w{Printing characters}
-Insert itself into the line at the cursor.
+@item @var{c}
+Insert an ordinary printing character @var{c} into the line at the cursor.
 @item @kbd{C-_}
 Undo the last thing that you did.  You can undo all the way back to an
 empty line.
@@ -173,7 +172,7 @@ Kill from the cursor to the end of the current word, or if between
 words, to the end of the next word.
 
 @item M-@key{DEL}
-Kill fromthe cursor the start ofthe previous word, or if between words, to the start of the previous word.
+Kill from the cursor the start ofthe previous word, or if between words, to the start of the previous word.
 
 @item C-w
 Kill from the cursor to the previous whitespace.  This is different than
@@ -227,8 +226,8 @@ of keybindings.  You can customize programs that use Readline by putting
 commands in an @dfn{init} file in your home directory.  The name of this
 file is @file{~/.inputrc}.
 
-When a program which uses the Readline library starts up, the
-@file{~/.inputrc} file is read, and the keybindings are set.
+When a program which uses the Readline library starts up, it reads the file
+@file{~/.inputrc}, and sets the keybindings.
 
 @menu
 * Readline Init Syntax::	Syntax for the commands in @file{~/.inputrc}.
@@ -244,6 +243,7 @@ You can start up with a vi-like editing mode by placing
 @code{set editing-mode vi}
 @end example
 
+@noindent
 in your @file{~/.inputrc} file.
 
 You can have Readline use a single line for display, scrolling the input
@@ -359,7 +359,7 @@ how to insert things like C-q for example.
 Insert a tab character.
 
 @item self-insert (a, b, A, 1, !, ...)
-Insert yourself.
+Insert an ordinary printing character into the line.
 
 @item transpose-chars (C-t)
 Drag the character before point forward over the character at point.
@@ -403,13 +403,14 @@ words, to the end of the next word.
 Kill the word behind the cursor.
 
 @item unix-line-discard (C-u)
-Do what C-u used to do in Unix line input.  We save the killed text on
-the kill-ring, though.
+Kill the entire line.  This is similar to the use of the Unix kill
+character (often also @key{C-u}), save that here the killed text can be
+retrieved later (since it goes on the kill-ring).
 
 @item unix-word-rubout (C-w)
-Do what C-w used to do in Unix line input.  The killed text is saved
-on the kill-ring.  This is different than @code{backward-kill-word} because
-the word boundaries differ.
+Kill the current word, like the Unix word erase character.  The killed
+text goes on the kill-ring.  This is different than
+@code{backward-kill-word} because the word boundaries differ.
 
 @item yank (C-y)
 Yank the top of the kill ring into the buffer at point.
@@ -428,7 +429,7 @@ Add this digit to the argument already accumulating, or start a new
 argument.  @kbd{M--} starts a negative argument.
 
 @item universal-argument ()
-Do what C-u does in emacs.  By default, this is not bound.
+Do what @key{C-u} does in emacs.  By default, this is not bound to any keys.
 @end table
 
 
@@ -453,7 +454,10 @@ List the possible completions of the text before point.
 @table @code
 
 @item abort (@kbd{C-g})
-Ding!  Stops things.
+The line editing commands @code{reverse-search-history} (@kbd{C-r}) and
+@code{forward-search-history} (@kbd{C-s} go into a separate input mode;
+you can abort the search, and return to normal input mode, by using the
+@code{abort} (@kbd{C-g}) command.
 
 @item do-uppercase-version (@kbd{M-a}, @kbd{M-b}, @dots)
 Run the command that is bound to your uppercase brother.
@@ -470,20 +474,20 @@ Undo all changes made to this line.  This is like typing the `undo'
 command enough times to get back to the beginning.
 @end table
 
-@node Readline Vi Mode, , Readline Init Syntax, Readline Init File
-@appendixsubsec Readline Vi Mode
+@node Readline vi Mode, , Readline Init Syntax, Readline Init File
+@appendixsubsec Readline @code{vi} Mode
 
-While the Readline library does not have a full set of Vi editing
+While the Readline library does not have a full set of @code{vi} editing
 functions, it does contain enough to allow simple editing of the line.
 
-In order to switch interactively between Emacs and Vi editing modes, use
-the command M-C-j (toggle-editing-mode).
+In order to switch interactively between Emacs and @code{vi} editing modes, use
+the command @kbd{M-C-j} (@code{toggle-editing-mode}).
 
-When you enter a line in Vi mode, you are already placed in `insertion'
-mode, as if you had typed an `i'.  Pressing @key{ESC} switches you into
-`edit' mode, where you can edit the text of the line with the standard
-Vi movement keys, move to previous history lines with `k', and following
-lines with `j', and so forth.
+When you enter a line in @code{vi} mode, you are already in
+``insertion'' mode, as if you had typed an @kbd{i}.  Pressing @key{ESC}
+switches you into ``edit'' mode, where you can edit the text of the line
+with the standard @code{vi} movement keys, move to previous history
+lines with @kbd{k}, to following lines with @kbd{j}, and so forth.
 
 
 
