@@ -33,13 +33,18 @@
 #include <fcntl.h>
 #include <windows.h>
 #include "buildsym.h"
+#include "symfile.h"
+#include "objfiles.h"
 #include "gdb_string.h"
 #include "thread.h"
 #include "gdbcmd.h"
 #include <sys/param.h>
-#define CHECK(x) check (x, __FILE__,__LINE__)
-#define DEBUG(x) if (remote_debug) printf x
 
+#define CHECK(x) 	check (x, __FILE__,__LINE__)
+#define DEBUG_EXEC(x)	if (debug_exec)		printf x
+#define DEBUG_EVENTS(x)	if (debug_events)	printf x
+#define DEBUG_MEM(x)	if (debug_memory)	printf x
+#define DEBUG_EXCEPT(x)	if (debug_exceptions)	printf x
 
 /* Forward declaration */
 extern struct target_ops child_ops;
@@ -63,6 +68,11 @@ static int event_count = 0;
 /* User options. */
 static int new_console = 0;
 static int new_group = 0;
+static int dos_path_style = 0;
+static int debug_exec = 0;		/* show execution */
+static int debug_events = 0;		/* show events from kernel */
+static int debug_memory = 0;		/* show target memory accesses */
+static int debug_exceptions = 0;	/* show target exceptions */
 
 /* This vector maps GDB's idea of a register's number into an address
    in the win32 exception context vector. 
@@ -275,7 +285,9 @@ handle_load_dll (char *eventp)
 
   if (done == sizeof (dll_name_ptr) && dll_name_ptr)
     {
-      char *dll_name;
+      char *dll_name, *dll_basename;
+      struct objfile *objfile;
+      char unix_dll_name[MAX_PATH];
       int size = event->u.LoadDll.fUnicode ? sizeof (WCHAR) : sizeof (char);
       int len = 0;
       char b[2];
@@ -289,7 +301,6 @@ handle_load_dll (char *eventp)
 	  len++;
 	}
       while ((b[0] != 0 || b[size - 1] != 0) && done == size);
-
 
       dll_name = alloca (len);
 
@@ -315,10 +326,32 @@ handle_load_dll (char *eventp)
 			     &done);
 	}
 
+
+      dos_path_to_unix_path (dll_name, unix_dll_name);
+
       /* FIXME!! It would be nice to define one symbol which pointed to the 
          front of the dll if we can't find any symbols. */
 
-      context.ContextFlags = CONTEXT_FULL;
+       if (!(dll_basename = strrchr(dll_name, '\\')))
+ 	dll_basename = strrchr(dll_name, '/');
+ 
+       ALL_OBJFILES(objfile) 
+ 	{
+ 	  char *objfile_basename;
+ 	  if (!(objfile_basename = strrchr(objfile->name, '\\')))
+ 	    objfile_basename = strrchr(objfile->name, '/');
+ 
+ 	  if (dll_basename && objfile_basename &&
+ 	      strcmp(dll_basename+1, objfile_basename+1) == 0)
+ 	    {
+ 	      printf_unfiltered ("%s (symbols previously loaded)\n", 
+ 				 dll_basename + 1);
+ 	      return 1;
+ 	    }
+ 	}
+ 
+
+      context.ContextFlags = CONTEXT_FULL | CONTEXT_FLOATING_POINT;
       GetThreadContext (current_thread, &context);
 
       /* The symbols in a dll are offset by 0x1000, which is the
@@ -328,14 +361,11 @@ handle_load_dll (char *eventp)
 	 FIXME: Is this the real reason that we need the 0x1000 ? */
 
 
-      symbol_file_add (dll_name, 0,
+      symbol_file_add (unix_dll_name, 0,
 		       (int) event->u.LoadDll.lpBaseOfDll + 0x1000, 0, 0, 0);
 
-      /* We strip off the path of the dll for tidiness. */
-      if (strrchr (dll_name, '\\'))
-	dll_name = strrchr (dll_name, '\\') + 1;
-
-      printf_unfiltered ("%x:%s\n", event->u.LoadDll.lpBaseOfDll, dll_name);
+      printf_unfiltered ("%x:%s\n", event->u.LoadDll.lpBaseOfDll, 
+			 unix_dll_name);
     }
   return 1;
 }
@@ -348,23 +378,42 @@ handle_exception (DEBUG_EVENT * event, struct target_waitstatus *ourstatus)
   int done = 0;
   ourstatus->kind = TARGET_WAITKIND_STOPPED;
 
-  for (i = 0; !done && xlate[i].us > 0; i++)
-    {
-      if (xlate[i].them == event->u.Exception.ExceptionRecord.ExceptionCode)
-	{
-	  ourstatus->value.sig = xlate[i].us;
-	  done = 1;
-	  break;
-	}
-    }
 
-  if (!done)
+  switch (event->u.Exception.ExceptionRecord.ExceptionCode) 
     {
-      printf_unfiltered ("Want to know about exception code %08x\n",
-			 event->u.Exception.ExceptionRecord.ExceptionCode);
+    case EXCEPTION_ACCESS_VIOLATION:
+      DEBUG_EXCEPT (("gdb: Target exception ACCESS_VIOLATION at 0x%08x\n",
+		     event->u.Exception.ExceptionRecord.ExceptionAddress));
+      ourstatus->value.sig = TARGET_SIGNAL_SEGV;
+      break;
+    case STATUS_STACK_OVERFLOW:
+      DEBUG_EXCEPT (("gdb: Target exception STACK_OVERFLOW at 0x%08x\n",
+		     event->u.Exception.ExceptionRecord.ExceptionAddress));
+      ourstatus->value.sig = TARGET_SIGNAL_SEGV;
+      break;
+    case EXCEPTION_BREAKPOINT:
+      DEBUG_EXCEPT (("gdb: Target exception BREAKPOINT at 0x%08x\n",
+		     event->u.Exception.ExceptionRecord.ExceptionAddress));
+      ourstatus->value.sig = TARGET_SIGNAL_TRAP;
+      break;
+    case DBG_CONTROL_C:
+      DEBUG_EXCEPT (("gdb: Target exception CONTROL_C at 0x%08x\n",
+		     event->u.Exception.ExceptionRecord.ExceptionAddress));
+      ourstatus->value.sig = TARGET_SIGNAL_INT;
+      break;
+    case EXCEPTION_SINGLE_STEP:
+      DEBUG_EXCEPT (("gdb: Target exception SINGLE_STEP at 0x%08x\n",
+		     event->u.Exception.ExceptionRecord.ExceptionAddress));
+      ourstatus->value.sig = TARGET_SIGNAL_TRAP;
+      break;
+    default:
+      printf_unfiltered ("gdb: unknown target exception 0x%08x at 0x%08x\n",
+			 event->u.Exception.ExceptionRecord.ExceptionCode,
+			 event->u.Exception.ExceptionRecord.ExceptionAddress);
       ourstatus->value.sig = TARGET_SIGNAL_UNKNOWN;
+      break;
     }
-  context.ContextFlags = CONTEXT_FULL;
+  context.ContextFlags = CONTEXT_FULL | CONTEXT_FLOATING_POINT;
   GetThreadContext (current_thread, &context);
   exception_count++;
 }
@@ -382,12 +431,7 @@ child_wait (int pid, struct target_waitstatus *ourstatus)
     {
       DEBUG_EVENT event;
       BOOL t = WaitForDebugEvent (&event, INFINITE);
-
-      DEBUG (("%d = WaitForDebugEvent() code=%d pid=%d tid=%d)\n",
-	      t,
-	      event.dwDebugEventCode,
-	      event.dwProcessId,
-	      event.dwThreadId));
+      char *p;
 
       event_count++;
 
@@ -397,11 +441,25 @@ child_wait (int pid, struct target_waitstatus *ourstatus)
       switch (event.dwDebugEventCode)
 	{
 	case CREATE_THREAD_DEBUG_EVENT:
+	  DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n", 
+			event.dwProcessId, event.dwThreadId,
+			"CREATE_THREAD_DEBUG_EVENT"));
+	  break;
 	case EXIT_THREAD_DEBUG_EVENT:
+	  DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
+			event.dwProcessId, event.dwThreadId,
+			"EXIT_THREAD_DEBUG_EVENT"));
+	  break;
 	case CREATE_PROCESS_DEBUG_EVENT:
+	  DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
+			event.dwProcessId, event.dwThreadId,
+			"CREATE_PROCESS_DEBUG_EVENT"));
 	  break;
 
 	case EXIT_PROCESS_DEBUG_EVENT:
+	  DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
+			event.dwProcessId, event.dwThreadId,
+			"EXIT_PROCESS_DEBUG_EVENT"));
 	  ourstatus->kind = TARGET_WAITKIND_EXITED;
 	  ourstatus->value.integer = event.u.ExitProcess.dwExitCode;
 	  CloseHandle (current_process);
@@ -410,29 +468,53 @@ child_wait (int pid, struct target_waitstatus *ourstatus)
 	  break;
 
 	case LOAD_DLL_DEBUG_EVENT:
-         catch_errors (handle_load_dll,
-                      (char*) &event,
-                      "\n[failed reading symbols from DLL]\n",
-                      RETURN_MASK_ALL);
-         registers_changed();          /* mark all regs invalid */
+	  DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
+			event.dwProcessId, event.dwThreadId,
+			"LOAD_DLL_DEBUG_EVENT"));
+	  catch_errors (handle_load_dll,
+			(char*) &event,
+			"\n[failed reading symbols from DLL]\n",
+			RETURN_MASK_ALL);
+	  registers_changed();          /* mark all regs invalid */
 	  break;
-	case EXCEPTION_DEBUG_EVENT:
+	case UNLOAD_DLL_DEBUG_EVENT:
+	  DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
+			event.dwProcessId, event.dwThreadId,
+			"UNLOAD_DLL_DEBUG_EVENT"));
+	  break;	/* FIXME: don't know what to do here */
+  	case EXCEPTION_DEBUG_EVENT:
+	  DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
+			event.dwProcessId, event.dwThreadId,
+			"EXCEPTION_DEBUG_EVENT"));
 	  handle_exception (&event, ourstatus);
 	  return current_process_id;
+
+	case OUTPUT_DEBUG_STRING_EVENT: /* message from the kernel */
+	  DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
+			event.dwProcessId, event.dwThreadId,
+			"OUTPUT_DEBUG_STRING_EVENT"));
+	  if (target_read_string
+	      ((CORE_ADDR) event.u.DebugString.lpDebugStringData, 
+	       &p, 1024, 0) && p && *p)
+	    {
+	      warning(p);
+	      free(p);
+	    }
+	  break;
 	default:
-	  printf_unfiltered ("waitfor it %d %d %d %d\n", t,
-			     event.dwDebugEventCode,
-			     event.dwProcessId,
-			     event.dwThreadId);
+	  printf_unfiltered ("gdb: kernel event for pid=%d tid=%d\n",
+			     event.dwProcessId, event.dwThreadId);
+	  printf_unfiltered ("                 unknown event code %d\n",
+			     event.dwDebugEventCode);
 	  break;
 	}
+      DEBUG_EVENTS (("ContinueDebugEvent (cpid=%d, ctid=%d, DBG_CONTINUE);\n",
+		     current_process_id, current_thread_id));
       CHECK (ContinueDebugEvent (current_process_id,
 				 current_thread_id,
 				 DBG_CONTINUE));
     }
 }
-
-
 
 
 /* Attach to process PID, then initialize for debugging it.  */
@@ -516,11 +598,141 @@ child_open (arg, from_tty)
 }
 
 
+/* Convert a unix-style set-of-paths (a colon-separated list of directory
+   paths with forward slashes) into the dos style (semicolon-separated 
+   list with backward slashes), simultaneously undoing any translations
+   performed by the mount table. */
+
+static char *buf = NULL;
+static int blen = 2000;
+
+static char *
+unix_paths_to_dos_paths(char *newenv)
+{
+  int ei;
+  char *src;
+
+  if (buf == 0)
+    buf = (char *) malloc(blen);
+
+  if (newenv == 0 || *newenv == 0 ||
+     (src = strchr(newenv, '=')) == 0)	/* find the equals sign */
+    return 0;
+
+  src++;				/* now skip past it */
+
+  if (src[0] == '/' ||			/* is this a unix style path? */
+     (src[0] == '.' && src[1] == '/') ||
+     (src[0] == '.' && src[1] == '.' && src[2] == '/'))
+    { /* we accept that we will fail on a relative path like 'foo/mumble' */
+      /* Found an env name, turn from unix style into dos style */
+      int len = src - newenv;
+      char *dir = buf + len;
+
+      memcpy(buf, newenv, len);
+      /* Split out the colons */
+      while (1)
+	{
+	  char *tok = strchr (src, ':');
+	  int doff = dir - buf;
+
+	  if (doff + MAX_PATH > blen) 
+	    {
+	      blen *= 2;
+	      buf = (char *) realloc((void *) buf, blen);
+	      dir = buf + doff;
+	    }
+	  if (tok)
+	    {
+	      *tok = 0;
+	            cygwin32_unix_path_to_dos_path_keep_rel (src, dir);
+	      *tok = ':';
+	      dir += strlen(dir);
+	      src = tok + 1;
+	      *dir++ = ';';
+	    }
+	  else
+	    {
+      cygwin32_unix_path_to_dos_path_keep_rel (src, dir);
+	      dir += strlen(dir);
+	      *dir++ = 0;
+	      break;
+	    }
+	}
+      return buf;
+    }
+  return 0;
+}
+
+/* Convert a dos-style set-of-paths (a semicolon-separated list with
+   backward slashes) into the dos style (colon-separated list of
+   directory paths with forward slashes), simultaneously undoing any
+   translations performed by the mount table. */
+
+static char *
+dos_paths_to_unix_paths(char *newenv)
+{
+  int ei;
+  char *src;
+
+  if (buf == 0)
+    buf = (char *) malloc(blen);
+
+  if (newenv == 0 || *newenv == 0 ||
+     (src = strchr(newenv, '=')) == 0)	/* find the equals sign */
+    return 0;
+
+  src++;				/* now skip past it */
+
+  if (src[0] == '\\' ||		/* is this a dos style path? */
+     (isalpha(src[0]) && src[1] == ':' && src[2] == '\\') ||
+     (src[0] == '.' && src[1] == '\\') ||
+     (src[0] == '.' && src[1] == '.' && src[2] == '\\'))
+    { /* we accept that we will fail on a relative path like 'foo\mumble' */
+      /* Found an env name, turn from dos style into unix style */
+      int len = src - newenv;
+      char *dir = buf + len;
+
+      memcpy(buf, newenv, len);
+      /* Split out the colons */
+      while (1)
+	{
+	  char *tok = strchr (src, ';');
+	  int doff = dir - buf;
+	  
+	  if (doff + MAX_PATH > blen) 
+	    {
+	      blen *= 2;
+	      buf = (char *) realloc((void *) buf, blen);
+	      dir = buf + doff;
+	    }
+	  if (tok)
+	    {
+	      *tok = 0;
+	         cygwin32_dos_path_to_unix_path_keep_rel (src, dir);
+	      *tok = ';';
+	      dir += strlen(dir);
+	      src = tok + 1;
+	      *dir++ = ':';
+	    }
+	  else
+	    {
+	         cygwin32_dos_path_to_unix_path_keep_rel (src, dir);
+	      dir += strlen(dir);
+	      *dir++ = 0;
+	      break;
+	    }
+	}
+      return buf;
+    }
+  return 0;
+}
+
+
 /* Start an inferior win32 child process and sets inferior_pid to its pid.
    EXEC_FILE is the file to run.
    ALLARGS is a string containing the arguments to the program.
    ENV is the environment vector to pass.  Errors reported with error().  */
-
 
 static void
 child_create_inferior (exec_file, allargs, env)
@@ -551,7 +763,7 @@ child_create_inferior (exec_file, allargs, env)
 
   unix_path_to_dos_path (exec_file, real_path);
 
-  flags = DEBUG_ONLY_THIS_PROCESS | DEBUG_PROCESS;
+  flags = DEBUG_ONLY_THIS_PROCESS; 
 
   if (new_group)
     flags |= CREATE_NEW_PROCESS_GROUP;
@@ -566,19 +778,45 @@ child_create_inferior (exec_file, allargs, env)
   strcat (args, " ");
   strcat (args, allargs);
 
-
+#if 0
   /* get total size for env strings */
   for (envlen = 0, i = 0; env[i] && *env[i]; i++)
     envlen += strlen(env[i]) + 1;       
+#else
+  /* get total size for env strings */
+  for (envlen = 0, i = 0; env[i] && *env[i]; i++)
+    {
+#if 0
+      winenv = 0;
+#else
+      winenv = unix_paths_to_dos_paths(env[i]);
+#endif
+      envlen += winenv ? strlen(winenv) + 1 : strlen(env[i]) + 1;
+    }
+#endif
 
-  winenv = alloca(envlen + 1);	/* allocate new buffer */
+  winenv = alloca(2 * envlen + 1);	/* allocate new buffer */
 
+  /* copy env strings into new buffer */
+  for (temp = winenv, i = 0; env[i] && *env[i];     i++) 
+    {
+#if 0
+      char *p = 0;
+#else
+      char *p = unix_paths_to_dos_paths(env[i]);
+#endif
+      strcpy(temp, p ? p : env[i]);
+      temp += strlen(temp) + 1;
+    }
+#if 0
   /* copy env strings into new buffer */
   for (temp = winenv, i = 0; env[i] && *env[i];     i++) 
     {
       strcpy(temp, env[i]);
       temp += strlen(temp) + 1;
     }
+#endif
+
   *temp = 0;			/* final nil string to terminate new env */
 
   ret = CreateProcess (0,
@@ -629,7 +867,9 @@ child_mourn_inferior ()
 void
 child_stop ()
 {
+  DEBUG_EVENTS (("gdb: GenerateConsoleCtrlEvent (CTRLC_EVENT, 0)\n"));
   CHECK (GenerateConsoleCtrlEvent (CTRL_C_EVENT, 0));
+  registers_changed();		/* refresh register state */
 }
 
 int
@@ -639,11 +879,15 @@ child_xfer_memory (CORE_ADDR memaddr, char *our, int len,
   DWORD done;
   if (write)
     {
+      DEBUG_MEM (("gdb: write target memory, %d bytes at 0x%08x\n",
+		  len, memaddr));
       WriteProcessMemory (current_process, memaddr, our, len, &done);
       FlushInstructionCache (current_process, memaddr, len);
     }
   else
     {
+      DEBUG_MEM (("gdb: read target memory, %d bytes at 0x%08x\n",
+		  len, memaddr));
       ReadProcessMemory (current_process, memaddr, our, len, &done);
     }
   return done;
@@ -655,19 +899,21 @@ child_kill_inferior (void)
   CHECK (TerminateProcess (current_process, 0));
   CHECK (CloseHandle (current_process));
   CHECK (CloseHandle (current_thread));
+  target_mourn_inferior();	/* or just child_mourn_inferior? */
 }
 
 void
 child_resume (int pid, int step, enum target_signal signal)
 {
-  DEBUG (("child_resume (%d, %d, %d);\n", pid, step, signal));
+  DEBUG_EXEC (("gdb: child_resume (pid=%d, step=%d, signal=%d);\n", 
+	       pid, step, signal));
 
   if (step)
     {
 #ifdef __PPC__
       warning ("Single stepping not done.\n");
 #endif
-#ifdef __I386__
+#ifdef i386
       /* Single step by setting t bit */
       child_fetch_inferior_registers (PS_REGNUM);
       context.EFlags |= FLAG_TRACE_BIT;
@@ -685,6 +931,8 @@ child_resume (int pid, int step, enum target_signal signal)
       fprintf_unfiltered (gdb_stderr, "Can't send signals to the child.\n");
     }
 
+  DEBUG_EVENTS (("gdb: ContinueDebugEvent (cpid=%d, ctid=%d, DBG_CONTINUE);\n",
+		 current_process_id, current_thread_id));
   CHECK (ContinueDebugEvent (current_process_id,
 			     current_thread_id,
 			     DBG_CONTINUE));
@@ -705,8 +953,9 @@ child_can_run ()
 static void
 child_close ()
 {
-
+  DEBUG_EVENTS (("gdb: child_close, inferior_pid=%d\n", inferior_pid));
 }
+
 struct target_ops child_ops =
 {
   "child",			/* to_shortname */
@@ -751,9 +1000,46 @@ struct target_ops child_ops =
   OPS_MAGIC			/* to_magic */
 };
 
+#include "environ.h"
+
+static void
+set_pathstyle_dos(args, from_tty, c)
+     char *args;
+     int from_tty;
+     struct cmd_list_element *c;
+{
+  char **vector = environ_vector(inferior_environ);
+  char *thisvar;
+  int dos = *(int *) c->var;
+
+  if (info_verbose)
+    printf_unfiltered ("Change dos_path_style to %s\n", dos ? "true":"false");
+
+  while (vector && *vector) 
+    {
+      if (dos)
+	thisvar = unix_paths_to_dos_paths(*vector);
+      else
+	thisvar = dos_paths_to_unix_paths(*vector);
+
+      if (thisvar) 
+	{
+	  if (info_verbose)
+	    printf_unfiltered ("Change %s\nto %s\n", *vector, thisvar);
+	  free(*vector);
+	  *vector = xmalloc(strlen(thisvar) + 1);
+	  strcpy(*vector, thisvar);
+	}
+      vector++;
+    }
+}
+
+
 void
 _initialize_inftarg ()
 {
+  struct cmd_list_element *c;
+
   add_show_from_set
     (add_set_cmd ("new-console", class_support, var_boolean,
 		  (char *) &new_console,
@@ -765,6 +1051,43 @@ _initialize_inftarg ()
     (add_set_cmd ("new-group", class_support, var_boolean,
 		  (char *) &new_group,
 		  "Set creation of new group when creating child process.",
+		  &setlist),
+     &showlist);
+
+  add_show_from_set
+    (c = add_set_cmd ("dos-path-style", class_support, var_boolean,
+		      (char *) &dos_path_style,
+		      "Set whether paths in child's environment are shown in dos style.",
+		  &setlist),
+     &showlist);
+
+  c->function.sfunc = set_pathstyle_dos;
+
+  add_show_from_set
+    (add_set_cmd ("debugexec", class_support, var_boolean,
+		  (char *) &debug_exec,
+		  "Set whether to display execution in child process.",
+		  &setlist),
+     &showlist);
+
+  add_show_from_set
+    (add_set_cmd ("debugevents", class_support, var_boolean,
+		  (char *) &debug_events,
+		  "Set whether to display kernel events in child process.",
+		  &setlist),
+     &showlist);
+
+  add_show_from_set
+    (add_set_cmd ("debugmemory", class_support, var_boolean,
+		  (char *) &debug_memory,
+		  "Set whether to display memory accesses in child process.",
+		  &setlist),
+     &showlist);
+
+  add_show_from_set
+    (add_set_cmd ("debugexceptions", class_support, var_boolean,
+		  (char *) &debug_exceptions,
+		  "Set whether to display kernel exceptions in child process.",
 		  &setlist),
      &showlist);
 

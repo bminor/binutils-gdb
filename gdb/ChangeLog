@@ -1,3 +1,13 @@
+Mon Mar 11 11:02:47 1996  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	With Michael Snyder:
+	* i386-tdep.c (skip_trampoline_code): Fix strncmp length.
+	* win32-nat.c (CHECK, DEBUG*, debug_*): New.
+	(handle_load_dll): Don't reload symbols.
+	(handle_exception):  Use the DEBUG_* names.
+	(child_wait): Add DEBUG_* code.
+	(_initialize_inftarg): Add new commands to set debug_ names.
+
 Mon Mar 11 09:19:58 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* From Peter Schauer:
@@ -856,7 +866,7 @@ Fri Jan 12 21:41:58 1996  Jeffrey A Law  (law@cygnus.com)
 Fri Jan 12 15:56:12 1996  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* dsrec.c (load_srec): Remove unused variable.
-	monitor.c (monitor_expect): Don't expect a ^C to echo.
+	* monitor.c (monitor_expect): Don't expect a ^C to echo.
 	* serial.c (serial_open): Add parallel interface.
 	* sh3-rom.c (parallel, parallel_in_use): New.
 	(sh3_load): If parallel_in_use, download though the
