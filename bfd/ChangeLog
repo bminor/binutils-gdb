@@ -1,3 +1,14 @@
+start-sanitize-m32r
+Thu Oct 17 10:43:29 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* reloc.c (m32r relocs): Rename them.
+	* bfd-in2.h, libbfd.h: Regenerated.
+	* elf32-m32r.c: Update.
+	(m32r_elf_10_pcrel_reloc): New function.
+	(elf_m32r_howto_table, R_M32R_10_PCREL entry): Use it.
+	(elf_m32r_howto_table, R_M32R_24 entry): Fix {src,dst}_masks.
+
+end-sanitize-m32r
 Wed Oct 16 11:24:35 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* linker.c (_bfd_generic_final_link): Set "linker_mark" for
