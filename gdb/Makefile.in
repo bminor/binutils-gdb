@@ -133,7 +133,7 @@ INCLUDE_CFLAGS = -I. -I${srcdir} -I$(INCLUDE_DIR) -I$(READLINE_DIR) -I${srcdir}/
 
 # {X,T}M_CFLAGS, if defined, has system-dependent CFLAGS.
 # CFLAGS for GDB
-GLOBAL_CFLAGS = ${MINUS_G} ${TM_CFLAGS} ${XM_CFLAGS}
+GLOBAL_CFLAGS = ${TM_CFLAGS} ${XM_CFLAGS}
 #PROFILE_CFLAGS = -pg
 
 # CFLAGS is specifically reserved for setting from the command line
