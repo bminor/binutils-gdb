@@ -1,3 +1,7 @@
+2002-07-23  Eric S. Raymond  <esr@golux.thyrsus.com>
+
+	* doc/binutils.texi (addr2line <man synopsis>): Correct brackets.
+
 2002-07-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* budemang.c: Include config.h and string.h/strings.h.
