@@ -71,6 +71,8 @@ extern void _bfd_mips_elf_copy_indirect_symbol
   PARAMS ((struct elf_link_hash_entry *, struct elf_link_hash_entry *));
 extern void _bfd_mips_elf_hide_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *, boolean));
+extern boolean _bfd_mips_elf_ignore_discarded_relocs
+  PARAMS ((asection *));
 extern boolean _bfd_mips_elf_find_nearest_line
   PARAMS ((bfd *, asection *, asymbol **, bfd_vma, const char **,
 	   const char **, unsigned int *));

@@ -2719,6 +2719,8 @@ const struct elf_size_info mips_elf64_size_info =
 #define elf_backend_gc_mark_hook	_bfd_mips_elf_gc_mark_hook
 #define elf_backend_gc_sweep_hook	_bfd_mips_elf_gc_sweep_hook
 #define elf_backend_hide_symbol		_bfd_mips_elf_hide_symbol
+#define elf_backend_ignore_discarded_relocs \
+					_bfd_mips_elf_ignore_discarded_relocs
 #define elf_backend_mips_irix_compat	elf64_mips_irix_compat
 #define elf_backend_mips_rtype_to_howto	mips_elf64_rtype_to_howto
 #define elf_backend_ecoff_debug_swap	&mips_elf64_ecoff_debug_swap

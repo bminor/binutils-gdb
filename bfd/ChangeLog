@@ -1,3 +1,11 @@
+2002-06-05  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* elf32-mips.c (elf32_mips_ignore_discarded_relocs): Move to...
+	elfxx-mips.c (_bfd_mips_elf_ignore_discarded_relocs): ... here.
+	elf64-mips.c (elf_backend_ignore_discarded_relocs): Use
+	_bfd_mips_elf_ignore_discarded_relocs.
+	elfxx-mips.h (_bfd_mips_elf_ignore_discarded_relocs): Declare.
+
 2002-06-05  H.J. Lu <hjl@gnu.org>
 
 	* elfxx-mips.c (mips_elf_calculate_relocation): Call

@@ -82,8 +82,6 @@ static boolean elf32_mips_grok_psinfo
   PARAMS ((bfd *, Elf_Internal_Note *));
 static boolean elf32_mips_discard_info
   PARAMS ((bfd *, struct elf_reloc_cookie *, struct bfd_link_info *));
-static boolean elf32_mips_ignore_discarded_relocs
-  PARAMS ((asection *));
 static boolean elf32_mips_write_section
   PARAMS ((bfd *, asection *, bfd_byte *));
 static irix_compat_t elf32_mips_irix_compat
@@ -1727,15 +1725,6 @@ elf32_mips_discard_info (abfd, cookie, info)
 }
 
 static boolean
-elf32_mips_ignore_discarded_relocs (sec)
-     asection *sec;
-{
-  if (strcmp (sec->name, ".pdr") == 0)
-    return true;
-  return false;
-}
-
-static boolean
 elf32_mips_write_section (output_bfd, sec, contents)
      bfd *output_bfd;
      asection *sec;
@@ -2056,7 +2045,7 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 
 #define elf_backend_discard_info	elf32_mips_discard_info
 #define elf_backend_ignore_discarded_relocs \
-					elf32_mips_ignore_discarded_relocs
+					_bfd_mips_elf_ignore_discarded_relocs
 #define elf_backend_write_section	elf32_mips_write_section
 #define elf_backend_mips_irix_compat	elf32_mips_irix_compat
 #define elf_backend_mips_rtype_to_howto	mips_elf32_rtype_to_howto

@@ -6422,6 +6422,15 @@ _bfd_mips_elf_hide_symbol (info, entry, force_local)
   got->_raw_size += MIPS_ELF_GOT_SIZE (dynobj);
 }
 
+boolean
+_bfd_mips_elf_ignore_discarded_relocs (sec)
+     asection *sec;
+{
+  if (strcmp (sec->name, ".pdr") == 0)
+    return true;
+  return false;
+}
+
 /* MIPS ELF uses a special find_nearest_line routine in order the
    handle the ECOFF debugging information.  */
 
