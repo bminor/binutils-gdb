@@ -8,7 +8,7 @@ start:
 
 	.globl	g1
 	.ent	g1
-i1:
+i1:				# 0x00004
 g1:
 	.space 0x8000
 	nop
@@ -16,7 +16,7 @@ g1:
 
 	.globl	g2
 	.ent	g2
-i2:
+i2:				# 0x08008
 g2:
 	.space 0x8000
 	nop
@@ -24,7 +24,7 @@ g2:
 
 	.globl	g3
 	.ent	g3
-i3:
+i3:				# 0x1000c
 g3:
 
 	la	$2, (i1 - i3)($4)

@@ -1,3 +1,15 @@
+2002-02-26  Chris Demetriou  <cgd@broadcom.com>
+
+	* gas/mips/empic2.d: Adjust for the fact that relocations on
+	symbols local to this file are resolved at assembly time into
+	section-relative relocations, even if the symbols are extern.
+	* gas/mips/empic2.s: Add file offset information, so the next
+	person to do the math mentioned above has an easier time.
+	* gas/mips/jal-empic-elf.d: New test.
+	* gas/mips/jal-empic-elf-2.d, gas/mips/jal-empic-elf-2.s: New test.
+	* gas/mips/jal-empic-elf-3.d, gas/mips/jal-empic-elf-3.s: New test.
+	* gas/mips/mips.exp: Run the new tests.
+	
 2002-02-25  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* mips-gp64-fp32-pic.d: Fix test of 64bit register loads.

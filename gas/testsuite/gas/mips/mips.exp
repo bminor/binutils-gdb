@@ -70,6 +70,9 @@ if { [istarget mips*-*-*] } then {
     # It appears that it broke between 2000-03-11 00:00UTC and
     # 2000-03-12 00:00 UTC.
     if $ecoff { run_dump_test "jal-empic" }
+    if $elf { run_dump_test "jal-empic-elf" }
+    if $elf { run_dump_test "jal-empic-elf-2" }
+    if $elf { run_dump_test "jal-empic-elf-3" }
     if !$aout { run_dump_test "la" }
     if $elf { run_dump_test "la-svr4pic" }
     if $elf { run_dump_test "la-xgot" }
