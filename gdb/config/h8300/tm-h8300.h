@@ -124,17 +124,19 @@ extern CORE_ADDR h8300_skip_prologue ();
 /* Nonzero if register N requires conversion
    from raw format to virtual format.  */
 
-#define REGISTER_CONVERTIBLE(N) 1
+#define REGISTER_CONVERTIBLE(N) 0
 
 /* Convert data from raw format for register REGNUM
    to virtual format for register REGNUM.  */
 
-/*#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO)  */
+#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO) \
+{ memcpy((TO), (FROM),  REGISTER_RAW_SIZE (REGNUM)); }
 
 /* Convert data from virtual format for register REGNUM
    to raw format for register REGNUM.  */
 
-/*#define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO)  */
+#define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO)	\
+{ memcpy((TO), (FROM),  REGISTER_RAW_SIZE (REGNUM)); }
 
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
@@ -271,11 +273,6 @@ extern CORE_ADDR h8300_skip_prologue ();
 
 #define SHORT_INT_MAX 32767
 #define SHORT_INT_MIN -32768
-
-#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO) \
-{ memcpy((TO), (FROM),  BINWORD); }
-#define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO)	\
-{ memcpy((TO), (FROM),  BINWORD); }
 
 #define	BEFORE_MAIN_LOOP_HOOK	\
   hms_before_main_loop();
