@@ -1,3 +1,11 @@
+2003-06-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_relocate_section): When optimizing toctprel
+	tls, check that a TOC16_DS or TOC16_LO_DS reloc isn't pointing to a
+	dtprel entry.  Ensure TLS_LD DTPMOD reloc has a zero addend.  Write
+	got section for RELATIVE relocs.  Fix wrong comment.  Change condition
+	under which dynamic relocs update the section contents.
+
 2003-06-13  Robert Millan  <zeratul2@wanadoo.es>
 
 	* config.bfd: Add i386-netbsd-gnu target.
@@ -6,18 +14,18 @@
 
 	* opncls.c (calc_crc32): Rename to
 	bfd_calc_gnu_debuglink_crc32 and export.
-        (GNU_DEBUGLINK): Define and use to replace occurrences of
+	(GNU_DEBUGLINK): Define and use to replace occurrences of
 	hard-coded ".gnu_debuglink" in the code.
-        (get_debug_link_info): Prevent aborts by replacing call to
+	(get_debug_link_info): Prevent aborts by replacing call to
 	xmalloc with a call to malloc.
-        (find_separate_debug_file): Prevent aborts by replacing calls
+	(find_separate_debug_file): Prevent aborts by replacing calls
 	to xmalloc and xstrdup with calls to malloc and strdup.
-        (bfd_add_gnu_debuglink): New function.  Add a .gnu_debuglink
+	(bfd_add_gnu_debuglink): New function.  Add a .gnu_debuglink
 	section to a bfd.
 	* bfd-in2.h: Regenerate.
 
 2003-06-12 Federico G. Schwindt <fgsch@lodoss.net>
-	
+
 	* config.bfd (i[3-7]86-*-openbsd[0-2].* | i[3-7]86-*-openbsd3.[0-3]):
 	New target (was i[3-7]86-*-openbsd* before).
 	(i[3-7]86-*-openbsd*): Change to use bfd_elf32_i386_vec.
@@ -81,11 +89,11 @@
 	(_bfd_mips_elf_sign_extend): New prototype.
 
 2003-06-11 Federico G. Schwindt <fgsch@lodoss.net>
-	
+
 	* config.bfd (sparc-*-openbsd[0-2].* | sparc-*-openbsd3.[0-1]):
 	New target (was sparc-*-openbsd* before).
 	(sparc-*-openbsd*): Change to use bfd_elf32_sparc_vec.
-	
+
 	* configure.in (vax-*-openbsd*): Set COREFILE to netbsd-core.lo.
 	* configure: Regenerate.
 

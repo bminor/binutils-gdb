@@ -7445,7 +7445,11 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		tls_mask = *toc_tls;
 		if (r_type == R_PPC64_TOC16_DS
 		    || r_type == R_PPC64_TOC16_LO_DS)
-		  goto toctprel;
+		  {
+		    if (tls_mask != 0
+			&& (tls_mask & (TLS_DTPREL | TLS_TPREL)) == 0)
+		      goto toctprel;
+		  }
 		else
 		  {
 		    /* If we found a GD reloc pair, then we might be
@@ -7468,11 +7472,11 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	case R_PPC64_GOT_TPREL16_DS:
 	case R_PPC64_GOT_TPREL16_LO_DS:
-	toctprel:
 	  if (tls_mask != 0
 	      && (tls_mask & TLS_TPREL) == 0)
 	    {
 	      bfd_vma insn;
+	    toctprel:
 	      insn = bfd_get_32 (output_bfd, contents + rel->r_offset - 2);
 	      insn &= 31 << 21;
 	      insn |= 0x3c0d0000;	/* addis 0,13,0 */
@@ -7985,6 +7989,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		    outrel.r_offset = (htab->sgot->output_section->vma
 				       + htab->sgot->output_offset
 				       + off);
+		    outrel.r_addend = rel->r_addend;
 		    if (tls_type & (TLS_LD | TLS_GD))
 		      {
 			outrel.r_addend = 0;
@@ -7997,6 +8002,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			    bfd_elf64_swap_reloca_out (output_bfd,
 						       &outrel, loc);
 			    outrel.r_offset += 8;
+			    outrel.r_addend = rel->r_addend;
 			    outrel.r_info
 			      = ELF64_R_INFO (indx, R_PPC64_DTPREL64);
 			  }
@@ -8006,11 +8012,18 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		    else if (tls_type == (TLS_TLS | TLS_TPREL))
 		      outrel.r_info = ELF64_R_INFO (indx, R_PPC64_TPREL64);
 		    else if (indx == 0)
-		      outrel.r_info = ELF64_R_INFO (indx, R_PPC64_RELATIVE);
+		      {
+			outrel.r_info = ELF64_R_INFO (indx, R_PPC64_RELATIVE);
+
+			/* Write the .got section contents for the sake
+			   of prelink.  */
+			loc = htab->sgot->contents + off;
+			bfd_put_64 (output_bfd, outrel.r_addend, loc);
+		      }
 		    else
 		      outrel.r_info = ELF64_R_INFO (indx, R_PPC64_GLOB_DAT);
-		    outrel.r_addend = rel->r_addend;
-		    if (indx == 0)
+
+		    if (indx == 0 && tls_type != (TLS_TLS | TLS_LD))
 		      {
 			outrel.r_addend += relocation;
 			if (tls_type & (TLS_GD | TLS_DTPREL | TLS_TPREL))
@@ -8023,8 +8036,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  }
 
 		/* Init the .got section contents here if we're not
-		   emitting a reloc.  A reloc will also init the
-		   section contents via _bfd_final_link_relocate.  */
+		   emitting a reloc.  */
 		else
 		  {
 		    relocation += rel->r_addend;
@@ -8254,9 +8266,6 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		     or this is an opd section reloc which must point
 		     at a local function.  */
 		  outrel.r_addend += relocation;
-		  /* We need to relocate .opd contents for ld.so, and
-		     it doesn't hurt to relocate in other cases.  */
-		  relocate = TRUE;
 		  if (r_type == R_PPC64_ADDR64 || r_type == R_PPC64_TOC)
 		    {
 		      if (is_opd && h != NULL)
@@ -8274,6 +8283,12 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			  unresolved_reloc = FALSE;
 			}
 		      outrel.r_info = ELF64_R_INFO (0, R_PPC64_RELATIVE);
+
+		      /* We need to relocate .opd contents for ld.so.
+			 Prelink also wants simple and consistent rules
+			 for relocs.  This make all RELATIVE relocs have
+			 *r_offset equal to r_addend.  */
+		      relocate = TRUE;
 		    }
 		  else
 		    {
@@ -8315,9 +8330,27 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      /* If this reloc is against an external symbol, it will
 		 be computed at runtime, so there's no need to do
-		 anything now.  */
+		 anything now.  However, for the sake of prelink ensure
+		 that the section contents are a known value.  */
 	      if (! relocate)
-		continue;
+		{
+		  unresolved_reloc = FALSE;
+		  /* The value chosen here is quite arbitrary as ld.so
+		     ignores section contents except for the special
+		     case of .opd where the contents might be accessed
+		     before relocation.  Choose zero, as that won't
+		     cause reloc overflow.  */
+		  relocation = 0;
+		  addend = 0;
+		  /* Use *r_offset == r_addend for R_PPC64_ADDR64 relocs
+		     to improve backward compatibility with older
+		     versions of ld.  */
+		  if (r_type == R_PPC64_ADDR64)
+		    addend = outrel.r_addend;
+		  /* Adjust pc_relative relocs to have zero in *r_offset.  */
+		  else if (ppc64_elf_howto_table[(int) r_type]->pc_relative)
+		    addend = outrel.r_offset;
+		}
 	    }
 	  break;
 
