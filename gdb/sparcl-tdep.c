@@ -296,28 +296,37 @@ open_tty (name)
   return desc;
 }
 
+/* Read a single character from the remote end, masking it down to 7 bits. */
+
+static int
+readchar (desc, timeout)
+     serial_t desc;
+     int timeout;
+{
+  int ch;
+
+  ch = SERIAL_READCHAR (desc, timeout);
+
+  switch (ch)
+    {
+    case SERIAL_EOF:
+      error ("SPARClite remote connection closed");
+    case SERIAL_ERROR:
+      perror_with_name ("SPARClite communication error");
+    case SERIAL_TIMEOUT:
+      error ("SPARClite remote timeout");
+    default:
+      return ch;
+    }
+}
+
 static int
 send_resp (desc, c)
      serial_t desc;
      char c;
 {
-  int i;
-
   SERIAL_WRITE (desc, &c, 1);
-  i = SERIAL_READCHAR (desc, 2);
-
-  if (i >= 0)
-    return i;
-
-  switch (i)
-    {
-    case SERIAL_ERROR:
-      perror_with_name ("Remote communication error");
-    case SERIAL_TIMEOUT:
-      error ("Remote timeout");
-    case SERIAL_EOF:
-      error ("Remote connection closed");
-    }
+  return readchar (desc, 2);
 }
 
 static void
@@ -652,7 +661,7 @@ sparclite_serial_start (entry)
   store_unsigned_integer (buffer + 1, 4, entry);
 
   SERIAL_WRITE (remote_desc, buffer, 1 + 4);
-  i = SERIAL_READCHAR (remote_desc, 2);
+  i = readchar (remote_desc, 2);
   if (i != 0x55)
     error ("Can't start SparcLite.  Error code %d\n", i);
 }
@@ -684,9 +693,7 @@ sparclite_serial_write (from_bfd, from_sec, from_addr, to_addr, len)
     error ("Bad response from load command (0x%x)", i);
 
   SERIAL_WRITE (remote_desc, buffer, 4 + 4 + len);
-  i = SERIAL_READCHAR (remote_desc, 2);
-  if (i < 0)
-    error ("I/O error in serial code.  Return code %d\n", i);
+  i = readchar (remote_desc, 2);
 
   if (i != checksum)
     error ("Bad checksum from load command (0x%x)", i);
