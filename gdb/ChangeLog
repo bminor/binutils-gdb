@@ -1,3 +1,26 @@
+Wed Sep 18 04:33:31 1991  Per Bothner  (bothner at cygnus.com)
+
+	* mipsread.c (parse_symbol):  Put non-static procedures
+	in the global block.
+
+Fri Sep 13 00:14:52 1991  John Gilmore  (gnu at cygnus.com)
+
+	Patch together `text_start' and `text_end' for 29K port.
+
+	* exec.c (exec_command):  If NEED_TEXT_START_END, define the
+	variables and set them based on the exec file.
+	* am29k-tdep.c:  declare text_start.
+	* valops.c (call_function_by_hand):  declare text_end.
+
+	* inferior.h:  Eliminate CANNOT_EXECUTE_STACK in favor of
+	defining CALL_DUMMY_LOCATION as BEFORE_TEXT_END.  This is
+	because machines that do this will also have to know to
+	set NEED_TEXT_START_END.  Besides, it was a redundant way to
+	say the same thing.
+	* tm-29k.h, tm-convex.h, tm-np1.h:  Eliminate
+	CANNOT_EXECUTE_STACK, define CALL_DUMMY_LOCATION and
+	NEED_TEXT_START_END.
+
 Thu Sep 12 00:22:24 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	AMD 29000 changes from David Wood <wood@david.ultra.nyu.edu>:
