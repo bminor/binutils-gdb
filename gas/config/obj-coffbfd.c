@@ -2299,14 +2299,16 @@ static void
 obj_coff_lcomm (ignore)
      int ignore;
 {
+  s_lcomm(0);
+  return;
+#if 0
   char *name;
   char c;
   int temp;
   char *p;
 
   symbolS *symbolP;
-  s_lcomm(0);
-  return;
+
   name = input_line_pointer;
 
   c = get_symbol_end ();
@@ -2358,6 +2360,7 @@ obj_coff_lcomm (ignore)
     as_bad("Symbol %s already defined", name);
 
   demand_empty_rest_of_line();
+#endif
 }
 
 static void
@@ -2663,7 +2666,7 @@ obj_coff_init_stab_section (seg)
   /* Zero it out. */
   memset (p, 0, 12);
   as_where (&file, (unsigned int *) NULL);
-  stabstr_name = alloca (strlen (segment_info[seg].scnhdr.s_name) + 4);
+  stabstr_name = (char *) alloca (strlen (segment_info[seg].scnhdr.s_name) + 4);
   strcpy (stabstr_name, segment_info[seg].scnhdr.s_name);
   strcat (stabstr_name, "str");
   stroff = get_stab_string_offset (file, stabstr_name);
