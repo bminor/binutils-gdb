@@ -195,7 +195,7 @@ typedef struct sec *sec_ptr;
 
 #define bfd_is_com_section(ptr) (((ptr)->flags & SEC_IS_COMMON) != 0)
 
-#define bfd_set_section_vma(bfd, ptr, val) (((ptr)->vma = (val)), ((ptr)->user_set_vma = true), true)
+#define bfd_set_section_vma(bfd, ptr, val) (((ptr)->vma = (ptr)->lma= (val)), ((ptr)->user_set_vma = true), true)
 #define bfd_set_section_alignment(bfd, ptr, val) (((ptr)->alignment_power = (val)),true)
 #define bfd_set_section_userdata(bfd, ptr, val) (((ptr)->userdata = (val)),true)
 
@@ -497,8 +497,15 @@ typedef struct sec
            ECOFF has two. */
 
 #define SEC_IS_COMMON 0x8000
-       
+
+        /*  The virtual memory address of the section - where it will be
+           at run time - the symbols are relocated against this */
    bfd_vma vma;
+
+        /*  The load address of the section - where it would be in a
+           rom image, really only used for writing section header information */
+   bfd_vma lma;
+
    boolean user_set_vma;
 
          /* The size of the section in bytes, as it will be output.
