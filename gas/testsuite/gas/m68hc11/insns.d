@@ -59,7 +59,7 @@ Disassembly of section .text:
 [	]+54: R_M68HC11_RL_JUMP	\*ABS\*
 [	]+55: R_M68HC11_16	Stop
 0+0057 <L1> anda	#23
-[	]+58: R_M68HC11_LO8	.text
+[	]+58: R_M68HC11_LO8	\.text
 0+0059 <L1\+0x2> andb	#0
-[	]+5a: R_M68HC11_HI8	.text
+[	]+5a: R_M68HC11_HI8	\.text
 0+005b <L1\+0x4> rts

@@ -27,7 +27,7 @@ Disassembly of section .text:
 0+0035 <L1\+0x2c> ldab	\[32767,SP\]
 0+0039 <L1\+0x30> ldd	\[32768,PC\]
 0+003d <L1\+0x34> ldd	9,PC
-[	]+3f: R_M68HC12_8	.text
+[	]+3f: R_M68HC12_8	\.text
 0+0040 <L1\+0x37> std	A,X
 0+0042 <L1\+0x39> ldx	B,X
 0+0044 <L1\+0x3b> stx	D,Y

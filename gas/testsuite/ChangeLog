@@ -1,5 +1,8 @@
 2002-08-26  Alan Modra  <amodra@bigpond.net.au>
 
+	* gas/m68hc11/insns.d: Quote dots.
+	* gas/m68hc11/opers12.d: Likewise.
+
 	* gas/ieee-fp/x930509a.exp: Run the test but xfail.  Add c80 to xfails.
 
 	* gas/vax/quad.exp: Use quad_elf.s for ELF targets.
