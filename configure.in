@@ -376,7 +376,7 @@ case "${host}" in
     noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache inet itcl db sn"
 	;;
   *-*-cygwin32)
-     noconfigdirs="tk tcl expect dejagnu cvs autoconf bison send-pr gprof rcs guile perl texinfo apache inet itcl db sn"
+     noconfigdirs="expect dejagnu cvs autoconf bison send-pr gprof rcs guile perl texinfo apache inet itcl db sn"
     ;;
   *-*-windows*)
 # This is only used to build WinGDB...
@@ -455,7 +455,7 @@ case "${target}" in
     ;;
   *-*-cygwin32)
     target_configdirs="$target_configdirs target-winsup"
-    noconfigdirs="$noconfigdirs tcl tk expect target-libgloss itcl db sn"
+    noconfigdirs="$noconfigdirs expect target-libgloss itcl db sn"
     # always build newlib.
     skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
 
@@ -613,7 +613,7 @@ esac
 # If we are building a Canadian Cross, discard tools that can not be built
 # using a cross compiler.  FIXME: These tools should be fixed.
 if [ "${build}" != "${host}" ]; then
-  noconfigdirs="$noconfigdirs tcl tk expect dejagnu itcl db sn"
+  noconfigdirs="$noconfigdirs expect dejagnu itcl db sn"
 fi
 
 # Make sure we don't let GNU ld be added if we didn't want it.
