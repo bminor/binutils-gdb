@@ -4616,6 +4616,143 @@ interruption must be on the cleanup chain before you call these
 functions, since they might never return to your code (they
 @samp{longjmp} instead).
 
+@section Per-architecture module data
+@cindex per-architecture module data
+@cindex multi-arch data
+@cindex data-pointer, per-architecture/per-module
+
+The multi-arch framework includes a mechanism for adding module specific
+per-architecture data-pointers to the @code{struct gdbarch} architecture
+object.
+
+A module registers one or more per-architecture data-pointers using the
+function @code{register_gdbarch_data}:
+
+@deftypefun struct gdbarch_data *register_gdbarch_data (gdbarch_data_init_ftype *@var{init}, gdbarch_data_free_ftype *@var{free})
+
+The @var{init} function is used to obtain an initial value for a
+per-architecture data-pointer.  The function is called, after the
+architecture has been created, when the data-pointer is still
+uninitialized (@code{NULL}) and its value has been requested via a call
+to @code{gdbarch_data}.  A data-pointer can also be initialize
+explicitly using @code{set_gdbarch_data}.
+
+The @var{free} function is called when a data-pointer needs to be
+destroyed.  This occurs when either the corresponding @code{struct
+gdbarch} object is being destroyed or when @code{set_gdbarch_data} is
+overriding a non-@code{NULL} data-pointer value.
+
+The function @code{register_gdbarch_data} returns a @code{struct
+gdbarch_data} that is used to identify the data-pointer that was added
+to the module.
+
+@end deftypefun
+
+A typical module has @code{init} and @code{free} functions of the form:
+
+@smallexample
+static struct gdbarch_data *nozel_handle;
+static void *
+nozel_init (struct gdbarch *gdbarch)
+@{
+  struct nozel *data = XMALLOC (struct nozel);
+  @dots{}
+  return data;
+@}
+@dots{}
+static void
+nozel_free (struct gdbarch *gdbarch, void *data)
+@{
+  xfree (data);
+@}
+@end smallexample
+
+Since uninitialized (@code{NULL}) data-pointers are initialized
+on-demand, an @code{init} function is free to call other modules that
+use data-pointers.  Those modules data-pointers will be initialized as
+needed.  Care should be taken to ensure that the @code{init} call graph
+does not contain cycles.
+
+The data-pointer is registered with the call:
+
+@smallexample
+void
+_initialize_nozel (void)
+@{
+  nozel_handle = register_gdbarch_data (nozel_init, nozel_free);
+@dots{}
+@end smallexample
+
+The per-architecture data-pointer is accessed using the function:
+
+@deftypefun void *gdbarch_data (struct gdbarch *@var{gdbarch}, struct gdbarch_data *@var{data_handle})
+Given the architecture @var{arch} and module data handle
+@var{data_handle} (returned by @code{register_gdbarch_data}, this
+function returns the current value of the per-architecture data-pointer.
+@end deftypefun
+
+The non-@code{NULL} data-pointer returned by @code{gdbarch_data} should
+be saved in a local variable and then used directly:
+
+@smallexample
+int
+nozel_total (struct gdbarch *gdbarch)
+@{
+  int total;
+  struct nozel *data = gdbarch_data (gdbarch, nozel_handle);
+  @dots{}
+  return total;
+@}
+@end smallexample
+
+It is also possible to directly initialize the data-pointer using:
+
+@deftypefun void set_gdbarch_data (struct gdbarch *@var{gdbarch}, struct gdbarch_data *handle, void *@var{pointer})
+Update the data-pointer corresponding to @var{handle} with the value of
+@var{pointer}.  If the previous data-pointer value is non-NULL, then it
+is freed using data-pointers @var{free} function.
+@end deftypefun
+
+This function is used by modules that require a mechanism for explicitly
+setting the per-architecture data-pointer during architecture creation:
+
+@smallexample
+/* Called during architecture creation.  */
+extern void
+set_gdbarch_nozel (struct gdbarch *gdbarch,
+                   int total)
+@{
+  struct nozel *data = XMALLOC (struct nozel);
+  @dots{}
+  set_gdbarch_data (gdbarch, nozel_handle, nozel);
+@}
+@end smallexample
+
+@smallexample
+/* Default, called when nozel not set by set_gdbarch_nozel().  */
+static void *
+nozel_init (struct gdbarch *gdbarch)
+@{
+  struct nozel *default_nozel = XMALLOC (struc nozel);
+  @dots{}
+  return default_nozel;
+@}
+@end smallexample
+
+@smallexample
+void
+_initialize_nozel (void)
+@{
+  nozel_handle = register_gdbarch_data (nozel_init, NULL);
+  @dots{}
+@end smallexample
+
+@noindent
+Note that an @code{init} function still needs to be registered.  It is
+used to initialize the data-pointer when the architecture creation phase
+fail to set an initial value.
+
+
 @section Wrapping Output Lines
 @cindex line wrap in output
 
