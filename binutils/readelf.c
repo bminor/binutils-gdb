@@ -405,12 +405,12 @@ print_vma (vma, mode)
       switch (mode)
 	{
 	case FULL_HEX: printf ("0x"); /* drop through */
-	case LONG_HEX: printf ("%08.8lx", vma); break;
+	case LONG_HEX: printf ("%8.8lx", (unsigned long) vma); break;
 	case PREFIX_HEX: printf ("0x"); /* drop through */
-	case HEX: printf ("%lx", vma); break;
-	case DEC: printf ("%ld", vma); break;
-	case DEC_5: printf ("%5ld", vma); break;
-	case UNSIGNED: printf ("%lu", vma); break;
+	case HEX: printf ("%lx", (unsigned long) vma); break;
+	case DEC: printf ("%ld", (unsigned long) vma); break;
+	case DEC_5: printf ("%5ld", (long) vma); break;
+	case UNSIGNED: printf ("%lu", (unsigned long) vma); break;
 	}
     }
 #ifdef BFD64
@@ -2514,7 +2514,7 @@ process_section_headers (file)
 	{
 	  putchar (' ');
 	  print_vma (section->sh_addr, LONG_HEX);
-	  printf ("  %08.8lx", section->sh_offset);
+	  printf ("  %8.8lx", section->sh_offset);
 	  printf ("\n       ");
 	  print_vma (section->sh_size, LONG_HEX);
 	  printf ("  ");
@@ -2746,23 +2746,24 @@ dynamic_segment_parisc_val (entry)
 	static struct
 	{
 	  long int bit;
-	  const char *str;
-	} flags[] =
-	  {
-	    { DT_HP_DEBUG_PRIVATE, "HP_DEBUG_PRIVATE" },
-	    { DT_HP_DEBUG_CALLBACK, "HP_DEBUG_CALLBACK" },
-	    { DT_HP_DEBUG_CALLBACK_BOR, "HP_DEBUG_CALLBACK_BOR" },
-	    { DT_HP_NO_ENVVAR, "HP_NO_ENVVAR" },
-	    { DT_HP_BIND_NOW, "HP_BIND_NOW" },
-	    { DT_HP_BIND_NONFATAL, "HP_BIND_NONFATAL" },
-	    { DT_HP_BIND_VERBOSE, "HP_BIND_VERBOSE" },
-	    { DT_HP_BIND_RESTRICTED, "HP_BIND_RESTRICTED" },
-	    { DT_HP_BIND_SYMBOLIC, "HP_BIND_SYMBOLIC" },
-	    { DT_HP_RPATH_FIRST, "HP_RPATH_FIRST" },
-	    { DT_HP_BIND_DEPTH_FIRST, "HP_BIND_DEPTH_FIRST" }
-	  };
+	  const char * str;
+	}
+	flags[] =
+	{
+	  { DT_HP_DEBUG_PRIVATE, "HP_DEBUG_PRIVATE" },
+	  { DT_HP_DEBUG_CALLBACK, "HP_DEBUG_CALLBACK" },
+	  { DT_HP_DEBUG_CALLBACK_BOR, "HP_DEBUG_CALLBACK_BOR" },
+	  { DT_HP_NO_ENVVAR, "HP_NO_ENVVAR" },
+	  { DT_HP_BIND_NOW, "HP_BIND_NOW" },
+	  { DT_HP_BIND_NONFATAL, "HP_BIND_NONFATAL" },
+	  { DT_HP_BIND_VERBOSE, "HP_BIND_VERBOSE" },
+	  { DT_HP_BIND_RESTRICTED, "HP_BIND_RESTRICTED" },
+	  { DT_HP_BIND_SYMBOLIC, "HP_BIND_SYMBOLIC" },
+	  { DT_HP_RPATH_FIRST, "HP_RPATH_FIRST" },
+	  { DT_HP_BIND_DEPTH_FIRST, "HP_BIND_DEPTH_FIRST" }
+	};
 	int first = 1;
-	int cnt;
+	size_t cnt;
 	bfd_vma val = entry->d_un.d_val;
 
 	for (cnt = 0; cnt < sizeof (flags) / sizeof (flags[0]); ++cnt)
@@ -2774,6 +2775,7 @@ dynamic_segment_parisc_val (entry)
              first = 0;
              val ^= flags[cnt].bit;
            }
+	
 	if (val != 0 || first)
 	  {
 	    if (! first)
@@ -3981,7 +3983,7 @@ process_symbol_table (file)
   char   nb [4];
   char   nc [4];
   int    nbuckets = 0;
-  int    nchains;
+  int    nchains = 0;
   int *  buckets = NULL;
   int *  chains = NULL;
 
@@ -4080,9 +4082,9 @@ process_symbol_table (file)
 		  SECTION_NAME (section),
 		  (unsigned long) (section->sh_size / section->sh_entsize));
 	  if (is_32bit_elf)
-	    printf (_("  Num:    Value  Size Type    Bind   Ot  Ndx Name\n"));
+	    printf (_("   Num:    Value  Size Type    Bind   Ot  Ndx Name\n"));
 	  else
-	    printf (_("  Num:    Value          Size Type    Bind   Ot  Ndx Name\n"));
+	    printf (_("   Num:    Value          Size Type    Bind   Ot  Ndx Name\n"));
 
 	  symtab = GET_ELF_SYMBOLS (file, section->sh_offset,
 				    section->sh_size / section->sh_entsize);
@@ -4105,7 +4107,7 @@ process_symbol_table (file)
 	       si < section->sh_size / section->sh_entsize;
 	       si ++, psym ++)
 	    {
-	      printf ("  %3d: ", si);
+	      printf ("%6d: ", si);
 	      print_vma (psym->st_value, LONG_HEX);
 	      putchar (' ');
 	      print_vma (psym->st_size, DEC_5);

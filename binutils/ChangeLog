@@ -1,3 +1,8 @@
+1999-12-07  H . J . Lu  hjl@valinux.com
+
+	* readelf.c: Fix compile time warnings.  Support more than 999
+	symbols.
+
 1999-12-03  Nick Clifton  <nickc@cygnus.com>
 
 	* readelf.c (enum print_mode): New type.
