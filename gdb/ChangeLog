@@ -1,3 +1,14 @@
+2003-07-04  Kris Warkentin  <kewarken@qnx.com>
+
+	* config/i386/nto.mh: Set XM_FILE to xm-i386.h
+
+2003-07-04  Kris Warkentin  <kewarken@qnx.com>
+
+	* nto-procfs.c: New file.  Native procfs support for QNX Neutrino.
+	* config/i386/nto.mh: New file.
+	* config/i386/nm-nto.h: New file.
+	* configure.host: Add i[3456]86-*-nto*.
+
 2003-07-03  Joel Brobecker  <brobecker@gnat.com>
 
 	* remote-vx.c (vx_add_symbols): Fix compilation error.
