@@ -27,9 +27,8 @@ fi
 
 Things-to-keep:
 
-aout-gdb.exp
-coff-gdb.exp
 mips-gdb.exp
+nind-gdb.exp
 udi-gdb.exp
 unix-gdb.exp
 vx-gdb.exp
@@ -76,3 +75,9 @@ else
 fi
 
 # eof
+CVS
+mips-gdb.exp
+nind-gdb.exp
+udi-gdb.exp
+unix-gdb.exp
+vx-gdb.exp
