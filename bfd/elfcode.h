@@ -300,8 +300,8 @@ elf_swap_shdr_in (abfd, src, dst)
   dst->sh_info = bfd_h_get_32 (abfd, (bfd_byte *) src->sh_info);
   dst->sh_addralign = get_word (abfd, (bfd_byte *) src->sh_addralign);
   dst->sh_entsize = get_word (abfd, (bfd_byte *) src->sh_entsize);
-  /* we haven't done any processing on it yet, so... */
-  dst->rawdata = (void *) 0;
+  dst->bfd_section = NULL;
+  dst->contents = NULL;
 }
 
 /* Translate an ELF section header table entry in internal format into an
@@ -575,13 +575,12 @@ bfd_section_from_shdr (abfd, shindex)
       return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
 
     case SHT_STRTAB:		/* A string table */
-      if (hdr->rawdata != NULL)
+      if (hdr->bfd_section != NULL)
 	return true;
       if (ehdr->e_shstrndx == shindex)
 	{
 	  elf_tdata (abfd)->shstrtab_hdr = *hdr;
 	  elf_elfsections (abfd)[shindex] = &elf_tdata (abfd)->shstrtab_hdr;
-	  hdr->rawdata = (PTR) & elf_tdata (abfd)->shstrtab_hdr;
 	  return true;
 	}
       {
@@ -613,10 +612,10 @@ bfd_section_from_shdr (abfd, shindex)
 #if 0 /* Not handling other string tables specially right now.  */
 		hdr2 = elf_elfsections (abfd)[i];	/* in case it moved */
 		/* We have a strtab for some random other section.  */
-		newsect = (asection *) hdr2->rawdata;
+		newsect = (asection *) hdr2->bfd_section;
 		if (!newsect)
 		  break;
-		hdr->rawdata = (PTR) newsect;
+		hdr->bfd_section = newsect;
 		hdr2 = &elf_section_data (newsect)->str_hdr;
 		*hdr2 = *hdr;
 		elf_elfsections (abfd)[shindex] = hdr2;
@@ -663,8 +662,7 @@ bfd_section_from_shdr (abfd, shindex)
 	if (! bfd_section_from_shdr (abfd, hdr->sh_info))
 	  return false;
 	target_sect = section_from_elf_index (abfd, hdr->sh_info);
-	if (target_sect == NULL
-	    || elf_section_data (target_sect) == NULL)
+	if (target_sect == NULL)
 	  return false;
 
 	hdr2 = &elf_section_data (target_sect)->rel_hdr;
@@ -1188,9 +1186,8 @@ elf_fake_sections (abfd, asect, ignore)
   this_hdr->sh_addralign = 1 << asect->alignment_power;
   this_hdr->sh_entsize = 0;
 
-  this_hdr->rawdata = (PTR) asect;
+  this_hdr->bfd_section = asect;
   this_hdr->contents = NULL;
-  this_hdr->size = 0;
 
   /* FIXME: This should not be based on section names.  */
   if (strcmp (asect->name, ".dynstr") == 0)
@@ -1279,7 +1276,6 @@ elf_fake_sections (abfd, asect, ignore)
       rela_hdr->sh_addr = 0;
       rela_hdr->sh_size = 0;
       rela_hdr->sh_offset = 0;
-      rela_hdr->size = 0;
     }
 }
 
@@ -1520,7 +1516,6 @@ elf_map_symbols (abfd)
     }
 
   max_index++;
-  elf_num_section_syms (abfd) = max_index;
   sect_syms = (asymbol **) bfd_zalloc (abfd, max_index * sizeof (asymbol *));
   elf_section_syms (abfd) = sect_syms;
 
@@ -1530,18 +1525,40 @@ elf_map_symbols (abfd)
       return false;
     }
 
+  for (idx = 0; idx < symcount; idx++)
+    {
+      if ((syms[idx]->flags & BSF_SECTION_SYM) != 0)
+	{
+	  asection *sec;
+
+	  sec = syms[idx]->section;
+	  if (! bfd_is_abs_section (sec))
+	    {
+	      if (sec->owner != abfd)
+		{
+		  sec = sec->output_section;
+		  BFD_ASSERT (sec->owner == abfd);
+		}
+	      sect_syms[sec->index] = syms[idx];
+	    }
+	}
+    }
+
   for (asect = abfd->sections; asect; asect = asect->next)
     {
-      asymbol *sym = bfd_make_empty_symbol (abfd);
-      if (!sym)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+      asymbol *sym;
+
+      if (sect_syms[asect->index] != NULL)
+	continue;
+
+      sym = bfd_make_empty_symbol (abfd);
+      if (sym == NULL)
+	return false;
       sym->the_bfd = abfd;
       sym->name = asect->name;
       sym->value = asect->vma;
-      sym->flags = BSF_SECTION_SYM;
+      /* Set the flags to 0 to indicate that this one was newly added.  */
+      sym->flags = 0;
       sym->section = asect;
       sect_syms[asect->index] = sym;
       num_sections++;
@@ -1554,15 +1571,15 @@ elf_map_symbols (abfd)
 
   if (num_sections)
     {
-#if 0 /* @@ I just deleted bfd_realloc, because it's broken and too hard to
-	 fix.  I'm leaving this code here as a reminder to look at this more
-	 carefully later and see if we can avoid wasting memory.  */
       if (syms)
-	syms = (asymbol **) bfd_realloc (abfd, syms,
+	{
+	  asymbol **osyms = syms;
+	  syms = (asymbol **) bfd_alloc (abfd,
 					 ((symcount + num_sections + 1)
 					  * sizeof (asymbol *)));
+	  memcpy (syms, osyms, symcount * sizeof (asymbol *));
+	}
       else
-#endif
 	syms = (asymbol **) bfd_alloc (abfd,
 				   (num_sections + 1) * sizeof (asymbol *));
       if (!syms)
@@ -1573,8 +1590,12 @@ elf_map_symbols (abfd)
 
       for (asect = abfd->sections; asect; asect = asect->next)
 	{
-	  if (sect_syms[asect->index])
-	    syms[symcount++] = sect_syms[asect->index];
+	  if (sect_syms[asect->index] != NULL
+	      && sect_syms[asect->index]->flags == 0)
+	    {
+	      sect_syms[asect->index]->flags = BSF_SECTION_SYM;
+	      syms[symcount++] = sect_syms[asect->index];
+	    }
 	}
 
       syms[symcount] = (asymbol *) 0;
@@ -1699,8 +1720,8 @@ assign_file_position_for_section (i_shdrp, offset, align)
 	offset = BFD_ALIGN (offset, al);
     }
   i_shdrp->sh_offset = offset;
-  if (i_shdrp->rawdata != NULL)
-    ((asection *) i_shdrp->rawdata)->filepos = offset;
+  if (i_shdrp->bfd_section != NULL)
+    i_shdrp->bfd_section->filepos = offset;
   if (i_shdrp->sh_type != SHT_NOBITS)
     offset += i_shdrp->sh_size;
   return offset;
@@ -2395,7 +2416,6 @@ swap_out_syms (abfd)
     symstrtab_hdr->sh_link = 0;
     symstrtab_hdr->sh_info = 0;
     symstrtab_hdr->sh_addralign = 1;
-    symstrtab_hdr->size = 0;
   }
 
   return true;
@@ -2524,52 +2544,18 @@ NAME(bfd_elf,write_object_contents) (abfd)
   return write_shdrs_and_ehdr (abfd);
 }
 
-/* Given an index of a section, retrieve a pointer to it.  Note
-   that for our purposes, sections are indexed by {1, 2, ...} with
-   0 being an illegal index. */
-
-/* In the original, each ELF section went into exactly one BFD
-   section. This doesn't really make sense, so we need a real mapping.
-   The mapping has to hide in the Elf_Internal_Shdr since asection
-   doesn't have anything like a tdata field... */
+/* Given an ELF section number, retrieve the corresponding BFD
+   section.  */
 
 static asection *
 section_from_elf_index (abfd, index)
      bfd *abfd;
      unsigned int index;
 {
-  /* @@ Is bfd_com_section_ptr really correct in all the places it could
-     be returned from this routine?  */
-
-  if (index == SHN_ABS)
-    return bfd_com_section_ptr;	/* not abs? */
-  if (index == SHN_COMMON)
-    return bfd_com_section_ptr;
-
+  BFD_ASSERT (index > 0 && index < SHN_LORESERVE);
   if (index >= elf_elfheader (abfd)->e_shnum)
     return NULL;
-
-  {
-    Elf_Internal_Shdr *hdr = elf_elfsections (abfd)[index];
-
-    switch (hdr->sh_type)
-      {
-	/* ELF sections that map to BFD sections */
-      case SHT_PROGBITS:
-      case SHT_NOBITS:
-      case SHT_HASH:
-      case SHT_DYNAMIC:
-	if (hdr->rawdata == NULL)
-	  {
-	    if (! bfd_section_from_shdr (abfd, index))
-	      return NULL;
-	  }
-	return (struct sec *) hdr->rawdata;
-
-      default:
-	return bfd_abs_section_ptr;
-      }
-  }
+  return elf_elfsections (abfd)[index]->bfd_section;
 }
 
 /* given a section, search the header to find them... */
@@ -2578,6 +2564,7 @@ elf_section_from_bfd_section (abfd, asect)
      bfd *abfd;
      struct sec *asect;
 {
+  struct elf_backend_data *bed = get_elf_backend_data (abfd);
   Elf_Internal_Shdr **i_shdrp = elf_elfsections (abfd);
   int index;
   Elf_Internal_Shdr *hdr;
@@ -2599,56 +2586,20 @@ elf_section_from_bfd_section (abfd, asect)
   for (index = 0; index < maxindex; index++)
     {
       hdr = i_shdrp[index];
-      switch (hdr->sh_type)
+      if (hdr->bfd_section == asect)
+	return index;
+
+      if (bed->elf_backend_section_from_bfd_section)
 	{
-	  /* ELF sections that map to BFD sections */
-	case SHT_PROGBITS:
-	case SHT_NOBITS:
-	case SHT_NOTE:
-	case SHT_HASH:
-	case SHT_DYNAMIC:
-	case SHT_DYNSYM:
-	case SHT_SYMTAB:
-	  if (hdr->rawdata)
-	    {
-	      if (((struct sec *) (hdr->rawdata)) == asect)
-		return index;
-	    }
-	  break;
+	  int retval;
 
-	case SHT_REL:
-	case SHT_RELA:
-	  /* We sometimes map a reloc section to a BFD section.  */
-	  if (hdr->sh_link != elf_onesymtab (abfd)
-	      && (asection *) hdr->rawdata == asect)
-	    return index;
-	  break;
-
-	case SHT_STRTAB:
-	  /* We map most string tables to BFD sections.  */
-	  if (index != elf_elfheader (abfd)->e_shstrndx
-	      && index != elf_onesymtab (abfd)
-	      && (asection *) hdr->rawdata == asect)
-	    return index;
-
-	  /* FALL THROUGH */
-	default:
-	  {
-	    struct elf_backend_data *bed = get_elf_backend_data (abfd);
-
-	    if (bed->elf_backend_section_from_bfd_section)
-	      {
-		int retval;
-
-		retval = index;
-		if ((*bed->elf_backend_section_from_bfd_section)
-		    (abfd, hdr, asect, &retval))
-		  return retval;
-	      }
-	  }
-	  break;
+	  retval = index;
+	  if ((*bed->elf_backend_section_from_bfd_section)
+	      (abfd, hdr, asect, &retval))
+	    return retval;
 	}
     }
+
   return -1;
 }
 
@@ -3073,9 +3024,6 @@ elf_debug_section (str, num, hdr)
 	   (long) hdr->sh_addralign);
   fprintf (stderr, "sh_entsize   = %ld\n",
 	   (long) hdr->sh_entsize);
-  fprintf (stderr, "rawdata      = 0x%.8lx\n", (long) hdr->rawdata);
-  fprintf (stderr, "contents     = 0x%.8lx\n", (long) hdr->contents);
-  fprintf (stderr, "size         = %ld\n", (long) hdr->size);
   fflush (stderr);
 }
 
@@ -4203,9 +4151,10 @@ elf_link_add_object_symbols (abfd, info)
       else if (sym.st_shndx > 0 && sym.st_shndx < SHN_LORESERVE)
 	{
 	  sec = section_from_elf_index (abfd, sym.st_shndx);
-	  if (sec == NULL)
-	    goto error_return;
-	  value -= sec->vma;
+	  if (sec != NULL)
+	    value -= sec->vma;
+	  else
+	    sec = bfd_abs_section_ptr;
 	}
       else if (sym.st_shndx == SHN_ABS)
 	sec = bfd_abs_section_ptr;
@@ -5389,7 +5338,7 @@ elf_bfd_final_link (abfd, info)
   for (i = 1; i < elf_elfheader (abfd)->e_shnum; i++)
     {
       o = section_from_elf_index (abfd, i);
-      if (! bfd_is_abs_section (o))
+      if (o != NULL)
 	o->target_index = abfd->symcount;
       elfsym.st_shndx = i;
       if (! elf_link_output_sym (&finfo, (const char *) NULL,
@@ -6034,11 +5983,7 @@ elf_link_input_bfd (finfo, input_bfd)
       if (isym->st_shndx == SHN_UNDEF)
 	isec = bfd_und_section_ptr;
       else if (isym->st_shndx > 0 && isym->st_shndx < SHN_LORESERVE)
-	{
-	  isec = section_from_elf_index (input_bfd, isym->st_shndx);
-	  if (isec == NULL)
-	    return false;
-	}
+	isec = section_from_elf_index (input_bfd, isym->st_shndx);
       else if (isym->st_shndx == SHN_ABS)
 	isec = bfd_abs_section_ptr;
       else if (isym->st_shndx == SHN_COMMON)

@@ -1,5 +1,42 @@
 Mon Oct 17 11:38:16 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	* elfcode.h (elf_swap_shdr_in): Use rawdata, not bfd_section.
+	Clear contents field.
+	(bfd_section_from_shdr): In SHT_STRTAB case, check bfd_section,
+	not rawdata.  Don't set rawdata if e_shstrndx.  Use bfd_section
+	rather than rawdata in commented out code.  In SHT_REL[A] case,
+	don't bother to check elf_section_data of section returned by
+	section_from_elf_index.
+	(elf_fake_sections): Set bfd_section, not rawdata.  Don't set
+	size.
+	(elf_map_symbols): Don't set elf_num_section_syms.  Don't create
+	section symbols that already exist.
+	(assign_file_position_for_section): Use bfd_section, not rawdata.
+	(section_from_elf_index): Just check bfd_section field.
+	(elf_section_from_bfd_section): Likewise.
+	(elf_debug_section): Don't print rawdata, contents, or size.
+	(elf_link_add_object_symbols): Don't error out if
+	section_from_elf_index returns NULL.
+	(elf_bfd_final_link): Check return value from
+	section_from_elf_index against NULL, not bfd_is_abs_section.
+	(elf_link_input_bfd): Don't check section_from_elf_index return
+	value.
+	* libelf.h (struct elf_obj_tdata): Remove num_section_syms field.
+	(elf_num_section_syms): Don't define.
+	* elf.c (elf_get_str_section): Store section contents in contents
+	field rather than rawdata field.
+	(elf_string_from_elf_section): Likewise.
+	(_bfd_elf_make_section_from_shdr): Store BFD section pointer in
+	bfd_section field rather than rawdata field.
+	* elf32-hppa.c (elf32_hppa_read_symext_info): Use bfd_section
+	rather than rawdata.
+	(elf32_hppa_size_stubs): Likewise.
+	* elf32-mips.c (mips_elf_final_write_processing): Use bfd_section
+	rathern than rawdata.
+	(mips_elf_section_from_shdr): Likewise.
+	(mips_elf_section_processing): Likewise.
+	(mips_elf_section_from_bfd_section): Remove rawdata check.
+
 	* srec.c (pass_over): Set the start address for S7, S8 or S9.
 
 Fri Oct 14 19:15:46 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>

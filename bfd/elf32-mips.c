@@ -71,7 +71,8 @@ static void mips_info_to_howto_rel
   PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
 static boolean mips_elf_sym_is_global PARAMS ((bfd *, asymbol *));
 static boolean mips_elf_object_p PARAMS ((bfd *));
-static void mips_elf_final_write_processing PARAMS ((bfd *));
+static void mips_elf_final_write_processing
+  PARAMS ((bfd *, boolean));
 static boolean mips_elf_section_from_shdr
   PARAMS ((bfd *, Elf32_Internal_Shdr *, char *));
 static boolean mips_elf_fake_sections
@@ -95,7 +96,7 @@ static void mips_elf_relocate_hi16
 	   bfd_vma));
 static boolean mips_elf_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
-	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
+	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **, char *));
 static boolean mips_elf_add_symbol_hook
   PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
 	   const char **, flagword *, asection **, bfd_vma *));
@@ -362,7 +363,7 @@ mips_elf_hi16_reloc (abfd,
     abort ();
 
   ret = bfd_reloc_ok;
-  if (symbol->section == &bfd_und_section
+  if (bfd_is_und_section (symbol->section)
       && output_bfd == (bfd *) NULL)
     ret = bfd_reloc_undefined;
 
@@ -548,7 +549,7 @@ mips_elf_gprel16_reloc (abfd,
       output_bfd = symbol->section->output_section->owner;
     }
 
-  if (symbol->section == &bfd_und_section
+  if (bfd_is_und_section (symbol->section)
       && relocateable == false)
     return bfd_reloc_undefined;
 
@@ -839,9 +840,11 @@ mips_elf_object_p (abfd)
    file.  This gets the MIPS architecture right based on the machine
    number.  */
 
+/*ARGSUSED*/
 static void
-mips_elf_final_write_processing (abfd)
+mips_elf_final_write_processing (abfd, linker)
      bfd *abfd;
+     boolean linker;
 {
   unsigned long val;
   unsigned int i;
@@ -878,8 +881,8 @@ mips_elf_final_write_processing (abfd)
 	  const char *name;
 	  asection *sec;
 
-	  BFD_ASSERT ((*hdrpp)->rawdata != NULL);
-	  name = ((asection *) (*hdrpp)->rawdata)->name;
+	  BFD_ASSERT ((*hdrpp)->bfd_section != NULL);
+	  name = bfd_get_section_name (abfd, (*hdrpp)->bfd_section);
 	  BFD_ASSERT (name != NULL
 		      && strncmp (name, ".gptab.", sizeof ".gptab." - 1) == 0);
 	  sec = bfd_get_section_by_name (abfd, name + sizeof ".gptab" - 1);
@@ -944,7 +947,7 @@ mips_elf_section_from_shdr (abfd, hdr, name)
 
   if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name))
     return false;
-  newsect = (asection *) hdr->rawdata;
+  newsect = hdr->bfd_section;
 
   if (hdr->sh_type == SHT_MIPS_DEBUG)
     {
@@ -1042,8 +1045,6 @@ mips_elf_section_from_bfd_section (abfd, hdr, sec, retval)
       *retval = SHN_MIPS_SCOMMON;
       return true;
     }
-  if ((asection *) hdr->rawdata == sec)
-    return true;
   return false;
 }
 
@@ -1073,9 +1074,9 @@ mips_elf_section_processing (abfd, hdr)
 	return false;
     }
 
-  if (hdr->rawdata != NULL)
+  if (hdr->bfd_section != NULL)
     {
-      const char *name = ((asection *) hdr->rawdata)->name;
+      const char *name = bfd_get_section_name (abfd, hdr->bfd_section);
 
       if (strcmp (name, ".sdata") == 0)
 	{
@@ -1173,7 +1174,7 @@ mips_elf_symbol_processing (abfd, asym)
       break;
 
     case SHN_MIPS_SUNDEFINED:
-      asym->section = &bfd_und_section;
+      asym->section = bfd_und_section_ptr;
       break;
     }
 }
@@ -1409,7 +1410,7 @@ mips_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
       break;
 
     case SHN_MIPS_SUNDEFINED:
-      *secp = &bfd_und_section;
+      *secp = bfd_und_section_ptr;
       break;
     }
 
@@ -2150,7 +2151,8 @@ mips_elf_relocate_hi16 (input_bfd, relhi, rello, contents, addend)
 
 static boolean
 mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
-			   contents, relocs, local_syms, local_sections)
+			   contents, relocs, local_syms, local_sections,
+			   output_names)
      bfd *output_bfd;
      struct bfd_link_info *info;
      bfd *input_bfd;
@@ -2159,6 +2161,7 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
      Elf_Internal_Rela *relocs;
      Elf_Internal_Sym *local_syms;
      asection **local_sections;
+     char *output_names;
 {
   Elf_Internal_Shdr *symtab_hdr;
   size_t locsymcount;
@@ -2372,9 +2375,7 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  name = h->root.root.string;
 		else
 		  {
-		    name = elf_string_from_elf_section (input_bfd,
-							symtab_hdr->sh_link,
-							sym->st_name);
+		    name = output_names + sym->st_name;
 		    if (name == NULL)
 		      return false;
 		    if (*name == '\0')
