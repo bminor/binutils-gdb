@@ -26,6 +26,7 @@ hppabsd.mt
 hppahpux.mh
 hppahpux.mt
 hppaosf.mt
+hppapro.mt
 nm-hppab.h
 nm-hppah.h
 tm-hppa.h
