@@ -1,3 +1,8 @@
+2002-04-04  Andrew Cagney  <ac131313@redhat.com>
+
+	* sparc-tdep.c (sparc_push_dummy_frame): Use GDB_TARGET_IS_SPARC64
+	as test for 64 bit target.
+
 2002-04-05  Andrew Cagney  <ac131313@redhat.com>
 
 	* h8500-tdep.c (h8500_write_fp): Delete function.

@@ -992,7 +992,7 @@ sparc_push_dummy_frame (void)
          old function (sparc64_write_fp) did the below although I'm
          not clear why.  The same goes for why this is only done when
          the underlying target is a simulator.  */
-      if (gdbarch_tdep (current_gdbarch)->intreg_size == 8)
+      if (GDB_TARGET_IS_SPARC64)
 	{
 	  /* Target is a 64 bit SPARC.  */
 	  CORE_ADDR oldfp = read_register (FP_REGNUM);
