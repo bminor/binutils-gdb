@@ -93,8 +93,7 @@ struct symbol *lookup_symbol_aux_local (const char *name,
 					const char *linkage_name,
 					const struct block *block,
 					const domain_enum domain,
-					struct symtab **symtab,
-					const struct block **static_block);
+					struct symtab **symtab);
 
 static
 struct symbol *lookup_symbol_aux_block (const char *name,
@@ -964,7 +963,7 @@ lookup_symbol_aux (const char *name, const char *linkage_name,
      STATIC_BLOCK or GLOBAL_BLOCK.  */
 
   sym = lookup_symbol_aux_local (name, linkage_name, block, domain,
-				 symtab, &static_block);
+				 symtab);
   if (sym != NULL)
     return sym;
 
@@ -1008,6 +1007,7 @@ lookup_symbol_aux (const char *name, const char *linkage_name,
      than that one, so I don't think we should worry about that for
      now.  */
 
+  static_block = block_static_block (block);
   if (static_block != NULL)
     {
       sym = lookup_symbol_aux_block (name, linkage_name, static_block,
@@ -1053,27 +1053,23 @@ lookup_symbol_aux (const char *name, const char *linkage_name,
 }
 
 /* Check to see if the symbol is defined in BLOCK or its superiors.
-   Don't search STATIC_BLOCK or GLOBAL_BLOCK.  If we don't find a
-   match, store the address of STATIC_BLOCK in static_block.  */
+   Don't search STATIC_BLOCK or GLOBAL_BLOCK.  */
 
 static struct symbol *
 lookup_symbol_aux_local (const char *name, const char *linkage_name,
 			 const struct block *block,
 			 const domain_enum domain,
-			 struct symtab **symtab,
-			 const struct block **static_block)
+			 struct symtab **symtab)
 {
   struct symbol *sym;
-  
+  const struct block *static_block = block_static_block (block);
+
   /* Check if either no block is specified or it's a global block.  */
 
-  if (block == NULL || BLOCK_SUPERBLOCK (block) == NULL)
-    {
-      *static_block = NULL;
-      return NULL;
-    }
+  if (static_block == NULL)
+    return NULL;
 
-  while (BLOCK_SUPERBLOCK (BLOCK_SUPERBLOCK (block)) != NULL)
+  while (block != static_block)
     {
       sym = lookup_symbol_aux_block (name, linkage_name, block, domain,
 				     symtab);
@@ -1082,9 +1078,8 @@ lookup_symbol_aux_local (const char *name, const char *linkage_name,
       block = BLOCK_SUPERBLOCK (block);
     }
 
-  /* We've reached the static block.  */
+  /* We've reached the static block without finding a result.  */
 
-  *static_block = block;
   return NULL;
 }
 

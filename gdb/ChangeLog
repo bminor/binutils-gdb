@@ -1,5 +1,13 @@
 2003-05-19  David Carlton  <carlton@bactrian.org>
 
+	* block.h: Declare block_static_block.
+	* block.c (block_static_block): New.
+	* symtab.c (lookup_symbol_aux): Remove 'static_block' argument to
+	lookup_symbol_aux_local, calling block_static_block instead.
+	(lookup_symbol_aux_local): Delete 'static_block' argument.
+
+2003-05-19  David Carlton  <carlton@bactrian.org>
+
 	* symtab.c (lookup_symbol_aux): Delete #if 0 hunk.
 
 2003-05-19  Michal Ludvig  <mludvig@suse.cz>

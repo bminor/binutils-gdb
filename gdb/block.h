@@ -207,4 +207,6 @@ extern void block_set_using (struct block *block,
 			     struct using_direct *using,
 			     struct obstack *obstack);
 
+extern const struct block *block_static_block (const struct block *block);
+
 #endif /* BLOCK_H */
