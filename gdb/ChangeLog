@@ -1,3 +1,9 @@
+2004-02-07  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc-tdep.c (sparc32_frame_prev_register): Rename local
+	variable `i6' to `i7'.
+	(sparc_supply_rwindow, sparc_collect_rwindow): Likewise.
+
 2004-02-07  Andrew Cagney  <cagney@redhat.com>
 
 	* tui/tui.h (Opaque, OpaquePtr OpaqueList): Delete definition.

@@ -729,11 +729,11 @@ sparc32_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 	if (valuep)
 	  {
 	    CORE_ADDR addr = cache->base + (regnum - SPARC_L0_REGNUM) * 4;
-	    ULONGEST i6;
+	    ULONGEST i7;
 
 	    /* Read the value in from memory.  */
-	    i6 = get_frame_memory_unsigned (next_frame, addr, 4);
-	    store_unsigned_integer (valuep, 4, i6 ^ wcookie);
+	    i7 = get_frame_memory_unsigned (next_frame, addr, 4);
+	    store_unsigned_integer (valuep, 4, i7 ^ wcookie);
 	  }
 	return;
       }
@@ -1241,9 +1241,9 @@ sparc_supply_rwindow (struct regcache *regcache, CORE_ADDR sp, int regnum)
 	      if (i == SPARC_I7_REGNUM)
 		{
 		  ULONGEST wcookie = sparc_fetch_wcookie ();
-		  ULONGEST i6 = extract_unsigned_integer (buf + offset, 4);
+		  ULONGEST i7 = extract_unsigned_integer (buf + offset, 4);
 
-		  store_unsigned_integer (buf + offset, 4, i6 ^ wcookie);
+		  store_unsigned_integer (buf + offset, 4, i7 ^ wcookie);
 		}
 
 	      regcache_raw_supply (regcache, i, buf);
@@ -1294,9 +1294,9 @@ sparc_collect_rwindow (const struct regcache *regcache,
 	      if (i == SPARC_I7_REGNUM)
 		{
 		  ULONGEST wcookie = sparc_fetch_wcookie ();
-		  ULONGEST i6 = extract_unsigned_integer (buf + offset, 4);
+		  ULONGEST i7 = extract_unsigned_integer (buf + offset, 4);
 
-		  store_unsigned_integer (buf + offset, 4, i6 ^ wcookie);
+		  store_unsigned_integer (buf + offset, 4, i7 ^ wcookie);
 		}
 
 	      target_write_memory (sp + ((i - SPARC_L0_REGNUM) * 4),
