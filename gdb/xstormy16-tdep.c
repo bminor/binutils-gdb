@@ -594,12 +594,12 @@ xstormy16_scan_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
       if (fi->extra_info->frameless_p)
 	{
 	  get_frame_saved_regs (fi)[E_SP_REGNUM] = sp - fi->extra_info->framesize;
-	  fi->frame = sp;
+	  deprecated_update_frame_base_hack (fi, sp);
 	}
       else
 	{
 	  get_frame_saved_regs (fi)[E_SP_REGNUM] = fp - fi->extra_info->framesize;
-	  fi->frame = fp;
+	  deprecated_update_frame_base_hack (fi, fp);
 	}
 
       /* So far only offsets to the beginning of the frame are

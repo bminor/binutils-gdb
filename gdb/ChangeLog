@@ -1,5 +1,14 @@
 2003-01-07  Andrew Cagney  <cagney@redhat.com>
 
+	* arm-tdep.c (arm_init_extra_frame_info): Use
+	deprecated_update_frame_base_hack.
+	* xstormy16-tdep.c (xstormy16_scan_prologue): Ditto.
+	* mn10300-tdep.c (analyze_dummy_frame): Ditto.
+	(fix_frame_pointer): Ditto.
+	(mn10300_analyze_prologue): Ditto.
+
+2003-01-07  Andrew Cagney  <cagney@redhat.com>
+
 	* xstormy16-tdep.c (xstormy16_init_extra_frame_info): Allocate
 	extra_info using frame_extra_info_zalloc.
 	* sparc-tdep.c (sparc_init_extra_frame_info): Ditto.

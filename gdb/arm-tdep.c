@@ -1131,9 +1131,7 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
       /* FIXME: What about thumb mode?  */
       fi->extra_info->framereg = ARM_SP_REGNUM;
-      fi->frame =
-	read_memory_integer (get_frame_saved_regs (fi)[fi->extra_info->framereg],
-			     REGISTER_RAW_SIZE (fi->extra_info->framereg));
+      deprecated_update_frame_base_hack (fi, read_memory_integer (get_frame_saved_regs (fi)[fi->extra_info->framereg], REGISTER_RAW_SIZE (fi->extra_info->framereg)));
       fi->extra_info->framesize = 0;
       fi->extra_info->frameoffset = 0;
 
@@ -1144,23 +1142,22 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
       if (!fi->next)
 	/* This is the innermost frame?  */
-	fi->frame = read_register (fi->extra_info->framereg);
+	deprecated_update_frame_base_hack (fi, read_register (fi->extra_info->framereg));
       else if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi->next), 0, 0))
 	/* Next inner most frame is a dummy, just grab its frame.
            Dummy frames always have the same FP as their caller.  */
-	fi->frame = fi->next->frame;
+	deprecated_update_frame_base_hack (fi, fi->next->frame);
       else if (fi->extra_info->framereg == ARM_FP_REGNUM
 	       || fi->extra_info->framereg == THUMB_FP_REGNUM)
 	{
 	  /* not the innermost frame */
 	  /* If we have an FP, the callee saved it.  */
 	  if (get_frame_saved_regs (get_next_frame (fi))[fi->extra_info->framereg] != 0)
-	    fi->frame =
-	      read_memory_integer (get_frame_saved_regs (get_next_frame (fi))[fi->extra_info->framereg], 4);
+	    deprecated_update_frame_base_hack (fi, read_memory_integer (get_frame_saved_regs (get_next_frame (fi))[fi->extra_info->framereg], 4));
 	  else if (fromleaf)
 	    /* If we were called by a frameless fn.  then our frame is
 	       still in the frame pointer register on the board...  */
-	    fi->frame = read_fp ();
+	    deprecated_update_frame_base_hack (fi, read_fp ());
 	}
 
       /* Calculate actual addresses of saved registers using offsets

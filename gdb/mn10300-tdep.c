@@ -162,7 +162,7 @@ analyze_dummy_frame (CORE_ADDR pc, CORE_ADDR frame)
   dummy->next = NULL;
   dummy->prev = NULL;
   deprecated_update_frame_pc_hack (dummy, pc);
-  dummy->frame = frame;
+  deprecated_update_frame_base_hack (dummy, frame);
   dummy->extra_info->status = 0;
   dummy->extra_info->stack_size = 0;
   memset (get_frame_saved_regs (dummy), '\000', SIZEOF_FRAME_SAVED_REGS);
@@ -210,9 +210,9 @@ fix_frame_pointer (struct frame_info *fi, int stack_size)
   if (fi && fi->next == NULL)
     {
       if (fi->extra_info->status & MY_FRAME_IN_SP)
-	fi->frame = read_sp () - stack_size;
+	deprecated_update_frame_base_hack (fi, read_sp () - stack_size);
       else if (fi->extra_info->status & MY_FRAME_IN_FP)
-	fi->frame = read_register (A3_REGNUM);
+	deprecated_update_frame_base_hack (fi, read_register (A3_REGNUM));
     }
 }
 
@@ -437,7 +437,7 @@ mn10300_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
   if (fi && buf[0] == 0xf0 && buf[1] == 0xfc)
     {
       if (fi->next == NULL)
-	fi->frame = read_sp ();
+	deprecated_update_frame_base_hack (fi, read_sp ());
       return get_frame_pc (fi);
     }
 
@@ -446,7 +446,7 @@ mn10300_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
   if (fi && get_frame_pc (fi) == func_addr)
     {
       if (fi->next == NULL)
-	fi->frame = read_sp ();
+	deprecated_update_frame_base_hack (fi, read_sp ());
       return get_frame_pc (fi);
     }
 
@@ -495,7 +495,7 @@ mn10300_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
 	{
 	  /* Fix fi->frame since it's bogus at this point.  */
 	  if (fi && fi->next == NULL)
-	    fi->frame = read_sp ();
+	    deprecated_update_frame_base_hack (fi, read_sp ());
 
 	  /* Note if/where callee saved registers were saved.  */
 	  set_movm_offsets (fi, movm_args);
@@ -508,7 +508,7 @@ mn10300_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
 	{
 	  /* Fix fi->frame since it's bogus at this point.  */
 	  if (fi && fi->next == NULL)
-	    fi->frame = read_sp ();
+	    deprecated_update_frame_base_hack (fi, read_sp ());
 
 	  /* Note if/where callee saved registers were saved.  */
 	  set_movm_offsets (fi, movm_args);
