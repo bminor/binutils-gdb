@@ -1,3 +1,9 @@
+2002-12-11  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/m-data.exp: Add test for members that shadow global
+	variables: see PR gdb/804.
+	* gdb.c++/m-data.cc: Ditto.
+
 2002-12-10  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.base/foll-vfork.exp: Re-enable test on HP/UX.

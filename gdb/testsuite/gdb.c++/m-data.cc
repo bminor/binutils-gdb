@@ -41,7 +41,18 @@ namespace __gnu_test
     public:
       gnu_obj_3(antiquities b): data(etruscan) { }
     }; 
-} 
+}
+
+int shadow = 0;
+
+class C
+{
+public:
+  C (int x) : shadow (x) {}
+  void marker () {}
+private:
+  int shadow;
+};
 
 int main()
 {
@@ -49,5 +60,9 @@ int main()
   gnu_obj_1		test1(egyptian, 4589);
   gnu_obj_2<long>	test2(roman);
   gnu_obj_3<long>	test3(greek);
+
+  C theC (1);				// breakpoint: first-constructs-done
+  theC.marker ();
+  
   return 0;
 }
