@@ -815,6 +815,8 @@ printchar (c, stream, quoter)
      int quoter;
 {
 
+  c &= 0xFF;			/* Avoid sign bit follies */
+
   if (              c < 0x20  ||		/* Low control chars */	
       (c >= 0x7F && c < 0xA0) ||		/* DEL, High controls */
       (sevenbit_strings && c >= 0x80)) {	/* high order bit set */

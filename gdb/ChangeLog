@@ -44,16 +44,6 @@ Wed Apr 29 15:26:51 1992  Per Bothner  (bothner@rtl.cygnus.com)
 	variables.  Instead, place all shared variables in a
 	stack-allocated structure, and pass around its address.	
 
-Wed Apr 29 23:39:38 1992  John Gilmore  (gnu at cygnus.com)
-
-	* m68k-pinsn.c (print_insn_arg):  When we really want sign
-	extension, use "signed char".  (Doesn't work on non-ANSI
-	compilers with char unsigned by default.  FIXME.)
-
-Mon Apr 27 20:06:14 1992  John Gilmore  (gnu at cygnus.com)
-
-	* munch:  Add sort -u to avoid duplications.
-
 Fri Apr 24 07:41:19 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* Makefile.in (make-proto-gdb-1):  1st cut at packaging
