@@ -1,3 +1,7 @@
+2004-11-08  Andrew Cagney  <cagney@gnu.org>
+
+	* PROBLEMS: Delete no-longer applicable problems.
+
 2004-11-05  Andrew Cagney  <cagney@gnu.org>
 
 	Backport 2004-10-27 Jim Blandy <jimb@redhat.com>
