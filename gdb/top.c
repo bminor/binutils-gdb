@@ -1914,6 +1914,13 @@ static void
 do_nothing (signo)
 int signo;
 {
+  /* Under System V the default disposition of a signal is reinstated after
+     the signal is caught and delivered to an application process.  On such
+     systems one must restore the replacement signal handler if one wishes
+     to continue handling the signal in one's program.  On BSD systems this
+     is not needed but it is harmless, and it simplifies the code to just do
+     it unconditionally. */
+  signal (signo, do_nothing);
 }
 
 static void
