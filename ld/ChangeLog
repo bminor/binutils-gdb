@@ -1,3 +1,9 @@
+Fri Dec 31 11:37:28 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* emulparams/i386mach.sh (NONPAGED_TEXT_START_ADDR): Don't include
+	exec header offset, since the exec header isn't loaded.
+	(PAGE_SIZE, SEGMENT_SIZE): Agree with bfd/i386mach3.c.
+
 Thu Dec 30 13:01:43 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	A major rewrite to move the bulk of the linker into BFD so that
