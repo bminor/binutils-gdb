@@ -1,5 +1,8 @@
 2004-06-27  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/fbsd64.mh (NATDEPFILES): Add bsd-kvm.o.
+	(LOADLIBES): New variable.
+
 	* bsd-kvm.c (bsd_kvm_fetch_registers): Directly return after
 	fetching from BSD_KVM_PADDR.  Correctly lookup address for
 	"_thread0".
