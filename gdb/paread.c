@@ -188,7 +188,9 @@ pa_symtab_read (abfd, addr, objfile)
 		 the assembler and/or compiler, to save space in the
 		 executable (and because having GDB make gross
 		 distinctions based on the name is kind of ugly), but
-		 until then, just ignore them.  */
+		 until then, just ignore them.  ("L$" at least, has something
+		 to do with getting relocation correct, so that one might
+		 be hard to fix).  */
 	      if (*symname == 'L'
 		  && (symname[1] == '$' || symname[2] == '$' 
 		      || symname[3] == '$'))
