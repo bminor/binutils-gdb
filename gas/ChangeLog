@@ -1,3 +1,43 @@
+2001-03-23  Hans-Peter Nilsson  <hp@axis.com>
+
+	* config/tc-cris.c: Tweak attribution.  Fix typos.  PIC support.
+	(PIC_SUFFIX_CHAR): New macro.
+	(cris_get_pic_suffix, cris_get_pic_reloc_size): New functions.
+	(pic): New variable.
+	(md_longopts): New option --pic.
+	(OPTION_PIC): Define.
+	(md_estimate_size_before_relax): Tweak longish comment.
+	(md_create_long_jump): Make the long jumps generate ADD.D offset,PC.
+	(md_assemble): Handle a PIC relocation on prefix and normal
+	instruction operands.
+	<output_instruction.insn_type == CRIS_INSN_BRANCH>: Handle
+	"complex" operand expressions.  Call frag_more outside
+	gen_cond_branch_32 parameter list.
+	(cris_process_instruction): Handle PIC relocs on parsed
+	operand expressions.  Validize PIC reloc sizes.
+	(get_autoinc_prefix_or_indir_op): Handle PIC suffix.
+	(gen_bdap): Handle "complex" operand expressions.
+	(gen_cond_branch_32): Use as_warn_where, not as_warn.  Use
+	ADD.D offset,PC as jump instruction if generating PIC.  Generate
+	error instead of crashing on complex expressions.
+	(cris_number_to_imm): Add segT parameter.  All callers changed.
+	Use segT parameter, not now_seg, for segment of fixup.  Handle
+	PCREL relocations but check that they are fully resolved.
+	(md_parse_option): Handle OPTION_PIC.
+	(tc_gen_reloc): Handle PIC relocs.
+	(md_show_usage): Update for --pic.
+	(md_apply_fix3): Renamed from md_apply_fix.
+	(md_pcrel_from): Accept emitting PCREL relocs when ELF.
+	(md_cris_force_relocation): Force relocation for PIC relocs.
+
+	* config/tc-cris.h: Tweak attribution.
+	(MD_APPLY_FIX3): Define.
+	(IS_CRIS_PIC_RELOC): New macro.
+	(TC_RELOC_RTSYM_LOC_FIXUP): Define.
+	(tc_fix_adjustable): Don't adjust a globally visible symbol when
+	generating ELF.
+	(tc_frob_symbol): Avoid emitting undefined symbols. 
+
 2001-03-20  Alan Modra  <alan@linuxcare.com.au>
 
 	* frags.h (struct frag): Add relax_marker.

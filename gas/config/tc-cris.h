@@ -1,9 +1,9 @@
 /* tc-cris.h -- Header file for tc-cris.c, the CRIS GAS port.
-   Copyright 2000 Free Software Foundation, Inc.
+   Copyright 2000, 2001 Free Software Foundation, Inc.
 
    Contributed by Axis Communications AB, Lund, Sweden.
    Originally written for GAS 1.38.1 by Mikael Asker.
-   Updated, BFDized and GNUified by Hans-Peter Nilsson.
+   Updates, BFDizing, GNUifying and ELF by Hans-Peter Nilsson.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -80,22 +80,52 @@ extern const struct relax_type md_cris_relax_table[];
 #define TC_FORCE_RELOCATION(fixp) md_cris_force_relocation (fixp)
 extern int md_cris_force_relocation PARAMS ((struct fix *));
 
+#define MD_APPLY_FIX3
+
+#define IS_CRIS_PIC_RELOC(X)			\
+  ((X) == BFD_RELOC_CRIS_16_GOT			\
+   || (X) == BFD_RELOC_CRIS_32_GOT		\
+   || (X) == BFD_RELOC_CRIS_16_GOTPLT		\
+   || (X) == BFD_RELOC_CRIS_32_GOTPLT		\
+   || (X) == BFD_RELOC_CRIS_32_GOTREL		\
+   || (X) == BFD_RELOC_CRIS_32_PLT_GOTREL	\
+   || (X) == BFD_RELOC_CRIS_32_PLT_PCREL)
+
+
+/* FIXME: Undocumented macro.  Make sure we don't resolve fixups for which
+   we want to emit dynamic relocations.  */
+
+#define TC_RELOC_RTSYM_LOC_FIXUP(FIX)				\
+  ((FIX)->fx_addsy == NULL					\
+   || (! S_IS_EXTERNAL ((FIX)->fx_addsy)			\
+       && ! S_IS_WEAK ((FIX)->fx_addsy)				\
+       && S_IS_DEFINED ((FIX)->fx_addsy)			\
+       && ! S_IS_COMMON ((FIX)->fx_addsy)			\
+       /* FIXME: Set fx_plt instead of this check.  */		\
+       && ! IS_CRIS_PIC_RELOC ((FIX)->fx_r_type)))
+
 /* This is really a workaround for a bug in write.c that resolves relocs
    for weak symbols - it should be postponed to the link stage or later.
-   */
+   Also don't adjust fixups for global symbols for ELF.  */
 #define tc_fix_adjustable(X)				\
- ((! (X)->fx_addsy || ! S_IS_WEAK((X)->fx_addsy))	\
+ (((X)->fx_addsy == NULL 				\
+   || (! S_IS_WEAK ((X)->fx_addsy)			\
+       && ! (OUTPUT_FLAVOR == bfd_target_elf_flavour	\
+	     && S_IS_EXTERNAL ((X)->fx_addsy))))	\
   && (X)->fx_r_type != BFD_RELOC_VTABLE_INHERIT		\
   && (X)->fx_r_type != BFD_RELOC_VTABLE_ENTRY)
 
 /* When we have fixups against constant expressions, we get a GAS-specific
    section symbol at no extra charge for obscure reasons in
    adjust_reloc_syms.  Since ELF outputs section symbols, it gladly
-   outputs this "*ABS*" symbol in every object.  Avoid that.  */
+   outputs this "*ABS*" symbol in every object.  Avoid that.
+   Also, don't emit undefined symbols (that aren't used in relocations).
+   They pop up when tentatively parsing register names as symbols.  */
 #define tc_frob_symbol(symp, punt)			\
  do {							\
-  if (OUTPUT_FLAVOR == bfd_target_elf_flavour		\
-      && (symp) == section_symbol (absolute_section))	\
+  if ((OUTPUT_FLAVOR == bfd_target_elf_flavour		\
+       && (symp) == section_symbol (absolute_section))	\
+      || ! S_IS_DEFINED (symp))				\
     (punt) = 1;						\
  } while (0)
 
