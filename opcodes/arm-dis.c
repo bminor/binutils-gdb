@@ -26,11 +26,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "libcoff.h"
 #include "opintl.h"
 
-/* start-sanitize-armelf */
 /* FIXME: This shouldn't be done here */
 #include "elf-bfd.h"
 #include "elf/internal.h"
-/* end-sanitize-armelf */
 
 static char *arm_conditional[] =
 {"eq", "ne", "cs", "cc", "mi", "pl", "vs", "vc",
@@ -724,9 +722,7 @@ print_insn_big_arm (pc, info)
   long               given;
   int                status;
   coff_symbol_type   *cs;
-/* start-sanitize-armelf */
   elf_symbol_type    *es;
-/* end-sanitize-armelf */
   int                is_thumb;
   
   is_thumb = false;
@@ -734,25 +730,23 @@ print_insn_big_arm (pc, info)
     {
     if (bfd_asymbol_flavour (*info->symbols) == bfd_target_coff_flavour)
      {
-     cs = coffsymbol (*info->symbols);
-     is_thumb = (cs->native->u.syment.n_sclass == C_THUMBEXT
-  		 || cs->native->u.syment.n_sclass == C_THUMBSTAT
-  		 || cs->native->u.syment.n_sclass == C_THUMBLABEL
-  		 || cs->native->u.syment.n_sclass == C_THUMBEXTFUNC
-  		 || cs->native->u.syment.n_sclass == C_THUMBSTATFUNC);
+       cs = coffsymbol (*info->symbols);
+       is_thumb = (cs->native->u.syment.n_sclass == C_THUMBEXT
+                   || cs->native->u.syment.n_sclass == C_THUMBSTAT
+                   || cs->native->u.syment.n_sclass == C_THUMBLABEL
+                   || cs->native->u.syment.n_sclass == C_THUMBEXTFUNC
+                   || cs->native->u.syment.n_sclass == C_THUMBSTATFUNC);
   
      }
-/* start-sanitize-armelf */
     else if (bfd_asymbol_flavour (*info->symbols) == bfd_target_elf_flavour)
      {
-     es = *(elf_symbol_type **)(info->symbols);
-     is_thumb = (es->internal_elf_sym.st_other == C_THUMBEXT
-                 || es->internal_elf_sym.st_other == C_THUMBSTAT
-                 || es->internal_elf_sym.st_other == C_THUMBLABEL
-                 || es->internal_elf_sym.st_other == C_THUMBEXTFUNC
-                 || es->internal_elf_sym.st_other == C_THUMBSTATFUNC);
+       es = *(elf_symbol_type **)(info->symbols);
+       is_thumb = (es->internal_elf_sym.st_other == C_THUMBEXT
+                   || es->internal_elf_sym.st_other == C_THUMBSTAT
+                   || es->internal_elf_sym.st_other == C_THUMBLABEL
+                   || es->internal_elf_sym.st_other == C_THUMBEXTFUNC
+                   || es->internal_elf_sym.st_other == C_THUMBSTATFUNC);
       }
-/* end-sanitize-armelf */
    }
 
   info->bytes_per_chunk = 4;
@@ -813,9 +807,7 @@ print_insn_little_arm (pc, info)
   long               given;
   int                status;
   coff_symbol_type   *cs;
-/* start-sanitize-armelf */
   elf_symbol_type    *es;
-/* end-sanitize-armelf */
   int                is_thumb;
 
   is_thumb = false;
@@ -823,25 +815,23 @@ print_insn_little_arm (pc, info)
     {
     if (bfd_asymbol_flavour (*info->symbols) == bfd_target_coff_flavour)
      {
-     cs = coffsymbol (*info->symbols);
-     is_thumb = (cs->native->u.syment.n_sclass == C_THUMBEXT
-  		 || cs->native->u.syment.n_sclass == C_THUMBSTAT
-  		 || cs->native->u.syment.n_sclass == C_THUMBLABEL
-  		 || cs->native->u.syment.n_sclass == C_THUMBEXTFUNC
-  		 || cs->native->u.syment.n_sclass == C_THUMBSTATFUNC);
+       cs = coffsymbol (*info->symbols);
+       is_thumb = (cs->native->u.syment.n_sclass == C_THUMBEXT
+                   || cs->native->u.syment.n_sclass == C_THUMBSTAT
+                   || cs->native->u.syment.n_sclass == C_THUMBLABEL
+                   || cs->native->u.syment.n_sclass == C_THUMBEXTFUNC
+                   || cs->native->u.syment.n_sclass == C_THUMBSTATFUNC);
   
      }
-/* start-sanitize-armelf */
     else if (bfd_asymbol_flavour (*info->symbols) == bfd_target_elf_flavour)
      {
-     es = *(elf_symbol_type **)(info->symbols);
-     is_thumb = (es->internal_elf_sym.st_other == C_THUMBEXT
-                 || es->internal_elf_sym.st_other == C_THUMBSTAT
-                 || es->internal_elf_sym.st_other == C_THUMBLABEL
-                 || es->internal_elf_sym.st_other == C_THUMBEXTFUNC
-                 || es->internal_elf_sym.st_other == C_THUMBSTATFUNC);
+       es = *(elf_symbol_type **)(info->symbols);
+       is_thumb = (es->internal_elf_sym.st_other == C_THUMBEXT
+                   || es->internal_elf_sym.st_other == C_THUMBSTAT
+                   || es->internal_elf_sym.st_other == C_THUMBLABEL
+                   || es->internal_elf_sym.st_other == C_THUMBEXTFUNC
+                   || es->internal_elf_sym.st_other == C_THUMBSTATFUNC);
       }
-/* end-sanitize-armelf */
    }
   
 
