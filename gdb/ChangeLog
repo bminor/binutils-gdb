@@ -1,3 +1,8 @@
+Fri Jul 23 09:57:25 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* demangle.c: Make it so `help set dem' tells you how to get the
+	list of demangling styles.
+
 Thu Jul 22 15:41:09 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* Makefile.in: Use REMOTE_O macro not remote.o.

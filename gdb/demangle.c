@@ -177,7 +177,8 @@ _initialize_demangler ()
 
    set = add_set_cmd ("demangle-style", class_support, var_string_noescape,
 		      (char *) &current_demangling_style_string,
-		      "Set the current C++ demangling style.",
+		      "Set the current C++ demangling style.\n\
+Use `set demangle-style' without arguments for a list of demangling styles.",
 		      &setlist);
    show = add_show_from_set (set, &showlist);
    set -> function.cfunc = set_demangling_command;
