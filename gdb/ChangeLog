@@ -1,3 +1,9 @@
+Sun Jul 19 02:11:45 1998  Martin M. Hunt  <hunt@cygnus.com>
+
+	* symtab.c (decode_line_2): Instead of printing a prompt
+	and calling command_line_input() without a prompt, just
+	call it with the proper args.  This makes the GUI work too.
+
 Fri Jul 17 9:26:50 1998  Ron Unrau  <runrau@cygnus.com>
 
 	* blockframe.c (find_pc_sect_partial_function): allow for the possi-

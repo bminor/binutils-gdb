@@ -351,9 +351,9 @@ static void
 gdbtk_cleanup (dummy)
      PTR dummy;
 {
+  Tcl_Eval (gdbtk_interp, "gdbtk_cleanup");
 #ifdef IDE
   struct ide_event_handle *h = (struct ide_event_handle *) dummy;
-
   ide_interface_deregister_all (h);
 #endif
   Tcl_Finalize ();

@@ -1,3 +1,9 @@
+Sat Jul 18 12:28:39 1998  Martin M. Hunt  <hunt@cygnus.com>
+
+	* gdbtk.c (gdbtk_cleanup): Add call to tcl function
+	gdbtk_cleanup. We need this so the GUI gets to clean
+	up no matter how GDB exits.
+
 Wed Jul  1 13:10:58 1998  Jim Ingham   <jingham@cygnus.com>
 
 	* Moved gdbtk_hooks.c & gdbtk_cmds.c to gdbtk-hooks.c &
