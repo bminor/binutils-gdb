@@ -1321,14 +1321,26 @@ read_type (pp, objfile)
 	      code = TYPE_CODE_ENUM;
 	      break;
 	    default:
-	      return error_type (pp);
+	      {
+		/* Complain and keep going, so compilers can invent new
+		   cross-reference types.  */
+		static struct complaint msg =
+		  {"Unrecognized cross-reference type `%c'", 0, 0};
+		complain (&msg, (*pp)[0]);
+		code = TYPE_CODE_STRUCT;
+		break;
+	      }
 	    }
 	   
 	  p = strchr(*pp, ':');
+	  if (p == NULL)
+	    return error_type (pp);
 	  while (p[1] == ':')
 	    {
 	       p += 2;
 	       p = strchr(p, ':');
+	       if (p == NULL)
+		 return error_type (pp);
 	    }
 	  to = type_name = 
 		(char *)obstack_alloc (&objfile->type_obstack, p - *pp + 1);
@@ -1339,8 +1351,9 @@ read_type (pp, objfile)
 	    *to++ = *from++;
 	  *to = '\0';
 	  
-	  /* Set the pointer ahead of the name which we just read.  */
-	  *pp = from;
+	  /* Set the pointer ahead of the name which we just read, and
+	     the colon.  */
+	  *pp = from + 1;
 	}
 
 	/* Now check to see whether the type has already been declared.  */

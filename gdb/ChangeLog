@@ -1,3 +1,10 @@
+Sun Nov 14 00:28:13 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabsread.c (read_type): Skip the colon when reading a
+	cross-reference.  Only complain, not error_type, on unrecognized
+	cross-reference types.  error_type, not dump core, if the colon is
+	missing.
+
 Fri Nov 12 16:23:08 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* config/m68k/tm-sun3.h:  Disable use of alternate breakpoint insn
