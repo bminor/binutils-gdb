@@ -1329,7 +1329,7 @@ md_assemble (str)
   build_bytes (opcode, operand);
 }
 
-#ifndef OBJ_ELF
+#ifndef BFD_ASSEMBLER
 void
 tc_crawl_symbol_chain (headers)
      object_headers *headers ATTRIBUTE_UNUSED;
@@ -1345,7 +1345,7 @@ md_undefined_symbol (name)
   return 0;
 }
 
-#ifndef OBJ_ELF
+#ifndef BFD_ASSEMBLER
 void
 tc_headers_hook (headers)
      object_headers *headers ATTRIBUTE_UNUSED;
@@ -1518,6 +1518,7 @@ md_pcrel_from (fixP)
   abort ();
 }
 
+#ifndef BFD_ASSEMBLER
 void
 tc_reloc_mangle (fix_ptr, intr, base)
      fixS *fix_ptr;
@@ -1580,7 +1581,7 @@ tc_reloc_mangle (fix_ptr, intr, base)
   else
     intr->r_symndx = -1;
 }
-#else /* OBJ_ELF */
+#else /* BFD_ASSEMBLER */
 arelent *
 tc_gen_reloc (section, fixp)
      asection *section ATTRIBUTE_UNUSED;
