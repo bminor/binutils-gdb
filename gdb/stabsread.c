@@ -199,9 +199,6 @@ static const char vb_name[] = "_vb$";
 #if !defined (BELIEVE_PCC_PROMOTION)
 #define BELIEVE_PCC_PROMOTION 0
 #endif
-#if !defined (BELIEVE_PCC_PROMOTION_TYPE)
-#define BELIEVE_PCC_PROMOTION_TYPE 0
-#endif
 
 static void
 invalid_cpp_abbrev_complaint (const char *arg1)

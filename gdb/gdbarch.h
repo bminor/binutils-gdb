@@ -111,7 +111,7 @@ extern enum gdb_osabi gdbarch_osabi (struct gdbarch *gdbarch);
 
 /* Number of bits in a char or unsigned char for the target machine.
    Just like CHAR_BIT in <limits.h> but describes the target machine.
-   v::TARGET_CHAR_BIT:int:char_bit::::8 * sizeof (char):8::0:
+   v:2:TARGET_CHAR_BIT:int:char_bit::::8 * sizeof (char):8::0:
   
    Number of bits in a short or unsigned short for the target machine. */
 
@@ -1278,10 +1278,8 @@ extern void set_gdbarch_believe_pcc_promotion_type (struct gdbarch *gdbarch, int
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (BELIEVE_PCC_PROMOTION_TYPE)
 #error "Non multi-arch definition of BELIEVE_PCC_PROMOTION_TYPE"
 #endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (BELIEVE_PCC_PROMOTION_TYPE)
+#if !defined (BELIEVE_PCC_PROMOTION_TYPE)
 #define BELIEVE_PCC_PROMOTION_TYPE (gdbarch_believe_pcc_promotion_type (current_gdbarch))
-#endif
 #endif
 
 #if defined (GET_SAVED_REGISTER)

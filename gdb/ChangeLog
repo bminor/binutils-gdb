@@ -1,5 +1,14 @@
 2003-02-01  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdbarch.sh: Explictly specify all method levels.  When a
+	variable with an empty level, provide a non-multi-arch default.
+	(BELIEVE_PCC_PROMOTION_TYPE): Set level to empty.
+	* gdbarch.h: Re-generate.
+	* stabsread.c (BELIEVE_PCC_PROMOTION_TYPE): Delete.  Always defined.
+	* config/m68k/tm-sun3.h (BELIEVE_PCC_PROMOTION_TYPE): Define as 1
+
+2003-02-01  Andrew Cagney  <ac131313@redhat.com>
+
 	* defs.h (host_pointer_to_address): Delete declaration.
 	(address_to_host_pointer): Delete declaration.
 	* utils.c (host_pointer_to_address): Delete function.

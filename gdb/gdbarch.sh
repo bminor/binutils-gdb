@@ -85,7 +85,7 @@ EOF
 	    case "${level}" in
 		1 ) gt_level=">= GDB_MULTI_ARCH_PARTIAL" ;;
 		2 ) gt_level="> GDB_MULTI_ARCH_PARTIAL" ;;
-		"" ) ;;
+		"" ) gt_level="> GDB_MULTI_ARCH_PARTIAL" ;;
 		* ) error "Error: bad level for ${function}" 1>&2 ; kill $$ ; exit 1 ;;
 	    esac
 
@@ -391,23 +391,23 @@ i:2:TARGET_BYTE_ORDER:int:byte_order::::BFD_ENDIAN_BIG
 i:2:TARGET_OSABI:enum gdb_osabi:osabi::::GDB_OSABI_UNKNOWN
 # Number of bits in a char or unsigned char for the target machine.
 # Just like CHAR_BIT in <limits.h> but describes the target machine.
-# v::TARGET_CHAR_BIT:int:char_bit::::8 * sizeof (char):8::0:
+# v:2:TARGET_CHAR_BIT:int:char_bit::::8 * sizeof (char):8::0:
 #
 # Number of bits in a short or unsigned short for the target machine.
-v::TARGET_SHORT_BIT:int:short_bit::::8 * sizeof (short):2*TARGET_CHAR_BIT::0
+v:2:TARGET_SHORT_BIT:int:short_bit::::8 * sizeof (short):2*TARGET_CHAR_BIT::0
 # Number of bits in an int or unsigned int for the target machine.
-v::TARGET_INT_BIT:int:int_bit::::8 * sizeof (int):4*TARGET_CHAR_BIT::0
+v:2:TARGET_INT_BIT:int:int_bit::::8 * sizeof (int):4*TARGET_CHAR_BIT::0
 # Number of bits in a long or unsigned long for the target machine.
-v::TARGET_LONG_BIT:int:long_bit::::8 * sizeof (long):4*TARGET_CHAR_BIT::0
+v:2:TARGET_LONG_BIT:int:long_bit::::8 * sizeof (long):4*TARGET_CHAR_BIT::0
 # Number of bits in a long long or unsigned long long for the target
 # machine.
-v::TARGET_LONG_LONG_BIT:int:long_long_bit::::8 * sizeof (LONGEST):2*TARGET_LONG_BIT::0
+v:2:TARGET_LONG_LONG_BIT:int:long_long_bit::::8 * sizeof (LONGEST):2*TARGET_LONG_BIT::0
 # Number of bits in a float for the target machine.
-v::TARGET_FLOAT_BIT:int:float_bit::::8 * sizeof (float):4*TARGET_CHAR_BIT::0
+v:2:TARGET_FLOAT_BIT:int:float_bit::::8 * sizeof (float):4*TARGET_CHAR_BIT::0
 # Number of bits in a double for the target machine.
-v::TARGET_DOUBLE_BIT:int:double_bit::::8 * sizeof (double):8*TARGET_CHAR_BIT::0
+v:2:TARGET_DOUBLE_BIT:int:double_bit::::8 * sizeof (double):8*TARGET_CHAR_BIT::0
 # Number of bits in a long double for the target machine.
-v::TARGET_LONG_DOUBLE_BIT:int:long_double_bit::::8 * sizeof (long double):8*TARGET_CHAR_BIT::0
+v:2:TARGET_LONG_DOUBLE_BIT:int:long_double_bit::::8 * sizeof (long double):8*TARGET_CHAR_BIT::0
 # For most targets, a pointer on the target and its representation as an
 # address in GDB have the same size and "look the same".  For such a
 # target, you need only set TARGET_PTR_BIT / ptr_bit and TARGET_ADDR_BIT
@@ -417,24 +417,24 @@ v::TARGET_LONG_DOUBLE_BIT:int:long_double_bit::::8 * sizeof (long double):8*TARG
 # also need to set POINTER_TO_ADDRESS and ADDRESS_TO_POINTER as well.
 #
 # ptr_bit is the size of a pointer on the target
-v::TARGET_PTR_BIT:int:ptr_bit::::8 * sizeof (void*):TARGET_INT_BIT::0
+v:2:TARGET_PTR_BIT:int:ptr_bit::::8 * sizeof (void*):TARGET_INT_BIT::0
 # addr_bit is the size of a target address as represented in gdb
-v::TARGET_ADDR_BIT:int:addr_bit::::8 * sizeof (void*):0:TARGET_PTR_BIT:
+v:2:TARGET_ADDR_BIT:int:addr_bit::::8 * sizeof (void*):0:TARGET_PTR_BIT:
 # Number of bits in a BFD_VMA for the target object file format.
-v::TARGET_BFD_VMA_BIT:int:bfd_vma_bit::::8 * sizeof (void*):TARGET_ARCHITECTURE->bits_per_address::0
+v:2:TARGET_BFD_VMA_BIT:int:bfd_vma_bit::::8 * sizeof (void*):TARGET_ARCHITECTURE->bits_per_address::0
 #
 # One if \`char' acts like \`signed char', zero if \`unsigned char'.
-v::TARGET_CHAR_SIGNED:int:char_signed::::1:-1:1::::
+v:2:TARGET_CHAR_SIGNED:int:char_signed::::1:-1:1::::
 #
-f::TARGET_READ_PC:CORE_ADDR:read_pc:ptid_t ptid:ptid::0:generic_target_read_pc::0
-f::TARGET_WRITE_PC:void:write_pc:CORE_ADDR val, ptid_t ptid:val, ptid::0:generic_target_write_pc::0
-f::TARGET_READ_FP:CORE_ADDR:read_fp:void:::0:generic_target_read_fp::0
-f::TARGET_READ_SP:CORE_ADDR:read_sp:void:::0:generic_target_read_sp::0
-f::TARGET_WRITE_SP:void:write_sp:CORE_ADDR val:val::0:generic_target_write_sp::0
+f:2:TARGET_READ_PC:CORE_ADDR:read_pc:ptid_t ptid:ptid::0:generic_target_read_pc::0
+f:2:TARGET_WRITE_PC:void:write_pc:CORE_ADDR val, ptid_t ptid:val, ptid::0:generic_target_write_pc::0
+f:2:TARGET_READ_FP:CORE_ADDR:read_fp:void:::0:generic_target_read_fp::0
+f:2:TARGET_READ_SP:CORE_ADDR:read_sp:void:::0:generic_target_read_sp::0
+f:2:TARGET_WRITE_SP:void:write_sp:CORE_ADDR val:val::0:generic_target_write_sp::0
 # Function for getting target's idea of a frame pointer.  FIXME: GDB's
 # whole scheme for dealing with "frames" and "frame pointers" needs a
 # serious shakedown.
-f::TARGET_VIRTUAL_FRAME_POINTER:void:virtual_frame_pointer:CORE_ADDR pc, int *frame_regnum, LONGEST *frame_offset:pc, frame_regnum, frame_offset::0:legacy_virtual_frame_pointer::0
+f:2:TARGET_VIRTUAL_FRAME_POINTER:void:virtual_frame_pointer:CORE_ADDR pc, int *frame_regnum, LONGEST *frame_offset:pc, frame_regnum, frame_offset::0:legacy_virtual_frame_pointer::0
 #
 M:::void:pseudo_register_read:struct regcache *regcache, int cookednum, void *buf:regcache, cookednum, buf:
 M:::void:pseudo_register_write:struct regcache *regcache, int cookednum, const void *buf:regcache, cookednum, buf:
@@ -516,10 +516,10 @@ v:1:CALL_DUMMY_STACK_ADJUST_P:int:call_dummy_stack_adjust_p::::0:-1:::0x%08lx
 v:2:CALL_DUMMY_STACK_ADJUST:int:call_dummy_stack_adjust::::0:::gdbarch->call_dummy_stack_adjust_p && gdbarch->call_dummy_stack_adjust == 0:0x%08lx::CALL_DUMMY_STACK_ADJUST_P
 f:2:FIX_CALL_DUMMY:void:fix_call_dummy:char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p:dummy, pc, fun, nargs, args, type, gcc_p:::0
 F:2:DEPRECATED_INIT_FRAME_PC_FIRST:CORE_ADDR:deprecated_init_frame_pc_first:int fromleaf, struct frame_info *prev:fromleaf, prev
-F::DEPRECATED_INIT_FRAME_PC:CORE_ADDR:deprecated_init_frame_pc:int fromleaf, struct frame_info *prev:fromleaf, prev
+F:2:DEPRECATED_INIT_FRAME_PC:CORE_ADDR:deprecated_init_frame_pc:int fromleaf, struct frame_info *prev:fromleaf, prev
 #
 v:2:BELIEVE_PCC_PROMOTION:int:believe_pcc_promotion:::::::
-v:2:BELIEVE_PCC_PROMOTION_TYPE:int:believe_pcc_promotion_type:::::::
+v::BELIEVE_PCC_PROMOTION_TYPE:int:believe_pcc_promotion_type:::::::
 F:2:GET_SAVED_REGISTER:void:get_saved_register:char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval:raw_buffer, optimized, addrp, frame, regnum, lval
 #
 f:2:REGISTER_CONVERTIBLE:int:register_convertible:int nr:nr:::generic_register_convertible_not::0
@@ -542,10 +542,10 @@ F:2:POP_FRAME:void:pop_frame:void:-:::0
 #
 f:2:STORE_STRUCT_RETURN:void:store_struct_return:CORE_ADDR addr, CORE_ADDR sp:addr, sp:::0
 #
-f::EXTRACT_RETURN_VALUE:void:extract_return_value:struct type *type, struct regcache *regcache, void *valbuf:type, regcache, valbuf:::legacy_extract_return_value::0
-f::STORE_RETURN_VALUE:void:store_return_value:struct type *type, struct regcache *regcache, const void *valbuf:type, regcache, valbuf:::legacy_store_return_value::0
-f::DEPRECATED_EXTRACT_RETURN_VALUE:void:deprecated_extract_return_value:struct type *type, char *regbuf, char *valbuf:type, regbuf, valbuf
-f::DEPRECATED_STORE_RETURN_VALUE:void:deprecated_store_return_value:struct type *type, char *valbuf:type, valbuf
+f:2:EXTRACT_RETURN_VALUE:void:extract_return_value:struct type *type, struct regcache *regcache, void *valbuf:type, regcache, valbuf:::legacy_extract_return_value::0
+f:2:STORE_RETURN_VALUE:void:store_return_value:struct type *type, struct regcache *regcache, const void *valbuf:type, regcache, valbuf:::legacy_store_return_value::0
+f:2:DEPRECATED_EXTRACT_RETURN_VALUE:void:deprecated_extract_return_value:struct type *type, char *regbuf, char *valbuf:type, regbuf, valbuf
+f:2:DEPRECATED_STORE_RETURN_VALUE:void:deprecated_store_return_value:struct type *type, char *valbuf:type, valbuf
 #
 F:2:EXTRACT_STRUCT_VALUE_ADDRESS:CORE_ADDR:extract_struct_value_address:struct regcache *regcache:regcache:::0
 F:2:DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS:CORE_ADDR:deprecated_extract_struct_value_address:char *regbuf:regbuf:::0
@@ -561,7 +561,7 @@ f:2:BREAKPOINT_FROM_PC:const unsigned char *:breakpoint_from_pc:CORE_ADDR *pcptr
 f:2:MEMORY_INSERT_BREAKPOINT:int:memory_insert_breakpoint:CORE_ADDR addr, char *contents_cache:addr, contents_cache::0:default_memory_insert_breakpoint::0
 f:2:MEMORY_REMOVE_BREAKPOINT:int:memory_remove_breakpoint:CORE_ADDR addr, char *contents_cache:addr, contents_cache::0:default_memory_remove_breakpoint::0
 v:2:DECR_PC_AFTER_BREAK:CORE_ADDR:decr_pc_after_break::::0:-1
-f::PREPARE_TO_PROCEED:int:prepare_to_proceed:int select_it:select_it::0:default_prepare_to_proceed::0
+f:2:PREPARE_TO_PROCEED:int:prepare_to_proceed:int select_it:select_it::0:default_prepare_to_proceed::0
 v:2:FUNCTION_START_OFFSET:CORE_ADDR:function_start_offset::::0:-1
 #
 f:2:REMOTE_TRANSLATE_XFER_ADDRESS:void:remote_translate_xfer_address:CORE_ADDR gdb_addr, int gdb_len, CORE_ADDR *rem_addr, int *rem_len:gdb_addr, gdb_len, rem_addr, rem_len:::generic_remote_translate_xfer_address::0
@@ -643,7 +643,7 @@ f:2:IN_SOLIB_RETURN_TRAMPOLINE:int:in_solib_return_trampoline:CORE_ADDR pc, char
 # does not.
 f:2:PC_IN_SIGTRAMP:int:pc_in_sigtramp:CORE_ADDR pc, char *name:pc, name:::legacy_pc_in_sigtramp::0
 F:2:SIGTRAMP_START:CORE_ADDR:sigtramp_start:CORE_ADDR pc:pc
-F::SIGTRAMP_END:CORE_ADDR:sigtramp_end:CORE_ADDR pc:pc
+F:2:SIGTRAMP_END:CORE_ADDR:sigtramp_end:CORE_ADDR pc:pc
 # A target might have problems with watchpoints as soon as the stack
 # frame of the current function has been destroyed.  This mostly happens
 # as the first action in a funtion's epilogue.  in_function_epilogue_p()
@@ -666,9 +666,9 @@ m::CONSTRUCT_INFERIOR_ARGUMENTS:char *:construct_inferior_arguments:int argc, ch
 F:2:DWARF2_BUILD_FRAME_INFO:void:dwarf2_build_frame_info:struct objfile *objfile:objfile:::0
 f:2:ELF_MAKE_MSYMBOL_SPECIAL:void:elf_make_msymbol_special:asymbol *sym, struct minimal_symbol *msym:sym, msym:::default_elf_make_msymbol_special::0
 f:2:COFF_MAKE_MSYMBOL_SPECIAL:void:coff_make_msymbol_special:int val, struct minimal_symbol *msym:val, msym:::default_coff_make_msymbol_special::0
-v::NAME_OF_MALLOC:const char *:name_of_malloc::::"malloc":"malloc"::0:%s:NAME_OF_MALLOC
-v::CANNOT_STEP_BREAKPOINT:int:cannot_step_breakpoint::::0:0::0
-v::HAVE_NONSTEPPABLE_WATCHPOINT:int:have_nonsteppable_watchpoint::::0:0::0
+v:2:NAME_OF_MALLOC:const char *:name_of_malloc::::"malloc":"malloc"::0:%s:NAME_OF_MALLOC
+v:2:CANNOT_STEP_BREAKPOINT:int:cannot_step_breakpoint::::0:0::0
+v:2:HAVE_NONSTEPPABLE_WATCHPOINT:int:have_nonsteppable_watchpoint::::0:0::0
 F:2:ADDRESS_CLASS_TYPE_FLAGS:int:address_class_type_flags:int byte_size, int dwarf2_addr_class:byte_size, dwarf2_addr_class
 M:2:ADDRESS_CLASS_TYPE_FLAGS_TO_NAME:const char *:address_class_type_flags_to_name:int type_flags:type_flags:
 M:2:ADDRESS_CLASS_NAME_TO_TYPE_FLAGS:int:address_class_name_to_type_flags:const char *name, int *type_flags_ptr:name, type_flags_ptr
@@ -891,11 +891,18 @@ do
 	printf "#if (GDB_MULTI_ARCH ${gt_level}) && defined (${macro})\n"
 	printf "#error \"Non multi-arch definition of ${macro}\"\n"
 	printf "#endif\n"
-	printf "#if GDB_MULTI_ARCH\n"
-	printf "#if (GDB_MULTI_ARCH ${gt_level}) || !defined (${macro})\n"
-	printf "#define ${macro} (gdbarch_${function} (current_gdbarch))\n"
-	printf "#endif\n"
-	printf "#endif\n"
+	if test "${level}" = ""
+	then
+	    printf "#if !defined (${macro})\n"
+	    printf "#define ${macro} (gdbarch_${function} (current_gdbarch))\n"
+	    printf "#endif\n"
+	else
+	    printf "#if GDB_MULTI_ARCH\n"
+	    printf "#if (GDB_MULTI_ARCH ${gt_level}) || !defined (${macro})\n"
+	    printf "#define ${macro} (gdbarch_${function} (current_gdbarch))\n"
+	    printf "#endif\n"
+	    printf "#endif\n"
+	fi
     fi
     if class_is_function_p
     then
