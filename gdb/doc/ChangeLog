@@ -1,3 +1,8 @@
+2002-05-14  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.texinfo (Debug Session): Document new `udp:' and `tcp:'
+	options for `target remote'.
+
 2002-05-13  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Delete

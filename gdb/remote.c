@@ -2222,6 +2222,26 @@ remote_check_symbols (struct objfile *objfile)
     }
 }
 
+static struct serial *
+remote_serial_open (char *name)
+{
+  static int udp_warning = 0;
+
+  /* FIXME: Parsing NAME here is a hack.  But we want to warn here instead
+     of in ser-tcp.c, because it is the remote protocol assuming that the
+     serial connection is reliable and not the serial connection promising
+     to be.  */
+  if (!udp_warning && strncmp (name, "udp:", 4) == 0)
+    {
+      warning ("The remote protocol may be unreliable over UDP.");
+      warning ("Some events may be lost, rendering further debugging "
+	       "impossible.");
+      udp_warning = 1;
+    }
+
+  return serial_open (name);
+}
+
 static void
 remote_open_1 (char *name, int from_tty, struct target_ops *target,
 	       int extended_p)
@@ -2239,7 +2259,7 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
 
   unpush_target (target);
 
-  remote_desc = serial_open (name);
+  remote_desc = remote_serial_open (name);
   if (!remote_desc)
     perror_with_name (name);
 
@@ -2337,7 +2357,7 @@ remote_async_open_1 (char *name, int from_tty, struct target_ops *target,
 
   unpush_target (target);
 
-  remote_desc = serial_open (name);
+  remote_desc = remote_serial_open (name);
   if (!remote_desc)
     perror_with_name (name);
 
@@ -5463,7 +5483,7 @@ remote_cisco_open (char *name, int from_tty)
 
   unpush_target (&remote_cisco_ops);
 
-  remote_desc = serial_open (name);
+  remote_desc = remote_serial_open (name);
   if (!remote_desc)
     perror_with_name (name);
 

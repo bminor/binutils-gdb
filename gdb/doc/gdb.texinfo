@@ -10475,7 +10475,7 @@ of its pure text.
 Establish communication using the @code{target remote} command.
 Its argument specifies how to communicate with the target
 machine---either via a devicename attached to a direct serial line, or a
-TCP port (usually to a terminal server which in turn has a serial line
+TCP or UDP port (usually to a terminal server which in turn has a serial line
 to the target).  For example, to use a serial line connected to the
 device named @file{/dev/ttyb}:
 
@@ -10485,7 +10485,8 @@ target remote /dev/ttyb
 
 @cindex TCP port, @code{target remote}
 To use a TCP connection, use an argument of the form
-@code{@var{host}:port}.  For example, to connect to port 2828 on a
+@code{@var{host}:@var{port}} or @code{tcp:@var{host}:@var{port}}.
+For example, to connect to port 2828 on a
 terminal server named @code{manyfarms}:
 
 @smallexample
@@ -10503,6 +10504,21 @@ target remote :1234
 @noindent
 
 Note that the colon is still required here.
+
+@cindex UDP port, @code{target remote}
+To use a UDP connection, use an argument of the form
+@code{udp:@var{host}:@var{port}}.  For example, to connect to UDP port 2828
+on a terminal server named @code{manyfarms}:
+
+@smallexample
+target remote udp:manyfarms:2828
+@end smallexample
+
+When using a UDP connection for remote debugging, you should keep in mind
+that the `U' stands for ``Unreliable''.  UDP can silently drop packets on
+busy or unreliable networks, which will cause havoc with your debugging
+session.
+
 @end enumerate
 
 Now you can use all the usual commands to examine and change data and to
