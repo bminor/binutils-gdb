@@ -1906,7 +1906,6 @@ read_struct_type (pp, type)
   struct next_fnfield
     {
       struct next_fnfield *next;
-      int visibility;			/* 0=public, 1=protected, 2=public */
       struct fn_field fn_field;
     };
 
@@ -2313,11 +2312,25 @@ read_struct_type (pp, type)
 	      *pp += 1;
 	      p = *pp;
 	      while (*p != ';') p++;
+
 	      /* If this is just a stub, then we don't have the
 		 real name here.  */
+	      if (TYPE_FLAGS (new_sublist->fn_field.type) & TYPE_FLAG_STUB)
+		new_sublist->fn_field.is_stub = 1;
 	      new_sublist->fn_field.physname = savestring (*pp, p - *pp);
 	      *pp = p + 1;
-	      new_sublist->visibility = *(*pp)++ - '0';
+
+	      /* Set this method's visibility fields.  */
+	      switch (*(*pp)++ - '0')
+		{
+		case 0:
+		  new_sublist->fn_field.is_private = 1;
+		  break;
+		case 1:
+		  new_sublist->fn_field.is_protected = 1;
+		  break;
+		}
+
 	      if (**pp == '\\') *pp = next_symbol_text ();
 	      switch (**pp)
 		{
@@ -2391,6 +2404,9 @@ read_struct_type (pp, type)
 		case '?':
 		  /* static member function.  */
 		  new_sublist->fn_field.voffset = VOFFSET_STATIC;
+		  if (strncmp (new_sublist->fn_field.physname,
+			       main_fn_name, strlen (main_fn_name)))
+		    new_sublist->fn_field.is_stub = 1;
 		  break;
 
 		default:
@@ -2417,22 +2433,8 @@ read_struct_type (pp, type)
 	  new_mainlist->fn_fieldlist.fn_fields =
 	    (struct fn_field *) obstack_alloc (symbol_obstack,
 					       sizeof (struct fn_field) * length);
-	  TYPE_FN_PRIVATE_BITS (new_mainlist->fn_fieldlist) =
-	    (B_TYPE *) obstack_alloc (symbol_obstack, B_BYTES (length));
-	  B_CLRALL (TYPE_FN_PRIVATE_BITS (new_mainlist->fn_fieldlist), length);
-
-	  TYPE_FN_PROTECTED_BITS (new_mainlist->fn_fieldlist) =
-	    (B_TYPE *) obstack_alloc (symbol_obstack, B_BYTES (length));
-	  B_CLRALL (TYPE_FN_PROTECTED_BITS (new_mainlist->fn_fieldlist), length);
-
 	  for (i = length; (i--, sublist); sublist = sublist->next)
-	    {
-	      new_mainlist->fn_fieldlist.fn_fields[i] = sublist->fn_field;
-	      if (sublist->visibility == 0)
-		B_SET (new_mainlist->fn_fieldlist.private_fn_field_bits, i);
-	      else if (sublist->visibility == 1)
-		B_SET (new_mainlist->fn_fieldlist.protected_fn_field_bits, i);
-	    }
+	    new_mainlist->fn_fieldlist.fn_fields[i] = sublist->fn_field;
 
 	  new_mainlist->fn_fieldlist.length = length;
 	  new_mainlist->next = mainlist;
