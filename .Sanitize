@@ -119,6 +119,17 @@ else
 	verbose=
 fi
 
+# Remove "sanitize-Sanitize" lines.
+if [ -n "${verbose}" ] ; then
+	echo Cleaning unconditional sanitizations out of Makefile.in...
+fi
+cp Makefile.in new
+sed '/start\-sanitize\-Sanitize/,/end-\sanitize\-Sanitize/d' < Makefile.in > new
+if [ -n "${safe}" -a ! -f .Recover/Makefile.in ] ; then
+	mv Makefile.in .Recover
+fi
+mv new Makefile.in
+
 if [ -n "${verbose}" ] ; then
 	echo Looking for signs of \"v9\"...
 fi

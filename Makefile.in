@@ -974,6 +974,9 @@ GDB_SUPPORT_FILES= $(GDB_SUPPORT_DIRS)
 
 .PHONY: setup-dirs-gdb gdb.tar.gz make-gdb.tar.gz
 setup-dirs-gdb:
+	$(start-sanitize-Sanitize)
+	@if [ -f .Sanitize ] ; then echo "RUN Sanitize FIRST!" ; false ; fi ;
+	$(end-sanitize-Sanitize)
 	./configure sun4
 	$(MAKE) clean
 	./configure -rm sun4
