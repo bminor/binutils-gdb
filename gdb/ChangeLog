@@ -1,5 +1,7 @@
 2003-11-27  Mark Kettenis  <kettenis@gnu.org>
 
+	* dwarf2-frame.c: Fix some comments and whitespace problems.
+
 	* i386nbsd-tdep.c: Don't include "gdbtypes.h".  Include
 	"gdb_assert.h" and "gdb_string.h".
 	(i386nbsd_r_reg_offset): Rename from regmap.
