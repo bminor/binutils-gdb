@@ -83,7 +83,7 @@
 /* Set to true if the save_state_t structure has the ss_wide member */
 #undef HAVE_STRUCT_MEMBER_SS_WIDE
 
-/* Define if <sys/ptrace.h> defines the PTRACE_GETXFPREGS request.  */
+/* Define if <sys/ptrace.h> defines the PTRACE_GETREGS request.  */
 #undef HAVE_PTRACE_GETREGS
 
 /* Define if <sys/ptrace.h> defines the PTRACE_GETXFPREGS request.  */
