@@ -1,3 +1,8 @@
+Fri Oct  6 12:08:18 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* interp.c (trap, case SYS_utime): Cast second arg of utime to
+	void * to avoid compiler error.
+	
 Thu Oct  5 14:13:29 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* interp.c (callback): Initialize to default callback.

@@ -584,7 +584,9 @@ trap (i, regs, memory, maskl, maskw, little_endian)
 	    regs[0] = chmod (ptr (regs[5]), regs[6]);
 	    break;
 	  case SYS_utime:
-	    regs[0] = utime (ptr (regs[5]), ptr (regs[6]));
+	    /* Cast the second argument to void *, to avoid type mismatch
+	       if a prototype is present.  */
+	    regs[0] = utime (ptr (regs[5]), (void *) ptr (regs[6]));
 	    break;
 	  default:
 	    abort ();
