@@ -1,3 +1,8 @@
+Mon Jan  9 15:43:53 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* interp.c:  Remove def of INLINE.  This comes from bfd.h.  Also,
+	declare IOMEM before using it.
+
 Wed Dec 28 21:25:31 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* interp.c (BUSERROR): New macro.
