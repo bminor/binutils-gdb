@@ -606,7 +606,7 @@ process_linenos (start, end)
 	  enter_line_range (tmpSubfile, inclTable[ii].begin, 
 			    inclTable[ii].end, start, 0, firstLine);
 
-	  if (offset < = inclTable[ii].end)
+	  if (offset <= inclTable[ii].end)
 	    offset = inclTable[ii].end + LINESZ;
 	}
 
