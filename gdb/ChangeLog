@@ -1,3 +1,16 @@
+Wed Jun 10 14:06:05 1998  Jason Molenda  (crash@bugshack.cygnus.com)
+
+	* configure.in: Add some tests for gnu-regex.c's benefit.
+	See if btowc() function is provided in C library.
+	* configure, config.in: Regenerated.
+	* Makefile.in (CLIBS, CDEPS): Add @LIBOBJS@ to build btowc.c
+	if necessary.
+	* btowc.c: New file.
+
+	* gnu-regex.c: Reorder wchar.h and wctype.h includes for Solaris'
+	benefit.
+	Drop namespace preserving defines for now.
+
 Wed Jun 10 11:53:42 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
 	* gnu-regex.c: Include "gnu-regex.h", not "regex.h".

@@ -136,6 +136,15 @@
 /* Define if you have the __argz_stringify function.  */
 #undef HAVE___ARGZ_STRINGIFY
 
+/* Define if you have the bcopy function.  */
+#undef HAVE_BCOPY
+
+/* Define if you have the btowc function.  */
+#undef HAVE_BTOWC
+
+/* Define if you have the bzero function.  */
+#undef HAVE_BZERO
+
 /* Define if you have the dcgettext function.  */
 #undef HAVE_DCGETTEXT
 
@@ -144,6 +153,12 @@
 
 /* Define if you have the getpagesize function.  */
 #undef HAVE_GETPAGESIZE
+
+/* Define if you have the isascii function.  */
+#undef HAVE_ISASCII
+
+/* Define if you have the memcpy function.  */
+#undef HAVE_MEMCPY
 
 /* Define if you have the munmap function.  */
 #undef HAVE_MUNMAP
@@ -186,6 +201,9 @@
 
 /* Define if you have the <endian.h> header file.  */
 #undef HAVE_ENDIAN_H
+
+/* Define if you have the <libintl.h> header file.  */
+#undef HAVE_LIBINTL_H
 
 /* Define if you have the <limits.h> header file.  */
 #undef HAVE_LIMITS_H
@@ -240,6 +258,12 @@
 
 /* Define if you have the <values.h> header file.  */
 #undef HAVE_VALUES_H
+
+/* Define if you have the <wchar.h> header file.  */
+#undef HAVE_WCHAR_H
+
+/* Define if you have the <wctype.h> header file.  */
+#undef HAVE_WCTYPE_H
 
 /* Define if you have the dl library (-ldl).  */
 #undef HAVE_LIBDL

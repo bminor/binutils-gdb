@@ -158,6 +158,7 @@ bcache.h
 blockframe.c
 breakpoint.c
 breakpoint.h
+btowc.c
 buildsym.c
 buildsym.h
 c-exp.y
