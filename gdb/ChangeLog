@@ -1,3 +1,9 @@
+2003-10-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* infrun.c (handle_inferior_event): Allow for breakpoint
+	instructions to generate a SIGSEGV in addition to SIGTRAP, SIGILL
+	and SIGEMT.  Update comments.
+
 2003-09-20  Mark Kettenis  <kettenis@gnu.org>
 
 	* Makefile.in (sparc-sol2-nat.o): Fix typo.

@@ -1845,16 +1845,21 @@ handle_inferior_event (struct execution_control_state *ecs)
      will be made according to the signal handling tables.  */
 
   /* First, distinguish signals caused by the debugger from signals
-     that have to do with the program's own actions.
-     Note that breakpoint insns may cause SIGTRAP or SIGILL
-     or SIGEMT, depending on the operating system version.
-     Here we detect when a SIGILL or SIGEMT is really a breakpoint
-     and change it to SIGTRAP.  */
+     that have to do with the program's own actions.  Note that
+     breakpoint insns may cause SIGTRAP or SIGILL or SIGEMT, depending
+     on the operating system version.  Here we detect when a SIGILL or
+     SIGEMT is really a breakpoint and change it to SIGTRAP.  We do
+     something similar for SIGSEGV, since a SIGSEGV will be generated
+     when we're trying to execute a breakpoint instruction on a
+     non-executable stack.  This happens for call dummy breakpoints
+     for architectures like SPARC that place call dummies on the
+     stack.  */
 
   if (stop_signal == TARGET_SIGNAL_TRAP
       || (breakpoints_inserted &&
 	  (stop_signal == TARGET_SIGNAL_ILL
-	   || stop_signal == TARGET_SIGNAL_EMT))
+	   || stop_signal == TARGET_SIGNAL_EMT
+	   || stop_signal == TARGET_SIGNAL_SEGV))
       || stop_soon == STOP_QUIETLY
       || stop_soon == STOP_QUIETLY_NO_SIGSTOP)
     {
@@ -1937,10 +1942,14 @@ handle_inferior_event (struct execution_control_state *ecs)
 
          If someone ever tries to get get call dummys on a
          non-executable stack to work (where the target would stop
-         with something like a SIGSEG), then those tests might need to
-         be re-instated.  Given, however, that the tests were only
+         with something like a SIGSEGV), then those tests might need
+         to be re-instated.  Given, however, that the tests were only
          enabled when momentary breakpoints were not being used, I
-         suspect that it won't be the case.  */
+         suspect that it won't be the case.
+
+	 NOTE: kettenis/2003-10-15: Indeed such checks don't seem to
+	 be necessary for call dummies on a non-executable stack on
+	 SPARC.  */
 
       if (stop_signal == TARGET_SIGNAL_TRAP)
 	ecs->random_signal
