@@ -40,7 +40,7 @@ extern const char EXP_CHARS[];
 /* Length in LittleNums of guard bits.  */
 #define GUARD (2)
 
-#ifndef TC_LARGEST_EXPONENT_IS_NORMAL(PRECISION)
+#ifndef TC_LARGEST_EXPONENT_IS_NORMAL
 #define TC_LARGEST_EXPONENT_IS_NORMAL(PRECISION) 0
 #endif
 
