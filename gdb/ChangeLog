@@ -1,3 +1,7 @@
+2003-03-28  Bob Rossi  <bob_rossi@cox.net>
+
+        * MAINTAINERS (write after approval): Add myself.
+
 2003-03-27  Theodore A. Roth  <troth@openavr.org>
 
 	* objc-exp.y: Add missing semi-colons.
