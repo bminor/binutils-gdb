@@ -1,3 +1,7 @@
+Fri May 14 21:35:29 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* gdb.texinfo: include readline appendices in info version of manual
+
 Fri May  7 11:56:18 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* gdbinv-s.texi (Remote Serial): describe new ^C behavior in

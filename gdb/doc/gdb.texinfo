@@ -22,25 +22,6 @@
 @c @cropmarks
 @end iftex
 
-@c Include the readline documentation in the TeX output, 
-@c but not in the Info output.
-@c Eventually, we should make a cross reference to the Readline Info
-@c nodes; but this requires that the nodes exist and be in an expected
-@c place.  Wait for a standard, complete GNU distribution.  Meanwhile,
-@c cross references are only in the printed TeX output, and only when
-@c `have-readline-appendices' is set.
-@c
-@c The readline documentation is distributed with the readline code 
-@c and consists of the two following files:
-@c     rluser.texinfo
-@c     inc-hist.texi
-@iftex
-@set have-readline-appendices
-@end iftex
-@ifinfo
-@clear have-readline-appendices
-@end ifinfo
-
 @finalout
 @syncodeindex ky cp
 
@@ -191,6 +172,8 @@ This is Edition 4.09, April 1993, for GDB Version @value{GDBVN}.
 @end ifclear
 
 * GDB Bugs::                    Reporting bugs in @value{GDBN}
+* Command Line Editing::        Facilities of the readline library
+* Using History Interactively::
 @ifset NOVEL
 * Renamed Commands::
 @end ifset
@@ -8006,10 +7989,14 @@ Such guesses are usually wrong.  Even we cannot guess right about such
 things without first using the debugger to find the facts.
 @end itemize
 
-@ifset have-readline-appendices
+@c The readline documentation is distributed with the readline code 
+@c and consists of the two following files:
+@c     rluser.texinfo
+@c     inc-hist.texi
+@c Use -I with makeinfo to point to the appropriate directory,
+@c environment var TEXINPUTS with TeX.
 @include rluser.texinfo
 @include inc-hist.texi
-@end ifset
 
 @ifset NOVEL
 @node Renamed Commands
