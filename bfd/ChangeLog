@@ -35,7 +35,7 @@
 	* elf32-s390.c (elf_s390_relocate_section): Likewise.
 	* elf32-ppc.c (ppc_elf_relocate_section): Likewise.
 
-2003-07-04  Paul  <paulc@senet.com.au>
+2003-07-04  Paul Clarke <paulc@senet.com.au>
 
 	* elf32-h8300.c (R_H8_DIR32A16): Fix name field.
 	(elf32_h8_relax_section) <R_H8_DIR16A8>: Adjust position of relocation.
