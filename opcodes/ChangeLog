@@ -1,3 +1,11 @@
+Thu Jul 28 18:14:16 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* sparc-dis.c (print_insn_sparc): Handle new operand type 'x'.
+
+	* sparc-opc.c: Added sparclite extended FP operations, and
+	versions of v9 impdep* instructions permitting specification of
+	the OPF field.
+
 Tue Jul 26 16:36:03 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* i960-dis.c (reg_names): Now const.
