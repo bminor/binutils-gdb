@@ -1,3 +1,7 @@
+2004-07-18  Andrew Cagney  <cagney@gnu.org>
+
+	* version.in: Bump to version 6.1.91.
+
 2004-07-17  Andrew Cagney  <cagney@gnu.org>
 
 	* README: Update to 6.2.
