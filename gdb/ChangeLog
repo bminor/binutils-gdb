@@ -1,3 +1,7 @@
+Tue Oct 17 08:04:26 1995  Fred Fish  <fnf@rtl.cygnus.com>
+
+	* NEWS: Fix typo.
+
 Mon Oct 16 11:27:06 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* remote-mips.c:  Add support for speedy (about 10x faster)

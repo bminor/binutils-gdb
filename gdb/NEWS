@@ -64,7 +64,7 @@ but does simplify configuration and building.
 
 * hpux10
 
-Get now supports hpux10.
+GDB now supports hpux10.
 
 *** Changes in GDB-4.14:
 
