@@ -1,3 +1,8 @@
+Fri Jul 17 13:30:18 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config-ml.in: Default to being verbose, to match Feb 18 change to
+	configure.
+
 Thu Jul 16 12:29:51 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	Brought over from egcs:
