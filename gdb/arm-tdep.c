@@ -1029,8 +1029,8 @@ arm_prologue_prev_register (struct frame_info *next_frame,
       return;
     }
 
-  trad_frame_prev_register (next_frame, cache->saved_regs, prev_regnum,
-			    optimized, lvalp, addrp, realnump, valuep);
+  trad_frame_get_prev_register (next_frame, cache->saved_regs, prev_regnum,
+				optimized, lvalp, addrp, realnump, valuep);
 }
 
 struct frame_unwind arm_prologue_unwind = {
@@ -1122,8 +1122,8 @@ arm_sigtramp_prev_register (struct frame_info *next_frame,
     *this_cache = arm_make_sigtramp_cache (next_frame);
   cache = *this_cache;
 
-  trad_frame_prev_register (next_frame, cache->saved_regs, prev_regnum,
-			    optimized, lvalp, addrp, realnump, valuep);
+  trad_frame_get_prev_register (next_frame, cache->saved_regs, prev_regnum,
+				optimized, lvalp, addrp, realnump, valuep);
 }
 
 struct frame_unwind arm_sigtramp_unwind = {

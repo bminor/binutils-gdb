@@ -2341,9 +2341,9 @@ hppa_frame_prev_register_helper (struct frame_info *next_frame,
 	{
 	  CORE_ADDR pc;
 
-	  trad_frame_prev_register (next_frame, saved_regs,
-				    HPPA_PCOQ_HEAD_REGNUM, optimizedp,
-				    lvalp, addrp, realnump, valuep);
+	  trad_frame_get_prev_register (next_frame, saved_regs,
+					HPPA_PCOQ_HEAD_REGNUM, optimizedp,
+					lvalp, addrp, realnump, valuep);
 
 	  pc = extract_unsigned_integer (valuep, 4);
 	  store_unsigned_integer (valuep, 4, pc + 4);
@@ -2357,8 +2357,8 @@ hppa_frame_prev_register_helper (struct frame_info *next_frame,
       return;
     }
 
-  trad_frame_prev_register (next_frame, saved_regs, regnum,
-                            optimizedp, lvalp, addrp, realnump, valuep);
+  trad_frame_get_prev_register (next_frame, saved_regs, regnum,
+				optimizedp, lvalp, addrp, realnump, valuep);
 }
 
 

@@ -2020,8 +2020,8 @@ s390_frame_prev_register (struct frame_info *next_frame,
 {
   struct s390_unwind_cache *info
     = s390_frame_unwind_cache (next_frame, this_prologue_cache);
-  trad_frame_prev_register (next_frame, info->saved_regs, regnum,
-                            optimizedp, lvalp, addrp, realnump, bufferp);
+  trad_frame_get_prev_register (next_frame, info->saved_regs, regnum,
+				optimizedp, lvalp, addrp, realnump, bufferp);
 }
 
 static const struct frame_unwind s390_frame_unwind = {
@@ -2092,8 +2092,8 @@ s390_stub_frame_prev_register (struct frame_info *next_frame,
 {
   struct s390_stub_unwind_cache *info
     = s390_stub_frame_unwind_cache (next_frame, this_prologue_cache);
-  trad_frame_prev_register (next_frame, info->saved_regs, regnum,
-                            optimizedp, lvalp, addrp, realnump, bufferp);
+  trad_frame_get_prev_register (next_frame, info->saved_regs, regnum,
+				optimizedp, lvalp, addrp, realnump, bufferp);
 }
 
 static const struct frame_unwind s390_stub_frame_unwind = {
@@ -2235,8 +2235,8 @@ s390_sigtramp_frame_prev_register (struct frame_info *next_frame,
 {
   struct s390_sigtramp_unwind_cache *info
     = s390_sigtramp_frame_unwind_cache (next_frame, this_prologue_cache);
-  trad_frame_prev_register (next_frame, info->saved_regs, regnum,
-                            optimizedp, lvalp, addrp, realnump, bufferp);
+  trad_frame_get_prev_register (next_frame, info->saved_regs, regnum,
+				optimizedp, lvalp, addrp, realnump, bufferp);
 }
 
 static const struct frame_unwind s390_sigtramp_frame_unwind = {

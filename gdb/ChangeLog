@@ -1,5 +1,43 @@
 2004-07-31  Andrew Cagney  <cagney@gnu.org>
 
+	* trad-frame.c (trad_frame_get_prev_register): Rename
+	trad_frame_get_prev_register.
+	* vax-tdep.c (vax_frame_prev_register): Update.
+	* trad-frame.h: Update.
+	* trad-frame.c (trad_frame_get_register): Update.
+	* sparcobsd-tdep.c (sparc32obsd_frame_prev_register): Update.
+	* sparcnbsd-tdep.c (sparc32nbsd_sigcontext_frame_prev_register):
+	Update.
+	* sparc64obsd-tdep.c (sparc64obsd_frame_prev_register): Update.
+	* sparc64nbsd-tdep.c (sparc64nbsd_sigcontext_frame_prev_register):
+	Update.
+	* sparc64fbsd-tdep.c (sparc64fbsd_sigtramp_frame_prev_register):
+	Update.
+	* sparc64-sol2-tdep.c (sparc64_sol2_sigtramp_frame_prev_register):
+	Update.
+	* sparc-sol2-tdep.c (sparc32_sol2_sigtramp_frame_prev_register):
+	Update.
+	* sparc-linux-tdep.c (sparc32_linux_sigtramp_frame_prev_register):
+	Update.
+	* s390-tdep.c (s390_frame_prev_register) 
+	(s390_stub_frame_prev_register) 
+	(s390_sigtramp_frame_prev_register): Update.
+	* rs6000-tdep.c (rs6000_frame_prev_register): Update.
+	* ppc-linux-tdep.c (ppc_linux_sigtramp_prev_register): Update.
+	* mips-tdep.c (mips_mdebug_frame_prev_register): Update.
+	* m88k-tdep.c (m88k_frame_prev_register) 
+	* m68hc11-tdep.c (m68hc11_frame_prev_register) 
+	* m32r-tdep.c (m32r_frame_prev_register): Update.
+	* hppa-tdep.c (hppa_frame_prev_register_helper) 
+	* frv-tdep.c (frv_frame_prev_register): Update.
+	* d10v-tdep.c (d10v_frame_prev_register): Update.
+	* cris-tdep.c (cris_frame_prev_register): Update.
+	* avr-tdep.c (avr_frame_prev_register): Update.
+	* arm-tdep.c (arm_prologue_prev_register) 
+	(arm_sigtramp_prev_register): Update.
+
+2004-07-31  Andrew Cagney  <cagney@gnu.org>
+
 	* frame.h (legacy_saved_regs_unwind)
 	(legacy_frame_chain_valid, legacy_frame_p)
 	(enum frame_type): Delete UNKNOWN_FRAME.

@@ -105,10 +105,10 @@ struct trad_frame_saved_reg *trad_frame_alloc_saved_regs (struct frame_info *nex
 
 /* Given the trad_frame info, return the location of the specified
    register.  */
-void trad_frame_prev_register (struct frame_info *next_frame,
-			       struct trad_frame_saved_reg this_saved_regs[],
-			       int regnum, int *optimizedp,
-			       enum lval_type *lvalp, CORE_ADDR *addrp,
-			       int *realregp, void *bufferp);
+void trad_frame_get_prev_register (struct frame_info *next_frame,
+				   struct trad_frame_saved_reg this_saved_regs[],
+				   int regnum, int *optimizedp,
+				   enum lval_type *lvalp, CORE_ADDR *addrp,
+				   int *realregp, void *bufferp);
 
 #endif

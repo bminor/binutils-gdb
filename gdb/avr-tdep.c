@@ -1025,8 +1025,8 @@ avr_frame_prev_register (struct frame_info *next_frame,
         }
     }
   else
-    trad_frame_prev_register (next_frame, info->saved_regs, regnum,
-                              optimizedp, lvalp, addrp, realnump, bufferp);
+    trad_frame_get_prev_register (next_frame, info->saved_regs, regnum,
+				  optimizedp, lvalp, addrp, realnump, bufferp);
 }
 
 static const struct frame_unwind avr_frame_unwind = {

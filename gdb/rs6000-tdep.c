@@ -2721,8 +2721,8 @@ rs6000_frame_prev_register (struct frame_info *next_frame,
 {
   struct rs6000_frame_cache *info = rs6000_frame_cache (next_frame,
 							this_cache);
-  trad_frame_prev_register (next_frame, info->saved_regs, regnum,
-			    optimizedp, lvalp, addrp, realnump, valuep);
+  trad_frame_get_prev_register (next_frame, info->saved_regs, regnum,
+				optimizedp, lvalp, addrp, realnump, valuep);
 }
 
 static const struct frame_unwind rs6000_frame_unwind =

@@ -114,11 +114,11 @@ trad_frame_set_unknown (struct trad_frame_saved_reg this_saved_regs[],
 }
 
 void
-trad_frame_prev_register (struct frame_info *next_frame,
-			  struct trad_frame_saved_reg this_saved_regs[],
-			  int regnum, int *optimizedp,
-			  enum lval_type *lvalp, CORE_ADDR *addrp,
-			  int *realregp, void *bufferp)
+trad_frame_get_prev_register (struct frame_info *next_frame,
+			      struct trad_frame_saved_reg this_saved_regs[],
+			      int regnum, int *optimizedp,
+			      enum lval_type *lvalp, CORE_ADDR *addrp,
+			      int *realregp, void *bufferp)
 {
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
   if (trad_frame_addr_p (this_saved_regs, regnum))
@@ -166,9 +166,9 @@ trad_frame_get_register (struct trad_frame_cache *this_trad_cache,
 			 enum lval_type *lvalp, CORE_ADDR *addrp,
 			 int *realregp, void *bufferp)
 {
-  trad_frame_prev_register (next_frame, this_trad_cache->prev_regs,
-			    regnum, optimizedp, lvalp, addrp, realregp,
-			    bufferp);
+  trad_frame_get_prev_register (next_frame, this_trad_cache->prev_regs,
+				regnum, optimizedp, lvalp, addrp, realregp,
+				bufferp);
 }
 
 void

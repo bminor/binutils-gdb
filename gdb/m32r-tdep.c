@@ -856,8 +856,8 @@ m32r_frame_prev_register (struct frame_info *next_frame,
 {
   struct m32r_unwind_cache *info
     = m32r_frame_unwind_cache (next_frame, this_prologue_cache);
-  trad_frame_prev_register (next_frame, info->saved_regs, regnum,
-			    optimizedp, lvalp, addrp, realnump, bufferp);
+  trad_frame_get_prev_register (next_frame, info->saved_regs, regnum,
+				optimizedp, lvalp, addrp, realnump, bufferp);
 }
 
 static const struct frame_unwind m32r_frame_unwind = {

@@ -731,9 +731,9 @@ m88k_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 	{
 	  CORE_ADDR pc;
 
-	  trad_frame_prev_register (next_frame, cache->saved_regs,
-				    M88K_SXIP_REGNUM, optimizedp,
-				    lvalp, addrp, realnump, valuep);
+	  trad_frame_get_prev_register (next_frame, cache->saved_regs,
+					M88K_SXIP_REGNUM, optimizedp,
+					lvalp, addrp, realnump, valuep);
 
 	  pc = extract_unsigned_integer (valuep, 4);
 	  if (regnum == M88K_SFIP_REGNUM)
@@ -749,8 +749,8 @@ m88k_frame_prev_register (struct frame_info *next_frame, void **this_cache,
       return;
     }
 
-  trad_frame_prev_register (next_frame, cache->saved_regs, regnum,
-			    optimizedp, lvalp, addrp, realnump, valuep);
+  trad_frame_get_prev_register (next_frame, cache->saved_regs, regnum,
+				optimizedp, lvalp, addrp, realnump, valuep);
 }
 
 static const struct frame_unwind m88k_frame_unwind =
