@@ -1,3 +1,10 @@
+Wed May 21 09:58:10 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* cofflink.c (mark_relocs): Add new function to mark symbols which
+	are used by relocations.  (_bfd_coff_link_input_bfd): Add call to
+	mark_relocs() and code to suppress the skipping of symbols that
+	have thus been marked.
+
 Tue May 20 18:45:26 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coff-sh.c (sh_merge_private_data): New static function.
