@@ -573,16 +573,38 @@ print_address_symbolic (addr, stream, do_demangle, leadin)
      char *leadin;
 {
   CORE_ADDR name_location;
-  register struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (addr);
+  register struct symbol *symbol;
+  char *name;
 
-  /* If nothing comes out, don't print anything symbolic.  */
+  /* First try to find the address in the symbol tables to find
+     static functions. If that doesn't succeed we try the minimal symbol
+     vector for symbols in non-text space.
+     FIXME: Should find a way to get at the static non-text symbols too.  */
   
-  if (msymbol == NULL)
-    return;
+  symbol = find_pc_function (addr);
+  if (symbol)
+    {
+    name_location = BLOCK_START (SYMBOL_BLOCK_VALUE (symbol));
+    if (do_demangle)
+      name = SYMBOL_SOURCE_NAME (symbol);
+    else
+      name = SYMBOL_LINKAGE_NAME (symbol);
+    }
+  else
+    {
+    register struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (addr);
 
-  /* If the nearest symbol is too far away, ditto.  */
+    /* If nothing comes out, don't print anything symbolic.  */
+    if (msymbol == NULL)
+      return;
+    name_location = SYMBOL_VALUE_ADDRESS (msymbol);
+    if (do_demangle)
+      name = SYMBOL_SOURCE_NAME (msymbol);
+    else
+      name = SYMBOL_LINKAGE_NAME (msymbol);
+    }
 
-  name_location = SYMBOL_VALUE_ADDRESS (msymbol);
+  /* If the nearest symbol is too far away, don't print anything symbolic.  */
 
   /* For when CORE_ADDR is larger than unsigned int, we do math in
      CORE_ADDR.  But when we detect unsigned wraparound in the
@@ -595,10 +617,7 @@ print_address_symbolic (addr, stream, do_demangle, leadin)
 
   fputs_filtered (leadin, stream);
   fputs_filtered ("<", stream);
-  if (do_demangle)
-    fputs_filtered (SYMBOL_SOURCE_NAME (msymbol), stream);
-  else
-    fputs_filtered (SYMBOL_LINKAGE_NAME (msymbol), stream);
+  fputs_filtered (name, stream);
   if (addr != name_location)
     fprintf_filtered (stream, "+%d>", (int)(addr - name_location));
   else

@@ -1,3 +1,8 @@
+Fri Apr 23 01:28:14 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* printcmd.c (print_address_symbolic): Search symtabs as well as the
+	minimal symbols for a nearby symbol.
+
 Thu Apr 22 19:44:21 1993  John Gilmore  (gnu@cacophony.cygnus.com)
 
 	* coffread.c:  Comment changes around minimal symbol recording.
