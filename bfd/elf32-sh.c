@@ -464,7 +464,7 @@ sh_elf_reloc_loop (r_type, input_bfd, input_section, contents, addr,
      bfd_vma start, end;
 {
   static bfd_vma last_addr;
-  asection *last_symbol_section;
+  static asection *last_symbol_section;
   bfd_byte *free_contents = NULL;
   bfd_byte *start_ptr, *ptr, *last_ptr;
   int diff, cum_diff;
