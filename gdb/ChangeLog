@@ -1,5 +1,11 @@
 2004-07-16  Andrew Cagney  <cagney@gnu.org>
 
+	* infrun.c (insert_step_resume_breakpoint): Delete gdb_assert
+	calls, no longer applicable.  Update comments and rename parameter
+	"step_frame" to "return_frame".
+
+2004-07-16  Andrew Cagney  <cagney@gnu.org>
+
 	* frame.c (fprint_field): New function.
 	(fprint_frame_id): Use fprint_field.
 

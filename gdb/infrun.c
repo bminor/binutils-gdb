@@ -2659,36 +2659,35 @@ step_into_function (struct execution_control_state *ecs)
   keep_going (ecs);
 }
 
-/* The inferior, as a result of a function call (has left) or signal
-   (about to leave) the single-step range.  Set a momentary breakpoint
-   within the step range where the inferior is expected to later
-   return.  */
+/* Insert a "step resume breakpoint" at RETURN_FRAME.pc.  This is used
+   to skip a function (next, skip-no-debug) or signal.  It's assumed
+   that the function/signal handler being skipped eventually returns
+   to the breakpoint inserted at RETURN_FRAME.pc.
+
+   For the skip-function case, the function may have been reached by
+   either single stepping a call / return / signal-return instruction,
+   or by hitting a breakpoint.  In all cases, the RETURN_FRAME belongs
+   to the skip-function's caller.
+
+   For the signals case, this is called with the interrupted
+   function's frame.  The signal handler, when it returns, will resume
+   the interrupted function at RETURN_FRAME.pc.  */
 
 static void
-insert_step_resume_breakpoint (struct frame_info *step_frame,
+insert_step_resume_breakpoint (struct frame_info *return_frame,
 			       struct execution_control_state *ecs)
 {
   struct symtab_and_line sr_sal;
 
-  /* This is only used within the step-resume range/frame.  */
-  gdb_assert (frame_id_eq (step_frame_id, get_frame_id (step_frame)));
-  gdb_assert (step_range_end != 0);
-  /* Remember, if the call instruction is the last in the step range,
-     the breakpoint will land just beyond that.  Hence ``<=
-     step_range_end''.  Also, ignore check when "nexti".  */
-  gdb_assert (step_range_start == step_range_end
-	      || (get_frame_pc (step_frame) >= step_range_start
-		  && get_frame_pc (step_frame) <= step_range_end));
-
   init_sal (&sr_sal);		/* initialize to zeros */
 
-  sr_sal.pc = ADDR_BITS_REMOVE (get_frame_pc (step_frame));
+  sr_sal.pc = ADDR_BITS_REMOVE (get_frame_pc (return_frame));
   sr_sal.section = find_pc_overlay (sr_sal.pc);
 
   check_for_old_step_resume_breakpoint ();
 
   step_resume_breakpoint
-    = set_momentary_breakpoint (sr_sal, get_frame_id (step_frame),
+    = set_momentary_breakpoint (sr_sal, get_frame_id (return_frame),
 				bp_step_resume);
 
   if (breakpoints_inserted)
