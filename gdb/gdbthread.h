@@ -50,6 +50,4 @@ extern void save_infrun_state PARAMS ((int, CORE_ADDR, CORE_ADDR, char *,
 /* Commands with a prefix of `thread'.  */
 extern struct cmd_list_element *thread_cmd_list;
 
-extern void _initialize_thread PARAMS ((void));
-
 #endif	/* GDBTHREAD_H */

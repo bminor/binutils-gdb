@@ -1,5 +1,5 @@
 /* Annotation routines for GDB.
-   Copyright 1986, 1989, 1990, 1991, 1992, 1995 Free Software Foundation, Inc.
+   Copyright 1986, 89, 90, 91, 92, 95, 1998 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -24,7 +24,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbtypes.h"
 #include "breakpoint.h"
 
+
+/* Prototypes for local functions. */
+
 static void print_value_flags PARAMS ((struct type *));
+
 static void breakpoint_changed PARAMS ((struct breakpoint *));
 
 void (*annotate_starting_hook) PARAMS ((void));

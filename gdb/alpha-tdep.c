@@ -1,5 +1,5 @@
 /* Target-dependent code for the ALPHA architecture, for GDB, the GNU Debugger.
-   Copyright 1993, 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
+   Copyright 1993, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -35,7 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 extern struct obstack frame_cache_obstack;
 
 
-/* Forward declarations.  */
+/* Prototypes for local functions. */
 
 static alpha_extra_func_info_t push_sigtramp_desc PARAMS ((CORE_ADDR low_addr));
 

@@ -1,6 +1,6 @@
 /* Implement a cached obstack.
    Written by Fred Fish (fnf@cygnus.com)
-   Copyright 1995 Free Software Foundation, Inc.
+   Copyright 1995, 1998 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -23,7 +23,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bcache.h"
 #include "gdb_string.h"		/* For memcpy declaration */
 
+/* Prototypes for local functions. */
+
 static unsigned int hash PARAMS ((void *, int));
+
 static void *lookup_cache PARAMS ((void *, int, int, struct bcache *));
 
 /* FIXME:  Incredibly simplistic hash generator.  Probably way too expensive

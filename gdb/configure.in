@@ -113,6 +113,13 @@ fi
 dnl See if host has libm.  This is usually needed by simulators.
 AC_CHECK_LIB(m, main)
 
+dnl Solaris puts wctype in /usr/lib/libw.a before Solaris 2.6.
+dnl
+dnl A bug in GNU ld 2.9.1 causes a problem if we link in -lw 
+dnl under Solaris 2.6 because it is some funky empty library.
+dnl So only link in libw if we have to.
+AC_CHECK_LIB(c, wctype,: ,AC_CHECK_LIB(w, wctype))
+
 dnl See if compiler supports "long long" type.
 
 AC_MSG_CHECKING(for long long support in compiler)
@@ -676,9 +683,6 @@ AC_ARG_WITH(sim-funit,
   *)  AC_MSG_WARN([--with-sim-funit option invalid for target ${target}])
 esac])dnl
 # end-sanitize-sky
-
-dnl Solaris puts wctype in /usr/lib/libw.a
-AC_CHECK_LIB(w, wctype, [LIBS="$LIBS -lw"])
 
 AC_SUBST(ENABLE_CFLAGS)
 

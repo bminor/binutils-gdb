@@ -1,5 +1,5 @@
 /* Low level packing and unpacking of values for GDB, the GNU Debugger.
-   Copyright 1986, 1987, 1989, 1991, 1993, 1994, 1995, 1996, 1997
+   Copyright 1986, 87, 89, 91, 93, 94, 95, 96, 97, 1998
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -32,7 +32,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "scm-lang.h"
 #include "demangle.h"
 
-/* Local function prototypes. */
+/* Prototypes for exported functions. */
+
+void _initialize_values PARAMS ((void));
+
+/* Prototypes for local functions. */
 
 static value_ptr value_headof PARAMS ((value_ptr, struct type *,
 				       struct type *));
