@@ -1565,6 +1565,10 @@ command_line_input (prrompt, repeat, annotation_suffix)
   char *nline;
   char got_eof = 0;
 
+  /* The annotation suffix must be non-NULL.  */
+  if (annotation_suffix == NULL)
+    annotation_suffix = "";
+
   if (annotation_level > 1 && instream == stdin)
     {
       local_prompt = alloca ((prrompt == NULL ? 0 : strlen (prrompt))
@@ -1841,7 +1845,7 @@ read_next_line (command)
   else
     prompt_ptr = NULL;
 
-  p = command_line_input (prompt_ptr, instream == stdin, NULL);
+  p = command_line_input (prompt_ptr, instream == stdin, "command");
 
   /* Not sure what to do here.  */
   if (p == NULL)

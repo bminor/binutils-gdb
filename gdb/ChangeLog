@@ -1,3 +1,10 @@
+Mon Nov 28 14:53:21 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* top.c (command_line_input): If annotation suffix is NULL,
+	replace it with an empty string.
+	(read_next_line): Pass "command" as annotation suffix to
+	command_line_input.
+
 Mon Nov 28 11:03:14 1994  J.T. Conklin  (jtc@rtl.cygnus.com)
 
 	* config/rs6000/tm-rs6000.h (setpgrp): move defn from here...
