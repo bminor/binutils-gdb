@@ -2005,7 +2005,18 @@ parse_procedure (pr, search_symtab, pst)
       e = (struct mips_extra_func_info *) SYMBOL_VALUE (i);
       e->pdr = *pr;
       e->pdr.isym = (long) s;
-      e->pdr.adr += cur_fdr->adr;  /* PDR address is relative to FDR address */
+
+      /* GDB expects the absolute function start address for the
+	 procedure descriptor in e->pdr.adr.
+	 As the address in the procedure descriptor is usually relative,
+	 we would have to relocate e->pdr.adr with cur_fdr->adr and
+	 ANOFFSET (pst->section_offsets, SECT_OFF_TEXT).
+	 Unfortunately cur_fdr->adr and e->pdr.adr are both absolute
+	 in shared libraries on some systems, and on other systems
+	 e->pdr.adr is sometimes offset by a bogus value.
+	 To work around these problems, we replace e->pdr.adr with
+	 the start address of the function.  */
+      e->pdr.adr = BLOCK_START (b);
 
       /* Correct incorrect setjmp procedure descriptor from the library
 	 to make backtrace through setjmp work.  */
