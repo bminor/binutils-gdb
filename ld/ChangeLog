@@ -1,3 +1,13 @@
+Thu Jan 26 12:33:05 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in: Add support for powerpc-*-eabi.
+
+	* scripttempl/elfppc.sc: New file for PowerPC embedded ABI
+	support.
+
+	* emulparams/elf32ppc.sh (SCRIPT_NAME): Use elfppc.sc instead of
+	elf.sc, which defines some new symbols PowerPC elf needs.
+
 Tue Jan 24 10:32:15 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* ldctor.c (ldctor_add_set_entry): Don't dump core if a
