@@ -91,7 +91,7 @@ all.cross: all-bison all-ld all-gnulib all-gdb
 clean: clean-libiberty clean-texinfo clean-bfd clean-binutils clean-bison \
 	clean-byacc clean-ld clean-gas clean-gcc clean-gnulib clean-readline \
 	clean-glob clean-gdb clean-make clean-diff clean-grep clean-rcs \
-	clean-cvs clean-emacs clean-ispell
+	clean-gdbm clean-cvs clean-emacs clean-ispell
 	rm -rf *.a TEMP errs core *.o *~ \#* TAGS *.E
 
 install: $(INSTALL_TARGET)
