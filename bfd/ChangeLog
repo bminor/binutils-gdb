@@ -1,5 +1,10 @@
 Wed Jun 26 16:29:02 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coff-alpha.c (alpha_adjust_reloc_in): Set the addend for a
+	BRADDR, SREL16, SREL32, or SREL64 reloc against an external
+	symbol.
+	(alpha_relocate_section): Likewise.
+
 	* coffswap.h (coff_swap_reloc_out): Use RELSZ, not sizeof.
 	(coff_swap_filehdr_out): Use FILHSZ, not sizeof.
 	(coff_swap_sym_out): Use SYMESZ, not sizeof.
