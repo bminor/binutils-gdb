@@ -32,6 +32,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define GDB_TARGET_IS_MIPS64 0
 #endif
 
+/* CYGNUS LOCAL jsmith */
+#if !defined (TARGET_MONITOR_PROMPT)
+#define TARGET_MONITOR_PROMPT { '<', 'I', 'D', 'T', '>' }
+#endif
+/* END CYGNUS LOCAL */
+
 /* Floating point is IEEE compliant */
 #define IEEE_FLOAT
 

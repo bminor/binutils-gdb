@@ -327,13 +327,19 @@ mips_error (va_alist)
    convenient for DejaGnu when you only have one connected serial
    port.  */
 
+/* CYGNUS LOCAL jsmith */
+/* The old code assumed a 5 character identification string, making it
+   a chore to change the string value.  However, we need to ensure
+   that the method of ascertaining the length of the string is
+   completely portable, without resorting to calling strlen(). */
+
 static int
 mips_readchar (timeout)
      int timeout;
 {
   int ch;
   static int state = 0;
-  static char nextstate[5] = { '<', 'I', 'D', 'T', '>' };
+  static char nextstate[] = TARGET_MONITOR_PROMPT; /* CYGNUS LOCAL jsmith */
 #ifdef MAINTENANCE_CMDS
   int i;
 
@@ -342,7 +348,7 @@ mips_readchar (timeout)
     i = watchdog;
 #endif
 
-  if (state == 5) 
+  if (state == (sizeof(nextstate) / sizeof(char))) /* CYGNUS LOCAL jsmith */
     timeout = 1;
   ch = SERIAL_READCHAR (mips_desc, timeout);
 #ifdef MAINTENANCE_CMDS
@@ -372,7 +378,7 @@ mips_readchar (timeout)
      (which is not echoed) is always an @ unless the packet is more
      than 64 characters long, which ours never are.  */
   if ((ch == SERIAL_TIMEOUT || ch == '@')
-      && state == 5
+      && state == (sizeof(nextstate) / sizeof(char)) /* CYGNUS LOCAL jsmith */
       && ! mips_initializing)
     {
       if (sr_get_debug () > 0)

@@ -1,3 +1,12 @@
+Fri Sep  1 08:25:50 1995  James G. Smith  <jsmith@beauty.cygnus.com>
+
+	* configure (mips64*vr4300*-*-elf): Support added.
+	* remote-mips.c (mips_readchar): Change to allow build-time prompt
+ 	string.
+	* config/mips/tm-mips.h: Added TARGET_MONITOR_PROMPT.
+	* config/mips/{vr4300.mt, vr4300el.mt, tm-vr4300.h,
+ 	tm-vr4300el.h}: Added.
+
 Thu Aug 31 12:48:04 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* config/sh/sh.mt (SIM): Add -lm.
