@@ -1,3 +1,15 @@
+2003-10-06      Matt Thomas <matt@3am-software.com>
+
+         Switch NetBSD/hppa to use Linux PA-RISC ELF ABI and
+         assembler syntax.
+
+         tc-hppa.c: Add "%farg[0-3]", "%fret", "%t[1-4]", "%tf[1-4]"
+         register names.  Change all "defined (TE_LINUX)" to
+         "(defined (TE_LINUX) || defined (TE_NETBSD))".
+
+         tc-hppa.h: Make NetBSD use "elfXX-hppa-linux" bfd target.
+         Remove NetBSD's use of LABELS_WITHOUT_COLONS.
+
 2003-10-06  Robert Millan  <robertmh@gnu.org>
 
 	* configure.in: Match GNU/KNetBSD with new knetbsd*-gnu	triplet.

@@ -1,3 +1,7 @@
+2003-10-06  Matt Thomas <matt@3am-software.com>
+
+         config.bfd: Move the hppa*-*-netbsd* case to the hppa*-*-linux* case.
+
 2003-10-06  Robert Millan  <robertmh@gnu.org>
 
 	* configure.in: Match GNU/KNetBSD with new knetbsd*-gnu triplet.
