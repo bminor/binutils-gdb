@@ -6,7 +6,7 @@
 
 2004-01-24  Mark Kettenis  <kettenis@gnu.org>
 
-	* sparc64-tdep.h (stryct_frame_info, struct trad_frame_saved_reg):
+	* sparc64-tdep.h (struct frame_info, struct trad_frame_saved_reg):
 	Add opaque declarations.
 	(sparc64nbsd_sigcontext_saved_regs): New prototype.
 	* sparc64nbsd-tdep.c (sparc64nbsd_sigcontext_saved_regs): New
