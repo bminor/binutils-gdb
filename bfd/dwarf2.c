@@ -1676,7 +1676,7 @@ find_debug_info (bfd *abfd, asection *after_sec)
   return NULL;
 }
 
-/* The DWARF2 version of find_nearest line.  Return TRUE if the line
+/* The DWARF2 version of find_nearest_line.  Return TRUE if the line
    is found without error.  ADDR_SIZE is the number of bytes in the
    initial .debug_info length field and in the abbreviation offset.
    You may use zero to indicate that the default value should be
