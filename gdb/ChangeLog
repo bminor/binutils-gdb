@@ -1,5 +1,7 @@
 2001-12-27  Michael Snyder  <msnyder@redhat.com>
 
+	* i386-linux-nat.c: Include i386-tdep.h.
+
 	* maint.c (match_substring): GNU coding standards fixes.
 	(print_bfd_section_info): Ditto.
 	(print_objfile_section_info): Ditto.

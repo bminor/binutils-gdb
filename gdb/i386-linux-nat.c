@@ -58,6 +58,9 @@
 /* Prototypes for i387_supply_fsave etc.  */
 #include "i387-nat.h"
 
+/* Defines for XMM0_REGNUM etc. */
+#include "i386-tdep.h"
+
 /* Prototypes for local functions.  */
 static void dummy_sse_values (void);
 
