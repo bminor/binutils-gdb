@@ -1,5 +1,8 @@
 2003-06-21  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.c (mips_dump_tdep): Do not print
+	REGISTER_CONVERT_FROM_TYPE or REGISTER_CONVERT_TO_TYPE.
+
 	* frame.c (get_frame_register): New function.
 	(frame_unwind_register_signed): New function.
 	(get_frame_register_signed): New function.

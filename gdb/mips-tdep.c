@@ -6259,12 +6259,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		      "mips_dump_tdep: RA_REGNUM = %d\n",
 		      RA_REGNUM);
   fprintf_unfiltered (file,
-		      "mips_dump_tdep: REGISTER_CONVERT_FROM_TYPE # %s\n",
-		      XSTRING (REGISTER_CONVERT_FROM_TYPE (REGNUM, VALTYPE, RAW_BUFFER)));
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: REGISTER_CONVERT_TO_TYPE # %s\n",
-		      XSTRING (REGISTER_CONVERT_TO_TYPE (REGNUM, VALTYPE, RAW_BUFFER)));
-  fprintf_unfiltered (file,
 		      "mips_dump_tdep: REGISTER_NAMES = delete?\n");
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: ROUND_DOWN = function?\n");
