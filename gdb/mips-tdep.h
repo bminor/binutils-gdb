@@ -40,4 +40,7 @@ enum mips_abi
 /* Return the MIPS ABI associated with GDBARCH.  */
 enum mips_abi mips_abi (struct gdbarch *gdbarch);
 
+/* For wince :-(.  */
+extern CORE_ADDR mips_next_pc (CORE_ADDR pc);
+
 #endif /* MIPS_TDEP_H */

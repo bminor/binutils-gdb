@@ -202,7 +202,7 @@ mcore_register_name (int regnum)
    instructions are 16 bits, this is all we need, regardless of
    address. bpkt = 0x0000 */
 
-const unsigned char *
+static const unsigned char *
 mcore_breakpoint_from_pc (CORE_ADDR * bp_addr, int *bp_size)
 {
   static char breakpoint[] =
@@ -606,7 +606,7 @@ mcore_analyze_prologue (struct frame_info *fi, CORE_ADDR pc, int skip_prologue)
    then DEPRECATED_INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC
    will be called for the new frame. */
 
-CORE_ADDR
+static CORE_ADDR
 mcore_frame_chain (struct frame_info * fi)
 {
   struct frame_info *dummy;
@@ -664,7 +664,7 @@ mcore_frame_chain (struct frame_info * fi)
 
 /* Skip the prologue of the function at PC. */
 
-CORE_ADDR
+static CORE_ADDR
 mcore_skip_prologue (CORE_ADDR pc)
 {
   CORE_ADDR func_addr, func_end;
@@ -684,13 +684,13 @@ mcore_skip_prologue (CORE_ADDR pc)
 }
 
 /* Return the address at which function arguments are offset. */
-CORE_ADDR
+static CORE_ADDR
 mcore_frame_args_address (struct frame_info * fi)
 {
   return get_frame_base (fi) - get_frame_extra_info (fi)->framesize;
 }
 
-CORE_ADDR
+static CORE_ADDR
 mcore_frame_locals_address (struct frame_info * fi)
 {
   return get_frame_base (fi) - get_frame_extra_info (fi)->framesize;
@@ -716,7 +716,7 @@ mcore_virtual_frame_pointer (CORE_ADDR pc, int *reg, LONGEST *offset)
 
 /* Find the value of register REGNUM in frame FI. */
 
-CORE_ADDR
+static CORE_ADDR
 mcore_find_callers_reg (struct frame_info *fi, int regnum)
 {
   for (; fi != NULL; fi = get_next_frame (fi))
@@ -735,7 +735,7 @@ mcore_find_callers_reg (struct frame_info *fi, int regnum)
 
 /* Find the saved pc in frame FI. */
 
-CORE_ADDR
+static CORE_ADDR
 mcore_frame_saved_pc (struct frame_info * fi)
 {
 
@@ -802,7 +802,7 @@ mcore_pop_frame (void)
    FIRST_ARGREG, since the MCORE treats struct returns (of less than eight
    bytes) as hidden first arguments. */
 
-CORE_ADDR
+static CORE_ADDR
 mcore_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		      int struct_return, CORE_ADDR struct_addr)
 {
@@ -912,7 +912,7 @@ mcore_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
    opted to use generic call dummies, so we simply store the
    CALL_DUMMY_ADDRESS into the PR register (r15). */
 
-CORE_ADDR
+static CORE_ADDR
 mcore_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   write_register (PR_REGNUM, CALL_DUMMY_ADDRESS ());
@@ -938,7 +938,7 @@ mcore_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
    EXTRACT_RETURN_VALUE?  GCC_P is true if compiled with gcc
    and TYPE is the type (which is known to be struct, union or array). */
 
-int
+static int
 mcore_use_struct_convention (int gcc_p, struct type *type)
 {
   return (TYPE_LENGTH (type) > 8);
@@ -948,7 +948,7 @@ mcore_use_struct_convention (int gcc_p, struct type *type)
    this buffer was passed as a hidden first argument, so
    just return that address. */
 
-CORE_ADDR
+static CORE_ADDR
 mcore_extract_struct_value_address (char *regbuf)
 {
   return extract_unsigned_integer (regbuf + REGISTER_BYTE (FIRST_ARGREG), DEPRECATED_REGISTER_SIZE);
@@ -958,7 +958,7 @@ mcore_extract_struct_value_address (char *regbuf)
    the function's return value and place the result into VALBUF.
    REGBUF is the register contents of the target. */
 
-void
+static void
 mcore_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 {
   /* Copy the return value (starting) in RETVAL_REGNUM to VALBUF. */
@@ -978,7 +978,7 @@ mcore_extract_return_value (struct type *type, char *regbuf, char *valbuf)
    significant word) and r3 (least significant word, left justified).
    Note that this includes structures of less than eight bytes, too. */
 
-void
+static void
 mcore_store_return_value (struct type *type, char *valbuf)
 {
   int value_size;
@@ -1004,7 +1004,7 @@ mcore_store_return_value (struct type *type, char *valbuf)
    This includes allocating space for saved registers and analyzing
    the prologue of this frame. */
 
-void
+static void
 mcore_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   if (fi && get_next_frame (fi))

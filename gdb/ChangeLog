@@ -1,3 +1,10 @@
+2003-06-12  Andrew Cagney  <cagney@redhat.com>
+
+	* wince.c: Include "mips-tdep.h".
+	* mips-tdep.h (mips_next_pc): Declare.
+	* mcore-tdep.c: Make more local functions static.
+	* Makefile.in (wince.o): Update dependencies.
+
 2003-06-12  David Carlton  <carlton@kealia.com>
 
 	* symtab.c (lookup_symbol_aux_minsyms): Replace
