@@ -80,7 +80,7 @@ fetch_osf_core_registers (char *core_reg_sect, unsigned core_reg_size,
     EFL + 8, EFL + 9, EFL + 10, EFL + 11, EFL + 12, EFL + 13, EFL + 14, EFL + 15,
     EFL + 16, EFL + 17, EFL + 18, EFL + 19, EFL + 20, EFL + 21, EFL + 22, EFL + 23,
     EFL + 24, EFL + 25, EFL + 26, EFL + 27, EFL + 28, EFL + 29, EFL + 30, EFL + 31,
-    CF_PC, -1
+    CF_PC, -1, -1
 #else
 #define EFL (EF_SIZE / 8)
     EF_V0, EF_T0, EF_T1, EF_T2, EF_T3, EF_T4, EF_T5, EF_T6,
@@ -91,7 +91,7 @@ fetch_osf_core_registers (char *core_reg_sect, unsigned core_reg_size,
     EFL + 8, EFL + 9, EFL + 10, EFL + 11, EFL + 12, EFL + 13, EFL + 14, EFL + 15,
     EFL + 16, EFL + 17, EFL + 18, EFL + 19, EFL + 20, EFL + 21, EFL + 22, EFL + 23,
     EFL + 24, EFL + 25, EFL + 26, EFL + 27, EFL + 28, EFL + 29, EFL + 30, EFL + 31,
-    EF_PC, -1
+    EF_PC, -1, -1
 #endif
   };
 

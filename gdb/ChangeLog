@@ -1,5 +1,15 @@
 2004-12-01  Joel Brobecker  <brobecker@gnat.com>
 
+	* alpha-tdep.c (alpha_register_name): Add comment.
+	(alpha_cannot_fetch_register): Exclude registers numbers which
+	are no longer used from the list of registers that can be fetched.
+	(alpha_cannot_store_register): Exclude registers numbers which
+	are no longer used from the list of registers that can be stored.
+	* alpha-nat.c (fetch_osf_core_registers): Add missing value in
+	core_reg_mapping array.
+
+2004-12-01  Joel Brobecker  <brobecker@gnat.com>
+
 	* alpha-tdep.c (alpha_heuristic_frame_prev_register): Fetch
 	the register value from the correct frame.
 

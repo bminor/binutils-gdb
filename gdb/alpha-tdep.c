@@ -47,6 +47,13 @@
 #include "alpha-tdep.h"
 
 
+/* Return the name of the REGNO register.
+
+   An empty name corresponds to a register number that used to
+   be used for a virtual register. That virtual register has
+   been removed, but the index is still reserved to maintain
+   compatibility with existing remote alpha targets.  */
+
 static const char *
 alpha_register_name (int regno)
 {
@@ -73,13 +80,15 @@ alpha_register_name (int regno)
 static int
 alpha_cannot_fetch_register (int regno)
 {
-  return regno == ALPHA_ZERO_REGNUM;
+  return (regno == ALPHA_ZERO_REGNUM
+          || strlen (alpha_register_name (regno)) == 0);
 }
 
 static int
 alpha_cannot_store_register (int regno)
 {
-  return regno == ALPHA_ZERO_REGNUM;
+  return (regno == ALPHA_ZERO_REGNUM
+          || strlen (alpha_register_name (regno)) == 0);
 }
 
 static struct type *
