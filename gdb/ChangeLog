@@ -1,5 +1,9 @@
 2003-08-10  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386bsd-nat.c (fetch_inferior_registers,
+	store_inferior_registers): Don't use && at the end of a line.
+	(_initialize_i386bsd_nat): Fix typo.
+
 	* frame.c (_initialize_frame): Add missing backslash.
 
 	From Peter Schauer (Peter.Schauer@regent.e-technik.tu-muenchen.de):

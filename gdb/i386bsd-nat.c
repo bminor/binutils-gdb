@@ -196,9 +196,9 @@ fetch_inferior_registers (int regno)
 #ifdef HAVE_PT_GETXMMREGS
       char xmmregs[512];
 
-      if (have_ptrace_xmmregs != 0 &&
-	  ptrace(PT_GETXMMREGS, PIDGET (inferior_ptid),
-		 (PTRACE_ARG3_TYPE) xmmregs, 0) == 0)
+      if (have_ptrace_xmmregs != 0
+	  && ptrace(PT_GETXMMREGS, PIDGET (inferior_ptid),
+		    (PTRACE_ARG3_TYPE) xmmregs, 0) == 0)
 	{
 	  have_ptrace_xmmregs = 1;
 	  i387_supply_fxsave (xmmregs);
@@ -252,9 +252,9 @@ store_inferior_registers (int regno)
 #ifdef HAVE_PT_GETXMMREGS
       char xmmregs[512];
 
-      if (have_ptrace_xmmregs != 0 &&
-	  ptrace(PT_GETXMMREGS, PIDGET (inferior_ptid),
-		 (PTRACE_ARG3_TYPE) xmmregs, 0) == 0)
+      if (have_ptrace_xmmregs != 0
+	  && ptrace(PT_GETXMMREGS, PIDGET (inferior_ptid),
+		    (PTRACE_ARG3_TYPE) xmmregs, 0) == 0)
 	{
 	  have_ptrace_xmmregs = 1;
 
@@ -408,7 +408,7 @@ _initialize_i386bsd_nat (void)
 #define SC_REG_OFFSET i386obsd_sc_reg_offset
 #else
   extern int i386bsd_sc_reg_offset[];
-#define SC_PC_OFFSET i386bsd_sc_reg_offset
+#define SC_REG_OFFSET i386bsd_sc_reg_offset
 #endif
 
   /* We only check the program counter, stack pointer and frame
