@@ -82,6 +82,9 @@ static int
 compact_minimal_symbols PARAMS ((struct minimal_symbol *, int,
 				 struct objfile *));
 
+static void add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
+						struct minimal_symbol **table);
+
 /* Compute a hash code based using the same criteria as `strcmp_iw'.  */
 
 unsigned int

@@ -1,3 +1,9 @@
+Mon Apr  3 14:45:25 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* symtab.h (add_minsym_to_demangled_hash_table): Revert 2000-03-29
+ 	Daniel Berlin <dan@cgsoftware.com>.  Function was static.
+	* minsyms.c (add_minsym_to_demangled_hash_table): Add prototype.
+
 Mon Apr  3 14:10:37 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb-events.h, gdb-events.c, gdb-events.sh: Re-indent.

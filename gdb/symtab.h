@@ -311,7 +311,7 @@ struct minimal_symbol
        so it doesn't have to rederive the info constantly (over a serial line).
        It is initialized to zero and stays that way until target-dependent code
        sets it.  Storage for any data pointed to by this field should be allo-
-       cated on the symbol_obstack for the associated objfile.
+       cated on the symbol_obstack for the associated objfile.  
        The type would be "void *" except for reasons of compatibility with older
        compilers.  This field is optional.
 
@@ -738,7 +738,7 @@ struct symbol
    symbols whose types we have not parsed yet.  For functions, it also
    contains their memory address, so we can find them from a PC value.
    Each partial_symbol sits in a partial_symtab, all of which are chained
-   on a  partial symtab list and which points to the corresponding
+   on a  partial symtab list and which points to the corresponding 
    normal symtab once the partial_symtab has been referenced.  */
 
 struct partial_symbol
@@ -837,7 +837,7 @@ struct section_offsets
   (sizeof (struct section_offsets) \
    + sizeof (((struct section_offsets *) 0)->offsets) * (SECT_OFF_MAX-1))
 
-/* Each source file or header is represented by a struct symtab.
+/* Each source file or header is represented by a struct symtab. 
    These objects are chained through the `next' field.  */
 
 struct symtab
@@ -1032,7 +1032,7 @@ struct partial_symtab
 
 
 /* The virtual function table is now an array of structures which have the
-   form { int16 offset, delta; void *pfn; }.
+   form { int16 offset, delta; void *pfn; }. 
 
    In normal virtual function tables, OFFSET is unused.
    DELTA is the amount which is added to the apparent object's base
@@ -1240,9 +1240,6 @@ extern unsigned int msymbol_hash PARAMS ((const char *));
 extern void
 add_minsym_to_hash_table (struct minimal_symbol *sym,
 			  struct minimal_symbol **table);
-extern void
-add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
-				    struct minimal_symbol **table);
 
 extern struct minimal_symbol *
   lookup_minimal_symbol PARAMS ((const char *, const char *, struct objfile *));
