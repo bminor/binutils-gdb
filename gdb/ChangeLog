@@ -1,3 +1,12 @@
+2002-01-15  Michael Snyder  <msnyder@redhat.com>
+
+	* symfile.c (generic_load): Use bfd_map_over_sections method
+	instead of manipulating bfd structure members directly.
+	(add_section_size_callback): New function, bfd sections callback
+	used by generic_load.
+	(load_sections_callback): New function, bfd sections callback
+	used by generic_load.
+
 2002-01-15  Elena Zannoni  <ezannoni@redhat.com>
 
 	[Based on work by Jim Blandy] 

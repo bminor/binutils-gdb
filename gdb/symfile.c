@@ -1174,19 +1174,139 @@ load_command (char *arg, int from_tty)
 static int download_write_size = 512;
 static int validate_download = 0;
 
+/* Callback service function for generic_load (bfd_map_over_sections).  */
+
+static void
+add_section_size_callback (bfd *abfd, asection *asec, void *data)
+{
+  bfd_size_type *sum = data;
+
+  *sum += bfd_get_section_size_before_reloc (asec);
+}
+
+/* Opaque data for load_section_callback.  */
+struct load_section_data {
+  unsigned long load_offset;
+  unsigned long write_count;
+  unsigned long data_count;
+  bfd_size_type total_size;
+};
+
+/* Callback service function for generic_load (bfd_map_over_sections).  */
+
+static void
+load_section_callback (bfd *abfd, asection *asec, void *data)
+{
+  struct load_section_data *args = data;
+
+  if (bfd_get_section_flags (abfd, asec) & SEC_LOAD)
+    {
+      bfd_size_type size = bfd_get_section_size_before_reloc (asec);
+      if (size > 0)
+	{
+	  char *buffer;
+	  struct cleanup *old_chain;
+	  CORE_ADDR lma = bfd_section_lma (abfd, asec) + args->load_offset;
+	  bfd_size_type block_size;
+	  int err;
+	  const char *sect_name = bfd_get_section_name (abfd, asec);
+	  bfd_size_type sent;
+
+	  if (download_write_size > 0 && size > download_write_size)
+	    block_size = download_write_size;
+	  else
+	    block_size = size;
+
+	  buffer = xmalloc (size);
+	  old_chain = make_cleanup (xfree, buffer);
+
+	  /* Is this really necessary?  I guess it gives the user something
+	     to look at during a long download.  */
+#ifdef UI_OUT
+	  ui_out_message (uiout, 0, "Loading section %s, size 0x%s lma 0x%s\n",
+			  sect_name, paddr_nz (size), paddr_nz (lma));
+#else
+	  fprintf_unfiltered (gdb_stdout,
+			      "Loading section %s, size 0x%s lma 0x%s\n",
+			      sect_name, paddr_nz (size), paddr_nz (lma));
+#endif
+
+	  bfd_get_section_contents (abfd, asec, buffer, 0, size);
+
+	  sent = 0;
+	  do
+	    {
+	      int len;
+	      bfd_size_type this_transfer = size - sent;
+
+	      if (this_transfer >= block_size)
+		this_transfer = block_size;
+	      len = target_write_memory_partial (lma, buffer,
+						 this_transfer, &err);
+	      if (err)
+		break;
+	      if (validate_download)
+		{
+		  /* Broken memories and broken monitors manifest
+		     themselves here when bring new computers to
+		     life.  This doubles already slow downloads.  */
+		  /* NOTE: cagney/1999-10-18: A more efficient
+		     implementation might add a verify_memory()
+		     method to the target vector and then use
+		     that.  remote.c could implement that method
+		     using the ``qCRC'' packet.  */
+		  char *check = xmalloc (len);
+		  struct cleanup *verify_cleanups = 
+		    make_cleanup (xfree, check);
+
+		  if (target_read_memory (lma, check, len) != 0)
+		    error ("Download verify read failed at 0x%s",
+			   paddr (lma));
+		  if (memcmp (buffer, check, len) != 0)
+		    error ("Download verify compare failed at 0x%s",
+			   paddr (lma));
+		  do_cleanups (verify_cleanups);
+		}
+	      args->data_count += len;
+	      lma += len;
+	      buffer += len;
+	      args->write_count += 1;
+	      sent += len;
+	      if (quit_flag
+		  || (ui_load_progress_hook != NULL
+		      && ui_load_progress_hook (sect_name, sent)))
+		error ("Canceled the download");
+
+	      if (show_load_progress != NULL)
+		show_load_progress (sect_name, sent, size, 
+				    args->data_count, args->total_size);
+	    }
+	  while (sent < size);
+
+	  if (err != 0)
+	    error ("Memory access error while loading section %s.", sect_name);
+
+	  do_cleanups (old_chain);
+	}
+    }
+}
+
 void
 generic_load (char *args, int from_tty)
 {
   asection *s;
   bfd *loadfile_bfd;
   time_t start_time, end_time;	/* Start and end times of download */
-  unsigned long data_count = 0;	/* Number of bytes transferred to memory */
-  unsigned long write_count = 0;	/* Number of writes needed. */
-  unsigned long load_offset;	/* offset to add to vma for each section */
   char *filename;
   struct cleanup *old_cleanups;
   char *offptr;
-  bfd_size_type total_size = 0;
+  struct load_section_data cbdata;
+  CORE_ADDR entry;
+
+  cbdata.load_offset = 0;	/* Offset to add to vma for each section. */
+  cbdata.write_count = 0;	/* Number of writes needed. */
+  cbdata.data_count = 0;	/* Number of bytes written to target memory. */
+  cbdata.total_size = 0;	/* Total size of all bfd sectors. */
 
   /* Parse the input argument - the user can specify a load offset as
      a second argument. */
@@ -1198,13 +1318,13 @@ generic_load (char *args, int from_tty)
     {
       char *endptr;
 
-      load_offset = strtoul (offptr, &endptr, 0);
+      cbdata.load_offset = strtoul (offptr, &endptr, 0);
       if (offptr == endptr)
 	error ("Invalid download offset:%s\n", offptr);
       *offptr = '\0';
     }
   else
-    load_offset = 0;
+    cbdata.load_offset = 0;
 
   /* Open the file for loading. */
   loadfile_bfd = bfd_openr (filename, gnutarget);
@@ -1225,129 +1345,30 @@ generic_load (char *args, int from_tty)
 	     bfd_errmsg (bfd_get_error ()));
     }
 
-  for (s = loadfile_bfd->sections; s; s = s->next)
-    if (bfd_get_section_flags (loadfile_bfd, s) & SEC_LOAD)
-      total_size += bfd_get_section_size_before_reloc (s);
+  bfd_map_over_sections (loadfile_bfd, add_section_size_callback, 
+			 (void *) &cbdata.total_size);
 
   start_time = time (NULL);
 
-  for (s = loadfile_bfd->sections; s; s = s->next)
-    {
-      if (s->flags & SEC_LOAD)
-	{
-	  bfd_size_type size = bfd_get_section_size_before_reloc (s);
-
-	  if (size > 0)
-	    {
-	      char *buffer;
-	      struct cleanup *old_chain;
-	      CORE_ADDR lma = bfd_section_lma (loadfile_bfd, s) + load_offset;
-	      bfd_size_type block_size;
-	      int err;
-	      const char *sect_name = bfd_get_section_name (loadfile_bfd, s);
-	      bfd_size_type sent;
-
-	      if (download_write_size > 0 && size > download_write_size)
-		block_size = download_write_size;
-	      else
-		block_size = size;
-
-	      buffer = xmalloc (size);
-	      old_chain = make_cleanup (xfree, buffer);
-
-	      /* Is this really necessary?  I guess it gives the user something
-	         to look at during a long download.  */
-#ifdef UI_OUT
-	      ui_out_message (uiout, 0, 
-			      "Loading section %s, size 0x%s lma 0x%s\n",
-			      sect_name, paddr_nz (size), paddr_nz (lma));
-#else
-	      fprintf_unfiltered (gdb_stdout,
-				  "Loading section %s, size 0x%s lma 0x%s\n",
-				  sect_name, paddr_nz (size), paddr_nz (lma));
-#endif
-
-	      bfd_get_section_contents (loadfile_bfd, s, buffer, 0, size);
-
-	      sent = 0;
-	      do
-		{
-		  int len;
-		  bfd_size_type this_transfer = size - sent;
-
-		  if (this_transfer >= block_size)
-		    this_transfer = block_size;
-		  len = target_write_memory_partial (lma, buffer,
-						     this_transfer, &err);
-		  if (err)
-		    break;
-		  if (validate_download)
-		    {
-		      /* Broken memories and broken monitors manifest
-			 themselves here when bring new computers to
-			 life.  This doubles already slow downloads.  */
-		      /* NOTE: cagney/1999-10-18: A more efficient
-                         implementation might add a verify_memory()
-                         method to the target vector and then use
-                         that.  remote.c could implement that method
-                         using the ``qCRC'' packet.  */
-		      char *check = xmalloc (len);
-		      struct cleanup *verify_cleanups = make_cleanup (xfree, 
-								      check);
-
-		      if (target_read_memory (lma, check, len) != 0)
-			error ("Download verify read failed at 0x%s",
-			       paddr (lma));
-		      if (memcmp (buffer, check, len) != 0)
-			error ("Download verify compare failed at 0x%s",
-			       paddr (lma));
-		      do_cleanups (verify_cleanups);
- 		    }
-		  data_count += len;
-		  lma += len;
-		  buffer += len;
-		  write_count += 1;
-		  sent += len;
-		  if (quit_flag
-		      || (ui_load_progress_hook != NULL
-			  && ui_load_progress_hook (sect_name, sent)))
-		    error ("Canceled the download");
-
-		  if (show_load_progress != NULL)
-		    show_load_progress (sect_name, sent, size, 
-					data_count, total_size);
-		}
-	      while (sent < size);
-
-	      if (err != 0)
-		error ("Memory access error while loading section %s.", 
-		       sect_name);
-
-	      do_cleanups (old_chain);
-	    }
-	}
-    }
+  bfd_map_over_sections (loadfile_bfd, load_section_callback, &cbdata);
 
   end_time = time (NULL);
-  {
-    CORE_ADDR entry = bfd_get_start_address (loadfile_bfd);
 
+  entry = bfd_get_start_address (loadfile_bfd);
 #ifdef UI_OUT
-    ui_out_text (uiout, "Start address ");
-    ui_out_field_fmt (uiout, "address", "0x%s", paddr_nz (entry));
-    ui_out_text (uiout, ", load size ");
-    ui_out_field_fmt (uiout, "load-size", "%lu", data_count);
-    ui_out_text (uiout, "\n");
-
+  ui_out_text (uiout, "Start address ");
+  ui_out_field_fmt (uiout, "address", "0x%s", paddr_nz (entry));
+  ui_out_text (uiout, ", load size ");
+  ui_out_field_fmt (uiout, "load-size", "%lu", cbdata.data_count);
+  ui_out_text (uiout, "\n");
 #else
-    fprintf_unfiltered (gdb_stdout,
-			"Start address 0x%s, load size %lu\n",
-			paddr_nz (entry), data_count);
+  fprintf_unfiltered (gdb_stdout,
+		      "Start address 0x%s, load size %lu\n",
+		      paddr_nz (entry), cbdata.data_count);
 #endif
-    /* We were doing this in remote-mips.c, I suspect it is right
-       for other targets too.  */
-    write_pc (entry);
-  }
+  /* We were doing this in remote-mips.c, I suspect it is right
+     for other targets too.  */
+  write_pc (entry);
 
   /* FIXME: are we supposed to call symbol_file_add or not?  According to
      a comment from remote-mips.c (where a call to symbol_file_add was
@@ -1355,8 +1376,8 @@ generic_load (char *args, int from_tty)
      loaded in.  remote-nindy.c had no call to symbol_file_add, but remote-vx.c
      does.  */
 
-  print_transfer_performance (gdb_stdout, data_count, write_count,
-			      end_time - start_time);
+  print_transfer_performance (gdb_stdout, cbdata.data_count, 
+			      cbdata.write_count, end_time - start_time);
 
   do_cleanups (old_cleanups);
 }
