@@ -679,11 +679,26 @@ lookup_symbol (const char *name, const struct block *block,
 	       const namespace_enum namespace, int *is_a_field_of_this,
 	       struct symtab **symtab)
 {
-  char *modified_name = NULL;
-  char *modified_name2 = NULL;
+  char *demangled_name = NULL;
+  const char *modified_name = NULL;
   const char *mangled_name = NULL;
   int needtofreename = 0;
   struct symbol *returnval;
+
+  modified_name = name;
+
+  /* If we are using C++ language, demangle the name before doing a lookup, so
+     we can always binary search. */
+  if (current_language->la_language == language_cplus)
+    {
+      demangled_name = cplus_demangle (name, DMGL_ANSI | DMGL_PARAMS);
+      if (demangled_name)
+	{
+	  mangled_name = name;
+	  modified_name = demangled_name;
+	  needtofreename = 1;
+	}
+    }
 
   if (case_sensitivity == case_sensitive_off)
     {
@@ -697,26 +712,11 @@ lookup_symbol (const char *name, const struct block *block,
       copy[len] = 0;
       modified_name = copy;
     }
-  else 
-      modified_name = (char *) name;
-
-  /* If we are using C++ language, demangle the name before doing a lookup, so
-     we can always binary search. */
-  if (current_language->la_language == language_cplus)
-    {
-      modified_name2 = cplus_demangle (modified_name, DMGL_ANSI | DMGL_PARAMS);
-      if (modified_name2)
-	{
-	  mangled_name = name;
-	  modified_name = modified_name2;
-	  needtofreename = 1;
-	}
-    }
 
   returnval = lookup_symbol_aux (modified_name, mangled_name, block,
 				 namespace, is_a_field_of_this, symtab);
   if (needtofreename)
-    xfree (modified_name2);
+    xfree (demangled_name);
 
   return returnval;	 
 }

@@ -1,3 +1,7 @@
+2002-07-30  Daniel Jacobowitz  <drow@mvista.com>
+
+	* symtab.c (lookup_symbol): Demangle before lowercasing.
+
 2002-07-30  Andrew Cagney  <ac131313@redhat.com>
 
 	* symtab.h: Replace #include "gdb_obstack.h" with opaque
