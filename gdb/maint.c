@@ -434,18 +434,6 @@ maintenance_print_command (char *arg, int from_tty)
   help_list (maintenanceprintlist, "maintenance print ", -1, gdb_stdout);
 }
 
-/* The "maintenance list" command is defined as a prefix, with
-   allow_unknown 0.  Therefore, its own definition is called only for
-   "maintenance list" with no args.  */
-
-/* ARGSUSED */
-static void
-maintenance_list_command (char *arg, int from_tty)
-{
-  printf_unfiltered ("\"maintenance list\" must be followed by the name of a list command.\n");
-  help_list (maintenancelistlist, "maintenance list ", -1, gdb_stdout);
-}
-
 /* The "maintenance translate-address" command converts a section and address
    to a symbol.  This can be called in two ways:
    maintenance translate-address <secname> <addr>
@@ -744,11 +732,6 @@ lists all sections from all object files, including shared libraries.",
 		  &maintenanceprintlist, "maintenance print ", 0,
 		  &maintenancelist);
 
-  add_prefix_cmd ("list", class_maintenance, maintenance_list_command,
-		  "Maintenance command for listing GDB internal state.",
-		  &maintenancelistlist, "maintenance list ", 0,
-		  &maintenancelist);
-
   add_prefix_cmd ("set", class_maintenance, maintenance_set_cmd, "\
 Set GDB internal variables used by the GDB maintainer.\n\
 Configure variables internal to GDB that aid in GDB's maintenance",
@@ -827,18 +810,18 @@ If a SOURCE file is specified, dump only that file's partial symbols.",
 	   "Print dump of current object file definitions.",
 	   &maintenanceprintlist);
 
-  add_cmd ("symtabs", class_maintenance, maintenance_list_symtabs,
+  add_cmd ("symtabs", class_maintenance, maintenance_info_symtabs,
 	   "List the full symbol tables for all object files.\n\
 This does not include information about individual symbols, blocks, or\n\
 linetables --- just the symbol table structures themselves.\n\
 With an argument REGEXP, list the symbol tables whose names that match that.",
-	   &maintenancelistlist);
+	   &maintenanceinfolist);
 
-  add_cmd ("psymtabs", class_maintenance, maintenance_list_psymtabs,
+  add_cmd ("psymtabs", class_maintenance, maintenance_info_psymtabs,
 	   "List the partial symbol tables for all object files.\n\
 This does not include information about individual partial symbols,\n\
 just the symbol table structures themselves.",
-	   &maintenancelistlist);
+	   &maintenanceinfolist);
 
   add_cmd ("statistics", class_maintenance, maintenance_print_statistics,
 	   "Print statistics about internal gdb state.",

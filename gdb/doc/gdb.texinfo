@@ -9031,14 +9031,14 @@ required for each object file from which @value{GDBN} has read some symbols.
 @xref{Files, ,Commands to specify files}, for a discussion of how
 @value{GDBN} reads symbols (in the description of @code{symbol-file}).
 
-@kindex maint list symtabs
-@kindex maint list psymtabs
+@kindex maint info symtabs
+@kindex maint info psymtabs
 @cindex listing @value{GDBN}'s internal symbol tables
 @cindex symbol tables, listing @value{GDBN}'s internal
 @cindex full symbol tables, listing @value{GDBN}'s internal
 @cindex partial symbol tables, listing @value{GDBN}'s internal
-@item maint list symtabs @r{[} @var{regexp} @r{]}
-@itemx maint list psymtabs @r{[} @var{regexp} @r{]}
+@item maint info symtabs @r{[} @var{regexp} @r{]}
+@itemx maint info psymtabs @r{[} @var{regexp} @r{]}
 
 List the @code{struct symtab} or @code{struct partial_symtab}
 structures whose names match @var{regexp}.  If @var{regexp} is not
@@ -9047,7 +9047,7 @@ copy into a @value{GDBN} debugging this one to examine a particular
 structure in more detail.  For example:
 
 @smallexample
-(@value{GDBP}) maint list psymtabs dwarf2read
+(@value{GDBP}) maint info psymtabs dwarf2read
 @{ objfile /home/gnu/build/gdb/gdb
   ((struct objfile *) 0x82e69d0)
   @{ psymtab /home/gnu/src/gdb/dwarf2read.c 
@@ -9060,7 +9060,7 @@ structure in more detail.  For example:
     dependencies (none)
   @}
 @}
-(@value{GDBP}) maint list symtabs
+(@value{GDBP}) maint info symtabs
 (@value{GDBP})
 @end smallexample
 @noindent
@@ -9074,7 +9074,7 @@ read the symtab for the compilation unit containing that function:
 (@value{GDBP}) break dwarf2_psymtab_to_symtab
 Breakpoint 1 at 0x814e5da: file /home/gnu/src/gdb/dwarf2read.c,
 line 1574.
-(@value{GDBP}) maint list symtabs
+(@value{GDBP}) maint info symtabs
 @{ objfile /home/gnu/build/gdb/gdb 
   ((struct objfile *) 0x82e69d0)
   @{ symtab /home/gnu/src/gdb/dwarf2read.c 

@@ -1,3 +1,9 @@
+2003-05-07  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.texinfo (Symbols): Update documentation: 'maint list
+	symtabs' and 'maint list psymtabs' have been renamed 'maint info
+	symtabs' and 'maint info psymtabs'.
+
 2003-05-05  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Make

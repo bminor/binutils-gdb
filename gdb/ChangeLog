@@ -1,3 +1,18 @@
+2003-05-07  Jim Blandy  <jimb@redhat.com>
+
+	Rename commands 'maint list symtabs' and 'maint list psymtabs' to
+	'maint info symtabs' and 'maint info psymtabs'.
+	* symmisc.c (maintenance_info_symtabs, maintenance_info_psymtabs):
+	Renamed from maintenance_list_symtabs and maintenance_list_psymtabs.
+	* symtab.h (maintenance_info_symtabs, maintenance_info_psymtabs):
+	Declarations updated.
+	* maint.c (maintenance_list_command): Delete.
+	(_initialize_maint_cmds): Update calls to add_cmd.
+	* gdbcmd.h (maintenancelistlist): Delete declaration.
+	* cli/cli-cmds.c (maintenancelistlist): Delete.
+	(init_cmd_lists): Don't initialize it.
+	* cli/cli-cmds.h (maintenancelistlist): Delete declaration.
+
 2003-05-07  Andrew Cagney  <cagney@redhat.com>
 
 	* d10v-tdep.c (remote_d10v_translate_xfer_address): Add
