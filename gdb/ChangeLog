@@ -1,3 +1,8 @@
+2003-05-12  J. Brobecker  <brobecker@gnat.com>
+
+	* NEWS: Mention that the hppa-hpux port has been partially
+	multiarched (32bit ABIT only, so far).
+
 2003-05-11  Andrew Cagney  <cagney@redhat.com>
 
 	* Makefile.in (mi-symbol-cmds.o): Rename mi-cmd-symbol.
