@@ -1,5 +1,7 @@
 2003-06-24  Jim Blandy  <jimb@redhat.com>
 
+	* ppc-linux-tdep.c: More "Linux" -> "GNU/Linux".
+
 	* ppc-linux-tdep.c (ppc64_linux_convert_from_func_ptr_addr): New
 	function.
 	(ppc_linux_init_abi): Register it as the
