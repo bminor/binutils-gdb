@@ -1,3 +1,7 @@
+Sun Dec 26 20:46:36 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* stabs.texinfo: Add notes about stabs-in-som where appropriate.
+
 Fri Dec  3 19:13:19 1993  John Gilmore  (gnu@cygnus.com)
 
 	* gdbint.texinfo:  Fix a few typos.

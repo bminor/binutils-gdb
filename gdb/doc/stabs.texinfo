@@ -475,8 +475,9 @@ file.  @code{C_BINCL} and @code{C_EINCL} do not nest.
 An @code{N_SLINE} symbol represents the start of a source line.  The
 desc field contains the line number and the value
 contains the code address for the start of that source line.  On most
-machines the address is absolute; for Sun's stabs-in-ELF, it is relative
-to the function in which the @code{N_SLINE} symbol occurs.
+machines the address is absolute; for Sun's stabs-in-ELF and GNU's 
+stabs-in-SOM, it is relative to the function in which the @code{N_SLINE} 
+symbol occurs.
 
 @findex N_DSLINE
 @findex N_BSLINE
@@ -649,8 +650,8 @@ RISC machine, and Sun @code{acc} compilers, put the variables after the
 @code{N_RBRAC} symbols are the start and end addresses of the code of
 the block, respectively.  For most machines, they are relative to the
 starting address of this source file.  For the Gould NP1, they are
-absolute.  For Sun's stabs-in-ELF, they are relative to the function in
-which they occur.
+absolute.  For Sun's stabs-in-ELF and GNU's stabs-in-SOM, they are relative 
+to the function in which they occur.
 
 The @code{N_LBRAC} and @code{N_RBRAC} stabs that describe the block
 scope of a procedure are located after the @code{N_FUN} stab that
@@ -2187,10 +2188,10 @@ entry now holds an absolute address:
 0000e008 D _g_foo
 @end example
 
-@node ELF Transformations
-@subsection Transformations of Stabs in ELF Files
+@node ELF and SOM Transformations
+@subsection Transformations of Stabs in ELF and SOM Files
 
-For ELF files, use @code{objdump --stabs} instead of @code{nm} to show
+For ELF and SOM files, use @code{objdump --stabs} instead of @code{nm} to show
 the stabs in an object or executable file.  @code{objdump} is a GNU
 utility; Sun does not provide any equivalent.
 
@@ -2936,8 +2937,8 @@ description in the class stab shows this ordering.
 
 The following are all the possible values for the stab type field, for
 @code{a.out} files, in numeric order.  This does not apply to XCOFF, but
-it does apply to stabs in ELF.  Stabs in ECOFF use these values but add
-0x8f300 to distinguish them from non-stab symbols.
+it does apply to stabs in ELF and stabs in SOM.  Stabs in ECOFF use these 
+values but add 0x8f300 to distinguish them from non-stab symbols.
 
 The symbolic names are defined in the file @file{include/aout/stabs.def}.
 
