@@ -1,3 +1,8 @@
+1999-06-04  Nick Clifton  <nickc@cygnus.com>
+
+	* emultempl/pe.em: If compiling for arm_epoc_pe rename
+	interworking functions to avoid a name space clash.
+
 1999-06-02  Jason Merrill  <jason@yorick.cygnus.com>
 
 	* scripttempl/v850.sc: Add initp support.

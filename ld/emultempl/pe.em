@@ -54,6 +54,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define	PE_DEF_SUBSYSTEM		3
 
+#ifdef TARGET_IS_arm_epoc_pe
+#define bfd_arm_pe_allocate_interworking_sections \
+	bfd_arm_epoc_pe_allocate_interworking_sections
+#define bfd_arm_pe_get_bfd_for_interworking \
+	bfd_arm_epoc_pe_get_bfd_for_interworking
+#define bfd_arm_pe_process_before_allocation \
+	bfd_arm_epoc_pe_process_before_allocation
+#endif
+
 static void gld_${EMULATION_NAME}_set_symbols PARAMS ((void));
 static void gld_${EMULATION_NAME}_after_open PARAMS ((void));
 static void gld_${EMULATION_NAME}_before_parse PARAMS ((void));
