@@ -1,6 +1,6 @@
 /* Get info from stack frames;
    convert between frames, blocks, functions and pc values.
-   Copyright 1986, 1987, 1988, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1988, 1989, 1991, 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "symtab.h"
@@ -68,10 +68,23 @@ int
 inside_main_func (pc)
 CORE_ADDR pc;
 {
+struct symbol *mainsym;
   if (pc == 0)
     return 1;
   if (symfile_objfile == 0)
     return 0;
+
+  if (symfile_objfile -> ei.main_func_lowpc == 0 &&
+      symfile_objfile -> ei.main_func_highpc > pc == 0)
+    {
+      mainsym = lookup_symbol ("main", NULL, VAR_NAMESPACE, NULL, NULL);
+      if (mainsym && SYMBOL_CLASS(mainsym) == LOC_BLOCK)
+        {
+          symfile_objfile->ei.main_func_lowpc = BLOCK_START (SYMBOL_BLOCK_VALUE (mainsym));
+          symfile_objfile->ei.main_func_highpc = BLOCK_END (SYMBOL_BLOCK_VALUE (mainsym));
+        }
+
+    }
   return (symfile_objfile -> ei.main_func_lowpc  <= pc &&
 	  symfile_objfile -> ei.main_func_highpc > pc);
 }
@@ -102,20 +115,19 @@ CORE_ADDR pc;
 	  symfile_objfile -> ei.entry_func_highpc > pc);
 }
 
-/* Address of innermost stack frame (contents of FP register) */
+/* Info about the innermost stack frame (contents of FP register) */
 
-static FRAME current_frame;
+static struct frame_info *current_frame;
 
-/*
- * Cache for frame addresses already read by gdb.  Valid only while
- * inferior is stopped.  Control variables for the frame cache should
- * be local to this module.
- */
+/* Cache for frame addresses already read by gdb.  Valid only while
+   inferior is stopped.  Control variables for the frame cache should
+   be local to this module.  */
+
 struct obstack frame_cache_obstack;
 
 /* Return the innermost (currently executing) stack frame.  */
 
-FRAME
+struct frame_info *
 get_current_frame ()
 {
   if (current_frame == NULL)
@@ -130,7 +142,7 @@ get_current_frame ()
 
 void
 set_current_frame (frame)
-     FRAME frame;
+     struct frame_info *frame;
 {
   current_frame = frame;
 }
@@ -138,60 +150,55 @@ set_current_frame (frame)
 /* Create an arbitrary (i.e. address specified by user) or innermost frame.
    Always returns a non-NULL value.  */
 
-FRAME
+struct frame_info *
 create_new_frame (addr, pc)
-     FRAME_ADDR addr;
+     CORE_ADDR addr;
      CORE_ADDR pc;
 {
-  struct frame_info *fci;	/* Same type as FRAME */
+  struct frame_info *fi;
   char *name;
 
-  fci = (struct frame_info *)
+  fi = (struct frame_info *)
     obstack_alloc (&frame_cache_obstack,
 		   sizeof (struct frame_info));
 
   /* Arbitrary frame */
-  fci->next = (struct frame_info *) 0;
-  fci->prev = (struct frame_info *) 0;
-  fci->frame = addr;
-  fci->pc = pc;
+  fi->next = NULL;
+  fi->prev = NULL;
+  fi->frame = addr;
+  fi->pc = pc;
   find_pc_partial_function (pc, &name, (CORE_ADDR *)NULL,(CORE_ADDR *)NULL);
-  fci->signal_handler_caller = IN_SIGTRAMP (fci->pc, name);
+  fi->signal_handler_caller = IN_SIGTRAMP (fi->pc, name);
 
 #ifdef INIT_EXTRA_FRAME_INFO
-  INIT_EXTRA_FRAME_INFO (0, fci);
+  INIT_EXTRA_FRAME_INFO (0, fi);
 #endif
 
-  return fci;
+  return fi;
 }
 
-/* Return the frame that called FRAME.
-   If FRAME is the original frame (it has no caller), return 0.  */
+/* Return the frame that called FI.
+   If FI is the original frame (it has no caller), return 0.  */
 
-FRAME
+struct frame_info *
 get_prev_frame (frame)
-     FRAME frame;
+     struct frame_info *frame;
 {
-  /* We're allowed to know that FRAME and "struct frame_info *" are
-     the same */
   return get_prev_frame_info (frame);
 }
 
-/* Return the frame that FRAME calls (0 if FRAME is the innermost
+/* Return the frame that FRAME calls (NULL if FRAME is the innermost
    frame).  */
 
-FRAME
+struct frame_info *
 get_next_frame (frame)
-     FRAME frame;
+     struct frame_info *frame;
 {
-  /* We're allowed to know that FRAME and "struct frame_info *" are
-     the same */
   return frame->next;
 }
 
-/*
- * Flush the entire frame cache.
- */
+/* Flush the entire frame cache.  */
+
 void
 flush_cached_frames ()
 {
@@ -199,8 +206,8 @@ flush_cached_frames ()
   obstack_free (&frame_cache_obstack, 0);
   obstack_init (&frame_cache_obstack);
 
-  current_frame = (struct frame_info *) 0; /* Invalidate cache */
-  select_frame ((FRAME) 0, -1);
+  current_frame = NULL;  /* Invalidate cache */
+  select_frame (NULL, -1);
   annotate_frames_invalid ();
 }
 
@@ -210,35 +217,12 @@ void
 reinit_frame_cache ()
 {
   flush_cached_frames ();
-#if 0
-  /* The inferior_pid test is wrong if there is a corefile.  But I don't
-     think this code is needed at all, now that get_current_frame will
-     create the frame if it is needed.  */
+
+  /* FIXME: The inferior_pid test is wrong if there is a corefile.  */
   if (inferior_pid != 0)
     {
-      set_current_frame (create_new_frame (read_fp (), read_pc ()));
       select_frame (get_current_frame (), 0);
     }
-  else
-    {
-      set_current_frame (0);
-      select_frame ((FRAME) 0, -1);
-    }
-#endif
-}
-
-/* Return a structure containing various interesting information
-   about a specified stack frame.  */
-/* How do I justify including this function?  Well, the FRAME
-   identifier format has gone through several changes recently, and
-   it's not completely inconceivable that it could happen again.  If
-   it does, have this routine around will help */
-
-struct frame_info *
-get_frame_info (frame)
-     FRAME frame;
-{
-  return frame;
 }
 
 /* If a machine allows frameless functions, it should define a macro
@@ -252,11 +236,10 @@ get_frame_info (frame)
 
 int
 frameless_look_for_prologue (frame)
-     FRAME frame;
+     struct frame_info *frame;
 {
   CORE_ADDR func_start, after_prologue;
-  func_start = (get_pc_function_start (frame->pc) +
-		FUNCTION_START_OFFSET);
+  func_start = (get_pc_function_start (frame->pc) + FUNCTION_START_OFFSET);
   if (func_start)
     {
       after_prologue = func_start;
@@ -295,9 +278,9 @@ frameless_look_for_prologue (frame)
 
 struct frame_info *
 get_prev_frame_info (next_frame)
-     FRAME next_frame;
+     struct frame_info *next_frame;
 {
-  FRAME_ADDR address = 0;
+  CORE_ADDR address = 0;
   struct frame_info *prev;
   int fromleaf = 0;
   char *name;
@@ -339,7 +322,7 @@ get_prev_frame_info (next_frame)
     {
       FRAMELESS_FUNCTION_INVOCATION (next_frame, fromleaf);
       if (fromleaf)
-	address = next_frame->frame;
+	address = FRAME_FP (next_frame);
     }
 #endif
 
@@ -394,8 +377,8 @@ get_prev_frame_info (next_frame)
    We shouldn't need INIT_FRAME_PC_FIRST to add more complication to
    an already overcomplicated part of GDB.   gnu@cygnus.com, 15Sep92.
 
-   To answer the question, yes the sparc needs INIT_FRAME_PC after
-   INIT_EXTRA_FRAME_INFO.  Suggested scheme:
+   Assuming that some machines need INIT_FRAME_PC after
+   INIT_EXTRA_FRAME_INFO, one possible scheme:
 
    SETUP_INNERMOST_FRAME()
      Default version is just create_new_frame (read_fp ()),
@@ -416,7 +399,7 @@ get_prev_frame_info (next_frame)
      the default INIT_FRAME_PC does.  Some machines will call it from
      INIT_PREV_FRAME (either at the beginning, the end, or in the middle).
      Some machines won't use it.
-   kingdon@cygnus.com, 13Apr93, 31Jan94.  */
+   kingdon@cygnus.com, 13Apr93, 31Jan94, 14Dec94.  */
 
 #ifdef INIT_FRAME_PC_FIRST
   INIT_FRAME_PC_FIRST (fromleaf, prev);
@@ -456,22 +439,20 @@ get_prev_frame_info (next_frame)
 
 CORE_ADDR
 get_frame_pc (frame)
-     FRAME frame;
+     struct frame_info *frame;
 {
-  struct frame_info *fi;
-  fi = get_frame_info (frame);
-  return fi->pc;
+  return frame->pc;
 }
 
 #if defined (FRAME_FIND_SAVED_REGS)
 /* Find the addresses in which registers are saved in FRAME.  */
 
 void
-get_frame_saved_regs (frame_info_addr, saved_regs_addr)
-     struct frame_info *frame_info_addr;
+get_frame_saved_regs (frame, saved_regs_addr)
+     struct frame_info *frame;
      struct frame_saved_regs *saved_regs_addr;
 {
-  FRAME_FIND_SAVED_REGS (frame_info_addr, *saved_regs_addr);
+  FRAME_FIND_SAVED_REGS (frame, *saved_regs_addr);
 }
 #endif
 
@@ -480,20 +461,17 @@ get_frame_saved_regs (frame_info_addr, saved_regs_addr)
 
 struct block *
 get_frame_block (frame)
-     FRAME frame;
+     struct frame_info *frame;
 {
-  struct frame_info *fi;
   CORE_ADDR pc;
 
-  fi = get_frame_info (frame);
-
-  pc = fi->pc;
-  if (fi->next != 0 && fi->next->signal_handler_caller == 0)
+  pc = frame->pc;
+  if (frame->next != 0 && frame->next->signal_handler_caller == 0)
     /* We are not in the innermost frame and we were not interrupted
        by a signal.  We need to subtract one to get the correct block,
        in case the call instruction was the last instruction of the block.
        If there are any machines on which the saved pc does not point to
-       after the call insn, we probably want to make fi->pc point after
+       after the call insn, we probably want to make frame->pc point after
        the call insn anyway.  */
     --pc;
   return block_for_pc (pc);
@@ -535,7 +513,7 @@ get_pc_function_start (pc)
 
 struct symbol *
 get_frame_function (frame)
-     FRAME frame;
+     struct frame_info *frame;
 {
   register struct block *bl = get_frame_block (frame);
   if (bl == 0)
@@ -760,13 +738,24 @@ find_pc_partial_function (pc, name, address, endaddr)
       return 0;
     }
 
-  /* See if we're in a transfer table for Sun shared libs.  */
+  /* See if we're in a transfer table for Sun shared libs.
 
+     Note the hack for Sun shared library transfer tables creates
+     problems for single stepping through the return path from a shared
+     library call if the return path includes trampoline code.
+
+     I don't really understand the reasoning behind the magic handling
+     for mst_trampoline symbols.  */
+
+#ifdef INHIBIT_SUNSOLIB_TRANSFER_TABLE_HACK
+    cache_pc_function_low = SYMBOL_VALUE_ADDRESS (msymbol);
+#else
   if (msymbol -> type == mst_text || msymbol -> type == mst_file_text)
     cache_pc_function_low = SYMBOL_VALUE_ADDRESS (msymbol);
   else
     /* It is a transfer table for Sun shared libraries.  */
     cache_pc_function_low = pc - FUNCTION_START_OFFSET;
+#endif
 
   cache_pc_function_name = SYMBOL_NAME (msymbol);
 
@@ -794,12 +783,11 @@ find_pc_partial_function (pc, name, address, endaddr)
 /* Return the innermost stack frame executing inside of BLOCK,
    or NULL if there is no such frame.  If BLOCK is NULL, just return NULL.  */
 
-FRAME
+struct frame_info *
 block_innermost_frame (block)
      struct block *block;
 {
-  struct frame_info *fi;
-  register FRAME frame;
+  struct frame_info *frame;
   register CORE_ADDR start;
   register CORE_ADDR end;
 
@@ -809,26 +797,25 @@ block_innermost_frame (block)
   start = BLOCK_START (block);
   end = BLOCK_END (block);
 
-  frame = 0;
+  frame = NULL;
   while (1)
     {
       frame = get_prev_frame (frame);
-      if (frame == 0)
-	return 0;
-      fi = get_frame_info (frame);
-      if (fi->pc >= start && fi->pc < end)
+      if (frame == NULL)
+	return NULL;
+      if (frame->pc >= start && frame->pc < end)
 	return frame;
     }
 }
 
-/* Return the full FRAME which corresponds to the given FRAME_ADDR
-   or NULL if no FRAME on the chain corresponds to FRAME_ADDR.  */
+/* Return the full FRAME which corresponds to the given CORE_ADDR
+   or NULL if no FRAME on the chain corresponds to CORE_ADDR.  */
 
-FRAME
+struct frame_info *
 find_frame_addr_in_frame_chain (frame_addr)
-     FRAME_ADDR frame_addr;
+     CORE_ADDR frame_addr;
 {
-  FRAME frame = NULL;
+  struct frame_info *frame = NULL;
 
   if (frame_addr == (CORE_ADDR)0)
     return NULL;
@@ -838,7 +825,6 @@ find_frame_addr_in_frame_chain (frame_addr)
       frame = get_prev_frame (frame);
       if (frame == NULL)
 	return NULL;
-
       if (FRAME_FP (frame) == frame_addr)
 	return frame;
     }
@@ -849,7 +835,7 @@ find_frame_addr_in_frame_chain (frame_addr)
 
 CORE_ADDR
 sigtramp_saved_pc (frame)
-     FRAME frame;
+     struct frame_info *frame;
 {
   CORE_ADDR sigcontext_addr;
   char buf[TARGET_PTR_BIT / TARGET_CHAR_BIT];
@@ -859,7 +845,8 @@ sigtramp_saved_pc (frame)
   /* Get sigcontext address, it is the third parameter on the stack.  */
   if (frame->next)
     sigcontext_addr = read_memory_integer (FRAME_ARGS_ADDRESS (frame->next)
-					    + FRAME_ARGS_SKIP + sigcontext_offs,
+					   + FRAME_ARGS_SKIP
+					   + sigcontext_offs,
 					   ptrbytes);
   else
     sigcontext_addr = read_memory_integer (read_register (SP_REGNUM)

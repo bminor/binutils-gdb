@@ -1,3 +1,9 @@
+Mon Aug 14 13:43:01 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* config/sparc/tm-sparclite.h: Define FRAME_CHAIN_VALID_ALTERNATE.
+	* blockframe.c (inside_main_func): If main func addr range not set,
+	try to set it now.
+
 Sat Aug 12 15:34:54 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
 
 	* config/powerpc/xm-aix.h (FIVE_ARG_PTRACE): Define.
