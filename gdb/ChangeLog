@@ -1,3 +1,16 @@
+2001-02-19  Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in (SFILES): Add frame.c .
+	(COMMON_OBS): Add frame.o .
+	(frame.o): New target.
+
+	* frame.c (find_saved_register): 
+	(default_get_saved_register): 
+	(get_saved_register): 
+	(read_relative_register_raw_bytes_for_frame): 
+	(read_relative_register_raw_bytes): Moved to here.
+	* regcache.c: From here.
+
 2001-02-20  Kevin Buettner  <kevinb@redhat.com>
 
 	* solib-aix5.c: New file.

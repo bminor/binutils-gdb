@@ -536,7 +536,8 @@ SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	tui/tuiSource.h tui/tuiSourceWin.c tui/tuiSourceWin.h \
 	tui/tuiStack.c tui/tuiStack.h tui/tuiWin.c tui/tuiWin.h \
 	tui/tui-file.h tui/tui-file.c \
-	ui-file.h ui-file.c
+	ui-file.h ui-file.c \
+	frame.c
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 
@@ -679,7 +680,8 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	c-typeprint.o ch-typeprint.o f-typeprint.o m2-typeprint.o \
 	c-valprint.o cp-valprint.o ch-valprint.o f-valprint.o m2-valprint.o \
 	nlmread.o serial.o mdebugread.o os9kread.o top.o utils.o \
-	ui-file.o tui-file.o
+	ui-file.o tui-file.o \
+	frame.o
 
 OBS = $(COMMON_OBS) $(ANNOTATE_OBS)
 
@@ -1341,6 +1343,8 @@ expprint.o: expprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 
 findvar.o: findvar.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h \
 	gdb_string.h
+
+frame.o: frame.c $(defs_h) $(frame_h) $(target_h) $(value_h) $(inferior_h)
 
 regcache.o: regcache.c $(defs_h) $(inferior_h) target.h 
 
