@@ -1970,7 +1970,8 @@ coff_set_flags (abfd, magicp, flagsp)
 #ifdef ARMMAGIC
     case bfd_arch_arm:
       * magicp = ARMMAGIC;
-      if (coff_data (abfd)->flags & F_APCS_26)
+      * flagsp = 0;
+      if (APCS_SET (abfd) && APCS_FLAG (abfd))
 	* flagsp = F_APCS26;
       switch (bfd_get_mach (abfd))
 	{

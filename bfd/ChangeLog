@@ -1,3 +1,13 @@
+Thu May 15 14:31:28 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* cpu-arm.c (compatible):  Allow default machine to be polymorphed
+	into any other machine type.
+
+	* coffcode.h (coff_set_flags):  Initialise flags variable to 0.
+
+	* coff-arm.c (coff_arm_bfd_merge_private_bfd_data):  When merging
+	data into an unitialised destination set its machine type as well.
+
 Thu May 15 16:40:20 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elflink.h (elf_link_add_object_symbols): Force ELF symbol size
