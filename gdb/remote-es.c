@@ -90,6 +90,10 @@ STP
 */
 
 
+#if 0
+/* Comment out entire file until it can be fixed (need to clean up
+   TERMINAL, etc.).  */
+
 #include <stdio.h>
 #include <signal.h>
 #include <sys/ioctl.h>
@@ -2255,14 +2259,17 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
   NULL,				/* to_sections_end */
   OPS_MAGIC			/* to_magic (always last) */
 };
+#endif /* 0 */
 
 void
 _initialize_es1800 ()
 {
+#if 0
   add_target (&es1800_ops);
   add_target (&es1800_child_ops);
   add_com ("transparent", class_support, es1800_transparent,
 	   "Start transparent communication with the ES 1800 emulator.");
   add_com ("init_break", class_support, es1800_init_break,
 	   "Download break routine and initialize break facility on ES 1800");
+#endif
 }

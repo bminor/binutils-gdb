@@ -1,5 +1,9 @@
 Sat Jan 29 07:44:59 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* config/m68k/monitor.mt (TDEPFILE): Add remote-es.o.
+	* config/m68k/es1800.mt: Add comment.
+	* remote-es.c: Comment out entire file until it can be fixed.
+
 	* ser-unix.c (wait_for, hardwire_readchar) [HAVE_TERMIO, HAVE_TERMIOS]:
 	If the timeout is too big to fit in c_cc[VTIME], then do multiple reads
 	to achieve the desired timeout.
