@@ -1,3 +1,8 @@
+2001-10-12  Daniel Jacobowitz  <drow@mvista.com>
+
+	* printcmd.c (print_frame_args):  Move symbol iteration explicitly
+	inside the func != NULL block.
+
 2001-10-12  Fernando Nasser  <fnasser@redhat.com>
 
 	* MAINTAINERS (Misc): Add Ian Roxborough as tcl/, tk/ and itcl/

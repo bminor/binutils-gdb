@@ -1807,167 +1807,167 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
     {
       b = SYMBOL_BLOCK_VALUE (func);
       nsyms = BLOCK_NSYMS (b);
-    }
 
-  for (i = 0; i < nsyms; i++)
-    {
-      QUIT;
-      sym = BLOCK_SYM (b, i);
+      for (i = 0; i < nsyms; i++)
+        {
+	  QUIT;
+	  sym = BLOCK_SYM (b, i);
 
-      /* Keep track of the highest stack argument offset seen, and
-         skip over any kinds of symbols we don't care about.  */
+	  /* Keep track of the highest stack argument offset seen, and
+	     skip over any kinds of symbols we don't care about.  */
 
-      switch (SYMBOL_CLASS (sym))
-	{
-	case LOC_ARG:
-	case LOC_REF_ARG:
-	  {
-	    long current_offset = SYMBOL_VALUE (sym);
-	    arg_size = TYPE_LENGTH (SYMBOL_TYPE (sym));
-
-	    /* Compute address of next argument by adding the size of
-	       this argument and rounding to an int boundary.  */
-	    current_offset =
-	      ((current_offset + arg_size + sizeof (int) - 1)
-		 & ~(sizeof (int) - 1));
-
-	    /* If this is the highest offset seen yet, set highest_offset.  */
-	    if (highest_offset == -1
-		|| (current_offset > highest_offset))
-	      highest_offset = current_offset;
-
-	    /* Add the number of ints we're about to print to args_printed.  */
-	    args_printed += (arg_size + sizeof (int) - 1) / sizeof (int);
-	  }
-
-	  /* We care about types of symbols, but don't need to keep track of
-	     stack offsets in them.  */
-	case LOC_REGPARM:
-	case LOC_REGPARM_ADDR:
-	case LOC_LOCAL_ARG:
-	case LOC_BASEREG_ARG:
-	  break;
-
-	  /* Other types of symbols we just skip over.  */
-	default:
-	  continue;
-	}
-
-      /* We have to look up the symbol because arguments can have
-         two entries (one a parameter, one a local) and the one we
-         want is the local, which lookup_symbol will find for us.
-         This includes gcc1 (not gcc2) on the sparc when passing a
-         small structure and gcc2 when the argument type is float
-         and it is passed as a double and converted to float by
-         the prologue (in the latter case the type of the LOC_ARG
-         symbol is double and the type of the LOC_LOCAL symbol is
-         float).  */
-      /* But if the parameter name is null, don't try it.
-         Null parameter names occur on the RS/6000, for traceback tables.
-         FIXME, should we even print them?  */
-
-      if (*SYMBOL_NAME (sym))
-	{
-	  struct symbol *nsym;
-	  nsym = lookup_symbol
-	    (SYMBOL_NAME (sym),
-	     b, VAR_NAMESPACE, (int *) NULL, (struct symtab **) NULL);
-	  if (SYMBOL_CLASS (nsym) == LOC_REGISTER)
+	  switch (SYMBOL_CLASS (sym))
 	    {
-	      /* There is a LOC_ARG/LOC_REGISTER pair.  This means that
-	         it was passed on the stack and loaded into a register,
-	         or passed in a register and stored in a stack slot.
-	         GDB 3.x used the LOC_ARG; GDB 4.0-4.11 used the LOC_REGISTER.
+	    case LOC_ARG:
+	    case LOC_REF_ARG:
+	      {
+		long current_offset = SYMBOL_VALUE (sym);
+		arg_size = TYPE_LENGTH (SYMBOL_TYPE (sym));
 
-	         Reasons for using the LOC_ARG:
-	         (1) because find_saved_registers may be slow for remote
-	         debugging,
-	         (2) because registers are often re-used and stack slots
-	         rarely (never?) are.  Therefore using the stack slot is
-	         much less likely to print garbage.
+		/* Compute address of next argument by adding the size of
+		   this argument and rounding to an int boundary.  */
+		current_offset =
+		  ((current_offset + arg_size + sizeof (int) - 1)
+		   & ~(sizeof (int) - 1));
 
-	         Reasons why we might want to use the LOC_REGISTER:
-	         (1) So that the backtrace prints the same value as
-	         "print foo".  I see no compelling reason why this needs
-	         to be the case; having the backtrace print the value which
-	         was passed in, and "print foo" print the value as modified
-	         within the called function, makes perfect sense to me.
+		/* If this is the highest offset seen yet, set highest_offset.  */
+		if (highest_offset == -1
+		    || (current_offset > highest_offset))
+		  highest_offset = current_offset;
 
-	         Additional note:  It might be nice if "info args" displayed
-	         both values.
-	         One more note:  There is a case with sparc structure passing
-	         where we need to use the LOC_REGISTER, but this is dealt with
-	         by creating a single LOC_REGPARM in symbol reading.  */
+		/* Add the number of ints we're about to print to args_printed.  */
+		args_printed += (arg_size + sizeof (int) - 1) / sizeof (int);
+	      }
 
-	      /* Leave sym (the LOC_ARG) alone.  */
-	      ;
+	      /* We care about types of symbols, but don't need to keep track of
+		 stack offsets in them.  */
+	    case LOC_REGPARM:
+	    case LOC_REGPARM_ADDR:
+	    case LOC_LOCAL_ARG:
+	    case LOC_BASEREG_ARG:
+	      break;
+
+	    /* Other types of symbols we just skip over.  */
+	    default:
+	      continue;
+	    }
+
+	  /* We have to look up the symbol because arguments can have
+	     two entries (one a parameter, one a local) and the one we
+	     want is the local, which lookup_symbol will find for us.
+	     This includes gcc1 (not gcc2) on the sparc when passing a
+	     small structure and gcc2 when the argument type is float
+	     and it is passed as a double and converted to float by
+	     the prologue (in the latter case the type of the LOC_ARG
+	     symbol is double and the type of the LOC_LOCAL symbol is
+	     float).  */
+	  /* But if the parameter name is null, don't try it.
+	     Null parameter names occur on the RS/6000, for traceback tables.
+	     FIXME, should we even print them?  */
+
+	  if (*SYMBOL_NAME (sym))
+	    {
+	      struct symbol *nsym;
+	      nsym = lookup_symbol
+		(SYMBOL_NAME (sym),
+		 b, VAR_NAMESPACE, (int *) NULL, (struct symtab **) NULL);
+	      if (SYMBOL_CLASS (nsym) == LOC_REGISTER)
+		{
+		  /* There is a LOC_ARG/LOC_REGISTER pair.  This means that
+		     it was passed on the stack and loaded into a register,
+		     or passed in a register and stored in a stack slot.
+		     GDB 3.x used the LOC_ARG; GDB 4.0-4.11 used the LOC_REGISTER.
+
+		     Reasons for using the LOC_ARG:
+		     (1) because find_saved_registers may be slow for remote
+		     debugging,
+		     (2) because registers are often re-used and stack slots
+		     rarely (never?) are.  Therefore using the stack slot is
+		     much less likely to print garbage.
+
+		     Reasons why we might want to use the LOC_REGISTER:
+		     (1) So that the backtrace prints the same value as
+		     "print foo".  I see no compelling reason why this needs
+		     to be the case; having the backtrace print the value which
+		     was passed in, and "print foo" print the value as modified
+		     within the called function, makes perfect sense to me.
+
+		     Additional note:  It might be nice if "info args" displayed
+		     both values.
+		     One more note:  There is a case with sparc structure passing
+		     where we need to use the LOC_REGISTER, but this is dealt with
+		     by creating a single LOC_REGPARM in symbol reading.  */
+
+		  /* Leave sym (the LOC_ARG) alone.  */
+		  ;
+		}
+	      else
+		sym = nsym;
+	    }
+
+#ifdef UI_OUT
+	  /* Print the current arg.  */
+	  if (!first)
+	    ui_out_text (uiout, ", ");
+	  ui_out_wrap_hint (uiout, "    ");
+
+	  annotate_arg_begin ();
+
+	  list_chain = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+	  fprintf_symbol_filtered (stb->stream, SYMBOL_SOURCE_NAME (sym),
+				   SYMBOL_LANGUAGE (sym), DMGL_PARAMS | DMGL_ANSI);
+	  ui_out_field_stream (uiout, "name", stb);
+	  annotate_arg_name_end ();
+	  ui_out_text (uiout, "=");
+#else
+	  /* Print the current arg.  */
+	  if (!first)
+	    fprintf_filtered (stream, ", ");
+	  wrap_here ("    ");
+
+	  annotate_arg_begin ();
+
+	  fprintf_symbol_filtered (stream, SYMBOL_SOURCE_NAME (sym),
+				   SYMBOL_LANGUAGE (sym), DMGL_PARAMS | DMGL_ANSI);
+	  annotate_arg_name_end ();
+	  fputs_filtered ("=", stream);
+#endif
+
+	  /* Avoid value_print because it will deref ref parameters.  We just
+	     want to print their addresses.  Print ??? for args whose address
+	     we do not know.  We pass 2 as "recurse" to val_print because our
+	     standard indentation here is 4 spaces, and val_print indents
+	     2 for each recurse.  */
+	  val = read_var_value (sym, fi);
+
+	  annotate_arg_value (val == NULL ? NULL : VALUE_TYPE (val));
+
+	  if (val)
+	    {
+#ifdef UI_OUT
+	      val_print (VALUE_TYPE (val), VALUE_CONTENTS (val), 0,
+			 VALUE_ADDRESS (val),
+			 stb->stream, 0, 0, 2, Val_no_prettyprint);
+	      ui_out_field_stream (uiout, "value", stb);
 	    }
 	  else
-	    sym = nsym;
-	}
+	    ui_out_text (uiout, "???");
 
-#ifdef UI_OUT
-      /* Print the current arg.  */
-      if (!first)
-	ui_out_text (uiout, ", ");
-      ui_out_wrap_hint (uiout, "    ");
-
-      annotate_arg_begin ();
-
-      list_chain = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
-      fprintf_symbol_filtered (stb->stream, SYMBOL_SOURCE_NAME (sym),
-			    SYMBOL_LANGUAGE (sym), DMGL_PARAMS | DMGL_ANSI);
-      ui_out_field_stream (uiout, "name", stb);
-      annotate_arg_name_end ();
-      ui_out_text (uiout, "=");
+	  /* Invoke ui_out_tuple_end.  */
+	  do_cleanups (list_chain);
 #else
-      /* Print the current arg.  */
-      if (!first)
-	fprintf_filtered (stream, ", ");
-      wrap_here ("    ");
-
-      annotate_arg_begin ();
-
-      fprintf_symbol_filtered (stream, SYMBOL_SOURCE_NAME (sym),
-			    SYMBOL_LANGUAGE (sym), DMGL_PARAMS | DMGL_ANSI);
-      annotate_arg_name_end ();
-      fputs_filtered ("=", stream);
+	      val_print (VALUE_TYPE (val), VALUE_CONTENTS (val), 0,
+			 VALUE_ADDRESS (val),
+			 stream, 0, 0, 2, Val_no_prettyprint);
+	    }
+	  else
+	    fputs_filtered ("???", stream);
 #endif
 
-      /* Avoid value_print because it will deref ref parameters.  We just
-         want to print their addresses.  Print ??? for args whose address
-         we do not know.  We pass 2 as "recurse" to val_print because our
-         standard indentation here is 4 spaces, and val_print indents
-         2 for each recurse.  */
-      val = read_var_value (sym, fi);
+	  annotate_arg_end ();
 
-      annotate_arg_value (val == NULL ? NULL : VALUE_TYPE (val));
-
-      if (val)
-	{
-#ifdef UI_OUT
-	  val_print (VALUE_TYPE (val), VALUE_CONTENTS (val), 0,
-		     VALUE_ADDRESS (val),
-		     stb->stream, 0, 0, 2, Val_no_prettyprint);
-	  ui_out_field_stream (uiout, "value", stb);
+	  first = 0;
 	}
-      else
-	ui_out_text (uiout, "???");
-
-      /* Invoke ui_out_tuple_end.  */
-      do_cleanups (list_chain);
-#else
-	  val_print (VALUE_TYPE (val), VALUE_CONTENTS (val), 0,
-		     VALUE_ADDRESS (val),
-		     stream, 0, 0, 2, Val_no_prettyprint);
-	}
-      else
-	fputs_filtered ("???", stream);
-#endif
-
-      annotate_arg_end ();
-
-      first = 0;
     }
 
   /* Don't print nameless args in situations where we don't know
