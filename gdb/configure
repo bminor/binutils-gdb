@@ -16,13 +16,13 @@ ac_help="$ac_help
 ac_help="$ac_help
   --with-included-gettext use the GNU gettext library included here"
 ac_help="$ac_help
-  --enable-netrom "
+  --enable-netrom         Enable NetROM support"
 ac_help="$ac_help
-  --enable-build-warnings		Enable build-time compiler warnings if gcc is used"
+  --enable-build-warnings Enable build-time compiler warnings if gcc is used"
 ac_help="$ac_help
   --with-mmalloc          Use memory mapped malloc package"
 ac_help="$ac_help
-  --enable-carp        Configure alternative readaptive paradigm "
+  --enable-carp           Configure alternative readaptive paradigm "
 ac_help="$ac_help
   --enable-targets        alternative target configurations"
 ac_help="$ac_help

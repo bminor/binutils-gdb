@@ -297,7 +297,7 @@ dnl Handle optional features that can be enabled.
 ENABLE_CFLAGS=
 
 AC_ARG_ENABLE(netrom,
-[  --enable-netrom ],
+[  --enable-netrom         Enable NetROM support],
 [case "${enableval}" in
 yes)	enable_netrom=yes ;;
 no)	enable_netrom=no ;;
@@ -310,7 +310,7 @@ if test "${enable_netrom}" = "yes"; then
 fi
 
 AC_ARG_ENABLE(build-warnings,
-[  --enable-build-warnings		Enable build-time compiler warnings if gcc is used],
+[  --enable-build-warnings Enable build-time compiler warnings if gcc is used],
 [build_warnings="-Wall -Wpointer-arith -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations"
 case "${enableval}" in
   yes)	;;
@@ -356,7 +356,7 @@ fi
 # significant backward compatibility.
 
 AC_ARG_ENABLE(carp,
-[  --enable-carp        Configure alternative readaptive paradigm ],
+[  --enable-carp           Configure alternative readaptive paradigm ],
 [case "${enableval}" in
   yes) enable_carp=yes ;;
   no)  enable_carp=no ;;
