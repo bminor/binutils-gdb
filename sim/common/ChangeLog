@@ -1,3 +1,11 @@
+2004-12-01  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cgen.sh: New thirteenth parameter opcfile, defaulting to
+	/dev/null.
+	<case desc>: Pass -OPC opcfile.
+	* Make-common.in (cgen-desc): Pass $(opcfile) as thirteenth
+	parameter to cgen.sh.
+
 2004-11-30  Richard Earnshaw  <rearnsha@arm.com>
 
 	* Make-common.in (sim-basics_h): Correct dependencies on
