@@ -2581,17 +2581,18 @@ gdb_loadfile (clientData, interp, objc, objv)
   file  = Tcl_GetStringFromObj (objv[2], NULL);
   Tcl_GetBooleanFromObj (interp, objv[3], &linenumbers);
 
-  if ((fp = fopen ( file, "r" )) == NULL)
-    {
-      Tcl_SetStringObj ( result_ptr->obj_ptr, "Can't open file for reading", -1);      
-      return TCL_ERROR;
-    }
-  
   symtab = full_lookup_symtab (file);
   if (!symtab)
     {
-      Tcl_SetStringObj ( result_ptr->obj_ptr, "File not found in symtab", -1);      
+      Tcl_SetStringObj ( result_ptr->obj_ptr, "File not found in symtab", -1);
       fclose (fp);
+      return TCL_ERROR;
+    }
+
+  file = symtab_to_filename ( symtab );
+  if ((fp = fopen ( file, "r" )) == NULL)
+    {
+      Tcl_SetStringObj ( result_ptr->obj_ptr, "Can't open file for reading", -1);
       return TCL_ERROR;
     }
 

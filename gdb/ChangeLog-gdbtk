@@ -1,3 +1,9 @@
+Fri Aug 28 12:14:49 1998  Martin M. Hunt  <hunt@cygnus.com>
+
+	* gdbtk-cmds.c (gdb_loadfile): Open the file after doing
+	the symtab lookup and calling symtab_to_filename(). This
+	makes GDBtk work with the GDB "dir" command.
+
 1998-08-18  Keith Seitz  <keiths@cygnus.com>
 	
 	* gdbtk-hooks.c (gdbtk_add_hooks): Set selected_frame_level_changed_hook.
