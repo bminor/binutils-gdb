@@ -1,3 +1,14 @@
+2004-11-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-d10v/reloc-003.d: Update for changed error message.
+	* ld-d10v/reloc-004.d: Likewise.
+	* ld-d10v/reloc-007.d: Likewise.
+	* ld-d10v/reloc-008.d: Likewise.
+	* ld-d10v/reloc-011.d: Likewise.
+	* ld-d10v/reloc-012.d: Likewise.
+	* ld-d10v/reloc-015.d: Likewise.
+	* ld-d10v/reloc-016.d: Likewise.
+
 2004-11-08  Inderpreet Singh   <inderpreetb@nioda.hcltech.com>
 	    Vineet Sharma      <vineets@noida.hcltech.com>
 
@@ -710,7 +721,7 @@
 2004-03-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elfvers/vers.exp: Add new tests for versioned weak
-	definition. 
+	definition.
 
 	* ld-elfvers/vers28a.c: New file.
 	* ld-elfvers/vers28a.dsym: Likewise.
