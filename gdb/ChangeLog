@@ -1,5 +1,11 @@
 2001-11-12  Jim Blandy  <jimb@redhat.com>
 
+	Patch from Andreas Schwab <schwab@suse.de>:
+	* eval.c (evaluate_subexp_standard): Fix memory leak: use alloca
+	instead of xmalloc.
+
+2001-11-12  Jim Blandy  <jimb@redhat.com>
+
 	* corefile.c (write_memory_unsigned_integer,
 	write_memory_signed_integer): New functions.
         (write_memory): Move to be with other write_memory_* functions.

@@ -839,7 +839,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	      struct value *valp = NULL;
 
 	      /* Prepare list of argument types for overload resolution */
-	      arg_types = (struct type **) xmalloc (nargs * (sizeof (struct type *)));
+	      arg_types = (struct type **) alloca (nargs * (sizeof (struct type *)));
 	      for (ix = 1; ix <= nargs; ix++)
 		arg_types[ix - 1] = VALUE_TYPE (argvec[ix]);
 
@@ -888,7 +888,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	      struct symbol *symp;
 
 	      /* Prepare list of argument types for overload resolution */
-	      arg_types = (struct type **) xmalloc (nargs * (sizeof (struct type *)));
+	      arg_types = (struct type **) alloca (nargs * (sizeof (struct type *)));
 	      for (ix = 1; ix <= nargs; ix++)
 		arg_types[ix - 1] = VALUE_TYPE (argvec[ix]);
 
