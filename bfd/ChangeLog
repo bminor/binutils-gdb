@@ -1,5 +1,8 @@
 Fri Oct  4 13:49:01 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coffcode.h (coff_compute_section_file_positions): Adjust sofar
+ 	by the change in size of the section when EXEC_P is not set.
+
 	* coff-m68k.c (coff_rtype_to_howto): Define if not defined.
 	(m68kcoff_rtype_to_howto): New static function.
 	* cf-m68klynx.c (coff_m68k_lynx_rtype_to_howto): Add the section
