@@ -1,5 +1,7 @@
 Sun Jul  5 03:06:39 1992  John Gilmore  (gnu at cygnus.com)
 
+	* tm-sysv4.h (NAMES_HAVE_UNDERSCORE):  SVR4 systems don't.
+
 	* buildsym.c (finish_block):  Fix thinko `inner block' complaints.
 	* dbxread.c (process_one_symbol):  Parse N_OPT "gcc2_compiled.".
 	* procfs.c (proc_set_exec_trap): Set run-on-last-close flag on

@@ -33,3 +33,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    when we have stepped into one of these fragments. */
 
 #define IN_SOLIB_TRAMPOLINE(pc,name) ((name) && (strcmp ("_init", name) == 0))
+
+/* In SVR4 ELF files, the ABI defines (pg. 4-25) that "External C symbols
+   have the same names in C, assembly code, and object files' symbol
+   tables."  So... */
+
+#undef	NAMES_HAVE_UNDERSCORE
