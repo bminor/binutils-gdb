@@ -10,6 +10,11 @@ Mon Feb 26 14:48:39 1996  David Mosberger-Tang  <davidm@AZStarNet.com>
 
 Mon Feb 26 14:01:13 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* cofflink.c (_bfd_coff_link_input_bfd): When merging, skip names
+	starting with '$' the way we skip names starting with '.'.  When
+	updating x_endndx, don't be fooled by an index which has been
+	merged.
+
 	* cofflink.c (_bfd_coff_link_input_bfd): Don't try to optimize a
 	struct/union/enum type with no elements.
 
