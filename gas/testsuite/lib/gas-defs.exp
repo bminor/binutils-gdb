@@ -266,6 +266,7 @@ proc run_dump_test { name } {
     set opts(name) {}
     set opts(PROG) {}
     set opts(source) {}
+    set opts(stderr) {}
 
     foreach i $opt_array {
 	set opt_name [lindex $i 0]
@@ -339,10 +340,30 @@ proc run_dump_test { name } {
     set comp_output [prune_warnings $comp_output]
 
     if ![string match "" $comp_output] then {
-	send_log "$comp_output\n"
-	verbose "$comp_output" 3
-	fail $testname
-	return
+	if { $opts(stderr) == "" }  then {
+	    send_log "$comp_output\n"
+	    verbose "$comp_output" 3
+	    fail $testname
+	    return
+	} else {
+	    catch {write_file dump.stderr "$comp_output"} write_output
+	    if ![string match "" $write_output] then {
+		send_log "error writing dump.stderr: $write_output\n"
+		verbose "error writing dump.stderr: $write_output" 3
+		send_log "$comp_output\n"
+		verbose "$comp_output" 3
+		fail $testname
+		return
+	    }
+	    set stderrfile $srcdir/$subdir/$opts(stderr)
+	    send_log "wrote pruned stderr to dump.stderr\n"
+	    verbose "wrote pruned stderr to dump.stderr" 3
+	    if { [regexp_diff "dump.stderr" "$stderrfile"] } then {
+		fail $testname
+		verbose "pruned stderr is [file_contents "dump.stderr"]" 2
+		return
+	    }
+	}
     }
 
     if { [which $binary] == 0 } {
@@ -562,6 +583,12 @@ proc file_contents { filename } {
     set contents [read $file]
     close $file
     return $contents
+}
+
+proc write_file { filename contents } {
+    set file [open $filename w]
+    puts $file "$contents"
+    close $file
 }
 
 proc verbose_eval { expr { level 1 } } {
