@@ -21,7 +21,13 @@
 #ifndef NM_AIX_H
 #define NM_AIX_H
 
-#include "config/nm-sysv4.h"
+/* Use SVR4 style shared library support */
+
+#include "solib.h"
+
+/* SVR4 has /proc support, so use it instead of ptrace. */
+
+#define USE_PROC_FS
 
 #ifndef AIX5
 #define AIX5 1
