@@ -1,3 +1,10 @@
+Thu Jul 15 12:37:05 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* m88k-dis.c: New file, moved in from gdb and changed to use the
+	new dis-asm.h disassembler interface.
+	* Makefile.in (DIS_LIBS): Added m88k-dis.o.
+	(m88k-dis.o): New target.
+
 Tue Jul 13 10:04:16 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* mips-dis.c (print_insn_arg, _print_insn_mips): Made pointer to

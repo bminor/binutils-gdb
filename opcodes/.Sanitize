@@ -38,6 +38,7 @@ i386-dis.c
 i960-dis.c
 m68881-ext.c
 m68k-dis.c
+m88k-dis.c
 mips-dis.c
 sh-opc.h
 sh-dis.c
