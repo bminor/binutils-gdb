@@ -678,7 +678,11 @@ proc run_dump_test { name } {
     } else {
 	set sourcefiles {}
 	foreach sf $opts(source) {
-	    lappend sourcefiles "$srcdir/$subdir/$sf"
+	    if { [string match "/*" $sf] } {
+		lappend sourcefiles "$sf"
+	    } {
+		lappend sourcefiles "$srcdir/$subdir/$sf"
+	    }
 	    # Must have asflags indexed on source name.
 	    set asflags($srcdir/$subdir/$sf) $asflags($sf)
 	}
