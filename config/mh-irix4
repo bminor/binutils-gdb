@@ -5,5 +5,5 @@
 
 CC = cc -cckr -Wf,-XNg1500
 SYSV = -DSYSV
-RANLIB = echo >/dev/null
+RANLIB = true
 INSTALL = cp
