@@ -1297,8 +1297,6 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_breakpoint_from_pc (gdbarch, avr_breakpoint_from_pc);
 
-  set_gdbarch_deprecated_frameless_function_invocation (gdbarch, legacy_frameless_look_for_prologue);
-
   frame_unwind_append_sniffer (gdbarch, avr_frame_sniffer);
   frame_base_set_default (gdbarch, &avr_frame_base);
 

@@ -1317,7 +1317,6 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
    */
   /* Stack grows up. */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  set_gdbarch_deprecated_frameless_function_invocation (gdbarch, legacy_frameless_look_for_prologue);
 
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, h8300_extract_struct_value_address);
   set_gdbarch_deprecated_use_struct_convention (gdbarch, always_use_struct_convention);

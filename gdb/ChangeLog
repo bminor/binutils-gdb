@@ -1,5 +1,19 @@
 2004-08-02  Andrew Cagney  <cagney@gnu.org>
 
+	* gdbarch.sh (deprecated_frameless_function_invocation): Delete.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* arm-tdep.c 	(arm_frameless_function_invocation): Delete.
+	(arm_gdbarch_init) Do not set frameless function invocation.
+	* frame.h (legacy_frameless_look_for_prologue): Delete declaration.
+	* blockframe.c (legacy_frameless_look_for_prologue): Delete function.
+	* frv-tdep.c (frv_frameless_function_invocation): Delete.
+	(frv_gdbarch_init): Do not set frameless function invocation.
+	* sh64-tdep.c (sh64_gdbarch_init): Ditto.
+	* sh-tdep.c (sh_gdbarch_init): Ditto.
+	* m32r-tdep.c (m32r_gdbarch_init): Ditto.
+	* h8300-tdep.c (h8300_gdbarch_init): Ditto.
+	* avr-tdep.c (avr_gdbarch_init): Ditto.
+
 	* blockframe.c (legacy_frame_chain_valid): Delete function.
 
 	* dummy-frame.c (struct dummy_frame): Delete call_lo, call_hi, top

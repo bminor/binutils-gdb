@@ -607,10 +607,6 @@ v:=:CORE_ADDR:deprecated_function_start_offset::::0:::0
 m::void:remote_translate_xfer_address:struct regcache *regcache, CORE_ADDR gdb_addr, int gdb_len, CORE_ADDR *rem_addr, int *rem_len:regcache, gdb_addr, gdb_len, rem_addr, rem_len:::generic_remote_translate_xfer_address::0
 #
 v:=:CORE_ADDR:frame_args_skip::::0:::0
-# DEPRECATED_FRAMELESS_FUNCTION_INVOCATION is not needed.  The new
-# frame code works regardless of the type of frame - frameless,
-# stackless, or normal.
-F:=:int:deprecated_frameless_function_invocation:struct frame_info *fi:fi
 F:=:CORE_ADDR:deprecated_frame_chain:struct frame_info *frame:frame
 F:=:int:deprecated_frame_chain_valid:CORE_ADDR chain, struct frame_info *thisframe:chain, thisframe
 # DEPRECATED_FRAME_SAVED_PC has been replaced by UNWIND_PC.  Please

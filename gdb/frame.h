@@ -556,8 +556,6 @@ extern struct symbol *get_frame_function (struct frame_info *);
 
 extern CORE_ADDR get_pc_function_start (CORE_ADDR);
 
-extern int legacy_frameless_look_for_prologue (struct frame_info *);
-
 extern struct frame_info *find_relative_frame (struct frame_info *, int *);
 
 extern void show_and_print_stack_frame (struct frame_info *fi, int print_level,

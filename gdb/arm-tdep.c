@@ -269,39 +269,6 @@ arm_saved_pc_after_call (struct frame_info *frame)
   return ADDR_BITS_REMOVE (read_register (ARM_LR_REGNUM));
 }
 
-/* Determine whether the function invocation represented by FI has a
-   frame on the stack associated with it.  If it does return zero,
-   otherwise return 1.  */
-
-static int
-arm_frameless_function_invocation (struct frame_info *fi)
-{
-  CORE_ADDR func_start, after_prologue;
-  int frameless;
-
-  /* Sometimes we have functions that do a little setup (like saving the
-     vN registers with the stmdb instruction, but DO NOT set up a frame.
-     The symbol table will report this as a prologue.  However, it is
-     important not to try to parse these partial frames as frames, or we
-     will get really confused.
-
-     So I will demand 3 instructions between the start & end of the
-     prologue before I call it a real prologue, i.e. at least
-	mov ip, sp,
-	stmdb sp!, {}
-	sub sp, ip, #4.  */
-
-  func_start = (get_frame_func (fi) + DEPRECATED_FUNCTION_START_OFFSET);
-  after_prologue = SKIP_PROLOGUE (func_start);
-
-  /* There are some frameless functions whose first two instructions
-     follow the standard APCS form, in which case after_prologue will
-     be func_start + 8.  */
-
-  frameless = (after_prologue < func_start + 12);
-  return frameless;
-}
-
 /* A typical Thumb prologue looks like this:
    push    {r7, lr}
    add     sp, sp, #-28
@@ -2718,8 +2685,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_unwind_dummy_id (gdbarch, arm_unwind_dummy_id);
   set_gdbarch_unwind_pc (gdbarch, arm_unwind_pc);
   set_gdbarch_unwind_sp (gdbarch, arm_unwind_sp);
-
-  set_gdbarch_deprecated_frameless_function_invocation (gdbarch, arm_frameless_function_invocation);
 
   frame_base_set_default (gdbarch, &arm_normal_base);
 

@@ -1066,12 +1066,6 @@ frv_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
   write_register (struct_return_regnum, addr);
 }
 
-static int
-frv_frameless_function_invocation (struct frame_info *frame)
-{
-  return legacy_frameless_look_for_prologue (frame);
-}
-
 static CORE_ADDR
 frv_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 {
@@ -1495,8 +1489,6 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_skip_prologue (gdbarch, frv_skip_prologue);
   set_gdbarch_breakpoint_from_pc (gdbarch, frv_breakpoint_from_pc);
   set_gdbarch_adjust_breakpoint_address (gdbarch, frv_gdbarch_adjust_breakpoint_address);
-
-  set_gdbarch_deprecated_frameless_function_invocation (gdbarch, frv_frameless_function_invocation);
 
   set_gdbarch_deprecated_use_struct_convention (gdbarch, always_use_struct_convention);
   set_gdbarch_extract_return_value (gdbarch, frv_extract_return_value);

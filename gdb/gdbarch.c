@@ -200,7 +200,6 @@ struct gdbarch
   CORE_ADDR deprecated_function_start_offset;
   gdbarch_remote_translate_xfer_address_ftype *remote_translate_xfer_address;
   CORE_ADDR frame_args_skip;
-  gdbarch_deprecated_frameless_function_invocation_ftype *deprecated_frameless_function_invocation;
   gdbarch_deprecated_frame_chain_ftype *deprecated_frame_chain;
   gdbarch_deprecated_frame_chain_valid_ftype *deprecated_frame_chain_valid;
   gdbarch_deprecated_frame_saved_pc_ftype *deprecated_frame_saved_pc;
@@ -346,7 +345,6 @@ struct gdbarch startup_gdbarch =
   0,  /* deprecated_function_start_offset */
   generic_remote_translate_xfer_address,  /* remote_translate_xfer_address */
   0,  /* frame_args_skip */
-  0,  /* deprecated_frameless_function_invocation */
   0,  /* deprecated_frame_chain */
   0,  /* deprecated_frame_chain_valid */
   0,  /* deprecated_frame_saved_pc */
@@ -625,7 +623,6 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of deprecated_function_start_offset, invalid_p == 0 */
   /* Skip verify of remote_translate_xfer_address, invalid_p == 0 */
   /* Skip verify of frame_args_skip, invalid_p == 0 */
-  /* Skip verify of deprecated_frameless_function_invocation, has predicate */
   /* Skip verify of deprecated_frame_chain, has predicate */
   /* Skip verify of deprecated_frame_chain_valid, has predicate */
   /* Skip verify of deprecated_frame_saved_pc, has predicate */
@@ -1049,24 +1046,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: deprecated_frame_saved_pc = <0x%lx>\n",
                       (long) current_gdbarch->deprecated_frame_saved_pc);
-#ifdef DEPRECATED_FRAMELESS_FUNCTION_INVOCATION_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_FRAMELESS_FUNCTION_INVOCATION_P()",
-                      XSTRING (DEPRECATED_FRAMELESS_FUNCTION_INVOCATION_P ()));
-#endif
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: gdbarch_deprecated_frameless_function_invocation_p() = %d\n",
-                      gdbarch_deprecated_frameless_function_invocation_p (current_gdbarch));
-#ifdef DEPRECATED_FRAMELESS_FUNCTION_INVOCATION
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_FRAMELESS_FUNCTION_INVOCATION(fi)",
-                      XSTRING (DEPRECATED_FRAMELESS_FUNCTION_INVOCATION (fi)));
-#endif
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: deprecated_frameless_function_invocation = <0x%lx>\n",
-                      (long) current_gdbarch->deprecated_frameless_function_invocation);
 #ifdef DEPRECATED_FUNCTION_START_OFFSET
   fprintf_unfiltered (file,
                       "gdbarch_dump: DEPRECATED_FUNCTION_START_OFFSET # %s\n",
@@ -3740,30 +3719,6 @@ set_gdbarch_frame_args_skip (struct gdbarch *gdbarch,
                              CORE_ADDR frame_args_skip)
 {
   gdbarch->frame_args_skip = frame_args_skip;
-}
-
-int
-gdbarch_deprecated_frameless_function_invocation_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->deprecated_frameless_function_invocation != NULL;
-}
-
-int
-gdbarch_deprecated_frameless_function_invocation (struct gdbarch *gdbarch, struct frame_info *fi)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->deprecated_frameless_function_invocation != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_frameless_function_invocation called\n");
-  return gdbarch->deprecated_frameless_function_invocation (fi);
-}
-
-void
-set_gdbarch_deprecated_frameless_function_invocation (struct gdbarch *gdbarch,
-                                                      gdbarch_deprecated_frameless_function_invocation_ftype deprecated_frameless_function_invocation)
-{
-  gdbarch->deprecated_frameless_function_invocation = deprecated_frameless_function_invocation;
 }
 
 int
