@@ -1,3 +1,8 @@
+Tue Jun  2 17:50:59 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-v850.c (v850_elf_print_private_bfd_data): Call
+	_bfd_elf_print_private)bfd_data ().
+
 Tue Jun  2 15:29:35 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elflink.h (elf_merge_symbol): Don't always set type_change_ok

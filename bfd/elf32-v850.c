@@ -1721,17 +1721,20 @@ v850_elf_print_private_bfd_data (abfd, ptr)
 {
   FILE * file = (FILE *) ptr;
   
-  BFD_ASSERT (abfd != NULL && ptr != NULL)
+  BFD_ASSERT (abfd != NULL && ptr != NULL);
   
-  fprintf (file, "private flags = %lx", elf_elfheader (abfd)->e_flags);
+  _bfd_elf_print_private_bfd_data (abfd, ptr);
+  
+  /* xgettext:c-format */
+  fprintf (file, _("private flags = %lx: "), elf_elfheader (abfd)->e_flags);
   
   switch (elf_elfheader (abfd)->e_flags & EF_V850_ARCH)
     {
     default:
-    case E_V850_ARCH: fprintf (file, ": v850 architecture"); break;
+    case E_V850_ARCH: fprintf (file, _("v850 architecture")); break;
 /* start-sanitize-v850e */
-    case E_V850E_ARCH:  fprintf (file, ": v850e architecture"); break;
-    case E_V850EA_ARCH: fprintf (file, ": v850ea architecture"); break;
+    case E_V850E_ARCH:  fprintf (file, _("v850e architecture")); break;
+    case E_V850EA_ARCH: fprintf (file, _("v850ea architecture")); break;
 /* end-sanitize-v850e */
     }
   
