@@ -462,6 +462,7 @@ sim_open (kind, cb, abfd, argv)
     {
       /* Allocate core managed memory */
       
+#ifndef TARGET_SKY
       /* the monitor  */
       sim_do_commandf (sd, "memory region 0x%lx,0x%lx", MONITOR_BASE, MONITOR_SIZE);
       /* For compatibility with the old code - under this (at level one)
@@ -469,7 +470,6 @@ sim_open (kind, cb, abfd, argv)
 	 smaller sub region */
       sim_do_command(sd," memory region 0x7fff8000,0x8000") ; /* MTZ- 32 k stack */
       /* start-sanitize-sky */
-#ifndef TARGET_SKY
       /* end-sanitize-sky */
       sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx%%0x%lx,0x%0x",
 		       K1BASE, K0SIZE,
@@ -477,11 +477,12 @@ sim_open (kind, cb, abfd, argv)
 		       K0BASE);
       /* start-sanitize-sky */
 #else
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx%%0x%lx,0x%0x,0x%0x",
-		       K1BASE, K0SIZE,
-		       MEM_SIZE, /* actual size */
-		       K0BASE, 
-		       0); /* add alias at 0x0000 */
+      /* the monitor  */
+      sim_do_commandf (sd, "memory region 0x%lx,0x%lx", MONITOR_BASE - K1BASE, MONITOR_SIZE);
+      sim_do_command (sd," memory region 0x7fff8000,0x8000") ; /* MTZ- 32 k stack */
+      /* 16M @ 0x0.  Aliases at 0x80000000 and 0xA0000000 are handled by 
+         address_translation() */
+      sim_do_commandf (sd, "memory size 0x%lx", MEM_SIZE);
 #endif
       /* end-sanitize-sky */
       
@@ -1772,23 +1773,6 @@ signal_exception (SIM_DESC sd,
 
   switch (exception) {
 
-    case SystemCall :
-      {
-        va_list ap;
-        unsigned int instruction;
-        unsigned int code;
-
-        va_start(ap,exception);
-        instruction = va_arg(ap,unsigned int);
-        va_end(ap);
-
-        code = (instruction >> 6) & 0xFFFFF;
-        
-        sim_io_eprintf(sd,"Ignoring instruction `syscall %d' (PC 0x%s)\n",
-		       code, pr_addr(cia));
-      }
-     break;
-
     case DebugBreakPoint :
       if (! (Debug & Debug_DM))
         {
@@ -1974,12 +1958,12 @@ signal_exception (SIM_DESC sd,
 	 sim_engine_halt (SD, CPU, NULL, NULL_CIA,
 			  sim_stopped, SIM_SIGFPE);
 
+       case SystemCall:
        case Trap:
 	 sim_engine_restart (SD, CPU, NULL, PC);
 	 break;
 
        case Watch:
-       case SystemCall:
 	 PC = EPC;
 	 sim_engine_halt (SD, CPU, NULL, NULL_CIA,
 			  sim_stopped, SIM_SIGTRAP);

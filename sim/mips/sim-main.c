@@ -75,6 +75,23 @@ address_translation (SIM_DESC sd,
   vAddr &= 0xFFFFFFFF;
 
   *pAddr = vAddr; /* default for isTARGET */
+
+/* start-sanitize-sky */
+#ifdef TARGET_SKY
+  if (vAddr >= 0x80000000)
+    {
+      if (vAddr < 0xa0000000)
+        {
+	  *pAddr = vAddr - 0x80000000;
+	}
+      else if (vAddr < 0xc0000000)
+	{
+	  *pAddr = vAddr - 0xa0000000;
+        }
+    }
+#endif
+/* end-sanitize-sky */
+
   *CCA = Uncached; /* not used for isHOST */
 
   return(res);
@@ -145,12 +162,15 @@ load_memory (SIM_DESC SD,
     sim_io_eprintf(sd,"LoadMemory CCA (%d) is not uncached (currently all accesses treated as cached)\n",CCA);
 #endif /* WARN_MEM */
 
+#if !(WITH_IGEN)
+  /* IGEN performs this test in ifetch16() / ifetch32() */
   /* If instruction fetch then we need to check that the two lo-order
      bits are zero, otherwise raise a InstructionFetch exception: */
   if ((IorD == isINSTRUCTION)
       && ((pAddr & 0x3) != 0)
       && (((pAddr & 0x1) != 0) || ((vAddr & 0x1) == 0)))
     SignalExceptionInstructionFetch ();
+#endif
 
   if (((pAddr & LOADDRMASK) + AccessLength) > LOADDRMASK)
     {
@@ -361,20 +381,50 @@ ifetch32 (SIM_DESC SD,
 	  address_word vaddr)
 {
   /* Copy the action of the LW instruction */
-  address_word reverse = (ReverseEndian ? (LOADDRMASK >> 2) : 0);
-  address_word bigend = (BigEndianCPU ? (LOADDRMASK >> 2) : 0);
-  unsigned64 value;
+  address_word mask = LOADDRMASK;
+  address_word access = AccessLength_WORD;
+  address_word reverseendian = (ReverseEndian ? (mask ^ access) : 0);
+  address_word bigendiancpu = (BigEndianCPU ? (mask ^ access) : 0);
+  unsigned int byte;
   address_word paddr;
-  unsigned32 instruction;
-  unsigned byte;
-  int cca;
-  AddressTranslation (vaddr, isINSTRUCTION, isLOAD, &paddr, &cca, isTARGET, isREAL);
-  paddr = ((paddr & ~LOADDRMASK) | ((paddr & LOADDRMASK) ^ (reverse << 2)));
-  LoadMemory (&value, NULL, cca, AccessLength_WORD, paddr, vaddr, isINSTRUCTION, isREAL);
-  byte = ((vaddr & LOADDRMASK) ^ (bigend << 2));
-  instruction = ((value >> (8 * byte)) & 0xFFFFFFFF);
-  return instruction;
+  int uncached;
+  unsigned64 memval;
+
+  if ((vaddr & access) != 0)
+    SignalExceptionInstructionFetch ();
+  AddressTranslation (vaddr, isINSTRUCTION, isLOAD, &paddr, &uncached, isTARGET, isREAL);
+  paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverseendian));
+  LoadMemory (&memval, NULL, uncached, access, paddr, vaddr, isINSTRUCTION, isREAL);
+  byte = ((vaddr & mask) ^ bigendiancpu);
+  return (memval >> (8 * byte));
 }
+
+
+INLINE_SIM_MAIN (unsigned16)
+ifetch16 (SIM_DESC SD,
+	  sim_cpu *CPU,
+	  address_word cia,
+	  address_word vaddr)
+{
+  /* Copy the action of the LH instruction */
+  address_word mask = LOADDRMASK;
+  address_word access = AccessLength_HALFWORD;
+  address_word reverseendian = (ReverseEndian ? (mask ^ access) : 0);
+  address_word bigendiancpu = (BigEndianCPU ? (mask ^ access) : 0);
+  unsigned int byte;
+  address_word paddr;
+  int uncached;
+  unsigned64 memval;
+
+  if ((vaddr & access) != 0)
+    SignalExceptionInstructionFetch ();
+  AddressTranslation (vaddr, isINSTRUCTION, isLOAD, &paddr, &uncached, isTARGET, isREAL);
+  paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverseendian));
+  LoadMemory (&memval, NULL, uncached, access, paddr, vaddr, isINSTRUCTION, isREAL);
+  byte = ((vaddr & mask) ^ bigendiancpu);
+  return (memval >> (8 * byte));
+}
+
 
 
 /* Description from page A-26 of the "MIPS IV Instruction Set" manual (revision 3.1) */
