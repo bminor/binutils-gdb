@@ -1,5 +1,5 @@
 /* IA-64 support for 64-bit ELF
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
@@ -1616,15 +1616,12 @@ elfNN_ia64_new_elf_hash_entry (entry, table, string)
   if (!ret)
     return 0;
 
-  /* Initialize our local data.  All zeros, and definitely easier
-     than setting a handful of bit fields.  */
-  memset (ret, 0, sizeof (*ret));
-
   /* Call the allocation method of the superclass.  */
   ret = ((struct elfNN_ia64_link_hash_entry *)
 	 _bfd_elf_link_hash_newfunc ((struct bfd_hash_entry *) ret,
 				     table, string));
 
+  ret->info = NULL;
   return (struct bfd_hash_entry *) ret;
 }
 
