@@ -932,15 +932,11 @@ gdb_readline (char *prompt_arg)
 	}
 
       if (c == '\n')
-#ifndef CRLF_SOURCE_FILES
-	break;
-#else
 	{
 	  if (input_index > 0 && result[input_index - 1] == '\r')
 	    input_index--;
 	  break;
 	}
-#endif
 
       result[input_index++] = c;
       while (input_index >= result_size)

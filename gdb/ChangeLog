@@ -1,3 +1,8 @@
+2004-10-14  Mark Kettenis  <kettenis@gnu.org>
+
+	* top.c (gdb_readline): Always accept "\r\n" as a line-ending.
+	* event-top.c (gdb_readline2): Likewise.
+
 2004-10-14  Orjan Friberg  <orjanf@axis.com>
 
 	* cris-tdep.c (_initialize_cris_tdep): Re-add call to
@@ -298,7 +303,6 @@
 	* mips-tdep.c (mips32_next_pc): Check the register's contents,
 	not its number for BLEZ/BLEZL and BGTZ/BGTZL.
 
->>>>>>> 1.6475
 2004-10-07  Kei Sakamoto  <sakamoto.kei@renesas.com>
 
 	* m32r-tdep.c (decode_prologue): Support functions written
