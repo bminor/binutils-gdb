@@ -436,7 +436,7 @@ set_internalvar_component (var, offset, bitpos, bitsize, newval)
 #endif
 
   if (bitsize)
-    modify_field (addr, (int) value_as_long (newval),
+    modify_field (addr, value_as_long (newval),
 		  bitpos, bitsize);
   else
     memcpy (addr, VALUE_CONTENTS (newval), TYPE_LENGTH (VALUE_TYPE (newval)));
@@ -1207,16 +1207,20 @@ unpack_field_as_long (type, valaddr, fieldno)
 void
 modify_field (addr, fieldval, bitpos, bitsize)
      char *addr;
-     int fieldval;
+     LONGEST fieldval;
      int bitpos, bitsize;
 {
-  long oword;
+  LONGEST oword;
 
   /* Reject values too big to fit in the field in question,
      otherwise adjoining fields may be corrupted.  */
   if (bitsize < (8 * sizeof (fieldval))
       && 0 != (fieldval & ~((1<<bitsize)-1)))
-    error ("Value %d does not fit in %d bits.", fieldval, bitsize);
+    {
+      /* FIXME: would like to include fieldval in the message, but
+	 we don't have a sprintf_longest.  */
+      error ("Value does not fit in %d bits.", bitsize);
+    }
 
   oword = extract_signed_integer (addr, sizeof oword);
 
@@ -1225,11 +1229,11 @@ modify_field (addr, fieldval, bitpos, bitsize)
   bitpos = sizeof (oword) * 8 - bitpos - bitsize;
 #endif
 
-  /* Mask out old value, while avoiding shifts >= longword size */
+  /* Mask out old value, while avoiding shifts >= size of oword */
   if (bitsize < 8 * sizeof (oword))
-    oword &= ~(((((unsigned long)1) << bitsize) - 1) << bitpos);
+    oword &= ~(((((unsigned LONGEST)1) << bitsize) - 1) << bitpos);
   else
-    oword &= ~((-1) << bitpos);
+    oword &= ~((~(unsigned LONGEST)0) << bitpos);
   oword |= fieldval << bitpos;
 
   store_signed_integer (addr, sizeof oword, oword);

@@ -178,7 +178,7 @@ CORE_ADDR
 NEXT_PROLOGUE_INSN (addr, lim, pword1)
      CORE_ADDR addr;
      CORE_ADDR lim;
-     short *pword1;
+     INSN_WORD *pword1;
 {
   char buf[2];
   if (addr < lim + 8)

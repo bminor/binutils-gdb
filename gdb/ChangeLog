@@ -1,5 +1,10 @@
 Fri Jul  9 12:36:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* values.c, value.h (modify_field), callers: Make fieldval a LONGEST.
+
+	* h8300-tdep.c (NEXT_PROLOGUE_INSN): Make pword1 an INSN_WORD *
+	not short *.
+
 	* findvar.c, defs.h
 	({extract,store}_{signed_integer,unsigned_integer,address}):
 	New routines to replace SWAP_TARGET_AND_HOST.

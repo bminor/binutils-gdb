@@ -214,9 +214,8 @@ read_memory_integer (memaddr, len)
      CORE_ADDR memaddr;
      int len;
 {
-  char *buf;
+  char buf[sizeof (LONGEST)];
 
-  buf = alloca (len);
   read_memory (memaddr, buf, len);
   return extract_signed_integer (buf, len);
 }
@@ -226,9 +225,8 @@ read_memory_unsigned_integer (memaddr, len)
      CORE_ADDR memaddr;
      int len;
 {
-  char *buf;
+  char buf[sizeof (unsigned LONGEST)];
 
-  buf = alloca (len);
   read_memory (memaddr, buf, len);
   return extract_unsigned_integer (buf, len);
 }
