@@ -1,3 +1,11 @@
+Wed Aug  4 08:53:41 1993  Fred Fish  (fnf@cygnus.com)
+
+	* gdb.t10/Makefile.in (nodebug.o):  Don't use "-c -o", many
+	compilers don't grok it.
+	* gdb.t16/gdbme.c (ctable1):  Initialize unsigned char array
+	with small octal ints rather than character constants, which
+	are signed and might not fit if first promoted to int.
+
 Tue Aug  3 18:28:25 1993  Fred Fish  (fnf@cygnus.com)
 
 	* gdb.t09/Makefile.in (clean):  Remove corefile.
