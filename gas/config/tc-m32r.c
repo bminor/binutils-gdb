@@ -386,7 +386,6 @@ md_begin ()
 }
 
 /* start-sanitize-m32rx */
-#ifdef HAVE_CPU_M32RX
 
 /* Returns true if an output of instruction 'a' is referenced by an operand
    of instruction 'b'.  If 'check_outputs' is true then b's outputs are
@@ -401,7 +400,7 @@ first_writes_to_seconds_operands (a, b, check_outputs)
   const CGEN_OPERAND_INSTANCE * b_operands = CGEN_INSN_OPERANDS (b->insn);
   int                           a_index;
 
-  /* If at least one of the instructions take sno opeands, then there is
+  /* If at least one of the instructions takes no operands, then there is
      nothing to check.  There really are instructions without operands,
      eg 'nop'.  */
   if (a_operands == NULL || b_operands == NULL)
@@ -687,8 +686,6 @@ assemble_parallel_insn (str, str2)
   return;
 }
 
-#endif /* HAVE_CPU_M32RX */
-
 /* end-sanitize-m32rx */
 
 
@@ -704,14 +701,12 @@ md_assemble (str)
   cgen_asm_init_parse ();
 
 /* start-sanitize-m32rx */
-#ifdef HAVE_CPU_M32RX
   /* Look for a parallel instruction seperator.  */
   if ((str2 = strstr (str, "||")) != NULL)
     {
       assemble_parallel_insn (str, str2);
       return;
     }
-#endif
 /* end-sanitize-m32rx */
   
   insn.insn = CGEN_SYM (assemble_insn) (str, & insn.fields, insn.buffer, & errmsg);
@@ -722,13 +717,11 @@ md_assemble (str)
     }
 
 /* start-sanitize-m32rx */
-#ifdef HAVE_CPU_M32RX
   if (! enable_m32rx && CGEN_INSN_ATTR (insn.insn, CGEN_INSN_MACH) == (1 << MACH_M32RX))
     {
       as_bad ("instruction '%s' is for the M32RX only", str);
       return;
     }
-#endif
 /* end-sanitize-m32rx */
   
   if (CGEN_INSN_BITSIZE (insn.insn) == 32)
@@ -736,7 +729,7 @@ md_assemble (str)
       /* 32 bit insns must live on 32 bit boundaries.  */
       if (prev_insn.insn || seen_relaxable_p)
 	{
-	  /* FIXME: If calling fill_insn too many times turns us into a memory
+	  /* ??? If calling fill_insn too many times turns us into a memory
 	     pig, can we call assemble_nop instead of !seen_relaxable_p?  */
 	  fill_insn (0);
 	}
@@ -755,7 +748,7 @@ md_assemble (str)
       if (CGEN_INSN_BITSIZE (insn.insn) != 16)
 	abort();
       
-      /* Get the indicies of the operands of the instruction.  */
+      /* Get the indices of the operands of the instruction.  */
       insn.insn = m32r_cgen_get_insn_operands (insn.insn,
 					       bfd_getb16 ((char *) insn.buffer),
 					       16,
@@ -769,7 +762,6 @@ md_assemble (str)
 	{
 /* start-sanitize-m32rx */
 /* start-sanitize-phase2-m32rx */
-#ifdef HAVE_CPU_M32RX
 	  /* Look to see if this instruction can be combined with the
 	     previous instruction to make one, parallel, 32 bit instruction.
 	     If the previous instruction (potentially) changed the flow of
@@ -791,7 +783,6 @@ md_assemble (str)
 	      else if (can_make_parallel (& insn, & prev_insn.insn) == NULL)
 		swap = true;
 	    }
-#endif
 /* end-sanitize-phase2-m32rx */
 /* end-sanitize-m32rx */
 	  
@@ -809,10 +800,9 @@ md_assemble (str)
 
 /* start-sanitize-m32rx */
 /* start-sanitize-phase2-m32rx */
-#ifdef HAVE_CPU_M32RX
       if (swap)
 	{
-	  int     tmp;
+	  int tmp;
 	  
 #define SWAP_BYTES(a,b) tmp = a; a = b; b = tmp
 
@@ -833,7 +823,6 @@ md_assemble (str)
       /* Record where this instruction was assembled.  */
       prev_insn.addr = insn.addr;
       prev_insn.frag = insn.frag;
-#endif
 /* end-sanitize-m32rx */
       
       /* If the insn needs the following one to be on a 32 bit boundary
