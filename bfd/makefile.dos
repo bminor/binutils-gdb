@@ -19,7 +19,7 @@ OBJS = \
 	targets.o \
 	cache.o \
 	archures.o \
-	core.o \
+	corefile.o \
 	section.o \
 	format.o \
 	syms.o \

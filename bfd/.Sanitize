@@ -103,7 +103,7 @@ configure
 configure.bat
 configure.host
 configure.in
-core.c
+corefile.c
 cpu-a29k.c
 cpu-alpha.c
 cpu-arm.c

@@ -83,7 +83,7 @@ BFD_H = bfd.h
 # need two copies of the executable, one to download and one for the
 # debugger).
 BFD_LIBS = \
-	archive.o archures.o bfd.o cache.o coffgen.o core.o \
+	archive.o archures.o bfd.o cache.o coffgen.o corefile.o \
 	format.o init.o libbfd.o opncls.o reloc.o \
 	section.o syms.o targets.o hash.o linker.o \
 	elf.o srec.o binary.o tekhex.o 
@@ -263,7 +263,7 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 coff-i960.c srec.c binary.c tekhex.c oasys.c ieee.c aout0.c \
 	 ecoff.c ecofflink.c coff-m68k.c coff-u68k.c coff-apollo.c \
 	 coff-a29k.c coff-pmac.c coff-rs6000.c coff-sparc.c coffgen.c \
-	 format.c section.c core.c syms.c stab-syms.c reloc.c init.c \
+	 format.c section.c corefile.c syms.c stab-syms.c reloc.c init.c \
 	 coff-m88k.c coff-mips.c coff-sh.c trad-core.c cisco-core.c newsos3.c \
 	 i386aout.c i386linux.c i386mach3.c i386netbsd.c i386os9k.c \
 	 bout.c aout-adobe.c coff-we32k.c coff-w65.c \
@@ -636,7 +636,7 @@ coffgen.o: coffgen.c $(INCDIR)/coff/internal.h libcoff.h \
   $(INCDIR)/bfdlink.h
 format.o: format.c
 section.o: section.c
-core.o: core.c
+corefile.o: corefile.c
 syms.o: syms.c $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def
 stab-syms.o: stab-syms.c libaout.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab.def
