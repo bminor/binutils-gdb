@@ -421,6 +421,29 @@ print_insn_arm (pc, info, given)
 			}
 		      break;
 
+		    case 'B':
+		      /* Print ARM V5 BLX(1) address: pc+25 bits.  */
+		      {
+			bfd_vma address;
+			bfd_vma offset = 0;
+			
+			if (given & 0x00800000)
+			  /* Is signed, hi bits should be ones.  */
+			  offset = (-1) ^ 0x00ffffff;
+
+			/* Offset is (SignExtend(offset field)<<2).  */
+			offset += given & 0x00ffffff;
+			offset <<= 2;
+			address = offset + pc + 8;
+			
+			if (given & 0x01000000)
+			  /* H bit allows addressing to 2-byte boundaries.  */
+			  address += 2;
+
+		        info->print_address_func (address, info);
+		      }
+		      break;
+
 		    case 'C':
 		      func (stream, "_");
 		      if (given & 0x80000)
@@ -648,6 +671,9 @@ print_insn_thumb (pc, info, given)
 	      info->bytes_per_chunk = 4;
 	      info->bytes_per_line  = 4;
 	      
+	      if ((given & 0x10000000) == 0)
+                 func (stream, "blx\t");
+	      else
                 func (stream, "bl\t");
 		
               info->print_address_func (BDISP23 (given) * 2 + pc + 4, info);

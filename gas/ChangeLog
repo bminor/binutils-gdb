@@ -1,3 +1,45 @@
+2000-11-24  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (xscale-elf): Add target.
+	(xscale-coff): Add target.
+	* configure: Regenerate.
+
+	* config/tc-arm.c (ARM_EXT_V5E): New ARM architecture
+	extenstion.
+	(ARM_EXT_XSCALE): New ARM architecture extension.
+	(ARM_LONGMUL): Rename to ARM_EXT_LONGMUL.
+	(ARM_HALFWORD): Rename to ARM_EXT_HALFWORD.
+	(ARM_THUMB): Rename to ARM_EXT_THUMB.
+	(ARM_ARCH_V4): Remove processor from architecture.
+	(ARM_ARCH_3M): New architecutre definition.
+	(ARM_ARCH_V5TE): New architecutre definition.
+	(ARM_ARCH_XSCALE): New architecutre definition.
+	(CPU_DEFAULT): Allow to be defaulted to XScale.
+	(atpcs): New boolean variable.
+	(ldr_flags): Support 'd' flag for double word loads.
+	(str_flags): Support 'd' flag for double word stored.
+	(do_mia): New function.
+	(do_mar): New function.
+	(do_mra): New function.
+	(do_pld): New function.
+	(do_ldrd): New function.
+	(do_blx): New function.
+	(do_bkpt): New function.
+	(do_clz): New function.
+	(do_lstc2): New function.
+	(do_cdp2): New function.
+	(do_t_blx): New function.
+	(do_t_bkpt): New function.
+	(do_smla): New function.
+	(do_smlal): New function.
+	(do_smul): New function.
+	(do_qadd): New function.
+	(do_co_reg2c): New function.
+	(LONGEST_INSN): Redefine to 7.
+
+	* doc/c-arm.texi: Document -mxscale, -mmarmv5te and -matpcs
+	command line switches.
+
 2000-11-22  Jim Wilson  <wilson@redhat.com>
 
 	* config/tc-ia64.c (pseudo_func): Add missing initializers.

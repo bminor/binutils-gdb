@@ -178,6 +178,8 @@ thumb-epoc-pe)		targ_emul=arm_epoc_pe ;
 			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 thumb-*-pe)		targ_emul=armpe ;
 			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
+xscale-*-coff)		targ_emul=armcoff ;;
+xscale-*-elf)		targ_emul=armelf ;;
 h8300-*-hms* | h8300-*-coff*)
 			targ_emul=h8300; targ_extra_emuls="h8300h h8300s"
 			;;

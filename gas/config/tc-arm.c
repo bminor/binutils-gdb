@@ -50,16 +50,21 @@
 #define ARM_CPU_MASK	0x0000000f
 
 /* The following bitmasks control CPU extensions (ARM7 onwards):   */
-#define ARM_LONGMUL	0x00000010	/* Allow long multiplies.  */
-#define ARM_HALFWORD	0x00000020	/* Allow half word loads.  */
-#define ARM_THUMB	0x00000040	/* Allow BX instruction.   */
+#define ARM_EXT_LONGMUL	0x00000010	/* Allow long multiplies.  */
+#define ARM_EXT_HALFWORD 0x00000020	/* Allow half word loads.  */
+#define ARM_EXT_THUMB	0x00000040	/* Allow BX instruction.   */
 #define ARM_EXT_V5	0x00000080	/* Allow CLZ, etc.         */
+#define ARM_EXT_V5E	0x00000100	/* "El Segundo". 	   */
+#define ARM_EXT_XSCALE	0x00000200	/* Allow MIA etc.  	   */
 
 /* Architectures are the sum of the base and extensions.  */
-#define ARM_ARCH_V4	(ARM_7 | ARM_LONGMUL | ARM_HALFWORD)
-#define ARM_ARCH_V4T	(ARM_ARCH_V4 | ARM_THUMB)
+#define ARM_ARCH_V3M     ARM_EXT_LONGMUL
+#define ARM_ARCH_V4     (ARM_ARCH_V3M | ARM_EXT_HALFWORD)
+#define ARM_ARCH_V4T	(ARM_ARCH_V4 | ARM_EXT_THUMB)
 #define ARM_ARCH_V5	(ARM_ARCH_V4 | ARM_EXT_V5)
-#define ARM_ARCH_V5T	(ARM_ARCH_V5 | ARM_THUMB)
+#define ARM_ARCH_V5T	(ARM_ARCH_V5 | ARM_EXT_THUMB)
+#define ARM_ARCH_V5TE	(ARM_ARCH_V5T | ARM_EXT_V5E)
+#define ARM_ARCH_XSCALE (ARM_ARCH_V5TE | ARM_EXT_XSCALE)
 
 /* Some useful combinations:  */
 #define ARM_ANY		0x00ffffff
@@ -78,10 +83,14 @@
 #define FPU_MEMMULTI	0x7f000000	/* Not fpu_core.  */
 
 #ifndef CPU_DEFAULT
-#if defined __thumb__
-#define CPU_DEFAULT (ARM_ARCH_V4 | ARM_THUMB)
+#if defined __XSCALE__
+#define CPU_DEFAULT	(ARM_9 | ARM_ARCH_XSCALE)
 #else
-#define CPU_DEFAULT ARM_ALL
+#if defined __thumb__
+#define CPU_DEFAULT 	(ARM_7 | ARM_ARCH_V4T)
+#else
+#define CPU_DEFAULT 	ARM_ALL
+#endif
 #endif
 #endif
 
@@ -98,6 +107,7 @@ static int target_oabi = 0;
 #if defined OBJ_COFF || defined OBJ_ELF
 /* Flags stored in private area of BFD structure.  */
 static boolean uses_apcs_26      = false;
+static boolean atpcs             = false;
 static boolean support_interwork = false;
 static boolean uses_apcs_float   = false;
 static boolean pic_code          = false;
@@ -244,9 +254,11 @@ LITTLENUM_TYPE fp_values[NUM_FLOAT_VALS][MAX_LITTLENUMS];
 #define CP_T_UD  0x00800000
 #define CP_T_WB  0x00200000
 
-#define CONDS_BIT       (0x00100000)
-#define LOAD_BIT        (0x00100000)
-#define TRANS_BIT	(0x00200000)
+#define CONDS_BIT        0x00100000
+#define LOAD_BIT         0x00100000
+#define TRANS_BIT	 0x00200000
+
+#define DOUBLE_LOAD_FLAG 0x00000001
 
 struct asm_cond
 {
@@ -294,6 +306,7 @@ static CONST struct asm_flg s_flag[] =
 
 static CONST struct asm_flg ldr_flags[] =
 {
+  {"d",  DOUBLE_LOAD_FLAG},
   {"b",  0x00400000},
   {"t",  TRANS_BIT},
   {"bt", 0x00400000 | TRANS_BIT},
@@ -305,6 +318,7 @@ static CONST struct asm_flg ldr_flags[] =
 
 static CONST struct asm_flg str_flags[] =
 {
+  {"d",  DOUBLE_LOAD_FLAG},
   {"b",  0x00400000},
   {"t",  TRANS_BIT},
   {"bt", 0x00400000 | TRANS_BIT},
@@ -591,6 +605,31 @@ static void do_mull		PARAMS ((char *, unsigned long));
 /* ARM THUMB.  */
 static void do_bx               PARAMS ((char *, unsigned long));
 
+/* ARM_EXT_XScale.  */
+static void do_mia		PARAMS ((char *, unsigned long));
+static void do_mar		PARAMS ((char *, unsigned long));
+static void do_mra		PARAMS ((char *, unsigned long));
+static void do_pld		PARAMS ((char *, unsigned long));
+static void do_ldrd		PARAMS ((char *, unsigned long));
+
+/* ARM_EXT_V5.  */
+static void do_blx		PARAMS ((char *, unsigned long));
+static void do_bkpt		PARAMS ((char *, unsigned long));
+static void do_clz		PARAMS ((char *, unsigned long));
+static void do_lstc2		PARAMS ((char *, unsigned long));
+static void do_cdp2		PARAMS ((char *, unsigned long));
+static void do_co_reg2		PARAMS ((char *, unsigned long));
+
+static void do_t_blx		PARAMS ((char *));
+static void do_t_bkpt		PARAMS ((char *));
+
+/* ARM_EXT_V5E.  */
+static void do_smla		PARAMS ((char *, unsigned long));
+static void do_smlal		PARAMS ((char *, unsigned long));
+static void do_smul		PARAMS ((char *, unsigned long));
+static void do_qadd		PARAMS ((char *, unsigned long));
+static void do_co_reg2c		PARAMS ((char *, unsigned long));
+
 /* Coprocessor Instructions.  */
 static void do_cdp		PARAMS ((char *, unsigned long));
 static void do_lstc		PARAMS ((char *, unsigned long));
@@ -648,10 +687,10 @@ static bfd_reloc_code_real_type	arm_parse_reloc PARAMS ((void));
    take 2:  */
 #define INSN_SIZE       4
 
-/* LONGEST_INST is the longest basic instruction name without conditions or
-   flags.  ARM7M has 4 of length 5.  */
-
-#define LONGEST_INST 5
+/* LONGEST_INST is the longest basic instruction name without
+   conditions or flags.  ARM7M has 4 of length 5.  El Segundo
+   has one basic instruction name of length 7 (SMLALxy).  */
+#define LONGEST_INST 7
 
 struct asm_opcode
 {
@@ -677,6 +716,19 @@ struct asm_opcode
 
 static CONST struct asm_opcode insns[] =
 {
+/* Intel XScale extensions to ARM V5 ISA.  */
+  {"mia",   0x0e200010, NULL,   NULL,        ARM_EXT_XSCALE, do_mia},
+  {"miaph", 0x0e280010, NULL,   NULL,        ARM_EXT_XSCALE, do_mia},
+  {"miabb", 0x0e2c0010, NULL,   NULL,        ARM_EXT_XSCALE, do_mia},
+  {"miabt", 0x0e2d0010, NULL,   NULL,        ARM_EXT_XSCALE, do_mia},
+  {"miatb", 0x0e2e0010, NULL,   NULL,        ARM_EXT_XSCALE, do_mia},
+  {"miatt", 0x0e2f0010, NULL,   NULL,        ARM_EXT_XSCALE, do_mia},
+  {"mar",   0x0c400000, NULL,   NULL,        ARM_EXT_XSCALE, do_mar},
+  {"mra",   0x0c500000, NULL,   NULL,        ARM_EXT_XSCALE, do_mra},
+  {"pld",   0xf450f000, "",     NULL,        ARM_EXT_XSCALE, do_pld},
+  {"ldr",   0x000000d0, NULL,   ldr_flags,   ARM_ANY,        do_ldrd},
+  {"str",   0x000000f0, NULL,   str_flags,   ARM_ANY,        do_ldrd},
+
 /* ARM Instructions.  */
   {"and",   0x00000000, NULL,   s_flag,      ARM_ANY,      do_arit},
   {"eor",   0x00200000, NULL,   s_flag,      ARM_ANY,      do_arit},
@@ -727,13 +779,13 @@ static CONST struct asm_opcode insns[] =
            handled by the PSR_xxx defines above.  */
 
 /* ARM 7M long multiplies - need signed/unsigned flags!  */
-  {"smull", 0x00c00090, NULL,   s_flag,      ARM_LONGMUL,  do_mull},
-  {"umull", 0x00800090, NULL,   s_flag,      ARM_LONGMUL,  do_mull},
-  {"smlal", 0x00e00090, NULL,   s_flag,      ARM_LONGMUL,  do_mull},
-  {"umlal", 0x00a00090, NULL,   s_flag,      ARM_LONGMUL,  do_mull},
+  {"smull", 0x00c00090, NULL,   s_flag,      ARM_EXT_LONGMUL,  do_mull},
+  {"umull", 0x00800090, NULL,   s_flag,      ARM_EXT_LONGMUL,  do_mull},
+  {"smlal", 0x00e00090, NULL,   s_flag,      ARM_EXT_LONGMUL,  do_mull},
+  {"umlal", 0x00a00090, NULL,   s_flag,      ARM_EXT_LONGMUL,  do_mull},
 
 /* ARM THUMB interworking.  */
-  {"bx",    0x012fff10, NULL,   NULL,        ARM_THUMB,    do_bx},
+  {"bx",    0x012fff10, NULL,   NULL,        ARM_EXT_THUMB,    do_bx},
 
 /* Floating point instructions.  */
   {"wfs",   0x0e200110, NULL,   NULL,        FPU_ALL,      do_fp_ctrl},
@@ -789,6 +841,48 @@ static CONST struct asm_opcode insns[] =
   {"stc",   0x0c000000, NULL,  cplong_flag,  ARM_2UP,      do_lstc},
   {"mcr",   0x0e000010, NULL,  NULL,         ARM_2UP,      do_co_reg},
   {"mrc",   0x0e100010, NULL,  NULL,         ARM_2UP,      do_co_reg},
+
+/*  ARM ISA extension 5.  */
+/* Note: blx is actually 2 opcodes, so the .value is set dynamically.
+   And it's sometimes conditional and sometimes not.  */
+  {"blx",            0, NULL,   NULL,        ARM_EXT_V5, do_blx},
+  {"clz",   0x016f0f10, NULL,   NULL,        ARM_EXT_V5, do_clz},
+  {"bkpt",  0xe1200070, "",   	NULL,        ARM_EXT_V5, do_bkpt},
+  {"ldc2",  0xfc100000, "",  	cplong_flag, ARM_EXT_V5, do_lstc2},
+  {"stc2",  0xfc000000, "",  	cplong_flag, ARM_EXT_V5, do_lstc2},
+  {"cdp2",  0xfe000000, "",  	NULL,        ARM_EXT_V5, do_cdp2},
+  {"mcr2",  0xfe000010, "",  	NULL,        ARM_EXT_V5, do_co_reg2},
+  {"mrc2",  0xfe100010, "",  	NULL,        ARM_EXT_V5, do_co_reg2},
+
+/*  ARM ISA extension 5E, El Segundo.  */
+  {"smlabb", 0x01000080, NULL,   NULL,        ARM_EXT_V5E, do_smla},
+  {"smlatb", 0x010000a0, NULL,   NULL,        ARM_EXT_V5E, do_smla},
+  {"smlabt", 0x010000c0, NULL,   NULL,        ARM_EXT_V5E, do_smla},
+  {"smlatt", 0x010000e0, NULL,   NULL,        ARM_EXT_V5E, do_smla},
+
+  {"smlawb", 0x01200080, NULL,   NULL,        ARM_EXT_V5E, do_smla},
+  {"smlawt", 0x012000c0, NULL,   NULL,        ARM_EXT_V5E, do_smla},
+
+  {"smlalbb",0x01400080, NULL,   NULL,        ARM_EXT_V5E, do_smlal},
+  {"smlaltb",0x014000a0, NULL,   NULL,        ARM_EXT_V5E, do_smlal},
+  {"smlalbt",0x014000c0, NULL,   NULL,        ARM_EXT_V5E, do_smlal},
+  {"smlaltt",0x014000e0, NULL,   NULL,        ARM_EXT_V5E, do_smlal},
+
+  {"smulbb", 0x01600080, NULL,   NULL,        ARM_EXT_V5E, do_smul},
+  {"smultb", 0x016000a0, NULL,   NULL,        ARM_EXT_V5E, do_smul},
+  {"smulbt", 0x016000c0, NULL,   NULL,        ARM_EXT_V5E, do_smul},
+  {"smultt", 0x016000e0, NULL,   NULL,        ARM_EXT_V5E, do_smul},
+
+  {"smulwb", 0x012000a0, NULL,   NULL,        ARM_EXT_V5E, do_smul},
+  {"smulwt", 0x012000e0, NULL,   NULL,        ARM_EXT_V5E, do_smul},
+
+  {"qadd",   0x01000050, NULL,   NULL,        ARM_EXT_V5E, do_qadd},
+  {"qdadd",  0x01400050, NULL,   NULL,        ARM_EXT_V5E, do_qadd},
+  {"qsub",   0x01200050, NULL,   NULL,        ARM_EXT_V5E, do_qadd},
+  {"qdsub",  0x01600050, NULL,   NULL,        ARM_EXT_V5E, do_qadd},
+
+  {"mcrr",  0x0c400000, NULL,   NULL,         ARM_EXT_V5E, do_co_reg2c},
+  {"mrrc",  0x0c500000, NULL,   NULL,         ARM_EXT_V5E, do_co_reg2c},
 };
 
 /* Defines for various bits that we will want to toggle.  */
@@ -947,64 +1041,66 @@ struct thumb_opcode
 
 static CONST struct thumb_opcode tinsns[] =
 {
-  {"adc",	0x4140,		2,	ARM_THUMB, do_t_arit},
-  {"add",	0x0000,		2,	ARM_THUMB, do_t_add},
-  {"and",	0x4000,		2,	ARM_THUMB, do_t_arit},
-  {"asr",	0x0000,		2,	ARM_THUMB, do_t_asr},
-  {"b",		T_OPCODE_BRANCH, 2,	ARM_THUMB, do_t_branch12},
-  {"beq",	0xd0fe,		2,	ARM_THUMB, do_t_branch9},
-  {"bne",	0xd1fe,		2,	ARM_THUMB, do_t_branch9},
-  {"bcs",	0xd2fe,		2,	ARM_THUMB, do_t_branch9},
-  {"bhs",	0xd2fe,		2,	ARM_THUMB, do_t_branch9},
-  {"bcc",	0xd3fe,		2,	ARM_THUMB, do_t_branch9},
-  {"bul",	0xd3fe,		2,	ARM_THUMB, do_t_branch9},
-  {"blo",	0xd3fe,		2,	ARM_THUMB, do_t_branch9},
-  {"bmi",	0xd4fe,		2,	ARM_THUMB, do_t_branch9},
-  {"bpl",	0xd5fe,		2,	ARM_THUMB, do_t_branch9},
-  {"bvs",	0xd6fe,		2,	ARM_THUMB, do_t_branch9},
-  {"bvc",	0xd7fe,		2,	ARM_THUMB, do_t_branch9},
-  {"bhi",	0xd8fe,		2,	ARM_THUMB, do_t_branch9},
-  {"bls",	0xd9fe,		2,	ARM_THUMB, do_t_branch9},
-  {"bge",	0xdafe,		2,	ARM_THUMB, do_t_branch9},
-  {"blt",	0xdbfe,		2,	ARM_THUMB, do_t_branch9},
-  {"bgt",	0xdcfe,		2,	ARM_THUMB, do_t_branch9},
-  {"ble",	0xddfe,		2,	ARM_THUMB, do_t_branch9},
-  {"bal",	0xdefe,		2,	ARM_THUMB, do_t_branch9},
-  {"bic",	0x4380,		2,	ARM_THUMB, do_t_arit},
-  {"bl",	0xf7fffffe,	4,	ARM_THUMB, do_t_branch23},
-  {"bx",	0x4700,		2,	ARM_THUMB, do_t_bx},
-  {"cmn",	T_OPCODE_CMN,	2,	ARM_THUMB, do_t_arit},
-  {"cmp",	0x0000,		2,	ARM_THUMB, do_t_compare},
-  {"eor",	0x4040,		2,	ARM_THUMB, do_t_arit},
-  {"ldmia",	0xc800,		2,	ARM_THUMB, do_t_ldmstm},
-  {"ldr",	0x0000,		2,	ARM_THUMB, do_t_ldr},
-  {"ldrb",	0x0000,		2,	ARM_THUMB, do_t_ldrb},
-  {"ldrh",	0x0000,		2,	ARM_THUMB, do_t_ldrh},
-  {"ldrsb",	0x5600,		2,	ARM_THUMB, do_t_lds},
-  {"ldrsh",	0x5e00,		2,	ARM_THUMB, do_t_lds},
-  {"ldsb",	0x5600,		2,	ARM_THUMB, do_t_lds},
-  {"ldsh",	0x5e00,		2,	ARM_THUMB, do_t_lds},
-  {"lsl",	0x0000,		2,	ARM_THUMB, do_t_lsl},
-  {"lsr",	0x0000,		2,	ARM_THUMB, do_t_lsr},
-  {"mov",	0x0000,		2,	ARM_THUMB, do_t_mov},
-  {"mul",	T_OPCODE_MUL,	2,	ARM_THUMB, do_t_arit},
-  {"mvn",	T_OPCODE_MVN,	2,	ARM_THUMB, do_t_arit},
-  {"neg",	T_OPCODE_NEG,	2,	ARM_THUMB, do_t_arit},
-  {"orr",	0x4300,		2,	ARM_THUMB, do_t_arit},
-  {"pop",	0xbc00,		2,	ARM_THUMB, do_t_push_pop},
-  {"push",	0xb400,		2,	ARM_THUMB, do_t_push_pop},
-  {"ror",	0x41c0,		2,	ARM_THUMB, do_t_arit},
-  {"sbc",	0x4180,		2,	ARM_THUMB, do_t_arit},
-  {"stmia",	0xc000,		2,	ARM_THUMB, do_t_ldmstm},
-  {"str",	0x0000,		2,	ARM_THUMB, do_t_str},
-  {"strb",	0x0000,		2,	ARM_THUMB, do_t_strb},
-  {"strh",	0x0000,		2,	ARM_THUMB, do_t_strh},
-  {"swi",	0xdf00,		2,	ARM_THUMB, do_t_swi},
-  {"sub",	0x0000,		2,	ARM_THUMB, do_t_sub},
-  {"tst",	T_OPCODE_TST,	2,	ARM_THUMB, do_t_arit},
+  {"adc",	0x4140,		2,	ARM_EXT_THUMB, do_t_arit},
+  {"add",	0x0000,		2,	ARM_EXT_THUMB, do_t_add},
+  {"and",	0x4000,		2,	ARM_EXT_THUMB, do_t_arit},
+  {"asr",	0x0000,		2,	ARM_EXT_THUMB, do_t_asr},
+  {"b",		T_OPCODE_BRANCH, 2,	ARM_EXT_THUMB, do_t_branch12},
+  {"beq",	0xd0fe,		2,	ARM_EXT_THUMB, do_t_branch9},
+  {"bne",	0xd1fe,		2,	ARM_EXT_THUMB, do_t_branch9},
+  {"bcs",	0xd2fe,		2,	ARM_EXT_THUMB, do_t_branch9},
+  {"bhs",	0xd2fe,		2,	ARM_EXT_THUMB, do_t_branch9},
+  {"bcc",	0xd3fe,		2,	ARM_EXT_THUMB, do_t_branch9},
+  {"bul",	0xd3fe,		2,	ARM_EXT_THUMB, do_t_branch9},
+  {"blo",	0xd3fe,		2,	ARM_EXT_THUMB, do_t_branch9},
+  {"bmi",	0xd4fe,		2,	ARM_EXT_THUMB, do_t_branch9},
+  {"bpl",	0xd5fe,		2,	ARM_EXT_THUMB, do_t_branch9},
+  {"bvs",	0xd6fe,		2,	ARM_EXT_THUMB, do_t_branch9},
+  {"bvc",	0xd7fe,		2,	ARM_EXT_THUMB, do_t_branch9},
+  {"bhi",	0xd8fe,		2,	ARM_EXT_THUMB, do_t_branch9},
+  {"bls",	0xd9fe,		2,	ARM_EXT_THUMB, do_t_branch9},
+  {"bge",	0xdafe,		2,	ARM_EXT_THUMB, do_t_branch9},
+  {"blt",	0xdbfe,		2,	ARM_EXT_THUMB, do_t_branch9},
+  {"bgt",	0xdcfe,		2,	ARM_EXT_THUMB, do_t_branch9},
+  {"ble",	0xddfe,		2,	ARM_EXT_THUMB, do_t_branch9},
+  {"bal",	0xdefe,		2,	ARM_EXT_THUMB, do_t_branch9},
+  {"bic",	0x4380,		2,	ARM_EXT_THUMB, do_t_arit},
+  {"bl",	0xf7fffffe,	4,	ARM_EXT_THUMB, do_t_branch23},
+  {"blx",	0,		0,	ARM_EXT_V5, do_t_blx},
+  {"bkpt",	0xbe00,		2,	ARM_EXT_V5, do_t_bkpt},
+  {"bx",	0x4700,		2,	ARM_EXT_THUMB, do_t_bx},
+  {"cmn",	T_OPCODE_CMN,	2,	ARM_EXT_THUMB, do_t_arit},
+  {"cmp",	0x0000,		2,	ARM_EXT_THUMB, do_t_compare},
+  {"eor",	0x4040,		2,	ARM_EXT_THUMB, do_t_arit},
+  {"ldmia",	0xc800,		2,	ARM_EXT_THUMB, do_t_ldmstm},
+  {"ldr",	0x0000,		2,	ARM_EXT_THUMB, do_t_ldr},
+  {"ldrb",	0x0000,		2,	ARM_EXT_THUMB, do_t_ldrb},
+  {"ldrh",	0x0000,		2,	ARM_EXT_THUMB, do_t_ldrh},
+  {"ldrsb",	0x5600,		2,	ARM_EXT_THUMB, do_t_lds},
+  {"ldrsh",	0x5e00,		2,	ARM_EXT_THUMB, do_t_lds},
+  {"ldsb",	0x5600,		2,	ARM_EXT_THUMB, do_t_lds},
+  {"ldsh",	0x5e00,		2,	ARM_EXT_THUMB, do_t_lds},
+  {"lsl",	0x0000,		2,	ARM_EXT_THUMB, do_t_lsl},
+  {"lsr",	0x0000,		2,	ARM_EXT_THUMB, do_t_lsr},
+  {"mov",	0x0000,		2,	ARM_EXT_THUMB, do_t_mov},
+  {"mul",	T_OPCODE_MUL,	2,	ARM_EXT_THUMB, do_t_arit},
+  {"mvn",	T_OPCODE_MVN,	2,	ARM_EXT_THUMB, do_t_arit},
+  {"neg",	T_OPCODE_NEG,	2,	ARM_EXT_THUMB, do_t_arit},
+  {"orr",	0x4300,		2,	ARM_EXT_THUMB, do_t_arit},
+  {"pop",	0xbc00,		2,	ARM_EXT_THUMB, do_t_push_pop},
+  {"push",	0xb400,		2,	ARM_EXT_THUMB, do_t_push_pop},
+  {"ror",	0x41c0,		2,	ARM_EXT_THUMB, do_t_arit},
+  {"sbc",	0x4180,		2,	ARM_EXT_THUMB, do_t_arit},
+  {"stmia",	0xc000,		2,	ARM_EXT_THUMB, do_t_ldmstm},
+  {"str",	0x0000,		2,	ARM_EXT_THUMB, do_t_str},
+  {"strb",	0x0000,		2,	ARM_EXT_THUMB, do_t_strb},
+  {"strh",	0x0000,		2,	ARM_EXT_THUMB, do_t_strh},
+  {"swi",	0xdf00,		2,	ARM_EXT_THUMB, do_t_swi},
+  {"sub",	0x0000,		2,	ARM_EXT_THUMB, do_t_sub},
+  {"tst",	T_OPCODE_TST,	2,	ARM_EXT_THUMB, do_t_arit},
   /* Pseudo ops:  */
-  {"adr",       0x0000,         2,      ARM_THUMB, do_t_adr},
-  {"nop",       0x46C0,         2,      ARM_THUMB, do_t_nop},      /* mov r8,r8  */
+  {"adr",       0x0000,         2,      ARM_EXT_THUMB, do_t_adr},
+  {"nop",       0x46C0,         2,      ARM_EXT_THUMB, do_t_nop},      /* mov r8,r8  */
 };
 
 struct reg_entry
@@ -1061,6 +1157,7 @@ static CONST struct reg_entry reg_table[] =
 #define BAD_PC 		_("r15 not allowed here")
 #define BAD_FLAGS 	_("Instruction should not have flags")
 #define BAD_COND 	_("Instruction is not conditional")
+#define ERR_NO_ACCUM	_("acc0 expected")
 
 static struct hash_control * arm_ops_hsh   = NULL;
 static struct hash_control * arm_tops_hsh  = NULL;
@@ -1613,7 +1710,7 @@ opcode_select (width)
     case 16:
       if (! thumb_mode)
 	{
-	  if (! (cpu_variant & ARM_THUMB))
+	  if (! (cpu_variant & ARM_EXT_THUMB))
 	    as_bad (_("selected processor does not support THUMB opcodes"));
 
 	  thumb_mode = 1;
@@ -1626,7 +1723,7 @@ opcode_select (width)
     case 32:
       if (thumb_mode)
 	{
-	  if ((cpu_variant & ARM_ANY) == ARM_THUMB)
+	  if ((cpu_variant & ARM_ANY) == ARM_EXT_THUMB)
 	    as_bad (_("selected processor does not support ARM opcodes"));
 
 	  thumb_mode = 0;
@@ -2181,9 +2278,10 @@ do_msr (str, flags)
       return;
     }
 
-  if (inst.instruction & ((PSR_c | PSR_x | PSR_s) << PSR_SHIFT))
+  if ((cpu_variant & ARM_EXT_V5) != ARM_EXT_V5
+      && inst.instruction & ((PSR_c | PSR_x | PSR_s) << PSR_SHIFT))
     {
-      inst.error = _("only flag field of psr can be set with immediate value");
+      inst.error = _("immediate value cannot be used to set this field");
       return;
     }
 
@@ -2382,6 +2480,1071 @@ do_mla (str, flags)
   inst.instruction |= flags;
   end_of_line (str);
   return;
+}
+
+/* Expects *str -> the characters "acc0", possibly with leading blanks.
+   Advances *str to the next non-alphanumeric.
+   Returns 0, or else FAIL (in which case sets inst.error).
+
+  (In a future XScale, there may be accumulators other than zero.
+  At that time this routine and its callers can be upgraded to suit.)  */
+
+static int
+accum0_required_here (str)
+     char ** str;
+{
+  static char buff [128];	/* Note the address is taken.  Hence, static. */
+  char * p = * str;
+  char   c;
+  int result = 0;		/* The accum number.  */
+
+  skip_whitespace (p);
+  
+  *str = p;			/* Advance caller's string pointer too.  */
+  c = *p++;
+  while (isalnum (c))
+    c = *p++;
+
+  *--p = 0;			/* Aap nul into input buffer at non-alnum.  */
+  
+  if (! ( streq (*str, "acc0") || streq (*str, "ACC0")))
+    {
+      sprintf (buff, _("acc0 expected, not '%.100s'"), *str);
+      inst.error = buff;
+      result = FAIL;
+    }
+  
+  *p = c;			/* Unzap.  */
+  *str = p;			/* Caller's string pointer to after match.  */
+  return result;
+}
+
+/* Expects **str -> after a comma. May be leading blanks.
+   Advances *str, recognizing a load  mode, and setting inst.instruction.
+   Returns rn, or else FAIL (in which case may set inst.error 
+   and not advance str)
+ 
+   Note: doesn't know Rd, so no err checks that require such knowledge.  */
+
+static int
+ld_mode_required_here (string)
+     char ** string;
+{
+  char * str = * string;
+  int    rn;
+  int    pre_inc = 0;
+
+  skip_whitespace (str);
+    
+  if (* str == '[')
+    {
+      str++;
+      
+      skip_whitespace (str);
+
+      if ((rn = reg_required_here (& str, 16)) == FAIL)
+	return FAIL;
+
+      skip_whitespace (str);
+
+      if (* str == ']')
+	{
+	  str ++;
+	  
+	  if (skip_past_comma (& str) == SUCCESS)
+	    {
+	      /* [Rn],... (post inc) */
+	      if (ldst_extend (& str, 1) == FAIL)
+		return FAIL;
+	    }
+	  else 	      /* [Rn] */
+	    {
+              skip_whitespace (str);
+
+              if (* str == '!')
+               {
+                 str ++;
+                 inst.instruction |= WRITE_BACK;
+               }
+
+	      inst.instruction |= INDEX_UP | HWOFFSET_IMM;
+	      pre_inc = 1;
+	    }
+	}
+      else	  /* [Rn,...] */
+	{
+	  if (skip_past_comma (& str) == FAIL)
+	    {
+	      inst.error = _("pre-indexed expression expected");
+	      return FAIL;
+	    }
+
+	  pre_inc = 1;
+	  
+	  if (ldst_extend (& str, 1) == FAIL)
+	    return FAIL;
+
+	  skip_whitespace (str);
+
+	  if (* str ++ != ']')
+	    {
+	      inst.error = _("missing ]");
+	      return FAIL;
+	    }
+
+	  skip_whitespace (str);
+
+	  if (* str == '!')
+	    {
+	      str ++;
+	      inst.instruction |= WRITE_BACK;
+	    }
+	}
+    }
+  else if (* str == '=')	/* ldr's "r,=label" syntax */
+    /* We should never reach here, because <text> = <expression> is
+       caught gas/read.c read_a_source_file() as a .set operation.  */
+    return FAIL;
+  else				/* PC +- 8 bit immediate offset.  */
+    {
+      if (my_get_expression (& inst.reloc.exp, & str))
+	return FAIL;
+
+      inst.instruction            |= HWOFFSET_IMM;	/* The I bit.  */
+      inst.reloc.type              = BFD_RELOC_ARM_OFFSET_IMM8;
+      inst.reloc.exp.X_add_number -= 8;  		/* PC rel adjust.  */
+      inst.reloc.pc_rel            = 1;
+      inst.instruction            |= (REG_PC << 16);
+      
+      rn = REG_PC;
+      pre_inc = 1;
+    }
+
+  inst.instruction |= (pre_inc ? PRE_INDEX : 0);
+  * string = str;
+  
+  return rn;
+}
+
+/* ARM V5E (El Segundo) signed-multiply-accumulate (argument parse)
+   SMLAxy{cond} Rd,Rm,Rs,Rn
+   SMLAWy{cond} Rd,Rm,Rs,Rn
+   Error if any register is R15.  */
+
+static void
+do_smla (str, flags)
+     char *        str;
+     unsigned long flags;
+{
+  int rd, rm, rs, rn;
+
+  skip_whitespace (str);
+
+  if ((rd = reg_required_here (& str, 16)) == FAIL
+      || skip_past_comma (& str) == FAIL
+      || (rm = reg_required_here (& str, 0)) == FAIL
+      || skip_past_comma (& str) == FAIL
+      || (rs = reg_required_here (& str, 8)) == FAIL
+      || skip_past_comma (& str) == FAIL
+      || (rn = reg_required_here (& str, 12)) == FAIL)
+    inst.error = BAD_ARGS;
+
+  else if (rd == REG_PC || rm == REG_PC || rs == REG_PC || rn == REG_PC) 
+    inst.error = BAD_PC;
+
+  else if (flags)
+    inst.error = BAD_FLAGS;
+
+  else
+    end_of_line (str);
+}
+
+/* ARM V5E (El Segundo) signed-multiply-accumulate-long (argument parse)
+   SMLALxy{cond} Rdlo,Rdhi,Rm,Rs
+   Error if any register is R15.
+   Warning if Rdlo == Rdhi.  */
+
+static void
+do_smlal (str, flags)
+     char *        str;
+     unsigned long flags;
+{
+  int rdlo, rdhi, rm, rs;
+
+  skip_whitespace (str);
+
+  if ((rdlo = reg_required_here (& str, 12)) == FAIL
+      || skip_past_comma (& str) == FAIL
+      || (rdhi = reg_required_here (& str, 16)) == FAIL
+      || skip_past_comma (& str) == FAIL
+      || (rm = reg_required_here (& str, 0)) == FAIL
+      || skip_past_comma (& str) == FAIL
+      || (rs = reg_required_here (& str, 8)) == FAIL)
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+
+  if (rdlo == REG_PC || rdhi == REG_PC || rm == REG_PC || rs == REG_PC)
+    {
+      inst.error = BAD_PC;
+      return;
+    }
+
+  if (rdlo == rdhi)
+    as_tsktsk (_("rdhi and rdlo must be different"));
+  
+  if (flags)
+    inst.error = BAD_FLAGS;
+  else
+    end_of_line (str);
+}
+
+/* ARM V5E (El Segundo) signed-multiply (argument parse)
+   SMULxy{cond} Rd,Rm,Rs
+   Error if any register is R15.  */
+
+static void
+do_smul (str, flags)
+     char *        str;
+     unsigned long flags;
+{
+  int rd, rm, rs;
+
+  skip_whitespace (str);
+
+  if ((rd = reg_required_here (& str, 16)) == FAIL
+      || skip_past_comma (& str) == FAIL
+      || (rm = reg_required_here (& str, 0)) == FAIL
+      || skip_past_comma (& str) == FAIL
+      || (rs = reg_required_here (& str, 8)) == FAIL)
+    inst.error = BAD_ARGS;
+
+  else if (rd == REG_PC || rm == REG_PC || rs == REG_PC)
+    inst.error = BAD_PC;
+
+  else if (flags)
+    inst.error = BAD_FLAGS;
+
+  else
+    end_of_line (str);
+}
+
+/* ARM V5E (El Segundo) saturating-add/subtract (argument parse)
+   Q[D]{ADD,SUB}{cond} Rd,Rm,Rn
+   Error if any register is R15.  */
+
+static void
+do_qadd (str, flags)
+     char *        str;
+     unsigned long flags;
+{
+  int rd, rm, rn;
+
+  skip_whitespace (str);
+
+  if ((rd = reg_required_here (& str, 12)) == FAIL
+      || skip_past_comma (& str) == FAIL
+      || (rm = reg_required_here (& str, 0)) == FAIL
+      || skip_past_comma (& str) == FAIL
+      || (rn = reg_required_here (& str, 16)) == FAIL)
+    inst.error = BAD_ARGS;
+
+  else if (rd == REG_PC || rm == REG_PC || rn == REG_PC)
+    inst.error = BAD_PC;
+
+  else if (flags)
+    inst.error = BAD_FLAGS;
+
+  else
+    end_of_line (str);
+}
+
+/* ARM V5E (el Segundo)
+   MCRRcc <coproc>, <opcode>, <Rd>, <Rn>, <CRm>.
+   MRRCcc <coproc>, <opcode>, <Rd>, <Rn>, <CRm>. 
+
+   These are equivalent to the XScale instructions MAR and MRA,
+   respectively, when coproc == 0, opcode == 0, and CRm == 0.  
+
+   Result unpredicatable if Rd or Rn is R15.  */
+
+static void
+do_co_reg2c (str, flags)
+     char *        str;
+     unsigned long flags;
+{
+  int rd, rn;
+
+  skip_whitespace (str);
+
+  if (co_proc_number (& str) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  if (skip_past_comma (& str) == FAIL
+      || cp_opc_expr (& str, 4, 4) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  if (skip_past_comma (& str) == FAIL
+      || (rd = reg_required_here (& str, 12)) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  if (skip_past_comma (& str) == FAIL
+      || (rn = reg_required_here (& str, 16)) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  /* Unpredictable result if rd or rn is R15.  */
+  if (rd == REG_PC || rn == REG_PC)
+    as_tsktsk 
+      (_("Warning: Instruction unpredictable when using r15"));
+
+  if (skip_past_comma (& str) == FAIL
+      || cp_reg_required_here (& str, 0) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  if (flags)
+    inst.error = BAD_COND;
+
+  end_of_line (str);
+}
+
+
+/* ARM V5 count-leading-zeroes instruction (argument parse)
+     CLZ{<cond>} <Rd>, <Rm>
+     Condition defaults to COND_ALWAYS.
+     Error if Rd or Rm are R15.  */
+
+static void
+do_clz (str, flags)
+     char *        str;
+     unsigned long flags;
+{
+  int rd, rm;
+
+  if (flags)
+    {
+      as_bad (BAD_FLAGS);
+      return;
+    }
+
+  skip_whitespace (str);
+
+  if (((rd = reg_required_here (& str, 12)) == FAIL)
+      || (skip_past_comma (& str) == FAIL)
+      || ((rm = reg_required_here (& str, 0)) == FAIL))
+    inst.error = BAD_ARGS;
+
+  else if (rd == REG_PC || rm == REG_PC )
+    inst.error = BAD_PC;
+
+  else
+    end_of_line (str);
+}
+
+/* ARM V5 (argument parse)
+     LDC2{L} <coproc>, <CRd>, <addressing mode>
+     STC2{L} <coproc>, <CRd>, <addressing mode>
+     Instruction is not conditional, and has 0xf in the codition field.
+     Otherwise, it's the same as LDC/STC.  */
+
+static void
+do_lstc2 (str, flags)
+     char *        str;
+     unsigned long flags;
+{
+  if (flags)
+    inst.error = BAD_COND;
+
+  skip_whitespace (str);
+
+  if (co_proc_number (& str) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+    }
+  else if (skip_past_comma (& str) == FAIL
+	   || cp_reg_required_here (& str, 12) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+    }
+  else if (skip_past_comma (& str) == FAIL
+	   || cp_address_required_here (& str) == FAIL)
+    {
+      if (! inst.error)
+	inst.error = BAD_ARGS;
+    }
+  else
+    end_of_line (str);
+}
+
+/* ARM V5 (argument parse)
+     CDP2 <coproc>, <opcode_1>, <CRd>, <CRn>, <CRm>, <opcode_2>
+     Instruction is not conditional, and has 0xf in the condition field.
+     Otherwise, it's the same as CDP.  */
+
+static void
+do_cdp2 (str, flags)
+     char *        str;
+     unsigned long flags;
+{
+  skip_whitespace (str);
+
+  if (co_proc_number (& str) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  if (skip_past_comma (& str) == FAIL
+      || cp_opc_expr (& str, 20,4) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  if (skip_past_comma (& str) == FAIL
+      || cp_reg_required_here (& str, 12) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  if (skip_past_comma (& str) == FAIL
+      || cp_reg_required_here (& str, 16) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  if (skip_past_comma (& str) == FAIL
+      || cp_reg_required_here (& str, 0) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  if (skip_past_comma (& str) == SUCCESS)
+    {
+      if (cp_opc_expr (& str, 5, 3) == FAIL)
+	{
+	  if (!inst.error)
+	    inst.error = BAD_ARGS;
+	  return;
+	}
+    }
+
+  if (flags)
+    inst.error = BAD_FLAGS;
+  
+  end_of_line (str);
+}
+
+/* ARM V5 (argument parse)
+     MCR2 <coproc>, <opcode_1>, <Rd>, <CRn>, <CRm>, <opcode_2>
+     MRC2 <coproc>, <opcode_1>, <Rd>, <CRn>, <CRm>, <opcode_2>
+     Instruction is not conditional, and has 0xf in the condition field.
+     Otherwise, it's the same as MCR/MRC.  */
+
+static void
+do_co_reg2 (str, flags)
+     char *        str;
+     unsigned long flags;
+{
+  skip_whitespace (str);
+
+  if (co_proc_number (& str) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  if (skip_past_comma (& str) == FAIL
+      || cp_opc_expr (& str, 21, 3) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  if (skip_past_comma (& str) == FAIL
+      || reg_required_here (& str, 12) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  if (skip_past_comma (& str) == FAIL
+      || cp_reg_required_here (& str, 16) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  if (skip_past_comma (& str) == FAIL
+      || cp_reg_required_here (& str, 0) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  if (skip_past_comma (& str) == SUCCESS)
+    {
+      if (cp_opc_expr (& str, 5, 3) == FAIL)
+	{
+	  if (!inst.error)
+	    inst.error = BAD_ARGS;
+	  return;
+	}
+    }
+
+  if (flags)
+    inst.error = BAD_COND;
+
+  end_of_line (str);
+}
+
+/* THUMB V5 breakpoint instruction (argument parse)
+	BKPT <immed_8>.  */
+
+static void
+do_t_bkpt (str)
+     char * str;
+{
+  expressionS expr;
+  unsigned long number;
+
+  skip_whitespace (str);     
+
+  /* Allow optional leading '#'.  */
+  if (is_immediate_prefix (*str))
+    str ++;
+
+  memset (& expr, '\0', sizeof (expr));
+  if (my_get_expression (& expr, & str) || (expr.X_op != O_constant))
+    {
+      inst.error = _("bad or missing expression");
+      return;
+    }
+  
+  number = expr.X_add_number;
+  
+  /* Check it fits an 8 bit unsigned.  */
+  if (number != (number & 0xff))
+    {
+      inst.error = _("immediate value out of range");
+      return;
+    }
+
+  inst.instruction |= number;
+
+  end_of_line (str);
+}
+
+/* ARM V5 branch-link-exchange (argument parse) for BLX(1) only.
+   Expects inst.instruction is set for BLX(1).
+   Note: this is cloned from do_branch, and the reloc changed to be a
+	new one that can cope with setting one extra bit (the H bit).  */
+
+static void
+do_branch25 (str, flags)
+     char *        str;
+     unsigned long flags ATTRIBUTE_UNUSED;
+{
+  if (my_get_expression (& inst.reloc.exp, & str))
+    return;
+  
+#ifdef OBJ_ELF
+  {
+    char * save_in;
+  
+    /* ScottB: February 5, 1998 */
+    /* Check to see of PLT32 reloc required for the instruction.  */
+    
+    /* arm_parse_reloc() works on input_line_pointer.
+       We actually want to parse the operands to the branch instruction
+       passed in 'str'.  Save the input pointer and restore it later.  */
+    save_in = input_line_pointer;
+    input_line_pointer = str;
+    
+    if (inst.reloc.exp.X_op == O_symbol
+	&& *str == '('
+	&& arm_parse_reloc () == BFD_RELOC_ARM_PLT32)
+      {
+	inst.reloc.type   = BFD_RELOC_ARM_PLT32;
+	inst.reloc.pc_rel = 0;
+	/* Modify str to point to after parsed operands, otherwise
+	   end_of_line() will complain about the (PLT) left in str.  */
+	str = input_line_pointer;
+      }
+    else
+      {
+	inst.reloc.type   = BFD_RELOC_ARM_PCREL_BLX;
+	inst.reloc.pc_rel = 1;
+      }
+    
+    input_line_pointer = save_in;
+  }
+#else
+  inst.reloc.type   = BFD_RELOC_ARM_PCREL_BLX;
+  inst.reloc.pc_rel = 1;
+#endif /* OBJ_ELF */
+  
+  end_of_line (str);
+}
+
+/* ARM V5 branch-link-exchange instruction (argument parse)
+     BLX <target_addr>		ie BLX(1)
+     BLX{<condition>} <Rm>	ie BLX(2)
+   Unfortunately, there are two different opcodes for this mnemonic.
+   So, the insns[].value is not used, and the code here zaps values
+	into inst.instruction.	
+   Also, the <target_addr> can be 25 bits, hence has its own reloc.  */
+
+static void
+do_blx (str, flags)
+     char *        str;
+     unsigned long flags;
+{
+  char * mystr = str;
+  int rm;
+
+  if (flags)
+    {
+      as_bad (BAD_FLAGS);
+      return;
+    }
+    	
+  skip_whitespace (mystr);
+  rm = reg_required_here (& mystr, 0);
+  
+  /* The above may set inst.error.  Ignore his opinion.  */
+  inst.error = 0;
+  
+  if (rm != FAIL)
+    {
+      /* Arg is a register.
+	 Use the condition code our caller put in inst.instruction.
+	 Pass ourselves off as a BX with a funny opcode.  */
+      inst.instruction |= 0x012fff30;
+      do_bx (str, flags);
+    }
+  else
+    {
+      /* This must be is BLX <target address>, no condition allowed.  */
+      if (inst.instruction != COND_ALWAYS)
+    	{
+      	  inst.error = BAD_COND;
+	  return;
+    	}
+      
+      inst.instruction = 0xfafffffe;
+      
+      /* Process like a B/BL, but with a different reloc.
+	 Note that B/BL expecte fffffe, not 0, offset in the opcode table.  */
+      do_branch25 (str, flags);
+    }
+}
+
+/* ARM V5 Thumb BLX (argument parse)
+	BLX <target_addr>	which is BLX(1)
+	BLX <Rm>		which is BLX(2)
+   Unfortunately, there are two different opcodes for this mnemonic.
+   So, the tinsns[].value is not used, and the code here zaps values
+	into inst.instruction.	*/
+
+static void
+do_t_blx (str)
+     char * str;
+{
+  char * mystr = str;
+  int rm;
+
+  skip_whitespace (mystr);
+  inst.instruction = 0x4780;
+
+  /* Note that this call is to the ARM register recognizer.  BLX(2)
+     uses the ARM register space, not the Thumb one, so a call to 
+     thumb_reg() would be wrong.  */
+  rm = reg_required_here (& mystr, 3);
+  inst.error = 0;
+  
+  if (rm != FAIL)
+    {
+      /* It's BLX(2).  The .instruction was zapped with rm & is final.  */
+      inst.size = 2;
+    }
+  else
+    {
+      /* No ARM register.  This must be BLX(1).  Change the .instruction.  */
+      inst.instruction = 0xf7ffeffe;
+      inst.size = 4;
+
+      if (my_get_expression (& inst.reloc.exp, & mystr))
+	return;
+      
+      inst.reloc.type   = BFD_RELOC_THUMB_PCREL_BLX;
+      inst.reloc.pc_rel = 1;
+    }
+  
+  end_of_line (mystr);
+}
+
+/* ARM V5 breakpoint instruction (argument parse)
+     BKPT <16 bit unsigned immediate>
+     Instruction is not conditional.
+	The bit pattern given in insns[] has the COND_ALWAYS condition,
+	and it is an error if the caller tried to override that.
+     Note "flags" is nonzero if a flag was supplied (which is an error).  */
+
+static void
+do_bkpt (str, flags)
+     char *        str;
+     unsigned long flags;
+{
+  expressionS expr;
+  unsigned long number;
+
+  skip_whitespace (str);
+  
+  /* Allow optional leading '#'.  */
+  if (is_immediate_prefix (* str))
+    str++;
+
+  memset (& expr, '\0', sizeof (expr));
+  
+  if (my_get_expression (& expr, & str) || (expr.X_op != O_constant))
+    {
+      inst.error = _("bad or missing expression");
+      return;
+    }
+  
+  number = expr.X_add_number;
+  
+  /* Check it fits a 16 bit unsigned.  */
+  if (number != (number & 0xffff))
+    {
+      inst.error = _("immediate value out of range");
+      return;
+    }
+  
+  /* Top 12 of 16 bits to bits 19:8.  */
+  inst.instruction |= (number & 0xfff0) << 4;
+  
+  /* Bottom 4 of 16 bits to bits 3:0.  */
+  inst.instruction |= number & 0xf;
+
+  end_of_line (str);
+
+  if (flags)
+    inst.error = BAD_FLAGS;
+}
+
+/* Xscale multiply-accumulate (argument parse)
+     MIAcc   acc0,Rm,Rs	
+     MIAPHcc acc0,Rm,Rs
+     MIAxycc acc0,Rm,Rs.  */
+
+static void
+do_mia (str, flags)
+     char * str;
+     unsigned long flags;
+{
+  int rs;
+  int rm;
+
+  if (flags)
+    as_bad (BAD_FLAGS);
+  
+  else if (accum0_required_here (& str) == FAIL)
+    inst.error = ERR_NO_ACCUM;
+  
+  else if (skip_past_comma (& str) == FAIL
+	   || (rm = reg_required_here (& str, 0)) == FAIL)
+    inst.error = BAD_ARGS;
+  
+  else if (skip_past_comma (& str) == FAIL
+	   || (rs = reg_required_here (& str, 12)) == FAIL)
+    inst.error = BAD_ARGS;
+  
+  /* inst.instruction has now been zapped with both rm and rs. */
+  else if (rm == REG_PC || rs == REG_PC)
+    inst.error = BAD_PC;	/* Undefined result if rm or rs is R15.  */
+  
+  else
+    end_of_line (str);
+}
+
+/* Xscale move-accumulator-register (argument parse)
+
+     MARcc   acc0,RdLo,RdHi.  */
+
+static void
+do_mar (str, flags)
+     char * str;
+     unsigned long flags;
+{
+  int rdlo, rdhi;
+
+  if (flags)
+    as_bad (BAD_FLAGS);
+  
+  else if (accum0_required_here (& str) == FAIL)
+    inst.error = ERR_NO_ACCUM;
+  
+  else if (skip_past_comma (& str) == FAIL
+	   || (rdlo = reg_required_here (& str, 12)) == FAIL)
+    inst.error = BAD_ARGS;
+  
+  else if (skip_past_comma (& str) == FAIL
+	   || (rdhi = reg_required_here (& str, 16)) == FAIL)
+    inst.error = BAD_ARGS;
+  
+  /* inst.instruction has now been zapped with both rdlo and rdhi.  */
+  else if (rdlo == REG_PC || rdhi == REG_PC)
+    inst.error = BAD_PC;	/* Undefined result if rdlo or rdhi is R15.  */
+  
+  else
+    end_of_line (str);
+}
+
+/* Xscale move-register-accumulator (argument parse)
+
+     MRAcc   RdLo,RdHi,acc0.  */
+
+static void
+do_mra (str, flags)
+     char * str;
+     unsigned long flags;
+{
+  int rdlo;
+  int rdhi;
+
+  if (flags)
+    {
+      as_bad (BAD_FLAGS);
+      return;
+    }
+
+  skip_whitespace (str);
+
+  if ((rdlo = reg_required_here (& str, 12)) == FAIL)
+    inst.error = BAD_ARGS;
+
+  else if (skip_past_comma (& str) == FAIL
+	   || (rdhi = reg_required_here (& str, 16)) == FAIL)
+    inst.error = BAD_ARGS;
+
+  else if  (skip_past_comma (& str) == FAIL
+	    || accum0_required_here (& str) == FAIL)
+    inst.error = ERR_NO_ACCUM;
+
+  /* inst.instruction has now been zapped with both rdlo and rdhi.  */
+  else if (rdlo == rdhi)
+    inst.error = BAD_ARGS;	/* Undefined result if 2 writes to same reg.  */
+
+  else if (rdlo == REG_PC || rdhi == REG_PC)
+    inst.error = BAD_PC;	/* Undefined result if rdlo or rdhi is R15.  */
+  else
+    end_of_line (str);
+}
+
+/* Xscale: Preload-Cache 
+
+    PLD <addr_mode>
+    
+  Syntactically, like LDR with B=1, W=0, L=1.  */
+
+static void
+do_pld (str, flags)
+     char * str;
+     unsigned long flags;
+{
+  int rd;
+
+  if (flags)
+    {
+      as_bad (BAD_FLAGS);
+      return;
+    }
+
+  skip_whitespace (str);
+
+  if (* str != '[')
+    {
+      inst.error = _("'[' expected after PLD mnemonic");
+      return;
+    }
+
+  ++ str;
+  skip_whitespace (str);
+
+  if ((rd = reg_required_here (& str, 16)) == FAIL)
+    return;
+
+  skip_whitespace (str);
+  
+  if (* str == ']')
+    {
+      /* [Rn], ... ?  */
+      ++ str;
+      skip_whitespace (str);
+
+      if (skip_past_comma (& str) == SUCCESS)
+	{
+	  if (ldst_extend (& str, 0) == FAIL)
+	    return;
+	}
+      else if (* str == '!') /* [Rn]! */
+	{
+	  inst.error = _("writeback used in preload instruction");
+	  ++ str;
+	}
+      else /* [Rn] */
+	inst.instruction |= INDEX_UP | PRE_INDEX;
+    }
+  else /* [Rn, ...] */
+    {
+      if (skip_past_comma (& str) == FAIL)
+	{
+	  inst.error = _("pre-indexed expression expected");
+	  return;
+	}
+      
+      if (ldst_extend (& str, 0) == FAIL)
+	return;
+
+      skip_whitespace (str);
+
+      if (* str != ']')
+	{
+	  inst.error = _("missing ]");
+	  return;
+	}
+
+      ++ str;
+      skip_whitespace (str);
+      
+      if (* str == '!') /* [Rn]! */
+	{
+	  inst.error = _("writeback used in preload instruction");
+	  ++ str;
+	}
+      
+      inst.instruction |= PRE_INDEX;
+    }
+
+  end_of_line (str);
+}
+
+/* Xscale load-consecutive (argument parse)
+   Mode is like LDRH.
+
+     LDRccD R, mode
+     STRccD R, mode.  */
+
+static void
+do_ldrd (str, flags)
+     char * str;
+     unsigned long flags;
+{
+  int rd;
+  int rn;
+
+  if (flags != DOUBLE_LOAD_FLAG)
+    {
+      /* Change instruction pattern to normal ldr/str.  */
+      if (inst.instruction & 0x20)
+	inst.instruction = (inst.instruction & COND_MASK) | 0x04000000; /* str */
+      else
+	inst.instruction = (inst.instruction & COND_MASK) | 0x04100000; /* ldr */
+
+      /* Perform a normal load/store instruction parse.  */
+      do_ldst (str, flags);
+
+      return;
+    }
+  
+  if ((cpu_variant & ARM_EXT_XSCALE) != ARM_EXT_XSCALE)
+    {
+      static char buff[128];
+
+      --str;
+      while (isspace (*str))
+	--str;
+      str -= 4;
+      
+      /* Deny all knowledge.  */
+      sprintf (buff, _("bad instruction '%.100s'"), str);
+      inst.error = buff;
+      return;
+    }
+  
+  skip_whitespace (str);
+    
+  if ((rd = reg_required_here (& str, 12)) == FAIL)
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+
+  if (skip_past_comma (& str) == FAIL
+      || (rn = ld_mode_required_here (& str)) == FAIL)
+    {
+      if (!inst.error)
+        inst.error = BAD_ARGS;
+      return;
+    }
+  
+  /* inst.instruction has now been zapped with Rd and the addressing mode.  */
+  if (rd & 1)		/* Unpredictable result if Rd is odd.  */
+    {
+      inst.error = _("Destination register must be even");	
+      return;
+    }
+
+  if (rd == REG_LR || rd == 12)
+    {
+      inst.error = _("r12 or r14 not allowed here");
+      return;
+    }
+
+  if (((rd == rn) || (rd + 1 == rn))
+      &&
+      ((inst.instruction & WRITE_BACK)
+       || (!(inst.instruction & PRE_INDEX))))
+    as_warn (_("pre/post-indexing used when modified address register is destination"));
+  
+  end_of_line (str);
 }
 
 /* Returns the index into fp_values of a floating point number,
@@ -3107,7 +4270,7 @@ do_ldst (str, flags)
     {
       /* This is actually a load/store of a halfword, or a
          signed-extension load.  */
-      if ((cpu_variant & ARM_HALFWORD) == 0)
+      if ((cpu_variant & ARM_EXT_HALFWORD) == 0)
 	{
 	  inst.error
 	    = _("Processor does not support halfwords or signed bytes");
@@ -5294,6 +6457,24 @@ md_begin ()
     if ((cpu_variant & FPU_ALL) == FPU_NONE) flags |= F_SOFT_FLOAT;
 
     bfd_set_private_flags (stdoutput, flags);
+
+    /* We have run out flags in the COFF header to encode the
+       status of ATPCS support, so instead we create a dummy,
+       empty, debug section called .arm.atpcs.  */
+    if (atpcs)
+      {
+	asection * sec;
+	
+	sec = bfd_make_section (stdoutput, ".arm.atpcs");
+
+	if (sec != NULL)
+	  {
+	    bfd_set_section_flags
+	      (stdoutput, sec, SEC_READONLY | SEC_DEBUGGING /* | SEC_HAS_CONTENTS */);
+	    bfd_set_section_size (stdoutput, sec, 0);
+	    bfd_set_section_contents (stdoutput, sec, NULL, 0, 0);
+	  }
+      }
   }
 #endif
 
@@ -5321,15 +6502,25 @@ md_begin ()
   /* Catch special cases.  */
   if (cpu_variant != (FPU_DEFAULT | CPU_DEFAULT))
     {
-      if (cpu_variant & (ARM_EXT_V5 & ARM_THUMB))
-	mach = bfd_mach_arm_5T;
+      if (cpu_variant & ARM_EXT_XSCALE)
+	mach = bfd_mach_arm_XScale;
+      else if (cpu_variant & ARM_EXT_V5E)
+	mach = bfd_mach_arm_5TE;
       else if (cpu_variant & ARM_EXT_V5)
-	mach = bfd_mach_arm_5;
-      else if (cpu_variant & ARM_THUMB)
-	mach = bfd_mach_arm_4T;
-      else if ((cpu_variant & ARM_ARCH_V4) == ARM_ARCH_V4)
-	mach = bfd_mach_arm_4;
-      else if (cpu_variant & ARM_LONGMUL)
+	{
+	  if (cpu_variant & ARM_EXT_THUMB)
+	    mach = bfd_mach_arm_5T;
+	  else
+	    mach = bfd_mach_arm_5;
+	}
+      else if (cpu_variant & ARM_EXT_HALFWORD)
+	{
+	  if (cpu_variant & ARM_EXT_THUMB)
+	    mach = bfd_mach_arm_4T;
+	  else
+	    mach = bfd_mach_arm_4;
+	}
+      else if (cpu_variant & ARM_EXT_LONGMUL)
 	mach = bfd_mach_arm_3M;
     }
 
@@ -5678,7 +6869,7 @@ md_apply_fix3 (fixP, val, seg)
 	    else
 	      {
 		as_bad_where (fixP->fx_file, fixP->fx_line,
-			      _("Unable to compute ADRL instructions for PC offset of 0x%x"),
+			      _("Unable to compute ADRL instructions for PC offset of 0x%lx"),
 			      value);
 		break;
 	      }
@@ -6038,7 +7229,7 @@ md_apply_fix3 (fixP, val, seg)
 
 	  if ((value + 2) & ~0x3fe)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("Invalid offset, value too big (0x%08X)"), value);
+			  _("Invalid offset, value too big (0x%08lX)"), value);
 
 	  /* Round up, since pc will be rounded down.  */
 	  newval |= (value + 2) >> 2;
@@ -6047,28 +7238,28 @@ md_apply_fix3 (fixP, val, seg)
 	case 9: /* SP load/store.  */
 	  if (value & ~0x3fc)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("Invalid offset, value too big (0x%08X)"), value);
+			  _("Invalid offset, value too big (0x%08lX)"), value);
 	  newval |= value >> 2;
 	  break;
 
 	case 6: /* Word load/store.  */
 	  if (value & ~0x7c)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("Invalid offset, value too big (0x%08X)"), value);
+			  _("Invalid offset, value too big (0x%08lX)"), value);
 	  newval |= value << 4; /* 6 - 2.  */
 	  break;
 
 	case 7: /* Byte load/store.  */
 	  if (value & ~0x1f)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("Invalid offset, value too big (0x%08X)"), value);
+			  _("Invalid offset, value too big (0x%08lX)"), value);
 	  newval |= value << 6;
 	  break;
 
 	case 8: /* Halfword load/store.  */
 	  if (value & ~0x3e)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("Invalid offset, value too big (0x%08X)"), value);
+			  _("Invalid offset, value too big (0x%08lX)"), value);
 	  newval |= value << 5; /* 6 - 1.  */
 	  break;
 
@@ -6271,8 +7462,7 @@ tc_gen_reloc (section, fixp)
 
     case BFD_RELOC_ARM_ADRL_IMMEDIATE:
       as_bad_where (fixp->fx_file, fixp->fx_line,
-		    _("ADRL used for a symbol not defined in the same file"),
-		    fixp->fx_r_type);
+		    _("ADRL used for a symbol not defined in the same file"));
       return NULL;
 
     case BFD_RELOC_ARM_OFFSET_IMM:
@@ -6683,7 +7873,8 @@ _("Warning: Use of the 'nv' conditional is deprecated\n"));
               -m[arm]8[10]            Arm 8 processors
               -m[arm]9[20][tdmi]      Arm 9 processors
               -mstrongarm[110[0]]     StrongARM processors
-              -m[arm]v[2345[t]]       Arm architectures
+              -mxscale                XScale processors
+              -m[arm]v[2345[t[e]]]    Arm architectures
               -mall                   All (except the ARM1)
       FP variants:
               -mfpa10, -mfpa11        FPA10 and 11 co-processor instructions
@@ -6698,6 +7889,7 @@ _("Warning: Use of the 'nv' conditional is deprecated\n"));
   	      -mapcs-float	      Pass floats in float regs
   	      -mapcs-reentrant        Position independent code
               -mthumb-interwork       Code supports Arm/Thumb interworking
+              -matpcs                 ARM/Thumb Procedure Call Standard
               -moabi                  Old ELF ABI  */
 
 CONST char * md_shortopts = "m:k";
@@ -6767,13 +7959,13 @@ md_parse_option (c, arg)
 	  /* Limit assembler to generating only Thumb instructions:  */
 	  if (streq (str, "thumb"))
 	    {
-	      cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_THUMB;
+	      cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_EXT_THUMB;
 	      cpu_variant = (cpu_variant & ~FPU_ALL) | FPU_NONE;
 	      thumb_mode = 1;
 	    }
 	  else if (streq (str, "thumb-interwork"))
 	    {
-	      if ((cpu_variant & ARM_THUMB) == 0)
+	      if ((cpu_variant & ARM_EXT_THUMB) == 0)
 		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_ARCH_V4T;
 #if defined OBJ_COFF || defined OBJ_ELF
 	      support_interwork = true;
@@ -6844,6 +8036,12 @@ md_parse_option (c, arg)
 	      as_bad (_("Unrecognised APCS switch -m%s"), arg);
 	      return 0;
 	    }
+
+	  if (! strcmp (str, "atpcs"))
+	    {
+	      atpcs = true;
+	      return 1;
+	    }
 #endif
 	  /* Strip off optional "arm".  */
 	  if (! strncmp (str, "arm", 3))
@@ -6910,11 +8108,11 @@ md_parse_option (c, arg)
 		  switch (*str)
 		    {
 		    case 't':
-		      cpu_variant |= (ARM_THUMB | ARM_ARCH_V4);
+		      cpu_variant |= ARM_ARCH_V4T;
 		      break;
 
 		    case 'm':
-		      cpu_variant |= ARM_LONGMUL;
+		      cpu_variant |= ARM_EXT_LONGMUL;
 		      break;
 
 		    case 'f': /* fe => fp enabled cpu.  */
@@ -6938,7 +8136,7 @@ md_parse_option (c, arg)
 	    case '8':
 	      if (streq (str, "8") || streq (str, "810"))
 		cpu_variant = (cpu_variant & ~ARM_ANY)
-		  | ARM_8 | ARM_ARCH_V4 | ARM_LONGMUL;
+		  | ARM_8 | ARM_ARCH_V4;
 	      else
 		goto bad;
 	      break;
@@ -6946,16 +8144,16 @@ md_parse_option (c, arg)
 	    case '9':
 	      if (streq (str, "9"))
 		cpu_variant = (cpu_variant & ~ARM_ANY)
-		  | ARM_9 | ARM_ARCH_V4 | ARM_LONGMUL | ARM_THUMB;
+		  | ARM_9 | ARM_ARCH_V4T;
 	      else if (streq (str, "920"))
 		cpu_variant = (cpu_variant & ~ARM_ANY)
-		  | ARM_9 | ARM_ARCH_V4 | ARM_LONGMUL;
+		  | ARM_9 | ARM_ARCH_V4;
 	      else if (streq (str, "920t"))
 		cpu_variant = (cpu_variant & ~ARM_ANY)
-		  | ARM_9 | ARM_ARCH_V4 | ARM_LONGMUL | ARM_THUMB;
+		  | ARM_9 | ARM_ARCH_V4T;
 	      else if (streq (str, "9tdmi"))
 		cpu_variant = (cpu_variant & ~ARM_ANY)
-		  | ARM_9 | ARM_ARCH_V4 | ARM_LONGMUL | ARM_THUMB;
+		  | ARM_9 | ARM_ARCH_V4T;
 	      else
 		goto bad;
 	      break;
@@ -6965,10 +8163,17 @@ md_parse_option (c, arg)
 		  || streq (str, "strongarm110")
 		  || streq (str, "strongarm1100"))
 		cpu_variant = (cpu_variant & ~ARM_ANY)
-		  | ARM_8 | ARM_ARCH_V4 | ARM_LONGMUL;
+		  | ARM_8 | ARM_ARCH_V4;
 	      else
 		goto bad;
 	      break;
+
+            case 'x':
+ 	      if (streq (str, "xscale"))
+ 		cpu_variant = ARM_9 | ARM_ARCH_XSCALE;
+ 	      else
+ 		goto bad;
+      	      break;
 
 	    case 'v':
 	      /* Select variant based on architecture rather than
@@ -6995,7 +8200,7 @@ md_parse_option (c, arg)
 
 		  switch (*++str)
 		    {
-		    case 'm': cpu_variant |= ARM_LONGMUL; break;
+		    case 'm': cpu_variant |= ARM_EXT_LONGMUL; break;
 		    case 0:   break;
 		    default:
 		      as_bad (_("Invalid architecture variant -m%s"), arg);
@@ -7004,11 +8209,11 @@ md_parse_option (c, arg)
 		  break;
 
 		case '4':
-		  cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_ARCH_V4;
+		  cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_7 | ARM_ARCH_V4;
 
 		  switch (*++str)
 		    {
-		    case 't': cpu_variant |= ARM_THUMB; break;
+		    case 't': cpu_variant |= ARM_EXT_THUMB; break;
 		    case 0:   break;
 		    default:
 		      as_bad (_("Invalid architecture variant -m%s"), arg);
@@ -7017,10 +8222,11 @@ md_parse_option (c, arg)
 		  break;
 
 		case '5':
-		  cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_ARCH_V5;
+		  cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_9 | ARM_ARCH_V5;
 		  switch (*++str)
 		    {
-		    case 't': cpu_variant |= ARM_THUMB; break;
+		    case 't': cpu_variant |= ARM_EXT_THUMB; break;
+		    case 'e': cpu_variant |= ARM_EXT_V5E; break;
 		    case 0:   break;
 		    default:
 		      as_bad (_("Invalid architecture variant -m%s"), arg);
@@ -7073,6 +8279,7 @@ md_show_usage (fp)
 #if defined OBJ_COFF || defined OBJ_ELF
   fprintf (fp, _("\
   -mapcs-32, -mapcs-26      specify which ARM Procedure Calling Standard to use\n\
+  -matpcs                   use ARM/Thumb Procedure Calling Standard\n\
   -mapcs-float              floating point args are passed in FP regs\n\
   -mapcs-reentrant          the code is position independent/reentrant\n"));
 #endif

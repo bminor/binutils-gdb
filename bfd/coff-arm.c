@@ -845,6 +845,7 @@ coff_arm_reloc_type_lookup (abfd, code)
       ASTD (BFD_RELOC_16,                   ARM_16);
       ASTD (BFD_RELOC_32,                   ARM_32);
       ASTD (BFD_RELOC_ARM_PCREL_BRANCH,     ARM_26);
+      ASTD (BFD_RELOC_ARM_PCREL_BLX,        ARM_26);
       ASTD (BFD_RELOC_8_PCREL,              ARM_DISP8);
       ASTD (BFD_RELOC_16_PCREL,             ARM_DISP16);
       ASTD (BFD_RELOC_32_PCREL,             ARM_DISP32);

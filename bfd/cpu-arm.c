@@ -93,6 +93,7 @@ processors[] =
   { bfd_mach_arm_4,  "strongarm"},
   { bfd_mach_arm_4,  "strongarm110" },
   { bfd_mach_arm_4,  "strongarm1100" },
+  { bfd_mach_arm_XScale, "xscale" }
 };
 
 static boolean
@@ -135,7 +136,9 @@ static const bfd_arch_info_type arch_info_struct[] =
   N( bfd_mach_arm_4,  "armv4",  false, & arch_info_struct[5] ),
   N( bfd_mach_arm_4T, "armv4t", false, & arch_info_struct[6] ),
   N( bfd_mach_arm_5,  "armv5",  false, & arch_info_struct[7] ),
-  N( bfd_mach_arm_5T, "armv5t", false, NULL )
+  N( bfd_mach_arm_5T, "armv5t", false, & arch_info_struct[8] ),
+  N( bfd_mach_arm_5TE, "armv5te", false, & arch_info_struct[9] ),
+  N( bfd_mach_arm_XScale, "xscale", false, NULL )
 };
 
 const bfd_arch_info_type bfd_arm_arch =

@@ -1,3 +1,13 @@
+2000-11-24  Nick Clifton  <nickc@redhat.com>
+
+	* arm-opc.h: Add new opcode formatting parameter 'B'.
+	(arm_opcodes): Add XScale, v5, and v5te	instructions.
+	(thumb_opcodes): Add v5t instructions.
+
+	* arm-dis.c (print_insn_arm): Handle new 'B' format
+	parameter.
+	(print_insn_thumb): Decode BLX(1) instruction.
+
 2000-11-21  Chris Demetriou  <cgd@sibyte.com>
 
 	* mips-opc.c: Fix file header comment.

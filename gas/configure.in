@@ -117,6 +117,7 @@ changequote([,])dnl
       armb*)		cpu_type=arm endian=little ;;
       armv*l)		cpu_type=arm endian=little ;;
       armv*b)		cpu_type=arm endian=big ;;
+      xscale*)		cpu_type=arm endian=little ;;
       strongarm*)	cpu_type=arm endian=little ;;
       thumb*)		cpu_type=arm endian=little ;;
       hppa*)		cpu_type=hppa ;;
@@ -406,6 +407,8 @@ changequote([,])dnl
 
       strongarm-*-coff)     fmt=coff ;;
       strongarm-*-elf)      fmt=elf ;;
+      xscale-*-coff)     fmt=coff ;;
+      xscale-*-elf)      fmt=elf ;;
 
       tic30-*-*aout*)	    fmt=aout bfd_gas=yes ;;
       tic30-*-*coff*)       fmt=coff bfd_gas=yes ;;

@@ -1,3 +1,21 @@
+2000-11-24  Nick Clifton  <nickc@redhat.com>
+
+	* archures.c (bfd_mach_arm_5TE): Define.
+	(bfd_mach_arm+XScale): Define.
+	* bfd-in2.h: Regenerate.
+
+	* coff-arm.c (coff_arm_reloc_type_lookup): Accept
+	BFD_RELOC_ARM_PCREL_BLX.
+
+	* coffcode.h (coff_set_flags): Set flags for 5t, 5te and
+	XScale machine numbers.
+
+	* config.bfd (xscale-elf): Add target.
+	(xscale-coff): Add target.
+
+	* cpu-arm.c: Add xscale machine name.
+	Add v5t, v5te and XScale machine numbers.
+
 2000-11-23  Kazu Hirata  <kazu@hxi.com>
 
 	* aix386-core.c: Fix formatting.

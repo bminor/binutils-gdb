@@ -1,3 +1,7 @@
+2000-11-24  Nick Clifton  <nickc@redhat.com>
+
+	* NEWS: Announce support for v5t, v5te and XScale.
+
 2000-11-22  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (get_machine_name): Add EM_JAVELIN, EM_FIREPATH,

@@ -2596,7 +2596,10 @@ coff_set_flags (abfd, magicp, flagsp)
 	case bfd_mach_arm_4:  * flagsp |= F_ARM_4;  break;
 	case bfd_mach_arm_4T: * flagsp |= F_ARM_4T; break;
 	case bfd_mach_arm_5:  * flagsp |= F_ARM_5;  break;
-	case bfd_mach_arm_5T: * flagsp |= F_ARM_5;  break; /* XXX - we do not have an F_ARM_5T */
+	  /* FIXME: we do not have F_ARM vaues greater than F_ARM_5.  */
+	case bfd_mach_arm_5T: * flagsp |= F_ARM_5;  break;
+	case bfd_mach_arm_5TE: * flagsp |= F_ARM_5; break;
+	case bfd_mach_arm_XScale: * flagsp |= F_ARM_5; break;
 	}
       return true;
 #endif

@@ -32,6 +32,7 @@ alpha*) targ_archs=bfd_alpha_arch ;;
 arm*)	targ_archs=bfd_arm_arch ;;
 strongarm*) targ_archs=bfd_arm_arch ;;
 thumb*)	targ_archs=bfd_arm_arch ;;
+xscale*) targ_archs=bfd_arm_arch ;;
 c30*)	targ_archs=bfd_tic30_arch ;;
 c54x*)	targ_archs=bfd_tic54x_arch ;;
 hppa*)	targ_archs=bfd_hppa_arch ;;
@@ -178,6 +179,15 @@ case "${targ}" in
     targ_selvecs=bfd_elf32_bigarm_vec
     ;;
   strongarm-*-coff)
+    targ_defvec=armcoff_little_vec
+    targ_selvecs=armcoff_big_vec
+    targ_underscore=yes
+    ;;
+  xscale-*-elf)
+    targ_defvec=bfd_elf32_littlearm_vec
+    targ_selvecs=bfd_elf32_bigarm_vec
+    ;;
+  xscale-*-coff)
     targ_defvec=armcoff_little_vec
     targ_selvecs=armcoff_big_vec
     targ_underscore=yes

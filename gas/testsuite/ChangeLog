@@ -1,3 +1,11 @@
+2000-11-24  Nick Clifton  <nickc@redhat.com>
+
+	* arm.exp: Run tests for xscale as well as arm.
+	Run xscale tests.
+
+	* xscale.s: New file: XScale instruction tests.
+	* xscale.d: New file: Expected XScale instruction results.
+
 2000-11-20  H.J. Lu  <hjl@gnu.org>
 
 	* gas/i386/intel.d: Add 3 "nop"s for the a.out assembler.

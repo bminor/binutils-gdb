@@ -1,3 +1,8 @@
+2000-11-24  Nick Clifton  <nickc@redhat.com>
+
+	* configure.tgt (xscale-coff): Add target.
+	(xscale-elf): Add target.
+
 2000-11-24  Fred Fish  <fnf@be.com>
 
         * ldmain.c (main): Remove redundant init of config.make_executable
