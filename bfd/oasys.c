@@ -147,7 +147,7 @@ DEFUN(oasys_slurp_symbol_table,(abfd),
 	    }
 	    break;
 	  case RELOCATION_TYPE_UND:
-	    dest = data->symbols + bfd_h_get_16(abfd, (bfd_byte *)&record.symbol.refno[0]);
+	    dest = data->symbols + bfd_h_get_16(abfd, record.symbol.refno);
 	    dest->section = &bfd_und_section;
 	    break;
 	  case RELOCATION_TYPE_COM:
@@ -166,7 +166,7 @@ DEFUN(oasys_slurp_symbol_table,(abfd),
 	  dest->name = string_ptr;
 	  dest->the_bfd = abfd;
 	  dest->udata = (PTR)NULL;
-	  dest->value = bfd_h_get_32(abfd, (bfd_byte *)&record.symbol.value[0]);
+	  dest->value = bfd_h_get_32(abfd, record.symbol.value);
 
 #ifdef UNDERSCORE_HACK
 	  if (record.symbol.name[0] != '_') {
@@ -232,20 +232,18 @@ DEFUN(oasys_archive_p,(abfd),
   oasys_extarchive_header_type header_ext;
   unsigned int i;
   file_ptr filepos;  
-  bfd_seek(abfd, (file_ptr) 0, false);
 
-  
+  bfd_seek(abfd, (file_ptr) 0, false);
   bfd_read((PTR)&header_ext, 1, sizeof(header_ext), abfd);
 
-
-  header.version = bfd_h_get_32(abfd, (bfd_byte *)header_ext.version);
-  header.mod_count = bfd_h_get_32(abfd, (bfd_byte *)header_ext.mod_count);
-  header.mod_tbl_offset = bfd_h_get_32(abfd, (bfd_byte *)header_ext.mod_tbl_offset);
-  header.sym_tbl_size = bfd_h_get_32(abfd, (bfd_byte *)header_ext.sym_tbl_size);
-  header.sym_count = bfd_h_get_32(abfd, (bfd_byte *)header_ext.sym_count);
-  header.sym_tbl_offset = bfd_h_get_32(abfd, (bfd_byte *)header_ext.sym_tbl_offset);
-  header.xref_count = bfd_h_get_32(abfd, (bfd_byte *)header_ext.xref_count);
-  header.xref_lst_offset = bfd_h_get_32(abfd, (bfd_byte *)header_ext.xref_lst_offset);
+  header.version = bfd_h_get_32(abfd, header_ext.version);
+  header.mod_count = bfd_h_get_32(abfd, header_ext.mod_count);
+  header.mod_tbl_offset = bfd_h_get_32(abfd, header_ext.mod_tbl_offset);
+  header.sym_tbl_size = bfd_h_get_32(abfd, header_ext.sym_tbl_size);
+  header.sym_count = bfd_h_get_32(abfd, header_ext.sym_count);
+  header.sym_tbl_offset = bfd_h_get_32(abfd, header_ext.sym_tbl_offset);
+  header.xref_count = bfd_h_get_32(abfd, header_ext.xref_count);
+  header.xref_lst_offset = bfd_h_get_32(abfd, header_ext.xref_lst_offset);
 
   /*
     There isn't a magic number in an Oasys archive, so the best we
@@ -259,26 +257,22 @@ DEFUN(oasys_archive_p,(abfd),
       header.xref_count > 100000) return (bfd_target *)NULL;
 
   /*
-    That all worked, lets buy the space for the header and read in
+    That all worked, let's buy the space for the header and read in
     the headers.
     */
     {
       oasys_ar_data_type *ar =
 	(oasys_ar_data_type*) bfd_alloc(abfd, sizeof(oasys_ar_data_type));
 
-
       oasys_module_info_type *module = 
 	(oasys_module_info_type*)
 	  bfd_alloc(abfd, sizeof(oasys_module_info_type) * header.mod_count);
 
-
       oasys_module_table_type record;
-
 
       abfd->tdata.oasys_ar_data = ar;
       ar->module = module;
       ar->module_count = header.mod_count;
-
 
       filepos = header.mod_tbl_offset;
       for (i = 0; i < header.mod_count; i++) {
@@ -290,14 +284,12 @@ DEFUN(oasys_archive_p,(abfd),
 	  oasys_extmodule_table_type_a_type record_ext;
 	  bfd_read((PTR)&record_ext, 1, sizeof(record_ext), abfd);
 	
-	  record.mod_size = bfd_h_get_32(abfd, (bfd_byte *)record_ext.mod_size);
-	  record.file_offset = bfd_h_get_32(abfd,
-					 (bfd_byte *)   record_ext.file_offset);
+	  record.mod_size = bfd_h_get_32(abfd, record_ext.mod_size);
+	  record.file_offset = bfd_h_get_32(abfd, record_ext.file_offset);
 
-	  record.dep_count = bfd_h_get_32(abfd, (bfd_byte *)record_ext.dep_count);
-	  record.depee_count = bfd_h_get_32(abfd,(bfd_byte *) record_ext.depee_count);
-	  record.sect_count = bfd_h_get_32(abfd, (bfd_byte *) record_ext.sect_count);
-
+	  record.dep_count = bfd_h_get_32(abfd, record_ext.dep_count);
+	  record.depee_count = bfd_h_get_32(abfd, record_ext.depee_count);
+	  record.sect_count = bfd_h_get_32(abfd, record_ext.sect_count);
 
 	  module[i].name = bfd_alloc(abfd,33);
 
@@ -312,14 +304,13 @@ DEFUN(oasys_archive_p,(abfd),
 	  oasys_extmodule_table_type_b_type record_ext;
 	  bfd_read((PTR)&record_ext, 1, sizeof(record_ext), abfd);
 	
-	  record.mod_size = bfd_h_get_32(abfd, (bfd_byte *) record_ext.mod_size);
-	  record.file_offset = bfd_h_get_32(abfd,
-					    (bfd_byte *)record_ext.file_offset);
+	  record.mod_size = bfd_h_get_32(abfd, record_ext.mod_size);
+	  record.file_offset = bfd_h_get_32(abfd, record_ext.file_offset);
 
-	  record.dep_count = bfd_h_get_32(abfd, (bfd_byte *) record_ext.dep_count);
-	  record.depee_count = bfd_h_get_32(abfd, (bfd_byte *) record_ext.depee_count);
-	  record.sect_count = bfd_h_get_32(abfd, (bfd_byte *) record_ext.sect_count);
-	  record.module_name_size = bfd_h_get_32(abfd, (bfd_byte *) record_ext.mod_name_length);
+	  record.dep_count = bfd_h_get_32(abfd, record_ext.dep_count);
+	  record.depee_count = bfd_h_get_32(abfd, record_ext.depee_count);
+	  record.sect_count = bfd_h_get_32(abfd, record_ext.sect_count);
+	  record.module_name_size = bfd_h_get_32(abfd, record_ext.mod_name_length);
 
 	  module[i].name = bfd_alloc(abfd,record.module_name_size + 1);
 	  bfd_read((PTR)module[i].name, 1, record.module_name_size, abfd);
@@ -413,8 +404,8 @@ DEFUN(oasys_object_p,(abfd),
 	    BFD_FAIL();
 	  }
 
-	  s->_raw_size  = bfd_h_get_32(abfd, (bfd_byte *) & record.section.value[0]) ;
-	  s->vma = bfd_h_get_32(abfd, (bfd_byte *)&record.section.vma[0]);
+	  s->_raw_size  = bfd_h_get_32(abfd, record.section.value);
+	  s->vma = bfd_h_get_32(abfd, record.section.vma);
 	  s->flags= 0;
 	  had_usefull = true;
 	}
@@ -459,6 +450,17 @@ DEFUN(oasys_object_p,(abfd),
 
 
 static void 
+DEFUN(oasys_get_symbol_info,(ignore_abfd, symbol, ret),
+      bfd *ignore_abfd AND
+      asymbol *symbol AND
+      symbol_info *ret)
+{
+  bfd_symbol_info (symbol, ret);
+  if (!symbol->section)
+    ret->type = (symbol->flags & BSF_LOCAL) ? 'a' : 'A';
+}
+
+static void 
 DEFUN(oasys_print_symbol,(ignore_abfd, afile, symbol, how),
       bfd *ignore_abfd AND
       PTR afile AND
@@ -473,7 +475,6 @@ DEFUN(oasys_print_symbol,(ignore_abfd, afile, symbol, how),
     fprintf(file,"%s", symbol->name);
     break;
   case bfd_print_symbol_all:
-  case bfd_print_symbol_nm:
     {
       CONST char *section_name = symbol->section == (asection *)NULL ?
 	(CONST char *) "*abs" : symbol->section->name;
@@ -494,10 +495,10 @@ DEFUN(oasys_print_symbol,(ignore_abfd, afile, symbol, how),
 static reloc_howto_type howto_table[]= 
 {
 
-HOWTO(  0, 0,  1,   16, false,0,   true,true,0,"abs16",true,0x0000ffff, 0x0000ffff,false),
-HOWTO(  0, 0,  2,   32, false,0,   true,true,0,"abs32",true,0xffffffff, 0xffffffff,false),
-HOWTO(  0, 0,  1,   16, true,0,   true,true,0,"pcrel16",true,0x0000ffff, 0x0000ffff,false),
-HOWTO(  0, 0,  2,   32, true,0,   true,true,0,"pcrel32",true,0xffffffff, 0xffffffff,false)
+HOWTO(  0, 0,  1,   16, false,0,complain_overflow_bitfield,0,"abs16",true,0x0000ffff, 0x0000ffff,false),
+HOWTO(  0, 0,  2,   32, false,0,complain_overflow_bitfield,0,"abs32",true,0xffffffff, 0xffffffff,false),
+HOWTO(  0, 0,  1,   16, true,0,complain_overflow_signed,0,"pcrel16",true,0x0000ffff, 0x0000ffff,false),
+HOWTO(  0, 0,  2,   32, true,0,complain_overflow_signed,0,"pcrel32",true,0xffffffff, 0xffffffff,false)
 };
 
 /* Read in all the section data and relocation stuff too */
@@ -532,18 +533,17 @@ DEFUN(oasys_slurp_section_data,(abfd),
 	case oasys_record_is_data_enum:
 	    {
 
-	      uint8e_type *src = record.data.data;
-	      uint8e_type *end_src = ((uint8e_type *)&record) +
-		record.header.length;
+	      bfd_byte *src = record.data.data;
+	      bfd_byte *end_src = ((bfd_byte *)&record) + record.header.length;
+	      bfd_byte *dst_ptr;
+	      bfd_byte *dst_base_ptr;
 	      unsigned int relbit;
-	      bfd_byte *dst_ptr ;
-	      bfd_byte *dst_base_ptr ;
 	      unsigned int count;
 	      asection *  section =
 		data->sections[record.data.relb & RELOCATION_SECT_BITS];
 	      bfd_vma dst_offset ;
-	      per =  oasys_per_section(section);
 
+	      per =  oasys_per_section(section);
 
 	      if (per->initialized == false) 
 		  {
@@ -558,14 +558,11 @@ DEFUN(oasys_slurp_section_data,(abfd),
 	      dst_offset = bfd_h_get_32(abfd, record.data.addr) ;
 	      if (per->had_vma == false) {
 		/* Take the first vma we see as the base */
-
 		section->vma = dst_offset;
 		per->had_vma = true;
 	      }
 
-
 	      dst_offset -=   section->vma;
-
 
 	      dst_base_ptr = oasys_per_section(section)->data;
 	      dst_ptr = oasys_per_section(section)->data +
@@ -575,8 +572,8 @@ DEFUN(oasys_slurp_section_data,(abfd),
 		section->flags |= SEC_LOAD | SEC_HAS_CONTENTS;
 	      }
 	      while (src < end_src) {
-		uint8e_type mod_byte = *src++;
-		uint32_type gap = end_src - src;
+		unsigned char mod_byte = *src++;
+		size_t gap = end_src - src;
 		
 		count = 8;
 		if (mod_byte == 0 && gap >= 8) {
@@ -596,7 +593,7 @@ DEFUN(oasys_slurp_section_data,(abfd),
 		      {
 			if (relbit & mod_byte) 
 			    {
-			      uint8e_type reloc = *src;
+			      unsigned char reloc = *src;
 			      /* This item needs to be relocated */
 			      switch (reloc & RELOCATION_TYPE_BITS) {
 			      case RELOCATION_TYPE_ABS:
@@ -625,7 +622,7 @@ DEFUN(oasys_slurp_section_data,(abfd),
 						     RELOCATION_SECT_BITS];
 
 				    r->relent.addend = -
-				     r->relent.section->vma;
+				      r->relent.section->vma;
 #endif
 				    r->relent.address = dst_ptr - dst_base_ptr;
 				    r->relent.howto = &howto_table[reloc>>6];
@@ -709,7 +706,7 @@ DEFUN(oasys_slurp_section_data,(abfd),
 
 
 
-bfd_error_vector_type bfd_error_vector;
+extern bfd_error_vector_type bfd_error_vector;
 
 static boolean
 DEFUN(oasys_new_section_hook,(abfd, newsect),
@@ -805,12 +802,13 @@ DEFUN(oasys_write_record,(abfd, type, record, size),
 {
   int checksum;
   size_t i;
-  uint8e_type *ptr;
+  unsigned char *ptr;
+
   record->header.length = size;
   record->header.type = (int)type;
   record->header.check_sum = 0;
   record->header.fill = 0;
-  ptr = &record->pad[0];
+  ptr = (unsigned char *)&record->pad[0];
   checksum = 0;
   for (i = 0; i < size; i++) {
     checksum += *ptr++;
@@ -839,17 +837,17 @@ DEFUN(oasys_write_syms, (abfd),
 
     if (bfd_is_com_section (g->section)) {
       symbol.relb = RELOCATION_TYPE_COM;
-      bfd_h_put_16(abfd, index, (uint8e_type *)(&symbol.refno[0]));
+      bfd_h_put_16(abfd, index, symbol.refno);
       index++;
     }
     else if (g->section == & bfd_abs_section) {
       symbol.relb = RELOCATION_TYPE_ABS;
-      bfd_h_put_16(abfd, 0, (uint8e_type *)(&symbol.refno[0]));
+      bfd_h_put_16(abfd, 0, symbol.refno);
 
     }
     else if (g->section == &bfd_und_section) {
       symbol.relb = RELOCATION_TYPE_UND ;
-      bfd_h_put_16(abfd, index, (uint8e_type *)(&symbol.refno[0]));
+      bfd_h_put_16(abfd, index, symbol.refno);
       /* Overload the value field with the output index number */
       index++;
     }
@@ -867,7 +865,7 @@ DEFUN(oasys_write_syms, (abfd),
       else {
 	symbol.relb = RELOCATION_TYPE_REL |g->section->output_section->target_index;
       }
-      bfd_h_put_16(abfd, 0, (uint8e_type *)(&symbol.refno[0]));
+      bfd_h_put_16(abfd, 0, symbol.refno);
     }
 #ifdef UNDERSCORE_HACK
     if (src[l] == '_')
@@ -878,7 +876,7 @@ DEFUN(oasys_write_syms, (abfd),
       l++;
     }
 
-    bfd_h_put_32(abfd, g->value, (bfd_byte*) symbol.value);
+    bfd_h_put_32(abfd, g->value, symbol.value);
 
       
     if (g->flags & BSF_LOCAL) {
@@ -904,7 +902,7 @@ DEFUN(oasys_write_sections, (abfd),
       bfd *CONST abfd)
 {
   asection *s;
-  static  oasys_section_record_type out = {0};
+  static oasys_section_record_type out;
 
   for (s = abfd->sections; s != (asection *)NULL; s = s->next) {
     if (!isdigit(s->name[0])) 
@@ -913,8 +911,8 @@ DEFUN(oasys_write_sections, (abfd),
 						    s->name);
 	}
     out.relb = RELOCATION_TYPE_REL | s->target_index;
-    bfd_h_put_32(abfd, s->_cooked_size, (bfd_byte *) out.value);
-    bfd_h_put_32(abfd, s->vma, (bfd_byte *) out.vma);
+    bfd_h_put_32(abfd, s->_cooked_size, out.value);
+    bfd_h_put_32(abfd, s->vma, out.vma);
 
     oasys_write_record(abfd,
 		       oasys_record_is_section_enum,
@@ -957,11 +955,11 @@ DEFUN(oasys_write_end,(abfd),
       bfd *CONST abfd)
 {
   oasys_end_record_type end;
-  uint8e_type null = 0;
+  unsigned char null = 0;
   end.relb = RELOCATION_TYPE_ABS;
-  bfd_h_put_32(abfd, abfd->start_address, (bfd_byte *)end.entry); 
-  bfd_h_put_16(abfd, 0, (bfd_byte *)end.fill);
-  end.zero =0;
+  bfd_h_put_32(abfd, abfd->start_address, end.entry); 
+  bfd_h_put_16(abfd, 0, end.fill);
+  end.zero = 0;
   oasys_write_record(abfd,
 		     oasys_record_is_end_enum,
 		     (oasys_record_union_type *)&end,
@@ -990,7 +988,7 @@ DEFUN(oasys_write_data, (abfd),
   asection *s;
   for (s = abfd->sections; s != (asection *)NULL; s = s->next) {
     if (s->flags & SEC_LOAD) {
-      uint8e_type *raw_data = oasys_per_section(s)->data;
+      bfd_byte *raw_data = oasys_per_section(s)->data;
       oasys_data_record_type processed_data;
       bfd_size_type current_byte_index = 0;
       unsigned int relocs_to_go = s->reloc_count;
@@ -1011,10 +1009,10 @@ DEFUN(oasys_write_data, (abfd),
 	  {
 	    /* Scan forwards by eight bytes or however much is left and see if
 	       there are any relocations going on */
-	    uint8e_type *mod = &processed_data.data[0];
-	    uint8e_type *dst = &processed_data.data[1];
+	    bfd_byte *mod = &processed_data.data[0];
+	    bfd_byte *dst = &processed_data.data[1];
 
-	    unsigned int i;
+	    unsigned int i = 0;
 	    *mod = 0;
 
 
@@ -1029,7 +1027,7 @@ DEFUN(oasys_write_data, (abfd),
  	       the magic number 8 comes from.
  	    */
  	    while (current_byte_index < s->_raw_size && dst <=
- 		(uint8e_type*)&processed_data.data[sizeof(processed_data.data)-8]) {
+ 		&processed_data.data[sizeof(processed_data.data)-8]) {
  	    
 
 		if (relocs_to_go != 0) {	
@@ -1037,13 +1035,14 @@ DEFUN(oasys_write_data, (abfd),
 		  reloc_howto_type *CONST how=r->howto;
 		  /* There is a relocation, is it for this byte ? */
 		  if (r->address == current_byte_index) {
-		    uint8e_type rel_byte;
+		    unsigned char rel_byte;
+
 		    p++;
 		    relocs_to_go--;
 
 		    *mod |= (1<<i);
 		    if(how->pc_relative) {
-		      rel_byte = 0x80;
+		      rel_byte = RELOCATION_PCREL_BIT;
 
 		      /* Also patch the raw data so that it doesn't have
 			 the -ve stuff any more */
@@ -1063,7 +1062,7 @@ DEFUN(oasys_write_data, (abfd),
 		      rel_byte = 0;
 		    }
 		    if (how->size ==2) {
-		      rel_byte |= 0x40;
+		      rel_byte |= RELOCATION_32BIT_BIT;
 		    }
 		  
 		    /* Is this a section relative relocation, or a symbol
@@ -1095,8 +1094,6 @@ DEFUN(oasys_write_data, (abfd),
 			  }
 			  else {
 			    rel_byte |= RELOCATION_TYPE_UND;
-		  
-
 			    *dst++ = rel_byte;
 			    /* Next two bytes are a symbol index - we can get
 			       this from the symbol value which has been zapped
@@ -1106,7 +1103,6 @@ DEFUN(oasys_write_data, (abfd),
 			    *dst++ = p->value >> 8;
 			    *dst++ = p->value;
 			  }
-
 			}
 #define ADVANCE { if (++i >= 8) { i = 0; mod = dst++; *mod = 0; } current_byte_index++; }
 		    /* relocations never occur from an unloadable section,
@@ -1127,7 +1123,7 @@ DEFUN(oasys_write_data, (abfd),
 		}
 		/* If this is coming from an unloadable section then copy
 		   zeros */
-		if (raw_data == (uint8e_type *)NULL) {
+		if (raw_data == NULL) {
 		  *dst++ = 0;
 		}
 		else {
@@ -1144,7 +1140,7 @@ DEFUN(oasys_write_data, (abfd),
 	    oasys_write_record(abfd,
 			       oasys_record_is_data_enum,
 			       (oasys_record_union_type *)&processed_data,
-			       dst - (uint8e_type*)&processed_data);
+			       dst - (bfd_byte *)&processed_data);
 			 
 	  }
     }
@@ -1332,8 +1328,12 @@ bfd_target oasys_vec =
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
   1,				/* minimum alignment */
-  _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
-  _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
+  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+    bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+    bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* data */
+  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+    bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+    bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* hdrs */
 
     {_bfd_dummy_target,
        oasys_object_p,		/* bfd_check_format */

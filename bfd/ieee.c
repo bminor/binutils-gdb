@@ -116,7 +116,7 @@ DEFUN(ieee_write_id,(abfd, id),
       CONST char *id)
 {
   size_t length = strlen(id);
-  if (length >= 0 && length <= 127) {
+  if (length <= 127) {
     ieee_write_byte(abfd, (bfd_byte)length);
   }
   else if (length < 255) {
@@ -173,7 +173,7 @@ DEFUN(read_id,(ieee),
   size_t length;
   char *string;
   length = this_byte_and_next(ieee);
-  if (length >= 0x00 && length <= 0x7f) {
+  if (length <= 0x7f) {
     /* Simple string of length 0 to 127 */
   }
   else if (length == 0xde) {
@@ -360,27 +360,27 @@ typedef struct
 
 static 
 reloc_howto_type abs32_howto 
- = HOWTO(1,0,2,32,false,0,false,true,0,"abs32",true,0xffffffff, 0xffffffff,false);
+ = HOWTO(1,0,2,32,false,0,complain_overflow_bitfield,0,"abs32",true,0xffffffff, 0xffffffff,false);
 static
 reloc_howto_type abs16_howto 
- = HOWTO(1,0,1,16,false,0,false,true,0,"abs16",true,0x0000ffff, 0x0000ffff,false);
+ = HOWTO(1,0,1,16,false,0,complain_overflow_bitfield,0,"abs16",true,0x0000ffff, 0x0000ffff,false);
 
 static
 reloc_howto_type abs8_howto 
- = HOWTO(1,0,0,8,false,0,false,true,0,"abs8",true,0x000000ff, 0x000000ff,false);
+ = HOWTO(1,0,0,8,false,0,complain_overflow_bitfield,0,"abs8",true,0x000000ff, 0x000000ff,false);
 
 static 
 reloc_howto_type rel32_howto 
- = HOWTO(1,0,2,32,true,0,false,true,0,"rel32",true,0xffffffff,
+ = HOWTO(1,0,2,32,true,0,complain_overflow_signed,0,"rel32",true,0xffffffff,
 	 0xffffffff,false);
 
 static
 reloc_howto_type rel16_howto 
- = HOWTO(1,0,1,16,true,0,false,true,0,"rel16",true,0x0000ffff, 0x0000ffff,false);
+ = HOWTO(1,0,1,16,true,0,complain_overflow_signed,0,"rel16",true,0x0000ffff, 0x0000ffff,false);
 
 static
 reloc_howto_type rel8_howto 
- = HOWTO(1,0,0,8,true,0,false,true,0,"rel8",true,0x000000ff, 0x000000ff,false);
+ = HOWTO(1,0,0,8,true,0,complain_overflow_signed,0,"rel8",true,0x000000ff, 0x000000ff,false);
 
 
 static ieee_symbol_index_type NOSYMBOL = {  0, 0};
@@ -1055,7 +1055,7 @@ DEFUN(ieee_archive_p,(abfd),
     ieee_ar_obstack_type t; 
     int rec =read_2bytes(&(ieee->h));
     if (rec ==(int)ieee_assign_value_to_variable_enum) {
-      int record_number = must_parse_int(&(ieee->h));
+      must_parse_int(&(ieee->h));
       t.file_offset = must_parse_int(&(ieee->h));
       t.abfd = (bfd *)NULL;
       ieee->element_count++;
@@ -3001,12 +3001,12 @@ bfd_target ieee_vec =
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
     1,				/* minimum alignment */
-_do_getb64, _do_getb_signed_64, _do_putb64,
-    _do_getb32, _do_getb_signed_32, _do_putb32,
-    _do_getb16, _do_getb_signed_16, _do_putb16, /* data */
-_do_getb64, _do_getb_signed_64, _do_putb64,
-    _do_getb32, _do_getb_signed_32, _do_putb32,
-    _do_getb16, _do_getb_signed_16, _do_putb16, /* hdrs */
+bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+    bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+    bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* data */
+bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+    bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+    bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* hdrs */
 
   { _bfd_dummy_target,
      ieee_object_p,		/* bfd_check_format */

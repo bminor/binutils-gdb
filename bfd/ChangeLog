@@ -1,3 +1,28 @@
+Thu Oct 28 16:23:40 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	gcc -Wall lint:
+	* coff-h8300.c (h8300_reloc16_estimate): Declare return type.
+	Remove useless statement probably left by code copy.
+	* cpu-i960.c (compatible): Fully bracket matrix initializer.
+	* elf32-hppa.c (hppa_elf_build_arg_reloc_stub): Use bfd_xmalloc
+	rather than xmalloc.  Use realloc and check the return value
+	rather than xrealloc.
+	(hppa_elf_get_section_contents): Add some casts.
+	* elf32-i386.c (elf_i386_reloc_type_lookup): Remove unused
+	variable.  Add default case to switch.
+	* hp300hpux.c: Declare aout_32_write_syms.
+	* i386bsd.c, i386linux.c, netbsd386.c (N_SHARED_LIB): Define as 0
+	(definition from aout/aout64.h is always 0 anyhow).
+	* i386lynx.c (swap_std_reloc_in): Remove unused variable.
+	* ieee.c (ieee_write_id): length can never be negative.
+	(read_id): Likewise.
+	(ieee_archive_p): Remove unused variable.
+	* libcoff-in.h (bfd_perform_slip): Declare.
+	* libcoff.h: Rebuilt.
+	* oasys.c (oasys_write_sections): Remove zero initialization of
+	static structure.
+	* reloc16.c: Indentation change.
+
 Wed Oct 27 16:51:29 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* configure.in, config/i386-mach3.mt: Update for new configuration
