@@ -347,8 +347,10 @@ static void
 coff_start_symtab ()
 {
   start_symtab (
-		/* We fill in the filename later.  */
-		"",
+		/* We fill in the filename later.  But start_symtab
+		   expects something we can later free() (in end_symtab).
+		   FIXME: leaks memory.  */
+		savestring ("", 0),
 		/* We never know the directory name for COFF.  */
 		NULL,
 		/* The start address is irrelevant, since we set
