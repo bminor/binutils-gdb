@@ -1,3 +1,10 @@
+Sun Oct 24 18:49:58 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t00/{help.exp,default.exp}: Loosen up a few more tests which
+	just started failing because they depended on the order the
+	subcommands are presented, or exact docstring text.  This kind of
+	test is a pain and has minimal benefit.
+
 Thu Oct 21 08:26:48 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t09/corefile.exp: At end of test, use "core" command with
