@@ -1,3 +1,11 @@
+2002-03-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.h (elf_bfd_final_link): Call elf_link_output_extsym
+	to output forced local syms for non-shared link.
+	(elf_link_output_extsym): Tweak condition for calling backend
+	adjust_dynamic_symbol so that previous behaviour is kept.
+	Whitespace changes throughout file.
+
 2002-03-04  H.J. Lu <hjl@gnu.org>
 
 	* elf.c (bfd_section_from_shdr): Handle special sections,
@@ -23,8 +31,8 @@
 
 2002-03-02  Tom Rix  <trix@redhat.com>
 
-	* coff64-rs6000.c (xcoff64_howto_table): Replace howto types with 
-	symbolic equiv. 
+	* coff64-rs6000.c (xcoff64_howto_table): Replace howto types with
+	symbolic equiv.
 	* coff-rs6000.c (xcoff_howto_table): Same.
 
 2002-03-01  David Mosberger  <davidm@hpl.hp.com>
