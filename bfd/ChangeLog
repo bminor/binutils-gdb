@@ -1,3 +1,7 @@
+Wed Nov 30 14:12:55 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* coff-sh.c: Use _bfd_dummy_target instead of no_archive.
+
 start-sanitize-arc
 Tue Nov 29 17:14:21 1994  Doug Evans  <dje@canuck.cygnus.com>
 
