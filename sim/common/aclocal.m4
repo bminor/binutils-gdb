@@ -259,7 +259,7 @@ clean: \$(SIM_EXTRA_CLEAN)
 distclean mostlyclean maintainer-clean realclean: clean
 	rm -f TAGS
 	rm -f Makefile config.cache config.log config.status
-	rm -f tconfig.h config.h stamp-h
+	rm -f tconfig.h config.h stamp-h targ-vals.def
 
 .c.o:
 	\$(CC) -c \$(ALL_CFLAGS) \$<
