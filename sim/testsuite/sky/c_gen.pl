@@ -17,7 +17,7 @@
 #         ! (reg wrt 32) 0xH  (addr)       0xH  (data) 
 #         ~ (reg wrt 64) 0xH  (addr)       0xHigh_Low (data)
 #         % (reg read 64) 0xH (addr)       0xHigh_Low (data) 
-#         r (read only)  0xH  (addr)       4/8
+#         @ (read only)  0xH  (addr)       4/8
 #         # comment line
 #       Note: n can be 0 (for VU1), 1 (for VU2), or 2 (for GIF).
 #             H, High, or Low is hex data in the format of FFFFFFFF
@@ -70,13 +70,13 @@ while( $inputline = <INFILE> )
 { 
   chop($inputline);           # get rid of the new line char;
   $current_line_number ++;
-
+  
   print OUTFILE ("/* #line \"$infile_name\" $current_line_number */\n");
   if ($inputline =~ /^\#/ )          # A line starts with "#" is a comment
   {  
       &process_comment;
   } 
-  elsif ( $inputline =~ /^[012]/ )   # This is a data line
+  elsif ( $inputline =~ /^[01234]/ )   # This is a data line
   {
       &process_data;
   }
@@ -96,8 +96,9 @@ while( $inputline = <INFILE> )
   {
       &perform_test64;
   }
-  elsif ( $inputline =~ /^\r/ )      # A line starts with "r" is a read only test request
+  elsif ( $inputline =~ /^\@/ )      # A line starts with "@" is a read only test request
   {
+      print ("glorp\n");
       &perform_test_read_only;
   }
   else   # ignore this input
@@ -317,10 +318,20 @@ print OUTFILE ("
 #define DATA_ADDR_CONST_1 0x10005000
 #define FLAG_ADDR_CONST_1 0x10009060
 
-/* GIF */
+/* GIF PATH1 */
 #define SRC_ADDR_CONST_2  0x1000a010
-#define DATA_ADDR_CONST_2 0x10006000
+#define DATA_ADDR_CONST_2 0x10006020
 #define FLAG_ADDR_CONST_2 0x1000a060
+
+/* GIF PATH2 */
+#define SRC_ADDR_CONST_3  0x1000a010
+#define DATA_ADDR_CONST_3 0x10006010
+#define FLAG_ADDR_CONST_3 0x1000a060
+
+/* GIF PATH3 */
+#define SRC_ADDR_CONST_4  0x1000a010
+#define DATA_ADDR_CONST_4 0x10006000
+#define FLAG_ADDR_CONST_4 0x1000a060
 ");
 print OUTFILE ("\n\n");
 

@@ -1,3 +1,7 @@
+Thu Apr  9 13:03:54 1998 Jillian Ye <jillian@cygnus.com>
+
+	* c_gen.pl: Added handling for data from GIF PATH1/2/3 FIFO.
+
 Wed Apr  8 18:07:41 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* t-cop2.s (mpg): Put END/NOP VU instructions to give something to
