@@ -1,3 +1,7 @@
+2001-11-06  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.texinfo (gdbarch_in_function_epilogue_p): Add documentation.
+
 2001-11-05  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.texinfo (info functions): Document use of backslash to 

@@ -3104,6 +3104,13 @@ stack top) stack address @var{rhs}. Define this as @code{lhs < rhs} if
 the target's stack grows downward in memory, or @code{lhs > rsh} if the
 stack grows upward.
 
+@item gdbarch_in_function_epilogue_p (@var{gdbarch}, @var{pc})
+@findex gdbarch_in_function_epilogue_p
+Returns non-zero if the given @var{pc} is in the epilogue of a function.
+The epilogue of a function is defined as the part of a function where
+the stack frame of the function already has been destroyed up to the
+final `return from function call' instruction.
+
 @item IN_SIGTRAMP (@var{pc}, @var{name})
 @findex IN_SIGTRAMP
 Define this to return non-zero if the given @var{pc} and/or @var{name}
