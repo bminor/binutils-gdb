@@ -128,42 +128,26 @@ case "${host}" in
 esac
 fi
 
-# See if we can extract a definition of CC from the fragment.
-if [ -z "${CC}" ]; then
-  if [ -n "${host_makefile_frag}" -a -f "${srcdir}/${host_makefile_frag}" ]; then
+# If we aren't going to be using gcc, see if we can extract a definition
+# of CC from the fragment.
+if [ -z "${CC}" -a "${build}" = "${host}" ]; then
+  IFS="${IFS= 	}"; save_ifs="$IFS"; IFS="${IFS}:"
+  found=
+  for dir in $PATH; do
+    test -z "$dir" && dir=.
+    if test -f $dir/gcc; then
+      found=yes
+      break
+    fi
+  done
+  IFS="$save_ifs"
+  if [ -z "${found}" -a -n "${host_makefile_frag}" -a -f "${srcdir}/${host_makefile_frag}" ]; then
     xx=`sed -n -e 's/^[ 	]*CC[ 	]*=[ 	]*\(.*\)$/\1/p' < ${srcdir}/${host_makefile_frag}`
     if [ -n "${xx}" ] ; then
       CC=$xx
     fi
   fi
 fi
-
-# The Solaris /usr/ucb/cc compiler does not appear to work.
-case "${host}" in
-  sparc-sun-solaris2*)
-      if [ "`/usr/bin/which ${CC-cc}`" = "/usr/ucb/cc" ] ; then
-          could_use=
-          [ -d /opt/SUNWspro/bin ] && could_use="/opt/SUNWspro/bin"
-          if [ -d /opt/cygnus/bin ] ; then
-              if [ "$could_use" = "" ] ; then
-                  could_use="/opt/cygnus/bin"
-              else
-                  could_use="$could_use or /opt/cygnus/bin"
-              fi
-          fi
-        if [ "$could_use" = "" ] ; then
-            echo "Warning: compilation may fail because you're using"
-            echo "/usr/ucb/cc.  You should change your PATH or CC "
-            echo "variable and rerun configure."
-        else
-            echo "Warning: compilation may fail because you're using"
-            echo "/usr/ucb/cc, when you should use the C compiler from"
-            echo "$could_use.  You should change your"
-            echo "PATH or CC variable and rerun configure."
-        fi
-      fi
-  ;;
-esac
 
 # We default to --with-shared on platforms where -fpic is meaningless.
 # Well, we don't yet, but we will.
@@ -709,6 +693,33 @@ else
   exit 1
 fi
 rm -f conftest*
+
+# The Solaris /usr/ucb/cc compiler does not appear to work.
+case "${host}" in
+  sparc-sun-solaris2*)
+      if [ "`/usr/bin/which ${CC-cc}`" = "/usr/ucb/cc" ] ; then
+          could_use=
+          [ -d /opt/SUNWspro/bin ] && could_use="/opt/SUNWspro/bin"
+          if [ -d /opt/cygnus/bin ] ; then
+              if [ "$could_use" = "" ] ; then
+                  could_use="/opt/cygnus/bin"
+              else
+                  could_use="$could_use or /opt/cygnus/bin"
+              fi
+          fi
+        if [ "$could_use" = "" ] ; then
+            echo "Warning: compilation may fail because you're using"
+            echo "/usr/ucb/cc.  You should change your PATH or CC "
+            echo "variable and rerun configure."
+        else
+            echo "Warning: compilation may fail because you're using"
+            echo "/usr/ucb/cc, when you should use the C compiler from"
+            echo "$could_use.  You should change your"
+            echo "PATH or CC variable and rerun configure."
+        fi
+      fi
+  ;;
+esac
 
 # If --enable-shared was set, we must set LD_LIBRARY_PATH so that the
 # binutils tools will find libbfd.so.

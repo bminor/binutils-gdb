@@ -1,3 +1,10 @@
+Thu Feb 15 17:42:25 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Don't get CC from the host Makefile fragment if we
+	can find gcc in PATH, or if this is a Canadian Cross.  Move the
+	Solaris test for /usr/ucb/cc to the post target script, just after
+	the compiler sanity test.
+
 Wed Feb 14 16:57:40 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config.sub: Merge with FSF.
