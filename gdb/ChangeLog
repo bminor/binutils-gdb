@@ -1,3 +1,8 @@
+2002-03-06  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* m68hc11-tdep.c (_initialize_m68hc11_tdep): Don't set tm_print_insn.
+	(m68hc11_gdbarch_init): But use set_gdbarch_print_insn instead.
+
 2002-03-05  Andrew Cagney  <ac131313@redhat.com>
 
 	* MAINTAINERS (Past Maintainers): Add Frank Ch. Eigler.
