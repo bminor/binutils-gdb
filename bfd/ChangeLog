@@ -1,3 +1,8 @@
+2000-11-21  Kazu Hirata  <kazu@hxi.com>
+
+	* ecoff.c: Fix formatting.
+	* ecofflink.c: Likewise.
+
 2000-11-21  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-sh.c (sh_elf_reloc_loop): Fix compile time warning, and
