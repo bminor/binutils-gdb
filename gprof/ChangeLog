@@ -1,3 +1,8 @@
+Fri Mar 20 19:21:56 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in: Rebuild with automake 1.2e.
+	* aclocal.m4, configure: Rebuild with libtool 1.2.
+
 Thu Feb 12 14:36:05 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gprof.c (usage): Update bug-gnu-utils address.
