@@ -1,3 +1,13 @@
+2005-03-22  Nick Clifton  <nickc@redhat.com>
+
+	* binary.c: Convert to ISO C90 formatting.
+	* coff-arm.c: Convert to ISO C90 formatting.
+	* coffgen.c: Convert to ISO C90 formatting.
+	* elf32-gen.c: Convert to ISO C90 formatting.
+	* elf64-gen.c: Convert to ISO C90 formatting.
+	* hash.c: Convert to ISO C90 formatting.
+	* ieee.c: Convert to ISO C90 formatting.
+
 2005-03-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_final_link_relocate): Don't fail for
