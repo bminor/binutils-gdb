@@ -1,5 +1,10 @@
 2003-08-14  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-i386.h: Remove BFD_ASSEMBLER tests and all !BFD_ASSEMBLER
+	code.
+	* config/tc-i386.c: Likewise.
+	(RELOC_ENUM): Don't define.  Replace throughout with enum.
+
 	* dep-in.sed: Remove libintl.h.  Ignore include/fopen-*.h
 	* Makefile.am (POTFILES.in): Unset LC_COLLATE.
 	Run "make dep-am".
@@ -1950,7 +1955,7 @@
 	* doc/as.texinfo: Document "-mips32r2" option.
 	* doc/c-mips.texi: Likewise.
 
-2002-12-30    Dmitry Diky <diwil@mail.ru>
+2002-12-30  Dmitry Diky  <diwil@mail.ru>
 
 	* configure.in: Add msp430 target.
 	* configure: Regenerate.
