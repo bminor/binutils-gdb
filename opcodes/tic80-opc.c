@@ -831,13 +831,16 @@ const struct tic80_opcode tic80_opcodes[] = {
   {"vadd.ss",	OP_LI(0x3C1) | P2(0) | P1(0),	MASK_LI | V_a(1) | P2(1) | P1(1),	TIC80_VECTOR,	{SPFI, REG_22, REG_22}	},
   {"vadd.sd",	OP_LI(0x3C1) | P2(1) | P1(0),	MASK_LI | V_a(1) | P2(1) | P1(1),	TIC80_VECTOR,	{SPFI, REG_22, REG_22}	},
 
-  /* Vector Load Data Into Register */
+  /* Vector Floating-Point Multiply and Add to Accumulator */
+
+  /* Vector Load Data Into Register - Note that this comes after all the other
+   vector instructions so that the disassembler will always print the load instruction
+   second for vector instructions that have two instructions in the same opcode. */
 
   {"vld0.s",	OP_V(0x1E) | V_m(1) | V_S(0) | V_p(0),	MASK_V | V_m(1) | V_S(1) | V_p(1),	TIC80_VECTOR, {REG_DEST} },
   {"vld1.s",	OP_V(0x1E) | V_m(1) | V_S(0) | V_p(1),	MASK_V | V_m(1) | V_S(1) | V_p(1),	TIC80_VECTOR, {REG_DEST} },
   {"vld0.d",	OP_V(0x1E) | V_m(1) | V_S(1) | V_p(0),	MASK_V | V_m(1) | V_S(1) | V_p(1),	TIC80_VECTOR, {REG_DEST} },
   {"vld1.d",	OP_V(0x1E) | V_m(1) | V_S(1) | V_p(1),	MASK_V | V_m(1) | V_S(1) | V_p(1),	TIC80_VECTOR, {REG_DEST} },
-
 
   {"xnor",	OP_LI(0x333),	MASK_LI,	0,		FIXME},
   {"xnor",	OP_REG(0x332),	MASK_REG,	0,		FIXME},

@@ -1,3 +1,15 @@
+start-sanitize-tic80
+Fri Jan 17 18:24:31 1997  Fred Fish  <fnf@cygnus.com>
+
+	* tic80-dis.c (print_insn_tic80): Broke excessively long
+	function up into several smaller ones and arranged for
+	the instruction printing function to be callable recursively
+	to print vector instructions that have both a load and a
+	math instruction packed into a single opcode.
+	* tic80-opc.c (tic80_opcodes): Expand comment for vld opcode
+	to explain why it comes after the other vector opcodes.
+	
+end-sanitize-tic80
 Fri Jan 17 16:19:15 1997  J.T. Conklin  <jtc@beauty.cygnus.com>
 
 	* m68k-opc.c (m68k_opcodes): add b, w, or l specifier to coldfire 
