@@ -1,5 +1,8 @@
 2005-02-08  Andrew Cagney  <cagney@gnu.org>
 
+	* ppc-linux-nat.c (ppc_register_u_addr): Hack around 64-bit
+	PT_FPSCR breakage.
+
 	* value.c (struct value): Move to here ...
 	* value.h (struct value): ... from here.  Copy comments to
 	corresponding function declarations, re-order.

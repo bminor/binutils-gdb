@@ -212,8 +212,19 @@ ppc_register_u_addr (int regno)
     u_addr = PT_MSR * wordsize;
   if (tdep->ppc_fpscr_regnum >= 0
       && regno == tdep->ppc_fpscr_regnum)
-    u_addr = PT_FPSCR * wordsize;
-
+    {
+      /* NOTE: cagney/2005-02-08: On some 64-bit GNU/Linux systems the
+	 kernel headers incorrectly contained the 32-bit definition of
+	 PT_FPSCR.  For the 32-bit definition, floating-point
+	 registers occupy two 32-bit "slots", and the FPSCR lives in
+	 the secondhalf of such a slot-pair (hence +1).  For 64-bit,
+	 the FPSCR instead occupies the full 64-bit 2-word-slot and
+	 hence no adjustment is necessary.  Hack around this.  */
+      if (wordsize == 8 && PT_FPSCR == (48 + 32 + 1))
+	u_addr = (48 + 32) * wordsize;
+      else
+	u_addr = PT_FPSCR * wordsize;
+    }
   return u_addr;
 }
 
