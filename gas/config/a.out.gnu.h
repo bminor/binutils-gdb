@@ -21,6 +21,18 @@
 #ifndef __A_OUT_GNU_H__
 #define __A_OUT_GNU_H__
 
+/* There are two main flavours of a.out, one which uses the standard
+   relocations, and one which uses extended relocations.
+
+   Today, the extended reloc uses are
+   TC_SPARC, TC_A29K
+
+   each must define the enum reloc_type
+
+*/
+
+#define USE_EXTENDED_RELOC (defined(TC_SPARC) || defined(TC_A29K)) 
+
 #if defined(TC_SPARC) || defined(TC_A29K)
 enum reloc_type {
 	RELOC_8,        RELOC_16,        RELOC_32, /* simple relocations */
@@ -49,17 +61,6 @@ enum reloc_type {
 };
 #endif /* TC_SPARC or TC_A29K */
 
-#ifdef TC_I860
-/* NOTE: three bits max, see struct reloc_info_i860.r_type */
-enum i860_reloc_type {
-	NO_RELOC = 0, BRADDR, LOW0, LOW1, LOW2, LOW3, LOW4, SPLIT0, SPLIT1, SPLIT2, RELOC_32,
-};
-
- /* NOTE: two bits max, see reloc_info_i860.r_type */
-enum highlow_type {
-	NO_SPEC = 0, PAIR, HIGH, HIGHADJ,
-};
-#endif /* TC_I860 */
 
 #define __GNU_EXEC_MACROS__
 
@@ -286,28 +287,13 @@ struct nlist {
    
    reloc_ext_bytes is how it looks on disk.  reloc_info_extended is
    how we might process it on a native host.  */
+#if USE_EXTENDED_RELOC
 
 struct reloc_ext_bytes {
 	unsigned char	r_address[4];
 	unsigned char r_index[3];
 	unsigned char r_bits[1];
 	unsigned char r_addend[4];
-};
-
-struct reloc_info_i860
-{
-	unsigned long r_address;
-	/*
-	 * Using bit fields here is a bad idea because the order is not portable. :-(
-	 */
-	unsigned int r_symbolnum: 24;
-	unsigned int r_pcrel    : 1;
-	unsigned int r_extern   : 1;
-	/* combining the two field simplifies the argument passing in "new_fix()" */
-	/* and is compatible with the existing Sparc #ifdef's */
-	/* r_type:  highlow_type - bits 5,4; reloc_type - bits 3-0 */
-	unsigned int r_type     : 6;
-	long r_addend;
 };
 
 
@@ -334,7 +320,44 @@ struct reloc_info_extended
 	long int	r_addend;
 };
 
+#else
+
 /* The standard, old-fashioned, Berkeley compatible relocation struct */
+
+
+
+#ifdef TC_I860
+/* NOTE: three bits max, see struct reloc_info_i860.r_type */
+enum i860_reloc_type {
+	NO_RELOC = 0, BRADDR, LOW0, LOW1, LOW2, LOW3, LOW4, SPLIT0, SPLIT1, SPLIT2, RELOC_32,
+};
+
+typedef enum i860_reloc_type reloc_type;
+
+ /* NOTE: two bits max, see reloc_info_i860.r_type */
+enum highlow_type {
+	NO_SPEC = 0, PAIR, HIGH, HIGHADJ,
+};
+
+
+struct reloc_info_i860
+{
+	unsigned long r_address;
+	/*
+	 * Using bit fields here is a bad idea because the order is not portable. :-(
+	 */
+	unsigned int r_symbolnum: 24;
+	unsigned int r_pcrel    : 1;
+	unsigned int r_extern   : 1;
+	/* combining the two field simplifies the argument passing in "new_fix()" */
+	/* and is compatible with the existing Sparc #ifdef's */
+	/* r_type:  highlow_type - bits 5,4; reloc_type - bits 3-0 */
+	unsigned int r_type     : 6;
+	long r_addend;
+};
+
+#endif /* TC_I860 */
+
 
 struct reloc_std_bytes {
 	unsigned char	r_address[4];
@@ -363,6 +386,8 @@ struct reloc_std_bytes {
 #define	RELOC_STD_BITS_RELATIVE_LITTLE	0x02
 
 #define	RELOC_STD_SIZE	8		/* Bytes per relocation entry */
+
+#endif /* USE_EXTENDED_RELOC */
 
 #ifndef CUSTOM_RELOC_FORMAT
 struct relocation_info
