@@ -29,6 +29,7 @@ Makefile
 hist.texinfo
 hstech.texinfo
 hsuser.texinfo
+inc-hist.texi
 rlman.texinfo
 rltech.texinfo
 rluser.texinfo
