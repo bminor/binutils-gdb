@@ -45,25 +45,6 @@ static void extract_immediate PARAMS ((FILE *,
 				       int *, int *,
 				       const struct h8_opcode *));
 
-static void print_colon_thingie PARAMS ((op_type *));
-
-static void
-print_colon_thingie (op_type *nib)
-{
-  switch (*nib & SIZE) {
-  case L_2:	fprintf (stdout, "2");	break;
-  case L_3:
-  case L_3NZ:	fprintf (stdout, "3");	break;
-  case L_4:	fprintf (stdout, "4");	break;
-  case L_5:	fprintf (stdout, "5");	break;
-  case L_8:	fprintf (stdout, "8");	break;
-  case L_16:
-  case L_16U:	fprintf (stdout, "16");	break;
-  case L_24:	fprintf (stdout, "24");	break;
-  case L_32:	fprintf (stdout, "32");	break;
-  }
-}
-
 /* Run through the opcodes and sort them into order to make them easy
    to disassemble.  */
 

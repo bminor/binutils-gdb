@@ -1,3 +1,7 @@
+2003-11-19  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* h8300-dis.c (print_colon_thingie): Remove.
+
 2003-11-18  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
 
 	* mips-opc.c (mips_builtin_opcodes): Handle new macros: "lca" and
