@@ -1,3 +1,7 @@
+Fri Jul 30 15:43:49 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdbtypes.h: Improve comments about C++ methods.
+
 Fri Jul 30 14:16:32 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
 	* c-exp.y:  Add missing 5th arg for one call to lookup_symbol, cast

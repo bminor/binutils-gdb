@@ -292,7 +292,10 @@ struct type
 
 struct cplus_struct_type
 {
-  /* Number of base classes this type derives from. */
+  /* Number of base classes this type derives from.  The baseclasses are
+     stored in the first N_BASECLASSES fields (i.e. the `fields' field of
+     the struct type).  I think only the `type' field of such a field has
+     any meaning.  */
 
   short n_baseclasses;
 
@@ -357,7 +360,16 @@ struct cplus_struct_type
       struct fn_field
 	{
 
-	  /* The name after it has been processed */
+	  /* If is_stub is clear, this is the mangled name which we can
+	     look up to find the address of the method (FIXME: it would
+	     be cleaner to have a pointer to the struct symbol here
+	     instead).  */
+
+	  /* If is_stub is set, this is the portion of the mangled
+	     name which specifies the arguments.  For example, "ii",
+	     if there are two int arguments, or "" if there are no
+	     arguments.  See gdb_mangle_name for the conversion from this
+	     format to the one used if is_stub is clear.  */
 
 	  char *physname;
 
@@ -365,7 +377,9 @@ struct cplus_struct_type
 
 	  struct type *type;
 
-	  /* The argument list */
+	  /* The argument list.  Only valid if is_stub is clear.  Contains
+	     the type of each argument, including `this', and ending with
+	     a NULL pointer after the last argument.  */
 
 	  struct type **args;
 
@@ -380,7 +394,12 @@ struct cplus_struct_type
 	  unsigned int is_volatile : 1;
 	  unsigned int is_private : 1;
 	  unsigned int is_protected : 1;
+
+	  /* A stub method only has some fields valid (but they are enough
+	     to reconstruct the rest of the fields).  */
 	  unsigned int is_stub : 1;
+
+	  /* Unused.  */
 	  unsigned int dummy : 3;
 
 	  /* Index into that baseclass's virtual function table,
