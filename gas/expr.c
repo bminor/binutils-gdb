@@ -859,7 +859,7 @@ operand (expressionP)
 	      input_line_pointer++;
 	      floating_constant (expressionP);
 	      expressionP->X_add_number =
-		-(isupper ((unsigned char) c) ? tolower (c) : c);
+		- (isupper ((unsigned char) c) ? tolower (c) : c);
 	    }
 	  else
 	    {
@@ -982,7 +982,7 @@ operand (expressionP)
 	  input_line_pointer++;
 	  floating_constant (expressionP);
 	  expressionP->X_add_number =
-	    -(isupper ((unsigned char) c) ? tolower (c) : c);
+	    - (isupper ((unsigned char) c) ? tolower (c) : c);
 	  break;
 
 	case '$':
@@ -1069,7 +1069,7 @@ operand (expressionP)
 	    /* input_line_pointer -> char after operand.  */
 	    if (c == '-')
 	      {
-		expressionP->X_add_number = -expressionP->X_add_number;
+		expressionP->X_add_number = - expressionP->X_add_number;
 		/* Notice: '-' may overflow: no warning is given.
 		   This is compatible with other people's
 		   assemblers.  Sigh.  */
@@ -1817,27 +1817,27 @@ expr (rankarg, resultP)
 	    case O_subtract:		resultP->X_add_number -= v; break;
 	    case O_eq:
 	      resultP->X_add_number =
-		resultP->X_add_number == v ? ~(offsetT) 0 : 0;
+		resultP->X_add_number == v ? ~ (offsetT) 0 : 0;
 	      break;
 	    case O_ne:
 	      resultP->X_add_number =
-		resultP->X_add_number != v ? ~(offsetT) 0 : 0;
+		resultP->X_add_number != v ? ~ (offsetT) 0 : 0;
 	      break;
 	    case O_lt:
 	      resultP->X_add_number =
-		resultP->X_add_number < v ? ~(offsetT) 0 : 0;
+		resultP->X_add_number <  v ? ~ (offsetT) 0 : 0;
 	      break;
 	    case O_le:
 	      resultP->X_add_number =
-		resultP->X_add_number <= v ? ~(offsetT) 0 : 0;
+		resultP->X_add_number <= v ? ~ (offsetT) 0 : 0;
 	      break;
 	    case O_ge:
 	      resultP->X_add_number =
-		resultP->X_add_number >= v ? ~(offsetT) 0 : 0;
+		resultP->X_add_number >= v ? ~ (offsetT) 0 : 0;
 	      break;
 	    case O_gt:
 	      resultP->X_add_number =
-		resultP->X_add_number > v ? ~(offsetT) 0 : 0;
+		resultP->X_add_number >  v ? ~ (offsetT) 0 : 0;
 	      break;
 	    case O_logical_and:
 	      resultP->X_add_number = resultP->X_add_number && v;
