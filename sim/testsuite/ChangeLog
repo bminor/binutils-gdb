@@ -1,5 +1,9 @@
 Tue Feb 17 12:46:05 1998  Doug Evans  <devans@seba.cygnus.com>
 
+	* config/default.exp: New file.
+	* lib/sim-defs.exp: New file.
+	* sim/m32r/*: m32r dejagnu simulator testsuite.
+
 	* Makefile.in (build_alias): Define.
 	(arch): Define.
 	(RUNTEST_FOR_TARGET): Delete.
