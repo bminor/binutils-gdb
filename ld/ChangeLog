@@ -1,3 +1,8 @@
+Thu Feb  9 11:38:22 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* lexsup.c (parse_args): For -V, call ldversion with 1, not 0.
+	* ld.texinfo, ld.1: Update accordingly.
+
 Wed Feb  8 17:34:45 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldlang.c (lang_one_common): Adjust references to common symbol
