@@ -431,7 +431,7 @@ f:2:TARGET_WRITE_PC:void:write_pc:CORE_ADDR val, ptid_t ptid:val, ptid::0:generi
 # This is simply not needed.  See value_of_builtin_frame_fp_reg and
 # call_function_by_hand.
 F::DEPRECATED_TARGET_READ_FP:CORE_ADDR:deprecated_target_read_fp:void
-f:2:TARGET_READ_SP:CORE_ADDR:read_sp:void:::0:generic_target_read_sp::0
+F:2:TARGET_READ_SP:CORE_ADDR:read_sp:void
 # The dummy call frame SP should be set by push_dummy_call.
 F:2:DEPRECATED_DUMMY_WRITE_SP:void:deprecated_dummy_write_sp:CORE_ADDR val:val
 # Function for getting target's idea of a frame pointer.  FIXME: GDB's

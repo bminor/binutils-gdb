@@ -28,7 +28,7 @@
 #include "regcache.h"
 #include "doublest.h"
 #include "value.h"
-
+#include "gdb_assert.h"
 #include "objfiles.h"
 #include "elf/common.h"		/* for DT_PLTGOT value */
 #include "elf-bfd.h"
@@ -621,6 +621,18 @@ ia64_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
   *pcptr &= ~0x0f;
 #endif
   return breakpoint;
+}
+
+static CORE_ADDR
+ia64_read_fp (void)
+{
+  /* We won't necessarily have a frame pointer and even if we do, it
+     winds up being extraordinarly messy when attempting to find the
+     frame chain.  So for the purposes of creating frames (which is
+     all deprecated_read_fp() is used for), simply use the stack
+     pointer value instead.  */
+  gdb_assert (SP_REGNUM >= 0);
+  return read_register (SP_REGNUM);
 }
 
 CORE_ADDR
@@ -2296,12 +2308,11 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      frame chain.  So for the purposes of creating frames (which is
      all deprecated_read_fp() is used for), simply use the stack
      pointer value instead.  */
-  set_gdbarch_deprecated_target_read_fp (gdbarch, generic_target_read_sp);
+  set_gdbarch_deprecated_target_read_fp (gdbarch, ia64_read_fp);
 
   /* Settings that should be unnecessary.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
-  set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 
   set_gdbarch_decr_pc_after_break (gdbarch, 0);

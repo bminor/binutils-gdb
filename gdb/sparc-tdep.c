@@ -3423,7 +3423,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_pc_regnum (gdbarch, SPARC32_PC_REGNUM);
       set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
       set_gdbarch_deprecated_push_arguments (gdbarch, sparc32_push_arguments);
-      set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
 
       set_gdbarch_register_byte (gdbarch, sparc32_register_byte);
       set_gdbarch_register_raw_size (gdbarch, sparc32_register_size);

@@ -502,7 +502,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->bfd_vma_bit = TARGET_ARCHITECTURE->bits_per_address;
   current_gdbarch->char_signed = -1;
   current_gdbarch->write_pc = generic_target_write_pc;
-  current_gdbarch->read_sp = generic_target_read_sp;
   current_gdbarch->virtual_frame_pointer = legacy_virtual_frame_pointer;
   current_gdbarch->num_regs = -1;
   current_gdbarch->sp_regnum = -1;
@@ -622,7 +621,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of read_pc, has predicate */
   /* Skip verify of write_pc, invalid_p == 0 */
   /* Skip verify of deprecated_target_read_fp, has predicate */
-  /* Skip verify of read_sp, invalid_p == 0 */
+  /* Skip verify of read_sp, has predicate */
   /* Skip verify of deprecated_dummy_write_sp, has predicate */
   /* Skip verify of virtual_frame_pointer, invalid_p == 0 */
   /* Skip verify of pseudo_register_read, has predicate */
@@ -2565,6 +2564,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->read_pc
                         /*TARGET_READ_PC ()*/);
 #endif
+#ifdef TARGET_READ_SP_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "TARGET_READ_SP_P()",
+                      XSTRING (TARGET_READ_SP_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_READ_SP_P() = %d\n",
+                      TARGET_READ_SP_P ());
+#endif
 #ifdef TARGET_READ_SP
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -2953,6 +2961,13 @@ set_gdbarch_deprecated_target_read_fp (struct gdbarch *gdbarch,
                                        gdbarch_deprecated_target_read_fp_ftype deprecated_target_read_fp)
 {
   gdbarch->deprecated_target_read_fp = deprecated_target_read_fp;
+}
+
+int
+gdbarch_read_sp_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->read_sp != 0;
 }
 
 CORE_ADDR

@@ -1844,7 +1844,7 @@ ia64-linux-nat.o: ia64-linux-nat.c $(defs_h) $(gdb_string_h) $(inferior_h) \
 ia64-linux-tdep.o: ia64-linux-tdep.c $(defs_h) $(arch_utils_h)
 ia64-tdep.o: ia64-tdep.c $(defs_h) $(inferior_h) $(symfile_h) $(gdbcore_h) \
 	$(arch_utils_h) $(floatformat_h) $(regcache_h) $(doublest_h) \
-	$(value_h) $(objfiles_h) $(elf_common_h) $(elf_bfd_h)
+	$(value_h) $(gdb_assert_h) $(objfiles_h) $(elf_common_h) $(elf_bfd_h)
 inf-loop.o: inf-loop.c $(defs_h) $(inferior_h) $(target_h) $(event_loop_h) \
 	$(event_top_h) $(inf_loop_h) $(remote_h)
 infcall.o: infcall.c $(defs_h) $(breakpoint_h) $(target_h) $(regcache_h) \
@@ -1998,9 +1998,9 @@ mipsv4-nat.o: mipsv4-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(target_h) \
 mn10200-tdep.o: mn10200-tdep.c $(defs_h) $(frame_h) $(inferior_h) \
 	$(target_h) $(value_h) $(bfd_h) $(gdb_string_h) $(gdbcore_h) \
 	$(symfile_h) $(regcache_h)
-mn10300-tdep.o: mn10300-tdep.c $(defs_h) $(frame_h) $(inferior_h) \
-	$(target_h) $(value_h) $(bfd_h) $(gdb_string_h) $(gdbcore_h) \
-	$(symfile_h) $(regcache_h) $(arch_utils_h)
+mn10300-tdep.o: mn10300-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
+	$(value_h) $(bfd_h) $(gdb_string_h) $(gdbcore_h) $(symfile_h) \
+	$(regcache_h) $(arch_utils_h) $(gdb_assert_h)
 monitor.o: monitor.c $(defs_h) $(gdbcore_h) $(target_h) $(gdb_string_h) \
 	$(command_h) $(serial_h) $(monitor_h) $(gdbcmd_h) $(inferior_h) \
 	$(gdb_regex_h) $(srec_h) $(regcache_h)

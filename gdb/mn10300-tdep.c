@@ -31,6 +31,7 @@
 #include "symfile.h"
 #include "regcache.h"
 #include "arch-utils.h"
+#include "gdb_assert.h"
 
 #define D0_REGNUM 0
 #define D2_REGNUM 2
@@ -1091,6 +1092,14 @@ mn10300_do_registers_info (int regnum, int fpregs)
     }
 }
 
+static CORE_ADDR
+mn10300_read_fp (void)
+{
+  /* That's right, we're using the stack pointer as our frame pointer.  */
+  gdb_assert (SP_REGNUM >= 0);
+  return read_register (SP_REGNUM);
+}
+
 /* Dump out the mn10300 speciic architecture information. */
 
 static void
@@ -1184,7 +1193,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   /* That's right, we're using the stack pointer as our frame pointer.  */
-  set_gdbarch_deprecated_target_read_fp (gdbarch, generic_target_read_sp);
+  set_gdbarch_deprecated_target_read_fp (gdbarch, mn10300_read_fp);
 
   /* Calling functions in the inferior from GDB.  */
   set_gdbarch_deprecated_call_dummy_words (gdbarch, mn10300_call_dummy_words);

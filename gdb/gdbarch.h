@@ -371,9 +371,29 @@ extern void set_gdbarch_deprecated_target_read_fp (struct gdbarch *gdbarch, gdba
 #define DEPRECATED_TARGET_READ_FP() (gdbarch_deprecated_target_read_fp (current_gdbarch))
 #endif
 
+#if defined (TARGET_READ_SP)
+/* Legacy for systems yet to multi-arch TARGET_READ_SP */
+#if !defined (TARGET_READ_SP_P)
+#define TARGET_READ_SP_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (TARGET_READ_SP_P)
+#define TARGET_READ_SP_P() (0)
+#endif
+
+extern int gdbarch_read_sp_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (TARGET_READ_SP_P)
+#error "Non multi-arch definition of TARGET_READ_SP"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_READ_SP_P)
+#define TARGET_READ_SP_P() (gdbarch_read_sp_p (current_gdbarch))
+#endif
+
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (TARGET_READ_SP)
-#define TARGET_READ_SP() (generic_target_read_sp ())
+#define TARGET_READ_SP() (internal_error (__FILE__, __LINE__, "TARGET_READ_SP"), 0)
 #endif
 
 typedef CORE_ADDR (gdbarch_read_sp_ftype) (void);

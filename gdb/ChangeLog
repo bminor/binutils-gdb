@@ -1,5 +1,28 @@
 2003-06-07  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (TARGET_READ_SP): Add predicate, delete default.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* mn10300-tdep.c: Include "gdb_assert.h".
+	(mn10300_read_fp): New function.
+	(mn10300_gdbarch_init): Set deprecated_target_read_fp to
+	mn10300_read_fp.  Do not set read_sp to generic_target_read_sp.
+	* ia64-tdep.c: Include "gdb_assert.h".
+	(ia64_read_fp): New function.
+	(ia64_gdbarch_init): Set deprecated_target_read_fp to
+	ia64_read_sp.  Do not set read_sp to generic_target_read_sp.
+	* regcache.c (generic_target_read_sp): Delete function.
+	(read_sp): Try TARGET_READ_SP and SP_REGNUM for the SP register.
+	* inferior.h (generic_target_read_sp): Delete declaration.
+	* frv-tdep.c (frv_gdbarch_init): Do not set read_sp to
+	generic_target_read_sp.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Ditto.
+	* sparc-tdep.c (sparc_gdbarch_init): Ditto
+	* sh-tdep.c (sh_gdbarch_init): Ditto.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Ditto.
+	* Makefile.in (mn10300-tdep.o, ia64-tdep.o): Update dependencies.
+
+2003-06-07  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh: Comment each field of startup_gdbarch.
 	* gdbarch.h, gdbarch.c: Re-generate.
 

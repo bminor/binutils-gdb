@@ -1273,9 +1273,6 @@ regcache_collect (int regnum, void *buf)
    they will use the contextual information provided by the FRAME.
    These functions do not belong in the register cache.  */
 
-/* NOTE: cagney/2003-06-07: The function generic_target_read_sp()
-   should be deleted.  */
-
 /* NOTE: cagney/2003-06-07: The function generic_target_write_sp()
    should be deleted.  */
 
@@ -1353,20 +1350,14 @@ write_pc (CORE_ADDR pc)
 /* Cope with strage ways of getting to the stack and frame pointers */
 
 CORE_ADDR
-generic_target_read_sp (void)
-{
-#ifdef SP_REGNUM
-  if (SP_REGNUM >= 0)
-    return read_register (SP_REGNUM);
-#endif
-  internal_error (__FILE__, __LINE__,
-		  "generic_target_read_sp");
-}
-
-CORE_ADDR
 read_sp (void)
 {
-  return TARGET_READ_SP ();
+  if (TARGET_READ_SP_P ())
+    return TARGET_READ_SP ();
+  /* Else return SP from get_current_frame.  */
+  else if (SP_REGNUM >= 0)
+    return read_register (SP_REGNUM);
+  internal_error (__FILE__, __LINE__, "read_sp: Unable to find SP");
 }
 
 void
