@@ -1,3 +1,9 @@
+2002-05-11  Eric Christopher  <echristo@redhat.com>
+
+	* mips-tdep.c (mips_double_register_type): Fix thinko.
+	(mips_single_register_type): Ditto.
+	* MAINTAINERS: Add self.
+
 2002-05-11  Mark Kettenis  <kettenis@gnu.org>
 
 	* i387-nat.c (i387_supply_register, i387_fill_fsave,
@@ -30,7 +36,7 @@
         * config/sh/tm-sh.h (enum sh-abi): Possible ABI's.
         (struct gdbarch_tdep): Add new fields for new registers and ABI
         info.
-        
+
         * sh-tdep.c: Include elf-bfd.h, elf/sh.h, gdb/sim-sh.h.
         (NUM_PSEUDO_REGS_SH_MEDIA, NUM_PSEUDO_REGS_SH_COMPACT,
         MSYMBOL_IS_SPECIAL, IS_ISA32_ADDR, MAKE_ISA32_ADDR,
@@ -97,11 +103,11 @@
 	due to a misplaced N_LBRAC entry.
 
 2002-05-09  Elena Zannoni  <ezannoni@redhat.com>
-  
-	From Daniel Berlin <dan@cgsoftware.com> 
+
+	From Daniel Berlin <dan@cgsoftware.com>
 	* linespec.c (find_toplevel_char): '<' and '>' also increase and
 	decrease the depth we are at, in the case of templates.
-	
+
 2002-05-09  Daniel Jacobowitz  <drow@mvista.com>
 
 	* mips-tdep.c (mips_float_register_type): New function.
@@ -128,9 +134,9 @@
 
 	* arm-tdep.c (arm_scan_prologue): Accept strb r(0123),[r11,#-nn],
 	strh r(0123),[r11,#-nn], str r(0123),[r11,#-nn], as well as
-	strb r(0123),[sp,#nn], strh r(0123),[sp,#nn] and 
+	strb r(0123),[sp,#nn], strh r(0123),[sp,#nn] and
 	str r(0123),[sp,#nn].
-	(arm_skip_prologue): Ditto.  Also make disassembly 
+	(arm_skip_prologue): Ditto.  Also make disassembly
 	order-independent by placing it in a loop.
 
 2002-05-06  Michael Snyder  <msnyder@redhat.com>
@@ -249,7 +255,7 @@
 
 	* arm-tdep.h (ARM_MAX_REGISTER_RAW_SIZE): Define.
 	(ARM_MAX_REGISTER_VIRTUAL_SIZE): Define.
-	* arm-tdep.c (arm_store_return_value): Use them.  
+	* arm-tdep.c (arm_store_return_value): Use them.
 	Use FP_REGISTER_RAW_SIZE when setting the FPA return value.
 	* remote-rdp.c (remote_rdp_fetch_register): Use
 	ARM_MAX_REGISTER_RAW_SIZE.
@@ -257,7 +263,7 @@
 
 2002-05-07  Michal Ludvig  <mludvig@suse.cz>
 
-	* dwarf2cfi.c: Code cleanup, removed unused variables, 
+	* dwarf2cfi.c: Code cleanup, removed unused variables,
 	added default labels to switch {} statements.
 	* x86-64-tdep.c: Ditto.
 	* x86-64-linux-nat.c: Ditto.
@@ -505,12 +511,12 @@
 
 	* p-lang.h (is_pascal_string_type): Declaration changed,
 	new sixth argument of type char ** added.
-	* p-lang.c (is_pascal_string_type): Implementation 
+	* p-lang.c (is_pascal_string_type): Implementation
 	changed. Args length_pos, length_size, string_pos, char_size
 	can now be NULL. New argument arrayname set to the field
 	name of the char array. Return value set to char array
 	field index plus one.
-	* p-valprint.c (pascal_val_print): Adapt to new declaration of 
+	* p-valprint.c (pascal_val_print): Adapt to new declaration of
 	is_pascal_string_type function.
 
 2002-05-02  Andrew Cagney  <cagney@redhat.com>
@@ -576,7 +582,7 @@
 	* x86-64-linux-nat.c (fill_gregset): Explicit cast to avoid warning.
 	* x86-64-tdep.c (i386_gdbarch_init): Ditto.
 	(x86_64_register_info_table): Added comments with register numbers.
-	
+
 2002-04-29  Elena Zannoni  <ezannoni@redhat.com>
 
 	* rs6000-tdep.c (rs6000_extract_return_value,
@@ -589,7 +595,7 @@
 	vectors.
 	(ppc_sysv_abi_push_arguments): Handle vector parameters.
 	* ppc-tdep.h (ppc_sysv_abi_broken_use_struct_convention): Export.
-        
+
 2002-04-24  Pierre Muller  <ics.u-strasbg.fr>
 
 	* hpread.c (hpread_psymtab_to_symtab_1,
@@ -599,7 +605,7 @@
 2002-04-24  Pierre Muller  <ics.u-strasbg.fr>
 
 	* remote-array.c (printf_monitor, write_monitor,
-	array_insert_breakpoint, array_remove_breakpoint ): 
+	array_insert_breakpoint, array_remove_breakpoint ):
 	Replace fprintf (stderr,...
 	with fprintf_unfiltered (gdb_stderr,....
 	* remote-es.c: Likewise.
@@ -654,7 +660,7 @@
 
 2002-04-26  Andrew Cagney  <ac131313@redhat.com>
 
-	* stack.c (selected_frame_level): 
+	* stack.c (selected_frame_level):
 	(select_frame): Do not set selected_frame_level.
 	* frame.h (selected_frame_level): Delete declaration.
 
@@ -887,10 +893,10 @@
 
 2002-04-24  Michael Snyder  <msnyder@redhat.com>
 
-	* arm-tdep.c (arm_scan_prologue): Move "mov ip, sp" into the 
+	* arm-tdep.c (arm_scan_prologue): Move "mov ip, sp" into the
 	loop.  Add handling for "str lr, [sp, #-4]!" and for saves
 	of argument regs ("str r(0123), [r11, #-nn"]).
-	(arm_skip_prologue): Better handling for frameless functions.  
+	(arm_skip_prologue): Better handling for frameless functions.
 	Treat "mov ip, sp" as optional.  Recognize "str lr, [sp, #-4]".
 	(arm_skip_prologue): Recognize str r(0123), [r11, #-nn].
 
@@ -928,7 +934,7 @@ Wed Apr 24 14:22:21 2002  Andrew Cagney  <cagney@redhat.com>
 2002-04-24  Michal Ludvig  <mludvig@suse.cz>
 
 	* gdbserver/linux-low.c (regsets_fetch_inferior_registers),
-	(regsets_store_inferior_registers): Removed cast to int from 
+	(regsets_store_inferior_registers): Removed cast to int from
 	ptrace() calls.
 	* gdbserver/regcache.h: Added declaration of struct inferior_info.
 
@@ -973,7 +979,7 @@ Wed Apr 24 14:22:21 2002  Andrew Cagney  <cagney@redhat.com>
 2002-04-22  H.J. Lu  (hjl@gnu.org)
 
 	* c-exp.y (typebase): Support
-	
+
 	[long|long long|short] [signed|unsigned] [int|]
 
 	and
@@ -1076,7 +1082,7 @@ Wed Apr 24 14:22:21 2002  Andrew Cagney  <cagney@redhat.com>
 	(supply_gregset): Likewise.
 
 2002-04-22  J. Brobecker  <brobecker@gnat.com>
-  
+
 	* symfile.h (get_section_index): Define.
 	* symfile.c (get_section_index): New function.
 	* mdebugread.c (SC_IS_SBSS): New macro.
@@ -1277,7 +1283,7 @@ Wed Apr 24 14:22:21 2002  Andrew Cagney  <cagney@redhat.com>
 	* gdbarch.sh (gdbarch_update_p): Keep the list of architectures
 	sorted in most most-recent-used order.  Document.
 	* gdbarch.h, gdbarch.c: Regenerate.
-	
+
 2002-04-20  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbserver/inferiors.c (struct inferior_info): Add regcache_data.
@@ -1362,7 +1368,7 @@ Wed Apr 24 14:22:21 2002  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (BREAKPOINT_FROM_PC): Return a const buffer.
 	* gdbarch.h, gdbarch.c: Regenerate.
-	
+
 	* defs.h (breakpoint_from_pc_fn): Delete type definition.
 	* target.h (memory_breakpoint_from_pc): Update declaration.
 	* config/mcore/tm-mcore.h (mcore_breakpoint_from_p): Ditto.
@@ -1425,9 +1431,9 @@ Wed Apr 24 14:22:21 2002  Andrew Cagney  <cagney@redhat.com>
 	* gdbarch.sh (LANG): Set to ``c''.
 
 2002-04-15  Andrew Cagney  <ac131313@redhat.com>
- 
+
  	* PROBLEMS: Mention hppa2.0-hp-hpux10.20 compile problems.
- 
+
 2002-04-15  Andrew Cagney  <ac131313@redhat.com>
 
 	* bcache.c: Include <stddef.h> and <stdlib.h> after "defs.h".
@@ -1435,13 +1441,13 @@ Wed Apr 24 14:22:21 2002  Andrew Cagney  <cagney@redhat.com>
 
  	* hpread.c (hpread_get_lntt): Add declaration.
  	Also fix PR gdb/391.
- 
+
 2002-04-14  Andrew Cagney  <ac131313@redhat.com>
 
 	* acinclude.m4 (AM_PROG_CC_STDC): Import from automake 1.6.
 	* aclocal.m4, configure: Re-generate.
 	Fix PR gdb/391.
-	
+
 2002-04-14  Elena Zannoni  <ezannoni@redhat.com>
 
         * mi/mi-cmd-disas.c (dump_insns): Use TARGET_PRINT_INSN
@@ -1592,7 +1598,7 @@ Wed Apr 24 14:22:21 2002  Andrew Cagney  <cagney@redhat.com>
 	(PTRACE_XFER_TYPE): Moved here from config/i386/nm-x86-64.h.
 
 2002-04-04  Jim Ingham  <jingham@apple.com>
- 
+
        * valarith.c (find_size_for_pointer_math): New function, either returns
        the size for a pointer's target, returns 1 for void *, or errors for
        incomplete types.
@@ -1700,7 +1706,7 @@ Wed Apr 24 14:22:21 2002  Andrew Cagney  <cagney@redhat.com>
 	* parser-defs.h (num_std_regs, std_regs, struct std_regs): Delete
 	declarations.  Update copyright.
 	Fix PR gdb/251.
-	
+
 2002-04-09  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbserver/Makefile.in: Add stamp-h target.
@@ -1985,7 +1991,7 @@ Wed Apr 24 14:22:21 2002  Andrew Cagney  <cagney@redhat.com>
 	whether breakpoints need to be removed from overlay load addr.
 	Handle bp_hardware_breakpoint as well as bp_breakpoint.
 	(bpstat_stop_status): Handle bp_hardware_breakpoint in overlays.
-	(create_overlay_event_breakpoint, enable_overlay_breakpoints, 
+	(create_overlay_event_breakpoint, enable_overlay_breakpoints,
 	disable_overlay_breakpoints): Update overlay_events_enabled.
 
 2002-04-04  Daniel Jacobowitz  <drow@mvista.com>
@@ -2002,14 +2008,14 @@ Wed Apr 24 14:22:21 2002  Andrew Cagney  <cagney@redhat.com>
 
 2002-04-04  Michal Ludvig  <mludvig@suse.cz>
 
-	* x86-64-linux-nat.c (child_xfer_memory): x86-64 ptrace() ABI 
+	* x86-64-linux-nat.c (child_xfer_memory): x86-64 ptrace() ABI
 	change sync with glibc.
 
 2002-04-03  Jim Blandy  <jimb@redhat.com>
 
 	* configure.in: Call AC_C_INLINE.
 	* configure: Regenerated.
-	
+
 2002-04-01  Daniel Jacobowitz  <drow@mvista.com>
 
 	* rs6000-tdep.c: Change #include of "bfd/libcoff.h"
@@ -2035,7 +2041,7 @@ Wed Apr 24 14:22:21 2002  Andrew Cagney  <cagney@redhat.com>
 2002-03-26  Michael Snyder  <msnyder@redhat.com>
 	    Andrew Cagney <cagney@redhat.com>
 
-	* cli/cli-dump.c: New file.  Dump memory to file, 
+	* cli/cli-dump.c: New file.  Dump memory to file,
 	restore file to memory.
 	* cli/cli-dump.h: New file.
 	* Makefile.in: Add rules, dependencies for cli-dump.o.
