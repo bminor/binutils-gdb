@@ -731,7 +731,8 @@ objcopy [ -F @var{bfdname} | --target=@var{bfdname} ]
         [ -O @var{bfdname} | --output-target=@var{bfdname} ]
         [ -S | --strip-all ]  [ -g | --strip-debug ]
         [ -x | --discard-all ]  [ -X | --discard-locals ]
-        [ -v | --verbose ]  [ -V | --version ]  [ --help ]
+        [ -b @var{byte} | --byte=@var{byte} ]  [ -v | --verbose ]
+        [ -V | --version ]  [ --help ]
         @var{infile} [@var{outfile}]
 @end smallexample
 
@@ -788,6 +789,13 @@ Do not copy non-global symbols from the source file.
 @itemx --discard-locals
 Do not copy compiler-generated local symbols.
 (These usually start with @samp{L} or @samp{.}.)
+
+@item -b @var{byte}
+@itemx --byte=@var{byte}
+Keep only every @var{byte}th byte of the input file (header data is not
+affected).  @var{byte} can be in the range from 0 to 3.  This option is
+useful for creating files to program 4 ROMs to create 32-bit words.  It
+is typically used with an @code{srec} output target.
 
 @item -V
 @itemx --version
@@ -878,6 +886,15 @@ each of the @var{objfile} files.
 @cindex section headers
 Display summary information from the section headers of the
 object file.
+
+File segments may be relocated to nonstandard addresses, for example by
+using the @samp{-Ttext}, @samp{-Tdata}, or @samp{-Tbss} options to
+@code{ld}.  However, some object file formats, such as a.out, do not
+store the starting address of the file segments.  In those situations,
+although @code{ld} relocates the sections correctly, using @samp{objdump
+-h} to list the file section headers cannot show the correct addresses.
+Instead, it shows the usual addresses, which are implicit for the
+target.
 
 @item --help
 Print a summary of the options to @code{objdump} and exit.
