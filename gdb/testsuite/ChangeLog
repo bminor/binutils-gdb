@@ -1,5 +1,8 @@
 2005-02-10  Mark Kettenis  <kettenis@chello.nl>
 
+	* gdb.dwarf2/dw2-intermix.exp, gdb.dwarf2/dw2-intermix.S: New
+	files.
+
 	* gdb.dwarf2/dw2-basic.exp, gdb.dwarf2/dw2-intercu.exp: Run tests
 	on *-*-openbsd*.  Correctly match whitespace in regukar
 	expressions.
