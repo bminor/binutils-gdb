@@ -223,7 +223,7 @@ const pseudo_typeS md_pseudo_table[] =
 
 static void
 mcore_s_literals (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   dump_literals (0);
   demand_empty_rest_of_line ();
@@ -409,10 +409,6 @@ md_begin ()
 	}
     }
 }
-
-static int reg_m;
-static int reg_n;
-static expressionS immediate;	/* absolute expression */
 
 /* Get a log2(val).  */
 static int
@@ -641,7 +637,7 @@ static void
 dump_literals (isforce)
      int isforce;
 {
-  int i;
+  unsigned int i;
   struct literal * p;
   symbolS * brarsym;
 
@@ -726,7 +722,7 @@ enter_literal (e, ispcrel)
      expressionS * e;
      int ispcrel;
 {
-  int i;
+  unsigned int i;
   struct literal * p;
 
   if (poolsize >= MAX_POOL_SIZE - 2)
@@ -839,9 +835,9 @@ parse_imm (s, val, min, max)
     ; /* An error message has already been emitted.  */
   else if (e.X_op != O_constant)
     as_bad (_("operand must be a constant"));
-  else if (e.X_add_number < min || e.X_add_number > max)
-    as_bad (_("operand must be absolute in range %d..%d, not %d"),
-	    min, max, e.X_add_number);
+  else if ((addressT) e.X_add_number < min || (addressT) e.X_add_number > max)
+    as_bad (_("operand must be absolute in range %u..%u, not %ld"),
+	    min, max, (long) e.X_add_number);
 
   * val = e.X_add_number;
 
@@ -855,8 +851,6 @@ parse_mem (s, reg, off, siz)
      unsigned * off;
      unsigned siz;
 {
-  char * new;
-
   * off = 0;
 
   while (ISSPACE (* s))
@@ -1323,6 +1317,8 @@ md_assemble (str)
 	    size = 2;
 	  else if ((inst & 0x6000) == 0x2000)
 	    size = 1;
+	  else
+	    abort ();
 
 	  op_end = parse_mem (op_end + 1, & reg, & off, size);
 
@@ -1661,7 +1657,7 @@ md_assemble (str)
 
 symbolS *
 md_undefined_symbol (name)
-       char * name;
+       char *name ATTRIBUTE_UNUSED;
 {
   return 0;
 }
@@ -1690,7 +1686,6 @@ md_atof (type, litP, sizeP)
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
   int    i;
   char * t;
-  char * atof_ieee ();
 
   switch (type)
     {
@@ -1779,9 +1774,6 @@ md_parse_option (c, arg)
      int c;
      char * arg;
 {
-  int i;
-  char * p;
-
   switch (c)
     {
     case OPTION_CPU:
@@ -1825,22 +1817,22 @@ int md_short_jump_size;
 
 void
 md_create_short_jump (ptr, from_Nddr, to_Nddr, frag, to_symbol)
-     char * ptr;
-     addressT from_Nddr;
-     addressT to_Nddr;
-     fragS * frag;
-     symbolS * to_symbol;
+     char * ptr ATTRIBUTE_UNUSED;
+     addressT from_Nddr ATTRIBUTE_UNUSED;
+     addressT to_Nddr ATTRIBUTE_UNUSED;
+     fragS * frag ATTRIBUTE_UNUSED;
+     symbolS * to_symbol ATTRIBUTE_UNUSED;
 {
   as_fatal (_("failed sanity check: short_jump"));
 }
 
 void
 md_create_long_jump (ptr, from_Nddr, to_Nddr, frag, to_symbol)
-     char * ptr;
-     addressT from_Nddr;
-     addressT to_Nddr;
-     fragS * frag;
-     symbolS * to_symbol;
+     char * ptr ATTRIBUTE_UNUSED;
+     addressT from_Nddr ATTRIBUTE_UNUSED;
+     addressT to_Nddr ATTRIBUTE_UNUSED;
+     fragS * frag ATTRIBUTE_UNUSED;
+     symbolS * to_symbol ATTRIBUTE_UNUSED;
 {
   as_fatal (_("failed sanity check: long_jump"));
 }
@@ -1848,8 +1840,8 @@ md_create_long_jump (ptr, from_Nddr, to_Nddr, frag, to_symbol)
 /* Called after relaxing, change the frags so they know how big they are.  */
 void
 md_convert_frag (abfd, sec, fragP)
-     bfd * abfd;
-     segT sec;
+     bfd * abfd ATTRIBUTE_UNUSED;
+     segT sec ATTRIBUTE_UNUSED;
      register fragS * fragP;
 {
   unsigned char * buffer;
@@ -2049,7 +2041,7 @@ void
 md_apply_fix3 (fixP, valP, segment)
      fixS *   fixP;
      valueT * valP;
-     segT     segment;
+     segT     segment ATTRIBUTE_UNUSED;
 {
   char *       buf  = fixP->fx_where + fixP->fx_frag->fr_literal;
   char *       file = fixP->fx_file ? fixP->fx_file : _("unknown");
@@ -2078,12 +2070,12 @@ md_apply_fix3 (fixP, valP, segment)
     case BFD_RELOC_MCORE_PCREL_IMM11BY2:     /* second byte of 2 byte opcode */
       if ((val & 1) != 0)
 	as_bad_where (file, fixP->fx_line,
-		      _("odd distance branch (0x%x bytes)"), val);
+		      _("odd distance branch (0x%lx bytes)"), (long) val);
       val /= 2;
       if (((val & ~0x3ff) != 0) && ((val | 0x3ff) != -1))
 	as_bad_where (file, fixP->fx_line,
-		      _("pcrel for branch to %s too far (0x%x)"),
-		      symname, val);
+		      _("pcrel for branch to %s too far (0x%lx)"),
+		      symname, (long) val);
       if (target_big_endian)
 	{
 	  buf[0] |= ((val >> 8) & 0x7);
@@ -2101,8 +2093,8 @@ md_apply_fix3 (fixP, valP, segment)
       val /= 4;
       if (val & ~0xff)
 	as_bad_where (file, fixP->fx_line,
-		      _("pcrel for lrw/jmpi/jsri to %s too far (0x%x)"),
-		      symname, val);
+		      _("pcrel for lrw/jmpi/jsri to %s too far (0x%lx)"),
+		      symname, (long) val);
       else if (! target_big_endian)
 	buf[0] |= (val & 0xff);
       else
@@ -2112,7 +2104,7 @@ md_apply_fix3 (fixP, valP, segment)
     case BFD_RELOC_MCORE_PCREL_IMM4BY2:	/* loopt instruction */
       if ((val < -32) || (val > -2))
 	as_bad_where (file, fixP->fx_line,
-		      _("pcrel for loopt too far (0x%x)"), val);
+		      _("pcrel for loopt too far (0x%lx)"), (long) val);
       val /= 2;
       if (! target_big_endian)
 	buf[0] |= (val & 0xf);
@@ -2275,7 +2267,7 @@ md_number_to_chars (ptr, use, nbytes)
 /* Round up a section size to the appropriate boundary.  */
 valueT
 md_section_align (segment, size)
-     segT segment;
+     segT segment ATTRIBUTE_UNUSED;
      valueT size;
 {
   return size;			/* Byte alignment is fine */
@@ -2286,7 +2278,7 @@ md_section_align (segment, size)
 long
 md_pcrel_from_section (fixp, sec)
      fixS * fixp;
-     segT sec;
+     segT sec ATTRIBUTE_UNUSED;
 {
 #ifdef OBJ_ELF
   /* If the symbol is undefined or defined in another section
@@ -2311,12 +2303,11 @@ md_pcrel_from_section (fixp, sec)
 
 arelent *
 tc_gen_reloc (section, fixp)
-     asection * section;
+     asection * section ATTRIBUTE_UNUSED;
      fixS * fixp;
 {
   arelent * rel;
   bfd_reloc_code_real_type code;
-  int handled = 0;
 
   switch (fixp->fx_r_type)
     {

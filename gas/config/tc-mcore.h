@@ -51,6 +51,7 @@
 #define LOCAL_LABELS_FB 1
 
 #define TC_COFF_SIZEMACHDEP(frag) tc_coff_sizemachdep (frag)
+int tc_coff_sizemachdep PARAMS ((struct frag *));
 
 extern const struct relax_type md_relax_table[];
 #define TC_GENERIC_RELAX_TABLE md_relax_table

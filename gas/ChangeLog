@@ -1,5 +1,25 @@
 2002-12-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-mcore.c (mcore_s_literals <ignore>): Add ATTRIBUTE_UNUSED.
+	(md_undefined_symbol <ignore>): Likewise.
+	(md_create_short_jump <all args>): Likewise.
+	(md_create_long_jump <all args>): Likewise.
+	(md_convert_frag <abfd, sec>): Likewise.
+	(md_apply_fix3 <segment>): Likewise.
+	(md_section_align <segment>): Likewise.
+	(md_pcrel_from_section <sec>): Likewise.
+	(tc_gen_reloc <section>): Likewise.
+	(reg_m, reg_n, immediate): Delete unused vars.
+	(dump_literals): Fix signed/unsigned warning.
+	(enter_literal): Likewise.
+	(parse_imm): Likewise.  Also fix format string.
+	(parse_mem): Remove unused var.
+	(md_assemble <LS>): Abort on unexpected inst.
+	(md_atof): Remove declaration of atof_ieee.
+	(md_parse_option): Remove unused vars.
+	(md_apply_fix3): Fix format strings, cast args.
+	(tc_gen_reloc): Delete unused var.
+	* config/tc-mcore.h (tc_coff_sizemachdep): Declare.
 	* config/tc-mn10200.c (md_parse_option <c, arg>): Add ATTRIBUTE_UNUSED.
 	(md_undefined_symbol <name>): Likewise.
 	(md_convert_frag <abfd>): Likewise.
