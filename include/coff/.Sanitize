@@ -36,6 +36,8 @@ m68k.h
 m88k.h
 mips.h
 rs6000.h
+sym.h
+symconst.h
 
 Do-last:
 
