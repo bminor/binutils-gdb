@@ -1,3 +1,10 @@
+2004-05-12  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* ld-sh/tlsbin-2.d: Adjust for section reordering changes
+	and removal of unneeded STT_SECTION symbols from .dynsym.
+	* ld-sh/tlsbin-3.d: Likewise.
+	* ld-sh/tlspic-2.d: Likewise.
+
 2004-05-12  Ben Elliston  <bje@au.ibm.com>
 
 	* ld-sh/sh64/relax.exp: Remove stray semicolons.
