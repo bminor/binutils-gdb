@@ -1,3 +1,33 @@
+Wed Jul  3 16:05:23 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* erc32.c (mec_reset mec_read mec_write memory_read memory_write),
+	sis.h:  Get rid of all uses of long long's.
+	* (close_port read_uart write_uart uarta_tx):  Don't seg fault
+	when can't open pty's.
+	* exec.c:  Add two new instructions: smul, and divscc.
+	* interf.c (flush_windows):  New routine to flush the register
+	windows out to the stack just before returning to GDB.  Makes
+	backtraces work much better.
+
+Wed Jun 26 12:19:11 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
+
+        * Makefile.in (bindir, libdir, datadir, mandir, infodir, includedir,
+        INSTALL_PROGRAM, INSTALL_DATA): Use autoconf-set values.
+        (docdir, oldincludedir): Removed.
+        * configure.in (AC_PREREQ): autoconf 2.5 or higher.
+        (AC_PROG_INSTALL): Added.
+        * configure: Rebuilt.
+
+Mon Jun 24 14:19:07 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Call AC_PROG_CC before running configure.host.
+	* configure: Rebuild with autoconf 2.10.
+
+Tue Jun  4 10:37:12 1996  Tom Tromey  <tromey@csk3.cygnus.com>
+
+	* Makefile.in (install): Don't check to see if tooldir exists.
+	Make $(tooldir) and $(tooldir)/bin.
+
 Mon Jun  3 12:33:38 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (end.h): Use explicit ./ when running end.

@@ -228,10 +228,12 @@ sim_close(int quitting)
 
 };
 
+/* Return non-zero if the caller should handle the load. Zero if
+     we have loaded the image. */
 int
 sim_load(char *prog, int from_tty)
 {
-    bfd_load(*prog);
+    bfd_load(prog);
     return (0);
 }
 
@@ -317,11 +319,63 @@ sim_stop_reason(enum sim_stop * reason, int *sigrc)
     simstat = OK;
 }
 
+/* Flush all register windows out to the stack.  Starting after the invalid
+   window, flush all windows up to, and including the current window.  This
+   allows GDB to do backtraces and look at local variables for frames that
+   are still in the register windows.  Note that strictly speaking, this
+   behavior is *wrong* for several reasons.  First, it doesn't use the window
+   overflow handlers.  It therefore assumes standard frame layouts and window
+   handling policies.  Second, it changes system state behind the back of the
+   target program.  I expect this to mainly pose problems when debugging trap
+   handlers.
+*/
+
+#define PSR_CWP 0x7
+
+static void
+flush_windows ()
+{
+  int invwin;
+  int cwp;
+  int win;
+  int ws;
+
+  /* Keep current window handy */
+
+  cwp = sregs.psr & PSR_CWP;
+
+  /* Calculate the invalid window from the wim. */
+
+  for (invwin = 0; invwin <= PSR_CWP; invwin++)
+    if ((sregs.wim >> invwin) & 1)
+      break;
+
+  /* Start saving with the window after the invalid window. */
+
+  invwin = (invwin - 1) & PSR_CWP;
+
+  for (win = invwin; ; win = (win - 1) & PSR_CWP)
+    {
+      uint32 sp;
+      int i;
+
+      sp = sregs.r[(win * 16 + 14) & 0x7f];
+
+      for (i = 0; i < 16; i++)
+	memory_write (11, sp + 4 * i, &sregs.r[(win * 16 + 16 + i) & 0x7f], 2,
+		      &ws);
+
+      if (win == cwp)
+	break;
+    }
+}
 
 void
 sim_resume(int step, int siggnal)
 {
     simstat = run_sim(&sregs, 1, 0, 0);
+
+    flush_windows ();
 }
 
 void
