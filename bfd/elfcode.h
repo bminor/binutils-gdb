@@ -939,14 +939,6 @@ elf_object_p (abfd)
   /* Remember the entry point specified in the ELF file header. */
   bfd_get_start_address (abfd) = i_ehdrp->e_entry;
 
-  /* Let the backend double check the format and override global
-     information.  */
-  if (ebd->elf_backend_object_p)
-    {
-      if ((*ebd->elf_backend_object_p) (abfd) == false)
-	goto got_wrong_format_error;
-    }
-
   /* Allocate space for a copy of the section header table in
      internal form, seek to the section header table in the file,
      read it in, and convert it to internal form.  */
@@ -995,6 +987,14 @@ elf_object_p (abfd)
     {
       if (! bfd_section_from_shdr (abfd, shindex))
 	goto got_no_match;
+    }
+
+  /* Let the backend double check the format and override global
+     information.  */
+  if (ebd->elf_backend_object_p)
+    {
+      if ((*ebd->elf_backend_object_p) (abfd) == false)
+	goto got_wrong_format_error;
     }
 
   return (abfd->xvec);
@@ -1914,7 +1914,7 @@ map_program_segments (abfd, off, first, phdr_size)
 
   /* Make sure the return value from get_program_header_size matches
      what we computed here.  */
-  if (phdr_count != phdr_size / sizeof (Elf_Internal_Phdr))
+  if (phdr_count != phdr_size / sizeof (Elf_External_Phdr))
     abort ();
 
   /* Set up program header information.  */
@@ -4111,6 +4111,7 @@ elf_link_add_object_symbols (abfd, info)
   Elf_Internal_Shdr *hdr;
   size_t symcount;
   size_t extsymcount;
+  size_t extsymoff;
   Elf_External_Sym *buf = NULL;
   struct elf_link_hash_entry **sym_hash;
   boolean dynamic;
@@ -4128,7 +4129,16 @@ elf_link_add_object_symbols (abfd, info)
   /* The sh_info field of the symtab header tells us where the
      external symbols start.  We don't care about the local symbols at
      this point.  */
-  extsymcount = symcount - hdr->sh_info;
+  if (elf_bad_symtab (abfd))
+    {
+      extsymcount = symcount;
+      extsymoff = 0;
+    }
+  else
+    {
+      extsymcount = symcount - hdr->sh_info;
+      extsymoff = hdr->sh_info;
+    }
 
   buf = (Elf_External_Sym *) malloc (extsymcount * sizeof (Elf_External_Sym));
   if (buf == NULL && extsymcount != 0)
@@ -4251,7 +4261,7 @@ elf_link_add_object_symbols (abfd, info)
     }
 
   if (bfd_seek (abfd,
-		hdr->sh_offset + hdr->sh_info * sizeof (Elf_External_Sym),
+		hdr->sh_offset + extsymoff * sizeof (Elf_External_Sym),
 		SEEK_SET) != 0
       || (bfd_read ((PTR) buf, sizeof (Elf_External_Sym), extsymcount, abfd)
 	  != extsymcount * sizeof (Elf_External_Sym)))
@@ -4283,9 +4293,9 @@ elf_link_add_object_symbols (abfd, info)
 	{
 	  /* This should be impossible, since ELF requires that all
 	     global symbols follow all local symbols, and that sh_info
-	     point to the first global symbol.  */
-	  bfd_set_error (bfd_error_bad_value);
-	  goto error_return;
+	     point to the first global symbol.  Unfortunatealy, Irix 5
+	     screws this up.  */
+	  continue;
 	}
       else if (bind == STB_GLOBAL)
 	flags = BSF_GLOBAL;
@@ -5093,10 +5103,19 @@ elf_bfd_final_link (abfd, info)
 
 	      /* We are interested in just local symbols, not all
 		 symbols.  */
-	      if (bfd_get_flavour (sec->owner) == bfd_target_elf_flavour
-		  && (elf_tdata (sec->owner)->symtab_hdr.sh_info
-		      > max_sym_count))
-		max_sym_count = elf_tdata (sec->owner)->symtab_hdr.sh_info;
+	      if (bfd_get_flavour (sec->owner) == bfd_target_elf_flavour)
+		{
+		  size_t sym_count;
+
+		  if (elf_bad_symtab (sec->owner))
+		    sym_count = (elf_tdata (sec->owner)->symtab_hdr.sh_size
+				 / sizeof (Elf_External_Sym));
+		  else
+		    sym_count = elf_tdata (sec->owner)->symtab_hdr.sh_info;
+
+		  if (sym_count > max_sym_count)
+		    max_sym_count = sym_count;
+		}
 
 	      if ((sec->flags & SEC_RELOC) != 0)
 		{
@@ -5688,7 +5707,9 @@ elf_link_output_extsym (h, data)
      output it.  */
   if (h->indx == -2)
     strip = false;
-  else if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0
+  else if (((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+	    || (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) != 0)
+	   && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0
 	   && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0)
     strip = true;
   else if (finfo->info->strip == strip_all
@@ -5843,6 +5864,8 @@ elf_link_input_bfd (finfo, input_bfd)
 				       asection **));
   bfd *output_bfd;
   Elf_Internal_Shdr *symtab_hdr;
+  size_t locsymcount;
+  size_t extsymoff;
   Elf_External_Sym *esym;
   Elf_External_Sym *esymend;
   Elf_Internal_Sym *isym;
@@ -5860,18 +5883,29 @@ elf_link_input_bfd (finfo, input_bfd)
   if (elf_elfheader (input_bfd)->e_type == ET_DYN)
     return true;
 
-  /* Read the local symbols.  */
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
+  if (elf_bad_symtab (input_bfd))
+    {
+      locsymcount = symtab_hdr->sh_size / sizeof (Elf_External_Sym);
+      extsymoff = 0;
+    }
+  else
+    {
+      locsymcount = symtab_hdr->sh_info;
+      extsymoff = symtab_hdr->sh_info;
+    }
+
+  /* Read the local symbols.  */
   if (bfd_seek (input_bfd, symtab_hdr->sh_offset, SEEK_SET) != 0
       || (bfd_read (finfo->external_syms, sizeof (Elf_External_Sym),
-		    symtab_hdr->sh_info, input_bfd)
-	  != symtab_hdr->sh_info * sizeof (Elf_External_Sym)))
+		    locsymcount, input_bfd)
+	  != locsymcount * sizeof (Elf_External_Sym)))
     return false;
 
   /* Swap in the local symbols and write out the ones which we know
      are going into the output file.  */
   esym = finfo->external_syms;
-  esymend = esym + symtab_hdr->sh_info;
+  esymend = esym + locsymcount;
   isym = finfo->internal_syms;
   pindex = finfo->indices;
   ppsection = finfo->sections;
@@ -5883,6 +5917,15 @@ elf_link_input_bfd (finfo, input_bfd)
 
       elf_swap_symbol_in (input_bfd, esym, isym);
       *pindex = -1;
+
+      if (elf_bad_symtab (input_bfd))
+	{
+	  if (ELF_ST_BIND (isym->st_info) != STB_LOCAL)
+	    {
+	      *ppsection = NULL;
+	      continue;
+	    }
+	}
 
       if (isym->st_shndx == SHN_UNDEF)
 	isec = &bfd_und_section;
@@ -6084,7 +6127,9 @@ elf_link_input_bfd (finfo, input_bfd)
 		  if (r_symndx == 0)
 		    continue;
 
-		  if (r_symndx >= symtab_hdr->sh_info)
+		  if (r_symndx >= locsymcount
+		      || (elf_bad_symtab (input_bfd)
+			  && finfo->sections[r_symndx] == NULL))
 		    {
 		      long indx;
 
@@ -6095,7 +6140,7 @@ elf_link_input_bfd (finfo, input_bfd)
 			 reloc to point to the global hash table entry
 			 for this symbol.  The symbol index is then
 			 set at the end of elf_bfd_final_link.  */
-		      indx = r_symndx - symtab_hdr->sh_info;
+		      indx = r_symndx - extsymoff;
 		      *rel_hash = elf_sym_hashes (input_bfd)[indx];
 
 		      /* Setting the index to -2 tells

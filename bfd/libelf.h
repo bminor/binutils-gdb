@@ -416,6 +416,13 @@ struct elf_obj_tdata
      table, used when linking.  This is indexed by the symbol index
      minus the sh_info field of the symbol table header.  */
   struct elf_link_hash_entry **sym_hashes;
+
+  /* Irix 5 often screws up the symbol table, sorting local symbols
+     after global symbols.  This flag is set if the symbol table in
+     this BFD appears to be screwed up.  If it is, we ignore the
+     sh_info field in the symbol table header, and always read all the
+     symbols.  */
+  boolean bad_symtab;
 };
 
 #define elf_tdata(bfd)		((bfd) -> tdata.elf_obj_data)
@@ -434,6 +441,7 @@ struct elf_obj_tdata
 #define elf_gp(bfd)		(elf_tdata(bfd) -> gp)
 #define elf_gp_size(bfd)	(elf_tdata(bfd) -> gp_size)
 #define elf_sym_hashes(bfd)	(elf_tdata(bfd) -> sym_hashes)
+#define elf_bad_symtab(bfd)	(elf_tdata(bfd) -> bad_symtab)
 
 extern char * elf_string_from_elf_section PARAMS ((bfd *, unsigned, unsigned));
 extern char * elf_get_str_section PARAMS ((bfd *, unsigned));
@@ -455,8 +463,15 @@ extern boolean bfd_elf_mkobject PARAMS ((bfd *));
 extern Elf_Internal_Shdr *bfd_elf_find_section PARAMS ((bfd *, char *));
 extern boolean _bfd_elf_make_section_from_shdr
   PARAMS ((bfd *abfd, Elf_Internal_Shdr *hdr, const char *name));
+extern struct bfd_hash_entry *_bfd_elf_link_hash_newfunc
+  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
 extern struct bfd_link_hash_table *_bfd_elf_link_hash_table_create
   PARAMS ((bfd *));
+extern boolean _bfd_elf_link_hash_table_init
+  PARAMS ((struct elf_link_hash_table *, bfd *,
+	   struct bfd_hash_entry *(*) (struct bfd_hash_entry *,
+				       struct bfd_hash_table *,
+				       const char *)));
 
 extern boolean bfd_elf32_write_object_contents PARAMS ((bfd *));
 extern boolean bfd_elf64_write_object_contents PARAMS ((bfd *));

@@ -1,3 +1,57 @@
+Tue May 24 16:17:18 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	Make MIPS ELF use new ELF backend linker.  No shared library
+	support yet.
+	* elf32-mips.c (bfd_mips_elf32_swap_gptab_in): New function.
+	(bfd_mips_elf32_swap_gptab_out): New function.
+	(mips_elf_object_p): If last symbol is LOCAL, set elf_bad_symtab.
+	(mips_elf_final_write_processing): Set sh_info field for .gptab.*
+	sections.
+	(mips_elf_fake_sections): Set sh_entsize for .gptab.* sections.
+	(mips_elf_read_ecoff_info): Read and free external symbols last,
+	not first, for clarity.
+	(struct mips_elf_link_hash_entry): Define new structure.
+	(struct mips_elf_link_hash_table): Define new structure.
+	(mips_elf_link_hash_lookup): Define new macro.
+	(mips_elf_link_hash_traverse): Define new macro.
+	(mips_elf_hash_table): Define new macro.
+	(mips_elf_link_hash_newfunc): New static function.
+	(mips_elf_link_hash_table_create): New static function.
+	(mips_elf_add_symbol_hook): New static function.
+	(struct extsym_info): Define new structure.
+	(mips_elf_get_extr, mips_elf_set_index): Remove.
+	(mips_elf_output_extsym): New static function.
+	(gptab_compare): New static function.
+	(mips_elf_final_link): Rewrite to use ELF backend linker, and to
+	merge gptab information in input files.
+	(mips_elf_relocate_hi16): New static function.
+	(mips_elf_relocate_section): New static function.
+	(bfd_elf32_bfd_link_hash_table_create): Define as macro before
+	including elf32-target.h.
+	(elf_backend_relocate_section): Likewise.
+	(elf_backend_add_symbol_hook): Likewise.
+	* elf.c (_bfd_elf_link_hash_newfunc): Rename from
+	elf_link_hash_newfunc and make globally visible.  Change caller.
+	(_bfd_elf_link_hash_table_init): New function, broken out of
+	_bfd_elf_link_hash_table_create.
+	(_bfd_elf_link_hash_table_create): Use
+	_bfd_elf_link_hash_table_init.
+	* libelf.h (struct elf_obj_tdata): Add new field bad_symtab.
+	(elf_bad_symtab): Define new accessor macro.
+	(_bfd_elf_link_hash_newfunc): Declare.
+	(_bew_elf_link_hash_table_init): Declare.
+	* elfcode.h (elf_object_p): Call backend object_p hook after
+	swapping in all the section headers.
+	(map_program_segments): Correct typo: Internal for External.
+	(elf_link_add_object_symbols): If elf_bad_symtab is set, read all
+	the symbols.  Skip STB_LOCAL symbols rather than giving an error.
+	(elf_bfd_final_link): If elf_bad_symtab is set, allocate space for
+	all symbols, not just locals.
+	(elf_link_output_extsym): Only skip a symbol not mentioned by a
+	regular file if it is mentioned by a dynamic object.
+	(elf_link_input_bfd): If elf_bad_symtab is set, read all the
+	symbols.
+
 Fri May 20 13:38:23 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* som.c (som_set_reloc_info): Do not set any relocation info

@@ -301,15 +301,10 @@ bfd_elf_generic_reloc (abfd,
   return bfd_reloc_continue;
 }
 
-/* Generic ELF link code.  */
-
-static struct bfd_hash_entry *elf_link_hash_newfunc
-  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
-
 /* Create an entry in an ELF linker hash table.  */
 
-static struct bfd_hash_entry *
-elf_link_hash_newfunc (entry, table, string)
+struct bfd_hash_entry *
+_bfd_elf_link_hash_newfunc (entry, table, string)
      struct bfd_hash_entry *entry;
      struct bfd_hash_table *table;
      const char *string;
@@ -347,6 +342,23 @@ elf_link_hash_newfunc (entry, table, string)
   return (struct bfd_hash_entry *) ret;
 }
 
+/* Initialize an ELF linker hash table.  */
+
+boolean
+_bfd_elf_link_hash_table_init (table, abfd, newfunc)
+     struct elf_link_hash_table *table;
+     bfd *abfd;
+     struct bfd_hash_entry *(*newfunc) PARAMS ((struct bfd_hash_entry *,
+						struct bfd_hash_table *,
+						const char *));
+{
+  table->dynobj = NULL;
+  table->dynsymcount = 0;
+  table->dynstr = NULL;
+  table->bucketcount = 0;
+  return _bfd_link_hash_table_init (&table->root, abfd, newfunc);
+}
+
 /* Create an ELF linker hash table.  */
 
 struct bfd_link_hash_table *
@@ -362,17 +374,12 @@ _bfd_elf_link_hash_table_create (abfd)
       bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
-  if (! _bfd_link_hash_table_init (&ret->root, abfd,
-				   elf_link_hash_newfunc))
+
+  if (! _bfd_elf_link_hash_table_init (ret, abfd, _bfd_elf_link_hash_newfunc))
     {
       bfd_release (abfd, ret);
       return NULL;
     }
-
-  ret->dynobj = NULL;
-  ret->dynsymcount = 0;
-  ret->dynstr = NULL;
-  ret->bucketcount = 0;
 
   return &ret->root;
 }
