@@ -503,6 +503,16 @@ elf_file_p (x_ehdrp)
 	  && (x_ehdrp->e_ident[EI_MAG3] == ELFMAG3));
 }
 
+struct bfd_preserve
+{
+  const struct bfd_arch_info *arch_info;
+  struct elf_obj_tdata *tdata;
+  struct bfd_hash_table section_htab;
+  struct sec *sections;
+  struct sec **section_tail;
+  unsigned int section_count;
+};
+
 /* Check to see if the file associated with ABFD matches the target vector
    that ABFD points to.
 
@@ -519,23 +529,16 @@ elf_object_p (abfd)
   Elf_Internal_Ehdr *i_ehdrp;	/* Elf file header, internal form */
   Elf_External_Shdr x_shdr;	/* Section header table entry, external form */
   Elf_Internal_Shdr i_shdr;
-  Elf_Internal_Shdr *i_shdrp = NULL; /* Section header table, internal form */
+  Elf_Internal_Shdr *i_shdrp;	/* Section header table, internal form */
   unsigned int shindex;
   char *shstrtab;		/* Internal copy of section header stringtab */
   struct elf_backend_data *ebd;
-  struct elf_obj_tdata *preserved_tdata = elf_tdata (abfd);
-  struct sec *preserved_sections = abfd->sections;
-  unsigned int preserved_section_count = abfd->section_count;
-  enum bfd_architecture previous_arch = bfd_get_arch (abfd);
-  unsigned long previous_mach = bfd_get_mach (abfd);
+  struct bfd_preserve preserve;
   struct elf_obj_tdata *new_tdata = NULL;
   asection *s;
   bfd_size_type amt;
 
-  /* Clear section information, since there might be a recognized bfd that
-     we now check if we can replace, and we don't want to append to it.  */
-  abfd->sections = NULL;
-  abfd->section_count = 0;
+  preserve.arch_info = abfd->arch_info;
 
   /* Read in the ELF header in external format.  */
 
@@ -582,7 +585,20 @@ elf_object_p (abfd)
   new_tdata = (struct elf_obj_tdata *) bfd_zalloc (abfd, amt);
   if (new_tdata == NULL)
     goto got_no_match;
+  preserve.tdata = elf_tdata (abfd);
   elf_tdata (abfd) = new_tdata;
+
+  /* Clear section information, since there might be a recognized bfd that
+     we now check if we can replace, and we don't want to append to it.  */
+  preserve.sections = abfd->sections;
+  preserve.section_tail = abfd->section_tail;
+  preserve.section_count = abfd->section_count;
+  preserve.section_htab = abfd->section_htab;
+  abfd->sections = NULL;
+  abfd->section_tail = &abfd->sections;
+  abfd->section_count = 0;
+  if (!bfd_hash_table_init (&abfd->section_htab, bfd_section_hash_newfunc))
+    goto got_no_match;
 
   /* Now that we know the byte order, swap in the rest of the header */
   i_ehdrp = elf_elfheader (abfd);
@@ -711,27 +727,28 @@ elf_object_p (abfd)
 	}
       for ( ; shindex < num_sec; shindex++)
 	elf_elfsections (abfd)[shindex] = shdrp++;
+
+      /* Read in the rest of the section header table and convert it
+	 to internal form.  */
+      for (shindex = 1; shindex < i_ehdrp->e_shnum; shindex++)
+	{
+	  if (bfd_bread ((PTR) & x_shdr, (bfd_size_type) sizeof x_shdr, abfd)
+	      != sizeof (x_shdr))
+	    goto got_no_match;
+	  elf_swap_shdr_in (abfd, &x_shdr, i_shdrp + shindex);
+
+	  /* If the section is loaded, but not page aligned, clear
+	     D_PAGED.  */
+	  if (i_shdrp[shindex].sh_size != 0
+	      && (i_shdrp[shindex].sh_flags & SHF_ALLOC) != 0
+	      && i_shdrp[shindex].sh_type != SHT_NOBITS
+	      && (((i_shdrp[shindex].sh_addr - i_shdrp[shindex].sh_offset)
+		   % ebd->maxpagesize)
+		  != 0))
+	    abfd->flags &= ~D_PAGED;
+	}
     }
 
-  /* Read in the rest of the section header table and convert it to
-     internal form.  */
-  for (shindex = 1; shindex < i_ehdrp->e_shnum; shindex++)
-    {
-      if (bfd_bread ((PTR) & x_shdr, (bfd_size_type) sizeof x_shdr, abfd)
-	  != sizeof (x_shdr))
-	goto got_no_match;
-      elf_swap_shdr_in (abfd, &x_shdr, i_shdrp + shindex);
-
-      /* If the section is loaded, but not page aligned, clear
-         D_PAGED.  */
-      if (i_shdrp[shindex].sh_size != 0
-	  && (i_shdrp[shindex].sh_flags & SHF_ALLOC) != 0
-	  && i_shdrp[shindex].sh_type != SHT_NOBITS
-	  && (((i_shdrp[shindex].sh_addr - i_shdrp[shindex].sh_offset)
-	       % ebd->maxpagesize)
-	      != 0))
-	abfd->flags &= ~D_PAGED;
-    }
   if (i_ehdrp->e_shstrndx)
     {
       if (! bfd_section_from_shdr (abfd, i_ehdrp->e_shstrndx))
@@ -818,6 +835,10 @@ elf_object_p (abfd)
 	}
     }
 
+  /* It would be nice to be able to free more memory here, eg. old
+     elf_elfsections, old tdata, but that's not possible since these
+     blocks are sitting inside obj_alloc'd memory.  */
+  bfd_hash_table_free (&preserve.section_htab);
   return (abfd->xvec);
 
  got_wrong_format_error:
@@ -830,15 +851,22 @@ elf_object_p (abfd)
      target-specific elf_backend_object_p function.  Note that saving the
      whole bfd here and restoring it would be even worse; the first thing
      you notice is that the cached bfd file position gets out of sync.  */
-  bfd_default_set_arch_mach (abfd, previous_arch, previous_mach);
   bfd_set_error (bfd_error_wrong_format);
+
  got_no_match:
+  abfd->arch_info = preserve.arch_info;
   if (new_tdata != NULL)
-    bfd_release (abfd, new_tdata);
-  elf_tdata (abfd) = preserved_tdata;
-  abfd->sections = preserved_sections;
-  abfd->section_count = preserved_section_count;
-  return (NULL);
+    {
+      /* bfd_release frees all memory more recently bfd_alloc'd than
+	 its arg, as well as its arg.  */
+      bfd_release (abfd, new_tdata);
+      elf_tdata (abfd) = preserve.tdata;
+      abfd->section_htab = preserve.section_htab;
+      abfd->sections = preserve.sections;
+      abfd->section_tail = preserve.section_tail;
+      abfd->section_count = preserve.section_count;
+    }
+  return NULL;
 }
 
 /* ELF .o/exec file writing */

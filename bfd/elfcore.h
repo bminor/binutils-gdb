@@ -81,21 +81,14 @@ elf_core_file_p (abfd)
 {
   Elf_External_Ehdr x_ehdr;	/* Elf file header, external form */
   Elf_Internal_Ehdr *i_ehdrp;	/* Elf file header, internal form */
-  Elf_Internal_Phdr *i_phdrp = NULL;	/* Elf program header, internal form */
+  Elf_Internal_Phdr *i_phdrp;	/* Elf program header, internal form */
   unsigned int phindex;
   struct elf_backend_data *ebd;
-  struct elf_obj_tdata *preserved_tdata = elf_tdata (abfd);
-  struct sec *preserved_sections = abfd->sections;
-  unsigned int preserved_section_count = abfd->section_count;
-  enum bfd_architecture previous_arch = bfd_get_arch (abfd);
-  unsigned long previous_mach = bfd_get_mach (abfd);
+  struct bfd_preserve preserve;
   struct elf_obj_tdata *new_tdata = NULL;
   bfd_size_type amt;
 
-  /* Clear section information, since there might be a recognized bfd that
-     we now check if we can replace, and we don't want to append to it.  */
-  abfd->sections = NULL;
-  abfd->section_count = 0;
+  preserve.arch_info = abfd->arch_info;
 
   /* Read in the ELF header in external format.  */
   if (bfd_bread ((PTR) &x_ehdr, (bfd_size_type) sizeof (x_ehdr), abfd)
@@ -136,7 +129,20 @@ elf_core_file_p (abfd)
   new_tdata = (struct elf_obj_tdata *) bfd_zalloc (abfd, amt);
   if (new_tdata == NULL)
     return NULL;
+  preserve.tdata = elf_tdata (abfd);
   elf_tdata (abfd) = new_tdata;
+
+  /* Clear section information, since there might be a recognized bfd that
+     we now check if we can replace, and we don't want to append to it.  */
+  preserve.sections = abfd->sections;
+  preserve.section_tail = abfd->section_tail;
+  preserve.section_count = abfd->section_count;
+  preserve.section_htab = abfd->section_htab;
+  abfd->sections = NULL;
+  abfd->section_tail = &abfd->sections;
+  abfd->section_count = 0;
+  if (!bfd_hash_table_init (&abfd->section_htab, bfd_section_hash_newfunc))
+    goto fail;
 
   /* Swap in the rest of the header, now that we have the byte order.  */
   i_ehdrp = elf_elfheader (abfd);
@@ -240,6 +246,7 @@ elf_core_file_p (abfd)
 	goto wrong;
     }
 
+  bfd_hash_table_free (&preserve.section_htab);
   return abfd->xvec;
 
 wrong:
@@ -252,15 +259,20 @@ wrong:
      target-specific elf_backend_object_p function.  Note that saving the
      whole bfd here and restoring it would be even worse; the first thing
      you notice is that the cached bfd file position gets out of sync.  */
-  bfd_default_set_arch_mach (abfd, previous_arch, previous_mach);
   bfd_set_error (bfd_error_wrong_format);
+
 fail:
-  if (i_phdrp != NULL)
-    bfd_release (abfd, i_phdrp);
+  abfd->arch_info = preserve.arch_info;
   if (new_tdata != NULL)
-    bfd_release (abfd, new_tdata);
-  elf_tdata (abfd) = preserved_tdata;
-  abfd->sections = preserved_sections;
-  abfd->section_count = preserved_section_count;
+    {
+      /* bfd_release frees all memory more recently bfd_alloc'd than
+	 its arg, as well as its arg.  */
+      bfd_release (abfd, new_tdata);
+      elf_tdata (abfd) = preserve.tdata;
+      abfd->section_htab = preserve.section_htab;
+      abfd->sections = preserve.sections;
+      abfd->section_tail = preserve.section_tail;
+      abfd->section_count = preserve.section_count;
+    }
   return NULL;
 }

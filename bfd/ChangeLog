@@ -1,3 +1,14 @@
+2001-12-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* elfcode.h (struct bfd_preserve): New.
+	(elf_object_p): Replace preserved_* vars with instance of above.
+	Save and restore arch_info pointer rather than arch, mach so that
+	more cases can be restored.  Save and restore new section_tail,
+	section_htab structure, and init appropriately.  Move "rest of
+	section header" code so that i_shdrp needs no NULL initialisation.
+	Free old section_htab on success.
+	* elfcore.h (elf_core_file_p): Likewise.
+
 2001-12-17  Tom Rix  <trix@redhat.com>
 
 	* coffcode.h (sec_to_styp_flags): Add STYP_EXCEPT and STYP_TYPCHK for 
