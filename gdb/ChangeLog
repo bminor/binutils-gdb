@@ -1,3 +1,7 @@
+2003-05-11  Mark Kettenis  <kettenis@gnu.org>
+
+	* value.h: Pretty print.
+
 2003-05-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/tm-linux.h (I386_GNULINUX_TARGET): Remove define.
