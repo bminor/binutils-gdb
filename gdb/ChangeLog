@@ -1,5 +1,8 @@
 Wed Apr 24 09:45:17 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 
+	* WHATS.NEW: Remove mention of readline and more paging (in 3.5).
+	Try to keep command names up to date with renaming.
+
 	* gmalloc.c [!HAVE_GETPAGESIZE]: Try to figure out the pagesize.
 
 	* infun.c (resume, resume_cleanups): New functions.

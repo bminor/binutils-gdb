@@ -2,20 +2,8 @@
 
  *  New Facilities
 
-Gdb now paginates its output, with a ``more''-like interface.  You can
-set the screen width and screen height with new ``set'' commands; they
-default to your terminal settings.  Wide output is wrapped at good
-places to make the output more readable.
-
-Gdb now reads its input via the ``readline'' interface.  This provides
-inline editing of commands, using familiar Emacs or VI commands (like
-``tcsh'' or the korn shell); history substitutions a la the C shell;
-and storage and recall of your command history across debugging
-sessions.  The default is Emacs mode; to switch temporarily to vi mode,
-use control-meta-J or ESC control-j.  You can switch permanently to vi
-mode by putting the line ``set editing-mode vi'' in the file .inputrc
-in your home directory.   For full details, see the description in
-readline/inc-readline.texinfo and readline/inc-history.texinfo.
+Wide output is wrapped at good places to make the output more
+readable.
 
 Gdb now supports cross-debugging from a host machine of one type to a
 target machine of another type.  Communication with the target system
@@ -47,7 +35,7 @@ What follows are the NEW set commands.  The command ``help set'' will
 print a complete list of old and new set commands.  ``help set FOO''
 will give a longer description of the variable FOO.
 
-caution on/off:  Enables warning questions for operations that are
+confirm on/off:  Enables warning questions for operations that are
 		 hard to recover from, e.g. rerunning the program while
 		 it is already running.  Default is ON.
 
@@ -88,22 +76,24 @@ screen-width N:  This integer value is the number of characters on a line.
 		 setting from the termcap entry matching the environment
 		 variable TERM.
 
-Note: ``set screensize'' is obsolete. Use ``set screen-height'' and
-``set screen-width'' instead.
+Note: ``set screensize'' is obsolete. Use ``set height'' and
+``set width'' instead.
 
-addressprint on/off:  Print memory addresses in various command displays,
+print address on/off:  Print memory addresses in various command displays,
 		      such as stack traces and structure values.  Gdb looks
 		      more ``symbolic'' if you turn this off; it looks more
 		      ``machine level'' with it on.  Default is ON.
 
-arrayprint on/off:  Prettyprint arrays.  New convenient format!  Default 
+print array on/off:  Prettyprint arrays.  New convenient format!  Default 
                     is OFF.
 
-demangle on/off:   Print C++ symbols in "source" form if on, "raw" form if off.
+print demangle on/off:   Print C++ symbols in "source" form if on,
+			"raw" form if off.
 
-asm-demangle on/off:  Same, for assembler level printouts like instructions.
+print asm-demangle on/off:  Same, for assembler level printouts
+			like instructions.
 
-vtblprint on/off:  Prettyprint C++ virtual function tables.  Default is OFF.
+print vtbl on/off:  Prettyprint C++ virtual function tables.  Default is OFF.
 
 
  *  Support for Epoch Environment.
