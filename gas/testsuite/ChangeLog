@@ -1,5 +1,11 @@
 Wed Nov  6 13:50:07 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* gas/mn10300/basic.exp: Test insertion of operands
+	into call and jmp instructions with 32bit offsets.
+	Fix typo in bit test patterns.
+	* gas/mn10300/other.s: Tweak constants to improve
+	testsuite coverage.
+
 	* gas/mn10300/basic.exp: Test insertion of 32bit operand
 	in calls, btst, bclr & bset instructions.
 

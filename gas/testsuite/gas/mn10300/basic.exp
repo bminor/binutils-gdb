@@ -126,7 +126,7 @@ proc do_bit {} {
 	    -re "^ +\[0-9\]+ 0025 F096\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 0027 FAF50840\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 002b FE010001\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +13 +FFFF40\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +12 +FFFF40\[^\n\]*\n"		{ set x [expr $x+1] }
 	    -re "\[^\n\]*\n"				{ }
 	    timeout				{ perror "timeout\n"; break }
 	    eof					{ break }
@@ -674,10 +674,12 @@ proc do_other {} {
 	    -re "^ +\[0-9\]+ 0003 53\[^\n\]*\n"		{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 0004 F0F6\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 0006 CC0100\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0009\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0009 DC0001FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +8 +FF\[^\n\]*\n"			{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 000e CD010005\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +9 +09\[^\n\]*\n"			{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0013\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0013 DD0001FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +10 +FF0920\[^\n\]*\n"		{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 001a F0F2\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 001c FAFF0100\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 0020 FCFF0001\[^\n\]*\n"	{ set x [expr $x+1] }
@@ -700,7 +702,7 @@ proc do_other {} {
     gas_finish
 
     # Did we find what we were looking for?  If not, flunk it.
-    if [expr $x==21] then { pass $testname } else { fail $testname }
+    if [expr $x==23] then { pass $testname } else { fail $testname }
 }
 
 proc do_shift {} {
