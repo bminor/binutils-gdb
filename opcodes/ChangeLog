@@ -1,3 +1,20 @@
+Mon Aug  7 16:12:58 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* m68k-dis.c: (fpcr_names): Add % before all register names.
+	(reg_names): Likewise.
+	(print_insn_arg): Don't explicitly print % before register names.
+	Add % before register names in static array names.  In case 'r',
+	print data registers as `@(Dn)', not `Dn@'.  When printing a
+	memory address, don't print @# before it.
+	(print_indexed): Change base_disp and outer_disp from int to
+	bfd_vma.  Print using MIT syntax, not mutant invalid Motorola
+	syntax.  Sign extend 8 byte displacement correctly.
+	(print_base): Print using MIT syntax.  Print zpc when appropriate.
+	Change parameter disp from int to bfd_vma.
+
+	* m68k-opc.c (m68k_opcode_aliases): Add jsrl and jsrs as aliases
+	for jsr.
+
 start-sanitize-sh3e
 Mon Aug  7 02:21:40 1995  Jeff Law  (law@snake.cs.utah.edu)
 
