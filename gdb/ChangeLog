@@ -1,3 +1,7 @@
+Tue Nov  9 12:48:06 1993  Tom Lord  (lord@cygnus.com)
+
+	* remote-hms.c (hms_wait): fixed too many arguments to putc_unfiltered.
+
 Tue Nov  9 12:20:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* utils.c (quit): Also call gdb_flush on standard output and error.
@@ -146,6 +150,11 @@ Tue Nov  2 16:28:34 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	* fork-child.c (fork_inferior): Fix comment so that it suggests
 	"set shell" rather than having "set env SHELL" affect GDB's
 	operation.
+
+Tue Nov  2 15:03:08 1993  Tom Lord  (lord@rtl.cygnus.com)
+
+	* utils.c (vfprintf_unfiltered): don't use maybe_filtered
+	since it involves a fixed size buffer.
 
 Tue Nov  2 13:42:30 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
