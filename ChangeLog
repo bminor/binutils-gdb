@@ -1,3 +1,12 @@
+Wed Jul  1 16:45:21 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ltconfig: Update to correct AIX handling.
+
+Wed Jun 24 16:01:59 1998  John Metzler  <jmetzler@cygnus.com>
+
+	* configure.in (noconfigdirs): Add configure pattern for mips tx39
+ 	cygmon
+
 Tue Jun 23 22:42:32 1998  Mark Alexander  <marka@cygnus.com>
 
 	* configure.in: Add cygmon and libstub support for mn10200.
