@@ -1,3 +1,8 @@
+Tue Jun 22 14:35:20 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
+
+	* elfcode.h (bfd_section_from_shdr, case SHT_PROGBITS): Even if
+	section already exists, use its pointer to fill in rawdata slot.
+
 Tue Jun 22 16:36:51 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* hosts/std-host.h: Return value of puts and fputs is int not void.
