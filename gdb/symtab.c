@@ -771,8 +771,8 @@ lookup_symbol_aux (const char *name, const struct block *block,
 	    {
 	      /* This is a mangled variable, look it up by its
 	         mangled name.  */
-	      return lookup_symbol (SYMBOL_NAME (msymbol), block,
-				    namespace, is_a_field_of_this, symtab);
+	      return lookup_symbol_aux (SYMBOL_NAME (msymbol), block,
+					namespace, is_a_field_of_this, symtab);
 	    }
 	  /* There are no debug symbols for this file, or we are looking
 	     for an unmangled variable.

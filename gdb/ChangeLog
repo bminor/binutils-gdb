@@ -1,3 +1,10 @@
+2001-01-09  James Ingham  <jingham@inghji.apple.com>
+
+         * symtab.c (lookup_symbol_aux): Call lookup_symbol_aux to lookup
+ 	 a mangled symbol rather than recursing into lookup_symbol, since
+ 	 this will just re-unmangle the name & call lookup_symbol_aux -
+ 	 leading to an infinite recursion.
+
 2001-01-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* infcmd.c (print_return_value): Restore another space lost by
