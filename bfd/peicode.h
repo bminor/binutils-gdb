@@ -771,7 +771,7 @@ static void add_data_entry (abfd, aout, idx, name, base)
   /* add import directory information if it exists */
   if (sec != NULL)
     {
-      aout->DataDirectory[idx].VirtualAddress = sec->lma - base;
+      aout->DataDirectory[idx].VirtualAddress = sec->vma - base;
       aout->DataDirectory[idx].Size = sec->_cooked_size;
       sec->flags |= SEC_DATA;
     }
@@ -844,12 +844,16 @@ coff_swap_aouthdr_out (abfd, in, out)
     bfd_vma dsize= 0;
     bfd_vma isize = SA(abfd->sections->filepos);
     bfd_vma tsize= 0;
-#ifdef PPC
-    isize = 0;
-#endif
+
     for (sec = abfd->sections; sec; sec = sec->next)
       {
 	int rounded = FA(sec->_raw_size);
+
+	if (strcmp(sec->name,".junk") == 0)
+	  {
+	    continue;
+	  }
+
 	if (sec->flags & SEC_DATA) 
 	  dsize += rounded;
 	if (sec->flags & SEC_CODE)
@@ -1070,6 +1074,16 @@ coff_swap_scnhdr_out (abfd, in, out)
     else if (strcmp (scnhdr_int->s_name, ".drectve") == 0)
       flags =  IMAGE_SCN_LNK_INFO | IMAGE_SCN_LNK_REMOVE ;
     /* end of ppc-nt additions */
+#ifdef POWERPC_LE_PE
+    else if (strncmp (scnhdr_int->s_name, ".stabstr", strlen(".stabstr")) == 0)
+      {
+	flags =  IMAGE_SCN_LNK_INFO;
+      }
+    else if (strcmp (scnhdr_int->s_name, ".stab") == 0)
+      {
+	flags =  IMAGE_SCN_LNK_INFO;
+      }
+#endif
 
     bfd_h_put_32(abfd, flags, (bfd_byte *) scnhdr_ext->s_flags);
   }
@@ -1137,10 +1151,6 @@ pe_print_idata(abfd, vfile)
   bfd_size_type i;
   bfd_size_type start, stop;
   int onaline = 20;
-  bfd_vma addr_value;
-  bfd_vma loadable_toc_address;
-  bfd_vma toc_address;
-  bfd_vma start_address;
 
   pe_data_type *pe = pe_data (abfd);
   struct internal_extra_pe_aouthdr *extra = &pe->pe_opthdr;
@@ -1158,6 +1168,9 @@ pe_print_idata(abfd, vfile)
 	 and the descriptor is supposed to be in the .reldata section. 
       */
 
+      bfd_vma loadable_toc_address;
+      bfd_vma toc_address;
+      bfd_vma start_address;
       bfd_byte *data = 0;
       int offset;
       data = (bfd_byte *) bfd_malloc ((size_t) bfd_section_size (abfd, 
@@ -1184,12 +1197,6 @@ pe_print_idata(abfd, vfile)
       fprintf (file,
 	       "\tcode-base %08lx toc (loadable/actual) %08lx/%08lx\n", 
 	       start_address, loadable_toc_address, toc_address);
-    }
-  else
-    {
-      loadable_toc_address = 0; 
-      toc_address = 0; 
-      start_address = 0;
     }
 #endif
 
@@ -1330,6 +1337,8 @@ pe_print_idata(abfd, vfile)
     }
 
   free (data);
+
+  return true;
 }
 
 static boolean
@@ -1399,43 +1408,50 @@ pe_print_edata(abfd, vfile)
 	  "\nThe Export Tables (interpreted .edata section contents)\n\n");
 
   fprintf(file,
-	  "Export Flags \t\t\t%x\n",edt.export_flags);
+	  "Export Flags \t\t\t%lx\n", (unsigned long) edt.export_flags);
 
   fprintf(file,
-	  "Time/Date stamp \t\t%x\n",edt.time_stamp);
+	  "Time/Date stamp \t\t%lx\n", (unsigned long) edt.time_stamp);
 
   fprintf(file,
 	  "Major/Minor \t\t\t%d/%d\n", edt.major_ver, edt.minor_ver);
 
-  fprintf(file,
-	  "Name \t\t\t\t%x %s\n", edt.name, data + edt.name + adj);
+  fprintf (file,
+	   "Name \t\t\t\t");
+  fprintf_vma (file, edt.name);
+  fprintf (file,
+	   "%s\n", data + edt.name + adj);
 
   fprintf(file,
-	  "Ordinal Base \t\t\t%d\n", edt.base);
+	  "Ordinal Base \t\t\t%ld\n", edt.base);
 
   fprintf(file,
 	  "Number in:\n");
 
   fprintf(file,
-	  "\tExport Address Table \t\t%x\n", edt.num_functions);
+	  "\tExport Address Table \t\t%lx\n",
+	  (unsigned long) edt.num_functions);
 
   fprintf(file,
-	  "\t[Name Pointer/Ordinal] Table\t%d\n", edt.num_names);
+	  "\t[Name Pointer/Ordinal] Table\t%ld\n", edt.num_names);
 
   fprintf(file,
 	  "Table Addresses\n");
 
-  fprintf(file,
-	  "\tExport Address Table \t\t%x\n",
-	  edt.eat_addr);
+  fprintf (file,
+	   "\tExport Address Table \t\t");
+  fprintf_vma (file, edt.eat_addr);
+  fprintf (file, "\n");
 
-  fprintf(file,
-	  "\tName Pointer Table \t\t%x\n",
-	  edt.npt_addr);
+  fprintf (file,
+	  "\tName Pointer Table \t\t");
+  fprintf_vma (file, edt.npt_addr);
+  fprintf (file, "\n");
 
-  fprintf(file,
-	  "\tOrdinal Table \t\t\t%x\n",
-	  edt.ot_addr);
+  fprintf (file,
+	   "\tOrdinal Table \t\t\t");
+  fprintf_vma (file, edt.ot_addr);
+  fprintf (file, "\n");
 
   
   /* The next table to find si the Export Address Table. It's basically
@@ -1449,7 +1465,7 @@ pe_print_edata(abfd, vfile)
   */
 
   fprintf(file,
-	  "\nExport Address Table -- Ordinal Base %d\n",
+	  "\nExport Address Table -- Ordinal Base %ld\n",
 	  edt.base);
 
   for (i = 0; i < edt.num_functions; ++i)
@@ -1469,16 +1485,16 @@ pe_print_edata(abfd, vfile)
 	  /* this rva is to a name (forwarding function) in our section */
 	  /* Should locate a function descriptor */
 	  fprintf(file,
-		  "\t[%4d] +base[%4d] %04lx %s -- %s\n", 
-		  i, i+edt.base, eat_member, "Forwarder RVA",
-		  data + eat_member + adj);
+		  "\t[%4ld] +base[%4ld] %04lx %s -- %s\n", 
+		  (long) i, (long) (i + edt.base), eat_member,
+		  "Forwarder RVA", data + eat_member + adj);
 	}
       else
 	{
 	  /* Should locate a function descriptor in the reldata section */
 	  fprintf(file,
-		  "\t[%4d] +base[%4d] %04lx %s\n", 
-		  i, i+edt.base, eat_member, "Export RVA");
+		  "\t[%4ld] +base[%4ld] %04lx %s\n", 
+		  (long) i, (long) (i + edt.base), eat_member, "Export RVA");
 	}
     }
 
@@ -1501,11 +1517,13 @@ pe_print_edata(abfd, vfile)
 				    edt.ot_addr
 				    + (i*2) + adj);
       fprintf(file,
-	      "\t[%4d] %s\n", ord, name);
+	      "\t[%4ld] %s\n", (long) ord, name);
 
     }
 
   free (data);
+
+  return true;
 }
 
 static boolean
@@ -1520,10 +1538,14 @@ pe_print_pdata(abfd, vfile)
   bfd_size_type i;
   bfd_size_type start, stop;
   int onaline = 20;
-  bfd_vma addr_value;
 
   if (section == 0)
     return true;
+
+  stop = bfd_section_size (abfd, section);
+  if ((stop % onaline) != 0)
+    fprintf (file, "Warning, .pdata section size (%ld) is not a multiple of %d\n",
+	     (long)stop, onaline);
 
   fprintf(file,
 	  "\nThe Function Table (interpreted .pdata section contents)\n");
@@ -1547,8 +1569,6 @@ pe_print_pdata(abfd, vfile)
 
   start = 0;
 
-  stop = bfd_section_size (abfd, section);
-
   for (i = start; i < stop; i += onaline)
     {
       bfd_vma begin_addr;
@@ -1566,7 +1586,8 @@ pe_print_pdata(abfd, vfile)
       eh_data = bfd_get_32(abfd, data+i+12);
       prolog_end_addr = bfd_get_32(abfd, data+i+16);
       
-      if (begin_addr == 0)
+      if (begin_addr == 0 && end_addr == 0 && eh_handler == 0
+	  && eh_data == 0 && prolog_end_addr == 0)
 	{
 	  /* We are probably into the padding of the
 	     section now */
@@ -1615,6 +1636,8 @@ pe_print_pdata(abfd, vfile)
     }
 
   free (data);
+
+  return true;
 }
 
 static const char *tbl[6] =
@@ -1638,8 +1661,6 @@ pe_print_reloc(abfd, vfile)
   bfd_size_type datasize = 0;
   bfd_size_type i;
   bfd_size_type start, stop;
-  int onaline = 20;
-  bfd_vma addr_value;
 
   if (section == 0)
     return true;
@@ -1684,8 +1705,7 @@ pe_print_reloc(abfd, vfile)
 	}
 
       fprintf (file,
-	       "\nVirtual Address: %08lx Chunk size %d (0x%x) "
-	       "Number of fixups %d\n", 
+	       "\nVirtual Address: %08lx Chunk size %ld (0x%lx) Number of fixups %ld\n",
 	       virtual_address, size, size, number);
 
       for (j = 0; j < number; ++j)
@@ -1698,14 +1718,16 @@ pe_print_reloc(abfd, vfile)
 	    abort();
 
 	  fprintf(file,
-		  "\treloc %4d offset %4x [%4x] %s\n", 
-		  j, off, off+virtual_address, tbl[t]);
+		  "\treloc %4d offset %4x [%4lx] %s\n", 
+		  j, off, (long) (off + virtual_address), tbl[t]);
 	  
 	}
       i += size;
     }
 
   free (data);
+
+  return true;
 }
 
 static boolean
