@@ -50,8 +50,9 @@ print_insn_txvu (pc, info)
       (*info->memory_error_func) (status, pc, info);
       return -1;
     }
-  upper = bfd_getl32 (buffer);
-  lower = bfd_getl32 (buffer + 4);
+  /* The lower instruction has the lower address.  */
+  upper = bfd_getl32 (buffer + 4);
+  lower = bfd_getl32 (buffer);
 
   /* FIXME: This will need revisiting.  */
   print_insn (pc, info, upper, 0);
@@ -167,9 +168,11 @@ print_insn (pc, info, insn, lower_p)
 		value -= 1 << operand->bits;
 	    }
 
+#if 0 /* commas are part of the syntax string now */
 	  /* If second or later operand, print a comma.  */
 	  if (num_operands > 0)
 	    (*func) (stream, ",");
+#endif
 
 	  /* Print the operand as directed by the flags.  */
 	  if (operand->print)
@@ -177,7 +180,7 @@ print_insn (pc, info, insn, lower_p)
 	  else if (operand->flags & TXVU_OPERAND_FAKE)
 	    ; /* nothing to do (??? at least not yet) */
 	  else if (operand->flags & TXVU_OPERAND_RELATIVE_BRANCH)
-	    (*info->print_address_func) (pc + value, info);
+	    (*info->print_address_func) (pc + (value << 3), info);
 	  /* ??? Not all cases of this are currently caught.  */
 	  else if (operand->flags & TXVU_OPERAND_ABSOLUTE_BRANCH)
 	    (*info->print_address_func) ((bfd_vma) value & 0xffffffff, info);
