@@ -1,3 +1,10 @@
+2001-05-01  Andreas Jaeger  <aj@suse.de>, Andreas Schwab <schwab@suse.de>
+
+	* ld-scripts/phdrs.exp: Fix regexp, s390x is 64 bit platform.
+
+	* ld-scripts/phdrs.t: Use startaddress that's greater than any
+	MAXPAGESIZE used.
+
 2001-04-29  H.J. Lu  <hjl@gnu.org>
 
 	* ld-shared/symbolic.dat: New.
