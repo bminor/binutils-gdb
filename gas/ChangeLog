@@ -1,3 +1,8 @@
+2004-10-01  Bill Farmer  <Bill@the-farmers.freeserve.co.uk>
+
+	* config/tc-pdp11.c (md_apply_fix3): Change to sign of the SOB
+	instruction's offset.
+
 2004-10-01  Adam Nemet  <anemet@lnxw.com>
 
 	* (TARGET_FORMAT): Remove LynxOS COFF definition.

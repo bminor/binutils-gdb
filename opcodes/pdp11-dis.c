@@ -342,7 +342,8 @@ print_insn_pdp11 (memaddr, info)
 	  case PDP11_OPCODE_REG_DISPL:
 	    {
 	      int displ = (opcode & 0x3f) << 10;
-	      bfd_vma address = memaddr + (sign_extend (displ) >> 9);
+	      bfd_vma address = memaddr - (displ >> 9);
+
 	      FPRINTF (F, OP.name);
 	      FPRINTF (F, AFTER_INSTRUCTION);
 	      print_reg (src, info);

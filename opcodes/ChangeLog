@@ -1,3 +1,8 @@
+2004-10-01  Bill Farmer  <Bill@the-farmers.freeserve.co.uk>
+
+	* pdp11-dis.c (print_insn_pdp11): Subtract the SOB's displacement
+	rather than add it.
+
 2004-09-30  Paul Brook  <paul@codesourcery.com>
 
 	* arm-dis.c (print_insn_arm): Handle 'e' for SMI instruction.
