@@ -1,6 +1,6 @@
 Wed Nov  4 18:46:47 1998  Dave Brolley  <brolley@cygnus.com>
 
-	* configure.in): Added case for bfd_fr30_arch.
+	* configure.in: Added case for bfd_fr30_arch.
 	* Makefile.am (CFILES): Added fr30-asm.c, fr30-dis.c, fr30-opc.c.
 	(ALL_MACHINES): Added fr30-asm.lo, fr30-dis.lo, fr30-opc.lo.
 	(CLEANFILES): Added stamp-fr30.
@@ -9,6 +9,8 @@ Wed Nov  4 18:46:47 1998  Dave Brolley  <brolley@cygnus.com>
 	* fr30-dis.c: New file.
 	* fr30-opc.c: New file.
 	* fr30-opc.h: New file.
+	* po/POTFILES.in: Regenerated
+	* po/opcodes.pot: Regenerated
 
 Mon Nov  2 15:05:33 1998  Geoffrey Noer  <noer@cygnus.com>
 
