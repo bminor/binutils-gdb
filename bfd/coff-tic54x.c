@@ -423,7 +423,7 @@ tic54x_reloc_processing (relent, reloc, symbols, abfd, section)
 }
 
 /* COFF0 differs in file/section header size and relocation entry size.  */
-static CONST bfd_coff_backend_data ticoff0_swap_table =
+static const bfd_coff_backend_data ticoff0_swap_table =
   {
     coff_SWAP_aux_in, coff_SWAP_sym_in, coff_SWAP_lineno_in,
     coff_SWAP_aux_out, coff_SWAP_sym_out,
@@ -464,7 +464,7 @@ static CONST bfd_coff_backend_data ticoff0_swap_table =
   };
 
 /* COFF1 differs in section header size.  */
-static CONST bfd_coff_backend_data ticoff1_swap_table =
+static const bfd_coff_backend_data ticoff1_swap_table =
   {
     coff_SWAP_aux_in, coff_SWAP_sym_in, coff_SWAP_lineno_in,
     coff_SWAP_aux_out, coff_SWAP_sym_out,

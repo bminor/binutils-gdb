@@ -33,7 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 static vms_section *add_new_contents PARAMS ((bfd *, sec_ptr));
 static int hash_string PARAMS ((const char *));
 static asymbol *new_symbol PARAMS ((bfd *, char *));
-  
+
 /*-----------------------------------------------------------------------------*/
 #if VMS_DEBUG
 /* debug functions */
@@ -334,7 +334,7 @@ _bfd_vms_get_record (abfd)
 
   if (bfd_tell (abfd) & 1)
     {
-      if (bfd_read (PRIV (vms_buf), 1, 1, abfd) != 1)
+      if (bfd_bread (PRIV (vms_buf), (bfd_size_type) 1, abfd) != 1)
 	{
 	  bfd_set_error (bfd_error_file_truncated);
 	  return 0;
@@ -344,7 +344,7 @@ _bfd_vms_get_record (abfd)
   /* read the record header on Alpha.  */
 
   if ((test_len != 0)
-      && (bfd_read (PRIV (vms_buf), 1, test_len, abfd)
+      && (bfd_bread (PRIV (vms_buf), (bfd_size_type) test_len, abfd)
 	  != (bfd_size_type) test_len))
     {
       bfd_set_error (bfd_error_file_truncated);
@@ -370,7 +370,8 @@ _bfd_vms_get_record (abfd)
 
   if (PRIV (is_vax))
     {
-      PRIV (rec_length) = bfd_read (vms_buf, 1, PRIV (buf_size), abfd);
+      PRIV (rec_length) = bfd_bread (vms_buf, (bfd_size_type) PRIV (buf_size),
+				    abfd);
       if (PRIV (rec_length) <= 0)
 	{
 	  bfd_set_error (bfd_error_file_truncated);
@@ -403,7 +404,8 @@ _bfd_vms_get_record (abfd)
 
       if (PRIV (rec_length) > PRIV (buf_size))
 	{
-	  PRIV (vms_buf) = (unsigned char *) realloc (vms_buf, PRIV (rec_length));
+	  PRIV (vms_buf) = ((unsigned char *)
+			    realloc (vms_buf, (size_t) PRIV (rec_length)));
 	  vms_buf = PRIV (vms_buf);
 	  if (vms_buf == 0)
 	    {
@@ -418,9 +420,9 @@ _bfd_vms_get_record (abfd)
       remaining = PRIV (rec_length) - test_len + test_start;
 
 #if VMS_DEBUG
-      vms_debug (10, "bfd_read remaining %d\n", remaining);
+      vms_debug (10, "bfd_bread remaining %d\n", remaining);
 #endif
-      if (bfd_read (vms_buf + test_len, 1, remaining, abfd) !=
+      if (bfd_bread (vms_buf + test_len, (bfd_size_type) remaining, abfd) !=
 	  (bfd_size_type) remaining)
 	{
 	  bfd_set_error (bfd_error_file_truncated);
@@ -430,7 +432,7 @@ _bfd_vms_get_record (abfd)
     }
 
 #if VMS_DEBUG
-  vms_debug (11, "bfd_read rec_length %d\n", PRIV (rec_length));
+  vms_debug (11, "bfd_bread rec_length %d\n", PRIV (rec_length));
 #endif
 
   return PRIV (rec_length);
@@ -491,11 +493,11 @@ _bfd_vms_save_sized_string (str, size)
      unsigned char *str;
      int size;
 {
-  char *newstr = bfd_malloc (size + 1);
+  char *newstr = bfd_malloc ((bfd_size_type) size + 1);
 
   if (newstr == NULL)
     return 0;
-  strncpy (newstr, (char *)str, size);
+  strncpy (newstr, (char *) str, (size_t) size);
   newstr[size] = 0;
 
   return newstr;
@@ -591,11 +593,11 @@ add_new_contents (abfd, section)
   if (sptr != NULL)
     return sptr;
 
-  newptr = (vms_section *) bfd_malloc (sizeof (vms_section));
+  newptr = (vms_section *) bfd_malloc ((bfd_size_type) sizeof (vms_section));
   if (newptr == (vms_section *) NULL)
     return NULL;
-  newptr->contents = (unsigned char *) bfd_alloc (abfd, (int)section->_raw_size);
-  if (newptr->contents == (unsigned char *)NULL)
+  newptr->contents = (unsigned char *) bfd_alloc (abfd, section->_raw_size);
+  if (newptr->contents == (unsigned char *) NULL)
     return NULL;
   newptr->offset = 0;
   newptr->size = section->_raw_size;
@@ -665,7 +667,7 @@ _bfd_vms_output_begin (abfd, rectype, rechead)
 	      rechead);
 #endif
 
-  _bfd_vms_output_short (abfd,rectype);
+  _bfd_vms_output_short (abfd, (unsigned int) rectype);
 
   /* save current output position to fill in lenght later  */
 
@@ -677,10 +679,10 @@ _bfd_vms_output_begin (abfd, rectype, rechead)
 	      PRIV (length_pos));
 #endif
 
-  _bfd_vms_output_short (abfd,0);		/* placeholder for length */
+  _bfd_vms_output_short (abfd, 0);		/* placeholder for length */
 
   if (rechead != -1)
-    _bfd_vms_output_short (abfd,rechead);
+    _bfd_vms_output_short (abfd, (unsigned int) rechead);
 
   return;
 }
@@ -780,15 +782,16 @@ _bfd_vms_output_flush (abfd)
 
   /* put length to buffer  */
   PRIV (output_size) = PRIV (length_pos);
-  _bfd_vms_output_short (abfd, (unsigned int)length);
+  _bfd_vms_output_short (abfd, (unsigned int) length);
 
   if (PRIV (push_level) == 0)
     {
 #ifndef VMS
 	/* write length first, see FF_FOREIGN in the input routines */
-      fwrite (PRIV (output_buf)+2, 2, 1, (FILE *)abfd->iostream);
+      fwrite (PRIV (output_buf) + 2, 2, 1, (FILE *) abfd->iostream);
 #endif
-      fwrite (PRIV (output_buf), real_size, 1, (FILE *)abfd->iostream);
+      fwrite (PRIV (output_buf), (size_t) real_size, 1,
+	      (FILE *) abfd->iostream);
 
       PRIV (output_size) = 0;
     }
@@ -859,7 +862,8 @@ _bfd_vms_output_short (abfd, value)
   vms_debug (6, "_bfd_vms_output_short (%04x)\n", value);
 #endif
 
-  bfd_put_16 (abfd, value & 0xffff, PRIV (output_buf) + PRIV (output_size));
+  bfd_put_16 (abfd, (bfd_vma) value & 0xffff,
+	      PRIV (output_buf) + PRIV (output_size));
   PRIV (output_size) += 2;
   return;
 }
@@ -875,7 +879,7 @@ _bfd_vms_output_long (abfd, value)
   vms_debug (6, "_bfd_vms_output_long (%08lx)\n", value);
 #endif
 
-  bfd_put_32 (abfd, value, PRIV (output_buf) + PRIV (output_size));
+  bfd_put_32 (abfd, (bfd_vma) value, PRIV (output_buf) + PRIV (output_size));
   PRIV (output_size) += 4;
   return;
 }
@@ -920,7 +924,7 @@ int len;
       (*_bfd_error_handler) (_("_bfd_vms_output_counted called with too many bytes"));
       return;
     }
-  _bfd_vms_output_byte (abfd, len & 0xff);
+  _bfd_vms_output_byte (abfd, (unsigned int) len & 0xff);
   _bfd_vms_output_dump (abfd, (unsigned char *)value, len);
 }
 
@@ -939,7 +943,7 @@ _bfd_vms_output_dump (abfd, data, length)
   if (length == 0)
     return;
 
-  memcpy (PRIV (output_buf) + PRIV (output_size), data, length);
+  memcpy (PRIV (output_buf) + PRIV (output_size), data, (size_t) length);
   PRIV (output_size) += length;
 
   return;
@@ -959,7 +963,7 @@ _bfd_vms_output_fill (abfd, value, count)
 
   if (count == 0)
     return;
-  memset (PRIV (output_buf) + PRIV (output_size), value, count);
+  memset (PRIV (output_buf) + PRIV (output_size), value, (size_t) count);
   PRIV (output_size) += count;
 
   return;
@@ -1031,7 +1035,7 @@ _bfd_vms_length_hash_symbol (abfd, in, maxlen)
 	i = maxlen;
     }
 
-  strncpy (out, in, i);
+  strncpy (out, in, (size_t) i);
   in += i;
   out += i;
 

@@ -104,7 +104,7 @@ static reloc_howto_type elf_howto_table[] =
 static reloc_howto_type elf32_s390_vtinherit_howto =
   HOWTO (R_390_GNU_VTINHERIT, 0,2,0,false,0,complain_overflow_dont, NULL, "R_390_GNU_VTINHERIT", false,0, 0, false);
 static reloc_howto_type elf32_s390_vtentry_howto =
-  HOWTO (R_390_GNU_VTENTRY, 0,2,0,false,0,complain_overflow_dont, _bfd_elf_rel_vtable_reloc_fn,"R_390_GNU_VTENTRY", false,0,0, false); 
+  HOWTO (R_390_GNU_VTENTRY, 0,2,0,false,0,complain_overflow_dont, _bfd_elf_rel_vtable_reloc_fn,"R_390_GNU_VTENTRY", false,0,0, false);
 
 static reloc_howto_type *
 elf_s390_reloc_type_lookup (abfd, code)
@@ -157,7 +157,7 @@ elf_s390_reloc_type_lookup (abfd, code)
   case BFD_RELOC_VTABLE_ENTRY:
     return &elf32_s390_vtentry_howto;
   default:
-    break;                                         
+    break;
   }
   return 0;
 }
@@ -184,7 +184,7 @@ elf_s390_info_to_howto (abfd, cache_ptr, dst)
     default:
       BFD_ASSERT (ELF32_R_TYPE(dst->r_info) < (unsigned int) R_390_max);
       cache_ptr->howto = &elf_howto_table[ELF32_R_TYPE(dst->r_info)];
-    }     
+    }
 }
 
 static boolean
@@ -213,7 +213,7 @@ elf_s390_is_local_label_name (abfd, name)
 /* The size in bytes of the first entry in the procedure linkage table.  */
 #define PLT_FIRST_ENTRY_SIZE 32
 /* The size in bytes of an entry in the procedure linkage table.  */
-#define PLT_ENTRY_SIZE 32 
+#define PLT_ENTRY_SIZE 32
 
 #define GOT_ENTRY_SIZE 4
 
@@ -227,7 +227,7 @@ elf_s390_is_local_label_name (abfd, name)
    are needed to load an address in a register and execute
    a branch( or just saving the address)
 
-   Furthermore, only r 0 and 1 are free to use!!!  */ 
+   Furthermore, only r 0 and 1 are free to use!!!  */
 
 /* The first 3 words in the GOT are then reserved.
    Word 0 is the address of the dynamic table.
@@ -241,7 +241,7 @@ elf_s390_is_local_label_name (abfd, name)
    The GOT holds the address in the PLT to be executed.
    The loader then gets:
    24(15) =  Pointer to the structure describing the object.
-   28(15) =  Offset in symbol table                                             
+   28(15) =  Offset in symbol table
 
    The loader  must  then find the module where the function is
    and insert the address in the GOT.
@@ -334,7 +334,7 @@ RET1: BASR 1,0         # 2 bytes  Return from GOT 1st time
 PLT0:
    ST   1,28(15)  # R1 has offset into symbol table
    L    1,4(12)   # Get loader ino(object struct address)
-   ST   1,24(15)  # Store address 
+   ST   1,24(15)  # Store address
    L    1,8(12)   # Entry address of loader in R1
    BR   1         # Jump to loader
 
@@ -456,9 +456,9 @@ elf_s390_link_hash_table_create (abfd)
      bfd *abfd;
 {
   struct elf_s390_link_hash_table *ret;
+  bfd_size_type amt = sizeof (struct elf_s390_link_hash_table);
 
-  ret = ((struct elf_s390_link_hash_table *)
-	 bfd_alloc (abfd, sizeof (struct elf_s390_link_hash_table)));
+  ret = (struct elf_s390_link_hash_table *) bfd_alloc (abfd, amt);
   if (ret == (struct elf_s390_link_hash_table *) NULL)
     return NULL;
 
@@ -517,7 +517,7 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
       if (r_symndx < symtab_hdr->sh_info)
 	h = NULL;
       else
-	h = sym_hashes[r_symndx - symtab_hdr->sh_info];      
+	h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 
       /* Some relocs require a global offset table.  */
       if (dynobj == NULL)
@@ -598,15 +598,16 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
      	      /* This is a global offset table entry for a local symbol.  */
 	      if (local_got_refcounts == NULL)
 		{
-		  size_t size;
+		  bfd_size_type size;
 
-		  size = symtab_hdr->sh_info * sizeof (bfd_signed_vma);
+		  size = symtab_hdr->sh_info;
+		  size *= sizeof (bfd_signed_vma);
 		  local_got_refcounts = (bfd_signed_vma *)
 		                         bfd_alloc (abfd, size);
 		  if (local_got_refcounts == NULL)
 		    return false;
 		  elf_local_got_refcounts (abfd) = local_got_refcounts;
-		  memset (local_got_refcounts, -1, size);
+		  memset (local_got_refcounts, -1, (size_t) size);
 		}
 	      if (local_got_refcounts[r_symndx] == -1)
 		{
@@ -744,7 +745,7 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 		  if (p == NULL)
 		    {
 		      p = ((struct elf_s390_pcrel_relocs_copied *)
-			   bfd_alloc (dynobj, sizeof *p));
+			   bfd_alloc (dynobj, (bfd_size_type) sizeof *p));
 		      if (p == NULL)
 			return false;
 		      p->next = eh->pcrel_relocs_copied;
@@ -772,7 +773,7 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
           if (!_bfd_elf32_gc_record_vtentry (abfd, sec, h, rel->r_addend))
             return false;
           break;
-                   
+
 	default:
 	  break;
 	}
@@ -1220,37 +1221,40 @@ elf_s390_size_dynamic_sections (output_bfd, info)
 	 must add the entries now so that we get the correct size for
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
+#define add_dynamic_entry(TAG, VAL) \
+  bfd_elf32_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+
       if (! info->shared)
 	{
-	  if (! bfd_elf32_add_dynamic_entry (info, DT_DEBUG, 0))
+	  if (!add_dynamic_entry (DT_DEBUG, 0))
 	    return false;
 	}
 
       if (plt)
 	{
-	  if (! bfd_elf32_add_dynamic_entry (info, DT_PLTGOT, 0)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_PLTRELSZ, 0)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_JMPREL, 0))
+	  if (!add_dynamic_entry (DT_PLTGOT, 0)
+	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
+	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
+	      || !add_dynamic_entry (DT_JMPREL, 0))
 	    return false;
 	}
 
       if (relocs)
         {
-          if (! bfd_elf32_add_dynamic_entry (info, DT_RELA, 0)
-              || ! bfd_elf32_add_dynamic_entry (info, DT_RELASZ, 0)
-              || ! bfd_elf32_add_dynamic_entry (info, DT_RELAENT,
-					    sizeof (Elf32_External_Rela)))
+          if (!add_dynamic_entry (DT_RELA, 0)
+              || !add_dynamic_entry (DT_RELASZ, 0)
+              || !add_dynamic_entry (DT_RELAENT, sizeof (Elf32_External_Rela)))
 	    return false;
          }
 
       if ((info->flags & DF_TEXTREL) != 0)
 	{
-	  if (! bfd_elf32_add_dynamic_entry (info, DT_TEXTREL, 0))
+	  if (!add_dynamic_entry (DT_TEXTREL, 0))
 	    return false;
 	  info->flags |= DF_TEXTREL;
 	}
     }
+#undef add_dynamic_entry
 
   return true;
 }
@@ -1546,7 +1550,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 
 
           break;
- 
+
         case R_390_GOTOFF:
           /* Relocation is relative to the start of the global offset
              table.  */
@@ -1798,7 +1802,7 @@ elf_s390_finish_dynamic_symbol (output_bfd, info, h, sym)
       srela = bfd_get_section_by_name (dynobj, ".rela.plt");
       BFD_ASSERT (splt != NULL && sgot != NULL && srela != NULL);
 
-      /* Calc. index no. 
+      /* Calc. index no.
          Current offset - size first entry / entry size.  */
       plt_index = (h->plt.offset - PLT_FIRST_ENTRY_SIZE) / PLT_ENTRY_SIZE;
 
@@ -1807,81 +1811,82 @@ elf_s390_finish_dynamic_symbol (output_bfd, info, h, sym)
       got_offset = (plt_index + 3) * GOT_ENTRY_SIZE;
 
       /* S390 uses halfwords for relative branch calc!  */
-      relative_offset = - ((PLT_FIRST_ENTRY_SIZE + 
-                           (PLT_ENTRY_SIZE * plt_index) + 18)/2);
+      relative_offset = - ((PLT_FIRST_ENTRY_SIZE +
+                           (PLT_ENTRY_SIZE * plt_index) + 18) / 2);
       /* If offset is > 32768, branch to a previous branch
          390 can only handle +-64 K jumps.  */
-      if ( -32768 > (int)relative_offset )
-          relative_offset = -(((65536/PLT_ENTRY_SIZE-1)*PLT_ENTRY_SIZE)/2);
+      if ( -32768 > (int) relative_offset )
+          relative_offset =
+	    -(unsigned) (((65536 / PLT_ENTRY_SIZE - 1) * PLT_ENTRY_SIZE) / 2);
 
       /* Fill in the entry in the procedure linkage table.  */
       if (!info->shared)
        {
-        bfd_put_32 (output_bfd, PLT_ENTRY_WORD0,
+        bfd_put_32 (output_bfd, (bfd_vma) PLT_ENTRY_WORD0,
                     splt->contents + h->plt.offset);
-        bfd_put_32 (output_bfd, PLT_ENTRY_WORD1,
+        bfd_put_32 (output_bfd, (bfd_vma) PLT_ENTRY_WORD1,
                     splt->contents + h->plt.offset + 4);
-        bfd_put_32 (output_bfd, PLT_ENTRY_WORD2,
+        bfd_put_32 (output_bfd, (bfd_vma) PLT_ENTRY_WORD2,
                     splt->contents + h->plt.offset + 8);
-        bfd_put_32 (output_bfd, PLT_ENTRY_WORD3,
+        bfd_put_32 (output_bfd, (bfd_vma) PLT_ENTRY_WORD3,
                     splt->contents + h->plt.offset + 12);
-        bfd_put_32 (output_bfd, PLT_ENTRY_WORD4,
+        bfd_put_32 (output_bfd, (bfd_vma) PLT_ENTRY_WORD4,
                     splt->contents + h->plt.offset + 16);
-        bfd_put_32 (output_bfd, 0+(relative_offset << 16),
+        bfd_put_32 (output_bfd, (bfd_vma) 0 + (relative_offset << 16),
                     splt->contents + h->plt.offset + 20);
         bfd_put_32 (output_bfd,
-                    (sgot->output_section->vma +
-                     sgot->output_offset +
-                     got_offset),
+                    (sgot->output_section->vma
+		     + sgot->output_offset
+		     + got_offset),
                      splt->contents + h->plt.offset + 24);
        }
       else if (got_offset < 4096)
        {
-        bfd_put_32 (output_bfd, PLT_PIC12_ENTRY_WORD0 + got_offset,
+        bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC12_ENTRY_WORD0 + got_offset,
                     splt->contents + h->plt.offset);
-        bfd_put_32 (output_bfd, PLT_PIC12_ENTRY_WORD1,
+        bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC12_ENTRY_WORD1,
                     splt->contents + h->plt.offset + 4);
-        bfd_put_32 (output_bfd, PLT_PIC12_ENTRY_WORD2,
+        bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC12_ENTRY_WORD2,
                     splt->contents + h->plt.offset + 8);
-        bfd_put_32 (output_bfd, PLT_PIC12_ENTRY_WORD3,
+        bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC12_ENTRY_WORD3,
                     splt->contents + h->plt.offset + 12);
-        bfd_put_32 (output_bfd, PLT_PIC12_ENTRY_WORD4,
+        bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC12_ENTRY_WORD4,
                     splt->contents + h->plt.offset + 16);
-        bfd_put_32 (output_bfd, 0+(relative_offset << 16),
+        bfd_put_32 (output_bfd, (bfd_vma) 0 + (relative_offset << 16),
                     splt->contents + h->plt.offset + 20);
-        bfd_put_32 (output_bfd, 0,
+        bfd_put_32 (output_bfd, (bfd_vma) 0,
                     splt->contents + h->plt.offset + 24);
        }
       else if (got_offset < 32768)
        {
-        bfd_put_32 (output_bfd, PLT_PIC16_ENTRY_WORD0 + got_offset,
+        bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC16_ENTRY_WORD0 + got_offset,
                     splt->contents + h->plt.offset);
-        bfd_put_32 (output_bfd, PLT_PIC16_ENTRY_WORD1,
+        bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC16_ENTRY_WORD1,
                     splt->contents + h->plt.offset + 4);
-        bfd_put_32 (output_bfd, PLT_PIC16_ENTRY_WORD2,
+        bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC16_ENTRY_WORD2,
                     splt->contents + h->plt.offset + 8);
-        bfd_put_32 (output_bfd, PLT_PIC16_ENTRY_WORD3,
+        bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC16_ENTRY_WORD3,
                     splt->contents + h->plt.offset + 12);
-        bfd_put_32 (output_bfd, PLT_PIC16_ENTRY_WORD4,
+        bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC16_ENTRY_WORD4,
                     splt->contents + h->plt.offset + 16);
-        bfd_put_32 (output_bfd, 0+(relative_offset << 16),
+        bfd_put_32 (output_bfd, (bfd_vma) 0 + (relative_offset << 16),
                     splt->contents + h->plt.offset + 20);
-        bfd_put_32 (output_bfd, 0,
+        bfd_put_32 (output_bfd, (bfd_vma) 0,
                     splt->contents + h->plt.offset + 24);
        }
       else
        {
-        bfd_put_32 (output_bfd, PLT_PIC_ENTRY_WORD0,
+        bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC_ENTRY_WORD0,
 		    splt->contents + h->plt.offset);
-        bfd_put_32 (output_bfd, PLT_PIC_ENTRY_WORD1,
+        bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC_ENTRY_WORD1,
 		    splt->contents + h->plt.offset + 4);
-        bfd_put_32 (output_bfd, PLT_PIC_ENTRY_WORD2,
+        bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC_ENTRY_WORD2,
 		    splt->contents + h->plt.offset + 8);
-        bfd_put_32 (output_bfd, PLT_PIC_ENTRY_WORD3, 
+        bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC_ENTRY_WORD3,
 		    splt->contents + h->plt.offset + 12);
-        bfd_put_32 (output_bfd, PLT_PIC_ENTRY_WORD4,
+        bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC_ENTRY_WORD4,
 		    splt->contents + h->plt.offset + 16);
-        bfd_put_32 (output_bfd, 0+(relative_offset << 16),
+        bfd_put_32 (output_bfd, (bfd_vma) 0 + (relative_offset << 16),
 		    splt->contents + h->plt.offset + 20);
         bfd_put_32 (output_bfd, got_offset,
 		    splt->contents + h->plt.offset + 24);
@@ -1932,7 +1937,7 @@ elf_s390_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       rela.r_offset = (sgot->output_section->vma
 		       + sgot->output_offset
-		       + (h->got.offset &~ 1));
+		       + (h->got.offset &~ (bfd_vma) 1));
 
       /* If this is a static link, or it is a -Bsymbolic link and the
 	 symbol is defined locally or was forced to be local because
@@ -2069,31 +2074,31 @@ elf_s390_finish_dynamic_sections (output_bfd, info)
           memset (splt->contents, 0, PLT_FIRST_ENTRY_SIZE);
           if (info->shared)
            {
-	      bfd_put_32 (output_bfd, PLT_PIC_FIRST_ENTRY_WORD0,
+	      bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC_FIRST_ENTRY_WORD0,
 		          splt->contents );
-	      bfd_put_32 (output_bfd, PLT_PIC_FIRST_ENTRY_WORD1,
-		          splt->contents +4 );
-	      bfd_put_32 (output_bfd, PLT_PIC_FIRST_ENTRY_WORD2,
-		          splt->contents +8 );
-	      bfd_put_32 (output_bfd, PLT_PIC_FIRST_ENTRY_WORD3,
-		          splt->contents +12 );
-	      bfd_put_32 (output_bfd, PLT_PIC_FIRST_ENTRY_WORD4,
-		          splt->contents +16 );
+	      bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC_FIRST_ENTRY_WORD1,
+		          splt->contents + 4 );
+	      bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC_FIRST_ENTRY_WORD2,
+		          splt->contents + 8 );
+	      bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC_FIRST_ENTRY_WORD3,
+		          splt->contents + 12 );
+	      bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC_FIRST_ENTRY_WORD4,
+		          splt->contents + 16 );
            }
           else
            {
-              bfd_put_32 (output_bfd, PLT_FIRST_ENTRY_WORD0,
+              bfd_put_32 (output_bfd, (bfd_vma) PLT_FIRST_ENTRY_WORD0,
                           splt->contents );
-              bfd_put_32 (output_bfd, PLT_FIRST_ENTRY_WORD1,
-                          splt->contents +4 );
-              bfd_put_32 (output_bfd, PLT_FIRST_ENTRY_WORD2,
-                          splt->contents +8 );
-              bfd_put_32 (output_bfd, PLT_FIRST_ENTRY_WORD3,
-                          splt->contents +12 );
-              bfd_put_32 (output_bfd, PLT_FIRST_ENTRY_WORD4,
-                          splt->contents +16 );
-              bfd_put_32 (output_bfd, PLT_FIRST_ENTRY_WORD5,
-                          splt->contents +20 );
+              bfd_put_32 (output_bfd, (bfd_vma) PLT_FIRST_ENTRY_WORD1,
+                          splt->contents + 4 );
+              bfd_put_32 (output_bfd, (bfd_vma) PLT_FIRST_ENTRY_WORD2,
+                          splt->contents + 8 );
+              bfd_put_32 (output_bfd, (bfd_vma) PLT_FIRST_ENTRY_WORD3,
+                          splt->contents + 12 );
+              bfd_put_32 (output_bfd, (bfd_vma) PLT_FIRST_ENTRY_WORD4,
+                          splt->contents + 16 );
+              bfd_put_32 (output_bfd, (bfd_vma) PLT_FIRST_ENTRY_WORD5,
+                          splt->contents + 20 );
               bfd_put_32 (output_bfd,
                           sgot->output_section->vma + sgot->output_offset,
                           splt->contents + 24);

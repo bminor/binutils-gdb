@@ -28,14 +28,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 struct xcoff_backend_data_rec
 {
-  /* 
-   * COFF backend information.  Must be the first field.  
+  /*
+   * COFF backend information.  Must be the first field.
    * This is where the std coff swap table goes
    */
   bfd_coff_backend_data coff;
 
   /* Magic number */
-  unsigned short _xcoff_magic_number;              
+  unsigned short _xcoff_magic_number;
 
   /* Architecture and machine for coff_set_arch_mach_hook */
   enum bfd_architecture _xcoff_architecture;
@@ -50,7 +50,7 @@ struct xcoff_backend_data_rec
   void (* _xcoff_swap_ldrel_out)(bfd *, const struct internal_ldrel *, PTR);
 
   /* size of the the external struct */
-  unsigned int _xcoff_ldhdrsz; 
+  unsigned int _xcoff_ldhdrsz;
   unsigned int _xcoff_ldsymsz;
   unsigned int _xcoff_ldrelsz;
 
@@ -60,9 +60,9 @@ struct xcoff_backend_data_rec
   /* size of the small aout file header */
   unsigned int _xcoff_small_aout_header_size;
 
-  /* 
-   * version 
-   * loader version 
+  /*
+   * version
+   * loader version
    * 1 : xcoff32
    * 2 : xcoff64
    */
@@ -72,7 +72,7 @@ struct xcoff_backend_data_rec
 				     struct internal_syment *,
 				     const char *);
 
-  boolean (* _xcoff_put_ldsymbol_name)(bfd *, struct xcoff_loader_info *, 
+  boolean (* _xcoff_put_ldsymbol_name)(bfd *, struct xcoff_loader_info *,
 				       struct internal_ldsym *,
 				       const char *);
 
@@ -80,34 +80,34 @@ struct xcoff_backend_data_rec
 
   asection * (* _xcoff_create_csect_from_smclas) (bfd *, union internal_auxent *, const char *);
 
-  /* 
-   * line_no and reloc overflow 
+  /*
+   * line_no and reloc overflow
    * 32 overflows to another section when the line_no or reloc count go
-   * over 0xffff.  64 does not overflow. 
+   * over 0xffff.  64 does not overflow.
    */
   boolean (*_xcoff_is_lineno_count_overflow)(bfd *, bfd_vma);
   boolean (*_xcoff_is_reloc_count_overflow)(bfd *, bfd_vma);
 
-  /* 
+  /*
    * .loader symbol table offset
    * 32 is after the .loader header
    * 64 is offset in .loader header
-   * 
+   *
    * Similar for the reloc table
    */
   bfd_vma (*_xcoff_loader_symbol_offset)(bfd *, struct internal_ldhdr *);
   bfd_vma (*_xcoff_loader_reloc_offset)(bfd *, struct internal_ldhdr *);
 
 
-  /* 
-   * Global linkage 
-   * 
+  /*
+   * Global linkage
+   *
    * The first word of global linkage code must be be modified by
-   * filling in the correct TOC offset.  
+   * filling in the correct TOC offset.
    */
   unsigned long *_xcoff_glink_code;
 
-  /* 
+  /*
    * Size of the global link code in bytes of the xcoff_glink_code table
    */
   unsigned long _xcoff_glink_size;
@@ -218,19 +218,19 @@ extern boolean _bfd_xcoff_bfd_link_add_symbols
   PARAMS ((bfd *, struct bfd_link_info *));
 extern boolean _bfd_xcoff_bfd_final_link
   PARAMS ((bfd *, struct bfd_link_info *));
-extern boolean _bfd_xcoff_slurp_symbol_table 
+extern boolean _bfd_xcoff_slurp_symbol_table
   PARAMS ((bfd *));
-extern long _bfd_xcoff_get_symbol_table 
+extern long _bfd_xcoff_get_symbol_table
   PARAMS ((bfd *, asymbol **));
-extern asymbol *_bfd_xcoff_make_empty_symbol 
+extern asymbol *_bfd_xcoff_make_empty_symbol
   PARAMS ((bfd *));
-extern long _bfd_xcoff_get_symbol_table_upper_bound 
+extern long _bfd_xcoff_get_symbol_table_upper_bound
   PARAMS ((bfd *));
-extern void _bfd_xcoff_print_symbol 
+extern void _bfd_xcoff_print_symbol
   PARAMS ((bfd *, PTR, asymbol *, bfd_print_symbol_type));
-extern void _bfd_xcoff_get_symbol_info 
+extern void _bfd_xcoff_get_symbol_info
   PARAMS ((bfd *, asymbol *, symbol_info *));
-extern long _bfd_xcoff_canonicalize_reloc 
+extern long _bfd_xcoff_canonicalize_reloc
   PARAMS((bfd *, sec_ptr, arelent **, asymbol **));
 extern reloc_howto_type *_bfd_xcoff_rtype_to_howto
   PARAMS ((bfd *, asection *, struct internal_reloc *,
@@ -259,7 +259,7 @@ extern boolean bfd_xcoff_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *, const char *, const char *,
 	   unsigned long, unsigned long, unsigned long, boolean,
 	   int, boolean, boolean, struct sec **));
-extern boolean xcoff_slurp_reloc_table 
+extern boolean xcoff_slurp_reloc_table
   PARAMS ((bfd *, asection *, asymbol **));
 
 #endif /* LIBXCOFF_H */

@@ -289,14 +289,14 @@ elf_s390_is_local_label_name (abfd, name)
    the program that manages to have a symbol table of more than 2 GB with a
    total size of at max 4 GB.  */
 
-#define PLT_ENTRY_WORD0     0xc0100000
-#define PLT_ENTRY_WORD1     0x0000e310
-#define PLT_ENTRY_WORD2     0x10000004
-#define PLT_ENTRY_WORD3     0x07f10d10
-#define PLT_ENTRY_WORD4     0xe310100c
-#define PLT_ENTRY_WORD5     0x0014c0f4
-#define PLT_ENTRY_WORD6     0x00000000
-#define PLT_ENTRY_WORD7     0x00000000
+#define PLT_ENTRY_WORD0     (bfd_vma) 0xc0100000
+#define PLT_ENTRY_WORD1     (bfd_vma) 0x0000e310
+#define PLT_ENTRY_WORD2     (bfd_vma) 0x10000004
+#define PLT_ENTRY_WORD3     (bfd_vma) 0x07f10d10
+#define PLT_ENTRY_WORD4     (bfd_vma) 0xe310100c
+#define PLT_ENTRY_WORD5     (bfd_vma) 0x0014c0f4
+#define PLT_ENTRY_WORD6     (bfd_vma) 0x00000000
+#define PLT_ENTRY_WORD7     (bfd_vma) 0x00000000
 
 /* The first PLT entry pushes the offset into the symbol table
    from R1 onto the stack at 8(15) and the loader object info
@@ -313,14 +313,14 @@ elf_s390_is_local_label_name (abfd, name)
 
      Fixup at offset 8: relative address to start of GOT.  */
 
-#define PLT_FIRST_ENTRY_WORD0     0xe310f038
-#define PLT_FIRST_ENTRY_WORD1     0x0024c010
-#define PLT_FIRST_ENTRY_WORD2     0x00000000
-#define PLT_FIRST_ENTRY_WORD3     0xd207f030
-#define PLT_FIRST_ENTRY_WORD4     0x1008e310
-#define PLT_FIRST_ENTRY_WORD5     0x10100004
-#define PLT_FIRST_ENTRY_WORD6     0x07f10700
-#define PLT_FIRST_ENTRY_WORD7     0x07000700
+#define PLT_FIRST_ENTRY_WORD0     (bfd_vma) 0xe310f038
+#define PLT_FIRST_ENTRY_WORD1     (bfd_vma) 0x0024c010
+#define PLT_FIRST_ENTRY_WORD2     (bfd_vma) 0x00000000
+#define PLT_FIRST_ENTRY_WORD3     (bfd_vma) 0xd207f030
+#define PLT_FIRST_ENTRY_WORD4     (bfd_vma) 0x1008e310
+#define PLT_FIRST_ENTRY_WORD5     (bfd_vma) 0x10100004
+#define PLT_FIRST_ENTRY_WORD6     (bfd_vma) 0x07f10700
+#define PLT_FIRST_ENTRY_WORD7     (bfd_vma) 0x07000700
 
 /* The s390 linker needs to keep track of the number of relocs that it
    decides to copy in check_relocs for each symbol.  This is so that
@@ -415,9 +415,9 @@ elf_s390_link_hash_table_create (abfd)
      bfd *abfd;
 {
   struct elf_s390_link_hash_table *ret;
+  bfd_size_type amt = sizeof (struct elf_s390_link_hash_table);
 
-  ret = ((struct elf_s390_link_hash_table *)
-	 bfd_alloc (abfd, sizeof (struct elf_s390_link_hash_table)));
+  ret = ((struct elf_s390_link_hash_table *) bfd_alloc (abfd, amt));
   if (ret == (struct elf_s390_link_hash_table *) NULL)
     return NULL;
 
@@ -562,15 +562,15 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 	      /* This is a global offset table entry for a local symbol.  */
 	      if (local_got_refcounts == NULL)
 		{
-		  size_t size;
+		  bfd_size_type size;
 
 		  size = symtab_hdr->sh_info * sizeof (bfd_vma);
-		  local_got_refcounts = (bfd_signed_vma *)
-		                         bfd_alloc (abfd, size);
+		  local_got_refcounts = ((bfd_signed_vma *)
+					 bfd_alloc (abfd, size));
 		  if (local_got_refcounts == NULL)
 		    return false;
 		  elf_local_got_refcounts (abfd) = local_got_refcounts;
-		  memset (local_got_refcounts, -1, size);
+		  memset (local_got_refcounts, -1, (size_t) size);
 		}
 	      if (local_got_refcounts[r_symndx] == -1)
 		{
@@ -718,7 +718,7 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 		  if (p == NULL)
 		    {
 		      p = ((struct elf_s390_pcrel_relocs_copied *)
-			   bfd_alloc (dynobj, sizeof *p));
+			   bfd_alloc (dynobj, (bfd_size_type) sizeof *p));
 		      if (p == NULL)
 			return false;
 		      p->next = eh->pcrel_relocs_copied;
@@ -1200,37 +1200,40 @@ elf_s390_size_dynamic_sections (output_bfd, info)
 	 must add the entries now so that we get the correct size for
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
+#define add_dynamic_entry(TAG, VAL) \
+  bfd_elf64_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+
       if (! info->shared)
 	{
-	  if (! bfd_elf64_add_dynamic_entry (info, DT_DEBUG, 0))
+	  if (!add_dynamic_entry (DT_DEBUG, 0))
 	    return false;
 	}
 
       if (plt)
 	{
-	  if (! bfd_elf64_add_dynamic_entry (info, DT_PLTGOT, 0)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_PLTRELSZ, 0)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_JMPREL, 0))
+	  if (!add_dynamic_entry (DT_PLTGOT, 0)
+	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
+	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
+	      || !add_dynamic_entry (DT_JMPREL, 0))
 	    return false;
 	}
 
       if (relocs)
         {
-          if (! bfd_elf64_add_dynamic_entry (info, DT_RELA, 0)
-              || ! bfd_elf64_add_dynamic_entry (info, DT_RELASZ, 0)
-              || ! bfd_elf64_add_dynamic_entry (info, DT_RELAENT,
-					    sizeof (Elf64_External_Rela)))
+          if (!add_dynamic_entry (DT_RELA, 0)
+              || !add_dynamic_entry (DT_RELASZ, 0)
+              || !add_dynamic_entry (DT_RELAENT, sizeof (Elf64_External_Rela)))
 	    return false;
          }
 
       if ((info->flags & DF_TEXTREL) != 0)
 	{
-	  if (! bfd_elf64_add_dynamic_entry (info, DT_TEXTREL, 0))
+	  if (!add_dynamic_entry (DT_TEXTREL, 0))
 	    return false;
 	  info->flags |= DF_TEXTREL;
 	}
     }
+#undef add_dynamic_entry
 
   return true;
 }
@@ -1886,7 +1889,7 @@ elf_s390_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       rela.r_offset = (sgot->output_section->vma
 		       + sgot->output_offset
-		       + (h->got.offset &~ 1));
+		       + (h->got.offset &~ (bfd_vma) 1));
 
       /* If this is a static link, or it is a -Bsymbolic link and the
 	 symbol is defined locally or was forced to be local because

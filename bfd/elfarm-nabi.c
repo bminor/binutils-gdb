@@ -688,7 +688,7 @@ elf32_arm_nabi_grok_prstatus (abfd, note)
      Elf_Internal_Note *note;
 {
   int offset;
-  int raw_size;
+  size_t raw_size;
 
   switch (note->descsz)
     {

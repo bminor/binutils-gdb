@@ -29,9 +29,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    E.g. align to an 8-byte boundary with argument of 8.  Take care never
    to wrap around if the address is within boundary-1 of the end of the
    address space.  */
-#define BFD_ALIGN(this, boundary)					\
-  ((((bfd_vma) (this) + (boundary) - 1) >= (bfd_vma) (this))		\
-   ? (((bfd_vma) (this) + ((boundary) - 1)) & (~((boundary)-1)))	\
+#define BFD_ALIGN(this, boundary)					  \
+  ((((bfd_vma) (this) + (boundary) - 1) >= (bfd_vma) (this))		  \
+   ? (((bfd_vma) (this) + ((boundary) - 1)) & ~ (bfd_vma) ((boundary)-1)) \
    : ~ (bfd_vma) 0)
 
 /* If you want to read and write large blocks, you might want to do it
@@ -87,20 +87,20 @@ struct areltdata {
 
 #define arelt_size(bfd) (((struct areltdata *)((bfd)->arelt_data))->parsed_size)
 
-extern PTR bfd_malloc PARAMS ((size_t));
-extern PTR bfd_realloc PARAMS ((PTR, size_t));
-extern PTR bfd_zmalloc PARAMS ((size_t));
+extern PTR bfd_malloc PARAMS ((bfd_size_type));
+extern PTR bfd_realloc PARAMS ((PTR, bfd_size_type));
+extern PTR bfd_zmalloc PARAMS ((bfd_size_type));
 
 extern bfd_error_handler_type _bfd_error_handler;
 
 /* These routines allocate and free things on the BFD's objalloc.  */
 
-extern PTR bfd_alloc PARAMS ((bfd *, size_t));
-extern PTR bfd_zalloc PARAMS ((bfd *, size_t));
+extern PTR bfd_alloc PARAMS ((bfd *, bfd_size_type));
+extern PTR bfd_zalloc PARAMS ((bfd *, bfd_size_type));
 extern void bfd_release PARAMS ((bfd *, PTR));
 
 bfd *	_bfd_create_empty_archive_element_shell PARAMS ((bfd *obfd));
-bfd *	_bfd_look_for_bfd_in_cache PARAMS ((bfd *arch_bfd, file_ptr index));
+bfd *	_bfd_look_for_bfd_in_cache PARAMS ((bfd *, file_ptr));
 boolean _bfd_add_bfd_to_archive_cache PARAMS ((bfd *, file_ptr, bfd *));
 boolean	_bfd_generic_mkarchive PARAMS ((bfd *abfd));
 const bfd_target *bfd_generic_archive_p PARAMS ((bfd *abfd));
@@ -162,8 +162,7 @@ int	bfd_generic_stat_arch_elt PARAMS ((bfd *, struct stat *));
 #define _bfd_generic_new_section_hook \
   ((boolean (*) PARAMS ((bfd *, asection *))) bfd_true)
 extern boolean _bfd_generic_get_section_contents
-  PARAMS ((bfd *, asection *, PTR location, file_ptr offset,
-	   bfd_size_type count));
+  PARAMS ((bfd *, asection *, PTR, file_ptr, bfd_size_type));
 extern boolean _bfd_generic_get_section_contents_in_window
   PARAMS ((bfd *, asection *, bfd_window *, file_ptr, bfd_size_type));
 
@@ -440,7 +439,7 @@ extern unsigned int _bfd_count_link_order_relocs
 /* Final link relocation routine.  */
 extern bfd_reloc_status_type _bfd_final_link_relocate
   PARAMS ((reloc_howto_type *, bfd *, asection *, bfd_byte *,
-	   bfd_vma address, bfd_vma value, bfd_vma addend));
+	   bfd_vma, bfd_vma, bfd_vma));
 
 /* Relocate a particular location by a howto and a value.  */
 extern bfd_reloc_status_type _bfd_relocate_contents
@@ -578,7 +577,7 @@ extern boolean _bfd_sh_align_load_span
 /* And more follows */
 
 void
-bfd_write_bigendian_4byte_int PARAMS ((bfd *abfd,  int i));
+bfd_write_bigendian_4byte_int PARAMS ((bfd *, unsigned int));
 
 unsigned int
 bfd_log2 PARAMS ((bfd_vma x));
@@ -816,7 +815,7 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_PPC64_TOC16_HI",
   "BFD_RELOC_PPC64_TOC16_HA",
   "BFD_RELOC_PPC64_TOC",
-  "BFD_RELOC_PPC64_PLTGOT16   ",
+  "BFD_RELOC_PPC64_PLTGOT16",
   "BFD_RELOC_PPC64_PLTGOT16_LO",
   "BFD_RELOC_PPC64_PLTGOT16_HI",
   "BFD_RELOC_PPC64_PLTGOT16_HA",

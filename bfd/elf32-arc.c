@@ -155,7 +155,7 @@ static boolean
 arc_elf_object_p (abfd)
      bfd *abfd;
 {
-  int mach = bfd_mach_arc_6;
+  unsigned int mach = bfd_mach_arc_6;
 
   if (elf_elfheader(abfd)->e_machine == EM_ARC)
     {

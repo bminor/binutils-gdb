@@ -98,7 +98,7 @@ struct elf_reloc_map
   unsigned char elf_reloc_val;
 };
 
-static CONST struct elf_reloc_map x86_64_reloc_map[] =
+static const struct elf_reloc_map x86_64_reloc_map[] =
 {
   { BFD_RELOC_NONE,		R_X86_64_NONE, },
   { BFD_RELOC_64,		R_X86_64_64,   },
@@ -327,9 +327,9 @@ elf64_x86_64_link_hash_table_create (abfd)
      bfd *abfd;
 {
   struct elf64_x86_64_link_hash_table *ret;
+  bfd_size_type amt = sizeof (struct elf64_x86_64_link_hash_table);
 
-  ret = ((struct elf64_x86_64_link_hash_table *)
-	 bfd_alloc (abfd, sizeof (struct elf64_x86_64_link_hash_table)));
+  ret = ((struct elf64_x86_64_link_hash_table *) bfd_alloc (abfd, amt));
   if (ret == (struct elf64_x86_64_link_hash_table *) NULL)
     return NULL;
 
@@ -463,15 +463,16 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 	      /* This is a global offset table entry for a local symbol.  */
 	      if (local_got_refcounts == NULL)
 		{
-		  size_t size;
+		  bfd_size_type size;
 
-		  size = symtab_hdr->sh_info * sizeof (bfd_signed_vma);
+		  size = symtab_hdr->sh_info;
+		  size *= sizeof (bfd_signed_vma);
 		  local_got_refcounts = ((bfd_signed_vma *)
 					 bfd_alloc (abfd, size));
 		  if (local_got_refcounts == NULL)
 		    return false;
 		  elf_local_got_refcounts (abfd) = local_got_refcounts;
-		  memset (local_got_refcounts, -1, size);
+		  memset (local_got_refcounts, -1, (size_t) size);
 		}
 	      if (local_got_refcounts[r_symndx] == -1)
 		{
@@ -606,7 +607,7 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 		  if (p == NULL)
 		    {
 		      p = ((struct elf64_x86_64_pcrel_relocs_copied *)
-			   bfd_alloc (dynobj, sizeof *p));
+			   bfd_alloc (dynobj, (bfd_size_type) sizeof *p));
 		      if (p == NULL)
 			return false;
 		      p->next = eh->pcrel_relocs_copied;
@@ -1077,36 +1078,39 @@ elf64_x86_64_size_dynamic_sections (output_bfd, info)
 	 must add the entries now so that we get the correct size for
 	 the .dynamic section.	The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
+#define add_dynamic_entry(TAG, VAL) \
+  bfd_elf64_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+
       if (! info->shared)
 	{
-	  if (! bfd_elf64_add_dynamic_entry (info, DT_DEBUG, 0))
+	  if (!add_dynamic_entry (DT_DEBUG, 0))
 	    return false;
 	}
 
       if (plt)
 	{
-	  if (! bfd_elf64_add_dynamic_entry (info, DT_PLTGOT, 0)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_PLTRELSZ, 0)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_JMPREL, 0))
+	  if (!add_dynamic_entry (DT_PLTGOT, 0)
+	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
+	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
+	      || !add_dynamic_entry (DT_JMPREL, 0))
 	    return false;
 	}
 
       if (relocs)
 	{
-	  if (! bfd_elf64_add_dynamic_entry (info, DT_RELA, 0)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_RELASZ, 0)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_RELAENT,
-						sizeof (Elf64_External_Rela)))
+	  if (!add_dynamic_entry (DT_RELA, 0)
+	      || !add_dynamic_entry (DT_RELASZ, 0)
+	      || !add_dynamic_entry (DT_RELAENT, sizeof (Elf64_External_Rela)))
 	    return false;
 	}
 
       if ((info->flags & DF_TEXTREL) != 0)
 	{
-	  if (! bfd_elf64_add_dynamic_entry (info, DT_TEXTREL, 0))
+	  if (!add_dynamic_entry (DT_TEXTREL, 0))
 	    return false;
 	}
     }
+#undef add_dynamic_entry
 
   return true;
 }
@@ -1521,7 +1525,7 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 		    }
 		  else
 		    {
-		      long indx;
+		      long sindx;
 
 		      if (h == NULL)
 			sec = local_sections[r_symndx];
@@ -1533,7 +1537,7 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 			  sec = h->root.u.def.section;
 			}
 		      if (sec != NULL && bfd_is_abs_section (sec))
-			indx = 0;
+			sindx = 0;
 		      else if (sec == NULL || sec->owner == NULL)
 			{
 			  bfd_set_error (bfd_error_bad_value);
@@ -1544,12 +1548,12 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 			  asection *osec;
 
 			  osec = sec->output_section;
-			  indx = elf_section_data (osec)->dynindx;
-			  BFD_ASSERT (indx > 0);
+			  sindx = elf_section_data (osec)->dynindx;
+			  BFD_ASSERT (sindx > 0);
 			}
 
 		      relocate = false;
-		      outrel.r_info = ELF64_R_INFO (indx, r_type);
+		      outrel.r_info = ELF64_R_INFO (sindx, r_type);
 		      outrel.r_addend = relocation + rela->r_addend;
 		    }
 
@@ -1730,7 +1734,7 @@ elf64_x86_64_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       rela.r_offset = (sgot->output_section->vma
 		       + sgot->output_offset
-		       + (h->got.offset &~ 1));
+		       + (h->got.offset &~ (bfd_vma) 1));
 
       /* If this is a static link, or it is a -Bsymbolic link and the
 	 symbol is defined locally or was forced to be local because

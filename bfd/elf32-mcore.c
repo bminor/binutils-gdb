@@ -550,7 +550,7 @@ mcore_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_MCORE_PCRELJSR_IMM11BY2:
 	  oldinst = bfd_get_16 (input_bfd, contents + offset);
 #define	MCORE_INST_BSR	0xF800
-	  bfd_put_16 (input_bfd, MCORE_INST_BSR, contents + offset);
+	  bfd_put_16 (input_bfd, (bfd_vma) MCORE_INST_BSR, contents + offset);
 	  break;
 	}
 
@@ -565,7 +565,7 @@ mcore_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       if (r != bfd_reloc_ok && r_type == R_MCORE_PCRELJSR_IMM11BY2)
 	{
 	  /* Wasn't ok, back it out and give up.  */
-	  bfd_put_16 (input_bfd, oldinst, contents + offset);
+	  bfd_put_16 (input_bfd, (bfd_vma) oldinst, contents + offset);
 	  r = bfd_reloc_ok;
 	}
 

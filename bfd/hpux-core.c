@@ -100,12 +100,21 @@ struct hpux_core_struct
 #define core_kernel_thread_id(bfd) (core_hdr(bfd)->lwpid)
 #define core_user_thread_id(bfd) (core_hdr(bfd)->user_tid)
 
+static asection *make_bfd_asection
+  PARAMS ((bfd *, const char *, flagword, bfd_size_type, bfd_vma,
+	   unsigned int));
+static asymbol *hpux_core_make_empty_symbol PARAMS ((bfd *));
+static const bfd_target *hpux_core_core_file_p PARAMS ((bfd *));
+static char *hpux_core_core_file_failing_command PARAMS ((bfd *));
+static int hpux_core_core_file_failing_signal PARAMS ((bfd *));
+static boolean hpux_core_core_file_matches_executable_p
+  PARAMS ((bfd *, bfd *));
 static void swap_abort PARAMS ((void));
 
 static asection *
 make_bfd_asection (abfd, name, flags, _raw_size, vma, alignment_power)
      bfd *abfd;
-     CONST char *name;
+     const char *name;
      flagword flags;
      bfd_size_type _raw_size;
      bfd_vma vma;
@@ -114,7 +123,7 @@ make_bfd_asection (abfd, name, flags, _raw_size, vma, alignment_power)
   asection *asect;
   char *newname;
 
-  newname = bfd_alloc (abfd, strlen (name) + 1);
+  newname = bfd_alloc (abfd, (bfd_size_type) strlen (name) + 1);
   if (!newname)
     return NULL;
 
@@ -137,7 +146,9 @@ static asymbol *
 hpux_core_make_empty_symbol (abfd)
      bfd *abfd;
 {
-  asymbol *new = (asymbol *) bfd_zalloc (abfd, sizeof (asymbol));
+  asymbol *new;
+
+  new = (asymbol *) bfd_zalloc (abfd, (bfd_size_type) sizeof (asymbol));
   if (new)
     new->the_bfd = abfd;
   return new;
@@ -160,7 +171,7 @@ hpux_core_core_file_p (abfd)
   int  unknown_sections = 0;
 
   core_hdr (abfd) = (struct hpux_core_struct *)
-    bfd_zalloc (abfd, sizeof (struct hpux_core_struct));
+    bfd_zalloc (abfd, (bfd_size_type) sizeof (struct hpux_core_struct));
   if (!core_hdr (abfd))
     return NULL;
 
@@ -169,21 +180,23 @@ hpux_core_core_file_p (abfd)
       int val;
       struct corehead core_header;
 
-      val = bfd_read ((void *) &core_header, 1, sizeof core_header, abfd);
+      val = bfd_bread ((void *) &core_header,
+		      (bfd_size_type) sizeof core_header, abfd);
       if (val <= 0)
 	break;
       switch (core_header.type)
 	{
 	case CORE_KERNEL:
 	case CORE_FORMAT:
-	  bfd_seek (abfd, core_header.len, SEEK_CUR);	/* Just skip this */
+	  /* Just skip this.  */
+	  bfd_seek (abfd, (file_ptr) core_header.len, SEEK_CUR);
           good_sections++;
 	  break;
 	case CORE_EXEC:
 	  {
 	    struct proc_exec proc_exec;
-	    if (bfd_read ((void *) &proc_exec, 1, core_header.len, abfd)
-		!= core_header.len)
+	    if (bfd_bread ((void *) &proc_exec, (bfd_size_type) core_header.len,
+			  abfd) != core_header.len)
 	      break;
 	    strncpy (core_command (abfd), proc_exec.cmd, MAXCOMLEN + 1);
             good_sections++;
@@ -197,13 +210,13 @@ hpux_core_core_file_p (abfd)
             /* We need to read this section, 'cause we need to determine
                whether the core-dumped app was threaded before we create
                any .reg sections. */
-	    if (bfd_read (&proc_info, 1, core_header.len, abfd)
+	    if (bfd_bread (&proc_info, (bfd_size_type) core_header.len, abfd)
 		!= core_header.len)
 	      break;
 
               /* However, we also want to create those sections with the
                  file positioned at the start of the record, it seems. */
-            if (bfd_seek (abfd, -core_header.len, SEEK_CUR) != 0)
+            if (bfd_seek (abfd, (file_ptr) -core_header.len, SEEK_CUR) != 0)
               break;
 
 #if defined(PROC_INFO_HAS_THREAD_ID)
@@ -258,7 +271,7 @@ hpux_core_core_file_p (abfd)
                   return NULL;
               }
 	    core_signal (abfd) = proc_info.sig;
-            if (bfd_seek (abfd, core_header.len, SEEK_CUR) != 0)
+            if (bfd_seek (abfd, (file_ptr) core_header.len, SEEK_CUR) != 0)
               break;
             good_sections++;
 	  }
@@ -275,7 +288,7 @@ hpux_core_core_file_p (abfd)
 				  core_header.len, core_header.addr, 2))
 	    return NULL;
 
-	  bfd_seek (abfd, core_header.len, SEEK_CUR);
+	  bfd_seek (abfd, (file_ptr) core_header.len, SEEK_CUR);
           good_sections++;
 	  break;
 
@@ -327,7 +340,8 @@ hpux_core_core_file_failing_signal (abfd)
 /* ARGSUSED */
 static boolean
 hpux_core_core_file_matches_executable_p (core_bfd, exec_bfd)
-     bfd *core_bfd, *exec_bfd;
+     bfd *core_bfd ATTRIBUTE_UNUSED;
+     bfd *exec_bfd ATTRIBUTE_UNUSED;
 {
   return true;			/* FIXME, We have no way of telling at this point */
 }
@@ -346,7 +360,7 @@ hpux_core_core_file_matches_executable_p (core_bfd, exec_bfd)
 
 /* If somebody calls any byte-swapping routines, shoot them.  */
 static void
-swap_abort()
+swap_abort ()
 {
   abort(); /* This way doesn't require any declaration for ANSI to fuck up */
 }

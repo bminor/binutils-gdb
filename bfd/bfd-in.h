@@ -113,16 +113,6 @@ typedef enum bfd_boolean {false, true} boolean;
 typedef enum bfd_boolean {bfd_fffalse, bfd_tttrue} boolean;
 #endif
 
-/* A pointer to a position in a file.  */
-/* FIXME:  This should be using off_t from <sys/types.h>.
-   For now, try to avoid breaking stuff by not including <sys/types.h> here.
-   This will break on systems with 64-bit file offsets (e.g. 4.4BSD).
-   Probably the best long-term answer is to avoid using file_ptr AND off_t
-   in this header file, and to handle this in the BFD implementation
-   rather than in its interface.  */
-/* typedef off_t	file_ptr; */
-typedef long int file_ptr;
-
 /* Support for different sizes of target format ints and addresses.
    If the type `long' is at least 64 bits, BFD_HOST_64BIT_LONG will be
    set to 1 above.  Otherwise, if gcc is being used, this code will
@@ -189,6 +179,17 @@ typedef unsigned long bfd_size_type;
 #define sprintf_vma(s,x) sprintf (s, "%08lx", x)
 
 #endif /* not BFD64  */
+
+/* A pointer to a position in a file.  */
+/* FIXME:  This should be using off_t from <sys/types.h>.
+   For now, try to avoid breaking stuff by not including <sys/types.h> here.
+   This will break on systems with 64-bit file offsets (e.g. 4.4BSD).
+   Probably the best long-term answer is to avoid using file_ptr AND off_t
+   in this header file, and to handle this in the BFD implementation
+   rather than in its interface.  */
+/* typedef off_t	file_ptr; */
+typedef bfd_signed_vma file_ptr;
+typedef bfd_vma ufile_ptr;
 
 extern void bfd_sprintf_vma PARAMS ((bfd *, char *, bfd_vma));
 extern void bfd_fprintf_vma PARAMS ((bfd *, PTR, bfd_vma));
@@ -300,7 +301,10 @@ typedef struct carsym {
    Perhaps just a forward definition would do? */
 struct orl {			/* output ranlib */
   char **name;			/* symbol name */
-  file_ptr pos;			/* bfd* or file position */
+  union {
+    file_ptr pos;
+    bfd *abfd;
+  } u;				/* bfd* or file position */
   int namidx;			/* index into string table */
 };
 
@@ -352,11 +356,11 @@ typedef struct _symbol_info
 {
   symvalue value;
   char type;
-  CONST char *name;            /* Symbol name.  */
+  const char *name;            /* Symbol name.  */
   unsigned char stab_type;     /* Stab type.  */
   char stab_other;             /* Stab other.  */
   short stab_desc;             /* Stab desc.  */
-  CONST char *stab_name;       /* String for stab type.  */
+  const char *stab_name;       /* String for stab type.  */
 } symbol_info;
 
 /* Get the name of a stabs type code.  */
@@ -482,14 +486,31 @@ extern void bfd_hash_traverse PARAMS ((struct bfd_hash_table *,
 /* Direct I/O routines, for programs which know more about the object
    file than BFD does.  Use higher level routines if possible.  */
 
-extern bfd_size_type bfd_read
-  PARAMS ((PTR, bfd_size_type size, bfd_size_type nitems, bfd *abfd));
-extern bfd_size_type bfd_write
-  PARAMS ((const PTR, bfd_size_type size, bfd_size_type nitems, bfd *abfd));
-extern int bfd_seek PARAMS ((bfd *abfd, file_ptr fp, int direction));
-extern long bfd_tell PARAMS ((bfd *abfd));
-extern int bfd_flush PARAMS ((bfd *abfd));
-extern int bfd_stat PARAMS ((bfd *abfd, struct stat *));
+extern bfd_size_type bfd_bread PARAMS ((PTR, bfd_size_type, bfd *));
+extern bfd_size_type bfd_bwrite PARAMS ((const PTR, bfd_size_type, bfd *));
+extern int bfd_seek PARAMS ((bfd *, file_ptr, int));
+extern ufile_ptr bfd_tell PARAMS ((bfd *));
+extern int bfd_flush PARAMS ((bfd *));
+extern int bfd_stat PARAMS ((bfd *, struct stat *));
+
+/* Deprecated old routines.  */
+#if __GNUC__
+#define bfd_read(BUF, ELTSIZE, NITEMS, ABFD)				\
+  (warn_deprecated ("bfd_read", __FILE__, __LINE__, __FUNCTION__),	\
+   bfd_bread ((BUF), (ELTSIZE) * (NITEMS), (ABFD)))
+#define bfd_write(BUF, ELTSIZE, NITEMS, ABFD)				\
+  (warn_deprecated ("bfd_write", __FILE__, __LINE__, __FUNCTION__),	\
+   bfd_bwrite ((BUF), (ELTSIZE) * (NITEMS), (ABFD)))
+#else
+#define bfd_read(BUF, ELTSIZE, NITEMS, ABFD)				\
+  (warn_deprecated ("bfd_read", (const char *) 0, 0, (const char *) 0), \
+   bfd_bread ((BUF), (ELTSIZE) * (NITEMS), (ABFD)))
+#define bfd_write(BUF, ELTSIZE, NITEMS, ABFD)				\
+  (warn_deprecated ("bfd_write", (const char *) 0, 0, (const char *) 0),\
+   bfd_bwrite ((BUF), (ELTSIZE) * (NITEMS), (ABFD)))
+#endif
+extern void warn_deprecated
+  PARAMS ((const char *, const char *, int, const char *));
 
 /* Cast from const char * to char * so that caller can assign to
    a char * without a warning.  */

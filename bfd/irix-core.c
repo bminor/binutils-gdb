@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include <core.out.h>
 
-struct sgi_core_struct 
+struct sgi_core_struct
 {
   int sig;
   char cmd[CORE_NAMESIZE];
@@ -41,11 +41,11 @@ struct sgi_core_struct
 #define core_command(bfd) (core_hdr(bfd)->cmd)
 
 static asection *make_bfd_asection
-  PARAMS ((bfd *, CONST char *, flagword, bfd_size_type, bfd_vma, file_ptr));
+  PARAMS ((bfd *, const char *, flagword, bfd_size_type, bfd_vma, file_ptr));
 static const bfd_target *irix_core_core_file_p PARAMS ((bfd *));
 static char *irix_core_core_file_failing_command PARAMS ((bfd *));
 static int irix_core_core_file_failing_signal PARAMS ((bfd *));
-static boolean irix_core_core_file_matches_executable_p 
+static boolean irix_core_core_file_matches_executable_p
   PARAMS ((bfd *, bfd *));
 static asymbol *irix_core_make_empty_symbol PARAMS ((bfd *));
 static void swap_abort PARAMS ((void));
@@ -53,7 +53,7 @@ static void swap_abort PARAMS ((void));
 static asection *
 make_bfd_asection (abfd, name, flags, _raw_size, vma, filepos)
      bfd *abfd;
-     CONST char *name;
+     const char *name;
      flagword flags;
      bfd_size_type _raw_size;
      bfd_vma vma;
@@ -83,8 +83,9 @@ irix_core_core_file_p (abfd)
   char *secname;
   struct coreout coreout;
   struct idesc *idg, *idf, *ids;
+  bfd_size_type amt;
 
-  val = bfd_read ((PTR)&coreout, 1, sizeof coreout, abfd);
+  val = bfd_bread ((PTR) &coreout, (bfd_size_type) sizeof coreout, abfd);
   if (val != sizeof coreout)
     {
       if (bfd_get_error () != bfd_error_system_call)
@@ -99,7 +100,8 @@ irix_core_core_file_p (abfd)
       || coreout.c_version != CORE_VERSION1)
     return 0;
 
-  core_hdr (abfd) = (struct sgi_core_struct *) bfd_zalloc (abfd, sizeof (struct sgi_core_struct));
+  amt = sizeof (struct sgi_core_struct);
+  core_hdr (abfd) = (struct sgi_core_struct *) bfd_zalloc (abfd, amt);
   if (!core_hdr (abfd))
     return NULL;
 
@@ -113,7 +115,7 @@ irix_core_core_file_p (abfd)
     {
       struct vmap vmap;
 
-      val = bfd_read ((PTR)&vmap, 1, sizeof vmap, abfd);
+      val = bfd_bread ((PTR) &vmap, (bfd_size_type) sizeof vmap, abfd);
       if (val != sizeof vmap)
 	break;
 
@@ -165,7 +167,7 @@ irix_core_core_file_p (abfd)
 		     idg->i_len + idf->i_len + ids->i_len,
 		     0,
 		     idg->i_offset);
- 
+
   /* OK, we believe you.  You're a core file (sure, sure).  */
   bfd_default_set_arch_mach (abfd, bfd_arch_mips, 0);
 
@@ -197,7 +199,8 @@ static asymbol *
 irix_core_make_empty_symbol (abfd)
      bfd *abfd;
 {
-  asymbol *new = (asymbol *) bfd_zalloc (abfd, sizeof (asymbol));
+  bfd_size_type amt = sizeof (asymbol);
+  asymbol *new = (asymbol *) bfd_zalloc (abfd, amt);
   if (new)
     new->the_bfd = abfd;
   return new;
@@ -260,7 +263,7 @@ const bfd_target irix_core_vec =
      bfd_false, bfd_false,
      bfd_false, bfd_false
     },
-    
+
        BFD_JUMP_TABLE_GENERIC (_bfd_generic),
        BFD_JUMP_TABLE_COPY (_bfd_generic),
        BFD_JUMP_TABLE_CORE (irix_core),
@@ -272,7 +275,7 @@ const bfd_target irix_core_vec =
        BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
     NULL,
-    
+
     (PTR) 0			/* backend_data */
 };
 

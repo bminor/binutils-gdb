@@ -59,7 +59,7 @@ reloc_howto_type *
 MY(reloc_howto) PARAMS ((bfd *, struct reloc_std_external *,
 			 int *, int *, int *));
 void
-MY(put_reloc) PARAMS ((bfd *, int, int, long, reloc_howto_type *,
+MY(put_reloc) PARAMS ((bfd *, int, int, bfd_vma, reloc_howto_type *,
 		       struct reloc_std_external *));
 
 /* The ns32k series is ah, unusual, when it comes to relocation.
@@ -78,16 +78,16 @@ MY(put_reloc) PARAMS ((bfd *, int, int, long, reloc_howto_type *,
    pointer, the static base register and general purpose register etc.
 
    For example:
-   
+
    sym1: .long .	 # pc relative 2's complement
    sym1: .long foo	 # 2's complement not pc relative
- 
+
    self:  movd @self, r0 # pc relative displacement
           movd foo, r0   # non pc relative displacement
 
    self:  movd self, r0  # pc relative immediate
           movd foo, r0   # non pc relative immediate
- 
+
    In addition, for historical reasons the encoding of the relocation types
    in the a.out format relocation entries is such that even the relocation
    methods which are standard are not encoded the standard way. */
@@ -180,14 +180,15 @@ MY(reloc_howto) (abfd, rel, r_index, r_extern, r_pcrel)
   return (MY(howto_table) + r_length + 3 * (*r_pcrel) + 6 * r_ns32k_type);
 }
 
-#define MY_reloc_howto(BFD,REL,IN,EX,PC) MY(reloc_howto) (BFD, REL, &IN, &EX, &PC)
+#define MY_reloc_howto(BFD, REL, IN, EX, PC) \
+  MY(reloc_howto) (BFD, REL, &IN, &EX, &PC)
 
 void
 MY(put_reloc) (abfd, r_extern, r_index, value, howto, reloc)
      bfd *abfd;
      int r_extern;
      int r_index;
-     long value;
+     bfd_vma value;
      reloc_howto_type *howto;
      struct reloc_std_external *reloc;
 {
@@ -219,7 +220,7 @@ MY(put_reloc) (abfd, r_extern, r_index, value, howto, reloc)
 #define MY_final_link_relocate _bfd_ns32k_final_link_relocate
 #define MY_relocate_contents _bfd_ns32k_relocate_contents
 
-#include <aoutx.h>
+#include "aoutx.h"
 
 reloc_howto_type *
 MY(bfd_reloc_type_lookup) (abfd,code)
@@ -280,7 +281,7 @@ MY_swap_std_reloc_in (abfd, bytes, cache_ptr, symbols, symcount)
   int r_pcrel;
   struct aoutdata  *su = &(abfd->tdata.aout_data->a);
 
-  cache_ptr->address = bfd_h_get_32 (abfd, bytes->r_address);
+  cache_ptr->address = H_GET_32 (abfd, bytes->r_address);
 
   /* Now the fun stuff.  */
   cache_ptr->howto = MY_reloc_howto(abfd, bytes, r_index, r_extern, r_pcrel);
@@ -349,8 +350,8 @@ _bfd_ns32k_relocate_contents (howto, input_bfd, relocation, location)
      bfd_byte *location;
 {
   int r_ns32k_type = (howto - MY(howto_table)) / 6;
-  long (*get_data) PARAMS ((bfd_byte *, long, long));
-  int (*put_data) PARAMS ((long, bfd_byte *, long, long));
+  bfd_vma (*get_data) PARAMS ((bfd_byte *, int));
+  int (*put_data) PARAMS ((bfd_vma, bfd_byte *, int));
 
   switch (r_ns32k_type)
     {

@@ -87,8 +87,8 @@ coff_z8k_select_reloc (howto)
 #define __A_MAGIC_SET__
 
 /* Code to swap in the reloc.  */
-#define SWAP_IN_RELOC_OFFSET   bfd_h_get_32
-#define SWAP_OUT_RELOC_OFFSET bfd_h_put_32
+#define SWAP_IN_RELOC_OFFSET	H_GET_32
+#define SWAP_OUT_RELOC_OFFSET	H_PUT_32
 #define SWAP_OUT_RELOC_EXTRA(abfd, src, dst) \
   dst->r_stuff[0] = 'S'; \
   dst->r_stuff[1] = 'C';
@@ -314,7 +314,7 @@ extra_case (in_abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr)
 		    input_section, reloc->address)))
 	      abort ();
 	  }
-	bfd_put_16 (in_abfd,gap,data + *dst_ptr);
+	bfd_put_16 (in_abfd, (bfd_vma) gap, data + *dst_ptr);
 	(*dst_ptr) += 2;
 	(*src_ptr) += 2;
 	break;

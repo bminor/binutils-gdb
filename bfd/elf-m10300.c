@@ -36,7 +36,7 @@ static boolean mn10300_elf_relax_section
 static bfd_byte * mn10300_elf_get_relocated_section_contents
   PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_order *,
 	   bfd_byte *, boolean, asymbol **));
-static int elf_mn10300_mach PARAMS ((flagword));
+static unsigned long elf_mn10300_mach PARAMS ((flagword));
 
 void    _bfd_mn10300_elf_final_write_processing PARAMS ((bfd *, boolean));
 boolean _bfd_mn10300_elf_object_p PARAMS ((bfd *));
@@ -840,15 +840,14 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	    extsyms = (Elf32_External_Sym *) symtab_hdr->contents;
 	  else
 	    {
+	      bfd_size_type amt = symtab_hdr->sh_size;
 	      /* Go get them off disk.  */
-	      extsyms = ((Elf32_External_Sym *)
-			 bfd_malloc (symtab_hdr->sh_size));
+	      extsyms = (Elf32_External_Sym *) bfd_malloc (amt);
 	      if (extsyms == NULL)
 		goto error_return;
 	      free_extsyms = extsyms;
 	      if (bfd_seek (input_bfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-		  || (bfd_read (extsyms, 1, symtab_hdr->sh_size, input_bfd)
-		      != symtab_hdr->sh_size))
+		  || bfd_bread (extsyms, amt, input_bfd) != amt)
 		goto error_return;
 	    }
 
@@ -925,6 +924,8 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 			{
 			  /* A local symbol.  */
 			  Elf_Internal_Sym isym;
+			  struct elf_link_hash_table *elftab;
+			  bfd_size_type amt;
 
 			  bfd_elf32_swap_symbol_in (input_bfd,
 						    extsyms + r_index, &isym);
@@ -953,7 +954,8 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 
 			  /* Tack on an ID so we can uniquely identify this
 			     local symbol in the global hash table.  */
-			  new_name = bfd_malloc (strlen (sym_name) + 10);
+			  amt = strlen (sym_name) + 10;
+			  new_name = bfd_malloc (amt);
 			  if (new_name == 0)
 			    goto error_return;
 
@@ -961,10 +963,10 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 				   sym_name, (int) sym_sec);
 			  sym_name = new_name;
 
-			  hash = (struct elf32_mn10300_link_hash_entry *)
-				   elf_link_hash_lookup (&hash_table->static_hash_table->root,
-						         sym_name, true,
-						         true, false);
+			  elftab = &hash_table->static_hash_table->root;
+			  hash = ((struct elf32_mn10300_link_hash_entry *)
+				  elf_link_hash_lookup (elftab, sym_name,
+							true, true, false));
 			  free (new_name);
 			}
 		      else
@@ -1016,6 +1018,9 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		      if (isym.st_shndx == shndx
 			  && ELF_ST_TYPE (isym.st_info) == STT_FUNC)
 			{
+			  struct elf_link_hash_table *elftab;
+			  bfd_size_type amt;
+
 			  if (isym.st_shndx == SHN_UNDEF)
 			    sym_sec = bfd_und_section_ptr;
 			  else if (isym.st_shndx > 0
@@ -1028,13 +1033,14 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 			  else if (isym.st_shndx == SHN_COMMON)
 			    sym_sec = bfd_com_section_ptr;
 
-			  sym_name = bfd_elf_string_from_elf_section (input_bfd,
-							symtab_hdr->sh_link,
-							isym.st_name);
+			  sym_name = (bfd_elf_string_from_elf_section
+				      (input_bfd, symtab_hdr->sh_link,
+				       isym.st_name));
 
 			  /* Tack on an ID so we can uniquely identify this
 			     local symbol in the global hash table.  */
-			  new_name = bfd_malloc (strlen (sym_name) + 10);
+			  amt = strlen (sym_name) + 10;
+			  new_name = bfd_malloc (amt);
 			  if (new_name == 0)
 			    goto error_return;
 
@@ -1042,10 +1048,10 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 				   sym_name, (int) sym_sec);
 			  sym_name = new_name;
 
-			  hash = (struct elf32_mn10300_link_hash_entry *)
-				    elf_link_hash_lookup (&hash_table->static_hash_table->root,
-						          sym_name, true,
-						          true, false);
+			  elftab = &hash_table->static_hash_table->root;
+			  hash = ((struct elf32_mn10300_link_hash_entry *)
+				  elf_link_hash_lookup (elftab, sym_name,
+							true, true, false));
 			  free (new_name);
 			  compute_function_info (input_bfd, hash,
 						 isym.st_value, contents);
@@ -1138,15 +1144,14 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	    extsyms = (Elf32_External_Sym *) symtab_hdr->contents;
 	  else
 	    {
+	      bfd_size_type amt = symtab_hdr->sh_size;
 	      /* Go get them off disk.  */
-	      extsyms = ((Elf32_External_Sym *)
-			 bfd_malloc (symtab_hdr->sh_size));
+	      extsyms = (Elf32_External_Sym *) bfd_malloc (amt);
 	      if (extsyms == NULL)
 		goto error_return;
 	      free_extsyms = extsyms;
 	      if (bfd_seek (input_bfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-		  || (bfd_read (extsyms, 1, symtab_hdr->sh_size, input_bfd)
-		      != symtab_hdr->sh_size))
+		  || bfd_bread (extsyms, amt, input_bfd) != amt)
 		goto error_return;
 	    }
 
@@ -1206,6 +1211,8 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		  asection *sym_sec = NULL;
 		  const char *sym_name;
 		  char *new_name;
+		  struct elf_link_hash_table *elftab;
+		  bfd_size_type amt;
 
 		  bfd_elf32_swap_symbol_in (input_bfd, esym, &isym);
 
@@ -1230,16 +1237,17 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 
 		  /* Tack on an ID so we can uniquely identify this
 		     local symbol in the global hash table.  */
-		  new_name = bfd_malloc (strlen (sym_name) + 10);
+		  amt = strlen (sym_name) + 10;
+		  new_name = bfd_malloc (amt);
 		  if (new_name == 0)
 		    goto error_return;
 		  sprintf (new_name, "%s_%08x", sym_name, (int) sym_sec);
 		  sym_name = new_name;
 
-		  sym_hash = (struct elf32_mn10300_link_hash_entry *)
-			    elf_link_hash_lookup (&hash_table->static_hash_table->root,
-					          sym_name, false,
-					          false, false);
+		  elftab = &hash_table->static_hash_table->root;
+		  sym_hash = ((struct elf32_mn10300_link_hash_entry *)
+			      elf_link_hash_lookup (elftab, sym_name,
+						    false, false, false));
 
 		  free (new_name);
 		  if (sym_hash == NULL)
@@ -1455,15 +1463,14 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	    extsyms = (Elf32_External_Sym *) symtab_hdr->contents;
 	  else
 	    {
+	      bfd_size_type amt = symtab_hdr->sh_size;
 	      /* Go get them off disk.  */
-	      extsyms = ((Elf32_External_Sym *)
-			 bfd_malloc (symtab_hdr->sh_size));
+	      extsyms = (Elf32_External_Sym *) bfd_malloc (amt);
 	      if (extsyms == NULL)
 		goto error_return;
 	      free_extsyms = extsyms;
 	      if (bfd_seek (abfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-		  || (bfd_read (extsyms, 1, symtab_hdr->sh_size, abfd)
-		      != symtab_hdr->sh_size))
+		  || bfd_bread (extsyms, amt, abfd) != amt)
 		goto error_return;
 	    }
 	}
@@ -1501,7 +1508,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 
 	  /* Tack on an ID so we can uniquely identify this
 	     local symbol in the global hash table.  */
-	  new_name = bfd_malloc (strlen (sym_name) + 10);
+	  new_name = bfd_malloc ((bfd_size_type) strlen (sym_name) + 10);
 	  if (new_name == 0)
 	    goto error_return;
 	  sprintf (new_name, "%s_%08x", sym_name, (int) sym_sec);
@@ -2583,7 +2590,8 @@ mn10300_elf_relax_delete_bytes (abfd, sec, addr, count)
   irelend = irel + sec->reloc_count;
 
   /* Actually delete the bytes.  */
-  memmove (contents + addr, contents + addr + count, toaddr - addr - count);
+  memmove (contents + addr, contents + addr + count,
+	   (size_t) (toaddr - addr - count));
   sec->_cooked_size -= count;
 
   /* Adjust all the relocs.  */
@@ -2716,7 +2724,7 @@ mn10300_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
 
   memcpy (data, elf_section_data (input_section)->this_hdr.contents,
-	  input_section->_raw_size);
+	  (size_t) input_section->_raw_size);
 
   if ((input_section->flags & SEC_RELOC) != 0
       && input_section->reloc_count > 0)
@@ -2724,20 +2732,19 @@ mn10300_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
       Elf_Internal_Sym *isymp;
       asection **secpp;
       Elf32_External_Sym *esym, *esymend;
+      bfd_size_type size;
 
       if (symtab_hdr->contents != NULL)
 	external_syms = (Elf32_External_Sym *) symtab_hdr->contents;
       else
 	{
-	  external_syms = ((Elf32_External_Sym *)
-			   bfd_malloc (symtab_hdr->sh_info
-				       * sizeof (Elf32_External_Sym)));
-	  if (external_syms == NULL && symtab_hdr->sh_info > 0)
+	  size = symtab_hdr->sh_info;
+	  size *= sizeof (Elf32_External_Sym);
+	  external_syms = (Elf32_External_Sym *) bfd_malloc (size);
+	  if (external_syms == NULL && size != 0)
 	    goto error_return;
 	  if (bfd_seek (input_bfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-	      || (bfd_read (external_syms, sizeof (Elf32_External_Sym),
-			    symtab_hdr->sh_info, input_bfd)
-		  != (symtab_hdr->sh_info * sizeof (Elf32_External_Sym))))
+	      || bfd_bread (external_syms, size, input_bfd) != size)
 	    goto error_return;
 	}
 
@@ -2747,15 +2754,16 @@ mn10300_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
       if (internal_relocs == NULL)
 	goto error_return;
 
-      internal_syms = ((Elf_Internal_Sym *)
-		       bfd_malloc (symtab_hdr->sh_info
-				   * sizeof (Elf_Internal_Sym)));
-      if (internal_syms == NULL && symtab_hdr->sh_info > 0)
+      size = symtab_hdr->sh_info;
+      size *= sizeof (Elf_Internal_Sym);
+      internal_syms = (Elf_Internal_Sym *) bfd_malloc (size);
+      if (internal_syms == NULL && size != 0)
 	goto error_return;
 
-      sections = (asection **) bfd_malloc (symtab_hdr->sh_info
-					   * sizeof (asection *));
-      if (sections == NULL && symtab_hdr->sh_info > 0)
+      size = symtab_hdr->sh_info;
+      size *= sizeof (asection *);
+      sections = (asection **) bfd_malloc (size);
+      if (sections == NULL && size != 0)
 	goto error_return;
 
       isymp = internal_syms;
@@ -2866,9 +2874,9 @@ elf32_mn10300_link_hash_table_create (abfd)
      bfd *abfd;
 {
   struct elf32_mn10300_link_hash_table *ret;
+  bfd_size_type amt = sizeof (struct elf32_mn10300_link_hash_table);
 
-  ret = ((struct elf32_mn10300_link_hash_table *)
-	 bfd_alloc (abfd, sizeof (struct elf32_mn10300_link_hash_table)));
+  ret = (struct elf32_mn10300_link_hash_table *) bfd_alloc (abfd, amt);
   if (ret == (struct elf32_mn10300_link_hash_table *) NULL)
     return NULL;
 
@@ -2880,9 +2888,9 @@ elf32_mn10300_link_hash_table_create (abfd)
     }
 
   ret->flags = 0;
+  amt = sizeof (struct elf_link_hash_table);
   ret->static_hash_table
-    = ((struct elf32_mn10300_link_hash_table *)
-       bfd_alloc (abfd, sizeof (struct elf_link_hash_table)));
+    = (struct elf32_mn10300_link_hash_table *) bfd_alloc (abfd, amt);
   if (ret->static_hash_table == NULL)
     {
       bfd_release (abfd, ret);
@@ -2899,7 +2907,7 @@ elf32_mn10300_link_hash_table_create (abfd)
   return &ret->root.root;
 }
 
-static int
+static unsigned long
 elf_mn10300_mach (flags)
      flagword flags;
 {

@@ -1,5 +1,5 @@
 /* BFD back-end for i386 a.out binaries under dynix.
-   Copyright 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1994, 1995, 2001 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -65,7 +65,7 @@ i386dynix_32_swap_exec_header_in (abfd, raw_bytes, execp)
      are memcmp'd, and thus the contents do matter. */
   memset ((PTR) execp, 0, sizeof (struct internal_exec));
   /* Now fill in fields in the execp, from the bytes in the raw data.  */
-  execp->a_info   = bfd_h_get_32 (abfd, bytes->e_info);
+  execp->a_info   = H_GET_32 (abfd, bytes->e_info);
   execp->a_text   = GET_WORD (abfd, bytes->e_text);
   execp->a_data   = GET_WORD (abfd, bytes->e_data);
   execp->a_bss    = GET_WORD (abfd, bytes->e_bss);

@@ -1,5 +1,5 @@
 /* OpenRISC-specific support for 32-bit ELF.
-   Copyright (C) 2001 Free Software Foundation, Inc.
+   Copyright 2001 Free Software Foundation, Inc.
    Contributed by Johan Rydberg, jrydberg@opencores.org
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -35,10 +35,10 @@ static boolean openrisc_elf_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
 static bfd_reloc_status_type openrisc_final_link_relocate
-  PARAMS ((reloc_howto_type *, bfd *, asection *, bfd_byte *, 
+  PARAMS ((reloc_howto_type *, bfd *, asection *, bfd_byte *,
            Elf_Internal_Rela *, bfd_vma));
 static boolean openrisc_elf_gc_sweep_hook
-  PARAMS ((bfd *, struct bfd_link_info *, asection *, 
+  PARAMS ((bfd *, struct bfd_link_info *, asection *,
            const Elf_Internal_Rela *));
 static asection * openrisc_elf_gc_mark_hook
   PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,

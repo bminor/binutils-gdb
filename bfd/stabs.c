@@ -1,5 +1,6 @@
 /* Stabs in sections linking support.
-   Copyright 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001
+   Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -178,7 +179,7 @@ _bfd_link_section_stabs (abfd, psinfo, stabsec, stabstrsec, psecinfo)
 {
   boolean first;
   struct stab_info *sinfo;
-  bfd_size_type count;
+  bfd_size_type count, amt;
   struct stab_section_info *secinfo;
   bfd_byte *stabbuf = NULL;
   bfd_byte *stabstrbuf = NULL;
@@ -223,7 +224,8 @@ _bfd_link_section_stabs (abfd, psinfo, stabsec, stabstrsec, psecinfo)
     {
       /* Initialize the stabs information we need to keep track of.  */
       first = true;
-      *psinfo = (PTR) bfd_alloc (abfd, sizeof (struct stab_info));
+      amt = sizeof (struct stab_info);
+      *psinfo = (PTR) bfd_alloc (abfd, amt);
       if (*psinfo == NULL)
 	goto error_return;
       sinfo = (struct stab_info *) *psinfo;
@@ -247,16 +249,16 @@ _bfd_link_section_stabs (abfd, psinfo, stabsec, stabstrsec, psecinfo)
 
   count = stabsec->_raw_size / STABSIZE;
 
-  *psecinfo = bfd_alloc (abfd,
-			 (sizeof (struct stab_section_info)
-			  + (count - 1) * sizeof (bfd_size_type)));
+  amt = sizeof (struct stab_section_info);
+  amt += (count - 1) * sizeof (bfd_size_type);
+  *psecinfo = bfd_alloc (abfd, amt);
   if (*psecinfo == NULL)
     goto error_return;
 
   secinfo = (struct stab_section_info *) *psecinfo;
   secinfo->excls = NULL;
   secinfo->cumulative_skips = NULL;
-  memset (secinfo->stridxs, 0, count * sizeof (bfd_size_type));
+  memset (secinfo->stridxs, 0, (size_t) count * sizeof (bfd_size_type));
 
   /* Read the stabs information from abfd.  */
 
@@ -265,9 +267,9 @@ _bfd_link_section_stabs (abfd, psinfo, stabsec, stabstrsec, psecinfo)
   if (stabbuf == NULL || stabstrbuf == NULL)
     goto error_return;
 
-  if (! bfd_get_section_contents (abfd, stabsec, stabbuf, 0,
+  if (! bfd_get_section_contents (abfd, stabsec, stabbuf, (bfd_vma) 0,
 				  stabsec->_raw_size)
-      || ! bfd_get_section_contents (abfd, stabstrsec, stabstrbuf, 0,
+      || ! bfd_get_section_contents (abfd, stabstrsec, stabstrbuf, (bfd_vma) 0,
 				     stabstrsec->_raw_size))
     goto error_return;
 
@@ -383,7 +385,8 @@ _bfd_link_section_stabs (abfd, psinfo, stabsec, stabstrsec, psecinfo)
 
 	  /* Record this symbol, so that we can set the value
              correctly.  */
-	  ne = (struct stab_excl_list *) bfd_alloc (abfd, sizeof *ne);
+	  amt = sizeof *ne;
+	  ne = (struct stab_excl_list *) bfd_alloc (abfd, amt);
 	  if (ne == NULL)
 	    goto error_return;
 	  ne->offset = sym - stabbuf;
@@ -471,8 +474,8 @@ _bfd_link_section_stabs (abfd, psinfo, stabsec, stabstrsec, psecinfo)
       bfd_size_type i, offset;
       bfd_size_type *pskips;
 
-      secinfo->cumulative_skips =
-	(bfd_size_type *) bfd_alloc (abfd, count * sizeof (bfd_size_type));
+      amt = count * sizeof (bfd_size_type);
+      secinfo->cumulative_skips = (bfd_size_type *) bfd_alloc (abfd, amt);
       if (secinfo->cumulative_skips == NULL)
 	goto error_return;
 
@@ -522,7 +525,8 @@ _bfd_write_section_stabs (output_bfd, psinfo, stabsec, psecinfo, contents)
 
   if (secinfo == NULL)
     return bfd_set_section_contents (output_bfd, stabsec->output_section,
-				     contents, stabsec->output_offset,
+				     contents,
+				     (file_ptr) stabsec->output_offset,
 				     stabsec->_raw_size);
 
   /* Handle each N_BINCL entry.  */
@@ -571,7 +575,7 @@ _bfd_write_section_stabs (output_bfd, psinfo, stabsec, psecinfo, contents)
   BFD_ASSERT ((bfd_size_type) (tosym - contents) == stabsec->_cooked_size);
 
   return bfd_set_section_contents (output_bfd, stabsec->output_section,
-				   contents, stabsec->output_offset,
+				   contents, (file_ptr) stabsec->output_offset,
 				   stabsec->_cooked_size);
 }
 
@@ -600,8 +604,8 @@ _bfd_write_stab_strings (output_bfd, psinfo)
 	      <= sinfo->stabstr->output_section->_raw_size);
 
   if (bfd_seek (output_bfd,
-		(sinfo->stabstr->output_section->filepos
-		 + sinfo->stabstr->output_offset),
+		(file_ptr) (sinfo->stabstr->output_section->filepos
+			    + sinfo->stabstr->output_offset),
 		SEEK_SET) != 0)
     return false;
 

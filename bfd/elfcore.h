@@ -86,9 +86,11 @@ elf_core_file_p (abfd)
   struct elf_backend_data *ebd;
   struct elf_obj_tdata *preserved_tdata = elf_tdata (abfd);
   struct elf_obj_tdata *new_tdata = NULL;
+  bfd_size_type amt;
 
   /* Read in the ELF header in external format.  */
-  if (bfd_read ((PTR) & x_ehdr, sizeof (x_ehdr), 1, abfd) != sizeof (x_ehdr))
+  if (bfd_bread ((PTR) &x_ehdr, (bfd_size_type) sizeof (x_ehdr), abfd)
+      != sizeof (x_ehdr))
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);
@@ -121,8 +123,8 @@ elf_core_file_p (abfd)
     }
 
   /* Give abfd an elf_obj_tdata.  */
-  new_tdata =
-    (struct elf_obj_tdata *) bfd_zalloc (abfd, sizeof (struct elf_obj_tdata));
+  amt = sizeof (struct elf_obj_tdata);
+  new_tdata = (struct elf_obj_tdata *) bfd_zalloc (abfd, amt);
   if (new_tdata == NULL)
     return NULL;
   elf_tdata (abfd) = new_tdata;
@@ -181,12 +183,12 @@ elf_core_file_p (abfd)
     goto wrong;
 
   /* Move to the start of the program headers.  */
-  if (bfd_seek (abfd, i_ehdrp->e_phoff, SEEK_SET) != 0)
+  if (bfd_seek (abfd, (file_ptr) i_ehdrp->e_phoff, SEEK_SET) != 0)
     goto wrong;
 
   /* Allocate space for the program headers.  */
-  i_phdrp = (Elf_Internal_Phdr *)
-    bfd_alloc (abfd, sizeof (*i_phdrp) * i_ehdrp->e_phnum);
+  amt = sizeof (*i_phdrp) * i_ehdrp->e_phnum;
+  i_phdrp = (Elf_Internal_Phdr *) bfd_alloc (abfd, amt);
   if (!i_phdrp)
     goto fail;
 
@@ -196,7 +198,7 @@ elf_core_file_p (abfd)
   for (phindex = 0; phindex < i_ehdrp->e_phnum; ++phindex)
     {
       Elf_External_Phdr x_phdr;
-      if (bfd_read ((PTR) &x_phdr, sizeof (x_phdr), 1, abfd)
+      if (bfd_bread ((PTR) &x_phdr, (bfd_size_type) sizeof (x_phdr), abfd)
 	  != sizeof (x_phdr))
 	goto fail;
 
@@ -206,7 +208,7 @@ elf_core_file_p (abfd)
   /* Process each program header.  */
   for (phindex = 0; phindex < i_ehdrp->e_phnum; ++phindex)
     {
-      if (! bfd_section_from_phdr (abfd, i_phdrp + phindex, phindex))
+      if (! bfd_section_from_phdr (abfd, i_phdrp + phindex, (int) phindex))
 	goto fail;
     }
 

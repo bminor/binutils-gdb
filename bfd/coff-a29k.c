@@ -154,14 +154,14 @@ a29k_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 	}
       signed_value >>= 2;
       insn = INSERT_HWORD (insn, signed_value);
-      bfd_put_32 (abfd, insn ,hit_data);
+      bfd_put_32 (abfd, (bfd_vma) insn ,hit_data);
       break;
     case R_ILOHALF:
       insn = bfd_get_32 (abfd, hit_data);
       unsigned_value = EXTRACT_HWORD(insn);
       unsigned_value +=  sym_value + reloc_entry->addend;
       insn = INSERT_HWORD(insn, unsigned_value);
-      bfd_put_32 (abfd, insn, hit_data);
+      bfd_put_32 (abfd, (bfd_vma) insn, hit_data);
       break;
     case R_IHIHALF:
       insn = bfd_get_32 (abfd, hit_data);
@@ -187,7 +187,7 @@ a29k_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
       unsigned_value = unsigned_value >> 16;
       insn = INSERT_HWORD(insn, unsigned_value);
       part1_consth_active = false;
-      bfd_put_32 (abfd, insn, hit_data);
+      bfd_put_32 (abfd, (bfd_vma) insn, hit_data);
       break;
     case R_BYTE:
       insn = bfd_get_8 (abfd, hit_data);
@@ -201,12 +201,12 @@ a29k_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
       unsigned_value = insn + sym_value + reloc_entry->addend;
       if (unsigned_value & 0xffff0000)
 	return bfd_reloc_overflow;
-      bfd_put_16 (abfd, insn, hit_data);
+      bfd_put_16 (abfd, (bfd_vma) insn, hit_data);
       break;
     case R_WORD:
       insn = bfd_get_32 (abfd, hit_data);
       insn += sym_value + reloc_entry->addend;
-      bfd_put_32 (abfd, insn, hit_data);
+      bfd_put_32 (abfd, (bfd_vma) insn, hit_data);
       break;
     default:
       *error_message = _("Unrecognized reloc");
@@ -482,7 +482,7 @@ coff_a29k_relocate_section (output_bfd, info, input_bfd, input_section,
 	  unsigned_value = EXTRACT_HWORD (insn);
 	  unsigned_value += val;
 	  insn = INSERT_HWORD (insn, unsigned_value);
-	  bfd_put_32 (input_bfd, insn, loc);
+	  bfd_put_32 (input_bfd, (bfd_vma) insn, loc);
 	  break;
 
 	case R_IHIHALF:

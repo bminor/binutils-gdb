@@ -114,7 +114,10 @@ ppcboot_mkobject (abfd)
      bfd *abfd;
 {
   if (!ppcboot_get_tdata (abfd))
-    ppcboot_set_tdata (abfd, bfd_zalloc (abfd, sizeof (ppcboot_data_t)));
+    {
+      bfd_size_type amt = sizeof (ppcboot_data_t);
+      ppcboot_set_tdata (abfd, bfd_zalloc (abfd, amt));
+    }
 
   return true;
 }
@@ -172,7 +175,8 @@ ppcboot_object_p (abfd)
       return NULL;
     }
 
-  if (bfd_read ((PTR) &hdr, sizeof (hdr), 1, abfd) != sizeof (hdr))
+  if (bfd_bread ((PTR) &hdr, (bfd_size_type) sizeof (hdr), abfd)
+      != sizeof (hdr))
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);
@@ -216,7 +220,7 @@ ppcboot_object_p (abfd)
   tdata->sec = sec;
   memcpy ((PTR) &tdata->header, (PTR) &hdr, sizeof (ppcboot_hdr_t));
 
-  ppcboot_set_arch_mach (abfd, bfd_arch_powerpc, 0);
+  ppcboot_set_arch_mach (abfd, bfd_arch_powerpc, 0L);
   return abfd->xvec;
 }
 
@@ -235,8 +239,8 @@ ppcboot_get_section_contents (abfd, section, location, offset, count)
      file_ptr offset;
      bfd_size_type count;
 {
-  if (bfd_seek (abfd, offset + sizeof (ppcboot_hdr_t), SEEK_SET) != 0
-      || bfd_read (location, 1, count, abfd) != count)
+  if (bfd_seek (abfd, offset + (file_ptr) sizeof (ppcboot_hdr_t), SEEK_SET) != 0
+      || bfd_bread (location, count, abfd) != count)
     return false;
   return true;
 }
@@ -259,7 +263,7 @@ mangle_name (abfd, suffix)
      bfd *abfd;
      char *suffix;
 {
-  int size;
+  bfd_size_type size;
   char *buf;
   char *p;
 
@@ -292,8 +296,9 @@ ppcboot_get_symtab (abfd, alocation)
   asection *sec = ppcboot_get_tdata (abfd)->sec;
   asymbol *syms;
   unsigned int i;
+  bfd_size_type amt = PPCBOOT_SYMS * sizeof (asymbol);
 
-  syms = (asymbol *) bfd_alloc (abfd, PPCBOOT_SYMS * sizeof (asymbol));
+  syms = (asymbol *) bfd_alloc (abfd, amt);
   if (syms == NULL)
     return false;
 
@@ -335,7 +340,7 @@ static asymbol *
 ppcboot_make_empty_symbol (abfd)
      bfd *abfd;
 {
-  return (asymbol *) bfd_alloc (abfd, sizeof (asymbol));
+  return (asymbol *) bfd_alloc (abfd, (bfd_size_type) sizeof (asymbol));
 }
 
 

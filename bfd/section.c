@@ -689,7 +689,7 @@ bfd_get_unique_section_name (abfd, templat, count)
   char *sname;
 
   len = strlen (templat);
-  sname = bfd_malloc (len + 8);
+  sname = bfd_malloc ((bfd_size_type) len + 8);
   if (sname == NULL)
     return NULL;
   strcpy (sname, templat);
@@ -788,7 +788,7 @@ bfd_make_section_anyway (abfd, name)
       sect = sect->next;
     }
 
-  newsect = (asection *) bfd_zalloc (abfd, sizeof (asection));
+  newsect = (asection *) bfd_zalloc (abfd, (bfd_size_type) sizeof (asection));
   if (newsect == NULL)
     return NULL;
 
@@ -1013,12 +1013,9 @@ FUNCTION
 	bfd_set_section_contents
 
 SYNOPSIS
-	boolean bfd_set_section_contents
-         (bfd *abfd,
-         asection *section,
-         PTR data,
-         file_ptr offset,
-         bfd_size_type count);
+	boolean bfd_set_section_contents (bfd *abfd, asection *section,
+					  PTR data, file_ptr offset,
+					  bfd_size_type count);
 
 DESCRIPTION
 	Sets the contents of the section @var{section} in BFD
@@ -1059,17 +1056,15 @@ bfd_set_section_contents (abfd, section, location, offset, count)
       return (false);
     }
 
-  if (offset < 0)
-    {
-    bad_val:
-      bfd_set_error (bfd_error_bad_value);
-      return false;
-    }
   sz = bfd_get_section_size_now (abfd, section);
   if ((bfd_size_type) offset > sz
       || count > sz
-      || offset + count > sz)
-    goto bad_val;
+      || offset + count > sz
+      || count != (size_t) count)
+    {
+      bfd_set_error (bfd_error_bad_value);
+      return false;
+    }
 
   switch (abfd->direction)
     {
@@ -1092,7 +1087,7 @@ bfd_set_section_contents (abfd, section, location, offset, count)
   /* Record a copy of the data in memory if desired.  */
   if (section->contents
       && location != section->contents + offset)
-    memcpy (section->contents + offset, location, count);
+    memcpy (section->contents + offset, location, (size_t) count);
 
   if (BFD_SEND (abfd, _bfd_set_section_contents,
 		(abfd, section, location, offset, count)))
@@ -1109,9 +1104,9 @@ FUNCTION
 	bfd_get_section_contents
 
 SYNOPSIS
-	boolean bfd_get_section_contents
-        (bfd *abfd, asection *section, PTR location,
-         file_ptr offset, bfd_size_type count);
+	boolean bfd_get_section_contents (bfd *abfd, asection *section,
+					  PTR location, file_ptr offset,
+					  bfd_size_type count);
 
 DESCRIPTION
 	Read data from @var{section} in BFD @var{abfd}
@@ -1138,21 +1133,21 @@ bfd_get_section_contents (abfd, section, location, offset, count)
 
   if (section->flags & SEC_CONSTRUCTOR)
     {
-      memset (location, 0, (unsigned) count);
+      memset (location, 0, (size_t) count);
       return true;
     }
 
-  if (offset < 0)
-    {
-    bad_val:
-      bfd_set_error (bfd_error_bad_value);
-      return false;
-    }
   /* Even if reloc_done is true, this function reads unrelocated
      contents, so we want the raw size.  */
   sz = section->_raw_size;
-  if ((bfd_size_type) offset > sz || count > sz || offset + count > sz)
-    goto bad_val;
+  if ((bfd_size_type) offset > sz
+      || count > sz
+      || offset + count > sz
+      || count != (size_t) count)
+    {
+      bfd_set_error (bfd_error_bad_value);
+      return false;
+    }
 
   if (count == 0)
     /* Don't bother.  */
@@ -1160,7 +1155,7 @@ bfd_get_section_contents (abfd, section, location, offset, count)
 
   if ((section->flags & SEC_HAS_CONTENTS) == 0)
     {
-      memset (location, 0, (unsigned) count);
+      memset (location, 0, (size_t) count);
       return true;
     }
 
@@ -1179,7 +1174,8 @@ FUNCTION
 	bfd_copy_private_section_data
 
 SYNOPSIS
-	boolean bfd_copy_private_section_data(bfd *ibfd, asection *isec, bfd *obfd, asection *osec);
+	boolean bfd_copy_private_section_data (bfd *ibfd, asection *isec,
+					       bfd *obfd, asection *osec);
 
 DESCRIPTION
 	Copy private section information from @var{isec} in the BFD

@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "libiberty.h"
 
 /* Sign-extend a 24-bit number.  */
-#define SEXT24(x)	((((x) & 0xffffff) ^ (~ 0x7fffff)) + 0x800000)
+#define SEXT24(x)	((((x) & 0xffffff) ^ 0x800000) - 0x800000)
 
 static reloc_howto_type *v850_elf_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
@@ -46,7 +46,7 @@ static boolean v850_elf_relocate_section
   PARAMS((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	  Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
 static bfd_reloc_status_type v850_elf_perform_relocation
-  PARAMS ((bfd *, int, bfd_vma, bfd_byte *));
+  PARAMS ((bfd *, unsigned int, bfd_vma, bfd_byte *));
 static boolean v850_elf_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *));
 static void remember_hi16s_reloc
@@ -524,7 +524,7 @@ v850_elf_reloc_type_lookup (abfd, code)
     if (v850_elf_reloc_map[i].bfd_reloc_val == code)
       {
 	unsigned int elf_reloc_val = v850_elf_reloc_map[i].elf_reloc_val;
-	
+
 	BFD_ASSERT (v850_elf_howto_table[elf_reloc_val].type == elf_reloc_val);
 
 	return v850_elf_howto_table + elf_reloc_val;
@@ -699,7 +699,8 @@ v850_elf_check_relocs (abfd, info, sec, relocs)
 
 		  sprintf (buff, msg, h->root.root.string);
 		  info->callbacks->warning (info, buff, h->root.root.string,
-					    abfd, h->root.u.def.section, 0);
+					    abfd, h->root.u.def.section,
+					    (bfd_vma) 0);
 
 		  bfd_set_error (bfd_error_bad_value);
 		  h->other |= V850_OTHER_ERROR;
@@ -764,10 +765,11 @@ remember_hi16s_reloc (abfd, addend, address)
      bfd_byte * address;
 {
   hi16s_location * entry = NULL;
+  bfd_size_type amt = sizeof (* free_hi16s);
 
   /* Find a free structure.  */
   if (free_hi16s == NULL)
-    free_hi16s = (hi16s_location *) bfd_zalloc (abfd, sizeof (* free_hi16s));
+    free_hi16s = (hi16s_location *) bfd_zalloc (abfd, amt);
 
   entry      = free_hi16s;
   free_hi16s = free_hi16s->next;
@@ -837,10 +839,10 @@ find_remembered_hi16s_reloc (addend, already_found)
 
 static bfd_reloc_status_type
 v850_elf_perform_relocation (abfd, r_type, addend, address)
-     bfd *      abfd;
-     int        r_type;
-     bfd_vma    addend;
-     bfd_byte * address;
+     bfd *abfd;
+     unsigned int r_type;
+     bfd_vma addend;
+     bfd_byte *address;
 {
   unsigned long insn;
   bfd_signed_vma saddend = (bfd_signed_vma) addend;
@@ -865,7 +867,7 @@ v850_elf_perform_relocation (abfd, r_type, addend, address)
       insn  = bfd_get_32 (abfd, address);
       insn &= ~0xfffe003f;
       insn |= (((addend & 0xfffe) << 16) | ((addend & 0x3f0000) >> 16));
-      bfd_put_32 (abfd, insn, address);
+      bfd_put_32 (abfd, (bfd_vma) insn, address);
       return bfd_reloc_ok;
 
     case R_V850_9_PCREL:
@@ -1064,7 +1066,7 @@ v850_elf_perform_relocation (abfd, r_type, addend, address)
 		  {
 		    insn = bfd_get_16 (abfd, hi16s_address);
 		    insn += 1;
-		    bfd_put_16 (abfd, insn, hi16s_address);
+		    bfd_put_16 (abfd, (bfd_vma) insn, hi16s_address);
 		  }
 	      }
 	    else
@@ -1130,7 +1132,7 @@ v850_elf_perform_relocation (abfd, r_type, addend, address)
       if (addend & 1)
         return bfd_reloc_dangerous;
 
-      insn = (addend & ~1) | (insn & 1);
+      insn = (addend &~ (bfd_vma) 1) | (insn & 1);
       break;
 
     case R_V850_TDA_6_8_OFFSET:
@@ -1219,9 +1221,9 @@ v850_elf_perform_relocation (abfd, r_type, addend, address)
 
       insn &= 0x0001ffdf;
       insn |= (addend & 1) << 5;
-      insn |= (addend & ~1) << 16;
+      insn |= (addend &~ (bfd_vma) 1) << 16;
 
-      bfd_put_32 (abfd, insn, address);
+      bfd_put_32 (abfd, (bfd_vma) insn, address);
       return bfd_reloc_ok;
 
     case R_V850_CALLT_6_7_OFFSET:
@@ -1246,7 +1248,7 @@ v850_elf_perform_relocation (abfd, r_type, addend, address)
 
     }
 
-  bfd_put_16 (abfd, insn, address);
+  bfd_put_16 (abfd, (bfd_vma) insn, address);
   return bfd_reloc_ok;
 }
 
@@ -1315,7 +1317,7 @@ v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
 	 	.text
 		.globl _start
 		nop
-	_start:         
+	_start:
         	jr foo
 
 	        .section ".foo","ax"
@@ -1363,7 +1365,7 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
      asection *              sym_sec;
      int                     is_local ATTRIBUTE_UNUSED;
 {
-  unsigned long  r_type   = howto->type;
+  unsigned int   r_type   = howto->type;
   bfd_byte *     hit_data = contents + offset;
 
   /* Adjust the value according to the relocation.  */
@@ -1535,7 +1537,8 @@ v850_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   if (sym_hashes == NULL)
     {
       info->callbacks->warning
-	(info, "no hash table available", NULL, input_bfd, input_section, 0);
+	(info, "no hash table available",
+	 NULL, input_bfd, input_section, (bfd_vma) 0);
 
       return false;
     }

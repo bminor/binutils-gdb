@@ -202,7 +202,7 @@ sec_merge_hash_lookup (table, string, alignment, create)
 	}
       hash ^= hash >> 2;
       len += table->entsize;
-    }      
+    }
   else
     {
       for (i = 0; i < table->entsize; ++i)
@@ -262,9 +262,9 @@ sec_merge_init (entsize, strings)
      boolean strings;
 {
   struct sec_merge_hash *table;
+  bfd_size_type amt = sizeof (struct sec_merge_hash);
 
-  table = ((struct sec_merge_hash *)
-	   bfd_malloc (sizeof (struct sec_merge_hash)));
+  table = (struct sec_merge_hash *) bfd_malloc (amt);
   if (table == NULL)
     return NULL;
 
@@ -325,7 +325,7 @@ sec_merge_emit (abfd, entry)
   int alignment_power = bfd_get_section_alignment (abfd, sec->output_section);
 
   if (alignment_power)
-    pad = bfd_zmalloc (1 << alignment_power);
+    pad = bfd_zmalloc ((bfd_size_type) 1 << alignment_power);
 
   for (; entry != NULL && entry->secinfo == secinfo; entry = entry->next)
     {
@@ -336,7 +336,7 @@ sec_merge_emit (abfd, entry)
       if (len)
 	{
 	  len = entry->alignment - len;
-	  if (bfd_write ((PTR) pad, 1, len, abfd) != len)
+	  if (bfd_bwrite ((PTR) pad, (bfd_size_type) len, abfd) != len)
 	    break;
 	  off += len;
 	}
@@ -344,7 +344,7 @@ sec_merge_emit (abfd, entry)
       str = entry->root.string;
       len = entry->len;
 
-      if (bfd_write ((PTR) str, 1, len, abfd) != len)
+      if (bfd_bwrite ((PTR) str, (bfd_size_type) len, abfd) != len)
 	break;
 
       off += len;
@@ -369,6 +369,7 @@ _bfd_merge_section (abfd, psinfo, sec, psecinfo)
   struct sec_merge_info *sinfo;
   struct sec_merge_sec_info *secinfo;
   unsigned int align;
+  bfd_size_type amt;
 
   if (sec->_raw_size == 0
       || (sec->flags & SEC_EXCLUDE)
@@ -417,7 +418,7 @@ _bfd_merge_section (abfd, psinfo, sec, psecinfo)
     {
       /* Initialize the information we need to keep track of.  */
       sinfo = (struct sec_merge_info *)
-	      bfd_alloc (abfd, sizeof (struct sec_merge_info));
+	      bfd_alloc (abfd, (bfd_size_type) sizeof (struct sec_merge_info));
       if (sinfo == NULL)
 	goto error_return;
       sinfo->next = (struct sec_merge_info *) *psinfo;
@@ -431,8 +432,8 @@ _bfd_merge_section (abfd, psinfo, sec, psecinfo)
 
   /* Read the section from abfd.  */
 
-  *psecinfo = bfd_alloc (abfd, sizeof (struct sec_merge_sec_info)
-			       + sec->_raw_size - 1);
+  amt = sizeof (struct sec_merge_sec_info) + sec->_raw_size - 1;
+  *psecinfo = bfd_alloc (abfd, amt);
   if (*psecinfo == NULL)
     goto error_return;
 
@@ -450,8 +451,8 @@ _bfd_merge_section (abfd, psinfo, sec, psecinfo)
   secinfo->htab = sinfo->htab;
   secinfo->first = NULL;
 
-  if (! bfd_get_section_contents (sec->owner, sec, secinfo->contents, 0,
-				  sec->_raw_size))
+  if (! bfd_get_section_contents (sec->owner, sec, secinfo->contents,
+				  (bfd_vma) 0, sec->_raw_size))
     goto error_return;
 
   return true;
@@ -470,7 +471,7 @@ cmplengthentry (a, b)
 {
   struct sec_merge_hash_entry * A = *(struct sec_merge_hash_entry **) a;
   struct sec_merge_hash_entry * B = *(struct sec_merge_hash_entry **) b;
-              
+
   if (A->len < B->len)
     return 1;
   else if (A->len > B->len)
@@ -556,16 +557,16 @@ record_section (sinfo, secinfo)
   align = bfd_get_section_alignment (sec->owner, sec);
   end = secinfo->contents + sec->_raw_size;
   nul = false;
-  mask = ((bfd_vma)1 << align) - 1;
+  mask = ((bfd_vma) 1 << align) - 1;
   if (sec->flags & SEC_STRINGS)
     {
-      for (p = secinfo->contents; p < end;)
+      for (p = secinfo->contents; p < end; )
 	{
 	  eltalign = p - secinfo->contents;
 	  eltalign = ((eltalign ^ (eltalign - 1)) + 1) >> 1;
 	  if (!eltalign || eltalign > mask)
 	    eltalign = mask + 1;
-	  entry = sec_merge_add (sinfo->htab, p, eltalign, secinfo);
+	  entry = sec_merge_add (sinfo->htab, p, (unsigned) eltalign, secinfo);
 	  if (! entry)
 	    goto error_return;
 	  p += entry->len;
@@ -576,8 +577,8 @@ record_section (sinfo, secinfo)
 		  if (!nul && !((p - secinfo->contents) & mask))
 		    {
 		      nul = true;
-		      entry = sec_merge_add (sinfo->htab, "", mask + 1,
-					     secinfo);
+		      entry = sec_merge_add (sinfo->htab, "",
+					     (unsigned) mask + 1, secinfo);
 		      if (! entry)
 			goto error_return;
 		    }
@@ -596,8 +597,8 @@ record_section (sinfo, secinfo)
 		  if (!nul && !((p - secinfo->contents) & mask))
 		    {
 		      nul = true;
-		      entry = sec_merge_add (sinfo->htab, p, mask + 1,
-					     secinfo);
+		      entry = sec_merge_add (sinfo->htab, p,
+					     (unsigned) mask + 1, secinfo);
 		      if (! entry)
 			goto error_return;
 		    }
@@ -633,12 +634,12 @@ merge_strings (sinfo)
   struct sec_merge_hash_entry **array, **a, **end, *e;
   struct sec_merge_sec_info *secinfo;
   htab_t lasttab = NULL, last4tab = NULL;
-  bfd_size_type size;
+  bfd_size_type size, amt;
 
   /* Now sort the strings by length, longest first.  */
-  array = (struct sec_merge_hash_entry **)
-	  malloc (sinfo->htab->size
-		  * sizeof (struct sec_merge_hash_entry *));
+  array = NULL;
+  amt = sinfo->htab->size * sizeof (struct sec_merge_hash_entry *);
+  array = (struct sec_merge_hash_entry **) bfd_malloc (amt);
   if (array == NULL)
     goto alloc_failure;
 
@@ -648,11 +649,11 @@ merge_strings (sinfo)
 
   sinfo->htab->size = a - array;
 
-  qsort (array, sinfo->htab->size, sizeof (struct sec_merge_hash_entry *),
-	 cmplengthentry);
+  qsort (array, (size_t) sinfo->htab->size,
+	 sizeof (struct sec_merge_hash_entry *), cmplengthentry);
 
-  last4tab = htab_create (sinfo->htab->size * 4, NULL, last4_eq, NULL);
-  lasttab = htab_create (sinfo->htab->size * 4, NULL, last_eq, NULL);
+  last4tab = htab_create ((size_t) sinfo->htab->size * 4, NULL, last4_eq, NULL);
+  lasttab = htab_create ((size_t) sinfo->htab->size * 4, NULL, last_eq, NULL);
   if (lasttab == NULL || last4tab == NULL)
     goto alloc_failure;
 
@@ -850,15 +851,15 @@ _bfd_write_merged_section (output_bfd, sec, psecinfo)
      PTR psecinfo;
 {
   struct sec_merge_sec_info *secinfo;
+  file_ptr pos;
 
   secinfo = (struct sec_merge_sec_info *) psecinfo;
 
   if (!secinfo->first)
     return true;
 
-  if (bfd_seek (output_bfd,
-		(sec->output_section->filepos + sec->output_offset),
-		SEEK_SET) != 0)
+  pos = sec->output_section->filepos + sec->output_offset;
+  if (bfd_seek (output_bfd, pos, SEEK_SET) != 0)
     return false;
 
   if (! sec_merge_emit (output_bfd, secinfo->first))

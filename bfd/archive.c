@@ -1,6 +1,6 @@
 /* BFD back-end for archive files (libraries).
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000
+   2000, 2001
    Free Software Foundation, Inc.
    Written by Cygnus Support.  Mostly Gumby Henkel-Wallace's fault.
 
@@ -173,9 +173,9 @@ boolean
 _bfd_generic_mkarchive (abfd)
      bfd *abfd;
 {
-  abfd->tdata.aout_ar_data = ((struct artdata *)
-			      bfd_zalloc (abfd, sizeof (struct artdata)));
+  bfd_size_type amt = sizeof (struct artdata);
 
+  abfd->tdata.aout_ar_data = (struct artdata *) bfd_zalloc (abfd, amt);
   if (bfd_ardata (abfd) == NULL)
     return false;
 
@@ -284,10 +284,9 @@ _bfd_add_bfd_to_archive_cache (arch_bfd, filepos, new_elt)
      bfd *arch_bfd, *new_elt;
      file_ptr filepos;
 {
-  struct ar_cache *new_cache = ((struct ar_cache *)
-				bfd_zalloc (arch_bfd,
-					    sizeof (struct ar_cache)));
+  bfd_size_type amt = sizeof (struct ar_cache);
 
+  struct ar_cache *new_cache = (struct ar_cache *) bfd_zalloc (arch_bfd, amt);
   if (new_cache == NULL)
     return false;
 
@@ -358,14 +357,14 @@ _bfd_generic_read_ar_hdr_mag (abfd, mag)
 {
   struct ar_hdr hdr;
   char *hdrp = (char *) &hdr;
-  unsigned int parsed_size;
+  size_t parsed_size;
   struct areltdata *ared;
   char *filename = NULL;
-  unsigned int namelen = 0;
-  unsigned int allocsize = sizeof (struct areltdata) + sizeof (struct ar_hdr);
+  bfd_size_type namelen = 0;
+  bfd_size_type allocsize = sizeof (struct areltdata) + sizeof (struct ar_hdr);
   char *allocptr = 0;
 
-  if (bfd_read ((PTR) hdrp, 1, sizeof (struct ar_hdr), abfd)
+  if (bfd_bread ((PTR) hdrp, (bfd_size_type) sizeof (struct ar_hdr), abfd)
       != sizeof (struct ar_hdr))
     {
       if (bfd_get_error () != bfd_error_system_call)
@@ -421,7 +420,7 @@ _bfd_generic_read_ar_hdr_mag (abfd, mag)
       filename = (allocptr
 		  + sizeof (struct areltdata)
 		  + sizeof (struct ar_hdr));
-      if (bfd_read (filename, 1, namelen, abfd) != namelen)
+      if (bfd_bread (filename, namelen, abfd) != namelen)
 	{
 	  if (bfd_get_error () != bfd_error_system_call)
 	    bfd_set_error (bfd_error_no_more_archived_files);
@@ -476,7 +475,7 @@ _bfd_generic_read_ar_hdr_mag (abfd, mag)
       ared->filename = allocptr + (sizeof (struct areltdata) +
 				   sizeof (struct ar_hdr));
       if (namelen)
-	memcpy (ared->filename, hdr.ar_name, namelen);
+	memcpy (ared->filename, hdr.ar_name, (size_t) namelen);
       ared->filename[namelen] = '\0';
     }
 
@@ -601,10 +600,11 @@ bfd_generic_archive_p (abfd)
 {
   struct artdata *tdata_hold;
   char armag[SARMAG + 1];
+  bfd_size_type amt;
 
   tdata_hold = abfd->tdata.aout_ar_data;
 
-  if (bfd_read ((PTR) armag, 1, SARMAG, abfd) != SARMAG)
+  if (bfd_bread ((PTR) armag, (bfd_size_type) SARMAG, abfd) != SARMAG)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);
@@ -622,8 +622,8 @@ bfd_generic_archive_p (abfd)
 
   /* We are setting bfd_ardata(abfd) here, but since bfd_ardata
      involves a cast, we can't do it as the left operand of assignment.  */
-  abfd->tdata.aout_ar_data = ((struct artdata *)
-			      bfd_zalloc (abfd, sizeof (struct artdata)));
+  amt = sizeof (struct artdata);
+  abfd->tdata.aout_ar_data = (struct artdata *) bfd_zalloc (abfd, amt);
 
   if (bfd_ardata (abfd) == NULL)
     return NULL;
@@ -700,7 +700,7 @@ bfd_generic_archive_p (abfd)
 /* Some constants for a 32 bit BSD archive structure.  We do not
    support 64 bit archives presently; so far as I know, none actually
    exist.  Supporting them would require changing these constants, and
-   changing some bfd_h_get_32 to bfd_h_get_64.  */
+   changing some H_GET_32 to H_GET_64.  */
 
 /* The size of an external symdef structure.  */
 #define BSD_SYMDEF_SIZE 8
@@ -725,7 +725,7 @@ do_slurp_bsd_armap (abfd)
   bfd_byte *raw_armap, *rbase;
   struct artdata *ardata = bfd_ardata (abfd);
   char *stringbase;
-  unsigned int parsed_size;
+  bfd_size_type parsed_size, amt;
   carsym *set;
 
   mapdata = (struct areltdata *) _bfd_read_ar_hdr (abfd);
@@ -738,7 +738,7 @@ do_slurp_bsd_armap (abfd)
   if (raw_armap == (bfd_byte *) NULL)
     return false;
 
-  if (bfd_read ((PTR) raw_armap, 1, parsed_size, abfd) != parsed_size)
+  if (bfd_bread ((PTR) raw_armap, parsed_size, abfd) != parsed_size)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_malformed_archive);
@@ -747,7 +747,7 @@ do_slurp_bsd_armap (abfd)
       return false;
     }
 
-  ardata->symdef_count = bfd_h_get_32 (abfd, raw_armap) / BSD_SYMDEF_SIZE;
+  ardata->symdef_count = H_GET_32 (abfd, raw_armap) / BSD_SYMDEF_SIZE;
 
   if (ardata->symdef_count * BSD_SYMDEF_SIZE >
       parsed_size - BSD_SYMDEF_COUNT_SIZE)
@@ -762,9 +762,8 @@ do_slurp_bsd_armap (abfd)
   stringbase = ((char *) rbase
 		+ ardata->symdef_count * BSD_SYMDEF_SIZE
 		+ BSD_STRING_COUNT_SIZE);
-  ardata->symdefs = (carsym *) bfd_alloc (abfd,
-					  (ardata->symdef_count
-					   * sizeof (carsym)));
+  amt = (bfd_size_type) ardata->symdef_count * sizeof (carsym);
+  ardata->symdefs = (carsym *) bfd_alloc (abfd, amt);
   if (!ardata->symdefs)
     return false;
 
@@ -772,8 +771,8 @@ do_slurp_bsd_armap (abfd)
        counter < ardata->symdef_count;
        counter++, set++, rbase += BSD_SYMDEF_SIZE)
     {
-      set->name = bfd_h_get_32 (abfd, rbase) + stringbase;
-      set->file_offset = bfd_h_get_32 (abfd, rbase + BSD_SYMDEF_OFFSET_SIZE);
+      set->name = H_GET_32 (abfd, rbase) + stringbase;
+      set->file_offset = H_GET_32 (abfd, rbase + BSD_SYMDEF_OFFSET_SIZE);
     }
 
   ardata->first_file_filepos = bfd_tell (abfd);
@@ -796,13 +795,14 @@ do_slurp_coff_armap (abfd)
   int *raw_armap, *rawptr;
   struct artdata *ardata = bfd_ardata (abfd);
   char *stringbase;
-  unsigned int stringsize;
+  bfd_size_type stringsize;
   unsigned int parsed_size;
   carsym *carsyms;
-  unsigned int nsymz;		/* Number of symbols in armap.  */
+  bfd_size_type nsymz;		/* Number of symbols in armap.  */
   bfd_vma (*swap) PARAMS ((const bfd_byte *));
   char int_buf[sizeof (long)];
-  unsigned int carsym_size, ptrsize, i;
+  bfd_size_type carsym_size, ptrsize;
+  unsigned int i;
 
   mapdata = (struct areltdata *) _bfd_read_ar_hdr (abfd);
   if (mapdata == NULL)
@@ -810,7 +810,7 @@ do_slurp_coff_armap (abfd)
   parsed_size = mapdata->parsed_size;
   bfd_release (abfd, (PTR) mapdata);	/* Don't need it any more.  */
 
-  if (bfd_read ((PTR) int_buf, 1, 4, abfd) != 4)
+  if (bfd_bread ((PTR) int_buf, (bfd_size_type) 4, abfd) != 4)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_malformed_archive);
@@ -855,8 +855,8 @@ do_slurp_coff_armap (abfd)
   raw_armap = (int *) bfd_alloc (abfd, ptrsize);
   if (raw_armap == NULL)
     goto release_symdefs;
-  if (bfd_read ((PTR) raw_armap, 1, ptrsize, abfd) != ptrsize
-      || bfd_read ((PTR) stringbase, 1, stringsize, abfd) != stringsize)
+  if (bfd_bread ((PTR) raw_armap, ptrsize, abfd) != ptrsize
+      || (bfd_bread ((PTR) stringbase, stringsize, abfd) != stringsize))
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_malformed_archive);
@@ -886,7 +886,7 @@ do_slurp_coff_armap (abfd)
   {
     struct areltdata *tmp;
 
-    bfd_seek (abfd,   ardata->first_file_filepos, SEEK_SET);
+    bfd_seek (abfd, ardata->first_file_filepos, SEEK_SET);
     tmp = (struct areltdata *) _bfd_read_ar_hdr (abfd);
     if (tmp != NULL)
       {
@@ -894,7 +894,7 @@ do_slurp_coff_armap (abfd)
 	    && tmp->arch_header[1] == ' ')
 	  {
 	    ardata->first_file_filepos +=
-	      (tmp->parsed_size + sizeof (struct ar_hdr) + 1) & ~1;
+	      (tmp->parsed_size + sizeof (struct ar_hdr) + 1) & ~(unsigned) 1;
 	  }
 	bfd_release (abfd, tmp);
       }
@@ -917,14 +917,14 @@ bfd_slurp_armap (abfd)
      bfd *abfd;
 {
   char nextname[17];
-  int i = bfd_read ((PTR) nextname, 1, 16, abfd);
+  int i = bfd_bread ((PTR) nextname, (bfd_size_type) 16, abfd);
 
   if (i == 0)
     return true;
   if (i != 16)
     return false;
 
-  if (bfd_seek (abfd, (file_ptr) - 16, SEEK_CUR) != 0)
+  if (bfd_seek (abfd, (file_ptr) -16, SEEK_CUR) != 0)
     return false;
 
   if (!strncmp (nextname, "__.SYMDEF       ", 16)
@@ -961,8 +961,9 @@ bfd_slurp_bsd_armap_f2 (abfd)
   struct artdata *ardata = bfd_ardata (abfd);
   char *stringbase;
   unsigned int stringsize;
+  bfd_size_type amt;
   carsym *set;
-  int i = bfd_read ((PTR) nextname, 1, 16, abfd);
+  int i = bfd_bread ((PTR) nextname, (bfd_size_type) 16, abfd);
 
   if (i == 0)
     return true;
@@ -970,7 +971,7 @@ bfd_slurp_bsd_armap_f2 (abfd)
     return false;
 
   /* The archive has at least 16 bytes in it.  */
-  if (bfd_seek (abfd, -16L, SEEK_CUR) != 0)
+  if (bfd_seek (abfd, (file_ptr) -16, SEEK_CUR) != 0)
     return false;
 
   if (!strncmp (nextname, "__.SYMDEF       ", 16)
@@ -987,7 +988,8 @@ bfd_slurp_bsd_armap_f2 (abfd)
   if (mapdata == NULL)
     return false;
 
-  raw_armap = (bfd_byte *) bfd_zalloc (abfd, mapdata->parsed_size);
+  amt = mapdata->parsed_size;
+  raw_armap = (bfd_byte *) bfd_zalloc (abfd, amt);
   if (raw_armap == NULL)
     {
     byebye:
@@ -995,8 +997,7 @@ bfd_slurp_bsd_armap_f2 (abfd)
       return false;
     }
 
-  if (bfd_read ((PTR) raw_armap, 1, mapdata->parsed_size, abfd) !=
-      mapdata->parsed_size)
+  if (bfd_bread ((PTR) raw_armap, amt, abfd) != amt)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_malformed_archive);
@@ -1005,7 +1006,7 @@ bfd_slurp_bsd_armap_f2 (abfd)
       goto byebye;
     }
 
-  ardata->symdef_count = bfd_h_get_16 (abfd, (PTR) raw_armap);
+  ardata->symdef_count = H_GET_16 (abfd, (PTR) raw_armap);
 
   if (ardata->symdef_count * BSD_SYMDEF_SIZE
       > mapdata->parsed_size - HPUX_SYMDEF_COUNT_SIZE)
@@ -1017,15 +1018,14 @@ bfd_slurp_bsd_armap_f2 (abfd)
 
   ardata->cache = 0;
 
-  stringsize = bfd_h_get_32 (abfd, raw_armap + HPUX_SYMDEF_COUNT_SIZE);
+  stringsize = H_GET_32 (abfd, raw_armap + HPUX_SYMDEF_COUNT_SIZE);
   /* Skip sym count and string sz.  */
   stringbase = ((char *) raw_armap
 		+ HPUX_SYMDEF_COUNT_SIZE
 		+ BSD_STRING_COUNT_SIZE);
   rbase = (bfd_byte *) stringbase + stringsize;
-  ardata->symdefs = (carsym *) bfd_alloc (abfd,
-					  (ardata->symdef_count
-					   * BSD_SYMDEF_SIZE));
+  amt = (bfd_size_type) ardata->symdef_count * BSD_SYMDEF_SIZE;
+  ardata->symdefs = (carsym *) bfd_alloc (abfd, amt);
   if (!ardata->symdefs)
     return false;
 
@@ -1033,8 +1033,8 @@ bfd_slurp_bsd_armap_f2 (abfd)
        counter < ardata->symdef_count;
        counter++, set++, rbase += BSD_SYMDEF_SIZE)
     {
-      set->name = bfd_h_get_32 (abfd, rbase) + stringbase;
-      set->file_offset = bfd_h_get_32 (abfd, rbase + BSD_SYMDEF_OFFSET_SIZE);
+      set->name = H_GET_32 (abfd, rbase) + stringbase;
+      set->file_offset = H_GET_32 (abfd, rbase + BSD_SYMDEF_OFFSET_SIZE);
     }
 
   ardata->first_file_filepos = bfd_tell (abfd);
@@ -1065,13 +1065,14 @@ _bfd_slurp_extended_name_table (abfd)
 {
   char nextname[17];
   struct areltdata *namedata;
+  bfd_size_type amt;
 
   /* FIXME:  Formatting sucks here, and in case of failure of BFD_READ,
      we probably don't want to return true.  */
   bfd_seek (abfd, bfd_ardata (abfd)->first_file_filepos, SEEK_SET);
-  if (bfd_read ((PTR) nextname, 1, 16, abfd) == 16)
+  if (bfd_bread ((PTR) nextname, (bfd_size_type) 16, abfd) == 16)
     {
-      if (bfd_seek (abfd, (file_ptr) - 16, SEEK_CUR) != 0)
+      if (bfd_seek (abfd, (file_ptr) -16, SEEK_CUR) != 0)
 	return false;
 
       if (strncmp (nextname, "ARFILENAMES/    ", 16) != 0 &&
@@ -1085,8 +1086,8 @@ _bfd_slurp_extended_name_table (abfd)
       if (namedata == NULL)
 	return false;
 
-      bfd_ardata (abfd)->extended_names =
-	bfd_zalloc (abfd, namedata->parsed_size);
+      amt = namedata->parsed_size;
+      bfd_ardata (abfd)->extended_names = bfd_zalloc (abfd, amt);
       if (bfd_ardata (abfd)->extended_names == NULL)
 	{
 	byebye:
@@ -1094,8 +1095,7 @@ _bfd_slurp_extended_name_table (abfd)
 	  return false;
 	}
 
-      if (bfd_read ((PTR) bfd_ardata (abfd)->extended_names, 1,
-		    namedata->parsed_size, abfd) != namedata->parsed_size)
+      if (bfd_bread ((PTR) bfd_ardata (abfd)->extended_names, amt, abfd) != amt)
 	{
 	  if (bfd_get_error () != bfd_error_system_call)
 	    bfd_set_error (bfd_error_malformed_archive);
@@ -1145,8 +1145,8 @@ normalize (abfd, file)
      bfd *abfd;
      const char *file;
 {
-  CONST char *first;
-  CONST char *last;
+  const char *first;
+  const char *last;
   char *copy;
 
   first = file + strlen (file) - 1;
@@ -1164,7 +1164,7 @@ normalize (abfd, file)
       first--;
     }
 
-  copy = (char *) bfd_alloc (abfd, last - first + 1);
+  copy = (char *) bfd_alloc (abfd, (bfd_size_type) (last - first + 1));
   if (copy == NULL)
     return NULL;
 
@@ -1242,7 +1242,7 @@ _bfd_construct_extended_name_table (abfd, trailing_slash, tabloc, tablen)
      bfd_size_type *tablen;
 {
   unsigned int maxname = abfd->xvec->ar_max_namelen;
-  unsigned int total_namelen = 0;
+  bfd_size_type total_namelen = 0;
   bfd *current;
   char *strptr;
 
@@ -1390,6 +1390,7 @@ bfd_ar_hdr_from_filesystem (abfd, filename, member)
   struct areltdata *ared;
   struct ar_hdr *hdr;
   char *temp, *temp1;
+  bfd_size_type amt;
 
   if (member && (member->flags & BFD_IN_MEMORY) != 0)
     {
@@ -1407,8 +1408,8 @@ bfd_ar_hdr_from_filesystem (abfd, filename, member)
       return NULL;
     }
 
-  ared = (struct areltdata *) bfd_zalloc (abfd, sizeof (struct ar_hdr) +
-					  sizeof (struct areltdata));
+  amt = sizeof (struct ar_hdr) + sizeof (struct areltdata);
+  ared = (struct areltdata *) bfd_zalloc (abfd, amt);
   if (ared == NULL)
     return NULL;
   hdr = (struct ar_hdr *) (((char *) ared) + sizeof (struct areltdata));
@@ -1535,7 +1536,7 @@ bfd_generic_stat_arch_elt (abfd, buf)
 void
 bfd_dont_truncate_arname (abfd, pathname, arhdr)
      bfd *abfd;
-     CONST char *pathname;
+     const char *pathname;
      char *arhdr;
 {
   /* FIXME: This interacts unpleasantly with ar's quick-append option.
@@ -1575,13 +1576,13 @@ bfd_dont_truncate_arname (abfd, pathname, arhdr)
 void
 bfd_bsd_truncate_arname (abfd, pathname, arhdr)
      bfd *abfd;
-     CONST char *pathname;
+     const char *pathname;
      char *arhdr;
 {
   struct ar_hdr *hdr = (struct ar_hdr *) arhdr;
-  int length;
-  CONST char *filename = strrchr (pathname, '/');
-  int maxlen = ar_maxnamelen (abfd);
+  size_t length;
+  const char *filename = strrchr (pathname, '/');
+  size_t maxlen = ar_maxnamelen (abfd);
 
 #ifdef HAVE_DOS_BASED_FILE_SYSTEM
   {
@@ -1626,13 +1627,13 @@ bfd_bsd_truncate_arname (abfd, pathname, arhdr)
 void
 bfd_gnu_truncate_arname (abfd, pathname, arhdr)
      bfd *abfd;
-     CONST char *pathname;
+     const char *pathname;
      char *arhdr;
 {
   struct ar_hdr *hdr = (struct ar_hdr *) arhdr;
-  int length;
-  CONST char *filename = strrchr (pathname, '/');
-  int maxlen = ar_maxnamelen (abfd);
+  size_t length;
+  const char *filename = strrchr (pathname, '/');
+  size_t maxlen = ar_maxnamelen (abfd);
 
 #ifdef HAVE_DOS_BASED_FILE_SYSTEM
   {
@@ -1731,16 +1732,16 @@ _bfd_write_archive_contents (arch)
   if (bfd_seek (arch, (file_ptr) 0, SEEK_SET) != 0)
     return false;
 #ifdef GNU960
-  wrote = bfd_write (BFD_GNU960_ARMAG (arch), 1, SARMAG, arch);
+  wrote = bfd_bwrite (BFD_GNU960_ARMAG (arch), (bfd_size_type) SARMAG, arch);
 #else
-  wrote = bfd_write (ARMAG, 1, SARMAG, arch);
+  wrote = bfd_bwrite (ARMAG, (bfd_size_type) SARMAG, arch);
 #endif
   if (wrote != SARMAG)
     return false;
 
   if (makemap && hasobjects)
     {
-      if (_bfd_compute_and_write_armap (arch, elength) != true)
+      if (_bfd_compute_and_write_armap (arch, (unsigned int) elength) != true)
 	return false;
     }
 
@@ -1752,18 +1753,18 @@ _bfd_write_archive_contents (arch)
       strcpy (hdr.ar_name, ename);
       /* Round size up to even number in archive header.  */
       sprintf (&(hdr.ar_size[0]), "%-10d",
-	       (int) ((elength + 1) & ~1));
+	       (int) ((elength + 1) & ~(bfd_size_type) 1));
       strncpy (hdr.ar_fmag, ARFMAG, 2);
       for (i = 0; i < sizeof (struct ar_hdr); i++)
 	if (((char *) (&hdr))[i] == '\0')
 	  (((char *) (&hdr))[i]) = ' ';
-      if ((bfd_write ((char *) &hdr, 1, sizeof (struct ar_hdr), arch)
+      if ((bfd_bwrite ((PTR) &hdr, (bfd_size_type) sizeof (struct ar_hdr), arch)
 	   != sizeof (struct ar_hdr))
-	  || bfd_write (etable, 1, elength, arch) != elength)
+	  || bfd_bwrite (etable, elength, arch) != elength)
 	return false;
       if ((elength % 2) == 1)
 	{
-	  if (bfd_write ("\012", 1, 1, arch) != 1)
+	  if (bfd_bwrite ("\012", (bfd_size_type) 1, arch) != 1)
 	    return false;
 	}
     }
@@ -1775,7 +1776,8 @@ _bfd_write_archive_contents (arch)
       struct ar_hdr *hdr = arch_hdr (current);
 
       /* Write ar header.  */
-      if (bfd_write ((char *) hdr, 1, sizeof (*hdr), arch) != sizeof (*hdr))
+      if (bfd_bwrite ((PTR) hdr, (bfd_size_type) sizeof (*hdr), arch)
+	  != sizeof (*hdr))
 	return false;
       if (bfd_seek (current, (file_ptr) 0, SEEK_SET) != 0)
 	return false;
@@ -1785,19 +1787,19 @@ _bfd_write_archive_contents (arch)
 	  if (amt > remaining)
 	    amt = remaining;
 	  errno = 0;
-	  if (bfd_read (buffer, amt, 1, current) != amt)
+	  if (bfd_bread (buffer, (bfd_size_type) amt, current) != amt)
 	    {
 	      if (bfd_get_error () != bfd_error_system_call)
 		bfd_set_error (bfd_error_malformed_archive);
 	      return false;
 	    }
-	  if (bfd_write (buffer, amt, 1, arch) != amt)
+	  if (bfd_bwrite (buffer, (bfd_size_type) amt, arch) != amt)
 	    return false;
 	  remaining -= amt;
 	}
       if ((arelt_size (current) % 2) == 1)
 	{
-	  if (bfd_write ("\012", 1, 1, arch) != 1)
+	  if (bfd_bwrite ("\012", (bfd_size_type) 1, arch) != 1)
 	    return false;
 	}
     }
@@ -1835,25 +1837,27 @@ _bfd_compute_and_write_armap (arch, elength)
   bfd *current;
   file_ptr elt_no = 0;
   struct orl *map = NULL;
-  int orl_max = 1024;		/* fine initial default */
-  int orl_count = 0;
+  unsigned int orl_max = 1024;		/* fine initial default */
+  unsigned int orl_count = 0;
   int stridx = 0;		/* string index */
   asymbol **syms = NULL;
   long syms_max = 0;
   boolean ret;
+  bfd_size_type amt;
 
   /* Dunno if this is the best place for this info...  */
   if (elength != 0)
     elength += sizeof (struct ar_hdr);
   elength += elength % 2;
 
-  map = (struct orl *) bfd_malloc (orl_max * sizeof (struct orl));
+  amt = (bfd_size_type) orl_max * sizeof (struct orl);
+  map = (struct orl *) bfd_malloc (amt);
   if (map == NULL)
     goto error_return;
 
   /* We put the symbol names on the arch objalloc, and then discard
      them when done.  */
-  first_name = bfd_alloc (arch, 1);
+  first_name = bfd_alloc (arch, (bfd_size_type) 1);
   if (first_name == NULL)
     goto error_return;
 
@@ -1885,7 +1889,7 @@ _bfd_compute_and_write_armap (arch, elength)
 		  if (syms_max > 0)
 		    free (syms);
 		  syms_max = storage;
-		  syms = (asymbol **) bfd_malloc ((size_t) syms_max);
+		  syms = (asymbol **) bfd_malloc ((bfd_size_type) syms_max);
 		  if (syms == NULL)
 		    goto error_return;
 		}
@@ -1906,16 +1910,15 @@ _bfd_compute_and_write_armap (arch, elength)
 		       bfd_is_com_section (sec))
 		      && ! bfd_is_und_section (sec))
 		    {
-		      size_t namelen;
+		      bfd_size_type namelen;
 		      struct orl *new_map;
 
 		      /* This symbol will go into the archive header.  */
 		      if (orl_count == orl_max)
 			{
 			  orl_max *= 2;
-			  new_map =
-			    ((struct orl *)
-			     bfd_realloc (map, orl_max * sizeof (struct orl)));
+			  amt = (bfd_size_type) orl_max * sizeof (struct orl);
+			  new_map = (struct orl *) bfd_realloc (map, amt);
 			  if (new_map == (struct orl *) NULL)
 			    goto error_return;
 
@@ -1923,17 +1926,16 @@ _bfd_compute_and_write_armap (arch, elength)
 			}
 
 		      namelen = strlen (syms[src_count]->name);
-		      map[orl_count].name = ((char **)
-					     bfd_alloc (arch,
-							sizeof (char *)));
+		      amt = sizeof (char *);
+		      map[orl_count].name = (char **) bfd_alloc (arch, amt);
 		      if (map[orl_count].name == NULL)
 			goto error_return;
 		      *(map[orl_count].name) = bfd_alloc (arch, namelen + 1);
 		      if (*(map[orl_count].name) == NULL)
 			goto error_return;
 		      strcpy (*(map[orl_count].name), syms[src_count]->name);
-		      (map[orl_count]).pos = (file_ptr) current;
-		      (map[orl_count]).namidx = stridx;
+		      map[orl_count].u.abfd = current;
+		      map[orl_count].namidx = stridx;
 
 		      stridx += namelen + 1;
 		      ++orl_count;
@@ -2011,18 +2013,18 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
   for (i = 0; i < sizeof (struct ar_hdr); i++)
     if (((char *) (&hdr))[i] == '\0')
       (((char *) (&hdr))[i]) = ' ';
-  if (bfd_write ((char *) &hdr, 1, sizeof (struct ar_hdr), arch)
+  if (bfd_bwrite ((PTR) &hdr, (bfd_size_type) sizeof (struct ar_hdr), arch)
       != sizeof (struct ar_hdr))
     return false;
-  bfd_h_put_32 (arch, (bfd_vma) ranlibsize, temp);
-  if (bfd_write (temp, 1, sizeof (temp), arch) != sizeof (temp))
+  H_PUT_32 (arch, ranlibsize, temp);
+  if (bfd_bwrite (temp, (bfd_size_type) sizeof (temp), arch) != sizeof (temp))
     return false;
 
   for (count = 0; count < orl_count; count++)
     {
       bfd_byte buf[BSD_SYMDEF_SIZE];
 
-      if (((bfd *) (map[count]).pos) != last_elt)
+      if (map[count].u.abfd != last_elt)
 	{
 	  do
 	    {
@@ -2030,25 +2032,26 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
 	      firstreal += firstreal % 2;
 	      current = current->next;
 	    }
-	  while (current != (bfd *) (map[count]).pos);
+	  while (current != map[count].u.abfd);
 	}			/* if new archive element */
 
       last_elt = current;
-      bfd_h_put_32 (arch, map[count].namidx, buf);
-      bfd_h_put_32 (arch, firstreal, buf + BSD_SYMDEF_OFFSET_SIZE);
-      if (bfd_write (buf, BSD_SYMDEF_SIZE, 1, arch) != BSD_SYMDEF_SIZE)
+      H_PUT_32 (arch, map[count].namidx, buf);
+      H_PUT_32 (arch, firstreal, buf + BSD_SYMDEF_OFFSET_SIZE);
+      if (bfd_bwrite (buf, (bfd_size_type) BSD_SYMDEF_SIZE, arch)
+	  != BSD_SYMDEF_SIZE)
 	return false;
     }
 
   /* Now write the strings themselves.  */
-  bfd_h_put_32 (arch, stringsize, temp);
-  if (bfd_write (temp, 1, sizeof (temp), arch) != sizeof (temp))
+  H_PUT_32 (arch, stringsize, temp);
+  if (bfd_bwrite (temp, (bfd_size_type) sizeof (temp), arch) != sizeof (temp))
     return false;
   for (count = 0; count < orl_count; count++)
     {
       size_t len = strlen (*map[count].name) + 1;
 
-      if (bfd_write (*map[count].name, 1, len, arch) != len)
+      if (bfd_bwrite (*map[count].name, (bfd_size_type) len, arch) != len)
 	return false;
     }
 
@@ -2056,7 +2059,7 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
      bug-compatible for sun's ar we use a null.  */
   if (padit)
     {
-      if (bfd_write ("", 1, 1, arch) != 1)
+      if (bfd_bwrite ("", (bfd_size_type) 1, arch) != 1)
 	return false;
     }
 
@@ -2105,7 +2108,7 @@ _bfd_archive_bsd_update_armap_timestamp (arch)
   bfd_ardata (arch)->armap_datepos = (SARMAG
 				      + offsetof (struct ar_hdr, ar_date[0]));
   if (bfd_seek (arch, bfd_ardata (arch)->armap_datepos, SEEK_SET) != 0
-      || (bfd_write (hdr.ar_date, sizeof (hdr.ar_date), 1, arch)
+      || (bfd_bwrite (hdr.ar_date, (bfd_size_type) sizeof (hdr.ar_date), arch)
 	  != sizeof (hdr.ar_date)))
     {
       /* FIXME: bfd can't call perror.  */
@@ -2146,7 +2149,7 @@ coff_write_armap (arch, elength, map, symbol_count, stridx)
   unsigned int ranlibsize = (symbol_count * 4) + 4;
   unsigned int stringsize = stridx;
   unsigned int mapsize = stringsize + ranlibsize;
-  file_ptr archive_member_file_ptr;
+  unsigned int archive_member_file_ptr;
   bfd *current = arch->archive_head;
   unsigned int count;
   struct ar_hdr hdr;
@@ -2178,7 +2181,7 @@ coff_write_armap (arch, elength, map, symbol_count, stridx)
 
   /* Write the ar header for this item and the number of symbols.  */
 
-  if (bfd_write ((PTR) &hdr, 1, sizeof (struct ar_hdr), arch)
+  if (bfd_bwrite ((PTR) &hdr, (bfd_size_type) sizeof (struct ar_hdr), arch)
       != sizeof (struct ar_hdr))
     return false;
 
@@ -2197,7 +2200,7 @@ coff_write_armap (arch, elength, map, symbol_count, stridx)
       /* For each symbol which is used defined in this object, write
 	 out the object file's address in the archive.  */
 
-      while (count < symbol_count && ((bfd *) (map[count]).pos) == current)
+      while (count < symbol_count && map[count].u.abfd == current)
 	{
 	  bfd_write_bigendian_4byte_int (arch, archive_member_file_ptr);
 	  count++;
@@ -2215,7 +2218,7 @@ coff_write_armap (arch, elength, map, symbol_count, stridx)
     {
       size_t len = strlen (*map[count].name) + 1;
 
-      if (bfd_write (*map[count].name, 1, len, arch) != len)
+      if (bfd_bwrite (*map[count].name, (bfd_size_type) len, arch) != len)
 	return false;
     }
 
@@ -2223,7 +2226,7 @@ coff_write_armap (arch, elength, map, symbol_count, stridx)
      bug-compatible for arc960 we use a null.  */
   if (padit)
     {
-      if (bfd_write ("", 1, 1, arch) != 1)
+      if (bfd_bwrite ("", (bfd_size_type) 1, arch) != 1)
 	return false;
     }
 

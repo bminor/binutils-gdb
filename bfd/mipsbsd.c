@@ -46,7 +46,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define SET_ARCH_MACH(ABFD, EXEC) \
   MY(set_arch_mach) (ABFD, N_MACHTYPE (EXEC)); \
   MY(choose_reloc_size) (ABFD);
-static void MY(set_arch_mach) PARAMS ((bfd *abfd, int machtype));
+static void MY(set_arch_mach) PARAMS ((bfd *abfd, unsigned long machtype));
 static void MY(choose_reloc_size) PARAMS ((bfd *abfd));
 
 #define MY_write_object_contents MY(write_object_contents)
@@ -67,18 +67,21 @@ static boolean MY(write_object_contents) PARAMS ((bfd *abfd));
 
 #include "aout-target.h"
 
-static bfd_reloc_status_type mips_fix_jmp_addr PARAMS ((bfd *, arelent *, struct symbol_cache_entry *, PTR, asection *, bfd *));
-static reloc_howto_type *    MY(reloc_howto_type_lookup) PARAMS ((bfd *, bfd_reloc_code_real_type));
+static bfd_reloc_status_type mips_fix_jmp_addr
+  PARAMS ((bfd *, arelent *, struct symbol_cache_entry *, PTR, asection *,
+	   bfd *, char **));
+static reloc_howto_type *MY(reloc_howto_type_lookup)
+  PARAMS ((bfd *, bfd_reloc_code_real_type));
 
 long MY(canonicalize_reloc) PARAMS ((bfd *, sec_ptr, arelent **, asymbol **));
 
 static void
 MY(set_arch_mach) (abfd, machtype)
      bfd *abfd;
-     int machtype;
+     unsigned long machtype;
 {
   enum bfd_architecture arch;
-  long machine;
+  unsigned int machine;
 
   /* Determine the architecture and machine type of the object file.  */
   switch (machtype)
@@ -194,13 +197,15 @@ MY (write_object_contents) (abfd)
    program counter, then we need to signal an error.  */
 
 static bfd_reloc_status_type
-mips_fix_jmp_addr (abfd,reloc_entry,symbol,data,input_section,output_bfd)
+mips_fix_jmp_addr (abfd, reloc_entry, symbol, data, input_section, output_bfd,
+		   error_message)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *reloc_entry;
      struct symbol_cache_entry *symbol;
      PTR data ATTRIBUTE_UNUSED;
      asection *input_section;
      bfd *output_bfd;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   bfd_vma relocation, pc;
 
@@ -378,7 +383,7 @@ MY(canonicalize_reloc) (abfd, section, relptr, symbols)
   return section->reloc_count;
 }
 
-static CONST struct aout_backend_data MY(backend_data) = {
+static const struct aout_backend_data MY(backend_data) = {
   0,				/* zmagic contiguous */
   1,				/* text incl header */
   0,				/* entry is text address */

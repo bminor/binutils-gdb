@@ -25,14 +25,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    as well as our own.  */
 #define NAME(x,y) CAT3(aoutarm,_32_,y)
 
-#include "libaout.h"
-#include "aout/aout64.h"
-
-#define N_TXTADDR(x) \
-  ((N_MAGIC(x) == NMAGIC) ? 0x8000 : \
-   (N_MAGIC(x) != ZMAGIC) ? 0 : \
-   (N_SHARED_LIB(x)) ? ((x).a_entry & ~(TARGET_PAGE_SIZE - 1)) : \
-   TEXT_START_ADDR)
+#define N_TXTADDR(x)						\
+  ((N_MAGIC (x) == NMAGIC)					\
+   ? (bfd_vma) 0x8000						\
+   : ((N_MAGIC (x) != ZMAGIC)					\
+      ? (bfd_vma) 0						\
+      : ((N_SHARED_LIB (x))					\
+	 ? ((x).a_entry & ~(bfd_vma) (TARGET_PAGE_SIZE - 1))	\
+	 : (bfd_vma) TEXT_START_ADDR)))
 
 #define TEXT_START_ADDR 0x8000
 #define TARGET_PAGE_SIZE 0x8000
@@ -47,15 +47,30 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define MY_bfd_reloc_type_lookup aoutarm_bfd_reloc_type_lookup
 
-static boolean 	             MY(write_object_contents) PARAMS ((bfd *));
-static bfd_reloc_status_type MY(fix_pcrel_26_done)     PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-static bfd_reloc_status_type MY(fix_pcrel_26)	       PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-static void                  MY(swap_std_reloc_in)     PARAMS ((bfd *, struct reloc_std_external *, arelent *, asymbol **, bfd_size_type));
-reloc_howto_type *           MY(bfd_reloc_type_lookup) PARAMS ((bfd *, bfd_reloc_code_real_type));
-reloc_howto_type *           MY(reloc_howto)           PARAMS ((bfd *, struct reloc_std_external *, int *, int *, int *));
-void                         MY(put_reloc)             PARAMS ((bfd *, int, int, long, reloc_howto_type *, struct reloc_std_external *));
-void                         MY(relocatable_reloc)     PARAMS ((reloc_howto_type *, bfd *, struct reloc_std_external *, bfd_vma *, bfd_vma));
-void                         MY(swap_std_reloc_out)    PARAMS ((bfd *, arelent *, struct reloc_std_external *));
+#include "libaout.h"
+#include "aout/aout64.h"
+
+static boolean MY(write_object_contents)
+  PARAMS ((bfd *));
+static bfd_reloc_status_type MY(fix_pcrel_26_done)
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static bfd_reloc_status_type MY(fix_pcrel_26)
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static void MY(swap_std_reloc_in)
+  PARAMS ((bfd *, struct reloc_std_external *, arelent *, asymbol **,
+	   bfd_size_type));
+reloc_howto_type *MY(bfd_reloc_type_lookup)
+  PARAMS ((bfd *, bfd_reloc_code_real_type));
+reloc_howto_type * MY(reloc_howto)
+  PARAMS ((bfd *, struct reloc_std_external *, int *, int *, int *));
+void MY(put_reloc)
+  PARAMS ((bfd *, int, int, bfd_vma, reloc_howto_type *,
+	   struct reloc_std_external *));
+void MY(relocatable_reloc)
+  PARAMS ((reloc_howto_type *, bfd *, struct reloc_std_external *, bfd_vma *,
+	   bfd_vma));
+void MY(swap_std_reloc_out)
+  PARAMS ((bfd *, arelent *, struct reloc_std_external *));
 
 reloc_howto_type MY(howto_table)[] =
   {
@@ -139,7 +154,7 @@ MY(put_reloc) (abfd, r_extern, r_index, value, howto, reloc)
      bfd *abfd;
      int r_extern;
      int r_index;
-     long value;
+     bfd_vma value;
      reloc_howto_type *howto;
      struct reloc_std_external *reloc;
 {
@@ -248,7 +263,7 @@ MY(fix_pcrel_26) (abfd, reloc_entry, symbol, data, input_section,
 {
   bfd_vma relocation;
   bfd_size_type addr = reloc_entry->address;
-  long target = bfd_get_32 (abfd, (bfd_byte *) data + addr);
+  bfd_vma target = bfd_get_32 (abfd, (bfd_byte *) data + addr);
   bfd_reloc_status_type flag = bfd_reloc_ok;
 
   /* If this is an undefined symbol, return error.  */
@@ -280,10 +295,10 @@ MY(fix_pcrel_26) (abfd, reloc_entry, symbol, data, input_section,
       if ((relocation & ~ (bfd_vma) 0x03ffffff) != ~ (bfd_vma) 0x03ffffff)
 	flag = bfd_reloc_overflow;
     }
-  else if (relocation & ~0x03ffffff)
+  else if (relocation & ~ (bfd_vma) 0x03ffffff)
     flag = bfd_reloc_overflow;
 
-  target &= ~0x00ffffff;
+  target &= ~ (bfd_vma) 0x00ffffff;
   target |= (relocation >> 2) & 0x00ffffff;
   bfd_put_32 (abfd, target, (bfd_byte *) data + addr);
 
@@ -307,7 +322,7 @@ MY(bfd_reloc_type_lookup) (abfd,code)
         code = BFD_RELOC_32;
         break;
       default:
-	return (CONST struct reloc_howto_struct *) 0;
+	return (const struct reloc_howto_struct *) 0;
       }
 
   switch (code)
@@ -319,7 +334,7 @@ MY(bfd_reloc_type_lookup) (abfd,code)
       ASTD (BFD_RELOC_16_PCREL, 5);
       ASTD (BFD_RELOC_32_PCREL, 6);
     default:
-      return (CONST struct reloc_howto_struct *) 0;
+      return (const struct reloc_howto_struct *) 0;
     }
 }
 
@@ -345,7 +360,7 @@ MY_swap_std_reloc_in (abfd, bytes, cache_ptr, symbols, symcount)
   int r_pcrel;
   struct aoutdata *su = &(abfd->tdata.aout_data->a);
 
-  cache_ptr->address = bfd_h_get_32 (abfd, bytes->r_address);
+  cache_ptr->address = H_GET_32 (abfd, bytes->r_address);
 
   cache_ptr->howto = MY_reloc_howto (abfd, bytes, r_index, r_extern, r_pcrel);
 
@@ -539,7 +554,7 @@ const bfd_target aout_arm_big_vec =
     BFD_JUMP_TABLE_WRITE (MY),
     BFD_JUMP_TABLE_LINK (MY),
     BFD_JUMP_TABLE_DYNAMIC (MY),
-    
+
     & aout_arm_little_vec,
 
     (PTR) MY_backend_data,

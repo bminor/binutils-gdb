@@ -64,8 +64,9 @@ ptrace_unix_core_file_p (abfd)
   int val;
   struct ptrace_user u;
   struct trad_core_struct *rawptr;
+  bfd_size_type amt;
 
-  val = bfd_read ((void *)&u, 1, sizeof u, abfd);
+  val = bfd_bread ((void *)&u, (bfd_size_type) sizeof u, abfd);
   if (val != sizeof u || u.pt_magic != _BCS_PTRACE_MAGIC
       || u.pt_rev != _BCS_PTRACE_REV)
     {
@@ -78,8 +79,8 @@ ptrace_unix_core_file_p (abfd)
 
   /* Allocate both the upage and the struct core_data at once, so
      a single free() will free them both.  */
-  rawptr = (struct trad_core_struct *)
-		bfd_zalloc (abfd, sizeof (struct trad_core_struct));
+  amt = sizeof (struct trad_core_struct);
+  rawptr = (struct trad_core_struct *) bfd_zalloc (abfd, amt);
 
   if (rawptr == NULL)
     return 0;
@@ -91,13 +92,14 @@ ptrace_unix_core_file_p (abfd)
   /* Create the sections.  This is raunchy, but bfd_close wants to free
      them separately.  */
 
-  core_stacksec (abfd) = (asection *) bfd_zalloc (abfd, sizeof (asection));
+  amt = sizeof (asection);
+  core_stacksec (abfd) = (asection *) bfd_zalloc (abfd, amt);
   if (core_stacksec (abfd) == NULL)
     return NULL;
-  core_datasec (abfd) = (asection *) bfd_zalloc (abfd, sizeof (asection));
+  core_datasec (abfd) = (asection *) bfd_zalloc (abfd, amt);
   if (core_datasec (abfd) == NULL)
     return NULL;
-  core_regsec (abfd) = (asection *) bfd_zalloc (abfd, sizeof (asection));
+  core_regsec (abfd) = (asection *) bfd_zalloc (abfd, amt);
   if (core_regsec (abfd) == NULL)
     return NULL;
 

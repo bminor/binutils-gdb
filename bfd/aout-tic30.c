@@ -57,13 +57,18 @@ static const bfd_target *tic30_aout_object_p PARAMS ((bfd *));
 static boolean tic30_aout_write_object_contents PARAMS ((bfd *));
 static boolean tic30_aout_set_sizes PARAMS ((bfd *));
 static const bfd_target * tic30_aout_callback PARAMS ((bfd *));
-static boolean MY_bfd_copy_private_section_data  PARAMS ((bfd *, asection *, bfd *, asection *));
+static boolean MY_bfd_copy_private_section_data
+  PARAMS ((bfd *, asection *, bfd *, asection *));
 static boolean MY_bfd_final_link PARAMS ((bfd *, struct bfd_link_info *));
-reloc_howto_type * tic30_aout_reloc_type_lookup  PARAMS ((bfd *, bfd_reloc_code_real_type));
-enum machine_type tic30_aout_machine_type  PARAMS ((enum bfd_architecture, unsigned long, boolean *));
-boolean tic30_aout_set_arch_mach  PARAMS ((bfd *, enum bfd_architecture, unsigned long));
+reloc_howto_type * tic30_aout_reloc_type_lookup
+  PARAMS ((bfd *, bfd_reloc_code_real_type));
+enum machine_type tic30_aout_machine_type
+  PARAMS ((enum bfd_architecture, unsigned long, boolean *));
+boolean tic30_aout_set_arch_mach
+  PARAMS ((bfd *, enum bfd_architecture, unsigned long));
 
-#define MY_reloc_howto(BFD,REL,IN,EX,PC) tic30_aout_reloc_howto(BFD,REL,&IN,&EX,&PC)
+#define MY_reloc_howto(BFD, REL, IN, EX, PC) \
+  tic30_aout_reloc_howto(BFD, REL, &IN, &EX, &PC)
 #define MY_final_link_relocate tic30_aout_final_link_relocate
 #define MY_object_p tic30_aout_object_p
 #define MY_mkobject NAME(aout,mkobject)
@@ -107,7 +112,7 @@ boolean tic30_aout_set_arch_mach  PARAMS ((bfd *, enum bfd_architecture, unsigne
 #define MY_finish_dynamic_link 0
 #endif
 
-static CONST struct aout_backend_data tic30_aout_backend_data =
+static const struct aout_backend_data tic30_aout_backend_data =
 {
   MY_zmagic_contiguous,
   MY_text_includes_header,
@@ -352,7 +357,7 @@ tic30_aout_callback (abfd)
 #ifdef SET_ARCH_MACH
   SET_ARCH_MACH (abfd, *execp);
 #else
-  bfd_default_set_arch_mach (abfd, DEFAULT_ARCH, 0);
+  bfd_default_set_arch_mach (abfd, DEFAULT_ARCH, 0L);
 #endif
 
   /* Now that we know the architecture, set the alignments of the
@@ -496,7 +501,9 @@ tic30_aout_relocate_contents (howto, input_bfd, relocation, location)
 	case complain_overflow_bitfield:
 	  {
 	    bfd_vma reloc_bits = (((1 << (howto->bitsize - 1)) - 1) << 1) | 1;
-	    if ((check & ~reloc_bits) != 0 && (((bfd_vma) signed_check & ~reloc_bits) != (-1 & ~reloc_bits)))
+	    if ((check & ~reloc_bits) != 0
+		&& (((bfd_vma) signed_check & ~reloc_bits)
+		    != ((bfd_vma) -1 & ~reloc_bits)))
 	      overflow = true;
 	  }
 	  break;
@@ -538,9 +545,9 @@ tic30_aout_object_p (abfd)
   struct external_exec exec_bytes;	/* Raw exec header from file.  */
   struct internal_exec exec;	/* Cleaned-up exec header.  */
   const bfd_target *target;
+  bfd_size_type amt = EXEC_BYTES_SIZE;
 
-  if (bfd_read ((PTR) & exec_bytes, 1, EXEC_BYTES_SIZE, abfd)
-      != EXEC_BYTES_SIZE)
+  if (bfd_bread ((PTR) &exec_bytes, amt, abfd) != amt)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);
@@ -550,7 +557,7 @@ tic30_aout_object_p (abfd)
 #ifdef SWAP_MAGIC
   exec.a_info = SWAP_MAGIC (exec_bytes.e_info);
 #else
-  exec.a_info = bfd_h_get_32 (abfd, exec_bytes.e_info);
+  exec.a_info = H_GET_32 (abfd, exec_bytes.e_info);
 #endif /* SWAP_MAGIC */
 
   if (N_BADMAG (exec))
@@ -638,9 +645,11 @@ tic30_aout_write_object_contents (abfd)
 
     if (adata (abfd).exec_bytes_size > 0)
       {
+	bfd_size_type amt;
 	if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
 	  return false;
-	if (bfd_write ((PTR) & exec_bytes, 1, adata (abfd).exec_bytes_size, abfd) != adata (abfd).exec_bytes_size)
+	amt = adata (abfd).exec_bytes_size;
+	if (bfd_bwrite ((PTR) &exec_bytes, amt, abfd) != amt)
 	  return false;
       }
 

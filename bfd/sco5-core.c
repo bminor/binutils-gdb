@@ -1,5 +1,5 @@
 /* BFD back end for SCO5 core files (U-area and raw sections)
-   Copyright 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
    Written by Jouke Numan <jnuman@hiscom.nl>
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -79,7 +79,9 @@ static asymbol *
 sco5_core_make_empty_symbol (abfd)
      bfd *abfd;
 {
-  asymbol *new = (asymbol *) bfd_zalloc (abfd, sizeof (asymbol));
+  asymbol *new;
+
+  new = (asymbol *) bfd_zalloc (abfd, (bfd_size_type) sizeof (asymbol));
   if (new)
     new->the_bfd = abfd;
   return new;
@@ -92,17 +94,17 @@ read_uarea(abfd, filepos)
 
 {
   struct sco5_core_struct *rawptr;
+  bfd_size_type amt = sizeof (struct sco5_core_struct);
 
-  rawptr = ((struct sco5_core_struct *)
-	    bfd_zmalloc (sizeof (struct sco5_core_struct)));
+  rawptr = (struct sco5_core_struct *) bfd_zmalloc (amt);
   if (rawptr == NULL)
     return NULL;
 
   abfd->tdata.sco5_core_data = rawptr;
 
-  if ((bfd_seek (abfd, filepos, SEEK_SET) != 0)
-      || (bfd_read ((void *)&rawptr->u, 1, sizeof rawptr->u, abfd)
-	  != sizeof rawptr->u))
+  if (bfd_seek (abfd, (file_ptr) filepos, SEEK_SET) != 0
+      || bfd_bread ((void *) &rawptr->u, (bfd_size_type) sizeof rawptr->u,
+		   abfd) != sizeof rawptr->u)
     {
       bfd_set_error (bfd_error_wrong_format);
       return NULL;
@@ -150,9 +152,10 @@ sco5_core_file_p (abfd)
     coresize = statbuf.st_size;
   }
   /* Last long in core is sizeof struct coreoffsets, read it */
-  if ((bfd_seek (abfd, coresize-sizeof coffset_siz, SEEK_SET) != 0)
-      || (bfd_read ((void *)&coffset_siz, 1, sizeof coffset_siz, abfd)
-	  != sizeof coffset_siz) )
+  if ((bfd_seek (abfd, (file_ptr) (coresize - sizeof coffset_siz),
+		 SEEK_SET) != 0)
+      || bfd_bread ((void *) &coffset_siz, (bfd_size_type) sizeof coffset_siz,
+		   abfd) != sizeof coffset_siz)
     {
       bfd_set_error (bfd_error_wrong_format);
       return NULL;
@@ -160,8 +163,8 @@ sco5_core_file_p (abfd)
 
   /* Use it to seek start of coreoffsets region, read it and determine
      validity */
-  if ((bfd_seek (abfd, coresize-coffset_siz, SEEK_SET) != 0)
-      || (bfd_read ((void *)&coffsets, 1, sizeof coffsets, abfd)
+  if ((bfd_seek (abfd, (file_ptr) (coresize - coffset_siz), SEEK_SET) != 0)
+      || (bfd_bread ((void *) &coffsets, (bfd_size_type) sizeof coffsets, abfd)
 	  != sizeof coffsets)
       || ((coffsets.u_info != 1) && (coffsets.u_info != C_VERSION)))
     {
@@ -207,13 +210,15 @@ sco5_core_file_p (abfd)
      coresecthead and check its validity */
 
   if ((bfd_seek (abfd,
-		 coresize - coffset_siz - 2 * sizeof coffset_siz,
+		 (file_ptr) (coresize - coffset_siz - 2 * sizeof coffset_siz),
 		 SEEK_SET) != 0)
-      || (bfd_read ((void *)&nsecs, 1, sizeof nsecs, abfd) != sizeof nsecs)
-      || (bfd_read ((void *)&cheadoffs, 1, sizeof cheadoffs, abfd)
-	  != sizeof cheadoffs)
-      || (bfd_seek (abfd, cheadoffs, SEEK_SET) != 0)
-      || (bfd_read ((void *)&chead, 1, sizeof chead, abfd) != sizeof chead)
+      || (bfd_bread ((void *) &nsecs, (bfd_size_type) sizeof nsecs, abfd)
+	  != sizeof nsecs)
+      || (bfd_bread ((void *) &cheadoffs, (bfd_size_type) sizeof cheadoffs,
+		    abfd) != sizeof cheadoffs)
+      || (bfd_seek (abfd, (file_ptr) cheadoffs, SEEK_SET) != 0)
+      || (bfd_bread ((void *) &chead, (bfd_size_type) sizeof chead, abfd)
+	  != sizeof chead)
       || (chead.cs_stype != CORES_OFFSETS)
       || (chead.cs_x.csx_magic != COREMAGIC_NUMBER))
     {
@@ -227,8 +232,9 @@ sco5_core_file_p (abfd)
   nsecs--;				/* We've seen CORES_OFFSETS already */
   for (; nsecs; nsecs--)
     {
-      if ((bfd_seek (abfd, chead.cs_hseek, SEEK_SET) != 0)
-	  || bfd_read ((void *)&chead, 1, sizeof chead, abfd) != sizeof chead)
+      if ((bfd_seek (abfd, (file_ptr) chead.cs_hseek, SEEK_SET) != 0)
+	  || (bfd_bread ((void *) &chead, (bfd_size_type) sizeof chead, abfd)
+	      != sizeof chead))
         {
           bfd_set_error (bfd_error_wrong_format);
           return NULL;
@@ -351,7 +357,8 @@ sco5_core_file_failing_signal (ignore_abfd)
 /* ARGSUSED */
 boolean
 sco5_core_file_matches_executable_p  (core_bfd, exec_bfd)
-     bfd *core_bfd, *exec_bfd;
+     bfd *core_bfd ATTRIBUTE_UNUSED;
+     bfd *exec_bfd ATTRIBUTE_UNUSED;
 {
   return true;          /* FIXME, We have no way of telling at this point */
 }

@@ -1,5 +1,6 @@
 /* BFD ECOFF object file private structure.
-   Copyright 1993, 1994, 1995, 1996, 1999 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1999, 2001
+   Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -320,7 +321,7 @@ extern long _bfd_ecoff_canonicalize_reloc
 /* ecoff_bfd_reloc_type_lookup defined by backend. */
 
 extern boolean _bfd_ecoff_set_arch_mach
-  PARAMS ((bfd *, enum bfd_architecture, unsigned long machine));
+  PARAMS ((bfd *, enum bfd_architecture, unsigned long));
 extern boolean _bfd_ecoff_set_section_contents
   PARAMS ((bfd *, asection *, PTR location, file_ptr, bfd_size_type));
 

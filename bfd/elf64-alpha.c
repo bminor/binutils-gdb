@@ -163,7 +163,7 @@ struct alpha_elf_link_hash_entry
     bfd *gotobj;
 
     /* the addend in effect for this entry.  */
-    bfd_signed_vma addend;
+    bfd_vma addend;
 
     /* the .got offset for this entry.  */
     int got_offset;
@@ -321,9 +321,9 @@ elf64_alpha_bfd_link_hash_table_create (abfd)
      bfd *abfd;
 {
   struct alpha_elf_link_hash_table *ret;
+  bfd_size_type amt = sizeof (struct alpha_elf_link_hash_table);
 
-  ret = ((struct alpha_elf_link_hash_table *)
-	 bfd_zalloc (abfd, sizeof (struct alpha_elf_link_hash_table)));
+  ret = (struct alpha_elf_link_hash_table *) bfd_zalloc (abfd, amt);
   if (ret == (struct alpha_elf_link_hash_table *) NULL)
     return NULL;
 
@@ -375,7 +375,8 @@ static boolean
 elf64_alpha_mkobject (abfd)
      bfd *abfd;
 {
-  abfd->tdata.any = bfd_zalloc (abfd, sizeof (struct alpha_elf_obj_tdata));
+  bfd_size_type amt = sizeof (struct alpha_elf_obj_tdata);
+  abfd->tdata.any = bfd_zalloc (abfd, amt);
   if (abfd->tdata.any == NULL)
     return false;
   return true;
@@ -387,7 +388,8 @@ elf64_alpha_object_p (abfd)
 {
   /* Allocate our special target data.  */
   struct alpha_elf_obj_tdata *new_tdata;
-  new_tdata = bfd_zalloc (abfd, sizeof (struct alpha_elf_obj_tdata));
+  bfd_size_type amt = sizeof (struct alpha_elf_obj_tdata);
+  new_tdata = bfd_zalloc (abfd, amt);
   if (new_tdata == NULL)
     return false;
   new_tdata->root = *abfd->tdata.elf_obj_data;
@@ -803,8 +805,8 @@ elf64_alpha_do_reloc_gpdisp (abfd, gpdisp, p_ldah, p_lda)
 	    | (((gpdisp >> 16) + ((gpdisp >> 15) & 1)) & 0xffff));
   i_lda = (i_lda & 0xffff0000) | (gpdisp & 0xffff);
 
-  bfd_put_32 (abfd, i_ldah, p_ldah);
-  bfd_put_32 (abfd, i_lda, p_lda);
+  bfd_put_32 (abfd, (bfd_vma) i_ldah, p_ldah);
+  bfd_put_32 (abfd, (bfd_vma) i_lda, p_lda);
 
   return ret;
 }
@@ -1065,7 +1067,8 @@ elf64_alpha_relax_with_lituse (info, symval, irel, irelend)
 	      urel->r_addend = irel->r_addend;
 	      info->changed_relocs = true;
 
-	      bfd_put_32 (info->abfd, insn, info->contents + urel->r_offset);
+	      bfd_put_32 (info->abfd, (bfd_vma) insn,
+			  info->contents + urel->r_offset);
 	      info->changed_contents = true;
 	    }
 
@@ -1077,7 +1080,7 @@ elf64_alpha_relax_with_lituse (info, symval, irel, irelend)
 	      irel->r_info = ELF64_R_INFO (ELF64_R_SYM (irel->r_info),
 					   R_ALPHA_GPRELHIGH);
 	      lit_insn = (OP_LDAH << 26) | (lit_insn & 0x03ff0000);
-	      bfd_put_32 (info->abfd, lit_insn,
+	      bfd_put_32 (info->abfd, (bfd_vma) lit_insn,
 			  info->contents + irel->r_offset);
 	      lit_reused = true;
 	      info->changed_contents = true;
@@ -1097,13 +1100,15 @@ elf64_alpha_relax_with_lituse (info, symval, irel, irelend)
 	  /* FIXME: sanity check the insn for byte op.  Check that the
 	     literal dest reg is indeed Rb in the byte insn.  */
 
-	  insn = (insn & ~0x001ff000) | ((symval & 7) << 13) | 0x1000;
+	  insn &= ~ (unsigned) 0x001ff000;
+	  insn |= ((symval & 7) << 13) | 0x1000;
 
 	  urel->r_info = ELF64_R_INFO (0, R_ALPHA_NONE);
 	  urel->r_addend = 0;
 	  info->changed_relocs = true;
 
-	  bfd_put_32 (info->abfd, insn, info->contents + urel->r_offset);
+	  bfd_put_32 (info->abfd, (bfd_vma) insn,
+		      info->contents + urel->r_offset);
 	  info->changed_contents = true;
 	  break;
 
@@ -1136,7 +1141,8 @@ elf64_alpha_relax_with_lituse (info, symval, irel, irelend)
 		else
 		  all_optimized = false;
 
-		bfd_put_32 (info->abfd, insn, info->contents + urel->r_offset);
+		bfd_put_32 (info->abfd, (bfd_vma) insn,
+			    info->contents + urel->r_offset);
 
 		/* Kill any HINT reloc that might exist for this insn.  */
 		xrel = (elf64_alpha_find_reloc_at_ofs
@@ -1172,8 +1178,8 @@ elf64_alpha_relax_with_lituse (info, symval, irel, irelend)
 		       In that case the insn would use $27 as the base.  */
 		    if (ldah == 0x27ba0000 && lda == 0x23bd0000)
 		      {
-			bfd_put_32 (info->abfd, INSN_UNOP, p_ldah);
-			bfd_put_32 (info->abfd, INSN_UNOP, p_lda);
+			bfd_put_32 (info->abfd, (bfd_vma) INSN_UNOP, p_ldah);
+			bfd_put_32 (info->abfd, (bfd_vma) INSN_UNOP, p_lda);
 
 			gpdisp->r_info = ELF64_R_INFO (0, R_ALPHA_NONE);
 			info->changed_contents = true;
@@ -1204,7 +1210,8 @@ elf64_alpha_relax_with_lituse (info, symval, irel, irelend)
 	  irel->r_info = ELF64_R_INFO (0, R_ALPHA_NONE);
 	  info->changed_relocs = true;
 
-	  bfd_put_32 (info->abfd, INSN_UNOP, info->contents + irel->r_offset);
+	  bfd_put_32 (info->abfd, (bfd_vma) INSN_UNOP,
+		      info->contents + irel->r_offset);
 	  info->changed_contents = true;
 	}
     }
@@ -1317,7 +1324,7 @@ elf64_alpha_relax_without_lituse (info, symval, irel)
      `ldq R,X(gp)' for `lda R,Y(gp)'.  */
 
   insn = (OP_LDA << 26) | (insn & 0x03ff0000);
-  bfd_put_32 (info->abfd, insn, info->contents + irel->r_offset);
+  bfd_put_32 (info->abfd, (bfd_vma) insn, info->contents + irel->r_offset);
   info->changed_contents = true;
 
   irel->r_info = ELF64_R_INFO (ELF64_R_SYM (irel->r_info), R_ALPHA_GPREL16);
@@ -1444,13 +1451,12 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
 	    extsyms = (Elf64_External_Sym *) symtab_hdr->contents;
 	  else
 	    {
-	      extsyms = ((Elf64_External_Sym *)
-			 bfd_malloc (symtab_hdr->sh_size));
+	      extsyms = (Elf64_External_Sym *) bfd_malloc (symtab_hdr->sh_size);
 	      if (extsyms == NULL)
 		goto error_return;
 	      free_extsyms = extsyms;
 	      if (bfd_seek (abfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-		  || (bfd_read (extsyms, 1, symtab_hdr->sh_size, abfd)
+		  || (bfd_bread (extsyms, symtab_hdr->sh_size, abfd)
 		      != symtab_hdr->sh_size))
 		goto error_return;
 	    }
@@ -1586,10 +1592,10 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
 
 /* PLT/GOT Stuff */
 #define PLT_HEADER_SIZE 32
-#define PLT_HEADER_WORD1	0xc3600000	/* br   $27,.+4     */
-#define PLT_HEADER_WORD2	0xa77b000c	/* ldq  $27,12($27) */
-#define PLT_HEADER_WORD3	0x47ff041f	/* nop              */
-#define PLT_HEADER_WORD4	0x6b7b0000	/* jmp  $27,($27)   */
+#define PLT_HEADER_WORD1	(bfd_vma) 0xc3600000	/* br   $27,.+4     */
+#define PLT_HEADER_WORD2	(bfd_vma) 0xa77b000c	/* ldq  $27,12($27) */
+#define PLT_HEADER_WORD3	(bfd_vma) 0x47ff041f	/* nop              */
+#define PLT_HEADER_WORD4	(bfd_vma) 0x6b7b0000	/* jmp  $27,($27)   */
 
 #define PLT_ENTRY_SIZE 12
 #define PLT_ENTRY_WORD1		0xc3800000	/* br   $28, plt0   */
@@ -1857,7 +1863,7 @@ elf64_alpha_read_ecoff_info (abfd, section, debug)
   swap = get_elf_backend_data (abfd)->elf_backend_ecoff_debug_swap;
   memset (debug, 0, sizeof (*debug));
 
-  ext_hdr = (char *) bfd_malloc ((size_t) swap->external_hdr_size);
+  ext_hdr = (char *) bfd_malloc (swap->external_hdr_size);
   if (ext_hdr == NULL && swap->external_hdr_size != 0)
     goto error_return;
 
@@ -1876,12 +1882,12 @@ elf64_alpha_read_ecoff_info (abfd, section, debug)
     debug->ptr = NULL;							\
   else									\
     {									\
-      debug->ptr = (type) bfd_malloc ((size_t) (size * symhdr->count));	\
+      bfd_size_type amt = (bfd_size_type) size * symhdr->count;		\
+      debug->ptr = (type) bfd_malloc (amt);				\
       if (debug->ptr == NULL)						\
 	goto error_return;						\
       if (bfd_seek (abfd, (file_ptr) symhdr->offset, SEEK_SET) != 0	\
-	  || (bfd_read (debug->ptr, size, symhdr->count,		\
-			abfd) != size * symhdr->count))			\
+	  || bfd_bread (debug->ptr, amt, abfd) != amt)			\
 	goto error_return;						\
     }
 
@@ -1994,9 +2000,9 @@ elf64_alpha_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
 	  char *fraw_src;
 	  char *fraw_end;
 	  struct fdr *fdr_ptr;
+	  bfd_size_type amt = sizeof (struct mips_elf_find_line);
 
-	  fi = ((struct mips_elf_find_line *)
-		bfd_zalloc (abfd, sizeof (struct mips_elf_find_line)));
+	  fi = (struct mips_elf_find_line *) bfd_zalloc (abfd, amt);
 	  if (fi == NULL)
 	    {
 	      msec->flags = origflags;
@@ -2010,10 +2016,8 @@ elf64_alpha_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
 	    }
 
 	  /* Swap in the FDR information.  */
-	  fi->d.fdr = ((struct fdr *)
-		       bfd_alloc (abfd,
-				  (fi->d.symbolic_header.ifdMax *
-				   sizeof (struct fdr))));
+	  amt = fi->d.symbolic_header.ifdMax * sizeof (struct fdr);
+	  fi->d.fdr = (struct fdr *) bfd_alloc (abfd, amt);
 	  if (fi->d.fdr == NULL)
 	    {
 	      msec->flags = origflags;
@@ -2225,6 +2229,7 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
   struct alpha_elf_got_entry **local_got_entries;
   const Elf_Internal_Rela *rel, *relend;
   int got_created;
+  bfd_size_type amt;
 
   if (info->relocateable)
     return true;
@@ -2278,9 +2283,9 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
 
 		if (!gotent)
 		  {
+		    amt = sizeof (struct alpha_elf_got_entry);
 		    gotent = ((struct alpha_elf_got_entry *)
-			      bfd_alloc (abfd,
-					 sizeof (struct alpha_elf_got_entry)));
+			      bfd_alloc (abfd, amt));
 		    if (!gotent)
 		      return false;
 
@@ -2303,16 +2308,16 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
 		/* This is a local .got entry -- record for merge.  */
 		if (!local_got_entries)
 		  {
-		    size_t size;
-		    size = (symtab_hdr->sh_info
-			    * sizeof (struct alpha_elf_got_entry *));
+		    bfd_size_type size;
+		    size = symtab_hdr->sh_info;
+		    size *= sizeof (struct alpha_elf_got_entry *);
 
 		    local_got_entries = ((struct alpha_elf_got_entry **)
 					 bfd_alloc (abfd, size));
 		    if (!local_got_entries)
 		      return false;
 
-		    memset (local_got_entries, 0, size);
+		    memset (local_got_entries, 0, (size_t) size);
 		    alpha_elf_tdata (abfd)->local_got_entries =
 		      local_got_entries;
 		  }
@@ -2323,9 +2328,9 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
 		  continue;
 		if (!gotent)
 		  {
+		    amt = sizeof (struct alpha_elf_got_entry);
 		    gotent = ((struct alpha_elf_got_entry *)
-			      bfd_alloc (abfd,
-					 sizeof (struct alpha_elf_got_entry)));
+			      bfd_alloc (abfd, amt));
 		    if (!gotent)
 		      return false;
 
@@ -2433,17 +2438,15 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
 	      sreloc = bfd_get_section_by_name (dynobj, rel_sec_name);
 	      if (sreloc == NULL)
 		{
+		  flagword flags;
+
 		  sreloc = bfd_make_section (dynobj, rel_sec_name);
+		  flags = (SEC_HAS_CONTENTS | SEC_IN_MEMORY
+			   | SEC_LINKER_CREATED | SEC_READONLY);
+		  if (sec->flags & SEC_ALLOC)
+		    flags |= SEC_ALLOC | SEC_LOAD;
 		  if (sreloc == NULL
-		      || !bfd_set_section_flags (dynobj, sreloc,
-						 (((sec->flags
-						    & SEC_ALLOC)
-						   ? (SEC_ALLOC
-						      | SEC_LOAD) : 0)
-						  | SEC_HAS_CONTENTS
-						  | SEC_IN_MEMORY
-						  | SEC_LINKER_CREATED
-						  | SEC_READONLY))
+		      || !bfd_set_section_flags (dynobj, sreloc, flags)
 		      || !bfd_set_section_alignment (dynobj, sreloc, 3))
 		    return false;
 		}
@@ -2465,9 +2468,8 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
 
 	      if (!rent)
 		{
-		  rent = ((struct alpha_elf_reloc_entry *)
-			  bfd_alloc (abfd,
-				     sizeof (struct alpha_elf_reloc_entry)));
+		  amt = sizeof (struct alpha_elf_reloc_entry);
+		  rent = (struct alpha_elf_reloc_entry *) bfd_alloc (abfd, amt);
 		  if (!rent)
 		    return false;
 
@@ -3162,7 +3164,7 @@ elf64_alpha_size_dynamic_sections (output_bfd, info)
       else
 	{
 	  /* Allocate memory for the section contents.  */
-	  s->contents = (bfd_byte *) bfd_zalloc(dynobj, s->_raw_size);
+	  s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->_raw_size);
 	  if (s->contents == NULL && s->_raw_size != 0)
 	    return false;
 	}
@@ -3175,35 +3177,38 @@ elf64_alpha_size_dynamic_sections (output_bfd, info)
 	 must add the entries now so that we get the correct size for
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
+#define add_dynamic_entry(TAG, VAL) \
+  bfd_elf64_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+
       if (!info->shared)
 	{
-	  if (!bfd_elf64_add_dynamic_entry (info, DT_DEBUG, 0))
+	  if (!add_dynamic_entry (DT_DEBUG, 0))
 	    return false;
 	}
 
-      if (! bfd_elf64_add_dynamic_entry (info, DT_PLTGOT, 0))
+      if (!add_dynamic_entry (DT_PLTGOT, 0))
 	return false;
 
       if (relplt)
 	{
-	  if (! bfd_elf64_add_dynamic_entry (info, DT_PLTRELSZ, 0)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_JMPREL, 0))
+	  if (!add_dynamic_entry (DT_PLTRELSZ, 0)
+	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
+	      || !add_dynamic_entry (DT_JMPREL, 0))
 	    return false;
 	}
 
-      if (! bfd_elf64_add_dynamic_entry (info, DT_RELA, 0)
-	  || ! bfd_elf64_add_dynamic_entry (info, DT_RELASZ, 0)
-	  || ! bfd_elf64_add_dynamic_entry (info, DT_RELAENT,
-					    sizeof (Elf64_External_Rela)))
+      if (!add_dynamic_entry (DT_RELA, 0)
+	  || !add_dynamic_entry (DT_RELASZ, 0)
+	  || !add_dynamic_entry (DT_RELAENT, sizeof (Elf64_External_Rela)))
 	return false;
 
       if (info->flags & DF_TEXTREL)
 	{
-	  if (! bfd_elf64_add_dynamic_entry (info, DT_TEXTREL, 0))
+	  if (!add_dynamic_entry (DT_TEXTREL, 0))
 	    return false;
 	}
     }
+#undef add_dynamic_entry
 
   return true;
 }
@@ -3265,7 +3270,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
       struct alpha_elf_link_hash_entry *h;
       Elf_Internal_Sym *sym;
       bfd_vma relocation;
-      bfd_signed_vma addend;
+      bfd_vma addend;
       bfd_reloc_status_type r;
 
       r_type = ELF64_R_TYPE(rel->r_info);
@@ -3408,7 +3413,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	    /* Initialize the .got entry's value.  */
 	    if (!(gotent->flags & ALPHA_ELF_GOT_ENTRY_RELOCS_DONE))
 	      {
-		bfd_put_64 (output_bfd, relocation+addend,
+		bfd_put_64 (output_bfd, relocation + addend,
 			    sgot->contents + gotent->got_offset);
 
 		/* If the symbol has been forced local, output a
@@ -3424,7 +3429,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 				       + sgot->output_offset
 				       + gotent->got_offset);
 		    outrel.r_info = ELF64_R_INFO(0, R_ALPHA_RELATIVE);
-		    outrel.r_addend = relocation+addend;
+		    outrel.r_addend = relocation + addend;
 
 		    bfd_elf64_swap_reloca_out (output_bfd, &outrel,
 					       ((Elf64_External_Rela *)
@@ -3654,7 +3659,7 @@ elf64_alpha_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       /* Fill in the entry in the procedure linkage table.  */
       {
-	unsigned insn1, insn2, insn3;
+	bfd_vma insn1, insn2, insn3;
 
 	insn1 = PLT_ENTRY_WORD1 | ((-(h->plt.offset + 4) >> 2) & 0x1fffff);
 	insn2 = PLT_ENTRY_WORD2;
@@ -3840,8 +3845,8 @@ elf64_alpha_finish_dynamic_sections (output_bfd, info)
 	  bfd_put_32 (output_bfd, PLT_HEADER_WORD4, splt->contents + 12);
 
 	  /* The next two words will be filled in by ld.so */
-	  bfd_put_64 (output_bfd, 0, splt->contents + 16);
-	  bfd_put_64 (output_bfd, 0, splt->contents + 24);
+	  bfd_put_64 (output_bfd, (bfd_vma) 0, splt->contents + 16);
+	  bfd_put_64 (output_bfd, (bfd_vma) 0, splt->contents + 24);
 
 	  elf_section_data (splt->output_section)->this_hdr.sh_entsize =
 	    PLT_HEADER_SIZE;
@@ -4103,7 +4108,8 @@ elf64_alpha_final_link (abfd, info)
 
 	sgot = alpha_elf_tdata(i)->got;
 	if (! bfd_set_section_contents (abfd, sgot->output_section,
-					sgot->contents, sgot->output_offset,
+					sgot->contents,
+					(file_ptr) sgot->output_offset,
 					sgot->_raw_size))
 	  return false;
       }

@@ -39,16 +39,17 @@ static void    aout_adobe_write_section PARAMS ((bfd *abfd, sec_ptr sect));
 static const bfd_target * aout_adobe_object_p PARAMS ((bfd *));
 static boolean aout_adobe_mkobject PARAMS ((bfd *));
 static boolean aout_adobe_write_object_contents PARAMS ((bfd *));
-static boolean aout_adobe_set_section_contents PARAMS ((bfd *, asection *, PTR, file_ptr, bfd_size_type));
-static boolean aout_adobe_set_arch_mach PARAMS ((bfd *, enum bfd_architecture, unsigned long));
+static boolean aout_adobe_set_section_contents
+  PARAMS ((bfd *, asection *, PTR, file_ptr, bfd_size_type));
+static boolean aout_adobe_set_arch_mach
+  PARAMS ((bfd *, enum bfd_architecture, unsigned long));
 static int     aout_adobe_sizeof_headers PARAMS ((bfd *, boolean));
 
 /* Swaps the information in an executable header taken from a raw byte
    stream memory image, into the internal exec_header structure.  */
 
 void aout_adobe_swap_exec_header_in
-  PARAMS ((bfd *abfd, struct external_exec *raw_bytes,
-	   struct internal_exec *execp));
+  PARAMS ((bfd *, struct external_exec *, struct internal_exec *));
 
 void
 aout_adobe_swap_exec_header_in (abfd, raw_bytes, execp)
@@ -59,7 +60,7 @@ aout_adobe_swap_exec_header_in (abfd, raw_bytes, execp)
   struct external_exec *bytes = (struct external_exec *) raw_bytes;
 
   /* Now fill in fields in the execp, from the bytes in the raw data.  */
-  execp->a_info   = bfd_h_get_32 (abfd, bytes->e_info);
+  execp->a_info   = H_GET_32 (abfd, bytes->e_info);
   execp->a_text   = GET_WORD (abfd, bytes->e_text);
   execp->a_data   = GET_WORD (abfd, bytes->e_data);
   execp->a_bss    = GET_WORD (abfd, bytes->e_bss);
@@ -72,10 +73,9 @@ aout_adobe_swap_exec_header_in (abfd, raw_bytes, execp)
 /* Swaps the information in an internal exec header structure into the
    supplied buffer ready for writing to disk.  */
 
-PROTO(void, aout_adobe_swap_exec_header_out,
-	  (bfd *abfd,
-	   struct internal_exec *execp,
-	   struct external_exec *raw_bytes));
+void aout_adobe_swap_exec_header_out
+  PARAMS ((bfd *, struct internal_exec *, struct external_exec *));
+
 void
 aout_adobe_swap_exec_header_out (abfd, execp, raw_bytes)
      bfd *abfd;
@@ -86,7 +86,7 @@ aout_adobe_swap_exec_header_out (abfd, execp, raw_bytes)
 
   /* Now fill in fields in the raw data, from the fields in the exec
      struct.  */
-  bfd_h_put_32 (abfd, execp->a_info  , bytes->e_info);
+  H_PUT_32 (abfd, execp->a_info  , bytes->e_info);
   PUT_WORD (abfd, execp->a_text  , bytes->e_text);
   PUT_WORD (abfd, execp->a_data  , bytes->e_data);
   PUT_WORD (abfd, execp->a_bss   , bytes->e_bss);
@@ -103,16 +103,16 @@ aout_adobe_object_p (abfd)
   struct internal_exec anexec;
   struct external_exec exec_bytes;
   char *targ;
+  bfd_size_type amt = EXEC_BYTES_SIZE;
 
-  if (bfd_read ((PTR) &exec_bytes, 1, EXEC_BYTES_SIZE, abfd)
-      != EXEC_BYTES_SIZE)
+  if (bfd_bread ((PTR) &exec_bytes, amt, abfd) != amt)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);
       return 0;
     }
 
-  anexec.a_info = bfd_h_get_32 (abfd, exec_bytes.e_info);
+  anexec.a_info = H_GET_32 (abfd, exec_bytes.e_info);
 
   /* Normally we just compare for the magic number.
      However, a bunch of Adobe tools aren't fixed up yet; they generate
@@ -154,7 +154,7 @@ aout_adobe_callback (abfd)
   flagword flags;
 
   /* Architecture and machine type -- unknown in this format.  */
-  bfd_set_arch_mach (abfd, bfd_arch_unknown, 0);
+  bfd_set_arch_mach (abfd, bfd_arch_unknown, 0L);
 
   /* The positions of the string table and symbol table.  */
   obj_str_filepos (abfd) = N_STROFF (*execp);
@@ -163,7 +163,8 @@ aout_adobe_callback (abfd)
   /* Suck up the section information from the file, one section at a time.  */
   for (;;)
     {
-      if (bfd_read ((PTR) ext, 1, sizeof (*ext), abfd) != sizeof (*ext))
+      bfd_size_type amt = sizeof (*ext);
+      if (bfd_bread ((PTR) ext, amt, abfd) != amt)
 	{
 	  if (bfd_get_error () != bfd_error_system_call)
 	    bfd_set_error (bfd_error_wrong_format);
@@ -215,7 +216,8 @@ aout_adobe_callback (abfd)
       /* Fix the name, if it is a sprintf'd name.  */
       if (sect->name == try_again)
 	{
-	  newname = (char *) bfd_zalloc (abfd, strlen (sect->name));
+	  amt = strlen (sect->name);
+	  newname = (char *) bfd_zalloc (abfd, amt);
 	  if (newname == NULL)
 	    return 0;
 	  strcpy (newname, sect->name);
@@ -226,11 +228,11 @@ aout_adobe_callback (abfd)
       bfd_set_section_flags (abfd, sect, flags);
       /* Assumed big-endian.  */
       sect->_raw_size = ((ext->e_size[0] << 8)
-			 | ext->e_size[1] << 8)
-	| ext->e_size[2];
+			 | ext->e_size[1] << 8
+			 | ext->e_size[2]);
       sect->_cooked_size = sect->_raw_size;
-      sect->vma = bfd_h_get_32 (abfd, ext->e_virtbase);
-      sect->filepos = bfd_h_get_32 (abfd, ext->e_filebase);
+      sect->vma = H_GET_32 (abfd, ext->e_virtbase);
+      sect->filepos = H_GET_32 (abfd, ext->e_filebase);
       /* FIXME XXX alignment?  */
 
       /* Set relocation information for first section of each type.  */
@@ -273,8 +275,9 @@ aout_adobe_mkobject (abfd)
      bfd *abfd;
 {
   struct bout_data_struct *rawptr;
+  bfd_size_type amt = sizeof (struct bout_data_struct);
 
-  rawptr = (struct bout_data_struct *) bfd_zalloc (abfd, sizeof (struct bout_data_struct));
+  rawptr = (struct bout_data_struct *) bfd_zalloc (abfd, amt);
   if (rawptr == NULL)
     return false;
 
@@ -297,6 +300,7 @@ aout_adobe_write_object_contents (abfd)
   struct external_exec swapped_hdr;
   static struct external_segdesc sentinel[1];	/* Initialized to zero.  */
   asection *sect;
+  bfd_size_type amt;
 
   exec_hdr (abfd)->a_info = ZMAGIC;
 
@@ -334,9 +338,9 @@ aout_adobe_write_object_contents (abfd)
 
   aout_adobe_swap_exec_header_out (abfd, exec_hdr (abfd), &swapped_hdr);
 
+  amt = EXEC_BYTES_SIZE;
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0
-      || (bfd_write ((PTR) &swapped_hdr, 1, EXEC_BYTES_SIZE, abfd)
-	  != EXEC_BYTES_SIZE))
+      || bfd_bwrite ((PTR) &swapped_hdr, amt, abfd) != amt)
     return false;
 
   /* Now write out the section information.  Text first, data next, rest
@@ -355,8 +359,8 @@ aout_adobe_write_object_contents (abfd)
       aout_adobe_write_section (abfd, sect);
 
   /* Write final `sentinel` section header (with type of 0).  */
-  if (bfd_write ((PTR) sentinel, 1, sizeof (*sentinel), abfd)
-      != sizeof (*sentinel))
+  amt = sizeof (*sentinel);
+  if (bfd_bwrite ((PTR) sentinel, amt, abfd) != amt)
     return false;
 
   /* Now write out reloc info, followed by syms and strings.  */
@@ -454,10 +458,10 @@ aout_adobe_set_section_contents (abfd, section, location, offset, count)
   if (bfd_seek (abfd, section->filepos + offset, SEEK_SET) != 0)
     return false;
 
-  if (count != 0)
-    return (bfd_write ((PTR) location, 1, count, abfd) == count) ? true : false;
+  if (count == 0)
+    return true;
 
-  return true;
+  return bfd_bwrite ((PTR) location, count, abfd) == count;
 }
 
 static boolean

@@ -19,7 +19,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 
-/* The only 386 aout system we have here is GO32 from DJ. 
+/* The only 386 aout system we have here is GO32 from DJ.
    These numbers make BFD work with that. If your aout 386 system
    doesn't work with these, we'll have to split them into different
    files.  Send me (sac@cygnus.com) the runes to make it work on your
@@ -75,7 +75,7 @@ i386aout_write_object_contents (abfd)
 #define MY_write_object_contents i386aout_write_object_contents
 
 #define MY_backend_data &MY(backend_data)
-static CONST struct aout_backend_data MY(backend_data) = {
+static const struct aout_backend_data MY(backend_data) = {
   0,				/* zmagic contiguous */
   1,				/* text incl header */
   0,				/* entry is text address */

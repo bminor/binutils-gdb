@@ -62,7 +62,7 @@ enum reloc_type
   };
 
 #if 0
-static CONST char *CONST reloc_type_names[] =
+static const char *const reloc_type_names[] =
   {
     "R_SPARC_NONE",
     "R_SPARC_8",		"R_SPARC_16",		"R_SPARC_32",
@@ -131,7 +131,7 @@ nlm_sparc_read_reloc (abfd, sym, secp, rel)
   struct nlm32_sparc_reloc_ext tmp_reloc;
   asection *code_sec, *data_sec;
 
-  if (bfd_read (&tmp_reloc, 12, 1, abfd) != 12)
+  if (bfd_bread (&tmp_reloc, (bfd_size_type) 12, abfd) != 12)
     return false;
 
   code_sec = bfd_get_section_by_name (abfd, NLM_CODE_NAME);
@@ -224,7 +224,7 @@ nlm_sparc_write_reloc (abfd, sec, rel)
   bfd_put_32 (abfd, rel->addend, tmp_reloc.addend);
   bfd_put_8 (abfd, (short) (rel->howto->type), tmp_reloc.type);
 
-  if (bfd_write (&tmp_reloc, 12, 1, abfd) != 12)
+  if (bfd_bwrite (&tmp_reloc, (bfd_size_type) 12, abfd) != 12)
     return false;
 
   return true;
@@ -259,24 +259,24 @@ nlm_sparc_read_import (abfd, sym)
 
   /* First, read in the number of relocation
      entries for this symbol.  */
-  if (bfd_read ((PTR) temp, 4, 1, abfd) != 4)
+  if (bfd_bread ((PTR) temp, (bfd_size_type) 4, abfd) != 4)
     return false;
 
   rcount = bfd_get_32 (abfd, temp);
 
   /* Next, read in the length of the symbol.  */
 
-  if (bfd_read ((PTR) &symlength, sizeof (symlength), 1, abfd)
+  if (bfd_bread ((PTR) &symlength, (bfd_size_type) sizeof (symlength), abfd)
       != sizeof (symlength))
     return false;
   sym -> symbol.the_bfd = abfd;
-  name = bfd_alloc (abfd, symlength + 1);
+  name = bfd_alloc (abfd, (bfd_size_type) symlength + 1);
   if (name == NULL)
     return false;
 
   /* Then read in the symbol.  */
 
-  if (bfd_read (name, symlength, 1, abfd) != symlength)
+  if (bfd_bread (name, (bfd_size_type) symlength, abfd) != symlength)
     return false;
   name[symlength] = '\0';
   sym -> symbol.name = name;
@@ -337,10 +337,10 @@ nlm_sparc_write_import (abfd, sec, rel)
 	   __FUNCTION__, base + (*rel->sym_ptr_ptr)->value);
 #endif
   bfd_put_32 (abfd, base + (*rel->sym_ptr_ptr)->value, temp);
-  if (bfd_write ((PTR)temp, 4, 1, abfd) != 4)
+  if (bfd_bwrite ((PTR) temp, (bfd_size_type) 4, abfd) != 4)
     return false;
-  bfd_put_32 (abfd, 1, temp);
-  if (bfd_write ((PTR)temp, 4, 1, abfd) != 4)
+  bfd_put_32 (abfd, (bfd_vma) 1, temp);
+  if (bfd_bwrite ((PTR) temp, (bfd_size_type) 4, abfd) != 4)
     return false;
   if (nlm_sparc_write_reloc (abfd, sec, rel) == false)
     return false;
@@ -361,12 +361,13 @@ nlm_sparc_write_external (abfd, count, sym, relocs)
   unsigned char temp[NLM_TARGET_LONG_SIZE];
 
   bfd_put_32 (abfd, count, temp);
-  if (bfd_write (temp, sizeof (temp), 1, abfd) != sizeof (temp))
+  if (bfd_bwrite (temp, (bfd_size_type) sizeof (temp), abfd) != sizeof (temp))
     return false;
 
   len = strlen (sym->name);
-  if ((bfd_write (&len, sizeof (bfd_byte), 1, abfd) != sizeof (bfd_byte))
-      || bfd_write (sym->name, len, 1, abfd) != len)
+  if ((bfd_bwrite (&len, (bfd_size_type) sizeof (bfd_byte), abfd)
+       != sizeof (bfd_byte))
+      || bfd_bwrite (sym->name, (bfd_size_type) len, abfd) != len)
     return false;
 
   for (i = 0; i < count; i++)
@@ -395,9 +396,9 @@ nlm_sparc_write_export (abfd, sym, value)
   bfd_put_32 (abfd, value, temp);
   len = strlen (sym->name);
 
-  if (bfd_write (temp, 4, 1, abfd) != 4
-      || bfd_write (&len, 1, 1, abfd) != 1
-      || bfd_write (sym->name, len, 1, abfd) != len)
+  if (bfd_bwrite (temp, (bfd_size_type) 4, abfd) != 4
+      || bfd_bwrite (&len, (bfd_size_type) 1, abfd) != 1
+      || bfd_bwrite (sym->name, (bfd_size_type) len, abfd) != len)
     return false;
 
   return true;

@@ -57,8 +57,8 @@ static reloc_howto_type howto_table[] =
 #define __A_MAGIC_SET__
 
 /* Code to swap in the reloc */
-#define SWAP_IN_RELOC_OFFSET   bfd_h_get_32
-#define SWAP_OUT_RELOC_OFFSET bfd_h_put_32
+#define SWAP_IN_RELOC_OFFSET	H_GET_32
+#define SWAP_OUT_RELOC_OFFSET	H_PUT_32
 #define SWAP_OUT_RELOC_EXTRA(abfd, src, dst) \
   dst->r_stuff[0] = 'S'; \
   dst->r_stuff[1] = 'C';
@@ -274,7 +274,7 @@ w65_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 	unsigned int gap = bfd_coff_reloc16_get_value (reloc, link_info,
 						       input_section);
 
-	bfd_put_16 (abfd, gap, data + dst_address);
+	bfd_put_16 (abfd, (bfd_vma) gap, data + dst_address);
 	dst_address += 2;
 	src_address += 2;
       }
@@ -284,7 +284,7 @@ w65_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 	unsigned int gap = bfd_coff_reloc16_get_value (reloc, link_info,
 						       input_section);
 	gap >>= 8;
-	bfd_put_16 (abfd, gap, data + dst_address);
+	bfd_put_16 (abfd, (bfd_vma) gap, data + dst_address);
 	dst_address += 2;
 	src_address += 2;
       }
@@ -294,7 +294,7 @@ w65_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 	unsigned int gap = bfd_coff_reloc16_get_value (reloc, link_info,
 						       input_section);
 	gap >>= 16;
-	bfd_put_16 (abfd, gap, data + dst_address);
+	bfd_put_16 (abfd, (bfd_vma) gap, data + dst_address);
 	dst_address += 2;
 	src_address += 2;
       }
@@ -304,7 +304,7 @@ w65_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
       {
 	unsigned int gap = bfd_coff_reloc16_get_value (reloc, link_info,
 						       input_section);
-	bfd_put_16 (abfd, gap, data + dst_address);
+	bfd_put_16 (abfd, (bfd_vma) gap, data + dst_address);
 	bfd_put_8 (abfd, gap >> 16, data+dst_address + 2);
 	dst_address += 3;
 	src_address += 3;

@@ -316,7 +316,7 @@ m68kcoff_common_addend_special_fn (abfd, reloc_entry, symbol, data,
 	  {
 	    short x = bfd_get_16 (abfd, addr);
 	    DOIT (x);
-	    bfd_put_16 (abfd, x, addr);
+	    bfd_put_16 (abfd, (bfd_vma) x, addr);
 	  }
 	  break;
 
@@ -324,7 +324,7 @@ m68kcoff_common_addend_special_fn (abfd, reloc_entry, symbol, data,
 	  {
 	    long x = bfd_get_32 (abfd, addr);
 	    DOIT (x);
-	    bfd_put_32 (abfd, x, addr);
+	    bfd_put_32 (abfd, (bfd_vma) x, addr);
 	  }
 	  break;
 
@@ -442,6 +442,7 @@ bfd_m68k_coff_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
   bfd_size_type symesz;
   struct internal_reloc *irel, *irelend;
   bfd_byte *p;
+  bfd_size_type amt;
 
   BFD_ASSERT (! info->relocateable);
 
@@ -457,7 +458,8 @@ bfd_m68k_coff_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
 					 NULL);
   irelend = irel + datasec->reloc_count;
 
-  relsec->contents = (bfd_byte *) bfd_alloc (abfd, datasec->reloc_count * 12);
+  amt = (bfd_size_type) datasec->reloc_count * 12;
+  relsec->contents = (bfd_byte *) bfd_alloc (abfd, amt);
   if (relsec->contents == NULL)
     return false;
 

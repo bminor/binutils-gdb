@@ -1,5 +1,5 @@
 /* AVR-specific support for 32-bit ELF
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
    Contributed by Denis Chertykov <denisc@overta.ru>
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -699,7 +699,7 @@ avr_final_link_relocate (howto, input_bfd, input_section,
       x = bfd_get_16 (input_bfd, contents);
       x |= ((srel & 0x10000) | ((srel << 3) & 0x1f00000)) >> 16;
       bfd_put_16 (input_bfd, x, contents);
-      bfd_put_16 (input_bfd, srel & 0xffff, contents+2);
+      bfd_put_16 (input_bfd, (bfd_vma) srel & 0xffff, contents+2);
       break;
 
     default:
@@ -913,7 +913,7 @@ static boolean
 elf32_avr_object_p (abfd)
      bfd *abfd;
 {
-  int e_set = bfd_mach_avr2;
+  unsigned int e_set = bfd_mach_avr2;
   if (elf_elfheader (abfd)->e_machine == EM_AVR
       || elf_elfheader (abfd)->e_machine == EM_AVR_OLD)
     {

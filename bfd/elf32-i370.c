@@ -921,37 +921,40 @@ i370_elf_size_dynamic_sections (output_bfd, info)
 	 must add the entries now so that we get the correct size for
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
-      if (! info->shared)
+#define add_dynamic_entry(TAG, VAL) \
+  bfd_elf32_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+
+      if (!info->shared)
 	{
-	  if (! bfd_elf32_add_dynamic_entry (info, DT_DEBUG, 0))
+	  if (!add_dynamic_entry (DT_DEBUG, 0))
 	    return false;
 	}
 
       if (plt)
 	{
-	  if (! bfd_elf32_add_dynamic_entry (info, DT_PLTGOT, 0)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_PLTRELSZ, 0)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_JMPREL, 0))
+	  if (!add_dynamic_entry (DT_PLTGOT, 0)
+	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
+	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
+	      || !add_dynamic_entry (DT_JMPREL, 0))
 	    return false;
 	}
 
       if (relocs)
 	{
-	  if (! bfd_elf32_add_dynamic_entry (info, DT_RELA, 0)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_RELASZ, 0)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_RELAENT,
-						sizeof (Elf32_External_Rela)))
+	  if (!add_dynamic_entry (DT_RELA, 0)
+	      || !add_dynamic_entry (DT_RELASZ, 0)
+	      || !add_dynamic_entry (DT_RELAENT, sizeof (Elf32_External_Rela)))
 	    return false;
 	}
 
       if (reltext)
 	{
-	  if (! bfd_elf32_add_dynamic_entry (info, DT_TEXTREL, 0))
+	  if (!add_dynamic_entry (DT_TEXTREL, 0))
 	    return false;
 	  info->flags |= DF_TEXTREL;
 	}
     }
+#undef add_dynamic_entry
 
   /* If we are generating a shared library, we generate a section
      symbol for each output section.  These are local symbols, which
@@ -1174,7 +1177,7 @@ i370_elf_finish_dynamic_sections (output_bfd, info)
   if (sgot)
     {
       unsigned char *contents = sgot->contents;
-      bfd_put_32 (output_bfd, 0x4e800021 /* blrl */, contents);
+      bfd_put_32 (output_bfd, (bfd_vma) 0x4e800021 /* blrl */, contents);
 
       if (sdyn == NULL)
 	bfd_put_32 (output_bfd, (bfd_vma) 0, contents+4);
@@ -1704,7 +1707,9 @@ i370_elf_post_process_headers (abfd, link_info)
 
 #define elf_backend_post_process_headers	i370_elf_post_process_headers
 
-int i370_noop()
+static int i370_noop PARAMS ((void));
+
+static int i370_noop ()
 {
   return 1;
 }

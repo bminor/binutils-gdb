@@ -47,9 +47,9 @@ static void sparc64_elf_info_to_howto
 static void sparc64_elf_build_plt
   PARAMS ((bfd *, unsigned char *, int));
 static bfd_vma sparc64_elf_plt_entry_offset
-  PARAMS ((int));
+  PARAMS ((bfd_vma));
 static bfd_vma sparc64_elf_plt_ptr_offset
-  PARAMS ((int, int));
+  PARAMS ((bfd_vma, bfd_vma));
 
 static boolean sparc64_elf_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *sec,
@@ -177,7 +177,7 @@ struct elf_reloc_map {
   unsigned char elf_reloc_val;
 };
 
-static CONST struct elf_reloc_map sparc_reloc_map[] =
+static const struct elf_reloc_map sparc_reloc_map[] =
 {
   { BFD_RELOC_NONE, R_SPARC_NONE, },
   { BFD_RELOC_16, R_SPARC_16, },
@@ -294,13 +294,12 @@ sparc64_elf_slurp_one_reloc_table (abfd, asect, rel_hdr, symbols, dynamic)
   bfd_size_type count;
   arelent *relents;
 
-  allocated = (PTR) bfd_malloc ((size_t) rel_hdr->sh_size);
+  allocated = (PTR) bfd_malloc (rel_hdr->sh_size);
   if (allocated == NULL)
     goto error_return;
 
   if (bfd_seek (abfd, rel_hdr->sh_offset, SEEK_SET) != 0
-      || (bfd_read (allocated, 1, rel_hdr->sh_size, abfd)
-	  != rel_hdr->sh_size))
+      || bfd_bread (allocated, rel_hdr->sh_size, abfd) != rel_hdr->sh_size)
     goto error_return;
 
   native_relocs = (bfd_byte *) allocated;
@@ -385,6 +384,7 @@ sparc64_elf_slurp_reloc_table (abfd, asect, symbols, dynamic)
   struct bfd_elf_section_data * const d = elf_section_data (asect);
   Elf_Internal_Shdr *rel_hdr;
   Elf_Internal_Shdr *rel_hdr2;
+  bfd_size_type amt;
 
   if (asect->relocation != NULL)
     return true;
@@ -415,9 +415,9 @@ sparc64_elf_slurp_reloc_table (abfd, asect, symbols, dynamic)
       rel_hdr2 = NULL;
     }
 
-  asect->relocation = ((arelent *)
-		       bfd_alloc (abfd,
-				  asect->reloc_count * 2 * sizeof (arelent)));
+  amt = asect->reloc_count;
+  amt *= 2 * sizeof (arelent);
+  asect->relocation = (arelent *) bfd_alloc (abfd, amt);
   if (asect->relocation == NULL)
     return false;
 
@@ -653,9 +653,9 @@ sparc64_elf_bfd_link_hash_table_create (abfd)
      bfd *abfd;
 {
   struct sparc64_elf_link_hash_table *ret;
+  bfd_size_type amt = sizeof (struct sparc64_elf_link_hash_table);
 
-  ret = ((struct sparc64_elf_link_hash_table *)
-	 bfd_zalloc (abfd, sizeof (struct sparc64_elf_link_hash_table)));
+  ret = (struct sparc64_elf_link_hash_table *) bfd_zalloc (abfd, amt);
   if (ret == (struct sparc64_elf_link_hash_table *) NULL)
     return NULL;
 
@@ -773,8 +773,8 @@ sparc_elf_wdisp16_reloc (abfd, reloc_entry, symbol, data, input_section,
   if (status != bfd_reloc_other)
     return status;
 
-  insn = (insn & ~0x303fff) | ((((relocation >> 2) & 0xc000) << 6)
-			       | ((relocation >> 2) & 0x3fff));
+  insn &= ~ (bfd_vma) 0x303fff;
+  insn |= (((relocation >> 2) & 0xc000) << 6) | ((relocation >> 2) & 0x3fff);
   bfd_put_32 (abfd, insn, (bfd_byte *) data + reloc_entry->address);
 
   if ((bfd_signed_vma) relocation < - 0x40000
@@ -812,7 +812,7 @@ sparc_elf_hix22_reloc (abfd,
     return status;
 
   relocation ^= MINUS_ONE;
-  insn = (insn & ~0x3fffff) | ((relocation >> 10) & 0x3fffff);
+  insn = (insn &~ (bfd_vma) 0x3fffff) | ((relocation >> 10) & 0x3fffff);
   bfd_put_32 (abfd, insn, (bfd_byte *) data + reloc_entry->address);
 
   if ((relocation & ~ (bfd_vma) 0xffffffff) != 0)
@@ -848,7 +848,7 @@ sparc_elf_lox10_reloc (abfd,
   if (status != bfd_reloc_other)
     return status;
 
-  insn = (insn & ~0x1fff) | 0x1c00 | (relocation & 0x3ff);
+  insn = (insn &~ (bfd_vma) 0x1fff) | 0x1c00 | (relocation & 0x3ff);
   bfd_put_32 (abfd, insn, (bfd_byte *) data + reloc_entry->address);
 
   return bfd_reloc_ok;
@@ -879,7 +879,7 @@ sparc64_elf_build_plt (output_bfd, contents, nentries)
      We fill them with `illtrap 0' to force ld.so to do something.  */
 
   for (i = 0; i < PLT_HEADER_SIZE/4; ++i)
-    bfd_put_32 (output_bfd, 0, contents+i*4);
+    bfd_put_32 (output_bfd, (bfd_vma) 0, contents+i*4);
 
   /* The first 32768 entries are close enough to plt1 to get there via
      a straight branch.  */
@@ -895,14 +895,14 @@ sparc64_elf_build_plt (output_bfd, contents, nentries)
       /* ba,a,pt %xcc, plt1 */
       ba = 0x30680000 | (((contents+PLT_ENTRY_SIZE) - (entry+4)) / 4 & 0x7ffff);
 
-      bfd_put_32 (output_bfd, sethi, entry);
-      bfd_put_32 (output_bfd, ba, entry+4);
-      bfd_put_32 (output_bfd, nop, entry+8);
-      bfd_put_32 (output_bfd, nop, entry+12);
-      bfd_put_32 (output_bfd, nop, entry+16);
-      bfd_put_32 (output_bfd, nop, entry+20);
-      bfd_put_32 (output_bfd, nop, entry+24);
-      bfd_put_32 (output_bfd, nop, entry+28);
+      bfd_put_32 (output_bfd, (bfd_vma) sethi, entry);
+      bfd_put_32 (output_bfd, (bfd_vma) ba,    entry + 4);
+      bfd_put_32 (output_bfd, (bfd_vma) nop,   entry + 8);
+      bfd_put_32 (output_bfd, (bfd_vma) nop,   entry + 12);
+      bfd_put_32 (output_bfd, (bfd_vma) nop,   entry + 16);
+      bfd_put_32 (output_bfd, (bfd_vma) nop,   entry + 20);
+      bfd_put_32 (output_bfd, (bfd_vma) nop,   entry + 24);
+      bfd_put_32 (output_bfd, (bfd_vma) nop,   entry + 28);
     }
 
   /* Now the tricky bit.  Entries 32768 and higher are grouped in blocks of
@@ -923,14 +923,20 @@ sparc64_elf_build_plt (output_bfd, contents, nentries)
 	  /* ldx [%o7 + ptr - entry+4], %g1 */
 	  ldx = 0xc25be000 | ((ptr - entry+4) & 0x1fff);
 
-	  bfd_put_32 (output_bfd, 0x8a10000f, entry);    /* mov %o7,%g5 */
-	  bfd_put_32 (output_bfd, 0x40000002, entry+4);  /* call .+8 */
-	  bfd_put_32 (output_bfd, nop, entry+8);         /* nop */
-	  bfd_put_32 (output_bfd, ldx, entry+12);        /* ldx [%o7+P],%g1 */
-	  bfd_put_32 (output_bfd, 0x83c3c001, entry+16); /* jmpl %o7+%g1,%g1 */
-	  bfd_put_32 (output_bfd, 0x9e100005, entry+20); /* mov %g5,%o7 */
+	  /* mov %o7,%g5
+	     call .+8
+	     nop
+	     ldx [%o7+P],%g1
+	     jmpl %o7+%g1,%g1
+	     mov %g5,%o7  */
+	  bfd_put_32 (output_bfd, (bfd_vma) 0x8a10000f, entry);
+	  bfd_put_32 (output_bfd, (bfd_vma) 0x40000002, entry + 4);
+	  bfd_put_32 (output_bfd, (bfd_vma) nop,        entry + 8);
+	  bfd_put_32 (output_bfd, (bfd_vma) ldx,        entry + 12);
+	  bfd_put_32 (output_bfd, (bfd_vma) 0x83c3c001, entry + 16);
+	  bfd_put_32 (output_bfd, (bfd_vma) 0x9e100005, entry + 20);
 
-	  bfd_put_64 (output_bfd, contents - (entry+4), ptr);
+	  bfd_put_64 (output_bfd, (bfd_vma) (contents - (entry + 4)), ptr);
 	}
     }
 }
@@ -939,9 +945,9 @@ sparc64_elf_build_plt (output_bfd, contents, nentries)
 
 static bfd_vma
 sparc64_elf_plt_entry_offset (index)
-     int index;
+     bfd_vma index;
 {
-  int block, ofs;
+  bfd_vma block, ofs;
 
   if (index < LARGE_PLT_THRESHOLD)
     return index * PLT_ENTRY_SIZE;
@@ -951,22 +957,21 @@ sparc64_elf_plt_entry_offset (index)
   block = (index - LARGE_PLT_THRESHOLD) / 160;
   ofs = (index - LARGE_PLT_THRESHOLD) % 160;
 
-  return ((bfd_vma) (LARGE_PLT_THRESHOLD + block*160) * PLT_ENTRY_SIZE
-	  + ofs * 6*4);
+  return (LARGE_PLT_THRESHOLD + block * 160) * PLT_ENTRY_SIZE + ofs * 6 * 4;
 }
 
 static bfd_vma
 sparc64_elf_plt_ptr_offset (index, max)
-     int index, max;
+     bfd_vma index;
+     bfd_vma max;
 {
-  int block, ofs, last;
+  bfd_vma block, ofs, last;
 
   BFD_ASSERT(index >= LARGE_PLT_THRESHOLD);
 
   /* See above for details.  */
 
-  block = (((index - LARGE_PLT_THRESHOLD) / 160) * 160)
-	  + LARGE_PLT_THRESHOLD;
+  block = (((index - LARGE_PLT_THRESHOLD) / 160) * 160) + LARGE_PLT_THRESHOLD;
   ofs = index - block;
   if (block + 160 > max)
     last = (max - LARGE_PLT_THRESHOLD) % 160;
@@ -1087,10 +1092,11 @@ sparc64_elf_check_relocs (abfd, info, sec, relocs)
                  symbol.  */
 	      if (local_got_offsets == NULL)
 		{
-		  size_t size;
+		  bfd_size_type size;
 		  register unsigned int i;
 
-		  size = symtab_hdr->sh_info * sizeof (bfd_vma);
+		  size = symtab_hdr->sh_info;
+		  size *= sizeof (bfd_vma);
 		  local_got_offsets = (bfd_vma *) bfd_alloc (abfd, size);
 		  if (local_got_offsets == NULL)
 		    return false;
@@ -1768,35 +1774,37 @@ sparc64_elf_size_dynamic_sections (output_bfd, info)
 	 must add the entries now so that we get the correct size for
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
+#define add_dynamic_entry(TAG, VAL) \
+  bfd_elf64_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+
       int reg;
       struct sparc64_elf_app_reg * app_regs;
       struct bfd_strtab_hash *dynstr;
       struct elf_link_hash_table *eht = elf_hash_table (info);
 
-      if (! info->shared)
+      if (!info->shared)
 	{
-	  if (! bfd_elf64_add_dynamic_entry (info, DT_DEBUG, 0))
+	  if (!add_dynamic_entry (DT_DEBUG, 0))
 	    return false;
 	}
 
       if (relplt)
 	{
-	  if (! bfd_elf64_add_dynamic_entry (info, DT_PLTGOT, 0)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_PLTRELSZ, 0)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_JMPREL, 0))
+	  if (!add_dynamic_entry (DT_PLTGOT, 0)
+	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
+	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
+	      || !add_dynamic_entry (DT_JMPREL, 0))
 	    return false;
 	}
 
-      if (! bfd_elf64_add_dynamic_entry (info, DT_RELA, 0)
-	  || ! bfd_elf64_add_dynamic_entry (info, DT_RELASZ, 0)
-	  || ! bfd_elf64_add_dynamic_entry (info, DT_RELAENT,
-					    sizeof (Elf64_External_Rela)))
+      if (!add_dynamic_entry (DT_RELA, 0)
+	  || !add_dynamic_entry (DT_RELASZ, 0)
+	  || !add_dynamic_entry (DT_RELAENT, sizeof (Elf64_External_Rela)))
 	return false;
 
       if (info->flags & DF_TEXTREL)
 	{
-	  if (! bfd_elf64_add_dynamic_entry (info, DT_TEXTREL, 0))
+	  if (!add_dynamic_entry (DT_TEXTREL, 0))
 	    return false;
 	}
 
@@ -1810,7 +1818,7 @@ sparc64_elf_size_dynamic_sections (output_bfd, info)
 	  {
 	    struct elf_link_local_dynamic_entry *entry, *e;
 
-	    if (! bfd_elf64_add_dynamic_entry (info, DT_SPARC_REGISTER, 0))
+	    if (!add_dynamic_entry (DT_SPARC_REGISTER, 0))
 	      return false;
 
 	    entry = (struct elf_link_local_dynamic_entry *)
@@ -1847,6 +1855,7 @@ sparc64_elf_size_dynamic_sections (output_bfd, info)
 	    eht->dynsymcount++;
 	  }
     }
+#undef add_dynamic_entry
 
   return true;
 }
@@ -2365,7 +2374,8 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			 Note this is different behaviour to the
 			 32-bit linker, which both adds the contents
 			 and ignores the addend.  So clear the location.  */
-		      bfd_put_64 (output_bfd, 0, sgot->contents + off);
+		      bfd_put_64 (output_bfd, (bfd_vma) 0,
+				  sgot->contents + off);
 
 		      /* We need to generate a R_SPARC_RELATIVE reloc
 			 for the dynamic linker.  */
@@ -2431,7 +2441,7 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    relocation = (relocation & 0x3ff) + ELF64_R_TYPE_DATA (rel->r_info);
 
 	    x = bfd_get_32 (input_bfd, contents + rel->r_offset);
-	    x = (x & ~0x1fff) | (relocation & 0x1fff);
+	    x = (x & ~(bfd_vma) 0x1fff) | (relocation & 0x1fff);
 	    bfd_put_32 (input_bfd, x, contents + rel->r_offset);
 
 	    r = bfd_check_overflow (howto->complain_on_overflow,
@@ -2452,8 +2462,9 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    relocation -= rel->r_offset;
 
 	    x = bfd_get_32 (input_bfd, contents + rel->r_offset);
-	    x = (x & ~0x303fff) | ((((relocation >> 2) & 0xc000) << 6)
-				   | ((relocation >> 2) & 0x3fff));
+	    x &= ~(bfd_vma) 0x303fff;
+	    x |= ((((relocation >> 2) & 0xc000) << 6)
+		  | ((relocation >> 2) & 0x3fff));
 	    bfd_put_32 (input_bfd, x, contents + rel->r_offset);
 
 	    r = bfd_check_overflow (howto->complain_on_overflow,
@@ -2471,7 +2482,7 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    relocation = relocation ^ MINUS_ONE;
 
 	    x = bfd_get_32 (input_bfd, contents + rel->r_offset);
-	    x = (x & ~0x3fffff) | ((relocation >> 10) & 0x3fffff);
+	    x = (x & ~(bfd_vma) 0x3fffff) | ((relocation >> 10) & 0x3fffff);
 	    bfd_put_32 (input_bfd, x, contents + rel->r_offset);
 
 	    r = bfd_check_overflow (howto->complain_on_overflow,
@@ -2489,7 +2500,7 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    relocation = (relocation & 0x3ff) | 0x1c00;
 
 	    x = bfd_get_32 (input_bfd, contents + rel->r_offset);
-	    x = (x & ~0x1fff) | relocation;
+	    x = (x & ~(bfd_vma) 0x1fff) | relocation;
 	    bfd_put_32 (input_bfd, x, contents + rel->r_offset);
 
 	    r = bfd_reloc_ok;
@@ -2578,7 +2589,7 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			      || reg == G0 || reg == O7)
 			    break;
 
-			  bfd_put_32 (input_bfd, INSN_NOP,
+			  bfd_put_32 (input_bfd, (bfd_vma) INSN_NOP,
 				      contents + rel->r_offset + 4);
 			}
 		      break;
@@ -2683,7 +2694,7 @@ sparc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	}
       else
 	{
-	  int max = splt->_raw_size / PLT_ENTRY_SIZE;
+	  bfd_vma max = splt->_raw_size / PLT_ENTRY_SIZE;
 	  rela.r_offset = sparc64_elf_plt_ptr_offset (h->plt.offset, max);
 	  rela.r_addend = -(sparc64_elf_plt_entry_offset (h->plt.offset) + 4)
 			  -(splt->output_section->vma + splt->output_offset);
@@ -2729,7 +2740,7 @@ sparc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       rela.r_offset = (sgot->output_section->vma
 		       + sgot->output_offset
-		       + (h->got.offset &~ 1));
+		       + (h->got.offset &~ (bfd_vma) 1));
 
       /* If this is a -Bsymbolic link, and the symbol is defined
 	 locally, we just want to emit a RELATIVE reloc.  Likewise if
@@ -2871,8 +2882,8 @@ sparc64_elf_finish_dynamic_sections (output_bfd, info)
       /* Initialize the contents of the .plt section.  */
       if (splt->_raw_size > 0)
 	{
-	  sparc64_elf_build_plt(output_bfd, splt->contents,
-				splt->_raw_size / PLT_ENTRY_SIZE);
+	  sparc64_elf_build_plt (output_bfd, splt->contents,
+				 (int) (splt->_raw_size / PLT_ENTRY_SIZE));
 	}
 
       elf_section_data (splt->output_section)->this_hdr.sh_entsize =

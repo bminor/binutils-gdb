@@ -1059,6 +1059,7 @@ ppc_elf_relax_section (abfd, isec, link_info, again)
       if (isec->reloc_count)
 	{
           unsigned n;
+	  bfd_size_type amt;
 
           /* Get a copy of the native relocations.  */
           internal_relocs = _bfd_elf32_link_read_relocs (
@@ -1070,8 +1071,9 @@ ppc_elf_relax_section (abfd, isec, link_info, again)
     	      free_relocs = internal_relocs;
 
           /* Setup a faster access method for the reloc info we need.  */
-          rela_comb = (Elf_Internal_Rela**)
-	    bfd_malloc (isec->reloc_count*sizeof (Elf_Internal_Rela*));
+	  amt = isec->reloc_count;
+	  amt *= sizeof (Elf_Internal_Rela*);
+          rela_comb = (Elf_Internal_Rela**) bfd_malloc (amt);
           if (rela_comb == NULL)
               goto error_return;
           for (n = 0; n < isec->reloc_count; ++n)
@@ -1200,7 +1202,7 @@ ppc_elf_relax_section (abfd, isec, link_info, again)
 #undef BO4
               if (modified)
 	        {
-                  bfd_put_32 (abfd, insn, contents + isec_offset);
+                  bfd_put_32 (abfd, (bfd_vma) insn, contents + isec_offset);
 		  section_modified = true;
 	        }
             }
@@ -2014,37 +2016,40 @@ ppc_elf_size_dynamic_sections (output_bfd, info)
 	 must add the entries now so that we get the correct size for
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
-      if (! info->shared)
+#define add_dynamic_entry(TAG, VAL) \
+  bfd_elf32_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+
+      if (!info->shared)
 	{
-	  if (! bfd_elf32_add_dynamic_entry (info, DT_DEBUG, 0))
+	  if (!add_dynamic_entry (DT_DEBUG, 0))
 	    return false;
 	}
 
       if (plt)
 	{
-	  if (! bfd_elf32_add_dynamic_entry (info, DT_PLTGOT, 0)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_PLTRELSZ, 0)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_JMPREL, 0))
+	  if (!add_dynamic_entry (DT_PLTGOT, 0)
+	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
+	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
+	      || !add_dynamic_entry (DT_JMPREL, 0))
 	    return false;
 	}
 
       if (relocs)
 	{
-	  if (! bfd_elf32_add_dynamic_entry (info, DT_RELA, 0)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_RELASZ, 0)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_RELAENT,
-						sizeof (Elf32_External_Rela)))
+	  if (!add_dynamic_entry (DT_RELA, 0)
+	      || !add_dynamic_entry (DT_RELASZ, 0)
+	      || !add_dynamic_entry (DT_RELAENT, sizeof (Elf32_External_Rela)))
 	    return false;
 	}
 
       if ((info->flags & DF_TEXTREL) != 0)
 	{
-	  if (! bfd_elf32_add_dynamic_entry (info, DT_TEXTREL, 0))
+	  if (!add_dynamic_entry (DT_TEXTREL, 0))
 	    return false;
 	  info->flags |= DF_TEXTREL;
 	}
     }
+#undef add_dynamic_entry
 
   return true;
 }
@@ -2200,15 +2205,16 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 	      /* This is a global offset table entry for a local symbol.  */
 	      if (local_got_refcounts == NULL)
 		{
-		  size_t size;
+		  bfd_size_type size;
 
-		  size = symtab_hdr->sh_info * sizeof (bfd_signed_vma);
-		  local_got_refcounts = (bfd_signed_vma *)
-		    bfd_alloc (abfd, size);
+		  size = symtab_hdr->sh_info;
+		  size *= sizeof (bfd_signed_vma);
+		  local_got_refcounts
+		    = (bfd_signed_vma *) bfd_alloc (abfd, size);
 		  if (local_got_refcounts == NULL)
 		    return false;
 		  elf_local_got_refcounts (abfd) = local_got_refcounts;
-		  memset (local_got_refcounts, -1, size);
+		  memset (local_got_refcounts, -1, (size_t) size);
 		}
 	      if (local_got_refcounts[r_symndx] == -1)
 		{
@@ -2579,21 +2585,24 @@ ppc_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 
       if (!sdata->bss_section)
 	{
+	  bfd_size_type amt;
+
 	  /* We don't go through bfd_make_section, because we don't
              want to attach this common section to DYNOBJ.  The linker
              will move the symbols to the appropriate output section
              when it defines common symbols.  */
-	  sdata->bss_section = ((asection *)
-				bfd_zalloc (abfd, sizeof (asection)));
+	  amt = sizeof (asection);
+	  sdata->bss_section = (asection *) bfd_zalloc (abfd, amt);
 	  if (sdata->bss_section == NULL)
 	    return false;
 	  sdata->bss_section->name = sdata->bss_name;
 	  sdata->bss_section->flags = SEC_IS_COMMON;
 	  sdata->bss_section->output_section = sdata->bss_section;
-	  sdata->bss_section->symbol =
-	    (asymbol *) bfd_zalloc (abfd, sizeof (asymbol));
+	  amt = sizeof (asymbol);
+	  sdata->bss_section->symbol = (asymbol *) bfd_zalloc (abfd, amt);
+	  amt = sizeof (asymbol *);
 	  sdata->bss_section->symbol_ptr_ptr =
-	    (asymbol **) bfd_zalloc (abfd, sizeof (asymbol *));
+	    (asymbol **) bfd_zalloc (abfd, amt);
 	  if (sdata->bss_section->symbol == NULL
 	      || sdata->bss_section->symbol_ptr_ptr == NULL)
 	    return false;
@@ -2697,7 +2706,7 @@ ppc_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       rela.r_offset = (sgot->output_section->vma
 		       + sgot->output_offset
-		       + (h->got.offset &~ 1));
+		       + (h->got.offset &~ (bfd_vma) 1));
 
       /* If this is a -Bsymbolic link, and the symbol is defined
 	 locally, we just want to emit a RELATIVE reloc.  The entry in
@@ -2842,7 +2851,7 @@ ppc_elf_finish_dynamic_sections (output_bfd, info)
   if (sgot)
     {
       unsigned char *contents = sgot->contents;
-      bfd_put_32 (output_bfd, 0x4e800021 /* blrl */, contents);
+      bfd_put_32 (output_bfd, (bfd_vma) 0x4e800021 /* blrl */, contents);
 
       if (sdyn == NULL)
 	bfd_put_32 (output_bfd, (bfd_vma) 0, contents+4);
@@ -3320,7 +3329,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    insn &= ~BRANCH_PREDICT_BIT;
 	  else
 	    insn |= BRANCH_PREDICT_BIT;
-	  bfd_put_32 (output_bfd, insn, contents + offset);
+	  bfd_put_32 (output_bfd, (bfd_vma) insn, contents + offset);
 	  break;
 
 	/* branch not taken predicition relocations */
@@ -3331,7 +3340,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    insn |= BRANCH_PREDICT_BIT;
 	  else
 	    insn &= ~BRANCH_PREDICT_BIT;
-	  bfd_put_32 (output_bfd, insn, contents + offset);
+	  bfd_put_32 (output_bfd, (bfd_vma) insn, contents + offset);
 	  break;
 
 	/* GOT16 relocations */
@@ -3568,7 +3577,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      {			/* fill in register field */
 		insn = bfd_get_32 (output_bfd, contents + offset);
 		insn = (insn & ~RA_REGISTER_MASK) | (reg << RA_REGISTER_SHIFT);
-		bfd_put_32 (output_bfd, insn, contents + offset);
+		bfd_put_32 (output_bfd, (bfd_vma) insn, contents + offset);
 	      }
 	  }
 	  break;
@@ -3731,7 +3740,7 @@ ppc_elf_grok_prstatus (abfd, note)
      Elf_Internal_Note *note;
 {
   int offset;
-  int raw_size;
+  unsigned int raw_size;
 
   switch (note->descsz)
     {

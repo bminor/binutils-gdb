@@ -228,7 +228,7 @@ coff_mcore_link_hash_table_create (abfd)
 {
   mcore_hash_table * ret;
 
-  ret = ((mcore_hash_table *) bfd_alloc (abfd, sizeof (* ret)));
+  ret = (mcore_hash_table *) bfd_alloc (abfd, (bfd_size_type) sizeof (* ret));
   if (ret == (mcore_hash_table *) NULL)
     return NULL;
 

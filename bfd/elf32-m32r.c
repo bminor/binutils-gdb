@@ -369,7 +369,7 @@ m32r_elf_do_10_pcrel_reloc (abfd, howto, input_section, data, offset,
 		 + input_section->output_offset);
   /* These jumps mask off the lower two bits of the current address
      before doing pcrel calculations.  */
-  relocation -= (offset & -4L);
+  relocation -= (offset & -(bfd_vma) 4);
 
   if (relocation < -0x200 || relocation > 0x1ff)
     status = bfd_reloc_overflow;
@@ -380,7 +380,7 @@ m32r_elf_do_10_pcrel_reloc (abfd, howto, input_section, data, offset,
   relocation >>= howto->rightshift;
   relocation <<= howto->bitpos;
   x = (x & ~howto->dst_mask) | (((x & howto->src_mask) + relocation) & howto->dst_mask);
-  bfd_put_16 (abfd, x, data + offset);
+  bfd_put_16 (abfd, (bfd_vma) x, data + offset);
 
   return status;
 }
@@ -457,7 +457,7 @@ m32r_elf_hi16_reloc (abfd, reloc_entry, symbol, data,
   relocation += reloc_entry->addend;
 
   /* Save the information, and let LO16 do the actual relocation.  */
-  n = (struct m32r_hi16 *) bfd_malloc (sizeof *n);
+  n = (struct m32r_hi16 *) bfd_malloc ((bfd_size_type) sizeof *n);
   if (n == NULL)
     return bfd_reloc_outofrange;
   n->addr = (bfd_byte *) data + reloc_entry->address;
@@ -556,8 +556,8 @@ m32r_elf_lo16_reloc (input_bfd, reloc_entry, symbol, data,
 	  if ((val & 0x8000) != 0)
 	    val += 0x10000;
 
-	  insn = (insn &~ 0xffff) | ((val >> 16) & 0xffff);
-	  bfd_put_32 (input_bfd, insn, l->addr);
+	  insn = (insn &~ (bfd_vma) 0xffff) | ((val >> 16) & 0xffff);
+	  bfd_put_32 (input_bfd, (bfd_vma) insn, l->addr);
 
 	  next = l->next;
 	  free (l);
@@ -647,14 +647,14 @@ m32r_elf_generic_reloc (input_bfd, reloc_entry, symbol, data,
       {
 	short x = bfd_get_16 (input_bfd, inplace_address);
 	DOIT (x);
-      	bfd_put_16 (input_bfd, x, inplace_address);
+      	bfd_put_16 (input_bfd, (bfd_vma) x, inplace_address);
       }
       break;
     case 2:
       {
 	unsigned long x = bfd_get_32 (input_bfd, inplace_address);
 	DOIT (x);
-      	bfd_put_32 (input_bfd, x, inplace_address);
+      	bfd_put_32 (input_bfd, (bfd_vma)x , inplace_address);
       }
       break;
     default:
@@ -855,8 +855,8 @@ m32r_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 
       if (s == NULL)
 	{
-	  int flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
-		       | SEC_IN_MEMORY | SEC_LINKER_CREATED);
+	  flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
+			    | SEC_IN_MEMORY | SEC_LINKER_CREATED);
 
 	  s = bfd_make_section_anyway (abfd, ".sdata");
 	  if (s == NULL)
@@ -874,7 +874,7 @@ m32r_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 						 "_SDA_BASE_",
 						 BSF_GLOBAL,
 						 s,
-						 32768,
+						 (bfd_vma) 32768,
 						 (const char *) NULL,
 						 false,
 						 get_elf_backend_data (abfd)->collect,
@@ -1410,15 +1410,14 @@ m32r_elf_relax_section (abfd, sec, link_info, again)
 	    extsyms = (Elf32_External_Sym *) symtab_hdr->contents;
 	  else
 	    {
+	      bfd_size_type amt = symtab_hdr->sh_size;
 	      /* Go get them off disk.  */
-	      extsyms = ((Elf32_External_Sym *)
-			 bfd_malloc (symtab_hdr->sh_size));
+	      extsyms = (Elf32_External_Sym *) bfd_malloc (amt);
 	      if (extsyms == NULL)
 		goto error_return;
 	      free_extsyms = extsyms;
 	      if (bfd_seek (abfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-		  || (bfd_read (extsyms, 1, symtab_hdr->sh_size, abfd)
-		      != symtab_hdr->sh_size))
+		  || bfd_bread (extsyms, amt, abfd) != amt)
 		goto error_return;
 	    }
 	}
@@ -1782,6 +1781,7 @@ m32r_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
   Elf_Internal_Rela *internal_relocs = NULL;
   Elf32_External_Sym *external_syms = NULL;
   Elf_Internal_Sym *internal_syms = NULL;
+  bfd_size_type amt;
 
   /* We only need to handle the case of relaxing, or of having a
      particular set of section contents, specially.  */
@@ -1808,15 +1808,13 @@ m32r_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
 	external_syms = (Elf32_External_Sym *) symtab_hdr->contents;
       else
 	{
-	  external_syms = ((Elf32_External_Sym *)
-			   bfd_malloc (symtab_hdr->sh_info
-				       * sizeof (Elf32_External_Sym)));
+	  amt = symtab_hdr->sh_info;
+	  amt *= sizeof (Elf32_External_Sym);
+	  external_syms = (Elf32_External_Sym *) bfd_malloc (amt);
 	  if (external_syms == NULL && symtab_hdr->sh_info > 0)
 	    goto error_return;
 	  if (bfd_seek (input_bfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-	      || (bfd_read (external_syms, sizeof (Elf32_External_Sym),
-			    symtab_hdr->sh_info, input_bfd)
-		  != (symtab_hdr->sh_info * sizeof (Elf32_External_Sym))))
+	      || bfd_bread (external_syms, amt, input_bfd) != amt)
 	    goto error_return;
 	}
 
@@ -1826,14 +1824,15 @@ m32r_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
       if (internal_relocs == NULL)
 	goto error_return;
 
-      internal_syms = ((Elf_Internal_Sym *)
-		       bfd_malloc (symtab_hdr->sh_info
-				   * sizeof (Elf_Internal_Sym)));
+      amt = symtab_hdr->sh_info;
+      amt *= sizeof (Elf_Internal_Sym);
+      internal_syms = (Elf_Internal_Sym *) bfd_malloc (amt);
       if (internal_syms == NULL && symtab_hdr->sh_info > 0)
 	goto error_return;
 
-      sections = (asection **) bfd_malloc (symtab_hdr->sh_info
-					   * sizeof (asection *));
+      amt = symtab_hdr->sh_info;
+      amt *= sizeof (asection *);
+      sections = (asection **) bfd_malloc (amt);
       if (sections == NULL && symtab_hdr->sh_info > 0)
 	goto error_return;
 

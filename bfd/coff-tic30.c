@@ -98,8 +98,8 @@ coff_tic30_select_reloc (howto)
 #define __A_MAGIC_SET__
 
 /* Code to swap in the reloc */
-#define SWAP_IN_RELOC_OFFSET  bfd_h_get_32
-#define SWAP_OUT_RELOC_OFFSET bfd_h_put_32
+#define SWAP_IN_RELOC_OFFSET  H_GET_32
+#define SWAP_OUT_RELOC_OFFSET H_PUT_32
 #define SWAP_OUT_RELOC_EXTRA(abfd, src, dst) dst->r_stuff[0] = 'S'; \
 dst->r_stuff[1] = 'C';
 

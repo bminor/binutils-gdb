@@ -347,7 +347,8 @@ _bfd_vms_write_hdr (abfd, objtype)
 	      continue;
 	    }
 
-	  _bfd_vms_output_dump (abfd, (unsigned char *)symbol->name, strlen (symbol->name));
+	  _bfd_vms_output_dump (abfd, (unsigned char *) symbol->name,
+				(int) strlen (symbol->name));
 	  if (had_case)
 	    break;
 	  had_file = 1;

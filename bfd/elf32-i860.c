@@ -695,7 +695,8 @@ elf32_i860_info_to_howto_rela (abfd, bfd_reloc, elf_reloc)
      arelent *bfd_reloc;
      Elf64_Internal_Rela *elf_reloc;
 {
-  bfd_reloc->howto = lookup_howto (ELF32_R_TYPE (elf_reloc->r_info));
+  bfd_reloc->howto
+    = lookup_howto ((unsigned) ELF32_R_TYPE (elf_reloc->r_info));
 }
 
 /* Specialized relocation handler for R_860_SPLITn.  These relocations
@@ -709,7 +710,7 @@ elf32_i860_relocate_splitn (input_bfd, rello, contents, value)
 {
   bfd_vma insn;
   reloc_howto_type *howto;
-  howto  = lookup_howto (ELF32_R_TYPE (rello->r_info));
+  howto = lookup_howto ((unsigned) ELF32_R_TYPE (rello->r_info));
   insn = bfd_get_32 (input_bfd, contents + rello->r_offset);
 
   /* Relocate.  */
@@ -736,7 +737,7 @@ elf32_i860_relocate_pc16 (input_bfd, input_section, rello, contents, value)
 {
   bfd_vma insn;
   reloc_howto_type *howto;
-  howto  = lookup_howto (ELF32_R_TYPE (rello->r_info));
+  howto = lookup_howto ((unsigned) ELF32_R_TYPE (rello->r_info));
   insn = bfd_get_32 (input_bfd, contents + rello->r_offset);
 
   /* Adjust for PC-relative relocation.  */
@@ -768,7 +769,7 @@ elf32_i860_relocate_pc26 (input_bfd, input_section, rello, contents, value)
 {
   bfd_vma insn;
   reloc_howto_type *howto;
-  howto  = lookup_howto (ELF32_R_TYPE (rello->r_info));
+  howto = lookup_howto ((unsigned) ELF32_R_TYPE (rello->r_info));
   insn = bfd_get_32 (input_bfd, contents + rello->r_offset);
 
   /* Adjust for PC-relative relocation.  */
@@ -924,10 +925,10 @@ elf32_i860_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
 
       /* This is a final link.  */
-      howto  = lookup_howto (ELF32_R_TYPE (rel->r_info));
-      h      = NULL;
-      sym    = NULL;
-      sec    = NULL;
+      howto = lookup_howto ((unsigned) ELF32_R_TYPE (rel->r_info));
+      h     = NULL;
+      sym   = NULL;
+      sec   = NULL;
 
       if (r_symndx < symtab_hdr->sh_info)
 	{

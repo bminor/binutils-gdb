@@ -767,10 +767,10 @@ sh_elf_reloc_loop (r_type, input_bfd, input_section, contents, addr,
 	contents = elf_section_data (symbol_section)->this_hdr.contents;
       else
 	{
-	  free_contents = contents
-	    = (bfd_byte *) bfd_malloc (symbol_section->_raw_size);
+	  contents = (bfd_byte *) bfd_malloc (symbol_section->_raw_size);
 	  if (contents == NULL)
 	    return bfd_reloc_outofrange;
+	  free_contents = contents;
 	  if (! bfd_get_section_contents (input_bfd, symbol_section, contents,
 					  (file_ptr) 0,
 					  symbol_section->_raw_size))
@@ -825,7 +825,7 @@ sh_elf_reloc_loop (r_type, input_bfd, input_section, contents, addr,
     return bfd_reloc_overflow;
 
   x = (insn & ~0xff) | (x & 0xff);
-  bfd_put_16 (input_bfd, x, contents + addr);
+  bfd_put_16 (input_bfd, (bfd_vma) x, contents + addr);
 
   return bfd_reloc_ok;
 }
@@ -880,7 +880,7 @@ sh_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
     case R_SH_DIR32:
       insn = bfd_get_32 (abfd, hit_data);
       insn += sym_value + reloc_entry->addend;
-      bfd_put_32 (abfd, insn, hit_data);
+      bfd_put_32 (abfd, (bfd_vma) insn, hit_data);
       break;
     case R_SH_IND12W:
       insn = bfd_get_16 (abfd, hit_data);
@@ -893,7 +893,7 @@ sh_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
       if (insn & 0x800)
 	sym_value -= 0x1000;
       insn = (insn & 0xf000) | (sym_value & 0xfff);
-      bfd_put_16 (abfd, insn, hit_data);
+      bfd_put_16 (abfd, (bfd_vma) insn, hit_data);
       if (sym_value < (bfd_vma) -0x1000 || sym_value >= 0x1000)
 	return bfd_reloc_overflow;
       break;
@@ -1120,7 +1120,7 @@ sh_elf_relax_section (abfd, sec, link_info, again)
 	 on a four byte boundary.  */
       paddr = insn & 0xff;
       paddr *= 4;
-      paddr += (laddr + 4) & ~3;
+      paddr += (laddr + 4) &~ (bfd_vma) 3;
       if (paddr >= sec->_raw_size)
 	{
 	  ((*_bfd_error_handler)
@@ -1151,13 +1151,12 @@ sh_elf_relax_section (abfd, sec, link_info, again)
 	    extsyms = (Elf32_External_Sym *) symtab_hdr->contents;
 	  else
 	    {
-	      extsyms = ((Elf32_External_Sym *)
-			 bfd_malloc (symtab_hdr->sh_size));
+	      extsyms = (Elf32_External_Sym *) bfd_malloc (symtab_hdr->sh_size);
 	      if (extsyms == NULL)
 		goto error_return;
 	      free_extsyms = extsyms;
 	      if (bfd_seek (abfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-		  || (bfd_read (extsyms, 1, symtab_hdr->sh_size, abfd)
+		  || (bfd_bread (extsyms, symtab_hdr->sh_size, abfd)
 		      != symtab_hdr->sh_size))
 		goto error_return;
 	    }
@@ -1251,7 +1250,7 @@ sh_elf_relax_section (abfd, sec, link_info, again)
              it will be handled here like other internal IND12W
              relocs.  */
 	  bfd_put_16 (abfd,
-		      0xb000 | ((foff >> 1) & 0xfff),
+		      (bfd_vma) 0xb000 | ((foff >> 1) & 0xfff),
 		      contents + irel->r_offset);
 	}
       else
@@ -1259,7 +1258,7 @@ sh_elf_relax_section (abfd, sec, link_info, again)
 	  /* We can't fully resolve this yet, because the external
              symbol value may be changed by future relaxing.  We let
              the final link phase handle it.  */
-	  bfd_put_16 (abfd, 0xb000, contents + irel->r_offset);
+	  bfd_put_16 (abfd, (bfd_vma) 0xb000, contents + irel->r_offset);
 	}
 
       /* See if there is another R_SH_USES reloc referring to the same
@@ -1460,7 +1459,8 @@ sh_elf_relax_delete_bytes (abfd, sec, addr, count)
     }
 
   /* Actually delete the bytes.  */
-  memmove (contents + addr, contents + addr + count, toaddr - addr - count);
+  memmove (contents + addr, contents + addr + count,
+	   (size_t) (toaddr - addr - count));
   if (irelalign == NULL)
     sec->_cooked_size -= count;
   else
@@ -1471,7 +1471,7 @@ sh_elf_relax_delete_bytes (abfd, sec, addr, count)
 
       BFD_ASSERT ((count & 1) == 0);
       for (i = 0; i < count; i += 2)
-	bfd_put_16 (abfd, NOP_OPCODE, contents + toaddr - count + i);
+	bfd_put_16 (abfd, (bfd_vma) NOP_OPCODE, contents + toaddr - count + i);
     }
 
   /* Adjust all the relocs.  */
@@ -1649,14 +1649,14 @@ sh_elf_relax_delete_bytes (abfd, sec, addr, count)
 	      insn += adjust / 2;
 	      if ((oinsn & 0xff00) != (insn & 0xff00))
 		overflow = true;
-	      bfd_put_16 (abfd, insn, contents + nraddr);
+	      bfd_put_16 (abfd, (bfd_vma) insn, contents + nraddr);
 	      break;
 
 	    case R_SH_IND12W:
 	      insn += adjust / 2;
 	      if ((oinsn & 0xf000) != (insn & 0xf000))
 		overflow = true;
-	      bfd_put_16 (abfd, insn, contents + nraddr);
+	      bfd_put_16 (abfd, (bfd_vma) insn, contents + nraddr);
 	      break;
 
 	    case R_SH_DIR8WPL:
@@ -1670,7 +1670,7 @@ sh_elf_relax_delete_bytes (abfd, sec, addr, count)
 		}
 	      if ((oinsn & 0xff00) != (insn & 0xff00))
 		overflow = true;
-	      bfd_put_16 (abfd, insn, contents + nraddr);
+	      bfd_put_16 (abfd, (bfd_vma) insn, contents + nraddr);
 	      break;
 
 	    case R_SH_SWITCH8:
@@ -1684,12 +1684,12 @@ sh_elf_relax_delete_bytes (abfd, sec, addr, count)
 	      voff += adjust;
 	      if (voff < - 0x8000 || voff >= 0x8000)
 		overflow = true;
-	      bfd_put_signed_16 (abfd, voff, contents + nraddr);
+	      bfd_put_signed_16 (abfd, (bfd_vma) voff, contents + nraddr);
 	      break;
 
 	    case R_SH_SWITCH32:
 	      voff += adjust;
-	      bfd_put_signed_32 (abfd, voff, contents + nraddr);
+	      bfd_put_signed_32 (abfd, (bfd_vma) voff, contents + nraddr);
 	      break;
 
 	    case R_SH_USES:
@@ -1780,12 +1780,12 @@ sh_elf_relax_delete_bytes (abfd, sec, addr, count)
 	      if (start > addr
 		  && start < toaddr
 		  && (stop <= addr || stop >= toaddr))
-		bfd_put_signed_32 (abfd, voff + count,
+		bfd_put_signed_32 (abfd, (bfd_vma) voff + count,
 				   ocontents + irelscan->r_offset);
 	      else if (stop > addr
 		       && stop < toaddr
 		       && (start <= addr || start >= toaddr))
-		bfd_put_signed_32 (abfd, voff - count,
+		bfd_put_signed_32 (abfd, (bfd_vma) voff - count,
 				   ocontents + irelscan->r_offset);
 	    }
 
@@ -1886,7 +1886,7 @@ sh_elf_relax_delete_bytes (abfd, sec, addr, count)
 	{
 	  /* Tail recursion.  */
 	  return sh_elf_relax_delete_bytes (abfd, sec, alignaddr,
-					    alignto - alignaddr);
+					    (int) (alignto - alignaddr));
 	}
     }
 
@@ -1907,13 +1907,16 @@ sh_elf_align_loads (abfd, sec, internal_relocs, contents, pswapped)
   Elf_Internal_Rela *irel, *irelend;
   bfd_vma *labels = NULL;
   bfd_vma *label, *label_end;
+  bfd_size_type amt;
 
   *pswapped = false;
 
   irelend = internal_relocs + sec->reloc_count;
 
   /* Get all the addresses with labels on them.  */
-  labels = (bfd_vma *) bfd_malloc (sec->reloc_count * sizeof (bfd_vma));
+  amt = sec->reloc_count;
+  amt *= sizeof (bfd_vma);
+  labels = (bfd_vma *) bfd_malloc (amt);
   if (labels == NULL)
     goto error_return;
   label_end = labels;
@@ -1982,8 +1985,8 @@ sh_elf_swap_insns (abfd, sec, relocs, contents, addr)
   /* Swap the instructions themselves.  */
   i1 = bfd_get_16 (abfd, contents + addr);
   i2 = bfd_get_16 (abfd, contents + addr + 2);
-  bfd_put_16 (abfd, i2, contents + addr);
-  bfd_put_16 (abfd, i1, contents + addr + 2);
+  bfd_put_16 (abfd, (bfd_vma) i2, contents + addr);
+  bfd_put_16 (abfd, (bfd_vma) i1, contents + addr + 2);
 
   /* Adjust all reloc addresses.  */
   irelend = internal_relocs + sec->reloc_count;
@@ -2052,7 +2055,7 @@ sh_elf_swap_insns (abfd, sec, relocs, contents, addr)
 	      insn += add / 2;
 	      if ((oinsn & 0xff00) != (insn & 0xff00))
 		overflow = true;
-	      bfd_put_16 (abfd, insn, loc);
+	      bfd_put_16 (abfd, (bfd_vma) insn, loc);
 	      break;
 
 	    case R_SH_IND12W:
@@ -2061,7 +2064,7 @@ sh_elf_swap_insns (abfd, sec, relocs, contents, addr)
 	      insn += add / 2;
 	      if ((oinsn & 0xf000) != (insn & 0xf000))
 		overflow = true;
-	      bfd_put_16 (abfd, insn, loc);
+	      bfd_put_16 (abfd, (bfd_vma) insn, loc);
 	      break;
 
 	    case R_SH_DIR8WPL:
@@ -2078,7 +2081,7 @@ sh_elf_swap_insns (abfd, sec, relocs, contents, addr)
 		  insn += add / 2;
 		  if ((oinsn & 0xff00) != (insn & 0xff00))
 		    overflow = true;
-		  bfd_put_16 (abfd, insn, loc);
+		  bfd_put_16 (abfd, (bfd_vma) insn, loc);
 		}
 
 	      break;
@@ -2431,9 +2434,9 @@ sh_elf_link_hash_table_create (abfd)
      bfd *abfd;
 {
   struct elf_sh_link_hash_table *ret;
+  bfd_size_type amt = sizeof (struct elf_sh_link_hash_table);
 
-  ret = ((struct elf_sh_link_hash_table *)
-	 bfd_alloc (abfd, sizeof (struct elf_sh_link_hash_table)));
+  ret = (struct elf_sh_link_hash_table *) bfd_alloc (abfd, amt);
   if (ret == (struct elf_sh_link_hash_table *) NULL)
     return NULL;
 
@@ -2535,7 +2538,7 @@ sh_elf_create_dynamic_sections (abfd, info)
 	    || ((secflags & SEC_HAS_CONTENTS) != SEC_HAS_CONTENTS))
 	  continue;
 	secname = bfd_get_section_name (abfd, sec);
-	relname = (char *) bfd_malloc (strlen (secname) + 6);
+	relname = (char *) bfd_malloc ((bfd_size_type) strlen (secname) + 6);
 	strcpy (relname, ".rela");
 	strcat (relname, secname);
 	s = bfd_make_section (abfd, relname);
@@ -2891,36 +2894,39 @@ sh_elf_size_dynamic_sections (output_bfd, info)
 	 must add the entries now so that we get the correct size for
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
+#define add_dynamic_entry(TAG, VAL) \
+  bfd_elf32_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+
       if (! info->shared)
 	{
-	  if (! bfd_elf32_add_dynamic_entry (info, DT_DEBUG, 0))
+	  if (!add_dynamic_entry (DT_DEBUG, 0))
 	    return false;
 	}
 
       if (plt)
 	{
-	  if (! bfd_elf32_add_dynamic_entry (info, DT_PLTGOT, 0)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_PLTRELSZ, 0)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_JMPREL, 0))
+	  if (!add_dynamic_entry (DT_PLTGOT, 0)
+	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
+	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
+	      || !add_dynamic_entry (DT_JMPREL, 0))
 	    return false;
 	}
 
       if (relocs)
 	{
-	  if (! bfd_elf32_add_dynamic_entry (info, DT_RELA, 0)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_RELASZ, 0)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_RELAENT,
-						sizeof (Elf32_External_Rela)))
+	  if (!add_dynamic_entry (DT_RELA, 0)
+	      || !add_dynamic_entry (DT_RELASZ, 0)
+	      || !add_dynamic_entry (DT_RELAENT, sizeof (Elf32_External_Rela)))
 	    return false;
 	}
 
       if ((info->flags & DF_TEXTREL) != 0)
 	{
-	  if (! bfd_elf32_add_dynamic_entry (info, DT_TEXTREL, 0))
+	  if (!add_dynamic_entry (DT_TEXTREL, 0))
 	    return false;
 	}
     }
+#undef add_dynamic_entry
 
   return true;
 }
@@ -3531,7 +3537,7 @@ sh_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
 
   memcpy (data, elf_section_data (input_section)->this_hdr.contents,
-	  input_section->_raw_size);
+	  (size_t) input_section->_raw_size);
 
   if ((input_section->flags & SEC_RELOC) != 0
       && input_section->reloc_count > 0)
@@ -3539,20 +3545,19 @@ sh_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
       Elf_Internal_Sym *isymp;
       asection **secpp;
       Elf32_External_Sym *esym, *esymend;
+      bfd_size_type size;
 
       if (symtab_hdr->contents != NULL)
 	external_syms = (Elf32_External_Sym *) symtab_hdr->contents;
       else
 	{
-	  external_syms = ((Elf32_External_Sym *)
-			   bfd_malloc (symtab_hdr->sh_info
-				       * sizeof (Elf32_External_Sym)));
-	  if (external_syms == NULL && symtab_hdr->sh_info > 0)
+	  size = symtab_hdr->sh_info;
+	  size *= sizeof (Elf32_External_Sym);
+	  external_syms = (Elf32_External_Sym *) bfd_malloc (size);
+	  if (external_syms == NULL && size != 0)
 	    goto error_return;
 	  if (bfd_seek (input_bfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-	      || (bfd_read (external_syms, sizeof (Elf32_External_Sym),
-			    symtab_hdr->sh_info, input_bfd)
-		  != (symtab_hdr->sh_info * sizeof (Elf32_External_Sym))))
+	      || bfd_bread (external_syms, size, input_bfd) != size)
 	    goto error_return;
 	}
 
@@ -3562,14 +3567,15 @@ sh_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
       if (internal_relocs == NULL)
 	goto error_return;
 
-      internal_syms = ((Elf_Internal_Sym *)
-		       bfd_malloc (symtab_hdr->sh_info
-				   * sizeof (Elf_Internal_Sym)));
+      size = symtab_hdr->sh_info;
+      size *= sizeof (Elf_Internal_Sym);
+      internal_syms = (Elf_Internal_Sym *) bfd_malloc (size);
       if (internal_syms == NULL && symtab_hdr->sh_info > 0)
 	goto error_return;
 
-      sections = (asection **) bfd_malloc (symtab_hdr->sh_info
-					   * sizeof (asection *));
+      size = symtab_hdr->sh_info;
+      size *= sizeof (asection *);
+      sections = (asection **) bfd_malloc (size);
       if (sections == NULL && symtab_hdr->sh_info > 0)
 	goto error_return;
 
@@ -3828,10 +3834,11 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
 	         symbol.  */
 	      if (local_got_offsets == NULL)
 		{
-		  size_t size;
+		  bfd_size_type size;
 		  register unsigned int i;
 
-		  size = symtab_hdr->sh_info * sizeof (bfd_vma);
+		  size = symtab_hdr->sh_info;
+		  size *= sizeof (bfd_vma);
 		  local_got_offsets = (bfd_vma *) bfd_alloc (abfd, size);
 		  if (local_got_offsets == NULL)
 		    return false;
@@ -3967,7 +3974,7 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
 		  if (p == NULL)
 		    {
 		      p = ((struct elf_sh_pcrel_relocs_copied *)
-			   bfd_alloc (dynobj, sizeof *p));
+			   bfd_alloc (dynobj, (bfd_size_type) sizeof *p));
 		      if (p == NULL)
 			return false;
 		      p->next = eh->pcrel_relocs_copied;
@@ -4220,7 +4227,7 @@ sh_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       rel.r_offset = (sgot->output_section->vma
 		      + sgot->output_offset
-		      + (h->got.offset &~ 1));
+		      + (h->got.offset &~ (bfd_vma) 1));
 
       /* If this is a -Bsymbolic link, and the symbol is defined
 	 locally, we just want to emit a RELATIVE reloc.  Likewise if

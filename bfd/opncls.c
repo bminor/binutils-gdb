@@ -49,7 +49,7 @@ _bfd_new_bfd ()
 {
   bfd *nbfd;
 
-  nbfd = (bfd *) bfd_zmalloc (sizeof (bfd));
+  nbfd = (bfd *) bfd_zmalloc ((bfd_size_type) sizeof (bfd));
   if (nbfd == NULL)
     return NULL;
 
@@ -68,7 +68,7 @@ _bfd_new_bfd ()
   nbfd->sections = (asection *) NULL;
   nbfd->format = bfd_unknown;
   nbfd->my_archive = (bfd *) NULL;
-  nbfd->origin = 0;				
+  nbfd->origin = 0;
   nbfd->opened_once = false;
   nbfd->output_has_begun = false;
   nbfd->section_count = 0;
@@ -107,7 +107,7 @@ FUNCTION
 	bfd_openr
 
 SYNOPSIS
-        bfd *bfd_openr(CONST char *filename, CONST char *target);
+        bfd *bfd_openr(const char *filename, const char *target);
 
 DESCRIPTION
 	Open the file @var{filename} (using <<fopen>>) with the target
@@ -122,8 +122,8 @@ DESCRIPTION
 
 bfd *
 bfd_openr (filename, target)
-     CONST char *filename;
-     CONST char *target;
+     const char *filename;
+     const char *target;
 {
   bfd *nbfd;
   const bfd_target *target_vec;
@@ -169,7 +169,7 @@ FUNCTION
          bfd_fdopenr
 
 SYNOPSIS
-         bfd *bfd_fdopenr(CONST char *filename, CONST char *target, int fd);
+         bfd *bfd_fdopenr(const char *filename, const char *target, int fd);
 
 DESCRIPTION
          <<bfd_fdopenr>> is to <<bfd_fopenr>> much like <<fdopen>> is to <<fopen>>.
@@ -192,8 +192,8 @@ DESCRIPTION
 
 bfd *
 bfd_fdopenr (filename, target, fd)
-     CONST char *filename;
-     CONST char *target;
+     const char *filename;
+     const char *target;
      int fd;
 {
   bfd *nbfd;
@@ -307,7 +307,7 @@ bfd_openstreamr (filename, target, streamarg)
   nbfd->iostream = (PTR) stream;
   nbfd->filename = filename;
   nbfd->direction = read_direction;
-				
+
   if (! bfd_cache_init (nbfd))
     {
       objalloc_free ((struct objalloc *) nbfd->memory);
@@ -328,7 +328,7 @@ FUNCTION
 	bfd_openw
 
 SYNOPSIS
-	bfd *bfd_openw(CONST char *filename, CONST char *target);
+	bfd *bfd_openw(const char *filename, const char *target);
 
 DESCRIPTION
 	Create a BFD, associated with file @var{filename}, using the
@@ -340,8 +340,8 @@ DESCRIPTION
 
 bfd *
 bfd_openw (filename, target)
-     CONST char *filename;
-     CONST char *target;
+     const char *filename;
+     const char *target;
 {
   bfd *nbfd;
   const bfd_target *target_vec;
@@ -429,7 +429,7 @@ bfd_close (abfd)
 
       if (stat (abfd->filename, &buf) == 0)
 	{
- 	  int mask = umask (0);
+ 	  unsigned int mask = umask (0);
 	  umask (mask);
 	  chmod (abfd->filename,
 		 (0777
@@ -484,7 +484,7 @@ bfd_close_all_done (abfd)
 
       if (stat (abfd->filename, &buf) == 0)
 	{
-	  int mask = umask (0);
+	  unsigned int mask = umask (0);
 	  umask (mask);
 	  chmod (abfd->filename,
 		 (0777
@@ -503,7 +503,7 @@ FUNCTION
 	bfd_create
 
 SYNOPSIS
-	bfd *bfd_create(CONST char *filename, bfd *templ);
+	bfd *bfd_create(const char *filename, bfd *templ);
 
 DESCRIPTION
 	Create a new BFD in the manner of
@@ -515,7 +515,7 @@ DESCRIPTION
 
 bfd *
 bfd_create (filename, templ)
-     CONST char *filename;
+     const char *filename;
      bfd *templ;
 {
   bfd *nbfd;
@@ -560,9 +560,10 @@ bfd_make_writable(abfd)
       return false;
     }
 
-  bim = (struct bfd_in_memory *) bfd_malloc (sizeof (struct bfd_in_memory));
+  bim = ((struct bfd_in_memory *)
+	 bfd_malloc ((bfd_size_type) sizeof (struct bfd_in_memory)));
   abfd->iostream = (PTR) bim;
-  /* bfd_write will grow these as needed */
+  /* bfd_bwrite will grow these as needed */
   bim->size = 0;
   bim->buffer = 0;
 
@@ -613,7 +614,7 @@ bfd_make_readable(abfd)
   abfd->sections = (asection *) NULL;
   abfd->format = bfd_unknown;
   abfd->my_archive = (bfd *) NULL;
-  abfd->origin = 0;				
+  abfd->origin = 0;
   abfd->opened_once = false;
   abfd->output_has_begun = false;
   abfd->section_count = 0;
@@ -650,9 +651,15 @@ DESCRIPTION
 PTR
 bfd_alloc (abfd, size)
      bfd *abfd;
-     size_t size;
+     bfd_size_type size;
 {
   PTR ret;
+
+  if (size != (unsigned long) size)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return NULL;
+    }
 
   ret = objalloc_alloc (abfd->memory, (unsigned long) size);
   if (ret == NULL)
@@ -663,13 +670,13 @@ bfd_alloc (abfd, size)
 PTR
 bfd_zalloc (abfd, size)
      bfd *abfd;
-     size_t size;
+     bfd_size_type size;
 {
   PTR res;
 
   res = bfd_alloc (abfd, size);
   if (res)
-    memset (res, 0, size);
+    memset (res, 0, (size_t) size);
   return res;
 }
 

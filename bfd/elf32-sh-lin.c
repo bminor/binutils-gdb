@@ -1,5 +1,5 @@
 /* Hitachi SH specific support for 32-bit Linux
-   Copyright 2000 Free Software Foundation, Inc.
+   Copyright 2000, 2001 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -43,7 +43,7 @@ elf32_shlin_grok_prstatus (abfd, note)
      Elf_Internal_Note *note;
 {
   int offset;
-  int raw_size;
+  unsigned int raw_size;
 
   switch (note->descsz)
     {

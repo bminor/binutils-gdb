@@ -37,7 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 static reloc_howto_type *coff_sparc_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 static void rtype2howto PARAMS ((arelent *, struct internal_reloc *));
-  
+
 enum reloc_type
   {
     R_SPARC_NONE = 0,
@@ -57,7 +57,7 @@ enum reloc_type
   };
 
 #if 0
-static CONST char *CONST reloc_type_names[] =
+static const char *const reloc_type_names[] =
 {
   "R_SPARC_NONE",
   "R_SPARC_8",		"R_SPARC_16",		"R_SPARC_32",
@@ -134,7 +134,7 @@ struct coff_reloc_map {
   unsigned char coff_reloc_val;
 };
 
-static CONST struct coff_reloc_map sparc_reloc_map[] =
+static const struct coff_reloc_map sparc_reloc_map[] =
 {
   { BFD_RELOC_NONE, R_SPARC_NONE, },
   { BFD_RELOC_16, R_SPARC_16, },
@@ -188,8 +188,8 @@ rtype2howto (cache_ptr, dst)
 
 #define RTYPE2HOWTO(internal, relocentry) rtype2howto(internal,relocentry)
 
-#define SWAP_IN_RELOC_OFFSET	bfd_h_get_32
-#define SWAP_OUT_RELOC_OFFSET	bfd_h_put_32
+#define SWAP_IN_RELOC_OFFSET	H_GET_32
+#define SWAP_OUT_RELOC_OFFSET	H_PUT_32
 #define CALC_ADDEND(abfd, ptr, reloc, cache_ptr) \
   cache_ptr->addend = reloc.r_offset;
 

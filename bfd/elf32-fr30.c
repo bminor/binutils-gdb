@@ -33,13 +33,20 @@ static reloc_howto_type * fr30_reloc_type_lookup
 static void fr30_info_to_howto_rela
   PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
 static boolean fr30_elf_relocate_section
-  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *, Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
+  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
+	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
 static bfd_reloc_status_type fr30_final_link_relocate
-  PARAMS ((reloc_howto_type *, bfd *, asection *, bfd_byte *, Elf_Internal_Rela *, bfd_vma));
+  PARAMS ((reloc_howto_type *, bfd *, asection *, bfd_byte *,
+	   Elf_Internal_Rela *, bfd_vma));
 static boolean fr30_elf_gc_sweep_hook
-  PARAMS ((bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *));
+  PARAMS ((bfd *, struct bfd_link_info *, asection *,
+	   const Elf_Internal_Rela *));
 static asection * fr30_elf_gc_mark_hook
-  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *, struct elf_link_hash_entry *, Elf_Internal_Sym *));
+  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
+static boolean fr30_elf_check_relocs
+  PARAMS ((bfd *, struct bfd_link_info *, asection *,
+	   const Elf_Internal_Rela *));
 
 static reloc_howto_type fr30_elf_howto_table [] =
 {
@@ -279,7 +286,7 @@ fr30_elf_i20_reloc (abfd, reloc_entry, symbol, data,
 
   x = bfd_get_32 (abfd, (char *) data + reloc_entry->address);
   x = (x & 0xff0f0000) | (relocation & 0x0000ffff) | ((relocation & 0x000f0000) << 4);
-  bfd_put_32 (abfd, x, (char *) data + reloc_entry->address);
+  bfd_put_32 (abfd, (bfd_vma) x, (char *) data + reloc_entry->address);
 
   return bfd_reloc_ok;
 }

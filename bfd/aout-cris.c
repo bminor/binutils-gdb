@@ -1,5 +1,5 @@
 /* BFD backend for CRIS a.out binaries.
-   Copyright 2000 Free Software Foundation, Inc.
+   Copyright 2000, 2001 Free Software Foundation, Inc.
    Contributed by Axis Communications AB.
    Written by Hans-Peter Nilsson.
 
@@ -37,7 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    after text, but with those, we don't have any choice besides reading
    symbol info, and luckily there's no pressing need for correctness for
    those vma:s at this time.  */
-#define N_TXTADDR(x) ((x).a_entry & ~0xffff)
+#define N_TXTADDR(x) ((x).a_entry & ~(bfd_vma) 0xffff)
 
 /* If you change this to 4, you can not link to an address N*4+2.  */
 #define SEGMENT_SIZE 2
@@ -158,7 +158,7 @@ MY(swap_ext_reloc_out) (abfd, g, natptr)
   int r_index;
   int r_extern;
   unsigned int r_type;
-  unsigned int r_addend;
+  bfd_vma r_addend;
   asymbol *sym = *(g->sym_ptr_ptr);
   asection *output_section = sym->section->output_section;
 

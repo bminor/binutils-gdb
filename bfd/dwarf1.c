@@ -145,9 +145,9 @@ static struct dwarf1_unit*
 alloc_dwarf1_unit (stash)
   struct dwarf1_debug* stash;
 {
-  struct dwarf1_unit* x =
-    (struct dwarf1_unit*) bfd_zalloc (stash->abfd,
-				      sizeof (struct dwarf1_unit));
+  bfd_size_type amt = sizeof (struct dwarf1_unit);
+
+  struct dwarf1_unit* x = (struct dwarf1_unit*) bfd_zalloc (stash->abfd, amt);
   x->prev = stash->lastUnit;
   stash->lastUnit = x;
 
@@ -162,9 +162,9 @@ alloc_dwarf1_func (stash, aUnit)
      struct dwarf1_debug* stash;
      struct dwarf1_unit* aUnit;
 {
-  struct dwarf1_func* x =
-    (struct dwarf1_func*) bfd_zalloc (stash->abfd,
-				      sizeof (struct dwarf1_func));
+  bfd_size_type amt = sizeof (struct dwarf1_func);
+
+  struct dwarf1_func* x = (struct dwarf1_func*) bfd_zalloc (stash->abfd, amt);
   x->prev = aUnit->func_list;
   aUnit->func_list = x;
 
@@ -277,7 +277,7 @@ parse_line_table (stash, aUnit)
   if (stash->line_section == 0)
     {
       asection *msec;
-      unsigned long size;
+      bfd_size_type size;
 
       msec = bfd_get_section_by_name (stash->abfd, ".line");
       if (! msec)
@@ -289,7 +289,8 @@ parse_line_table (stash, aUnit)
       if (! stash->line_section)
 	return false;
 
-      if (! bfd_get_section_contents (stash->abfd, msec, stash->line_section, 0, size))
+      if (! bfd_get_section_contents (stash->abfd, msec, stash->line_section,
+				      (bfd_vma) 0, size))
 	{
 	  stash->line_section = 0;
 	  return false;
@@ -302,9 +303,9 @@ parse_line_table (stash, aUnit)
   if (xptr < stash->line_section_end)
     {
       unsigned long eachLine;
-
-      char* tblend;
+      char *tblend;
       unsigned long base;
+      bfd_size_type amt;
 
       /* First comes the length.  */
       tblend = bfd_get_32 (stash->abfd, (bfd_byte *) xptr) + xptr;
@@ -319,9 +320,9 @@ parse_line_table (stash, aUnit)
       aUnit->line_count = (tblend - xptr) / 10;
 
       /* Allocate an array for the entries.  */
-      aUnit->linenumber_table = (struct linenumber *)
-	bfd_alloc (stash->abfd,
-		   sizeof (struct linenumber) * aUnit->line_count);
+      amt = sizeof (struct linenumber) * aUnit->line_count;
+      aUnit->linenumber_table = ((struct linenumber *)
+				 bfd_alloc (stash->abfd, amt));
 
       for (eachLine = 0; eachLine < aUnit->line_count; eachLine++)
 	{
@@ -482,10 +483,10 @@ _bfd_dwarf1_find_nearest_line (abfd, section, symbols, offset,
   if (! stash)
     {
       asection *msec;
-      unsigned long size;
+      bfd_size_type size = sizeof (struct dwarf1_debug);
 
-      stash = elf_tdata (abfd)->dwarf1_find_line_info =
-	(struct dwarf1_debug*) bfd_zalloc (abfd, sizeof (struct dwarf1_debug));
+      stash = elf_tdata (abfd)->dwarf1_find_line_info
+	= (struct dwarf1_debug *) bfd_zalloc (abfd, size);
 
       if (! stash)
 	return false;
@@ -505,7 +506,8 @@ _bfd_dwarf1_find_nearest_line (abfd, section, symbols, offset,
       if (! stash->debug_section)
 	return false;
 
-      if (! bfd_get_section_contents (abfd, msec, stash->debug_section, 0, size))
+      if (! bfd_get_section_contents (abfd, msec, stash->debug_section,
+				      (bfd_vma) 0, size))
 	{
 	  stash->debug_section = 0;
 	  return false;

@@ -142,7 +142,7 @@ struct elf_reloc_map {
   unsigned char elf_reloc_val;
 };
 
-static CONST struct elf_reloc_map sparc_reloc_map[] =
+static const struct elf_reloc_map sparc_reloc_map[] =
 {
   { BFD_RELOC_NONE, R_SPARC_NONE, },
   { BFD_RELOC_16, R_SPARC_16, },
@@ -455,10 +455,11 @@ elf32_sparc_check_relocs (abfd, info, sec, relocs)
                  symbol.  */
 	      if (local_got_offsets == NULL)
 		{
-		  size_t size;
+		  bfd_size_type size;
 		  register unsigned int i;
 
-		  size = symtab_hdr->sh_info * sizeof (bfd_vma);
+		  size = symtab_hdr->sh_info;
+		  size *= sizeof (bfd_vma);
 		  local_got_offsets = (bfd_vma *) bfd_alloc (abfd, size);
 		  if (local_got_offsets == NULL)
 		    return false;
@@ -1032,33 +1033,36 @@ elf32_sparc_size_dynamic_sections (output_bfd, info)
 	 must add the entries now so that we get the correct size for
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
-      if (! info->shared)
+#define add_dynamic_entry(TAG, VAL) \
+  bfd_elf32_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+
+      if (!info->shared)
 	{
-	  if (! bfd_elf32_add_dynamic_entry (info, DT_DEBUG, 0))
+	  if (!add_dynamic_entry (DT_DEBUG, 0))
 	    return false;
 	}
 
       if (relplt)
 	{
-	  if (! bfd_elf32_add_dynamic_entry (info, DT_PLTGOT, 0)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_PLTRELSZ, 0)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_JMPREL, 0))
+	  if (!add_dynamic_entry (DT_PLTGOT, 0)
+	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
+	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
+	      || !add_dynamic_entry (DT_JMPREL, 0))
 	    return false;
 	}
 
-      if (! bfd_elf32_add_dynamic_entry (info, DT_RELA, 0)
-	  || ! bfd_elf32_add_dynamic_entry (info, DT_RELASZ, 0)
-	  || ! bfd_elf32_add_dynamic_entry (info, DT_RELAENT,
-					    sizeof (Elf32_External_Rela)))
+      if (!add_dynamic_entry (DT_RELA, 0)
+	  || !add_dynamic_entry (DT_RELASZ, 0)
+	  || !add_dynamic_entry (DT_RELAENT, sizeof (Elf32_External_Rela)))
 	return false;
 
       if (info->flags & DF_TEXTREL)
 	{
-	  if (! bfd_elf32_add_dynamic_entry (info, DT_TEXTREL, 0))
+	  if (!add_dynamic_entry (DT_TEXTREL, 0))
 	    return false;
 	}
     }
+#undef add_dynamic_entry
 
   return true;
 }
@@ -1670,7 +1674,7 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 			      || reg == G0 || reg == O7)
 			    break;
 
-			  bfd_put_32 (input_bfd, INSN_NOP,
+			  bfd_put_32 (input_bfd, (bfd_vma) INSN_NOP,
 				      contents + rel->r_offset + 4);
 			}
 
@@ -1757,7 +1761,7 @@ elf32_sparc_finish_dynamic_symbol (output_bfd, info, h, sym)
 		  (PLT_ENTRY_WORD1
 		   + (((- (h->plt.offset + 4)) >> 2) & 0x3fffff)),
 		  splt->contents + h->plt.offset + 4);
-      bfd_put_32 (output_bfd, PLT_ENTRY_WORD2,
+      bfd_put_32 (output_bfd, (bfd_vma) PLT_ENTRY_WORD2,
 		  splt->contents + h->plt.offset + 8);
 
       /* Fill in the entry in the .rela.plt section.  */
@@ -1800,7 +1804,7 @@ elf32_sparc_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       rela.r_offset = (sgot->output_section->vma
 		       + sgot->output_offset
-		       + (h->got.offset &~ 1));
+		       + (h->got.offset &~ (bfd_vma) 1));
 
       /* If this is a -Bsymbolic link, and the symbol is defined
 	 locally, we just want to emit a RELATIVE reloc.  Likewise if
@@ -1926,7 +1930,7 @@ elf32_sparc_finish_dynamic_sections (output_bfd, info)
       if (splt->_raw_size > 0)
 	{
 	  memset (splt->contents, 0, 4 * PLT_ENTRY_SIZE);
-	  bfd_put_32 (output_bfd, SPARC_NOP,
+	  bfd_put_32 (output_bfd, (bfd_vma) SPARC_NOP,
 		      splt->contents + splt->_raw_size - 4);
 	}
 

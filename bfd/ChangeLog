@@ -1,3 +1,550 @@
+2001-09-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* libbfd.c (bfd_bread): New function replacing bfd_read without
+	redundant params.  Allow reads up to (size_t) -2 in length.
+	(bfd_bwrite): Similarly for bfd_write.
+	(real_read): Return a size_t.
+	(bfd_read): Call bfd_bread.
+	(bfd_write): Call bfd_bwrite.
+	(warn_deprecated): New function to annoy everybody.
+	(bfd_get_file_window): Don't call bfd_set_error unnecessarily.
+	* bfd-in.h (bfd_bread, bfd_bwrite, warn_deprecated): Declare.
+	(bfd_read, bfd_write): Define as macro.
+	* aix386-core.c: Replace calls to bfd_read with bfd_bread, and
+	likewise for bfd_write.  Ensure function args are correct size by
+	using casts or local vars.  In some cases, remove unnecessary
+	casts.  Formatting fixes, in some cases removing a large expression
+	from function args by using a local var.  Replace CONST with const.
+	Modify variable types to avoid warings.  Use casts to avoid
+	warnings when using negative numbers in unsigned expressions.
+	* aout-adobe.c: Likewise.
+	* aout-arm.c: Likewise.
+	* aout-cris.c: Likewise.
+	* aout-encap.c: Likewise.
+	* aout-ns32k.c: Likewise.
+	* aout-target.h: Likewise.
+	* aout-tic30.c: Likewise.
+	* aoutf1.h: Likewise.
+	* aoutx.h: Likewise.
+	* archive.c: Likewise.
+	* archures.c: Likewise.
+	* bfd-in.h: Likewise.
+	* bfd.c: Likewise.
+	* binary.c: Likewise.
+	* bout.c: Likewise.
+	* cache.c: Likewise.
+	* cisco-core.c: Likewise.
+	* coff-a29k.c: Likewise.
+	* coff-alpha.c: Likewise.
+	* coff-arm.c: Likewise.
+	* coff-h8300.c: Likewise.
+	* coff-h8500.c: Likewise.
+	* coff-i386.c: Likewise.
+	* coff-i860.c: Likewise.
+	* coff-i960.c: Likewise.
+	* coff-ia64.c: Likewise.
+	* coff-m68k.c: Likewise.
+	* coff-m88k.c: Likewise.
+	* coff-mcore.c: Likewise.
+	* coff-mips.c: Likewise.
+	* coff-ppc.c: Likewise.
+	* coff-rs6000.c: Likewise.
+	* coff-sh.c: Likewise.
+	* coff-sparc.c: Likewise.
+	* coff-stgo32.c: Likewise.
+	* coff-tic30.c: Likewise.
+	* coff-tic54x.c: Likewise.
+	* coff-tic80.c: Likewise.
+	* coff-w65.c: Likewise.
+	* coff-z8k.c: Likewise.
+	* coff64-rs6000.c: Likewise.
+	* coffcode.h: Likewise.
+	* coffgen.c: Likewise.
+	* cofflink.c: Likewise.
+	* coffswap.h: Likewise.
+	* corefile.c: Likewise.
+	* cpu-arc.c: Likewise.
+	* cpu-h8300.c: Likewise.
+	* cpu-h8500.c: Likewise.
+	* cpu-i960.c: Likewise.
+	* cpu-ia64-opc.c: Likewise.
+	* cpu-ns32k.c: Likewise.
+	* cpu-pdp11.c: Likewise.
+	* cpu-pj.c: Likewise.
+	* cpu-sh.c: Likewise.
+	* cpu-w65.c: Likewise.
+	* cpu-z8k.c: Likewise.
+	* dwarf1.c: Likewise.
+	* dwarf2.c: Likewise.
+	* ecoff.c: Likewise.
+	* ecofflink.c: Likewise.
+	* ecoffswap.h: Likewise.
+	* elf-bfd.h: Likewise.
+	* elf-hppa.h: Likewise.
+	* elf-m10200.c: Likewise.
+	* elf-m10300.c: Likewise.
+	* elf.c: Likewise.
+	* elf32-arc.c: Likewise.
+	* elf32-arm.h: Likewise.
+	* elf32-avr.c: Likewise.
+	* elf32-cris.c: Likewise.
+	* elf32-fr30.c: Likewise.
+	* elf32-gen.c: Likewise.
+	* elf32-h8300.c: Likewise.
+	* elf32-hppa.c: Likewise.
+	* elf32-i370.c: Likewise.
+	* elf32-i386.c: Likewise.
+	* elf32-i860.c: Likewise.
+	* elf32-m32r.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-mcore.c: Likewise.
+	* elf32-mips.c: Likewise.
+	* elf32-openrisc.c: Likewise.
+	* elf32-pj.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-s390.c: Likewise.
+	* elf32-sh-lin.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf32-sparc.c: Likewise.
+	* elf32-v850.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elf64-hppa.c: Likewise.
+	* elf64-mips.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-s390.c: Likewise.
+	* elf64-sparc.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+	* elfarm-nabi.c: Likewise.
+	* elfcode.h: Likewise.
+	* elfcore.h: Likewise.
+	* elflink.c: Likewise.
+	* elflink.h: Likewise.
+	* elfxx-ia64.c: Likewise.
+	* elfxx-target.h: Likewise.
+	* format.c: Likewise.
+	* hash.c: Likewise.
+	* hp300hpux.c: Likewise.
+	* hppabsd-core.c: Likewise.
+	* hpux-core.c: Likewise.
+	* i386aout.c: Likewise.
+	* i386dynix.c: Likewise.
+	* i386linux.c: Likewise.
+	* i386lynx.c: Likewise.
+	* i386mach3.c: Likewise.
+	* i386msdos.c: Likewise.
+	* i386os9k.c: Likewise.
+	* ieee.c: Likewise.
+	* ihex.c: Likewise.
+	* irix-core.c: Likewise.
+	* libaout.h: Likewise.
+	* libbfd-in.h: Likewise.
+	* libbfd.c: Likewise.
+	* libcoff-in.h: Likewise.
+	* libecoff.h: Likewise.
+	* libieee.h: Likewise.
+	* libnlm.h: Likewise.
+	* libpei.h: Likewise.
+	* libxcoff.h: Likewise.
+	* linker.c: Likewise.
+	* lynx-core.c: Likewise.
+	* m68klinux.c: Likewise.
+	* merge.c: Likewise.
+	* mipsbsd.c: Likewise.
+	* netbsd-core.c: Likewise.
+	* nlm.c: Likewise.
+	* nlm32-alpha.c: Likewise.
+	* nlm32-i386.c: Likewise.
+	* nlm32-ppc.c: Likewise.
+	* nlm32-sparc.c: Likewise.
+	* nlmcode.h: Likewise.
+	* nlmswap.h: Likewise.
+	* ns32k.h: Likewise.
+	* oasys.c: Likewise.
+	* opncls.c: Likewise.
+	* osf-core.c: Likewise.
+	* pc532-mach.c: Likewise.
+	* pdp11.c: Likewise.
+	* pe-mips.c: Likewise.
+	* peXXigen.c: Likewise.
+	* peicode.h: Likewise.
+	* ppcboot.c: Likewise.
+	* ptrace-core.c: Likewise.
+	* reloc.c: Likewise.
+	* reloc16.c: Likewise.
+	* riscix.c: Likewise.
+	* rs6000-core.c: Likewise.
+	* sco5-core.c: Likewise.
+	* section.c: Likewise.
+	* som.c: Likewise.
+	* sparclinux.c: Likewise.
+	* sparclynx.c: Likewise.
+	* srec.c: Likewise.
+	* stabs.c: Likewise.
+	* sunos.c: Likewise.
+	* syms.c: Likewise.
+	* targets.c: Likewise.
+	* tekhex.c: Likewise.
+	* trad-core.c: Likewise.
+	* versados.c: Likewise.
+	* vms-gsd.c: Likewise.
+	* vms-hdr.c: Likewise.
+	* vms-misc.c: Likewise.
+	* vms-tir.c: Likewise.
+	* vms.c: Likewise.
+	* vms.h: Likewise.
+	* xcofflink.c: Likewise.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* libcoff.h: Regenerate.
+
+	* bfd.c (struct _bfd): Make "where" and "origin" unsigned.
+	* bfd-in.h (file_ptr): Change from a long int to a bfd_signed_vma.
+	(ufile_ptr): Define.
+	(bfd_tell): Return a ufile_ptr.
+	* libbfd.c (bfd_tell): Likewise.
+	(bfd_seek): Use bfd_size_type locals.  Don't call bfd_set_error
+	unnecessarily.
+	* aix386-core.c: Test != 0 for bfd_seek errors rather than < 0.
+	* aoutf1.h: Likewise.
+	* som.c: Likewise.
+	* cache.c (bfd_cache_lookup_worker): Guard against abfd->where
+	larger than unsigned long can represent.
+
+	* libbfd.c (bfd_malloc): Take a bfd_size_type arg.  Error if
+	size overflows size_t.
+	(bfd_realloc): Likewise.
+	(bfd_zmalloc): Likewise.
+	* opncls.c (bfd_alloc): Likewise.
+	(bfd_zalloc): Likewise.
+	* libbfd-in.h (bfd_malloc, bfd_realloc, bfd_zmalloc): Update.
+	(bfd_alloc, bfd_zalloc): Update.
+
+	* libbfd.c (bfd_get_8): Mask with 0xff in case char is more than
+	8 bits.
+	(bfd_get_signed_8): Likewise.
+	(H_PUT_64, H_PUT_32, H_PUT_16, H_PUT_8,
+	H_PUT_S64, H_PUT_S32, H_PUT_S16, H_PUT_S8,
+	H_GET_64, H_GET_32, H_GET_16, H_GET_8,
+	H_GET_S64, H_GET_S32, H_GET_S16, H_GET_S8): Define and use.
+	* libaout.h: Likewise define and use here.
+	* aout-adobe.c: Use H_GET_* and H_PUT_* macros.
+	* aout-arm.c: Likewise.
+	* aout-encap.c: Likewise.
+	* aout-ns32k.c: Likewise.
+	* aout-tic30.c: Likewise.
+	* aoutf1.h: Likewise.
+	* aoutx.h: Likewise.
+	* bout.c: Likewise.
+	* coff-alpha.c: Likewise.
+	* coff-h8300.c: Likewise.
+	* coff-h8500.c: Likewise.
+	* coff-i960.c: Likewise.
+	* coff-ia64.c: Likewise.
+	* coff-m88k.c: Likewise.
+	* coff-mips.c: Likewise.
+	* coff-ppc.c: Likewise.
+	* coff-rs6000.c: Likewise.
+	* coff-sh.c: Likewise.
+	* coff-sparc.c: Likewise.
+	* coff-stgo32.c: Likewise.
+	* coff-tic30.c: Likewise.
+	* coff-tic80.c: Likewise.
+	* coff-w65.c: Likewise.
+	* coff-z8k.c: Likewise.
+	* coff64-rs6000.c: Likewise.
+	* coffgen.c: Likewise.
+	* cofflink.c: Likewise.
+	* coffswap.h: Likewise.
+	* ecoff.c: Likewise.
+	* ecoffswap.h: Likewise.
+	* elf.c: Likewise.
+	* elf32-mips.c: Likewise.
+	* elf64-mips.c: Likewise.
+	* hp300hpux.c: Likewise.
+	* i386dynix.c: Likewise.
+	* i386lynx.c: Likewise.
+	* i386msdos.c: Likewise.
+	* i386os9k.c: Likewise.
+	* libpei.h: Likewise.
+	* nlm32-alpha.c: Likewise.
+	* nlm32-i386.c: Likewise.
+	* nlm32-ppc.c: Likewise.
+	* nlmcode.h: Likewise.
+	* nlmswap.h: Likewise.
+	* oasys.c: Likewise.
+	* pdp11.c: Likewise.
+	* pe-mips.c: Likewise.
+	* peXXigen.c: Likewise.
+	* peicode.h: Likewise.
+	* riscix.c: Likewise.
+	* sunos.c: Likewise.
+	* xcofflink.c: Likewise.
+	* elfcode.h: (put_word, get_word, put_signed_word, get_signed_word):
+	Rename to H_PUT_WORD, H_GET_WORD, H_PUT_SIGNED_WORD, H_GET_SIGNED_WORD.
+	* coff-rs6000.c (PUTWORD, PUTHALF, PUTBYTE): Don't define. Use
+	equivalent H_PUT_* macro instead.
+	(GETWORD, GETHALF, GETBYTE): Similarly.
+	* coff64-rs6000.c (PUTWORD, PUTHALF, PUTBYTE): Likewise.
+	(GETWORD, GETHALF, GETBYTE): Likewise.
+	* coffswap.h (PUTWORD, PUTHALF, PUTBYTE): Likewise.
+
+	* bfd-in.h (struct orl): Change "pos" to a union.
+	* archive.c (_bfd_compute_and_write_armap): Use it instead of casts.
+	(bsd_write_armap): Here too.
+	(coff_write_armap): And here.
+	* coff-rs6000.c (xcoff_write_armap_old): And here.
+	(xcoff_write_one_armap_big): And here.
+	(xcoff_write_armap_big): And here.
+	* ecoff.c (_bfd_ecoff_write_armap): And here.
+	* elf64-mips.c (mips_elf64_write_armap): And here.
+
+	* aoutf1.h (sunos_set_arch_mach): Make "mach" param an enum.
+	* elf-m10300.c (elf_mn10300_mach): Return an unsigned long.
+	* elf32-h8300.c (elf32_h8_mach): Likewise.
+	* elf32-mips.c (elf_mips_mach): Likewise.
+	* sparclynx.c (NAME(lynx,set_arch_mach)): Likewise.
+
+	* aix386-core.c (aix386_core_file_p): Remove redundant bfd_release
+	calls.
+	(aix386_core_vec): Typo fix.
+
+	* aout-arm.c: Include libaout.h and aout/aout64.h after N_TXTADDR
+	etc. to avoid redefined macro warning.
+	(MY(put_reloc)): Use bfd_vma for "value" rather than long.
+	(MY(fix_pcrel_26)): Likewise.
+	* aout-ns32k.c (MY(put_reloc)): Likewise.
+	* aout-cris.c (MY(swap_ext_reloc_out)): Likewise for r_addend.
+	* aoutx.h (NAME(aout,swap_ext_reloc_out)): Likewise.
+	* coff-arm.c (coff_arm_relocate_section): Likewise for my_offset.
+
+	* aout-encap.c: Include "file", not <file> for binutils headers.
+	(encap_object_p): Half baked attempt to fix compile errors in
+	code dealing with "magic".
+
+	* aout-ns32k.c: Include "file", not <file> for binutils headers.
+	(_bfd_ns32k_relocate_contents): get_data and put_data manipulate
+	bfd_vma's rather than longs.
+	* cpu-ns32k.c (ns32k_sign_extend): Delete.
+	(_bfd_ns32k_get_displacement): Return a bfd_vma, don't pass in offset.
+	(_bfd_ns32k_get_immediate): Likewise.  Add code for 8 byte values,
+	remove case 3.
+	(_bfd_ns32k_put_displacement): Accept a bfd_vma, don't pass in offset.
+	Use unsigned comparisons.
+	(bfd_ns32k_put_immediate): Likewise, and add code for 8 byte values.
+	(do_ns32k_reloc): get_data and put_data operate on bfd_vma's.
+	(_bfd_do_ns32k_reloc_contents): Likewise.
+	* ns32k.h (_bfd_ns32k_get_displacement): Update prototype.
+	(_bfd_ns32k_get_immediate): Likewise.
+	(_bfd_ns32k_put_displacement): Likewise.
+	(_bfd_ns32k_put_immediate): Likewise.
+	(bfd_reloc_status_type): Likewise.
+
+	* aoutx.h (NAME(aout,find_nearest_line)): Rename 'p' to 'colon'
+	to avoid shadowing.
+	* pdp11.c (NAME(aout,find_nearest_line)): Likewise.
+	* coff-h8300.c (h8300_reloc16_extra_cases): Remove shadowing "value".
+	* coff-ppc.c (enum ref_category): Rename "data" to "tocdata" to
+	avoid shadowing.
+	(record_toc): Use a bfd_signed_vma for our_toc_offset.
+	* coffcode.h (coff_write_relocs): Rename "i" to avoid shadowing.
+	* elf.c (bfd_elf_get_bfd_needed_list): Rename "link" var to avoid
+	shadow warning.
+	(_bfd_elfcore_strndup): Likewise for "dup".
+	* elf32-cris.c (cris_elf_relocate_section): "symname" instead of
+	"name" to avoid shadowing.
+	* elf32-hppa.c (elf32_hppa_relocate_section): Remove duplicate
+	definition of "off".
+	* elf32-i386.c (elf_i386_relocate_section): Likewise.
+	* elf32-mips.c (_bfd_mips_elf_modify_segment_map): Remove duplicate
+	definition of "s".
+	(_bfd_mips_elf_final_link): Rename "i" to "j".  Remove duplicate
+	"secpp".
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Rename inner "indx"
+	to avoid shadowing.
+	* elflink.h (elf_link_add_object_symbols): Rename "link" to "shlink"
+	to avoid shadowing.
+	(elf_link_input_bfd): Likewise.
+	(elf_bfd_final_link): Remove duplicate innermost "off" var.
+	* oasys.c (oasys_write_data): Rename innermost "p" to "sym".
+	* reloc16.c (bfd_coff_reloc16_relax_section): Rename "i" param to
+	"input_section".
+	* som.c (som_prep_for_fixups): Rename inner "i" to "j".
+	* sunos.c (sunos_add_dynamic_symbols): Localise "s" var.
+	(sunos_write_dynamic_symbol): Remove unused vars.
+	* syms.c (_bfd_stab_section_find_nearest_line): Remove duplicate
+	innermost "directory_name" and "file_name" vars.
+	* tekhex.c (first_phase): Rename local var "type" to "stype".
+	(tekhex_write_object_contents): Rename innermost "s" to "sym".
+	* vms-gsd.c (vms_secflag_by_name): Change "size" param to "hassize",
+	doing comparison at caller.
+	(vms_esecflag_by_name): Likewise.
+	* vms-tir.c (etir_sto): Rename innermost "psect" to "psect1".
+	* xcofflink.c (xcoff_link_input_bfd): Delete duplicate innermost "o".
+	(xcoff_write_global_symbol): Rename "p" param to "inf".
+
+	* cisco-core.c: Add missing prototypes.
+	(cisco_core_file_failing_command): Add ATTRIBUTE_UNUSED.
+	(cisco_core_file_failing_signal): Likewise.
+	(cisco_core_file_matches_executable_p): Likewise.
+	* hpux-core.c (hpux_core_core_file_failing_signal): Likewise.
+	* netbsd-core.c (netbsd_core_file_matches_executable_p): Likewise.
+	* osf-core.c (osf_core_core_file_matches_executable_p): Likewise.
+	* sco5-core.c (sco5_core_file_matches_executable_p): Likewise.
+
+	* coff-arm.c (coff_arm_link_hash_table): Use bfd_size_type for
+	thumb_glue_size and arm_glue_size.
+	* elf32-arm.h (elf32_arm_link_hash_table): Likewise here.
+
+	* coff64-rs6000.c: Group prototypes together.
+
+	* coffcode.h (coff_set_arch_mach): Add ATTRIBUTE_UNUSED.
+	(buy_and_read): Remove "seek" param.  Change "size" to bfd_size_type.
+
+	* cpu-arc.c: Add missing prototypes.
+	* cpu-h8500.c: Likewise.
+	* cpu-i960.c: Likewise.
+	* cpu-pj.c: Likewise.
+	* cpu-sh.c: Likewise.
+	* cpu-w65.c: Likewise.
+	* cpu-z8k.c: Likewise.
+	* elf32-fr30.c: Likewise.
+	* elf32-h8300.c: Likewise.
+	* elf32-i370.c: Likewise.
+	* hpux-core.c: Likewise.
+	* versados.c: Likewise.
+
+	* cpu-h8300.c (bfd_default_scan_num_mach): Don't declare.
+	* cpu-h8500.c: Likewise.
+	* cpu-i960.c: Likewise.
+	* cpu-z8k.c: Likewise.
+
+	* cpu-ia64-opc.c: Correct comment.
+
+	* dwarf2.c (_bfd_dwarf2_find_nearest_line): Remove unused var.
+
+	* elf-bfd.h (elf_size_info): Change count param of write_out_phdrs
+	to unsigned.
+	(bfd_elf32_write_out_phdrs): Likewise.
+	(bfd_elf64_write_out_phdrs): Likewise.
+	(elf_linker_section_pointers): Change addend to bfd_vma.
+	(_bfd_elf_find_pointer_linker_section): Likewise.
+	(_bfd_elfcore_make_pseudosection): Change size param to size_t and
+	filepos to unsigned file_ptr.
+	(_bfd_elfcore_strndup): Change max param to size_t.
+	* elf.c (_bfd_elfcore_make_pseudosection): As above.
+	(_bfd_elfcore_strndup): Likewise.
+	(_bfd_elf_find_pointer_linker_section): Likewise.
+
+	* elf-hppa.h (elf_hppa_relocate_insn): Return an int, and change
+	insn and sym_value to ints.
+
+	* elf.c (elf_read): Make "offset" param a file_ptr, "size" a
+	bfd_size_type.
+	(elfcore_read_notes): Likewise.
+
+	* elf32-arm.h (elf32_arm_final_link_relocate): Change sym_flags
+	param from unsigned char to int.
+	(elf32_arm_relocate_section): If USE_REL, cast "rel" appropriately
+	for info_to_howto call.
+	(add_dynamic_entry): Define macro.
+	(elf32_arm_size_dynamic_sections): Use add_dynamic_entry.
+
+	* elf32-cris.c (add_dynamic_entry): Define macro.
+	(elf_cris_size_dynamic_sections): Use add_dynamic_entry.
+
+	* elf32-h8300.c (elf32_h8_final_write_processing): Make static.
+	(elf32_h8_object_p): Likewise.
+	(elf32_h8_merge_private_bfd_data): Likewise.
+	(elf32_h8_relax_section): Cast gap to int so signed comparisons work.
+
+	* elf32-hppa.c (add_dynamic_entry): Define macro.
+	(elf32_hppa_size_dynamic_sections): Use it.
+	* elf32-i370.c (add_dynamic_entry): Define macro.
+	(i370_elf_size_dynamic_sections): Use it.
+	(i370_noop): Make static.
+	* elf32-i386.c (add_dynamic_entry): Define macro.
+	(elf_i386_size_dynamic_sections): Use it.
+	* elf32-m68k.c (add_dynamic_entry): Define macro.
+	(elf_m68k_size_dynamic_sections): Use it.
+	* elf32-ppc.c (add_dynamic_entry): Define macro.
+	(ppc_elf_size_dynamic_sections): Use it.
+	* elf32-s390.c (add_dynamic_entry): Define macro.
+	(elf_s390_size_dynamic_sections): Use it.
+	* elf64-alpha.c (add_dynamic_entry): Define macro.
+	(elf64_alpha_size_dynamic_sections): Use it.
+	* elf64-hppa.c (add_dynamic_entry): Define macro.
+	(elf64_hppa_size_dynamic_sections): Use it.
+	* elf64-ppc.c (add_dynamic_entry): Define macro.
+	(ppc64_elf_size_dynamic_sections): Use it.
+	* elf64-s390.c (add_dynamic_entry): Define macro.
+	(elf_s390_size_dynamic_sections): Use it.
+	* elf64-sparc.c (add_dynamic_entry): Define macro.
+	(sparc64_elf_size_dynamic_sections): Use it.
+	* elf64-x86-64.c (add_dynamic_entry): Define macro.
+	(elf64_x86_64_size_dynamic_sections): Use it.
+	* elfxx-ia64.c (add_dynamic_entry): Define macro.
+	(elfNN_ia64_size_dynamic_sections): Use it.
+
+	* elf32-v850.c (SEXT24): Modify to avoid signed/unsigned warning.
+	(v850_elf_perform_relocation): Make "r_type" param unsigned.
+
+	* elf64-mips.c (mips_elf64_slurp_one_reloc_table): Just return
+	false if the first malloc fails rather than going via error_return.
+
+	* elf64-sparc.c (sparc64_elf_plt_entry_offset): Use a bfd_vma for
+	"index" param.
+	(sparc64_elf_plt_ptr_offset): Likewise, and for "max" param too.
+
+	* elflink.h (elf_link_input_bfd): s/ingored/ignored/ in error message.
+
+	* elfxx-ia64.c (global_sym_index): Return a long.
+
+	* ieee.c (get_symbol): Use int rather than char param.
+	(ieee_slurp_sections): Move "section" var to inner blocks.
+	(copy_expression): Don't init "value" to zero or worry about
+	clearing to zero after using.
+	(ieee_write_debug_part): Rename "output_buffer" to "obuff" to avoid
+	shadowing.
+
+	* ihex.c (ihex_write_record): Make "count" var a size_t, "addr" an
+	unsigned int.
+
+	* libbfd-in.h (BFD_ALIGN): Add cast to avoid signed/unsigned warning.
+	(bfd_write_bigendian_4byte_int): Pass an unsigned int value param.
+
+	* mipsbsd.c (mips_fix_jmp_addr): Add "error_message" param.
+
+	* pc532-mach.c (MYNSX): Delete.
+	(ns32kaout_bfd_reloc_type_lookup): Define prototype without MYNSX.
+	(write_object_contents): Correct prototype.
+
+	* peicode.h (pe_ILF_build_a_bfd): Use an unsigned int param rather
+	than unsigned short.
+
+	* section.c (bfd_set_section_contents): Remove redundant
+	"offset < 0" test.  Check that "count" doesn't overflow size_t.
+	(bfd_get_section_contents): Likewise.
+
+	* som.c (som_fixup_formats): Add missing braces.
+	(som_reloc_addend): Pass a bfd_vma for "addend".
+
+	* srec.c (srec_write_record): Pass "type" as an unsigned int.
+	(srec_write_symbols): Remove an unnecessary var.
+
+	* targets.c (_bfd_target_vector): Sort entries.  Sort externs
+	to match.
+	* configure.in: Sort to match.  Bump version number.
+	* configure: Regenerate.
+
+	* tekhex.c (move_section_contents): Assert offset == 0.
+
+	* versados.c (new_symbol_string): Constify arg.
+	(process_esd): Use bfd_und_section_ptr rather than &bfd_und_section.
+	(versados_get_symbol_info): Make static.
+	(versados_print_symbol): Likewise.
+	(versados_get_reloc_upper_bound): Likewise.
+	(versados_canonicalize_reloc): Likewise.
+
 2001-09-18  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* elflink.h (elf_link_input_bfd): Fix typo in error message.

@@ -63,8 +63,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "libbfd.h"
 #include "aout/aout64.h"
 
-/* We can`t use the MYNS macro here for cpp reasons too subtle for me -- IWD */
-
 #define MY_bfd_reloc_type_lookup ns32kaout_bfd_reloc_type_lookup
 
 /* libaout doesn't use NAME for these ...  */
@@ -75,19 +73,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define MY_exec_header_not_counted 1
 
-#define MYNSX(OP) CAT(ns32kaout_,OP)
-reloc_howto_type *
-MYNSX(bfd_reloc_type_lookup)
-  PARAMS((bfd *abfd AND
-	  bfd_reloc_code_real_type code));
+reloc_howto_type *ns32kaout_bfd_reloc_type_lookup
+  PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 
-boolean
-MYNSX(write_object_contents)
-  PARAMS((bfd *abfd));
+static boolean MY(write_object_contents)
+  PARAMS ((bfd *abfd));
 
 static boolean
 MY(write_object_contents) (abfd)
-bfd *abfd;
+     bfd *abfd;
 {
   struct external_exec exec_bytes;
   struct internal_exec *execp = exec_hdr (abfd);

@@ -142,10 +142,11 @@ bfd_check_format_matches (abfd, format, matching)
 
   if (matching)
     {
+      bfd_size_type amt;
+
       *matching = NULL;
-      matching_vector =
-	(char **) bfd_malloc (sizeof (char *)
-			      * 2 * _bfd_target_vector_entries);
+      amt = sizeof (char *) * 2 * _bfd_target_vector_entries;
+      matching_vector = (char **) bfd_malloc (amt);
       if (!matching_vector)
 	return false;
     }
@@ -159,7 +160,7 @@ bfd_check_format_matches (abfd, format, matching)
   /* If the target type was explicitly specified, just check that target.  */
   if (!abfd->target_defaulted)
     {
-      if (bfd_seek (abfd, (file_ptr)0, SEEK_SET) != 0)	/* rewind! */
+      if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)	/* rewind! */
 	return false;
 
       right_targ = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
@@ -210,7 +211,7 @@ bfd_check_format_matches (abfd, format, matching)
 
       abfd->xvec = *target;	/* Change BFD's target temporarily */
 
-      if (bfd_seek (abfd, (file_ptr)0, SEEK_SET) != 0)
+      if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
 	return false;
 
       /* If _bfd_check_format neglects to set bfd_error, assume

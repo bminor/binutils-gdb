@@ -107,27 +107,26 @@ msdos_write_object_contents (abfd)
     }
 
   /* Constants.  */
-  bfd_h_put_16(abfd, EXE_MAGIC, &hdr[0]);
-  bfd_h_put_16(abfd, EXE_PAGE_SIZE / 16, &hdr[8]);
-  bfd_h_put_16(abfd, EXE_LOAD_LOW, &hdr[12]);
-  bfd_h_put_16(abfd, 0x3e, &hdr[24]);
-  bfd_h_put_16(abfd, 0x0001, &hdr[28]); /* XXX??? */
-  bfd_h_put_16(abfd, 0x30fb, &hdr[30]); /* XXX??? */
-  bfd_h_put_16(abfd, 0x726a, &hdr[32]); /* XXX??? */
+  H_PUT_16 (abfd, EXE_MAGIC, &hdr[0]);
+  H_PUT_16 (abfd, EXE_PAGE_SIZE / 16, &hdr[8]);
+  H_PUT_16 (abfd, EXE_LOAD_LOW, &hdr[12]);
+  H_PUT_16 (abfd, 0x3e, &hdr[24]);
+  H_PUT_16 (abfd, 0x0001, &hdr[28]); /* XXX??? */
+  H_PUT_16 (abfd, 0x30fb, &hdr[30]); /* XXX??? */
+  H_PUT_16 (abfd, 0x726a, &hdr[32]); /* XXX??? */
 
   /* Bytes in last page (0 = full page).  */
-  bfd_h_put_16(abfd, outfile_size & (EXE_PAGE_SIZE - 1), &hdr[2]);
+  H_PUT_16 (abfd, outfile_size & (EXE_PAGE_SIZE - 1), &hdr[2]);
 
   /* Number of pages.  */
-  bfd_h_put_16(abfd, (outfile_size + EXE_PAGE_SIZE - 1) / EXE_PAGE_SIZE,
-  	       &hdr[4]);
+  H_PUT_16 (abfd, (outfile_size + EXE_PAGE_SIZE - 1) / EXE_PAGE_SIZE, &hdr[4]);
 
   /* Set the initial stack pointer to the end of the bss.
      The program's crt0 code must relocate it to a real stack.  */
-  bfd_h_put_16(abfd, high_vma, &hdr[16]);
+  H_PUT_16 (abfd, high_vma, &hdr[16]);
 
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0
-      || bfd_write (hdr, 1, sizeof(hdr), abfd) != sizeof(hdr))
+      || bfd_bwrite (hdr, (bfd_size_type) sizeof(hdr), abfd) != sizeof(hdr))
     return false;
 
   return true;
@@ -149,8 +148,8 @@ msdos_set_section_contents (abfd, section, location, offset, count)
 
   if (bfd_get_section_flags (abfd, section) & SEC_LOAD)
     {
-      if (bfd_seek (abfd, (file_ptr) (section->filepos + offset), SEEK_SET) != 0
-          || bfd_write (location, 1, count, abfd) != count)
+      if (bfd_seek (abfd, section->filepos + offset, SEEK_SET) != 0
+          || bfd_bwrite (location, count, abfd) != count)
         return false;
     }
 
@@ -244,7 +243,7 @@ const bfd_target i386msdos_vec =
     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
     NULL,
-  
+
     (PTR) 0
   };
 

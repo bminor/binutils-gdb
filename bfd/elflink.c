@@ -278,10 +278,10 @@ _bfd_elf_link_record_dynamic_symbol (info, h)
 	}
       else
 	{
-	  alc = bfd_malloc (p - name + 1);
+	  alc = bfd_malloc ((bfd_size_type) (p - name + 1));
 	  if (alc == NULL)
 	    return false;
-	  strncpy (alc, name, p - name);
+	  strncpy (alc, name, (size_t) (p - name));
 	  alc[p - name] = '\0';
 	  name = alc;
 	  copy = true;
@@ -397,9 +397,9 @@ _bfd_elf_create_linker_section (abfd, info, which, defaults)
   if (!lsect)
     {
       asection *s;
+      bfd_size_type amt = sizeof (elf_linker_section_t);
 
-      lsect = (elf_linker_section_t *)
-	bfd_alloc (dynobj, sizeof (elf_linker_section_t));
+      lsect = (elf_linker_section_t *) bfd_alloc (dynobj, amt);
 
       *lsect = *defaults;
       elf_linker_section (dynobj, which) = lsect;
@@ -506,7 +506,7 @@ _bfd_elf_create_linker_section (abfd, info, which, defaults)
 elf_linker_section_pointers_t *
 _bfd_elf_find_pointer_linker_section (linker_pointers, addend, which)
      elf_linker_section_pointers_t *linker_pointers;
-     bfd_signed_vma addend;
+     bfd_vma addend;
      elf_linker_section_enum_t which;
 {
   for ( ; linker_pointers != NULL; linker_pointers = linker_pointers->next)

@@ -1,5 +1,5 @@
 /* picoJava specific support for 32-bit ELF
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
    Contributed by Steve Chamberlan of Transmeta (sac@pobox.com).
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -224,7 +224,7 @@ pj_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
     case R_PJ_DATA_DIR32:
       insn = bfd_get_32 (abfd, hit_data);
       insn += sym_value + reloc_entry->addend;
-      bfd_put_32 (abfd, insn, hit_data);
+      bfd_put_32 (abfd, (bfd_vma) insn, hit_data);
       break;
 
       /* Relocations in code are always bigendian, no matter what the
@@ -233,7 +233,7 @@ pj_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
     case R_PJ_CODE_DIR32:
       insn = bfd_getb32 (hit_data);
       insn += sym_value + reloc_entry->addend;
-      bfd_putb32 (insn, hit_data);
+      bfd_putb32 ((bfd_vma) insn, hit_data);
       break;
 
     case R_PJ_CODE_REL16:
@@ -241,18 +241,18 @@ pj_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
       insn += sym_value + reloc_entry->addend
         -  (input_section->output_section->vma
             + input_section->output_offset);
-      bfd_putb16 (insn, hit_data);
+      bfd_putb16 ((bfd_vma) insn, hit_data);
       break;
     case R_PJ_CODE_LO16:
       insn = bfd_getb16 (hit_data);
       insn += sym_value + reloc_entry->addend;
-      bfd_putb16 (insn, hit_data);
+      bfd_putb16 ((bfd_vma) insn, hit_data);
       break;
 
     case R_PJ_CODE_HI16:
       insn = bfd_getb16 (hit_data);
       insn += (sym_value + reloc_entry->addend) >> 16;
-      bfd_putb16 (insn, hit_data);
+      bfd_putb16 ((bfd_vma) insn, hit_data);
       break;
 
     default:

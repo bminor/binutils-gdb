@@ -1,5 +1,5 @@
 /* Generic support for 32-bit ELF
-   Copyright 1993, 1995, 1998, 1999 Free Software Foundation, Inc.
+   Copyright 1993, 1995, 1998, 1999, 2001 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -29,8 +29,23 @@ static void elf32_h8_info_to_howto
   PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static void elf32_h8_info_to_howto_rel
   PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
-static int elf32_h8_mach
+static unsigned long elf32_h8_mach
   PARAMS ((flagword));
+static void elf32_h8_final_write_processing
+  PARAMS ((bfd *, boolean));
+static boolean elf32_h8_object_p
+  PARAMS ((bfd *));
+static boolean elf32_h8_merge_private_bfd_data
+  PARAMS ((bfd *, bfd *));
+static boolean elf32_h8_relax_section
+  PARAMS ((bfd *, asection *, struct bfd_link_info *, boolean *));
+static boolean elf32_h8_relax_delete_bytes
+  PARAMS ((bfd *, asection *, bfd_vma, int));
+static boolean elf32_h8_symbol_address_p
+  PARAMS ((bfd *, asection *, Elf32_External_Sym *, bfd_vma));
+static bfd_byte *elf32_h8_get_relocated_section_contents
+  PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_order *,
+	   bfd_byte *, boolean, asymbol **));
 static bfd_reloc_status_type elf32_h8_final_link_relocate
   PARAMS ((unsigned long, bfd *, bfd *, asection *,
 	   bfd_byte *, bfd_vma, bfd_vma, bfd_vma,
@@ -39,7 +54,7 @@ static boolean elf32_h8_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *,
 	   bfd_byte *, Elf_Internal_Rela *,
 	   Elf_Internal_Sym *, asection **));
-static bfd_reloc_status_type special 
+static bfd_reloc_status_type special
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 
 /* This does not include any relocation information, but should be
@@ -420,7 +435,7 @@ elf32_h8_relocate_section (output_bfd, info, input_bfd, input_section,
   relend = relocs + input_section->reloc_count;
   for (; rel < relend; rel++)
     {
-      int r_type;
+      unsigned int r_type;
       unsigned long r_symndx;
       Elf_Internal_Sym *sym;
       asection *sec;
@@ -503,7 +518,7 @@ elf32_h8_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  elf32_h8_info_to_howto (input_bfd, &bfd_reloc, rel);
 	  howto = bfd_reloc.howto;
-	  
+
 	  if (h != NULL)
 	    name = h->root.root.string;
 	  else
@@ -564,7 +579,7 @@ elf32_h8_relocate_section (output_bfd, info, input_bfd, input_section,
 
    Examine that field and return the proper BFD machine type for
    the object file.  */
-static int
+static unsigned long
 elf32_h8_mach (flags)
      flagword flags;
 {
@@ -586,7 +601,7 @@ elf32_h8_mach (flags)
    file.  We use this opportunity to encode the BFD machine type
    into the flags field in the object file.  */
 
-void
+static void
 elf32_h8_final_write_processing (abfd, linker)
      bfd *abfd;
      boolean linker ATTRIBUTE_UNUSED;
@@ -616,7 +631,7 @@ elf32_h8_final_write_processing (abfd, linker)
 /* Return nonzero if ABFD represents a valid H8 ELF object file; also
    record the encoded machine type found in the ELF flags.  */
 
-boolean
+static boolean
 elf32_h8_object_p (abfd)
      bfd *abfd;
 {
@@ -629,7 +644,7 @@ elf32_h8_object_p (abfd)
    object file when linking.  The only data we need to copy at this
    time is the architecture/machine information.  */
 
-boolean
+static boolean
 elf32_h8_merge_private_bfd_data (ibfd, obfd)
      bfd *ibfd;
      bfd *obfd;
@@ -665,7 +680,7 @@ elf32_h8_merge_private_bfd_data (ibfd, obfd)
      mov.b:24/32     ->    mov.b:8                4 bytes
 
      mov.[bwl]:24/32 ->    mov.[bwl]:16           2 bytes
-	
+
 
 */
 
@@ -766,7 +781,7 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 		goto error_return;
 	      free_extsyms = extsyms;
 	      if (bfd_seek (abfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-		  || (bfd_read (extsyms, 1, symtab_hdr->sh_size, abfd)
+		  || (bfd_bread (extsyms, symtab_hdr->sh_size, abfd)
 		      != symtab_hdr->sh_size))
 		goto error_return;
 	    }
@@ -837,7 +852,7 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 	    /* If the distance is within -126..+130 inclusive, then we can
 	       relax this jump.  +130 is valid since the target will move
 	       two bytes closer if we do relax this branch.  */
-	    if ((int)gap >= -126 && (int)gap <= 130)
+	    if ((int) gap >= -126 && (int) gap <= 130)
 	      {
 		unsigned char code;
 
@@ -859,8 +874,8 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 
 		   Such sequences are used by the compiler to deal with
 		   long conditional branches.  */
-		if (gap <= 130
-		    && gap >= -128
+		if ((int) gap <= 130
+		    && (int) gap >= -128
 		    && last_reloc
 		    && ELF32_R_TYPE (last_reloc->r_info) == R_H8_PCREL8
 		    && ELF32_R_SYM (last_reloc->r_info) < symtab_hdr->sh_info)
@@ -871,7 +886,7 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 
 		    /* We will need to examine the symbol used by the
 		       previous relocation.  */
-		
+
 		    bfd_elf32_swap_symbol_in (abfd,
 					      (extsyms + ELF32_R_SYM (last_reloc->r_info)),
 					      &last_symbol);
@@ -958,7 +973,7 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 	    dot = (sec->output_section->vma
 		   + sec->output_offset
 		   + irel->r_offset - 2);
-	  
+
 	    gap = value - dot;
 
 	    /* If the distance is within -126..+130 inclusive, then we can
@@ -1268,7 +1283,8 @@ elf32_h8_relax_delete_bytes (abfd, sec, addr, count)
   irelend = irel + sec->reloc_count;
 
   /* Actually delete the bytes.  */
-  memmove (contents + addr, contents + addr + count, toaddr - addr - count);
+  memmove (contents + addr, contents + addr + count,
+	   (size_t) (toaddr - addr - count));
   sec->_cooked_size -= count;
 
   /* Adjust all the relocs.  */
@@ -1400,7 +1416,7 @@ elf32_h8_get_relocated_section_contents (output_bfd, link_info, link_order,
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
 
   memcpy (data, elf_section_data (input_section)->this_hdr.contents,
-	  input_section->_raw_size);
+	  (size_t) input_section->_raw_size);
 
   if ((input_section->flags & SEC_RELOC) != 0
       && input_section->reloc_count > 0)
@@ -1413,15 +1429,15 @@ elf32_h8_get_relocated_section_contents (output_bfd, link_info, link_order,
 	external_syms = (Elf32_External_Sym *) symtab_hdr->contents;
       else
 	{
-	  external_syms = ((Elf32_External_Sym *)
-			   bfd_malloc (symtab_hdr->sh_info
-				       * sizeof (Elf32_External_Sym)));
+	  bfd_size_type amt;
+
+	  amt = symtab_hdr->sh_info;
+	  amt *= sizeof (Elf32_External_Sym);
+	  external_syms = (Elf32_External_Sym *) bfd_malloc (amt);
 	  if (external_syms == NULL && symtab_hdr->sh_info > 0)
 	    goto error_return;
 	  if (bfd_seek (input_bfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-	      || (bfd_read (external_syms, sizeof (Elf32_External_Sym),
-			    symtab_hdr->sh_info, input_bfd)
-		  != (symtab_hdr->sh_info * sizeof (Elf32_External_Sym))))
+	      || bfd_bread (external_syms, amt, input_bfd) != amt)
 	    goto error_return;
 	}
 
@@ -1432,12 +1448,12 @@ elf32_h8_get_relocated_section_contents (output_bfd, link_info, link_order,
 	goto error_return;
 
       internal_syms = ((Elf_Internal_Sym *)
-		       bfd_malloc (symtab_hdr->sh_info
+		       bfd_malloc ((bfd_size_type) symtab_hdr->sh_info
 				   * sizeof (Elf_Internal_Sym)));
       if (internal_syms == NULL && symtab_hdr->sh_info > 0)
 	goto error_return;
 
-      sections = (asection **) bfd_malloc (symtab_hdr->sh_info
+      sections = (asection **) bfd_malloc ((bfd_size_type) symtab_hdr->sh_info
 					   * sizeof (asection *));
       if (sections == NULL && symtab_hdr->sh_info > 0)
 	goto error_return;

@@ -1,7 +1,8 @@
 /* BFD back-end for AIX on PS/2 core files.
    This was based on trad-core.c, which was written by John Gilmore of
         Cygnus Support.
-   Copyright 1988, 1989, 1991, 1992, 1993, 1994, 1996, 1998, 1999, 2000
+   Copyright 1988, 1989, 1991, 1992, 1993, 1994, 1996, 1998, 1999, 2000,
+   2001
    Free Software Foundation, Inc.
    Written by Minh Tran-Le <TRANLE@INTELLICORP.COM>.
    Converted to back end form by Ian Lance Taylor <ian@cygnus.com>.
@@ -72,14 +73,16 @@ aix386_core_file_p (abfd)
 {
   int i, n;
   unsigned char longbuf[4];	/* Raw bytes of various header fields */
-  int core_size = sizeof (struct corehdr);
+  bfd_size_type core_size = sizeof (struct corehdr);
+  bfd_size_type amt;
   struct corehdr *core;
   struct mergem {
     struct trad_core_struct coredata;
     struct corehdr internal_core;
   } *mergem;
 
-  if (bfd_read ((PTR) longbuf, 1, sizeof (longbuf), abfd) != sizeof (longbuf))
+  amt = sizeof (longbuf);
+  if (bfd_bread ((PTR) longbuf, amt, abfd) != amt)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);
@@ -89,19 +92,21 @@ aix386_core_file_p (abfd)
   if (strncmp (longbuf, COR_MAGIC, 4))
     return 0;
 
-  if (bfd_seek (abfd, 0L, false) < 0)
+  if (bfd_seek (abfd, (file_ptr) 0, 0) != 0)
     return 0;
 
-  mergem = (struct mergem *) bfd_zalloc (abfd, sizeof (struct mergem));
+  amt = sizeof (struct mergem);
+  mergem = (struct mergem *) bfd_zalloc (abfd, amt);
   if (mergem == NULL)
     return 0;
 
   core = &mergem->internal_core;
 
-  if ((bfd_read ((PTR) core, 1, core_size, abfd)) != core_size)
+  if ((bfd_bread ((PTR) core, core_size, abfd)) != core_size)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);
+    loser:
       bfd_release (abfd, (char *) mergem);
       return 0;
     }
@@ -111,38 +116,23 @@ aix386_core_file_p (abfd)
 
   /* Create the sections.  This is raunchy, but bfd_close wants to
      reclaim them.  */
-  core_regsec (abfd) = (asection *) bfd_zalloc (abfd, sizeof (asection));
+  amt = sizeof (asection);
+  core_regsec (abfd) = (asection *) bfd_zalloc (abfd, amt);
   if (core_regsec (abfd) == NULL)
-    {
-    loser:
-      bfd_release (abfd, (char *) mergem);
-      return 0;
-    }
-  core_reg2sec (abfd) = (asection *) bfd_zalloc (abfd, sizeof (asection));
+    goto loser;
+
+  core_reg2sec (abfd) = (asection *) bfd_zalloc (abfd, amt);
   if (core_reg2sec (abfd) == NULL)
-    {
-    loser1:
-      bfd_release (abfd, core_regsec (abfd));
-      goto loser;
-    }
+    /* bfd_release frees everything allocated after it's arg.  */
+    goto loser;
 
   for (i = 0, n = 0; (i < MAX_CORE_SEGS) && (core->cd_segs[i].cs_type); i++)
     {
       if (core->cd_segs[i].cs_offset == 0)
 	continue;
-      core_section (abfd, n) =
-	(asection *) bfd_zalloc (abfd, sizeof (asection));
+      core_section (abfd, n) = (asection *) bfd_zalloc (abfd, amt);
       if (core_section (abfd, n) == NULL)
-	{
-	  int j;
-	  if (n > 0)
-	    {
-	      for (j = 0; j < n; j++)
-		bfd_release (abfd, core_section (abfd, j));
-	    }
-	  bfd_release (abfd, (char *) mergem);
-	  goto loser1;
-	}
+	goto loser;
 
       switch (core->cd_segs[i].cs_type)
 	{
@@ -193,8 +183,8 @@ aix386_core_file_p (abfd)
   core_regsec (abfd)->_raw_size = sizeof (core->cd_regs);
   core_reg2sec (abfd)->_raw_size = sizeof (core->cd_fpregs);
 
-  core_regsec (abfd)->vma = -1;
-  core_reg2sec (abfd)->vma = -1;
+  core_regsec (abfd)->vma = (bfd_vma) -1;
+  core_reg2sec (abfd)->vma = (bfd_vma) -1;
 
   /* We'll access the regs afresh in the core file, like any section.  */
   core_regsec (abfd)->filepos =
@@ -243,15 +233,15 @@ swap_abort ()
   abort ();
 }
 
-#define	NO_GET	((PROTO(bfd_vma, (*), (       const bfd_byte *))) swap_abort )
-#define NO_GETS ((PROTO(bfd_signed_vma, (*), (const bfd_byte *))) swap_abort )
-#define	NO_PUT	((PROTO(void,        (*), (bfd_vma, bfd_byte *))) swap_abort )
+#define	NO_GET	((bfd_vma (*) PARAMS ((const bfd_byte *))) swap_abort)
+#define NO_GETS ((bfd_signed_vma (*) PARAMS ((const bfd_byte *))) swap_abort)
+#define	NO_PUT	((void (*) PARAMS ((bfd_vma, bfd_byte *))) swap_abort)
 
 const bfd_target aix386_core_vec = {
   "aix386-core",
   bfd_target_unknown_flavour,
   BFD_ENDIAN_BIG,		/* target byte order */
-  BFD_ENDIANG_BIG,		/* target headers byte order */
+  BFD_ENDIAN_BIG,		/* target headers byte order */
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | WP_TEXT),

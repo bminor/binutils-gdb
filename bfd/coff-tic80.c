@@ -35,8 +35,8 @@ Boston, MA 02111-1307, USA.  */
 #define COFF_ALIGN_IN_SECTION_HEADER 1
 #define COFF_ALIGN_IN_SFLAGS 1
 
-#define GET_SCNHDR_FLAGS bfd_h_get_16
-#define PUT_SCNHDR_FLAGS bfd_h_put_16
+#define GET_SCNHDR_FLAGS H_GET_16
+#define PUT_SCNHDR_FLAGS H_PUT_16
 
 static void rtype2howto
   PARAMS ((arelent *cache_ptr, struct internal_reloc *dst));

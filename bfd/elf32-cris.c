@@ -637,9 +637,9 @@ elf_cris_link_hash_table_create (abfd)
      bfd *abfd;
 {
   struct elf_cris_link_hash_table *ret;
+  bfd_size_type amt = sizeof (struct elf_cris_link_hash_table);
 
-  ret = ((struct elf_cris_link_hash_table *)
-	 bfd_alloc (abfd, sizeof (struct elf_cris_link_hash_table)));
+  ret = ((struct elf_cris_link_hash_table *) bfd_alloc (abfd, amt));
   if (ret == (struct elf_cris_link_hash_table *) NULL)
     return NULL;
 
@@ -758,7 +758,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       struct elf_link_hash_entry * h;
       bfd_vma                      relocation;
       bfd_reloc_status_type        r;
-      const char *                 name = NULL;
+      const char *                 symname = NULL;
       int                          r_type;
 
       r_type = ELF32_R_TYPE (rel->r_info);
@@ -803,9 +803,10 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			+ sec->output_offset
 			+ sym->st_value);
 
-	  name = bfd_elf_string_from_elf_section
-	    (input_bfd, symtab_hdr->sh_link, sym->st_name);
-	  name = (name == NULL) ? bfd_section_name (input_bfd, sec) : name;
+	  symname = (bfd_elf_string_from_elf_section
+		     (input_bfd, symtab_hdr->sh_link, sym->st_name));
+	  if (symname == NULL)
+	    symname = bfd_section_name (input_bfd, sec);
 	}
       else
 	{
@@ -815,7 +816,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-	  name = h->root.root.string;
+	  symname = h->root.root.string;
 
 	  if (h->root.type == bfd_link_hash_defined
 	      || h->root.type == bfd_link_hash_defweak)
@@ -881,14 +882,14 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		       bfd_get_filename (bfd_my_archive (input_bfd)),
 		       bfd_get_filename (input_bfd),
 		       cris_elf_howto_table[r_type].name,
-		       name,
+		       symname,
 		       bfd_get_section_name (input_bfd, input_section));
 		  else
 		    (*_bfd_error_handler)
 		      (_("%s: unresolvable relocation %s against symbol `%s' from %s section"),
 		       bfd_get_filename (input_bfd),
 		       cris_elf_howto_table[r_type].name,
-		       name,
+		       symname,
 		       bfd_get_section_name (input_bfd, input_section));
 		  bfd_set_error (bfd_error_bad_value);
 		  return false;
@@ -904,7 +905,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  else
 	    {
 	      if (!(info->callbacks->undefined_symbol
-		    (info, name, input_bfd,
+		    (info, symname, input_bfd,
 		     input_section, rel->r_offset,
 		     (!info->shared || info->no_undefined
 		      || ELF_ST_VISIBILITY (h->other)))))
@@ -951,7 +952,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		(_("%s: No PLT nor GOT for relocation %s against symbol `%s' from %s section"),
 		 bfd_get_filename (input_bfd),
 		 cris_elf_howto_table[r_type].name,
-		 name[0] != '\0' ? name : _("[whose name is lost]"),
+		 symname[0] != '\0' ? symname : _("[whose name is lost]"),
 		 bfd_get_section_name (input_bfd, input_section));
 
 	      /* FIXME: Perhaps blaming input is not the right thing to
@@ -1078,7 +1079,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		     bfd_get_filename (input_bfd),
 		     cris_elf_howto_table[r_type].name,
 		     rel->r_addend,
-		     name[0] != '\0' ? name : _("[whose name is lost]"),
+		     symname[0] != '\0' ? symname : _("[whose name is lost]"),
 		     bfd_get_section_name (input_bfd, input_section));
 
 		bfd_set_error (bfd_error_bad_value);
@@ -1095,7 +1096,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		(_("%s: relocation %s is not allowed for global symbol: `%s' from %s section"),
 		 bfd_get_filename (input_bfd),
 		 cris_elf_howto_table[r_type].name,
-		 name,
+		 symname,
 		 bfd_get_section_name (input_bfd, input_section));
 	      bfd_set_error (bfd_error_bad_value);
 	      return false;
@@ -1327,13 +1328,13 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	    case bfd_reloc_overflow:
 	      r = info->callbacks->reloc_overflow
-		(info, name, howto->name, (bfd_vma) 0,
+		(info, symname, howto->name, (bfd_vma) 0,
 		 input_bfd, input_section, rel->r_offset);
 	      break;
 
 	    case bfd_reloc_undefined:
 	      r = info->callbacks->undefined_symbol
-		(info, name, input_bfd, input_section, rel->r_offset,
+		(info, symname, input_bfd, input_section, rel->r_offset,
 		 true);
 	      break;
 
@@ -1356,7 +1357,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  if (msg)
 	    r = info->callbacks->warning
-	      (info, msg, name, input_bfd, input_section, rel->r_offset);
+	      (info, msg, symname, input_bfd, input_section, rel->r_offset);
 
 	  if (! r)
 	    return false;
@@ -1505,6 +1506,7 @@ elf_cris_finish_dynamic_symbol (output_bfd, info, h, sym)
       asection *sgot;
       asection *srela;
       Elf_Internal_Rela rela;
+      bfd_byte *where;
 
       /* This symbol has an entry in the global offset table.  Set it up.  */
 
@@ -1514,27 +1516,25 @@ elf_cris_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       rela.r_offset = (sgot->output_section->vma
 		       + sgot->output_offset
-		       + (h->got.offset &~ 1));
+		       + (h->got.offset &~ (bfd_vma) 1));
 
       /* If this is a static link, or it is a -Bsymbolic link and the
 	 symbol is defined locally or was forced to be local because
 	 of a version file, we just want to emit a RELATIVE reloc.
 	 The entry in the global offset table will already have been
 	 initialized in the relocate_section function.  */
+      where = sgot->contents + (h->got.offset &~ (bfd_vma) 1);
       if (! elf_hash_table (info)->dynamic_sections_created
 	  || (info->shared
 	      && (info->symbolic || h->dynindx == -1)
 	      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
 	{
 	  rela.r_info = ELF32_R_INFO (0, R_CRIS_RELATIVE);
-	  rela.r_addend = bfd_get_signed_32 (output_bfd,
-					     (sgot->contents
-					      + (h->got.offset & ~1)));
+	  rela.r_addend = bfd_get_signed_32 (output_bfd, where);
 	}
       else
 	{
-	  bfd_put_32 (output_bfd, (bfd_vma) 0,
-		      sgot->contents + (h->got.offset & ~1));
+	  bfd_put_32 (output_bfd, (bfd_vma) 0, where);
 	  rela.r_info = ELF32_R_INFO (h->dynindx, R_CRIS_GLOB_DAT);
 	  rela.r_addend = 0;
 	}
@@ -2317,17 +2317,17 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 
 	  if (local_got_refcounts == NULL)
 	    {
-	      size_t size;
+	      bfd_size_type amt;
 
 	      /* We use index local_got_refcounts[-1] to count all
 		 GOT-relative relocations that do not have explicit
 		 GOT entries.  */
-	      size = (symtab_hdr->sh_info + 1) * sizeof (bfd_signed_vma);
-	      local_got_refcounts = ((bfd_signed_vma *)
-				     bfd_alloc (abfd, size));
+	      amt = symtab_hdr->sh_info + 1;
+	      amt *= sizeof (bfd_signed_vma);
+	      local_got_refcounts = ((bfd_signed_vma *) bfd_alloc (abfd, amt));
 	      if (local_got_refcounts == NULL)
 		return false;
-	      memset (local_got_refcounts, -1, size);
+	      memset (local_got_refcounts, -1, (size_t) amt);
 
 	      local_got_refcounts++;
 	      elf_local_got_refcounts (abfd) = local_got_refcounts;
@@ -2605,7 +2605,7 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 	      if (p == NULL)
 		{
 		  p = ((struct elf_cris_pcrel_relocs_copied *)
-		       bfd_alloc (dynobj, sizeof *p));
+		       bfd_alloc (dynobj, (bfd_size_type) sizeof *p));
 		  if (p == NULL)
 		    return false;
 		  p->next = eh->pcrel_relocs_copied;
@@ -2790,37 +2790,40 @@ elf_cris_size_dynamic_sections (output_bfd, info)
 	 must add the entries now so that we get the correct size for
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
+#define add_dynamic_entry(TAG, VAL) \
+  bfd_elf32_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+
       if (!info->shared)
 	{
-	  if (!bfd_elf32_add_dynamic_entry (info, DT_DEBUG, 0))
+	  if (!add_dynamic_entry (DT_DEBUG, 0))
 	    return false;
 	}
 
       if (plt)
 	{
-	  if (!bfd_elf32_add_dynamic_entry (info, DT_PLTGOT, 0)
-	      || !bfd_elf32_add_dynamic_entry (info, DT_PLTRELSZ, 0)
-	      || !bfd_elf32_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
-	      || !bfd_elf32_add_dynamic_entry (info, DT_JMPREL, 0))
+	  if (!add_dynamic_entry (DT_PLTGOT, 0)
+	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
+	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
+	      || !add_dynamic_entry (DT_JMPREL, 0))
 	    return false;
 	}
 
       if (relocs)
 	{
-	  if (!bfd_elf32_add_dynamic_entry (info, DT_RELA, 0)
-	      || !bfd_elf32_add_dynamic_entry (info, DT_RELASZ, 0)
-	      || !bfd_elf32_add_dynamic_entry (info, DT_RELAENT,
-					       sizeof (Elf32_External_Rela)))
+	  if (!add_dynamic_entry (DT_RELA, 0)
+	      || !add_dynamic_entry (DT_RELASZ, 0)
+	      || !add_dynamic_entry (DT_RELAENT, sizeof (Elf32_External_Rela)))
 	    return false;
 	}
 
       if ((info->flags & DF_TEXTREL) != 0)
 	{
-	  if (!bfd_elf32_add_dynamic_entry (info, DT_TEXTREL, 0))
+	  if (!add_dynamic_entry (DT_TEXTREL, 0))
 	    return false;
 	  info->flags |= DF_TEXTREL;
 	}
     }
+#undef add_dynamic_entry
 
   return true;
 }

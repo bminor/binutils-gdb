@@ -62,7 +62,7 @@ struct elf64_hppa_dyn_hash_entry
   /* The index of the (possibly local) symbol in the input bfd and its
      associated BFD.  Needed so that we can have relocs against local
      symbols in shared libraries.  */
-  unsigned long sym_indx;
+  long sym_indx;
   bfd *owner;
 
   /* Dynamic symbols may need to have two different values.  One for
@@ -317,7 +317,7 @@ elf64_hppa_hash_table_create (abfd)
 {
   struct elf64_hppa_link_hash_table *ret;
 
-  ret = bfd_zalloc (abfd, sizeof (*ret));
+  ret = bfd_zalloc (abfd, (bfd_size_type) sizeof (*ret));
   if (!ret)
     return 0;
   if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
@@ -557,7 +557,7 @@ count_dyn_reloc (abfd, dyn_h, type, sec, sec_symndx, offset, addend)
   struct elf64_hppa_dyn_reloc_entry *rent;
 
   rent = (struct elf64_hppa_dyn_reloc_entry *)
-  bfd_alloc (abfd, sizeof (*rent));
+  bfd_alloc (abfd, (bfd_size_type) sizeof (*rent));
   if (!rent)
     return false;
 
@@ -614,6 +614,7 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
       int highest_shndx;
       Elf_Internal_Sym *local_syms, *isym;
       Elf64_External_Sym *ext_syms, *esym;
+      bfd_size_type amt;
 
       /* We're done with the old cache of section index to section symbol
 	 index information.  Free it.
@@ -624,15 +625,15 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
 	free (hppa_info->section_syms);
 
       /* Allocate memory for the internal and external symbols.  */
-      local_syms
-        = (Elf_Internal_Sym *) bfd_malloc (symtab_hdr->sh_info
-                                           * sizeof (Elf_Internal_Sym));
+      amt = symtab_hdr->sh_info;
+      amt *= sizeof (Elf_Internal_Sym);
+      local_syms = (Elf_Internal_Sym *) bfd_malloc (amt);
       if (local_syms == NULL)
 	return false;
 
-      ext_syms
-        = (Elf64_External_Sym *) bfd_malloc (symtab_hdr->sh_info
-                                             * sizeof (Elf64_External_Sym));
+      amt = symtab_hdr->sh_info;
+      amt *= sizeof (Elf64_External_Sym);
+      ext_syms = (Elf64_External_Sym *) bfd_malloc (amt);
       if (ext_syms == NULL)
 	{
 	  free (local_syms);
@@ -641,10 +642,7 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
 
       /* Read in the local symbols.  */
       if (bfd_seek (abfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-          || bfd_read (ext_syms, 1,
-                       (symtab_hdr->sh_info
-                        * sizeof (Elf64_External_Sym)), abfd)
-          != (symtab_hdr->sh_info * sizeof (Elf64_External_Sym)))
+          || bfd_bread (ext_syms, amt, abfd) != amt)
         {
 	  free (local_syms);
 	  free (ext_syms);
@@ -669,8 +667,9 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
       /* Allocate an array to hold the section index to section symbol index
 	 mapping.  Bump by one since we start counting at zero.  */
       highest_shndx++;
-      hppa_info->section_syms = (int *) bfd_malloc (highest_shndx
-						    * sizeof (int));
+      amt = highest_shndx;
+      amt *= sizeof (int);
+      hppa_info->section_syms = (int *) bfd_malloc (amt);
 
       /* Now walk the local symbols again.  If we find a section symbol,
 	 record the index of the symbol into the section_syms array.  */
@@ -1047,8 +1046,8 @@ allocate_global_data_dlt (dyn_h, data)
 	      bfd *owner;
 	      owner = (h ? h->root.u.def.section->owner : dyn_h->owner);
 
-	      if (!_bfd_elf64_link_record_local_dynamic_symbol
-		    (x->info, owner, dyn_h->sym_indx))
+	      if (! (_bfd_elf64_link_record_local_dynamic_symbol
+		     (x->info, owner, dyn_h->sym_indx)))
 		return false;
 	    }
 	}
@@ -1801,8 +1800,11 @@ elf64_hppa_size_dynamic_sections (output_bfd, info)
       /* Always create a DT_PLTGOT.  It actually has nothing to do with
 	 the PLT, it is how we communicate the __gp value of a load
 	 module to the dynamic linker.  */
-      if (! bfd_elf64_add_dynamic_entry (info, DT_HP_DLD_FLAGS, 0)
-	  || ! bfd_elf64_add_dynamic_entry (info, DT_PLTGOT, 0))
+#define add_dynamic_entry(TAG, VAL) \
+  bfd_elf64_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+
+      if (!add_dynamic_entry (DT_HP_DLD_FLAGS, 0)
+	  || !add_dynamic_entry (DT_PLTGOT, 0))
 	return false;
 
       /* Add some entries to the .dynamic section.  We fill in the
@@ -1812,36 +1814,36 @@ elf64_hppa_size_dynamic_sections (output_bfd, info)
 	 dynamic linker and used by the debugger.  */
       if (! info->shared)
 	{
-	  if (! bfd_elf64_add_dynamic_entry (info, DT_DEBUG, 0)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_HP_DLD_HOOK, 0)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_HP_LOAD_MAP, 0))
+	  if (!add_dynamic_entry (DT_DEBUG, 0)
+	      || !add_dynamic_entry (DT_HP_DLD_HOOK, 0)
+	      || !add_dynamic_entry (DT_HP_LOAD_MAP, 0))
 	    return false;
 	}
 
       if (plt)
 	{
-	  if (! bfd_elf64_add_dynamic_entry (info, DT_PLTRELSZ, 0)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_JMPREL, 0))
+	  if (!add_dynamic_entry (DT_PLTRELSZ, 0)
+	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
+	      || !add_dynamic_entry (DT_JMPREL, 0))
 	    return false;
 	}
 
       if (relocs)
 	{
-	  if (! bfd_elf64_add_dynamic_entry (info, DT_RELA, 0)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_RELASZ, 0)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_RELAENT,
-						sizeof (Elf64_External_Rela)))
+	  if (!add_dynamic_entry (DT_RELA, 0)
+	      || !add_dynamic_entry (DT_RELASZ, 0)
+	      || !add_dynamic_entry (DT_RELAENT, sizeof (Elf64_External_Rela)))
 	    return false;
 	}
 
       if (reltext)
 	{
-	  if (! bfd_elf64_add_dynamic_entry (info, DT_TEXTREL, 0))
+	  if (!add_dynamic_entry (DT_TEXTREL, 0))
 	    return false;
 	  info->flags |= DF_TEXTREL;
 	}
     }
+#undef add_dynamic_entry
 
   return true;
 }
@@ -2026,13 +2028,13 @@ elf64_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
 	  /* Wide mode allows 16 bit offsets.  */
 	  max_offset = 32768;
 	  insn &= ~ 0xfff1;
-	  insn |= re_assemble_16 (value);
+	  insn |= re_assemble_16 ((int) value);
 	}
       else
 	{
 	  max_offset = 8192;
 	  insn &= ~ 0x3ff1;
-	  insn |= re_assemble_14 (value);
+	  insn |= re_assemble_14 ((int) value);
 	}
 
       if ((value & 7) || value + max_offset >= 2*max_offset - 8)
@@ -2043,7 +2045,7 @@ elf64_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
 	  return false;
 	}
 
-      bfd_put_32 (stub->owner, insn,
+      bfd_put_32 (stub->owner, (bfd_vma) insn,
 		  stub->contents + dyn_h->stub_offset);
 
       /* Fix up the second ldd instruction.  */
@@ -2052,14 +2054,14 @@ elf64_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
       if (output_bfd->arch_info->mach >= 25)
 	{
 	  insn &= ~ 0xfff1;
-	  insn |= re_assemble_16 (value);
+	  insn |= re_assemble_16 ((int) value);
 	}
       else
 	{
 	  insn &= ~ 0x3ff1;
-	  insn |= re_assemble_14 (value);
+	  insn |= re_assemble_14 ((int) value);
 	}
-      bfd_put_32 (stub->owner, insn,
+      bfd_put_32 (stub->owner, (bfd_vma) insn,
 		  stub->contents + dyn_h->stub_offset + 8);
     }
 
@@ -2571,7 +2573,8 @@ elf64_hppa_modify_segment_map (abfd)
 	  break;
       if (m == NULL)
 	{
-	  m = (struct elf_segment_map *) bfd_zalloc (abfd, sizeof *m);
+	  m = ((struct elf_segment_map *)
+	       bfd_zalloc (abfd, (bfd_size_type) sizeof *m));
 	  if (m == NULL)
 	    return false;
 

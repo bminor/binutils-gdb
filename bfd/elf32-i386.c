@@ -455,9 +455,9 @@ elf_i386_link_hash_table_create (abfd)
      bfd *abfd;
 {
   struct elf_i386_link_hash_table *ret;
+  bfd_size_type amt = sizeof (struct elf_i386_link_hash_table);
 
-  ret = ((struct elf_i386_link_hash_table *)
-	 bfd_alloc (abfd, sizeof (struct elf_i386_link_hash_table)));
+  ret = (struct elf_i386_link_hash_table *) bfd_alloc (abfd, amt);
   if (ret == (struct elf_i386_link_hash_table *) NULL)
     return NULL;
 
@@ -633,15 +633,16 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 	      /* This is a global offset table entry for a local symbol.  */
 	      if (local_got_refcounts == NULL)
 		{
-		  size_t size;
+		  bfd_size_type size;
 
-		  size = symtab_hdr->sh_info * sizeof (bfd_signed_vma);
+		  size = symtab_hdr->sh_info;
+		  size *= sizeof (bfd_signed_vma);
 		  local_got_refcounts = ((bfd_signed_vma *)
 					 bfd_alloc (abfd, size));
 		  if (local_got_refcounts == NULL)
 		    return false;
 		  elf_local_got_refcounts (abfd) = local_got_refcounts;
-		  memset (local_got_refcounts, -1, size);
+		  memset (local_got_refcounts, -1, (size_t) size);
 		}
 	      if (local_got_refcounts[r_symndx] == -1)
 		local_got_refcounts[r_symndx] = 1;
@@ -801,7 +802,7 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 		  if (p == NULL)
 		    {
 		      p = ((struct elf_i386_dyn_relocs *)
-			   bfd_alloc (dynobj, sizeof *p));
+			   bfd_alloc (dynobj, (bfd_size_type) sizeof *p));
 		      if (p == NULL)
 			return false;
 		      p->next = eh->dyn_relocs;
@@ -1388,36 +1389,39 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 	 must add the entries now so that we get the correct size for
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
+#define add_dynamic_entry(TAG, VAL) \
+  bfd_elf32_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+
       if (! info->shared)
 	{
-	  if (! bfd_elf32_add_dynamic_entry (info, DT_DEBUG, 0))
+	  if (!add_dynamic_entry (DT_DEBUG, 0))
 	    return false;
 	}
 
       if (htab->splt->_raw_size != 0)
 	{
-	  if (! bfd_elf32_add_dynamic_entry (info, DT_PLTGOT, 0)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_PLTRELSZ, 0)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_PLTREL, DT_REL)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_JMPREL, 0))
+	  if (!add_dynamic_entry (DT_PLTGOT, 0)
+	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
+	      || !add_dynamic_entry (DT_PLTREL, DT_REL)
+	      || !add_dynamic_entry (DT_JMPREL, 0))
 	    return false;
 	}
 
       if (relocs)
 	{
-	  if (! bfd_elf32_add_dynamic_entry (info, DT_REL, 0)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_RELSZ, 0)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_RELENT,
-						sizeof (Elf32_External_Rel)))
+	  if (!add_dynamic_entry (DT_REL, 0)
+	      || !add_dynamic_entry (DT_RELSZ, 0)
+	      || !add_dynamic_entry (DT_RELENT, sizeof (Elf32_External_Rel)))
 	    return false;
 	}
 
       if ((info->flags & DF_TEXTREL) != 0)
 	{
-	  if (! bfd_elf32_add_dynamic_entry (info, DT_TEXTREL, 0))
+	  if (!add_dynamic_entry (DT_TEXTREL, 0))
 	    return false;
 	}
     }
+#undef add_dynamic_entry
 
   return true;
 }
@@ -1764,8 +1768,6 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 		outrel.r_offset = rel->r_offset;
 	      else
 		{
-		  bfd_vma off;
-
 		  off = (_bfd_stab_section_offset
 			 (output_bfd, htab->root.stab_info, input_section,
 			  &elf_section_data (input_section)->stab_info,
@@ -1983,7 +1985,7 @@ elf_i386_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       rel.r_offset = (htab->sgot->output_section->vma
 		      + htab->sgot->output_offset
-		      + (h->got.offset &~ 1));
+		      + (h->got.offset & ~(bfd_vma) 1));
 
       /* If this is a static link, or it is a -Bsymbolic link and the
 	 symbol is defined locally or was forced to be local because
@@ -2226,7 +2228,7 @@ elf_i386_grok_prstatus (abfd, note)
      Elf_Internal_Note *note;
 {
   int offset;
-  int raw_size;
+  size_t raw_size;
 
   switch (note->descsz)
     {

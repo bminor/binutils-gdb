@@ -605,14 +605,13 @@ mn10200_elf_relax_section (abfd, sec, link_info, again)
 	  else
 	    {
 	      /* Go get them off disk.  */
-	      extsyms = ((Elf32_External_Sym *)
-			 bfd_malloc (symtab_hdr->sh_size));
+	      bfd_size_type amt = symtab_hdr->sh_size;
+	      extsyms = (Elf32_External_Sym *) bfd_malloc (amt);
 	      if (extsyms == NULL)
 		goto error_return;
 	      free_extsyms = extsyms;
 	      if (bfd_seek (abfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-		  || (bfd_read (extsyms, 1, symtab_hdr->sh_size, abfd)
-		      != symtab_hdr->sh_size))
+		  || bfd_bread (extsyms, amt, abfd) != amt)
 		goto error_return;
 	    }
 	}
@@ -1279,7 +1278,8 @@ mn10200_elf_relax_delete_bytes (abfd, sec, addr, count)
   irelend = irel + sec->reloc_count;
 
   /* Actually delete the bytes.  */
-  memmove (contents + addr, contents + addr + count, toaddr - addr - count);
+  memmove (contents + addr, contents + addr + count,
+	   (size_t) (toaddr - addr - count));
   sec->_cooked_size -= count;
 
   /* Adjust all the relocs.  */
@@ -1411,7 +1411,7 @@ mn10200_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
 
   memcpy (data, elf_section_data (input_section)->this_hdr.contents,
-	  input_section->_raw_size);
+	  (size_t) input_section->_raw_size);
 
   if ((input_section->flags & SEC_RELOC) != 0
       && input_section->reloc_count > 0)
@@ -1419,20 +1419,19 @@ mn10200_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
       Elf_Internal_Sym *isymp;
       asection **secpp;
       Elf32_External_Sym *esym, *esymend;
+      bfd_size_type size;
 
       if (symtab_hdr->contents != NULL)
 	external_syms = (Elf32_External_Sym *) symtab_hdr->contents;
       else
 	{
-	  external_syms = ((Elf32_External_Sym *)
-			   bfd_malloc (symtab_hdr->sh_info
-				       * sizeof (Elf32_External_Sym)));
-	  if (external_syms == NULL && symtab_hdr->sh_info > 0)
+	  size = symtab_hdr->sh_info;
+	  size *= sizeof (Elf32_External_Sym);
+	  external_syms = (Elf32_External_Sym *) bfd_malloc (size);
+	  if (external_syms == NULL && size != 0)
 	    goto error_return;
 	  if (bfd_seek (input_bfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-	      || (bfd_read (external_syms, sizeof (Elf32_External_Sym),
-			    symtab_hdr->sh_info, input_bfd)
-		  != (symtab_hdr->sh_info * sizeof (Elf32_External_Sym))))
+	      || bfd_bread (external_syms, size, input_bfd) != size)
 	    goto error_return;
 	}
 
@@ -1442,15 +1441,16 @@ mn10200_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
       if (internal_relocs == NULL)
 	goto error_return;
 
-      internal_syms = ((Elf_Internal_Sym *)
-		       bfd_malloc (symtab_hdr->sh_info
-				   * sizeof (Elf_Internal_Sym)));
-      if (internal_syms == NULL && symtab_hdr->sh_info > 0)
+      size = symtab_hdr->sh_info;
+      size *= sizeof (Elf_Internal_Sym);
+      internal_syms = (Elf_Internal_Sym *) bfd_malloc (size);
+      if (internal_syms == NULL && size != 0)
 	goto error_return;
 
-      sections = (asection **) bfd_malloc (symtab_hdr->sh_info
-					   * sizeof (asection *));
-      if (sections == NULL && symtab_hdr->sh_info > 0)
+      size = symtab_hdr->sh_info;
+      size *= sizeof (asection *);
+      sections = (asection **) bfd_malloc (size);
+      if (sections == NULL && size != 0)
 	goto error_return;
 
       isymp = internal_syms;

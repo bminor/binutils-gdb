@@ -1,5 +1,5 @@
 /* BFD back-end for binary objects.
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support, <ian@cygnus.com>
 
@@ -111,7 +111,7 @@ binary_object_p (abfd)
           && (bfd_external_binary_architecture != bfd_arch_unknown))
         bfd_set_arch_info (abfd, bfd_lookup_arch (bfd_external_binary_architecture, 0));
     }
-  
+
   return abfd->xvec;
 }
 
@@ -130,7 +130,7 @@ binary_get_section_contents (abfd, section, location, offset, count)
      bfd_size_type count;
 {
   if (bfd_seek (abfd, offset, SEEK_SET) != 0
-      || bfd_read (location, 1, count, abfd) != count)
+      || bfd_bread (location, count, abfd) != count)
     return false;
   return true;
 }
@@ -151,7 +151,7 @@ mangle_name (abfd, suffix)
      bfd *abfd;
      char *suffix;
 {
-  int size;
+  bfd_size_type size;
   char *buf;
   char *p;
 
@@ -183,8 +183,9 @@ binary_get_symtab (abfd, alocation)
   asection *sec = (asection *) abfd->tdata.any;
   asymbol *syms;
   unsigned int i;
+  bfd_size_type amt = BIN_SYMS * sizeof (asymbol);
 
-  syms = (asymbol *) bfd_alloc (abfd, BIN_SYMS * sizeof (asymbol));
+  syms = (asymbol *) bfd_alloc (abfd, amt);
   if (syms == NULL)
     return false;
 
@@ -225,7 +226,7 @@ static asymbol *
 binary_make_empty_symbol (abfd)
      bfd *abfd;
 {
-  return (asymbol *) bfd_alloc (abfd, sizeof (asymbol));
+  return (asymbol *) bfd_alloc (abfd, (bfd_size_type) sizeof (asymbol));
 }
 
 #define binary_print_symbol _bfd_nosymbols_print_symbol

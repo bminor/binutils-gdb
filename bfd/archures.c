@@ -458,6 +458,7 @@ bfd_arch_list ()
   const char **name_ptr;
   const char **name_list;
   const bfd_arch_info_type * const *app;
+  bfd_size_type amt;
 
   /* Determine the number of architectures.  */
   vec_length = 0;
@@ -470,8 +471,8 @@ bfd_arch_list ()
 	}
     }
 
-  name_list = (const char **)
-    bfd_malloc ((vec_length + 1) * sizeof (char **));
+  amt = (vec_length + 1) * sizeof (char **);
+  name_list = (const char **) bfd_malloc (amt);
   if (name_list == NULL)
     return NULL;
 
@@ -751,7 +752,7 @@ bfd_default_scan (info, string)
   printable_name_colon = strchr (info->printable_name, ':');
   if (printable_name_colon == NULL)
     {
-      int strlen_arch_name = strlen (info->arch_name);
+      size_t strlen_arch_name = strlen (info->arch_name);
       if (strncasecmp (string, info->arch_name, strlen_arch_name) == 0)
 	{
 	  if (string[strlen_arch_name] == ':')
@@ -773,7 +774,7 @@ bfd_default_scan (info, string)
      Attempt to match: <arch> <mach>?  */
   if (printable_name_colon != NULL)
     {
-      int colon_index = printable_name_colon - info->printable_name;
+      size_t colon_index = printable_name_colon - info->printable_name;
       if (strncasecmp (string, info->printable_name, colon_index) == 0
 	  && strcasecmp (string + colon_index,
 			 info->printable_name + colon_index + 1) == 0)

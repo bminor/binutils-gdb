@@ -1,6 +1,6 @@
 /* BFD back end for traditional Unix core files (U-area and raw sections)
    Copyright 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999,
-   2000
+   2000, 2001
    Free Software Foundation, Inc.
    Written by John Gilmore of Cygnus Support.
 
@@ -80,14 +80,15 @@ trad_unix_core_file_p (abfd)
   int val;
   struct user u;
   struct trad_core_struct *rawptr;
+  bfd_size_type amt;
 
 #ifdef TRAD_CORE_USER_OFFSET
   /* If defined, this macro is the file position of the user struct.  */
-  if (bfd_seek (abfd, TRAD_CORE_USER_OFFSET, SEEK_SET) != 0)
+  if (bfd_seek (abfd, (file_ptr) TRAD_CORE_USER_OFFSET, SEEK_SET) != 0)
     return 0;
 #endif
 
-  val = bfd_read ((void *)&u, 1, sizeof u, abfd);
+  val = bfd_bread ((void *) &u, (bfd_size_type) sizeof u, abfd);
   if (val != sizeof u)
     {
       /* Too small to be a core file */
@@ -149,8 +150,8 @@ trad_unix_core_file_p (abfd)
 
   /* Allocate both the upage and the struct core_data at once, so
      a single free() will free them both.  */
-  rawptr = (struct trad_core_struct *)
-		bfd_zmalloc (sizeof (struct trad_core_struct));
+  amt = sizeof (struct trad_core_struct);
+  rawptr = (struct trad_core_struct *) bfd_zmalloc (amt);
   if (rawptr == NULL)
     return 0;
 
@@ -161,13 +162,16 @@ trad_unix_core_file_p (abfd)
   /* Create the sections.  This is raunchy, but bfd_close wants to free
      them separately.  */
 
-  core_stacksec(abfd) = (asection *) bfd_zalloc (abfd, sizeof (asection));
+  amt = sizeof (asection);
+  core_stacksec(abfd) = (asection *) bfd_zalloc (abfd, amt);
   if (core_stacksec (abfd) == NULL)
     return NULL;
-  core_datasec (abfd) = (asection *) bfd_zalloc (abfd, sizeof (asection));
+  amt = sizeof (asection);
+  core_datasec (abfd) = (asection *) bfd_zalloc (abfd, amt);
   if (core_datasec (abfd) == NULL)
     return NULL;
-  core_regsec (abfd) = (asection *) bfd_zalloc (abfd, sizeof (asection));
+  amt = sizeof (asection);
+  core_regsec (abfd) = (asection *) bfd_zalloc (abfd, amt);
   if (core_regsec (abfd) == NULL)
     return NULL;
 

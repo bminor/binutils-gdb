@@ -63,7 +63,7 @@ static boolean vms_construct_extended_name_table
   PARAMS ((bfd *abfd, char **tabloc, bfd_size_type *tablen,
 	   const char **name));
 static void vms_truncate_arname
-  PARAMS ((bfd *abfd, CONST char *pathname, char *arhdr));
+  PARAMS ((bfd *abfd, const char *pathname, char *arhdr));
 static boolean vms_write_armap
   PARAMS ((bfd *arch, unsigned int elength, struct orl *map,
 	   unsigned int orl_count, int stridx));
@@ -71,7 +71,7 @@ static PTR vms_read_ar_hdr PARAMS ((bfd *abfd));
 static bfd *vms_get_elt_at_index PARAMS ((bfd *abfd, symindex index));
 static bfd *vms_openr_next_archived_file PARAMS ((bfd *arch, bfd *prev));
 static boolean vms_update_armap_timestamp PARAMS ((bfd *abfd));
-static int vms_generic_stat_arch_elt PARAMS ((bfd *abfd, struct stat *stat));
+static int vms_generic_stat_arch_elt PARAMS ((bfd *, struct stat *));
 static long vms_get_symtab_upper_bound PARAMS ((bfd *abfd));
 static long vms_get_symtab PARAMS ((bfd *abfd, asymbol **symbols));
 static void vms_print_symbol
@@ -232,14 +232,15 @@ vms_initialize (abfd)
      bfd *abfd;
 {
   int i;
+  bfd_size_type amt;
 
   if (abfd->tdata.any != 0)
     return true;
 
-  bfd_set_start_address (abfd, (bfd_vma)-1);
+  bfd_set_start_address (abfd, (bfd_vma) -1);
 
-  abfd->tdata.any = ((struct vms_private_data_struct*)
-		     bfd_malloc (sizeof (struct vms_private_data_struct)));
+  amt = sizeof (struct vms_private_data_struct);
+  abfd->tdata.any = (struct vms_private_data_struct*) bfd_malloc (amt);
   if (abfd->tdata.any == 0)
     return false;
 
@@ -255,8 +256,8 @@ vms_initialize (abfd)
   PRIV (fixup_done) = false;
   PRIV (sections) = NULL;
 
-  PRIV (stack) = ((struct stack_struct *)
-		 bfd_malloc (sizeof (struct stack_struct) * STACKSIZE));
+  amt = sizeof (struct stack_struct) * STACKSIZE;
+  PRIV (stack) = (struct stack_struct *) bfd_malloc (amt);
   if (PRIV (stack) == 0)
     {
      vms_init_no_mem1:
@@ -266,8 +267,8 @@ vms_initialize (abfd)
     }
   PRIV (stackptr) = 0;
 
-  PRIV (vms_symbol_table) = ((struct bfd_hash_table *)
-			     bfd_malloc (sizeof (struct bfd_hash_table)));
+  amt = sizeof (struct bfd_hash_table);
+  PRIV (vms_symbol_table) = (struct bfd_hash_table *) bfd_malloc (amt);
   if (PRIV (vms_symbol_table) == 0)
     {
      vms_init_no_mem2:
@@ -279,9 +280,8 @@ vms_initialize (abfd)
   if (!bfd_hash_table_init (PRIV (vms_symbol_table), _bfd_vms_hash_newfunc))
     return false;
 
-  PRIV (location_stack) = ((struct location_struct *)
-			  bfd_malloc (sizeof (struct location_struct)
-				      * LOCATION_SAVE_SIZE));
+  amt = sizeof (struct location_struct) * LOCATION_SAVE_SIZE;
+  PRIV (location_stack) = (struct location_struct *) bfd_malloc (amt);
   if (PRIV (location_stack) == 0)
     {
      vms_init_no_mem3:
@@ -401,7 +401,7 @@ vms_object_p (abfd)
       return 0;
     }
 
-  if (bfd_seek (abfd, 0L, SEEK_SET))
+  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET))
     {
       bfd_set_error (bfd_error_file_truncated);
       return 0;
@@ -740,8 +740,9 @@ vms_new_section_hook (abfd, section)
 
   if (abfd->section_count > PRIV (section_count))
     {
-      PRIV (sections) = ((asection **)
-			    bfd_realloc (PRIV (sections), abfd->section_count * sizeof (asection *)));
+      bfd_size_type amt = abfd->section_count;
+      amt *= sizeof (asection *);
+      PRIV (sections) = (asection **) bfd_realloc (PRIV (sections), amt);
       if (PRIV (sections) == 0)
 	return false;
       PRIV (section_count) = abfd->section_count;
@@ -978,7 +979,7 @@ vms_construct_extended_name_table (abfd, tabloc, tablen, name)
 static void
 vms_truncate_arname (abfd, pathname, arhdr)
      bfd *abfd ATTRIBUTE_UNUSED;
-     CONST char *pathname ATTRIBUTE_UNUSED;
+     const char *pathname ATTRIBUTE_UNUSED;
      char *arhdr ATTRIBUTE_UNUSED;
 {
 #if VMS_DEBUG
@@ -1051,14 +1052,14 @@ vms_get_elt_at_index (abfd, index)
    -> bfd_generic_stat_arch_elt  */
 
 static int
-vms_generic_stat_arch_elt (abfd, stat)
+vms_generic_stat_arch_elt (abfd, st)
      bfd *abfd;
-     struct stat *stat;
+     struct stat *st;
 {
 #if VMS_DEBUG
-  vms_debug (1, "vms_generic_stat_arch_elt(%p, %p)\n", abfd, stat);
+  vms_debug (1, "vms_generic_stat_arch_elt(%p, %p)\n", abfd, st);
 #endif
-  return bfd_generic_stat_arch_elt(abfd, stat);
+  return bfd_generic_stat_arch_elt (abfd, st);
 }
 
 /* This is a new function in bfd 2.5  */
@@ -1147,7 +1148,9 @@ asymbol *
 _bfd_vms_make_empty_symbol (abfd)
      bfd *abfd;
 {
-  asymbol *symbol = (asymbol *)bfd_zalloc(abfd, sizeof (asymbol));
+  asymbol *symbol;
+
+  symbol = (asymbol *) bfd_zalloc(abfd, (bfd_size_type) sizeof (asymbol));
 
 #if VMS_DEBUG
   vms_debug (1, "_bfd_vms_make_empty_symbol(%p)\n", abfd);
@@ -1188,7 +1191,7 @@ vms_print_symbol (abfd, file, symbol, how)
 
       case bfd_print_symbol_all:
 	{
-	  CONST char *section_name = symbol->section->name;
+	  const char *section_name = symbol->section->name;
 
 	  bfd_print_symbol_vandf (abfd, (PTR)file, symbol);
 
@@ -1293,8 +1296,8 @@ vms_find_nearest_line (abfd, section, symbols, offset, file, func, line)
      asection *section ATTRIBUTE_UNUSED;
      asymbol **symbols ATTRIBUTE_UNUSED;
      bfd_vma offset ATTRIBUTE_UNUSED;
-     CONST char **file ATTRIBUTE_UNUSED;
-     CONST char **func ATTRIBUTE_UNUSED;
+     const char **file ATTRIBUTE_UNUSED;
+     const char **func ATTRIBUTE_UNUSED;
      unsigned int *line ATTRIBUTE_UNUSED;
 {
 #if VMS_DEBUG

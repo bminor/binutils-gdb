@@ -1154,12 +1154,12 @@ mips_elf64_swap_reloc_in (abfd, src, dst)
      const Elf64_Mips_External_Rel *src;
      Elf64_Mips_Internal_Rel *dst;
 {
-  dst->r_offset = bfd_h_get_64 (abfd, (bfd_byte *) src->r_offset);
-  dst->r_sym = bfd_h_get_32 (abfd, (bfd_byte *) src->r_sym);
-  dst->r_ssym = bfd_h_get_8 (abfd, (bfd_byte *) src->r_ssym);
-  dst->r_type3 = bfd_h_get_8 (abfd, (bfd_byte *) src->r_type3);
-  dst->r_type2 = bfd_h_get_8 (abfd, (bfd_byte *) src->r_type2);
-  dst->r_type = bfd_h_get_8 (abfd, (bfd_byte *) src->r_type);
+  dst->r_offset = H_GET_64 (abfd, src->r_offset);
+  dst->r_sym = H_GET_32 (abfd, src->r_sym);
+  dst->r_ssym = H_GET_8 (abfd, src->r_ssym);
+  dst->r_type3 = H_GET_8 (abfd, src->r_type3);
+  dst->r_type2 = H_GET_8 (abfd, src->r_type2);
+  dst->r_type = H_GET_8 (abfd, src->r_type);
 }
 
 /* Swap in a MIPS 64-bit Rela reloc.  */
@@ -1170,13 +1170,13 @@ mips_elf64_swap_reloca_in (abfd, src, dst)
      const Elf64_Mips_External_Rela *src;
      Elf64_Mips_Internal_Rela *dst;
 {
-  dst->r_offset = bfd_h_get_64 (abfd, (bfd_byte *) src->r_offset);
-  dst->r_sym = bfd_h_get_32 (abfd, (bfd_byte *) src->r_sym);
-  dst->r_ssym = bfd_h_get_8 (abfd, (bfd_byte *) src->r_ssym);
-  dst->r_type3 = bfd_h_get_8 (abfd, (bfd_byte *) src->r_type3);
-  dst->r_type2 = bfd_h_get_8 (abfd, (bfd_byte *) src->r_type2);
-  dst->r_type = bfd_h_get_8 (abfd, (bfd_byte *) src->r_type);
-  dst->r_addend = bfd_h_get_signed_64 (abfd, (bfd_byte *) src->r_addend);
+  dst->r_offset = H_GET_64 (abfd, src->r_offset);
+  dst->r_sym = H_GET_32 (abfd, src->r_sym);
+  dst->r_ssym = H_GET_8 (abfd, src->r_ssym);
+  dst->r_type3 = H_GET_8 (abfd, src->r_type3);
+  dst->r_type2 = H_GET_8 (abfd, src->r_type2);
+  dst->r_type = H_GET_8 (abfd, src->r_type);
+  dst->r_addend = H_GET_S64 (abfd, src->r_addend);
 }
 
 /* Swap out a MIPS 64-bit Rel reloc.  */
@@ -1187,12 +1187,12 @@ mips_elf64_swap_reloc_out (abfd, src, dst)
      const Elf64_Mips_Internal_Rel *src;
      Elf64_Mips_External_Rel *dst;
 {
-  bfd_h_put_64 (abfd, src->r_offset, (bfd_byte *) dst->r_offset);
-  bfd_h_put_32 (abfd, src->r_sym, (bfd_byte *) dst->r_sym);
-  bfd_h_put_8 (abfd, src->r_ssym, (bfd_byte *) dst->r_ssym);
-  bfd_h_put_8 (abfd, src->r_type3, (bfd_byte *) dst->r_type3);
-  bfd_h_put_8 (abfd, src->r_type2, (bfd_byte *) dst->r_type2);
-  bfd_h_put_8 (abfd, src->r_type, (bfd_byte *) dst->r_type);
+  H_PUT_64 (abfd, src->r_offset, dst->r_offset);
+  H_PUT_32 (abfd, src->r_sym, dst->r_sym);
+  H_PUT_8 (abfd, src->r_ssym, dst->r_ssym);
+  H_PUT_8 (abfd, src->r_type3, dst->r_type3);
+  H_PUT_8 (abfd, src->r_type2, dst->r_type2);
+  H_PUT_8 (abfd, src->r_type, dst->r_type);
 }
 
 /* Swap out a MIPS 64-bit Rela reloc.  */
@@ -1203,13 +1203,13 @@ mips_elf64_swap_reloca_out (abfd, src, dst)
      const Elf64_Mips_Internal_Rela *src;
      Elf64_Mips_External_Rela *dst;
 {
-  bfd_h_put_64 (abfd, src->r_offset, (bfd_byte *) dst->r_offset);
-  bfd_h_put_32 (abfd, src->r_sym, (bfd_byte *) dst->r_sym);
-  bfd_h_put_8 (abfd, src->r_ssym, (bfd_byte *) dst->r_ssym);
-  bfd_h_put_8 (abfd, src->r_type3, (bfd_byte *) dst->r_type3);
-  bfd_h_put_8 (abfd, src->r_type2, (bfd_byte *) dst->r_type2);
-  bfd_h_put_8 (abfd, src->r_type, (bfd_byte *) dst->r_type);
-  bfd_h_put_64 (abfd, src->r_addend, (bfd_byte *) dst->r_addend);
+  H_PUT_64 (abfd, src->r_offset, dst->r_offset);
+  H_PUT_32 (abfd, src->r_sym, dst->r_sym);
+  H_PUT_8 (abfd, src->r_ssym, dst->r_ssym);
+  H_PUT_8 (abfd, src->r_type3, dst->r_type3);
+  H_PUT_8 (abfd, src->r_type2, dst->r_type2);
+  H_PUT_8 (abfd, src->r_type, dst->r_type);
+  H_PUT_64 (abfd, src->r_addend, dst->r_addend);
 }
 
 /* Swap in a MIPS 64-bit Rel reloc.  */
@@ -1310,7 +1310,7 @@ struct elf_reloc_map
   enum elf_mips_reloc_type elf_reloc_val;
 };
 
-static CONST struct elf_reloc_map mips_reloc_map[] =
+static const struct elf_reloc_map mips_reloc_map[] =
 {
   { BFD_RELOC_NONE, R_MIPS_NONE, },
   { BFD_RELOC_16, R_MIPS_16 },
@@ -1391,10 +1391,10 @@ mips_elf64_slurp_one_reloc_table (abfd, asect, symbols, rel_hdr)
 
   allocated = (PTR) bfd_malloc (rel_hdr->sh_size);
   if (allocated == NULL)
-    goto error_return;
+    return false;
 
   if (bfd_seek (abfd, rel_hdr->sh_offset, SEEK_SET) != 0
-      || (bfd_read (allocated, 1, rel_hdr->sh_size, abfd) != rel_hdr->sh_size))
+      || (bfd_bread (allocated, rel_hdr->sh_size, abfd) != rel_hdr->sh_size))
     goto error_return;
 
   native_relocs = (bfd_byte *) allocated;
@@ -1583,6 +1583,7 @@ mips_elf64_slurp_reloc_table (abfd, asect, symbols, dynamic)
      asymbol **symbols;
      boolean dynamic;
 {
+  bfd_size_type amt;
   struct bfd_elf_section_data * const d = elf_section_data (asect);
 
   if (dynamic)
@@ -1597,9 +1598,9 @@ mips_elf64_slurp_reloc_table (abfd, asect, symbols, dynamic)
     return true;
 
   /* Allocate space for 3 arelent structures for each Rel structure.  */
-  asect->relocation = ((arelent *)
-		       bfd_alloc (abfd,
-				  asect->reloc_count * 3 * sizeof (arelent)));
+  amt = asect->reloc_count;
+  amt *= 3 * sizeof (arelent);
+  asect->relocation = (arelent *) bfd_alloc (abfd, amt);
   if (asect->relocation == NULL)
     return false;
 
@@ -1785,18 +1786,19 @@ mips_elf64_slurp_armap (abfd)
   char *stringbase;
   bfd_byte *raw_armap = NULL;
   carsym *carsyms;
+  bfd_size_type amt;
 
   ardata->symdefs = NULL;
 
   /* Get the name of the first element.  */
   arhdrpos = bfd_tell (abfd);
-  i = bfd_read ((PTR) nextname, 1, 16, abfd);
+  i = bfd_bread ((PTR) nextname, (bfd_size_type) 16, abfd);
   if (i == 0)
     return true;
   if (i != 16)
     return false;
 
-  if (bfd_seek (abfd, (file_ptr) - 16, SEEK_CUR) != 0)
+  if (bfd_seek (abfd, (file_ptr) -16, SEEK_CUR) != 0)
     return false;
 
   /* Archives with traditional armaps are still permitted.  */
@@ -1815,7 +1817,7 @@ mips_elf64_slurp_armap (abfd)
   parsed_size = mapdata->parsed_size;
   bfd_release (abfd, (PTR) mapdata);
 
-  if (bfd_read (int_buf, 1, 8, abfd) != 8)
+  if (bfd_bread (int_buf, (bfd_size_type) 8, abfd) != 8)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_malformed_archive);
@@ -1828,7 +1830,8 @@ mips_elf64_slurp_armap (abfd)
   carsym_size = nsymz * sizeof (carsym);
   ptrsize = 8 * nsymz;
 
-  ardata->symdefs = (carsym *) bfd_zalloc (abfd, carsym_size + stringsize + 1);
+  amt = carsym_size + stringsize + 1;
+  ardata->symdefs = (carsym *) bfd_zalloc (abfd, amt);
   if (ardata->symdefs == NULL)
     return false;
   carsyms = ardata->symdefs;
@@ -1838,8 +1841,8 @@ mips_elf64_slurp_armap (abfd)
   if (raw_armap == NULL)
     goto error_return;
 
-  if (bfd_read (raw_armap, 1, ptrsize, abfd) != ptrsize
-      || bfd_read (stringbase, 1, stringsize, abfd) != stringsize)
+  if (bfd_bread (raw_armap, ptrsize, abfd) != ptrsize
+      || bfd_bread (stringbase, stringsize, abfd) != stringsize)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_malformed_archive);
@@ -1919,12 +1922,12 @@ mips_elf64_write_armap (arch, elength, map, symbol_count, stridx)
 
   /* Write the ar header for this item and the number of symbols */
 
-  if (bfd_write ((PTR) &hdr, 1, sizeof (struct ar_hdr), arch)
+  if (bfd_bwrite ((PTR) &hdr, (bfd_size_type) sizeof (struct ar_hdr), arch)
       != sizeof (struct ar_hdr))
     return false;
 
-  bfd_putb64 (symbol_count, buf);
-  if (bfd_write (buf, 1, 8, arch) != 8)
+  bfd_putb64 ((bfd_vma) symbol_count, buf);
+  if (bfd_bwrite (buf, (bfd_size_type) 8, arch) != 8)
     return false;
 
   /* Two passes, first write the file offsets for each symbol -
@@ -1940,10 +1943,10 @@ mips_elf64_write_armap (arch, elength, map, symbol_count, stridx)
       /* For each symbol which is used defined in this object, write out
 	 the object file's address in the archive */
 
-      while (((bfd *) (map[count]).pos) == current)
+      while (map[count].u.abfd == current)
 	{
-	  bfd_putb64 (archive_member_file_ptr, buf);
-	  if (bfd_write (buf, 1, 8, arch) != 8)
+	  bfd_putb64 ((bfd_vma) archive_member_file_ptr, buf);
+	  if (bfd_bwrite (buf, (bfd_size_type) 8, arch) != 8)
 	    return false;
 	  count++;
 	}
@@ -1960,7 +1963,7 @@ mips_elf64_write_armap (arch, elength, map, symbol_count, stridx)
     {
       size_t len = strlen (*map[count].name) + 1;
 
-      if (bfd_write (*map[count].name, 1, len, arch) != len)
+      if (bfd_bwrite (*map[count].name, (bfd_size_type) len, arch) != len)
 	return false;
     }
 
@@ -1968,7 +1971,7 @@ mips_elf64_write_armap (arch, elength, map, symbol_count, stridx)
      However, the Irix 6.2 tools do not appear to do this.  */
   while (padding != 0)
     {
-      if (bfd_write ("", 1, 1, arch) != 1)
+      if (bfd_bwrite ("", (bfd_size_type) 1, arch) != 1)
 	return false;
       --padding;
     }

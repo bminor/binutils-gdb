@@ -92,8 +92,8 @@ static bfd_reloc_status_type elf_hppa_final_link_relocate
            asection *, struct elf_link_hash_entry *,
 	   struct elf64_hppa_dyn_hash_entry *));
 
-static unsigned int elf_hppa_relocate_insn
-  PARAMS ((unsigned int, unsigned int, unsigned int));
+static int elf_hppa_relocate_insn
+  PARAMS ((int, int, unsigned int));
 #endif
 
 /* ELF/PA relocation howto entries.  */
@@ -619,16 +619,16 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 {
   elf_hppa_reloc_type *finaltype;
   elf_hppa_reloc_type **final_types;
+  bfd_size_type amt = sizeof (elf_hppa_reloc_type *) * 2;
 
   /* Allocate slots for the BFD relocation.  */
-  final_types = ((elf_hppa_reloc_type **)
-		 bfd_alloc (abfd, sizeof (elf_hppa_reloc_type *) * 2));
+  final_types = (elf_hppa_reloc_type **) bfd_alloc (abfd, amt);
   if (final_types == NULL)
     return NULL;
 
   /* Allocate space for the relocation itself.  */
-  finaltype = ((elf_hppa_reloc_type *)
-	       bfd_alloc (abfd, sizeof (elf_hppa_reloc_type)));
+  amt = sizeof (elf_hppa_reloc_type);
+  finaltype = (elf_hppa_reloc_type *) bfd_alloc (abfd, amt);
   if (finaltype == NULL)
     return NULL;
 
@@ -1484,9 +1484,9 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
      struct elf_link_hash_entry *h ATTRIBUTE_UNUSED;
      struct elf64_hppa_dyn_hash_entry *dyn_h;
 {
-  unsigned int insn;
+  int insn;
   bfd_vma offset = rel->r_offset;
-  bfd_vma addend = rel->r_addend;
+  bfd_signed_vma addend = rel->r_addend;
   reloc_howto_type *howto = elf_hppa_howto_table + ELF_R_TYPE (rel->r_info);
   unsigned int r_type = howto->type;
   bfd_byte *hit_data = contents + offset;
@@ -1538,7 +1538,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	  value = hppa_field_adjust (value, -8 + addend, e_rsel);
 
 	/* Apply the relocation to the given instruction.  */
-	insn = elf_hppa_relocate_insn (insn, value, r_type);
+	insn = elf_hppa_relocate_insn (insn, (int) value, r_type);
 	break;
       }
 
@@ -1570,7 +1570,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	value >>= 2;
 
 	/* Apply the relocation to the given instruction.  */
-	insn = elf_hppa_relocate_insn (insn, value, r_type);
+	insn = elf_hppa_relocate_insn (insn, (int) value, r_type);
 	break;
       }
 
@@ -1672,7 +1672,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	else
 	  value = hppa_field_adjust (value, addend, e_rrsel);
 
-	insn = elf_hppa_relocate_insn (insn, value, r_type);
+	insn = elf_hppa_relocate_insn (insn, (int) value, r_type);
 	break;
       }
 
@@ -1709,7 +1709,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	else
 	  value = hppa_field_adjust (value, addend, e_rrsel);
 
-	insn = elf_hppa_relocate_insn (insn, value, r_type);
+	insn = elf_hppa_relocate_insn (insn, (int) value, r_type);
 	break;
       }
 
@@ -1746,7 +1746,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	    value >>= 2;
 	  }
 
-	insn = elf_hppa_relocate_insn (insn, value, r_type);
+	insn = elf_hppa_relocate_insn (insn, (int) value, r_type);
 	break;
       }
 
@@ -1781,7 +1781,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	else
 	  value = hppa_field_adjust (value, addend, e_rrsel);
 
-	insn = elf_hppa_relocate_insn (insn, value, r_type);
+	insn = elf_hppa_relocate_insn (insn, (int) value, r_type);
 	break;
       }
 
@@ -1991,7 +1991,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
     }
 
   /* Update the instruction word.  */
-  bfd_put_32 (input_bfd, insn, hit_data);
+  bfd_put_32 (input_bfd, (bfd_vma) insn, hit_data);
   return bfd_reloc_ok;
 }
 
@@ -2001,10 +2001,10 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
    Instead this routine is meant to handle the bit manipulations needed
    to insert the relocation into the given instruction.  */
 
-static unsigned int
+static int
 elf_hppa_relocate_insn (insn, sym_value, r_type)
-     unsigned int insn;
-     unsigned int sym_value;
+     int insn;
+     int sym_value;
      unsigned int r_type;
 {
   switch (r_type)
@@ -2013,11 +2013,11 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
        the "B" instruction.  */
     case R_PARISC_PCREL22F:
     case R_PARISC_PCREL22C:
-      return (insn & ~ 0x3ff1ffd) | re_assemble_22 (sym_value);
+      return (insn & ~0x3ff1ffd) | re_assemble_22 (sym_value);
 
       /* This is any 12 bit branch.  */
     case R_PARISC_PCREL12F:
-      return (insn & ~ 0x1ffd) | re_assemble_12 (sym_value);
+      return (insn & ~0x1ffd) | re_assemble_12 (sym_value);
 
     /* This is any 17 bit branch.  In PA2.0 syntax it also corresponds
        to the "B" instruction as well as BE.  */
@@ -2026,7 +2026,7 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_DIR17R:
     case R_PARISC_PCREL17C:
     case R_PARISC_PCREL17R:
-      return (insn & ~ 0x1f1ffd) | re_assemble_17 (sym_value);
+      return (insn & ~0x1f1ffd) | re_assemble_17 (sym_value);
 
     /* ADDIL or LDIL instructions.  */
     case R_PARISC_DLTREL21L:
@@ -2037,7 +2037,7 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_DPREL21L:
     case R_PARISC_PLTOFF21L:
     case R_PARISC_DIR21L:
-      return (insn & ~ 0x1fffff) | re_assemble_21 (sym_value);
+      return (insn & ~0x1fffff) | re_assemble_21 (sym_value);
 
     /* LDO and integer loads/stores with 14 bit displacements.  */
     case R_PARISC_DLTREL14R:
@@ -2062,7 +2062,7 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_DIR14F:
     case R_PARISC_DIR16F:
     case R_PARISC_LTOFF16F:
-      return (insn & ~ 0x3fff) | low_sign_unext (sym_value, 14);
+      return (insn & ~0x3fff) | low_sign_unext (sym_value, 14);
 
     /* Doubleword loads and stores with a 14 bit displacement.  */
     case R_PARISC_DLTREL14DR:
@@ -2080,8 +2080,8 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_DIR14DR:
     case R_PARISC_DIR16DF:
     case R_PARISC_LTOFF16DF:
-      return (insn & ~ 0x3ff1) | (((sym_value & 0x2000) >> 13)
-				  | ((sym_value & 0x1ff8) << 1));
+      return (insn & ~0x3ff1) | (((sym_value & 0x2000) >> 13)
+				 | ((sym_value & 0x1ff8) << 1));
 
     /* Floating point single word load/store instructions.  */
     case R_PARISC_DLTREL14WR:
@@ -2099,8 +2099,8 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_DIR16WF:
     case R_PARISC_DIR14WR:
     case R_PARISC_LTOFF16WF:
-      return (insn & ~ 0x3ff9) | (((sym_value & 0x2000) >> 13)
-				  | ((sym_value & 0x1ffc) << 1));
+      return (insn & ~0x3ff9) | (((sym_value & 0x2000) >> 13)
+				 | ((sym_value & 0x1ffc) << 1));
 
     default:
       return insn;

@@ -340,9 +340,9 @@ elf_m68k_link_hash_table_create (abfd)
      bfd *abfd;
 {
   struct elf_m68k_link_hash_table *ret;
+  bfd_size_type amt = sizeof (struct elf_m68k_link_hash_table);
 
-  ret = ((struct elf_m68k_link_hash_table *)
-	 bfd_alloc (abfd, sizeof (struct elf_m68k_link_hash_table)));
+  ret = (struct elf_m68k_link_hash_table *) bfd_alloc (abfd, amt);
   if (ret == (struct elf_m68k_link_hash_table *) NULL)
     return NULL;
 
@@ -558,15 +558,16 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 	      /* This is a global offset table entry for a local symbol.  */
 	      if (local_got_refcounts == NULL)
 		{
-		  size_t size;
+		  bfd_size_type size;
 
-		  size = symtab_hdr->sh_info * sizeof (bfd_signed_vma);
+		  size = symtab_hdr->sh_info;
+		  size *= sizeof (bfd_signed_vma);
 		  local_got_refcounts = ((bfd_signed_vma *)
 					 bfd_alloc (abfd, size));
 		  if (local_got_refcounts == NULL)
 		    return false;
 		  elf_local_got_refcounts (abfd) = local_got_refcounts;
-		  memset (local_got_refcounts, -1, size);
+		  memset (local_got_refcounts, -1, (size_t) size);
 		}
 	      if (local_got_refcounts[r_symndx] == -1)
 		{
@@ -750,7 +751,7 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 		  if (p == NULL)
 		    {
 		      p = ((struct elf_m68k_pcrel_relocs_copied *)
-			   bfd_alloc (dynobj, sizeof *p));
+			   bfd_alloc (dynobj, (bfd_size_type) sizeof *p));
 		      if (p == NULL)
 			return false;
 		      p->next = eh->pcrel_relocs_copied;
@@ -1264,36 +1265,39 @@ elf_m68k_size_dynamic_sections (output_bfd, info)
 	 must add the entries now so that we get the correct size for
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
+#define add_dynamic_entry(TAG, VAL) \
+  bfd_elf32_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+
       if (!info->shared)
 	{
-	  if (!bfd_elf32_add_dynamic_entry (info, DT_DEBUG, 0))
+	  if (!add_dynamic_entry (DT_DEBUG, 0))
 	    return false;
 	}
 
       if (plt)
 	{
-	  if (!bfd_elf32_add_dynamic_entry (info, DT_PLTGOT, 0)
-	      || !bfd_elf32_add_dynamic_entry (info, DT_PLTRELSZ, 0)
-	      || !bfd_elf32_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
-	      || !bfd_elf32_add_dynamic_entry (info, DT_JMPREL, 0))
+	  if (!add_dynamic_entry (DT_PLTGOT, 0)
+	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
+	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
+	      || !add_dynamic_entry (DT_JMPREL, 0))
 	    return false;
 	}
 
       if (relocs)
 	{
-	  if (!bfd_elf32_add_dynamic_entry (info, DT_RELA, 0)
-	      || !bfd_elf32_add_dynamic_entry (info, DT_RELASZ, 0)
-	      || !bfd_elf32_add_dynamic_entry (info, DT_RELAENT,
-					       sizeof (Elf32_External_Rela)))
+	  if (!add_dynamic_entry (DT_RELA, 0)
+	      || !add_dynamic_entry (DT_RELASZ, 0)
+	      || !add_dynamic_entry (DT_RELAENT, sizeof (Elf32_External_Rela)))
 	    return false;
 	}
 
       if ((info->flags & DF_TEXTREL) != 0)
 	{
-	  if (!bfd_elf32_add_dynamic_entry (info, DT_TEXTREL, 0))
+	  if (!add_dynamic_entry (DT_TEXTREL, 0))
 	    return false;
 	}
     }
+#undef add_dynamic_entry
 
   return true;
 }
@@ -1961,7 +1965,7 @@ elf_m68k_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       rela.r_offset = (sgot->output_section->vma
 		       + sgot->output_offset
-		       + (h->got.offset &~ 1));
+		       + (h->got.offset &~ (bfd_vma) 1));
 
       /* If this is a -Bsymbolic link, and the symbol is defined
 	 locally, we just want to emit a RELATIVE reloc.  Likewise if
@@ -1975,12 +1979,12 @@ elf_m68k_finish_dynamic_symbol (output_bfd, info, h, sym)
 	  rela.r_info = ELF32_R_INFO (0, R_68K_RELATIVE);
 	  rela.r_addend = bfd_get_signed_32 (output_bfd,
 					     (sgot->contents
-					      + (h->got.offset & ~1)));
+					      + (h->got.offset &~ (bfd_vma) 1)));
 	}
       else
 	{
 	  bfd_put_32 (output_bfd, (bfd_vma) 0,
-		      sgot->contents + (h->got.offset & ~1));
+		      sgot->contents + (h->got.offset &~ (bfd_vma) 1));
 	  rela.r_info = ELF32_R_INFO (h->dynindx, R_68K_GLOB_DAT);
 	  rela.r_addend = 0;
 	}
@@ -2186,6 +2190,7 @@ bfd_m68k_elf32_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
   Elf_Internal_Rela *free_relocs = NULL;
   Elf_Internal_Rela *irel, *irelend;
   bfd_byte *p;
+  bfd_size_type amt;
 
   BFD_ASSERT (! info->relocateable);
 
@@ -2203,17 +2208,15 @@ bfd_m68k_elf32_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
     {
       /* Go get them off disk.  */
       if (info->keep_memory)
-	extsyms = ((Elf32_External_Sym *)
-		   bfd_alloc (abfd, symtab_hdr->sh_size));
+	extsyms = (Elf32_External_Sym *) bfd_alloc (abfd, symtab_hdr->sh_size);
       else
-	extsyms = ((Elf32_External_Sym *)
-		   bfd_malloc (symtab_hdr->sh_size));
+	extsyms = (Elf32_External_Sym *) bfd_malloc (symtab_hdr->sh_size);
       if (extsyms == NULL)
 	goto error_return;
       if (! info->keep_memory)
 	free_extsyms = extsyms;
       if (bfd_seek (abfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-	  || (bfd_read (extsyms, 1, symtab_hdr->sh_size, abfd)
+	  || (bfd_bread (extsyms, symtab_hdr->sh_size, abfd)
 	      != symtab_hdr->sh_size))
 	goto error_return;
       if (info->keep_memory)
@@ -2229,7 +2232,8 @@ bfd_m68k_elf32_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
   if (! info->keep_memory)
     free_relocs = internal_relocs;
 
-  relsec->contents = (bfd_byte *) bfd_alloc (abfd, datasec->reloc_count * 12);
+  amt = (bfd_size_type) datasec->reloc_count * 12;
+  relsec->contents = (bfd_byte *) bfd_alloc (abfd, amt);
   if (relsec->contents == NULL)
     goto error_return;
 

@@ -463,6 +463,7 @@ read_abbrevs (abfd, offset, stash)
   struct abbrev_info *cur_abbrev;
   unsigned int abbrev_number, bytes_read, abbrev_name;
   unsigned int abbrev_form, hash_number;
+  bfd_size_type amt;
 
   if (! stash->dwarf_abbrev_buffer)
     {
@@ -477,13 +478,12 @@ read_abbrevs (abfd, offset, stash)
 	}
 
       stash->dwarf_abbrev_size = msec->_raw_size;
-      stash->dwarf_abbrev_buffer = (char*) bfd_alloc (abfd, stash->dwarf_abbrev_size);
+      stash->dwarf_abbrev_buffer = (char*) bfd_alloc (abfd, msec->_raw_size);
       if (! stash->dwarf_abbrev_buffer)
 	  return 0;
 
-      if (! bfd_get_section_contents (abfd, msec,
-				      stash->dwarf_abbrev_buffer, 0,
-				      stash->dwarf_abbrev_size))
+      if (! bfd_get_section_contents (abfd, msec, stash->dwarf_abbrev_buffer,
+				      (bfd_vma) 0, msec->_raw_size))
 	return 0;
     }
 
@@ -495,7 +495,8 @@ read_abbrevs (abfd, offset, stash)
       return 0;
     }
 
-  abbrevs = (struct abbrev_info**) bfd_zalloc (abfd, sizeof (struct abbrev_info*) * ABBREV_HASH_SIZE);
+  amt = sizeof (struct abbrev_info*) * ABBREV_HASH_SIZE;
+  abbrevs = (struct abbrev_info**) bfd_zalloc (abfd, amt);
 
   abbrev_ptr = stash->dwarf_abbrev_buffer + offset;
   abbrev_number = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
@@ -504,7 +505,8 @@ read_abbrevs (abfd, offset, stash)
   /* Loop until we reach an abbrev number of 0.  */
   while (abbrev_number)
     {
-      cur_abbrev = (struct abbrev_info*)bfd_zalloc (abfd, sizeof (struct abbrev_info));
+      amt = sizeof (struct abbrev_info);
+      cur_abbrev = (struct abbrev_info *) bfd_zalloc (abfd, amt);
 
       /* Read in abbrev header.  */
       cur_abbrev->number = abbrev_number;
@@ -523,10 +525,10 @@ read_abbrevs (abfd, offset, stash)
 	{
 	  if ((cur_abbrev->num_attrs % ATTR_ALLOC_CHUNK) == 0)
 	    {
-	      cur_abbrev->attrs = (struct attr_abbrev *)
-		bfd_realloc (cur_abbrev->attrs,
-			     (cur_abbrev->num_attrs + ATTR_ALLOC_CHUNK)
-			     * sizeof (struct attr_abbrev));
+	      amt = cur_abbrev->num_attrs + ATTR_ALLOC_CHUNK;
+	      amt *= sizeof (struct attr_abbrev);
+	      cur_abbrev->attrs = ((struct attr_abbrev *)
+				   bfd_realloc (cur_abbrev->attrs, amt));
 	      if (! cur_abbrev->attrs)
 		return 0;
 	    }
@@ -574,6 +576,7 @@ read_attribute (attr, abbrev, unit, info_ptr)
   bfd *abfd = unit->abfd;
   unsigned int bytes_read;
   struct dwarf_block *blk;
+  bfd_size_type amt;
 
   attr->name = abbrev->name;
   attr->form = abbrev->form;
@@ -586,7 +589,8 @@ read_attribute (attr, abbrev, unit, info_ptr)
       info_ptr += unit->addr_size;
       break;
     case DW_FORM_block2:
-      blk = (struct dwarf_block *) bfd_alloc (abfd, sizeof (struct dwarf_block));
+      amt = sizeof (struct dwarf_block);
+      blk = (struct dwarf_block *) bfd_alloc (abfd, amt);
       blk->size = read_2_bytes (abfd, info_ptr);
       info_ptr += 2;
       blk->data = read_n_bytes (abfd, info_ptr, blk->size);
@@ -594,7 +598,8 @@ read_attribute (attr, abbrev, unit, info_ptr)
       DW_BLOCK (attr) = blk;
       break;
     case DW_FORM_block4:
-      blk = (struct dwarf_block *) bfd_alloc (abfd, sizeof (struct dwarf_block));
+      amt = sizeof (struct dwarf_block);
+      blk = (struct dwarf_block *) bfd_alloc (abfd, amt);
       blk->size = read_4_bytes (abfd, info_ptr);
       info_ptr += 4;
       blk->data = read_n_bytes (abfd, info_ptr, blk->size);
@@ -618,7 +623,8 @@ read_attribute (attr, abbrev, unit, info_ptr)
       info_ptr += bytes_read;
       break;
     case DW_FORM_block:
-      blk = (struct dwarf_block *) bfd_alloc (abfd, sizeof (struct dwarf_block));
+      amt = sizeof (struct dwarf_block);
+      blk = (struct dwarf_block *) bfd_alloc (abfd, amt);
       blk->size = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
       info_ptr += bytes_read;
       blk->data = read_n_bytes (abfd, info_ptr, blk->size);
@@ -626,7 +632,8 @@ read_attribute (attr, abbrev, unit, info_ptr)
       DW_BLOCK (attr) = blk;
       break;
     case DW_FORM_block1:
-      blk = (struct dwarf_block *) bfd_alloc (abfd, sizeof (struct dwarf_block));
+      amt = sizeof (struct dwarf_block);
+      blk = (struct dwarf_block *) bfd_alloc (abfd, amt);
       blk->size = read_1_byte (abfd, info_ptr);
       info_ptr += 1;
       blk->data = read_n_bytes (abfd, info_ptr, blk->size);
@@ -722,8 +729,8 @@ add_line_info (table, address, filename, line, column, end_sequence)
      unsigned int column;
      int end_sequence;
 {
-  struct line_info* info = (struct line_info*)
-    bfd_alloc (table->abfd, sizeof (struct line_info));
+  bfd_size_type amt = sizeof (struct line_info);
+  struct line_info* info = (struct line_info*) bfd_alloc (table->abfd, amt);
 
   info->prev_line = table->last_line;
   table->last_line = info;
@@ -799,7 +806,7 @@ arange_add (unit, low_pc, high_pc)
     }
 
   /* Need to allocate a new arange and insert it into the arange list.  */
-  arange = bfd_zalloc (unit->abfd, sizeof (*arange));
+  arange = bfd_zalloc (unit->abfd, (bfd_size_type) sizeof (*arange));
   arange->low = low_pc;
   arange->high = high_pc;
 
@@ -822,6 +829,7 @@ decode_line_info (unit, stash)
   unsigned int i, bytes_read;
   char *cur_file, *cur_dir;
   unsigned char op_code, extended_op, adj_opcode;
+  bfd_size_type amt;
 
   if (! stash->dwarf_line_buffer)
     {
@@ -836,13 +844,12 @@ decode_line_info (unit, stash)
 	}
 
       stash->dwarf_line_size = msec->_raw_size;
-      stash->dwarf_line_buffer = (char *) bfd_alloc (abfd, stash->dwarf_line_size);
+      stash->dwarf_line_buffer = (char *) bfd_alloc (abfd, msec->_raw_size);
       if (! stash->dwarf_line_buffer)
 	return 0;
 
-      if (! bfd_get_section_contents (abfd, msec,
-				      stash->dwarf_line_buffer, 0,
-				      stash->dwarf_line_size))
+      if (! bfd_get_section_contents (abfd, msec, stash->dwarf_line_buffer,
+				      (bfd_vma) 0, msec->_raw_size))
 	return 0;
 
       /* FIXME: We ought to apply the relocs against this section before
@@ -860,8 +867,8 @@ decode_line_info (unit, stash)
       return 0;
     }
 
-  table = (struct line_info_table*) bfd_alloc (abfd,
-					       sizeof (struct line_info_table));
+  amt = sizeof (struct line_info_table);
+  table = (struct line_info_table*) bfd_alloc (abfd, amt);
   table->abfd = abfd;
   table->comp_dir = unit->comp_dir;
 
@@ -894,8 +901,8 @@ decode_line_info (unit, stash)
   line_ptr += 1;
   lh.opcode_base = read_1_byte (abfd, line_ptr);
   line_ptr += 1;
-  lh.standard_opcode_lengths = (unsigned char *)
-    bfd_alloc (abfd, lh.opcode_base * sizeof (unsigned char));
+  amt = lh.opcode_base * sizeof (unsigned char);
+  lh.standard_opcode_lengths = (unsigned char *) bfd_alloc (abfd, amt);
 
   lh.standard_opcode_lengths[0] = 1;
 
@@ -912,9 +919,9 @@ decode_line_info (unit, stash)
 
       if ((table->num_dirs % DIR_ALLOC_CHUNK) == 0)
 	{
-	  table->dirs = (char **)
-	    bfd_realloc (table->dirs,
-			 (table->num_dirs + DIR_ALLOC_CHUNK) * sizeof (char *));
+	  amt = table->num_dirs + DIR_ALLOC_CHUNK;
+	  amt *= sizeof (char *);
+	  table->dirs = (char **) bfd_realloc (table->dirs, amt);
 	  if (! table->dirs)
 	    return 0;
 	}
@@ -931,10 +938,9 @@ decode_line_info (unit, stash)
 
       if ((table->num_files % FILE_ALLOC_CHUNK) == 0)
 	{
-	  table->files = (struct fileinfo *)
-	    bfd_realloc (table->files,
-			 (table->num_files + FILE_ALLOC_CHUNK)
-			 * sizeof (struct fileinfo));
+	  amt = table->num_files + FILE_ALLOC_CHUNK;
+	  amt *= sizeof (struct fileinfo);
+	  table->files = (struct fileinfo *) bfd_realloc (table->files, amt);
 	  if (! table->files)
 	    return 0;
 	}
@@ -1001,10 +1007,10 @@ decode_line_info (unit, stash)
 		  line_ptr += bytes_read;
 		  if ((table->num_files % FILE_ALLOC_CHUNK) == 0)
 		    {
-		      table->files = (struct fileinfo *)
-			bfd_realloc (table->files,
-				     (table->num_files + FILE_ALLOC_CHUNK)
-				     * sizeof (struct fileinfo));
+		      amt = table->num_files + FILE_ALLOC_CHUNK;
+		      amt *= sizeof (struct fileinfo);
+		      table->files =
+			(struct fileinfo *) bfd_realloc (table->files, amt);
 		      if (! table->files)
 			return 0;
 		    }
@@ -1208,7 +1214,8 @@ scan_unit_for_functions (unit)
 
       if (abbrev->tag == DW_TAG_subprogram)
 	{
-	  func = (struct funcinfo*) bfd_zalloc (abfd, sizeof (struct funcinfo));
+	  bfd_size_type amt = sizeof (struct funcinfo);
+	  func = (struct funcinfo *) bfd_zalloc (abfd, amt);
 	  func->prev_func = unit->function_table;
 	  unit->function_table = func;
 	}
@@ -1295,7 +1302,7 @@ find_rela_addend (abfd, sec, offset, syms)
   if (reloc_size <= 0)
     return 0;
 
-  relocs = (arelent **) bfd_malloc ((size_t) reloc_size);
+  relocs = (arelent **) bfd_malloc ((bfd_size_type) reloc_size);
   if (relocs == NULL)
     return 0;
 
@@ -1318,7 +1325,7 @@ find_rela_addend (abfd, sec, offset, syms)
 	free (relocs);
 	return addend;
       }
-  
+
   free (relocs);
   return 0;
 }
@@ -1353,6 +1360,8 @@ parse_comp_unit (abfd, stash, unit_length, abbrev_length)
 
   char *info_ptr = stash->info_ptr;
   char *end_ptr = info_ptr + unit_length;
+  bfd_size_type amt;
+  bfd_size_type off;
 
   version = read_2_bytes (abfd, info_ptr);
   info_ptr += 2;
@@ -1367,9 +1376,8 @@ parse_comp_unit (abfd, stash, unit_length, abbrev_length)
      .debug_abbrev+offset.  On RELA targets, we have to find the
      relocation and extract the addend to obtain the actual
      abbrev_offset, so do it here.  */
-  abbrev_offset += find_rela_addend (abfd, stash->sec,
-				     info_ptr - stash->sec_info_ptr,
-				     stash->syms);
+  off = info_ptr - stash->sec_info_ptr;
+  abbrev_offset += find_rela_addend (abfd, stash->sec, off, stash->syms);
   info_ptr += abbrev_length;
   addr_size = read_1_byte (abfd, info_ptr);
   info_ptr += 1;
@@ -1421,7 +1429,8 @@ parse_comp_unit (abfd, stash, unit_length, abbrev_length)
       return 0;
     }
 
-  unit = (struct comp_unit*) bfd_zalloc (abfd, sizeof (struct comp_unit));
+  amt = sizeof (struct comp_unit);
+  unit = (struct comp_unit*) bfd_zalloc (abfd, amt);
   unit->abfd = abfd;
   unit->addr_size = addr_size;
   unit->abbrevs = abbrevs;
@@ -1645,11 +1654,11 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
 
   if (! stash)
     {
-      unsigned long total_size;
+      bfd_size_type total_size;
       asection *msec;
+      bfd_size_type amt = sizeof (struct dwarf2_debug);
 
-      stash =
-	(struct dwarf2_debug*) bfd_zalloc (abfd, sizeof (struct dwarf2_debug));
+      stash = (struct dwarf2_debug*) bfd_zalloc (abfd, amt);
       if (! stash)
 	return false;
 
@@ -1680,8 +1689,8 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
 	   msec;
 	   msec = find_debug_info (abfd, msec))
 	{
-	  unsigned long size;
-	  unsigned long start;
+	  bfd_size_type size;
+	  bfd_size_type start;
 
 	  size = msec->_raw_size;
 	  if (size == 0)
@@ -1689,7 +1698,8 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
 
 	  start = stash->info_ptr_end - stash->info_ptr;
 
-	  if (! bfd_get_section_contents (abfd, msec, stash->info_ptr + start, 0, size))
+	  if (! bfd_get_section_contents (abfd, msec, stash->info_ptr + start,
+					  (bfd_vma) 0, size))
 	    continue;
 
 	  stash->info_ptr_end = stash->info_ptr + start + size;
@@ -1732,7 +1742,6 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
   /* Read each remaining comp. units checking each as they are read.  */
   while (stash->info_ptr < stash->info_ptr_end)
     {
-      struct comp_unit* each;
       bfd_vma length;
       boolean found;
 

@@ -1,5 +1,6 @@
 /* BFD back-end for OSF/1 core files.
-   Copyright 1993, 1994, 1995, 1998, 1999 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1998, 1999, 2001
+   Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -30,7 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* forward declarations */
 
 static asection *
-make_bfd_asection PARAMS ((bfd *, CONST char *, flagword, bfd_size_type,
+make_bfd_asection PARAMS ((bfd *, const char *, flagword, bfd_size_type,
 			   bfd_vma, file_ptr));
 static asymbol *
 osf_core_make_empty_symbol PARAMS ((bfd *));
@@ -47,7 +48,7 @@ swap_abort PARAMS ((void));
 
 /* These are stored in the bfd's tdata */
 
-struct osf_core_struct 
+struct osf_core_struct
 {
   int sig;
   char cmd[MAXCOMLEN + 1];
@@ -60,7 +61,7 @@ struct osf_core_struct
 static asection *
 make_bfd_asection (abfd, name, flags, _raw_size, vma, filepos)
      bfd *abfd;
-     CONST char *name;
+     const char *name;
      flagword flags;
      bfd_size_type _raw_size;
      bfd_vma vma;
@@ -85,7 +86,9 @@ static asymbol *
 osf_core_make_empty_symbol (abfd)
      bfd *abfd;
 {
-  asymbol *new = (asymbol *) bfd_zalloc (abfd, sizeof (asymbol));
+  asymbol *new;
+
+  new = (asymbol *) bfd_zalloc (abfd, (bfd_size_type) sizeof (asymbol));
   if (new)
     new->the_bfd = abfd;
   return new;
@@ -99,8 +102,10 @@ osf_core_core_file_p (abfd)
   int i;
   char *secname;
   struct core_filehdr core_header;
+  bfd_size_type amt;
 
-  val = bfd_read ((PTR)&core_header, 1, sizeof core_header, abfd);
+  amt = sizeof core_header;
+  val = bfd_bread ((PTR) &core_header, amt, abfd);
   if (val != sizeof core_header)
     return NULL;
 
@@ -108,7 +113,7 @@ osf_core_core_file_p (abfd)
     return NULL;
 
   core_hdr (abfd) = (struct osf_core_struct *)
-    bfd_zalloc (abfd, sizeof (struct osf_core_struct));
+    bfd_zalloc (abfd, (bfd_size_type) sizeof (struct osf_core_struct));
   if (!core_hdr (abfd))
     return NULL;
 
@@ -120,7 +125,8 @@ osf_core_core_file_p (abfd)
       struct core_scnhdr core_scnhdr;
       flagword flags;
 
-      val = bfd_read ((PTR)&core_scnhdr, 1, sizeof core_scnhdr, abfd);
+      amt = sizeof core_scnhdr;
+      val = bfd_bread ((PTR) &core_scnhdr, amt, abfd);
       if (val != sizeof core_scnhdr)
 	break;
 
@@ -178,7 +184,8 @@ osf_core_core_file_failing_signal (abfd)
 /* ARGSUSED */
 static boolean
 osf_core_core_file_matches_executable_p (core_bfd, exec_bfd)
-     bfd *core_bfd, *exec_bfd;
+     bfd *core_bfd ATTRIBUTE_UNUSED;
+     bfd *exec_bfd ATTRIBUTE_UNUSED;
 {
   return true;		/* FIXME, We have no way of telling at this point */
 }
@@ -239,7 +246,7 @@ const bfd_target osf_core_vec =
      bfd_false, bfd_false,
      bfd_false, bfd_false
     },
-    
+
        BFD_JUMP_TABLE_GENERIC (_bfd_generic),
        BFD_JUMP_TABLE_COPY (_bfd_generic),
        BFD_JUMP_TABLE_CORE (osf_core),
@@ -251,6 +258,6 @@ const bfd_target osf_core_vec =
        BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
     NULL,
-    
+
     (PTR) 0			/* backend_data */
 };

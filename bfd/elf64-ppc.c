@@ -1724,15 +1724,16 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 	      /* This is a global offset table entry for a local symbol.  */
 	      if (local_got_refcounts == NULL)
 		{
-		  size_t size;
+		  bfd_size_type size;
 
-		  size = symtab_hdr->sh_info * sizeof (bfd_signed_vma);
-		  local_got_refcounts = (bfd_signed_vma *)
-		    bfd_alloc (abfd, size);
+		  size = symtab_hdr->sh_info;
+		  size *= sizeof (bfd_signed_vma);
+		  local_got_refcounts = ((bfd_signed_vma *)
+					 bfd_alloc (abfd, size));
 		  if (local_got_refcounts == NULL)
 		    return false;
 		  elf_local_got_refcounts (abfd) = local_got_refcounts;
-		  memset (local_got_refcounts, -1, size);
+		  memset (local_got_refcounts, -1, (size_t) size);
 		}
 	      if (local_got_refcounts[r_symndx] == -1)
 		{
@@ -2455,36 +2456,39 @@ ppc64_elf_size_dynamic_sections (output_bfd, info)
 	 must add the entries now so that we get the correct size for
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
-      if (! info->shared)
+#define add_dynamic_entry(TAG, VAL) \
+  bfd_elf64_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+
+      if (!info->shared)
 	{
-	  if (! bfd_elf64_add_dynamic_entry (info, DT_DEBUG, 0))
+	  if (!add_dynamic_entry (DT_DEBUG, 0))
 	    return false;
 	}
 
       if (plt)
 	{
-	  if (! bfd_elf64_add_dynamic_entry (info, DT_PLTGOT, 0)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_PLTRELSZ, 0)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_JMPREL, 0))
+	  if (!add_dynamic_entry (DT_PLTGOT, 0)
+	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
+	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
+	      || !add_dynamic_entry (DT_JMPREL, 0))
 	    return false;
 	}
 
       if (relocs)
 	{
-	  if (! bfd_elf64_add_dynamic_entry (info, DT_RELA, 0)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_RELASZ, 0)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_RELAENT,
-						sizeof (Elf64_External_Rela)))
+	  if (!add_dynamic_entry (DT_RELA, 0)
+	      || !add_dynamic_entry (DT_RELASZ, 0)
+	      || !add_dynamic_entry (DT_RELAENT, sizeof (Elf64_External_Rela)))
 	    return false;
 	}
 
       if (reltext)
 	{
-	  if (! bfd_elf64_add_dynamic_entry (info, DT_TEXTREL, 0))
+	  if (!add_dynamic_entry (DT_TEXTREL, 0))
 	    return false;
 	}
     }
+#undef add_dynamic_entry
 
   /* If we are generating a shared library, we generate a section
      symbol for each output section.  These are local symbols, which
@@ -2663,7 +2667,6 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   bfd_vma *local_got_offsets;
   bfd_vma TOCstart;
   boolean ret = true;
-  long insn;
 
 #ifdef DEBUG
   fprintf (stderr, "ppc64_elf_relocate_section called for %s section %s, %ld relocations%s\n",
@@ -2707,6 +2710,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       reloc_howto_type *howto;
       unsigned long r_symndx;
       bfd_vma relocation;
+      long insn;
 
       r_type = (enum elf_ppc_reloc_type) ELF64_R_TYPE (rel->r_info);
       offset = rel->r_offset;
@@ -2910,16 +2914,17 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  <= input_section->_cooked_size))
 	    {
 	      bfd_byte *pnext;
-	      unsigned long insn;
 
 	      pnext = contents + (rel->r_offset - input_section->vma) + 4;
 	      insn = bfd_get_32 (input_bfd, pnext);
 
 	      if (insn == 0x60000000	 /* nop (ori  r0,r0,0) */
 		  || insn == 0x4def7b82	 /* cror 15,15,15 */
-		  || insn == 0x4ffffb82)   /* cror 31,31,31 */
+		  || insn == 0x4ffffb82) /* cror 31,31,31 */
 		{
-		  bfd_put_32 (input_bfd, 0xe8410028, pnext); /* ld r2,40(r1) */
+		  bfd_put_32 (input_bfd,
+			      (bfd_vma) 0xe8410028, /* ld r2,40(r1) */
+			      pnext);
 #ifdef DEBUG
 		  fprintf (stderr, "ppc64_elf_relocate_section: " \
 			   "patched nop after call to %s\n", sym_name);
@@ -3118,7 +3123,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    insn &= ~BRANCH_PREDICT_BIT;
 	  else
 	    insn |= BRANCH_PREDICT_BIT;
-	  bfd_put_32 (output_bfd, insn, contents + offset);
+	  bfd_put_32 (output_bfd, (bfd_vma) insn, contents + offset);
 	  break;
 
 	  /* Branch not taken predicition relocations.  */
@@ -3129,7 +3134,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    insn |= BRANCH_PREDICT_BIT;
 	  else
 	    insn &= ~BRANCH_PREDICT_BIT;
-	  bfd_put_32 (output_bfd, insn, contents + offset);
+	  bfd_put_32 (output_bfd, (bfd_vma) insn, contents + offset);
 	  break;
 
 
@@ -3461,7 +3466,7 @@ ppc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 				   + (sizeof (ppc64_elf_glink_code)
 				      / sizeof (*ppc64_elf_glink_code))));
 	    {
-	      bfd_put_32 (output_bfd, *stub, p);
+	      bfd_put_32 (output_bfd, (bfd_vma) *stub, p);
 	    }
 #ifdef DEBUG
 	  fprintf (stderr, ", linkage function");
@@ -3535,7 +3540,7 @@ ppc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       rela.r_offset = (sgot->output_section->vma
 		       + sgot->output_offset
-		       + (h->got.offset &~ 1));
+		       + (h->got.offset &~ (bfd_vma) 1));
 
       /* If this is a -Bsymbolic link, and the symbol is defined
 	 locally, we just want to emit a RELATIVE reloc.  The entry in

@@ -153,7 +153,7 @@ coff_mips_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 	    {
 	      short x = bfd_get_16 (abfd, addr);
 	      DOIT (x);
-	      bfd_put_16 (abfd, x, addr);
+	      bfd_put_16 (abfd, (bfd_vma) x, addr);
 	    }
 	    break;
 
@@ -161,7 +161,7 @@ coff_mips_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 	    {
 	      long x = bfd_get_32 (abfd, addr);
 	      DOIT (x);
-	      bfd_put_32 (abfd, x, addr);
+	      bfd_put_32 (abfd, (bfd_vma) x, addr);
 	    }
 	    break;
 
@@ -567,10 +567,9 @@ mips_swap_reloc_in (abfd, src, dst)
   RELOC *reloc_src = (RELOC *) src;
   struct internal_reloc *reloc_dst = (struct internal_reloc *) dst;
 
-  reloc_dst->r_vaddr = bfd_h_get_32(abfd, (bfd_byte *)reloc_src->r_vaddr);
-  reloc_dst->r_symndx =
-    bfd_h_get_signed_32(abfd, (bfd_byte *) reloc_src->r_symndx);
-  reloc_dst->r_type = bfd_h_get_16(abfd, (bfd_byte *) reloc_src->r_type);
+  reloc_dst->r_vaddr = H_GET_32 (abfd, reloc_src->r_vaddr);
+  reloc_dst->r_symndx = H_GET_S32 (abfd, reloc_src->r_symndx);
+  reloc_dst->r_type = H_GET_16 (abfd, reloc_src->r_type);
   reloc_dst->r_size = 0;
   reloc_dst->r_extern = 0;
   reloc_dst->r_offset = 0;
@@ -614,23 +613,18 @@ mips_swap_reloc_out (abfd, src, dst)
 	     the same address as a REFHI, we assume this is the matching
 	     PAIR reloc and output it accordingly.  The symndx is really
 	     the low 16 bits of the addend */
-	  bfd_h_put_32 (abfd, reloc_src->r_vaddr,
-			(bfd_byte *) reloc_dst->r_vaddr);
-	  bfd_h_put_32 (abfd, reloc_src->r_symndx,
-			(bfd_byte *) reloc_dst->r_symndx);
-
-	  bfd_h_put_16(abfd, MIPS_R_PAIR, (bfd_byte *)
-		       reloc_dst->r_type);
+	  H_PUT_32 (abfd, reloc_src->r_vaddr, reloc_dst->r_vaddr);
+	  H_PUT_32 (abfd, reloc_src->r_symndx, reloc_dst->r_symndx);
+	  H_PUT_16 (abfd, MIPS_R_PAIR, reloc_dst->r_type);
 	  return RELSZ;
 	}
       break;
     }
 
-  bfd_h_put_32(abfd, reloc_src->r_vaddr, (bfd_byte *) reloc_dst->r_vaddr);
-  bfd_h_put_32(abfd, reloc_src->r_symndx, (bfd_byte *) reloc_dst->r_symndx);
+  H_PUT_32 (abfd, reloc_src->r_vaddr, reloc_dst->r_vaddr);
+  H_PUT_32 (abfd, reloc_src->r_symndx, reloc_dst->r_symndx);
 
-  bfd_h_put_16(abfd, reloc_src->r_type, (bfd_byte *)
-	       reloc_dst->r_type);
+  H_PUT_16 (abfd, reloc_src->r_type, reloc_dst->r_type);
   return RELSZ;
 }
 

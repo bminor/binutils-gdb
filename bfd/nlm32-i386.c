@@ -1,5 +1,5 @@
 /* Support for 32-bit i386 NLM (NetWare Loadable Module)
-   Copyright 1993, 1994, 2000 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 2000, 2001 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -86,7 +86,7 @@ nlm_i386_read_reloc (abfd, sym, secp, rel)
   bfd_vma val;
   const char *name;
 
-  if (bfd_read (temp, sizeof (temp), 1, abfd) != sizeof (temp))
+  if (bfd_bread (temp, (bfd_size_type) sizeof (temp), abfd) != sizeof (temp))
     return false;
 
   val = bfd_get_32 (abfd, temp);
@@ -228,7 +228,7 @@ nlm_i386_write_import (abfd, sec, rel)
     }
 
   bfd_put_32 (abfd, val, temp);
-  if (bfd_write (temp, sizeof (temp), 1, abfd) != sizeof (temp))
+  if (bfd_bwrite (temp, (bfd_size_type) sizeof (temp), abfd) != sizeof (temp))
     return false;
 
   return true;
@@ -350,23 +350,24 @@ nlm_i386_read_import (abfd, sym)
   unsigned char symlength;		/* length of symbol name */
   char *name;
 
-  if (bfd_read ((PTR) &symlength, sizeof (symlength), 1, abfd)
+  if (bfd_bread ((PTR) &symlength, (bfd_size_type) sizeof (symlength), abfd)
       != sizeof (symlength))
     return false;
   sym -> symbol.the_bfd = abfd;
-  name = bfd_alloc (abfd, symlength + 1);
+  name = bfd_alloc (abfd, (bfd_size_type) symlength + 1);
   if (name == NULL)
     return false;
-  if (bfd_read (name, symlength, 1, abfd) != symlength)
+  if (bfd_bread (name, (bfd_size_type) symlength, abfd) != symlength)
     return false;
   name[symlength] = '\0';
   sym -> symbol.name = name;
   sym -> symbol.flags = 0;
   sym -> symbol.value = 0;
   sym -> symbol.section = bfd_und_section_ptr;
-  if (bfd_read ((PTR) temp, sizeof (temp), 1, abfd) != sizeof (temp))
+  if (bfd_bread ((PTR) temp, (bfd_size_type) sizeof (temp), abfd)
+      != sizeof (temp))
     return false;
-  rcount = bfd_h_get_32 (abfd, temp);
+  rcount = H_GET_32 (abfd, temp);
   nlm_relocs = ((struct nlm_relent *)
 		bfd_alloc (abfd, rcount * sizeof (struct nlm_relent)));
   if (!nlm_relocs)
@@ -402,12 +403,13 @@ nlm_i386_write_external (abfd, count, sym, relocs)
   unsigned char temp[NLM_TARGET_LONG_SIZE];
 
   len = strlen (sym->name);
-  if ((bfd_write (&len, sizeof (bfd_byte), 1, abfd) != sizeof (bfd_byte))
-      || bfd_write (sym->name, len, 1, abfd) != len)
+  if ((bfd_bwrite (&len, (bfd_size_type) sizeof (bfd_byte), abfd)
+       != sizeof (bfd_byte))
+      || bfd_bwrite (sym->name, (bfd_size_type) len, abfd) != len)
     return false;
 
   bfd_put_32 (abfd, count, temp);
-  if (bfd_write (temp, sizeof (temp), 1, abfd) != sizeof (temp))
+  if (bfd_bwrite (temp, (bfd_size_type) sizeof (temp), abfd) != sizeof (temp))
     return false;
 
   for (i = 0; i < count; i++)

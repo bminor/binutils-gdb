@@ -23,8 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 
-int bfd_default_scan_num_mach ();
-
 static boolean h8300_scan
   PARAMS ((const struct bfd_arch_info *, const char *));
 static const bfd_arch_info_type * compatible

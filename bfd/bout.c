@@ -67,7 +67,7 @@ bout_swap_exec_header_in (abfd, raw_bytes, execp)
   struct external_exec *bytes = (struct external_exec *)raw_bytes;
 
   /* Now fill in fields in the execp, from the bytes in the raw data.  */
-  execp->a_info   = bfd_h_get_32 (abfd, bytes->e_info);
+  execp->a_info   = H_GET_32 (abfd, bytes->e_info);
   execp->a_text   = GET_WORD (abfd, bytes->e_text);
   execp->a_data   = GET_WORD (abfd, bytes->e_data);
   execp->a_bss    = GET_WORD (abfd, bytes->e_bss);
@@ -95,7 +95,7 @@ bout_swap_exec_header_out (abfd, execp, raw_bytes)
   struct external_exec *bytes = (struct external_exec *)raw_bytes;
 
   /* Now fill in fields in the raw data, from the fields in the exec struct.  */
-  bfd_h_put_32 (abfd, execp->a_info  , bytes->e_info);
+  H_PUT_32 (abfd, execp->a_info  , bytes->e_info);
   PUT_WORD (abfd, execp->a_text  , bytes->e_text);
   PUT_WORD (abfd, execp->a_data  , bytes->e_data);
   PUT_WORD (abfd, execp->a_bss   , bytes->e_bss);
@@ -117,16 +117,16 @@ b_out_object_p (abfd)
 {
   struct internal_exec anexec;
   struct external_exec exec_bytes;
+  bfd_size_type amt = EXEC_BYTES_SIZE;
 
-  if (bfd_read ((PTR) &exec_bytes, 1, EXEC_BYTES_SIZE, abfd)
-      != EXEC_BYTES_SIZE)
+  if (bfd_bread ((PTR) &exec_bytes, amt, abfd) != amt)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);
       return 0;
     }
 
-  anexec.a_info = bfd_h_get_32 (abfd, exec_bytes.e_info);
+  anexec.a_info = H_GET_32 (abfd, exec_bytes.e_info);
 
   if (N_BADMAG (anexec))
     {
@@ -206,17 +206,18 @@ b_out_mkobject (abfd)
      bfd *abfd;
 {
   struct bout_data_struct *rawptr;
+  bfd_size_type amt = sizeof (struct bout_data_struct);
 
-  rawptr = (struct bout_data_struct *) bfd_zalloc (abfd, sizeof (struct bout_data_struct));
+  rawptr = (struct bout_data_struct *) bfd_zalloc (abfd, amt);
   if (rawptr == NULL)
     return false;
 
   abfd->tdata.bout_data = rawptr;
   exec_hdr (abfd) = &rawptr->e;
 
-  obj_textsec (abfd) = (asection *)NULL;
-  obj_datasec (abfd) = (asection *)NULL;
-  obj_bsssec (abfd) = (asection *)NULL;
+  obj_textsec (abfd) = (asection *) NULL;
+  obj_datasec (abfd) = (asection *) NULL;
+  obj_bsssec (abfd) = (asection *) NULL;
 
   return true;
 }
@@ -257,6 +258,7 @@ b_out_write_object_contents (abfd)
      bfd *abfd;
 {
   struct external_exec swapped_hdr;
+  bfd_size_type amt;
 
   if (! aout_32_make_sections (abfd))
     return false;
@@ -282,9 +284,9 @@ b_out_write_object_contents (abfd)
 
   bout_swap_exec_header_out (abfd, exec_hdr (abfd), &swapped_hdr);
 
+  amt = EXEC_BYTES_SIZE;
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0
-      || (bfd_write ((PTR) &swapped_hdr, 1, EXEC_BYTES_SIZE, abfd)
-	  != EXEC_BYTES_SIZE))
+      || bfd_bwrite ((PTR) &swapped_hdr, amt, abfd) != amt)
     return false;
 
   /* Now write out reloc info, followed by syms and strings */
@@ -311,7 +313,8 @@ b_out_write_object_contents (abfd)
 	}
 
       if (q > outsyms)
-	qsort (outsyms, q - outsyms, sizeof (asymbol*), b_out_symbol_cmp);
+	qsort (outsyms, (size_t) (q - outsyms), sizeof (asymbol*),
+	       b_out_symbol_cmp);
 
       /* Back to your regularly scheduled program.  */
       if (bfd_seek (abfd, (file_ptr) (N_SYMOFF(*exec_hdr(abfd))), SEEK_SET)
@@ -321,7 +324,8 @@ b_out_write_object_contents (abfd)
       if (! aout_32_write_syms (abfd))
 	return false;
 
-      if (bfd_seek (abfd, (file_ptr) (N_TROFF(*exec_hdr(abfd))), SEEK_SET) != 0)
+      if (bfd_seek (abfd, (file_ptr) (N_TROFF(*exec_hdr(abfd))), SEEK_SET)
+	  != 0)
 	return false;
 
       if (!b_out_squirt_out_relocs (abfd, obj_textsec (abfd))) return false;
@@ -372,7 +376,7 @@ calljx_callback (abfd, link_info, reloc_entry, src, dst, input_section)
       BFD_ASSERT (IS_BALNAME (balsym->other));
       inst &= BALX_MASK;
       inst |= BALX;
-      bfd_put_32 (abfd, inst, (bfd_byte *) dst-4);
+      bfd_put_32 (abfd, (bfd_vma) inst, (bfd_byte *) dst-4);
       symbol = balsym;
       value = (symbol->symbol.value
 	       + output_addr (symbol->symbol.section));
@@ -380,7 +384,7 @@ calljx_callback (abfd, link_info, reloc_entry, src, dst, input_section)
 
   word += value + reloc_entry->addend;
 
-  bfd_put_32 (abfd, word, dst);
+  bfd_put_32 (abfd, (bfd_vma) word, dst);
   return bfd_reloc_ok;
 }
 
@@ -445,7 +449,7 @@ callj_callback (abfd, link_info, reloc_entry,  data, srcidx, dstidx,
 		      - output_addr (input_section))
 		     & BAL_MASK);
     }
-  bfd_put_32 (abfd, word, (bfd_byte *) data + dstidx);
+  bfd_put_32 (abfd, (bfd_vma) word, (bfd_byte *) data + dstidx);
   return bfd_reloc_ok;
 }
 
@@ -520,14 +524,14 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
      asymbol **symbols;
 {
   register struct relocation_info *rptr;
-  unsigned int counter ;
-  arelent *cache_ptr ;
+  unsigned int counter;
+  arelent *cache_ptr;
   int extern_mask, pcrel_mask, callj_mask, length_shift;
   int incode_mask;
   int size_mask;
   bfd_vma prev_addr = 0;
   unsigned int count;
-  size_t  reloc_size;
+  bfd_size_type reloc_size, amt;
   struct relocation_info *relocs;
   arelent *reloc_cache;
 
@@ -559,7 +563,7 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
   return false;
 
  doit:
-  if (bfd_seek (abfd, (file_ptr) (asect->rel_filepos),  SEEK_SET) != 0)
+  if (bfd_seek (abfd, asect->rel_filepos, SEEK_SET) != 0)
     return false;
   count = reloc_size / sizeof (struct relocation_info);
 
@@ -567,15 +571,16 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
   if (!relocs && reloc_size != 0)
     return false;
 
-  reloc_cache = (arelent *) bfd_malloc ((count+1) * sizeof (arelent));
+  amt = ((bfd_size_type) count + 1) * sizeof (arelent);
+  reloc_cache = (arelent *) bfd_malloc (amt);
   if (!reloc_cache)
     {
       if (relocs != NULL)
-	free ((char*)relocs);
+	free (relocs);
       return false;
     }
 
-  if (bfd_read ((PTR) relocs, 1, reloc_size, abfd) != reloc_size)
+  if (bfd_bread ((PTR) relocs, reloc_size, abfd) != reloc_size)
     {
       free (reloc_cache);
       if (relocs != NULL)
@@ -611,7 +616,7 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
     unsigned char *raw = (unsigned char *)rptr;
     unsigned int symnum;
 
-    cache_ptr->address = bfd_h_get_32 (abfd, raw + 0);
+    cache_ptr->address = H_GET_32 (abfd, raw + 0);
     cache_ptr->howto = 0;
 
     if (bfd_header_big_endian (abfd))
@@ -750,13 +755,14 @@ b_out_squirt_out_relocs (abfd, section)
   int len_1;
   unsigned int count = section->reloc_count;
   struct relocation_info *native, *natptr;
-  size_t natsize = count * sizeof (struct relocation_info);
-  int extern_mask, pcrel_mask,  len_2, callj_mask;
+  bfd_size_type natsize;
+  int extern_mask, pcrel_mask, len_2, callj_mask;
 
   if (count == 0)
     return true;
 
-  generic   = section->orelocation;
+  generic = section->orelocation;
+  natsize = (bfd_size_type) count * sizeof (struct relocation_info);
   native = ((struct relocation_info *) bfd_malloc (natsize));
   if (!native && natsize != 0)
     return false;
@@ -789,7 +795,7 @@ b_out_squirt_out_relocs (abfd, section)
       asymbol *sym = *(g->sym_ptr_ptr);
       asection *output_section = sym->section->output_section;
 
-      bfd_h_put_32(abfd, g->address, raw);
+      H_PUT_32 (abfd, g->address, raw);
       /* Find a type in the output format which matches the input howto -
 	 at the moment we assume input format == output format FIXME!!  */
       r_idx = 0;
@@ -861,7 +867,7 @@ b_out_squirt_out_relocs (abfd, section)
 	raw[7] |= extern_mask;
     }
 
-  if (bfd_write ((PTR) native, 1, natsize, abfd) != natsize)
+  if (bfd_bwrite ((PTR) native, natsize, abfd) != natsize)
     {
       free ((PTR)native);
       return false;
@@ -965,10 +971,10 @@ b_out_set_section_contents (abfd, section, location, offset, count)
   if (bfd_seek (abfd, section->filepos + offset, SEEK_SET) != 0)
     return false;
 
-  if (count != 0)
-    return (bfd_write ((PTR)location, 1, count, abfd) == count) ? true : false;
+  if (count == 0)
+    return true;
 
-  return true;
+  return bfd_bwrite ((PTR) location, count, abfd) == count;
 }
 
 static boolean
@@ -1151,7 +1157,7 @@ aligncode (abfd, input_section, r, shrink)
   bfd_vma gap;
   bfd_vma old_end;
   bfd_vma new_end;
-  int shrink_delta;
+  unsigned int shrink_delta;
   int size = r->howto->size;
 
   /* Reduce the size of the alignment so that it's still aligned but
@@ -1196,10 +1202,10 @@ b_out_bfd_relax_section (abfd, i, link_info, again)
   /* Get enough memory to hold the stuff.  */
   bfd *input_bfd = i->owner;
   asection *input_section = i;
-  int shrink = 0 ;
+  unsigned int shrink = 0 ;
   arelent **reloc_vector = NULL;
-  long reloc_size = bfd_get_reloc_upper_bound(input_bfd,
-					      input_section);
+  long reloc_size = bfd_get_reloc_upper_bound (input_bfd,
+					       input_section);
 
   if (reloc_size < 0)
     return false;
@@ -1212,7 +1218,7 @@ b_out_bfd_relax_section (abfd, i, link_info, again)
     {
       long reloc_count;
 
-      reloc_vector = (arelent **) bfd_malloc (reloc_size);
+      reloc_vector = (arelent **) bfd_malloc ((bfd_size_type) reloc_size);
       if (reloc_vector == NULL && reloc_size != 0)
 	goto error_return;
 
@@ -1242,7 +1248,7 @@ b_out_bfd_relax_section (abfd, i, link_info, again)
 				      link_info);
 		  break;
 		case ABS32CODE_SHRUNK:
-		  shrink+=4;
+		  shrink += 4;
 		  break;
 		}
 	    }
@@ -1287,7 +1293,7 @@ b_out_bfd_get_relocated_section_contents (output_bfd, link_info, link_order,
 						       data, relocateable,
 						       symbols);
 
-  reloc_vector = (arelent **) bfd_malloc (reloc_size);
+  reloc_vector = (arelent **) bfd_malloc ((bfd_size_type) reloc_size);
   if (reloc_vector == NULL && reloc_size != 0)
     goto error_return;
 
@@ -1297,7 +1303,7 @@ b_out_bfd_get_relocated_section_contents (output_bfd, link_info, link_order,
   BFD_ASSERT (true == bfd_get_section_contents (input_bfd,
 						input_section,
 						data,
-						0,
+						(bfd_vma) 0,
 						input_section->_raw_size));
 
   reloc_count = bfd_canonicalize_reloc (input_bfd,
@@ -1366,7 +1372,8 @@ b_out_bfd_get_relocated_section_contents (output_bfd, link_info, link_order,
 		  break;
 		case ALIGNDONE:
 		  BFD_ASSERT (reloc->addend >= src_address);
-		  BFD_ASSERT (reloc->addend <= input_section->_raw_size);
+		  BFD_ASSERT ((bfd_vma) reloc->addend
+			      <= input_section->_raw_size);
 		  src_address = reloc->addend;
 		  dst_address = ((dst_address + reloc->howto->size)
 				 & ~reloc->howto->size);
@@ -1394,7 +1401,7 @@ b_out_bfd_get_relocated_section_contents (output_bfd, link_info, link_order,
 				+ reloc->addend)
 			       & BAL_MASK));
 
-		    bfd_put_32 (input_bfd, word, data + dst_address);
+		    bfd_put_32 (input_bfd, (bfd_vma) word, data + dst_address);
 		    dst_address += 4;
 		    src_address += 4;
 
@@ -1414,7 +1421,7 @@ b_out_bfd_get_relocated_section_contents (output_bfd, link_info, link_order,
 				- output_addr (input_section))
 			       & PCREL13_MASK));
 
-		    bfd_put_32 (input_bfd, word, data + dst_address);
+		    bfd_put_32 (input_bfd, (bfd_vma) word, data + dst_address);
 		    dst_address += 4;
 		    src_address += 4;
 		  }

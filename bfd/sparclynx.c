@@ -43,7 +43,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "aout/stab_gnu.h"
 #include "aout/ar.h"
 
-void NAME (lynx,set_arch_mach) PARAMS ((bfd *, int));
+void NAME (lynx,set_arch_mach) PARAMS ((bfd *, unsigned long));
 static void choose_reloc_size PARAMS ((bfd *));
 static boolean NAME (aout,sparclynx_write_object_contents) PARAMS ((bfd *));
 
@@ -78,11 +78,11 @@ static boolean NAME (aout,sparclynx_write_object_contents) PARAMS ((bfd *));
 void
 NAME(lynx,set_arch_mach) (abfd, machtype)
      bfd *abfd;
-     int machtype;
+     unsigned long machtype;
 {
   /* Determine the architecture and machine type of the object file.  */
   enum bfd_architecture arch;
-  long machine;
+  unsigned long machine;
 
   switch (machtype)
     {
@@ -228,7 +228,7 @@ sparclynx_set_sizes (abfd)
     }
 }
 
-static CONST struct aout_backend_data sparclynx_aout_backend =
+static const struct aout_backend_data sparclynx_aout_backend =
   {
     0, 1, 0, 1, 0, sparclynx_set_sizes, 0,
     0,				/* add_dynamic_symbols */

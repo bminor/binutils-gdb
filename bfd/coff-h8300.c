@@ -184,11 +184,13 @@ h8300_coff_link_hash_table_create (abfd)
      bfd *abfd;
 {
   struct h8300_coff_link_hash_table *ret;
-  ret = ((struct h8300_coff_link_hash_table *)
-         bfd_alloc (abfd, sizeof (struct h8300_coff_link_hash_table)));
+  bfd_size_type amt = sizeof (struct h8300_coff_link_hash_table);
+
+  ret = (struct h8300_coff_link_hash_table *) bfd_alloc (abfd, amt);
   if (ret == NULL)
     return NULL;
-  if (!_bfd_link_hash_table_init (&ret->root.root, abfd, _bfd_generic_link_hash_newfunc))
+  if (!_bfd_link_hash_table_init (&ret->root.root, abfd,
+				  _bfd_generic_link_hash_newfunc))
     {
       bfd_release (abfd, ret);
       return NULL;
@@ -275,8 +277,8 @@ static reloc_howto_type howto_table[] =
 #define __A_MAGIC_SET__
 
 /* Code to swap in the reloc.  */
-#define SWAP_IN_RELOC_OFFSET   bfd_h_get_32
-#define SWAP_OUT_RELOC_OFFSET bfd_h_put_32
+#define SWAP_IN_RELOC_OFFSET	H_GET_32
+#define SWAP_OUT_RELOC_OFFSET	H_PUT_32
 #define SWAP_OUT_RELOC_EXTRA(abfd, src, dst) \
   dst->r_stuff[0] = 'S'; \
   dst->r_stuff[1] = 'C';
@@ -719,7 +721,7 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
       /* Everything looks OK.  Apply the relocation and update the
 	 src/dst address appropriately.  */
 
-      bfd_put_16 (abfd, gap, data + dst_address);
+      bfd_put_16 (abfd, (bfd_vma) gap, data + dst_address);
       dst_address += 2;
       src_address += 2;
 
@@ -1055,8 +1057,8 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 	/* We need to find the symbol so we can determine it's
 	   address in the function vector table.  */
 	asymbol *symbol;
-	bfd_vma value;
 	const char *name;
+	struct funcvec_hash_table *ftab;
 	struct funcvec_hash_entry *h;
 	asection *vectors_sec = h8300_coff_hash_table (link_info)->vectors_sec;
 
@@ -1097,7 +1099,7 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 	name = symbol->name;
 	if (symbol->flags & BSF_LOCAL)
 	  {
-	    char *new_name = bfd_malloc (strlen (name) + 9);
+	    char *new_name = bfd_malloc ((bfd_size_type) strlen (name) + 9);
 	    if (new_name == NULL)
 	      abort ();
 
@@ -1107,8 +1109,8 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 	    name = new_name;
 	  }
 
-	h = funcvec_hash_lookup (h8300_coff_hash_table (link_info)->funcvec_hash_table,
-				 name, false, false);
+	ftab = h8300_coff_hash_table (link_info)->funcvec_hash_table;
+	h = funcvec_hash_lookup (ftab, name, false, false);
 
 	/* This shouldn't ever happen.  If it does that means we've got
 	   data corruption of some kind.  Aborting seems like a reasonable
@@ -1147,7 +1149,7 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 	bfd_set_section_contents (vectors_sec->output_section->owner,
 				  vectors_sec->output_section,
 				  vectors_sec->contents,
-				  vectors_sec->output_offset,
+				  (file_ptr) vectors_sec->output_offset,
 				  vectors_sec->_raw_size);
 	break;
       }
@@ -1180,6 +1182,7 @@ h8300_bfd_link_add_symbols (abfd, info)
 {
   asection *sec;
   struct funcvec_hash_table *funcvec_hash_table;
+  bfd_size_type amt;
 
   /* If we haven't created a vectors section, do so now.  */
   if (!h8300_coff_hash_table (info)->vectors_sec)
@@ -1201,8 +1204,8 @@ h8300_bfd_link_add_symbols (abfd, info)
 	return false;
 
       /* Also create the vector hash table.  */
-      funcvec_hash_table = ((struct funcvec_hash_table *)
-	bfd_alloc (abfd, sizeof (struct funcvec_hash_table)));
+      amt = sizeof (struct funcvec_hash_table);
+      funcvec_hash_table = (struct funcvec_hash_table *) bfd_alloc (abfd, amt);
 
       if (!funcvec_hash_table)
 	return false;
@@ -1238,7 +1241,7 @@ h8300_bfd_link_add_symbols (abfd, info)
       if (reloc_size <= 0)
 	continue;
 
-      relocs = (arelent **) bfd_malloc ((size_t) reloc_size);
+      relocs = (arelent **) bfd_malloc ((bfd_size_type) reloc_size);
       if (!relocs)
 	return false;
 
@@ -1269,13 +1272,15 @@ h8300_bfd_link_add_symbols (abfd, info)
 	      && symbol != bfd_abs_section_ptr->symbol)
 
 	    {
+	      struct funcvec_hash_table *ftab;
 	      struct funcvec_hash_entry *h;
 
 	      name = symbol->name;
 	      if (symbol->flags & BSF_LOCAL)
 		{
-		  char *new_name = bfd_malloc (strlen (name) + 9);
+		  char *new_name;
 
+		  new_name = bfd_malloc ((bfd_size_type) strlen (name) + 9);
 		  if (new_name == NULL)
 		    abort ();
 
@@ -1286,15 +1291,14 @@ h8300_bfd_link_add_symbols (abfd, info)
 		}
 
 	      /* Look this symbol up in the function vector hash table.  */
-	      h = funcvec_hash_lookup (h8300_coff_hash_table (info)->funcvec_hash_table,
-				       name, false, false);
+	      ftab = h8300_coff_hash_table (info)->funcvec_hash_table;
+	      h = funcvec_hash_lookup (ftab, name, false, false);
 
 	      /* If this symbol isn't already in the hash table, add
 		 it and bump up the size of the hash table.  */
 	      if (h == NULL)
 		{
-		  h = funcvec_hash_lookup (h8300_coff_hash_table (info)->funcvec_hash_table,
-					   name, true, true);
+		  h = funcvec_hash_lookup (ftab, name, true, true);
 		  if (h == NULL)
 		    {
 		      free (relocs);
@@ -1318,15 +1322,15 @@ h8300_bfd_link_add_symbols (abfd, info)
 
   /* Now actually allocate some space for the function vector.  It's
      wasteful to do this more than once, but this is easier.  */
-  if (h8300_coff_hash_table (info)->vectors_sec->_raw_size != 0)
+  sec = h8300_coff_hash_table (info)->vectors_sec;
+  if (sec->_raw_size != 0)
     {
       /* Free the old contents.  */
-      if (h8300_coff_hash_table (info)->vectors_sec->contents)
-	free (h8300_coff_hash_table (info)->vectors_sec->contents);
+      if (sec->contents)
+	free (sec->contents);
 
       /* Allocate new contents.  */
-      h8300_coff_hash_table (info)->vectors_sec->contents
-	= bfd_malloc (h8300_coff_hash_table (info)->vectors_sec->_raw_size);
+      sec->contents = bfd_malloc (sec->_raw_size);
     }
 
   return true;

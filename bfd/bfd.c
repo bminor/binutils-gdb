@@ -70,7 +70,7 @@ CODE_FRAGMENT
 .    {* When a file is closed by the caching routines, BFD retains
 .       state information on the file here: *}
 .
-.    file_ptr where;
+.    ufile_ptr where;
 .
 .    {* and here: (``once'' means at least once) *}
 .
@@ -108,7 +108,7 @@ CODE_FRAGMENT
 .       anything. I believe that this can become always an add of
 .       origin, with origin set to 0 for non archive files.   *}
 .
-.    file_ptr origin;
+.    ufile_ptr origin;
 .
 .    {* Remember when output has begun, to stop strange things
 .       from happening. *}
@@ -1235,14 +1235,14 @@ bfd_record_phdr (abfd, type, flags_valid, flags, at_valid, at,
      asection **secs;
 {
   struct elf_segment_map *m, **pm;
+  bfd_size_type amt;
 
   if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
     return true;
 
-  m = ((struct elf_segment_map *)
-       bfd_alloc (abfd,
-		  (sizeof (struct elf_segment_map)
-		   + ((size_t) count - 1) * sizeof (asection *))));
+  amt = sizeof (struct elf_segment_map);
+  amt += ((bfd_size_type) count - 1) * sizeof (asection *);
+  m = (struct elf_segment_map *) bfd_alloc (abfd, amt);
   if (m == NULL)
     return false;
 

@@ -258,24 +258,28 @@ read_hdr (bfd *abfd, CoreHdr *core)
 {
   bfd_size_type size;
 
-  if (bfd_seek (abfd, 0, SEEK_SET) != 0)
+  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
     return false;
 
   /* Read the leading portion that old and new core dump structures have in
      common.  */
-  if (bfd_read (core, CORE_COMMONSZ, 1, abfd) != CORE_COMMONSZ)
+  size = CORE_COMMONSZ;
+  if (bfd_bread (core, size, abfd) != size)
     return false;
 
   /* Read the trailing portion of the structure.  */
-  size = CORE_NEW (*core) ? sizeof (core->new) : sizeof (core->old)
-    - CORE_COMMONSZ;
-  return bfd_read ((char *) core + CORE_COMMONSZ, size, 1, abfd) == size;
+  if (CORE_NEW (*core))
+    size = sizeof (core->new);
+  else
+    size = sizeof (core->old);
+  size -= CORE_COMMONSZ;
+  return bfd_bread ((char *) core + CORE_COMMONSZ, size, abfd) == size;
 }
 
 static asection *
 make_bfd_asection (abfd, name, flags, _raw_size, vma, filepos)
      bfd *abfd;
-     CONST char *name;
+     const char *name;
      flagword flags;
      bfd_size_type _raw_size;
      bfd_vma vma;
@@ -424,7 +428,7 @@ rs6000coff_core_p (abfd)
 
   /* Allocate core file header.  */
   size = CORE_NEW (core) ? sizeof (core.new) : sizeof (core.old);
-  tmpptr = (char *) bfd_zalloc (abfd, size);
+  tmpptr = (char *) bfd_zalloc (abfd, (bfd_size_type) size);
   if (!tmpptr)
     return NULL;
 
@@ -545,7 +549,7 @@ rs6000coff_core_p (abfd)
       {
 	if (bfd_seek (abfd, c_loader, SEEK_SET) != 0)
 	  return NULL;
-	if (bfd_read (&ldinfo, size, 1, abfd) != size)
+	if (bfd_bread (&ldinfo, size, abfd) != size)
 	  return NULL;
 
 	if (proc64)
@@ -590,7 +594,7 @@ rs6000coff_core_p (abfd)
 	    bfd_vma vminfo_addr;
 
 	    size = CORE_NEW (core) ? sizeof (vminfo.new) : sizeof (vminfo.old);
-	    if (bfd_read (&vminfo, size, 1, abfd) != size)
+	    if (bfd_bread (&vminfo, size, abfd) != size)
 	      return NULL;
 
 	    if (CORE_NEW (core))
@@ -652,14 +656,14 @@ rs6000coff_core_file_matches_executable_p (core_bfd, exec_bfd)
     return false;
 
   alloc = 100;
-  path = bfd_malloc (alloc);
+  path = bfd_malloc ((bfd_size_type) alloc);
   if (path == NULL)
     return false;
   s = path;
 
   while (1)
     {
-      if (bfd_read (s, 1, 1, core_bfd) != 1)
+      if (bfd_bread (s, (bfd_size_type) 1, core_bfd) != 1)
 	{
 	  free (path);
 	  return false;
@@ -672,7 +676,7 @@ rs6000coff_core_file_matches_executable_p (core_bfd, exec_bfd)
 	  char *n;
 
 	  alloc *= 2;
-	  n = bfd_realloc (path, alloc);
+	  n = bfd_realloc (path, (bfd_size_type) alloc);
 	  if (n == NULL)
 	    {
 	      free (path);

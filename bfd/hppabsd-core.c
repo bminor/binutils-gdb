@@ -48,7 +48,7 @@
 #include <sys/user.h>		/* After a.out.h  */
 #include <sys/file.h>
 
-static asection *make_bfd_asection PARAMS ((bfd *, CONST char *,
+static asection *make_bfd_asection PARAMS ((bfd *, const char *,
 					    flagword, bfd_size_type,
 					    file_ptr, unsigned int));
 static asymbol *hppabsd_core_make_empty_symbol PARAMS ((bfd *));
@@ -80,7 +80,7 @@ struct hppabsd_core_struct
 static asection *
 make_bfd_asection (abfd, name, flags, _raw_size, offset, alignment_power)
      bfd *abfd;
-     CONST char *name;
+     const char *name;
      flagword flags;
      bfd_size_type _raw_size;
      file_ptr offset;
@@ -104,7 +104,9 @@ static asymbol *
 hppabsd_core_make_empty_symbol (abfd)
      bfd *abfd;
 {
-  asymbol *new = (asymbol *) bfd_zalloc (abfd, sizeof (asymbol));
+  asymbol *new;
+
+  new = (asymbol *) bfd_zalloc (abfd, (bfd_size_type) sizeof (asymbol));
   if (new)
     new->the_bfd = abfd;
   return new;
@@ -121,7 +123,7 @@ hppabsd_core_core_file_p (abfd)
 
   /* Try to read in the u-area.  We will need information from this
      to know how to grok the rest of the core structures.  */
-  val = bfd_read ((void *) &u, 1, sizeof u, abfd);
+  val = bfd_bread ((void *) &u, (bfd_size_type) sizeof u, abfd);
   if (val != sizeof u)
     {
       if (bfd_get_error () != bfd_error_system_call)
@@ -168,7 +170,7 @@ hppabsd_core_core_file_p (abfd)
   /* OK, we believe you.  You're a core file (sure, sure).  */
 
   coredata = (struct hppabsd_core_struct *)
-    bfd_zalloc (abfd, sizeof (struct hppabsd_core_struct));
+    bfd_zalloc (abfd, (bfd_size_type) sizeof (struct hppabsd_core_struct));
   if (!coredata)
     return NULL;
 

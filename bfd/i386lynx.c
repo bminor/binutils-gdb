@@ -50,31 +50,31 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 			   obj_reloc_entry_size (abfd));		      \
 	NAME(aout,swap_exec_header_out) (abfd, execp, &exec_bytes);	      \
 									      \
-	if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0) return false;	      \
-	if (bfd_write ((PTR) &exec_bytes, 1, EXEC_BYTES_SIZE, abfd)	      \
-	    != EXEC_BYTES_SIZE)						      \
+	if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0		      \
+	    || bfd_bwrite ((PTR) &exec_bytes, (bfd_size_type) EXEC_BYTES_SIZE, \
+			  abfd) != EXEC_BYTES_SIZE)			      \
 	  return false;							      \
 	/* Now write out reloc info, followed by syms and strings */	      \
   									      \
 	if (bfd_get_symcount (abfd) != 0) 				      \
 	    {								      \
-	      if (bfd_seek (abfd, (file_ptr)(N_SYMOFF(*execp)), SEEK_SET)     \
+	      if (bfd_seek (abfd, (file_ptr) (N_SYMOFF(*execp)), SEEK_SET)    \
 		  != 0)							      \
 	        return false;						      \
 									      \
-	      if (! NAME(aout,write_syms)(abfd)) return false;		      \
+	      if (! NAME(aout,write_syms) (abfd)) return false;		      \
 									      \
-	      if (bfd_seek (abfd, (file_ptr)(N_TRELOFF(*execp)), SEEK_SET)    \
+	      if (bfd_seek (abfd, (file_ptr) (N_TRELOFF(*execp)), SEEK_SET)   \
 		  != 0)							      \
 	        return false;						      \
 									      \
 	      if (!NAME(lynx,squirt_out_relocs) (abfd, obj_textsec (abfd)))   \
 		return false;						      \
-	      if (bfd_seek (abfd, (file_ptr)(N_DRELOFF(*execp)), SEEK_SET)    \
+	      if (bfd_seek (abfd, (file_ptr) (N_DRELOFF(*execp)), SEEK_SET)   \
 		  != 0)							      \
 	        return 0;						      \
 									      \
-	      if (!NAME(lynx,squirt_out_relocs)(abfd, obj_datasec (abfd)))    \
+	      if (!NAME(lynx,squirt_out_relocs) (abfd, obj_datasec (abfd)))   \
 		return false;						      \
 	    }								      \
       }
@@ -366,7 +366,7 @@ NAME(lynx,swap_std_reloc_in) (abfd, bytes, cache_ptr, symbols, symcount)
   int r_baserel, r_jmptable, r_relative;
   struct aoutdata *su = &(abfd->tdata.aout_data->a);
 
-  cache_ptr->address = bfd_h_get_32 (abfd, bytes->r_address);
+  cache_ptr->address = H_GET_32 (abfd, bytes->r_address);
 
   r_index = bytes->r_index[1];
   r_extern = (0 != (bytes->r_index[0] & RELOC_STD_BITS_EXTERN_BIG));
@@ -391,7 +391,7 @@ NAME(lynx,slurp_reloc_table) (abfd, asect, symbols)
      sec_ptr asect;
      asymbol **symbols;
 {
-  unsigned int count;
+  bfd_size_type count;
   bfd_size_type reloc_size;
   PTR relocs;
   arelent *reloc_cache;
@@ -429,7 +429,7 @@ doit:
   reloc_cache = (arelent *) bfd_malloc (count * sizeof (arelent));
   if (!reloc_cache && count != 0)
     return false;
-  memset (reloc_cache, 0, count * sizeof (arelent));
+  memset (reloc_cache, 0, (size_t) count * sizeof (arelent));
 
   relocs = (PTR) bfd_alloc (abfd, reloc_size);
   if (!relocs && reloc_size != 0)
@@ -438,7 +438,7 @@ doit:
       return false;
     }
 
-  if (bfd_read (relocs, 1, reloc_size, abfd) != reloc_size)
+  if (bfd_bread (relocs, reloc_size, abfd) != reloc_size)
     {
       bfd_release (abfd, relocs);
       free (reloc_cache);
@@ -454,7 +454,7 @@ doit:
       for (; counter < count; counter++, rptr++, cache_ptr++)
 	{
 	  NAME(lynx,swap_ext_reloc_in) (abfd, rptr, cache_ptr, symbols,
-					bfd_get_symcount (abfd));
+					(bfd_size_type) bfd_get_symcount (abfd));
 	}
     }
   else
@@ -466,7 +466,7 @@ doit:
       for (; counter < count; counter++, rptr++, cache_ptr++)
 	{
 	  NAME(lynx,swap_std_reloc_in) (abfd, rptr, cache_ptr, symbols,
-					bfd_get_symcount (abfd));
+					(bfd_size_type) bfd_get_symcount (abfd));
 	}
 
     }
@@ -491,13 +491,14 @@ NAME(lynx,squirt_out_relocs) (abfd, section)
   size_t each_size;
 
   unsigned int count = section->reloc_count;
-  size_t natsize;
+  bfd_size_type natsize;
 
   if (count == 0)
     return true;
 
   each_size = obj_reloc_entry_size (abfd);
-  natsize = each_size * count;
+  natsize = count;
+  natsize *= each_size;
   native = (unsigned char *) bfd_zalloc (abfd, natsize);
   if (!native)
     return false;
@@ -519,7 +520,7 @@ NAME(lynx,squirt_out_relocs) (abfd, section)
 	NAME(lynx,swap_std_reloc_out) (abfd, *generic, (struct reloc_std_external *) natptr);
     }
 
-  if (bfd_write ((PTR) native, 1, natsize, abfd) != natsize)
+  if (bfd_bwrite ((PTR) native, natsize, abfd) != natsize)
     {
       bfd_release (abfd, native);
       return false;
