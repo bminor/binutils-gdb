@@ -1,3 +1,8 @@
+2003-09-19  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/rstqf.cgs: Use nldq instead of nldqi.
+	* sim/frv/rstq.cgs: Use nldq instead of nldqi.
+
 2003-09-11  Michael Snyder  <msnyder@redhat.com>
 
 	* sim/testsuite/sim/frv/movgs.cgs: Change lcr to spr[273],

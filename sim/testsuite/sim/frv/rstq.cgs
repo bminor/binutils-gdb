@@ -90,7 +90,7 @@ add:
 
 	; 1 nesr active with the incorrect address in neear for gr
 	set_gr_gr	sp,gr12
-	nldqi		@(sp,0),gr40
+	nldq		@(sp,gr0),gr40
 	test_spr_gr	neear0,gr12
 	set_mem_limmed	0x2222,0x2222,gr6
 	set_mem_limmed	0x3333,0x3333,gr27
