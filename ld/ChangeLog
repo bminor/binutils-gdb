@@ -1,3 +1,15 @@
+Mon Jun 16 19:18:21 1997  Geoff Keating  <geoffk@ozemail.com.au>
+
+	* scripttempl/elfppc.sc: Correct .rela.sdata entries.
+
+	* scripttempl/elfppc.sc: Put the PLT between the small and large
+	BSS segments.
+	* emulparams/elf32ppc.sh (TEXT_START_ADDR): The ABI says `A
+	program base of 0x02000000 is recommended...' because otherwise
+	shared libraries are less efficient.  We use 0x01800000 because
+	otherwise it's impossible to branch to location 0, for instance if
+	you have an undefined weak symbol.
+
 Mon Jun 16 12:49:36 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
 
 	* ldlang.c (lang_place_undefineds): Add \n in einfo call.
