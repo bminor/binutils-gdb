@@ -362,7 +362,11 @@ examine_tag(p, is_trans, argcount, msize, mfp_used)
 	 *msize = tag1 & 0x7ff;
     }
   if (is_trans)
-    *is_trans = ((tag1 & (1<<21)) ? 1 : 0); 
+    *is_trans = ((tag1 & (1<<21)) ? 1 : 0);
+  /* Note that this includes the frame pointer and the return address
+     register, so the actual number of registers of arguments is two less.
+     argcount can be zero, however, sometimes, for strange assembler
+     routines.  */
   if (argcount)
     *argcount = (tag1 >> 16) & 0x1f;
   if (mfp_used)

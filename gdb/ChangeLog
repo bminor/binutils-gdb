@@ -1,5 +1,7 @@
 Fri Jan 28 15:40:33 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* a29k-tdep.c (examine_tag): Add comment regarding argcount.
+
 	* remote-mips.c (mips_ops): Fix docstring.
 
 	* remote-bug.c (bug_ops): Remove spurious newline from docstring.
