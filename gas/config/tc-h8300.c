@@ -1,5 +1,6 @@
 /* tc-h8300.c -- Assemble code for the Hitachi H8/300
-   Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 1998 Free Software Foundation.
+   Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 2000
+   Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -886,6 +887,11 @@ do_a_fix_imm (offset, operand, relaxmode)
 	  bytes[1] = operand->exp.X_add_number >> 16;
 	  bytes[2] = operand->exp.X_add_number >> 8;
 	  bytes[3] = operand->exp.X_add_number >> 0;
+	  if (relaxmode != 0)
+	    {
+	      idx = (relaxmode == 2) ? R_MOV24B1 : R_MOVL1;
+	      fix_new_exp (frag_now, offset, 4, &operand->exp, 0, idx);
+	    }
 	  break;
 	}
 
@@ -915,19 +921,15 @@ do_a_fix_imm (offset, operand, relaxmode)
 	    idx = R_MOV16B1;
 	  else
 	    idx = R_RELWORD;
-	  operand->exp.X_add_number = (short)operand->exp.X_add_number;
+	  operand->exp.X_add_number =
+	    ((operand->exp.X_add_number & 0xffff) ^ 0x8000) - 0x8000;
 	  break;
 	case L_8:
 	  size = 1;
 	  where = 0;
 	  idx = R_RELBYTE;
-	  /* This used to use a cast to char, but that fails if char is an
-	     unsigned type.  We can't use `signed char', as that isn't valid
-	     K&R C.  */
-	  if (operand->exp.X_add_number & 0x80)
-	    operand->exp.X_add_number |= ((offsetT) -1 << 8);
-	  else
-	    operand->exp.X_add_number &= 0xff;
+	  operand->exp.X_add_number =
+	    ((operand->exp.X_add_number & 0xff) ^ 0x80) - 0x80;
 	}
 
       fix_new_exp (frag_now,
@@ -1114,13 +1116,8 @@ build_bytes (this_try, operand)
 	    }
 
 	  operand[i].exp.X_add_number -= 1;
-	  /* This used to use a cast to char, but that fails if char is an
-	     unsigned type.  We can't use `signed char', as that isn't valid
-	     K&R C.  */
-	  if (operand[i].exp.X_add_number & 0x80)
-	    operand[i].exp.X_add_number |= ((offsetT) -1 << 8);
-	  else
-	    operand[i].exp.X_add_number &= 0xff;
+	  operand[i].exp.X_add_number =
+	    ((operand[i].exp.X_add_number & 0xff) ^ 0x80) - 0x80;
 
 	  fix_new_exp (frag_now,
 		       output - frag_now->fr_literal + where,
@@ -1151,7 +1148,8 @@ build_bytes (this_try, operand)
 		       (unsigned long) operand->exp.X_add_number);
 	    }
 	  if (!Hmode)
-	    operand[i].exp.X_add_number = (short) operand[i].exp.X_add_number;
+	    operand[i].exp.X_add_number = 
+	      ((operand[i].exp.X_add_number & 0xffff) ^ 0x8000) - 0x8000;
 	  fix_new_exp (frag_now,
 		       output - frag_now->fr_literal,
 		       4,

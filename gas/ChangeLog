@@ -1,3 +1,15 @@
+2000-05-14  Alan Modra  <alan@linuxcare.com.au>
+
+	* config/tc-h8300.c (do_a_fix_imm): Don't rely on `short' being 16
+	bits.  Instead explicitly mask and sign extend.  Do the 8 bit mask
+	and sign extend without an if statement.
+	(build_bytes): Likewise.
+
+2000-05-14  Kazu Hirata  <kazu@hxi.com>
+
+	* config/tc-h8300.c (do_a_fix_imm): Output a reloc for no
+	X_add_symbol L_32 case.
+
 2000-05-14  David O'Brien  <obrien@FreeBSD.org>
 
 	* config/te-freebsd.h: New file.
