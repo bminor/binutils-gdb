@@ -358,7 +358,7 @@ all.normal: all-m4 all-autoconf all-libiberty all-mmalloc all-texinfo \
 	$(start-sanitize-chill) \
 	all-chillrt \
 	$(end-sanitize-chill) \
-	all-gprof all-prms all-send-pr all-libm all-deja-gnu \
+	all-gprof all-prms all-send-pr all-libm all-dejagnu \
 	all-fileutils all-find all-gawk all-sed all-shellutils \
 	all-textutils all-time all-wdiff all-uudecode \
 	all-hello all-tar all-gzip all-indent all-recode
@@ -370,7 +370,7 @@ all.cross: all-libiberty all-mmalloc all-gas all-byacc all-flex all-ld \
 	$(start-sanitize-chill) \
 	all-chillrt \
 	$(end-sanitize-chill) \
-	all-deja-gnu
+	all-dejagnu
 
 .PHONY: clean distclean mostlyclean realclean local-clean local-distclean
 
@@ -411,7 +411,7 @@ install-no-fixedincludes: install-dirs gcc-no-fixedincludes \
 	install-chillrt \
 	$(end-sanitize-chill) \
 	install-cvs \
-	install-deja-gnu \
+	install-dejagnu \
 	install-diff \
 	install-emacs \
 	install-etc \
@@ -484,7 +484,7 @@ install.cross: install-dirs install-libiberty install-mmalloc \
 	$(start-sanitize-chill) \
 	install-chillrt \
 	$(end-sanitize-chill) \
-	install-gcc install-etc install-deja-gnu
+	install-gcc install-etc install-dejagnu
 
 ### gzip
 all-gzip: all-libiberty
@@ -572,19 +572,19 @@ install-tar: force
 	fi
 
 
-### deja-gnu
-all-deja-gnu: force
-	@if [ -f ./deja-gnu/Makefile ] ; then \
+### dejagnu
+all-dejagnu: force
+	@if [ -f ./dejagnu/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
-		(cd ./deja-gnu; $(MAKE) $(FLAGS_TO_PASS) all) ; \
+		(cd ./dejagnu; $(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
 
-install-deja-gnu: force
-	@if [ -f ./deja-gnu/Makefile ] ; then \
+install-dejagnu: force
+	@if [ -f ./dejagnu/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
-		(cd ./deja-gnu;	$(MAKE) $(FLAGS_TO_PASS) install) ; \
+		(cd ./dejagnu;	$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
