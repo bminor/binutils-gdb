@@ -1,3 +1,8 @@
+Tue Nov 22 11:55:37 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* scripttempl/elf.sc: Fill .text section with NOPS.  From Eric
+	Youngdale <eric@aib.com>.
+
 Thu Nov 17 14:39:48 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	Patches from pirker@eiunix.tuwien.ac.at (Martin Pirker).
