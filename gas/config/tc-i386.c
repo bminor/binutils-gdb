@@ -3912,6 +3912,9 @@ md_apply_fix3 (fixP, valp, seg)
     {
       switch (fixP->fx_r_type)
 	{
+	default:
+	  break;
+
 	case BFD_RELOC_32:
 	  fixP->fx_r_type = BFD_RELOC_32_PCREL;
 	  break;
