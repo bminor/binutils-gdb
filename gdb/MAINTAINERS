@@ -55,13 +55,16 @@ maintainer works with the native maintainer when resolving API issues.
 
 	alpha		--target=alpha-dec-osf4.0a -Werror
 			Maintenance only
+			OBSOLETE candidate, not multi-arch
 
 	arc		--target=arc-elf ,-Werror
 			Maintenance only
+			OBSOLETE candidate, not multi-arch
 
 	arm		--target=arm-coff,arm-elf,arm-pe -w
 			Fernando Nasser		fnasser@redhat.com
 			Scott Bambrough		scottb@netwinder.org
+			Not multi-arch
 
 	cris		--target=cris-elf -w
 			Orjan Friberg		orjanf@axis.com
@@ -71,58 +74,70 @@ maintainer works with the native maintainer when resolving API issues.
 
 	d30v		--target=d30v-elf ,-Werror
 			Maintenance only
+			OBSOLETE candidate, not multi-arch
 
 	djgpp		--target=i586-pc-msdosdjgpp ,-Werror
 			(See native and host)
 
 	fr30		--target=fr30-elf -Werror
 			Maintenance only
+			OBSOLETE candidate, not multi-arch
 
 	h8300		--target=h8300hms -Werror
 			Maintenance only
+			Not multi-arch, work in progress
 
 	h8500		--target=h8500hms -Werror
 			Maintenance only
+			Not multi-arch, work in progress
 
 	i386		--target=i386-elf,i386-aout ,-Werror
 			Mark Kettenis           kettenis@gnu.org
 
 	i960		--target=i960-coff ,-Werror
 			Maintenance only
+			OBSOLETE candidate, not multi-arch
 
 	ia64		--target=ia64-linux ,-Werror
 			Kevin Buettner		kevinb@redhat.com
 
 	m32r		--target=m32r-elf -Werror
 			Michael Snyder		msnyder@redhat.com
+			Not multi-arch
 
 	m68hc11		--target=m68hc11-elf ,-Werror
 			Stephane Carrez		Stephane.Carrez@worldnet.fr
 
 	m68k		--target=m68k-elf ,-Werror
 			Maintenance only
+			OBSOLETE candidate, not multi-arch
 
 	m88k		--target=m88k ,-Werror
 			Known problem in 5.1
 			Maintenance only
+			OBSOLETE candidate, not multi-arch
 
 	mcore		--target=mcore-elf,mcore-pe ,-Werror
 			Maintenance only
+			OBSOLETE candidate, not multi-arch
 
 	mips		--target=mips-elf,mips64-elf ,-Werror
 			Andrew Cagney		cagney@redhat.com
 
 	mn10200		--target=mn10200-elf ,-Werror
 			Maintenance only
+			OBSOLETE candidate, not multi-arch
 
 	mn10300		--target=mn10300-elf ,-Werror
 			Maintenance only
 
 	ns32k		--target=ns32k-netbsd ,-Werror
 			Maintenance only
+			OBSOLETE candidate, not multi-arch
 
 	pa		(--target=hppa1.1-hp-proelf broken)
 			Maintenance only
+			OBSOLETE candidate, not multi-arch
 
 	powerpc		--target=powerpc-eabi ,-Werror
 			Kevin Buettner		kevinb@redhat.com
@@ -143,18 +158,21 @@ maintainer works with the native maintainer when resolving API issues.
 
 	v850		--target=v850-elf ,-Werror
 			Maintenance only
+			OBSOLETE candidate, not multi-arch
 
 	vax		--target=vax-dec-vms5.5 ,-Werror
 			Maintenance only
+			OBSOLETE candidate, not multi-arch
 
 	w65		Deleted.
 
 	xstormy16	--target=xstormy16-elf ,-Werror
 			Corinna Vinschen	vinschen@redhat.com
 
-	z8k		(--target=z8k-coff broken)
+	z8k		--target=z8k-coff ,-Werror
 			Known problem in 5.1
 			Maintenance only
+			OBSOLETE candidate, not multi-arch
 
 All maintainers can make arbitrary changes to OBSOLETE targets.
 

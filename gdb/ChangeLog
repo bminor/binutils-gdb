@@ -1,5 +1,14 @@
 2002-01-06  Andrew Cagney  <ac131313@redhat.com>
 
+	* MAINTAINERS: Note that alpha-dec-osf4.0a, arc-elf, arm-coff,
+	arm-elf, arm-pe, d30v-elf, fr30-elf, h8300hms, h8500hms,
+	i960-coff, m32r-elf, m68k-elf, m88k, mcore-elf, mn10200-elf,
+	ns32k-netbsd, hppa1.1-hp-proelf, v850-elf, vax-dec-vms5.5 and
+	z8k-coff have not been multi-arched.  Update z8k-coff build
+	status.
+
+2002-01-06  Andrew Cagney  <ac131313@redhat.com>
+
 	* MAINTAINERS: Mark a29k target as obsolete.
 	* Makefile.in (a29k-tdep.o, remote-adapt.o, remote-eb.o)
 	(remote-mm.o, remote-udi.o): Obsolete.  Remove references in
