@@ -1083,10 +1083,7 @@ line_info (arg, from_tty)
     {
       sals = decode_line_spec_1 (arg, 0);
       
-      /* If this command is repeated with RET,
-	 turn it into the no-arg variant.  */
-      if (from_tty)
-	*arg = 0;
+      dont_repeat ();
     }
 
   /* C++  More than one line may have been specified, as when the user
@@ -1096,9 +1093,22 @@ line_info (arg, from_tty)
       sal = sals.sals[i];
       
       if (sal.symtab == 0)
-	error ("No source file specified.");
-
-      if (sal.line > 0
+	{
+	  printf_filtered ("No line number information available");
+	  if (sal.pc != 0)
+	    {
+	      /* This is useful for "info line *0x7f34".  If we can't tell the
+		 user about a source line, at least let them have the symbolic
+		 address.  */
+	      printf_filtered (" for address ");
+	      wrap_here ("  ");
+	      print_address (sal.pc, stdout);
+	    }
+	  else
+	    printf_filtered (".");
+	  printf_filtered ("\n");
+	}
+      else if (sal.line > 0
 	  && find_line_pc_range (sal.symtab, sal.line, &start_pc, &end_pc))
 	{
 	  if (start_pc == end_pc)
@@ -1123,6 +1133,9 @@ line_info (arg, from_tty)
 	    identify_source_line (sal.symtab, sal.line, 0, start_pc);
 	}
       else
+	/* Is there any case in which we get here, and have an address
+	   which the user would want to see?  If we have debugging symbols
+	   and no line numbers?  */
 	printf_filtered ("Line number %d is out of range for \"%s\".\n",
 			 sal.line, sal.symtab->filename);
     }
