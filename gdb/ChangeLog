@@ -1,3 +1,8 @@
+2003-03-10  Klee Dienes  <kdienes@apple.com>
+
+	* breakpoint.c (bpstat_copy): Copy the command lines as well
+	as the old value, to match what is freed in bpstat_clear.
+
 2003-03-10  David Carlton  <carlton@math.stanford.edu>
 
 	* minsyms.c (add_minsym_to_hash_table): Replace

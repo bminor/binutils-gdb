@@ -1816,6 +1816,11 @@ bpstat_copy (bpstat bs)
     {
       tmp = (bpstat) xmalloc (sizeof (*tmp));
       memcpy (tmp, bs, sizeof (*tmp));
+      if (bs->commands != NULL)
+	tmp->commands = copy_command_lines (bs->commands);
+      if (bs->old_val != NULL)
+	tmp->old_val = value_copy (bs->old_val);
+
       if (p == NULL)
 	/* This is the first thing in the chain.  */
 	retval = tmp;
