@@ -34,6 +34,7 @@ hppaelf.em
 linux.em
 lnk960.em
 m88kbcs.em
+mipsecoff.em
 sunos.em
 vanilla.em
 
