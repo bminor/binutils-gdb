@@ -1,5 +1,8 @@
 Thu Jul 28 12:54:07 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
+	* config/mt-slite (LDFLAGS): If using the newlib in the tree, set
+	  the -B and -L prefixes so we can find the debugging stub.
+
 	* Makefile.in (CC_FOR_TARGET, CXX_FOR_TARGET): Use newlib if it is
 	  there and we are using the gcc from the tree.
 
