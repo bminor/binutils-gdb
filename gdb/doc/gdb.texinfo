@@ -578,7 +578,7 @@ not allow it to take effect until a time when it is safe.
 @cindex command line editing
 @cindex history substitution
 GDB reads its input commands via the @code{readline} interface.  This
-GNU library provides consistant behaviour for programs which provide a
+GNU library provides consistent behavior for programs which provide a
 command line interface to the user.  Advantages are @samp{emacs}-style
 or @samp{vi}-style inline editing of commands, @samp{csh}-like history
 substitution, and a storage and recall of command history across
@@ -850,11 +850,11 @@ as the file for execution and symbols, and the second argument (if any) is
 used as the core dump file name.  Thus,
 
 @example
-gdb progm core
+gdb program core
 @end example
 
 @noindent
-specifies @file{progm} as the executable program and @file{core} as a core
+specifies @file{program} as the executable program and @file{core} as a core
 dump file to examine.  (You do not need to have a core dump file if what
 you plan to do is debug the program interactively.)
 
@@ -2819,7 +2819,7 @@ Do not pretty print C++ virtual function tables.
 Show whether C++ virtual function tables are pretty printed, or not.
 
 @item set addressprint
-@item set adressprint on
+@item set addressprint on
 @kindex set addressprint
 GDB will print memory addresses in stack traces and structure values.
 The default is on.
@@ -2982,7 +2982,7 @@ machine instructions.  The default memory range is the function
 surrounding the program counter of the selected frame.  A single
 argument to this command is a program counter value; the function
 surrounding this value will be dumped.  Two arguments (separated by one
-or more spaces) specify a range of addresss (first inclusive, second
+or more spaces) specify a range of addresses (first inclusive, second
 exclusive) to be dumped.
 
 @kindex x
@@ -3555,7 +3555,7 @@ would store the value 4 into the variable @code{x}, and then print
 the value of the assignment expression (which is 4).
 
 All the assignment operators of C are supported, including the
-incrementation operators @samp{++} and @samp{--}, and combining
+increment operators @samp{++} and @samp{--}, and combining
 assignments such as @samp{+=} and @samp{<<=}.
 
 @kindex set
@@ -3969,7 +3969,7 @@ This is useful because it means that you can copy the text of previous
 commands and input them again; you can even use parts of the output
 in this way.
 
-All the facilities of Emacs's Shell mode are available for this purpose.
+All the facilities of Emacs' Shell mode are available for this purpose.
 
 @item
 GDB displays source code through Emacs.  Each time GDB displays a
