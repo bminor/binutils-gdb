@@ -2176,6 +2176,7 @@ md_assemble (str)
 	    }
 
 	  if (BFD_DEFAULT_TARGET_SIZE == 64
+	      && ppc_size == PPC_OPCODE_64
 	      && (operand->flags & PPC_OPERAND_DS) != 0)
 	    {
 	      switch (reloc)
@@ -3586,6 +3587,7 @@ ppc_tc (ignore)
 
 #endif /* OBJ_XCOFF */
 #ifdef OBJ_ELF
+  int align;
 
   /* Skip the TOC symbol name.  */
   while (is_part_of_name (*input_line_pointer)
@@ -3596,8 +3598,9 @@ ppc_tc (ignore)
     ++input_line_pointer;
 
   /* Align to a four/eight byte boundary.  */
-  frag_align (BFD_DEFAULT_TARGET_SIZE == 64 ? 3 : 2, 0, 0);
-  record_alignment (now_seg, BFD_DEFAULT_TARGET_SIZE == 64 ? 3 : 2);
+  align = BFD_DEFAULT_TARGET_SIZE == 64 && ppc_size == PPC_OPCODE_64 ? 3 : 2;
+  frag_align (align, 0, 0);
+  record_alignment (now_seg, align);
 #endif /* OBJ_ELF */
 
   if (*input_line_pointer != ',')
@@ -3630,7 +3633,7 @@ ppc_is_toc_sym (sym)
 #endif
 #ifdef OBJ_ELF
   const char *sname = segment_name (S_GET_SEGMENT (sym));
-  if (BFD_DEFAULT_TARGET_SIZE == 64)
+  if (BFD_DEFAULT_TARGET_SIZE == 64 && ppc_size == PPC_OPCODE_64)
     return strcmp (sname, ".toc") == 0;
   else
     return strcmp (sname, ".got") == 0;
@@ -5174,6 +5177,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	  fixp->fx_r_type = BFD_RELOC_PPC_TOC16;
 #ifdef OBJ_ELF
 	  if (BFD_DEFAULT_TARGET_SIZE == 64
+	      && ppc_size == PPC_OPCODE_64
 	      && (operand->flags & PPC_OPERAND_DS) != 0)
 	    fixp->fx_r_type = BFD_RELOC_PPC64_TOC16_DS;
 #endif
@@ -5207,9 +5211,11 @@ md_apply_fix3 (fixp, valuep, seg)
 #endif
       switch (fixp->fx_r_type)
 	{
-#if BFD_DEFAULT_TARGET_SIZE != 64
 	case BFD_RELOC_CTOR:
-#endif
+	  if (BFD_DEFAULT_TARGET_SIZE == 64 && ppc_size == PPC_OPCODE_64)
+	    goto ctor64;
+	  /* fall through */
+
 	case BFD_RELOC_32:
 	  if (fixp->fx_pcrel)
 	    fixp->fx_r_type = BFD_RELOC_32_PCREL;
@@ -5223,10 +5229,8 @@ md_apply_fix3 (fixp, valuep, seg)
 			      value, 4);
 	  break;
 
-#if BFD_DEFAULT_TARGET_SIZE == 64
-	case BFD_RELOC_CTOR:
-#endif
 	case BFD_RELOC_64:
+	ctor64:
 	  if (fixp->fx_pcrel)
 	    fixp->fx_r_type = BFD_RELOC_64_PCREL;
 	  /* fall through */
