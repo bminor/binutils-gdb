@@ -1,3 +1,8 @@
+Tue Aug 31 13:21:06 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* stabs.texinfo: Initial-caps all words in node names and
+	non-trivial words in section names.
+
 Mon Aug 30 11:13:16 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo: Many minor cleanups.
