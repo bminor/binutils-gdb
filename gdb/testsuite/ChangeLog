@@ -1,3 +1,8 @@
+2004-03-24  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/gdb1250.exp: Use runto {allow-pending}.
+	* lib/gdb.exp (runto, gdb_breakpoint): Support {allow-pending}.
+
 2004-03-22  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.base/watchpoint.exp (test_stepping): Delete bogus XFAILs
