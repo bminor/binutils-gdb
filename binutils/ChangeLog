@@ -1,3 +1,14 @@
+Mon May 12 13:14:22 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Don't clear OPCODES when --enable-commonbfdlib is
+	used on HP/UX.
+	* configure: Rebuild.
+
+Fri Apr 25 14:22:08 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
+
+	* Makefile.in (maintainer-clean realclean): Change *.info*
+	to binutils.info* to save sysroff.info.
+
 Tue Apr 15 13:42:22 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (INSTALL): Set to @INSTALL@.
