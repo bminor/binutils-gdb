@@ -3418,7 +3418,7 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
       xcoff_data (sub)->debug_indices = debug_index;
 
       /* Grab the contents of the .debug section.  We use malloc and
-	 copy the neams into the debug stringtab, rather than
+	 copy the names into the debug stringtab, rather than
 	 bfd_alloc, because I expect that, when linking many files
 	 together, many of the strings will be the same.  Storing the
 	 strings in the hash table should save space in this case.  */
@@ -3966,7 +3966,8 @@ _bfd_xcoff_bfd_final_link (abfd, info)
 	    }
 	}
 
-      bfd_coff_compute_section_file_positions (abfd);
+      if (! bfd_coff_compute_section_file_positions (abfd))
+	goto error_return;
     }
 
   /* Allocate space for the pointers we need to keep for the relocs.  */
