@@ -1,5 +1,11 @@
 2002-05-02  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (gdbarch_update_p): Revert 2002-05-02 Andrew Cagney
+	<cagney@redhat.com> change.
+	* gdbarch.c: Regenerate.
+
+2002-05-02  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh (gdbarch_update_p): Swap out the old architecture
 	before probing for a new one.  Detect errorenous gdbarch_init
 	functions.

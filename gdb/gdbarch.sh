@@ -2079,7 +2079,6 @@ int
 gdbarch_update_p (struct gdbarch_info info)
 {
   struct gdbarch *new_gdbarch;
-  struct gdbarch *old_gdbarch;
   struct gdbarch_registration *rego;
 
   /* Fill in missing parts of the INFO struct using a number of
@@ -2148,39 +2147,29 @@ gdbarch_update_p (struct gdbarch_info info)
       return 0;
     }
 
-  /* Swap the data belonging to the old target out.  This stops the
-     ->init() function trying to refer to the previous architecture.  */
-  swapout_gdbarch_swap (current_gdbarch);
-  init_gdbarch_swap (current_gdbarch);
-  old_gdbarch = current_gdbarch;
-  current_gdbarch = NULL;
-
   /* Ask the target for a replacement architecture. */
   new_gdbarch = rego->init (info, rego->arches);
 
-  /* Did the target like it?  No. Reject the change and revert to the
-     old architecture.  */
+  /* Did the target like it?  No. Reject the change. */
   if (new_gdbarch == NULL)
     {
       if (gdbarch_debug)
 	fprintf_unfiltered (gdb_stdlog, "gdbarch_update: Target rejected architecture\\n");
-      swapin_gdbarch_swap (old_gdbarch);
-      current_gdbarch = old_gdbarch;
       return 0;
     }
 
-  /* Did the architecture change?  No.  Oops, put the old architecture
-     back.  */
-  if (old_gdbarch == new_gdbarch)
+  /* Did the architecture change?  No. Do nothing. */
+  if (current_gdbarch == new_gdbarch)
     {
       if (gdbarch_debug)
 	fprintf_unfiltered (gdb_stdlog, "gdbarch_update: Architecture 0x%08lx (%s) unchanged\\n",
 			    (long) new_gdbarch,
 			    new_gdbarch->bfd_arch_info->printable_name);
-      swapin_gdbarch_swap (old_gdbarch);
-      current_gdbarch = old_gdbarch;
       return 1;
     }
+
+  /* Swap all data belonging to the old target out */
+  swapout_gdbarch_swap (current_gdbarch);
 
   /* Is this a pre-existing architecture?  Yes. Move it to the front
      of the list of architectures (keeping the list sorted Most
@@ -2238,10 +2227,14 @@ gdbarch_update_p (struct gdbarch_info info)
   new_gdbarch->dump_tdep = rego->dump_tdep;
   verify_gdbarch (new_gdbarch);
 
-  /* Initialize the per-architecture data-pointers and swap areas for
-     all parties that registered an interest in this architecture.
-     CURRENT_GDBARCH must be updated before these modules are called.
-     The swap area's will have already been initialized to zero.  */
+  /* Initialize the per-architecture memory (swap) areas.
+     CURRENT_GDBARCH must be update before these modules are
+     called. */
+  init_gdbarch_swap (new_gdbarch);
+  
+  /* Initialize the per-architecture data-pointer of all parties that
+     registered an interest in this architecture.  CURRENT_GDBARCH
+     must be updated before these modules are called. */
   init_gdbarch_data (new_gdbarch);
   architecture_changed_event ();
 
