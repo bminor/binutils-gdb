@@ -327,7 +327,8 @@ static boolean elf32_hppa_create_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 
 static void elf32_hppa_copy_indirect_symbol
-  PARAMS ((struct elf_link_hash_entry *, struct elf_link_hash_entry *));
+  PARAMS ((struct elf_backend_data *, struct elf_link_hash_entry *,
+	   struct elf_link_hash_entry *));
 
 static boolean elf32_hppa_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *,
@@ -1145,7 +1146,8 @@ elf32_hppa_create_dynamic_sections (abfd, info)
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
 static void
-elf32_hppa_copy_indirect_symbol (dir, ind)
+elf32_hppa_copy_indirect_symbol (bed, dir, ind)
+     struct elf_backend_data *bed;
      struct elf_link_hash_entry *dir, *ind;
 {
   struct elf32_hppa_link_hash_entry *edir, *eind;
@@ -1189,7 +1191,7 @@ elf32_hppa_copy_indirect_symbol (dir, ind)
       eind->dyn_relocs = NULL;
     }
 
-  _bfd_elf_link_hash_copy_indirect (dir, ind);
+  _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
 }
 
 /* Look through the relocs for a section during the first phase, and

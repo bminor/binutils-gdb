@@ -1418,10 +1418,12 @@ _bfd_elf_link_hash_newfunc (entry, table, string)
    old indirect symbol.  Also used for copying flags to a weakdef.  */
 
 void
-_bfd_elf_link_hash_copy_indirect (dir, ind)
+_bfd_elf_link_hash_copy_indirect (bed, dir, ind)
+     struct elf_backend_data *bed;
      struct elf_link_hash_entry *dir, *ind;
 {
   bfd_signed_vma tmp;
+  bfd_signed_vma lowest_valid = bed->can_refcount;
 
   /* Copy down any references that we may have already seen to the
      symbol which just became indirect.  */
@@ -1439,22 +1441,22 @@ _bfd_elf_link_hash_copy_indirect (dir, ind)
   /* Copy over the global and procedure linkage table refcount entries.
      These may have been already set up by a check_relocs routine.  */
   tmp = dir->got.refcount;
-  if (tmp <= 0)
+  if (tmp < lowest_valid)
     {
       dir->got.refcount = ind->got.refcount;
       ind->got.refcount = tmp;
     }
   else
-    BFD_ASSERT (ind->got.refcount <= 0);
+    BFD_ASSERT (ind->got.refcount < lowest_valid);
 
   tmp = dir->plt.refcount;
-  if (tmp <= 0)
+  if (tmp < lowest_valid)
     {
       dir->plt.refcount = ind->plt.refcount;
       ind->plt.refcount = tmp;
     }
   else
-    BFD_ASSERT (ind->plt.refcount <= 0);
+    BFD_ASSERT (ind->plt.refcount < lowest_valid);
 
   if (dir->dynindx == -1)
     {
