@@ -1,3 +1,9 @@
+Mon Dec  4 12:29:05 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* sh-opc.h (sh_arg_type): Added A_SSR and A_SPC.
+	(sh_table): Added many SH3 opcodes.
+	* sh-dis.c (print_insn_shx): Added cases for A_SSR and A_SPC.
+
 Fri Dec  1 07:42:18 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* ppc-opc.c (subfc., subfco): Mark this PPCCOM, not PPC.

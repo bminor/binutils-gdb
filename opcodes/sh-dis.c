@@ -142,7 +142,7 @@ print_insn_shx(memaddr, info)
       }
     ok:
       fprintf(stream,"%s\t", op->name);
-      for (n = 0; n < 2 && op->arg[n] != A_END; n++) 
+      for (n = 0; n < 3 && op->arg[n] != A_END; n++) 
 	{
 	  if (n && op->arg[1] != A_END)
 	    fprintf(stream,",");
@@ -212,6 +212,12 @@ print_insn_shx(memaddr, info)
 	    case A_VBR:
 	      fprintf(stream,"vbr");
 	      break;
+	    case A_SSR:
+	      fprintf(stream,"ssr");
+	      break;
+	    case A_SPC:
+	      fprintf(stream,"spc");
+	      break;
 	    case A_MACH:
 	      fprintf(stream,"mach");
 	      break;
@@ -235,6 +241,9 @@ print_insn_shx(memaddr, info)
 	    case FPUL_M:
 	    case FPUL_N:
 	      fprintf(stream,"fpul");
+	      break;
+	    case F_FR0:
+	      fprintf(stream,"fr0");
 	      break;
 /* end-sanitize-sh3e */
 	    default:
