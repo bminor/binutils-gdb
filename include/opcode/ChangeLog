@@ -1,3 +1,31 @@
+Sun Dec  6 13:21:34 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* i386.h (i386_optab): Permit w suffix on processor control and
+ 	status word instructions.
+
+1998-11-30  Doug Evans  <devans@casey.cygnus.com>
+
+	* cgen.h (struct cgen_hw_entry): Delete const on attrs member.
+	(struct cgen_keyword_entry): Ditto.
+	(struct cgen_operand): Ditto.
+	(CGEN_IFLD): New typedef, with associated access macros.
+	(CGEN_IFMT): New typedef, with associated access macros.
+	(CGEN_IFMT): Renamed from CGEN_FORMAT.  New member `iflds'.
+	(CGEN_IVALUE): New typedef.
+	(struct cgen_insn): Delete const on syntax,attrs members.
+	`format' now points to format data.  Type of `value' is now
+	CGEN_IVALUE.
+	(struct cgen_opcode_table): New member ifld_table.
+
+1998-11-18  Doug Evans  <devans@casey.cygnus.com>
+
+	* cgen.h (cgen_extract_fn): Update type of `base_insn' arg.
+	(CGEN_OPERAND_INSTANCE): New member `attrs'.
+	(CGEN_OPERAND_INSTANCE_{ATTRS,ATTR}): New macros.
+	(cgen_dis_lookup_insn): Update type of `base_insn' arg.
+	(cgen_opcode_table): Update type of dis_hash fn.
+	(extract_operand): Update type of `insn_value' arg.
+
 Thu Oct 29 11:38:36 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* cgen.h (CGEN_VERSION_{MAJOR,MINOR,FIXLEVEL}): Delete.
