@@ -27,6 +27,7 @@ Makefile.in
 README
 configure.in
 gdbserver.1
+low-hppabsd.c
 low-lynx.c
 low-sparc.c
 low-sun3.c
