@@ -1,3 +1,8 @@
+Thu Apr 15 01:00:29 1993  John Gilmore  (gnu@cygnus.com)
+
+	* ieee.c (ieee_slurp_sections):  Pass all ieee section names
+	straight through into BFD sections.  Add comments.
+
 Wed Apr 14 20:34:54 1993  John Gilmore  (gnu@cygnus.com)
 
 	Cleanup in preparation for better 64-bit host support.
