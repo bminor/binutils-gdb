@@ -1,3 +1,13 @@
+2003-10-31  Andrew Cagney  <cagney@redhat.com>
+
+	* s390-tdep.c (s390_cannot_extract_struct_value_address): New
+	function.
+	(s390_gdbarch_init): Set extract_struct_value_address.
+	* arch-utils.c (generic_cannot_extract_struct_value_address):
+	Delete function.
+	* arch-utils.h (generic_cannot_extract_struct_value_address):
+	Delete definition.
+
 2003-10-31  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-linux-nat.c (fetch_core_registers): Remove.

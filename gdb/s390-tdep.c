@@ -1874,6 +1874,15 @@ s390_frame_chain (struct frame_info *thisframe)
 
 
 
+/* NOTE: cagney/2003-10-31: "return_value" makes
+   "extract_struct_value_address", "extract_return_value", and
+   "use_struct_convention" redundant.  */
+static CORE_ADDR
+s390_cannot_extract_struct_value_address (struct regcache *regcache)
+{
+  return 0;
+}
+
 /* a given return value in `regbuf' with a type `valtype', extract and copy its
    value into `valbuf' */
 static void
@@ -2622,8 +2631,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_stab_reg_to_regnum (gdbarch, s390_stab_reg_to_regnum);
   set_gdbarch_dwarf_reg_to_regnum (gdbarch, s390_stab_reg_to_regnum);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, s390_stab_reg_to_regnum);
-  set_gdbarch_deprecated_extract_struct_value_address
-    (gdbarch, generic_cannot_extract_struct_value_address);
+  set_gdbarch_extract_struct_value_address (gdbarch, s390_cannot_extract_struct_value_address);
 
   /* Parameters for inferior function calls.  */
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
