@@ -1,3 +1,9 @@
+1998-12-14  Doug Evans  <devans@casey.cygnus.com>
+
+	* lib/sim-defs.exp (run_sim_test): New option xerror, for expected
+	errors.  Translate \n sequences in expected output to newline char.
+	(slurp_options): Make parentheses optional.
+
 1998-12-14  Dave Brolley  <brolley@cygnus.com>
 
 	* sim/fr30/call.cgs: Test ret here as well.
