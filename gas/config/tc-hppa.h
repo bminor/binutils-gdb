@@ -1,6 +1,6 @@
 /* tc-hppa.h -- Header file for the PA
-   Copyright 1989, 1993, 1994, 1995, 1997, 1998, 1999, 2000, 2001, 2002
-   Free Software Foundation, Inc.
+   Copyright 1989, 1993, 1994, 1995, 1997, 1998, 1999, 2000, 2001, 2002,
+   2003 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -140,6 +140,9 @@ int hppa_fix_adjustable PARAMS((struct fix *));
    normally appear safe to handle it completely within GAS.  */
 #define TC_FORCE_RELOCATION(FIX) hppa_force_relocation (FIX)
 
+/* Values passed to md_apply_fix3 don't include the symbol value.  */
+#define MD_APPLY_SYM_VALUE(FIX) 0
+
 #ifdef OBJ_SOM
 /* If a symbol is imported, but never used, then the symbol should
    *not* end up in the symbol table.  Likewise for absolute symbols
@@ -161,10 +164,9 @@ int hppa_fix_adjustable PARAMS((struct fix *));
 #define UNDEFINED_DIFFERENCE_OK
 #endif
 
-/* Values passed to md_apply_fix3 don't include the symbol value.  */
-#define MD_APPLY_SYM_VALUE(FIX) 0
-
 #ifdef OBJ_ELF
+#define DIFF_EXPR_OK 1
+
 /* Handle .type psuedo.  Given a type string of `millicode', set the
    internal elf symbol type to STT_PARISC_MILLI, and return
    BSF_FUNCTION for the BFD symbol type.  */

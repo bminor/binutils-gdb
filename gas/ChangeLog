@@ -1,3 +1,8 @@
+2003-01-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-hppa.h (DIFF_EXPR_OK): Define.
+	(MD_APPLY_SYM_VALUE): Move.
+
 2003-01-23  Nick Clifton  <nickc@redhat.com>
 
         NEWS: Announce sh2e support.
