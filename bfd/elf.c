@@ -2206,6 +2206,7 @@ _bfd_elf_make_section_from_phdr (bfd *abfd,
   newsect->_raw_size = hdr->p_filesz;
   newsect->filepos = hdr->p_offset;
   newsect->flags |= SEC_HAS_CONTENTS;
+  newsect->alignment_power = bfd_log2 (hdr->p_align);
   if (hdr->p_type == PT_LOAD)
     {
       newsect->flags |= SEC_ALLOC;
