@@ -1,3 +1,9 @@
+2003-02-04  David Carlton  <carlton@math.stanford.edu>
+
+	* objfiles.c (allocate_objfile): Always set name.  Add comment at
+	start of function.
+	* jv-lang.c (get_dynamics_objfile): Add comment.
+
 2003-02-03  Michal Ludvig  <mludvig@suse.cz>
 
 	* dwarf2cfi.c (pointer_encoding): Added new parameter.
