@@ -121,17 +121,17 @@ static boolean xcoff_write_armap_big
 static boolean xcoff_write_archive_contents_old PARAMS ((bfd *));
 static boolean xcoff_write_archive_contents_big PARAMS ((bfd *));
 static void xcoff_swap_ldhdr_in
-  PARAMS ((bfd *, const struct external_ldhdr *, struct internal_ldhdr *));
+  PARAMS ((bfd *, const PTR, struct internal_ldhdr *));
 static void xcoff_swap_ldhdr_out
-  PARAMS ((bfd *, const struct internal_ldhdr *, struct external_ldhdr *));
+  PARAMS ((bfd *, const struct internal_ldhdr *, PTR));
 static void xcoff_swap_ldsym_in
-  PARAMS ((bfd *, const struct external_ldsym *, struct internal_ldsym *));
+  PARAMS ((bfd *, const PTR, struct internal_ldsym *));
 static void xcoff_swap_ldsym_out
-  PARAMS ((bfd *, const struct internal_ldsym *, struct external_ldsym *));
+  PARAMS ((bfd *, const struct internal_ldsym *, PTR));
 static void xcoff_swap_ldrel_in
-  PARAMS ((bfd *, const struct external_ldrel *, struct internal_ldrel *));
+  PARAMS ((bfd *, const PTR, struct internal_ldrel *));
 static void xcoff_swap_ldrel_out
-  PARAMS ((bfd *, const struct internal_ldrel *, struct external_ldrel *));
+  PARAMS ((bfd *, const struct internal_ldrel *, PTR));
 static boolean xcoff_ppc_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   struct internal_reloc *, struct internal_syment *, asection **));
@@ -139,7 +139,7 @@ static boolean _bfd_xcoff_put_ldsymbol_name
   PARAMS ((bfd *, struct xcoff_loader_info *, struct internal_ldsym *,
 	   const char *));
 static asection *xcoff_create_csect_from_smclas
-  PARAMS ((bfd *, union internal_auxent *, char *));
+  PARAMS ((bfd *, union internal_auxent *, const char *));
 static boolean xcoff_is_lineno_count_overflow PARAMS ((bfd *, bfd_vma));
 static boolean xcoff_is_reloc_count_overflow PARAMS ((bfd *, bfd_vma));
 static bfd_vma xcoff_loader_symbol_offset
@@ -2272,11 +2272,13 @@ _bfd_xcoff_sizeof_headers (abfd, reloc)
 /* Swap in the ldhdr structure.  */
 
 static void
-xcoff_swap_ldhdr_in (abfd, src, dst)
+xcoff_swap_ldhdr_in (abfd, s, dst)
      bfd *abfd;
-     const struct external_ldhdr *src;
+     const PTR s;
      struct internal_ldhdr *dst;
 {
+  const struct external_ldhdr *src = (const struct external_ldhdr *) s;
+
   dst->l_version = bfd_get_32 (abfd, src->l_version);
   dst->l_nsyms = bfd_get_32 (abfd, src->l_nsyms);
   dst->l_nreloc = bfd_get_32 (abfd, src->l_nreloc);
@@ -2290,11 +2292,13 @@ xcoff_swap_ldhdr_in (abfd, src, dst)
 /* Swap out the ldhdr structure.  */
 
 static void
-xcoff_swap_ldhdr_out (abfd, src, dst)
+xcoff_swap_ldhdr_out (abfd, src, d)
      bfd *abfd;
      const struct internal_ldhdr *src;
-     struct external_ldhdr *dst;
+     PTR d;
 {
+  struct external_ldhdr *dst = (struct external_ldhdr *) d;
+
   bfd_put_32 (abfd, src->l_version, dst->l_version);
   bfd_put_32 (abfd, src->l_nsyms, dst->l_nsyms);
   bfd_put_32 (abfd, src->l_nreloc, dst->l_nreloc);
@@ -2308,11 +2312,13 @@ xcoff_swap_ldhdr_out (abfd, src, dst)
 /* Swap in the ldsym structure.  */
 
 static void
-xcoff_swap_ldsym_in (abfd, src, dst)
+xcoff_swap_ldsym_in (abfd, s, dst)
      bfd *abfd;
-     const struct external_ldsym *src;
+     const PTR s;
      struct internal_ldsym *dst;
 {
+  const struct external_ldsym *src = (const struct external_ldsym *) s;
+
   if (bfd_get_32 (abfd, src->_l._l_l._l_zeroes) != 0) {
     memcpy (dst->_l._l_name, src->_l._l_name, SYMNMLEN);
   } else {
@@ -2330,11 +2336,12 @@ xcoff_swap_ldsym_in (abfd, src, dst)
 /* Swap out the ldsym structure.  */
 
 static void
-xcoff_swap_ldsym_out (abfd, src, dst)
+xcoff_swap_ldsym_out (abfd, src, d)
      bfd *abfd;
      const struct internal_ldsym *src;
-     struct external_ldsym *dst;
+     PTR d;
 {
+  struct external_ldsym *dst = (struct external_ldsym *) d;
 
   if (src->_l._l_l._l_zeroes != 0)
     memcpy (dst->_l._l_name, src->_l._l_name, SYMNMLEN);
@@ -2354,11 +2361,13 @@ xcoff_swap_ldsym_out (abfd, src, dst)
 /* Swap in the ldrel structure.  */
 
 static void
-xcoff_swap_ldrel_in (abfd, src, dst)
+xcoff_swap_ldrel_in (abfd, s, dst)
      bfd *abfd;
-     const struct external_ldrel *src;
+     const PTR s;
      struct internal_ldrel *dst;
 {
+  const struct external_ldrel *src = (const struct external_ldrel *) s;
+
   dst->l_vaddr = bfd_get_32 (abfd, src->l_vaddr);
   dst->l_symndx = bfd_get_32 (abfd, src->l_symndx);
   dst->l_rtype = bfd_get_16 (abfd, src->l_rtype);
@@ -2368,11 +2377,13 @@ xcoff_swap_ldrel_in (abfd, src, dst)
 /* Swap out the ldrel structure.  */
 
 static void
-xcoff_swap_ldrel_out (abfd, src, dst)
+xcoff_swap_ldrel_out (abfd, src, d)
      bfd *abfd;
      const struct internal_ldrel *src;
-     struct external_ldrel *dst;
+     PTR d;
 {
+  struct external_ldrel *dst = (struct external_ldrel *) d;
+
   bfd_put_32 (abfd, src->l_vaddr, dst->l_vaddr);
   bfd_put_32 (abfd, src->l_symndx, dst->l_symndx);
   bfd_put_16 (abfd, src->l_rtype, dst->l_rtype);
@@ -2817,7 +2828,7 @@ static asection *
 xcoff_create_csect_from_smclas (abfd, aux, symbol_name) 
      bfd *abfd;
      union internal_auxent *aux;
-     char *symbol_name;
+     const char *symbol_name;
 {
 
   asection *return_value = NULL;

@@ -92,6 +92,12 @@ do { \
 #define GETBYTE bfd_h_get_8
 
 
+static void _bfd_xcoff64_swap_lineno_in PARAMS ((bfd *, PTR, PTR));
+static unsigned int _bfd_xcoff64_swap_lineno_out PARAMS ((bfd *, PTR, PTR));
+static boolean _bfd_xcoff64_put_ldsymbol_name
+  PARAMS ((bfd *, struct xcoff_loader_info *, struct internal_ldsym *,
+	   const char *));
+
 /* For XCOFF64, the effective width of symndx changes depending on 
    whether we are the first entry.  Sigh.  */
 static void
@@ -488,14 +494,46 @@ extern int rs6000coff_core_file_failing_signal PARAMS ((bfd *abfd));
    moved to another file shared by the linker (which XCOFF calls the
    ``binder'') and the loader.  */
 
+static void xcoff64_swap_ldhdr_in
+  PARAMS ((bfd *, const PTR, struct internal_ldhdr *));
+static void xcoff64_swap_ldhdr_out
+  PARAMS ((bfd *, const struct internal_ldhdr *, PTR d));
+static void xcoff64_swap_ldsym_in
+  PARAMS ((bfd *, const PTR, struct internal_ldsym *));
+static void xcoff64_swap_ldsym_out
+  PARAMS ((bfd *, const struct internal_ldsym *, PTR d));
+static void xcoff64_swap_ldrel_in
+  PARAMS ((bfd *, const PTR, struct internal_ldrel *));
+static void xcoff64_swap_ldrel_out
+  PARAMS ((bfd *, const struct internal_ldrel *, PTR d));
+static boolean xcoff64_write_object_contents PARAMS ((bfd *));
+static boolean xcoff64_ppc_relocate_section
+  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
+	   struct internal_reloc *, struct internal_syment *,
+	   asection **sections));
+static boolean xcoff64_slurp_armap PARAMS ((bfd *));
+static const bfd_target *xcoff64_archive_p PARAMS ((bfd *));
+static bfd *xcoff64_openr_next_archived_file PARAMS ((bfd *, bfd *));
+static int xcoff64_sizeof_headers PARAMS ((bfd *, boolean));
+static asection *xcoff64_create_csect_from_smclas
+  PARAMS ((bfd *, union internal_auxent *, const char *));
+static boolean xcoff64_is_lineno_count_overflow PARAMS ((bfd *, bfd_vma));
+static boolean xcoff64_is_reloc_count_overflow PARAMS ((bfd *, bfd_vma));
+static bfd_vma xcoff64_loader_symbol_offset
+  PARAMS ((bfd *, struct internal_ldhdr *));
+static bfd_vma xcoff64_loader_reloc_offset
+  PARAMS ((bfd *, struct internal_ldhdr *));
+
 /* Swap in the ldhdr structure.  */
 
 static void
-xcoff64_swap_ldhdr_in (abfd, src, dst)
-  bfd *abfd;
- const struct external_ldhdr *src;
- struct internal_ldhdr *dst;
- {
+xcoff64_swap_ldhdr_in (abfd, s, dst)
+     bfd *abfd;
+     const PTR s;
+     struct internal_ldhdr *dst;
+{
+  const struct external_ldhdr *src = (const struct external_ldhdr *) s;
+
   dst->l_version = bfd_get_32 (abfd, src->l_version);
   dst->l_nsyms = bfd_get_32 (abfd, src->l_nsyms);
   dst->l_nreloc = bfd_get_32 (abfd, src->l_nreloc);
@@ -511,11 +549,13 @@ xcoff64_swap_ldhdr_in (abfd, src, dst)
 /* Swap out the ldhdr structure.  */
 
 static void
-xcoff64_swap_ldhdr_out (abfd, src, dst)
+xcoff64_swap_ldhdr_out (abfd, src, d)
      bfd *abfd;
      const struct internal_ldhdr *src;
-     struct external_ldhdr *dst;
+     PTR d;
 {
+  struct external_ldhdr *dst = (struct external_ldhdr *) d;
+
   bfd_put_32 (abfd, src->l_version, dst->l_version);
   bfd_put_32 (abfd, src->l_nsyms, dst->l_nsyms);
   bfd_put_32 (abfd, src->l_nreloc, dst->l_nreloc);
@@ -531,11 +571,12 @@ xcoff64_swap_ldhdr_out (abfd, src, dst)
 /* Swap in the ldsym structure.  */
 
 static void
-xcoff64_swap_ldsym_in (abfd, src, dst)
+xcoff64_swap_ldsym_in (abfd, s, dst)
      bfd *abfd;
-     const struct external_ldsym *src;
+     const PTR s;
      struct internal_ldsym *dst;
 {
+  const struct external_ldsym *src = (const struct external_ldsym *) s;
   /* 
    * XCOFF64 does not use l_zeroes like XCOFF32
    * Set the internal l_zeroes to 0 so the common 32/64 code uses l_value
@@ -554,11 +595,13 @@ xcoff64_swap_ldsym_in (abfd, src, dst)
 /* Swap out the ldsym structure.  */
 
 static void
-xcoff64_swap_ldsym_out (abfd, src, dst)
+xcoff64_swap_ldsym_out (abfd, src, d)
      bfd *abfd;
      const struct internal_ldsym *src;
-     struct external_ldsym *dst;
+     PTR d;
 {
+  struct external_ldsym *dst = (struct external_ldsym *) d;
+
   bfd_put_64 (abfd, src->l_value, dst->l_value);
   bfd_put_32 (abfd, src->_l._l_l._l_offset, dst->l_offset);
   bfd_put_16 (abfd, src->l_scnum, dst->l_scnum);
@@ -571,11 +614,13 @@ xcoff64_swap_ldsym_out (abfd, src, dst)
 /* Swap in the ldrel structure.  */
 
 static void
-xcoff64_swap_ldrel_in (abfd, src, dst)
+xcoff64_swap_ldrel_in (abfd, s, dst)
      bfd *abfd;
-     const struct external_ldrel *src;
+     const PTR s;
      struct internal_ldrel *dst;
 {
+  const struct external_ldrel *src = (const struct external_ldrel *) s;
+
   dst->l_vaddr = bfd_get_64 (abfd, src->l_vaddr);
   dst->l_symndx = bfd_get_32 (abfd, src->l_symndx);
   dst->l_rtype = bfd_get_16 (abfd, src->l_rtype);
@@ -585,11 +630,13 @@ xcoff64_swap_ldrel_in (abfd, src, dst)
 /* Swap out the ldrel structure.  */
 
 static void
-xcoff64_swap_ldrel_out (abfd, src, dst)
+xcoff64_swap_ldrel_out (abfd, src, d)
      bfd *abfd;
      const struct internal_ldrel *src;
-     struct external_ldrel *dst;
+     PTR d;
 {
+  struct external_ldrel *dst = (struct external_ldrel *) d;
+
   bfd_put_64 (abfd, src->l_vaddr, dst->l_vaddr);
   bfd_put_16 (abfd, src->l_rtype, dst->l_rtype);
   bfd_put_16 (abfd, src->l_rsecnm, dst->l_rsecnm);
@@ -926,7 +973,7 @@ xcoff64_write_object_contents (abfd)
    This is currently the only processor which uses XCOFF; I hope that
    will never change.  */
 
-boolean
+static boolean
 xcoff64_ppc_relocate_section (output_bfd, info, input_bfd,
 			      input_section, contents, relocs, syms,
 			      sections)
@@ -1698,7 +1745,7 @@ xcoff64_reloc_type_lookup (abfd, code)
 
 /* Read in the armap of an XCOFF archive.  */
 
-boolean
+static boolean
 xcoff64_slurp_armap (abfd)
      bfd *abfd;
 {
@@ -1791,7 +1838,7 @@ xcoff64_slurp_armap (abfd)
 
 /* See if this is an NEW XCOFF archive.  */
 
-const bfd_target *
+static const bfd_target *
 xcoff64_archive_p (abfd)
      bfd *abfd;
 {
@@ -1860,7 +1907,7 @@ xcoff64_archive_p (abfd)
 
 /* Open the next element in an XCOFF archive.  */
 
-bfd *
+static bfd *
 xcoff64_openr_next_archived_file (archive, last_file)
      bfd *archive;
      bfd *last_file;
@@ -1901,7 +1948,7 @@ xcoff64_openr_next_archived_file (archive, last_file)
    always uses an a.out header.  */
 
 /*ARGSUSED*/
-int
+static int
 xcoff64_sizeof_headers (abfd, reloc)
      bfd *abfd;
      boolean reloc ATTRIBUTE_UNUSED;
@@ -1960,7 +2007,7 @@ xcoff64_create_csect_from_smclas (abfd, aux, symbol_name)
   return return_value;
 }
 
-boolean 
+static boolean 
 xcoff64_is_lineno_count_overflow (abfd, value)
     bfd *abfd ATTRIBUTE_UNUSED;
 	bfd_vma value ATTRIBUTE_UNUSED;
@@ -1968,7 +2015,7 @@ xcoff64_is_lineno_count_overflow (abfd, value)
   return false;
 }
 
-boolean 
+static boolean 
 xcoff64_is_reloc_count_overflow (abfd, value)
     bfd *abfd ATTRIBUTE_UNUSED;
 	bfd_vma value ATTRIBUTE_UNUSED;
@@ -1976,7 +2023,7 @@ xcoff64_is_reloc_count_overflow (abfd, value)
   return false;
 }
 
-bfd_vma
+static bfd_vma
 xcoff64_loader_symbol_offset (abfd, ldhdr)
     bfd *abfd ATTRIBUTE_UNUSED;
 	struct internal_ldhdr *ldhdr;
@@ -1984,7 +2031,7 @@ xcoff64_loader_symbol_offset (abfd, ldhdr)
   return (ldhdr->l_symoff);
 }
 
-bfd_vma
+static bfd_vma
 xcoff64_loader_reloc_offset (abfd, ldhdr)
     bfd *abfd ATTRIBUTE_UNUSED;
     struct internal_ldhdr *ldhdr;
@@ -2269,5 +2316,3 @@ const bfd_target rs6000coff64_vec =
   /* back end data */
   (void *) &bfd_xcoff_backend_data,
 };
-
-

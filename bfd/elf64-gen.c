@@ -40,6 +40,13 @@ static reloc_howto_type dummy =
 	 0,			/* dst_mask */
 	 false);		/* pcrel_offset */
 
+static void elf_generic_info_to_howto
+  PARAMS ((bfd *, arelent *, Elf64_Internal_Rela *));
+static void elf_generic_info_to_howto_rel
+  PARAMS ((bfd *, arelent *, Elf64_Internal_Rel *));
+static boolean elf64_generic_link_add_symbols
+  PARAMS ((bfd *, struct bfd_link_info *));
+
 static void
 elf_generic_info_to_howto (abfd, bfd_reloc, elf_reloc)
      bfd *abfd ATTRIBUTE_UNUSED;

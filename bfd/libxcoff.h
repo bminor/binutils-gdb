@@ -42,12 +42,12 @@ struct xcoff_backend_data_rec
   long _xcoff_machine;
 
   /* function pointers to xcoff specific swap routines */
-  void (* _xcoff_swap_ldhdr_in)(bfd *, PTR, struct internal_ldhdr *);
-  void (* _xcoff_swap_ldhdr_out)(bfd *, struct internal_ldhdr *, PTR);
-  void (* _xcoff_swap_ldsym_in)(bfd *, PTR, struct internal_ldsym *);
-  void (* _xcoff_swap_ldsym_out)(bfd *, struct internal_ldsym *, PTR);
-  void (* _xcoff_swap_ldrel_in)(bfd *, PTR, struct internal_ldrel *);
-  void (* _xcoff_swap_ldrel_out)(bfd *, struct internal_ldrel *, PTR);
+  void (* _xcoff_swap_ldhdr_in)(bfd *, const PTR, struct internal_ldhdr *);
+  void (* _xcoff_swap_ldhdr_out)(bfd *, const struct internal_ldhdr *, PTR);
+  void (* _xcoff_swap_ldsym_in)(bfd *, const PTR, struct internal_ldsym *);
+  void (* _xcoff_swap_ldsym_out)(bfd *, const struct internal_ldsym *, PTR);
+  void (* _xcoff_swap_ldrel_in)(bfd *, const PTR, struct internal_ldrel *);
+  void (* _xcoff_swap_ldrel_out)(bfd *, const struct internal_ldrel *, PTR);
 
   /* size of the the external struct */
   unsigned int _xcoff_ldhdrsz; 
