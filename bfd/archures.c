@@ -146,10 +146,10 @@ DESCRIPTION
 . {* start-sanitize-v850 *}
 .  bfd_arch_v850,      {* NEC V850 *}
 . {* start-sanitize-v850e *}
-#define bfd_mach_v850e	'E'
+.#define bfd_mach_v850e	'E'
 . {* end-sanitize-v850e *}
 . {* start-sanitize-v850eq *}
-#define bfd_mach_v850eq	'Q'
+.#define bfd_mach_v850eq	'Q'
 . {* end-sanitize-v850eq *}
 . {* end-sanitize-v850 *}
 .  bfd_arch_arc,       {* Argonaut RISC Core *}

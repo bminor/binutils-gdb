@@ -1237,13 +1237,13 @@ enum bfd_architecture
   /* end-sanitize-tic80 */
   /* start-sanitize-v850 */
   bfd_arch_v850,       /* NEC V850 */
-  /* end-sanitize-v850 */
   /* start-sanitize-v850e */
 #define bfd_mach_v850e	'E'
   /* end-sanitize-v850e */
   /* start-sanitize-v850eq */
 #define bfd_mach_v850eq	'Q'
   /* end-sanitize-v850eq */
+  /* end-sanitize-v850 */
   bfd_arch_arc,        /* Argonaut RISC Core */
 #define bfd_mach_arc_base 0
   bfd_arch_m32r,       /* Mitsubishi M32R/D */
