@@ -29,6 +29,7 @@ all.texi
 as.1
 as.texinfo
 c-a29k.texi
+c-arm.texi
 c-d10v.texi
 c-h8300.texi
 c-h8500.texi
