@@ -12,3 +12,4 @@ Disassembly of section \.text:
  * 8:	70a60001 *	madu	\$5,\$6
  * c:	00003812 *	mflo	\$7
  *10:	01000011 *	mthi	\$8
+	...

@@ -27,7 +27,6 @@ OFFSET  *TYPE  *VALUE
 
 Contents of section \.text:
  0000 6ff0fff0 cc00aad0 cc0022e0 6ff0fff0  .*
-Contents of section \.data:
 Contents of section \.text\.compact:
  0000 0009e02a 89000009 0009               .*
 Contents of section \.text\.shmediaanddata:

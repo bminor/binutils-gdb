@@ -19,6 +19,35 @@
    along with this program; if not, write to the Free Software
    Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+/* Objdump overview.
+
+   Objdump displays information about one or more object files, either on
+   their own, or inside libraries.  It is commonly used as a disassembler,
+   but it can also display information about file headers, symbol tables,
+   relocations, debugging directives and more.
+
+   The flow of execution is as follows:
+ 
+   1. Command line arguments are checked for control switches and the
+      information to be displayed is selected.
+      
+   2. Any remaining arguments are assumed to be object files, and they are
+      processed in order by display_bfd().  If the file is an archive each
+      of its elements is processed in turn.
+      
+   3. The file's target architecture and binary file format are determnined
+      by bfd_check_format().  If they are recognised, then dump_bfd() is
+      called.
+
+   4. dump_bfd() in turn calls seperate functions to display the requested
+      item(s) of infomation(s).  For example dissasemble_data() is called if
+      a disassmebly has been requested.
+
+   When disassembling the code loops through blocks of instructions bounded
+   by symbols, calling dissassemble_bytes() on each block.  The actual
+   disassembling is done by the libopcodes library, via a function pointer
+   supplied by the disassembler() function.  */
+
 #include "bfd.h"
 #include "bfdver.h"
 #include "progress.h"
@@ -46,6 +75,7 @@ static int exit_status = 0;
 
 static char *default_target = NULL;	/* Default at runtime.  */
 
+/* The following variables are set based on arguments passed on command line.  */
 static int show_version = 0;		/* Show the version number.  */
 static int dump_section_contents;	/* -s */
 static int dump_section_headers;	/* -h */
@@ -66,9 +96,6 @@ static bfd_boolean disassemble;		/* -d */
 static bfd_boolean disassemble_all;	/* -D */
 static int disassemble_zeroes;		/* --disassemble-zeroes */
 static bfd_boolean formats_info;	/* -i */
-static char **only;			/* -j secname */
-static size_t only_size = 0;
-static size_t only_used = 0;
 static int wide_output;			/* -w */
 static bfd_vma start_address = (bfd_vma) -1; /* --start-address */
 static bfd_vma stop_address = (bfd_vma) -1;  /* --stop-address */
@@ -77,16 +104,27 @@ static int dump_debugging_tags;		/* --debugging-tags */
 static bfd_vma adjust_section_vma = 0;	/* --adjust-vma */
 static int file_start_context = 0;      /* --file-start-context */
 
+/* Pointer to an array of section names provided by
+   one or more "-j secname" command line options.  */
+static char **only;
+/* The total number of slots in the only[] array.  */
+static size_t only_size = 0;
+/* The number of occupied slots in the only[] array.  */
+static size_t only_used = 0;
+
 /* Variables for handling include file path table.  */
 static const char **include_paths;
 static int include_path_count;
 
-/* Extra info to pass to the disassembler address printing function.  */
+/* Extra info to pass to the section disassembler and address printing function.  */
 struct objdump_disasm_info
 {
-  bfd *abfd;
-  asection *sec;
-  bfd_boolean require_sec;
+  bfd *              abfd;
+  asection *         sec;
+  bfd_boolean        require_sec;
+  arelent **         dynrelbuf;
+  long               dynrelcount;
+  disassembler_ftype disassemble_fn;
 };
 
 /* Architecture to disassemble for, or default if NULL.  */
@@ -121,15 +159,6 @@ static bfd_size_type stab_size;
 
 static char *strtab;
 static bfd_size_type stabstr_size;
-
-/* Forward declarations.  */
-
-static void dump_data (bfd *);
-static void dump_relocs (bfd *);
-static void dump_dynamic_relocs (bfd *);
-static void dump_reloc_set (bfd *, asection *, arelent **, long);
-static void dump_symbols (bfd *, bfd_boolean);
-static void dump_section_stabs (bfd *, char *, char *);
 
 static void
 usage (FILE *stream, int status)
@@ -562,7 +591,8 @@ compare_relocs (const void *ap, const void *bp)
     return 0;
 }
 
-/* Print VMA to STREAM.  If SKIP_ZEROES is TRUE, omit leading zeroes.  */
+/* Print an address (VMA) to the output stream in INFO.
+   If SKIP_ZEROES is TRUE, omit leading zeroes.  */
 
 static void
 objdump_print_value (bfd_vma vma, struct disassemble_info *info,
@@ -736,7 +766,7 @@ find_symbol_for_address (bfd *abfd, asection *sec, bfd_vma vma,
   return sorted_syms[thisplace];
 }
 
-/* Print an address to INFO symbolically.  */
+/* Print an address and the offset to the nearest symbol.  */
 
 static void
 objdump_print_addr_with_sym (bfd *abfd, asection *sec, asymbol *sym,
@@ -782,8 +812,8 @@ objdump_print_addr_with_sym (bfd *abfd, asection *sec, asymbol *sym,
     }
 }
 
-/* Print VMA to INFO, symbolically if possible.  If SKIP_ZEROES is
-   TRUE, don't output leading zeroes.  */
+/* Print an address (VMA), symbolically if possible.
+   If SKIP_ZEROES is TRUE, don't output leading zeroes.  */
 
 static void
 objdump_print_addr (bfd_vma vma, struct disassemble_info *info,
@@ -1145,6 +1175,24 @@ objdump_sprintf (SFILE *f, const char *format, ...)
   return n;
 }
 
+/* Returns TRUE if the specified section should be dumped.  */
+
+static bfd_boolean
+process_section_p (asection * section)
+{
+  size_t i;
+
+  if (only == NULL)
+    return TRUE;
+
+  for (i = 0; i < only_used; i++)
+    if (strcmp (only [i], section->name) == 0)
+      return TRUE;
+
+  return FALSE;
+}
+
+
 /* The number of zeroes we want to see before we start skipping them.
    The number is arbitrarily chosen.  */
 
@@ -1499,20 +1547,233 @@ disassemble_bytes (struct disassemble_info * info,
     }
 }
 
+static void
+disassemble_section (bfd *abfd, asection *section, void *info)
+{
+  struct disassemble_info *    pinfo = (struct disassemble_info *) info;
+  struct objdump_disasm_info * paux = (struct objdump_disasm_info *) pinfo->application_data;
+  unsigned int                 opb = pinfo->octets_per_byte;
+  bfd_byte *                   data = NULL;
+  bfd_size_type                datasize = 0;
+  arelent **                   rel_pp = NULL;
+  arelent **                   rel_ppstart = NULL;
+  arelent **                   rel_ppend;
+  unsigned long                stop_offset;
+  asymbol *                    sym = NULL;
+  long                         place = 0;
+  long                         rel_count;
+  bfd_vma                      rel_offset;
+  unsigned long                addr_offset;
+
+  /* Sections that do not contain machine
+     code are not normally disassembled.  */
+  if (! disassemble_all
+      && only == NULL
+      && (section->flags & SEC_CODE) == 0)
+    return;
+
+  if (! process_section_p (section))
+    return;
+
+  datasize = bfd_get_section_size_before_reloc (section);
+  if (datasize == 0)
+    return;
+
+  /* Decide which set of relocs to use.  Load them if necessary.  */
+  if (paux->dynrelbuf)
+    {
+      rel_pp = paux->dynrelbuf;
+      rel_count = paux->dynrelcount;
+      /* Dynamic reloc addresses are absolute, non-dynamic are section
+	 relative.  REL_OFFSET specifies the reloc address corresponnding
+	 to the start of this section.  */
+      rel_offset = pinfo->buffer_vma;
+    }
+  else
+    {
+      rel_count = 0;
+      rel_pp = NULL;
+      rel_offset = 0;
+
+      if ((section->flags & SEC_RELOC) != 0
+#ifndef DISASSEMBLER_NEEDS_RELOCS
+	  && dump_reloc_info
+#endif
+	  )
+	{
+	  long relsize;
+
+	  relsize = bfd_get_reloc_upper_bound (abfd, section);
+	  if (relsize < 0)
+	    bfd_fatal (bfd_get_filename (abfd));
+
+	  if (relsize > 0)
+	    {
+	      rel_ppstart = rel_pp = xmalloc (relsize);
+	      rel_count = bfd_canonicalize_reloc (abfd, section, rel_pp, syms);
+	      if (rel_count < 0)
+		bfd_fatal (bfd_get_filename (abfd));
+
+	      /* Sort the relocs by address.  */
+	      qsort (rel_pp, rel_count, sizeof (arelent *), compare_relocs);
+	    }
+	}
+
+    }
+  rel_ppend = rel_pp + rel_count;
+
+  data = xmalloc (datasize);
+
+  bfd_get_section_contents (abfd, section, data, 0, datasize);
+
+  paux->sec = section;
+  pinfo->buffer = data;
+  pinfo->buffer_vma = section->vma;
+  pinfo->buffer_length = datasize;
+  pinfo->section = section;
+
+  if (start_address == (bfd_vma) -1
+      || start_address < pinfo->buffer_vma)
+    addr_offset = 0;
+  else
+    addr_offset = start_address - pinfo->buffer_vma;
+
+  if (stop_address == (bfd_vma) -1)
+    stop_offset = datasize / opb;
+  else
+    {
+      if (stop_address < pinfo->buffer_vma)
+	stop_offset = 0;
+      else
+	stop_offset = stop_address - pinfo->buffer_vma;
+      if (stop_offset > pinfo->buffer_length / opb)
+	stop_offset = pinfo->buffer_length / opb;
+    }
+
+  /* Skip over the relocs belonging to addresses below the
+     start address.  */
+  while (rel_pp < rel_ppend
+	 && (*rel_pp)->address < rel_offset + addr_offset)
+    ++rel_pp;
+
+  printf (_("Disassembly of section %s:\n"), section->name);
+
+  /* Find the nearest symbol forwards from our current position.  */
+  sym = find_symbol_for_address (abfd, section, section->vma + addr_offset,
+				 TRUE, &place);
+
+  /* Disassemble a block of instructions up to the address associated with
+     the symbol we have just found.  Then print the symbol and find the
+     next symbol on.  Repeat until we have disassembled the entire section
+     or we have reached the end of the address range we are interested in.  */
+  while (addr_offset < stop_offset)
+    {
+      asymbol *nextsym;
+      unsigned long nextstop_offset;
+      bfd_boolean insns;
+
+      if (sym != NULL
+	  && bfd_asymbol_value (sym) <= section->vma + addr_offset)
+	{
+	  int x;
+
+	  for (x = place;
+	       (x < sorted_symcount
+		&& (bfd_asymbol_value (sorted_syms[x])
+		    <= section->vma + addr_offset));
+	       ++x)
+	    continue;
+
+	  pinfo->symbols = & sorted_syms[place];
+	  pinfo->num_symbols = x - place;
+	}
+      else
+	pinfo->symbols = NULL;
+
+      if (! prefix_addresses)
+	{
+	  pinfo->fprintf_func (pinfo->stream, "\n");
+	  objdump_print_addr_with_sym (abfd, section, sym,
+				       section->vma + addr_offset,
+				       pinfo, FALSE);
+	  pinfo->fprintf_func (pinfo->stream, ":\n");
+	}
+
+      if (sym != NULL
+	  && bfd_asymbol_value (sym) > section->vma + addr_offset)
+	nextsym = sym;
+      else if (sym == NULL)
+	nextsym = NULL;
+      else
+	{
+	  /* Search forward for the next appropriate symbol in
+	     SECTION.  Note that all the symbols are sorted
+	     together into one big array, and that some sections
+	     may have overlapping addresses.  */
+	  while (place < sorted_symcount
+		 && (sorted_syms[place]->section != section
+		     || (bfd_asymbol_value (sorted_syms[place])
+			 <= bfd_asymbol_value (sym))))
+	    ++place;
+	  if (place >= sorted_symcount)
+	    nextsym = NULL;
+	  else
+	    nextsym = sorted_syms[place];
+	}
+
+      if (sym != NULL
+	  && bfd_asymbol_value (sym) > section->vma + addr_offset)
+	{
+	  nextstop_offset = bfd_asymbol_value (sym) - section->vma;
+	  if (nextstop_offset > stop_offset)
+	    nextstop_offset = stop_offset;
+	}
+      else if (nextsym == NULL)
+	nextstop_offset = stop_offset;
+      else
+	{
+	  nextstop_offset = bfd_asymbol_value (nextsym) - section->vma;
+	  if (nextstop_offset > stop_offset)
+	    nextstop_offset = stop_offset;
+	}
+
+      /* If a symbol is explicitly marked as being an object
+	 rather than a function, just dump the bytes without
+	 disassembling them.  */
+      if (disassemble_all
+	  || sym == NULL
+	  || bfd_asymbol_value (sym) > section->vma + addr_offset
+	  || ((sym->flags & BSF_OBJECT) == 0
+	      && (strstr (bfd_asymbol_name (sym), "gnu_compiled")
+		  == NULL)
+	      && (strstr (bfd_asymbol_name (sym), "gcc2_compiled")
+		  == NULL))
+	  || (sym->flags & BSF_FUNCTION) != 0)
+	insns = TRUE;
+      else
+	insns = FALSE;
+
+      disassemble_bytes (pinfo, paux->disassemble_fn, insns, data,
+			 addr_offset, nextstop_offset,
+			 rel_offset, &rel_pp, rel_ppend);
+
+      addr_offset = nextstop_offset;
+      sym = nextsym;
+    }
+
+  free (data);
+
+  if (rel_ppstart != NULL)
+    free (rel_ppstart);
+}
+
 /* Disassemble the contents of an object file.  */
 
 static void
 disassemble_data (bfd *abfd)
 {
-  unsigned long addr_offset;
-  disassembler_ftype disassemble_fn;
   struct disassemble_info disasm_info;
   struct objdump_disasm_info aux;
-  asection *section;
-  unsigned int opb;
-  arelent **dynrelbuf = NULL;
-  long relcount = 0;
-  bfd_vma rel_offset;
 
   print_files = NULL;
   prev_functionname = NULL;
@@ -1533,6 +1794,9 @@ disassemble_data (bfd *abfd)
   disasm_info.application_data = (void *) &aux;
   aux.abfd = abfd;
   aux.require_sec = FALSE;
+  aux.dynrelbuf = NULL;
+  aux.dynrelcount = 0;
+
   disasm_info.print_address_func = objdump_print_address;
   disasm_info.symbol_at_address_func = objdump_symbol_at_address;
 
@@ -1556,8 +1820,9 @@ disassemble_data (bfd *abfd)
       abfd->xvec = xvec;
     }
 
-  disassemble_fn = disassembler (abfd);
-  if (!disassemble_fn)
+  /* Use libopcodes to locate a suitable disassembler.  */
+  aux.disassemble_fn = disassembler (abfd);
+  if (!aux.disassemble_fn)
     {
       non_fatal (_("Can't disassemble for architecture %s\n"),
 		 bfd_printable_arch_mach (bfd_get_arch (abfd), 0));
@@ -1565,13 +1830,11 @@ disassemble_data (bfd *abfd)
       return;
     }
 
-  opb = bfd_octets_per_byte (abfd);
-
   disasm_info.flavour = bfd_get_flavour (abfd);
   disasm_info.arch = bfd_get_arch (abfd);
   disasm_info.mach = bfd_get_mach (abfd);
   disasm_info.disassembler_options = disassembler_options;
-  disasm_info.octets_per_byte = opb;
+  disasm_info.octets_per_byte = bfd_octets_per_byte (abfd);
 
   if (bfd_big_endian (abfd))
     disasm_info.display_endian = disasm_info.endian = BFD_ENDIAN_BIG;
@@ -1582,260 +1845,34 @@ disassemble_data (bfd *abfd)
        instead.  */
     disasm_info.endian = BFD_ENDIAN_UNKNOWN;
 
+  /* Pre-load the dynamic relocs if we are going
+     to be dumping them along with the disassembly.  */
   if (dump_dynamic_reloc_info)
     {
       long relsize = bfd_get_dynamic_reloc_upper_bound (abfd);
-
+  
       if (relsize < 0)
 	bfd_fatal (bfd_get_filename (abfd));
 
       if (relsize > 0)
 	{
-	  dynrelbuf = xmalloc (relsize);
-	  relcount = bfd_canonicalize_dynamic_reloc (abfd, dynrelbuf, dynsyms);
-	  if (relcount < 0)
+	  aux.dynrelbuf = xmalloc (relsize);
+	  aux.dynrelcount = bfd_canonicalize_dynamic_reloc (abfd, aux.dynrelbuf, dynsyms);
+	  if (aux.dynrelcount < 0)
 	    bfd_fatal (bfd_get_filename (abfd));
 
 	  /* Sort the relocs by address.  */
-	  qsort (dynrelbuf, relcount, sizeof (arelent *), compare_relocs);
+	  qsort (aux.dynrelbuf, aux.dynrelcount, sizeof (arelent *), compare_relocs);
 	}
     }
 
-  for (section = abfd->sections;
-       section != NULL;
-       section = section->next)
-    {
-      bfd_byte *data = NULL;
-      bfd_size_type datasize = 0;
-      arelent **relbuf = NULL;
-      arelent **relpp = NULL;
-      arelent **relppend = NULL;
-      unsigned long stop_offset;
-      asymbol *sym = NULL;
-      long place = 0;
+  bfd_map_over_sections (abfd, disassemble_section, & disasm_info);
 
-      /* Sections that do not contain machine code are not normally
-	 disassembled.  */
-      if (! disassemble_all
-	  && only == NULL
-	  && (section->flags & SEC_CODE) == 0)
-	continue;
-
-      if (only != NULL)
-	{
-	  size_t i;
-
-	  for (i = 0; i < only_used; i++)
-	    if (strcmp (only [i], section->name) == 0)
-	      break;
-
-	  if (i == only_used)
-	    continue;
-	}
-
-      if (dynrelbuf == NULL)
-	relcount = 0;
-      if ((section->flags & SEC_RELOC) != 0
-#ifndef DISASSEMBLER_NEEDS_RELOCS
-	  && dump_reloc_info
-#endif
-	  && dynrelbuf == NULL)
-	{
-	  long relsize;
-
-	  relsize = bfd_get_reloc_upper_bound (abfd, section);
-	  if (relsize < 0)
-	    bfd_fatal (bfd_get_filename (abfd));
-
-	  if (relsize > 0)
-	    {
-	      relbuf = xmalloc (relsize);
-	      relcount = bfd_canonicalize_reloc (abfd, section, relbuf, syms);
-	      if (relcount < 0)
-		bfd_fatal (bfd_get_filename (abfd));
-
-	      /* Sort the relocs by address.  */
-	      qsort (relbuf, relcount, sizeof (arelent *), compare_relocs);
-	    }
-	}
-
-      datasize = bfd_get_section_size_before_reloc (section);
-      if (datasize == 0)
-	continue;
-
-      printf (_("Disassembly of section %s:\n"), section->name);
-
-      data = xmalloc (datasize);
-
-      bfd_get_section_contents (abfd, section, data, 0, datasize);
-
-      aux.sec = section;
-      disasm_info.buffer = data;
-      disasm_info.buffer_vma = section->vma;
-      disasm_info.buffer_length = datasize;
-      disasm_info.section = section;
-
-      if (start_address == (bfd_vma) -1
-	  || start_address < disasm_info.buffer_vma)
-	addr_offset = 0;
-      else
-	addr_offset = start_address - disasm_info.buffer_vma;
-
-      if (dynrelbuf)
-	{
-	  relpp = dynrelbuf;
-	  /* Dynamic reloc addresses are absolute, non-dynamic are
-	     section relative.  REL_OFFSET specifies the reloc address
-	     corresponnding to the start of this section.  */
-	  rel_offset = disasm_info.buffer_vma;
-	}
-      else
-	{
-	  relpp = relbuf;
-	  rel_offset = 0;
-	}
-      relppend = relpp + relcount;
-
-      /* Skip over the relocs belonging to addresses below the
-	 start address.  */
-      while (relpp < relppend
-	     && (*relpp)->address < rel_offset + addr_offset)
-	++relpp;
-
-      if (stop_address == (bfd_vma) -1)
-	stop_offset = datasize / opb;
-      else
-	{
-	  if (stop_address < disasm_info.buffer_vma)
-	    stop_offset = 0;
-	  else
-	    stop_offset = stop_address - disasm_info.buffer_vma;
-	  if (stop_offset > disasm_info.buffer_length / opb)
-	    stop_offset = disasm_info.buffer_length / opb;
-	}
-
-      sym = find_symbol_for_address (abfd, section, section->vma + addr_offset,
-				     TRUE, &place);
-
-      while (addr_offset < stop_offset)
-	{
-	  asymbol *nextsym;
-	  unsigned long nextstop_offset;
-	  bfd_boolean insns;
-
-	  if (sym != NULL
-	      && bfd_asymbol_value (sym) <= section->vma + addr_offset)
-	    {
-	      int x;
-
-	      for (x = place;
-		   (x < sorted_symcount
-		    && (bfd_asymbol_value (sorted_syms[x])
-			<= section->vma + addr_offset));
-		   ++x)
-		continue;
-
-	      disasm_info.symbols = & sorted_syms[place];
-	      disasm_info.num_symbols = x - place;
-	    }
-	  else
-	    disasm_info.symbols = NULL;
-
-	  if (! prefix_addresses)
-	    {
-	      (* disasm_info.fprintf_func) (disasm_info.stream, "\n");
-	      objdump_print_addr_with_sym (abfd, section, sym,
-					   section->vma + addr_offset,
-					   &disasm_info,
-					   FALSE);
-	      (* disasm_info.fprintf_func) (disasm_info.stream, ":\n");
-	    }
-
-	  if (sym != NULL
-	      && bfd_asymbol_value (sym) > section->vma + addr_offset)
-	    nextsym = sym;
-	  else if (sym == NULL)
-	    nextsym = NULL;
-	  else
-	    {
-	      /* Search forward for the next appropriate symbol in
-		 SECTION.  Note that all the symbols are sorted
-		 together into one big array, and that some sections
-		 may have overlapping addresses.  */
-	      while (place < sorted_symcount
-		     && (sorted_syms[place]->section != section
-			 || (bfd_asymbol_value (sorted_syms[place])
-			     <= bfd_asymbol_value (sym))))
-		++place;
-	      if (place >= sorted_symcount)
-		nextsym = NULL;
-	      else
-		nextsym = sorted_syms[place];
-	    }
-
-	  if (sym != NULL
-	      && bfd_asymbol_value (sym) > section->vma + addr_offset)
-	    {
-	      nextstop_offset = bfd_asymbol_value (sym) - section->vma;
-	      if (nextstop_offset > stop_offset)
-		nextstop_offset = stop_offset;
-	    }
-	  else if (nextsym == NULL)
-	    nextstop_offset = stop_offset;
-	  else
-	    {
-	      nextstop_offset = bfd_asymbol_value (nextsym) - section->vma;
-	      if (nextstop_offset > stop_offset)
-		nextstop_offset = stop_offset;
-	    }
-
-	  /* If a symbol is explicitly marked as being an object
-	     rather than a function, just dump the bytes without
-	     disassembling them.  */
-	  if (disassemble_all
-	      || sym == NULL
-	      || bfd_asymbol_value (sym) > section->vma + addr_offset
-	      || ((sym->flags & BSF_OBJECT) == 0
-		  && (strstr (bfd_asymbol_name (sym), "gnu_compiled")
-		      == NULL)
-		  && (strstr (bfd_asymbol_name (sym), "gcc2_compiled")
-		      == NULL))
-	      || (sym->flags & BSF_FUNCTION) != 0)
-	    insns = TRUE;
-	  else
-	    insns = FALSE;
-
-	  disassemble_bytes (&disasm_info, disassemble_fn, insns, data,
-			     addr_offset, nextstop_offset,
-			     rel_offset, &relpp, relppend);
-
-	  addr_offset = nextstop_offset;
-	  sym = nextsym;
-	}
-
-      free (data);
-
-      if (relbuf != NULL)
-	free (relbuf);
-    }
-
-  if (dynrelbuf != NULL)
-    free (dynrelbuf);
+  if (aux.dynrelbuf != NULL)
+    free (aux.dynrelbuf);
   free (sorted_syms);
 }
 
-/* Dump the stabs sections from an object file that has a section that
-   uses Sun stabs encoding.  */
-
-static void
-dump_stabs (bfd *abfd)
-{
-  dump_section_stabs (abfd, ".stab", ".stabstr");
-  dump_section_stabs (abfd, ".stab.excl", ".stab.exclstr");
-  dump_section_stabs (abfd, ".stab.index", ".stab.indexstr");
-  dump_section_stabs (abfd, "$GDB_SYMBOLS$", "$GDB_STRINGS$");
-}
-
 /* Read ABFD's stabs section STABSECT_NAME into `stabs'
    and string table section STRSECT_NAME into `strtab'.
    If the section exists and was read, allocate the space and return TRUE.
@@ -1848,14 +1885,14 @@ read_section_stabs (bfd *abfd, const char *stabsect_name,
   asection *stabsect, *stabstrsect;
 
   stabsect = bfd_get_section_by_name (abfd, stabsect_name);
-  if (0 == stabsect)
+  if (stabsect == NULL)
     {
       printf (_("No %s section present\n\n"), stabsect_name);
       return FALSE;
     }
 
   stabstrsect = bfd_get_section_by_name (abfd, strsect_name);
-  if (0 == stabstrsect)
+  if (stabstrsect == NULL)
     {
       non_fatal (_("%s has no %s section"),
 		 bfd_get_filename (abfd), strsect_name);
@@ -1914,8 +1951,7 @@ read_section_stabs (bfd *abfd, const char *stabsect_name,
    using string table section STRSECT_NAME (in `strtab').  */
 
 static void
-print_section_stabs (bfd *abfd, const char *stabsect_name,
-		     const char *strsect_name ATTRIBUTE_UNUSED)
+print_section_stabs (bfd *abfd, const char *stabsect_name)
 {
   int i;
   unsigned file_string_table_offset = 0;
@@ -1981,38 +2017,60 @@ print_section_stabs (bfd *abfd, const char *stabsect_name,
   printf ("\n\n");
 }
 
-static void
-dump_section_stabs (bfd *abfd, char *stabsect_name, char *strsect_name)
+typedef struct
 {
-  asection *s;
+  const char * section_name;
+  const char * string_section_name;
+}
+stab_section_names;
+
+static void
+find_stabs_section (bfd *abfd, asection *section, void *names)
+{
+  int len;
+  stab_section_names * sought = (stab_section_names *) names;
 
   /* Check for section names for which stabsect_name is a prefix, to
      handle .stab0, etc.  */
-  for (s = abfd->sections;
-       s != NULL;
-       s = s->next)
+  len = strlen (sought->section_name);
+
+  /* If the prefix matches, and the files section name ends with a
+     nul or a digit, then we match.  I.e., we want either an exact
+     match or a section followed by a number.  */
+  if (strncmp (sought->section_name, section->name, len) == 0
+      && (section->name[len] == 0
+	  || ISDIGIT (section->name[len])))
     {
-      int len;
-
-      len = strlen (stabsect_name);
-
-      /* If the prefix matches, and the files section name ends with a
-	 nul or a digit, then we match.  I.e., we want either an exact
-	 match or a section followed by a number.  */
-      if (strncmp (stabsect_name, s->name, len) == 0
-	  && (s->name[len] == '\000'
-	      || ISDIGIT (s->name[len])))
+      if (read_section_stabs (abfd, section->name, sought->string_section_name))
 	{
-	  if (read_section_stabs (abfd, s->name, strsect_name))
-	    {
-	      print_section_stabs (abfd, s->name, strsect_name);
-	      free (stabs);
-	      free (strtab);
-	    }
+	  print_section_stabs (abfd, section->name);
+	  free (stabs);
+	  free (strtab);
 	}
     }
 }
 
+static void
+dump_stabs_section (bfd *abfd, char *stabsect_name, char *strsect_name)
+{
+  stab_section_names s;
+
+  s.section_name = stabsect_name;
+  s.string_section_name = strsect_name;
+  
+  bfd_map_over_sections (abfd, find_stabs_section, & s);
+}
+
+/* Dump the any sections containing stabs debugging information.  */
+
+static void
+dump_stabs (bfd *abfd)
+{
+  dump_stabs_section (abfd, ".stab", ".stabstr");
+  dump_stabs_section (abfd, ".stab.excl", ".stab.exclstr");
+  dump_stabs_section (abfd, ".stab.index", ".stab.indexstr");
+  dump_stabs_section (abfd, "$GDB_SYMBOLS$", "$GDB_STRINGS$");
+}
 
 static void
 dump_bfd_header (bfd *abfd)
@@ -2048,296 +2106,134 @@ dump_bfd_private_header (bfd *abfd)
   bfd_print_private_bfd_data (abfd, stdout);
 }
 
-/* Dump selected contents of ABFD.  */
-
-static void
-dump_bfd (bfd *abfd)
-{
-  /* If we are adjusting section VMA's, change them all now.  Changing
-     the BFD information is a hack.  However, we must do it, or
-     bfd_find_nearest_line will not do the right thing.  */
-  if (adjust_section_vma != 0)
-    {
-      asection *s;
-
-      for (s = abfd->sections; s != NULL; s = s->next)
-	{
-	  s->vma += adjust_section_vma;
-	  s->lma += adjust_section_vma;
-	}
-    }
-
-  if (! dump_debugging_tags)
-    printf (_("\n%s:     file format %s\n"), bfd_get_filename (abfd),
-	    abfd->xvec->name);
-  if (dump_ar_hdrs)
-    print_arelt_descr (stdout, abfd, TRUE);
-  if (dump_file_header)
-    dump_bfd_header (abfd);
-  if (dump_private_headers)
-    dump_bfd_private_header (abfd);
-  if (! dump_debugging_tags)
-    putchar ('\n');
-  if (dump_section_headers)
-    dump_headers (abfd);
-
-  if (dump_symtab || dump_reloc_info || disassemble || dump_debugging)
-    syms = slurp_symtab (abfd);
-  if (dump_dynamic_symtab || dump_dynamic_reloc_info)
-    dynsyms = slurp_dynamic_symtab (abfd);
-
-  if (dump_symtab)
-    dump_symbols (abfd, FALSE);
-  if (dump_dynamic_symtab)
-    dump_symbols (abfd, TRUE);
-  if (dump_stab_section_info)
-    dump_stabs (abfd);
-  if (dump_reloc_info && ! disassemble)
-    dump_relocs (abfd);
-  if (dump_dynamic_reloc_info && ! disassemble)
-    dump_dynamic_relocs (abfd);
-  if (dump_section_contents)
-    dump_data (abfd);
-  if (disassemble)
-    disassemble_data (abfd);
-  if (dump_debugging)
-    {
-      void *dhandle;
-
-      dhandle = read_debugging_info (abfd, syms, symcount);
-      if (dhandle != NULL)
-	{
-	  if (! print_debugging_info (stdout, dhandle, abfd, syms, demangle,
-	      dump_debugging_tags ? TRUE : FALSE))
-	    {
-	      non_fatal (_("%s: printing debugging information failed"),
-			 bfd_get_filename (abfd));
-	      exit_status = 1;
-	    }
-	}
-    }
-
-  if (syms)
-    {
-      free (syms);
-      syms = NULL;
-    }
-
-  if (dynsyms)
-    {
-      free (dynsyms);
-      dynsyms = NULL;
-    }
-}
-
-static void
-display_bfd (bfd *abfd)
-{
-  char **matching;
-
-  if (bfd_check_format_matches (abfd, bfd_object, &matching))
-    {
-      dump_bfd (abfd);
-      return;
-    }
-
-  if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
-    {
-      nonfatal (bfd_get_filename (abfd));
-      list_matching_formats (matching);
-      free (matching);
-      return;
-    }
-
-  if (bfd_get_error () != bfd_error_file_not_recognized)
-    {
-      nonfatal (bfd_get_filename (abfd));
-      return;
-    }
-
-  if (bfd_check_format_matches (abfd, bfd_core, &matching))
-    {
-      dump_bfd (abfd);
-      return;
-    }
-
-  nonfatal (bfd_get_filename (abfd));
-
-  if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
-    {
-      list_matching_formats (matching);
-      free (matching);
-    }
-}
-
-static void
-display_file (char *filename, char *target)
-{
-  bfd *file, *arfile = NULL;
-
-  file = bfd_openr (filename, target);
-  if (file == NULL)
-    {
-      nonfatal (filename);
-      return;
-    }
-
-  if (bfd_check_format (file, bfd_archive))
-    {
-      bfd *last_arfile = NULL;
-
-      printf (_("In archive %s:\n"), bfd_get_filename (file));
-      for (;;)
-	{
-	  bfd_set_error (bfd_error_no_error);
-
-	  arfile = bfd_openr_next_archived_file (file, arfile);
-	  if (arfile == NULL)
-	    {
-	      if (bfd_get_error () != bfd_error_no_more_archived_files)
-		nonfatal (bfd_get_filename (file));
-	      break;
-	    }
-
-	  display_bfd (arfile);
-
-	  if (last_arfile != NULL)
-	    bfd_close (last_arfile);
-	  last_arfile = arfile;
-	}
-
-      if (last_arfile != NULL)
-	bfd_close (last_arfile);
-    }
-  else
-    display_bfd (file);
-
-  bfd_close (file);
-}
 
+/* Display a section in hexadecimal format with associated characters.
+   Each line prefixed by the zero padded address.  */
+
+static void
+dump_section (bfd *abfd, asection *section, void *dummy ATTRIBUTE_UNUSED)
+{
+  bfd_byte *data = 0;
+  bfd_size_type datasize;
+  bfd_size_type addr_offset;
+  bfd_size_type start_offset;
+  bfd_size_type stop_offset;
+  unsigned int opb = bfd_octets_per_byte (abfd);
+  /* Bytes per line.  */
+  const int onaline = 16;
+  char buf[64];
+  int count;
+  int width;
+
+  if ((section->flags & SEC_HAS_CONTENTS) == 0)
+    return;
+
+  if (! process_section_p (section))
+    return;
+  
+  if ((datasize = bfd_section_size (abfd, section)) == 0)
+    return;
+
+  printf (_("Contents of section %s:\n"), section->name);
+
+  data = xmalloc (datasize);
+
+  bfd_get_section_contents (abfd, section, data, 0, datasize);
+
+  /* Compute the address range to display.  */
+  if (start_address == (bfd_vma) -1
+      || start_address < section->vma)
+    start_offset = 0;
+  else
+    start_offset = start_address - section->vma;
+
+  if (stop_address == (bfd_vma) -1)
+    stop_offset = datasize / opb;
+  else
+    {
+      if (stop_address < section->vma)
+	stop_offset = 0;
+      else
+	stop_offset = stop_address - section->vma;
+
+      if (stop_offset > datasize / opb)
+	stop_offset = datasize / opb;
+    }
+
+  width = 4;
+
+  bfd_sprintf_vma (abfd, buf, start_offset + section->vma);
+  if (strlen (buf) >= sizeof (buf))
+    abort ();
+
+  count = 0;
+  while (buf[count] == '0' && buf[count+1] != '\0')
+    count++;
+  count = strlen (buf) - count;
+  if (count > width)
+    width = count;
+
+  bfd_sprintf_vma (abfd, buf, stop_offset + section->vma - 1);
+  if (strlen (buf) >= sizeof (buf))
+    abort ();
+
+  count = 0;
+  while (buf[count] == '0' && buf[count+1] != '\0')
+    count++;
+  count = strlen (buf) - count;
+  if (count > width)
+    width = count;
+
+  for (addr_offset = start_offset;
+       addr_offset < stop_offset; addr_offset += onaline / opb)
+    {
+      bfd_size_type j;
+
+      bfd_sprintf_vma (abfd, buf, (addr_offset + section->vma));
+      count = strlen (buf);
+      if ((size_t) count >= sizeof (buf))
+	abort ();
+
+      putchar (' ');
+      while (count < width)
+	{
+	  putchar ('0');
+	  count++;
+	}
+      fputs (buf + count - width, stdout);
+      putchar (' ');
+
+      for (j = addr_offset * opb;
+	   j < addr_offset * opb + onaline; j++)
+	{
+	  if (j < stop_offset * opb)
+	    printf ("%02x", (unsigned) (data[j]));
+	  else
+	    printf ("  ");
+	  if ((j & 3) == 3)
+	    printf (" ");
+	}
+
+      printf (" ");
+      for (j = addr_offset * opb;
+	   j < addr_offset * opb + onaline; j++)
+	{
+	  if (j >= stop_offset * opb)
+	    printf (" ");
+	  else
+	    printf ("%c", ISPRINT (data[j]) ? data[j] : '.');
+	}
+      putchar ('\n');
+    }
+  free (data);
+}
+
 /* Actually display the various requested regions.  */
 
 static void
 dump_data (bfd *abfd)
 {
-  asection *section;
-  bfd_byte *data = 0;
-  bfd_size_type datasize = 0;
-  bfd_size_type addr_offset;
-  bfd_size_type start_offset, stop_offset;
-  unsigned int opb = bfd_octets_per_byte (abfd);
-
-  for (section = abfd->sections; section != NULL; section =
-       section->next)
-    {
-      int onaline = 16;
-      size_t i;
-
-      for (i = 0; i < only_used; i++)
-	if (strcmp (only [i], section->name) == 0)
-	  break;
-
-      if (only_used == 0 || i != only_used)
-	{
-	  if (section->flags & SEC_HAS_CONTENTS)
-	    {
-	      char buf[64];
-	      int count, width;
-
-	      printf (_("Contents of section %s:\n"), section->name);
-
-	      if (bfd_section_size (abfd, section) == 0)
-		continue;
-	      data = xmalloc (bfd_section_size (abfd, section));
-	      datasize = bfd_section_size (abfd, section);
-
-
-	      bfd_get_section_contents (abfd, section, data, 0,
-					bfd_section_size (abfd, section));
-
-	      if (start_address == (bfd_vma) -1
-		  || start_address < section->vma)
-		start_offset = 0;
-	      else
-		start_offset = start_address - section->vma;
-	      if (stop_address == (bfd_vma) -1)
-		stop_offset = bfd_section_size (abfd, section) / opb;
-	      else
-		{
-		  if (stop_address < section->vma)
-		    stop_offset = 0;
-		  else
-		    stop_offset = stop_address - section->vma;
-		  if (stop_offset > bfd_section_size (abfd, section) / opb)
-		    stop_offset = bfd_section_size (abfd, section) / opb;
-		}
-
-	      width = 4;
-
-	      bfd_sprintf_vma (abfd, buf, start_offset + section->vma);
-	      if (strlen (buf) >= sizeof (buf))
-		abort ();
-	      count = 0;
-	      while (buf[count] == '0' && buf[count+1] != '\0')
-		count++;
-	      count = strlen (buf) - count;
-	      if (count > width)
-		width = count;
-
-	      bfd_sprintf_vma (abfd, buf, stop_offset + section->vma - 1);
-	      if (strlen (buf) >= sizeof (buf))
-		abort ();
-	      count = 0;
-	      while (buf[count] == '0' && buf[count+1] != '\0')
-		count++;
-	      count = strlen (buf) - count;
-	      if (count > width)
-		width = count;
-
-	      for (addr_offset = start_offset;
-		   addr_offset < stop_offset; addr_offset += onaline / opb)
-		{
-		  bfd_size_type j;
-
-		  bfd_sprintf_vma (abfd, buf, (addr_offset + section->vma));
-		  count = strlen (buf);
-		  if ((size_t) count >= sizeof (buf))
-		    abort ();
-		  putchar (' ');
-		  while (count < width)
-		    {
-		      putchar ('0');
-		      count++;
-		    }
-		  fputs (buf + count - width, stdout);
-		  putchar (' ');
-
-		  for (j = addr_offset * opb;
-		       j < addr_offset * opb + onaline; j++)
-		    {
-		      if (j < stop_offset * opb)
-			printf ("%02x", (unsigned) (data[j]));
-		      else
-			printf ("  ");
-		      if ((j & 3) == 3)
-			printf (" ");
-		    }
-
-		  printf (" ");
-		  for (j = addr_offset * opb;
-		       j < addr_offset * opb + onaline; j++)
-		    {
-		      if (j >= stop_offset * opb)
-			printf (" ");
-		      else
-			printf ("%c", ISPRINT (data[j]) ? data[j] : '.');
-		    }
-		  putchar ('\n');
-		}
-	      free (data);
-	    }
-	}
-    }
+  bfd_map_over_sections (abfd, dump_section, NULL);
 }
 
 /* Should perhaps share code and display with nm?  */
@@ -2367,138 +2263,44 @@ dump_symbols (bfd *abfd ATTRIBUTE_UNUSED, bfd_boolean dynamic)
 
   for (count = 0; count < max; count++)
     {
-      if (*current)
-	{
-	  bfd *cur_bfd = bfd_asymbol_bfd (*current);
+      bfd *cur_bfd;
 
-	  if (cur_bfd != NULL)
+      if (*current == NULL)
+	printf (_("no information for the %ld'th symbol"), count);
+
+      else if ((cur_bfd = bfd_asymbol_bfd (*current)) == NULL)
+	printf (_("could not determine the type of the %ld'th symbol"),
+		count);
+
+      else
+	{
+	  const char *name = (*current)->name;
+
+	  if (do_demangle && name != NULL && *name != '\0')
 	    {
-	      const char *name;
 	      char *alloc;
 
-	      name = (*current)->name;
-	      alloc = NULL;
-	      if (do_demangle && name != NULL && *name != '\0')
-		{
-		  /* If we want to demangle the name, we demangle it
-		     here, and temporarily clobber it while calling
-		     bfd_print_symbol.  FIXME: This is a gross hack.  */
-		  alloc = demangle (cur_bfd, name);
-		  (*current)->name = alloc;
-		}
-
+	      /* If we want to demangle the name, we demangle it
+		 here, and temporarily clobber it while calling
+		 bfd_print_symbol.  FIXME: This is a gross hack.  */
+	      alloc = demangle (cur_bfd, name);
+	      (*current)->name = alloc;
 	      bfd_print_symbol (cur_bfd, stdout, *current,
 				bfd_print_symbol_all);
-
 	      (*current)->name = name;
-	      if (alloc != NULL)
-		free (alloc);
-
-	      printf ("\n");
+	      free (alloc);
 	    }
+	  else
+	    bfd_print_symbol (cur_bfd, stdout, *current,
+			      bfd_print_symbol_all);
 	}
+
+      printf ("\n");
       current++;
     }
-  printf ("\n");
-  printf ("\n");
+  printf ("\n\n");
 }
-
-static void
-dump_relocs (bfd *abfd)
-{
-  arelent **relpp;
-  long relcount;
-  asection *a;
-
-  for (a = abfd->sections; a != NULL; a = a->next)
-    {
-      long relsize;
-
-      if (bfd_is_abs_section (a))
-	continue;
-      if (bfd_is_und_section (a))
-	continue;
-      if (bfd_is_com_section (a))
-	continue;
-
-      if (only)
-	{
-	  size_t i;
-
-	  for (i = 0; i < only_used; i++)
-	    if (strcmp (only [i], a->name) == 0)
-	      break;
-
-	  if (i == only_used)
-	    continue;
-	}
-      else if ((a->flags & SEC_RELOC) == 0)
-	continue;
-
-      relsize = bfd_get_reloc_upper_bound (abfd, a);
-      if (relsize < 0)
-	bfd_fatal (bfd_get_filename (abfd));
-
-      printf ("RELOCATION RECORDS FOR [%s]:", a->name);
-
-      if (relsize == 0)
-	{
-	  printf (" (none)\n\n");
-	}
-      else
-	{
-	  relpp = xmalloc (relsize);
-	  relcount = bfd_canonicalize_reloc (abfd, a, relpp, syms);
-
-	  if (relcount < 0)
-	    bfd_fatal (bfd_get_filename (abfd));
-	  else if (relcount == 0)
-	    printf (" (none)\n\n");
-	  else
-	    {
-	      printf ("\n");
-	      dump_reloc_set (abfd, a, relpp, relcount);
-	      printf ("\n\n");
-	    }
-	  free (relpp);
-	}
-    }
-}
-
-static void
-dump_dynamic_relocs (bfd *abfd)
-{
-  long relsize;
-  arelent **relpp;
-  long relcount;
-
-  relsize = bfd_get_dynamic_reloc_upper_bound (abfd);
-  if (relsize < 0)
-    bfd_fatal (bfd_get_filename (abfd));
-
-  printf ("DYNAMIC RELOCATION RECORDS");
-
-  if (relsize == 0)
-    printf (" (none)\n\n");
-  else
-    {
-      relpp = xmalloc (relsize);
-      relcount = bfd_canonicalize_dynamic_reloc (abfd, relpp, dynsyms);
-
-      if (relcount < 0)
-	bfd_fatal (bfd_get_filename (abfd));
-      else if (relcount == 0)
-	printf (" (none)\n\n");
-      else
-	{
-	  printf ("\n");
-	  dump_reloc_set (abfd, NULL, relpp, relcount);
-	  printf ("\n\n");
-	}
-      free (relpp);
-    }
-}
-
+
 static void
 dump_reloc_set (bfd *abfd, asection *sec, arelent **relpp, long relcount)
 {
@@ -2513,6 +2315,7 @@ dump_reloc_set (bfd *abfd, asection *sec, arelent **relpp, long relcount)
     if (width == 0)
       {
 	char buf[30];
+
 	bfd_sprintf_vma (abfd, buf, (bfd_vma) -1);
 	width = strlen (buf) - 7;
       }
@@ -2610,6 +2413,88 @@ dump_reloc_set (bfd *abfd, asection *sec, arelent **relpp, long relcount)
     }
 }
 
+static void
+dump_relocs_in_section (bfd *abfd, asection *section, void *dummy ATTRIBUTE_UNUSED)
+{
+  arelent **relpp;
+  long relcount;
+  long relsize;
+
+  if (   bfd_is_abs_section (section)
+      || bfd_is_und_section (section)
+      || bfd_is_com_section (section)
+      || (! process_section_p (section))
+      || ((section->flags & SEC_RELOC) == 0))
+    return;
+
+  relsize = bfd_get_reloc_upper_bound (abfd, section);
+  if (relsize < 0)
+    bfd_fatal (bfd_get_filename (abfd));
+
+  printf ("RELOCATION RECORDS FOR [%s]:", section->name);
+
+  if (relsize == 0)
+    {
+      printf (" (none)\n\n");
+      return;
+    }
+
+  relpp = xmalloc (relsize);
+  relcount = bfd_canonicalize_reloc (abfd, section, relpp, syms);
+
+  if (relcount < 0)
+    bfd_fatal (bfd_get_filename (abfd));
+  else if (relcount == 0)
+    printf (" (none)\n\n");
+  else
+    {
+      printf ("\n");
+      dump_reloc_set (abfd, section, relpp, relcount);
+      printf ("\n\n");
+    }
+  free (relpp);
+}
+
+static void
+dump_relocs (bfd *abfd)
+{
+  bfd_map_over_sections (abfd, dump_relocs_in_section, NULL);
+}
+
+static void
+dump_dynamic_relocs (bfd *abfd)
+{
+  long relsize;
+  arelent **relpp;
+  long relcount;
+
+  relsize = bfd_get_dynamic_reloc_upper_bound (abfd);
+  if (relsize < 0)
+    bfd_fatal (bfd_get_filename (abfd));
+
+  printf ("DYNAMIC RELOCATION RECORDS");
+
+  if (relsize == 0)
+    printf (" (none)\n\n");
+  else
+    {
+      relpp = xmalloc (relsize);
+      relcount = bfd_canonicalize_dynamic_reloc (abfd, relpp, dynsyms);
+
+      if (relcount < 0)
+	bfd_fatal (bfd_get_filename (abfd));
+      else if (relcount == 0)
+	printf (" (none)\n\n");
+      else
+	{
+	  printf ("\n");
+	  dump_reloc_set (abfd, NULL, relpp, relcount);
+	  printf ("\n\n");
+	}
+      free (relpp);
+    }
+}
+
 /* Creates a table of paths, to search for source files.  */
 
 static void
@@ -2626,6 +2511,174 @@ add_include_path (const char *path)
 #endif
   include_paths[include_path_count - 1] = path;
 }
+
+static void
+adjust_addresses (bfd *abfd ATTRIBUTE_UNUSED, asection *section, void *dummy ATTRIBUTE_UNUSED)
+{
+  section->vma += adjust_section_vma;
+  section->lma += adjust_section_vma;
+}
+
+/* Dump selected contents of ABFD.  */
+
+static void
+dump_bfd (bfd *abfd)
+{
+  /* If we are adjusting section VMA's, change them all now.  Changing
+     the BFD information is a hack.  However, we must do it, or
+     bfd_find_nearest_line will not do the right thing.  */
+  if (adjust_section_vma != 0)
+    bfd_map_over_sections (abfd, adjust_addresses, NULL);
+
+  if (! dump_debugging_tags)
+    printf (_("\n%s:     file format %s\n"), bfd_get_filename (abfd),
+	    abfd->xvec->name);
+  if (dump_ar_hdrs)
+    print_arelt_descr (stdout, abfd, TRUE);
+  if (dump_file_header)
+    dump_bfd_header (abfd);
+  if (dump_private_headers)
+    dump_bfd_private_header (abfd);
+  if (! dump_debugging_tags)
+    putchar ('\n');
+  if (dump_section_headers)
+    dump_headers (abfd);
+
+  if (dump_symtab || dump_reloc_info || disassemble || dump_debugging)
+    syms = slurp_symtab (abfd);
+  if (dump_dynamic_symtab || dump_dynamic_reloc_info)
+    dynsyms = slurp_dynamic_symtab (abfd);
+
+  if (dump_symtab)
+    dump_symbols (abfd, FALSE);
+  if (dump_dynamic_symtab)
+    dump_symbols (abfd, TRUE);
+  if (dump_stab_section_info)
+    dump_stabs (abfd);
+  if (dump_reloc_info && ! disassemble)
+    dump_relocs (abfd);
+  if (dump_dynamic_reloc_info && ! disassemble)
+    dump_dynamic_relocs (abfd);
+  if (dump_section_contents)
+    dump_data (abfd);
+  if (disassemble)
+    disassemble_data (abfd);
+
+  if (dump_debugging)
+    {
+      void *dhandle;
+
+      dhandle = read_debugging_info (abfd, syms, symcount);
+      if (dhandle != NULL)
+	{
+	  if (! print_debugging_info (stdout, dhandle, abfd, syms, demangle,
+	      dump_debugging_tags ? TRUE : FALSE))
+	    {
+	      non_fatal (_("%s: printing debugging information failed"),
+			 bfd_get_filename (abfd));
+	      exit_status = 1;
+	    }
+	}
+    }
+
+  if (syms)
+    {
+      free (syms);
+      syms = NULL;
+    }
+
+  if (dynsyms)
+    {
+      free (dynsyms);
+      dynsyms = NULL;
+    }
+}
+
+static void
+display_bfd (bfd *abfd)
+{
+  char **matching;
+
+  if (bfd_check_format_matches (abfd, bfd_object, &matching))
+    {
+      dump_bfd (abfd);
+      return;
+    }
+
+  if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
+    {
+      nonfatal (bfd_get_filename (abfd));
+      list_matching_formats (matching);
+      free (matching);
+      return;
+    }
+
+  if (bfd_get_error () != bfd_error_file_not_recognized)
+    {
+      nonfatal (bfd_get_filename (abfd));
+      return;
+    }
+
+  if (bfd_check_format_matches (abfd, bfd_core, &matching))
+    {
+      dump_bfd (abfd);
+      return;
+    }
+
+  nonfatal (bfd_get_filename (abfd));
+
+  if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
+    {
+      list_matching_formats (matching);
+      free (matching);
+    }
+}
+
+static void
+display_file (char *filename, char *target)
+{
+  bfd *file, *arfile = NULL;
+
+  file = bfd_openr (filename, target);
+  if (file == NULL)
+    {
+      nonfatal (filename);
+      return;
+    }
+
+  /* If the file is an archive, process all of its elements.  */
+  if (bfd_check_format (file, bfd_archive))
+    {
+      bfd *last_arfile = NULL;
+
+      printf (_("In archive %s:\n"), bfd_get_filename (file));
+      for (;;)
+	{
+	  bfd_set_error (bfd_error_no_error);
+
+	  arfile = bfd_openr_next_archived_file (file, arfile);
+	  if (arfile == NULL)
+	    {
+	      if (bfd_get_error () != bfd_error_no_more_archived_files)
+		nonfatal (bfd_get_filename (file));
+	      break;
+	    }
+
+	  display_bfd (arfile);
+
+	  if (last_arfile != NULL)
+	    bfd_close (last_arfile);
+	  last_arfile = arfile;
+	}
+
+      if (last_arfile != NULL)
+	bfd_close (last_arfile);
+    }
+  else
+    display_bfd (file);
+
+  bfd_close (file);
+}
 
 int
 main (int argc, char **argv)
@@ -2634,12 +2687,13 @@ main (int argc, char **argv)
   char *target = default_target;
   bfd_boolean seenflag = FALSE;
 
-#if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
+#if defined (HAVE_SETLOCALE)
+#if defined (HAVE_LC_MESSAGES)
   setlocale (LC_MESSAGES, "");
 #endif
-#if defined (HAVE_SETLOCALE)
   setlocale (LC_CTYPE, "");
 #endif
+
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 

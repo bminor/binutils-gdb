@@ -20,4 +20,4 @@ OFFSET           TYPE              VALUE
 Contents of section \.text:
  0000 f8010000 f20f0000 fd000000 fd000000  .*
  0010 fd000000 fd000000 00000000 00000000  .*
-Contents of section \.data:
+

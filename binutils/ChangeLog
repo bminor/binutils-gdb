@@ -1,3 +1,35 @@
+2003-09-03  Nick Clifton  <nickc@redhat.com>
+
+	* objdump.c (struct objdump_disasm_info): Add new fields
+        'dynrelbuf', 'dynrelcount' and 'disassemble_fn'.
+        (process_section_p): New function:  Returns TRUE if a section
+        can be dumped.
+        (disassemble_section): New function: Contains the body of
+	disassemble_data(), but just for one section.
+        (disassemble_data): Use bfd_map_over_sections to walk section
+        chain.
+        (find_stabs_section): New function: Find a stabs containing
+        section and then dump it.
+        (dump_stabs_section): New function: Use bfd_map_over_sections
+        to find the section to dump.
+        (dump_stabs): Use dump_stabs_section.
+        (dump_section): New function: Display the contents of a
+        section.
+        (dump_data): Use bfd_map_over_sections to display section
+        contents.
+        (dump_relocs_in_section): Display the relocs in a given section.
+        (dump_relocs): Use bfd_map_over_sections to display relocs.
+	(adjust_addresses): New function: Adjust the vma and lma of
+        sections.
+        (dump_bfd): Use bfd_map_over_sections.
+        * doc/binutils.texi: Document the "objdump -s" (no longer)
+        dumps empty sections.
+        
+2003-08-24  Jonathan R. Grant  <jg-binutils@jguk.org>
+
+	* objdump.c: Improve comments/documentation.
+	dump_data: Eliminate duplicate function calls to bfd_section_size.
+
 2003-09-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* MAINTAINERS: Move Dave Anglin's entry to where it belongs.

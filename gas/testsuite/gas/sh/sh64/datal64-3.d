@@ -119,6 +119,5 @@ Contents of section \.text:
  00a0 c80002c0 c80002c0 cc0001e0 c80001e0  .*
  00b0 c80001e0 c80001e0 6ff0fff0 6ff0fff0  .*
  00c0 6ff0fff0                             .*
-Contents of section \.data:
 Contents of section \.rodata:
  0000 00000088 000000d0 00000008 00000020  .*
