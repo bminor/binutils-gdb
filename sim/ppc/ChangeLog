@@ -1,3 +1,10 @@
+Thu Feb 15 18:10:13 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* emul_netbsd.c (toplevel): Do not include sys/resource.h if the
+	system doesn't have it, and turn off getrusage processing.
+	(write_rusage): #ifdef out if we don't have getrusage.
+	(do_getrusage): Define as 0 if we don't have getrusage.
+
 Wed Feb 14 17:38:12 1996  J. T. Conklin  <jtc@cygnus.com>
 
 	* configure.in (AC_HEADER_DIRENT): Add, so that we can figure out
