@@ -1,14 +1,13 @@
 # Sed commands to finish translating the binutils Unix makefile into MPW syntax.
 
-# Define undefined makefile variables.
+# Add a rule.
 /^#### .*/a\
 \
-BUILD_NLMCONV = \
-BUILD_SRCONV = \
-SYSINFO_PROG = \
-BUILD_DLLTOOL = \
-\
 "{o}"underscore.c.o \\Option-f "{o}"underscore.c\
+
+# Comment out any alias settings.
+/^host_alias =/s/^/#/
+/^target_alias =/s/^/#/
 
 # Whack out unused host define bits.
 /HDEFINES/s/@HDEFINES@//
@@ -36,6 +35,10 @@ BUILD_DLLTOOL = \
 
 /^{[A-Z]*_PROG}/s/$/ "{s}"mac-binutils.r/
 /{[A-Z]*_PROG}\.r/s/{[A-Z]*_PROG}\.r/mac-binutils.r/
+
+# There are auto-generated references to BFD .h files that are not
+# in the objdir (like bfd.h) but are in the source dir.
+/::bfd:lib/s/::bfd:lib\([a-z]*\)\.h/{BFDDIR}:lib\1.h/g
 
 # Fix the locations of generated files.
 /config/s/"{s}"config\.h/"{o}"config.h/g
@@ -83,6 +86,11 @@ install-only \\Option-f\
 		Duplicate -y :{prog} "{bindir}"{progname}\
 	End For\
 
+
+/true/s/ ; @true$//
+
+# dot files are trouble, remove them and their actions.
+/^\.dep/,/^$/d
 
 # Remove un-useful targets.
 /^Makefile \\Option-f/,/^$/d

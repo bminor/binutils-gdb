@@ -1,3 +1,12 @@
+Tue Jan 16 12:07:25 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-config.in (BUILD_NLMCONV, BUILD_SRCONV, SYSINFO_PROG,
+	BUILD_DLLTOOL): Put definitions for these into makefile when
+	configuring, instead of always clearing in mpw-make.sed.
+	* mpw-make.sed: Edit out any host_alias or target_alias settings,
+	fix pathname to BFD internal include files, remove dependency
+	calculation rules.
+
 Thu Jan 11 17:31:38 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* objdump.c (dump_section_header): Add new section flags
