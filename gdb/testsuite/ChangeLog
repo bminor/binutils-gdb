@@ -1,3 +1,13 @@
+2003-03-04  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/templates.exp (do_tests): Accept valid const in "print
+	Garply<Garply<char> >:: garply".
+	(test_ptype_of_templates): KFAIL "ptype T5<int>" and "ptype t5i"
+	with respect to PR c++/1111; note also PR c++/1113.
+	(test_template_breakpoints): KFAIL "constructor breakpoint" with
+	respect to PR c++/1062.
+	KFAIL "destructor breakpoint" with respect to PR c++/1112.
+
 2003-03-03  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb.c++/classes.exp (test_enums): KFAIL "ptype obj_with_enum"
