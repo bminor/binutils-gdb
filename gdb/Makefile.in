@@ -519,6 +519,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c  \
 	charset.c cli-out.c coffread.c coff-pe-read.c \
 	complaints.c completer.c corefile.c \
 	cp-abi.c cp-support.c cp-namespace.c cp-valprint.c \
+	cp-names.y \
 	dbxread.c demangle.c dictionary.c disasm.c doublest.c dummy-frame.c \
 	dwarfread.c dwarf2expr.c dwarf2loc.c dwarf2read.c dwarf2-frame.c \
 	elfread.c environ.c eval.c event-loop.c event-top.c expprint.c \
@@ -579,6 +580,7 @@ elf_arm_h =	$(INCLUDE_DIR)/elf/arm.h $(elf_reloc_macros_h)
 elf_bfd_h =	$(BFD_SRC)/elf-bfd.h
 elf_frv_h =	$(INCLUDE_DIR)/elf/frv.h $(elf_reloc_macros_h)
 libaout_h =	$(BFD_SRC)/libaout.h
+libiberty_h =	$(INCLUDE_DIR)/libiberty.h
 libbfd_h =	$(BFD_SRC)/libbfd.h
 remote_sim_h =	$(INCLUDE_DIR)/gdb/remote-sim.h
 demangle_h =    $(INCLUDE_DIR)/demangle.h
@@ -596,6 +598,7 @@ gdb_sim_frv_h = $(INCLUDE_DIR)/gdb/sim-frv.h
 gdb_sim_ppc_h =	$(INCLUDE_DIR)/gdb/sim-ppc.h
 gdb_sim_sh_h =	$(INCLUDE_DIR)/gdb/sim-sh.h
 splay_tree_h =  $(INCLUDE_DIR)/splay-tree.h
+safe_ctype_h =  $(INCLUDE_DIR)/safe-ctype.h
 hashtab_h =	$(INCLUDE_DIR)/hashtab.h
 
 #
@@ -944,11 +947,13 @@ SUBDIRS = @subdirs@
 
 # For now, shortcut the "configure GDB for fewer languages" stuff.
 YYFILES = c-exp.c \
+	cp-names.c \
 	objc-exp.c \
 	ada-exp.c \
 	jv-exp.c \
 	f-exp.c m2-exp.c p-exp.c
 YYOBJ = c-exp.o \
+	cp-names.o \
 	objc-exp.o \
 	ada-exp.o \
 	jv-exp.o \
@@ -1078,6 +1083,14 @@ uninstall-tui:
 		fi ; \
 		rm -f $(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT) \
 		      $(DESTDIR)$(man1dir)/$$transformed_name.1
+
+# The C++ name parser can be built standalone for testing.
+test-cp-names.o: cp-names.c $(safe_ctype_h) $(libiberty_h) $(demangle_h)
+	$(CC) -c $(INTERNAL_CFLAGS) -DTEST_CPNAMES \
+		-o test-cp-names.o cp-names.c
+
+test-cp-names$(EXEEXT): test-cp-names.o $(LIBIBERTY)
+	$(CC) -o test-cp-names$(EXEEXT) test-cp-names.o $(LIBIBERTY)
 
 # We do this by grepping through sources.  If that turns out to be too slow,
 # maybe we could just require every .o file to have an initialization routine
@@ -1233,6 +1246,8 @@ clean mostlyclean: $(CONFIG_CLEAN)
 	rm -f init.c version.c
 	rm -f gdb$(EXEEXT) core make.log
 	rm -f gdb[0-9]$(EXEEXT)
+	rm -f test-cp-names$(EXEEXT)
+
 .PHONY: clean-tui
 clean-tui:
 	rm -f $(TUI)$(EXEEXT)
@@ -1260,6 +1275,7 @@ local-maintainer-clean:
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 	rm -f c-exp.c \
+		cp-names.c \
 		ada-lex.c ada-exp.c \
 	        objc-exp.c \
 		jv-exp.tab \
@@ -1491,7 +1507,6 @@ v850ice.o: $(srcdir)/v850ice.c
 		$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) \
 		$(GDBTK_CFLAGS) \
 		$(srcdir)/v850ice.c
-
 
 # Message files.  Based on code in gcc/Makefile.in.
 
@@ -1811,6 +1826,7 @@ core-regset.o: core-regset.c $(defs_h) $(command_h) $(gdbcore_h) \
 	$(inferior_h) $(target_h) $(gdb_string_h) $(gregset_h)
 cp-abi.o: cp-abi.c $(defs_h) $(value_h) $(cp_abi_h) $(command_h) $(gdbcmd_h) \
 	$(ui_out_h) $(gdb_string_h)
+cp-names.o: cp-names.c $(safe_ctype_h) $(libiberty_h) $(demangle_h)
 cp-namespace.o: cp-namespace.c $(defs_h) $(cp_support_h) $(gdb_obstack_h) \
 	$(symtab_h) $(symfile_h) $(gdb_assert_h) $(block_h) $(objfiles_h) \
 	$(gdbtypes_h) $(dictionary_h) $(command_h) $(frame_h)

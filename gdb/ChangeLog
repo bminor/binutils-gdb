@@ -1,6 +1,25 @@
+2005-03-10  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (SFILES): Add cp-names.y.
+	(libiberty_h, safe_ctype_h): New.
+	(YYFILES): Add cp-names.c.
+	(YYOBJ): Add cp-names.o.
+	(test-cp-names.o, test-cp-names$(EXEEXT), cp-names.o): New rules.
+	(clean): Remove test-cp-names$(EXEEXT).
+	(local-maintainer-clean): Remove cp-names.c.
+	* cp-names.y: New file.
+	* cp-support.c (find_last_component): Delete.
+	(d_left, d_right): Define.
+	(cp_canonicalize_string, mangled_name_to_comp): New functions.
+	(cp_class_name_from_physname, method_name_from_physname): Rewrite
+	to use mangled_name_to_comp.
+	* cp-support.h (cp_canonicalize_string, cp_demangled_name_to_comp)
+	(cp_comp_to_string): New prototypes.
+	* config/djgpp/fnchange.lst: Add cp-names.c.
+
 2005-03-10  Bob Rossi  <bob@brasko.net>
 
-	* main.c(print_gdb_help): remove the --[no]sync help message
+	* main.c (print_gdb_help): Remove the --[no]async help message.
 
 2005-03-10  Mark Kettenis  <kettenis@gnu.org>
 

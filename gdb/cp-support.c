@@ -1,5 +1,5 @@
 /* Helper routines for C++ support in GDB.
-   Copyright 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
 
@@ -35,9 +35,10 @@
 #include "complaints.h"
 #include "gdbtypes.h"
 
-/* Functions related to demangled name parsing.  */
+#define d_left(dc) (dc)->u.s_binary.left
+#define d_right(dc) (dc)->u.s_binary.right
 
-static const char *find_last_component (const char *name);
+/* Functions related to demangled name parsing.  */
 
 static unsigned int cp_find_first_component_aux (const char *name,
 						 int permissive);
@@ -71,6 +72,204 @@ struct cmd_list_element *maint_cplus_cmd_list = NULL;
 static void maint_cplus_command (char *arg, int from_tty);
 static void first_component_command (char *arg, int from_tty);
 
+/* Return the canonicalized form of STRING, or NULL if STRING can not be
+   parsed.  The return value is allocated via xmalloc.
+
+   drow/2005-03-07: Should we also return NULL for things that trivially do
+   not require any change?  e.g. simple identifiers.  This could be more
+   efficient.  */
+
+char *
+cp_canonicalize_string (const char *string)
+{
+  void *storage;
+  struct demangle_component *ret_comp;
+  char *ret;
+  int len = strlen (string);
+
+  len = len + len / 8;
+
+  ret_comp = cp_demangled_name_to_comp (string, &storage, NULL);
+  if (ret_comp == NULL)
+    return NULL;
+
+  ret = cp_comp_to_string (ret_comp, len);
+
+  xfree (storage);
+
+  return ret;
+}
+
+/* Convert a mangled name to a demangle_component tree.  *MEMORY is set to the
+   block of used memory that should be freed when finished with the tree. 
+   DEMANGLED_P is set to the char * that should be freed when finished with
+   the tree, or NULL if none was needed.  OPTIONS will be passed to the
+   demangler.  */
+
+static struct demangle_component *
+mangled_name_to_comp (const char *mangled_name, int options,
+		      void **memory, char **demangled_p)
+{
+  struct demangle_component *ret;
+  char *demangled_name;
+  int len;
+
+  /* If it looks like a v3 mangled name, then try to go directly
+     to trees.  */
+  if (mangled_name[0] == '_' && mangled_name[1] == 'Z')
+    {
+      ret = cplus_demangle_v3_components (mangled_name, options, memory);
+      if (ret)
+	{
+	  *demangled_p = NULL;
+	  return ret;
+	}
+    }
+
+  /* If it doesn't, or if that failed, then try to demangle the name.  */
+  demangled_name = cplus_demangle (mangled_name, options);
+  if (demangled_name == NULL)
+   return NULL;
+  
+  /* If we could demangle the name, parse it to build the component tree.  */
+  ret = cp_demangled_name_to_comp (demangled_name, memory, NULL);
+
+  if (ret == NULL)
+    {
+      free (demangled_name);
+      return NULL;
+    }
+
+  *demangled_p = demangled_name;
+  return ret;
+}
+
+/* Return the name of the class containing method PHYSNAME.  */
+
+char *
+cp_class_name_from_physname (const char *physname)
+{
+  void *storage;
+  char *demangled_name = NULL, *ret;
+  struct demangle_component *ret_comp, *prev_comp;
+  int done;
+
+  ret_comp = mangled_name_to_comp (physname, DMGL_ANSI, &storage,
+				   &demangled_name);
+  if (ret_comp == NULL)
+    return NULL;
+
+  done = 0;
+  prev_comp = NULL;
+  while (!done)
+    switch (ret_comp->type)
+      {
+      case DEMANGLE_COMPONENT_TYPED_NAME:
+	prev_comp = NULL;
+        ret_comp = d_right (ret_comp);
+        break;
+      case DEMANGLE_COMPONENT_QUAL_NAME:
+      case DEMANGLE_COMPONENT_LOCAL_NAME:
+	prev_comp = ret_comp;
+        ret_comp = d_right (ret_comp);
+        break;
+      case DEMANGLE_COMPONENT_CONST:
+      case DEMANGLE_COMPONENT_RESTRICT:
+      case DEMANGLE_COMPONENT_VOLATILE:
+      case DEMANGLE_COMPONENT_CONST_THIS:
+      case DEMANGLE_COMPONENT_RESTRICT_THIS:
+      case DEMANGLE_COMPONENT_VOLATILE_THIS:
+      case DEMANGLE_COMPONENT_VENDOR_TYPE_QUAL:
+	prev_comp = NULL;
+        ret_comp = d_left (ret_comp);
+        break;
+      case DEMANGLE_COMPONENT_NAME:
+      case DEMANGLE_COMPONENT_TEMPLATE:
+      case DEMANGLE_COMPONENT_CTOR:
+      case DEMANGLE_COMPONENT_DTOR:
+      case DEMANGLE_COMPONENT_OPERATOR:
+      case DEMANGLE_COMPONENT_EXTENDED_OPERATOR:
+	done = 1;
+	break;
+      default:
+	done = 1;
+	prev_comp = NULL;
+	ret_comp = NULL;
+	break;
+      }
+
+  ret = NULL;
+  if (prev_comp != NULL)
+    {
+      *prev_comp = *d_left (prev_comp);
+      /* The ten is completely arbitrary; we don't have a good estimate.  */
+      ret = cp_comp_to_string (prev_comp, 10);
+    }
+
+  xfree (storage);
+  if (demangled_name)
+    xfree (demangled_name);
+  return ret;
+}
+
+/* Return the name of the method whose linkage name is PHYSNAME.  */
+
+char *
+method_name_from_physname (const char *physname)
+{
+  void *storage;
+  char *demangled_name = NULL, *ret;
+  struct demangle_component *ret_comp;
+  int done;
+
+  ret_comp = mangled_name_to_comp (physname, DMGL_ANSI, &storage,
+				   &demangled_name);
+  if (ret_comp == NULL)
+    return NULL;
+
+  done = 0;
+  while (!done)
+    switch (ret_comp->type)
+      {
+      case DEMANGLE_COMPONENT_QUAL_NAME:
+      case DEMANGLE_COMPONENT_LOCAL_NAME:
+      case DEMANGLE_COMPONENT_TYPED_NAME:
+        ret_comp = d_right (ret_comp);
+        break;
+      case DEMANGLE_COMPONENT_CONST:
+      case DEMANGLE_COMPONENT_RESTRICT:
+      case DEMANGLE_COMPONENT_VOLATILE:
+      case DEMANGLE_COMPONENT_CONST_THIS:
+      case DEMANGLE_COMPONENT_RESTRICT_THIS:
+      case DEMANGLE_COMPONENT_VOLATILE_THIS:
+      case DEMANGLE_COMPONENT_VENDOR_TYPE_QUAL:
+        ret_comp = d_left (ret_comp);
+        break;
+      case DEMANGLE_COMPONENT_NAME:
+      case DEMANGLE_COMPONENT_TEMPLATE:
+      case DEMANGLE_COMPONENT_CTOR:
+      case DEMANGLE_COMPONENT_DTOR:
+      case DEMANGLE_COMPONENT_OPERATOR:
+      case DEMANGLE_COMPONENT_EXTENDED_OPERATOR:
+	done = 1;
+	break;
+      default:
+	done = 1;
+	ret_comp = NULL;
+	break;
+      }
+
+  ret = NULL;
+  if (ret_comp != NULL)
+    /* The ten is completely arbitrary; we don't have a good estimate.  */
+    ret = cp_comp_to_string (ret_comp, 10);
+
+  xfree (storage);
+  if (demangled_name)
+    xfree (demangled_name);
+  return ret;
+}
+
 /* Here are some random pieces of trivia to keep in mind while trying
    to take apart demangled names:
 
@@ -97,120 +296,6 @@ static void first_component_command (char *arg, int from_tty);
    overlapping functionality; can we combine them?  Also, do they
    handle all the above considerations correctly?  */
 
-/* Find the last component of the demangled C++ name NAME.  NAME
-   must be a method name including arguments, in order to correctly
-   locate the last component.
-
-   This function return a pointer to the first colon before the
-   last component, or NULL if the name had only one component.  */
-
-static const char *
-find_last_component (const char *name)
-{
-  const char *p;
-  int depth;
-
-  /* Functions can have local classes, so we need to find the
-     beginning of the last argument list, not the end of the first
-     one.  */
-  p = name + strlen (name) - 1;
-  while (p > name && *p != ')')
-    p--;
-
-  if (p == name)
-    return NULL;
-
-  /* P now points at the `)' at the end of the argument list.  Walk
-     back to the beginning.  */
-  p--;
-  depth = 1;
-  while (p > name && depth > 0)
-    {
-      if (*p == '<' || *p == '(')
-	depth--;
-      else if (*p == '>' || *p == ')')
-	depth++;
-      p--;
-    }
-
-  if (p == name)
-    return NULL;
-
-  while (p > name && *p != ':')
-    p--;
-
-  if (p == name || p == name + 1 || p[-1] != ':')
-    return NULL;
-
-  return p - 1;
-}
-
-/* Return the name of the class containing method PHYSNAME.  */
-
-char *
-cp_class_name_from_physname (const char *physname)
-{
-  char *ret = NULL;
-  const char *end;
-  int depth = 0;
-  char *demangled_name = cplus_demangle (physname, DMGL_ANSI | DMGL_PARAMS);
-
-  if (demangled_name == NULL)
-    return NULL;
-
-  end = find_last_component (demangled_name);
-  if (end != NULL)
-    {
-      ret = xmalloc (end - demangled_name + 1);
-      memcpy (ret, demangled_name, end - demangled_name);
-      ret[end - demangled_name] = '\0';
-    }
-
-  xfree (demangled_name);
-  return ret;
-}
-
-/* Return the name of the method whose linkage name is PHYSNAME.  */
-
-char *
-method_name_from_physname (const char *physname)
-{
-  char *ret = NULL;
-  const char *end;
-  int depth = 0;
-  char *demangled_name = cplus_demangle (physname, DMGL_ANSI | DMGL_PARAMS);
-
-  if (demangled_name == NULL)
-    return NULL;
-
-  end = find_last_component (demangled_name);
-  if (end != NULL)
-    {
-      char *args;
-      int len;
-
-      /* Skip "::".  */
-      end = end + 2;
-
-      /* Find the argument list, if any.  */
-      args = strchr (end, '(');
-      if (args == NULL)
-	len = strlen (end + 2);
-      else
-	{
-	  args --;
-	  while (*args == ' ')
-	    args --;
-	  len = args - end + 1;
-	}
-      ret = xmalloc (len + 1);
-      memcpy (ret, end, len);
-      ret[len] = 0;
-    }
-
-  xfree (demangled_name);
-  return ret;
-}
 
 /* This returns the length of first component of NAME, which should be
    the demangled name of a C++ variable/function/method/etc.
