@@ -388,17 +388,35 @@ start_subfile (name, dirname)
 
   /* Save its name and compilation directory name */
   subfile->name = strdup (name);
-  if (dirname == NULL)
-    {
-      subfile->dirname = NULL;
-    }
-  else
-    {
-      subfile->dirname = strdup (dirname);
-    }
+  subfile->dirname = (dirname == NULL) ? NULL : strdup (dirname);
   
   /* Initialize line-number recording for this subfile.  */
   subfile->line_vector = NULL;
+}
+
+/* For stabs readers, the first N_SO symbol is assumed to be the source
+   file name, and the subfile struct is initialized using that assumption.
+   If another N_SO symbol is later seen, immediately following the first
+   one, then the first one is assumed to be the directory name and the
+   second one is really the source file name.
+
+   So we have to patch up the subfile struct by moving the old name value to
+   dirname and remembering the new name.  Some sanity checking is performed
+   to ensure that the state of the subfile struct is reasonable and that the
+   old name we are assuming to be a directory name actually is (by checking
+   for a trailing '/'). */
+
+void
+patch_subfile_names (subfile, name)
+     struct subfile *subfile;
+     char *name;
+{
+  if (subfile != NULL && subfile->dirname == NULL && subfile->name != NULL
+      && subfile->name[strlen(subfile->name)-1] == '/')
+    {
+      subfile->dirname = subfile->name;
+      subfile->name = strdup (name);
+    }
 }
 
 
@@ -692,9 +710,17 @@ end_symtab (end_addr, sort_pending, sort_linevec, objfile)
 	  symtab->nonreloc = TRUE;
 #endif
 	}
-      if (subfile->line_vector)
+      if (subfile->name != NULL)
 	{
-	  free ((PTR)subfile->line_vector);
+	  free ((PTR) subfile->name);
+	}
+      if (subfile->dirname != NULL)
+	{
+	  free ((PTR) subfile->dirname);
+	}
+      if (subfile->line_vector != NULL)
+	{
+	  free ((PTR) subfile->line_vector);
 	}
 
       nextsub = subfile->next;

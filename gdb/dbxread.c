@@ -68,7 +68,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symfile.h"
 #include "objfiles.h"
 #include "buildsym.h"
+#include "stabsread.h"
 #include "gdb-stabs.h"
+#include "demangle.h"
 
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"	/* We always use GNU stabs, not native, now */
@@ -502,6 +504,7 @@ static void
 dbx_new_init (ignore)
      struct objfile *ignore;
 {
+  stabsread_new_init ();
   buildsym_new_init ();
   init_header_files ();
 }
@@ -897,7 +900,7 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
   init_bincl_list (20, objfile);
   make_cleanup (free_bincl_list, objfile);
 
-  last_source_file = 0;
+  last_source_file = NULL;
 
 #ifdef END_OF_TEXT_DEFAULT
   end_of_text_addr = END_OF_TEXT_DEFAULT;
@@ -1339,6 +1342,7 @@ dbx_psymtab_to_symtab_1 (pst)
   if (LDSYMLEN(pst))		/* Otherwise it's a dummy */
     {
       /* Init stuff necessary for reading in symbols */
+      stabsread_init ();
       buildsym_init ();
       old_chain = make_cleanup (really_free_pendings, 0);
       file_string_table_offset = FILE_STRING_OFFSET (pst);
@@ -1433,16 +1437,17 @@ read_ofile_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
   unsigned char type;
   unsigned max_symnum;
   register bfd *abfd;
+  struct symtab *rtn;
 
   current_objfile = objfile;
-  subfile_stack = 0;
+  subfile_stack = NULL;
 
 #ifdef hp9000s800
   stringtab_global = HP_STRINGTAB (objfile);
 #else
   stringtab_global = DBX_STRINGTAB (objfile);
 #endif
-  last_source_file = 0;
+  last_source_file = NULL;
 
   abfd = objfile->obfd;
   symfile_bfd = objfile->obfd;	/* Implicit param to next_text_symbol */
@@ -1467,6 +1472,19 @@ read_ofile_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
 	(bufp->n_type == N_TEXT
 	 && (strcmp (namestring, GCC_COMPILED_FLAG_SYMBOL) == 0
 	     || strcmp(namestring, GCC2_COMPILED_FLAG_SYMBOL) == 0));
+
+      /* Try to select a C++ demangling based on the compilation unit
+	 producer. */
+
+      if (processing_gcc_compilation)
+	{
+#if 1	  /* Works, but is experimental.  -fnf */
+	  if (current_demangling_style == auto_demangling)
+	    {
+	      set_demangling_style (GNU_DEMANGLING_STYLE_STRING);
+	    }
+#endif
+	}
     }
   else
     {
@@ -1508,12 +1526,20 @@ read_ofile_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
       else if (type == N_TEXT
 	       && (strcmp (namestring, GCC_COMPILED_FLAG_SYMBOL) == 0
 		   || strcmp (namestring, GCC2_COMPILED_FLAG_SYMBOL) == 0))
-	/* I don't think this code will ever be executed, because
-	   the GCC_COMPILED_FLAG_SYMBOL usually is right before
-	   the N_SO symbol which starts this source file.
-	   However, there is no reason not to accept
-	   the GCC_COMPILED_FLAG_SYMBOL anywhere.  */
-	processing_gcc_compilation = 1;
+	{
+	  /* I don't think this code will ever be executed, because
+	     the GCC_COMPILED_FLAG_SYMBOL usually is right before
+	     the N_SO symbol which starts this source file.
+	     However, there is no reason not to accept
+	     the GCC_COMPILED_FLAG_SYMBOL anywhere.  */
+	  processing_gcc_compilation = 1;
+#if 1	  /* Works, but is experimental.  -fnf */
+	  if (current_demangling_style == auto_demangling)
+	    {
+	      set_demangling_style (GNU_DEMANGLING_STYLE_STRING);
+	    }
+#endif
+	}
       else if (type & N_EXT || type == (unsigned char)N_TEXT
 	       || type == (unsigned char)N_NBTEXT
 	       ) {
@@ -1538,7 +1564,9 @@ read_ofile_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
   if (last_source_start_addr == 0)
     last_source_start_addr = text_offset;
 
-  return end_symtab (text_offset + text_size, 0, 0, objfile);
+  rtn = end_symtab (text_offset + text_size, 0, 0, objfile);
+  end_stabs ();
+  return (rtn);
 }
 
 /* This handles a single symbol from the symbol-file, building symbols
@@ -1581,7 +1609,7 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
   /* Something is wrong if we see real data before
      seeing a source file name.  */
 
-  if (last_source_file == 0 && type != (unsigned char)N_SO)
+  if (last_source_file == NULL && type != (unsigned char)N_SO)
     {
       /* Currently this ignores N_ENTRY on Gould machines, N_NSYM on machines
 	 where that code is defined.  */
@@ -1777,19 +1805,13 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	     Patch things up. */	   
 	  if (previous_stab_code == N_SO)
 	    {
-	      if (current_subfile && current_subfile->dirname == NULL
-		  && current_subfile->name != NULL
-		  && current_subfile->name[strlen(current_subfile->name)-1] == '/')
-		{
-		  current_subfile->dirname = current_subfile->name;
-		  current_subfile->name =
-		    obsavestring (name, strlen (name),
-				  &objfile -> symbol_obstack);
-		}
+	      patch_subfile_names (current_subfile, name);
 	      break;		/* Ignore repeated SOs */
 	    }
 	  end_symtab (valu, 0, 0, objfile);
+	  end_stabs ();
 	}
+      start_stabs ();
       start_symtab (name, NULL, valu);
       break;
 
@@ -1937,7 +1959,15 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
       if (name)
 	{
 	  if (!strcmp (name, GCC2_COMPILED_FLAG_SYMBOL))
-	    processing_gcc_compilation = 1;
+	    {
+	      processing_gcc_compilation = 1;
+#if 1	      /* Works, but is experimental.  -fnf */
+	      if (current_demangling_style == auto_demangling)
+		{
+		  set_demangling_style (GNU_DEMANGLING_STYLE_STRING);
+		}
+#endif
+	    }
 	}
       break;
 
@@ -2059,6 +2089,7 @@ DEFUN(elfstab_build_psymtabs, (objfile, section_offsets, mainline,
   if (val != stabstrsize)
     perror_with_name (name);
 
+  stabsread_new_init ();
   buildsym_new_init ();
   free_header_files ();
   init_header_files ();

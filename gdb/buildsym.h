@@ -217,6 +217,9 @@ extern void
 start_subfile PARAMS ((char *, char *));
 
 extern void
+patch_subfile_names PARAMS ((struct subfile *subfile, char *name));
+
+extern void
 push_subfile PARAMS ((void));
 
 extern char *
