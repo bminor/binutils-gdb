@@ -1,5 +1,14 @@
 2003-05-22  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* config/tc-mips.c (append_insn): Use actual relocation size for new
+	fixp's.	Don't relax overflow checking for partial_inplace relocations.
+	Use the actual relocation type in combined relocs, not just the type
+	of the first one.
+	(macro_build_jalr): Use actual relocation size for new fix.
+	(s_cpsetup, s_gpdword): Likewise.
+
+2003-05-22  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* config/tc-mips.c (macro): Don't use uninitialized tempreg.
 
 2003-05-22  Nick Clifton  <nickc@redhat.com>
