@@ -1,3 +1,14 @@
+Thu Jan 22 17:51:44 1998  Nick Clifton  <nickc@cygnus.com>
+
+start-sanitize-m32rx
+	* config/tc-m32r.c: Add support for swapping fixups of swap
+	instructions. 
+end-sanitize-m32rx
+	* cgen.c (cgen_save_fixups, cgen_restore_fixups,
+	cgen_swap_fixups): Functions to save, restore and swap the fixup
+	chain with a backup copy.
+	(cgen_asm_finish_insn): Returns address of constructed insn.
+
 Wed Jan 21 16:49:10 1998  Richard Henderson  <rth@cygnus.com>
 
 	* listing.c (file_info_struct): Remove FILE, add POS.
