@@ -1,5 +1,5 @@
 /* PowerPC-specific support for 32-bit ELF
-   Copyright 1994, 1995, 1996 Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -1695,6 +1695,8 @@ ppc_elf_size_dynamic_sections (output_bfd, info)
                  than .rel.plt.  */
 	      if (strcmp (name, ".rela.plt") != 0)
 		{
+		  const char *outname;
+
 		  relocs = true;
 
 		  /* If this relocation section applies to a read only
@@ -1702,7 +1704,9 @@ ppc_elf_size_dynamic_sections (output_bfd, info)
 		     entry.  The entries in the .rel.plt section
 		     really apply to the .got section, which we
 		     created ourselves and so know is not readonly.  */
-		  target = bfd_get_section_by_name (output_bfd, name + 4);
+		  outname = bfd_get_section_name (output_bfd,
+						  s->output_section);
+		  target = bfd_get_section_by_name (output_bfd, outname + 4);
 		  if (target != NULL
 		      && (target->flags & SEC_READONLY) != 0)
 		    reltext = true;

@@ -1,5 +1,5 @@
 /* MIPS-specific support for 32-bit ELF
-   Copyright 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
 
    Most of the information added by Ian Lance Taylor, Cygnus Support,
    <ian@cygnus.com>.
@@ -5675,6 +5675,7 @@ mips_elf_size_dynamic_sections (output_bfd, info)
 	    strip = true;
 	  else
 	    {
+	      const char *outname;
 	      asection *target;
 
 	      /* If this relocation section applies to a read only
@@ -5683,9 +5684,11 @@ mips_elf_size_dynamic_sections (output_bfd, info)
                  assert a DT_TEXTREL entry rather than testing whether
                  there exists a relocation to a read only section or
                  not.  */
-	      target = bfd_get_section_by_name (output_bfd, name + 4);
+	      outname = bfd_get_section_name (output_bfd,
+					      s->output_section);
+	      target = bfd_get_section_by_name (output_bfd, outname + 4);
 	      if ((target != NULL && (target->flags & SEC_READONLY) != 0)
-		  || strcmp (name, ".rel.dyn") == 0)
+		  || strcmp (outname, ".rel.dyn") == 0)
 		reltext = true;
 
 	      /* We use the reloc_count field as a counter if we need

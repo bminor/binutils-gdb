@@ -1,3 +1,14 @@
+Mon Jan 27 12:25:02 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-i386.c (elf_i386_size_dynamic_sections): When checking for
+	relocations against the text segment, look up the output name of
+	the reloc section.
+	* elf32-m68k.c (elf_m68k_size_dynamic_sections): Likewise.
+	* elf32-mips.c (mips_elf_size_dynamic_sections): Likewise.
+	* elf32-ppc.c (ppc_elf_size_dynamic_sections): Likewise.
+	* elf32-sparc.c (elf32_sparc_size_dynamic_sections): Likewise.
+	* elf64-alpha.c (elf64_alpha_size_dynamic_sections): Likewise.
+
 start-sanitize-tic80
 Wed Jan 22 15:40:28 1997  Fred Fish  <fnf@cygnus.com>
 
