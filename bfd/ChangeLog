@@ -1,5 +1,7 @@
 Wed Mar  1 11:57:39 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coff-i960.c (COFF_PAGE_SIZE): Define.
+
 	* configure.in: Rewrite output of TDEFAULTS to avoid relying on
 	semantics of single quotes in parameter substitution.
 
