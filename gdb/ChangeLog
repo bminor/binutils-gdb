@@ -1,3 +1,14 @@
+2001-07-07  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbtypes.h (builtin_type_void_data_ptr): Rename
+	builtin_type_ptr.
+	* gdbtypes.c (builtin_type_void_data_ptr): Update.
+	(build_gdbtypes): Update.
+	(_initialize_gdbtypes): Update.
+	* values.c (value_as_pointer): Update.
+	* utils.c (host_pointer_to_address): Update.
+	(address_to_host_pointer): Update.
+
 2001-07-08  Andrew Cagney  <ac131313@redhat.com>
 
 	* remote-udi.c (udi_wait): Make type, instead of name, of first

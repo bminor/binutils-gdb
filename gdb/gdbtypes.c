@@ -73,7 +73,7 @@ struct type *builtin_type_v4si;
 struct type *builtin_type_v8qi;
 struct type *builtin_type_v4hi;
 struct type *builtin_type_v2si;
-struct type *builtin_type_ptr;
+struct type *builtin_type_void_data_ptr;
 struct type *builtin_type_void_func_ptr;
 struct type *builtin_type_CORE_ADDR;
 struct type *builtin_type_bfd_vma;
@@ -2956,7 +2956,7 @@ build_gdbtypes (void)
      target type for a value the target will never see.  It's only
      used to hold the values of (typeless) linker symbols, which are
      indeed in the unified virtual address space.  */
-  builtin_type_ptr = make_pointer_type (builtin_type_void, NULL);
+  builtin_type_void_data_ptr = make_pointer_type (builtin_type_void, NULL);
   builtin_type_void_func_ptr
     = lookup_pointer_type (lookup_function_type (builtin_type_void));
   builtin_type_CORE_ADDR =
@@ -3011,7 +3011,7 @@ _initialize_gdbtypes (void)
   register_gdbarch_swap (&builtin_type_v8qi, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v4hi, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v2si, sizeof (struct type *), NULL);
-  REGISTER_GDBARCH_SWAP (builtin_type_ptr);
+  REGISTER_GDBARCH_SWAP (builtin_type_void_data_ptr);
   REGISTER_GDBARCH_SWAP (builtin_type_void_func_ptr);
   REGISTER_GDBARCH_SWAP (builtin_type_CORE_ADDR);
   REGISTER_GDBARCH_SWAP (builtin_type_bfd_vma);

@@ -595,9 +595,10 @@ value_as_pointer (value_ptr val)
      can be different and may require different integer to pointer
      conversions. */
   if (TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_INT
-      && TYPE_LENGTH (VALUE_TYPE (val)) <= TYPE_LENGTH (builtin_type_ptr))
+      && (TYPE_LENGTH (VALUE_TYPE (val))
+	  <= TYPE_LENGTH (builtin_type_void_data_ptr)))
     {
-      val = value_cast (builtin_type_ptr, val);
+      val = value_cast (builtin_type_void_data_ptr, val);
     }
   return unpack_long (VALUE_TYPE (val), VALUE_CONTENTS (val));
 #endif

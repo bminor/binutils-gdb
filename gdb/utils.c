@@ -3000,19 +3000,19 @@ phex_nz (ULONGEST l, int sizeof_l)
 CORE_ADDR
 host_pointer_to_address (void *ptr)
 {
-  if (sizeof (ptr) != TYPE_LENGTH (builtin_type_ptr))
+  if (sizeof (ptr) != TYPE_LENGTH (builtin_type_void_data_ptr))
     internal_error (__FILE__, __LINE__,
 		    "core_addr_to_void_ptr: bad cast");
-  return POINTER_TO_ADDRESS (builtin_type_ptr, &ptr);
+  return POINTER_TO_ADDRESS (builtin_type_void_data_ptr, &ptr);
 }
 
 void *
 address_to_host_pointer (CORE_ADDR addr)
 {
   void *ptr;
-  if (sizeof (ptr) != TYPE_LENGTH (builtin_type_ptr))
+  if (sizeof (ptr) != TYPE_LENGTH (builtin_type_void_data_ptr))
     internal_error (__FILE__, __LINE__,
 		    "core_addr_to_void_ptr: bad cast");
-  ADDRESS_TO_POINTER (builtin_type_ptr, &ptr, addr);
+  ADDRESS_TO_POINTER (builtin_type_void_data_ptr, &ptr, addr);
   return ptr;
 }

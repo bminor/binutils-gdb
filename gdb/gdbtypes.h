@@ -846,9 +846,10 @@ extern struct type *builtin_type_string;
 extern struct type *builtin_type_bool;
 
 /* Address/pointer types: */
-/* (C) Language pointer type. Some target platforms use an implicitly
-   {sign,zero} -extended 32 bit C language pointer on a 64 bit ISA. */
-extern struct type *builtin_type_ptr;
+/* (C) Language `pointer to data' type.  Some target platforms use an
+   implicitly {sign,zero} -extended 32 bit C language pointer on a 64
+   bit ISA.  */
+extern struct type *builtin_type_void_data_ptr;
 
 /* (C) Language `pointer to function returning void' type.  Since
    ANSI, C standards have explicitly said that pointers to functions
