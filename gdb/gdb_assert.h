@@ -21,6 +21,11 @@
 #ifndef GDB_ASSERT_H
 #define GDB_ASSERT_H
 
+/* PRAGMATICS: "gdb_assert.h":gdb_assert() is a lower case (rather
+   than upper case) macro since that provides the closest fit to the
+   existing lower case macro <assert.h>:assert() that it is
+   replacing. */
+
 #define gdb_assert(expr)                                                      \
   ((void) ((expr) ? 0 :                                                       \
 	   (gdb_assert_fail (#expr, __FILE__, __LINE__, ASSERT_FUNCTION), 0)))
