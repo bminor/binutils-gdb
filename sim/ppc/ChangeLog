@@ -1,3 +1,8 @@
+Thu Feb 22 22:48:57 1996  Andrew Cagney  <cagney@highland.com.au>
+
+	* README, RUN, INSTALL: Update to reflect announcement
+	* psim: PSIM 1.0.1 released
+
 Thu Feb 22 14:01:56 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* emul_bugapi.c (emul_bugapi_do_read): New function to handle
@@ -25,12 +30,35 @@ Wed Feb 21 10:39:35 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	Correct implementation of _OUTLN.  Add support for _OUTSTR and
 	_PCRLR system calls.
 
-	* psim.c (psim_options): Call device_add_string_property, not
-	device_tree_add_parsed, since we want to add the model as a
-	string, and 603/604 look like integers.
+Wed Feb 21 17:07:27 1996  Andrew Cagney  <cagney@highland.com.au>
 
-	* emul_bugapi.c (emul_bugapi_create): Make formats type
-	compatible.
+	* NOTES: New file.  Ramblings on why things were done they way
+ 	they were.
+	
+	* psim.c (psim_options): Didn't enter the model value into the
+ 	device tree as a string.
+	
+  	* cpu.c (cpu_synchronize_context): Wrong test for conditional
+ 	flush of cache.
+
+	* emul_generic.c (emul_add_tree_hardware): reg value didn't match
+ 	bus address.
+	
+	* ppc-opcode-flat: new file. Generate an instruction decode
+ 	function like ppc-opcode-complex but use switch statements.
+
+	* INSTALL: document new opcode file, add example configurations.
+
+Tue Feb 20 18:42:31 1996  Andrew Cagney  <cagney@highland.com.au>
+
+	* main.c (main): rename psim instance (system) to simulation and
+ 	make global.
+	* main.c (error): print out performance even when an error occures.
+
+	* emul_bugapi.c (emul_bugapi_create): Fix argument passing.
+
+	* emul_generic.c (emul_add_tree_hardware): Move hardware devices
+ 	to 0x80000000 from 0x400000.
 
 Mon Feb 19 22:54:40 1996  Andrew Cagney  <cagney@highland.com.au>
 

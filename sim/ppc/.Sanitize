@@ -30,6 +30,7 @@ COPYING.LIB
 ChangeLog
 INSTALL
 Makefile.in
+NOTES
 README
 RUN
 PROBLEMS
@@ -89,6 +90,7 @@ os_emul.h
 ppc-cache-rules
 ppc-instructions
 ppc-opcode-complex
+ppc-opcode-flat
 ppc-opcode-simple
 ppc-opcode-stupid
 ppc-opcode-test-1
