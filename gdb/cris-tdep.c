@@ -1278,9 +1278,6 @@ cris_spec_reg_applicable (struct cris_spec_reg spec_reg)
     case cris_ver_warning:
       /* Indeterminate/obsolete.  */
       return 0;
-    case cris_ver_sim:
-      /* Simulator only.  */
-      return 0;
     case cris_ver_v0_3:
       return (version >= 0 && version <= 3);
     case cris_ver_v3p:
@@ -1374,33 +1371,6 @@ cris_cannot_store_register (int regno)
      agent decide whether they are writable.  */
   
   return 0;
-}
-
-/* Returns the register offset for the first byte of register regno's space 
-   in the saved register state.  Returns -1 for an invalid or unimplemented
-   register.  */
-
-static int
-cris_register_offset (int regno)
-{
-  int i;
-  int reg_size;
-  int offset = 0;
-  
-  if (regno >= 0 && regno < NUM_REGS)
-    {
-      /* FIXME: The offsets should be cached and calculated only once,
-         when the architecture being debugged has changed.  */
-      for (i = 0; i < regno; i++)
-        offset += cris_register_size (i);
-      
-      return offset;
-    }
-  else
-    {
-      /* Invalid register.  */
-      return -1;
-    }
 }
 
 /* Return the GDB type (defined in gdbtypes.c) for the "standard" data type

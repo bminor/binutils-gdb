@@ -72,8 +72,7 @@ maintainer works with the native maintainer when resolving API issues.
 	cris		--target=cris-elf ,-Werror
 			Orjan Friberg		orjanf@axis.com
 
-	d10v		--target=d10v-elf ,-Werror
-			Maintenance only
+	d10v		OBSOLETE
 
 	d30v		Deleted.
 

@@ -1,3 +1,11 @@
+2004-11-12  Andrew Cagney  <cagney@gnu.org>
+
+	* cris-tdep.c (cris_register_offset): Delete, never called.
+	(cris_spec_reg_applicable): Delete cris_ver_sim.
+	* MAINTAINERS: List d10v as OBSOLETE.
+	* rdi-share/host.h (FOPEN_WB): #ifdef 0 out definitions of
+	FOPEN_WB et.al., defined by "fopen-bin.h".
+
 2004-11-12  Randolph Chung  <tausq@debian.org>
 
 	* hppa-tdep.c (hppa_skip_permanent_breakpoint): Move definition ...

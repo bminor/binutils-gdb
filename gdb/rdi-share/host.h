@@ -158,6 +158,7 @@ typedef char *ArgvType;
 #define ROR_32(val, n) \
 ((((unsigned32)(val) >> (n)) | ((unsigned32)(val) << (32-(n)))) & 0xFFFFFFFFL)
 
+#if 0
 #ifdef COMPILING_ON_UNIX
 #  define FOPEN_WB     "w"
 #  define FOPEN_RB     "r"
@@ -169,6 +170,7 @@ typedef char *ArgvType;
 #  define FOPEN_WB     "wb"
 #  define FOPEN_RB     "rb"
 #  define FOPEN_RWB    "rb+"
+#endif
 #endif
 
 #ifndef FILENAME_MAX
