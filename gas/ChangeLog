@@ -1,3 +1,8 @@
+Thu Mar 14 18:18:25 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/obj-coff.h (C_REGISTER_SECTION): Change from 20 to 50, to
+	correspond to 11 March change.
+
 Thu Mar 14 15:27:10 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-h8300.c (build_bytes, MEMIND case): Generate
