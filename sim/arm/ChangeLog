@@ -1,3 +1,18 @@
+2003-03-30  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (CON_FLAGS): Remove.
+	(COPRO): Unconditionally include iwmmxt.o.
+	* configure: Regenerate.
+	* Makefile.in (CON_FLAGS): Remove.
+	* armcopro.c: Remove use of __IWMMXT__ flag.
+	* wrapper.c: Likewise.
+	* armemu.c: Likewise.
+	Add explanatory comment for suppressed code.
+
+2003-03-27  Nick Clifton  <nickc@redhat.com>
+
+	* armos.c (ARMul_OsHandleSWI): Catch SWIs for unhandled vectors.
+
 2003-03-27  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in: (CON_FLAGS): Define and intialise.
@@ -15,7 +30,6 @@
 	(ARMul_Abort): Catch branches through uninitialised vectors.
 	* armos.c (softevtorcode): Update comment.
 	(ARMul_OsInit): Use ARMUndefinedInstrV.
-	(ARMul_OsHandleSWI): Catch SWIs for unhandled vectors.
 	* wrapper.c (sim_create_inferior): Handle iWMMXt processor type.
 	(sim_store_register): Handle iWMMXt registers.
 	(sim_fetch_register): Handle iWMMXt registers.

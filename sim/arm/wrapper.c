@@ -505,7 +505,6 @@ sim_store_register (sd, rn, memory, length)
       memcpy (&DSPsc, memory, sizeof DSPsc);
       return sizeof DSPsc;
 
-#ifdef __IWMMXT__
     case SIM_ARM_IWMMXT_COP0R0_REGNUM:
     case SIM_ARM_IWMMXT_COP0R1_REGNUM:
     case SIM_ARM_IWMMXT_COP0R2_REGNUM:
@@ -539,7 +538,7 @@ sim_store_register (sd, rn, memory, length)
     case SIM_ARM_IWMMXT_COP1R14_REGNUM:
     case SIM_ARM_IWMMXT_COP1R15_REGNUM:
       return Store_Iwmmxt_Register (rn - SIM_ARM_IWMMXT_COP0R0_REGNUM, memory);
-#endif
+
     default:
       return 0;
     }
@@ -619,7 +618,6 @@ sim_fetch_register (sd, rn, memory, length)
       memcpy (memory, & DSPsc, sizeof DSPsc);
       return sizeof DSPsc;
 
-#ifdef __IWMMXT__
     case SIM_ARM_IWMMXT_COP0R0_REGNUM:
     case SIM_ARM_IWMMXT_COP0R1_REGNUM:
     case SIM_ARM_IWMMXT_COP0R2_REGNUM:
@@ -653,7 +651,7 @@ sim_fetch_register (sd, rn, memory, length)
     case SIM_ARM_IWMMXT_COP1R14_REGNUM:
     case SIM_ARM_IWMMXT_COP1R15_REGNUM:
       return Fetch_Iwmmxt_Register (rn - SIM_ARM_IWMMXT_COP0R0_REGNUM, memory);
-#endif
+
     default:
       return 0;
     }

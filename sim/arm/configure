@@ -3534,15 +3534,7 @@ fi
 done
 
 
-COPRO="armcopro.o maverick.o"
-CON_FLAGS=  
-case x$target_alias in
-	xxscale-*)
-		COPRO="armcopro.o maverick.o iwmmxt.o"
-		CON_FLAGS=-D__IWMMXT__
-		;;
-esac
-
+COPRO="armcopro.o maverick.o iwmmxt.o"
 
 
 
@@ -3756,7 +3748,6 @@ s%@sim_stdio@%$sim_stdio%g
 s%@sim_trace@%$sim_trace%g
 s%@sim_profile@%$sim_profile%g
 s%@EXEEXT@%$EXEEXT%g
-s%@CON_FLAGS@%$CON_FLAGS%g
 s%@COPRO@%$COPRO%g
 
 CEOF
