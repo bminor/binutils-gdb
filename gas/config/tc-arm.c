@@ -39,57 +39,78 @@
 #include "dwarf2dbg.h"
 #endif
 
-/* Types of processor to assemble for.  */
-#define ARM_1		0x00000001
-#define ARM_2		0x00000002
-#define ARM_3		0x00000004
-#define ARM_250		ARM_3
-#define ARM_6		0x00000008
-#define ARM_7		ARM_6           /* Same core instruction set.  */
-#define ARM_8		ARM_6           /* Same core instruction set.  */
-#define ARM_9		ARM_6           /* Same core instruction set.  */
-#define ARM_CPU_MASK	0x0000000f
+/* The following bitmasks control CPU extensions:  */
+#define ARM_EXT_V1	 0x00000001	/* All processors (core set).  */
+#define ARM_EXT_V2	 0x00000002	/* Multiply instructions.  */
+#define ARM_EXT_V2S	 0x00000004	/* SWP instructions.       */
+#define ARM_EXT_V3	 0x00000008	/* MSR MRS.                */
+#define ARM_EXT_V3M	 0x00000010	/* Allow long multiplies.  */
+#define ARM_EXT_V4	 0x00000020	/* Allow half word loads.  */
+#define ARM_EXT_V4T	 0x00000040	/* Thumb v1.               */
+#define ARM_EXT_V5	 0x00000080	/* Allow CLZ, etc.         */
+#define ARM_EXT_V5T	 0x00000100	/* Thumb v2.               */
+#define ARM_EXT_V5ExP	 0x00000200	/* DSP core set.           */
+#define ARM_EXT_V5E	 0x00000400	/* DSP Double transfers.   */
+/* Processor specific extensions.  */
+#define ARM_EXT_XSCALE	 0x00000800	/* Allow MIA etc.          */
+#define ARM_EXT_MAVERICK 0x00001000	/* Use Cirrus/DSP coprocessor.  */
 
-/* The following bitmasks control CPU extensions (ARM7 onwards):   */
-#define ARM_EXT_LONGMUL	0x00000010	/* Allow long multiplies.  */
-#define ARM_EXT_HALFWORD 0x00000020	/* Allow half word loads.  */
-#define ARM_EXT_THUMB	0x00000040	/* Allow BX instruction.   */
-#define ARM_EXT_V5	0x00000080	/* Allow CLZ, etc.         */
-#define ARM_EXT_V5E	0x00000100	/* "El Segundo". 	   */
-#define ARM_EXT_XSCALE	0x00000200	/* Allow MIA etc.  	   */
-#define ARM_EXT_MAVERICK 0x00000400      /* Use Cirrus/DSP coprocessor.  */
-
-/* Architectures are the sum of the base and extensions.  */
-#define ARM_ARCH_V3M     ARM_EXT_LONGMUL
-#define ARM_ARCH_V4     (ARM_ARCH_V3M | ARM_EXT_HALFWORD)
-#define ARM_ARCH_V4T	(ARM_ARCH_V4 | ARM_EXT_THUMB)
-#define ARM_ARCH_V5	(ARM_ARCH_V4 | ARM_EXT_V5)
-#define ARM_ARCH_V5T	(ARM_ARCH_V5 | ARM_EXT_THUMB)
-#define ARM_ARCH_V5TE	(ARM_ARCH_V5T | ARM_EXT_V5E)
-#define ARM_ARCH_XSCALE (ARM_ARCH_V5TE | ARM_EXT_XSCALE)
+/* Architectures are the sum of the base and extensions.  The ARM ARM (rev E)
+   defines the following: ARMv3, ARMv3M, ARMv4xM, ARMv4, ARMv4TxM, ARMv4T,
+   ARMv5xM, ARMv5, ARMv5TxM, ARMv5T, ARMv5TExP, ARMv5TE.  To these we add
+   three more to cover cores prior to ARM6.  Finally, there are cores which
+   implement further extensions in the co-processor space.  */
+#define ARM_ARCH_V1			  ARM_EXT_V1
+#define ARM_ARCH_V2	(ARM_ARCH_V1	| ARM_EXT_V2)
+#define ARM_ARCH_V2S	(ARM_ARCH_V2	| ARM_EXT_V2S)
+#define ARM_ARCH_V3	(ARM_ARCH_V2S	| ARM_EXT_V3)
+#define ARM_ARCH_V3M	(ARM_ARCH_V3	| ARM_EXT_V3M)
+#define ARM_ARCH_V4xM	(ARM_ARCH_V3	| ARM_EXT_V4)
+#define ARM_ARCH_V4	(ARM_ARCH_V3M	| ARM_EXT_V4)
+#define ARM_ARCH_V4TxM	(ARM_ARCH_V4xM	| ARM_EXT_V4T)
+#define ARM_ARCH_V4T	(ARM_ARCH_V4	| ARM_EXT_V4T)
+#define ARM_ARCH_V5xM	(ARM_ARCH_V4xM	| ARM_EXT_V5)
+#define ARM_ARCH_V5	(ARM_ARCH_V4	| ARM_EXT_V5)
+#define ARM_ARCH_V5TxM	(ARM_ARCH_V5xM	| ARM_EXT_V4T | ARM_EXT_V5T)
+#define ARM_ARCH_V5T	(ARM_ARCH_V5	| ARM_EXT_V4T | ARM_EXT_V5T)
+#define ARM_ARCH_V5TExP	(ARM_ARCH_V5T	| ARM_EXT_V5ExP)
+#define ARM_ARCH_V5TE	(ARM_ARCH_V5TExP | ARM_EXT_V5E)
+/* Processors with specific extensions in the co-processor space.  */
+#define ARM_ARCH_XSCALE	(ARM_ARCH_V5TE	| ARM_EXT_XSCALE)
 
 /* Some useful combinations:  */
 #define ARM_ANY		0x00ffffff
 #define ARM_2UP		(ARM_ANY - ARM_1)
-#define ARM_ALL		ARM_2UP		/* Not arm1 only.  */
-#define ARM_3UP		0x00fffffc
-#define ARM_6UP		0x00fffff8      /* Includes ARM7.  */
+#define ARM_ALL		ARM_ANY
 
-#define FPU_CORE	0x80000000
-#define FPU_FPA10	0x40000000
-#define FPU_FPA11	0x40000000
+#define FPU_FPA_EXT_V1	0x80000000	/* Base FPA instruction set.  */
+#define FPU_FPA_EXT_V2	0x40000000	/* LFM/SFM.		      */
 #define FPU_NONE	0
 
+#define FPU_ARCH_FPE	 FPU_FPA_EXT_V1
+#define FPU_ARCH_FPA	(FPU_ARCH_FPE | FPU_FPA_EXT_V2)
+
 /* Some useful combinations.  */
-#define FPU_ALL		0xff000000	/* Note this is ~ARM_ANY.  */
-#define FPU_MEMMULTI	0x7f000000	/* Not fpu_core.  */
+#define FPU_ANY		0xff000000	/* Note this is ~ARM_ANY.  */
+
+/* Types of processor to assemble for.  */
+#define ARM_1		ARM_ARCH_V1
+#define ARM_2		ARM_ARCH_V2
+#define ARM_3		ARM_ARCH_V2S
+#define ARM_250		ARM_ARCH_V2S
+#define ARM_6		ARM_ARCH_V3
+#define ARM_7		ARM_ARCH_V3
+#define ARM_8		ARM_ARCH_V4
+#define ARM_9		ARM_ARCH_V4T
+#define ARM_STRONG	ARM_ARCH_V4
+#define ARM_CPU_MASK	0x0000000f              /* XXX? */
 
 #ifndef CPU_DEFAULT
 #if defined __XSCALE__
-#define CPU_DEFAULT	(ARM_9 | ARM_ARCH_XSCALE)
+#define CPU_DEFAULT	(ARM_ARCH_XSCALE)
 #else
 #if defined __thumb__
-#define CPU_DEFAULT 	(ARM_7 | ARM_ARCH_V4T)
+#define CPU_DEFAULT 	(ARM_ARCH_V5T)
 #else
 #define CPU_DEFAULT 	ARM_ALL
 #endif
@@ -97,7 +118,7 @@
 #endif
 
 #ifndef FPU_DEFAULT
-#define FPU_DEFAULT FPU_ALL
+#define FPU_DEFAULT FPU_ARCH_FPA
 #endif
 
 #define streq(a, b)           (strcmp (a, b) == 0)
@@ -785,120 +806,122 @@ static const struct asm_opcode insns[] =
   {"mar",   0x0c400000, NULL,   NULL,        ARM_EXT_XSCALE, do_mar},
   {"mra",   0x0c500000, NULL,   NULL,        ARM_EXT_XSCALE, do_mra},
   {"pld",   0xf450f000, "",     NULL,        ARM_EXT_XSCALE, do_pld},
-  {"ldr",   0x000000d0, NULL,   ldr_flags,   ARM_ANY,        do_ldrd},
-  {"str",   0x000000f0, NULL,   str_flags,   ARM_ANY,        do_ldrd},
+  {"ldr",   0x000000d0, NULL,   ldr_flags,   ARM_EXT_V1,        do_ldrd},
+  {"str",   0x000000f0, NULL,   str_flags,   ARM_EXT_V1,        do_ldrd},
 
 /* ARM Instructions.  */
-  {"and",   0x00000000, NULL,   s_flag,      ARM_ANY,      do_arit},
-  {"eor",   0x00200000, NULL,   s_flag,      ARM_ANY,      do_arit},
-  {"sub",   0x00400000, NULL,   s_flag,      ARM_ANY,      do_arit},
-  {"rsb",   0x00600000, NULL,   s_flag,      ARM_ANY,      do_arit},
-  {"add",   0x00800000, NULL,   s_flag,      ARM_ANY,      do_arit},
-  {"adc",   0x00a00000, NULL,   s_flag,      ARM_ANY,      do_arit},
-  {"sbc",   0x00c00000, NULL,   s_flag,      ARM_ANY,      do_arit},
-  {"rsc",   0x00e00000, NULL,   s_flag,      ARM_ANY,      do_arit},
-  {"orr",   0x01800000, NULL,   s_flag,      ARM_ANY,      do_arit},
-  {"bic",   0x01c00000, NULL,   s_flag,      ARM_ANY,      do_arit},
-  {"tst",   0x01000000, NULL,   cmp_flags,   ARM_ANY,      do_cmp},
-  {"teq",   0x01200000, NULL,   cmp_flags,   ARM_ANY,      do_cmp},
-  {"cmp",   0x01400000, NULL,   cmp_flags,   ARM_ANY,      do_cmp},
-  {"cmn",   0x01600000, NULL,   cmp_flags,   ARM_ANY,      do_cmp},
-  {"mov",   0x01a00000, NULL,   s_flag,      ARM_ANY,      do_mov},
-  {"mvn",   0x01e00000, NULL,   s_flag,      ARM_ANY,      do_mov},
-  {"str",   0x04000000, NULL,   str_flags,   ARM_ANY,      do_ldst},
-  {"ldr",   0x04100000, NULL,   ldr_flags,   ARM_ANY,      do_ldst},
-  {"stm",   0x08000000, NULL,   stm_flags,   ARM_ANY,      do_ldmstm},
-  {"ldm",   0x08100000, NULL,   ldm_flags,   ARM_ANY,      do_ldmstm},
-  {"swi",   0x0f000000, NULL,   NULL,        ARM_ANY,      do_swi},
+  {"and",   0x00000000, NULL,   s_flag,      ARM_EXT_V1,      do_arit},
+  {"eor",   0x00200000, NULL,   s_flag,      ARM_EXT_V1,      do_arit},
+  {"sub",   0x00400000, NULL,   s_flag,      ARM_EXT_V1,      do_arit},
+  {"rsb",   0x00600000, NULL,   s_flag,      ARM_EXT_V1,      do_arit},
+  {"add",   0x00800000, NULL,   s_flag,      ARM_EXT_V1,      do_arit},
+  {"adc",   0x00a00000, NULL,   s_flag,      ARM_EXT_V1,      do_arit},
+  {"sbc",   0x00c00000, NULL,   s_flag,      ARM_EXT_V1,      do_arit},
+  {"rsc",   0x00e00000, NULL,   s_flag,      ARM_EXT_V1,      do_arit},
+  {"orr",   0x01800000, NULL,   s_flag,      ARM_EXT_V1,      do_arit},
+  {"bic",   0x01c00000, NULL,   s_flag,      ARM_EXT_V1,      do_arit},
+  {"tst",   0x01000000, NULL,   cmp_flags,   ARM_EXT_V1,      do_cmp},
+  {"teq",   0x01200000, NULL,   cmp_flags,   ARM_EXT_V1,      do_cmp},
+  {"cmp",   0x01400000, NULL,   cmp_flags,   ARM_EXT_V1,      do_cmp},
+  {"cmn",   0x01600000, NULL,   cmp_flags,   ARM_EXT_V1,      do_cmp},
+  {"mov",   0x01a00000, NULL,   s_flag,      ARM_EXT_V1,      do_mov},
+  {"mvn",   0x01e00000, NULL,   s_flag,      ARM_EXT_V1,      do_mov},
+  {"str",   0x04000000, NULL,   str_flags,   ARM_EXT_V1,      do_ldst},
+  {"ldr",   0x04100000, NULL,   ldr_flags,   ARM_EXT_V1,      do_ldst},
+  {"stm",   0x08000000, NULL,   stm_flags,   ARM_EXT_V1,      do_ldmstm},
+  {"ldm",   0x08100000, NULL,   ldm_flags,   ARM_EXT_V1,      do_ldmstm},
+  {"swi",   0x0f000000, NULL,   NULL,        ARM_EXT_V1,      do_swi},
 #ifdef TE_WINCE
-  {"bl",    0x0b000000, NULL,   NULL,        ARM_ANY,      do_branch},
-  {"b",     0x0a000000, NULL,   NULL,        ARM_ANY,      do_branch},
+  {"bl",    0x0b000000, NULL,   NULL,        ARM_EXT_V1,      do_branch},
+  {"b",     0x0a000000, NULL,   NULL,        ARM_EXT_V1,      do_branch},
 #else
-  {"bl",    0x0bfffffe, NULL,   NULL,        ARM_ANY,      do_branch},
-  {"b",     0x0afffffe, NULL,   NULL,        ARM_ANY,      do_branch},
+  {"bl",    0x0bfffffe, NULL,   NULL,        ARM_EXT_V1,      do_branch},
+  {"b",     0x0afffffe, NULL,   NULL,        ARM_EXT_V1,      do_branch},
 #endif
 
 /* Pseudo ops.  */
-  {"adr",   0x028f0000, NULL,   long_flag,   ARM_ANY,      do_adr},
-  {"nop",   0x01a00000, NULL,   NULL,        ARM_ANY,      do_nop},
+  {"adr",   0x028f0000, NULL,   long_flag,   ARM_EXT_V1,      do_adr},
+  {"nop",   0x01a00000, NULL,   NULL,        ARM_EXT_V1,      do_nop},
 
 /* ARM 2 multiplies.  */
-  {"mul",   0x00000090, NULL,   s_flag,      ARM_2UP,      do_mul},
-  {"mla",   0x00200090, NULL,   s_flag,      ARM_2UP,      do_mla},
+  {"mul",   0x00000090, NULL,   s_flag,      ARM_EXT_V2,      do_mul},
+  {"mla",   0x00200090, NULL,   s_flag,      ARM_EXT_V2,      do_mla},
 
 /* ARM 3 - swp instructions.  */
-  {"swp",   0x01000090, NULL,   byte_flag,   ARM_3UP,      do_swap},
+  {"swp",   0x01000090, NULL,   byte_flag,   ARM_EXT_V2S,      do_swap},
 
 /* ARM 6 Coprocessor instructions.  */
-  {"mrs",   0x010f0000, NULL,   NULL,        ARM_6UP,      do_mrs},
-  {"msr",   0x0120f000, NULL,   NULL,        ARM_6UP,      do_msr},
+  {"mrs",   0x010f0000, NULL,   NULL,        ARM_EXT_V3,      do_mrs},
+  {"msr",   0x0120f000, NULL,   NULL,        ARM_EXT_V3,      do_msr},
 /* ScottB: our code uses 0x0128f000 for msr.
    NickC:  but this is wrong because the bits 16 through 19 are
            handled by the PSR_xxx defines above.  */
 
 /* ARM 7M long multiplies - need signed/unsigned flags!  */
-  {"smull", 0x00c00090, NULL,   s_flag,      ARM_EXT_LONGMUL,  do_mull},
-  {"umull", 0x00800090, NULL,   s_flag,      ARM_EXT_LONGMUL,  do_mull},
-  {"smlal", 0x00e00090, NULL,   s_flag,      ARM_EXT_LONGMUL,  do_mull},
-  {"umlal", 0x00a00090, NULL,   s_flag,      ARM_EXT_LONGMUL,  do_mull},
+  {"smull", 0x00c00090, NULL,   s_flag,      ARM_EXT_V3M,  do_mull},
+  {"umull", 0x00800090, NULL,   s_flag,      ARM_EXT_V3M,  do_mull},
+  {"smlal", 0x00e00090, NULL,   s_flag,      ARM_EXT_V3M,  do_mull},
+  {"umlal", 0x00a00090, NULL,   s_flag,      ARM_EXT_V3M,  do_mull},
 
 /* ARM THUMB interworking.  */
-  {"bx",    0x012fff10, NULL,   NULL,        ARM_EXT_THUMB,    do_bx},
+  /* Note: bx (and blx) are required on V5, even if the processor does
+     not support Thumb.   */
+  {"bx",    0x012fff10, NULL,   NULL,        ARM_EXT_V4T | ARM_EXT_V5, do_bx},
 
 /* Floating point instructions.  */
-  {"wfs",   0x0e200110, NULL,   NULL,        FPU_ALL,      do_fp_ctrl},
-  {"rfs",   0x0e300110, NULL,   NULL,        FPU_ALL,      do_fp_ctrl},
-  {"wfc",   0x0e400110, NULL,   NULL,        FPU_ALL,      do_fp_ctrl},
-  {"rfc",   0x0e500110, NULL,   NULL,        FPU_ALL,      do_fp_ctrl},
-  {"ldf",   0x0c100100, "sdep", NULL,        FPU_ALL,      do_fp_ldst},
-  {"stf",   0x0c000100, "sdep", NULL,        FPU_ALL,      do_fp_ldst},
-  {"lfm",   0x0c100200, NULL,   lfm_flags,   FPU_MEMMULTI, do_fp_ldmstm},
-  {"sfm",   0x0c000200, NULL,   sfm_flags,   FPU_MEMMULTI, do_fp_ldmstm},
-  {"mvf",   0x0e008100, "sde",  round_flags, FPU_ALL,      do_fp_monadic},
-  {"mnf",   0x0e108100, "sde",  round_flags, FPU_ALL,      do_fp_monadic},
-  {"abs",   0x0e208100, "sde",  round_flags, FPU_ALL,      do_fp_monadic},
-  {"rnd",   0x0e308100, "sde",  round_flags, FPU_ALL,      do_fp_monadic},
-  {"sqt",   0x0e408100, "sde",  round_flags, FPU_ALL,      do_fp_monadic},
-  {"log",   0x0e508100, "sde",  round_flags, FPU_ALL,      do_fp_monadic},
-  {"lgn",   0x0e608100, "sde",  round_flags, FPU_ALL,      do_fp_monadic},
-  {"exp",   0x0e708100, "sde",  round_flags, FPU_ALL,      do_fp_monadic},
-  {"sin",   0x0e808100, "sde",  round_flags, FPU_ALL,      do_fp_monadic},
-  {"cos",   0x0e908100, "sde",  round_flags, FPU_ALL,      do_fp_monadic},
-  {"tan",   0x0ea08100, "sde",  round_flags, FPU_ALL,      do_fp_monadic},
-  {"asn",   0x0eb08100, "sde",  round_flags, FPU_ALL,      do_fp_monadic},
-  {"acs",   0x0ec08100, "sde",  round_flags, FPU_ALL,      do_fp_monadic},
-  {"atn",   0x0ed08100, "sde",  round_flags, FPU_ALL,      do_fp_monadic},
-  {"urd",   0x0ee08100, "sde",  round_flags, FPU_ALL,      do_fp_monadic},
-  {"nrm",   0x0ef08100, "sde",  round_flags, FPU_ALL,      do_fp_monadic},
-  {"adf",   0x0e000100, "sde",  round_flags, FPU_ALL,      do_fp_dyadic},
-  {"suf",   0x0e200100, "sde",  round_flags, FPU_ALL,      do_fp_dyadic},
-  {"rsf",   0x0e300100, "sde",  round_flags, FPU_ALL,      do_fp_dyadic},
-  {"muf",   0x0e100100, "sde",  round_flags, FPU_ALL,      do_fp_dyadic},
-  {"dvf",   0x0e400100, "sde",  round_flags, FPU_ALL,      do_fp_dyadic},
-  {"rdf",   0x0e500100, "sde",  round_flags, FPU_ALL,      do_fp_dyadic},
-  {"pow",   0x0e600100, "sde",  round_flags, FPU_ALL,      do_fp_dyadic},
-  {"rpw",   0x0e700100, "sde",  round_flags, FPU_ALL,      do_fp_dyadic},
-  {"rmf",   0x0e800100, "sde",  round_flags, FPU_ALL,      do_fp_dyadic},
-  {"fml",   0x0e900100, "sde",  round_flags, FPU_ALL,      do_fp_dyadic},
-  {"fdv",   0x0ea00100, "sde",  round_flags, FPU_ALL,      do_fp_dyadic},
-  {"frd",   0x0eb00100, "sde",  round_flags, FPU_ALL,      do_fp_dyadic},
-  {"pol",   0x0ec00100, "sde",  round_flags, FPU_ALL,      do_fp_dyadic},
-  {"cmf",   0x0e90f110, NULL,   except_flag, FPU_ALL,      do_fp_cmp},
-  {"cnf",   0x0eb0f110, NULL,   except_flag, FPU_ALL,      do_fp_cmp},
+  {"wfs",   0x0e200110, NULL,   NULL,        FPU_FPA_EXT_V1,      do_fp_ctrl},
+  {"rfs",   0x0e300110, NULL,   NULL,        FPU_FPA_EXT_V1,      do_fp_ctrl},
+  {"wfc",   0x0e400110, NULL,   NULL,        FPU_FPA_EXT_V1,      do_fp_ctrl},
+  {"rfc",   0x0e500110, NULL,   NULL,        FPU_FPA_EXT_V1,      do_fp_ctrl},
+  {"ldf",   0x0c100100, "sdep", NULL,        FPU_FPA_EXT_V1,      do_fp_ldst},
+  {"stf",   0x0c000100, "sdep", NULL,        FPU_FPA_EXT_V1,      do_fp_ldst},
+  {"lfm",   0x0c100200, NULL,   lfm_flags,   FPU_FPA_EXT_V2, do_fp_ldmstm},
+  {"sfm",   0x0c000200, NULL,   sfm_flags,   FPU_FPA_EXT_V2, do_fp_ldmstm},
+  {"mvf",   0x0e008100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
+  {"mnf",   0x0e108100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
+  {"abs",   0x0e208100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
+  {"rnd",   0x0e308100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
+  {"sqt",   0x0e408100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
+  {"log",   0x0e508100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
+  {"lgn",   0x0e608100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
+  {"exp",   0x0e708100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
+  {"sin",   0x0e808100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
+  {"cos",   0x0e908100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
+  {"tan",   0x0ea08100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
+  {"asn",   0x0eb08100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
+  {"acs",   0x0ec08100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
+  {"atn",   0x0ed08100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
+  {"urd",   0x0ee08100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
+  {"nrm",   0x0ef08100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
+  {"adf",   0x0e000100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_dyadic},
+  {"suf",   0x0e200100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_dyadic},
+  {"rsf",   0x0e300100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_dyadic},
+  {"muf",   0x0e100100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_dyadic},
+  {"dvf",   0x0e400100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_dyadic},
+  {"rdf",   0x0e500100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_dyadic},
+  {"pow",   0x0e600100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_dyadic},
+  {"rpw",   0x0e700100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_dyadic},
+  {"rmf",   0x0e800100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_dyadic},
+  {"fml",   0x0e900100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_dyadic},
+  {"fdv",   0x0ea00100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_dyadic},
+  {"frd",   0x0eb00100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_dyadic},
+  {"pol",   0x0ec00100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_dyadic},
+  {"cmf",   0x0e90f110, NULL,   except_flag, FPU_FPA_EXT_V1,      do_fp_cmp},
+  {"cnf",   0x0eb0f110, NULL,   except_flag, FPU_FPA_EXT_V1,      do_fp_cmp},
 /* The FPA10 data sheet suggests that the 'E' of cmfe/cnfe should not
    be an optional suffix, but part of the instruction.  To be compatible,
    we accept either.  */
-  {"cmfe",  0x0ed0f110, NULL,   NULL,        FPU_ALL,      do_fp_cmp},
-  {"cnfe",  0x0ef0f110, NULL,   NULL,        FPU_ALL,      do_fp_cmp},
-  {"flt",   0x0e000110, "sde",  round_flags, FPU_ALL,      do_fp_from_reg},
-  {"fix",   0x0e100110, NULL,   fix_flags,   FPU_ALL,      do_fp_to_reg},
+  {"cmfe",  0x0ed0f110, NULL,   NULL,        FPU_FPA_EXT_V1,      do_fp_cmp},
+  {"cnfe",  0x0ef0f110, NULL,   NULL,        FPU_FPA_EXT_V1,      do_fp_cmp},
+  {"flt",   0x0e000110, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_from_reg},
+  {"fix",   0x0e100110, NULL,   fix_flags,   FPU_FPA_EXT_V1,      do_fp_to_reg},
 
 /* Generic copressor instructions.  */
-  {"cdp",   0x0e000000, NULL,  NULL,         ARM_2UP,      do_cdp},
-  {"ldc",   0x0c100000, NULL,  long_flag,    ARM_2UP,      do_lstc},
-  {"stc",   0x0c000000, NULL,  long_flag,    ARM_2UP,      do_lstc},
-  {"mcr",   0x0e000010, NULL,  NULL,         ARM_2UP,      do_co_reg},
-  {"mrc",   0x0e100010, NULL,  NULL,         ARM_2UP,      do_co_reg},
+  {"cdp",   0x0e000000, NULL,  NULL,         ARM_EXT_V2,      do_cdp},
+  {"ldc",   0x0c100000, NULL,  long_flag,    ARM_EXT_V2,      do_lstc},
+  {"stc",   0x0c000000, NULL,  long_flag,    ARM_EXT_V2,      do_lstc},
+  {"mcr",   0x0e000010, NULL,  NULL,         ARM_EXT_V2,      do_co_reg},
+  {"mrc",   0x0e100010, NULL,  NULL,         ARM_EXT_V2,      do_co_reg},
 
 /*  ARM ISA extension 5.  */
 /* Note: blx is actually 2 opcodes, so the .value is set dynamically.
@@ -1177,66 +1200,66 @@ struct thumb_opcode
 
 static const struct thumb_opcode tinsns[] =
 {
-  {"adc",	0x4140,		2,	ARM_EXT_THUMB, do_t_arit},
-  {"add",	0x0000,		2,	ARM_EXT_THUMB, do_t_add},
-  {"and",	0x4000,		2,	ARM_EXT_THUMB, do_t_arit},
-  {"asr",	0x0000,		2,	ARM_EXT_THUMB, do_t_asr},
-  {"b",		T_OPCODE_BRANCH, 2,	ARM_EXT_THUMB, do_t_branch12},
-  {"beq",	0xd0fe,		2,	ARM_EXT_THUMB, do_t_branch9},
-  {"bne",	0xd1fe,		2,	ARM_EXT_THUMB, do_t_branch9},
-  {"bcs",	0xd2fe,		2,	ARM_EXT_THUMB, do_t_branch9},
-  {"bhs",	0xd2fe,		2,	ARM_EXT_THUMB, do_t_branch9},
-  {"bcc",	0xd3fe,		2,	ARM_EXT_THUMB, do_t_branch9},
-  {"bul",	0xd3fe,		2,	ARM_EXT_THUMB, do_t_branch9},
-  {"blo",	0xd3fe,		2,	ARM_EXT_THUMB, do_t_branch9},
-  {"bmi",	0xd4fe,		2,	ARM_EXT_THUMB, do_t_branch9},
-  {"bpl",	0xd5fe,		2,	ARM_EXT_THUMB, do_t_branch9},
-  {"bvs",	0xd6fe,		2,	ARM_EXT_THUMB, do_t_branch9},
-  {"bvc",	0xd7fe,		2,	ARM_EXT_THUMB, do_t_branch9},
-  {"bhi",	0xd8fe,		2,	ARM_EXT_THUMB, do_t_branch9},
-  {"bls",	0xd9fe,		2,	ARM_EXT_THUMB, do_t_branch9},
-  {"bge",	0xdafe,		2,	ARM_EXT_THUMB, do_t_branch9},
-  {"blt",	0xdbfe,		2,	ARM_EXT_THUMB, do_t_branch9},
-  {"bgt",	0xdcfe,		2,	ARM_EXT_THUMB, do_t_branch9},
-  {"ble",	0xddfe,		2,	ARM_EXT_THUMB, do_t_branch9},
-  {"bal",	0xdefe,		2,	ARM_EXT_THUMB, do_t_branch9},
-  {"bic",	0x4380,		2,	ARM_EXT_THUMB, do_t_arit},
-  {"bl",	0xf7fffffe,	4,	ARM_EXT_THUMB, do_t_branch23},
+  {"adc",	0x4140,		2,	ARM_EXT_V4T, do_t_arit},
+  {"add",	0x0000,		2,	ARM_EXT_V4T, do_t_add},
+  {"and",	0x4000,		2,	ARM_EXT_V4T, do_t_arit},
+  {"asr",	0x0000,		2,	ARM_EXT_V4T, do_t_asr},
+  {"b",		T_OPCODE_BRANCH, 2,	ARM_EXT_V4T, do_t_branch12},
+  {"beq",	0xd0fe,		2,	ARM_EXT_V4T, do_t_branch9},
+  {"bne",	0xd1fe,		2,	ARM_EXT_V4T, do_t_branch9},
+  {"bcs",	0xd2fe,		2,	ARM_EXT_V4T, do_t_branch9},
+  {"bhs",	0xd2fe,		2,	ARM_EXT_V4T, do_t_branch9},
+  {"bcc",	0xd3fe,		2,	ARM_EXT_V4T, do_t_branch9},
+  {"bul",	0xd3fe,		2,	ARM_EXT_V4T, do_t_branch9},
+  {"blo",	0xd3fe,		2,	ARM_EXT_V4T, do_t_branch9},
+  {"bmi",	0xd4fe,		2,	ARM_EXT_V4T, do_t_branch9},
+  {"bpl",	0xd5fe,		2,	ARM_EXT_V4T, do_t_branch9},
+  {"bvs",	0xd6fe,		2,	ARM_EXT_V4T, do_t_branch9},
+  {"bvc",	0xd7fe,		2,	ARM_EXT_V4T, do_t_branch9},
+  {"bhi",	0xd8fe,		2,	ARM_EXT_V4T, do_t_branch9},
+  {"bls",	0xd9fe,		2,	ARM_EXT_V4T, do_t_branch9},
+  {"bge",	0xdafe,		2,	ARM_EXT_V4T, do_t_branch9},
+  {"blt",	0xdbfe,		2,	ARM_EXT_V4T, do_t_branch9},
+  {"bgt",	0xdcfe,		2,	ARM_EXT_V4T, do_t_branch9},
+  {"ble",	0xddfe,		2,	ARM_EXT_V4T, do_t_branch9},
+  {"bal",	0xdefe,		2,	ARM_EXT_V4T, do_t_branch9},
+  {"bic",	0x4380,		2,	ARM_EXT_V4T, do_t_arit},
+  {"bl",	0xf7fffffe,	4,	ARM_EXT_V4T, do_t_branch23},
   {"blx",	0,		0,	ARM_EXT_V5, do_t_blx},
   {"bkpt",	0xbe00,		2,	ARM_EXT_V5, do_t_bkpt},
-  {"bx",	0x4700,		2,	ARM_EXT_THUMB, do_t_bx},
-  {"cmn",	T_OPCODE_CMN,	2,	ARM_EXT_THUMB, do_t_arit},
-  {"cmp",	0x0000,		2,	ARM_EXT_THUMB, do_t_compare},
-  {"eor",	0x4040,		2,	ARM_EXT_THUMB, do_t_arit},
-  {"ldmia",	0xc800,		2,	ARM_EXT_THUMB, do_t_ldmstm},
-  {"ldr",	0x0000,		2,	ARM_EXT_THUMB, do_t_ldr},
-  {"ldrb",	0x0000,		2,	ARM_EXT_THUMB, do_t_ldrb},
-  {"ldrh",	0x0000,		2,	ARM_EXT_THUMB, do_t_ldrh},
-  {"ldrsb",	0x5600,		2,	ARM_EXT_THUMB, do_t_lds},
-  {"ldrsh",	0x5e00,		2,	ARM_EXT_THUMB, do_t_lds},
-  {"ldsb",	0x5600,		2,	ARM_EXT_THUMB, do_t_lds},
-  {"ldsh",	0x5e00,		2,	ARM_EXT_THUMB, do_t_lds},
-  {"lsl",	0x0000,		2,	ARM_EXT_THUMB, do_t_lsl},
-  {"lsr",	0x0000,		2,	ARM_EXT_THUMB, do_t_lsr},
-  {"mov",	0x0000,		2,	ARM_EXT_THUMB, do_t_mov},
-  {"mul",	T_OPCODE_MUL,	2,	ARM_EXT_THUMB, do_t_arit},
-  {"mvn",	T_OPCODE_MVN,	2,	ARM_EXT_THUMB, do_t_arit},
-  {"neg",	T_OPCODE_NEG,	2,	ARM_EXT_THUMB, do_t_arit},
-  {"orr",	0x4300,		2,	ARM_EXT_THUMB, do_t_arit},
-  {"pop",	0xbc00,		2,	ARM_EXT_THUMB, do_t_push_pop},
-  {"push",	0xb400,		2,	ARM_EXT_THUMB, do_t_push_pop},
-  {"ror",	0x41c0,		2,	ARM_EXT_THUMB, do_t_arit},
-  {"sbc",	0x4180,		2,	ARM_EXT_THUMB, do_t_arit},
-  {"stmia",	0xc000,		2,	ARM_EXT_THUMB, do_t_ldmstm},
-  {"str",	0x0000,		2,	ARM_EXT_THUMB, do_t_str},
-  {"strb",	0x0000,		2,	ARM_EXT_THUMB, do_t_strb},
-  {"strh",	0x0000,		2,	ARM_EXT_THUMB, do_t_strh},
-  {"swi",	0xdf00,		2,	ARM_EXT_THUMB, do_t_swi},
-  {"sub",	0x0000,		2,	ARM_EXT_THUMB, do_t_sub},
-  {"tst",	T_OPCODE_TST,	2,	ARM_EXT_THUMB, do_t_arit},
+  {"bx",	0x4700,		2,	ARM_EXT_V4T, do_t_bx},
+  {"cmn",	T_OPCODE_CMN,	2,	ARM_EXT_V4T, do_t_arit},
+  {"cmp",	0x0000,		2,	ARM_EXT_V4T, do_t_compare},
+  {"eor",	0x4040,		2,	ARM_EXT_V4T, do_t_arit},
+  {"ldmia",	0xc800,		2,	ARM_EXT_V4T, do_t_ldmstm},
+  {"ldr",	0x0000,		2,	ARM_EXT_V4T, do_t_ldr},
+  {"ldrb",	0x0000,		2,	ARM_EXT_V4T, do_t_ldrb},
+  {"ldrh",	0x0000,		2,	ARM_EXT_V4T, do_t_ldrh},
+  {"ldrsb",	0x5600,		2,	ARM_EXT_V4T, do_t_lds},
+  {"ldrsh",	0x5e00,		2,	ARM_EXT_V4T, do_t_lds},
+  {"ldsb",	0x5600,		2,	ARM_EXT_V4T, do_t_lds},
+  {"ldsh",	0x5e00,		2,	ARM_EXT_V4T, do_t_lds},
+  {"lsl",	0x0000,		2,	ARM_EXT_V4T, do_t_lsl},
+  {"lsr",	0x0000,		2,	ARM_EXT_V4T, do_t_lsr},
+  {"mov",	0x0000,		2,	ARM_EXT_V4T, do_t_mov},
+  {"mul",	T_OPCODE_MUL,	2,	ARM_EXT_V4T, do_t_arit},
+  {"mvn",	T_OPCODE_MVN,	2,	ARM_EXT_V4T, do_t_arit},
+  {"neg",	T_OPCODE_NEG,	2,	ARM_EXT_V4T, do_t_arit},
+  {"orr",	0x4300,		2,	ARM_EXT_V4T, do_t_arit},
+  {"pop",	0xbc00,		2,	ARM_EXT_V4T, do_t_push_pop},
+  {"push",	0xb400,		2,	ARM_EXT_V4T, do_t_push_pop},
+  {"ror",	0x41c0,		2,	ARM_EXT_V4T, do_t_arit},
+  {"sbc",	0x4180,		2,	ARM_EXT_V4T, do_t_arit},
+  {"stmia",	0xc000,		2,	ARM_EXT_V4T, do_t_ldmstm},
+  {"str",	0x0000,		2,	ARM_EXT_V4T, do_t_str},
+  {"strb",	0x0000,		2,	ARM_EXT_V4T, do_t_strb},
+  {"strh",	0x0000,		2,	ARM_EXT_V4T, do_t_strh},
+  {"swi",	0xdf00,		2,	ARM_EXT_V4T, do_t_swi},
+  {"sub",	0x0000,		2,	ARM_EXT_V4T, do_t_sub},
+  {"tst",	T_OPCODE_TST,	2,	ARM_EXT_V4T, do_t_arit},
   /* Pseudo ops:  */
-  {"adr",       0x0000,         2,      ARM_EXT_THUMB, do_t_adr},
-  {"nop",       0x46C0,         2,      ARM_EXT_THUMB, do_t_nop},      /* mov r8,r8  */
+  {"adr",       0x0000,         2,      ARM_EXT_V4T, do_t_adr},
+  {"nop",       0x46C0,         2,      ARM_EXT_V4T, do_t_nop},      /* mov r8,r8  */
 };
 
 struct reg_entry
@@ -1886,7 +1909,7 @@ opcode_select (width)
     case 16:
       if (! thumb_mode)
 	{
-	  if (! (cpu_variant & ARM_EXT_THUMB))
+	  if (! (cpu_variant & ARM_EXT_V4T))
 	    as_bad (_("selected processor does not support THUMB opcodes"));
 
 	  thumb_mode = 1;
@@ -1899,7 +1922,7 @@ opcode_select (width)
     case 32:
       if (thumb_mode)
 	{
-	  if ((cpu_variant & ARM_ANY) == ARM_EXT_THUMB)
+	  if ((cpu_variant & ARM_ANY) == ARM_EXT_V4T)
 	    as_bad (_("selected processor does not support ARM opcodes"));
 
 	  thumb_mode = 0;
@@ -4433,7 +4456,7 @@ do_ldst (str, flags)
     {
       /* This is actually a load/store of a halfword, or a
          signed-extension load.  */
-      if ((cpu_variant & ARM_EXT_HALFWORD) == 0)
+      if ((cpu_variant & ARM_EXT_V4) == 0)
 	{
 	  inst.error
 	    = _("Processor does not support halfwords or signed bytes");
@@ -7221,7 +7244,7 @@ md_begin ()
     if (support_interwork) flags |= F_INTERWORK;
     if (uses_apcs_float)   flags |= F_APCS_FLOAT;
     if (pic_code)          flags |= F_PIC;
-    if ((cpu_variant & FPU_ALL) == FPU_NONE) flags |= F_SOFT_FLOAT;
+    if ((cpu_variant & FPU_ANY) == FPU_NONE) flags |= F_SOFT_FLOAT;
 
     bfd_set_private_flags (stdoutput, flags);
 
@@ -7256,14 +7279,14 @@ md_begin ()
       mach = bfd_mach_arm_2a;
       break;
 
+    case ARM_6:			/* Also ARM_7.  */
+      mach = bfd_mach_arm_3;
+      break;
+
     default:
-    case ARM_6 | ARM_3 | ARM_2:	/* Actually no CPU type defined.  */
       mach = bfd_mach_arm_4;
       break;
 
-    case ARM_7: 		/* Also ARM_6.  */
-      mach = bfd_mach_arm_3;
-      break;
     }
 
   /* Catch special cases.  */
@@ -7273,19 +7296,19 @@ md_begin ()
     mach = bfd_mach_arm_5TE;
   else if (cpu_variant & ARM_EXT_V5)
     {
-      if (cpu_variant & ARM_EXT_THUMB)
+      if (cpu_variant & ARM_EXT_V4T)
 	mach = bfd_mach_arm_5T;
       else
 	mach = bfd_mach_arm_5;
     }
-  else if (cpu_variant & ARM_EXT_HALFWORD)
+  else if (cpu_variant & ARM_EXT_V4)
     {
-      if (cpu_variant & ARM_EXT_THUMB)
+      if (cpu_variant & ARM_EXT_V4T)
 	mach = bfd_mach_arm_4T;
       else
 	mach = bfd_mach_arm_4;
     }
-  else if (cpu_variant & ARM_EXT_LONGMUL)
+  else if (cpu_variant & ARM_EXT_V3M)
     mach = bfd_mach_arm_3M;
 
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, mach);
@@ -8707,19 +8730,17 @@ md_parse_option (c, arg)
       switch (*str)
 	{
 	case 'f':
-	  if (streq (str, "fpa10"))
-	    cpu_variant = (cpu_variant & ~FPU_ALL) | FPU_FPA10;
-	  else if (streq (str, "fpa11"))
-	    cpu_variant = (cpu_variant & ~FPU_ALL) | FPU_FPA11;
+	  if (streq (str, "fpa10") || streq (str, "fpa11"))
+	    cpu_variant = (cpu_variant & ~FPU_ANY) | FPU_ARCH_FPA;
 	  else if (streq (str, "fpe-old"))
-	    cpu_variant = (cpu_variant & ~FPU_ALL) | FPU_CORE;
+	    cpu_variant = (cpu_variant & ~FPU_ANY) | FPU_ARCH_FPE;
 	  else
 	    goto bad;
 	  break;
 
 	case 'n':
 	  if (streq (str, "no-fpu"))
-	    cpu_variant &= ~FPU_ALL;
+	    cpu_variant &= ~FPU_ANY;
 	  break;
 
 #ifdef OBJ_ELF
@@ -8733,13 +8754,13 @@ md_parse_option (c, arg)
 	  /* Limit assembler to generating only Thumb instructions:  */
 	  if (streq (str, "thumb"))
 	    {
-	      cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_EXT_THUMB;
-	      cpu_variant = (cpu_variant & ~FPU_ALL) | FPU_NONE;
+	      cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_EXT_V4T;
+	      cpu_variant = (cpu_variant & ~FPU_ANY) | FPU_NONE;
 	      thumb_mode = 1;
 	    }
 	  else if (streq (str, "thumb-interwork"))
 	    {
-	      if ((cpu_variant & ARM_EXT_THUMB) == 0)
+	      if ((cpu_variant & ARM_EXT_V4T) == 0)
 		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_ARCH_V4T;
 #if defined OBJ_COFF || defined OBJ_ELF
 	      support_interwork = true;
@@ -8752,7 +8773,7 @@ md_parse_option (c, arg)
 	default:
 	  if (streq (str, "all"))
 	    {
-	      cpu_variant = ARM_ALL | FPU_ALL;
+	      cpu_variant = ARM_ALL | FPU_DEFAULT;
 	      return 1;
 	    }
 #if defined OBJ_COFF || defined OBJ_ELF
@@ -8886,7 +8907,7 @@ md_parse_option (c, arg)
 		      break;
 
 		    case 'm':
-		      cpu_variant |= ARM_EXT_LONGMUL;
+		      cpu_variant |= ARM_EXT_V3M;
 		      break;
 
 		    case 'f': /* fe => fp enabled cpu.  */
@@ -8977,7 +8998,7 @@ md_parse_option (c, arg)
 
 		  switch (*++str)
 		    {
-		    case 'm': cpu_variant |= ARM_EXT_LONGMUL; break;
+		    case 'm': cpu_variant |= ARM_EXT_V3M; break;
 		    case 0:   break;
 		    default:
 		      as_bad (_("Invalid architecture variant -m%s"), arg);
@@ -8990,7 +9011,7 @@ md_parse_option (c, arg)
 
 		  switch (*++str)
 		    {
-		    case 't': cpu_variant |= ARM_EXT_THUMB; break;
+		    case 't': cpu_variant |= ARM_EXT_V4T; break;
 		    case 0:   break;
 		    default:
 		      as_bad (_("Invalid architecture variant -m%s"), arg);
@@ -9002,7 +9023,7 @@ md_parse_option (c, arg)
 		  cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_9 | ARM_ARCH_V5;
 		  switch (*++str)
 		    {
-		    case 't': cpu_variant |= ARM_EXT_THUMB; break;
+		    case 't': cpu_variant |= ARM_EXT_V4T; break;
 		    case 'e': cpu_variant |= ARM_EXT_V5E; break;
 		    case 0:   break;
 		    default:

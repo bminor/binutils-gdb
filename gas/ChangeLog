@@ -1,3 +1,23 @@
+2001-10-31  Richard Earnshaw  <rearnsha@arm.com>
+
+	General cleanup of feature definitions.
+	* tc-arm.c (ARM_EXT_LONGMUL, ARM_EXT_HALFWORD, ARM_EXT_THUMB): Delete.
+	(ARM_2UP, ARM_ALL, ARM_3UP, ARM_6UP): Delete.
+	(FPU_CORE, FPU_FPA10, FPA_FPA11, FPU_ALL, FPA_MEMMULTI): Delete.
+	(ARM_EXT_V{1,2,2S,3,3M,4,4T,5T,5ExP}): New defines.
+	(ARM_EXT_V{5,5E}): Synchronize with above.
+	(ARM_ARCH_V*): Define a complete set in terms of above features.
+	(ARM_{1,2,3,250,6,7,8,9,STRONG}): Define in terms of architecture.
+	(FPU_FPA_EXT_V[12]): Define.
+	(FPU_ARCH_FPE, FPU_ARCH_FPA): Define in terms of above.
+	(FPU_ANY): Define.
+	(FPU_DEFAULT): Default to FPA.
+	(CPU_DEFAULT): For XScale, this is now just ARM_ARCH_XSCALE; for
+	Thumb, this is now ARM_ARCH_V5T.
+	(insns): Rework for new feature defines.
+	(tinsns): Likewise.
+	(opcode_select, do_ldst, md_begin, md_parse_option): Likewise.
+
 2001-10-31  NIIBE Yutaka  <gniibe@m17n.org>
 
 	* configure.in: Handle sh*eb-*-linux* and sh*-*-linux*.
