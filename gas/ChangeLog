@@ -39,6 +39,10 @@ Tue Feb 28 18:29:27 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 start-sanitize-rce
 	* config/tc-rce.*: Ditto.
 end-sanitize-rce
+	* config/tc-m68k.*: Ditto.
+
+	* config/tc-m68k.c (mote_pseudo_table): Removed dots from opcode
+	names.
 
 	* read.c (s_app_line): Ignore non-positive line numbers.
 
