@@ -1,3 +1,21 @@
+2001-03-08  Andrew Cagney  <ac131313@redhat.com>
+
+	* inferior.h (ARCH_NUM_REGS): Delete definition.
+	* stack.c (frame_info): Use NUM_REGS, not ARCH_NUM_REGS.
+	* regcache.c (registers_changed): Ditto.
+	(registers_fetched): Ditto.
+	* infptrace.c (fetch_inferior_registers): Ditto.
+	(store_inferior_registers): Ditto.
+	* infcmd.c (do_registers_info): Ditto.
+	(registers_info): Ditto.
+	* i386-linux-nat.c (old_fetch_inferior_registers): Ditto.
+	(old_store_inferior_registers): Ditto.
+	* gdbserver/low-linux.c (register_addr): Ditto.
+	* gdbserver/low-hppabsd.c (register_addr): Ditto.
+	* core-aout.c: Don't include "inferior.h".
+	(fetch_core_registers): Use NUM_REGS not ARCH_NUM_REGS.
+	(register_addr): Ditto.
+
 2001-03-13  Fernando Nasser  <fnasser@redhat.com>
 
 	From Steven Johnson <sjohnson@neurizon.net>

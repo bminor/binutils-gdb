@@ -717,7 +717,7 @@ _tuiSetSpecialRegsContent (refreshValuesOnly)
   endRegNum = FP0_REGNUM - 1;
 #if 0
   endRegNum = (-1);
-  for (i = START_SPECIAL_REGS; (i < ARCH_NUM_REGS && endRegNum < 0); i++)
+  for (i = START_SPECIAL_REGS; (i < NUM_REGS && endRegNum < 0); i++)
     if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT)
       endRegNum = i - 1;
 #endif
@@ -750,7 +750,7 @@ _tuiSetGeneralAndSpecialRegsContent (refreshValuesOnly)
   endRegNum = FP0_REGNUM - 1;
 #if 0
   endRegNum = (-1);
-  for (i = 0; (i < ARCH_NUM_REGS && endRegNum < 0); i++)
+  for (i = 0; (i < NUM_REGS && endRegNum < 0); i++)
     if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT)
       endRegNum = i - 1;
 #endif
@@ -781,12 +781,12 @@ _tuiSetFloatRegsContent (dpyType, refreshValuesOnly)
   startRegNum = FP0_REGNUM;
 #if 0
   startRegNum = (-1);
-  for (i = ARCH_NUM_REGS - 1; (i >= 0 && startRegNum < 0); i--)
+  for (i = NUM_REGS - 1; (i >= 0 && startRegNum < 0); i--)
     if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) != TYPE_CODE_FLT)
       startRegNum = i + 1;
 #endif
   ret = _tuiSetRegsContent (startRegNum,
-			    ARCH_NUM_REGS - 1,
+			    NUM_REGS - 1,
 			    selected_frame,
 			    dpyType,
 			    refreshValuesOnly);

@@ -1,3 +1,7 @@
+2001-03-08  Andrew Cagney  <ac131313@redhat.com>
+
+	* tuiRegs.c: Use NUM_REGS, not ARCH_NUM_REGS.
+
 2001-03-06  Kevin Buettner  <kevinb@redhat.com>
 
 	* tui-file.h: Update/correct copyright notice.

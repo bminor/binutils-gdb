@@ -271,7 +271,7 @@ mi_cmd_data_list_register_names (char *command, char **argv, int argc)
      case, some entries of REGISTER_NAME will change depending upon
      the particular processor being debugged.  */
 
-  numregs = ARCH_NUM_REGS;
+  numregs = NUM_REGS;
 
   ui_out_list_begin (uiout, "register-names");
 
@@ -321,7 +321,7 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
      case, some entries of REGISTER_NAME will change depending upon
      the particular processor being debugged.  */
 
-  numregs = ARCH_NUM_REGS;
+  numregs = NUM_REGS;
 
   ui_out_list_begin (uiout, "changed-registers");
 
@@ -415,7 +415,7 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
      case, some entries of REGISTER_NAME will change depending upon
      the particular processor being debugged.  */
 
-  numregs = ARCH_NUM_REGS;
+  numregs = NUM_REGS;
 
   if (argc == 0)
     {
@@ -562,7 +562,7 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
      case, some entries of REGISTER_NAME will change depending upon
      the particular processor being debugged.  */
 
-  numregs = ARCH_NUM_REGS;
+  numregs = NUM_REGS;
 
   if (argc == 0)
     {

@@ -1467,7 +1467,7 @@ void
 do_registers_info (int regnum, int fpregs)
 {
   register int i;
-  int numregs = ARCH_NUM_REGS;
+  int numregs = NUM_REGS;
 
   for (i = 0; i < numregs; i++)
     {
@@ -1591,7 +1591,7 @@ registers_info (char *addr_exp, int fpregs)
       end = addr_exp;
       while (*end != '\0' && *end != ' ' && *end != '\t')
 	++end;
-      numregs = ARCH_NUM_REGS;
+      numregs = NUM_REGS;
 
       regnum = target_map_name_to_register (addr_exp, end - addr_exp);
       if (regnum >= 0)

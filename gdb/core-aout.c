@@ -38,7 +38,6 @@
 #include <sys/param.h>
 #include "gdbcore.h"
 #include "value.h"		/* For supply_register.  */
-#include "inferior.h"		/* For ARCH_NUM_REGS. */
 #include "regcache.h"
 
 /* These are needed on various systems to expand REGISTER_U_ADDR.  */
@@ -82,7 +81,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
   CORE_ADDR addr;
   int bad_reg = -1;
   CORE_ADDR reg_ptr = -reg_addr;	/* Original u.u_ar0 is -reg_addr. */
-  int numregs = ARCH_NUM_REGS;
+  int numregs = NUM_REGS;
 
   /* If u.u_ar0 was an absolute address in the core file, relativize it now,
      so we can use it as an offset into core_reg_sect.  When we're done,
@@ -118,7 +117,7 @@ register_addr (int regno, CORE_ADDR blockend)
 {
   CORE_ADDR addr;
 
-  if (regno < 0 || regno >= ARCH_NUM_REGS)
+  if (regno < 0 || regno >= NUM_REGS)
     error ("Invalid register number %d.", regno);
 
   REGISTER_U_ADDR (addr, blockend, regno);

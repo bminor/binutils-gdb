@@ -1001,7 +1001,7 @@ frame_info (char *addr_exp, int from_tty)
       print_address_numeric (fi->saved_regs[SP_REGNUM], 1, gdb_stdout);
       printf_filtered ("\n");
       count = 0;
-      numregs = ARCH_NUM_REGS;
+      numregs = NUM_REGS;
       for (i = 0; i < numregs; i++)
 	if (fi->saved_regs[i] && i != SP_REGNUM)
 	  {

@@ -541,7 +541,7 @@ register_addr (int regno, CORE_ADDR blockend)
 {
   CORE_ADDR addr;
 
-  if (regno < 0 || regno >= ARCH_NUM_REGS)
+  if (regno < 0 || regno >= NUM_REGS)
     error ("Invalid register number %d.", regno);
 
   REGISTER_U_ADDR (addr, blockend, regno);

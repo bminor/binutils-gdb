@@ -192,7 +192,7 @@ old_fetch_inferior_registers (int regno)
     }
   else
     {
-      for (regno = 0; regno < ARCH_NUM_REGS; regno++)
+      for (regno = 0; regno < NUM_REGS; regno++)
 	{
 	  fetch_register (regno);
 	}
@@ -254,7 +254,7 @@ old_store_inferior_registers (int regno)
     }
   else
     {
-      for (regno = 0; regno < ARCH_NUM_REGS; regno++)
+      for (regno = 0; regno < NUM_REGS; regno++)
 	{
 	  store_register (regno);
 	}

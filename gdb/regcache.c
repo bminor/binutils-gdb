@@ -163,7 +163,7 @@ registers_changed (void)
      gdb gives control to the user (ie watchpoints).  */
   alloca (0);
 
-  for (i = 0; i < ARCH_NUM_REGS; i++)
+  for (i = 0; i < NUM_REGS; i++)
     set_register_cached (i, 0);
 
   /* Assume that if all the hardware regs have changed, 
@@ -185,7 +185,7 @@ registers_fetched (void)
 {
   int i;
 
-  for (i = 0; i < ARCH_NUM_REGS; i++)
+  for (i = 0; i < NUM_REGS; i++)
     set_register_cached (i, 1);
   /* Do not assume that the pseudo-regs have also been fetched.
      Fetching all real regs might not account for all pseudo-regs.  */
