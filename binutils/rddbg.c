@@ -193,9 +193,9 @@ read_section_stabs_debugging_info (abfd, syms, symcount, dhandle, pfound)
 
 		  if (stroff + strx > strsize)
 		    {
-		      fprintf (stderr, "%s: %s: stab entry %d is corrupt, strx = 0x%x, type = %d\n",
+		      fprintf (stderr, "%s: %s: stab entry %ld is corrupt, strx = 0x%x, type = %d\n",
 			       bfd_get_filename (abfd), names[i].secname,
-			       (stab - stabs) / 12, strx, type);
+			       (long) (stab - stabs) / 12, strx, type);
 		      continue;
 		    }
 

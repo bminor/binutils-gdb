@@ -1,3 +1,8 @@
+2003-02-04  Andreas Schwab  <schwab@suse.de>
+
+	* rddbg.c (read_section_stabs_debugging_info): Cast ptrdiff_t to
+	long and use %ld in printf format.
+
 2003-01-28  Richard Sandiford  <rsandifo@redhat.com>
 
 	* readelf.c (dump_relocations): Reorder the r_info field for
