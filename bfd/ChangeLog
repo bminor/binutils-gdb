@@ -1,3 +1,10 @@
+2001-01-01  Kazu Hirata  <kazu@hxi.com>
+
+	* reloc.c: Fix formatting.
+	* riscix.c: Likewise.
+	* rs6000-core.c: Likewise.
+	* xcoff-target.h: Likewise.
+
 2000-12-29  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* elfcode.h (elf_object_p): Also restore the bfd mach field on

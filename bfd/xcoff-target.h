@@ -146,7 +146,7 @@ extern unsigned int _bfd_xcoff_swap_aux_out PARAMS ((bfd *, PTR, int, int, int, 
 
 #include "coffcode.h"
 
-/* The transfer vector that leads the outside world to all of the above. */
+/* The transfer vector that leads the outside world to all of the above.  */
 
 const bfd_target TARGET_SYM =
 {
@@ -189,6 +189,6 @@ const bfd_target TARGET_SYM =
      BFD_JUMP_TABLE_DYNAMIC (_bfd_xcoff),
 
   NULL,
-  
+
   COFF_SWAP_TABLE
 };

@@ -146,7 +146,6 @@ DESCRIPTION
 	to the relocation offset. Its interpretation is dependent upon
 	the howto. For example, on the 68k the code:
 
-
 |        char foo[];
 |        main()
 |                {
@@ -161,10 +160,8 @@ DESCRIPTION
 |        unlk fp
 |        rts
 
-
         This could create a reloc pointing to <<foo>>, but leave the
         offset in the data, something like:
-
 
 |RELOCATION RECORDS FOR [.text]:
 |offset   type      value
@@ -176,20 +173,16 @@ DESCRIPTION
 |0000000c 4e5e               ; unlk fp
 |0000000e 4e75               ; rts
 
-
         Using coff and an 88k, some instructions don't have enough
         space in them to represent the full address range, and
         pointers have to be loaded in two parts. So you'd get something like:
-
 
 |        or.u     r13,r0,hi16(_foo+0x12345678)
 |        ld.b     r2,r13,lo16(_foo+0x12345678)
 |        jmp      r1
 
-
         This should create two relocs, both pointing to <<_foo>>, and with
         0x12340000 in their addend field. The data would consist of:
-
 
 |RELOCATION RECORDS FOR [.text]:
 |offset   type      value
@@ -199,7 +192,6 @@ DESCRIPTION
 |00000000 5da05678           ; or.u r13,r0,0x5678
 |00000004 1c4d5678           ; ld.b r2,r13,0x5678
 |00000008 f400c001           ; jmp r1
-
 
         The relocation routine digs out the value from the data, adds
         it to the addend to get the original offset, and then adds the
@@ -223,7 +215,6 @@ DESCRIPTION
         Both relocs contain a pointer to <<foo>>, and the offsets
         contain junk.
 
-
 |RELOCATION RECORDS FOR [.text]:
 |offset   type      value
 |00000004 HI22      _foo+0x12345678
@@ -234,7 +225,6 @@ DESCRIPTION
 |00000008 f048a000     ; ldsb [%g2+%lo(_foo+0)],%i0
 |0000000c 81c7e008     ; ret
 |00000010 81e80000     ; restore
-
 
         o <<howto>>
 
@@ -391,14 +381,12 @@ FUNCTION
 DESCRIPTION
 	The HOWTO define is horrible and will go away.
 
-
 .#define HOWTO(C, R,S,B, P, BI, O, SF, NAME, INPLACE, MASKSRC, MASKDST, PC) \
 .  {(unsigned)C,R,S,B, P, BI, O,SF,NAME,INPLACE,MASKSRC,MASKDST,PC}
 
 DESCRIPTION
 	And will be replaced with the totally magic way. But for the
 	moment, we are compatible, so do it this way.
-
 
 .#define NEWHOWTO( FUNCTION, NAME,SIZE,REL,IN) HOWTO(0,0,SIZE,0,REL,0,complain_overflow_dont,FUNCTION, NAME,false,0,0,IN)
 .
@@ -589,7 +577,6 @@ DESCRIPTION
 
 */
 
-
 bfd_reloc_status_type
 bfd_perform_relocation (abfd, reloc_entry, data, input_section, output_bfd,
 			error_message)
@@ -650,7 +637,6 @@ bfd_perform_relocation (abfd, reloc_entry, data, input_section, output_bfd,
     relocation = 0;
   else
     relocation = symbol->value;
-
 
   reloc_target_output_section = symbol->section->output_section;
 
@@ -989,7 +975,6 @@ DESCRIPTION
 	assembler.
 
 */
-
 
 bfd_reloc_status_type
 bfd_install_relocation (abfd, reloc_entry, data_start, data_start_offset,
@@ -1779,7 +1764,6 @@ ENUMDOC
 displacements off that register.  These relocation types are
 handled specially, because the value the register will have is
 decided relatively late.
-
 
 ENUM
   BFD_RELOC_I960_CALLJ
@@ -2600,15 +2584,15 @@ ENUMDOC
 ENUM
   BFD_RELOC_TIC54X_16_OF_23
 ENUMDOC
-  This is a 16-bit reloc for the tms320c54x, where the least 
-  significant 16 bits of a 23-bit extended address are placed into 
+  This is a 16-bit reloc for the tms320c54x, where the least
+  significant 16 bits of a 23-bit extended address are placed into
   the opcode.
 
 ENUM
   BFD_RELOC_TIC54X_MS7_OF_23
 ENUMDOC
   This is a reloc for the tms320c54x, where the most
-  significant 7 bits of a 23-bit extended address are placed into 
+  significant 7 bits of a 23-bit extended address are placed into
   the opcode.
 
 ENUM
@@ -2680,7 +2664,7 @@ ENUM
   BFD_RELOC_AVR_16_PM
 ENUMDOC
   This is a 16 bit reloc for the AVR that stores 17 bit value (usually
-  program memory address) into 16 bits.  
+  program memory address) into 16 bits.
 ENUM
   BFD_RELOC_AVR_LO8_LDI
 ENUMDOC
@@ -3009,7 +2993,6 @@ CODE_FRAGMENT
 .typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
 */
 
-
 /*
 FUNCTION
 	bfd_reloc_type_lookup
@@ -3025,7 +3008,6 @@ DESCRIPTION
 
 */
 
-
 reloc_howto_type *
 bfd_reloc_type_lookup (abfd, code)
      bfd *abfd;
@@ -3037,7 +3019,6 @@ bfd_reloc_type_lookup (abfd, code)
 static reloc_howto_type bfd_howto_32 =
 HOWTO (0, 00, 2, 32, false, 0, complain_overflow_bitfield, 0, "VRT32", false, 0xffffffff, 0xffffffff, true);
 
-
 /*
 INTERNAL_FUNCTION
 	bfd_default_reloc_type_lookup
@@ -3048,7 +3029,6 @@ SYNOPSIS
 
 DESCRIPTION
 	Provides a default relocation lookup routine for any architecture.
-
 
 */
 
