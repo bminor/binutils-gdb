@@ -1,4 +1,32 @@
+Tue Nov 25 12:46:36 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.base/funcargs.exp: Query GDB for target_sizeof_int,
+ 	target_sizeof_long and target_bigendian_p.
+	(structs_by_value, structs_by_reference): Check values according
+ 	to targets word size and endianess.
+	
+Mon Nov 24 16:37:06 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.base/langs.exp: For "continue to exit" ignore any trailing
+ 	output.
+
+Fri Oct 17 13:24:43 1997  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.base/default.exp, gdb.base/help.exp, gdb.base/setshow.exp:
+ 	Update test of set args help to match source change.
+
+Fri Sep 26 17:36:20 1997  Jason Molenda  (crash@pern.cygnus.com)
+
+	* gdb.base/default.exp: Expect help system output to be in
+	alphabetical order.
+	* gdb.base/help.exp: Ditto.
+
 Wed Sep 24 13:08:14 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* gdb.base/signals.exp: Change "i*86-pc-linux-gnu" to
+	"i*86-pc-linux-gnu*".
+	* gdb.base/interrupt.exp: Ditto.
+	* gdb.base/corefile.exp: Ditto.
 
 	* lib/gdb.exp(gdb_compile): If is_vxworks target feature is set,
  	define vxworks when building the testcase.
