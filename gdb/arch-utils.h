@@ -142,4 +142,8 @@ extern int generic_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc
    of the integer type.  */
 extern int generic_register_raw_size (int regnum);
 
+/* Assume the virtual size of registers corresponds to the virtual type.  */
+
+extern int generic_register_virtual_size (int regnum);
+
 #endif

@@ -387,6 +387,14 @@ generic_register_raw_size (int regnum)
   return TARGET_INT_BIT / HOST_CHAR_BIT;
 }
 
+/* Assume the virtual size corresponds to the virtual type.  */
+
+int
+generic_register_virtual_size (int regnum)
+{
+  return REGISTER_VIRTUAL_TYPE (regnum);
+}
+
 
 /* Functions to manipulate the endianness of the target.  */
 

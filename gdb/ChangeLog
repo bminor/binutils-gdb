@@ -23,6 +23,13 @@
 	* symfile.c (simple_read_overlay_table): Ditto.
 	(simple_read_overlay_region_table): Ditto.
 
+2001-12-10  Michael Snyder  <msnyder@redhat.com>
+
+	* arch-utils.c (generic_register_virtual_size): New function.
+	* arch-utils.h: Export generic version of register_virtual_size.
+	* gdbarch.sh (REGISTER_VIRTUAL_SIZE): Use new function as default.
+	* gdbarch.c: Regenerate.
+
 2001-12-09  Fred Fish  <fnf@redhat.com>
 
 	* gdbtypes.c (TYPE_FLAG_UNSIGNED, TYPE_FLAG_STUB): Use

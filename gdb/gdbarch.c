@@ -314,7 +314,7 @@ struct gdbarch startup_gdbarch =
   0,
   generic_register_raw_size,
   0,
-  0,
+  generic_register_virtual_size,
   0,
   0,
   0,
