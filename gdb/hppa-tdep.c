@@ -1256,24 +1256,37 @@ pa_print_fp_reg (i)
     }
 }
 
-/* Function calls that pass into a new compilation unit must pass through a
-   small piece of code that does long format (`external' in HPPA parlance)
-   jumps.  We figure out where the trampoline is going to end up, and return
-   the PC of the final destination.  If we aren't in a trampoline, we just
-   return NULL. 
+/* Figure out if PC is in a trampoline, and if so find out where
+   the trampoline will jump to.  If not in a trampoline, return zero.
 
-   For computed calls, we just extract the new PC from r22.  */
+   Simple code examination probably is not a good idea since the code
+   sequences in trampolines can also appear in user code.
+
+   We use unwinds and information from the minimal symbol table to
+   determine when we're in a trampoline.  This won't work for ELF
+   (yet) since it doesn't create stub unwind entries.  Whether or
+   not ELF will create stub unwinds or normal unwinds for linker
+   stubs is still being debated.
+
+   This should handle simple calls through dyncall or sr4export,
+   long calls, argument relocation stubs, and dyncall/sr4export
+   calling an argument relocation stub.  It even handles some stubs
+   used in dynamic executables.  */
 
 CORE_ADDR
 skip_trampoline_code (pc, name)
      CORE_ADDR pc;
      char *name;
 {
-  long inst0, inst1;
+  long orig_pc = pc;
+  long prev_inst, curr_inst, loc;
   static CORE_ADDR dyncall = 0;
+  static CORE_ADDR sr4export = 0;
   struct minimal_symbol *msym;
+  struct unwind_table_entry *u;
 
-/* FIXME XXX - dyncall must be initialized whenever we get a new exec file */
+/* FIXME XXX - dyncall and sr4export must be initialized whenever we get a
+   new exec file */
 
   if (!dyncall)
     {
@@ -1284,19 +1297,113 @@ skip_trampoline_code (pc, name)
 	dyncall = -1;
     }
 
+  if (!sr4export)
+    {
+      msym = lookup_minimal_symbol ("_sr4export", NULL);
+      if (msym)
+	sr4export = SYMBOL_VALUE_ADDRESS (msym);
+      else
+	sr4export = -1;
+    }
+
+  /* Addresses passed to dyncall may *NOT* be the actual address
+     of the funtion.  So we may have to do something special.  */
   if (pc == dyncall)
-    return (CORE_ADDR)(read_register (22) & ~0x3);
+    {
+      pc = (CORE_ADDR) read_register (22);
 
-  inst0 = read_memory_integer (pc, 4);
-  inst1 = read_memory_integer (pc+4, 4);
+      /* If bit 30 (counting from the left) is on, then pc is the address of
+	 the PLT entry for this function, not the address of the function
+	 itself.  Bit 31 has meaning too, but only for MPE.  */
+      if (pc & 0x2)
+	pc = (CORE_ADDR) read_memory_integer (pc & ~0x3, 4);
+    }
+  else if (pc == sr4export)
+    pc = (CORE_ADDR) (read_register (22));
 
-  if (   (inst0 & 0xffe00000) == 0x20200000 /* ldil xxx, r1 */
-      && (inst1 & 0xffe0e002) == 0xe0202002) /* be,n yyy(sr4, r1) */
-    pc = extract_21 (inst0) + extract_17 (inst1);
-  else
-    pc = (CORE_ADDR)NULL;
+  /* Get the unwind descriptor corresponding to PC, return zero
+     if no unwind was found.  */
+  u = find_unwind_entry (pc);
+  if (!u)
+    return 0;
 
-  return pc;
+  /* If this isn't a linker stub, then return now.  */
+  if (u->stub_type == 0)
+    return orig_pc == pc ? 0 : pc & ~0x3;
+
+  /* It's a stub.  Search for a branch and figure out where it goes.
+     Note we have to handle multi insn branch sequences like ldil;ble.
+     Most (all?) other branches can be determined by examining the contents
+     of certain registers and the stack.  */
+  loc = pc;
+  curr_inst = 0;
+  prev_inst = 0;
+  while (1)
+    {
+      /* Make sure we haven't walked outside the range of this stub.  */
+      if (u != find_unwind_entry (loc))
+	{
+	  warning ("Unable to find branch in linker stub");
+	  return orig_pc == pc ? 0 : pc & ~0x3;
+	}
+
+      prev_inst = curr_inst;
+      curr_inst = read_memory_integer (loc, 4);
+
+      /* Does it look like a branch external using %r1?  Then it's the
+	 branch from the stub to the actual function.  */
+      if ((curr_inst & 0xffe0e000) == 0xe0202000)
+	{
+	  /* Yup.  See if the previous instruction loaded
+	     a value into %r1.  If so compute and return the jump address.  */
+	  if ((prev_inst & 0xffe00000) == 0x20202000)
+	    return (extract_21 (prev_inst) + extract_17 (curr_inst)) & ~0x3;
+	  else
+	    {
+	      warning ("Unable to find ldil X,%%r1 before ble Y(%%sr4,%%r1).");
+	      return orig_pc == pc ? 0 : pc & ~0x3;
+	    }
+	}
+
+      /* Does it look like bl X,rp?  Another way to do a branch from the
+	 stub to the actual function.  */
+      else if ((curr_inst & 0xffe0e000) == 0xe8400000)
+	return (loc + extract_17 (curr_inst) + 8) & ~0x3;
+
+      /* Does it look like bv (rp)?   Note this depends on the
+	 current stack pointer being the same as the stack
+	 pointer in the stub itself!  This is a branch on from the
+	 stub back to the original caller.  */
+      else if ((curr_inst & 0xffe0e000) == 0xe840c000)
+	{
+	  /* Yup.  See if the previous instruction loaded
+	     rp from sp - 8.  */
+	  if (prev_inst == 0x4bc23ff1)
+	    return (read_memory_integer
+		    (read_register (SP_REGNUM) - 8, 4)) & ~0x3;
+	  else
+	    {
+	      warning ("Unable to find restore of %%rp before bv (%%rp).");
+	      return orig_pc == pc ? 0 : pc & ~0x3;
+	    }
+	}
+
+      /* What about be,n 0(sr0,%rp)?  It's just another way we return to
+	 the original caller from the stub.  Used in dynamic executables.  */
+      else if (curr_inst == 0xe0400002)
+	{
+	  /* The value we jump to is sitting in sp - 24.  But that's
+	     loaded several instructions before the be instruction.
+	     I guess we could check for the previous instruction being
+	     mtsp %r1,%sr0 if we want to do sanity checking.  */
+	  return (read_memory_integer 
+		  (read_register (SP_REGNUM) - 24, 4)) & ~0x3;
+	}
+
+      /* Haven't found the branch yet, but we're still in the stub.
+	 Keep looking.  */
+      loc += 4;
+    }
 }
 
 /* For the given instruction (INST), return any adjustment it makes
@@ -1411,7 +1518,7 @@ inst_saves_fr (inst)
    be in the prologue.  */
 
 CORE_ADDR
-skip_prologue(pc)
+skip_prologue (pc)
      CORE_ADDR pc;
 {
   char buf[4];
@@ -1421,6 +1528,10 @@ skip_prologue(pc)
 
   u = find_unwind_entry (pc);
   if (!u)
+    return pc;
+
+  /* If we are not at the beginning of a function, then return now.  */
+  if ((pc & ~0x3) != u->region_start)
     return pc;
 
   /* This is how much of a frame adjustment we need to account for.  */

@@ -12,6 +12,12 @@ Fri Mar 25 12:40:41 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 Fri Mar 25 10:14:03 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* hppa-tdep.c (skip_prologue): Do nothing if not at the beginning
+	of a function.
+	(skip_trampoline_code): Rewrite and add support for argument
+	relocation stubs stubs, import/export stubs, calls through
+	"_sr4export" and cascaded trampolines.
+
 	* hppa-tdep.c (skip_prologue): Return "pc" not zero
 	if no unwind descriptor is found.
 
