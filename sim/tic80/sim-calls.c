@@ -80,7 +80,13 @@ sim_open (SIM_OPEN_KIND kind, char **argv)
       return 0;
     }
 
-  engine_init(&simulation);
+  /* Initialize the main processor */
+  memset (&STATE_CPU (&simulation, 0)->reg, 0, sizeof STATE_CPU (&simulation, 0)->reg);
+  memset (&STATE_CPU (&simulation, 0)->acc, 0, sizeof STATE_CPU (&simulation, 0)->acc);
+  memset (&STATE_CPU (&simulation, 0)->cr, 0, sizeof STATE_CPU (&simulation, 0)->cr);
+  STATE_CPU (&simulation, 0)->is_user_mode = 0;
+  memset (&STATE_CPU (&simulation, 0)->cia, 0, sizeof STATE_CPU (&simulation, 0)->cia);
+  CPU_STATE (STATE_CPU (&simulation, 0)) = &simulation;
 
 #define TIC80_MEM_START 0x2000000
 #define TIC80_MEM_SIZE 0x100000
@@ -229,42 +235,6 @@ sim_create_inferior (SIM_DESC sd,
   return SIM_RC_OK;
 }
 
-
-volatile int keep_running = 1;
-
-void
-sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc)
-{
-  if (!keep_running)
-    {
-      *reason = sim_stopped;
-      *sigrc = SIGINT;
-      keep_running = 1;
-    }
-  else
-    {
-      *reason = simulation.reason;
-      *sigrc = simulation.siggnal;
-    }
-}
-
-
-int
-sim_stop (SIM_DESC sd)
-{
-  keep_running = 0;
-  return 1;
-}
-
-void
-sim_resume (SIM_DESC sd, int step, int siggnal)
-{
-  /* keep_running = 1 - in sim_stop_reason */
-  if (step)
-    engine_step (sd);
-  else
-    engine_run_until_stop (sd, &keep_running);
-}
 
 void
 sim_do_command (SIM_DESC sd, char *cmd)

@@ -180,6 +180,7 @@ sim_main_headers = \
 	$(srcdir)/../common/sim-module.h \
 	$(srcdir)/../common/sim-trace.h \
 	$(srcdir)/../common/sim-profile.h \
+	$(srcdir)/../common/sim-engine.h \
 	tconfig.h
 
 sim-assert_h = $(srcdir)/../common/sim-assert.h
@@ -190,6 +191,7 @@ sim-config_h = $(srcdir)/../common/sim-config.h
 sim-n-bits_h = $(srcdir)/../common/sim-n-bits.h
 sim-core_h = $(srcdir)/../common/sim-core.h
 sim-n-core_h = $(srcdir)/../common/sim-n-core.h
+sim-engine_h = $(srcdir)/../common/sim-engine.h
 sim-events_h = $(srcdir)/../common/sim-events.h
 sim-fpu_h = $(srcdir)/../common/sim-fpu.h
 sim-io_h = $(srcdir)/../common/sim-io.h
@@ -206,6 +208,14 @@ BUILT_SRC_FROM_COMMON= \
 	sim-core.c \
 	sim-config.c \
 	sim-io.c
+
+sim-abort.o: sim-abort.c \
+	$(SIM_EXTRA_DEPS)
+sim-abort.c: $(srcdir)/../common/sim-abort.c
+	rm -f $@ tmp-$@
+	echo "# 1 \"$(srcdir)/../common/$@\"" > tmp-$@
+	cat $(srcdir)/../common/$@ >> tmp-$@
+	$(srcdir)/../../move-if-change tmp-$@ $@
 
 sim-bits.o: sim-bits.c $(sim-bits_h) $(sim-n-bits_h) $(sim-assert_h) \
 	$(SIM_EXTRA_DEPS)
@@ -234,6 +244,14 @@ sim-core.c: $(srcdir)/../common/sim-core.c
 sim-endian.o: sim-endian.c $(sim-endian_h) $(sim-n-endian_h) $(sim-assert_h) \
 	$(SIM_EXTRA_DEPS)
 sim-endian.c: $(srcdir)/../common/sim-endian.c
+	rm -f $@ tmp-$@
+	echo "# 1 \"$(srcdir)/../common/$@\"" > tmp-$@
+	cat $(srcdir)/../common/$@ >> tmp-$@
+	$(srcdir)/../../move-if-change tmp-$@ $@
+
+sim-engine.o: sim-engine.c $(sim_main_headers) $(sim-engine_h) $(sim-assert_h) \
+	$(SIM_EXTRA_DEPS)
+sim-engine.c: $(srcdir)/../common/sim-engine.c
 	rm -f $@ tmp-$@
 	echo "# 1 \"$(srcdir)/../common/$@\"" > tmp-$@
 	cat $(srcdir)/../common/$@ >> tmp-$@
@@ -276,6 +294,38 @@ sim-module.o: $(srcdir)/../common/sim-module.c $(sim_main_headers) \
 sim-options.o: $(srcdir)/../common/sim-options.c $(sim_main_headers) \
 	  $(sim-options_h) $(sim-io_h) $(SIM_EXTRA_DEPS)
 	$(CC) -c $(srcdir)/../common/sim-options.c $(ALL_CFLAGS)
+
+sim-reason.o: sim-reason.c $(sim_main_headers) $(sim-assert_h) \
+	$(SIM_EXTRA_DEPS)
+sim-reason.c: $(srcdir)/../common/sim-reason.c
+	rm -f $@ tmp-$@
+	echo "# 1 \"$(srcdir)/../common/$@\"" > tmp-$@
+	cat $(srcdir)/../common/$@ >> tmp-$@
+	$(srcdir)/../../move-if-change tmp-$@ $@
+
+sim-resume.o: sim-resume.c $(sim_main_headers) $(sim-assert_h) \
+	$(SIM_EXTRA_DEPS)
+sim-resume.c: $(srcdir)/../common/sim-resume.c
+	rm -f $@ tmp-$@
+	echo "# 1 \"$(srcdir)/../common/$@\"" > tmp-$@
+	cat $(srcdir)/../common/$@ >> tmp-$@
+	$(srcdir)/../../move-if-change tmp-$@ $@
+
+sim-run.o: sim-run.c $(sim_main_headers) $(sim-assert_h) \
+	$(SIM_EXTRA_DEPS)
+sim-run.c: $(srcdir)/../common/sim-run.c
+	rm -f $@ tmp-$@
+	echo "# 1 \"$(srcdir)/../common/$@\"" > tmp-$@
+	cat $(srcdir)/../common/$@ >> tmp-$@
+	$(srcdir)/../../move-if-change tmp-$@ $@
+
+sim-stop.o: sim-stop.c $(sim_main_headers) $(sim-assert_h) \
+	$(SIM_EXTRA_DEPS)
+sim-stop.c: $(srcdir)/../common/sim-stop.c
+	rm -f $@ tmp-$@
+	echo "# 1 \"$(srcdir)/../common/$@\"" > tmp-$@
+	cat $(srcdir)/../common/$@ >> tmp-$@
+	$(srcdir)/../../move-if-change tmp-$@ $@
 
 sim-trace.o: $(srcdir)/../common/sim-trace.c $(sim_main_headers) \
 	  $(sim-options_h) $(sim-io_h) $(SIM_EXTRA_DEPS)

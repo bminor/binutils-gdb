@@ -36,16 +36,8 @@
 #endif
 #endif
 
-void
-engine_init (SIM_DESC sd)
-{
-  memset (&STATE_CPU (sd, 0)->reg, 0, sizeof STATE_CPU (sd, 0)->reg);
-  memset (&STATE_CPU (sd, 0)->cia, 0, sizeof STATE_CPU (sd, 0)->cia);
-  CPU_STATE (STATE_CPU (sd, 0)) = sd;
-}
 
-
-/* Mechanisms for stopping/restarting the simulation */
+#if 0
 
 void
 engine_error (SIM_DESC sd,
@@ -59,13 +51,7 @@ engine_error (SIM_DESC sd,
   sim_io_evprintf (sd, fmt, ap);
   va_end (ap);
 
-  if (sd->halt_ok)
-    {
-      sim_io_eprintf (sd, "\n");
-      engine_halt (sd, cpu, cia, sim_stopped, SIGABRT);
-    }
-  else
-    sim_io_error (sd, " - aborting simulation");
+  sim_halt (sd, cpu, NULL, cia, sim_stopped, SIGABRT);
 }
 
 void
@@ -139,3 +125,6 @@ engine_step (SIM_DESC sd)
       engine_halt (sd, cpu, cia, sim_stopped, SIGTRAP);
     }
 }
+
+#endif
+

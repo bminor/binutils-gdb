@@ -21,12 +21,13 @@
 
 // The following is called when ever an illegal instruction is encountered.
 ::internal::illegal
-	engine_error (SD, CPU, cia,
-	              "illegal instruction at 0x%lx", cia.ip);
+	sim_io_eprintf (SD, "0x%lx: illegal instruction\n", (unsigned long) cia.ip);
+	sim_engine_halt (SD, CPU, NULL, cia, sim_signalled, SIGILL);
+
 // The following is called when ever an FP op is attempted with FPU disabled.
 ::internal::fp_unavailable
-	engine_error (SD, CPU, cia,
-	              "floating-point unavailable at 0x%lx", cia.ip);
+	sim_io_eprintf (SD, "0x%lx: floating-point unavailable\n", (unsigned long) cia.ip);
+	sim_engine_halt (SD, CPU, NULL, cia, sim_signalled, SIGFPE);
 
 // Handle a branch instruction
 instruction_address::function::do_branch:int annul, address_word target, int rLink_p, unsigned32 *rLink
@@ -184,7 +185,7 @@ instruction_address::function::do_bcnd:instruction_address nia, int Cond, unsign
 	  case 0: val = SEXT32 (source, 7); break;
 	  case 1: val = SEXT32 (source, 15); break;
 	  case 2: val = source; break;
-	  default: engine_error (SD, CPU, cia, "bcnd - reserved size");
+	  default: sim_engine_abort (SD, CPU, cia, "bcnd - reserved size");
 	  }
 	switch (code)
 	  {
@@ -271,28 +272,28 @@ void::function::do_cmnd:signed32 source
 	int PP = EXTRACTED32 (source, 3, 0);
 	/* what is implemented? */
 	if (PP != 0)
-	  engine_error (SD, CPU, cia, "0x%lx: cmnd - PPs not supported",
-	                (unsigned long) cia.ip);
+	  sim_engine_abort (SD, CPU, cia, "0x%lx: cmnd - PPs not supported",
+	                    (unsigned long) cia.ip);
 	if (VC != 0)
-	  engine_error (SD, CPU, cia, "0x%lx: cmnd - VC not supported",
-	                (unsigned long) cia.ip);
+	  sim_engine_abort (SD, CPU, cia, "0x%lx: cmnd - VC not supported",
+	                    (unsigned long) cia.ip);
 	if (TC != 0)
-	  engine_error (SD, CPU, cia, "0x%lx: cmnd - TC not supported",
-	                (unsigned long) cia.ip);
+	  sim_engine_abort (SD, CPU, cia, "0x%lx: cmnd - TC not supported",
+	                    (unsigned long) cia.ip);
 	if (MP)
 	  {
 	    if (Reset || Halt)
-	      engine_halt (SD, CPU, cia, sim_exited, 0);
+	      sim_engine_halt (SD, CPU, NULL, cia, sim_exited, 0);
 	    if (Unhalt)
-	      engine_error (SD, CPU, cia, "0x%lx: cmnd - Can not unhalt the MP",
-	                    (unsigned long) cia.ip);
+	      sim_engine_abort (SD, CPU, cia, "0x%lx: cmnd - Can not unhalt the MP",
+	                        (unsigned long) cia.ip);
 	    /* if (ICR || DCR); */
 	    if (Task)
-	      engine_error (SD, CPU, cia, "0x%lx: cmnd - Can not Task the MP",
-	                    (unsigned long) cia.ip);
+	      sim_engine_abort (SD, CPU, cia, "0x%lx: cmnd - Can not Task the MP",
+	                        (unsigned long) cia.ip);
 	    if (Msg)
-	      engine_error (SD, CPU, cia, "0x%lx: cmnd - Msg to MP not suported",
-	                    (unsigned long) cia.ip);
+	      sim_engine_abort (SD, CPU, cia, "0x%lx: cmnd - Msg to MP not suported",
+	                        (unsigned long) cia.ip);
 	  }
 	TRACE_SINK1 (MY_INDEX, source);
 31./,21.0b0000010,14.UI::::cmnd i
@@ -401,11 +402,11 @@ sim_fpu::function::get_fp_reg:int reg, unsigned32 val, int precision
 	    return sim_fpu_32to (val);
 	  case 1: /* double */
 	    if (reg < 0)
-	      engine_error (SD, CPU, cia, "DP immediate invalid");
+	      sim_engine_abort (SD, CPU, cia, "DP immediate invalid");
 	    if (reg & 1)
-	      engine_error (SD, CPU, cia, "DP FP register must be even");
+	      sim_engine_abort (SD, CPU, cia, "DP FP register must be even");
 	    if (reg <= 1)
-	      engine_error (SD, CPU, cia, "DP FP register must be >= 2");
+	      sim_engine_abort (SD, CPU, cia, "DP FP register must be >= 2");
 	    return sim_fpu_64to (INSERTED64 (GPR (reg + 1), 63, 32)
 	                         | INSERTED64 (GPR (reg), 31, 0));
 	  case 2: /* 32 bit signed integer */
@@ -413,7 +414,7 @@ sim_fpu::function::get_fp_reg:int reg, unsigned32 val, int precision
 	  case 3: /* 32 bit unsigned integer */
 	    return sim_fpu_u32to (val);
 	  default:
-	    engine_error (SD, CPU, cia, "Unsupported FP precision");
+	    sim_engine_abort (SD, CPU, cia, "Unsupported FP precision");
 	  }
 	return sim_fpu_i32to (0);
 void::function::set_fp_reg:int Dest, sim_fpu val, int PD
@@ -428,9 +429,9 @@ void::function::set_fp_reg:int Dest, sim_fpu val, int PD
 	    {
 	      unsigned64 v = sim_fpu_to64 (val);
 	      if (Dest & 1)
-	        engine_error (SD, CPU, cia, "DP FP Dest register must be even");
+	        sim_engine_abort (SD, CPU, cia, "DP FP Dest register must be even");
 	      if (Dest <= 1)
-	        engine_error (SD, CPU, cia, "DP FP Dest register must be >= 2");
+	        sim_engine_abort (SD, CPU, cia, "DP FP Dest register must be >= 2");
 	      GPR (Dest + 0) = VL4_8 (v);
 	      GPR (Dest + 1) = VH4_8 (v);
 	      break;
@@ -446,7 +447,7 @@ void::function::set_fp_reg:int Dest, sim_fpu val, int PD
 	      break;
 	    }
 	  default:
-	    engine_error (SD, CPU, cia, "Unsupported FP precision");
+	    sim_engine_abort (SD, CPU, cia, "Unsupported FP precision");
 	  }
 
 // fadd.{s|d}{s|d}{s|d}
@@ -634,10 +635,10 @@ instruction_address::function::do_jsr:instruction_address nia, signed32 *rLink, 
 	TRACE_UCOND_BR (MY_INDEX, target);
 	nia = do_branch (_SD, annul, target, 1, rLink);
 	if (nia.dp & 0x3)
-	  engine_error (SD, CPU, cia,
-	                "0x%lx: destination address 0x%lx misaligned",
-	                (unsigned long) cia.ip,
-	                (unsigned long) nia.dp);
+	  sim_engine_abort (SD, CPU, cia,
+	                    "0x%lx: destination address 0x%lx misaligned",
+	                    (unsigned long) cia.ip,
+	                    (unsigned long) nia.dp);
 	return nia;
 31.Link,26.Base,21.0b100010,15.A,14.SignedOffset::::jsr i
 	nia = do_jsr (_SD, nia, rLink, A, vSignedOffset, vBase);
@@ -675,8 +676,8 @@ void::function::do_ld:int Dest, unsigned32 base, unsigned32 *rBase, int m , int 
 	    {
 	      signed64 val;
 	      if (Dest & 0x1)
-	        engine_error (SD, CPU, cia, "0x%lx: ld.d to odd register %d",
-	                      cia.ip, Dest);
+	        sim_engine_abort (SD, CPU, cia, "0x%lx: ld.d to odd register %d",
+	                          cia.ip, Dest);
 	      addr = base + (S ? (offset << 3) : offset);
 	      if (m)
 	        *rBase = addr;
@@ -687,7 +688,7 @@ void::function::do_ld:int Dest, unsigned32 base, unsigned32 *rBase, int m , int 
 	    break;
 	  default:
 	    addr = -1;
-	    engine_error (SD, CPU, cia, "ld - invalid sz %d", sz);
+	    sim_engine_abort (SD, CPU, cia, "ld - invalid sz %d", sz);
 	  }
 	TRACE_LD (MY_INDEX, GPR(Dest), m, S, base, offset);
 31.Dest,26.Base,21.0b0100,17.m,16.sz,14.SignedOffset::::ld i
@@ -714,7 +715,7 @@ void::function::do_ld_u:unsigned32 *rDest, unsigned32 base, unsigned32 *rBase, i
 	    break;
 	  default:
 	    addr = -1;
-	    engine_error (SD, CPU, cia, "ld.u - invalid sz %d", sz);
+	    sim_engine_abort (SD, CPU, cia, "ld.u - invalid sz %d", sz);
 	  }
 	if (m)
 	  *rBase = addr;
@@ -867,9 +868,9 @@ void::function::do_shift:int Dest, unsigned32 source, int Merge, int i, int n, i
 	    shiftmask = ~((1 << nRotate) - 1);	/* inverted */
 	    break;
 	  default:
-	    engine_error (SD, CPU, cia,
-	                  "0x%lx: Invalid merge (%d) for shift",
-	                  cia.ip, source);
+	    sim_engine_abort (SD, CPU, cia,
+	                      "0x%lx: Invalid merge (%d) for shift",
+	                      cia.ip, source);
 	    shiftmask = 0;
 	  }
 	/* and the composite mask */
@@ -894,9 +895,9 @@ void::function::do_shift:int Dest, unsigned32 source, int Merge, int i, int n, i
 	    }
 	    break;
 	  default:
-	    engine_error (SD, CPU, cia,
-	                  "0x%lx: Invalid merge (%d)",
-	                  cia.ip, source);
+	    sim_engine_abort (SD, CPU, cia,
+	                      "0x%lx: Invalid merge (%d)",
+	                      cia.ip, source);
 
 	  }
 	TRACE_SHIFT (MY_INDEX, GPR (Dest), input, i, n, Merge, EndMask, Rotate);
@@ -942,9 +943,9 @@ void::function::do_st:int Source, unsigned32 base, unsigned32 *rBase, int m , in
 	    {
 	      signed64 val;
 	      if (Source & 0x1)
-	        engine_error (SD, CPU, cia,
-	                      "0x%lx: st.d with odd source register %d",
-	                      cia.ip, Source);
+	        sim_engine_abort (SD, CPU, cia,
+	                          "0x%lx: st.d with odd source register %d",
+	                          cia.ip, Source);
 	      addr = base + (S ? (offset << 3) : offset);
 	      val = (V4_H8 (GPR(Source + 1)) | V4_L8 (GPR(Source)));
 	      STORE (addr, 8, val);
@@ -952,7 +953,7 @@ void::function::do_st:int Source, unsigned32 base, unsigned32 *rBase, int m , in
 	    break;
 	  default:
 	    addr = -1;
-	    engine_error (SD, CPU, cia, "st - invalid sz %d", sz);
+	    sim_engine_abort (SD, CPU, cia, "st - invalid sz %d", sz);
 	  }
 	if (m)
 	  *rBase = addr;
@@ -1035,7 +1036,7 @@ void::function::do_trap:unsigned32 trap_number
 	      {
 	      case 1: /* EXIT */
 	        {
-	          engine_halt (SD, CPU, cia, sim_exited, GPR(2));
+	          sim_engine_halt (SD, CPU, NULL, cia, sim_exited, GPR(2));
 	          break;
 	        }
 	      case 4: /* WRITE */
@@ -1056,9 +1057,9 @@ void::function::do_trap:unsigned32 trap_number
 	                sim_io_write_stderr (SD, &c, 1);
 	              }
 	          else
-	            engine_error (SD, CPU, cia,
-	                          "0x%lx: write to invalid fid %d",
-	                          (unsigned long) cia.ip, GPR(2));
+	            sim_engine_abort (SD, CPU, cia,
+	                              "0x%lx: write to invalid fid %d",
+	                              (unsigned long) cia.ip, GPR(2));
 	          GPR(2) = GPR(6);
 	          break;
 	        }
@@ -1069,13 +1070,13 @@ void::function::do_trap:unsigned32 trap_number
 		    GPR(2) = -22;		/* -EINVAL */
 		    break;
 		  }
-	        engine_error (SD, CPU, cia,
-	                      "0x%lx: unknown syscall %d",
-	                      (unsigned long) cia.ip, GPR(15));
+	        sim_engine_abort (SD, CPU, cia,
+	                          "0x%lx: unknown syscall %d",
+	                          (unsigned long) cia.ip, GPR(15));
 	      }
 	    break;
 	  case 73:
-	    engine_halt (SD, CPU, cia, sim_stopped, SIGTRAP);
+	    sim_engine_halt (SD, CPU, NULL, cia, sim_stopped, SIGTRAP);
 
 	  /* Add a few traps for now to print the register state */
 	  case 74:
@@ -1096,9 +1097,9 @@ void::function::do_trap:unsigned32 trap_number
 	    break;
 
 	  default:
-	    engine_error (SD, CPU, cia,
-	                  "0x%lx: unsupported trap %d",
-	                  (unsigned long) cia.ip, trap_number);
+	    sim_engine_abort (SD, CPU, cia,
+	                      "0x%lx: unsupported trap %d",
+	                      (unsigned long) cia.ip, trap_number);
 	  }
 31./,27.0,26./,21.0b0000001,14.UTN::::trap i
 	do_trap (_SD, UTN);

@@ -1,3 +1,8 @@
+Mon May 19 12:55:42 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (SIM_OBJS): Link in sim-abort.o as a stub for
+ 	sim_engine_abort.
+
 Mon May  5 12:45:28 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-if.c (sim_open): Update to reflect changes to core in

@@ -27,6 +27,71 @@
 
 #include <signal.h>
 
+typedef enum {
+  watch_invalid,
+
+  /* core - target byte order */
+  watch_core_targ_1,
+  watch_core_targ_2,
+  watch_core_targ_4,
+  watch_core_targ_8,
+  /* core - big-endian */
+  watch_core_be_1,
+  watch_core_be_2,
+  watch_core_be_4,
+  watch_core_be_8,
+  /* core - little-endian */
+  watch_core_le_1,
+  watch_core_le_2,
+  watch_core_le_4,
+  watch_core_le_8,
+
+  /* sim - host byte order */
+  watch_sim_host_1,
+  watch_sim_host_2,
+  watch_sim_host_4,
+  watch_sim_host_8,
+  /* sim - big-endian */
+  watch_sim_be_1,
+  watch_sim_be_2,
+  watch_sim_be_4,
+  watch_sim_be_8,
+  /* sim - little-endian */
+  watch_sim_le_1,
+  watch_sim_le_2,
+  watch_sim_le_4,
+  watch_sim_le_8,
+  
+  /* wallclock */
+  watch_clock,
+
+  /* timer */
+  watch_timer,
+} sim_watchpoints;
+
+
+struct _sim_event {
+  sim_watchpoints watching;
+  void *data;
+  sim_event_handler *handler;
+  /* timer event */
+  signed64 time_of_event;
+  /* watch wallclock event */
+  unsigned wallclock;
+  /* watch core address */
+  address_word core_addr;
+  sim_core_maps core_map;
+  /* watch sim addr */
+  void *host_addr;
+  /* watch core/sim range */
+  unsigned ub;
+  unsigned lb;
+  unsigned64 ub64;
+  unsigned64 lb64;
+  /* list */
+  sim_event *next;
+};
+
 
 /* The event queue maintains a single absolute time using two
    variables.
@@ -65,10 +130,10 @@ do \
   { \
     if (WITH_TRACE) \
       { \
-        if (sd->events.trace) \
+        if (STATE_EVENTS (sd)->trace) \
           { \
             const char *file; \
-            SIM_FILTER_PATH(file, __FILE__); \
+            SIM_FILTER_PATH (file, __FILE__); \
             sim_io_printf (sd, "%s:%d: ", file, __LINE__); \
             sim_io_printf  ARGS; \
           } \
@@ -77,26 +142,72 @@ do \
 while (0)
 
 
+/* event queue iterator */
+STATIC_INLINE_SIM_EVENTS\
+(sim_event **)
+next_event_queue (SIM_DESC sd,
+		  sim_event **queue)
+{
+  if (queue == NULL)
+    return &STATE_EVENTS (sd)->queue;
+  else if (queue == &STATE_EVENTS (sd)->queue)
+    return &STATE_EVENTS (sd)->watchpoints;
+  else if (queue == &STATE_EVENTS (sd)->watchpoints)
+    return &STATE_EVENTS (sd)->watchedpoints;
+  else if (queue == &STATE_EVENTS (sd)->watchedpoints)
+    return NULL;
+  else
+    sim_io_error (sd, "next_event_queue - bad queue");
+  return NULL;
+}
+
+
 STATIC_INLINE_SIM_EVENTS\
 (void)
-sim_events_poll (void *data)
+sim_events_poll (SIM_DESC sd,
+		 void *data)
 {
   /* just re-schedule in 1000 million ticks time */
-  SIM_DESC sd = data;
-  sim_events_schedule(sd, SIM_EVENTS_POLL_RATE, sim_events_poll, sd);
+  sim_events_schedule (sd, SIM_EVENTS_POLL_RATE, sim_events_poll, sd);
   sim_io_poll_quit (sd);
 }
 
 
-INLINE_SIM_EVENTS\
-(void)
-sim_events_init(SIM_DESC sd)
+/* "events" module install handler.
+   This is called via sim_module_install to install the "events" subsystem
+   into the simulator.  */
+
+EXTERN_SIM_EVENTS\
+(SIM_RC)
+sim_events_install (SIM_DESC sd)
 {
-  sim_events *events = &sd->events;
-  sim_event *event;
+  sim_module_add_uninstall_fn (sd, sim_events_uninstall);
+  sim_module_add_init_fn (sd, sim_events_init);
+  return SIM_RC_OK;
+}
+
+
+/* Uninstall the "events" subsystem from the simulator.  */
+
+EXTERN_SIM_EVENTS\
+(void)
+sim_events_uninstall (SIM_DESC sd)
+{
+  /* FIXME: free buffers, etc. */
+}
+
+
+/* Initialize the simulator event manager */
+
+EXTERN_SIM_EVENTS\
+(SIM_RC)
+sim_events_init (SIM_DESC sd)
+{
+  sim_events *events = STATE_EVENTS (sd);
 
   /* drain the interrupt queue */
   {
+    sim_event *event;
 #if defined(HAVE_SIGPROCMASK) && defined(SIG_SETMASK)
     sigset_t old_mask;
     sigset_t new_mask;
@@ -111,106 +222,125 @@ sim_events_init(SIM_DESC sd)
     }
     events->held = NULL;
     events->held_end = &events->held;
+    events->work_pending = 0;
 #if defined(HAVE_SIGPROCMASK) && defined(SIG_SETMASK)
     /*-UNLOCK-*/ sigprocmask(SIG_SETMASK, &old_mask, NULL);
 #endif
   }
 
-  /* drain the normal queue */
-  event = events->queue;
-  while (event != NULL) {
-    sim_event *dead = event;
-    event = event->next;
-    zfree(dead);
+  /* drain the normal queues */
+  {
+    sim_event **queue = NULL;
+    while ((queue = next_event_queue (sd, queue)) != NULL)
+      {
+	if (queue == NULL) break;
+	while (*queue != NULL)
+	  {
+	    sim_event *dead = *queue;
+	    *queue = dead->next;
+	    zfree (dead);
+	  }
+	*queue = NULL;
+      }
   }
-  events->queue = NULL;
-    
+
   /* wind time back to zero */
-  events->processing = 0;
+  events->processing = 1; /* start by doing queue */
   events->time_of_event = 0;
   events->time_from_event = 0;
+  events->initial_wallclock = sim_elapsed_time_get ();
 
   /* schedule our initial counter event */
-  sim_events_schedule(sd, 0, sim_events_poll, sd);
+  sim_events_schedule (sd, 0, sim_events_poll, sd);
 
   /* from now on, except when the large-int event is being processed
      the event queue is non empty */
-  SIM_ASSERT(events->queue != NULL);
+  SIM_ASSERT (events->queue != NULL);
+
+  return SIM_RC_OK;
 }
+
 
 INLINE_SIM_EVENTS\
 (signed64)
-sim_events_time(SIM_DESC sd)
+sim_events_time (SIM_DESC sd)
 {
-  sim_events *events = &sd->events;
+  sim_events *events = STATE_EVENTS (sd);
   return events->time_of_event - events->time_from_event;
 }
 
-STATIC_INLINE_SIM_EVENTS\
-(void)
-update_time_from_event(SIM_DESC sd)
-{
-  sim_events *events = &sd->events;
-  signed64 current_time = sim_events_time(sd);
-  if (events->queue != NULL) {
-    events->time_from_event = (events->queue->time_of_event - current_time);
-    events->time_of_event = events->queue->time_of_event;
-  }
-  else {
-    events->time_of_event = current_time - 1;
-    events->time_from_event = -1;
-  }
-  SIM_ASSERT(current_time == sim_events_time (sd));
-  SIM_ASSERT((events->time_from_event >= 0) == (events->queue != NULL));
-}
 
 STATIC_INLINE_SIM_EVENTS\
 (void)
-insert_sim_event(SIM_DESC sd,
-		 sim_event *new_event,
-		 signed64 delta)
+update_time_from_event (SIM_DESC sd)
 {
-  sim_events *events = &sd->events;
+  sim_events *events = STATE_EVENTS (sd);
+  signed64 current_time = sim_events_time (sd);
+  if (events->queue != NULL)
+    {
+      events->time_from_event = (events->queue->time_of_event - current_time);
+      events->time_of_event = events->queue->time_of_event;
+    }
+  else
+    {
+      events->time_of_event = current_time - 1;
+      events->time_from_event = -1;
+    }
+  SIM_ASSERT (current_time == sim_events_time (sd));
+  SIM_ASSERT ((events->time_from_event >= 0) == (events->queue != NULL));
+}
+
+
+STATIC_INLINE_SIM_EVENTS\
+(void)
+insert_sim_event (SIM_DESC sd,
+		  sim_event *new_event,
+		  signed64 delta)
+{
+  sim_events *events = STATE_EVENTS (sd);
   sim_event *curr;
   sim_event **prev;
   signed64 time_of_event;
 
   if (delta < 0)
-    engine_error (sd, "what is past is past!\n");
-
+    sim_io_error (sd, "what is past is past!\n");
+  
   /* compute when the event should occure */
-  time_of_event = sim_events_time(sd) + delta;
-
+  time_of_event = sim_events_time (sd) + delta;
+  
   /* find the queue insertion point - things are time ordered */
   prev = &events->queue;
   curr = events->queue;
-  while (curr != NULL && time_of_event >= curr->time_of_event) {
-    SIM_ASSERT(curr->next == NULL
-	   || curr->time_of_event <= curr->next->time_of_event);
-    prev = &curr->next;
-    curr = curr->next;
-  }
-  SIM_ASSERT(curr == NULL || time_of_event < curr->time_of_event);
-
+  while (curr != NULL && time_of_event >= curr->time_of_event)
+    {
+      SIM_ASSERT (curr->next == NULL
+		  || curr->time_of_event <= curr->next->time_of_event);
+      prev = &curr->next;
+      curr = curr->next;
+    }
+  SIM_ASSERT (curr == NULL || time_of_event < curr->time_of_event);
+  
   /* insert it */
   new_event->next = curr;
   *prev = new_event;
   new_event->time_of_event = time_of_event;
-
+  
   /* adjust the time until the first event */
-  update_time_from_event(sd);
+  update_time_from_event (sd);
 }
 
-INLINE_SIM_EVENTS\
+
+EXTERN_SIM_EVENTS\
 (sim_event *)
-sim_events_schedule(SIM_DESC sd,
-		    signed64 delta_time,
-		    sim_event_handler *handler,
-		    void *data)
+sim_events_schedule (SIM_DESC sd,
+		     signed64 delta_time,
+		     sim_event_handler *handler,
+		     void *data)
 {
   sim_event *new_event = ZALLOC(sim_event);
   new_event->data = data;
   new_event->handler = handler;
+  new_event->watching = watch_timer;
   insert_sim_event(sd, new_event, delta_time);
   ETRACE((_ETRACE,
 	  "event scheduled at %ld - tag 0x%lx - time %ld, handler 0x%lx, data 0x%lx\n",
@@ -223,27 +353,28 @@ sim_events_schedule(SIM_DESC sd,
 }
 
 
-INLINE_SIM_EVENTS\
+EXTERN_SIM_EVENTS\
 (sim_event *)
 sim_events_schedule_after_signal(SIM_DESC sd,
 				 signed64 delta_time,
 				 sim_event_handler *handler,
 				 void *data)
 {
-  sim_events *events = &sd->events;
-  sim_event *new_event = ZALLOC(sim_event);
-
+  sim_events *events = STATE_EVENTS (sd);
+  sim_event *new_event = ZALLOC (sim_event);
+  
   new_event->data = data;
   new_event->handler = handler;
   new_event->time_of_event = delta_time; /* work it out later */
   new_event->next = NULL;
-
+  
   {
-#if defined(HAVE_SIGPROCMASK) && defined(SIG_SETMASK)
+#if defined (HAVE_SIGPROCMASK) && defined (SIG_SETMASK)
+    /*-LOCK-*/
     sigset_t old_mask;
     sigset_t new_mask;
     sigfillset(&new_mask);
-    /*-LOCK-*/ sigprocmask(SIG_SETMASK, &new_mask, &old_mask);
+    sigprocmask (SIG_SETMASK, &new_mask, &old_mask);
 #endif
     if (events->held == NULL) {
       events->held = new_event;
@@ -252,77 +383,337 @@ sim_events_schedule_after_signal(SIM_DESC sd,
       *events->held_end = new_event;
     }
     events->held_end = &new_event->next;
-#if defined(HAVE_SIGPROCMASK) && defined(SIG_SETMASK)
-    /*-UNLOCK-*/ sigprocmask(SIG_SETMASK, &old_mask, NULL);
+    events->work_pending = 1; /* notify main process */
+#if defined (HAVE_SIGPROCMASK) && defined (SIG_SETMASK)
+    /*-UNLOCK-*/
+    sigprocmask (SIG_SETMASK, &old_mask, NULL);
 #endif
   }
-
-  ETRACE((_ETRACE,
-	  "event scheduled at %ld - tag 0x%lx - time %ld, handler 0x%lx, data 0x%lx\n",
-	  (long)sim_events_time(sd),
-	  (long)new_event,
-	  (long)new_event->time_of_event,
-	  (long)new_event->handler,
-	  (long)new_event->data));
-
+  
+  ETRACE ((_ETRACE,
+	   "event scheduled at %ld - tag 0x%lx - time %ld, handler 0x%lx, data 0x%lx\n",
+	   (long)sim_events_time(sd),
+	   (long)new_event,
+	   (long)new_event->time_of_event,
+	   (long)new_event->handler,
+	   (long)new_event->data));
+  
   return new_event;
 }
 
 
-INLINE_SIM_EVENTS\
-(void)
-sim_events_deschedule(SIM_DESC sd,
-		      sim_event *event_to_remove)
+EXTERN_SIM_EVENTS\
+(sim_event *)
+sim_events_watch_clock (SIM_DESC sd,
+			unsigned wallclock_ms_time,
+			sim_event_handler *handler,
+			void *data)
 {
-  sim_events *events = &sd->events;
-  sim_event *to_remove = (sim_event*)event_to_remove;
-  SIM_ASSERT((events->time_from_event >= 0) == (events->queue != NULL));
-  if (event_to_remove != NULL) {
-    sim_event *current;
-    sim_event **ptr_to_current;
-    for (ptr_to_current = &events->queue, current = *ptr_to_current;
-	 current != NULL && current != to_remove;
-	 ptr_to_current = &current->next, current = *ptr_to_current);
-    if (current == to_remove) {
-      *ptr_to_current = current->next;
-      ETRACE((_ETRACE,
-	      "event descheduled at %ld - tag 0x%lx - time %ld, handler 0x%lx, data 0x%lx\n",
-	      (long)sim_events_time(sd),
-	      (long)event_to_remove,
-	      (long)current->time_of_event,
-	      (long)current->handler,
-	      (long)current->data));
-      zfree(current);
-      update_time_from_event(sd);
-    }
-    else {
-      ETRACE((_ETRACE,
-	      "event descheduled at %ld - tag 0x%lx - not found\n",
-	      (long)sim_events_time(sd),
-	      (long)event_to_remove));
-    }
-  }
-  SIM_ASSERT((events->time_from_event >= 0) == (events->queue != NULL));
+  sim_events *events = STATE_EVENTS (sd);
+  sim_event *new_event = ZALLOC (sim_event);
+  /* type */
+  new_event->watching = watch_clock;
+  /* handler */
+  new_event->data = data;
+  new_event->handler = handler;
+  /* data */
+  new_event->wallclock = wallclock_ms_time;
+  /* insert */
+  new_event->next = events->watchpoints;
+  events->watchpoints = new_event;
+  events->work_pending = 1;
+  ETRACE ((_ETRACE,
+	  "event watching clock at %ld - tag 0x%lx - wallclock %ld, handler 0x%lx, data 0x%lx\n",
+	   (long)sim_events_time (sd),
+	   (long)new_event,
+	   (long)new_event->wallclock,
+	   (long)new_event->handler,
+	   (long)new_event->data));
+  return new_event;
 }
 
 
+EXTERN_SIM_EVENTS\
+(sim_event *)
+sim_events_watch_sim (SIM_DESC sd,
+		      void *host_addr,
+		      int nr_bytes,
+		      int byte_order,
+		      unsigned64 lb,
+		      unsigned64 ub,
+		      sim_event_handler *handler,
+		      void *data)
+{
+  sim_events *events = STATE_EVENTS (sd);
+  sim_event *new_event = ZALLOC (sim_event);
+  /* type */
+  switch (byte_order)
+    {
+    case 0:
+      switch (nr_bytes)
+	{
+	case 1: new_event->watching = watch_sim_host_1; break;
+	case 2: new_event->watching = watch_sim_host_2; break;
+	case 4: new_event->watching = watch_sim_host_4; break;
+	case 8: new_event->watching = watch_sim_host_8; break;
+	default: sim_io_error (sd, "sim_events_watch_sim - invalid nr bytes");
+	}
+      break;
+    case BIG_ENDIAN:
+      switch (nr_bytes)
+	{
+	case 1: new_event->watching = watch_sim_be_1; break;
+	case 2: new_event->watching = watch_sim_be_2; break;
+	case 4: new_event->watching = watch_sim_be_4; break;
+	case 8: new_event->watching = watch_sim_be_8; break;
+	default: sim_io_error (sd, "sim_events_watch_sim - invalid nr bytes");
+	}
+      break;
+    case LITTLE_ENDIAN:
+      switch (nr_bytes)
+	{
+	case 1: new_event->watching = watch_sim_le_1; break;
+	case 2: new_event->watching = watch_sim_le_2; break;
+	case 4: new_event->watching = watch_sim_le_4; break;
+	case 8: new_event->watching = watch_sim_le_8; break;
+	default: sim_io_error (sd, "sim_events_watch_sim - invalid nr bytes");
+	}
+      break;
+    default:
+      sim_io_error (sd, "sim_events_watch_sim - invalid byte order");
+    }
+  /* handler */
+  new_event->data = data;
+  new_event->handler = handler;
+  /* data */
+  new_event->host_addr = host_addr;
+  new_event->lb = lb;
+  new_event->lb64 = lb;
+  new_event->ub = ub;
+  new_event->ub64 = ub;
+  /* insert */
+  new_event->next = events->watchpoints;
+  events->watchpoints = new_event;
+  events->work_pending = 1;
+  ETRACE ((_ETRACE,
+	   "event watching host at %ld - tag 0x%lx - host-addr 0x%lx, 0x%lx..0x%lx, handler 0x%lx, data 0x%lx\n",
+	   (long)sim_events_time (sd),
+	   (long)new_event,
+	   (long)new_event->host_addr,
+	   (long)new_event->lb,
+	   (long)new_event->ub,
+	   (long)new_event->handler,
+	   (long)new_event->data));
+  return new_event;
+}
+
+
+EXTERN_SIM_EVENTS\
+(sim_event *)
+sim_events_watch_core (SIM_DESC sd,
+		       address_word core_addr,
+		       sim_core_maps core_map,
+		       int nr_bytes,
+		       int byte_order,
+		       unsigned64 lb,
+		       unsigned64 ub,
+		       sim_event_handler *handler,
+		       void *data)
+{
+  sim_events *events = STATE_EVENTS (sd);
+  sim_event *new_event = ZALLOC (sim_event);
+  /* type */
+  switch (byte_order)
+    {
+    case 0:
+      switch (nr_bytes)
+	{
+	case 1: new_event->watching = watch_core_targ_1; break;
+	case 2: new_event->watching = watch_core_targ_2; break;
+	case 4: new_event->watching = watch_core_targ_4; break;
+	case 8: new_event->watching = watch_core_targ_8; break;
+	default: sim_io_error (sd, "sim_events_watch_core - invalid nr bytes");
+	}
+      break;
+    case BIG_ENDIAN:
+      switch (nr_bytes)
+	{
+	case 1: new_event->watching = watch_core_be_1; break;
+	case 2: new_event->watching = watch_core_be_2; break;
+	case 4: new_event->watching = watch_core_be_4; break;
+	case 8: new_event->watching = watch_core_be_8; break;
+	default: sim_io_error (sd, "sim_events_watch_core - invalid nr bytes");
+	}
+      break;
+    case LITTLE_ENDIAN:
+      switch (nr_bytes)
+	{
+	case 1: new_event->watching = watch_core_le_1; break;
+	case 2: new_event->watching = watch_core_le_2; break;
+	case 4: new_event->watching = watch_core_le_4; break;
+	case 8: new_event->watching = watch_core_le_8; break;
+	default: sim_io_error (sd, "sim_events_watch_core - invalid nr bytes");
+	}
+      break;
+    default:
+      sim_io_error (sd, "sim_events_watch_core - invalid byte order");
+    }
+  /* handler */
+  new_event->data = data;
+  new_event->handler = handler;
+  /* data */
+  new_event->core_addr = core_addr;
+  new_event->core_map = core_map;
+  new_event->lb = lb;
+  new_event->lb64 = lb;
+  new_event->ub = ub;
+  new_event->ub64 = ub;
+  /* insert */
+  new_event->next = events->watchpoints;
+  events->watchpoints = new_event;
+  events->work_pending = 1;
+  ETRACE ((_ETRACE,
+	   "event watching host at %ld - tag 0x%lx - host-addr 0x%lx, 0x%lx..0x%lx, handler 0x%lx, data 0x%lx\n",
+	   (long)sim_events_time (sd),
+	   (long)new_event,
+	   (long)new_event->host_addr,
+	   (long)new_event->lb,
+	   (long)new_event->ub,
+	   (long)new_event->handler,
+	   (long)new_event->data));
+  return new_event;
+}
+
+
+EXTERN_SIM_EVENTS\
+(void)
+sim_events_deschedule (SIM_DESC sd,
+		       sim_event *event_to_remove)
+{
+  sim_events *events = STATE_EVENTS (sd);
+  sim_event *to_remove = (sim_event*)event_to_remove;
+  SIM_ASSERT ((events->time_from_event >= 0) == (events->queue != NULL));
+  if (event_to_remove != NULL)
+    {
+      sim_event **queue = NULL;
+      while ((queue = next_event_queue (sd, queue)) != NULL)
+	{
+	  sim_event **ptr_to_current;
+	  for (ptr_to_current = queue;
+	       *ptr_to_current != NULL && *ptr_to_current != to_remove;
+	       ptr_to_current = &(*ptr_to_current)->next);
+	  if (*ptr_to_current == to_remove)
+	    {
+	      sim_event *dead = *ptr_to_current;
+	      *ptr_to_current = dead->next;
+	      ETRACE ((_ETRACE,
+		       "event/watch descheduled at %ld - tag 0x%lx - time %ld, handler 0x%lx, data 0x%lx\n",
+		       (long) sim_events_time (sd),
+		       (long) event_to_remove,
+		       (long) dead->time_of_event,
+		       (long) dead->handler,
+		       (long) dead->data));
+	      zfree (dead);
+	      update_time_from_event (sd);
+	      SIM_ASSERT ((events->time_from_event >= 0) == (events->queue != NULL));
+	      return;
+	    }
+	}
+    }
+  ETRACE ((_ETRACE,
+	   "event/watch descheduled at %ld - tag 0x%lx - not found\n",
+	   (long) sim_events_time (sd),
+	   (long) event_to_remove));
+}
+
+
+STATIC_INLINE_SIM_EVENTS\
+(int)
+sim_watch_valid (SIM_DESC sd,
+		 sim_event *to_do)
+{
+  switch (to_do->watching)
+    {
+
+#define WATCH_CORE(N,OP) \
+      { \
+	unsigned_##N word; \
+	sim_core_read_buffer (sd, to_do->core_map, &word, to_do->core_addr, sizeof (word)); \
+	OP (word); \
+	return (word >= to_do->lb && word <= to_do->ub); \
+      }
+
+    case watch_core_targ_1: WATCH_CORE (1, T2H);
+    case watch_core_targ_2: WATCH_CORE (2, T2H);
+    case watch_core_targ_4: WATCH_CORE (4, T2H);
+    case watch_core_targ_8: WATCH_CORE (8, T2H);
+
+    case watch_core_be_1: WATCH_CORE (1, BE2H);
+    case watch_core_be_2: WATCH_CORE (2, BE2H);
+    case watch_core_be_4: WATCH_CORE (4, BE2H);
+    case watch_core_be_8: WATCH_CORE (8, BE2H);
+
+    case watch_core_le_1: WATCH_CORE (1, LE2H);
+    case watch_core_le_2: WATCH_CORE (2, LE2H);
+    case watch_core_le_4: WATCH_CORE (4, LE2H);
+    case watch_core_le_8: WATCH_CORE (8, LE2H);
+
+#undef WATCH_CORE
+
+#define WATCH_SIM(N,OP) \
+      { \
+	unsigned_##N word = *(unsigned_##N*)to_do->host_addr; \
+        OP (word); \
+	return (word >= to_do->lb && word <= to_do->ub); \
+      }
+
+    case watch_sim_host_1: WATCH_SIM (1, word = );
+    case watch_sim_host_2: WATCH_SIM (2, word = );
+    case watch_sim_host_4: WATCH_SIM (4, word = );
+    case watch_sim_host_8: WATCH_SIM (8, word = );
+
+    case watch_sim_be_1: WATCH_SIM (1, BE2H);
+    case watch_sim_be_2: WATCH_SIM (2, BE2H);
+    case watch_sim_be_4: WATCH_SIM (4, BE2H);
+    case watch_sim_be_8: WATCH_SIM (8, BE2H);
+
+    case watch_sim_le_1: WATCH_SIM (1, LE2H);
+    case watch_sim_le_2: WATCH_SIM (1, LE2H);
+    case watch_sim_le_4: WATCH_SIM (1, LE2H);
+    case watch_sim_le_8: WATCH_SIM (1, LE2H);
+#undef WATCH_SIM
+
+    case watch_clock: /* wallclock */
+      return (sim_elapsed_time_since (STATE_EVENTS (sd)->initial_wallclock)
+	      < to_do->wallclock);
+
+    case watch_timer:
+    case watch_invalid:
+      sim_io_error (sd, "sim_watch_valid - bad switch");
+      break;
+
+    }
+  return 1;
+}
 
 
 INLINE_SIM_EVENTS\
 (int)
-sim_events_tick(SIM_DESC sd)
+sim_events_tick (SIM_DESC sd)
 {
-  sim_events *events = &sd->events;
+  sim_events *events = STATE_EVENTS (sd);
 
-  /* we should only be here when the previous tick has been fully
+  /* this should only be called after the previous tick has been fully
      processed */
-  SIM_ASSERT(!events->processing && events->queue != NULL);
+  SIM_ASSERT (!events->processing);
 
   /* Advance the time but *only* if there is nothing to process */
-  if (events->time_from_event == 0)
-    return 1;
-  else if (events->held != NULL)
-    return 1;
+  if (events->work_pending
+      || events->time_from_event == 0)
+    {
+      events->processing = 1;
+      return 1;
+    }
   else {
     events->time_from_event -= 1;
     return 0;
@@ -330,67 +721,131 @@ sim_events_tick(SIM_DESC sd)
 }
 
 
+INLINE_SIM_EVENTS\
+(void)
+sim_events_preprocess (SIM_DESC sd,
+		       int events_were_last,
+		       int events_were_next)
+{
+  sim_events *events = STATE_EVENTS(sd);
+  if (events->processing)
+    {
+      /* Halted midway through event processing */
+      ASSERT (events_were_last && events_were_next);
+      sim_events_process (sd);
+    }
+  else if (events_were_next)
+    {
+      /* Halted by the last processor */
+      ASSERT (!events->processing && !events_were_last);
+      if (sim_events_tick (sd))
+	sim_events_process (sd);
+    }
+}
+
 
 INLINE_SIM_EVENTS\
 (void)
-sim_events_process(SIM_DESC sd)
+sim_events_process (SIM_DESC sd)
 {
-  sim_events *events = &sd->events;
+  sim_events *events = STATE_EVENTS(sd);
   signed64 event_time = sim_events_time(sd);
 
-  /* something to do */
-  SIM_ASSERT(events->time_from_event == 0 || events->held != NULL);
-  SIM_ASSERT(events->queue != NULL);
+  ASSERT (events->processing);
 
-  /* move any events that were queued by any signal handlers onto the
-     real event queue.  */
-  if (events->held != NULL) {
-    sim_event *held_events;
-    sim_event *curr_event;
-
+  /* move any events that were queued by any signal handlers onto
+     the real event queue.  */
+  if (events->held != NULL)
+    {
+      sim_event *held_events;
+      sim_event *curr_event;
+      
 #if defined(HAVE_SIGPROCMASK) && defined(SIG_SETMASK)
-    /*-LOCK-*/
-    sigset_t old_mask;
-    sigset_t new_mask;
-    sigfillset(&new_mask);
-    sigprocmask(SIG_SETMASK, &new_mask, &old_mask);
+      /*-LOCK-*/
+      sigset_t old_mask;
+      sigset_t new_mask;
+      sigfillset(&new_mask);
+      sigprocmask(SIG_SETMASK, &new_mask, &old_mask);
 #endif
-
-    held_events = events->held;
-    events->held = NULL;
-    events->held_end = &events->held;
-
+      
+      held_events = events->held;
+      events->held = NULL;
+      events->held_end = &events->held;
+      events->work_pending = 0;
+      
 #if defined(HAVE_SIGPROCMASK) && defined(SIG_SETMASK)
-    /*-UNLOCK-*/
-    sigprocmask(SIG_SETMASK, &old_mask, NULL);
+      /*-UNLOCK-*/
+      sigprocmask(SIG_SETMASK, &old_mask, NULL);
 #endif
-
-    do {
-      curr_event = held_events;
-      held_events = curr_event->next;
-      insert_sim_event(sd, curr_event, curr_event->time_of_event);
-    } while (held_events != NULL);
-  }
-
+      
+      do
+	{
+	  curr_event = held_events;
+	  held_events = curr_event->next;
+	  insert_sim_event (sd, curr_event,
+			    curr_event->time_of_event);
+	}
+      while (held_events != NULL);
+    }
+  
+  /* Process any watchpoints. Be careful to allow a watchpoint to
+     appear/disappear under our feet.
+     To ensure that watchpoints are processed only once per cycle,
+     they are moved onto a watched queue, this returned to the
+     watchpoint queue when all queue processing has been
+     completed. */
+  while (events->watchpoints != NULL)
+    {
+      sim_event *to_do = events->watchpoints;
+      events->watchpoints = to_do->next;
+      if (sim_watch_valid (sd, to_do))
+	{
+	  sim_event_handler *handler = to_do->handler;
+	  void *data = to_do->data;
+	  events->queue = to_do->next;
+	  ETRACE((_ETRACE,
+		  "event issued at %ld - tag 0x%lx - handler 0x%lx, data 0x%lx\n",
+		  (long) event_time,
+		  (long) to_do,
+		  (long) handler,
+		  (long) data));
+	  zfree (to_do);
+	  handler (sd, data);
+	}
+      else
+	{
+	  to_do->next = events->watchedpoints;
+	  events->watchedpoints = to_do;
+	}
+    }
+  
   /* consume all events for this or earlier times.  Be careful to
-     allow a new event to appear under our feet */
-  events->processing = 1;
-  while (events->queue->time_of_event <= event_time) {
-    sim_event *to_do = events->queue;
-    sim_event_handler *handler = to_do->handler;
-    void *data = to_do->data;
-    events->queue = to_do->next;
-    ETRACE((_ETRACE,
-	    "event issued at %ld - tag 0x%lx - handler 0x%lx, data 0x%lx\n",
-	    (long)event_time,
-	    (long)to_do,
-	    (long)handler,
-	    (long)data));
-    zfree (to_do);
-    handler (data);
-  }
+     allow an event to appear/disappear under our feet */
+  while (events->queue->time_of_event <= event_time)
+    {
+      sim_event *to_do = events->queue;
+      sim_event_handler *handler = to_do->handler;
+      void *data = to_do->data;
+      events->queue = to_do->next;
+      ETRACE((_ETRACE,
+	      "event issued at %ld - tag 0x%lx - handler 0x%lx, data 0x%lx\n",
+	      (long) event_time,
+	      (long) to_do,
+	      (long) handler,
+	      (long) data));
+      zfree (to_do);
+      handler (sd, data);
+    }
+  
+  /* put things back where they belong ready for the next iteration */
+  events->watchpoints = events->watchedpoints;
+  events->watchedpoints = NULL;
+  if (events->watchpoints != NULL)
+    events->work_pending = 1;
+  
+  /* this round of processing complete */
   events->processing = 0;
-
+  
   /* re-caculate time for new events - advance the time */
   update_time_from_event(sd);
   SIM_ASSERT(events->time_from_event > 0 && events->queue != NULL);

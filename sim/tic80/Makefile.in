@@ -10,7 +10,7 @@
 # Not all of these need to be mentioned, only the necessary ones.
 
 # List of object files, less common parts.
-SIM_OBJS = sim-endian.o sim-bits.o sim-config.o interp.o \
+SIM_OBJS = sim-endian.o sim-bits.o sim-config.o \
 	support.o idecode.o semantics.o itable.o misc.o \
 	sim-calls.o \
 	sim-events.o \
@@ -22,7 +22,12 @@ SIM_OBJS = sim-endian.o sim-bits.o sim-config.o interp.o \
 	sim-options.o \
 	sim-trace.o \
 	sim-profile.o \
-	sim-fpu.o
+	sim-fpu.o \
+	sim-engine.o \
+	sim-run.o \
+	sim-resume.o \
+	sim-stop.o \
+	sim-reason.o
 
 # List of extra dependencies.
 # Generally this consists of simulator specific files included by sim-main.h.
@@ -142,6 +147,7 @@ ENGINE_H = \
 	$(srcdir)/../common/sim-core.h \
 	$(srcdir)/../common/sim-events.h \
 	$(srcdir)/../common/sim-fpu.h \
+	$(srcdir)/../common/sim-engine.h \
 
 idecode.o: $(ENGINE_H)
 semantics.o: $(ENGINE_H)

@@ -1,3 +1,68 @@
+Mon May 19 12:07:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-basics.h (transfer_type): New type.
+
+	* sim-core.c (sim_core_signal): New function. Print core signal
+ 	information.
+	(sim_core_find_mapping): Add transfer argument.
+
+	* sim-n-core.h (sim_core_{write,write}_unaligned_N): Call
+ 	SIM_CORE_SIGNAL if a recoverable abort.
+	* sim-core.c (sim_core_find_mapping): Ditto.
+
+Fri May 16 15:13:21 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-core.c (sim_core_find_mapping): Replace calls to
+ 	sim_io_error to more resiliant sim_engine_abort.
+
+	* sim-n-core.h (sim_core_read_unaligned_N): Ditto.
+	(sim_core_write_unaligned_N): Ditto.
+
+Tue May 13 13:50:06 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-module.c: Add sim_events_install to list.
+	
+	* sim-events.c (sim_events_install, sim_events_uninstall): Clonse
+ 	from sim_core_*.
+	(sim_events_init): Now returns SIG_RC.
+
+	* sim-run.c: New file. Generic sim_engine_run.
+	* sim-reason.c: New file. Generic sim_stop_reason.
+	* sim-stop.c: New file. Generic sim_stop.
+	* sim-resume.c: New file. Generic sim_resume.
+	
+	* Make-common.in (sim-engine.o): Add rule.
+	(sim-run.o, sim-reason.o, sim-stop.o, sim-resume.o): Ditto.
+	
+	* sim-engine.h, sim-engine.c: New file. Provide generic
+ 	implementation of sim_engine_halt, sim_engine_error. et.al.
+
+	* sim-base.h (sim_state_base): Add member halt.
+	(sim-engine.h): Include.
+
+	* sim-events.h (sim_event_handler): Always pass SIM_DESC to event
+ 	handlers.
+	* sim-events.c (sim_events_poll): Update event handler.
+
+Tue May 13 09:57:49 1997  Andrew Cagney  <cagney@b2.cygnus.com>
+
+	* sim-events.h, sim-events.c (sim_events_watch_clock): New
+ 	function.
+	(sim_events_watch_sim): New function.
+	(sim_events_watch_core): New function.
+	(sim_watch_valid): New function.
+	(sim_events_preprocess): New function.
+	(sim_events_process): Process the watchpoints as well as the timer
+ 	queue.
+	(sim_events_tick): Check WORK_PENDING instead of the hold queue.
+	(sim_events_deschedule): Check all the queues when removing an
+ 	event.
+	(sim_events_init): Ditto for cleaning.
+
+Mon May 19 12:07:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-fpu.c (is_ufpu_number): Comment out - currently unused.
+
 Mon May 19 11:23:03 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* callback.c (os_open): Type of arg flags is int.

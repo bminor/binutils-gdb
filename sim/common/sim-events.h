@@ -38,49 +38,84 @@
    illustrated above, the event queue should be processed before the
    first instruction.  That instruction being executed during tick 1.
 
-   The event queue is processed using:
+   The simulator main loop may take a form similar to:
 
-        if (sim_events_tick (sd)) {
-	  sim_events_process (sd);
-	}
+       if (halt-/restart-setjmp)
+         {
 
-   */
-   
+	   .... // Determine who should go next
+	   last-cpu-nr = get-last-cpu-nr (sd);
+	   next-cpu-nr = get-next-cpu-nr (sd);
+	   events-were-last? = (last-cpu-nr >= nr-cpus);
+	   events-were-next? = (next-cpu-nr >= nr-cpus);
 
-typedef void sim_event_handler(void *data);
+           .... // process any outstanding events
+           sim_events_preprocess (sd, events-were-last?, events-were-next?);
+	   if (events-were-next)
+	     next-cpu-nr = 0;
+
+           .... // prime main loop 
+
+           while (1)
+             {
+	        .... // model one insn of next-cpu-nr .. nr-cpus
+                if (sim_events_tick (sd))
+	          sim_events_process (sd);
+                next-cpu-nr = 0
+	     }
+         }
+
+   NB.  In the above pseudo code it is assumed that any cpu-nr >=
+   nr-cpus is a marker for the event queue. */
+
+
+typedef void sim_event_handler(SIM_DESC sd, void *data);
 
 typedef struct _sim_event sim_event;
-struct _sim_event {
-  void *data;
-  sim_event_handler *handler;
-  signed64 time_of_event;  
-  sim_event *next;
-};
 
 typedef struct _sim_events sim_events;
 struct _sim_events {
   int processing;
   sim_event *queue;
+  sim_event *watchpoints;
+  sim_event *watchedpoints;
+  /* flag additional work needed */
+  volatile int work_pending;
+  /* the asynchronous event queue */
   sim_event *volatile held;
   sim_event *volatile *volatile held_end;
+  /* timekeeping */
+  SIM_ELAPSED_TIME initial_wallclock;
   signed64 time_of_event;
   int time_from_event;
-  void *path_to_halt_or_restart;
   int trace;
 };
 
 
 
+/* Install the "events" module.  */
+
+EXTERN_SIM_EVENTS\
+(SIM_RC) sim_events_install (SIM_DESC sd);
+
+
+/* Uninstall the "events" subsystem.  */
+
+EXTERN_SIM_EVENTS\
+(void)
+sim_events_uninstall (SIM_DESC sd);
+
+
+
 /* Initialization */
 
-INLINE_SIM_EVENTS\
-(void) sim_events_init
-(SIM_DESC sd);
+EXTERN_SIM_EVENTS\
+(SIM_RC) sim_events_init (SIM_DESC sd);
 
 
 /* Set Tracing Level */
 
-INLINE_SIM_EVENTS\
+EXTERN_SIM_EVENTS\
 (void) sim_events_set_trace
 (SIM_DESC sd,
  int level);
@@ -88,14 +123,14 @@ INLINE_SIM_EVENTS\
 
 /* Schedule an event DELTA_TIME ticks into the future */
 
-INLINE_SIM_EVENTS\
+EXTERN_SIM_EVENTS\
 (sim_event *) sim_events_schedule
 (SIM_DESC sd,
  signed64 delta_time,
  sim_event_handler *handler,
  void *data);
 
-INLINE_SIM_EVENTS\
+EXTERN_SIM_EVENTS\
 (sim_event *) sim_events_schedule_after_signal
 (SIM_DESC sd,
  signed64 delta_time,
@@ -107,79 +142,77 @@ INLINE_SIM_EVENTS\
    simulation.  The exact interpretation of wallclock is host
    dependant. */
 
-INLINE_SIM_EVENTS\
-(void) sim_events_wallclock_schedule
+EXTERN_SIM_EVENTS\
+(sim_event *) sim_events_watch_clock
 (SIM_DESC sd,
- signed64 wallclock_ms_time,
+ unsigned wallclock_ms_time,
  sim_event_handler *handler,
  void *data);
 
 
-#if 0
-/* Schedule an event when the value at ADDR lies between LB..UB */
+/* Schedule an event when the NR_BYTES value at HOST_ADDR with
+   BYTE_ORDER lies within LB..UB (unsigned).
 
-typedef enum {
-  /* value host byte ordered */
-  watch_host_1,
-  watch_host_2,
-  watch_host_4,
-  watch_host_8,
-  /* value target byte ordered */
-  watch_targ_1,
-  watch_targ_2,
-  watch_targ_4,
-  watch_targ_8,
-  /* value big-endian */
-  watch_bend_1,
-  watch_bend_2,
-  watch_bend_4,
-  watch_bend_8,
-  /* value little-endian */
-  watch_lend_1,
-  watch_lend_2,
-  watch_lend_4,
-  watch_lend_8,
-} sim_watchpoint;
+   HOST_ADDR: pointer into the host address space.
+   BYTE_ORDER: 0 - host endian; BIG_ENDIAN; LITTLE_ENDIAN */
 
-INLINE_SIM_EVENTS\
-(void) sim_events_watchpoint_schedule
+EXTERN_SIM_EVENTS\
+(sim_event*) sim_events_watch_sim
 (SIM_DESC sd,
- sim_watchpoint type,
- void *addr,
+ void *host_addr,
+ int nr_bytes,
+ int byte_order,
  unsigned64 lb,
  unsigned64 ub,
  sim_event_handler *handler,
  void *data);
-#endif
 
 
-#if 0
-/* Schedule an event when the value in CORE lies between LB..UB */
+/* Schedule an event when the NR_BYTES value at CORE_ADDR with BYTE_ORDER
+   lies between LB..UB.
 
-INLINE_SIM_EVENTS\
-(void) sim_events_watchcore_schedule
+   CORE_ADDR/MAP: pointer into the target address space.
+   BYTE_ORDER: 0 - current target endian; BIG_ENDIAN; LITTLE_ENDIAN */
+
+EXTERN_SIM_EVENTS\
+(sim_event*) sim_events_watch_core
 (SIM_DESC sd,
- sim_watchpoint type,
- address_word addr,
- sim_core_maps map,
+ address_word core_addr,
+ sim_core_maps core_map,
+ int nr_bytes,
+ int byte_order,
  unsigned64 lb,
  unsigned64 ub,
  sim_event_handler *handler,
  void *data);
-#endif
 
 
 /* Deschedule the specified event */
 
-INLINE_SIM_EVENTS\
+EXTERN_SIM_EVENTS\
 (void) sim_events_deschedule
 (SIM_DESC sd,
  sim_event *event_to_remove);
 
 
+/* Prepare for main simulator loop.  Ensure that the next thing to do
+   is not event processing.
 
-/* progress time.  Broken into two parts so that if something is
-   pending, the caller has a chance to save any cached state */
+   If the simulator halted part way through event processing then both
+   EVENTS_WERE_LAST and EVENTS_WERE_FIRST shall be true.
+
+   If the simulator halted after processing the last cpu, then only
+   EVENTS_WERE_NEXT shall be true. */
+
+INLINE_SIM_EVENTS\
+(void) sim_events_preprocess
+(SIM_DESC sd,
+ int events_were_last,
+ int events_were_next);
+
+
+/* Progress time - separated into two parts so that the main loop can
+   save its context before the event queue is processed */
 
 INLINE_SIM_EVENTS\
 (int) sim_events_tick
@@ -188,6 +221,7 @@ INLINE_SIM_EVENTS\
 INLINE_SIM_EVENTS\
 (void) sim_events_process
 (SIM_DESC sd);
+
 
 
 /* local concept of time */
