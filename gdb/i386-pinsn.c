@@ -104,6 +104,8 @@ int OP_J(), OP_SEG();
 int OP_DIR(), OP_OFF(), OP_DSSI(), OP_ESDI(), OP_ONE(), OP_C();
 int OP_D(), OP_T(), OP_rm();
 
+static void dofloat (), putop (), append_prefix (), set_op ();
+static int get16 (), get32 ();
 
 #define b_mode 1
 #define v_mode 2
@@ -845,6 +847,7 @@ struct dis386 grps[][8] = {
 
 static int prefixes;
 
+static void
 ckprefix ()
 {
   prefixes = 0;
@@ -916,13 +919,14 @@ extern void fputs_filtered ();
  *   100 bytes is certainly enough, unless symbol printing is added later
  * The function returns the length of this instruction in bytes.
  */
+
+int
 i386dis (pc, inbuf, stream)
      int pc;
      unsigned char *inbuf;
      FILE *stream;
 {
   struct dis386 *dp;
-  char *p;
   int i;
   int enter_instruction;
   char *first, *second, *third;
@@ -1297,7 +1301,7 @@ char *fgrps[][8] = {
   },
 };
 
-
+static void
 dofloat ()
 {
   struct dis386 *dp;
@@ -1335,20 +1339,27 @@ dofloat ()
 }
 
 /* ARGSUSED */
+int
 OP_ST (ignore)
+     int ignore;
 {
   oappend ("%st");
+  return (0);
 }
 
 /* ARGSUSED */
+int
 OP_STi (ignore)
+     int ignore;
 {
   sprintf (scratchbuf, "%%st(%d)", rm);
   oappend (scratchbuf);
+  return (0);
 }
 
 
 /* capital letters in template are macros */
+static void
 putop (template)
      char *template;
 {
@@ -1383,13 +1394,14 @@ putop (template)
 
 static void
 oappend (s)
-char *s;
+     char *s;
 {
   strcpy (obufp, s);
   obufp += strlen (s);
   *obufp = 0;
 }
 
+static void
 append_prefix ()
 {
   if (prefixes & PREFIX_CS)
@@ -1406,17 +1418,21 @@ append_prefix ()
     oappend ("%gs:");
 }
 
+int
 OP_indirE (bytemode)
+     int bytemode;
 {
   oappend ("*");
   OP_E (bytemode);
+  return (0);
 }
 
+int
 OP_E (bytemode)
+     int bytemode;
 {
   int disp;
   int havesib;
-  int didoutput = 0;
   int base;
   int index;
   int scale;
@@ -1449,7 +1465,7 @@ OP_E (bytemode)
 	  oappend ("<bad dis table>");
 	  break;
 	}
-      return;
+      return (0);
     }
   
   append_prefix ();
@@ -1525,9 +1541,12 @@ OP_E (bytemode)
 	}
       oappend (")");
     }
+  return (0);
 }
 
+int
 OP_G (bytemode)
+     int bytemode;
 {
   switch (bytemode) 
     {
@@ -1550,8 +1569,10 @@ OP_G (bytemode)
       oappend ("<internal disassembler error>");
       break;
     }
+  return (0);
 }
 
+static int
 get32 ()
 {
   int x = 0;
@@ -1563,6 +1584,7 @@ get32 ()
   return (x);
 }
 
+static int
 get16 ()
 {
   int x = 0;
@@ -1572,14 +1594,17 @@ get16 ()
   return (x);
 }
 
+static void
 set_op (op)
-int op;
+     int op;
 {
   op_index[op_ad] = op_ad;
   op_address[op_ad] = op;
 }
 
+int
 OP_REG (code)
+     int code;
 {
   char *s;
   
@@ -1610,9 +1635,12 @@ OP_REG (code)
       break;
     }
   oappend (s);
+  return (0);
 }
 
+int
 OP_I (bytemode)
+     int bytemode;
 {
   int op;
   
@@ -1632,13 +1660,16 @@ OP_I (bytemode)
       break;
     default:
       oappend ("<internal disassembler error>");
-      return;
+      return (0);
     }
   sprintf (scratchbuf, "$0x%x", op);
   oappend (scratchbuf);
+  return (0);
 }
 
+int
 OP_sI (bytemode)
+     int bytemode;
 {
   int op;
   
@@ -1658,13 +1689,16 @@ OP_sI (bytemode)
       break;
     default:
       oappend ("<internal disassembler error>");
-      return;
+      return (0);
     }
   sprintf (scratchbuf, "$0x%x", op);
   oappend (scratchbuf);
+  return (0);
 }
 
+int
 OP_J (bytemode)
+     int bytemode;
 {
   int disp;
   int mask = -1;
@@ -1688,25 +1722,31 @@ OP_J (bytemode)
       break;
     default:
       oappend ("<internal disassembler error>");
-      return;
+      return (0);
     }
   disp = (start_pc + codep - start_codep + disp) & mask;
   set_op (disp);
   sprintf (scratchbuf, "0x%x", disp);
   oappend (scratchbuf);
+  return (0);
 }
 
 /* ARGSUSED */
+int
 OP_SEG (dummy)
+     int dummy;
 {
   static char *sreg[] = {
     "%es","%cs","%ss","%ds","%fs","%gs","%?","%?",
   };
 
   oappend (sreg[reg]);
+  return (0);
 }
 
+int
 OP_DIR (size)
+     int size;
 {
   int seg, offset;
   
@@ -1741,10 +1781,13 @@ OP_DIR (size)
       oappend ("<internal disassembler error>");
       break;
     }
+  return (0);
 }
 
 /* ARGSUSED */
+int
 OP_OFF (bytemode)
+     int bytemode;
 {
   int off;
   
@@ -1755,55 +1798,76 @@ OP_OFF (bytemode)
   
   sprintf (scratchbuf, "0x%x", off);
   oappend (scratchbuf);
+  return (0);
 }
 
 /* ARGSUSED */
+int
 OP_ESDI (dummy)
+    int dummy;
 {
   oappend ("%es:(");
   oappend (aflag ? "%edi" : "%di");
   oappend (")");
+  return (0);
 }
 
 /* ARGSUSED */
+int
 OP_DSSI (dummy)
+    int dummy;
 {
   oappend ("%ds:(");
   oappend (aflag ? "%esi" : "%si");
   oappend (")");
+  return (0);
 }
 
 /* ARGSUSED */
+int
 OP_ONE (dummy)
+    int dummy;
 {
   oappend ("1");
+  return (0);
 }
 
 /* ARGSUSED */
+int
 OP_C (dummy)
+    int dummy;
 {
   codep++; /* skip mod/rm */
   sprintf (scratchbuf, "%%cr%d", reg);
   oappend (scratchbuf);
+  return (0);
 }
 
 /* ARGSUSED */
+int
 OP_D (dummy)
+    int dummy;
 {
   codep++; /* skip mod/rm */
   sprintf (scratchbuf, "%%db%d", reg);
   oappend (scratchbuf);
+  return (0);
 }
 
 /* ARGSUSED */
+int
 OP_T (dummy)
+     int dummy;
 {
   codep++; /* skip mod/rm */
   sprintf (scratchbuf, "%%tr%d", reg);
   oappend (scratchbuf);
+  return (0);
 }
 
+int
 OP_rm (bytemode)
+     int bytemode;
 {
   switch (bytemode) 
     {
@@ -1814,9 +1878,12 @@ OP_rm (bytemode)
       oappend (names16[rm]);
       break;
     }
+  return (0);
 }
 	
 #define MAXLEN 20
+
+int
 print_insn (memaddr, stream)
      CORE_ADDR memaddr;
      FILE *stream;

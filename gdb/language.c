@@ -625,8 +625,9 @@ character_type (type)
       return (TYPE_CODE(type) == TYPE_CODE_INT) &&
 	 TYPE_LENGTH(type) == sizeof(char)
 	 ? 1 : 0;
+   default:
+      return (0);
    }
-   return (0);
 }
 
 /* Returns non-zero if the value is a boolean type */
@@ -642,8 +643,9 @@ boolean_type (type)
    case language_c:
    case language_cplus:
       return TYPE_CODE(type) != TYPE_CODE_INT ? 0 : 1;
+   default:
+      return (0);
    }
-   return (0);
 }
 
 /* Returns non-zero if the value is a floating-point type */
@@ -679,8 +681,9 @@ structured_type(type)
       return (TYPE_CODE(type) == TYPE_CODE_STRUCT) ||
 	 (TYPE_CODE(type) == TYPE_CODE_SET) ||
 	    (TYPE_CODE(type) == TYPE_CODE_ARRAY);
+   default:
+      return (0);
    }
-   return (0);
 }
 
 /* This page contains functions that return info about

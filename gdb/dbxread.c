@@ -424,7 +424,7 @@ add_new_header_file (name, instance)
   header_files[i].length = 10;
   header_files[i].vector
     = (struct type **) xmalloc (10 * sizeof (struct type *));
-  bzero (header_files[i].vector, 10 * sizeof (struct type *));
+  (void) memset (header_files[i].vector, 0, 10 * sizeof (struct type *));
 
   add_this_object_header_file (i);
 }
@@ -1872,7 +1872,7 @@ process_one_symbol (type, desc, valu, name, offset, objfile)
 	int i;
 	struct symbol *sym =
 	  (struct symbol *) xmmalloc (objfile -> md, sizeof (struct symbol));
-	bzero (sym, sizeof *sym);
+	(void) memset (sym, 0, sizeof *sym);
 	SYMBOL_NAME (sym) = savestring (name, strlen (name));
 	SYMBOL_CLASS (sym) = LOC_BLOCK;
 	SYMBOL_NAMESPACE (sym) = (enum namespace)((long)
@@ -2014,7 +2014,7 @@ DEFUN(elfstab_build_psymtabs, (objfile, addr, mainline,
   DBX_STRINGTAB_SIZE (objfile) = stabstrsize;
   DBX_SYMTAB_OFFSET  (objfile) = staboffset;
   
-  if (stabstrsize < 0)
+  if (stabstrsize < 0)	/* FIXME:  stabstrsize is unsigned; never true! */
     error ("ridiculous string table size: %d bytes", stabstrsize);
   DBX_STRINGTAB (objfile) = (char *)
     obstack_alloc (&objfile->psymbol_obstack, stabstrsize+1);

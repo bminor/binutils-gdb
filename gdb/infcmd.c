@@ -528,7 +528,7 @@ The expression which contained the function call has been discarded.");
 
   /* On return, the stack dummy has been popped already.  */
 
-  bcopy (stop_registers, buffer, sizeof stop_registers);
+  (void) memcpy (buffer, stop_registers, sizeof stop_registers);
 }
 
 /* Proceed until we reach a different source line with pc greater than

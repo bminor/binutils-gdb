@@ -1068,7 +1068,7 @@ parse_and_eval_type (p, length)
     char *tmp = (char *)alloca (length + 4);
     struct expression *expr;
     tmp[0] = '(';
-    bcopy (p, tmp+1, length);
+    (void) memcpy (tmp+1, p, length);
     tmp[length+1] = ')';
     tmp[length+2] = '0';
     tmp[length+3] = '\0';

@@ -130,7 +130,7 @@ value_zero (type, lv)
 {
   register value val = allocate_value (type);
 
-  memset (VALUE_CONTENTS (val), 0, TYPE_LENGTH (type));
+  (void) memset (VALUE_CONTENTS (val), 0, TYPE_LENGTH (type));
   VALUE_LVAL (val) = lv;
 
   return val;
@@ -323,7 +323,7 @@ value_assign (toval, fromval)
 	     amount_copied += reg_size, regno++)
 	  {
 	    get_saved_register (buffer + amount_copied,
-				(int *)NULL, (CORE_ADDR)NULL,
+				(int *)NULL, (CORE_ADDR *)NULL,
 				frame, regno, (enum lval_type *)NULL);
 	  }
 
@@ -333,10 +333,10 @@ value_assign (toval, fromval)
 			(int) value_as_long (fromval),
 			VALUE_BITPOS (toval), VALUE_BITSIZE (toval));
 	else if (use_buffer)
-	  bcopy (raw_buffer, buffer + byte_offset, use_buffer);
+	  (void) memcpy (buffer + byte_offset, raw_buffer, use_buffer);
 	else
-	  bcopy (VALUE_CONTENTS (fromval), buffer + byte_offset,
-		 TYPE_LENGTH (type));
+	  (void) memcpy (buffer + byte_offset, VALUE_CONTENTS (fromval),
+			 TYPE_LENGTH (type));
 
 	/* Copy it back.  */
 	for ((regno = VALUE_FRAME_REGNUM (toval) + reg_offset,
@@ -379,8 +379,9 @@ value_assign (toval, fromval)
     }
 
   val = allocate_value (type);
-  bcopy (toval, val, VALUE_CONTENTS_RAW (val) - (char *) val);
-  bcopy (VALUE_CONTENTS (fromval), VALUE_CONTENTS_RAW (val), TYPE_LENGTH (type));
+  (void) memcpy (val, toval, VALUE_CONTENTS_RAW (val) - (char *) val);
+  (void) memcpy (VALUE_CONTENTS_RAW (val), VALUE_CONTENTS (fromval),
+		 TYPE_LENGTH (type));
   VALUE_TYPE (val) = type;
   
   return val;
@@ -741,7 +742,7 @@ call_function_by_hand (function, nargs, args)
 
   /* Create a call sequence customized for this function
      and the number of arguments for it.  */
-  bcopy (dummy, dummy1, sizeof dummy);
+  (void) memcpy (dummy1, dummy, sizeof dummy);
   for (i = 0; i < sizeof dummy / sizeof (REGISTER_TYPE); i++)
     SWAP_TARGET_AND_HOST (&dummy1[i], sizeof (REGISTER_TYPE));
   FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args,
@@ -1331,8 +1332,9 @@ check_field (arg1, name)
    to resolve user expressions of the form "DOMAIN::NAME".  */
 
 value
-value_struct_elt_for_reference (domain, curtype, name, intype)
+value_struct_elt_for_reference (domain, offset, curtype, name, intype)
      struct type *domain, *curtype, *intype;
+     int offset;
      char *name;
 {
   register struct type *t = curtype;
@@ -1367,7 +1369,7 @@ value_struct_elt_for_reference (domain, curtype, name, intype)
 	  return value_from_longest
 	    (lookup_reference_type (lookup_member_type (TYPE_FIELD_TYPE (t, i),
 							domain)),
-	     (LONGEST) (TYPE_FIELD_BITPOS (t, i) >> 3));
+	     offset + (LONGEST) (TYPE_FIELD_BITPOS (t, i) >> 3));
 	}
     }
 
@@ -1431,7 +1433,15 @@ value_struct_elt_for_reference (domain, curtype, name, intype)
 
   for (i = TYPE_N_BASECLASSES (t) - 1; i >= 0; i--)
     {
+      value v;
+      int base_offset;
+
+      if (BASETYPE_VIA_VIRTUAL (t, i))
+	base_offset = 0;
+      else
+	base_offset = TYPE_BASECLASS_BITPOS (t, i) / 8;
       v = value_struct_elt_for_reference (domain,
+					  offset + base_offset,
 					  TYPE_BASECLASS (t, i),
 					  name,
 					  intype);

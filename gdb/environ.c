@@ -1,29 +1,28 @@
 /* environ.c -- library for manipulating environments for GNU.
    Copyright (C) 1986, 1989 Free Software Foundation, Inc.
 
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 1, or (at your option)
-   any later version.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))
 
+#include "defs.h"
 #include "environ.h"
 #include <string.h>
+#include "defs.h" /* For strsave().  */
 
-extern char *xmalloc ();
-extern char *xrealloc ();
-extern void free ();
 
 /* Return a new environment object.  */
 
@@ -74,13 +73,13 @@ init_environ (e)
 				      (e->allocated + 1) * sizeof (char *));
     }
 
-  bcopy (environ, e->vector, (i + 1) * sizeof (char *));
+  (void) memcpy (e->vector, environ, (i + 1) * sizeof (char *));
 
   while (--i >= 0)
     {
       register int len = strlen (e->vector[i]);
       register char *new = (char *) xmalloc (len + 1);
-      bcopy (e->vector[i], new, len + 1);
+      (void) memcpy (new, e->vector[i], len + 1);
       e->vector[i] = new;
     }
 }
@@ -99,14 +98,14 @@ environ_vector (e)
 
 char *
 get_in_environ (e, var)
-     struct environ *e;
-     char *var;
+     const struct environ *e;
+     const char *var;
 {
   register int len = strlen (var);
   register char **vector = e->vector;
   register char *s;
 
-  for (; s = *vector; vector++)
+  for (; (s = *vector) != NULL; vector++)
     if (!strncmp (s, var, len)
 	&& s[len] == '=')
       return &s[len + 1];
@@ -119,15 +118,15 @@ get_in_environ (e, var)
 void
 set_in_environ (e, var, value)
      struct environ *e;
-     char *var;
-     char *value;
+     const char *var;
+     const char *value;
 {
   register int i;
   register int len = strlen (var);
   register char **vector = e->vector;
   register char *s;
 
-  for (i = 0; s = vector[i]; i++)
+  for (i = 0; (s = vector[i]) != NULL; i++)
     if (!strncmp (s, var, len)
 	&& s[len] == '=')
       break;
@@ -175,13 +174,13 @@ unset_in_environ (e, var)
   register char **vector = e->vector;
   register char *s;
 
-  for (; s = *vector; vector++)
+  for (; (s = *vector) != NULL; vector++)
     if (!strncmp (s, var, len)
 	&& s[len] == '=')
       {
 	free (s);
-	bcopy (vector + 1, vector,
-	       (e->allocated - (vector - e->vector)) * sizeof (char *));
+	(void) memcpy (vector, vector + 1,
+		       (e->allocated - (vector - e->vector)) * sizeof (char *));
 	e->vector[e->allocated - 1] = 0;
 	return;
       }

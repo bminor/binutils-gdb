@@ -30,12 +30,12 @@ extern struct objfile *current_objfile;
 #define obstack_chunk_free free
 
 /* Some macros for char-based bitfields.  */
-#define B_SET(a,x) (a[x>>3] |= (1 << (x&7)))
-#define B_CLR(a,x) (a[x>>3] &= ~(1 << (x&7)))
-#define B_TST(a,x) (a[x>>3] & (1 << (x&7)))
+#define B_SET(a,x) ((a)[(x)>>3] |= (1 << ((x)&7)))
+#define B_CLR(a,x) ((a)[(x)>>3] &= ~(1 << ((x)&7)))
+#define B_TST(a,x) ((a)[(x)>>3] & (1 << ((x)&7)))
 #define B_TYPE		unsigned char
 #define	B_BYTES(x)	( 1 + ((x)>>3) )
-#define	B_CLRALL(a,x) bzero (a, B_BYTES(x))
+#define	B_CLRALL(a,x) (void) memset ((a), 0, B_BYTES(x))
 
 
 /* Define a simple structure used to hold some very basic information about
@@ -490,7 +490,15 @@ extern int current_source_line;
 #define SYMBOL_VALUE_CHAIN(symbol) (symbol)->value.chain
 #define SYMBOL_TYPE(symbol) (symbol)->type
 #define SYMBOL_LINE(symbol) (symbol)->line
+#if 0
+/* This currently fails because some symbols are not being initialized
+   to zero on allocation, and no code is currently setting this value.
+   Basereg handling will probably change significantly in the next release.
+   FIXME -fnf */
 #define SYMBOL_BASEREG_VALID(symbol) (symbol)->aux_value.basereg.regno_valid
+#else
+#define SYMBOL_BASEREG_VALID(symbol) 0
+#endif
 #define SYMBOL_BASEREG(symbol) (symbol)->aux_value.basereg.regno
 
 /* The virtual function table is now an array of structures
@@ -577,6 +585,11 @@ reread_symbols PARAMS ((void));
 extern void
 prim_record_minimal_symbol PARAMS ((const char *, CORE_ADDR,
 				    enum minimal_symbol_type));
+
+extern void
+prim_record_minimal_symbol_and_info PARAMS ((const char *, CORE_ADDR,
+					     enum minimal_symbol_type,
+					     char *info));
 
 extern struct minimal_symbol *
 lookup_minimal_symbol PARAMS ((const char *, struct objfile *));
@@ -671,6 +684,9 @@ extern char **
 make_symbol_completion_list PARAMS ((char *));
 
 /* symtab.c */
+
+extern void
+clear_symtab_users_once PARAMS ((void));
 
 extern struct partial_symtab *
 find_main_psymtab PARAMS ((void));

@@ -236,7 +236,7 @@ print_floating (valaddr, type, stream)
     if (len == sizeof (float))
       {
 	/* It's single precision. */
-	bcopy (valaddr, &low, sizeof (low));
+	(void) memcpy ((char *) &low, valaddr, sizeof (low));
 	/* target -> host.  */
 	SWAP_TARGET_AND_HOST (&low, sizeof (float));
 	nonnegative = low >= 0;
@@ -250,11 +250,11 @@ print_floating (valaddr, type, stream)
 	/* It's double precision.  Get the high and low words.  */
 
 #if TARGET_BYTE_ORDER == BIG_ENDIAN
-	  bcopy (valaddr+4, &low,  sizeof (low));
-	  bcopy (valaddr+0, &high, sizeof (high));
+	(void) memcpy (&low, valaddr+4,  sizeof (low));
+	(void) memcpy (&high, valaddr+0, sizeof (high));
 #else
-	  bcopy (valaddr+0, &low,  sizeof (low));
-	  bcopy (valaddr+4, &high, sizeof (high));
+	(void) memcpy (&low, valaddr+0,  sizeof (low));
+	(void) memcpy (&high, valaddr+4, sizeof (high));
 #endif
 	  SWAP_TARGET_AND_HOST (&low, sizeof (low));
 	  SWAP_TARGET_AND_HOST (&high, sizeof (high));
@@ -368,7 +368,7 @@ value_print (val, stream, format, pretty)
 	      rep1 = i + 1;
 	      reps = 1;
 	      while (rep1 < n
-		     && !bcmp (VALUE_CONTENTS (val) + typelen * i,
+		     && !memcmp (VALUE_CONTENTS (val) + typelen * i,
 			       VALUE_CONTENTS (val) + typelen * rep1, typelen))
 		{
 		  ++reps;
@@ -815,8 +815,8 @@ val_print (type, valaddr, address, stream, format, deref_ref, recurse, pretty)
 		  rep1 = i + 1;
 		  reps = 1;
 		  while (rep1 < len
-			 && !bcmp (valaddr + i * eltlen,
-				   valaddr + rep1 * eltlen, eltlen))
+			 && !memcmp (valaddr + i * eltlen,
+				     valaddr + rep1 * eltlen, eltlen))
 		    {
 		      ++reps;
 		      ++rep1;
@@ -1562,6 +1562,9 @@ type_print_varspec_prefix (type, stream, show, passed_a_ptr)
     case TYPE_CODE_ERROR:
     case TYPE_CODE_CHAR:
     case TYPE_CODE_BOOL:
+    case TYPE_CODE_SET:
+    case TYPE_CODE_RANGE:
+    case TYPE_CODE_PASCAL_ARRAY:
       /* These types need no prefix.  They are listed here so that
 	 gcc -Wall will reveal any types that haven't been handled.  */
       break;
@@ -1662,6 +1665,9 @@ type_print_varspec_suffix (type, stream, show, passed_a_ptr, demangled_args)
     case TYPE_CODE_ERROR:
     case TYPE_CODE_CHAR:
     case TYPE_CODE_BOOL:
+    case TYPE_CODE_SET:
+    case TYPE_CODE_RANGE:
+    case TYPE_CODE_PASCAL_ARRAY:
       /* These types do not need a suffix.  They are listed so that
 	 gcc -Wall will report types that may not have been considered.  */
       break;

@@ -1,3 +1,22 @@
+Mon Jun 29 16:30:25 1992  Fred Fish  (fnf@cygnus.com)
+
+	* dbxread.c, i386-pinsn.c, i386-tdep.c, regex.c, solib.c, symmisc.c,
+	symtab.h, tm-i386v4.h, valprint.c, values.c:  Lint.
+	* breakpoint.c, c-exp.y, coffread.c, command.c, environ.c, eval.c,
+	findvar.c, infcmd.c, infptrace.c, infrun.c, m2-exp.y, parse.c,
+	putenv.c, solib.c, sparc-xdep.c, symtab.c, tm-i386v.h, tm-sparc.h,
+	utils.c, valarith.c, valops.c, valprint.c, values.c:
+	Replace bcopy() use with memcpy(), which is more standard and can
+	take advantage of gcc's builtin functions for increased performance.
+	* breakpoint.c, buildsym.c, coffread.c, dbxread.c, i386-tdep.c,
+	ieee-float.c, infcmd.c, sparc-tdep.c, stack.c, symtab.c, symtab.h,
+	target.c, values.c:
+	Replace bzero() use with memset(), which is more standard and can
+	take advantage of gcc's builtin functions for increased performance.
+	* i386-tdep.c, main.c, valprint.c:
+	Replace bcmp() use with memcmp(), which is more standard and can
+	take advantage of gcc's builtin functions for increased performance.
+
 Sun Jun 28 13:30:22 1992  Fred Fish  (fnf@cygnus.com)
 
 	* remote.c (remote_wait):  Fix cast on signal() call.

@@ -248,7 +248,6 @@ void
 free_objfile (objfile)
      struct objfile *objfile;
 {
-  struct objfile *ofp;
   int mmfd;
 
   /* First do any symbol file specific actions required when we are

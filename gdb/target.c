@@ -27,6 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "inferior.h"
 #include "bfd.h"
 #include "symfile.h"
+#include "objfiles.h"
 
 extern int errno;
 
@@ -169,6 +170,7 @@ nomemory (memaddr, myaddr, len, write)
      int len;
      int write;
 {
+  errno = EIO;		/* Can't read/write this location */
   return 0;		/* No bytes handled */
 }
 
@@ -520,7 +522,7 @@ target_xfer_memory (memaddr, myaddr, len, write)
 	  /* If this address is for nonexistent memory,
 	     read zeros if reading, or do nothing if writing.  Return error. */
 	  if (!write)
-	    bzero (myaddr, len);
+	    (void) memset (myaddr, 0, len);
 	  if (errno == 0)
 	    return EIO;
 	  else

@@ -71,6 +71,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "coff/mips.h"		/* COFF-like aspects of ecoff files */
 #include "coff/ecoff-ext.h"	/* External forms of ecoff sym structures */
 
+#include "libbfd.h"		/* FIXME Secret internal BFD stuff (bfd_read) */
 #include "libaout.h"		/* FIXME Secret internal BFD stuff for a.out */
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"	/* STABS information */
@@ -340,8 +341,6 @@ mipscoff_symfile_read (objfile, addr, mainline)
      CORE_ADDR addr;
      int mainline;
 {
-  bfd *abfd = objfile -> obfd;
-
   init_minimal_symbol_collection ();
   make_cleanup (discard_minimal_symbols, 0);
 
@@ -385,10 +384,10 @@ static PTR
 xzalloc(size)
      unsigned int size;
 {
-	PTR p = xmalloc(size);
+  PTR p = xmalloc (size);
 
-	memset(p, 0, size);
-	return p;
+  (void) memset (p, 0, size);
+  return p;
 }
 
 /* Exported procedure: Builds a symtab from the PST partial one.
@@ -524,6 +523,7 @@ fixup_symtab (hdr, data, f_ptr, abfd)
 	/* This function depends on the external and internal forms
 	   of the MIPS symbol table taking identical space.  Check this
 	   assumption at compile-time.  */
+#if 0	/* FIXME: Unused */
 	static check_hdr1[1 + sizeof (struct hdr_ext) - sizeof (HDRR)] = {0};
 	static check_hdr2[1 + sizeof (HDRR) - sizeof (struct hdr_ext)] = {0};
 	static check_fdr1[1 + sizeof (struct fdr_ext) - sizeof (FDR)] = {0};
@@ -536,6 +536,7 @@ fixup_symtab (hdr, data, f_ptr, abfd)
 	static check_ext2[1 + sizeof (EXTR) - sizeof (struct ext_ext)] = {0};
 	static check_rfd1[1 + sizeof (struct rfd_ext) - sizeof (RFDT)] = {0};
 	static check_rfd2[1 + sizeof (RFDT) - sizeof (struct rfd_ext)] = {0};
+#endif
 
 	/* Swap in the header record.  */
 	ecoff_swap_hdr_in (abfd, hdr, hdr);
@@ -845,6 +846,8 @@ add_pending(fh, sh, t)
 /* Throw away undef entries when done with file index F_IDX */
 /* FIXME -- storage leak.  This is never called!!!   --gnu */
 
+#if 0
+
 static void
 free_pending(f_idx)
 	int f_idx;
@@ -857,6 +860,8 @@ free_pending(f_idx)
 	}
 	pending_list[f_idx] = 0;
 }
+
+#endif
 
 static char *
 prepend_tag_kind(tag_name, type_code)
@@ -1630,7 +1635,6 @@ parse_procedure (pr, bound, have_stabs)
     SYMR *sh = (SYMR*)pr->isym;
     struct block *b;
     struct mips_extra_func_info *e;
-    char name[100];
     char *sh_name;
 
     /* Static procedure at address pr->adr.  Sigh. */
@@ -2347,7 +2351,6 @@ psymtab_to_symtab_1(pst, filename)
 	 * This symbol table contains stabs-in-ecoff entries.
 	 */
 
-	SYMR *sh;
 	PDR *pr;
 	
 	/* Parse local symbols first */

@@ -26,6 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "breakpoint.h"
 #include "command.h"
 #include "obstack.h"
+#include "language.h"
 
 #include <string.h>
 
@@ -255,7 +256,7 @@ dump_psymtab (objfile, psymtab, outfile)
 		    psymtab -> filename);
   fprintf_filtered (outfile, "(object 0x%x)\n\n", psymtab);
   fprintf (outfile, "  Read from object file %s (0x%x)\n",
-	   objfile -> name, objfile);
+	   objfile -> name, (unsigned int) objfile);
   
   if (psymtab -> readin)
     {
@@ -299,7 +300,7 @@ dump_symtab (objfile, symtab, outfile)
 
   fprintf (outfile, "\nSymtab for file %s\n", symtab->filename);
   fprintf (outfile, "Read from object file %s (%x)\n", objfile->name,
-	   objfile);
+	   (unsigned int) objfile);
   fprintf (outfile, "Language: %s\n", language_str (symtab -> language));
   
   /* First print the line table.  */
@@ -320,10 +321,10 @@ dump_symtab (objfile, symtab, outfile)
       b = BLOCKVECTOR_BLOCK (bv, i);
       depth = block_depth (b) * 2;
       print_spaces (depth, outfile);
-      fprintf (outfile, "block #%03d (object 0x%x) ", i, b);
+      fprintf (outfile, "block #%03d (object 0x%x) ", i, (unsigned int) b);
       fprintf (outfile, "[0x%x..0x%x]", BLOCK_START (b), BLOCK_END (b));
       if (BLOCK_SUPERBLOCK (b))
-	fprintf (outfile, " (under 0x%x)", BLOCK_SUPERBLOCK (b));
+	fprintf (outfile, " (under 0x%x)", (unsigned int) BLOCK_SUPERBLOCK (b));
       if (BLOCK_FUNCTION (b))
 	fprintf (outfile, " %s", SYMBOL_NAME (BLOCK_FUNCTION (b)));
       fputc ('\n', outfile);
@@ -461,12 +462,28 @@ print_symbol (symbol, depth, outfile)
 	  break;
 
 	case LOC_ARG:
-	  fprintf (outfile, "arg at 0x%lx,", SYMBOL_VALUE (symbol));
+	  if (SYMBOL_BASEREG_VALID (symbol))
+	    {
+	      fprintf (outfile, "arg at 0x%lx from register %d,",
+		       SYMBOL_VALUE (symbol), SYMBOL_BASEREG (symbol));
+	    }
+	  else
+	    {
+	      fprintf (outfile, "arg at 0x%lx,", SYMBOL_VALUE (symbol));
+	    }
 	  break;
 
 	case LOC_LOCAL_ARG:
-	  fprintf (outfile, "arg at offset 0x%x from fp,",
-		   SYMBOL_VALUE (symbol));
+	  if (SYMBOL_BASEREG_VALID (symbol))
+	    {
+	      fprintf (outfile, "arg at offset 0x%lx from register %d,",
+		       SYMBOL_VALUE (symbol), SYMBOL_BASEREG (symbol));
+	    }
+	  else
+	    {
+	      fprintf (outfile, "arg at offset 0x%lx from fp,",
+		       SYMBOL_VALUE (symbol));
+	    }
 
 	case LOC_REF_ARG:
 	  fprintf (outfile, "reference arg at 0x%lx,", SYMBOL_VALUE (symbol));
@@ -477,7 +494,15 @@ print_symbol (symbol, depth, outfile)
 	  break;
 
 	case LOC_LOCAL:
-	  fprintf (outfile, "local at 0x%lx,", SYMBOL_VALUE (symbol));
+	  if (SYMBOL_BASEREG_VALID (symbol))
+	    {
+	      fprintf (outfile, "local at 0x%lx from register %d",
+		       SYMBOL_VALUE (symbol), SYMBOL_BASEREG (symbol));
+	    }
+	  else
+	    {
+	      fprintf (outfile, "local at 0x%lx,", SYMBOL_VALUE (symbol));
+	    }
 	  break;
 
 	case LOC_TYPEDEF:
@@ -489,7 +514,7 @@ print_symbol (symbol, depth, outfile)
 
 	case LOC_BLOCK:
 	  fprintf (outfile, "block (object 0x%x) starting at 0x%x,",
-		   SYMBOL_BLOCK_VALUE (symbol),
+		   (unsigned int) SYMBOL_BLOCK_VALUE (symbol),
 		   BLOCK_START (SYMBOL_BLOCK_VALUE (symbol)));
 	  break;
 

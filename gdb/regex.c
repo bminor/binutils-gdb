@@ -122,6 +122,7 @@ static int obscure_syntax = 0;
 
 int
 re_set_syntax (syntax)
+     int syntax;
 {
   int ret;
 
@@ -706,7 +707,7 @@ re_compile_fastmap (bufp)
   register char *fastmap = bufp->fastmap;
   register unsigned char *p = pattern;
   register unsigned char *pend = pattern + size;
-  register int j, k;
+  register int j;
   unsigned char *translate = (unsigned char *) bufp->translate;
 
   unsigned char *stackb[NFAILURES];

@@ -1800,7 +1800,7 @@ save_inferior_status (inf_status, restore_stack_info)
   inf_status->restore_stack_info = restore_stack_info;
   inf_status->proceed_to_finish = proceed_to_finish;
   
-  bcopy (stop_registers, inf_status->stop_registers, REGISTER_BYTES);
+  (void) memcpy (inf_status->stop_registers, stop_registers, REGISTER_BYTES);
   
   record_selected_frame (&(inf_status->selected_frame_address),
 			 &(inf_status->selected_level));
@@ -1834,7 +1834,7 @@ restore_inferior_status (inf_status)
   breakpoint_proceeded = inf_status->breakpoint_proceeded;
   proceed_to_finish = inf_status->proceed_to_finish;
 
-  bcopy (inf_status->stop_registers, stop_registers, REGISTER_BYTES);
+  (void) memcpy (stop_registers, inf_status->stop_registers, REGISTER_BYTES);
 
   /* The inferior can be gone if the user types "print exit(0)"
      (and perhaps other times).  */

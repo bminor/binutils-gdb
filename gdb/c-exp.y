@@ -1221,7 +1221,7 @@ yylex ()
 	  {
 	    char *err_copy = (char *) alloca (p - tokstart + 1);
 
-	    bcopy (tokstart, err_copy, p - tokstart);
+	    (void) memcpy (err_copy, tokstart, p - tokstart);
 	    err_copy[p - tokstart] = 0;
 	    error ("Invalid number \"%s\".", err_copy);
 	  }

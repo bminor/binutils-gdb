@@ -391,8 +391,8 @@ read_memory_nobpt (memaddr, myaddr, len)
 	      bptlen -= (membpt + bptlen) - (memaddr + len);
 	    }
 
-	  bcopy (b->shadow_contents + bptoffset,
-		 myaddr + membpt - memaddr, bptlen);
+	  (void) memcpy (myaddr + membpt - memaddr, 
+			 b->shadow_contents + bptoffset, bptlen);
 
 	  if (membpt > memaddr)
 	    {
@@ -577,7 +577,7 @@ bpstat_copy (bs)
   for (; bs != NULL; bs = bs->next)
     {
       tmp = (bpstat) xmalloc (sizeof (*tmp));
-      bcopy (bs, tmp, sizeof (*tmp));
+      (void) memcpy (tmp, bs, sizeof (*tmp));
       if (p == NULL)
 	/* This is the first thing in the chain.  */
 	retval = tmp;
@@ -1209,7 +1209,7 @@ set_raw_breakpoint (sal)
   register struct breakpoint *b, *b1;
 
   b = (struct breakpoint *) xmalloc (sizeof (struct breakpoint));
-  bzero (b, sizeof *b);
+  (void) memset (b, 0, sizeof (*b));
   b->address = sal.pc;
   b->symtab = sal.symtab;
   b->line_number = sal.line;
@@ -1377,6 +1377,12 @@ mention (b)
       if (b->symtab)
 	printf_filtered (": file %s, line %d.",
 			 b->symtab->filename, b->line_number);
+      break;
+    case bp_until:
+    case bp_finish:
+    case bp_longjmp:
+    case bp_longjmp_resume:
+      break;
     }
   printf_filtered ("\n");
 }
@@ -1796,7 +1802,7 @@ get_catch_sals (this_level_only)
 
   bl = blockvector_for_pc (BLOCK_END (block) - 4, &index);
   blocks_searched = (char *) alloca (BLOCKVECTOR_NBLOCKS (bl) * sizeof (char));
-  bzero (blocks_searched, BLOCKVECTOR_NBLOCKS (bl) * sizeof (char));
+  (void) memset (blocks_searched, 0, BLOCKVECTOR_NBLOCKS (bl) * sizeof (char));
 
   while (block != 0)
     {

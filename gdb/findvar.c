@@ -17,9 +17,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include <stdio.h>
 #include "defs.h"
 #include "symtab.h"
+#include "gdbtypes.h"
 #include "frame.h"
 #include "value.h"
 #include "gdbcore.h"
@@ -129,7 +129,7 @@ get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
   if (optimized != NULL)
     *optimized = 0;
   addr = find_saved_register (frame, regnum);
-  if (addr != NULL)
+  if (addr != 0)
     {
       if (lval != NULL)
 	*lval = lval_memory;
@@ -171,8 +171,9 @@ read_relative_register_raw_bytes (regnum, myaddr)
   int optim;
   if (regnum == FP_REGNUM && selected_frame)
     {
-      bcopy (&FRAME_FP(selected_frame), myaddr, sizeof (CORE_ADDR));
-      SWAP_TARGET_AND_HOST (myaddr, sizeof (CORE_ADDR)); /* in target order */
+      (void) memcpy (myaddr, &FRAME_FP(selected_frame),
+		     REGISTER_RAW_SIZE(FP_REGNUM));
+      SWAP_TARGET_AND_HOST (myaddr, REGISTER_RAW_SIZE(FP_REGNUM)); /* in target order */
       return 0;
     }
 
@@ -201,8 +202,8 @@ value_of_register (regnum)
 
   target_convert_to_virtual (regnum, raw_buffer, virtual_buffer);
   val = allocate_value (REGISTER_VIRTUAL_TYPE (regnum));
-  bcopy (virtual_buffer, VALUE_CONTENTS_RAW (val),
-	 REGISTER_VIRTUAL_SIZE (regnum));
+  (void) memcpy (VALUE_CONTENTS_RAW (val), virtual_buffer,
+		 REGISTER_VIRTUAL_SIZE (regnum));
   VALUE_LVAL (val) = lval;
   VALUE_ADDRESS (val) = addr;
   VALUE_REGNO (val) = regnum;
@@ -262,7 +263,7 @@ read_register_bytes (regbyte, myaddr, len)
 	break;
       }
   if (myaddr != NULL)
-    bcopy (&registers[regbyte], myaddr, len);
+    (void) memcpy (myaddr, &registers[regbyte], len);
 }
 
 /* Read register REGNO into memory at MYADDR, which must be large enough
@@ -276,7 +277,8 @@ read_register_gen (regno, myaddr)
 {
   if (!register_valid[regno])
     target_fetch_registers (regno);
-  bcopy (&registers[REGISTER_BYTE (regno)], myaddr, REGISTER_RAW_SIZE (regno));
+  (void) memcpy (myaddr, &registers[REGISTER_BYTE (regno)],
+		 REGISTER_RAW_SIZE (regno));
 }
 
 /* Copy LEN bytes of consecutive data from memory at MYADDR
@@ -290,22 +292,24 @@ write_register_bytes (regbyte, myaddr, len)
 {
   /* Make sure the entire registers array is valid.  */
   read_register_bytes (0, (char *)NULL, REGISTER_BYTES);
-  bcopy (myaddr, &registers[regbyte], len);
+  (void) memcpy (&registers[regbyte], myaddr, len);
   target_store_registers (-1);
 }
 
 /* Return the contents of register REGNO, regarding it as an integer.  */
+/* FIXME, this loses when the REGISTER_VIRTUAL (REGNO) is true.  Also,
+   why is the return type CORE_ADDR rather than some integer type?  */
 
 CORE_ADDR
 read_register (regno)
      int regno;
 {
-  int reg;
+  REGISTER_TYPE reg;
+
   if (!register_valid[regno])
     target_fetch_registers (regno);
-  /* FIXME, this loses when REGISTER_RAW_SIZE (regno) != sizeof (int) */
-  reg = *(int *) &registers[REGISTER_BYTE (regno)];
-  SWAP_TARGET_AND_HOST (&reg, sizeof (int));
+  memcpy (&reg, &registers[REGISTER_BYTE (regno)], sizeof (REGISTER_TYPE));
+  SWAP_TARGET_AND_HOST (&reg, sizeof (REGISTER_TYPE));
   return reg;
 }
 
@@ -315,24 +319,27 @@ read_register (regno)
 #endif
 
 /* Store VALUE in the register number REGNO, regarded as an integer.  */
+/* FIXME, this loses when REGISTER_VIRTUAL (REGNO) is true.  Also, 
+   shouldn't the val arg be a LONGEST or something?  */
 
 void
 write_register (regno, val)
      int regno, val;
 {
+  REGISTER_TYPE reg;
+
   /* On the sparc, writing %g0 is a no-op, so we don't even want to change
      the registers array if something writes to this register.  */
   if (CANNOT_STORE_REGISTER (regno))
     return;
 
-  SWAP_TARGET_AND_HOST (&val, sizeof (int));
+  reg = val;
+  SWAP_TARGET_AND_HOST (&reg, sizeof (REGISTER_TYPE));
 
   target_prepare_to_store ();
 
   register_valid [regno] = 1;
-  /* FIXME, this loses when REGISTER_RAW_SIZE (regno) != sizeof (int) */
-  /* FIXME, this depends on REGISTER_BYTE (regno) being aligned for host */
-  *(int *) &registers[REGISTER_BYTE (regno)] = val;
+  memcpy (&registers[REGISTER_BYTE (regno)], &reg, sizeof (REGISTER_TYPE));
 
   target_store_registers (regno);
 }
@@ -347,7 +354,8 @@ supply_register (regno, val)
      char *val;
 {
   register_valid[regno] = 1;
-  bcopy (val, &registers[REGISTER_BYTE (regno)], REGISTER_RAW_SIZE (regno));
+  (void) memcpy (&registers[REGISTER_BYTE (regno)], val,
+		 REGISTER_RAW_SIZE (regno));
 }
 
 /* Given a struct symbol for a variable,
@@ -376,14 +384,14 @@ read_var_value (var, frame)
   switch (SYMBOL_CLASS (var))
     {
     case LOC_CONST:
-      bcopy (&SYMBOL_VALUE (var), VALUE_CONTENTS_RAW (v), len);
+      (void) memcpy (VALUE_CONTENTS_RAW (v), &SYMBOL_VALUE (var), len);
       SWAP_TARGET_AND_HOST (VALUE_CONTENTS_RAW (v), len);
       VALUE_LVAL (v) = not_lval;
       return v;
 
     case LOC_LABEL:
       addr = SYMBOL_VALUE_ADDRESS (var);
-      bcopy (&addr, VALUE_CONTENTS_RAW (v), len);
+      (void) memcpy (VALUE_CONTENTS_RAW (v), &addr, len);
       SWAP_TARGET_AND_HOST (VALUE_CONTENTS_RAW (v), len);
       VALUE_LVAL (v) = not_lval;
       return v;
@@ -392,7 +400,7 @@ read_var_value (var, frame)
       {
 	char *bytes_addr;
 	bytes_addr = SYMBOL_VALUE_BYTES (var);
-	bcopy (bytes_addr, VALUE_CONTENTS_RAW (v), len);
+	(void) memcpy (VALUE_CONTENTS_RAW (v), bytes_addr, len);
 	VALUE_LVAL (v) = not_lval;
 	return v;
       }
@@ -401,43 +409,59 @@ read_var_value (var, frame)
       addr = SYMBOL_VALUE_ADDRESS (var);
       break;
 
-/* Nonzero if a struct which is located in a register or a LOC_ARG
-   really contains
-   the address of the struct, not the struct itself.  GCC_P is nonzero
-   if the function was compiled with GCC.  */
-#if !defined (REG_STRUCT_HAS_ADDR)
-#define REG_STRUCT_HAS_ADDR(gcc_p) 0
-#endif
-
     case LOC_ARG:
-      fi = get_frame_info (frame);
-      if (fi == NULL)
-	return 0;
-      addr = FRAME_ARGS_ADDRESS (fi);
-      if (!addr) {
-	return 0;
-      }
+      if (SYMBOL_BASEREG_VALID (var))
+	{
+	  addr = FRAME_GET_BASEREG_VALUE (frame, SYMBOL_BASEREG (var));
+	}
+      else
+	{
+	  fi = get_frame_info (frame);
+	  if (fi == NULL)
+	    return 0;
+	  addr = FRAME_ARGS_ADDRESS (fi);
+	}
+      if (!addr)
+	{
+	  return 0;
+	}
       addr += SYMBOL_VALUE (var);
       break;
       
     case LOC_REF_ARG:
-      fi = get_frame_info (frame);
-      if (fi == NULL)
-	return 0;
-      addr = FRAME_ARGS_ADDRESS (fi);
-      if (!addr) {
-	return 0;
-      }
+      if (SYMBOL_BASEREG_VALID (var))
+	{
+	  addr = FRAME_GET_BASEREG_VALUE (frame, SYMBOL_BASEREG (var));
+	}
+      else
+	{
+	  fi = get_frame_info (frame);
+	  if (fi == NULL)
+	    return 0;
+	  addr = FRAME_ARGS_ADDRESS (fi);
+	}
+      if (!addr)
+	{
+	  return 0;
+	}
       addr += SYMBOL_VALUE (var);
-      read_memory (addr, &addr, sizeof (CORE_ADDR));
+      read_memory (addr, (char *) &addr, sizeof (CORE_ADDR));
       break;
       
     case LOC_LOCAL:
     case LOC_LOCAL_ARG:
-      fi = get_frame_info (frame);
-      if (fi == NULL)
-	return 0;
-      addr = SYMBOL_VALUE (var) + FRAME_LOCALS_ADDRESS (fi);
+      if (SYMBOL_BASEREG_VALID (var))
+	{
+	  addr = FRAME_GET_BASEREG_VALUE (frame, SYMBOL_BASEREG (var));
+	}
+      else
+	{
+	  fi = get_frame_info (frame);
+	  if (fi == NULL)
+	    return 0;
+	  addr = FRAME_LOCALS_ADDRESS (fi);
+	}
+      addr += SYMBOL_VALUE (var);
       break;
 
     case LOC_TYPEDEF:
@@ -459,8 +483,17 @@ read_var_value (var, frame)
 	
 	v = value_from_register (type, SYMBOL_VALUE (var), frame);
 
+	/* Nonzero if a struct which is located in a register or a LOC_ARG
+	   really contains
+	   the address of the struct, not the struct itself.  GCC_P is nonzero
+	   if the function was compiled with GCC.  */
+#if !defined (REG_STRUCT_HAS_ADDR)
+#define REG_STRUCT_HAS_ADDR(gcc_p) 0
+#endif
+
 	if (REG_STRUCT_HAS_ADDR (BLOCK_GCC_COMPILED (b))
-	    && TYPE_CODE (type) == TYPE_CODE_STRUCT)
+	    && (   (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+	        || (TYPE_CODE (type) == TYPE_CODE_UNION)))
 	  addr = *(CORE_ADDR *)VALUE_CONTENTS (v);
 	else
 	  return v;
@@ -575,7 +608,7 @@ value_from_register (type, regnum, frame)
 	 endian machines.  */
 
       /* Copy into the contents section of the value.  */
-      bcopy (value_bytes, VALUE_CONTENTS_RAW (v), len);
+      (void) memcpy (VALUE_CONTENTS_RAW (v), value_bytes, len);
 
       return v;
     }
@@ -607,11 +640,11 @@ value_from_register (type, regnum, frame)
 	     with raw type `extended' and virtual type `double'.
 	     Fetch it as a `double' and then convert to `float'.  */
 	  v = allocate_value (REGISTER_VIRTUAL_TYPE (regnum));
-	  bcopy (virtual_buffer, VALUE_CONTENTS_RAW (v), len);
+	  (void) memcpy (VALUE_CONTENTS_RAW (v), virtual_buffer, len);
 	  v = value_cast (type, v);
 	}
       else
-	bcopy (virtual_buffer, VALUE_CONTENTS_RAW (v), len);
+	(void) memcpy (VALUE_CONTENTS_RAW (v), virtual_buffer, len);
     }
   else
     {
@@ -625,8 +658,8 @@ value_from_register (type, regnum, frame)
 	}
 #endif
 
-      bcopy (virtual_buffer + VALUE_OFFSET (v),
-	     VALUE_CONTENTS_RAW (v), len);
+      (void) memcpy (VALUE_CONTENTS_RAW (v), virtual_buffer + VALUE_OFFSET (v),
+		     len);
     }
   
   return v;
@@ -657,18 +690,6 @@ locate_var_value (var, frame)
       || TYPE_CODE (type) == TYPE_CODE_FUNC)
     {
       addr = VALUE_ADDRESS (lazy_value);
-
-      /* C++: The "address" of a reference should yield the address
-       * of the object pointed to. So force an extra de-reference. */
-
-      if (TYPE_CODE (type) == TYPE_CODE_REF)
-	{
-	  char *buf = alloca (TYPE_LENGTH (type));
-	  read_memory (addr, buf, TYPE_LENGTH (type));
-	  addr = unpack_pointer (type, buf);
-	  type = TYPE_TARGET_TYPE (type);
-	}
-
       return value_from_longest (lookup_pointer_type (type), (LONGEST) addr);
     }
 

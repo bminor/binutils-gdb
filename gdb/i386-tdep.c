@@ -21,6 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "frame.h"
 #include "inferior.h"
 #include "gdbcore.h"
+#include "target.h"
 
 #ifdef USE_PROC_FS	/* Target dependent support for /proc */
 #include <sys/procfs.h>
@@ -203,9 +204,9 @@ i386_get_frame_setup (pc)
       static unsigned char proto2[4] = { 0x87,0x44,0x24,0x00 };
       pos = codestream_tell ();
       codestream_read (buf, 4);
-      if (bcmp (buf, proto1, 3) == 0)
+      if (memcmp (buf, proto1, 3) == 0)
 	pos += 3;
-      else if (bcmp (buf, proto2, 4) == 0)
+      else if (memcmp (buf, proto2, 4) == 0)
 	pos += 4;
       
       codestream_seek (pos);
@@ -388,13 +389,12 @@ i386_frame_find_saved_regs (fip, fsrp)
      struct frame_saved_regs *fsrp;
 {
   long locals;
-  unsigned char *p;
   unsigned char op;
   CORE_ADDR dummy_bottom;
   CORE_ADDR adr;
   int i;
   
-  bzero (fsrp, sizeof *fsrp);
+  (void) memset (fsrp, 0, sizeof *fsrp);
   
   /* if frame is the end of a dummy, compute where the
    * beginning would be
@@ -644,3 +644,37 @@ fill_fpregset (fpregsetp, regno)
 #endif	/* defined (FP0_REGNUM) */
 
 #endif  /* USE_PROC_FS */
+
+#ifdef GET_LONGJMP_TARGET
+
+/* Figure out where the longjmp will land.  Slurp the args out of the stack.
+   We expect the first arg to be a pointer to the jmp_buf structure from which
+   we extract the pc (JB_PC) that we will land at.  The pc is copied into PC.
+   This routine returns true on success. */
+
+int
+get_longjmp_target(pc)
+     CORE_ADDR *pc;
+{
+  CORE_ADDR sp, jb_addr;
+
+  sp = read_register(SP_REGNUM);
+
+  if (target_read_memory(sp + SP_ARG0, /* Offset of first arg on stack */
+			 (char *) &jb_addr,
+			 sizeof(CORE_ADDR)))
+    return 0;
+
+
+  SWAP_TARGET_AND_HOST(&jb_addr, sizeof(CORE_ADDR));
+
+  if (target_read_memory(jb_addr + JB_PC * JB_ELEMENT_SIZE, (char *) pc,
+			 sizeof(CORE_ADDR)))
+    return 0;
+
+  SWAP_TARGET_AND_HOST(pc, sizeof(CORE_ADDR));
+
+  return 1;
+}
+
+#endif /* GET_LONGJMP_TARGET */

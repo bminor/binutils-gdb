@@ -779,7 +779,7 @@ print_frame_label_vars (frame, this_level_only, stream)
 
   bl = blockvector_for_pc (BLOCK_END (block) - 4, &index);
   blocks_printed = (char *) alloca (BLOCKVECTOR_NBLOCKS (bl) * sizeof (char));
-  bzero (blocks_printed, BLOCKVECTOR_NBLOCKS (bl) * sizeof (char));
+  (void) memset (blocks_printed, 0, BLOCKVECTOR_NBLOCKS (bl) * sizeof (char));
 
   while (block != 0)
     {

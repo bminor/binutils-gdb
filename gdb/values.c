@@ -211,9 +211,9 @@ value_copy (arg)
   VALUE_LAZY (val) = VALUE_LAZY (arg);
   if (!VALUE_LAZY (val))
     {
-      bcopy (VALUE_CONTENTS_RAW (arg), VALUE_CONTENTS_RAW (val),
-	     TYPE_LENGTH (VALUE_TYPE (arg))
-	     * (VALUE_REPEATED (arg) ? VALUE_REPETITIONS (arg) : 1));
+      memcpy (VALUE_CONTENTS_RAW (val), VALUE_CONTENTS_RAW (arg),
+	      TYPE_LENGTH (VALUE_TYPE (arg))
+	      * (VALUE_REPEATED (arg) ? VALUE_REPETITIONS (arg) : 1));
     }
   return val;
 }
@@ -247,7 +247,7 @@ record_latest_value (val)
       register struct value_history_chunk *new
 	= (struct value_history_chunk *)
 	  xmalloc (sizeof (struct value_history_chunk));
-      bzero (new->values, sizeof new->values);
+      (void) memset (new->values, 0, sizeof new->values);
       new->next = value_history_chain;
       value_history_chain = new;
     }
@@ -437,8 +437,8 @@ set_internalvar_component (var, offset, bitpos, bitsize, newval)
     modify_field (addr, (int) value_as_long (newval),
 		  bitpos, bitsize);
   else
-    bcopy (VALUE_CONTENTS (newval), addr,
-	   TYPE_LENGTH (VALUE_TYPE (newval)));
+    (void) memcpy (addr, VALUE_CONTENTS (newval),
+		   TYPE_LENGTH (VALUE_TYPE (newval)));
 }
 
 void
@@ -587,7 +587,7 @@ unpack_long (type, valaddr)
       if (len == sizeof (float))
 	{
 	  float retval;
-	  bcopy (valaddr, &retval, sizeof (retval));
+	  (void) memcpy (&retval, valaddr, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
@@ -595,7 +595,7 @@ unpack_long (type, valaddr)
       if (len == sizeof (double))
 	{
 	  double retval;
-	  bcopy (valaddr, &retval, sizeof (retval));
+	  (void) memcpy (&retval, valaddr, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
@@ -616,7 +616,7 @@ unpack_long (type, valaddr)
       if (len == sizeof (short))
 	{
 	  unsigned short retval;
-	  bcopy (valaddr, &retval, sizeof (retval));
+	  (void) memcpy (&retval, valaddr, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
@@ -624,7 +624,7 @@ unpack_long (type, valaddr)
       if (len == sizeof (int))
 	{
 	  unsigned int retval;
-	  bcopy (valaddr, &retval, sizeof (retval));
+	  (void) memcpy (&retval, valaddr, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
@@ -632,7 +632,7 @@ unpack_long (type, valaddr)
       if (len == sizeof (long))
 	{
 	  unsigned long retval;
-	  bcopy (valaddr, &retval, sizeof (retval));
+	  (void) memcpy (&retval, valaddr, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
@@ -640,7 +640,7 @@ unpack_long (type, valaddr)
       if (len == sizeof (long long))
 	{
 	  unsigned long long retval;
-	  bcopy (valaddr, &retval, sizeof (retval));
+	  (void) memcpy (&retval, valaddr, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
@@ -655,7 +655,7 @@ unpack_long (type, valaddr)
       if (len == sizeof (char))
 	{
 	  SIGNED char retval;	/* plain chars might be unsigned on host */
-	  bcopy (valaddr, &retval, sizeof (retval));
+	  (void) memcpy (&retval, valaddr, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
@@ -663,7 +663,7 @@ unpack_long (type, valaddr)
       if (len == sizeof (short))
 	{
 	  short retval;
-	  bcopy (valaddr, &retval, sizeof (retval));
+	  (void) memcpy (&retval, valaddr, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
@@ -671,7 +671,7 @@ unpack_long (type, valaddr)
       if (len == sizeof (int))
 	{
 	  int retval;
-	  bcopy (valaddr, &retval, sizeof (retval));
+	  (void) memcpy (&retval, valaddr, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
@@ -679,7 +679,7 @@ unpack_long (type, valaddr)
       if (len == sizeof (long))
 	{
 	  long retval;
-	  bcopy (valaddr, &retval, sizeof (retval));
+	  (void) memcpy (&retval, valaddr, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
@@ -688,7 +688,7 @@ unpack_long (type, valaddr)
       if (len == sizeof (long long))
 	{
 	  long long retval;
-	  bcopy (valaddr, &retval, sizeof (retval));
+	  (void) memcpy (&retval, valaddr, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
@@ -706,14 +706,14 @@ unpack_long (type, valaddr)
       if (len == sizeof(long))
       {
 	unsigned long retval;
-	bcopy (valaddr, &retval, sizeof(retval));
+	(void) memcpy (&retval, valaddr, sizeof(retval));
 	SWAP_TARGET_AND_HOST (&retval, sizeof(retval));
 	return retval;
       }
       else if (len == sizeof(short))
       {
 	unsigned short retval;
-	bcopy (valaddr, &retval, len);
+	(void) memcpy (&retval, valaddr, len);
 	SWAP_TARGET_AND_HOST (&retval, len);
 	return retval;
       }
@@ -755,7 +755,7 @@ unpack_double (type, valaddr, invp)
       if (len == sizeof (float))
 	{
 	  float retval;
-	  bcopy (valaddr, &retval, sizeof (retval));
+	  (void) memcpy (&retval, valaddr, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
@@ -763,7 +763,7 @@ unpack_double (type, valaddr, invp)
       if (len == sizeof (double))
 	{
 	  double retval;
-	  bcopy (valaddr, &retval, sizeof (retval));
+	  (void) memcpy (&retval, valaddr, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
@@ -816,7 +816,7 @@ unpack_pointer (type, valaddr)
       if (len == sizeof (CORE_ADDR))
 	{
 	  CORE_ADDR retval;
-	  bcopy (valaddr, &retval, sizeof (retval));
+	  (void) memcpy (&retval, valaddr, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
@@ -872,9 +872,8 @@ value_primitive_field (arg1, offset, fieldno, arg_type)
       if (VALUE_LAZY (arg1))
 	VALUE_LAZY (v) = 1;
       else
-	bcopy (VALUE_CONTENTS_RAW (arg1) + offset,
-	       VALUE_CONTENTS_RAW (v),
-	       TYPE_LENGTH (type));
+	(void) memcpy (VALUE_CONTENTS_RAW (v),
+		       VALUE_CONTENTS_RAW (arg1) + offset, TYPE_LENGTH (type));
     }
   VALUE_LVAL (v) = VALUE_LVAL (arg1);
   if (VALUE_LVAL (arg1) == lval_internalvar)
@@ -1008,8 +1007,6 @@ value_headof (arg, btype, dtype)
   /* First collect the vtables we must look at for this object.  */
   /* FIXME-tiemann: right now, just look at top-most vtable.  */
   value vtbl, entry, best_entry = 0;
-  /* FIXME: entry_type is never used.  */
-  struct type *entry_type;
   int i, nelems;
   int offset, best_offset = 0;
   struct symbol *sym;
@@ -1034,7 +1031,7 @@ value_headof (arg, btype, dtype)
 	 know that we aren't happy, but don't throw an error.
 	 FIXME: there has to be a better way to do this.  */
       struct type *error_type = (struct type *)xmalloc (sizeof (struct type));
-      bcopy (VALUE_TYPE (arg), error_type, sizeof (struct type));
+      (void) memcpy (error_type, VALUE_TYPE (arg), sizeof (struct type));
       TYPE_NAME (error_type) = savestring ("suspicious *", sizeof ("suspicious *"));
       VALUE_TYPE (arg) = error_type;
       return arg;
@@ -1221,7 +1218,7 @@ unpack_field_as_long (type, valaddr, fieldno)
   int bitsize = TYPE_FIELD_BITSIZE (type, fieldno);
   int lsbcount;
 
-  bcopy (valaddr + bitpos / 8, &val, sizeof (val));
+  (void) memcpy (&val, valaddr + bitpos / 8, sizeof (val));
   SWAP_TARGET_AND_HOST (&val, sizeof (val));
 
   /* Extract bits.  See comment above. */
@@ -1270,7 +1267,7 @@ modify_field (addr, fieldval, bitpos, bitsize)
       && 0 != (fieldval & ~((1<<bitsize)-1)))
     error ("Value %d does not fit in %d bits.", fieldval, bitsize);
   
-  bcopy (addr, &oword, sizeof oword);
+  (void) memcpy (&oword, addr, sizeof oword);
   SWAP_TARGET_AND_HOST (&oword, sizeof oword);		/* To host format */
 
   /* Shifting for bit field depends on endianness of the target machine.  */
@@ -1286,7 +1283,7 @@ modify_field (addr, fieldval, bitpos, bitsize)
   oword |= fieldval << bitpos;
 
   SWAP_TARGET_AND_HOST (&oword, sizeof oword);		/* To target format */
-  bcopy (&oword, addr, sizeof oword);
+  (void) memcpy (addr, &oword, sizeof oword);
 }
 
 /* Convert C numbers into newly allocated values */

@@ -18,10 +18,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
-
+#if !defined(__GO32__)
 #include <sys/ioctl.h>
 #include <sys/param.h>
 #include <pwd.h>
+#endif
 #include <varargs.h>
 #include <ctype.h>
 #include <string.h>
@@ -402,6 +403,7 @@ quit ()
 {
   target_terminal_ours ();
   wrap_here ((char *)0);		/* Force out any pending output */
+#if !defined(__GO32__)
 #ifdef HAVE_TERMIO
   ioctl (fileno (stdout), TCFLSH, 1);
 #else /* not HAVE_TERMIO */
@@ -412,6 +414,7 @@ quit ()
 #else
   error ("Quit (expect signal %d when inferior is resumed)", SIGINT);
 #endif /* TIOCGPGRP */
+#endif
 }
 
 /* Control C comes here */
@@ -631,7 +634,7 @@ savestring (ptr, size)
      int size;
 {
   register char *p = (char *) xmalloc (size + 1);
-  bcopy (ptr, p, size);
+  (void) memcpy (p, ptr, size);
   p[size] = 0;
   return p;
 }
@@ -643,7 +646,7 @@ msavestring (md, ptr, size)
      int size;
 {
   register char *p = (char *) xmmalloc (md, size + 1);
-  bcopy (ptr, p, size);
+  (void) memcpy (p, ptr, size);
   p[size] = 0;
   return p;
 }
@@ -1285,6 +1288,24 @@ print_spaces_filtered (n, stream)
 
 /* C++ demangler stuff.  */
 
+/* Make a copy of a symbol, applying C++ demangling if demangling is enabled
+   and a demangled version exists.  Note that the value returned from
+   cplus_demangle is already allocated in malloc'd memory. */
+
+char *
+strdup_demangled (name)
+     const char *name;
+{
+  char *demangled = NULL;
+
+  if (demangle)
+    {
+      demangled = cplus_demangle (name, DMGL_PARAMS | DMGL_ANSI);
+    }
+  return ((demangled != NULL) ? demangled : strdup (name));
+}
+
+
 /* Print NAME on STREAM, demangling if necessary.  */
 void
 fprint_symbol (stream, name)
@@ -1301,6 +1322,73 @@ fprint_symbol (stream, name)
       free (demangled);
     }
 }
+
+/* Do a strcmp() type operation on STRING1 and STRING2, ignoring any
+   differences in whitespace.  Returns 0 if they match, non-zero if they
+   don't (slightly different than strcmp()'s range of return values). */
+
+int
+strcmp_iw (string1, string2)
+     const char *string1;
+     const char *string2;
+{
+  while ((*string1 != '\0') && (*string2 != '\0'))
+    {
+      while (isspace (*string1))
+	{
+	  string1++;
+	}
+      while (isspace (*string2))
+	{
+	  string2++;
+	}
+      if (*string1 != *string2)
+	{
+	  break;
+	}
+      if (*string1 != '\0')
+	{
+	  string1++;
+	  string2++;
+	}
+    }
+  return (!((*string1 == '\0') && (*string2 == '\0')));
+}
+
+/* Demangle NAME and compare the result with LOOKFOR, ignoring any differences
+   in whitespace.
+   
+   If a match is found, returns a pointer to the demangled version of NAME
+   in malloc'd memory, which needs to be freed by the caller after use.
+   If a match is not found, returns NULL.
+
+   OPTIONS is a flags word that controls the demangling process and is just
+   passed on to the demangler.
+
+   When the caller sees a non-NULL result, it knows that NAME is the mangled
+   equivalent of LOOKFOR, and it can use either NAME, the "official demangled"
+   version of NAME (the return value) or the "unofficial demangled" version
+   of NAME (LOOKFOR, which it already knows). */
+
+char *
+demangle_and_match (name, lookfor, options)
+     const char *name;
+     const char *lookfor;
+     int options;
+{
+  char *demangled;
+
+  if ((demangled = cplus_demangle (name, options)) != NULL)
+    {
+      if (strcmp_iw (demangled, lookfor) != 0)
+	{
+	  free (demangled);
+	  demangled = NULL;
+	}
+    }
+  return (demangled);
+}
+
 
 void
 _initialize_utils ()
@@ -1322,6 +1410,10 @@ _initialize_utils ()
   
   /* These defaults will be used if we are unable to get the correct
      values from termcap.  */
+#if defined(__GO32__)
+  lines_per_page = ScreenRows();
+  chars_per_line = ScreenCols();
+#else  
   lines_per_page = 24;
   chars_per_line = 80;
   /* Initialize the screen height and width from termcap.  */
@@ -1364,7 +1456,7 @@ _initialize_utils ()
   /* If there is a better way to determine the window size, use it. */
   SIGWINCH_HANDLER ();
 #endif
-
+#endif
   /* If the output is not a terminal, don't paginate it.  */
   if (!ISATTY (stdout))
     lines_per_page = UINT_MAX;

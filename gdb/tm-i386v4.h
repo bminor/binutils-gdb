@@ -63,4 +63,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    we extract the pc (JB_PC) that we will land at.  The pc is copied into ADDR.
    This routine returns true on success */
 
+extern int
+get_longjmp_target PARAMS ((CORE_ADDR *));
+
 #define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)

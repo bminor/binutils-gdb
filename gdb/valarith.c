@@ -17,11 +17,10 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include <stdio.h>
-
 #include "defs.h"
 #include "value.h"
 #include "symtab.h"
+#include "gdbtypes.h"
 #include "expression.h"
 #include "target.h"
 #include <string.h>
@@ -135,7 +134,8 @@ value_subscripted_rvalue (array, idx)
     error ("no such vector element");
 
   v = allocate_value (elt_type);
-  bcopy (VALUE_CONTENTS (array) + elt_offs, VALUE_CONTENTS (v), elt_size);
+  (void) memcpy (VALUE_CONTENTS (v), VALUE_CONTENTS (array) + elt_offs,
+		 elt_size);
 
   if (VALUE_LVAL (array) == lval_internalvar)
     VALUE_LVAL (v) = lval_internalvar_component;
@@ -550,7 +550,7 @@ value_binop (arg1, arg2, op)
   return val;
 }
 
-/* Simulate the C operator ! -- return 1 if ARG1 contains zeros.  */
+/* Simulate the C operator ! -- return 1 if ARG1 contains zero.  */
 
 int
 value_zerop (arg1)
@@ -560,6 +560,9 @@ value_zerop (arg1)
   register char *p;
 
   COERCE_ARRAY (arg1);
+
+  if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_FLT)
+    return 0 == value_as_double (arg1);
 
   len = TYPE_LENGTH (VALUE_TYPE (arg1));
   p = VALUE_CONTENTS (arg1);

@@ -69,9 +69,16 @@ elf_symfile_finish PARAMS ((struct objfile *));
 static void
 elf_symtab_read PARAMS ((bfd *,  CORE_ADDR, struct objfile *));
 
+#if 0
 static void
 record_minimal_symbol PARAMS ((char *, CORE_ADDR, enum minimal_symbol_type,
 			       struct objfile *));
+#endif
+
+static void
+record_minimal_symbol_and_info PARAMS ((char *, CORE_ADDR,
+					enum minimal_symbol_type, char *,
+					struct objfile *));
 
 static void
 elf_locate_sections PARAMS ((bfd *, asection *, PTR));
@@ -169,6 +176,8 @@ DESCRIPTION
 
  */
 
+#if 0	/* FIXME:  Unused */
+
 static void
 record_minimal_symbol (name, address, ms_type, objfile)
      char *name;
@@ -179,6 +188,8 @@ record_minimal_symbol (name, address, ms_type, objfile)
   name = obsavestring (name, strlen (name), &objfile -> symbol_obstack);
   prim_record_minimal_symbol (name, address, ms_type);
 }
+
+#endif
 
 static void
 record_minimal_symbol_and_info (name, address, ms_type, info, objfile)

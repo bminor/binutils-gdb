@@ -94,11 +94,15 @@ struct so_list {
   struct objfile *objfile;		/* objfile for loaded lib */
   struct section_table *sections;
   struct section_table *sections_end;
+  struct section_table *textsection;
 };
 
 static struct so_list *so_list_head;	/* List of known shared objects */
 static CORE_ADDR debug_base;		/* Base of dynamic linker structures */
 static CORE_ADDR breakpoint_addr;	/* Address where end bkpt is set */
+
+extern int
+fdmatch PARAMS ((int, int));		/* In libiberty */
 
 /* Local function prototypes */
 
@@ -115,7 +119,7 @@ static int
 disable_break PARAMS ((void));
 
 static void
-info_sharedlibrary_command PARAMS ((void));
+info_sharedlibrary_command PARAMS ((char *, int));
 
 static int
 symbol_add_stub PARAMS ((char *));
@@ -223,6 +227,10 @@ solib_map_sections (so)
       p -> addr += (CORE_ADDR) LM_ADDR (so);
       p -> endaddr += (CORE_ADDR) LM_ADDR (so);
       so -> lmend = (CORE_ADDR) max (p -> endaddr, so -> lmend);
+      if (strcmp (p -> sec_ptr -> name, ".text") == 0)
+	{
+	  so -> textsection = p;
+	}
     }
 }
 
@@ -664,7 +672,8 @@ symbol_add_stub (arg)
   register struct so_list *so = (struct so_list *) arg;	/* catch_errs bogon */
   
   so -> objfile = symbol_file_add (so -> so_name, so -> from_tty,
-				   (unsigned int) LM_ADDR (so), 0, 0, 0);
+				   (unsigned int) so -> textsection -> addr,
+				   0, 0, 0);
   return (1);
 }
 
@@ -765,8 +774,9 @@ solib_add (arg_string, from_tty, target)
 	      if (so -> so_name[0])
 		{
 		  count = so -> sections_end - so -> sections;
-		  bcopy (so -> sections, (char *)(target -> to_sections + old), 
-			 (sizeof (struct section_table)) * count);
+		  (void) memcpy ((char *) (target -> to_sections + old),
+				 so -> sections, 
+				 (sizeof (struct section_table)) * count);
 		  old += count;
 		}
 	    }
@@ -791,7 +801,9 @@ DESCRIPTION
 */
 
 static void
-info_sharedlibrary_command ()
+info_sharedlibrary_command (ignore, from_tty)
+     char *ignore;
+     int from_tty;
 {
   register struct so_list *so = NULL;  	/* link map state variable */
   int header_done = 0;
@@ -1003,12 +1015,11 @@ static int
 enable_break ()
 {
 
-  int j;
-
 #ifndef SVR4_SHARED_LIBS
 
+  int j;
   int in_debugger;
-  
+
   /* Get link_dynamic structure */
 
   j = target_read_memory (debug_base, (char *) &dynamic_copy,
@@ -1193,11 +1204,34 @@ special_symbol_handling (so)
 struct so_list *so;
 {
 #ifndef SVR4_SHARED_LIBS
+  int j;
+
+  if (debug_addr == 0)
+    {
+      /* Get link_dynamic structure */
+
+      j = target_read_memory (debug_base, (char *) &dynamic_copy,
+			      sizeof (dynamic_copy));
+      if (j)
+	{
+	  /* unreadable */
+	  return;
+	}
+
+      /* Calc address of debugger interface structure */
+      /* FIXME, this needs work for cross-debugging of core files
+	 (byteorder, size, alignment, etc).  */
+
+      debug_addr = (CORE_ADDR) dynamic_copy.ldd;
+    }
 
   /* Read the debugger structure from the inferior, just to make sure
      we have a current copy. */
 
-  read_memory (debug_addr, (char *) &debug_copy, sizeof (debug_copy));
+  j = target_read_memory (debug_addr, (char *) &debug_copy,
+			  sizeof (debug_copy));
+  if (j)
+    return;		/* unreadable */
 
   /* Get common symbol definitions for the loaded object. */
 

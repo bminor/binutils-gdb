@@ -464,7 +464,7 @@ sparc_frame_find_saved_regs (fi, saved_regs_addr)
   if (!fid)
     fatal ("Bad frame info struct in FRAME_FIND_SAVED_REGS");
 
-  bzero (saved_regs_addr, sizeof (*saved_regs_addr));
+  (void) memset (saved_regs_addr, 0, sizeof (*saved_regs_addr));
 
   /* Old test.
   if (fi->pc >= frame - CALL_DUMMY_LENGTH - 0x140

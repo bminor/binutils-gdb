@@ -324,7 +324,7 @@ coff_lookup_type (index)
       type_vector = (struct type **)
 	xrealloc ((char *) type_vector,
 		  type_vector_length * sizeof (struct type *));
-      bzero (&type_vector[old_vector_length],
+      (void) memset (&type_vector[old_vector_length], 0,
 	     (type_vector_length - old_vector_length) * sizeof(struct type *));
     }
   return &type_vector[index];
@@ -776,7 +776,6 @@ coff_symfile_read (objfile, addr, mainline)
   int num_symbols;
   int symtab_offset;
   int stringtab_offset;
-  struct symtab *s;
 
   info = (struct coff_symfile_info *) objfile -> sym_private;
   symfile_bfd = abfd;			/* Kludge for swap routines */
@@ -919,14 +918,14 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
   nlist_stream_global = stream;
   nlist_nsyms_global = nsyms;
   last_source_file = 0;
-  bzero (opaque_type_chain, sizeof opaque_type_chain);
+  (void) memset (opaque_type_chain, 0, sizeof opaque_type_chain);
 
   if (type_vector)			/* Get rid of previous one */
     free ((PTR)type_vector);
   type_vector_length = 160;
   type_vector = (struct type **)
 		xmalloc (type_vector_length * sizeof (struct type *));
-  bzero (type_vector, type_vector_length * sizeof (struct type *));
+  (void) memset (type_vector, 0, type_vector_length * sizeof (struct type *));
 
   coff_start_symtab ();
 
@@ -1319,7 +1318,7 @@ init_stringtab (chan, offset)
   if (stringtab == NULL)
     return -1;
 
-  bcopy (&length, stringtab, sizeof length);
+  (void) memcpy (stringtab, &length, sizeof length);
   if (length == sizeof length)		/* Empty table -- just the count */
     return 0;
 
@@ -1426,7 +1425,7 @@ init_lineno (chan, offset, size)
     return -1;
 
   /* Terminate it with an all-zero sentinel record */
-  bzero (linetab + size, local_linesz);
+  (void) memset (linetab + size, 0, local_linesz);
 
   make_cleanup (free, linetab);		/* Be sure it gets de-allocated. */
   return 0;
@@ -1485,7 +1484,7 @@ patch_type (type, real_type)
   TYPE_FIELDS (target) = (struct field *)
     obstack_alloc (&current_objfile -> type_obstack, field_size);
 
-  bcopy (TYPE_FIELDS (real_target), TYPE_FIELDS (target), field_size);
+  (void) memcpy (TYPE_FIELDS (target), TYPE_FIELDS (real_target), field_size);
 
   if (TYPE_NAME (real_target))
     {
@@ -1576,7 +1575,7 @@ process_coff_symbol (cs, aux, objfile)
 #endif
   struct type *temptype;
 
-  bzero (sym, sizeof (struct symbol));
+  (void) memset (sym, 0, sizeof (struct symbol));
   name = cs->c_name;
   name = (name[0] == '_' ? name + offset : name);
   SYMBOL_NAME (sym) = obstack_copy0 (&objfile->symbol_obstack, name, strlen (name));
@@ -1595,8 +1594,8 @@ process_coff_symbol (cs, aux, objfile)
        struct type *new = (struct type *)
 		    obstack_alloc (&objfile->symbol_obstack, sizeof (struct type));
        
-       bcopy(lookup_function_type (decode_function_type (cs, cs->c_type, aux)),
-	     new, sizeof(struct type));
+       (void) memcpy (new, lookup_function_type (decode_function_type (cs, cs->c_type, aux)),
+		      sizeof(struct type));
        SYMBOL_TYPE (sym) = new;
        in_function_type = SYMBOL_TYPE(sym);
 #else
@@ -1793,7 +1792,7 @@ decode_type (cs, c_type, aux)
 	  type = (struct type *)
 	    obstack_alloc (&current_objfile -> type_obstack,
 			   sizeof (struct type));
-	  bzero (type, sizeof (struct type));
+	  (void) memset (type, 0, sizeof (struct type));
 	  TYPE_OBJFILE (type) = current_objfile;
 
 	  base_type = decode_type (cs, new_c_type, aux);
@@ -2104,7 +2103,7 @@ coff_read_enum_type (index, length, lastsym)
 	{
 	  case C_MOE:
 	    sym = (struct symbol *) xmalloc (sizeof (struct symbol));
-	    bzero (sym, sizeof (struct symbol));
+	    (void) memset (sym, 0, sizeof (struct symbol));
 
 	    SYMBOL_NAME (sym) = savestring (name, strlen (name));
 	    SYMBOL_CLASS (sym) = LOC_CONST;

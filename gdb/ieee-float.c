@@ -77,7 +77,7 @@ double_to_ieee_extended (ext_format, from, to)
   unsigned long mant0, mant1, exponent;
   unsigned char tobytes[8];
 
-  bzero (to, TOTALSIZE);
+  (void) memset (to, 0, TOTALSIZE);
   if (dfrom == 0)
     return;			/* Result is zero */
   if (dfrom != dfrom) {

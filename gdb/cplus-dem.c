@@ -175,8 +175,10 @@ typedef struct string		/* Beware: these aren't required to be */
 static char *
 mop_up PARAMS ((string *, struct work_stuff *, int));
 
+#if 0
 static int
 demangle_method_args PARAMS ((string *, const char **, struct work_stuff *));
+#endif
 
 static int
 demangle_template PARAMS ((string *declp, const char **, struct work_stuff *));
@@ -211,8 +213,10 @@ string_init PARAMS ((string *));
 static void
 string_clear PARAMS ((string *));
 
+#if 0
 static int
 string_empty PARAMS ((string *));
+#endif
 
 static void
 string_append PARAMS ((string *, const char *));
@@ -335,7 +339,6 @@ cplus_demangle (mangled, options)
   string decl;
   int success = 0;
   struct work_stuff work[1];
-  const char *p;
   char *demangled = NULL;
 
   if ((mangled != NULL) && (*mangled != '\0'))
@@ -582,7 +585,6 @@ demangle_template (declp, mangled, work)
      struct work_stuff *work;
 {
   int i;
-  int n;
   string tname;
   string trawname;
   int is_pointer;
@@ -662,8 +664,8 @@ demangle_template (declp, mangled, work)
 		{
 		  case 'P':
 		  case 'R':
-		  done = is_pointer = 1;
-		  break;
+		    done = is_pointer = 1;
+		    break;
 		  case 'C':	/* const */
 		  case 'S':	/* explicitly signed [char] */
 		  case 'U':	/* unsigned */
@@ -671,29 +673,29 @@ demangle_template (declp, mangled, work)
 		  case 'F':	/* function */
 		  case 'M':	/* member function */
 		  case 'O':	/* ??? */
-		  old_p++;
-		  continue;
+		    old_p++;
+		    continue;
 		  case 'Q':	/* repetition of following */
 		  case 'T':	/* remembered type */
-		  abort ();
-		  break;
+		    abort ();
+		    break;
 		  case 'v':	/* void */
-		  abort ();
-		  break;
+		    abort ();
+		    break;
 		  case 'x':	/* long long */
 		  case 'l':	/* long */
 		  case 'i':	/* int */
 		  case 's':	/* short */
 		  case 'c':	/* char */
-		  done = is_integral = 1;
-		  break;
+		    done = is_integral = 1;
+		    break;
 		  case 'r':	/* long double */
 		  case 'd':	/* double */
 		  case 'f':	/* float */
-		  done = is_real = 1;
-		  break;
+		    done = is_real = 1;
+		    break;
 		  default:
-		  abort ();
+		    abort ();
 		}
 	    }
 	  if (is_integral)
@@ -786,6 +788,7 @@ demangle_template (declp, mangled, work)
 	  success = demangle_args (declp, mangled, work);
 	}
     }
+  return (success);
 }
 
 /*
@@ -1839,12 +1842,16 @@ string_clear (s)
   s->p = s->b;
 }
 
+#if 0
+
 static int
 string_empty (s)
      string *s;
 {
   return (s->b == s->p);
 }
+
+#endif
 
 static void
 string_append (p, s)
@@ -1901,6 +1908,7 @@ string_prepend (p, s)
 }
 
 #if 0
+
 static void
 string_prepends (p, s)
      string *p, *s;
@@ -1910,6 +1918,7 @@ string_prepends (p, s)
       string_prependn (p, s->b, s->p - s->b);
     }
 }
+
 #endif
 
 static void

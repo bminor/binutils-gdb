@@ -40,9 +40,11 @@ regardless of whether or not the actual target has floating point hardware.
 #include <sys/procfs.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <string.h>
 
 #include "inferior.h"
 #include "target.h"
+#include "command.h"
 
 #define MAX_SYSCALLS	256	/* Maximum number of syscalls for table */
 
@@ -626,8 +628,6 @@ NOTES
 static void
 init_syscall_table ()
 {
-  int syscallnum;
-  
 #if defined (SYS_exit)
   syscall_table[SYS_exit] = "exit";
 #endif
@@ -1466,7 +1466,6 @@ proc_iterate_over_mappings (func)
   int funcstat = 0;
   struct prmap *prmaps;
   struct prmap *prmap;
-  CORE_ADDR baseaddr = 0;
 
   if (pi.valid && (ioctl (pi.fd, PIOCNMAP, &nmap) == 0))
     {
@@ -2766,7 +2765,6 @@ info_proc (args, from_tty)
   struct procinfo pii;
   struct procinfo *pip;
   struct cleanup *old_chain;
-  char *nexttok;
   char **argv;
   int argsize;
   int summary = 1;

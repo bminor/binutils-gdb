@@ -643,6 +643,9 @@ perror PARAMS ((const char *));				/* 4.9.10.4 */
 extern double
 atof PARAMS ((const char *nptr));			/* 4.10.1.1 */
 
+extern int
+atoi PARAMS ((const char *));				/* 4.10.1.2 */
+
 #ifndef MALLOC_INCOMPATIBLE
 
 extern PTR
@@ -661,6 +664,12 @@ qsort PARAMS ((void *base, size_t nmemb,		/* 4.10.5.2 */
 	       size_t size,
 	       int (*comp)(const void *, const void *)));
 
+extern PTR
+memcpy PARAMS ((void *, const void *, size_t));		/* 4.11.2.1 */
+
+extern int
+memcmp PARAMS ((const void *, const void *, size_t));	/* 4.11.4.1 */
+
 extern char *
 strchr PARAMS ((const char *, int));			/* 4.11.5.2 */
 
@@ -672,6 +681,9 @@ strstr PARAMS ((const char *, const char *));		/* 4.11.5.7 */
 
 extern char *
 strtok PARAMS ((char *, const char *));			/* 4.11.5.8 */
+
+extern PTR
+memset PARAMS ((void *, int, size_t));			/* 4.11.6.1 */
 
 extern char *
 strerror PARAMS ((int));				/* 4.11.6.2 */
