@@ -1,3 +1,8 @@
+2000-10-25  Diego Novillo  <dnovillo@cygnus.com>
+
+	* tc-i386.c: Fix prototype declarations for functions taking no
+	arguments.
+
 2000-10-24  Diego Novillo  <dnovillo@cygnus.com>
 
 	* tc-i386.c (i386_operand_modifier): Remove.

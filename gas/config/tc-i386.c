@@ -4335,18 +4335,18 @@ static struct intel_token cur_token, prev_token;
 
 /* Prototypes for intel parser functions.  */
 static int intel_match_token	PARAMS ((int code));
-static void intel_get_token	PARAMS (());
-static void intel_putback_token	PARAMS (());
-static int intel_expr		PARAMS (());
-static int intel_e05		PARAMS (());
-static int intel_e05_1		PARAMS (());
-static int intel_e06		PARAMS (());
-static int intel_e06_1		PARAMS (());
-static int intel_e09		PARAMS (());
-static int intel_e09_1		PARAMS (());
-static int intel_e10		PARAMS (());
-static int intel_e10_1		PARAMS (());
-static int intel_e11		PARAMS (());
+static void intel_get_token	PARAMS ((void));
+static void intel_putback_token	PARAMS ((void));
+static int intel_expr		PARAMS ((void));
+static int intel_e05		PARAMS ((void));
+static int intel_e05_1		PARAMS ((void));
+static int intel_e06		PARAMS ((void));
+static int intel_e06_1		PARAMS ((void));
+static int intel_e09		PARAMS ((void));
+static int intel_e09_1		PARAMS ((void));
+static int intel_e10		PARAMS ((void));
+static int intel_e10_1		PARAMS ((void));
+static int intel_e11		PARAMS ((void));
 
 
 static int
