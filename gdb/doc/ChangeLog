@@ -1,6 +1,11 @@
 2003-04-08  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Delete
+	references to EXTRA_FRAME_INFO.
+
+2003-04-08  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
 	PRINT_TYPELESS_INTEGER.
 
 2003-04-02  J. Brobecker  <brobecker@gnat.com>
