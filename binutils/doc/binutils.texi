@@ -960,6 +960,9 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--localize-symbols=}@var{filename}]
         [@option{--weaken-symbols=}@var{filename}]
         [@option{--alt-machine-code=@var{index}}]
+        [@option{--prefix-symbols=@var{string}]
+        [@option{--prefix-sections=@var{string}]
+        [@option{--prefix-alloc-sections=@var{string}]
         [@option{-v}|@option{--verbose}]
         [@option{-V}|@option{--version}]  
         [@option{--help}]
@@ -1318,6 +1321,16 @@ If the output architecture has alternate machine codes, use the
 a machine is assigned an official code and the tool-chain adopts the 
 new code, but other applications still depend on the original code
 being used.
+
+@item --prefix-symbols=@var{string}
+Prefix all symbols in the output file with @var{string}.
+
+@item --prefix-sections=@var{string}
+Prefix all section names in the output file with @var{string}.
+
+@item --prefix-alloc-sections=@var{string}
+Prefix all the names of all allocated sections in the output file with
+@var{string}.
 
 @item -V
 @itemx --version

@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Added --prefix-symbols=<text>, --prefix-sections=<text> and
+  --prefix-alloc-sections=<text> to objcopy.
+
 * readelf can handle the extensions to the DWARF2 spec used by the Unified
   Parallel C compiler.
 

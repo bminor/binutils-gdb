@@ -238,6 +238,11 @@ static struct redefine_node *redefine_sym_list = NULL;
 /* If this is TRUE, we weaken global symbols (set BSF_WEAK).  */
 static bfd_boolean weaken = FALSE;
 
+/* Prefix symbols/sections.  */
+static char *prefix_symbols_string = 0;
+static char *prefix_sections_string = 0;
+static char *prefix_alloc_sections_string = 0;
+
 /* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
 
 #define OPTION_ADD_SECTION 150
@@ -267,6 +272,9 @@ static bfd_boolean weaken = FALSE;
 #define OPTION_WEAKEN_SYMBOLS (OPTION_KEEPGLOBAL_SYMBOLS + 1)
 #define OPTION_RENAME_SECTION (OPTION_WEAKEN_SYMBOLS + 1)
 #define OPTION_ALT_MACH_CODE (OPTION_RENAME_SECTION + 1)
+#define OPTION_PREFIX_SYMBOLS (OPTION_ALT_MACH_CODE + 1)
+#define OPTION_PREFIX_SECTIONS (OPTION_PREFIX_SYMBOLS + 1)
+#define OPTION_PREFIX_ALLOC_SECTIONS (OPTION_PREFIX_SECTIONS + 1)
 
 /* Options to handle if running as "strip".  */
 
@@ -303,6 +311,7 @@ static struct option copy_options[] =
   {"adjust-vma", required_argument, 0, OPTION_CHANGE_ADDRESSES},
   {"adjust-section-vma", required_argument, 0, OPTION_CHANGE_SECTION_ADDRESS},
   {"adjust-warnings", no_argument, 0, OPTION_CHANGE_WARNINGS},
+  {"alt-machine-code", required_argument, 0, OPTION_ALT_MACH_CODE},
   {"binary-architecture", required_argument, 0, 'B'},
   {"byte", required_argument, 0, 'b'},
   {"change-addresses", required_argument, 0, OPTION_CHANGE_ADDRESSES},
@@ -315,45 +324,47 @@ static struct option copy_options[] =
   {"debugging", no_argument, 0, OPTION_DEBUGGING},
   {"discard-all", no_argument, 0, 'x'},
   {"discard-locals", no_argument, 0, 'X'},
-  {"only-section", required_argument, 0, 'j'},
   {"format", required_argument, 0, 'F'}, /* Obsolete */
   {"gap-fill", required_argument, 0, OPTION_GAP_FILL},
   {"help", no_argument, 0, 'h'},
   {"input-format", required_argument, 0, 'I'}, /* Obsolete */
   {"input-target", required_argument, 0, 'I'},
   {"interleave", required_argument, 0, 'i'},
+  {"keep-global-symbol", required_argument, 0, 'G'},
+  {"keep-global-symbols", required_argument, 0, OPTION_KEEPGLOBAL_SYMBOLS},
   {"keep-symbol", required_argument, 0, 'K'},
+  {"keep-symbols", required_argument, 0, OPTION_KEEP_SYMBOLS},
+  {"localize-symbol", required_argument, 0, 'L'},
+  {"localize-symbols", required_argument, 0, OPTION_LOCALIZE_SYMBOLS},
   {"no-adjust-warnings", no_argument, 0, OPTION_NO_CHANGE_WARNINGS},
   {"no-change-warnings", no_argument, 0, OPTION_NO_CHANGE_WARNINGS},
+  {"only-section", required_argument, 0, 'j'},
   {"output-format", required_argument, 0, 'O'},	/* Obsolete */
   {"output-target", required_argument, 0, 'O'},
   {"pad-to", required_argument, 0, OPTION_PAD_TO},
+  {"prefix-symbols", required_argument, 0, OPTION_PREFIX_SYMBOLS},
+  {"prefix-sections", required_argument, 0, OPTION_PREFIX_SECTIONS},
+  {"prefix-alloc-sections", required_argument, 0, OPTION_PREFIX_ALLOC_SECTIONS},
   {"preserve-dates", no_argument, 0, 'p'},
-  {"localize-symbol", required_argument, 0, 'L'},
-  {"keep-global-symbol", required_argument, 0, 'G'},
+  {"redefine-sym", required_argument, 0, OPTION_REDEFINE_SYM},
   {"remove-leading-char", no_argument, 0, OPTION_REMOVE_LEADING_CHAR},
   {"remove-section", required_argument, 0, 'R'},
   {"rename-section", required_argument, 0, OPTION_RENAME_SECTION},
   {"set-section-flags", required_argument, 0, OPTION_SET_SECTION_FLAGS},
   {"set-start", required_argument, 0, OPTION_SET_START},
+  {"srec-len", required_argument, 0, OPTION_SREC_LEN},
+  {"srec-forceS3", no_argument, 0, OPTION_SREC_FORCES3},
   {"strip-all", no_argument, 0, 'S'},
   {"strip-debug", no_argument, 0, 'g'},
   {"strip-unneeded", no_argument, 0, OPTION_STRIP_UNNEEDED},
   {"strip-symbol", required_argument, 0, 'N'},
+  {"strip-symbols", required_argument, 0, OPTION_STRIP_SYMBOLS},
   {"target", required_argument, 0, 'F'},
   {"verbose", no_argument, 0, 'v'},
   {"version", no_argument, 0, 'V'},
   {"weaken", no_argument, 0, OPTION_WEAKEN},
   {"weaken-symbol", required_argument, 0, 'W'},
-  {"redefine-sym", required_argument, 0, OPTION_REDEFINE_SYM},
-  {"srec-len", required_argument, 0, OPTION_SREC_LEN},
-  {"srec-forceS3", no_argument, 0, OPTION_SREC_FORCES3},
-  {"keep-symbols", required_argument, 0, OPTION_KEEP_SYMBOLS},
-  {"strip-symbols", required_argument, 0, OPTION_STRIP_SYMBOLS},
-  {"keep-global-symbols", required_argument, 0, OPTION_KEEPGLOBAL_SYMBOLS},
-  {"localize-symbols", required_argument, 0, OPTION_LOCALIZE_SYMBOLS},
   {"weaken-symbols", required_argument, 0, OPTION_WEAKEN_SYMBOLS},
-  {"alt-machine-code", required_argument, 0, OPTION_ALT_MACH_CODE},
   {0, no_argument, 0, 0}
 };
 
@@ -438,6 +449,11 @@ copy_usage (stream, exit_status)
      --keep-global-symbols <file>  -G for all symbols listed in <file>\n\
      --weaken-symbols <file>       -W for all symbols listed in <file>\n\
      --alt-machine-code <index>    Use alternate machine code for output\n\
+     --prefix-symbols <prefix>     Add <prefix> to start of every symbol name\n\
+     --prefix-sections <prefix>    Add <prefix> to start of every section name\n\
+     --prefix-alloc-sections <prefix>\n\
+                                   Add <prefix> to start of every allocatable\n\
+                                     section name\n\
   -v --verbose                     List all object files modified\n\
   -V --version                     Display this program's version number\n\
   -h --help                        Display this output\n\
@@ -768,50 +784,70 @@ filter_symbols (abfd, obfd, osyms, isyms, symcount)
     {
       asymbol *sym = from[src_count];
       flagword flags = sym->flags;
-      const char *name = bfd_asymbol_name (sym);
+      char *name = (char *) bfd_asymbol_name (sym);
       int keep;
       bfd_boolean undefined;
-
-      if (redefine_sym_list)
-	{
-	  const char *old_name, *new_name;
-
-	  old_name = bfd_asymbol_name (sym);
-	  new_name = lookup_sym_redefinition (old_name);
-	  name = bfd_asymbol_name (sym) = new_name;
-	}
-
-      if (change_leading_char
-	  && (bfd_get_symbol_leading_char (abfd)
-	      != bfd_get_symbol_leading_char (obfd))
-	  && (bfd_get_symbol_leading_char (abfd) == '\0'
-	      || (name[0] == bfd_get_symbol_leading_char (abfd))))
-	{
-	  if (bfd_get_symbol_leading_char (obfd) == '\0')
-	    name = bfd_asymbol_name (sym) = name + 1;
-	  else
-	    {
-	      char *n;
-
-	      n = xmalloc (strlen (name) + 2);
-	      n[0] = bfd_get_symbol_leading_char (obfd);
-	      if (bfd_get_symbol_leading_char (abfd) == '\0')
-		strcpy (n + 1, name);
-	      else
-		strcpy (n + 1, name + 1);
-	      name = bfd_asymbol_name (sym) = n;
-	    }
-	}
+      bfd_boolean rem_leading_char;
+      bfd_boolean add_leading_char;
 
       undefined = bfd_is_und_section (bfd_get_section (sym));
 
-      if (remove_leading_char
-	  && ((flags & BSF_GLOBAL) != 0
-	      || (flags & BSF_WEAK) != 0
-	      || undefined
-	      || bfd_is_com_section (bfd_get_section (sym)))
-	  && name[0] == bfd_get_symbol_leading_char (abfd))
-	name = bfd_asymbol_name (sym) = name + 1;
+      if (redefine_sym_list)
+	{
+	  char *old_name, *new_name;
+
+	  old_name = (char *) bfd_asymbol_name (sym);
+	  new_name = (char *) lookup_sym_redefinition (old_name);
+	  name = (char *) bfd_asymbol_name (sym) = new_name;
+	}
+
+      /* Check if we will remove the current leading character.  */
+      rem_leading_char =
+	(name[0] == bfd_get_symbol_leading_char (abfd))
+	&& (change_leading_char
+	    || (remove_leading_char
+		&& ((flags & (BSF_GLOBAL | BSF_WEAK)) != 0
+		    || undefined
+		    || bfd_is_com_section (bfd_get_section (sym)))));
+
+      /* Check if we will add a new leading character.  */
+      add_leading_char =
+	change_leading_char
+	&& (bfd_get_symbol_leading_char (obfd) != '\0')
+	&& (bfd_get_symbol_leading_char (abfd) == '\0'
+	    || (name[0] == bfd_get_symbol_leading_char (abfd)));
+
+      /* Short circuit for change_leading_char if we can do it in-place.  */
+      if (rem_leading_char && add_leading_char && !prefix_symbols_string)
+        {
+	  name[0] = bfd_get_symbol_leading_char (obfd);
+	  bfd_asymbol_name (sym) = name;
+	  rem_leading_char = FALSE;
+	  add_leading_char = FALSE;
+        }
+
+      /* Remove leading char.  */
+      if (rem_leading_char)
+	name = (char *) bfd_asymbol_name (sym) = name + 1;
+
+      /* Add new leading char and/or prefix.  */
+      if (add_leading_char || prefix_symbols_string)
+        {
+          char *n, *ptr;
+
+          ptr = n = xmalloc (1 + strlen (prefix_symbols_string) + strlen (name) + 1);
+          if (add_leading_char)
+	    *ptr++ = bfd_get_symbol_leading_char (obfd);
+
+          if (prefix_symbols_string)
+            {
+              strcpy (ptr, prefix_symbols_string);
+              ptr += strlen (prefix_symbols_string);
+           }
+
+          strcpy (ptr, name);
+          name = (char *) bfd_asymbol_name (sym) = n;
+	}
 
       if (strip_symbols == STRIP_ALL)
 	keep = 0;
@@ -1176,6 +1212,7 @@ copy_object (ibfd, obfd)
       || localize_specific_list != NULL
       || keepglobal_specific_list != NULL
       || weaken_specific_list != NULL
+      || prefix_symbols_string
       || sections_removed
       || sections_copied
       || convert_debugging
@@ -1599,6 +1636,7 @@ setup_section (ibfd, isection, obfdarg)
   flagword flags;
   const char *err;
   const char * name;
+  char *prefix = NULL;
 
   if ((bfd_get_section_flags (ibfd, isection) & SEC_DEBUGGING) != 0
       && (strip_symbols == STRIP_DEBUG
@@ -1620,6 +1658,22 @@ setup_section (ibfd, isection, obfdarg)
   /* Get the, possibly new, name of the output section.  */
   name = find_section_rename (ibfd, isection, & flags);
 
+  /* Prefix sections.  */
+  if ((prefix_alloc_sections_string) && (bfd_get_section_flags (ibfd, isection) & SEC_ALLOC))
+    prefix = prefix_alloc_sections_string;
+  else if (prefix_sections_string)
+    prefix = prefix_sections_string;
+
+  if (prefix)
+    {
+      char *n;
+
+      n = xmalloc (strlen (prefix) + strlen (name) + 1);
+      strcpy (n, prefix);
+      strcat (n, name);
+      name = n;
+    }
+    
   osection = bfd_make_section_anyway (obfd, name);
 
   if (osection == NULL)
@@ -2574,6 +2628,18 @@ copy_main (argc, argv)
 	  use_alt_mach_code = atoi (optarg);
 	  if (use_alt_mach_code <= 0)
 	    fatal (_("alternate machine code index must be positive"));
+	  break;
+
+	case OPTION_PREFIX_SYMBOLS:
+	  prefix_symbols_string = optarg;
+	  break;
+
+	case OPTION_PREFIX_SECTIONS:
+	  prefix_sections_string = optarg;
+	  break;
+
+	case OPTION_PREFIX_ALLOC_SECTIONS:
+	  prefix_alloc_sections_string = optarg;
 	  break;
 
 	case 0:

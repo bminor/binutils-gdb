@@ -1,3 +1,15 @@
+2002-12-15  Nick Kelsey  <nickk@ubicom.com>
+
+	* objcopy.c: Add --prefix-symbols=<prefix> option to rename all
+	symbols by adding the given prefix to the begining of the symbol
+	name. This is useful to provide name space seperation regardless
+	of how the object file was created. Added --prefix-sections=
+	<prefix> and --prefix-alloc-sections=<prefix> options to rename all
+	sections (or all sections with the alloc flag set) by adding the given
+	prefix to the begining of the symbol name.
+	* NEWS: Mention this new feature.
+	* doc/binutils.texi: Document this new feature.
+
 2002-12-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* dlltool.c (mcore_elf_gen_out_file): Replace all occurrences of
