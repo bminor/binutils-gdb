@@ -1,12 +1,14 @@
 Tue Oct  4 11:23:12 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	* configure.in: Use ${config_shell} when running config.bfd.
+
 	* cofflink.c (coff_link_input_bfd): Don't try to convert a long
 	filename if the offset field is zero.
 
 	* elfcode.h (swap_out_syms): If the alignment of a common symbol
 	was not set, use a sensible default rather than zero.
 
-Mon Oct  3 16:04:29 1994  H.J. Lu (hlu@nynexst.com)
+Mon Oct  3 16:04:29 1994  H.J. Lu (hjl@nynexst.com)
 
 	* opncls.c (bfd_close): Honor umask when setting execution bits.
 	(bfd_close_all_done): Likewise.

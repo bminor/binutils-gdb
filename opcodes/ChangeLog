@@ -1,3 +1,11 @@
+Tue Oct  4 12:14:21 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* configure.in: Use ${config_shell} when running config.bfd.
+
+Wed Sep 21 18:49:12 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* mips-opc.c (mips_opcodes): "dabs" is only available with -mips3.
+
 Thu Sep 15 16:30:22 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* a29k-dis.c (print_insn): Print the opcode.
