@@ -217,7 +217,7 @@ case "${target}" in
   v810*)		target_makefile_frag=config/mt-v810 ;;
   i[3456]86-*-netware*) target_makefile_frag=config/mt-netware ;;
 # start-sanitize-r5900
-  mips64vr5900*-*-*)    target_makefile_frag=config/mt-r5900 ;;
+  mips64r5900*-*-*)    target_makefile_frag=config/mt-r5900 ;;
 # end-sanitize-r5900
   powerpc-*-netware*)   target_makefile_frag=config/mt-netware ;;
   *-*-linux-gnu)        target_makefile_frag=config/mt-linux ;;
