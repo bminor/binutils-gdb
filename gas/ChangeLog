@@ -1,3 +1,10 @@
+2005-01-27  Christian Groessler  <chris@groessler.org>
+
+	* config/tc-z8k.c (INSERT): Remove, not used anywhere.
+	(md_apply_fix3): Make relative branches out of range an error
+	instead of a warning.  Display correct line number for out of
+	range branches/calls/memory accesses.
+
 2005-01-27  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* dwarf2dbg.c (dwarf2_finish): Correct logic for determining when
