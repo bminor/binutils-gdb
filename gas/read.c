@@ -1063,9 +1063,9 @@ s_lcomm (needs_align)
       return;
     }
 
-#ifdef TC_MIPS
+#if defined (TC_MIPS) || defined (TC_ALPHA)
 #if defined (OBJ_ECOFF) || defined (OBJ_ELF)
-  /* For MIPS ECOFF or ELF, small objects are put in .sbss.  */
+  /* For MIPS and Alpha ECOFF or ELF, small objects are put in .sbss.  */
   if (temp <= bfd_get_gp_size (stdoutput))
     {
       bss_seg = subseg_new (".sbss", 1);

@@ -1,3 +1,8 @@
+Mon Jan 24 14:12:25 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* read.c (s_lcomm): Treat Alpha like MIPS in handling of .sbss
+	section.
+
 Thu Jan 20 13:17:58 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* expr.c (operand): For floating point operand with unusual fp
