@@ -173,8 +173,10 @@ read_begin ()
   pobegin ();
   obj_read_begin_hook ();
 
-  obstack_begin (&notes, 5000);
-  obstack_begin (&cond_obstack, 960);
+  /* Something close -- but not too close -- to a multiple of 1024.
+     The debugging malloc I'm using has 24 bytes of overhead.  */
+  obstack_begin (&notes, 5090);
+  obstack_begin (&cond_obstack, 990);
 
 #define BIGNUM_BEGIN_SIZE (16)
   bignum_low = xmalloc ((long) BIGNUM_BEGIN_SIZE);
@@ -592,7 +594,7 @@ read_a_source_file (name)
 		     guarentee it. . . */
 		  tmp_len = buffer_limit - s;
 		  tmp_buf = xmalloc (tmp_len + 1);
-		  bcopy (s, tmp_buf, tmp_len);
+		  memcpy (tmp_buf, s, tmp_len);
 		  do
 		    {
 		      new_tmp = input_scrub_next_buffer (&buffer);
@@ -608,7 +610,7 @@ read_a_source_file (name)
 			num = buffer_limit - buffer;
 
 		      tmp_buf = xrealloc (tmp_buf, tmp_len + num);
-		      bcopy (buffer, tmp_buf + tmp_len, num);
+		      memcpy (tmp_buf, buffer + tmp_len, num);
 		      tmp_len += num;
 		    }
 		  while (!ends);
@@ -2122,7 +2124,7 @@ big_cons (nbytes)
 		p[i] = *src++;
 	    }
 	  else
-	    bcopy (bignum_low, p, (int) nbytes);
+	    memcpy (p, bignum_low, (int) nbytes);
 	}
       /* C contains character after number. */
       SKIP_WHITESPACE ();
@@ -2234,7 +2236,7 @@ float_cons (float_type)		/* Worker to do .float etc statements. */
 	  while (--count >= 0)
 	    {
 	      p = frag_more (length);
-	      bcopy (temp, p, length);
+	      memcpy (p, temp, length);
 	    }
 	}
       SKIP_WHITESPACE ();
