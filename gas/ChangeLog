@@ -1,3 +1,9 @@
+1999-06-13  Ian Lance Taylor  <ian@zembu.com>
+
+	From K. Richard Pixley <rich@noir.com>:
+	* configure.in (ppc-*-vxworks*): New target.
+	* configure: Rebuild.
+
 1999-06-12  Philip Blundell  <philb@gnu.org>
 
 	* config/tc-arm.c (tc_gen_reloc): Fix handling of GOTPC relocs.
