@@ -1,3 +1,11 @@
+2003-09-01  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+        * gas/mips/elf-rel-got-n32.d: Fix ulw and usw patterns for
+        little-endian.
+        * gas/mips/elf-rel-got-n64.d: Likewise.
+        * gas/mips/elf-rel-xgot-n32.d: Likewise.
+        * gas/mips/elf-rel-xgot-n64.d: Likewise.
+
 2003-08-29  Jakub Jelinek  <jakub@redhat.com>
 
 	* gas/cfi/cfi-sparc-1.s: New test.

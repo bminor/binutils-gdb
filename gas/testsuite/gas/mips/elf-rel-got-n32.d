@@ -58,36 +58,36 @@ Disassembly of section \.text:
 			80: R_MIPS_GOT_OFST	dg1\+0x38
 00000084 <fn\+0x84> 8f810000 	lw	at,0\(gp\)
 			84: R_MIPS_GOT_DISP	dg1
-00000088 <fn\+0x88> 88250000 	lwl	a1,0\(at\)
-0000008c <fn\+0x8c> 98250003 	lwr	a1,3\(at\)
+00000088 <fn\+0x88> 8825000[03] 	lwl	a1,[03]\(at\)
+0000008c <fn\+0x8c> 9825000[03] 	lwr	a1,[03]\(at\)
 00000090 <fn\+0x90> 8f810000 	lw	at,0\(gp\)
 			90: R_MIPS_GOT_DISP	dg1
 00000094 <fn\+0x94> 2421000c 	addiu	at,at,12
-00000098 <fn\+0x98> 88250000 	lwl	a1,0\(at\)
-0000009c <fn\+0x9c> 98250003 	lwr	a1,3\(at\)
+00000098 <fn\+0x98> 8825000[03] 	lwl	a1,[03]\(at\)
+0000009c <fn\+0x9c> 9825000[03] 	lwr	a1,[03]\(at\)
 000000a0 <fn\+0xa0> 8f810000 	lw	at,0\(gp\)
 			a0: R_MIPS_GOT_DISP	dg1
 000000a4 <fn\+0xa4> 00310821 	addu	at,at,s1
-000000a8 <fn\+0xa8> 88250000 	lwl	a1,0\(at\)
-000000ac <fn\+0xac> 98250003 	lwr	a1,3\(at\)
+000000a8 <fn\+0xa8> 8825000[03] 	lwl	a1,[03]\(at\)
+000000ac <fn\+0xac> 9825000[03] 	lwr	a1,[03]\(at\)
 000000b0 <fn\+0xb0> 8f810000 	lw	at,0\(gp\)
 			b0: R_MIPS_GOT_DISP	dg1
 000000b4 <fn\+0xb4> 2421000c 	addiu	at,at,12
 000000b8 <fn\+0xb8> 00310821 	addu	at,at,s1
-000000bc <fn\+0xbc> 88250000 	lwl	a1,0\(at\)
-000000c0 <fn\+0xc0> 98250003 	lwr	a1,3\(at\)
+000000bc <fn\+0xbc> 8825000[03] 	lwl	a1,[03]\(at\)
+000000c0 <fn\+0xc0> 9825000[03] 	lwr	a1,[03]\(at\)
 000000c4 <fn\+0xc4> 8f810000 	lw	at,0\(gp\)
 			c4: R_MIPS_GOT_DISP	dg1
 000000c8 <fn\+0xc8> 24210022 	addiu	at,at,34
 000000cc <fn\+0xcc> 00250821 	addu	at,at,a1
-000000d0 <fn\+0xd0> 88250000 	lwl	a1,0\(at\)
-000000d4 <fn\+0xd4> 98250003 	lwr	a1,3\(at\)
+000000d0 <fn\+0xd0> 8825000[03] 	lwl	a1,[03]\(at\)
+000000d4 <fn\+0xd4> 9825000[03] 	lwr	a1,[03]\(at\)
 000000d8 <fn\+0xd8> 8f810000 	lw	at,0\(gp\)
 			d8: R_MIPS_GOT_DISP	dg1
 000000dc <fn\+0xdc> 24210038 	addiu	at,at,56
 000000e0 <fn\+0xe0> 00250821 	addu	at,at,a1
-000000e4 <fn\+0xe4> a8250000 	swl	a1,0\(at\)
-000000e8 <fn\+0xe8> b8250003 	swr	a1,3\(at\)
+000000e4 <fn\+0xe4> a825000[03] 	swl	a1,[03]\(at\)
+000000e8 <fn\+0xe8> b825000[03] 	swr	a1,[03]\(at\)
 000000ec <fn\+0xec> 8f850000 	lw	a1,0\(gp\)
 			ec: R_MIPS_GOT_DISP	\.data\+0x3c
 000000f0 <fn\+0xf0> 8f850000 	lw	a1,0\(gp\)
@@ -133,32 +133,32 @@ Disassembly of section \.text:
 			14c: R_MIPS_GOT_OFST	\.data\+0x74
 00000150 <fn\+0x150> 8f810000 	lw	at,0\(gp\)
 			150: R_MIPS_GOT_DISP	\.data\+0x3c
-00000154 <fn\+0x154> 88250000 	lwl	a1,0\(at\)
-00000158 <fn\+0x158> 98250003 	lwr	a1,3\(at\)
+00000154 <fn\+0x154> 8825000[03] 	lwl	a1,[03]\(at\)
+00000158 <fn\+0x158> 9825000[03] 	lwr	a1,[03]\(at\)
 0000015c <fn\+0x15c> 8f810000 	lw	at,0\(gp\)
 			15c: R_MIPS_GOT_DISP	\.data\+0x48
-00000160 <fn\+0x160> 88250000 	lwl	a1,0\(at\)
-00000164 <fn\+0x164> 98250003 	lwr	a1,3\(at\)
+00000160 <fn\+0x160> 8825000[03] 	lwl	a1,[03]\(at\)
+00000164 <fn\+0x164> 9825000[03] 	lwr	a1,[03]\(at\)
 00000168 <fn\+0x168> 8f810000 	lw	at,0\(gp\)
 			168: R_MIPS_GOT_DISP	\.data\+0x3c
 0000016c <fn\+0x16c> 00310821 	addu	at,at,s1
-00000170 <fn\+0x170> 88250000 	lwl	a1,0\(at\)
-00000174 <fn\+0x174> 98250003 	lwr	a1,3\(at\)
+00000170 <fn\+0x170> 8825000[03] 	lwl	a1,[03]\(at\)
+00000174 <fn\+0x174> 9825000[03] 	lwr	a1,[03]\(at\)
 00000178 <fn\+0x178> 8f810000 	lw	at,0\(gp\)
 			178: R_MIPS_GOT_DISP	\.data\+0x48
 0000017c <fn\+0x17c> 00310821 	addu	at,at,s1
-00000180 <fn\+0x180> 88250000 	lwl	a1,0\(at\)
-00000184 <fn\+0x184> 98250003 	lwr	a1,3\(at\)
+00000180 <fn\+0x180> 8825000[03] 	lwl	a1,[03]\(at\)
+00000184 <fn\+0x184> 9825000[03] 	lwr	a1,[03]\(at\)
 00000188 <fn\+0x188> 8f810000 	lw	at,0\(gp\)
 			188: R_MIPS_GOT_DISP	\.data\+0x5e
 0000018c <fn\+0x18c> 00250821 	addu	at,at,a1
-00000190 <fn\+0x190> 88250000 	lwl	a1,0\(at\)
-00000194 <fn\+0x194> 98250003 	lwr	a1,3\(at\)
+00000190 <fn\+0x190> 8825000[03] 	lwl	a1,[03]\(at\)
+00000194 <fn\+0x194> 9825000[03] 	lwr	a1,[03]\(at\)
 00000198 <fn\+0x198> 8f810000 	lw	at,0\(gp\)
 			198: R_MIPS_GOT_DISP	\.data\+0x74
 0000019c <fn\+0x19c> 00250821 	addu	at,at,a1
-000001a0 <fn\+0x1a0> a8250000 	swl	a1,0\(at\)
-000001a4 <fn\+0x1a4> b8250003 	swr	a1,3\(at\)
+000001a0 <fn\+0x1a0> a825000[03] 	swl	a1,[03]\(at\)
+000001a4 <fn\+0x1a4> b825000[03] 	swr	a1,[03]\(at\)
 000001a8 <fn\+0x1a8> 8f850000 	lw	a1,0\(gp\)
 			1a8: R_MIPS_GOT_DISP	fn
 000001ac <fn\+0x1ac> 8f850000 	lw	a1,0\(gp\)
@@ -230,36 +230,36 @@ Disassembly of section \.text:
 			250: R_MIPS_GOT_OFST	dg2\+0x38
 00000254 <fn\+0x254> 8f810000 	lw	at,0\(gp\)
 			254: R_MIPS_GOT_DISP	dg2
-00000258 <fn\+0x258> 88250000 	lwl	a1,0\(at\)
-0000025c <fn\+0x25c> 98250003 	lwr	a1,3\(at\)
+00000258 <fn\+0x258> 8825000[03] 	lwl	a1,[03]\(at\)
+0000025c <fn\+0x25c> 9825000[03] 	lwr	a1,[03]\(at\)
 00000260 <fn\+0x260> 8f810000 	lw	at,0\(gp\)
 			260: R_MIPS_GOT_DISP	dg2
 00000264 <fn\+0x264> 2421000c 	addiu	at,at,12
-00000268 <fn\+0x268> 88250000 	lwl	a1,0\(at\)
-0000026c <fn\+0x26c> 98250003 	lwr	a1,3\(at\)
+00000268 <fn\+0x268> 8825000[03] 	lwl	a1,[03]\(at\)
+0000026c <fn\+0x26c> 9825000[03] 	lwr	a1,[03]\(at\)
 00000270 <fn\+0x270> 8f810000 	lw	at,0\(gp\)
 			270: R_MIPS_GOT_DISP	dg2
 00000274 <fn\+0x274> 00310821 	addu	at,at,s1
-00000278 <fn\+0x278> 88250000 	lwl	a1,0\(at\)
-0000027c <fn\+0x27c> 98250003 	lwr	a1,3\(at\)
+00000278 <fn\+0x278> 8825000[03] 	lwl	a1,[03]\(at\)
+0000027c <fn\+0x27c> 9825000[03] 	lwr	a1,[03]\(at\)
 00000280 <fn\+0x280> 8f810000 	lw	at,0\(gp\)
 			280: R_MIPS_GOT_DISP	dg2
 00000284 <fn\+0x284> 2421000c 	addiu	at,at,12
 00000288 <fn\+0x288> 00310821 	addu	at,at,s1
-0000028c <fn\+0x28c> 88250000 	lwl	a1,0\(at\)
-00000290 <fn\+0x290> 98250003 	lwr	a1,3\(at\)
+0000028c <fn\+0x28c> 8825000[03] 	lwl	a1,[03]\(at\)
+00000290 <fn\+0x290> 9825000[03] 	lwr	a1,[03]\(at\)
 00000294 <fn\+0x294> 8f810000 	lw	at,0\(gp\)
 			294: R_MIPS_GOT_DISP	dg2
 00000298 <fn\+0x298> 24210022 	addiu	at,at,34
 0000029c <fn\+0x29c> 00250821 	addu	at,at,a1
-000002a0 <fn\+0x2a0> 88250000 	lwl	a1,0\(at\)
-000002a4 <fn\+0x2a4> 98250003 	lwr	a1,3\(at\)
+000002a0 <fn\+0x2a0> 8825000[03] 	lwl	a1,[03]\(at\)
+000002a4 <fn\+0x2a4> 9825000[03] 	lwr	a1,[03]\(at\)
 000002a8 <fn\+0x2a8> 8f810000 	lw	at,0\(gp\)
 			2a8: R_MIPS_GOT_DISP	dg2
 000002ac <fn\+0x2ac> 24210038 	addiu	at,at,56
 000002b0 <fn\+0x2b0> 00250821 	addu	at,at,a1
-000002b4 <fn\+0x2b4> a8250000 	swl	a1,0\(at\)
-000002b8 <fn\+0x2b8> b8250003 	swr	a1,3\(at\)
+000002b4 <fn\+0x2b4> a825000[03] 	swl	a1,[03]\(at\)
+000002b8 <fn\+0x2b8> b825000[03] 	swr	a1,[03]\(at\)
 000002bc <fn\+0x2bc> 8f850000 	lw	a1,0\(gp\)
 			2bc: R_MIPS_GOT_DISP	\.data\+0xb4
 000002c0 <fn\+0x2c0> 8f850000 	lw	a1,0\(gp\)
@@ -305,32 +305,32 @@ Disassembly of section \.text:
 			31c: R_MIPS_GOT_OFST	\.data\+0xec
 00000320 <fn\+0x320> 8f810000 	lw	at,0\(gp\)
 			320: R_MIPS_GOT_DISP	\.data\+0xb4
-00000324 <fn\+0x324> 88250000 	lwl	a1,0\(at\)
-00000328 <fn\+0x328> 98250003 	lwr	a1,3\(at\)
+00000324 <fn\+0x324> 8825000[03] 	lwl	a1,[03]\(at\)
+00000328 <fn\+0x328> 9825000[03] 	lwr	a1,[03]\(at\)
 0000032c <fn\+0x32c> 8f810000 	lw	at,0\(gp\)
 			32c: R_MIPS_GOT_DISP	\.data\+0xc0
-00000330 <fn\+0x330> 88250000 	lwl	a1,0\(at\)
-00000334 <fn\+0x334> 98250003 	lwr	a1,3\(at\)
+00000330 <fn\+0x330> 8825000[03] 	lwl	a1,[03]\(at\)
+00000334 <fn\+0x334> 9825000[03] 	lwr	a1,[03]\(at\)
 00000338 <fn\+0x338> 8f810000 	lw	at,0\(gp\)
 			338: R_MIPS_GOT_DISP	\.data\+0xb4
 0000033c <fn\+0x33c> 00310821 	addu	at,at,s1
-00000340 <fn\+0x340> 88250000 	lwl	a1,0\(at\)
-00000344 <fn\+0x344> 98250003 	lwr	a1,3\(at\)
+00000340 <fn\+0x340> 8825000[03] 	lwl	a1,[03]\(at\)
+00000344 <fn\+0x344> 9825000[03] 	lwr	a1,[03]\(at\)
 00000348 <fn\+0x348> 8f810000 	lw	at,0\(gp\)
 			348: R_MIPS_GOT_DISP	\.data\+0xc0
 0000034c <fn\+0x34c> 00310821 	addu	at,at,s1
-00000350 <fn\+0x350> 88250000 	lwl	a1,0\(at\)
-00000354 <fn\+0x354> 98250003 	lwr	a1,3\(at\)
+00000350 <fn\+0x350> 8825000[03] 	lwl	a1,[03]\(at\)
+00000354 <fn\+0x354> 9825000[03] 	lwr	a1,[03]\(at\)
 00000358 <fn\+0x358> 8f810000 	lw	at,0\(gp\)
 			358: R_MIPS_GOT_DISP	\.data\+0xd6
 0000035c <fn\+0x35c> 00250821 	addu	at,at,a1
-00000360 <fn\+0x360> 88250000 	lwl	a1,0\(at\)
-00000364 <fn\+0x364> 98250003 	lwr	a1,3\(at\)
+00000360 <fn\+0x360> 8825000[03] 	lwl	a1,[03]\(at\)
+00000364 <fn\+0x364> 9825000[03] 	lwr	a1,[03]\(at\)
 00000368 <fn\+0x368> 8f810000 	lw	at,0\(gp\)
 			368: R_MIPS_GOT_DISP	\.data\+0xec
 0000036c <fn\+0x36c> 00250821 	addu	at,at,a1
-00000370 <fn\+0x370> a8250000 	swl	a1,0\(at\)
-00000374 <fn\+0x374> b8250003 	swr	a1,3\(at\)
+00000370 <fn\+0x370> a825000[03] 	swl	a1,[03]\(at\)
+00000374 <fn\+0x374> b825000[03] 	swr	a1,[03]\(at\)
 00000378 <fn\+0x378> 8f850000 	lw	a1,0\(gp\)
 			378: R_MIPS_GOT_DISP	fn2
 0000037c <fn\+0x37c> 8f850000 	lw	a1,0\(gp\)
