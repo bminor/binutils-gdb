@@ -378,6 +378,23 @@ i386_frameless_function_invocation (struct frame_info *frame)
   return frameless_look_for_prologue (frame);
 }
 
+/* Return the saved program counter for FRAME.  */
+
+CORE_ADDR
+i386_frame_saved_pc (struct frame_info *frame)
+{
+  /* FIXME: kettenis/2001-05-09: Conditionalizing the next bit of code
+     on SIGCONTEXT_PC_OFFSET and I386V4_SIGTRAMP_SAVED_PC should be
+     considered a temporary hack.  I plan to come up with something
+     better when we go multi-arch.  */
+#if defined (SIGCONTEXT_PC_OFFSET) || defined (I386V4_SIGTRAMP_SAVED_PC)
+  if (frame->signal_handler_caller)
+    return sigtramp_saved_pc (frame);
+#endif
+
+  return read_memory_unsigned_integer (frame->frame + 4, 4);
+}
+
 /* Immediately after a function call, return the saved pc.  */
 
 CORE_ADDR

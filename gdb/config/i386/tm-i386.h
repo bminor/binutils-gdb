@@ -330,15 +330,10 @@ extern CORE_ADDR i386_frame_chain (struct frame_info *frame);
   i386_frameless_function_invocation (frame)
 extern int i386_frameless_function_invocation (struct frame_info *frame);
 
-/* Saved Pc.  Get it from sigcontext if within sigtramp.  */
+/* Return the saved program counter for FRAME.  */
 
-#define FRAME_SAVED_PC(FRAME) \
-  (((FRAME)->signal_handler_caller \
-    ? sigtramp_saved_pc (FRAME) \
-    : read_memory_unsigned_integer ((FRAME)->frame + 4, 4)) \
-   )
-
-extern CORE_ADDR sigtramp_saved_pc (struct frame_info *);
+#define FRAME_SAVED_PC(frame) i386_frame_saved_pc (frame)
+extern CORE_ADDR i386_frame_saved_pc (struct frame_info *frame);
 
 #define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
 

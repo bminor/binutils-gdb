@@ -1,5 +1,10 @@
 2001-05-09  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_frame_saved_pc): New function.
+	* config/i386/tm-i386.h (FRAME_SAVED_PC): Redefine in terms of
+	i386_frame_saved_pc.
+	(i386_frame_saved_pc): New prototype.
+
 	* i386-tdep.c (i386_register_virtual_type): New function.
 	(i386_register_convertible): New function.
 	* config/i386/tm-i386.h (REGISTER_VIRTUAL_TYPE): Redefine in terms
