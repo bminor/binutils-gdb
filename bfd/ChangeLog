@@ -1,3 +1,16 @@
+2001-01-02  Kazu Hirata  <kazu@hxi.com>
+
+	* pc532-mach.c: Fix formatting.
+	* pe-arm.c: Likewise.
+	* pe-i386.c: Likewise.
+	* pe-mips.c: Likewise.
+	* pe-ppc.c: Likewise.
+	* pe-sh.c: Likewise.
+	* pei-mips.c: Likewise.
+	* pei-sh.c: Likewise.
+	* ppcboot.c: Likewise.
+	* ptrace-core.c: Likewise.
+
 2001-01-01  Kazu Hirata  <kazu@hxi.com>
 
 	* reloc.c: Fix formatting.
