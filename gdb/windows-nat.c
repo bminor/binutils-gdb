@@ -635,21 +635,16 @@ get_image_name (HANDLE h, void *address, int unicode)
   if (address == NULL)
     return NULL;
 
-  ReadProcessMemory (h, address,  &address_ptr, sizeof (address_ptr), &done);
-
   /* See if we could read the address of a string, and that the
      address isn't null. */
-
-  if (done != sizeof (address_ptr) || !address_ptr)
+  if (!ReadProcessMemory (h, address,  &address_ptr, sizeof (address_ptr), &done) 
+      || done != sizeof (address_ptr) || !address_ptr)
     return NULL;
 
   /* Find the length of the string */
-  do
-    {
-      ReadProcessMemory (h, address_ptr + len * size, &b, size, &done);
-      len++;
-    }
-  while ((b[0] != 0 || b[size - 1] != 0) && done == size);
+  while (ReadProcessMemory (h, address_ptr + len++ * size, &b, size, &done)
+	 && (b[0] != 0 || b[size - 1] != 0) && done == size)
+    continue;
 
   if (!unicode)
     ReadProcessMemory (h, address_ptr, buf, len, &done);
@@ -1863,21 +1858,23 @@ child_xfer_memory (CORE_ADDR memaddr, char *our, int len,
 		   int write, struct mem_attrib *mem,
 		   struct target_ops *target)
 {
-  DWORD done;
+  DWORD done = 0;
   if (write)
     {
       DEBUG_MEM (("gdb: write target memory, %d bytes at 0x%08lx\n",
 		  len, (DWORD) memaddr));
-      WriteProcessMemory (current_process_handle, (LPVOID) memaddr, our,
-			  len, &done);
+      if (!WriteProcessMemory (current_process_handle, (LPVOID) memaddr, our,
+			       len, &done))
+	done = 0;
       FlushInstructionCache (current_process_handle, (LPCVOID) memaddr, len);
     }
   else
     {
       DEBUG_MEM (("gdb: read target memory, %d bytes at 0x%08lx\n",
 		  len, (DWORD) memaddr));
-      ReadProcessMemory (current_process_handle, (LPCVOID) memaddr, our, len,
-			 &done);
+      if (!ReadProcessMemory (current_process_handle, (LPCVOID) memaddr, our,
+			      len, &done))
+	done = 0;
     }
   return done;
 }
