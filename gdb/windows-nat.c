@@ -1,6 +1,8 @@
 /* Target-vector operations for controlling win32 child processes, for GDB.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free
+   Software Foundation, Inc.
+
    Contributed by Cygnus Solutions, A Red Hat Company.
 
    This file is part of GDB.
@@ -571,7 +573,7 @@ register_loaded_dll (const char *name, DWORD load_addr)
 /* Wait for child to do something.  Return pid of child, or -1 in case
    of error; store status through argument pointer OURSTATUS.  */
 static int
-handle_load_dll (void *dummy ATTRIBUTE_UNUSED)
+handle_load_dll (void *dummy)
 {
   LOAD_DLL_DEBUG_INFO *event = &current_event.u.LoadDll;
   DWORD dll_name_ptr;
@@ -652,7 +654,7 @@ handle_load_dll (void *dummy ATTRIBUTE_UNUSED)
 }
 
 static int
-handle_unload_dll (void *dummy ATTRIBUTE_UNUSED)
+handle_unload_dll (void *dummy)
 {
   DWORD lpBaseOfDll = (DWORD) current_event.u.UnloadDll.lpBaseOfDll + 0x1000;
   struct so_stuff *so;
@@ -676,7 +678,7 @@ handle_unload_dll (void *dummy ATTRIBUTE_UNUSED)
 
 /* Return name of last loaded DLL. */
 char *
-child_solib_loaded_library_pathname (int pid ATTRIBUTE_UNUSED)
+child_solib_loaded_library_pathname (int pid)
 {
   return !solib_end || !solib_end->name[0] ? NULL : solib_end->name;
 }
@@ -742,7 +744,7 @@ dll_symbol_command (char *args, int from_tty)
 
 /* List currently loaded DLLs. */
 void
-info_dll_command (char *ignore ATTRIBUTE_UNUSED, int from_tty ATTRIBUTE_UNUSED)
+info_dll_command (char *ignore, int from_tty)
 {
   struct so_stuff *so = &solib_start;
 
@@ -888,7 +890,7 @@ child_continue (DWORD continue_status, int id)
    handling by WFI (or whatever).
  */
 static int
-get_child_debug_event (int pid ATTRIBUTE_UNUSED, struct target_waitstatus *ourstatus)
+get_child_debug_event (int pid, struct target_waitstatus *ourstatus)
 {
   BOOL debug_event;
   DWORD continue_status, event_code;
@@ -1158,7 +1160,7 @@ child_attach (char *args, int from_tty)
 }
 
 static void
-child_detach (char *args ATTRIBUTE_UNUSED, int from_tty)
+child_detach (char *args, int from_tty)
 {
   int detached = 1;
 
@@ -1190,7 +1192,7 @@ child_detach (char *args ATTRIBUTE_UNUSED, int from_tty)
 /* Print status information about what we're accessing.  */
 
 static void
-child_files_info (struct target_ops *ignore ATTRIBUTE_UNUSED)
+child_files_info (struct target_ops *ignore)
 {
   printf_unfiltered ("\tUsing the running image of %s %s.\n",
       attach_flag ? "attached" : "child", target_pid_to_str (inferior_ptid));
@@ -1198,7 +1200,7 @@ child_files_info (struct target_ops *ignore ATTRIBUTE_UNUSED)
 
 /* ARGSUSED */
 static void
-child_open (char *arg ATTRIBUTE_UNUSED, int from_tty ATTRIBUTE_UNUSED)
+child_open (char *arg, int from_tty)
 {
   error ("Use the \"run\" command to start a Unix child process.");
 }
@@ -1360,8 +1362,8 @@ child_stop (void)
 
 int
 child_xfer_memory (CORE_ADDR memaddr, char *our, int len,
-		   int write, struct mem_attrib *mem ATTRIBUTE_UNUSED,
-		   struct target_ops *target ATTRIBUTE_UNUSED)
+		   int write, struct mem_attrib *mem,
+		   struct target_ops *target)
 {
   DWORD done;
   if (write)
@@ -1454,7 +1456,7 @@ child_can_run (void)
 }
 
 static void
-child_close (int x ATTRIBUTE_UNUSED)
+child_close (int x)
 {
   DEBUG_EVENTS (("gdb: child_close, inferior_ptid=%d\n",
 		PIDGET (inferior_ptid)));
@@ -1758,7 +1760,8 @@ out:
 }
 
 void
-child_solib_add (char *filename ATTRIBUTE_UNUSED, int from_tty, struct target_ops *target, int readsyms)
+child_solib_add (char *filename, int from_tty, struct target_ops *target,
+		 int readsyms)
 {
   if (!readsyms)
     return;

@@ -1,6 +1,7 @@
 /* Memory-access and commands for remote es1800 processes, for GDB.
-   Copyright 1988, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1988, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000,
+   2001, 2002 Free Software Foundation, Inc.
 
    This file is added to GDB to make it possible to do debugging via an
    ES-1800 emulator. The code was originally written by Johan Holmberg
@@ -962,9 +963,8 @@ tohex (int nib)
 
 static int
 es1800_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len,
-			     int write, 
-			     struct mem_attrib *attrib ATTRIBUTE_UNUSED,
-			     struct target_ops *target ATTRIBUTE_UNUSED)
+			     int write, struct mem_attrib *attrib,
+			     struct target_ops *target)
 {
   int origlen = len;
   int xfersize;

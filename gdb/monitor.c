@@ -1,6 +1,8 @@
 /* Remote debugging interface for boot monitors, for GDB.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
+   1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+
    Contributed by Cygnus Support.  Written by Rob Savoye for Cygnus.
    Resurrected from the ashes by Stu Grossman.
 
@@ -2019,8 +2021,7 @@ monitor_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
 
 static int
 monitor_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
-		     struct mem_attrib *attrib ATTRIBUTE_UNUSED,
-		     struct target_ops *target ATTRIBUTE_UNUSED)
+		     struct mem_attrib *attrib, struct target_ops *target)
 {
   int res;
 

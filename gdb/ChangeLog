@@ -1,3 +1,13 @@
+2002-01-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* infptrace.c: Remove ATTRIBUTE_UNUSED.  Update copyright.
+	* monitor.c, remote-array.c, remote-bug.c: Ditto.
+	* remote-e7000.c, remote-es.c, remote-mips.c: Ditto.
+	* remote-nindy.c, remote-os9k.c, remote-rdi.c: Ditto.
+	* remote-rdp.c, remote-sds.c, remote-sim.c: Ditto.
+	* remote-st.c, remote-vx.c, remote.c, win32-nat.c: Ditto.
+	* x86-64-linux-nat.c: Ditto.
+
 2002-01-18  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* alpha-tdep.c (alpha_register_name): New function. 

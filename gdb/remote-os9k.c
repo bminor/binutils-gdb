@@ -1,6 +1,7 @@
 /* Remote debugging interface for boot monitors, for GDB.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000,
-   2001 Free Software Foundation, Inc.
+
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999,
+   2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -826,9 +827,8 @@ rombug_read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 
 static int
 rombug_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len,
-			     int write, 
-			     struct mem_attrib *attrib ATTRIBUTE_UNUSED,
-			     struct target_ops *target ATTRIBUTE_UNUSED)
+			     int write, struct mem_attrib *attrib,
+			     struct target_ops *target)
 {
   if (write)
     return rombug_write_inferior_memory (memaddr, myaddr, len);

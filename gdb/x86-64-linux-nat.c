@@ -1,6 +1,7 @@
 /* Native-dependent code for Linux/x86-64.
-   Copyright 2001
-   Free Software Foundation, Inc.
+
+   Copyright 2001, 2002 Free Software Foundation, Inc.
+
    Contributed by Jiri Smid, SuSE Labs.
 
    This file is part of GDB.
@@ -405,8 +406,7 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
 
 int
 child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
-		   struct mem_attrib *attrib ATTRIBUTE_UNUSED,
-		   struct target_ops *target)
+		   struct mem_attrib *attrib, struct target_ops *target)
 {
   register int i;
   /* Round starting address down to longword boundary.  */

@@ -1,6 +1,8 @@
 /* Remote debugging interface for MIPS remote debugging protocol.
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
+   2002 Free Software Foundation, Inc.
+
    Contributed by Cygnus Support.  Written by Ian Lance Taylor
    <ian@cygnus.com>.
 
@@ -2066,8 +2068,7 @@ static int mask_address_p = 1;
 
 static int
 mips_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
-		  struct mem_attrib *attrib ATTRIBUTE_UNUSED,
-		  struct target_ops *target ATTRIBUTE_UNUSED)
+		  struct mem_attrib *attrib, struct target_ops *target)
 {
   int i;
   CORE_ADDR addr;

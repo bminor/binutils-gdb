@@ -1,6 +1,8 @@
 /* Remote debugging interface for Array Tech RAID controller..
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
+   1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+
    Contributed by Cygnus Support. Written by Rob Savoye for Cygnus.
 
    This module talks to a debug monitor called 'MONITOR', which
@@ -23,8 +25,7 @@
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.
- */
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "gdbcore.h"
@@ -994,8 +995,7 @@ array_read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 
 static int
 array_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
-		   struct mem_attrib *attrib ATTRIBUTE_UNUSED,
-		   struct target_ops *target ATTRIBUTE_UNUSED)
+		   struct mem_attrib *attrib, struct target_ops *target)
 {
   if (write)
     return array_write_inferior_memory (memaddr, myaddr, len);

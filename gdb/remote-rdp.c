@@ -1,6 +1,7 @@
 /* Remote debugging for the ARM RDP interface.
-   Copyright 1994, 1995, 1998, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1994, 1995, 1998, 1999, 2000, 2001, 2002 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1246,9 +1247,8 @@ remote_rdp_prepare_to_store (void)
 
 static int
 remote_rdp_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len,
-				 int write, 
-				 struct mem_attrib *attrib ATTRIBUTE_UNUSED,
-				 struct target_ops *target ATTRIBUTE_UNUSED)
+				 int write, struct mem_attrib *attrib,
+				 struct target_ops *target)
 {
   /* I infer from D Taylor's code that there's a limit on the amount
      we can transfer in one chunk.. */

@@ -1,6 +1,8 @@
 /* Memory-access and commands for remote VxWorks processes, for GDB.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1997, 1998, 1999, 2000,
-   2001 Free Software Foundation, Inc.
+
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1997, 1998, 1999,
+   2000, 2001, 2002 Free Software Foundation, Inc.
+
    Contributed by Wind River Systems and Cygnus Support.
 
    This file is part of GDB.
@@ -477,8 +479,7 @@ vx_prepare_to_store (void)
 
 static int
 vx_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
-		struct mem_attrib *attrib ATTRIBUTE_UNUSED,
-		struct target_ops *target ATTRIBUTE_UNUSED)
+		struct mem_attrib *attrib, struct target_ops *target)
 {
   int status;
   Rptrace ptrace_in;
