@@ -1,3 +1,8 @@
+2003-09-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-ia64.c (elfNN_ia64_special_sections): Mark all sections
+	started with ".sbss" or "".sdata" as SHF_IA_64_SHORT.
+
 2003-09-10  John David Anglin	<dave.anglin@nrc-cnrc.nrc.ca>
 	    Randolph Chung	<randolph@tausq.org>
 
