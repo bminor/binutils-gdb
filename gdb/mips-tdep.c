@@ -1905,9 +1905,8 @@ heuristic_proc_start (CORE_ADDR pc)
 	  {
 	    static int blurb_printed = 0;
 
-	    warning
-	      ("GDB can't find the start of the function at 0x%s.",
-	       paddr_nz (pc));
+	    warning ("GDB can't find the start of the function at 0x%s.",
+		     paddr_nz (pc));
 
 	    if (!blurb_printed)
 	      {
@@ -5441,7 +5440,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (found_abi == MIPS_ABI_UNKNOWN && info.abfd != NULL)
     bfd_map_over_sections (info.abfd, mips_find_abi_section, &found_abi);
 
-  /* If we have no usefu BFD information, use the ABI from the last
+  /* If we have no useful BFD information, use the ABI from the last
      MIPS architecture (if there is one).  */
   if (found_abi == MIPS_ABI_UNKNOWN && info.abfd == NULL && arches != NULL)
     found_abi = gdbarch_tdep (arches->gdbarch)->found_abi;
