@@ -3267,10 +3267,10 @@ macro_build_ldst_constoffset (char *place, int *counter, expressionS *ep,
   assert (ep->X_op == O_constant);
 
   /* Sign-extending 32-bit constants makes their handling easier.  */
-  if (! dbl)
+  if (! dbl && ! ((ep->X_add_number & ~((bfd_vma) 0x7fffffff))
+		  == ~((bfd_vma) 0x7fffffff)))
     {
-      if (ep->X_add_number & ~((bfd_vma) 0x7fffffff)
-	  && ~(ep->X_add_number | 0x7fffffff))
+      if (ep->X_add_number & ~((bfd_vma) 0xffffffff))
 	as_bad (_("too large constant specified"));
 
     ep->X_add_number = (((ep->X_add_number & 0xffffffff) ^ 0x80000000)
@@ -3431,10 +3431,10 @@ load_register (int *counter, int reg, expressionS *ep, int dbl)
       assert (ep->X_op == O_constant);
 
       /* Sign-extending 32-bit constants makes their handling easier.  */
-      if (! dbl)
+      if (! dbl && ! ((ep->X_add_number & ~((bfd_vma) 0x7fffffff))
+		      == ~((bfd_vma) 0x7fffffff)))
 	{
-	  if (ep->X_add_number & ~((bfd_vma) 0x7fffffff)
-	      && ~(ep->X_add_number | 0x7fffffff))
+	  if (ep->X_add_number & ~((bfd_vma) 0xffffffff))
 	    as_bad (_("too large constant specified"));
 
 	ep->X_add_number = (((ep->X_add_number & 0xffffffff) ^ 0x80000000)
@@ -5941,10 +5941,11 @@ macro (struct mips_cl_insn *ip)
          described below.  */
       if ((! HAVE_64BIT_ADDRESSES
 	   && (! HAVE_64BIT_GPRS && offset_expr.X_op == O_constant))
-          && (offset_expr.X_op == O_constant))
+          && (offset_expr.X_op == O_constant)
+	  && ! ((offset_expr.X_add_number & ~((bfd_vma) 0x7fffffff))
+		== ~((bfd_vma) 0x7fffffff)))
 	{
-	  if (offset_expr.X_add_number & ~((bfd_vma) 0x7fffffff)
-	      && ~(offset_expr.X_add_number | 0x7fffffff))
+	  if (offset_expr.X_add_number & ~((bfd_vma) 0xffffffff))
 	    as_bad (_("too large constant specified"));
 
 	offset_expr.X_add_number = (((offset_expr.X_add_number & 0xffffffff)
