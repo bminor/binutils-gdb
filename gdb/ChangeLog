@@ -1,3 +1,8 @@
+2004-01-03  J. Brobecker  <brobecker@gnat.com>
+
+	* infrun.c (handle_inferior_event): Move the declaration of
+	real_stop_pc inside the if blocks where it is used.
+
 2004-01-03  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc64-tdep.c (sparc64_16_byte_align_p)

@@ -1244,7 +1244,6 @@ pc_in_sigtramp (CORE_ADDR pc)
 void
 handle_inferior_event (struct execution_control_state *ecs)
 {
-  CORE_ADDR real_stop_pc;
   /* NOTE: cagney/2003-03-28: If you're looking at this code and
      thinking that the variable stepped_after_stopped_by_watchpoint
      isn't used, then you're wrong!  The macro STOPPED_BY_WATCHPOINT,
@@ -2479,6 +2478,7 @@ process_event_stop_test:
       || ecs->stop_func_name == 0)
     {
       /* It's a subroutine call.  */
+      CORE_ADDR real_stop_pc;
 
       if ((step_over_calls == STEP_OVER_NONE)
 	  || ((step_range_end == 1)
@@ -2582,7 +2582,7 @@ process_event_stop_test:
   if (IN_SOLIB_RETURN_TRAMPOLINE (stop_pc, ecs->stop_func_name))
     {
       /* Determine where this trampoline returns.  */
-      real_stop_pc = SKIP_TRAMPOLINE_CODE (stop_pc);
+      CORE_ADDR real_stop_pc = SKIP_TRAMPOLINE_CODE (stop_pc);
 
       /* Only proceed through if we know where it's going.  */
       if (real_stop_pc)
