@@ -127,10 +127,13 @@ DEFUN(bfd_cache_delete,(abfd),
 {
   boolean ret;
 
-  if (fclose ((FILE *)(abfd->iostream)) == EOF)
-    ret = false;
-  else
+  if (fclose ((FILE *)(abfd->iostream)) == 0)
     ret = true;
+  else
+    {
+      ret = false;
+      bfd_error = system_call_error;
+    }
   snip (abfd);
   abfd->iostream = NULL;
   open_files--;
