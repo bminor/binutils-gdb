@@ -29,6 +29,7 @@ a29k.h
 alpha.h
 apollo.h
 arm.h
+aux.h
 ecoff.h
 h8300.h
 h8500.h

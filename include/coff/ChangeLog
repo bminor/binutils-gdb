@@ -1,3 +1,22 @@
+Wed Jan 31 13:11:54 1996  Richard Henderson  <rth@tamu.edu>
+
+	* aux.h: New file.
+	* internal.h, m68k.h: Protect against multiple inclusion.
+
+Wed Nov 22 13:48:39 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ecoff.h (_RCONST, STYP_RCONST, RELOC_SECTION_RCONST): Define.
+	(NUM_RELOC_SECTIONS): Update.
+	* symconst.h (scRConst): Define.
+
+Tue Nov 14 18:54:29 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* internal.h (C_NT_WEAK): Define.
+
+Thu Nov  9 14:08:30 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* rs6000.h (STYP_OVRFLO): Define.
+
 Tue Nov  7 14:38:45 1995  Kim Knuttila  <krk@cygnus.com>
 
 	* coff/powerpc.h (IMAGE_NT_OPTIONAL_HDR_MAGIC): Added define.
