@@ -1,4 +1,11 @@
 start-sanitize-v850
+Sat Aug 31 01:27:26 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* v850-opc.c (insert_d22, extract_d22): New functions.
+	(v850_operands): Use insert_d22 and extract_d22 for
+	D22 operands.
+	(insert_d9): Fix range check.
+
 Fri Aug 30 18:01:02 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
 
 	* v850-opc.c (v850_operands): Add V850_OPERAND_SIGNED flag

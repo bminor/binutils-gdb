@@ -4,6 +4,8 @@
 /* Local insertion and extraction functions.  */
 static unsigned long insert_d9 PARAMS ((unsigned long, long, const char **));
 static long extract_d9 PARAMS ((unsigned long, int *));
+static unsigned long insert_d22 PARAMS ((unsigned long, long, const char **));
+static long extract_d22 PARAMS ((unsigned long, int *));
 
 /* regular opcode */
 #define OP(x)		((x & 0x3f) << 5)
@@ -58,7 +60,7 @@ const struct v850_operand v850_operands[] = {
 
 /* The DISP22 field in a format 4 insn. */
 #define D22	(D16+1)
-  { 22, 0, 0, 0, V850_OPERAND_SIGNED },
+  { 22, 0, insert_d22, extract_d22, V850_OPERAND_SIGNED },
 
 #define B3	(D22+1)
 /* The 3 bit immediate field in format 8 insn.  */
@@ -258,7 +260,7 @@ insert_d9 (insn, value, errmsg)
      long value;
      const char **errmsg;
 {
-  if (value > 511 || value <= -512)
+  if (value > 255 || value <= -256)
     *errmsg = "value out of range";
 
   return (insn | ((value & 0x1f0) << 7) | ((value & 0x0e) << 3));
@@ -275,4 +277,26 @@ extract_d9 (insn, invalid)
     ret -= 0x0200;
 
   return ret;
+}
+
+static unsigned long
+insert_d22 (insn, value, errmsg)
+     unsigned long insn;
+     long value;
+     const char **errmsg;
+{
+  if (value > 0xfffff || value <= -0x100000)
+    *errmsg = "value out of range";
+
+  return (insn | ((value & 0xfffe) << 16) | ((value & 0x3f0000) >> 16));
+}
+
+static long
+extract_d22 (insn, invalid)
+     unsigned long insn;
+     int *invalid;
+{
+  int ret = ((insn & 0xfffe0000) >> 16) | ((insn & 0x3f) << 16);
+
+  return ((ret << 10) >> 10);
 }
