@@ -19,6 +19,9 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#ifndef SOLIB_H
+#define SOLIB_H
+
 /* Forward decl's for prototypes */
 struct target_ops;
 
@@ -197,3 +200,5 @@ extern int in_solib_dynsym_resolve_code (CORE_ADDR);	/* solib.c */
 /* Discard symbols that were auto-loaded from shared libraries. */
 
 extern void no_shared_libraries (char *ignored, int from_tty);
+
+#endif /* SOLIB_H */
