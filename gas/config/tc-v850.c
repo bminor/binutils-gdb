@@ -1331,6 +1331,17 @@ md_begin ()
 
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, machine);
 
+ /* start-sanitize-v850e */
+   call_table_data_section = subseg_new (".call_table_data", 0);
+   bfd_set_section_flags (stdoutput, call_table_data_section,
+                        applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC
+                                      | SEC_DATA | SEC_HAS_CONTENTS));
+
+   call_table_text_section = subseg_new (".call_table_text", 0);
+   bfd_set_section_flags (stdoutput, call_table_text_section,
+                        applicable & (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE));
+ /* end-sanitize-v850e */
+
 }
 
 
