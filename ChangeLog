@@ -1,3 +1,7 @@
+Thu May 27 08:05:31 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config.guess: Added special check for i[34]86-unixware-sysv4*.
+
 Wed May 26 16:33:40 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* config.guess: For i[34]86-unknown-sysv4 use UNAME_MACHINE for
