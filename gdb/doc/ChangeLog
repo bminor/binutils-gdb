@@ -1,3 +1,7 @@
+2003-06-22  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.texinfo (Contributors): Mention 6.0 release engineer.
+
 2003-06-22  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbint.texinfo (Coding): Clarify use of gdb_XXX.h headers.

@@ -1,7 +1,7 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 5.3:
+*** Changes in GDB 6.0:
 
 * The meaning of "detach" has changed for gdbserver
 

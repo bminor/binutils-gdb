@@ -2,6 +2,9 @@
 
 	GDB 6.0 branch created.
 	* version.in: Bump to version 5.3.90_0000-00-00-cvs.
+	* PROBLEMS: Update.  Empty.
+	* README: Update.
+	* NEWS: Update.
 
 2003-06-22  Daniel Jacobowitz  <drow@mvista.com>
 
