@@ -906,10 +906,10 @@ profile_print_addr_ranges (sim_cpu *cpu)
 
   if (asr)
     {
-      sim_io_printf (sd, "Selected address ranges:\n");
+      sim_io_printf (sd, "Selected address ranges:\n\n");
       while (asr != NULL)
 	{
-	  sim_io_printf (sd, "0x%lx - 0x%lx\n",
+	  sim_io_printf (sd, "  0x%lx - 0x%lx\n",
 			 (long) asr->start, (long) asr->end);
 	  asr = asr->next;
 	}
