@@ -220,7 +220,8 @@ enum language
     language_asm,		/* Assembly language */
     language_scm,    		/* Scheme / Guile */
     language_pascal,		/* Pascal */
-    language_minimal		/* All other languages, minimal support only */
+    language_minimal,		/* All other languages, minimal support only */
+    nr_languages
   };
 
 enum precision_type

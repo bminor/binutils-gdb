@@ -137,6 +137,26 @@ struct language_format_info
     char *la_format_suffix;	/* Suffix for custom format string */
   };
 
+/* Per architecture (OS/ABI) language information.  */
+
+struct language_arch_info
+{
+  /* Its primative types.  This is a vector ended by a NULL pointer.
+     These types can be specified by name in parsing types in
+     expressions, regardless of whether the program being debugged
+     actually defines such a type.  */
+  struct type **primative_type_vector;
+  /* Type of elements of strings. */
+  struct type *string_char_type;
+};
+
+struct type *language_string_char_type (const struct language_defn *l,
+					struct gdbarch *gdbarch);
+
+struct type *language_lookup_primative_type_by_name (const struct language_defn *l,
+						     struct gdbarch *gdbarch,
+						     const char *name);
+
 /* Structure tying together assorted information about a language.  */
 
 struct language_defn
@@ -283,6 +303,10 @@ struct language_defn
 
     /* The list of characters forming word boundaries.  */
     char *(*la_word_break_characters) (void);
+
+    /* The per-architecture (OS/ABI) language information.  */
+    void (*la_language_arch_info) (struct gdbarch *,
+				   struct language_arch_info *);
 
     /* Add fields above this point, so the magic number is always last. */
     /* Magic number for compat checking */

@@ -1114,6 +1114,7 @@ const struct language_defn java_language_defn =
   0,				/* String lower bound */
   &builtin_type_char,		/* Type of string elements */
   default_word_break_characters,
+  NULL, /* FIXME: la_language_arch_info.  */
   LANG_MAGIC
 };
 

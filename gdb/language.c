@@ -1273,20 +1273,25 @@ static char *unk_lang_class_name (const char *mangled)
   return NULL;
 }
 
-static struct type **const (unknown_builtin_types[]) =
-{
-  0
-};
 static const struct op_print unk_op_print_tab[] =
 {
   {NULL, OP_NULL, PREC_NULL, 0}
 };
 
+static void
+unknown_language_arch_info (struct gdbarch *gdbarch,
+			    struct language_arch_info *lai)
+{
+  lai->string_char_type = builtin_type (gdbarch)->builtin_char;
+  lai->primative_type_vector = GDBARCH_OBSTACK_CALLOC (gdbarch, 1,
+						       struct type *);
+}
+
 const struct language_defn unknown_language_defn =
 {
   "unknown",
   language_unknown,
-  &unknown_builtin_types[0],
+  NULL,
   range_check_off,
   type_check_off,
   case_sensitive_on,
@@ -1314,8 +1319,9 @@ const struct language_defn unknown_language_defn =
   unk_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
-  &builtin_type_char,		/* Type of string elements */
+  NULL,
   default_word_break_characters,
+  unknown_language_arch_info,	/* la_language_arch_info.  */
   LANG_MAGIC
 };
 
@@ -1324,7 +1330,7 @@ const struct language_defn auto_language_defn =
 {
   "auto",
   language_auto,
-  &unknown_builtin_types[0],
+  NULL,
   range_check_off,
   type_check_off,
   case_sensitive_on,
@@ -1352,8 +1358,9 @@ const struct language_defn auto_language_defn =
   unk_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
-  &builtin_type_char,		/* Type of string elements */
+  NULL,
   default_word_break_characters,
+  unknown_language_arch_info,	/* la_language_arch_info.  */
   LANG_MAGIC
 };
 
@@ -1361,7 +1368,7 @@ const struct language_defn local_language_defn =
 {
   "local",
   language_auto,
-  &unknown_builtin_types[0],
+  NULL,
   range_check_off,
   type_check_off,
   case_sensitive_on,
@@ -1389,17 +1396,91 @@ const struct language_defn local_language_defn =
   unk_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
-  &builtin_type_char,		/* Type of string elements */
+  NULL,
   default_word_break_characters,
+  unknown_language_arch_info,	/* la_language_arch_info.  */
   LANG_MAGIC
 };
 
+/* Per-architecture language information.  */
+
+static struct gdbarch_data *language_gdbarch_data;
+
+struct language_gdbarch
+{
+  /* A vector of per-language per-architecture info.  Indexed by "enum
+     language".  */
+  struct language_arch_info arch_info[nr_languages];
+};
+
+static void *
+language_gdbarch_post_init (struct gdbarch *gdbarch)
+{
+  struct language_gdbarch *l;
+  int i;
+
+  l = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct language_gdbarch);
+  for (i = 0; i <= languages_size; i++)
+    {
+      if (languages[i] != NULL
+	  && languages[i]->la_language_arch_info != NULL)
+	languages[i]->la_language_arch_info
+	  (gdbarch, l->arch_info + languages[i]->la_language);
+    }
+  return l;
+}
+
+struct type *
+language_string_char_type (const struct language_defn *la,
+			   struct gdbarch *gdbarch)
+{
+  struct language_gdbarch *ld = gdbarch_data (gdbarch,
+					      language_gdbarch_data);
+  if (ld->arch_info[la->la_language].string_char_type != NULL)
+    return ld->arch_info[la->la_language].string_char_type;
+  else
+    return (*la->string_char_type);
+}
+
+struct type *
+language_lookup_primative_type_by_name (const struct language_defn *la,
+					struct gdbarch *gdbarch,
+					const char *name)
+{
+  struct language_gdbarch *ld = gdbarch_data (gdbarch,
+					      language_gdbarch_data);
+  if (ld->arch_info[la->la_language].primative_type_vector != NULL)
+    {
+      struct type *const *p;
+      for (p = ld->arch_info[la->la_language].primative_type_vector;
+	   (*p) != NULL;
+	   p++)
+	{
+	  if (strcmp (TYPE_NAME (*p), name) == 0)
+	    return (*p);
+	}
+    }
+  else
+    {
+      struct type **const *p;
+      for (p = current_language->la_builtin_type_vector; *p != NULL; p++)
+	{
+	  if (strcmp (TYPE_NAME (**p), name) == 0)
+	    return (**p);
+	}
+    }
+  return (NULL);
+}
+
 /* Initialize the language routines */
 
 void
 _initialize_language (void)
 {
   struct cmd_list_element *set, *show;
+
+  language_gdbarch_data
+    = gdbarch_data_register_post_init (language_gdbarch_post_init);
 
   /* GDB commands for language specific stuff */
 

@@ -774,8 +774,12 @@ create_array_type (struct type *result_type, struct type *element_type,
 struct type *
 create_string_type (struct type *result_type, struct type *range_type)
 {
+  struct type *string_char_type;
+      
+  string_char_type = language_string_char_type (current_language,
+						current_gdbarch);
   result_type = create_array_type (result_type,
-				   *current_language->string_char_type,
+				   string_char_type,
 				   range_type);
   TYPE_CODE (result_type) = TYPE_CODE_STRING;
   return (result_type);
@@ -1032,16 +1036,9 @@ type_name_no_tag (const struct type *type)
 struct type *
 lookup_primitive_typename (char *name)
 {
-  struct type **const *p;
-
-  for (p = current_language->la_builtin_type_vector; *p != NULL; p++)
-    {
-      if (strcmp (TYPE_NAME (**p), name) == 0)
-	{
-	  return (**p);
-	}
-    }
-  return (NULL);
+  return language_lookup_primative_type_by_name (current_language,
+						 current_gdbarch,
+						 name);
 }
 
 /* Lookup a typedef or primitive type named NAME,

@@ -1170,15 +1170,18 @@ value_from_string (char *ptr)
   struct value *val;
   int len = strlen (ptr);
   int lowbound = current_language->string_lower_bound;
-  struct type *rangetype =
-  create_range_type ((struct type *) NULL,
-		     builtin_type_int,
-		     lowbound, len + lowbound - 1);
-  struct type *stringtype =
-  create_array_type ((struct type *) NULL,
-		     *current_language->string_char_type,
-		     rangetype);
+  struct type *string_char_type;
+  struct type *rangetype;
+  struct type *stringtype;
 
+  rangetype = create_range_type ((struct type *) NULL,
+				 builtin_type_int,
+				 lowbound, len + lowbound - 1);
+  string_char_type = language_string_char_type (current_language,
+						current_gdbarch);
+  stringtype = create_array_type ((struct type *) NULL,
+				  string_char_type,
+				  rangetype);
   val = allocate_value (stringtype);
   memcpy (VALUE_CONTENTS_RAW (val), ptr, len);
   return val;

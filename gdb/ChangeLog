@@ -1,5 +1,34 @@
 2004-07-27  Andrew Cagney  <cagney@gnu.org>
 
+	* defs.h (enum language): Add nr_languages.
+	* language.h (struct language_arch_info): Define.
+	(struct language_defn): Add la_language_arch_info.
+	(language_lookup_primative_type_by_name): Declare.
+	(language_string_char_type): Declare.
+	* language.c (_initialize_language, language_gdbarch_post_init)
+	(struct language_gdbarch, language_gdbarch_data): Implement
+	per-architecture language information.
+	(unknown_language_arch_info, language_string_char_type)
+	(language_lookup_primative_type_by_name): New functions.
+	(unknown_language_defn, auto_language_defn)
+	(local_language_defn): Set la_language_arch_info to
+	unknown_language_arch_info.
+	(unknown_builtin_types): Delete.
+	* gdbtypes.c (lookup_primitive_typename): Use
+	language_lookup_primative_type_by_name.
+	(create_string_type): Use language_string_char_type.
+	* values.c (value_from_string): Use language_string_char_type.
+	* scm-lang.c (scm_language_defn): Add NULL la_language_arch_info.
+	* p-lang.c (pascal_language_defn): Ditto.
+	* m2-lang.c (m2_language_defn): Ditto.
+	* jv-lang.c (java_language_defn): Ditto.
+	* objc-lang.c (objc_language_defn): Ditto.
+	* f-lang.c (f_language_defn): Ditto.
+	* c-lang.c (c_language_defn, cplus_language_defn) 
+	(asm_language_defn, minimal_language_defn): Ditto.
+	
+2004-07-27  Andrew Cagney  <cagney@gnu.org>
+
 	* gdbtypes.h (struct builtin_type): Declare.
 	(builtin_type): Declare.
 	* d10v-tdep.c (d10v_register_type): Use builtin_type.
