@@ -1,3 +1,7 @@
+2002-04-29  Andrew Cagney  <ac131313@redhat.com>
+
+	GDB 5.2 released from 5.2 branch.
+
 2002-04-29  Michal Ludvig  <mludvig@suse.cz>
 
 	* x86-64-linux-nat.c (fill_gregset): Explicit cast to avoid warning.
