@@ -1,5 +1,8 @@
 Fri Mar 25 17:35:49 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* config/obj-aout.c (obj_aout_frob_symbol): If N_EXT is set for an
+	N_INDR symbol, set BSF_EXPORT and clear BSF_LOCAL.
+
 	* config/tc-mips.c (append_insn): If EMBEDDED_PIC, don't swap a
 	branch with an instruction that uses $at, in case the branch is
 	later expanded.

@@ -19,6 +19,7 @@ to the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
 #include "as.h"
 #ifdef BFD_ASSEMBLER
+#undef NO_RELOC
 #include "aout/aout64.h"
 #endif
 #include "obstack.h"
@@ -136,6 +137,11 @@ obj_aout_frob_symbol (sym, punt)
 	  /* Put indirect symbols in the indirect section.  */
 	  sym->bsym->section = &bfd_ind_section;
 	  sym->bsym->flags |= BSF_INDIRECT;
+	  if (type & N_EXT)
+	    {
+	      sym->bsym->flags |= BSF_EXPORT;
+	      sym->bsym->flags &=~ BSF_LOCAL;
+	    }
 	  break;
 	case N_WARNING:
 	  /* Mark warning symbols.  */
@@ -149,6 +155,27 @@ obj_aout_frob_symbol (sym, punt)
     }
 
   S_SET_TYPE (sym, type);
+}
+
+void
+obj_aout_frob_file ()
+{
+  /* Relocation processing may require knowing the VMAs of the sections.
+     Since writing to a section will cause the BFD back end to compute the
+     VMAs, fake it out here....  */
+  bfd_byte b = 0;
+  boolean x = true;
+  if (bfd_section_size (stdoutput, text_section) != 0)
+    {
+      x = bfd_set_section_contents (stdoutput, text_section, &b, (file_ptr) 0,
+				    (bfd_size_type) 1);
+    }
+  else if (bfd_section_size (stdoutput, data_section) != 0)
+    {
+      x = bfd_set_section_contents (stdoutput, data_section, &b, (file_ptr) 0,
+				    (bfd_size_type) 1);
+    }
+  assert (x == true);
 }
 
 #else
@@ -167,7 +194,7 @@ obj_emit_relocations (where, fixP, segment_address_in_file)
      relax_addressT segment_address_in_file;
 {
   for (; fixP; fixP = fixP->fx_next)
-    if (fixP->fx_addsy != NULL)
+    if (fixP->fx_done == 0)
       {
 	tc_aout_fix_to_chars (*where, fixP, segment_address_in_file);
 	*where += md_reloc_size;
@@ -306,12 +333,10 @@ obj_crawl_symbol_chain (headers)
       if (!S_IS_REGISTER (symbolP)
 	  && (!S_GET_NAME (symbolP)
 	      || S_IS_DEBUG (symbolP)
-#ifdef TC_I960
-      /* FIXME-SOON this ifdef seems highly dubious to me.  xoxorich. */
 	      || !S_IS_DEFINED (symbolP)
 	      || S_IS_EXTERNAL (symbolP)
-#endif /* TC_I960 */
-	      || (S_GET_NAME (symbolP)[0] != '\001' && (flagseen['L'] || !S_LOCAL_NAME (symbolP)))))
+	      || (S_GET_NAME (symbolP)[0] != '\001'
+		  && (flagseen['L'] || !S_LOCAL_NAME (symbolP)))))
 	{
 	  symbolP->sy_number = symbol_number++;
 
@@ -330,6 +355,9 @@ obj_crawl_symbol_chain (headers)
       else
 	{
 	  if (S_IS_EXTERNAL (symbolP) || !S_IS_DEFINED (symbolP))
+	    /* This warning should never get triggered any more.
+	       Well, maybe if you're doing twisted things with
+	       register names...  */
 	    {
 	      as_bad ("Local symbol %s never defined.", decode_local_label_name (S_GET_NAME (symbolP)));
 	    }			/* oops. */
