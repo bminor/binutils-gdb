@@ -1,3 +1,8 @@
+1999-01-11  Nick Clifton  <nickc@cygnus.com>
+
+	* scripttempl/fr30.sc: Fill .init and .fini sections with NOP
+	pattern. 
+
 1999-01-03  Ken Raeburn  <raeburn@cygnus.com>
 
 	* Makefile.am (check-DEJAGNU): No longer provide HOSTING_EMU,

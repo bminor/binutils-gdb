@@ -32,7 +32,7 @@ SECTIONS
   .rela.bss	: { *(.rela.bss) }
   .rel.plt	: { *(.rel.plt) }
   .rela.plt	: { *(.rela.plt) }
-  .init		: { KEEP (*(.init)) } =0
+  .init		: { KEEP (*(.init)) } =0x9fa0
   .plt		: { *(.plt) }
 
   .text		: {
@@ -46,7 +46,7 @@ SECTIONS
   ${RELOCATING+_etext = .;}
   ${RELOCATING+PROVIDE (etext = .);}
 
-  .fini		: { KEEP (*(.fini))    } =0
+  .fini		: { KEEP (*(.fini)) } =0x9fa0
   .rodata	: { *(.rodata) ${RELOCATING+*(.rodata.*)} *(.gnu.linkonce.r*) }
   .rodata1	: { *(.rodata1) }
 
