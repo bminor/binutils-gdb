@@ -20,44 +20,42 @@
 #include <stdlib.h>
 /*#include <string.h>*/
 #else
-extern char *EXFUN(mktemp,(CONST char*));
-extern int   EXFUN(fflush,(FILE *));
-extern int   EXFUN(write,(int, CONST char *, int));
-extern void  EXFUN(abort,(void));
-extern int   EXFUN(close,(int));
-extern int   EXFUN(fcntl,(int des, int cmd, int e));
-extern int   EXFUN(fprintf,(FILE *,char *,...));
-extern int   EXFUN(printf,(char *,...));
-extern int   EXFUN(qsort,(void *data,int els, int siz, int func()));
-extern void  EXFUN(exit,(int));
-extern int   EXFUN(fseek,(FILE*, int, int));
-extern int   EXFUN(fclose,(FILE*));
-extern void  EXFUN(bcopy,(char*,char*,int));
-extern int   EXFUN(bcmp,(char *, char *, int));
-extern void  EXFUN(bzero,(char *, int));
-extern PTR   EXFUN(memset,(PTR, int, int));
-extern void  EXFUN(puts,(CONST char*));
-extern void  EXFUN(fputs,(CONST char*,FILE*));
-extern int   EXFUN(rmdir,(CONST char *));
-extern int   EXFUN(getuid,(void));
-extern int   EXFUN(getgid,(void));
-extern int   EXFUN(rename,(CONST char *, CONST char*));
-extern int   EXFUN(getuid,());
-extern int   EXFUN(getgid,());
-extern void  EXFUN(perror,(CONST char *));
+extern int   fprintf PARAMS ((FILE *,char *,...));
+extern int   printf PARAMS((char *,...));
+extern char *mktemp ();
+extern int   fflush ();
+extern int   write ();
+extern void  abort ();
+extern int   close ();
+extern int   fcntl ();
+extern int   qsort ();
+extern void  exit ();
+extern int   fseek ();
+extern int   fclose ();
+extern void  bcopy ();
+extern int   bcmp ();
+extern void  bzero ();
+extern PTR   memset ();
+extern void  puts ();
+extern void  fputs ();
+extern int   rmdir ();
+extern int   getuid ();
+extern int   getgid ();
+extern int   rename ();
+extern void  perror ();
 #ifndef DONTDECLARE_MALLOC
-extern PTR   EXFUN(malloc,(unsigned));
-extern PTR   EXFUN(realloc, (PTR, unsigned));
+extern PTR   malloc ();
+extern PTR   realloc ();
 #endif
 
 #ifndef __GNUC__
-extern PTR   EXFUN(memcpy,(PTR,CONST PTR,unsigned int));
+extern PTR   memcpy ();
 #else
-/* char * EXFUN( memcpy,(char *,CONST char *,unsigned int)); */
+/* char * memcpy (); */
 #endif
 
 #ifdef __STDC__
-extern void EXFUN(free,(PTR));
+extern void free ();
 #else
 extern int free();
 #endif
@@ -70,7 +68,6 @@ extern int chmod();
 extern int fread();
 extern int fstat();
 extern int fwrite();
-extern int sscanf();
 extern int stat();
 extern int strtol();
 
@@ -85,7 +82,7 @@ extern long atol();
 extern char *getenv();
 extern int fputc();
 extern int unlink();
-#endif /* __STDC__ */
+#endif /* STDC_HEADERS */
 
 /* EXACT TYPES */
 #ifndef int8e_type
