@@ -151,6 +151,10 @@ case $basic_machine in
 		basic_machine=i386-unknown
 		os=-scosysv322
 		;;
+	go32 | i386-go32)
+		basic_machine=i386-unknown
+		os=-go32
+		;;
 	i386-isc* | isc)
 		basic_machine=i386-unknown
 		os=-iscsysv
@@ -280,7 +284,7 @@ case $basic_machine in
 		;;
 	next)
 		basic_machine=m68k-next
-		os=-sysv
+		os=-mach
 		;;
 	hp9k3[2-9][0-9])
 		basic_machine=m68k-hp
@@ -377,9 +381,26 @@ case $basic_machine in
 		basic_machine=a29k-amd
 		os=-ebmon
 		;;
-	h8300hds)
+
+	h8300hms)
 		basic_machine=h8300-hitachi
-		os=-hds
+		os=-hms
+		;;
+	udi29k)
+		basic_machine=a29k-amd
+		os=-udi
+		;;
+	a29khif)
+		basic_machine=a29k-amd
+		os=-udi
+		;;
+	sa29200)
+		basic_machine=a29k-amd
+		os=-udi
+		;;
+	h8300xray)
+		basic_machine=h8300-hitachi
+		os=-xray
 		;;
 	harris)
 		basic_machine=m88k-harris
@@ -483,16 +504,17 @@ case $os in
 	-bsd* | -sysv* | -mach* | -minix* | -genix* | -ultrix* \
 	      | -vms* | -sco* | -esix* | -isc* | -aix* | -sunos* | -hpux* \
 	      | -unos* | -osf* | -v88r* | -luna* | -dgux* | -solari* | -sym* \
-	      | -amigados* | -msdos* | -none* | -os68k* | -irix* \
-	      | -nindy* | -vxworks* | -ebmon* | -hds* | -m88kbcs*)
-		;;
+	      | -newsos | -amigados* | -msdos* | -none* | -os68k* | -irix* \
+	      | -nindy* | -vxworks* | -ebmon* | -udi | -hms* | -xray | -m88kbcs* | -go32)
+	;;
 # start-sanitize-v9
 	-v7 | -v9 | -hal32 | -hal64) ;;
 # end-sanitize-v9
 
-	-newsos*)
-		os=-bsd
-		;;
+# Note that readline checks for newsos
+#	-newsos*)
+#		os=-bsd
+#		;;
 	-osfrose*)
 		os=-osf
 		;;
