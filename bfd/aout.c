@@ -1,5 +1,4 @@
-/*** bfd backend for sunos binaries */
-/** a.out files */
+/* BFD semi-generic back-end for a.out binaries */
 
 /* Copyright (C) 1990, 1991 Free Software Foundation, Inc.
 
@@ -19,14 +18,11 @@ You should have received a copy of the GNU General Public License
 along with BFD; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* $Id$ */
-
 #include <ansidecl.h>
 #include "sysdep.h"
 #include "bfd.h"
 #include "libbfd.h"
 
-#include "a.out.sun4.h"
 #include "a.out.gnu.h"
 #include "stab.gnu.h"
 #include "ar.h"
@@ -86,24 +82,7 @@ HOWTO( 7,	       0,  3, 	64, true,  0, false, true,0,"DISP64",   true, 0xfeedfac
 
 bfd_error_vector_type bfd_error_vector;
 
-PROTO (void , sunos4_write_syms, ());
-PROTO (static boolean,sunos4_squirt_out_relocs,(bfd *abfd, asection *section));
-
-
-static size_t
-reloc_size_func(abfd)
-bfd *abfd;
-{
-  switch (bfd_get_architecture (abfd)) {
-  case bfd_arch_sparc:
-  case bfd_arch_a29k:
-    return  RELOC_EXT_SIZE;
-  default:
-    return  RELOC_STD_SIZE;
-  }
-}
-
-static void
+void
 DEFUN(bfd_aout_swap_exec_header_in,(abfd, raw_bytes, execp),
       bfd *abfd AND
       unsigned char *raw_bytes AND
@@ -122,7 +101,7 @@ DEFUN(bfd_aout_swap_exec_header_in,(abfd, raw_bytes, execp),
   execp->a_drsize = bfd_h_getlong (abfd, bytes->a_drsize);
 }
 
-static void
+void
 DEFUN(bfd_aout_swap_exec_header_out,(abfd, execp, raw_bytes),
      bfd *abfd AND
      struct exec *execp AND 
@@ -141,26 +120,24 @@ DEFUN(bfd_aout_swap_exec_header_out,(abfd, execp, raw_bytes),
   bfd_h_putlong (abfd, execp->a_drsize, bytes->a_drsize);
 }
 
+/* Some A.OUT variant thinks that the file whose format we're checking
+   is an a.out file.  Do some more checking, and set up for access if
+   it really is.  Call back to the calling environment's "finish up"
+   function just before returning, to handle any last-minute setup.  */
+ 
 bfd_target *
-sunos4_object_p (abfd)
+some_aout_object_p (abfd, callback_to_real_object_p)
      bfd *abfd;
+     bfd_target *(*callback_to_real_object_p) ();
 {
-  unsigned char magicbuf[4];	/* Raw bytes of magic number from file */
-  unsigned long magic;		/* Swapped magic number */
   unsigned char exec_bytes[EXEC_BYTES_SIZE];	/* Raw bytes of exec hdr */
   struct exec *execp;
   PTR rawptr;
 
-  bfd_error = system_call_error;
-
-  if (bfd_read ((PTR)magicbuf, 1, sizeof (magicbuf), abfd) !=
-      sizeof (magicbuf))
+  if (bfd_seek (abfd, 0L, false) < 0) {
+    bfd_error = system_call_error;
     return 0;
-  magic = bfd_h_getlong (abfd, magicbuf);
-
-  if (N_BADMAG (*((struct exec *) &magic))) return 0;
-
-  if (bfd_seek (abfd, 0L, false) < 0) return 0;
+  }
 
   if (bfd_read ((PTR) exec_bytes, 1, EXEC_BYTES_SIZE, abfd)
       != EXEC_BYTES_SIZE) {
@@ -169,16 +146,16 @@ sunos4_object_p (abfd)
   }
 
   /* Use an intermediate variable for clarity */
-  rawptr = (PTR) bfd_zalloc (abfd, sizeof (struct sunexdata) + sizeof (struct exec));
+  rawptr = (PTR) bfd_zalloc (abfd, sizeof (struct aoutdata) + sizeof (struct exec));
 
   if (rawptr == NULL) {
     bfd_error = no_memory;
     return 0;
   }
 
-  set_tdata (abfd, ((struct sunexdata *) rawptr));
+  set_tdata (abfd, ((struct aoutdata *) rawptr));
   exec_hdr (abfd) = execp =
-    (struct exec *) ((char *)rawptr + sizeof (struct sunexdata));
+    (struct exec *) ((char *)rawptr + sizeof (struct aoutdata));
 
   bfd_aout_swap_exec_header_in (abfd, exec_bytes, execp);
 
@@ -191,75 +168,38 @@ sunos4_object_p (abfd)
   if (execp->a_syms) 
     abfd->flags |= HAS_LINENO | HAS_DEBUG | HAS_SYMS | HAS_LOCALS;
 
-
   if (N_MAGIC (*execp) == ZMAGIC) abfd->flags |= D_PAGED;
   if (N_MAGIC (*execp) == NMAGIC) abfd->flags |= WP_TEXT;
 
-  /* Determine the architecture and machine type of the object file.  */
-  abfd->obj_arch = bfd_arch_unknown;	/* Default values */
-  abfd->obj_machine = 0;
-  switch (N_MACHTYPE (*execp)) {
-
-  case M_UNKNOWN:
-	break;
-
-  case M_68010:
-	abfd->obj_arch = bfd_arch_m68k;
-	abfd->obj_machine = 68010;
-	break;
-
-  case M_68020:
-	abfd->obj_arch = bfd_arch_m68k;
-	abfd->obj_machine = 68020;
-	break;
-
-  case M_SPARC:
-	abfd->obj_arch = bfd_arch_sparc;
-	break;
-
-  case M_386:
-	abfd->obj_arch = bfd_arch_i386;
-	break;
-
-  case M_29K:
-	abfd->obj_arch = bfd_arch_a29k;
-	break;
-
-  default:
-	abfd->obj_arch = bfd_arch_obscure;
-	break;
-  }
-
   bfd_get_start_address (abfd) = execp->a_entry;
 
+  obj_aout_symbols (abfd) = (aout_symbol_type *)NULL;
   bfd_get_symcount (abfd) = execp->a_syms / sizeof (struct nlist);
 
-  /* Remember the positions of the string table and symbol table.  */
-  obj_str_filepos (abfd) = N_STROFF (*execp);
-  obj_sym_filepos (abfd) = N_SYMOFF (*execp);
+  /* Set the default architecture and machine type.  These can be
+     overridden in the callback routine.  */
+  abfd->obj_arch = bfd_arch_unknown;
+  abfd->obj_machine = 0;
+
+  /* The default relocation entry size is that of traditional V7 Unix.  */
+  obj_reloc_entry_size (abfd) = RELOC_STD_SIZE;
 
   /* create the sections.  This is raunchy, but bfd_close wants to reclaim
      them */
   obj_textsec (abfd) = (asection *)NULL;
   obj_datasec (abfd) = (asection *)NULL;
   obj_bsssec (abfd) = (asection *)NULL;
-  obj_aout_symbols(abfd) = (aout_symbol_type *)NULL;
   (void)bfd_make_section(abfd, ".text");
   (void)bfd_make_section(abfd, ".data");
   (void)bfd_make_section(abfd, ".bss");
 
+  abfd->sections = obj_textsec (abfd);
+  obj_textsec (abfd)->next = obj_datasec (abfd);
+  obj_datasec (abfd)->next = obj_bsssec (abfd);
+
   obj_datasec (abfd)->size = execp->a_data;
   obj_bsssec (abfd)->size = execp->a_bss;
   obj_textsec (abfd)->size = execp->a_text;
-  obj_datasec (abfd)->vma = N_DATADDR(*execp);
-  obj_bsssec (abfd)->vma = N_BSSADDR(*execp);
-  obj_textsec (abfd)->vma = N_TXTADDR(*execp);
-
-  obj_textsec (abfd)->filepos = N_TXTOFF(*execp);
-  obj_datasec (abfd)->filepos = N_DATOFF(*execp);
-
-  obj_textsec (abfd)->rel_filepos = N_TRELOFF(*execp);
-  obj_datasec (abfd)->rel_filepos = N_DRELOFF(*execp);
 
   obj_textsec (abfd)->flags = (execp->a_trsize != 0 ?
                                (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_HAS_CONTENTS) :
@@ -269,15 +209,70 @@ sunos4_object_p (abfd)
                                (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS));
   obj_bsssec (abfd)->flags = SEC_ALLOC;
 
-  abfd->sections = obj_textsec (abfd);
-  obj_textsec (abfd)->next = obj_datasec (abfd);
-  obj_datasec (abfd)->next = obj_bsssec (abfd);
-  return abfd->xvec;
+#ifdef THIS_IS_ONLY_DOCUMENTATION
+  /* Call back to the format-dependent code to fill in the rest of the 
+     fields and do any further cleanup.  Things that should be filled
+     in by the callback:  */
+
+        struct exec *execp = exec_hdr (abfd);
+
+	/* The virtual memory addresses of the sections */
+	obj_datasec (abfd)->vma = N_DATADDR(*execp);
+	obj_bsssec (abfd)->vma = N_BSSADDR(*execp);
+	obj_textsec (abfd)->vma = N_TXTADDR(*execp);
+
+	/* The file offsets of the sections */
+	obj_textsec (abfd)->filepos = N_TXTOFF(*execp);
+	obj_datasec (abfd)->filepos = N_DATOFF(*execp);
+
+	/* The file offsets of the relocation info */
+	obj_textsec (abfd)->rel_filepos = N_TRELOFF(*execp);
+	obj_datasec (abfd)->rel_filepos = N_DRELOFF(*execp);
+
+	/* The file offsets of the string table and symbol table.  */
+	obj_str_filepos (abfd) = N_STROFF (*execp);
+	obj_sym_filepos (abfd) = N_SYMOFF (*execp);
+
+     /* This common code can't fill in those things because they depend
+     on either the start address of the text segment, the rounding
+     up of virtual addersses between segments, or the starting file 
+     position of the text segment -- all of which varies among different
+     versions of a.out.  */
+
+	/* Determine the architecture and machine type of the object file.  */
+	switch (N_MACHTYPE (*exec_hdr (abfd))) {
+	default:
+	      abfd->obj_arch = bfd_arch_obscure;
+	      break;
+	}
+
+	/* Determine the size of a relocation entry */
+	switch (abfd->obj_arch) {
+	case bfd_arch_sparc:
+	case bfd_arch_a29k:
+	  obj_reloc_entry_size (abfd) = RELOC_EXT_SIZE;
+	default:
+	  obj_reloc_entry_size (abfd) = RELOC_STD_SIZE;
+	}
+
+	return abfd->xvec;
+
+     /* The architecture is encoded in various ways in various a.out variants,
+     or is not encoded at all in some of them.  The relocation size depends
+     on the architecture and the a.out variant.  Finally, the return value
+     is the bfd_target vector in use.  If an error occurs, return zero and
+     set bfd_error to the appropriate error code.
+
+     Formats such as b.out, which have additional fields in the a.out
+     header, should cope with them in this callback as well.  */
+#endif /* DOCUMENTATION */
+
+  return (*callback_to_real_object_p)(abfd);
 }
 
 
 boolean
-sunos4_mkobject (abfd)
+aout_mkobject (abfd)
      bfd *abfd;
 {
   char *rawptr;
@@ -285,15 +280,15 @@ sunos4_mkobject (abfd)
   bfd_error = system_call_error;
 
   /* Use an intermediate variable for clarity */
-  rawptr = bfd_zalloc (abfd, sizeof (struct sunexdata) + sizeof (struct exec));
+  rawptr = bfd_zalloc (abfd, sizeof (struct aoutdata) + sizeof (struct exec));
 
   if (rawptr == NULL) {
     bfd_error = no_memory;
     return false;
   }
 
-  set_tdata (abfd, (struct sunexdata *) rawptr);
-  exec_hdr (abfd) = (struct exec *) (rawptr + sizeof (struct sunexdata));
+  set_tdata (abfd, (struct aoutdata *) rawptr);
+  exec_hdr (abfd) = (struct exec *) (rawptr + sizeof (struct aoutdata));
 
   /* For simplicity's sake we just make all the sections right here. */
 
@@ -314,7 +309,7 @@ sunos4_mkobject (abfd)
    If the architecture is understood, machine type 0 (default) should
    always be understood.  */
 
-static enum machine_type
+enum machine_type
 aout_machine_type (arch, machine)
      enum bfd_architecture arch;
      unsigned long machine;
@@ -354,7 +349,7 @@ aout_machine_type (arch, machine)
 }
 
 boolean
-sunos4_set_arch_mach (abfd, arch, machine)
+aout_set_arch_mach (abfd, arch, machine)
      bfd *abfd;
      enum bfd_architecture arch;
      unsigned long machine;
@@ -366,359 +361,11 @@ sunos4_set_arch_mach (abfd, arch, machine)
     return false;		/* We can't represent this type */
   return true;			/* We're easy ... */
 }
-
-boolean
-sunos4_write_object_contents (abfd)
-     bfd *abfd;
-{
-  size_t data_pad = 0;
-  unsigned char exec_bytes[EXEC_BYTES_SIZE];
-  struct exec *execp = exec_hdr (abfd);
-
-  execp->a_text = obj_textsec (abfd)->size;
-
-  /* Magic number, maestro, please!  */
-  switch (bfd_get_architecture(abfd)) {
-  case bfd_arch_m68k:
-    switch (bfd_get_machine(abfd)) {
-    case 68010:
-      N_SET_MACHTYPE(*execp, M_68010);
-      break;
-    default:
-    case 68020:
-      N_SET_MACHTYPE(*execp, M_68020);
-      break;
-    }
-    break;
-  case bfd_arch_sparc:
-    N_SET_MACHTYPE(*execp, M_SPARC);
-    break;
-  case bfd_arch_i386:
-    N_SET_MACHTYPE(*execp, M_386);
-    break;
-  case bfd_arch_a29k:
-    N_SET_MACHTYPE(*execp, M_29K);
-    break;
-  default:
-    N_SET_MACHTYPE(*execp, M_UNKNOWN);
-  }
-
-  N_SET_MAGIC (*execp, OMAGIC);
-  if (abfd->flags & D_PAGED) {
-    /* This is not strictly true, but will probably do for the default
-	case.  FIXME.  */
-    execp->a_text = obj_textsec (abfd)->size + sizeof(struct exec);
-    N_SET_MAGIC (*execp, ZMAGIC);
-  } else if (abfd->flags & WP_TEXT) {
-    N_SET_MAGIC (*execp, NMAGIC);
-  }
-  N_SET_FLAGS (*execp, 0x1);	/* copied from ld.c; who the hell knows? */
-
-  if (abfd->flags & D_PAGED) 
-      {
-	data_pad = ((obj_datasec(abfd)->size + PAGE_SIZE -1)
-		    & (- PAGE_SIZE)) - obj_datasec(abfd)->size;
-
-	if (data_pad > obj_bsssec(abfd)->size)
-	  execp->a_bss = 0;
-	else 
-	  execp->a_bss = obj_bsssec(abfd)->size - data_pad;
-	execp->a_data = obj_datasec(abfd)->size + data_pad;
-
-      }
-  else {
-    execp->a_data = obj_datasec (abfd)->size;
-    execp->a_bss = obj_bsssec (abfd)->size;
-  }
-
-  execp->a_syms = bfd_get_symcount (abfd) * sizeof (struct nlist);
-  execp->a_entry = bfd_get_start_address (abfd);
-
-  execp->a_trsize = ((obj_textsec (abfd)->reloc_count) *
-		     reloc_size_func(abfd));
-		       
-  execp->a_drsize = ((obj_datasec (abfd)->reloc_count) *
-		     reloc_size_func(abfd));
-
-  bfd_aout_swap_exec_header_out (abfd, execp, exec_bytes);
-
-  bfd_seek (abfd, 0L, false);
-  bfd_write ((PTR) exec_bytes, 1, EXEC_BYTES_SIZE, abfd);
-
-  /* Now write out reloc info, followed by syms and strings */
-
-  if (bfd_get_symcount (abfd) != 0) 
-    {
-      bfd_seek (abfd,
-		(long)(N_SYMOFF(*execp)), false);
-
-      sunos4_write_syms (abfd);
-
-      bfd_seek (abfd,	(long)(N_TRELOFF(*execp)), false);
-
-      if (!sunos4_squirt_out_relocs (abfd, obj_textsec (abfd))) return false;
-      bfd_seek (abfd, (long)(N_DRELOFF(*execp)), false);
-
-      if (!sunos4_squirt_out_relocs (abfd, obj_datasec (abfd))) return false;
-    }
-  return true;
-}
 
-/* core files */
-
-#define CORE_MAGIC 0x080456
-#define CORE_NAMELEN 16
-
-/* The core structure is taken from the Sun documentation.
-   Unfortunately, they don't document the FPA structure, or at least I
-   can't find it easily.  Fortunately the core header contains its own
-   length.  So this shouldn't cause problems, except for c_ucode, which
-   so far we don't use but is easy to find with a little arithmetic. */
-
-/* But the reg structure can be gotten from the SPARC processor handbook.
-   This really should be in a GNU include file though so that gdb can use
-   the same info. */
-struct regs {
-  int r_psr;
-  int r_pc;
-  int r_npc;
-  int r_y;
-  int r_g1;
-  int r_g2;
-  int r_g3;
-  int r_g4;
-  int r_g5;
-  int r_g6;
-  int r_g7;
-  int r_o0;
-  int r_o1;
-  int r_o2;
-  int r_o3;
-  int r_o4;
-  int r_o5;
-  int r_o6;
-  int r_o7;
-};
-
-/* Taken from Sun documentation: */
-
-/* FIXME:  It's worse than we expect.  This struct contains TWO substructs
-   neither of whose size we know, WITH STUFF IN BETWEEN THEM!  We can't
-   even portably access the stuff in between!  */
-
-struct core {
-  int c_magic;			/* Corefile magic number */
-  int c_len;			/* Sizeof (struct core) */
-  struct regs c_regs;		/* General purpose registers */
-  struct exec c_aouthdr;	/* A.out header */
-  int c_signo;			/* Killing signal, if any */
-  int c_tsize;			/* Text size (bytes) */
-  int c_dsize;			/* Data size (bytes) */
-  int c_ssize;			/* Stack size (bytes) */
-  char c_cmdname[CORE_NAMELEN + 1]; /* Command name */
-  double fp_stuff[1];		/* external FPU state (size unknown by us) */
-		/* The type "double" is critical here, for alignment.
-		   SunOS declares a struct here, but the struct's alignment
-		   is double since it contains doubles.  */
-  int c_ucode;			/* Exception no. from u_code */
-		/* (this member is not accessible by name since we don't
-		    portably know the size of fp_stuff.) */
-};
-
-/* Supposedly the user stack grows downward from the bottom of kernel memory.
-   Presuming that this remains true, this definition will work. */
-#define USRSTACK (-(128*1024*1024))
-
-PROTO (static void, swapcore, (bfd *abfd, struct core *core));
-
-/* need this cast b/c ptr is really void * */
-#define core_hdr(bfd) (((struct suncordata *) (bfd->tdata))->hdr)
-#define core_datasec(bfd) (((struct suncordata *) ((bfd)->tdata))->data_section)
-#define core_stacksec(bfd) (((struct suncordata*)((bfd)->tdata))->stack_section)
-#define core_regsec(bfd) (((struct suncordata *) ((bfd)->tdata))->reg_section)
-#define core_reg2sec(bfd) (((struct suncordata *) ((bfd)->tdata))->reg2_section)
-
-/* These are stored in the bfd's tdata */
-struct suncordata {
-  struct core *hdr;             /* core file header */
-  asection *data_section;
-  asection *stack_section;
-  asection *reg_section;
-  asection *reg2_section;
-};
-
-bfd_target *
-sunos4_core_file_p (abfd)
-     bfd *abfd;
-{
-  unsigned char longbuf[4];	/* Raw bytes of various header fields */
-  int core_size;
-  int core_mag;
-  struct core *core;
-  char *rawptr;
-
-  bfd_error = system_call_error;
-
-  if (bfd_read ((PTR)longbuf, 1, sizeof (longbuf), abfd) !=
-	 sizeof (longbuf))
-    return 0;
-  core_mag = bfd_h_getlong (abfd, longbuf);
-
-  if (core_mag != CORE_MAGIC) return 0;
-
-  /* SunOS core headers can vary in length; second word is size; */
-  if (bfd_read ((PTR)longbuf, 1, sizeof (longbuf), abfd) !=
-	 sizeof (longbuf))
-    return 0;
-  core_size = bfd_h_getlong (abfd, longbuf);
-  /* Sanity check */
-  if (core_size > 20000)
-    return 0;
-
-  if (bfd_seek (abfd, 0L, false) < 0) return 0;
-
-  rawptr = bfd_zalloc (abfd, core_size + sizeof (struct suncordata));
-  if (rawptr == NULL) {
-    bfd_error = no_memory;
-    return 0;
-  }
-
-  core = (struct core *) (rawptr + sizeof (struct suncordata));
-
-  if ((bfd_read ((PTR) core, 1, core_size, abfd)) != core_size) {
-    bfd_error = system_call_error;
-    bfd_release (abfd, rawptr);
-    return 0;
-  }
-
-  swapcore (abfd, core);
-  set_tdata (abfd, ((struct suncordata *) rawptr));
-  core_hdr (abfd) = core;
-
-  /* create the sections.  This is raunchy, but bfd_close wants to reclaim
-     them */
-  core_stacksec (abfd) = (asection *) bfd_zalloc (abfd, sizeof (asection));
-  if (core_stacksec (abfd) == NULL) {
-loser:
-    bfd_error = no_memory;
-    bfd_release (abfd, rawptr);
-    return 0;
-  }
-  core_datasec (abfd) = (asection *) bfd_zalloc (abfd, sizeof (asection));
-  if (core_datasec (abfd) == NULL) {
-loser1:
-    bfd_release (abfd, core_stacksec (abfd));
-    goto loser;
-  }
-  core_regsec (abfd) = (asection *) bfd_zalloc (abfd, sizeof (asection));
-  if (core_regsec (abfd) == NULL) {
-loser2:
-    bfd_release (abfd, core_datasec (abfd));
-    goto loser1;
-  }
-  core_reg2sec (abfd) = (asection *) bfd_zalloc (abfd, sizeof (asection));
-  if (core_reg2sec (abfd) == NULL) {
-    bfd_release (abfd, core_regsec (abfd));
-    goto loser2;
-  }
-
-  core_stacksec (abfd)->name = ".stack";
-  core_datasec (abfd)->name = ".data";
-  core_regsec (abfd)->name = ".reg";
-  core_reg2sec (abfd)->name = ".reg2";
-
-  core_stacksec (abfd)->flags = SEC_ALLOC + SEC_LOAD;
-  core_datasec (abfd)->flags = SEC_ALLOC + SEC_LOAD;
-  core_regsec (abfd)->flags = SEC_ALLOC;
-  core_reg2sec (abfd)->flags = SEC_ALLOC;
-
-  core_stacksec (abfd)->size = core->c_ssize;
-  core_datasec (abfd)->size = core->c_dsize;
-  core_regsec (abfd)->size = (sizeof core->c_regs);
-  /* Float regs take up end of struct, except c_ucode.  */
-  core_reg2sec (abfd)->size = core_size - (sizeof core->c_ucode) -
-			      (file_ptr)(((struct core *)0)->fp_stuff);
-
-  core_stacksec (abfd)->vma = (USRSTACK - core->c_ssize);
-  core_datasec (abfd)->vma = N_DATADDR(core->c_aouthdr);
-  core_regsec (abfd)->vma = -1;
-  core_reg2sec (abfd)->vma = -1;
-
-  core_stacksec (abfd)->filepos = core->c_len + core->c_dsize;
-  core_datasec (abfd)->filepos = core->c_len;
-                        /* In file header: */
-  core_regsec (abfd)->filepos = (file_ptr)(&((struct core *)0)->c_regs);
-  core_reg2sec (abfd)->filepos = (file_ptr)(((struct core *)0)->fp_stuff);
-
-  /* Align to word at least */
-  core_stacksec (abfd)->alignment_power = 2;
-  core_datasec (abfd)->alignment_power = 2;
-  core_regsec (abfd)->alignment_power = 2;
-  core_reg2sec (abfd)->alignment_power = 2;
-
-  abfd->sections = core_stacksec (abfd);
-  core_stacksec (abfd)->next = core_datasec (abfd);
-  core_datasec (abfd)->next = core_regsec (abfd);
-  core_regsec (abfd)->next = core_reg2sec (abfd);
-
-  abfd->section_count = 4;
-
-  return abfd->xvec;
-}
-
-char *
-sunos4_core_file_failing_command (abfd)
-     bfd *abfd;
-{
-  return core_hdr (abfd)->c_cmdname;
-}
-
-int
-sunos4_core_file_failing_signal (abfd)
-     bfd *abfd;
-{
-  return core_hdr (abfd)->c_signo;
-}
+/* exec and core file sections */
 
 boolean
-sunos4_core_file_matches_executable_p  (core_bfd, exec_bfd)
-     bfd *core_bfd, *exec_bfd;
-{
-  if (core_bfd->xvec != exec_bfd->xvec) {
-    bfd_error = system_call_error;
-    return false;
-  }
-
-  return (bcmp ((char *)&core_hdr (core_bfd), (char*) &exec_hdr (exec_bfd),
-                sizeof (struct exec)) == 0) ? true : false;
-}
-
-/* byte-swap core structure */
-/* FIXME, this needs more work to swap IN a core struct from raw bytes */
-static void
-swapcore (abfd, core)
-     bfd *abfd;
-     struct core *core;
-{
-  unsigned char exec_bytes[EXEC_BYTES_SIZE];
-
-  core->c_magic = bfd_h_getlong (abfd, (unsigned char *)&core->c_magic);
-  core->c_len   = bfd_h_getlong (abfd, (unsigned char *)&core->c_len  );
-  /* Leave integer registers in target byte order.  */
-  bcopy ((char *)&(core->c_aouthdr), (char *)exec_bytes, EXEC_BYTES_SIZE);
-  bfd_aout_swap_exec_header_in (abfd, exec_bytes, &core->c_aouthdr);
-  core->c_signo = bfd_h_getlong (abfd, (unsigned char *)&core->c_signo);
-  core->c_tsize = bfd_h_getlong (abfd, (unsigned char *)&core->c_tsize);
-  core->c_dsize = bfd_h_getlong (abfd, (unsigned char *)&core->c_dsize);
-  core->c_ssize = bfd_h_getlong (abfd, (unsigned char *)&core->c_ssize);
-  /* Leave FP registers in target byte order.  */
-  /* Leave "c_ucode" unswapped for now, since we can't find it easily.  */
-}
-
-/** exec and core file sections */
-
-boolean
-sunos4_new_section_hook (abfd, newsect)
+aout_new_section_hook (abfd, newsect)
      bfd *abfd;
      asection *newsect;
 {
@@ -747,10 +394,10 @@ sunos4_new_section_hook (abfd, newsect)
 }
 
 boolean
-sunos4_set_section_contents (abfd, section, location, offset, count)
+aout_set_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
      sec_ptr section;
-     unsigned char *location;
+     PTR location;
      file_ptr offset;
       int count;
 {
@@ -782,28 +429,8 @@ sunos4_set_section_contents (abfd, section, location, offset, count)
   }
   return true;
 }
-
-boolean
-sunos4_get_section_contents (abfd, section, location, offset, count)
-     bfd *abfd;
-     sec_ptr section;
-     PTR location;
-     file_ptr offset;
-     int count;
-{
-  if (count) {
-    if (offset >= section->size) return false;
-
-    bfd_seek (abfd, section->filepos + offset, SEEK_SET);
-
-    return (bfd_read (location, 1, count, abfd) == count) ? true:false;
-  }
-  else return true;
-}
-
 
 /* Classify stabs symbols */
-
 
 #define sym_in_text_section(sym) \
      (((sym)->n_type  & (N_ABS | N_TEXT | N_DATA | N_BSS))== N_TEXT)
@@ -1032,7 +659,7 @@ translate_to_native_sym_flags (sym_pointer, cache_ptr_g, abfd)
    hold them all plus all the cached symbol entries. */
 
 asymbol *
-sunos4_make_empty_symbol (abfd)
+aout_make_empty_symbol (abfd)
 bfd *abfd;
 {
   aout_symbol_type  *new =
@@ -1043,7 +670,7 @@ bfd *abfd;
 }
 
 boolean
-DEFUN(sunos4_slurp_symbol_table, (abfd),
+DEFUN(aout_slurp_symbol_table, (abfd),
       bfd *abfd)
 {
   size_t symbol_size;
@@ -1133,7 +760,7 @@ DEFUN(sunos4_slurp_symbol_table, (abfd),
 
 
 void
-DEFUN(sunos4_write_syms,(abfd),
+DEFUN(aout_write_syms,(abfd),
      bfd *abfd)
 {
   unsigned int count ;
@@ -1203,30 +830,30 @@ DEFUN(sunos4_write_syms,(abfd),
 
 
 void
-DEFUN(sunos4_reclaim_symbol_table,(abfd),
+DEFUN(aout_reclaim_symbol_table,(abfd),
      bfd *abfd)
 {
 
 }
 
 unsigned int
-sunos4_get_symtab_upper_bound (abfd)
+aout_get_symtab_upper_bound (abfd)
      bfd *abfd;
 {
-  if (!sunos4_slurp_symbol_table (abfd)) return 0;
+  if (!aout_slurp_symbol_table (abfd)) return 0;
 
   return (bfd_get_symcount (abfd)+1) * (sizeof (aout_symbol_type *));
 }
 
 unsigned int
-sunos4_get_symtab (abfd, location)
+aout_get_symtab (abfd, location)
      bfd *abfd;
      asymbol **location;
 {
   unsigned int counter = 0;
   aout_symbol_type *symbase;
 
-  if (!sunos4_slurp_symbol_table (abfd)) return 0;
+  if (!aout_slurp_symbol_table (abfd)) return 0;
 
   for (symbase = obj_aout_symbols(abfd); counter++ < bfd_get_symcount (abfd);)
     *(location++) = (asymbol *)( symbase++);
@@ -1262,7 +889,7 @@ swap_std_reloc_out (abfd, g, natptr)
 
   r_addend = g->addend;	/* Start here, see how it goes */
 
-  /* name was clobbered by sunos4_write_syms to be symbol index */
+  /* name was clobbered by aout_write_syms to be symbol index */
 
   if (g->sym_ptr_ptr != NULL) 
     {
@@ -1348,7 +975,7 @@ swap_ext_reloc_out (abfd, g, natptr)
 
   r_addend = g->addend;	/* Start here, see how it goes */
 
-  /* name was clobbered by sunos4_write_syms to be symbol index*/
+  /* name was clobbered by aout_write_syms to be symbol index*/
 
   if (g->sym_ptr_ptr != NULL) 
     {
@@ -1450,7 +1077,7 @@ swap_ext_reloc_in (abfd, bytes, cache_ptr, symbols)
   int r_index;
   int r_extern;
   unsigned int r_type;
-  struct sunexdata *su = (struct sunexdata *)(abfd->tdata);
+  struct aoutdata *su = (struct aoutdata *)(abfd->tdata);
 
   cache_ptr->address = bfd_h_getlong (abfd, bytes->r_address);
 
@@ -1487,7 +1114,7 @@ swap_std_reloc_in (abfd, bytes, cache_ptr, symbols)
   unsigned int r_length;
   int r_pcrel;
   int r_baserel, r_jmptable, r_relative;
-  struct sunexdata *su = (struct sunexdata *)(abfd->tdata);
+  struct aoutdata *su = (struct aoutdata *)(abfd->tdata);
 
   cache_ptr->address = bfd_h_getlong (abfd, bytes->r_address);
 
@@ -1525,7 +1152,7 @@ swap_std_reloc_in (abfd, bytes, cache_ptr, symbols)
 /* Reloc hackery */
 
 boolean
-sunos4_slurp_reloc_table (abfd, asect, symbols)
+aout_slurp_reloc_table (abfd, asect, symbols)
      bfd *abfd;
      sec_ptr asect;
      asymbol **symbols;
@@ -1555,7 +1182,7 @@ sunos4_slurp_reloc_table (abfd, asect, symbols)
 
  doit:
   bfd_seek (abfd, asect->rel_filepos, SEEK_SET);
-  each_size = reloc_size_func(abfd);
+  each_size = obj_reloc_entry_size (abfd);
 
   count = reloc_size / each_size;
 
@@ -1610,8 +1237,8 @@ nomem:
 
 /* Write out a relocation section into an object file.  */
 
-static boolean
-sunos4_squirt_out_relocs (abfd, section)
+boolean
+aout_squirt_out_relocs (abfd, section)
      bfd *abfd;
      asection *section;
 {
@@ -1624,7 +1251,7 @@ sunos4_squirt_out_relocs (abfd, section)
 
   if (count == 0) return true;
 
-  each_size = reloc_size_func(abfd);
+  each_size = obj_reloc_entry_size (abfd);
   natsize = each_size * count;
   native = (unsigned char *) bfd_zalloc (abfd, natsize);
   if (!native) {
@@ -1660,7 +1287,7 @@ sunos4_squirt_out_relocs (abfd, section)
 
 /* This is stupid.  This function should be a boolean predicate */
 unsigned int
-sunos4_canonicalize_reloc (abfd, section, relptr, symbols)
+aout_canonicalize_reloc (abfd, section, relptr, symbols)
      bfd *abfd;
      sec_ptr section;
      arelent **relptr;
@@ -1669,7 +1296,7 @@ sunos4_canonicalize_reloc (abfd, section, relptr, symbols)
   arelent *tblptr = section->relocation;
   unsigned int count;
 
-  if (!(tblptr || sunos4_slurp_reloc_table (abfd, section, symbols)))
+  if (!(tblptr || aout_slurp_reloc_table (abfd, section, symbols)))
     return 0;
 
   if (section->flags & SEC_CONSTRUCTOR) {
@@ -1694,7 +1321,7 @@ sunos4_canonicalize_reloc (abfd, section, relptr, symbols)
 }
 
 unsigned int
-sunos4_get_reloc_upper_bound (abfd, asect)
+aout_get_reloc_upper_bound (abfd, asect)
      bfd *abfd;
      sec_ptr asect;
 {
@@ -1709,12 +1336,12 @@ sunos4_get_reloc_upper_bound (abfd, asect)
 
   if (asect == obj_datasec (abfd))
     return (sizeof (arelent *) *
-            ((exec_hdr(abfd)->a_drsize / reloc_size_func(abfd))
+            ((exec_hdr(abfd)->a_drsize / obj_reloc_entry_size (abfd))
              +1));
 
   if (asect == obj_textsec (abfd))
     return (sizeof (arelent *) *
-            ((exec_hdr(abfd)->a_trsize / reloc_size_func(abfd))
+            ((exec_hdr(abfd)->a_trsize / obj_reloc_entry_size (abfd))
              +1));
 
   bfd_error = invalid_operation;
@@ -1722,7 +1349,7 @@ sunos4_get_reloc_upper_bound (abfd, asect)
 }
 
 void
-sunos4_reclaim_reloc (ignore_abfd, ignore)
+aout_reclaim_reloc (ignore_abfd, ignore)
      bfd *ignore_abfd;
      sec_ptr ignore;
 {
@@ -1731,20 +1358,22 @@ sunos4_reclaim_reloc (ignore_abfd, ignore)
 
 
 alent *
-sunos4_get_lineno(ignore_abfd, ignore_symbol)
+aout_get_lineno(ignore_abfd, ignore_symbol)
 bfd *ignore_abfd;
-PTR ignore_symbol;
+asymbol *ignore_symbol;
 {
 return (alent *)NULL;
 }
 
 void 
-sunos4_print_symbol(ignore_abfd, file,  symbol, how)
+aout_print_symbol(ignore_abfd, afile, symbol, how)
 bfd *ignore_abfd;
-FILE *file;
+PTR afile;
 asymbol *symbol;
 bfd_print_symbol_enum_type how;
 {
+  FILE *file = (FILE *)afile;
+
   switch (how) {
   case bfd_print_symbol_name_enum:
     fprintf(file,"%s", symbol->name);
@@ -1771,24 +1400,6 @@ bfd_print_symbol_enum_type how;
     break;
   }
 }
-/* Once we know all the stuff that could be consed, we know how to clean
-   it up.  So why don't we? */
-
-boolean
-sunos4_close_and_cleanup (abfd)
-     bfd *abfd;
-{
-  if (!bfd_read_p (abfd))
-    switch (abfd->format) {
-    case bfd_archive:
-      if (!_bfd_write_archive_contents (abfd)) return false; break;
-    case bfd_object:
-      if (!sunos4_write_object_contents (abfd))  return false; break;
-    default: bfd_error = invalid_operation; return false;
-    }
-
-  return true;
-}
 
 /* 
  provided a bfd, a section and an offset into the section, calculate
@@ -1797,7 +1408,7 @@ sunos4_close_and_cleanup (abfd)
 */
  
 boolean
-DEFUN(sunos4_find_nearest_line,(abfd,
+DEFUN(aout_find_nearest_line,(abfd,
 				section,
 				symbols,
 				offset,
@@ -1872,63 +1483,9 @@ DEFUN(sunos4_find_nearest_line,(abfd,
 
 }
 
-static int 
-DEFUN(sunos4_sizeof_headers,(ignore_abfd),
+int 
+DEFUN(aout_sizeof_headers,(ignore_abfd),
       bfd *ignore_abfd)
 {
   return 0;		/* FIXME, this is the wrong value! */
 }
-
-#define sunos4_openr_next_archived_file bfd_generic_openr_next_archived_file
-#define sunos4_generic_stat_arch_elt bfd_generic_stat_arch_elt
-#define sunos4_slurp_armap bfd_slurp_bsd_armap
-#define sunos4_slurp_extended_name_table bfd_true
-#define sunos4_write_armap bsd_write_armap
-#define sunos4_truncate_arname bfd_bsd_truncate_arname
-bfd_target aout_big_vec =
-{
-  "a.out-generic-big",		/* name */
-  bfd_target_aout_flavour_enum,
-  true,				/* target byte order */
-  true,				/* target headers byte order */
-  (HAS_RELOC | EXEC_P |		/* object flags */
-   HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
-  ' ',				/* ar_pad_char */
-  16,				/* ar_max_namelen */
-  _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* data */
-  _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* hdrs */
-
-    {_bfd_dummy_target, sunos4_object_p,
-       bfd_generic_archive_p, sunos4_core_file_p},
-    {bfd_false, sunos4_mkobject,
-       _bfd_generic_mkarchive, bfd_false},
-
-  JUMP_TABLE(sunos4)
-  };
-
-
-bfd_target aout_little_vec =
-{
-  "a.out-generic-little",		/* name */
-  bfd_target_aout_flavour_enum,
-  false,			/* target byte order */
-  false,			/* target headers byte order */
-  (HAS_RELOC | EXEC_P |		/* object flags */
-   HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
-  ' ',				/* ar_pad_char */
-  16,				/* ar_max_namelen */
-  _do_getllong, _do_putllong, _do_getlshort, _do_putlshort, /* data */
-  _do_getllong, _do_putllong, _do_getlshort, _do_putlshort, /* hdrs */
-
-
-    {_bfd_dummy_target, sunos4_object_p,
-       bfd_generic_archive_p, sunos4_core_file_p},
-    {bfd_false, sunos4_mkobject,
-       _bfd_generic_mkarchive, bfd_false},
-
-  JUMP_TABLE(sunos4)
-  };
