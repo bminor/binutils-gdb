@@ -1,7 +1,7 @@
 /* tc-m68k.c  All the m68020 specific stuff in one convenient, huge,
    slow to compile, easy to find file.
 
-   Copyright (C) 1987, 1991, 1992 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1991, 1992, 1993 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -99,6 +99,19 @@ static struct obstack robyn;
 #define DBCC            5
 #define PCLEA		6
 
+struct m68k_incant
+  {
+    char *m_operands;
+    unsigned long m_opcode;
+    short m_opnum;
+    short m_codenum;
+    int m_arch;
+    struct m68k_incant *m_next;
+  };
+
+#define getone(x)	((((x)->m_opcode)>>16)&0xffff)
+#define gettwo(x)	(((x)->m_opcode)&0xffff)
+
 /* Operands we can parse:  (And associated modes)
 
    numb:	8 bit num
@@ -176,6 +189,7 @@ struct m68k_exp
   {
     char *e_beg;
     char *e_end;
+    segT e_seg;
     expressionS e_exp;
     short e_siz;		/* 0== default 1==short/byte 2==word 3==long */
   };
@@ -335,8 +349,7 @@ struct m68k_it
     struct
       {
 	int n;
-	symbolS *add, *sub;
-	long off;
+	expressionS exp;
 	char wid;
 	char pcrel;
       }
@@ -349,9 +362,10 @@ struct m68k_it
 
 static struct m68k_it the_ins;	/* the instruction being assembled */
 
-#define seg(exp)	((exp)->e_exp.X_seg)
+#define seg(exp)	((exp)->e_seg)
+#define op(exp)		((exp)->e_exp.X_op)
 #define adds(exp)	((exp)->e_exp.X_add_symbol)
-#define subs(exp)	((exp)->e_exp.X_subtract_symbol)
+#define subs(exp)	((exp)->e_exp.X_op_symbol)
 #define offs(exp)	((exp)->e_exp.X_add_number)
 
 /* Macros for adding things to the m68k_it struct */
@@ -359,21 +373,29 @@ static struct m68k_it the_ins;	/* the instruction being assembled */
 #define addword(w)	the_ins.opcode[the_ins.numo++]=(w)
 
 /* Like addword, but goes BEFORE general operands */
-#define insop(w)	{int z;\
-			     for(z=the_ins.numo;z>opcode->m_codenum;--z)\
-				 the_ins.opcode[z]=the_ins.opcode[z-1];\
-				     for(z=0;z<the_ins.nrel;z++)\
-					 the_ins.reloc[z].n+=2;\
-					     the_ins.opcode[opcode->m_codenum]=w;\
-						 the_ins.numo++;\
-					     }
+static void
+insop (w, opcode)
+     int w;
+     struct m68k_incant *opcode;
+{
+  int z;
+  for(z=the_ins.numo;z>opcode->m_codenum;--z)
+    the_ins.opcode[z]=the_ins.opcode[z-1];
+  for(z=0;z<the_ins.nrel;z++)
+    the_ins.reloc[z].n+=2;
+  the_ins.opcode[opcode->m_codenum]=w;
+  the_ins.numo++;
+}
 
-
-#define add_exp(beg,end) (\
-			  the_ins.exprs[the_ins.nexp].e_beg=beg,\
-			  the_ins.exprs[the_ins.nexp].e_end=end,\
-			  &the_ins.exprs[the_ins.nexp++]\
-			  )
+static struct m68k_exp *
+add_exp (beg, end)
+     char *beg;
+     char *end;
+{
+  the_ins.exprs[the_ins.nexp].e_beg=beg;
+  the_ins.exprs[the_ins.nexp].e_end=end;
+  return &the_ins.exprs[the_ins.nexp++];
+}
 
 
 /* The numo+1 kludge is so we can hit the low order byte of the prev word.
@@ -389,9 +411,7 @@ add_fix (width, exp, pc_rel)
 				   : (((width)=='b')
 				      ? ((the_ins.numo-1)*2)
 				      : (the_ins.numo*2)));
-  the_ins.reloc[the_ins.nrel].add = adds((exp));
-  the_ins.reloc[the_ins.nrel].sub = subs((exp));
-  the_ins.reloc[the_ins.nrel].off = offs((exp));
+  the_ins.reloc[the_ins.nrel].exp = exp->e_exp;
   the_ins.reloc[the_ins.nrel].wid = width;
   the_ins.reloc[the_ins.nrel++].pcrel = pc_rel;
 }
@@ -408,23 +428,8 @@ add_frag(add,off,type)
   the_ins.fragb[the_ins.nfrag++].fragty=type;
 }
 
-#define isvar(exp)	((exp) && (adds(exp) || subs(exp)))
-
-struct m68k_incant
-  {
-    char *m_operands;
-    unsigned long m_opcode;
-    short m_opnum;
-    short m_codenum;
-    int m_arch;
-    struct m68k_incant *m_next;
-  };
-
-
-
-#define getone(x)	((((x)->m_opcode)>>16)&0xffff)
-#define gettwo(x)	(((x)->m_opcode)&0xffff)
-
+#define isvar(exp) \
+  ((exp) && op (exp) != O_constant && op (exp) != O_big)
 
 static char *crack_operand PARAMS ((char *str, struct m68k_op *opP));
 static int get_num PARAMS ((struct m68k_exp *exp, int ok));
@@ -434,11 +439,11 @@ static int reverse_8_bits PARAMS ((int in));
 static int try_index PARAMS ((char **s, struct m68k_op *opP));
 static void install_gen_operand PARAMS ((int mode, int val));
 static void install_operand PARAMS ((int mode, int val));
-static void s_bss PARAMS ((void));
-static void s_data1 PARAMS ((void));
-static void s_data2 PARAMS ((void));
-static void s_even PARAMS ((void));
-static void s_proc PARAMS ((void));
+static void s_bss PARAMS ((int));
+static void s_data1 PARAMS ((int));
+static void s_data2 PARAMS ((int));
+static void s_even PARAMS ((int));
+static void s_proc PARAMS ((int));
 
 static int current_architecture;
 
@@ -546,7 +551,7 @@ CONST pseudo_typeS mote_pseudo_table[] =
   {"sect", obj_coff_section, 0},
   {"section", obj_coff_section, 0},
 #endif
-  0,
+  {0, 0, 0}
 };
 
 #define issbyte(x)	((x)>=-128 && (x)<=127)
@@ -1006,7 +1011,7 @@ m68k_ip_op (str, opP)
 	      char *stmp;
 	      char *index ();
 
-	      if (stmp = index (str, ','))
+	      if ((stmp = index (str, ',')) != NULL)
 		{
 		  opP->con1 = add_exp (str, stmp - 1);
 		  str = stmp;
@@ -1100,7 +1105,7 @@ m68k_ip_op (str, opP)
 	/* "EXP2" or "EXP2(REG..." */
 	char *stmp;
 	char *index ();
-	if (stmp = index (str, '('))
+	if ((stmp = index (str, '(')) != NULL)
 	  {
 	    char *ostr = str;
 
@@ -1552,7 +1557,7 @@ m68k_ip (instring)
   if (p == instring)
     {
       the_ins.error = "No operator";
-      the_ins.opcode[0] = NULL;
+      the_ins.opcode[0] = 0;
       /* the_ins.numo=1; */
       return;
     }
@@ -1584,7 +1589,7 @@ m68k_ip (instring)
   if (opcode == NULL)
     {
       the_ins.error = "Unknown operator";
-      the_ins.opcode[0] = NULL;
+      the_ins.opcode[0] = 0;
       /* the_ins.numo=1; */
       return;
     }
@@ -1680,6 +1685,9 @@ m68k_ip (instring)
 		    case REGLST:
 		    case AINDR:
 		      losing++;
+		      break;
+		    default:
+		      break;
 		    }
 		  break;
 
@@ -1881,8 +1889,7 @@ m68k_ip (instring)
 
 		      t = get_num (opP->con1, 0);
 		      if (!issbyte (t)
-			  || isvar (opP->con1)
-			  || seg (opP->con1) != absolute_section)
+			  || isvar (opP->con1))
 			losing++;
 		    }
 		  break;
@@ -2059,21 +2066,21 @@ m68k_ip (instring)
 		default:
 		  {
 		    int got_one = 0, idx;
-		    CONST static struct
+		    static const struct
 		      {
 			int arch;
-			CONST char *name;
+			const char *name;
 		      }
 		    archs[] =
 		    {
-		      m68000, "68000",
-		      m68010, "68010",
-		      m68020, "68020",
-		      m68030, "68030",
-		      m68040, "68040",
-		      cpu32,  "cpu32",
-		      m68881, "68881",
-		      m68851, "68851",
+		      { m68000, "68000" },
+		      { m68010, "68010" },
+		      { m68020, "68020" },
+		      { m68030, "68030" },
+		      { m68040, "68040" },
+		      { cpu32,  "cpu32" },
+		      { m68881, "68881" },
+		      { m68851, "68851" }
 		    };
 		    for (idx = 0; idx < sizeof (archs) / sizeof (archs[0]); idx++)
 		      {
@@ -2180,28 +2187,33 @@ m68k_ip (instring)
 		  outro = -1;
 		  break;
 		default:
-		  as_fatal ("Internal error:  Can't decode %c%c in line %s of file \"%s\"",
+		  as_fatal ("Internal error:  Can't decode %c%c in line %d of file \"%s\"",
 			    *s, s[1], __LINE__, __FILE__);
 		}
 	      if (!baseo)
 		break;
 
 	      /* We gotta put out some float */
-#if 0
-	      if (seg (opP->con1) != SEG_BIG)
+	      if (op (opP->con1) != O_big)
 		{
-		  int_to_gen (nextword);
-		  gen_to_words (words, baseo, (long int) outro);
-		  for (wordp = words; baseo--; wordp++)
-		    addword (*wordp);
-		  break;
-		}		/* Its BIG */
-#else
-	      if (seg (opP->con1) != big_section)
-		{
-		  abort ();
+		  valueT val;
+		  int gencnt;
+
+		  /* Can other cases happen here?  */
+		  if (op (opP->con1) != O_constant)
+		    abort ();
+		  
+		  val = (valueT) offs (opP->con1);
+		  gencnt = 0;
+		  do
+		    {
+		      generic_bignum[gencnt] = (LITTLENUM_TYPE) val;
+		      val >>= LITTLENUM_NUMBER_OF_BITS;
+		      ++gencnt;
+		    }
+		  while (val != 0);
+		  offs (opP->con1) = gencnt;
 		}
-#endif
 	      if (offs (opP->con1) > 0)
 		{
 		  if (offs (opP->con1) > baseo)
@@ -2210,10 +2222,10 @@ m68k_ip (instring)
 		      offs (opP->con1) = baseo;
 		    }
 		  baseo -= offs (opP->con1);
-		  for (wordp = generic_bignum + offs (opP->con1) - 1; offs (opP->con1)--; --wordp)
-		    addword (*wordp);
 		  while (baseo--)
 		    addword (0);
+		  for (wordp = generic_bignum + offs (opP->con1) - 1; offs (opP->con1)--; --wordp)
+		    addword (*wordp);
 		  break;
 		}
 	      gen_to_words (words, baseo, (long) outro);
@@ -2482,8 +2494,8 @@ m68k_ip (instring)
 		      addword (nextword);
 		      break;
 		    }
-		  /* Don't generate pc relative code
-	     on 68010 and 68000 */
+		  /* Don't generate pc relative code on 68010 and
+		     68000.  */
 		  if (isvar (opP->con1)
 		      && !subs (opP->con1)
 		      && seg (opP->con1) == text_section
@@ -2555,20 +2567,22 @@ m68k_ip (instring)
 				   user beware! */
 	      if (!isbyte (tmpreg))
 		opP->error = "out of range";
-	      insop (tmpreg);
+	      insop (tmpreg, opcode);
 	      if (isvar (opP->con1))
 		the_ins.reloc[the_ins.nrel - 1].n = (opcode->m_codenum) * 2;
 	      break;
 	    case 'w':
 	      if (!isword (tmpreg))
 		opP->error = "out of range";
-	      insop (tmpreg);
+	      insop (tmpreg, opcode);
 	      if (isvar (opP->con1))
 		the_ins.reloc[the_ins.nrel - 1].n = (opcode->m_codenum) * 2;
 	      break;
 	    case 'l':
-	      insop (tmpreg);	/* Because of the way insop works, we put these two out backwards */
-	      insop (tmpreg >> 16);
+	      /* Because of the way insop works, we put these two out
+		 backwards.  */
+	      insop (tmpreg, opcode);
+	      insop (tmpreg >> 16, opcode);
 	      if (isvar (opP->con1))
 		the_ins.reloc[the_ins.nrel - 1].n = (opcode->m_codenum) * 2;
 	      break;
@@ -2579,7 +2593,7 @@ m68k_ip (instring)
 	      install_operand (s[1], tmpreg);
 	      break;
 	    default:
-	      as_fatal ("Internal error:  Unknown mode #%c in line %s of file \"%s\"", s[1], __LINE__, __FILE__);
+	      as_fatal ("Internal error:  Unknown mode #%c in line %d of file \"%s\"", s[1], __LINE__, __FILE__);
 	    }
 	  break;
 
@@ -2687,7 +2701,7 @@ m68k_ip (instring)
 		}
 	      break;
 	    default:
-	      as_fatal ("Internal error:  operand type B%c unknown in line %s of file \"%s\"",
+	      as_fatal ("Internal error:  operand type B%c unknown in line %d of file \"%s\"",
 			s[1], __LINE__, __FILE__);
 	    }
 	  break;
@@ -2810,7 +2824,7 @@ m68k_ip (instring)
 	    {
 	      if (tmpreg & 0x7FF0000)
 		as_bad ("Floating point register in register list");
-	      insop (reverse_16_bits (tmpreg));
+	      insop (reverse_16_bits (tmpreg), opcode);
 	    }
 	  else
 	    {
@@ -2826,7 +2840,7 @@ m68k_ip (instring)
 	    {
 	      if (tmpreg & 0x7FF0000)
 		as_bad ("Floating point register in register list");
-	      insop (tmpreg);
+	      insop (tmpreg, opcode);
 	    }
 	  else if (s[1] == '8')
 	    {
@@ -3196,8 +3210,8 @@ install_operand (mode, val)
       the_ins.opcode[2] |= val << 6;
       break;
     case '6':
-      /* DANGER!  This is a hack to force cas2l and cas2w cmds
-		   to be three words long! */
+      /* DANGER!  This is a hack to force cas2l and cas2w cmds to be
+	 three words long! */
       the_ins.numo++;
       the_ins.opcode[2] |= val;
       break;
@@ -3391,122 +3405,120 @@ verify_symbol_chain_2 (s);
 
 struct init_entry
   {
-    char *name;
+    const char *name;
     int number;
   };
 
-static CONST struct init_entry init_table[] =
+static const struct init_entry init_table[] =
 {
-  "d0", DATA0,
-  "d1", DATA1,
-  "d2", DATA2,
-  "d3", DATA3,
-  "d4", DATA4,
-  "d5", DATA5,
-  "d6", DATA6,
-  "d7", DATA7,
-  "a0", ADDR0,
-  "a1", ADDR1,
-  "a2", ADDR2,
-  "a3", ADDR3,
-  "a4", ADDR4,
-  "a5", ADDR5,
-  "a6", ADDR6,
-  "fp", ADDR6,
-  "a7", ADDR7,
-  "sp", ADDR7,
-  "fp0", FP0,
-  "fp1", FP1,
-  "fp2", FP2,
-  "fp3", FP3,
-  "fp4", FP4,
-  "fp5", FP5,
-  "fp6", FP6,
-  "fp7", FP7,
-  "fpi", FPI,
-  "fpiar", FPI,
-  "fpc", FPI,
-  "fps", FPS,
-  "fpsr", FPS,
-  "fpc", FPC,
-  "fpcr", FPC,
+  { "d0", DATA0 },
+  { "d1", DATA1 },
+  { "d2", DATA2 },
+  { "d3", DATA3 },
+  { "d4", DATA4 },
+  { "d5", DATA5 },
+  { "d6", DATA6 },
+  { "d7", DATA7 },
+  { "a0", ADDR0 },
+  { "a1", ADDR1 },
+  { "a2", ADDR2 },
+  { "a3", ADDR3 },
+  { "a4", ADDR4 },
+  { "a5", ADDR5 },
+  { "a6", ADDR6 },
+  { "fp", ADDR6 },
+  { "a7", ADDR7 },
+  { "sp", ADDR7 },
+  { "fp0", FP0 },
+  { "fp1", FP1 },
+  { "fp2", FP2 },
+  { "fp3", FP3 },
+  { "fp4", FP4 },
+  { "fp5", FP5 },
+  { "fp6", FP6 },
+  { "fp7", FP7 },
+  { "fpi", FPI },
+  { "fpiar", FPI },
+  { "fpc", FPI },
+  { "fps", FPS },
+  { "fpsr", FPS },
+  { "fpc", FPC },
+  { "fpcr", FPC },
 
-  "cop0", COP0,
-  "cop1", COP1,
-  "cop2", COP2,
-  "cop3", COP3,
-  "cop4", COP4,
-  "cop5", COP5,
-  "cop6", COP6,
-  "cop7", COP7,
-  "pc", PC,
-  "zpc", ZPC,
-  "sr", SR,
+  { "cop0", COP0 },
+  { "cop1", COP1 },
+  { "cop2", COP2 },
+  { "cop3", COP3 },
+  { "cop4", COP4 },
+  { "cop5", COP5 },
+  { "cop6", COP6 },
+  { "cop7", COP7 },
+  { "pc", PC },
+  { "zpc", ZPC },
+  { "sr", SR },
 
-  "ccr", CCR,
-  "cc", CCR,
+  { "ccr", CCR },
+  { "cc", CCR },
 
-  "usp", USP,
-  "isp", ISP,
-  "sfc", SFC,
-  "dfc", DFC,
-  "cacr", CACR,
-  "caar", CAAR,
+  { "usp", USP },
+  { "isp", ISP },
+  { "sfc", SFC },
+  { "dfc", DFC },
+  { "cacr", CACR },
+  { "caar", CAAR },
 
-  "vbr", VBR,
+  { "vbr", VBR },
 
-  "msp", MSP,
-  "itt0", ITT0,
-  "itt1", ITT1,
-  "dtt0", DTT0,
-  "dtt1", DTT1,
-  "mmusr", MMUSR,
-  "tc", TC,
-  "srp", SRP,
-  "urp", URP,
+  { "msp", MSP },
+  { "itt0", ITT0 },
+  { "itt1", ITT1 },
+  { "dtt0", DTT0 },
+  { "dtt1", DTT1 },
+  { "mmusr", MMUSR },
+  { "tc", TC },
+  { "srp", SRP },
+  { "urp", URP },
 
-  "ac", AC,
-  "bc", BC,
-  "cal", CAL,
-  "crp", CRP,
-  "drp", DRP,
-  "pcsr", PCSR,
-  "psr", PSR,
-  "scc", SCC,
-  "val", VAL,
-  "bad0", BAD0,
-  "bad1", BAD1,
-  "bad2", BAD2,
-  "bad3", BAD3,
-  "bad4", BAD4,
-  "bad5", BAD5,
-  "bad6", BAD6,
-  "bad7", BAD7,
-  "bac0", BAC0,
-  "bac1", BAC1,
-  "bac2", BAC2,
-  "bac3", BAC3,
-  "bac4", BAC4,
-  "bac5", BAC5,
-  "bac6", BAC6,
-  "bac7", BAC7,
+  { "ac", AC },
+  { "bc", BC },
+  { "cal", CAL },
+  { "crp", CRP },
+  { "drp", DRP },
+  { "pcsr", PCSR },
+  { "psr", PSR },
+  { "scc", SCC },
+  { "val", VAL },
+  { "bad0", BAD0 },
+  { "bad1", BAD1 },
+  { "bad2", BAD2 },
+  { "bad3", BAD3 },
+  { "bad4", BAD4 },
+  { "bad5", BAD5 },
+  { "bad6", BAD6 },
+  { "bad7", BAD7 },
+  { "bac0", BAC0 },
+  { "bac1", BAC1 },
+  { "bac2", BAC2 },
+  { "bac3", BAC3 },
+  { "bac4", BAC4 },
+  { "bac5", BAC5 },
+  { "bac6", BAC6 },
+  { "bac7", BAC7 },
 
-  "ic", IC,
-  "dc", DC,
-  "nc", NC,
+  { "ic", IC },
+  { "dc", DC },
+  { "nc", NC },
 
-  "tt0", TT0,
-  "tt1", TT1,
+  { "tt0", TT0 },
+  { "tt1", TT1 },
   /* 68ec030 versions of same */
-  "ac0", TT0,
-  "ac1", TT1,
+  { "ac0", TT0 },
+  { "ac1", TT1 },
   /* 68ec030 access control unit, identical to 030 MMU status reg */
-  "acusr", PSR,
+  { "acusr", PSR },
 
-  0,
-
+  { 0, 0 }
 };
-
 
 void
 init_regtable ()
@@ -3649,14 +3661,13 @@ md_assemble (str)
 			the_ins.reloc[m].wid);
 	    }
 
-	  fix_new (frag_now,
-		   (toP - frag_now->fr_literal) - the_ins.numo * 2 + the_ins.reloc[m].n,
-		   n,
-		   the_ins.reloc[m].add,
-		   the_ins.reloc[m].sub,
-		   the_ins.reloc[m].off,
-		   the_ins.reloc[m].pcrel,
-		   NO_RELOC);
+	  fix_new_exp (frag_now,
+		       ((toP - frag_now->fr_literal)
+			- the_ins.numo * 2 + the_ins.reloc[m].n),
+		       n,
+		       &the_ins.reloc[m].exp,
+		       the_ins.reloc[m].pcrel,
+		       NO_RELOC);
 	}
       return;
     }
@@ -3693,14 +3704,13 @@ md_assemble (str)
 	  the_ins.reloc[m].wid = 0;
 	  wid = (wid == 'b') ? 1 : (wid == 'w') ? 2 : (wid == 'l') ? 4 : 4000;
 
-	  fix_new (frag_now,
-		   (toP - frag_now->fr_literal) - the_ins.numo * 2 + the_ins.reloc[m].n,
-		   wid,
-		   the_ins.reloc[m].add,
-		   the_ins.reloc[m].sub,
-		   the_ins.reloc[m].off,
-		   the_ins.reloc[m].pcrel,
-		   NO_RELOC);
+	  fix_new_exp (frag_now,
+		       ((toP - frag_now->fr_literal)
+			- the_ins.numo * 2 + the_ins.reloc[m].n),
+		       wid,
+		       &the_ins.reloc[m].exp,
+		       the_ins.reloc[m].pcrel,
+		       NO_RELOC);
 	}
       (void) frag_var (rs_machine_dependent, 10, 0,
 		       (relax_substateT) (the_ins.fragb[n].fragty),
@@ -3729,14 +3739,13 @@ md_assemble (str)
       the_ins.reloc[m].wid = 0;
       wid = (wid == 'b') ? 1 : (wid == 'w') ? 2 : (wid == 'l') ? 4 : 4000;
 
-      fix_new (frag_now,
-	       (the_ins.reloc[m].n + toP - frag_now->fr_literal) - shorts_this_frag * 2,
-	       wid,
-	       the_ins.reloc[m].add,
-	       the_ins.reloc[m].sub,
-	       the_ins.reloc[m].off,
-	       the_ins.reloc[m].pcrel,
-	       NO_RELOC);
+      fix_new_exp (frag_now,
+		   ((the_ins.reloc[m].n + toP - frag_now->fr_literal)
+		    - shorts_this_frag * 2),
+		   wid,
+		   &the_ins.reloc[m].exp,
+		   the_ins.reloc[m].pcrel,
+		   NO_RELOC);
     }
 }
 
@@ -3769,7 +3778,7 @@ md_begin ()
 
   register CONST struct m68k_opcode *ins;
   register struct m68k_incant *hack, *slak;
-  register char *retval = 0;	/* empty string, or error msg text */
+  register const char *retval = 0;	/* empty string, or error msg text */
   register unsigned int i;
   register char c;
 
@@ -3836,7 +3845,7 @@ md_begin ()
 
 #ifndef MIT_SYNTAX_ONLY
   /* Insert pseudo ops, these have to go into the opcode table since
-	   gas expects pseudo ops to start with a dot */
+     gas expects pseudo ops to start with a dot */
   {
     int n = 0;
     while (mote_pseudo_table[n].poc_name)
@@ -4091,14 +4100,13 @@ md_convert_frag_1 (fragP)
 	  if (fragP->fr_opcode[0] == 0x61)
 	    {
 	      fragP->fr_opcode[0] = 0x4E;
-	      fragP->fr_opcode[1] = 0xB9;	/* JBSR with ABSL LONG offset */
+	      fragP->fr_opcode[1] = (char) 0xB9; /* JBSR with ABSL LONG offset */
 	      subseg_change (text_section, 0); /* @@ */
 
 	      fix_new (fragP,
 		       fragP->fr_fix,
 		       4,
 		       fragP->fr_symbol,
-		       0,
 		       fragP->fr_offset,
 		       0,
 		       NO_RELOC);
@@ -4109,10 +4117,10 @@ md_convert_frag_1 (fragP)
 	  else if (fragP->fr_opcode[0] == 0x60)
 	    {
 	      fragP->fr_opcode[0] = 0x4E;
-	      fragP->fr_opcode[1] = 0xF9;	/* JMP  with ABSL LONG offset */
+	      fragP->fr_opcode[1] = (char) 0xF9; /* JMP  with ABSL LONG offset */
 	      subseg_change (text_section, 0); /* @@ */
-	      fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, 0, fragP->fr_offset, 0,
-		       NO_RELOC);
+	      fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
+		       fragP->fr_offset, 0, NO_RELOC);
 	      fragP->fr_fix += 4;
 	      ext = 0;
 	    }
@@ -4123,7 +4131,7 @@ md_convert_frag_1 (fragP)
 	}
       else
 	{
-	  fragP->fr_opcode[1] = 0xff;
+	  fragP->fr_opcode[1] = (char) 0xff;
 	  ext = 4;
 	}
       break;
@@ -4137,12 +4145,11 @@ md_convert_frag_1 (fragP)
 	   different frag, in which case refering to them is a no-no.
 	   Only fr_opcode[0,1] are guaranteed to work. */
       *buffer_address++ = 0x4e;	/* put in jmp long (0x4ef9) */
-      *buffer_address++ = 0xf9;
+      *buffer_address++ = (char) 0xf9;
       fragP->fr_fix += 2;	/* account for jmp instruction */
       subseg_change (text_section, 0);
-      fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, 0,
-	       fragP->fr_offset, 0,
-	       NO_RELOC);
+      fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
+	       fragP->fr_offset, 0, NO_RELOC);
       fragP->fr_fix += 4;
       ext = 0;
       break;
@@ -4155,11 +4162,11 @@ md_convert_frag_1 (fragP)
       *buffer_address++ = 0x60;	/* put in bra pc+6 */
       *buffer_address++ = 0x06;
       *buffer_address++ = 0x4e;	/* put in jmp long (0x4ef9) */
-      *buffer_address++ = 0xf9;
+      *buffer_address++ = (char) 0xf9;
 
       fragP->fr_fix += 6;	/* account for bra/jmp instructions */
       subseg_change (text_section, 0);
-      fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, 0,
+      fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
 	       fragP->fr_offset, 0, NO_RELOC);
       fragP->fr_fix += 4;
       ext = 0;
@@ -4180,11 +4187,12 @@ md_convert_frag_1 (fragP)
 	PCREL is really trying to shorten an ABSOLUTE address anyway */
       /* JF FOO This code has not been tested */
       subseg_change (text_section, 0);
-      fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, 0, fragP->fr_offset,
+      fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, fragP->fr_offset,
 	       0, NO_RELOC);
       if ((fragP->fr_opcode[1] & 0x3F) != 0x3A)
-	as_bad ("Internal error (long PC-relative operand) for insn 0x%04lx at 0x%lx",
-		fragP->fr_opcode[0], fragP->fr_address);
+	as_bad ("Internal error (long PC-relative operand) for insn 0x%04x at 0x%lx",
+		(unsigned) fragP->fr_opcode[0],
+		(unsigned long) fragP->fr_address);
       fragP->fr_opcode[1] &= ~0x3F;
       fragP->fr_opcode[1] |= 0x39;	/* Mode 7.1 */
       fragP->fr_fix += 4;
@@ -4193,7 +4201,7 @@ md_convert_frag_1 (fragP)
     case TAB (PCLEA, SHORT):
       subseg_change (text_section, 0);
       fix_new (fragP, (int) (fragP->fr_fix), 2, fragP->fr_symbol,
-	       (symbolS *) 0, fragP->fr_offset, 1, NO_RELOC);
+	       fragP->fr_offset, 1, NO_RELOC);
       fragP->fr_opcode[1] &= ~0x3F;
       fragP->fr_opcode[1] |= 0x3A;
       ext = 2;
@@ -4201,7 +4209,7 @@ md_convert_frag_1 (fragP)
     case TAB (PCLEA, LONG):
       subseg_change (text_section, 0);
       fix_new (fragP, (int) (fragP->fr_fix) + 2, 4, fragP->fr_symbol,
-	       (symbolS *) 0, fragP->fr_offset + 2, 1, NO_RELOC);
+	       fragP->fr_offset + 2, 1, NO_RELOC);
       *buffer_address++ = 0x01;
       *buffer_address++ = 0x70;
       fragP->fr_fix += 2;
@@ -4270,20 +4278,20 @@ md_estimate_size_before_relax (fragP, segment)
 	    if (fragP->fr_opcode[0] == 0x61)
 	      {
 		fragP->fr_opcode[0] = 0x4E;
-		fragP->fr_opcode[1] = 0xB9;	/* JBSR with ABSL LONG offset */
+		fragP->fr_opcode[1] = (char) 0xB9; /* JBSR with ABSL LONG offset */
 		subseg_change (text_section, 0);
 		fix_new (fragP, fragP->fr_fix, 4,
-			 fragP->fr_symbol, 0, fragP->fr_offset, 0, NO_RELOC);
+			 fragP->fr_symbol, fragP->fr_offset, 0, NO_RELOC);
 		fragP->fr_fix += 4;
 		frag_wane (fragP);
 	      }
 	    else if (fragP->fr_opcode[0] == 0x60)
 	      {
 		fragP->fr_opcode[0] = 0x4E;
-		fragP->fr_opcode[1] = 0xF9;	/* JMP  with ABSL LONG offset */
+		fragP->fr_opcode[1] = (char) 0xF9; /* JMP  with ABSL LONG offset */
 		subseg_change (text_section, 0);
 		fix_new (fragP, fragP->fr_fix, 4,
-			 fragP->fr_symbol, 0, fragP->fr_offset, 0, NO_RELOC);
+			 fragP->fr_symbol, fragP->fr_offset, 0, NO_RELOC);
 		fragP->fr_fix += 4;
 		frag_wane (fragP);
 	      }
@@ -4295,9 +4303,9 @@ md_estimate_size_before_relax (fragP, segment)
 	else
 	  {			/* Symbol is still undefined.  Make it simple */
 	    fix_new (fragP, (int) (fragP->fr_fix), 4, fragP->fr_symbol,
-		     (symbolS *) 0, fragP->fr_offset + 4, 1, NO_RELOC);
+		     fragP->fr_offset + 4, 1, NO_RELOC);
 	    fragP->fr_fix += 4;
-	    fragP->fr_opcode[1] = 0xff;
+	    fragP->fr_opcode[1] = (char) 0xff;
 	    frag_wane (fragP);
 	    break;
 	  }
@@ -4351,10 +4359,10 @@ md_estimate_size_before_relax (fragP, segment)
 	    fragP->fr_opcode[1] = 0x04;	/* branch offset = 6 */
 	    /* JF: these were fr_opcode[2,3] */
 	    buffer_address[0] = 0x4e;	/* put in jmp long (0x4ef9) */
-	    buffer_address[1] = 0xf8;
+	    buffer_address[1] = (char) 0xf8;
 	    fragP->fr_fix += 2;	/* account for jmp instruction */
 	    subseg_change (text_section, 0);
-	    fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol, 0,
+	    fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol,
 		     fragP->fr_offset, 0, NO_RELOC);
 	    fragP->fr_fix += 2;
 	  }
@@ -4363,10 +4371,10 @@ md_estimate_size_before_relax (fragP, segment)
 	    fragP->fr_opcode[1] = 0x06;	/* branch offset = 6 */
 	    /* JF: these were fr_opcode[2,3] */
 	    buffer_address[0] = 0x4e;	/* put in jmp long (0x4ef9) */
-	    buffer_address[1] = 0xf9;
+	    buffer_address[1] = (char) 0xf9;
 	    fragP->fr_fix += 2;	/* account for jmp instruction */
 	    subseg_change (text_section, 0);
-	    fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, 0,
+	    fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
 		     fragP->fr_offset, 0, NO_RELOC);
 	    fragP->fr_fix += 4;
 	  }
@@ -4394,12 +4402,10 @@ md_estimate_size_before_relax (fragP, segment)
 	    /* JF: these were fr_opcode[5-7] */
 	    buffer_address[3] = 0x04;	/* plus 4 */
 	    buffer_address[4] = 0x4e;	/* Put in Jump Word */
-	    buffer_address[5] = 0xf8;
+	    buffer_address[5] = (char) 0xf8;
 	    fragP->fr_fix += 6;	/* account for bra/jmp instruction */
 	    subseg_change (text_section, 0);
-	    fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol, 0,
-
-
+	    fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol,
 		     fragP->fr_offset, 0, NO_RELOC);
 	    fragP->fr_fix += 2;
 	  }
@@ -4408,10 +4414,10 @@ md_estimate_size_before_relax (fragP, segment)
 	    /* JF: these were fr_opcode[5-7] */
 	    buffer_address[3] = 0x06;	/* Plus 6 */
 	    buffer_address[4] = 0x4e;	/* put in jmp long (0x4ef9) */
-	    buffer_address[5] = 0xf9;
+	    buffer_address[5] = (char) 0xf9;
 	    fragP->fr_fix += 6;	/* account for bra/jmp instruction */
 	    subseg_change (text_section, 0);
-	    fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, 0,
+	    fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
 		     fragP->fr_offset, 0, NO_RELOC);
 	    fragP->fr_fix += 4;
 	  }
@@ -4560,8 +4566,8 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
       offset = to_addr - S_GET_VALUE (to_symbol);
       md_number_to_chars (ptr, (valueT) 0x4EF9, 2);
       md_number_to_chars (ptr + 2, (valueT) offset, 4);
-      fix_new (frag, (ptr + 2) - frag->fr_literal, 4, to_symbol, (symbolS *) 0, (long) 0, 0,
-	       NO_RELOC);
+      fix_new (frag, (ptr + 2) - frag->fr_literal, 4, to_symbol, (offsetT) 0,
+	       0, NO_RELOC);
     }
   else
     {
@@ -4660,18 +4666,12 @@ get_num (exp, ok)
   save_in = input_line_pointer;
   input_line_pointer = exp->e_beg;
   section = expression (&exp->e_exp);
-  if (section == pass1_section)
-    {
-      seg (exp) = absolute_section;
-      adds (exp) = 0;
-      subs (exp) = 0;
-      offs (exp) = (ok == 10) ? 1 : 0;
-      as_warn ("Unknown expression: '%s' defaulting to %d", exp->e_beg, offs (exp));
-    }
-  else if (section == absent_section)
+  seg (exp) = section;
+  if (exp->e_exp.X_op == O_absent)
     {
       /* Do the same thing the VAX asm does */
       seg (exp) = absolute_section;
+      op (exp) = O_constant;
       adds (exp) = 0;
       subs (exp) = 0;
       offs (exp) = 0;
@@ -4681,7 +4681,7 @@ get_num (exp, ok)
 	  offs (exp) = 1;
 	}
     }
-  else if (section == absolute_section)
+  else if (exp->e_exp.X_op == O_constant)
     {
       switch (ok)
 	{
@@ -4728,9 +4728,9 @@ get_num (exp, ok)
 	  break;
 	}
     }
-  else if (section == big_section)
+  else if (exp->e_exp.X_op == O_big)
     {
-      if (offs (exp) < 0	/* flonum */
+      if (offs (exp) <= 0	/* flonum */
 	  && (ok == 80		/* no bignums */
 	      || (ok > 10	/* small-int ranges including 0 ok */
 		  /* If we have a flonum zero, a zero integer should
@@ -4743,6 +4743,7 @@ get_num (exp, ok)
 
 	  gen_to_words (words, 2, 8L);	/* These numbers are magic! */
 	  seg (exp) = absolute_section;
+	  op (exp) = O_constant;
 	  adds (exp) = 0;
 	  subs (exp) = 0;
 	  offs (exp) = words[1] | (words[0] << 16);
@@ -4750,6 +4751,7 @@ get_num (exp, ok)
       else if (ok != 0)
 	{
 	  seg (exp) = absolute_section;
+	  op (exp) = O_constant;
 	  adds (exp) = 0;
 	  subs (exp) = 0;
 	  offs (exp) = (ok == 10) ? 1 : 0;
@@ -4761,6 +4763,7 @@ get_num (exp, ok)
       if (ok >= 10 && ok <= 70)
 	{
 	  seg (exp) = absolute_section;
+	  op (exp) = O_constant;
 	  adds (exp) = 0;
 	  subs (exp) = 0;
 	  offs (exp) = (ok == 10) ? 1 : 0;
@@ -4794,31 +4797,35 @@ get_num (exp, ok)
 void demand_empty_rest_of_line ();	/* Hate those extra verbose names */
 
 static void
-s_data1 ()
+s_data1 (ignore)
+     int ignore;
 {
-  subseg_new (data_section, 1);
+  subseg_set (data_section, 1);
   demand_empty_rest_of_line ();
 }
 
 static void
-s_data2 ()
+s_data2 (ignore)
+     int ignore;
 {
-  subseg_new (data_section, 2);
+  subseg_set (data_section, 2);
   demand_empty_rest_of_line ();
 }
 
 static void
-s_bss ()
+s_bss (ignore)
+     int ignore;
 {
   /* We don't support putting frags in the BSS segment, we fake it
      by marking in_bss, then looking at s_skip for clues.  */
 
-  subseg_new (bss_section, 0);
+  subseg_set (bss_section, 0);
   demand_empty_rest_of_line ();
 }
 
 static void
-s_even ()
+s_even (ignore)
+     int ignore;
 {
   register int temp;
   register long temp_fill;
@@ -4831,7 +4838,8 @@ s_even ()
 }
 
 static void
-s_proc ()
+s_proc (ignore)
+     int ignore;
 {
   demand_empty_rest_of_line ();
 }
