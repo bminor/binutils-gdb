@@ -76,8 +76,6 @@ remote-z8k.c\
 rs6000-nat.c\
 rs6000-pinsn.c\
 rs6000-tdep.c\
-ser-bsd.c\
-ser-go32.c\
 solib.c\
 sparc-nat.c\
 sparc-pinsn.c\
@@ -193,6 +191,9 @@ ALLPARAM=\
 ./config/mips/xm-irix4.h\
 ./config/mips/xm-mips.h\
 ./config/nm-sysv4.h\
+./config/none/nm-none.h\
+./config/none/tm-none.h\
+./config/none/xm-none.h\
 ./config/ns32k/nm-umax.h\
 ./config/ns32k/tm-merlin.h\
 ./config/ns32k/tm-umax.h\
@@ -211,6 +212,7 @@ ALLPARAM=\
 ./config/rs6000/tm-rs6000.h\
 ./config/rs6000/xm-rs6000.h\
 ./config/sparc/nm-sun4os4.h\
+./config/sparc/tm-sparclite.h\
 ./config/sparc/tm-spc-em.h\
 ./config/sparc/tm-sun4os4.h\
 ./config/sparc/tm-sun4sol2.h\
@@ -326,6 +328,7 @@ ALLCONFIG=\
 ./config/rs6000/rs6000.mh\
 ./config/rs6000/rs6000.mt\
 ./config/sparc/sparc-em.mt\
+./config/sparc/sparclite.mt\
 ./config/sparc/sun4os4.mh\
 ./config/sparc/sun4os4.mt\
 ./config/sparc/sun4sol2.mh\
