@@ -1,3 +1,25 @@
+Sun Nov  1 16:20:35 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* libbfd-in.h (_bfd_dwarf1_find_nearest_line): Declare.
+	* libbfd.h: Rebuild.
+
+	* elf32-mips.c (mips_elf_dynsym_sec_names): Comment out.
+	(SIZEOF_MIPS_DYNSYM_SECNAMES): Likewise.
+	(MIPS_TEXT_DYNSYM_SECN): Likewise.
+	(_bfd_mips_elf_fake_sections): Don't set sh_info field of a .hash
+	section.
+	(struct mips_elf_link_hash_table): Remove dynsym_sec_strindex
+	field.
+	(mips_elf_link_hash_table_create): Don't initialize
+	dynsym_sec_strindex.
+	(mips_elf_gc_mark_hook): Add default case to avoid warning.
+	(mips_elf_size_dynamic_sections): Generate a section symbol for
+	every output section.
+	(mips_elf_finish_dynamic_sections): Count all sections for
+	DT_MIPS_UNREFEXTNO.
+	(mips_elf_finish_dynamic_sections): Use dynamic symbols for all
+	output sections.
+
 Sun Nov  1 12:46:53 1998  Geoff Keating  <geoffk@ozemail.com.au>
 
 	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Allocate two slots

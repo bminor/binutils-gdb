@@ -319,7 +319,7 @@ extern boolean _bfd_generic_set_section_contents
    bfd_false)
 #define _bfd_nolink_bfd_gc_sections \
   ((boolean (*) \
-    PARAMS ((struct bfd_link_info *))) \
+    PARAMS ((bfd *, struct bfd_link_info *))) \
    bfd_false)
 #define _bfd_nolink_bfd_link_hash_table_create \
   ((struct bfd_link_hash_table *(*) PARAMS ((bfd *))) bfd_nullvoidptr)
@@ -355,6 +355,11 @@ extern asymbol *_bfd_generic_minisymbol_to_symbol
 extern boolean _bfd_stab_section_find_nearest_line
   PARAMS ((bfd *, asymbol **, asection *, bfd_vma, boolean *, const char **,
 	   const char **, unsigned int *, PTR *));
+
+/* Find the neaderst line using DWARF 1 debugging information.  */
+extern boolean _bfd_dwarf1_find_nearest_line
+  PARAMS ((bfd *, asection *, asymbol **, bfd_vma, const char **,
+	   const char **, unsigned int *));
 
 /* Find the nearest line using DWARF 2 debugging information.  */
 extern boolean _bfd_dwarf2_find_nearest_line
@@ -649,7 +654,7 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_SPARC_M44",
   "BFD_RELOC_SPARC_L44",
   "BFD_RELOC_SPARC_REGISTER",
-  "BFD_RELOC_SPARC_32LE",
+  "BFD_RELOC_SPARC_REV32",
   "BFD_RELOC_ALPHA_GPDISP_HI16",
   "BFD_RELOC_ALPHA_GPDISP_LO16",
   "BFD_RELOC_ALPHA_GPDISP",
