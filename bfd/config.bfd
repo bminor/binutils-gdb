@@ -47,7 +47,7 @@ esac
 
 # start-sanitize-sky
 case "${targ}" in
-  mips64r5900-sky-elf*) targ_archs="${targ_archs} bfd_dvp_arch" ;;
+  mips64*-sky*-elf*) targ_archs="${targ_archs} bfd_dvp_arch" ;;
 esac
 # end-sanitize-sky
 
@@ -508,7 +508,8 @@ case "${targ}" in
     targ_defvec=rs6000coff_vec
     ;;
   powerpc-*-*bsd* | powerpc-*-elf* | powerpc-*-sysv4* | powerpc-*-eabi* | \
-  powerpc-*-solaris2* | powerpc-*-linux-gnu* | powerpc-*-rtems*)
+  powerpc-*-solaris2* | powerpc-*-linux-gnu* | powerpc-*-rtems* | \
+  powerpc-*-vxworks*)
     targ_defvec=bfd_elf32_powerpc_vec
     targ_selvecs="rs6000coff_vec bfd_elf32_powerpcle_vec ppcboot_vec"
     ;;
@@ -520,7 +521,7 @@ case "${targ}" in
     targ_selvecs="nlm32_powerpc_vec rs6000coff_vec"
     ;;
   powerpcle-*-elf* | powerpcle-*-sysv4* | powerpcle-*-eabi* | \
-  powerpcle-*-solaris2* | powerpcle-*-linux-gnu*)
+  powerpcle-*-solaris2* | powerpcle-*-linux-gnu* | powerpcle-*-vxworks*)
     targ_defvec=bfd_elf32_powerpcle_vec
     targ_selvecs="rs6000coff_vec bfd_elf32_powerpc_vec ppcboot_vec"
     ;;
