@@ -6,7 +6,7 @@
 srctrigger=as.c
 srcname="gas"
 targetdependent=true
-
+need_bfd=
 # per-host:
 
 gas_host=generic
@@ -45,9 +45,15 @@ cpu_type=${target_cpu}
 
 # assign object format
 case ${target_os} in
-sysv* | -coff*)
+sysv* | -coff* | ebmon )
 	obj_format=coff
 	;;
+
+hds)
+	obj_format=ieee
+	need_bfd="$(unsubdir)/../bfd$(subdir)/libbfd.a"
+	;;
+
 bout*)
 	obj_format=bout
 	;;
@@ -68,6 +74,11 @@ vax)
 	atof=ieee
 	;;
 esac
+
+# and target makefile frag
+
+target_makefile_frag=config/tmake-${target_cpu}
+
 
 files="config/ho-${gas_host}.h config/tc-${cpu_type}.c \
 	config/tc-${cpu_type}.h config/te-${emulation}.h \
