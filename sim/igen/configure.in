@@ -9,7 +9,7 @@ AC_PROG_CC
 SIM_AC_OPTION_WARNINGS
 
 # Put a plausible default for CC_FOR_BUILD in Makefile.
-if test "x$cross_compiling" = "xno"; then
+if test "x$cross_compiling" = "xno" -a "x$host" != "xi386-windows"; then
   AR_FOR_BUILD='$(AR)'
   AR_FLAGS_FOR_BUILD='$(AR_FLAGS)'
   CC_FOR_BUILD='$(CC)'
