@@ -107,7 +107,7 @@ install-info-gasp: gasp.info
 	  dir=$(srcdir) ; \
 	fi ; \
 	for i in `cd $$dir ; echo gasp.info*` ; do \
-		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
+		$(INSTALL_DATA) $$dir/$$i $(infodir)/$$i ; \
 	done
 
 as.dvi:	$(srcdir)/as.texinfo asconfig.texi
@@ -148,15 +148,18 @@ as.me: $(srcdir)/as.texinfo asconfig.texi
 	texi2roff -me >as.me 
 
 clean: clean-dvi clean-info
+	rm -f asconfig.texi
 
 distclean:
-	rm -f Makefile config.status as.?? as.??s as.aux as.log as.toc
+	rm -f Makefile config.status asconfig.texi \
+		as.?? as.??s as.aux as.log as.toc \
+		gasp.?? gasp.??s gasp.aux gasp.log gasp.toc
 
 clean-dvi:
-	rm -f as.?? as.???
+	rm -f as.?? as.??? gasp.?? gasp.???
 
 clean-info:
-	rm -f as.info*
+	rm -f as.info* gasp.info*
 
 force:
 
