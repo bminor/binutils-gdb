@@ -26,12 +26,15 @@
    ever a .lit4?)  On the MIPS, it could be used for .lit4 as well.
 
    The expressions passed here should contain either constants or symbols,
-   *not* a combination of both.  Typically, the constant pool is accessed
+   not a combination of both.  Typically, the constant pool is accessed
    with some sort of GP register, so the size of the pool must be kept down
    if possible.  The exception is section offsets -- if you're storing a
    pointer to the start of .data, for example, and your machine provides
    for 16-bit signed addends, you might want to store .data+32K, so that
-   you can access all of the first 64K of .data with the one pointer...  */
+   you can access all of the first 64K of .data with the one pointer.
+
+   This isn't a requirement, just a guideline that can help keep .o file
+   size down.  */
 
 #include "as.h"
 #include "subsegs.h"
