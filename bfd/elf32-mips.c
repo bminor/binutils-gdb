@@ -2460,21 +2460,8 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
   boolean ok;
 
   /* Check if we have the same endianess */
-  if (ibfd->xvec->byteorder != obfd->xvec->byteorder
-      && obfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)
-    {
-      const char *msg;
-
-      if (bfd_big_endian (ibfd))
-	msg = _("%s: compiled for a big endian system and target is little endian");
-      else
-	msg = _("%s: compiled for a little endian system and target is big endian");
-
-      (*_bfd_error_handler) (msg, bfd_get_filename (ibfd));
-
-      bfd_set_error (bfd_error_wrong_format);
-      return false;
-    }
+  if (_bfd_generic_verify_endian_match (ibfd, obfd) == false)
+    return false;
 
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)

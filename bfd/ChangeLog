@@ -1,3 +1,21 @@
+2000-05-22  Momchil Velikov  <velco@fadata.bg>
+
+	* libbfd.c (_bfd_generic_verify_endian_match): Compare endianess
+        only if it is known for both input and output bfds. Separate
+	error message strings as in some languages, it may be necessary
+	to change more than one place in the string to change between
+	'big' and 'little'. 
+
+	* elf32-ppc.c (ppc_elf_merge_private_bfd_data): Remove inline
+	endianess checks, call _bfd_generic_verify_endian_match() instead.  
+	
+	* elf32-mips.c (_bfd_mips_elf_merge_private_bfd_data): Likewise.  
+
+	* elf32-mcore.c (mcore_elf_merge_private_bfd_data): Likewise.  
+
+	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Likewise. Verify
+	endianess before checking bfd flavours.  
+
 2000-05-22  H.J. Lu  <hjl@gnu.org>
 
 	* elflink.h (elf_link_output_extsym): Clear the visibility

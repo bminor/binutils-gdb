@@ -322,18 +322,8 @@ mcore_elf_merge_private_bfd_data (ibfd, obfd)
   flagword new_flags;
 
   /* Check if we have the same endianess */
-  if (   ibfd->xvec->byteorder != obfd->xvec->byteorder
-      && obfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)
-    {
-      (*_bfd_error_handler)
-	(_("%s: compiled for a %s endian system and target is %s endian.\n"),
-	 bfd_get_filename (ibfd),
-         bfd_big_endian (ibfd) ? "big" : "little",
-         bfd_big_endian (obfd) ? "big" : "little");
-
-      bfd_set_error (bfd_error_wrong_format);
-      return false;
-    }
+  if (_bfd_generic_verify_endian_match (ibfd, obfd) == false)
+    return false;
 
   if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
