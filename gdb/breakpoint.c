@@ -5821,9 +5821,10 @@ can_use_hardware_watchpoint (struct value *v)
 		}
 	    }
 	}
-      else if (v->lval != not_lval && deprecated_value_modifiable (v) == 0)
+      else if (VALUE_LVAL (v) != not_lval
+	       && deprecated_value_modifiable (v) == 0)
 	return 0;	/* ??? What does this represent? */
-      else if (v->lval == lval_register)
+      else if (VALUE_LVAL (v) == lval_register)
 	return 0;	/* cannot watch a register with a HW watchpoint */
     }
 

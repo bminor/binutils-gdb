@@ -784,7 +784,8 @@ cp_print_hpacc_virtual_table_entries (struct type *type, int *vfuncs,
 	  if (value_lazy (vf))
 	    (void) value_fetch_lazy (vf);
 	  /* adjust by offset */
-	  vf->aligner.contents[0] += 4 * (HP_ACC_VFUNC_START + vx);
+	  /* NOTE: cagney/2005-01-02: THIS IS BOGUS.  */
+	  value_contents_writeable (vf)[0] += 4 * (HP_ACC_VFUNC_START + vx);
 	  vf = value_ind (vf);	/* get the entry */
 	  /* make it a pointer */
 	  deprecated_set_value_type (vf, value_type (v));

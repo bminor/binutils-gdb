@@ -536,10 +536,11 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 		       this point.  */
 		    /* Go see if the actual parameter is a variable of
 		       type pointer to function or just a function.  */
-		    if (args[i]->lval == not_lval)
+		    if (VALUE_LVAL (args[i]) == not_lval)
 		      {
 			char *arg_name;
-			if (find_pc_partial_function ((CORE_ADDR) args[i]->aligner.contents[0], &arg_name, NULL, NULL))
+			/* NOTE: cagney/2005-01-02: THIS IS BOGUS.  */
+			if (find_pc_partial_function ((CORE_ADDR) value_contents (args[i])[0], &arg_name, NULL, NULL))
 			  error ("\
 You cannot use function <%s> as argument. \n\
 You must use a pointer to function type variable. Command ignored.", arg_name);

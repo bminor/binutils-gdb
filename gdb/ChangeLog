@@ -1,5 +1,9 @@
 2005-02-07  Andrew Cagney  <cagney@gnu.org>
 
+	* cp-valprint.c, c-valprint.c, infcall.c: Use value_contents or
+	value_contents_writeable, include note that there are problems.
+	* breakpoint.c, infcall.c: Use VALUE_LVAL.
+
 	* value.h (set_value_offset): Declare.
 	* value.c (set_value_offset): Declare.
 	* gnu-v2-abi.c, jv-valprint.c, valarith.c, valops.c: Update.
