@@ -150,7 +150,8 @@ m2-exp.tab.o : m2-exp.tab.c ${srcdir}/defs.h ${srcdir}/../include/ansidecl.h xm.
   tm.h config.status ${srcdir}/symtab.h ${srcdir}/../include/obstack.h ${srcdir}/gdbtypes.h ${srcdir}/frame.h ${srcdir}/expression.h \
   ${srcdir}/language.h ${srcdir}/value.h ${srcdir}/parser-defs.h ${srcdir}/../include/bfd.h ${srcdir}/symfile.h ${srcdir}/objfiles.h 
 m68k-pinsn.o : m68k-pinsn.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status ${srcdir}/../include/fopen-same.h \
-  tm.h config.status symtab.h ${srcdir}/../include/obstack.h ${srcdir}/../include/opcode/m68k.h gdbcore.h ${srcdir}/../include/bfd.h 
+  tm.h config.status symtab.h ${srcdir}/../include/obstack.h ${srcdir}/../include/opcode/m68k.h gdbcore.h ${srcdir}/../include/bfd.h \
+  ieee-float.h 
 m68k-tdep.o : m68k-tdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status ${srcdir}/../include/fopen-same.h \
   tm.h config.status ieee-float.h frame.h symtab.h ${srcdir}/../include/obstack.h 
 m88k-pinsn.o : m88k-pinsn.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status ${srcdir}/../include/fopen-same.h \
@@ -236,6 +237,10 @@ remote-nindy.o : remote-nindy.c defs.h ${srcdir}/../include/ansidecl.h xm.h conf
   gdbtypes.h expression.h target.h ${srcdir}/../include/bfd.h gdbcore.h command.h ieee-float.h \
   ${srcdir}/../include/wait.h ${srcdir}/nindy-share/ttycntl.h ${srcdir}/nindy-share/demux.h ${srcdir}/nindy-share/env.h \
   ${srcdir}/nindy-share/stop.h 
+remote-st2000.o : remote-st2000.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status ${srcdir}/../include/fopen-same.h \
+  tm-29k.h inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h frame.h value.h \
+  gdbtypes.h expression.h ${srcdir}/../include/wait.h terminal.h target.h ${srcdir}/../include/bfd.h \
+  gdbcore.h 
 remote-udi.o : remote-udi.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status ${srcdir}/../include/fopen-same.h \
   tm.h config.status inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h frame.h value.h \
   gdbtypes.h expression.h ${srcdir}/../include/wait.h terminal.h target.h ${srcdir}/../include/bfd.h \
