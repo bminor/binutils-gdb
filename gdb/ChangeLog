@@ -1,3 +1,10 @@
+Thu Mar  8 15:43:40 2001  David Taylor  <taylor@redhat.com>
+
+	* stack.c (parse_frame_specification): For one argument case,
+ 	handle the situation where the argument is an integer, not an
+ 	address -- arguably the most common case.  This matters on
+	targets where pointers and addresses are different.
+
 2001-03-08  Andrew Cagney  <ac131313@redhat.com>
 
 	* TODO: Revise 5.1 list.  Delete PARAMS task.  Add coding standard

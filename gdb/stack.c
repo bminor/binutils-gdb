@@ -704,6 +704,7 @@ parse_frame_specification (char *frame_exp)
   int numargs = 0;
 #define	MAXARGS	4
   CORE_ADDR args[MAXARGS];
+  int level;
 
   if (frame_exp)
     {
@@ -723,8 +724,15 @@ parse_frame_specification (char *frame_exp)
 	  addr_string = savestring (frame_exp, p - frame_exp);
 
 	  {
+	    value_ptr vp;
+
 	    tmp_cleanup = make_cleanup (xfree, addr_string);
-	    args[numargs++] = parse_and_eval_address (addr_string);
+
+	    vp = parse_and_eval (addr_string);
+	    if (numargs == 0)
+	      level = value_as_long (vp);
+
+	    args[numargs++] = value_as_pointer (vp);
 	    do_cleanups (tmp_cleanup);
 	  }
 
@@ -744,7 +752,6 @@ parse_frame_specification (char *frame_exp)
       /* NOTREACHED */
     case 1:
       {
-	int level = args[0];
 	struct frame_info *fid =
 	find_relative_frame (get_current_frame (), &level);
 	struct frame_info *tfid;
