@@ -1,3 +1,30 @@
+2000-07-12  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* regcache.c (registers_changed, registers_fetched): Use 
+	ARCH_NUM_REGS directly, eliminating an unnecessary variable.
+
+	This change adds pseudo-register capability to GDB.
+	Pseudo-registers are handled like registers, but they
+	don't come from or live on the target.  They may be 
+	aliases for an existing register, or they may be computed.
+	* defs.h (NUM_PSEUDO_REGISTERS): Define default of zero.
+	(ARCH_FETCH_PSEUDO_REGISTERS): Define default of no-op.
+	(ARCH_STORE_PSEUDO_REGISTERS): Define default of no-op.
+	# regcache.c (registers_changed): Mark pseudo-registers 
+	invalid, as well as real registers.
+	(registers_fetched): Do not mark pseudo-registers as fetched
+	at the same time as other (real) registers.
+	(read_register_bytes): Fetch pseudo-registers (if any) from
+	the target architecture module instead of from the target.
+	(read_register_gen): Ditto.
+	(read_register): Ditto.
+	(write_register_bytes): Store pseudo-registers (if any) to
+	the target architecture module instead of to the target.
+	(write_register_gen): Ditto.
+	(write_register): Ditto.
+	(build_regcache): Allocate enough register_valid space for
+	pseudo-registers as well as normal (real) ones.
+	
 Tue Jul 11 19:45:42 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
  	* valops.c (value_cast): Allow cast from INT, ENUM or RANGE to

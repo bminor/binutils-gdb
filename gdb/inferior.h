@@ -52,10 +52,34 @@ extern void write_inferior_status_register (struct inferior_status
 
 /* This macro gives the number of registers actually in use by the
    inferior.  This may be less than the total number of registers,
-   perhaps depending on the actual CPU in use or program being run.  */
+   perhaps depending on the actual CPU in use or program being run.  
+   FIXME: This could be replaced by the new MULTI_ARCH capability.  */
 
 #ifndef ARCH_NUM_REGS
 #define ARCH_NUM_REGS NUM_REGS
+#endif
+
+/* This macro gives the number of pseudo-registers that live in the
+   register namespace but do not get fetched or stored on the target.
+   These pseudo-registers may be aliases for other registers, 
+   combinations of other registers, or they may be computed by GDB. 
+   FIXME: move into gdbarch.[ch] */
+#ifndef NUM_PSEUDO_REGS
+#define NUM_PSEUDO_REGS 0
+#endif
+
+/* This function is called when the value of a pseudo-register needs
+   to be updated.  Typically it will be defined on a per-architecture
+   basis.  FIXME: move into gdbarch.[ch].  */
+#ifndef ARCH_FETCH_PSEUDO_REGISTERS
+#define ARCH_FETCH_PSEUDO_REGISTERS(REGNUM) /* no-op */
+#endif
+
+/* This function is called when the value of a pseudo-register needs
+   to be set or stored.  Typically it will be defined on a per-architecture
+   basis.  FIXME: move into gdbarch.[ch].  */
+#ifndef ARCH_STORE_PSEUDO_REGISTERS
+#define ARCH_STORE_PSEUDO_REGISTERS(REGNUM) /* no-op */
 #endif
 
 extern void set_sigint_trap (void);

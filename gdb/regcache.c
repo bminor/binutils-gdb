@@ -282,7 +282,6 @@ void
 registers_changed (void)
 {
   int i;
-  int numregs = ARCH_NUM_REGS;
 
   registers_pid = -1;
 
@@ -293,7 +292,12 @@ registers_changed (void)
      gdb gives control to the user (ie watchpoints).  */
   alloca (0);
 
-  for (i = 0; i < numregs; i++)
+  for (i = 0; i < ARCH_NUM_REGS; i++)
+    register_valid[i] = 0;
+
+  /* Assume that if all the hardware regs have changed, 
+     then so have the pseudo-registers.  */
+  for (i = NUM_REGS; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
     register_valid[i] = 0;
 
   if (registers_changed_hook)
@@ -309,10 +313,11 @@ void
 registers_fetched (void)
 {
   int i;
-  int numregs = ARCH_NUM_REGS;
 
-  for (i = 0; i < numregs; i++)
+  for (i = 0; i < ARCH_NUM_REGS; i++)
     register_valid[i] = 1;
+  /* Do not assume that the pseudo-regs have also been fetched.
+     Fetching all real regs might not account for all pseudo-regs.  */
 }
 
 /* read_register_bytes and write_register_bytes are generally a *BAD*
@@ -351,7 +356,7 @@ read_register_bytes (int inregbyte, char *myaddr, int inlen)
   /* See if we are trying to read bytes from out-of-date registers.  If so,
      update just those registers.  */
 
-  for (regno = 0; regno < NUM_REGS; regno++)
+  for (regno = 0; regno < NUM_REGS + NUM_PSEUDO_REGS; regno++)
     {
       int regstart, regend;
 
@@ -368,9 +373,12 @@ read_register_bytes (int inregbyte, char *myaddr, int inlen)
 	/* The range the user wants to read doesn't overlap with regno.  */
 	continue;
 
-      /* We've found an invalid register where at least one byte will be read.
+      /* We've found an uncached register where at least one byte will be read.
          Update it from the target.  */
-      target_fetch_registers (regno);
+      if (regno < NUM_REGS)
+	target_fetch_registers (regno);
+      else if (regno < NUM_PSEUDO_REGS)
+	ARCH_FETCH_PSEUDO_REGISTERS (regno);
 
       if (!register_valid[regno])
 	error ("read_register_bytes:  Couldn't update register %d.", regno);
@@ -395,7 +403,12 @@ read_register_gen (int regno, char *myaddr)
     }
 
   if (!register_valid[regno])
-    target_fetch_registers (regno);
+    {
+      if (regno < NUM_REGS)
+	target_fetch_registers (regno);
+      else if (regno < NUM_REGS + NUM_PSEUDO_REGS)
+	ARCH_FETCH_PSEUDO_REGISTERS (regno);
+    }
   memcpy (myaddr, &registers[REGISTER_BYTE (regno)],
 	  REGISTER_RAW_SIZE (regno));
 }
@@ -433,13 +446,17 @@ write_register_gen (int regno, char *myaddr)
       && memcmp (&registers[REGISTER_BYTE (regno)], myaddr, size) == 0)
     return;
 
-  target_prepare_to_store ();
+  if (regno < NUM_REGS)
+    target_prepare_to_store ();
 
   memcpy (&registers[REGISTER_BYTE (regno)], myaddr, size);
 
   register_valid[regno] = 1;
 
-  target_store_registers (regno);
+  if (regno < NUM_REGS)
+    target_store_registers (regno);
+  else if (regno < NUM_REGS + NUM_PSEUDO_REGS)
+    ARCH_STORE_PSEUDO_REGISTERS (regno);
 }
 
 /* Copy INLEN bytes of consecutive data from memory at MYADDR
@@ -458,7 +475,7 @@ write_register_bytes (int myregstart, char *myaddr, int inlen)
      nice things like handling threads, and avoiding updates when the
      new and old contents are the same.  */
 
-  for (regno = 0; regno < NUM_REGS; regno++)
+  for (regno = 0; regno < NUM_REGS + NUM_PSEUDO_REGS; regno++)
     {
       int regstart, regend;
 
@@ -490,7 +507,10 @@ write_register_bytes (int myregstart, char *myaddr, int inlen)
 		  myaddr + (overlapstart - myregstart),
 		  overlapend - overlapstart);
 
-	  target_store_registers (regno);
+	  if (regno < NUM_REGS)
+	    target_store_registers (regno);
+	  else if (regno < NUM_REGS + NUM_PSEUDO_REGS)
+	    ARCH_STORE_PSEUDO_REGISTERS (regno);
 	}
     }
 }
@@ -509,7 +529,12 @@ read_register (int regno)
     }
 
   if (!register_valid[regno])
-    target_fetch_registers (regno);
+    {
+      if (regno < NUM_REGS)
+	target_fetch_registers (regno);
+      else if (regno < NUM_PSEUDO_REGS)
+	ARCH_FETCH_PSEUDO_REGISTERS (regno);
+    }
 
   return (extract_unsigned_integer (&registers[REGISTER_BYTE (regno)],
 				    REGISTER_RAW_SIZE (regno)));
@@ -604,13 +629,17 @@ write_register (int regno, LONGEST val)
       && memcmp (&registers[REGISTER_BYTE (regno)], buf, size) == 0)
     return;
 
-  target_prepare_to_store ();
+  if (regno < NUM_REGS)
+    target_prepare_to_store ();
 
   memcpy (&registers[REGISTER_BYTE (regno)], buf, size);
 
   register_valid[regno] = 1;
 
-  target_store_registers (regno);
+  if (regno < NUM_REGS)
+    target_store_registers (regno);
+  else if (regno < NUM_REGS + NUM_PSEUDO_REGS)
+    ARCH_STORE_PSEUDO_REGISTERS (regno);
 }
 
 void
@@ -859,7 +888,8 @@ build_regcache (void)
   /* We allocate some extra slop since we do a lot of memcpy's around
      `registers', and failing-soft is better than failing hard.  */
   int sizeof_registers = REGISTER_BYTES + /* SLOP */ 256;
-  int sizeof_register_valid = NUM_REGS * sizeof (*register_valid);
+  int sizeof_register_valid = 
+    (NUM_REGS + NUM_PSEUDO_REGS) * sizeof (*register_valid);
   registers = xmalloc (sizeof_registers);
   memset (registers, 0, sizeof_registers);
   register_valid = xmalloc (sizeof_register_valid);
