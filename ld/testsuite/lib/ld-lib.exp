@@ -170,7 +170,8 @@ proc default_ld_simple_link { ld target objects } {
     # If we are compiling with gcc, we want to add gcc_ld_flag to
     # flags.  Rather than determine this in some complex way, we guess
     # based on the name of the compiler.
-    if {[string match "*gcc*" $ld] || [string match "*++*" $ld]} then {
+    set ldexe [string replace $ld 0 [string last "/" $ld] ""]
+    if {[string match "*gcc*" $ldexe] || [string match "*++*" $ldexe]} then {
 	set flags "$gcc_ld_flag $flags"
     }
 
@@ -218,7 +219,8 @@ proc default_ld_compile { cc source object } {
     # If we are compiling with gcc, we want to add gcc_gas_flag to
     # flags.  Rather than determine this in some complex way, we guess
     # based on the name of the compiler.
-    if {[string match "*gcc*" $cc] || [string match "*++*" $cc]} then {
+    set ccexe [string replace $cc 0 [string last "/" $cc] ""]
+    if {[string match "*gcc*" $ccexe] || [string match "*++*" $ccexe]} then {
 	set flags "$gcc_gas_flag $flags"
     }
 

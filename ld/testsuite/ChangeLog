@@ -1,3 +1,9 @@
+2003-06-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* lib/ld-lib.exp (default_ld_simple_link): Trim ld path before
+	looking for gcc match.
+	(default_ld_compile): Likewise for cc.
+
 2003-06-17  Loren James Rittle  <rittle@latour.rsch.comm.mot.com>
 
 	* ld-undefined/undefined.exp (i?86-*-freebsd*): Remove xfail.
