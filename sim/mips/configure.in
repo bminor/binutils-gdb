@@ -24,7 +24,9 @@ case "${target}" in
 # start-sanitize-tx19
   mips*tx19*)		SIM_SUBTARGET="-DSUBTARGET_R3900=1";;
 # end-sanitize-tx19
+# start-sanitize-vr4xxx
   mips64vr5xxx*-*-*)	SIM_SUBTARGET="-DTARGET_ENABLE_FR=1" ;;
+# end-sanitize-vr4xxx
   mips*tx39*)           SIM_SUBTARGET="-DSUBTARGET_R3900=1";;
   *)                    SIM_SUBTARGET="";;
 esac
