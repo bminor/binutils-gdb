@@ -1,3 +1,7 @@
+Wed Aug 24 13:04:47 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* configure.in: Change i[34]86 to i[345]86.
+
 Sat Jul 16 13:26:31 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* configure.in (m88*-harris-cxux7*): Recognize.
