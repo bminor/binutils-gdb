@@ -981,15 +981,10 @@ parse_at (src, op)
 		}
 	      else if (mode == A_PC)
 		{
-		  /* Turn a plain @(4,pc) into @(.+4,pc).  */
-		  if (op->immediate.X_op == O_constant)
-		    {
-		      op->immediate.X_add_symbol = dot ();
-		      op->immediate.X_op = O_symbol;
-		      op->type = A_DISP_PC;
-		    }
-		  else
-		    op->type = A_DISP_PC_ABS;
+		  op->type = A_DISP_PC_ABS;
+		  /* Such operands don't get corrected for PC==.+4, so
+		     make the correction here.  */
+		  op->immediate.X_add_number -= 4;
 		}
 	      else
 		{
