@@ -64,10 +64,10 @@ int type3_regs[15] = { 2, 1, 0, 27, 26, 25, 24, 31, 30, 29, 28, 23, 22, 20, 21};
 #endif
 
 
-static unsigned32 trace_values[3];
-static int trace_num_values;
-static unsigned32 trace_pc;
-static char *trace_name;
+unsigned32 trace_values[3];
+int trace_num_values;
+unsigned32 trace_pc;
+const char *trace_name;
 
 
 void
@@ -165,8 +165,20 @@ trace_input (name, type, size)
       trace_num_values = 2;
       break;
       
+    case OP_IMM16_REG_REG:
+      trace_values[0] = EXTEND16 (OP[2]) << size;
+      trace_values[1] = State.regs[OP[1]];
+      trace_num_values = 2;
+      break;
+      
     case OP_UIMM_REG_REG:
       trace_values[0] = (OP[0] & 0xffff) << size;
+      trace_values[1] = State.regs[OP[1]];
+      trace_num_values = 2;
+      break;
+      
+    case OP_UIMM16_REG_REG:
+      trace_values[0] = (OP[2]) << size;
       trace_values[1] = State.regs[OP[1]];
       trace_num_values = 2;
       break;
@@ -197,14 +209,10 @@ trace_input (name, type, size)
 }
 
 void
-trace_output (result)
-     enum op_types result;
+trace_result (int has_result, unsigned32 result)
 {
   char buf[1000];
   char *chp;
-
-  if (!TRACE_ALU_P (STATE_CPU (simulator, 0)))
-    return;
 
   buf[0] = '\0';
   chp = buf;
@@ -224,6 +232,23 @@ trace_output (result)
       }
   }
 
+  /* append any result to the end of the buffer */
+  if (has_result)
+    sprintf (chp, " :: 0x%.8lx", (unsigned long)result);
+  
+  trace_one_insn (simulator, STATE_CPU (simulator, 0), trace_pc,
+		  TRACE_LINENUM_P (STATE_CPU (simulator, 0)),
+		  "simops", __LINE__, "alu", 
+		  "%-*s -%s", SIZE_INSTRUCTION, trace_name, buf);
+}
+
+void
+trace_output (result)
+     enum op_types result;
+{
+  if (!TRACE_ALU_P (STATE_CPU (simulator, 0)))
+    return;
+
   switch (result)
     {
     default:
@@ -238,11 +263,12 @@ trace_output (result)
     case OP_STORE32:
     case OP_BIT:
     case OP_EX2:
+      trace_result (0, 0);
       break;
       
     case OP_LOAD16:
     case OP_STSR:
-      sprintf (chp, " :: 0x%.8lx", (unsigned long)State.regs[OP[0]]);
+      trace_result (1, State.regs[OP[0]]);
       break;
       
     case OP_REG_REG:
@@ -251,29 +277,27 @@ trace_output (result)
     case OP_IMM_REG_MOVE:
     case OP_LOAD32:
     case OP_EX1:
-      sprintf (chp, " :: 0x%.8lx", (unsigned long)State.regs[OP[1]]);
+      trace_result (1, State.regs[OP[1]]);
       break;
       
     case OP_IMM_REG_REG:
     case OP_UIMM_REG_REG:
-      sprintf (chp, " :: 0x%.8lx", (unsigned long)State.regs[OP[2]]);
+    case OP_IMM16_REG_REG:
+    case OP_UIMM16_REG_REG:
+      trace_result (1, State.regs[OP[1]]);
       break;
       
     case OP_JUMP:
       if (OP[1] != 0)
-	sprintf (chp, " :: 0x%.8lx", (unsigned long)State.regs[OP[1]]);
+	trace_result (1, State.regs[OP[1]]);
+      else
+	trace_result (0, 0);
       break;
       
     case OP_LDSR:
-      sprintf (chp, " :: 0x%.8lx", (unsigned long)State.sregs[OP[1]]);
+      trace_result (1, State.sregs[OP[1]]);
       break;
     }
-  
-  trace_one_insn (simulator, STATE_CPU (simulator, 0), trace_pc,
-		  TRACE_LINENUM_P (STATE_CPU (simulator, 0)),
-		  "simops", __LINE__, "alu", 
-		  "%-*s -%s", SIZE_INSTRUCTION, trace_name, buf);
-
 }
 #endif
 
@@ -849,7 +873,7 @@ OP_600 ()
 {
   unsigned int op0, op1, result, z, s, cy, ov;
 
-  trace_input ("addi", OP_IMM_REG_REG, 0);
+  trace_input ("addi", OP_IMM16_REG_REG, 0);
 
   /* Compute the result.  */
 
@@ -869,7 +893,7 @@ OP_600 ()
   PSW &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
   PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0));
-  trace_output (OP_IMM_REG_REG);
+  trace_output (OP_IMM16_REG_REG);
 
   return 4;
 }
@@ -933,28 +957,14 @@ OP_180 ()
 }
 
 /* sxh reg1 */
-/* mulh reg1, reg2 */
 int
 OP_E0 ()
 {
-/* start-sanitize-v850e */
-  if (OP[1] == 0)
-    {
-      trace_input ("sxh", OP_REG, 0);
+  trace_input ("mulh", OP_REG_REG, 0);
       
-      State.regs[ OP[0] ] = EXTEND16 (State.regs[ OP[0] ]);
-
-      trace_output (OP_REG);
-    }
-  else
-/* end-sanitize-v850e */
-    {
-      trace_input ("mulh", OP_REG_REG, 0);
+  State.regs[ OP[1] ] = (EXTEND16 (State.regs[ OP[1] ]) * EXTEND16 (State.regs[ OP[0] ]));
       
-      State.regs[ OP[1] ] = (EXTEND16 (State.regs[ OP[1] ]) * EXTEND16 (State.regs[ OP[0] ]));
-      
-      trace_output (OP_REG_REG);
-    }
+  trace_output (OP_REG_REG);
 
   return 2;
 }
@@ -976,72 +986,55 @@ OP_2E0 ()
 int
 OP_6E0 ()
 {
-  trace_input ("mulhi", OP_IMM_REG_REG, 0);
+  trace_input ("mulhi", OP_IMM16_REG_REG, 0);
   
   State.regs[ OP[1] ] = EXTEND16 (State.regs[ OP[0] ]) * EXTEND16 (OP[2]);
       
-  trace_output (OP_IMM_REG_REG);
+  trace_output (OP_IMM16_REG_REG);
   
   return 4;
 }
 
 /* divh reg1, reg2 */
-/* switch  reg1 */
 int
 OP_40 ()
 {
-/* start-sanitize-v850e */
-  if (OP[1] == 0)
+  unsigned int op0, op1, result, ov, s, z;
+  int temp;
+
+  trace_input ("divh", OP_REG_REG, 0);
+
+  /* Compute the result.  */
+  temp = EXTEND16 (State.regs[ OP[0] ]);
+  op0 = temp;
+  op1 = State.regs[OP[1]];
+  
+  if (op0 == 0xffffffff && op1 == 0x80000000)
     {
-      unsigned long adr;
-
-      trace_input ("switch", OP_REG, 0);
-      
-      adr      = State.pc + 2 + (State.regs[ OP[0] ] << 1);
-      State.pc = State.pc + 2 + (EXTEND16 (load_mem (adr, 2)) << 1);
-
-      trace_output (OP_REG);
+      result = 0x80000000;
+      ov = 1;
+    }
+  else if (op0 != 0)
+    {
+      result = op1 / op0;
+      ov = 0;
     }
   else
-/* end-sanitize-v850e */
     {
-      unsigned int op0, op1, result, ov, s, z;
-      int temp;
-
-      trace_input ("divh", OP_REG_REG, 0);
-
-      /* Compute the result.  */
-      temp = EXTEND16 (State.regs[ OP[0] ]);
-      op0 = temp;
-      op1 = State.regs[OP[1]];
-      
-      if (op0 == 0xffffffff && op1 == 0x80000000)
-	{
-	  result = 0x80000000;
-	  ov = 1;
-	}
-      else if (op0 != 0)
-	{
-	  result = op1 / op0;
-	  ov = 0;
-	}
-      else
-	{
-	  result = 0x0;
-	  ov = 1;
-	}
-      
-      /* Compute the condition codes.  */
-      z = (result == 0);
-      s = (result & 0x80000000);
-      
-      /* Store the result and condition codes.  */
-      State.regs[OP[1]] = result;
-      PSW &= ~(PSW_Z | PSW_S | PSW_OV);
-      PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
-	      | (ov ? PSW_OV : 0));
-      trace_output (OP_REG_REG);
+      result = 0x0;
+      ov = 1;
     }
+  
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+  
+  /* Store the result and condition codes.  */
+  State.regs[OP[1]] = result;
+  PSW &= ~(PSW_Z | PSW_S | PSW_OV);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+	  | (ov ? PSW_OV : 0));
+  trace_output (OP_REG_REG);
 
   return 2;
 }
@@ -1196,54 +1189,39 @@ OP_220 ()
 }
 
 /* satsub reg1, reg2 */
-/* sxb reg1 */
 int
 OP_A0 ()
 {
-/* start-sanitize-v850e */
-  if (OP[1] == 0)
-    {
-      trace_input ("sxb", OP_REG, 0);
-
-      State.regs[ OP[0] ] = EXTEND8 (State.regs[ OP[0] ]);
-
-      trace_output (OP_REG);
-    }
-  else
-/* end-sanitize-v850e */
-    {
-      unsigned int op0, op1, result, z, s, cy, ov, sat;
-
-      trace_input ("satsub", OP_REG_REG, 0);
-      
-      /* Compute the result.  */
-      op0 = State.regs[ OP[0] ];
-      op1 = State.regs[ OP[1] ];
-      result = op1 - op0;
-      
-      /* Compute the condition codes.  */
-      z = (result == 0);
-      s = (result & 0x80000000);
-      cy = (op1 < op0);
-      ov = ((op1 & 0x80000000) != (op0 & 0x80000000)
-	    && (op1 & 0x80000000) != (result & 0x80000000));
-      sat = ov;
-      
-      /* Store the result and condition codes.  */
-      State.regs[OP[1]] = result;
-      PSW &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-      PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
-	      | (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0)
-	      | (sat ? PSW_SAT : 0));
-      
-      /* Handle saturated results.  */
-      if (sat && s)
-	State.regs[OP[1]] = 0x80000000;
-      else if (sat)
-	State.regs[OP[1]] = 0x7fffffff;
-      trace_output (OP_REG_REG);
-    }
-
+  unsigned int op0, op1, result, z, s, cy, ov, sat;
+  
+  trace_input ("satsub", OP_REG_REG, 0);
+  
+  /* Compute the result.  */
+  op0 = State.regs[ OP[0] ];
+  op1 = State.regs[ OP[1] ];
+  result = op1 - op0;
+  
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+  cy = (op1 < op0);
+  ov = ((op1 & 0x80000000) != (op0 & 0x80000000)
+	&& (op1 & 0x80000000) != (result & 0x80000000));
+  sat = ov;
+  
+  /* Store the result and condition codes.  */
+  State.regs[OP[1]] = result;
+  PSW &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+	  | (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0)
+	  | (sat ? PSW_SAT : 0));
+  
+  /* Handle saturated results.  */
+  if (sat && s)
+    State.regs[OP[1]] = 0x80000000;
+  else if (sat)
+    State.regs[OP[1]] = 0x7fffffff;
+  trace_output (OP_REG_REG);
   return 2;
 }
 
@@ -1364,112 +1342,29 @@ OP_0 ()
 }
 
 /* mov sign_extend(imm5), reg */
-/* callt imm6 */
 int
 OP_200 ()
 {
-/* start-sanitize-v850e */
-  if (OP[1] == 0)
-    {
-      unsigned long adr;
-      
-      trace_input ("callt", OP_LOAD16, 1);
-      
-      CTPC  = PC + 2;
-      CTPSW = PSW;
-      
-      adr = CTBP + ((OP[3] & 0x3f) << 1);
-      
-      PC = CTBP + load_mem (adr, 1);
-
-      trace_output (OP_LOAD16);
-
-      return 0;
-    }
-  else
-/* end-sanitize-v850e */
-    {
-      int value = SEXT5 (OP[0]);
- 
-      trace_input ("mov", OP_IMM_REG_MOVE, 0);
-      
-      State.regs[ OP[1] ] = value;
-      
-      trace_output (OP_IMM_REG_MOVE);
-
-      return 2;
-    }
+  int value = SEXT5 (OP[0]);
+  
+  trace_input ("mov", OP_IMM_REG_MOVE, 0);
+  
+  State.regs[ OP[1] ] = value;
+  
+  trace_output (OP_IMM_REG_MOVE);
+  
+  return 2;
 }
 
-/* mov imm32, reg1 */
-/* movea sign_extend(imm16), reg, reg  */
-int
-OP_620 ()
-{
-/* start-sanitize-v850e */
-  if (OP[1] == 0)
-    {
-      trace_input ("mov", OP_IMM_REG, 4);
-
-      State.regs[ OP[0] ] = load_mem (PC + 2, 4);
-      
-      trace_output (OP_IMM_REG);
-
-      return 6;
-    }
-  else
-/* end-sanitize-v850e */
-    {
-      trace_input ("movea", OP_IMM_REG_REG, 0);
-  
-      State.regs[ OP[1] ] = State.regs[ OP[0] ] + EXTEND16 (OP[2]);
-  
-      trace_output (OP_IMM_REG_REG);
-
-      return 4;
-    }
-}
-
-/* dispose imm5, list12 [, reg1] */
 /* movhi imm16, reg, reg */
 int
 OP_640 ()
 {
-/* start-sanitize-v850e */
-
-  if (OP[1] == 0)
-    {
-      int        i;
+  trace_input ("movhi", OP_UIMM16_REG_REG, 16);
       
-      trace_input ("dispose", OP_PUSHPOP1, 0);
-
-      SP += (OP[3] & 0x3e) << 1;
-
-      /* Load the registers with lower number registers being retrieved from higher addresses.  */
-      for (i = 12; i--;)
-	if ((OP[3] & (1 << type1_regs[ i ])))
-	  {
-	    State.regs[ 20 + i ] = load_mem (SP, 4);
-	    SP += 4;
-	  }
-
-      if ((OP[3] & 0x1f0000) != 0)
-	{
-	  PC = State.regs[ (OP[3] >> 16) & 0x1f];
-	  return 0;
-	}
+  State.regs[ OP[1] ] = State.regs[ OP[0] ] + (OP[2] << 16);
       
-      trace_output (OP_PUSHPOP1);
-    }
-  else
-/* end-sanitize-v850e */
-    {
-      trace_input ("movhi", OP_UIMM_REG_REG, 16);
-      
-      State.regs[ OP[1] ] = State.regs[ OP[0] ] + (OP[2] << 16);
-      
-      trace_output (OP_UIMM_REG_REG);
-    }
+  trace_output (OP_UIMM16_REG_REG);
 
   return 4;
 }
@@ -1663,7 +1558,7 @@ OP_680 ()
 {
   unsigned int op0, op1, result, z, s;
 
-  trace_input ("ori", OP_UIMM_REG_REG, 0);
+  trace_input ("ori", OP_UIMM16_REG_REG, 0);
   op0 = OP[2];
   op1 = State.regs[ OP[0] ];
   result = op0 | op1;
@@ -1676,7 +1571,7 @@ OP_680 ()
   State.regs[OP[1]] = result;
   PSW &= ~(PSW_Z | PSW_S | PSW_OV);
   PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
-  trace_output (OP_UIMM_REG_REG);
+  trace_output (OP_UIMM16_REG_REG);
 
   return 4;
 }
@@ -1713,7 +1608,7 @@ OP_6C0 ()
 {
   unsigned int result, z;
 
-  trace_input ("andi", OP_UIMM_REG_REG, 0);
+  trace_input ("andi", OP_UIMM16_REG_REG, 0);
 
   result = OP[2] & State.regs[ OP[0] ];
 
@@ -1726,7 +1621,7 @@ OP_6C0 ()
   PSW &= ~(PSW_Z | PSW_S | PSW_OV);
   PSW |= (z ? PSW_Z : 0);
   
-  trace_output (OP_UIMM_REG_REG);
+  trace_output (OP_UIMM16_REG_REG);
 
   return 4;
 }
@@ -1763,7 +1658,7 @@ OP_6A0 ()
 {
   unsigned int op0, op1, result, z, s;
 
-  trace_input ("xori", OP_UIMM_REG_REG, 0);
+  trace_input ("xori", OP_UIMM16_REG_REG, 0);
   op0 = OP[2];
   op1 = State.regs[ OP[0] ];
   result = op0 ^ op1;
@@ -1776,7 +1671,7 @@ OP_6A0 ()
   State.regs[OP[1]] = result;
   PSW &= ~(PSW_Z | PSW_S | PSW_OV);
   PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
-  trace_output (OP_UIMM_REG_REG);
+  trace_output (OP_UIMM16_REG_REG);
 
   return 4;
 }

@@ -84,16 +84,16 @@ extern SIM_DESC simulator;
 
 #define SIG_V850_EXIT	-1	/* indication of a normal exit */
 
-extern uint32 OP[4];
 
 /* Because we are still using the old semantic table, provide compat
    macro's that store the instruction where the old simops expects
    it. */
 
+extern uint32 OP[4];
 #if 0
 OP[0] = inst & 0x1f;           /* RRRRR -> reg1 */
 OP[1] = (inst >> 11) & 0x1f;   /* rrrrr -> reg2 */
-OP[2] = (inst >> 16) & 0xffff; /* wwwww -> reg3 */
+OP[2] = (inst >> 16) & 0xffff; /* wwwww -> reg3 OR imm16 */
 OP[3] = inst;
 #endif
 
@@ -122,10 +122,11 @@ PC += (CALL); \
 nia = PC
 
 
-#if 0
-extern struct simops Simops[];
-#endif
+/* new */
+#define GR  ((CPU)->reg.regs)
+#define SR  ((CPU)->reg.sregs)
 
+/* old */
 #define State    (STATE_CPU (simulator, 0)->reg)
 #define PC	(State.pc)
 #define SP	(State.regs[3])
@@ -245,6 +246,8 @@ enum op_types
   OP_JUMP,
   OP_IMM_REG_REG,
   OP_UIMM_REG_REG,
+  OP_IMM16_REG_REG,
+  OP_UIMM16_REG_REG,
   OP_BIT,
   OP_EX1,
   OP_EX2,
@@ -266,9 +269,60 @@ enum op_types
 #ifdef DEBUG
 void trace_input PARAMS ((char *name, enum op_types type, int size));
 void trace_output PARAMS ((enum op_types result));
+void trace_result PARAMS ((int has_result, unsigned32 result));
+
+extern int trace_num_values;
+extern unsigned32 trace_values[];
+extern unsigned32 trace_pc;
+extern const char *trace_name;
+
+#define TRACE_ALU_INPUT0() \
+do { \
+  if (TRACE_ALU_P (CPU)) { \
+    trace_pc = CIA; \
+    trace_name = itable[MY_INDEX].name; \
+    trace_num_values = 0; \
+  } \
+} while (0)
+
+#define TRACE_ALU_INPUT1(IN1) \
+do { \
+  if (TRACE_ALU_P (CPU)) { \
+    trace_pc = CIA; \
+    trace_name = itable[MY_INDEX].name; \
+    trace_values[0] = (IN1); \
+    trace_num_values = 1; \
+  } \
+} while (0)
+
+#define TRACE_ALU_INPUT2(IN1, IN2) \
+do { \
+  if (TRACE_ALU_P (CPU)) { \
+    trace_pc = CIA; \
+    trace_name = itable[MY_INDEX].name; \
+    trace_values[0] = (IN1); \
+    trace_values[1] = (IN2); \
+    trace_num_values = 2; \
+  } \
+} while (0)
+
+#define TRACE_ALU_RESULT(RESULT) \
+do { \
+  if (TRACE_ALU_P (CPU)) { \
+    trace_result (1, (RESULT)); \
+  } \
+} while (0)
+
+
 #else
 #define trace_input(NAME, IN1, IN2)
 #define trace_output(RESULT)
+#define trace_result(HAS_RESULT, RESULT)
+
+#define TRACE_ALU_INPUT0()
+#define TRACE_ALU_INPUT1(IN1)
+#define TRACE_ALU_INPUT2(IN1, IN2)
+#define TRACE_ALU_RESULT(RESULT)
 #endif
 
 

@@ -1,3 +1,39 @@
+Tue Sep 16 22:14:01 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* simops.c (trace_output): Add result argument.
+	(trace_result): New function.  Simpler version of trace_output,
+ 	assumes trace needed.
+	(trace_output): Call trace_result.
+	(trace_output): For IMM_REG_REG, trace correct register.
+	(trace_input): Add case for 16bit immediates.
+	(OP_600, OP_640, OP_680, OP_6C0, OP_6A0): Use.
+
+	* sim-main.h (TRACE_ALU_INPUT, TRACE_ALU_RESULT): Define.
+	(trace_values, trace_name, trace_pc, trace_num_values): Make
+ 	global.
+	(GR, SR): Define.
+	
+	v850.insn (movea, stsr): Use.
+start-sanitize-v850e
+	(sxb, sxh, zxb, zxh): Ditto.
+end-sanitize-v850e
+	
+Tue Sep 16 21:14:01 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* simops.c: Move "movea" from here.
+	* v850.igen: To here.
+
+	* v850.igen (simm16): Define, sign extend imm16.
+	(uimm16): Define, no sign extension.
+	(addi, andi, movea, movhi, mulhi, ori, satsubi, xori): Use.
+	
+start-sanitize-v850e
+	* simops.c: Move "sxh", "switch", "sxb", "callt", "dispose",
+ 	"mov32" from here.
+	* v850.igen: To here.
+	(switch): Fix off by two error in NIA calc.
+	
+end-sanitize-v850e
 Tue Sep 16 15:14:01 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* simops.c (trace_pc, trace_name, trace_values, trace_num_values):

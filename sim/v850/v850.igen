@@ -52,10 +52,10 @@
 # start-sanitize-v850eq
 :cache::unsigned:imm5:iiii:(32 - (iiii << 1))
 # end-sanitize-v850eq
-:cache::unsigned:imm16:iiiiiiiiiiiiiiii:iiiiiiiiiiiiiiii
+:cache::unsigned:simm16:iiiiiiiiiiiiiiii:EXTEND16 (iiiiiiiiiiiiiiii)
+:cache::unsigned:uimm16:iiiiiiiiiiiiiiii:iiiiiiiiiiiiiiii
 :cache::unsigned:imm32:iiiiiiiiiiiiiiii,IIIIIIIIIIIIIIII:(iiiiiiiiiiiiiiii < 16 + IIIIIIIIIIIIIIII)
 # start-sanitize-v850e
-:cache::unsigned:uimm16:iiiiiiiiiiiiiiii:iiiiiiiiiiiiiiii
 :cache::unsigned:uimm32:iiiiiiiiiiiiiiii,dddddddddddddddd:((iiiiiiiiiiiiiiii << 16) + dddddddddddddddd)
 # end-sanitize-v850e
 
@@ -97,7 +97,7 @@ rrrrr,010010,iiiii:II:::add
 
 // ADDI
 rrrrr,110000,RRRRR + iiiiiiiiiiiiiiii:VI:::addi
-"addi <imm16>, r<reg1>, r<reg2>"
+"addi <simm16>, r<reg1>, r<reg2>"
 {
   COMPAT_2 (OP_600 ());
 }
@@ -115,7 +115,7 @@ rrrrr,001010,RRRRR:I:::and
 
 // ANDI
 rrrrr,110110,RRRRR + iiiiiiiiiiiiiiii:VI:::andi
-"andi <imm16>, r<reg1>, r<reg2>"
+"andi <uimm16>, r<reg1>, r<reg2>"
 {
   COMPAT_2 (OP_6C0 ());
 }
@@ -263,7 +263,14 @@ rrrrr,11111100000 + wwwww,01101000000:XII:::bsw
 // end-sanitize-v850eq
 "callt <imm6>"
 {
-  COMPAT_1 (OP_200 ());
+  unsigned long adr;
+  SAVE_1;
+  trace_input ("callt", OP_LOAD16, 1);
+  CTPC  = cia + 2;
+  CTPSW = PSW;
+  adr = CTBP + ((OP[3] & 0x3f) << 1);
+  nia = CTBP + load_mem (adr, 1);
+  trace_output (OP_LOAD16);
 }
 
 
@@ -368,7 +375,28 @@ rrrrr,010011,iiiii:II:::cmp
 "dispose <imm5>, <list12>":RRRRR == 0
 "dispose <imm5>, <list12>, [reg1]"
 {
-  COMPAT_2 (OP_640 ());
+  int i;
+  SAVE_2;
+      
+  trace_input ("dispose", OP_PUSHPOP1, 0);
+
+  SP += (OP[3] & 0x3e) << 1;
+
+  /* Load the registers with lower number registers being retrieved
+     from higher addresses.  */
+  for (i = 12; i--;)
+    if ((OP[3] & (1 << type1_regs[ i ])))
+      {
+	State.regs[ 20 + i ] = load_mem (SP, 4);
+	SP += 4;
+      }
+  
+  if ((OP[3] & 0x1f0000) != 0)
+    {
+      nia = State.regs[ (OP[3] >> 16) & 0x1f];
+    }
+  
+  trace_output (OP_PUSHPOP1);
 }
 
 
@@ -579,7 +607,10 @@ rrrrr!0,010000,iiiii:II:::mov
 // end-sanitize-v850eq
 "mov <imm32>, r<reg1>"
 {
-  COMPAT_2 (OP_620 ());
+  SAVE_2;
+  trace_input ("mov", OP_IMM_REG, 4);
+  State.regs[ OP[0] ] = load_mem (PC + 2, 4);
+  trace_output (OP_IMM_REG);
 }
 
 
@@ -587,16 +618,18 @@ rrrrr!0,010000,iiiii:II:::mov
 // end-sanitize-v850e
 // MOVEA
 rrrrr!0,110001,RRRRR + iiiiiiiiiiiiiiii:VI:::movea
-"movea <imm16>, r<reg1>, r<reg2>"
+"movea <simm16>, r<reg1>, r<reg2>"
 {
-  COMPAT_2 (OP_620 ());
+  TRACE_ALU_INPUT2 (GR[reg1], simm16);
+  GR[reg2] = GR[reg1] + simm16;
+  TRACE_ALU_RESULT (GR[reg2]);
 }
 
 
 
 // MOVHI
 rrrrr!0,110010,RRRRR + iiiiiiiiiiiiiiii:VI:::movhi
-"movhi <imm16>, r<reg1>, r<reg2>"
+"movhi <uimm16>, r<reg1>, r<reg2>"
 {
   COMPAT_2 (OP_640 ());
 }
@@ -647,7 +680,7 @@ rrrrr!0,010111,iiiii:II:::mulh
 
 // MULHI
 rrrrr!0,110111,RRRRR + iiiiiiiiiiiiiiii:VI:::mulhi
-"mulhi <imm16>, r<reg1>, r<reg2>"
+"mulhi <uimm16>, r<reg1>, r<reg2>"
 {
   COMPAT_2 (OP_6E0 ());
 }
@@ -729,7 +762,7 @@ rrrrr,001000,RRRRR:I:::or
 
 // ORI 
 rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
-"ori <imm16>, r<reg1>, r<reg2>"
+"ori <uimm16>, r<reg1>, r<reg2>"
 {
   COMPAT_2 (OP_680 ());
 }
@@ -874,7 +907,7 @@ rrrrr!0,000101,RRRRR:I:::satsub
 
 // SATSUBI
 rrrrr!0,110011,RRRRR + iiiiiiiiiiiiiiii:VI:::satsubi
-"satsubi <imm16>, r<reg1>, r<reg2>"
+"satsubi <simm16>, r<reg1>, r<reg2>"
 {
   COMPAT_2 (OP_660 ());
 }
@@ -1055,13 +1088,9 @@ rrrrr,111011,RRRRR + ddddddddddddddd,1:VII:::st.w
 rrrrr,111111,RRRRR + 0000000001000000:IX:::stsr
 "stsr r<regID>, r<reg1>"
 {
-  SAVE_2;
-
-  trace_input ("stsr", OP_STSR, 0);
-  
-  State.regs[ reg1 ] = State.sregs[ regID ];
-  
-  trace_output (OP_STSR);
+  TRACE_ALU_INPUT0();
+  GR[reg1] = SR[regID];
+  TRACE_ALU_RESULT (GR[reg1]);
 }
 
 
@@ -1093,12 +1122,17 @@ rrrrr,001100,RRRRR:I:::subr
 // end-sanitize-v850eq
 "switch r<reg1>"
 {
-  COMPAT_1 (OP_40 ());
+  unsigned long adr;
+  SAVE_1;
+  trace_input ("switch", OP_REG, 0);
+  adr = (cia + 2) + (State.regs[ reg1 ] << 1);
+  nia = (cia + 2) + (EXTEND16 (load_mem (adr, 2)) << 1);
+  trace_output (OP_REG);
 }
+
+
+
 // end-sanitize-v850e
-
-
-
 // start-sanitize-v850e
 // SXB
 00000000101,RRRRR:I:::sxb
@@ -1108,7 +1142,9 @@ rrrrr,001100,RRRRR:I:::subr
 // end-sanitize-v850eq
 "sxb r<reg1>"
 {
-  COMPAT_1 (OP_A0 ());
+  TRACE_ALU_INPUT1 (GR[reg1]);
+  GR[reg1] = EXTEND8 (GR[reg1]);
+  TRACE_ALU_RESULT (GR[reg1]);
 }
 
 
@@ -1123,7 +1159,9 @@ rrrrr,001100,RRRRR:I:::subr
 // end-sanitize-v850eq
 "sxh r<reg1>"
 {
-  COMPAT_1 (OP_E0 ());
+  TRACE_ALU_INPUT1 (GR[reg1]);
+  GR[reg1] = EXTEND16 (GR[reg1]);
+  TRACE_ALU_RESULT (GR[reg1]);
 }
 
 
@@ -1179,7 +1217,7 @@ rrrrr,001001,RRRRR:I:::xor
 
 // XORI
 rrrrr,110101,RRRRR + iiiiiiiiiiiiiiii:VI:::xori
-"xori <imm16>, r<reg1>, r<reg2>"
+"xori <uimm16>, r<reg1>, r<reg2>"
 {
   COMPAT_2 (OP_6A0 ());
 }
@@ -1195,13 +1233,9 @@ rrrrr,110101,RRRRR + iiiiiiiiiiiiiiii:VI:::xori
 // end-sanitize-v850eq
 "zxb r<reg1>"
 {
-  SAVE_1;
-
-  trace_input ("zxb", OP_REG, 0);
-
-  State.regs[ OP[0] ] &= 0xff;
-
-  trace_output (OP_REG);
+  TRACE_ALU_INPUT1 (GR[reg1]);
+  GR[reg1] = GR[reg1] & 0xff;
+  TRACE_ALU_RESULT (GR[reg1]);
 }
 
 
@@ -1216,13 +1250,9 @@ rrrrr,110101,RRRRR + iiiiiiiiiiiiiiii:VI:::xori
 // end-sanitize-v850eq
 "zxh r<reg1>"
 {
-  SAVE_1;
-
-  trace_input ("zxh", OP_REG, 0);
-      
-  State.regs[ OP[0] ] &= 0xffff;
-
-  trace_output (OP_REG);
+  TRACE_ALU_INPUT1 (GR[reg1]);
+  GR[reg1] = GR[reg1] & 0xffff;
+  TRACE_ALU_RESULT (GR[reg1]);
 }
 
 
