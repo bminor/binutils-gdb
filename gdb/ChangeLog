@@ -1,3 +1,16 @@
+Sat Aug  6 22:27:30 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* config/mips/tm-irix5.h (IN_SIGTRAMP):  Redefine for Irix 5,
+	Irix 5 has a standard _sigtramp signal handler.
+	* irix5-nat.c (solib_add):  Get rid of sigtramp_address handling,
+	it is not needed for a standard _sigtramp signal handler.
+	Add shared library sections to the section table of the target
+	before adding the symbols.
+	* mips-tdep.c (mips_skip_prologue):  Do not skip load immediate
+	instructions that do not prepare a stack adjustment.
+	* regex.c (SIGN_EXTEND_CHAR):  Update to emacs-19.25 definition,
+	which does the right thing on machines where `char' is unsigned.
+
 Fri Aug  5 17:50:59 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* remote.c (remote_open):  Move setting of inferior_pid prior to

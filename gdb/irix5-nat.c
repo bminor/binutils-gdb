@@ -217,8 +217,6 @@ static char *bkpt_names[] = {
 
 char shadow_contents[BREAKPOINT_MAX];	/* Stash old bkpt addr contents */
 
-extern CORE_ADDR sigtramp_address, sigtramp_end;
-
 struct so_list {
   struct so_list *next;			/* next structure in linked list */
   struct obj_list ll;
@@ -615,37 +613,10 @@ solib_add (arg_string, from_tty, target)
       error ("Invalid regexp: %s", re_err);
     }
   
-  /* Getting new symbols may change our opinion about what is
-     frameless.  */
-  reinit_frame_cache ();
-  /* Not to mention where _sigtramp is.  */
-  sigtramp_address = 0;
-  
-  while ((so = find_solib (so)) != NULL)
-    {
-      if (so -> lm.o_path[0] && re_exec (so -> lm.o_path))
-	{
-	  so -> from_tty = from_tty;
-	  if (so -> symbols_loaded)
-	    {
-	      if (from_tty)
-		{
-		  printf_unfiltered ("Symbols already loaded for %s\n", so -> lm.o_path);
-		}
-	    }
-	  else if (catch_errors
-		   (symbol_add_stub, (char *) so,
-		    "Error while reading shared library symbols:\n",
-		    RETURN_MASK_ALL))
-	    {
-	      so_last = so;
-	      so -> symbols_loaded = 1;
-	    }
-	}
-    }
-  
-  /* Now add the shared library sections to the section table of the
-     specified target, if any.  */
+  /* Add the shared library sections to the section table of the
+     specified target, if any. We have to do this before reading the
+     symbol files as symbol_file_add calls reinit_frame_cache and
+     creating a new frame might access memory in the shared library.  */
   if (target)
     {
       /* Count how many new section_table entries there are.  */
@@ -688,6 +659,30 @@ solib_add (arg_string, from_tty, target)
 			  (sizeof (struct section_table)) * count);
 		  old += count;
 		}
+	    }
+	}
+    }
+  
+  /* Now add the symbol files.  */
+  while ((so = find_solib (so)) != NULL)
+    {
+      if (so -> lm.o_path[0] && re_exec (so -> lm.o_path))
+	{
+	  so -> from_tty = from_tty;
+	  if (so -> symbols_loaded)
+	    {
+	      if (from_tty)
+		{
+		  printf_unfiltered ("Symbols already loaded for %s\n", so -> lm.o_path);
+		}
+	    }
+	  else if (catch_errors
+		   (symbol_add_stub, (char *) so,
+		    "Error while reading shared library symbols:\n",
+		    RETURN_MASK_ALL))
+	    {
+	      so_last = so;
+	      so -> symbols_loaded = 1;
 	    }
 	}
     }

@@ -93,8 +93,16 @@ init_syntax_once ()
 
 #define BYTEWIDTH 8
 
-#ifndef SIGN_EXTEND_CHAR
-#define SIGN_EXTEND_CHAR(x) (x)
+/* We remove any previous definition of `SIGN_EXTEND_CHAR',
+   since ours (we hope) works properly with all combinations of
+   machines, compilers, `char' and `unsigned char' argument types.
+   (Per Bothner suggested the basic approach.)  */
+#undef SIGN_EXTEND_CHAR
+#if __STDC__
+#define SIGN_EXTEND_CHAR(c) ((signed char) (c))
+#else  /* not __STDC__ */
+/* As in Harbison and Steele.  */
+#define SIGN_EXTEND_CHAR(c) ((((unsigned char) (c)) ^ 128) - 128)
 #endif
 
 static int obscure_syntax = 0;
