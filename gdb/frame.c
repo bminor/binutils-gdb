@@ -1790,9 +1790,13 @@ get_prev_frame (struct frame_info *this_frame)
      get_current_frame().  */
   gdb_assert (this_frame != NULL);
 
+  /* Make sure we pass an address within THIS_FRAME's code block to
+     inside_main_func.  Otherwise, we might stop unwinding at a
+     function which has a call instruction as its last instruction if
+     that function immediately precedes main().  */
   if (this_frame->level >= 0
       && !backtrace_past_main
-      && inside_main_func (get_frame_pc (this_frame)))
+      && inside_main_func (get_frame_address_in_block (this_frame)))
     /* Don't unwind past main(), bug always unwind the sentinel frame.
        Note, this is done _before_ the frame has been marked as
        previously unwound.  That way if the user later decides to
