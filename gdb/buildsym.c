@@ -726,7 +726,7 @@ patch_block_stabs (symbols, stabs, objfile)
 	  struct symbol *sym = find_symbol_in_list (symbols, name, pp-name);
 	  if (!sym)
 	    {
-#ifndef IBM6000
+#ifndef IBM6000_TARGET
 	      printf ("ERROR! stab symbol not found!\n");	/* FIXME */
 #endif
 	    }
@@ -882,7 +882,7 @@ end_symtab (end_addr, sort_pending, sort_linevec, objfile)
 	symtab->free_code = free_linetable;
 	symtab->free_ptr = 0;
 
-#if 0 /* defined(IBM6000) */
+#ifdef IBM6000_TARGET
 	/* In case we need to duplicate symbol tables (to represent include
 	   files), and in case our system needs relocation, we want to
 	   relocate the main symbol table node only (for the main file,
@@ -898,11 +898,11 @@ end_symtab (end_addr, sort_pending, sort_linevec, objfile)
       free (subfile);
     }
 
-#if 0 /* defined(IBM6000) */
+#ifdef IBM6000_TARGET
   /* all include symbol tables are non-relocatable, except the main source
      file's. */
-  if (symtab_list)
-    symtab_list->nonreloc = FALSE;
+  if (symtab)
+    symtab->nonreloc = FALSE;
 #endif
 
   if (type_vector)
@@ -1863,7 +1863,7 @@ read_type (pp, objfile)
     case '*':
       type1 = read_type (pp, objfile);
 /* FIXME -- we should be doing smash_to_XXX types here.  */
-#if 0
+#ifdef IBM6000_TARGET
     /* postponed type decoration should be allowed. */
     if (typenums[1] > 0 && typenums[1] < type_vector_length &&
     	(type = type_vector[typenums[1]])) {

@@ -1323,6 +1323,12 @@ _initialize_utils ()
       }
   }
 
+#if defined(SIGWINCH) && defined(SIGWINCH_HANDLER)
+
+  /* If tere is a better way to determine window size, use it. */
+  SIGWINCH_HANDLER ();
+#endif
+
   /* If the output is not a terminal, don't paginate it.  */
   if (!ISATTY (stdout))
     lines_per_page = UINT_MAX;
@@ -1350,3 +1356,9 @@ _initialize_utils ()
 		  &setprintlist),
      &showprintlist);
 }
+
+/* Machine specific function to handle SIGWINCH signal. */
+
+#ifdef  SIGWINCH_HANDLER_BODY
+        SIGWINCH_HANDLER_BODY
+#endif

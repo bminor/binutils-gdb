@@ -130,7 +130,7 @@ lookup_minimal_symbol (name, objf)
   struct objfile *objfile;
   struct minimal_symbol *msymbol;
   struct minimal_symbol *found_symbol = NULL;
-#ifdef IBM6000
+#ifdef IBM6000_TARGET
   struct minimal_symbol *trampoline_symbol = NULL;
 #endif
 
@@ -147,13 +147,13 @@ lookup_minimal_symbol (name, objf)
 	    {
 	      if (strcmp (msymbol -> name, name) == 0)
 		{
+#ifdef IBM6000_TARGET
 /* I *think* all platforms using shared libraries (and trampoline code)
  * will suffer this problem. Consider a case where there are 5 shared
  * libraries, each referencing `foo' with a trampoline entry. When someone
  * wants to put a breakpoint on `foo' and the only info we have is minimal
  * symbol vector, we want to use the real `foo', rather than one of those
  * trampoline entries. MGO */	
-#ifdef IBM6000
 	  /* If a trampoline symbol is found, we prefer to keep looking
 	     for the *real* symbol. If the actual symbol not found,
 	     then we'll use the trampoline entry. Sorry for the machine
@@ -173,7 +173,7 @@ lookup_minimal_symbol (name, objf)
 	    }
 	}
     }
-#ifdef IBM6000
+#ifdef IBM6000_TARGET
   return found_symbol ? found_symbol : trampoline_symbol;
 #endif
 
@@ -232,6 +232,7 @@ lookup_minimal_symbol_by_pc (pc)
 
 	     Warning: this code is trickier than it would appear at first. */
 
+	  /* Should also requires that pc is <= end of objfile.  FIXME! */
 	  if (pc >= msymbol[lo].address)
 	    {
 	      while (msymbol[hi].address > pc)

@@ -1,3 +1,10 @@
+Sun Mar 29 14:16:22 1992  Per Bothner  (bothner@cygnus.com)
+
+	* Merged in latest RS6000 diffs from Metin G. Ozisik.
+	* xcoffsolib.c, xcoffsolib.h:  New files, from Metin.
+	* Various files: Changed #ifdef IBM6000 to IBM6000_HOST
+	or IBM6000_TARGET as (approximately) appropriate.
+
 Sat Mar 28 13:00:10 1992  Fred Fish  (fnf@cygnus.com)
 
 	* objfiles.h (OBJF_SYMS):  Define flag bit for objfile flags.

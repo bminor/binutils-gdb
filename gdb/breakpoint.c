@@ -17,9 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include <stdio.h>
-#include <ctype.h>
 #include "defs.h"
+#include <ctype.h>
 #include "symtab.h"
 #include "frame.h"
 #include "breakpoint.h"
@@ -2270,8 +2269,12 @@ breakpoint_re_set ()
   create_longjmp_breakpoint("siglongjmp");
   create_longjmp_breakpoint(NULL);
 
+#if 0
+  /* Took this out (temporaliy at least), since it produces an extra 
+     blank line at startup. This messes up the gdbtests. -PB */
   /* Blank line to finish off all those mention() messages we just printed.  */
   printf_filtered ("\n");
+#endif
 }
 
 /* Set ignore-count of breakpoint number BPTNUM to COUNT.
@@ -2693,3 +2696,35 @@ an expression changes.");
 	    "Status of all watchpoints, or watchpoint number NUMBER.\n\
 Second column is \"y\" for enabled watchpoints, \"n\" for disabled.");
 }
+
+#ifdef IBM6000_HOST
+/* Where should this function go? It is used by AIX only. FIXME. */
+
+/* Breakpoint address relocation used to be done in breakpoint_re_set(). That
+   approach the following problem:
+
+     before running the program, if a file is list, then a breakpoint is
+     set (just the line number), then if we switch into another file and run
+     the program, just a line number as a breakpoint address was not
+     descriptive enough and breakpoint was ending up in a different file's
+     similar line. 
+
+  I don't think any other platform has this breakpoint relocation problem, so this
+  is not an issue for other platforms. */
+   
+void
+fixup_breakpoints (low, high, delta)
+  CORE_ADDR low;
+  CORE_ADDR high;
+  CORE_ADDR delta;
+{
+  struct breakpoint *b;
+  extern struct breakpoint *breakpoint_chain;
+
+  ALL_BREAKPOINTS (b)
+    {
+     if (b->address >= low && b->address <= high)
+       b->address += delta;
+    }
+}
+#endif

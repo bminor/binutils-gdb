@@ -22,7 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "defs.h"
 #include "bfd.h"
 
-#ifdef IBM6000
+#ifdef IBM6000_HOST
 /* Native only:  Need struct tbtable in <sys/debug.h>. */
 
 /* AIX COFF names have a preceeding dot `.' */
@@ -38,7 +38,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/file.h>
 #endif
 #include <sys/stat.h>
-/*#include <linenum.h>*/
 #include <sys/debug.h>
 
 #include "symtab.h"
@@ -50,6 +49,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "coff/internal.h"	/* FIXME, internal data from BFD */
 #include "libcoff.h"		/* FIXME, internal data from BFD */
 #include "coff/rs6000.h"	/* FIXME, raw file-format guts of xcoff */
+
+
+/* Define this if you want gdb use the old xcoff symbol processing. This
+   way it won't use common `define_symbol()' function and Sun dbx stab
+   string grammar. And likely it won't be able to do G++ debugging. */
+
+/* #define	NO_DEFINE_SYMBOL 1 */
+
+/* Define this if you want gdb to ignore typdef stabs. This was needed for
+   one of Transarc, to reduce the size of the symbol table. Types won't be
+   recognized, but tag names will be. */
+
+/* #define	NO_TYPES  1 */
 
 /* Simplified internal version of coff symbol table information */
 
@@ -942,7 +954,8 @@ retrieve_traceback (abfd, textsec, cs, size)
   if (ALLOCED) 					\
     namestr = (NAME) + 1;			\
   else {					\
-    namestr = obstack_copy0 (&objfile->symbol_obstack, (NAME) + 1, strlen ((NAME)+1)); \
+    (NAME) = namestr = 				\
+    obstack_copy0 (&objfile->symbol_obstack, (NAME) + 1, strlen ((NAME)+1)); \
     (ALLOCED) = 1;						\
   }								\
   prim_record_minimal_symbol (namestr, (ADDR), (TYPE));		\
@@ -1011,6 +1024,8 @@ read_xcoff_symtab (objfile, nsyms)
   int fcn_start_addr;
   long fcn_line_offset;
   size_t size;
+
+  struct coff_symbol fcn_stab_saved;
 
   /* fcn_cs_saved is global because process_xcoff_symbol needs it. */
   union internal_auxent fcn_aux_saved;
@@ -1293,8 +1308,30 @@ function_entry_point:
 	    /* record trampoline code entries as mst_unknown symbol. When we
 	       lookup mst symbols, we will choose mst_text over mst_unknown. */
 
+#if 1
+	    /* After the implementation of incremental loading of shared
+	       libraries, we don't want to access trampoline entries. This
+	       approach has a consequence of the necessity to bring the whole 
+	       shared library at first, in order do anything with it (putting
+	       breakpoints, using malloc, etc). On the other side, this is
+	       consistient with gdb's behaviour on a SUN platform. */
+
+	    /* Trying to prefer *real* function entry over its trampoline,
+	       by assigning `mst_unknown' type to trampoline entries fails.
+	       Gdb treats those entries as chars. FIXME. */
+
+	    /* Recording this entry is necessary. Single stepping relies on
+	       this vector to get an idea about function address boundaries. */
+
+	    prim_record_minimal_symbol (0, cs->c_value, mst_unknown);
+#else
+
+	    /* record trampoline code entries as mst_unknown symbol. When we
+	       lookup mst symbols, we will choose mst_text over mst_unknown. */
+
 	    RECORD_MINIMAL_SYMBOL (cs->c_name, cs->c_value, mst_unknown,
 				   symname_alloced);
+#endif
 	    continue;
 	  }
 	  break;
@@ -1348,6 +1385,7 @@ function_entry_point:
 
     case C_FUN:
 
+#ifdef NO_DEFINE_SYMBOL
       /* For a function stab, just save its type in `fcn_type_saved', and leave
 	 it for the `.bf' processing. */
       {
@@ -1362,6 +1400,9 @@ function_entry_point:
 
 	fcn_type_saved = lookup_function_type (read_type (&pp, objfile));
       }
+#else
+      fcn_stab_saved = *cs;
+#endif
       break;
     
 
@@ -1430,6 +1471,8 @@ function_entry_point:
 	mark_first_line (fcn_line_offset, cs->c_symnum);
 
 	new = push_context (0, fcn_start_addr);
+
+#ifdef NO_DEFINE_SYMBOL
 	new->name = process_xcoff_symbol (&fcn_cs_saved, objfile);
 
 	/* Between a function symbol and `.bf', there always will be a function
@@ -1443,6 +1486,10 @@ function_entry_point:
 	  SYMBOL_TYPE (new->name) = fcn_type_saved;
 	  fcn_type_saved = NULL;
 	}
+#else
+	new->name = define_symbol 
+		(fcn_cs_saved.c_value, fcn_stab_saved.c_name, 0, 0, objfile);
+#endif
       }
       else if (strcmp (cs->c_name, ".ef") == 0) {
 
@@ -1610,6 +1657,8 @@ process_xcoff_symbol (cs, objfile)
 #endif
 
     case C_DECL:      			/* a type decleration?? */
+
+#if defined(NO_TYPEDEFS) || defined(NO_DEFINE_SYMBOL)
 	qq =  (char*) strchr (name, ':');
 	if (!qq)			/* skip if there is no ':' */
 	  return NULL;
@@ -1637,7 +1686,32 @@ process_xcoff_symbol (cs, objfile)
 				obsavestring (name, qq-name,
 					      &objfile->symbol_obstack);
 	}
-	ttype = SYMBOL_TYPE (sym) = read_type (&pp, objfile);
+	ttype = SYMBOL_TYPE (sym) = read_type (&pp);
+
+	/* if there is no name for this typedef, you don't have to keep its
+	   symbol, since nobody could ask for it. Otherwise, build a symbol
+	   and add it into symbol_list. */
+
+	if (nameless)
+	  return;
+
+#ifdef NO_TYPEDEFS
+	/* Transarc wants to eliminate type definitions from the symbol table.
+	   Limited debugging capabilities, but faster symbol table processing
+	   and less memory usage. Note that tag definitions (starting with
+	   'T') will remain intact. */
+
+	if (qq[1] != 'T' && (!TYPE_NAME (ttype) || *(TYPE_NAME (ttype)) == '\0')) {
+
+	  if (SYMBOL_NAME (sym))
+	      TYPE_NAME (ttype) = SYMBOL_NAME (sym);
+	  else
+	      TYPE_NAME (ttype) = obsavestring (name, qq-name);
+
+	  return;
+	}
+
+#endif /* !NO_TYPEDEFS */
 
 	/* read_type() will return null if type (or tag) definition was
 	   unnnecessarily duplicated. Also, if the symbol doesn't have a name,
@@ -1651,51 +1725,49 @@ process_xcoff_symbol (cs, objfile)
 	   symbol, since nobody could ask for it. Otherwise, build a symbol
 	   and add it into symbol_list. */
 
-	if (!nameless) {
-	  if (qq[1] == 'T')
+	if (qq[1] == 'T')
 	    SYMBOL_NAMESPACE (sym) = STRUCT_NAMESPACE;
-	  else if (qq[1] == 't')
+	else if (qq[1] == 't')
 	    SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
-	  else {
-	    printf ("ERROR: Unrecognized stab string.\n");
+	else {
+	    warning ("Unrecognized stab string.\n");
 	    return NULL;
-	  }
+	}
 
-	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
-	  if (!SYMBOL_NAME (sym))
-	    SYMBOL_NAME (sym) = obsavestring (name, qq-name,
-					      &objfile->symbol_obstack);
+	SYMBOL_CLASS (sym) = LOC_TYPEDEF;
+	if (!SYMBOL_NAME (sym))
+	    SYMBOL_NAME (sym) = obsavestring (name, qq-name);
 
-	  SYMBOL_DUP (sym, sym2);
-	  add_symbol_to_list 
+	SYMBOL_DUP (sym, sym2);
+	add_symbol_to_list 
 	     (sym2, within_function ? &local_symbols : &file_symbols);
 
-	  /* For a combination of struct and type, add one more symbol
-	     for the type. */
+	/* For a combination of struct and type, add one more symbol
+	   for the type. */
 
-	  if (struct_and_type_combined) {
+	if (struct_and_type_combined) {
 	    SYMBOL_DUP (sym, sym2);
 	    SYMBOL_NAMESPACE (sym2) = VAR_NAMESPACE;
 	    add_symbol_to_list 
 	       (sym2, within_function ? &local_symbols : &file_symbols);
-	  }
-  	}
+	}
 
-	/* assign a name to the type node. */
+	/*  assign a name to the type node. */
 
-	if (!nameless && (!TYPE_NAME (ttype) || *(TYPE_NAME (ttype)) == '\0')) {
+	if (!TYPE_NAME (ttype) || *(TYPE_NAME (ttype)) == '\0') {
 	  if (struct_and_type_combined)
 	    TYPE_NAME (ttype) = SYMBOL_NAME (sym);
-	  
-/*	  else if  (SYMBOL_NAMESPACE (sym) == STRUCT_NAMESPACE) */
 	  else if  (qq[1] == 'T')		/* struct namespace */
 	    TYPE_NAME (ttype) = concat (
 		TYPE_CODE (ttype) == TYPE_CODE_UNION ? "union " :
 		TYPE_CODE (ttype) == TYPE_CODE_STRUCT? "struct " : "enum ",
 		SYMBOL_NAME (sym), NULL);
 	}
-
 	break;
+
+#else /* !NO_DEFINE_SYMBOL */
+ 	return define_symbol (cs->c_value, cs->c_name, 0, 0, objfile);
+#endif
 
     case C_GSYM:
       add_stab_to_list (name, &global_stabs);
@@ -1703,6 +1775,8 @@ process_xcoff_symbol (cs, objfile)
 
     case C_PSYM:
     case C_RPSYM:
+
+#ifdef NO_DEFINE_SYMBOL
 	if (*name == ':' || (pp = (char *) strchr (name, ':')) == NULL)
 	  return NULL;
 	SYMBOL_NAME (sym) = obsavestring (name, pp-name, &objfile -> symbol_obstack);
@@ -1712,8 +1786,15 @@ process_xcoff_symbol (cs, objfile)
 	SYMBOL_DUP (sym, sym2);
 	add_symbol_to_list (sym2, &local_symbols);
 	break;
+#else
+	sym = define_symbol (cs->c_value, cs->c_name, 0, 0, objfile);
+	SYMBOL_CLASS (sym) = (cs->c_sclass == C_PSYM) ? LOC_ARG : LOC_REGPARM;
+	return sym;
+#endif
 
     case C_STSYM:
+
+#ifdef NO_DEFINE_SYMBOL
 	if (*name == ':' || (pp = (char *) strchr (name, ':')) == NULL)
 	  return NULL;
 	SYMBOL_NAME (sym) = obsavestring (name, pp-name, &objfile -> symbol_obstack);
@@ -1725,6 +1806,20 @@ process_xcoff_symbol (cs, objfile)
 	add_symbol_to_list 
 	   (sym2, within_function ? &local_symbols : &file_symbols);
 	break;
+#else
+	/* If we are going to use Sun dbx's define_symbol(), we need to
+	   massage our stab string a little. Change 'V' type to 'S' to be
+	   comparible with Sun. */
+
+	if (*name == ':' || (pp = (char *) index (name, ':')) == NULL)
+	  return NULL;
+
+	++pp;
+	if (*pp == 'V') *pp = 'S';
+	sym = define_symbol (cs->c_value, cs->c_name, 0, 0, objfile);
+	SYMBOL_VALUE (sym) += static_block_base;
+	return sym;
+#endif
 
     case C_LSYM:
 	if (*name == ':' || (pp = (char *) strchr (name, ':')) == NULL)
@@ -1768,6 +1863,8 @@ process_xcoff_symbol (cs, objfile)
       break;
 
     case C_RSYM:
+
+#ifdef NO_DEFINE_SYMBOL
 	pp = (char*) strchr (name, ':');
 	SYMBOL_CLASS (sym) = LOC_REGISTER;
 	SYMBOL_VALUE (sym) = STAB_REG_TO_REGNUM (cs->c_value);
@@ -1788,9 +1885,19 @@ process_xcoff_symbol (cs, objfile)
 	SYMBOL_DUP (sym, sym2);
 	add_symbol_to_list (sym2, &local_symbols);
 	break;
+#else
+	if (pp) {
+	  sym = define_symbol (cs->c_value, cs->c_name, 0, 0, objfile);
+	  return sym;
+	}
+	else {
+	  warning ("A non-stab C_RSYM needs special handling.");
+	  return NULL;
+	}
+#endif
 
     default	:
-      printf ("ERROR: Unexpected storage class: %d.\n", cs->c_sclass);
+      warning ("Unexpected storage class: %d.", cs->c_sclass);
       return NULL;
     }
   }
@@ -2198,7 +2305,8 @@ aixcoff_symfile_read (objfile, addr, mainline)
 
   read_xcoff_symtab(objfile, num_symbols);
 
-  make_cleanup (free_debugsection, 0);
+  /* Free debug section. */
+  free_debugsection ();
 
   /* Sort symbols alphabetically within each block.  */
   sort_syms ();
@@ -2241,7 +2349,8 @@ _initialize_xcoffread ()
        struct s *p;
      };
 */
-#if 0
+
+
 /* Smash TYPE to be a type of pointers to TO_TYPE.
    If TO_TYPE is not permanent and has no pointer-type yet,
    record TYPE as its pointer-type.  */
@@ -2250,7 +2359,7 @@ void
 smash_to_pointer_type (type, to_type)
      struct type *type, *to_type;
 {
-  int type_permanent = (TYPE_FLAGS (type) & TYPE_FLAG_PERM);
+/*  int type_permanent = (TYPE_FLAGS (type) & TYPE_FLAG_PERM); */
   
   bzero (type, sizeof (struct type));
   TYPE_TARGET_TYPE (type) = to_type;
@@ -2261,33 +2370,34 @@ smash_to_pointer_type (type, to_type)
 /* ??? TYPE_TARGET_TYPE and TYPE_MAIN_VARIANT are the same. You can't do
   this. It will break the target type!!!
   TYPE_MAIN_VARIANT (type) = type;
-*/
 
   if (type_permanent)
     TYPE_FLAGS (type) |= TYPE_FLAG_PERM;
+*/
 
-  if (TYPE_POINTER_TYPE (to_type) == 0
+  if (TYPE_POINTER_TYPE (to_type) == 0)
+#if 0
       && (!(TYPE_FLAGS (to_type) & TYPE_FLAG_PERM)
 	  || type_permanent))
+#endif /* 0 */
     {
       TYPE_POINTER_TYPE (to_type) = type;
     }
 }
-#endif
 
-#else /* IBM6000 */
+#else /* IBM6000_HOST */
 struct type *
 builtin_type (pp)
 char **pp;
 {
     fatal ("internals eror: builtin_type called!");
 }
-#endif /* IBM6000 */
+#endif /* IBM6000_HOST */
 
 
 #define DEBUG 1
 
-#if defined (DEBUG) && defined (IBM6000)	/* Needs both defined */
+#if defined (DEBUG) && defined (IBM6000_HOST)	/* Needs both defined */
 void
 dump_strtbl ()
 {

@@ -187,6 +187,15 @@ int pc;
   if ((op & 0xfc000000) == 0x48000000) { /* bl foo, to save fprs??? */
     pc += 4;
     op = read_memory_integer (pc, 4);
+
+    /* At this point, make sure this is not a trampoline function
+       (a function that simply calls another functions, and nothing else).
+       If the next is not a nop, this branch was part of the function
+       prologue. */
+
+    if (op == 0x4def7b82 ||		/* crorc 15, 15, 15 */
+	op == 0x0)
+      return pc - 4;			/* don't skip over this branch */
   }
 
   if ((op & 0xfc1f0000) == 0xbc010000) { /* stm Rx, NUM(r1) */
@@ -546,6 +555,14 @@ function_frame_info (pc, fdata)
   if ((op & 0xfc000000) == 0x48000000) { /* bl foo, to save fprs??? */
     pc += 4;
     op = read_memory_integer (pc, 4);
+    /* At this point, make sure this is not a trampoline function
+       (a function that simply calls another functions, and nothing else).
+       If the next is not a nop, this branch was part of the function
+       prologue. */
+
+    if (op == 0x4def7b82 ||		/* crorc 15, 15, 15 */
+	op == 0x0)
+      return;				/* prologue is over */
   }
 
   if ((op & 0xfc1f0000) == 0xd8010000) { /* stfd Rx,NUM(r1) */

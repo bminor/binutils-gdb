@@ -17,9 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include <stdio.h>
-#include <string.h>
 #include "defs.h"
+#include <string.h>
 #include "frame.h"
 #include "symtab.h"
 #include "gdbtypes.h"
@@ -1555,7 +1554,7 @@ print_frame_args (func, fi, num, stream)
 	 two entries (one a parameter, one a register or local), and the one
 	 we want is the non-parm, which lookup_symbol will find for
 	 us.  After this, sym could be any SYMBOL_CLASS...  */
-#ifdef IBM6000
+#ifdef IBM6000_TARGET
       /* AIX/RS6000 implements a concept of traceback tables, in which case
          it creates nameless parameters. Looking for those parameter symbols
 	 will result in an error. */

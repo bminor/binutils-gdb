@@ -18,5 +18,5 @@
 # the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #TDEPFILES= exec.o rs6k-pinsn.o rs6k-tdep.o
-TDEPFILES= rs6000-pinsn.o rs6000-tdep.o
+TDEPFILES= rs6000-pinsn.o rs6000-tdep.o xcoffsolib.o
 TM_FILE= tm-rs6000.h

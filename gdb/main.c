@@ -1216,6 +1216,10 @@ init_signals ()
   if (signal (SIGHUP, do_nothing) != SIG_IGN)
     signal (SIGHUP, disconnect);
   signal (SIGFPE, float_handler);
+
+#if defined(SIGWINCH) && defined(SIGWINCH_HANDLER)
+  signal (SIGWINCH, SIGWINCH_HANDLER);
+#endif
 }
 
 /* Read one line from the command input stream `instream'

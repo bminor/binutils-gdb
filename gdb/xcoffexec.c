@@ -40,6 +40,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "objfiles.h"
 
 #include "libbfd.h"		/* BFD internals (sigh!)  FIXME */
+#include "xcoffsolib.h"
 
 /* Prototypes for local functions */
 
@@ -68,6 +69,7 @@ extern void symbol_file_command ();
 static void exec_files_info();
 extern struct objfile *lookup_objfile_bfd ();
 
+#if 0
 /*
  * the vmap struct is used to describe the virtual address space of
  * the target we are manipulating.  The first entry is always the "exec"
@@ -96,6 +98,9 @@ struct vmap_and_bfd {
 };
 
 static struct vmap *vmap;	/* current vmap				*/
+#endif /* 0 */
+
+struct vmap *vmap;		/* current vmap */
 
 extern struct target_ops exec_ops;
 
@@ -320,6 +325,7 @@ map_vmap (bfd *bf, bfd *arch)
   struct objfile *obj;
 
   vp = (void*) xmalloc (sizeof (*vp));
+  bzero (vp, sizeof (*vp));
   vp->nxt = 0;
   vp->bfd = bf;
   vp->name = bfd_get_filename(arch ? arch : bf);
@@ -332,7 +338,14 @@ map_vmap (bfd *bf, bfd *arch)
   obj = lookup_objfile_bfd (bf);
   if (exec_bfd && !obj) {
     obj = allocate_objfile (bf, 0);
+
+#if 0
+    This is only needed if we want to load shared libraries no matter what.
+    Since we provide the choice of incremental loading of shared objects now,
+    we don't have to load them as default anymore.
+    
     syms_from_objfile (obj, 0, 0, 0);
+#endif
   }
 
   /* find the end of the list, and append. */
@@ -436,8 +449,8 @@ struct stat *vip;
 	  if (fstat(fileno(io), &si) < 0)
 	    fatal("cannot fstat BFD for sym");
 	  
-	  if (si.st_dev != vip->st_dev
-	      || si.st_ino != vip->st_ino)
+	  if (vip && (si.st_dev != vip->st_dev
+	      || si.st_ino != vip->st_ino))
 	    continue;
 	}
 	
@@ -717,59 +730,61 @@ register struct ld_info *ldi;
 		      , name);
 retry:
 	for (got_one = 0, vp = vmap; vp; vp = vp->nxt) {
-		FILE *io;
+	  FILE *io;
 
-		/* The filenames are not always sufficient to match on. */
-		if ((name[0] == "/"
-		    && !eq(name, vp->name))
-		    || (memb[0] && !eq(memb, vp->member)))
-			continue;
+	  /* First try to find a `vp', which is the same as in ldinfo.
+	     If not the same, just continue and grep the next `vp'. If same,
+	     relocate its tstart, tend, dstart, dend values. If no such `vp'
+	     found, get out of this for loop, add this ldi entry as a new vmap
+	     (add_vmap) and come back, fins its `vp' and so on... */
 
-		/* totally opaque! */
-		io = bfd_cache_lookup(vp->bfd);
-		if (!io)
-			fatal("cannot find BFD's iostream for %s"
-			      , vp->name);
+	  /* The filenames are not always sufficient to match on. */
 
-		/* see if we are referring to the same file */
-		if (fstat(fileno(io), &vi) < 0)
-			fatal("cannot fstat BFD for %s", vp->name);
+	  if ((name[0] == "/" && !eq(name, vp->name))
+	      	|| (memb[0] && !eq(memb, vp->member)))
+	    continue;
 
-		if (ii.st_dev != vi.st_dev || ii.st_ino != vi.st_ino)
-			continue;
+	  io = bfd_cache_lookup(vp->bfd);		/* totally opaque! */
+	  if (!io)
+	    fatal("cannot find BFD's iostream for %s", vp->name);
 
-		if (!retried)
-		    close(ldi->ldinfo_fd);
+	  /* see if we are referring to the same file */
 
-		++got_one;
+	  if (fstat(fileno(io), &vi) < 0)
+	    fatal("cannot fstat BFD for %s", vp->name);
 
-		/* found a corresponding VMAP. remap! */
-		ostart = vp->tstart;
+	  if (ii.st_dev != vi.st_dev || ii.st_ino != vi.st_ino)
+	    continue;
 
-		vp->tstart = ldi->ldinfo_textorg;
-		vp->tend   = vp->tstart + ldi->ldinfo_textsize;
-		vp->dstart = ldi->ldinfo_dataorg;
-		vp->dend   = vp->dstart + ldi->ldinfo_datasize;
+	  if (!retried)
+	    close(ldi->ldinfo_fd);
 
-		if (vp->tadj) {
-		  vp->tstart += vp->tadj;
-		  vp->tend   += vp->tadj;
-		}
+	  ++got_one;
 
-		/* relocate symbol table(s). */
-		vmap_symtab(vp, ostart, &vi);
+	  /* found a corresponding VMAP. remap! */
+	  ostart = vp->tstart;
 
-		/* there may be more, so we don't break out of the loop. */
+	  vp->tstart = ldi->ldinfo_textorg;
+	  vp->tend   = vp->tstart + ldi->ldinfo_textsize;
+	  vp->dstart = ldi->ldinfo_dataorg;
+	  vp->dend   = vp->dstart + ldi->ldinfo_datasize;
+
+	  if (vp->tadj) {
+	    vp->tstart += vp->tadj;
+	    vp->tend   += vp->tadj;
+	  }
+
+	  /* relocate symbol table(s). */
+	  vmap_symtab(vp, ostart, &vi);
+
+	  /* there may be more, so we don't break out of the loop. */
 	}
 
-	/*
-	 * if there was no matching *vp, we must perforce create
-	 * the sucker(s)
-	 */
-	if (!got_one && !retried) {
-		add_vmap(ldi);
-		++retried;
-		goto retry;
+	/* if there was no matching *vp, we must perforce create the sucker(s) */
+  	if (!got_one && !retried) {
+	  add_vmap(ldi);
+	  ++retried;
+	  goto retry;
 	}
   } while (ldi->ldinfo_next
 	 && (ldi = (void *) (ldi->ldinfo_next + (char *) ldi)));
@@ -894,18 +909,21 @@ exec_files_info (t)
   if (!vp)
     return;
 
-  printf("\n\tMapping info for file `%s'.\n", vp->name);
-  printf("\t  %8.8s   %8.8s %8.8s %s\n",
-			"start", "end", "section", "file(member)");
+  printf("\tMapping info for file `%s'.\n", vp->name);
+
+  printf("\t  %8.8s   %8.8s   %8.8s   %8.8s %8.8s %s\n",
+    "tstart", "tend", "dstart", "dend", "section", "file(member)");
 
   for (; vp; vp = vp->nxt)
-	printf("\t0x%8.8x 0x%8.8x %s%s%s%s\n",
-		vp->tstart,
-		vp->tend,
-		vp->name,
-		vp->member ? "(" : "",
-		vp->member,
-		vp->member ? ")" : "");
+     printf("\t0x%8.8x 0x%8.8x 0x%8.8x 0x%8.8x %s%s%s%s\n",
+	vp->tstart,
+	vp->tend,
+	vp->dstart,
+	vp->dend,
+	vp->name,
+	*vp->member ? "(" : "",
+	vp->member,
+	*vp->member ? ")" : "");
 }
 
 #ifdef DAMON

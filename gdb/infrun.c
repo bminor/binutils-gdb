@@ -191,6 +191,12 @@ extern struct target_ops child_ops;	/* In inftarg.c */
 #define	SKIP_TRAMPOLINE_CODE(pc)	0
 #endif
 
+/* For SVR4 shared libraries, each call goes through a small piece of
+   trampoline code in the ".init" section.  IN_SOLIB_TRAMPOLINE evaluates
+   to nonzero if we are current stopped in one of these. */
+#ifndef IN_SOLIB_TRAMPOLINE
+#define IN_SOLIB_TRAMPOLINE(pc,name)	0
+#endif
 
 #ifdef TDESC
 #include "tdesc.h"
@@ -791,6 +797,14 @@ wait_for_inferior ()
 
       target_wait (&w);
 
+#ifdef SIGTRAP_STOP_AFTER_LOAD
+
+      /* Somebody called load(2), and it gave us a "trap signal after load".
+         Ignore it gracefully. */
+
+      SIGTRAP_STOP_AFTER_LOAD (w);
+#endif
+
       /* See if the process still exists; clean up if it doesn't.  */
       if (WIFEXITED (w))
 	{
@@ -1201,10 +1215,11 @@ wait_for_inferior ()
 
 	  /* ==> See comments at top of file on this algorithm.  <==*/
 	  
-	  if (stop_pc == stop_func_start
-		   && (stop_func_start != prev_func_start
-		       || prologue_pc != stop_func_start
-		       || stop_sp != prev_sp))
+	  if ((stop_pc == stop_func_start
+	       || IN_SOLIB_TRAMPOLINE (stop_pc, stop_func_name))
+	      && (stop_func_start != prev_func_start
+		  || prologue_pc != stop_func_start
+		  || stop_sp != prev_sp))
 	    {
 	      /* It's a subroutine call.
 		 (0)  If we are not stepping over any calls ("stepi"), we

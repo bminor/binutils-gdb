@@ -45,6 +45,11 @@ extern int	symtab_relocated;
   if (!symtab_relocated && !inferior_pid && (PC) >  TEXT_SEGMENT_BASE)	\
     (PC) -= ( TEXT_SEGMENT_BASE + text_adjustment (exec_bfd));
 
+/* Load segment of a given pc value. */
+
+#define	PC_LOAD_SEGMENT(PC)	pc_load_segment_name(PC)
+
+
 /* Conversion between a register number in stab string to actual register num. */
 
 #define	STAB_REG_TO_REGNUM(value)	(value)
@@ -131,11 +136,37 @@ extern int aix_loadInfoTextIndex;
   } while (0)
 	
 
+#if 0
+   The following comment is not correct anymore. AIX has a trap signal
+   that might be sent with a "stopped after a load" status. This might
+   show up when the inferior is just started, or anytime inferior
+   loads something else. It is incorrect to try to skip over it *only* in
+   startup-time. It always has to be ignored and should not be mixed up
+   with breakpoint traps. See the macro SIGTRAP_STOP_AFTER_LOAD and its 
+   usage in infrun.c.
+
 /* In aix, number of the trap signals we need to skip over once the
    inferior process starts running is different in version 3.1 and 3.2.
    This will be 2 for version 3.1x, 3 for version 3.2x. */
 
 #define	START_INFERIOR_TRAPS_EXPECTED	aix_starting_inferior_traps ()
+#endif /* 0 */
+
+#define	START_INFERIOR_TRAPS_EXPECTED	2
+
+/* AIX might return a sigtrap, with a "stop after load" status. It should
+   be ignored by gdb, shouldn't be mixed up with breakpoint traps. */
+
+#define SIGTRAP_STOP_AFTER_LOAD(W)	\
+ if ( (W) == 0x57c ) {			\
+   if (breakpoints_inserted) {		\
+     mark_breakpoints_out ();		\
+     insert_breakpoints ();		\
+     insert_step_breakpoint ();		\
+   }					\
+   resume (0, 0);			\
+   continue;				\
+ }
 
 /* In aixcoff, we cannot process line numbers when we see them. This is
    mainly because we don't know the boundaries of the include files. So,
@@ -442,12 +473,7 @@ extern unsigned int rs6000_struct_return_address;
 
 #define	INIT_EXTRA_FRAME_INFO(fromleaf, fi)	\
 	fi->initial_sp = 0;		\
-	fi->cache_fsr = 0;		\
-	if (fromleaf) {			\
-	  int tmp = 0;			\
-	  read_memory ((fi)->frame, &tmp, sizeof (int));	\
-	  (fi)->frame = tmp;		\
-	}
+	fi->cache_fsr = 0;
 
 #define FRAME_SAVED_PC(FRAME)		\
 	read_memory_integer (read_memory_integer ((FRAME)->frame, 4)+8, 4)
@@ -587,7 +613,35 @@ extern unsigned int rs6000_struct_return_address;
 #define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, using_gcc) \
 	fix_call_dummy(dummyname, pc, fun, nargs, type)
 
+
+/* Signal handler for SIGWINCH `window size changed'. */
+
+#define	SIGWINCH_HANDLER  aix_resizewindow
+extern	void	aix_resizewindow ();
+
+/* `lines_per_page' and `chars_per_line' are local to utils.c. Rectify this. */
+
+#define	SIGWINCH_HANDLER_BODY	\
+									\
+/* Respond to SIGWINCH `window size changed' signal, and reset GDB's	\
+   window settings approproatelt. */					\
+									\
+void 						\
+aix_resizewindow ()				\
+{						\
+  int fd = fileno (stdout);			\
+  if (isatty (fd)) {				\
+    int val;					\
+						\
+    val = atoi (termdef (fd, 'l'));		\
+    if (val > 0)				\
+      lines_per_page = val;			\
+    val = atoi (termdef (fd, 'c'));		\
+    if (val > 0)				\
+      chars_per_line = val;			\
+  }						\
+}
+
+
 /* Flag for machine-specific stuff in shared files.  FIXME */
-#ifndef IBM6000
-#define IBM6000
-#endif
+#define IBM6000_TARGET

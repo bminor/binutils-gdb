@@ -803,7 +803,7 @@ reread_symbols ()
 the_big_top:
   for (objfile = object_files; objfile; objfile = objfile->next) {
     if (objfile->obfd) {
-#ifdef IBM6000
+#ifdef IBM6000_TARGET
      /* If this object is from a shared library, then you should
         stat on the library name, not member name. */
 

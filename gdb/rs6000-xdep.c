@@ -510,6 +510,10 @@ exec_one_dummy_insn ()
 }
 
 
+#if 0
+
+   *** not needed anymore ***
+
 /* Return the number of initial trap signals we need to ignore once the inferior
    process starts running. This will be `2' for aix-3.1, `3' for aix-3.2 */
 
@@ -530,3 +534,4 @@ aix_starting_inferior_traps ()
   else
     return 3;
 }
+#endif

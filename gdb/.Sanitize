@@ -241,6 +241,8 @@ vax-pinsn.c
 vx-share
 xcoffexec.c
 xcoffread.c
+xcoffsolib.c
+xcoffsolib.h
 xm-3b1.h
 xm-m88k.h
 xm-altos.h
