@@ -1,3 +1,7 @@
+Mon Apr  7 17:46:23 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* .Sanitize: remove sanitization for M32R target.
+
 Thu Apr  3 15:21:26 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* gdb.base/help.exp: update help msg for INFO ADDR; add help test
@@ -508,26 +512,21 @@ Sat Nov  9 01:05:10 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 	* gdb.base/corefile.exp:  Consume $prompt in mmap fail cases.
 	* gdb.stabs/weird.exp:  Remove v_comb xfails.
 
-start-sanitize-m32r
 Tue Nov  5 10:44:23 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* gdb.base/[bitfields.exp crossload.exp funcargs.exp interrupt.exp
 	            list.exp scope.exp watchpoint.exp]
 	  Make all timeout error msgs explicitly say "(timeout)".
 	
-end-sanitize-m32r
-	Mon Nov  4 12:03:06 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
+Mon Nov  4 12:03:06 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* config/monitor.exp: Increase download timeout to 1000 seconds.
 
-start-sanitize-m32r
 Mon Nov  4 12:02:26 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* config/m32r.exp: Increase timeout to 120 seconds.
 
-end-sanitize-m32r
-
-	Sun Nov  3 14:37:05 1996  Fred Fish  <fnf@cygnus.com>
+Sun Nov  3 14:37:05 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.c++/classes.exp: Modify to handle current gcc C++ member ordering
 	and accept older ordering as obsolescent gcc or gdb.
@@ -541,11 +540,9 @@ Fri Nov  1 11:56:09 1996  Fred Fish  <fnf@cygnus.com>
 	* gdb.base/corefile.exp: Add test to read mmapped data
 	from core file.
 
-start-sanitize-m32r
 Wed Oct 30 18:19:16 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* config/m32r.exp: New file.
-end-sanitize-m32r
 
 Mon Oct 21 14:40:50 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
