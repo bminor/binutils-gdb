@@ -1,3 +1,21 @@
+start-sanitize-v850e
+Fri Aug 22 10:39:28 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* simops.c (bsh): Only set CY flag if either of the bottom
+	bytes is zero.
+	
+	* simops.c (prepare, dispose): Lower numbered
+	registers go to higher numbered address.
+
+	* simops.c (unsigned divide instructions): S bit set if result has
+	top bit set.
+	
+start-sanitize-v850eq
+	* simops.c (pushml, pushmh, popml, popmh): Lower numbered
+	registers go to higher numbered address.
+end-sanitize-v850eq
+end-sanitize-v850e
+	
 Wed Aug 20 13:56:35 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* simops.c (OP_107E0, OP_107F0, OP_307E0, OP_307F0): Use correct

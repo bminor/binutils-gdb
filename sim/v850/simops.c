@@ -1669,8 +1669,8 @@ OP_640 ()
 
       SP += (OP[3] & 0x3e) << 1;
 
-      /* Load the registers with lower number registers being retrieved from lower addresses.  */
-      for (i = 0; i < 12; i++)
+      /* Load the registers with lower number registers being retrieved from higher addresses.  */
+      for (i = 12; i--;)
 	if ((OP[3] & (1 << type1_regs[ i ])))
 	  {
 	    State.regs[ 20 + i ] = load_mem (SP, 4);
@@ -2692,6 +2692,7 @@ OP_1C207E0 (void)
   
   if (overflow)      PSW |= PSW_OV;
   if (quotient == 0) PSW |= PSW_Z;
+  if (quotient & 0x80000000) PSW |= PSW_S;
   
   trace_output (OP_IMM_REG_REG_REG);
 
@@ -2761,6 +2762,7 @@ OP_18207E0 (void)
   
   if (overflow)      PSW |= PSW_OV;
   if (quotient == 0) PSW |= PSW_Z;
+  if (quotient & 0x80000000) PSW |= PSW_S;
   
   trace_output (OP_IMM_REG_REG_REG);
 
@@ -2837,6 +2839,7 @@ OP_2C207E0 (void)
       
       if (overflow)      PSW |= PSW_OV;
       if (quotient == 0) PSW |= PSW_Z;
+      if (quotient & 0x80000000) PSW |= PSW_S;
 
       trace_output (OP_REG_REG_REG);
     }
@@ -2863,6 +2866,7 @@ OP_2C207E0 (void)
       
       if (overflow)      PSW |= PSW_OV;
       if (quotient == 0) PSW |= PSW_Z;
+      if (quotient & 0x80000000) PSW |= PSW_S;
 
       trace_output (OP_IMM_REG_REG_REG);
     }
@@ -2973,6 +2977,7 @@ OP_28207E0 (void)
       
       if (overflow)      PSW |= PSW_OV;
       if (quotient == 0) PSW |= PSW_Z;
+      if (quotient & 0x80000000) PSW |= PSW_S;
 
       trace_output (OP_REG_REG_REG);
     }
@@ -2999,6 +3004,7 @@ OP_28207E0 (void)
       
       if (overflow)      PSW |= PSW_OV;
       if (quotient == 0) PSW |= PSW_Z;
+      if (quotient & 0x80000000) PSW |= PSW_S;
 
       trace_output (OP_IMM_REG_REG_REG);
     }
@@ -3203,7 +3209,7 @@ OP_34207E0 (void)
 
   if (value == 0) PSW |= PSW_Z;
   if (value & 0x80000000) PSW |= PSW_S;
-  if (((value & 0xffff) == 0) || (value & 0xffff0000) == 0) PSW |= PSW_CY;
+  if (((value & 0xff) == 0) || (value & 0x00ff) == 0) PSW |= PSW_CY;
 
   trace_output (OP_REG_REG3);
   
@@ -3221,6 +3227,21 @@ OP_107E0 (void)
 
       trace_input ("pushml", OP_PUSHPOP3, 0);
 
+      /* Store the registers with lower number registers being placed at higher addresses.  */
+      for (i = 0; i < 15; i++)
+	if ((OP[3] & (1 << type3_regs[ i ])))
+	  {
+	    SP -= 4;
+	    store_mem (SP & ~ 3, 4, State.regs[ i + 1 ]);
+	  }
+
+      if (OP[3] & (1 << 3))
+	{
+	  SP -= 4;
+
+	  store_mem (SP & ~ 3, 4, PSW);
+	}
+	  
       if (OP[3] & (1 << 19))
 	{
 	  SP -= 8;
@@ -3236,21 +3257,6 @@ OP_107E0 (void)
 	      store_mem ( SP      & ~ 3, 4, EIPSW);
 	    }
 	}
-
-      if (OP[3] & (1 << 3))
-	{
-	  SP -= 4;
-
-	  store_mem (SP & ~ 3, 4, PSW);
-	}
-	  
-      /* Store the registers with lower number registers being placed at lower addresses.  */
-      for (i = 15; i--;)
-	if ((OP[3] & (1 << type3_regs[ i ])))
-	  {
-	    SP -= 4;
-	    store_mem (SP & ~ 3, 4, State.regs[ i + 1 ]);
-	  }
 
       trace_output (OP_PUSHPOP2);
     }
@@ -3282,8 +3288,8 @@ OP_10780 (void)
       
       trace_input ("prepare", OP_PUSHPOP1, 0);
       
-      /* Store the registers with lower number registers being placed at lower addresses.  */
-      for (i = 12; i--;)
+      /* Store the registers with lower number registers being placed at higher addresses.  */
+      for (i = 0; i < 12; i++)
 	if ((OP[3] & (1 << type1_regs[ i ])))
 	  {
 	    SP -= 4;
@@ -3318,8 +3324,8 @@ OP_1B0780 (void)
   
   trace_input ("prepare", OP_PUSHPOP1, 0);
   
-  /* Store the registers with lower number registers being placed at lower addresses.  */
-  for (i = 12; i--;)
+  /* Store the registers with lower number registers being placed at higher addresses.  */
+  for (i = 0; i < 12; i++)
     if ((OP[3] & (1 << type1_regs[ i ])))
       {
 	SP -= 4;
@@ -3343,8 +3349,8 @@ OP_130780 (void)
   
   trace_input ("prepare", OP_PUSHPOP1, 0);
   
-  /* Store the registers with lower number registers being placed at lower addresses.  */
-  for (i = 12; i--;)
+  /* Store the registers with lower number registers being placed at higher addresses.  */
+  for (i = 0; i < 12; i++)
     if ((OP[3] & (1 << type1_regs[ i ])))
       {
 	SP -= 4;
@@ -3368,8 +3374,8 @@ OP_B0780 (void)
   
   trace_input ("prepare", OP_PUSHPOP1, 0);
   
-  /* Store the registers with lower number registers being placed at lower addresses.  */
-  for (i = 12; i--;)
+  /* Store the registers with lower number registers being placed at higher addresses.  */
+  for (i = 0; i < 12; i++)
     if ((OP[3] & (1 << type1_regs[ i ])))
       {
 	SP -= 4;
@@ -3393,8 +3399,8 @@ OP_30780 (void)
   
   trace_input ("prepare", OP_PUSHPOP1, 0);
   
-  /* Store the registers with lower number registers being placed at lower addresses.  */
-  for (i = 12; i--;)
+  /* Store the registers with lower number registers being placed at higher addresses.  */
+  for (i = 0; i < 12; i++)
     if ((OP[3] & (1 << type1_regs[ i ])))
       {
 	SP -= 4;
@@ -3474,14 +3480,6 @@ OP_307F0 (void)
   
   trace_input ("popmh", OP_PUSHPOP2, 0);
   
-  /* Load the registers with lower number registers being retrieved from lower addresses.  */
-  for (i = 0; i++; i < 16)
-    if ((OP[3] & (1 << type2_regs[ i ])))
-      {
-	State.regs[ i + 16 ] = load_mem (SP & ~ 3, 4);
-	SP += 4;
-      }
-  
   if (OP[3] & (1 << 19))
     {
       if ((PSW & PSW_NP) && ((PSW & PSW_EP) == 0))
@@ -3498,6 +3496,14 @@ OP_307F0 (void)
       SP += 8;
     }
   
+  /* Load the registers with lower number registers being retrieved from higher addresses.  */
+  for (i = 16; i--;)
+    if ((OP[3] & (1 << type2_regs[ i ])))
+      {
+	State.regs[ i + 16 ] = load_mem (SP & ~ 3, 4);
+	SP += 4;
+      }
+  
   trace_output (OP_PUSHPOP2);
 
   return 4;
@@ -3511,20 +3517,6 @@ OP_107F0 (void)
 
   trace_input ("popml", OP_PUSHPOP3, 0);
 
-  /* Load the registers with lower number registers being retrieved from lower addresses.  */
-  for (i = 0; i++; i < 15)
-    if ((OP[3] & (1 << type3_regs[ i ])))
-      {
-	State.regs[ i + 1 ] = load_mem (SP & ~ 3, 4);
-	SP += 4;
-      }
-  
-  if (OP[3] & (1 << 3))
-    {
-      PSW = load_mem (SP & ~ 3, 4);
-      SP += 4;
-    }
-  
   if (OP[3] & (1 << 19))
     {
       if ((PSW & PSW_NP) && ((PSW & PSW_EP) == 0))
@@ -3541,6 +3533,20 @@ OP_107F0 (void)
       SP += 8;
     }
   
+  if (OP[3] & (1 << 3))
+    {
+      PSW = load_mem (SP & ~ 3, 4);
+      SP += 4;
+    }
+  
+  /* Load the registers with lower number registers being retrieved from higher addresses.  */
+  for (i = 15; i--;)
+    if ((OP[3] & (1 << type3_regs[ i ])))
+      {
+	State.regs[ i + 1 ] = load_mem (SP & ~ 3, 4);
+	SP += 4;
+      }
+  
   trace_output (OP_PUSHPOP2);
 }
 
@@ -3551,6 +3557,14 @@ OP_307E0 (void)
   int i;
 
   trace_input ("pushmh", OP_PUSHPOP2, 0);
+  
+  /* Store the registers with lower number registers being placed at higher addresses.  */
+  for (i = 0; i < 16; i++)
+    if ((OP[3] & (1 << type2_regs[ i ])))
+      {
+	SP -= 4;
+	store_mem (SP & ~ 3, 4, State.regs[ i + 16 ]);
+      }
   
   if (OP[3] & (1 << 19))
     {
@@ -3567,14 +3581,6 @@ OP_307E0 (void)
 	  store_mem ( SP      & ~ 3, 4, EIPSW);
 	}
     }
-  
-  /* Store the registers with lower number registers being placed at lower addresses.  */
-  for (i = 16; i--;)
-    if ((OP[3] & (1 << type2_regs[ i ])))
-      {
-	SP -= 4;
-	store_mem (SP & ~ 3, 4, State.regs[ i + 16 ]);
-      }
   
   trace_output (OP_PUSHPOP2);
 
