@@ -59,6 +59,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define  CSTOPB  0x00000040
 #endif
 
+static const char hexchars[]="0123456789abcdef";
+static char *hex2mem();
+
 #define SWAP_TARGET_AND_HOST(buffer,len) 				\
   do									\
     {									\
@@ -77,9 +80,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
     }									\
   while (0)
 
-
-extern void make_xmodem_packet();
-extern void print_xmodem_packet();
+static void make_xmodem_packet();
+static void print_xmodem_packet();
+static void make_gdb_packet();
+static unsigned long ascii2hexword();
+static char *hexword2ascii();
+static int tohex();
+static int to_hex();
+static int from_hex();
 
 struct monitor_ops *current_monitor;
 extern struct cmd_list_element *setlist;
@@ -96,7 +104,13 @@ static int hashmark;				/* flag set by "set hash" */
 FILE *log_file;
 #endif
 
-static int timeout = 24;
+static int timeout = 30;
+/* Having this larger than 400 causes us to be incompatible with m68k-stub.c
+   and i386-stub.c.  Normally, no one would notice because it only matters
+   for writing large chunks of memory (e.g. in downloads).  Also, this needs
+   to be more than 400 if required to hold the registers (see below, where
+   we round it up based on REGISTER_BYTES).  */
+#define PBUFSIZ 400
 
 /* 
  * Descriptor for I/O to remote machine.  Initialize it to NULL so that
@@ -209,7 +223,7 @@ printf_monitor(va_alist)
 {
   va_list args;
   char *pattern;
-  char buf[200];
+  char buf[PBUFSIZ];
   int i;
 
   va_start(args);
@@ -220,6 +234,8 @@ printf_monitor(va_alist)
 
   debuglogs (1, "printf_monitor(), Sending: \"%s\".", buf);
 
+  if (strlen(buf) > PBUFSIZ)
+    error ("printf_monitor(): string too long");
   if (SERIAL_WRITE(monitor_desc, buf, strlen(buf)))
     fprintf(stderr, "SERIAL_WRITE failed: %s\n", safe_strerror(errno));
 }
@@ -251,8 +267,8 @@ debuglogs(va_alist)
 {
   va_list args;
   char *pattern, *p;
-  char buf[200];
-  char newbuf[300];
+  unsigned char buf[PBUFSIZ];
+  char newbuf[PBUFSIZ];
   int level, i;
 
   va_start(args);
@@ -269,7 +285,9 @@ debuglogs(va_alist)
   
   /* convert some characters so it'll look right in the log */
   p = newbuf;
-  for (i=0 ; buf[i] != '\0'; i++) {
+  for (i = 0 ; buf[i] != '\0'; i++) {
+    if (i > PBUFSIZ)
+      error ("Debug message too long");
     switch (buf[i]) {
     case '\n':					/* newlines */
       *p++ = '\\';
@@ -300,7 +318,12 @@ debuglogs(va_alist)
       *p++ = buf[i] + 'A';
       continue;
     }
-  }
+     if (buf[i] >= 128) {			/* modify control characters */
+      *p++ = '!';
+      *p++ = buf[i] + 'A';
+      continue;
+    }
+ }
   *p = '\0';					/* terminate the string */
 
   if (sr_get_debug() > level)
@@ -326,8 +349,10 @@ readchar(timeout)
 
   c = SERIAL_READCHAR(monitor_desc, timeout);
 
-  if (sr_get_debug() > 5)
+  if (sr_get_debug() > 5) {
     putchar(c & 0x7f);
+    debuglogs (5, "readchar: timeout = %d\n", timeout);
+  }
 
 #ifdef LOG_FILE
   if (isascii (c))
@@ -539,8 +564,6 @@ monitor_create_inferior (execfile, args, env)
 
   entry_pt = (int) bfd_get_start_address (exec_bfd);
 
-  debuglogs (3, "create_inferior(exexfile=%s, args=%s, env=%s)", execfile, args, env);
-
 /* The "process" (board) is already stopped awaiting our commands, and
    the program is already downloaded.  We just set its PC and go.  */
 
@@ -599,7 +622,7 @@ monitor_open(args, name, from_tty)
   
   SERIAL_RAW(monitor_desc);
 
-#ifndef __GO32__
+#if !defined(__GO32__) && !defined(GDB_TARGET_IS_PA_ELF)
   /* some systems only work with 2 stop bits */
   if (STOPBITS == 2) {
     temptempio = (TERMINAL *)SERIAL_GET_TTY_STATE(monitor_desc);
@@ -607,6 +630,7 @@ monitor_open(args, name, from_tty)
     temptempio->sg_cflag |= baud_rate | CSTOPB;
 #else
     temptempio->c_cflag |= baud_rate | CSTOPB;
+/***    temptempio->c_lflag |= ~0x00000008; turn off echo ***/
 #endif
     SERIAL_SET_TTY_STATE(monitor_desc, temptempio);
     debuglogs (4, "Set serial port to 2 stop bits");
@@ -622,13 +646,26 @@ monitor_open(args, name, from_tty)
   fprintf_filtered (log_file, "Remote target %s connected to %s\n\n", TARGET_NAME, dev_name);
 #endif
 
-  /* wake up the monitor and see if it's alive */
-  printf_monitor(INIT_CMD);
-  expect_prompt(1);		/* See if we get a prompt */
+  /* see if the target is alive. For a ROM monitor, we can just try to force the
+     prompt to print a few times. FOr the GDB remote protocol, the application
+     being debugged is sitting at a breakpoint and waiting for GDB to initialize
+     the connection. We force it to give us an empty packet to see if it's alive.
+     */
+  if (GDBPROTO) {
+    debuglogs (3, "Trying to ACK the target's debug stub");
+    printf_monitor (INIT_CMD);	/* ask for the last signal */
+    expect ("$S05#b8",0);		/* look for a response */
+    printf_monitor ("+");	/* ask for the last signal */
+    expect_prompt(1);		/* See if we get a prompt */
+  } else {
+    /* wake up the monitor and see if it's alive */
+    printf_monitor(INIT_CMD);
+    expect_prompt(1);		/* See if we get a prompt */
 
-  /* try again to be sure */
-  printf_monitor(INIT_CMD);
-  expect_prompt(1);		/* See if we get a prompt */
+    /* try again to be sure */
+    printf_monitor(INIT_CMD);
+    expect_prompt(1);		/* See if we get a prompt */
+  }
 
   if (from_tty)
     printf("Remote target %s connected to %s\n", TARGET_NAME, dev_name);
@@ -773,15 +810,39 @@ get_reg_name (regno)
  *	block regs.
  */
 void
-monitor_fetch_registers ()
+monitor_fetch_registers (ignored)
+     int ignored;
 {
-  int regno;
+  int regno, i;
+  char *p;
+  unsigned char packet[PBUFSIZ];
+  char regs[REGISTER_BYTES];
 
-  /* yeah yeah, i know this is horribly inefficient.  but it isn't done
-     very often...  i'll clean it up later.  */
+  debuglogs (1, "monitor_fetch_registers (ignored=%d)\n", ignored);
 
-  for (regno = 0; regno <= PC_REGNUM; regno++)
-    monitor_fetch_register(regno);
+  memset (packet, 0, PBUFSIZ);
+  if (GDBPROTO) {
+    /* Unimplemented registers read as all bits zero.  */
+    memset (regs, 0, REGISTER_BYTES);
+    make_gdb_packet (packet, "g");
+    if (monitor_send_packet (packet) == 0)
+      error ("Couldn't transmit packet\n");
+    if (monitor_get_packet (packet) == 0)
+          error ("Couldn't receive packet\n");  
+    /* FIXME: read bytes from packet */
+    debuglogs (4, "monitor_fetch_registers: Got a \"%s\" back\n", packet);
+    for (regno = 0; regno <= PC_REGNUM+4; regno++) {
+      /* supply register stores in target byte order, so swap here */
+      /* FIXME: convert from ASCII hex to raw bytes */
+      i = ascii2hexword (packet + (regno * 8));
+      debuglogs (5, "Adding register %d = %x\n", regno, i);
+      SWAP_TARGET_AND_HOST (&i, 4);
+      supply_register (regno, (char *)&i);
+    }
+  } else {
+    for (regno = 0; regno <= PC_REGNUM; regno++)
+      monitor_fetch_register(regno);
+  }
 }
 
 /* 
@@ -824,17 +885,48 @@ monitor_fetch_register (regno)
   return;
 }
 
-/* Store the remote registers from the contents of the block REGS.  */
-
+/*
+ * monitor_store_registers - store the remote registers.
+ */
 void
-monitor_store_registers ()
+monitor_store_registers (ignored)
+     int ignored;
 {
   int regno;
-
+  unsigned long i;
+  char packet[PBUFSIZ];
+  char buf[PBUFSIZ];
+  char num[9];
+  
   debuglogs (1, "monitor_store_registers()");
 
-  for (regno = 0; regno <= PC_REGNUM; regno++)
-    monitor_store_register(regno);
+  if (GDBPROTO) {
+    memset (packet, 0, PBUFSIZ);
+    memset (buf, 0, PBUFSIZ);
+    buf[0] = 'G';
+
+    /* Unimplemented registers read as all bits zero.  */
+    /* FIXME: read bytes from packet */
+    for (regno = 0; regno < 41; regno++) { /* FIXME */
+      /* supply register stores in target byte order, so swap here */
+      /* FIXME: convert from ASCII hex to raw bytes */
+      i = (unsigned long)read_register (regno);
+#if 0
+      SWAP_TARGET_AND_HOST (&i, 4);
+#endif
+      hexword2ascii (num, i);
+      strcpy (buf+(regno * 8)+1, num);
+    }
+    *(buf + (regno * 8) + 2) = 0;
+    make_gdb_packet (packet, buf);
+    if (monitor_send_packet (packet) == 0)
+      error ("Couldn't transmit packet\n");
+    if (monitor_get_packet (packet) == 0)
+      error ("Couldn't receive packet\n");  
+  } else {
+    for (regno = 0; regno <= PC_REGNUM; regno++)
+      monitor_store_register(regno);
+  }
 
   registers_changed ();
 }
@@ -910,26 +1002,62 @@ monitor_write_inferior_memory (memaddr, myaddr, len)
      unsigned char *myaddr;
      int len;
 {
-  int i;
-  char buf[10];
-
+  unsigned long i;
+  int j;
+  char packet[PBUFSIZ];
+  char buf[PBUFSIZ];
+  char num[9];
+  char *p;
+  
   debuglogs (1, "monitor_write_inferior_memory (memaddr=0x%x, myaddr=0x%x, len=%d)", memaddr, myaddr, len);
+  memset (buf, '\0', PBUFSIZ);		/* this also sets the string terminator */
+  p = buf;
 
-  for (i = 0; i < len; i++) {
-    printf_monitor (ROMCMD(SET_MEM), memaddr + i, myaddr[i] );
-    if (*ROMDELIM(SET_MEM) != 0) {		/* if there's a delimiter */
-      expect (ROMDELIM(SET_MEM), 1);
-      expect (CMD_DELIM);
-      printf_monitor ("%x", myaddr[i]);
+  if (GDBPROTO) {
+    *p++ = 'M';				/* The command to write memory */
+    hexword2ascii (num, memaddr);	/* convert the address */
+    strcpy (p, num);			/* copy the address */
+    p += 8;
+    *p++ = ',';				/* add comma delimeter */
+    hexword2ascii (num, len);		/* Get the length as a 4 digit number */
+    *p++ = num[4];
+    *p++ = num[5];
+    *p++ = num[6];
+    *p++ = num[7];
+    *p++ = ':';				/* add the colon delimeter */
+    for (j = 0; j < len; j++) {		/* copy the data in after converting it */
+#if 0
+      hexword2ascii (num, myaddr[j]);
+#endif
+      *p++ = tohex ((myaddr[j] >> 4) & 0xf);
+      *p++ = tohex  (myaddr[j] & 0xf);
+#if 0
+      strcpy ((buf+14)+(j * 2), num+6);
+#endif
     }
-/***    printf_monitor ("%x", myaddr[i]); ***/
-    if (sr_get_debug() > 1)
-      printf ("\nSet 0x%x to 0x%x\n", memaddr + i, myaddr[i]);
-    if (*ROMDELIM(SET_MEM) != 0) {
-      expect (CMD_DELIM);
-      printf_monitor (CMD_END);
+
+    make_gdb_packet (packet, buf);
+    if (monitor_send_packet (packet) == 0)
+      error ("Couldn't transmit packet\n");
+    if (monitor_get_packet (packet) == 0)
+      error ("Couldn't receive packet\n");  
+  } else {
+    for (i = 0; i < len; i++) {
+      printf_monitor (ROMCMD(SET_MEM), memaddr + i, myaddr[i] );
+      if (*ROMDELIM(SET_MEM) != 0) {		/* if there's a delimiter */
+	expect (ROMDELIM(SET_MEM), 1);
+	expect (CMD_DELIM);
+	printf_monitor ("%x", myaddr[i]);
+      }
+      /***    printf_monitor ("%x", myaddr[i]); ***/
+      if (sr_get_debug() > 1)
+	printf ("\nSet 0x%x to 0x%x\n", memaddr + i, myaddr[i]);
+      if (*ROMDELIM(SET_MEM) != 0) {
+	expect (CMD_DELIM);
+	printf_monitor (CMD_END);
+      }
+      expect_prompt (1);
     }
-    expect_prompt (1);
   }
   return len;
 }
@@ -947,6 +1075,7 @@ monitor_read_inferior_memory(memaddr, myaddr, len)
 {
   int i, j;
   char buf[20];
+  char packet[PBUFSIZ];
 
   /* Number of bytes read so far.  */
   int count;
@@ -987,23 +1116,40 @@ monitor_read_inferior_memory(memaddr, myaddr, len)
     
     debuglogs (3, "Display %d bytes at %x for Big Endian host", len_this_pass, startaddr);
     
-    for (i = 0; i < len_this_pass; i++) {
-      printf_monitor (ROMCMD(GET_MEM), startaddr, startaddr);
-      sprintf (buf, ROMCMD(GET_MEM), startaddr, startaddr);
-      if (*ROMDELIM(GET_MEM) != 0) {		/* if there's a delimiter */
-	expect (ROMDELIM(GET_MEM), 1);
-      } else {
+    if (GDBPROTO) {
+      for (i = 0; i < len_this_pass; i++) {
+	sprintf (buf, "m%08x,%04x", startaddr, len_this_pass);
+	make_gdb_packet (packet, buf);
+	if (monitor_send_packet (packet) == 0)
+	  error ("Couldn't transmit packet\n");
+	if (monitor_get_packet (packet) == 0)
+	  error ("Couldn't receive packet\n");  
+	debuglogs (4, "monitor_read_inferior: Got a \"%s\" back\n", packet);
+	for (j = 0; j < len_this_pass ; j++) {		/* extract the byte values */
+	  myaddr[count++] = from_hex (*(packet+(j*2))) * 16 + from_hex (*(packet+(j*2)+1));
+	  debuglogs (5, "myaddr set to %x\n", myaddr[count-1]);
+	}
+	startaddr += 1;
+      }
+    } else {
+      for (i = 0; i < len_this_pass; i++) {
+	printf_monitor (ROMCMD(GET_MEM), startaddr, startaddr);
 	sprintf (buf, ROMCMD(GET_MEM), startaddr, startaddr);
-	expect (buf,1);				/* get the command echo */
-	get_hex_word(1);			/* strip away the address */
+	if (*ROMDELIM(GET_MEM) != 0) {		/* if there's a delimiter */
+	  expect (ROMDELIM(GET_MEM), 1);
+	} else {
+	  sprintf (buf, ROMCMD(GET_MEM), startaddr, startaddr);
+	  expect (buf,1);				/* get the command echo */
+	  get_hex_word(1);			/* strip away the address */
+	}
+	get_hex_byte (&myaddr[count++]);		/* get the value at this address */
+	
+	if (*ROMDELIM(GET_MEM) != 0) {
+	  printf_monitor (CMD_END);
+	}
+	expect_prompt (1);
+	startaddr += 1;
       }
-      get_hex_byte (&myaddr[count++]);		/* get the value at this address */
-      
-      if (*ROMDELIM(GET_MEM) != 0) {
-	printf_monitor (CMD_END);
-      }
-      expect_prompt (1);
-      startaddr += 1;
     }
   } 
   return len;
@@ -1524,7 +1670,7 @@ monitor_make_srec (buffer, type, memaddr, myaddr, len)
  *	SUM  = Add the contents of the 128 bytes and use the low-order
  *	       8 bits of the result.
  */
-void
+static void
 make_xmodem_packet (packet, data, len)
      unsigned char packet[];
      unsigned char *data;
@@ -1566,7 +1712,7 @@ make_xmodem_packet (packet, data, len)
 /*
  * print_xmodem_packet -- print the packet as a debug check
  */
-void
+static void
 print_xmodem_packet(packet)
      char packet[];
 {
@@ -1606,6 +1752,308 @@ print_xmodem_packet(packet)
     debuglogs (4, "xmodem: data checksum wrong, got a %d", packet[XMODEM_PACKETSIZE] & 0xff);
   }
   putchar ('\n');
+}
+
+/*
+ * make_gdb_packet -- make a GDB packet. The data is always ASCII.
+ *	 A debug packet whose contents are <data>
+ *	 is encapsulated for transmission in the form:
+ *
+ *		$ <data> # CSUM1 CSUM2
+ *
+ *       <data> must be ASCII alphanumeric and cannot include characters
+ *       '$' or '#'.  If <data> starts with two characters followed by
+ *       ':', then the existing stubs interpret this as a sequence number.
+ *
+ *       CSUM1 and CSUM2 are ascii hex representation of an 8-bit 
+ *       checksum of <data>, the most significant nibble is sent first.
+ *       the hex digits 0-9,a-f are used.
+ *
+ */
+static void
+make_gdb_packet (buf, data)
+     char *buf, *data;
+{
+  int i;
+  unsigned char csum = 0;
+  int cnt;
+  char *p;
+
+  debuglogs (3, "make_gdb_packet(%s)\n", data);
+  cnt  = strlen (data);
+  if (cnt > PBUFSIZ)
+    error ("make_gdb_packet(): to much data\n");
+
+  /* start with the packet header */
+  p = buf;
+  *p++ = '$';
+
+  /* calculate the checksum */
+  for (i = 0; i < cnt; i++) {
+    csum += data[i];
+    *p++ = data[i];
+  }
+
+  /* terminate the data with a '#' */
+  *p++ = '#';
+  
+  /* add the checksum as two ascii digits */
+  *p++ = tohex ((csum >> 4) & 0xf);
+  *p++ = tohex (csum & 0xf);
+  *p  = 0x0;			/* Null terminator on string */
+}
+
+/*
+ * monitor_send_packet -- send a GDB packet to the target with error handling. We
+ *		get a '+' (ACK) back if the packet is received and the checksum
+ *		matches. Otherwise a '-' (NAK) is returned. It returns a 1 for a
+ *		successful transmition, or a 0 for a failure.
+ */
+int
+monitor_send_packet (packet)
+     char *packet;
+{
+  int c, retries, i;
+  char junk[PBUFSIZ];
+
+  retries = 0;
+
+#if 0
+  /* scan the packet to make sure it only contains valid characters.
+     this may sound silly, but sometimes a garbled packet will hang
+     the target board. We scan the whole thing, then print the error
+     message.
+     */
+  for (i = 0; i < strlen(packet); i++) {
+    debuglogs (5, "monitor_send_packet(): Scanning \'%c\'\n", packet[i]);
+    /* legit hex numbers or command */
+    if ((isxdigit(packet[i])) || (isalpha(packet[i])))
+      continue;
+    switch (packet[i]) {
+    case '+':			/* ACK */
+    case '-':			/* NAK */
+    case '#':			/* end of packet */
+    case '$':			/* start of packet */
+      continue;
+    default:			/* bogus character */
+      retries++;
+      debuglogs (4, "monitor_send_packet(): Found a non-ascii digit \'%c\' in the packet.\n", packet[i]);
+    }
+  }
+#endif  
+
+  if (retries > 0)
+    error ("Can't send packet, found %d non-ascii characters", retries);
+
+  /* ok, try to send the packet */
+  retries = 0;
+  while (retries <= 10) {
+    printf_monitor ("%s", packet);
+    
+    /* read until either a timeout occurs (-2) or '+' is read */
+    while (retries <= 10) {
+      c = readchar (timeout);
+      debuglogs (3, "Reading a GDB protocol packet... Got a '%c'\n", c);
+      switch (c) {
+      case '+':
+	debuglogs (3, "Got Ack\n");
+	return 1;
+      case SERIAL_TIMEOUT:
+	debuglogs (3, "Timed out reading serial port\n");
+	break;            /* Retransmit buffer */
+      case '-':
+	debuglogs (3, "Got NAK\n");
+	break;			/* FIXME: (maybe) was a continue */
+      case '$':
+	/* it's probably an old response, or the echo of our command.
+	 * just gobble up the packet and ignore it.
+	 */
+	debuglogs (3, "Got a junk packet\n");
+	do {
+	  c = readchar (timeout);
+	  junk[i++] = c;
+	} while (c != '#');
+	c = readchar (timeout);
+	junk[i++] = c;
+	c = readchar (timeout);
+	junk[i++] = c;
+	junk[i++] = '\0';
+	debuglogs (3, "Reading a junk packet, got a \"%s\"\n", junk);
+	continue;               /* Now, go look for next packet */
+      default:
+	continue;
+      }
+      retries++;
+      debuglogs (3, "Retransmitting packet \"%s\"\n", packet);
+      break;                /* Here to retransmit */
+    }
+  } /* outer while */
+  return 0;
+}
+
+/*
+ * monitor_get_packet -- get a GDB packet from the target. Basically we read till we
+ *		see a '#', then check the checksum. It returns a 1 if it's gotten a
+ *		packet, or a 0 it the packet wasn't transmitted correctly.
+ */
+int
+monitor_get_packet (packet)
+     char *packet;
+{
+  int c;
+  int retries;
+  unsigned char csum;
+  unsigned char pktcsum;
+  char *bp;
+
+  csum = 0;
+  bp = packet;
+
+  memset (packet, 1, PBUFSIZ);
+  retries = 0;
+  while (retries <= 10) {
+    do {
+      c = readchar (timeout);
+      if (c == SERIAL_TIMEOUT) {
+	debuglogs (3, "monitor_get_packet: got time out from serial port.\n");
+      }
+      debuglogs (3, "Waiting for a '$', got a %c\n", c);
+    } while (c != '$');
+    
+    retries = 0;
+    while (retries <= 10) {
+      c = readchar (timeout);
+      debuglogs (3, "monitor_get_packet: got a '%c'\n", c);
+      switch (c) {
+      case SERIAL_TIMEOUT:
+	debuglogs (3, "Timeout in mid-packet, retrying\n");
+	return 0;
+      case '$':
+	debuglogs (3, "Saw new packet start in middle of old one\n");
+	return 0;             /* Start a new packet, count retries */
+      case '#':	
+	*bp = '\0';
+	pktcsum = from_hex (readchar (timeout)) << 4;
+	pktcsum |= from_hex (readchar (timeout));
+	if (csum == pktcsum) {
+	  debuglogs (3, "\nGDB packet checksum correct, packet data is \"%s\",\n", packet);
+	  printf_monitor ("+");
+	  expect_prompt (1);
+	  return 1;
+	}
+	debuglogs (3, "Bad checksum, sentsum=0x%x, csum=0x%x\n", pktcsum, csum);
+	return 0;
+      case '*':               /* Run length encoding */
+	debuglogs (5, "Run length encoding in packet\n");
+	csum += c;
+	c = readchar (timeout);
+	csum += c;
+	c = c - ' ' + 3;      /* Compute repeat count */
+	
+	if (c > 0 && c < 255 && bp + c - 1 < packet + PBUFSIZ - 1) {
+	  memset (bp, *(bp - 1), c);
+	  bp += c;
+	  continue;
+	}
+	*bp = '\0';
+	printf_filtered ("Repeat count %d too large for buffer.\n", c);
+	return 0;
+	
+      default:
+	if ((!isxdigit(c)) && (!ispunct(c)))
+	  debuglogs (4, "Got a non-ascii digit \'%c\'.\\n", c);
+	if (bp < packet + PBUFSIZ - 1) {
+	  *bp++ = c;
+	  csum += c;
+	  continue;
+	}
+	
+	*bp = '\0';
+	puts_filtered ("Remote packet too long.\n");
+	return 0;
+      }
+    }
+  }
+}
+
+/*
+ * ascii2hexword -- convert an ascii number represented by 8 digits to a hex value.
+ */
+static unsigned long
+ascii2hexword (mem)
+     unsigned char *mem;
+{
+  unsigned long val;
+  int i;
+  char buf[9];
+
+  val = 0;
+  for (i = 0; i < 8; i++) {
+    val <<= 4;
+    if (mem[i] >= 'A' && mem[i] <= 'F')
+      val = val + mem[i] - 'A' + 10;      
+    if (mem[i] >= 'a' && mem[i] <= 'f')
+      val = val + mem[i] - 'a' + 10;
+    if (mem[i] >= '0' && mem[i] <= '9')
+      val = val + mem[i] - '0';
+    buf[i] = mem[i];
+  }
+  buf[8] = '\0';
+  debuglogs (4, "ascii2hexword() got a 0x%x from %s(%x).\n", val, buf, mem);
+  return val;
+}
+
+/*
+ * ascii2hexword -- convert a hex value to an ascii number represented by 8
+ *	digits.
+ */
+static char*
+hexword2ascii (mem, num)
+     unsigned char *mem;
+     unsigned long num;
+{
+  int i;
+  unsigned char ch;
+  
+  debuglogs (4, "hexword2ascii() converting %x ", num);
+  for (i = 7; i >= 0; i--) {    
+    mem[i] = tohex ((num >> 4) & 0xf);
+    mem[i] = tohex (num & 0xf);
+    num = num >> 4;
+  }
+  mem[8] = '\0';
+  debuglogs (4, "\tto a %s", mem);
+}
+
+/* Convert hex digit A to a number.  */
+static int
+from_hex (a)
+     int a;
+{  
+  if (a == 0)
+    return 0;
+
+  debuglogs (4, "from_hex got a 0x%x(%c)\n",a,a);
+  if (a >= '0' && a <= '9')
+    return a - '0';
+  if (a >= 'a' && a <= 'f')
+    return a - 'a' + 10;
+  if (a >= 'A' && a <= 'F')
+    return a - 'A' + 10;
+  else {
+    error ("Reply contains invalid hex digit 0x%x", a);
+  }
+}
+
+/* Convert number NIB to a hex digit.  */
+static int
+tohex (nib)
+     int nib;
+{
+  if (nib < 10)
+    return '0'+nib;
+  else
+    return 'a'+nib-10;
 }
 
 /*
