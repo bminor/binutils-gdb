@@ -416,7 +416,9 @@ assemble_one_insn (cpu, opcode, operand_table, str, insn_buf)
 	      /* Pick the suffix out and parse it.  */
 	      /* ??? Hmmm ... there may not be any need to nul-terminate the
 		 string, and it may in fact complicate things.  */
-	      for (t = *s == '.' ? s + 1 : s; *t && isalpha (*t); ++t)
+	      for (t = *s == '.' ? s + 1 : s;
+		   *t && (isalnum (*t) || *t == '[' || *t == ']');
+		   ++t)
 		continue;
 	      c = *t;
 	      *t = '\0';
