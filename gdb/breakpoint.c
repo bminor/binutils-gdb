@@ -7396,7 +7396,7 @@ ignore_command (args, from_tty)
 static void
 map_breakpoint_numbers (args, function)
      char *args;
-     void (*function) (struct breakpoint *);
+     void (*function) PARAMS ((struct breakpoint *));
 {
   register char *p = args;
   char *p1;

@@ -30,7 +30,7 @@
 #ifdef _WIN32
 /* On Windows, this function pointer is initialized to a function in
    the wiggler DLL.  */
-static int (*dll_do_command) (const char *, char *);
+static int (*dll_do_command) PARAMS ((const char *, char *));
 #endif
 
 static int

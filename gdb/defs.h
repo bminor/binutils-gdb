@@ -56,6 +56,9 @@
 
 #include "libiberty.h"
 
+/* libiberty.h can't declare this one, but evidently we can.  */
+extern char *strsignal (int);
+
 #include "progress.h"
 
 #ifdef USE_MMALLOC
@@ -290,6 +293,8 @@ extern int subset_compare (char *, char *);
 
 extern char *safe_strerror (int);
 
+extern char *safe_strsignal (int);
+
 extern void init_malloc (void *);
 
 extern void request_quit (int);
@@ -368,9 +373,6 @@ extern void mfree (PTR, PTR);
 #endif
 
 extern void init_page_info (void);
-
-extern CORE_ADDR host_pointer_to_address (void *ptr);
-extern void *address_to_host_pointer (CORE_ADDR addr);
 
 /* From demangle.c */
 

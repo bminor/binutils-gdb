@@ -603,8 +603,9 @@ add_packet_config_cmd (config, name, title, set_func, show_func,
      struct packet_config *config;
      char *name;
      char *title;
-     void (*set_func) (char *args, int from_tty, struct cmd_list_element * c);
-     void (*show_func) (char *name, int from_tty);
+     void (*set_func) PARAMS ((char *args, int from_tty,
+			       struct cmd_list_element * c));
+     void (*show_func) PARAMS ((char *name, int from_tty));
      struct cmd_list_element **setlist;
      struct cmd_list_element **showlist;
 {
@@ -730,8 +731,8 @@ PTR sigint_remote_token;
 /* These are pointers to hook functions that may be set in order to
    modify resume/wait behavior for a particular architecture.  */
 
-void (*target_resume_hook) (void);
-void (*target_wait_loop_hook) (void);
+void (*target_resume_hook) PARAMS ((void));
+void (*target_wait_loop_hook) PARAMS ((void));
 
 
 
@@ -2444,7 +2445,7 @@ cleanup_sigint_signal_handler (void *dummy)
 
 /* Send ^C to target to halt it.  Target will respond, and send us a
    packet.  */
-static void (*ofunc) (int);
+static void (*ofunc) PARAMS ((int));
 
 /* The command line interface's stop routine. This function is installed
    as a signal handler for SIGINT. The first time a user requests a
