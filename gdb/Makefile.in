@@ -2612,7 +2612,7 @@ target.o: target.c $(defs_h) $(gdb_string_h) $(target_h) $(gdbcmd_h) \
 thread.o: thread.c $(defs_h) $(symtab_h) $(frame_h) $(inferior_h) \
 	$(environ_h) $(value_h) $(target_h) $(gdbthread_h) $(command_h) \
 	$(gdbcmd_h) $(regcache_h) $(gdb_h) $(gdb_string_h) $(ui_out_h)
-linux-thread-db.o: linux-thread-db.c $(defs_h) $(gdb_assert_h)
+linux-thread-db.o: linux-thread-db.c $(defs_h) $(gdb_assert_h) \
 	$(gdb_proc_service_h) $(gdb_thread_db_h) $(bfd_h) $(gdbthread_h) \
 	$(inferior_h) $(symfile_h) $(objfiles_h) $(target_h) $(regcache_h) \
 	$(solib_svr4_h)

@@ -1,5 +1,9 @@
 2004-11-14  Daniel Jacobowitz  <dan@debian.org>
 
+	* Makefile.in (linux-thread-db.o): Fix typo in last change.
+
+2004-11-14  Daniel Jacobowitz  <dan@debian.org>
+
 	* linux-thread-db.c: New file, renamed from thread-db.c.
 	* thread-db.c: Remove.
 	* Makefile.in (linux-thread-db.o): Rename from thread-db.o rule.
