@@ -191,6 +191,7 @@ gdb-all.texi: ${SFILES_DOCDIR}
 # GDB MANUAL: TeX dvi file
 gdb.dvi : gdb-${CONFIG}.texi rluser.texinfo inc-hist.texi
 	TEXINPUTS=${TEXIDIR}:.:$(srcdir):$$TEXINPUTS tex gdb-${CONFIG}.texi
+	TEXINPUTS=${TEXIDIR}:.:$(srcdir):$$TEXINPUTS tex gdb-${CONFIG}.texi
 	texindex gdb-${CONFIG}.??
 	TEXINPUTS=${TEXIDIR}:.:$(srcdir):$$TEXINPUTS tex gdb-${CONFIG}.texi
 	mv gdb-${CONFIG}.dvi ./gdb.dvi
