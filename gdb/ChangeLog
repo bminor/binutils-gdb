@@ -1,3 +1,9 @@
+2002-02-19  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* i386-tdep.c (get_longjmp_target): Fix compilation failure
+	by setting dummy values to JB_PC and JB_ELEMENT_SIZE
+	if not defined.
+
 2002-02-18  Richard Earnshaw  <rearnsha@arm.com>
 
 	* config/arm/nbsd.mt (TDEPFILES): Add solib-sunos.o.

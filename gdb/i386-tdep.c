@@ -839,6 +839,16 @@ i386_pop_frame (void)
 
 #ifdef GET_LONGJMP_TARGET
 
+/* FIXME: Multi-arching does not set JB_PC and JB_ELEMENT_SIZE yet.  
+   Fill in with dummy value to enable compilation.  */
+#ifndef JB_PC
+#define JB_PC 0
+#endif /* JB_PC */
+
+#ifndef JB_ELEMENT_SIZE
+#define JB_ELEMENT_SIZE 4
+#endif /* JB_ELEMENT_SIZE */
+
 /* Figure out where the longjmp will land.  Slurp the args out of the
    stack.  We expect the first arg to be a pointer to the jmp_buf
    structure from which we extract the pc (JB_PC) that we will land
