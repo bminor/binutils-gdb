@@ -1,3 +1,14 @@
+2001-03-26  H.J. Lu  <hjl@gnu.org>
+
+	* elf32-gen.c (elf32_generic_link_add_symbols): New. Check
+	if there are any relocations for generic ELF.
+	(bfd_elf32_bfd_link_add_symbols): Defined to
+	elf32_generic_link_add_symbols.
+	* elf64-gen.c (elf64_generic_link_add_symbols): New. Check
+	if there are any relocations for generic ELF.
+	(bfd_elf64_bfd_link_add_symbols): Defined to
+	elf64_generic_link_add_symbols.
+
 2001-03-23  Nick Clifton  <nickc@redhat.com>
 
 	* Makefile.am (BUILD_CFILES): New variable: List of C source
