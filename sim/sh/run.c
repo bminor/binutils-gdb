@@ -74,7 +74,7 @@ main (ac, av)
     {
       printf ("run %s\n", name);
     }
-  abfd = bfd_openr (name, "coff-sh");
+  abfd = bfd_openr (name, "");
   if (abfd)
     {
 
