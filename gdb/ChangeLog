@@ -1,3 +1,9 @@
+Wed Aug 26 21:10:52 1992  John Gilmore  (gnu@cygnus.com)
+
+	* configure.in (host configurations):  Reformat nested cases into
+	easy-to-maintain table.
+	(altos-*-gas):  Use -gas flag instead of OS "gas".
+
 Wed Aug 26 16:02:01 1992  Fred Fish  (fnf@cygnus.com)
 
 	* cplus-dem.c:  Reorder args to most local functions to make them

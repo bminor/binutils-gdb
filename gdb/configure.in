@@ -7,166 +7,91 @@ target_dependent=true
 
 # map host info into gdb names.
 
-case "${host_cpu}" in
+case "${host}" in
 
-m68k)
-	case "${host_vendor}" in
-	apollo*)
-		case "${host_os}" in
-		sysv*)	gdb_host=apollo68v ;;
-		bsd*)	gdb_host=apollo68b ;;
-		esac
-		;;
-	att)	gdb_host=3b1 ;;
-	altos)
-		case "${host_os}" in
-		gas)	gdb_host=altosgas ;;
-		*)	gdb_host=altos ;;	
-		esac
-		;;
+a29k-*-*)		gdb_host=ultra3 ;;
 
-	cbm)
-		case ${host_os} in
-		amigados)	gdb_host=amigados ;;
-		sysv4*)		gdb_host=amix ;;
-		esac
-		;;
+arm-*-*)		gdb_host=arm ;;
 
-	hp)
-		case ${host_os} in
-		hpux)	gdb_host=hp300hpux ;;
-		bsd)	gdb_host=hp300bsd ;;
-		esac
-		;;
+c[12]-*-*)		gdb_host=convex ;;
 
-	isi)	gdb_host=isi ;;
-	sony)	gdb_host=news ;;
-	sun)
-		case "${host_os}" in
-		sunos3)	gdb_host=sun3os3 ;;
-		sunos4)	gdb_host=sun3os4 ;;
-		*)	gdb_host=sun3 ;;
-		esac
-		;;
-	esac
-	;;
+hppa*-hp-hpux)		gdb_host=hppahpux ;;
+hppa*-hp-bsd)		gdb_host=hppabsd ;;
 
-m68000)
-	case "${host_vendor}" in
-	sun)
-		case "${host_os}" in
-		sunos3)	gdb_host=sun2os3 ;;
-		sunos4)	gdb_host=sun2os4 ;;
-		*)	gdb_host=sun2 ;;
-		esac
-	esac
-	;;
+i[34]86-sun-*)		gdb_host=sun386 ;;
+i[34]86-sco-*)		gdb_host=i386sco ;;
+i[34]86-sequent-*)	gdb_host=symmetry ;;
+i[34]86-ncr-*)		gdb_host=ncr3000 ;;
 
-sparc)
-	case "${host_os}" in
-	sunos3)		gdb_host=sun4os3 ;;
-	sunos4)		gdb_host=sun4os4 ;;
-	solaris2*)	gdb_host=sun4sol2 ;;
-	*)		gdb_host=sun4 ;;
-	esac
-	;;
+i[34]86-*-go32)		gdb_host=go32 ;;
+i[34]86-*-sysv32)	gdb_host=i386v32 ;;
+i[34]86-*-sysv4*)	gdb_host=i386v4 ;;
+i[34]86-*-sysv*)	gdb_host=i386v ;;
+i[34]86-*-scosysv*)	gdb_host=i386sco ;;
+i[34]86-*-mach)		gdb_host=i386mach ;;
+i[34]86-*-linux)	gdb_host=linux ;;
 
-m68030)
-	case "${host_vendor}" in
-	sony)	gdb_host=news1000 ;;
-	esac
-	;;
+i860-*-*)		gdb_host=stratus ;;
 
-mips)
-	case "${host_vendor}" in
-	sony)	gdb_host=bigmips ;;
-	dec)	gdb_host=decstation ;;
-	little)	gdb_host=littlemips ;;
-	sgi)
-		case "${host_os}" in
-		irix3)	gdb_host=irix3 ;;
-		irix4)	gdb_host=irix4 ;;
-		esac
-		;;
-	esac
-	;;
+m68k-apollo*-sysv*)	gdb_host=apollo68v ;;
 
-i860)
-	gdb_host=stratus
-	;;
+m68k-att-*)		gdb_host=3b1 ;;
 
-i386 | i486)
-	case "${host_vendor}" in
-	sun)	gdb_host=sun386 ;;
-	sco)	gdb_host=i386sco ;;
-	sequent)	gdb_host=symmetry ;;
-	ncr)	gdb_host=ncr3000 ;;
-	*)
-		case "${host_os}" in
-		go32)   gdb_host=go32 ;;
-		sysv32)	gdb_host=i386v32 ;;
-		sysv4*)	gdb_host=i386v4 ;;
-		sysv*)	gdb_host=i386v ;;
-		scosysv*) gdb_host=i386sco ;;
-		mach)	gdb_host=i386mach ;;
-		linux)	gdb_host=linux ;;
-		esac
-		;;
-	esac
-	;;
+m68k-altos-*)		case "$gas" in
+			yes)	gdb_host=altosgas ;;
+			*)	gdb_host=altos ;;	
+			esac ;;
 
-c1 | c2)	gdb_host=convex ;;
+m68k-cbm-sysv4*)	gdb_host=amix ;;
 
-ns32k)
-	case "${host_vendor}" in
-	umax)	gdb_host=umax ;;
-	esac
-	;;
+m68k-hp-hpux)		gdb_host=hp300hpux ;;
+m68k-hp-bsd)		gdb_host=hp300bsd ;;
 
-romp)
-	gdb_host=rtbsd
-	;;
+m68k-isi-*)		gdb_host=isi ;;
+m68k-sony-*)		gdb_host=news ;;
 
-rs6000)
-	gdb_host=rs6000
-	;;
+m68k-sun-sunos3)	gdb_host=sun3os3 ;;
+m68k-sun-sunos4)	gdb_host=sun3os4 ;;
+m68k-sun-*)		gdb_host=sun3 ;;
 
-a29k)
-	gdb_host=ultra3
-	;;
+m68000-sun-sunos3)	gdb_host=sun2os3 ;;
+m68000-sun-sunos4)	gdb_host=sun2os4 ;;
 
-m88k)
-	case "${host_vendor}" in
-	motorola)
-		gdb_host=delta88 ;;
-	*)	
-		gdb_host=m88k ;;
-	esac
-	;;
+m68030-sony-*)		gdb_host=news1000 ;;
 
-vax)
-	case "${host_os}" in
-	bsd*)
-		gdb_host=vaxbsd ;;
-	ultrix*)
-		gdb_host=vaxult ;;
-	esac
-	;;
+m88k-motorola-*)	gdb_host=delta88 ;;
+m88k-*-*)		gdb_host=m88k ;;
 
-arm | merlin | none | np1 | pn | pyramid | tahoe)
-	gdb_host=${host_cpu}
-	;;
+mips-sony-*)		gdb_host=bigmips ;;
+mips-dec-*)		gdb_host=decstation ;;
+mips-little-*)		gdb_host=littlemips ;;
+mips-sgi-irix3)		gdb_host=irix3 ;;
+mips-sgi-irix4)		gdb_host=irix4 ;;
 
-hppa*)
-	case "${host_vendor}" in
-	hp)
-		case "${host_os}" in
-		hpux)	gdb_host=hppahpux ;;
-		bsd)	gdb_host=hppabsd ;;
-		esac
-		;;
-	esac
-	;;
+none-*-*)		gdb_host=none ;;
+np1-*-*)		gdb_host=np1 ;;
+
+ns32k-umax-*)		gdb_host=umax ;;
+ns32k-utek-sysv)	gdb_host=merlin ;;
+
+
+pn-*-*)			gdb_host=pn ;;
+
+pyramid-*-*)		gdb_host=pyramid ;;
+
+romp-*-*)		gdb_host=rtbsd ;;
+
+rs6000-*-*)		gdb_host=rs6000 ;;
+
+sparc-*-sunos3)		gdb_host=sun4os3 ;;
+sparc-*-sunos4)		gdb_host=sun4os4 ;;
+sparc-*-solaris2*)	gdb_host=sun4sol2 ;;
+sparc-*-*)		gdb_host=sun4 ;;
+
+tahoe-*-*)		gdb_host=tahoe ;;
+
+vax-*-bsd*)		gdb_host=vaxbsd ;;
+vax-*-ultrix*)		gdb_host=vaxult ;;
 
 ### unhandled hosts
 #altosgas
