@@ -1,3 +1,18 @@
+Tue Mar  2 21:15:58 1993  Fred Fish  (fnf@cygnus.com)
+
+	(Ultrix 2.2 support from Michael Rendell <michael@mercury.cs.mun.ca>)
+	* configure.in (vax-*-ultrix2*):  Add Ultrix 2.2 triplet.
+	* config.guess:  Change 'VAX*:ULTRIX:*:*' to 'VAX*:ULTRIX*:*:*'.
+	* config/mh-vaxult2:  New file.
+
+Tue Mar  2 18:11:03 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in: remove no-op mips-dec-bsd* in "case $target"
+
+	* Makefile.in (dir.info): only run gen-info-dir if it exists,
+	(install-info): install dir.info only if it exists,
+	(all-expect, install-expect): pass along X11_FLAGS_TO_PASS
+
 Tue Mar  2 09:01:30 1993  Ken Raeburn  (raeburn@cygnus.com)
 
 	* configure.in: For vms target, skip bfd, ld, binutils.  Do build

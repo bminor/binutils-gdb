@@ -94,6 +94,7 @@ case "${host}" in
   i[34]86-*-isc*)	  host_makefile_frag=config/mh-sysv ;;
   i[34]86-*-linux)        host_makefile_frag=config/mh-linux ;;
   i[34]86-*-solaris2*)    host_makefile_frag=config/mh-sysv4 ;;
+  vax-*-ultrix2*)         host_makefile_frag=config/mh-vaxult2 ;;
   *-ibm-aix*)             host_makefile_frag=config/mh-aix ;;
   *-bull-bosx*)           host_makefile_frag=config/mh-aix ;;
   *-sun-solaris*)         host_makefile_frag=config/mh-solaris ;;
