@@ -51,17 +51,17 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 
 /* Set by the object-format or the target.  */
 #ifndef TC_IMPLICIT_LCOMM_ALIGNMENT
-#define TC_IMPLICIT_LCOMM_ALIGNMENT(SIZE, P2VAR)        	\
+#define TC_IMPLICIT_LCOMM_ALIGNMENT(SIZE, P2VAR)		\
   do								\
-    {                                                   	\
-      if ((SIZE) >= 8)                                      	\
-	(P2VAR) = 3;                                        	\
-      else if ((SIZE) >= 4)                                 	\
-	(P2VAR) = 2;                                        	\
-      else if ((SIZE) >= 2)                                 	\
-	(P2VAR) = 1;                                        	\
-      else                                                  	\
-	(P2VAR) = 0;                                        	\
+    {								\
+      if ((SIZE) >= 8)						\
+	(P2VAR) = 3;						\
+      else if ((SIZE) >= 4)					\
+	(P2VAR) = 2;						\
+      else if ((SIZE) >= 2)					\
+	(P2VAR) = 1;						\
+      else							\
+	(P2VAR) = 0;						\
     }								\
   while (0)
 #endif
@@ -473,7 +473,7 @@ pobegin ()
   /* Now portable ones.  Skip any that we've seen already.  */
   pop_table_name = "standard";
   pop_insert (potable);
-  
+
 #ifdef TARGET_USE_CFIPOP
   pop_table_name = "cfi";
   pop_override_ok = 1;
@@ -601,8 +601,8 @@ read_a_source_file (name)
 			}
 
 		      /* In MRI mode, we need to handle the MACRO
-                         pseudo-op specially: we don't want to put the
-                         symbol in the symbol table.  */
+			 pseudo-op specially: we don't want to put the
+			 symbol in the symbol table.  */
 		      if (!mri_line_macro
 #ifdef TC_START_LABEL_WITHOUT_COLON
 			  && TC_START_LABEL_WITHOUT_COLON(c,
@@ -685,10 +685,10 @@ read_a_source_file (name)
 	      c = get_symbol_end ();	/* name's delimiter.  */
 
 	      /* C is character after symbol.
-	         That character's place in the input line is now '\0'.
-	         S points to the beginning of the symbol.
-	           [In case of pseudo-op, s->'.'.]
-	         Input_line_pointer->'\0' where c was.  */
+		 That character's place in the input line is now '\0'.
+		 S points to the beginning of the symbol.
+		   [In case of pseudo-op, s->'.'.]
+		 Input_line_pointer->'\0' where c was.  */
 	      if (TC_START_LABEL (c, input_line_pointer))
 		{
 		  if (flag_m68k_mri)
@@ -754,7 +754,7 @@ read_a_source_file (name)
 		  if (NO_PSEUDO_DOT || flag_m68k_mri)
 		    {
 		      /* The MRI assembler and the m88k use pseudo-ops
-                         without a period.  */
+			 without a period.  */
 		      pop = (pseudo_typeS *) hash_find (po_hash, s);
 		      if (pop != NULL && pop->poc_handler == NULL)
 			pop = NULL;
@@ -765,16 +765,16 @@ read_a_source_file (name)
 		    {
 		      /* PSEUDO - OP.
 
-		         WARNING: c has next char, which may be end-of-line.
-		         We lookup the pseudo-op table with s+1 because we
-		         already know that the pseudo-op begins with a '.'.  */
+			 WARNING: c has next char, which may be end-of-line.
+			 We lookup the pseudo-op table with s+1 because we
+			 already know that the pseudo-op begins with a '.'.  */
 
 		      if (pop == NULL)
 			pop = (pseudo_typeS *) hash_find (po_hash, s + 1);
 
 		      /* In MRI mode, we may need to insert an
-                         automatic alignment directive.  What a hack
-                         this is.  */
+			 automatic alignment directive.  What a hack
+			 this is.  */
 		      if (mri_pending_align
 			  && (pop == NULL
 			      || !((pop->poc_handler == cons
@@ -821,8 +821,8 @@ read_a_source_file (name)
 			input_line_pointer++;
 
 		      /* Input_line is restored.
-		         Input_line_pointer->1st non-blank char
-		         after pseudo-operation.  */
+			 Input_line_pointer->1st non-blank char
+			 after pseudo-operation.  */
 		      (*pop->poc_handler) (pop->poc_val);
 
 		      /* If that was .end, just get out now.  */
@@ -1605,7 +1605,7 @@ s_app_file (appfile)
 	= (!new_logical_line (s, appfile ? -2 : -1) && appfile);
 
       /* In MRI mode, the preprocessor may have inserted an extraneous
-         backquote.  */
+	 backquote.  */
       if (flag_m68k_mri
 	  && *input_line_pointer == '\''
 	  && is_end_of_line[(unsigned char) input_line_pointer[1]])
@@ -1656,7 +1656,7 @@ s_end (ignore)
   if (flag_mri)
     {
       /* The MRI assembler permits the start symbol to follow .end,
-         but we don't support that.  */
+	 but we don't support that.  */
       SKIP_WHITESPACE ();
       if (!is_end_of_line[(unsigned char) *input_line_pointer]
 	  && *input_line_pointer != '*'
@@ -1782,18 +1782,18 @@ s_fill (ignore)
       memset (p, 0, (unsigned int) size);
 
       /* The magic number BSD_FILL_SIZE_CROCK_4 is from BSD 4.2 VAX
-         flavoured AS.  The following bizarre behaviour is to be
-         compatible with above.  I guess they tried to take up to 8
-         bytes from a 4-byte expression and they forgot to sign
-         extend.  */
+	 flavoured AS.  The following bizarre behaviour is to be
+	 compatible with above.  I guess they tried to take up to 8
+	 bytes from a 4-byte expression and they forgot to sign
+	 extend.  */
 #define BSD_FILL_SIZE_CROCK_4 (4)
       md_number_to_chars (p, (valueT) fill,
 			  (size > BSD_FILL_SIZE_CROCK_4
 			   ? BSD_FILL_SIZE_CROCK_4
 			   : (int) size));
       /* Note: .fill (),0 emits no frag (since we are asked to .fill 0 bytes)
-         but emits no error message because it seems a legal thing to do.
-         It is a degenerate case of .fill but could be emitted by a
+	 but emits no error message because it seems a legal thing to do.
+	 It is a degenerate case of .fill but could be emitted by a
 	 compiler.  */
     }
   demand_empty_rest_of_line ();
@@ -2129,8 +2129,8 @@ s_lcomm_internal (needs_align, bytes_p)
 
 #ifdef OBJ_COFF
       /* The symbol may already have been created with a preceding
-         ".globl" directive -- be careful not to step on storage class
-         in that case.  Otherwise, set it to static.  */
+	 ".globl" directive -- be careful not to step on storage class
+	 in that case.  Otherwise, set it to static.  */
       if (S_GET_STORAGE_CLASS (symbolP) != C_EXT)
 	{
 	  S_SET_STORAGE_CLASS (symbolP, C_STAT);
@@ -2665,7 +2665,8 @@ s_print (ignore)
   int len;
 
   s = demand_copy_C_string (&len);
-  printf ("%s\n", s);
+  if (s != NULL)
+    printf ("%s\n", s);
   demand_empty_rest_of_line ();
 }
 
@@ -2832,7 +2833,7 @@ s_set (equiv)
 #ifndef NO_LISTING
       /* When doing symbol listings, play games with dummy fragments living
 	 outside the normal fragment chain to record the file and line info
-         for this symbol.  */
+	 for this symbol.  */
       if (listing & LISTING_SYMBOLS)
 	{
 	  extern struct list_info_struct *listing_tail;
@@ -3200,11 +3201,11 @@ discard_rest_of_line ()
 }
 
 /* In:	Pointer to a symbol.
-  	Input_line_pointer->expression.
+	Input_line_pointer->expression.
 
    Out:	Input_line_pointer->just after any whitespace after expression.
-  	Tried to set symbol to value of expression.
-  	Will change symbols type, value, and frag;  */
+	Tried to set symbol to value of expression.
+	Will change symbols type, value, and frag;  */
 
 void
 pseudo_set (symbolP)
@@ -3301,7 +3302,7 @@ pseudo_set (symbolP)
     }
 }
 
-/*  			cons()
+/*			cons()
 
    CONStruct more frag of .bytes, or .words etc.
    Should need_pass_2 be 1 then emit no frag(s).
@@ -4119,7 +4120,7 @@ hex_float (float_type, bytes)
   return length;
 }
 
-/*  			float_cons()
+/*			float_cons()
 
    CONStruct some more frag chars of .floats .ffloats etc.
    Makes 0 or more new frags.
@@ -4162,15 +4163,15 @@ float_cons (float_type)
       SKIP_WHITESPACE ();
 
       /* Skip any 0{letter} that may be present. Don't even check if the
-         letter is legal. Someone may invent a "z" format and this routine
-         has no use for such information. Lusers beware: you get
-         diagnostics if your input is ill-conditioned.  */
+	 letter is legal. Someone may invent a "z" format and this routine
+	 has no use for such information. Lusers beware: you get
+	 diagnostics if your input is ill-conditioned.  */
       if (input_line_pointer[0] == '0'
 	  && ISALPHA (input_line_pointer[1]))
 	input_line_pointer += 2;
 
       /* Accept :xxxx, where the x's are hex digits, for a floating
-         point with the exact digits specified.  */
+	 point with the exact digits specified.  */
       if (input_line_pointer[0] == ':')
 	{
 	  ++input_line_pointer;
@@ -4583,7 +4584,7 @@ stringer (append_zero)		/* Worker to do .ascii etc statements.  */
       c = 0;
       ignore_rest_of_line ();
     }
-  
+
   while (c == ',' || c == '<' || c == '"')
     {
       SKIP_WHITESPACE ();
@@ -4605,11 +4606,11 @@ stringer (append_zero)		/* Worker to do .ascii etc statements.  */
 #ifndef NO_LISTING
 #ifdef OBJ_ELF
 	  /* In ELF, when gcc is emitting DWARF 1 debugging output, it
-             will emit .string with a filename in the .debug section
-             after a sequence of constants.  See the comment in
-             emit_expr for the sequence.  emit_expr will set
-             dwarf_file_string to non-zero if this string might be a
-             source file name.  */
+	     will emit .string with a filename in the .debug section
+	     after a sequence of constants.  See the comment in
+	     emit_expr for the sequence.  emit_expr will set
+	     dwarf_file_string to non-zero if this string might be a
+	     source file name.  */
 	  if (strcmp (segment_name (now_seg), ".debug") != 0)
 	    dwarf_file_string = 0;
 	  else if (dwarf_file_string)
@@ -5119,7 +5120,7 @@ s_include (arg)
       if (filename == NULL)
 	{
 	  /* demand_copy_string has already printed an error and
-             called ignore_rest_of_line.  */
+	     called ignore_rest_of_line.  */
 	  return;
 	}
     }

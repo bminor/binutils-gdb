@@ -1,3 +1,7 @@
+2003-08-16  Benjamin Kalytta  <bkausbk@web.de>
+
+	* read.c (s_print): Check for NULL.
+
 2003-08-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* write.c (fixup_segment): When handling an expression involving
