@@ -378,6 +378,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	    {
 	    case 'S':
 	      CUR_SYMBOL_VALUE += ANOFFSET (section_offsets, SECT_OFF_DATA);
+#ifdef STATIC_TRANSFORM_NAME
+	      namestring = STATIC_TRANSFORM_NAME (namestring);
+#endif
 	      ADD_PSYMBOL_ADDR_TO_LIST (namestring, p - namestring,
 					VAR_NAMESPACE, LOC_STATIC,
 					objfile->static_psymbols,

@@ -1047,6 +1047,18 @@ define_symbol (valu, string, desc, type, objfile)
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_STATIC;
       SYMBOL_VALUE_ADDRESS (sym) = valu;
+#ifdef STATIC_TRANSFORM_NAME
+      if (SYMBOL_NAME (sym)[0] == '$')
+      {
+	struct minimal_symbol *msym;
+	msym = lookup_minimal_symbol (SYMBOL_NAME (sym), NULL, objfile);
+	if (msym != NULL)
+	  {
+	    SYMBOL_NAME (sym) = STATIC_TRANSFORM_NAME (SYMBOL_NAME (sym));
+	    SYMBOL_VALUE_ADDRESS (sym) = SYMBOL_VALUE_ADDRESS (msym);
+	  }
+      }
+#endif
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       add_symbol_to_list (sym, &file_symbols);
       break;
@@ -1173,6 +1185,18 @@ define_symbol (valu, string, desc, type, objfile)
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_STATIC;
       SYMBOL_VALUE_ADDRESS (sym) = valu;
+#ifdef STATIC_TRANSFORM_NAME
+      if (SYMBOL_NAME (sym)[0] == '$')
+      {
+	struct minimal_symbol *msym;
+	msym = lookup_minimal_symbol (SYMBOL_NAME (sym), NULL, objfile);
+	if (msym != NULL)
+	  {
+	    SYMBOL_NAME (sym) = STATIC_TRANSFORM_NAME (SYMBOL_NAME (sym));
+	    SYMBOL_VALUE_ADDRESS (sym) = SYMBOL_VALUE_ADDRESS (msym);
+	  }
+      }
+#endif
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       if (os9k_stabs)
 	add_symbol_to_list (sym, &global_symbols);

@@ -64,6 +64,9 @@ get_longjmp_target PARAMS ((CORE_ADDR *));
    and for SunPRO 3.0, N_FUN symbols too.  */
 #define SOFUN_ADDRESS_MAYBE_MISSING
 
+extern char *solaris_static_transform_name PARAMS ((char *));
+#define STATIC_TRANSFORM_NAME(x) solaris_static_transform_name (x)
+
 #define FAULTED_USE_SIGINFO
 
 /* Enable handling of shared libraries for a.out executables.  */

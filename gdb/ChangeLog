@@ -1,3 +1,12 @@
+Thu Feb  9 07:43:41 1995  Jim Kingdon  <kingdon@deneb.cygnus.com>
+
+	* config/sparc/tm-sun4sol2.h: Define STATIC_TRANSFORM_NAME.
+	* partial-stab.h: Call it.
+	* stabsread.c (define_symbol) [STATIC_TRANSFORM_NAME]: Call
+	STATIC_TRANSFORM_NAME to get the name and use minimal symbols to
+	get the address.
+	* sparc-tdep.c (solaris_static_transform_name): New function.
+
 Thu Feb  9 12:09:09 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* somread.c (som_symtab_read): Handle dynamic relocation for both
