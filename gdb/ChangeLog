@@ -1,3 +1,8 @@
+2002-09-10  Jeff Law  <law@redhat.com>
+
+	* infttrace.c (child_resume): Simplify and rework to avoid
+	TT_PROC_CONTINUE.
+
 2002-09-09  Fred Fish  <fnf@intrinsity.com>
 
 	* printcmd.c (print_scalar_formatted): "len" is the number of
