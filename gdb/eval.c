@@ -884,7 +884,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
         goto nosideret;
       
       tem2 = value_as_long (arg2);
-      tem2 = value_as_long (arg3);
+      tem3 = value_as_long (arg3);
       
       return value_slice (arg1, tem2, tem3 - tem2 + 1);
 

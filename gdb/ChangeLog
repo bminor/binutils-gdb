@@ -1,3 +1,7 @@
+Sun Dec  3 12:31:03 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* eval.c (evaluate_subexp_standard case):  Fix typo.
+
 Sun Dec  3 11:59:21 1995  Jeffrey A. Law  <law@cygnus.com>
 
 	* ch-exp.c (parse_named_record_element): Avoid aggregrate
