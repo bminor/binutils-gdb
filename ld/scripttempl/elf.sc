@@ -2,9 +2,9 @@
 # Unusual variables checked by this code:
 #	NOP - two byte opcode for no-op (defaults to 0)
 #	DATA_ADDR - if end-of-text-plus-one-page isn't right for data start
-#	OTHER_READONLY_SECTIONS - other than .text .init .ctors .rodata ...
+#	OTHER_READONLY_SECTIONS - other than .text .init .rodata ...
 #		(e.g., .PARISC.milli)
-#	OTHER_READWRITE_SECTIONS - other than .data .bss .sdata ...
+#	OTHER_READWRITE_SECTIONS - other than .data .bss .ctors .sdata ...
 #		(e.g., .PARISC.global)
 #	OTHER_SECTIONS - at the end
 #	EXECUTABLE_SYMBOLS - symbols that must be defined for an
@@ -20,6 +20,7 @@
 # When adding sections, do note that the names of some sections are used
 # when specifying the start address of the next.
 #
+test -z "$ENTRY" && ENTRY=_start
 test -z "${BIG_OUTPUT_FORMAT}" && BIG_OUTPUT_FORMAT=${OUTPUT_FORMAT}
 test -z "${LITTLE_OUTPUT_FORMAT}" && LITTLE_OUTPUT_FORMAT=${OUTPUT_FORMAT}
 test "$LD_FLAG" = "N" && DATA_ADDR=.
@@ -29,6 +30,7 @@ cat <<EOF
 OUTPUT_FORMAT("${OUTPUT_FORMAT}", "${BIG_OUTPUT_FORMAT}",
 	      "${LITTLE_OUTPUT_FORMAT}")
 OUTPUT_ARCH(${ARCH})
+ENTRY(${ENTRY})
 
 ${RELOCATING+${LIB_SEARCH_DIRS}}
 ${RELOCATING+/* Do we need any of these for elf?
@@ -73,12 +75,12 @@ SECTIONS
   {
     ${RELOCATING+${TEXT_START_SYMBOLS}}
     *(.text)
-  }
+    /* .gnu.warning sections are handled specially by elf32.em.  */
+    *(.gnu.warning)
+  } =${NOP-0}
   ${RELOCATING+_etext = .;}
   ${RELOCATING+PROVIDE (etext = .);}
   .fini    ${RELOCATING-0} : { *(.fini)    } =${NOP-0}
-  .ctors   ${RELOCATING-0} : { *(.ctors)   }
-  .dtors   ${RELOCATING-0} : { *(.dtors)   }
   .rodata  ${RELOCATING-0} : { *(.rodata)  }
   .rodata1 ${RELOCATING-0} : { *(.rodata1) }
   ${RELOCATING+${OTHER_READONLY_SECTIONS}}
@@ -93,6 +95,8 @@ SECTIONS
   }
   .data1 ${RELOCATING-0} : { *(.data1) }
   ${RELOCATING+${OTHER_READWRITE_SECTIONS}}
+  .ctors       ${RELOCATING-0} : { *(.ctors)   }
+  .dtors       ${RELOCATING-0} : { *(.dtors)   }
   .got         ${RELOCATING-0} : { *(.got.plt) *(.got) }
   .dynamic     ${RELOCATING-0} : { *(.dynamic) }
   ${DATA_PLT+${PLT}}
