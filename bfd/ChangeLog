@@ -1,3 +1,8 @@
+Tue Feb  7 16:27:33 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_bfd_find_nearest_line): Just return false, don't
+	abort.
+
 Tue Feb  7 14:43:33 1995  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 
 	* ecoff.c: Reformatted some comments and brace constructs in
