@@ -45,8 +45,9 @@
 #define FRAMELESS_FUNCTION_INVOCATION(FI) \
      (frameless_look_for_prologue(FI))
 
+extern CORE_ADDR i386go32_frame_saved_pc (struct frame_info *frame);
 #undef  FRAME_SAVED_PC
-#define FRAME_SAVED_PC(FRAME) (read_memory_integer ((FRAME)->frame + 4, 4))
+#define FRAME_SAVED_PC(FRAME) (i386go32_frame_saved_pc ((FRAME)))
 
 /* Support for longjmp.  */
 

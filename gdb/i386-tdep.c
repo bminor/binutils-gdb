@@ -508,6 +508,12 @@ i386_frame_saved_pc (struct frame_info *frame)
   return read_memory_unsigned_integer (frame->frame + 4, 4);
 }
 
+CORE_ADDR
+i386go32_frame_saved_pc (struct frame_info *frame)
+{
+  return read_memory_integer (frame->frame + 4, 4);
+}
+
 /* Immediately after a function call, return the saved pc.  */
 
 CORE_ADDR
