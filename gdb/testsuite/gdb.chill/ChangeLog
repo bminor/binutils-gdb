@@ -2,6 +2,7 @@ Mon Feb 20 16:19:58 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* chillvars.ch:  Add missing INIT's.
 	* chillvars.exp:  Allow builtin types as either case. E.g. (BOOL|bool).
+	* pr-5016.exp:  Likewise.
 
 Sun Feb 12 11:26:08 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 

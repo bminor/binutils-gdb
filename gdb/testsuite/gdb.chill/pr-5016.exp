@@ -42,7 +42,7 @@ proc do_tests {} {
     gdb_test "whatis i" "type = m_index" "whatis int-range"
     gdb_test_exact "ptype m_index" "type = RANGE (1:10)" "ptype m_index"
     gdb_test_exact "whatis a" "type = /*LOC*/ vector"
-    gdb_test_exact "ptype a" "type = /*LOC*/ ARRAY (1:10) INT"
+    gdb_test "ptype a" "type = /\\*LOC\\*/ ARRAY \\(1:10\\) (INT|int)"
 }
 
 # Check to see if we have an executable to test.  If not, then either we
