@@ -8077,6 +8077,7 @@ resources_match (rs, idesc, note, qp_regno, path)
       /* Skip apparent PR write conflicts where both writes are an AND or both
 	 writes are an OR.  */
       if (rs->dependency->specifier == IA64_RS_PR
+	  || rs->dependency->specifier == IA64_RS_PRr
 	  || rs->dependency->specifier == IA64_RS_PR63)
 	{
 	  if (specs[count].cmp_type != CMP_NONE
@@ -8085,7 +8086,7 @@ resources_match (rs, idesc, note, qp_regno, path)
 	      if (md.debug_dv)
 		fprintf (stderr, "  %s on parallel compare allowed (PR%d)\n",
 			 dv_mode[rs->dependency->mode],
-			 rs->dependency->specifier == IA64_RS_PR ?
+			 rs->dependency->specifier != IA64_RS_PR63 ?
 			 specs[count].index : 63);
 	      continue;
 	    }
@@ -8095,7 +8096,7 @@ resources_match (rs, idesc, note, qp_regno, path)
 		     dv_mode[rs->dependency->mode],
 		     dv_cmp_type[rs->cmp_type],
 		     dv_cmp_type[specs[count].cmp_type],
-		     rs->dependency->specifier == IA64_RS_PR ?
+		     rs->dependency->specifier != IA64_RS_PR63 ?
 		     specs[count].index : 63);
 
 	}

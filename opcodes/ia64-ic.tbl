@@ -206,7 +206,7 @@ pr-unc-writers-fp;	IC:pr-gen-writers-fp[Field(ctype)==unc]+11, fprcpa+11, fprsqr
 pr-unc-writers-int;	IC:pr-gen-writers-int[Field(ctype)==unc]+11
 pr-writers;	IC:pr-writers-int, IC:pr-writers-fp
 pr-writers-fp;	IC:pr-norm-writers-fp, IC:pr-unc-writers-fp
-pr-writers-int;	IC:pr-norm-writers-int, IC:pr-unc-writers-int
+pr-writers-int;	IC:pr-norm-writers-int, IC:pr-unc-writers-int, IC:pr-and-writers, IC:pr-or-writers
 predicatable-instructions;	IC:mov-from-PR, IC:mov-to-PR, IC:pr-readers-br, IC:pr-readers-nobr-nomovpr
 priv-ops;	IC:mov-to-IND-priv, bsw, itc.i, itc.d, itr.i, itr.d, IC:mov-to-CR, IC:mov-from-CR, IC:mov-to-PSR-l, IC:mov-from-PSR, IC:mov-from-IND-priv, ptc.e, ptc.g, ptc.ga, ptc.l, ptr.i, ptr.d, rfi, rsm, ssm, tak, tpa
 probe-all;	IC:probe-fault, IC:probe-nofault

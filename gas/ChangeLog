@@ -1,3 +1,7 @@
+2000-10-05  Jim Wilson  <wilson@cygnus.com>
+
+	* config/tc-ia64.c (resources_match): Handle IA64_RS_PRr.
+
 2000-10-05  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-i386.c: Delete some useless comments, reformat others.
