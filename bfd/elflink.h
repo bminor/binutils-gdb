@@ -48,14 +48,10 @@ static boolean elf_link_find_version_dependencies
   PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean elf_link_assign_sym_version
   PARAMS ((struct elf_link_hash_entry *, PTR));
-static boolean elf_link_renumber_dynsyms
-  PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean elf_collect_hash_codes
   PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean elf_link_read_relocs_from_section 
   PARAMS ((bfd *, Elf_Internal_Shdr *, PTR, Elf_Internal_Rela *));
-static void elf_link_remove_section_and_adjust_dynindices 
-  PARAMS ((struct bfd_link_info *, asection *));
 static void elf_link_output_relocs
   PARAMS ((bfd *, asection *, Elf_Internal_Shdr *, Elf_Internal_Rela *));
 static boolean elf_link_size_reloc_section
@@ -2051,6 +2047,73 @@ elf_add_dynamic_entry (info, tag, val)
 
   return true;
 }
+
+/* Record a new local dynamic symbol.  */
+
+boolean
+elf_link_record_local_dynamic_symbol (info, input_bfd, input_indx)
+     struct bfd_link_info *info;
+     bfd *input_bfd;
+     long input_indx;
+{
+  struct elf_link_local_dynamic_entry *entry;
+  struct elf_link_hash_table *eht;
+  struct bfd_strtab_hash *dynstr;
+  Elf_External_Sym esym;
+  unsigned long dynstr_index;
+  char *name;
+  int elfsec, link;
+
+  /* See if the entry exists already.  */
+  for (entry = elf_hash_table (info)->dynlocal; entry ; entry = entry->next)
+    if (entry->input_bfd == input_bfd && entry->input_indx == input_indx)
+      return true;
+
+  entry = (struct elf_link_local_dynamic_entry *)
+    bfd_alloc (input_bfd, sizeof (*entry));
+  if (entry == NULL)
+    return false;
+
+  /* Go find the symbol, so that we can find it's name.  */
+  if (bfd_seek (input_bfd,
+		(elf_tdata (input_bfd)->symtab_hdr.sh_offset
+		 + input_indx * sizeof (Elf_External_Sym)),
+		SEEK_SET) != 0
+      || (bfd_read (&esym, sizeof (Elf_External_Sym), 1, input_bfd)
+	  != sizeof (Elf_External_Sym)))
+    return false;
+  elf_swap_symbol_in (input_bfd, &esym, &entry->isym);
+
+  name = (bfd_elf_string_from_elf_section
+	  (input_bfd, elf_tdata (input_bfd)->symtab_hdr.sh_link,
+	   entry->isym.st_name));
+
+  dynstr = elf_hash_table (info)->dynstr;
+  if (dynstr == NULL)
+    {
+      /* Create a strtab to hold the dynamic symbol names.  */
+      elf_hash_table (info)->dynstr = dynstr = _bfd_elf_stringtab_init ();
+      if (dynstr == NULL)
+	return false;
+    }
+
+  dynstr_index = _bfd_stringtab_add (dynstr, name, true, false);
+  if (dynstr_index == (unsigned long) -1)
+    return false;
+  entry->isym.st_name = dynstr_index;
+
+  eht = elf_hash_table (info);
+
+  entry->next = eht->dynlocal;
+  eht->dynlocal = entry;
+  entry->input_bfd = input_bfd;
+  entry->input_indx = input_indx;
+  eht->dynsymcount++;
+
+  /* The dynindx will be set at the end of size_dynamic_sections.  */
+
+  return true;
+}
 
 
 /* Read and swap the relocs from the section indicated by SHDR.  This
@@ -2310,8 +2373,6 @@ struct elf_assign_sym_version_info
   struct bfd_elf_version_tree *verdefs;
   /* Whether we are exporting all dynamic symbols.  */
   boolean export_dynamic;
-  /* Whether we removed any symbols from the dynamic symbol table.  */
-  boolean removed_dynamic;
   /* Whether we had a failure.  */
   boolean failed;
 };
@@ -2486,42 +2547,6 @@ compute_bucket_count (info)
   return best_size;
 }
 
-/* Remove SECTION from the BFD.  If a symbol for SECTION was going to
-   be put into the dynamic symbol table, remove it, and renumber
-   subsequent entries.  */
-
-static void
-elf_link_remove_section_and_adjust_dynindices (info, section)
-     struct bfd_link_info *info;
-     asection *section;
-{
-  /* Remove the section from the output list.  */
-  _bfd_strip_section_from_output (section);
-
-  if (elf_section_data (section->output_section)->dynindx)
-    {
-      asection *s;
-      int increment = -1;
-
-      /* We were going to output an entry in the dynamic symbol table
-	 for the symbol corresponding to this section.  Now, the
-	 section is gone.  So, we must renumber the dynamic indices of
-	 all subsequent sections and all other entries in the dynamic
-	 symbol table.  */
-      elf_section_data (section->output_section)->dynindx = 0;
-      for (s = section->output_section->next; s; s = s->next)
-	if (elf_section_data (s)->dynindx)
-	  --elf_section_data (s)->dynindx;
-      
-      elf_link_hash_traverse (elf_hash_table (info),
-			      _bfd_elf_link_adjust_dynindx,
-			      &increment);
-
-      /* There is one less dynamic symbol than there was before.  */
-      --elf_hash_table (info)->dynsymcount;
-    }
-}
-
 /* Set up the sizes and contents of the ELF dynamic sections.  This is
    called by the ELF linker emulation before_allocation routine.  We
    must set the sizes of the sections before the linker sets the
@@ -2545,7 +2570,6 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
   bfd_size_type soname_indx;
   bfd *dynobj;
   struct elf_backend_data *bed;
-  bfd_size_type old_dynsymcount;
   struct elf_assign_sym_version_info asvinfo;
 
   *sinterpptr = NULL;
@@ -2650,7 +2674,6 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       asvinfo.info = info;
       asvinfo.verdefs = verdefs;
       asvinfo.export_dynamic = export_dynamic;
-      asvinfo.removed_dynamic = false;
       asvinfo.failed = false;
 
       elf_link_hash_traverse (elf_hash_table (info),
@@ -2712,7 +2735,6 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 
   /* The backend must work out the sizes of all the other dynamic
      sections.  */
-  old_dynsymcount = elf_hash_table (info)->dynsymcount;
   if (bed->elf_backend_size_dynamic_sections
       && ! (*bed->elf_backend_size_dynamic_sections) (output_bfd, info))
     return false;
@@ -2734,7 +2756,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       verdefs = asvinfo.verdefs;
 
       if (verdefs == NULL)
-	elf_link_remove_section_and_adjust_dynindices (info, s);
+	_bfd_strip_section_from_output (s);
       else
 	{
 	  unsigned int cdefs;
@@ -2743,23 +2765,6 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	  bfd_byte *p;
 	  Elf_Internal_Verdef def;
 	  Elf_Internal_Verdaux defaux;
-
-	  if (asvinfo.removed_dynamic)
-	    {
-	      /* Some dynamic symbols were changed to be local
-		 symbols.  In this case, we renumber all of the
-		 dynamic symbols, so that we don't have a hole.  If
-		 the backend changed dynsymcount, then assume that the
-		 new symbols are at the start.  This is the case on
-		 the MIPS.  FIXME: The names of the removed symbols
-		 will still be in the dynamic string table, wasting
-		 space.  */
-	      elf_hash_table (info)->dynsymcount =
-		1 + (elf_hash_table (info)->dynsymcount - old_dynsymcount);
-	      elf_link_hash_traverse (elf_hash_table (info),
-				      elf_link_renumber_dynsyms,
-				      (PTR) info);
-	    }
 
 	  cdefs = 0;
 	  size = 0;
@@ -2927,7 +2932,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 				(PTR) &sinfo);
 
 	if (elf_tdata (output_bfd)->verref == NULL)
-	  elf_link_remove_section_and_adjust_dynindices (info, s);
+	  _bfd_strip_section_from_output (s);
 	else
 	  {
 	    Elf_Internal_Verneed *t;
@@ -3018,7 +3023,12 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	  }
       }
 
-      dynsymcount = elf_hash_table (info)->dynsymcount;
+      /* Assign dynsym indicies.  In a shared library we generate a 
+	 section symbol for each output section, which come first.
+	 Next come all of the back-end allocated local dynamic syms,
+	 followed by the rest of the global symbols.  */
+
+      dynsymcount = _bfd_elf_link_renumber_dynsyms (output_bfd, info);
 
       /* Work out the size of the symbol version section.  */
       s = bfd_get_section_by_name (dynobj, ".gnu.version");
@@ -3026,10 +3036,10 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       if (dynsymcount == 0
 	  || (verdefs == NULL && elf_tdata (output_bfd)->verref == NULL))
 	{
-	  elf_link_remove_section_and_adjust_dynindices (info, s);
+	  _bfd_strip_section_from_output (s);
 	  /* The DYNSYMCOUNT might have changed if we were going to
 	     output a dynamic symbol table entry for S.  */
-	  dynsymcount = elf_hash_table (info)->dynsymcount;
+	  dynsymcount = _bfd_elf_link_renumber_dynsyms (output_bfd, info);
 	}
       else
 	{
@@ -3513,7 +3523,6 @@ elf_link_assign_sym_version (h, data)
 			      && info->shared
 			      && ! sinfo->export_dynamic)
 			    {
-			      sinfo->removed_dynamic = true;
 			      h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
 			      h->elf_link_hash_flags &=~
 				ELF_LINK_HASH_NEEDS_PLT;
@@ -3629,7 +3638,6 @@ elf_link_assign_sym_version (h, data)
 			  && info->shared
 			  && ! sinfo->export_dynamic)
 			{
-			  sinfo->removed_dynamic = true;
 			  h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
 			  h->elf_link_hash_flags &=~ ELF_LINK_HASH_NEEDS_PLT;
 			  h->dynindx = -1;
@@ -3654,7 +3662,6 @@ elf_link_assign_sym_version (h, data)
 	      && info->shared
 	      && ! sinfo->export_dynamic)
 	    {
-	      sinfo->removed_dynamic = true;
 	      h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
 	      h->elf_link_hash_flags &=~ ELF_LINK_HASH_NEEDS_PLT;
 	      h->dynindx = -1;
@@ -3663,26 +3670,6 @@ elf_link_assign_sym_version (h, data)
 		 recorded in the dynamic string table section.  */
 	    }
 	}
-    }
-
-  return true;
-}
-
-/* This function is used to renumber the dynamic symbols, if some of
-   them are removed because they are marked as local.  This is called
-   via elf_link_hash_traverse.  */
-
-static boolean
-elf_link_renumber_dynsyms (h, data)
-     struct elf_link_hash_entry *h;
-     PTR data;
-{
-  struct bfd_link_info *info = (struct bfd_link_info *) data;
-
-  if (h->dynindx != -1)
-    {
-      h->dynindx = elf_hash_table (info)->dynsymcount;
-      ++elf_hash_table (info)->dynsymcount;
     }
 
   return true;
@@ -4161,11 +4148,77 @@ elf_bfd_final_link (abfd, info)
 	return false;
     }
 
-  /* The sh_info field records the index of the first non local
-     symbol.  */
+  /* The sh_info field records the index of the first non local symbol.  */
   symtab_hdr->sh_info = bfd_get_symcount (abfd);
+
   if (dynamic)
-    elf_section_data (finfo.dynsym_sec->output_section)->this_hdr.sh_info = 1;
+    {
+      Elf_Internal_Sym sym;
+      Elf_External_Sym *dynsym =
+	(Elf_External_Sym *)finfo.dynsym_sec->contents;
+      unsigned long last_local = 0;
+
+      /* Write out the section symbols for the output sections.  */
+      if (info->shared)
+	{
+	  asection *s;
+
+	  sym.st_size = 0;
+	  sym.st_name = 0;
+	  sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
+	  sym.st_other = 0;
+
+	  for (s = abfd->sections; s != NULL; s = s->next)
+	    {
+	      int indx;
+	      indx = elf_section_data (s)->this_idx;
+	      BFD_ASSERT (indx > 0);
+	      sym.st_shndx = indx;
+	      sym.st_value = s->vma;
+
+	      elf_swap_symbol_out (abfd, &sym,
+				   dynsym + elf_section_data (s)->dynindx);
+	    }
+
+	  last_local = bfd_count_sections (abfd);
+	}
+
+      /* Write out the local dynsyms.  */
+      if (elf_hash_table (info)->dynlocal)
+	{
+	  struct elf_link_local_dynamic_entry *e;
+	  for (e = elf_hash_table (info)->dynlocal; e ; e = e->next)
+	    {
+	      asection *s, *os;
+
+	      sym.st_size = e->isym.st_size;
+	      sym.st_other = e->isym.st_other;
+
+	      /* Note that we saved a word of storage and overwrote
+                 the original st_name with the dynstr_index.  */
+	      sym.st_name = e->isym.st_name;
+
+	      /* Whatever binding the symbol had before, it's now local.  */
+	      sym.st_info = ELF_ST_INFO (STB_LOCAL,
+					 ELF_ST_TYPE (e->isym.st_info));
+
+	      s = bfd_section_from_elf_index (e->input_bfd, e->isym.st_shndx);
+
+	      sym.st_shndx = elf_section_data (s->output_section)->this_idx;
+	      sym.st_value = (s->output_section->vma
+			      + s->output_offset
+			      + e->isym.st_value);
+
+	      if (last_local < e->dynindx)
+		last_local = e->dynindx;
+
+	      elf_swap_symbol_out (abfd, &sym, dynsym + e->dynindx);
+	    }
+	}
+
+      elf_section_data (finfo.dynsym_sec->output_section)
+	->this_hdr.sh_info = last_local;
+    }
 
   /* We get the global symbols from the hash table.  */
   eoinfo.failed = false;

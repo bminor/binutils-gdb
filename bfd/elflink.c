@@ -260,22 +260,83 @@ _bfd_elf_link_record_dynamic_symbol (info, h)
   return true;
 }
 
-/* Increase the index at which H will appear in the dynamic symbol
-   table by INCREMENT (which is really an `int *').  Called via
-   elf_link_hash_traverse.  */
+/* Return the dynindex of a local dynamic symbol.  */
 
-boolean
-_bfd_elf_link_adjust_dynindx (h, increment)
-     struct elf_link_hash_entry *h;
-     PTR increment;
+long
+_bfd_elf_link_lookup_local_dynindx (info, input_bfd, input_indx)
+     struct bfd_link_info *info;
+     bfd *input_bfd;
+     long input_indx;
 {
+  struct elf_link_local_dynamic_entry *e;
+
+  for (e = elf_hash_table (info)->dynlocal; e ; e = e->next)
+    if (e->input_bfd == input_bfd && e->input_indx == input_indx)
+      return e->dynindx;
+  return -1;
+}
+
+/* This function is used to renumber the dynamic symbols, if some of
+   them are removed because they are marked as local.  This is called
+   via elf_link_hash_traverse.  */
+
+static boolean elf_link_renumber_hash_table_dynsyms
+  PARAMS ((struct elf_link_hash_entry *, PTR));
+
+static boolean
+elf_link_renumber_hash_table_dynsyms (h, data)
+     struct elf_link_hash_entry *h;
+     PTR data;
+{
+  size_t *count = (size_t *) data;
+
   if (h->dynindx != -1)
-    h->dynindx += *((int *) increment);
-    
+    h->dynindx = ++(*count);
+
   return true;
 }
+
+/* Assign dynsym indicies.  In a shared library we generate a section
+   symbol for each output section, which come first.  Next come all of
+   the back-end allocated local dynamic syms, followed by the rest of
+   the global symbols.  */
+
+unsigned long
+_bfd_elf_link_renumber_dynsyms (output_bfd, info)
+     bfd *output_bfd;
+     struct bfd_link_info *info;
+{
+  unsigned long dynsymcount = 0;
+
+  if (info->shared)
+    {
+      asection *p;
+      for (p = output_bfd->sections; p ; p = p->next)
+	elf_section_data (p)->dynindx = ++dynsymcount;
+    }
+
+  if (elf_hash_table (info)->dynlocal)
+    {
+      struct elf_link_local_dynamic_entry *p;
+      for (p = elf_hash_table (info)->dynlocal; p ; p = p->next)
+	p->dynindx = ++dynsymcount;
+    }
+
+  elf_link_hash_traverse (elf_hash_table (info),
+			  elf_link_renumber_hash_table_dynsyms,
+			  &dynsymcount);
+
+  /* There is an unused NULL entry at the head of the table which
+     we must account for in our count.  Unless there weren't any
+     symbols, which means we'll have no table at all.  */
+  if (dynsymcount != 0)
+    ++dynsymcount;
+
+  return elf_hash_table (info)->dynsymcount = dynsymcount;
+}
 
-/* Create a special linker section, or return a pointer to a linker section already created  */
+/* Create a special linker section, or return a pointer to a linker
+   section already created */
 
 elf_linker_section_t *
 _bfd_elf_create_linker_section (abfd, info, which, defaults)

@@ -130,6 +130,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define elf_gc_common_final_link	NAME(_bfd_elf,gc_common_final_link)
 #define elf_gc_record_vtinherit		NAME(_bfd_elf,gc_record_vtinherit)
 #define elf_gc_record_vtentry		NAME(_bfd_elf,gc_record_vtentry)
+#define elf_link_record_local_dynamic_symbol \
+  NAME(_bfd_elf,link_record_local_dynamic_symbol)
 
 #if ARCH_SIZE == 64
 #define ELF_R_INFO(X,Y)	ELF64_R_INFO(X,Y)

@@ -86,6 +86,16 @@ struct elf_link_hash_entry
 
   /* Symbol index as a dynamic symbol.  Initialized to -1, and remains
      -1 if this is not a dynamic symbol.  */
+  /* ??? Note that this is consistently used as a synonym for tests
+     against whether we can perform various simplifying transformations
+     to the code.  (E.g. changing a pc-relative jump to a PLT entry
+     into a pc-relative jump to the target function.)  That test, which
+     is often relatively complex, and someplaces wrong or incomplete,
+     should really be replaced by a predicate in elflink.c.
+
+     End result: this field -1 does not indicate that the symbol is
+     not in the dynamic symbol table, but rather that the symbol is
+     not visible outside this DSO.  */
   long dynindx;
 
   /* String table index in .dynstr if this is a dynamic symbol.  */
@@ -181,6 +191,25 @@ struct elf_link_hash_entry
 #define ELF_LINK_HASH_MARK 04000
 };
 
+/* Records local symbols to be emitted in the dynamic symbol table.  */
+
+struct elf_link_local_dynamic_entry
+{
+  struct elf_link_local_dynamic_entry *next;
+
+  /* The input bfd this symbol came from.  */
+  bfd *input_bfd;
+
+  /* The index of the local symbol being copied.  */
+  long input_indx;
+
+  /* The index in the outgoing dynamic symbol table.  */
+  long dynindx;
+  
+  /* A copy of the input symbol.  */
+  Elf_Internal_Sym isym;
+};
+
 /* ELF linker hash table.  */
 
 struct elf_link_hash_table
@@ -209,6 +238,8 @@ struct elf_link_hash_table
   struct elf_link_hash_entry *hgot;
   /* A pointer to information used to link stabs in sections.  */
   PTR stab_info;
+  /* A linked list of local symbols to be added to .dynsym.  */
+  struct elf_link_local_dynamic_entry *dynlocal;
 };
 
 /* Look up an entry in an ELF linker hash table.  */
@@ -956,6 +987,9 @@ struct bfd_strtab_hash *_bfd_elf_stringtab_init PARAMS ((void));
 boolean
 _bfd_elf_link_record_dynamic_symbol PARAMS ((struct bfd_link_info *,
 					     struct elf_link_hash_entry *));
+long
+_bfd_elf_link_lookup_local_dynindx PARAMS ((struct bfd_link_info *,
+					    bfd *, long));
 boolean
 _bfd_elf_compute_section_file_positions PARAMS ((bfd *,
 						 struct bfd_link_info *));
@@ -970,8 +1004,8 @@ boolean _bfd_elf_create_dynamic_sections PARAMS ((bfd *,
 						  struct bfd_link_info *));
 boolean _bfd_elf_create_got_section PARAMS ((bfd *,
 					     struct bfd_link_info *));
-boolean _bfd_elf_link_adjust_dynindx PARAMS ((struct elf_link_hash_entry *,
-					      PTR));
+unsigned long _bfd_elf_link_renumber_dynsyms PARAMS ((bfd *,
+						      struct bfd_link_info *));
 
 elf_linker_section_t *_bfd_elf_create_linker_section
   PARAMS ((bfd *abfd,
@@ -1113,8 +1147,15 @@ extern boolean bfd_elf64_link_create_dynamic_sections
 extern Elf_Internal_Rela *_bfd_elf64_link_read_relocs
   PARAMS ((bfd *, asection *, PTR, Elf_Internal_Rela *, boolean));
 
-#define bfd_elf32_link_record_dynamic_symbol _bfd_elf_link_record_dynamic_symbol
-#define bfd_elf64_link_record_dynamic_symbol _bfd_elf_link_record_dynamic_symbol
+#define bfd_elf32_link_record_dynamic_symbol \
+  _bfd_elf_link_record_dynamic_symbol
+#define bfd_elf64_link_record_dynamic_symbol \
+  _bfd_elf_link_record_dynamic_symbol
+
+boolean _bfd_elf32_link_record_local_dynamic_symbol
+  PARAMS ((struct bfd_link_info *, bfd *, long));
+boolean _bfd_elf64_link_record_local_dynamic_symbol
+  PARAMS ((struct bfd_link_info *, bfd *, long));
 
 extern boolean _bfd_elf_close_and_cleanup PARAMS ((bfd *));
 extern bfd_reloc_status_type _bfd_elf_rel_vtable_reloc_fn

@@ -1,3 +1,36 @@
+1999-07-13  Richard Henderson  <rth@cygnus.com>
+
+	* elf.c (assign_file_positions_for_segments): Don't overwrite p_flags.
+
+	* elf-bfd.h (struct elf_link_local_dynamic_entry): New.
+	(struct elf_link_hash_table): Add dynlocal.
+	(_bfd_elf_link_lookup_local_dynindx): Prototype.
+	(_bfd_elf_link_adjust_dynindx): Delete.
+	(_bfd_elf_link_renumber_dynsyms): Prototype.
+	(_bfd_elf,link_record_local_dynamic_symbol): Prototype.
+	* elfcode.h (elf_link_record_local_dynamic_symbol): New alias.
+	* elflink.c (_bfd_elf_link_adjust_dynindx): Delete.
+	(_bfd_elf_link_lookup_local_dynindx): New function.
+	(elf_link_renumber_hash_table_dynsyms): New function.
+	(_bfd_elf_link_renumber_dynsyms): New function.
+	* elflink.h (elf_link_record_local_dynamic_symbol): New function.
+	(struct elf_assign_sym_version_info): Delete removed_dynamic.
+	(bfd_elf,size_dynamic_sections): Use _bfd_strip_section_from_output
+	instead of elf_link_remove_section_and_adjust_dynindices.
+	Remove removed_dynamic code.  Use _bfd_elf_link_renumber_dynsyms.
+	(elf_link_assign_sym_version): Remove removed_dynamic code.
+	(elf_link_renumber_dynsyms): Delete.
+	(elf_bfd_final_link): Install section and local symbols into .dynsym.
+
+	* elf32-m68k.c (elf_m68k_adjust_dynindx): Delete.
+	(elf_m68k_size_dynamic_sections): Don't set section dynindicies.
+	(elf_m68k_finish_dynamic_sections): Don't write section dynsyms.
+	* elf32-mips.c: Similarly.
+	* elf32-ppc.c: Similarly.
+	* elf32-sparc.c: Similarly.
+	* elf64-alpha.c: Similarly.
+	* elf64-sparc.c: Similarly.
+
 1999-07-13  Mark Mitchell  <mark@codesourcery.com>
 
 	* elf32-mips.c (mips_elf_calculate_relocation): Do not complain

@@ -115,8 +115,6 @@ static boolean elf64_alpha_adjust_dynamic_symbol
   PARAMS((struct bfd_link_info *, struct elf_link_hash_entry *));
 static boolean elf64_alpha_size_dynamic_sections
   PARAMS((bfd *, struct bfd_link_info *));
-static boolean elf64_alpha_adjust_dynindx
-  PARAMS((struct elf_link_hash_entry *, PTR));
 static boolean elf64_alpha_relocate_section
   PARAMS((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	  Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
@@ -3264,34 +3262,6 @@ elf64_alpha_size_dynamic_sections (output_bfd, info)
 	}
     }
 
-  /* If we are generating a shared library, we generate a section
-     symbol for each output section.  These are local symbols, which
-     means that they must come first in the dynamic symbol table.
-     That means we must increment the dynamic symbol index of every
-     other dynamic symbol.  */
-  if (info->shared)
-    {
-      long c[2], i;
-      asection *p;
-
-      c[0] = 0;
-      c[1] = bfd_count_sections (output_bfd);
-
-      elf_hash_table (info)->dynsymcount += c[1];
-      elf_link_hash_traverse (elf_hash_table(info),
-			      elf64_alpha_adjust_dynindx,
-			      (PTR) c);
-
-      for (i = 1, p = output_bfd->sections;
-	   p != NULL;
-	   p = p->next, i++)
-	{
-	  elf_section_data (p)->dynindx = i;
-	  /* These symbols will have no names, so we don't need to
-	     fiddle with dynstr_index.  */
-	}
-    }
-
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       /* Add some entries to the .dynamic section.  We fill in the
@@ -3328,22 +3298,6 @@ elf64_alpha_size_dynamic_sections (output_bfd, info)
 	    return false;
 	}
     }
-
-  return true;
-}
-
-/* Increment the index of a dynamic symbol by a given amount.  Called
-   via elf_link_hash_traverse.  */
-
-static boolean
-elf64_alpha_adjust_dynindx (h, cparg)
-     struct elf_link_hash_entry *h;
-     PTR cparg;
-{
-  long *cp = (long *)cparg;
-
-  if (h->dynindx >= cp[0])
-    h->dynindx += cp[1];
 
   return true;
 }
@@ -3989,44 +3943,6 @@ elf64_alpha_finish_dynamic_sections (output_bfd, info)
 	  elf_section_data (splt->output_section)->this_hdr.sh_entsize =
 	    PLT_HEADER_SIZE;
 	}
-    }
-
-  if (info->shared)
-    {
-      asection *sdynsym;
-      asection *s;
-      Elf_Internal_Sym sym;
-
-      /* Set up the section symbols for the output sections.  */
-
-      sdynsym = bfd_get_section_by_name (dynobj, ".dynsym");
-      BFD_ASSERT (sdynsym != NULL);
-
-      sym.st_size = 0;
-      sym.st_name = 0;
-      sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
-      sym.st_other = 0;
-
-      for (s = output_bfd->sections; s != NULL; s = s->next)
-	{
-	  int indx;
-
-	  sym.st_value = s->vma;
-
-	  indx = elf_section_data (s)->this_idx;
-	  BFD_ASSERT (indx > 0);
-	  sym.st_shndx = indx;
-
-	  bfd_elf64_swap_symbol_out (output_bfd, &sym,
-				     (PTR) (((Elf64_External_Sym *)
-					     sdynsym->contents)
-					    + elf_section_data (s)->dynindx));
-	}
-
-      /* Set the sh_info field of the output .dynsym section to the
-         index of the first global symbol.  */
-      elf_section_data (sdynsym->output_section)->this_hdr.sh_info =
-	bfd_count_sections (output_bfd) + 1;
     }
 
   return true;

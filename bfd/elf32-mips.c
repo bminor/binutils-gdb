@@ -7693,32 +7693,6 @@ _bfd_mips_elf_size_dynamic_sections (output_bfd, info)
 	return false;
     }
 
-  /* If we use dynamic linking, we generate a section symbol for each
-     output section.  These are local symbols, which means that they
-     must come first in the dynamic symbol table.
-     That means we must increment the dynamic symbol index of every
-     other dynamic symbol.  */
-  {
-    unsigned int c, i;
-
-    c = 0;
-    if (elf_hash_table (info)->dynamic_sections_created)
-      {
-	c = bfd_count_sections (output_bfd);
-	elf_link_hash_traverse (elf_hash_table (info),
-				_bfd_elf_link_adjust_dynindx,
-				(PTR) &c);
-	elf_hash_table (info)->dynsymcount += c;
-
-	for (i = 1, s = output_bfd->sections; s != NULL; s = s->next, i++)
-	  {
-	    elf_section_data (s)->dynindx = i;
-	    /* These symbols will have no names, so we don't need to
-	       fiddle with dynstr_index.  */
-	  }
-      }
-  }
-
   return true;
 }
 
@@ -8163,59 +8137,32 @@ _bfd_mips_elf_finish_dynamic_sections (output_bfd, info)
       = MIPS_ELF_GOT_SIZE (output_bfd);
 
   {
-    asection *sdynsym;
     asection *smsym;
     asection *s;
-    Elf_Internal_Sym sym;
     Elf32_compact_rel cpt;
 
-    /* Set up the section symbols for the output sections. SGI sets
-       the STT_NOTYPE attribute for these symbols.  Should we do so?  */
+    /* ??? The section symbols for the output sections were set up in
+       _bfd_elf_final_link.  SGI sets the STT_NOTYPE attribute for these
+       symbols.  Should we do so?  */
 
-    sdynsym = bfd_get_section_by_name (dynobj, ".dynsym");
     smsym = bfd_get_section_by_name (dynobj, 
 				     MIPS_ELF_MSYM_SECTION_NAME (dynobj));
-    if (sdynsym != NULL)
+    if (smsym != NULL)
       {
 	Elf32_Internal_Msym msym;
-
-	sym.st_size = 0;
-	sym.st_name = 0;
-	sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
-	sym.st_other = 0;
 
 	msym.ms_hash_value = 0;
 	msym.ms_info = ELF32_MS_INFO (0, 1);
 
 	for (s = output_bfd->sections; s != NULL; s = s->next)
 	  {
-	    int indx;
-	    long dynindx;
+	    long dynindx = elf_section_data (s)->dynindx;
 
-	    sym.st_value = s->vma;
-
-	    indx = elf_section_data (s)->this_idx;
-	    BFD_ASSERT (indx > 0);
-	    sym.st_shndx = indx;
-		
-	    dynindx  = elf_section_data (s)->dynindx;
-
-	    (*get_elf_backend_data (output_bfd)->s->swap_symbol_out)
-	      (output_bfd, &sym, 
-	       sdynsym->contents 
-	       + (dynindx * MIPS_ELF_SYM_SIZE (output_bfd)));
-		
-	    if (smsym)
-	      bfd_mips_elf_swap_msym_out 
-		(output_bfd, &msym,
-		 (((Elf32_External_Msym *) smsym->contents)
-		  + dynindx));
+	    bfd_mips_elf_swap_msym_out 
+	      (output_bfd, &msym,
+	       (((Elf32_External_Msym *) smsym->contents)
+		+ dynindx));
 	  }
-
-	/* Set the sh_info field of the output .dynsym section to
-	       the index of the first global symbol.  */
-	elf_section_data (sdynsym->output_section)->this_hdr.sh_info =
-	  bfd_count_sections (output_bfd) + 1;
       }
 
     if (SGI_COMPAT (output_bfd))

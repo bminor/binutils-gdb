@@ -80,8 +80,6 @@ static boolean ppc_elf_gc_sweep_hook PARAMS ((bfd *abfd,
 static boolean ppc_elf_adjust_dynamic_symbol PARAMS ((struct bfd_link_info *,
 						      struct elf_link_hash_entry *));
 
-static boolean ppc_elf_adjust_dynindx PARAMS ((struct elf_link_hash_entry *, PTR));
-
 static boolean ppc_elf_size_dynamic_sections PARAMS ((bfd *, struct bfd_link_info *));
 
 static boolean ppc_elf_relocate_section PARAMS ((bfd *,
@@ -1881,27 +1879,6 @@ ppc_elf_adjust_dynamic_symbol (info, h)
 }
 
 
-/* Increment the index of a dynamic symbol by a given amount.  Called
-   via elf_link_hash_traverse.  */
-
-static boolean
-ppc_elf_adjust_dynindx (h, cparg)
-     struct elf_link_hash_entry *h;
-     PTR cparg;
-{
-  int *cp = (int *) cparg;
-
-#ifdef DEBUG
-  fprintf (stderr, "ppc_elf_adjust_dynindx called, h->dynindx = %d, *cp = %d\n", h->dynindx, *cp);
-#endif
-
-  if (h->dynindx != -1)
-    h->dynindx += *cp;
-
-  return true;
-}
-
-
 /* Set the sizes of the dynamic sections.  */
 
 static boolean
@@ -2081,43 +2058,6 @@ ppc_elf_size_dynamic_sections (output_bfd, info)
 	  if (! bfd_elf32_add_dynamic_entry (info, DT_TEXTREL, 0))
 	    return false;
 	}
-    }
-
-  /* If we are generating a shared library, we generate a section
-     symbol for each output section.  These are local symbols, which
-     means that they must come first in the dynamic symbol table.
-     That means we must increment the dynamic symbol index of every
-     other dynamic symbol.
-
-     FIXME: We assume that there will never be relocations to
-     locations in linker-created sections that do not have
-     externally-visible names. Instead, we should work out precisely
-     which sections relocations are targetted at.  */
-  if (info->shared)
-    {
-      int c;
-
-      for (c = 0, s = output_bfd->sections; s != NULL; s = s->next)
-	{
-	  if ((s->flags & SEC_LINKER_CREATED) != 0
-	      || (s->flags & SEC_ALLOC) == 0)
-	    {
-	      elf_section_data (s)->dynindx = 0;
-	      continue;
-	    }
-
-	  /* These symbols will have no names, so we don't need to
-	     fiddle with dynstr_index.  */
-
-	  elf_section_data (s)->dynindx = c + 1;
-
-	  c++;
-	}
-
-      elf_link_hash_traverse (elf_hash_table (info),
-			      ppc_elf_adjust_dynindx,
-			      (PTR) &c);
-      elf_hash_table (info)->dynsymcount += c;
     }
 
   return true;
@@ -2922,54 +2862,6 @@ ppc_elf_finish_dynamic_sections (output_bfd, info)
 		    contents+4);
 
       elf_section_data (sgot->output_section)->this_hdr.sh_entsize = 4;
-    }
-
-  if (info->shared)
-    {
-      asection *sdynsym;
-      asection *s;
-      Elf_Internal_Sym sym;
-      int maxdindx = 0;
-
-      /* Set up the section symbols for the output sections.  */
-
-      sdynsym = bfd_get_section_by_name (dynobj, ".dynsym");
-      BFD_ASSERT (sdynsym != NULL);
-
-      sym.st_size = 0;
-      sym.st_name = 0;
-      sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
-      sym.st_other = 0;
-
-      for (s = output_bfd->sections; s != NULL; s = s->next)
-	{
-	  int indx, dindx;
-
-	  sym.st_value = s->vma;
-
-	  indx = elf_section_data (s)->this_idx;
-	  dindx = elf_section_data (s)->dynindx;
-	  if (dindx > 0)
-	    {
-	      BFD_ASSERT(indx > 0);
-	      BFD_ASSERT(dindx > 0);
-
-	      if (dindx > maxdindx)
-		maxdindx = dindx;
-
-	      sym.st_shndx = indx;
-
-	      bfd_elf32_swap_symbol_out (output_bfd, &sym,
-					 (PTR) (((Elf32_External_Sym *)
-						 sdynsym->contents)
-						+ dindx));
-	    }
-	}
-
-      /* Set the sh_info field of the output .dynsym section to the
-         index of the first global symbol.  */
-      elf_section_data (sdynsym->output_section)->this_hdr.sh_info =
-	maxdindx + 1;
     }
 
   return true;
