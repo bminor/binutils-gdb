@@ -198,7 +198,7 @@ HOWTO( 4,	       0,  0, 	8,  true,  0, complain_overflow_signed,  0,"DISP8",	tru
 HOWTO( 5,	       0,  1, 	16, true,  0, complain_overflow_signed,  0,"DISP16",	true, 0x0000ffff,0x0000ffff, false),
 HOWTO( 6,	       0,  2, 	32, true,  0, complain_overflow_signed,  0,"DISP32",	true, 0xffffffff,0xffffffff, false),
 HOWTO( 7,	       0,  4, 	64, true,  0, complain_overflow_signed,  0,"DISP64",	true, 0xfeedface,0xfeedface, false),
-{ -1 },
+HOWTO( 8,	       0,  2,    0, false, 0, complain_overflow_bitfield,0,"GOT_REL",	false,         0,0x00000000, false),
 HOWTO( 9,	       0,  1,   16, false, 0, complain_overflow_bitfield,0,"BASE16",	false,0xffffffff,0xffffffff, false),
 HOWTO(10,	       0,  2,   32, false, 0, complain_overflow_bitfield,0,"BASE32",	false,0xffffffff,0xffffffff, false),
 { -1 },
@@ -2694,13 +2694,13 @@ NAME(aout,bfd_free_cached_info) (abfd)
   if (bfd_get_format (abfd) != bfd_object)
     return true;
 
-#define FREE(x) if (x != NULL) { free (x); x = NULL; }
-  FREE (obj_aout_symbols (abfd));
-  FREE (obj_aout_external_syms (abfd));
-  FREE (obj_aout_external_strings (abfd));
+#define BFCI_FREE(x) if (x != NULL) { free (x); x = NULL; }
+  BFCI_FREE (obj_aout_symbols (abfd));
+  BFCI_FREE (obj_aout_external_syms (abfd));
+  BFCI_FREE (obj_aout_external_strings (abfd));
   for (o = abfd->sections; o != (asection *) NULL; o = o->next)
-    FREE (o->relocation);
-#undef FREE
+    BFCI_FREE (o->relocation);
+#undef BFCI_FREE
 
   return true;
 }

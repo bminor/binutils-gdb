@@ -1,3 +1,14 @@
+Sun Jul 10 09:12:02 1994  D. V. Henkel-Wallace  (gumby@cygnus.com)
+
+	* aoutx.h (bfd_free_cached_info): Change name of FREE to BFCI_FREE
+	in order not to collide with LynxOS's definition of FREE in
+	/usr/include/sys/proc.h
+
+Thu Jul  7 14:18:06 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* reloc.c (bfd_perform_relocation): Don't clobber the relocation
+	value for coff-Intel-little or coff-Intel-big.  Hack upon hack.
+
 Thu Jul  7 10:10:34 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* aoutx.h (howto_table_std):  Add entry for GOT relocations
