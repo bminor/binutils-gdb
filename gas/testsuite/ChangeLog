@@ -1,5 +1,11 @@
 2005-02-15  Jan Beulich  <jbeulich@novell.com>
 
+	* gas/ia64/reloc.[ds]: New.
+	* gas/ia64/reloc-bad.[ls]: New.
+	* gas/ia64/ia64.exp: Run new tests.
+
+2005-02-15  Jan Beulich  <jbeulich@novell.com>
+
 	* gas/ia64/operand-or.d: Pass -xnone to assembler.
 
 2005-02-13  Jan Beulich  <jbeulich@novell.com>

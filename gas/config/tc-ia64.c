@@ -10738,6 +10738,7 @@ ia64_gen_real_reloc_type (sym, r_type)
      bfd_reloc_code_real_type r_type;
 {
   bfd_reloc_code_real_type new = 0;
+  const char *type = NULL, *suffix = "";
 
   if (sym == NULL)
     {
@@ -10754,7 +10755,7 @@ ia64_gen_real_reloc_type (sym, r_type)
 	case BFD_RELOC_IA64_DIR32LSB:	new = BFD_RELOC_IA64_FPTR32LSB; break;
 	case BFD_RELOC_IA64_DIR64MSB:	new = BFD_RELOC_IA64_FPTR64MSB; break;
 	case BFD_RELOC_IA64_DIR64LSB:	new = BFD_RELOC_IA64_FPTR64LSB; break;
-	default:			break;
+	default:			type = "FPTR"; break;
 	}
       break;
 
@@ -10767,7 +10768,7 @@ ia64_gen_real_reloc_type (sym, r_type)
 	case BFD_RELOC_IA64_DIR32LSB:	new = BFD_RELOC_IA64_GPREL32LSB; break;
 	case BFD_RELOC_IA64_DIR64MSB:	new = BFD_RELOC_IA64_GPREL64MSB; break;
 	case BFD_RELOC_IA64_DIR64LSB:	new = BFD_RELOC_IA64_GPREL64LSB; break;
-	default:			break;
+	default:			type = "GPREL"; break;
 	}
       break;
 
@@ -10776,7 +10777,7 @@ ia64_gen_real_reloc_type (sym, r_type)
 	{
 	case BFD_RELOC_IA64_IMM22:	new = BFD_RELOC_IA64_LTOFF22; break;
 	case BFD_RELOC_IA64_IMM64:	new = BFD_RELOC_IA64_LTOFF64I; break;
-	default:			break;
+	default:			type = "LTOFF"; break;
 	}
       break;
 
@@ -10784,7 +10785,7 @@ ia64_gen_real_reloc_type (sym, r_type)
       switch (r_type)
 	{
 	case BFD_RELOC_IA64_IMM22:	new = BFD_RELOC_IA64_LTOFF22X; break;
-	default:			break;
+	default:			type = "LTOFF"; suffix = "X"; break;
 	}
       break;
 
@@ -10797,7 +10798,7 @@ ia64_gen_real_reloc_type (sym, r_type)
 	case BFD_RELOC_IA64_DIR32LSB:	new = BFD_RELOC_IA64_PCREL32LSB; break;
 	case BFD_RELOC_IA64_DIR64MSB:	new = BFD_RELOC_IA64_PCREL64MSB; break;
 	case BFD_RELOC_IA64_DIR64LSB:	new = BFD_RELOC_IA64_PCREL64LSB; break;
-	default:			break;
+	default:			type = "PCREL"; break;
 	}
       break;
 
@@ -10808,7 +10809,7 @@ ia64_gen_real_reloc_type (sym, r_type)
 	case BFD_RELOC_IA64_IMM64:	new = BFD_RELOC_IA64_PLTOFF64I; break;
 	case BFD_RELOC_IA64_DIR64MSB:	new = BFD_RELOC_IA64_PLTOFF64MSB;break;
 	case BFD_RELOC_IA64_DIR64LSB:	new = BFD_RELOC_IA64_PLTOFF64LSB;break;
-	default:			break;
+	default:			type = "PLTOFF"; break;
 	}
       break;
 
@@ -10819,7 +10820,7 @@ ia64_gen_real_reloc_type (sym, r_type)
 	case BFD_RELOC_IA64_DIR32LSB:	new = BFD_RELOC_IA64_SECREL32LSB;break;
 	case BFD_RELOC_IA64_DIR64MSB:	new = BFD_RELOC_IA64_SECREL64MSB;break;
 	case BFD_RELOC_IA64_DIR64LSB:	new = BFD_RELOC_IA64_SECREL64LSB;break;
-	default:			break;
+	default:			type = "SECREL"; break;
 	}
       break;
 
@@ -10830,7 +10831,7 @@ ia64_gen_real_reloc_type (sym, r_type)
 	case BFD_RELOC_IA64_DIR32LSB:	new = BFD_RELOC_IA64_SEGREL32LSB;break;
 	case BFD_RELOC_IA64_DIR64MSB:	new = BFD_RELOC_IA64_SEGREL64MSB;break;
 	case BFD_RELOC_IA64_DIR64LSB:	new = BFD_RELOC_IA64_SEGREL64LSB;break;
-	default:			break;
+	default:			type = "SEGREL"; break;
 	}
       break;
 
@@ -10841,7 +10842,7 @@ ia64_gen_real_reloc_type (sym, r_type)
 	case BFD_RELOC_IA64_DIR32LSB:	new = BFD_RELOC_IA64_LTV32LSB; break;
 	case BFD_RELOC_IA64_DIR64MSB:	new = BFD_RELOC_IA64_LTV64MSB; break;
 	case BFD_RELOC_IA64_DIR64LSB:	new = BFD_RELOC_IA64_LTV64LSB; break;
-	default:			break;
+	default:			type = "LTV"; break;
 	}
       break;
 
@@ -10852,22 +10853,28 @@ ia64_gen_real_reloc_type (sym, r_type)
 	  new = BFD_RELOC_IA64_LTOFF_FPTR22; break;
 	case BFD_RELOC_IA64_IMM64:
 	  new = BFD_RELOC_IA64_LTOFF_FPTR64I; break;
+	case BFD_RELOC_IA64_DIR32MSB:
+	  new = BFD_RELOC_IA64_LTOFF_FPTR32MSB; break;
+	case BFD_RELOC_IA64_DIR32LSB:
+	  new = BFD_RELOC_IA64_LTOFF_FPTR32LSB; break;
+	case BFD_RELOC_IA64_DIR64MSB:
+	  new = BFD_RELOC_IA64_LTOFF_FPTR64MSB; break;
+	case BFD_RELOC_IA64_DIR64LSB:
+	  new = BFD_RELOC_IA64_LTOFF_FPTR64LSB; break;
 	default:
-	  break;
+	  type = "LTOFF_FPTR"; break;
 	}
       break;
 
     case FUNC_TP_RELATIVE:
       switch (r_type)
 	{
-	case BFD_RELOC_IA64_IMM14:
-	  new = BFD_RELOC_IA64_TPREL14; break;
-	case BFD_RELOC_IA64_IMM22:
-	  new = BFD_RELOC_IA64_TPREL22; break;
-	case BFD_RELOC_IA64_IMM64:
-	  new = BFD_RELOC_IA64_TPREL64I; break;
-	default:
-	  break;
+	case BFD_RELOC_IA64_IMM14:      new = BFD_RELOC_IA64_TPREL14; break;
+	case BFD_RELOC_IA64_IMM22:      new = BFD_RELOC_IA64_TPREL22; break;
+	case BFD_RELOC_IA64_IMM64:      new = BFD_RELOC_IA64_TPREL64I; break;
+	case BFD_RELOC_IA64_DIR64MSB:   new = BFD_RELOC_IA64_TPREL64MSB; break;
+	case BFD_RELOC_IA64_DIR64LSB:   new = BFD_RELOC_IA64_TPREL64LSB; break;
+	default:                        type = "TPREL"; break;
 	}
       break;
 
@@ -10877,7 +10884,19 @@ ia64_gen_real_reloc_type (sym, r_type)
 	case BFD_RELOC_IA64_IMM22:
 	  new = BFD_RELOC_IA64_LTOFF_TPREL22; break;
 	default:
-	  break;
+	  type = "LTOFF_TPREL"; break;
+	}
+      break;
+
+    case FUNC_DTP_MODULE:
+      switch (r_type)
+	{
+	case BFD_RELOC_IA64_DIR64MSB:
+	  new = BFD_RELOC_IA64_DTPMOD64MSB; break;
+	case BFD_RELOC_IA64_DIR64LSB:
+	  new = BFD_RELOC_IA64_DTPMOD64LSB; break;
+	default:
+	  type = "DTPMOD"; break;
 	}
       break;
 
@@ -10887,13 +10906,17 @@ ia64_gen_real_reloc_type (sym, r_type)
 	case BFD_RELOC_IA64_IMM22:
 	  new = BFD_RELOC_IA64_LTOFF_DTPMOD22; break;
 	default:
-	  break;
+	  type = "LTOFF_DTPMOD"; break;
 	}
       break;
 
     case FUNC_DTP_RELATIVE:
       switch (r_type)
 	{
+	case BFD_RELOC_IA64_DIR32MSB:
+	  new = BFD_RELOC_IA64_DTPREL32MSB; break;
+	case BFD_RELOC_IA64_DIR32LSB:
+	  new = BFD_RELOC_IA64_DTPREL32LSB; break;
 	case BFD_RELOC_IA64_DIR64MSB:
 	  new = BFD_RELOC_IA64_DTPREL64MSB; break;
 	case BFD_RELOC_IA64_DIR64LSB:
@@ -10905,7 +10928,7 @@ ia64_gen_real_reloc_type (sym, r_type)
 	case BFD_RELOC_IA64_IMM64:
 	  new = BFD_RELOC_IA64_DTPREL64I; break;
 	default:
-	  break;
+	  type = "DTPREL"; break;
 	}
       break;
 
@@ -10915,22 +10938,48 @@ ia64_gen_real_reloc_type (sym, r_type)
 	case BFD_RELOC_IA64_IMM22:
 	  new = BFD_RELOC_IA64_LTOFF_DTPREL22; break;
 	default:
-	  break;
+	  type = "LTOFF_DTPREL"; break;
 	}
       break;
 
     case FUNC_IPLT_RELOC:
+      switch (r_type)
+	{
+	case BFD_RELOC_IA64_IPLTMSB:    return r_type;
+	case BFD_RELOC_IA64_IPLTLSB:    return r_type;
+	default:                        type = "IPLT"; break;
+	}
       break;
 
     default:
       abort ();
     }
 
-  /* Hmmmm.  Should this ever occur?  */
   if (new)
     return new;
   else
-    return r_type;
+    {
+      int width;
+
+      if (!type)
+	abort ();
+      switch (r_type)
+	{
+	case BFD_RELOC_IA64_DIR32MSB: width = 32; suffix = "MSB"; break;
+	case BFD_RELOC_IA64_DIR32LSB: width = 32; suffix = "LSB"; break;
+	case BFD_RELOC_IA64_DIR64MSB: width = 64; suffix = "MSB"; break;
+	case BFD_RELOC_IA64_DIR64LSB: width = 64; suffix = "LSB"; break;
+	case BFD_RELOC_IA64_IMM14:    width = 14; break;
+	case BFD_RELOC_IA64_IMM22:    width = 22; break;
+	case BFD_RELOC_IA64_IMM64:    width = 64; suffix = "I"; break;
+	default:                      abort ();
+	}
+
+      /* This should be an error, but since previously there wasn't any
+	 diagnostic here, dont't make it fail because of this for now.  */
+      as_warn ("Cannot express %s%d%s relocation", type, width, suffix);
+      return r_type;
+    }
 }
 
 /* Here is where generate the appropriate reloc for pseudo relocation

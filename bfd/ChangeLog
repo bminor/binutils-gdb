@@ -1,3 +1,8 @@
+2005-02-15  Jan Beulich  <jbeulich@novell.com>
+
+	* elfxx-ia64.c (ia64_howto_table): Correct strings for
+	R_IA64_DTPMOD64[LM]SB.
+
 2005-02-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfxx-ia64.c (elfNN_ia64_relax_section): Allow relax

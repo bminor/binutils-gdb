@@ -49,6 +49,9 @@ if [istarget "ia64-*"] then {
 
     run_dump_test "dependency-1"
 
+    run_dump_test "reloc"
+    run_list_test "reloc-bad" ""
+
     run_dump_test "real"
     run_dump_test "align"
     run_dump_test "order"

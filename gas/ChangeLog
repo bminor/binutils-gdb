@@ -1,5 +1,16 @@
 2005-02-15  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-ia64.c (ia64_gen_real_reloc_type): Define and initialize
+	new variables type, suffix, and width. Handle
+	BFD_RELOC_IA64_DIR(32|64)[LM]SB in FUNC_LT_FPTR_RELATIVE case.
+	Handle BFD_RELOC_IA64_DIR64[LM]SB in FUNC_TP_RELATIVE case. Add
+	FUNC_DTP_MODULE case. Handle BFD_RELOC_IA64_DIR32[LM]SB in
+	FUNC_DTP_RELATIVE case. Return incoming relocation type if
+	BFD_RELOC_IA64_IPLT[LM]SB in FUNC_IPLT_RELOC case. Generate warning
+	if unable to translate relocation type, using the new variables.
+
+2005-02-15  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-ia64.h (ia64_symbol_chars): Declare.
 	(ty_symbol_chars): Define.
 	* config/tc-ia64.c (ia64_symbol_chars): Define.
