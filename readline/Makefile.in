@@ -79,9 +79,9 @@ history.info: history.texi
 readline.info: readline.texi inc-read.texi
 	$(MAKEINFO) -o readline.info $(srcdir)/readline.texi
 
-libreadline.a:	readline.o history.o funmap.o keymaps.o tilde.o
+libreadline.a:	readline.o history.o funmap.o keymaps.o tilde.o vi_mode.o
 		$(RM) -f libreadline.a
-		$(AR) $(AR_FLAGS) libreadline.a readline.o history.o funmap.o keymaps.o tilde.o
+		$(AR) $(AR_FLAGS) libreadline.a readline.o history.o funmap.o keymaps.o tilde.o vi_mode.o
 		$(RANLIB) libreadline.a
 
 readline.o:	readline.h chardefs.h  keymaps.h history.h readline.c vi_mode.c
@@ -94,10 +94,10 @@ tilde.o:	../glob/tilde.c
 libtest:	libreadline.a libtest.c
 		$(CC) -o libtest $(CFLAGS) $(CPPFLAGS) -L. libtest.c -lreadline -ltermcap
 
-readline: readline.c history.o keymaps.o funmap.o readline.h chardefs.h
+readline: readline.c history.o keymaps.o funmap.o readline.h chardefs.h vi_mode.o
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(READLINE_DEFINES) \
 		$(LOCAL_INCLUDES) -DTEST -o readline readline.c funmap.o \
-		 keymaps.o history.o -L. -ltermcap
+		 keymaps.o history.o vi_mode.o -L. -ltermcap
 
 readline.tar:	$(THINGS_TO_TAR)
 		tar -cf readline.tar $(THINGS_TO_TAR)
