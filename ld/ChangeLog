@@ -1,3 +1,8 @@
+Wed Feb  8 17:34:45 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldlang.c (lang_one_common): Adjust references to common symbol
+	information for new structure.
+
 Mon Feb  6 12:17:24 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldmain.c (undefined_symbol): Handle section being NULL.
