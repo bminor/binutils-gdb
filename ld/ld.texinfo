@@ -1209,10 +1209,16 @@ addresses of sections
 placement of common blocks
 @end itemize
 
-You may supply a command file (also known as a link script) to the
+You may supply a command file (also known as a linker script) to the
 linker either explicitly through the @samp{-T} option, or implicitly as
-an ordinary file. If the linker opens a file which it cannot recognize
-as a supported object or archive format, it reports an error.
+an ordinary file.  Normally you should use the @samp{-T} option.  An
+implicit linker script should only be used when you want to augment,
+rather than replace, the default linker script; typically an implicit
+linker script would consist only of @code{INPUT} or @code{GROUP}
+commands.
+
+If the linker opens a file which it cannot recognize as a supported
+object or archive format, nor as a linker script, it reports an error.
 
 @menu
 * Scripts::                     Linker Scripts
