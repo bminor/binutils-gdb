@@ -46,6 +46,8 @@ static INLINE unsigned int assemble_12 (unsigned int, unsigned int)
 static INLINE void dis_assemble_12 (unsigned int, unsigned int *,
 				    unsigned int *)
      __attribute__ ((__unused__));
+static INLINE void dis_assemble_16 (unsigned int, unsigned int *, int)
+     __attribute__ ((__unused__));
 static INLINE unsigned long assemble_17 (unsigned int, unsigned int,
 					 unsigned int)
      __attribute__ ((__unused__));
@@ -81,7 +83,7 @@ static INLINE  unsigned long hppa_rebuild_insn (bfd *, unsigned long,
 
 
 /* The PA instruction set variants.  */
-enum pa_arch {pa10 = 10, pa11 = 11, pa20 = 20};
+enum pa_arch {pa10 = 10, pa11 = 11, pa20 = 20, pa20w = 25};
 
 /* HP PA-RISC relocation types */
 
@@ -275,6 +277,30 @@ dis_assemble_12 (as12, x, y)
 {
   *y = (as12 & 0x800) >> 11;
   *x = ((as12 & 0x3ff) << 1) | ((as12 & 0x400) >> 10);
+}
+
+static INLINE void
+dis_assemble_16 (as16, x, wide)
+     unsigned int as16;
+     unsigned int *x;
+     int wide;
+{
+  unsigned int t1, t2;
+
+  if (wide)
+    {
+      /* Unusual 16-bit encoding.  */
+      t1 = (as16 << 1) & 0xffff;
+      t2 = (as16 & 0x8000);
+      *x = t1 ^ t2 ^ (t2 >> 1) | (t2 >> 15);
+    }
+  else
+    {
+      /* Standard 14-bit encoding.  */
+      t1 = (as16 << 1) & 0x3fff;
+      t2 = (as16 & 0x2000);
+      *x = t1 | (t2 >> 13);
+    }
 }
 
 static INLINE unsigned long
