@@ -1,3 +1,18 @@
+Thu Mar  8 16:06:00 2001  David Taylor  <taylor@redhat.com>
+
+	* gdb.base/annota1.exp: Move test of isnative to earlier in the
+ 	file -- to prevent failing when the compile fails but we have no
+ 	intention of running the tests anyway.
+
+	* gdb.base/long_long.exp: Test target_info for no_long_long, skip
+	tests if set.
+
+	* gdb.base/maint.exp: Support 2 byte integers as well as 4 byte
+ 	integers.
+
+	* gdb.c++/ctti.exp: Skip tests if skip_cplus_tests returns true.
+	* gdb.c++/namespace.exp: Ditto.
+
 2001-03-07  Orjan Friberg  <orjanf@axis.com>
 
 	* gdb.base/pointers.c: Don't assume doubles are >= 8 bytes.
