@@ -1,3 +1,13 @@
+Tue Jan 28 10:18:16 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* ldgram.y: map -M behave in the same way as -Map (sets file name
+	to be "-".
+	* ldsym.c, ldlang.c: remember that size of a section is dependent on
+	whether or not relaxing has been done.
+	* ldmain.c: don't open a map file if it doesn't have a name
+	* relax.c: all the brains have moved into bfd.
+	* ldwrite.c: ammend comment
+
 Fri Jan 24 14:23:46 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* Makefile.in: added relax, also made three stage go through a

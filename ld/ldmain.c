@@ -129,21 +129,21 @@ main (argc, argv)
 
   bfd_init();
 #ifdef GNU960
-   {
-     int i;
+{
+  int i;
  
-     check_v960( argc, argv );
-     emulation = GLD960_EMULATION_NAME;
-     for ( i = 1; i < argc; i++ ){
-       if ( !strcmp(argv[i],"-Fcoff") ){
- 	emulation = LNK960_EMULATION_NAME;
- 	output_flavor = BFD_COFF_FORMAT;
- 	break;
-       }
-     }
-   }
+  check_v960( argc, argv );
+  emulation = GLD960_EMULATION_NAME;
+  for ( i = 1; i < argc; i++ ){
+      if ( !strcmp(argv[i],"-Fcoff") ){
+	  emulation = LNK960_EMULATION_NAME;
+	  output_flavor = BFD_COFF_FORMAT;
+	  break;
+	}
+    }
+}
 #else
-   emulation =  (char *) getenv(EMULATION_ENVIRON); 
+  emulation =  (char *) getenv(EMULATION_ENVIRON); 
 #endif
 
   /* Initialize the data about options.  */
@@ -172,8 +172,8 @@ main (argc, argv)
   config.text_read_only = true;
   config.make_executable = true;
   if (emulation == (char *)NULL) {
-    emulation= DEFAULT_EMULATION;
-  }
+      emulation= DEFAULT_EMULATION;
+    }
 
   ldemul_choose_mode(emulation);
   default_target =  ldemul_choose_target();
@@ -183,15 +183,21 @@ main (argc, argv)
   parse_args(argc, argv);
   lang_final(); 
   if (trace_files) {
-    info("%P: mode %s\n", emulation);
-  }
+      info("%P: mode %s\n", emulation);
+    }
   if (lang_has_input_file == false) {
-    einfo("%P%F: No input files\n");
-  }
+      einfo("%P%F: No input files\n");
+    }
 
   ldemul_after_parse();
-      if (config.map_filename) 
-      {
+
+  if (config.map_filename) 
+  {
+    if (strcmp(config.map_filename[0],"-") == 0) 
+    {
+      config.map_file = stdout;
+    }
+    else {
 	config.map_file = fopen(config.map_filename, FOPEN_WT);
 	if (config.map_file == (FILE *)NULL) 
 	{
@@ -199,7 +205,8 @@ main (argc, argv)
 		config.map_filename);
 	}
       }
-      else config.map_file = stdout;	
+  }
+
 
   lang_process();
 
@@ -208,35 +215,35 @@ main (argc, argv)
 
 
   if (config.text_read_only) {
-    /* Look for a text section and mark the readonly attribute in it */
-    asection *found = bfd_get_section_by_name(output_bfd, ".text");
-    if (found == (asection *)NULL) {
-      einfo("%P%F: text marked read only, but no text section present");
+      /* Look for a text section and mark the readonly attribute in it */
+      asection *found = bfd_get_section_by_name(output_bfd, ".text");
+      if (found == (asection *)NULL) {
+	  einfo("%P%F: text marked read only, but no text section present");
+	}
+      found->flags |= SEC_READONLY;
     }
-    found->flags |= SEC_READONLY;
-  }
 
   if (config.relocateable_output) {
-    output_bfd->flags &= ~EXEC_P;
+      output_bfd->flags &= ~EXEC_P;
 
-    ldwrite();
-    bfd_close(output_bfd);
-  }
-  else {
-    output_bfd->flags |= EXEC_P;
-
-    ldwrite();
-
-    if (config.make_executable == false && force_make_executable ==false) {
-
-      unlink(output_filename);
+      ldwrite();
+      bfd_close(output_bfd);
     }
-    else {    bfd_close(output_bfd); };
-    return (!config.make_executable);
-  }
+  else {
+      output_bfd->flags |= EXEC_P;
+
+      ldwrite();
+
+      if (config.make_executable == false && force_make_executable ==false) {
+
+	  unlink(output_filename);
+	}
+      else {    bfd_close(output_bfd); };
+      return (!config.make_executable);
+    }
 
   return(0);
-} /* main() */
+}				/* main() */
 
 
 void

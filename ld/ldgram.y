@@ -193,11 +193,8 @@ command_line_option:
 		}
 
 	|	OPTION_M {
-			if (write_map) {
-			    option_longmap = true;
-			}
-			write_map = true;
-
+	    config.map_filename = "-";
+	    
 			}
 	|	OPTION_n {
 			config.magic_demand_paged = false;

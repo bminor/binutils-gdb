@@ -227,7 +227,7 @@ DEFUN(print_file_stuff,(f),
 	     s != (asection *)NULL;
 	     s = s->next) {
 	    print_address(s->output_offset);
-	    if (s->flags & SEC_HAS_CONTENTS) 
+	    if (s->reloc_done)
 	    {
 	      fprintf (config.map_file, " %08x 2**%2ud %s\n",
 		      (unsigned)bfd_get_section_size_after_reloc(s),
