@@ -1,3 +1,20 @@
+2003-10-19  Marek Michalkiewicz  <marekm@amelek.gda.pl>
+
+	* Makefile.am: Remove old (before GCC 3.3) emulations for AVR
+	target: avr1200, avr23xx, avr4433, avr44x4, avr85xx, avrmega103,
+	avrmega161, avrmega603.  Default to avr2.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Likewise.
+	* emulparams/avr1200.sh: Remove.
+	* emulparams/avr23xx.sh: Remove.
+	* emulparams/avr4433.sh: Remove.
+	* emulparams/avr44x4.sh: Remove.
+	* emulparams/avr85xx.sh: Remove.
+	* emulparams/avrmega103.sh: Remove.
+	* emulparams/avrmega161.sh: Remove.
+	* emulparams/avrmega603.sh: Remove.
+	* scripttempl/elf32avr.sc: Remove.
+
 2003-10-19  Andreas Schwab  <schwab@suse.de>
 
 	* emultempl/ticoff.em (gld_${EMULATION_NAME}_list_options): Add

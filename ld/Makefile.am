@@ -128,16 +128,8 @@ ALL_EMULATIONS = \
 	earmnto.o \
 	earmnbsd.o \
 	earmpe.o \
-	eavr1200.o \
-	eavr23xx.o \
-	eavr4433.o \
-	eavr44x4.o \
-	eavr85xx.o \
-	eavrmega103.o \
-	eavrmega161.o \
-	eavrmega603.o \
-	eavr1.o \
 	eavr2.o \
+	eavr1.o \
 	eavr3.o \
 	eavr4.o \
 	eavr5.o \
@@ -527,58 +519,26 @@ earm_epoc_pe.c: $(srcdir)/emulparams/arm_epoc_pe.sh \
 earmpe.c: $(srcdir)/emulparams/armpe.sh \
   $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/pe.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} armpe "$(tdir_armpe)"
-eavr85xx.c: $(srcdir)/emulparams/avr85xx.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf32avr.sc \
-  ${GEN_DEPENDS}
-	${GENSCRIPTS} avr85xx "$(tdir_avr85xx)"
-eavr1200.c: $(srcdir)/emulparams/avr1200.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf32avr.sc \
-  ${GEN_DEPENDS}
-	${GENSCRIPTS} avr1200 "$(tdir_avr85xx)"
-eavr23xx.c: $(srcdir)/emulparams/avr23xx.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf32avr.sc \
-  ${GEN_DEPENDS}
-	${GENSCRIPTS} avr23xx "$(tdir_avr85xx)"
-eavr44x4.c: $(srcdir)/emulparams/avr44x4.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf32avr.sc \
-  ${GEN_DEPENDS}
-	${GENSCRIPTS} avr44x4 "$(tdir_avr85xx)"
-eavr4433.c: $(srcdir)/emulparams/avr4433.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf32avr.sc \
-  ${GEN_DEPENDS}
-	${GENSCRIPTS} avr4433 "$(tdir_avr85xx)"
-eavrmega603.c: $(srcdir)/emulparams/avrmega603.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf32avr.sc \
-  ${GEN_DEPENDS}
-	${GENSCRIPTS} avrmega603 "$(tdir_avr85xx)"
-eavrmega103.c: $(srcdir)/emulparams/avrmega103.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf32avr.sc \
-  ${GEN_DEPENDS}
-	${GENSCRIPTS} avrmega103 "$(tdir_avr85xx)"
-eavrmega161.c: $(srcdir)/emulparams/avrmega161.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf32avr.sc \
-  ${GEN_DEPENDS}
-	${GENSCRIPTS} avrmega161 "$(tdir_avr85xx)"
-eavr1.c: $(srcdir)/emulparams/avr1.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/avr.sc \
-  ${GEN_DEPENDS}
-	${GENSCRIPTS} avr1 "$(tdir_avr85xx)"
 eavr2.c: $(srcdir)/emulparams/avr2.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/avr.sc \
   ${GEN_DEPENDS}
-	${GENSCRIPTS} avr2 "$(tdir_avr85xx)"
+	${GENSCRIPTS} avr2 "$(tdir_avr2)"
+eavr1.c: $(srcdir)/emulparams/avr1.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/avr.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} avr1 "$(tdir_avr2)"
 eavr3.c: $(srcdir)/emulparams/avr3.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/avr.sc \
   ${GEN_DEPENDS}
-	${GENSCRIPTS} avr3 "$(tdir_avr85xx)"
+	${GENSCRIPTS} avr3 "$(tdir_avr2)"
 eavr4.c: $(srcdir)/emulparams/avr4.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/avr.sc \
   ${GEN_DEPENDS}
-	${GENSCRIPTS} avr4 "$(tdir_avr85xx)"
+	${GENSCRIPTS} avr4 "$(tdir_avr2)"
 eavr5.c: $(srcdir)/emulparams/avr5.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/avr.sc \
   ${GEN_DEPENDS}
-	${GENSCRIPTS} avr5 "$(tdir_avr85xx)"
+	${GENSCRIPTS} avr5 "$(tdir_avr2)"
 ecoff_i860.c: $(srcdir)/emulparams/coff_i860.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/i860coff.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} coff_i860 "$(tdir_coff_i860)"
