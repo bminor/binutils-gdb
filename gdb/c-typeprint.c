@@ -420,7 +420,19 @@ c_type_print_varspec_suffix (type, stream, show, passed_a_ptr, demangled_args)
       if (passed_a_ptr)
 	fprintf_filtered (stream, ")");
       if (!demangled_args)
-	fprintf_filtered (stream, "()");
+	{ int i, len = TYPE_NFIELDS (type);
+	  fprintf_filtered (stream, "(");
+	  for (i = 0; i < len; i++)
+	    {
+	      if (i > 0)
+		{
+		  fputs_filtered (", ", stream);
+		  wrap_here ("    ");
+		}
+	      c_print_type (TYPE_FIELD_TYPE (type, i), "", stream, -1, 0);
+	    }
+	  fprintf_filtered (stream, ")");
+	}
       c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
 				   passed_a_ptr, 0);
       break;

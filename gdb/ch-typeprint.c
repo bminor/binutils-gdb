@@ -165,7 +165,26 @@ chill_type_print_base (type, stream, show, level)
         chill_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
 	break;
       case TYPE_CODE_FUNC:
-	fprintf_filtered (stream, "PROC (?)");
+	fprintf_filtered (stream, "PROC (");
+	len = TYPE_NFIELDS (type);
+	for (i = 0; i < len; i++)
+	  {
+	    struct type *param_type = TYPE_FIELD_TYPE (type, i);
+	    if (i > 0)
+	      {
+		fputs_filtered (", ", stream);
+		wrap_here ("    ");
+	      }
+	    if (TYPE_CODE (param_type) == TYPE_CODE_REF)
+	      {
+		chill_type_print_base (TYPE_TARGET_TYPE (param_type),
+				       stream, show, level);
+		fputs_filtered (" LOC", stream);
+	      }
+	    else
+	      chill_type_print_base (param_type, stream, show, level);
+	  }
+	fprintf_filtered (stream, ")");
 	if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
 	  {
 	    fputs_filtered (" RETURNS (", stream);

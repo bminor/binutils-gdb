@@ -228,13 +228,6 @@ struct type
 
   struct type *reference_type;
 
-  /* Type that is a function returning this type.
-     NULL if no such function type is known here.
-     The debugger may add the address of such a type
-     if it has to construct one later.  */
-
-  struct type *function_type;
-
   /* Flags about this type.  */
 
   short flags;
@@ -249,6 +242,7 @@ struct type
      For range types, there are two "fields",
      the minimum and maximum values (both inclusive).
      For enum types, each possible value is described by one "field".
+     For a function type, a "field" for each parameter type.
      For C++ classes, there is one field for each base class (if it is
      a derived class) plus one field for each class data member.  Member
      functions are recorded elsewhere.
@@ -484,7 +478,6 @@ allocate_cplus_struct_type PARAMS ((struct type *));
 #define TYPE_TARGET_TYPE(thistype) (thistype)->target_type
 #define TYPE_POINTER_TYPE(thistype) (thistype)->pointer_type
 #define TYPE_REFERENCE_TYPE(thistype) (thistype)->reference_type
-#define TYPE_FUNCTION_TYPE(thistype) (thistype)->function_type
 #define TYPE_LENGTH(thistype) (thistype)->length
 #define TYPE_OBJFILE(thistype) (thistype)->objfile
 #define TYPE_FLAGS(thistype) (thistype)->flags

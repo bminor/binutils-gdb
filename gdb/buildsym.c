@@ -31,6 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "symfile.h"		/* Needed for "struct complaint" */
 #include "objfiles.h"
+#include "gdbtypes.h"
 #include "complaints.h"
 #include <string.h>
 
@@ -226,8 +227,49 @@ finish_block (symbol, listhead, old_blocks, start, end, objfile)
 
   if (symbol)
     {
+      struct type *ftype = SYMBOL_TYPE (symbol);
       SYMBOL_BLOCK_VALUE (symbol) = block;
       BLOCK_FUNCTION (block) = symbol;
+
+      if (TYPE_NFIELDS (ftype) <= 0)
+	{
+	  /* No parameter type information is recorded with the function's
+	     type.  Set that from the type of the parameter symbols. */
+	  int nparams = 0, iparams;
+	  struct symbol *sym;
+	  for (i = 0; i < BLOCK_NSYMS (block); i++)
+	    {
+	      sym = BLOCK_SYM (block, i);
+	      switch (SYMBOL_CLASS (sym))
+		{
+		case LOC_ARG:
+		case LOC_REF_ARG:
+		case LOC_REGPARM:
+		case LOC_REGPARM_ADDR:
+		  nparams++;
+		}
+	    }
+	  if (nparams > 0)
+	    {
+	      TYPE_NFIELDS (ftype) = nparams;
+	      TYPE_FIELDS (ftype) = (struct field *)
+		TYPE_ALLOC (ftype, nparams * sizeof (struct field));
+						
+	      for (i = iparams = 0; iparams < nparams; i++)
+		{
+		  sym = BLOCK_SYM (block, i);
+		  switch (SYMBOL_CLASS (sym))
+		    {
+		    case LOC_ARG:
+		    case LOC_REF_ARG:
+		    case LOC_REGPARM:
+		    case LOC_REGPARM_ADDR:
+		      TYPE_FIELD_TYPE (ftype, iparams) = SYMBOL_TYPE (sym);
+		      iparams++;
+		    }
+		}
+	    }
+	}
     }
   else
     {

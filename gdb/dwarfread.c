@@ -1600,7 +1600,6 @@ read_subroutine_type (dip, thisdie, enddie)
       /* We have an existing partially constructed type, so bash it
 	 into the correct type. */
       TYPE_TARGET_TYPE (ftype) = type;
-      TYPE_FUNCTION_TYPE (type) = ftype;
       TYPE_LENGTH (ftype) = 1;
       TYPE_CODE (ftype) = TYPE_CODE_FUNC;
     }

@@ -1,3 +1,19 @@
+Sun Feb 12 10:02:16 1995  Per Bothner  <bothner@cygnus.com>
+
+	* buildsym.c (finish_block):  If finishing a function without known
+	parameter type info, set that from parameter symbols.
+	* c-typeprint.c (c_type_print_varspec_suffix):  For TYPE_CODE_FUNC,
+	print parameter types, if available.
+	* ch-typeprint.c (chill_type_print_base):  Likewise.
+
+	* gdbtypes.h (struct type):  Remove function type field.
+	(TYPE_FUNCTION_TYPE):  Remove macro.  We can't as simply re-use
+	function types now that we're also storing parameter types.
+	And the payoff is much less.
+	* gdbtypes.c (make_function_type):  Don't use/set TYPE_FUNCTION_TYPE.
+	(recursive_dump_type):  Don't print TYPE_FUNCTION_TYPE.
+	* dwarfread.c (read_subroutine_type):  Don't set TYPE_FUNCTION_TYPE.
+
 Sun Feb 12 09:03:47 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* buildsym.c (start_subfile): Set language for f2c like for cfront.

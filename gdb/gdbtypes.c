@@ -226,17 +226,6 @@ make_function_type (type, typeptr)
   register struct type *ntype;		/* New type */
   struct objfile *objfile;
 
-  ntype = TYPE_FUNCTION_TYPE (type);
-
-  if (ntype) 
-    if (typeptr == 0)		
-      return ntype;	/* Don't care about alloc, and have new type.  */
-    else if (*typeptr == 0)
-      {
-	*typeptr = ntype;	/* Tracking alloc, and we have new type.  */
-	return ntype;
-      }
-
   if (typeptr == 0 || *typeptr == 0)	/* We'll need to allocate one.  */
     {
       ntype = alloc_type (TYPE_OBJFILE (type));
@@ -252,14 +241,10 @@ make_function_type (type, typeptr)
     }
 
   TYPE_TARGET_TYPE (ntype) = type;
-  TYPE_FUNCTION_TYPE (type) = ntype;
 
   TYPE_LENGTH (ntype) = 1;
   TYPE_CODE (ntype) = TYPE_CODE_FUNC;
   
-  if (!TYPE_FUNCTION_TYPE (type))	/* Remember it, if don't have one.  */
-    TYPE_FUNCTION_TYPE (type) = ntype;
-
   return ntype;
 }
 
@@ -1443,9 +1428,6 @@ recursive_dump_type (type, spaces)
   printf_filtered ("\n");
   printfi_filtered (spaces, "reference_type ");
   gdb_print_address (TYPE_REFERENCE_TYPE (type), gdb_stdout);
-  printf_filtered ("\n");
-  printfi_filtered (spaces, "function_type ");
-  gdb_print_address (TYPE_FUNCTION_TYPE (type), gdb_stdout);
   printf_filtered ("\n");
   printfi_filtered (spaces, "flags 0x%x", TYPE_FLAGS (type));
   if (TYPE_FLAGS (type) & TYPE_FLAG_UNSIGNED)
