@@ -1,4 +1,4 @@
-/* CPU family header for m32rx.
+/* CPU family header for m32rxf.
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
@@ -22,8 +22,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 */
 
-#ifndef CPU_M32RX_H
-#define CPU_M32RX_H
+#ifndef CPU_M32RXF_H
+#define CPU_M32RXF_H
 
 /* Maximum number of instructions that are fetched at a time.
    This is for LIW type instructions sets (e.g. m32r).  */
@@ -59,257 +59,251 @@ typedef struct {
 #define GET_H_ACCUMS(a1) CPU (h_accums)[a1]
 #define SET_H_ACCUMS(a1, x) (CPU (h_accums)[a1] = (x))
   /* condition bit */
-  UBI h_cond;
+  BI h_cond;
 #define GET_H_COND() CPU (h_cond)
 #define SET_H_COND(x) (CPU (h_cond) = (x))
-  /* sm */
-  UBI h_sm;
-#define GET_H_SM() CPU (h_sm)
-#define SET_H_SM(x) (CPU (h_sm) = (x))
-  /* bsm */
-  UBI h_bsm;
-#define GET_H_BSM() CPU (h_bsm)
-#define SET_H_BSM(x) (CPU (h_bsm) = (x))
-  /* ie */
-  UBI h_ie;
-#define GET_H_IE() CPU (h_ie)
-#define SET_H_IE(x) (CPU (h_ie) = (x))
-  /* bie */
-  UBI h_bie;
-#define GET_H_BIE() CPU (h_bie)
-#define SET_H_BIE(x) (CPU (h_bie) = (x))
-  /* bcond */
-  UBI h_bcond;
-#define GET_H_BCOND() CPU (h_bcond)
-#define SET_H_BCOND(x) (CPU (h_bcond) = (x))
-  /* bpc */
-  SI h_bpc;
-#define GET_H_BPC() CPU (h_bpc)
-#define SET_H_BPC(x) (CPU (h_bpc) = (x))
+  /* psw part of psw */
+  UQI h_psw;
+#define GET_H_PSW() CPU (h_psw)
+#define SET_H_PSW(x) (CPU (h_psw) = (x))
+  /* backup psw */
+  UQI h_bpsw;
+#define GET_H_BPSW() CPU (h_bpsw)
+#define SET_H_BPSW(x) (CPU (h_bpsw) = (x))
+  /* backup bpsw */
+  UQI h_bbpsw;
+#define GET_H_BBPSW() CPU (h_bbpsw)
+#define SET_H_BBPSW(x) (CPU (h_bbpsw) = (x))
   /* lock */
-  UBI h_lock;
+  BI h_lock;
 #define GET_H_LOCK() CPU (h_lock)
 #define SET_H_LOCK(x) (CPU (h_lock) = (x))
   } hardware;
 #define CPU_CGEN_HW(cpu) (& (cpu)->cpu_data.hardware)
-  /* CPU profiling state information.  */
-  struct {
-  /* general registers */
-  unsigned long h_gr;
-  } profile;
-#define CPU_CGEN_PROFILE(cpu) (& (cpu)->cpu_data.profile)
-} M32RX_CPU_DATA;
+} M32RXF_CPU_DATA;
 
 /* Cover fns for register access.  */
-USI m32rx_h_pc_get (SIM_CPU *);
-void m32rx_h_pc_set (SIM_CPU *, USI);
-SI m32rx_h_gr_get (SIM_CPU *, UINT);
-void m32rx_h_gr_set (SIM_CPU *, UINT, SI);
-USI m32rx_h_cr_get (SIM_CPU *, UINT);
-void m32rx_h_cr_set (SIM_CPU *, UINT, USI);
-DI m32rx_h_accum_get (SIM_CPU *);
-void m32rx_h_accum_set (SIM_CPU *, DI);
-DI m32rx_h_accums_get (SIM_CPU *, UINT);
-void m32rx_h_accums_set (SIM_CPU *, UINT, DI);
-UBI m32rx_h_cond_get (SIM_CPU *);
-void m32rx_h_cond_set (SIM_CPU *, UBI);
-UBI m32rx_h_sm_get (SIM_CPU *);
-void m32rx_h_sm_set (SIM_CPU *, UBI);
-UBI m32rx_h_bsm_get (SIM_CPU *);
-void m32rx_h_bsm_set (SIM_CPU *, UBI);
-UBI m32rx_h_ie_get (SIM_CPU *);
-void m32rx_h_ie_set (SIM_CPU *, UBI);
-UBI m32rx_h_bie_get (SIM_CPU *);
-void m32rx_h_bie_set (SIM_CPU *, UBI);
-UBI m32rx_h_bcond_get (SIM_CPU *);
-void m32rx_h_bcond_set (SIM_CPU *, UBI);
-SI m32rx_h_bpc_get (SIM_CPU *);
-void m32rx_h_bpc_set (SIM_CPU *, SI);
-UBI m32rx_h_lock_get (SIM_CPU *);
-void m32rx_h_lock_set (SIM_CPU *, UBI);
+USI m32rxf_h_pc_get (SIM_CPU *);
+void m32rxf_h_pc_set (SIM_CPU *, USI);
+SI m32rxf_h_gr_get (SIM_CPU *, UINT);
+void m32rxf_h_gr_set (SIM_CPU *, UINT, SI);
+USI m32rxf_h_cr_get (SIM_CPU *, UINT);
+void m32rxf_h_cr_set (SIM_CPU *, UINT, USI);
+DI m32rxf_h_accum_get (SIM_CPU *);
+void m32rxf_h_accum_set (SIM_CPU *, DI);
+DI m32rxf_h_accums_get (SIM_CPU *, UINT);
+void m32rxf_h_accums_set (SIM_CPU *, UINT, DI);
+BI m32rxf_h_cond_get (SIM_CPU *);
+void m32rxf_h_cond_set (SIM_CPU *, BI);
+UQI m32rxf_h_psw_get (SIM_CPU *);
+void m32rxf_h_psw_set (SIM_CPU *, UQI);
+UQI m32rxf_h_bpsw_get (SIM_CPU *);
+void m32rxf_h_bpsw_set (SIM_CPU *, UQI);
+UQI m32rxf_h_bbpsw_get (SIM_CPU *);
+void m32rxf_h_bbpsw_set (SIM_CPU *, UQI);
+BI m32rxf_h_lock_get (SIM_CPU *);
+void m32rxf_h_lock_set (SIM_CPU *, BI);
 
 /* These must be hand-written.  */
-extern CPUREG_FETCH_FN m32rx_fetch_register;
-extern CPUREG_STORE_FN m32rx_store_register;
+extern CPUREG_FETCH_FN m32rxf_fetch_register;
+extern CPUREG_STORE_FN m32rxf_store_register;
+
+typedef struct {
+  int empty;
+} MODEL_M32RX_DATA;
 
 /* The ARGBUF struct.  */
 struct argbuf {
   /* These are the baseclass definitions.  */
-  unsigned int length;
   PCADDR addr;
   const IDESC *idesc;
   /* cpu specific data follows */
-  insn_t insn;
+  union sem semantic;
+  int written;
   union {
     struct { /* e.g. add $dr,$sr */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
+      unsigned char in_dr;
+      unsigned char in_sr;
+      unsigned char out_dr;
     } fmt_add;
     struct { /* e.g. add3 $dr,$sr,$hash$slo16 */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
       HI f_simm16;
+      unsigned char in_sr;
+      unsigned char out_dr;
     } fmt_add3;
     struct { /* e.g. and3 $dr,$sr,$uimm16 */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
       USI f_uimm16;
+      unsigned char in_sr;
+      unsigned char out_dr;
     } fmt_and3;
     struct { /* e.g. or3 $dr,$sr,$hash$ulo16 */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
       UHI f_uimm16;
+      unsigned char in_sr;
+      unsigned char out_dr;
     } fmt_or3;
     struct { /* e.g. addi $dr,$simm8 */
-      UINT f_r1;
+      SI * f_r1;
       SI f_simm8;
+      unsigned char in_dr;
+      unsigned char out_dr;
     } fmt_addi;
     struct { /* e.g. addv $dr,$sr */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
+      unsigned char in_dr;
+      unsigned char in_sr;
+      unsigned char out_dr;
     } fmt_addv;
     struct { /* e.g. addv3 $dr,$sr,$simm16 */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
       SI f_simm16;
+      unsigned char in_sr;
+      unsigned char out_dr;
     } fmt_addv3;
     struct { /* e.g. addx $dr,$sr */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
+      unsigned char in_dr;
+      unsigned char in_sr;
+      unsigned char out_dr;
     } fmt_addx;
-    struct { /* e.g. bc.s $disp8 */
-      IADDR f_disp8;
-    } fmt_bc8;
-    struct { /* e.g. bc.l $disp24 */
-      IADDR f_disp24;
-    } fmt_bc24;
-    struct { /* e.g. beq $src1,$src2,$disp16 */
-      UINT f_r1;
-      UINT f_r2;
-      IADDR f_disp16;
-    } fmt_beq;
-    struct { /* e.g. beqz $src2,$disp16 */
-      UINT f_r2;
-      IADDR f_disp16;
-    } fmt_beqz;
-    struct { /* e.g. bl.s $disp8 */
-      IADDR f_disp8;
-    } fmt_bl8;
-    struct { /* e.g. bl.l $disp24 */
-      IADDR f_disp24;
-    } fmt_bl24;
-    struct { /* e.g. bcl.s $disp8 */
-      IADDR f_disp8;
-    } fmt_bcl8;
-    struct { /* e.g. bcl.l $disp24 */
-      IADDR f_disp24;
-    } fmt_bcl24;
-    struct { /* e.g. bra.s $disp8 */
-      IADDR f_disp8;
-    } fmt_bra8;
-    struct { /* e.g. bra.l $disp24 */
-      IADDR f_disp24;
-    } fmt_bra24;
     struct { /* e.g. cmp $src1,$src2 */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
+      unsigned char in_src1;
+      unsigned char in_src2;
     } fmt_cmp;
     struct { /* e.g. cmpi $src2,$simm16 */
-      UINT f_r2;
+      SI * f_r2;
       SI f_simm16;
+      unsigned char in_src2;
     } fmt_cmpi;
     struct { /* e.g. cmpz $src2 */
-      UINT f_r2;
+      SI * f_r2;
+      unsigned char in_src2;
     } fmt_cmpz;
     struct { /* e.g. div $dr,$sr */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
+      unsigned char in_sr;
+      unsigned char in_dr;
+      unsigned char out_dr;
     } fmt_div;
-    struct { /* e.g. jc $sr */
-      UINT f_r2;
-    } fmt_jc;
-    struct { /* e.g. jl $sr */
-      UINT f_r2;
-    } fmt_jl;
-    struct { /* e.g. jmp $sr */
-      UINT f_r2;
-    } fmt_jmp;
     struct { /* e.g. ld $dr,@$sr */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
+      unsigned char in_sr;
+      unsigned char out_dr;
     } fmt_ld;
     struct { /* e.g. ld $dr,@($slo16,$sr) */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
       HI f_simm16;
+      unsigned char in_sr;
+      unsigned char out_dr;
     } fmt_ld_d;
     struct { /* e.g. ldb $dr,@$sr */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
+      unsigned char in_sr;
+      unsigned char out_dr;
     } fmt_ldb;
     struct { /* e.g. ldb $dr,@($slo16,$sr) */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
       HI f_simm16;
+      unsigned char in_sr;
+      unsigned char out_dr;
     } fmt_ldb_d;
     struct { /* e.g. ldh $dr,@$sr */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
+      unsigned char in_sr;
+      unsigned char out_dr;
     } fmt_ldh;
     struct { /* e.g. ldh $dr,@($slo16,$sr) */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
       HI f_simm16;
+      unsigned char in_sr;
+      unsigned char out_dr;
     } fmt_ldh_d;
     struct { /* e.g. ld $dr,@$sr+ */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
+      unsigned char in_sr;
+      unsigned char out_dr;
+      unsigned char out_sr;
     } fmt_ld_plus;
     struct { /* e.g. ld24 $dr,$uimm24 */
-      UINT f_r1;
+      SI * f_r1;
       ADDR f_uimm24;
+      unsigned char out_dr;
     } fmt_ld24;
     struct { /* e.g. ldi8 $dr,$simm8 */
-      UINT f_r1;
+      SI * f_r1;
       SI f_simm8;
+      unsigned char out_dr;
     } fmt_ldi8;
     struct { /* e.g. ldi16 $dr,$hash$slo16 */
-      UINT f_r1;
+      SI * f_r1;
       HI f_simm16;
+      unsigned char out_dr;
     } fmt_ldi16;
     struct { /* e.g. lock $dr,@$sr */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
+      unsigned char in_sr;
+      unsigned char out_dr;
     } fmt_lock;
     struct { /* e.g. machi $src1,$src2,$acc */
-      UINT f_r1;
+      SI * f_r1;
       UINT f_acc;
-      UINT f_r2;
+      SI * f_r2;
+      unsigned char in_src1;
+      unsigned char in_src2;
     } fmt_machi_a;
     struct { /* e.g. mulhi $src1,$src2,$acc */
-      UINT f_r1;
+      SI * f_r1;
       UINT f_acc;
-      UINT f_r2;
+      SI * f_r2;
+      unsigned char in_src1;
+      unsigned char in_src2;
     } fmt_mulhi_a;
     struct { /* e.g. mv $dr,$sr */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
+      unsigned char in_sr;
+      unsigned char out_dr;
     } fmt_mv;
     struct { /* e.g. mvfachi $dr,$accs */
-      UINT f_r1;
+      SI * f_r1;
       UINT f_accs;
+      unsigned char out_dr;
     } fmt_mvfachi_a;
     struct { /* e.g. mvfc $dr,$scr */
-      UINT f_r1;
+      SI * f_r1;
       UINT f_r2;
+      unsigned char out_dr;
     } fmt_mvfc;
     struct { /* e.g. mvtachi $src1,$accs */
-      UINT f_r1;
+      SI * f_r1;
       UINT f_accs;
+      unsigned char in_src1;
     } fmt_mvtachi_a;
     struct { /* e.g. mvtc $sr,$dcr */
       UINT f_r1;
-      UINT f_r2;
+      SI * f_r2;
+      unsigned char in_sr;
     } fmt_mvtc;
     struct { /* e.g. nop */
       int empty;
@@ -319,115 +313,212 @@ struct argbuf {
       UINT f_accs;
       USI f_imm1;
     } fmt_rac_dsi;
-    struct { /* e.g. rte */
-      int empty;
-    } fmt_rte;
     struct { /* e.g. seth $dr,$hash$hi16 */
-      UINT f_r1;
+      SI * f_r1;
       UHI f_hi16;
+      unsigned char out_dr;
     } fmt_seth;
     struct { /* e.g. sll3 $dr,$sr,$simm16 */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
       SI f_simm16;
+      unsigned char in_sr;
+      unsigned char out_dr;
     } fmt_sll3;
     struct { /* e.g. slli $dr,$uimm5 */
-      UINT f_r1;
+      SI * f_r1;
       USI f_uimm5;
+      unsigned char in_dr;
+      unsigned char out_dr;
     } fmt_slli;
     struct { /* e.g. st $src1,@$src2 */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
+      unsigned char in_src2;
+      unsigned char in_src1;
     } fmt_st;
     struct { /* e.g. st $src1,@($slo16,$src2) */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
       HI f_simm16;
+      unsigned char in_src2;
+      unsigned char in_src1;
     } fmt_st_d;
     struct { /* e.g. stb $src1,@$src2 */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
+      unsigned char in_src2;
+      unsigned char in_src1;
     } fmt_stb;
     struct { /* e.g. stb $src1,@($slo16,$src2) */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
       HI f_simm16;
+      unsigned char in_src2;
+      unsigned char in_src1;
     } fmt_stb_d;
     struct { /* e.g. sth $src1,@$src2 */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
+      unsigned char in_src2;
+      unsigned char in_src1;
     } fmt_sth;
     struct { /* e.g. sth $src1,@($slo16,$src2) */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
       HI f_simm16;
+      unsigned char in_src2;
+      unsigned char in_src1;
     } fmt_sth_d;
     struct { /* e.g. st $src1,@+$src2 */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
+      unsigned char in_src2;
+      unsigned char in_src1;
+      unsigned char out_src2;
     } fmt_st_plus;
-    struct { /* e.g. trap $uimm4 */
-      USI f_uimm4;
-    } fmt_trap;
     struct { /* e.g. unlock $src1,@$src2 */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
+      unsigned char in_src2;
+      unsigned char in_src1;
     } fmt_unlock;
     struct { /* e.g. satb $dr,$sr */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
+      unsigned char in_sr;
+      unsigned char out_dr;
     } fmt_satb;
     struct { /* e.g. sat $dr,$sr */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
+      unsigned char in_sr;
+      unsigned char out_dr;
     } fmt_sat;
     struct { /* e.g. sadd */
       int empty;
     } fmt_sadd;
     struct { /* e.g. macwu1 $src1,$src2 */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
+      unsigned char in_src1;
+      unsigned char in_src2;
     } fmt_macwu1;
     struct { /* e.g. msblo $src1,$src2 */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
+      unsigned char in_src1;
+      unsigned char in_src2;
     } fmt_msblo;
     struct { /* e.g. mulwu1 $src1,$src2 */
-      UINT f_r1;
-      UINT f_r2;
+      SI * f_r1;
+      SI * f_r2;
+      unsigned char in_src1;
+      unsigned char in_src2;
     } fmt_mulwu1;
     struct { /* e.g. sc */
       int empty;
     } fmt_sc;
-  } fields;
-#if 1 || WITH_PROFILE_MODEL_P /*FIXME:wip*/
-  unsigned long h_gr_get;
-  unsigned long h_gr_set;
+  /* cti insns, kept separately so addr_cache is in fixed place */
+  struct {
+    union {
+    struct { /* e.g. bc.s $disp8 */
+      IADDR f_disp8;
+    } fmt_bc8;
+    struct { /* e.g. bc.l $disp24 */
+      IADDR f_disp24;
+    } fmt_bc24;
+    struct { /* e.g. beq $src1,$src2,$disp16 */
+      SI * f_r1;
+      SI * f_r2;
+      IADDR f_disp16;
+      unsigned char in_src1;
+      unsigned char in_src2;
+    } fmt_beq;
+    struct { /* e.g. beqz $src2,$disp16 */
+      SI * f_r2;
+      IADDR f_disp16;
+      unsigned char in_src2;
+    } fmt_beqz;
+    struct { /* e.g. bl.s $disp8 */
+      IADDR f_disp8;
+      unsigned char out_h_gr_14;
+    } fmt_bl8;
+    struct { /* e.g. bl.l $disp24 */
+      IADDR f_disp24;
+      unsigned char out_h_gr_14;
+    } fmt_bl24;
+    struct { /* e.g. bcl.s $disp8 */
+      IADDR f_disp8;
+      unsigned char out_h_gr_14;
+    } fmt_bcl8;
+    struct { /* e.g. bcl.l $disp24 */
+      IADDR f_disp24;
+      unsigned char out_h_gr_14;
+    } fmt_bcl24;
+    struct { /* e.g. bra.s $disp8 */
+      IADDR f_disp8;
+    } fmt_bra8;
+    struct { /* e.g. bra.l $disp24 */
+      IADDR f_disp24;
+    } fmt_bra24;
+    struct { /* e.g. jc $sr */
+      SI * f_r2;
+      unsigned char in_sr;
+    } fmt_jc;
+    struct { /* e.g. jl $sr */
+      SI * f_r2;
+      unsigned char in_sr;
+      unsigned char out_h_gr_14;
+    } fmt_jl;
+    struct { /* e.g. jmp $sr */
+      SI * f_r2;
+      unsigned char in_sr;
+    } fmt_jmp;
+    struct { /* e.g. rte */
+      int empty;
+    } fmt_rte;
+    struct { /* e.g. trap $uimm4 */
+      USI f_uimm4;
+    } fmt_trap;
+    } fields;
+#if WITH_SCACHE_PBB_M32RXF
+    SEM_PC addr_cache;
 #endif
+  } cti;
+#if WITH_SCACHE_PBB_M32RXF
+    /* Writeback handler.  */
+    struct {
+      /* Pointer to argbuf entry for insn whose results need writing back.  */
+      const struct argbuf *abuf;
+    } write;
+    /* x-before handler */
+    struct {
+      /*const SCACHE *insns[MAX_PARALLEL_INSNS];*/
+      int first_p;
+    } before;
+    /* x-after handler */
+    struct {
+      int empty;
+    } after;
+    /* This entry is used to terminate each pbb.  */
+    struct {
+      /* Number of insns in pbb.  */
+      int insn_count;
+      /* Next pbb to execute.  */
+      SCACHE *next;
+    } chain;
+#endif
+  } fields;
 };
 
 /* A cached insn.
-   This is currently also used in the non-scache case.  In this situation we
-   assume the cache size is 1, and do a few things a little differently.  */
-/* FIXME: non-scache version to be redone.  */
+
+   ??? SCACHE used to contain more than just argbuf.  We could delete the
+   type entirely and always just use ARGBUF, but for future concerns and as
+   a level of abstraction it is left in.  */
 
 struct scache {
-  IADDR next;
-  union {
-#if ! WITH_SEM_SWITCH_FULL
-    SEMANTIC_FN *sem_full;
-#endif
-#if ! WITH_SEM_SWITCH_FAST
-    SEMANTIC_FN *sem_fast;
-#endif
-#if WITH_SEM_SWITCH_FULL || WITH_SEM_SWITCH_FAST
-#ifdef __GNUC__
-    void *sem_case;
-#else
-    int sem_case;
-#endif
-#endif
-  } semantic;
   struct argbuf argbuf;
 };
 
@@ -1374,273 +1465,236 @@ struct scache {
   f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
   f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
 
-/* Fetched input values of an instruction.  */
+/* Queued output values of an instruction.  */
 
 struct parexec {
   union {
     struct { /* e.g. add $dr,$sr */
       SI dr;
-      SI sr;
     } fmt_add;
     struct { /* e.g. add3 $dr,$sr,$hash$slo16 */
-      SI sr;
-      HI slo16;
+      SI dr;
     } fmt_add3;
     struct { /* e.g. and3 $dr,$sr,$uimm16 */
-      SI sr;
-      USI uimm16;
+      SI dr;
     } fmt_and3;
     struct { /* e.g. or3 $dr,$sr,$hash$ulo16 */
-      SI sr;
-      UHI ulo16;
+      SI dr;
     } fmt_or3;
     struct { /* e.g. addi $dr,$simm8 */
       SI dr;
-      SI simm8;
     } fmt_addi;
     struct { /* e.g. addv $dr,$sr */
       SI dr;
-      SI sr;
+      BI condbit;
     } fmt_addv;
     struct { /* e.g. addv3 $dr,$sr,$simm16 */
-      SI sr;
-      SI simm16;
+      SI dr;
+      BI condbit;
     } fmt_addv3;
     struct { /* e.g. addx $dr,$sr */
       SI dr;
-      SI sr;
-      UBI condbit;
+      BI condbit;
     } fmt_addx;
     struct { /* e.g. bc.s $disp8 */
-      UBI condbit;
-      USI disp8;
+      USI pc;
     } fmt_bc8;
     struct { /* e.g. bc.l $disp24 */
-      UBI condbit;
-      USI disp24;
+      USI pc;
     } fmt_bc24;
     struct { /* e.g. beq $src1,$src2,$disp16 */
-      SI src1;
-      SI src2;
-      USI disp16;
+      USI pc;
     } fmt_beq;
     struct { /* e.g. beqz $src2,$disp16 */
-      SI src2;
-      USI disp16;
+      USI pc;
     } fmt_beqz;
     struct { /* e.g. bl.s $disp8 */
+      SI h_gr_14;
       USI pc;
-      USI disp8;
     } fmt_bl8;
     struct { /* e.g. bl.l $disp24 */
+      SI h_gr_14;
       USI pc;
-      USI disp24;
     } fmt_bl24;
     struct { /* e.g. bcl.s $disp8 */
-      UBI condbit;
+      SI h_gr_14;
       USI pc;
-      USI disp8;
     } fmt_bcl8;
     struct { /* e.g. bcl.l $disp24 */
-      UBI condbit;
+      SI h_gr_14;
       USI pc;
-      USI disp24;
     } fmt_bcl24;
     struct { /* e.g. bra.s $disp8 */
-      USI disp8;
+      USI pc;
     } fmt_bra8;
     struct { /* e.g. bra.l $disp24 */
-      USI disp24;
+      USI pc;
     } fmt_bra24;
     struct { /* e.g. cmp $src1,$src2 */
-      SI src1;
-      SI src2;
+      BI condbit;
     } fmt_cmp;
     struct { /* e.g. cmpi $src2,$simm16 */
-      SI src2;
-      SI simm16;
+      BI condbit;
     } fmt_cmpi;
     struct { /* e.g. cmpz $src2 */
-      SI src2;
+      BI condbit;
     } fmt_cmpz;
     struct { /* e.g. div $dr,$sr */
       SI dr;
-      SI sr;
     } fmt_div;
     struct { /* e.g. jc $sr */
-      UBI condbit;
-      SI sr;
+      USI pc;
     } fmt_jc;
     struct { /* e.g. jl $sr */
+      SI h_gr_14;
       USI pc;
-      SI sr;
     } fmt_jl;
     struct { /* e.g. jmp $sr */
-      SI sr;
+      USI pc;
     } fmt_jmp;
     struct { /* e.g. ld $dr,@$sr */
-      SI h_memory_sr;
-      USI sr;
+      SI dr;
     } fmt_ld;
     struct { /* e.g. ld $dr,@($slo16,$sr) */
-      SI h_memory_add__VM_sr_slo16;
-      SI sr;
-      HI slo16;
+      SI dr;
     } fmt_ld_d;
     struct { /* e.g. ldb $dr,@$sr */
-      QI h_memory_sr;
-      USI sr;
+      SI dr;
     } fmt_ldb;
     struct { /* e.g. ldb $dr,@($slo16,$sr) */
-      QI h_memory_add__VM_sr_slo16;
-      SI sr;
-      HI slo16;
+      SI dr;
     } fmt_ldb_d;
     struct { /* e.g. ldh $dr,@$sr */
-      HI h_memory_sr;
-      USI sr;
+      SI dr;
     } fmt_ldh;
     struct { /* e.g. ldh $dr,@($slo16,$sr) */
-      HI h_memory_add__VM_sr_slo16;
-      SI sr;
-      HI slo16;
+      SI dr;
     } fmt_ldh_d;
     struct { /* e.g. ld $dr,@$sr+ */
-      SI h_memory_sr;
+      SI dr;
       SI sr;
     } fmt_ld_plus;
     struct { /* e.g. ld24 $dr,$uimm24 */
-      USI uimm24;
+      SI dr;
     } fmt_ld24;
     struct { /* e.g. ldi8 $dr,$simm8 */
-      SI simm8;
+      SI dr;
     } fmt_ldi8;
     struct { /* e.g. ldi16 $dr,$hash$slo16 */
-      HI slo16;
+      SI dr;
     } fmt_ldi16;
     struct { /* e.g. lock $dr,@$sr */
-      SI h_memory_sr;
-      USI sr;
+      BI h_lock_0;
+      SI dr;
     } fmt_lock;
     struct { /* e.g. machi $src1,$src2,$acc */
       DI acc;
-      SI src1;
-      SI src2;
     } fmt_machi_a;
     struct { /* e.g. mulhi $src1,$src2,$acc */
-      SI src1;
-      SI src2;
+      DI acc;
     } fmt_mulhi_a;
     struct { /* e.g. mv $dr,$sr */
-      SI sr;
+      SI dr;
     } fmt_mv;
     struct { /* e.g. mvfachi $dr,$accs */
-      DI accs;
+      SI dr;
     } fmt_mvfachi_a;
     struct { /* e.g. mvfc $dr,$scr */
-      USI scr;
+      SI dr;
     } fmt_mvfc;
     struct { /* e.g. mvtachi $src1,$accs */
       DI accs;
-      SI src1;
     } fmt_mvtachi_a;
     struct { /* e.g. mvtc $sr,$dcr */
-      SI sr;
+      USI dcr;
     } fmt_mvtc;
     struct { /* e.g. nop */
       int empty;
     } fmt_nop;
     struct { /* e.g. rac $accd,$accs,$imm1 */
-      DI accs;
-      USI imm1;
+      DI accd;
     } fmt_rac_dsi;
     struct { /* e.g. rte */
-      UBI h_bsm_0;
-      UBI h_bie_0;
-      UBI h_bcond_0;
-      SI h_bpc_0;
+      USI pc;
+      USI h_cr_6;
+      UQI h_psw_0;
+      UQI h_bpsw_0;
     } fmt_rte;
     struct { /* e.g. seth $dr,$hash$hi16 */
-      SI hi16;
+      SI dr;
     } fmt_seth;
     struct { /* e.g. sll3 $dr,$sr,$simm16 */
-      SI sr;
-      SI simm16;
+      SI dr;
     } fmt_sll3;
     struct { /* e.g. slli $dr,$uimm5 */
       SI dr;
-      USI uimm5;
     } fmt_slli;
     struct { /* e.g. st $src1,@$src2 */
-      USI src2;
-      SI src1;
+      SI h_memory_src2;
+      USI h_memory_src2_idx;
     } fmt_st;
     struct { /* e.g. st $src1,@($slo16,$src2) */
-      SI src2;
-      HI slo16;
-      SI src1;
+      SI h_memory_add__VM_src2_slo16;
+      USI h_memory_add__VM_src2_slo16_idx;
     } fmt_st_d;
     struct { /* e.g. stb $src1,@$src2 */
-      USI src2;
-      QI src1;
+      QI h_memory_src2;
+      USI h_memory_src2_idx;
     } fmt_stb;
     struct { /* e.g. stb $src1,@($slo16,$src2) */
-      SI src2;
-      HI slo16;
-      QI src1;
+      QI h_memory_add__VM_src2_slo16;
+      USI h_memory_add__VM_src2_slo16_idx;
     } fmt_stb_d;
     struct { /* e.g. sth $src1,@$src2 */
-      USI src2;
-      HI src1;
+      HI h_memory_src2;
+      USI h_memory_src2_idx;
     } fmt_sth;
     struct { /* e.g. sth $src1,@($slo16,$src2) */
-      SI src2;
-      HI slo16;
-      HI src1;
+      HI h_memory_add__VM_src2_slo16;
+      USI h_memory_add__VM_src2_slo16_idx;
     } fmt_sth_d;
     struct { /* e.g. st $src1,@+$src2 */
+      SI h_memory_new_src2;
+      USI h_memory_new_src2_idx;
       SI src2;
-      SI src1;
     } fmt_st_plus;
     struct { /* e.g. trap $uimm4 */
-      USI h_cr_0;
+      USI h_cr_14;
+      USI h_cr_6;
+      UQI h_bbpsw_0;
+      UQI h_bpsw_0;
+      UQI h_psw_0;
       SI pc;
-      SI uimm4;
     } fmt_trap;
     struct { /* e.g. unlock $src1,@$src2 */
-      UBI h_lock_0;
-      USI src2;
-      SI src1;
+      SI h_memory_src2;
+      USI h_memory_src2_idx;
+      BI h_lock_0;
     } fmt_unlock;
     struct { /* e.g. satb $dr,$sr */
-      SI sr;
+      SI dr;
     } fmt_satb;
     struct { /* e.g. sat $dr,$sr */
-      UBI condbit;
-      SI sr;
+      SI dr;
     } fmt_sat;
     struct { /* e.g. sadd */
-      DI h_accums_1;
       DI h_accums_0;
     } fmt_sadd;
     struct { /* e.g. macwu1 $src1,$src2 */
       DI h_accums_1;
-      SI src1;
-      SI src2;
     } fmt_macwu1;
     struct { /* e.g. msblo $src1,$src2 */
       DI accum;
-      SI src1;
-      SI src2;
     } fmt_msblo;
     struct { /* e.g. mulwu1 $src1,$src2 */
-      SI src1;
-      SI src2;
+      DI h_accums_1;
     } fmt_mulwu1;
     struct { /* e.g. sc */
-      UBI condbit;
+      int empty;
     } fmt_sc;
   } operands;
+  /* For conditionally written operands, bitmask of which ones were.  */
+  int written;
 };
 
-#endif /* CPU_M32RX_H */
+#endif /* CPU_M32RXF_H */

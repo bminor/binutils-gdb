@@ -1,3 +1,13 @@
+Wed Nov  4 23:55:37 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* sim-main.h: Delete inclusion of config.h, include sim-basics.h
+	before cgen-types.h.
+	* tconfig.in: Guard against multiple inclusion.
+	* cpu.h: Delete decls moved to genmloop.sh.
+start-sanitize-m32rx
+	* cpux.h: Ditto.
+end-sanitize-m32rx
+
 Mon Oct 19 14:13:05 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* sim-main.h: #include cpu-opc.h.
