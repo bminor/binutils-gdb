@@ -676,7 +676,7 @@ when gdb is started.", &cmdlist);
 		   "Set ",
 		   &setlist),
     add_show_from_set (c, &showlist);
-  c->function.sfunc = set_verbose;
+  set_cmd_sfunc (c, set_verbose);
   set_verbose (NULL, 0, c);
 
   add_prefix_cmd ("history", class_support, set_history,

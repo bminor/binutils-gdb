@@ -248,7 +248,7 @@ notice_args_set (char *args, int from_tty, struct cmd_list_element *c)
 
 /* Notice when `show args' is run.  */
 static void
-notice_args_read (struct cmd_list_element *c)
+notice_args_read (char *args, int from_tty, struct cmd_list_element *c)
 {
   /* Might compute the value.  */
   get_inferior_args ();
@@ -1877,9 +1877,9 @@ _initialize_infcmd (void)
 Follow this command with any number of args, to be passed to the program.",
 		   &setlist);
   c->completer = filename_completer;
-  c->function.sfunc = notice_args_set;
+  set_cmd_sfunc (c, notice_args_set);
   c = add_show_from_set (c, &showlist);
-  c->pre_show_hook = notice_args_read;
+  set_cmd_sfunc (c, notice_args_read);
 
   c = add_cmd
     ("environment", no_class, environment_info,

@@ -1555,8 +1555,8 @@ _initialize_language (void)
 		     "Set the current source language.",
 		     &setlist);
   show = add_show_from_set (set, &showlist);
-  set->function.cfunc = set_language_command;
-  show->function.cfunc = show_language_command;
+  set_cmd_cfunc (set, set_language_command);
+  set_cmd_cfunc (show, show_language_command);
 
   add_prefix_cmd ("check", no_class, set_check,
 		  "Set the status of the type/range checker",
@@ -1575,16 +1575,16 @@ _initialize_language (void)
 		     "Set type checking.  (on/warn/off/auto)",
 		     &setchecklist);
   show = add_show_from_set (set, &showchecklist);
-  set->function.cfunc = set_type_command;
-  show->function.cfunc = show_type_command;
+  set_cmd_cfunc (set, set_type_command);
+  set_cmd_cfunc (show, show_type_command);
 
   set = add_set_cmd ("range", class_support, var_string_noescape,
 		     (char *) &range,
 		     "Set range checking.  (on/warn/off/auto)",
 		     &setchecklist);
   show = add_show_from_set (set, &showchecklist);
-  set->function.cfunc = set_range_command;
-  show->function.cfunc = show_range_command;
+  set_cmd_cfunc (set, set_range_command);
+  set_cmd_cfunc (show, show_range_command);
 
   set = add_set_cmd ("case-sensitive", class_support, var_string_noescape,
                      (char *) &case_sensitive,
@@ -1592,8 +1592,8 @@ _initialize_language (void)
 For Fortran the default is off; for other languages the default is on.",
                      &setlist);
   show = add_show_from_set (set, &showlist);
-  set->function.cfunc = set_case_command;
-  show->function.cfunc = show_case_command;
+  set_cmd_cfunc (set, set_case_command);
+  set_cmd_cfunc (show, show_case_command);
 
   add_language (&unknown_language_defn);
   add_language (&local_language_defn);

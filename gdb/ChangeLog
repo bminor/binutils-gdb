@@ -1,3 +1,50 @@
+2002-02-04  Andrew Cagney  <ac131313@redhat.com>
+
+	* cli/cli-decode.c (do_cfunc, set_cmd_cfunc): New functions.
+	(do_sfunc, set_cmd_sfunc): New functions.
+
+	* command.h (struct cmd_list_element): Add field func.
+	* cli/cli-decode.h (struct cmd_list_element): Ditto.
+	* command.h (set_cmd_sfunc, set_cmd_cfunc): Declare.
+	* cli/cli-decode.h: Ditto.
+
+	* cli/cli-decode.c (help_cmd): Test for func not cfunc/sfunc.
+	(help_all, help_cmd_list): Ditto.
+	(find_cmd, complete_on_cmdlist): Ditto.
+	* top.c (execute_command): Ditto.
+
+	* cli/cli-setshow.c (do_setshow_command): Call func instead of
+	function.sfunc.
+
+	* infcmd.c (notice_args_read): Fix function signature.
+
+	* cli/cli-cmds.c (init_cli_cmds): Use set_cmd_sfunc.
+	* cli/cli-decode.c (add_set_cmd): Ditto.
+	* utils.c (initialize_utils): Ditto.
+	* maint.c (_initialize_maint_cmds): Ditto.
+	* infrun.c (_initialize_infrun): Ditto.
+	* demangle.c (_initialize_demangler): Ditto.
+	* remote.c (add_packet_config_cmd): Ditto.
+	* mips-tdep.c (_initialize_mips_tdep): Ditto.
+	* cris-tdep.c (_initialize_cris_tdep): Ditto.
+	* proc-api.c (_initialize_proc_api): Ditto.
+	* kod.c (_initialize_kod): Ditto.
+	* valprint.c (_initialize_valprint): Ditto.
+	* top.c (init_main): Ditto.
+	* infcmd.c (_initialize_infcmd): Ditto.
+	* corefile.c (_initialize_core): Ditto.
+	* arm-tdep.c (_initialize_arm_tdep): Ditto.
+	* arch-utils.c (initialize_current_architecture): Ditto.
+	(_initialize_gdbarch_utils): Ditto.
+	* alpha-tdep.c (_initialize_alpha_tdep): Ditto.
+
+	* cli/cli-decode.c (add_cmd): Use set_cmd_cfunc.
+	* wince.c (_initialize_inftarg): Ditto.
+	* symfile.c (_initialize_symfile): Ditto.
+	* mips-tdep.c (_initialize_mips_tdep): Ditto.
+	* language.c (_initialize_language): Ditto.
+	* arc-tdep.c (_initialize_arc_tdep): Ditto.
+
 2002-02-04  Michael Snyder  <msnyder@redhat.com>
 
 	* memattr.c (_initialize_mem): Elaborate the help for 'mem' command.

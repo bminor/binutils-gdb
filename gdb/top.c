@@ -672,7 +672,16 @@ execute_command (char *p, int from_tty)
       /* Pass null arg rather than an empty one.  */
       arg = *p ? p : 0;
 
-      /* Clear off trailing whitespace, except for set and complete command.  */
+      /* FIXME: cagney/2002-02-02: The c->type test is pretty dodgy
+         while the is_complete_command(cfunc) test is just plain
+         bogus.  They should both be replaced by a test of the form
+         c->strip_trailing_white_space_p.  */
+      /* NOTE: cagney/2002-02-02: The function.cfunc in the below
+         can't be replaced with func.  This is because it is the
+         cfunc, and not the func, that has the value that the
+         is_complete_command hack is testing for.  */
+      /* Clear off trailing whitespace, except for set and complete
+         command.  */
       if (arg
 	  && c->type != set_cmd
 	  && !is_complete_command (c->function.cfunc))
@@ -698,12 +707,12 @@ execute_command (char *p, int from_tty)
 	execute_user_command (c, arg);
       else if (c->type == set_cmd || c->type == show_cmd)
 	do_setshow_command (arg, from_tty & caution, c);
-      else if (c->function.cfunc == NULL)
+      else if (c->func == NULL)
 	error ("That is not a command, just a help topic.");
       else if (call_command_hook)
 	call_command_hook (c, arg, from_tty & caution);
       else
-	(*c->function.cfunc) (arg, from_tty & caution);
+	(*c->func) (c, arg, from_tty & caution);
        
       /* If this command has been post-hooked, run the hook last. */
       if ((c->hook_post) && (!c->hook_in))
@@ -1943,7 +1952,7 @@ init_main (void)
 		       (char *) &new_async_prompt, "Set gdb's prompt",
 		       &setlist);
       add_show_from_set (c, &showlist);
-      c->function.sfunc = set_async_prompt;
+      set_cmd_sfunc (c, set_async_prompt);
     }
 
   add_show_from_set
@@ -1979,7 +1988,7 @@ Without an argument, command line editing is enabled.  To edit, use\n\
 EMACS-like or VI-like commands like control-P or ESC.", &setlist);
 
       add_show_from_set (c, &showlist);
-      c->function.sfunc = set_async_editing_command;
+      set_cmd_sfunc (c, set_async_editing_command);
     }
 
   add_show_from_set
@@ -1993,7 +2002,7 @@ Without an argument, saving is enabled.", &sethistlist),
 		   "Set the size of the command history, \n\
 ie. the number of previous commands to keep a record of.", &sethistlist);
   add_show_from_set (c, &showhistlist);
-  c->function.sfunc = set_history_size_command;
+  set_cmd_sfunc (c, set_history_size_command);
 
   c = add_set_cmd ("filename", no_class, var_filename,
 		   (char *) &history_filename,
@@ -2030,7 +2039,7 @@ ie. the number of previous commands to keep a record of.", &sethistlist);
 2 == output annotated suitably for use by programs that control GDB.",
 		       &setlist);
       add_show_from_set (c, &showlist);
-      c->function.sfunc = set_async_annotation_level;
+      set_cmd_sfunc (c, set_async_annotation_level);
     }
   if (event_loop_p)
     {

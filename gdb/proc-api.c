@@ -777,7 +777,7 @@ _initialize_proc_api (void)
 		   "Set tracing for /proc api calls.\n", &setlist);
 
   add_show_from_set (c, &showlist);
-  c->function.sfunc = set_procfs_trace_cmd;
+  set_cmd_sfunc (c, set_procfs_trace_cmd);
   c->completer = filename_completer;
 
   c = add_set_cmd ("procfs-file", no_class, var_filename,
@@ -785,5 +785,5 @@ _initialize_proc_api (void)
 		   "Set filename for /proc tracefile.\n", &setlist);
 
   add_show_from_set (c, &showlist);
-  c->function.sfunc = set_procfs_file_cmd;
+  set_cmd_sfunc (c, set_procfs_file_cmd);
 }

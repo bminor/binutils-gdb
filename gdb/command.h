@@ -127,7 +127,13 @@ struct cmd_list_element
     enum command_class class;
 
     /* Function definition of this command.  NULL for command class
-       names and for help topics that are not really commands.  */
+       names and for help topics that are not really commands.  NOTE:
+       cagney/2002-02-02: This function signature is evolving.  For
+       the moment suggest sticking with either set_cmd_cfunc() or
+       set_cmd_sfunc().  */
+    void (*func) (struct cmd_list_element *c, char *args, int from_tty);
+    /* The command's real callback.  At present func() bounces through
+       to one of the below.  */
     union
       {
 	/* If type is not_set_cmd, call it like this:  */
@@ -276,6 +282,16 @@ extern struct cmd_list_element *add_abbrev_prefix_cmd (char *,
 						       **, char *, int,
 						       struct cmd_list_element
 						       **);
+
+/* Set the commands corresponding callback.  */
+
+extern void set_cmd_cfunc (struct cmd_list_element *cmd,
+			   void (*cfunc) (char *args, int from_tty));
+
+extern void set_cmd_sfunc (struct cmd_list_element *cmd,
+			   void (*sfunc) (char *args, int from_tty,
+					  struct cmd_list_element * c));
+
 
 extern struct cmd_list_element *lookup_cmd (char **,
 					    struct cmd_list_element *, char *,

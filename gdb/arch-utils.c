@@ -793,7 +793,7 @@ initialize_current_architecture (void)
 			  arches, &set_architecture_string,
 			  "Set architecture of target.",
 			  &setlist);
-    c->function.sfunc = set_architecture;
+    set_cmd_sfunc (c, set_architecture);
     add_alias_cmd ("processor", "architecture", class_support, 1, &setlist);
     /* Don't use set_from_show - need to print both auto/manual and
        current setting. */
@@ -828,7 +828,7 @@ _initialize_gdbarch_utils (void)
 			endian_enum, &set_endian_string,
 			"Set endianness of target.",
 			&setlist);
-  c->function.sfunc = set_endian;
+  set_cmd_sfunc (c, set_endian);
   /* Don't use set_from_show - need to print both auto/manual and
      current setting. */
   add_cmd ("endian", class_support, show_endian,

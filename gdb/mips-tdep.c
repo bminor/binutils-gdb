@@ -4786,9 +4786,9 @@ This option can be set to one of:\n\
 Set this to be able to access processor-type-specific registers.\n\
 ",
 		   &setlist);
-  c->function.cfunc = mips_set_processor_type_command;
+  set_cmd_cfunc (c, mips_set_processor_type_command);
   c = add_show_from_set (c, &showlist);
-  c->function.cfunc = mips_show_processor_type_command;
+  set_cmd_cfunc (c, mips_show_processor_type_command);
 
   tmp_mips_processor_type = xstrdup (DEFAULT_MIPS_TYPE);
   mips_set_processor_type_command (xstrdup (DEFAULT_MIPS_TYPE), 0);
@@ -4807,7 +4807,7 @@ search.  The only need to set it is when debugging a stripped executable.",
 		   &setlist);
   /* We need to throw away the frame cache when we set this, since it
      might change our ability to get backtraces.  */
-  c->function.sfunc = reinit_frame_cache_sfunc;
+  set_cmd_sfunc (c, reinit_frame_cache_sfunc);
   add_show_from_set (c, &showlist);
 
   /* Allow the user to control whether the upper bits of 64-bit

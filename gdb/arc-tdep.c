@@ -692,9 +692,9 @@ change the cpu being debugged.  It also gives one access to\n\
 cpu-type-specific registers and recognize cpu-type-specific instructions.\
 ",
 		   &setlist);
-  c->function.cfunc = arc_set_cpu_type_command;
+  set_cmd_cfunc (c, arc_set_cpu_type_command);
   c = add_show_from_set (c, &showlist);
-  c->function.cfunc = arc_show_cpu_type_command;
+  set_cmd_cfunc (c, arc_show_cpu_type_command);
 
   /* We have to use xstrdup() here because the `set' command frees it
      before setting a new value.  */

@@ -3875,19 +3875,19 @@ _initialize_cris_tdep (void)
   c = add_set_cmd ("cris-version", class_support, var_integer, 
                    (char *) &usr_cmd_cris_version, 
                    "Set the current CRIS version.", &setlist);
-  c->function.sfunc = cris_version_update;
+  set_cmd_sfunc (c, cris_version_update);
   add_show_from_set (c, &showlist);
   
   c = add_set_enum_cmd ("cris-mode", class_support, cris_mode_enums, 
                         &usr_cmd_cris_mode, 
                         "Set the current CRIS mode.", &setlist);
-  c->function.sfunc = cris_mode_update;
+  set_cmd_sfunc (c, cris_mode_update);
   add_show_from_set (c, &showlist);
 
   c = add_set_enum_cmd ("cris-abi", class_support, cris_abi_enums, 
                         &usr_cmd_cris_abi, 
                         "Set the current CRIS ABI version.", &setlist);
-  c->function.sfunc = cris_abi_update;
+  set_cmd_sfunc (c, cris_abi_update);
   add_show_from_set (c, &showlist);
 
   c = add_cmd ("cris-fpless-backtrace", class_support, cris_fpless_backtrace, 

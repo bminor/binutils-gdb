@@ -790,7 +790,7 @@ passes without a response from the target, an error occurs.", &setlist),
 			"Set internal profiling.\n\
 When enabled GDB is profiled.",
 			&maintenance_set_cmdlist);
-  tmpcmd->function.sfunc = maintenance_set_profile_cmd;
+  set_cmd_sfunc (tmpcmd, maintenance_set_profile_cmd);
   add_show_from_set (tmpcmd, &maintenance_show_cmdlist);
 #endif
 }

@@ -1686,6 +1686,6 @@ search.  The only need to set it is when debugging a stripped executable.",
 		   &setlist);
   /* We need to throw away the frame cache when we set this, since it
      might change our ability to get backtraces.  */
-  c->function.sfunc = reinit_frame_cache_sfunc;
+  set_cmd_sfunc (c, reinit_frame_cache_sfunc);
   add_show_from_set (c, &showlist);
 }

@@ -345,7 +345,7 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
     }
   else
     error ("gdb internal error: bad cmd_type in do_setshow_command");
-  (*c->function.sfunc) (NULL, from_tty, c);
+  c->func (c, NULL, from_tty);
   if (c->type == set_cmd && set_hook)
     set_hook (c);
 }

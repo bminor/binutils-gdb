@@ -2339,7 +2339,7 @@ The valid values are:\n");
 			      &disassembly_flavor,
 			      helptext,
 			      &setlist);
-  new_cmd->function.sfunc = set_disassembly_flavor_sfunc;
+  set_cmd_sfunc (new_cmd, set_disassembly_flavor_sfunc);
   add_show_from_set (new_cmd, &showlist);
 
   /* ??? Maybe this should be a boolean.  */

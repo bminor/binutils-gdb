@@ -4350,7 +4350,6 @@ A fork or vfork creates a new process.  follow-fork-mode can be:\n\
 For \"parent\" or \"child\", the unfollowed process will run free.\n\
 By default, the debugger will follow the parent process.",
 			&setlist);
-/*  c->function.sfunc = ; */
   add_show_from_set (c, &showlist);
 
   c = add_set_enum_cmd ("scheduler-locking", class_run,
@@ -4364,7 +4363,7 @@ step == scheduler locked during every single-step operation.\n\
 	Other threads may run while stepping over a function call ('next').",
 			&setlist);
 
-  c->function.sfunc = set_schedlock_func;	/* traps on target vector */
+  set_cmd_sfunc (c, set_schedlock_func);	/* traps on target vector */
   add_show_from_set (c, &showlist);
 
   c = add_set_cmd ("step-mode", class_run,

@@ -40,6 +40,46 @@ static struct cmd_list_element *find_cmd (char *command,
 
 static void help_all (struct ui_file *stream);
 
+/* Set the callback function for the specified command.  For each both
+   the commands callback and func() are set.  The latter set to a
+   bounce function (unless cfunc / sfunc is NULL that is).  */
+
+static void
+do_cfunc (struct cmd_list_element *c, char *args, int from_tty)
+{
+  c->function.cfunc (args, from_tty); /* Ok.  */
+}
+
+void
+set_cmd_cfunc (struct cmd_list_element *cmd,
+	       void (*cfunc) (char *args, int from_tty))
+{
+  if (cfunc == NULL)
+    cmd->func = NULL;
+  else
+    cmd->func = do_cfunc;
+  cmd->function.cfunc = cfunc; /* Ok.  */
+}
+
+static void
+do_sfunc (struct cmd_list_element *c, char *args, int from_tty)
+{
+  c->function.sfunc (args, from_tty, c); /* Ok.  */
+}
+
+void
+set_cmd_sfunc (struct cmd_list_element *cmd,
+	       void (*sfunc) (char *args, int from_tty,
+			      struct cmd_list_element * c))
+{
+  if (sfunc == NULL)
+    cmd->func = NULL;
+  else
+    cmd->func = do_sfunc;
+  cmd->function.sfunc = sfunc; /* Ok.  */
+}
+
+
 /* Add element named NAME.
    CLASS is the top level category into which commands are broken down
    for "help" purposes.
@@ -85,7 +125,7 @@ add_cmd (char *name, enum command_class class, void (*fun) (char *, int),
 
   c->name = name;
   c->class = class;
-  c->function.cfunc = fun;
+  set_cmd_cfunc (c, fun);
   c->doc = doc;
   c->flags = 0;
   c->replacement = NULL;
@@ -165,7 +205,10 @@ add_alias_cmd (char *name, char *oldname, enum command_class class,
       return 0;
     }
 
-  c = add_cmd (name, class, old->function.cfunc, old->doc, list);
+  c = add_cmd (name, class, NULL, old->doc, list);
+  /* NOTE: Both FUNC and all the FUNCTIONs need to be copied.  */
+  c->func = old->func;
+  c->function = old->function;
   c->prefixlist = old->prefixlist;
   c->prefixname = old->prefixname;
   c->allow_unknown = old->allow_unknown;
@@ -244,7 +287,7 @@ add_set_cmd (char *name,
   c->var = var;
   /* This needs to be something besides NULL so that this isn't
      treated as a help class.  */
-  c->function.sfunc = empty_sfunc;
+  set_cmd_sfunc (c, empty_sfunc);
   return c;
 }
 
@@ -516,18 +559,18 @@ help_cmd (char *command, struct ui_file *stream)
      If c->prefixlist is nonzero, we have a prefix command.
      Print its documentation, then list its subcommands.
 
-     If c->function is nonzero, we really have a command.
-     Print its documentation and return.
+     If c->func is non NULL, we really have a command.  Print its
+     documentation and return.
 
-     If c->function is zero, we have a class name.
-     Print its documentation (as if it were a command)
-     and then set class to the number of this class
-     so that the commands in the class will be listed.  */
+     If c->func is NULL, we have a class name.  Print its
+     documentation (as if it were a command) and then set class to the
+     number of this class so that the commands in the class will be
+     listed.  */
 
   fputs_filtered (c->doc, stream);
   fputs_filtered ("\n", stream);
 
-  if (c->prefixlist == 0 && c->function.cfunc != NULL)
+  if (c->prefixlist == 0 && c->func != NULL)
     return;
   fprintf_filtered (stream, "\n");
 
@@ -536,7 +579,7 @@ help_cmd (char *command, struct ui_file *stream)
     help_list (*c->prefixlist, c->prefixname, all_commands, stream);
 
   /* If this is a class name, print all of the commands in the class */
-  if (c->function.cfunc == NULL)
+  if (c->func == NULL)
     help_list (cmdlist, "", c->class, stream);
 
   if (c->hook_pre || c->hook_post)
@@ -620,7 +663,7 @@ help_all (struct ui_file *stream)
         help_cmd_list (*c->prefixlist, all_commands, c->prefixname, 0, stream);
     
       /* If this is a class name, print all of the commands in the class */
-      else if (c->function.cfunc == NULL)
+      else if (c->func == NULL)
         help_cmd_list (cmdlist, c->class, "", 0, stream);
     }
 }
@@ -681,8 +724,8 @@ help_cmd_list (struct cmd_list_element *list, enum command_class class,
     {
       if (c->abbrev_flag == 0 &&
 	  (class == all_commands
-	   || (class == all_classes && c->function.cfunc == NULL)
-	   || (class == c->class && c->function.cfunc != NULL)))
+	   || (class == all_classes && c->func == NULL)
+	   || (class == c->class && c->func != NULL)))
 	{
 	  fprintf_filtered (stream, "%s%s -- ", prefix, c->name);
 	  print_doc_line (stream, c->doc);
@@ -710,7 +753,7 @@ find_cmd (char *command, int len, struct cmd_list_element *clist,
   *nfound = 0;
   for (c = clist; c; c = c->next)
     if (!strncmp (command, c->name, len)
-	&& (!ignore_help_classes || c->function.cfunc))
+	&& (!ignore_help_classes || c->func))
       {
 	found = c;
 	(*nfound)++;
@@ -1241,7 +1284,7 @@ complete_on_cmdlist (struct cmd_list_element *list, char *text, char *word)
   for (ptr = list; ptr; ptr = ptr->next)
     if (!strncmp (ptr->name, text, textlen)
 	&& !ptr->abbrev_flag
-	&& (ptr->function.cfunc
+	&& (ptr->func
 	    || ptr->prefixlist))
       {
 	if (matches == sizeof_matchlist)

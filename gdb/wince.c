@@ -1983,7 +1983,7 @@ _initialize_inftarg (void)
 	       (char *) "Set how to upload executables to remote device.\n",
 		     &setlist);
   add_show_from_set (set, &showlist);
-  set->function.cfunc = set_upload_type;
+  set_cmd_cfunc (set, set_upload_type);
   set_upload_type (NULL, 0);
 
   add_show_from_set

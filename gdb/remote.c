@@ -675,7 +675,7 @@ add_packet_config_cmd (struct packet_config *config,
   set_cmd = add_set_auto_boolean_cmd (cmd_name, class_obscure,
 				&config->detect, set_doc,
 				set_remote_list);
-  set_cmd->function.sfunc = set_func;
+  set_cmd_sfunc (set_cmd, set_func);
   show_cmd = add_cmd (cmd_name, class_obscure, show_func, show_doc,
 		      show_remote_list);
   /* set/show remote NAME-packet {auto,on,off} -- legacy */
@@ -6154,7 +6154,7 @@ in a memory packet.\n",
 				     &remote_Z_packet_detect,
 				     "\
 Set use of remote protocol `Z' packets", &remote_set_cmdlist);
-  tmpcmd->function.sfunc = set_remote_protocol_Z_packet_cmd;
+  set_cmd_sfunc (tmpcmd, set_remote_protocol_Z_packet_cmd);
   add_cmd ("Z-packet", class_obscure, show_remote_protocol_Z_packet_cmd,
 	   "Show use of remote protocol `Z' packets ",
 	   &remote_show_cmdlist);

@@ -224,6 +224,6 @@ _initialize_kod (void)
 		   (char *) &operating_system,
 		   "Set operating system",
 		   &setlist);
-  c->function.sfunc = kod_set_os;
+  set_cmd_sfunc (c, kod_set_os);
   add_show_from_set (c, &showlist);
 }

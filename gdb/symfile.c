@@ -3274,7 +3274,7 @@ for access from GDB.", &cmdlist);
 		   "Set mapping between filename extension and source language.\n\
 Usage: set extension-language .foo bar",
 		   &setlist);
-  c->function.cfunc = set_ext_lang_command;
+  set_cmd_cfunc (c, set_ext_lang_command);
 
   add_info ("extensions", info_ext_lang_command,
 	    "All filename extensions associated with a source language.");

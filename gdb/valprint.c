@@ -1490,14 +1490,14 @@ _initialize_valprint (void)
 		   "Set default input radix for entering numbers.",
 		   &setlist);
   add_show_from_set (c, &showlist);
-  c->function.sfunc = set_input_radix;
+  set_cmd_sfunc (c, set_input_radix);
 
   c = add_set_cmd ("output-radix", class_support, var_uinteger,
 		   (char *) &output_radix,
 		   "Set default output radix for printing of values.",
 		   &setlist);
   add_show_from_set (c, &showlist);
-  c->function.sfunc = set_output_radix;
+  set_cmd_sfunc (c, set_output_radix);
 
   /* The "set radix" and "show radix" commands are special in that they are
      like normal set and show commands but allow two normally independent

@@ -2238,7 +2238,7 @@ initialize_utils (void)
 		   "Set number of characters gdb thinks are in a line.",
 		   &setlist);
   add_show_from_set (c, &showlist);
-  c->function.sfunc = set_width_command;
+  set_cmd_sfunc (c, set_width_command);
 
   add_show_from_set
     (add_set_cmd ("height", class_support,
