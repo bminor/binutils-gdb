@@ -1,5 +1,8 @@
 Fri Apr 10 08:30:58 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* Makefile.in:  Update version to 4.5.
+	* WHATS.NEW:  The obvious.
+
 	* depend:  Generate new depend file for this release.
 
 	* Makefile.in (depend):  Fix dependancy generation so that it does

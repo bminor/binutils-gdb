@@ -1,6 +1,96 @@
 		What has changed since GDB-3.5?
 		(Organized release by release)
 
+*** Changes in GDB-4.5:
+
+ * New machines supported (host and target)
+
+IBM RS6000 running AIX			rs6000-ibm-aix	or rs6000
+
+SGI Irix-4.x				mips-sgi-irix4	or iris4
+
+ * New malloc package
+
+GDB now uses a new memory manager called mmalloc, based on gmalloc.
+Mmalloc is capable of handling mutiple heaps of memory.  It is also
+capable of saving a heap to a file, and then mapping it back in later.
+This can be used to greatly speedup the startup of GDB by using a
+pre-parsed symbol table which lives in a mmalloc managed heap.  For
+more details, please read mmalloc/mmalloc.texi.
+
+ * info proc
+
+The 'info proc' command (SVR4 only) has been enhanced quite a bit.  See
+'help info proc' for details.
+
+ * MIPS ecoff symbol table format
+
+The code that reads MIPS symbol table format is now supported on all hosts.
+Thanks to MIPS for releasing the sym.h and symconst.h files to make this
+possible.
+
+ * File name changes for MS-DOS
+
+Many files in the config directories have been renamed to make it easier to
+support GDB on MS-DOSe systems (which have very restrictive file name
+conventions :-( ).  MS-DOSe host support (under DJ Delorie's GO32
+environment) is close to working but has some remaining problems.  Note
+that debugging of DOS programs is not supported, due to limitations
+in the ``operating system'', but it can be used to host cross-debugging.
+
+ * Cross byte order fixes
+
+Many fixes have been made to support cross debugging of Sparc and MIPS
+targets from hosts whose byte order differs.
+
+ * New -mapped and -readnow options
+
+If memory-mapped files are available on your system through the 'mmap'
+system call, you can use the -mapped option on the `file' or
+`symbol-file' commands to cause GDB to write the symbols from your
+program into a reusable file.  If the program you are debugging is
+called `/tmp/fred', the mapped symbol file will be `/tmp/fred.syms'.
+Future GDB debugging sessions will notice the presence of this file,
+and will quickly map in symbol information from it, rather than reading
+the symbol table from the executable program.  Using the '-mapped'
+option in a GDB `file' or `symbol-file' command has the same effect as
+starting GDB with the '-mapped' command-line option.
+
+You can cause GDB to read the entire symbol table immediately by using
+the '-readnow' option with any of the commands that load symbol table
+information (or on the GDB command line).  This makes the command
+slower, but makes future operations faster.
+
+The -mapped and -readnow options are typically combined in order to
+build a `fred.syms' file that contains complete symbol information.
+A simple GDB invocation to do nothing but build a `.syms' file for future
+use is:
+
+	gdb -batch -nx -mapped -readnow programname
+
+The `.syms' file is specific to the host machine on which GDB is run.
+It holds an exact image of GDB's internal symbol table.  It cannot be
+shared across multiple host platforms.
+
+ * longjmp() handling
+
+GDB is now capable of stepping and nexting over longjmp(), _longjmp(), and
+siglongjmp() without losing control.  This feature has not yet been ported to
+all systems.  It currently works on many 386 platforms, all MIPS-based
+platforms (SGI, DECstation, etc), and Sun3/4.
+
+ * Solaris 2.0
+
+Preliminary work has been put in to support the new Solaris OS from Sun.  At
+this time, it can control and debug processes, but it is not capable of
+reading symbols.
+
+ * Bug fixes
+
+As always, many many bug fixes.  The major areas were with g++, and mipsread.
+People using the MIPS-based platforms should experience fewer mysterious
+crashes and trashed symbol tables.
+
 *** Changes in GDB-4.4:
 
  * New machines supported (host and target)
