@@ -14,7 +14,7 @@
 Sections:
 Idx Name          Size      VMA               LMA               File off  Algn
   0 \.text         0+  0+  0+  0+  2\*\*2
-
+                  
   1 \.MMIX\.sec\.0   0+4  1000000000000000  1000000000000000  0+  2\*\*2
                   CONTENTS, ALLOC, LOAD
 Contents of section \.MMIX\.sec\.0:
