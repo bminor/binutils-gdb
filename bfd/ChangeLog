@@ -1,3 +1,17 @@
+2002-08-01  Denis Chertykov  <denisc@overta.ru>
+
+	* elf32-ip2k.c: Processor manufacturer changed to Ubicom.
+	(struct misc): New field isymbuf. All free_* fields removed.
+	(symbol_value): Pass in internal syms. No need to swap syms in.
+	(ip2k_elf_relax_section): Use bfd_elf_get_elf_syms. Properly free
+	possibly cached info.
+	(tidyup_after_error): Removed.
+	(ip2k_elf_relax_section_pass1): Don't use removed fields of struct
+	misc. Use new field.
+	(adjust_all_relocations): Use internal syms. No need to swap syms
+	in and out.
+	(add_page_insn): Don't use removed fields of struct misc.
+
 2002-08-01  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-arm.h: Revert previous delta.
