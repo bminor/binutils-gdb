@@ -1180,8 +1180,11 @@ extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
    gdbarch'' from the ARCHES list - indicating that the new
    architecture is just a synonym for an earlier architecture (see
    gdbarch_list_lookup_by_info()); a newly created ``struct gdbarch''
-   - that describes the selected architecture (see
-   gdbarch_alloc()). */
+   - that describes the selected architecture (see gdbarch_alloc()).
+
+   The DUMP_TDEP function shall print out all target specific values.
+   Care should be taken to ensure that the function works in both the
+   multi-arch and non- multi-arch cases. */
 
 struct gdbarch_list
 {
@@ -1208,8 +1211,22 @@ struct gdbarch_info
 };
 
 typedef struct gdbarch *(gdbarch_init_ftype) (struct gdbarch_info info, struct gdbarch_list *arches);
+typedef void (gdbarch_dump_tdep_ftype) (struct gdbarch *gdbarch, struct ui_file *file);
 
+/* DEPRECATED - use gdbarch_register() */
 extern void register_gdbarch_init (enum bfd_architecture architecture, gdbarch_init_ftype *);
+
+extern void gdbarch_register (enum bfd_architecture architecture,
+                              gdbarch_init_ftype *,
+                              gdbarch_dump_tdep_ftype *);
+
+
+/* Return a freshly allocated, NULL terminated, array of the valid
+   architecture names.  Since architectures are registered during the
+   _initialize phase this function only returns useful information
+   once initialization has been completed. */
+
+extern const char **gdbarch_printable_names (void);
 
 
 /* Helper function.  Search the list of ARCHES for a GDBARCH that
@@ -1226,7 +1243,10 @@ extern struct gdbarch_list *gdbarch_list_lookup_by_info (struct gdbarch_list *ar
 extern struct gdbarch *gdbarch_alloc (const struct gdbarch_info *info, struct gdbarch_tdep *tdep);
 
 
-/* Helper function.  Free a partially-constructed ``struct gdbarch''.  */
+/* Helper function.  Free a partially-constructed ``struct gdbarch''.
+   It is assumed that the caller freeds the ``struct
+   gdbarch_tdep''. */
+
 extern void gdbarch_free (struct gdbarch *);
 
 
@@ -1342,13 +1362,6 @@ extern const struct bfd_arch_info *target_architecture;
 #define TARGET_ARCHITECTURE (target_architecture + 0)
 #endif
 
-/* Notify the target dependant backend of a change to the selected
-   architecture. A zero return status indicates that the target did
-   not like the change. */
-
-extern int (*target_architecture_hook) (const struct bfd_arch_info *);
-
-
 
 /* The target-system-dependant disassembler is semi-dynamic */
 
@@ -1397,26 +1410,15 @@ extern disassemble_info tm_print_insn_info;
 extern void set_gdbarch_from_file (bfd *);
 
 
-/* Explicitly set the dynamic target-system-dependant parameters based
-   on bfd_architecture and machine. */
-
-extern void set_architecture_from_arch_mach (enum bfd_architecture, unsigned long);
-
-
 /* Initialize the current architecture to the "first" one we find on
    our list.  */
 
 extern void initialize_current_architecture (void);
 
-/* Helper function for targets that don't know how my arguments are
-   being passed */
-
-extern int frame_num_args_unknown (struct frame_info *fi);
-
 
 /* gdbarch trace variable */
 extern int gdbarch_debug;
 
-extern void gdbarch_dump (void);
+extern void gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file);
 
 #endif

@@ -250,6 +250,7 @@ do
 	# An optional indicator for any predicte to wrap around the
 	# print member code.
 
+	#   () -> Call a custom function to do the dump.
 	#   exp -> Wrap print up in ``if (${print_p}) ...
 	#   ``'' -> No predicate
 
@@ -670,8 +671,11 @@ extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
    gdbarch'' from the ARCHES list - indicating that the new
    architecture is just a synonym for an earlier architecture (see
    gdbarch_list_lookup_by_info()); a newly created \`\`struct gdbarch''
-   - that describes the selected architecture (see
-   gdbarch_alloc()). */
+   - that describes the selected architecture (see gdbarch_alloc()).
+
+   The DUMP_TDEP function shall print out all target specific values.
+   Care should be taken to ensure that the function works in both the
+   multi-arch and non- multi-arch cases. */
 
 struct gdbarch_list
 {
@@ -698,8 +702,22 @@ struct gdbarch_info
 };
 
 typedef struct gdbarch *(gdbarch_init_ftype) (struct gdbarch_info info, struct gdbarch_list *arches);
+typedef void (gdbarch_dump_tdep_ftype) (struct gdbarch *gdbarch, struct ui_file *file);
 
+/* DEPRECATED - use gdbarch_register() */
 extern void register_gdbarch_init (enum bfd_architecture architecture, gdbarch_init_ftype *);
+
+extern void gdbarch_register (enum bfd_architecture architecture,
+                              gdbarch_init_ftype *,
+                              gdbarch_dump_tdep_ftype *);
+
+
+/* Return a freshly allocated, NULL terminated, array of the valid
+   architecture names.  Since architectures are registered during the
+   _initialize phase this function only returns useful information
+   once initialization has been completed. */
+
+extern const char **gdbarch_printable_names (void);
 
 
 /* Helper function.  Search the list of ARCHES for a GDBARCH that
@@ -716,7 +734,10 @@ extern struct gdbarch_list *gdbarch_list_lookup_by_info (struct gdbarch_list *ar
 extern struct gdbarch *gdbarch_alloc (const struct gdbarch_info *info, struct gdbarch_tdep *tdep);
 
 
-/* Helper function.  Free a partially-constructed \`\`struct gdbarch''.  */
+/* Helper function.  Free a partially-constructed \`\`struct gdbarch''.
+   It is assumed that the caller freeds the \`\`struct
+   gdbarch_tdep''. */
+
 extern void gdbarch_free (struct gdbarch *);
 
 
@@ -832,13 +853,6 @@ extern const struct bfd_arch_info *target_architecture;
 #define TARGET_ARCHITECTURE (target_architecture + 0)
 #endif
 
-/* Notify the target dependant backend of a change to the selected
-   architecture. A zero return status indicates that the target did
-   not like the change. */
-
-extern int (*target_architecture_hook) (const struct bfd_arch_info *);
-
-
 
 /* The target-system-dependant disassembler is semi-dynamic */
 
@@ -887,27 +901,16 @@ extern disassemble_info tm_print_insn_info;
 extern void set_gdbarch_from_file (bfd *);
 
 
-/* Explicitly set the dynamic target-system-dependant parameters based
-   on bfd_architecture and machine. */
-
-extern void set_architecture_from_arch_mach (enum bfd_architecture, unsigned long);
-
-
 /* Initialize the current architecture to the "first" one we find on
    our list.  */
 
 extern void initialize_current_architecture (void);
 
-/* Helper function for targets that don't know how my arguments are
-   being passed */
-
-extern int frame_num_args_unknown (struct frame_info *fi);
-
 
 /* gdbarch trace variable */
 extern int gdbarch_debug;
 
-extern void gdbarch_dump (void);
+extern void gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file);
 
 #endif
 EOF
@@ -992,6 +995,7 @@ done
 echo ""
 echo "  /* target specific vector. */"
 echo "  struct gdbarch_tdep *tdep;"
+echo "  gdbarch_dump_tdep_ftype *dump_tdep;"
 echo ""
 echo "  /* per-architecture data-pointers */"
 echo "  int nr_data;"
@@ -1050,9 +1054,10 @@ EOF
 echo ""
 echo "extern const struct bfd_arch_info bfd_default_arch_struct;"
 echo ""
-echo "struct gdbarch startup_gdbarch = {"
+echo "struct gdbarch startup_gdbarch ="
+echo "{"
 echo "  /* basic architecture information */"
-function_list | while do_read # eval read $read
+function_list | while do_read
 do
     if class_is_info_p
     then
@@ -1060,8 +1065,8 @@ do
     fi
 done
 cat <<EOF
-  /* target specific vector */
-  NULL,
+  /* target specific vector and its dump routine */
+  NULL, NULL,
   /*per-architecture data-pointers and swap regions */
   0, NULL, NULL,
   /* Multi-arch values */
@@ -1076,6 +1081,7 @@ done
 cat <<EOF
   /* startup_gdbarch() */
 };
+
 struct gdbarch *current_gdbarch = &startup_gdbarch;
 EOF
 
@@ -1133,6 +1139,7 @@ cat <<EOF
    However, if an architecture's init function encounters an error
    building the structure, it may need to clean up a partially
    constructed gdbarch.  */
+
 void
 gdbarch_free (struct gdbarch *arch)
 {
@@ -1203,41 +1210,70 @@ EOF
 # dump the structure
 echo ""
 echo ""
-echo "/* Print out the details of the current architecture. */"
-echo ""
 cat <<EOF
+/* Print out the details of the current architecture. */
+
+/* NOTE/WARNING: The parameter is called \`\`current_gdbarch'' so that it
+   just happens to match the global variable \`\`current_gdbarch''.  That
+   way macros refering to that variable get the local and not the global
+   version - ulgh.  Once everything is parameterised with gdbarch, this
+   will go away. */
+
 void
-gdbarch_dump (void)
+gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
 {
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: GDB_MULTI_ARCH = %d\\n",
+                      GDB_MULTI_ARCH);
 EOF
-function_list | while do_read # eval read $read
+function_list | while do_read
 do
     echo "#ifdef ${macro}"
     if class_is_function_p
     then
-	echo "  fprintf_unfiltered (gdb_stdlog,"
-	echo "                      \"gdbarch_update: ${macro} = 0x%08lx\\n\","
-	echo "                      (long) current_gdbarch->${function}"
-	echo "                      /*${macro} ()*/);"
+	echo "  fprintf_unfiltered (file,"
+	echo "                      \"gdbarch_dump: %s # %s\\n\","
+	echo "                      \"${macro}(${actual})\","
+	echo "                      XSTRING (${macro} (${actual})));"
     else
-	if [ "${print_p}" ]
-	then
-	  echo "  if (${print_p})"
-	  echo "    fprintf_unfiltered (gdb_stdlog,"
-	  echo "                        \"gdbarch_update: ${macro} = ${fmt}\\n\","
-	  echo "                        ${print});"
-	else
-	  echo "  fprintf_unfiltered (gdb_stdlog,"
-	  echo "                      \"gdbarch_update: ${macro} = ${fmt}\\n\","
-	  echo "                      ${print});"
-	fi
+	echo "  fprintf_unfiltered (file,"
+	echo "                      \"gdbarch_dump: ${macro} # %s\\n\","
+	echo "                      XSTRING (${macro}));"
+    fi
+    echo "#endif"
+done
+function_list | while do_read
+do
+    echo "#ifdef ${macro}"
+    if [ "${print_p}" = "()" ]
+    then
+	echo "  gdbarch_dump_${function} (current_gdbarch);"
+    elif [ "${print_p}" = "0" ]
+    then
+	echo "  /* skip print of ${macro}, print_p == 0. */"
+    elif [ "${print_p}" ]
+    then
+	echo "  if (${print_p})"
+	echo "    fprintf_unfiltered (file,"
+	echo "                        \"gdbarch_dump: ${macro} = ${fmt}\\n\","
+	echo "                        ${print});"
+    elif class_is_function_p
+    then
+	echo "  if (GDB_MULTI_ARCH)"
+	echo "    fprintf_unfiltered (file,"
+	echo "                        \"gdbarch_dump: ${macro} = 0x%08lx\\n\","
+	echo "                        (long) current_gdbarch->${function}"
+	echo "                        /*${macro} ()*/);"
+    else
+	echo "  fprintf_unfiltered (file,"
+	echo "                      \"gdbarch_dump: ${macro} = ${fmt}\\n\","
+	echo "                      ${print});"
     fi
     echo "#endif"
 done
 cat <<EOF
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: GDB_MULTI_ARCH = %d\\n",
-                      GDB_MULTI_ARCH);
+  if (current_gdbarch->dump_tdep != NULL)
+    current_gdbarch->dump_tdep (current_gdbarch, file);
 }
 EOF
 
@@ -1511,21 +1547,67 @@ swapin_gdbarch_swap (struct gdbarch *gdbarch)
 
 /* Keep a registrary of the architectures known by GDB. */
 
-struct gdbarch_init_registration
+struct gdbarch_registration
 {
   enum bfd_architecture bfd_architecture;
   gdbarch_init_ftype *init;
+  gdbarch_dump_tdep_ftype *dump_tdep;
   struct gdbarch_list *arches;
-  struct gdbarch_init_registration *next;
+  struct gdbarch_registration *next;
 };
 
-static struct gdbarch_init_registration *gdbarch_init_registrary = NULL;
+static struct gdbarch_registration *gdbarch_registrary = NULL;
+
+static void
+append_name (const char ***buf, int *nr, const char *name)
+{
+  *buf = xrealloc (*buf, sizeof (char**) * (*nr + 1));
+  (*buf)[*nr] = name;
+  *nr += 1;
+}
+
+const char **
+gdbarch_printable_names (void)
+{
+  if (GDB_MULTI_ARCH)
+    {
+      /* Accumulate a list of names based on the registed list of
+         architectures. */
+      enum bfd_architecture a;
+      int nr_arches = 0;
+      const char **arches = NULL;
+      struct gdbarch_registration *rego;
+      for (rego = gdbarch_registrary;
+	   rego != NULL;
+	   rego = rego->next)
+	{
+	  const struct bfd_arch_info *ap;
+	  ap = bfd_lookup_arch (rego->bfd_architecture, 0);
+	  if (ap == NULL)
+	    internal_error ("gdbarch_architecture_names: multi-arch unknown");
+	  do
+	    {
+	      append_name (&arches, &nr_arches, ap->printable_name);
+	      ap = ap->next;
+	    }
+	  while (ap != NULL);
+	}
+      append_name (&arches, &nr_arches, NULL);
+      return arches;
+    }
+  else
+    /* Just return all the architectures that BFD knows.  Assume that
+       the legacy architecture framework supports them. */
+    return bfd_arch_list ();
+}
+
 
 void
-register_gdbarch_init (enum bfd_architecture bfd_architecture,
-                       gdbarch_init_ftype *init)
+gdbarch_register (enum bfd_architecture bfd_architecture,
+                  gdbarch_init_ftype *init,
+		  gdbarch_dump_tdep_ftype *dump_tdep)
 {
-  struct gdbarch_init_registration **curr;
+  struct gdbarch_registration **curr;
   const struct bfd_arch_info *bfd_arch_info;
   /* Check that BFD reconizes this architecture */
   bfd_arch_info = bfd_lookup_arch (bfd_architecture, 0);
@@ -1534,7 +1616,7 @@ register_gdbarch_init (enum bfd_architecture bfd_architecture,
       internal_error ("gdbarch: Attempt to register unknown architecture (%d)", bfd_architecture);
     }
   /* Check that we haven't seen this architecture before */
-  for (curr = &gdbarch_init_registrary;
+  for (curr = &gdbarch_registrary;
        (*curr) != NULL;
        curr = &(*curr)->next)
     {
@@ -1548,13 +1630,26 @@ register_gdbarch_init (enum bfd_architecture bfd_architecture,
 			bfd_arch_info->printable_name,
 			(long) init);
   /* Append it */
-  (*curr) = XMALLOC (struct gdbarch_init_registration);
+  (*curr) = XMALLOC (struct gdbarch_registration);
   (*curr)->bfd_architecture = bfd_architecture;
   (*curr)->init = init;
+  (*curr)->dump_tdep = dump_tdep;
   (*curr)->arches = NULL;
   (*curr)->next = NULL;
+  /* When non- multi-arch, install what ever target dump routine we've
+     been provided - hopefully that routine has been writen correct
+     and works regardless of multi-arch. */
+  if (!GDB_MULTI_ARCH && dump_tdep != NULL
+      && startup_gdbarch.dump_tdep == NULL)
+    startup_gdbarch.dump_tdep = dump_tdep;
 }
-  
+
+void
+register_gdbarch_init (enum bfd_architecture bfd_architecture,
+		       gdbarch_init_ftype *init)
+{
+  gdbarch_register (bfd_architecture, init, NULL);
+}
 
 
 /* Look for an architecture using gdbarch_info.  Base search on only
@@ -1584,7 +1679,7 @@ gdbarch_update (struct gdbarch_info info)
 {
   struct gdbarch *new_gdbarch;
   struct gdbarch_list **list;
-  struct gdbarch_init_registration *rego;
+  struct gdbarch_registration *rego;
 
   /* Fill in any missing bits. Most important is the bfd_architecture
      which is used to select the target architecture. */
@@ -1618,9 +1713,11 @@ gdbarch_update (struct gdbarch_info info)
   /* A default for abfd? */
 
   /* Find the target that knows about this architecture. */
-  for (rego = gdbarch_init_registrary;
-       rego != NULL && rego->bfd_architecture != info.bfd_architecture;
-       rego = rego->next);
+  for (rego = gdbarch_registrary;
+       rego != NULL;
+       rego = rego->next)
+    if (rego->bfd_architecture == info.bfd_architecture)
+      break;
   if (rego == NULL)
     {
       if (gdbarch_debug)
@@ -1685,7 +1782,8 @@ gdbarch_update (struct gdbarch_info info)
       if ((*list)->gdbarch == new_gdbarch)
 	{
 	  if (gdbarch_debug)
-	    fprintf_unfiltered (gdb_stdlog, "gdbarch_update: Previous architecture 0x%08lx (%s) selected\n",
+	    fprintf_unfiltered (gdb_stdlog,
+                                "gdbarch_update: Previous architecture 0x%08lx (%s) selected\n",
 				(long) new_gdbarch,
 				new_gdbarch->bfd_arch_info->printable_name);
 	  current_gdbarch = new_gdbarch;
@@ -1693,7 +1791,7 @@ gdbarch_update (struct gdbarch_info info)
 	  return 1;
 	}
     }
-    
+
   /* Append this new architecture to this targets list. */
   (*list) = XMALLOC (struct gdbarch_list);
   (*list)->next = NULL;
@@ -1707,10 +1805,11 @@ gdbarch_update (struct gdbarch_info info)
 			  "gdbarch_update: New architecture 0x%08lx (%s) selected\n",
 			  (long) new_gdbarch,
 			  new_gdbarch->bfd_arch_info->printable_name);
-      gdbarch_dump ();
     }
   
-  /* Check that the newly installed architecture is valid.  */
+  /* Check that the newly installed architecture is valid.  Plug in
+     any post init values.  */
+  new_gdbarch->dump_tdep = rego->dump_tdep;
   verify_gdbarch (new_gdbarch);
 
   /* Initialize the per-architecture memory (swap) areas.
@@ -1723,365 +1822,12 @@ gdbarch_update (struct gdbarch_info info)
      must be updated before these modules are called. */
   init_gdbarch_data (new_gdbarch);
   
+  if (gdbarch_debug)
+    gdbarch_dump (current_gdbarch, gdb_stdlog);
+
   return 1;
 }
 
-
-
-/* Functions to manipulate the endianness of the target.  */
-
-#ifdef TARGET_BYTE_ORDER_SELECTABLE
-/* compat - Catch old targets that expect a selectable byte-order to
-   default to BIG_ENDIAN */
-#ifndef TARGET_BYTE_ORDER_DEFAULT
-#define TARGET_BYTE_ORDER_DEFAULT BIG_ENDIAN
-#endif
-#endif
-#if !TARGET_BYTE_ORDER_SELECTABLE_P
-#ifndef TARGET_BYTE_ORDER_DEFAULT
-/* compat - Catch old non byte-order selectable targets that do not
-   define TARGET_BYTE_ORDER_DEFAULT and instead expect
-   TARGET_BYTE_ORDER to be used as the default.  For targets that
-   defined neither TARGET_BYTE_ORDER nor TARGET_BYTE_ORDER_DEFAULT the
-   below will get a strange compiler warning. */
-#define TARGET_BYTE_ORDER_DEFAULT TARGET_BYTE_ORDER
-#endif
-#endif
-#ifndef TARGET_BYTE_ORDER_DEFAULT
-#define TARGET_BYTE_ORDER_DEFAULT BIG_ENDIAN /* arbitrary */
-#endif
-int target_byte_order = TARGET_BYTE_ORDER_DEFAULT;
-int target_byte_order_auto = 1;
-
-/* Chain containing the \"set endian\" commands.  */
-static struct cmd_list_element *endianlist = NULL;
-
-/* Called by \`\`show endian''.  */
-static void
-show_endian (char *args, int from_tty)
-{
-  char *msg =
-    (TARGET_BYTE_ORDER_AUTO
-     ? "The target endianness is set automatically (currently %s endian)\n"
-     : "The target is assumed to be %s endian\n");
-  printf_unfiltered (msg, (TARGET_BYTE_ORDER == BIG_ENDIAN ? "big" : "little"));
-}
-
-/* Called if the user enters \`\`set endian'' without an argument.  */
-static void
-set_endian (char *args, int from_tty)
-{
-  printf_unfiltered ("\"set endian\" must be followed by \"auto\", \"big\" or \"little\".\n");
-  show_endian (args, from_tty);
-}
-
-/* Called by \`\`set endian big''.  */
-static void
-set_endian_big (char *args, int from_tty)
-{
-  if (TARGET_BYTE_ORDER_SELECTABLE_P)
-    {
-      target_byte_order = BIG_ENDIAN;
-      target_byte_order_auto = 0;
-      if (GDB_MULTI_ARCH)
-	{
-	  struct gdbarch_info info;
-	  memset (&info, 0, sizeof info);
-	  info.byte_order = BIG_ENDIAN;
-	  gdbarch_update (info);
-	}
-    }
-  else
-    {
-      printf_unfiltered ("Byte order is not selectable.");
-      show_endian (args, from_tty);
-    }
-}
-
-/* Called by \`\`set endian little''.  */
-static void
-set_endian_little (char *args, int from_tty)
-{
-  if (TARGET_BYTE_ORDER_SELECTABLE_P)
-    {
-      target_byte_order = LITTLE_ENDIAN;
-      target_byte_order_auto = 0;
-      if (GDB_MULTI_ARCH)
-	{
-	  struct gdbarch_info info;
-	  memset (&info, 0, sizeof info);
-	  info.byte_order = LITTLE_ENDIAN;
-	  gdbarch_update (info);
-	}
-    }
-  else
-    {
-      printf_unfiltered ("Byte order is not selectable.");
-      show_endian (args, from_tty);
-    }
-}
-
-/* Called by \`\`set endian auto''.  */
-static void
-set_endian_auto (char *args, int from_tty)
-{
-  if (TARGET_BYTE_ORDER_SELECTABLE_P)
-    {
-      target_byte_order_auto = 1;
-    }
-  else
-    {
-      printf_unfiltered ("Byte order is not selectable.");
-      show_endian (args, from_tty);
-    }
-}
-
-/* Set the endianness from a BFD.  */
-static void
-set_endian_from_file (bfd *abfd)
-{
-  if (TARGET_BYTE_ORDER_SELECTABLE_P)
-    {
-      int want;
-      
-      if (bfd_big_endian (abfd))
-	want = BIG_ENDIAN;
-      else
-	want = LITTLE_ENDIAN;
-      if (TARGET_BYTE_ORDER_AUTO)
-	target_byte_order = want;
-      else if (TARGET_BYTE_ORDER != want)
-	warning ("%s endian file does not match %s endian target.",
-		 want == BIG_ENDIAN ? "big" : "little",
-		 TARGET_BYTE_ORDER == BIG_ENDIAN ? "big" : "little");
-    }
-  else
-    {
-      if (bfd_big_endian (abfd)
-	  ? TARGET_BYTE_ORDER != BIG_ENDIAN
-	  : TARGET_BYTE_ORDER == BIG_ENDIAN)
-	warning ("%s endian file does not match %s endian target.",
-		 bfd_big_endian (abfd) ? "big" : "little",
-		 TARGET_BYTE_ORDER == BIG_ENDIAN ? "big" : "little");
-    }
-}
-
-
-
-/* Functions to manipulate the architecture of the target */
-
-enum set_arch { set_arch_auto, set_arch_manual };
-
-int target_architecture_auto = 1;
-extern const struct bfd_arch_info bfd_default_arch_struct;
-const struct bfd_arch_info *target_architecture = &bfd_default_arch_struct;
-int (*target_architecture_hook) (const struct bfd_arch_info *ap);
-
-static void show_endian (char *, int);
-static void set_endian (char *, int);
-static void set_endian_big (char *, int);
-static void set_endian_little (char *, int);
-static void set_endian_auto (char *, int);
-static void set_endian_from_file (bfd *);
-static int arch_ok (const struct bfd_arch_info *arch);
-static void set_arch (const struct bfd_arch_info *arch, enum set_arch type);
-static void show_architecture (char *, int);
-static void set_architecture (char *, int);
-static void info_architecture (char *, int);
-static void set_architecture_from_file (bfd *);
-
-/* Do the real work of changing the current architecture */
-
-static int
-arch_ok (const struct bfd_arch_info *arch)
-{
-  /* Should be performing the more basic check that the binary is
-     compatible with GDB. */
-  /* Check with the target that the architecture is valid. */
-  return (target_architecture_hook == NULL
-	  || target_architecture_hook (arch));
-}
-
-static void
-set_arch (const struct bfd_arch_info *arch,
-          enum set_arch type)
-{
-  switch (type)
-    {
-    case set_arch_auto:
-      if (!arch_ok (arch))
-	warning ("Target may not support %s architecture",
-		 arch->printable_name);
-      target_architecture = arch;
-      break;
-    case set_arch_manual:
-      if (!arch_ok (arch))
-	{
-	  printf_unfiltered ("Target does not support \`%s' architecture.\n",
-			     arch->printable_name);
-	}
-      else
-	{
-	  target_architecture_auto = 0;
-	  target_architecture = arch;
-	}
-      break;
-    }
-  if (gdbarch_debug)
-    gdbarch_dump ();
-}
-
-/* Called if the user enters \`\`show architecture'' without an argument. */
-static void
-show_architecture (char *args, int from_tty)
-{
-  const char *arch;
-  arch = TARGET_ARCHITECTURE->printable_name;
-  if (target_architecture_auto)
-    printf_filtered ("The target architecture is set automatically (currently %s)\n", arch);
-  else
-    printf_filtered ("The target architecture is assumed to be %s\n", arch);
-}
-
-/* Called if the user enters \`\`set architecture'' with or without an
-   argument. */
-static void
-set_architecture (char *args, int from_tty)
-{
-  if (args == NULL)
-    {
-      printf_unfiltered ("\"set architecture\" must be followed by \"auto\" or an architecture name.\n");
-    }
-  else if (strcmp (args, "auto") == 0)
-    {
-      target_architecture_auto = 1;
-    }
-  else if (GDB_MULTI_ARCH)
-    {
-      const struct bfd_arch_info *arch = bfd_scan_arch (args);
-      if (arch == NULL)
-	printf_unfiltered ("Architecture \`%s' not reconized.\n", args);
-      else
-	{
-	  struct gdbarch_info info;
-	  memset (&info, 0, sizeof info);
-	  info.bfd_arch_info = arch;
-	  if (gdbarch_update (info))
-	    target_architecture_auto = 0;
-	  else
-	    printf_unfiltered ("Architecture \`%s' not reconized.\n", args);
-	}
-    }
-  else
-    {
-      const struct bfd_arch_info *arch = bfd_scan_arch (args);
-      if (arch != NULL)
-	set_arch (arch, set_arch_manual);
-      else
-	printf_unfiltered ("Architecture \`%s' not reconized.\n", args);
-    }
-}
-
-/* Called if the user enters \`\`info architecture'' without an argument. */
-static void
-info_architecture (char *args, int from_tty)
-{
-  enum bfd_architecture a;
-  if (GDB_MULTI_ARCH)
-    {
-      if (gdbarch_init_registrary != NULL)
-	{
-	  struct gdbarch_init_registration *rego;
-	  printf_filtered ("Available architectures are:\n");
-	  for (rego = gdbarch_init_registrary;
-	       rego != NULL;
-	       rego = rego->next)
-	    {
-	      const struct bfd_arch_info *ap;
-	      ap = bfd_lookup_arch (rego->bfd_architecture, 0);
-	      if (ap != NULL)
-		{
-		  do
-		    {
-		      printf_filtered (" %s", ap->printable_name);
-		      ap = ap->next;
-		    }
-		  while (ap != NULL);
-		  printf_filtered ("\n");
-		}
-	    }
-	}
-      else
-	{
-	  printf_filtered ("There are no available architectures.\n");
-	}
-      return;
-    }
-  printf_filtered ("Available architectures are:\n");
-  for (a = bfd_arch_obscure + 1; a < bfd_arch_last; a++)
-    {
-      const struct bfd_arch_info *ap = bfd_lookup_arch (a, 0);
-      if (ap != NULL)
-	{
-	  do
-	    {
-	      printf_filtered (" %s", ap->printable_name);
-	      ap = ap->next;
-	    }
-	  while (ap != NULL);
-	  printf_filtered ("\n");
-	}
-    }
-}
-
-/* Set the architecture from arch/machine */
-void
-set_architecture_from_arch_mach (arch, mach)
-     enum bfd_architecture arch;
-     unsigned long mach;
-{
-  const struct bfd_arch_info *wanted = bfd_lookup_arch (arch, mach);
-  if (wanted != NULL)
-    set_arch (wanted, set_arch_manual);
-  else
-    internal_error ("gdbarch: hardwired architecture/machine not reconized");
-}
-
-/* Set the architecture from a BFD */
-static void
-set_architecture_from_file (bfd *abfd)
-{
-  const struct bfd_arch_info *wanted = bfd_get_arch_info (abfd);
-  if (target_architecture_auto)
-    {
-      set_arch (wanted, set_arch_auto);
-    }
-  else if (wanted != target_architecture)
-    {
-      warning ("%s architecture file may be incompatible with %s target.",
-	       wanted->printable_name,
-	       target_architecture->printable_name);
-    }
-}
-
-
-/* Misc helper functions for targets. */
-
-int
-frame_num_args_unknown (fi)
-     struct frame_info *fi;
-{
-  return -1;
-}
-
-
-int
-generic_register_convertible_not (num)
-     int num;
-{
-  return 0;
-}
-  
 
 /* Disassembler */
 
@@ -2090,81 +1836,12 @@ int (*tm_print_insn) (bfd_vma, disassemble_info *);
 disassemble_info tm_print_insn_info;
 
 
-
-/* Set the dynamic target-system-dependant parameters (architecture,
-   byte-order) using information found in the BFD */
-
-void
-set_gdbarch_from_file (abfd)
-     bfd *abfd;
-{
-  if (GDB_MULTI_ARCH)
-    {
-      struct gdbarch_info info;
-      memset (&info, 0, sizeof info);
-      info.abfd = abfd;
-      gdbarch_update (info);
-      return;
-    }
-  set_architecture_from_file (abfd);
-  set_endian_from_file (abfd);
-}
-
-
-/* Initialize the current architecture.  */
-void
-initialize_current_architecture ()
-{
-  if (GDB_MULTI_ARCH)
-    {
-      struct gdbarch_init_registration *rego;
-      const struct bfd_arch_info *chosen = NULL;
-      for (rego = gdbarch_init_registrary; rego != NULL; rego = rego->next)
-	{
-	  const struct bfd_arch_info *ap
-	    = bfd_lookup_arch (rego->bfd_architecture, 0);
-
-	  /* Choose the first architecture alphabetically.  */
-	  if (chosen == NULL
-	      || strcmp (ap->printable_name, chosen->printable_name) < 0)
-	    chosen = ap;
-	}
-
-      if (chosen != NULL)
-	{
-	  struct gdbarch_info info;
-	  memset (&info, 0, sizeof info);
-	  info.bfd_arch_info = chosen;
-	  gdbarch_update (info);
-	}
-    }
-}
-
 extern void _initialize_gdbarch (void);
+
 void
 _initialize_gdbarch ()
 {
   struct cmd_list_element *c;
-
-  add_prefix_cmd ("endian", class_support, set_endian,
-		  "Set endianness of target.",
-		  &endianlist, "set endian ", 0, &setlist);
-  add_cmd ("big", class_support, set_endian_big,
-	   "Set target as being big endian.", &endianlist);
-  add_cmd ("little", class_support, set_endian_little,
-	   "Set target as being little endian.", &endianlist);
-  add_cmd ("auto", class_support, set_endian_auto,
-	   "Select target endianness automatically.", &endianlist);
-  add_cmd ("endian", class_support, show_endian,
-	   "Show endianness of target.", &showlist);
-
-  add_cmd ("architecture", class_support, set_architecture,
-	   "Set architecture of target.", &setlist);
-  add_alias_cmd ("processor", "architecture", class_support, 1, &setlist);
-  add_cmd ("architecture", class_support, show_architecture,
-	   "Show architecture of target.", &showlist);
-  add_cmd ("architecture", class_support, info_architecture,
-	   "List supported target architectures", &infolist);
 
   INIT_DISASSEMBLE_INFO_NO_ARCH (tm_print_insn_info, gdb_stdout, (fprintf_ftype)fprintf_filtered);
   tm_print_insn_info.flavour = bfd_target_unknown_flavour;

@@ -1,3 +1,49 @@
+Fri Jun  9 15:06:37 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.sh (struct gdbarch): Add member dump_tdep.
+	(struct gdbarch_registration): Ditto.
+	(gdbarch_dump): Add ui_file and gdbarch arguments.  Add support
+ 	for external dump functions.  Dump the macro value.  Call target
+ 	dump routine.
+	(gdbarch_register): New function.
+	(gdbarch_registrary): Replace gdbarch_init_registrary.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* arch-utils.c (set_arch): Update.
+	
+	* mips-tdep.c (mips_dump_tdep): New function. Move dump code here.
+	(mips_gdbarch_init): From here.
+
+	* maint.c (maintenance_print_architecture): New function.
+	(_initialize_maint_cmds): Add command ``maintenance print
+ 	architecture''.
+
+Wed Jun  7 11:34:54 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* arch-utils.c (target_byte_order, target_byte_order_auto,
+ 	show_endian, set_endian, set_endian_big, set_endian_little,
+ 	set_endian_auto, set_endian_from_file, enum set_arch,
+ 	target_architecture_auto, set_architecture_string,
+ 	target_architecture_hook, target_architecture, arch_ok, set_arch,
+ 	set_architecture_from_arch_mach, set_architecture_from_file,
+ 	show_architecture, set_architecture, info_architecture,
+ 	set_gdbarch_from_file, initialize_current_architecture): Copy from
+ 	gdbarch.c.  Rewrite ``set architecture'' and ``set endian''
+ 	commands to use enums.
+	(_initialize_gdbarch_utils): Fix name.
+	* arch-utils.h (set_architecture_from_arch_mach,
+ 	target_architecture_hook): Copy from gdbarch.h.
+	* gdbarch.sh: Update.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
+Tue Jun  6 16:21:14 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.sh (generic_register_convertible_not,
+ 	frame_num_args_unknown): Move from here.
+	* arch-utils.c (generic_register_convertible_not,
+ 	frame_num_args_unknown): To here.
+	* arch-utils.h (frame_num_args_unknown): Add declaration.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
 2000-06-05  Daniel Berlin  <dan@cgsoftware.com>
 
 	* c-exp.y (yylex): template handling fixes.
