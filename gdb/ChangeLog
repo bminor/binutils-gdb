@@ -1,3 +1,8 @@
+Tue Mar 21 13:34:12 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* infrun.c (handle_command): Don't print TARGET_SIGNAL_0,
+	TARGET_SIGNAL_UNKNOWN, or TARGET_SIGNAL_DEFAULT.
+
 Mon Mar 20 10:09:59 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* hppab-nat.c (store_inferior_registers): Sync with HPUX version.
