@@ -2191,7 +2191,8 @@ hppa_elf_build_linker_stub (abfd, output_bfd, link_info, reloc_entry,
 	 old symbol (a function symbol) to the stub (the stub will call
 	 the original function).  */
       stub_sym = stub_entry->sym;
-      reloc_entry->sym_ptr_ptr = bfd_zalloc (abfd, sizeof (asymbol **));
+      reloc_entry->sym_ptr_ptr = (asymbol **) bfd_zalloc (abfd,
+							  sizeof (asymbol **));
       if (reloc_entry->sym_ptr_ptr == NULL)
 	{
 	  bfd_set_error (bfd_error_no_memory);
@@ -2229,7 +2230,8 @@ hppa_elf_build_linker_stub (abfd, output_bfd, link_info, reloc_entry,
 
       /* Redirect the original relocation from the old symbol (a function)
 	 to the stub (the stub calls the function).  */
-      reloc_entry->sym_ptr_ptr = bfd_zalloc (abfd, sizeof (asymbol **));
+      reloc_entry->sym_ptr_ptr = (asymbol **) bfd_zalloc (abfd,
+							  sizeof (asymbol **));
       if (reloc_entry->sym_ptr_ptr == NULL)
 	{
 	  bfd_set_error (bfd_error_no_memory);
@@ -2724,7 +2726,7 @@ hppa_look_for_stubs_in_section (stub_bfd, abfd, output_bfd, asec,
 	  if (!abfd->outsymbols)
 	    {
 	      bfd_set_error (bfd_error_no_memory);
-	      return false;
+	      abort ();
 	    }
 	  abfd->symcount = bfd_canonicalize_symtab (abfd, abfd->outsymbols);
 	}

@@ -135,7 +135,7 @@ struct som_section_data_struct
 #define som_section_data(sec) \
   ((struct som_section_data_struct *)sec->used_by_bfd)
 #define som_symbol_data(symbol) \
-  (((som_symbol_type **) symbol->udata))
+  ((som_symbol_type *) symbol)
 
 
 /* Defines groups of basic relocations.  FIXME:  These should
@@ -160,10 +160,12 @@ struct som_section_data_struct
 
 /* Exported functions, mostly for use by GAS.  */
 void bfd_som_set_section_attributes PARAMS ((asection *, int, int,
-					     unsigned char, int));
+					     unsigned int, int));
 void bfd_som_set_subsection_attributes PARAMS ((asection *, asection *,
 						int, unsigned int, int));
 void bfd_som_set_symbol_type PARAMS ((asymbol *, unsigned int));
 void bfd_som_attach_unwind_info PARAMS ((asymbol *, char *));
-
+boolean bfd_som_attach_aux_hdr PARAMS ((bfd *, int, char *));
+int ** hppa_som_gen_reloc_type
+  PARAMS ((bfd *, int, int, enum hppa_reloc_field_selector_type_alt));
 #endif /* _SOM_H */

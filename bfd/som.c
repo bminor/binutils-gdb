@@ -1369,7 +1369,7 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field)
      bfd *abfd;
      int base_type;
      int format;
-     enum hppa_reloc_field_selector_type field;
+     enum hppa_reloc_field_selector_type_alt field;
 {
   int *final_type, **final_types;
 
@@ -3990,7 +3990,7 @@ bfd_som_set_section_attributes (section, defined, private, sort_key, spnum)
      asection *section;
      int defined;
      int private;
-     unsigned char sort_key;
+     unsigned int sort_key;
      int spnum;
 {
   struct space_dictionary_record *space_dict;
@@ -4052,7 +4052,7 @@ bfd_som_attach_unwind_info (symbol, unwind_desc)
 
 /* Attach an auxiliary header to the BFD backend so that it may be
    written into the object file.  */
-void
+boolean
 bfd_som_attach_aux_hdr (abfd, type, string)
      bfd *abfd;
      int type;
@@ -4071,7 +4071,7 @@ bfd_som_attach_aux_hdr (abfd, type, string)
       if (!obj_som_version_hdr (abfd))
 	{
 	  bfd_set_error (bfd_error_no_memory);
-	  abort();		/* FIXME */
+	  return false;
 	}
       obj_som_version_hdr (abfd)->header_id.type = VERSION_AUX_ID;
       obj_som_version_hdr (abfd)->header_id.length = len + pad;
@@ -4092,7 +4092,7 @@ bfd_som_attach_aux_hdr (abfd, type, string)
       if (!obj_som_copyright_hdr (abfd))
 	{
 	  bfd_set_error (bfd_error_no_error);
-	  abort();		/* FIXME */
+	  return false;
 	}
       obj_som_copyright_hdr (abfd)->header_id.type = COPYRIGHT_AUX_ID;
       obj_som_copyright_hdr (abfd)->header_id.length = len + pad;
@@ -4100,8 +4100,7 @@ bfd_som_attach_aux_hdr (abfd, type, string)
       obj_som_copyright_hdr (abfd)->string_length = len;
       strcpy (obj_som_copyright_hdr (abfd)->copyright, string);
     }
-  else
-    abort ();
+  return true;
 }
 
 static boolean
