@@ -631,7 +631,7 @@ child_wait (pid, ourstatus)
       /* Initial thread value can only be acquired via wait, so we have to
 	 resort to this hack.  */
 
-      if (TIDGET (inferior_pid) == 0)
+      if (TIDGET (inferior_pid) == 0 && thread != 0)
 	{
 	  inferior_pid = BUILDPID (inferior_pid, thread);
 	  add_thread (inferior_pid);
@@ -639,6 +639,11 @@ child_wait (pid, ourstatus)
 
       pid = BUILDPID (pid, thread);
 
+      /* We've become a single threaded process again.  */
+      if (thread == 0)
+	inferior_pid = pid;
+
+      /* Check for thread creation.  */
       if (WIFSTOPPED(status)
 	  && WSTOPSIG(status) == SIGTRAP
 	  && !in_thread_list (pid))

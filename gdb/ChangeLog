@@ -1,4 +1,9 @@
-Thu Jul 20 15:00:31 1995  Jeff Law  (law@snake.cs.utah.edu)
+Thu Jul 20 14:18:51 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* lynx-nat.c (child_wait): A thread_id of zero from wait apparently
+	means the process is single threaded, so there's no need to add
+	it to the thread list.  Handle case where multi-threaded process
+	reverts back to a single-threaded process.
 
 	* gdbserver/low-hppabsd.c: Remove error declaration.
 	* gdbserver/low-sparc.c: Likewise.
