@@ -1,5 +1,9 @@
 2003-05-18  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_frame_cache): Fix indentation of comment.
+
+2003-05-18  Mark Kettenis  <kettenis@gnu.org>
+
 	Merge from mainline.
 	* i386-tdep.h (I386_SIZEOF_GREGS, I386_SIZEOF_FREGS,
 	I386_SIZEOF_XREGS): Remove defenitions.

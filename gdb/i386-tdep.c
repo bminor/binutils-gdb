@@ -703,14 +703,14 @@ i386_frame_cache (struct frame_info *next_frame, void **this_cache)
   cache = i386_alloc_frame_cache ();
   *this_cache = cache;
 
-/* In principle, for normal frames, %ebp holds the frame pointer,
-   which holds the base address for the current stack frame.  However,
-   for functions that don't need it, the frame pointer is optional.
-   For these "frameless" functions the frame pointer is actually the
-   frame pointer of the calling frame.  Signal trampolines are just a
-   special case of a "frameless" function.  They (usually) share their
-   frame pointer with the frame that was in progress when the signal
-   occurred.  */
+  /* In principle, for normal frames, %ebp holds the frame pointer,
+     which holds the base address for the current stack frame.
+     However, for functions that don't need it, the frame pointer is
+     optional.  For these "frameless" functions the frame pointer is
+     actually the frame pointer of the calling frame.  Signal
+     trampolines are just a special case of a "frameless" function.
+     They (usually) share their frame pointer with the frame that was
+     in progress when the signal occurred.  */
 
   frame_unwind_register (next_frame, I386_EBP_REGNUM, buf);
   cache->base = extract_unsigned_integer (buf, 4);
