@@ -1,22 +1,26 @@
-/*  This file is part of the program psim.
+/* The IGEN simulator generator for GDB, the GNU Debugger.
 
-    Copyright (C) 1994,1995,1996, Andrew Cagney <cagney@highland.com.au>
+   Copyright 2002 Free Software Foundation, Inc.
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+   Contributed by Andrew Cagney.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
- 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- 
-    */
+   This file is part of GDB.
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
+
 
 
 #include "misc.h"
@@ -33,7 +37,8 @@
 #endif
 
 
-enum {
+enum
+{
   ca_type,
   ca_field_name,
   ca_derived_name,
@@ -43,10 +48,10 @@ enum {
 };
 
 static const name_map cache_type_map[] = {
-  { "cache", cache_value },
-  { "compute", compute_value },
-  { "scratch", scratch_value },
-  { NULL, 0 },
+  {"cache", cache_value},
+  {"compute", compute_value},
+  {"scratch", scratch_value},
+  {NULL, 0},
 };
 
 
@@ -63,8 +68,7 @@ load_cache_table (char *file_name)
       new_rule->line = entry->line;
       new_rule->entry_type = name2i (entry->field[ca_type], cache_type_map);
       new_rule->name = entry->field[ca_derived_name];
-      filter_parse (&new_rule->original_fields,
-		    entry->field[ca_field_name]);
+      filter_parse (&new_rule->original_fields, entry->field[ca_field_name]);
       new_rule->type = entry->field[ca_type_def];
       /* expression is the concatenation of the remaining fields */
       if (entry->nr_fields > ca_expression)
@@ -97,7 +101,7 @@ load_cache_table (char *file_name)
 igen_options options;
 
 int
-main(int argc, char **argv)
+main (int argc, char **argv)
 {
   cache_entry *rules = NULL;
   lf *l;
