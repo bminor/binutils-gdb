@@ -109,8 +109,8 @@ ChangeLog
 Makefile.in
 README
 config
-config-com.multi
-config-pos.multi
+cfg-ml-com.in
+cfg-ml-pos.in
 config.guess
 config.sub
 configure
