@@ -686,37 +686,47 @@ WORD (courierize)
 
 	      while (at (tos, idx) && at (tos, idx) != '\n')
 		{
-		  if (at (tos, idx) == '{' && at (tos, idx + 1) == '*')
+		  if (command > 1)
+		    {
+		      /* We are inside {} parameters of some command;
+			 Just pass through until matching brace.  */
+		      if (at (tos, idx) == '{')
+			++command;
+		      else if (at (tos, idx) == '}')
+			--command;
+		    }
+		  else if (command != 0)
+		    {
+		      if (at (tos, idx) == '{')
+			++command;
+		      else if (!islower ((unsigned char) at (tos, idx)))
+			--command;
+		    }
+		  else if (at (tos, idx) == '@'
+			   && islower ((unsigned char) at (tos, idx + 1)))
+		    {
+		      ++command;
+		    }
+		  else if (at (tos, idx) == '{' && at (tos, idx + 1) == '*')
 		    {
 		      cattext (&out, "/*");
 		      idx += 2;
+		      continue;
 		    }
 		  else if (at (tos, idx) == '*' && at (tos, idx + 1) == '}')
 		    {
 		      cattext (&out, "*/");
 		      idx += 2;
+		      continue;
 		    }
-		  else if (at (tos, idx) == '{' && !command)
+		  else if (at (tos, idx) == '{'
+			   || at (tos, idx) == '}')
 		    {
-		      cattext (&out, "@{");
-		      idx++;
-		    }
-		  else if (at (tos, idx) == '}' && !command)
-		    {
-		      cattext (&out, "@}");
-		      idx++;
-		    }
-		  else
-		    {
-		      if (at (tos, idx) == '@')
-			command = 1;
-		      else if (isspace ((unsigned char) at (tos, idx))
-			       || at (tos, idx) == '}')
-			command = 0;
-		      catchar (&out, at (tos, idx));
-		      idx++;
+		      catchar (&out, '@');
 		    }
 
+		  catchar (&out, at (tos, idx));
+		  idx++;
 		}
 	      catchar (&out, '\n');
 	    }
