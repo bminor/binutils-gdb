@@ -1,3 +1,18 @@
+1999-02-10  Doug Evans  <devans@casey.cygnus.com>
+
+	* gas/m32r/allinsn.d: Prefix all | with \.
+	(push,pop): Fix expected output.
+	* gas/m32r/relax-1.d: Emitted nops are serial, not parallel.
+	* gas/m32r/fslot.d: Prefix all | with \.
+start-sanitize-cygnus
+	* gas/m32r/fslotx.d: Prefix all | with \.
+	* gas/m32r/m32rx.d: Assemble with -O to get effect we're testing for.
+	Prefix all | with \.  Fix misc. typos.
+	* gas/m32r/m32rx.s (bc__add,bcl__addi): Use non-relaxable versions
+	of branches so we get the effect we're testing for.
+	* gas/m32r/relax-2.d: Prefix all | with \.
+end-sanitize-cygnus
+
 1999-02-08  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/vtable/inherit0.s: Do not use '@' prefix to .type operator.
