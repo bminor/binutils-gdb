@@ -1034,7 +1034,7 @@ debug a core file instead, you must kill the subprocess in which the
 program is running.  To do this, use the @samp{kill} command
 (@pxref{Kill Process}).
 
-@item load @var{filename} @var{address}
+@item load @var{filename}
 @kindex load
 This command will dynamically link @var{filename} on the current target,
 performing any necessary downloads, then add @var{filename}'s symbol
@@ -1470,16 +1470,14 @@ for GDB still comes from your terminal.
 
 @node Attach, Kill Process, Input/Output, Running
 @section Debugging an Already-Running Process
-@kindex detach
 @kindex attach
 @cindex attach
 
 @table @code
 @item attach @var{process--id}
 This command attaches to a running process, if your currently selected
-target supports processes. (@samp{target} command (@samp{info files}
-will show your active targets).  The command takes as argument a
-process ID.
+target supports processes.  (@samp{info files} will show your active
+targets).  The command takes as argument a process ID.
 
 You specify a process ID to debug an already-running process that was
 started outside of GDB.  (The usual way to find out the process-id of
@@ -1500,6 +1498,7 @@ can modify storage.  If you would rather the process continue running,
 you may use the @samp{continue} command after attaching GDB to the
 process.
 
+@kindex detach
 When you have finished debugging the attached process, you can use the
 @samp{detach} command to release it from GDB's control.  Detaching
 the process continues its execution.  After the @samp{detach} command,
@@ -3013,8 +3012,8 @@ Print C++ names in their source form rather than their mangled form, even
 in assembler code printouts such as instruction disassemblies.
 The default is off.
 
-@item show asm_demangle
-@kindex show asm_demangle
+@item show asm-demangle
+@kindex show asm-demangle
 Show whether C++ names in assembly listings will be printed in mangled
 or demangled form.
 
