@@ -1,5 +1,36 @@
 2004-09-19  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386bsd-nat.c: Include "i386bsd-nat.h" and "inf-ptrace.h".
+	(i386bsd_fetch_inferior_registers): Rename from
+	fetch_inferior_registers.  Make static.
+	(i386bsd_store_inferior_registers): Rename from
+	store_inferior_registers.  Make static.
+	(i386bsd_target): New function.
+	* i386bsd-nat.h: New file.
+	* i386fbsd-nat.c: Include "target.h", "fbsd-nat.h" and
+	"i386bsd-nat.h".
+	(i386fbsd_resume): Rename from child_resume.  Make static.
+	(_initialize_i386fbsd_nat): Construct and add target vector.
+	* i386nbsd-nat.c: Include "target.h" and "i386bsd-nat.h".
+	(_initialize_i386nbsd_nat): Construct and add target vector.
+	* config/i386/nm-fbsd.h: (CHILD_RESUME, CHILD_PID_TO_EXEC_FILE):
+	Remove defines.
+	* config/i386/fbsd.mh (NATDEPFILES): Add inf-child.o, inf-ptrace.o
+	and fbsd-nat.o.  Remove inftarg.o and fbsd-proc.o.
+	* config/i386/nbsdaout.mh (NATDEPFILES): Add inf-child.o,
+	inf-ptrace.o, i386bsd-nat.o and bsd-kvm.o.  Remove inftarg.o.
+	(LOADLIBES): New variable.
+	* config/i386/nbsdelf.mh (NATDEPFILES): Add inf-child.o and
+	inf-ptrace.o.  Remove inftarg.o.
+	* config/i386/obsd.mh (NATDEPFILES): Add inf-child.o and
+	inf-ptrace.o. Remove inftarg.o.
+	* config/i386/obsdaout.mh (NATDEPFILES): Add inf-child.o,
+	inf-ptrace.o, i386nbsd-nat.o and bsd-kvm.o.  Remove inftarg.o.
+	(LOADLIBES): New variable.
+	* Makefile.in (i386bsd_nat_h): New variable.
+	(i386bsd-nat.o, i386fbsd-nat.o, i386nbsd-nat.o): Update
+	dependencies.
+
 	* sparc64nbsd-tdep.c: Include "objfiles.h".
 	(sparc64nbsd_init_abi): Set in_solib_call_trampoline and
 	skip_trampoline_code.  Set solib_svr4_fetch_link_map_offsets to

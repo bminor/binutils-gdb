@@ -54,12 +54,6 @@ extern unsigned long i386bsd_dr_get_status (void);
 
 /* Get generic BSD native definitions.  */
 #include "config/nm-bsd.h"
-
-/* Override child_resume in `infptrace.c' to work around a kernel bug.  */
-#define CHILD_RESUME
-
-/* Override child_pid_to_exec_file in 'inftarg.c'.  */
-#define CHILD_PID_TO_EXEC_FILE
 
 
 /* Support for the user struct.  */
