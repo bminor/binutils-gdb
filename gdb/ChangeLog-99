@@ -379,7 +379,7 @@ Mon Dec 13 11:10:59 1999  Jimmy Guo	<guo@cup.hp.com>
 
 	* valarith.c (value_binop): Add support for exponentiation,
 	equal, not equal.
-	(my_strcmp): New function.
+	(value_strcmp): New function.
 	(value_equal,value_less): Add string equality comparison support.
 
 	* m2-exp.y (lex): add default case statement to capture
