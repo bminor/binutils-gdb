@@ -1,3 +1,10 @@
+Tue Mar 11 01:13:31 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	From Eric Youngdale <eric@andante.jic.com>:
+	* config/obj-elf.c (obj_elf_symver): Check for duplicate or
+	illegal symbol version names.
+	(elf_frob_symbol): Check for external default versions.
+
 Sun Mar  9 23:49:12 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	From Eric Youngdale <eric@andante.jic.com>:
