@@ -200,6 +200,9 @@
 
 2002-04-05  Michael Snyder  <msnyder@redhat.com>
 
+	* breakpoint.c (clear_command): Rewrite middle section to
+	combine two loops with identical control conditions.
+	Add a cleanup to eliminate a memory leak.
 	* cli/cli-dump.c (restore_section_callback): Use paddr_nz.
 
 2002-04-05  H.J. Lu  (hjl@gnu.org)

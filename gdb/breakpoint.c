@@ -6442,15 +6442,15 @@ tcatch_command (char *arg, int from_tty)
   catch_command_1 (arg, 1, from_tty);
 }
 
+/* Delete breakpoints by address or line.  */
 
 static void
 clear_command (char *arg, int from_tty)
 {
-  register struct breakpoint *b, *b1;
+  struct breakpoint *b, *tmp, *prev, *found;
   int default_match;
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
-  register struct breakpoint *found;
   int i;
 
   if (arg)
@@ -6462,6 +6462,7 @@ clear_command (char *arg, int from_tty)
     {
       sals.sals = (struct symtab_and_line *)
 	xmalloc (sizeof (struct symtab_and_line));
+      make_cleanup (xfree, sals.sals);
       INIT_SAL (&sal);		/* initialize to zeroes */
       sal.line = default_breakpoint_line;
       sal.symtab = default_breakpoint_symtab;
@@ -6476,13 +6477,11 @@ clear_command (char *arg, int from_tty)
     }
 
   /* For each line spec given, delete bps which correspond
-     to it.  We do this in two loops: the first loop looks at
-     the initial bp(s) in the chain which should be deleted,
-     the second goes down the rest of the chain looking ahead
-     one so it can take those bps off the chain without messing
-     up the chain. */
+     to it.  Do it in two passes, solely to preserve the current
+     behavior that from_tty is forced true if we delete more than
+     one breakpoint.  */
 
-
+  found = NULL;
   for (i = 0; i < sals.nelts; i++)
     {
       /* If exact pc given, clear bpts at that pc.
@@ -6498,81 +6497,75 @@ clear_command (char *arg, int from_tty)
          1              0             <can't happen> */
 
       sal = sals.sals[i];
-      found = (struct breakpoint *) 0;
+      prev = NULL;
 
-
-      while (breakpoint_chain
-      /* Why don't we check here that this is not
-         a watchpoint, etc., as we do below?
-         I can't make it fail, but don't know
-         what's stopping the failure: a watchpoint
-         of the same address as "sal.pc" should
-         wind up being deleted. */
-
-	     && (((sal.pc && (breakpoint_chain->address == sal.pc)) 
-		  && (!overlay_debugging 
-		      || breakpoint_chain->section == sal.section))
-		 || ((default_match || (0 == sal.pc))
-		     && breakpoint_chain->source_file != NULL
-		     && sal.symtab != NULL
-	      && STREQ (breakpoint_chain->source_file, sal.symtab->filename)
-		     && breakpoint_chain->line_number == sal.line)))
-
+      /* Find all matching breakpoints, remove them from the
+	 breakpoint chain, and add them to the 'found' chain.  */
+      ALL_BREAKPOINTS_SAFE (b, tmp)
 	{
-	  b1 = breakpoint_chain;
-	  breakpoint_chain = b1->next;
-	  b1->next = found;
-	  found = b1;
-	}
-
-      ALL_BREAKPOINTS (b)
-	while (b->next
-	       && b->next->type != bp_none
-	       && b->next->type != bp_watchpoint
-	       && b->next->type != bp_hardware_watchpoint
-	       && b->next->type != bp_read_watchpoint
-	       && b->next->type != bp_access_watchpoint
-	       && (((sal.pc && (b->next->address == sal.pc)) 
-		    && (!overlay_debugging || b->next->section == sal.section))
-		   || ((default_match || (0 == sal.pc))
-		       && b->next->source_file != NULL
-		       && sal.symtab != NULL
-		       && STREQ (b->next->source_file, sal.symtab->filename)
-		       && b->next->line_number == sal.line)))
-
-
-	{
-	  b1 = b->next;
-	  b->next = b1->next;
-	  b1->next = found;
-	  found = b1;
-	}
-
-      if (found == 0)
-	{
-	  if (arg)
-	    error ("No breakpoint at %s.", arg);
+	  /* Are we going to delete b? */
+	  if (b->type != bp_none
+	      && b->type != bp_watchpoint
+	      && b->type != bp_hardware_watchpoint
+	      && b->type != bp_read_watchpoint
+	      && b->type != bp_access_watchpoint
+	      /* Not if b is a watchpoint of any sort... */
+	      && (((sal.pc && (b->address == sal.pc)) 
+		   && (!section_is_overlay (b->section)
+		       || b->section == sal.section))
+		  /* Yes, if sal.pc matches b (modulo overlays).  */
+		  || ((default_match || (0 == sal.pc))
+		      && b->source_file != NULL
+		      && sal.symtab != NULL
+		      && STREQ (b->source_file, sal.symtab->filename)
+		      && b->line_number == sal.line)))
+	    /* Yes, if sal source file and line matches b.  */
+	    {
+	      /* Remove it from breakpoint_chain...  */
+	      if (b == breakpoint_chain)
+		{
+		  /* b is at the head of the list */
+		  breakpoint_chain = b->next;
+		}
+	      else
+		{
+		  prev->next = b->next;
+		}
+	      /* And add it to 'found' chain.  */
+	      b->next = found;
+	      found = b;
+	    }
 	  else
-	    error ("No breakpoint at this line.");
+	    {
+	      /* Keep b, and keep a pointer to it.  */
+	      prev = b;
+	    }
 	}
-
-      if (found->next)
-	from_tty = 1;		/* Always report if deleted more than one */
-      if (from_tty)
-	printf_unfiltered ("Deleted breakpoint%s ", found->next ? "s" : "");
-      breakpoints_changed ();
-      while (found)
-	{
-	  if (from_tty)
-	    printf_unfiltered ("%d ", found->number);
-	  b1 = found->next;
-	  delete_breakpoint (found);
-	  found = b1;
-	}
-      if (from_tty)
-	putchar_unfiltered ('\n');
     }
-  xfree (sals.sals);
+  /* Now go thru the 'found' chain and delete them.  */
+  if (found == 0)
+    {
+      if (arg)
+	error ("No breakpoint at %s.", arg);
+      else
+	error ("No breakpoint at this line.");
+    }
+
+  if (found->next)
+    from_tty = 1;		/* Always report if deleted more than one */
+  if (from_tty)
+    printf_unfiltered ("Deleted breakpoint%s ", found->next ? "s" : "");
+  breakpoints_changed ();
+  while (found)
+    {
+      if (from_tty)
+	printf_unfiltered ("%d ", found->number);
+      tmp = found->next;
+      delete_breakpoint (found);
+      found = tmp;
+    }
+  if (from_tty)
+    putchar_unfiltered ('\n');
 }
 
 /* Delete breakpoint in BS if they are `delete' breakpoints and
