@@ -1,8 +1,13 @@
 2003-06-21  Andrew Cagney  <cagney@redhat.com>
 
-	From Ian Lance Taylor <ian@airs.com>:
-        * hw_nvram.c (hw_nvram_init_address): Correct call to memset--swap
-        second and third arguments.
+	* ppc-instructions: Add missing +8 line.  Found by blofeldus at
+	yahoo.com.
+	
+2003-06-21  Andrew Cagney  <cagney@redhat.com>
+
+	From Ian Lance Taylor <ian@airs.com>: * hw_nvram.c
+	(hw_nvram_init_address): Correct call to memset--swap second and
+	third arguments.
 
 2003-06-21  Andrew Cagney  <cagney@redhat.com>
 
