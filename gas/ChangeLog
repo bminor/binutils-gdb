@@ -1,3 +1,22 @@
+Thu Jul 15 11:51:03 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* Preliminary support for m88k-coff.
+	* configure.in (m88k-*-coff*): New target.  Use coffbfd and
+	m88kcoff.
+	* config/m88kcoff.mt: New file.
+	* read.c (lex_type): New macro LEX_AT to set lex type of '@'.
+	(pseudo_set): Handle difference of symbols in different fragments
+	by saving the entire expression as the value of the symbol.
+	* symbols.c (resolve_symbol_value): Resolve difference
+	expressions.
+	* config/obj-coffbfd.c (obj_pseudo_table): If TC_M88K, accept
+	"sdef" as a synonym for "def".
+	* config/obj-coffbfd.h: If TC_M88K, include coff/m88k.h and set
+	TARGET_FORMAT.
+	(S_IS_LOCAL): Any symbol which includes \001 in the name is local.
+	* config/tc-m88k.c, config/tc-m88k.h: Numerous changes to bring
+	m88k port up to date, and to add COFF support.
+
 Wed Jul 14 15:09:32 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* Removed sy_forward and replaced it with an undefined expression

@@ -602,6 +602,21 @@ resolve_symbol_value (symp)
 			+ symp->sy_frag->fr_address
 			+ S_GET_VALUE (symp->sy_value.X_add_symbol)));
 	}
+      else if (symp->sy_value.X_seg == diff_section)
+	{
+	  resolve_symbol_value (symp->sy_value.X_add_symbol);
+	  resolve_symbol_value (symp->sy_value.X_subtract_symbol);
+	  if (S_GET_SEGMENT (symp->sy_value.X_add_symbol)
+	      != S_GET_SEGMENT (symp->sy_value.X_subtract_symbol))
+	    as_bad ("%s is difference of symbols in different sections",
+		    S_GET_NAME (symp));
+	  S_SET_VALUE (symp,
+		       (symp->sy_value.X_add_number
+			+ symp->sy_frag->fr_address
+			+ S_GET_VALUE (symp->sy_value.X_add_symbol)
+			- S_GET_VALUE (symp->sy_value.X_subtract_symbol)));
+	  S_SET_SEGMENT (symp, absolute_section);
+	}
       else
 	{
 	  /* More cases need to be added here.  */

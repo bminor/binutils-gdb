@@ -64,6 +64,11 @@
 #define TARGET_FORMAT "coff-m68k"
 #endif
 
+#ifdef TC_M88K
+#include "coff/m88k.h"
+#define TARGET_FORMAT "coff-m88kbcs"
+#endif
+
 #ifdef TC_I386
 #include "coff/i386.h"
 #define TARGET_FORMAT "coff-i386"
@@ -156,10 +161,11 @@ obj_symbol_type;
 /* True if a debug special symbol entry */
 #define S_IS_DEBUG(s)		((s)->sy_symbol.ost_entry.n_scnum == C_DEBUG_SECTION)
 /* True if a symbol is local symbol name */
-/* A symbol name whose name begin with ^A is a gas internal pseudo symbol */
-#define S_IS_LOCAL(s)		(S_GET_NAME(s)[0] == '\001' || \
-				 (s)->sy_symbol.ost_entry.n_scnum == C_REGISTER_SECTION || \
-				 (S_LOCAL_NAME(s) && !flagseen['L']))
+/* A symbol name whose name includes ^A is a gas internal pseudo symbol */
+#define S_IS_LOCAL(s) \
+  ((s)->sy_symbol.ost_entry.n_scnum == C_REGISTER_SECTION \
+   || (S_LOCAL_NAME(s) && !flagseen['L']) \
+   || (strchr (s, '\001') != NULL))
 /* True if a symbol is not defined in this file */
 #define S_IS_EXTERN(s)		((s)->sy_symbol.ost_entry.n_scnum == 0 \
 				 && S_GET_VALUE (s) == 0)

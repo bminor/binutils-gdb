@@ -178,6 +178,10 @@ const pseudo_typeS obj_pseudo_table[] =
   {"ident", obj_coff_ident, 0},
   {"ABORT", s_abort, 0},
   {"lcomm", obj_coff_lcomm, 0},
+#ifdef TC_M88K
+  /* The m88k uses sdef instead of def.  */
+  {"sdef", obj_coff_def, 0},
+#endif
   {NULL}			/* end sentinel */
 };				/* obj_pseudo_table */
 

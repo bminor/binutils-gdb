@@ -68,6 +68,11 @@ char *input_line_pointer;	/*->next char of source file to parse. */
 die horribly;
 #endif
 
+#ifndef LEX_AT
+/* The m88k unfortunately uses @ as a label beginner.  */
+#define LEX_AT 0
+#endif
+
 /* used by is_... macros. our ctype[] */
 const char lex_type[256] =
 {
@@ -75,7 +80,7 @@ const char lex_type[256] =
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* PQRSTUVWXYZ[\]^_ */
   0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0,	/* _!"#$%&'()*+,-./ */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,	/* 0123456789:;<=>? */
-  0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,	/* @ABCDEFGHIJKLMNO */
+  LEX_AT, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,	/* @ABCDEFGHIJKLMNO */
   3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 3,	/* PQRSTUVWXYZ[\]^_ */
   0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,	/* `abcdefghijklmno */
   3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0,	/* pqrstuvwxyz{|}~. */
@@ -1473,11 +1478,7 @@ pseudo_set (symbolP)
 		S_GET_VALUE (exp.X_subtract_symbol);
 	      goto abs;
 	    }
-	  as_bad ("Invalid expression: separation between symbols `%s'",
-		  S_GET_NAME (exp.X_add_symbol));
-	  as_bad (" and `%s' may not be constant",
-		  S_GET_NAME (exp.X_subtract_symbol));
-	  need_pass_2++;
+	  symbolP->sy_value = exp;
 	}
       else
 	{
