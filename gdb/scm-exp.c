@@ -230,7 +230,7 @@ scm_lreadr (skipping)
 {
   int c, j;
   struct stoken str;
-  LONGEST svalue;
+  LONGEST svalue = 0;
  tryagain:
   c = *lexptr++;
   switch (c)

@@ -664,8 +664,8 @@ record_line (subfile, line, pc)
 
 static int
 compare_line_numbers (ln1p, ln2p)
-     const PTR ln1p;
-     const PTR ln2p;
+     const void *ln1p;
+     const void *ln2p;
 {
   struct linetable_entry *ln1 = (struct linetable_entry *) ln1p;
   struct linetable_entry *ln2 = (struct linetable_entry *) ln2p;

@@ -1,3 +1,11 @@
+Mon Aug 12 21:23:44 1996  Fred Fish  <fnf@cygnus.com>
+
+	* remote-pa.c (boot_board): Add dummy params to make type compatible
+ 	for passing to add_com.
+	* scm-exp.c (scm_lreadr): Ensure svalue is not used uninitialized.
+	* buildsym.c (compare_line_numbers): Change function to match
+	prototype and also what qsort expects.
+
 Mon Aug 12 19:19:00 1996  Mark Alexander  <marka@cygnus.com>
 
 	* remote.c: Make remote_write_size public.

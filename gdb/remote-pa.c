@@ -175,7 +175,7 @@ static int
 read_frame PARAMS ((char *));
 
 static void
-boot_board PARAMS ((void));
+boot_board PARAMS ((char *, int));
 
 static int
 remote_write_bytes PARAMS ((CORE_ADDR memaddr, char *myaddr, int len));
@@ -374,8 +374,10 @@ get_offsets ()
 
 #define INBUFSIZE 10
 
-void
-boot_board()
+static void
+boot_board (dummy1, dummy2)
+     char *dummy1;
+     int dummy2;
 {
   char c;
   char buf[INBUFSIZE];
