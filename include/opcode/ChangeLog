@@ -1,3 +1,18 @@
+start-sanitize-sky
+Mon Jan  5 13:33:21 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* txvu.h: New file
+
+end-sanitize-sky
+start-sanitize-d30v
+Tue Dec 16 15:15:52 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* d30v.h (d30v_opcode): Reorder flags somewhat, add new flags for
+	2 word load/store, ADDppp/SUBppp, 16/32 bit multiply.  Make
+	flags_{used,set} long.
+	(d30v_operand): Make flags field long.
+
+end-sanitize-d30v
 Mon Dec  1 12:24:44 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* m68k.h: Fix comment describing operand types.
