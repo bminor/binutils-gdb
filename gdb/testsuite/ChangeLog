@@ -1,3 +1,7 @@
+2003-08-12  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/float.exp: Add test for SH.
+
 2003-08-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.arch/i386-prologue.c, gdb.arch/i386-prologue.exp: New files.
