@@ -210,6 +210,14 @@ struct _sim_cpu {
   
   uint8                 ios[MAX_PORTS];
 
+  /* Memory bank parameters which describe how the memory bank window
+     is mapped in memory and how to convert it in virtual address.  */
+  uint16                bank_start;
+  uint16                bank_end;
+  address_word          bank_virtual;
+  unsigned              bank_shift;
+  
+
   struct hw            *hw_cpu;
 
   /* ... base type ... */
@@ -237,7 +245,7 @@ struct _sim_cpu {
 #define cpu_get_sp(PROC)           ((PROC)->cpu_regs.sp)
 #define cpu_get_a(PROC)            ((PROC->cpu_regs.d >> 8) & 0x0FF)
 #define cpu_get_b(PROC)            ((PROC->cpu_regs.d) & 0x0FF)
-#define cpu_get_page(PROC)         (PROC->cpu_regs.page)
+#define cpu_get_page(PROC)         ((PROC)->cpu_regs.page)
 
 /* 68HC12 specific and Motorola internal registers.  */
 #define cpu_get_tmp3(PROC)         (0)
@@ -246,7 +254,7 @@ struct _sim_cpu {
 #define cpu_set_d(PROC,VAL)        (((PROC)->cpu_regs.d) = (VAL))
 #define cpu_set_x(PROC,VAL)        (((PROC)->cpu_regs.ix) = (VAL))
 #define cpu_set_y(PROC,VAL)        (((PROC)->cpu_regs.iy) = (VAL))
-#define cpu_set_page(PROC,VAL)     ((PROC->cpu_regs.page) = (VAL))
+#define cpu_set_page(PROC,VAL)     (((PROC)->cpu_regs.page) = (VAL))
 
 /* 68HC12 specific and Motorola internal registers.  */
 #define cpu_set_tmp3(PROC,VAL)     (0)
@@ -297,9 +305,10 @@ extern void cpu_memory_exception (struct _sim_cpu *proc,
 inline address_word
 phys_to_virt (sim_cpu *cpu, address_word addr)
 {
-  if (addr >= 0x8000 && addr < 0xc000)
-    return ((address_word) (addr) - 0x8000)
-      + (((address_word) cpu->cpu_regs.page) << 14) + 0x01000000;
+  if (addr >= cpu->bank_start && addr < cpu->bank_end)
+    return ((address_word) (addr - cpu->bank_start)
+            + (((address_word) cpu->cpu_regs.page) << cpu->bank_shift)
+            + cpu->bank_virtual);
   else
     return (address_word) (addr);
 }
