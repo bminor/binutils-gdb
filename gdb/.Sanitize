@@ -64,7 +64,6 @@ Makefile.in
 NEWS
 README
 TODO
-a29k-pinsn.c
 a29k-tdep.c
 a68v-nat.c
 alpha-nat.c
@@ -73,7 +72,6 @@ altos-xdep.c
 annotate.c
 annotate.h
 arm-convert.s
-arm-pinsn.c
 arm-tdep.c
 arm-xdep.c
 blockframe.c
@@ -101,7 +99,6 @@ complaints.c
 complaints.h
 config
 configure.in
-convex-pinsn.c
 convex-tdep.c
 convex-xdep.c
 copying.awk
@@ -149,17 +146,15 @@ gdbserver
 gdbtypes.c
 gdbtypes.h
 go32-xdep.c
-gould-pinsn.c
+gould-tdep.c
 gould-xdep.c
 h8300-tdep.c
 h8500-tdep.c
 hp300ux-nat.c
-hppa-pinsn.c
 hppa-tdep.c
 hppab-nat.c
 hppah-nat.c
 hpread.c
-i386-pinsn.c
 i386-stub.c
 i386-tdep.c
 i386aix-nat.c
@@ -170,7 +165,6 @@ i386mach-nat.c
 i386v-nat.c
 i386v4-nat.c
 i387-tdep.c
-i960-pinsn.c
 i960-tdep.c
 infcmd.c
 inferior.h
@@ -191,11 +185,9 @@ m2-lang.h
 m2-typeprint.c
 m2-valprint.c
 m3-nat.c
-m68k-pinsn.c
 m68k-stub.c
 m68k-tdep.c
 m88k-nat.c
-m88k-pinsn.c
 m88k-tdep.c
 main.c
 maint.c
@@ -204,7 +196,6 @@ mem-break.c
 minimon.h
 minsyms.c
 mips-nat.c
-mips-pinsn.c
 mips-tdep.c
 mipsm3-nat.c
 mipsv4-nat.c
@@ -217,7 +208,7 @@ nindy-tdep.c
 nlm
 nlmread.c
 nlmstub.def
-ns32k-pinsn.c
+ns32k-tdep.c
 ns32km3-nat.c
 objfiles.c
 objfiles.h
@@ -230,7 +221,6 @@ partial-stab.h
 printcmd.c
 procfs.c
 ptx4-nat.c
-pyr-pinsn.c
 pyr-tdep.c
 pyr-xdep.c
 regex.c
@@ -258,7 +248,6 @@ remote-vx.c
 remote-z8k.c
 remote.c
 rs6000-nat.c
-rs6000-pinsn.c
 rs6000-tdep.c
 rom68k-rom.c
 saber.suppress
@@ -278,7 +267,6 @@ somsolib.h
 source.c
 sp64-tdep.c
 sparc-nat.c
-sparc-pinsn.c
 sparc-stub.c
 sparc-tdep.c
 sparcl-stub.c
@@ -299,7 +287,7 @@ symm-tdep.c
 symmisc.c
 symtab.c
 symtab.h
-tahoe-pinsn.c
+tahoe-tdep.c
 target.c
 target.h
 terminal.h
@@ -320,7 +308,7 @@ valprint.c
 valprint.h
 value.h
 values.c
-vax-pinsn.c
+vax-tdep.c
 vx-share
 w65-tdep.c
 w89k-rom.c
