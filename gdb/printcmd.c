@@ -70,10 +70,6 @@ static char last_size = 'w';
 
 static CORE_ADDR next_address;
 
-/* Default section to examine next. */
-
-static asection *next_section;
-
 /* Last address examined.  */
 
 static CORE_ADDR last_examine_address;
@@ -169,9 +165,6 @@ static void print_command (char *, int);
 static void print_command_1 (char *, int, int);
 
 static void validate_format (struct format_data, char *);
-
-static void do_examine (struct format_data, CORE_ADDR addr,
-			asection * section);
 
 static void print_formatted (struct value *, int, int, struct ui_file *);
 
@@ -288,7 +281,6 @@ print_formatted (struct value *val, int format, int size,
   if (VALUE_LVAL (val) == lval_memory)
     {
       next_address = VALUE_ADDRESS (val) + len;
-      next_section = VALUE_BFD_SECTION (val);
     }
 
   switch (format)
@@ -297,7 +289,6 @@ print_formatted (struct value *val, int format, int size,
       /* FIXME: Need to handle wchar_t's here... */
       next_address = VALUE_ADDRESS (val)
 	+ val_print_string (VALUE_ADDRESS (val), -1, 1, stream);
-      next_section = VALUE_BFD_SECTION (val);
       break;
 
     case 'i':
@@ -311,7 +302,6 @@ print_formatted (struct value *val, int format, int size,
       wrap_here ("    ");
       next_address = VALUE_ADDRESS (val)
 	+ gdb_print_insn (VALUE_ADDRESS (val), stream);
-      next_section = VALUE_BFD_SECTION (val);
       break;
 
     default:
@@ -763,7 +753,7 @@ static struct type *examine_g_type;
    Fetch it from memory and print on gdb_stdout.  */
 
 static void
-do_examine (struct format_data fmt, CORE_ADDR addr, asection *sect)
+do_examine (struct format_data fmt, CORE_ADDR addr)
 {
   char format = 0;
   char size;
@@ -776,7 +766,6 @@ do_examine (struct format_data fmt, CORE_ADDR addr, asection *sect)
   size = fmt.size;
   count = fmt.count;
   next_address = addr;
-  next_section = sect;
 
   /* String or instruction format implies fetch single bytes
      regardless of the specified size.  */
@@ -831,7 +820,7 @@ do_examine (struct format_data fmt, CORE_ADDR addr, asection *sect)
 	     the disassembler be modified so that LAST_EXAMINE_VALUE
 	     is left with the byte sequence from the last complete
 	     instruction fetched from memory? */
-	  last_examine_value = value_at_lazy (val_type, next_address, sect);
+	  last_examine_value = value_at_lazy (val_type, next_address);
 
 	  if (last_examine_value)
 	    release_value (last_examine_value);
@@ -1304,12 +1293,10 @@ x_command (char *exp, int from_tty)
 	next_address = VALUE_ADDRESS (val);
       else
 	next_address = value_as_address (val);
-      if (VALUE_BFD_SECTION (val))
-	next_section = VALUE_BFD_SECTION (val);
       do_cleanups (old_chain);
     }
 
-  do_examine (fmt, next_address, next_section);
+  do_examine (fmt, next_address);
 
   /* If the examine succeeds, we remember its size and format for next time.  */
   last_size = fmt.size;
@@ -1549,7 +1536,7 @@ do_one_display (struct display *d)
 
       annotate_display_value ();
 
-      do_examine (d->format, addr, VALUE_BFD_SECTION (val));
+      do_examine (d->format, addr);
     }
   else
     {

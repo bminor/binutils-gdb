@@ -228,7 +228,7 @@ java_class_from_object (struct value *obj_val)
   if (TYPE_CODE (VALUE_TYPE (obj_val)) == TYPE_CODE_PTR
       && TYPE_LENGTH (TYPE_TARGET_TYPE (VALUE_TYPE (obj_val))) == 0)
     obj_val = value_at (get_java_object_type (),
-			value_as_address (obj_val), NULL);
+			value_as_address (obj_val));
 
   vtable_val = value_struct_elt (&obj_val, NULL, "vtable", NULL, "structure");
   return value_struct_elt (&vtable_val, NULL, "class", NULL, "structure");
@@ -904,7 +904,7 @@ evaluate_subexp_java (struct type *expect_type, struct expression *exp,
 	    error ("array index (%ld) out of bounds (length: %ld)",
 		   index, length);
 	  address = (address + 4) + index * TYPE_LENGTH (el_type);
-	  return value_at (el_type, address, NULL);
+	  return value_at (el_type, address);
 	}
       else if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
 	{

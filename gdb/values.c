@@ -97,7 +97,6 @@ allocate_value (struct type *type)
   VALUE_REGNO (val) = -1;
   VALUE_LAZY (val) = 0;
   VALUE_OPTIMIZED_OUT (val) = 0;
-  VALUE_BFD_SECTION (val) = NULL;
   VALUE_EMBEDDED_OFFSET (val) = 0;
   VALUE_POINTED_TO_OFFSET (val) = 0;
   val->modifiable = 1;
@@ -228,7 +227,6 @@ value_copy (struct value *arg)
   VALUE_OPTIMIZED_OUT (val) = VALUE_OPTIMIZED_OUT (arg);
   VALUE_EMBEDDED_OFFSET (val) = VALUE_EMBEDDED_OFFSET (arg);
   VALUE_POINTED_TO_OFFSET (val) = VALUE_POINTED_TO_OFFSET (arg);
-  VALUE_BFD_SECTION (val) = VALUE_BFD_SECTION (arg);
   val->modifiable = arg->modifiable;
   if (!VALUE_LAZY (val))
     {
@@ -795,8 +793,7 @@ value_static_field (struct type *type, int fieldno)
   if (TYPE_FIELD_STATIC_HAS_ADDR (type, fieldno))
     {
       retval = value_at (TYPE_FIELD_TYPE (type, fieldno),
-			 TYPE_FIELD_STATIC_PHYSADDR (type, fieldno),
-			 NULL);
+			 TYPE_FIELD_STATIC_PHYSADDR (type, fieldno));
     }
   else
     {
@@ -812,8 +809,7 @@ value_static_field (struct type *type, int fieldno)
 	  else
 	    {
 	      retval = value_at (TYPE_FIELD_TYPE (type, fieldno),
-				 SYMBOL_VALUE_ADDRESS (msym),
-				 SYMBOL_BFD_SECTION (msym));
+				 SYMBOL_VALUE_ADDRESS (msym));
 	    }
 	}
       else

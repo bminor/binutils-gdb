@@ -122,7 +122,6 @@ value_add (struct value *arg1, struct value *arg2)
       retval = value_from_pointer (valptrtype,
 				   value_as_address (valptr)
 				   + (sz * value_as_long (valint)));
-      VALUE_BFD_SECTION (retval) = VALUE_BFD_SECTION (valptr);
       return retval;
     }
 

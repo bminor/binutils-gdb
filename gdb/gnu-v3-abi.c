@@ -226,8 +226,7 @@ gnuv3_rtti_type (struct value *value,
   vtable_address
     = value_as_address (value_field (value, TYPE_VPTR_FIELDNO (value_type)));
   vtable = value_at_lazy (vtable_type,
-                          vtable_address - vtable_address_point_offset (),
-                          VALUE_BFD_SECTION (value));
+                          vtable_address - vtable_address_point_offset ());
   
   /* Find the linker symbol for this vtable.  */
   vtable_symbol
@@ -330,8 +329,7 @@ gnuv3_virtual_fn_field (struct value **value_p,
     = value_as_address (value_field (value, TYPE_VPTR_FIELDNO (vfn_base)));
 
   vtable = value_at_lazy (vtable_type,
-                          vtable_address - vtable_address_point_offset (),
-                          VALUE_BFD_SECTION (value));
+                          vtable_address - vtable_address_point_offset ());
 
   /* Fetch the appropriate function pointer from the vtable.  */
   vfn = value_subscript (value_field (vtable, vtable_field_virtual_functions),
@@ -409,10 +407,9 @@ gnuv3_baseclass_offset (struct type *type, int index, char *valaddr,
 	   TYPE_NAME (vbasetype) ? TYPE_NAME (vbasetype) : "<unknown>");
 
   vtable_address = value_as_address (value_at_lazy (builtin_type_void_data_ptr,
-						    address, NULL));
+						    address));
   vtable = value_at_lazy (vtable_type,
-                          vtable_address - vtable_address_point_offset (),
-                          NULL);
+                          vtable_address - vtable_address_point_offset ());
   offset_val = value_from_longest(builtin_type_int, cur_base_offset);
   vbase_array = value_field (vtable, vtable_field_vcall_and_vbase_offsets);
   base_offset = value_as_long (value_subscript (vbase_array, offset_val));

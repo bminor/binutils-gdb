@@ -162,9 +162,6 @@ struct value
        actually exist in the program.  */
     char optimized_out;
 
-    /* The BFD section associated with this value.  */
-    asection *bfd_section;
-
     /* Actual contents of the value.  For use of this value; setting
        it uses the stuff above.  Not valid if lazy is nonzero.
        Target byte-order.  We force it to be aligned properly for any
@@ -226,7 +223,6 @@ extern int value_fetch_lazy (struct value *val);
 #define VALUE_OPTIMIZED_OUT(val) ((val)->optimized_out)
 #define VALUE_EMBEDDED_OFFSET(val) ((val)->embedded_offset)
 #define VALUE_POINTED_TO_OFFSET(val) ((val)->pointed_to_offset)
-#define VALUE_BFD_SECTION(val) ((val)->bfd_section)
 
 /* Convert a REF to the object referenced.  */
 
@@ -236,8 +232,7 @@ extern int value_fetch_lazy (struct value *val);
     if (TYPE_CODE (value_type_arg_tmp) == TYPE_CODE_REF)		\
       arg = value_at_lazy (TYPE_TARGET_TYPE (value_type_arg_tmp),	\
                            unpack_pointer (VALUE_TYPE (arg),		\
-                                           VALUE_CONTENTS (arg)),	\
-			                   VALUE_BFD_SECTION (arg));	\
+                                           VALUE_CONTENTS (arg)));	\
   } while (0)
 
 /* If ARG is an array, convert it to a pointer.
@@ -309,10 +304,8 @@ extern struct value *value_from_pointer (struct type *type, CORE_ADDR addr);
 extern struct value *value_from_double (struct type *type, DOUBLEST num);
 extern struct value *value_from_string (char *string);
 
-extern struct value *value_at (struct type *type, CORE_ADDR addr,
-			       asection * sect);
-extern struct value *value_at_lazy (struct type *type, CORE_ADDR addr,
-				    asection * sect);
+extern struct value *value_at (struct type *type, CORE_ADDR addr);
+extern struct value *value_at_lazy (struct type *type, CORE_ADDR addr);
 
 extern struct value *value_from_register (struct type *type, int regnum,
 					  struct frame_info *frame);

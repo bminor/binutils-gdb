@@ -1810,7 +1810,7 @@ ada_value_primitive_packed_val (struct value *obj, char *valaddr, long offset,
   else if (VALUE_LAZY (obj))
     {
       v = value_at (type,
-                    VALUE_ADDRESS (obj) + VALUE_OFFSET (obj) + offset, NULL);
+                    VALUE_ADDRESS (obj) + VALUE_OFFSET (obj) + offset);
       bytes = (unsigned char *) alloca (len);
       read_memory (VALUE_ADDRESS (v), bytes, len);
     }
@@ -7772,7 +7772,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
               struct type *arrType = ada_type_of_array (arg1, 0);
               if (arrType == NULL)
                 error ("Attempt to dereference null array pointer.");
-              return value_at_lazy (arrType, 0, NULL);
+              return value_at_lazy (arrType, 0);
             }
           else if (TYPE_CODE (type) == TYPE_CODE_PTR
                    || TYPE_CODE (type) == TYPE_CODE_REF

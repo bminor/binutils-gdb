@@ -410,10 +410,7 @@ value_cast (struct type *type, struct value *arg2)
       return arg2;
     }
   else if (VALUE_LVAL (arg2) == lval_memory)
-    {
-      return value_at_lazy (type, VALUE_ADDRESS (arg2) + VALUE_OFFSET (arg2),
-			    VALUE_BFD_SECTION (arg2));
-    }
+    return value_at_lazy (type, VALUE_ADDRESS (arg2) + VALUE_OFFSET (arg2));
   else if (code1 == TYPE_CODE_VOID)
     {
       return value_zero (builtin_type_void, not_lval);
@@ -451,7 +448,7 @@ value_zero (struct type *type, enum lval_type lv)
    adjustments before or after calling it. */
 
 struct value *
-value_at (struct type *type, CORE_ADDR addr, asection *sect)
+value_at (struct type *type, CORE_ADDR addr)
 {
   struct value *val;
 
@@ -464,7 +461,6 @@ value_at (struct type *type, CORE_ADDR addr, asection *sect)
 
   VALUE_LVAL (val) = lval_memory;
   VALUE_ADDRESS (val) = addr;
-  VALUE_BFD_SECTION (val) = sect;
 
   return val;
 }
@@ -472,7 +468,7 @@ value_at (struct type *type, CORE_ADDR addr, asection *sect)
 /* Return a lazy value with type TYPE located at ADDR (cf. value_at).  */
 
 struct value *
-value_at_lazy (struct type *type, CORE_ADDR addr, asection *sect)
+value_at_lazy (struct type *type, CORE_ADDR addr)
 {
   struct value *val;
 
@@ -484,7 +480,6 @@ value_at_lazy (struct type *type, CORE_ADDR addr, asection *sect)
   VALUE_LVAL (val) = lval_memory;
   VALUE_ADDRESS (val) = addr;
   VALUE_LAZY (val) = 1;
-  VALUE_BFD_SECTION (val) = sect;
 
   return val;
 }
@@ -853,7 +848,6 @@ value_coerce_function (struct value *arg1)
 
   retval = value_from_pointer (lookup_pointer_type (VALUE_TYPE (arg1)),
 			       (VALUE_ADDRESS (arg1) + VALUE_OFFSET (arg1)));
-  VALUE_BFD_SECTION (retval) = VALUE_BFD_SECTION (arg1);
   return retval;
 }
 
@@ -891,7 +885,6 @@ value_addr (struct value *arg1)
   arg2 = value_change_enclosing_type (arg2, lookup_pointer_type (VALUE_ENCLOSING_TYPE (arg1)));
   /* ... and also the relative position of the subobject in the full object */
   VALUE_POINTED_TO_OFFSET (arg2) = VALUE_EMBEDDED_OFFSET (arg1);
-  VALUE_BFD_SECTION (arg2) = VALUE_BFD_SECTION (arg1);
   return arg2;
 }
 
@@ -916,8 +909,7 @@ value_ind (struct value *arg1)
      BUILTIN_TYPE_LONGEST would seem to be a mistake.  */
   if (TYPE_CODE (base_type) == TYPE_CODE_INT)
     return value_at_lazy (builtin_type_int,
-			  (CORE_ADDR) value_as_long (arg1),
-			  VALUE_BFD_SECTION (arg1));
+			  (CORE_ADDR) value_as_long (arg1));
   else if (TYPE_CODE (base_type) == TYPE_CODE_PTR)
     {
       struct type *enc_type;
@@ -926,9 +918,8 @@ value_ind (struct value *arg1)
       enc_type = check_typedef (VALUE_ENCLOSING_TYPE (arg1));
       enc_type = TYPE_TARGET_TYPE (enc_type);
       /* Retrieve the enclosing object pointed to */
-      arg2 = value_at_lazy (enc_type,
-		   value_as_address (arg1) - VALUE_POINTED_TO_OFFSET (arg1),
-			    VALUE_BFD_SECTION (arg1));
+      arg2 = value_at_lazy (enc_type, (value_as_address (arg1)
+				       - VALUE_POINTED_TO_OFFSET (arg1)));
       /* Re-adjust type */
       VALUE_TYPE (arg2) = TYPE_TARGET_TYPE (base_type);
       /* Add embedding info */
@@ -1044,7 +1035,6 @@ value_array (int lowbound, int highbound, struct value **elemvec)
 		  VALUE_CONTENTS_ALL (elemvec[idx]),
 		  typelength);
 	}
-      VALUE_BFD_SECTION (val) = VALUE_BFD_SECTION (elemvec[0]);
       return val;
     }
 
@@ -1062,7 +1052,7 @@ value_array (int lowbound, int highbound, struct value **elemvec)
 
   /* Create the array type and set up an array value to be evaluated lazily. */
 
-  val = value_at_lazy (arraytype, addr, VALUE_BFD_SECTION (elemvec[0]));
+  val = value_at_lazy (arraytype, addr);
   return (val);
 }
 
@@ -1100,7 +1090,7 @@ value_string (char *ptr, int len)
   addr = allocate_space_in_inferior (len);
   write_memory (addr, ptr, len);
 
-  val = value_at_lazy (stringtype, addr, NULL);
+  val = value_at_lazy (stringtype, addr);
   return (val);
 }
 
@@ -1434,7 +1424,7 @@ find_rt_vbase_offset (struct type *type, struct type *basetype, char *valaddr,
      & use long type */
 
   /* epstein : FIXME -- added param for overlay section. May not be correct */
-  vp = value_at (builtin_type_int, vtbl + 4 * (-skip - index - HP_ACC_VBASE_START), NULL);
+  vp = value_at (builtin_type_int, vtbl + 4 * (-skip - index - HP_ACC_VBASE_START));
   boffset = value_as_long (vp);
   *skip_p = -1;
   *boffset_p = boffset;
@@ -2641,8 +2631,7 @@ value_full_object (struct value *argp, struct type *rtype, int xfull, int xtop,
      adjusting for the embedded offset of argp if that's what value_rtti_type
      used for its computation. */
   new_val = value_at_lazy (real_type, VALUE_ADDRESS (argp) - top +
-			   (using_enc ? 0 : VALUE_EMBEDDED_OFFSET (argp)),
-			   VALUE_BFD_SECTION (argp));
+			   (using_enc ? 0 : VALUE_EMBEDDED_OFFSET (argp)));
   VALUE_TYPE (new_val) = VALUE_TYPE (argp);
   VALUE_EMBEDDED_OFFSET (new_val) = using_enc ? top + VALUE_EMBEDDED_OFFSET (argp) : top;
   return new_val;

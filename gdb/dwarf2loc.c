@@ -247,8 +247,6 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
       CORE_ADDR address = dwarf_expr_fetch (ctx, 0);
 
       retval = allocate_value (SYMBOL_TYPE (var));
-      VALUE_BFD_SECTION (retval) = SYMBOL_BFD_SECTION (var);
-
       VALUE_LVAL (retval) = lval_memory;
       VALUE_LAZY (retval) = 1;
       VALUE_ADDRESS (retval) = address;

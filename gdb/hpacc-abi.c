@@ -128,7 +128,7 @@ hpacc_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
        * which case the multiplier should be 8 and values should be long */
       vp = value_at (builtin_type_int,
 		     coreptr + 4 * (TYPE_FN_FIELD_VOFFSET (f, j) +
-				    HP_ACC_VFUNC_START), NULL);
+				    HP_ACC_VFUNC_START));
 
       coreptr = *(CORE_ADDR *) (VALUE_CONTENTS (vp));
       /* coreptr now contains the address of the virtual function */
@@ -147,13 +147,13 @@ hpacc_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
       /* pai: FIXME 32x64 problem here, if words are 8 bytes long
        * the multiplier below has to be 8 and value should be long. */
       vp = value_at (builtin_type_int,
-		     coreptr + 4 * (HP_ACC_VFUNC_START + class_index), NULL);
+		     coreptr + 4 * (HP_ACC_VFUNC_START + class_index));
       /* Indirect once more, offset by function index */
       /* pai: FIXME 32x64 problem here, again multiplier could be 8 and value long */
       coreptr =
 	*(CORE_ADDR *) (VALUE_CONTENTS (vp) +
 			4 * TYPE_FN_FIELD_VOFFSET (f, j));
-      vp = value_at (builtin_type_int, coreptr, NULL);
+      vp = value_at (builtin_type_int, coreptr);
       coreptr = *(CORE_ADDR *) (VALUE_CONTENTS (vp));
 
       /* coreptr now contains the address of the virtual function */
@@ -229,16 +229,14 @@ hpacc_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
   /* Fetch the top offset of the object */
   /* FIXME possible 32x64 problem with pointer size & arithmetic */
   vp = value_at (builtin_type_int,
-                 coreptr + 4 * HP_ACC_TOP_OFFSET_OFFSET,
-                 VALUE_BFD_SECTION (v));
+                 coreptr + 4 * HP_ACC_TOP_OFFSET_OFFSET);
   top_offset = value_as_long (vp);
   if (top)
     *top = top_offset;
 
   /* Fetch the typeinfo pointer */
   /* FIXME possible 32x64 problem with pointer size & arithmetic */
-  vp = value_at (builtin_type_int, coreptr + 4 * HP_ACC_TYPEINFO_OFFSET,
-                 VALUE_BFD_SECTION (v));
+  vp = value_at (builtin_type_int, coreptr + 4 * HP_ACC_TYPEINFO_OFFSET);
   /* Indirect through the typeinfo pointer and retrieve the pointer
    * to the string name */
   coreptr = *(CORE_ADDR *) (VALUE_CONTENTS (vp));
@@ -246,7 +244,7 @@ hpacc_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
     error ("Retrieved null typeinfo pointer in trying to determine "
            "run-time type");
   /* 4 -> offset of name field */
-  vp = value_at (builtin_type_int, coreptr + 4, VALUE_BFD_SECTION (v));
+  vp = value_at (builtin_type_int, coreptr + 4);
   /* FIXME possible 32x64 problem */
 
   coreptr = *(CORE_ADDR *) (VALUE_CONTENTS (vp));

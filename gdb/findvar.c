@@ -386,7 +386,6 @@ read_var_value (struct symbol *var, struct frame_info *frame)
 
   v = allocate_value (type);
   VALUE_LVAL (v) = lval_memory;	/* The most likely possibility.  */
-  VALUE_BFD_SECTION (v) = SYMBOL_BFD_SECTION (var);
 
   len = TYPE_LENGTH (type);
 
@@ -450,7 +449,7 @@ Attempt to access variable defined in different shared object or load module whe
 addresses have not been bound by the dynamic loader. Try again when executable is running.");
 
 	locaddr = SYMBOL_VALUE_ADDRESS (var);
-	loc = value_at (lookup_pointer_type (type), locaddr, NULL);
+	loc = value_at (lookup_pointer_type (type), locaddr);
 	addr = value_as_address (loc);
       }
 
@@ -473,7 +472,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 	if (!argref)
 	  return 0;
 	argref += SYMBOL_VALUE (var);
-	ref = value_at (lookup_pointer_type (type), argref, NULL);
+	ref = value_at (lookup_pointer_type (type), argref);
 	addr = value_as_address (ref);
 	break;
       }
@@ -758,7 +757,6 @@ locate_var_value (struct symbol *var, struct frame_info *frame)
 
       addr = VALUE_ADDRESS (lazy_value);
       val = value_from_pointer (lookup_pointer_type (type), addr);
-      VALUE_BFD_SECTION (val) = VALUE_BFD_SECTION (lazy_value);
       return val;
     }
 

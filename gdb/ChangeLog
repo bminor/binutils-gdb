@@ -1,5 +1,36 @@
 2004-11-09  Andrew Cagney  <cagney@gnu.org>
 
+	* value.h (struct value): Delete field bfd_section.
+	(VALUE_BFD_SECTION): Delete macro.
+	(COERCE_REF): Update.
+	(value_at, value_at_lazy): Delete asection parameter.
+	* printcmd.c (print_formatted, x_command): Update.
+	(do_examine): Delete asection parameter.
+	(next_section): Delete variable.
+	* valops.c (value_cast, value_at, value_at_lazy)
+	(value_coerce_function, value_addr, value_ind, value_string) 
+	(find_rt_vbase_offset, value_full_object): Update.
+	* hpacc-abi.c (hpacc_virtual_fn_field)
+	(hpacc_value_rtti_type): Update.
+	* gnu-v3-abi.c (gnuv3_rtti_type, gnuv3_virtual_fn_field) 
+	(gnuv3_baseclass_offset): Update.
+	* f-valprint.c (f_val_print): Update.
+	* c-valprint.c (c_val_print): Update.
+	* p-valprint.c (pascal_val_print): Update.
+	* jv-valprint.c (java_value_print): Update.
+	* jv-lang.c (java_class_from_object, evaluate_subexp_java): Update.
+	* ada-lang.c (ada_value_primitive_packed_val)
+	(ada_evaluate_subexp): Update.
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc): Update.
+	* expprint.c (print_subexp_standard): Update.
+	* infcall.c (call_function_by_hand): Update.
+	* valarith.c (value_add): Update.
+	* eval.c (evaluate_subexp_standard): Update.
+	* values.c (allocate_value, value_copy, value_static_field): Update.
+	* findvar.c (read_var_value, locate_var_value): Update.
+	
+2004-11-09  Andrew Cagney  <cagney@gnu.org>
+
 	* i386-linux-tdep.c: Include "dwarf2-frame.h".
 	* Makefile.in: Update all dependencies.
 

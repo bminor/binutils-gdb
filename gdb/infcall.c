@@ -852,7 +852,7 @@ the function call).", name);
 	 you're seeing problems with values being returned using the
 	 "struct return convention", check that PUSH_DUMMY_CALL isn't
 	 playing tricks.  */
-      retval = value_at (value_type, struct_addr, NULL);
+      retval = value_at (value_type, struct_addr);
     else
       {
 	/* This code only handles "register convention".  */

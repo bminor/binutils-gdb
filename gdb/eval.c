@@ -1972,8 +1972,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	return value_zero (exp->elts[pc + 1].type, lval_memory);
       else
 	return value_at_lazy (exp->elts[pc + 1].type,
-			      value_as_address (arg1),
-			      NULL);
+			      value_as_address (arg1));
 
     case UNOP_PREINCREMENT:
       arg1 = evaluate_subexp (expect_type, exp, pos, noside);

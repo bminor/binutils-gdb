@@ -237,7 +237,7 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
 		    {
 		      wtype = TYPE_TARGET_TYPE (type);
 		    }
-		  vt_val = value_at (wtype, vt_address, NULL);
+		  vt_val = value_at (wtype, vt_address);
 		  val_print (VALUE_TYPE (vt_val), VALUE_CONTENTS (vt_val), 0,
 			     VALUE_ADDRESS (vt_val), stream, format,
 			     deref_ref, recurse + 1, pretty);
@@ -289,8 +289,7 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
 	      value_at
 	      (TYPE_TARGET_TYPE (type),
 	       unpack_pointer (lookup_pointer_type (builtin_type_void),
-			       valaddr + embedded_offset),
-	       NULL);
+			       valaddr + embedded_offset));
 	      val_print (VALUE_TYPE (deref_val),
 			 VALUE_CONTENTS (deref_val), 0,
 			 VALUE_ADDRESS (deref_val), stream, format,

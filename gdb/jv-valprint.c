@@ -68,7 +68,7 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
 	  type = type_from_class (java_class_from_object (val));
 	  type = lookup_pointer_type (type);
 
-	  val = value_at (type, address, NULL);
+	  val = value_at (type, address);
 	}
     }
 
