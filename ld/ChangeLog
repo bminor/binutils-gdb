@@ -1,3 +1,11 @@
+Mon Apr 11 12:32:57 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* scripttempl/i386coff.sc: If relocating, don't put .init and
+	.fini sections into .text; keep them separate.
+	* config/i386sco.mh (HOSTING_CRT0): If ../gcc/crtbegin.o does not
+	exist, get crtbegin based on gcc -print-libgcc-file-name.
+	(HOSTING_LIBS): Similar change for ../gcc/crtend.o.
+
 Wed Apr  6 00:09:37 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* configure.in (hppa*-*-*elf*): Don't require "-hp-" for the
