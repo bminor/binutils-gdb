@@ -2586,6 +2586,81 @@ again:
       type = make_function_type (type1, dbx_lookup_type (typenums));
       break;
 
+    case 'g':                   /* Prototyped function.  (Sun)  */
+      {
+        /* Unresolved questions:
+
+           - According to Sun's ``STABS Interface Manual'', for 'f'
+           and 'F' symbol descriptors, a `0' in the argument type list
+           indicates a varargs function.  But it doesn't say how 'g'
+           type descriptors represent that info.  Someone with access
+           to Sun's toolchain should try it out.
+
+           - According to the comment in define_symbol (search for
+           `process_prototype_types:'), Sun emits integer arguments as
+           types which ref themselves --- like `void' types.  Do we
+           have to deal with that here, too?  Again, someone with
+           access to Sun's toolchain should try it out and let us
+           know.  */
+
+        const char *type_start = (*pp) - 1;
+        struct type *return_type = read_type (pp, objfile);
+        struct type *func_type
+          = make_function_type (return_type, dbx_lookup_type (typenums));
+        struct type_list {
+          struct type *type;
+          struct type_list *next;
+        } *arg_types = 0;
+        int num_args = 0;
+
+        while (**pp && **pp != '#')
+          {
+            struct type *arg_type = read_type (pp, objfile);
+            struct type_list *new = alloca (sizeof (*new));
+            new->type = arg_type;
+            new->next = arg_types;
+            arg_types = new;
+            num_args++;
+          }
+        if (**pp == '#')
+          ++*pp;
+        else
+          {
+            static struct complaint msg = {
+              "Prototyped function type didn't end arguments with `#':\n%s",
+              0, 0
+            };
+            complain (&msg, type_start);
+          }
+
+        /* If there is just one argument whose type is `void', then
+           that's just an empty argument list.  */
+        if (arg_types
+            && ! arg_types->next
+            && TYPE_CODE (arg_types->type) == TYPE_CODE_VOID)
+          num_args = 0;
+
+        TYPE_FIELDS (func_type)
+          = (struct field *) TYPE_ALLOC (func_type,
+                                         num_args * sizeof (struct field));
+        memset (TYPE_FIELDS (func_type), 0, num_args * sizeof (struct field));
+        {
+          int i;
+          struct type_list *t;
+
+          /* We stuck each argument type onto the front of the list
+             when we read it, so the list is reversed.  Build the
+             fields array right-to-left.  */
+          for (t = arg_types, i = num_args - 1; t; t = t->next, i--)
+            TYPE_FIELD_TYPE (func_type, i) = t->type;
+        }
+        TYPE_NFIELDS (func_type) = num_args;
+        TYPE_FLAGS (func_type) |= TYPE_FLAG_PROTOTYPED;
+
+        type = func_type;
+        break;
+      }
+
     case 'k':			/* Const qualifier on some type (Sun) */
     case 'c':			/* Const qualifier on some type (OS9000) */
       /* Because 'c' means other things to AIX and 'k' is perfectly good,

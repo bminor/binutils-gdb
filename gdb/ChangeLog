@@ -1,3 +1,8 @@
+2002-02-09  Jim Blandy  <jimb@redhat.com>
+
+	* stabsread.c (read_type): Add code to parse Sun's syntax for
+	prototyped function types.
+
 2002-02-09  Andrew Cagney  <ac131313@redhat.com>
 
 	* Makefile.in (SUBDIR_CLI_INITS): Set to SUBDIR_CLI_SRCS.
