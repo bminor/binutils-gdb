@@ -3,21 +3,21 @@
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support, <sac@cygnus.com>.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define UNDERSCORE_HACK 1
 #include "bfd.h"
@@ -61,7 +61,10 @@ static boolean oasys_find_nearest_line
 static int oasys_generic_stat_arch_elt PARAMS ((bfd *, struct stat *));
 static int oasys_sizeof_headers PARAMS ((bfd *, boolean));
 
-/* Read in all the section data and relocation stuff too */
+long oasys_get_symtab PARAMS ((bfd *, asymbol **));
+long oasys_canonicalize_reloc PARAMS ((bfd *, sec_ptr, arelent **, asymbol **));
+
+/* Read in all the section data and relocation stuff too.  */
 PROTO (static boolean, oasys_slurp_section_data, (bfd * CONST abfd));
 
 static boolean
@@ -239,9 +242,6 @@ oasys_get_symtab_upper_bound (abfd)
 
   return (abfd->symcount + 1) * (sizeof (oasys_symbol_type *));
 }
-
-/*
-*/
 
 extern const bfd_target oasys_vec;
 

@@ -52,6 +52,10 @@ static reloc_howto_type *           mcore_coff_reloc_type_lookup
 static reloc_howto_type *           coff_mcore_rtype_to_howto
   PARAMS ((bfd *, asection *, struct internal_reloc *,
 	   struct coff_link_hash_entry *, struct internal_syment *, bfd_vma *));
+static void mcore_emit_base_file_entry
+  PARAMS ((struct bfd_link_info *, bfd *, asection *, bfd_vma));
+static boolean in_reloc_p PARAMS ((bfd *, reloc_howto_type *));
+static struct bfd_link_hash_table * coff_mcore_link_hash_table_create PARAMS ((bfd *));
 
 /* The NT loader points the toc register to &toc + 32768, in order to
    use the complete range of a 16-bit displacement. We have to adjust
@@ -217,6 +221,7 @@ mcore_hash_table;
   ((mcore_hash_table *) ((info)->hash))
 
 /* Create an MCore coff linker hash table.  */
+
 static struct bfd_link_hash_table *
 coff_mcore_link_hash_table_create (abfd)
      bfd * abfd;
@@ -244,6 +249,7 @@ coff_mcore_link_hash_table_create (abfd)
 }
 
 /* Add an entry to the base file.  */
+
 static void
 mcore_emit_base_file_entry (info, output_bfd, input_section, reloc_offset)
       struct bfd_link_info * info;
@@ -352,6 +358,7 @@ coff_mcore_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
 
 /* Return true if this relocation should appear in the output .reloc section.
    This function is referenced in pe_mkobject in peicode.h.  */
+
 static boolean
 in_reloc_p (abfd, howto)
      bfd * abfd ATTRIBUTE_UNUSED;

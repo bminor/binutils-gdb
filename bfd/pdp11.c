@@ -1,21 +1,21 @@
 /* BFD back-end for PDP-11 a.out binaries.
    Copyright 2001 Free Software Foundation, Inc.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* BFD backend for PDP-11, running 2.11BSD in particular.
 
@@ -362,6 +362,12 @@ static boolean translate_to_native_sym_flags
 static void adjust_o_magic PARAMS ((bfd *, struct internal_exec *));
 static void adjust_z_magic PARAMS ((bfd *, struct internal_exec *));
 static void adjust_n_magic PARAMS ((bfd *, struct internal_exec *));
+
+static int pdp11_aout_write_headers PARAMS ((bfd *, struct internal_exec *));
+void pdp11_aout_swap_reloc_out PARAMS  ((bfd *, arelent *, struct pdp11_aout_reloc_external *));
+void pdp11_aout_swap_reloc_in
+PARAMS ((bfd *, struct pdp11_aout_reloc_external *, arelent *,
+	 bfd_size_type, asymbol **, bfd_size_type));
 
 /*
 SUBSECTION

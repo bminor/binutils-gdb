@@ -54,6 +54,15 @@ static void mips_adjust_reloc_in PARAMS ((bfd *,
 static void mips_adjust_reloc_out PARAMS ((bfd *, const arelent *,
 					   struct internal_reloc *));
 #endif
+
+static boolean in_reloc_p PARAMS ((bfd *, reloc_howto_type *));
+static reloc_howto_type * coff_mips_reloc_type_lookup PARAMS ((bfd *, bfd_reloc_code_real_type));
+static void mips_swap_reloc_in PARAMS ((bfd *, PTR, PTR));
+static unsigned int mips_swap_reloc_out PARAMS ((bfd *, PTR, PTR));
+static boolean coff_pe_mips_relocate_section
+  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
+	   struct internal_reloc *, struct internal_syment *, asection **));
+
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (2)
 /* The page size is a guess based on ELF.  */
 
@@ -169,7 +178,8 @@ coff_mips_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 /* Return true if this relocation should
    appear in the output .reloc section.  */
 
-static boolean in_reloc_p(abfd, howto)
+static boolean
+in_reloc_p (abfd, howto)
      bfd * abfd ATTRIBUTE_UNUSED;
      reloc_howto_type *howto;
 {

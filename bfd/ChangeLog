@@ -1,3 +1,14 @@
+2001-08-28  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* sparclynx.c: Add missing prototypes.
+	* coff-mcore.c: Add missing prototypes.
+	* elf32-pj.c: Add missing prototypes.
+	* nlm32-sparc.c: Add missing prototypes.
+	* oasys.c: Add missing prototypes.
+	* pdp11.c: Add missing prototypes.
+	* pe-mips.c: Add missing prototypes.
+	* riscix.c: Add missing prototypes.
+
 2001-08-27  Daniel Jacobowitz  <drow@mvista.com>
 
 	* elf32-i386.c: Add missing prototypes.

@@ -143,6 +143,24 @@ riscix_fix_pcrel_26_done PARAMS ((bfd *, arelent *, asymbol *, PTR,
 static bfd_reloc_status_type
 riscix_fix_pcrel_26 PARAMS ((bfd *, arelent *, asymbol *, PTR,
 			     asection *, bfd *, char **));
+static const bfd_target *
+MY (object_p) PARAMS ((bfd *));
+
+reloc_howto_type *
+riscix_reloc_type_lookup PARAMS ((bfd *, bfd_reloc_code_real_type));
+
+void
+riscix_swap_std_reloc_out PARAMS ((bfd *, arelent *, struct reloc_std_external *));
+
+boolean
+riscix_squirt_out_relocs PARAMS ((bfd *, asection *));
+
+long
+MY (canonicalize_reloc) PARAMS ((bfd *, sec_ptr, arelent **, asymbol **));
+
+const bfd_target *
+riscix_some_aout_object_p PARAMS ((bfd *, struct internal_exec *, const bfd_target *(*) (bfd *)));
+
 
 static reloc_howto_type riscix_std_reloc_howto[] = {
   /* type              rs size bsz  pcrel bitpos ovrf                     sf name     part_inpl readmask  setmask    pcdone */

@@ -31,6 +31,8 @@ static reloc_howto_type *pj_elf_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 static void pj_elf_info_to_howto
   PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
+static void pj_elf_final_write_processing
+  PARAMS ((bfd *, boolean));
 
 static reloc_howto_type pj_elf_howto_table[] =
 {
