@@ -1,3 +1,9 @@
+2004-11-24  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	* gas/arc/st.s: Add checks for other variants of the sr and st
+	instruction.
+	* gas/arc/st.d: Update the expected disassembly.
+
 2004-11-23  Nick Clifton  <nickc@redhat.com>
 
 	* gas/mn10300/relax.s: Add further tests of the relaxing of branch
