@@ -1,4 +1,4 @@
-2001-09-24  Jiri Smid  <smid@naga.suse.cz>
+2001-09-25  Jiri Smid  <smid@suse.cz>
 
 	* x86-64-linux-tdep.c (LINUX_SIGINFO_SIZE): Add.
 	(x86_64_linux_sigcontext_addr): Replace `sizeof (struct siginfo)'
