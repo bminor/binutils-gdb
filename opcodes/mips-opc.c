@@ -57,16 +57,19 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 #define WR_C1	INSN_COP
 #define WR_C2   INSN_COP
 #define WR_C3   INSN_COP
-#define WR_HI	INSN_WRITE_HI
-#define WR_LO	INSN_WRITE_LO
-#define RD_HI	INSN_READ_HI
-#define RD_LO	INSN_READ_LO
 
-/* start-sanitize-vr5400 */
+#define WR_HI	INSN_WRITE_HI
+#define RD_HI	INSN_READ_HI
+#define MOD_HI  WR_HI|RD_HI
+
+#define WR_LO	INSN_WRITE_LO
+#define RD_LO	INSN_READ_LO
+#define MOD_LO  WR_LO|RD_LO
+
 #define WR_HILO WR_HI|WR_LO
 #define RD_HILO RD_HI|RD_LO
 #define MOD_HILO WR_HILO|RD_HILO
-/* end-sanitize-vr5400 */
+
 
 #define I1	INSN_ISA1
 #define I2	INSN_ISA2
@@ -525,13 +528,31 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"lwxc1",   "D,t(b)",	0x4c000000, 0xfc00f83f, LDD|WR_D|RD_t|RD_b,	I4	},
   /* start-sanitize-vr4320 */
 {"mac",     "s,t",	0x00000028, 0xfc00ffff, RD_s|RD_t|MOD_HILO,	N4},
-{"dmac",    "s,t",	0x00000029, 0xfc00ffff, RD_s|RD_t|WR_LO,	N4},
+{"dmac",    "s,t",	0x00000029, 0xfc00ffff, RD_s|RD_t|MOD_LO,	N4},
+  /* end-sanitize-vr4320 */
+  /* start-sanitize-vr4320 */
+{"macc",    "d,s,t",	0x000000A8, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,N4},
   /* end-sanitize-vr4320 */
   /* start-sanitize-vr5400 */
-{"macc",    "d,s,t",	0x00000158, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,	N5	},
-{"maccu",   "d,s,t",	0x00000159, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,	N5	},
-{"macchi",  "d,s,t",	0x00000358, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,	N5	},
-{"macchiu", "d,s,t",	0x00000359, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,	N5	},
+{"macc",    "d,s,t",	0x00000158, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,N5},
+  /* end-sanitize-vr5400 */
+  /* start-sanitize-vr4320 */
+{"maccu",   "d,s,t",	0x000000E8, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,N4},
+  /* end-sanitize-vr4320 */
+  /* start-sanitize-vr5400 */
+{"maccu",   "d,s,t",	0x00000159, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,N5},
+  /* end-sanitize-vr5400 */
+  /* start-sanitize-vr4320 */
+{"macchi",  "d,s,t",	0x000002A8, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,N4},
+  /* end-sanitize-vr4320 */
+  /* start-sanitize-vr5400 */
+{"macchi",  "d,s,t",	0x00000358, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,N5},
+  /* end-sanitize-vr5400 */
+  /* start-sanitize-vr4320 */
+{"macchiu", "d,s,t",	0x000002E8, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,N4},
+  /* end-sanitize-vr4320 */
+  /* start-sanitize-vr5400 */
+{"macchiu", "d,s,t",	0x00000359, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,N5},
   /* end-sanitize-vr5400 */
 {"mad",	    "s,t",	0x70000000, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO|RD_HI|RD_LO,	P3	},
 {"madu",    "s,t",	0x70000001, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO|RD_HI|RD_LO,	P3	},
@@ -676,19 +697,37 @@ const struct mips_opcode mips_builtin_opcodes[] = {
   /* end-sanitize-r5900 */
 {"mul.d",   "D,V,T",	0x46200002, 0xffe0003f,	WR_D|RD_S|RD_T|FP_D,	I1	},
 {"mul.s",   "D,V,T",	0x46000002, 0xffe0003f,	WR_D|RD_S|RD_T|FP_S,	I1	},
-  /* start-sanitize-vr5400 */
-{"mulu",    "d,s,t",	0x00000059, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
-{"mulhi",   "d,s,t",	0x00000258, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
-{"mulhiu",  "d,s,t",	0x00000259, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
-{"mul",     "d,s,t",	0x00000058, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
-  /* end-sanitize-vr5400 */
 {"mul",     "d,v,t",	0x70000002, 0xfc0007ff, WR_d|RD_s|RD_t|WR_HI|WR_LO,P3},
+  /* start-sanitize-vr4320 */
+{"mul",     "d,s,t",	0x00000128, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N4},
+  /* end-sanitize-vr4320 */
+  /* start-sanitize-vr5400 */
+{"mul",     "d,s,t",	0x00000058, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5},
+  /* end-sanitize-vr5400 */
 {"mul",     "d,v,t",	0,    (int) M_MUL,	INSN_MACRO,	I1	},
 {"mul",     "d,v,I",	0,    (int) M_MUL_I,	INSN_MACRO,	I1	},
 {"mulo",    "d,v,t",	0,    (int) M_MULO,	INSN_MACRO,	I1	},
 {"mulo",    "d,v,I",	0,    (int) M_MULO_I,	INSN_MACRO,	I1	},
 {"mulou",   "d,v,t",	0,    (int) M_MULOU,	INSN_MACRO,	I1	},
 {"mulou",   "d,v,I",	0,    (int) M_MULOU_I,	INSN_MACRO,	I1	},
+  /* start-sanitize-vr4320 */
+{"mulu",    "d,s,t",	0x00000168, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N4},
+  /* end-sanitize-vr4320 */
+  /* start-sanitize-vr5400 */
+{"mulu",    "d,s,t",	0x00000059, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5},
+  /* end-sanitize-vr5400 */
+  /* start-sanitize-vr4320 */
+{"mulhi",   "d,s,t",	0x00000328, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N4},
+  /* end-sanitize-vr4320 */
+  /* start-sanitize-vr5400 */
+{"mulhi",   "d,s,t",	0x00000258, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5},
+  /* end-sanitize-vr5400 */
+  /* start-sanitize-vr4320 */
+{"mulhiu",  "d,s,t",	0x00000368, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N4},
+  /* end-sanitize-vr4320 */
+  /* start-sanitize-vr5400 */
+{"mulhiu",  "d,s,t",	0x00000259, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5},
+  /* end-sanitize-vr5400 */
   /* start-sanitize-vr5400 */
 {"muls",    "d,s,t",	0x000000d8, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
 {"mulsu",   "d,s,t",	0x000000d9, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
