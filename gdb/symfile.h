@@ -93,7 +93,7 @@ struct sym_fns {
 
 			/*   Functions   */
 
-extern void free_named_symtab ();
+extern int  free_named_symtabs ();
 extern int  fill_in_vptr_fieldno ();
 extern void add_symtab_fns ();
 
