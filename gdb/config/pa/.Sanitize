@@ -42,29 +42,4 @@ Things-to-lose:
 
 Do-last:
 
-echo Removing traces of \"hpread\"...
-
-# Don't try to clean directories here, as the 'mv' command will fail.
-# Also, grep fails on NFS mounted directories.
-if ( echo $* | grep keep\-hpread > /dev/null ) ; then
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-hpread $i > /dev/null) ; then
-			echo Keeping hpread stuff in $i
-		fi
-	done
-else
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-hpread $i > /dev/null) ; then
-			echo Removing traces of \"hpread\" out of $i...
-			cp $i new
-			sed '/start\-sanitize\-hpread/,/end-\sanitize\-hpread/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				echo Caching $i in .Recover...
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
 # End of file.
