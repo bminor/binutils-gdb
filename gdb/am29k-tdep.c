@@ -27,6 +27,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "inferior.h"
 
+extern CORE_ADDR text_start;	/* FIXME, kludge... */
+
 /* Structure to hold cached info about function prologues.  */
 struct prologue_info
 {

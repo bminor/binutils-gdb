@@ -50,6 +50,13 @@ bfd *exec_bfd = NULL;
 
 int write_files = 0;
 
+/* Text start and end addresses (KLUDGE) if needed */
+
+#if NEED_TEXT_START_END
+CORE_ADDR text_start = 0;
+CORE_ADDR text_end   = 0;
+#endif
+
 /* Forward decl */
 
 extern struct target_ops exec_ops;
@@ -136,6 +143,18 @@ exec_file_command (filename, from_tty)
 				&exec_ops.sections_end))
 	error ("Can't find the file sections in `%s': %s", 
 		exec_bfd->filename, bfd_errmsg (bfd_error));
+
+#if NEED_TEXT_START_END
+      /* This is a KLUDGE (FIXME) because a few places in a few ports
+	 (29K springs to mind) need this info for now.  */
+      {
+	struct section_table *p;
+	for (p = exec_ops.sections; p < exec_ops.sections_end; p++)
+	  if (!strcmp (".text", bfd_section_name (p->bfd, p->sec_ptr))
+	    text_start = p->addr;
+	    text_end   = p->endaddr;
+      }
+#endif
 
       validate_files ();
 
