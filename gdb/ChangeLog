@@ -1,5 +1,12 @@
 2004-11-20  Mark Kettenis  <kettenis@gnu.org>
 
+	* hppa-hpux-nat.c: New file.
+	* config/pa/hpux.mh (NATDEPFILES): New file.
+	* Makefile.in (ALLDEPFILES): Add hppa-hpux-nat.c.
+	(hppa-hpux-nat.o): New dependency.
+	* configure.host: Remove hppa*-*-hpux10.20.
+	(hppa*-*-hpux*, hppa*-*-hiux*): Set gdb_host to hpux.mh.
+
 	* inf-ptrace.c: Fix coding style.
 
 	* gdb_ptrace.h [PTRACE_TYPE_ARG5] (ptrace): New macro.

@@ -50,11 +50,10 @@ arm*-*-netbsdelf* | arm*-*-knetbsd*-gnu)
 			gdb_host=nbsdelf ;;
 arm*-*-netbsd*)		gdb_host=nbsdaout ;;
 
-hppa*-*-hiux*)		gdb_host=hppahpux ;;
-hppa*-*-hpux10.20)	gdb_host=hpux1020 ;;
 hppa*64*-*-hpux11*)	gdb_host=hpux11w ;;
 hppa*-*-hpux11*)	gdb_host=hpux11 ;;
-hppa*-*-hpux*)		gdb_host=hppahpux ;;
+hppa*-*-hpux* | hppa*-*-hiux*)
+			gdb_host=hpux ;;
 hppa*-*-linux*)		gdb_host=linux ;;
 hppa*-*-openbsd*)	gdb_host=obsd ;;
 

@@ -1370,7 +1370,7 @@ ALLDEPFILES = \
 	fork-child.c \
 	glibc-tdep.c \
 	go32-nat.c h8300-tdep.c \
-	hppa-tdep.c hppa-hpux-tdep.c \
+	hppa-tdep.c hppa-hpux-tdep.c hppa-hpux-nat.c \
 	hppah-nat.c hpread.c \
 	hppa-linux-tdep.c hppa-linux-nat.c \
 	hppabsd-nat.c hppabsd-tdep.c \
@@ -1969,6 +1969,8 @@ hppabsd-tdep.o: hppabsd-tdep.c $(defs_h) $(arch_utils_h) $(osabi_h) \
 hppah-nat.o: hppah-nat.c $(defs_h) $(inferior_h) $(target_h) $(gdbcore_h) \
 	$(gdb_wait_h) $(regcache_h) $(gdb_string_h) $(infttrace_h) \
 	$(hppa_tdep_h)
+hppa-hpux-nat.o: hppa-hpux-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
+	$(target_h) $(gdb_assert_h) $(hppa_tdep_h) $(inf_ptrace_h)
 hppa-hpux-tdep.o: hppa-hpux-tdep.c $(defs_h) $(arch_utils_h) $(gdbcore_h) \
 	$(osabi_h) $(gdb_string_h) $(frame_h) $(frame_unwind_h) \
 	$(trad_frame_h) $(symtab_h) $(objfiles_h) $(inferior_h) $(infcall_h) \
