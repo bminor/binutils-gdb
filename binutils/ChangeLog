@@ -1,3 +1,7 @@
+Wed May  6 11:08:53 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* sanity.sh: remove temporary directory when finished.
+
 Tue May  5 12:00:58 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* Makefile.in:  Bump to version 1.97.

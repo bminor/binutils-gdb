@@ -45,4 +45,6 @@ done
 
 ### ranlib
 
+rm -rf ${TMPDIR}
+
 exit 0
