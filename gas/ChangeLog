@@ -1,3 +1,14 @@
+2000-11-08  Jim Wilson  <wilson@redhat.com>
+
+	* config/tc-ia64.c (struct unw_rec_list): Add slot_frag field.
+	(struct unwind): Add next_slot_frag field.
+	(slot_index): New parameters slot_frag and first_frag.  Add code
+	to add in frag sizes when different.  Add comments.
+	(fixup_unw_records): New locals first_frag and last_frag.  Pass new
+	arguments to slot_index.
+	(emit_one_bundle): Set slot_frag field.  Set next_slot_number after
+	loop end.  Set next_slot_frag field.
+
 2000-11-07  H.J. Lu  <hjl@gnu.org>
 
 	* doc/as.texinfo (.symver): Updated for versioned symbol

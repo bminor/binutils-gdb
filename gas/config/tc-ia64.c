@@ -562,9 +562,19 @@ static struct gr {
 /* These are the routines required to output the various types of
    unwind records.  */
 
+/* A slot_number is a frag address plus the slot index (0-2).  We use the
+   frag address here so that if there is a section switch in the middle of
+   a function, then instructions emitted to a different section are not
+   counted.  Since there may be more than one frag for a function, this
+   means we also need to keep track of which frag this address belongs to
+   so we can compute inter-frag distances.  This also nicely solves the
+   problem with nops emitted for align directives, which can't easily be
+   counted, but can easily be derived from frag sizes.  */
+
 typedef struct unw_rec_list {
   unwind_record r;
   unsigned long slot_number;
+  fragS *slot_frag;
   struct unw_rec_list *next;
 } unw_rec_list;
 
@@ -573,6 +583,7 @@ typedef struct unw_rec_list {
 static struct
 {
   unsigned long next_slot_number;
+  fragS *next_slot_frag;
 
   /* Maintain a list of unwind entries for the current function.  */
   unw_rec_list *list;
@@ -793,7 +804,8 @@ static void process_unw_records PARAMS ((unw_rec_list *, vbyte_func));
 static int calc_record_size PARAMS ((unw_rec_list *));
 static void set_imask PARAMS ((unw_rec_list *, unsigned long, unsigned long, unsigned int));
 static int count_bits PARAMS ((unsigned long));
-static unsigned long slot_index PARAMS ((unsigned long, unsigned long));
+static unsigned long slot_index PARAMS ((unsigned long, fragS *,
+					 unsigned long, fragS *));
 static void fixup_unw_records PARAMS ((unw_rec_list *));
 static int output_unw_records PARAMS ((unw_rec_list *, void **));
 static int convert_expr_to_ab_reg PARAMS ((expressionS *, unsigned int *, unsigned int *));
@@ -2406,13 +2418,47 @@ count_bits (unsigned long mask)
   return n;
 }
 
-unsigned long
-slot_index (unsigned long slot_addr, unsigned long first_addr)
-{
-  return (3 * ((slot_addr >> 4) - (first_addr >> 4))
-	  + ((slot_addr & 0x3) - (first_addr & 0x3)));
-}
+/* Return the number of instruction slots from FIRST_ADDR to SLOT_ADDR.
+   SLOT_FRAG is the frag containing SLOT_ADDR, and FIRST_FRAG is the frag
+   containing FIRST_ADDR.  */
 
+unsigned long
+slot_index (slot_addr, slot_frag, first_addr, first_frag)
+     unsigned long slot_addr;
+     fragS *slot_frag;
+     unsigned long first_addr;
+     fragS *first_frag;
+{
+  unsigned long index = 0;
+
+  /* First time we are called, the initial address and frag are invalid.  */
+  if (first_addr == 0)
+    return 0;
+
+  /* If the two addresses are in different frags, then we need to add in
+     the remaining size of this frag, and then the entire size of intermediate
+     frags.  */
+  while (slot_frag != first_frag)
+    {
+      unsigned long start_addr = (unsigned long) &first_frag->fr_literal;
+
+      /* Add in the full size of the frag converted to instruction slots.  */
+      index += 3 * (first_frag->fr_fix >> 4);
+      /* Subtract away the initial part before first_addr.  */
+      index -= (3 * ((first_addr >> 4) - (start_addr >> 4))
+		+ ((first_addr & 0x3) - (start_addr & 0x3)));
+
+      /* Move to the beginning of the next frag.  */
+      first_frag = first_frag->fr_next;
+      first_addr = (unsigned long) &first_frag->fr_literal;
+    }
+
+  /* Add in the used part of the last frag.  */
+  index += (3 * ((slot_addr >> 4) - (first_addr >> 4))
+	    + ((slot_addr & 0x3) - (first_addr & 0x3)));
+  return index;
+}
+  
 /* Given a complete record list, process any records which have
    unresolved fields, (ie length counts for a prologue).  After
    this has been run, all neccessary information should be available
@@ -2424,12 +2470,14 @@ fixup_unw_records (list)
 {
   unw_rec_list *ptr, *region = 0;
   unsigned long first_addr = 0, rlen = 0, t;
+  fragS *first_frag = 0;
 
   for (ptr = list; ptr; ptr = ptr->next)
     {
       if (ptr->slot_number == SLOT_NUM_NOT_SET)
 	as_bad (" Insn slot not set in unwind record.");
-      t = slot_index (ptr->slot_number, first_addr);
+      t = slot_index (ptr->slot_number, ptr->slot_frag,
+		      first_addr, first_frag);
       switch (ptr->r.type)
 	{
 	case prologue:
@@ -2439,17 +2487,21 @@ fixup_unw_records (list)
 	    unw_rec_list *last;
 	    int size, dir_len = 0;
 	    unsigned long last_addr;
+	    fragS *last_frag;
 
 	    first_addr = ptr->slot_number;
+	    first_frag = ptr->slot_frag;
 	    ptr->slot_number = 0;
 	    /* Find either the next body/prologue start, or the end of
 	       the list, and determine the size of the region.  */
 	    last_addr = unwind.next_slot_number;
+	    last_frag = unwind.next_slot_frag;
 	    for (last = ptr->next; last != NULL; last = last->next)
 	      if (last->r.type == prologue || last->r.type == prologue_gr
 		  || last->r.type == body)
 		{
 		  last_addr = last->slot_number;
+		  last_frag = last->slot_frag;
 		  break;
 		}
 	      else if (!last->next)
@@ -2460,6 +2512,7 @@ fixup_unw_records (list)
 		  if (ptr->r.type != body)
 		    {
 		      last_addr = last->slot_number;
+		      last_frag = last->slot_frag;
 		      switch (last->r.type)
 			{
 			case frgr_mem:
@@ -2484,7 +2537,8 @@ fixup_unw_records (list)
 		    }
 		  break;
 		}
-	    size = slot_index (last_addr, first_addr) + dir_len;
+	    size = (slot_index (last_addr, last_frag, first_addr, first_frag)
+		    + dir_len);
 	    rlen = ptr->r.record.r.rlen = size;
 	    region = ptr;
 	    break;
@@ -5293,7 +5347,10 @@ emit_one_bundle ()
       for (ptr = md.slot[curr].unwind_record; ptr; ptr = ptr->next)
 	if (ptr->r.type == prologue || ptr->r.type == prologue_gr
 	    || ptr->r.type == body)
-	  ptr->slot_number = (unsigned long) f + i;
+	  {
+	    ptr->slot_number = (unsigned long) f + i;
+	    ptr->slot_frag = frag_now;
+	  }
 
       if (idesc->flags & IA64_OPCODE_SLOT2)
 	{
@@ -5498,9 +5555,11 @@ emit_one_bundle ()
       for (ptr = md.slot[curr].unwind_record; ptr; ptr = ptr->next)
 	if (ptr->r.type != prologue && ptr->r.type != prologue_gr
 	    && ptr->r.type != body)
-	  ptr->slot_number = (unsigned long) f + i;
+	  {
+	    ptr->slot_number = (unsigned long) f + i;
+	    ptr->slot_frag = frag_now;
+	  }
       md.slot[curr].unwind_record = NULL;
-      unwind.next_slot_number = (unsigned long) f + i + ((i == 2)?(0x10-2):1);
 
       if (required_unit == IA64_UNIT_L)
 	{
@@ -5566,6 +5625,9 @@ emit_one_bundle ()
 
   number_to_chars_littleendian (f + 0, t0, 8);
   number_to_chars_littleendian (f + 8, t1, 8);
+
+  unwind.next_slot_number = (unsigned long) f + 16;
+  unwind.next_slot_frag = frag_now;
 }
 
 int
