@@ -1,3 +1,8 @@
+2001-12-17  Corinna Vinschen  <vinschen@redhat.com>
+
+	* NEWS: Note new target XStormy16.
+	* MAINTAINERS: Add -Werror to XStormy16.
+
 2001-12-17  Fernando Nasser  <fnasser@redhat.com>
 
 	From Richard Earnshaw <rearnsha@arm.com>:
