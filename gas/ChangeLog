@@ -1,4 +1,15 @@
-Sat May 20 03:49:32 2000  Hans-Peter Nilsson  <hp@bitrange.com>
+Sat May 20 16:41:55 2000  Hans-Peter Nilsson  <hp@axis.com>
+
+	* stabs.c (aout_process_stab): Make global.
+	(s_desc): Add ATTRIBUTE_UNUSED to args as appropriate.
+	* read.h (aout_process_stab): Declare.
+
+	* configure.in (EMULATIONS) [i386aout, i386coff, i386elf]:
+	Generalize to *aout, *coff *elf.
+	* configure: Regenerated.
+
+	* doc/internals.texi (Object format backend): Say
+	SEPARATE_STAB_SECTIONS needs to be nonzero, not just defined.
 
 	* Makefile.am (TARG_ENV_HFILES): Delete te-multi.h.
 	* Makefile.in: Regenerated.

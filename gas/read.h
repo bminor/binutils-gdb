@@ -89,6 +89,7 @@ enum linkonce_type
 extern void pop_insert PARAMS ((const pseudo_typeS *));
 extern unsigned int get_stab_string_offset
   PARAMS ((const char *string, const char *stabstr_secname));
+extern void aout_process_stab PARAMS ((int, const char *, int, int, int));
 extern char *demand_copy_C_string PARAMS ((int *len_pointer));
 extern char get_absolute_expression_and_terminator
   PARAMS ((long *val_pointer));

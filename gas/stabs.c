@@ -131,9 +131,8 @@ get_stab_string_offset (string, stabstr_secname)
 #define OBJ_PROCESS_STAB(SEG,W,S,T,O,D)	aout_process_stab(W,S,T,O,D)
 #endif
 
-static void aout_process_stab PARAMS ((int, const char *, int, int, int));
-
-static void
+/* Here instead of obj-aout.c because other formats use it too.  */
+void
 aout_process_stab (what, string, type, other, desc)
      int what;
      const char *string;
@@ -441,7 +440,7 @@ s_xstab (what)
 
 void 
 s_desc (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *name;
   char c;

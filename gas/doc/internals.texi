@@ -1406,8 +1406,8 @@ generate a @code{.file} symbol if none was generated previously.
 
 @item SEPARATE_STAB_SECTIONS
 @cindex SEPARATE_STAB_SECTIONS
-You may define this macro to indicate that stabs should be placed in separate
-sections, as in ELF.
+You may define this macro to a nonzero value to indicate that stabs should be
+placed in separate sections, as in ELF.
 
 @item INIT_STAB_SECTION
 @cindex INIT_STAB_SECTION

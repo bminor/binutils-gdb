@@ -676,12 +676,12 @@ for em in . $emulations ; do
 	fmt=elf   file=mipself ;;
     mipsbecoff | mipslecoff)
 	fmt=ecoff file=mipsecoff ;;
-    i386aout)
-	fmt=aout  file=i386aout ;;
-    i386coff)
-	fmt=coff  file=i386coff ;;
-    i386elf)
-	fmt=elf   file=i386elf ;;
+    *coff)
+	fmt=coff  file=$em ;;
+    *aout)
+	fmt=aout file=$em ;;
+    *elf)
+	fmt=elf file=$em ;;
   esac
   formats="$formats $fmt"
   emfiles="$emfiles e-$file.o"
