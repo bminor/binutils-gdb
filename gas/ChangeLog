@@ -1,3 +1,8 @@
+2003-06-25  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/tc-h8300.c (get_specific): Allow ':8' to be used for
+	unsigned 8-bit operands.
+
 2003-06-24  Nick Clifton  <nickc@redhat.com>
 
 	* read.c (s_comm): Change error message to assume an unsigned size

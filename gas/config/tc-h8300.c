@@ -1302,6 +1302,7 @@ get_specific (instruction, operands, size)
 #endif
 
 		  if (((x_size == L_16 && op_size == L_16U)
+		       || (x_size == L_8 && op_size == L_8U)
 		       || (x_size == L_3 && op_size == L_3NZ))
 		      /* We're deliberately more permissive for ABS modes.  */
 		      && (op_mode == ABS

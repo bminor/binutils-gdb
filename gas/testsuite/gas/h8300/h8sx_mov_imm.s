@@ -93,6 +93,18 @@
 	mov.l	#.L1,@0x18000
 	mov.l	#bar,@0x18000
 
+	mov.w	#-1,@er0
+	mov.w	#0,@er0
+	mov.w	#1,@er0
+	mov.w	#0xff,@er0
+	mov.w	#0x100,@er0
+
+	mov.l	#-1,@er0
+	mov.l	#0,@er0
+	mov.l	#1,@er0
+	mov.l	#0xff,@er0
+	mov.l	#0x100,@er0
+	
 	.globl	bar
 bar:
 	.space	16

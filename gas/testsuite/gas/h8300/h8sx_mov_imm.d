@@ -289,5 +289,19 @@ Disassembly of section \.text:
 .*:	00 00 48 00 *
 .*:	00 01 80 00 *
 			.*: R_H8_DIR32	bar
+.*:	79 74 ff ff *	79 74 ff ff 00 00 * mov.w	#0xffff,@r0
+.*:	00 00 *
+.*:	01 5d 00 00 *	01 5d 00 00 * mov.w	#0x0,@r0
+.*:	01 5d 00 01 *	01 5d 00 01 * mov.w	#0x1,@r0
+.*:	01 5d 00 ff *	01 5d 00 ff * mov.w	#0xff,@r0
+.*:	79 74 01 00 *	79 74 01 00 00 00 * mov.w	#0x100,@r0
+.*:	00 00 *
+.*:	7a 74 ff ff *	7a 74 ff ff ff ff 00 00 * mov.l	#0xffffffff,@r0
+.*:	ff ff 00 00 *
+.*:	01 0d 00 00 *	01 0d 00 00 * mov.l	#0x0,@r0
+.*:	01 0d 00 01 *	01 0d 00 01 * mov.l	#0x1,@r0
+.*:	01 0d 00 ff *	01 0d 00 ff * mov.l	#0xff,@r0
+.*:	7a 7c 01 00 *	7a 7c 01 00 00 00 * mov.l	#0x100,@r0
+.*:	00 00 *
 .* <.*>:
 	\.\.\.
