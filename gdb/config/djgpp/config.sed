@@ -7,6 +7,8 @@ s|\.gdbinit|gdb.ini|g
   /^s%@prefix@%/a\
   s,\\([yp*]\\)\\.tab,\\1_tab,g\
   /^	@rm -f/s,\\$@-\\[0-9\\]\\[0-9\\],& *.i[1-9] *.i[1-9][0-9],\
+  s,standards\\.info\\*,standard*.inf*,\
+  s,configure\\.info\\*,configur*.inf*,\
   s,\\.info\\*,.inf* *.i[1-9] *.i[1-9][0-9],\
   s,\\.gdbinit,gdb.ini,g\
   /TEXINPUTS=/s,:,';',g\

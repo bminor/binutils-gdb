@@ -1,5 +1,8 @@
 2001-11-25  Eli Zaretskii  <eliz@is.elta.co.il>
 
+	* config/djgpp/config.sed: Fix an error in etc/ at "make install"
+	time on non-LFN systems where standards*.inf* expands to nothing.
+
 	* go32-nat.c (save_npx): Avoid a warning from GCC 3.x.
 
 2001-11-24  Pierre Muller  <muller@ics.u-strasbg.fr>
