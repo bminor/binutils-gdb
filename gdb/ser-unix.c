@@ -84,7 +84,7 @@ static int hardwire_send_break PARAMS ((serial_t));
 static int hardwire_setstopbits PARAMS ((serial_t, int));
 
 #ifdef __CYGWIN32__
-extern void ui_loop_hook PARAMS ((int));
+extern void (*ui_loop_hook) PARAMS ((int));
 #endif
 
 /* Open up a real live device for serial I/O */
