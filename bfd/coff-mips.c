@@ -191,7 +191,7 @@ DEFUN (ecoff_new_section_hook, (abfd, section),
     section->flags |= SEC_DATA | SEC_LOAD | SEC_ALLOC | SEC_READONLY;
   else if (strcmp (section->name, _BSS) == 0
 	   || strcmp (section->name, _SBSS) == 0)
-    section->flags |= SEC_ALLOC | SEC_IS_COMMON;
+    section->flags |= SEC_ALLOC;
 
   /* Probably any other section name is SEC_NEVER_LOAD, but I'm
      uncertain about .init on some systems and I don't know how shared
@@ -518,6 +518,15 @@ DEFUN (ecoff_slurp_symbolic_info, (abfd),
 /* ECOFF symbol table routines.  The ECOFF symbol table is described
    in gcc/mips-tfile.c.  */
 
+/* ECOFF uses two common sections.  One is the usual one, and the
+   other is for small objects.  All the small objects are kept
+   together, and then referenced via the gp pointer, which yields
+   faster assembler code.  This is what we use for the small common
+   section.  */
+static asection ecoff_scom_section;
+static asymbol ecoff_scom_symbol;
+static asymbol *ecoff_scom_symbol_ptr;
+
 /* Create an empty symbol.  */
 
 static asymbol *
@@ -618,7 +627,8 @@ DEFUN (ecoff_set_symbol_info, (abfd, ecoff_sym, asym, ext),
       break;
     case scSBss:
       asym->section = bfd_make_section_old_way (abfd, ".sbss");
-      asym->value -= asym->section->vma;
+      if (! ext)
+	asym->value -= asym->section->vma;
       break;
     case scRData:
       asym->section = bfd_make_section_old_way (abfd, ".rdata");
@@ -631,8 +641,20 @@ DEFUN (ecoff_set_symbol_info, (abfd, ecoff_sym, asym, ext),
       asym->section = &bfd_com_section;
       break;
     case scSCommon:
-      asym->section = bfd_make_section_old_way (abfd, ".sbss");
-      asym->value -= asym->section->vma;
+      if (ecoff_scom_section.name == NULL)
+	{
+	  /* Initialize the small common section.  */
+	  ecoff_scom_section.name = "*SCOM*";
+	  ecoff_scom_section.flags = SEC_IS_COMMON;
+	  ecoff_scom_section.output_section = &ecoff_scom_section;
+	  ecoff_scom_section.symbol = &ecoff_scom_symbol;
+	  ecoff_scom_section.symbol_ptr_ptr = &ecoff_scom_symbol_ptr;
+	  ecoff_scom_symbol.name = "*SCOM*";
+	  ecoff_scom_symbol.flags = BSF_SECTION_SYM;
+	  ecoff_scom_symbol.section = &ecoff_scom_section;
+	  ecoff_scom_symbol_ptr = &ecoff_scom_symbol;
+	}
+      asym->section = &ecoff_scom_section;
       break;
     case scVarRegister:
     case scVariant:
@@ -1368,23 +1390,57 @@ DEFUN (ecoff_swap_reloc_out, (abfd, src, dst),
   return RELSZ;
 }
 
+/* ECOFF relocs are either against external symbols, or against
+   sections.  If we are producing relocateable output, and the reloc
+   is against an external symbol, the resulting reloc will also be
+   against the same symbol.  In such a case, we don't want to change
+   anything about the way the reloc is handled, since it will all be
+   done at final link time.  Rather than put special case code into
+   bfd_perform_relocation, all the reloc types use this howto
+   function.  It just short circuits the reloc if producing
+   relocateable output against an external symbol.  */
+
+static bfd_reloc_status_type
+ecoff_generic_reloc (abfd,
+		     reloc_entry,
+		     symbol,
+		     data,
+		     input_section,
+		     output_bfd)
+     bfd *abfd;
+     arelent *reloc_entry;
+     asymbol *symbol;
+     PTR data;
+     asection *input_section;
+     bfd *output_bfd;
+{
+  if (output_bfd != (bfd *) NULL
+      && (symbol->flags & BSF_SECTION_SYM) == 0)
+    {
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
+
+  return bfd_reloc_continue;
+}
+
 /* Do a REFHI relocation.  The next reloc must be the corresponding
    REFLO.  This has to be done in a function so that carry is handled
    correctly.  */
 
 static bfd_reloc_status_type
-DEFUN (ecoff_refhi_reloc, (abfd,
-			   reloc_entry,
-			   symbol,
-			   data,
-			   input_section,
-			   output_bfd),
-       bfd *abfd AND
-       arelent *reloc_entry AND
-       asymbol *symbol AND
-       PTR data AND
-       asection *input_section AND
-       bfd *output_bfd)
+ecoff_refhi_reloc (abfd,
+		   reloc_entry,
+		   symbol,
+		   data,
+		   input_section,
+		   output_bfd)
+     bfd *abfd;
+     arelent *reloc_entry;
+     asymbol *symbol;
+     PTR data;
+     asection *input_section;
+     bfd *output_bfd;
 {
   bfd_reloc_status_type ret;
   arelent *rello;
@@ -1392,6 +1448,15 @@ DEFUN (ecoff_refhi_reloc, (abfd,
   unsigned long insn;
   unsigned long val;
   unsigned long vallo;
+
+  /* If we're relocating, and this an external symbol, we don't want
+     to change anything.  */
+  if (output_bfd != (bfd *) NULL
+      && (symbol->flags & BSF_SECTION_SYM) == 0)
+    {
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
 
   ret = bfd_reloc_ok;
   if (symbol->section == &bfd_und_section
@@ -1407,12 +1472,8 @@ DEFUN (ecoff_refhi_reloc, (abfd,
   else
     relocation = symbol->value;
 
-  if (output_bfd == (bfd *) NULL)
-    {
-      relocation += symbol->section->output_section->vma;
-      relocation += symbol->section->output_offset;
-    }
-
+  relocation += symbol->section->output_section->vma;
+  relocation += symbol->section->output_offset;
   relocation += reloc_entry->addend;
 
   if (reloc_entry->address > input_section->_cooked_size)
@@ -1446,23 +1507,32 @@ DEFUN (ecoff_refhi_reloc, (abfd,
    the offset from the gp register.  */
 
 static bfd_reloc_status_type
-DEFUN (ecoff_gprel_reloc, (abfd,
-			   reloc_entry,
-			   symbol,
-			   data,
-			   input_section,
-			   output_bfd),
-       bfd *abfd AND
-       arelent *reloc_entry AND
-       asymbol *symbol AND
-       PTR data AND
-       asection *input_section AND
-       bfd *output_bfd)
+ecoff_gprel_reloc (abfd,
+		   reloc_entry,
+		   symbol,
+		   data,
+		   input_section,
+		   output_bfd)
+     bfd *abfd;
+     arelent *reloc_entry;
+     asymbol *symbol;
+     PTR data;
+     asection *input_section;
+     bfd *output_bfd;
 {
   boolean relocateable;
   bfd_vma relocation;
   unsigned long val;
   unsigned long insn;
+
+  /* If we're relocating, and this an external symbol, we don't want
+     to change anything.  */
+  if (output_bfd != (bfd *) NULL
+      && (symbol->flags & BSF_SECTION_SYM) == 0)
+    {
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
 
   if (output_bfd != (bfd *) NULL)
     relocateable = true;
@@ -1482,7 +1552,7 @@ DEFUN (ecoff_gprel_reloc, (abfd,
      target data.  */
   if (ecoff_data (output_bfd)->gp == 0)
     {
-      if (relocateable)
+      if (relocateable != false)
 	{
 	  /* Make up a value.  */
 	  ecoff_data (output_bfd)->gp =
@@ -1547,7 +1617,7 @@ DEFUN (ecoff_gprel_reloc, (abfd,
   insn = (insn &~ 0xffff) | (val & 0xffff);
   bfd_put_32 (abfd, insn, (bfd_byte *) data + reloc_entry->address);
 
-  if (relocateable)
+  if (relocateable != false)
     reloc_entry->address += input_section->output_offset;
 
   /* Make sure it fit in 16 bits.  */
@@ -1588,7 +1658,7 @@ static reloc_howto_type ecoff_howto_table[] =
 	 0,			/* bitpos */
 	 false,			/* absolute (obsolete) */
 	 true,			/* complain_on_overflow */
-	 0,			/* special_function */
+	 ecoff_generic_reloc,	/* special_function */
 	 "REFHALF",		/* name */
 	 true,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -1604,7 +1674,7 @@ static reloc_howto_type ecoff_howto_table[] =
 	 0,			/* bitpos */
 	 false,			/* absolute (obsolete) */
 	 true,			/* complain_on_overflow */
-	 0,			/* special_function */
+	 ecoff_generic_reloc,	/* special_function */
 	 "REFWORD",		/* name */
 	 true,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
@@ -1620,7 +1690,7 @@ static reloc_howto_type ecoff_howto_table[] =
 	 0,			/* bitpos */
 	 false,			/* absolute (obsolete) */
 	 true,			/* complain_on_overflow */
-	 0,			/* special_function */
+	 ecoff_generic_reloc,	/* special_function */
 	 "JMPADDR",		/* name */
 	 true,			/* partial_inplace */
 	 0x3ffffff,		/* src_mask */
@@ -1653,7 +1723,7 @@ static reloc_howto_type ecoff_howto_table[] =
 	 0,			/* bitpos */
 	 false,			/* absolute (obsolete) */
 	 true,			/* complain_on_overflow */
-	 0,			/* special_function */
+	 ecoff_generic_reloc,	/* special_function */
 	 "REFLO",		/* name */
 	 true,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -1823,7 +1893,7 @@ DEFUN (ecoff_canonicalize_reloc, (abfd, section, relptr, symbols),
 	   count++, chain = chain->next)
 	*relptr++ = &chain->relent;
     }
-  else 
+  else
     { 
       arelent *tblptr;
 
@@ -1873,7 +1943,6 @@ DEFUN (ecoff_find_nearest_line, (abfd,
   unsigned char *line_ptr;
   unsigned char *line_end;
   int lineno;
-  SYMR proc_sym;
 
   /* If we're not in the .text section, we don't have any line
      numbers.  */
@@ -1966,13 +2035,38 @@ DEFUN (ecoff_find_nearest_line, (abfd,
   if (offset > 100)
     return false;
 
-  *filename_ptr = ecoff_data (abfd)->ss + fdr_ptr->issBase + fdr_ptr->rss;
-  ecoff_swap_sym_in (abfd,
-		     (ecoff_data (abfd)->external_sym
-		      + fdr_ptr->isymBase
-		      + pdr.isym),
-		     &proc_sym);
-  *functionname_ptr = ecoff_data (abfd)->ss + proc_sym.iss;
+  /* If fdr_ptr->rss is -1, then this file does not have full symbols,
+     at least according to gdb/mipsread.c.  */
+  if (fdr_ptr->rss == -1)
+    {
+      *filename_ptr = NULL;
+      if (pdr.isym == -1)
+	*functionname_ptr = NULL;
+      else
+	{
+	  EXTR proc_ext;
+
+	  ecoff_swap_ext_in (abfd,
+			     (ecoff_data (abfd)->external_ext
+			      + pdr.isym),
+			     &proc_ext);
+	  *functionname_ptr = ecoff_data (abfd)->ssext + proc_ext.asym.iss;
+	}
+    }
+  else
+    {
+      SYMR proc_sym;
+
+      *filename_ptr = ecoff_data (abfd)->ss + fdr_ptr->issBase + fdr_ptr->rss;
+      ecoff_swap_sym_in (abfd,
+			 (ecoff_data (abfd)->external_sym
+			  + fdr_ptr->isymBase
+			  + pdr.isym),
+			 &proc_sym);
+      *functionname_ptr = (ecoff_data (abfd)->ss
+			   + fdr_ptr->issBase
+			   + proc_sym.iss);
+    }
   *retline_ptr = lineno;
   return true;
 }
@@ -2235,14 +2329,6 @@ DEFUN (ecoff_get_debug, (output_bfd, seclet, section),
   FDR *fdr_ptr;
   FDR *fdr_end;
   struct fdr_ext *fdr_out;
-  long iss;
-  long isym;
-  long iline;
-  long iopt;
-  long ipdr;
-  long iaux;
-  long irfd;
-  long cbline;
 
   input_bfd = seclet->u.indirect.section->owner;
 
@@ -2443,17 +2529,6 @@ DEFUN (ecoff_get_debug, (output_bfd, seclet, section),
      ifd values.  */
   input_ecoff->ifdbase = output_symhdr->ifdMax;
 
-  /* Step through the FDR's of input_bfd, adjust the offsets, and
-     swap them out.  */
-  iss = output_symhdr->issMax;
-  isym = output_symhdr->isymMax;
-  iline = output_symhdr->ilineMax;
-  iopt = output_symhdr->ioptMax;
-  ipdr = output_symhdr->ipdMax;
-  iaux = output_symhdr->iauxMax;
-  irfd = output_symhdr->crfd;
-  cbline = output_symhdr->cbLine;
-
   fdr_ptr = input_ecoff->fdr;
   fdr_end = fdr_ptr + input_symhdr->ifdMax;
   fdr_out = output_ecoff->external_fdr + output_symhdr->ifdMax;
@@ -2469,20 +2544,13 @@ DEFUN (ecoff_get_debug, (output_bfd, seclet, section),
 		 + seclet->offset
 		 + (fdr_ptr->adr - input_ecoff->fdr->adr));
 
-      fdr.issBase = iss;
-      iss += fdr.cbSs;
-      fdr.isymBase = isym;
-      isym += fdr.csym;
-      fdr.ilineBase = iline;
-      iline += fdr.cline;
-      fdr.ioptBase = iopt;
-      iopt += fdr.copt;
-      fdr.ipdFirst = ipdr;
-      ipdr += fdr.cpd;
-      fdr.iauxBase = iaux;
-      iaux += fdr.caux;
-      fdr.rfdBase = irfd;
-      irfd += fdr.crfd;
+      fdr.issBase += output_symhdr->issMax;
+      fdr.isymBase += output_symhdr->isymMax;
+      fdr.ilineBase += output_symhdr->ilineMax;
+      fdr.ioptBase += output_symhdr->ioptMax;
+      fdr.ipdFirst += output_symhdr->ipdMax;
+      fdr.iauxBase += output_symhdr->iauxMax;
+      fdr.rfdBase += output_symhdr->crfd;
 
       /* If there are no RFD's, we are going to add some.  We don't
 	 want to adjust irfd for this, so that all the FDR's can share
@@ -2491,10 +2559,7 @@ DEFUN (ecoff_get_debug, (output_bfd, seclet, section),
 	fdr.crfd = input_symhdr->ifdMax;
 
       if (fdr.cbLine != 0)
-	{
-	  fdr.cbLineOffset = cbline;
-	  cbline += fdr.cbLine;
-	}
+	fdr.cbLineOffset += output_symhdr->cbLine;
 
       ecoff_swap_fdr_out (output_bfd, &fdr, fdr_out);
     }
@@ -2561,15 +2626,6 @@ DEFUN (ecoff_get_debug, (output_bfd, seclet, section),
   output_symhdr->iauxMax += input_symhdr->iauxMax;
   output_symhdr->issMax += input_symhdr->issMax;
   output_symhdr->ifdMax += input_symhdr->ifdMax;
-
-  /* Double check that the counts we got by stepping through the FDR's
-     match the counts we got from input_symhdr.  We don't check iss or
-     cbline because they are rounded.  */
-  BFD_ASSERT (output_symhdr->isymMax == isym
-	      && output_symhdr->ilineMax == iline
-	      && output_symhdr->ioptMax == iopt
-	      && output_symhdr->ipdMax == ipdr
-	      && output_symhdr->iauxMax == iaux);
 
   return true;
 }
