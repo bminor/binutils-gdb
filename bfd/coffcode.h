@@ -818,9 +818,9 @@ coff_set_arch_mach_hook(abfd, filehdr)
   switch (internal_f->f_magic) {
 #ifdef I386MAGIC
   case I386MAGIC:
-#ifdef I386AIXMAGIC
+  case I386PTXMAGIC:
   case I386AIXMAGIC:		/* Danbury PS/2 AIX C Compiler */
-#endif
+  case I386LYNXMAGIC:
     arch = bfd_arch_i386;
     machine = 0;
     break;
@@ -2079,8 +2079,9 @@ SUBSUBSECTION
 
 #ifndef CALC_ADDEND
 #define CALC_ADDEND(abfd, ptr, reloc, cache_ptr) 	\
-	    if (ptr && bfd_asymbol_bfd(ptr) == abfd		\
-		&& ((ptr->flags & BSF_OLD_COMMON)== 0))	\
+	    if (ptr && bfd_asymbol_bfd(ptr) == abfd	\
+		&& !bfd_is_com_section(ptr->section)	\
+		&& !(ptr->flags & BSF_OLD_COMMON))	\
 	    {						\
 		cache_ptr->addend = -(ptr->section->vma + ptr->value);	\
 	    }						\
@@ -2251,7 +2252,7 @@ dummy_reloc16_extra_cases (abfd, seclet, reloc, data, src_ptr, dst_ptr)
      unsigned int *src_ptr;
      unsigned int *dst_ptr;
 {
-  printf("%s\n", reloc->howto->name);
+  fprintf(stderr, "%s\n", reloc->howto->name);
   abort ();
 }
 #endif

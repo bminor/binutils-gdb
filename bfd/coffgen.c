@@ -1173,12 +1173,12 @@ bfd            *abfd)
 	      }
 
 	    internal_ptr->u.syment._n._n_n._n_offset =
-	     (int) (string_table - 4 +
+	     (long) (string_table - 4 +
 		    (internal_ptr+1)->u.auxent.x_file.x_n.x_offset);
 	  }
 	else {
 	    /* ordinary short filename, put into memory anyway */
-	    internal_ptr->u.syment._n._n_n._n_offset = (int)
+	    internal_ptr->u.syment._n._n_n._n_offset = (long)
 	     copy_name(abfd, (internal_ptr+1)->u.auxent.x_file.x_fname,
 		       FILNMLEN);
 	  }
@@ -1203,7 +1203,7 @@ bfd            *abfd)
 	      }			/* on error */
 	    memset(newstring, 0, i);
 	    strncpy(newstring, internal_ptr->u.syment._n._n_name, i-1);
-	    internal_ptr->u.syment._n._n_n._n_offset =  (int) newstring;
+	    internal_ptr->u.syment._n._n_n._n_offset =  (long int) newstring;
 	    internal_ptr->u.syment._n._n_n._n_zeroes = 0;
 	  }
 	else if (!bfd_coff_symname_in_debug(abfd, &internal_ptr->u.syment)) {
@@ -1211,7 +1211,7 @@ bfd            *abfd)
 	    if (string_table == NULL) {
 		string_table = build_string_table(abfd);
 	      }
-	    internal_ptr->u.syment._n._n_n._n_offset = (int)
+	    internal_ptr->u.syment._n._n_n._n_offset = (long int)
 	     (string_table - 4 + internal_ptr->u.syment._n._n_n._n_offset);
 	  }
 	else {
@@ -1219,7 +1219,7 @@ bfd            *abfd)
 	    if (debug_section == NULL) {
 		debug_section = build_debug_section(abfd);
 	      }
-	    internal_ptr->u.syment._n._n_n._n_offset = (int)
+	    internal_ptr->u.syment._n._n_n._n_offset = (long int)
 	     (debug_section + internal_ptr->u.syment._n._n_n._n_offset);
 	  }
       }
@@ -1363,11 +1363,11 @@ coff_print_symbol (abfd, filep, symbol, how)
 	
 	  if (l)
 	    {
-	      printf ("\n%s :", l->u.sym->name);
+	      fprintf (file, "\n%s :", l->u.sym->name);
 	      l++;
 	      while (l->line_number) 
 		{
-		  printf ("\n%4d : 0x%x",
+		  fprintf (file, "\n%4d : 0x%x",
 			  l->line_number,
 			  l->u.offset);
 		  l++;

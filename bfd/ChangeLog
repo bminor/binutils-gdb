@@ -1,3 +1,15 @@
+Wed Aug  4 08:33:55 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coff-h8500.c (rtype2howto): Do an fprintf to stderr rather than
+	using printf.
+	* coff-z8k.c (rtype2howto): Likewise.
+	* coffcode.h (dummy_reloc16_extra_cases): Likewise.
+	* elf32-i386.c (TRACE): Likewise.
+	* hp300hpux.c (convert_sym_type, swap_std_reloc_in): Likewise.
+	* rs6000-core.c (rs6000coff_get_section_contents): Likewise.
+	* coffgen.c (coff_print_symbol): Do an fprintf to the file
+	argument rather than using printf.
+
 Tue Aug  3 18:17:25 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* coffswap.h: Added macros used when accessing several fields;
