@@ -16,6 +16,9 @@ run_dump_test all_insns
 run_dump_test insns-dwarf2
 run_dump_test lbranch-dwarf2
 
+# Compliance with Motorola Assembly Language Input Standard
+run_dump_test malis
+
 # Some 68HC12 tests
 run_dump_test opers12
 run_dump_test opers12-dwarf2
