@@ -1,3 +1,12 @@
+2000-10-01  Ulf Carlsson  <ulfc@engr.sgi.com>
+
+	From  Ralf Baechle  <ralf@gnu.org>
+
+	* elf32-mips.c (_bfd_mips_elf_finish_dynamic_sections): Mark gld
+	produces binaries with got[1] = 0x80000001 to differenciate them
+	for the dynamic linker from the broken binaries produced by old
+	versions.
+	
 2000-09-30  Petr Sorfa <petrs@sco.com>
 
 	* elf.c (elfcore_grok_pstatus): Check for size of pxstatus_t.

@@ -8879,7 +8879,7 @@ _bfd_mips_elf_finish_dynamic_sections (output_bfd, info)
   if (sgot != NULL && sgot->_raw_size > 0)
     {
       MIPS_ELF_PUT_WORD (output_bfd, (bfd_vma) 0, sgot->contents);
-      MIPS_ELF_PUT_WORD (output_bfd, (bfd_vma) 0x80000000, 
+      MIPS_ELF_PUT_WORD (output_bfd, (bfd_vma) 0x80000001, 
 			 sgot->contents + MIPS_ELF_GOT_SIZE (output_bfd));
     }
 
