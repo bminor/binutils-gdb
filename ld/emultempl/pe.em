@@ -1,5 +1,10 @@
 # This shell script emits a C file. -*- C -*-
 # It does some substitutions.
+if [ -z "$MACHINE" ]; then 
+  OUTPUT_ARCH=${ARCH}
+else
+  OUTPUT_ARCH=${ARCH}:${MACHINE}
+fi
 rm -f e${EMULATION_NAME}.c
 (echo;echo;echo;echo;echo)>e${EMULATION_NAME}.c # there, now line numbers match ;-)
 cat >>e${EMULATION_NAME}.c <<EOF
@@ -131,7 +136,15 @@ static void
 gld_${EMULATION_NAME}_before_parse()
 {
   output_filename = "${EXECUTABLE_NAME:-a.exe}";
-  ldfile_output_architecture = bfd_arch_${ARCH};
+  const bfd_arch_info_type *arch = bfd_scan_arch ("${OUTPUT_ARCH}");
+  if (arch)
+    {
+      ldfile_output_architecture = arch->arch;
+      ldfile_output_machine = arch->mach;
+      ldfile_output_machine_name = arch->printable_name;
+    }
+  else
+    ldfile_output_architecture = bfd_arch_${ARCH};
 #ifdef DLL_SUPPORT
   config.has_shared = 1;
 

@@ -1,3 +1,16 @@
+2001-05-24  H.J. Lu  <hjl@gnu.org>
+
+	* emultempl/aix.em (OUTPUT_ARCH): Defined.
+	(gld${EMULATION_NAME}_before_parse): Initialize
+	ldfile_output_architecture, ldfile_output_machine and
+	ldfile_output_machine_name from ${OUTPUT_ARCH} if possible.
+	* emultempl/beos.em: Likewise.
+	* emultempl/elf32.em: Likewise.
+	* emultempl/linux.em: Likewise.
+	* emultempl/mipsecoff.em: Likewise.
+	* emultempl/pe.em: Likewise.
+	* emultempl/sunos.em: Likewise.
+
 2001-05-24 Tom Rix <trix@redhat.com>
 
 	* emultempl/aix.em : (gld${EMULATION_NAME}_read_file) 
