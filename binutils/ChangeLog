@@ -1,5 +1,8 @@
 Wed Feb  7 14:17:45 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ieee.c (ieee_start_compilation_unit): Clear modified and
+	modified_alloc fields of info.
+
 	* configure.in: Check for --enable-shared.  Substitute new
 	variables BFDLIB and OPCODES.
 	* configure: Rebuild.

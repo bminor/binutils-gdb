@@ -2781,7 +2781,7 @@ ieee_read_cxx_class (info, pp, count)
 	case 'm':
 	case 'v':
 	  {
-	    bfd_vma flags, virtindex, control;
+	    bfd_vma flags, voffset, control;
 	    const char *name, *mangled;
 	    unsigned long namlen, mangledlen;
 	    struct ieee_var *pv, *pvend;
@@ -2798,9 +2798,11 @@ ieee_read_cxx_class (info, pp, count)
 		|| ! ieee_require_atn65 (info, pp, &mangled, &mangledlen))
 	      return false;
 	    count -= 3;
-	    if (id == 'v')
+	    if (id != 'v')
+	      voffset = 0;
+	    else
 	      {
-		if (! ieee_require_asn (info, pp, &virtindex))
+		if (! ieee_require_asn (info, pp, &voffset))
 		  return false;
 		--count;
 	      }
@@ -2903,19 +2905,12 @@ ieee_read_cxx_class (info, pp, count)
 	      }
 	    else
 	      {
-		bfd_vma voffset;
 		debug_type vcontext;
 
 		if (id != 'v')
-		  {
-		    voffset = 0;
-		    vcontext = DEBUG_TYPE_NULL;
-		  }
+		  vcontext = DEBUG_TYPE_NULL;
 		else
 		  {
-		    /* FIXME: This should depend upon the pointer
-                       size.  */
-		    voffset = virtindex * 4;
 		    /* FIXME: How can we calculate this correctly?  */
 		    vcontext = it->type;
 		  }
@@ -3487,8 +3482,6 @@ struct ieee_range
 
 struct ieee_type_class
 {
-  /* The name of the class.  */
-  const char *name;
   /* The name index in the debugging information.  */
   unsigned int indx;
   /* The pmisc records for the class.  */
@@ -3517,6 +3510,8 @@ struct ieee_write_type
   unsigned int indx;
   /* The size of the type, if known.  */
   unsigned int size;
+  /* The name of the type, if any.  */
+  const char *name;
   /* If this is a function or method type, we build the type here, and
      only add it to the output buffers if we need it.  */
   struct ieee_buf *fndef;
@@ -3550,8 +3545,6 @@ struct ieee_name_type
 {
   /* Next name/type assocation.  */
   struct ieee_name_type *next;
-  /* Name.  */
-  const char *name;
   /* Type.  */
   struct ieee_write_type type;
   /* If this is a tag which has not yet been defined, this is the
@@ -4200,8 +4193,8 @@ ieee_define_named_type (info, name, tagp, id, size, unsignedp, ppbuf)
       /* The name is a tag.  If we have already defined the tag, we
          must use the existing type index.  */
       for (nt = info->tags; nt != NULL; nt = nt->next)
-	if (nt->name[0] == tag[0]
-	    && strcmp (nt->name, tag) == 0)
+	if (nt->type.name[0] == tag[0]
+	    && strcmp (nt->type.name, tag) == 0)
 	  break;
 
       if (nt == NULL)
@@ -4210,7 +4203,7 @@ ieee_define_named_type (info, name, tagp, id, size, unsignedp, ppbuf)
 	  memset (nt, 0, sizeof *nt);
 	  if (tag != name)
 	    tag = xstrdup (ab);
-	  nt->name = tag;
+	  nt->type.name = tag;
 	  nt->next = info->tags;
 	  info->tags = nt;
 	  nt->type.indx = info->type_indx;
@@ -4342,7 +4335,7 @@ write_ieee_debugging_info (abfd, dhandle)
       ++info.name_indx;
       if (! ieee_write_byte (&info, (int) ieee_nn_record)
 	  || ! ieee_write_number (&info, name_indx)
-	  || ! ieee_write_id (&info, nt->name)
+	  || ! ieee_write_id (&info, nt->type.name)
 	  || ! ieee_write_byte (&info, (int) ieee_ty_record_enum)
 	  || ! ieee_write_number (&info, nt->type.indx)
 	  || ! ieee_write_byte (&info, 0xce)
@@ -4476,6 +4469,8 @@ ieee_start_compilation_unit (p, filename)
   info->cxx = NULL;
   info->linenos = NULL;
   info->ranges = NULL;
+  info->modified = NULL;
+  info->modified_alloc = 0;
 
   return true;
 }
@@ -5177,6 +5172,7 @@ ieee_start_struct_type (p, tag, id, structp, size)
       || ! ieee_write_number (info, size))
     return false;
 
+  info->type_stack->type.name = tag;
   info->type_stack->type.strdef = strdef;
 
   return true;
@@ -5250,8 +5246,7 @@ ieee_struct_field (p, name, bitpos, bitsize, visibility)
 	      || ! ieee_write_number (info, 4)
 	      || ! ieee_write_asn (info, nindx, 'R')
 	      || ! ieee_write_asn (info, nindx, 3)
-	      || ! ieee_write_atn65 (info, nindx,
-				     info->type_stack->type.classdef->name)
+	      || ! ieee_write_atn65 (info, nindx, info->type_stack->type.name)
 	      || ! ieee_write_atn65 (info, nindx, name))
 	    return false;
 	}
@@ -5330,7 +5325,6 @@ ieee_start_class_type (p, tag, id, structp, size, vptr, ownvptr)
   struct ieee_buf *pmiscbuf;
   unsigned int indx;
   struct ieee_type_class *classdef;
-  struct ieee_name_type *nt;
 
   /* A C++ class is output as a C++ struct along with a set of pmisc
      records describing the class.  */
@@ -5352,8 +5346,8 @@ ieee_start_class_type (p, tag, id, structp, size, vptr, ownvptr)
   vclass = NULL;
   if (vptr && ! ownvptr)
     {
-      assert (info->type_stack->type.classdef != NULL);
-      vclass = info->type_stack->type.classdef->name;
+      vclass = info->type_stack->type.name;
+      assert (vclass != NULL);
       /* We don't call ieee_pop_unused_type, since the class should
          get defined.  */
       (void) ieee_pop_type (info);
@@ -5378,7 +5372,6 @@ ieee_start_class_type (p, tag, id, structp, size, vptr, ownvptr)
   classdef = (struct ieee_type_class *) xmalloc (sizeof *classdef);
   memset (classdef, 0, sizeof *classdef);
 
-  classdef->name = tag;
   classdef->indx = indx;
   classdef->pmiscbuf = pmiscbuf;
   classdef->pmisccount = 3;
@@ -5386,15 +5379,6 @@ ieee_start_class_type (p, tag, id, structp, size, vptr, ownvptr)
   classdef->ownvptr = ownvptr;
 
   info->type_stack->type.classdef = classdef;
-
-  /* We need to fill in the classdef in the tag as well, so that it
-     will be set when ieee_tag_type is called.  */
-  for (nt = info->tags; nt != NULL; nt = nt->next)
-    if (nt->name[0] == tag[0]
-	&& strcmp (nt->name, tag) == 0)
-      break;
-  assert (nt != NULL);
-  nt->type.classdef = classdef;
 
   return true;
 }
@@ -5453,12 +5437,12 @@ ieee_class_baseclass (p, bitpos, virtual, visibility)
   unsigned int nindx;
 
   assert (info->type_stack != NULL
-	  && info->type_stack->type.classdef != NULL
+	  && info->type_stack->type.name != NULL
 	  && info->type_stack->next != NULL
 	  && info->type_stack->next->type.classdef != NULL
 	  && info->type_stack->next->type.strdef != NULL);
 
-  bname = info->type_stack->type.classdef->name;
+  bname = info->type_stack->type.name;
   bindx = ieee_pop_type (info);
 
   /* We are currently defining both a struct and a class.  We must
@@ -5583,9 +5567,7 @@ ieee_class_method_var (info, physname, visibility, staticp, constp,
     {
       if (voffset > info->type_stack->type.classdef->voffset)
 	info->type_stack->type.classdef->voffset = voffset;
-      /* FIXME: The size of a vtable entry depends upon the
-         architecture.  */
-      if (! ieee_write_asn (info, nindx, (voffset / 4) + 1))
+      if (! ieee_write_asn (info, nindx, voffset))
 	return false;
       ++info->type_stack->type.classdef->pmisccount;
     }
@@ -5669,16 +5651,12 @@ ieee_end_class_type (p)
   if (info->type_stack->type.classdef->vclass != NULL
       || info->type_stack->type.classdef->ownvptr)
     {
-      bfd_vma vsize;
-
-      /* FIXME: This calculation is architecture dependent.  */
-      vsize = (info->type_stack->type.classdef->voffset + 4) / 4;
-
       if (! ieee_change_buffer (info,
 				&info->type_stack->type.classdef->pmiscbuf)
 	  || ! ieee_write_asn (info, nindx, 'z')
 	  || ! ieee_write_atn65 (info, nindx, "")
-	  || ! ieee_write_asn (info, nindx, vsize))
+	  || ! ieee_write_asn (info, nindx,
+			       info->type_stack->type.classdef->voffset))
 	return false;
       if (info->type_stack->type.classdef->ownvptr)
 	{
@@ -5738,8 +5716,8 @@ ieee_typedef_type (p, name)
 
   for (nt = info->typedefs; nt != NULL; nt = nt->next)
     {
-      if (nt->name[0] == name[0]
-	  && strcmp (nt->name, name) == 0)
+      if (nt->type.name[0] == name[0]
+	  && strcmp (nt->type.name, name) == 0)
 	{
 	  if (! ieee_push_type (info, nt->type.indx, nt->type.size,
 				nt->type.unsignedp))
@@ -5774,8 +5752,8 @@ ieee_tag_type (p, name, id, kind)
 
   for (nt = info->tags; nt != NULL; nt = nt->next)
     {
-      if (nt->name[0] == name[0]
-	  && strcmp (nt->name, name) == 0)
+      if (nt->type.name[0] == name[0]
+	  && strcmp (nt->type.name, name) == 0)
 	{
 	  if (! ieee_push_type (info, nt->type.indx, nt->type.size,
 				nt->type.unsignedp))
@@ -5791,7 +5769,7 @@ ieee_tag_type (p, name, id, kind)
 
   if (name == ab)
     name = xstrdup (ab);
-  nt->name = name;
+  nt->type.name = name;
   nt->type.indx = info->type_indx;
   ++info->type_indx;
   nt->kind = kind;
@@ -5799,7 +5777,12 @@ ieee_tag_type (p, name, id, kind)
   nt->next = info->tags;
   info->tags = nt;
 
-  return ieee_push_type (info, nt->type.indx, 0, false);
+  if (! ieee_push_type (info, nt->type.indx, 0, false))
+    return false;
+
+  info->type_stack->type.name = name;
+
+  return true;
 }
 
 /* Output a typedef.  */
@@ -5817,8 +5800,8 @@ ieee_typdef (p, name)
 
   nt = (struct ieee_name_type *) xmalloc (sizeof *nt);
   memset (nt, 0, sizeof *nt);
-  nt->name = name;
   nt->type = info->type_stack->type;
+  nt->type.name = name;
   nt->kind = DEBUG_KIND_ILLEGAL;
 
   nt->next = info->typedefs;
