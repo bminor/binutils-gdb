@@ -139,6 +139,7 @@ CPU_DOCS = \
 	c-arc.texi \
 	c-arm.texi \
 	c-d10v.texi \
+	c-cris.texi \
 	c-h8300.texi \
 	c-h8500.texi \
 	c-hppa.texi \
@@ -189,7 +190,7 @@ DIST_COMMON =  Makefile.am Makefile.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 all: all-redirect
 .SUFFIXES:

@@ -28,6 +28,7 @@ CPU_DOCS = \
 	c-arc.texi \
 	c-arm.texi \
 	c-d10v.texi \
+	c-cris.texi \
 	c-h8300.texi \
 	c-h8500.texi \
 	c-hppa.texi \

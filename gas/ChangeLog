@@ -1,3 +1,12 @@
+2002-02-09  Hans-Peter Nilsson  <hp@axis.com>
+
+	* doc/c-cris.texi: New.
+	* doc/all.texi: @set CRIS.
+	* doc/as.texinfo: Ditto.  Add CRIS gas manpage option overview.
+	Include c-cris.texi.
+	* doc/Makefile.am (CPU_DOCS): Add c-cris.texi
+	* doc/Makefile.in: Regenerate.
+
 2002-02-08  Chris Demetriou  <cgd@broadcom.com>
 
 	* config/tc-mips.c (IS_SEXT_32BIT_NUM): New macro to

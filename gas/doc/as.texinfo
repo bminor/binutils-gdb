@@ -31,6 +31,7 @@
 @set A29K
 @set ARC
 @set ARM
+@set CRIS
 @set D10V
 @set D30V
 @set H8/300
@@ -283,6 +284,15 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mapcs-32}|@b{-mapcs-26}|@b{-mapcs-float}|
     @b{-mapcs-reentrant}]
    [@b{-mthumb-interwork}] [@b{-moabi}] [@b{-k}]
+@end ifset
+@ifset CRIS
+
+@emph{Target CRIS options:}
+   [@b{--underscore} | @b{--no-underscore}]
+   [@b{--pic}] [@b{-N}]
+   [@b{--emulation=criself} | @b{--emulation=crisaout}]
+@c Deprecated -- deliberately not documented.
+@c [@b{-h}] [@b{-H}]
 @end ifset
 @ifset D10V
 
@@ -580,6 +590,10 @@ ARM code in mind.
 @item -k
 Specify that PIC code has been generated.
 @end table
+@end ifset
+
+@ifset CRIS
+See the info pages for documentation of the CRIS-specific options.
 @end ifset
 
 @ifset D10V
@@ -5578,6 +5592,9 @@ subject, see the hardware manufacturer's manual.
 @ifset ARM
 * ARM-Dependent::               ARM Dependent Features
 @end ifset
+@ifset MMIX
+* CRIS-Dependent::              CRIS Dependent Features
+@end ifset
 @ifset D10V
 * D10V-Dependent::              D10V Dependent Features
 @end ifset
@@ -5674,6 +5691,10 @@ subject, see the hardware manufacturer's manual.
 
 @ifset ARM
 @include c-arm.texi
+@end ifset
+
+@ifset CRIS
+@include c-cris.texi
 @end ifset
 
 @ifset Hitachi-all

@@ -29,6 +29,7 @@
 @set A29K
 @set ARC
 @set ARM
+@set CRIS
 @set D10V
 @set D30V
 @set H8/300
