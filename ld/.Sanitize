@@ -46,10 +46,14 @@ genscripts.sh
 gld.1
 gld960.em
 gld960.sh
+go32.sh
 hp300bsd.sh
 h8300hms.em
 h8300hms.sc-sh
 h8300hms.sh
+h8300xray.em
+h8300xray.sc-sh
+h8300xray.sh
 i386aout.sh
 i960.sc-sh
 ld.h
@@ -107,7 +111,13 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.34  1992/04/15 23:11:53  sac
+# Revision 1.35  1992/04/17 15:59:22  sac
+# 	* relax.c: added handling for new "padding" seclet type, used to
+# 	fill out gaps between section.
+# 	* ldgram.y, ldlex.l: now -defsym on the command line is done
+# 	properly.
+#
+# Revision 1.34  1992/04/15  23:11:53  sac
 # added mri.c
 #
 # Revision 1.33  1992/04/05  01:46:05  sac

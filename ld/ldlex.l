@@ -1,4 +1,5 @@
 %{
+
 /* Copyright (C) 1991 Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
@@ -65,7 +66,8 @@ unsigned int include_stack_ptr = 0;
 %a 4000
 %o 5000
 FILENAMECHAR1	[_a-zA-Z\/\.\\]
-FILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\]
+SYMBOLCHARN     [_a-zA-Z\/\.\\0-9]
+FILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\=\$\:\[\]\\]
 FILENAME	{FILENAMECHAR}+
 WHITE		[ \t\n]+ 
 
@@ -74,10 +76,16 @@ WHITE		[ \t\n]+
 %x EXPRESSION
 %x COMMENT
 %x BOTH
+%x DEFSYMEXP
 %x MRI
 %%
   
-<COMMAND>"-defsym" 		{ return OPTION_defsym; }
+<DEFSYMEXP>"-"                  { RTOKEN('-');}
+<DEFSYMEXP>"+"                  { RTOKEN('+');}
+<DEFSYMEXP>{FILENAMECHAR1}{SYMBOLCHARN}*   { yylval.name = buystring(yytext); return NAME; }
+<DEFSYMEXP>[ \t]                { RTOKEN(DEFSYMEND); }
+<DEFSYMEXP>"="                  { RTOKEN('='); }
+<COMMAND>"-defsym"{WHITE}*	{ return OPTION_defsym; }
 <COMMAND>"-noinhibit_exec" 	{ return OPTION_noinhibit_exec; }
 <COMMAND>"-noinhibit-exec"	{ return OPTION_noinhibit_exec; }
 <COMMAND>"-sort_common"		{ return OPTION_sort_common;}
@@ -441,8 +449,15 @@ BEGIN(SCRIPT);
 void
 DEFUN_VOID(ldlex_mri_script)
 {
-  *(state_stack_p)++ = yy_start;
-  BEGIN(MRI);
+*(state_stack_p)++ = yy_start;
+BEGIN(MRI);
+}
+
+void
+DEFUN_VOID(ldlex_defsym)
+{
+*(state_stack_p)++ = yy_start;
+BEGIN(DEFSYMEXP);
 }
 	   
 void

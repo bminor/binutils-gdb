@@ -27,7 +27,6 @@ DEFUN(build_it,(statement),
       lang_statement_union_type *statement)
 {
   switch (statement->header.type) {
-  case lang_fill_statement_enum: 
     {
 #if 0
       bfd_byte play_area[SHORT_SIZE];
@@ -113,7 +112,27 @@ DEFUN(build_it,(statement),
 	
     }
     break;
+  case lang_padding_statement_enum:
+    /* Make a new seclet with the right filler */
+    {
+      /* Create a new seclet in the output section with this
+	 attached */
 
+      bfd_seclet_type *seclet  =
+	bfd_new_seclet(statement->padding_statement.output_section->owner,
+		       statement->padding_statement.output_section);
+	
+      seclet->type = bfd_fill_seclet;
+      seclet->size = statement->padding_statement.size;
+      seclet->offset = statement->padding_statement.output_offset;
+      seclet->u.fill.value = statement->padding_statement.fill;
+      seclet->next = 0;
+    }
+    break;
+
+
+
+    break;
   default:
     /* All the other ones fall through */
     ;
