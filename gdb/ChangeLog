@@ -1,5 +1,13 @@
 Thu May 23 15:13:56 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* h8300-tdep.c (IS_PUSH): Refine.
+	(IS_MOVE_FP, IS_MOV_SP_FP): Accept H8/300H varaints.
+	(IS_SUB4_SP, IS_SUBL_SP): New macros.
+	(h8300_skip_prologue): Handle H8/300H prologue code sequences.
+	(examine_prologue): Handle addresses from 0x010000 to 0xffffff
+	when in H8/300H mode.  Get the return pointer's address correctly
+	for the H8/300H.  Handle H8/300H prolouge code sequences.
+
 	* symfile.c (generic_load): Print the starting address
 	of the file just loaded.
 

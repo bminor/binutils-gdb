@@ -48,11 +48,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
  */
 
-#define IS_PUSH(x) ((x & 0xff00)==0x6d00)
+#define IS_PUSH(x) ((x & 0xfff0)==0x6df0)
 #define IS_PUSH_FP(x) (x == 0x6df6)
-#define IS_MOVE_FP(x) (x == 0x0d76)
-#define IS_MOV_SP_FP(x) (x == 0x0d76)
+#define IS_MOVE_FP(x) (x == 0x0d76 || x == 0x0ff6)
+#define IS_MOV_SP_FP(x) (x == 0x0d76 || x == 0x0ff6)
 #define IS_SUB2_SP(x) (x==0x1b87)
+#define IS_SUB4_SP(x) (x==0x1b97)
+#define IS_SUBL_SP(x) (x==0x7a37)
 #define IS_MOVK_R5(x) (x==0x7905)
 #define IS_SUB_R5SP(x) (x==0x1957)
 
@@ -67,12 +69,19 @@ h8300_skip_prologue (start_pc)
      CORE_ADDR start_pc;
 {
   short int w;
+  int adjust = 0;
 
   w = read_memory_unsigned_integer (start_pc, 2);
+  if (w == 0x0100)
+    {
+      w = read_memory_unsigned_integer (start_pc + 2, 2);
+      adjust = 2;
+    }
+
   /* Skip past all push insns */
   while (IS_PUSH_FP (w))
     {
-      start_pc += 2;
+      start_pc += 2 + adjust;
       w = read_memory_unsigned_integer (start_pc, 2);
     }
 
@@ -95,11 +104,14 @@ h8300_skip_prologue (start_pc)
       start_pc += 2;
       w = read_memory_unsigned_integer (start_pc, 2);
     }
-  while (IS_SUB2_SP (w))
+  while (IS_SUB2_SP (w) || IS_SUB4_SP (w))
     {
       start_pc += 2;
       w = read_memory_unsigned_integer (start_pc, 2);
     }
+
+  if (IS_SUBL_SP (w))
+    start_pc += 6;
 
   return start_pc;
 }
@@ -226,6 +238,8 @@ examine_prologue (ip, limit, after_prolog_fp, fsr, fi)
 
   char in_frame[11];		/* One for each reg */
 
+  int adjust = 0;
+
   memset (in_frame, 1, 11);
   for (r = 0; r < 8; r++)
     {
@@ -235,20 +249,26 @@ examine_prologue (ip, limit, after_prolog_fp, fsr, fi)
     {
       after_prolog_fp = read_register (SP_REGNUM);
     }
-  if (ip == 0 || ip & (h8300hmode ? ~0xffff : ~0xffff))
+  if (ip == 0 || ip & (h8300hmode ? ~0xffffff : ~0xffff))
     return 0;
 
   next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn_word);
+
+  if (insn_word == 0x0100)
+    {
+      insn_word = read_memory_unsigned_integer (ip + 2, 2);
+      adjust = 2;
+    }
 
   /* Skip over any fp push instructions */
   fsr->regs[6] = after_prolog_fp;
   while (next_ip && IS_PUSH_FP (insn_word))
     {
-      ip = next_ip;
+      ip = next_ip + adjust;
 
       in_frame[insn_word & 0x7] = reg_save_depth;
       next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn_word);
-      reg_save_depth += 2;
+      reg_save_depth += 2 + adjust;
     }
 
   /* Is this a move into the fp */
@@ -262,11 +282,11 @@ examine_prologue (ip, limit, after_prolog_fp, fsr, fi)
   /* Skip over any stack adjustment, happens either with a number of
      sub#2,sp or a mov #x,r5 sub r5,sp */
 
-  if (next_ip && IS_SUB2_SP (insn_word))
+  if (next_ip && (IS_SUB2_SP (insn_word) || IS_SUB4_SP (insn_word)))
     {
-      while (next_ip && IS_SUB2_SP (insn_word))
+      while (next_ip && (IS_SUB2_SP (insn_word) || IS_SUB4_SP (insn_word)))
 	{
-	  auto_depth += 2;
+	  auto_depth += IS_SUB2_SP (insn_word) ? 2 : 4;
 	  ip = next_ip;
 	  next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn_word);
 	}
@@ -282,7 +302,16 @@ examine_prologue (ip, limit, after_prolog_fp, fsr, fi)
 	  next_ip = NEXT_PROLOGUE_INSN (next_ip, limit, &insn_word);
 	  auto_depth += insn_word;
 	}
+      if (next_ip && IS_SUBL_SP (insn_word))
+	{
+	  ip = next_ip;
+	  auto_depth += read_memory_unsigned_integer (ip, 4);
+	  ip += 4;
+
+	  next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn_word);
+	}
     }
+
   /* Work out which regs are stored where */
   while (next_ip && IS_PUSH (insn_word))
     {
@@ -297,7 +326,7 @@ examine_prologue (ip, limit, after_prolog_fp, fsr, fi)
   /* Locals are always reffed based from the fp */
   fi->locals_pointer = after_prolog_fp;
   /* The PC is at a known place */
-  fi->from_pc = read_memory_unsigned_integer (after_prolog_fp + 2, BINWORD);
+  fi->from_pc = read_memory_unsigned_integer (after_prolog_fp + BINWORD, BINWORD);
 
   /* Rememeber any others too */
   in_frame[PC_REGNUM] = 0;
