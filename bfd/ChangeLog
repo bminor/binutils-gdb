@@ -1,3 +1,8 @@
+2001-07-06  Philip Blundell  <philb@gnu.org>
+
+	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Correct sense of
+	`interworking' warning message.
+
 2001-07-05  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* peicode.h (coff_swap_scnhdr_in): For sections containing
