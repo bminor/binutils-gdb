@@ -1,3 +1,7 @@
+2002-10-02  Marko Mlinar <markom@opencores.org>
+
+        * MAINTAINERS: Add myself to the Write After Approval list.
+
 2002-10-01  Alexandre Oliva  <aoliva@redhat.com>
 
 	* mips-tdep.c (mips_find_abi_section): .mdebug.abi64 is the name
