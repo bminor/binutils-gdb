@@ -495,7 +495,7 @@ Ty Coon, President of Vice
 That's all there is to it!
 
 @node User Interface, Files, License, Top
-@chapter Using GDB
+@chapter GDB Commands and Displays
 
 GDB is invoked with the shell command @samp{gdb}.  Once started, it reads
 commands from the terminal until you tell it to exit.
