@@ -1,3 +1,14 @@
+Mon Nov  2 20:10:18 1998  Martin von Loewis  <loewis@informatik.hu-berlin.de>
+
+	* app.c (do_scrub_begin): Set characters above 127 to be symbol
+	characters.
+	(do_scrub_chars): Add some casts to unsigned char to avoid
+	unwanted sign extension.
+	* read.c (lex_type): Set characters about 127 to be symbol
+	characters.
+	* config/tc-i386.c (md_begin): Set identifier_chars and
+	operand_chars for values above 127.
+
 Mon Nov  2 15:05:33 1998  Geoffrey Noer  <noer@cygnus.com>
 
         * configure.in: detect cygwin* instead of cygwin32*

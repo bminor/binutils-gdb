@@ -69,7 +69,8 @@ struct _i386_insn
     /* TM holds the template for the insn were currently assembling. */
     template tm;
 
-    /* SUFFIX holds the opcode suffix (e.g. 'l' for 'movl') if given. */
+    /* SUFFIX holds the instruction mnemonic suffix if given.
+       (e.g. 'l' for 'movl')  */
     char suffix;
 
     /* Operands are coded with OPERANDS, TYPES, DISPS, IMMS, and REGS. */
@@ -172,14 +173,14 @@ const char EXP_CHARS[] = "eE";
 const char FLT_CHARS[] = "fFdDxX";
 
 /* tables for lexical analysis */
-static char opcode_chars[256];
+static char mnemonic_chars[256];
 static char register_chars[256];
 static char operand_chars[256];
 static char identifier_chars[256];
 static char digit_chars[256];
 
 /* lexical macros */
-#define is_opcode_char(x) (opcode_chars[(unsigned char) x])
+#define is_mnemonic_char(x) (mnemonic_chars[(unsigned char) x])
 #define is_operand_char(x) (operand_chars[(unsigned char) x])
 #define is_register_char(x) (register_chars[(unsigned char) x])
 #define is_space_char(x) ((x) == ' ')
@@ -527,7 +528,7 @@ const pseudo_typeS md_pseudo_table[] =
 /* for interface with expression () */
 extern char *input_line_pointer;
 
-/* hash table for opcode lookup */
+/* hash table for instruction mnemonic lookup */
 static struct hash_control *op_hash;
 /* hash table for register lookup */
 static struct hash_control *reg_hash;
@@ -591,7 +592,7 @@ md_begin ()
       }
   }
 
-  /* fill in lexical tables:  opcode_chars, operand_chars.  */
+  /* fill in lexical tables:  mnemonic_chars, operand_chars.  */
   {
     register int c;
     register char *p;
@@ -601,25 +602,30 @@ md_begin ()
 	if (isdigit (c))
 	  {
 	    digit_chars[c] = c;
-	    opcode_chars[c] = c;
+	    mnemonic_chars[c] = c;
 	    register_chars[c] = c;
 	    operand_chars[c] = c;
 	  }
 	else if (islower (c))
 	  {
-	    opcode_chars[c] = c;
+	    mnemonic_chars[c] = c;
 	    register_chars[c] = c;
 	    operand_chars[c] = c;
 	  }
 	else if (isupper (c))
 	  {
-	    opcode_chars[c] = tolower (c);
-	    register_chars[c] = opcode_chars[c];
+	    mnemonic_chars[c] = tolower (c);
+	    register_chars[c] = mnemonic_chars[c];
 	    operand_chars[c] = c;
 	  }
 
 	if (isalpha (c) || isdigit (c))
 	  identifier_chars[c] = c;
+	else if (c >= 128)
+	  {
+	    identifier_chars[c] = c;
+	    operand_chars[c] = c;
+	  }
       }
 
 #ifdef LEX_AT
@@ -912,25 +918,25 @@ md_assemble (line)
   memset (im_expressions, '\0', sizeof (im_expressions));
   save_stack_p = save_stack;	/* reset stack pointer */
 
-  /* First parse an opcode & call i386_operand for the operands.
+  /* First parse an instruction mnemonic & call i386_operand for the operands.
      We assume that the scrubber has arranged it so that line[0] is the valid
-     start of a (possibly prefixed) opcode. */
+     start of a (possibly prefixed) mnemonic. */
   {
-    char opcode[MAX_OPCODE_SIZE];
+    char mnemonic[MAX_MNEM_SIZE];
     char *l = line;
     char *token_start = l;
-    char *opp;
+    char *mnem_p;
 
     /* Non-zero if we found a prefix only acceptable with string insns. */
     const char *expecting_string_instruction = NULL;
 
     while (1)
       {
-	opp = opcode;
-	while ((*opp = opcode_chars[(unsigned char) *l]) != 0)
+	mnem_p = mnemonic;
+	while ((*mnem_p = mnemonic_chars[(unsigned char) *l]) != 0)
 	  {
-	    opp++;
-	    if (opp >= opcode + sizeof (opcode))
+	    mnem_p++;
+	    if (mnem_p >= mnemonic + sizeof (mnemonic))
 	      {
 		as_bad (_("no such 386 instruction: `%s'"), token_start);
 		return;
@@ -941,7 +947,7 @@ md_assemble (line)
 	    && *l != END_OF_INSN
 	    && *l != PREFIX_SEPARATOR)
 	  {
-	    as_bad (_("invalid character %s in opcode"),
+	    as_bad (_("invalid character %s in mnemonic"),
 		    output_invalid (*l));
 	    return;
 	  }
@@ -950,12 +956,12 @@ md_assemble (line)
 	    if (*l == PREFIX_SEPARATOR)
 	      as_bad (_("expecting prefix; got nothing"));
 	    else
-	      as_bad (_("expecting opcode; got nothing"));
+	      as_bad (_("expecting mnemonic; got nothing"));
 	    return;
 	  }
 
 	/* Look up instruction (or prefix) via hash table.  */
-	current_templates = hash_find (op_hash, opcode);
+	current_templates = hash_find (op_hash, mnemonic);
 
 	if (*l != END_OF_INSN
 	    && (! is_space_char (*l) || l[1] != END_OF_INSN)
@@ -992,18 +998,18 @@ md_assemble (line)
     if (!current_templates)
       {
 	/* See if we can get a match by trimming off a suffix.	*/
-	switch (opp[-1])
+	switch (mnem_p[-1])
 	  {
-	  case DWORD_OPCODE_SUFFIX:
-	  case WORD_OPCODE_SUFFIX:
-	  case BYTE_OPCODE_SUFFIX:
-	  case SHORT_OPCODE_SUFFIX:
-#if LONG_OPCODE_SUFFIX != DWORD_OPCODE_SUFFIX
-	  case LONG_OPCODE_SUFFIX:
+	  case DWORD_MNEM_SUFFIX:
+	  case WORD_MNEM_SUFFIX:
+	  case BYTE_MNEM_SUFFIX:
+	  case SHORT_MNEM_SUFFIX:
+#if LONG_MNEM_SUFFIX != DWORD_MNEM_SUFFIX
+	  case LONG_MNEM_SUFFIX:
 #endif
-	    i.suffix = opp[-1];
-	    opp[-1] = '\0';
-	    current_templates = hash_find (op_hash, opcode);
+	    i.suffix = mnem_p[-1];
+	    mnem_p[-1] = '\0';
+	    current_templates = hash_find (op_hash, mnemonic);
 	  }
 	if (!current_templates)
 	  {
@@ -1118,7 +1124,7 @@ md_assemble (line)
       }
   }
 
-  /* Now we've parsed the opcode into a set of templates, and have the
+  /* Now we've parsed the mnemonic into a set of templates, and have the
      operands at hand.
 
      Next, we find a template that matches the given insn,
@@ -1149,13 +1155,13 @@ md_assemble (line)
     overlap1 = 0;
     overlap2 = 0;
     found_reverse_match = 0;
-    suffix_check = (i.suffix == BYTE_OPCODE_SUFFIX
+    suffix_check = (i.suffix == BYTE_MNEM_SUFFIX
 		    ? No_bSuf
-		    : (i.suffix == WORD_OPCODE_SUFFIX
+		    : (i.suffix == WORD_MNEM_SUFFIX
 		       ? No_wSuf
-		       : (i.suffix == SHORT_OPCODE_SUFFIX
+		       : (i.suffix == SHORT_MNEM_SUFFIX
 			  ? No_sSuf
-			  : (i.suffix == LONG_OPCODE_SUFFIX ? No_lSuf : 0))));
+			  : (i.suffix == LONG_MNEM_SUFFIX ? No_lSuf : 0))));
 
     for (t = current_templates->start;
 	 t < current_templates->end;
@@ -1285,19 +1291,19 @@ md_assemble (line)
 	  }
       }
 
-    /* If matched instruction specifies an explicit opcode suffix, use
-       it.  */
+    /* If matched instruction specifies an explicit instruction mnemonic
+       suffix, use it.  */
     if (i.tm.opcode_modifier & (Size16 | Size32))
       {
 	if (i.tm.opcode_modifier & Size16)
-	  i.suffix = WORD_OPCODE_SUFFIX;
+	  i.suffix = WORD_MNEM_SUFFIX;
 	else
-	  i.suffix = DWORD_OPCODE_SUFFIX;
+	  i.suffix = DWORD_MNEM_SUFFIX;
       }
     else if (i.reg_operands)
       {
-	/* If there's no opcode suffix we try to invent one based on
-	   register operands. */
+	/* If there's no instruction mnemonic suffix we try to invent one
+	   based on register operands. */
 	if (!i.suffix)
 	  {
 	    /* We take i.suffix from the last register operand specified,
@@ -1307,13 +1313,13 @@ md_assemble (line)
 	    for (op = i.operands; --op >= 0; )
 	      if (i.types[op] & Reg)
 		{
-		  i.suffix = ((i.types[op] & Reg8) ? BYTE_OPCODE_SUFFIX :
-			      (i.types[op] & Reg16) ? WORD_OPCODE_SUFFIX :
-			      DWORD_OPCODE_SUFFIX);
+		  i.suffix = ((i.types[op] & Reg8) ? BYTE_MNEM_SUFFIX :
+			      (i.types[op] & Reg16) ? WORD_MNEM_SUFFIX :
+			      DWORD_MNEM_SUFFIX);
 		  break;
 		}
 	  }
-	else if (i.suffix == BYTE_OPCODE_SUFFIX)
+	else if (i.suffix == BYTE_MNEM_SUFFIX)
 	  {
 	    int op;
 	    for (op = i.operands; --op >= 0; )
@@ -1353,7 +1359,7 @@ md_assemble (line)
 		  }
 	      }
 	  }
-	else if (i.suffix == DWORD_OPCODE_SUFFIX)
+	else if (i.suffix == DWORD_MNEM_SUFFIX)
 	  {
 	    int op;
 	    for (op = i.operands; --op >= 0; )
@@ -1380,7 +1386,7 @@ md_assemble (line)
 		}
 #endif
 	  }
-	else if (i.suffix == WORD_OPCODE_SUFFIX)
+	else if (i.suffix == WORD_MNEM_SUFFIX)
 	  {
 	    int op;
 	    for (op = i.operands; --op >= 0; )
@@ -1419,8 +1425,8 @@ md_assemble (line)
       {
 	if (i.suffix)
 	  {
-	   overlap0 &= (i.suffix == BYTE_OPCODE_SUFFIX ? (Imm8 | Imm8S) :
-			(i.suffix == WORD_OPCODE_SUFFIX ? Imm16 : Imm32));
+	   overlap0 &= (i.suffix == BYTE_MNEM_SUFFIX ? (Imm8 | Imm8S) :
+			(i.suffix == WORD_MNEM_SUFFIX ? Imm16 : Imm32));
 	  }
 	else if (overlap0 == (Imm16 | Imm32))
 	  {
@@ -1429,7 +1435,7 @@ md_assemble (line)
 	  }
 	else
 	  {
-	    as_bad (_("no opcode suffix given; can't determine immediate size"));
+	    as_bad (_("no instruction mnemonic suffix given; can't determine immediate size"));
 	    return;
 	  }
       }
@@ -1439,8 +1445,8 @@ md_assemble (line)
       {
 	if (i.suffix)
 	  {
-	   overlap1 &= (i.suffix == BYTE_OPCODE_SUFFIX ? (Imm8 | Imm8S) :
-			(i.suffix == WORD_OPCODE_SUFFIX ? Imm16 : Imm32));
+	   overlap1 &= (i.suffix == BYTE_MNEM_SUFFIX ? (Imm8 | Imm8S) :
+			(i.suffix == WORD_MNEM_SUFFIX ? Imm16 : Imm32));
 	  }
 	else if (overlap1 == (Imm16 | Imm32))
 	  {
@@ -1449,7 +1455,7 @@ md_assemble (line)
 	  }
 	else
 	  {
-	    as_bad (_("no opcode suffix given; can't determine immediate size"));
+	    as_bad (_("no instruction mnemonic suffix given; can't determine immediate size"));
 	    return;
 	  }
       }
@@ -1470,18 +1476,17 @@ md_assemble (line)
       i.reg_operands--;
 
     /* Finalize opcode.  First, we change the opcode based on the operand
-       size given by i.suffix: we never have to change things for byte insns,
-       or when no opcode suffix is need to size the operands. */
+       size given by i.suffix:  We need not change things for byte insns.  */
 
     if (!i.suffix && (i.tm.opcode_modifier & W))
       {
-	as_bad (_("no opcode suffix given and no register operands; can't size instruction"));
+	as_bad (_("no instruction mnemonic suffix given and no register operands; can't size instruction"));
 	return;
       }
 
-    if (i.suffix && i.suffix != BYTE_OPCODE_SUFFIX)
+    if (i.suffix && i.suffix != BYTE_MNEM_SUFFIX)
       {
-	/* Select between byte and word/dword operations. */
+	/* It's not a byte, select word/dword operation.  */
 	if (i.tm.opcode_modifier & W)
 	  {
 	    if (i.tm.opcode_modifier & ShortForm)
@@ -1492,8 +1497,8 @@ md_assemble (line)
 	/* Now select between word & dword operations via the operand
 	   size prefix, except for instructions that will ignore this
 	   prefix anyway.  */
-	if ((i.suffix == DWORD_OPCODE_SUFFIX
-	     || i.suffix == LONG_OPCODE_SUFFIX) == flag_16bit_code
+	if ((i.suffix == DWORD_MNEM_SUFFIX
+	     || i.suffix == LONG_MNEM_SUFFIX) == flag_16bit_code
 	    && !(i.tm.opcode_modifier & IgnoreSize))
 	  {
 	    unsigned int prefix = DATA_PREFIX_OPCODE;
@@ -1504,7 +1509,7 @@ md_assemble (line)
 	      return;
 	  }
 	/* Size floating point instruction.  */
-	if (i.suffix == LONG_OPCODE_SUFFIX)
+	if (i.suffix == LONG_MNEM_SUFFIX)
 	  {
 	    if (i.tm.opcode_modifier & FloatMF)
 	      i.tm.base_opcode ^= 4;
@@ -1516,10 +1521,7 @@ md_assemble (line)
 	/* These AMD specific instructions have an opcode suffix which
 	   is coded in the same place as an 8-bit immediate field
 	   would be.  Here we fake an 8-bit immediate operand from the
-	   opcode suffix stored in tm.extension_opcode.
-	   Note: this "opcode suffix" has nothing to do with what gas
-	   calls opcode suffixes.  gas opcode suffixes should really
-	   be called instruction mnemonic suffixes.  FIXME maybe.  */
+	   opcode suffix stored in tm.extension_opcode.  */
 
 	expressionS *exp;
 
@@ -2416,10 +2418,10 @@ i386_operand (operand_string)
 	  /* If a suffix is given, this operand may be shortened.  */
 	  switch (i.suffix)
 	    {
-	    case WORD_OPCODE_SUFFIX:
+	    case WORD_MNEM_SUFFIX:
 	      i.types[this_operand] |= Imm16;
 	      break;
-	    case BYTE_OPCODE_SUFFIX:
+	    case BYTE_MNEM_SUFFIX:
 	      i.types[this_operand] |= Imm16 | Imm8 | Imm8S;
 	      break;
 	    }
