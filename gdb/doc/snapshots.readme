@@ -96,13 +96,13 @@ day.
 Note that the current plan is to provide GNU gzip compressed files only.  You
 can ftp gzip from prep.ai.mit.edu in directory pub/gnu.
 
-Also, as the gcc developers did with their gcc snapshot system, even though we
-will make the snapshots available on a publically accessible ftp area, we ask
-that recipients not widely publicise their availability.  The motivation for
-this request is not to hoard them, but to avoid the situation where the
-general GDB user base naively attempts to use the snapshots, has trouble with
-them, complains publically, and the reputation of GDB declines because of a
-perception of instability or lack of quality control.
+Also, even though we will make the snapshots available on a publically
+accessible ftp area, we ask that recipients not widely publicise their
+availability.  The motivation for this request is not to hoard them, but to
+avoid the situation where the general GDB user base naively attempts to use
+the snapshots, has trouble with them, complains publically, and the reputation
+of GDB suffers because of a perception of instability or lack of quality
+control.
 
 
 GDB TEST SUITE
