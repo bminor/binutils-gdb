@@ -1,11 +1,17 @@
+Fri May 21 10:42:25 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: add standards.texi and make-stds.texi to ETC_SUPPORT
+
 Fri May 21 06:20:52 1993  Brendan Kehoe  (brendan@lisa.cygnus.com)
 
 	* config.guess: Recognize some Sequent platforms.
 
 Thu May 20 14:33:48 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
+	* Makefile.in: added the vault-install target
+
 	* configure.in: actually use the Sun3 makefile fragment that's in
-	config/
+	config, also added the release dir to configdirs	
 
 Thu May 20 14:19:18 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
