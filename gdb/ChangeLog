@@ -1,3 +1,14 @@
+2002-08-01  Kevin Buettner  <kevinb@redhat.com>
+
+	* mips-tdep.c (mips_register_virtual_type): New function.
+	(mips_gdbarch_init): Register mips_register_virtual_type()
+	with gdbarch machinery.
+	* config/mips/tm-irix6.h (mips/tm-bigmips64.h): Include
+	this file instead of tm-bigmips.h.
+	(MIPS_REGSIZE): Delete this macro.
+	(REGISTER_VIRTUAL_TYPE): Delete macro.  Undef macro so that
+	multiarch version in mips-tdep.c will be found.
+
 2002-08-01  Andrew Cagney  <cagney@redhat.com>
 
 	* NEWS: Menion that CHILL has been made obsolete.

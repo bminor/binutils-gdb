@@ -19,10 +19,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include "mips/tm-bigmips.h"
-
-#undef MIPS_REGSIZE
-#define MIPS_REGSIZE 8
+#include "mips/tm-bigmips64.h"
 
 /* SGI's assembler doesn't grok dollar signs in identifiers.
    So we use dots instead.  This item must be coordinated with G++. */
@@ -91,14 +88,6 @@
       ((N) - FP0_REGNUM) * sizeof(double) : \
       32 * sizeof(double) + ((N) - 32) * MIPS_REGSIZE)
 
-#undef  REGISTER_VIRTUAL_TYPE
-/* define 8 byte register type */
-#define REGISTER_VIRTUAL_TYPE(N) \
-	(((N) >= FP0_REGNUM && (N) < FP0_REGNUM+32) ? builtin_type_double \
-	 : ((N) == 32 /*SR*/) ? builtin_type_uint32 \
-	 : ((N) >= 70 && (N) <= 89) ? builtin_type_uint32 \
-	 : builtin_type_long_long)
-
 /* Force N32 ABI as the default. */
 #define MIPS_DEFAULT_ABI MIPS_ABI_N32
 
@@ -129,3 +118,6 @@
 /* Select the disassembler */
 #undef TM_PRINT_INSN_MACH
 #define TM_PRINT_INSN_MACH bfd_mach_mips8000
+
+/* Undefine those methods which have been multiarched.  */
+#undef REGISTER_VIRTUAL_TYPE

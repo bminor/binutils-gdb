@@ -483,6 +483,36 @@ mips_register_convert_to_raw (struct type *virtual_type, int n,
 	    TYPE_LENGTH (virtual_type));
 }
 
+/* Return the GDB type object for the "standard" data type
+   of data in register REG.  
+   
+   Note: kevinb/2002-08-01: The definition below should faithfully
+   reproduce the behavior of each of the REGISTER_VIRTUAL_TYPE
+   definitions found in config/mips/tm-*.h.  I'm concerned about
+   the ``FCRCS_REGNUM <= reg && reg <= LAST_EMBED_REGNUM'' clause
+   though.  In some cases FP_REGNUM is in this range, and I doubt
+   that this code is correct for the 64-bit case.  */
+
+static struct type *
+mips_register_virtual_type (int reg)
+{
+  if (FP0_REGNUM <= reg && reg < FP0_REGNUM + 32)
+    return builtin_type_double;
+  else if (reg == PS_REGNUM /* CR */)
+    return builtin_type_uint32;
+  else if (FCRCS_REGNUM <= reg && reg <= LAST_EMBED_REGNUM)
+    return builtin_type_uint32;
+  else
+    {
+      /* Everything else... return ``long long'' when registers
+         are 64-bits wide, ``int'' otherwise.  */
+      if (MIPS_REGSIZE == TYPE_LENGTH (builtin_type_long_long))
+	return builtin_type_long_long;
+      else
+	return builtin_type_int;
+    }
+}
+
 /* Should the upper word of 64-bit addresses be zeroed? */
 enum auto_boolean mask_address_var = AUTO_BOOLEAN_AUTO;
 
@@ -4634,6 +4664,8 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_pointer_to_address (gdbarch, signed_pointer_to_address);
   set_gdbarch_address_to_pointer (gdbarch, address_to_signed_pointer);
   set_gdbarch_integer_to_address (gdbarch, mips_integer_to_address);
+
+  set_gdbarch_register_virtual_type (gdbarch, mips_register_virtual_type);
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch, osabi);
