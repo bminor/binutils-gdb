@@ -1,3 +1,13 @@
+2001-02-17  Mark Kettenis  <kettenis@gnu.org>
+
+	* i387-nat.c: Include "i387-nat.h".  Use regnum instead of regno
+	consistently for parameter names.  Fix comments accordingly.
+	(i387_supply_register): New function.
+	(i387_supply_fsave): Implement using i387_supply_register.
+	* i387-nat.h: Use regnum instead of regno consistently for
+	parameter names.  Fix comments accordingly.
+	(i387_supply_register): New prototype.
+
 2001-02-16  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
 
 	* remote.c (build_remote_gdbarch_data): Use new TARGET_ADDR_BIT 

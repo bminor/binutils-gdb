@@ -1,5 +1,5 @@
 /* Native-dependent code for the i387.
-   Copyright 2000 Free Software Foundation, Inc.
+   Copyright 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,15 +22,17 @@
 #include "inferior.h"
 #include "value.h"
 
+#include "i387-nat.h"
+
 /* FIXME: kettenis/2000-05-21: Right now more than a few i386 targets
    define their own routines to manage the floating-point registers in
    GDB's register array.  Most (if not all) of these targets use the
    format used by the "fsave" instruction in their communication with
    the OS.  They should all be converted to use the routines below.  */
 
-/* At fsave_offset[REGNO] you'll find the offset to the location in
+/* At fsave_offset[REGNUM] you'll find the offset to the location in
    the data structure used by the "fsave" instruction where GDB
-   register REGNO is stored.  */
+   register REGNUM is stored.  */
 
 static int fsave_offset[] =
 {
@@ -55,6 +57,32 @@ static int fsave_offset[] =
 #define FSAVE_ADDR(fsave, regnum) (fsave + fsave_offset[regnum - FP0_REGNUM])
 
 
+/* Fill register REGNUM in GDB's register array with the appropriate
+   value from *FSAVE.  This function masks off any of the reserved
+   bits in *FSAVE.  */
+
+void
+i387_supply_register (int regnum, char *fsave)
+{
+  /* Most of the FPU control registers occupy only 16 bits in
+     the fsave area.  Give those a special treatment.  */
+  if (regnum >= FIRST_FPU_CTRL_REGNUM
+      && regnum != FCOFF_REGNUM && regnum != FDOFF_REGNUM)
+    {
+      unsigned int val = *(unsigned short *) (FSAVE_ADDR (fsave, regnum));
+
+      if (regnum == FOP_REGNUM)
+	{
+	  val &= ((1 << 11) - 1);
+	  supply_register (regnum, (char *) &val);
+	}
+      else
+	supply_register (regnum, (char *) &val);
+    }
+  else
+    supply_register (regnum, FSAVE_ADDR (fsave, regnum));
+}
+
 /* Fill GDB's register array with the floating-point register values
    in *FSAVE.  This function masks off any of the reserved
    bits in *FSAVE.  */
@@ -65,39 +93,21 @@ i387_supply_fsave (char *fsave)
   int i;
 
   for (i = FP0_REGNUM; i <= LAST_FPU_CTRL_REGNUM; i++)
-    {
-      /* Most of the FPU control registers occupy only 16 bits in
-	 the fsave area.  Give those a special treatment.  */
-      if (i >= FIRST_FPU_CTRL_REGNUM
-	  && i != FCOFF_REGNUM && i != FDOFF_REGNUM)
-	{
-	  unsigned int val = *(unsigned short *) (FSAVE_ADDR (fsave, i));
-
-	  if (i == FOP_REGNUM)
-	    {
-	      val &= ((1 << 11) - 1);
-	      supply_register (i, (char *) &val);
-	    }
-	  else
-	    supply_register (i, (char *) &val);
-	}
-      else
-	supply_register (i, FSAVE_ADDR (fsave, i));
-    }
+    i387_supply_register (i, fsave);
 }
 
-/* Fill register REGNO (if it is a floating-point register) in *FSAVE
-   with the value in GDB's register array.  If REGNO is -1, do this
+/* Fill register REGNUM (if it is a floating-point register) in *FSAVE
+   with the value in GDB's register array.  If REGNUM is -1, do this
    for all registers.  This function doesn't touch any of the reserved
    bits in *FSAVE.  */
 
 void
-i387_fill_fsave (char *fsave, int regno)
+i387_fill_fsave (char *fsave, int regnum)
 {
   int i;
 
   for (i = FP0_REGNUM; i <= LAST_FPU_CTRL_REGNUM; i++)
-    if (regno == -1 || regno == i)
+    if (regnum == -1 || regnum == i)
       {
 	/* Most of the FPU control registers occupy only 16 bits in
            the fsave area.  Give those a special treatment.  */
@@ -125,9 +135,9 @@ i387_fill_fsave (char *fsave, int regno)
 }
 
 
-/* At fxsave_offset[REGNO] you'll find the offset to the location in
+/* At fxsave_offset[REGNUM] you'll find the offset to the location in
    the data structure used by the "fxsave" instruction where GDB
-   register REGNO is stored.  */
+   register REGNUM is stored.  */
 
 static int fxsave_offset[] =
 {
@@ -223,18 +233,18 @@ i387_supply_fxsave (char *fxsave)
     }
 }
 
-/* Fill register REGNO (if it is a floating-point or SSE register) in
-   *FXSAVE with the value in GDB's register array.  If REGNO is -1, do
+/* Fill register REGNUM (if it is a floating-point or SSE register) in
+   *FXSAVE with the value in GDB's register array.  If REGNUM is -1, do
    this for all registers.  This function doesn't touch any of the
    reserved bits in *FXSAVE.  */
 
 void
-i387_fill_fxsave (char *fxsave, int regno)
+i387_fill_fxsave (char *fxsave, int regnum)
 {
   int i;
 
   for (i = FP0_REGNUM; i <= MXCSR_REGNUM; i++)
-    if (regno == -1 || regno == i)
+    if (regnum == -1 || regnum == i)
       {
 	/* Most of the FPU control registers occupy only 16 bits in
            the fxsave area.  Give those a special treatment.  */
