@@ -1,3 +1,8 @@
+2000-10-25  Fred Fish  <fnf@cygnus.com>
+
+	* mips-tdep.c (MIPS_DEFAULT_MASK_ADDRESS_P): Define using either
+	the current arch or use zero.
+
 2000-10-25  Fernando Nasser  <fnasser@cygnus.com>
 
 	* ser-unix.c (do_unix_readchar): Coding style improvement only.

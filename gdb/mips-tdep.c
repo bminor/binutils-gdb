@@ -224,6 +224,13 @@ mips_stack_argsize (void)
 #define GDB_TARGET_IS_MIPS64 (gdbarch_tdep (current_gdbarch)->gdb_target_is_mips64 + 0)
 #endif
 
+#if GDB_MULTI_ARCH
+#undef MIPS_DEFAULT_MASK_ADDRESS_P
+#define MIPS_DEFAULT_MASK_ADDRESS_P (gdbarch_tdep (current_gdbarch)->default_mask_address_p)
+#elif !defined (MIPS_DEFAULT_MASK_ADDRESS_P)
+#define MIPS_DEFAULT_MASK_ADDRESS_P (0)
+#endif
+
 #define VM_MIN_ADDRESS (CORE_ADDR)0x400000
 
 int gdb_print_insn_mips (bfd_vma, disassemble_info *);
@@ -468,7 +475,7 @@ mips_mask_address_p (void)
       return 0;
       break;
     case CMD_AUTO_BOOLEAN_AUTO:
-      return gdbarch_tdep (current_gdbarch)->default_mask_address_p;
+      return MIPS_DEFAULT_MASK_ADDRESS_P;
     default:
       internal_error ("mips_mask_address_p: bad switch");
       return -1;
