@@ -1,7 +1,7 @@
 /* Target-dependent code for PowerPC systems using the SVR4 ABI
    for GDB, the GNU debugger.
 
-   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,6 +28,7 @@
 #include "gdb_string.h"
 #include "gdb_assert.h"
 #include "ppc-tdep.h"
+#include "target.h"
 
 /* Pass the arguments in either registers, or in the stack. Using the
    ppc sysv ABI, the first eight words of the argument list (that might
@@ -1012,4 +1013,22 @@ ppc64_sysv_abi_store_return_value (struct type *valtype,
 {
   if (!ppc64_sysv_abi_return_value (valtype, regbuf, valbuf, NULL))
     error ("Function return value location unknown");
+}
+
+CORE_ADDR
+ppc64_sysv_abi_adjust_breakpoint_address (struct gdbarch *gdbarch,
+					  CORE_ADDR bpaddr)
+{
+  /* PPC64 SYSV specifies that the minimal-symbol "FN" should point at
+     a function-descriptor while the corresponding minimal-symbol
+     ".FN" should point at the entry point.  Consequently, a command
+     like "break FN" applied to an object file with only minimal
+     symbols, will insert the breakpoint into the descriptor at "FN"
+     and not the function at ".FN".  Avoid this confusion by adjusting
+     any attempt to set a descriptor breakpoint into a corresponding
+     function breakpoint.  Note that GDB warns the user when this
+     adjustment is applied - that's ok as otherwise the user will have
+     no way of knowing why their breakpoint at "FN" resulted in the
+     program stopping at ".FN".  */
+  return gdbarch_convert_from_func_ptr_addr (gdbarch, bpaddr, &current_target);
 }

@@ -2895,6 +2895,15 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_function_start_offset (gdbarch, 0);
   set_gdbarch_breakpoint_from_pc (gdbarch, rs6000_breakpoint_from_pc);
 
+  /* Handle the 64-bit SVR4 minimal-symbol convention of using "FN"
+     for the descriptor and ".FN" for the entry-point -- a user
+     specifying "break FN" will unexpectedly end up with a breakpoint
+     on the descriptor and not the function.  This architecture method
+     transforms any breakpoints on descriptors into breakpoints on the
+     corresponding entry point.  */
+  if (sysv_abi && wordsize == 8)
+    set_gdbarch_adjust_breakpoint_address (gdbarch, ppc64_sysv_abi_adjust_breakpoint_address);
+
   /* Not sure on this. FIXMEmgo */
   set_gdbarch_frame_args_skip (gdbarch, 8);
 

@@ -1,5 +1,14 @@
 2003-10-31  Andrew Cagney  <cagney@redhat.com>
 
+	* rs6000-tdep.c (rs6000_gdbarch_init): For 64-bit ABI, set
+	adjust_breakpoint_address.
+	* Makefile.in (ppc-sysv-tdep.o): Add $(target_h).
+	* ppc-tdep.h (ppc64_sysv_abi_adjust_breakpoint_address): Declare.
+	* ppc-sysv-tdep.c: Include "target.h".  Update copyright.
+	(ppc64_sysv_abi_adjust_breakpoint_address): New function.
+
+2003-10-31  Andrew Cagney  <cagney@redhat.com>
+
 	* target.h (struct target_ops): Replace "to_read_partial" and
 	"to_write_partial" with "to_xfer_partial".  Update comments.
 	* target.c (debug_to_write_partial): Delete function.
