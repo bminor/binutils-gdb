@@ -2687,7 +2687,7 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 
   syms = bfd_malloc ((symcount + 1) * sizeof (*syms));
   if (syms == NULL)
-    return 0;
+    return -1;
 
   if (!relocatable && static_count != 0 && dyn_count != 0)
     {
@@ -2758,10 +2758,14 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 
       slurp_relocs = get_elf_backend_data (abfd)->s->slurp_reloc_table;
       relcount = (opd->flags & SEC_RELOC) ? opd->reloc_count : 0;
-
-      if (! relcount
-	  || ! (*slurp_relocs) (abfd, opd, static_syms, FALSE))
+      if (relcount == 0)
 	goto done;
+
+      if (!(*slurp_relocs) (abfd, opd, static_syms, FALSE))
+	{
+	  count = -1;
+	  goto done;
+	}
 
       size = 0;
       for (i = secsymend, r = opd->relocation; i < opdsymend; ++i)
@@ -2794,7 +2798,7 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
       s = *ret = bfd_malloc (size);
       if (s == NULL)
 	{
-	  count = 0;
+	  count = -1;
 	  goto done;
 	}
 
@@ -2847,6 +2851,7 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 	    free_contents_and_exit:
 	      free (contents);
 	    }
+	  count = -1;
 	  goto done;
 	}
 
@@ -2866,10 +2871,7 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 
       s = *ret = bfd_malloc (size);
       if (s == NULL)
-	{
-	  count = 0;
-	  goto free_contents_and_exit;
-	}
+	goto free_contents_and_exit;
 
       names = (char *) (s + count);
 
