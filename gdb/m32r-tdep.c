@@ -37,6 +37,7 @@
 #include "arch-utils.h"
 #include "regcache.h"
 #include "trad-frame.h"
+#include "dis-asm.h"
 
 #include "gdb_assert.h"
 
