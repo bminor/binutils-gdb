@@ -1,3 +1,8 @@
+2002-01-15  Daniel Jacobowitz  <drow@mvista.com>
+
+	* c-typeprint.c (is_type_conversion_operator): Add additional
+	check for non-conversion operators.
+
 2002-01-15  Michael Snyder  <msnyder@redhat.com>
 
 	* linux-proc.c: Add "info proc" command, a la procfs.c.

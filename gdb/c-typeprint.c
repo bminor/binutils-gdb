@@ -402,7 +402,13 @@ is_type_conversion_operator (struct type *type, int i, int j)
   while (strchr (" \t\f\n\r", *name))
     name++;
 
-  if (strncmp (name, "new", 3) == 0)
+  if (!('a' <= *name && *name <= 'z')
+      && !('A' <= *name && *name <= 'Z')
+      && *name != '_')
+    /* If this doesn't look like the start of an identifier, then it
+       isn't a type conversion operator.  */
+    return 0;
+  else if (strncmp (name, "new", 3) == 0)
     name += 3;
   else if (strncmp (name, "delete", 6) == 0)
     name += 6;
