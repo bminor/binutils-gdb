@@ -69,9 +69,11 @@ extern CORE_ADDR mz8k_skip_prologue PARAMS ((CORE_ADDR ip));
 
 #define INVALID_FLOAT(p, len) 0   /* Just a first guess; not checked */
 
-/* Say how long registers are.  */
+/* Say how long (ordinary) registers are.  This is a piece of bogosity
+   used in push_word and a few other places; REGISTER_RAW_SIZE is the
+   real way to know how big a register is.  */
 
-#define REGISTER_TYPE unsigned int
+#define REGISTER_SIZE 4
 
 #define NUM_REGS 	23   /* 16 registers + 1 ccr + 1 pc + 3 debug
 				regs + fake fp + fake sp*/

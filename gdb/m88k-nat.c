@@ -211,7 +211,8 @@ m88k_register_u_addr (blockend, regnum)
     case 28:
     case 29:
     case 30:
-    case 31:          return (ustart + ((int) &u.pt_r0 - (int) &u) + sizeof(REGISTER_TYPE) * regnum);
+    case 31:
+      return (ustart + ((int) &u.pt_r0 - (int) &u) + REGISTER_SIZE * regnum);
     case PSR_REGNUM:  return (ustart + ((int) &u.pt_psr - (int) &u));
     case FPSR_REGNUM: return (ustart + ((int) &u.pt_fpsr - (int) &u));
     case FPCR_REGNUM: return (ustart + ((int) &u.pt_fpcr - (int) &u));
@@ -224,7 +225,7 @@ m88k_register_u_addr (blockend, regnum)
 	       give it zero */
 	    return (ustart + ((int) &u.pt_r0 - (int) &u));
 	else
-	    return (blockend + sizeof (REGISTER_TYPE) * regnum);
+	    return (blockend + REGISTER_SIZE * regnum);
     }
 }
 

@@ -83,9 +83,11 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 
 #define INVALID_FLOAT(p,l) 0
 
-/* Say how long (all) registers are.  */
+/* Say how long (ordinary) registers are.  This is a piece of bogosity
+   used in push_word and a few other places; REGISTER_RAW_SIZE is the
+   real way to know how big a register is.  */
 
-#define REGISTER_TYPE long
+#define REGISTER_SIZE 4
 
 /* Number of machine registers */
 

@@ -310,7 +310,7 @@ SFILES = blockframe.c breakpoint.c buildsym.c c-exp.y c-lang.c \
 	mem-break.c minsyms.c mipsread.c nlmread.c objfiles.c parse.c \
 	printcmd.c remote.c source.c stabsread.c stack.c symfile.c symmisc.c \
 	symtab.c target.c thread.c typeprint.c utils.c valarith.c valops.c \
-	valprint.c values.c serial.c ser-unix.c
+	valprint.c values.c serial.c ser-unix.c mdebugread.c
 
 # Files that are not source code, but need to go into
 # gdb-$(VERSION).tar.Z.
@@ -375,10 +375,10 @@ defs_h =	defs.h xm.h tm.h nm.h config.status
 
 inferior_h =	inferior.h $(breakpoint_h)
 
-# Header files that are not named in config/*/* Makefile fragments go
-# into HFILES.
+# Header files that need to have srcdir added.
 
-HFILES = buildsym.h call-cmds.h coff-solib.h defs.h environ.h $(gdbcmd_h) \
+HFILES_NO_SRCDIR = buildsym.h call-cmds.h coff-solib.h defs.h environ.h \
+	$(gdbcmd_h) \
 	$(gdbcore_h) gdb-stabs.h $(inferior_h) language.h minimon.h monitor.h \
 	objfiles.h parser-defs.h partial-stab.h serial.h signals.h solib.h \
 	symfile.h stabsread.h target.h terminal.h typeprint.h xcoffsolib.h \
@@ -386,7 +386,7 @@ HFILES = buildsym.h call-cmds.h coff-solib.h defs.h environ.h $(gdbcmd_h) \
 	config/m68k/tm-m68k.h config/pa/tm-hppa.h config/i960/tm-i960.h \
 	config/sparc/tm-sparc.h config/tm-sunos.h config/tm-sysv4.h \
 	config/m68k/xm-m68k.h config/sparc/xm-sparc.h config/xm-sysv4.h \
-	config/vax/xm-vax.h config/nm-m3.h config/nm-trash.h $(udiheaders) \
+	config/vax/xm-vax.h config/nm-m3.h config/nm-trash.h \
 	29k-share/udi/udiids.h 29k-share/udi_soc nindy-share/b.out.h \
 	nindy-share/block_io.h nindy-share/coff.h \
 	nindy-share/env.h nindy-share/stop.h \
@@ -394,6 +394,11 @@ HFILES = buildsym.h call-cmds.h coff-solib.h defs.h environ.h $(gdbcmd_h) \
 	vx-share/vxWorks.h vx-share/wait.h vx-share/xdr_ld.h \
 	vx-share/xdr_ptrace.h vx-share/xdr_rdb.h thread.h \
 	$(remote_utils_h)
+
+# Header files that already have srcdir in them.
+
+HFILES_WITH_SRCDIR = $(udiheaders)
+
 
 # GDB "info" files, which should be included in their entirety
 INFOFILES = gdb.info*
@@ -417,9 +422,12 @@ DEPFILES = $(TDEPFILES) $(XDEPFILES) $(SER_HARDWIRE) $(NATDEPFILES) $(REMOTE_O)
 SOURCES = $(SFILES) $(ALLDEPFILES) $(YYFILES)
 # Don't include YYFILES (*.tab.c) because we already include *.y in SFILES,
 # and it's more useful to see it in the .y file.
-TAGFILES = $(SFILES) $(HFILES) $(ALLDEPFILES) $(ALLPARAM) $(POSSLIBS) 
+TAGFILES_NO_SRCDIR = $(SFILES) $(HFILES_NO_SRCDIR) $(ALLDEPFILES) \
+	$(ALLPARAM) $(POSSLIBS)
+TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
 
-TARFILES = $(SFILES) $(HFILES) $(NONSRC) $(ALLDEPFILES) $(ALLCONFIG) \
+TARFILES = $(SFILES) $(HFILES_NO_SRCDIR) $(HFILES_WITH_SRCDIR) \
+	$(NONSRC) $(ALLDEPFILES) $(ALLCONFIG) \
 	$(ALLPARAM) $(INFOFILES) $(POSSLIBS) $(REMOTE_EXAMPLES)
 
 
@@ -432,7 +440,7 @@ OBS =	version.o main.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
 	dwarfread.o mipsread.o stabsread.o core.o c-lang.o ch-lang.o m2-lang.o \
 	complaints.o typeprint.o c-typeprint.o ch-typeprint.o m2-typeprint.o \
 	c-valprint.o cp-valprint.o ch-valprint.o m2-valprint.o nlmread.o \
-	serial.o
+	serial.o mdebugread.o
 
 RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)
 
@@ -459,8 +467,16 @@ all: gdb
 	@$(MAKE) $(FLAGS_TO_PASS) DO=all "DODIRS=`echo $(SUBDIRS) | sed 's/testsuite//'`" subdir_do
 
 installcheck:
+
+# The check target can not use subdir_do, because subdir_do does not
+# use TARGET_FLAGS_TO_PASS.
 check: force
-	@rootme=`pwd`; export rootme; $(MAKE) $(TARGET_FLAGS_TO_PASS) DO=check DODIRS=testsuite subdir_do
+	@if [ -f testsuite/Makefile ]; then \
+	  rootme=`pwd`; export rootme; \
+	  cd testsuite; \
+	  $(MAKE) $(TARGET_FLAGS_TO_PASS) check; \
+	else true; fi
+
 info dvi install-info clean-info: force
 	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
@@ -601,14 +617,21 @@ kdb:	$(NTSSTART) $(OBS) $(NTSOBS) $(ADD_DEPS) $(CDEPS)
 	  -lc $(CLIBS)
 
 # Put the proper machine-specific files first, so M-. on a machine
-# specific routine gets the one for the correct machine.
-TAGS:	
+# specific routine gets the one for the correct machine.  (FIXME: those
+# files go in twice; we should be removing them from the main list).
+
+# TAGS depends on all the files that go into it so you can rebuild TAGS
+# with `make TAGS' and not have to say `rm TAGS' first.
+
+TAGS: $(TAGFILES_NO_SRCDIR) $(TAGFILES_WITH_SRCDIR)
 	etags `find $(srcdir)/config \( -name $(TM_FILE) \
 		-o -name $(XM_FILE) \
 		-o -name $(NAT_FILE) \) -print` \
-	`(for i in $(DEPFILES) $(TAGFILES); do \
+	`(for i in $(DEPFILES) $(TAGFILES_NO_SRCDIR); do \
 		echo $(srcdir)/$$i ; \
-	done) | sed -e 's/\.o$$/\.c/'` \
+	done ; for i in $(TAGFILES_WITH_SRCDIR); do \
+		echo $$i ; \
+	done) | sed -e 's/\.o$$/\.c/'`
 
 tags: TAGS
 
@@ -851,11 +874,12 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	go32-xdep.c gould-pinsn.c gould-xdep.c h8300-tdep.c h8500-tdep.c \
 	hp300ux-nat.c hppa-pinsn.c hppa-tdep.c hppab-nat.c hppah-nat.c \
 	i386-pinsn.c i386-tdep.c i386b-nat.c i386mach-nat.c i386v-nat.c \
-	i386aix-nat.c i386m3-nat.c i386v4-nat.c i386ly-nat.c i386ly-tdep.c \
+	i386aix-nat.c i386m3-nat.c i386v4-nat.c i386ly-tdep.c \
 	i387-tdep.c \
 	i960-pinsn.c i960-tdep.c \
-	infptrace.c inftarg.c irix4-nat.c isi-xdep.c m3-nat.c \
-	m68k-pinsn.c m68k-tdep.c m68kly-nat.c \
+	infptrace.c inftarg.c irix4-nat.c isi-xdep.c \
+	lynx-nat.c m3-nat.c \
+	m68k-pinsn.c m68k-tdep.c \
 	m88k-nat.c m88k-pinsn.c m88k-tdep.c mips-nat.c mips-pinsn.c \
 	mips-tdep.c mipsm3-nat.c news-xdep.c \
 	nindy-share/Onindy.c nindy-share/nindy.c \
@@ -1222,6 +1246,10 @@ main.o: main.c $(bfd_h) $(getopt_h) $(readline_headers) call-cmds.h \
 
 maint.o: maint.c $(defs_h) $(gdbcmd_h) $(gdbtypes_h) $(symtab_h) language.h \
 	$(expression_h)
+
+mdebugread.o: mdebugread.c buildsym.h complaints.h $(bfd_h) $(defs_h) \
+	$(expression_h) gdb-stabs.h $(gdbcore_h) $(gdbtypes_h) language.h \
+	objfiles.h partial-stab.h stabsread.h symfile.h $(symtab_h)
 
 mem-break.o: mem-break.c $(defs_h) 
 

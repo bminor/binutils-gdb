@@ -1,3 +1,18 @@
+Sun Dec 26 09:18:10 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* valops.c (call_function_by_hand, push_word), defs.h (push_word),
+	convex-xdep.c, m88k-nat.c, i386m3-nat.c, mips-tdep.c, mipsm3-nat.c,
+	ns32km3-nat.c, remote-bug.c, m88k-tdep.c, remote-hms.c, remote-mips.c,
+	config/gould/tm-np1.h, hppa-tdep.c (hppa_fix_call_dummy), remote-vx.c:
+	Use REGISTER_SIZE, unsigned LONGEST, and
+	{store,extract}_unsigned_integer, instead of sizeof
+	(REGISTER_TYPE) and REGISTER_TYPE.
+	* All tm.h files: Change REGISTER_TYPE to REGISTER_SIZE.
+	* hppa-tdep.c (pa_print_fp_reg): Remove unused variable val.
+
+	* Makefile.in (ALLDEPFILES): Remove i386ly-nat.c and m68kly-nat.c.
+	Add lynx-nat.c.
+
 Sat Dec 25 20:05:41 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
     * hppa-tdep.c (init_extra_frame_info): Correctly adjust the base

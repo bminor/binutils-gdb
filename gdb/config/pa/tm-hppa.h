@@ -120,9 +120,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Name of the builtin type for the LONGEST type above. */
 #define BUILTIN_TYPE_LONGEST builtin_type_long
 
-/* Say how long (ordinary) registers are.  */
+/* Say how long (ordinary) registers are.  This is a piece of bogosity
+   used in push_word and a few other places; REGISTER_RAW_SIZE is the
+   real way to know how big a register is.  */
 
-#define REGISTER_TYPE long
+#define REGISTER_SIZE 4
 
 /* Number of machine registers */
 
@@ -217,23 +219,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define MAX_REGISTER_VIRTUAL_SIZE 8
 
-/* Nonzero if register N requires conversion
-   from raw format to virtual format.  */
-
-#define REGISTER_CONVERTIBLE(N) 0
-
-/* Convert data from raw format for register REGNUM
-   to virtual format for register REGNUM.  */
-
-#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM, FROM, TO) \
-{ memcpy ((TO), (FROM), (REGNUM) < FP4_REGNUM ? 4 : 8); }
-
-/* Convert data from virtual format for register REGNUM
-   to raw format for register REGNUM.  */
-
-#define REGISTER_CONVERT_TO_RAW(REGNUM, FROM, TO) \
-{ memcpy ((TO), (FROM), (REGNUM) < FP4_REGNUM ? 4 : 8); }
-
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
 
@@ -257,8 +242,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    of type TYPE, given in virtual format.  */
 
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
-  write_register_bytes (TYPE_LENGTH(TYPE) > 4 ? FP4_REGNUM :28,		\
-			VALBUF, TYPE_LENGTH (TYPE))
+  write_register_bytes ((TYPE_LENGTH(TYPE) > 4 \
+			 ? REGISTER_BYTE (FP4_REGNUM) \
+			 : REGISTER_BYTE (28)),		\
+			(VALBUF), TYPE_LENGTH (TYPE))
 
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,
@@ -564,6 +551,9 @@ struct obj_unwind_info {
 };
 
 #define OBJ_UNWIND_INFO(obj) ((struct obj_unwind_info *)obj->obj_private)
+
+extern CORE_ADDR target_read_pc PARAMS ((void));
+extern void target_write_pc PARAMS ((CORE_ADDR));
 
 #define TARGET_READ_PC() target_read_pc ()
 #define TARGET_WRITE_PC(v) target_write_pc (v)

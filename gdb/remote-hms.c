@@ -868,7 +868,7 @@ hms_fetch_register (dummy)
   int s;
   int gottok;
 
-  REGISTER_TYPE reg[NUM_REGS];
+  unsigned LONGEST reg[NUM_REGS];
   int foo[8];
 
   check_open ();

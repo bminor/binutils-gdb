@@ -75,9 +75,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define NS32K_SVC_IMMED_OPERANDS
 
-/* Say how long (ordinary) registers are.  */
+/* Say how long (ordinary) registers are.  This is a piece of bogosity
+   used in push_word and a few other places; REGISTER_RAW_SIZE is the
+   real way to know how big a register is.  */
 
-#define REGISTER_TYPE long
+#define REGISTER_SIZE 4
 
 /* Number of machine registers */
 

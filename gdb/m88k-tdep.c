@@ -768,9 +768,9 @@ collect_returned_value (rval, value_type, struct_return, nargs, args)
 static void
 write_word (sp, word)
      CORE_ADDR sp;
-     REGISTER_TYPE word;
+     unsigned LONGEST word;
 {
-  register int len = sizeof (REGISTER_TYPE);
+  register int len = REGISTER_SIZE;
   char buffer[MAX_REGISTER_RAW_SIZE];
 
   store_unsigned_integer (buffer, len, word);

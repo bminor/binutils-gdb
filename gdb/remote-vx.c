@@ -459,7 +459,7 @@ vx_write_register (regno)
 
   in_data.bytes = registers;
 
-  in_data.len = VX_NUM_REGS * sizeof (REGISTER_TYPE);
+  in_data.len = VX_NUM_REGS * REGISTER_SIZE;
 
   /* XXX change second param to be a proc number */
   status = net_ptrace_clnt_call (PTRACE_SETREGS, &ptrace_in, &ptrace_out);

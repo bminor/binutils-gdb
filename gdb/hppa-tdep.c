@@ -961,7 +961,7 @@ hppa_push_arguments (nargs, args, sp, struct_return, struct_addr)
 
 CORE_ADDR
 hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
-     REGISTER_TYPE *dummy;
+     char *dummy;
      CORE_ADDR pc;
      CORE_ADDR fun;
      int nargs;
@@ -985,10 +985,30 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
 
   sr4export_addr = SYMBOL_VALUE_ADDRESS (msymbol);
 
-  dummy[9] = deposit_21 (fun >> 11, dummy[9]);
-  dummy[10] = deposit_14 (fun & MASK_11, dummy[10]);
-  dummy[12] = deposit_21 (sr4export_addr >> 11, dummy[12]);
-  dummy[13] = deposit_14 (sr4export_addr & MASK_11, dummy[13]);
+  store_unsigned_integer
+    (&dummy[9*REGISTER_SIZE],
+     REGISTER_SIZE,
+     deposit_21 (fun >> 11,
+		 extract_unsigned_integer (&dummy[9*REGISTER_SIZE],
+					   REGISTER_SIZE)));
+  store_unsigned_integer
+    (&dummy[10*REGISTER_SIZE],
+     REGISTER_SIZE,
+     deposit_14 (fun & MASK_11,
+		 extract_unsigned_integer (&dummy[10*REGISTER_SIZE],
+					   REGISTER_SIZE)));
+  store_unsigned_integer
+    (&dummy[12*REGISTER_SIZE],
+     REGISTER_SIZE,
+     deposit_21 (sr4export_addr >> 11,
+		 extract_unsigned_integer (&dummy[12*REGISTER_SIZE],
+					   REGISTER_SIZE)));
+  store_unsigned_integer
+    (&dummy[13*REGISTER_SIZE],
+     REGISTER_SIZE,
+     deposit_14 (sr4export_addr & MASK_11,
+		 extract_unsigned_integer (&dummy[13*REGISTER_SIZE],
+					   REGISTER_SIZE)));
 
   write_register (22, pc);
 
@@ -1115,7 +1135,6 @@ pa_print_fp_reg (i)
 {
   unsigned char raw_buffer[MAX_REGISTER_RAW_SIZE];
   unsigned char virtual_buffer[MAX_REGISTER_VIRTUAL_SIZE];
-  REGISTER_TYPE val;
 
   /* Get the data in raw format.  */
   read_relative_register_raw_bytes (i, raw_buffer);

@@ -92,9 +92,11 @@ i386_skip_prologue PARAMS ((int));
 /* Name of the builtin type for the LONGEST type above. */
 #define BUILTIN_TYPE_LONGEST builtin_type_long
 
-/* Say how long (ordinary) registers are.  */
+/* Say how long (ordinary) registers are.  This is a piece of bogosity
+   used in push_word and a few other places; REGISTER_RAW_SIZE is the
+   real way to know how big a register is.  */
 
-#define REGISTER_TYPE long
+#define REGISTER_SIZE 4
 
 /* Number of machine registers */
 

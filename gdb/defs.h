@@ -893,13 +893,8 @@ void store_floating PARAMS ((void *, int, double));
 extern CORE_ADDR
 push_bytes PARAMS ((CORE_ADDR, char *, int));
 
-/* In some modules, we don't have a definition of REGISTER_TYPE yet, so we
-   must avoid prototyping this function for now.  FIXME.  Should be:
 extern CORE_ADDR
-push_word PARAMS ((CORE_ADDR, REGISTER_TYPE));
- */
-extern CORE_ADDR
-push_word ();
+push_word PARAMS ((CORE_ADDR, unsigned LONGEST));
 
 /* Some parts of gdb might be considered optional, in the sense that they
    are not essential for being able to build a working, usable debugger

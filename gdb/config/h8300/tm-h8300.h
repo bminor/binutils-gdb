@@ -93,9 +93,11 @@ extern CORE_ADDR h8300_skip_prologue ();
 
 #define INVALID_FLOAT(p, len) 0   /* Just a first guess; not checked */
 
-/* Say how long registers are.  */
+/* Say how long (ordinary) registers are.  This is a piece of bogosity
+   used in push_word and a few other places; REGISTER_RAW_SIZE is the
+   real way to know how big a register is.  */
 
-#define REGISTER_TYPE  unsigned short
+#define REGISTER_SIZE 2
 
 #define NUM_REGS 13  
 

@@ -1045,7 +1045,7 @@ static void
 mips_fetch_registers (regno)
      int regno;
 {
-  REGISTER_TYPE val;
+  unsigned LONGEST val;
   int err;
 
   if (regno == -1)

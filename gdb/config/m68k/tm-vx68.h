@@ -88,4 +88,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Number of registers in a ptrace_getfpregs call. */
 
 #define VX_SIZE_FPREGS (8 * REGISTER_RAW_SIZE (FP0_REGNUM) \
-			+ (3 * sizeof (REGISTER_TYPE)))
+			+ (3 * REGISTER_SIZE))

@@ -425,8 +425,6 @@ static void
 bug_fetch_register(regno)
      int regno;
 {
-  REGISTER_TYPE regval;
-
   sr_check_open();
 
   if (regno == -1)
@@ -444,12 +442,15 @@ bug_fetch_register(regno)
     }
   else if (regno < XFP_REGNUM)
     {
-      sr_write("rs ", 3);
-      sr_write_cr(get_reg_name(regno));
-      sr_expect("=");
-      regval = sr_get_hex_word();
-      gr_expect_prompt();
-      supply_register(regno, (char *) &regval);
+      char buffer[MAX_REGISTER_RAW_SIZE];
+
+      sr_write ("rs ", 3);
+      sr_write_cr (get_reg_name(regno));
+      sr_expect ("=");
+      store_unsigned_integer (buffer, REGISTER_RAW_SIZE (regno),
+			      sr_get_hex_word());
+      gr_expect_prompt ();
+      supply_register (regno, buffer);
     }
   else
     {

@@ -122,13 +122,13 @@ static int reg_offset[] =
 #define FETCH_REGS(state, regnum, count) \
   memcpy (&registers[REGISTER_BYTE (regnum)], \
 	  (char *)state+reg_offset[ regnum ], \
-	  count*sizeof (REGISTER_TYPE))
+	  count*REGISTER_SIZE)
 
 /* Store COUNT contiguous registers to thread STATE starting from REGNUM */
 #define STORE_REGS(state, regnum, count) \
   memcpy ((char *)state+reg_offset[ regnum ], \
 	  &registers[REGISTER_BYTE (regnum)], \
-	  count*sizeof (REGISTER_TYPE))
+	  count*REGISTER_SIZE)
 
 #define REGS_ALL    -1
 #define REGS_NORMAL  1
