@@ -310,6 +310,7 @@ proc gdb_test { args } {
     global GDB
     global expect_out
     upvar timeout timeout
+    global gdb_spawn_id;
 
     if [llength $args]>2 then {
 	set message [lindex $args 2]
@@ -334,11 +335,14 @@ proc gdb_test { args } {
 
     set result -1
     if ![string match $command ""] {
-	send_gdb "$command\n"
+	if { [send_gdb "$command\n"] != "" } {
+	    perror "Couldn't send $command to GDB.";
+	    return $result;
+	}
     }
 
     expect {
-	-re ".*Ending remote debugging.*$gdb_prompt$" {
+	-i $gdb_spawn_id -re ".*Ending remote debugging.*$gdb_prompt$" {
 	    if ![isnative] then {
 		warning "Can`t communicate to remote target."
 	    }
@@ -346,25 +350,25 @@ proc gdb_test { args } {
 	    gdb_start
 	    set result -1
 	}
-	-re "\[\r\n\]*($pattern)\[\r\n\]+$gdb_prompt $" {
+	-i $gdb_spawn_id -re "\[\r\n\]*($pattern)\[\r\n\]+$gdb_prompt $" {
 	    if ![string match "" $message] then {
 		pass "$message"
 	    }
 	    set result 0
 	}
-	-re "(${question_string})$" {
+	-i $gdb_spawn_id -re "(${question_string})$" {
 	    send_gdb "$response_string\n";
 	    exp_continue;
 	}
-	-re "Undefined command:.*$gdb_prompt" {
+	-i $gdb_spawn_id -re "Undefined command:.*$gdb_prompt" {
 	    perror "Undefined command \"$command\"."
 	    set result 1
 	}
-	-re "Ambiguous command.*$gdb_prompt $" {
+	-i $gdb_spawn_id -re "Ambiguous command.*$gdb_prompt $" {
 	    perror "\"$command\" is not a unique command name."
 	    set result 1
 	}
-	-re ".*Program exited with code \[0-9\]+.*$gdb_prompt $" {
+	-i $gdb_spawn_id -re ".*Program exited with code \[0-9\]+.*$gdb_prompt $" {
 	    if ![string match "" $message] then {
 		set errmsg "$message: the program exited"
 	    } else {
@@ -373,7 +377,7 @@ proc gdb_test { args } {
 	    fail "$errmsg"
 	    return -1
 	}
-	-re "The program is not being run.*$gdb_prompt $" {
+	-i $gdb_spawn_id -re "The program is not being run.*$gdb_prompt $" {
 	    if ![string match "" $message] then {
 		set errmsg "$message: the program is no longer running"
 	    } else {
@@ -382,25 +386,25 @@ proc gdb_test { args } {
 	    fail "$errmsg"
 	    return -1
 	}
-	-re ".*$gdb_prompt $" {
+	-i $gdb_spawn_id -re ".*$gdb_prompt $" {
 	    if ![string match "" $message] then {
 		fail "$message"
 	    }
 	    set result 1
 	}
-	"<return>" {
+	-i $gdb_spawn_id "<return>" {
 	    send_gdb "\n"
 	    perror "Window too small."
 	}
-	-re "\\(y or n\\) " {
+	-i $gdb_spawn_id -re "\\(y or n\\) " {
 	    send_gdb "n\n"
 	    perror "Got interactive prompt."
 	}
-	eof {
+	-i $gdb_spawn_id eof {
 	    perror "Process no longer exists"
 	    return -1
 	}
-	full_buffer {
+	-i $gdb_spawn_id full_buffer {
 	    perror "internal buffer is full."
 	}
 	timeout	{
