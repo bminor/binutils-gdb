@@ -37,8 +37,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    | refs     | ----->  | one entry|  -----> asymbol
    +----------+		+----------+	   |   	     |
    | coms     |		|          |	   +---------+
-   +----------+		+----------+	   | udata   |-----> another canonical symbol
-					   +---------+
+   +----------+		+----------+	   | udata   |-----> another canonical
+					   +---------+		symbol
 
 
 
