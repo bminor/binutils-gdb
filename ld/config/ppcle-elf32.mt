@@ -1,1 +1,1 @@
-EMUL=elf32ppcle
+EMUL=elf32lppc
