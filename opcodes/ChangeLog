@@ -1,3 +1,10 @@
+Mon Jul 15 16:59:55 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* i386-dis.c:  Get rid of print_insn_i8086.  Use info.mach to
+	distinguish between variants of the instruction set.
+	* sparc-dis.c:  Get rid of print_insn_sparclite.  Use info.mach to
+	distinguish between variants of the instruction set.
+
 Fri Jul 12 10:12:01 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* i386-dis.c (print_insn_i8086):  New routine to disassemble using
