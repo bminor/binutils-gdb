@@ -1,3 +1,9 @@
+start-sanitize-sky
+Mon Mar 23 13:16:22 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-dvp.c (insert_mpg_marker): Update mpgloc.
+
+end-sanitize-sky
 start-sanitize-r5900
 Sun Mar 22 13:21:01 1998  Jeffrey A Law  (law@cygnus.com)
 

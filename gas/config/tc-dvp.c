@@ -1888,6 +1888,8 @@ static void
 insert_mpg_marker ()
 {
   s_endmpg (1);
+  /* Update mpgloc.  */
+  vif_set_mpgloc (vif_get_mpgloc () + 256);
   md_assemble ("mpg *,*");
   /* Record the cpu type in case we're in the middle of reading binary
      data.  */
@@ -2110,6 +2112,10 @@ s_dmadata (ignore)
       ignore_rest_of_line ();
       return;
     }
+
+  /* Do an implicit alignment to a 16 byte boundary. */
+  frag_align (4, 0, 0);
+  record_alignment (now_seg, 4);
 
   c = get_symbol_end ();
   line_label = colon (name);	/* user-defined label */
