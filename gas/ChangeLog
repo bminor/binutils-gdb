@@ -1,5 +1,9 @@
 Fri Apr  2 08:54:57 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* config/tc-mips.c (macro): Optimizations to branching code and a
+	couple of bug fixes from ralphc@pyrps5.eng.pyramid.com (Ralph
+	Campbell).
+
 	* config/ho-irix.h: New file; if not gcc, define BROKEN_ASSERT.
 	* configure.in (mips-sgi-irix*): Set gas_host to irix.
 
