@@ -195,7 +195,7 @@ x86_64_register_convert_to_virtual (int regnum, struct type *type,
 				    char *from, char *to)
 {
   char buf[12];
-  DOUBLEST d;
+
   /* We only support floating-point values.  */
   if (TYPE_CODE (type) != TYPE_CODE_FLT)
     {
@@ -426,6 +426,8 @@ classify_argument (struct type *type,
 	      }
 	    }
 	    break;
+	  default:
+	    break;
 	  }
 	/* Final merger cleanup.  */
 	for (i = 0; i < words; i++)
@@ -488,6 +490,8 @@ classify_argument (struct type *type,
 	}
     case TYPE_CODE_VOID:
       return 0;
+    default: /* Avoid warning.  */
+      break;
     }
   internal_error (__FILE__, __LINE__,
 		  "classify_argument: unknown argument type");

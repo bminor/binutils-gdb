@@ -1,3 +1,10 @@
+2002-05-07  Michal Ludvig  <mludvig@suse.cz>
+
+	* dwarf2cfi.c: Code cleanup, removed unused variables, 
+	added default labels to switch {} statements.
+	* x86-64-tdep.c: Ditto.
+	* x86-64-linux-nat.c: Ditto.
+
 2002-05-07  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* solib.h: Protect against multiple inclusion.
