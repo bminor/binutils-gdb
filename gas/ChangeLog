@@ -1,3 +1,9 @@
+Tue Dec  7 16:02:53 1993  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* config/tc-sh.c (md_convert_frag): Truncate disps before calling
+	md_number_to_chars.  (md_assemble): Don't modify
+	input_line_pointer.
+
 Mon Dec  6 11:49:03 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* config/tc-h8300.c (md_assemble): Don't update input_line_pointer.
