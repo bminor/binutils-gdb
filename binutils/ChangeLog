@@ -1,3 +1,10 @@
+2004-08-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* readelf.c (debug_apply_rela_addends): New function, extracted from..
+	(display_debug_info): ..here.
+	(display_debug_frames): Call debug_apply_rela_addends.  Don't do
+	DW_EH_PE_pcrel adjustment for ET_REL.
+
 2004-08-06  Andreas Schwab  <schwab@suse.de>
 
 	* readelf.c (dump_relocations): Fix typo when calculating

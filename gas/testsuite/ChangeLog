@@ -1,3 +1,17 @@
+2004-08-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/cfi/cfi-alpha-1.d: Adjust for readelf fix.
+	* gas/cfi/cfi-alpha-3.d: Likewise.
+	* gas/cfi/cfi-i386.d: Likewise.
+	* gas/cfi/cfi-m68k.d: Likewise.
+	* gas/cfi/cfi-ppc-1.d: Likewise.
+	* gas/cfi/cfi-s390-1.d: Likewise.
+	* gas/cfi/cfi-s390x-1.d: Likewise.
+	* gas/cfi/cfi-sh-1.d: Likewise.
+	* gas/cfi/cfi-sparc-1.d: Likewise.
+	* gas/cfi/cfi-sparc64-1.d: Likewise.
+	* gas/cfi/cfi-x86_64.d: Likewise.
+
 2004-08-13 Jan Beulich <jbeulich@novell.com>
 
 	* gas/all/altmacro.[sd]: New test.

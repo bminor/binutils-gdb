@@ -8506,6 +8506,88 @@ read_and_display_attr (unsigned long attribute,
   return data;
 }
 
+/* Apply addends of RELA relocations.  */
+
+static int
+debug_apply_rela_addends (FILE *file,
+			  Elf_Internal_Shdr *section,
+			  int reloc_size,
+			  unsigned char *sec_data,
+			  unsigned char *start,
+			  unsigned char *end)
+{
+  Elf_Internal_Shdr *relsec;
+
+  if (end - start < reloc_size)
+    return 1;
+
+  for (relsec = section_headers;
+       relsec < section_headers + elf_header.e_shnum;
+       ++relsec)
+    {
+      unsigned long nrelas;
+      Elf_Internal_Rela *rela, *rp;
+      Elf_Internal_Shdr *symsec;
+      Elf_Internal_Sym *symtab;
+      Elf_Internal_Sym *sym;
+
+      if (relsec->sh_type != SHT_RELA
+	  || SECTION_HEADER (relsec->sh_info) != section
+	  || relsec->sh_size == 0)
+	continue;
+
+      if (!slurp_rela_relocs (file, relsec->sh_offset, relsec->sh_size,
+			      &rela, &nrelas))
+	return 0;
+
+      symsec = SECTION_HEADER (relsec->sh_link);
+      symtab = GET_ELF_SYMBOLS (file, symsec);
+
+      for (rp = rela; rp < rela + nrelas; ++rp)
+	{
+	  unsigned char *loc;
+
+	  if (rp->r_offset >= (bfd_vma) (start - sec_data)
+	      && rp->r_offset < (bfd_vma) (end - sec_data) - reloc_size)
+	    loc = sec_data + rp->r_offset;
+	  else
+	    continue;
+
+	  if (is_32bit_elf)
+	    {
+	      sym = symtab + ELF32_R_SYM (rp->r_info);
+
+	      if (ELF32_R_SYM (rp->r_info) != 0
+		  && ELF32_ST_TYPE (sym->st_info) != STT_SECTION)
+		{
+		  warn (_("Skipping unexpected symbol type %u\n"),
+			ELF32_ST_TYPE (sym->st_info));
+		  continue;
+		}
+	    }
+	  else
+	    {
+	      sym = symtab + ELF64_R_SYM (rp->r_info);
+
+	      if (ELF64_R_SYM (rp->r_info) != 0
+		  && ELF64_ST_TYPE (sym->st_info) != STT_SECTION)
+		{
+		  warn (_("Skipping unexpected symbol type %u\n"),
+			ELF64_ST_TYPE (sym->st_info));
+		  continue;
+		}
+	    }
+
+	  byte_put (loc, rp->r_addend, reloc_size);
+	}
+
+      free (symtab);
+      free (rela);
+      break;
+    }
+  return 1;
+}
+
 static int
 display_debug_info (Elf_Internal_Shdr *section,
 		    unsigned char *start,
@@ -8522,7 +8604,6 @@ display_debug_info (Elf_Internal_Shdr *section,
   while (start < end)
     {
       DWARF2_Internal_CompUnit compunit;
-      Elf_Internal_Shdr *relsec;
       unsigned char *hdrptr;
       unsigned char *cu_abbrev_offset_ptr;
       unsigned char *tags;
@@ -8552,71 +8633,13 @@ display_debug_info (Elf_Internal_Shdr *section,
       compunit.cu_version = byte_get (hdrptr, 2);
       hdrptr += 2;
 
-      /* Apply addends of RELA relocations.  */
-      for (relsec = section_headers;
-	   relsec < section_headers + elf_header.e_shnum;
-	   ++relsec)
-	{
-	  unsigned long nrelas;
-	  Elf_Internal_Rela *rela, *rp;
-	  Elf_Internal_Shdr *symsec;
-	  Elf_Internal_Sym *symtab;
-	  Elf_Internal_Sym *sym;
+      cu_offset = start - section_begin;
+      start += compunit.cu_length + initial_length_size;
 
-	  if (relsec->sh_type != SHT_RELA
-	      || SECTION_HEADER (relsec->sh_info) != section
-	      || relsec->sh_size == 0)
-	    continue;
-
-	  if (!slurp_rela_relocs (file, relsec->sh_offset, relsec->sh_size,
-				  & rela, & nrelas))
-	    return 0;
-
-	  symsec = SECTION_HEADER (relsec->sh_link);
-	  symtab = GET_ELF_SYMBOLS (file, symsec);
-
-	  for (rp = rela; rp < rela + nrelas; ++rp)
-	    {
-	      unsigned char *loc;
-
-	      if (rp->r_offset >= (bfd_vma) (hdrptr - section_begin)
-		  && section->sh_size > (bfd_vma) offset_size
-		  && rp->r_offset <= section->sh_size - offset_size)
-		loc = section_begin + rp->r_offset;
-	      else
-		continue;
-
-	      if (is_32bit_elf)
-		{
-		  sym = symtab + ELF32_R_SYM (rp->r_info);
-
-		  if (ELF32_R_SYM (rp->r_info) != 0
-		      && ELF32_ST_TYPE (sym->st_info) != STT_SECTION)
-		    {
-		      warn (_("Skipping unexpected symbol type %u\n"),
-			    ELF32_ST_TYPE (sym->st_info));
-		      continue;
-		    }
-		}
-	      else
-		{
-		  sym = symtab + ELF64_R_SYM (rp->r_info);
-
-		  if (ELF64_R_SYM (rp->r_info) != 0
-		      && ELF64_ST_TYPE (sym->st_info) != STT_SECTION)
-		    {
-		      warn (_("Skipping unexpected symbol type %u\n"),
-			    ELF64_ST_TYPE (sym->st_info));
-		      continue;
-		    }
-		}
-
-	      byte_put (loc, rp->r_addend, offset_size);
-	    }
-
-	  free (rela);
-	  break;
-	}
+      if (elf_header.e_type == ET_REL
+	  && !debug_apply_rela_addends (file, section, offset_size,
+					section_begin, hdrptr, start))
+	return 0;
 
       cu_abbrev_offset_ptr = hdrptr;
       compunit.cu_abbrev_offset = byte_get (hdrptr, offset_size);
@@ -8626,8 +8649,6 @@ display_debug_info (Elf_Internal_Shdr *section,
       hdrptr += 1;
 
       tags = hdrptr;
-      cu_offset = start - section_begin;
-      start += compunit.cu_length + initial_length_size;
 
       printf (_("  Compilation Unit @ %lx:\n"), cu_offset);
       printf (_("   Length:        %ld\n"), compunit.cu_length);
@@ -9017,6 +9038,11 @@ display_debug_frames (Elf_Internal_Shdr *section,
       block_end = saved_start + length + initial_length_size;
       cie_id = byte_get (start, offset_size); start += offset_size;
 
+      if (elf_header.e_type == ET_REL
+	  && !debug_apply_rela_addends (file, section, offset_size,
+					section_start, start, block_end))
+	return 0;
+
       if (is_eh ? (cie_id == 0) : (cie_id == DW_CIE_ID))
 	{
 	  int version;
@@ -9181,7 +9207,10 @@ display_debug_frames (Elf_Internal_Shdr *section,
 	    encoded_ptr_size = size_of_encoded_value (fc->fde_encoding);
 
 	  fc->pc_begin = get_encoded_value (start, fc->fde_encoding);
-	  if ((fc->fde_encoding & 0x70) == DW_EH_PE_pcrel)
+	  if ((fc->fde_encoding & 0x70) == DW_EH_PE_pcrel
+	      /* Don't adjust for ET_REL since there's invariably a pcrel
+		 reloc here, which we haven't applied.  */
+	      && elf_header.e_type != ET_REL)
 	    fc->pc_begin += section->sh_addr + (start - section_start);
 	  start += encoded_ptr_size;
 	  fc->pc_range = byte_get (start, encoded_ptr_size);
@@ -9380,7 +9409,8 @@ display_debug_frames (Elf_Internal_Shdr *section,
 
 	    case DW_CFA_set_loc:
 	      vma = get_encoded_value (start, fc->fde_encoding);
-	      if ((fc->fde_encoding & 0x70) == DW_EH_PE_pcrel)
+	      if ((fc->fde_encoding & 0x70) == DW_EH_PE_pcrel
+		  && elf_header.e_type != ET_REL)
 		vma += section->sh_addr + (start - section_start);
 	      start += encoded_ptr_size;
 	      if (do_debug_frames_interp)
