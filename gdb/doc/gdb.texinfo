@@ -2942,6 +2942,9 @@ command does (@pxref{Frame Info, ,Information about a frame}).
 * Backtrace::                   Backtraces
 * Selection::                   Selecting a frame
 * Frame Info::                  Information on a frame
+@ifset MIPS
+* MIPS Stack::                  MIPS machines and the function stack
+@end ifset
 @end menu
 
 @node Frames
@@ -3192,6 +3195,40 @@ exception handlers, visit the associated frame (using the @code{up},
 @xref{Exception Handling, ,Breakpoints and exceptions}.
 @end ifclear
 @end table
+
+@ifset MIPS
+@node MIPS Stack
+@section MIPS machines and the function stack
+
+@cindex stack on MIPS
+@cindex MIPS stack
+MIPS based computers use an unusual stack frame, which sometimes
+requires @value{GDBN} to search backward in the object code to find the
+beginning of a function.
+
+@cindex response time, MIPS debugging
+To improve response time (especially for embedded applications, where
+@value{GDBN} may be restricted to a slow serial line for this search)
+you may want to limit the size of this search, using one of these
+commands:
+@c FIXME! So what happens when GDB does *not* find the beginning of a
+@c function?
+
+@cindex @code{heuristic-fence-post} (MIPS)
+@table @code
+@item set heuristic-fence-post @var{limit}
+Restrict @var{GDBN} to examining at most @var{limit} bytes in its search
+for the beginning of a function.  A value of @code{0} (the default)
+means there is no limit.
+
+@item show heuristic-fence-post
+Display the current limit.
+@end table
+
+@noindent
+These commands are available @emph{only} when @value{GDBN} is configured
+for debugging programs on MIPS processors.
+@end ifset
 
 @node Source
 @chapter Examining Source Files
