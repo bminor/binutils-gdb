@@ -595,7 +595,7 @@ aix5_relocate_main_executable (void)
                          symfile_objfile->num_sections);
   make_cleanup (free, new_offsets);
   for (i = 0; i < symfile_objfile->num_sections; i++)
-    ANOFFSET (new_offsets, i) = ANOFFSET (symfile_objfile->section_offsets, i);
+    new_offsets->offsets[i] = ANOFFSET (symfile_objfile->section_offsets, i);
 
   /* Iterate over the mappings in the main executable and compute
      the new offset value as appropriate.  */
@@ -622,7 +622,7 @@ aix5_relocate_main_executable (void)
 
 		  if (increment != ANOFFSET (new_offsets, idx))
 		    {
-		      ANOFFSET (new_offsets, idx) = increment;
+		      new_offsets->offsets[idx] = increment;
 		      changed = 1;
 		    }
 		}
