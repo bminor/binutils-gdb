@@ -1689,31 +1689,76 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
 	      isym._n._n_n._n_offset = STRING_SIZE_SIZE + indx;
 	    }
 
-	  if (isym.n_scnum > 0)
+	  switch (isym.n_sclass)
 	    {
-	      isym.n_scnum = (*secpp)->output_section->target_index;
-	      isym.n_value += (*secpp)->output_offset;
-	      if (! obj_pe (input_bfd))
-		isym.n_value -= (*secpp)->vma;
-	      if (! obj_pe (finfo->output_bfd))
-		isym.n_value += (*secpp)->output_section->vma;
-	    }
+	    case C_AUTO:
+	    case C_MOS:
+	    case C_EOS:
+	    case C_MOE:
+	    case C_MOU:
+	    case C_UNTAG:
+	    case C_STRTAG:
+	    case C_ENTAG:
+	    case C_TPDEF:
+	    case C_ARG:
+	    case C_USTATIC:
+	    case C_REG:
+	    case C_REGPARM:
+	    case C_FIELD:
+	      /* The symbol value should not be modified.  */
+	      break;
 
-	  /* The value of a C_FILE symbol is the symbol index of the
-	     next C_FILE symbol.  The value of the last C_FILE symbol
-	     is the symbol index to the first external symbol
-	     (actually, coff_renumber_symbols does not get this
-	     right--it just sets the value of the last C_FILE symbol
-	     to zero--and nobody has ever complained about it).  We
-	     try to get this right, below, just before we write the
-	     symbols out, but in the general case we may have to write
-	     the symbol out twice.  */
-	  if (isym.n_sclass == C_FILE)
-	    {
+	    case C_FCN:
+	      if (obj_pe (input_bfd)
+		  && strcmp (isym.n_name, ".bf") != 0
+		  && isym.n_scnum > 0)
+		{
+		  /* For PE, .lf and .ef get their value left alone,
+		     while .bf gets relocated.  However, they all have
+		     "real" section numbers, and need to be moved into
+		     the new section.  */
+		  isym.n_scnum = (*secpp)->output_section->target_index;
+		  break;
+		}
+	      /* Fall through.  */
+	    default:
+	    case C_LABEL:  /* Not completely sure about these 2 */
+	    case C_EXTDEF:
+	    case C_BLOCK:
+	    case C_EFCN:
+	    case C_NULL:
+	    case C_EXT:
+	    case C_STAT:
+	    case C_SECTION:
+	    case C_NT_WEAK:
+	      /* Compute new symbol location.  */
+	    if (isym.n_scnum > 0)
+	      {
+		isym.n_scnum = (*secpp)->output_section->target_index;
+		isym.n_value += (*secpp)->output_offset;
+		if (! obj_pe (input_bfd))
+		  isym.n_value -= (*secpp)->vma;
+		if (! obj_pe (finfo->output_bfd))
+		  isym.n_value += (*secpp)->output_section->vma;
+	      }
+	    break;
+
+	    case C_FILE:
+	      /* The value of a C_FILE symbol is the symbol index of
+		 the next C_FILE symbol.  The value of the last C_FILE
+		 symbol is the symbol index to the first external
+		 symbol (actually, coff_renumber_symbols does not get
+		 this right--it just sets the value of the last C_FILE
+		 symbol to zero--and nobody has ever complained about
+		 it).  We try to get this right, below, just before we
+		 write the symbols out, but in the general case we may
+		 have to write the symbol out twice.  */
+
 	      if (finfo->last_file_index != -1
 		  && finfo->last_file.n_value != (long) output_index)
 		{
-		  /* We must correct the value of the last C_FILE entry.  */
+		  /* We must correct the value of the last C_FILE
+                     entry.  */
 		  finfo->last_file.n_value = output_index;
 		  if ((bfd_size_type) finfo->last_file_index >= syment_base)
 		    {
@@ -1745,6 +1790,7 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
 
 	      finfo->last_file_index = output_index;
 	      finfo->last_file = isym;
+	      break;
 	    }
 
 	  /* If doing task linking, convert normal global function symbols to

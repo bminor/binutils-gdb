@@ -7,6 +7,11 @@
 
 1999-09-11  Donn Terry  <donn@interix.com>
 
+	* cofflink.c (_bfd_coff_link_input_bfd): When writing out a
+	symbol, switch on the class when determining whether to modify the
+	value.  For PE, don't modify the value of a C_FCN symbol not named
+	.bf.
+
 	* libbfd-in.h (_bfd_abort): Declare.
 	(abort): Define.
 	* bfd.c (_bfd_abort): New function.
