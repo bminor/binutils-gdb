@@ -706,12 +706,12 @@ static void usage (FILE *, int);
 static void inform (const char *, ...);
 
 static char *
-prefix_encode (char *start, unsigned code))
+prefix_encode (char *start, unsigned code)
 {
   static char alpha[26] = "abcdefghijklmnopqrstuvwxyz";
   static char buf[32];
   char *p;
-  strcpy (buf, start;
+  strcpy (buf, start);
   p = strchr (buf, '\0');
   do
     *p++ = alpha[code % sizeof (alpha)];
@@ -721,11 +721,11 @@ prefix_encode (char *start, unsigned code))
 }
 
 static char *
-dlltmp (char **buf, const char *fmt))
+dlltmp (char **buf, const char *fmt)
 {
   if (!*buf)
     {
-      *buf = malloc (strlen (tmp_prefix) + 64;
+      *buf = malloc (strlen (tmp_prefix) + 64);
       sprintf (*buf, fmt, tmp_prefix);
     }
   return *buf;
@@ -2890,7 +2890,7 @@ remove_null_names (export_type **ptr)
 }
 
 static void
-dtab (export **ptr
+dtab (export_type **ptr
 #ifndef SACDEBUG
 ATTRIBUTE_UNUSED
 #endif

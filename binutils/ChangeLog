@@ -1,3 +1,9 @@
+2003-09-15  Anthony Green  <green@redhat.com>
+
+	* dlltool.c (prefix_encode): Fix ISO C90 conversion.
+	(dlltmp): Ditto.
+	(dtab): Ditto.
+
 2003-09-14  Andreas Jaeger  <aj@suse.de>
 
 	* addr2line.c: Convert to ISO C90 prototypes, change PTR, remove
