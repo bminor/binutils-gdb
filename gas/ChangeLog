@@ -1,3 +1,8 @@
+2005-03-02  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-i386.c (intel_e11): If not followed by T_PTR, treat T_BYTE
+	etc. like normal symbol references (T_ID).
+
 2005-03-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* symbols.c (fb_label_name): Fix silly thinko in last change.

@@ -1,3 +1,8 @@
+2005-03-02  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/i386/intelok.d: Add -r to objdump options. Adjust expectations.
+	* gas/i386/intelok.s: Add checks for various special memory operands.
+
 2005-03-01  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
 
 	* gas/arc/extensions.s: New file.

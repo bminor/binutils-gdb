@@ -1,5 +1,5 @@
 #as: -J
-#objdump: -dwMintel
+#objdump: -drwMintel
 #name: i386 intel-ok
 
 .*: +file format .*
@@ -93,6 +93,20 @@ Disassembly of section .text:
 [ 	]*[0-9a-f]+:	d7[ 	]+xlat(b|[ 	]+(BYTE PTR )?(ds:)?\[ebx\])
 [ 	]*[0-9a-f]+:	d7[ 	]+xlat(b|[ 	]+(BYTE PTR )?(ds:)?\[ebx\])
 [ 	]*[0-9a-f]+:	d7[ 	]+xlat(b|[ 	]+(BYTE PTR )?(ds:)?\[ebx\])
+[ 	]*[0-9a-f]+:	8b 80 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\][ 	]+[0-9a-f]+:[ 	]+(R_386_|dir)?32[ 	]+byte
+[ 	]*[0-9a-f]+:	8b 80 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\][ 	]+[0-9a-f]+:[ 	]+(R_386_|dir)?32[ 	]+byte
+[ 	]*[0-9a-f]+:	8b 40 04[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+4\]
+[ 	]*[0-9a-f]+:	8b 40 04[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+4\]
+[ 	]*[0-9a-f]+:	8b 80 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\][ 	]+[0-9a-f]+:[ 	]+(R_386_|dir)?32[ 	]+fword
+[ 	]*[0-9a-f]+:	8b 80 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\][ 	]+[0-9a-f]+:[ 	]+(R_386_|dir)?32[ 	]+fword
+[ 	]*[0-9a-f]+:	8b 80 04 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+4\][ 	]+[0-9a-f]+:[ 	]+(R_386_|dir)?32[ 	]+qword
+[ 	]*[0-9a-f]+:	8b 80 04 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+4\][ 	]+[0-9a-f]+:[ 	]+(R_386_|dir)?32[ 	]+qword
+[ 	]*[0-9a-f]+:	8b 80 08 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+8\][ 	]+[0-9a-f]+:[ 	]+(R_386_|dir)?32[ 	]+tbyte
+[ 	]*[0-9a-f]+:	8b 80 08 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+8\][ 	]+[0-9a-f]+:[ 	]+(R_386_|dir)?32[ 	]+tbyte
+#[ 	]*[0-9a-f]+:	8b 04 85 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\*4\][ 	]+[0-9a-f]+:[ 	]+(R_386_|dir)?32[ 	]+word
+#[ 	]*[0-9a-f]+:	8b 04 85 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\*4\][ 	]+[0-9a-f]+:[ 	]+(R_386_|dir)?32[ 	]+word
+#[ 	]*[0-9a-f]+:	8b 04 85 04 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\*4\+4\][ 	]+[0-9a-f]+:[ 	]+(R_386_|dir)?32[ 	]+xmmword
+#[ 	]*[0-9a-f]+:	8b 04 85 04 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\*4\+4\][ 	]+[0-9a-f]+:[ 	]+(R_386_|dir)?32[ 	]+xmmword
 [ 	]*[0-9a-f]+:	6a 01[ 	]+push[ 	]+0x1
 [ 	]*[0-9a-f]+:	6a ff[ 	]+push[ 	]+0xffffffff
 [ 	]*[0-9a-f]+:	6a fe[ 	]+push[ 	]+0xfffffffe

@@ -1,6 +1,10 @@
 	.intel_syntax noprefix
+	.equiv dword, 4
 	.text
 start:
+
+	# operand sizes
+
 	add	al, [eax]
 	add	al, byte ptr [eax]
 	add	ax, [eax]
@@ -87,6 +91,23 @@ start:
 	xlat	[ebx]
 	xlat	byte ptr [ebx]
 	xlatb
+
+	# memory operands
+
+	mov	eax, dword ptr [byte+eax]
+	mov	eax, dword ptr byte[eax]
+	mov	eax, [dword+eax]
+	mov	eax, dword[eax]
+	mov	eax, [fword+eax]
+	mov	eax, fword[eax]
+	mov	eax, [qword+eax+dword]
+	mov	eax, qword[eax+dword]
+	mov	eax, [tbyte+eax+dword*2]
+	mov	eax, tbyte[eax+dword*2]
+#	mov	eax, [word+eax*dword]
+#	mov	eax, word[eax*dword]
+#	mov	eax, [xmmword+(eax+1)*dword]
+#	mov	eax, xmmword[(eax+1)*dword]
 
 	# expressions
 

@@ -6154,6 +6154,23 @@ intel_e11 ()
     {
       intel_match_token (cur_token.code);
 
+      if (cur_token.code != T_PTR)
+	{
+	  /* It must have been an identifier; add it to the displacement string.  */
+	  strcat (intel_parser.disp, prev_token.str);
+
+	  /* The identifier represents a memory reference only if it's not
+	     preceded by an offset modifier and if it's not an equate.  */
+	  if (intel_parser.op_modifier != T_OFFSET)
+	    {
+	      symbolS *symbolP;
+
+	      symbolP = symbol_find(prev_token.str);
+	      if (!symbolP || S_GET_SEGMENT(symbolP) != absolute_section)
+		intel_parser.is_mem = 1;
+	    }
+	}
+
       return 1;
     }
 
