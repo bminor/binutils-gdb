@@ -1,5 +1,8 @@
 Mon Aug  9 09:53:45 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* remote-udi.c: Make udi_ops extern rather than trying forward
+	declaration of a static variable.
+
 	* hppab-nat.c: Define ptrace to call_ptrace and pass the 5th arg
 	there, rather than using an ANSI C specific macro.
 

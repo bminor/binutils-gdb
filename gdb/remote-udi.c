@@ -1476,12 +1476,13 @@ void  convert16() {;}
 void  convert32() {;}
 FILE* EchoFile = 0;		/* used for debugging */
 int   QuietMode = 0;		/* used for debugging */
+
+/* Target_ops vector.  Not static because there does not seem to be
+   any portable way to do a forward declaration of a static variable.
+   The RS/6000 doesn't like "extern" followed by "static"; SunOS
+   /bin/cc doesn't like "static" twice.  */
 
-/****************************************************************************/
-/* 
- *  Define the target subroutine names 
- */
-static struct target_ops udi_ops = {
+struct target_ops udi_ops = {
         "udi",
 	"Remote UDI connected TIP",
 	"Remote debug an AMD 29k using UDI socket connection to TIP process.\n\
