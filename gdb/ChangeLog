@@ -1,3 +1,16 @@
+2002-08-10  Andrew Cagney  <cagney@redhat.com>
+	    Elena Zannoni  <ezannoni@redhat.com>
+	    Martin M. Hunt  <hunt@redhat.com>
+
+	* gdbtypes.c (build_builtin_type_vec128): Set the vector bit.
+	(build_builtin_type_vec128i): Set the vector bit.
+	* gdbtypes.h (builtin_type_vec64, builtin_type_vec64i): Declare.
+	* gdbtypes.c (builtin_type_vec64, builtin_type_vec64i): Define.
+	(build_builtin_type_vec64): New function.
+	(build_builtin_type_vec64i): New function.
+	(build_gdbtypes): Initialize builtin_type_vec64 and
+	builtin_type_vec64i.
+
 2002-08-09  Andrew Cagney  <cagney@redhat.com>
 
 	* regcache.c (regcache_dump): Compare the register offset

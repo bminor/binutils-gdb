@@ -952,6 +952,10 @@ extern struct type *builtin_type_v8hi;
 extern struct type *builtin_type_v4hi;
 extern struct type *builtin_type_v2si;
 
+/* Type for 64 bit vectors. */
+extern struct type *builtin_type_vec64;
+extern struct type *builtin_type_vec64i;
+
 /* Type for 128 bit vectors. */
 extern struct type *builtin_type_vec128;
 extern struct type *builtin_type_vec128i;
