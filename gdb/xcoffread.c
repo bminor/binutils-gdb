@@ -368,7 +368,7 @@ arrange_linetable (oldLineTb)
 
   fentry_size = NUM_OF_FUNCTIONS;
   fentry = (struct linetable_entry*)
-	malloc (fentry_size * sizeof (struct linetable_entry));
+    xmalloc (fentry_size * sizeof (struct linetable_entry));
 
   for (function_count=0, ii=0; ii <oldLineTb->nitems; ++ii) {
 
@@ -377,7 +377,7 @@ arrange_linetable (oldLineTb)
       if (function_count >= fentry_size) {	/* make sure you have room. */
 	fentry_size *= 2;
 	fentry = (struct linetable_entry*) 
-	   realloc (fentry, fentry_size * sizeof (struct linetable_entry));
+	  xrealloc (fentry, fentry_size * sizeof (struct linetable_entry));
       }
       fentry[function_count].line = ii;
       fentry[function_count].pc = oldLineTb->item[ii].pc;
@@ -393,8 +393,10 @@ arrange_linetable (oldLineTb)
     qsort (fentry, function_count, sizeof(struct linetable_entry), compare_lte);
 
   /* allocate a new line table. */
-  newLineTb = (struct linetable*) malloc (sizeof (struct linetable) + 
-	(oldLineTb->nitems - function_count) * sizeof (struct linetable_entry));
+  newLineTb = (struct linetable *)
+    xmalloc
+      (sizeof (struct linetable) + 
+       (oldLineTb->nitems - function_count) * sizeof (struct linetable_entry));
 
   /* if line table does not start with a function beginning, copy up until
      a function begin. */
