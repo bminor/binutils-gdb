@@ -1,3 +1,8 @@
+2002-01-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* maint.c (_initialize_maint_cmds): Add missing \ in
+	string-literal.
+
 2001-12-30  Michael Snyder  <msnyder@redhat.com>
 
 	* sparc-tdep.c (sparc-store-return-value): Whitespace fix-up.

@@ -652,7 +652,7 @@ to test internal functions such as the C++ demangler, etc.",
   add_alias_cmd ("i", "info", class_maintenance, 1, &maintenancelist);
 
   add_cmd ("sections", class_maintenance, maintenance_info_sections,
-	   "List the BFD sections of the exec and core files. \n
+	   "List the BFD sections of the exec and core files. \n\
 Arguments may be any combination of:\n\
 	[one or more section names]\n\
 	ALLOC LOAD RELOC READONLY CODE DATA ROM CONSTRUCTOR\n\
