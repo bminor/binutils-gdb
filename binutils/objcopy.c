@@ -962,6 +962,16 @@ copy_archive (ibfd, obfd, output_target)
 				  (char *) NULL);
       bfd *output_bfd = bfd_openw (output_name, output_target);
       bfd *last_element;
+      struct stat buf;
+      int stat_status = 0;
+
+      if (preserve_dates)
+	{
+	  stat_status = bfd_stat_arch_elt (this_element, &buf);
+	  if (stat_status != 0)
+	    non_fatal (_("internal stat error on %s"),
+		       bfd_get_filename (this_element));
+	}
 
       l = (struct name_list *) xmalloc (sizeof (struct name_list));
       l->name = output_name;
@@ -983,6 +993,9 @@ copy_archive (ibfd, obfd, output_target)
 	  /* Error in new object file. Don't change archive. */
 	  status = 1;
 	}
+
+      if (preserve_dates && stat_status == 0)
+	set_times (output_name, &buf);
 
       /* Open the newly output file and attach to our list.  */
       output_bfd = bfd_openr (output_name, output_target);

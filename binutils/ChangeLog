@@ -1,5 +1,8 @@
 Thu May 27 11:58:33 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
+	* objcopy.c (copy_archive): Preserve dates of archive members if
+	requested.
+
 	* readelf.c (dump_relocations): Always print the addend on RELA
 	systems even if there is no symbol.
 	(process_program_headers): Reset dynamic_size before looping
