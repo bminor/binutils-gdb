@@ -6108,9 +6108,9 @@ pa_build_unwind_subspace (call_info)
   /* Get some space to hold relocation information for the unwind
      descriptor.  */
   p = frag_more (16);
-  md_number_to_chars (p, 0, 8);
 
   /* Relocation info. for start offset of the function.  */
+  md_number_to_chars (p, 0, 4);
   fix_new_hppa (frag_now, p - frag_now->fr_literal, 4,
 		call_info->start_symbol, (offsetT) 0,
 		(expressionS *) NULL, 0, reloc,
@@ -6123,7 +6123,7 @@ pa_build_unwind_subspace (call_info)
      symbol into the symbol table.  It (should) end up giving the same
      value as call_info->start_symbol + function size once the linker is
      finished with its work.  */
-
+  md_number_to_chars (p + 4, 0, 4);
   fix_new_hppa (frag_now, p + 4 - frag_now->fr_literal, 4,
 		call_info->end_symbol, (offsetT) 0,
 		(expressionS *) NULL, 0, reloc,
