@@ -49,7 +49,9 @@ static boolean elf_i386_gc_sweep_hook
 	   const Elf_Internal_Rela *));
 static boolean elf_i386_adjust_dynamic_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
-static boolean allocate_plt_and_got_and_discard_relocs
+static boolean allocate_dynrelocs
+  PARAMS ((struct elf_link_hash_entry *, PTR));
+static boolean readonly_dynrelocs
   PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean elf_i386_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
@@ -378,12 +380,16 @@ static const bfd_byte elf_i386_pic_plt_entry[PLT_ENTRY_SIZE] =
 
 struct elf_i386_dyn_relocs
 {
-  /* Next section.  */
   struct elf_i386_dyn_relocs *next;
-  /* A section in dynobj.  */
-  asection *section;
-  /* Number of relocs copied in this section.  */
+
+  /* The input section of the reloc.  */
+  asection *sec;
+
+  /* Total number of relocs copied for the input section.  */
   bfd_size_type count;
+
+  /* Number of pc-relative relocs copied for the input section.  */
+  bfd_size_type pc_count;
 };
 
 /* i386 ELF linker hash entry.  */
@@ -392,7 +398,7 @@ struct elf_i386_link_hash_entry
 {
   struct elf_link_hash_entry root;
 
-  /* Number of PC relative relocs copied for this symbol.  */
+  /* Track dynamic relocs copied for this symbol.  */
   struct elf_i386_dyn_relocs *dyn_relocs;
 };
 
@@ -743,9 +749,9 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 		      || strcmp (bfd_get_section_name (abfd, sec),
 				 name + 4) != 0)
 		    {
-		      (*_bfd_error_handler) (_("%s: bad relocation section name `%s\'"),
-					     bfd_archive_filename (abfd),
-					     name);
+		      (*_bfd_error_handler)
+			(_("%s: bad relocation section name `%s\'"),
+			 bfd_archive_filename (abfd), name);
 		    }
 
 		  sreloc = bfd_get_section_by_name (dynobj, name);
@@ -763,32 +769,20 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 			  || ! bfd_set_section_alignment (dynobj, sreloc, 2))
 			return false;
 		    }
-		  if (sec->flags & SEC_READONLY)
-		    info->flags |= DF_TEXTREL;
+		  elf_section_data (sec)->sreloc = sreloc;
 		}
 
-	      sreloc->_raw_size += sizeof (Elf32_External_Rel);
-
-	      /* If this is a global symbol, we count the number of PC
-		 relative relocations we have entered for this symbol,
-		 so that we can discard them later as necessary.  Note
-		 that this function is only called if we are using an
-		 elf_i386 linker hash table, which means that h is
-		 really a pointer to an elf_i386_link_hash_entry.  */
-	      if (!info->shared
-		  || (h != NULL
-		      && ELF32_R_TYPE (rel->r_info) == R_386_PC32))
+	      /* If this is a global symbol, we count the number of
+		 relocations we need for this symbol.  */
+	      if (h != NULL)
 		{
 		  struct elf_i386_link_hash_entry *eh;
 		  struct elf_i386_dyn_relocs *p;
 
 		  eh = (struct elf_i386_link_hash_entry *) h;
+		  p = eh->dyn_relocs;
 
-		  for (p = eh->dyn_relocs; p != NULL; p = p->next)
-		    if (p->section == sreloc)
-		      break;
-
-		  if (p == NULL)
+		  if (p == NULL || p->sec != sec)
 		    {
 		      p = ((struct elf_i386_dyn_relocs *)
 			   bfd_alloc (dynobj, (bfd_size_type) sizeof *p));
@@ -796,11 +790,19 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 			return false;
 		      p->next = eh->dyn_relocs;
 		      eh->dyn_relocs = p;
-		      p->section = sreloc;
+		      p->sec = sec;
 		      p->count = 0;
+		      p->pc_count = 0;
 		    }
 
-		  ++p->count;
+		  p->count += 1;
+		  if (ELF32_R_TYPE (rel->r_info) == R_386_PC32)
+		    p->pc_count += 1;
+		}
+	      else
+		{
+		  /* Track dynamic relocs needed for local syms too.  */
+		  elf_section_data (sec)->local_dynrel += 1;
 		}
 	    }
 
@@ -893,6 +895,8 @@ elf_i386_gc_sweep_hook (abfd, info, sec, relocs)
   struct elf_link_hash_entry *h;
   bfd *dynobj;
 
+  elf_section_data (sec)->local_dynrel = 0;
+
   dynobj = elf_hash_table (info)->dynobj;
   if (dynobj == NULL)
     return true;
@@ -924,9 +928,32 @@ elf_i386_gc_sweep_hook (abfd, info, sec, relocs)
 
       case R_386_32:
       case R_386_PC32:
-	if (info->shared)
-	  break;
-	/* Fall through.  */
+	r_symndx = ELF32_R_SYM (rel->r_info);
+	if (r_symndx >= symtab_hdr->sh_info)
+	  {
+	    struct elf_i386_link_hash_entry *eh;
+	    struct elf_i386_dyn_relocs **pp;
+	    struct elf_i386_dyn_relocs *p;
+
+	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+
+	    if (!info->shared && h->plt.refcount > 0)
+	      h->plt.refcount -= 1;
+
+	    eh = (struct elf_i386_link_hash_entry *) h;
+
+	    for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+	      if (p->sec == sec)
+		{
+		  if (ELF32_R_TYPE (rel->r_info) == R_386_PC32)
+		    p->pc_count -= 1;
+		  p->count -= 1;
+		  if (p->count == 0)
+		    *pp = p->next;
+		  break;
+		}
+	  }
+	break;
 
       case R_386_PLT32:
 	r_symndx = ELF32_R_SYM (rel->r_info);
@@ -1087,12 +1114,10 @@ elf_i386_adjust_dynamic_symbol (info, h)
        || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0))
 
 /* Allocate space in .plt, .got and associated reloc sections for
-   global syms. Also discards space allocated for relocs in the
-   check_relocs function that we subsequently have found to be
-   unneeded.  */
+   dynamic relocs.  */
 
 static boolean
-allocate_plt_and_got_and_discard_relocs (h, inf)
+allocate_dynrelocs (h, inf)
      struct elf_link_hash_entry *h;
      PTR inf;
 {
@@ -1100,6 +1125,7 @@ allocate_plt_and_got_and_discard_relocs (h, inf)
   struct elf_i386_link_hash_table *htab;
   asection *s;
   struct elf_i386_link_hash_entry *eh;
+  struct elf_i386_dyn_relocs *p;
 
   if (h->root.type == bfd_link_hash_indirect
       || h->root.type == bfd_link_hash_warning)
@@ -1191,50 +1217,103 @@ allocate_plt_and_got_and_discard_relocs (h, inf)
   else
     h->got.offset = (bfd_vma) -1;
 
-  /* In the shared -Bsymbolic case, discard space allocated for
-     dynamic relocs against symbols which turn out to be defined
-     in regular objects.  For the normal shared case, discard space
-     for relocs that have become local due to symbol visibility
-     changes.  For the non-shared case, discard space for symbols
-     which turn out to need copy relocs or are not dynamic.  */
-
   eh = (struct elf_i386_link_hash_entry *) h;
   if (eh->dyn_relocs == NULL)
     return true;
 
-  if (!info->shared
-      && (h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0
-      && (((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
-	   && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
-	  || (htab->root.dynamic_sections_created
-	      && (h->root.type == bfd_link_hash_undefweak
-		  || h->root.type == bfd_link_hash_undefined))))
+  /* In the shared -Bsymbolic case, discard space allocated for
+     dynamic pc-relative relocs against symbols which turn out to be
+     defined in regular objects.  For the normal shared case, discard
+     space for relocs that have become local due to symbol visibility
+     changes.  */
+
+  if (info->shared)
     {
-      /* Make sure this symbol is output as a dynamic symbol.
-	 Undefined weak syms won't yet be marked as dynamic.  */
-      if (h->dynindx == -1
-	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
+      if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
+	  && ((h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0
+	      || info->symbolic))
 	{
-	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
-	    return false;
+	  struct elf_i386_dyn_relocs **pp;
+
+	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+	    {
+	      p->count -= p->pc_count;
+	      p->pc_count = 0;
+	      if (p->count == 0)
+		*pp = p->next;
+	      else
+		pp = &p->next;
+	    }
+	}
+    }
+  else
+    {
+      /* For the non-shared case, discard space for relocs against
+	 symbols which turn out to need copy relocs or are not
+	 dynamic.  */
+
+      if ((h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0
+	  && (((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
+	      || (htab->root.dynamic_sections_created
+		  && (h->root.type == bfd_link_hash_undefweak
+		      || h->root.type == bfd_link_hash_undefined))))
+	{
+	  /* Make sure this symbol is output as a dynamic symbol.
+	     Undefined weak syms won't yet be marked as dynamic.  */
+	  if (h->dynindx == -1
+	      && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
+	    {
+	      if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+		return false;
+	    }
+
+	  /* If that succeeded, we know we'll be keeping all the
+	     relocs.  */
+	  if (h->dynindx != -1)
+	    goto keep;
 	}
 
-      /* If that succeeded, we know we'll be keeping all the relocs.  */
-      if (h->dynindx != -1)
-	return true;
+      eh->dyn_relocs = NULL;
+
+    keep:
     }
 
-  if (!info->shared
-      || ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
-	  && ((h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0
-	      || info->symbolic)))
+  /* Finally, allocate space.  */
+  for (p = eh->dyn_relocs; p != NULL; p = p->next)
     {
-      struct elf_i386_dyn_relocs *c;
-
-      for (c = eh->dyn_relocs; c != NULL; c = c->next)
-	c->section->_raw_size -= c->count * sizeof (Elf32_External_Rel);
+      asection *sreloc = elf_section_data (p->sec)->sreloc;
+      sreloc->_raw_size += p->count * sizeof (Elf32_External_Rel);
     }
 
+  return true;
+}
+
+/* Find any dynamic relocs that apply to read-only sections.  */
+
+static boolean
+readonly_dynrelocs (h, inf)
+     struct elf_link_hash_entry *h;
+     PTR inf;
+{
+  struct elf_i386_link_hash_entry *eh;
+  struct elf_i386_dyn_relocs *p;
+
+  eh = (struct elf_i386_link_hash_entry *) h;
+  for (p = eh->dyn_relocs; p != NULL; p = p->next)
+    {
+      asection *s = p->sec->output_section;
+
+      if (s != NULL && (s->flags & SEC_READONLY) != 0)
+	{
+	  struct bfd_link_info *info = (struct bfd_link_info *) inf;
+
+	  info->flags |= DF_TEXTREL;
+
+	  /* Not an error, just cut short the traversal.  */
+	  return false;
+	}
+    }
   return true;
 }
 
@@ -1249,7 +1328,7 @@ elf_i386_size_dynamic_sections (output_bfd, info)
   bfd *dynobj;
   asection *s;
   boolean relocs;
-  bfd *i;
+  bfd *ibfd;
 
   htab = elf_i386_hash_table (info);
   dynobj = htab->root.dynobj;
@@ -1269,8 +1348,9 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 	}
     }
 
-  /* Set up .got offsets for local syms.  */
-  for (i = info->input_bfds; i; i = i->link_next)
+  /* Set up .got offsets for local syms, and space for local dynamic
+     relocs.  */
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
     {
       bfd_signed_vma *local_got;
       bfd_signed_vma *end_local_got;
@@ -1278,14 +1358,25 @@ elf_i386_size_dynamic_sections (output_bfd, info)
       Elf_Internal_Shdr *symtab_hdr;
       asection *srel;
 
-      if (bfd_get_flavour (i) != bfd_target_elf_flavour)
+      if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
 	continue;
 
-      local_got = elf_local_got_refcounts (i);
+      for (s = ibfd->sections; s != NULL; s = s->next)
+	{
+	  bfd_size_type count = elf_section_data (s)->local_dynrel;
+
+	  if (count != 0)
+	    {
+	      srel = elf_section_data (s)->sreloc;
+	      srel->_raw_size += count * sizeof (Elf32_External_Rel);
+	    }
+	}
+
+      local_got = elf_local_got_refcounts (ibfd);
       if (!local_got)
 	continue;
 
-      symtab_hdr = &elf_tdata (i)->symtab_hdr;
+      symtab_hdr = &elf_tdata (ibfd)->symtab_hdr;
       locsymcount = symtab_hdr->sh_info;
       end_local_got = local_got + locsymcount;
       s = htab->sgot;
@@ -1304,11 +1395,9 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 	}
     }
 
-  /* Allocate global sym .plt and .got entries.  Also discard all
-     unneeded relocs.  */
-  elf_link_hash_traverse (&htab->root,
-			  allocate_plt_and_got_and_discard_relocs,
-			  (PTR) info);
+  /* Allocate global sym .plt and .got entries, and space for global
+     sym dynamic relocs.  */
+  elf_link_hash_traverse (&htab->root, allocate_dynrelocs, (PTR) info);
 
   /* We now have determined the sizes of the various dynamic sections.
      Allocate memory for them.  */
@@ -1402,12 +1491,16 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 	      || !add_dynamic_entry (DT_RELSZ, 0)
 	      || !add_dynamic_entry (DT_RELENT, sizeof (Elf32_External_Rel)))
 	    return false;
-	}
 
-      if ((info->flags & DF_TEXTREL) != 0)
-	{
-	  if (!add_dynamic_entry (DT_TEXTREL, 0))
-	    return false;
+	  /* If any dynamic relocs apply to a read-only section,
+	     then we need a DT_TEXTREL entry.  */
+	  elf_link_hash_traverse (&htab->root, readonly_dynrelocs, (PTR) info);
+
+	  if ((info->flags & DF_TEXTREL) != 0)
+	    {
+	      if (!add_dynamic_entry (DT_TEXTREL, 0))
+		return false;
+	    }
 	}
     }
 #undef add_dynamic_entry
@@ -1434,7 +1527,6 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
   bfd_vma *local_got_offsets;
-  asection *sreloc;
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
 
@@ -1444,7 +1536,6 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
   sym_hashes = elf_sym_hashes (input_bfd);
   local_got_offsets = elf_local_got_offsets (input_bfd);
 
-  sreloc = NULL;
   rel = relocs;
   relend = relocs + input_section->reloc_count;
   for (; rel < relend; rel++)
@@ -1712,37 +1803,12 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      Elf_Internal_Rel outrel;
 	      boolean skip, relocate;
+	      asection *sreloc;
+	      Elf32_External_Rel *loc;
 
 	      /* When generating a shared object, these relocations
 		 are copied into the output file to be resolved at run
 		 time.  */
-
-	      if (sreloc == NULL)
-		{
-		  const char *name;
-
-		  name = (bfd_elf_string_from_elf_section
-			  (input_bfd,
-			   elf_elfheader (input_bfd)->e_shstrndx,
-			   elf_section_data (input_section)->rel_hdr.sh_name));
-		  if (name == NULL)
-		    return false;
-
-		  if (strncmp (name, ".rel", 4) != 0
-		      || strcmp (bfd_get_section_name (input_bfd,
-						       input_section),
-				 name + 4) != 0)
-		    {
-		      (*_bfd_error_handler)
-			(_("%s: bad relocation section name `%s\'"),
-			 bfd_archive_filename (input_bfd), name);
-		      return false;
-		    }
-
-		  sreloc = bfd_get_section_by_name (dynobj, name);
-		  if (sreloc == NULL)
-		    abort ();
-		}
 
 	      skip = false;
 
@@ -1786,11 +1852,14 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 		  outrel.r_info = ELF32_R_INFO (0, R_386_RELATIVE);
 		}
 
-	      bfd_elf32_swap_reloc_out (output_bfd, &outrel,
-					(((Elf32_External_Rel *)
-					  sreloc->contents)
-					 + sreloc->reloc_count));
-	      ++sreloc->reloc_count;
+	      sreloc = elf_section_data (input_section)->sreloc;
+	      if (sreloc == NULL)
+		abort ();
+
+	      loc = ((Elf32_External_Rel *) sreloc->contents
+		     + sreloc->reloc_count);
+	      sreloc->reloc_count += 1;
+	      bfd_elf32_swap_reloc_out (output_bfd, &outrel, loc);
 
 	      /* If this reloc is against an external symbol, we do
 		 not want to fiddle with the addend.  Otherwise, we

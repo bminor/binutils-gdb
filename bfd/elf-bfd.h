@@ -737,43 +737,63 @@ struct bfd_elf_section_data
 {
   /* The ELF header for this section.  */
   Elf_Internal_Shdr this_hdr;
+
   /* The ELF header for the reloc section associated with this
      section, if any.  */
   Elf_Internal_Shdr rel_hdr;
+
   /* If there is a second reloc section associated with this section,
      as can happen on Irix 6, this field points to the header.  */
   Elf_Internal_Shdr *rel_hdr2;
+
   /* The number of relocations currently assigned to REL_HDR.  */
   unsigned int rel_count;
+
   /* The number of relocations currently assigned to REL_HDR2.  */
   unsigned int rel_count2;
+
+  /* The number of dynamic relocs copied for local symbols.  */
+  unsigned int local_dynrel;
+
+  /* A pointer to the bfd section used for dynamic relocs.  */
+  asection *sreloc;
+
   /* The ELF section number of this section.  Only used for an output
      file.  */
   int this_idx;
+
   /* The ELF section number of the reloc section indicated by
      REL_HDR if any.  Only used for an output file.  */
   int rel_idx;
+
   /* The ELF section number of the reloc section indicated by
      REL_HDR2 if any.  Only used for an output file.  */
   int rel_idx2;
+
   /* Used by the backend linker to store the symbol hash table entries
      associated with relocs against global symbols.  */
   struct elf_link_hash_entry **rel_hashes;
+
   /* A pointer to the swapped relocs.  If the section uses REL relocs,
      rather than RELA, all the r_addend fields will be zero.  This
      pointer may be NULL.  It is used by the backend linker.  */
   Elf_Internal_Rela *relocs;
+
   /* Used by the backend linker when generating a shared library to
      record the dynamic symbol index for a section symbol
      corresponding to this section.  A value of 0 means that there is
      no dynamic symbol for this section.  */
   long dynindx;
+
   /* A pointer used for .stab linking optimizations.  */
   PTR stab_info;
+
   /* A pointer used for SEC_MERGE optimizations.  */
   PTR merge_info;
+
   /* A pointer available for the processor specific ELF backend.  */
   PTR tdata;
+
   /* Nonzero if this section uses RELA relocations, rather than REL.  */
   unsigned int use_rela_p:1;
 };

@@ -1,3 +1,21 @@
+2001-09-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (struct bfd_elf_section_data): Add "local_dynrel"
+	and "sreloc" fields.
+	* elf32-i386.c (struct elf_i386_dyn_relocs): Add "sec", and
+	"pc_count" fields.  Remove "section" field.
+	(elf_i386_check_relocs): Don't set DF_TEXTREL here.  Don't
+	allocate space for dynamic relocs here.  Instead, record all
+	needed dynamic relocs via dyn_relocs and local_dynrel.  Cache
+	pointer to "sreloc" section in elf_section_data.
+	(elf_i386_gc_sweep_hook): Sweep dyn_relocs and local_dynrel.
+	(allocate_plt_and_got_and_discard_relocs): Rename to
+	allocate_dynrelocs.  Allocate rather than discarding dyn relocs.
+	(readonly_dynrelocs): New function.
+	(elf_i386_size_dynamic_sections): Call readonly_dynrelocs.
+	Rename "i" to "ibfd".  Allocate space for local dyn relocs.
+	(elf_i386_relocate_section): Make use of cached sreloc.
+
 2001-09-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-bfd.h (elf_backend_reloc_type_class): Pass in the entire
