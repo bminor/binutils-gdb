@@ -1,7 +1,9 @@
 start-sanitize-v850
 Fri Aug 23 11:02:55 1996  Jeffrey A Law  (law@cygnus.com)
 
-	* gas/v850/basic.exp (branch_tests): Test instruction bit patters,
+	* gas/v850/basic.exp (compare_tests): Test instruction bit patterns.
+
+	* gas/v850/basic.exp (branch_tests): Test instruction bit patterns,
 	but not displacements (yet).
 	
 	* gas/v850/basic.exp (bit_tests): Test instruction bit patterns.
