@@ -4,7 +4,10 @@
 	maximum length of generated Srecords.
 	(--srec-forceS3): New parameter that restricts the generation of
 	Srecords to type S3 only.
-
+	* binutils.texi: Document new command line switches.
+	* objcopy.1: Docuemnt the new command line switches.
+	* NEWS: Announce the existence of the new command line switches.
+	
 2000-10-31  Nick Clifton  <nickc@redhat.com>
 
 	* MAINTAINERS: Add Jim Wilson as the maintainer for the IA64
