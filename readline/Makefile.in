@@ -187,12 +187,24 @@ includes:
 		$(INSTALL_FILE) $(srcdir)/keymaps.h $(includedir)/readline/keymaps.h
 		$(INSTALL_FILE) $(srcdir)/chardefs.h $(includedir)/readline/chardefs.h
 
-clean mostlyclean:
-		rm -f $(STAGESTUFF) *.a *.log *.cp *.tp *.vr *.fn
-		rm -f *.aux *.pg *.toc
+local-clean:
+	rm -f $(STAGESTUFF) *.a *.log *.cp *.tp *.vr *.fn
+	rm -f *.aux *.pg *.toc
 
-distclean realclean: clean
+local-distclean: local-clean
 	rm -f Makefile config.status sysdep.h
+
+mostlyclean: local-clean
+	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
+
+clean: local-clean
+	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
+
+distclean: local-distclean
+	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
+
+realclean: local-realclean
+	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
 $(DESTDIR)/libreadline.a: libreadline.a
 

@@ -1,3 +1,8 @@
+Sun Jan 16 12:33:11 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in (clean mostlyclean distclean realclean): Recurse
+	into subdirectories as well as doing this directory.
+
 Sat Jan 15 19:36:12 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* readline.c, display.c:  Patches to allow use of all 80
