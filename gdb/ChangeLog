@@ -1,5 +1,16 @@
 2004-12-18  Mark Kettenis  <kettenis@gnu.org>
 
+	* hppah-nat.c: Remove file.
+	* infttrace.h: Remove file.
+	* infttrace.c: Remove file.
+	* Makefile.in (ALLDEPFILES): Remove hppah-nat.c
+	(infttrace_h): Remove variable.
+	(hppah-nat.o, infttrace.o): Remove dependencies.
+	* configure.host (hppa*64*-*-hpux11*): Remove.
+	* config/pa/hpux11w.mh: Remove file.
+	* config/pa/nm-hppah.h: Remove file.
+	* config/pa/nm-hppah11.h: Remove file.
+
 	* config/djgpp/fnchange.lst: Resolve name clash between
 	../bfd/elf32-arm.c and ../bfd/elf32-arc.c, i386-sol2-nat.c and
 	i386-sol2-tdep.c, mips64obsd-nat.c and mips64obsd-tdep.c,
