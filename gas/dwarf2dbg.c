@@ -359,7 +359,7 @@ out_end_sequence ()
 /* Look up a filenumber either by filename or by filenumber.  If both
    a filenumber and a filename are specified, lookup by filename takes
    precedence.  If the filename cannot be found, it is added to the
-   filetable the filenumber for the new entry is returned.  */
+   filetable and the filenumber for the new entry is returned.  */
 static int
 get_filenum (filenum, file)
      int filenum;
@@ -368,10 +368,12 @@ get_filenum (filenum, file)
   int i, last = filenum - 1;
   char char0 = file[0];
 
-  if (last >= ls.num_filenames)
+  /* If filenum is out of range of the filename table, then try using the
+     table entry returned from the previous call.  */
+  if (last >= ls.num_filenames || last < 0)
     last = ls.last_filename;
 
-  /* do a quick check against the previously used filename: */
+  /* Do a quick check against the specified or previously used filenum.  */
   if (ls.num_filenames > 0 && ls.file[last].name[0] == char0
       && strcmp (ls.file[last].name + 1, file + 1) == 0)
     return last + 1;
@@ -395,6 +397,7 @@ get_filenum (filenum, file)
     }
   ls.file[ls.num_filenames].dir = 0;
   ls.file[ls.num_filenames].name = file;
+  ls.last_filename = ls.num_filenames;
   return ++ls.num_filenames;
 }
 
@@ -425,6 +428,11 @@ dwarf2_gen_line_info (addr, l)
   else
     return;	/* no filename, no filnum => no play */
 
+  /* Must save these before the subseg_new call, as that call will change
+     them.  */
+  saved_seg = now_seg;
+  saved_subseg = now_subseg;
+
   if (!ls.line_seg)
     {
 #ifdef BFD_ASSEMBLER
@@ -445,8 +453,6 @@ dwarf2_gen_line_info (addr, l)
 #endif
     }
 
-  saved_seg = now_seg;
-  saved_subseg = now_subseg;
   subseg_set (ls.line_seg, DL_BODY);
 
   if (ls.text_seg != saved_seg || ls.text_subseg != saved_subseg)
