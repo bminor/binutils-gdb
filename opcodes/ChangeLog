@@ -1,3 +1,21 @@
+Tue Nov 21 18:28:06 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: Rebuild with autoconf 2.6.
+
+Wed Nov 15 19:02:53 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* configure.in: Sort list of architectures.  Accept but do nothing
+	for alliant, convex, pyramid, romp, and tahoe.
+
+Wed Nov  8 20:18:59 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* a29k-dis.c (print_special): Change num to unsigned int.
+
+Wed Nov  8 20:10:35 1995  Eric Freudenthal <freudenthal@nyu.edu>
+
+	* a29k-dis.c (print_insn): Cast insn24 to unsigned long when
+	shifting it.
+
 Tue Nov  7 15:21:06 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Call AC_CHECK_PROG to find and cache AR.
