@@ -1,3 +1,11 @@
+Thu Sep 30 12:00:49 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* c-exp.y, m2-exp.y:  Change type of address for msymbol to
+	builtin_type_long.
+	* infptrace.c (fetch_register, store_inferior_register,
+	child_xfer_memory):  Use PTRACE_XFER_TYPE for the type of ptrace
+	transfers. Provide an `int' default for PTRACE_XFER_TYPE.
+
 Thu Sep 30 11:30:56 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* defs.h (TARGET_*_BIT): Don't use host information (sizeof) in

@@ -646,7 +646,7 @@ variable:	NAME
 			      if (msymbol != NULL)
 				{
 				  write_exp_elt_opcode (OP_LONG);
-				  write_exp_elt_type (builtin_type_int);
+				  write_exp_elt_type (builtin_type_long);
 				  write_exp_elt_longcst ((LONGEST) SYMBOL_VALUE_ADDRESS (msymbol));
 				  write_exp_elt_opcode (OP_LONG);
 				  write_exp_elt_opcode (UNOP_MEMVAL);
