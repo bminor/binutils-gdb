@@ -32,45 +32,10 @@ Mark
 
 --
 
-x86 linux GDB and SIGALRM (???)
-http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00803.html
-
-This problem has been fixed, but a regression test still needs to be
-added to the testsuite:
-http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00309.html
-
-Mark
-
-[The test has been submitted for approval - cagney]
-
---
-
 		GDB 5.1 - New features
 		======================
 
 The following new features should be included in 5.1.
-
---
-
-Pascal (Pierre Muller, David Taylor)
-
-Pierre Muller has contributed patches for adding Pascal Language
-support to GDB.
-
-2 pascal language patches inserted in database
-http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00521.html
-
-Indent -gnu ?
-http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00496.html
-
-[I think this has been merged, need to confirm - cagney]
-
--- 2001-03-08
-
-Add CRIS target.
-
-A predicate to this is the multi-arching of SOFTWARE_SINGLE_STEP().  A
-patch has been submitted.
 
 --
 
