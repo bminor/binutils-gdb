@@ -44,13 +44,11 @@ struct
   }
 arc_cpu_type_table[] =
 {
-  {
-    "base", bfd_mach_arc_base
-  }
-  ,
-  {
-    NULL, 0
-  }
+  { "arc5", bfd_mach_arc_5 },
+  { "arc6", bfd_mach_arc_6 },
+  { "arc7", bfd_mach_arc_7 },
+  { "arc8", bfd_mach_arc_8 },
+  {  NULL,  0 }
 };
 
 /* Used by simulator.  */
@@ -618,8 +616,7 @@ arc_print_insn (bfd_vma vma, disassemble_info *info)
     {
       current_mach = arc_bfd_mach_type;
       current_endian = TARGET_BYTE_ORDER;
-      current_disasm = arc_get_disassembler (current_mach,
-					     current_endian == BIG_ENDIAN);
+      current_disasm = arc_get_disassembler (NULL);
     }
 
   return (*current_disasm) (vma, info);

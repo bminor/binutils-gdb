@@ -1,3 +1,9 @@
+2001-01-18  Nick Clifton  <nickc@redhat.com>
+
+	* arc-tdep.c (arc_cpu_type_table): Add new arc core numbers.
+	(arc_print_insn): No bfd available, so pass NULL to
+	arc_get_disassembler.
+
 2001-01-09  James Ingham  <jingham@inghji.apple.com>
 
          * symtab.c (lookup_symbol_aux): Call lookup_symbol_aux to lookup
