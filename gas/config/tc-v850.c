@@ -92,19 +92,14 @@ const pseudo_typeS md_pseudo_table[] =
 static struct hash_control *v850_hash;
 
 /* Structure to hold information about predefined registers.  */
-struct pd_reg
+struct reg_name
 {
-  char *name;
+  const char *name;
   int value;
 };
 
-
-/* an expressionS only has one register type, so we fake it */
-/* by setting high bits to indicate type */
-#define REGISTER_MASK		0xFF
-
-/*   The table is sorted. Suitable for searching by a binary search. */
-static const struct pd_reg pre_defined_registers[] =
+/* This table is sorted. Suitable for searching by a binary search. */
+static const struct reg_name pre_defined_registers[] =
 {
   { "ep", 30 },			/* ep - element ptr */
   { "gp", 4 },			/* gp - global ptr */
@@ -145,7 +140,42 @@ static const struct pd_reg pre_defined_registers[] =
   { "tp", 5 },			/* tp - text ptr */
   { "zero", 0 },
 };
-#define REG_NAME_CNT	(sizeof(pre_defined_registers) / sizeof(struct pd_reg))
+#define REG_NAME_CNT	(sizeof(pre_defined_registers) / sizeof(struct reg_name))
+
+
+static const struct reg_name system_registers[] = 
+{
+  { "eipc", 0 },
+  { "eipsw", 1 },
+  { "fepc", 2 },
+  { "fepsw", 3 },
+  { "ecr", 4 },
+  { "psw", 5 },
+};
+
+static const struct reg_name cc_names[] =
+{
+  { "c", 0x1 },
+  { "ge", 0xe },
+  { "gt", 0xf },
+  { "h", 0xb },
+  { "l", 0x1 },
+  { "le", 0x7 },
+  { "lt", 0x6 },
+  { "n", 0x4 },
+  { "nc", 0x9 },
+  { "nh", 0x3 },
+  { "nl", 0x9 },
+  { "ns", 0xc },
+  { "nv", 0x8 },
+  { "nz", 0xa },
+  { "p",  0xc },
+  { "s", 0x4 },
+  { "sa", 0xd },
+  { "t", 0x5 },
+  { "v", 0x0 },
+  { "z", 0x2 },
+};
 
 /* reg_name_search does a binary search of the pre_defined_registers
    array to see if "name" is a valid regiter name.  Returns the register
@@ -343,66 +373,6 @@ get_reloc (op)
 }
 
 
-/* get_operands parses a string of operands and returns and array of
-   expressions. */
-static int
-get_operands (exp)
-     expressionS exp[];
-{
-  char *p = input_line_pointer;
-  int numops = 0;
-  
-  while (*p) 
-    {
-      while (*p == ' ' || *p == '\t' || *p == ',')
-        p++;
-      if (*p==0 || *p=='\n' || *p=='\r')
-        break;
-
-      /* skip trailing parens */
-      if (*p == ')' || *p == ']')
-	{
-	  p++;
-	  continue;
-	}
-
-      if (*p == '[') 
-	{
-	  p++;
-	  input_line_pointer = p;
-	  register_name(&exp[numops]);
-	}
-      else if (strncmp(p, "lo(", 3) == 0)
-	{
-	  p += 3;
-	  input_line_pointer = p;
-	  expression(&exp[numops]);
-	}
-      else if (strncmp(p, "hi(", 3) == 0)
-	{
-	  p += 3;
-	  input_line_pointer = p;
-	  expression(&exp[numops]);
-	}
-      else
-	{
-	  input_line_pointer = p;
-	  if (!register_name(&exp[numops]))
-	    expression(&exp[numops]);
-	}
-
-      p = input_line_pointer;
-      numops++;
-    }
-
-  input_line_pointer = p;
-
-  exp[numops].X_op = 0;
-  return (numops);
-}
-
-
-
 void
 md_assemble (str) 
      char *str;
@@ -441,65 +411,166 @@ md_assemble (str)
 
   input_line_pointer = str;
 
-  /* get all the operands and save them as expressions */
-  numops = get_operands (myops);
-
-  /* now search the opcode table for one with operands that matches
-     what we've got */
-  match = 0;
-  while (!match) 
+  for(;;)
     {
-      match = 1;
-      for (i = 0; opcode->operands[i]; i++)
-	{
-	  int flags = v850_operands[opcode->operands[i]].flags;
-	  int X_op = myops[i].X_op;
-	  int num  = myops[i].X_add_number;
+      const char *errmsg = NULL;
 
-	  if (X_op == 0)
+      fc = 0;
+      match = 0;
+      next_opindex = 0;
+      for (opindex_ptr = opcode->operands; *opindex_ptr != 0; opindex_ptr++)
+	{
+	  const struct v850_operand *operand;
+	  char *hold;
+	  expressionS ex;
+	  char endc;
+
+	  if (next_opindex == 0)
 	    {
-	      match = 0;
+	      operand = &v850_operands[*opindex_ptr];
+	    }
+	  else
+	    {
+	      operand = &v850_operands[next_opindex];
+	      next_opindex = 0;
+	    }
+
+	  errmsg = NULL;
+
+	  while (*str == ' ' || *str == ',' || *str == '[' || *str == ']')
+	    ++str;
+
+	  /* Gather the operand. */
+	  hold = input_line_pointer;
+	  input_line_pointer = str;
+
+	  if ((operand->flags & V850_OPERAND_REG) != 0) 
+	    {
+	      if (!register_name(&ex))
+		{
+		  errmsg = "invalid register name";
+		  goto error;
+		}
+	    }
+	  else if (strncmp(input_line_pointer, "lo(", 3) == 0) 
+	    {
+	      input_line_pointer += 3;
+	      expression(&ex);
+
+	      if (*input_line_pointer++ != ')')
+		{
+		  errmsg = "syntax error: expected `)'";
+		  goto error;
+		}
+	      
+	      if (ex.X_op == O_constant) 
+		ex.X_add_number &= 0xffff;
+	      else
+		{
+		  if (fc > MAX_INSN_FIXUPS)
+		    as_fatal ("too many fixups");
+		  
+		  fixups[fc].exp = ex;
+		  fixups[fc].opindex = *opindex_ptr;
+		  fixups[fc].reloc = BFD_RELOC_LO16;
+		  fc++;
+		}
+	    }
+	  else if (strncmp(input_line_pointer, "hi(", 3) == 0) 
+	    {
+	      input_line_pointer += 3;
+	      expression(&ex);
+
+	      if (*input_line_pointer++ != ')')
+		{
+		  errmsg = "syntax error: expected `)'";
+		  goto error;
+		}
+	      
+	      if (ex.X_op == O_constant)
+		ex.X_add_number = (ex.X_add_number >> 16) & 0xffff;
+	      else 
+		{
+		  if (fc > MAX_INSN_FIXUPS)
+		    as_fatal ("too many fixups");
+		  
+		  fixups[fc].exp = ex;
+		  fixups[fc].opindex = *opindex_ptr;
+		  fixups[fc].reloc = BFD_RELOC_HI16;
+		  fc++;
+		}
+	    }
+	  else
+	    {
+		expression(&ex);
+	    }
+
+	  str = input_line_pointer;
+	  input_line_pointer = hold;
+
+	  switch (ex.X_op) 
+	    {
+	    case O_illegal:
+	      errmsg = "illegal operand";
+	      goto error;
+	    case O_absent:
+	      errmsg = "missing operand";
+	      goto error;
+	    case O_register:
+	      if ((operand->flags & V850_OPERAND_REG) == 0)
+		{
+		  errmsg = "invalid operand";
+		  goto error;
+		}
+		
+	      insn = v850_insert_operand (insn, operand, ex.X_add_number,
+					  (char *) NULL, 0);
+	      break;
+
+	    case O_constant:
+	      insn = v850_insert_operand (insn, operand, ex.X_add_number,
+					  (char *) NULL, 0);
+	      break;
+
+	    default:
+	      /* We need to generate a fixup for this expression.  */
+	      if (fc >= MAX_INSN_FIXUPS)
+		as_fatal ("too many fixups");
+	      fixups[fc].exp = ex;
+	      fixups[fc].opindex = *opindex_ptr;
+	      fixups[fc].reloc = BFD_RELOC_UNUSED;
+	      ++fc;
 	      break;
 	    }
 
-	  if (flags & OPERAND_REG) 
-	    {
-	      if (X_op != O_register) 
-		{
-		  match = 0;
-		  break;
-		}
-	    }
+	  while (*str == ' ' || *str == ',' || *str == '[' || *str == ']')
+	    ++str;
 	}
+      match = 1;
 
-      /* we're only done if the operands matched so far AND there are
-	 no more to check. */
-      if (match && myops[i].X_op == 0)
-	break;
+    error:
+      if (match == 0)
+        {
+	  next_opcode = opcode + 1;
+	  if (next_opcode->opcode != 0 && !strcmp(next_opcode->name, opcode->name))
+	    {
+	      opcode = next_opcode;
+	      continue;
+	    }
+	  
+	  as_bad ("%s", errmsg);
+	  return;
+        }
+      break;
+    }
       
-      next_opcode = opcode + 1;
-      if (next_opcode->opcode == 0)
-	break;
-      if (strcmp (next_opcode->name, opcode->name))
-	break;
-      opcode = next_opcode;
-    }
-
-  if (!match) 
-    {
-      as_bad ("Unrecognized operands");
-      return;
-    }
-
-  insn = opcode->opcode;
-
-#if 0
   while (isspace (*str))
     ++str;
 
   if (*str != '\0')
     as_bad ("junk at end of line: `%s'", str);
-#endif
+
+  input_line_pointer = str;
 
   /* Write out the instruction.  */
   if ((insn & 0x0600) == 0x0600)
@@ -636,18 +707,18 @@ v850_insert_operand (insn, operand, val, file, line)
       long min, max;
       offsetT test;
 
-#if 0
-      if ((operand->flags & PPC_OPERAND_SIGNED) != 0)
+      if ((operand->flags & V850_OPERAND_SIGNED) != 0)
         {
+#if 0
           if ((operand->flags & PPC_OPERAND_SIGNOPT) != 0
               && ppc_size == PPC_OPCODE_32)
             max = (1 << operand->bits) - 1;
           else
+#endif
             max = (1 << (operand->bits - 1)) - 1;
           min = - (1 << (operand->bits - 1));
         }
       else
-#endif
         {
           max = (1 << operand->bits) - 1;
           min = 0;
