@@ -1,3 +1,7 @@
+2003-10-01  Chris Demetriou  <cgd@broadcom.com>
+
+	* config/tc-mips.c (s_cpreturn): Correct errors in comment.
+
 2003-10-01  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (macro_build_ldst_constoffset): Fix sign extension

@@ -12527,11 +12527,11 @@ s_cprestore (int ignore ATTRIBUTE_UNUSED)
 }
 
 /* Handle the .cpreturn pseudo-op defined for NewABI PIC code. If an offset
-   was given in the preceeding .gpsetup, it results in:
+   was given in the preceeding .cpsetup, it results in:
      ld		$gp, offset($sp)
 
    If a register $reg2 was given there, it results in:
-     daddiu	$gp, $gp, $reg2
+     daddu	$gp, $reg2, $0
  */
 static void
 s_cpreturn (int ignore ATTRIBUTE_UNUSED)
