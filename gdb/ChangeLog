@@ -1,10 +1,10 @@
 Wed Nov 20 00:43:09 1996  Doug Evans  <dje@canuck.cygnus.com>
 
-	* callback.h: Deleted, moved to ../include.
-	* callback.c: Deleted, moved to ../sim/common.
+	* callback.h: Delete, moved to ../include.
+	* callback.c: Delete, moved to ../sim/common.
 	* Makefile.in (SFILES,COMMON_OBJS): Delete callback.[co].
 	(callback.o): Delete rule.
-	* remote-sim.h: No longer include callback.h
+	* remote-sim.h: No longer include callback.h.
 	(sim_callback_write_stdout): Delete prototype.
 	* remote-sim.c (init_callbacks,end_callbacks): New functions.
 	(gdb_os_write_stdout, gdb_os_printf_filtered): New functions.
@@ -22,8 +22,8 @@ Mon Nov 18 23:43:05 1996  Tom Tromey  <tromey@cygnus.com>
 
 	Fixes for Tcl 7.6 / Tk 4.2:
 	* gdbtk.tcl (apply_filespec): Use tk_getOpenFile.
-	Removed old fileselect code.
-	* gdbtk.c (Tcl_Alloc): Renamed from Tcl_Malloc.
+	Remove old fileselect code.
+	* gdbtk.c (Tcl_Alloc): Rename from Tcl_Malloc.
 
 end-sanitize-gdbtk
 Mon Nov 18 15:58:05 1996  Jim Wilson  <wilson@cygnus.com>
@@ -48,8 +48,10 @@ Thu Nov 14 15:54:20 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	instead of doing addr>>32 to eliminate a warning produced by GCC
 	on 32-bit systems.
 
+start-sanitize-d10v
 	* config/d10v/tm-d10v.h (ULONGEST): Define.
 
+end-sanitize-d10v
 Tue Nov 12 12:25:27 1996  Jim Wilson  <wilson@cygnus.com>
 
 	* c-typeprint.c (cp_type_print_method_args): Pass -1 for show in
@@ -83,13 +85,13 @@ end-sanitize-m32r
 	 
 Mon Nov 11 17:15:59 1996  Geoffrey Noer  <noer@cygnus.com>
 
-	* defs.h: modify Nov 11 12:59:00 change so _MSC_VER is checked
-	instead of _WIN32
-	* win32-nat.c: fix Nov 11 12:59:00 change (windows.h should
+	* defs.h: Modify Nov 11 12:59:00 change so _MSC_VER is checked
+	instead of _WIN32.
+	* win32-nat.c: Fix Nov 11 12:59:00 change (windows.h should
 	be included instead of windefs.h for compilers other than
 	VC++).
-	* mswin/windefs.h: remove ^Ms and change C++ style comments
-	to C style comments
+	* mswin/windefs.h: Remove ^Ms and change C++ style comments
+	to C style comments.
 
 Mon Nov 11 14:32:38 1996  Mark Alexander  <marka@cygnus.com>
 
@@ -103,7 +105,7 @@ Mon Nov 11 12:59:00 1996  Dawn Perchik <dawn@critters.cygnus.com>
 
 	* mips-tdep.c, remote-mips.c, values.c, mdebugread.c,
 	config/mips/tm-mips.h: Add/fix bugs for 64-bit mips support.
-	* defs.h: Cleanup; add prototypess
+	* defs.h: Cleanup; add prototypes.
 	* corefile.c: Change FIXME #ifdef
 	* win32-nat.c: Include windefs instead of windows.h.
 	* utils.c: Add routines for printing addresses and registers 
@@ -137,7 +139,8 @@ Sat Nov  9 01:05:10 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 Fri Nov  8 14:30:23 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
-	* config/tm-sh.h: Added a missing comma in middle of REGISTER_NAMES list.
+	* config/tm-sh.h: Added a missing comma in middle of
+ 	REGISTER_NAMES list.
 
 Fri Nov  8 12:29:51 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
