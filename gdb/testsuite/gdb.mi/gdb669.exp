@@ -1,4 +1,4 @@
-# Copyright 2002, 2003 Free Software Foundation, Inc.
+# Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -176,7 +176,7 @@ proc check_mi_and_console_threads {name} {
 #
 set testfile "pthreads"
 set srcfile "$testfile.c"
-set binfile "$objdir/$subdir/$testfile"
+set binfile "$objdir/$subdir/gdb669-$testfile"
 
 set options [list debug incdir=$objdir]
 if {[gdb_compile_pthreads "$srcdir/$subdir/$srcfile" $binfile executable $options] != "" } {

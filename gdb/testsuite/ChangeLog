@@ -1,3 +1,12 @@
+2004-01-13  Elena Zannoni  <ezannoni@redhat.com>
+
+         * gdb.threads/gcore-thread.exp: Prefix name of binary with
+         test specific name.
+         * gdb.mi/gdb669.exp: Ditto.
+         * gdb.mi/mi-pthreads.exp: Ditto.
+         * gdb.mi/mi1-pthreads.exp: Ditto.
+         * gdb.mi/mi2-pthreads.exp: Ditto.
+
 2004-01-12  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.cp/member-ptr.cc: Add copyright notice.
