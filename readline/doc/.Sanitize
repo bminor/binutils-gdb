@@ -25,7 +25,8 @@ Do-first:
 
 Things-to-keep:
 
-Makefile
+Makefile.in
+configure.in
 hist.texinfo
 hstech.texinfo
 hsuser.texinfo
@@ -33,8 +34,6 @@ inc-hist.texi
 rlman.texinfo
 rltech.texinfo
 rluser.texinfo
-texindex.c
-texinfo.tex
 
 Do-last:
 
