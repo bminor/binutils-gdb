@@ -42,6 +42,7 @@ aout-target.h
 archive.c
 archures.c
 bfd-in.h
+bfd-in2.h
 bfd.c
 bout.c
 cache.c
@@ -140,5 +141,16 @@ trad-core.c
 Things-to-lose:
 
 Do-last:
+
+if ( echo $* | grep keep\-v9 > /dev/null ) ; then
+	echo Keeping v9 stuff in configure.in.
+else
+	echo Cleaning configure.in ...
+	grep -v v9 < configure.in > new
+	if [ -n "${safe}" ] ; then
+		cp configure.in .Recover
+	fi
+	mv new configure.in
+fi
 
 # End of file.

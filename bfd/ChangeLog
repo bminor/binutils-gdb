@@ -1,3 +1,15 @@
+Thu May 27 13:38:47 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* configure.in, Makefile.in: Build bfd-in2.h in source directory,
+	from bfd-in.h and .c files.  Build bfd.h in build directory,
+	substituting in requested target word size.  Insert word size into
+	makefile, and maybe enable 64-bit targets.
+
+	* bfd-in.h, libbfd.c, demo64.c, targets.c: Define BFD64 if 64 bits
+	are available.  Conditionalize on this.  Assume HOST_64_BIT
+	will be defined if needed, so 64-bit targets are conditionalized
+	only in the Makefile.
+
 Tue May 25 14:03:56 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* libbfd.c (COERCE64): Rewrite to avoid out-of-range values.
