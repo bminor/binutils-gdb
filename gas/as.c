@@ -91,8 +91,7 @@ int debug_memory = 0;
 /* We build a list of defsyms as we read the options, and then define
    them after we have initialized everything.  */
 
-struct defsym_list
-{
+struct defsym_list {
   struct defsym_list *next;
   char *name;
   valueT value;
@@ -102,8 +101,7 @@ static struct defsym_list *defsyms;
 
 /* Keep a record of the itbl files we read in.  */
 
-struct itbl_file_list
-{
+struct itbl_file_list {
   struct itbl_file_list *next;
   char *name;
 };
@@ -350,24 +348,23 @@ parse_args (pargc, pargv)
 
   char *shortopts;
   extern CONST char *md_shortopts;
-  static const char std_shortopts[] =
-    {
-      '-', 'J',
+  static const char std_shortopts[] = {
+    '-', 'J',
 #ifndef WORKING_DOT_WORD
-      /* -K is not meaningful if .word is not being hacked.  */
-      'K',
+    /* -K is not meaningful if .word is not being hacked.  */
+    'K',
 #endif
-      'L', 'M', 'R', 'W', 'Z', 'f', 'a', ':', ':', 'D', 'I', ':', 'o', ':',
+    'L', 'M', 'R', 'W', 'Z', 'f', 'a', ':', ':', 'D', 'I', ':', 'o', ':',
 #ifndef VMS
-      /* -v takes an argument on VMS, so we don't make it a generic
-         option.  */
-      'v',
+    /* -v takes an argument on VMS, so we don't make it a generic
+       option.  */
+    'v',
 #endif
-      'w', 'X',
-      /* New option for extending instruction set (see also --itbl below)  */
-      't', ':',
-      '\0'
-    };
+    'w', 'X',
+    /* New option for extending instruction set (see also --itbl below)  */
+    't', ':',
+    '\0'
+  };
   struct option *longopts;
   extern struct option md_longopts[];
   extern size_t md_longopts_size;
@@ -474,7 +471,7 @@ parse_args (pargc, pargv)
 		 VMS code in md_parse_option can return 0 in that case,
 		 but it has no way of pushing the filename argument back.  */
 	      if (optarg && *optarg)
-		new_argv[new_argc++] = optarg,  new_argv[new_argc] = NULL;
+		new_argv[new_argc++] = optarg, new_argv[new_argc] = NULL;
 	      else
 #else
 	      case 'v':

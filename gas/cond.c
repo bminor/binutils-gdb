@@ -28,8 +28,7 @@
    scanned.  */
 struct obstack cond_obstack;
 
-struct file_line
-{
+struct file_line {
   char *file;
   unsigned int line;
 };
@@ -37,8 +36,7 @@ struct file_line
 /* We push one of these structures for each .if, and pop it at the
    .endif.  */
 
-struct conditional_frame
-{
+struct conditional_frame {
   /* The source file & line number of the "if".  */
   struct file_line if_file_line;
   /* The source file & line of the "else".  */

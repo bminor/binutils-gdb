@@ -57,8 +57,7 @@ cgen_asm_record_register (name, number)
    OPINDEX is the index in the operand table.
    OPINFO is something the caller chooses to help in reloc determination.  */
 
-struct fixup
-{
+struct fixup {
   int opindex;
   int opinfo;
   expressionS exp;
@@ -87,7 +86,7 @@ queue_fixup (opindex, opinfo, expP)
   /* We need to generate a fixup for this expression.  */
   if (num_fixups >= GAS_CGEN_MAX_FIXUPS)
     as_fatal (_("too many fixups"));
-  fixups[num_fixups].exp     = * expP;
+  fixups[num_fixups].exp     = *expP;
   fixups[num_fixups].opindex = opindex;
   fixups[num_fixups].opinfo  = opinfo;
   ++ num_fixups;
@@ -315,7 +314,7 @@ gas_cgen_parse_operand (cd, want, strP, opindex, opinfo, resultP, valueP)
       *resultP = CGEN_PARSE_OPERAND_RESULT_REGISTER;
       break;
     default:
-      queue_fixup (opindex, opinfo, & exp);
+      queue_fixup (opindex, opinfo, &exp);
       *valueP = 0;
       *resultP = CGEN_PARSE_OPERAND_RESULT_QUEUED;
       break;

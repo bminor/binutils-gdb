@@ -33,13 +33,13 @@ extern CGEN_CPU_DESC gas_cgen_cpu_desc;
 /* Struct defining result of gas_cgen_finish_insn.  */
 typedef struct {
   /* frag containing the insn */
-  fragS * frag;
+  fragS *frag;
   /* Address of insn in frag.  */
-  char * addr;
+  char *addr;
   /* Number of fixups this insn has.  */
   int num_fixups;
   /* Array of fixups.  */
-  fixS * fixups[GAS_CGEN_MAX_FIXUPS];
+  fixS *fixups[GAS_CGEN_MAX_FIXUPS];
 } finished_insnS;
 
 /* Callback for operand parsing.
@@ -56,7 +56,7 @@ extern void gas_cgen_init_parse PARAMS ((void));
 extern void gas_cgen_save_fixups PARAMS ((void));
 extern void gas_cgen_restore_fixups PARAMS ((void));
 extern void gas_cgen_swap_fixups PARAMS ((void));
-     
+
 /* Add a register to the assembler's hash table.
    This makes lets GAS parse registers for us.
    ??? This isn't currently used, but it could be in the future.  */

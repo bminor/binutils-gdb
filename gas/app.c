@@ -211,24 +211,23 @@ static char mri_last_ch;
    state at the time .include is interpreted is completely unrelated.
    That's why we have to save it all.  */
 
-struct app_save
-  {
-    int          state;
-    int          old_state;
-    char *       out_string;
-    char         out_buf[sizeof (out_buf)];
-    int          add_newlines;
-    char *       saved_input;
-    int          saved_input_len;
+struct app_save {
+  int          state;
+  int          old_state;
+  char *       out_string;
+  char         out_buf[sizeof (out_buf)];
+  int          add_newlines;
+  char *       saved_input;
+  int          saved_input_len;
 #ifdef TC_M68K
-    int          scrub_m68k_mri;
+  int          scrub_m68k_mri;
 #endif
-    const char * mri_state;
-    char         mri_last_ch;
+  const char * mri_state;
+  char         mri_last_ch;
 #if defined TC_ARM && defined OBJ_ELF
-    const char * symver_state;
+  const char * symver_state;
 #endif
-  };
+};
 
 char *
 app_push ()
@@ -779,19 +778,20 @@ do_scrub_chars (get, tostart, tolen)
 	    }
 
 #ifdef KEEP_WHITE_AROUND_COLON
-          if (lex[ch] == LEX_IS_COLON)
-            {
-              /* only keep this white if there's no white *after* the colon */
-              ch2 = GET ();
-              UNGET (ch2);
-              if (!IS_WHITESPACE (ch2))
-                {
-                  state = 9;
-                  UNGET (ch);
-                  PUT (' ');
-                  break;
-                }
-            }
+	  if (lex[ch] == LEX_IS_COLON)
+	    {
+	      /* Only keep this white if there's no white *after* the
+                 colon.  */
+	      ch2 = GET ();
+	      UNGET (ch2);
+	      if (!IS_WHITESPACE (ch2))
+		{
+		  state = 9;
+		  UNGET (ch);
+		  PUT (' ');
+		  break;
+		}
+	    }
 #endif
 	  if (IS_COMMENT (ch)
 	      || ch == '/'
@@ -1014,7 +1014,7 @@ do_scrub_chars (get, tostart, tolen)
 
 	case LEX_IS_COLON:
 #ifdef KEEP_WHITE_AROUND_COLON
-          state = 9;
+	  state = 9;
 #else
 	  if (state == 9 || state == 10)
 	    state = 3;
@@ -1040,7 +1040,7 @@ do_scrub_chars (get, tostart, tolen)
 
 #ifdef TC_V850
 	case LEX_IS_DOUBLEDASH_1ST:
-	  ch2 = GET();
+	  ch2 = GET ();
 	  if (ch2 != '-')
 	    {
 	      UNGET (ch2);
@@ -1062,7 +1062,7 @@ do_scrub_chars (get, tostart, tolen)
 #endif
 #ifdef DOUBLEBAR_PARALLEL
 	case LEX_IS_DOUBLEBAR_1ST:
-	  ch2 = GET();
+	  ch2 = GET ();
 	  if (ch2 != '|')
 	    {
 	      UNGET (ch2);
@@ -1140,12 +1140,14 @@ do_scrub_chars (get, tostart, tolen)
 	     Trap is the only short insn that has a first operand that is
 	     neither register nor label.
 	     We must prevent exef0f ||trap #1 to degenerate to exef0f ||trap#1 .
-	     We can't make '#' LEX_IS_SYMBOL_COMPONENT because it is already
-	     LEX_IS_LINE_COMMENT_START.  However, it is the only character in
-	     line_comment_chars for d10v, hence we can recognize it as such.  */
+	     We can't make '#' LEX_IS_SYMBOL_COMPONENT because it is
+	     already LEX_IS_LINE_COMMENT_START.  However, it is the
+	     only character in line_comment_chars for d10v, hence we
+	     can recognize it as such.  */
 	  /* An alternative approach would be to reset the state to 1 when
 	     we see '||', '<'- or '->', but that seems to be overkill.  */
-	  if (state == 10) PUT (' ');
+	  if (state == 10)
+	    PUT (' ');
 #endif
 	  /* We have a line comment character which is not at the
 	     start of a line.  If this is also a normal comment
@@ -1165,9 +1167,9 @@ do_scrub_chars (get, tostart, tolen)
 #if defined TC_ARM && defined OBJ_ELF
 	  /* On the ARM, `@' is the comment character.
 	     Unfortunately this is also a special character in ELF .symver
-	     directives (and .type, though we deal with those another way).  So
-	     we check if this line is such a directive, and treat the character
-	     as default if so.  This is a hack.  */
+	     directives (and .type, though we deal with those another way).
+	     So we check if this line is such a directive, and treat
+	     the character as default if so.  This is a hack.  */
 	  if ((symver_state != NULL) && (*symver_state == 0))
 	    goto de_fault;
 #endif
@@ -1217,7 +1219,7 @@ do_scrub_chars (get, tostart, tolen)
 		{
 		  int type;
 
-		  ch2 = * (unsigned char *) s;
+		  ch2 = *(unsigned char *) s;
 		  type = lex[ch2];
 		  if (type != 0
 		      && type != LEX_IS_SYMBOL_COMPONENT)

@@ -33,17 +33,16 @@
 #ifndef __bit_fix_h__
 #define __bit_fix_h__
 
-struct bit_fix
-  {
-    int fx_bit_size;		/* Length of bitfield */
-    int fx_bit_offset;		/* Bit offset to bitfield */
-    long fx_bit_base;		/* Where do we apply the bitfix.
-				      If this is zero, default is assumed.  */
-    long fx_bit_base_adj;	/* Adjustment of base */
-    long fx_bit_max;		/* Signextended max for bitfield */
-    long fx_bit_min;		/* Signextended min for bitfield */
-    long fx_bit_add;		/* Or mask, used for huffman prefix */
-  };
+struct bit_fix {
+  int fx_bit_size;		/* Length of bitfield */
+  int fx_bit_offset;		/* Bit offset to bitfield */
+  long fx_bit_base;		/* Where do we apply the bitfix.
+				   If this is zero, default is assumed.  */
+  long fx_bit_base_adj;		/* Adjustment of base */
+  long fx_bit_max;		/* Signextended max for bitfield */
+  long fx_bit_min;		/* Signextended min for bitfield */
+  long fx_bit_add;		/* Or mask, used for huffman prefix */
+};
 typedef struct bit_fix bit_fixS;
 
 #endif /* __bit_fix_h__ */

@@ -1,3 +1,13 @@
+2000-10-12  Kazu Hirata  <kazu@hxi.com>
+
+	* app.c: Fix formatting.
+	* as.c: Likewise.
+	* as.h: Likewise.
+	* bit_fix.h: Likewise.
+	* cgen.c: Likewise.
+	* cgen.h: Likewise.
+	* cond.c: Likewise.
+
 2000-10-11  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/obj-elf.c (elf_frob_symbol): Revert 2000-10-07 change.
