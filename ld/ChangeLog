@@ -1,3 +1,7 @@
+2004-04-20  Chris Demetriou  <cgd@broadcom.com>
+
+	* NEWS: Note that MIPS --embedded-relocs option is deprecated.
+
 2004-04-19  Jakub Jelinek  <jakub@redhat.com>
 
 	* ldlang.c (lang_do_assignments_1): Handle .tbss output section

@@ -1,5 +1,8 @@
 -*- text -*-
 
+* The MIPS --embedded-relocs (used to embed relocations into binaries for
+  Embedded-PIC code) is deprecated and will be removed in a future release.
+
 * cr16c support added by NSC.
 
 * m32r Linux (ELF) support added by Renesas.
