@@ -12,7 +12,7 @@
 
 case "${target_cpu}" in
 
-alpha)			gdb_target_cpu=alpha ;;
+alpha*)			gdb_target_cpu=alpha ;;
 c[12])			gdb_target_cpu=convex ;;
 hppa*)			gdb_target_cpu=pa ;;
 i[3456]86*)		gdb_target_cpu=i386 ;;
@@ -43,8 +43,8 @@ a29k-*-sym1*)		gdb_target=ultra3 ;;
 a29k-*-udi*)		gdb_target=a29k-udi ;;
 a29k-*-vxworks*)        gdb_target=vx29k ;;
 
-alpha-*-osf*)		gdb_target=alpha-osf1 ;;
-alpha-*-linux*)		gdb_target=alpha-linux ;;
+alpha*-*-osf*)		gdb_target=alpha-osf1 ;;
+alpha*-*-linux*)	gdb_target=alpha-linux ;;
 
 arc-*-*)		gdb_target=arc ;;
 

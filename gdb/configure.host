@@ -10,6 +10,7 @@
 
 case "${host_cpu}" in
 
+alpha*)			gdb_host_cpu=alpha ;;
 c[12])			gdb_host_cpu=convex ;;
 hppa*)			gdb_host_cpu=pa ;;
 i[3456]86*)		gdb_host_cpu=i386 ;;
@@ -29,10 +30,10 @@ case "${host}" in
 
 a29k-*-*)		gdb_host=ultra3 ;;
 
-alpha-*-osf1*)		gdb_host=alpha-osf1 ;;
-alpha-*-osf2*)		gdb_host=alpha-osf2 ;;
-alpha-*-osf[3456789]*)	gdb_host=alpha-osf3 ;;
-alpha-*-linux*)		gdb_host=alpha-linux ;;
+alpha*-*-osf1*)		gdb_host=alpha-osf1 ;;
+alpha*-*-osf2*)		gdb_host=alpha-osf2 ;;
+alpha*-*-osf[3456789]*)	gdb_host=alpha-osf3 ;;
+alpha*-*-linux*)	gdb_host=alpha-linux ;;
 
 arm-*-*)		gdb_host=arm ;;
 
