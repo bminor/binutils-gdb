@@ -1,3 +1,8 @@
+Fri Sep  3 18:17:32 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/obj-elf.h (elf_symbol): No longer special-cased on
+	sparcv9, since elf_symbol_type is now independent of size.
+
 Thu Aug  5 13:06:02 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* config/tc-sparc.c (md_apply_fix, case BFD_RELOC_64): Fill in
