@@ -24,7 +24,7 @@
 #include <sys/sysctl.h>
 
 /* Prevent warning from -Wmissing-prototypes.  */
-void _initialize_i386fbsd_nat (void);
+void _initialize_i386obsd_nat (void);
 
 void
 _initialize_i386obsd_nat (void)

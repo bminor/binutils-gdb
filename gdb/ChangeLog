@@ -1,5 +1,7 @@
 2002-07-04  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386obsd-nat.c (_initialize_i386obsd_nat): Fix typo in prototype.
+
 	* i386bsd-tdep.c (i386nbsd_sigtramp_start, i386nbsd_sigtramp_end):
 	New variables.
 	(i386nbsd_init_abi): Use these to initialize tdep->sigtramp_start
