@@ -733,8 +733,8 @@ install: $(ALLLIBS)
 	$(INSTALL_DATA) $(INCDIR)/ansidecl.h $(oldincludedir)/ansidecl.h; \
 	$(INSTALL_DATA) $(INCDIR)/bfdlink.h $(oldincludedir)/bfdlink.h; \
 	$(INSTALL_DATA) $(INCDIR)/obstack.h $(oldincludedir)/obstack.h; \
-	$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS); \
 	fi
+	$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
 
 Makefile: Makefile.in config.status
 	CONFIG_FILES=Makefile CONFIG_HEADERS= $(SHELL) ./config.status
@@ -848,7 +848,7 @@ end-sanitize-arc:
 start-sanitize-d10v:
 elf32-d10v.o: elf32-d10v.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/elf/d10v.h elf32-target.h
+  elf32-target.h
 end-sanitize-d10v:
 
 start-sanitize-m32r:
@@ -1070,7 +1070,7 @@ hp300hpux.o: hp300hpux.c $(INCDIR)/aout/hp300hpux.h \
   aoutx.h $(INCDIR)/bfdlink.h libaout.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h \
   aout-target.h
-som.o: som.c som.h ../bfd/sysdep.h libhppa.h
+som.o: som.c
 i386aout.o: i386aout.c $(INCDIR)/aout/aout64.h libaout.h \
   $(INCDIR)/bfdlink.h aout-target.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
