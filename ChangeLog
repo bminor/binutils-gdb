@@ -1,3 +1,8 @@
+Tue Sep 19 13:51:05 1995  J.T. Conklin  <jtc@blues.cygnus.com>
+
+	* configure.in (noconfigdirs): Disable libg++ and libstdc++ on
+	v810-*-*.
+
 Mon Sep 18 23:08:26 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* configure.in (noconfigdirs): Disable bfd, binutils, gas, gcc,
