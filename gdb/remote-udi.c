@@ -1,5 +1,5 @@
 /* Remote debugging interface for AMD 29k interfaced via UDI, for GDB.
-   Copyright 1990, 1992 Free Software Foundation, Inc.
+   Copyright 1990, 1992, 1995 Free Software Foundation, Inc.
    Written by Daniel Mann.  Contributed by AMD.
 
 This file is part of GDB.
@@ -1287,18 +1287,19 @@ download(load_arg_string, from_tty)
   immediate_quit--;
 }
 
-/* User interface to download an image into the remote target.  See download()
- * for details on args.
- */
+/* Function to download an image into the remote target.  */
 
 static void
-udi_load(args, from_tty)
+udi_load (args, from_tty)
      char *args;
      int from_tty;
 {
   download (args, from_tty);
 
-  symbol_file_add (strtok (args, " \t"), from_tty, 0, 0, 0, 0);
+  /* As a convenience, pick up any symbol info that is in the program
+     being loaded.  Note that we assume that the program is the``mainline'';
+     if this is not always true, then this code will need to be augmented.  */
+  symbol_file_add (strtok (args, " \t"), from_tty, 0, 1, 0, 0);
 
   /* Getting new symbols may change our opinion about what is
      frameless.  */
@@ -1660,7 +1661,7 @@ Arguments are\n\
 	0,			/* terminal_ours */
 	0,			/* terminal_info */
         udi_kill,             	/* FIXME, kill */
-        udi_load,
+        udi_load,		/* to_load */
         0,                      /* lookup_symbol */
         udi_create_inferior,
         udi_mourn,		/* mourn_inferior FIXME */

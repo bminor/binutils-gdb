@@ -1,3 +1,7 @@
+Mon Jan  2 15:02:51 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* remote-udi.c (udi_load): Tell symbol_file_add that the
+	program being loaded is the main program.
 
 For older changes see ChangeLog-94
 
