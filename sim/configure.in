@@ -83,6 +83,8 @@ case "${target}" in
 # end-sanitize-v850
   w65-*-*)		sim_target=w65 ;;
   z8k*-*-*)		sim_target=z8k ;;
+  sparc64-*-*)
+	;; # Don't build erc32 if sparc64.
   sparc*-*-*)
 	# The SPARC simulator can only be compiled by gcc.
 	sim_target=erc32
@@ -110,8 +112,10 @@ yes)
 	;;
 esac
 
-configdirs="common ${sim_target}"
-AC_CONFIG_SUBDIRS($configdirs)
+if test x"${sim_target}" != x ; then
+	configdirs="common ${sim_target}"
+	AC_CONFIG_SUBDIRS($configdirs)
+fi
 
 AC_OUTPUT(Makefile)
 
