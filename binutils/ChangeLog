@@ -1,3 +1,18 @@
+2001-02-07  David Mosberger  <davidm@hpl.hp.com>
+
+	* readelf.c (process_unwind): New function.
+	(slurp_ia64_unwind_table): Ditto.
+	(dump_ia64_unwind): Ditto.
+	(find_symbol_for_address): Ditto.
+	(slurp_rela_relocs): New function (split off from dump_relocations()).
+	(slurp_rel_relocs): Ditto.
+	(parse_args): Handle '-u' option.
+
+	* unwind-ia64.c: New file.
+	* unwind-ia64.h: New file.
+	* Makefile.am: Include unwind-ia64.c in readelf build.
+	* Makefile.in: Regenerate.
+
 2001-02-04  Philip Blundell  <philb@gnu.org>
 
 	* configure.in (OBJDUMP_DEFS): Match `arm*-*', not just `arm-*'.

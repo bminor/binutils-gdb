@@ -253,7 +253,7 @@ objcopy_SOURCES = objcopy.c not-strip.c rename.c $(WRITE_DEBUG_SRCS) $(BULIBS)
 
 strings_SOURCES = strings.c $(BULIBS)
 
-readelf_SOURCES = readelf.c version.c
+readelf_SOURCES = readelf.c version.c unwind-ia64.c
 readelf_LDADD = $(INTLLIBS) $(LIBIBERTY)
 
 strip_new_SOURCES = objcopy.c is-strip.c rename.c $(WRITE_DEBUG_SRCS) $(BULIBS)
@@ -394,7 +394,8 @@ version.$(OBJEXT) filemode.$(OBJEXT)
 addr2line_LDADD = $(LDADD)
 addr2line_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
 addr2line_LDFLAGS = 
-readelf_OBJECTS =  readelf.$(OBJEXT) version.$(OBJEXT)
+readelf_OBJECTS =  readelf.$(OBJEXT) version.$(OBJEXT) \
+unwind-ia64.$(OBJEXT)
 readelf_DEPENDENCIES =  ../libiberty/libiberty.a
 readelf_LDFLAGS = 
 nm_new_OBJECTS =  nm.$(OBJEXT) bucomm.$(OBJEXT) version.$(OBJEXT) \
