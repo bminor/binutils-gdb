@@ -1,3 +1,8 @@
+2001-07-30  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* ld.texinfo (Simple Assignments): Fix computation in SECTIONS
+	example.
+
 2001-07-19  David O'Brien  <obrien@FreeBSD.org>
 
 	* emultempl/elf32.em: Do not assuming that contents of the buffer
