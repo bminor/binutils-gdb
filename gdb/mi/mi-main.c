@@ -282,7 +282,7 @@ enum mi_cmd_result
 mi_cmd_data_list_register_names (char *command, char **argv, int argc)
 {
   int regnum, numregs;
-  int i;
+  int i, numbers;
 
   /* Note that the test for a valid register must include checking the
      REGISTER_NAME because NUM_REGS may be allocated for the union of
@@ -291,6 +291,26 @@ mi_cmd_data_list_register_names (char *command, char **argv, int argc)
      the particular processor being debugged.  */
 
   numregs = NUM_REGS + NUM_PSEUDO_REGS;
+  numbers = 0;
+
+  if (!gdb_current_interpreter_is_named (GDB_INTERPRETER_MI0)
+      && !gdb_current_interpreter_is_named (GDB_INTERPRETER_MI1)
+      && argc > 0 && *argv[0] == '-')
+    {
+      if (strncmp (argv[0], "-numbers", strlen (argv[0])) == 0)
+	{
+	  numbers = 1;
+	  --argc;
+	  ++argv;
+	}
+      else
+	{
+	  xasprintf (&mi_error_message,
+		     "mi_cmd_data_list_register_names: invalid option \"%s\"",
+		     argv[0]);
+	  return MI_CMD_ERROR;
+	}
+    }
 
   ui_out_list_begin (uiout, "register-names");
 
@@ -304,7 +324,17 @@ mi_cmd_data_list_register_names (char *command, char **argv, int argc)
 	      || *(REGISTER_NAME (regnum)) == '\0')
 	    ui_out_field_string (uiout, NULL, "");
 	  else
-	    ui_out_field_string (uiout, NULL, REGISTER_NAME (regnum));
+	    {
+	      if (numbers)
+		{
+		  ui_out_tuple_begin (uiout, NULL);
+		  ui_out_field_int (uiout, "number", regnum);
+		  ui_out_field_string (uiout, "name", REGISTER_NAME (regnum));
+		  ui_out_tuple_end (uiout);
+		}
+	      else
+		ui_out_field_string (uiout, NULL, REGISTER_NAME (regnum));
+	    }
 	}
     }
 
@@ -319,9 +349,29 @@ mi_cmd_data_list_register_names (char *command, char **argv, int argc)
 	}
       if (REGISTER_NAME (regnum) == NULL
 	  || *(REGISTER_NAME (regnum)) == '\0')
-	ui_out_field_string (uiout, NULL, "");
+	{
+	  if (numbers)
+	    {
+	      ui_out_tuple_begin (uiout, NULL);
+	      ui_out_field_int (uiout, "number", regnum);
+	      ui_out_field_string (uiout, "name", "");
+	      ui_out_tuple_end (uiout);
+	    }
+	  else
+	    ui_out_field_string (uiout, NULL, "");
+	}
       else
-	ui_out_field_string (uiout, NULL, REGISTER_NAME (regnum));
+	{
+	  if (numbers)
+	    {
+	      ui_out_tuple_begin (uiout, NULL);
+	      ui_out_field_int (uiout, "number", regnum);
+	      ui_out_field_string (uiout, NULL, REGISTER_NAME (regnum));
+	      ui_out_tuple_end (uiout);
+	    }
+	  else
+	    ui_out_field_string (uiout, NULL, REGISTER_NAME (regnum));
+	}
     }
   ui_out_list_end (uiout);
   return MI_CMD_DONE;
