@@ -2875,7 +2875,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_frameless_function_invocation
     (gdbarch, arm_frameless_function_invocation);
-  set_gdbarch_frame_args_skip (gdbarch, 0);
 
   frame_base_set_default (gdbarch, &arm_normal_base);
 

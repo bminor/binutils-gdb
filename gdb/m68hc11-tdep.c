@@ -1536,7 +1536,6 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
 
   /* Set register info.  */
   set_gdbarch_fp0_regnum (gdbarch, -1);
-  set_gdbarch_frame_args_skip (gdbarch, 0);
 
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
 

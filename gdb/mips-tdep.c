@@ -5791,8 +5791,6 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_to_value (gdbarch, mips_register_to_value);
   set_gdbarch_value_to_register (gdbarch, mips_value_to_register);
 
-  set_gdbarch_frame_args_skip (gdbarch, 0);
-
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_breakpoint_from_pc (gdbarch, mips_breakpoint_from_pc);
 

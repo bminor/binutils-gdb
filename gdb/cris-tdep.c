@@ -4266,9 +4266,6 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_breakpoint_from_pc (gdbarch, cris_breakpoint_from_pc);
   
-  /* The number of bytes at the start of arglist that are not really args,
-     0 in the CRIS ABI.  */
-  set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation 
     (gdbarch, cris_frameless_function_invocation);
   set_gdbarch_deprecated_frame_chain (gdbarch, cris_frame_chain);

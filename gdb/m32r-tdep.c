@@ -950,7 +950,6 @@ m32r_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_memory_remove_breakpoint (gdbarch,
 					m32r_memory_remove_breakpoint);
 
-  set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation (gdbarch,
 					     frameless_look_for_prologue);
 

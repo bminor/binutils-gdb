@@ -523,7 +523,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->memory_insert_breakpoint = default_memory_insert_breakpoint;
   current_gdbarch->memory_remove_breakpoint = default_memory_remove_breakpoint;
   current_gdbarch->remote_translate_xfer_address = generic_remote_translate_xfer_address;
-  current_gdbarch->frame_args_skip = -1;
   current_gdbarch->frameless_function_invocation = generic_frameless_function_invocation_not;
   current_gdbarch->deprecated_frame_args_address = get_frame_base;
   current_gdbarch->deprecated_frame_locals_address = get_frame_base;
@@ -705,9 +704,7 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of decr_pc_after_break, invalid_p == 0 */
   /* Skip verify of function_start_offset, invalid_p == 0 */
   /* Skip verify of remote_translate_xfer_address, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (current_gdbarch->frame_args_skip == -1))
-    fprintf_unfiltered (log, "\n\tframe_args_skip");
+  /* Skip verify of frame_args_skip, invalid_p == 0 */
   /* Skip verify of frameless_function_invocation, invalid_p == 0 */
   /* Skip verify of deprecated_frame_chain, has predicate */
   /* Skip verify of deprecated_frame_chain_valid, has predicate */
@@ -4598,8 +4595,7 @@ CORE_ADDR
 gdbarch_frame_args_skip (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Check variable changed from pre-default.  */
-  gdb_assert (gdbarch->frame_args_skip != -1);
+  /* Skip verify of frame_args_skip, invalid_p == 0 */
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_frame_args_skip called\n");
   return gdbarch->frame_args_skip;

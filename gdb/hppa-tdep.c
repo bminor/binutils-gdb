@@ -5194,7 +5194,6 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frameless_function_invocation
     (gdbarch, hppa_frameless_function_invocation);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, hppa_frame_saved_pc);
-  set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, hppa_push_dummy_frame);
   set_gdbarch_deprecated_pop_frame (gdbarch, hppa_pop_frame);
   /* set_gdbarch_deprecated_fix_call_dummy (gdbarch, hppa_fix_call_dummy); */

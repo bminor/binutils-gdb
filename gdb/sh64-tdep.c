@@ -2847,7 +2847,6 @@ sh64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_skip_prologue (gdbarch, sh_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
-  set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation (gdbarch, frameless_look_for_prologue);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
