@@ -279,12 +279,32 @@ EOF
     fail "gdb printed no output" ! -s Gdb.log
     grep -e internal-error Gdb.log && fail "gdb panic" 1
 
+    echo ... cleanup ${target}
+
+    # Create a sed script that cleans up the output from GDB.
+    rm -f mbuild.sed
+    touch mbuild.sed || exit 1
+
+    # Rules to replace <0xNNNN> with the corresponding function's
+    # name.
+    sed -n -e '/<0x0*>/d' -e 's/^.*<0x\([0-9a-f]*\)>.*$/0x\1/p' Gdb.log \
+    | sort -u \
+    | while read addr
+    do
+	func="`addr2line -f -e ./gdb/gdb -s ${addr} | sed -n -e 1p`"
+	test ${verbose} -gt 0 && echo "${addr} ${func}" 1>&2
+	echo "s/<${addr}>/<${func}>/g"
+    done >> mbuild.sed
+
+    # Rules to strip the leading paths off of file names.
+    echo 's/"\/.*\/gdb\//"gdb\//g' >> mbuild.sed
+
     # Replace the build directory with a file as semaphore that stops
     # a rebuild. (should the logs be saved?)
 
     cd ${builddir}
     rm -f ${target}.tmp
-    mv ${target}/Gdb.log ${target}.tmp
+    sed -f ${target}/mbuild.sed ${target}/Gdb.log > ${target}.tmp
     rm -rf ${target}
     mv ${target}.tmp ${target}
 

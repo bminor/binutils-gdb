@@ -1,3 +1,9 @@
+2003-01-08  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb_mbuild.sh: Edit the output of `maint print architecture'
+	replacing hex constants with function names and stripping leading
+	file name directory prefixes.
+
 2003-01-08  Andrew Cagney  <cagney@redhat.com>
 
 	* gcore.c, i386-linux-tdep.c: Use get_frame_pc, get_next_frame and
