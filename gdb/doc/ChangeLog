@@ -6,6 +6,8 @@ Sat Aug 28 12:08:09 1993  David J. MacKenzie  (djm@edison.eng.umd.edu)
 	Use @deffn to define stab types.
 	Eliminate some wordiness.  Break up some nodes.
 	Add an (alphabetized) index of symbol types.
+	Use consistent capitalization style in node and section names.
+
 Thu Aug 26 06:36:31 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
 	* gdb.texinfo:  Change typo "Two two" to "The two".
