@@ -7,58 +7,61 @@
 
 SCO Unix on i386 IBM PC clones		i386-sco-sysv	or  i386sco
 	(except core files)
-
-BSD Reno on Vaxen			vax-dec-bsd
-Ultrix on Vaxen				vax-dec-ultrix
+BSD Reno on Vax				vax-dec-bsd
+Ultrix on Vax				vax-dec-ultrix
 
  * New machines supported (target)
 
 AMD 29000 embedded, using EBMON		a29k-none-none
 
- * C++ stuff
+ * C++ support
 
-Improvements have been made in the way GDB handles C++ references.  The
-demangler has also been improved, and now deals with symbols mangled as
-per the Annotated C++ Reference Guide.  GDB also now handles stabs embedded in
-MIPS symbol tables (which was the only way to get C++ debugging info into MIPS
-binaries).  This will become useful in a future version of G++.
+GDB continues to improve its handling of C++.  `References' work better.
+The demangler has also been improved, and now deals with symbols mangled as
+per the Annotated C++ Reference Guide.
+
+GDB also now handles `stabs' symbol information embedded in MIPS
+`ecoff' symbol tables.  Since the ecoff format was not easily
+extensible to handle new languages such as C++, this appeared to be a
+good way to put C++ debugging info into MIPS binaries.  This option
+will be supported in the GNU C compiler, version 2, when it is
+released.
 
  * New features for SVR4
 
-The `info process' command will print out process information.
+GDB now handles SVR4 shared libraries, in the same fashion as SunOS
+shared libraries.  Debugging dynamically linked programs should present
+only minor differences from debugging statically linked programs.
 
-Better shared library support for SVR4 and SunOS.
+The `info proc' command will print out information about any process
+on an SVR4 system (including the one you are debugging).  At the moment,
+it prints the address mappings of the process.
 
-	Info proc, improved SVR4, shared libs
+If you bring up GDB on another SVR4 system, please send mail to
+bug-gdb@prep.ai.mit.edu to let us know what changes were reqired (if any).
 
+ * Better dynamic linking support in SunOS
 
-***FIXME * Improved ELF and DWARF support
-
-GDB can read ELF object files on System V Release 4, and can handle
-debugging records for C, in DWARF format, in ELF files.  This support
-is preliminary.  If you bring up GDB on another SVR4 system, please
-send mail to bug-gdb@prep.ai.mit.edu to let us know what changes were
-reqired (if any).
+Reading symbols from shared libraries which contain debugging symbols
+now works properly.  However, there remain issues such as automatic
+skipping of `transfer vector' code during function calls, which
+make it harder to debug code in a shared library, than to debug the
+same code linked statically.
 
  * New Getopt
 
-GDB is now using the latest `getopt' routines from the FSF.  This version
-now accepts the -- prefix for options with long names.  Note that gdb will
-continue to accept the old format as well.  Also, various single letter
-abbreviations for options have been explicity added to the option table so that
-they won't get overshadowed in the future by other options that begin with the
-same letter.
+GDB is now using the latest `getopt' routines from the FSF.  This
+version accepts the -- prefix for options with long names.  GDB will
+continue to accept the old forms (-option and +option) as well.
+Various single letter abbreviations for options have been explicity
+added to the option table so that they won't get overshadowed in the
+future by other options that begin with the same letter.
 
-***FIXME * Bugs fixed
+ * Bugs fixed
 
-The `stepi' bug that many of you noticed has been squashed.
-Many bugs in C++ have been handled.  Many more remain to be handled.
+The `cleanup_undefined_types' bug that many of you noticed has been squashed.
+Many assorted bugs have been handled.  Many more remain to be handled.
 See the various ChangeLog files (primarily in gdb and bfd) for details.
-
-***FIXME * State of the MIPS world (in case you wondered):
-
-blah blah blah.....................................
-===============================================================================
 
 
 *** Changes in GDB-4.3:
@@ -403,5 +406,5 @@ for more details.
 
 GDB now handles cross debugging.  If you are remotely debugging between 
 two different machines, type ``./configure host -target=targ''.
-Host is the machine where gdb will run; targ is the machine
+Host is the machine where GDB will run; targ is the machine
 where the program that you are debugging will run.

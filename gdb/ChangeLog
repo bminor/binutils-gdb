@@ -2,7 +2,7 @@ Fri Jan 31 00:05:01 1992  John Gilmore  (gnu at cygnus.com)
 
 	* Projects:  Patching executables is done.
 	* Makefile.in (VERSION):  Roll to gdb-4.4.
-	* README:  Update for gdb-4.4.
+	* README, WHATS.NEW:  Update for gdb-4.4.
 
 	* symfile.c (reread_symbols):  Whenever we reread one object
 	file's symbols, we must restart the scan, because the object_files
