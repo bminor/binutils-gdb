@@ -5,8 +5,7 @@
 	* ppc-opc.c (RA0): Define.
 	(RAQ, RAL, RAM, RAS, RSQ, RTQ, RSO): Use PPC_OPERAND_GPR_0.
 	(RAOPT): Rename from RAO.  Update all uses.
-	(powerpc_opcodes): Use RA0 as appropriate.  Add "lsdx", "lsdi",
-	"stsdx", "stsdi", "lmd" and "stmd" insns.
+	(powerpc_opcodes): Use RA0 as appropriate.
 
 2004-03-15  Alan Modra  <amodra@bigpond.net.au>
 
