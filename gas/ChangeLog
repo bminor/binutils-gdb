@@ -1,3 +1,8 @@
+Thu Feb  5 12:39:08 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure, Makefile.in, aclocal.m4: Rebuild with new libtool.
+	* doc/Makefile.in: Likewise.
+
 Wed Feb  4 15:41:54 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-m32r.c (check_for_side_effects): New function.
