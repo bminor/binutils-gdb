@@ -38,8 +38,13 @@ if { [istarget mips*-*-*] } then {
 	if $has_newabi {
 	    run_dump_test "elf-rel-got-n32"
 	    run_dump_test "elf-rel-xgot-n32"
-	    run_dump_test "elf-rel-got-n64"
-	    run_dump_test "elf-rel-xgot-n64"
+	    if { $linux_gnu } {
+		run_dump_test "elf-rel-got-n64-linux"
+		run_dump_test "elf-rel-xgot-n64-linux"
+	    } else {
+		run_dump_test "elf-rel-got-n64"
+		run_dump_test "elf-rel-xgot-n64"
+	    }
 
 	    run_dump_test "relax-jalr-n32"
 	    run_dump_test "relax-jalr-n32-shared"

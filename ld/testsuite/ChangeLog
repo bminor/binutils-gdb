@@ -1,5 +1,11 @@
 2003-06-12  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* ld-mips-elf/elf-rel-got-n64-linux.d: New file.
+	* ld-mips-elf/elf-rel-xgot-n64-linux.d: New file.
+	* ld-mips-elf/mips-elf.exp: Use the new files for Linux.
+
+2003-06-12  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* ld-mips-elf/relax-jalr.s: Fix testsuite breakage.
 	* ld-mips-elf/relax-jalr-n32.d: Likewise.
 	* ld-mips-elf/relax-jalr-n32-shared.d: Likewise.
