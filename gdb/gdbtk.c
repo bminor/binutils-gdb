@@ -2708,8 +2708,9 @@ gdb_actions_command (clientData, interp, objc, objv)
     }
 
   /* Free any existing actions */
-  for (temp = tp->actions; temp != NULL; temp = temp->next)
+  for (temp = tp->actions; temp != NULL; temp = next)
     {
+      next = temp->next;
       if (temp->action)
         free (temp->action);
       free (temp);
