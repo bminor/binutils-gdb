@@ -1,3 +1,12 @@
+2002-04-06  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (cris_elf_howto_table) <R_CRIS_16_PCREL,
+	R_CRIS_32_PCREL>: Fix typo in name.
+	(cris_elf_check_relocs): Always create .rela.got here when
+	R_CRIS_16_GOTPLT or R_CRIS_32_GOTPLT is seen.
+	(elf_cris_adjust_gotplt_to_got): Don't create .rela.got here;
+	assume it's created.
+
 2002-04-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* configure.in: Bump version to 2.12.1 and comment out is_release.
