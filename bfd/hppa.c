@@ -38,6 +38,29 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/file.h>
 #include <errno.h>
  
+/* Magic not defined in standard HP-UX header files until 8.0 */
+
+#ifndef CPU_PA_RISC1_0
+#define CPU_PA_RISC1_0 0x20B
+#endif /* CPU_PA_RISC1_0 */
+#ifndef CPU_PA_RISC1_1
+#define CPU_PA_RISC1_1 0x210
+#endif /* CPU_PA_RISC1_1 */
+#ifndef _PA_RISC1_0_ID
+#define _PA_RISC1_0_ID CPU_PA_RISC1_0
+#endif /* _PA_RISC1_0_ID */
+#ifndef _PA_RISC1_1_ID
+#define _PA_RISC1_1_ID CPU_PA_RISC1_1
+#endif /* _PA_RISC1_1_ID */
+#ifndef _PA_RISC_MAXID
+#define _PA_RISC_MAXID	0x2FF
+#endif /* _PA_RISC_MAXID */
+#ifndef _PA_RISC_ID
+#define _PA_RISC_ID(__m_num)		\
+    (((__m_num) == _PA_RISC1_0_ID) ||	\
+     ((__m_num) >= _PA_RISC1_1_ID && (__m_num) <= _PA_RISC_MAXID))
+#endif /* _PA_RISC_ID */
+
 struct container {
   struct header f;
   struct som_exec_auxhdr e;
