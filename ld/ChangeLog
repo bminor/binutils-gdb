@@ -1,3 +1,18 @@
+Mon Dec 19 14:02:13 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* ld.h (split_by_reloc, split_by_file): New flags.
+	* ldwrite.c  (clone_section, split_sections): New functions.
+	* lexsup.c (parse_args): Understand new split options.
+
+start-sanitize-arc
+Tue Dec 13 16:45:18 1994  Doug Evans  <dje@canuck.cygnus.com>
+
+	* configure.in (arc-elf): New target.
+	* Makefile.in (earcelf.c): New target.
+	* config/arc-elf.mt: New file.
+	* emulparms/arcelf.sh: New file.
+end-sanitize-arc
+
 Fri Dec  9 17:22:55 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* scripttempl/elf.sc: Move .ctors and .dtors from .text segment to

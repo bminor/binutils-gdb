@@ -44,42 +44,46 @@ build_link_order (statement)
   switch (statement->header.type)
     {
     case lang_data_statement_enum:
-      /* FIXME: This should probably build a link_order, but instead
-	 it just does the output directly.  */
       {
-	bfd_vma value = statement->data_statement.value;
-	bfd_byte play_area[QUAD_SIZE];
-	unsigned int size = 0;
-	asection *output_section = statement->data_statement.output_section;
+	asection *output_section;
+	struct bfd_link_order *link_order;
+	bfd_vma value;
+
+	output_section = statement->data_statement.output_section;
+	ASSERT (output_section->owner == output_bfd);
+
+	link_order = bfd_new_link_order (output_bfd, output_section);
+	if (link_order == NULL)
+	  einfo ("%P%F: bfd_new_link_order failed");
+
+	link_order->type = bfd_data_link_order;
+	link_order->offset = statement->data_statement.output_vma;
+	link_order->u.data.contents = (bfd_byte *) xmalloc (QUAD_SIZE);
+
+	value = statement->data_statement.value;
 
 	ASSERT (output_section->owner == output_bfd);
 	switch (statement->data_statement.type)
 	  {
 	  case QUAD:
-	    bfd_put_64 (output_bfd, value, play_area);
-	    size = QUAD_SIZE;
+	    bfd_put_64 (output_bfd, value, link_order->u.data.contents);
+	    link_order->size = QUAD_SIZE;
 	    break;
 	  case LONG:
-	    bfd_put_32 (output_bfd, value, play_area);
-	    size = LONG_SIZE;
+	    bfd_put_32 (output_bfd, value, link_order->u.data.contents);
+	    link_order->size = LONG_SIZE;
 	    break;
 	  case SHORT:
-	    bfd_put_16 (output_bfd, value, play_area);
-	    size = SHORT_SIZE;
+	    bfd_put_16 (output_bfd, value, link_order->u.data.contents);
+	    link_order->size = SHORT_SIZE;
 	    break;
 	  case BYTE:
-	    bfd_put_8 (output_bfd, value, play_area);
-	    size = BYTE_SIZE;
+	    bfd_put_8 (output_bfd, value, link_order->u.data.contents);
+	    link_order->size = BYTE_SIZE;
 	    break;
 	  default:
 	    abort ();
 	  }
-
-	if (! bfd_set_section_contents (output_bfd, output_section,
-					play_area,
-					statement->data_statement.output_vma,
-					size))
-	  einfo ("%P%X: writing data failed: %E\n");
       }
       break;
 
@@ -196,12 +200,217 @@ build_link_order (statement)
 
 /* Call BFD to write out the linked file.  */
 
+
+/**********************************************************************/
+
+
+/* Wander around the input sections, make sure that
+   we'll never try and create an output section with more relocs
+   than will fit.. Do this by always assuming the worst case, and
+   creating new output sections with all the right bits */
+#define TESTIT 1
+static asection *
+clone_section (abfd, s, count)
+     bfd *abfd;
+     asection *s;
+     int *count;
+{
+#define SSIZE 8
+  char sname[SSIZE];		/* ??  find the name for this size */
+  asection *n;
+
+  /* Invent a section name - use first five
+     chars of base section name and a digit suffix */
+  do
+    {
+      int i;
+      char b[6];
+      for (i = 0; i < sizeof (b) - 1 && s->name[i]; i++)
+	b[i] = s->name[i];
+      b[i] = 0;
+      sprintf (sname, "%s%d", b, (*count)++);
+    }
+  while (bfd_get_section_by_name (abfd, sname));
+
+  n = bfd_make_section_anyway (abfd, strdup (sname));
+
+  n->flags = s->flags;
+  n->vma = s->vma;
+  n->user_set_vma = s->user_set_vma;
+  n->lma = s->lma;
+  n->_cooked_size = 0;
+  n->_raw_size = 0;
+  n->output_offset = s->output_offset;
+  n->output_section = n;
+  n->orelocation = 0;
+  n->reloc_count = 0;
+
+  return n;
+}
+
+#if TESTING
+static void 
+ds (s)
+     asection *s;
+{
+  struct bfd_link_order *l = s->link_order_head;
+  printf ("vma %x size %x\n", s->vma, s->_raw_size);
+  while (l)
+    {
+      if (l->type == bfd_indirect_link_order)
+	{
+	  printf ("%8x %s\n", l->offset, l->u.indirect.section->owner->filename);
+	}
+      else
+	{
+	  printf ("%8x something else\n", l->offset);
+	}
+      l = l->next;
+    }
+  printf ("\n");
+}
+dump (s, a1, a2)
+     char *s;
+     asection *a1;
+     asection *a2;
+{
+  printf ("%s\n", s);
+  ds (a1);
+  ds (a2);
+}
+
+static void 
+sanity_check (abfd)
+     bfd *abfd;
+{
+  asection *s;
+  for (s = abfd->sections; s; s = s->next)
+    {
+      struct bfd_link_order *p;
+      bfd_vma prev = 0;
+      for (p = s->link_order_head; p; p = p->next)
+	{
+	  if (p->offset > 100000)
+	    abort ();
+	  if (p->offset < prev)
+	    abort ();
+	  prev = p->offset;
+	}
+    }
+}
+#else
+#define sanity_check(a)
+#define dump(a, b, c)
+#endif
+
+
+void 
+split_sections (abfd, info)
+     bfd *abfd;
+     struct bfd_link_info *info;
+{
+  asection *original_sec;
+  int nsecs = abfd->section_count;
+  sanity_check (abfd);
+  /* look through all the original sections */
+  for (original_sec = abfd->sections;
+       original_sec && nsecs;
+       original_sec = original_sec->next, nsecs--)
+    {
+      int count = 0;
+      int lines = 0;
+      int relocs = 0;
+      struct bfd_link_order **pp;
+      bfd_vma vma = original_sec->vma;
+      bfd_vma shift_offset = 0;
+      asection *cursor = original_sec;
+      /* count up the relocations and line entries to see if
+	 anything would be too big to fit */
+      for (pp = &(cursor->link_order_head); *pp; pp = &((*pp)->next))
+	{
+	  struct bfd_link_order *p = *pp;
+	  int thislines = 0;
+	  int thisrelocs = 0;
+	  if (p->type == bfd_indirect_link_order)
+	    {
+	      asection *sec;
+
+	      sec = p->u.indirect.section;
+
+	      if (info->strip == strip_none
+		  || info->strip == strip_some)
+		thislines = sec->lineno_count;
+
+	      if (info->relocateable)
+		thisrelocs = sec->reloc_count;
+
+	    }
+	  else if (info->relocateable
+		   && (p->type == bfd_section_reloc_link_order
+		       || p->type == bfd_symbol_reloc_link_order))
+	    thisrelocs++;
+
+	  if (thisrelocs + relocs > config.split_by_reloc
+	      || thislines + lines > config.split_by_reloc
+	      || config.split_by_file)
+	    {
+	      /* create a new section and put this link order and the
+		 following link orders into it */
+	      struct bfd_link_order *l = p;
+	      asection *n = clone_section (abfd, cursor, &count);
+	      *pp = NULL;	/* Snip off link orders from old section */
+	      n->link_order_head = l;	/* attach to new section */
+	      pp = &n->link_order_head;
+
+	      /* change the size of the original section and
+		 update the vma of the new one */
+
+	      dump ("before snip", cursor, n);
+
+	      n->_raw_size = cursor->_raw_size - l->offset;
+	      cursor->_raw_size = l->offset;
+
+	      vma += cursor->_raw_size;
+	      n->lma = n->vma = vma;
+
+	      shift_offset = l->offset;
+
+	      /* run down the chain and change the output section to
+		 the right one, update the offsets too */
+
+	      while (l)
+		{
+		  l->offset -= shift_offset;
+		  if (l->type == bfd_indirect_link_order)
+		    {
+		      l->u.indirect.section->output_section = n;
+		      l->u.indirect.section->output_offset = l->offset;
+		    }
+		  l = l->next;
+		}
+	      dump ("after snip", cursor, n);
+	      cursor = n;
+	      relocs = thisrelocs;
+	      lines = thislines;
+	    }
+	  else
+	    {
+	      relocs += thisrelocs;
+	      lines += thislines;
+	    }
+	}
+    }
+  sanity_check (abfd);
+}
+/**********************************************************************/
 void
 ldwrite ()
 {
   lang_for_each_statement (build_link_order);
 
-  if (! bfd_final_link (output_bfd, &link_info))
+  if (config.split_by_reloc || config.split_by_file)
+    split_sections (output_bfd, &link_info);
+  if (!bfd_final_link (output_bfd, &link_info))
     einfo ("%F%P: final link failed: %E\n", output_bfd);
 
   if (config.map_file)
@@ -228,7 +437,7 @@ print_symbol_table ()
 
 static void
 print_file_stuff (f)
-     lang_input_statement_type * f;
+     lang_input_statement_type *f;
 {
   fprintf (config.map_file, "  %s\n", f->filename);
   if (f->just_syms_flag)
@@ -289,7 +498,7 @@ print_symbol (p, ignore)
 	 || p->type == bfd_link_hash_warning)
     p = p->u.i.link;
 
-  switch (p->type) 
+  switch (p->type)
     {
     case bfd_link_hash_new:
       abort ();
@@ -297,16 +506,16 @@ print_symbol (p, ignore)
     case bfd_link_hash_undefined:
       fprintf (config.map_file, "undefined                     ");
       fprintf (config.map_file, "%s ", p->root.string);
-      print_nl ();    
+      print_nl ();
       break;
 
     case bfd_link_hash_weak:
       fprintf (config.map_file, "weak                          ");
       fprintf (config.map_file, "%s ", p->root.string);
-      print_nl ();    
+      print_nl ();
       break;
 
-    case bfd_link_hash_defined:	    
+    case bfd_link_hash_defined:
       {
 	asection *defsec = p->u.def.section;
 
@@ -324,7 +533,7 @@ print_symbol (p, ignore)
 	  }
 	fprintf (config.map_file, " %s ", p->root.string);
       }
-      print_nl ();    
+      print_nl ();
       break;
 
     case bfd_link_hash_common:
