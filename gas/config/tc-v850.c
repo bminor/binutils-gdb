@@ -1082,16 +1082,19 @@ v850_reloc_prefix (const struct v850_operand * operand)
     {
       input_line_pointer += 6;
       
-      if (operand == NULL)                               return BFD_RELOC_V850_TDA_7_7_OFFSET;
-      if (operand->bits == 6 && operand->shift == 1)     return BFD_RELOC_V850_TDA_6_8_OFFSET;
+      if (operand == NULL)                               return BFD_RELOC_V850_TDA_7_7_OFFSET;  
+      if (operand->bits == 6 && operand->shift == 1)     return BFD_RELOC_V850_TDA_6_8_OFFSET;  /* sld.w/sst.w, operand: D8_6  */
       /* start-sanitize-v850e */
-      if (operand->bits == 4 && operand->insert != NULL) return BFD_RELOC_V850_TDA_4_5_OFFSET;
-      if (operand->bits == 4 && operand->insert == NULL) return BFD_RELOC_V850_TDA_4_4_OFFSET;
+      if (operand->bits == 4 && operand->insert != NULL) return BFD_RELOC_V850_TDA_4_5_OFFSET;  /* sld.hu, operand: D5-4 */
+      if (operand->bits == 4 && operand->insert == NULL) return BFD_RELOC_V850_TDA_4_4_OFFSET;  /* sld.bu, operand: D4   */
       /* end-sanitize-v850e */
+      if (operand->bits == 16 && operand->shift == 16)   return BFD_RELOC_V850_TDA_16_16_OFFSET; /* set1 & chums, operands: D16 */
       
       assert (operand->bits == 7);
       
-      return  operand->insert != NULL ? BFD_RELOC_V850_TDA_7_8_OFFSET :  BFD_RELOC_V850_TDA_7_7_OFFSET;
+      return  operand->insert != NULL
+	? BFD_RELOC_V850_TDA_7_8_OFFSET     /* sld.h/sst.h, operand: D8_7 */
+	: BFD_RELOC_V850_TDA_7_7_OFFSET;    /* sld.b/sst.b, opreand: D7   */
     }
 
   if (paren_skipped)
