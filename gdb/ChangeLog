@@ -1,5 +1,10 @@
 2004-03-09  Daniel Jacobowitz  <drow@mvista.com>
 
+	* infrun.c (handle_inferior_event): Remove short-circuit code for
+	events in a different thread.
+
+2004-03-09  Daniel Jacobowitz  <drow@mvista.com>
+
 	* target.c (debug_to_xfer_memory): If targetdebug is 1, don't
 	print the whole transfer.
 	(initialize_targets): Update description of "set debug target".

@@ -1883,61 +1883,9 @@ handle_inferior_event (struct execution_control_state *ecs)
     ecs->random_signal = 1;
 
   /* See if something interesting happened to the non-current thread.  If
-     so, then switch to that thread, and eventually give control back to
-     the user.
-
-     Note that if there's any kind of pending follow (i.e., of a fork,
-     vfork or exec), we don't want to do this now.  Rather, we'll let
-     the next resume handle it. */
-  if (!ptid_equal (ecs->ptid, inferior_ptid) &&
-      (pending_follow.kind == TARGET_WAITKIND_SPURIOUS))
+     so, then switch to that thread.  */
+  if (!ptid_equal (ecs->ptid, inferior_ptid))
     {
-      int printed = 0;
-
-      /* If it's a random signal for a non-current thread, notify user
-         if he's expressed an interest. */
-      if (ecs->random_signal && signal_print[stop_signal])
-	{
-/* ??rehrauer: I don't understand the rationale for this code.  If the
-   inferior will stop as a result of this signal, then the act of handling
-   the stop ought to print a message that's couches the stoppage in user
-   terms, e.g., "Stopped for breakpoint/watchpoint".  If the inferior
-   won't stop as a result of the signal -- i.e., if the signal is merely
-   a side-effect of something GDB's doing "under the covers" for the
-   user, such as stepping threads over a breakpoint they shouldn't stop
-   for -- then the message seems to be a serious annoyance at best.
-
-   For now, remove the message altogether. */
-#if 0
-	  printed = 1;
-	  target_terminal_ours_for_output ();
-	  printf_filtered ("\nProgram received signal %s, %s.\n",
-			   target_signal_to_name (stop_signal),
-			   target_signal_to_string (stop_signal));
-	  gdb_flush (gdb_stdout);
-#endif
-	}
-
-      /* If it's not SIGTRAP and not a signal we want to stop for, then
-         continue the thread. */
-
-      if (stop_signal != TARGET_SIGNAL_TRAP && !signal_stop[stop_signal])
-	{
-	  if (printed)
-	    target_terminal_inferior ();
-
-	  /* Clear the signal if it should not be passed.  */
-	  if (signal_program[stop_signal] == 0)
-	    stop_signal = TARGET_SIGNAL_0;
-
-	  target_resume (ecs->ptid, 0, stop_signal);
-	  prepare_to_wait (ecs);
-	  return;
-	}
-
-      /* It's a SIGTRAP or a signal we're interested in.  Switch threads,
-         and fall into the rest of wait_for_inferior().  */
-
       context_switch (ecs);
 
       if (context_hook)
