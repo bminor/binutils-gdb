@@ -896,7 +896,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	procfs.c pyr-tdep.c pyr-xdep.c \
 	remote-adapt.c remote-bug.c remote-e7000.c remote-eb.c remote-es.c \
 	remote-hms.c remote-mips.c \
-	remote-mm.c remote-mon.c remote-nindy.c remote-os9k.c remote-sim.c \
+	remote-mm.c remote-nindy.c remote-os9k.c remote-sim.c \
 	remote-st.c remote-utils.c dcache.c \
 	remote-udi.c remote-vx.c remote-vx29k.c remote-z8k.c \
 	rs6000-nat.c rs6000-tdep.c \
@@ -1323,9 +1323,6 @@ remote-mips.o: remote-mips.c $(wait_h) $(defs_h) $(gdbcmd_h) \
 
 remote-mm.o: remote-mm.c $(bfd_h) $(wait_h) $(defs_h) $(inferior_h) \
 	minimon.h target.h terminal.h
-
-remote-mon.o: remote-mon.c $(wait_h) $(command_h) $(defs_h) \
-	$(gdbcore_h) monitor.h serial.h target.h
 
 remote-nindy.o: remote-nindy.c $(floatformat_h) $(wait_h) $(command_h) \
 	$(defs_h) $(gdbcore_h) $(inferior_h) \

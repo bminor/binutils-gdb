@@ -74,6 +74,7 @@ annotate.h
 arm-convert.s
 arm-tdep.c
 arm-xdep.c
+array-rom.c
 blockframe.c
 breakpoint.c
 breakpoint.h
