@@ -1,3 +1,7 @@
+2003-09-25  Richard Earnshaw  <rearnsha@arm.com>
+
+	* lib/java.exp (java_init): Import target_alias before using it.
+
 2003-09-25  David Carlton  <carlton@kealia.com>
 
 	* gdb.base/corefile.exp: Delete obsolete setup_xfail.
