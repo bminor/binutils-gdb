@@ -1,3 +1,14 @@
+1999-05-27  Nick Clifton  <nickc@cygnus.com>
+
+	* elfarm-oabi.c (elf32_arm_howto_table): Add entry for
+	R_ARM_PLT32. 
+	(find_howto): New function: Find entries in the
+	elf32_arm_howto_table.
+	(elf32_arm_info_to_howto): Use find_howto if the entry cannot be
+	computed simply.
+	(elf32_arm_reloc_type_lookup): Add lookup for
+	BFD_RELOC_ARM_PLT32. 
+
 1999-05-25  Philip Blundell  <pb@nexus.co.uk>
 
 	* bfd/elf32-arm.h (elf32_arm_link_hash_newfunc): New function.
