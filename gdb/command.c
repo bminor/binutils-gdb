@@ -684,12 +684,15 @@ lookup_cmd (line, list, cmdtype, allow_unknown, ignore_help_classes)
   struct cmd_list_element *last_list = 0;
   struct cmd_list_element *c =
     lookup_cmd_1 (line, list, &last_list, ignore_help_classes);
+#if 0
+  /* This is wrong for complete_command.  */
   char *ptr = (*line) + strlen (*line) - 1;
 
   /* Clear off trailing whitespace.  */
   while (ptr >= *line && (*ptr == ' ' || *ptr == '\t'))
     ptr--;
   *(ptr + 1) = '\0';
+#endif
   
   if (!c)
     {

@@ -1,5 +1,21 @@
 Wed Mar 23 07:50:33 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* main.c (complete_command): New command, from Rick Sladkey
+	<jrs@world.std.com>.
+	(symbol_completion_function): Don't declare rl_point and
+	rl_line_buffer; they are now declared in readline.h.
+	(show_commands): Don't declare history_base; it is declared in
+	history.h.
+	* command.c (lookup_cmd): Don't delete trailing whitespace.
+
+Wed Mar 23 16:14:52 1994  Stu Grossman  (grossman at cygnus.com)
+
+	* minsyms.c (prim_record_minimal_symbol):  Move section deduction
+	code from prim_record_minimal_symbol_and_info() to here.  Callers
+	of the latter can legitimately supply a section number of -1.
+
+Wed Mar 23 07:50:33 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
 	* gdbtypes.h, gdbtypes.c: Add comments regarding whether static
 	member functions have an element in args for a (nonexistent) this
 	pointer.

@@ -40,8 +40,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* readline defines this.  */
 #undef savestring
 
-#ifdef USG
 #include <sys/types.h>
+#ifdef USG
+/* What is this for?  X_OK?  */
 #include <unistd.h>
 #endif
 
@@ -145,6 +146,9 @@ show_command PARAMS ((char *, int));
 
 static void
 info_command PARAMS ((char *, int));
+
+static void
+complete_command PARAMS ((char *, int));
 
 static void
 do_nothing PARAMS ((int));
@@ -856,7 +860,6 @@ GDB manual (available as on-line info or a printed manual).\n", gdb_stdout);
       if (!SET_TOP_LEVEL ())
 	{
 	  cd_command (cdarg, 0);
-	  init_source_path ();
 	}
     }
   do_cleanups (ALL_CLEANUPS);
@@ -1323,7 +1326,7 @@ filename_completer (text, word)
    "p b-a" ambiguous (all symbols starting with a)
    "p b-" ambiguous (all symbols)
    "file Make" "file" (word break hard to screw up here)
-   "file ../gdb.stabs/wi" "erd" (needs to not break word at slash)
+   "file ../gdb.stabs/we" "ird" (needs to not break word at slash)
    */
 
 /* Generate completions one by one for the completer.  Each time we are
@@ -1359,8 +1362,6 @@ symbol_completion_function (text, matches)
   /* Pointer within tmp_command which corresponds to text.  */
   char *word;
   struct cmd_list_element *c, *result_list;
-  extern char *rl_line_buffer;
-  extern int rl_point;
 
   if (matches == 0)
     {
@@ -1973,6 +1974,28 @@ info_command (arg, from_tty)
   help_list (infolist, "info ", -1, gdb_stdout);
 }
 
+/* The "complete" command is used by Emacs to implement completion.  */
+
+/* ARGSUSED */
+static void
+complete_command (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  int i;
+  char *completion;
+
+  dont_repeat ();
+
+  strcpy (rl_line_buffer, arg);
+  rl_point = strlen (arg);
+
+  for (completion = symbol_completion_function (rl_line_buffer, i = 0);
+       completion;
+       completion = symbol_completion_function (rl_line_buffer, ++i))
+    printf_unfiltered ("%s\n", completion);
+}
+
 /* The "show" command with no arguments shows all the settings.  */
 
 /* ARGSUSED */
@@ -2492,7 +2515,6 @@ show_commands (args, from_tty)
   int hist_len;
 
   extern HIST_ENTRY *history_get PARAMS ((int));
-  extern int history_base;
 
   /* Print out some of the commands from the command history.  */
   /* First determine the length of the history list.  */
@@ -2855,6 +2877,9 @@ ie. the number of previous commands to keep a record of.", &sethistlist);
         "Generic command for showing things about the program being debugged.",
 		  &infolist, "info ", 0, &cmdlist);
   add_com_alias ("i", "info", class_info, 1);
+
+  add_com ("complete", class_obscure, complete_command,
+	   "List the completions for the rest of the line as a command.");
 
   add_prefix_cmd ("show", class_info, show_command,
 		  "Generic command for showing things about the debugger.",
