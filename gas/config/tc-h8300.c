@@ -31,6 +31,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <ctype.h>
 
 char  comment_chars[]  = { ';',0 };
+char line_separator_chars[] = { '$' ,0};
 
 /* This table describes all the machine specific pseudo-ops the assembler
    has to support.  The fields are:
@@ -38,8 +39,11 @@ char  comment_chars[]  = { ';',0 };
 	  function to call to execute this pseudo-op
 	  Integer arg to pass to the function
  */
+
+void cons();
 const pseudo_typeS md_pseudo_table[] = {
-	{ 0,		0,		0	}
+  { "int",	cons,		2 },
+  { 0,		0,		0	}
 };
 
 int  md_reloc_size ;
