@@ -38,6 +38,10 @@ struct fix;
    type.  The idea is that if the original type is already some kind of PIC
    relocation, we leave it alone, otherwise we give it the desired type */
 
+/* This arranges for gas/write.c to not apply a relocation if
+   tc_fix_adjustable() says it is not adjustable.  */
+#define TC_DONT_FIX_NON_ADJUSTABLE 1
+
 #define tc_fix_adjustable(X)  tc_i386_fix_adjustable(X)
 extern int tc_i386_fix_adjustable PARAMS ((struct fix *));
 

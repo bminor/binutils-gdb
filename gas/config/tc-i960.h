@@ -153,6 +153,10 @@ extern int i960_validate_fix PARAMS ((struct fix *, segT, symbolS **));
        && ! S_IS_COMMON ((FIX)->fx_addsy)))
 #endif
 
+/* This arranges for gas/write.c to not apply a relocation if
+   tc_fix_adjustable() says it is not adjustable.  */
+#define TC_DONT_FIX_NON_ADJUSTABLE 1
+
 #ifndef OBJ_ELF
 #define tc_fix_adjustable(FIXP)		((FIXP)->fx_bsr == 0)
 #else

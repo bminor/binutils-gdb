@@ -1,5 +1,5 @@
 /* tc-v850.h -- Header file for tc-v850.c.
-   Copyright (C) 1996, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 2000 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -36,6 +36,10 @@
 
 #define MD_APPLY_FIX3
 #define md_operand(x)
+
+/* This arranges for gas/write.c to not apply a relocation if
+   obj_fix_adjustable() says it is not adjustable.  */
+#define TC_DONT_FIX_NON_ADJUSTABLE 1
 
 #define obj_fix_adjustable(fixP) v850_fix_adjustable(fixP)
 #define TC_FORCE_RELOCATION(fixp) v850_force_relocation(fixp)

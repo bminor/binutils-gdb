@@ -173,6 +173,10 @@ while (0)
 	     && S_IS_DEFINED ((FIX)->fx_addsy)		\
 	     && ! S_IS_COMMON ((FIX)->fx_addsy)))
 
+/* This arranges for gas/write.c to not apply a relocation if
+   tc_fix_adjustable() says it is not adjustable.  */
+#define TC_DONT_FIX_NON_ADJUSTABLE 1
+
 #define tc_fix_adjustable(X) tc_m68k_fix_adjustable(X)
 extern int tc_m68k_fix_adjustable PARAMS ((struct fix *));
 #define elf_tc_final_processing m68k_elf_final_processing

@@ -2706,17 +2706,17 @@ fixup_segment (fixP, this_segment_type)
 	      else
 		{
 		  seg_reloc_count++;
-#if !(defined (TC_V850) && defined (OBJ_ELF))
-#if !(defined (TC_M68K) && defined (OBJ_ELF))
-#if !(defined (TC_ARM)  && defined (OBJ_ELF))
-#if !(defined (TC_I960) && defined (OBJ_ELF))
-#if !defined (TC_I386) || !(defined (OBJ_ELF) || defined (OBJ_COFF)) || defined (TE_PE)
-		  add_number += S_GET_VALUE (add_symbolP);
+#ifdef TC_DONT_FIX_NON_ADJUSTABLE
+		  if (1
+#ifdef obj_fix_adjustable
+		      && obj_fix_adjustable (fixP)
 #endif
+#ifdef tc_fix_adjustable
+		      && tc_fix_adjustable (fixP)
 #endif
+		      )
 #endif
-#endif
-#endif
+		    add_number += S_GET_VALUE (add_symbolP);
 		}
 	    }
 	}

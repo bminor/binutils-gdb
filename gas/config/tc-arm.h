@@ -116,6 +116,10 @@
 #define TC_FIX_TYPE PTR
 #define TC_INIT_FIX_DATA(FIXP) ((FIXP)->tc_fix_data = NULL)
 
+/* This arranges for gas/write.c to not apply a relocation if
+   obj_fix_adjustable() says it is not adjustable.  */
+#define TC_DONT_FIX_NON_ADJUSTABLE 1
+
 #ifdef OBJ_ELF
 #include "write.h"        /* For definition of fixS */
 #define obj_fix_adjustable(fixP) arm_fix_adjustable (fixP)
