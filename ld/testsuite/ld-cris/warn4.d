@@ -1,7 +1,7 @@
 #source: start1.s
 #source: globsym1ref.s
 #source: globsymw2.s
-#target: cris-*-*elf* cris-*-*aout*
+#target: cris-*-*elf*
 #as: --em=criself
 #ld: -mcriself
 #warning: warning: isatty is not implemented and will always fail$
