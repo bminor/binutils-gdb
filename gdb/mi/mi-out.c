@@ -31,7 +31,7 @@
 
 struct ui_out_data
   {
-    int supress_field_separator;
+    int suppress_field_separator;
     int first_header;
     struct ui_file *buffer;
   };
@@ -293,8 +293,8 @@ static void
 field_separator (struct ui_out *uiout)
 {
   struct ui_out_data *data = ui_out_data (uiout);
-  if (data->supress_field_separator)
-    data->supress_field_separator = 0;
+  if (data->suppress_field_separator)
+    data->suppress_field_separator = 0;
   else
     fputc_unfiltered (',', data->buffer);
 }
@@ -306,7 +306,7 @@ mi_open (struct ui_out *uiout,
 {
   struct ui_out_data *data = ui_out_data (uiout);
   field_separator (uiout);
-  data->supress_field_separator = 1;
+  data->suppress_field_separator = 1;
   if (name)
     fprintf_unfiltered (data->buffer, "%s=", name);
   switch (type)
@@ -338,7 +338,7 @@ mi_close (struct ui_out *uiout,
     default:
       internal_error (__FILE__, __LINE__, "bad switch");
     }
-  data->supress_field_separator = 0;
+  data->suppress_field_separator = 0;
 }
 
 /* add a string to the buffer */
@@ -383,7 +383,7 @@ mi_out_new (void)
 {
   int flags = 0;
   struct ui_out_data *data = XMALLOC (struct ui_out_data);
-  data->supress_field_separator = 0;
+  data->suppress_field_separator = 0;
   /* FIXME: This code should be using a ``string_file'' and not the
      TUI buffer hack. */
   data->buffer = mem_fileopen ();
