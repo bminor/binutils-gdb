@@ -1,3 +1,8 @@
+2002-03-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* configure.in (WIN32LIBADD): Don't eval PICFLAG assignment.
+	* configure: Regenerate.
+
 2002-03-02  Tom Rix  <trix@redhat.com>
 
 	* coff64-rs6000.c (xcoff64_howto_table): Replace howto types with 
