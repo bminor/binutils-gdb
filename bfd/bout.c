@@ -522,11 +522,11 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
     cache_ptr->howto = 0;
     if (abfd->xvec->header_byteorder_big_p) 
     {
-      symnum = ((int) raw[4] << 16) | ((int) raw[5] << 8) | (int) raw[6];
+      symnum = (raw[4] << 16) | (raw[5] << 8) | raw[6];
     } 
     else
     {
-      symnum = ((int) raw[6] << 16) | ((int) raw[5] << 8) | (int) raw[4];
+      symnum = (raw[6] << 16) | (raw[5] << 8) | raw[4];
     }
 
     if (raw[7] & extern_mask) 
@@ -745,7 +745,7 @@ b_out_squirt_out_relocs (abfd, section)
 
     if (r_idx != 0)
       /* already mucked with r_extern, r_idx */;
-    else if (output_section == &bfd_com_section 
+    else if (bfd_is_com_section (output_section)
 	     || output_section == &bfd_abs_section
 	     || output_section == &bfd_und_section) 
     {

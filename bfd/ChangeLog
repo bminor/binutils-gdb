@@ -1,3 +1,14 @@
+Tue Jan 26 11:43:14 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* section.c (SEC_IS_COMMON): New section flag, needed for MIPS
+	ECOFF which has two common sections.
+	(bfd_com_section): Set SEC_IS_COMMON flag.
+	* bfd-in.h (bfd_is_com_section): New macro to test SEC_IS_COMMON.
+	* aoutx.h, archive.c, bout.c, coff-a29k.c, coff-m88k.c,
+	coff-mips.c, coffgen.c, ieee.c, oasys.c, reloc.c, syms.: Use
+	bfd_is_com_section macro rather than checking for equality to
+	bfd_com_section.
+
 Mon Jan 25 15:27:36 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* coffcode.h (_bfd_coff_mkobject_hook): Pass aouthdr argument.

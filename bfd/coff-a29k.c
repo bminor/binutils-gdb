@@ -42,7 +42,7 @@ asymbol *symbol;
 {                                             
   long relocation = 0;
 
-  if (symbol->section == &bfd_com_section) 
+  if (bfd_is_com_section (symbol->section))
   {
     relocation = 0;                           
   }

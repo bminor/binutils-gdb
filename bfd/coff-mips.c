@@ -191,7 +191,7 @@ DEFUN (ecoff_new_section_hook, (abfd, section),
     section->flags |= SEC_DATA | SEC_LOAD | SEC_ALLOC | SEC_READONLY;
   else if (strcmp (section->name, _BSS) == 0
 	   || strcmp (section->name, _SBSS) == 0)
-    section->flags |= SEC_ALLOC;
+    section->flags |= SEC_ALLOC | SEC_IS_COMMON;
 
   /* Probably any other section name is SEC_NEVER_LOAD, but I'm
      uncertain about .init on some systems and I don't know how shared
@@ -617,17 +617,8 @@ DEFUN (ecoff_set_symbol_info, (abfd, ecoff_sym, asym, ext),
       asym->value -= asym->section->vma;
       break;
     case scSBss:
-      /* FIXME: putting global .sbss symbols in the common section is
-	 wrong, because it means they may not be accessible via the gp
-	 register.  But the linker checks the section a symbol is in
-	 rather than checking the flags.  */
-      if (ext)
-	asym->section = &bfd_com_section;
-      else
-	{
-	  asym->section = bfd_make_section_old_way (abfd, ".sbss");
-	  asym->value -= asym->section->vma;
-	}
+      asym->section = bfd_make_section_old_way (abfd, ".sbss");
+      asym->value -= asym->section->vma;
       break;
     case scRData:
       asym->section = bfd_make_section_old_way (abfd, ".rdata");
@@ -637,8 +628,11 @@ DEFUN (ecoff_set_symbol_info, (abfd, ecoff_sym, asym, ext),
       asym->flags = BSF_DEBUGGING;
       break;
     case scCommon:
-    case scSCommon:
       asym->section = &bfd_com_section;
+      break;
+    case scSCommon:
+      asym->section = bfd_make_section_old_way (abfd, ".sbss");
+      asym->value -= asym->section->vma;
       break;
     case scVarRegister:
     case scVariant:
@@ -1408,7 +1402,7 @@ DEFUN (ecoff_refhi_reloc, (abfd,
   BFD_ASSERT (rello->howto->type == ECOFF_R_REFLO
 	      && *rello->sym_ptr_ptr == *reloc_entry->sym_ptr_ptr);
 
-  if (symbol->section == &bfd_com_section)
+  if (bfd_is_com_section (symbol->section))
     relocation = 0;
   else
     relocation = symbol->value;
@@ -1527,7 +1521,7 @@ DEFUN (ecoff_gprel_reloc, (abfd,
 	}
     }
 
-  if (symbol->section == &bfd_com_section)
+  if (bfd_is_com_section (symbol->section))
     relocation = 0;
   else
     relocation = symbol->value;
@@ -2355,7 +2349,7 @@ DEFUN (ecoff_get_debug, (output_bfd, seclet, section),
 	  SYMR sym;
 
 	  ecoff_swap_sym_in (input_bfd, esym_ptr->native.lnative, &sym);
-	  if (esym_ptr->symbol.section != &bfd_com_section
+	  if (! bfd_is_com_section (esym_ptr->symbol.section)
 	      && (esym_ptr->symbol.flags & BSF_DEBUGGING) == 0
 	      && esym_ptr->symbol.section != &bfd_und_section)
 	    sym.value = (esym_ptr->symbol.value
@@ -2814,7 +2808,7 @@ DEFUN (ecoff_bfd_seclet_link, (abfd, data, relocateable),
 
 	  esym.asym.iss = symhdr->issExtMax;
 
-	  if (sym_ptr->section == &bfd_com_section
+	  if (bfd_is_com_section (sym_ptr->section)
 	      || sym_ptr->section == &bfd_und_section)
 	    esym.asym.value = sym_ptr->value;
 	  else

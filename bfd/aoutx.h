@@ -1213,7 +1213,7 @@ DEFUN(translate_to_native_sym_flags,(sym_pointer, cache_ptr, abfd),
   {
     sym_pointer->e_type[0] = (N_UNDF | N_EXT);
   }
-  else if (bfd_get_output_section(cache_ptr) == &bfd_com_section) {
+  else if (bfd_is_com_section (bfd_get_output_section (cache_ptr))) {
       sym_pointer->e_type[0] = (N_UNDF | N_EXT);
     }    
   else {    
@@ -1469,7 +1469,7 @@ DEFUN(NAME(aout,swap_std_reloc_out),(abfd, g, natptr),
      */
      
 
-  if (output_section == &bfd_com_section 
+  if (bfd_is_com_section (output_section)
       || output_section == &bfd_abs_section
       || output_section == &bfd_und_section) 
     {
@@ -1553,7 +1553,7 @@ DEFUN(NAME(aout,swap_ext_reloc_out),(abfd, g, natptr),
      check for that here
      */
      
-  if (output_section == &bfd_com_section 
+  if (bfd_is_com_section (output_section)
       || output_section == &bfd_abs_section
       || output_section == &bfd_und_section) 
   {
@@ -1656,16 +1656,16 @@ DEFUN(NAME(aout,swap_ext_reloc_in), (abfd, bytes, cache_ptr, symbols),
 
   /* now the fun stuff */
   if (abfd->xvec->header_byteorder_big_p != false) {
-    r_index = (  ((int) bytes->r_index[0] << 16)
-	       | ((int) bytes->r_index[1] << 8)
-	       |  (int) bytes->r_index[2]);
+    r_index =  (bytes->r_index[0] << 16)
+	     | (bytes->r_index[1] << 8)
+	     |  bytes->r_index[2];
     r_extern = (0 != (bytes->r_type[0] & RELOC_EXT_BITS_EXTERN_BIG));
     r_type   =       (bytes->r_type[0] & RELOC_EXT_BITS_TYPE_BIG)
 				      >> RELOC_EXT_BITS_TYPE_SH_BIG;
   } else {
-    r_index = (  ((int) bytes->r_index[2] << 16)
-	       | ((int) bytes->r_index[1] << 8)
-	       |  (int) bytes->r_index[0]);
+    r_index =  (bytes->r_index[2] << 16)
+	     | (bytes->r_index[1] << 8)
+	     |  bytes->r_index[0];
     r_extern = (0 != (bytes->r_type[0] & RELOC_EXT_BITS_EXTERN_LITTLE));
     r_type   =       (bytes->r_type[0] & RELOC_EXT_BITS_TYPE_LITTLE)
 				      >> RELOC_EXT_BITS_TYPE_SH_LITTLE;
@@ -1693,9 +1693,9 @@ DEFUN(NAME(aout,swap_std_reloc_in), (abfd, bytes, cache_ptr, symbols),
 
   /* now the fun stuff */
   if (abfd->xvec->header_byteorder_big_p != false) {
-    r_index = (  ((int) bytes->r_index[0] << 16)
-	       | ((int) bytes->r_index[1] << 8)
-	       |  (int) bytes->r_index[2]);
+    r_index =  (bytes->r_index[0] << 16)
+      | (bytes->r_index[1] << 8)
+	|  bytes->r_index[2];
     r_extern  = (0 != (bytes->r_type[0] & RELOC_STD_BITS_EXTERN_BIG));
     r_pcrel   = (0 != (bytes->r_type[0] & RELOC_STD_BITS_PCREL_BIG));
     r_baserel = (0 != (bytes->r_type[0] & RELOC_STD_BITS_BASEREL_BIG));
@@ -1704,9 +1704,9 @@ DEFUN(NAME(aout,swap_std_reloc_in), (abfd, bytes, cache_ptr, symbols),
     r_length  =       (bytes->r_type[0] & RELOC_STD_BITS_LENGTH_BIG) 
       			>> RELOC_STD_BITS_LENGTH_SH_BIG;
   } else {
-    r_index = (  ((int) bytes->r_index[2] << 16)
-	       | ((int) bytes->r_index[1] << 8)
-	       |  (int) bytes->r_index[0]);
+    r_index =  (bytes->r_index[2] << 16)
+      | (bytes->r_index[1] << 8)
+	|  bytes->r_index[0];
     r_extern  = (0 != (bytes->r_type[0] & RELOC_STD_BITS_EXTERN_LITTLE));
     r_pcrel   = (0 != (bytes->r_type[0] & RELOC_STD_BITS_PCREL_LITTLE));
     r_baserel = (0 != (bytes->r_type[0] & RELOC_STD_BITS_BASEREL_LITTLE));
