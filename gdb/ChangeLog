@@ -1,3 +1,8 @@
+Wed Jan 29 12:45:54 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/powerpc/ppc{,le}-sim.mt (SIM): Remove the library
+	../sim/common/libcommon.a.
+
 Tue Jan 28 15:54:13 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* blockframe.c: fix a null pointer ref in generic_get_saved_register
