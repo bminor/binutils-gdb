@@ -200,16 +200,13 @@ case "${target}" in
   hppa*-*-osf)
     # Do configure ld/binutils/gas for this case.
     ;;
-  m68k-hp-hpux*)
-    configdirs=`echo ${configdirs} | sed -e 's/emacs//'`
-    ;;	
   hppa*-*-*)
     # HP's C compiler doesn't handle Emacs correctly (but on BSD and Mach
     # cc is gcc, and on any system a user should be able to link cc to
     # whatever they want.  FIXME, emacs).
     case "${CC}" in
 	"" | cc*) configdirs=`echo ${configdirs} | sed -e 's/emacs//'` ;;
-        *) echo "building emacs" ;;
+        *) ;;
     esac
     configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas /pagas /;s/shellutils//'`
     gasdir=pagas
