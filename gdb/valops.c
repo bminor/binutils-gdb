@@ -569,10 +569,10 @@ value_assign (struct value *toval, struct value *fromval)
 	char *dest_buffer;
 	CORE_ADDR changed_addr;
 	int changed_len;
+        char buffer[sizeof (LONGEST)];
 
 	if (VALUE_BITSIZE (toval))
 	  {
-	    char buffer[sizeof (LONGEST)];
 	    /* We assume that the argument to read_memory is in units of
 	       host chars.  FIXME:  Is that correct?  */
 	    changed_len = (VALUE_BITPOS (toval)
