@@ -1,3 +1,8 @@
+Tue Dec  7 15:10:54 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* libnlm.h (nlm_backend_data): Removed macro definition.
+	(nlm_alpha_backend_data): Adjusted accordingly.
+
 Sun Dec  5 19:32:08 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* som.c (som_begin_writing): Flesh out code for handling simple
