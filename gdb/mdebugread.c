@@ -3190,9 +3190,11 @@ psymtab_to_symtab_1 (pst, filename)
 		  ;
 		}
 	      else
-		/* Handle encoded stab line number. */
-		valu += ANOFFSET (pst->section_offsets, SECT_OFF_TEXT);
-		record_line (current_subfile, sh.index, valu);
+		{
+		  /* Handle encoded stab line number. */
+		  valu += ANOFFSET (pst->section_offsets, SECT_OFF_TEXT);
+		  record_line (current_subfile, sh.index, valu);
+		}
 	    }
 	  else if (sh.st == stProc || sh.st == stStaticProc
 		   || sh.st == stStatic || sh.st == stEnd)
