@@ -170,24 +170,6 @@ extern void mips_register_convert_from_type (int regnum,
 #define REGISTER_CONVERT_FROM_TYPE(n, type, buffer)	\
   mips_register_convert_from_type ((n), (type), (buffer))
 
-/* Store the address of the place in which to copy the structure the
-   subroutine will return.  Handled by mips_push_arguments.  */
-
-#define STORE_STRUCT_RETURN(addr, sp)
-/**/
-
-/* Extract from an array REGBUF containing the (raw) register state
-   the address in which a function should return its structure value,
-   as a CORE_ADDR (or an expression that can be used as one).  */
-/* The address is passed in a0 upon entry to the function, but when
-   the function exits, the compiler has copied the value to v0.  This
-   convention is specified by the System V ABI, so I think we can rely
-   on it.  */
-
-#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
-  (extract_address (REGBUF + REGISTER_BYTE (V0_REGNUM), \
-		    REGISTER_RAW_SIZE (V0_REGNUM)))
-
 
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
