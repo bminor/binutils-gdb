@@ -1,5 +1,7 @@
 Wed Apr  2 15:06:28 1997  Doug Evans  <dje@canuck.cygnus.com>
 
+	* run.c (main): Pass SIM_OPEN_STANDALONE to sim_open.
+
 	* aclocal.m4: Check for stdlib.h, string.h, strings.h, unistd.h.
 	(sim-debug): Allow arguments.  Define WITH_DEBUG in addition to
 	-DDEBUG.

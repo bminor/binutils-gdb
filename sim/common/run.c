@@ -46,6 +46,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "callback.h"
 #include "remote-sim.h"
 
+#include "../libiberty/alloca-conf.h"
+
 static void usage PARAMS ((void));
 extern int optind;
 extern char *optarg;
@@ -185,7 +187,7 @@ main (ac, av)
 
   /* Ensure that any run-time initialisation that needs to be
      performed by the simulator can occur. */
-  sd = sim_open (sim_argv);
+  sd = sim_open (SIM_OPEN_STANDALONE, sim_argv);
 
   for (s = abfd->sections; s; s = s->next)
     {
