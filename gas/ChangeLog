@@ -1,3 +1,8 @@
+2001-03-02  Dave Brolley  <brolley@redhat.com>
+
+	* config/tc-m32r.c (expand_debug_syms): Call frag_align_code rather than
+	m32r_do_align.
+
 2001-03-02  Richard Sandiford  <rsandifo@redhat.com>
 
 	* config/atof-ieee.c (TC_LARGEST_EXPONENT_IS_NORMAL): New macro.

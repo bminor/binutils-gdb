@@ -444,7 +444,7 @@ expand_debug_syms (syms, align)
   if (!syms)
     return;
 
-  (void) m32r_do_align (align, NULL, 0, 0);
+  (void) frag_align_code (align, 0);
   for (; syms != (sym_linkS *) 0; syms = next_syms)
     {
       symbolS *symbolP = syms->symbol;
