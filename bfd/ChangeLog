@@ -1,5 +1,14 @@
 2001-09-25  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-i386.c: Add comment re linker function names and ordering.
+	(elf_i386_link_hash_newfunc): Rename to link_hash_newfunc.
+	(elf_i386_grok_prstatus): Move before linker functions.
+	(elf_i386_grok_psinfo): Likewise.
+	(elf_i386_fake_sections): Move so that functions are ordered.
+	(elf_i386_reloc_type_class): Likewise.  Comment function purpose.
+
+2001-09-25  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-hppa.c: Rename all occurrences of "hplink" to "htab"
 	throughout file.
 

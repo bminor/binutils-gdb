@@ -31,7 +31,11 @@ static void elf_i386_info_to_howto
 static void elf_i386_info_to_howto_rel
   PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
 static boolean elf_i386_is_local_label_name PARAMS ((bfd *, const char *));
-static struct bfd_hash_entry *elf_i386_link_hash_newfunc
+static boolean elf_i386_grok_prstatus
+  PARAMS ((bfd *abfd, Elf_Internal_Note *note));
+static boolean elf_i386_grok_psinfo
+  PARAMS ((bfd *abfd, Elf_Internal_Note *note));
+static struct bfd_hash_entry *link_hash_newfunc
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
 static struct bfd_link_hash_table *elf_i386_link_hash_table_create
   PARAMS ((bfd *));
@@ -53,6 +57,8 @@ static boolean allocate_dynrelocs
   PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean readonly_dynrelocs
   PARAMS ((struct elf_link_hash_entry *, PTR));
+static boolean elf_i386_fake_sections
+  PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *));
 static boolean elf_i386_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static boolean elf_i386_relocate_section
@@ -61,16 +67,10 @@ static boolean elf_i386_relocate_section
 static boolean elf_i386_finish_dynamic_symbol
   PARAMS ((bfd *, struct bfd_link_info *, struct elf_link_hash_entry *,
 	   Elf_Internal_Sym *));
-static boolean elf_i386_finish_dynamic_sections
-  PARAMS ((bfd *, struct bfd_link_info *));
-static boolean elf_i386_fake_sections
-  PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *));
 static enum elf_reloc_type_class elf_i386_reloc_type_class
   PARAMS ((const Elf_Internal_Rela *));
-static boolean elf_i386_grok_prstatus
-  PARAMS ((bfd *abfd, Elf_Internal_Note *note));
-static boolean elf_i386_grok_psinfo
-  PARAMS ((bfd *abfd, Elf_Internal_Note *note));
+static boolean elf_i386_finish_dynamic_sections
+  PARAMS ((bfd *, struct bfd_link_info *));
 
 #define USE_REL	1		/* 386 uses REL relocations instead of RELA */
 
@@ -315,7 +315,84 @@ elf_i386_is_local_label_name (abfd, name)
   return _bfd_elf_is_local_label_name (abfd, name);
 }
 
-/* Functions for the i386 ELF linker.  */
+/* Support for core dump NOTE sections.  */
+static boolean
+elf_i386_grok_prstatus (abfd, note)
+     bfd *abfd;
+     Elf_Internal_Note *note;
+{
+  int offset;
+  size_t raw_size;
+
+  switch (note->descsz)
+    {
+      default:
+	return false;
+
+      case 144:		/* Linux/i386 */
+	/* pr_cursig */
+	elf_tdata (abfd)->core_signal = bfd_get_16 (abfd, note->descdata + 12);
+
+	/* pr_pid */
+	elf_tdata (abfd)->core_pid = bfd_get_32 (abfd, note->descdata + 24);
+
+	/* pr_reg */
+	offset = 72;
+	raw_size = 68;
+
+	break;
+    }
+
+  /* Make a ".reg/999" section.  */
+  return _bfd_elfcore_make_pseudosection (abfd, ".reg",
+					  raw_size, note->descpos + offset);
+}
+
+static boolean
+elf_i386_grok_psinfo (abfd, note)
+     bfd *abfd;
+     Elf_Internal_Note *note;
+{
+  switch (note->descsz)
+    {
+      default:
+	return false;
+
+      case 128:		/* Linux/MIPS elf_prpsinfo */
+	elf_tdata (abfd)->core_program
+	 = _bfd_elfcore_strndup (abfd, note->descdata + 28, 16);
+	elf_tdata (abfd)->core_command
+	 = _bfd_elfcore_strndup (abfd, note->descdata + 44, 80);
+    }
+
+  /* Note that for some reason, a spurious space is tacked
+     onto the end of the args in some (at least one anyway)
+     implementations, so strip it off if it exists.  */
+
+  {
+    char *command = elf_tdata (abfd)->core_command;
+    int n = strlen (command);
+
+    if (0 < n && command[n - 1] == ' ')
+      command[n - 1] = '\0';
+  }
+
+  return true;
+}
+
+/* Functions for the i386 ELF linker.
+
+   In order to gain some understanding of code in this file without
+   knowing all the intricate details of the linker, note the
+   following:
+
+   Functions named elf_i386_* are called by external routines, other
+   functions are only called locally.  elf_i386_* functions appear
+   in this file more or less in the order in which they are called
+   from external routines.  eg. elf_i386_check_relocs is called
+   early in the link process, elf_i386_finish_dynamic_sections is
+   one of the last functions.  */
+
 
 /* The name of the dynamic interpreter.  This is put in the .interp
    section.  */
@@ -426,7 +503,7 @@ struct elf_i386_link_hash_table
 /* Create an entry in an i386 ELF linker hash table.  */
 
 static struct bfd_hash_entry *
-elf_i386_link_hash_newfunc (entry, table, string)
+link_hash_newfunc (entry, table, string)
      struct bfd_hash_entry *entry;
      struct bfd_hash_table *table;
      const char *string;
@@ -468,8 +545,7 @@ elf_i386_link_hash_table_create (abfd)
   if (ret == (struct elf_i386_link_hash_table *) NULL)
     return NULL;
 
-  if (! _bfd_elf_link_hash_table_init (&ret->root, abfd,
-				       elf_i386_link_hash_newfunc))
+  if (! _bfd_elf_link_hash_table_init (&ret->root, abfd, link_hash_newfunc))
     {
       bfd_release (abfd, ret);
       return NULL;
@@ -1508,6 +1584,41 @@ elf_i386_size_dynamic_sections (output_bfd, info)
   return true;
 }
 
+/* Set the correct type for an x86 ELF section.  We do this by the
+   section name, which is a hack, but ought to work.  */
+
+static boolean
+elf_i386_fake_sections (abfd, hdr, sec)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     Elf32_Internal_Shdr *hdr;
+     asection *sec;
+{
+  register const char *name;
+
+  name = bfd_get_section_name (abfd, sec);
+
+  /* This is an ugly, but unfortunately necessary hack that is
+     needed when producing EFI binaries on x86. It tells
+     elf.c:elf_fake_sections() not to consider ".reloc" as a section
+     containing ELF relocation info.  We need this hack in order to
+     be able to generate ELF binaries that can be translated into
+     EFI applications (which are essentially COFF objects).  Those
+     files contain a COFF ".reloc" section inside an ELFNN object,
+     which would normally cause BFD to segfault because it would
+     attempt to interpret this section as containing relocation
+     entries for section "oc".  With this hack enabled, ".reloc"
+     will be treated as a normal data section, which will avoid the
+     segfault.  However, you won't be able to create an ELFNN binary
+     with a section named "oc" that needs relocations, but that's
+     the kind of ugly side-effects you get when detecting section
+     types based on their names...  In practice, this limitation is
+     unlikely to bite.  */
+  if (strcmp (name, ".reloc") == 0)
+    hdr->sh_type = SHT_PROGBITS;
+
+  return true;
+}
+
 /* Relocate an i386 ELF section.  */
 
 static boolean
@@ -2096,6 +2207,26 @@ elf_i386_finish_dynamic_symbol (output_bfd, info, h, sym)
   return true;
 }
 
+/* Used to decide how to sort relocs in an optimal manner for the
+   dynamic linker, before writing them out.  */
+
+static enum elf_reloc_type_class
+elf_i386_reloc_type_class (rela)
+     const Elf_Internal_Rela *rela;
+{
+  switch ((int) ELF32_R_TYPE (rela->r_info))
+    {
+    case R_386_RELATIVE:
+      return reloc_class_relative;
+    case R_386_JUMP_SLOT:
+      return reloc_class_plt;
+    case R_386_COPY:
+      return reloc_class_copy;
+    default:
+      return reloc_class_normal;
+    }
+}
+
 /* Finish up the dynamic sections.  */
 
 static boolean
@@ -2215,125 +2346,6 @@ elf_i386_finish_dynamic_sections (output_bfd, info)
 
       elf_section_data (htab->sgotplt->output_section)->this_hdr.sh_entsize = 4;
     }
-  return true;
-}
-
-/* Set the correct type for an x86 ELF section.  We do this by the
-   section name, which is a hack, but ought to work.  */
-
-static boolean
-elf_i386_fake_sections (abfd, hdr, sec)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     Elf32_Internal_Shdr *hdr;
-     asection *sec;
-{
-  register const char *name;
-
-  name = bfd_get_section_name (abfd, sec);
-
-  if (strcmp (name, ".reloc") == 0)
-    /*
-     * This is an ugly, but unfortunately necessary hack that is
-     * needed when producing EFI binaries on x86. It tells
-     * elf.c:elf_fake_sections() not to consider ".reloc" as a section
-     * containing ELF relocation info.  We need this hack in order to
-     * be able to generate ELF binaries that can be translated into
-     * EFI applications (which are essentially COFF objects).  Those
-     * files contain a COFF ".reloc" section inside an ELFNN object,
-     * which would normally cause BFD to segfault because it would
-     * attempt to interpret this section as containing relocation
-     * entries for section "oc".  With this hack enabled, ".reloc"
-     * will be treated as a normal data section, which will avoid the
-     * segfault.  However, you won't be able to create an ELFNN binary
-     * with a section named "oc" that needs relocations, but that's
-     * the kind of ugly side-effects you get when detecting section
-     * types based on their names...  In practice, this limitation is
-     * unlikely to bite.
-     */
-    hdr->sh_type = SHT_PROGBITS;
-
-  return true;
-}
-
-static enum elf_reloc_type_class
-elf_i386_reloc_type_class (rela)
-     const Elf_Internal_Rela *rela;
-{
-  switch ((int) ELF32_R_TYPE (rela->r_info))
-    {
-    case R_386_RELATIVE:
-      return reloc_class_relative;
-    case R_386_JUMP_SLOT:
-      return reloc_class_plt;
-    case R_386_COPY:
-      return reloc_class_copy;
-    default:
-      return reloc_class_normal;
-    }
-}
-
-/* Support for core dump NOTE sections */
-static boolean
-elf_i386_grok_prstatus (abfd, note)
-     bfd *abfd;
-     Elf_Internal_Note *note;
-{
-  int offset;
-  size_t raw_size;
-
-  switch (note->descsz)
-    {
-      default:
-	return false;
-
-      case 144:		/* Linux/i386 */
-	/* pr_cursig */
-	elf_tdata (abfd)->core_signal = bfd_get_16 (abfd, note->descdata + 12);
-
-	/* pr_pid */
-	elf_tdata (abfd)->core_pid = bfd_get_32 (abfd, note->descdata + 24);
-
-	/* pr_reg */
-	offset = 72;
-	raw_size = 68;
-
-	break;
-    }
-
-  /* Make a ".reg/999" section.  */
-  return _bfd_elfcore_make_pseudosection (abfd, ".reg",
-					  raw_size, note->descpos + offset);
-}
-
-static boolean
-elf_i386_grok_psinfo (abfd, note)
-     bfd *abfd;
-     Elf_Internal_Note *note;
-{
-  switch (note->descsz)
-    {
-      default:
-	return false;
-
-      case 128:		/* Linux/MIPS elf_prpsinfo */
-	elf_tdata (abfd)->core_program
-	 = _bfd_elfcore_strndup (abfd, note->descdata + 28, 16);
-	elf_tdata (abfd)->core_command
-	 = _bfd_elfcore_strndup (abfd, note->descdata + 44, 80);
-    }
-
-  /* Note that for some reason, a spurious space is tacked
-     onto the end of the args in some (at least one anyway)
-     implementations, so strip it off if it exists.  */
-
-  {
-    char *command = elf_tdata (abfd)->core_command;
-    int n = strlen (command);
-
-    if (0 < n && command[n - 1] == ' ')
-      command[n - 1] = '\0';
-  }
-
   return true;
 }
 
