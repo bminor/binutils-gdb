@@ -1,3 +1,13 @@
+Wed Jul 15 11:20:01 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* sunos.c: Add undef of valid to avoid problem on SunOS.
+
+start-sanitize-beos
+Tue Jul 14 15:30:59 1998  Richard Henderson  <rth@cygnus.com>
+
+	* config.bfd (i?86-pc-beos{pe,elf,}*): Recognize.
+
+end-sanitize-beos
 Tue Jul 14 11:22:21 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* elf32-m68k.c (elf_m68k_check_relocs): Also reference count
