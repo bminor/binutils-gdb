@@ -1,3 +1,7 @@
+2002-05-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlex.l: Use #include "" instead of <> for local header files.
+
 2002-05-24  TAMURA Kent <kent@netbsd.org>
 
 	* configure.tgt: Add a target for i386-netbsdpe.
@@ -169,7 +173,7 @@
 	(lang_size_sections_1): Evaluate it.
 	(lang_leave_output_section_statement): Rework LMA lookup.
 	(overlay_lma, overlay_nocrossrefs): Remove.
-	(lang_enter_overlay): Remove LMA and corssref arguments.
+	(lang_enter_overlay): Remove LMA and crossref arguments.
 	(lang_enter_overlay_section): Don't set the LMA here.
 	(lang_leave_overlay): Take LMA and crossref arguments.  Move the '.'
 	assignment to the last section's update_dot_tree.  Unconditionally

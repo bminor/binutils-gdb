@@ -26,7 +26,7 @@ This was written by steve chamberlain
 */
 
 
-#include <ansidecl.h>
+#include "ansidecl.h"
 #include <stdio.h>
 
 #ifdef MPW
