@@ -2017,7 +2017,7 @@ void m68k_ip (instring)
 	      break;
 	    } else {
 	      addword(0x0170);
-	      add_fix('l',opP->con1,1);
+	      add_fix('l',opP->con1,0);
 	    }
 	  } else
 	    addword(0x0170);
