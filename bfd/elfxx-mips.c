@@ -1486,7 +1486,7 @@ mips_elf_got_page (abfd, info, value, offsetp)
 
   g = mips_elf_got_info (elf_hash_table (info)->dynobj, &sgot);
 
-  /* Look to see if we aleady have an appropriate entry.  */
+  /* Look to see if we already have an appropriate entry.  */
   last_entry = sgot->contents + MIPS_ELF_GOT_SIZE (abfd) * g->assigned_gotno;
   for (entry = (sgot->contents
 		+ MIPS_ELF_GOT_SIZE (abfd) * MIPS_RESERVED_GOTNO);
@@ -1639,7 +1639,7 @@ mips_elf_sort_hash_table (info, max_local)
 			       &hsd);
 
   /* There should have been enough room in the symbol table to
-     accomodate both the GOT and non-GOT symbols.  */
+     accommodate both the GOT and non-GOT symbols.  */
   BFD_ASSERT (hsd.max_non_got_dynindx <= hsd.min_got_dynindx);
 
   /* Now we know which dynamic symbol has the lowest dynamic symbol
@@ -3959,7 +3959,7 @@ _bfd_mips_elf_create_dynamic_sections (abfd, info)
 	    return false;
 	}
 
-      /* Change aligments of some sections.  */
+      /* Change alignments of some sections.  */
       s = bfd_get_section_by_name (abfd, ".hash");
       if (s != NULL)
 	bfd_set_section_alignment (abfd, s, 4);
@@ -6107,9 +6107,9 @@ _bfd_mips_elf_modify_segment_map (abfd)
 
   /* For IRIX 6, we don't have .mdebug sections, nor does anything but
      .dynamic end up in PT_DYNAMIC.  However, we do have to insert a
-     PT_OPTIONS segement immediately following the program header
+     PT_OPTIONS segment immediately following the program header
      table.  */
-  if (ABI_64_P (abfd))
+  if (NEWABI_P (abfd))
     {
       for (s = abfd->sections; s; s = s->next)
 	if (elf_section_data (s)->this_hdr.sh_type == SHT_MIPS_OPTIONS)
@@ -6122,7 +6122,7 @@ _bfd_mips_elf_modify_segment_map (abfd)
 	  /* Usually, there's a program header table.  But, sometimes
 	     there's not (like when running the `ld' testsuite).  So,
 	     if there's no program header table, we just put the
-	     options segement at the end.  */
+	     options segment at the end.  */
 	  for (pm = &elf_tdata (abfd)->segment_map;
 	       *pm != NULL;
 	       pm = &(*pm)->next)
@@ -6791,7 +6791,7 @@ _bfd_elf_mips_get_relocated_section_contents (abfd, link_info, link_order,
 	  asymbol *sym = *(*parent)->sym_ptr_ptr;
 	  if (bfd_is_abs_section (sym->section) && abfd)
 	    {
-	      /* The special_function wouldn't get called anyways.  */
+	      /* The special_function wouldn't get called anyway.  */
 	    }
 	  else if (!gp_found)
 	    {
