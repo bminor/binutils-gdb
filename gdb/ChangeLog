@@ -1,3 +1,11 @@
+2002-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* defs.h (gdb_readline_wrapper): Declare.
+	* utils.c (prompt_for_continue): Use gdb_readline_wrapper.
+	* tracepoint.c (read_actions): Use gdb_readline_wrapper.
+	* top.c (gdb_readline_wrapper): New function.
+	(command_line_input): Use it.
+
 2002-07-24  Andrew Cagney  <cagney@redhat.com>
 
 	* regcache.h (regcache_raw_read, regcache_raw_write): Replace

@@ -1603,7 +1603,7 @@ prompt_for_continue (void)
   /* Call readline, not gdb_readline, because GO32 readline handles control-C
      whereas control-C to gdb_readline will cause the user to get dumped
      out to DOS.  */
-  ignore = readline (cont_prompt);
+  ignore = gdb_readline_wrapper (cont_prompt);
 
   if (annotation_level > 1)
     printf_unfiltered ("\n\032\032post-prompt-for-continue\n");

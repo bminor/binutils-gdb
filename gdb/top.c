@@ -947,6 +947,29 @@ static int write_history_p;
 static int history_size;
 static char *history_filename;
 
+/* This is like readline(), but it has some gdb-specific behavior.
+   gdb can use readline in both the synchronous and async modes during
+   a single gdb invocation.  At the ordinary top-level prompt we might
+   be using the async readline.  That means we can't use
+   rl_pre_input_hook, since it doesn't work properly in async mode.
+   However, for a secondary prompt (" >", such as occurs during a
+   `define'), gdb just calls readline() directly, running it in
+   synchronous mode.  So for operate-and-get-next to work in this
+   situation, we have to switch the hooks around.  That is what
+   gdb_readline_wrapper is for.  */
+char *
+gdb_readline_wrapper (char *prompt)
+{
+  /* Set the hook that works in this case.  */
+  if (event_loop_p && after_char_processing_hook)
+    {
+      rl_pre_input_hook = (Function *) after_char_processing_hook;
+      after_char_processing_hook = NULL;
+    }
+
+  return readline (prompt);
+}
+
 
 #ifdef STOP_SIGNAL
 static void
@@ -1174,7 +1197,7 @@ command_line_input (char *prompt_arg, int repeat, char *annotation_suffix)
 	}
       else if (command_editing_p && instream == stdin && ISATTY (instream))
 	{
-	  rl = readline (local_prompt);
+	  rl = gdb_readline_wrapper (local_prompt);
 	}
       else
 	{

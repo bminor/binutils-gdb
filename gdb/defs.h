@@ -535,6 +535,8 @@ extern char *skip_quoted (char *);
 
 extern char *gdb_readline (char *);
 
+extern char *gdb_readline_wrapper (char *);
+
 extern char *command_line_input (char *, int, char *);
 
 extern void print_prompt (void);
