@@ -1,5 +1,11 @@
 Thu Jan 16 17:07:52 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ld.h (args_type): Rename auxiliary_filter_shlib to
+	auxiliary_filters, and make it char **.
+	* lexsup.c (parse_args): Handle -f by setting up an array.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation): Use
+	new name of auxiliary_filters.
+
 	* ld.texinfo (Options): Improve documentation of --filter and
 	--auxiliary.
 
