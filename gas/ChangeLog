@@ -1,5 +1,15 @@
 2002-12-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-fr30.c (md_parse_option <c,arg>):  Add ATTRIBUTE_UNUSED.
+	(md_undefined_symbol <name>): Likewise.
+	(md_convert_frag <all args>): Likewise.
+	(md_cgen_lookup_reloc <insn>): Likewise.
+	(md_begin): Delete unused vars.
+	(md_assemble): Likewise.
+	(md_estimate_size_before_relax): Likewise.
+	(fr30_relax_frag): #if 0 out, seems unused.
+	(md_atof): Remove declaration of atof_ieee.
+	(restore_colon): Prototype.
 	* config/tc-frv.c (frv_insert_vliw_insn): Prototype.
 	(frv_find_in_vliw): Likewise.
 	(frv_debug_tomcat): Likewise.

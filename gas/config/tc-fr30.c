@@ -66,8 +66,8 @@ size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (c, arg)
-     int    c;
-     char * arg;
+     int c ATTRIBUTE_UNUSED;
+     char *arg ATTRIBUTE_UNUSED;
 {
   switch (c)
     {
@@ -95,10 +95,6 @@ const pseudo_typeS md_pseudo_table[] =
 void
 md_begin ()
 {
-  flagword applicable;
-  segT     seg;
-  subsegT  subseg;
-
   /* Initialize the `cgen' interface.  */
 
   /* Set the machine number and endian.  */
@@ -114,12 +110,11 @@ md_begin ()
 
 void
 md_assemble (str)
-     char * str;
+     char *str;
 {
   static int last_insn_had_delay_slot = 0;
   fr30_insn insn;
-  char *    errmsg;
-  char *    str2 = NULL;
+  char *errmsg;
 
   /* Initialize GAS's cgen interface for a new instruction.  */
   gas_cgen_init_parse ();
@@ -172,7 +167,7 @@ md_section_align (segment, size)
 
 symbolS *
 md_undefined_symbol (name)
-  char * name;
+  char *name ATTRIBUTE_UNUSED;
 {
   return 0;
 }
@@ -207,6 +202,7 @@ const relax_typeS md_relax_table[] =
   {0x2000000 - 1 - 2, -0x2000000 - 2, 4, 0 }
 };
 
+#if 0
 long
 fr30_relax_frag (segment, fragP, stretch)
      segT    segment;
@@ -248,6 +244,7 @@ fr30_relax_frag (segment, fragP, stretch)
 
   return growth;
 }
+#endif
 
 /* Return an initial guess of the length by which a fragment must grow to
    hold a branch to reach its destination.
@@ -273,7 +270,9 @@ md_estimate_size_before_relax (fragP, segment)
 
   if (S_GET_SEGMENT (fragP->fr_symbol) != segment)
     {
+#if 0
       int    old_fr_fix = fragP->fr_fix;
+#endif
 
       /* The symbol is undefined in this segment.
 	 Change the relaxation subtype to the max allowable and leave
@@ -337,9 +336,9 @@ md_estimate_size_before_relax (fragP, segment)
 
 void
 md_convert_frag (abfd, sec, fragP)
-  bfd *   abfd;
-  segT    sec;
-  fragS * fragP;
+  bfd *abfd ATTRIBUTE_UNUSED;
+  segT sec ATTRIBUTE_UNUSED;
+  fragS *fragP ATTRIBUTE_UNUSED;
 {
 #if 0
   char * opcode;
@@ -449,9 +448,9 @@ md_pcrel_from_section (fixP, sec)
 
 bfd_reloc_code_real_type
 md_cgen_lookup_reloc (insn, operand, fixP)
-     const CGEN_INSN *    insn;
-     const CGEN_OPERAND * operand;
-     fixS *               fixP;
+     const CGEN_INSN *insn ATTRIBUTE_UNUSED;
+     const CGEN_OPERAND *operand;
+     fixS *fixP;
 {
   switch (operand->type)
     {
@@ -515,7 +514,6 @@ md_atof (type, litP, sizeP)
   int              prec;
   LITTLENUM_TYPE   words [MAX_LITTLENUMS];
   char *           t;
-  char *           atof_ieee ();
 
   switch (type)
     {
@@ -556,6 +554,8 @@ md_atof (type, litP, sizeP)
 }
 
 /* Worker function for fr30_is_colon_insn().  */
+static char restore_colon PARAMS ((int));
+
 static char
 restore_colon (advance_i_l_p_by)
      int advance_i_l_p_by;
