@@ -1,3 +1,13 @@
+Wed Jan  1 04:23:06 1992  Fred Fish  (fnf at cygnus.com)
+
+	* elf.c:  Change all '#if HAVE_PROCFS' to '#ifdef HAVE_PROCFS'.
+
+	* config/mh-amix, config/mh-i386v4:  Remove HDEFINES that was
+	being used to -DHAVE_PROCFS.
+
+	* hosts/h-amix, hosts/h-i386v4:  Add '#define HAVE_PROCFS'.  Move
+	'#include "fopen-same.h"' to end of file to match other h-* files.
+
 Fri Dec 20 12:06:17 1991  Fred Fish  (fnf at cygnus.com)
 
 	* configure.in:  Change svr4 references to sysv4.  Add case
