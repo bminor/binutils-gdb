@@ -3225,7 +3225,7 @@ process_pseudo_op (idx, line, acc)
 	    {
 	    case K_ALTERNATE:
 	      alternate = 1;
-	      macro_init (1, mri, exp_get_abs);
+	      macro_init (1, mri, 0, exp_get_abs);
 	      return 1;
 	    case K_AELSE:
 	      do_aelse ();
@@ -3606,7 +3606,7 @@ main (argc, argv)
 
   process_init ();
 
-  macro_init (alternate, mri, exp_get_abs);
+  macro_init (alternate, mri, 0, exp_get_abs);
 
   if (out_name) {
     outfile = fopen (out_name, "w");
