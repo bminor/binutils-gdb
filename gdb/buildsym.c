@@ -3011,9 +3011,6 @@ read_huge_number (pp, end, valu, bits)
     }
 }
 
-#define	MAX_OF_C_TYPE(t)	((1 << (sizeof (t)*8 - 1)) - 1)
-#define	MIN_OF_C_TYPE(t)	(-(1 << (sizeof (t)*8 - 1)))
-
 static struct type *
 read_range_type (pp, typenums, objfile)
      char **pp;

@@ -1,5 +1,5 @@
 /* Read ELF (Executable and Linking Format) object files for GDB.
-   Copyright (C) 1991 Free Software Foundation, Inc.
+   Copyright 1991, 1992 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support.
 
 This file is part of GDB.
@@ -24,7 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
  *									*
  * This file is still under construction.  When it is complete, this	*
  * notice will be removed.  Until then, direct any questions or changes	*
- * to Fred Fish at Cygnus Support (fnf@cygint)				*
+ * to Fred Fish at Cygnus Support (fnf@cygnus.com)			*
  *									* 
  * FIXME	Still needs support for shared libraries.		*
  * FIXME	Still needs support for core files.			*
@@ -219,10 +219,8 @@ elf_symtab_read (abfd, addr, mainline, objfile)
 	      && (sym -> section != NULL))
 	    {
 	      symaddr = sym -> value;
-	      /* Relocate all non-absolute symbols by base address.
-	         FIXME:  Can we eliminate the check for mainline now,
-		 since shouldn't addr be 0 in this case? */
-	      if (!mainline && (sym -> section != &bfd_abs_section))
+	      /* Relocate all non-absolute symbols by base address.  */
+	      if (sym -> section != &bfd_abs_section)
 		{
 		  symaddr += addr;
 		}

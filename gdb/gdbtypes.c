@@ -79,7 +79,7 @@ lookup_pointer_type (type)
       TYPE_TARGET_TYPE (ptype) = type;
       TYPE_POINTER_TYPE (type) = ptype;
       
-      /* We assume the machine has only one representation for pointers!  */
+      /* FIXME, assume machine has only one representation for pointers!  */
       
       TYPE_LENGTH (ptype) = TARGET_PTR_BIT / TARGET_CHAR_BIT;
       TYPE_CODE (ptype) = TYPE_CODE_PTR;
@@ -236,10 +236,9 @@ create_array_type (element_type, number)
    include the offset (that's the value of the MEMBER itself), but does
    include the structure type into which it points (for some reason).
 
-   FIXME:  When "smashing" the type, we preserve the objfile that the
+   When "smashing" the type, we preserve the objfile that the
    old type pointed to, since we aren't changing where the type is actually
-   allocated.  If the two types aren't associated with the same objfile,
-   then we are in deep-s**t anyway... */
+   allocated.  */
 
 void
 smash_to_member_type (type, domain, to_type)
@@ -262,10 +261,9 @@ smash_to_member_type (type, domain, to_type)
 /* Smash TYPE to be a type of method of DOMAIN with type TO_TYPE.
    METHOD just means `function that gets an extra "this" argument'.
 
-   FIXME:  When "smashing" the type, we preserve the objfile that the
+   When "smashing" the type, we preserve the objfile that the
    old type pointed to, since we aren't changing where the type is actually
-   allocated.  If the two types aren't associated with the same objfile,
-   then we are in deep-s**t anyway... */
+   allocated.  */
 
 void
 smash_to_method_type (type, domain, to_type, args)

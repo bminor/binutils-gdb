@@ -1,5 +1,6 @@
 /* Shared code to pre-read a stab (dbx-style), when building a psymtab.
-   Copyright (C) 1986-1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992 Free Software Foundation,
+   Inc.
 
 This file is part of GDB.
 

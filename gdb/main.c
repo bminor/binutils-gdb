@@ -1591,28 +1591,11 @@ validate_comname (comname)
   p = comname;
   while (*p)
     {
-      if (!(*p >= 'A' && *p <= 'Z')
-	  && !(*p >= 'a' && *p <= 'z')
-	  && !(*p >= '0' && *p <= '9')
-	  && *p != '-')
+      if (!isalnum(*p) && *p != '-')
 	error ("Junk in argument list: \"%s\"", p);
       p++;
     }
 }
-
-#ifdef IBM6000
-
-lowercase (char *str)
-{
-  while (*str) {
- 
-    /* isupper(), tolower() are function calls in AIX. */
-    if ( *str >= 'A' && *str <= 'Z')
-      *str = *str + 'a' - 'A';
-    ++str;
-  }
-}
-#endif
 
 static void
 define_command (comname, from_tty)
@@ -1625,14 +1608,6 @@ define_command (comname, from_tty)
 
   validate_comname (comname);
 
-#ifdef IBM6000
-
-  /* If the rest of the commands will be case insensetive, this one 
-     should behave in the same manner. */
-
-  lowercase (comname);
-#endif
-
   /* Look it up, and verify that we got an exact match.  */
   c = lookup_cmd (&tem, cmdlist, "", -1, 1);
   if (c && 0 != strcmp (comname, c->name))
@@ -1644,9 +1619,16 @@ define_command (comname, from_tty)
 	tem = "Redefine command \"%s\"? ";
       else
 	tem = "Really redefine built-in command \"%s\"? ";
-      if (!query (tem, comname))
-	error ("Command \"%s\" not redefined.", comname);
+      if (!query (tem, c->name))
+	error ("Command \"%s\" not redefined.", c->name);
     }
+
+  comname = savestring (comname, strlen (comname));
+
+  /* If the rest of the commands will be case insensetive, this one 
+     should behave in the same manner. */
+  for (tem = comname; *tem; tem++)
+    if (isupper(*tem)) *tem = tolower(*tem);
 
   if (from_tty)
     {
@@ -1654,7 +1636,6 @@ define_command (comname, from_tty)
 End with a line saying just \"end\".\n", comname);
       fflush (stdout);
     }
-  comname = savestring (comname, strlen (comname));
 
   cmds = read_command_lines ();
 
@@ -2028,8 +2009,13 @@ set_history_size_command (args, from_tty, c)
 {
   if (history_size == UINT_MAX)
     unstifle_history ();
-  else
+  else if (history_size >= 0)
     stifle_history (history_size);
+  else
+    {
+      history_size = UINT_MAX;
+      error ("History size must be non-negative");
+    }
 }
 
 /* ARGSUSED */

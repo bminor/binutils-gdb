@@ -1,3 +1,19 @@
+Fri Mar 27 15:44:55 1992  John Gilmore  (gnu at cygnus.com)
+
+	* buildsym.c (MAX_OF_C_TYPE, MIN_OF_C_TYPE):  Unused, remove.
+	* copying.awk:  Lint.  Make stronger warning at top of copying.c.
+	* elfread.c (elf_symtab_read):  Eliminate check of mainline.
+	* gdbtypes.c (smash_to_*):  Remove FIXME comments.
+	(lookup_pointer_type):  Add FIXME comment.
+	* main.c (set_history_size_command):  Disallow negative size.
+	* partial-stab.h:  Update copyright.
+	* rs6000-tdep.c (skip_trampoline_code):  Better comments.
+
+Wed Mar 25 10:45:38 1992  John Gilmore  (gnu at cygnus.com)
+
+	* main.c (set_history_size_command):  Negative size is error.
+	(Reported by Peggy Fieland.)
+
 Thu Mar 26 17:01:18 1992  Fred Fish  (fnf@cygnus.com)
 
 	* coffread.c (coff_symfile_init):  Update comment.

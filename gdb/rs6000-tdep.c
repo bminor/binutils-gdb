@@ -835,8 +835,11 @@ int fram;
 
 
 
-/* Indirect function calls use a piece of trampoline code do co context switching,
-   i.e. to set the new TOC table. Skip such code if exists. */
+/* Indirect function calls use a piece of trampoline code to do context
+   switching, i.e. to set the new TOC table. Skip such code if we are on
+   its first instruction (as when we have single-stepped to here). 
+   Result is desired PC to step until, or NULL if we are not in
+   trampoline code.  */
 
 skip_trampoline_code (pc)
 int pc;
