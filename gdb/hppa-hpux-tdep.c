@@ -31,14 +31,15 @@
 #include "inferior.h"
 #include "infcall.h"
 #include "observer.h"
+#include "hppa-tdep.h"
+#include "solib-som.h"
+#include "solib-pa64.h"
 #include "regset.h"
 
 #include "gdb_string.h"
 
 #include <dl.h>
 #include <machine/save_state.h>
-
-#include "hppa-tdep.h"
 
 #ifndef offsetof
 #define offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
@@ -1690,6 +1691,7 @@ hppa_hpux_som_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tdep->find_global_pointer = hppa_hpux_som_find_global_pointer;
   hppa_hpux_init_abi (info, gdbarch);
+  som_solib_select (tdep);
 }
 
 static void
@@ -1699,6 +1701,7 @@ hppa_hpux_elf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tdep->is_elf = 1;
   hppa_hpux_init_abi (info, gdbarch);
+  pa64_solib_select (tdep);
 }
 
 static enum gdb_osabi

@@ -338,6 +338,10 @@ internalize_unwinds (struct objfile *objfile, struct unwind_table_entry *table,
 
 	  text_offset = low_text_segment_address;
 	}
+      else if (gdbarch_tdep (current_gdbarch)->solib_get_text_base)
+        {
+	  text_offset = gdbarch_tdep (current_gdbarch)->solib_get_text_base (objfile);
+	}
 
       bfd_get_section_contents (objfile->obfd, section, buf, 0, size);
 

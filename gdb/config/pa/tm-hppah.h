@@ -24,17 +24,7 @@
 
 struct frame_info;
 
-/* The solib hooks are not really designed to have a list of hook
-   and handler routines.  So until we clean up those interfaces you
-   either get SOM shared libraries or HP's unusual PA64 ELF shared
-   libraries, but not both.  */
-#ifdef GDB_TARGET_IS_HPPA_20W
-#include "pa64solib.h"
-#endif
-
-#ifndef GDB_TARGET_IS_HPPA_20W
-#include "somsolib.h"
-#endif
+#include "solib.h"		/* Support for shared libraries. */
 
 /* For HP-UX on PA-RISC we have an implementation
    for the exception handling target op (in hppa-tdep.c) */

@@ -22,6 +22,8 @@
 #define HPPA_TDEP_H
 
 struct trad_frame_saved_reg;
+struct objfile;
+struct so_list;
 
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,
@@ -97,6 +99,12 @@ struct gdbarch_tdep
   void (*unwind_adjust_stub) (struct frame_info *next_frame, CORE_ADDR base,
   			      struct trad_frame_saved_reg *saved_regs);
 
+  /* These are solib-dependent methods.  They are really HPUX only, but
+     we don't have a HPUX-specific tdep vector at the moment.  */
+  CORE_ADDR (*solib_thread_start_addr) (struct so_list *so);
+  CORE_ADDR (*solib_get_got_by_pc) (CORE_ADDR addr);
+  CORE_ADDR (*solib_get_solib_by_pc) (CORE_ADDR addr);
+  CORE_ADDR (*solib_get_text_base) (struct objfile *objfile);
 };
 
 /*

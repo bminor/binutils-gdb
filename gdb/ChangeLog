@@ -1,5 +1,27 @@
 2004-12-13  Randolph Chung  <tausq@debian.org>
 
+	* Makefile.in (pa64solib_h, somsolib_h): Delete.
+	(solib_pa64_h, solib_som_h): New.
+	(HFILES_NO_SRCDIR, ALLDEPFILES): Replace somsolib.h with solib-som.h.
+	(hppa-hpux-tdep.o, hpread.o): Update dependencies.
+	(pa64solib.o, somsolib.o): Delete.
+	(solib-pa64.o, solib-som.o): New.
+	* hppa-hpux-tdep.c: Include new solib interfaces.
+	(hppa_hpux_som_init_abi): Attach to SOM solib interface.
+	(hppa_hpux_elf_init_abi): Attach to PA64 ELF solib interface.
+	* hppa-tdep.c (internalize_unwinds): If solib_get_text_base method
+	is available, use it to determine the base of unwind records.
+	* hppa-tdep.h (gdbarch_tdep): Add new solib methods.
+	* hpread.c: Replace somsolib.h with solib-som.h.
+	(hpread_process_one_debug_symbol): Use target vector to get thread 
+	start address.
+	* config/pa/hppa64.mt (TDEPFILES): Use new solib interface.
+	* config/pa/hppahpux.mt (TDEPFILES): Likewise.
+	* config/pa/hpux.mh (NATDEPFILES): Delete references to target objects.
+	* config/pa/tm-hppah.h: Use new solib interface.
+
+2004-12-13  Randolph Chung  <tausq@debian.org>
+
 	* tramp-frame.c (tramp_frame_sniffer): Allow frames with names or 
 	sections to be trampolines too.
 

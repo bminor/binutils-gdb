@@ -35,7 +35,7 @@
 #include "gdb-stabs.h"
 #include "gdbtypes.h"
 #include "demangle.h"
-#include "somsolib.h"
+#include "solib-som.h"
 #include "gdb_assert.h"
 #include "hppa-tdep.h"
 
@@ -5779,14 +5779,8 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 	       * where to look for this variable, using a call-back
 	       * to interpret the private shared-library data.
 	       */
-	      if (bfd_get_flavour(objfile->obfd) == bfd_target_som_flavour)
-	        SYMBOL_VALUE_ADDRESS (sym) = dn_bufp->dsvar.location +
-		  som_solib_thread_start_addr (so);
-#ifndef PA_SOM_ONLY
-	      else
-	        SYMBOL_VALUE_ADDRESS (sym) = dn_bufp->dsvar.location +
-		  pa64_solib_thread_start_addr (so);
-#endif
+	      SYMBOL_VALUE_ADDRESS (sym) = dn_bufp->dsvar.location +
+	        gdbarch_tdep (current_gdbarch)->solib_thread_start_addr (so);
 	    }
 	}
       break;
