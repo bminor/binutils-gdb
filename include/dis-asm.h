@@ -162,6 +162,9 @@ extern int print_insn_i960		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_sh		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_shl		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_hppa		PARAMS ((bfd_vma, disassemble_info*));
+/* start-sanitize-fr30 */
+extern int print_insn_fr30		PARAMS ((bfd_vma, disassemble_info*));
+/* end-sanitize-fr30 */
 extern int print_insn_m32r		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_m88k		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_mn10200		PARAMS ((bfd_vma, disassemble_info*));
