@@ -1,3 +1,7 @@
+2005-02-23  Jim Blandy  <jimb@redhat.com>
+
+	* disasm.c (gdb_disassemble_info): Call disassemble_init_for_target.
+
 2005-02-23  Andrew Cagney  <cagney@gnu.org>
 
 	* cli/cli-dump.c (dump_bfd_file): Replace magic constant with
