@@ -1,3 +1,18 @@
+2001-12-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* ui-out.c (struct ui_out_table): Add field entry_level.
+	(verify_field): New function.
+	(verify_field_proper_position): Delete function.
+	(verify_field_alignment): Delete function.
+	(ui_out_field_int): Update to use verify_field.
+	(ui_out_field_skip): Ditto.
+	(ui_out_field_string): Ditto.
+	(ui_out_field_fmt): Ditto.
+	(ui_out_table_begin): Initialize table.entry_level.
+	(ui_out_table_end): Clear table.entry_level.
+	(ui_out_begin): Call verify_field before pushing the new tuple or
+	list onto the stack.  Use table.entry_level.
+
 2001-12-14  Corinna Vinschen  <vinschen@redhat.com>
 
 	* config/djgpp/fnchange.lst: Add entries for opcodes/xstormy16-* files.

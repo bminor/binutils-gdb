@@ -71,6 +71,11 @@ struct ui_out_table
      header is being generated.  */
   int body_flag;
 
+  /* The level at which each entry of the table is to be found.  A row
+     (a tuple) is made up of entries.  Consequently ENTRY_LEVEL is one
+     above that of the table.  */
+  int entry_level;
+
   /* Number of table columns (as specified in the table_begin call).  */
   int columns;
 
@@ -262,8 +267,8 @@ static void append_header_to_list (struct ui_out *uiout, int width,
 static int get_next_header (struct ui_out *uiout, int *colno, int *width,
 			    int *alignment, char **colhdr);
 static void clear_header_list (struct ui_out *uiout);
-static void verify_field_proper_position (struct ui_out *uiout);
-static void verify_field_alignment (struct ui_out *uiout, int fldno, int *width, int *alignment);
+static void verify_field (struct ui_out *uiout, int *fldno, int *width,
+			  int *align);
 
 static void init_ui_out_state (struct ui_out *uiout);
 
@@ -283,6 +288,7 @@ previous table_end.");
 
   uiout->table.flag = 1;
   uiout->table.body_flag = 0;
+  uiout->table.entry_level = uiout->level + 1;
   uiout->table.columns = nbrofcols;
   if (tblid != NULL)
     uiout->table.id = xstrdup (tblid);
@@ -322,6 +328,7 @@ ui_out_table_end (struct ui_out *uiout)
     internal_error (__FILE__, __LINE__,
 		    "misplaced table_end or missing table_begin.");
 
+  uiout->table.entry_level = 0;
   uiout->table.body_flag = 0;
   uiout->table.flag = 0;
 
@@ -357,9 +364,29 @@ ui_out_begin (struct ui_out *uiout,
     internal_error (__FILE__, __LINE__,
 		    "table header or table_body expected; lists must be \
 specified after table_body.");
+
+  /* Be careful to verify the ``field'' before the new tuple/list is
+     pushed onto the stack.  That way the containing list/table/row is
+     verified and not the newly created tuple/list.  This verification
+     is needed (at least) for the case where a table row entry
+     contains either a tuple/list.  For that case bookkeeping such as
+     updating the column count or advancing to the next heading still
+     needs to be performed.  */
+  {
+    int fldno;
+    int width;
+    int align;
+    verify_field (uiout, &fldno, &width, &align);
+  }
+
   new_level = push_level (uiout, type, id);
-  if (uiout->table.flag && (new_level == 1))
+
+  /* If the push puts us at the same level as a table row entry, we've
+     got a new table row.  Put the header pointer back to the start.  */
+  if (uiout->table.body_flag
+      && uiout->table.entry_level == new_level)
     uiout->table.header_next = uiout->table.header_first;
+
   uo_begin (uiout, type, new_level, id);
 }
 
@@ -456,12 +483,7 @@ ui_out_field_int (struct ui_out *uiout,
   int align;
   struct ui_out_level *current = current_level (uiout);
 
-  verify_field_proper_position (uiout);
-
-  current->field_count += 1;
-  fldno = current->field_count;
-
-  verify_field_alignment (uiout, fldno, &width, &align);
+  verify_field (uiout, &fldno, &width, &align);
 
   uo_field_int (uiout, fldno, width, align, fldname, value);
 }
@@ -505,14 +527,8 @@ ui_out_field_skip (struct ui_out *uiout,
   int fldno;
   int width;
   int align;
-  struct ui_out_level *current = current_level (uiout);
 
-  verify_field_proper_position (uiout);
-
-  current->field_count += 1;
-  fldno = current->field_count;
-
-  verify_field_alignment (uiout, fldno, &width, &align);
+  verify_field (uiout, &fldno, &width, &align);
 
   uo_field_skip (uiout, fldno, width, align, fldname);
 }
@@ -525,14 +541,8 @@ ui_out_field_string (struct ui_out *uiout,
   int fldno;
   int width;
   int align;
-  struct ui_out_level *current = current_level (uiout);
 
-  verify_field_proper_position (uiout);
-
-  current->field_count += 1;
-  fldno = current->field_count;
-
-  verify_field_alignment (uiout, fldno, &width, &align);
+  verify_field (uiout, &fldno, &width, &align);
 
   uo_field_string (uiout, fldno, width, align, fldname, string);
 }
@@ -547,15 +557,9 @@ ui_out_field_fmt (struct ui_out *uiout,
   int fldno;
   int width;
   int align;
-  struct ui_out_level *current = current_level (uiout);
-
-  verify_field_proper_position (uiout);
-
-  current->field_count += 1;
-  fldno = current->field_count;
 
   /* will not align, but has to call anyway */
-  verify_field_alignment (uiout, fldno, &width, &align);
+  verify_field (uiout, &fldno, &width, &align);
 
   va_start (args, format);
 
@@ -1055,39 +1059,37 @@ get_next_header (struct ui_out *uiout,
   return 1;
 }
 
-/* makes sure the field_* calls were properly placed */
+
+/* Verify that the field/tuple/list is correctly positioned.  Return
+   the field number and corresponding alignment (if
+   available/applicable).  */
 
 static void
-verify_field_proper_position (struct ui_out *uiout)
+verify_field (struct ui_out *uiout, int *fldno, int *width, int *align)
 {
+  struct ui_out_level *current = current_level (uiout);
+  char *text;
+
   if (uiout->table.flag)
     {
       if (!uiout->table.body_flag)
 	internal_error (__FILE__, __LINE__,
 			"table_body missing; table fields must be \
 specified after table_body and inside a list.");
-      if (uiout->level == 0)
-	internal_error (__FILE__, __LINE__,
-			"list_begin missing; table fields must be \
-specified after table_body and inside a list.");
+      /* NOTE: cagney/2001-12-08: There was a check here to ensure
+	 that this code was only executed when uiout->level was
+	 greater than zero.  That no longer applies - this code is run
+	 before each table row tuple is started and at that point the
+	 level is zero.  */
     }
-}
 
-/* determines what is the alignment policy */
+  current->field_count += 1;
 
-static void
-verify_field_alignment (struct ui_out *uiout,
-			int fldno,
-			int *width,
-			int *align)
-{
-  int colno;
-  char *text;
-
-  if (uiout->table.flag
-      && get_next_header (uiout, &colno, width, align, &text))
+  if (uiout->table.body_flag
+      && uiout->table.entry_level == uiout->level
+      && get_next_header (uiout, fldno, width, align, &text))
     {
-      if (fldno != colno)
+      if (*fldno != current->field_count)
 	internal_error (__FILE__, __LINE__,
 			"ui-out internal error in handling headers.");
     }
@@ -1095,8 +1097,10 @@ verify_field_alignment (struct ui_out *uiout,
     {
       *width = 0;
       *align = ui_noalign;
+      *fldno = current->field_count;
     }
 }
+
 
 /* access to ui_out format private members */
 
