@@ -210,6 +210,9 @@ syntax.
 it may be necessary to refer to some variables with a trailing
 underscore.
 
+@value{GDBN} can be used to debug programs written in Objective-C,
+using either the Apple/NeXT or the GNU Objective-C runtime.
+
 @menu
 * Free Software::               Freely redistributable software
 * Contributors::                Contributors to GDB
@@ -3180,7 +3183,8 @@ end
 @cindex overloading
 @cindex symbol overloading
 
-Some programming languages (notably C@t{++}) permit a single function name
+Some programming languages (notably C@t{++} and Objective-C) permit a 
+single function name
 to be defined several times, for application in different contexts.
 This is called @dfn{overloading}.  When a function name is overloaded,
 @samp{break @var{function}} is not enough to tell @value{GDBN} where you want
@@ -7487,6 +7491,9 @@ C source file
 @itemx .c++
 C@t{++} source file
 
+@item .m
+Objective-C source file
+
 @item .f
 @itemx .F
 Fortran source file
@@ -7762,7 +7769,7 @@ being set automatically by @value{GDBN}.
 @node Support
 @section Supported languages
 
-@value{GDBN} supports C, C@t{++}, Fortran, Java, assembly, and Modula-2.
+@value{GDBN} supports C, C@t{++}, Objective-C, Fortran, Java, assembly, and Modula-2.
 @c This is false ...
 Some @value{GDBN} features may be used in expressions regardless of the
 language you use: the @value{GDBN} @code{@@} and @code{::} operators,
@@ -7779,8 +7786,9 @@ books written on each of these languages; please look to these for a
 language reference or tutorial.
 
 @menu
-* C::           C and C@t{++}
-* Modula-2::    Modula-2
+* C::                           C and C@t{++}
+* Objective-C::                 Objective-C             
+* Modula-2::                    Modula-2
 @end menu
 
 @node C
@@ -8297,7 +8305,101 @@ available choices, or to finish the type list for you.
 @xref{Completion,, Command completion}, for details on how to do this.
 @end table
 
-@node Modula-2
+@node Objective-C
+@subsection Objective-C
+
+@cindex Objective-C
+This section provides information about some commands and command
+options that are useful for debugging Objective-C code.
+
+@menu
+* Method Names in Commands::    
+* The Print Command with Objective-C::  
+@end menu
+
+@node Method Names in Commands, The Print Command with Objective-C, Objective-C, Objective-C
+@subsubsection Method Names in Commands
+
+The following commands have been extended to accept Objective-C method
+names as line specifications:
+
+@kindex clear@r{, and Objective-C}
+@kindex break@r{, and Objective-C}
+@kindex info line@r{, and Objective-C}
+@kindex jump@r{, and Objective-C}
+@kindex list@r{, and Objective-C}
+@itemize
+@item @code{clear}
+@item @code{break}
+@item @code{info line}
+@item @code{jump}
+@item @code{list}
+@end itemize
+
+A fully qualified Objective-C method name is specified as
+
+@smallexample
+-[@var{Class} @var{methodName}]
+@end smallexample
+
+where the minus sign is used to indicate an instance method and a plus
+sign (not shown) is used to indicate a class method. The
+class name @var{Class} and method name @var{methoName} are enclosed in
+brackets, similar to the way messages are specified in Objective-C source
+code. For example, to set a breakpoint at the @code{create} instance method of 
+class @code{Fruit} in the program currently being debugged, enter:
+
+@smallexample
+break -[Fruit create]
+@end smallexample
+
+To list ten program lines around the @code{initialize} class method,
+enter:
+
+@smallexample
+list +[NSText initialize]
+@end smallexample
+
+In the current version of GDB, the plus or minus sign is required.  In
+future versions of GDB, the plus or minus sign will be optional, but you
+can use it to narrow the search.  It is also possible to specify just a
+method name:
+
+@smallexample
+break create
+@end smallexample
+
+You must specify the complete method name, including any colons.  If
+your program's source files contain more than one @code{create} method,
+you'll be presented with a numbered list of classes that implement that
+method.  Indicate your choice by number, or type @samp{0} to exit if
+none apply.
+
+As another example, to clear a breakpoint established at the
+@code{makeKeyAndOrderFront:} method of the @code{NSWindow} class, enter:
+
+@smallexample
+clear -[NSWindow makeKeyAndOrderFront:]
+@end smallexample
+
+@node The Print Command with Objective-C
+@subsubsection The Print Command With Objective-C
+
+The print command has also been extended to accept methods. For example:
+
+@smallexample
+print -[object hash]
+@end smallexample
+
+@cindex print an Objective-C object description
+will tell gdb to send the -hash message to object and print the
+result. Also an additional command has been added, @code{print-object}
+or @code{po} for short, which is meant to print the description of an
+object. However, this command may only work with certain Objective-C
+libraries that have a particular hook function, called
+@code{_NSPrintForDebugger} defined.
+
+@node Modula-2,  , Objective-C, Support
 @subsection Modula-2
 
 @cindex Modula-2, @value{GDBN} support
@@ -8936,6 +9038,20 @@ outside of functions (i.e.@: excluding local variables).
 Print the names and data types of all variables (except for local
 variables) whose names contain a match for regular expression
 @var{regexp}.
+
+@kindex info classes
+@item info classes
+@itemx info classes @var{regexp}
+Display all Objective-C classes in your program, or
+(with the @var{regexp} argument) all those matching a particular regular
+expression.
+
+@kindex info selectors
+@item info selectors
+@itemx info selectors @var{regexp}
+Display all Objective-C selectors in your program, or
+(with the @var{regexp} argument) all those matching a particular regular
+expression.
 
 @ignore
 This was never implemented.

@@ -1,3 +1,7 @@
+2003-06-07  Adam Fedor  <fedor@gnu.org>
+
+	* gdb.texinfo: Add Objective-C documentation.
+
 2003-06-01  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Add "func_addr"
