@@ -1,4 +1,15 @@
+Mon Aug 16 03:05:17 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.t00/help.exp, gdb.t02/whatis.exp, gdb.t07/watchpoint.exp,
+	gdb.t08/opaque.exp, gdb.t17/interrupt.exp:  Update for vax running
+	Ultrix.
+	* gdb.t02/whatis.exp:  Use procedure to setup xfails on long versus
+	int tests.
+	* gdb.t08/opaque.exp:  Use procedure to setup xfails for opaque tests.
+
 Thu Aug 12 15:24:28 1993  Fred Fish  (fnf@deneb.cygnus.com)
+
+	* Makefile.in (distclean):  Remove *.log *.plog *.sum *.psum site.*.
 
 	* gdb.t17/interrupt.exp:  Fix 'missing Continuing' case so pattern
 	to match does not match the passing case but still matches the 
