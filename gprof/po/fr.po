@@ -1,11 +1,11 @@
 # Messages français pour gprof.
-# Copyright (C) 1996 Free Software Foundation, Inc.
-# Michel Robitaille <robitail@IRO.UMontreal.CA>, 1996.
+# Copyright © 1996 Free Software Foundation, Inc.
+# Michel Robitaille <robitail@IRO.UMontreal.CA>, depuis/since 1996.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: gprof 2.12-pre020121\n"
-"POT-Creation-Date: 2002-01-17 14:03+0000\n"
+"Project-Id-Version: gprof 2.12.1\n"
+"POT-Creation-Date: 2002-01-31 18:32+0000\n"
 "PO-Revision-Date: 2002-03-16 21:00-0500\n"
 "Last-Translator: Michel Robitaille <robitail@IRO.UMontreal.CA>\n"
 "Language-Team: French <traduc@traduc.org>\n"
@@ -13,46 +13,46 @@ msgstr ""
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: alpha.c:90
+#: alpha.c:93 mips.c:47
 msgid "<indirect child>"
 msgstr "<rejeton indirect>"
 
-#: alpha.c:107
+#: alpha.c:110 mips.c:64
 #, c-format
 msgid "[find_call] %s: 0x%lx to 0x%lx\n"
 msgstr "[find_call] %s: 0x%lx to 0x%lx\n"
 
-#: alpha.c:129
+#: alpha.c:132
 #, c-format
 msgid "[find_call] 0x%lx: jsr%s <indirect_child>\n"
 msgstr "[find_call] 0x%lx: jsr%s <indirect_child>\n"
 
-#: alpha.c:138
+#: alpha.c:142
 #, c-format
 msgid "[find_call] 0x%lx: bsr"
 msgstr "[find_call] 0x%lx: bsr"
 
-#: basic_blocks.c:124 call_graph.c:87 hist.c:92
+#: basic_blocks.c:122 call_graph.c:90 hist.c:93
 #, c-format
 msgid "%s: %s: unexpected end of file\n"
 msgstr "%s: %s: fin prématurée du fichier\n"
 
-#: basic_blocks.c:192
+#: basic_blocks.c:190
 #, c-format
 msgid "%s: warning: ignoring basic-block exec counts (use -l or --line)\n"
 msgstr "%s: AVERTISSEMENT: a ignoré les compteurs d'exécution des blocs de base(utiliser -l ou --line)\n"
 
 #. FIXME: This only works if bfd_vma is unsigned long.
-#: basic_blocks.c:283 basic_blocks.c:293
+#: basic_blocks.c:281 basic_blocks.c:291
 #, c-format
 msgid "%s:%d: (%s:0x%lx) %lu executions\n"
 msgstr "%s:%d: (%s:0x%lx) %lu exécutions\n"
 
-#: basic_blocks.c:284 basic_blocks.c:294
+#: basic_blocks.c:282 basic_blocks.c:292
 msgid "<unknown>"
 msgstr "<inconnu>"
 
-#: basic_blocks.c:538
+#: basic_blocks.c:536
 #, c-format
 msgid ""
 "\n"
@@ -69,7 +69,7 @@ msgstr ""
 "     Ligne     Compteur\n"
 "\n"
 
-#: basic_blocks.c:562
+#: basic_blocks.c:560
 msgid ""
 "\n"
 "Execution Summary:\n"
@@ -79,22 +79,22 @@ msgstr ""
 "Sommaire d'exécution:\n"
 "\n"
 
-#: basic_blocks.c:563
+#: basic_blocks.c:561
 #, c-format
 msgid "%9ld   Executable lines in this file\n"
 msgstr "%9ld   Lignes exécutables dans ce fichier\n"
 
-#: basic_blocks.c:565
+#: basic_blocks.c:563
 #, c-format
 msgid "%9ld   Lines executed\n"
 msgstr "%9ld   Lignes exécutées\n"
 
-#: basic_blocks.c:566
+#: basic_blocks.c:564
 #, c-format
 msgid "%9.2f   Percent of the file executed\n"
 msgstr "%9.2f   Percent du fichier exécuté\n"
 
-#: basic_blocks.c:570
+#: basic_blocks.c:568
 #, c-format
 msgid ""
 "\n"
@@ -103,17 +103,17 @@ msgstr ""
 "\n"
 "%9lu   Nombre total de lignes exécutées\n"
 
-#: basic_blocks.c:572
+#: basic_blocks.c:570
 #, c-format
 msgid "%9.2f   Average executions per line\n"
 msgstr "%9.2f   Exécutions moyennes par ligne\n"
 
-#: call_graph.c:66
+#: call_graph.c:69
 #, c-format
 msgid "[cg_tally] arc from %s to %s traversed %lu times\n"
 msgstr "[cg_tally] arc à partir de %s à %s traversés %lu fois\n"
 
-#: cg_print.c:54
+#: cg_print.c:58
 msgid ""
 "\t\t     Call graph (explanation follows)\n"
 "\n"
@@ -121,7 +121,7 @@ msgstr ""
 "\t\t     Appel de graphe (les explications suivent)\n"
 "\n"
 
-#: cg_print.c:56
+#: cg_print.c:60
 msgid ""
 "\t\t\tCall graph\n"
 "\n"
@@ -129,7 +129,7 @@ msgstr ""
 "\t\t\tAppel de graphe\n"
 "\n"
 
-#: cg_print.c:59 hist.c:354
+#: cg_print.c:63 hist.c:355
 #, c-format
 msgid ""
 "\n"
@@ -138,7 +138,7 @@ msgstr ""
 "\n"
 "granularité: chaque échantillonnage couvre %ld octet(s)"
 
-#: cg_print.c:63
+#: cg_print.c:67
 #, c-format
 msgid ""
 " for %.2f%% of %.2f seconds\n"
@@ -147,7 +147,7 @@ msgstr ""
 " pour %.2f%% of %.2f secondes\n"
 "\n"
 
-#: cg_print.c:67
+#: cg_print.c:71
 msgid ""
 " no time propagated\n"
 "\n"
@@ -155,63 +155,63 @@ msgstr ""
 " pas de propagation de temps\n"
 "\n"
 
-#: cg_print.c:76 cg_print.c:79 cg_print.c:81
+#: cg_print.c:80 cg_print.c:83 cg_print.c:85
 msgid "called"
 msgstr "appelé"
 
-#: cg_print.c:76 cg_print.c:81
+#: cg_print.c:80 cg_print.c:85
 msgid "total"
 msgstr "total"
 
-#: cg_print.c:76
+#: cg_print.c:80
 msgid "parents"
 msgstr "parents"
 
-#: cg_print.c:78 cg_print.c:79
+#: cg_print.c:82 cg_print.c:83
 msgid "index"
 msgstr "index"
 
-#: cg_print.c:78
+#: cg_print.c:82
 msgid "%time"
 msgstr "%temps"
 
-#: cg_print.c:78 cg_print.c:79
+#: cg_print.c:82 cg_print.c:83
 msgid "self"
 msgstr "auto"
 
-#: cg_print.c:78
+#: cg_print.c:82
 msgid "descendants"
 msgstr "descendants"
 
-#: cg_print.c:79 hist.c:380
+#: cg_print.c:83 hist.c:381
 msgid "name"
 msgstr "nom"
 
-#: cg_print.c:81
+#: cg_print.c:85
 msgid "children"
 msgstr "rejetons"
 
-#: cg_print.c:86
+#: cg_print.c:90
 #, c-format
 msgid "index %% time    self  children    called     name\n"
 msgstr "index %% temp    auto  rejetons    appelé     nom\n"
 
-#: cg_print.c:109
+#: cg_print.c:113
 #, c-format
 msgid " <cycle %d as a whole> [%d]\n"
 msgstr " <cycle %d en entier> [%d]\n"
 
-#: cg_print.c:335
+#: cg_print.c:339
 #, c-format
 msgid "%6.6s %5.5s %7.7s %11.11s %7.7s %7.7s     <spontaneous>\n"
 msgstr "%6.6s %5.5s %7.7s %11.11s %7.7s %7.7s     <spontanés>\n"
 
-#: cg_print.c:336
+#: cg_print.c:340
 #, c-format
 msgid "%6.6s %5.5s %7.7s %7.7s %7.7s %7.7s     <spontaneous>\n"
 msgstr "%6.6s %5.5s %7.7s %7.7s %7.7s %7.7s     <spontanés>\n"
 
-#: cg_print.c:570
+#: cg_print.c:574
 msgid ""
 "Index by function name\n"
 "\n"
@@ -219,151 +219,146 @@ msgstr ""
 "Index par nom de fonction\n"
 "\n"
 
-#: cg_print.c:627 cg_print.c:636
+#: cg_print.c:631 cg_print.c:640
 #, c-format
 msgid "<cycle %d>"
 msgstr "<cycle %d>"
 
-#: corefile.c:61
+#: corefile.c:64
 #, c-format
 msgid "%s: could not open %s.\n"
 msgstr "%s: ne peut ouvrir %s.\n"
 
-#: corefile.c:75 corefile.c:109
+#: corefile.c:78 corefile.c:112
 #, c-format
 msgid "%s: unable to parse mapping file %s.\n"
 msgstr "%s: incapable d'analyser le fichier de projection %s.\n"
 
-#: corefile.c:151
+#: corefile.c:154
 #, c-format
 msgid "%s: %s: not in a.out format\n"
 msgstr "%s: %s: n'est pas dans le format a.out\n"
 
-#: corefile.c:162
+#: corefile.c:165
 #, c-format
 msgid "%s: can't find .text section in %s\n"
 msgstr "%s: ne peut repérer la section .text dans %s\n"
 
-#: corefile.c:220
+#: corefile.c:223
 #, c-format
 msgid "%s: ran out room for %lu bytes of text space\n"
 msgstr "%s: espace épuisé pour %lu octets dans l'espace texte\n"
 
-#: corefile.c:234
+#: corefile.c:237
 #, c-format
 msgid "%s: can't do -c\n"
 msgstr "%s: ne peut appliquer l'option -c\n"
 
-#: corefile.c:265
+#: corefile.c:272
 #, c-format
 msgid "%s: -c not supported on architecture %s\n"
 msgstr "%s: l'option -c n'est pas supporté l'architecture %s\n"
 
-#: corefile.c:432
+#: corefile.c:439
 #, c-format
 msgid "%s: file `%s' has no symbols\n"
 msgstr "%s: fichier « %s » n'a pas de symbole\n"
 
-#: corefile.c:732
+#: corefile.c:739
 #, c-format
 msgid "%s: somebody miscounted: ltab.len=%d instead of %ld\n"
 msgstr "%s: mauvais décomptage: ltab.len=%d au lieu de %ld\n"
 
-#: gmon_io.c:59 gmon_io.c:106
+#: gmon_io.c:83 gmon_io.c:137 gmon_io.c:188 gmon_io.c:216 gmon_io.c:386 gmon_io.c:413 gmon_io.c:609 gmon_io.c:634
 #, c-format
-msgid "%s: GMON_PTR_SIZE has unexpected value of %u\n"
-msgstr "%s: GMON_PTR_SIZE a une valeur de taille inattendue de %u\n"
+msgid "%s: bits per address has unexpected value of %u\n"
+msgstr "%s: bits par adresse a une valeur inattendue de %u\n"
 
-#: gmon_io.c:154 gmon_io.c:172
-#, c-format
-msgid "%s: bfd_vma has unexpected size of %ld bytes\n"
-msgstr "%s: bfd_vma a une taille inattendue de %ld octetst\n"
-
-#: gmon_io.c:207 gmon_io.c:299
+#: gmon_io.c:252 gmon_io.c:347
 #, c-format
 msgid "%s: file too short to be a gmon file\n"
 msgstr "%s: fichier trop court pour être un fichier gmon\n"
 
-#: gmon_io.c:217 gmon_io.c:333
+#: gmon_io.c:262 gmon_io.c:396
 #, c-format
 msgid "%s: file `%s' has bad magic cookie\n"
 msgstr "%s: fichier « %s » a un nombre magique erroné\n"
 
-#: gmon_io.c:228
+#: gmon_io.c:273
 #, c-format
 msgid "%s: file `%s' has unsupported version %d\n"
 msgstr "%s: fichier « %s » est d'une version non supportée %d\n"
 
-#: gmon_io.c:258
+#: gmon_io.c:303
 #, c-format
 msgid "%s: %s: found bad tag %d (file corrupted?)\n"
 msgstr "%s: %s: a repéré une étiquette erronée %d (fichier corrompu?)\n"
 
-#: gmon_io.c:321
+#: gmon_io.c:369
 #, c-format
 msgid "%s: profiling rate incompatible with first gmon file\n"
 msgstr "%s: taux de profilage incompatible avec le premier fichier gmon\n"
 
-#: gmon_io.c:350
+#: gmon_io.c:429
 #, c-format
 msgid "%s: incompatible with first gmon file\n"
 msgstr "%s: incompatible avec le premier fichier gmon\n"
 
-#: gmon_io.c:378
+#: gmon_io.c:457
 #, c-format
 msgid "%s: file '%s' does not appear to be in gmon.out format\n"
 msgstr "%s: fichier « %s » ne semble pas être dans le format gmon.out\n"
 
-#: gmon_io.c:399
+#: gmon_io.c:478
 #, c-format
 msgid "%s: unexpected EOF after reading %d/%d bins\n"
 msgstr "%s: EOF inattendu après la lecture de %d/%d bins\n"
 
-#: gmon_io.c:435
+#: gmon_io.c:511
 msgid "time is in ticks, not seconds\n"
 msgstr "temps est en tics et non pas en secondes\n"
 
-#: gmon_io.c:441 gmon_io.c:578
+#: gmon_io.c:517 gmon_io.c:704
 #, c-format
 msgid "%s: don't know how to deal with file format %d\n"
 msgstr "%s: ne sait pas comment gérer le format %d du fichier\n"
 
-#: gmon_io.c:448
+#: gmon_io.c:524
 #, c-format
 msgid "File `%s' (version %d) contains:\n"
 msgstr "Fichier « %s » (version %d) contient:\n"
 
-#: gmon_io.c:451
+#: gmon_io.c:527
 #, c-format
 msgid "\t%d histogram record\n"
 msgstr "\t%d enregistrement de type histogramme\n"
 
-#: gmon_io.c:452
+#: gmon_io.c:528
 #, c-format
 msgid "\t%d histogram records\n"
 msgstr "\t%d enregistrements de type histogramme\n"
 
-#: gmon_io.c:454
+#: gmon_io.c:530
 #, c-format
 msgid "\t%d call-graph record\n"
 msgstr "\t%d enregistrement de type call-graph\n"
 
-#: gmon_io.c:455
+#: gmon_io.c:531
 #, c-format
 msgid "\t%d call-graph records\n"
 msgstr "\t%d enregistrements de type call-graph\n"
 
-#: gmon_io.c:457
+#: gmon_io.c:533
 #, c-format
 msgid "\t%d basic-block count record\n"
 msgstr "\t%d enregistrement de décomptes de bloc de base\n"
 
-#: gmon_io.c:458
+#: gmon_io.c:534
 #, c-format
 msgid "\t%d basic-block count records\n"
 msgstr "\t%d enregistrements de décomptes de bloc de base\n"
 
-#: gprof.c:145
+#: gprof.c:147
 #, c-format
 msgid ""
 "Usage: %s [-[abcDhilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][name]] [-I dirs]\n"
@@ -394,76 +389,76 @@ msgstr ""
 "\t[--demangle[=STYLE]] [--no-demangle]\n"
 "\t[fichier-image] [fichier-profile...]\n"
 
-#: gprof.c:161
+#: gprof.c:163
 #, c-format
 msgid "Report bugs to %s\n"
 msgstr "Rapporter toutes anomalies à %s\n"
 
-#: gprof.c:233
+#: gprof.c:235
 #, c-format
 msgid "%s: debugging not supported; -d ignored\n"
 msgstr "%s: mise au point n'est pas supportée; -d ignorée\n"
 
-#: gprof.c:313
+#: gprof.c:315
 #, c-format
 msgid "%s: unknown file format %s\n"
 msgstr "%s: format de fichier inconnu %s\n"
 
 #. This output is intended to follow the GNU standards document.
-#: gprof.c:397
+#: gprof.c:399
 #, c-format
 msgid "GNU gprof %s\n"
 msgstr "GNU gprof %s\n"
 
-#: gprof.c:398
+#: gprof.c:400
 msgid "Based on BSD gprof, copyright 1983 Regents of the University of California.\n"
 msgstr "Basé à partir de BSD gprof, copyright 1983 Regents of the University of California.\n"
 
-#: gprof.c:399
+#: gprof.c:401
 msgid "This program is free software.  This program has absolutely no warranty.\n"
 msgstr "Ce logiciel est libre. AUCUNE garantie n'est donnée.\n"
 
-#: gprof.c:440
+#: gprof.c:442
 #, c-format
 msgid "%s: unknown demangling style `%s'\n"
 msgstr "%s: style d'encodage par mutilation inconnu « %s »\n"
 
-#: gprof.c:460
+#: gprof.c:462
 #, c-format
 msgid "%s: Only one of --function-ordering and --file-ordering may be specified.\n"
 msgstr "%s: une seule des options --function-ordering et --file-ordering peut être spécifiée.\n"
 
-#: gprof.c:560
+#: gprof.c:562
 #, c-format
 msgid "%s: sorry, file format `prof' is not yet supported\n"
 msgstr "%s: désolé, le format de fichier « prof » n'est pas encore supporté\n"
 
-#: gprof.c:621
+#: gprof.c:623
 #, c-format
 msgid "%s: gmon.out file is missing histogram\n"
 msgstr "%s: le fichier gmon.out n'a pas d'histogramme\n"
 
-#: gprof.c:628
+#: gprof.c:630
 #, c-format
 msgid "%s: gmon.out file is missing call-graph data\n"
 msgstr "%s: le fichier gmon.out n'a pas de données de type call-graph\n"
 
-#: hist.c:121
+#: hist.c:122
 #, c-format
 msgid "%s: `%s' is incompatible with first gmon file\n"
 msgstr "%s: « %s » est incompatible avec le premier fichier gmon\n"
 
-#: hist.c:137
+#: hist.c:138
 #, c-format
 msgid "%s: %s: unexpected EOF after reading %d of %d samples\n"
 msgstr "%s: %s: EOF inattendu après la lecture de %d de %d échantillons\n"
 
-#: hist.c:350
+#: hist.c:351
 #, c-format
 msgid "%c%c/call"
 msgstr "%c%c/appel"
 
-#: hist.c:358
+#: hist.c:359
 #, c-format
 msgid ""
 " for %.2f%% of %.2f %s\n"
@@ -472,7 +467,7 @@ msgstr ""
 " pour %.2f%% of %.2f %s\n"
 "\n"
 
-#: hist.c:364
+#: hist.c:365
 #, c-format
 msgid ""
 "\n"
@@ -481,7 +476,7 @@ msgstr ""
 "\n"
 "Chaque échantillon dénombre %g %s.\n"
 
-#: hist.c:369
+#: hist.c:370
 msgid ""
 " no time accumulated\n"
 "\n"
@@ -489,27 +484,27 @@ msgstr ""
 " pas d'accumulation de temps\n"
 "\n"
 
-#: hist.c:376
+#: hist.c:377
 msgid "cumulative"
 msgstr "cumulatif"
 
-#: hist.c:376
+#: hist.c:377
 msgid "self  "
 msgstr "auto  "
 
-#: hist.c:376
+#: hist.c:377
 msgid "total "
 msgstr "total "
 
-#: hist.c:379
+#: hist.c:380
 msgid "time"
 msgstr "temps"
 
-#: hist.c:379
+#: hist.c:380
 msgid "calls"
 msgstr "appels"
 
-#: hist.c:468
+#: hist.c:469
 msgid ""
 "\n"
 "\n"
@@ -521,9 +516,19 @@ msgstr ""
 "\n"
 "profile plat:\n"
 
-#: hist.c:474
+#: hist.c:475
 msgid "Flat profile:\n"
 msgstr "Profile plat:\n"
+
+#: mips.c:75
+#, c-format
+msgid "[find_call] 0x%lx: jal"
+msgstr "[find_call] 0x%lx: jal"
+
+#: mips.c:100
+#, c-format
+msgid "[find_call] 0x%lx: jalr\n"
+msgstr "[find_call] 0x%lx: jalr\n"
 
 #: source.c:163
 #, c-format
@@ -535,7 +540,10 @@ msgstr "%s: n'a pu localiser « %s »\n"
 msgid "*** File %s:\n"
 msgstr "*** Fichier %s:\n"
 
-#: utils.c:94
+#: utils.c:96
 #, c-format
 msgid " <cycle %d>"
 msgstr " <cycle %d>"
+
+#~ msgid "%s: bfd_vma has unexpected size of %ld bytes\n"
+#~ msgstr "%s: bfd_vma a une taille inattendue de %ld octetst\n"
