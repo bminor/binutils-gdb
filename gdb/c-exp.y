@@ -1637,5 +1637,5 @@ void
 yyerror (msg)
      char *msg;
 {
-  error (msg ? msg : "Invalid syntax in expression.");
+  error ("A %s in expression, near `%s'.", (msg ? msg : "error"), lexptr);
 }

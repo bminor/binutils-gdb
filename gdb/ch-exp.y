@@ -1989,15 +1989,7 @@ yylex ()
 
 void
 yyerror (msg)
-     char *msg;	/* unused */
+     char *msg;
 {
-  printf_unfiltered ("Parsing:  %s\n", lexptr);
-  if (yychar < 256)
-    {
-      error ("Invalid syntax in expression near character '%c'.", yychar);
-    }
-  else
-    {
-      error ("Invalid syntax in expression");
-    }
+  error ("A %s in expression, near `%s'.", (msg ? msg : "error"), lexptr);
 }
