@@ -481,4 +481,4 @@ AC_SUBST(tdefaults)
 
 rm -f doc/config.status
 AC_OUTPUT(Makefile doc/Makefile,
-[case x$CONFIG_HEADERS in xconfig.h) echo > stamp-h ;; esac])
+[case x$CONFIG_HEADERS in xconfig.h:config.in) echo > stamp-h ;; esac])
