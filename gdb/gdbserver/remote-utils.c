@@ -48,7 +48,7 @@ void
 remote_open (char *name)
 {
   int save_fcntl_flags;
-
+  
   if (!strchr (name, ':'))
     {
       remote_desc = open (name, O_RDWR);
@@ -99,7 +99,7 @@ remote_open (char *name)
       }
 #endif
 
-
+      fprintf (stderr, "Remote debugging using %s\n", name);
     }
   else
     {
@@ -107,7 +107,6 @@ remote_open (char *name)
       int port;
       struct sockaddr_in sockaddr;
       int tmp;
-      struct protoent *protoent;
       int tmp_desc;
 
       port_str = strchr (name, ':');
@@ -136,10 +135,6 @@ remote_open (char *name)
       if (remote_desc == -1)
 	perror_with_name ("Accept failed");
 
-      protoent = getprotobyname ("tcp");
-      if (!protoent)
-	perror_with_name ("getprotobyname");
-
       /* Enable TCP keep alive process. */
       tmp = 1;
       setsockopt (tmp_desc, SOL_SOCKET, SO_KEEPALIVE, (char *) &tmp, sizeof (tmp));
@@ -147,13 +142,17 @@ remote_open (char *name)
       /* Tell TCP not to delay small packets.  This greatly speeds up
          interactive response. */
       tmp = 1;
-      setsockopt (remote_desc, protoent->p_proto, TCP_NODELAY,
+      setsockopt (remote_desc, IPPROTO_TCP, TCP_NODELAY,
 		  (char *) &tmp, sizeof (tmp));
 
       close (tmp_desc);		/* No longer need this */
 
       signal (SIGPIPE, SIG_IGN);	/* If we don't do this, then gdbserver simply
 					   exits when the remote side dies.  */
+
+      /* Convert IP address to string.  */
+      fprintf (stderr, "Remote debugging from host %s\n", 
+         inet_ntoa (sockaddr.sin_addr));
     }
 
 #if defined(F_SETFL) && defined (FASYNC)
@@ -164,7 +163,6 @@ remote_open (char *name)
 #endif
 #endif
   disable_async_io ();
-  fprintf (stderr, "Remote debugging using %s\n", name);
 }
 
 void
@@ -465,17 +463,15 @@ outreg (int regno, char *buf)
 void
 prepare_resume_reply (char *buf, char status, unsigned char signo)
 {
-  int nib;
+  int nib, sig;
 
   *buf++ = status;
 
-  /* FIXME!  Should be converting this signal number (numbered
-     according to the signal numbering of the system we are running on)
-     to the signal numbers used by the gdb protocol (see enum target_signal
-     in gdb/target.h).  */
-  nib = ((signo & 0xf0) >> 4);
+  sig = (int)target_signal_from_host (signo);
+
+  nib = ((sig & 0xf0) >> 4);
   *buf++ = tohex (nib);
-  nib = signo & 0x0f;
+  nib = sig & 0x0f;
   *buf++ = tohex (nib);
 
   if (status == 'T')

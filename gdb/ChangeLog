@@ -1,5 +1,33 @@
 2002-03-29  Daniel Jacobowitz  <drow@mvista.com>
 
+	Merge from trunk:
+
+	2002-03-27  Daniel Jacobowitz  <drow@mvista.com>
+
+        * gdbserver/server.c (main): Call target_signal_to_host_p
+        and target_signal_to_host on signals received from the remote.
+        * gdbserver/remote-utils.c (prepare_resume_reply): Call
+        target_signal_from_host on signals sent to the remote.
+        * gdbserver/server.h: Add prototypes.  Include "gdb/signals.h".
+        * gdbserver/Makefile.in: Add signals.o.  Add -I${INCLUDE_DIR}.
+
+
+ 	2002-03-20  Martin M. Hunt  <hunt@redhat.com>
+
+        * gdbserver/remote-utils.c (remote_open): Don't call
+        getprotobyname, we're all using TCP here so just use
+        IPPROTO_TCP.
+        * gdbserver/gdbreplay.c (remote_open): Ditto.
+
+
+	2002-03-13  Michal Ludvig  <mludvig@suse.cz>
+
+        * gdbserver/remote-util.c (remote_open): Print remote-side's
+        IP address when remote debugging over the network.
+
+2002-03-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	Merge from trunk:
 	2002-03-27  Daniel Jacobowitz  <drow@mvista.com>
 
 	* signals/signals.c: Include "server.h" in gdbserver build.
