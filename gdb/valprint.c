@@ -34,9 +34,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Prototypes for local functions */
 
 static void
-print_string PARAMS ((FILE *, char *, unsigned int, int));
-
-static void
 show_print PARAMS ((char *, int));
 
 static void
@@ -88,7 +85,7 @@ extern int demangle;	/* whether to print C++ syms raw or source-form */
 /* Maximum number of chars to print for a string pointer value
    or vector contents, or UINT_MAX for no limit.  */
 
-static unsigned int print_max;
+unsigned int print_max;
 
 /* Default input and output radixes, and output format letter.  */
 
@@ -96,9 +93,11 @@ unsigned input_radix = 10;
 unsigned output_radix = 10;
 int output_format = 0;
 
-/* Print repeat counts if there are more than this
-   many repetitions of an element in an array.  */
-#define	REPEAT_COUNT_THRESHOLD	10
+/* Print repeat counts if there are more than this many repetitions of an
+   element in an array.  Referenced by the low level language dependent
+   print routines. */
+
+unsigned int repeat_count_threshold = 10;
 
 /* Define a mess of print controls.  */
 
@@ -113,99 +112,6 @@ int objectprint;	/* Controls looking up an object's derived type
 struct obstack dont_print_obstack;
 
 
-/* Print the character string STRING, printing at most LENGTH characters.
-   Printing stops early if the number hits print_max; repeat counts
-   are printed as appropriate.  Print ellipses at the end if we
-   had to stop before printing LENGTH characters, or if FORCE_ELLIPSES.  */
-
-static void
-print_string (stream, string, length, force_ellipses)
-     FILE *stream;
-     char *string;
-     unsigned int length;
-     int force_ellipses;
-{
-  register unsigned int i;
-  unsigned int things_printed = 0;
-  int in_quotes = 0;
-  int need_comma = 0;
-  extern int inspect_it;
-
-  if (length == 0)
-    {
-      fputs_filtered ("\"\"", stdout);
-      return;
-    }
-
-  for (i = 0; i < length && things_printed < print_max; ++i)
-    {
-      /* Position of the character we are examining
-	 to see whether it is repeated.  */
-      unsigned int rep1;
-      /* Number of repetitions we have detected so far.  */
-      unsigned int reps;
-
-      QUIT;
-
-      if (need_comma)
-	{
-	  fputs_filtered (", ", stream);
-	  need_comma = 0;
-	}
-
-      rep1 = i + 1;
-      reps = 1;
-      while (rep1 < length && string[rep1] == string[i])
-	{
-	  ++rep1;
-	  ++reps;
-	}
-
-      if (reps > REPEAT_COUNT_THRESHOLD)
-	{
-	  if (in_quotes)
-	    {
-	      if (inspect_it)
-		fputs_filtered ("\\\", ", stream);
-	      else
-		fputs_filtered ("\", ", stream);
-	      in_quotes = 0;
-	    }
-	  fputs_filtered ("'", stream);
-	  printchar (string[i], stream, '\'');
-	  fprintf_filtered (stream, "' <repeats %u times>", reps);
-	  i = rep1 - 1;
-	  things_printed += REPEAT_COUNT_THRESHOLD;
-	  need_comma = 1;
-	}
-      else
-	{
-	  if (!in_quotes)
-	    {
-	      if (inspect_it)
-		fputs_filtered ("\\\"", stream);
-	      else
-		fputs_filtered ("\"", stream);
-	      in_quotes = 1;
-	    }
-	  printchar (string[i], stream, '"');
-	  ++things_printed;
-	}
-    }
-
-  /* Terminate the quotes if necessary.  */
-  if (in_quotes)
-    {
-      if (inspect_it)
-	fputs_filtered ("\\\"", stream);
-      else
-	fputs_filtered ("\"", stream);
-    }
-
-  if (force_ellipses || i < length)
-    fputs_filtered ("...", stream);
-}
-
 /* Print a floating point value of type TYPE, pointed to in GDB by VALADDR,
    on STREAM.  */
 
@@ -351,7 +257,7 @@ value_print (val, stream, format, pretty)
       /* Print arrays of characters using string syntax.  */
       if (typelen == 1 && TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_INT
 	  && format == 0)
-	print_string (stream, VALUE_CONTENTS (val), n, 0);
+	local_printstr (stream, VALUE_CONTENTS (val), n, 0);
       else
 	{
 	  unsigned int things_printed = 0;
@@ -378,7 +284,7 @@ value_print (val, stream, format, pretty)
 		  ++rep1;
 		}
 
-	      if (reps > REPEAT_COUNT_THRESHOLD)
+	      if (reps > repeat_count_threshold)
 		{
 		  val_print (VALUE_TYPE (val),
 			     VALUE_CONTENTS (val) + typelen * i,
@@ -386,7 +292,7 @@ value_print (val, stream, format, pretty)
 			     stream, format, 1, 0, pretty);
 		  fprintf (stream, " <repeats %u times>", reps);
 		  i = rep1 - 1;
-		  things_printed += REPEAT_COUNT_THRESHOLD;
+		  things_printed += repeat_count_threshold;
 		}
 	      else
 		{
@@ -783,7 +689,7 @@ val_print (type, valaddr, address, stream, format, deref_ref, recurse, pretty)
 	  /* For an array of chars, print with string syntax.  */
 	  if (eltlen == 1 && TYPE_CODE (elttype) == TYPE_CODE_INT
 	      && (format == 0 || format == 's') )
-	    print_string (stream, valaddr, len, 0);
+	    local_printstr (stream, valaddr, len, 0);
 	  else
 	    {
 	      unsigned int things_printed = 0;
@@ -826,14 +732,14 @@ val_print (type, valaddr, address, stream, format, deref_ref, recurse, pretty)
 		      ++rep1;
 		    }
 
-		  if (reps > REPEAT_COUNT_THRESHOLD)
+		  if (reps > repeat_count_threshold)
 		    {
 		      val_print (elttype, valaddr + i * eltlen,
 				 0, stream, format, deref_ref,
 				 recurse + 1, pretty);
 		      fprintf_filtered (stream, " <repeats %u times>", reps);
 		      i = rep1 - 1;
-		      things_printed += REPEAT_COUNT_THRESHOLD;
+		      things_printed += repeat_count_threshold;
 		    }
 		  else
 		    {
@@ -981,7 +887,7 @@ val_print (type, valaddr, address, stream, format, deref_ref, recurse, pretty)
 		  int force_ellipses = 1;
 
 		  /* This loop always fetches print_max characters, even
-		     though print_string might want to print more or fewer
+		     though local_printstr might want to print more or fewer
 		     (with repeated characters).  This is so that
 		     we don't spend forever fetching if we print
 		     a long string consisting of the same character
@@ -1014,7 +920,7 @@ val_print (type, valaddr, address, stream, format, deref_ref, recurse, pretty)
 
 		  if (addressprint)
 		    fputs_filtered (" ", stream);
-		  print_string (stream, string, i, force_ellipses);
+		  local_printstr (stream, string, i, force_ellipses);
 		}
 
 	      if (errcode != 0)
@@ -1251,11 +1157,24 @@ val_print (type, valaddr, address, stream, format, deref_ref, recurse, pretty)
 			
       if (TYPE_LENGTH (type) == 1)
 	{
-	  fprintf_filtered (stream, " '");
-	  printchar ((unsigned char) unpack_long (type, valaddr), 
-		     stream, '\'');
-	  fprintf_filtered (stream, "'");
+	  fputs_filtered (" ", stream);
+	  local_printchar ((unsigned char) unpack_long (type, valaddr), 
+			   stream);
 	}
+      break;
+
+    case TYPE_CODE_CHAR:
+      if (format || output_format)
+	{
+	  print_scalar_formatted (valaddr, type,
+				  format? format: output_format,
+				  0, stream);
+	  break;
+	}
+      fprintf_filtered (stream, TYPE_UNSIGNED (type) ? "%u" : "%d",
+			unpack_long (type, valaddr));
+      fputs_filtered (" ", stream);
+      local_printchar ((unsigned char) unpack_long (type, valaddr), stream);
       break;
 
     case TYPE_CODE_FLT:
@@ -1285,10 +1204,12 @@ val_print (type, valaddr, address, stream, format, deref_ref, recurse, pretty)
       fprintf_filtered (stream, "<range type>");
       break;
 
+    /* start-sanitize-chill (FIXME!) */
     case TYPE_CODE_BOOL:
       val = unpack_long (builtin_type_chill_bool, valaddr);
       fprintf_filtered (stream, val ? "TRUE" : "FALSE");
       break;
+    /* end-sanitize-chill */
 
     default:
       error ("Invalid type code in symbol table.");
@@ -1331,10 +1252,12 @@ typedef_print (type, new, stream)
       type_print(type,"",stream,0);
       break;
 #endif
+/* start-sanitize-chill */
 #ifdef _LANG_chill
    case language_chill:
       error("Missing Chill support in function typedef_print."); /*FIXME*/
 #endif
+/* end-sanitize-chill */
    default:
       error("Language not supported.");
    }
@@ -1526,8 +1449,7 @@ type_print_varspec_prefix (type, stream, show, passed_a_ptr)
     case TYPE_CODE_MEMBER:
       if (passed_a_ptr)
 	fprintf_filtered (stream, "(");
-      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0,
-				 0);
+      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0);
       fprintf_filtered (stream, " ");
       name = type_name_no_tag (TYPE_DOMAIN_TYPE (type));
       if (name)
@@ -1540,13 +1462,11 @@ type_print_varspec_prefix (type, stream, show, passed_a_ptr)
     case TYPE_CODE_METHOD:
       if (passed_a_ptr)
 	fprintf (stream, "(");
-      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0,
-				 0);
+      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0);
       if (passed_a_ptr)
 	{
 	  fprintf_filtered (stream, " ");
-	  type_print_base (TYPE_DOMAIN_TYPE (type), stream, 0,
-			   passed_a_ptr);
+	  type_print_base (TYPE_DOMAIN_TYPE (type), stream, 0, passed_a_ptr);
 	  fprintf_filtered (stream, "::");
 	}
       break;
@@ -1557,15 +1477,13 @@ type_print_varspec_prefix (type, stream, show, passed_a_ptr)
       break;
 
     case TYPE_CODE_FUNC:
-      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0,
-				 0);
+      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0);
       if (passed_a_ptr)
 	fprintf_filtered (stream, "(");
       break;
 
     case TYPE_CODE_ARRAY:
-      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0,
-				 0);
+      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0);
       if (passed_a_ptr)
 	fprintf_filtered (stream, "(");
       break;
@@ -2149,6 +2067,14 @@ _initialize_valprint ()
     (add_set_cmd ("elements", no_class, var_uinteger, (char *)&print_max,
 		  "Set limit on string chars or array elements to print.\n\
 \"set print elements 0\" causes there to be no limit.",
+		  &setprintlist),
+     &showprintlist);
+
+  add_show_from_set
+    (add_set_cmd ("repeats", no_class, var_uinteger,
+		  (char *)&repeat_count_threshold,
+		  "Set threshold for repeated print elements.\n\
+\"set print repeats 0\" causes all elements to be individually printed.",
 		  &setprintlist),
      &showprintlist);
 

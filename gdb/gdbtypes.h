@@ -62,7 +62,7 @@ enum type_code
 {
   TYPE_CODE_UNDEF,		/* Not used; catches errors */
   TYPE_CODE_PTR,		/* Pointer type */
-  TYPE_CODE_ARRAY,		/* Array type, lower bound zero */
+  TYPE_CODE_ARRAY,		/* Array type with lower & upper bounds. */
   TYPE_CODE_STRUCT,		/* C struct or Pascal record */
   TYPE_CODE_UNION,		/* C union or Pascal variant part */
   TYPE_CODE_ENUM,		/* Enumeration type */
@@ -583,7 +583,8 @@ extern struct type *
 lookup_function_type PARAMS ((struct type *));
 
 extern struct type *
-create_array_type PARAMS ((struct type *, int));
+create_array_type PARAMS ((struct type *, struct type *, struct type *, int,
+			   int));
 
 extern struct type *
 lookup_unsigned_typename PARAMS ((char *));

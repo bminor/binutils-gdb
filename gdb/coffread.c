@@ -130,9 +130,9 @@ struct coff_pending
 
 struct coff_pending *coff_file_symbols;	/* static at top level, and types */
 
-struct coff_pending *coff_global_symbols;	/* global functions and variables */
+struct coff_pending *coff_global_symbols;  /* global functions and variables */
 
-struct coff_pending *coff_local_symbols;	/* everything local to lexical context */
+struct coff_pending *coff_local_symbols;  /* everything local to lexical context */
 
 /* List of unclosed lexical contexts
    (that will become blocks, eventually).  */
@@ -267,7 +267,7 @@ static void
 coff_new_init PARAMS ((struct objfile *));
 
 static void
-coff_symfile_read PARAMS ((struct objfile *, CORE_ADDR, int));
+coff_symfile_read PARAMS ((struct objfile *, struct section_offsets *, int));
 
 static void
 coff_symfile_finish PARAMS ((struct objfile *));
@@ -522,7 +522,7 @@ coff_start_symtab ()
   coff_global_symbols = 0;
   coff_context_stack = 0;
   within_function = 0;
-  last_source_file = 0;
+  last_source_file = NULL;
 
   /* Initialize the source file line number information for this file.  */
 
@@ -591,7 +591,7 @@ coff_end_symtab (objfile)
       free ((PTR)line_vector);
       line_vector = 0;
       line_vector_length = -1;
-      last_source_file = 0;
+      last_source_file = NULL;
       return;
     }
 
@@ -654,7 +654,7 @@ coff_end_symtab (objfile)
   /* Reinitialize for beginning of new file. */
   line_vector = 0;
   line_vector_length = -1;
-  last_source_file = 0;
+  last_source_file = NULL;
 }
 
 static void
@@ -762,9 +762,9 @@ static bfd *symfile_bfd;
 
 /* ARGSUSED */
 static void
-coff_symfile_read (objfile, addr, mainline)
+coff_symfile_read (objfile, section_offsets, mainline)
      struct objfile *objfile;
-     CORE_ADDR addr;
+     struct section_offsets *section_offsets;
      int mainline;
 {
   struct coff_symfile_info *info;
@@ -917,7 +917,7 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
   current_objfile = objfile;
   nlist_stream_global = stream;
   nlist_nsyms_global = nsyms;
-  last_source_file = 0;
+  last_source_file = NULL;
   memset (opaque_type_chain, 0, sizeof opaque_type_chain);
 
   if (type_vector)			/* Get rid of previous one */
@@ -1481,8 +1481,7 @@ patch_type (type, real_type)
 
   TYPE_LENGTH (target) = TYPE_LENGTH (real_target);
   TYPE_NFIELDS (target) = TYPE_NFIELDS (real_target);
-  TYPE_FIELDS (target) = (struct field *)
-    obstack_alloc (&current_objfile -> type_obstack, field_size);
+  TYPE_FIELDS (target) = (struct field *) TYPE_ALLOC (target, field_size);
 
   memcpy (TYPE_FIELDS (target), TYPE_FIELDS (real_target), field_size);
 
@@ -1774,7 +1773,7 @@ decode_type (cs, c_type, aux)
 	{
 	  int i, n;
 	  register unsigned short *dim;
-	  struct type *base_type;
+	  struct type *base_type, *index_type;
 
 	  /* Define an array type.  */
 	  /* auxent refers to array, not base type */
@@ -1789,17 +1788,10 @@ decode_type (cs, c_type, aux)
 	    *dim = *(dim + 1);
 	  *dim = 0;
 
-	  type = (struct type *)
-	    obstack_alloc (&current_objfile -> type_obstack,
-			   sizeof (struct type));
-	  memset (type, 0, sizeof (struct type));
-	  TYPE_OBJFILE (type) = current_objfile;
-
 	  base_type = decode_type (cs, new_c_type, aux);
-
-	  TYPE_CODE (type) = TYPE_CODE_ARRAY;
-	  TYPE_TARGET_TYPE (type) = base_type;
-	  TYPE_LENGTH (type) = n * TYPE_LENGTH (base_type);
+	  index_type = lookup_fundamental_type (current_objfile, FT_INTEGER);
+	  type = create_array_type ((struct type *) NULL, base_type,
+				    index_type, 0, n - 1);
 	}
       return type;
     }
@@ -2045,8 +2037,7 @@ coff_read_struct_type (index, length, lastsym)
 
   TYPE_NFIELDS (type) = nfields;
   TYPE_FIELDS (type) = (struct field *)
-    obstack_alloc (&current_objfile -> type_obstack,
-		   sizeof (struct field) * nfields);
+    TYPE_ALLOC (type, sizeof (struct field) * nfields);
 
   /* Copy the saved-up fields into the field vector.  */
 
@@ -2128,8 +2119,7 @@ coff_read_enum_type (index, length, lastsym)
   TYPE_CODE (type) = TYPE_CODE_ENUM;
   TYPE_NFIELDS (type) = nsyms;
   TYPE_FIELDS (type) = (struct field *)
-    obstack_alloc (&current_objfile -> type_obstack,
-		   sizeof (struct field) * nsyms);
+    TYPE_ALLOC (type, sizeof (struct field) * nsyms);
 
   /* Find the symbols for the values and put them into the type.
      The symbols can be found in the symlist that we put them on
@@ -2154,6 +2144,18 @@ coff_read_enum_type (index, length, lastsym)
   return type;
 }
 
+/* Fake up support for relocating symbol addresses.  FIXME.  */
+
+struct section_offsets coff_symfile_faker = {0};
+
+struct section_offsets *
+coff_symfile_offsets (objfile, addr)
+     struct objfile *objfile;
+     CORE_ADDR addr;
+{
+  return &coff_symfile_faker;
+}
+
 /* Register our ability to parse symbols for coff BFD files */
 
 static struct sym_fns coff_sym_fns =
@@ -2164,6 +2166,7 @@ static struct sym_fns coff_sym_fns =
   coff_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
   coff_symfile_read,	/* sym_read: read a symbol file into symtab */
   coff_symfile_finish,	/* sym_finish: finished with file, cleanup */
+  coff_symfile_offsets, /* sym_offsets:  xlate external to internal form */
   NULL			/* next: pointer to next struct sym_fns */
 };
 

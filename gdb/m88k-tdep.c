@@ -603,7 +603,7 @@ pushed_size (prev_words, v)
       case TYPE_CODE_ENUM:		/* Enumeration type */
       case TYPE_CODE_INT:		/* Integer type */
       case TYPE_CODE_REF:		/* C++ Reference types */
-      case TYPE_CODE_ARRAY:		/* Array type, lower bound zero */
+      case TYPE_CODE_ARRAY:		/* Array type, lower & upper bounds */
 
 	return 1;
 
@@ -663,7 +663,7 @@ store_parm (prev_words, left_parm_addr, v)
       case TYPE_CODE_PTR:		/* Pointer type */
       case TYPE_CODE_ENUM:		/* Enumeration type */
       case TYPE_CODE_INT:		/* Integer type */
-      case TYPE_CODE_ARRAY:		/* Array type, lower bound zero */
+      case TYPE_CODE_ARRAY:		/* Array type, lower & upper bounds */
       case TYPE_CODE_REF:		/* C++ Reference types */
 
 	store_parm_word (start, *val_addr);

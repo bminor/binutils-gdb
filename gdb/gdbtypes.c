@@ -290,49 +290,54 @@ allocate_stub_method (type)
   return (mtype);
 }
 
-/* Create an array type.  Elements will be of type TYPE, and there will
-   be NUM of them.
+/* Create an array type using either a blank type supplied in RESULT_TYPE,
+   or creating a new type.  Elements will be of type ELEMENT_TYPE, the
+   indices will be of type INDEX_TYPE, and will range from LOW_BOUND
+   to HIGH_BOUND, inclusive.
 
-   Eventually this should be extended to take two more arguments which
-   specify the bounds of the array and the type of the index.
-   It should also be changed to be a "lookup" function, with the
-   appropriate data structures added to the type field.
-   Then read array type should call here.  */
+   FIXME:  Maybe we should check the TYPE_CODE of RESULT_TYPE to make
+   sure it is TYPE_CODE_UNDEF before we bash it into an array type? */
 
 struct type *
-create_array_type (element_type, number)
+create_array_type (result_type, element_type, index_type, low_bound,
+		   high_bound)
+     struct type *result_type;
      struct type *element_type;
-     int number;
+     struct type *index_type;
+     int low_bound;
+     int high_bound;
 {
-  struct type *result_type;
   struct type *range_type;
 
-  result_type = alloc_type (TYPE_OBJFILE (element_type));
+  /* Create a blank type if we are not given one to bash on. */
+  if (result_type == NULL)
+    {
+      result_type = alloc_type (TYPE_OBJFILE (element_type));
+    }
 
+  /* Create a range type.  */
+  range_type = alloc_type (TYPE_OBJFILE (element_type));
+  TYPE_CODE (range_type) = TYPE_CODE_RANGE;
+  TYPE_TARGET_TYPE (range_type) = index_type;
+  TYPE_LENGTH (range_type) = sizeof (int);  /* This should never be needed. */
+  TYPE_NFIELDS (range_type) = 2;
+  TYPE_FIELDS (range_type) = (struct field *)
+    TYPE_ALLOC (range_type, 2 * sizeof (struct field));
+  memset (TYPE_FIELDS (range_type), 0, 2 * sizeof (struct field));
+  TYPE_FIELD_BITPOS (range_type, 0) = low_bound;
+  TYPE_FIELD_BITPOS (range_type, 1) = high_bound;
+  TYPE_FIELD_TYPE (range_type, 0) = builtin_type_int; /* FIXME */
+  TYPE_FIELD_TYPE (range_type, 1) = builtin_type_int; /* FIXME */
+
+  /* Create the array type. */
   TYPE_CODE (result_type) = TYPE_CODE_ARRAY;
   TYPE_TARGET_TYPE (result_type) = element_type;
-  TYPE_LENGTH (result_type) = number * TYPE_LENGTH (element_type);
+  TYPE_LENGTH (result_type) =
+    TYPE_LENGTH (element_type) * (high_bound - low_bound + 1);
   TYPE_NFIELDS (result_type) = 1;
   TYPE_FIELDS (result_type) = (struct field *)
     TYPE_ALLOC (result_type, sizeof (struct field));
-
-  {
-    /* Create range type.  */
-    range_type = alloc_type (TYPE_OBJFILE (result_type));
-    TYPE_CODE (range_type) = TYPE_CODE_RANGE;
-    TYPE_TARGET_TYPE (range_type) = builtin_type_int;  /* FIXME */
-
-    /* This should never be needed.  */
-    TYPE_LENGTH (range_type) = sizeof (int);
-
-    TYPE_NFIELDS (range_type) = 2;
-    TYPE_FIELDS (range_type) = (struct field *)
-      TYPE_ALLOC (range_type, 2 * sizeof (struct field));
-    TYPE_FIELD_BITPOS (range_type, 0) = 0; /* FIXME */
-    TYPE_FIELD_BITPOS (range_type, 1) = number-1; /* FIXME */
-    TYPE_FIELD_TYPE (range_type, 0) = builtin_type_int; /* FIXME */
-    TYPE_FIELD_TYPE (range_type, 1) = builtin_type_int; /* FIXME */
-  }
+  memset (TYPE_FIELDS (result_type), 0, sizeof (struct field));
   TYPE_FIELD_TYPE (result_type, 0) = range_type;
   TYPE_VPTR_FIELDNO (result_type) = -1;
 

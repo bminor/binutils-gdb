@@ -350,7 +350,8 @@ value_of_trapped_internalvar (var)
       long vm[4];
       long i, *p;
       bcopy (read_vector_register_1 (VM_REGNUM), vm, sizeof vm);
-      type = vector_type (builtin_type_int, len);
+      type = create_array_type ((struct type *) NULL, builtin_type_int,
+				builtin_type_int, 0, len - 1);
       val = allocate_value (type);
       p = (long *) VALUE_CONTENTS (val);
       for (i = 0; i < len; i++) 
@@ -358,7 +359,8 @@ value_of_trapped_internalvar (var)
     }
   else if (name[0] == 'V')
     {
-      type = vector_type (builtin_type_long_long, len);
+      type = create_array_type ((struct type *) NULL, builtin_type_long_long,
+				builtin_type_int, 0, len - 1);
       val = allocate_value (type);
       bcopy (read_vector_register_1 (name[1] - '0'),
 	     VALUE_CONTENTS (val), TYPE_LENGTH (type));
@@ -366,7 +368,8 @@ value_of_trapped_internalvar (var)
   else if (name[0] == 'v')
     {
       long *p1, *p2;
-      type = vector_type (builtin_type_long, len);
+      type = create_array_type ((struct type *) NULL, builtin_type_long,
+				builtin_type_int, 0, len - 1);
       val = allocate_value (type);
       p1 = read_vector_register_1 (name[1] - '0');
       p2 = (long *) VALUE_CONTENTS (val);
@@ -383,22 +386,6 @@ value_of_trapped_internalvar (var)
   VALUE_LVAL (val) = lval_internalvar;
   VALUE_INTERNALVAR (val) = var;
   return val;
-}
-
-/* Construct the type for a vector register's value --
-   array[LENGTH] of ELEMENT_TYPE.  */
-
-static struct type *
-vector_type (element_type, length)
-     struct type *element_type;
-     long length;
-{
-  struct type *type = (struct type *) xmalloc (sizeof (struct type));
-  bzero (type, sizeof type);
-  TYPE_CODE (type) = TYPE_CODE_ARRAY;
-  TYPE_TARGET_TYPE (type) = element_type;
-  TYPE_LENGTH (type) = length * TYPE_LENGTH (TYPE_TARGET_TYPE (type));
-  return type;
 }
 
 /* Handle a new value assigned to a trapped internal variable */

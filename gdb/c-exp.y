@@ -721,8 +721,10 @@ ptype	:	typebase
 		      case tp_array:
 			array_size = pop_type_int ();
 			if (array_size != -1)
-			  follow_type = create_array_type (follow_type,
-							   array_size);
+			  follow_type =
+			    create_array_type ((struct type *) NULL,
+					       follow_type, builtin_type_int,
+					       0, array_size - 1);
 			else
 			  follow_type = lookup_pointer_type (follow_type);
 			break;

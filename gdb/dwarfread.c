@@ -413,7 +413,7 @@ static struct type *
 decode_array_element_type PARAMS ((char *));
 
 static struct type *
-decode_subscr_data PARAMS ((char *, char *));
+decode_subscript_data_item PARAMS ((char *, char *));
 
 static void
 dwarf_read_array_type PARAMS ((struct dieinfo *));
@@ -1249,11 +1249,12 @@ decode_array_element_type (scan)
 
 LOCAL FUNCTION
 
-	decode_subscr_data -- decode array subscript and element type data
+	decode_subscript_data_item -- decode array subscript item
 
 SYNOPSIS
 
-	static struct type *decode_subscr_data (char *scan, char *end)
+	static struct type *
+	decode_subscript_data_item (char *scan, char *end)
 
 DESCRIPTION
 
@@ -1265,9 +1266,21 @@ DESCRIPTION
 	source (I.E. leftmost dimension first, next to leftmost second,
 	etc).
 
+	The data items describing each array dimension consist of four
+	parts: (1) a format specifier, (2) type type of the subscript
+	index, (3) a description of the low bound of the array dimension,
+	and (4) a description of the high bound of the array dimension.
+
+	The last data item is the description of the type of each of
+	the array elements.
+
 	We are passed a pointer to the start of the block of bytes
-	containing the data items, and a pointer to the first byte past
-	the data.  This function decodes the data and returns a type.
+	containing the remaining data items, and a pointer to the first
+	byte past the data.  This function recursively decodes the
+	remaining data items and returns a type.
+
+	If we somehow fail to decode some data, we complain about it
+	and return a type "array of int".
 
 BUGS
 	FIXME:  This code only implements the forms currently used
@@ -1278,12 +1291,13 @@ BUGS
  */
 
 static struct type *
-decode_subscr_data (scan, end)
+decode_subscript_data_item (scan, end)
      char *scan;
      char *end;
 {
-  struct type *typep = NULL;
-  struct type *nexttype;
+  struct type *typep = NULL;	/* Array type we are building */
+  struct type *nexttype;	/* Type of each element (may be array) */
+  struct type *indextype;	/* Type of this index */
   unsigned int format;
   unsigned short fundtype;
   unsigned long lowbound;
@@ -1299,26 +1313,24 @@ decode_subscr_data (scan, end)
       typep = decode_array_element_type (scan);
       break;
     case FMT_FT_C_C:
-      /* Read the type of the index, but don't do anything with it.
-	 FIXME:  This is OK for C since only int's are allowed.
-	 It might not be OK for other languages. */
       fundtype = target_to_host (scan, SIZEOF_FMT_FT, GET_UNSIGNED,
 				 current_objfile);
+      indextype = decode_fund_type (fundtype);
       scan += SIZEOF_FMT_FT;
       nbytes = TARGET_FT_LONG_SIZE (current_objfile);
       lowbound = target_to_host (scan, nbytes, GET_UNSIGNED, current_objfile);
       scan += nbytes;
       highbound = target_to_host (scan, nbytes, GET_UNSIGNED, current_objfile);
       scan += nbytes;
-      nexttype = decode_subscr_data (scan, end);
-      if (nexttype != NULL)
+      nexttype = decode_subscript_data_item (scan, end);
+      if (nexttype == NULL)
 	{
-	  typep = alloc_type (current_objfile);
-	  TYPE_CODE (typep) = TYPE_CODE_ARRAY;
-	  TYPE_LENGTH (typep) = TYPE_LENGTH (nexttype);
-	  TYPE_LENGTH (typep) *= (highbound - lowbound) + 1;
-	  TYPE_TARGET_TYPE (typep) = nexttype;
-	}		    
+	  /* Munged subscript data or other problem, fake it. */
+	  SQUAWK (("can't decode subscript data items"));
+	  nexttype = dwarf_fundamental_type (current_objfile, FT_INTEGER);
+	}
+      typep = create_array_type ((struct type *) NULL, nexttype, indextype,
+				 lowbound, highbound);
       break;
     case FMT_FT_C_X:
     case FMT_FT_X_C:
@@ -1328,9 +1340,13 @@ decode_subscr_data (scan, end)
     case FMT_UT_X_C:
     case FMT_UT_X_X:
       SQUAWK (("array subscript format 0x%x not handled yet", format));
+      typep = dwarf_fundamental_type (current_objfile, FT_INTEGER);
+      typep = create_array_type ((struct type *) NULL, typep, typep, 0, 1);
       break;
     default:
       SQUAWK (("unknown array subscript format %x", format));
+      typep = dwarf_fundamental_type (current_objfile, FT_INTEGER);
+      typep = create_array_type ((struct type *) NULL, typep, typep, 0, 1);
       break;
     }
   return (typep);
@@ -1374,30 +1390,29 @@ dwarf_read_array_type (dip)
       blocksz = target_to_host (sub, nbytes, GET_UNSIGNED, current_objfile);
       subend = sub + nbytes + blocksz;
       sub += nbytes;
-      type = decode_subscr_data (sub, subend);
-      if (type == NULL)
+      type = decode_subscript_data_item (sub, subend);
+      if ((utype = lookup_utype (dip -> die_ref)) == NULL)
 	{
-	  if ((utype = lookup_utype (dip -> die_ref)) == NULL)
-	    {
-	      utype = alloc_utype (dip -> die_ref, NULL);
-	    }
-	  TYPE_CODE (utype) = TYPE_CODE_ARRAY;
-	  TYPE_TARGET_TYPE (utype) = 
-      	    dwarf_fundamental_type (current_objfile, FT_INTEGER);
-	  TYPE_LENGTH (utype) = 1 * TYPE_LENGTH (TYPE_TARGET_TYPE (utype));
+	  /* Install user defined type that has not been referenced yet. */
+	  alloc_utype (dip -> die_ref, type);
+	}
+      else if (TYPE_CODE (utype) == TYPE_CODE_UNDEF)
+	{
+	  /* Ick!  A forward ref has already generated a blank type in our
+	     slot, and this type probably already has things pointing to it
+	     (which is what caused it to be created in the first place).
+	     If it's just a place holder we can plop our fully defined type
+	     on top of it.  We can't recover the space allocated for our
+	     new type since it might be on an obstack, but we could reuse
+	     it if we kept a list of them, but it might not be worth it
+	     (FIXME). */
+	  *utype = *type;
 	}
       else
 	{
-	  if ((utype = lookup_utype (dip -> die_ref)) == NULL)
-	    {
-	      alloc_utype (dip -> die_ref, type);
-	    }
-	  else
-	    {
-	      TYPE_CODE (utype) = TYPE_CODE_ARRAY;
-	      TYPE_LENGTH (utype) = TYPE_LENGTH (type);
-	      TYPE_TARGET_TYPE (utype) = TYPE_TARGET_TYPE (type);
-	    }
+	  /* Double ick!  Not only is a type already in our slot, but
+	     someone has decorated it.  Complain and leave it alone. */
+	  SQUAWK (("duplicate user defined array type definition"));
 	}
     }
 }
@@ -1495,7 +1510,7 @@ read_subroutine_type (dip, thisdie, enddie)
       ftype = lookup_function_type (type);
       alloc_utype (dip -> die_ref, ftype);
     }
-  else
+  else if (TYPE_CODE (ftype) == TYPE_CODE_UNDEF)
     {
       /* We have an existing partially constructed type, so bash it
 	 into the correct type. */
@@ -1503,6 +1518,10 @@ read_subroutine_type (dip, thisdie, enddie)
       TYPE_FUNCTION_TYPE (type) = ftype;
       TYPE_LENGTH (ftype) = 1;
       TYPE_CODE (ftype) = TYPE_CODE_FUNC;
+    }
+  else
+    {
+      SQUAWK (("duplicate user defined function type definition"));
     }
 }
 
@@ -3197,10 +3216,12 @@ DESCRIPTION
 
 NOTES
 
-	If we encounter a fundamental type that we are unprepared to
-	deal with, and it is not in the range of those types defined
-	as application specific types, then we issue a warning and
-	treat the type as an "int".
+	For robustness, if we are asked to translate a fundamental
+	type that we are unprepared to deal with, we return int so
+	callers can always depend upon a valid type being returned,
+	and so gdb may at least do something reasonable by default.
+	If the type is not in the range of those types defined as
+	application specific types, we also issue a warning.
 */
 
 static struct type *
@@ -3311,10 +3332,13 @@ decode_fund_type (fundtype)
     
     }
 
-  if ((typep == NULL) && !(FT_lo_user <= fundtype && fundtype <= FT_hi_user))
+  if (typep == NULL)
     {
-      SQUAWK (("unexpected fundamental type 0x%x", fundtype));
-      typep = dwarf_fundamental_type (current_objfile, FT_VOID);
+      typep = dwarf_fundamental_type (current_objfile, FT_INTEGER);
+      if (!(FT_lo_user <= fundtype && fundtype <= FT_hi_user))
+	{
+	  SQUAWK (("unexpected fundamental type 0x%x", fundtype));
+	}
     }
     
   return (typep);

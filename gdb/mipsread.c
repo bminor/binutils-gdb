@@ -68,6 +68,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/param.h>
 #include <sys/file.h>
 #include <sys/stat.h>
+#include <string.h>
 
 #include "gdb-stabs.h"
 
@@ -78,6 +79,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "libaout.h"		/* FIXME Secret internal BFD stuff for a.out */
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"	/* STABS information */
+#include "expression.h"
+#include "language.h"		/* Needed inside partial-stab.h */
 
 struct coff_exec {
 	struct external_filehdr f;
@@ -1106,15 +1109,17 @@ data:		/* Common code for symbols describing data */
 		    if (tsym->st == stMember) {
 			if (nfields == 0 && type_code == TYPE_CODE_UNDEF)
 			    /* If the type of the member is Nil (or Void),
-			       assume the tag is an enumeration. */
+			       without qualifiers, assume the tag is an
+			       enumeration. */
 			    if (tsym->index == indexNil)
 				type_code = TYPE_CODE_ENUM;
 			    else {
 				ecoff_swap_tir_in (bigend,
 						   &ax[tsym->index].a_ti,
 						   &tir);
-				if (tir.bt == btNil || tir.bt == btVoid)
-				    type_code = TYPE_CODE_ENUM;
+				if ((tir.bt == btNil || tir.bt == btVoid)
+				    && tir.tq0 == tqNil)
+				      type_code = TYPE_CODE_ENUM;
 			    }
 			nfields++;
 			if (tsym->value > max_value)
@@ -1549,6 +1554,7 @@ upgrade_type(tpp, tq, ax, bigend)
 		return 0;
 
 	case tqArray:
+		/* We should probably try to use create_array_type here.  FIXME! */
 		off = 0;
 		t = init_type(TYPE_CODE_ARRAY, 0, 0, (char *) NULL,
 			      (struct objfile *) NULL);
@@ -1978,6 +1984,7 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
 	if (fh->csym >= 2
 	    && strcmp((char *)(((SYMR *)fh->isymBase)[1].iss),
 		      stabs_symbol) == 0) {
+	    processing_gcc_compilation = 2;
 	    for (cur_sdx = 2; cur_sdx < fh->csym; cur_sdx++) {
 		int type_code;
 		char *namestring;
@@ -2009,6 +2016,7 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
 	    }
 	}
 	else {
+	    processing_gcc_compilation = 0;
 	    for (cur_sdx = 0; cur_sdx < fh->csym; ) {
 		char *name;
 		enum address_class class;
@@ -2356,6 +2364,9 @@ psymtab_to_symtab_1(pst, filename)
 
 	PDR *pr;
 
+	/* We indicate that this is a GCC compilation so that certain features
+	   will be enabled in stabsread/dbxread.  */
+	processing_gcc_compilation = 2;
 	/* Parse local symbols first */
 
 	if (fh->csym <= 2)	/* FIXME, this blows psymtab->symtab ptr */
@@ -2420,6 +2431,8 @@ psymtab_to_symtab_1(pst, filename)
 	int f_max;
 	int maxlines;
 	EXTR **ext_ptr;
+
+	processing_gcc_compilation = 0;
 
 	/* How many symbols will we need */
 	/* FIXME, this does not count enum values. */

@@ -2371,36 +2371,15 @@ read_array_type (pp, type, objfile)
       upper = -1;
     }
 
-  {
-    /* Create range type.  */
-    range_type = alloc_type (objfile);
-    TYPE_CODE (range_type) = TYPE_CODE_RANGE;
-    TYPE_TARGET_TYPE (range_type) = index_type;
-
-    /* This should never be needed.  */
-    TYPE_LENGTH (range_type) = sizeof (int);
-
-    TYPE_NFIELDS (range_type) = 2;
-    TYPE_FIELDS (range_type) = (struct field *)
-      TYPE_ALLOC (range_type, 2 * sizeof (struct field));
-    memset (TYPE_FIELDS (range_type), 0, 2 * sizeof (struct field));
-    TYPE_FIELD_BITPOS (range_type, 0) = lower;
-    TYPE_FIELD_BITPOS (range_type, 1) = upper;
-  }
-
-  TYPE_CODE (type) = TYPE_CODE_ARRAY;
-  TYPE_TARGET_TYPE (type) = element_type;
-  TYPE_LENGTH (type) = (upper - lower + 1) * TYPE_LENGTH (element_type);
-  TYPE_NFIELDS (type) = 1;
-  TYPE_FIELDS (type) = (struct field *)
-    TYPE_ALLOC (type, sizeof (struct field));
-  memset (TYPE_FIELDS (type), 0, sizeof (struct field));
-  TYPE_FIELD_TYPE (type, 0) = range_type;
+  type = create_array_type (type, element_type, index_type, lower, upper);
 
   /* If we have an array whose element type is not yet known, but whose
      bounds *are* known, record it to be adjusted at the end of the file.  */
+
   if (TYPE_LENGTH (element_type) == 0 && !adjustable)
-    add_undefined_type (type);
+    {
+      add_undefined_type (type);
+    }
 
   return type;
 }

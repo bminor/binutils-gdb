@@ -1,3 +1,41 @@
+Mon Dec 14 18:48:52 1992  Fred Fish  (fnf@cygnus.com)
+
+	* gdbtypes.c (create_array_type):  Complete rewrite.  Now requires
+	a optional type to decorate as an array type, the type of the
+	index, and the bounds of the array.  Records this additional info
+	in the array type for use with languages with nonzero array
+	bounds.
+	* gdbtypes.h (enum type_code):  Update comment for TYPE_CODE_ARRAY
+	to note that arrays may have bounds.
+	* gdbtypes.h (create_array_type):  Update prototype.
+	* c-exp.y (ptype production):  Adjust for new create_array_type
+	calling conventions.
+	* coffread.c (decode_type):  Call create_array_type rather than
+	handcrafting array types.
+	* convex-tdep.c (value_type):  Remove, now use create_array_type.
+	* convex-tdep.c (value_of_trapped_internalvar):  Convert calls to
+	vector_type into calls to create_array_type.
+	* dwarfread.c (decode_subscr_data):  Name changed to
+	decode_subscript_data_item throughout.
+	* dwarfread.c (decode_subscript_data_item):  Rewrite to use
+	create_array_type.  Now records index type and range as well.
+	* dwarfread.c (dwarf_read_array_type):  Rewrite as part of
+	change to use create_array_type.
+	* dwarfread.c (read_subroutine_type):  Test existing user defined
+	types before decorating them, to ensure they are blank, and
+	complain about it if they are not.
+	* dwarfread.c (decode_fund_type):  For unrecognized types, always
+	return some valid type (type integer).  If the unrecognized type
+	cannot be an implementation defined type, complain as well.
+	* m88k-tdep.c (pushed_size):  Update comment for TYPE_CODE_ARRAY.
+	* m88k-tdep.c (store_param):  Update comment for TYPE_CODE_ARRAY.
+	* mipsread.c (upgrade_type):  Add FIXME comment that code to
+	handcraft arrays should be replaced with call to create_array_type.
+	* stabsread.c (read_array_type):  Replace code to handcraft
+	array types with call to create_array_type.
+	* valprint.c (type_print_varspec_prefix):  Minor formatting
+	change, join lines that don't need to be split.
+
 Mon Dec 14 17:18:42 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* convex-xdep.c, hppab-nat.c, i860-tdep.c, infptrace.c:  Remove
