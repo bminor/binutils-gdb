@@ -1,3 +1,18 @@
+2002-06-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (bfd_section_from_shdr): Make "name" const.
+	* elf-bfd.h (elf_backend_section_from_shdr): Likewise.
+	* elf32-i370.c (i370_elf_section_from_shdr): Likewise.
+	* elf32-ppc.c (ppc_elf_section_from_shdr): Likewise.
+	* elf32-sh64.c (sh64_backend_section_from_shdr): Likewise.
+	* elf32-v850.c (v850_elf_section_from_shdr): Likewise.
+	* elf64-alpha.c (elf64_alpha_section_from_shdr): Likewise.
+	* elf64-hppa.c (elf64_hppa_section_from_shdr): Likewise.
+	* elf64-ppc.c (ppc64_elf_section_from_shdr): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_section_from_shdr): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_section_from_shdr): Likewise.
+	* elfxx-mips.h (_bfd_mips_elf_section_from_shdr): Likewise.
+
 2002-06-03  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
 
 	* elfxx-mips.c (ABI_64_P): Use backend's data to determine the
@@ -523,7 +538,7 @@
 2002-05-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-i386.c (elf_i386_relocate_section): Remove overflow checks
-	addend in 2002-05-09 commit.
+	added in 2002-05-09 commit.
 
 	* elf32-hppa.c (elf32_hppa_size_stubs): Revert part of 2002-05-04,
 	don't look for stubs on all undefined syms.

@@ -174,7 +174,7 @@ static boolean elfNN_ia64_relax_section
 static boolean is_unwind_section_name
   PARAMS ((bfd *abfd, const char *));
 static boolean elfNN_ia64_section_from_shdr
-  PARAMS ((bfd *, ElfNN_Internal_Shdr *, char *));
+  PARAMS ((bfd *, ElfNN_Internal_Shdr *, const char *));
 static boolean elfNN_ia64_section_flags
   PARAMS ((flagword *, ElfNN_Internal_Shdr *));
 static boolean elfNN_ia64_fake_sections
@@ -1047,7 +1047,7 @@ static boolean
 elfNN_ia64_section_from_shdr (abfd, hdr, name)
      bfd *abfd;
      ElfNN_Internal_Shdr *hdr;
-     char *name;
+     const char *name;
 {
   asection *newsect;
 

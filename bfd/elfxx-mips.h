@@ -25,7 +25,7 @@ extern void _bfd_mips_elf_symbol_processing
 extern boolean _bfd_mips_elf_section_processing
   PARAMS ((bfd *, Elf_Internal_Shdr *));
 extern boolean _bfd_mips_elf_section_from_shdr
-  PARAMS ((bfd *, Elf_Internal_Shdr *, char *));
+  PARAMS ((bfd *, Elf_Internal_Shdr *, const char *));
 extern boolean _bfd_mips_elf_fake_sections
   PARAMS ((bfd *, Elf_Internal_Shdr *, asection *));
 extern boolean _bfd_mips_elf_section_from_bfd_section

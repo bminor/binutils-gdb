@@ -3351,7 +3351,7 @@ boolean
 _bfd_mips_elf_section_from_shdr (abfd, hdr, name)
      bfd *abfd;
      Elf_Internal_Shdr *hdr;
-     char *name;
+     const char *name;
 {
   flagword flags = 0;
 

@@ -184,7 +184,7 @@ static boolean elf64_hppa_object_p
   PARAMS ((bfd *));
 
 static boolean elf64_hppa_section_from_shdr
-  PARAMS ((bfd *, Elf64_Internal_Shdr *, char *));
+  PARAMS ((bfd *, Elf64_Internal_Shdr *, const char *));
 
 static void elf64_hppa_post_process_headers
   PARAMS ((bfd *, struct bfd_link_info *));
@@ -403,7 +403,7 @@ static boolean
 elf64_hppa_section_from_shdr (abfd, hdr, name)
      bfd *abfd;
      Elf64_Internal_Shdr *hdr;
-     char *name;
+     const char *name;
 {
   asection *newsect;
 

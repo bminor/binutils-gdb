@@ -1576,7 +1576,7 @@ bfd_section_from_shdr (abfd, shindex)
   Elf_Internal_Shdr *hdr = elf_elfsections (abfd)[shindex];
   Elf_Internal_Ehdr *ehdr = elf_elfheader (abfd);
   struct elf_backend_data *bed = get_elf_backend_data (abfd);
-  char *name;
+  const char *name;
 
   name = elf_string_from_elf_strtab (abfd, hdr->sh_name);
 

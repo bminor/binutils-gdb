@@ -73,7 +73,7 @@ static boolean elf64_alpha_mkobject
 static boolean elf64_alpha_object_p
   PARAMS((bfd *));
 static boolean elf64_alpha_section_from_shdr
-  PARAMS((bfd *, Elf64_Internal_Shdr *, char *));
+  PARAMS((bfd *, Elf64_Internal_Shdr *, const char *));
 static boolean elf64_alpha_section_flags
   PARAMS((flagword *, Elf64_Internal_Shdr *));
 static boolean elf64_alpha_fake_sections
@@ -2353,7 +2353,7 @@ static boolean
 elf64_alpha_section_from_shdr (abfd, hdr, name)
      bfd *abfd;
      Elf64_Internal_Shdr *hdr;
-     char *name;
+     const char *name;
 {
   asection *newsect;
 

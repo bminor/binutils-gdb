@@ -62,7 +62,7 @@ static boolean ppc64_elf_set_private_flags
 static boolean ppc64_elf_merge_private_bfd_data
   PARAMS ((bfd *, bfd *));
 static boolean ppc64_elf_section_from_shdr
-  PARAMS ((bfd *, Elf64_Internal_Shdr *, char *));
+  PARAMS ((bfd *, Elf64_Internal_Shdr *, const char *));
 
 
 /* The name of the dynamic interpreter.  This is put in the .interp
@@ -1775,7 +1775,7 @@ static boolean
 ppc64_elf_section_from_shdr (abfd, hdr, name)
      bfd *abfd;
      Elf64_Internal_Shdr *hdr;
-     char *name;
+     const char *name;
 {
   asection *newsect;
   flagword flags;

@@ -54,7 +54,7 @@ static boolean sh64_elf_link_output_symbol_hook
   PARAMS ((bfd *, struct bfd_link_info *, const char *, Elf_Internal_Sym *,
 	   asection *));
 static boolean sh64_backend_section_from_shdr
-  PARAMS ((bfd *, Elf_Internal_Shdr *, char *));
+  PARAMS ((bfd *, Elf_Internal_Shdr *, const char *));
 static void sh64_elf_final_write_processing PARAMS ((bfd *, boolean));
 static boolean sh64_bfd_elf_copy_private_section_data
   PARAMS ((bfd *, asection *, bfd *, asection *));
@@ -255,7 +255,7 @@ boolean
 sh64_backend_section_from_shdr (abfd, hdr, name)
      bfd *abfd;
      Elf_Internal_Shdr *hdr;
-     char *name;
+     const char *name;
 {
   flagword flags = 0;
 

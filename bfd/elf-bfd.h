@@ -490,7 +490,7 @@ struct elf_backend_data
   /* A function to handle unusual section types when creating BFD
      sections from ELF sections.  */
   boolean (*elf_backend_section_from_shdr)
-    PARAMS ((bfd *, Elf32_Internal_Shdr *, char *));
+    PARAMS ((bfd *, Elf32_Internal_Shdr *, const char *));
 
   /* A function to convert machine dependent section header flags to
      BFD internal section header flags.  */
