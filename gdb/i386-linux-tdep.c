@@ -255,7 +255,7 @@ i386_linux_sigcontext_addr (struct frame_info *frame)
 /* Assuming FRAME is for a Linux sigtramp routine, return the saved
    program counter.  */
 
-CORE_ADDR
+static CORE_ADDR
 i386_linux_sigtramp_saved_pc (struct frame_info *frame)
 {
   CORE_ADDR addr;
@@ -269,12 +269,34 @@ i386_linux_sigtramp_saved_pc (struct frame_info *frame)
 /* Assuming FRAME is for a Linux sigtramp routine, return the saved
    stack pointer.  */
 
-CORE_ADDR
+static CORE_ADDR
 i386_linux_sigtramp_saved_sp (struct frame_info *frame)
 {
   CORE_ADDR addr;
   addr = i386_linux_sigcontext_addr (frame);
   return read_memory_integer (addr + LINUX_SIGCONTEXT_SP_OFFSET, 4);
+}
+
+/* Return the saved program counter for FRAME.  */
+
+CORE_ADDR
+i386_linux_frame_saved_pc (struct frame_info *frame)
+{
+  if (frame->signal_handler_caller)
+    return i386_linux_sigtramp_saved_pc (frame);
+
+  /* See comment in "i386/tm-linux.h" for an explanation what this
+     "FRAMELESS_SIGNAL" stuff is supposed to do.
+
+     FIXME: kettenis/2001-03-26: That comment should eventually be
+     moved to this file.  */
+  if (FRAMELESS_SIGNAL (frame))
+    {
+      CORE_ADDR sp = i386_linux_sigtramp_saved_sp (frame->next);
+      return read_memory_unsigned_integer (sp, 4);
+    }
+
+  return read_memory_unsigned_integer (frame->frame + 4, 4);
 }
 
 /* Immediately after a function call, return the saved pc.  */

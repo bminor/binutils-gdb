@@ -1,3 +1,15 @@
+2001-03-26  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-linux-tdep.c (i386_linux_sigtramp_saved_pc,
+	i386_linux_sigtramp_saved_sp): Make static.
+	(i386_linux_frame_saved_pc): New function based on the old
+	FRAME_SAVED_PC macro, but use read_memory_unsigned_integer instead
+	of read_memory_integer.
+	* config/i386/tm-linux.h (sigtramp_saved_pc): Remove definition.
+	(i386_linux_sigtramp_saved_pc): Remove prototype.
+	(FRAME_SAVED_PC): Redefine in terms of i386_linux_frame_saved_pc.
+	(i386_linux_frame_saved_pc): New prototype.
+
 2001-03-26  Andrew Cagney  <ac131313@redhat.com>
 
 	* MAINTAINERS: Document m88k as a ``Known problem in 5.1''.

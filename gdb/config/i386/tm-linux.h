@@ -46,12 +46,6 @@ extern struct link_map_offsets *i386_linux_svr4_fetch_link_map_offsets (void);
 #define IN_SIGTRAMP(pc, name) i386_linux_in_sigtramp (pc, name)
 extern int i386_linux_in_sigtramp (CORE_ADDR, char *);
 
-/* We need our own version of sigtramp_saved_pc to get the saved PC in
-   a sigtramp routine.  */
-
-#define sigtramp_saved_pc i386_linux_sigtramp_saved_pc
-extern CORE_ADDR i386_linux_sigtramp_saved_pc (struct frame_info *);
-
 /* Signal trampolines don't have a meaningful frame.  As in tm-i386.h,
    the frame pointer value we use is actually the frame pointer of the
    calling frame--that is, the frame which was in progress when the
@@ -89,14 +83,8 @@ extern CORE_ADDR i386_linux_sigtramp_saved_pc (struct frame_info *);
 	  : 0)))
 
 #undef FRAME_SAVED_PC
-#define FRAME_SAVED_PC(FRAME)					\
-  ((FRAME)->signal_handler_caller				\
-   ? sigtramp_saved_pc (FRAME)					\
-   : (FRAMELESS_SIGNAL (FRAME)					\
-      ? read_memory_integer (i386_linux_sigtramp_saved_sp ((FRAME)->next), 4) \
-      : read_memory_integer ((FRAME)->frame + 4, 4)))
-
-extern CORE_ADDR i386_linux_sigtramp_saved_sp (struct frame_info *);
+#define FRAME_SAVED_PC(frame) i386_linux_frame_saved_pc (frame)
+extern CORE_ADDR i386_linux_frame_saved_pc (struct frame_info *frame);
 
 #undef SAVED_PC_AFTER_CALL
 #define SAVED_PC_AFTER_CALL(frame) i386_linux_saved_pc_after_call (frame)
