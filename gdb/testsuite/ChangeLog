@@ -1,3 +1,8 @@
+2003-06-29  Michael Chastain  <mec@shout.net>
+
+	* gdb.c++/inherit.exp (test_print_svi_classes): Accept gdb
+	output of '<VTT for class>' for virtual base classes.
+
 2003-06-30  David Carlton  <carlton@kealia.com>
 
 	* gdb.c++/maint.exp (test_invalid_name): New.
