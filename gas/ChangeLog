@@ -1,3 +1,20 @@
+2000-04-10  Alan Modra  <alan@linuxcare.com.au>
+
+	* config/tc-i386.c (fits_in_signed_byte): Change arg to offsetT.
+	(fits_in_unsigned_byte, fits_in_unsigned_word): Ditto.
+	(fits_in_signed_word, smallest_imm_type): Ditto.
+	(md_assemble): Use an offsetT var to hold offsetT values, not a
+	long.
+	(offset_in_range): New.
+	(md_assemble): Use it.
+	(md_convert_frag): Change type of target_address, opcode_address,
+	and displacement_from_opcode_start to offsetT.
+	(md_create_short_jump): Change type of offset to offsetT.
+	(md_create_long_jump): Ditto.
+	(md_apply_fix3): Use -4, not 0xfffffffc for BFD_RELOC_386_PLT32.
+	(md_chars_to_number): Remove.
+	(output_invalid): Remove duplicate prototype.
+
 2000-04-09  Nick Clifton  <nickc@cygnus.com>
 
 	* Makefile.am (CPU_TYPES): Add 'avr'.

@@ -52,11 +52,12 @@
 #define false 0
 
 static unsigned int mode_from_disp_size PARAMS ((unsigned int));
-static int fits_in_signed_byte PARAMS ((long));
-static int fits_in_unsigned_byte PARAMS ((long));
-static int fits_in_unsigned_word PARAMS ((long));
-static int fits_in_signed_word PARAMS ((long));
-static int smallest_imm_type PARAMS ((long));
+static int fits_in_signed_byte PARAMS ((offsetT));
+static int fits_in_unsigned_byte PARAMS ((offsetT));
+static int fits_in_unsigned_word PARAMS ((offsetT));
+static int fits_in_signed_word PARAMS ((offsetT));
+static int smallest_imm_type PARAMS ((offsetT));
+static offsetT offset_in_range PARAMS ((offsetT, int));
 static int add_prefix PARAMS ((unsigned int));
 static void set_16bit_code_flag PARAMS ((int));
 static void set_16bit_gcc_code_flag PARAMS((int));
@@ -410,35 +411,35 @@ mode_from_disp_size (t)
 
 static INLINE int
 fits_in_signed_byte (num)
-     long num;
+     offsetT num;
 {
   return (num >= -128) && (num <= 127);
 }				/* fits_in_signed_byte() */
 
 static INLINE int
 fits_in_unsigned_byte (num)
-     long num;
+     offsetT num;
 {
   return (num & 0xff) == num;
 }				/* fits_in_unsigned_byte() */
 
 static INLINE int
 fits_in_unsigned_word (num)
-     long num;
+     offsetT num;
 {
   return (num & 0xffff) == num;
 }				/* fits_in_unsigned_word() */
 
 static INLINE int
 fits_in_signed_word (num)
-     long num;
+     offsetT num;
 {
   return (-32768 <= num) && (num <= 32767);
 }				/* fits_in_signed_word() */
 
 static int
 smallest_imm_type (num)
-     long num;
+     offsetT num;
 {
 #if 0
   /* This code is disabled because all the Imm1 forms in the opcode table
@@ -458,6 +459,31 @@ smallest_imm_type (num)
 	  ? (Imm16 | Imm32)
 	  : (Imm32));
 }				/* smallest_imm_type() */
+
+static offsetT
+offset_in_range (val, size)
+     offsetT val;
+     int size;
+{
+  offsetT mask;
+  switch (size)
+    {
+    case 1: mask = ((offsetT) 1 <<  8) - 1; break;
+    case 2: mask = ((offsetT) 1 << 16) - 1; break;
+    case 4: mask = ((offsetT) 1 << 32) - 1; break;
+    default: abort();
+    }
+
+  if ((val & ~ mask) != 0 && (val & ~ mask) != ~ mask)
+    {
+      char buf1[40], buf2[40];
+
+      sprint_value (buf1, val);
+      sprint_value (buf2, val & mask);
+      as_warn (_("%s shortened to %s"), buf1, buf2);
+    }
+  return val & mask;
+}
 
 /* Returns 0 if attempting to add a prefix where one from the same
    class already exists, 1 if non rep/repne added, 2 if rep/repne
@@ -2256,7 +2282,7 @@ md_assemble (line)
 	*p++ = i.tm.base_opcode;
 	if (i.op[1].imms->X_op == O_constant)
 	  {
-	    long n = (long) i.op[1].imms->X_add_number;
+	    offsetT n = i.op[1].imms->X_add_number;
 
 	    if (size == 2
 		&& !fits_in_unsigned_word (n)
@@ -2265,7 +2291,7 @@ md_assemble (line)
 		as_bad (_("16-bit jump out of range"));
 		return;
 	      }
-	    md_number_to_chars (p, (valueT) n, size);
+	    md_number_to_chars (p, n, size);
 	  }
 	else
 	  fix_new_exp (frag_now, p - frag_now->fr_literal, size,
@@ -2363,28 +2389,21 @@ md_assemble (line)
 		  {
 		    if (i.op[n].disps->X_op == O_constant)
 		      {
-			int size = 4;
-			long val = (long) i.op[n].disps->X_add_number;
+			int size;
+			offsetT val;
 
+			size = 4;
 			if (i.types[n] & (Disp8 | Disp16))
 			  {
-			    long mask;
-
 			    size = 2;
-			    mask = ~ (long) 0xffff;
 			    if (i.types[n] & Disp8)
-			      {
-				size = 1;
-				mask = ~ (long) 0xff;
-			      }
-
-			    if ((val & mask) != 0 && (val & mask) != mask)
-			      as_warn (_("%ld shortened to %ld"),
-				       val, val & ~mask);
+			      size = 1;
 			  }
+			val = offset_in_range (i.op[n].disps->X_add_number,
+					       size);
 			insn_size += size;
 			p = frag_more (size);
-			md_number_to_chars (p, (valueT) val, size);
+			md_number_to_chars (p, val, size);
 		      }
 		    else
 		      {
@@ -2414,27 +2433,21 @@ md_assemble (line)
 		  {
 		    if (i.op[n].imms->X_op == O_constant)
 		      {
-			int size = 4;
-			long val = (long) i.op[n].imms->X_add_number;
+			int size;
+			offsetT val;
 
+			size = 4;
 			if (i.types[n] & (Imm8 | Imm8S | Imm16))
 			  {
-			    long mask;
-
 			    size = 2;
-			    mask = ~ (long) 0xffff;
 			    if (i.types[n] & (Imm8 | Imm8S))
-			      {
-				size = 1;
-				mask = ~ (long) 0xff;
-			      }
-			    if ((val & mask) != 0 && (val & mask) != mask)
-			      as_warn (_("%ld shortened to %ld"),
-				       val, val & ~mask);
+			      size = 1;
 			  }
+			val = offset_in_range (i.op[n].imms->X_add_number,
+					       size);
 			insn_size += size;
 			p = frag_more (size);
-			md_number_to_chars (p, (valueT) val, size);
+			md_number_to_chars (p, val, size);
 		      }
 		    else
 		      {		/* not absolute_section */
@@ -3750,10 +3763,10 @@ md_convert_frag (abfd, sec, fragP)
 {
   register unsigned char *opcode;
   unsigned char *where_to_put_displacement = NULL;
-  unsigned int target_address;
-  unsigned int opcode_address;
+  offsetT target_address;
+  offsetT opcode_address;
   unsigned int extension = 0;
-  int displacement_from_opcode_start;
+  offsetT displacement_from_opcode_start;
 
   opcode = (unsigned char *) fragP->fr_opcode;
 
@@ -3829,7 +3842,7 @@ md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
      fragS *frag ATTRIBUTE_UNUSED;
      symbolS *to_symbol ATTRIBUTE_UNUSED;
 {
-  long offset;
+  offsetT offset;
 
   offset = to_addr - (from_addr + 2);
   md_number_to_chars (ptr, (valueT) 0xeb, 1);	/* opcode for byte-disp jump */
@@ -3843,7 +3856,7 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
      fragS *frag;
      symbolS *to_symbol;
 {
-  long offset;
+  offsetT offset;
 
   if (flag_do_long_jump)
     {
@@ -3978,7 +3991,7 @@ md_apply_fix3 (fixP, valp, seg)
     case BFD_RELOC_386_PLT32:
       /* Make the jump instruction point to the address of the operand.  At
 	 runtime we merely add the offset to the actual PLT entry. */
-      value = 0xfffffffc;
+      value = -4;
       break;
     case BFD_RELOC_386_GOTPC:
 /*
@@ -4042,23 +4055,6 @@ md_apply_fix3 (fixP, valp, seg)
 
   return 1;
 }
-
-#if 0
-/* This is never used.  */
-long				/* Knows about the byte order in a word. */
-md_chars_to_number (con, nbytes)
-     unsigned char con[];	/* Low order byte 1st. */
-     int nbytes;		/* Number of bytes in the input. */
-{
-  long retval;
-  for (retval = 0, con += nbytes - 1; nbytes--; con--)
-    {
-      retval <<= BITS_PER_CHAR;
-      retval |= *con;
-    }
-  return retval;
-}
-#endif /* 0 */
 
 
 #define MAX_LITTLENUMS 6
@@ -4114,8 +4110,6 @@ md_atof (type, litP, sizeP)
 }
 
 char output_invalid_buf[8];
-
-static char * output_invalid PARAMS ((int));
 
 static char *
 output_invalid (c)
