@@ -5081,13 +5081,19 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 	case R_SH_DIR32:
 	case R_SH_REL32:
+#ifdef INCLUDE_SHMEDIA
+	case R_SH_IMM_LOW16_PCREL:
+	case R_SH_IMM_MEDLOW16_PCREL:
+	case R_SH_IMM_MEDHI16_PCREL:
+	case R_SH_IMM_HI16_PCREL:
+#endif
 	  if (info->shared
 	      && (h == NULL
 		  || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 		  || h->root.type != bfd_link_hash_undefweak)
 	      && r_symndx != 0
 	      && (input_section->flags & SEC_ALLOC) != 0
-	      && (r_type != R_SH_REL32
+	      && (r_type == R_SH_DIR32
 		  || !SYMBOL_CALLS_LOCAL (info, h)))
 	    {
 	      Elf_Internal_Rela outrel;
@@ -5140,6 +5146,17 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  outrel.r_addend
 		    = bfd_get_32 (input_bfd, contents + rel->r_offset);
 		}
+#ifdef INCLUDE_SHMEDIA
+	      else if (r_type == R_SH_IMM_LOW16_PCREL
+		       || r_type == R_SH_IMM_MEDLOW16_PCREL
+		       || r_type == R_SH_IMM_MEDHI16_PCREL
+		       || r_type == R_SH_IMM_HI16_PCREL)
+		{
+		  BFD_ASSERT (h != NULL && h->dynindx != -1);
+		  outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
+		  outrel.r_addend = addend;
+		}
+#endif
 	      else
 		{
 		  /* h->dynindx may be -1 if this symbol was marked to
@@ -6655,6 +6672,12 @@ sh_elf_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 
 	case R_SH_DIR32:
 	case R_SH_REL32:
+#ifdef INCLUDE_SHMEDIA
+	case R_SH_IMM_LOW16_PCREL:
+	case R_SH_IMM_MEDLOW16_PCREL:
+	case R_SH_IMM_MEDHI16_PCREL:
+	case R_SH_IMM_HI16_PCREL:
+#endif
 	  if (h != NULL && ! info->shared)
 	    {
 	      h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
@@ -6772,7 +6795,14 @@ sh_elf_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 		}
 
 	      p->count += 1;
-	      if (r_type == R_SH_REL32)
+	      if (r_type == R_SH_REL32
+#ifdef INCLUDE_SHMEDIA
+		  || r_type == R_SH_IMM_LOW16_PCREL
+		  || r_type == R_SH_IMM_MEDLOW16_PCREL
+		  || r_type == R_SH_IMM_MEDHI16_PCREL
+		  || r_type == R_SH_IMM_HI16_PCREL
+#endif
+		  )
 		p->pc_count += 1;
 	    }
 

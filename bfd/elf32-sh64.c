@@ -85,6 +85,7 @@ static void sh64_find_section_for_address
 #define elf_backend_add_symbol_hook		sh64_elf_add_symbol_hook
 #define elf_backend_link_output_symbol_hook \
 	sh64_elf_link_output_symbol_hook
+#define elf_backend_merge_symbol_attribute	sh64_elf_merge_symbol_attribute
 #define elf_backend_final_write_processing 	sh64_elf_final_write_processing
 #define elf_backend_section_from_shdr		sh64_backend_section_from_shdr
 #define elf_backend_special_sections		sh64_elf_special_sections
@@ -733,6 +734,27 @@ sh64_elf_final_write_processing (bfd *abfd,
 	    }
 	}
     }
+}
+
+/* Merge non visibility st_other attribute when the symbol comes from
+   a dynamic object.  */
+static void
+sh64_elf_merge_symbol_attribute (struct elf_link_hash_entry *h,
+				 const Elf_Internal_Sym *isym,
+				 bfd_boolean definition,
+				 bfd_boolean dynamic)
+{
+  if (isym->st_other != 0 && dynamic)
+    {
+      unsigned char other;
+
+      /* Take the balance of OTHER from the definition.  */
+      other = (definition ? isym->st_other : h->other);
+      other &= ~ ELF_ST_VISIBILITY (-1);
+      h->other = other | ELF_ST_VISIBILITY (h->other);
+    }
+
+  return;
 }
 
 static struct bfd_elf_special_section const sh64_elf_special_sections[]=

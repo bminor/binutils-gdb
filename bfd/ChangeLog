@@ -1,3 +1,14 @@
+2003-10-15  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* elf32-sh.c (sh_elf_relocate_section): Handle R_SH_IMM_*_PCREL
+	relocations.
+	(sh_elf_check_relocs): Likewise.
+
+	* elf32-sh64.c (elf_backend_merge_symbol_attribute): Define.
+	(sh64_elf_merge_symbol_attribute): New.
+	* elf64-sh64.c (elf_backend_merge_symbol_attribute): Define.
+	(sh64_elf64_merge_symbol_attribute): New.
+
 2003-10-14  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* elf-bfd.h (struct elf_backend_data): New function pointer member

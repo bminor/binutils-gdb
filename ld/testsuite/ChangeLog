@@ -1,3 +1,12 @@
+2003-10-15  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* ld-sh/sh64/rd-sh64.exp: If the test matches *-dso.d, copy
+	the output of linker to the file tmpdir/*-dso.so.
+	* ld-sh/sh64/stobin-0-dso.d: New.
+	* ld-sh/sh64/stobin-1.d: New.
+	* ld-sh/sh64/stobin.s: New.
+	* ld-sh/sh64/stolib.s: New.
+
 2003-10-13  Richard Sandiford  <rsandifo@redht.com>
 
 	* ld-mips-elf/multi-got-1.d (RELSZ): Don't include the size of the
