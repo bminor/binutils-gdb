@@ -40,9 +40,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "a.out.encap.h"
 #else
 #endif
-#ifndef N_SET_MAGIC
-#define N_SET_MAGIC(exec, val) ((exec).a_magic = (val))
-#endif
 
 /*#include <sys/user.h>		After a.out.h  */
 #include <sys/file.h>

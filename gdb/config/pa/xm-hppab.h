@@ -25,9 +25,3 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define	HOST_BYTE_ORDER	BIG_ENDIAN
 
 #include "pa/xm-pa.h"
-
-#ifndef SEEK_SET
-#  define SEEK_SET    0		/* Set file pointer to "offset" */
-#  define SEEK_CUR    1		/* Set file pointer to current plus "offset" */
-#  define SEEK_END    2		/* Set file pointer to EOF plus "offset" */
-#endif /* SEEK_SET */
