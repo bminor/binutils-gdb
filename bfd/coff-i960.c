@@ -139,7 +139,7 @@ static reloc_howto_type howto_table[] =
 
 };
 
-/* The real code is in coff-code.h */
+/* The real code is in coffcode.h */
 
 #include "coffcode.h"
 
