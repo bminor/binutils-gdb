@@ -55,11 +55,13 @@ endif
 ifeq ($(canonhost),mips-dec-ultrix)
 TARGETS	= $(NATIVE) m68k-vxworks m68k-aout i960-vxworks \
 	  sparc-vxworks m68k-coff i386-aout sparc-aout i960-intel-nindy
+CC = cc -Wf,-XNg1000
 all: all-cygnus
 endif
 
 ifeq ($(canonhost),mips-sgi-irix4)
 TARGETS	= $(NATIVE) m68k-vxworks a29k-amd-udi
+CC = cc -cckr -Wf,-XNg1500 -Wf,-XNk1000 -Wf,-XNh1100
 all: all-cygnus
 endif
 
