@@ -1,3 +1,9 @@
+2002-08-16  Keith Seitz  <keiths@redhat.com>
+
+	* gdb-events.sh (clear_gdb_event_hooks): New function.
+	* gdb-events.c: Regenerate.
+	* gdb-events.h: Regenerate.
+
 2002-08-16  Andrew Cagney  <ac131313@redhat.com>
 
 	* breakpoint.c (bpstat_stop_status): Rename not_a_breakpoint to

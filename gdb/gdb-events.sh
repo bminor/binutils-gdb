@@ -267,6 +267,9 @@ extern struct gdb_events *set_gdb_event_hooks (struct gdb_events *vector);
 /* Deliver any pending events. */
 extern void gdb_events_deliver (struct gdb_events *vector);
 
+/* Clear event handlers */
+extern void clear_gdb_event_hooks (void);
+
 #if !WITH_GDB_EVENTS
 #define set_gdb_events(x) 0
 #define set_gdb_event_hooks(x) 0
@@ -389,6 +392,18 @@ do
   esac
 done
 cat <<EOF
+}
+#endif
+EOF
+
+# Clear hooks function
+echo ""
+cat <<EOF
+#if WITH_GDB_EVENTS
+void
+clear_gdb_event_hooks (void)
+{
+  set_gdb_event_hooks (&null_event_hooks);
 }
 #endif
 EOF
