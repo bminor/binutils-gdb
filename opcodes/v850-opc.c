@@ -1,6 +1,10 @@
 #include "ansidecl.h"
 #include "opcode/v850.h"
 
+/* Local insertion and extraction functions.  */
+static unsigned long insert_d9 PARAMS ((unsigned long, long, const char **));
+static long extract_d9 PARAMS ((unsigned long, int *));
+
 /* regular opcode */
 #define OP(x)		((x & 0x3f) << 5)
 #define OP_MASK		OP(0x3f)
@@ -33,7 +37,7 @@ const struct v850_operand v850_operands[] = {
 #define I5	(R2+1)
   { 5, 0, 0, 0, 0 }, 
 
-#define IMM16 field in a format 6 insn. */
+/* The IMM16 field in a format 6 insn. */
 #define I16	(I5+1)
   { 16, 0, 0, 0, 0 }, 
 
@@ -41,12 +45,12 @@ const struct v850_operand v850_operands[] = {
 #define D6	(I16+1)
   { 6, 1, 0, 0, 0 },
 
-/* The DISP8 field in a format 3 insn. */
-#define D8	(D6+1)
-  { 9, 0, 0, 0, 0 },
+/* The DISP9 field in a format 3 insn. */
+#define D9	(D6+1)
+  { 0, 0, insert_d9, extract_d9, 0 },
 
 /* The DISP16 field in a format 6 insn. */
-#define D16	(D8+1)
+#define D16	(D9+1)
   { 16, 0, 0, 0, 0 }, 
 
 /* The DISP22 field in a format 4 insn. */
@@ -70,7 +74,7 @@ const struct v850_operand v850_operands[] = {
 #define IF2	{I5, R2}
 
 /* conditional branch instruction format (Format III) */
-#define IF3	{D8}
+#define IF3	{D9}
 
 /* 16-bit load/store instruction (Format IV) */
 #define IF4A	{D6, R2}
@@ -215,3 +219,30 @@ const struct v850_opcode v850_opcodes[] = {
 const int v850_num_opcodes =
   sizeof (v850_opcodes) / sizeof (v850_opcodes[0]);
 
+
+/* The functions used to insert and extract complicated operands.  */
+
+static unsigned long
+insert_d9 (insn, value, errmsg)
+     unsigned long insn;
+     long value;
+     const char **errmsg;
+{
+  if (value > 511 || value <= -512)
+    *errmsg = "value out of range";
+
+  return (insn | ((value & 0x1f0) << 7) | ((value & 0x0e) << 3));
+}
+
+static long
+extract_d9 (insn, invalid)
+     unsigned long insn;
+     int *invalid;
+{
+  long ret = ((insn & 0xf800) >> 7) | ((insn & 0x0070) >> 3);
+
+  if ((insn & 0x8000) != 0)
+    ret -= 0x0200;
+
+  return ret;
+}
