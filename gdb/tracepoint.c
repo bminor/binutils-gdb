@@ -1198,8 +1198,7 @@ collect_symbol (collect, sym)
   case LOC_STATIC:
     offset = SYMBOL_VALUE_ADDRESS (sym); 
     if (info_verbose)
-      printf_filtered ("LOC_STATIC %s: collect %d bytes "
-		       "at 0x%08x\n",
+      printf_filtered ("LOC_STATIC %s: collect %d bytes at 0x%08x\n",
 		       SYMBOL_NAME (sym), len, offset);
     add_memrange (collect, -1, offset, len);	/* 0 == memory */
     break;
@@ -1550,16 +1549,16 @@ trace_start_command (args, from_tty)
 	      if (tdp_actions)
 		{
 		  if (strlen (buf) + strlen (tdp_actions) >= sizeof (buf))
-		    error ("Actions for tracepoint %d too complex; "
-			   "please simplify.", t->number);
+		    error ("Actions for tracepoint %d too complex; please simplify.",
+			   t->number);
 		  strcat (buf, tdp_actions);
 		}
 	      if (stepping_actions)
 		{
 		  strcat (buf, "S");
 		  if (strlen (buf) + strlen (stepping_actions) >= sizeof (buf))
-		    error ("Actions for tracepoint %d too complex; "
-			   "please simplify.", t->number);
+		    error ("Actions for tracepoint %d too complex; please simplify.",
+			   t->number);
 		  strcat (buf, stepping_actions);
 		}
 	    }

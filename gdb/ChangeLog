@@ -1,3 +1,18 @@
+Fri Mar 13 15:37:02 1998  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+        * config/m68k/xm-sun3os4.h:  Remove malloc declarations, they
+        are handled via autoconf now.
+        * remote.c (remote_ops, extended_remote_ops):  Replace static
+        forward declaration by moving the static definition to the top of
+        the file, for old K&R compilers.
+        * tracepoint.c (collect_symbol, trace_start_command):
+        Replace ANSI string concatenation with K&R compatible simple string.
+
+1998-03-11  Fred Fish  <fnf@ninemoons.com>
+
+	* source.c (select_source_symtab): Don't reach error if we have
+	a current_source_symtab from reading in partial symbol table.
+
 start-sanitize-vr4320
 Tue Mar 10 16:15:13 1998  Gavin Koch  <gavin@cygnus.com>
 

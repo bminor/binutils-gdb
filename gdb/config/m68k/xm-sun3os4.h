@@ -19,9 +19,3 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "m68k/xm-sun3.h"
 #define FPU
-
-/* Prevent type conflicts between yacc malloc decls and defs.h */
-#define MALLOC_INCOMPATIBLE
-extern char *malloc();
-extern char *realloc();
-extern void free();
