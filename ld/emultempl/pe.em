@@ -193,6 +193,11 @@ gld_${EMULATION_NAME}_list_options (file)
   fprintf (file, _("  --stack <size>                     Set size of the initial stack\n"));
   fprintf (file, _("  --subsystem <name>[:<version>]     Set required OS subsystem [& version]\n"));
   fprintf (file, _("  --support-old-code                 Support interworking with old code\n"));
+  fprintf (file, _("  --output-def <file>                Generate a .DEF file for the built DLL\n"));
+  fprintf (file, _("  --export-all-symbols               Automatically export all globals to DLL\n"));
+  fprintf (file, _("  --exclude-symbols sym,sym,...      Exclude symbols from automatic export\n"));
+  fprintf (file, _("  --kill-at                          Remove @nn from exported symbols\n"));
+  fprintf (file, _("  --add-stdcall-alias                Export symbols with and without @nn\n"));
 }
 
 static void
