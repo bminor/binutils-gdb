@@ -1,5 +1,8 @@
 2002-04-08  Alan Modra  <amodra@bigpond.net.au>
 
+	* ldlang.c (lang_size_sections_1): Don't complain about
+	SEC_NEVER_LOAD sections having no memory region specified.
+
 	* ld.texinfo (Format Commands <OUTPUT_FORMAT>): Typo fix.
 
 2002-04-07  matthew green  <mrg@redhat.com>
