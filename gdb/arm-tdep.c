@@ -1143,7 +1143,8 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       fi->extra_info->frameoffset = 0;
 
     }
-  else if (PC_IN_CALL_DUMMY (fi->pc, sp, fi->frame))
+  else if (!USE_GENERIC_DUMMY_FRAMES
+	   && PC_IN_CALL_DUMMY (fi->pc, sp, fi->frame))
     {
       CORE_ADDR rp;
       CORE_ADDR callers_sp;
@@ -1162,7 +1163,10 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
       callers_sp = read_memory_integer (fi->saved_regs[ARM_SP_REGNUM],
                                         REGISTER_RAW_SIZE (ARM_SP_REGNUM));
-      fi->extra_info->framereg = ARM_FP_REGNUM;
+      if (arm_pc_is_thumb (fi->pc))
+	fi->extra_info->framereg = THUMB_FP_REGNUM;
+      else
+	fi->extra_info->framereg = ARM_FP_REGNUM;
       fi->extra_info->framesize = callers_sp - sp;
       fi->extra_info->frameoffset = fi->frame - sp;
     }
