@@ -44,11 +44,15 @@ static alpha_extra_func_info_t heuristic_proc_desc PARAMS ((CORE_ADDR,
 							    CORE_ADDR,
 							    struct frame_info *));
 
-static alpha_extra_func_info_t find_proc_desc PARAMS ((CORE_ADDR, struct frame_info *));
+static alpha_extra_func_info_t find_proc_desc PARAMS ((CORE_ADDR,
+						       struct frame_info *));
 
+#if 0
 static int alpha_in_lenient_prologue PARAMS ((CORE_ADDR, CORE_ADDR));
+#endif
 
-static void reinit_frame_cache_sfunc PARAMS ((char *, int, struct cmd_list_element *));
+static void reinit_frame_cache_sfunc PARAMS ((char *, int,
+					      struct cmd_list_element *));
 
 static CORE_ADDR after_prologue PARAMS ((CORE_ADDR pc,
 					 alpha_extra_func_info_t proc_desc));
@@ -382,7 +386,6 @@ after_prologue (pc, proc_desc)
      CORE_ADDR pc;
      alpha_extra_func_info_t proc_desc;
 {
-  struct block *b;
   struct symtab_and_line sal;
   CORE_ADDR func_addr, func_end;
 
@@ -971,6 +974,7 @@ alpha_skip_prologue (pc, lenient)
     return pc + offset;
 }
 
+#if 0
 /* Is address PC in the prologue (loosely defined) for function at
    STARTADDR?  */
 
@@ -982,6 +986,7 @@ alpha_in_lenient_prologue (startaddr, pc)
   CORE_ADDR end_prologue = alpha_skip_prologue (startaddr, 1);
   return pc >= startaddr && pc < end_prologue;
 }
+#endif
 
 /* The alpha needs a conversion between register and memory format if
    the register is a floating point register and

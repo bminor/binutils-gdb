@@ -56,6 +56,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/stat.h>
 #include <ctype.h>
 
+extern void initialize_targets PARAMS ((void));
+
+extern void initialize_utils PARAMS ((void));
+
 /* Prototypes for local functions */
 
 static char * line_completion_function PARAMS ((char *, int, char *, int));
@@ -1004,7 +1008,7 @@ static char *
 locate_arg (p)
      char *p;
 {
-  while (p = strchr (p, '$'))
+  while ((p = strchr (p, '$')))
     {
       if (strncmp (p, "$arg", 4) == 0 && isdigit (p[4]))
 	return p;
@@ -1026,7 +1030,7 @@ insert_args (line)
   /* First we need to know how much memory to allocate for the new line.  */
   save_line = line;
   len = 0;
-  while (p = locate_arg (line))
+  while ((p = locate_arg (line)))
     {
       len += p - line;
       i = p[4] - '0';
@@ -1054,7 +1058,7 @@ insert_args (line)
   /* Save pointer to beginning of new line.  */
   save_line = new_line;
 
-  while (p = locate_arg (line))
+  while ((p = locate_arg (line)))
     {
       int i, len;
 
@@ -1062,7 +1066,8 @@ insert_args (line)
       new_line += p - line;
       i = p[4] - '0';
 
-      if (len = user_args->a[i].len)
+      len = user_args->a[i].len;
+      if (len)
 	{
 	  memcpy (new_line, user_args->a[i].arg, len);
 	  new_line += len;

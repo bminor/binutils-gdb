@@ -102,8 +102,6 @@ sr_scan_args(proto, args)
   int n;
   char *p, *q;
 
-  extern int strtol();
-
   /* if no args, then nothing to do. */
   if (args == NULL || *args == '\0')
     return;

@@ -553,8 +553,6 @@ extern void error_begin PARAMS ((void));
 
 extern NORETURN void fatal () ATTR_NORETURN;
 
-extern NORETURN void exit PARAMS ((int)) ATTR_NORETURN;	/* 4.10.4.3 */
-
 extern NORETURN void nomem PARAMS ((long)) ATTR_NORETURN;
 
 /* Reasons for calling return_to_top_level.  */
@@ -593,62 +591,34 @@ extern char *getenv PARAMS ((const char *));
 extern void psignal PARAMS ((unsigned, const char *));
 #endif
 
-/* For now, we can't include <stdlib.h> because it conflicts with
-   "../include/getopt.h".  (FIXME)
-
-   However, if a function is defined in the ANSI C standard and a prototype
-   for that function is defined and visible in any header file in an ANSI
-   conforming environment, then that prototype must match the definition in
-   the ANSI standard.  So we can just duplicate them here without conflict,
-   since they must be the same in all conforming ANSI environments.  If
-   these cause problems, then the environment is not ANSI conformant. */
-   
 #ifdef __STDC__
 #include <stddef.h>
+#include <stdlib.h>
 #endif
 
-extern int fclose PARAMS ((GDB_FILE *stream));		/* 4.9.5.1 */
+extern int fclose ();
 
-extern void perror PARAMS ((const char *));		/* 4.9.10.4 */
-
-extern double atof PARAMS ((const char *nptr));		/* 4.10.1.1 */
-
-extern int atoi PARAMS ((const char *));		/* 4.10.1.2 */
+extern double atof ();
 
 #ifndef MALLOC_INCOMPATIBLE
 
-extern PTR malloc PARAMS ((size_t size));		/* 4.10.3.3 */
+extern PTR malloc ();
 
-extern PTR realloc PARAMS ((void *ptr, size_t size));	/* 4.10.3.4 */
+extern PTR realloc ();
 
-extern void free PARAMS ((void *));			/* 4.10.3.2 */
+extern void free ();
 
-#endif	/* MALLOC_INCOMPATIBLE */
+#endif /* MALLOC_INCOMPATIBLE */
 
-extern void
-qsort PARAMS ((void *base, size_t nmemb,		/* 4.10.5.2 */
-	       size_t size,
-	       int (*compar)(const void *, const void *)));
+extern char *strchr ();
 
-#ifndef	MEM_FNS_DECLARED	/* Some non-ANSI use void *, not char *.  */
-extern PTR memcpy PARAMS ((void *, const void *, size_t));  /* 4.11.2.1 */
+extern char *strrchr ();
 
-extern int memcmp PARAMS ((const void *, const void *, size_t)); /* 4.11.4.1 */
-#endif
+extern char *strstr ();
 
-extern char *strchr PARAMS ((const char *, int));	/* 4.11.5.2 */
+extern char *strtok ();
 
-extern char *strrchr PARAMS ((const char *, int));	/* 4.11.5.5 */
-
-extern char *strstr PARAMS ((const char *, const char *)); /* 4.11.5.7 */
-
-extern char *strtok PARAMS ((char *, const char *));	/* 4.11.5.8 */
-
-#ifndef	MEM_FNS_DECLARED	/* Some non-ANSI use void *, not char *.  */
-extern PTR memset PARAMS ((void *, int, size_t));	/* 4.11.6.1 */
-#endif
-
-extern char *strerror PARAMS ((int));			/* 4.11.6.2 */
+extern char *strerror ();
 
 /* Various possibilities for alloca.  */
 #ifndef alloca
@@ -861,7 +831,7 @@ extern void (*fputs_unfiltered_hook) PARAMS ((const char *linebuffer,
 extern void (*print_frame_info_listing_hook) PARAMS ((struct symtab *s,
 						      int line, int stopline,
 						      int noerror));
-extern int (*query_hook) PARAMS ((void));
+extern int (*query_hook) PARAMS (());
 extern void (*flush_hook) PARAMS ((FILE *stream));
 extern void (*create_breakpoint_hook) PARAMS ((struct breakpoint *b));
 extern void (*delete_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
@@ -879,7 +849,7 @@ extern int (*target_wait_hook) PARAMS ((int pid,
 extern void (*call_command_hook) PARAMS ((struct cmd_list_element *c,
 					  char *cmd, int from_tty));
 
-extern NORETURN void (*error_hook) PARAMS ((void));
+extern NORETURN void (*error_hook) PARAMS (());
 
 /* Inhibit window interface if non-zero. */
 
