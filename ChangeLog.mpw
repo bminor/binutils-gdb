@@ -1,0 +1,7 @@
+Fri Jan  7 14:34:31 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-build.in: New file, top-level build script fragment for MPW.
+	* mpw-configure: New file, configure script for MPW.
+	* mpw-config.in: New file, config fragment for MPW.
+
+

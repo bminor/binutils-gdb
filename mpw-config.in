@@ -1,0 +1,11 @@
+Set host_libs "mmalloc libiberty opcodes bfd readline"
+
+Set host_tools "byacc flex binutils ld gas gcc gdb"
+
+Set target_libs ""
+
+Set target_tools ""
+
+Set configdirs "{host_libs} {host_tools} {target_libs} {target_tools}"
+Export configdirs
+

@@ -1,0 +1,122 @@
+# Configuration script
+
+### This script (and its config.in fragments) must NOT use any 8-bit chars!
+
+Set savedir "`Directory`"
+
+#Set Echo 1
+
+Set thisscript "{0}"
+
+Set srcroot "--------"
+
+Set srcdir ":"
+
+Set objdir ":"
+
+Set hostalias "m68k-apple-mpw"
+
+Set targetalias {hostalias}
+
+Set verify 0
+Set verifystr ""
+
+# Parse arguments.
+
+Loop
+	Break If {#} == 0
+	If "{1}" =~ /--prefix/
+		Set prefix "{2}"
+		Shift 1
+	Else If "{1}" =~ /--srcdir/
+		Set srcdir "{2}"
+		Shift 1
+	Else If "{1}" =~ /--srcroot/
+		Set srcroot "{2}"
+		Shift 1
+	Else If "{1}" =~ /--target/
+		Set targetalias "{2}"
+		Shift 1
+	Else If "{1}" =~ /-v/
+		Set verify 1
+		Set verifystr "-v"
+		Shift 1
+	Else
+		Echo "{1}" is not a valid argument
+		Exit 1
+	End If
+	Shift 1
+End Loop
+
+Set Exit 0
+
+# (should interpret aliases if not in canonical form)
+
+Set target_canonical "{targetalias}"
+
+Set configdirs ""
+
+If "{srcroot}" =~ /--------/
+	Set srcroot "{srcdir}"
+End If
+If "`Exists "{srcdir}"`" == ""
+	Echo Source directory {srcdir} does not exist!
+	Exit 1
+End If
+If "`Exists "{srcroot}"`" == ""
+	Echo Top-level source directory {srcroot} does not exist!
+	Exit 1
+End If
+
+If "`Exists "{srcdir}"mpw-config.in`" != ""
+	Execute "{srcdir}"mpw-config.in
+End If
+If "`Exists "{srcdir}"mpw-xconfig.in`" != ""
+	Execute "{srcdir}"mpw-xconfig.in
+End If
+
+If "`Exists "{srcdir}"mpw-make.in`" != ""
+	Echo "srcroot = " {srcroot} > "{objdir}"Makefile.tem
+	Echo "topsrcdir = " {srcroot} > "{objdir}"Makefile.tem
+	Echo "srcdir = " {srcdir} >> "{objdir}"Makefile.tem
+	Echo "target_canonical = " {target_canonical} >> "{objdir}"Makefile.tem
+	Echo "mdname = " {mdname} >> "{objdir}"Makefile.tem
+	mpw-7to8 "{srcdir}"mpw-make.in >>"{objdir}"Makefile.tem
+	MoveIfChange "{objdir}"Makefile.tem "{objdir}"Makefile
+	If {verify} == 1
+		Echo Created Makefile in "`Directory`"
+	End If
+End If
+
+If "`Exists "{srcdir}"mpw-build.in`" != ""
+	Echo "Set srcroot " {srcroot} > "{objdir}"mpw-build.tem
+	Echo "Set srcdir " {srcdir} >> "{objdir}"mpw-build.tem
+	Echo "Set target_canonical " {target_canonical} >> "{objdir}"mpw-build.tem
+	mpw-7to8 "{srcdir}"mpw-build.in >>"{objdir}"mpw-build.tem
+	MoveIfChange "{objdir}"mpw-build.tem "{objdir}"mpw-build
+	If {verify} == 1
+		Echo Created mpw-build in "`Directory`"
+	End If
+End If
+
+For subdir In {configdirs}
+	Set savedir "`Directory`"
+	If "`Exists "{srcdir}{subdir}:"`" == ""
+		Echo Strange, no {subdir} in {srcdir}
+		Continue
+	End If
+	If {verify} == 1
+		Echo Configuring {subdir}...
+	End If
+	If "`Exists "{objdir}{subdir}:"`" == ""
+		NewFolder "{objdir}{subdir}"
+	End If
+	SetDirectory "{objdir}{subdir}:"
+	"{thisscript}" --target "{target_canonical}" --srcdir "{srcdir}{subdir}:" --srcroot "{srcroot}" {verifystr}
+	SetDirectory "{savedir}"
+End For
+
+Echo "# This directory was configured as follows:" >config.status
+Echo "mpw-configure --host {hostalias} --target {targetalias} --srcdir {srcdir}" >>config.status
+
+SetDirectory "{savedir}"

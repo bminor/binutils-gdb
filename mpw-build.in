@@ -1,0 +1,130 @@
+# Top-level script fragment to build everything for MPW.
+
+Set savedir "`Directory`"
+
+#Set Echo 1
+
+Set thisscript "{0}"
+
+Set topsrcdir ":"
+
+Set srcdir ":"
+
+Set objdir ":"
+
+Set verify 0
+Set verifystr ""
+
+Set BuildTarget "none"
+
+Set prefix "{Boot}"Cygnus:latest:
+
+# Parse arguments.
+
+Loop
+	Break If {#} == 0
+	If "{1}" =~ /--srcdir/
+		Set srcdir "{2}"
+		Shift 1
+	Else If "{1}" =~ /--topdir/
+		Set topsrcdir "{2}"
+		Shift 1
+	Else If "{1}" =~ /--prefix/
+		Set prefix "{2}"
+		Shift 1
+	Else If "{1}" =~ /-v/
+		Set verify 1
+		Set verifystr "-v"
+		Shift 1
+	Else
+		If "{BuildTarget}" =~ /none/
+			Set BuildTarget "{1}"
+		Else
+			Echo Only one build target allowed, ignoring "{1}"
+		End If
+	End If
+	Shift 1
+End Loop
+
+If "{BuildTarget}" =~ /all/
+	"{thisscript}" all-ld
+	"{thisscript}" all-gcc
+	"{thisscript}" all-gdb
+Else If "{BuildTarget}" =~ /all-binutils/
+	"{thisscript}" do-libiberty
+	"{thisscript}" do-bfd
+	"{thisscript}" do-opcodes
+	"{thisscript}" do-binutils
+Else If "{BuildTarget}" =~ /all-gas/
+	"{thisscript}" do-libiberty
+	"{thisscript}" do-bfd
+	"{thisscript}" do-opcodes
+	"{thisscript}" do-gas
+Else If "{BuildTarget}" =~ /all-gcc/
+	"{thisscript}" all-gas
+	"{thisscript}" do-gcc
+Else If "{BuildTarget}" =~ /all-gdb/
+	"{thisscript}" do-libiberty
+	"{thisscript}" do-bfd
+	"{thisscript}" do-opcodes
+	"{thisscript}" do-gdb
+Else If "{BuildTarget}" =~ /all-ld/
+	"{thisscript}" do-libiberty
+	"{thisscript}" do-bfd
+	"{thisscript}" do-opcodes
+	"{thisscript}" do-ld
+Else If "{BuildTarget}" =~ /do-bfd/
+	SetDirectory :bfd:
+	BuildProgram all
+Else If "{BuildTarget}" =~ /do-libiberty/
+	SetDirectory :libiberty:
+	BuildProgram all
+Else If "{BuildTarget}" =~ /do-mmalloc/
+	SetDirectory :mmalloc:
+	BuildProgram all
+Else If "{BuildTarget}" =~ /do-opcodes/
+	SetDirectory :opcodes:
+	BuildProgram all
+Else If "{BuildTarget}" =~ /do-readline/
+	SetDirectory :readline:
+	BuildProgram all
+Else If "{BuildTarget}" =~ /do-binutils/
+	SetDirectory :binutils:
+	BuildProgram all
+Else If "{BuildTarget}" =~ /do-gas/
+	SetDirectory :gas:
+	:mpw-build all --prefix "{prefix}"
+Else If "{BuildTarget}" =~ /do-gcc/
+	SetDirectory :gcc:
+	:mpw-build all --prefix "{prefix}"
+Else If "{BuildTarget}" =~ /do-gdb/
+	SetDirectory :gdb:
+	BuildProgram all
+Else If "{BuildTarget}" =~ /do-ld/
+	SetDirectory :ld:
+	BuildProgram all
+Else If "{BuildTarget}" =~ /install/
+	"{thisscript}" install-binutils
+	"{thisscript}" install-gas
+	"{thisscript}" install-gcc
+	"{thisscript}" install-gdb
+	"{thisscript}" install-ld
+Else If "{BuildTarget}" =~ /install-binutils/
+	SetDirectory :binutils:
+	:mpw-build install --prefix "{prefix}"
+Else If "{BuildTarget}" =~ /install-gas/
+	SetDirectory :gas:
+	:mpw-build install --prefix "{prefix}"
+Else If "{BuildTarget}" =~ /install-gcc/
+	SetDirectory :gcc:
+	:mpw-build install --prefix "{prefix}"
+Else If "{BuildTarget}" =~ /install-gdb/
+	SetDirectory :gdb:
+	:mpw-build install --prefix "{prefix}"
+Else If "{BuildTarget}" =~ /install-ld/
+	SetDirectory :ld:
+	:mpw-build install --prefix "{prefix}"
+Else
+End If
+
+SetDirectory "{savedir}"

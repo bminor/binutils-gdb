@@ -1,6 +1,6 @@
 # .Sanitize for devo.
 
-# Each directory to survive it's way into a release will need a file
+# Each directory to survive its way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
 # and must exist in the order specified by this file.  Each directory
 # in the tree will be processed, top down, in the following order.
@@ -21,6 +21,11 @@ else
 	lose_these_too="${lose_these_too} release release-info build-all.mk"
 fi
 
+if ( echo $* | grep keep\-mpw > /dev/null) ; then
+	keep_these_too="mpw-configure mpw-config.in mpw-build.in ChangeLog.mpw ${keep_these_too}"
+else
+	lose_these_too="mpw-configure mpw-config.in mpw-build.in ChangeLog.mpw ${lose_these_too}"
+fi
 
 # All files listed between the "Things-to-keep:" line and the
 # "Do-last:" line will be kept.  All other files will be removed.
@@ -166,6 +171,39 @@ else
 			fi
 			cp $i new
 			sed '/start\-sanitize\-chill/,/end-\sanitize\-chill/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+if [ -n "${verbose}" ] ; then
+	echo Removing traces of \"mpw\"...
+fi
+
+# Don't try to clean directories here, as the 'mv' command will fail.
+# Also, grep fails on NFS mounted directories.
+if ( echo $* | grep keep\-mpw > /dev/null ) ; then
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-mpw $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping mpw stuff in $i
+			fi
+		fi
+	done
+else
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-mpw $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"mpw\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-mpw/,/end-\sanitize\-mpw/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...
