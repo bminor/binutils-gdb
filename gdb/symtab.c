@@ -134,20 +134,13 @@ struct symbol *lookup_symbol_aux_psymtabs (int block_index,
 					   struct symtab **symtab);
 
 static
-struct symbol *lookup_symbol_aux_using (const char *name,
-					const char *linkage_name,
-					const struct block *block,
-					const namespace_enum namespace,
-					struct symtab **symtab);
-
-static
-struct symbol *lookup_symbol_aux_using_loop (const char *name,
-					     const char *linkage_name,
-					     const struct block *block,
-					     namespace_enum namespace,
-					     struct symtab **symtab,
-					     const char *scope,
-					     int scope_len);
+struct symbol *lookup_symbol_aux_namespace_scope (const char *name,
+						  const char *linkage_name,
+						  const struct block *block,
+						  namespace_enum namespace,
+						  struct symtab **symtab,
+						  const char *scope,
+						  int scope_len);
 
 static struct symbol *find_active_alias (struct symbol *sym, CORE_ADDR addr);
 
@@ -964,12 +957,11 @@ lookup_symbol_aux (const char *name, const char *linkage_name,
     }
 
   /* Now search this block's static block, and all the global blocks.
-     We do this from within lookup_symbol_aux_using: that will apply
-     appropriate using directives in the C++ case.  But it works fine
-     in the non-C++ case, too.  */
+     In the C++ case, do lookup in namespace scope.  */
 
-  sym = lookup_symbol_aux_using (name, linkage_name, block, namespace,
-				 symtab);
+  sym = lookup_symbol_aux_namespace_scope (name, linkage_name, block,
+					   namespace, symtab,
+					   block_scope (block), 0);
   if (sym != NULL)
     return sym;
 
@@ -1259,32 +1251,19 @@ lookup_symbol_aux_psymtabs (int block_index, const char *name,
   return NULL;
 }
 
-/* This function and lookup_symbol_aux_using_loop calculates the
-   appropriate namespaces scope for BLOCK, and searches for NAME in
-   each of the namespaces that are in scope.  */
+/* Lookup NAME at namespace scope (or, in C terms, in static and
+   global variables).  SCOPE is the namespace that the current
+   function is defined within; only consider namespaces whose length
+   is at least SCOPE_LEN.  (This is to make the recursion easier.)  */
 
 static struct symbol *
-lookup_symbol_aux_using (const char *name,
-			 const char *linkage_name,
-			 const struct block *block,
-			 const namespace_enum namespace,
-			 struct symtab **symtab)
-{
-  const char *scope = block_scope (block);
-
-  return lookup_symbol_aux_using_loop (name, linkage_name, block,
-				       namespace, symtab,
-				       scope, 0);
-}
-
-static struct symbol *
-lookup_symbol_aux_using_loop (const char *name,
-			      const char *linkage_name,
-			      const struct block *block,
-			      namespace_enum namespace,
-			      struct symtab **symtab,
-			      const char *scope,
-			      int scope_len)
+lookup_symbol_aux_namespace_scope (const char *name,
+				   const char *linkage_name,
+				   const struct block *block,
+				   namespace_enum namespace,
+				   struct symtab **symtab,
+				   const char *scope,
+				   int scope_len)
 {
   char *cp_namespace;
 
@@ -1300,8 +1279,9 @@ lookup_symbol_aux_using_loop (const char *name,
 	  new_scope_len += 2;
 	}
       new_scope_len += cp_find_first_component (scope + new_scope_len);
-      sym = lookup_symbol_aux_using_loop (name, linkage_name, block, namespace,
-					  symtab, scope, new_scope_len);
+      sym = lookup_symbol_aux_namespace_scope (name, linkage_name, block,
+					       namespace, symtab,
+					       scope, new_scope_len);
       if (sym != NULL)
 	return sym;
     }
