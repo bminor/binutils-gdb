@@ -1,5 +1,12 @@
 2002-09-10  Keith Seitz  <keiths@redhat.com>
 
+	* lib/mi-support.exp (mi_runto): New proc. Does the same as gdb's
+	runto proc.
+	(mi_run_to_main): Use mi_runto.
+	(mi_execute_to): Renamed from mi_run_to. Changed all callers.
+
+2002-09-10  Keith Seitz  <keiths@redhat.com>
+
 	* lib/mi-support.exp: (mi_run_to_main): Allow anything to precede
 	regexp for stopping at main. Could have multiple event notifications.
 	Don't assume that main was declared with no parameters.
