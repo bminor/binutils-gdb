@@ -46,7 +46,7 @@ struct regset;
 /* This file implements the SPARC 32-bit ABI as defined by the section
    "Low-Level System Information" of the SPARC Compliance Definition
    (SCD) 2.4.1, which is the 32-bit System V psABI for SPARC.  The SCD
-   lists changes with respect to the origional 32-bit psABI as defined
+   lists changes with respect to the original 32-bit psABI as defined
    in the "System V ABI, SPARC Processor Supplement".
 
    Note that if we talk about SunOS, we mean SunOS 4.x, which was
@@ -185,7 +185,7 @@ sparc_integral_or_pointer_p (const struct type *type)
       {
 	/* We have byte, half-word, word and extended-word/doubleword
            integral types.  The doubleword is an extension to the
-           origional 32-bit ABI by the SCD 2.4.x.  */
+           original 32-bit ABI by the SCD 2.4.x.  */
 	int len = TYPE_LENGTH (type);
 	return (len == 1 || len == 2 || len == 4 || len == 8);
       }

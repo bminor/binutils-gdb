@@ -236,7 +236,7 @@ i386nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->struct_return = reg_struct_return;
 
   /* NetBSD has a `struct sigcontext' that's different from the
-     origional 4.3 BSD.  */
+     original 4.3 BSD.  */
   tdep->sc_reg_offset = i386nbsd_sc_reg_offset;
   tdep->sc_num_regs = ARRAY_SIZE (i386nbsd_sc_reg_offset);
 }

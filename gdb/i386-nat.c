@@ -454,7 +454,7 @@ i386_handle_nonaligned_watchpoint (i386_wp_op_t what, CORE_ADDR addr, int len,
   while (len > 0)
     {
       int align = addr % max_wp_len;
-      /* Four (eigth on AMD64) is the maximum length a debug register
+      /* Four (eight on AMD64) is the maximum length a debug register
 	 can watch.  */
       int try = (len > max_wp_len ? (max_wp_len - 1) : len - 1);
       int size = size_try_array[try][align];
@@ -582,7 +582,7 @@ i386_stopped_data_address (void)
 	     watchpoint, not a hardware breakpoint.  The reason is
 	     that GDB doesn't call the target_stopped_data_address
 	     method except for data watchpoints.  In other words, I'm
-	     being paranoid.  */
+	     being paranoiac.  */
 	  && I386_DR_GET_RW_LEN (i) != 0)
 	{
 	  addr = dr_mirror[i];
