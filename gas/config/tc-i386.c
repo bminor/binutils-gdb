@@ -1413,6 +1413,21 @@ md_assemble (line)
 
   if (i.tm.opcode_modifier & ImmExt)
     {
+      if ((i.tm.cpu_flags & CpuPNI) && i.operands > 0)
+	{
+          /* These Intel Precott New Instructions have the fixed
+	     operands with an opcode suffix which is coded in the same
+	     place as an 8-bit immediate field would be. Here we check
+	     those operands and remove them afterwards.  */
+	  unsigned int x;
+
+	  for (x = 0; x < i.operands; x++) 
+	    if (i.op[x].regs->reg_num != x)
+	      as_bad (_("can't use register '%%%s' as operand %d in '%s'."),
+			i.op[x].regs->reg_name, x + 1, i.tm.name);
+	  i.operands = 0;
+ 	}
+
       /* These AMD 3DNow! and Intel Katmai New Instructions have an
 	 opcode suffix which is coded in the same place as an 8-bit
 	 immediate field would be.  Here we fake an 8-bit immediate

@@ -1,3 +1,11 @@
+2003-06-23  H.J. Lu <hongjiu.lu@intel.com>
+
+	* gas/config/tc-i386.c (md_assemble): Support Intel Precott New
+	Instructions.
+
+	* gas/config/tc-i386.h (CpuPNI): New.
+	(CpuUnknownFlags): Add CpuPNI.
+
 2003-06-23    <davidm@hpl.hp.com>
 
 	* config/tc-ia64.c (pseudo_func): Add ABI constants for linux,

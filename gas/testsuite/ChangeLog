@@ -1,3 +1,10 @@
+2003-06-23  H.J. Lu <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Add prescott.
+
+	* gas/i386/prescott.d: New file.
+	* gas/i386/prescott.s: Likewise.
+
 2003-06-21  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* gas/mips/elf-rel-got-n32.d: Remove special handling for n32 ABI.
