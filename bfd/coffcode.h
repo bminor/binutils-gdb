@@ -338,6 +338,12 @@ DEFUN(sec_to_styp_flags, (sec_name, sec_flags),
   {
     styp_flags = STYP_LIB;
 #endif				/* _LIB */
+#ifdef _LIT
+  }
+  else if (!strcmp (sec_name, _LIT))
+  {
+    stype_flags = STYP_LIT;
+#endif /* _LIT */
 
   }
   /* Try and figure out what it should be */
@@ -413,11 +419,16 @@ DEFUN(styp_to_sec_flags, (abfd, hdr),
   }
   else if (styp_flags & STYP_BSS) 
   {
-    sec_flags |= SEC_ALLOC;
+#ifdef BSS_NOLOAD_IS_SHARED_LIBRARY
+    if (sec_flags & SEC_NEVER_LOAD)
+      sec_flags |= SEC_ALLOC | SEC_SHARED_LIBRARY;
+    else
+#endif
+      sec_flags |= SEC_ALLOC;
   }
   else if (styp_flags & STYP_INFO) 
   {
-    sec_flags |= SEC_NEVER_LOAD;
+    /* Nothing to do.  */
   }
   else
   {
@@ -1226,6 +1237,14 @@ DEFUN(coff_compute_section_file_positions,(abfd),
       current->_raw_size += sofar - old_sofar ;
 #endif
 
+#ifdef _LIB
+      /* Force .lib sections to start at zero.  The vma is then
+	 incremented in coff_set_section_contents.  This is right for
+	 SVR3.2.  */
+      if (strcmp (current->name, _LIB) == 0)
+	bfd_set_section_vma (abfd, current, 0);
+#endif
+
       previous = current;
     }
   obj_relocbase(abfd) = sofar;
@@ -1637,7 +1656,7 @@ DEFUN(coff_set_section_contents,(abfd, section, location, offset, count),
        right for SVR3.2.  Shared libraries should probably get more
        generic support.  Ian Taylor <ian@cygnus.com>.  */
     if (strcmp (section->name, _LIB) == 0)
-      ++section->vma;
+      ++section->lma;
 #endif
 
     /* Don't write out bss sections - one way to do this is to 

@@ -1,3 +1,7 @@
+Sat Apr 24 21:33:45 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* coffcode.h [_LIT]: Recognize .lit section.
+
 Fri Apr 23 19:00:36 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* coff-alpha.c, cpu-alpha.c, config/alphaosf.mt,
