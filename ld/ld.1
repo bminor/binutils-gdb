@@ -92,6 +92,9 @@ ld \- the GNU linker
 .RB "[\|" \-noinhibit-exec "\|]" 
 .RB "[\|" \-no\-keep\-memory "\|]" 
 .RB "[\|" \-no\-warn\-mismatch "\|]" 
+.RB "[\|" \-O\c
+.I level\c
+\&\|]
 .RB "[\|" "\-oformat\ "\c
 .I output-format\c
 \&\|] 
@@ -688,6 +691,16 @@ option is not specified, the name `\|\c
 script command \c
 .B OUTPUT\c
 \& can also specify the output file name.
+
+.TP
+.BI "\-O" "level"
+Generate optimized output files.  This might use significantly more
+time and therefore probably should be enabled only for generating the
+final binary.
+\c
+.I level\c
+\& is supposed to be a numeric value.  Any value greater than zero enables
+the optimizations.
 
 .TP
 .BI "\-oformat " "output\-format"

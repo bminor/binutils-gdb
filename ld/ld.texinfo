@@ -554,6 +554,13 @@ Use @var{output} as the name for the program produced by @code{ld}; if this
 option is not specified, the name @file{a.out} is used by default.  The
 script command @code{OUTPUT} can also specify the output file name.
 
+@kindex -O @var{level}
+@cindex generating optimized output
+@item -O @var{level}
+If @var{level} is a numeric values greater than zero @code{ld} optimizes
+the output.  This might take significantly longer and therefore probably
+should only be enabled for the final binary.
+
 @cindex partial link
 @cindex relocatable output
 @kindex -r
@@ -1663,6 +1670,12 @@ command is also used to set the format for the output file.  @xref{BFD}.
 There are a few other linker scripts commands.
 
 @table @code
+@item ASSERT(@var{exp}, @var{message})
+@kindex ASSERT
+@cindex assertion in linker script
+Ensure that @var{exp} is non-zero.  If it is zero, then exit the linker
+with an error code, and print @var{message}.
+
 @item EXTERN(@var{symbol} @var{symbol} @dots{})
 @kindex EXTERN
 @cindex undefined symbol in linker script
@@ -2324,10 +2337,20 @@ runtime code expects to see.
       __DTOR_END__ = .;
 @end smallexample
 
+If you are using the @sc{gnu} C++ support for initialization priority,
+which provides some control over the order in which global constructors
+are run, you must sort the constructors at link time to ensure that they
+are executed in the correct order.  When using the @code{CONSTRUCTORS}
+command, use @samp{SORT(CONSTRUCTORS)} instead.  When using the
+@code{.ctors} and @code{.dtors} sections, use @samp{*(SORT(.ctors))} and
+@samp{*(SORT(.dtors))} instead of just @samp{*(.ctors)} and
+@samp{*(.dtors)}.
+
 Normally the compiler and linker will handle these issues automatically,
 and you will not need to concern yourself with them.  However, you may
 need to consider this if you are using C++ and writing your own linker
 scripts.
+
 @end table
 
 @node Output Section Discarding
