@@ -4140,11 +4140,15 @@ sim_engine_run (sd, next_cpu_nr, siggnal)
 #ifdef DEBUG
     {
       printf("DBG: state = 0x%08X :",state);
+#if 0
       if (state & simSTOP) printf(" simSTOP");
       if (state & simSTEP) printf(" simSTEP");
+#endif
       if (state & simHALTEX) printf(" simHALTEX");
       if (state & simHALTIN) printf(" simHALTIN");
+#if 0
       if (state & simBE) printf(" simBE");
+#endif
       printf("\n");
     }
 #endif /* DEBUG */
