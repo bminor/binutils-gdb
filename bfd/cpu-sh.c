@@ -23,19 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 
-static boolean scan_mach
-  PARAMS ((const struct bfd_arch_info *, const char *));
-
-static boolean
-scan_mach (info, string)
-     const struct bfd_arch_info *info;
-     const char *string;
-{
-  if (strcasecmp (info->printable_name, string) == 0)
-    return true;
-  return false;
-}
-
 #if 0
 /* This routine is provided two arch_infos and returns whether
    they'd be compatible */
@@ -75,7 +62,7 @@ static const bfd_arch_info_type arch_info_struct[] =
     1,
     false,			/* not the default */
     bfd_default_compatible,
-    scan_mach,
+    bfd_default_scan,
     SH2_NEXT
   },
   {
@@ -89,7 +76,7 @@ static const bfd_arch_info_type arch_info_struct[] =
     1,
     false,			/* not the default */
     bfd_default_compatible,
-    scan_mach,
+    bfd_default_scan,
     SH_DSP_NEXT
   },
   {
@@ -103,7 +90,7 @@ static const bfd_arch_info_type arch_info_struct[] =
     1,
     false,			/* not the default */
     bfd_default_compatible,
-    scan_mach,
+    bfd_default_scan,
     SH3_NEXT
   },
   {
@@ -117,7 +104,7 @@ static const bfd_arch_info_type arch_info_struct[] =
     1,
     false,			/* not the default */
     bfd_default_compatible,
-    scan_mach,
+    bfd_default_scan,
     SH3_DSP_NEXT
   },
   {
@@ -131,7 +118,7 @@ static const bfd_arch_info_type arch_info_struct[] =
     1,
     false,			/* not the default */
     bfd_default_compatible,
-    scan_mach,
+    bfd_default_scan,
     SH3E_NEXT
   },
   {
@@ -145,7 +132,7 @@ static const bfd_arch_info_type arch_info_struct[] =
     1,
     false,			/* not the default */
     bfd_default_compatible,
-    scan_mach,
+    bfd_default_scan,
     SH4_NEXT
   },
   {
@@ -159,7 +146,7 @@ static const bfd_arch_info_type arch_info_struct[] =
     1,
     false,			/* not the default */
     bfd_default_compatible,
-    scan_mach,
+    bfd_default_scan,
     SH64_NEXT
   },
 };
@@ -176,6 +163,6 @@ const bfd_arch_info_type bfd_sh_arch =
   1,
   true,				/* the default machine */
   bfd_default_compatible,
-  scan_mach,
+  bfd_default_scan,
   SH_NEXT
 };

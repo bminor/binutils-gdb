@@ -1,3 +1,9 @@
+Wed Apr 17 19:23:43 2002  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* cpu-sh.c (scan_mach): Delete.
+	(arch_info_struct): Replace scan_mach with bfd_default_scan.
+	(bfd_sh_arch): Likewise.
+
 2002-04-16  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* ihex.c (ihex_write_object_contents): Fix check for records
