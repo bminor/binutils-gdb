@@ -119,7 +119,7 @@ static char tic80_trace_buffer[1024];
 static int  tic80_size_name;
 
 #define SIZE_HEX	8
-#define SIZE_DECIMAL	13
+#define SIZE_DECIMAL	11
 
 /* Initialize tracing by calculating the maximum name size */
 static void
@@ -144,20 +144,14 @@ tic80_trace_alu3 (int indx,
 		  unsigned32 input1,
 		  unsigned32 input2)
 {
-  char buf1[SIZE_DECIMAL+10], buf2[SIZE_DECIMAL+10], bufr[SIZE_DECIMAL+10];
-
   if (!tic80_size_name)
     tic80_init_trace ();
 
-  sprintf (bufr, "(%ld)", (long) (signed32) result);
-  sprintf (buf1, "(%ld)", (long) (signed32) input1);
-  sprintf (buf2, "(%ld)", (long) (signed32) input2);
-
-  sprintf (tic80_trace_buffer, "%-*s 0x%.*lx %-*s 0x%.*lx %-*s => 0x%.*lx %-*s",
+  sprintf (tic80_trace_buffer, "%-*s 0x%.*lx/%*ld 0x%.*lx/%*ld => 0x%.*lx/%*ld",
 	   tic80_size_name, itable[indx].name,
-	   SIZE_HEX, input1, SIZE_DECIMAL, buf1,
-	   SIZE_HEX, input2, SIZE_DECIMAL, buf2,
-	   SIZE_HEX, result, SIZE_DECIMAL, bufr);
+	   SIZE_HEX, input1, SIZE_DECIMAL, (long)(signed32)input1,
+	   SIZE_HEX, input2, SIZE_DECIMAL, (long)(signed32)input2,
+	   SIZE_HEX, result, SIZE_DECIMAL, (long)(signed32)result);
 
   return tic80_trace_buffer;
 }
@@ -168,24 +162,19 @@ tic80_trace_alu2 (int indx,
 		  unsigned32 result,
 		  unsigned32 input)
 {
-  char bufi[SIZE_DECIMAL+10], bufr[SIZE_DECIMAL+10];
-
   if (!tic80_size_name)
     tic80_init_trace ();
 
-  sprintf (bufr, "(%ld)", (long) (signed32) result);
-  sprintf (bufi, "(%ld)", (long) (signed32) input);
-
-  sprintf (tic80_trace_buffer, "%-*s 0x%.*lx %-*s %*s => 0x%.*lx %-*s",
+  sprintf (tic80_trace_buffer, "%-*s 0x%.*lx/%*ld %*s => 0x%.*lx/%*ld",
 	   tic80_size_name, itable[indx].name,
-	   SIZE_HEX, input, SIZE_DECIMAL, bufi,
-	   SIZE_HEX + SIZE_DECIMAL + 3, "",
-	   SIZE_HEX, result, SIZE_DECIMAL, bufr);
+	   SIZE_HEX, input, SIZE_DECIMAL, (long)(signed32)input,
+	   SIZE_HEX + SIZE_DECIMAL + 1, "",
+	   SIZE_HEX, result, SIZE_DECIMAL, (long)(signed32)result);
 
   return tic80_trace_buffer;
 }
 
-/* Trace the result of an FPU operation with 2 integer inputs and an integer output */
+/* Trace the result of an FPU operation with 2 floating point inputs and a floating point output */
 void
 tic80_trace_fpu3 (SIM_DESC sd,
 		  sim_cpu *cpu,
@@ -202,12 +191,12 @@ tic80_trace_fpu3 (SIM_DESC sd,
 		  itable[indx].file, itable[indx].line_nr, "fpu",
 		  "%-*s %*f %*f => %*f",
 		  tic80_size_name, itable[indx].name,
-		  SIZE_HEX + SIZE_DECIMAL + 3, sim_fpu_2d (input1),
-		  SIZE_HEX + SIZE_DECIMAL + 3, sim_fpu_2d (input2),
-		  SIZE_HEX + SIZE_DECIMAL + 3, sim_fpu_2d (result));
+		  SIZE_HEX + SIZE_DECIMAL + 1, sim_fpu_2d (input1),
+		  SIZE_HEX + SIZE_DECIMAL + 1, sim_fpu_2d (input2),
+		  SIZE_HEX + SIZE_DECIMAL + 1, sim_fpu_2d (result));
 }
 
-/* Trace the result of an FPU operation with 1 integer input and an integer output */
+/* Trace the result of an FPU operation with 1 floating point input and a floating point output */
 void
 tic80_trace_fpu2 (SIM_DESC sd,
 		  sim_cpu *cpu,
@@ -223,8 +212,8 @@ tic80_trace_fpu2 (SIM_DESC sd,
 		  itable[indx].file, itable[indx].line_nr, "fpu",
 		  "%-*s %*f %-*s => %*f",
 		  tic80_size_name, itable[indx].name,
-		  SIZE_HEX + SIZE_DECIMAL + 3, sim_fpu_2d (input),
-		  SIZE_HEX + SIZE_DECIMAL + 3, "",
+		  SIZE_HEX + SIZE_DECIMAL + 1, sim_fpu_2d (input),
+		  SIZE_HEX + SIZE_DECIMAL + 1, "",
 		  SIZE_HEX + SIZE_DECIMAL, sim_fpu_2d (result));
 }
 
@@ -238,12 +227,8 @@ tic80_trace_fpu2i (SIM_DESC sd,
 		   sim_fpu input1,
 		   sim_fpu input2)
 {
-  char bufr[SIZE_DECIMAL+10];
-
   if (!tic80_size_name)
     tic80_init_trace ();
-
-  sprintf (bufr, "(%ld)", (long) (signed32) result);
 
   trace_one_insn (sd, cpu, cia.ip, 1,
 		  itable[indx].file, itable[indx].line_nr, "fpu",
@@ -251,7 +236,7 @@ tic80_trace_fpu2i (SIM_DESC sd,
 		  tic80_size_name, itable[indx].name,
 		  SIZE_HEX + SIZE_DECIMAL + 3, sim_fpu_2d (input1),
 		  SIZE_HEX + SIZE_DECIMAL + 3, sim_fpu_2d (input2),
-		  SIZE_HEX, result, SIZE_DECIMAL, bufr);
+		  SIZE_HEX, result, SIZE_DECIMAL, (long)(signed32)result);
 }
 
 /* Trace the result of a NOP operation */
@@ -269,15 +254,12 @@ tic80_trace_nop (int indx)
 char *
 tic80_trace_sink1 (int indx, unsigned32 input)
 {
-  char buf[SIZE_DECIMAL+10];
-
   if (!tic80_size_name)
     tic80_init_trace ();
 
-  sprintf (buf, "(%ld)", (long) (signed32) input);
-  sprintf (tic80_trace_buffer, "%-*s 0x%.*lx %-*s",
+  sprintf (tic80_trace_buffer, "%-*s 0x%.*lx/%*ld",
 	   tic80_size_name, itable[indx].name,
-	   SIZE_HEX, input, SIZE_DECIMAL, buf);
+	   SIZE_HEX, input, SIZE_DECIMAL, (long)(signed32)input);
 
   return tic80_trace_buffer;
 }
@@ -286,39 +268,29 @@ tic80_trace_sink1 (int indx, unsigned32 input)
 char *
 tic80_trace_sink2 (int indx, unsigned32 input1, unsigned32 input2)
 {
-  char buf1[SIZE_DECIMAL+10], buf2[SIZE_DECIMAL+10];
-
   if (!tic80_size_name)
     tic80_init_trace ();
 
-  sprintf (buf1, "(%ld)", (long) (signed32) input1);
-  sprintf (buf2, "(%ld)", (long) (signed32) input2);
-  sprintf (tic80_trace_buffer, "%-*s 0x%.*lx %-*s 0x%.*lx %-*s",
+  sprintf (tic80_trace_buffer, "%-*s 0x%.*lx/%*ld 0x%.*lx/%*ld",
 	   tic80_size_name, itable[indx].name,
-	   SIZE_HEX, input1, SIZE_DECIMAL, buf1,
-	   SIZE_HEX, input2, SIZE_DECIMAL, buf2);
+	   SIZE_HEX, input1, SIZE_DECIMAL, (long)(signed32)input1,
+	   SIZE_HEX, input2, SIZE_DECIMAL, (long)(signed32)input2);
 
   return tic80_trace_buffer;
 }
 
-/* Trace the result of a data sink with two inputs */
+/* Trace the result of a data sink with three inputs */
 char *
 tic80_trace_sink3 (int indx, unsigned32 input1, unsigned32 input2, unsigned32 input3)
 {
-  char buf1[SIZE_DECIMAL+10], buf2[SIZE_DECIMAL+10], buf3[SIZE_DECIMAL+10];
-
   if (!tic80_size_name)
     tic80_init_trace ();
 
-  sprintf (buf1, "(%ld)", (long) (signed32) input1);
-  sprintf (buf2, "(%ld)", (long) (signed32) input2);
-  sprintf (buf3, "(%ld)", (long) (signed32) input3);
-
-  sprintf (tic80_trace_buffer, "%-*s 0x%.*lx %-*s 0x%.*lx %-*s 0x%.*lx %-*s",
+  sprintf (tic80_trace_buffer, "%-*s 0x%.*lx/%*ld 0x%.*lx/%*ld    0x%.*lx/%*ld",
 	   tic80_size_name, itable[indx].name,
-	   SIZE_HEX, input1, SIZE_DECIMAL, buf1,
-	   SIZE_HEX, input2, SIZE_DECIMAL, buf2,
-	   SIZE_HEX, input3, SIZE_DECIMAL, buf3);
+	   SIZE_HEX, input1, SIZE_DECIMAL, (long)(signed32)input1,
+	   SIZE_HEX, input2, SIZE_DECIMAL, (long)(signed32)input2,
+	   SIZE_HEX, input3, SIZE_DECIMAL, (long)(signed32)input3);
 
   return tic80_trace_buffer;
 }
@@ -330,26 +302,22 @@ tic80_trace_cond_br (int indx,
 		     unsigned32 cond,
 		     unsigned32 target)
 {
-  char buf[SIZE_DECIMAL+10];
-
   if (!tic80_size_name)
     tic80_init_trace ();
 
-  sprintf (buf, "(%ld)", (long) (signed32) cond);
-
   if (jump_p)
     sprintf (tic80_trace_buffer,
-	     "%-*s 0x%.*lx %*s 0x%.*lx %-*s => 0x%.*lx",
+	     "%-*s 0x%.*lx %*s 0x%.*lx/%*ld => 0x%.*lx",
 	     tic80_size_name, itable[indx].name,
 	     SIZE_HEX, target, SIZE_DECIMAL, "",
-	     SIZE_HEX, cond, SIZE_DECIMAL, buf,
+	     SIZE_HEX, cond, SIZE_DECIMAL, (long)(signed32)cond,
 	     SIZE_HEX, target);
   else
     sprintf (tic80_trace_buffer,
-	     "%-*s 0x%.*lx %*s 0x%.*lx %-*s => [fallthrough]",
+	     "%-*s 0x%.*lx %*s 0x%.*lx/%*ld => [fallthrough]",
 	     tic80_size_name, itable[indx].name,
 	     SIZE_HEX, target, SIZE_DECIMAL, "",
-	     SIZE_HEX, cond, SIZE_DECIMAL, buf);
+	     SIZE_HEX, cond, SIZE_DECIMAL, (long)(signed32)cond);
 
   return tic80_trace_buffer;	       
 }
@@ -382,7 +350,6 @@ tic80_trace_ldst (int indx,
 		  unsigned32 input1,
 		  unsigned32 input2)
 {
-  char buf1[SIZE_DECIMAL+10], buf2[SIZE_DECIMAL+10], bufr[SIZE_DECIMAL+10];
   char name[40];
 
   if (!tic80_size_name)
@@ -395,16 +362,12 @@ tic80_trace_ldst (int indx,
   if (s_p)
     strcat (name, ":s");
 
-  sprintf (bufr, "(%ld)", (long) (signed32) value);
-  sprintf (buf1, "(%ld)", (long) (signed32) input1);
-  sprintf (buf2, "(%ld)", (long) (signed32) input2);
-
-  sprintf (tic80_trace_buffer, "%-*s 0x%.*lx %-*s 0x%.*lx %-*s %s 0x%.*lx %-*s",
+  sprintf (tic80_trace_buffer, "%-*s 0x%.*lx/%*ld 0x%.*lx/%*ld %s 0x%.*lx/%*ld",
 	   tic80_size_name, name,
-	   SIZE_HEX, input1, SIZE_DECIMAL, buf1,
-	   SIZE_HEX, input2, SIZE_DECIMAL, buf2,
+	   SIZE_HEX, input1, SIZE_DECIMAL, (long)(signed32)input1,
+	   SIZE_HEX, input2, SIZE_DECIMAL, (long)(signed32)input2,
 	   (!st_p) ? "=>" : "<=",
-	   SIZE_HEX, value, SIZE_DECIMAL, bufr);
+	   SIZE_HEX, value, SIZE_DECIMAL, (long)(signed32)value);
 
   return tic80_trace_buffer;
 }
