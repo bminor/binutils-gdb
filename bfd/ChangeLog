@@ -1,31 +1,44 @@
+2000-12-09  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-mips.c (_bfd_mips_elf_find_nearest_line): Pass
+	dwarf2_find_line_info as last parameter to invocation of
+	_bfd_dwarf2_find_nearest_line.
+	* elf32-arm.h (elf32_arm_find_nearest_line): Pass
+	dwarf2_find_line_info as last parameter to invocation of
+	_bfd_dwarf2_find_nearest_line.
+
 2000-12-08  Mark Elbrecht  <snowball3@bigfoot.com>
 
 	* Makefile.am (BFD32_BACKENDS): Move dwarf2.lo from here...
-	  (BFD_LIBS): ...to here.
-	  (BFD32_BACKENDS_CFILES): Move dwarf2.c from here...
-	  (BFD_LIBS_CFILES): ...to here.
+	(BFD_LIBS): ...to here.
+	(BFD32_BACKENDS_CFILES): Move dwarf2.c from here...
+	(BFD_LIBS_CFILES): ...to here.
 	* Makefile.in: Regenerate.
 	* configure.in: Remove dwarf.lo from the elf shell variable.
 	* configure: Regenerate.
 	* libcoff-in.h (coff_tdata): Add pointer dwarf2_find_line_info.
 	* libcoff.h: Regenerate.
 	* coffgen.c (coff_find_nearest_line): Call 
-	  _bfd_dwarf2_find_nearest_line.
+	_bfd_dwarf2_find_nearest_line.
 	* dwarf2.c (_bfd_dwarf2_find_nearest_line): Add parameter. Update
-	  accordingly.
-	  (read_abbrevs): Likewise
-	  (decode_line_info): Likewise.
-	  (parse_comp_unit): Likewise.
-	  (comp_unit_find_nearest_line): Likewise.
+	accordingly.
+	(read_abbrevs): Likewise
+	(decode_line_info): Likewise.
+	(parse_comp_unit): Likewise.
+	(comp_unit_find_nearest_line): Likewise.
 	* libbfd-in.h (_bfd_dwarf2_find_nearest_line): Update prototype.
 	* libbfd.h: Regenerate.
 	* elf.c (_bfd_elf_find_nearest_line): Update call.
 	* elf-bfd.h (elf_obj_tdata): Change dwarf2_find_line_info to type PTR.
 	* dwarf2.c (concat_filename): Use IS_ABSOLUTE_PATH.
 	* coffcode.h (STYP_XCOFF_DEBUG, STYP_DEBUG_INFO): New macros.
-	  (sec_to_styp_flags): Use them. Handle DWARF2 sections.
-	  (styp_to_sec_flags): Handle DWARF2 sections.
-
+	(sec_to_styp_flags): Use them. Handle DWARF2 sections.
+	(styp_to_sec_flags): Handle DWARF2 sections.
+	* elf32-arm.h (elf32_arm_find_nearest_line): Add parameter to call
+	to _bfd_find_nearest_line.
+	* elf32-mips.c (_bfd_mips_elf_find_nearest_line): Add parameter to
+	call to _bfd_find_nearest_line.
+	  
 2000-12-08  Kazu Hirata  <kazu@hxi.com>
 
 	* coffgen.c: Fix formatting.
