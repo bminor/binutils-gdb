@@ -1,5 +1,8 @@
 Fri Feb 17 14:50:08 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (md_pseudo_table): Add 2byte, 4byte and 8byte
+	if OBJ_ELF.  From gary@Intrepid.COM (Gary Funck).
+
 	* config/obj-elf.c (elf_frob_symbol): Warn if a symbol is both
 	weak and common.
 	* config/obj-aout.c (obj_aout_frob_symbol): Likewise.

@@ -487,6 +487,11 @@ const pseudo_typeS md_pseudo_table[] =
 #ifdef OBJ_ELF
   /* We need to tweak the ELF ".section" pseudo-op a bit.  */
   {"section", s_elf_section, 0},
+
+  /* Redirect additional ELF data allocation pseudo-ops.  */
+  {"2byte", s_cons, 2},
+  {"4byte", s_cons, 4},
+  {"8byte", s_cons, 8},
 #endif
 
  /* Sentinel.  */
