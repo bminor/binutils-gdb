@@ -275,5 +275,7 @@ extern void sh_pop_frame PARAMS ((void));
 
 #define COERCE_FLOAT_TO_DOUBLE 1
 
+#define BELIEVE_PCC_PROMOTION 1
+
 /* Need this for WinGDB.  See gdb/mswin/{regdoc.h, gdbwin.c, gui.cpp}.  */
 #define TARGET_SH
