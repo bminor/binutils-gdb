@@ -1,3 +1,8 @@
+1999-09-24  Nick Clifton  <nickc@cygnus.com>
+
+	* gmon_io.c (gmon_out_read): Make sure that sensible values
+	are extracted from a raw header.
+
 1999-08-06  Ian Lance Taylor  <ian@zembu.com>
 
 	From Brad Lucier <lucier@math.purdue.edu>:

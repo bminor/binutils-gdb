@@ -251,6 +251,15 @@ DEFUN (gmon_out_read, (filename), const char *filename)
 	   printf ("[gmon_out_read] samp_bytes %d hist_num_bins %d\n",
 		   samp_bytes, hist_num_bins));
 
+      /* Make sure that we have sensible values.  */
+      if (samp_bytes < 0 || lowpc > highpc)
+        {
+          fprintf (stderr, 
+	    _("%s: file '%s' does not appear to be in gmon.out format\n"),
+	    whoami, filename);
+          done (1);
+        }
+
       if (hist_num_bins)
 	{
 	  ++nhist;
