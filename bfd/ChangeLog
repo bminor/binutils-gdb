@@ -1,5 +1,8 @@
 Wed Jun 15 01:34:07 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* coff-sparc.c (SWAP_OUT_RELOC_EXTRA): Define to clear the r_spare
+	field of the reloc rather than letting it be garbage.
+
 	* archive.c (bfd_slurp_armap): Recognize __.SYMDEF/ as well as
 	__.SYMDEF; the former was used in old Linux archives.  From
 	jrs@world.std.com (Rick Sladkey).

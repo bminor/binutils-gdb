@@ -26,7 +26,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "coff/internal.h"
 #include "libcoff.h"
 
-#define BADMAG(x) ((x).f_magic != SPARCMAGIC)
+#define BADMAG(x) ((x).f_magic != SPARCMAGIC && (x).f_magic != LYNXCOFFMAGIC)
+
+/* The page size is a guess based on ELF.  */
+#define COFF_PAGE_SIZE 0x10000
 
 enum reloc_type
   {
@@ -202,7 +205,18 @@ rtype2howto (cache_ptr, dst)
     cache_ptr->addend += reloc.r_offset;			\
   }
 
+/* Clear the r_spare field in relocs.  */
+#define SWAP_OUT_RELOC_EXTRA(abfd,src,dst) \
+  do { \
+       dst->r_spare[0] = 0; \
+       dst->r_spare[1] = 0; \
+     } while (0)
+
 #define __A_MAGIC_SET__
+
+/* Enable Sparc-specific hacks in coffcode.h. */
+
+#define COFF_SPARC
 
 #include "coffcode.h"
 
@@ -224,14 +238,14 @@ bfd_target
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
+   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   0,				/* leading underscore */
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
 
-  3,				/* minimum alignment power */
+  2,				/* minimum alignment power */
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
      bfd_getb32, bfd_getb_signed_32, bfd_putb32,
      bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* data */
@@ -259,4 +273,3 @@ bfd_target
 
   COFF_SWAP_TABLE,
 };
-
