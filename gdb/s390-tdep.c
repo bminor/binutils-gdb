@@ -229,7 +229,7 @@ s390_get_frame_info (CORE_ADDR pc, struct frame_extra_info *fextra_info,
      load instruction, and got_load_len is the length of that
      instruction.  */
   int got_state;
-  CORE_ADDR got_load_addr, got_load_len;
+  CORE_ADDR got_load_addr = 0, got_load_len = 0;
 
   const_pool_state = save_link_state = got_state = varargs_state = 0;
   frame_pointer_found = 0;
