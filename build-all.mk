@@ -68,17 +68,19 @@ endif
 
 ifeq ($(canonhost),sparc-sun-sunos4.1.3)
 TARGETS = $(NATIVE) \
-	i386-go32 \
+	i386-go32 	\
 	a29k-amd-udi 	\
-	h8300-hms 	h8500-hms \
-	i386-aout	i386-coff \
-	i386-lynx 	i386-netware \
-	i960-intel-nindy		i960-vxworks \
+	h8300-hms 	\
+	i386-aout	\
+	i386-lynx 	\
+	i386-netware 	\
+	i960-vxworks 	i960-intel-nindy \
 	mips-idt-ecoff	\
 	m68k-aout	m68k-vxworks 	m68k-coff \
-	m88k-coff \
-	sh-hms \
-	sparc-aout	sparc-vxworks	sparclite-aout \
+	m68k-lynx 	\
+	sh-hms 		\
+	sparc-aout	sparc-vxworks	\
+	sparclite-aout  sparclite-vxworks \
 	z8k-coff
 GCC = gcc -O -pipe
 all: all-cygnus
@@ -86,8 +88,7 @@ endif
 
 ifeq ($(canonhost),m68k-sun-sunos4.1.1)
 TARGETS = $(NATIVE) \
-	i960-intel-nindy \
-	m68k-aout 	m68k-vxworks 	m68k-coff 
+	m68k-aout	m68k-coff	i960-intel-nindy 
 GCC = gcc -O -msoft-float
 CC = cc -J
 all: all-cygnus
@@ -95,14 +96,13 @@ endif
 
 ifeq ($(canonhost),sparc-sun-solaris2)
 TARGETS = $(NATIVE) \
+	a29k-amd-udi \
 	i386-aout \
 	i960-vxworks	i960-intel-nindy \
 	m68k-aout	m68k-coff 	m68k-vxworks \
-	mips-idt-ecoff \
-	sparc-aout	sparc-vxworks	sparclite-aout \
-	h8300-hms	h8500-hms \
-	a29k-amd-udi \
-	i386-coff 
+	m88k-coff	\
+	mips-idt-ecoff 	mipsel-idt-ecoff \
+	sparc-aout	sparc-vxworks	sparclite-aout
 CC = cc -Xs
 GCC = gcc -O -pipe
 all: all-cygnus
@@ -123,18 +123,8 @@ endif
 
 ifeq ($(canonhost),rs6000-ibm-aix)
 TARGETS	= $(NATIVE) \
-	a29k-amd-udi 	\
-	h8300-hms 	h8500-hms \
-	i386-aout	i386-coff \
-	i386-lynx 	i386-netware \
-	i960-intel-nindy		i960-vxworks \
-	mips-idt-ecoff	\
-	m68k-aout	m68k-vxworks 	m68k-coff \
-	m88k-coff \
-	sh-hms \
-	sparc-aout	sparc-vxworks	sparclite-aout \
-	i386-go32 \
-	z8k-coff
+	i960-vxworks	i960-intel-nindy \
+	m68k-vxworks
 all: all-cygnus
 endif
 
@@ -149,17 +139,9 @@ endif
 
 ifeq ($(canonhost),hppa1.1-hp-hpux)
 TARGETS = \
+	$(NATIVE) \
 	i960-vxworks \
-	m68k-aout	m68k-vxworks 
-#	sparc-aout	sparc-vxworks	sparclite-aout \
-#	z8k-coff \
-#	m88k-coff \
-#	mips-idt-ecoff	\
-#	h8300-hms 	h8500-hms \
-#	i386-aout	i386-coff \
-#	i960-intel-nindy \
-#	m68k-coff \
-#	a29k-amd-udi 	
+	m68k-aout	m68k-vxworks
 #	sh-hms		# doesn't work
 CC = cc 
 #CFLAGS = +Obb2000
@@ -173,13 +155,13 @@ all: all-cygnus
 endif
 
 ifeq ($(canonhost),i386-go32)
-TARGETS = \p
+TARGETS = \
 	a29k-amd-udi \
-	h8300-hms 	h8500-hms \
-	i386-aout \
+	h8300-hms 	\
+	i386-aout 	\
 	m68k-aout	m68k-coff \
-	mips-idt-ecoff \
-	sh-hms \
+	mips-idt-ecoff 	\
+	sh-hms 		\
 	sparclite-aout
 CC = i386-go32-gcc
 GCC = i386-go32-gcc -O
@@ -194,22 +176,6 @@ TARGETS = $(NATIVE)
 CC = cc
 all: all-cygnus
 endif
-
-#ifeq ($(canonhost),i386-sysv4.2)
-#TARGETS = $(NATIVE) \
-#	a29k-amd-udi 	\
-#	h8300-hms 	h8500-hms \
-#	i386-aout	i386-coff \
-#	i960-intel-nindy		i960-vxworks \
-#	mips-idt-ecoff	\
-#	m68k-aout	m68k-vxworks 	m68k-coff \
-#	m88k-coff \
-#	sh-hms \
-#	sparc-aout	sparc-vxworks	sparclite-aout \
-#	z8k-sim		z8k-coff
-#CC = cc
-#all: all-cygnus
-#endif
 
 ifeq ($(canonhost),i386-lynxos)
 TARGETS = $(NATIVE)
