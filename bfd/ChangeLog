@@ -1,3 +1,12 @@
+Mon Apr 24 02:17:31 2000  Jeffrey A Law  (law@cygnus.com)
+
+	* elf64-hppa.c, elf64-hppa.h: New files with PA64 support.
+
+Mon Apr 24 02:14:29 2000  Jason Eckhardt  <jle@cygnus.com>
+
+	* libhppa.h (dis_assemble_16): New function.
+	(pa_arch): Added pa20w element.
+
 Mon Apr 24 01:49:03 2000  Ulrich Drepper  <drepper@cygnus.com>
 
 	* elf-bfd.h: Add prototypes for bfd_elf32_write_relocs,
