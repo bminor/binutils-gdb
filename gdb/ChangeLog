@@ -1,3 +1,8 @@
+2003-06-11  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* ia64-tdep.c (ia64_gdbarch_init): Set number of long double 
+	bits to 128.
+
 2003-06-11  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (DEPRECATED_REGISTER_CONVERTIBLE): Deprecate
