@@ -1,9 +1,21 @@
+Sat Jan 24 23:52:08 1998  Martin M. Hunt  <hunt@cygnus.com>
+
+	* gdbtk.c: Merge from Foundry branch.
+	(TclDebug): New debugging function.
+	(gdb_loc): For frames, find address of calling function
+	instead of whatever is on the stack (usually the next
+	instruction).
+	(gdb_listfiles): Takes an optional pathname argument and 
+	returns an alphabetized list of basenames of files in the
+	path.
+
 Wed Jan 22  10:37:02 1998  Keith Seitz  <keiths@onions.cygnus.com>
 
-	* symfile.c: Define two new hooks for symbol reading: "pre_add_symbol_hook"
- 	and "post_add_symbol_hook". These hooks are called before we begin reading
-	symbols, and after we finish.
-	(generic_load): Use new symbol reading hooks and get rid of compiler warning.
+	* symfile.c: Define two new hooks for symbol reading: 
+	"pre_add_symbol_hook" and "post_add_symbol_hook". These hooks 
+	are called before we begin reading symbols, and after we finish.
+	(generic_load): Use new symbol reading hooks and get rid of 
+	compiler warning.
 
 	* gdbtk.c (gdbtk_init): Add hooks for pre- and post-symbol reading.
 	(gdbtk_pre_add_symbol): New function: the pre-add-symbol hook.

@@ -86,6 +86,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #undef SIOCSPGRP
 #endif
 
+static int load_in_progress = 0;
+
 int gdbtk_load_hash PARAMS ((char *, unsigned long));
 int (*ui_load_progress_hook) PARAMS ((char *, unsigned long));
 void (*pre_add_symbol_hook) PARAMS ((char *));
@@ -111,7 +113,7 @@ static int gdb_path_conv PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
 static int gdb_stop PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
 static int gdb_confirm_quit PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
 static int gdb_force_quit PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
-static int gdb_listfiles PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
+static int gdb_listfiles PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 static int gdb_listfuncs PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
 static int call_wrapper PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
 static int gdb_cmd PARAMS ((ClientData, Tcl_Interp *, int, char *argv[]));
@@ -135,6 +137,7 @@ static int gdb_regnames PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
 static void get_register PARAMS ((int, void *));
 static int gdb_target_has_execution_command PARAMS ((ClientData, Tcl_Interp *, int, char *argv[]));
 static int gdb_load_info PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
+void TclDebug PARAMS ((const char *fmt, ...));
 static int gdb_get_vars_command PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 static int gdb_get_function_command PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 static int gdb_get_line_command PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
@@ -158,6 +161,19 @@ static Tcl_Interp *interp = NULL;
 
 #ifndef WINNT
 static int x_fd;		/* X network socket */
+#endif
+
+#ifdef __CYGWIN32__
+
+/* On Windows we use timer interrupts when gdb might otherwise hang
+   for a long time.  See the comment above gdbtk_start_timer.  This
+   variable is true when timer interrupts are being used.  */
+
+static int gdbtk_timer_going = 0;
+
+static void gdbtk_start_timer PARAMS ((void));
+static void gdbtk_stop_timer PARAMS ((void));
+
 #endif
 
 /* This variable is true when the inferior is running.  Although it's
@@ -588,8 +604,15 @@ gdb_loc (clientData, interp, argc, argv)
 
   if (argc == 1)
     {
-      pc = selected_frame ? selected_frame->pc : stop_pc;
-      sal = find_pc_line (pc, 0);
+      if (selected_frame)
+	{
+	  sal = find_pc_line (selected_frame->pc,
+			      selected_frame->next != NULL
+			      && !selected_frame->next->signal_handler_caller
+			      && !frame_in_dummy (selected_frame->next));
+	}
+      else
+	sal = find_pc_line (stop_pc, 0);
     }
   else if (argc == 2)
     {
@@ -604,12 +627,11 @@ gdb_loc (clientData, interp, argc, argv)
 
       if (sals.nelts != 1)
 	error ("Ambiguous line spec");
-
-      pc = sal.pc;
     }
   else
     error ("wrong # args");
 
+  pc = sal.pc;
   if (sal.symtab)
     Tcl_DStringAppendElement (result_ptr, sal.symtab->filename);
   else
@@ -618,19 +640,14 @@ gdb_loc (clientData, interp, argc, argv)
   find_pc_partial_function (pc, &funcname, NULL, NULL);
   Tcl_DStringAppendElement (result_ptr, funcname);
 
-  /* Would it be better to use "find_file_in_dir"? */
   filename = symtab_to_filename (sal.symtab);
-
   if (filename == NULL)
     filename = "N/A";
+
   Tcl_DStringAppendElement (result_ptr, filename);
-
   dsprintf_append_element (result_ptr, "%d", sal.line); /* line number */
-
   dsprintf_append_element (result_ptr, "0x%s", paddr_nz(pc)); /* PC in current frame */
-
   dsprintf_append_element (result_ptr, "0x%s", paddr_nz(stop_pc)); /* Real PC */
-
   return TCL_OK;
 }
 
@@ -1043,10 +1060,24 @@ gdb_cmd (clientData, interp, argc, argv)
       Tcl_DStringAppend (result_ptr, "", -1);
       save_ptr = result_ptr;
       result_ptr = NULL;
+      load_in_progress = 1;
+      
+      /* On Windows, use timer interrupts so that the user can cancel
+	 the download.  FIXME: We may have to do something on other
+	 systems.  */
+#ifdef __CYGWIN32__
+      gdbtk_start_timer ();
+#endif
     }
 
   execute_command (argv[1], 1);
 
+#ifdef __CYGWIN32__
+  if (load_in_progress)
+    gdbtk_stop_timer ();
+#endif
+
+  load_in_progress = 0;
   bpstat_do_actions (&stop_bpstat);
   
   if (save_ptr) 
@@ -1111,8 +1142,13 @@ call_wrapper (clientData, interp, argc, argv)
     {
       wrapped_args.val = TCL_ERROR;	/* Flag an error for TCL */
 
-      gdb_flush (gdb_stderr);	/* Flush error output */
+#ifdef __CYGWIN32__
+      /* Make sure the timer interrupts are turned off.  */
+      if (gdbtk_timer_going)
+	gdbtk_stop_timer ();
+#endif
 
+      gdb_flush (gdb_stderr);	/* Flush error output */
       gdb_flush (gdb_stdout);	/* Sometimes error output comes here as well */
 
       /* In case of an error, we may need to force the GUI into idle
@@ -1121,6 +1157,14 @@ call_wrapper (clientData, interp, argc, argv)
 
       running_now = 0;
       Tcl_Eval (interp, "gdbtk_tcl_idle");
+    }
+
+  /* if the download was cancelled, don't print the error */
+  if (load_in_progress) 
+    {
+      Tcl_DStringInit (&error_string);
+      wrapped_args.val = TCL_OK;
+      load_in_progress = 0;
     }
 
   if (Tcl_DStringLength (&error_string) == 0)
@@ -1132,6 +1176,7 @@ call_wrapper (clientData, interp, argc, argv)
     {
       Tcl_DStringResult (interp, &error_string);
       Tcl_DStringFree (&result);
+      Tcl_DStringFree (&error_string);
     }
   else
     {
@@ -1153,22 +1198,73 @@ call_wrapper (clientData, interp, argc, argv)
 }
 
 static int
-gdb_listfiles (clientData, interp, argc, argv)
-     ClientData clientData;
-     Tcl_Interp *interp;
-     int argc;
-     char *argv[];
+comp_files (file1, file2)
+     const char *file1[], *file2[];
+{
+  return strcmp(*file1,*file2);
+}
+
+
+static int
+gdb_listfiles (clientData, interp, objc, objv)
+  ClientData clientData;
+  Tcl_Interp *interp;
+  int objc;
+  Tcl_Obj *CONST objv[];
 {
   struct objfile *objfile;
   struct partial_symtab *psymtab;
   struct symtab *symtab;
+  char *lastfile, *pathname, *files[1000];
+  int i, numfiles = 0, len = 0;
+  Tcl_Obj *mylist;
+  
+  if (objc > 2)
+    {
+      Tcl_WrongNumArgs (interp, 1, objv, "Usage: gdb_listfiles ?pathname?");
+      return TCL_ERROR;
+    }
+  else if (objc == 2)
+    pathname = Tcl_GetStringFromObj (objv[1], &len);
+
+  mylist = Tcl_NewListObj (0, NULL);
 
   ALL_PSYMTABS (objfile, psymtab)
-    Tcl_DStringAppendElement (result_ptr, psymtab->filename);
+    {
+      if (len == 0)
+	{
+	  if (psymtab->filename)
+	    files[numfiles++] = basename(psymtab->filename);
+	}
+      else if (!strcmp(psymtab->filename,basename(psymtab->filename))
+	       || !strncmp(pathname,psymtab->filename,len))
+	if (psymtab->filename)
+	  files[numfiles++] = basename(psymtab->filename);
+    }
 
   ALL_SYMTABS (objfile, symtab)
-    Tcl_DStringAppendElement (result_ptr, symtab->filename);
+    {
+      if (len == 0)
+	{
+	  if (symtab->filename)
+	    files[numfiles++] = basename(symtab->filename);
+	}
+      else if (!strcmp(symtab->filename,basename(symtab->filename))
+	       || !strncmp(pathname,symtab->filename,len))
+	if (symtab->filename)
+	  files[numfiles++] = basename(symtab->filename);
+    }
 
+  qsort (files, numfiles, sizeof(char *), comp_files);
+
+  lastfile = "";
+  for (i = 0; i < numfiles; i++)
+    {
+      if (strcmp(files[i],lastfile))
+	Tcl_ListObjAppendElement (interp, mylist, Tcl_NewStringObj(files[i], -1));
+      lastfile = files[i];
+    }
+  Tcl_SetObjResult (interp, mylist);
   return TCL_OK;
 }
 
@@ -1252,6 +1348,11 @@ gdb_clear_file (clientData, interp, argc, argv)
     pop_target ();
 
   symbol_file_command (NULL, 0);
+
+  /* gdb_loc refers to stop_pc, but nothing seems to clear it, so we
+     clear it here.  FIXME: This seems like an abstraction violation
+     somewhere.  */
+  stop_pc = 0;
 
   return TCL_OK;
 }
@@ -1591,7 +1692,27 @@ x_event (signo)
 {
   /* Process pending events */
 
-  while (Tcl_DoOneEvent (TCL_DONT_WAIT|TCL_ALL_EVENTS) != 0);
+  while (Tcl_DoOneEvent (TCL_DONT_WAIT|TCL_ALL_EVENTS) != 0)
+    ;
+
+  /* If we are doing a download, see if the download should be
+     cancelled.  FIXME: We should use a better variable name.  */
+  if (load_in_progress)
+    {
+      char *val;
+
+      val = Tcl_GetVar (interp, "download_cancel_ok", TCL_GLOBAL_ONLY);
+      if (val != NULL && atoi (val))
+	{
+	  quit_flag = 1;
+#ifdef REQUEST_QUIT
+	  REQUEST_QUIT;
+#else
+	  if (immediate_quit) 
+	    quit ();
+#endif
+	}
+    }
 }
 
 #ifdef __CYGWIN32__
@@ -1622,6 +1743,8 @@ gdbtk_start_timer ()
   it.it_value.tv_usec = 500 * 1000;
 
   setitimer (ITIMER_REAL, &it, NULL);
+
+  gdbtk_timer_going = 1;
 }
 
 static void
@@ -1630,6 +1753,8 @@ gdbtk_stop_timer ()
   sigset_t nullsigmask;
   struct sigaction action;
   struct itimerval it;
+
+  gdbtk_timer_going = 0;
 
   sigemptyset (&nullsigmask);
 
@@ -1672,6 +1797,11 @@ gdbtk_wait (pid, ourstatus)
 #endif /* WINNT */
 
 #ifdef __CYGWIN32__
+  /* Call x_event ourselves now, as well as starting the timer;
+     otherwise, if single stepping, we may never wait long enough for
+     the timer to trigger.  */
+  x_event (SIGALRM);
+
   gdbtk_start_timer ();
 #endif
 
@@ -1895,8 +2025,7 @@ gdbtk_init ( argv0 )
   Tcl_CreateCommand (interp, "gdb_path_conv", call_wrapper, gdb_path_conv, NULL);
   Tcl_CreateCommand (interp, "gdb_sourcelines", call_wrapper, gdb_sourcelines,
 		     NULL);
-  Tcl_CreateCommand (interp, "gdb_listfiles", call_wrapper, gdb_listfiles,
-		     NULL);
+  Tcl_CreateObjCommand (interp, "gdb_listfiles", gdb_listfiles, NULL, NULL);
   Tcl_CreateCommand (interp, "gdb_listfuncs", call_wrapper, gdb_listfuncs,
 		     NULL);
   Tcl_CreateCommand (interp, "gdb_get_mem", call_wrapper, gdb_get_mem,
@@ -2206,11 +2335,10 @@ gdbtk_load_hash (section, num)
      char *section;
      unsigned long num;
 {
-  int result;
   char buf[128];
   sprintf (buf, "download_hash %s %ld", section, num);
-  result = Tcl_Eval (interp, buf); 
-  return result;
+  Tcl_Eval (interp, buf); 
+  return  atoi (interp->result);
 }
 
 /* gdb_get_vars_command -
@@ -2760,6 +2888,37 @@ gdbtk_post_add_symbol ()
 {
   Tcl_Eval (interp, "gdbtk_tcl_post_add_symbol");
 }
+
+
+/* TclDebug (const char *fmt, ...) works just like printf() but */
+/* sends the output to the GDB TK debug window. */
+/* Not for normal use; just a convenient tool for debugging */
+void
+#ifdef ANSI_PROTOTYPES
+TclDebug (const char *fmt, ...)
+#else
+TclDebug (va_alist)
+     va_dcl
+#endif
+{
+  va_list args;
+  char buf[512];
+
+#ifdef ANSI_PROTOTYPES
+  va_start (args, fmt);
+#else
+  char *fmt;
+  va_start (args);
+  fmt = va_arg (args, char *);
+#endif
+
+  strcpy (buf, "debug \"");
+  vsprintf (&buf[7], fmt, args);
+  va_end (args);
+  strcat (buf, "\"");
+  Tcl_Eval (interp, buf);
+}
+
 
 /* Come here during initialize_all_files () */
 
