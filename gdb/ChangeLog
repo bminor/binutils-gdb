@@ -1,5 +1,11 @@
 2002-02-10  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdbarch.sh: For for level one methods, disallow a definition
+	when partially multi-arched.  Add comments explaining rationale.
+	* gdbarch.h: Re-generate.
+
+2002-02-10  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdbarch.sh (EXTRA_STACK_ALIGNMENT_NEEDED): Don't require when
 	multi-arch partial.
 	
