@@ -1,3 +1,8 @@
+2004-08-11  Mark Kettenis  <kettenis@gnu.org>
+
+	* inflow.c (O_NOCTTY): Define to zero if not already defined.
+	(new_tty): Use O_NOCTTY unconditionally.
+
 2004-08-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* procfs.c (procfs_detach): Cleanup.  Print process ID, not LWP
