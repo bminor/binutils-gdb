@@ -18,6 +18,8 @@ Mon Sep 13 21:03:18 1993  John Gilmore  (gnu@cacophony.cygnus.com)
 	(bsd_update_armap_timestamp):  New function to check and
 	rewrite the timestamp.
 
+	* hosts/std-host.h (offsetof):  Define, if not already, for archive.c.
+	
 Sat Sep 11 18:13:42 1993  Jim Kingdon  (kingdon@poseidon.cygnus.com)
 
 	* hosts/i386sco.h: Define a bunch of stuff for core files.
