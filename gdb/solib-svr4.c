@@ -287,23 +287,12 @@ IGNORE_FIRST_LINK_MAP_ENTRY (struct so_list *so)
 
 #endif /* !SVR4_SHARED_LIBS */
 
-
 static CORE_ADDR debug_base;	/* Base of dynamic linker structures */
 static CORE_ADDR breakpoint_addr;	/* Address where end bkpt is set */
 
 /* Local function prototypes */
 
 static int match_main (char *);
-
-/* If non-zero, this is a prefix that will be added to the front of the name
-   shared libraries with an absolute filename for loading.  */
-static char *solib_absolute_prefix = NULL;
-
-/* If non-empty, this is a search path for loading non-absolute shared library
-   symbol files.  This takes precedence over the environment variables PATH
-   and LD_LIBRARY_PATH.  */
-static char *solib_search_path = NULL;
-
 
 #ifndef SVR4_SHARED_LIBS
 
@@ -1269,7 +1258,9 @@ enable_break (void)
       unsigned int interp_sect_size;
       char *buf;
       CORE_ADDR load_addr;
-      bfd *tmp_bfd;
+      bfd *tmp_bfd = NULL;
+      int tmp_fd = -1;
+      char *tmp_pathname = NULL;
       CORE_ADDR sym_addr = 0;
 
       /* Read the contents of the .interp section into a local buffer;
@@ -1287,7 +1278,11 @@ enable_break (void)
          to find any magic formula to find it for Solaris (appears to
          be trivial on GNU/Linux).  Therefore, we have to try an alternate
          mechanism to find the dynamic linker's base address.  */
-      tmp_bfd = bfd_openr (buf, gnutarget);
+
+      tmp_fd  = solib_open (buf, &tmp_pathname);
+      if (tmp_fd >= 0)
+	tmp_bfd = bfd_fdopenr (tmp_pathname, gnutarget, tmp_fd);
+
       if (tmp_bfd == NULL)
 	goto bkpt_at_symbol;
 

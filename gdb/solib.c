@@ -66,6 +66,85 @@ static char *solib_search_path = NULL;
 
 /*
 
+   GLOBAL FUNCTION
+
+   solib_open -- Find a shared library file and open it.
+
+   SYNOPSIS
+
+   int solib_open (char *in_patname, char **found_pathname);
+
+   DESCRIPTION
+
+   Global variable SOLIB_ABSOLUTE_PREFIX is used as a prefix directory
+   to search for shared libraries if they have an absolute path.
+
+   Global variable SOLIB_SEARCH_PATH is used as a prefix directory
+   (or set of directories, as in LD_LIBRARY_PATH) to search for all
+   shared libraries if not found in SOLIB_ABSOLUTE_PREFIX.
+
+   Search order:
+   * If path is absolute, look in SOLIB_ABSOLUTE_PREFIX.
+   * If path is absolute, look for it literally (unmodified).
+   * Look in SOLIB_SEARCH_PATH.
+   * Look in inferior's $PATH.
+   * Look in inferior's $LD_LIBRARY_PATH.
+
+   RETURNS
+   
+   file handle for opened solib, or -1 for failure.  */
+
+int
+solib_open (char *in_pathname, char **found_pathname)
+{
+  int found_file = -1;
+  char *temp_pathname = NULL;
+
+  if (solib_absolute_prefix != NULL &&
+      ROOTED_P (in_pathname))
+    {
+      int  prefix_len = strlen (solib_absolute_prefix);
+
+      /* Remove trailing slashes from absolute prefix.  */
+      while (prefix_len > 0 && SLASH_P (solib_absolute_prefix[prefix_len - 1]))
+	prefix_len--;
+
+      /* Cat the prefixed pathname together.  */
+      temp_pathname = alloca (prefix_len + strlen (in_pathname) + 1);
+      strncpy (temp_pathname, solib_absolute_prefix, prefix_len);
+      temp_pathname[prefix_len] = '\0';
+      strcat (temp_pathname, in_pathname);
+
+      /* Now see if we can open it.  */
+      found_file = open (temp_pathname, O_RDONLY, 0);
+    }
+
+  /* If not found, next search the solib_search_path (if any).  */
+  if (found_file < 0 && solib_search_path != NULL)
+    found_file = openp (solib_search_path,
+			1, in_pathname, O_RDONLY, 0, &temp_pathname);
+
+  /* If not found, next search the inferior's $PATH environment variable. */
+  if (found_file < 0 && solib_search_path != NULL)
+    found_file = openp (get_in_environ (inferior_environ, "PATH"),
+			1, in_pathname, O_RDONLY, 0, &temp_pathname);
+
+  /* If not found, next search the inferior's $LD_LIBRARY_PATH 
+     environment variable. */
+  if (found_file < 0 && solib_search_path != NULL)
+    found_file = openp (get_in_environ (inferior_environ, "LD_LIBRARY_PATH"),
+			1, in_pathname, O_RDONLY, 0, &temp_pathname);
+
+  /* Done.  If not found, tough luck.  Return found_file and 
+     (optionally) found_pathname.  */
+  if (found_pathname != NULL)
+    *found_pathname = strsave (temp_pathname);
+  return found_file;
+}
+
+
+/*
+
    LOCAL FUNCTION
 
    solib_map_sections -- open bfd and build sections for shared lib
@@ -104,49 +183,15 @@ solib_map_sections (PTR arg)
 
   filename = tilde_expand (so->so_name);
 
-  if (solib_absolute_prefix && ROOTED_P (filename))
-    /* Prefix shared libraries with absolute filenames with
-       SOLIB_ABSOLUTE_PREFIX.  */
-    {
-      char *pfxed_fn;
-      int pfx_len;
-
-      pfx_len = strlen (solib_absolute_prefix);
-
-      /* Remove trailing slashes.  */
-      while (pfx_len > 0 && SLASH_P (solib_absolute_prefix[pfx_len - 1]))
-	pfx_len--;
-
-      pfxed_fn = xmalloc (pfx_len + strlen (filename) + 1);
-      strcpy (pfxed_fn, solib_absolute_prefix);
-      strcat (pfxed_fn, filename);
-      free (filename);
-
-      filename = pfxed_fn;
-    }
-
   old_chain = make_cleanup (free, filename);
+  scratch_chan = solib_open (filename, &scratch_pathname);
 
-  scratch_chan = -1;
-
-  if (solib_search_path)
-    scratch_chan = openp (solib_search_path,
-			  1, filename, O_RDONLY, 0, &scratch_pathname);
-  if (scratch_chan < 0)
-    scratch_chan = openp (get_in_environ (inferior_environ, "PATH"),
-			  1, filename, O_RDONLY, 0, &scratch_pathname);
-  if (scratch_chan < 0)
-    {
-      scratch_chan = openp (get_in_environ
-			    (inferior_environ, "LD_LIBRARY_PATH"),
-			    1, filename, O_RDONLY, 0, &scratch_pathname);
-    }
   if (scratch_chan < 0)
     {
       perror_with_name (filename);
     }
-  /* Leave scratch_pathname allocated.  abfd->name will point to it.  */
 
+  /* Leave scratch_pathname allocated.  abfd->name will point to it.  */
   abfd = bfd_fdopenr (scratch_pathname, gnutarget, scratch_chan);
   if (!abfd)
     {
@@ -154,12 +199,13 @@ solib_map_sections (PTR arg)
       error ("Could not open `%s' as an executable file: %s",
 	     scratch_pathname, bfd_errmsg (bfd_get_error ()));
     }
+
   /* Leave bfd open, core_xfer_memory and "info files" need it.  */
   so->abfd = abfd;
   abfd->cacheable = true;
 
-  /* copy full path name into so_name, so that later symbol_file_add can find
-     it */
+  /* copy full path name into so_name, so that later symbol_file_add
+     can find it */
   if (strlen (scratch_pathname) >= SO_NAME_MAX_PATH_SIZE)
     error ("Full path name length of shared library exceeds SO_NAME_MAX_PATH_SIZE in so_list structure.");
   strcpy (so->so_name, scratch_pathname);

@@ -93,6 +93,9 @@ struct target_so_ops
 
 void free_so (struct so_list *so);
 
+/* Find solib binary file and open it.  */
+extern int solib_open (char *in_pathname, char **found_pathname);
+
 /* FIXME: gdbarch needs to control this variable */
 extern struct target_so_ops *current_target_so_ops;
 

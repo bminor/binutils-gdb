@@ -1,3 +1,11 @@
+2000-11-20  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* solist.h: Declare new function solib_open.
+	* solib.c (solib_open): New function.  Abstracts some of the
+	code from solib_map_sections, for finding the binary solib file.
+	(solib_map_sections): Call solib_open.
+	* solib-svr4.c (enable_break): Call solib_open.
+
 2000-11-20  J.T. Conklin  <jtc@redback.com>
 
 	* gdbserver/low-nbsd.c (fetch_inferior_registers,
