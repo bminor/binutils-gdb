@@ -2459,7 +2459,7 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
 	     dynamic symbol table.  */
 	  if (!h && info->shared)
 	    {
-	      if (! (_bfd_elfNN_link_record_local_dynamic_symbol
+	      if (! (bfd_elf_link_record_local_dynamic_symbol
 		     (info, abfd, (long) r_symndx)))
 		return FALSE;
 	    }
@@ -2631,7 +2631,7 @@ allocate_fptr (dyn_i, data)
 	      BFD_ASSERT ((h->root.type == bfd_link_hash_defined)
 			  || (h->root.type == bfd_link_hash_defweak));
 
-	      if (!_bfd_elfNN_link_record_local_dynamic_symbol
+	      if (!bfd_elf_link_record_local_dynamic_symbol
 		    (x->info, h->root.u.def.section->owner,
 		     global_sym_index (h)))
 		return FALSE;
@@ -3838,7 +3838,7 @@ elfNN_ia64_final_link (abfd, info)
     }
 
   /* Invoke the regular ELF backend linker to do all the work.  */
-  if (!bfd_elfNN_bfd_final_link (abfd, info))
+  if (!bfd_elf_final_link (abfd, info))
     return FALSE;
 
   if (unwind_output_sec)
@@ -4596,7 +4596,7 @@ elfNN_ia64_finish_dynamic_symbol (output_bfd, info, h, sym)
 	  /* Mark the symbol as undefined, rather than as defined in the
 	     plt section.  Leave the value alone.  */
 	  /* ??? We didn't redefine it in adjust_dynamic_symbol in the
-	     first place.  But perhaps elflink.h did some for us.  */
+	     first place.  But perhaps elflink.c did some for us.  */
 	  if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	    sym->st_shndx = SHN_UNDEF;
 	}

@@ -1,3 +1,137 @@
+2004-04-01  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2read.c (dwarf2_objfile_data_key): New.
+	(struct dwarf2_per_objfile, dwarf2_per_objfile): New.
+	(dwarf_info_size, dwarf_abbrev_size, dwarf_line_size)
+	(dwarf_pubnames_size, dwarf_aranges_size, dwarf_loc_size)
+	(dwarf_macinfo_size, dwarf_str_size, dwarf_ranges_size)
+	(dwarf_frame_size, dwarf_eh_frame_size, dwarf_info_buffer)
+	(dwarf_abbrev_buffer, dwarf_line_buffer, dwarf_str_buffer)
+	(dwarf_macinfo_buffer, dwarf_ranges_buffer, dwarf_loc_buffer):
+	Remove variables.
+	(struct dwarf2_pinfo): Remove per-objfile members.  Update comments.
+	(DWARF_ABBREV_SIZE, DWARF_LINE_SIZE)
+	(DWARF_LOC_SIZE, DWARF_MACINFO_SIZE, DWARF_STR_SIZE)
+	(DWARF_RANGES_SIZE, DWARF_INFO_BUFFER)
+	(DWARF_ABBREV_BUFFER, DWARF_LINE_BUFFER, DWARF_STR_BUFFER)
+	(DWARF_MACINFO_BUFFER, DWARF_RANGES_BUFFER, DWARF_LOC_BUFFER):
+	Remove macros.
+	(dwarf2_has_info): Take an objfile argument.  Allocate per-objfile
+	data.
+	(dwarf2_locate_sections, dwarf2_build_psymtabs)
+	(dwarf2_build_psymtabs_easy, dwarf2_build_psymtabs_hard)
+	(skip_one_die, dwarf2_get_pc_bounds, dwarf2_read_abbrevs)
+	(read_partial_die, read_full_die, read_indirect_string)
+	(dwarf_decode_line_header, dwarf_decode_macros)
+	(dwarf2_symbol_mark_computed): Remove use of removed macros.
+	Update uses of removed variables.
+	(psymtab_to_symtab_1): Restore per-objfile data pointer.  Remove use
+	of removed macros.
+	(_initialize_dwarf2_read): New function.
+	* symfile.h (dwarf2_has_info): Update prototype.
+	* coffread.c (coff_symfile_read): Update call to dwarf2_has_info.
+	* elfread.c (elf_symfile_read): Likewise.
+
+2004-04-01  Jim Blandy  <jimb@redhat.com>
+
+	* rs6000-tdep.c (rs6000_dwarf2_stab_reg_to_regnum): New, unified
+	function for register numbers on all the rs6000-derived targets.
+	(rs6000_gdbarch_init): Don't register a separate
+	gdbarch_dwarf2_reg_to_regnum function for the E500.  Use
+	rs6000_dwarf2_stab_reg_to_regnum for both Dwarf 2 and stabs on all
+	variants.
+
+	* i386-tdep.c: Add FIXME regarding STABS vs. Dwarf 2 register
+	numbering.
+
+2004-04-01  Paul N. Hilfinger  <Hilfinger@gnat.com>
+
+	* valarith.c: Update copyright notice.
+	(value_add): Handle range types.
+	(value_sub): Ditto.
+	(value_equal): Ditto.
+	(value_less): Ditto.
+	(value_neg): Ditto.
+	(value_complement): Ditto.
+	(value_binop): Simplify slightly by using is_integral_type and 
+	eliminiating unnecessary COERCE_ENUMs.
+	
+2004-03-31  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.h (frame_unwind_id): Declare.
+	* frame.c (frame_unwind_id): New function.
+	(get_prev_frame_1): New function.
+	(frame_debug_got_null_frame): New function.
+	(get_prev_frame): Use frame_debug_got_null_frame.  Move unwind
+	code proper to prev_frame, update description.
+	* infrun.c (step_over_function): Use frame_unwind_id.
+
+2004-04-31  J. Brobecker  <brobecker@gnat.com>
+
+	* hppa-tdep.c (hppa32_push_dummy_call): Set the Stack Pointer.
+	(hppa64_push_dummy_call): Likewise.
+
+2004-03-30  Jim Blandy  <jimb@redhat.com>
+
+	From Ulrich Weigand:
+ 	* utils.c (query): Do not use a va_list variable multiple times.
+
+2004-03-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (linux_nat_h): Update dependencies.
+	* configure.in: Check for <gnu/libc-version.h>.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* linux-nat.h: Include "target.h".  Add waitstatus field to
+	struct lwp_info.
+	* lin-lwp.c (add_lwp): Initialize waitstatus.kind.
+	(lin_lwp_attach_lwp): Don't attach to LWPs we have already attached
+	to.
+	(lin_lwp_handle_extended): New function.  Handle clone events.
+	(wait_lwp): Use lin_lwp_handle_extended.  Update comment about
+	thread exit events.
+	(child_wait): Handle clone events.
+	(lin_lwp_wait: Use lin_lwp_handle_extended and handle clone events.
+	* linux-nat.c (linux_enable_event_reporting): Turn on
+	PTRACE_O_TRACECLONE.
+	(linux_handle_extended_wait): Handle clone events.
+	* thread-db.c: Include <gnu/libc-version.h>.
+	(struct private_thread_info): Add dying flag.
+	(enable_thread_event_reporting): Enable TD_DEATH for glibc 2.2 and
+	higher.
+	(attach_thread): Update comments.  Handle dying threads.
+	(detach_thread): Set the dying flag.
+	(check_event): Always call attach_thread.
+
+2004-03-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* mips-tdep.c (mips_pdr_data): New.
+	(non_heuristic_proc_desc): Use objfile_data and set_objfile_data.
+	(_initialize_mips_tdep): Initialize mips_pdr_data.
+
+2004-03-29  Corinna Vinschen  <vinschen@redhat.com>
+
+	* minsyms.c (install_minimal_symbols): Move dropping leading
+	char from linkage name from here...
+	(prim_record_minimal_symbol_and_info): ...to here.  Simplify
+	test for "__gnu_compiled*" symbols.
+
+2004-03-28  Jim Blandy  <jimb@redhat.com>
+
+	* rs6000-tdep.c (skip_prologue): Recognize moves from argument
+	registers to temp register r0 and byte stores as prologue
+	instructions.
+
+2004-03-28  Andrew Cagney  <cagney@redhat.com>
+
+	* PROBLEMS (Stack backtraces): Rewrite.  Remove reference to
+	arm*-*-*.
+
+2004-03-28  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tui/tui-regs.c (tui_show_registers): Make sure the TUI is active
+	and switch the layout to force a display of register window.
+
 2004-02-26  J. Brobecker  <brobecker@gnat.com>
 
 	* amd64-tdep.c (amd64_classify): make RANGE_TYPE objects be part
@@ -455,6 +589,7 @@
 	(determine_prefix): Look at TYPE_TAG_NAME and call
 	determine_class_name when appropriate.
 	(determine_prefix_aux, class_name): Delete.
+	(read_namespace): Set die->type.
 
 2004-03-15  Kevin Buettner  <kevinb@redhat.com>
 

@@ -1,3 +1,42 @@
+2004-04-01  Joel Brobecker  <brobecker@gnat.com>
+
+	* lib/ada.exp: Add copyright notice.
+	* bar.ads: Likewise.
+	* bar.adb: Likewise.
+	* null_record.adb: Likewise.
+	* null_record.exp: Likewise.
+	* gnat_ada.gpr.in: Likewise. Fix typo in a comment, clarify another.
+
+2004-04-01  Joel Brobecker  <brobecker@gnat.com>
+
+	* configure.in: Generate gdb.ada/Makefile and gdb.ada/gnat_ada.gpr.
+	* configure: Regenerate.
+
+2004-04-01  Joel Brobecker  <brobecker@gnat.com>
+
+	* lib/ada.exp (gdb_compile_ada): Emit UNSUPPORTED if we failed
+	to build the application. Remove the message printed when in
+	verbose mode, redundant with the UNSUPPORTED message above.
+
+2004-03-31  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdb.ada (bar.ads, bar.adb, null_record.adb): New files.
+	* gdb.ada (null_record.exp): New testcase.
+
+2004-03-31  Joel Brobecker  <brobecker@gnat.com>
+
+	* Makefile.in (ALL_SUBDIRS) Add gdb.ada.
+
+2004-03-31  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdb.ada: New subdirectory.
+	* gdb.ada/Makefile.in: New file.
+	* gdb.ada/gnat_ada.gpr.in: New file.
+
+2004-03-31  Joel Brobecker  <brobecker@gnat.com>
+
+	* lib/ada.exp: New file.
+
 2004-03-24  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.base/gdb1250.exp: Use runto {allow-pending}.

@@ -1,3 +1,12 @@
+2004-03-29  Chris Demetriou  <cgd@broadcom.com>
+	    Richard Sandiford  <rsandifo@redhat.com>
+
+	* sim-main.h (MIPS_MACH_HAS_MT_HILO_HAZARD)
+	(MIPS_MACH_HAS_MULT_HILO_HAZARD, MIPS_MACH_HAS_DIV_HILO_HAZARD): New.
+	* mips.igen (check_mt_hilo, check_mult_hilo, check_div_hilo): Provide
+	separate implementations for mipsIV and mipsV.  Use new macros to
+	determine whether the restrictions apply.
+
 2004-01-19  Chris Demetriou  <cgd@broadcom.com>
 
 	* mips.igen (check_mf_cycles, check_mt_hilo, check_mf_hilo)

@@ -4756,7 +4756,7 @@ else
 fi
 done
 
-for ac_hdr in proc_service.h thread_db.h
+for ac_hdr in proc_service.h thread_db.h gnu/libc-version.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6

@@ -1199,16 +1199,14 @@ elf32_hppa_check_relocs (bfd *abfd,
 	  /* This relocation describes the C++ object vtable hierarchy.
 	     Reconstruct it for later use during GC.  */
 	case R_PARISC_GNU_VTINHERIT:
-	  if (!_bfd_elf32_gc_record_vtinherit (abfd, sec,
-					       &h->elf, rel->r_offset))
+	  if (!bfd_elf_gc_record_vtinherit (abfd, sec, &h->elf, rel->r_offset))
 	    return FALSE;
 	  continue;
 
 	  /* This relocation describes which C++ vtable entries are actually
 	     used.  Record for later use during GC.  */
 	case R_PARISC_GNU_VTENTRY:
-	  if (!_bfd_elf32_gc_record_vtentry (abfd, sec,
-					     &h->elf, rel->r_addend))
+	  if (!bfd_elf_gc_record_vtentry (abfd, sec, &h->elf, rel->r_addend))
 	    return FALSE;
 	  continue;
 
@@ -1621,17 +1619,6 @@ elf32_hppa_hide_symbol (struct bfd_link_info *info,
     }
 }
 
-/* This is the condition under which elf32_hppa_finish_dynamic_symbol
-   will be called from elflink.h.  If elflink.h doesn't call our
-   finish_dynamic_symbol routine, we'll need to do something about
-   initializing any .plt and .got entries in elf32_hppa_relocate_section.  */
-#define WILL_CALL_FINISH_DYNAMIC_SYMBOL(DYN, INFO, H) \
-  ((DYN)								\
-   && ((INFO)->shared							\
-       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)	\
-   && ((H)->dynindx != -1						\
-       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0))
-
 /* Adjust a symbol defined by a dynamic object and referenced by a
    regular object.  The current definition is in some section of the
    dynamic object, but we're not including those sections.  We have to
@@ -1803,11 +1790,11 @@ allocate_plt_static (struct elf_link_hash_entry *h, void *inf)
 	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0
 	  && h->type != STT_PARISC_MILLI)
 	{
-	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
 	}
 
-      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info, h))
+      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info->shared, h))
 	{
 	  /* Allocate these later.  From this point on, h->plabel
 	     means that the plt entry is only used by a plabel.
@@ -1881,7 +1868,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0
 	  && h->type != STT_PARISC_MILLI)
 	{
-	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
 	}
 
@@ -1952,7 +1939,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	      && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0
 	      && h->type != STT_PARISC_MILLI)
 	    {
-	      if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
 		return FALSE;
 	    }
 
@@ -3005,7 +2992,7 @@ static bfd_boolean
 elf32_hppa_final_link (bfd *abfd, struct bfd_link_info *info)
 {
   /* Invoke the regular ELF linker to do all the work.  */
-  if (!bfd_elf32_bfd_final_link (abfd, info))
+  if (!bfd_elf_final_link (abfd, info))
     return FALSE;
 
   /* If we're producing a final executable, sort the contents of the
@@ -3479,7 +3466,8 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 
 		off = h->elf.got.offset;
 		dyn = htab->elf.dynamic_sections_created;
-		if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, &h->elf))
+		if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared,
+						       &h->elf))
 		  {
 		    /* If we aren't going to call finish_dynamic_symbol,
 		       then we need to handle initialisation of the .got
@@ -3571,7 +3559,8 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 	      if (h != NULL)
 		{
 		  off = h->elf.plt.offset;
-		  if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info, &h->elf))
+		  if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info->shared,
+							 &h->elf))
 		    {
 		      /* In a non-shared link, adjust_dynamic_symbols
 			 isn't called for symbols forced local.  We

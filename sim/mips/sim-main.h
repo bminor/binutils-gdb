@@ -953,6 +953,18 @@ extern int mips_mach_multi(SIM_DESC sd);
 #define	MIPS_MACH(SD)	MIPS_MACH_DEFAULT
 #endif
 
+/* Macros for determining whether a MIPS IV or MIPS V part is subject
+   to the hi/lo restrictions described in mips.igen.  */
+
+#define MIPS_MACH_HAS_MT_HILO_HAZARD(SD) \
+  (MIPS_MACH (SD) != bfd_mach_mips5500)
+
+#define MIPS_MACH_HAS_MULT_HILO_HAZARD(SD) \
+  (MIPS_MACH (SD) != bfd_mach_mips5500)
+
+#define MIPS_MACH_HAS_DIV_HILO_HAZARD(SD) \
+  (MIPS_MACH (SD) != bfd_mach_mips5500)
+
 #if H_REVEALS_MODULE_P (SIM_MAIN_INLINE)
 #include "sim-main.c"
 #endif

@@ -700,6 +700,14 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 
 	  /* store parameters in stack */
 	}
+      /* Move parameters from argument registers to temporary register.  */
+      else if ((op & 0xfc0007fe) == 0x7c000378 &&	/* mr(.)  Rx,Ry */
+               (((op >> 21) & 31) >= 3) &&              /* R3 >= Ry >= R10 */
+               (((op >> 21) & 31) <= 10) &&
+               (((op >> 16) & 31) == 0)) /* Rx: scratch register r0 */
+        {
+          continue;
+        }
       else if ((op & 0xfc1f0003) == 0xf8010000 ||	/* std rx,NUM(r1) */
 	       (op & 0xfc1f0000) == 0xd8010000 ||	/* stfd Rx,NUM(r1) */
 	       (op & 0xfc1f0000) == 0xfc010000)		/* frsp, fp?,NUM(r1) */
@@ -709,10 +717,11 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	  /* store parameters in stack via frame pointer */
 	}
       else if (framep &&
-	       ((op & 0xfc1f0000) == 0x901f0000 ||	/* st rx,NUM(r1) */
-		(op & 0xfc1f0000) == 0xd81f0000 ||	/* stfd Rx,NUM(r1) */
-		(op & 0xfc1f0000) == 0xfc1f0000))
-	{			/* frsp, fp?,NUM(r1) */
+	       ((op & 0xfc1f0000) == 0x901f0000 ||     /* st rx,NUM(r31) */
+                (op & 0xfc1f0000) == 0x981f0000 ||     /* stb Rx,NUM(r31) */
+		(op & 0xfc1f0000) == 0xd81f0000 ||     /* stfd Rx,NUM(r31) */
+		(op & 0xfc1f0000) == 0xfc1f0000))      /* frsp, fp?,NUM(r31) */
+        {
 	  continue;
 
 	  /* Set up frame pointer */
@@ -1547,42 +1556,47 @@ e500_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
     }
 }
 
-/* Convert a dwarf2 register number to a gdb REGNUM.  */
+/* Convert a dbx stab or Dwarf 2 register number (from `r'
+   declaration) to a gdb REGNUM.  */
 static int
-e500_dwarf2_reg_to_regnum (int num)
+rs6000_dwarf2_stab_reg_to_regnum (int num)
 {
-  int regnum;
-  if (0 <= num && num <= 31)
-    return num + gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum;
-  else 
-    return num;
-}
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-/* Convert a dbx stab register number (from `r' declaration) to a gdb
-   REGNUM.  */
-static int
-rs6000_stab_reg_to_regnum (int num)
-{
-  int regnum;
-  switch (num)
-    {
-    case 64: 
-      regnum = gdbarch_tdep (current_gdbarch)->ppc_mq_regnum;
-      break;
-    case 65: 
-      regnum = gdbarch_tdep (current_gdbarch)->ppc_lr_regnum;
-      break;
-    case 66: 
-      regnum = gdbarch_tdep (current_gdbarch)->ppc_ctr_regnum;
-      break;
-    case 76: 
-      regnum = gdbarch_tdep (current_gdbarch)->ppc_xer_regnum;
-      break;
-    default: 
-      regnum = num;
-      break;
-    }
-  return regnum;
+  if (0 <= num && num <= 31)
+    return tdep->ppc_gp0_regnum + num;
+  else if (32 <= num && num <= 63)
+    return FP0_REGNUM + (num - 32);
+  else if (1200 <= num && num < 1200 + 32)
+    return tdep->ppc_ev0_regnum + (num - 1200);
+  else
+    switch (num)
+      {
+      case 64: 
+        return tdep->ppc_mq_regnum;
+      case 65:
+        return tdep->ppc_lr_regnum;
+      case 66: 
+        return tdep->ppc_ctr_regnum;
+      case 76: 
+        return tdep->ppc_xer_regnum;
+      case 109:
+        return tdep->ppc_vrsave_regnum;
+      default: 
+        return num;
+      }
+
+  /* FIXME: jimb/2004-03-28: Doesn't something need to be done here
+     for the Altivec registers, too?
+
+     Looking at GCC, the headers in config/rs6000 never define a
+     DBX_REGISTER_NUMBER macro, so the debug info uses the same
+     numbers GCC does internally.  Then, looking at the REGISTER_NAMES
+     macro defined in config/rs6000/rs6000.h, it seems that GCC gives
+     v0 -- v31 the numbers 77 -- 108.  But we number them 119 -- 150.
+
+     I don't have a way to test this ready to hand, but I noticed it
+     and thought I should include a note.  */
 }
 
 static void
@@ -2590,7 +2604,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
         set_gdbarch_pc_regnum (gdbarch, 0);
         set_gdbarch_sp_regnum (gdbarch, tdep->ppc_gp0_regnum + 1);
         set_gdbarch_deprecated_fp_regnum (gdbarch, tdep->ppc_gp0_regnum + 1);
-        set_gdbarch_dwarf2_reg_to_regnum (gdbarch, e500_dwarf2_reg_to_regnum);
         set_gdbarch_pseudo_register_read (gdbarch, e500_pseudo_register_read);
         set_gdbarch_pseudo_register_write (gdbarch, e500_pseudo_register_write);
 	break;
@@ -2665,7 +2678,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_register_convertible (gdbarch, rs6000_register_convertible);
   set_gdbarch_deprecated_register_convert_to_virtual (gdbarch, rs6000_register_convert_to_virtual);
   set_gdbarch_deprecated_register_convert_to_raw (gdbarch, rs6000_register_convert_to_raw);
-  set_gdbarch_stab_reg_to_regnum (gdbarch, rs6000_stab_reg_to_regnum);
+  set_gdbarch_stab_reg_to_regnum (gdbarch, rs6000_dwarf2_stab_reg_to_regnum);
+  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, rs6000_dwarf2_stab_reg_to_regnum);
   /* Note: kevinb/2002-04-12: I'm not convinced that rs6000_push_arguments()
      is correct for the SysV ABI when the wordsize is 8, but I'm also
      fairly certain that ppc_sysv_abi_push_arguments() will give even

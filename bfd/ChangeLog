@@ -1,3 +1,201 @@
+2004-04-01  Paul Brook  <paul@codesourcery.com>
+
+	* bfd-in.h (bfd_elf32_arm_process_before_allocation): Update.
+	* elf32-arm.h (struct elf32_elf_section_map): New.
+	(struct _arm_elf_section_data): New.
+	(elf32_arm_section_data): Define.
+	(struct elf32_arm_link_hash_table): Add byteswap_code.
+	(elf32_arm_link_hash_table_create): Initialize byteswap_code.
+	(bfd_elf32_arm_process_before_allocation): Add byteswap_code.
+	(elf32_arm_post_process_headers): Set EF_ARM_BE8.
+	(elf32_arm_output_symbol_hook, elf32_arm_new_section_hook,
+	elf32_arm_compare_mapping, elf32_arm_write_section): New functions.
+	(bfd_elf32_new_section_hook, elf_backend_write_section,
+	elf_backend_link_output_symbol_hook): Define.
+
+2004-04-01  Andy Chittenden  <achittenden@bluearc.com>
+
+	* stabs.c (struct stab_link_includes_totals): Add field 'symb'
+	that keeps the characters in a B_INCL..B_EINCL range.
+	(_bfd_link_section_stabs): When computing the sum of the
+	characters in a B_INCL..B_EINCL range also keep a copy of those
+	characters.  Use this information to distinguish between
+	include sections that have the same sum and the same length
+	but which are nevertheless unique.
+
+2004-03-31  Paul Brook  <paul@codesourcery.com>
+
+	* elf32-arm.h (elf32_arm_final_link_relocate): Add R_ARM_ALU*.
+	* elfarm-nabi.c (elf32_arm_howto_table): Ditto.
+
+2004-03-31  Andy Chittenden <achittenden@bluearc.com>
+
+	* stabs.c (struct stab_link_includes_totals): Rename field 'total'
+	to 'sum_chars' and add field 'num_chars'.
+	(_bfd_link_section_stabs): When computing the sum of the
+	characters in a B_INCL..B_EINCL range also keep a count of the
+	number of characters.  Use this information to help distinguish
+	between include sections when have the same sum but which
+	nevertheless are still unique.
+
+2004-03-31  Mattias Engdegård  <mattias@virtutech.se>
+
+	* stabs.c (_bfd_link_section_stabs): Do not skip N_EXCL stabs.
+
+2004-03-30  Galit Heller  <Galit.Heller@nsc.com>
+            Tomer Levi    <Tomer.Levi@nsc.com>
+
+	* Makefile.am (ALL_MACHINES): Add cpu-cr16c.lo.
+	(ALL_MACHINES_CFILES): Add cpu-cr16c.c.
+	(BFD32_BACKENDS): Add elf32-cr16c.lo.
+	(BFD32_BACKENDS_CFILES): Add elf32-cr16c.c.
+	(cpu-cr16c.lo): New target.
+	(elf32-cr16c.lo): Likewise.
+	* Makefile.in: Regenerate.
+	* archures.c (bfd_architecture): Add bfd_{arch,mach}_cr16c.
+	(bfd_archures_list): Add bfd_cr16c_arch.
+	* config.bfd: Handle cr16c-*-elf*.
+	* configure.in: Handle bfd_elf32_cr16c_vec.
+	* configure: Regenerate.
+	* reloc.c: Add BFD_RELOC_16C_NUM08, BFD_RELOC_16C_NUM08_C,
+	BFD_RELOC_16C_NUM16, BFD_RELOC_16C_NUM16_C,
+	BFD_RELOC_16C_NUM32, BFD_RELOC_16C_NUM32_C,
+	BFD_RELOC_16C_DISP04, BFD_RELOC_16C_DISP04_C,
+	BFD_RELOC_16C_DISP08, BFD_RELOC_16C_DISP08_C,
+	BFD_RELOC_16C_DISP16, BFD_RELOC_16C_DISP16_C,
+	BFD_RELOC_16C_DISP24, BFD_RELOC_16C_DISP24_C,
+	BFD_RELOC_16C_DISP24a, BFD_RELOC_16C_DISP24a_C,
+	BFD_RELOC_16C_REG04, BFD_RELOC_16C_REG04_C,
+	BFD_RELOC_16C_REG04a, BFD_RELOC_16C_REG04a_C,
+	BFD_RELOC_16C_REG14, BFD_RELOC_16C_REG14_C,
+	BFD_RELOC_16C_REG16, BFD_RELOC_16C_REG16_C,
+	BFD_RELOC_16C_REG20, BFD_RELOC_16C_REG20_C,
+	BFD_RELOC_16C_ABS20, BFD_RELOC_16C_ABS20_C,
+	BFD_RELOC_16C_ABS24, BFD_RELOC_16C_ABS24_C,
+	BFD_RELOC_16C_IMM04, BFD_RELOC_16C_IMM04_C,
+	BFD_RELOC_16C_IMM16, BFD_RELOC_16C_IMM16_C,
+	BFD_RELOC_16C_IMM20, BFD_RELOC_16C_IMM20_C,
+	BFD_RELOC_16C_IMM24, BFD_RELOC_16C_IMM24_C,
+	BFD_RELOC_16C_IMM32, BFD_RELOC_16C_IMM32_C.
+	* targets.c (bfd_elf32_cr16c_vec): Declare.
+	(bfd_target_vector): Add bfd_elf32_cr16c_vec.
+	* cpu-cr16c.c: New file.
+	* elf32-cr16c.c: Likewise.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Likewise.
+
+2004-03-30  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf.c (map_sections_to_segments): Fix handling of .tbss.
+
+2004-03-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Remove all mention of elflink.h.
+	* Makefile.in: Regenerate.
+	* bfd-in.h (bfd_elf_discard_info): Declare.
+	(bfd_elf32_discard_info, bfd_elf64_discard_info): Delete.
+	* bfd-in2.h: Regenerate.
+	* elf-bfd.h (bfd_elf32_print_symbol, bfd_elf64_print_symbol,
+	bfd_elf32_link_record_dynamic_symbol,
+	bfd_elf64_link_record_dynamic_symbol,
+	_bfd_elf_link_record_dynamic_symbol, bfd_elf32_bfd_final_link,
+	bfd_elf64_bfd_final_link, elf_link_record_local_dynamic_symbol,
+	_bfd_elf32_link_record_local_dynamic_symbol,
+	_bfd_elf64_link_record_local_dynamic_symbol,
+	_bfd_elf32_gc_sections, _bfd_elf32_gc_common_finalize_got_offsets,
+	_bfd_elf32_gc_common_final_link, _bfd_elf64_gc_common_final_link,
+	_bfd_elf32_gc_record_vtinherit, _bfd_elf32_gc_record_vtentry,
+	_bfd_elf64_gc_sections, _bfd_elf64_gc_common_finalize_got_offsets,
+	_bfd_elf64_gc_record_vtinherit, _bfd_elf64_gc_record_vtentry,
+	_bfd_elf32_reloc_symbol_deleted_p,
+	_bfd_elf64_reloc_symbol_deleted_p): Delete.
+	(bfd_elf_link_record_dynamic_symbol,
+	bfd_elf_link_record_local_dynamic_symbol,
+	bfd_elf_final_link, bfd_elf_gc_sections,
+	bfd_elf_gc_record_vtinherit, bfd_elf_gc_record_vtentry,
+	bfd_elf_gc_common_finalize_got_offsets, bfd_elf_gc_common_final_link,
+	bfd_elf_reloc_symbol_deleted_p): Declare.
+	(WILL_CALL_FINISH_DYNAMIC_SYMBOL): Define.
+	* elf32-arm.h: Update for changed function names.  Remove local
+	WILL_CALL_FINISH_DYNAMIC_SECTION define.
+	* elf-hppa.h, elf-m10300.c, elf32-cris.c, elf32-d10v.c, elf32-dlx.c,
+	* elf32-fr30.c, elf32-frv.c, elf32-h8300.c, elf32-hppa.c, elf32-i386.c,
+	* elf32-iq2000.c, elf32-m32r.c, elf32-m68hc1x.c, elf32-m68k.c,
+	* elf32-mcore.c, elf32-openrisc.c, elf32-ppc.c, elf32-s390.c,
+	* elf32-sh.c, elf32-sparc.c, elf32-v850.c, elf32-vax.c,
+	* elf32-xstormy16.c, elf32-xtensa.c, elf64-alpha.c, elf64-hppa.c,
+	* elf64-mmix.c, elf64-ppc.c, elf64-s390.c, elf64-sh64.c, elf64-sparc.c,
+	* elf64-x86-64.c, elfxx-ia64.c, elfxx-mips.c, elfxx-target.h: Likewise.
+	* elfxx-target.h (bfd_elfNN_bfd_final_link): Define.
+	(bfd_elfNN_print_symbol): Define.
+	* elfcode.h: Don't include elflink.h.
+	(elf_bfd_discard_info, elf_reloc_symbol_deleted_p,
+	elf_link_record_dynamic_symbol, elf_bfd_final_link, elf_gc_sections,
+	elf_gc_common_finalize_got_offsets, elf_gc_common_final_link,
+	elf_gc_record_vtinherit, elf_gc_record_vtentry,
+	elf_link_record_local_dynamic_symbol): Don't define.
+	* elflink.c: Update for changed function names.  Move elflink.h
+	code here.
+	* elflink.h: Delete file.
+	* po/SRC-POTFILES.in: Regenerate.
+	* po/bfd.pot: Regenerate.
+
+2004-03-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-mmix.c (mmix_elf_relocate_section): Restore code setting
+	"name" for global syms accidentally removed in 2004-03-20 change.
+
+2004-03-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (struct elf_reloc_cookie): Add r_sym_shift field.
+	* elflink.h: Replace all occurrences of sizeof (Elf_External_*)
+	where Elf_External_* is different for 64 and 32 bit, with
+	corresponding elf_size_info field.
+	(struct elf_final_link_info): Use "bfd_byte *" instead
+	of "Elf_External_Sym *" for external_syms and symbuf.
+	(elf_link_adjust_relocs): Set up r_type_mask and r_sym_shift local
+	vars and use instead of ELF_R_INFO and ELF_R_TYPE macros.
+	(struct elf_link_sort_rela): Add "sym_mask" alias for "offset".
+	(elf_link_sort_cmp1): Use sym_mask field instead of ELF_R_SYM.
+	(elf_link_sort_cmp2): Adjust.
+	(elf_link_sort_relocs): Set up r_sym_mask local var instead of
+	using ELF_R_SYM macro.  Set u.sym_mask.
+	(elf_bfd_final_link): Call _bfd_elf_stringtab_init instead of macro
+	version, elf_stringtab_init.  Ditto for bfd_section_from_elf_index
+	vs. section_from_elf_index.  Adjust Elf_External_Sym pointer
+	arithmetic.  Pass bed to elf_link_flush_output_syms.  Adjust
+	Elf_External_Dyn pointer arithmentic.  Use bed swap_dyn_in and
+	swap_syn_out functions.  Rearrange dyn swap in/out switch.
+	(elf_link_output_sym): Adjust Elf_External_Sym pointer arithmentic.
+	Pass bed to elf_link_flush_output_syms.  Use bed swap_symbol_out.
+	(elf_link_flush_output_syms): Add elf_backend_data arg.
+	(elf_link_check_versioned_symbol): Likewise.
+	(elf_link_output_extsym): Pass bed to elf_link_check_versioned_symbol.
+	Adjust Elf_External_Sym pointer arithmetic.  Use bed swap_symbol_out.
+	(elf_link_input_bfd): Use bfd_section_from_elf_index.  Set up
+	r_type_mask and r_sym_shift local vars and use instead of ELF_R_SYM,
+	ELF_R_TYPE and ELF_R_INFO macros.
+	(elf_reloc_link_order): Select ELF32_R_INFO or ELF64_R_INFO invocation
+	based on size rather than using ELF_R_INFO.
+	(elf_gc_mark): Set up r_sym_shift local var and use instead of
+	ELF_R_SYM macro.
+	(struct alloc_got_off_arg): New.
+	(elf_gc_common_finalize_got_offsets): Use elf_size_info instead of
+	ARCH_SIZE.  Pass get entry size down to elf_gc_allocate_got_offsets.
+	(elf_gc_allocate_got_offsets): Adjust.
+	(elf_reloc_symbol_deleted_p): Usee cookie.r_sym_shift instead of
+	ELF_R_SYM.  Use bfd_section_from_elf_index.
+	(elf_bfd_discard_info): Set cookie.r_sym_shift.
+	* elfcode.h (elf_stringtab_init, section_from_elf_index): Delete.
+	(elf_slurp_symbol_table): Use bfd_section_from_elf_index.
+
+2004-03-26  Stan Shebs  <shebs@apple.com>
+
+	Remove MPW support, no longer used.
+	* config.bfd (powerpc-*-mpw*): Remove configuration.
+	* mpw-config.in, mpw-make.sed: Remove files.
+	* ecoffswap.h [MPW_C]: Remove MPW-C-friendly version of code.
+
 2004-03-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (elf_backend_add_symbol_hook): Define.
@@ -53,7 +251,7 @@
 
 	* elflink.h (elf_link_add_object_symbols): Add DT_NEEDED for as-needed
 	and chained shared libs only if dynsym.  Clear dynsym on forced-local.
-	
+
 	* elf-bfd.h (_bfd_elf_add_dynamic_entry): Declare.
 	(bfd_elf32_add_dynamic_entry, bfd_elf64_add_dynamic_entry): Delete.
 	(_bfd_elf_add_dt_needed_tag): Declare.
@@ -114,7 +312,7 @@
 	(elf_xtensa_size_dynamic_sections): Don't add DT_TEXTREL entry.
 	(elf_xtensa_relocate_section): Read literal tables and check for
 	dynamic relocations in read-only sections and not in literal pools.
-	
+
 2004-03-23  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 51.

@@ -13944,7 +13944,7 @@ The assembly window shows the disassembly output of the program.
 @item register
 This window shows the processor registers.  It detects when
 a register is changed and when this is the case, registers that have
-changed are highlighted.
+changed are highlighted.  
 
 @end table
 
@@ -14236,6 +14236,22 @@ can be affected to another window.
 @item refresh
 @kindex refresh
 Refresh the screen.  This is similar to using @key{C-L} key.
+
+@item tui reg float
+@kindex tui reg
+Show the floating point registers in the register window.
+
+@item tui reg general
+Show the general registers in the register window.
+
+@item tui reg next
+Show the next register group.  The list of register groups as well as
+their order is target specific.  The predefined register groups are the
+following: @code{general}, @code{float}, @code{system}, @code{vector},
+@code{all}, @code{save}, @code{restore}.
+
+@item tui reg system
+Show the system registers in the register window.
 
 @item update
 @kindex update

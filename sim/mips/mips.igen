@@ -238,13 +238,15 @@
 // On the r3900, restriction (2) is not present, and restriction (3) is not
 // present for multiplication.
 //
-// For now this code is paranoid.  Historically the simulator
-// enforced restrictions (2) and (3) for more ISAs and CPU types than
-// necessary.  Unfortunately, at least some MIPS IV and later parts'
-// documentation describes them as having these hazards (e.g. vr5000),
-// so they can't be removed for at leats MIPS IV.  MIPS V hasn't been
-// checked (since there are no known hardware implementations).
-// 
+// Unfortunately, there seems to be some confusion about whether the last
+// two restrictions should apply to "MIPS IV" as well.  One edition of
+// the MIPS IV ISA says they do, but references in later ISA documents
+// suggest they don't.
+//
+// In reality, some MIPS IV parts, such as the VR5000 and VR5400, do have
+// these restrictions, while others, like the VR5500, don't.  To accomodate
+// such differences, the MIPS IV and MIPS V version of these helper functions
+// use auxillary routines to determine whether the restriction applies.
 
 // check_mf_cycles:
 //
@@ -274,13 +276,23 @@
 *mipsI:
 *mipsII:
 *mipsIII:
-*mipsIV:
-*mipsV:
 *vr4100:
 *vr5000:
 {
   signed64 time = sim_events_time (SD);
   int ok = check_mf_cycles (SD_, history, time, "MT");
+  history->mt.timestamp = time;
+  history->mt.cia = CIA;
+  return ok;
+}
+
+:function:::int:check_mt_hilo:hilo_history *history
+*mipsIV:
+*mipsV:
+{
+  signed64 time = sim_events_time (SD);
+  int ok = (! MIPS_MACH_HAS_MT_HILO_HAZARD (SD)
+	    || check_mf_cycles (SD_, history, time, "MT"));
   history->mt.timestamp = time;
   history->mt.cia = CIA;
   return ok;
@@ -350,14 +362,27 @@
 *mipsI:
 *mipsII:
 *mipsIII:
-*mipsIV:
-*mipsV:
 *vr4100:
 *vr5000:
 {
   signed64 time = sim_events_time (SD);
   int ok = (check_mf_cycles (SD_, hi, time, "OP")
 	    && check_mf_cycles (SD_, lo, time, "OP"));
+  hi->op.timestamp = time;
+  lo->op.timestamp = time;
+  hi->op.cia = CIA;
+  lo->op.cia = CIA;
+  return ok;
+}
+
+:function:::int:check_mult_hilo:hilo_history *hi, hilo_history *lo
+*mipsIV:
+*mipsV:
+{
+  signed64 time = sim_events_time (SD);
+  int ok = (! MIPS_MACH_HAS_MULT_HILO_HAZARD (SD)
+	    || (check_mf_cycles (SD_, hi, time, "OP")
+	        && check_mf_cycles (SD_, lo, time, "OP")));
   hi->op.timestamp = time;
   lo->op.timestamp = time;
   hi->op.cia = CIA;
@@ -389,8 +414,6 @@
 *mipsI:
 *mipsII:
 *mipsIII:
-*mipsIV:
-*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -398,6 +421,21 @@
   signed64 time = sim_events_time (SD);
   int ok = (check_mf_cycles (SD_, hi, time, "OP")
 	    && check_mf_cycles (SD_, lo, time, "OP"));
+  hi->op.timestamp = time;
+  lo->op.timestamp = time;
+  hi->op.cia = CIA;
+  lo->op.cia = CIA;
+  return ok;
+}
+
+:function:::int:check_div_hilo:hilo_history *hi, hilo_history *lo
+*mipsIV:
+*mipsV:
+{
+  signed64 time = sim_events_time (SD);
+  int ok = (! MIPS_MACH_HAS_DIV_HILO_HAZARD (SD)
+	    || (check_mf_cycles (SD_, hi, time, "OP")
+	        && check_mf_cycles (SD_, lo, time, "OP")));
   hi->op.timestamp = time;
   lo->op.timestamp = time;
   hi->op.cia = CIA;

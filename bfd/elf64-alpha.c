@@ -2462,7 +2462,7 @@ elf64_alpha_create_dynamic_sections (abfd, info)
   h->type = STT_OBJECT;
 
   if (info->shared
-      && ! _bfd_elf_link_record_dynamic_symbol (info, h))
+      && ! bfd_elf_link_record_dynamic_symbol (info, h))
     return FALSE;
 
   s = bfd_make_section (abfd, ".rela.plt");
@@ -2506,7 +2506,7 @@ elf64_alpha_create_dynamic_sections (abfd, info)
   h->type = STT_OBJECT;
 
   if (info->shared
-      && ! _bfd_elf_link_record_dynamic_symbol (info, h))
+      && ! bfd_elf_link_record_dynamic_symbol (info, h))
     return FALSE;
 
   elf_hash_table (info)->hgot = h;
@@ -5335,7 +5335,7 @@ elf64_alpha_final_link (abfd, info)
     }
 
   /* Invoke the regular ELF backend linker to do all the work.  */
-  if (! bfd_elf64_bfd_final_link (abfd, info))
+  if (! bfd_elf_final_link (abfd, info))
     return FALSE;
 
   /* Now write out the computed sections.  */

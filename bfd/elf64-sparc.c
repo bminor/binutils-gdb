@@ -1178,7 +1178,7 @@ sparc64_elf_check_relocs (abfd, info, sec, relocs)
 	      /* Make sure this symbol is output as a dynamic symbol.  */
 	      if (h->dynindx == -1)
 		{
-		  if (! bfd_elf64_link_record_dynamic_symbol (info, h))
+		  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 		    return FALSE;
 		}
 
@@ -1261,7 +1261,7 @@ sparc64_elf_check_relocs (abfd, info, sec, relocs)
 	  /* Make sure this symbol is output as a dynamic symbol.  */
 	  if (h->dynindx == -1)
 	    {
-	      if (! bfd_elf64_link_record_dynamic_symbol (info, h))
+	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
 		return FALSE;
 	    }
 
@@ -1989,17 +1989,6 @@ sparc64_elf_relax_section (abfd, section, link_info, again)
   return TRUE;
 }
 
-/* This is the condition under which finish_dynamic_symbol will be called
-   from elflink.h.  If elflink.h doesn't call our finish_dynamic_symbol
-   routine, we'll need to do something about initializing any .plt and
-   .got entries in relocate_section.  */
-#define WILL_CALL_FINISH_DYNAMIC_SYMBOL(DYN, INFO, H)			\
-  ((DYN)								\
-   && ((INFO)->shared							\
-       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)	\
-   && ((H)->dynindx != -1						\
-       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0))
-
 /* Relocate a SPARC64 ELF section.  */
 
 static bfd_boolean
@@ -2327,7 +2316,7 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      BFD_ASSERT (off != (bfd_vma) -1);
 	      dyn = elf_hash_table (info)->dynamic_sections_created;
 
-	      if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, h)
+	      if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
 		  || (info->shared
 		      && (info->symbolic
 			  || h->dynindx == -1

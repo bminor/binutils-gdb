@@ -1,3 +1,7 @@
+2004-03-30  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	* m32r.opc (parse_hi16): Fixed shigh(0xffff8000) bug.
+
 2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
 
 	* frv.cpu (define-arch frv): Add fr450 mach.

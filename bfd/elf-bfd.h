@@ -492,6 +492,7 @@ struct elf_reloc_cookie
   size_t locsymcount;
   size_t extsymoff;
   struct elf_link_hash_entry **sym_hashes;
+  int r_sym_shift;
   bfd_boolean bad_symtab;
 };
 
@@ -1308,9 +1309,6 @@ extern void bfd_elf_print_symbol
   bfd_elf_string_from_elf_section (abfd, elf_elfheader(abfd)->e_shstrndx, \
 				   strindex)
 
-#define bfd_elf32_print_symbol	bfd_elf_print_symbol
-#define bfd_elf64_print_symbol	bfd_elf_print_symbol
-
 extern void _bfd_elf_sprintf_vma
   (bfd *, char *, bfd_vma);
 extern void _bfd_elf_fprintf_vma
@@ -1492,8 +1490,6 @@ extern bfd_boolean _bfd_elf_link_find_version_dependencies
 extern bfd_boolean _bfd_elf_link_assign_sym_version
   (struct elf_link_hash_entry *, void *);
 
-extern bfd_boolean _bfd_elf_link_record_dynamic_symbol
-  (struct bfd_link_info *, struct elf_link_hash_entry *);
 extern long _bfd_elf_link_lookup_local_dynindx
   (struct bfd_link_info *, bfd *, long);
 extern bfd_boolean _bfd_elf_compute_section_file_positions
@@ -1555,9 +1551,6 @@ extern int bfd_elf32_core_file_failing_signal
 extern bfd_boolean bfd_elf32_core_file_matches_executable_p
   (bfd *, bfd *);
 
-extern bfd_boolean bfd_elf32_bfd_final_link
-  (bfd *, struct bfd_link_info *);
-
 extern void bfd_elf32_swap_symbol_in
   (bfd *, const void *, const void *, Elf_Internal_Sym *);
 extern void bfd_elf32_swap_symbol_out
@@ -1599,8 +1592,6 @@ extern int bfd_elf64_core_file_failing_signal
   (bfd *);
 extern bfd_boolean bfd_elf64_core_file_matches_executable_p
   (bfd *, bfd *);
-extern bfd_boolean bfd_elf64_bfd_final_link
-  (bfd *, struct bfd_link_info *);
 
 extern void bfd_elf64_swap_symbol_in
   (bfd *, const void *, const void *, Elf_Internal_Sym *);
@@ -1638,17 +1629,11 @@ extern bfd_boolean bfd_elf_link_add_symbols
 extern bfd_boolean _bfd_elf_add_dynamic_entry
   (struct bfd_link_info *, bfd_vma, bfd_vma);
 
-#define bfd_elf32_link_record_dynamic_symbol \
-  _bfd_elf_link_record_dynamic_symbol
-#define bfd_elf64_link_record_dynamic_symbol \
-  _bfd_elf_link_record_dynamic_symbol
+extern bfd_boolean bfd_elf_link_record_dynamic_symbol
+  (struct bfd_link_info *, struct elf_link_hash_entry *);
 
-extern int elf_link_record_local_dynamic_symbol
+extern int bfd_elf_link_record_local_dynamic_symbol
   (struct bfd_link_info *, bfd *, long);
-#define _bfd_elf32_link_record_local_dynamic_symbol \
-  elf_link_record_local_dynamic_symbol
-#define _bfd_elf64_link_record_local_dynamic_symbol \
-  elf_link_record_local_dynamic_symbol
 
 extern bfd_boolean _bfd_elf_close_and_cleanup
   (bfd *);
@@ -1656,31 +1641,25 @@ extern bfd_reloc_status_type _bfd_elf_rel_vtable_reloc_fn
   (bfd *, arelent *, struct bfd_symbol *, void *,
    asection *, bfd *, char **);
 
-extern bfd_boolean _bfd_elf32_gc_sections
+extern bfd_boolean bfd_elf_final_link
   (bfd *, struct bfd_link_info *);
-extern bfd_boolean _bfd_elf32_gc_common_finalize_got_offsets
+
+extern bfd_boolean bfd_elf_gc_sections
   (bfd *, struct bfd_link_info *);
-extern bfd_boolean _bfd_elf32_gc_common_final_link
-  (bfd *, struct bfd_link_info *);
-extern bfd_boolean _bfd_elf32_gc_record_vtinherit
-  (bfd *, asection *, struct elf_link_hash_entry *, bfd_vma);
-extern bfd_boolean _bfd_elf32_gc_record_vtentry
+
+extern bfd_boolean bfd_elf_gc_record_vtinherit
   (bfd *, asection *, struct elf_link_hash_entry *, bfd_vma);
 
-extern bfd_boolean _bfd_elf64_gc_sections
-  (bfd *, struct bfd_link_info *);
-extern bfd_boolean _bfd_elf64_gc_common_finalize_got_offsets
-  (bfd *, struct bfd_link_info *);
-extern bfd_boolean _bfd_elf64_gc_common_final_link
-  (bfd *, struct bfd_link_info *);
-extern bfd_boolean _bfd_elf64_gc_record_vtinherit
-  (bfd *, asection *, struct elf_link_hash_entry *, bfd_vma);
-extern bfd_boolean _bfd_elf64_gc_record_vtentry
+extern bfd_boolean bfd_elf_gc_record_vtentry
   (bfd *, asection *, struct elf_link_hash_entry *, bfd_vma);
 
-extern bfd_boolean _bfd_elf32_reloc_symbol_deleted_p
-  (bfd_vma, void *);
-extern bfd_boolean _bfd_elf64_reloc_symbol_deleted_p
+extern bfd_boolean bfd_elf_gc_common_finalize_got_offsets
+  (bfd *, struct bfd_link_info *);
+
+extern bfd_boolean bfd_elf_gc_common_final_link
+  (bfd *, struct bfd_link_info *);
+
+extern bfd_boolean bfd_elf_reloc_symbol_deleted_p
   (bfd_vma, void *);
 
 /* Exported interface for writing elf corefile notes. */
@@ -1710,6 +1689,16 @@ extern bfd *_bfd_elf64_bfd_from_remote_memory
 
 extern bfd_boolean _sh_elf_set_mach_from_flags
   (bfd *);
+
+/* This is the condition under which finish_dynamic_symbol will be called.
+   If our finish_dynamic_symbol isn't called, we'll need to do something
+   about initializing any .plt and .got entries in relocate_section.  */
+#define WILL_CALL_FINISH_DYNAMIC_SYMBOL(DYN, SHARED, H) \
+  ((DYN)								\
+   && ((SHARED)								\
+       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)	\
+   && ((H)->dynindx != -1						\
+       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0))
 
 /* This macro is to avoid lots of duplicated code in the body
    of xxx_relocate_section() in the various elfxx-xxxx.c files.  */

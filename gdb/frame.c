@@ -40,6 +40,8 @@
 #include "command.h"
 #include "gdbcmd.h"
 
+static struct frame_info *get_prev_frame_1 (struct frame_info *this_frame);
+
 /* We keep a cache of stack frames, each of which is a "struct
    frame_info".  The innermost one gets allocated (in
    wait_for_inferior) each time the inferior stops; current_frame
@@ -248,6 +250,16 @@ get_frame_id (struct frame_info *fi)
 	}
     }
   return fi->this_id.value;
+}
+
+struct frame_id
+frame_unwind_id (struct frame_info *next_frame)
+{
+  /* Use prev_frame, and not get_prev_frame.  The latter will truncate
+     the frame chain, leading to this function unintentionally
+     returning a null_frame_id (e.g., when a caller requests the frame
+     ID of "main()"s caller.  */
+  return get_frame_id (get_prev_frame_1 (next_frame));
 }
 
 const struct frame_id null_frame_id; /* All zeros.  */
@@ -1720,129 +1732,27 @@ legacy_get_prev_frame (struct frame_info *this_frame)
   return prev;
 }
 
-/* Return a structure containing various interesting information
-   about the frame that called THIS_FRAME.  Returns NULL
-   if there is no such frame.
+/* Return a "struct frame_info" corresponding to the frame that called
+   THIS_FRAME.  Returns NULL if there is no such frame.
 
-   This function tests some target-independent conditions that should
-   terminate the frame chain, such as unwinding past main().  It
-   should not contain any target-dependent tests, such as checking
-   whether the program-counter is zero.  */
+   Unlike get_prev_frame, this function always tries to unwind the
+   frame.  */
 
-struct frame_info *
-get_prev_frame (struct frame_info *this_frame)
+static struct frame_info *
+get_prev_frame_1 (struct frame_info *this_frame)
 {
   struct frame_info *prev_frame;
 
+  gdb_assert (this_frame != NULL);
+
   if (frame_debug)
     {
-      fprintf_unfiltered (gdb_stdlog, "{ get_prev_frame (this_frame=");
+      fprintf_unfiltered (gdb_stdlog, "{ get_prev_frame_1 (this_frame=");
       if (this_frame != NULL)
 	fprintf_unfiltered (gdb_stdlog, "%d", this_frame->level);
       else
 	fprintf_unfiltered (gdb_stdlog, "<NULL>");
       fprintf_unfiltered (gdb_stdlog, ") ");
-    }
-
-  /* Return the inner-most frame, when the caller passes in NULL.  */
-  /* NOTE: cagney/2002-11-09: Not sure how this would happen.  The
-     caller should have previously obtained a valid frame using
-     get_selected_frame() and then called this code - only possibility
-     I can think of is code behaving badly.
-
-     NOTE: cagney/2003-01-10: Talk about code behaving badly.  Check
-     block_innermost_frame().  It does the sequence: frame = NULL;
-     while (1) { frame = get_prev_frame (frame); .... }.  Ulgh!  Why
-     it couldn't be written better, I don't know.
-
-     NOTE: cagney/2003-01-11: I suspect what is happening is
-     block_innermost_frame() is, when the target has no state
-     (registers, memory, ...), still calling this function.  The
-     assumption being that this function will return NULL indicating
-     that a frame isn't possible, rather than checking that the target
-     has state and then calling get_current_frame() and
-     get_prev_frame().  This is a guess mind.  */
-  if (this_frame == NULL)
-    {
-      /* NOTE: cagney/2002-11-09: There was a code segment here that
-	 would error out when CURRENT_FRAME was NULL.  The comment
-	 that went with it made the claim ...
-
-	 ``This screws value_of_variable, which just wants a nice
-	 clean NULL return from block_innermost_frame if there are no
-	 frames.  I don't think I've ever seen this message happen
-	 otherwise.  And returning NULL here is a perfectly legitimate
-	 thing to do.''
-
-         Per the above, this code shouldn't even be called with a NULL
-         THIS_FRAME.  */
-      return current_frame;
-    }
-
-  /* There is always a frame.  If this assertion fails, suspect that
-     something should be calling get_selected_frame() or
-     get_current_frame().  */
-  gdb_assert (this_frame != NULL);
-
-  /* Make sure we pass an address within THIS_FRAME's code block to
-     inside_main_func.  Otherwise, we might stop unwinding at a
-     function which has a call instruction as its last instruction if
-     that function immediately precedes main().  */
-  if (this_frame->level >= 0
-      && !backtrace_past_main
-      && inside_main_func (get_frame_address_in_block (this_frame)))
-    /* Don't unwind past main(), bug always unwind the sentinel frame.
-       Note, this is done _before_ the frame has been marked as
-       previously unwound.  That way if the user later decides to
-       allow unwinds past main(), that just happens.  */
-    {
-      if (frame_debug)
-	fprintf_unfiltered (gdb_stdlog, "-> NULL // inside main func }\n");
-      return NULL;
-    }
-
-  if (this_frame->level > backtrace_limit)
-    {
-      error ("Backtrace limit of %d exceeded", backtrace_limit);
-    }
-
-  /* If we're already inside the entry function for the main objfile,
-     then it isn't valid.  Don't apply this test to a dummy frame -
-     dummy frame PC's typically land in the entry func.  Don't apply
-     this test to the sentinel frame.  Sentinel frames should always
-     be allowed to unwind.  */
-  /* NOTE: cagney/2003-02-25: Don't enable until someone has found
-     hard evidence that this is needed.  */
-  /* NOTE: cagney/2003-07-07: Fixed a bug in inside_main_func - wasn't
-     checking for "main" in the minimal symbols.  With that fixed
-     asm-source tests now stop in "main" instead of halting the
-     backtrace in wierd and wonderful ways somewhere inside the entry
-     file.  Suspect that deprecated_inside_entry_file and
-     inside_entry_func tests were added to work around that (now
-     fixed) case.  */
-  /* NOTE: cagney/2003-07-15: danielj (if I'm reading it right)
-     suggested having the inside_entry_func test use the
-     inside_main_func msymbol trick (along with entry_point_address I
-     guess) to determine the address range of the start function.
-     That should provide a far better stopper than the current
-     heuristics.  */
-  /* NOTE: cagney/2003-07-15: Need to add a "set backtrace
-     beyond-entry-func" command so that this can be selectively
-     disabled.  */
-  if (0
-#if 0
-      && backtrace_beyond_entry_func
-#endif
-      && this_frame->type != DUMMY_FRAME && this_frame->level >= 0
-      && inside_entry_func (this_frame))
-    {
-      if (frame_debug)
-	{
-	  fprintf_unfiltered (gdb_stdlog, "-> ");
-	  fprint_frame (gdb_stdlog, NULL);
-	  fprintf_unfiltered (gdb_stdlog, "// inside entry func }\n");
-	}
-      return NULL;
     }
 
   /* Only try to do the unwind once.  */
@@ -1857,40 +1767,6 @@ get_prev_frame (struct frame_info *this_frame)
       return this_frame->prev;
     }
   this_frame->prev_p = 1;
-
-  /* If we're inside the entry file, it isn't valid.  Don't apply this
-     test to a dummy frame - dummy frame PC's typically land in the
-     entry file.  Don't apply this test to the sentinel frame.
-     Sentinel frames should always be allowed to unwind.  */
-  /* NOTE: drow/2002-12-25: should there be a way to disable this
-     check?  It assumes a single small entry file, and the way some
-     debug readers (e.g.  dbxread) figure out which object is the
-     entry file is somewhat hokey.  */
-  /* NOTE: cagney/2003-01-10: If there is a way of disabling this test
-     then it should probably be moved to before the ->prev_p test,
-     above.  */
-  /* NOTE: vinschen/2003-04-01: Disabled.  It turns out that the call
-     to deprecated_inside_entry_file destroys a meaningful backtrace
-     under some conditions.  E. g. the backtrace tests in the
-     asm-source testcase are broken for some targets.  In this test
-     the functions are all implemented as part of one file and the
-     testcase is not necessarily linked with a start file (depending
-     on the target).  What happens is, that the first frame is printed
-     normaly and following frames are treated as being inside the
-     enttry file then.  This way, only the #0 frame is printed in the
-     backtrace output.  */
-  if (0
-      && this_frame->type != DUMMY_FRAME && this_frame->level >= 0
-      && deprecated_inside_entry_file (get_frame_pc (this_frame)))
-    {
-      if (frame_debug)
-	{
-	  fprintf_unfiltered (gdb_stdlog, "-> ");
-	  fprint_frame (gdb_stdlog, NULL);
-	  fprintf_unfiltered (gdb_stdlog, " // inside entry file }\n");
-	}
-      return NULL;
-    }
 
   /* If any of the old frame initialization methods are around, use
      the legacy get_prev_frame method.  */
@@ -1975,6 +1851,166 @@ get_prev_frame (struct frame_info *this_frame)
     }
 
   return prev_frame;
+}
+
+/* Debug routine to print a NULL frame being returned.  */
+
+static void
+frame_debug_got_null_frame (struct ui_file *file,
+			    struct frame_info *this_frame,
+			    const char *reason)
+{
+  if (frame_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog, "{ get_prev_frame (this_frame=");
+      if (this_frame != NULL)
+	fprintf_unfiltered (gdb_stdlog, "%d", this_frame->level);
+      else
+	fprintf_unfiltered (gdb_stdlog, "<NULL>");
+      fprintf_unfiltered (gdb_stdlog, ") -> // %s}\n", reason);
+    }
+}
+
+/* Return a structure containing various interesting information about
+   the frame that called THIS_FRAME.  Returns NULL if there is entier
+   no such frame or the frame fails any of a set of target-independent
+   condition that should terminate the frame chain (e.g., as unwinding
+   past main()).
+
+   This function should not contain target-dependent tests, such as
+   checking whether the program-counter is zero.  */
+
+struct frame_info *
+get_prev_frame (struct frame_info *this_frame)
+{
+  struct frame_info *prev_frame;
+
+  /* Return the inner-most frame, when the caller passes in NULL.  */
+  /* NOTE: cagney/2002-11-09: Not sure how this would happen.  The
+     caller should have previously obtained a valid frame using
+     get_selected_frame() and then called this code - only possibility
+     I can think of is code behaving badly.
+
+     NOTE: cagney/2003-01-10: Talk about code behaving badly.  Check
+     block_innermost_frame().  It does the sequence: frame = NULL;
+     while (1) { frame = get_prev_frame (frame); .... }.  Ulgh!  Why
+     it couldn't be written better, I don't know.
+
+     NOTE: cagney/2003-01-11: I suspect what is happening is
+     block_innermost_frame() is, when the target has no state
+     (registers, memory, ...), still calling this function.  The
+     assumption being that this function will return NULL indicating
+     that a frame isn't possible, rather than checking that the target
+     has state and then calling get_current_frame() and
+     get_prev_frame().  This is a guess mind.  */
+  if (this_frame == NULL)
+    {
+      /* NOTE: cagney/2002-11-09: There was a code segment here that
+	 would error out when CURRENT_FRAME was NULL.  The comment
+	 that went with it made the claim ...
+
+	 ``This screws value_of_variable, which just wants a nice
+	 clean NULL return from block_innermost_frame if there are no
+	 frames.  I don't think I've ever seen this message happen
+	 otherwise.  And returning NULL here is a perfectly legitimate
+	 thing to do.''
+
+         Per the above, this code shouldn't even be called with a NULL
+         THIS_FRAME.  */
+      frame_debug_got_null_frame (gdb_stdlog, this_frame, "this_frame NULL");
+      return current_frame;
+    }
+
+  /* There is always a frame.  If this assertion fails, suspect that
+     something should be calling get_selected_frame() or
+     get_current_frame().  */
+  gdb_assert (this_frame != NULL);
+
+  /* Make sure we pass an address within THIS_FRAME's code block to
+     inside_main_func.  Otherwise, we might stop unwinding at a
+     function which has a call instruction as its last instruction if
+     that function immediately precedes main().  */
+  if (this_frame->level >= 0
+      && !backtrace_past_main
+      && inside_main_func (get_frame_address_in_block (this_frame)))
+    /* Don't unwind past main(), bug always unwind the sentinel frame.
+       Note, this is done _before_ the frame has been marked as
+       previously unwound.  That way if the user later decides to
+       allow unwinds past main(), that just happens.  */
+    {
+      frame_debug_got_null_frame (gdb_stdlog, this_frame, "inside main func");
+      return NULL;
+    }
+
+  if (this_frame->level > backtrace_limit)
+    {
+      error ("Backtrace limit of %d exceeded", backtrace_limit);
+    }
+
+  /* If we're already inside the entry function for the main objfile,
+     then it isn't valid.  Don't apply this test to a dummy frame -
+     dummy frame PC's typically land in the entry func.  Don't apply
+     this test to the sentinel frame.  Sentinel frames should always
+     be allowed to unwind.  */
+  /* NOTE: cagney/2003-02-25: Don't enable until someone has found
+     hard evidence that this is needed.  */
+  /* NOTE: cagney/2003-07-07: Fixed a bug in inside_main_func - wasn't
+     checking for "main" in the minimal symbols.  With that fixed
+     asm-source tests now stop in "main" instead of halting the
+     backtrace in wierd and wonderful ways somewhere inside the entry
+     file.  Suspect that deprecated_inside_entry_file and
+     inside_entry_func tests were added to work around that (now
+     fixed) case.  */
+  /* NOTE: cagney/2003-07-15: danielj (if I'm reading it right)
+     suggested having the inside_entry_func test use the
+     inside_main_func msymbol trick (along with entry_point_address I
+     guess) to determine the address range of the start function.
+     That should provide a far better stopper than the current
+     heuristics.  */
+  /* NOTE: cagney/2003-07-15: Need to add a "set backtrace
+     beyond-entry-func" command so that this can be selectively
+     disabled.  */
+  if (0
+#if 0
+      && backtrace_beyond_entry_func
+#endif
+      && this_frame->type != DUMMY_FRAME && this_frame->level >= 0
+      && inside_entry_func (this_frame))
+    {
+      frame_debug_got_null_frame (gdb_stdlog, this_frame, "inside entry func");
+      return NULL;
+    }
+
+  /* If we're inside the entry file, it isn't valid.  Don't apply this
+     test to a dummy frame - dummy frame PC's typically land in the
+     entry file.  Don't apply this test to the sentinel frame.
+     Sentinel frames should always be allowed to unwind.  */
+  /* NOTE: drow/2002-12-25: should there be a way to disable this
+     check?  It assumes a single small entry file, and the way some
+     debug readers (e.g.  dbxread) figure out which object is the
+     entry file is somewhat hokey.  */
+  /* NOTE: cagney/2003-01-10: If there is a way of disabling this test
+     then it should probably be moved to before the ->prev_p test,
+     above.  */
+  /* NOTE: vinschen/2003-04-01: Disabled.  It turns out that the call
+     to deprecated_inside_entry_file destroys a meaningful backtrace
+     under some conditions.  E. g. the backtrace tests in the
+     asm-source testcase are broken for some targets.  In this test
+     the functions are all implemented as part of one file and the
+     testcase is not necessarily linked with a start file (depending
+     on the target).  What happens is, that the first frame is printed
+     normaly and following frames are treated as being inside the
+     enttry file then.  This way, only the #0 frame is printed in the
+     backtrace output.  */
+  if (0
+      && this_frame->type != DUMMY_FRAME && this_frame->level >= 0
+      && deprecated_inside_entry_file (get_frame_pc (this_frame)))
+    {
+      frame_debug_got_null_frame (gdb_stdlog, this_frame, "inside entry file");
+      return NULL;
+    }
+
+  return get_prev_frame_1 (this_frame);
 }
 
 CORE_ADDR
