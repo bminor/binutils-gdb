@@ -1,3 +1,15 @@
+Sat Apr 18 01:21:04 1998  Stan Cox  <scox@cygnus.com>
+
+	* configure.in: Added sparc86x support.
+	
+	* configure: Rebuild.
+	
+	* config/tc-sparc.c (lookup_arch): Added arch_type to struct
+	sparc_arch.
+	(md_parse_option): Warn if -EL is not supported for this architecture.
+
+	* config/tc-sparc.h (SPARC_BIENDIAN) Always define.
+	
 Sat Apr 18 01:19:01 1998  Jeffrey A Law  (law@cygnus.com)
 
         * config/tc-mips.c (mips_ip): Note when we use get match on

@@ -92,6 +92,7 @@ changequote([,])dnl
       sparclite*)	cpu_type=sparc arch=sparclite ;;
       sparclet*)	cpu_type=sparc arch=sparclet ;;
       sparc64*)		cpu_type=sparc arch=v9-64 ;;
+      sparc86x*)	cpu_type=sparc arch=sparc86x  ;;
       sparc*)		cpu_type=sparc arch=sparclite ;; # ??? See tc-sparc.c.
       v850*)		cpu_type=v850 ;;
       *)		cpu_type=${cpu} ;;
