@@ -1,3 +1,8 @@
+2004-05-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/m68k/nm-nbsd.h: Tweak comments.
+	* config/m68k/nm-nbsdaout.h: Likewise.
+
 2004-04-30  Andrew Cagney  <cagney@redhat.com>
 
 	* arm-tdep.c (arm_sigtramp_unwind_sniffer): Call
