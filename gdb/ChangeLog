@@ -1,3 +1,86 @@
+Fri Sep  4 00:34:30 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	A bunch of changes mostly to improve debugging of C++ programs.
+	Specifically, nested types are supported, and the calling
+	of inferiors methods is improved.
+
+	* expression.h, c-exp.y: STRUCTOP_PTR and STRUCTOP_STRUCT
+	expression types now take an extra parameter that is used
+	for an (optional) type qualifier, as in: EXP.TYPE::NAME.
+	If there is no qualifier (as in EXP.NAME), the TYPE is NULL.
+	(Before, there was a cute but not-quote-valid re-write to
+	EXP.*(&TYPE::NAME .)
+	* parse.c (length_of_subexp, prefixify_subexp), expprint.c
+	(print_subexp), eval.c (evaluate_subexp):  Handle the extra
+	operand of STRUCTOP_STRUCT and STRUCTOP_PTR.
+
+	* value.h:  New macros METHOD_PTR_IS_VIRTUAL,
+	METHOD_PTR_FROM_VOFFSET, METHOD_PTR_TO_VOFFSET to partially
+	hide the implementation details of pointer-to-method objects.
+	How to tell if the pointer points to a virtual method is
+	still very dependent on the particular compiler, but this
+	should make it easier to find the places to change.
+	* eval.c (evaluate_subexp [case OP_FUNCALL]), valprint.c
+	(val_print [case TYPE_CODE_PTR]):  Use the new METHOD_PTR_*
+	macros, instead of a hard-wired-in code that incorrectly
+	assumed a no-longerused representation of pointer-to-method
+	values.  And otherwise fix the relevant bit-rotted code.
+
+	* valprint.c (type_print_base [case TYPE_CODE_STRUCT]):
+	If there are both fields and methods, put a space between.
+
+	* gdbtypes.h:  New macro TYPE_FIELD_NESTED.
+	* symtab.C, syntab.h:  New function find_nested_type()
+	searches a class recursively for a nested type.
+	* c-exp.y:  Support nested type syntax:  TYPE1::TYPE2.
+	This required some nasty interactions between the lexer
+	and the parser (surprise, surprise), using the current_type
+	global variable (see comment above its declaration),
+	and the new function find_nested_type().
+	* expprint.c (print_subexp), valprint.c (val_print_fields,
+	type_print_base [case TYPE_CODE_STRUCT]):  Support nested types.
+	* stabsread.c (read_struct_type):  Recognize types fields
+	nested in classes.
+
+	* gdbtypes.c, symtab.h:  New functions check_struct,
+	check_union, and check_enum (factored out from lookup_struct,
+	lookup_union, lookup_enum).
+	* c-exp.y:  Support 'enum Foo::Bar' syntax as just the same
+	as 'Foo::Bar' followed by a call to check_enum.  Similarly
+	for struct and union.
+
+	* stabsread.c (read_struct_type):  Fix bug in handling of
+	GNU C++ anonymous type (indicated by CPLUS_MARKER followed
+	by '_').  (It used to prematurely exit the loop reading in
+	the fields, so it would think it should start reading
+	methods while still in the fields.  This could crash gdb
+	given a gcc that can emit nested type information.)
+
+	* valops.c (search_struct_method):  Pass 'this' value by
+	reference instead of by value.  This provides a more
+	consistent interface through a recursive search where the
+	"bottom" functions may need to adjust offsets (due to multiple
+	inheritance).
+	* valops.c, value.h, values.c:  Pass extra parameters to
+	value_fn_field and value_virtual_fn_field so we can
+	correctly adjust offset for multiple inheritance.
+	* eval.c (evaluate_subexp [case OP_FUNCALL]):  Simplify
+	virtual function calls by using value_virtual_fn_field().
+	* values.c: New function baseclass_offset, derived from
+	baseclass_addr (which perhaps can be made obsolete?).
+	It returns an offset rather than an address.  This is a
+	cleaner interface since it doesn't mess around allocating
+	new values.
+	* valops.c (search_struct_method):  Use baseclass_offset
+	rather than baseclass_addr.
+
+	* symfile.h:  Declaration of set_demangling_style() moved
+	here from demangle.h (which is now in ../include).
+	* i386-xdep.c:  Update comment.
+	* utils.c (strcmp_iw):  Add a hack to allow "FOO(ARGS)" to
+	match "FOO".  This allows 'break Foo' to work when Foo is
+	a mangled C++ function.  (See comment before function.)
+
 Thu Sep  3 09:17:05 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* a68v-xdep.c (store_inferior_registers):  Define as type void.

@@ -513,6 +513,15 @@ lookup_signed_typename (name)
   return lookup_typename (name, (struct block *) NULL, 0);
 }
 
+struct type *
+check_struct (type)
+     struct type *type;
+{
+  if (TYPE_CODE (type) != TYPE_CODE_STRUCT)
+    error ("This context has %s, not a struct or class.", TYPE_NAME (type));
+  return type;
+}
+
 /* Lookup a structure type named "struct NAME",
    visible in lexical block BLOCK.  */
 
@@ -530,11 +539,16 @@ lookup_struct (name, block)
     {
       error ("No struct type named %s.", name);
     }
-  if (TYPE_CODE (SYMBOL_TYPE (sym)) != TYPE_CODE_STRUCT)
-    {
-      error ("This context has class, union or enum %s, not a struct.", name);
-    }
-  return (SYMBOL_TYPE (sym));
+  return check_struct (SYMBOL_TYPE (sym));
+}
+
+struct type *
+check_union (type)
+     struct type *type;
+{
+  if (TYPE_CODE (type) != TYPE_CODE_UNION)
+    error ("This context has %s, not a union.", TYPE_NAME (type));
+  return type;
 }
 
 /* Lookup a union type named "union NAME",
@@ -554,11 +568,16 @@ lookup_union (name, block)
     {
       error ("No union type named %s.", name);
     }
-  if (TYPE_CODE (SYMBOL_TYPE (sym)) != TYPE_CODE_UNION)
-    {
-      error ("This context has class, struct or enum %s, not a union.", name);
-    }
-  return (SYMBOL_TYPE (sym));
+  return check_union (SYMBOL_TYPE (sym));
+}
+
+struct type *
+check_enum (type)
+     struct type *type;
+{
+  if (TYPE_CODE (type) != TYPE_CODE_ENUM)
+    error ("This context has %s, not an enum.", TYPE_NAME (type));
+  return type;
 }
 
 /* Lookup an enum type named "enum NAME",
@@ -577,11 +596,7 @@ lookup_enum (name, block)
     {
       error ("No enum type named %s.", name);
     }
-  if (TYPE_CODE (SYMBOL_TYPE (sym)) != TYPE_CODE_ENUM)
-    {
-      error ("This context has class, struct or union %s, not an enum.", name);
-    }
-  return (SYMBOL_TYPE (sym));
+  return check_enum (SYMBOL_TYPE (sym));
 }
 
 /* Lookup a template type named "template NAME<TYPE>",

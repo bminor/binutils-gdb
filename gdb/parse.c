@@ -275,6 +275,9 @@ length_of_subexp (expr, endpos)
 
   switch (i)
     {
+    case STRUCTOP_STRUCT:
+    case STRUCTOP_PTR:
+      args = 1;
       /* C++  */
     case OP_SCOPE:
       oplen = 4 + ((expr->elts[endpos - 2].longconst
@@ -326,9 +329,6 @@ length_of_subexp (expr, endpos)
       args = 1;
       break;
 
-    case STRUCTOP_STRUCT:
-    case STRUCTOP_PTR:
-      args = 1;
     case OP_M2_STRING:
     case OP_STRING:
       oplen = 3 + ((expr->elts[endpos - 2].longconst
@@ -393,6 +393,9 @@ prefixify_subexp (inexpr, outexpr, inend, outbeg)
   opcode = inexpr->elts[inend - 1].opcode;
   switch (opcode)
     {
+    case STRUCTOP_STRUCT:
+    case STRUCTOP_PTR:
+      args = 1;
       /* C++  */
     case OP_SCOPE:
       oplen = 4 + ((inexpr->elts[inend - 2].longconst
@@ -443,9 +446,6 @@ prefixify_subexp (inexpr, outexpr, inend, outbeg)
       args=1;
       break;
 
-   case STRUCTOP_STRUCT:
-    case STRUCTOP_PTR:
-      args = 1;
     case OP_M2_STRING:
     case OP_STRING:
       oplen = 3 + ((inexpr->elts[inend - 2].longconst

@@ -296,39 +296,34 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	  arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
 
 	  fnptr = longest_to_int (value_as_long (arg1));
-	  /* FIXME-tiemann: this is way obsolete.  */
-	  if (fnptr < 128)
+
+	  if (METHOD_PTR_IS_VIRTUAL(fnptr))
 	    {
+	      int fnoffset = METHOD_PTR_TO_VOFFSET(fnptr);
 	      struct type *basetype;
+	      struct type *domain_type =
+		  TYPE_DOMAIN_TYPE (TYPE_TARGET_TYPE (VALUE_TYPE (arg1)));
 	      int i, j;
 	      basetype = TYPE_TARGET_TYPE (VALUE_TYPE (arg2));
-	      basetype = TYPE_VPTR_BASETYPE (basetype);
+	      if (domain_type != basetype)
+		  arg2 = value_cast(lookup_pointer_type (domain_type), arg2);
+	      basetype = TYPE_VPTR_BASETYPE (domain_type);
 	      for (i = TYPE_NFN_FIELDS (basetype) - 1; i >= 0; i--)
 		{
 		  struct fn_field *f = TYPE_FN_FIELDLIST1 (basetype, i);
 		  /* If one is virtual, then all are virtual.  */
 		  if (TYPE_FN_FIELD_VIRTUAL_P (f, 0))
 		    for (j = TYPE_FN_FIELDLIST_LENGTH (basetype, i) - 1; j >= 0; --j)
-		      if (TYPE_FN_FIELD_VOFFSET (f, j) == fnptr)
+		      if (TYPE_FN_FIELD_VOFFSET (f, j) == fnoffset)
 			{
-			  value vtbl;
-			  value base = value_ind (arg2);
-			  struct type *fntype = lookup_pointer_type (TYPE_FN_FIELD_TYPE (f, j));
-
-			  if (TYPE_VPTR_FIELDNO (basetype) < 0)
-			    fill_in_vptr_fieldno (basetype);
-
-			  VALUE_TYPE (base) = basetype;
-			  vtbl = value_field (base, TYPE_VPTR_FIELDNO (basetype));
-			  VALUE_TYPE (vtbl) = lookup_pointer_type (fntype);
-			  VALUE_TYPE (arg1) = builtin_type_int;
-			  arg1 = value_subscript (vtbl, arg1);
-			  VALUE_TYPE (arg1) = fntype;
+			  value temp = value_ind (arg2);
+			  arg1 = value_virtual_fn_field (&temp, f, j, domain_type, 0);
+			  arg2 = value_addr (temp);
 			  goto got_it;
 			}
 		}
 	      if (i < 0)
-		error ("virtual function at index %d not found", fnptr);
+		error ("virtual function at index %d not found", fnoffset);
 	    }
 	  else
 	    {
@@ -347,8 +342,9 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	  nargs = longest_to_int (exp->elts[pc + 1].longconst) + 1;
 	  /* First, evaluate the structure into arg2 */
 	  pc2 = (*pos)++;
-	  tem2 = strlen (&exp->elts[pc2 + 1].string);
-	  *pos += 2 + (tem2 + sizeof (union exp_element)) / sizeof (union exp_element);
+	  /* type = exp->elts[pc2 + 1].type; */
+	  tem2 = strlen (&exp->elts[pc2 + 2].string);
+	  *pos += 3 + (tem2 + sizeof (union exp_element)) / sizeof (union exp_element);
 	  if (noside == EVAL_SKIP)
 	    goto nosideret;
 
@@ -381,9 +377,13 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	  int static_memfuncp;
 	  value temp = arg2;
 
+	  /* argvec[0] gets the method;
+	     argvec[1] gets the 'this' pointer (unless static) (from arg2);
+	     the remaining args go into the rest of argvec. */
+
 	  argvec[1] = arg2;
 	  argvec[0] =
-	    value_struct_elt (&temp, argvec+1, &exp->elts[pc2 + 1].string,
+	    value_struct_elt (&temp, argvec+1, &exp->elts[pc2 + 2].string,
 			      &static_memfuncp,
 			      op == STRUCTOP_STRUCT
 			      ? "structure" : "structure pointer");
@@ -428,40 +428,50 @@ evaluate_subexp (expect_type, exp, pos, noside)
       return call_function_by_hand (argvec[0], nargs, argvec + 1);
 
     case STRUCTOP_STRUCT:
-      tem = strlen (&exp->elts[pc + 1].string);
-      (*pos) += 2 + ((tem + sizeof (union exp_element))
+      tem = strlen (&exp->elts[pc + 2].string);
+      (*pos) += 3 + ((tem + sizeof (union exp_element))
 		     / sizeof (union exp_element));
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_PTR)
+	goto handle_structop_ptr;
+      type = exp->elts[pc + 1].type;
+      if (type)
+	arg1 = value_ind (value_cast (lookup_pointer_type (type),
+				      value_addr (arg1)));
       if (noside == EVAL_SKIP)
 	goto nosideret;
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	return value_zero (lookup_struct_elt_type (VALUE_TYPE (arg1),
-						   &exp->elts[pc + 1].string,
-						   1),
+						   &exp->elts[pc + 2].string,
+						   0),
 			   lval_memory);
       else
 	{
 	  value temp = arg1;
-	  return value_struct_elt (&temp, (value *)0, &exp->elts[pc + 1].string,
+	  return value_struct_elt (&temp, (value *)0, &exp->elts[pc + 2].string,
 				   (int *) 0, "structure");
 	}
 
     case STRUCTOP_PTR:
-      tem = strlen (&exp->elts[pc + 1].string);
-      (*pos) += 2 + (tem + sizeof (union exp_element)) / sizeof (union exp_element);
+      tem = strlen (&exp->elts[pc + 2].string);
+      (*pos) += 3 + (tem + sizeof (union exp_element)) / sizeof (union exp_element);
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+    handle_structop_ptr:
+      type = exp->elts[pc + 1].type;
+      if (type)
+	arg1 = value_cast (lookup_pointer_type (type), arg1);
       if (noside == EVAL_SKIP)
 	goto nosideret;
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	return value_zero (lookup_struct_elt_type (TYPE_TARGET_TYPE
 						   (VALUE_TYPE (arg1)),
-						   &exp->elts[pc + 1].string,
-						   1),
+						   &exp->elts[pc + 2].string,
+						   0),
 			   lval_memory);
       else
 	{
 	  value temp = arg1;
-	  return value_struct_elt (&temp, (value *)0, &exp->elts[pc + 1].string,
+	  return value_struct_elt (&temp, (value *)0, &exp->elts[pc + 2].string,
 				   (int *) 0, "structure pointer");
 	}
 
@@ -564,8 +574,18 @@ evaluate_subexp (expect_type, exp, pos, noside)
       if (noside == EVAL_SKIP)
 	goto nosideret;
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	return value_zero (TYPE_TARGET_TYPE (VALUE_TYPE (arg1)),
-			   VALUE_LVAL (arg1));
+	{
+	  /* If the user attempts to subscript something that has no target
+	     type (like a plain int variable for example), then report this
+	     as an error. */
+
+	  type = TYPE_TARGET_TYPE (VALUE_TYPE (arg1));
+	  if (type)
+	    return value_zero (type, VALUE_LVAL (arg1));
+	  else
+	    error ("cannot subscript something of type `%s'",
+		   TYPE_NAME (VALUE_TYPE (arg1)));
+	}
 			   
       if (binop_user_defined_p (op, arg1, arg2))
 	return value_x_binop (arg1, arg2, op, OP_NULL);
@@ -1068,7 +1088,7 @@ parse_and_eval_type (p, length)
     char *tmp = (char *)alloca (length + 4);
     struct expression *expr;
     tmp[0] = '(';
-    (void) memcpy (tmp+1, p, length);
+    memcpy (tmp+1, p, length);
     tmp[length+1] = ')';
     tmp[length+2] = '0';
     tmp[length+3] = '\0';

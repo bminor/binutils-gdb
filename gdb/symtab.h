@@ -562,6 +562,15 @@ lookup_union PARAMS ((char *, struct block *));
 extern struct type *
 lookup_enum PARAMS ((char *, struct block *));
 
+extern struct type *
+check_struct PARAMS ((struct type *));
+
+extern struct type *
+check_union PARAMS ((struct type *));
+
+extern struct type *
+check_enum PARAMS ((struct type *));
+
 extern struct symbol *
 block_function PARAMS ((struct block *));
 
@@ -668,6 +677,22 @@ decode_line_1 PARAMS ((char **, int, struct symtab *, int));
 
 /* Symmisc.c */
 
+#if MAINTENANCE_CMDS
+
+void
+maintenance_print_symbols PARAMS ((char *, int));
+
+void
+maintenance_print_psymbols PARAMS ((char *, int));
+
+void
+maintenance_print_msymbols PARAMS ((char *, int));
+
+void
+maintenance_print_objfiles PARAMS ((char *, int));
+
+#endif
+
 extern void
 free_symtab PARAMS ((struct symtab *));
 
@@ -706,6 +731,9 @@ clear_symtab_users_once PARAMS ((void));
 
 extern struct partial_symtab *
 find_main_psymtab PARAMS ((void));
+
+extern struct type *
+find_nested_type PARAMS ((struct type *, char*));
 
 /* blockframe.c */
 

@@ -186,7 +186,8 @@ lookup_symtab_1 (name)
  got_psymtab:
 
   if (ps -> readin)
-    error ("Internal: readin pst for `%s' found when no symtab found.", name);
+    error ("Internal: readin %s pst for `%s' found when no symtab found.",
+	   ps -> filename, name);
 
   s = PSYMTAB_TO_SYMTAB (ps);
 
@@ -262,13 +263,56 @@ gdb_mangle_name (type, i, j)
   struct fn_field *method = &f[j];
   char *field_name = TYPE_FN_FIELDLIST_NAME (type, i);
   char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
-  char *opname;
-  int is_constructor = strcmp (field_name, type_name_no_tag (type)) == 0;
-
+  char *newname = type_name_no_tag (type);
+  int is_constructor = strcmp(field_name, newname) == 0;
+  int is_destructor = is_constructor && physname[0] == '_'
+      && physname[1] == CPLUS_MARKER && physname[2] == '_';
   /* Need a new type prefix.  */
   char *const_prefix = method->is_const ? "C" : "";
   char *volatile_prefix = method->is_volatile ? "V" : "";
   char buf[20];
+#ifndef GCC_MANGLE_BUG
+  int len = strlen (newname);
+
+  if (is_destructor)
+    {
+      mangled_name = (char*) xmalloc(strlen(physname)+1);
+      strcpy(mangled_name, physname);
+      return mangled_name;
+    }
+
+  sprintf (buf, "__%s%s%d", const_prefix, volatile_prefix, len);
+  mangled_name_len = ((is_constructor ? 0 : strlen (field_name))
+			  + strlen (buf) + len
+			  + strlen (physname)
+			  + 1);
+
+  /* Only needed for GNU-mangled names.  ANSI-mangled names
+     work with the normal mechanisms.  */
+  if (OPNAME_PREFIX_P (field_name))
+    {
+      char *opname = cplus_mangle_opname (field_name + 3, 0);
+      if (opname == NULL)
+	error ("No mangling for \"%s\"", field_name);
+      mangled_name_len += strlen (opname);
+      mangled_name = (char *)xmalloc (mangled_name_len);
+
+      strncpy (mangled_name, field_name, 3);
+      mangled_name[3] = '\0';
+      strcat (mangled_name, opname);
+    }
+  else
+    {
+      mangled_name = (char *)xmalloc (mangled_name_len);
+      if (is_constructor)
+	mangled_name[0] = '\0';
+      else
+	strcpy (mangled_name, field_name);
+    }
+  strcat (mangled_name, buf);
+  strcat (mangled_name, newname);
+#else
+  char *opname;
 
   if (is_constructor)
     {
@@ -310,8 +354,9 @@ gdb_mangle_name (type, i, j)
 	}
     }
   strcat (mangled_name, buf);
-  strcat (mangled_name, physname);
 
+#endif
+  strcat (mangled_name, physname);
   return (mangled_name);
 }
 
@@ -521,7 +566,8 @@ found:
 
 	  ALL_MSYMBOLS (objfile, msymbol)
 	    {
-	      demangled = demangle_and_match (msymbol -> name, name, 0);
+	      demangled = demangle_and_match (msymbol -> name, name,
+					      DMGL_PARAMS | DMGL_ANSI);
 	      if (demangled != NULL)
 		{
 		  free (demangled);
@@ -579,7 +625,7 @@ found_msym:
 	  block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 	  sym = lookup_block_symbol (block, name, namespace);
 	  if (!sym)
-	    error ("Internal: global symbol `%s' found in psymtab but not in symtab", name);
+	    error ("Internal: global symbol `%s' found in %s psymtab but not in symtab", name, ps->filename);
 	  if (symtab != NULL)
 	    *symtab = s;
 	  return sym;
@@ -613,7 +659,7 @@ found_msym:
 	  block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
 	  sym = lookup_block_symbol (block, name, namespace);
 	  if (!sym)
-	    error ("Internal: static symbol `%s' found in psymtab but not in symtab", name);
+	    error ("Internal: static symbol `%s' found in %s psymtab but not in symtab", name, ps->filename);
 	  if (symtab != NULL)
 	    *symtab = s;
 	  return sym;
@@ -648,7 +694,7 @@ found_msym:
 	      block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
 	      sym = lookup_demangled_block_symbol (block, name);
 	      if (!sym)
-		error ("Internal: mangled static symbol `%s' found in psymtab but not in symtab", name);
+		error ("Internal: mangled static symbol `%s' found in %s psymtab but not in symtab", name, ps->filename);
 	      if (symtab != NULL)
 		*symtab = s;
 	      return sym;
@@ -680,7 +726,8 @@ lookup_demangled_block_symbol (block, name)
       sym = BLOCK_SYM (block, bot);
       if (SYMBOL_NAMESPACE (sym) == VAR_NAMESPACE)
 	{
-	  demangled = demangle_and_match (SYMBOL_NAME (sym), name, 0);
+	  demangled = demangle_and_match (SYMBOL_NAME (sym), name,
+					  DMGL_PARAMS | DMGL_ANSI);
 	  if (demangled != NULL)
 	    {
 	      free (demangled);
@@ -712,7 +759,8 @@ lookup_demangled_partial_symbol (pst, name)
     {
       if (SYMBOL_NAMESPACE (psym) == VAR_NAMESPACE)
 	{
-	  demangled = demangle_and_match (SYMBOL_NAME (psym), name, 0);
+	  demangled = demangle_and_match (SYMBOL_NAME (psym), name,
+					  DMGL_PARAMS | DMGL_ANSI);
 	  if (demangled != NULL)
 	    {
 	      free (demangled);
@@ -1221,6 +1269,31 @@ find_pc_line_pc_range (pc, startptr, endptr)
   return sal.symtab != 0;
 }
 
+struct type *
+find_nested_type (type, name)
+     struct type *type;
+     char *name;
+{
+  int i;
+  for (i = TYPE_NFIELDS (type) - 1; i >= TYPE_N_BASECLASSES (type); i--)
+    {
+      char *t_field_name = TYPE_FIELD_NAME (type, i);
+
+      if (t_field_name && !strcmp (t_field_name, name))
+	if (TYPE_FIELD_NESTED (type, i))
+	  {
+	    return TYPE_FIELD_TYPE (type, i);
+	  }
+    }
+  for (i = TYPE_N_BASECLASSES (type) - 1; i >= 0; i--)
+    {
+      struct type * t = find_nested_type (TYPE_BASECLASS (type, i), name);
+      if (t)
+	return t;
+    }
+  return NULL;
+}
+
 /* If P is of the form "operator[ \t]+..." where `...' is
    some legitimate operator text, return a pointer to the
    beginning of the substring of the operator text.

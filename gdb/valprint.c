@@ -510,7 +510,7 @@ val_print_fields (type, valaddr, stream, format, recurse, pretty, dont_print)
       for (i = n_baseclasses; i < len; i++)
 	{
 	  /* Check if static field */
-	  if (TYPE_FIELD_STATIC (type, i))
+	  if (TYPE_FIELD_STATIC (type, i) || TYPE_FIELD_NESTED (type, i))
 	    continue;
 	  if (fields_seen)
 	    fprintf_filtered (stream, ", ");
@@ -628,6 +628,7 @@ cplus_val_print (type, valaddr, stream, format, recurse, pretty, dont_print)
 	  obstack_ptr_grow (&dont_print_obstack, TYPE_BASECLASS (type, i));
 	}
 
+      /* Fix to use baseclass_offset instead. FIXME */
       baddr = baseclass_addr (type, i, valaddr, 0, &err);
       if (err == 0 && baddr == 0)
 	error ("could not find virtual baseclass `%s'\n",
@@ -867,8 +868,9 @@ val_print (type, valaddr, address, stream, format, deref_ref, recurse, pretty)
 
 	  addr = unpack_pointer (lookup_pointer_type (builtin_type_void),
 				valaddr);
-	  if (addr < 128)			/* FIXME!  What is this 128? */
+	  if (METHOD_PTR_IS_VIRTUAL(addr))
 	    {
+	      int offset = METHOD_PTR_TO_VOFFSET(addr);
 	      len = TYPE_NFN_FIELDS (domain);
 	      for (i = 0; i < len; i++)
 		{
@@ -878,9 +880,9 @@ val_print (type, valaddr, address, stream, format, deref_ref, recurse, pretty)
 		  for (j = 0; j < len2; j++)
 		    {
 		      QUIT;
-		      if (TYPE_FN_FIELD_VOFFSET (f, j) == addr)
+		      if (TYPE_FN_FIELD_VOFFSET (f, j) == offset)
 			{
-			  kind = "virtual";
+			  kind = "virtual ";
 			  goto common;
 			}
 		    }
@@ -1473,7 +1475,11 @@ type_print_derivation_info (stream, type)
 			BASETYPE_VIA_PUBLIC (type, i) ? "public" : "private",
 			BASETYPE_VIA_VIRTUAL(type, i) ? " virtual" : "");
       name = type_name_no_tag (TYPE_BASECLASS (type, i));
-      fprintf_filtered (stream, "%s ", name ? name : "(null)");
+      fprintf_filtered (stream, "%s", name ? name : "(null)");
+    }
+  if (i > 0)
+    {
+      fputs_filtered (" ", stream);
     }
 }
 
@@ -1841,10 +1847,14 @@ type_print_base (type, stream, show, level)
 		{
 		  fprintf_filtered (stream, "static ");
 		}
+	      if (TYPE_FIELD_NESTED (type, i))
+		{
+		  fprintf_filtered (stream, "typedef ");
+		}
 	      type_print_1 (TYPE_FIELD_TYPE (type, i),
 			    TYPE_FIELD_NAME (type, i),
 			    stream, show - 1, level + 4);
-	      if (!TYPE_FIELD_STATIC (type, i)
+	      if (!TYPE_FIELD_STATIC (type, i) && !TYPE_FIELD_NESTED (type, i)
 		  && TYPE_FIELD_PACKED (type, i))
 		{
 		  /* It is a bitfield.  This code does not attempt
@@ -1858,8 +1868,13 @@ type_print_base (type, stream, show, level)
 	      fprintf_filtered (stream, ";\n");
 	    }
 
-	  /* C++: print out the methods */
+	  /* If there are both fields and methods, put a space between. */
 	  len = TYPE_NFN_FIELDS (type);
+	  if (len && section_type != s_none)
+	     fprintf_filtered (stream, "\n");
+
+	  /* C++: print out the methods */
+
 	  for (i = 0; i < len; i++)
 	    {
 	      struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);

@@ -1158,7 +1158,8 @@ read_type (pp, objfile)
     case '#':				/* Method (class & fn) type */
       if ((*pp)[0] == '#')
 	{
-	  /* We'll get the parameter types from the name.  */
+	  /* This "minimized" format bogus, because it doesn't yield
+	     enough information.  I've changed gcc to not emit it.  --Per */
 	  struct type *return_type;
 
 	  *pp += 1;
@@ -1417,8 +1418,10 @@ read_struct_type (pp, type, objfile)
       p = *pp;
       if (*p == CPLUS_MARKER)
 	{
+	  if (*p == '_')    /* GNU C++ anonymous type.  */
+	    ;
 	  /* Special GNU C++ name.  */
-	  if (*++p == 'v')
+	  else if (*++p == 'v')
 	    {
 	      const char *prefix;
 	      char *name = 0;
@@ -1457,15 +1460,12 @@ read_struct_type (pp, type, objfile)
 	      list->field.bitsize = 0;
 	      list->visibility = 0;	/* private */
 	      non_public_fields++;
+
+	      nfields++;
+	      continue;
 	    }
-	  /* GNU C++ anonymous type.  */
-	  else if (*p == '_')
-	    break;
 	  else
 	    complain (&invalid_cpp_abbrev_complaint, *pp);
-
-	  nfields++;
-	  continue;
 	}
 
       while (*p != ':') p++;
@@ -1508,21 +1508,26 @@ read_struct_type (pp, type, objfile)
       if (**pp == ':')
  	{
  	  p = ++(*pp);
-#if 0
-	  /* Possible future hook for nested types. */
 	  if (**pp == '!')
-	    {
-	      list->field.bitpos = (long)-2; /* nested type */
+	    { /* C++ nested type -as in FOO::BAR */
+	      list->field.bitpos = (long)(-2); /* nested type */
  	      p = ++(*pp);
+	      if (TYPE_NAME (list->field.type) == NULL && **pp == '\'')
+		{
+		  for (p = ++(*pp); *p != '\''; ) p++;
+		  TYPE_NAME (list->field.type) = savestring (*pp, p - *pp);
+		}
+	      while (*p != ';') p++;
+	      list->field.bitsize = 0;
+	      *pp = p + 1;
 	    }
 	  else
-#endif
 	    { /* Static class member.  */
-	      list->field.bitpos = (long)-1;
+	      list->field.bitpos = (long)(-1);
+	      while (*p != ';') p++;
+	      list->field.bitsize = (long) savestring (*pp, p - *pp);
+	      *pp = p + 1;
 	    }
- 	  while (*p != ';') p++;
- 	  list->field.bitsize = (long) savestring (*pp, p - *pp);
- 	  *pp = p + 1;
  	  nfields++;
  	  continue;
  	}

@@ -903,12 +903,15 @@ value_field (arg1, fieldno)
    J is an index into F which provides the desired method. */
 
 value
-value_fn_field (f, j)
+value_fn_field (arg1p, f, j, type, offset)
+     value *arg1p;
      struct fn_field *f;
      int j;
+     struct type *type;
+     int offset;
 {
   register value v;
-  register struct type *type = TYPE_FN_FIELD_TYPE (f, j);
+  register struct type *ftype = TYPE_FN_FIELD_TYPE (f, j);
   struct symbol *sym;
 
   sym = lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, j),
@@ -916,27 +919,40 @@ value_fn_field (f, j)
   if (! sym) error ("Internal error: could not find physical method named %s",
 		    TYPE_FN_FIELD_PHYSNAME (f, j));
   
-  v = allocate_value (type);
+  v = allocate_value (ftype);
   VALUE_ADDRESS (v) = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
-  VALUE_TYPE (v) = type;
+  VALUE_TYPE (v) = ftype;
+
+  if (arg1p)
+   {
+    if (type != VALUE_TYPE (*arg1p))
+      *arg1p = value_ind (value_cast (lookup_pointer_type (type),
+				      value_addr (*arg1p)));
+
+    /* Move the `this' pointer according to the offset. */
+    VALUE_OFFSET (*arg1p) += offset;
+    }
+
   return v;
 }
 
 /* Return a virtual function as a value.
    ARG1 is the object which provides the virtual function
-   table pointer.  ARG1 is side-effected in calling this function.
+   table pointer.  *ARG1P is side-effected in calling this function.
    F is the list of member functions which contains the desired virtual
    function.
    J is an index into F which provides the desired virtual function.
 
    TYPE is the type in which F is located.  */
 value
-value_virtual_fn_field (arg1, f, j, type)
-     value arg1;
+value_virtual_fn_field (arg1p, f, j, type, offset)
+     value *arg1p;
      struct fn_field *f;
      int j;
      struct type *type;
+     int offset;
 {
+  value arg1 = *arg1p;
   /* First, get the virtual function table pointer.  That comes
      with a strange type, so cast it to type `pointer to long' (which
      should serve just fine as a function type).  Then, index into
@@ -968,7 +984,9 @@ value_virtual_fn_field (arg1, f, j, type)
 
   /* The virtual function table is now an array of structures
      which have the form { int16 offset, delta; void *pfn; }.  */
-  vtbl = value_ind (value_field (arg1, TYPE_VPTR_FIELDNO (context)));
+  vtbl = value_ind (value_primitive_field (arg1, 0, 
+					   TYPE_VPTR_FIELDNO (context),
+					   TYPE_VPTR_BASETYPE (context)));
 
   /* Index into the virtual function table.  This is hard-coded because
      looking up a field is not cheap, and it may be important to save
@@ -977,7 +995,7 @@ value_virtual_fn_field (arg1, f, j, type)
   entry = value_subscript (vtbl, vi);
 
   /* Move the `this' pointer according to the virtual function table.  */
-  VALUE_OFFSET (arg1) += value_as_long (value_field (entry, 0));
+  VALUE_OFFSET (arg1) += value_as_long (value_field (entry, 0)) + offset;
   if (! VALUE_LAZY (arg1))
     {
       VALUE_LAZY (arg1) = 1;
@@ -988,6 +1006,7 @@ value_virtual_fn_field (arg1, f, j, type)
   /* Reinstantiate the function pointer with the correct type.  */
   VALUE_TYPE (vfn) = lookup_pointer_type (TYPE_FN_FIELD_TYPE (f, j));
 
+  *arg1p = arg1;
   return vfn;
 }
 
@@ -1103,6 +1122,67 @@ value_from_vtable_info (arg, type)
   return value_headof (arg, 0, type);
 }
 
+/* Compute the offset of the baseclass which is
+   the INDEXth baseclass of class TYPE, for a value ARG,
+   wih extra offset of OFFSET.
+   The result is the offste of the baseclass value relative
+   to (the address of)(ARG) + OFFSET.
+
+   -1 is returned on error. */
+
+int
+baseclass_offset (type, index, arg, offset)
+     struct type *type;
+     int index;
+     value arg;
+     int offset;
+{
+  struct type *basetype = TYPE_BASECLASS (type, index);
+
+  if (BASETYPE_VIA_VIRTUAL (type, index))
+    {
+      /* Must hunt for the pointer to this virtual baseclass.  */
+      register int i, len = TYPE_NFIELDS (type);
+      register int n_baseclasses = TYPE_N_BASECLASSES (type);
+      char *vbase_name, *type_name = type_name_no_tag (basetype);
+
+      vbase_name = (char *)alloca (strlen (type_name) + 8);
+      sprintf (vbase_name, "_vb%c%s", CPLUS_MARKER, type_name);
+      /* First look for the virtual baseclass pointer
+	 in the fields.  */
+      for (i = n_baseclasses; i < len; i++)
+	{
+	  if (! strcmp (vbase_name, TYPE_FIELD_NAME (type, i)))
+	    {
+	      CORE_ADDR addr
+		= unpack_pointer (TYPE_FIELD_TYPE (type, i),
+				  VALUE_CONTENTS (arg) + VALUE_OFFSET (arg)
+				  + offset
+				  + (TYPE_FIELD_BITPOS (type, i) / 8));
+
+	      if (VALUE_LVAL (arg) != lval_memory)
+		  return -1;
+
+	      return addr -
+		  (LONGEST) (VALUE_ADDRESS (arg) + VALUE_OFFSET (arg) + offset);
+	    }
+	}
+      /* Not in the fields, so try looking through the baseclasses.  */
+      for (i = index+1; i < n_baseclasses; i++)
+	{
+	  int boffset =
+	      baseclass_offset (type, i, arg, offset);
+	  if (boffset)
+	    return boffset;
+	}
+      /* Not found.  */
+      return -1;
+    }
+
+  /* Baseclass is easily computed.  */
+  return TYPE_BASECLASS_BITPOS (type, index) / 8;
+}
+
 /* Compute the address of the baseclass which is
    the INDEXth baseclass of class TYPE.  The TYPE base
    of the object is at VALADDR.
@@ -1111,6 +1191,8 @@ value_from_vtable_info (arg, type)
    or 0 if no error.  In that case the return value is not the address
    of the baseclasss, but the address which could not be read
    successfully.  */
+
+/* FIXME Fix remaining uses of baseclass_addr to use baseclass_offset */
 
 char *
 baseclass_addr (type, index, valaddr, valuep, errp)

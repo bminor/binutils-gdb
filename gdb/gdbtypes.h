@@ -435,6 +435,7 @@ allocate_cplus_struct_type PARAMS ((struct type *));
        B_TST(TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits, (n))
 
 #define TYPE_FIELD_STATIC(thistype, n) ((thistype)->fields[n].bitpos == -1)
+#define TYPE_FIELD_NESTED(thistype, n) ((thistype)->fields[n].bitpos == -2)
 #define TYPE_FIELD_STATIC_PHYSNAME(thistype, n) ((char *)(thistype)->fields[n].bitsize)
 
 #define TYPE_FN_FIELDLISTS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->fn_fieldlists

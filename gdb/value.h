@@ -52,7 +52,7 @@ struct value
       {
 	/* Address in inferior or byte of registers structure.  */
 	CORE_ADDR address;
-	/* Pointer to interrnal variable.  */
+	/* Pointer to internal variable.  */
 	struct internalvar *internalvar;
 	/* Number of register.  Only used with
 	   lval_reg_frame_relative.  */
@@ -62,7 +62,9 @@ struct value
     int offset;	
     /* Only used for bitfields; number of bits contained in them.  */
     int bitsize;
-    /* Only used for bitfields; position of start of field.  */
+    /* Only used for bitfields; position of start of field.
+       For BITS_BIG_ENDIAN=0 targets, it is the position of the LSB.
+       For BITS_BIG_ENDIAN=1 targets, it is the position of the MSB. */
     int bitpos;
     /* Frame value is relative to.  In practice, this address is only
        used if the value is stored in several registers in other than
@@ -182,6 +184,12 @@ struct internalvar
   value value;
 };
 
+/* Pointer to member function.  Depends on compiler implementation. */
+
+#define METHOD_PTR_IS_VIRTUAL(ADDR)  ((ADDR) & 0x80000000)
+#define METHOD_PTR_FROM_VOFFSET(OFFSET) (0x80000000 + (OFFSET))
+#define METHOD_PTR_TO_VOFFSET(ADDR) (~0x80000000 & (ADDR))
+
 
 #include "symtab.h"
 #include "gdbtypes.h"
@@ -212,7 +220,7 @@ unpack_double PARAMS ((struct type *type, char *valaddr, int *invp));
 extern CORE_ADDR
 unpack_pointer PARAMS ((struct type *type, char *valaddr));
 
-extern long
+extern LONGEST
 unpack_field_as_long PARAMS ((struct type *type, char *valaddr,
 			      int fieldno));
 
@@ -298,6 +306,7 @@ value_struct_elt PARAMS ((value *argp, value *args, char *name,
 
 extern value
 value_struct_elt_for_reference PARAMS ((struct type *domain,
+					int offset,
 					struct type *curtype,
 					char *name,
 					struct type *intype));
@@ -396,11 +405,12 @@ extern value
 value_x_unop PARAMS ((value arg1, enum exp_opcode op));
 
 extern value
-value_fn_field PARAMS ((struct fn_field *f, int j));
+value_fn_field PARAMS ((value *arg1p, struct fn_field *f, int j,
+			struct type* type, int offset));
 
 extern value
-value_virtual_fn_field PARAMS ((value arg1, struct fn_field *f, int j,
-				struct type *type));
+value_virtual_fn_field PARAMS ((value *arg1p, struct fn_field *f, int j,
+				struct type *type, int offset));
 
 extern int
 binop_user_defined_p PARAMS ((enum exp_opcode op, value arg1, value arg2));
@@ -414,7 +424,7 @@ typecmp PARAMS ((int staticp, struct type *t1[], value t2[]));
 extern int
 destructor_name_p PARAMS ((const char *name, const struct type *type));
 
-#define value_free(val) free (val)
+#define value_free(val) free ((PTR)val)
 
 extern void
 free_all_values PARAMS ((void));

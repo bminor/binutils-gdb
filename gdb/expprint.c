@@ -74,12 +74,9 @@ print_subexp (exp, pos, stream, prec)
     /* Common ops */
 
     case OP_SCOPE:
-      myprec = PREC_PREFIX;
-      assoc = 0;
       (*pos) += 2;
-      print_subexp (exp, pos, stream,
-		    (enum precedence) ((int) myprec + assoc));
-      fputs_filtered (" :: ", stream);
+      type_print (exp->elts[pc + 1].type, "", stream, 0);
+      fputs_filtered ("::", stream);
       nargs = strlen (&exp->elts[pc + 2].string);
       (*pos) += 1 + (nargs + sizeof (union exp_element)) / sizeof (union exp_element);
 
@@ -114,7 +111,7 @@ print_subexp (exp, pos, stream, prec)
     case OP_REGISTER:
       (*pos) += 2;
       fprintf_filtered (stream, "$%s",
-	       reg_names[longest_to_int (exp->elts[pc + 1].longconst));
+	       reg_names[longest_to_int (exp->elts[pc + 1].longconst)]);
       return;
 
     case OP_INTERNALVAR:
@@ -163,20 +160,30 @@ print_subexp (exp, pos, stream, prec)
       return;
 
     case STRUCTOP_STRUCT:
-      tem = strlen (&exp->elts[pc + 1].string);
-      (*pos) += 2 + (tem + sizeof (union exp_element)) / sizeof (union exp_element);
+      tem = strlen (&exp->elts[pc + 2].string);
+      (*pos) += 3 + (tem + sizeof (union exp_element)) / sizeof (union exp_element);
       print_subexp (exp, pos, stream, PREC_SUFFIX);
       fputs_filtered (".", stream);
-      fputs_filtered (&exp->elts[pc + 1].string, stream);
+      if (exp->elts[pc + 1].type)
+	{
+	  type_print (exp->elts[pc + 1].type, "", stream, 0);
+          fputs_filtered ("::", stream);
+	}
+      fputs_filtered (&exp->elts[pc + 2].string, stream);
       return;
 
     /* Will not occur for Modula-2 */
     case STRUCTOP_PTR:
-      tem = strlen (&exp->elts[pc + 1].string);
-      (*pos) += 2 + (tem + sizeof (union exp_element)) / sizeof (union exp_element);
+      tem = strlen (&exp->elts[pc + 2].string);
+      (*pos) += 3 + (tem + sizeof (union exp_element)) / sizeof (union exp_element);
       print_subexp (exp, pos, stream, PREC_SUFFIX);
       fputs_filtered ("->", stream);
-      fputs_filtered (&exp->elts[pc + 1].string, stream);
+      if (exp->elts[pc + 1].type)
+	{
+	  type_print (exp->elts[pc + 1].type, "", stream, 0);
+          fputs_filtered ("::", stream);
+	}
+      fputs_filtered (&exp->elts[pc + 2].string, stream);
       return;
 
     case BINOP_SUBSCRIPT:

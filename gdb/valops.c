@@ -43,7 +43,7 @@ static value
 search_struct_field PARAMS ((char *, value, int, struct type *, int));
 
 static value
-search_struct_method PARAMS ((char *, value, value *, int, int *,
+search_struct_method PARAMS ((char *, value *, value *, int, int *,
 			      struct type *));
 
 static int
@@ -1038,6 +1038,7 @@ search_struct_field (name, arg1, offset, type, looking_for_baseclass)
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
 	  value v2;
+	  /* Fix to use baseclass_offset instead. FIXME */
 	  baseclass_addr (type, i, VALUE_CONTENTS (arg1) + offset,
 			  &v2, (int *)NULL);
 	  if (v2 == 0)
@@ -1065,9 +1066,9 @@ search_struct_field (name, arg1, offset, type, looking_for_baseclass)
    If found, return value, else return NULL. */
 
 static value
-search_struct_method (name, arg1, args, offset, static_memfuncp, type)
+search_struct_method (name, arg1p, args, offset, static_memfuncp, type)
      char *name;
-     register value arg1, *args;
+     register value *arg1p, *args;
      int offset, *static_memfuncp;
      register struct type *type;
 {
@@ -1092,10 +1093,10 @@ search_struct_method (name, arg1, args, offset, static_memfuncp, type)
 			    TYPE_FN_FIELD_ARGS (f, j), args))
 		{
 		  if (TYPE_FN_FIELD_VIRTUAL_P (f, j))
-		    return (value)value_virtual_fn_field (arg1, f, j, type);
+		    return (value)value_virtual_fn_field (arg1p, f, j, type, offset);
 		  if (TYPE_FN_FIELD_STATIC_P (f, j) && static_memfuncp)
 		    *static_memfuncp = 1;
-		  return (value)value_fn_field (f, j);
+		  return (value)value_fn_field (arg1p, f, j, type, offset);
 		}
 	      j--;
 	    }
@@ -1104,25 +1105,27 @@ search_struct_method (name, arg1, args, offset, static_memfuncp, type)
 
   for (i = TYPE_N_BASECLASSES (type) - 1; i >= 0; i--)
     {
-      value v, v2;
+      value v;
       int base_offset;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
-	  baseclass_addr (type, i, VALUE_CONTENTS (arg1) + offset,
-			  &v2, (int *)NULL);
-	  if (v2 == 0)
+	  base_offset =
+	      baseclass_offset (type, i, *arg1p, offset);
+	  if (base_offset == -1)
 	    error ("virtual baseclass botch");
-	  base_offset = 0;
 	}
       else
 	{
-	  v2 = arg1;
 	  base_offset = TYPE_BASECLASS_BITPOS (type, i) / 8;
         }
-      v = search_struct_method (name, v2, args, base_offset,
+      v = search_struct_method (name, arg1p, args, base_offset + offset,
 				static_memfuncp, TYPE_BASECLASS (type, i));
-      if (v) return v;
+      if (v)
+	{
+/*	  *arg1p = arg1_tmp;*/
+	  return v;
+        }
     }
   return NULL;
 }
@@ -1193,7 +1196,7 @@ value_struct_elt (argp, args, name, static_memfuncp, err)
       if (destructor_name_p (name, t))
 	error ("Cannot get value of destructor");
 
-      v = search_struct_method (name, *argp, args, 0, static_memfuncp, t);
+      v = search_struct_method (name, argp, args, 0, static_memfuncp, t);
 
       if (v == 0)
 	{
@@ -1210,8 +1213,9 @@ value_struct_elt (argp, args, name, static_memfuncp, err)
       if (!args[1])
 	{
 	  /* destructors are a special case.  */
-	  return (value)value_fn_field (TYPE_FN_FIELDLIST1 (t, 0),
-					TYPE_FN_FIELDLIST_LENGTH (t, 0));
+	  return (value)value_fn_field (NULL, TYPE_FN_FIELDLIST1 (t, 0),
+					TYPE_FN_FIELDLIST_LENGTH (t, 0),
+					0, 0);
 	}
       else
 	{
@@ -1219,7 +1223,7 @@ value_struct_elt (argp, args, name, static_memfuncp, err)
 	}
     }
   else
-    v = search_struct_method (name, *argp, args, 0, static_memfuncp, t);
+    v = search_struct_method (name, argp, args, 0, static_memfuncp, t);
 
   if (v == 0)
     {
@@ -1414,23 +1418,29 @@ value_struct_elt_for_reference (domain, offset, curtype, name, intype)
 		(lookup_reference_type
 		 (lookup_member_type (TYPE_FN_FIELD_TYPE (f, j),
 				      domain)),
-		 (LONGEST) TYPE_FN_FIELD_VOFFSET (f, j));
+		 METHOD_PTR_FROM_VOFFSET((LONGEST) TYPE_FN_FIELD_VOFFSET (f, j)));
 	    }
 	  else
 	    {
 	      struct symbol *s = lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, j),
 						0, VAR_NAMESPACE, 0, NULL);
-	      v = read_var_value (s, 0);
-#if 0
-	      VALUE_TYPE (v) = lookup_reference_type
-		(lookup_member_type (TYPE_FN_FIELD_TYPE (f, j),
-				     domain));
-#endif
-	      return v;
+	      if (s == NULL)
+		{
+		  v = 0;
 		}
+	      else
+		{
+		  v = read_var_value (s, 0);
+#if 0
+		  VALUE_TYPE (v) = lookup_reference_type
+		    (lookup_member_type (TYPE_FN_FIELD_TYPE (f, j),
+					 domain));
+#endif
+		}
+	      return v;
 	    }
 	}
-
+    }
   for (i = TYPE_N_BASECLASSES (t) - 1; i >= 0; i--)
     {
       value v;
