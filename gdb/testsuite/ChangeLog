@@ -1,3 +1,8 @@
+Tue Mar 29 23:55:27 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gdb.t07/watchpoint.exp (test_watchpoint_triggered_in_syscall): 
+	Fix typo(s).
+
 Sun Mar 27 16:53:14 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gdb.t07/gdbme.c: More code for watchpoint testing.
