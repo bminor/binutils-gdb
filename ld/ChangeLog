@@ -1,3 +1,9 @@
+2005-03-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_finish): Don't set
+	bfd_section when removing unused empty output sections for
+	non-relocatable link.
+
 2005-03-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (lang_insert_orphan): Use old section_tail rather than

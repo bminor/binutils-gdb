@@ -1459,8 +1459,6 @@ gld${EMULATION_NAME}_finish (void)
 	    {
 	      asection **p;
 
-	      os->bfd_section = NULL;
-
 	      for (p = &output_bfd->sections; *p; p = &(*p)->next)
 		if (*p == s)
 		  {
