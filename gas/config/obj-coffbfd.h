@@ -28,6 +28,9 @@
 /* By default we omit the optional aouthdr.  */
 #define OBJ_COFF_OMIT_OPTIONAL_HEADER
 
+#define BFD_HEADERS
+#define BFD
+
 #include "targ-cpu.h"
 
 #include "bfd.h"

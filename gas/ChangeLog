@@ -1,5 +1,29 @@
 Sun Mar 20 14:43:14 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* Makefile.in (config-stamp): If `defs' is defined, emit a
+	preprocessor directive to create a macro named by this value into
+	config.new; don't explicitly go for BFD_ASSEMBLER.
+	* configure.in: Define `defs', not `BFDDEF'.  Set it to
+	MANY_SEGMENTS for any obj-coffbfd target.
+	* config/obj-coffbfd.h (BFD_HEADERS, BFD): Define.
+	* config/i386coff.mt (TDEFINES): Don't define BFD, MANY_SEGMENTS,
+	or BFD_HEADERS.
+	(LOCAL_LOADLIBES): Deleted.
+	* config/m68kcoff.mt (TDEFINES): Don't define those macros.
+	* config/m88kcoff.mt (TDEFINES): Ditto.
+	* config/ebmon29k.mt: Deleted.
+	* config/h8300hds.mt: Deleted.
+	* config/ic960coff.mt: Deleted.
+	* config/sparc.mt: Deleted.
+	* config/h8300.mt (LOCAL_LOADLIBES, TDEFINES): Deleted.
+	* config/h8500.mt (LOCAL_LOADLIBES, TDEFINES): Deleted.
+	* config/sh.mt (LOCAL_LOADLIBES, TDEFINES): Deleted.
+	* config/z8k.mt (LOCAL_LOADLIBES): Deleted.
+	(TDEFINES): Don't define the coffbfd macros.
+
+	* Makefile.in: Insert makefile fragments before OBJS definition.
+	(OBJS): Add $(TE_OBJS).
+
 	* config/obj-coff.c (obj_pseudo_table): Supply "section"
 	unconditionally.
 

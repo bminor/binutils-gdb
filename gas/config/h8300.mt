@@ -1,3 +1,1 @@
 TARG_CPU_DEPENDENTS=$(srcdir)/../include/opcode/h8300.h
-LOCAL_LOADLIBES=../bfd/libbfd.a
-TDEFINES=-DBFD_HEADERS -DMANY_SEGMENTS -DBFD
