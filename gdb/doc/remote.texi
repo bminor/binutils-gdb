@@ -69,13 +69,13 @@ For @sc{sparc} architectures.
 @item m68k-stub.c
 @kindex m68k-stub.c
 @cindex Motorola 680x0
-@cindex 680x0
+@cindex m680x0
 For Motorola 680x0 architectures.
 
 @item i386-stub.c
 @kindex i386-stub.c
 @cindex Intel
-@cindex 386
+@cindex i386
 For Intel 386 and compatible architectures.
 @end table
 
