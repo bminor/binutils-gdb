@@ -194,7 +194,7 @@ static bfd_boolean elfNN_ia64_add_symbol_hook
 static int elfNN_ia64_additional_program_headers
   PARAMS ((bfd *abfd));
 static bfd_boolean elfNN_ia64_modify_segment_map
-  PARAMS ((bfd *));
+  PARAMS ((bfd *, struct bfd_link_info *));
 static bfd_boolean elfNN_ia64_is_local_label_name
   PARAMS ((bfd *abfd, const char *name));
 static bfd_boolean elfNN_ia64_dynamic_symbol_p
@@ -1405,8 +1405,9 @@ elfNN_ia64_additional_program_headers (abfd)
 }
 
 static bfd_boolean
-elfNN_ia64_modify_segment_map (abfd)
+elfNN_ia64_modify_segment_map (abfd, info)
      bfd *abfd;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
 {
   struct elf_segment_map *m, **pm;
   Elf_Internal_Shdr *hdr;

@@ -2739,7 +2739,8 @@ ppc_elf_additional_program_headers (bfd *abfd)
 /* Modify the segment map if needed.  */
 
 static bfd_boolean
-ppc_elf_modify_segment_map (bfd *abfd ATTRIBUTE_UNUSED)
+ppc_elf_modify_segment_map (bfd *abfd ATTRIBUTE_UNUSED,
+			    struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   return TRUE;
 }

@@ -60,7 +60,7 @@ static bfd_boolean elf_xtensa_adjust_dynamic_symbol
 static bfd_boolean elf_xtensa_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static bfd_boolean elf_xtensa_modify_segment_map
-  PARAMS ((bfd *));
+  PARAMS ((bfd *, struct bfd_link_info *));
 static bfd_boolean elf_xtensa_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
@@ -1415,8 +1415,9 @@ elf_xtensa_size_dynamic_sections (output_bfd, info)
    this and it probably ought to be moved into elf.c as well.  */
 
 static bfd_boolean
-elf_xtensa_modify_segment_map (abfd)
+elf_xtensa_modify_segment_map (abfd, info)
      bfd *abfd;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
 {
   struct elf_segment_map **m_p;
 

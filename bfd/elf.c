@@ -41,7 +41,7 @@
 #include "libiberty.h"
 
 static int elf_sort_sections (const void *, const void *);
-static bfd_boolean assign_file_positions_except_relocs (bfd *);
+static bfd_boolean assign_file_positions_except_relocs (bfd *, struct bfd_link_info *);
 static bfd_boolean prep_headers (bfd *);
 static bfd_boolean swap_out_syms (bfd *, struct bfd_strtab_hash **, int) ;
 static bfd_boolean elfcore_read_notes (bfd *, file_ptr, bfd_size_type) ;
@@ -3103,7 +3103,7 @@ _bfd_elf_compute_section_file_positions (bfd *abfd,
   /* sh_offset is set in assign_file_positions_except_relocs.  */
   shstrtab_hdr->sh_addralign = 1;
 
-  if (!assign_file_positions_except_relocs (abfd))
+  if (!assign_file_positions_except_relocs (abfd, link_info))
     return FALSE;
 
   if (link_info == NULL && bfd_get_symcount (abfd) > 0)
@@ -3576,7 +3576,7 @@ elf_sort_sections (const void *arg1, const void *arg2)
    the file header, and writes out the program headers.  */
 
 static bfd_boolean
-assign_file_positions_for_segments (bfd *abfd)
+assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 {
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   unsigned int count;
@@ -3628,7 +3628,7 @@ assign_file_positions_for_segments (bfd *abfd)
 
   if (bed->elf_backend_modify_segment_map)
     {
-      if (! (*bed->elf_backend_modify_segment_map) (abfd))
+      if (! (*bed->elf_backend_modify_segment_map) (abfd, link_info))
 	return FALSE;
     }
 
@@ -4136,7 +4136,8 @@ get_program_header_size (bfd *abfd)
    We also don't set the positions of the .symtab and .strtab here.  */
 
 static bfd_boolean
-assign_file_positions_except_relocs (bfd *abfd)
+assign_file_positions_except_relocs (bfd *abfd,
+				     struct bfd_link_info *link_info)
 {
   struct elf_obj_tdata * const tdata = elf_tdata (abfd);
   Elf_Internal_Ehdr * const i_ehdrp = elf_elfheader (abfd);
@@ -4187,7 +4188,7 @@ assign_file_positions_except_relocs (bfd *abfd)
 
       /* Assign file positions for the loaded sections based on the
          assignment of sections to segments.  */
-      if (! assign_file_positions_for_segments (abfd))
+      if (! assign_file_positions_for_segments (abfd, link_info))
 	return FALSE;
 
       /* Assign file positions for the other sections.  */

@@ -1,3 +1,17 @@
+2003-11-27  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf-bfd.h (elf_backend_data::elf_backend_modify_segment_map):
+	Add link info argument.
+	* elf32-i370.c (elf_backend_modify_segment_map): Likewise.
+	* elf32-ppc.c (ppc_elf_modify_segment_map): Likewise.
+	* elf32-xtensa.c (elf_xtensa_modify_segment_map): Likewise.
+	* elf64-hppa.c (elf64_hppa_modify_segment_map): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_modify_segment_map): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_modify_segment_map): Likewise.
+	* elfxx-mips.h (_bfd_mips_elf_modify_segment_map): Likewise.
+	* elf.c (assign_file_positions_except_relocs,
+	assign_file_positions_for_segments): Likewise.  Adjust calls.
+
 2003-11-27  Mark Kettenis  <kettenis@gnu.org>
 
 	* elf.c (elfcore_grok_netbsd_procinfo): Make a pseudosection out

@@ -7308,8 +7308,9 @@ _bfd_mips_elf_additional_program_headers (abfd)
 /* Modify the segment map for an IRIX5 executable.  */
 
 bfd_boolean
-_bfd_mips_elf_modify_segment_map (abfd)
+_bfd_mips_elf_modify_segment_map (abfd, info)
      bfd *abfd;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
 {
   asection *s;
   struct elf_segment_map *m, **pm;

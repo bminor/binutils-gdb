@@ -760,7 +760,7 @@ struct elf_backend_data
   /* This function is called to modify an existing segment map in a
      backend specific fashion.  */
   bfd_boolean (*elf_backend_modify_segment_map)
-    (bfd *);
+    (bfd *, struct bfd_link_info *);
 
   /* This function is called during section gc to discover the section a
      particular relocation refers to.  */

@@ -1555,6 +1555,6 @@ static int i370_noop ()
 #define elf_backend_additional_program_headers \
   (int (*) PARAMS ((bfd *))) i370_noop
 #define elf_backend_modify_segment_map \
-  (bfd_boolean (*) PARAMS ((bfd *))) i370_noop
+  (bfd_boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) i370_noop
 
 #include "elf32-target.h"
