@@ -1,6 +1,5 @@
 \input texinfo
 @setfilename ld.info
-@c $Id$
 @syncodeindex ky cp
 @c @smallbook
 @c @cropmarks
@@ -14,7 +13,7 @@ END-INFO-DIR-ENTRY
 @end ifinfo
 
 @ifinfo
-This file documents the GNU linker GLD.
+This file documents the GNU linker LD.
 
 Copyright (C) 1991, 1992 Free Software Foundation, Inc.
 
@@ -45,12 +44,12 @@ original English.
 @iftex
 @finalout
 @setchapternewpage odd
-@settitle GLD, the GNU linker
+@settitle Using LD, the GNU linker
 @titlepage
-@title gld
+@title Using ld
 @subtitle The GNU linker
 @sp 1
-@subtitle Second Edition---@code{gld} version 2.0
+@subtitle Second Edition---@code{ld} version 2.0
 @subtitle January 1992
 @author Steve Chamberlain and Roland Pesch
 @author Cygnus Support
@@ -62,7 +61,7 @@ original English.
 {\parskip=0pt
 \hfill Cygnus Support\par
 \hfill steve\@cygnus.com, pesch\@cygnus.com\par
-\hfill {\it GLD, the GNU linker}, \manvers\par
+\hfill {\it Using LD, the GNU linker}, \manvers\par
 \hfill \TeX{}info \texinfoversion\par
 }
 \global\parindent=0pt % Steve likes it this way.
@@ -88,7 +87,7 @@ into another language, under the above conditions for modified versions.
 
 @node Top, Overview, (dir), (dir)
 @ifinfo
-This file documents the GNU linker gld.
+This file documents the GNU linker ld.
 @end ifinfo
 
 @menu
@@ -134,12 +133,12 @@ SECTIONS Command
 
 Machine Dependent Features
 
-* H8/300::                      @code{gld} and the H8/300
-* i960::                        @code{gld} and the Intel 960 family
-* m68k::                        @code{gld} and the Motorola 68000 family
-* m88k::                        @code{gld} and the Motorola 880x0 family
+* H8/300::                      @code{ld} and the H8/300
+* i960::                        @code{ld} and the Intel 960 family
+* m68k::                        @code{ld} and the Motorola 68000 family
+* m88k::                        @code{ld} and the Motorola 880x0 family
 
-@code{gld} and the Intel 960 family
+@code{ld} and the Intel 960 family
 
 * i960-arch::                   Linking for a Specific i960 Architecture
 * i960-emulation::              Emulating Other i960 Linkers
@@ -157,16 +156,16 @@ BFD
 
 @cindex GNU linker
 @cindex what is this?
-@code{gld} combines a number of object and archive files, relocates
+@code{ld} combines a number of object and archive files, relocates
 their data and ties up symbol references. Often the last step in
-building a new compiled program to run is a call to @code{gld}.
+building a new compiled program to run is a call to @code{ld}.
 
-@code{gld} accepts Linker Command Language files written in
+@code{ld} accepts Linker Command Language files written in
 a superset of AT&T's Link Editor Command Language syntax,
 to provide explicit and total control over the linking process.
 
-This version of @code{gld} uses the general purpose BFD libraries
-to operate on object files. This allows @code{gld} to read, combine, and
+This version of @code{ld} uses the general purpose BFD libraries
+to operate on object files. This allows @code{ld} to read, combine, and
 write object files in many different formats---for example, COFF or
 @code{a.out}.  Different formats may be linked together to produce any
 available kind of object file.  @xref{BFD} for a list of formats
@@ -175,13 +174,13 @@ supported on various architectures.
 Aside from its flexibility, the GNU linker is more helpful than other
 linkers in providing diagnostic information.  Many linkers abandon
 execution immediately upon encountering an error; whenever possible,
-@code{gld} continues executing, allowing you to identify other errors
+@code{ld} continues executing, allowing you to identify other errors
 (or, in some cases, to get an output file in spite of the error).
 
 @node Invocation, Commands, Overview, Top
 @chapter Invocation
 
-The GNU linker @code{gld} is meant to cover a broad range of situations,
+The GNU linker @code{ld} is meant to cover a broad range of situations,
 and to be as compatible as possible with other linkers.  As a result,
 you have many choices to control its behavior through the command line,
 and through environment variables.
@@ -196,18 +195,18 @@ and through environment variables.
 
 @cindex command line
 @cindex options
-Here is a sketch of the options you can use on the @code{gld} command
+Here is a sketch of the options you can use on the @code{ld} command
 line:
 
 @smallexample
-gld [-o @var{output} ] @var{objfiles}@dots{}
+ld [-o @var{output} ] @var{objfiles}@dots{}
     [ -A@var{architecture} ]  [ -b @var{input-format} ]  [ -Bstatic ]  
     [ -c @var{MRI-commandfile} ]  [ -d | -dc | -dp ]  
     [ -defsym @var{symbol} = @var{expression} ]
     [ -e @var{entry} ]  [ -F ]  [ -F @var{format} ]
     [ -format @var{input-format} ]  [ -g ]  [ -i ]
     [ -l@var{ar} ]  [ -L@var{searchdir} ]  [ -M | -m ]  
-    [ -n ]  [ -noinhibit-exec ]  [ -R @var{filename} ]  [ -relax ]
+    [ -n | -N ]  [ -noinhibit-exec ]  [ -R @var{filename} ]  [ -relax ]
     [ -r | -Ur ]  [ -S ]  [ -s ]  [ -T @var{commandfile} ]  
     [ -Ttext @var{textorg} ]  [ -Tdata @var{dataorg} ]  [ -Tbss @var{bssorg} ]
     [ -t ]  [ -u @var{sym}]  [-v]  [ -X ]  [ -x ] 
@@ -217,18 +216,18 @@ gld [-o @var{output} ] @var{objfiles}@dots{}
 This plethora of command-line options may seem intimidating, but in
 actual practice few of them are used in any particular context.
 @cindex standard Unix system
-For instance, a frequent use of @code{gld} is to link standard Unix
+For instance, a frequent use of @code{ld} is to link standard Unix
 object files on a standard, supported Unix system.  On such a system, to
 link a file @code{hello.o}:
 @example
-$ gld -o output /lib/crt0.o hello.o -lc
+$ ld -o output /lib/crt0.o hello.o -lc
 @end example
-This tells @code{gld} to produce a file called @code{output} as the
+This tells @code{ld} to produce a file called @code{output} as the
 result of linking the file @code{/lib/crt0.o} with @code{hello.o} and
 the library @code{libc.a} which will come from the standard search
 directories.
 
-The command-line options to @code{gld} may be specified in any order, and
+The command-line options to @code{ld} may be specified in any order, and
 may be repeated at will.  For the most part, repeating an option with a
 different argument will either have no further effect, or override prior
 occurrences (those further to the left on the command line) of an
@@ -261,14 +260,14 @@ The object files @var{objfiles} to be linked.
 @cindex architectures
 @kindex -A@var{arch}
 @item -A@var{architecture}
-In the current release of @code{gld}, this option is useful only for the
-Intel 960 family of architectures.  In that @code{gld} configuration, the
+In the current release of @code{ld}, this option is useful only for the
+Intel 960 family of architectures.  In that @code{ld} configuration, the
 @var{architecture} argument identifies the particular architecture in
 the 960 family, enabling some safeguards and modifying the
 archive-library search path.  @xref{i960-arch,,,Linking for a Specific
 i960 Architecture}, for details.
 
-Future releases of @code{gld} may support similar functionality for
+Future releases of @code{ld} may support similar functionality for
 other architecture families.
 
 @cindex binary input format
@@ -278,7 +277,7 @@ other architecture families.
 @cindex input format
 Specify the binary format for input object files that follow this option
 on the command line.  You don't usually need to specify this, as
-@code{gld} is configured to expect as a default input format the most
+@code{ld} is configured to expect as a default input format the most
 usual format on each machine.  @var{input-format} is a text string, the
 name of a particular format supported by the BFD libraries.  @xref{BFD}.
 @code{-format @var{input-format}} has the same effect.@refill
@@ -296,7 +295,7 @@ format from a script, using the command @code{TARGET}.
 @kindex -Bstatic
 @item -Bstatic 
 This flag is accepted for command-line compatibility with the SunOS linker,
-but has no effect on @code{gld}.
+but has no effect on @code{ld}.
 
 @kindex -c @var{MRI-cmdfile}
 @cindex compatibility, MRI
@@ -359,7 +358,7 @@ there is a gap between explicitly specified section addresses
 @itemx -F@var{format}
 Some older linkers used this option throughout a compilation toolchain
 for specifying object-file format for both input and output object
-files.  @code{gld}'s mechanisms (the @code{-b} or @code{-format} options
+files.  @code{ld}'s mechanisms (the @code{-b} or @code{-format} options
 for input files, the @code{TARGET} command in linker scripts for output
 files, the @code{GNUTARGET} environment variable) are more flexible, but
 but it accepts (and ignores) the @code{-F} option flag for compatibility
@@ -390,11 +389,11 @@ specified.
 @kindex -L@var{dir}
 @item -L@var{searchdir} 
 This command adds path @var{searchdir} to the list of paths that
-@code{gld} will search for archive libraries.  You may use this option
+@code{ld} will search for archive libraries.  You may use this option
 any number of times.
 
 The default set of paths searched (without being specified with
-@code{-L}) depends on what emulation mode @code{gld} is using, and in
+@code{-L}) depends on what emulation mode @code{ld} is using, and in
 some cases also on how it was configured.  @xref{Environment}.  The
 paths can also be specified in a link script with the @code{SEARCH_DIR}
 command.
@@ -408,8 +407,6 @@ Print (to the standard output file) a link map---diagnostic information
 about where symbols are mapped by @code{ld}, and information on global
 common storage allocation.
 
-@ignore
-@c -N in older GNU linker, not in new
 @kindex -N
 @cindex read/write from cmd line
 @kindex OMAGIC
@@ -417,7 +414,9 @@ common storage allocation.
 specifies readable and writable @code{text} and @code{data} sections. If
 the output format supports Unix style magic numbers, the output is
 marked as @code{OMAGIC}.
-@end ignore
+
+When you use the @samp{-N} option, the linker does not page-align the
+data segment.
 
 @item -n 
 @kindex -n
@@ -453,7 +452,7 @@ programs.
 @cindex synthesizing linker
 @cindex relaxing addressing modes
 An option with machine dependent effects.  Currently this option is only
-supported on the H8/300; see @ref{H8/300,,@code{gld} and the H8/300}.
+supported on the H8/300; see @ref{H8/300,,@code{ld} and the H8/300}.
 
 On some platforms, use this option to perform global optimizations that
 become possible when the linker resolves addressing in your program, such
@@ -468,7 +467,7 @@ has no effect.
 @cindex relocatable output
 @kindex -r
 Generates relocatable output---i.e., generate an output file that can in
-turn serve as input to @code{gld}.  This is often called @dfn{partial
+turn serve as input to @code{ld}.  This is often called @dfn{partial
 linking}.  As a side effect, in environments that support standard Unix
 magic numbers, this option also sets the output file's magic number to
 @code{OMAGIC}.
@@ -515,8 +514,8 @@ Use @var{org} as the starting address for---respectively---the
 @itemx -T@var{commandfile}
 @kindex -T @var{script}
 @cindex script files
-Directs @code{gld} to read link commands from the file
-@var{commandfile}.  These commands will completely override @code{gld}'s
+Directs @code{ld} to read link commands from the file
+@var{commandfile}.  These commands will completely override @code{ld}'s
 default link format (rather than adding to it); @var{commandfile} must
 specify everything necessary to describe the target format.
 @xref{Commands}.
@@ -545,13 +544,13 @@ arguments to enter additional undefined symbols.
 @cindex constructors
 For anything other than C++ programs, this option is equivalent to
 @code{-r}: it generates relocatable output---i.e., an output file that can in
-turn serve as input to @code{gld}.  When linking C++ programs, @code{-Ur}
+turn serve as input to @code{ld}.  When linking C++ programs, @code{-Ur}
 @emph{will} resolve references to constructors, unlike @code{-r}.
 
 @item -v
 @kindex -v
 @cindex version
-Display the version number for @code{gld}.
+Display the version number for @code{ld}.
 
 @item -X 
 @kindex -X
@@ -589,7 +588,7 @@ See description of @code{-N}.
 @node Environment,  , Options, Invocation
 @section Environment Variables
 
-You can change the behavior of @code{gld} with two environment
+You can change the behavior of @code{ld} with two environment
 variables: @code{GNUTARGET} and @code{LDEMULATION}.  Depending on the
 setting of the latter, other environment variables may be used as well.
 
@@ -598,7 +597,7 @@ setting of the latter, other environment variables may be used as well.
 @code{GNUTARGET} determines the input-file object format if you don't
 use @code{-b} (or its synonym @code{-format}).  Its value should be one
 of the BFD names for an input format (@pxref{BFD}).  If there is no
-@code{GNUTARGET} in the environment, @code{gld} uses the natural format
+@code{GNUTARGET} in the environment, @code{ld} uses the natural format
 of the host. If @code{GNUTARGET} is set to @code{default} then BFD attempts to discover the
 input format by examining binary input files; this method often
 succeeds, but there are potential ambiguities, since there is no method
@@ -610,8 +609,8 @@ so ambiguities are resolved in favor of convention.
 @kindex LDEMULATION
 @cindex emulation
 @cindex environment vars
-@code{LDEMULATION} controls some aspects of @code{gld}'s dominant
-personality.  Although @code{gld} is flexible enough to permit its use
+@code{LDEMULATION} controls some aspects of @code{ld}'s dominant
+personality.  Although @code{ld} is flexible enough to permit its use
 in many contexts regardless of configuration, you can use this variable
 to make it act more like one or another older linker by default.
 
@@ -648,7 +647,7 @@ setting the default BFD machine as @code{m68k}.
 
 @item LDEMULATION=gld960
 @itemx LDEMULATION=lnk960
-Emulate older linkers for the i960 family; see @ref{i960,,@code{gld} and
+Emulate older linkers for the i960 family; see @ref{i960,,@code{ld} and
 the Intel 960 family}, for details. 
 
 @item LDEMULATION=gldm88kbcs
@@ -659,9 +658,9 @@ Configure the linker for the Motorola 88K family.
 @kindex vanilla
 @cindex emulation, disabling
 @cindex disabling emulation
-This is the least specific setting for @code{gld}.  You can set
+This is the least specific setting for @code{ld}.  You can set
 @code{LDEMULATION=vanilla} to disable emulation of other linkers.  This
-setting makes @code{gld} take the default machine from the BFD
+setting makes @code{ld} take the default machine from the BFD
 configuration on your system; @code{a.out-generic-big} is the default
 target.  No other defaults are specified.
 @end table
@@ -692,7 +691,7 @@ an ordinary file. If the linker opens a file which it cannot recognize
 as a supported object or archive format, it tries to interpret the file
 as a command file.
 
-You can also include a script directly on the @code{gld} command line,
+You can also include a script directly on the @code{ld} command line,
 delimited by the characters @samp{@{} and @samp{@}}.
 
 @menu
@@ -706,7 +705,7 @@ delimited by the characters @samp{@{} and @samp{@}}.
 
 @node Scripts, Expressions, Commands, Commands
 @section Linker Scripts
-The @code{gld} command language is a collection of statements; some are
+The @code{ld} command language is a collection of statements; some are
 simple keywords setting a particular flag, some are used to select and
 group input files or name output files; and two particular statement
 types have a fundamental and pervasive impact on the linking process.
@@ -715,7 +714,7 @@ types have a fundamental and pervasive impact on the linking process.
 @cindex commands, fundamental
 @cindex output file layout
 @cindex layout of output file
-The most fundamental command of the @code{gld} command language is the
+The most fundamental command of the @code{ld} command language is the
 @code{SECTIONS} command (@pxref{SECTIONS}).  Every meaningful command
 script must have a @code{SECTIONS} command: it specifies a
 ``picture'' of the output file's layout, in varying degrees of detail.
@@ -723,7 +722,7 @@ No other command is required in all cases.
 
 The @code{MEMORY} command complements @code{SECTIONS} by describing the
 available memory in the target architecture.  This command is optional;
-if you don't use a @code{MEMORY} command, @code{gld} assumes sufficient
+if you don't use a @code{MEMORY} command, @code{ld} assumes sufficient
 memory is available in a contiguous block for all output.
 @xref{MEMORY}.
 
@@ -973,7 +972,7 @@ symbols, using any of the C assignment operators:
 @itemx @var{symbol} /= @var{expression} ;
 @end table
 
-Two things distinguish assignment from other operators in @code{gld}
+Two things distinguish assignment from other operators in @code{ld}
 expressions.
 @itemize @bullet
 @item 
@@ -990,7 +989,7 @@ statement.
 Assignment statements may appear:
 @itemize @bullet
 @item 
-as commands in their own right in a @code{gld} script; or
+as commands in their own right in an @code{ld} script; or
 @item 
 as independent statements within a @code{SECTIONS} command; or
 @item 
@@ -1209,7 +1208,7 @@ names.  Use distinct names to specify multiple regions.
 @item (@var{attr})
 @cindex memory region attributes
 is an optional list of attributes, permitted for compatibility with the
-AT&T linker but not used by @code{gld} beyond checking that the
+AT&T linker but not used by @code{ld} beyond checking that the
 attribute list is valid.  Valid attribute lists must be made up of the
 characters ``@code{LIRWX}''.  If you omit the attribute list, you may
 omit the parentheses around it as well.
@@ -1319,7 +1318,7 @@ formats which only support a limited number of sections, such as
 with numbers and not names (as is the case for Oasys), the name should be
 supplied as a quoted numeric string.  A section name may consist of any
 sequence characters, but any name which does not conform to the standard
-@code{gld} symbol name syntax must be quoted.
+@code{ld} symbol name syntax must be quoted.
 
 @node Section Contents, Section Options, Section Definition, SECTIONS
 @subsection Section Contents
@@ -1372,7 +1371,7 @@ section names by either commas or whitespace.
 @cindex input sections to output section
 @kindex *(@var{section})
 Instead of explicitly naming particular input files in a link control
-script, you can refer to @emph{all} files from the @code{gld} command
+script, you can refer to @emph{all} files from the @code{ld} command
 line: use @samp{*} instead of a particular filename before the
 parenthesized input-file section list.  
 
@@ -1414,7 +1413,7 @@ uninitialized data from all input files (so far as it is not yet
 allocated); @var{filename}@code{(COMMON)} refers to uninitialized data
 from a particular file.  Both are special cases of the general
 mechanisms for specifying where to place input-file sections:
-@code{gld} permits you to refer to uninitialized data as if it
+@code{ld} permits you to refer to uninitialized data as if it
 were in an input-file section named @code{COMMON}, regardless of the
 input file's format.
 @end table
@@ -1504,7 +1503,7 @@ int abss;
 @end example
 
 @noindent
-@samp{gld -M sample a.o b.o c.o d.o} would create a map like this,
+@samp{ld -M sample a.o b.o c.o d.o} would create a map like this,
 containing symbols matching the object file names:
 @example
 00000000 A __DYNAMIC
@@ -1716,7 +1715,7 @@ command-line options.
 @itemx NOFLOAT
 @kindex NOFLOAT
 These keywords were used in some older linkers to request a particular
-math subroutine library.  @code{gld} doesn't use the keywords, assuming
+math subroutine library.  @code{ld} doesn't use the keywords, assuming
 instead that any necessary subroutines are in libraries specified using
 the general mechanisms for linking to archives; but to permit the use of
 scripts that were written for the older linkers, the keywords
@@ -1776,7 +1775,7 @@ input files.@refill
 @kindex SEARCH_DIR ( @var{path} )
 @cindex path for libraries
 @cindex search path, libraries
-Add @var{path} to the list of paths where @code{gld} looks for
+Add @var{path} to the list of paths where @code{ld} looks for
 archive libraries.  @code{SEARCH_DIR(@var{path})} has the same
 effect as @code{-L@var{path})} on the command line.
 
@@ -1792,15 +1791,15 @@ process.
 Change the input-file object code format (like the command-line option
 @code{-b} or its synonym @code{-format}).  The argument @var{format} is
 one of the strings used by BFD to name binary formats.  In the current
-@code{gld} implementation, if @code{TARGET} is specified but
+@code{ld} implementation, if @code{TARGET} is specified but
 @code{OUTPUT_FORMAT} is not, the last @code{TARGET} argument is also
-used as the default format for the @code{gld} output file.
+used as the default format for the @code{ld} output file.
 @xref{BFD}.@refill
 
 @kindex GNUTARGET
-If you don't use the @code{TARGET} command, @code{gld} uses the value of
+If you don't use the @code{TARGET} command, @code{ld} uses the value of
 the environment variable @code{GNUTARGET}, if available, to select the
-output file format.  If that variable is also absent, @code{gld} uses
+output file format.  If that variable is also absent, @code{ld} uses
 the default format configured for your machine in the BFD libraries.
 
 @end table
@@ -1809,28 +1808,28 @@ the default format configured for your machine in the BFD libraries.
 @chapter Machine Dependent Features
 
 @cindex machine dependencies
-@code{gld} has additional features on some platforms; the following
-sections describe them.  Machines where @code{gld} has no additional
+@code{ld} has additional features on some platforms; the following
+sections describe them.  Machines where @code{ld} has no additional
 functionality are not listed.
 
 @menu
-* H8/300::                      @code{gld} and the H8/300
-* i960::                        @code{gld} and the Intel 960 family
-* m68k::                        @code{gld} and the Motorola 68000 family
-* m88k::                        @code{gld} and the Motorola 880x0 family
+* H8/300::                      @code{ld} and the H8/300
+* i960::                        @code{ld} and the Intel 960 family
+* m68k::                        @code{ld} and the Motorola 68000 family
+* m88k::                        @code{ld} and the Motorola 880x0 family
 @end menu
 
 @node H8/300, i960, Machine Dependent, Machine Dependent
-@section @code{gld} and the H8/300
+@section @code{ld} and the H8/300
 
 @cindex H8/300 support
-For the H8/300, @code{gld} can perform these global optimizations when
+For the H8/300, @code{ld} can perform these global optimizations when
 you specify the @samp{-relax} command-line option.
 
 @table @emph
 @item relaxing address modes
 @cindex relaxing on i960
-@code{gld} finds all @code{jsr} and @code{jmp} instructions whose
+@code{ld} finds all @code{jsr} and @code{jmp} instructions whose
 targets are within eight bits, and turns them into eight-bit
 program-counter relative @code{bsr} and @code{bra} instructions,
 respectively.
@@ -1838,7 +1837,7 @@ respectively.
 @item synthesizing instructions
 @cindex synthesizing on i960
 @c FIXME: specifically mov.b, or any mov instructions really?
-@code{gld} finds all @code{mov.b} instructions which use the
+@code{ld} finds all @code{mov.b} instructions which use the
 sixteen-bit absolute address form, but refer to the top
 page of memory, and changes them to use the eight-bit address form.
 (That is: the linker turns @samp{mov.b @code{@@}@var{aa}:16} into
@@ -1847,7 +1846,7 @@ top page of memory).
 @end table
 
 @node i960, m68k, H8/300, Machine Dependent
-@section @code{gld} and the Intel 960 family
+@section @code{ld} and the Intel 960 family
 
 @cindex i960 support
 @menu
@@ -1866,7 +1865,7 @@ linker's search strategy for archive libraries, to support the use of
 libraries specific to each particular architecture, by including in the
 search loop names suffixed with the string identifying the architecture.
 
-For example, if your @code{gld} command line included @w{@samp{-ACA}} as
+For example, if your @code{ld} command line included @w{@samp{-ACA}} as
 well as @w{@samp{-ltry}}, the linker would look (in its built-in search
 paths, and in any paths you specify with @code{-L}) for a library with
 the names
@@ -1889,7 +1888,7 @@ specifies a library.
 @subsection Emulating Other i960 Linkers
 You can set the @code{LDEMULATION} environment variable
 (@pxref{Environment,,Environment Variables}) to make
-@code{gld} more compatible with two older Intel 960 linkers:
+@code{ld} more compatible with two older Intel 960 linkers:
 
 @table @code
 @item LDEMULATION=gld960
@@ -1907,7 +1906,7 @@ format, for this emulation.
 
 @kindex GNU960
 This emulation can behave slightly differently depending on the setting
-of the @code{gld} compile-time switch @code{GNU960}.  If @code{gld} is
+of the @code{ld} compile-time switch @code{GNU960}.  If @code{ld} is
 compiled with @code{GNU960} defined, then an additional environment
 variable---@code{GNUTARGET}---is available; its value, if available,
 specifies some other default output format than @code{b.out.big}.
@@ -1917,7 +1916,7 @@ specifies some other default output format than @code{b.out.big}.
 @cindex i960
 @cindex Architectures, i960 family
 Emulate the Intel linker @code{lnk960}.  The default output format is
-@code{coff-Intel-big}.  With this emulation, @code{gld}
+@code{coff-Intel-big}.  With this emulation, @code{ld}
 supports the additional script commands @code{HLL} and @code{SYSLIB} for
 specification of library archives.  This is the only emulation with
 extensive support for the @code{-A} (architecture) command-line option.
@@ -1945,18 +1944,18 @@ selected; the core library @file{cg} is always included, but the library
 Like @code{gld960}, this emulation uses additional environment variables
 to set the default library search paths.  Also like @code{gld960}, the
 behavior of this emulation is slightly different depending on whether
-@code{gld} itself was compiled with @code{GNU960} defined.
+@code{ld} itself was compiled with @code{GNU960} defined.
 
 @kindex G960BASE
 @kindex G960LIB
 @kindex I960BASE
-If your @code{gld} was compiled with @code{GNU960} defined, the default
+If your @code{ld} was compiled with @code{GNU960} defined, the default
 paths are taken from all three of @code{G960LIB}, @code{G960BASE}, and
 @code{I960BASE}.  For the first two, paths you supply are automatically
 suffixed with @samp{/lib/libcoff}; for the last, your path is
 automatically suffixed with @samp{/lib}.
 
-If your @code{gld} was @emph{not} compiled with @code{GNU960} defined,
+If your @code{ld} was @emph{not} compiled with @code{GNU960} defined,
 the default paths are taken from @code{I960BASE}, and @code{G960BASE} is
 only consulted if @code{I960BASE} is undefined.  In this case
 @code{G960LIB} is not used at all.
@@ -1965,7 +1964,7 @@ only consulted if @code{I960BASE} is undefined.  In this case
 @node i960-commands,  , i960-emulation, i960
 @subsection Command Language Extensions for i960
 
-@code{gld} understands the following additional commands when
+@code{ld} understands the following additional commands when
 @code{LDEMULATION} is set to @samp{lnk960}:
 
 @table @code
@@ -1978,7 +1977,7 @@ Using @code{HLL(@var{file}} in a linker script is equivalent to
 including @code{-l}@var{file} on the command line.  
 
 @cindex @code{lnk960} command @code{HLL}
-The @code{HLL} command is only supported when @code{gld} emulates
+The @code{HLL} command is only supported when @code{ld} emulates
 @code{lnk960}, as specified by the @code{LDEMULATION} environment
 variable.
 
@@ -1989,14 +1988,14 @@ Use the named @var{file}s as binary input files, searching for them in
 the same list of paths as archives.
 
 @cindex @code{lnk960} command @code{SYSLIB}
-The @code{SYSLIB} command is only supported when @code{gld} emulates
+The @code{SYSLIB} command is only supported when @code{ld} emulates
 @code{lnk960}, as specified by the @code{LDEMULATION} environment
 variable.
 
 @end table
 
 @node m68k, m88k, i960, Machine Dependent
-@section @code{gld} and the Motorola 680x0 family
+@section @code{ld} and the Motorola 680x0 family
 
 @cindex m68k support
 You can set the environment variable @code{LDEMULATION} to @samp{gld68k}
@@ -2006,7 +2005,7 @@ only differs in specifically setting the default BFD machine as
 @code{m68k}.  @xref{Environment,,Environment Variables}.
 
 @node m88k,  , m68k, Machine Dependent
-@section @code{gld} and the Motorola 880x0 family
+@section @code{ld} and the Motorola 880x0 family
 
 @cindex m88k support
 @kindex gldm88kbcs
@@ -2259,7 +2258,7 @@ defined.  This ensures that each symbol points to its containing
 section.  Each symbol also has a varying amount of hidden data to contain
 private data for the BFD back end.  Since the symbol points to the
 original file, the private data format for that symbol is accessible.
-@code{gld} can operate on a collection of symbols of wildly different
+@code{ld} can operate on a collection of symbols of wildly different
 formats without problems.
 
 Normal global and simple local symbols are maintained on output, so an
