@@ -1,3 +1,9 @@
+Tue Feb  2 10:16:08 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* lib/gdb.exp (gdb_preprocess): Remove 'puts' statement. 
+
+	* gdb.c++/method.exp: Add missing close brace.
+
 1999-01-30  Jim Blandy  <jimb@zwingli.cygnus.com>
 
 	* gdb.base/maint.exp: Use 'set height 0' to disable page
