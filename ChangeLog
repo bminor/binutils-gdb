@@ -1,3 +1,7 @@
+Fri Jun 12 14:03:34 1998  Syd Polk  <spolk@cygnus.com>
+
+	* Makefile.in: all-snavigator needs all-libgui.
+
 Thu Jun 11 19:43:47 1998  Mark Alexander  <marka@cygnus.com>
 
 	* configure.in: Add cygmon and libstub support for mn10300.

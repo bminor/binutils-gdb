@@ -544,7 +544,9 @@ ALL_MODULES = \
 	all-send-pr \
 	all-shellutils \
 	all-sim \
+	$(start-sanitize-cygnus) \
 	all-snavigator \
+	$(end-sanitize-cygnus) \
 	all-tar \
 	all-tcl \
 	all-texinfo \
@@ -627,7 +629,9 @@ CROSS_CHECK_MODULES = \
 	check-sed \
 	check-send-pr \
 	check-shellutils \
+	$(start-sanitize-cygnus) \
 	check-snavigator \
+	$(end-sanitize-cygnus) \
 	check-sim \
 	check-tar \
 	check-tcl \
@@ -716,7 +720,9 @@ INSTALL_MODULES = \
 	install-send-pr \
 	install-shellutils \
 	install-sim \
+	$(start-sanitize-cygnus) \
 	install-snavigator \
+	$(end-sanitize-cygnus) \
 	install-tar \
 	install-texinfo \
 	install-textutils \
@@ -904,7 +910,9 @@ CLEAN_MODULES = \
 	clean-send-pr \
 	clean-shellutils \
 	clean-sim \
+	$(start-sanitize-cygnus) \
 	clean-snavigator \
+	$(end-sanitize-cygnus) \
 	clean-tar \
 	clean-tcl \
 	clean-texinfo \
@@ -1609,7 +1617,9 @@ all-sed: all-libiberty
 all-send-pr: all-prms
 all-shellutils:
 all-sim: all-libiberty all-bfd all-opcodes all-readline
-all-snavigator: all-tcl all-tk all-tix all-itcl all-db all-grep all-flexlm
+# start-sanitize-cygnus
+all-snavigator: all-tcl all-tk all-tix all-itcl all-db all-grep all-flexlm all-libgui
+# end-sanitize-cygnus
 all-tar: all-libiberty
 all-tcl:
 all-tclX: all-tcl all-tk
@@ -1779,7 +1789,7 @@ binutils.tar.gz: $(DIST_SUPPORT) $(BINUTILS_SUPPORT_DIRS) binutils
 		SUPPORT_FILES="$(BINUTILS_SUPPORT_DIRS) makeall.bat configure.bat"
 
 .PHONY: gas+binutils.tar.gz
-GASB_SUPPORT_DIRS= $(GAS_SUPPORT_DIRS) binutils ld gprof intl
+GASB_SUPPORT_DIRS= $(GAS_SUPPORT_DIRS) binutils ld gprof
 gas+binutils.tar.gz: $(DIST_SUPPORT) $(GASB_SUPPORT_DIRS) gas
 	$(MAKE) -f Makefile.in taz TOOL=gas \
 		SUPPORT_FILES="$(GASB_SUPPORT_DIRS) makeall.bat configure.bat"
