@@ -1,5 +1,10 @@
 2005-03-09  Richard Sandiford  <rsandifo@redhat.com>
 
+	* config/tc-mips.c (s_cpsetup): Use '__gnu_local_gp' instead of '_gp'
+	for -mno-shared optimization.
+
+2005-03-09  Richard Sandiford  <rsandifo@redhat.com>
+
 	* config/tc-mips.c (MAX_VR4130_NOPS, MAX_DELAY_NOPS): New macros.
 	(MAX_NOPS): Bump to 4.
 	(mips_fix_vr4130): New variable.
