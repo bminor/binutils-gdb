@@ -287,7 +287,7 @@ SFILES = ${srcdir}/blockframe.c ${srcdir}/breakpoint.c ${srcdir}/buildsym.c \
   ${srcdir}/target.c ${srcdir}/typeprint.c ${srcdir}/utils.c \
   ${srcdir}/valarith.c \
   ${srcdir}/valops.c ${srcdir}/valprint.c ${srcdir}/values.c \
-  ${srcdir}/serial.c ser-hardwire.c
+  ${srcdir}/serial.c ser-hardwire.c ${srcdir}/ser-go32.c ${srcdir}/ser-unix.c
 
 # Files that are not source code, but need to go into gdb-$(VERSION).tar.Z.
 NONSRC = ${srcdir}/Makefile.in ${srcdir}/depend ${srcdir}/alldeps.mak \
