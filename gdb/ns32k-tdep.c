@@ -21,6 +21,9 @@
 
 #include "defs.h"
 #include "frame.h"
+#include "gdbcore.h"
+
+static int sign_extend (int value, int bits);
 
 void
 _initialize_ns32k_tdep (void)
@@ -90,6 +93,8 @@ merlin_frame_num_args (struct frame_info *fi)
 	width = 2;
       else if (insn == 0x57f)	/* adjspd */
 	width = 4;
+      else
+	internal_error (__FILE__, __LINE__, "bad else");
       numargs = read_memory_integer (pc + 2, width);
       if (width > 1)
 	flip_bytes (&numargs, width);
@@ -135,6 +140,8 @@ umax_frame_num_args (struct frame_info *fi)
 	    width = 2;
 	  else if (insn == 0x57f)	/* adjspd */
 	    width = 4;
+	  else
+	    internal_error (__FILE__, __LINE__, "bad else");
 	  numargs = read_memory_integer (pc + 2, width);
 	  if (width > 1)
 	    flip_bytes (&numargs, width);
@@ -145,6 +152,7 @@ umax_frame_num_args (struct frame_info *fi)
 }
 
 
+static int
 sign_extend (int value, int bits)
 {
   value = value & ((1 << bits) - 1);
@@ -154,9 +162,10 @@ sign_extend (int value, int bits)
 }
 
 void
-flip_bytes (char *ptr, int count)
+flip_bytes (void *p, int count)
 {
   char tmp;
+  char *ptr = 0;
 
   while (count > 0)
     {

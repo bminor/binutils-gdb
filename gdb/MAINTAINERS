@@ -114,7 +114,7 @@ maintainer works with the native maintainer when resolving API issues.
 	mn10300		--target=mn10300-elf ,-Werror
 			Andrew Cagney		cagney@cygnus.com
 
-	ns32k		--target=ns32k-netbsd ,Werror
+	ns32k		--target=ns32k-netbsd ,-Werror
 			Maintenance only
 
 	pa		(--target=hppa1.1-hp-proelf broken)

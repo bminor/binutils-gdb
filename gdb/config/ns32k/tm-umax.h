@@ -241,6 +241,8 @@ extern int umax_frame_num_args (struct frame_info *fi);
    ways in the stack frame.  sp is even more special:
    the address we return for it IS the sp for the next frame.  */
 
+extern int ns32k_localcount (CORE_ADDR enter_pc);
+
 #define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs)	\
 { 								\
   register int	regmask, regnum;				\
@@ -321,6 +323,8 @@ extern int umax_frame_num_args (struct frame_info *fi);
 
 /* Insert the specified number of args and function address
    into a call sequence of the above form stored at DUMMYNAME.  */
+
+void flip_bytes (void *ptr, int count);
 
 #define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p)   		\
 {								\

@@ -1,3 +1,16 @@
+2001-03-28  Andrew Cagney  <ac131313@redhat.com>
+
+	* MAINTAINERS: Change ns32k target to ,-Werror.
+
+	* ns32k-tdep.c: Include "gdbcore.h"
+	(flip_bytes): Change first argument to void*. Add forward
+	declaration.
+	(sign_extend): Add declaration.
+	(merlin_frame_num_args): Add final else clause to if-else chain.
+	(umax_frame_num_args): Ditto.
+	* config/ns32k/tm-umax.h (ns32k_localcount): Declare.
+	(flip_bytes): Ditto.
+
 2001-03-28  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-linux-tdep.c (FRAMELESS_SIGNAL): Moved here from
