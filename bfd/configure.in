@@ -54,7 +54,7 @@ BFD_CC_FOR_BUILD
 
 AC_CHECK_HEADERS(stddef.h string.h strings.h stdlib.h time.h unistd.h)
 AC_CHECK_HEADERS(fcntl.h sys/file.h)
-AC_CHECK_FUNCS(fcntl)
+AC_CHECK_FUNCS(fcntl getpagesize)
 
 BFD_BINARY_FOPEN
 
@@ -203,11 +203,9 @@ changequote([,])dnl
 	AC_DEFINE(TRAD_HEADER,"hosts/pc532mach.h")
 	;;
   rs6000-*-lynx*)	COREFILE=lynx-core.o ;;
-  rs6000-*-aix4*)	COREFILE=rs6000-core.o
-			COREFLAG=-DALTERNATE_AIX_CORE_FORMAT ;;
+  rs6000-*-aix4*)	COREFILE=rs6000-core.o ;;
   rs6000-*-*)		COREFILE=rs6000-core.o ;;
-  powerpc-*-aix4*)	COREFILE=rs6000-core.o
-			COREFLAG=-DALTERNATE_AIX_CORE_FORMAT ;;
+  powerpc-*-aix4*)	COREFILE=rs6000-core.o ;;
   powerpc-*-aix*)	COREFILE=rs6000-core.o ;;
   tahoe-*-*)
 	COREFILE=trad-core.o
@@ -411,7 +409,8 @@ do
     nlm32_powerpc_vec)		tb="$tb nlm32-ppc.o nlm32.o nlm.o" ;;
     pc532netbsd_vec)		tb="$tb ns32knetbsd.o aout-ns32k.o stab-syms.o" ;;
     pc532machaout_vec)		tb="$tb pc532-mach.o aout-ns32k.o stab-syms.o" ;;
-    rs6000coff_vec)		tb="$tb coff-rs6000.o" ;;
+    pmac_xcoff_vec)		tb="$tb coff-pmac.o xcofflink.o" ;;
+    rs6000coff_vec)		tb="$tb coff-rs6000.o xcofflink.o" ;;
     bfd_powerpc_pe_vec)         tb="$tb pe-ppc.o cofflink.o" ;;  
     bfd_powerpcle_pe_vec)       tb="$tb pe-ppc.o cofflink.o" ;;  
     bfd_powerpc_pei_vec)        tb="$tb pei-ppc.o cofflink.o" ;;

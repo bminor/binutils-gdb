@@ -19,7 +19,7 @@
 /^Makefile /,/--recheck/d
 
 # Don't do any recursive subdir stuff.
-/subdir_do/s/{MAKE} subdir_do/null-command/
+/ subdir_do/s/{MAKE}/null-command/
 
 /BFD_H/s/^{BFD_H}/#{BFD_H}/
 

@@ -36,6 +36,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "coff/rs6000.h"
 #include "libcoff.h"
 
+/* The main body of code is in coffcode.h.  */
+
+static boolean xcoff_mkobject PARAMS ((bfd *));
+static boolean xcoff_copy_private_bfd_data PARAMS ((bfd *, bfd *));
+static void xcoff_rtype2howto
+  PARAMS ((arelent *, struct internal_reloc *));
+static reloc_howto_type *xcoff_reloc_type_lookup
+  PARAMS ((bfd *, bfd_reloc_code_real_type));
 static boolean xcoff_slurp_armap PARAMS ((bfd *));
 static const bfd_target *xcoff_archive_p PARAMS ((bfd *));
 static PTR xcoff_read_ar_hdr PARAMS ((bfd *));
@@ -45,18 +53,72 @@ static const char *normalize_filename PARAMS ((bfd *));
 static boolean xcoff_write_armap
   PARAMS ((bfd *, unsigned int, struct orl *, unsigned int, int));
 static boolean xcoff_write_archive_contents PARAMS ((bfd *));
+
+/* We use our own tdata type.  Its first field is the COFF tdata type,
+   so the COFF routines are compatible.  */
 
-/* The main body of code is in coffcode.h.  */
+static boolean
+xcoff_mkobject (abfd)
+     bfd *abfd;
+{
+  coff_data_type *coff;
 
-#define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (3)
+  abfd->tdata.xcoff_obj_data =
+    ((struct xcoff_tdata *)
+     bfd_zalloc (abfd, sizeof (struct xcoff_tdata)));
+  if (abfd->tdata.xcoff_obj_data == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return false;
+    }
+  coff = coff_data (abfd);
+  coff->symbols = (coff_symbol_type *) NULL;
+  coff->conversion_table = (unsigned int *) NULL;
+  coff->raw_syments = (struct coff_ptr_struct *) NULL;
+  coff->relocbase = 0;
 
+  xcoff_data (abfd)->modtype = ('1' << 8) | 'L';
+
+  /* We set cputype to -1 to indicate that it has not been
+     initialized.  */
+  xcoff_data (abfd)->cputype = -1;
+
+  xcoff_data (abfd)->csects = NULL;
+  xcoff_data (abfd)->debug_indices = NULL;
+
+  return true;
+}
+
+/* Copy XCOFF data from one BFD to another.  */
+
+static boolean
+xcoff_copy_private_bfd_data (ibfd, obfd)
+     bfd *ibfd;
+     bfd *obfd;
+{
+  struct xcoff_tdata *ix, *ox;
+
+  if (ibfd->xvec != obfd->xvec)
+    return true;
+  ix = xcoff_data (ibfd);
+  ox = xcoff_data (obfd);
+  ox->toc = ix->toc;
+  ox->text_align_power = ix->text_align_power;
+  ox->data_align_power = ix->data_align_power;
+  ox->modtype = ix->modtype;
+  ox->cputype = ix->cputype;
+  ox->maxdata = ix->maxdata;
+  ox->maxstack = ix->maxstack;
+  return true;
+}
+
 /* The XCOFF reloc table.  Actually, XCOFF relocations specify the
    bitsize and whether they are signed or not, along with a
    conventional type.  This table is for the types, which are used for
    different algorithms for putting in the reloc.  Many of these
    relocs need special_function entries, which I have not written.  */
 
-static reloc_howto_type rs6000coff_howto_table[] =
+static reloc_howto_type xcoff_howto_table[] =
 {
   /* Standard 32 bit relocation.  */
   HOWTO (0,	                /* type */                                 
@@ -110,7 +172,7 @@ static reloc_howto_type rs6000coff_howto_table[] =
 	 16,	                /* bitsize */                   
 	 false,	                /* pc_relative */                          
 	 0,	                /* bitpos */                               
-	 complain_overflow_signed, /* complain_on_overflow */
+	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,		        /* special_function */                     
 	 "R_TOC",               /* name */                                 
 	 true,	                /* partial_inplace */                      
@@ -400,17 +462,12 @@ static reloc_howto_type rs6000coff_howto_table[] =
 	 false)                 /* pcrel_offset */
 };
 
-#define RTYPE2HOWTO(cache_ptr, dst) rs6000coff_rtype2howto (cache_ptr, dst)
-
-static void rs6000coff_rtype2howto PARAMS ((arelent *,
-					    struct internal_reloc *));
-
 static void
-rs6000coff_rtype2howto (relent, internal)
+xcoff_rtype2howto (relent, internal)
      arelent *relent;
      struct internal_reloc *internal;
 {
-  relent->howto = rs6000coff_howto_table + internal->r_type;
+  relent->howto = xcoff_howto_table + internal->r_type;
 
   /* The r_size field of an XCOFF reloc encodes the bitsize of the
      relocation, as well as indicating whether it is signed or not.
@@ -426,26 +483,21 @@ rs6000coff_rtype2howto (relent, internal)
 #endif
 }
 
-#define coff_bfd_reloc_type_lookup rs6000coff_reloc_type_lookup
-
-static reloc_howto_type *rs6000coff_reloc_type_lookup
-  PARAMS ((bfd *, bfd_reloc_code_real_type));
-
 static reloc_howto_type *
-rs6000coff_reloc_type_lookup (abfd, code)
+xcoff_reloc_type_lookup (abfd, code)
      bfd *abfd;
      bfd_reloc_code_real_type code;
 {
   switch (code)
     {
     case BFD_RELOC_PPC_B26:
-      return &rs6000coff_howto_table[0xa];
+      return &xcoff_howto_table[0xa];
     case BFD_RELOC_PPC_BA26:
-      return &rs6000coff_howto_table[8];
+      return &xcoff_howto_table[8];
     case BFD_RELOC_PPC_TOC16:
-      return &rs6000coff_howto_table[3];
+      return &xcoff_howto_table[3];
     case BFD_RELOC_32:
-      return &rs6000coff_howto_table[0];
+      return &xcoff_howto_table[0];
     default:
       return NULL;
     }
@@ -460,8 +512,17 @@ rs6000coff_reloc_type_lookup (abfd, code)
 	: 0)								\
        | (howto->bitsize - 1));						\
   }
+
+#define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (3)
 
 #define COFF_LONG_FILENAMES
+
+#define RTYPE2HOWTO(cache_ptr, dst) xcoff_rtype2howto (cache_ptr, dst)
+
+#define coff_mkobject xcoff_mkobject
+#define coff_bfd_copy_private_bfd_data xcoff_copy_private_bfd_data
+#define coff_bfd_reloc_type_lookup xcoff_reloc_type_lookup
+#define coff_relocate_section _bfd_ppc_xcoff_relocate_section
 
 #include "coffcode.h"
 
@@ -826,7 +887,7 @@ xcoff_openr_next_archived_file (archive, last_file)
 
 /* Stat an element in an XCOFF archive.  */
 
-int
+static int
 xcoff_generic_stat_arch_elt (abfd, s)
      bfd *abfd;
      struct stat *s;
@@ -881,7 +942,7 @@ xcoff_write_armap (abfd, elength, map, orl_count, stridx)
 {
   struct xcoff_ar_hdr hdr;
   char *p;
-  char buf[4];
+  unsigned char buf[4];
   bfd *sub;
   file_ptr fileoff;
   unsigned int i;
@@ -1262,6 +1323,12 @@ extern int lynx_core_file_failing_signal PARAMS ((bfd *abfd));
 
 #endif /* LYNX_CORE */
 
+#define _bfd_xcoff_sizeof_headers coff_sizeof_headers
+#define _bfd_xcoff_bfd_get_relocated_section_contents \
+  coff_bfd_get_relocated_section_contents
+#define _bfd_xcoff_bfd_relax_section coff_bfd_relax_section
+#define _bfd_xcoff_bfd_link_split_section coff_bfd_link_split_section
+
 /* The transfer vector that leads the outside world to all of the above. */
 
 const bfd_target rs6000coff_vec =
@@ -1272,7 +1339,7 @@ const bfd_target rs6000coff_vec =
   true,				/* header byte order is big */
 
   (HAS_RELOC | EXEC_P |		/* object flags */
-   HAS_LINENO | HAS_DEBUG |
+   HAS_LINENO | HAS_DEBUG | DYNAMIC |
    HAS_SYMS | HAS_LOCALS | WP_TEXT),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
@@ -1301,7 +1368,7 @@ const bfd_target rs6000coff_vec =
      BFD_JUMP_TABLE_SYMBOLS (coff),
      BFD_JUMP_TABLE_RELOCS (coff),
      BFD_JUMP_TABLE_WRITE (coff),
-     BFD_JUMP_TABLE_LINK (coff),
+     BFD_JUMP_TABLE_LINK (_bfd_xcoff),
      BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   COFF_SWAP_TABLE,

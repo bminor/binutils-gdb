@@ -11,7 +11,7 @@ If "{target_canonical}" =~ /m68k-apple-macos/
 	Set defvec m68kcoff_vec
 	Set selvecs '&m68kcoff_vec'
 Else If "{target_canonical}" =~ /powerpc-apple-macos/
-	Set BFD_BACKENDS '"{o}"coff-pmac.c.o "{o}"cofflink.c.o'
+	Set BFD_BACKENDS '"{o}"coff-pmac.c.o "{o}"xcofflink.c.o'
 	Set defvec pmac_xcoff_vec
 	Set selvecs '&pmac_xcoff_vec'
 	Set selarchs "&bfd_powerpc_arch"

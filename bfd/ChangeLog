@@ -1,3 +1,17 @@
+Tue Oct 24 17:44:20 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* configure.in: Add xcofflink.o to pmac_xcoff_vec.
+	* configure: Rebuild.
+	* mpw-config.in: Add xcofflink.c.o to powerpc-apple-macos.
+	* coff-pmac.c: Include coff-rs6000.c instead of duplicating its
+	contents.
+	(pmac_xcoff_vec): Update to use new xcoff support.
+	* coff-rs6000.c (xcoff_generic_stat_arch_elt): Make static.
+	(xcoff_write_armap): Declare buf as unsigned char.
+	* xcofflink.c (xcoff_link_add_symbols): Declare a local as PTR.
+
+	* mpw-make.sed: Generalize subdir_do edit.
+	
 Tue Oct 24 10:25:01 1995  Jeffrey A Law  (law@cygnus.com)
 
 	* hppabsd-core.c (make_bfd_asection): Initialize asect->filepos
