@@ -1,3 +1,17 @@
+2003-03-02  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* gas/mips/bge.d: Reactivate external branch tests.
+	* gas/mips/bge.s: Likewise.
+	* gas/mips/bgeu.d: Likewise.
+	* gas/mips/bgeu.s: Likewise.
+	* gas/mips/blt.d: Likewise.
+	* gas/mips/blt.s: Likewise.
+	* gas/mips/bltu.d: Likewise.
+	* gas/mips/bltu.s: Likewise.
+	* gas/mips/branch-misc-2.d: New File.
+	* gas/mips/branch-misc-2.l: Remove.
+	* gas/mips/mips.exp: Adjust branch-misc-2 test.
+
 2003-02-21  Nick Clifton  <nickc@redhat.com>
 
 	* gas/all/test-gen.c: New file: Framework for automatically

@@ -1,3 +1,17 @@
+2003-03-02  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (append_insn): Add handling of
+	BFD_RELOC_MIPSEMB_16_PCREL_S2. Avoid emitting unneeded
+	BFD_RELOC_16_PCREL_S2 relocs and add earlier warnings about
+	misaligned address and reange overflow.
+	(macro_build): Add handling of BFD_RELOC_MIPSEMB_16_PCREL_S2. Add
+	earlier warnings about misaligned address and reange overflow.
+	(mips_ip): Add handling of BFD_RELOC_MIPSEMB_16_PCREL_S2.
+	(md_apply_fix): Likewise. Fix warning output.
+	(tc_gen_reloc): Add handling of BFD_RELOC_MIPSEMB_16_PCREL_S2.
+	Allow BFD_RELOC_16_PCREL_S2 for all ABIs.
+	(md_convert_frag): Add handling of BFD_RELOC_MIPSEMB_16_PCREL_S2.
+
 2003-02-21  Nick Clifton  <nickc@redhat.com>
 
 	* NEWS: Mention availability of test generator program.

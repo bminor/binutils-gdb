@@ -2331,6 +2331,9 @@ to compensate for the borrow when the low bits are added.  */
 /* Like BFD_RELOC_LO16, but PC relative.  */
   BFD_RELOC_PCREL_LO16,
 
+/* Like BFD_RELOC_16_PCREL_S2, but for MIPS Embedded PIC.  */
+  BFD_RELOC_MIPSEMB_16_PCREL_S2,
+
 /* Relocation against a MIPS literal section.  */
   BFD_RELOC_MIPS_LITERAL,
 

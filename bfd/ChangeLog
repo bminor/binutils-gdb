@@ -1,3 +1,23 @@
+2003-03-02  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* elf32-mips.c (elf_mips_howto_table_rel): Change definition of
+	R_MIPS_PC16 to rightshift 2.
+	(elf_reloc_map mips_reloc_map): Map to rightshifted BFD reloc.
+	(bfd_elf32_bfd_reloc_type_lookup): Support
+	BFD_RELOC_MIPSEMB_16_PCREL_S2.
+	* elf64-mips.c (mips_elf64_howto_table_rel): Change definition of
+	R_MIPS_PC16 to rightshift 2.
+	(mips_elf64_howto_table_rela): Likewise.
+	(mips_reloc_map): Map to rightshifted BFD reloc.
+	* elfn32-mips.c: The same as in elf64-mips.c.
+	* elfxx-mips.c (mips_elf_got_for_ibfd): Typo in comment.
+	(mips_elf_calculate_relocation): Handle rightshifted addends for
+	R_MIPS_PC16.
+	* reloc.c (BFD_RELOC_MIPSEMB_16_PCREL_S2): New BFD relocation for
+	MIPS Embedded PIC. Remove superfluous empty COMMENT.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
 2003-02-28  Richard Henderson  <rth@redhat.com>
 
 	* elfxx-ia64.c (elfNN_ia64_relax_section): Correct bounds
