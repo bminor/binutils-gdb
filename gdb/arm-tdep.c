@@ -1014,6 +1014,7 @@ void
 arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   int reg;
+  CORE_ADDR sp;
 
   if (fi->next)
     fi->pc = FRAME_SAVED_PC (fi->next);
@@ -1033,6 +1034,13 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   else
 #endif
 
+  /* Compute stack pointer for this frame.  We use this value for both the
+     sigtramp and call dummy cases.  */
+  if (!fi->next)
+    sp = read_sp();
+  else
+    sp = fi->next->frame - fi->next->frameoffset + fi->next->framesize;
+
   /* Determine whether or not we're in a sigtramp frame. 
      Unfortunately, it isn't sufficient to test
      fi->signal_handler_caller because this value is sometimes set
@@ -1043,27 +1051,44 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
      Note: If an ARM IN_SIGTRAMP method ever needs to compare against
      the name of the function, the code below will have to be changed
      to first fetch the name of the function and then pass this name
-     to IN_SIGTRAMP. */
+     to IN_SIGTRAMP.  */
 
   if (SIGCONTEXT_REGISTER_ADDRESS_P () 
       && (fi->signal_handler_caller || IN_SIGTRAMP (fi->pc, 0)))
     {
-      CORE_ADDR sp;
-
-      if (!fi->next)
-	sp = read_sp();
-      else
-	sp = fi->next->frame - fi->next->frameoffset + fi->next->framesize;
-
       for (reg = 0; reg < NUM_REGS; reg++)
 	fi->fsr.regs[reg] = SIGCONTEXT_REGISTER_ADDRESS (sp, fi->pc, reg);
 
       /* FIXME: What about thumb mode? */
       fi->framereg = SP_REGNUM;
-      fi->frame = read_memory_integer (fi->fsr.regs[fi->framereg], 4);
+      fi->frame = read_memory_integer (fi->fsr.regs[fi->framereg],
+                                       REGISTER_RAW_SIZE (fi->framereg));
       fi->framesize = 0;
       fi->frameoffset = 0;
 
+    }
+  else if (PC_IN_CALL_DUMMY (fi->pc, sp, fi->frame))
+    {
+      CORE_ADDR rp;
+      CORE_ADDR callers_sp;
+
+      /* Set rp point at the high end of the saved registers.  */
+      rp = fi->frame - REGISTER_SIZE;
+
+      /* Fill in addresses of saved registers.  */
+      fi->fsr.regs[PS_REGNUM] = rp;
+      rp -= REGISTER_RAW_SIZE (PS_REGNUM);
+      for (reg = PC_REGNUM; reg >= 0; reg--)
+	{
+	  fi->fsr.regs[reg] = rp;
+	  rp -= REGISTER_RAW_SIZE (reg);
+	}
+
+      callers_sp = read_memory_integer (fi->fsr.regs[SP_REGNUM],
+                                        REGISTER_RAW_SIZE (SP_REGNUM));
+      fi->framereg = FP_REGNUM;
+      fi->framesize = callers_sp - sp;
+      fi->frameoffset = fi->frame - sp;
     }
   else
     {
@@ -1110,6 +1135,11 @@ arm_frame_saved_pc (struct frame_info *fi)
     return generic_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
   else
 #endif
+  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame - fi->frameoffset, fi->frame))
+    {
+      return read_memory_integer (fi->fsr.regs[PC_REGNUM], REGISTER_RAW_SIZE (PC_REGNUM));
+    }
+  else
     {
       CORE_ADDR pc = arm_find_callers_reg (fi, LR_REGNUM);
       return IS_THUMB_ADDR (pc) ? UNMAKE_THUMB_ADDR (pc) : pc;
@@ -1156,13 +1186,15 @@ arm_push_dummy_frame (void)
      instruction stores the PC, it stores the address of the stm
      instruction itself plus 12.  */
   fp = sp = push_word (sp, prologue_start + 12);
-  sp = push_word (sp, read_register (PC_REGNUM));	/* FIXME: was PS_REGNUM */
-  sp = push_word (sp, old_sp);
-  sp = push_word (sp, read_register (FP_REGNUM));
 
-  for (regnum = 10; regnum >= 0; regnum--)
+  /* Push the processor status.  */
+  sp = push_word (sp, read_register (PS_REGNUM));
+
+  /* Push all 16 registers starting with r15.  */
+  for (regnum = PC_REGNUM; regnum >= 0; regnum--)
     sp = push_word (sp, read_register (regnum));
 
+  /* Update fp (for both Thumb and ARM) and sp.  */
   write_register (FP_REGNUM, fp);
   write_register (THUMB_FP_REGNUM, fp);
   write_register (SP_REGNUM, sp);
@@ -1377,45 +1409,25 @@ arm_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   return sp;
 }
 
+/* Pop the current frame.  So long as the frame info has been initialized
+   properly (see arm_init_extra_frame_info), this code works for dummy frames
+   as well as regular frames.  I.e, there's no need to have a special case
+   for dummy frames.  */
 void
 arm_pop_frame (void)
 {
   int regnum;
   struct frame_info *frame = get_current_frame ();
+  CORE_ADDR old_SP = frame->frame - frame->frameoffset + frame->framesize;
 
-  if (!PC_IN_CALL_DUMMY(frame->pc, frame->frame, read_fp()))
-    {
-      CORE_ADDR old_SP;
+  for (regnum = 0; regnum < NUM_REGS; regnum++)
+    if (frame->fsr.regs[regnum] != 0)
+      write_register (regnum,
+		  read_memory_integer (frame->fsr.regs[regnum],
+				       REGISTER_RAW_SIZE (regnum)));
 
-      old_SP = read_register (frame->framereg);
-      for (regnum = 0; regnum < NUM_REGS; regnum++)
-        if (frame->fsr.regs[regnum] != 0)
-          write_register (regnum,
-		      read_memory_integer (frame->fsr.regs[regnum], 4));
-
-      write_register (PC_REGNUM, FRAME_SAVED_PC (frame));
-      write_register (SP_REGNUM, old_SP);
-    }
-  else
-    {
-      CORE_ADDR sp;
-
-      sp = read_register (FP_REGNUM);
-      sp -= sizeof(CORE_ADDR); /* we don't care about this first word */
-
-      write_register (PC_REGNUM, read_memory_integer (sp, 4));
-      sp -= sizeof(CORE_ADDR);
-      write_register (SP_REGNUM, read_memory_integer (sp, 4));
-      sp -= sizeof(CORE_ADDR);
-      write_register (FP_REGNUM, read_memory_integer (sp, 4));
-      sp -= sizeof(CORE_ADDR);
-
-      for (regnum = 10; regnum >= 0; regnum--)
-        {
-          write_register (regnum, read_memory_integer (sp, 4));
-          sp -= sizeof(CORE_ADDR);
-        }
-    }
+  write_register (PC_REGNUM, FRAME_SAVED_PC (frame));
+  write_register (SP_REGNUM, old_SP);
 
   flush_cached_frames ();
 }

@@ -1,3 +1,13 @@
+2001-12-20  Kevin Buettner  <kevinb@redhat.com>
+
+	* arm-tdep.c (arm_init_extra_frame_info): Add special case for
+	call dummies.
+	(arm_frame_saved_pc): Likewise.
+	(arm_push_dummy_frame): Make sure all of the GPRs are saved.
+	(arm_pop_frame): Eliminate special case for call dummies.  It
+	is no longer needed now that the frame info is being properly
+	initialized.
+
 2001-12-20  Michael Snyder  <msnyder@redhat.com>
 
 	* maint.c (maintenance_info_sections): Pass string argument to
