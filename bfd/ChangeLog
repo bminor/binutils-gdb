@@ -8,6 +8,8 @@ Tue Jan 25 11:43:28 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 Tue Jan 25 11:46:46 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* reloc.c (bfd_get_reloc_size): Size of type -2 is 4 bytes, not 2.
+
 	* hp300hpux.c (MY(write_object_contents)): Write out the symbols
 	before writing out the relocs, so that the right symbol indices
 	are used.
