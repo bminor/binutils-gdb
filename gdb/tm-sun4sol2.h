@@ -1,5 +1,5 @@
 /* Macro definitions for GDB for a Sun 4 running Solaris 2
-   Copyright (C) 1989, 1992 Free Software Foundation, Inc.
+   Copyright 1989, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -18,11 +18,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "tm-sparc.h"
-
 #include "tm-sysv4.h"
-
-#undef STACK_END_ADDRESS
-#define STACK_END_ADDRESS 0xf8000000
 
 /* The values of N_SLINE, N_LBRAC, N_RBRAC symbols in .stab sections are
    relative to the current function, rather than being absolute or

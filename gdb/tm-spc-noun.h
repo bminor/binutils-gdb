@@ -1,6 +1,6 @@
 /* Target machine definitions for GDB for an embedded SPARC, that uses
    a file format where symbols have no leading underscore.
-   Copyright (C) 1989, 1992 Free Software Foundation, Inc.
+   Copyright 1989, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -19,11 +19,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "tm-sparc.h"
-
-/* Arbitrary -- FIXME.  */
-
-#undef STACK_END_ADDRESS
-#define STACK_END_ADDRESS 0xf8000000
 
 /* Offsets into jmp_buf.  Not defined by Sun, but at least documented in a
    comment in <machine/setjmp.h>! */

@@ -1,3 +1,21 @@
+Wed Oct 21 03:51:01 1992  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in (VERSION):  Tick to 4.6.9.
+
+Tue Oct 20 23:27:56 1992  John Gilmore  (gnu@cygnus.com)
+
+	* mipsread.c (UNSAFE_DATA_ADDR):  Remove MIPS-host-specific
+	definition, replace with portable one.
+	* remote-nindy.c:  Lint.
+	(nindy_wait):  Return type is int, result is inferior_pid.
+	* symmisc.c (dump_psymtab):  Only print section_offsets if set.
+	(initialize_symmisc):  Remove empty function.
+	* tm-spc-noun.h, tm-sun4os4.h, tm-sun4sol2.h (STACK_END_ADDRESS):
+	Remove obsolete, misspelled macro.
+	* doc/gdbint.texinfo:  Document obsolete STACK_END_ADDR.
+	(all @node commands):  Use new form to avoid nitpicking errors.
+	* doc/gdbint.texinfo:  Document host/native/target split.
+	                                                                   
 Wed Oct 21 00:14:34 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* mips-nat.c (zerobuf):  Get rid of const to avoid gcc warnings.

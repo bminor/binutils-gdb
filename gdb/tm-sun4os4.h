@@ -1,5 +1,5 @@
 /* Macro definitions for GDB for a Sun 4 running sunos 4.
-   Copyright (C) 1989, 1992 Free Software Foundation, Inc.
+   Copyright 1989, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -19,9 +19,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "tm-sparc.h"
 #include "tm-sunos.h"
-
-#undef STACK_END_ADDRESS
-#define STACK_END_ADDRESS 0xf8000000
 
 /* Offsets into jmp_buf.  Not defined by Sun, but at least documented in a
    comment in <machine/setjmp.h>! */

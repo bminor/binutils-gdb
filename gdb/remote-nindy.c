@@ -145,8 +145,18 @@ static int have_regs = 0;	/* 1 iff regs read since i960 last halted */
 static int regs_changed = 0;	/* 1 iff regs were modified since last read */
 
 extern char *exists();
-static void dcache_flush (), dcache_poke (), dcache_init();
-static int dcache_fetch ();
+
+static void
+dcache_flush (), dcache_poke (), dcache_init();
+
+static int
+dcache_fetch ();
+
+static void
+nindy_fetch_registers PARAMS ((int));
+
+static void
+nindy_store_registers PARAMS ((int));
 
 /* FIXME, we can probably use the normal terminal_inferior stuff here.
    We have to do terminal_inferior and then set up the passthrough
@@ -355,7 +365,7 @@ nindy_resume (step, siggnal)
  * Return to caller, storing status in 'status' just as `wait' would.
  */
 
-void
+static int
 nindy_wait( status )
     WAITTYPE *status;
 {
@@ -456,6 +466,7 @@ nindy_wait( status )
 		}
 		WSETSTOP( (*status), stop_code );
 	}
+	return inferior_pid;
 }
 
 /* Read the remote registers into the block REGS.  */
