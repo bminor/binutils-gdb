@@ -151,7 +151,11 @@ command_line:
 	;
 
 command_line_option:
-		SCRIPT ifile_list ENDSCRIPT
+		SCRIPT 
+                 	{ ldgram_in_script = true; }
+		ifile_list 
+			{ ldgram_in_script = false; }
+		ENDSCRIPT
 	|	OPTION_v
 			{	
 			ldversion();
@@ -318,7 +322,7 @@ ifile_p1:
 	|	high_level_library
 	|	low_level_library
 	|	floating_point_support
-	|	assignment end
+	|	statement_anywhere
 	|	TARGET_K '(' NAME ')'
 		{ lang_add_target($3); }
 	|	SEARCH_DIR '(' filename ')'

@@ -281,82 +281,94 @@ bfd_vma dot;
 {
   etree_value_type result;
   switch (tree->type.node_code) 
-    {
-    case DEFINED:
-      result.value =
-	ldsym_get_soft(tree->name.name) != (ldsym_type *)NULL;
-      result.section = 0;
-      result.valid = true;
-      break;
-    case NAME:
-      result.valid = false;
-      if (tree->name.name[0] == '.' && tree->name.name[1] == 0) {
+      {
+      case DEFINED:
+	result.value =
+	  ldsym_get_soft(tree->name.name) != (ldsym_type *)NULL;
+	result.section = 0;
+	result.valid = true;
+	break;
+      case NAME:
+	result.valid = false;
+	if (tree->name.name[0] == '.' && tree->name.name[1] == 0) {
+
+	  if (allocation_done != lang_first_phase_enum) {
+	    result = new_rel_from_section(dot, current_section);
+	  }
+	  else {
+	    result = invalid();
+	  }
+	}
+	else {
+	  if (allocation_done == lang_final_phase_enum) {
+	    ldsym_type *sy = ldsym_get_soft(tree->name.name);
+	  
+	    if (sy) {
+	      asymbol **sdefp = sy->sdefs_chain;
+
+	      if (sdefp) {
+		asymbol *sdef = *sdefp;
+		if (sdef->section == (asection *)NULL) {
+		  /* This is an absolute symbol */
+		  result = new_abs(sdef->value);
+		}
+		else {
+		  lang_output_section_statement_type *os =
+		    lang_output_section_statement_lookup(
+							 sdef->section->output_section->name);
+		  /* If the symbol is from a file which we are not
+		     relocating (-R) then return an absolute for its
+		     value */
+		  if (sdef->the_bfd->usrdata && 
+		      ((lang_input_statement_type*)(sdef->the_bfd->usrdata))->just_syms_flag == true) 
+		      {
+			result = new_abs(sdef->value + sdef->section ?
+					 sdef->section->vma : 0);
+		      }
+		  else {
+		    result = new_rel(sdef->value, os);
+		  }
+		}
+	      }
+	    }
+	    if (result.valid == false) {
+	      info("%F%S: undefined symbol `%s' referenced in expression.\n",
+		   tree->name.name);
+	    }
+
+	  }
+	}
+
+	break;
+
+      case ADDR:
 
 	if (allocation_done != lang_first_phase_enum) {
-	  result = new_rel_from_section(dot, current_section);
+	  lang_output_section_statement_type *os =
+	    lang_output_section_find(tree->name.name);
+	  check(os,tree->name.name,"ADDR");
+	  result =    new_rel((bfd_vma)0,  os);
 	}
 	else {
 	  result = invalid();
 	}
-      }
-      else {
-	if (allocation_done == lang_final_phase_enum) {
-	  ldsym_type *sy = ldsym_get_soft(tree->name.name);
-	  
-	  if (sy) {
-	    asymbol **sdefp = sy->sdefs_chain;
-
-	    if (sdefp) {
-	      asymbol *sdef = *sdefp;
-	      if (sdef->section == (asection *)NULL) {
-		/* This is an absolute symbol */
-		result = new_abs(sdef->value);
-	      }
-	      else {
-		lang_output_section_statement_type *os =
-		  lang_output_section_statement_lookup( sdef->section->output_section->name);
-		result = new_rel(sdef->value, os);
-	      }
-	    }
-	  }
-	  if (result.valid == false) {
-	    info("%F%S: undefined symbol `%s' referenced in expression.\n",
-		   tree->name.name);
-	  }
-
+	break;
+      case SIZEOF:
+	if(allocation_done != lang_first_phase_enum) {
+	  lang_output_section_statement_type *os = 
+	    lang_output_section_find(tree->name.name);
+	  check(os,tree->name.name,"SIZEOF");
+	  result = new_abs((bfd_vma)(os->bfd_section->size));
 	}
-      }
+	else {
+	  result = invalid();
+	}
+	break;
 
-      break;
-
-    case ADDR:
-
-      if (allocation_done != lang_first_phase_enum) {
-	lang_output_section_statement_type *os =
-	  lang_output_section_find(tree->name.name);
-	check(os,tree->name.name,"ADDR");
-	result =    new_rel((bfd_vma)0,  os);
+      default:
+	FAIL();
+	break;
       }
-      else {
-	result = invalid();
-      }
-      break;
-    case SIZEOF:
-      if(allocation_done != lang_first_phase_enum) {
-	lang_output_section_statement_type *os = 
-	  lang_output_section_find(tree->name.name);
-	check(os,tree->name.name,"SIZEOF");
-	result = new_abs((bfd_vma)(os->bfd_section->size));
-      }
-      else {
-	result = invalid();
-      }
-      break;
-
-    default:
-      FAIL();
-      break;
-    }
 
   return result;
 }

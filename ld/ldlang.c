@@ -1247,23 +1247,28 @@ DEFUN(size_input_section, (this_ptr, output_section_statement, fill,  dot),
   asection *i = is->section;
  
   if (is->ifile->just_syms_flag == false) {	    
-  dot =  insert_pad(this_ptr, fill, i->alignment_power,
-		    output_section_statement->bfd_section, dot);
+    dot =  insert_pad(this_ptr, fill, i->alignment_power,
+		      output_section_statement->bfd_section, dot);
 
-  /* remember the largest size so we can malloc the largest area */
-  /* needed for the output stage */
-  if (i->size > largest_section) {
-    largest_section = i->size;
+    /* remember the largest size so we can malloc the largest area */
+    /* needed for the output stage */
+    if (i->size > largest_section) {
+      largest_section = i->size;
+    }
+
+    /* Remember where in the output section this input section goes */
+
+    i->output_offset = dot - output_section_statement->bfd_section->vma;
+
+    /* Mark how big the output section must be to contain this now */
+    dot += i->size;
+    output_section_statement->bfd_section->size =
+      dot - output_section_statement->bfd_section->vma;
   }
-
-  /* Remember where in the output section this input section goes */
-  i->output_offset = dot - output_section_statement->bfd_section->vma;
-
-  /* Mark how big the output section must be to contain this now */
-  dot += i->size;
-  output_section_statement->bfd_section->size =
-    dot - output_section_statement->bfd_section->vma;
-}
+  else
+      {
+	i->output_offset = i->vma - output_section_statement->bfd_section->vma;
+      }
 
   return dot ;
 }
@@ -1718,8 +1723,10 @@ DEFUN_VOID(lang_common)
 	      com->section->alignment_power = power_of_two;
 	    }
 
+	    /* Symbol stops being common and starts being global, but
+	       we remember that it was common once. */
 
-	    com->flags = BSF_EXPORT | BSF_GLOBAL ;
+	    com->flags = BSF_EXPORT | BSF_GLOBAL | BSF_OLD_COMMON;
 
 
 	    if (write_map) 
@@ -1731,7 +1738,6 @@ DEFUN_VOID(lang_common)
 		}
 	    com->value = com->section->size;
 	    com->section->size += size;
-	    com->the_bfd = output_bfd;
 
 
 	  }

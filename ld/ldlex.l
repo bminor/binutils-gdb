@@ -383,27 +383,6 @@ WHITE		[ \t]+
   yylval.name[yyleng-2] = 0; /* Fry final quote */
   return NAME;
 }
-[0][0-7KM]* {
-
-  yylval.integer = number(yytext+1, 8);
- return INT;
-}
-
-[0-9]+[KM]? {
-  if (hex_mode == true || ldgram_in_defsym == true) {
-    yylval.integer = number(yytext, 16);
-  }
-  else {
-    yylval.integer = number(yytext, 10);
-  }
-  return INT;
-}
-
-0[Xx][0-9a-fA-FKM]+ {
- 
-  yylval.integer = number(yytext+2,16);	
-  return INT;
-}
 
 "\#"{WHITE}*{FILENAMECHAR}+ {
   char *p = yytext+1;
@@ -439,17 +418,34 @@ WHITE		[ \t]+
   int ch;
   keyword_type *k;
 
-  if (hex_mode) {
-    ch = yytext[0];
-    /* Then always read a number */
-    while (isxdigit(ch)) {
-      yytext[yyleng++] = ch;
-      ch = input();
+  if ((hex_mode && isxdigit(yytext[0]))
+      ||
+      (isdigit(yytext[0]) && (ldgram_in_expression == true || ldgram_in_script == true))) {
+    char *start = yytext;
+    unsigned int base = 10;
+    if (hex_mode == true) base = 16;
+    if (yytext[0] == '0') {
+      base = 8;
     }
+    ch = input();
+    while (isxdigit(ch) 
+	   || ch == 'x'
+	   || ch == 'X'
+	   || ch == 'M'		
+	   )
+	{
+	  if (ch == 'x' || ch == 'X') {
+	    base = 16;
+	    start = yytext + yyleng;
+	  }
+	  else {
+	    yytext[yyleng++] = ch;
+	  }
+	  ch = input();
+	}
     yytext[yyleng] = 0;
     unput(ch);
-
-    yylval.integer = number(yytext,16);
+    yylval.integer = number(start, base);
     return INT;
   }
 
@@ -462,8 +458,8 @@ WHITE		[ \t]+
 
     
 
-    /* Otherwise we only notice special things if were in an
-       expression */
+  /* Otherwise we only notice special things if were in an
+     expression */
 
   if (ldgram_in_expression) {
     if (yytext[0] != '/' ||  ldgram_in_defsym == false)  {
@@ -482,10 +478,10 @@ WHITE		[ \t]+
 	if (isalpha(ch) || isdigit(ch) || ch == '.'  || ch == '_' ) {
 	  yytext[yyleng++] = ch;
 	}
-else if (ch == '=' && ldgram_in_script) {
-/* An = within a script is always taken to be an operator */
-break;
-}
+	else if (ch == '=' && ldgram_in_script) {
+	  /* An = within a script is always taken to be an operator */
+	  break;
+	}
 	else if (ch == '+' || ch == '-' || ch == '/' || ch == '=') {
 	  if (ldgram_in_expression) break;
 	  yytext[yyleng++] = ch;
