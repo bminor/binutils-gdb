@@ -1,3 +1,14 @@
+Wed Dec  4 18:24:39 1991  John Gilmore  (gnu at cygnus.com)
+
+	* main.c (input_from_terminal_p):  Check whether GDB has a
+	terminal at all.
+	(initialize_main):  Revise doc for `set editing'.
+
+Wed Dec  4 15:36:39 1991  Fred Fish  (fnf at cygnus.com)
+
+	* dwarfread.c (struct_type):  Handle structures and unions which
+	contain DIE's other than just member dies.
+
 Wed Dec  4 01:59:05 1991  John Gilmore  (gnu at cygnus.com)
 
 	* symfile.c (reread_symbols):  Avoid kludging mtime_set, now that
