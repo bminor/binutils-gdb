@@ -34,13 +34,20 @@ struct elf32_mn10300_link_hash_entry
 
   /* For function symbols, the size of this function's stack
      (if <= 255 bytes).  We stuff this into "call" instructions
-     to this target when it's valid and profitable to do so.  */
+     to this target when it's valid and profitable to do so.
+
+     This does not include stack allocated by movm!  */
   unsigned char stack_size;
 
   /* For function symbols, arguments (if any) for movm instruction
      in the prologue.  We stuff this value into "call" instructions
      to the target when it's valid and profitable to do so.  */
   unsigned char movm_args;
+
+  /* For funtion symbols, the amount of stack space that would be allocated
+     by the movm instruction.  This is redundant with movm_args, but we
+     add it to the hash table to avoid computing it over and over.  */
+  unsigned char movm_stack_size;
 
 /* When set, convert all "call" instructions to this target into "calls"
    instructions.  */
@@ -1543,7 +1550,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	      if (code == 0xdd)
 		{
 		  bfd_put_8 (abfd, h->movm_args, contents + irel->r_offset + 4);
-		  bfd_put_8 (abfd, h->stack_size,
+		  bfd_put_8 (abfd, h->stack_size + h->movm_stack_size,
 			     contents + irel->r_offset + 5);
 		}
 	    }
@@ -1658,7 +1665,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	      if (code == 0xcd)
 		{
 		  bfd_put_8 (abfd, h->movm_args, contents + irel->r_offset + 2);
-		  bfd_put_8 (abfd, h->stack_size,
+		  bfd_put_8 (abfd, h->stack_size + h->movm_stack_size,
 			     contents + irel->r_offset + 3);
 		}
 	    }
@@ -2257,6 +2264,32 @@ compute_function_info (abfd, hash, addr, contents)
       byte2 = bfd_get_8 (abfd, contents + addr + 1);
     }
 
+  /* Now figure out how much stack space will be allocated by the movm
+     instruction.  We need this kept separate from the funtion's normal
+     stack space.  */
+  if (hash->movm_args)
+    {
+      /* Space for d2.  */
+      if (hash->movm_args & 0x80)
+	hash->movm_stack_size += 4;
+
+      /* Space for d3.  */
+      if (hash->movm_args & 0x40)
+	hash->movm_stack_size += 4;
+
+      /* Space for a2.  */
+      if (hash->movm_args & 0x20)
+	hash->movm_stack_size += 4;
+
+      /* Space for a3.  */
+      if (hash->movm_args & 0x10)
+	hash->movm_stack_size += 4;
+
+      /* "other" space.  d0, d1, a0, a1, mdr, lir, lar, 4 byte pad.  */
+      if (hash->movm_args & 0x08)
+	hash->movm_stack_size += 8 * 4;
+    }
+
   /* Now look for the two stack adjustment variants.  */
   if (byte1 == 0xf8 && byte2 == 0xfe)
     {
@@ -2271,9 +2304,16 @@ compute_function_info (abfd, hash, addr, contents)
       temp = ((temp & 0xffff) ^ (~0x7fff)) + 0x8000;
       temp = -temp;
 
-      if (temp <= 255)
+      if (temp < 255)
 	hash->stack_size = temp;
     }
+
+  /* If the total stack to be allocated by the call instruction is more
+     than 255 bytes, then we can't remove the stack adjustment by using
+     "call" (we might still be able to remove the "movm" instruction.  */
+  if (hash->stack_size + hash->movm_stack_size > 255)
+    hash->stack_size = 0;
+
   return;
 }
 
@@ -2581,6 +2621,7 @@ elf32_mn10300_link_hash_newfunc (entry, table, string)
     {
       ret->direct_calls = 0;
       ret->stack_size = 0;
+      ret->movm_stack_size = 0;
       ret->flags = 0;
       ret->movm_args = 0;
     }
