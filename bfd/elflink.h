@@ -4123,6 +4123,24 @@ elf_link_output_extsym (h, data)
 	      ((struct elf_link_hash_entry *) h->root.u.i.link, data));
     }
 
+  /* Give the processor backend a chance to tweak the symbol value,
+     and also to finish up anything that needs to be done for this
+     symbol.  */
+  if ((h->dynindx != -1
+       || (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0)
+      && elf_hash_table (finfo->info)->dynamic_sections_created)
+    {
+      struct elf_backend_data *bed;
+
+      bed = get_elf_backend_data (finfo->output_bfd);
+      if (! ((*bed->elf_backend_finish_dynamic_symbol)
+	     (finfo->output_bfd, finfo->info, h, &sym)))
+	{
+	  eoinfo->failed = true;
+	  return false;
+	}
+    }
+
   /* If this symbol should be put in the .dynsym section, then put it
      there now.  We have already know the symbol index.  We also fill
      in the entry in the .hash section.  */
@@ -4138,17 +4156,6 @@ elf_link_output_extsym (h, data)
       bfd_vma chain;
 
       sym.st_name = h->dynstr_index;
-
-      /* Give the processor backend a chance to tweak the symbol
-	 value, and also to finish up anything that needs to be done
-	 for this symbol.  */
-      bed = get_elf_backend_data (finfo->output_bfd);
-      if (! ((*bed->elf_backend_finish_dynamic_symbol)
-	     (finfo->output_bfd, finfo->info, h, &sym)))
-	{
-	  eoinfo->failed = true;
-	  return false;
-	}
 
       elf_swap_symbol_out (finfo->output_bfd, &sym,
 			   (PTR) (((Elf_External_Sym *)

@@ -1050,7 +1050,7 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 		       || r_type == R_SPARC_GOT22)
 		      && elf_hash_table (info)->dynamic_sections_created
 		      && (! info->shared
-			  || ! info->symbolic
+			  || (! info->symbolic && h->dynindx != -1)
 			  || (h->elf_link_hash_flags
 			      & ELF_LINK_HASH_DEF_REGULAR) == 0))
 		  || (info->shared
@@ -1123,15 +1123,16 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      if (! elf_hash_table (info)->dynamic_sections_created
 		  || (info->shared
-		      && info->symbolic
+		      && (info->symbolic || h->dynindx == -1)
 		      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
 		{
 		  /* This is actually a static link, or it is a
                      -Bsymbolic link and the symbol is defined
-                     locally.  We must initialize this entry in the
-                     global offset table.  Since the offset must
-                     always be a multiple of 4, we use the least
-                     significant bit to record whether we have
+                     locally, or the symbol was forced to be local
+                     because of a version file.  We must initialize
+                     this entry in the global offset table.  Since the
+                     offset must always be a multiple of 4, we use the
+                     least significant bit to record whether we have
                      initialized it already.
 
 		     When doing a dynamic link, we create a .rela.got
@@ -1498,8 +1499,6 @@ elf32_sparc_finish_dynamic_symbol (output_bfd, info, h, sym)
       /* This symbol has an entry in the global offset table.  Set it
          up.  */
 
-      BFD_ASSERT (h->dynindx != -1);
-
       sgot = bfd_get_section_by_name (dynobj, ".got");
       srela = bfd_get_section_by_name (dynobj, ".rela.got");
       BFD_ASSERT (sgot != NULL && srela != NULL);
@@ -1509,11 +1508,12 @@ elf32_sparc_finish_dynamic_symbol (output_bfd, info, h, sym)
 		       + (h->got_offset &~ 1));
 
       /* If this is a -Bsymbolic link, and the symbol is defined
-	 locally, we just want to emit a RELATIVE reloc.  The entry in
-	 the global offset table will already have been initialized in
-	 the relocate_section function.  */
+	 locally, we just want to emit a RELATIVE reloc.  Likewise if
+	 the symbol was forced to be local because of a version file.
+	 The entry in the global offset table will already have been
+	 initialized in the relocate_section function.  */
       if (info->shared
-	  && info->symbolic
+	  && (info->symbolic || h->dynindx == -1)
 	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
 	rela.r_info = ELF32_R_INFO (0, R_SPARC_RELATIVE);
       else
