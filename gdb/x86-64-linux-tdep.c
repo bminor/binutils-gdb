@@ -234,7 +234,7 @@ x86_64_linux_sigcontext_addr (struct frame_info *next_frame)
 
 
 /* From <asm/sigcontext.h>.  */
-static int x86_64_linux_sc_reg_offset[X86_64_NUM_GREGS] =
+static int x86_64_linux_sc_reg_offset[] =
 {
   13 * 8,			/* %rax */
   11 * 8,			/* %rbx */
@@ -275,7 +275,7 @@ x86_64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tdep->sigcontext_addr = x86_64_linux_sigcontext_addr;
   tdep->sc_reg_offset = x86_64_linux_sc_reg_offset;
-  tdep->sc_num_regs = X86_64_NUM_GREGS;
+  tdep->sc_num_regs = ARRAY_SIZE (x86_64_linux_sc_reg_offset);
 }
 
 

@@ -1,3 +1,10 @@
+2003-10-31  Mark Kettenis  <kettenis@gnu.org>
+
+	* x86-64-linux-tdep.c (x86_64_linux_sc_reg_offset): Don't
+	explicitly specify size of array.
+	(x86_64_linux_init_abi): Use ARRAY_SIZE to initialize
+	TDEP->sc_num_regs.
+
 2003-10-31  Andrew Cagney  <cagney@redhat.com>
 
 	* s390-tdep.c (s390_cannot_extract_struct_value_address): New
