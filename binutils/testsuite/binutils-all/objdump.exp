@@ -1,4 +1,4 @@
-#   Copyright (C) 1993, 1994 Free Software Foundation, Inc.
+#   Copyright (C) 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@ send_user "Version [binutil_version $OBJDUMP]"
 
 set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -i"]
 
-set cpus_expected "(a29k|alliant|alpha|arm|convex|h8|hppa|i386|i860|i960|m68k|m88k|mips|ns32k|powerpc|pyramid|romp|rs6000|sh|sparc|tahoe|vax|we32k|z8k)"
-# start-sanitize-arc
-set cpus_expected "(a29k|alliant|alpha|arc|arm|convex|h8|hppa|i386|i860|i960|m68k|m88k|mips|ns32k|powerpc|pyramid|romp|rs6000|sh|sparc|tahoe|vax|we32k|z8k)"
-# end-sanitize-arc
+set cpus_expected "(a29k|alliant|alpha|arc|arm|convex|d10v|h8|hppa|i386|i860|i960|m32r|m68k|m88k|mips|mn10200|mn10300|ns32k|powerpc|pyramid|romp|rs6000|sh|sparc|tahoe|vax|we32k|z8k|z8001|z8002)"
+# start-sanitize-d30v
+set cpus_expected "(a29k|alliant|alpha|arm|convex|d10v|h8|hppa|i386|i860|i960|d30v|m32r|m68k|m88k|mips|mn10200|mn10300|ns32k|powerpc|pyramid|romp|rs6000|sh|sparc|tahoe|vax|we32k|z8k|z8001|z8002)"
+# end-sanitize-d30v
 
-set want "BFD header file version.*srec.*header .* endian, data .* endian.*$cpus_expected"
+set want "BFD header file version.*srec.*header .* endian.*, data .* endian.*$cpus_expected"
 
 if [regexp $want $got] then {
     pass "objdump -i"
@@ -47,15 +47,20 @@ if [regexp $want $got] then {
 # The remaining tests require a test file.
 
 
-if {![binutils_assemble $AS $srcdir$subdir/bintest.s tmpdir/bintest.o]} then {
+if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.o]} then {
     return
+}
+if [is_remote host] {
+    set testfile [remote_download host tmpdir/bintest.o]
+} else {
+    set testfile tmpdir/bintest.o
 }
 
 # Test objdump -f
 
-set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -f tmpdir/bintest.o"]
+set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -f $testfile"]
 
-set want "tmpdir/bintest.o:\[ 	\]*file format.*architecture:\[ 	\]*${cpus_expected}.*HAS_RELOC.*HAS_SYMS"
+set want "$testfile:\[ 	\]*file format.*architecture:\[ 	\]*${cpus_expected}.*HAS_RELOC.*HAS_SYMS"
 
 if ![regexp $want $got] then {
     fail "objdump -f"
@@ -65,15 +70,15 @@ if ![regexp $want $got] then {
 
 # Test objdump -h
 
-set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -h tmpdir/bintest.o"]
+set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -h $testfile"]
 
-set want "tmpdir/bintest.o:\[ 	\]*file format.*SECTION\[ 	]*\[0-9\]+\[ 	\]*\\\[\[^\]\]*(text|TEXT|CODE)\[^\]\]*\\\]\[ 	:\]*size\[ 	\]*(\[0-9a-fA-F\]+)\[ 	\]*.*SECTION\[ 	\]*\[0-9\]+\[ 	\]*\\\[\[^\]\]*(data|DATA)\[^\]\]*\\\]\[ 	:\]*size\[ 	\]*(\[0-9a-fA-F\]+)\[ 	\]*"
+set want "$testfile:\[ 	\]*file format.*Sections.*\[0-9\]+\[ 	\]+\[^ 	\]*(text|TEXT|\\\$CODE\\\$)\[^ 	\]*\[ 	\]*(\[0-9a-fA-F\]+).*\[0-9\]+\[ 	\]+\[^ 	\]*(data|DATA)\[^ 	\]*\[ 	\]*(\[0-9a-fA-F\]+)"
 
 if ![regexp $want $got all text_name text_size data_name data_size] then {
     fail "objdump -h"
 } else {
-    verbose "text size is $text_size"
-    verbose "data size is $data_size"
+    verbose "text name is $text_name size is $text_size"
+    verbose "data name is $data_name size is $data_size"
     if {[expr "0x$text_size"] < 8 || [expr "0x$data_size"] < 4} then {
 	send_log "sizes too small\n"
 	fail "objdump -h"
@@ -84,7 +89,7 @@ if ![regexp $want $got all text_name text_size data_name data_size] then {
 
 # Test objdump -t
 
-set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -t tmpdir/bintest.o"]
+set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -t $testfile"]
 
 if [info exists vars] then { unset vars }
 while {[regexp "(\[a-z\]*_symbol)(.*)" $got all symbol rest]} {
@@ -103,9 +108,9 @@ if {![info exists vars(text_symbol)] \
 
 # Test objdump -r
 
-set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -r tmpdir/bintest.o"]
+set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -r $testfile"]
 
-set want "tmpdir/bintest.o:\[ 	\]*file format.*RELOCATION RECORDS FOR \\\[\[^\]\]*(text|TEXT|CODE)\[^\]\]*\\\].*external_symbol"
+set want "$testfile:\[ 	\]*file format.*RELOCATION RECORDS FOR \\\[\[^\]\]*(text|TEXT|\\\$CODE\\\$)\[^\]\]*\\\].*external_symbol"
 
 if [regexp $want $got] then {
     pass "objdump -r"
@@ -115,9 +120,9 @@ if [regexp $want $got] then {
 
 # Test objdump -s
 
-set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -s tmpdir/bintest.o"]
+set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -s $testfile"]
 
-set want "tmpdir/bintest.o:\[ 	\]*file format.*Contents.*(text|TEXT|CODE)\[^0-9\]*\[ 	\]*\[0-9a-fA-F\]*\[ 	\]*(00000001|01000000).*Contents.*(data|DATA)\[^0-9\]*\[ 	\]*\[0-9a-fA-F\]*\[ 	\]*(00000002|02000000)"
+set want "$testfile:\[ 	\]*file format.*Contents.*(text|TEXT|\\\$CODE\\\$)\[^0-9\]*\[ 	\]*\[0-9a-fA-F\]*\[ 	\]*(00000001|01000000).*Contents.*(data|DATA)\[^0-9\]*\[ 	\]*\[0-9a-fA-F\]*\[ 	\]*(00000002|02000000)"
 
 if [regexp $want $got] then {
     pass "objdump -s"
