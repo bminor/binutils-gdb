@@ -1,0 +1,34 @@
+# Test DEFINED in a linker script.
+# By Ian Lance Taylor, Cygnus Support.
+
+if ![file isdirectory tmpdir] {catch "exec mkdir tmpdir" status}
+
+set as [findfile $base_dir/../gas/as.new $base_dir/../gas/as.new [transform as]]
+set nm [findfile $base_dir/../binutils/nm.new $base_dir/../binutils/nm.new [transform nm]]
+
+if ![ld_assemble $as $srcdir$subdir/defined.s tmpdir/def.o] { return }
+
+set prms_id 5699
+
+if ![ld_simple_link $ld tmpdir/def "-T $srcdir$subdir/defined.t tmpdir/def.o"] {
+    fail DEFINED
+} else {
+    if [ld_nm $nm tmpdir/def] {
+	if {![info exists nm_output(value1)] \
+	     || ![info exists nm_output(value2)]} {
+	    perror "bad output from $nm"
+	} else {
+	    if {$nm_output(value1) != 1} {
+		fail "DEFINED (value1 == $nm_output(value1))"
+	    } else {
+		if {$nm_output(value2) != 2} {
+		    fail "DEFINED (value2 == $nm_output(value2))"
+		} else {
+		    pass DEFINED
+		}
+	    }
+	}
+    }
+}
+
+set prms_id 0

@@ -1,5 +1,13 @@
 Tue Sep 27 14:59:51 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* ld.scripts: New directory.
+	* ld.scripts/defined.exp, ld.scripts/defined.s: New files.
+	* ld.scripts/defined.t: New file.
+	* lib/ld.exp (default_ld_simple_link): New function.
+	(default_ld_assemble, default_ld_nm): New functions.
+	* config/default.exp: Rename from unix-ld.exp.
+	(ld_simple_link, ld_assemble, ld_nm): New functions.
+
 	* config/unix-ld.exp: Set ld using findfile.
 	* lib/ld.exp (default_ld_relocate): Return a value.  Change format
 	of log messages.

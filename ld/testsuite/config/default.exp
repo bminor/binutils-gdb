@@ -93,11 +93,35 @@ proc ld_link { ld target objects } {
 }
 
 #
+# ld_simple_link 
+#	link a program using ld, without including any libraries
+#
+proc ld_simple_link { ld target objects } {
+	default_ld_simple_link $ld $target $objects
+}
+
+#
 # ld_compile 
 #	compile an object using $cc
 #
 proc ld_compile { cc source object } {
 	default_ld_compile $cc $source $object 
+}
+
+#
+# ld_assemble
+#	assemble a file
+#
+proc ld_assemble { as source object } {
+	default_ld_assemble $as $source $object 
+}
+
+#
+# ld_nm
+#	run nm on a file
+#
+proc ld_nm { nm object } {
+	default_ld_nm $nm $object
 }
 
 #

@@ -23,12 +23,9 @@ Do-first:
 
 Things-to-keep:
 
-ChangeLog
-config
-lib
-ld.bootstrap
-ld.cdtest
-ld.scripts
+defined.exp
+defined.s
+defined.t
 
 Things-to-lose:
 

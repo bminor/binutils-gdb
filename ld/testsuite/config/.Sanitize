@@ -23,7 +23,7 @@ Do-first:
 
 Things-to-keep:
 
-unix-ld.exp
+default.exp
 
 Things-to-lose:
 
