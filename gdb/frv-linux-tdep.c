@@ -192,7 +192,7 @@ frv_linux_sigcontext_reg_addr (struct frame_info *next_frame, int regno,
       else if (tramp_type == RT_SIGTRAMP)
 	{
 	  /* For a realtime sigtramp frame, SP + 12 contains a pointer
- 	     to the a ucontext struct.  The ucontext struct contains a
+ 	     to a ucontext struct.  The ucontext struct contains a
  	     sigcontext struct starting 24 bytes in.  (The offset of
  	     uc_mcontext within struct ucontext is derived as follows: 
  	     stack_t is a 12-byte struct and struct sigcontext is

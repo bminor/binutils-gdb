@@ -1,3 +1,8 @@
+2005-03-21  Kevin Buettner  <kevinb@redhat.com>
+
+	* frv-linux-tdep.c (frv_linux_sigcontext_reg_addr): Fix typo in
+	comment.
+
 2005-03-20  Mark Kettenis  <kettenis@gnu.org>
 
 	* dwarf2loc.c (dwarf_expr_tls_address): Mark addr as volatile.
