@@ -12,6 +12,9 @@
 #define SEEK_SET 0
 #define SEEK_CUR 1
 
+extern char *malloc();
+extern void free();
+
 /* EXACT TYPES */
 typedef char int8e_type;
 typedef unsigned char uint8e_type;
