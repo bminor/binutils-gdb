@@ -608,6 +608,8 @@ value_repeat (arg1, count)
     error ("Only values in memory can be extended with '@'.");
   if (count < 1)
     error ("Invalid number %d of repetitions.", count);
+  if (VALUE_REPEATED (arg1))
+    error ("Cannot create artificial arrays of artificial arrays.");
 
   val = allocate_repeat_value (VALUE_TYPE (arg1), count);
 
