@@ -1,3 +1,7 @@
+1999-05-26  Nick Clifton  <nickc@cygnus.com>
+
+	* emulparams/armelf_oabi.sh (TEMPLATE_NAME): Set to armelf_oabi. 
+
 1999-05-24  Philip Blundell  <philb@gnu.org>
 
 	* emultempl/armelf.em (before_parse): Set config.dynamic_link and
