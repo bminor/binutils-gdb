@@ -299,6 +299,7 @@ jump_command (arg, from_tty)
      int from_tty;
 {
   register CORE_ADDR addr;
+  struct symtabs_and_lines sals;
   struct symtab_and_line sal;
 
   ERROR_NO_INFERIOR;
@@ -306,7 +307,14 @@ jump_command (arg, from_tty)
   if (!arg)
     error_no_arg ("starting address");
 
-  sal = decode_line_spec (arg, 1);
+  sals = decode_line_spec (arg, 1);
+  if (sals.nelts != 1)
+    {
+      error ("Unreasonable jump request");
+    }
+
+  sal = sals.sals[0];
+  free (sals.sals);
 
   if (sal.symtab == 0 && sal.pc == 0)
     error ("No source file has been specified.");
@@ -458,7 +466,7 @@ finish_command (arg, from_tty)
 
   /* Find the function we will return from.  */
 
-  fi = get_frame_info (fi.next_frame);
+  fi = get_frame_info (fi.next_frame, fi.next_next_frame);
   function = find_pc_function (fi.pc);
 
   if (from_tty)
@@ -613,6 +621,9 @@ write_pc (val)
      CORE_ADDR val;
 {
   write_register (PC_REGNUM, (long) val);
+#ifdef NPC_REGNUM
+  write_register (NPC_REGNUM, (long) val+4);
+#endif
 }
 
 char *reg_names[] = REGISTER_NAMES;
@@ -670,7 +681,7 @@ registers_info (addr_exp)
       /* If virtual format is floating, print it that way.  */
       if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT
 	  && ! INVALID_FLOAT (virtual_buffer, REGISTER_VIRTUAL_SIZE (i)))
-	val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, stdout, 0);
+	val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, stdout, 0, 1);
       /* Else if virtual format is too long for printf,
 	 print in hex a byte at a time.  */
       else if (REGISTER_VIRTUAL_SIZE (i) > sizeof (long))

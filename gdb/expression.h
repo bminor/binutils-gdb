@@ -60,6 +60,20 @@ enum exp_opcode
   BINOP_COMMA,		/* , */
   BINOP_SUBSCRIPT,	/* x[y] */
   BINOP_EXP,		/* Exponentiation */
+
+/* C++.  */
+  BINOP_MIN,		/* <? */
+  BINOP_MAX,		/* >? */
+  BINOP_SCOPE,		/* :: */
+
+  /* STRUCTOP_MEMBER is used for pointer-to-member constructs.
+     X . * Y translates into X STRUCTOP_MEMBER Y.  */
+  STRUCTOP_MEMBER,
+  /* STRUCTOP_MPTR is used for pointer-to-member constructs
+     when X is a pointer instead of an aggregate.  */
+  STRUCTOP_MPTR,
+/* end of C++.  */
+
   BINOP_END,
 
   BINOP_ASSIGN_MODIFY,	/* +=, -=, *=, and so on.
@@ -144,6 +158,17 @@ enum exp_opcode
    (after the string), followed by another STRUCTOP_... code.  */
   STRUCTOP_STRUCT,
   STRUCTOP_PTR,
+
+/* C++ */
+  /* OP_THIS is just a placeholder for the class instance variable.
+     It just comes in a tight (OP_THIS, OP_THIS) pair.  */
+  OP_THIS,
+
+  /* OP_SCOPE surrounds a type name and a field name.  The type
+     name is encoded as one element, but the field name stays as
+     a string, which, of course, is variable length.  */
+  OP_SCOPE,
+
 };
 
 union exp_element

@@ -61,6 +61,10 @@ case $# in
 		pinsnfile=m68k-pinsn.c
 		opcodefile=m68k-opcode.h
 		;;
+	sun4)
+		pinsnfile=sparc-pinsn.c
+		opcodefile=sparc-opcode.h
+		;;
 	umax)
 		pinsnfile=ns32k-pinsn.c
 		opcodefile=ns32k-opcode.h

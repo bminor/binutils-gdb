@@ -196,7 +196,7 @@ frame_info (addr_exp)
     printf (" in %s", funname);
   if (sal.symtab)
     printf (" (%s line %d)", sal.symtab->filename, sal.line);
-  printf ("; saved pc 0x%x\n", FRAME_SAVED_PC (frame));
+  printf ("; saved pc 0x%x\n", FRAME_SAVED_PC (frame, fi.next_frame));
   if (calling_frame)
     printf (" called by frame at 0x%x", calling_frame);
   if (fi.next_frame && calling_frame)
@@ -347,7 +347,7 @@ print_frame_arg_vars (frame, stream)
   for (i = 0; i < nsyms; i++)
     {
       sym = BLOCK_SYM (b, i);
-      if (SYMBOL_CLASS (sym) == LOC_ARG)
+      if (SYMBOL_CLASS (sym) == LOC_ARG || SYMBOL_CLASS (sym) == LOC_REGPARM)
 	{
 	  fprintf (stream, "%s = ", SYMBOL_NAME (sym));
 	  print_variable_value (sym, frame, stream);
@@ -433,7 +433,7 @@ find_relative_frame (frame, level_offset_ptr)
   /* Going down could be done by iterating get_frame_info to
      find the next frame, but that would be quadratic
      since get_frame_info must scan all the way from the current frame.
-     The following algotithm is linear.  */
+     The following algorithm is linear.  */
   if (*level_offset_ptr < 0)
     {
       /* First put frame1 at innermost frame

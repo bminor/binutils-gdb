@@ -176,6 +176,12 @@ write_register (regno, val)
      int regno, val;
 {
   /* This loses when REGISTER_RAW_SIZE (regno) != sizeof (int) */
+#if defined(sun4)
+  /* This is a no-op on a Sun 4.  */
+  if (regno == 0)
+    return;
+#endif
+
   *(int *) &registers[REGISTER_BYTE (regno)] = val;
 
   if (have_inferior_p ())
@@ -253,6 +259,7 @@ read_var_value (var, frame)
       return v;
 
     case LOC_REGISTER:
+    case LOC_REGPARM:
       {
 	char raw_buffer[MAX_REGISTER_RAW_SIZE];
 	char virtual_buffer[MAX_REGISTER_VIRTUAL_SIZE];
@@ -356,6 +363,7 @@ locate_var_value (var, frame)
 	     SYMBOL_NAME (var));
 
     case LOC_REGISTER:
+    case LOC_REGPARM:
       addr = find_saved_register (frame, val);
       if (addr != 0)
 	{

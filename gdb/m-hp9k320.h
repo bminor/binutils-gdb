@@ -256,13 +256,13 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 #define FRAME_CHAIN(thisframe)  (read_memory_integer (thisframe, 4))
 
 #define FRAME_CHAIN_VALID(chain, thisframe) \
-  (chain != 0 && (FRAME_SAVED_PC (thisframe) >= first_object_file_end))
+  (chain != 0 && (FRAME_SAVED_PC (thisframe,0) >= first_object_file_end))
 
 #define FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
 
 /* Define other aspects of the stack frame.  */
 
-#define FRAME_SAVED_PC(frame) (read_memory_integer (frame + 4, 4))
+#define FRAME_SAVED_PC(frame,ignore) (read_memory_integer (frame + 4, 4))
 
 #define FRAME_ARGS_ADDRESS(fi) (fi.frame)
 
@@ -277,7 +277,7 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 
 #if 0
 #define FRAME_NUM_ARGS(val, fi)  \
-{ register CORE_ADDR pc = FRAME_SAVED_PC (fi.frame);		\
+{ register CORE_ADDR pc = FRAME_SAVED_PC (fi.frame,0);		\
   register int insn = 0177777 & read_memory_integer (pc, 2);	\
   val = 0;							\
   if (insn == 0047757 || insn == 0157374)  /* lea W(sp),sp or addaw #W,sp */ \

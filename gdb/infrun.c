@@ -29,7 +29,6 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #include <stdio.h>
 #include <signal.h>
 #include <a.out.h>
-#include <sys/file.h>
 
 #ifdef UMAX_PTRACE
 #include <sys/param.h>
@@ -117,6 +116,14 @@ static int running_in_shell;
 
 static int stop_print_frame;
 
+#ifdef NO_SINGLE_STEP
+/* Non-zero if we just simulated a single-step ptrace call.  This is
+   needed because we cannot remove the breakpoints in the inferior
+   process until after the `wait' in `wait_for_inferior'.
+   Used for sun4.  */
+int one_stepped;
+#endif /* NO_SINGLE_STEP */
+
 static void insert_step_breakpoint ();
 static void remove_step_breakpoint ();
 static void wait_for_inferior ();
@@ -178,7 +185,12 @@ proceed (addr, signal, step)
 	oneproc = 1;
     }
   else
-    write_register (PC_REGNUM, addr);
+    {
+      write_register (PC_REGNUM, addr);
+#ifdef NPC_REGNUM
+      write_register (NPC_REGNUM, addr+4);
+#endif
+    }
 
   if (trap_expected_after_continue)
     {
@@ -351,6 +363,13 @@ wait_for_inferior ()
 	    continue;
 	}
 
+#ifdef NO_SINGLE_STEP
+      if (one_stepped)
+	{
+	  single_step (0);
+        }
+#endif /* NO_SINGLE_STEP */
+
       pc_changed = 0;
       fetch_inferior_registers ();
       stop_pc = read_pc ();
@@ -451,6 +470,9 @@ wait_for_inferior ()
 		      {
 			stop_pc -= DECR_PC_AFTER_BREAK;
 			write_register (PC_REGNUM, stop_pc);
+#ifdef NPC_REGNUM
+			write_register (NPC_REGNUM, stop_pc + 4);
+#endif
 			pc_changed = 0;
 		      }
 		  }
@@ -463,6 +485,9 @@ wait_for_inferior ()
 		    {
 		      stop_pc -= DECR_PC_AFTER_BREAK;
 		      write_register (PC_REGNUM, stop_pc);
+#ifdef NPC_REGNUM
+		      write_register (PC_REGNUM, stop_pc + 4);
+#endif
 		      pc_changed = 0;
 		    }
 		}
@@ -766,13 +791,7 @@ Further execution is probably impossible.\n");
   if (running_in_shell)
     {
       if (stop_signal == SIGSEGV)
-	{
-	  char *exec_file = (char *) get_exec_file (1);
-
-	  if (access (exec_file, X_OK) != 0)
-	    printf ("The file \"%s\" is not executable.\n", exec_file);
-	  else
-	    printf ("\
+	printf ("\
 You have just encountered a bug in \"sh\".  GDB starts your program\n\
 by running \"sh\" with a command to exec your program.\n\
 This is so that \"sh\" will process wildcards and I/O redirection.\n\
@@ -784,7 +803,6 @@ some variables whose values are large; then do \"run\" again.\n\
 \n\
 If that works, you might want to put those \"unset-env\" commands\n\
 into a \".gdbinit\" file in this directory so they will happen every time.\n");
-	}
       /* Don't confuse user with his program's symbols on sh's data.  */
       stop_print_frame = 0;
     }
@@ -1024,6 +1042,150 @@ Pass and Stop may be combined.");
   signal_stop[SIGURG] = 0;
   signal_print[SIGURG] = 0;
 #endif /* SIGURG */
+}
+
+#ifdef NO_SINGLE_STEP
+/* This code was written by Gary Beihl (beihl@mcc.com).
+   It was modified by Michael Tiemann (tiemann@corto.inria.fr).  */
+
+/* Simulate single-step ptrace call for sun4.  */
+
+typedef enum
+{
+  b_error, not_branch, bicc, bicca, ba, baa, ticc, ta,
+} branch_type;
+
+static CORE_ADDR next_pc, pc8, target;
+static int brkpc8, brktrg;
+typedef char binsn_quantum[sizeof break_insn];
+static binsn_quantum break_mem[3];
+
+int
+single_step (signal)
+     int signal;
+{
+  branch_type br, isabranch();
+
+  next_pc = read_register (NPC_REGNUM);
+  pc8 = read_register (PC_REGNUM) + 8; /* branch not taken */
+
+  if (!one_stepped)
+    {
+      /* Always set breakpoint for NPC.  */
+      read_memory (next_pc, break_mem[0], sizeof break_insn);
+      write_memory (next_pc, break_insn, sizeof break_insn);
+
+      /* printf ("set break at %x\n",next_pc); */
+      br = isabranch (pc8 - 8, &target);
+      brkpc8 = brktrg = 0;
+
+      if (br == bicca && pc8 != next_pc)
+	{
+	  /* Handle branches with care */
+	  brkpc8 = 1;
+	  read_memory (pc8, break_mem[1], sizeof break_insn);
+	  write_memory (pc8, break_insn, sizeof break_insn);
+	}
+      else if (br == baa && target != next_pc)
+	{ 
+	  brktrg = 1;
+	  read_memory (target, break_mem[2], sizeof break_insn);
+	  write_memory (target, break_insn, sizeof break_insn);
+	}
+
+      /* Let it go */
+      ptrace (7, inferior_pid, 1, signal);
+      one_stepped = 1;
+      return;
+    }
+  else
+    {
+      /* Remove breakpoints */
+      write_memory (next_pc, break_mem[0], sizeof break_insn);
+
+      if (brkpc8)
+	{
+	  write_memory (pc8, break_mem[1], sizeof break_insn);
+	}
+      if (brktrg)
+	{
+	  write_memory (target, break_mem[2], sizeof break_insn);
+	}
+      one_stepped = 0;
+    }
+}
+
+#endif /* NO_SINGLE_STEP */
+
+static int save_insn_opcodes[] = { 0x03000000, 0x82007ee0, 0x9de38001, 0x03000000, 0x82007ee0, 0x91d02001, 0x01000000 };
+
+void
+do_save_insn (size)
+     int size;
+{
+  int g1 = read_register (1);
+  CORE_ADDR sp = read_register (SP_REGNUM);
+  CORE_ADDR pc = read_register (PC_REGNUM);
+#ifdef NPC_REGNUM
+  CORE_ADDR npc = read_register (NPC_REGNUM);
+#endif
+  CORE_ADDR fake_pc = sp - sizeof (save_insn_opcodes);
+  save_insn_opcodes[0] = 0x03000000 | ((-size >> 12) & 0x3fffff);
+  save_insn_opcodes[1] = 0x82006000 | (-size & 0x3ff);
+  save_insn_opcodes[3] = 0x03000000 | ((g1 >> 12) & 0x3fffff);
+  save_insn_opcodes[4] = 0x82006000 | (g1 & 0x3ff);
+  write_memory (fake_pc, save_insn_opcodes, sizeof (save_insn_opcodes));
+  clear_proceed_status ();
+  stop_after_trap = 1;
+
+  proceed (fake_pc, 0, 0);
+
+  write_register (PC_REGNUM, pc);
+#ifdef NPC_REGNUM
+  write_register (NPC_REGNUM, npc);
+#endif
+}
+
+static int restore_insn_opcodes[] = { 0x81e80000, 0x91d02001, 0x01000000 };
+
+void
+do_restore_insn (raw_buffer)
+     char raw_buffer[];
+{
+  CORE_ADDR pc = read_memory_integer (*(int *)&raw_buffer[REGISTER_BYTE (PC_REGNUM)], 4);
+  CORE_ADDR sp = read_register (SP_REGNUM);
+#ifdef NPC_REGNUM
+  CORE_ADDR npc = *(int *)&raw_buffer[REGISTER_BYTE (NPC_REGNUM)] != 0
+    ? read_memory_integer (*(int *)&raw_buffer[REGISTER_BYTE (NPC_REGNUM)], 4) : pc + 4;
+#endif
+  CORE_ADDR fake_pc = sp - sizeof (restore_insn_opcodes);
+  int saved_stop_stack_dummy = stop_stack_dummy;
+
+  if (*(int *)&raw_buffer[REGISTER_BYTE (PC_REGNUM)] == 0)
+    abort ();
+
+  write_memory (fake_pc, restore_insn_opcodes, sizeof (restore_insn_opcodes));
+  clear_proceed_status ();
+  stop_after_trap = 1;
+
+  proceed (fake_pc, 0, 0);
+
+  stop_stack_dummy = saved_stop_stack_dummy;
+  write_register (PC_REGNUM, pc);
+#ifdef NPC_REGNUM
+  write_register (NPC_REGNUM, npc);
+#endif
+
+  /* Select innermost stack frame except on return from a stack dummy routine,
+     or if the program has exited.  */
+  if (!stop_stack_dummy)
+    {
+      select_frame (stop_frame, 0);
+    }
+  else
+    {
+      select_frame (read_register (FP_REGNUM), 0);
+    }
 }
 
 END_FILE

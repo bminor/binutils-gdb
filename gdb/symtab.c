@@ -28,6 +28,9 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 
 START_FILE
 
+static int find_line_common();
+static int lookup_misc_func();
+
 /* Allocate an obstack to hold objects that should be freed
    when we load a new symbol table.
    This includes the symbols made by dbxread
@@ -176,14 +179,17 @@ lookup_enum (name, block)
 }
 
 /* Given a type TYPE, return a type of pointers to that type.
-   May need to construct such a type if this is the first use.  */
+   May need to construct such a type if this is the first use.
+
+   C++: use TYPE_MAIN_VARIANT and TYPE_CHAIN to keep pointer
+   to member types under control.  */
 
 struct type *
 lookup_pointer_type (type)
      struct type *type;
 {
   register struct type *ptype = TYPE_POINTER_TYPE (type);
-  if (ptype) return ptype;
+  if (ptype) return TYPE_MAIN_VARIANT (ptype);
 
   /* This is the first time anyone wanted a pointer to a TYPE.  */
   if (TYPE_FLAGS (type) & TYPE_FLAG_PERM)
@@ -193,6 +199,7 @@ lookup_pointer_type (type)
 					    sizeof (struct type));
 
   bzero (ptype, sizeof (struct type));
+  TYPE_MAIN_VARIANT (ptype) = ptype;
   TYPE_TARGET_TYPE (ptype) = type;
   TYPE_POINTER_TYPE (type) = ptype;
   /* New type is permanent if type pointed to is permanent.  */
@@ -204,12 +211,150 @@ lookup_pointer_type (type)
   return ptype;
 }
 
+struct type *
+lookup_reference_type (type)
+     struct type *type;
+{
+  register struct type *rtype = TYPE_REFERENCE_TYPE (type);
+  if (rtype) return TYPE_MAIN_VARIANT (rtype);
+
+  /* This is the first time anyone wanted a pointer to a TYPE.  */
+  if (TYPE_FLAGS (type) & TYPE_FLAG_PERM)
+    rtype  = (struct type *) xmalloc (sizeof (struct type));
+  else
+    rtype  = (struct type *) obstack_alloc (symbol_obstack,
+					    sizeof (struct type));
+
+  bzero (rtype, sizeof (struct type));
+  TYPE_MAIN_VARIANT (rtype) = rtype;
+  TYPE_TARGET_TYPE (rtype) = type;
+  TYPE_REFERENCE_TYPE (type) = rtype;
+  /* New type is permanent if type pointed to is permanent.  */
+  if (TYPE_FLAGS (type) & TYPE_FLAG_PERM)
+    TYPE_FLAGS (rtype) |= TYPE_FLAG_PERM;
+  /* We assume the machine has only one representation for pointers!  */
+  TYPE_LENGTH (rtype) = sizeof (char *);
+  TYPE_CODE (rtype) = TYPE_CODE_REF;
+  return rtype;
+}
+
+/* Implement direct support for MEMBER_TYPE in GNU C++.
+   May need to construct such a type if this is the first use.
+   The TYPE is the type of the member.  The DOMAIN is the type
+   of the aggregate that the member belongs to.  */
+
+struct type *
+lookup_member_type (domain, type)
+     struct type *domain, *type;
+{
+  register struct type *mtype = TYPE_MAIN_VARIANT (type);
+  struct type *main_type;
+
+  main_type = mtype;
+  while (mtype)
+    {
+      if (TYPE_DOMAIN_TYPE (mtype) == domain)
+	return mtype;
+      mtype = TYPE_NEXT_VARIANT (mtype);
+    }
+
+  /* This is the first time anyone wanted this member type.  */
+  if (TYPE_FLAGS (type) & TYPE_FLAG_PERM)
+    mtype  = (struct type *) xmalloc (sizeof (struct type));
+  else
+    mtype  = (struct type *) obstack_alloc (symbol_obstack,
+					    sizeof (struct type));
+
+  bzero (mtype, sizeof (struct type));
+  if (main_type == 0) main_type = mtype;
+  else
+    {
+      TYPE_NEXT_VARIANT (mtype) = TYPE_NEXT_VARIANT (main_type);
+      TYPE_NEXT_VARIANT (main_type) = mtype;
+    }
+  TYPE_MAIN_VARIANT (mtype) = main_type;
+  TYPE_TARGET_TYPE (mtype) = type;
+  TYPE_DOMAIN_TYPE (mtype) = domain;
+  /* New type is permanent if type pointed to is permanent.  */
+  if (TYPE_FLAGS (type) & TYPE_FLAG_PERM)
+    TYPE_FLAGS (mtype) |= TYPE_FLAG_PERM;
+
+  /* In practice, this is never used.  */
+  TYPE_LENGTH (mtype) = 1;
+  TYPE_CODE (mtype) = TYPE_CODE_MEMBER;
+
+  return mtype;
+}
+
+/* Given a type TYPE, return a type which has offset OFFSET,
+   via_virtual VIA_VIRTUAL, and via_public VIA_PUBLIC.
+   May need to construct such a type if none exists.  */
+struct type *
+lookup_basetype_type (type, offset, via_virtual, via_public)
+     struct type *type;
+     int offset;
+     int via_virtual, via_public;
+{
+  register struct type *btype = TYPE_MAIN_VARIANT (type);
+  struct type *main_type;
+
+  if (offset != 0)
+    {
+      printf ("type offset non-zero in lookup_basetype_type");
+      offset = 0;
+    }
+
+  main_type = btype;
+  while (btype)
+    {
+      if (/* TYPE_OFFSET (btype) == offset
+	  && */ TYPE_VIA_PUBLIC (btype) == via_public
+	  && TYPE_VIA_VIRTUAL (btype) == via_virtual)
+	return btype;
+      btype = TYPE_NEXT_VARIANT (btype);
+    }
+
+  /* This is the first time anyone wanted this member type.  */
+  if (TYPE_FLAGS (type) & TYPE_FLAG_PERM)
+    btype  = (struct type *) xmalloc (sizeof (struct type));
+  else
+    btype  = (struct type *) obstack_alloc (symbol_obstack,
+					    sizeof (struct type));
+
+  if (main_type == 0)
+    {
+      main_type = btype;
+      bzero (btype, sizeof (struct type));
+      TYPE_MAIN_VARIANT (btype) = main_type;
+    }
+  else
+    {
+      bcopy (main_type, btype, sizeof (struct type));
+      TYPE_NEXT_VARIANT (main_type) = btype;
+    }
+/* TYPE_OFFSET (btype) = offset; */
+  if (via_public)
+    TYPE_FLAGS (btype) |= TYPE_FLAG_VIA_PUBLIC;
+  if (via_virtual)
+    TYPE_FLAGS (btype) |= TYPE_FLAG_VIA_VIRTUAL;
+  /* New type is permanent if type pointed to is permanent.  */
+  if (TYPE_FLAGS (type) & TYPE_FLAG_PERM)
+    TYPE_FLAGS (btype) |= TYPE_FLAG_PERM;
+
+  /* In practice, this is never used.  */
+  TYPE_LENGTH (btype) = 1;
+  TYPE_CODE (btype) = TYPE_CODE_STRUCT;
+
+  return btype;
+}
+
 /* Given a type TYPE, return a type of functions that return that type.
    May need to construct such a type if this is the first use.  */
 
 struct type *
-lookup_function_type (type)
+lookup_function_type (type, argtypes)
      struct type *type;
+     struct type **argtypes;
 {
   register struct type *ptype = TYPE_FUNCTION_TYPE (type);
   if (ptype) return ptype;
@@ -247,10 +392,52 @@ smash_to_pointer_type (type, to_type)
   TYPE_LENGTH (type) = sizeof (char *);
   TYPE_CODE (type) = TYPE_CODE_PTR;
 
+  TYPE_MAIN_VARIANT (type) = type;
+
   if (TYPE_POINTER_TYPE (to_type) == 0
       && !(TYPE_FLAGS (type) & TYPE_FLAG_PERM))
     {
       TYPE_POINTER_TYPE (to_type) = type;
+    }
+}
+
+/* Smash TYPE to be a type of members of DOMAIN with type TO_TYPE.  */
+
+void
+smash_to_member_type (type, domain, to_type)
+     struct type *type, *domain, *to_type;
+{
+  bzero (type, sizeof (struct type));
+  TYPE_TARGET_TYPE (type) = to_type;
+  TYPE_DOMAIN_TYPE (type) = domain;
+
+  /* In practice, this is never needed.  */
+  TYPE_LENGTH (type) = 1;
+  TYPE_CODE (type) = TYPE_CODE_MEMBER;
+
+  TYPE_MAIN_VARIANT (type) = lookup_member_type (domain, to_type);
+}
+
+/* Smash TYPE to be a type of reference to TO_TYPE.
+   If TO_TYPE is not permanent and has no pointer-type yet,
+   record TYPE as its pointer-type.  */
+
+void
+smash_to_reference_type (type, to_type)
+     struct type *type, *to_type;
+{
+  bzero (type, sizeof (struct type));
+  TYPE_TARGET_TYPE (type) = to_type;
+  /* We assume the machine has only one representation for pointers!  */
+  TYPE_LENGTH (type) = sizeof (char *);
+  TYPE_CODE (type) = TYPE_CODE_REF;
+
+  TYPE_MAIN_VARIANT (type) = type;
+
+  if (TYPE_REFERENCE_TYPE (to_type) == 0
+      && !(TYPE_FLAGS (type) & TYPE_FLAG_PERM))
+    {
+      TYPE_REFERENCE_TYPE (to_type) = type;
     }
 }
 
@@ -280,6 +467,62 @@ static struct symbol *lookup_block_symbol ();
 /* Find the definition for a specified symbol name NAME
    in namespace NAMESPACE, visible from lexical block BLOCK.
    Returns the struct symbol pointer, or zero if no symbol is found.  */
+
+struct symbol *
+lookup_symbol_1 (name, block, namespace)
+     char *name;
+     register struct block *block;
+     enum namespace namespace;
+{
+  register int i, n;
+  register struct symbol *sym;
+  register struct symtab *s;
+  struct blockvector *bv;
+
+  /* Search specified block and its superiors.  */
+
+  while (block != 0)
+    {
+      sym = lookup_block_symbol (block, name, namespace);
+      if (sym) return sym;
+      block = BLOCK_SUPERBLOCK (block);
+    }
+  return 0;
+}
+
+struct symbol *
+lookup_symbol_2 (name, block, namespace)
+     char *name;
+     register struct block *block; /* ignored as parameter */
+     enum namespace namespace;
+{
+  register int i, n;
+  register struct symbol *sym;
+  register struct symtab *s;
+  struct blockvector *bv;
+
+  /* Now search all symtabs' global blocks.  */
+
+  for (s = symtab_list; s; s = s->next)
+    {
+      bv = BLOCKVECTOR (s);
+      block = BLOCKVECTOR_BLOCK (bv, 0);
+      sym = lookup_block_symbol (block, name, namespace);
+      if (sym) return sym;
+    }
+
+  /* Now search all symtabs' per-file blocks.
+     Not strictly correct, but more useful than an error.  */
+
+  for (s = symtab_list; s; s = s->next)
+    {
+      bv = BLOCKVECTOR (s);
+      block = BLOCKVECTOR_BLOCK (bv, 1);
+      sym = lookup_block_symbol (block, name, namespace);
+      if (sym) return sym;
+    }
+  return 0;
+}
 
 struct symbol *
 lookup_symbol (name, block, namespace)
@@ -742,13 +985,15 @@ find_pc_line_pc_range (pc, startptr, endptr)
    if no file is validly specified.  Callers must check that.
    Also, the line number returned may be invalid.  */
 
-struct symtab_and_line
+struct symtabs_and_lines
 decode_line_1 (argptr, funfirstline, default_symtab, default_line)
      char **argptr;
      int funfirstline;
      struct symtab *default_symtab;
      int default_line;
 {
+  struct symtabs_and_lines decode_line_2 ();
+  struct symtabs_and_lines values;
   struct symtab_and_line value;
   register char *p, *p1;
   register struct symtab *s;
@@ -756,6 +1001,13 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
   register CORE_ADDR pc;
   register int i;
   char *copy;
+  struct symbol *sym_class;
+  char *class_name, *method_name, *phys_name;
+  int method_counter;
+  int i1;
+  struct symbol **sym_arr;
+  struct type *t, *field;
+  char **physnames;
 
   /* Defaults have defaults.  */
 
@@ -771,9 +1023,11 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
     {
       (*argptr)++;
       pc = parse_and_eval_address_1 (argptr);
-      value = find_pc_line (pc, 0);
-      value.pc = pc;
-      return value;
+      values.sals = (struct symtab_and_line *)malloc (sizeof (struct symtab_and_line));
+      values.nelts = 1;
+      values.sals[0] = find_pc_line (pc, 0);
+      values.sals[0].pc = pc;
+      return values;
     }
 
   /* Maybe arg is FILE : LINENUM or FILE : FUNCTION */
@@ -789,6 +1043,121 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 
   if (p[0] == ':')
     {
+      /*  C++  */
+      if (p[1] ==':')
+	{
+	  /* Extract the class name.  */
+	  p1 = p;
+	  while (p != *argptr && p[-1] == ' ') --p;
+	  copy = (char *) alloca (p - *argptr + 1);
+	  bcopy (*argptr, copy, p - *argptr);
+	  copy[p - *argptr] = 0;
+
+	  /* Discard the class name from the arg.  */
+	  p = p1 + 2;
+	  while (*p == ' ' || *p == '\t') p++;
+	  *argptr = p;
+
+	  sym_class = lookup_symbol (copy, 0, STRUCT_NAMESPACE);
+       
+	  if (sym_class &&
+	      (TYPE_CODE (SYMBOL_TYPE (sym_class)) == TYPE_CODE_STRUCT
+	       || TYPE_CODE (SYMBOL_TYPE (sym_class)) == TYPE_CODE_UNION))
+	    {
+	      /* Arg token is not digits => try it as a function name
+		 Find the next token (everything up to end or next whitespace). */
+	      p = *argptr;
+	      while (*p && *p != ' ' && *p != '\t' && *p != ',' && *p !=':') p++;
+	      copy = (char *) alloca (p - *argptr + 1);
+	      bcopy (*argptr, copy, p - *argptr);
+	      copy[p - *argptr] = '\0';
+
+	      /* no line number may be specified */
+	      while (*p == ' ' || *p == '\t') p++;
+	      *argptr = p;
+
+	      sym = 0;
+	      i1 = 0;		/*  counter for the symbol array */
+	      t = SYMBOL_TYPE (sym_class);
+	      sym_arr = (struct symbol **) alloca(TYPE_NFN_FIELDS_TOTAL (t) * sizeof(struct symbol*));
+	      physnames = (char **) alloca (TYPE_NFN_FIELDS_TOTAL (t) * sizeof(char*));
+
+	      if (destructor_name_p (copy, t))
+		{
+		  /* destructors are a special case.  */
+		  struct fn_field *f = TYPE_FN_FIELDLIST1 (t, 0);
+		  int len = TYPE_FN_FIELDLIST_LENGTH (t, 0) - 1;
+		  phys_name = TYPE_FN_FIELD_PHYSNAME (f, len);
+		  physnames[i1] = (char *)alloca (strlen (phys_name) + 1);
+		  strcpy (physnames[i1], phys_name);
+		  sym_arr[i1] = lookup_symbol (phys_name, SYMBOL_BLOCK_VALUE (sym_class), VAR_NAMESPACE);
+		  if (sym_arr[i1]) i1++;
+		}
+	      else while (t)
+		{
+		  class_name = TYPE_NAME (t);
+		  while (*class_name++ != ' ');
+
+		  sym_class = lookup_symbol (class_name, 0, STRUCT_NAMESPACE);
+		  for (method_counter = TYPE_NFN_FIELDS (SYMBOL_TYPE (sym_class)) - 1;
+		       method_counter >= 0;
+		       --method_counter)
+		    {
+		      int field_counter;
+		      struct fn_field *f =
+			TYPE_FN_FIELDLIST1 (SYMBOL_TYPE (sym_class), method_counter);
+
+		      method_name = TYPE_FN_FIELDLIST_NAME (SYMBOL_TYPE (sym_class), method_counter);
+		      if (!strcmp (copy, method_name))
+			for (field_counter = TYPE_FN_FIELDLIST_LENGTH (SYMBOL_TYPE (sym_class), method_counter) - 1;
+			     field_counter >= 0;
+			     --field_counter)
+			  {
+			    phys_name = TYPE_FN_FIELD_PHYSNAME (f, field_counter);
+			    physnames[i1] = (char*) alloca (strlen (phys_name) + 1);
+			    strcpy (physnames[i1], phys_name);
+			    sym_arr[i1] = lookup_symbol (phys_name, SYMBOL_BLOCK_VALUE (sym_class), VAR_NAMESPACE);
+			    if (sym_arr[i1]) i1++;
+			  }
+		    }
+		  if (TYPE_N_BASECLASSES (t))
+		    t = TYPE_BASECLASS(t, 1);
+		  else break;
+		}
+
+	      if (i1 == 1)
+		{
+		  sym = sym_arr[0];
+
+		  if (sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
+		    {
+		      /* Arg is the name of a function */
+		      pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym)) + FUNCTION_START_OFFSET;
+		      if (funfirstline)
+			SKIP_PROLOGUE (pc);
+		      values.sals = (struct symtab_and_line *)malloc (sizeof (struct symtab_and_line));
+		      values.nelts = 1;
+		      values.sals[0] = find_pc_line (pc, 0);
+		      values.sals[0].pc = (values.sals[0].end && values.sals[0].pc != pc) ? values.sals[0].end : pc;
+		    }
+		  else
+		    {
+		      values.nelts = 0;
+		    }
+		  return values;
+		}
+	      if (i1 > 0)
+		{
+		  return decode_line_2 (argptr, sym_arr, physnames, i1, funfirstline);
+		}
+	      else
+		error ("that class does not have any method named %s",copy);
+	    }
+	  else
+	    error("no class, struct, or union named %s", copy );
+	}
+      /*  end of C++  */
+
       /* Extract the file name.  */
       p1 = p;
       while (p != *argptr && p[-1] == ' ') --p;
@@ -855,7 +1224,10 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 	s = default_symtab;
       value.symtab = s;
       value.pc = 0;
-      return value;
+      values.sals = (struct symtab_and_line *)malloc (sizeof (struct symtab_and_line));
+      values.sals[0] = value;
+      values.nelts = 1;
+      return values;
     }
 
   /* Arg token is not digits => try it as a function name
@@ -882,7 +1254,10 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 	SKIP_PROLOGUE (pc);
       value = find_pc_line (pc, 0);
       value.pc = (value.end && value.pc != pc) ? value.end : pc;
-      return value;
+      values.sals = (struct symtab_and_line *)malloc (sizeof (struct symtab_and_line));
+      values.sals[0] = value;
+      values.nelts = 1;
+      return values;
     }
 
   if (sym)
@@ -897,7 +1272,10 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
       value.pc = misc_function_vector[i].address + FUNCTION_START_OFFSET;
       if (funfirstline)
 	SKIP_PROLOGUE (value.pc);
-      return value;
+      values.sals = (struct symtab_and_line *)malloc (sizeof (struct symtab_and_line));
+      values.sals[0] = value;
+      values.nelts = 1;
+      return values;
     }
 
   if (symtab_list == 0)
@@ -905,19 +1283,114 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
   error ("Function %s not defined.", copy);
 }
 
-struct symtab_and_line
+struct symtabs_and_lines
 decode_line_spec (string, funfirstline)
      char *string;
      int funfirstline;
 {
-  struct symtab_and_line sal;
+  struct symtabs_and_lines sals;
   if (string == 0)
     error ("Empty line specification.");
-  sal = decode_line_1 (&string, funfirstline,
-		       current_source_symtab, current_source_line);
+  sals = decode_line_1 (&string, funfirstline,
+			current_source_symtab, current_source_line);
   if (*string)
     error ("Junk at end of line specification: %s", string);
-  return sal;
+  return sals;
+}
+
+struct symtabs_and_lines
+decode_line_2 (argptr, sym_arr, physnames, nelts, funfirstline)
+     char **argptr;
+     struct symbol *sym_arr[];
+     char *physnames[];
+     int nelts;
+     int funfirstline;
+{
+  char *getenv();
+  struct symtabs_and_lines values, return_values;
+  register CORE_ADDR pc;
+  char *args, *arg1, *read_line ();
+  int i;
+  char *prompt;
+
+  values.sals = (struct symtab_and_line *) alloca (nelts * sizeof(struct symtab_and_line));
+  return_values.sals = (struct symtab_and_line *) malloc (nelts * sizeof(struct symtab_and_line));
+
+  i = 0;
+  printf("[0] cancel\n[1] all\n");
+  while (i < nelts)
+    {
+      if (sym_arr[i] && SYMBOL_CLASS (sym_arr[i]) == LOC_BLOCK)
+	{
+	  /* Arg is the name of a function */
+	  pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym_arr[i])) 
+	       + FUNCTION_START_OFFSET;
+	  if (funfirstline)
+	    SKIP_PROLOGUE (pc);
+	  values.sals[i] = find_pc_line (pc, 0);
+	  printf("[%d] file:%s; line number:%d\n",
+		 (i+2), values.sals[i].symtab->filename, values.sals[i].line);
+	}
+      else printf ("?HERE\n");
+      i++;
+    }
+  
+  if ((prompt = getenv ("PS2")) == NULL)
+    {
+      prompt = ">";
+    }
+  printf("%s ",prompt);
+  fflush(stdout);
+
+  args = read_line (0);
+  
+  if (args == 0)
+    error_no_arg ("one or more choice numbers");
+
+  i = 0;
+  while (*args)
+    {
+      int num;
+
+      arg1 = args;
+      while (*arg1 >= '0' && *arg1 <= '9') arg1++;
+      if (*arg1 && *arg1 != ' ' && *arg1 != '\t')
+	error ("Arguments must be choice numbers.");
+
+      num = atoi (args);
+
+      if (num == 0)
+	error ("cancelled");
+      else if (num == 1)
+	{
+	  bcopy (values.sals, return_values.sals, (nelts * sizeof(struct symtab_and_line)));
+	  return_values.nelts = nelts;
+	  return return_values;
+	}
+
+      if (num > nelts + 2)
+	{
+	  printf ("No choice number %d.\n", num);
+	}
+      else
+	{
+	  num -= 2;
+	  if (values.sals[num].pc)
+	    {
+	      return_values.sals[i++] = values.sals[num];
+	      values.sals[num].pc = 0;
+	    }
+	  else
+	    {
+	      printf ("duplicate request for %d ignored.\n", num);
+	    }
+	}
+
+      args = arg1;
+      while (*args == ' ' || *args == '\t') args++;
+    }
+  return_values.nelts = i;
+  return return_values;
 }
 
 /* Return the index of misc function named NAME.  */
@@ -998,7 +1471,7 @@ list_symbols (regexp, class)
   char *val;
   int found_in_file;
   static char *classnames[]
-    = {"variable", "function", "type"};
+    = {"variable", "function", "type", "method"};
   int print_count = 0;
 
   if (regexp)
@@ -1035,7 +1508,8 @@ list_symbols (regexp, class)
 		    && ((class == 0 && SYMBOL_CLASS (sym) != LOC_TYPEDEF
 			 && SYMBOL_CLASS (sym) != LOC_BLOCK)
 			|| (class == 1 && SYMBOL_CLASS (sym) == LOC_BLOCK)
-			|| (class == 2 && SYMBOL_CLASS (sym) == LOC_TYPEDEF)))
+			|| (class == 2 && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
+			|| (class == 3 && SYMBOL_CLASS (sym) == LOC_BLOCK)))
 		  {
 		    if (!found_in_file)
 		      {
@@ -1050,17 +1524,30 @@ list_symbols (regexp, class)
 			&& SYMBOL_NAMESPACE (sym) != STRUCT_NAMESPACE)
 		      printf ("typedef ");
 
-		    type_print (SYMBOL_TYPE (sym),
-				(SYMBOL_CLASS (sym) == LOC_TYPEDEF
-				 ? "" : SYMBOL_NAME (sym)),
-				stdout, 0);
+		    if (class < 3)
+		      {
+			type_print (SYMBOL_TYPE (sym),
+				    (SYMBOL_CLASS (sym) == LOC_TYPEDEF
+				     ? "" : SYMBOL_NAME (sym)),
+				    stdout, 0);
+			printf (";\n");
+		      }
+		    else
+		      {
+			char buf[1024];
+# if 0
+			type_print_base (TYPE_FN_FIELD_TYPE(t, i), stdout, 0, 0); 
+			type_print_varspec_prefix (TYPE_FN_FIELD_TYPE(t, i), stdout, 0); 
+			sprintf (buf, " %s::", TYPE_NAME (t));
+			type_print_method_args (TYPE_FN_FIELD_ARGS (t, i), buf, name, stdout);
+# endif
+		      }
 		    if (class == 2
 			&& SYMBOL_NAMESPACE (sym) != STRUCT_NAMESPACE
 			&& (TYPE_NAME ((SYMBOL_TYPE (sym))) == 0
 			    || 0 != strcmp (TYPE_NAME ((SYMBOL_TYPE (sym))),
 					    SYMBOL_NAME (sym))))
 		      printf (" %s", SYMBOL_NAME (sym));
-		    printf (";\n");
 		  }
 	      }
 	  }
@@ -1087,6 +1574,13 @@ types_info (regexp)
      char *regexp;
 {
   list_symbols (regexp, 2);
+}
+
+static void
+methods_info (regexp)
+     char *regexp;
+{
+  list_symbols (regexp, 3);
 }
 
 /* Call sort_block_syms to sort alphabetically the symbols of one block.  */
@@ -1124,6 +1618,7 @@ init_type (code, length, uns, name)
 
   type = (struct type *) xmalloc (sizeof (struct type));
   bzero (type, sizeof *type);
+  TYPE_MAIN_VARIANT (type) = type;
   TYPE_CODE (type) = code;
   TYPE_LENGTH (type) = length;
   TYPE_FLAGS (type) = uns ? TYPE_FLAG_UNSIGNED : 0;
@@ -1131,6 +1626,10 @@ init_type (code, length, uns, name)
   TYPE_NFIELDS (type) = 0;
   TYPE_NAME (type) = name;
 
+  /* C++ fancies.  */
+  TYPE_NFN_FIELDS (type) = 0;
+  TYPE_N_BASECLASSES (type) = 0;
+  TYPE_BASECLASSES (type) = 0;
   return type;
 }
 
@@ -1143,6 +1642,11 @@ initialize ()
 	    "All function names, or those matching REGEXP.");
   add_info ("types", types_info,
 	    "All types names, or those matching REGEXP.");
+  add_info ("methods", methods_info,
+	    "All method names, or those matching REGEXP::REGEXP.\n\
+If the class qualifier is ommited, it is assumed to be the current scope.\n\
+If the first REGEXP is ommited, then all methods matching the second REGEXP\n\
+are listed.");
   add_info ("sources", sources_info,
 	    "Source files in the program.");
 

@@ -52,11 +52,11 @@ TSSTART = /lib/crt0.o
 
 NTSSTART = kdb-start.o
 
-gdb : $(STARTOBS) $(OBS) $(TSOBS) $(ENDOBS) $(OBSTACK1)
-	$(CC) $(LDFLAGS) -o gdb $(STARTOBS) $(OBS) $(TSOBS) $(ENDOBS) $(CLIBS)
+gdb+ : $(STARTOBS) $(OBS) $(TSOBS) $(ENDOBS) $(OBSTACK1)
+	$(CC) $(LDFLAGS) -o gdb+ $(STARTOBS) $(OBS) $(TSOBS) $(ENDOBS) $(CLIBS)
 
-xgdb : $(STARTOBS) $(OBS) $(TSOBS) xgdb.o $(ENDOBS) $(OBSTACK1)
-	$(CC) $(LDFLAGS) -o xgdb $(STARTOBS) $(OBS) $(TSOBS) xgdb.o $(ENDOBS) \
+xgdb+ : $(STARTOBS) $(OBS) $(TSOBS) xgdb.o $(ENDOBS) $(OBSTACK1)
+	$(CC) $(LDFLAGS) -o xgdb+ $(STARTOBS) $(OBS) $(TSOBS) xgdb.o $(ENDOBS) \
            -lXaw -lXt -lX11 $(CLIBS)
 
 kdb : $(NTSSTART) $(STARTOBS) $(OBS) $(NTSOBS) $(ENDOBS) $(OBSTACK1)
@@ -89,7 +89,7 @@ main.o : main.c defs.h command.h
 # pinsn.o depends on ALL the opcode printers
 # since we don't know which one is really being used.
 pinsn.o : pinsn.c defs.h param.h symtab.h \
-    vax-opcode.h vax-pinsn.c m68k-opcode.h m68k-pinsn.c
+    vax-opcode.h vax-pinsn.c m68k-opcode.h m68k-pinsn.c sparc-opcode.h sparc-pinsn.c
 printcmd.o : printcmd.c defs.h initialize.h param.h symtab.h value.h expression.h
 remote.o : remote.c defs.h initialize.h param.h frame.h inferior.h
 source.o : source.c defs.h initialize.h symtab.h

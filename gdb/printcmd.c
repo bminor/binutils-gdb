@@ -499,6 +499,10 @@ address_info (exp)
       printf ("static at address 0x%x", val);
       break;
 
+    case LOC_REGPARM:
+      printf ("an argument in register %s", reg_names[val]);
+      break;
+
     case LOC_ARG:
       printf ("an argument at offset %d", val);
       break;
@@ -934,6 +938,7 @@ print_frame_args (func, addr, num, stream)
   int first = 1;
   register int i;
   register int last_offset = FRAME_ARGS_SKIP;
+  register int last_regparm = 0;
   register struct symbol *sym, *nextsym;
   register value val;
 
@@ -951,31 +956,73 @@ print_frame_args (func, addr, num, stream)
 	{
 	  QUIT;
 	  sym = BLOCK_SYM (b, i);
-	  if (SYMBOL_CLASS (sym) == LOC_ARG
-	      && SYMBOL_VALUE (sym) >= last_offset
-	      && (nextsym == 0
-		  || SYMBOL_VALUE (sym) < SYMBOL_VALUE (nextsym)))
-	    nextsym = sym;
+	  if (SYMBOL_CLASS (sym) == LOC_ARG)
+	    {
+	      if (SYMBOL_VALUE (sym) >= last_offset
+		  && (nextsym == 0
+		      || SYMBOL_VALUE (sym) < SYMBOL_VALUE (nextsym)))
+		nextsym = sym;
+	    }
+	  else if (SYMBOL_CLASS (sym) == LOC_REGPARM)
+	    {
+	      if (SYMBOL_VALUE (sym) >= last_regparm
+		  && (nextsym == 0
+		      || SYMBOL_VALUE (sym) < SYMBOL_VALUE (nextsym)))
+		nextsym = sym;
+	    }
 	}
       if (nextsym == 0)
 	break;
       sym = nextsym;
       /* Print any nameless args between the last arg printed
 	 and the next arg.  */
-      if (last_offset != (SYMBOL_VALUE (sym) / sizeof (int)) * sizeof (int))
+      if (SYMBOL_CLASS (sym) == LOC_ARG
+	  && last_offset != (SYMBOL_VALUE (sym) / sizeof (int)) * sizeof (int))
 	{
 	  print_frame_nameless_args (addr, last_offset, SYMBOL_VALUE (sym),
 				     stream);
 	  first = 0;
 	}
       /* Print the next arg.  */
-      val = value_at (SYMBOL_TYPE (sym), addr + SYMBOL_VALUE (sym));
+      if (SYMBOL_CLASS (sym) == LOC_REGPARM)
+	{
+	  unsigned char raw_buffer[MAX_REGISTER_RAW_SIZE];
+	  unsigned char virtual_buffer[MAX_REGISTER_VIRTUAL_SIZE];
+
+	  read_relative_register_raw_bytes (SYMBOL_VALUE (sym), raw_buffer);
+	  if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_FLT)
+	    val = value_from_double (SYMBOL_TYPE (sym), *(double *)raw_buffer);
+	  else if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_INT
+		   || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_ENUM)
+	    val = value_from_long (SYMBOL_TYPE (sym), *(int *)raw_buffer);
+	  else if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_PTR)
+	    {
+	      if (sizeof (char *) == sizeof (int))
+		val = value_from_long (builtin_type_int, *(int *)raw_buffer);
+	      else if (sizeof (char *) == sizeof (long))
+		val = value_from_long (builtin_type_long, *(long *)raw_buffer);
+	      else
+		error ("pointer size not sizeof (int) or sizeof (long)");
+	      VALUE_TYPE (val) = SYMBOL_TYPE (sym);
+	    }
+	  else
+	    error ("can't extract non-scalar from register");
+	}
+      else
+	val = value_at (SYMBOL_TYPE (sym), addr + SYMBOL_VALUE (sym));
+
       if (! first)
 	fprintf (stream, ", ");
       fprintf (stream, "%s=", SYMBOL_NAME (sym));
       value_print (val, stream, 0);
       first = 0;
-      last_offset = SYMBOL_VALUE (sym) + TYPE_LENGTH (SYMBOL_TYPE (sym));
+      if (SYMBOL_CLASS (sym) == LOC_ARG)
+	last_offset = SYMBOL_VALUE (sym) + TYPE_LENGTH (SYMBOL_TYPE (sym));
+      else
+	{
+	  last_regparm = SYMBOL_VALUE (sym) + 1;
+	  last_offset += TYPE_LENGTH (SYMBOL_TYPE (sym));
+	}
       /* Round up address of next arg to multiple of size of int.  */
       last_offset
 	= ((last_offset + sizeof (int) - 1) / sizeof (int)) * sizeof (int);

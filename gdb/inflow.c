@@ -461,7 +461,15 @@ resume (step, signal)
     remote_resume (step, signal);
   else
     {
+#ifdef NO_SINGLE_STEP
+      if (step)
+	{
+	  single_step (signal);
+	}
+      else ptrace (7, inferior_pid, 1, signal);
+#else
       ptrace (step ? 9 : 7, inferior_pid, 1, signal);
+#endif
       if (errno)
 	perror_with_name ("ptrace");
     }
@@ -514,6 +522,7 @@ fetch_inferior_registers ()
       ptrace (PTRACE_GETREGS, inferior_pid, &inferior_registers);
       ptrace (PTRACE_GETFPREGS, inferior_pid, &inferior_fp_registers);
 
+#if defined(sun2) || defined(sun3)
       bcopy (&inferior_registers, registers, 16 * 4);
       bcopy (&inferior_fp_registers, &registers[REGISTER_BYTE (FP0_REGNUM)],
 	     sizeof inferior_fp_registers.fps_regs);
@@ -522,6 +531,25 @@ fetch_inferior_registers ()
       bcopy (&inferior_fp_registers.fps_control,
 	     &registers[REGISTER_BYTE (FPC_REGNUM)],
 	     sizeof inferior_fp_registers - sizeof inferior_fp_registers.fps_regs);
+#endif
+#if defined(sun4)
+      registers[REGISTER_BYTE (0)] = 0;
+      bcopy (&inferior_registers.r_g1, &registers[REGISTER_BYTE (1)], 15 * 4);
+      bcopy (&inferior_fp_registers, &registers[REGISTER_BYTE (FP0_REGNUM)],
+	     sizeof inferior_fp_registers.fpu_fr);
+      *(int *)&registers[REGISTER_BYTE (PS_REGNUM)] = inferior_registers.r_ps; 
+      *(int *)&registers[REGISTER_BYTE (PC_REGNUM)] = inferior_registers.r_pc;
+      *(int *)&registers[REGISTER_BYTE (NPC_REGNUM)] = inferior_registers.r_npc;
+      *(int *)&registers[REGISTER_BYTE (Y_REGNUM)] = inferior_registers.r_y;
+/*      *(int *)&registers[REGISTER_BYTE (RP_REGNUM)] =
+             inferior_registers.r_o7 + 8;
+      bcopy (&inferior_fp_registers.Fpu_fsr,
+	     &registers[REGISTER_BYTE (FPS_REGNUM)],
+	     sizeof (FPU_FSR_TYPE)); */
+      read_inferior_memory (inferior_registers.r_sp,
+			    &registers[REGISTER_BYTE (16)],
+			    16*4);
+#endif
     }
 }
 
@@ -540,17 +568,61 @@ store_inferior_registers (regno)
     remote_store_registers (registers);
   else
     {
-      bcopy (registers, &inferior_registers, 16 * 4);
-      bcopy (&registers[REGISTER_BYTE (FP0_REGNUM)], &inferior_fp_registers,
-	     sizeof inferior_fp_registers.fps_regs);
-      inferior_registers.r_ps = *(int *)&registers[REGISTER_BYTE (PS_REGNUM)];
-      inferior_registers.r_pc = *(int *)&registers[REGISTER_BYTE (PC_REGNUM)];
-      bcopy (&registers[REGISTER_BYTE (FPC_REGNUM)],
-	     &inferior_fp_registers.fps_control,
-	     sizeof inferior_fp_registers - sizeof inferior_fp_registers.fps_regs);
+      int in_regs = 1, in_fpregs = 1, in_fparegs, in_cpregs = 1;
 
-      ptrace (PTRACE_SETREGS, inferior_pid, &inferior_registers);
-      ptrace (PTRACE_SETFPREGS, inferior_pid, &inferior_fp_registers);
+#if defined(sun2) || defined(sun3)
+      if (in_regs)
+	{
+	  bcopy (registers, &inferior_registers, 16 * 4);
+	  inferior_registers.r_ps = *(int *)&registers[REGISTER_BYTE (PS_REGNUM)];
+	  inferior_registers.r_pc = *(int *)&registers[REGISTER_BYTE (PC_REGNUM)];
+	}
+      if (in_fpregs)
+	{
+	  bcopy (&registers[REGISTER_BYTE (FP0_REGNUM)], &inferior_fp_registers,
+		 sizeof inferior_fp_registers.fps_regs);
+	  bcopy (&registers[REGISTER_BYTE (FPC_REGNUM)],
+		 &inferior_fp_registers.fps_control,
+		 sizeof inferior_fp_registers - sizeof inferior_fp_registers.fps_regs);
+	}
+      if (in_regs)
+	ptrace (PTRACE_SETREGS, inferior_pid, &inferior_registers);
+      if (in_fpregs)
+	ptrace (PTRACE_SETFPREGS, inferior_pid, &inferior_fp_registers);
+#endif
+#if defined(sun4)
+      if (regno >= 0)
+	if (FP0_REGNUM <= regno && regno <= FP0_REGNUM + 32)
+	  in_regs = 0;
+	else
+	  in_fpregs = 0;
+
+      if (in_regs)
+	{
+	  bcopy (&registers[REGISTER_BYTE (1)], &inferior_registers.r_g1, 15 * 4);
+	  inferior_registers.r_ps = *(int *)&registers[REGISTER_BYTE (PS_REGNUM)];
+	  inferior_registers.r_pc = *(int *)&registers[REGISTER_BYTE (PC_REGNUM)];
+	  inferior_registers.r_npc = *(int *)&registers[REGISTER_BYTE (NPC_REGNUM)];
+	  inferior_registers.r_y = *(int *)&registers[REGISTER_BYTE (Y_REGNUM)];
+	  write_inferior_memory (*(int *)&registers[REGISTER_BYTE (SP_REGNUM)],
+				 &registers[REGISTER_BYTE (16)],
+				 16*4);
+	}
+      if (in_fpregs)
+	{
+	  bcopy (&registers[REGISTER_BYTE (FP0_REGNUM)], &inferior_fp_registers,
+		 sizeof inferior_fp_registers.fpu_fr);
+  /*      bcopy (&registers[REGISTER_BYTE (FPS_REGNUM)],
+	         &inferior_fp_registers.Fpu_fsr,
+		 sizeof (FPU_FSR_TYPE));
+  ****/
+	}
+
+      if (in_regs)
+	ptrace (PTRACE_SETREGS, inferior_pid, &inferior_registers);
+      if (in_fpregs)
+	ptrace (PTRACE_SETFPREGS, inferior_pid, &inferior_fp_registers);
+#endif
     }
 }
 

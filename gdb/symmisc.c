@@ -521,6 +521,10 @@ print_symbol (symbol, depth, outfile)
 	  fprintf (outfile, "arg at 0x%x,", SYMBOL_VALUE (symbol));
 	  break;
 
+	case LOC_REGPARM:
+	  fprintf (outfile, "parmameter register %d,", SYMBOL_VALUE (symbol));
+	  break;
+
 	case LOC_LOCAL:
 	  fprintf (outfile, "local at 0x%x,", SYMBOL_VALUE (symbol));
 	  break;

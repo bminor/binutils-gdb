@@ -54,7 +54,7 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
    the new frame is not set up until the new function executes
    some instructions.  */
 
-#define SAVED_PC_AFTER_CALL(frame) FRAME_SAVED_PC(frame)
+#define SAVED_PC_AFTER_CALL(frame) FRAME_SAVED_PC(frame,0)
 
 /* This is the amount to subtract from u.u_ar0
    to get the offset in the core file of the register values.  */
@@ -212,13 +212,13 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #define FRAME_CHAIN(thisframe)  (read_memory_integer (thisframe + 12, 4))
 
 #define FRAME_CHAIN_VALID(chain, thisframe) \
-  (chain != 0 && (FRAME_SAVED_PC (thisframe) >= first_object_file_end))
+  (chain != 0 && (FRAME_SAVED_PC (thisframe,ignore) >= first_object_file_end))
 
 #define FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
 
 /* Define other aspects of the stack frame.  */
 
-#define FRAME_SAVED_PC(frame) (read_memory_integer (frame + 16, 4))
+#define FRAME_SAVED_PC(frame, ignore) (read_memory_integer (frame + 16, 4), 0)
 
 /* Cannot find the AP register value directly from the FP value.
    Must find it saved in the frame called by this one, or in the AP register

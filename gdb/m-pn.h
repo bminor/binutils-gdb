@@ -325,7 +325,7 @@ anyone else from sharing it farther.  Help stamp out software hoarding! */
 	(chain)
 
 /* Define other aspects of the stack frame on NPL.  */
-#define FRAME_SAVED_PC(frame) \
+#define FRAME_SAVED_PC(frame,ignore) \
 	(read_memory_integer (frame + 8, 4))
 
 #define FRAME_ARGS_ADDRESS(fi) \

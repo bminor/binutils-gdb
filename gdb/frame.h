@@ -32,6 +32,10 @@ struct frame_info
     CORE_ADDR pc;
     /* The frame called by the frame we are describing, or 0.  */
     FRAME next_frame;
+
+    /* The frame called by `next_frame', or 0 if there is none
+       (or `next_frame' is 0).  */
+    FRAME next_next_frame;
   };
 
 /* Describe the saved registers of a frame.  */

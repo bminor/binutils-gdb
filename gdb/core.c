@@ -201,6 +201,7 @@ core_file_command (filename, from_tty)
 	data_offset = sizeof corestr;
 	stack_offset = sizeof corestr + corestr.c_dsize;
 
+#if defined(sun2) || defined(sun3)
 	bcopy (&corestr.c_regs, registers, 16 * 4);
 	*(int *)&registers[REGISTER_BYTE (PS_REGNUM)] = corestr.c_regs.r_ps;
 	*(int *)&registers[REGISTER_BYTE (PC_REGNUM)] = corestr.c_regs.r_pc;
@@ -210,6 +211,26 @@ core_file_command (filename, from_tty)
 	bcopy (&corestr.c_fpstatus.fps_control,
 	       &registers[REGISTER_BYTE (FPC_REGNUM)],
 	       sizeof corestr.c_fpstatus - sizeof corestr.c_fpstatus.fps_regs);
+#endif
+#if defined(sun4)
+	/* G0 *always* holds 0.  */
+	*(int *)&registers[REGISTER_BYTE (0)] = 0;
+	/* The globals and output registers.  I don't know where
+	   to get the locals and input registers from the core file.  */
+	bcopy (&corestr.c_regs.r_g1, registers, 15 * 4);
+	*(int *)&registers[REGISTER_BYTE (PS_REGNUM)] = corestr.c_regs.r_ps;
+	*(int *)&registers[REGISTER_BYTE (PC_REGNUM)] = corestr.c_regs.r_pc;
+	*(int *)&registers[REGISTER_BYTE (NPC_REGNUM)] = corestr.c_regs.r_npc;
+	*(int *)&registers[REGISTER_BYTE (Y_REGNUM)] = corestr.c_regs.r_y;
+	bcopy (corestr.c_fpu.fpu_regs,
+	       &registers[REGISTER_BYTE (FP0_REGNUM)],
+	       sizeof corestr.c_fpu.fpu_regs);
+#ifdef FPU
+	bcopy (&corestr.c_fpu.fpu_fsr,
+	       &registers[REGISTER_BYTE (FPS_REGNUM)],
+	       sizeof (FPU_FSR_TYPE));
+#endif
+#endif
 
 	bcopy (&corestr.c_aouthdr, &core_aouthdr, sizeof (struct exec));
 

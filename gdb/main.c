@@ -1153,7 +1153,7 @@ dump_me_command ()
 static void
 initialize_main ()
 {
-  prompt = savestring ("(gdb) ", 6);
+  prompt = savestring ("(gdb+) ", 7);
 
   /* Define the classes of commands.
      They will appear in the help list in the reverse of this order.  */

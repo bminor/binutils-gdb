@@ -622,63 +622,96 @@ set_breakpoint (s, line, tempflag)
 }
 
 /* Set a breakpoint according to ARG (function, linenum or *address)
-   and make it temporary if TEMPFLAG is nonzero.  */
+   and make it temporary if TEMPFLAG is nonzero.
+
+   LINE_NUM is for C++.  */
 
 static void
-break_command_1 (arg, tempflag, from_tty)
+break_command_1 (arg, tempflag, from_tty, line_num)
      char *arg;
-     int tempflag, from_tty;
+     int tempflag, from_tty, line_num;
 {
+  struct symtabs_and_lines sals;
   struct symtab_and_line sal;
   register struct expression *cond = 0;
   register struct breakpoint *b;
+  char *save_arg;
+  int i;
 
-  sal.pc = 0;
+  sals.sals = NULL;
+  sals.nelts = 0;
+
+  sal.line = sal.pc = sal.end = 0;
+  sal.symtab = 0;
 
   if (arg)
     {
-      sal = decode_line_1 (&arg, 1, 0, 0);
+      CORE_ADDR pc;
+      sals = decode_line_1 (&arg, 1, 0, 0);
 
-      if (sal.pc == 0 && sal.symtab != 0)
+      if (! sals.nelts) return;
+      save_arg = arg;
+      for (i = 0; i < sals.nelts; i++)
 	{
-	  sal.pc = find_line_pc (sal.symtab, sal.line);
-	  if (sal.pc == 0)
-	    error ("No line %d in file \"%s\".",
-		   sal.line, sal.symtab->filename);
-	}
+	  sal = sals.sals[i];
+	  if (sal.pc == 0 && sal.symtab != 0)
+	    {
+	      pc = find_line_pc (sal.symtab, sal.line);
+	      if (pc == 0)
+		error ("No line %d in file \"%s\".",
+		       sal.line, sal.symtab->filename);
+	    }
+	  else pc = sal.pc;
 
-      while (*arg)
-	{
-	  if (arg[0] == 'i' && arg[1] == 'f'
-	      && (arg[2] == ' ' || arg[2] == '\t'))
-	    cond = (struct expression *) parse_c_1 ((arg += 2, &arg),
-						    block_for_pc (sal.pc), 0);
-	  else
-	    error ("Junk at end of arguments.");
+	  while (*arg)
+	    {
+	      if (arg[0] == 'i' && arg[1] == 'f'
+		  && (arg[2] == ' ' || arg[2] == '\t'))
+		cond = (struct expression *) parse_c_1 ((arg += 2, &arg),
+							block_for_pc (pc), 0);
+	      else
+		error ("Junk at end of arguments.");
+	    }
+	  arg = save_arg;
+	  sals.sals[i].pc = pc;
 	}
     }
   else if (default_breakpoint_valid)
     {
+      sals.sals = (struct symtab_and_line *) malloc (sizeof (struct symtab_and_line));
       sal.pc = default_breakpoint_address;
       sal.line = default_breakpoint_line;
       sal.symtab = default_breakpoint_symtab;
+      sals.sals[0] = sal;
+      sals.nelts = 1;
     }
   else
     error ("No default breakpoint address now.");
 
-  if (from_tty)
-    describe_other_breakpoints (sal.pc);
+  for (i = 0; i < sals.nelts; i++)
+    {
+      sal = sals.sals[i];
+      sal.line += line_num;  /** C++  **/
+      if (line_num != 0)
+	{			/* get the pc for a particular line  */
+	  sal.pc = find_line_pc (sal.symtab, sal.line);
+	}
 
-  b = set_raw_breakpoint (sal);
-  b->number = ++breakpoint_count;
-  b->cond = cond;
-  if (tempflag)
-    b->enable = temporary;
+      if (from_tty)
+	describe_other_breakpoints (sal.pc);
 
-  printf ("Breakpoint %d at 0x%x", b->number, b->address);
-  if (b->symtab)
-    printf (": file %s, line %d.", b->symtab->filename, b->line_number);
-  printf ("\n");
+      b = set_raw_breakpoint (sal);
+      b->number = ++breakpoint_count;
+      b->cond = cond;
+      if (tempflag)
+	b->enable = temporary;
+
+      printf ("Breakpoint %d at 0x%x", b->number, b->address);
+      if (b->symtab)
+	printf (": file %s, line %d.", b->symtab->filename, b->line_number);
+      printf ("\n");
+    }
+  free (sals.sals);
 }
 
 static void
@@ -686,7 +719,7 @@ break_command (arg, from_tty)
      char *arg;
      int from_tty;
 {
-  break_command_1 (arg, 0, from_tty);
+  break_command_1 (arg, 0, from_tty, 0);
 }
 
 static void
@@ -694,7 +727,7 @@ tbreak_command (arg, from_tty)
      char *arg;
      int from_tty;
 {
-  break_command_1 (arg, 1, from_tty);
+  break_command_1 (arg, 1, from_tty, 0);
 }
 
 static void
@@ -703,60 +736,70 @@ clear_command (arg, from_tty)
      int from_tty;
 {
   register struct breakpoint *b, *b1;
+  struct symtabs_and_lines sals;
   struct symtab_and_line sal;
   register struct breakpoint *found;
+  int i;
 
   if (arg)
-    sal = decode_line_spec (arg, 1);
+    sals = decode_line_spec (arg, 1);
   else
     {
+      sals.sals = (struct symtab_and_line *) malloc (sizeof (struct symtab_and_line));
       sal.line = default_breakpoint_line;
       sal.symtab = default_breakpoint_symtab;
       sal.pc = 0;
       if (sal.symtab == 0)
 	error ("No source file specified.");
+
+      sals.sals[0] = sal;
+      sals.nelts = 1;
     }
 
-  /* If exact pc given, clear bpts at that pc.
-     But if sal.pc is zero, clear all bpts on specified line.  */
-
-  found = (struct breakpoint *) 0;
-  while (breakpoint_chain
-	 && (sal.pc ? breakpoint_chain->address == sal.pc
-	     : (breakpoint_chain->symtab == sal.symtab
-		&& breakpoint_chain->line_number == sal.line)))
+  for (i = 0; i < sals.nelts; i++)
     {
-      b1 = breakpoint_chain;
-      breakpoint_chain = b1->next;
-      b1->next = found;
-      found = b1;
+      /* If exact pc given, clear bpts at that pc.
+	 But if sal.pc is zero, clear all bpts on specified line.  */
+      sal = sals.sals[i];
+      found = (struct breakpoint *) 0;
+      while (breakpoint_chain
+	     && (sal.pc ? breakpoint_chain->address == sal.pc
+		 : (breakpoint_chain->symtab == sal.symtab
+		    && breakpoint_chain->line_number == sal.line)))
+	{
+	  b1 = breakpoint_chain;
+	  breakpoint_chain = b1->next;
+	  b1->next = found;
+	  found = b1;
+	}
+
+      ALL_BREAKPOINTS (b)
+	while (b->next
+	       && (sal.pc ? b->next->address == sal.pc
+		   : (b->next->symtab == sal.symtab
+		      && b->next->line_number == sal.line)))
+	  {
+	    b1 = b->next;
+	    b->next = b1->next;
+	    b1->next = found;
+	    found = b1;
+	  }
+
+      if (found == 0)
+	error ("No breakpoint at %s.", arg);
+
+      if (found->next) from_tty = 1; /* Always report if deleted more than one */
+      if (from_tty) printf ("Deleted breakpoint%s ", found->next ? "s" : "");
+      while (found)
+	{
+	  if (from_tty) printf ("%d ", found->number);
+	  b1 = found->next;
+	  delete_breakpoint (found);
+	  found = b1;
+	}
+      if (from_tty) putchar ('\n');
     }
-
-  ALL_BREAKPOINTS (b)
-    while (b->next
-	   && (sal.pc ? b->next->address == sal.pc
-	       : (b->next->symtab == sal.symtab
-		  && b->next->line_number == sal.line)))
-      {
-	b1 = b->next;
-	b->next = b1->next;
-	b1->next = found;
-	found = b1;
-      }
-
-  if (found == 0)
-    error ("No breakpoint at %s.", arg);
-
-  if (found->next) from_tty = 1; /* Alwats report if deleted more than one */
-  if (from_tty) printf ("Deleted breakpoint%s ", found->next ? "s" : "");
-  while (found)
-    {
-      if (from_tty) printf ("%d ", found->number);
-      b1 = found->next;
-      delete_breakpoint (found);
-      found = b1;
-    }
-  if (from_tty) putchar ('\n');
+  free (sals.sals);
 }
 
 /* Delete breakpoint number BNUM if it is a `delete' breakpoint.

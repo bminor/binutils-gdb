@@ -254,13 +254,13 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #define FRAME_CHAIN(thisframe)  (read_memory_integer (thisframe, 4))
 
 #define FRAME_CHAIN_VALID(chain, thisframe) \
-  (chain != 0 && (FRAME_SAVED_PC (thisframe) >= first_object_file_end))
+  (chain != 0 && (FRAME_SAVED_PC (thisframe,0) >= first_object_file_end))
 
 #define FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
 
 /* Define other aspects of the stack frame.  */
 
-#define FRAME_SAVED_PC(frame) (read_memory_integer (frame + 4, 4))
+#define FRAME_SAVED_PC(frame,ignore) (read_memory_integer (frame + 4, 4))
 
 /* compute base of arguments */
 #define FRAME_ARGS_ADDRESS(fi) ((fi).frame)
@@ -276,7 +276,7 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
   int addr_mode;					\
   int width;						\
 							\
-  pc = FRAME_SAVED_PC (fi.frame);			\
+  pc = FRAME_SAVED_PC (fi.frame,0);			\
   insn = read_memory_integer (pc,2);			\
   addr_mode = (insn >> 11) & 0x1f;			\
   insn = insn & 0x7ff;					\

@@ -92,7 +92,7 @@ get_frame_info (frame)
 {
   struct frame_info val;
   FRAME current = get_current_frame ();
-  register FRAME frame1;
+  register FRAME frame1, frame2;
 
   val.frame = frame;
 
@@ -100,17 +100,21 @@ get_frame_info (frame)
     {
       val.pc = read_pc ();
       val.next_frame = 0;
+      val.next_next_frame = 0;
     }
   else 
     {
-      for (frame1 = current; frame1; frame1 = get_prev_frame (frame1))
+      for (frame1 = current, frame2 = 0;
+	   frame1;
+	   frame2 = frame1, frame1 = get_prev_frame (frame1))
 	{
 	  QUIT;
 	  if (frame1 == frame)
 	    break;
 
-	  val.pc = FRAME_SAVED_PC (frame1);
+	  val.pc = FRAME_SAVED_PC (frame1, frame2);
 	  val.next_frame = frame1;
+	  val.next_next_frame = frame2;
 	}
     }
 
@@ -125,22 +129,23 @@ get_frame_info (frame)
    to find the frame called by the one being described -- that is FRAME.  */
 
 struct frame_info
-get_prev_frame_info (next_frame)
-     FRAME next_frame;
+get_prev_frame_info (next_frame, next_next_frame)
+     FRAME next_frame, next_next_frame;
 {
   struct frame_info val;
   register FRAME frame = get_prev_frame (next_frame);
 
   val.frame = frame;
   val.next_frame = next_frame;
+  val.next_next_frame = next_next_frame;
 
   if (next_frame == 0)
     {
       val.pc = read_pc ();
     }
-  else 
+  else
     {
-      val.pc = FRAME_SAVED_PC (next_frame);
+      val.pc = FRAME_SAVED_PC (next_frame, next_next_frame);
     }
 
   return val;

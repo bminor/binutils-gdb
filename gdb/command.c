@@ -106,6 +106,10 @@ what you give them.   Help stamp out software-hoarding!  */
 #include "command.h"
 #include <stdio.h>
 
+#ifdef sparc
+#include <alloca.h>
+#endif
+
 extern char *xmalloc ();
 
 static char *savestring ();

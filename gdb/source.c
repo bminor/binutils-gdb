@@ -59,13 +59,16 @@ select_source_symtab (s)
 {
   if (s)
     {
+      struct symtabs_and_lines sals;
       struct symtab_and_line sal;
 
       /* Make the default place to list be the function `main'
 	 if one exists.  */
       if (lookup_symbol ("main", 0, VAR_NAMESPACE))
 	{
-	  sal = decode_line_spec ("main", 1);
+	  sals = decode_line_spec ("main", 1);
+	  sal = sals.sals[0];
+	  free (sals.sals);
 	  current_source_symtab = sal.symtab;
 	  current_source_line = sal.line - 9;
 	  return;
@@ -490,6 +493,7 @@ list_command (arg, from_tty)
      char *arg;
      int from_tty;
 {
+  struct symtabs_and_lines sals, sals_end;
   struct symtab_and_line sal, sal_end;
   struct symbol *sym;
   char *arg1;
@@ -534,7 +538,18 @@ list_command (arg, from_tty)
   if (*arg1 == ',')
     dummy_beg = 1;
   else
-    sal = decode_line_1 (&arg1, 0, 0, 0);
+    {
+      sals = decode_line_1 (&arg1, 0, 0, 0);
+
+      if (! sals.nelts) return;  /*  C++  */
+      if (sals.nelts != 1)
+	{
+	  error ("Unreasonable listing request");
+	}
+
+      sal = sals.sals[0];
+      free (sals.sals);
+    }
 
   /* Record whether the BEG arg is all digits.  */
 
@@ -551,10 +566,16 @@ list_command (arg, from_tty)
 	arg1++;
       if (*arg1 == 0)
 	dummy_end = 1;
-      else if (dummy_beg)
-	sal_end = decode_line_1 (&arg1, 0, 0, 0);
       else
-	sal_end = decode_line_1 (&arg1, 0, sal.symtab, sal.line);
+	{
+	  if (dummy_beg)
+	    sals_end = decode_line_1 (&arg1, 0, 0, 0);
+	  else
+	    sals_end = decode_line_1 (&arg1, 0, sal.symtab, sal.line);
+	  if (! sals_end.nelts) return;  /* C++ */
+	  sal_end = sals_end.sals[0];
+	  free (sals_end.sals);
+	}
     }
 
   if (*arg1)
@@ -607,8 +628,7 @@ list_command (arg, from_tty)
     print_source_lines (sal.symtab, max (sal.line - 5, 1), sal.line + 5, 0);
   else
     print_source_lines (sal.symtab, sal.line,
-			dummy_end ? sal.line + 10 : sal_end.line + 1,
-			0);
+			dummy_end ? sal.line + 10 : sal_end.line + 1, 0);
 }
 
 /* Print info on range of pc's in a specified line.  */
@@ -618,6 +638,7 @@ line_info (arg, from_tty)
      char *arg;
      int from_tty;
 {
+  struct symtabs_and_lines sals;
   struct symtab_and_line sal;
   int start_pc, end_pc;
 
@@ -628,8 +649,15 @@ line_info (arg, from_tty)
     }
   else
     {
-      sal = decode_line_spec (arg, 0);
+      sals = decode_line_spec (arg);
 
+      if (sals.nelts == 0)
+	return;			/* C++ */
+      if (sals.nelts != 1)
+	error ("unreasonable line info request");
+      
+      sal = sals.sals[0];
+      free (sals.sals);
       /* If this command is repeated with RET,
 	 turn it into the no-arg variant.  */
 

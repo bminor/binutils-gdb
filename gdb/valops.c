@@ -276,13 +276,25 @@ value
 value_ind (arg1)
      value arg1;
 {
+  /* Must do this before COERCE_ARRAY, otherwise an infinite loop
+     will result.  */
+  if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_REF)
+    return value_at (TYPE_TARGET_TYPE (VALUE_TYPE (arg1)),
+		     (CORE_ADDR) value_as_long (arg1));
+
   COERCE_ARRAY (arg1);
+
+  if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_MEMBER)
+    error ("not implemented: member types in value_ind");
 
   /* Allow * on an integer so we can cast it to whatever we want.  */
   if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_INT)
     return value_at (builtin_type_long, 
 		     (CORE_ADDR) value_as_long (arg1));
   else if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_PTR)
+    return value_at (TYPE_TARGET_TYPE (VALUE_TYPE (arg1)),
+		     (CORE_ADDR) value_as_long (arg1));
+  else if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_REF)
     return value_at (TYPE_TARGET_TYPE (VALUE_TYPE (arg1)),
 		     (CORE_ADDR) value_as_long (arg1));
   error ("Attempt to take contents of a non-pointer value.");
@@ -406,10 +418,28 @@ call_function (function, nargs, args)
 
   PUSH_DUMMY_FRAME;
 
+  old_sp = sp = read_register (SP_REGNUM);
+
+#if 1 INNER_THAN 2  /* Stack grows down */
+  sp -= sizeof dummy;
+  start_sp = sp;
+#else  /* Stack grows up */
+  start_sp = sp;
+  sp += sizeof dummy;
+#endif
+
   {
     register CORE_ADDR funaddr;
     register struct type *ftype = VALUE_TYPE (function);
     register enum type_code code = TYPE_CODE (ftype);
+
+    /* If it's a member function, just look at the function
+       part of it.  */
+    if (code == TYPE_CODE_MEMBER)
+      {
+	ftype = TYPE_TARGET_TYPE (ftype);
+	code = TYPE_CODE (ftype);
+      }
 
     /* Determine address to call.  */
     if (code == TYPE_CODE_FUNC)
@@ -444,24 +474,40 @@ call_function (function, nargs, args)
     /* Create a call sequence customized for this function
        and the number of arguments for it.  */
     bcopy (dummy, dummy1, sizeof dummy);
+#ifdef sun4
+    FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, value_type);
+#else
     FIX_CALL_DUMMY (dummy1, funaddr, nargs);
+#endif
   }
 
-  old_sp = sp = read_register (SP_REGNUM);
+  write_memory (start_sp, dummy1, sizeof dummy);
 
-#if 1 INNER_THAN 2  /* Stack grows down */
-  sp -= sizeof dummy;
-  write_memory (sp, dummy1, sizeof dummy);
-  start_sp = sp;
+#ifdef STACK_ALIGN
+  /* If stack grows down, we must leave a hole at the top.  */
+  {
+    int len = 0;
+    for (i = nargs - 1; i >= 0; i--)
+      len += TYPE_LENGTH (VALUE_TYPE (args[i]));
+    len += CALL_DUMMY_STACK_ADJUST;
+#if 1 INNER_THAN 2
+    sp -= STACK_ALIGN (len) - len;
+#else
+    sp += STACK_ALIGN (len) - len;
+#endif
+  }
+#endif
+
   for (i = nargs - 1; i >= 0; i--)
     sp = value_arg_push (sp, args[i]);
-#else  /* Stack grows up */
-  start_sp = sp;
-  write_memory (sp, dummy1, sizeof dummy);
-  sp += sizeof dummy;
-  for (i = 0; i < nargs; i++)
-    sp = value_arg_push (sp, args[i]);
-#endif  /* Stack grows up */
+
+#ifdef CALL_DUMMY_STACK_ADJUST
+#if 1 INNER_THAN 2
+    sp -= CALL_DUMMY_STACK_ADJUST;
+#else
+    sp += CALL_DUMMY_STACK_ADJUST;
+#endif
+#endif
 
   write_register (SP_REGNUM, sp);
 
@@ -552,16 +598,24 @@ value_string (ptr, len)
 /* Given ARG1, a value of type (pointer to a)* structure/union,
    extract the component named NAME from the ultimate target structure/union
    and return it as a value with its appropriate type.
-   ERR is used in the error message if ARG1's type is wrong.  */
-   
+   ERR is used in the error message if ARG1's type is wrong.
+
+   C++: ARGS is a list of argument types to aid in the selection of
+   an appropriate method. Also, handle derived types.
+
+   ERR is an error message to be printed in case the field is not found.  */
+
 value
-value_struct_elt (arg1, name, err)
-     register value arg1;
+value_struct_elt (arg1, args, name, err)
+     register value arg1, *args;
      char *name;
      char *err;
 {
   register struct type *t;
   register int i;
+  int found = 0;
+
+  struct type *baseclass;
 
   COERCE_ARRAY (arg1);
 
@@ -569,28 +623,443 @@ value_struct_elt (arg1, name, err)
 
   /* Follow pointers until we get to a non-pointer.  */
 
-  while (TYPE_CODE (t) == TYPE_CODE_PTR)
+  while (TYPE_CODE (t) == TYPE_CODE_PTR || TYPE_CODE (t) == TYPE_CODE_REF)
     {
       arg1 = value_ind (arg1);
       COERCE_ARRAY (arg1);
       t = VALUE_TYPE (arg1);
     }
 
+  if (TYPE_CODE (t) == TYPE_CODE_MEMBER)
+    error ("not implemented: member type in value_struct_elt");
+
   if (TYPE_CODE (t) != TYPE_CODE_STRUCT
       &&
       TYPE_CODE (t) != TYPE_CODE_UNION)
     error ("Attempt to extract a component of a value that is not a %s.", err);
 
-  for (i = TYPE_NFIELDS (t) - 1; i >= 0; i--)
-    {
-      if (!strcmp (TYPE_FIELD_NAME (t, i), name))
-	break;
+  baseclass = t;
+
+  if (!args)
+    {  
+      /*  if there are no arguments ...do this...  */
+
+      /*  Try as a variable first, because if we succeed, there
+	  is less work to be done.  */
+      while (t)
+	{
+	  for (i = TYPE_NFIELDS (t) - 1; i >= 0; i--)
+	    {
+	      if (!strcmp (TYPE_FIELD_NAME (t, i), name))
+		{
+		  found = 1;
+		  break;
+		}
+	    }
+	  
+	  if (i >= 0)
+	    return TYPE_FIELD_STATIC (t, i)
+	      ? value_static_field (t, name, i) : value_field (arg1, i);
+
+	  if (TYPE_N_BASECLASSES (t) == 0)
+	    break;
+
+	  t = TYPE_BASECLASS (t, 1);
+	  VALUE_TYPE (arg1) = t; /* side effect! */
+	}
+
+      /* C++: If it was not found as a data field, then try to
+         return it as a pointer to a method.  */ 
+      t = baseclass;
+      VALUE_TYPE (arg1) = t;	/* side effect! */
+
+      if (destructor_name_p (name, t))
+	error ("use `info method' command to print out value of destructor");
+
+      while (t)
+	{
+	  for (i = TYPE_NFN_FIELDS (t) - 1; i >= 0; --i)
+	    {
+	      if (! strcmp (TYPE_FN_FIELDLIST_NAME (t, i), name))
+		{
+		  error ("use `info method' command to print value of method \"%s\"", name);
+		}
+	    }
+
+	  if (TYPE_N_BASECLASSES (t) == 0)
+	    break;
+
+	  t = TYPE_BASECLASS (t, 1);
+	}
+
+      if (found == 0)
+	error("there is no field named %s", name);
+      return 0;
     }
 
-  if (i < 0)
-    error ("Structure has no component named %s.", name);
+  if (destructor_name_p (name, t))
+    {
+      if (!args[1])
+	{
+	  /* destructors are a special case.  */
+	  return (value)value_fn_field (arg1, 0, TYPE_FN_FIELDLIST_LENGTH (t, 0));
+	}
+      else
+	{
+	  error ("destructor should not have any argument");
+	}
+    }
 
-  return value_field (arg1, i);
+  /*   This following loop is for methods with arguments.  */
+  while (t)
+    {
+      /* Look up as method first, because that is where we
+	 expect to find it first.  */
+      for (i = TYPE_NFN_FIELDS (t) - 1; i >= 0; i--)
+	{
+	  struct fn_field *f = TYPE_FN_FIELDLIST1 (t, i);
+
+	  if (!strcmp (TYPE_FN_FIELDLIST_NAME (t, i), name))
+	    {
+	      int j;
+	      struct fn_field *f = TYPE_FN_FIELDLIST1 (t, i);
+
+	      found = 1;
+	      for (j = TYPE_FN_FIELDLIST_LENGTH (t, i) - 1; j >= 0; --j)
+		{
+		  if (!typecmp (TYPE_FN_FIELD_ARGS (f, j), args))
+		    {
+		      if (TYPE_FN_FIELD_VIRTUAL_P (f, j))
+			return (value)value_virtual_fn_field (arg1, f, j, t);
+		      else
+			return (value)value_fn_field (arg1, i, j);
+		    }
+		}
+	    }
+	}
+
+      if (TYPE_N_BASECLASSES (t) == 0)
+	break;
+
+      t = TYPE_BASECLASS (t, 1);
+      VALUE_TYPE (arg1) = t;	/* side effect! */
+    }
+
+  if (found)
+    {
+      error ("Structure method %s not defined for arglist.", name);
+      return 0;
+    }
+  else
+    {
+      /* See if user tried to invoke data as function */
+      t = baseclass;
+      while (t)
+	{
+	  for (i = TYPE_NFIELDS (t) - 1; i >= 0; i--)
+	    {
+	      if (!strcmp (TYPE_FIELD_NAME (t, i), name))
+		{
+		  found = 1;
+		  break;
+		}
+	    }
+	  
+	  if (i >= 0)
+	    return TYPE_FIELD_STATIC (t, i)
+	      ? value_static_field (t, name, i) : value_field (arg1, i);
+
+	  if (TYPE_N_BASECLASSES (t) == 0)
+	    break;
+
+	  t = TYPE_BASECLASS (t, 1);
+	  VALUE_TYPE (arg1) = t; /* side effect! */
+	}
+      error ("Structure has no component named %s.", name);
+    }
+}
+
+/* C++: return 1 is NAME is a legitimate name for the destructor
+   of type TYPE.  If TYPE does not have a destructor, or
+   if NAME is inappropriate for TYPE, an error is signaled.  */
+int
+destructor_name_p (name, type)
+     char *name;
+     struct type *type;
+{
+  /* destructors are a special case.  */
+  char *dname = TYPE_NAME (type);
+
+  if (name[0] == '~')
+    {
+      if (! TYPE_HAS_DESTRUCTOR (type))
+	error ("type `%s' does not have destructor defined",
+	       TYPE_NAME (type));
+      /* Skip past the "struct " at the front.  */
+      while (*dname++ != ' ') ;
+      if (strcmp (dname, name+1))
+	error ("destructor specification error");
+      else
+	return 1;
+    }
+  return 0;
+}
+
+/* C++: Given ARG1, a value of type (pointer to a)* structure/union,
+   return 1 if the component named NAME from the ultimate
+   target structure/union is defined, otherwise, return 0.  */
+   
+int
+check_field (arg1, name)
+     register value arg1;
+     char *name;
+{
+  register struct type *t;
+  register int i;
+  int found = 0;
+
+  struct type *baseclass;
+
+  COERCE_ARRAY (arg1);
+
+  t = VALUE_TYPE (arg1);
+
+  /* Follow pointers until we get to a non-pointer.  */
+
+  while (TYPE_CODE (t) == TYPE_CODE_PTR || TYPE_CODE (t) == TYPE_CODE_REF)
+    {
+      arg1 = value_ind (arg1);
+      COERCE_ARRAY (arg1);
+      t = VALUE_TYPE (arg1);
+    }
+
+  if (TYPE_CODE (t) == TYPE_CODE_MEMBER)
+    error ("not implemented: member type in check_field");
+
+  if (TYPE_CODE (t) != TYPE_CODE_STRUCT
+      && TYPE_CODE (t) != TYPE_CODE_UNION)
+    error ("Internal error: `this' is not an aggregate");
+
+  baseclass = t;
+
+  while (t)
+    {
+      for (i = TYPE_NFIELDS (t) - 1; i >= 0; i--)
+	{
+	  if (!strcmp (TYPE_FIELD_NAME (t, i), name))
+	    {
+	      return 1;
+	    }
+	}
+
+      if (TYPE_N_BASECLASSES (t) == 0)
+	break;
+
+      t = TYPE_BASECLASS (t, 1);
+      VALUE_TYPE (arg1) = t;	/* side effect! */
+    }
+
+  /* C++: If it was not found as a data field, then try to
+     return it as a pointer to a method.  */ 
+  t = baseclass;
+  VALUE_TYPE (arg1) = t;	/* side effect! */
+
+  /* Destructors are a special case.  */
+  if (destructor_name_p (name, t))
+    return 1;
+
+  while (t)
+    {
+      for (i = TYPE_NFN_FIELDS (t) - 1; i >= 0; --i)
+	{
+	  if (!strcmp (TYPE_FN_FIELDLIST_NAME (t, i), name))
+	    return 1;
+	}
+
+      if (TYPE_N_BASECLASSES (t) == 0)
+	break;
+
+      t = TYPE_BASECLASS (t, 1);
+    }
+  return 0;
+}
+
+/* C++: Given an aggregate type DOMAIN, and a member name NAME,
+   return the address of this member as a pointer to member
+   type.  If INTYPE is non-null, then it will be the type
+   of the member we are looking for.  This will help us resolve
+   pointers to member functions.  */
+   
+value
+value_struct_elt_for_address (domain, intype, name)
+     struct type *domain, *intype;
+     char *name;
+{
+  register struct type *t = domain;
+  register int i;
+  int found = 0;
+  value v;
+
+  struct type *baseclass;
+
+  if (TYPE_CODE (t) != TYPE_CODE_STRUCT
+      && TYPE_CODE (t) != TYPE_CODE_UNION)
+    error ("Internal error: non-aggregate type to value_struct_elt_for_address");
+
+  baseclass = t;
+
+  while (t)
+    {
+      for (i = TYPE_NFIELDS (t) - 1; i >= 0; i--)
+	{
+	  if (!strcmp (TYPE_FIELD_NAME (t, i), name))
+	    {
+	      if (TYPE_FIELD_PACKED (t, i))
+		error ("pointers to bitfield members not allowed");
+
+	      v = value_from_long (builtin_type_int, TYPE_FIELD_BITPOS (t, i) >> 3);
+	      VALUE_TYPE (v) = lookup_pointer_type (lookup_member_type (TYPE_FIELD_TYPE (t, i), baseclass));
+	      return v;
+	    }
+	}
+
+      if (TYPE_N_BASECLASSES (t) == 0)
+	break;
+
+      t = TYPE_BASECLASS (t, 1);
+    }
+
+  /* C++: If it was not found as a data field, then try to
+     return it as a pointer to a method.  */ 
+  t = baseclass;
+
+  /* Destructors are a special case.  */
+  if (destructor_name_p (name, t))
+    {
+      error ("pointers to destructors not implemented yet");
+    }
+
+  /* Perform all necessary dereferencing.  */
+  while (intype && TYPE_CODE (intype) == TYPE_CODE_PTR)
+    intype = TYPE_TARGET_TYPE (intype);
+
+  while (t)
+    {
+      for (i = TYPE_NFN_FIELDS (t) - 1; i >= 0; --i)
+	{
+	  if (!strcmp (TYPE_FN_FIELDLIST_NAME (t, i), name))
+	    {
+	      int j = TYPE_FN_FIELDLIST_LENGTH (t, i);
+	      struct fn_field *f = TYPE_FN_FIELDLIST1 (t, i);
+
+	      if (intype == 0 && j > 1)
+		error ("non-unique member `%s' requires type instantiation", name);
+	      if (intype)
+		{
+		  while (j--)
+		    if (TYPE_FN_FIELD_TYPE (f, j) == intype)
+		      break;
+		  if (j < 0)
+		    error ("no member function matches that type instantiation");
+		}
+	      else
+		j = 0;
+
+	      if (TYPE_FN_FIELD_VIRTUAL_P (f, j))
+		{
+		  v = value_from_long (builtin_type_long,
+				       TYPE_FN_FIELD_VOFFSET (f, j));
+		}
+	      else
+		{
+		  struct symbol *s = lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, j),
+						    0, VAR_NAMESPACE);
+		  v = locate_var_value (s, 0);
+		}
+	      VALUE_TYPE (v) = lookup_pointer_type (lookup_member_type (TYPE_FN_FIELD_TYPE (f, j), baseclass));
+	      return v;
+	    }
+	}
+
+      if (TYPE_N_BASECLASSES (t) == 0)
+	break;
+
+      t = TYPE_BASECLASS (t, 1);
+    }
+  return 0;
+}
+
+/* Compare two argument lists and return the position in which they differ,
+   or zero if equal. Note that we ignore the first argument, which is
+   the type of the instance variable. This is because we want to handle
+   derived classes. This is not entirely correct: we should actually
+   check to make sure that a requested operation is type secure,
+   shouldn't we? */
+int typecmp(t1, t2)
+     struct type *t1[];
+     value t2[];
+{
+  int i;
+  
+  if (t1[0]->code == TYPE_CODE_VOID) return 0;
+  if (!t1[1]) return 0;
+  for (i = 1; t1[i] && t1[i]->code != TYPE_CODE_VOID; i++)
+    {
+      if (! t2[i]
+	  || t1[i]->code != t2[i]->type->code
+	  || t1[i]->target_type != t2[i]->type->target_type)
+	{
+	  return i+1;
+	}
+    }
+  if (!t1[i]) return 0;
+  return t2[i] ? i+1 : 0;
+}
+
+#ifndef FRAME
+#include "frame.h"
+#endif
+
+/* C++: return the value of the class instance variable, if one exists.
+   Flag COMPLAIN signals an error if the request is made in an
+   inappropriate context.  */
+value
+value_of_this (complain)
+     int complain;
+{
+  extern FRAME selected_frame;
+  struct symbol *func, *sym;
+  char *funname = 0;
+  struct block *b;
+  int i;
+
+  if (selected_frame == 0)
+    if (complain)
+      error ("no frame selected");
+    else return 0;
+
+  func = get_frame_function (selected_frame);
+  if (func)
+    funname = SYMBOL_NAME (func);
+  else
+    if (complain)
+      error ("no `this' in nameless context");
+    else return 0;
+
+  b = SYMBOL_BLOCK_VALUE (func);
+  i = BLOCK_NSYMS (b);
+  if (i <= 0)
+    if (complain)
+      error ("no args, no `this'");
+    else return 0;
+
+  sym = BLOCK_SYM (b, 0);
+  if (strncmp ("$this", SYMBOL_NAME (sym), 5))
+    if (complain)
+      error ("current stack frame not in method");
+    else return 0;
+
+  return read_var_value (sym, selected_frame);
 }
 
 static

@@ -43,6 +43,7 @@ static int expout_ptr;
 static int yylex ();
 static yyerror ();
 static void write_exp_elt ();
+static void write_exp_elt2 ();
 static void write_exp_string ();
 static void start_arglist ();
 static int end_arglist ();
@@ -93,10 +94,14 @@ struct stoken
     struct block *bval;
     enum exp_opcode opcode;
     struct internalvar *ivar;
+
+    struct type **tvec;
+    int *ivec;
   }
 
 %type <voidval> exp exp1 start variable
 %type <tval> type typebase
+%type <tvec> nonempty_typelist
 %type <bval> block
 
 %token <lval> INT CHAR
@@ -121,6 +126,9 @@ struct stoken
 %token <ivar> VARIABLE
 
 %token <opcode> ASSIGN_MODIFY
+
+/* C++ */
+%token THIS
 
 %left ','
 %left ABOVE_COMMA
@@ -196,10 +204,18 @@ exp	:	exp ARROW name
 			  write_exp_elt (STRUCTOP_PTR); }
 	;
 
+exp	:	exp ARROW '*' exp
+			{ write_exp_elt (STRUCTOP_MPTR); }
+	;
+
 exp	:	exp '.' name
 			{ write_exp_elt (STRUCTOP_STRUCT);
 			  write_exp_string ($3);
 			  write_exp_elt (STRUCTOP_STRUCT); }
+	;
+
+exp	:	exp '.' '*' exp
+			{ write_exp_elt (STRUCTOP_MEMBER); }
 	;
 
 exp	:	exp '[' exp1 ']'
@@ -352,7 +368,7 @@ exp	:	CHAR
 exp	:	FLOAT
 			{ write_exp_elt (OP_DOUBLE);
 			  write_exp_elt (builtin_type_double);
-			  write_exp_elt ($1);
+			  write_exp_elt2 ($1);
 			  write_exp_elt (OP_DOUBLE); }
 	;
 
@@ -390,8 +406,17 @@ exp	:	STRING
 			  write_exp_elt (OP_STRING); }
 	;
 
+/* C++.  */
+exp	:	THIS
+			{ write_exp_elt (OP_THIS);
+			  write_exp_elt (OP_THIS); }
+	;
+
+/* end of C++.  */
+
 block	:	name
-			{ struct symtab *tem = lookup_symtab (copy_name ($1));
+			{
+			  struct symtab *tem = lookup_symtab (copy_name ($1));
 			  struct symbol *sym;
 			  
 			  if (tem)
@@ -406,34 +431,88 @@ block	:	name
 			      else
 				error ("No file or function \"%s\".",
 				       copy_name ($1));
-			    }}
+			    }
+			}
 	;
 
 block	:	block COLONCOLON name
-			{ struct symbol *tem
+			{
+			  struct symbol *tem
 			    = lookup_symbol (copy_name ($3), $1, VAR_NAMESPACE);
 			  if (!tem || SYMBOL_CLASS (tem) != LOC_BLOCK)
 			    error ("No function \"%s\" in specified context.",
 				   copy_name ($3));
-			  $$ = SYMBOL_BLOCK_VALUE (tem); }
+			  $$ = SYMBOL_BLOCK_VALUE (tem);
+			}
 	;
 
 variable:	block COLONCOLON name
-			{ struct symbol *sym;
+			{
+			  struct symbol *sym;
 			  sym = lookup_symbol (copy_name ($3), $1, VAR_NAMESPACE);
 			  if (sym == 0)
 			    error ("No symbol \"%s\" in specified context.",
 				   copy_name ($3));
 			  write_exp_elt (OP_VAR_VALUE);
 			  write_exp_elt (sym);
-			  write_exp_elt (OP_VAR_VALUE); }
+			  write_exp_elt (OP_VAR_VALUE);
+			}
+	;
+
+variable:	typebase COLONCOLON name
+			{
+			  struct type *type = $1;
+			  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
+			      && TYPE_CODE (type) != TYPE_CODE_UNION)
+			    error ("`%s' is not defined as an aggregate type.",
+				   TYPE_NAME (type));
+
+			  write_exp_elt (OP_SCOPE);
+			  write_exp_elt (type);
+			  write_exp_string ($3);
+			  write_exp_elt (OP_SCOPE);
+			}
+	|	COLONCOLON name
+			{
+			  char *name = copy_name ($2);
+			  struct symbol *sym;
+			  int i;
+
+			  sym = lookup_symbol_2 (name, 0, VAR_NAMESPACE);
+			  if (sym)
+			    {
+			      write_exp_elt (OP_VAR_VALUE);
+			      write_exp_elt (sym);
+			      write_exp_elt (OP_VAR_VALUE);
+			      break;
+			    }
+			  for (i = 0; i < misc_function_count; i++)
+			    if (!strcmp (misc_function_vector[i].name, name))
+			      break;
+
+			  if (i < misc_function_count)
+			    {
+			      write_exp_elt (OP_LONG);
+			      write_exp_elt (builtin_type_int);
+			      write_exp_elt (misc_function_vector[i].address);
+			      write_exp_elt (OP_LONG);
+			      write_exp_elt (UNOP_MEMVAL);
+			      write_exp_elt (builtin_type_char);
+			      write_exp_elt (UNOP_MEMVAL);
+			    }
+			  else
+			    if (symtab_list == 0)
+			      error ("No symbol table is loaded.  Use the \"symbol-file\" command.");
+			    else
+			      error ("No symbol \"%s\" in current context.", name);
+			}
 	;
 
 variable:	NAME
 			{ struct symbol *sym;
-			  sym = lookup_symbol (copy_name ($1),
-					      expression_context_block,
-					      VAR_NAMESPACE);
+			  sym = lookup_symbol_1 (copy_name ($1),
+						 expression_context_block,
+						 VAR_NAMESPACE);
 			  if (sym)
 			    {
 			      write_exp_elt (OP_VAR_VALUE);
@@ -444,6 +523,32 @@ variable:	NAME
 			    {
 			      register char *arg = copy_name ($1);
 			      register int i;
+			      int v, val;
+			      /* C++: see if it hangs off of `this'.  Must
+			         not inadvertently convert from a method call
+				 to data ref.  */
+			      v = (int)value_of_this (0);
+			      if (v)
+				{
+				  val = check_field (v, arg);
+				  if (val)
+				    {
+				      write_exp_elt (OP_THIS);
+				      write_exp_elt (OP_THIS);
+				      write_exp_elt (STRUCTOP_PTR);
+				      write_exp_string ($1);
+				      write_exp_elt (STRUCTOP_PTR);
+				      break;
+				    }
+				}
+			      sym = lookup_symbol_2 (arg, 0, VAR_NAMESPACE);
+			      if (sym)
+				{
+				  write_exp_elt (OP_VAR_VALUE);
+				  write_exp_elt (sym);
+				  write_exp_elt (OP_VAR_VALUE);
+				  break; /* YACC-dependent */
+				}
 			      for (i = 0; i < misc_function_count; i++)
 				if (!strcmp (misc_function_vector[i].name, arg))
 				  break;
@@ -471,6 +576,17 @@ variable:	NAME
 type	:	typebase
 	|	type '*'
 			{ $$ = lookup_pointer_type ($1); }
+	|	type '&'
+			{ $$ = lookup_reference_type ($1); }
+	|	typebase COLONCOLON '*'
+			{ $$ = lookup_member_type (builtin_type_int, $1); }
+	|	type '(' typebase COLONCOLON '*' ')'
+			{ $$ = lookup_member_type ($1, $3); }
+	|	type '(' typebase COLONCOLON '*' ')' '(' ')'
+			{ $$ = lookup_member_type (lookup_function_type ($1, 0), $3); }
+	|	type '(' typebase COLONCOLON '*' ')' '(' nonempty_typelist ')'
+			{ $$ = lookup_member_type (lookup_function_type ($1, $8), $3);
+			  free ($8); }
 	;
 
 typebase
@@ -488,6 +604,19 @@ typebase
 					    expression_context_block); }
 	|	UNSIGNED name
 			{ $$ = lookup_unsigned_typename (copy_name ($2)); }
+	;
+
+nonempty_typelist
+	:	type
+		{ $$ = (struct type **)xmalloc (sizeof (struct type *) * 2);
+		  $$[0] = (struct type *)0;
+		  $$[1] = $1;
+		}
+	|	nonempty_typelist ',' type
+		{ int len = sizeof (struct type *) * ++($<ivec>1[0]);
+		  $$ = (struct type **)xrealloc ($1, len);
+		  $$[$<ivec>$[0]] = $3;
+		}
 	;
 
 name	:	NAME
@@ -543,10 +672,16 @@ free_funcalls ()
 
 /* Add one element to the end of the expression.  */
 
+/* To avoid a bug in the Sun 4 compiler, we pass only things that
+   can fit into a single register through here.  */
 static void
 write_exp_elt (expelt)
-     union exp_element expelt;
+     /* union exp_element expelt; */
+     long expelt;
 {
+  union exp_element temp;
+  temp.longconst = expelt;
+
   if (expout_ptr >= expout_size)
     {
       expout_size *= 2;
@@ -554,7 +689,25 @@ write_exp_elt (expelt)
 					       sizeof (struct expression)
 					       + expout_size * sizeof (union exp_element));
     }
-  expout->elts[expout_ptr++] = expelt;
+  expout->elts[expout_ptr++] = /* expelt */ temp;
+}
+
+/* Things that take more space must come through here.  */
+static void
+write_exp_elt2 (expelt)
+     double expelt;
+{
+  union exp_element temp;
+  temp.doubleconst = expelt;
+
+  if (expout_ptr >= expout_size)
+    {
+      expout_size *= 2;
+      expout = (struct expression *) xrealloc (expout,
+					       sizeof (struct expression)
+					       + expout_size * sizeof (union exp_element));
+    }
+  expout->elts[expout_ptr++] = temp;
 }
 
 /* Add a string constant to the end of the expression.
@@ -904,13 +1057,23 @@ yylex ()
     {
       return STRUCT;
     }
-  if (namelen == 5 && !strncmp (tokstart, "union", 5))
+  if (namelen == 5)
     {
-      return UNION;
+      if (!strncmp (tokstart, "union", 5))
+	{
+	  return UNION;
+	}
     }
-  if (namelen == 4 && !strncmp (tokstart, "enum", 4))
+  if (namelen == 4)
     {
-      return ENUM;
+      if (!strncmp (tokstart, "enum", 4))
+	{
+	  return ENUM;
+	}
+      if (!strncmp (tokstart, "this", 4))
+	{
+	  return THIS;
+	}
     }
   if (namelen == 6 && !strncmp (tokstart, "sizeof", 6))
     {
@@ -991,10 +1154,20 @@ length_of_subexp (expr, endpos)
   register int args = 0;
   register int i;
 
+  if (endpos < 0)
+    error ("?error in length_of_subexp");
+
   i = (int) expr->elts[endpos - 1].opcode;
 
   switch (i)
     {
+      /* C++  */
+    case OP_SCOPE:
+      oplen = 4 + ((expr->elts[endpos - 2].longconst
+		    + sizeof (union exp_element))
+		   / sizeof (union exp_element));
+      break;
+
     case OP_LONG:
     case OP_DOUBLE:
       oplen = 4;
@@ -1025,7 +1198,6 @@ length_of_subexp (expr, endpos)
       oplen = 3 + ((expr->elts[endpos - 2].longconst
 		    + sizeof (union exp_element))
 		   / sizeof (union exp_element));
-		   
       break;
 
     case TERNOP_COND:
@@ -1035,6 +1207,11 @@ length_of_subexp (expr, endpos)
     case BINOP_ASSIGN_MODIFY:
       oplen = 3;
       args = 2;
+      break;
+
+      /* C++ */
+    case OP_THIS:
+      oplen = 2;
       break;
 
     default:
@@ -1074,6 +1251,13 @@ prefixify_subexp (inexpr, outexpr, inend, outbeg)
   opcode = inexpr->elts[inend - 1].opcode;
   switch (opcode)
     {
+      /* C++  */
+    case OP_SCOPE:
+      oplen = 4 + ((inexpr->elts[inend - 2].longconst
+		    + sizeof (union exp_element))
+		   / sizeof (union exp_element));
+      break;
+
     case OP_LONG:
     case OP_DOUBLE:
       oplen = 4;
@@ -1114,6 +1298,11 @@ prefixify_subexp (inexpr, outexpr, inend, outbeg)
     case BINOP_ASSIGN_MODIFY:
       oplen = 3;
       args = 2;
+      break;
+
+      /* C++ */
+    case OP_THIS:
+      oplen = 2;
       break;
 
     default:

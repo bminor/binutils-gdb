@@ -1,5 +1,6 @@
 /* GDB symbol table format definitions.
    Copyright (C) 1986 Free Software Foundation, Inc.
+   Hacked by Michael Tiemann (tiemann@mcc.com)
 
 GDB is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY.  No author or distributor accepts responsibility to anyone
@@ -117,12 +118,21 @@ enum type_code
   TYPE_CODE_SET,		/* Pascal sets */
   TYPE_CODE_RANGE,		/* Range (integers within spec'd bounds) */
   TYPE_CODE_PASCAL_ARRAY,	/* Array with explicit type of index */
+
+  /* C++ */
+  TYPE_CODE_MEMBER,		/* Member type */
+  TYPE_CODE_REF,		/* C++ Reference types */
 };
 
 /* This appears in a type's flags word for an unsigned integer type.  */
 #define TYPE_FLAG_UNSIGNED 1
 
 /* Other flag bits are used with GDB.  */
+
+#define TYPE_FLAG_HAS_CONSTRUCTOR 256
+#define TYPE_FLAG_HAS_DESTRUCTOR 512
+#define TYPE_FLAG_VIA_PUBLIC 1024
+#define TYPE_FLAG_VIA_VIRTUAL 2048
 
 struct type
 {
@@ -144,11 +154,23 @@ struct type
      The debugger may add the address of such a type
      if it has to construct one later.  */ 
   struct type *pointer_type;
+  /* C++: also need a reference type.  */
+  struct type *reference_type;
   /* Type that is a function returning this type.
      Zero if no such function type is known here.
      The debugger may add the address of such a type
      if it has to construct one later.  */
   struct type *function_type;
+
+/* Handling of pointers to members:
+   MAIN_VARIANT is used for pointer and pointer
+   to member types.  Normally it the value of the address of its
+   containing type.  However, for pointers to members, we must be
+   able to allocate pointer to member types and look them up
+   from some place of reference.
+   NEXT_VARIANT is the next element in the chain.  */
+  struct type *main_variant, *next_variant;
+
   /* Flags about this type.  */
   short flags;
   /* Number of fields described for this type */
@@ -185,6 +207,67 @@ struct type
 	 Zero for range bounds and array domains.  */
       char *name;
     } *fields;
+
+  /* C++ */
+  int *private_field_bits;
+  int *protected_field_bits;
+
+  /* Number of methods described for this type */
+  short nfn_fields;
+  /* Number of base classes this type derives from.  */
+  short n_baseclasses;
+
+  /* Number of methods described for this type plus all the
+     methods that it derives from.  */
+  int nfn_fields_total;
+
+  /* For classes, structures, and unions, a description of each field,
+     which consists of an overloaded name, followed by the types of
+     arguments that the method expects, and then the name after it
+     has been renamed to make it distinct. */
+  struct fn_fieldlist
+    {
+      /* The overloaded name.  */
+      char *name;
+      /* The number of methods with this name.  */
+      int length;
+      /* The list of methods.  */
+      struct fn_field
+	{
+#if 0
+	  /* The overloaded name */
+	  char *name;
+#endif
+	  /* The type of the argument */
+	  struct type *type;
+	  /* The argument list */
+	  struct type **args;
+	  /* The name after it has been processed */
+	  char *physname;
+	  /* If this is a virtual function, the offset into the vtbl-1,
+	     else 0.  */
+	  int voffset;
+	} *fn_fields;
+
+      int *private_fn_field_bits;
+      int *protected_fn_field_bits;
+
+    } *fn_fieldlists;
+
+  /* For types with virtual functions, VPTR_BASETYPE is the base class which
+     defined the virtual function table pointer.  VPTR_FIELDNO is
+     the field number of that pointer in the structure.
+
+     For types that are pointer to member types, VPTR_BASETYPE
+     ifs the type that this pointer is a member of.
+
+     Unused otherwise.  */
+  struct type *vptr_basetype;
+
+  int vptr_fieldno;
+
+  /* If this type has base classes, put them here.  */
+  struct type **baseclasses;
 };
 
 /* All of the name-scope contours of the program
@@ -287,6 +370,7 @@ enum address_class
   LOC_STATIC,		/* Value is at fixed address */
   LOC_REGISTER,		/* Value is in register */
   LOC_ARG,		/* Value is at spec'd position in arglist */
+  LOC_REGPARM,		/* Value is at spec'd position in register window */
   LOC_LOCAL,		/* Value is at spec'd pos in stack frame */
   LOC_TYPEDEF,		/* Value not used; definition in SYMBOL_TYPE
 			   Symbols in the namespace STRUCT_NAMESPACE
