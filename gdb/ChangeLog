@@ -1,3 +1,12 @@
+2003-03-21  Corinna Vinschen  <vinschen@redhat.com>
+
+	* Makefile.in (ALLDEPFILES): Add i386-cygwin-tdep.c.
+	(i386-cygwin-tdep.o): Add dependencies.
+	* defs.h (enum gdb_osabi): Add GDB_OSABI_CYGWIN.
+	* i386-cygwin-tdep.c: New file.
+	* osabi.c (gdb_osabi_name): Add string for GDB_OSABI_CYGWIN.
+	* config/i386/cygwin.mt (TDEPFILES): Add i386-cygwin-tdep.o.
+
 2003-03-20  Andrew Cagney  <cagney@redhat.com>
 
 	* infrun.c (DYNAMIC_TRAMPOLINE_NEXTPC): Delete macro.

@@ -74,6 +74,8 @@ static const char * const gdb_osabi_names[] =
   "ARM APCS",
   "QNX Neutrino",
 
+  "Cygwin",
+
   "<invalid>"
 };
 

@@ -1351,7 +1351,7 @@ ALLDEPFILES = \
 	hppa-tdep.c hppa-hpux-tdep.c \
 	hppab-nat.c hppah-nat.c hpread.c \
 	i386-tdep.c i386b-nat.c i386v-nat.c i386-linux-nat.c \
-	i386v4-nat.c i386ly-tdep.c \
+	i386v4-nat.c i386ly-tdep.c i386-cygwin-tdep.c \
 	i386bsd-nat.c i386bsd-tdep.c i386fbsd-nat.c \
 	i387-tdep.c \
 	i386-linux-tdep.c i386-nat.c \
@@ -1785,6 +1785,8 @@ i386gnu-nat.o: i386gnu-nat.c $(defs_h) $(inferior_h) $(floatformat_h) \
 i386gnu-tdep.o: i386gnu-tdep.c $(defs_h) $(i386_tdep_h) $(osabi_h)
 i386ly-tdep.o: i386ly-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(regcache_h) $(target_h) $(i386_tdep_h) $(osabi_h)
+i386-cygwin-tdep.o: i386-cygwin-tdep.c $(defs_h) $(gdb_string_h) \
+	$(i386_tdep_h) $(osabi_h)
 i386nbsd-tdep.o: i386nbsd-tdep.c $(defs_h) $(gdbtypes_h) $(gdbcore_h) \
 	$(regcache_h) $(arch_utils_h) $(i386_tdep_h) $(i387_tdep_h) \
 	$(nbsd_tdep_h) $(solib_svr4_h) $(osabi_h)
