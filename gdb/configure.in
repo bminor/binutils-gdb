@@ -314,6 +314,129 @@ if test x$want_mmalloc = xtrue; then
    MMALLOC='../mmalloc/libmmalloc.a'
 fi
 
+# start-sanitize-carp
+# The below takes an educated guess at the targets that
+# should be built.  It is an interum version that provides
+# significant backward compatibility.
+
+AC_ARG_ENABLE(carp,
+[  --enable-carp        Configure alternative readaptive paradigm ],
+[case "${enableval}" in
+  yes) enable_carp=yes ;;
+  no)  enable_carp=no ;;
+  *)   AC_MSG_ERROR([bad value ${enableval} for carp option]) ;;
+esac],[enable_carp=no])dnl
+
+AC_ARG_ENABLE(targets,
+[  --enable-targets        alternative target configurations],
+[case "${enableval}" in
+  yes | "") AC_ERROR(enable-targets option must specify target names or 'all')
+            ;;
+  no)       enable_targets= ;;
+  *)        enable_targets="$enableval" ;;
+esac])dnl
+
+# Canonicalize the secondary target names.
+all_targets=false
+if test -n "$enable_targets" ; then
+    if test "$enable_targets" = all ; then
+	all_targets=true
+    else
+	for targ in `echo $enable_targets | sed 's/,/ /g'`
+	do
+	    result=`${CONFIG_SHELL-/bin/sh} $ac_config_sub $targ 2>/dev/null`
+	    if test -n "$result" ; then
+		canon_targets="$canon_targets $result"
+	    fi
+	done
+    fi
+fi
+
+# Convert the target names into GDB [*]-tdep.c names
+changequote(,)dnl
+selarchs=
+for targ in $target $canon_targets
+do
+    if test "x$targ" = "xall" ; then
+        all_targets=true
+    else
+	t_cpu=`echo $targ | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
+	t_vendor=`echo $targ | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\2/'`
+	t_os=`echo $targ | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
+	mt=`
+target=$targ
+target_cpu=$t_cpu
+target_vendor=$t_vendor
+target_os=$t_os
+. ${srcdir}/configure.tgt
+echo ${srcdir}/config/${gdb_target_cpu}/${gdb_target}.mt`
+	if test -r ${mt} ; then
+	    # This gets confused over .mt files that have multiple -tdep.o
+	    tdep=`sed -n '
+s/^.*[ 	=]\([^ 	]*\)-tdep.o.*/\1/p
+' $mt`
+	    selarchs="$selarchs $tdep"
+	fi
+    fi
+done	
+changequote([,])dnl
+
+# We don't do any links based on the target system, just makefile config.
+
+if test x${all_targets} = xfalse ; then
+
+    # Target architecture .o files.
+    ta=
+
+    for arch in $selarchs
+    do
+	archdefs="$archdefs -DARCH_$arch"
+	ta="$ta ${arch}-tdep.o"
+	# Special cases
+	case "$arch" in
+	dvp)		ta="$ta mips-tdep.o dvp-tdep.o" ;;
+	esac
+    done
+
+    # Weed out duplicate .o files.
+    f=""
+    for i in $ta ; do
+	case " $f " in
+	*" $i "*) ;;
+	*) f="$f $i" ;;
+	esac
+    done
+    ta="$f"
+
+    # And duplicate -D flags.
+    f=""
+    for i in $archdefs ; do
+	case " $f " in
+	*" $i "*) ;;
+	*) f="$f $i" ;;
+	esac
+    done
+    archdefs="$f"
+
+    MACHINE_OBS="$ta"
+
+else	# all_targets is true
+    archdefs=-DARCH_all
+    MACHINE_OBS='$(ALL_MACHINES)'
+fi
+
+dnl Don't define an archdefs list
+dnl AC_SUBST(archdefs)
+dnl XXXX this name will change several more times
+if test "${enable_carp}" = yes ; then
+    gdb_target=carp
+    gdb_target_cpu=carp
+else
+    MACHINE_OBS="# $MACHINE_OBS"
+fi
+AC_SUBST(MACHINE_OBS)
+
+# end-sanitize-carp
 # start-sanitize-gdbtk
 # start-sanitize-ide
 ENABLE_IDE=
