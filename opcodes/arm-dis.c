@@ -172,13 +172,13 @@ arm_decode_shift (given, func, stream)
 
 static int
 print_insn_arm (pc, info, given)
-     bfd_vma                   pc;
-     struct disassemble_info * info;
-     long                      given;
+     bfd_vma pc;
+     struct disassemble_info *info;
+     long given;
 {
-  struct arm_opcode *  insn;
-  void *               stream = info->stream;
-  fprintf_ftype        func   = info->fprintf_func;
+  const struct arm_opcode *insn;
+  void *stream = info->stream;
+  fprintf_ftype func   = info->fprintf_func;
 
   for (insn = arm_opcodes; insn->assembler; insn++)
     {
@@ -753,13 +753,13 @@ print_insn_arm (pc, info, given)
 
 static int
 print_insn_thumb (pc, info, given)
-     bfd_vma                   pc;
-     struct disassemble_info * info;
-     long                      given;
+     bfd_vma pc;
+     struct disassemble_info *info;
+     long given;
 {
-  struct thumb_opcode * insn;
-  void *                stream = info->stream;
-  fprintf_ftype         func = info->fprintf_func;
+  const struct thumb_opcode *insn;
+  void *stream = info->stream;
+  fprintf_ftype func = info->fprintf_func;
 
   for (insn = thumb_opcodes; insn->assembler; insn++)
     {

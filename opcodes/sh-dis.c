@@ -29,14 +29,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #endif
 
 static void print_movxy
-  PARAMS ((sh_opcode_info *, int, int, fprintf_ftype, void *));
+  PARAMS ((const sh_opcode_info *, int, int, fprintf_ftype, void *));
 static void print_insn_ddt PARAMS ((int, struct disassemble_info *));
 static void print_dsp_reg PARAMS ((int, fprintf_ftype, void *));
 static void print_insn_ppi PARAMS ((int, struct disassemble_info *));
 
 static void
 print_movxy (op, rn, rm, fprintf_fn, stream)
-     sh_opcode_info *op;
+     const sh_opcode_info *op;
      int rn, rm;
      fprintf_ftype fprintf_fn;
      void *stream;
@@ -105,8 +105,8 @@ print_insn_ddt (insn, info)
     fprintf_fn (stream, ".word 0x%x", insn);
   else
     {
-      static sh_opcode_info *first_movx, *first_movy;
-      sh_opcode_info *opx, *opy;
+      static const sh_opcode_info *first_movx, *first_movy;
+      const sh_opcode_info *opx, *opy;
       unsigned int insn_x, insn_y;
 
       if (! first_movx)
@@ -192,7 +192,7 @@ print_insn_ppi (field_b, info)
   void *stream = info->stream;
   unsigned int nib1, nib2, nib3;
   char *dc = NULL;
-  sh_opcode_info *op;
+  const sh_opcode_info *op;
 
   if ((field_b & 0xe800) == 0)
     {
@@ -298,7 +298,7 @@ print_insn_sh (memaddr, info)
   unsigned char nibs[4];
   int status;
   bfd_vma relmask = ~(bfd_vma) 0;
-  sh_opcode_info *op;
+  const sh_opcode_info *op;
   int target_arch;
 
   switch (info->mach)

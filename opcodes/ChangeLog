@@ -1,3 +1,21 @@
+2002-12-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* arm-dis.c (print_insn_arm): Constify "insn".  Formatting.
+	(print_insn_thumb): Likewise.
+	* h8500-dis.c (print_insn_h8500): Constify "opcode".
+	* mcore-dis.c (print_insn_mcore): Constify "op".  Formatting.
+	* ns32k-dis.c (print_insn_arg <case 'F'>): Use a union to avoid
+	type-punned pointer warnings.
+	<case 'L'>: Likewise.  Fix error message too.
+	* pdp11-dis.c (print_reg): Warning fix.
+	* sh-dis.c (print_movxy): Constify "op" param.
+	(print_insn_ddt): Constify sh_opcode_info vars.
+	(print_insn_ppi): Likewise.
+	(print_insn_sh): Likewise.
+	* tic30-dis.c (cnvt_tmsfloat_ieee): Use a union to avoid
+	type-punned pointer warnings.
+	* w65-dis.c (print_insn_w65): Constify "op".
+
 2002-12-01  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* m68hc11-dis.c (PC_REGNUM): Define.

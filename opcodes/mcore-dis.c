@@ -1,5 +1,5 @@
 /* Disassemble Motorola M*Core instructions.
-   Copyright 1993, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1993, 1999, 2000, 2002 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -89,12 +89,12 @@ print_insn_mcore (memaddr, info)
      bfd_vma memaddr;
      struct disassemble_info *info;
 {
-  unsigned char       ibytes[4];
-  fprintf_ftype       fprintf = info->fprintf_func;
-  void *              stream = info->stream;
-  unsigned short      inst;
-  mcore_opcode_info * op;
-  int                 status;
+  unsigned char ibytes[4];
+  fprintf_ftype fprintf = info->fprintf_func;
+  void *stream = info->stream;
+  unsigned short inst;
+  const mcore_opcode_info *op;
+  int status;
 
   info->bytes_per_chunk = 2;
 
@@ -128,19 +128,48 @@ print_insn_mcore (memaddr, info)
 
       switch (op->opclass)
 	{
-	case O0: break;
-	case OT: fprintf (stream, "\t%d", inst & 0x3); break;
+	case O0:
+	  break;
+
+	case OT:
+	  fprintf (stream, "\t%d", inst & 0x3);
+	  break;
+
 	case O1:
 	case JMP:
-	case JSR: fprintf (stream, "\t%s", name); break;
-	case OC:  fprintf (stream, "\t%s, %s", name, crname[(inst >> 4) & 0x1F]); break;
-	case O1R1: fprintf (stream, "\t%s, r1", name); break;
+	case JSR:
+	  fprintf (stream, "\t%s", name);
+	  break;
+
+	case OC:
+	  fprintf (stream, "\t%s, %s", name, crname[(inst >> 4) & 0x1F]);
+	  break;
+
+	case O1R1:
+	  fprintf (stream, "\t%s, r1", name);
+	  break;
+
 	case MULSH:
-	case O2: fprintf (stream, "\t%s, %s", name, grname[(inst >> 4) & 0xF]); break;
-	case X1: fprintf (stream, "\tr1, %s", name); break;
-	case OI: fprintf (stream, "\t%s, %d", name, ((inst >> 4) & 0x1F) + 1); break;
-	case RM: fprintf (stream, "\t%s-r15, (r0)", name); break;
-	case RQ: fprintf (stream, "\tr4-r7, (%s)", name); break;
+	case O2:
+	  fprintf (stream, "\t%s, %s", name, grname[(inst >> 4) & 0xF]);
+	  break;
+
+	case X1:
+	  fprintf (stream, "\tr1, %s", name);
+	  break;
+
+	case OI:
+	  fprintf (stream, "\t%s, %d", name, ((inst >> 4) & 0x1F) + 1);
+	  break;
+
+	case RM:
+	  fprintf (stream, "\t%s-r15, (r0)", name);
+	  break;
+
+	case RQ:
+	  fprintf (stream, "\tr4-r7, (%s)", name);
+	  break;
+
 	case OB:
 	case OBRa:
 	case OBRb:
@@ -149,10 +178,17 @@ print_insn_mcore (memaddr, info)
 	case SIa:
 	case OMa:
 	case OMb:
-	case OMc: fprintf (stream, "\t%s, %d", name, (inst >> 4) & 0x1F); break;
-	case I7: fprintf (stream, "\t%s, %d", name, (inst >> 4) & 0x7F); break;
-	case LS: fprintf (stream, "\t%s, (%s, %d)", grname[(inst >> 8) & 0xF],
-			  name, ((inst >> 4) & 0xF) << isiz[(inst >> 13) & 3]);
+	case OMc:
+	  fprintf (stream, "\t%s, %d", name, (inst >> 4) & 0x1F);
+	  break;
+
+	case I7:
+	  fprintf (stream, "\t%s, %d", name, (inst >> 4) & 0x7F);
+	  break;
+
+	case LS:
+	  fprintf (stream, "\t%s, (%s, %d)", grname[(inst >> 8) & 0xF],
+		   name, ((inst >> 4) & 0xF) << isiz[(inst >> 13) & 3]);
 	  break;
 
 	case BR:
