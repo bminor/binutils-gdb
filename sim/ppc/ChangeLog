@@ -1,3 +1,7 @@
+2001-07-16  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in: Add dependencies on $(CPU_H).
+
 Wed Mar  7 10:45:12 HST 2001  Glen Nakamura  <gen@lava.net>
 
 	* hw_init.c (dma_file): Fixed problem with loading last 1KB of

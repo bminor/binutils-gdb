@@ -585,7 +585,7 @@ tmp-hw: Makefile $(HW_SRC) $(srcdir)/../../move-if-change
 	$(srcdir)/../../move-if-change tmp-hw.c hw.c
 	touch tmp-hw
 
-hw_cpu.o: hw_cpu.c $(DEVICE_TABLE_H)
+hw_cpu.o: hw_cpu.c $(DEVICE_TABLE_H) $(CPU_H)
 hw_core.o: hw_core.c $(DEVICE_TABLE_H)
 hw_disk.o: hw_disk.c $(DEVICE_TABLE_H) pk.h
 hw_glue.o: hw_glue.c $(DEVICE_TABLE_H)
@@ -596,11 +596,11 @@ hw_iobus.o: hw_iobus.c $(DEVICE_TABLE_H)
 hw_memory.o: hw_memory.c $(DEVICE_TABLE_H)
 hw_nvram.o: hw_nvram.c $(DEVICE_TABLE_H)
 hw_opic.o: hw_opic.c $(DEVICE_TABLE_H)
-hw_pal.o: hw_pal.c $(DEVICE_TABLE_H)
+hw_pal.o: hw_pal.c $(DEVICE_TABLE_H) $(CPU_H)
 hw_phb.o: hw_phb.c $(DEVICE_TABLE_H) hw_phb.h
 hw_register.o: hw_register.c $(DEVICE_TABLE_H)
 hw_trace.o: hw_trace.c $(DEVICE_TABLE_H)
-hw_vm.o: hw_vm.c $(DEVICE_TABLE_H)
+hw_vm.o: hw_vm.c $(DEVICE_TABLE_H) $(CPU_H)
 # ignore this line, it stops make from getting confused
 
 
