@@ -1,4 +1,4 @@
-# .Sanitize for devo/ld/scripttempl.
+# .Sanitize for devo/ld/scripttempl
 
 # Each directory to survive its way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
@@ -16,7 +16,6 @@
 Do-first:
 
 d30v_files="elfd30v.sc"
-
 if ( echo $* | grep keep\-d30v > /dev/null ) ; then
 	keep_these_too="${d30v_files} ${keep_these_too}"
 else
@@ -24,7 +23,6 @@ else
 fi
 
 tic80_files="tic80coff.sc"
-
 if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
 	keep_these_too="${tic80_files} ${keep_these_too}"
 else
@@ -43,9 +41,9 @@ README
 a29k.sc
 aix.sc
 alpha.sc
+aout.sc
 armaout.sc
 armcoff.sc
-aout.sc
 delta68.sc
 ebmon29k.sc
 elf.sc
@@ -91,6 +89,8 @@ z8000.sc
 
 Things-to-lose:
 
+
+
 # The lines between the "Do-last:" line and the end of the file
 # are executed as a /bin/sh shell script after everything else is
 # done.
@@ -98,7 +98,6 @@ Things-to-lose:
 Do-last:
 
 v850_files="v850.sc"
-
 if ( echo $* | grep keep\-v850e > /dev/null ) ; then
 	for i in $v850_files ; do
 		if test ! -d $i && (grep sanitize-v850e $i > /dev/null) ; then
@@ -126,3 +125,4 @@ else
 	done
 fi
 
+# eof

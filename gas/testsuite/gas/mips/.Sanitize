@@ -1,6 +1,6 @@
-# .Sanitize for devo/gas/testsuite/gas/mips.
+# .Sanitize for devo/gas/testsuite/gas/mips
 
-# Each directory to survive it's way into a release will need a file
+# Each directory to survive its way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
 # and must exist in the order specified by this file.  Each directory
 # in the tree will be processed, top down, in the following order.
@@ -11,7 +11,7 @@
 
 # The lines between the "Do-first:" line and the "Things-to-keep:"
 # line are executed as a /bin/sh shell script before anything else is
-# done in this 
+# done in this directory.
 
 Do-first:
 
@@ -64,7 +64,7 @@ else
 fi
 
 # All files listed between the "Things-to-keep:" line and the
-# "Files-to-sed:" line will be kept.  All other files will be removed.
+# "Do-last:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
 # called.  Directories not listed will be removed in their entirety
 # with rm -rf.
@@ -111,17 +111,17 @@ la.s
 lb-empic.d
 lb-pic.s
 lb-svr4pic.d
-lb-xgot.d
 lb-xgot-ilocks.d
+lb-xgot.d
 lb.d
 lb.s
-ld.d
-ld.s
 ld-empic.d
 ld-ilocks.d
 ld-pic.s
 ld-svr4pic.d
 ld-xgot.d
+ld.d
+ld.s
 li.d
 li.s
 lif-empic.d
@@ -150,12 +150,12 @@ sb.d
 sb.s
 trunc.d
 trunc.s
+uld.d
+uld.s
 ulh-empic.d
 ulh-pic.s
 ulh-svr4pic.d
 ulh-xgot.d
-uld.d
-uld.s
 ulh.d
 ulh.s
 ulw.d
@@ -168,6 +168,12 @@ usw.d
 usw.s
 
 Things-to-lose:
+
+
+
+# The lines between the "Do-last:" line and the end of the file
+# are executed as a /bin/sh shell script after everything else is
+# done.
 
 Do-last:
 
@@ -311,4 +317,4 @@ else
 	done
 fi
 
-# End of file.
+# eof

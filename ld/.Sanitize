@@ -1,4 +1,4 @@
-# .Sanitize for devo/ld.
+# .Sanitize for devo/ld
 
 # Each directory to survive its way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
@@ -15,8 +15,9 @@
 
 Do-first:
 
+
 # All files listed between the "Things-to-keep:" line and the
-# "Files-to-sed:" line will be kept.  All other files will be removed.
+# "Do-last:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
 # called.  Directories not listed will be removed in their entirety
 # with rm -rf.
@@ -30,8 +31,8 @@ NEWS
 README
 TODO
 acconfig.h
-aclocal.m4
 acinclude.m4
+aclocal.m4
 config.in
 configure
 configure.bat
@@ -41,10 +42,10 @@ configure.tgt
 dep-in.sed
 emulparams
 emultempl
+gen-doc.texi
 genscripts.sh
 h8-doc.texi
 ld.1
-gen-doc.texi
 ld.h
 ld.texinfo
 ldcref.c
@@ -74,12 +75,13 @@ lexsup.c
 mac-ld.r
 mpw-config.in
 mpw-elfmips.c
-mpw-idtmips.c
 mpw-eppcmac.c
 mpw-esh.c
+mpw-idtmips.c
 mpw-make.sed
 mri.c
 mri.h
+po
 scripttempl
 stamp-h.in
 sysdep.h
@@ -87,10 +89,15 @@ testsuite
 
 Things-to-lose:
 
+
+
+# The lines between the "Do-last:" line and the end of the file
+# are executed as a /bin/sh shell script after everything else is
+# done.
+
 Do-last:
 
 v850_files="ChangeLog configure.tgt Makefile.am Makefile.in"
-
 if ( echo $* | grep keep\-v850e > /dev/null ) ; then
 	for i in $v850_files ; do
 		if test ! -d $i && (grep sanitize-v850e $i > /dev/null) ; then
@@ -119,7 +126,6 @@ else
 fi
 
 tx49_files="ChangeLog configure.tgt"
-
 if ( echo $* | grep keep\-tx49 > /dev/null ) ; then
 	for i in $tx49_files ; do
 		if test ! -d $i && (grep sanitize-tx49 $i > /dev/null) ; then
@@ -148,7 +154,6 @@ else
 fi
 
 r5900_files="ChangeLog configure.tgt Makefile.in Makefile.am"
-
 if ( echo $* | grep keep\-r5900 > /dev/null ) ; then
 	for i in $r5900_files ; do
 		if test ! -d $i && (grep sanitize-r5900 $i > /dev/null) ; then
@@ -177,7 +182,6 @@ else
 fi
 
 vr4320_files="ChangeLog configure.tgt"
-
 if ( echo $* | grep keep\-vr4320 > /dev/null ) ; then
 	for i in $vr4320_files ; do
 		if test ! -d $i && (grep sanitize-vr4320 $i > /dev/null) ; then
@@ -206,7 +210,6 @@ else
 fi
 
 tic80_files="ChangeLog configure.tgt Makefile.am Makefile.in"
-
 if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
 	for i in $tic80_files ; do
 		if test ! -d $i && (grep sanitize-tic80 $i > /dev/null) ; then
@@ -235,7 +238,6 @@ else
 fi
 
 d30v_files="ChangeLog configure.tgt Makefile.am Makefile.in"
-
 if ( echo $* | grep keep\-d30v > /dev/null ) ; then
 	for i in $d30v_files ; do
 		if test ! -d $i && (grep sanitize-d30v $i > /dev/null) ; then
@@ -264,7 +266,6 @@ else
 fi
 
 sky_files="ChangeLog configure.tgt"
-
 if ( echo $* | grep keep\-sky > /dev/null ) ; then
 	for i in $sky_files ; do
 		if test ! -d $i && (grep sanitize-sky $i > /dev/null) ; then
@@ -298,5 +299,4 @@ for i in * ; do
 	fi
 done
 
-#
-# End of file.
+# eof

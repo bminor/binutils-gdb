@@ -1,4 +1,4 @@
-# .Sanitize for devo/gprof
+# .Sanitize for devo/intl
 
 # Each directory to survive its way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
@@ -24,72 +24,41 @@ Do-first:
 
 Things-to-keep:
 
-.gdbinit
 ChangeLog
-Makefile.am
+ChangeLog.Cygnus
 Makefile.in
-NOTES
-TEST
-TODO
 acconfig.h
 aclocal.m4
-alpha.c
-basic_blocks.c
-basic_blocks.h
-bb_exit_func.c
-bbconv.pl
-bsd_callg_bl.m
-call_graph.c
-call_graph.h
-cg_arcs.c
-cg_arcs.h
-cg_dfn.c
-cg_dfn.h
-cg_print.c
-cg_print.h
+bindtextdom.c
+cat-compat.c
+config.in
 configure
-configure.bat
 configure.in
-core.c
-core.h
-flat_bl.m
-fsf_callg_bl.m
-gconfig.in
-gen-c-prog.awk
-gmon.h
-gmon_io.c
-gmon_io.h
-gmon_out.h
-gprof.1
-gprof.c
-gprof.h
-gprof.texi
-hertz.c
-hertz.h
-hist.c
-hist.h
-i386.c
-po
-search_list.c
-search_list.h
-source.c
-source.h
-sparc.c
-stamp-h.in
-sym_ids.c
-sym_ids.h
-symtab.c
-symtab.h
-tahoe.c
-utils.c
-utils.h
-vax.c
+dcgettext.c
+dgettext.c
+explodename.c
+finddomain.c
+gettext.c
+gettext.h
+gettextP.h
+hash-string.h
+intl-compat.c
+intlh.inst.in
+l10nflist.c
+libgettext.h
+libintl.glibc
+linux-msg.sed
+loadinfo.h
+loadmsgcat.c
+localealias.c
+po2tbl.sed.in
+textdomain.c
+xopen-msg.sed
 
 Things-to-lose:
 
-.cvsignore
-make_hp_order_obj
-make_solaris_order_map
+README-CYGNUS
+
 
 # The lines between the "Do-last:" line and the end of the file
 # are executed as a /bin/sh shell script after everything else is

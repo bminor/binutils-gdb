@@ -11,7 +11,7 @@
 
 # The lines between the "Do-first:" line and the "Things-to-keep:"
 # line are executed as a /bin/sh shell script before anything else is
-# done in this 
+# done in this directory.
 
 Do-first:
 
@@ -44,7 +44,7 @@ else
 fi
 
 # All files listed between the "Things-to-keep:" line and the
-# "Files-to-sed:" line will be kept.  All other files will be removed.
+# "Do-last:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
 # called.  Directories not listed will be removed in their entirety
 # with rm -rf.
@@ -55,11 +55,11 @@ aout_gnu.h
 atof-ieee.c
 atof-tahoe.c
 atof-vax.c
-go32.cfg
 e-i386coff.c
 e-i386elf.c
 e-mipsecoff.c
 e-mipself.c
+go32.cfg
 itbl-mips.h
 m68k-parse.h
 m68k-parse.y
@@ -147,8 +147,8 @@ tc-z8k.c
 tc-z8k.h
 te-386bsd.h
 te-aux.h
-te-delta.h
 te-delt88.h
+te-delta.h
 te-dpx2.h
 te-dynix.h
 te-generic.h
@@ -175,15 +175,20 @@ te-sun3.h
 te-svr4.h
 te-sysv32.h
 vax-inst.h
-vms-conf.h
 vms-a-conf.h
+vms-conf.h
 
 Things-to-lose:
+
+
+
+# The lines between the "Do-last:" line and the end of the file
+# are executed as a /bin/sh shell script after everything else is
+# done.
 
 Do-last:
 
 r5900_files="tc-mips.c"
-
 if ( echo $* | grep keep\-r5900 > /dev/null ) ; then
 	for i in $r5900_files ; do
 		if test ! -d $i && (grep sanitize-r5900 $i > /dev/null) ; then
@@ -240,7 +245,6 @@ else
 fi
 
 tx19_files="tc-mips.c"
-
 if ( echo $* | grep keep\-tx19 > /dev/null ) ; then
 	for i in $tx19_files ; do
 		if test ! -d $i && (grep sanitize-tx19 $i > /dev/null) ; then
@@ -269,7 +273,6 @@ else
 fi
 
 tx49_files="ChangeLog tc-mips.c"
-
 if ( echo $* | grep keep\-tx49 > /dev/null ) ; then
 	for i in $tx49_files ; do
 		if test ! -d $i && (grep sanitize-tx49 $i > /dev/null) ; then
@@ -298,7 +301,6 @@ else
 fi
 
 tic80_files="obj-coff.h"
-
 if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
 	for i in $tic80_files ; do
 		if test ! -d $i && (grep sanitize-tic80 $i > /dev/null) ; then
@@ -442,4 +444,4 @@ for i in * ; do
 	fi
 done
 
-# End of file.
+# eof

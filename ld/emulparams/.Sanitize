@@ -16,7 +16,6 @@
 Do-first:
 
 d30v_files="d30velf.sh d30v_o.sh d30v_e.sh"
-
 if ( echo $* | grep keep\-d30v > /dev/null ) ; then
 	keep_these_too="${d30v_files} ${keep_these_too}"
 else
@@ -24,7 +23,6 @@ else
 fi
 
 tic80_files="tic80coff.sh"
-
 if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
 	keep_these_too="${tic80_files} ${keep_these_too}"
 else
@@ -32,7 +30,6 @@ else
 fi
 
 r5900_files="elf32l5900.sh"
-
 if ( echo $* | grep keep\-r5900 > /dev/null ) ; then
 	keep_these_too="${r5900_files} ${keep_these_too}"
 else
@@ -62,18 +59,18 @@ d10velf.sh
 delta68.sh
 ebmon29k.sh
 elf32_sparc.sh
+elf32b4300.sh
 elf32bmip.sh
 elf32bsmip.sh
 elf32ebmip.sh
 elf32elmip.sh
+elf32l4300.sh
 elf32lmip.sh
 elf32lppc.sh
 elf32lsmip.sh
 elf32ppc.sh
-elf32b4300.sh
-elf32l4300.sh
-elf64alpha.sh
 elf64_sparc.sh
+elf64alpha.sh
 elf_i386.sh
 gld960.sh
 gld960coff.sh
@@ -152,6 +149,8 @@ z8002.sh
 
 Things-to-lose:
 
+
+
 # The lines between the "Do-last:" line and the end of the file
 # are executed as a /bin/sh shell script after everything else is
 # done.
@@ -159,7 +158,6 @@ Things-to-lose:
 Do-last:
 
 v850e_files="v850.sh"
-
 if ( echo $* | grep keep\-v850e > /dev/null ) ; then
 	for i in $v850e_files ; do
 		if test ! -d $i && (grep sanitize-v850e $i > /dev/null) ; then
@@ -187,3 +185,4 @@ else
 	done
 fi
 
+# eof

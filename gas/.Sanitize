@@ -1,4 +1,4 @@
-# .Sanitize for devo/gas.
+# .Sanitize for devo/gas
 
 # Each directory to survive its way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
@@ -23,7 +23,7 @@ for d in obsolete regress regress.m68k testscripts ; do
 done
 
 # All files listed between the "Things-to-keep:" line and the
-# "Files-to-sed:" line will be kept.  All other files will be removed.
+# "Do-last:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
 # called.  Directories not listed will be removed in their entirety
 # with rm -rf.
@@ -45,6 +45,7 @@ aclocal.m4
 app.c
 as.c
 as.h
+asintl.h
 atof-generic.c
 bignum-copy.c
 bignum.h
@@ -52,8 +53,8 @@ bit_fix.h
 cgen.c
 cond.c
 config
-config.in
 config-gas.com
+config.in
 configure
 configure.bat
 configure.in
@@ -81,14 +82,14 @@ hash.h
 input-file.c
 input-file.h
 input-scrub.c
-link.cmd
-listing.c
-listing.h
-literal.c
 itbl-lex.l
 itbl-ops.c
 itbl-ops.h
 itbl-parse.y
+link.cmd
+listing.c
+listing.h
+literal.c
 mac-as.r
 macro.c
 macro.h
@@ -99,6 +100,7 @@ mpw-make.sed
 obj.h
 output-file.c
 output-file.h
+po
 read.c
 read.h
 sb.c
@@ -117,6 +119,12 @@ write.c
 write.h
 
 Things-to-lose:
+
+
+
+# The lines between the "Do-last:" line and the end of the file
+# are executed as a /bin/sh shell script after everything else is
+# done.
 
 Do-last:
 
@@ -432,5 +440,4 @@ for i in * ; do
 	fi
 done
 
-#
-# End of file.
+# eof
