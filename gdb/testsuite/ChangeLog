@@ -1,9 +1,9 @@
-2001-02-27  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
+2001-02-27  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.base/varargs.c (find_max_double): Fix printf format string:
 	first arg is int not float.
 
-2001-02-22  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
+2001-02-22  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.base/reread.exp: Unsupported for non-native targets;
 	doesn't work for remote debugging.
@@ -80,7 +80,7 @@ Fri Jan 12 18:29:01 2001  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.base/callfuncs.exp: Add space after ``Value returned is''.
 
-2000-12-21  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
+2000-12-21  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.base/finish.exp: Accept '1' instead of \001 from char_func.
 	Add a RE to accept a non-ascii char if one is ever presented.
@@ -89,7 +89,7 @@ Fri Jan 12 18:29:01 2001  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* lib/mi-support.exp (mi_gdb_start): Test for MI_OUT, not UI_OUT.
 
-2000-12-18  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
+2000-12-18  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.base/setvar.exp: Use double '\\' to quote curly braces 
 	in regexp.  One '\' does not suffice on Linux.
@@ -103,13 +103,13 @@ Fri Jan 12 18:29:01 2001  Andrew Cagney  <cagney@b1.cygnus.com>
 	'finish' from main runs into name conflicts with local names
 	in __libc_start_main).
 
-2000-12-07  Michael Snyder  <msnyder@cleaver.cygnus.com>
+2000-12-07  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.base/finish.exp: New test for gdb's "finish" command.
 	* gdb.base/return2.exp: New test for gdb's "return" command.
 	* gdb.base/return2.c: New source file for above.
 
-2000-12-05  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
+2000-12-05  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.base/constvars.exp: Add a "pass" message if "up" succeeds.
 	* gdb.base/miscexprs.exp: Ditto.
@@ -120,7 +120,7 @@ Fri Jan 12 18:29:01 2001  Andrew Cagney  <cagney@b1.cygnus.com>
 	* gdb.c++/overload.exp:   Ditto.
 	* gdb.c++/ref-types.exp:  Ditto.
 
-2000-12-05  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
+2000-12-05  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.base/constvars.exp: Test result of "up" command.
 	* gdb.base/miscexprs.exp: Ditto.
@@ -165,13 +165,13 @@ Fri Jan 12 18:29:01 2001  Andrew Cagney  <cagney@b1.cygnus.com>
 	* gdb.base/break.exp: Test backtrace and finish from called
 	function on all platforms, not just HP-UX.
 
-2000-11-03  Michael Snyder  <msnyder@cleaver.cygnus.com>
+2000-11-03  Michael Snyder  <msnyder@cygnus.com>
 
 	* config/monitor.exp (gdb_target_cmd): Abstracts some of the
 	code from gdb_target_monitor, so it can be used independantly
 	for gdbserver.  Also comment out an unnecessary PUTS.
 	
-2000-11-03  Michael Snyder  <msnyder@cleaver.cygnus.com>
+2000-11-03  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.base/a2-run.exp: Use gdb_skip_stdio_test.
 	* gdb.base/corefile.exp: Expect the message "Program is being
@@ -209,24 +209,24 @@ Fri Jan 12 18:29:01 2001  Andrew Cagney  <cagney@b1.cygnus.com>
 	inferior functions.  Add tests for continuining, finishing and
 	returning from a stop in a call dummy.
 
-2000-10-24  Michael Snyder  <msnyder@cleaver.cygnus.com>
+2000-10-24  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.base/commands.exp: Break up long lines, and re-indent.
 
-2000-10-19  Michael Snyder  <msnyder@cleaver.cygnus.com>
+2000-10-19  Michael Snyder  <msnyder@cygnus.com>
 
 	* config/gdbserver.exp:  Rewritten from the ground up, to make it
 	compatible with the current dejagnu tree, and to make it work with
 	the new "gdbserver" in libremote.
 
-2000-10-16  Michael Snyder  <msnyder@cleaver.cygnus.com>
+2000-10-16  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.base/sizeof.exp (check_sizeof): Skip if no printf support.
 	* gdb.base/varargs.exp: Skip entire test if no printf support.
 	* gdb.base/ending-run.exp (Step to return): Skip if no printf supt.
 	* gdb.base/shlib-call.exp: Skip several tests if no printf support.
 
-2000-10-13  Michael Snyder  <msnyder@cleaver.cygnus.com>
+2000-10-13  Michael Snyder  <msnyder@cygnus.com>
 
 	* lib/gdb.exp (gdb_skip_float_test): New proc.  Skip test if
 	no floating point support.
@@ -338,18 +338,18 @@ Wed Jun  7 13:02:40 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* gdb.c++/misc.cc: Fix ambiguous initialization with correct 
 	initialization.
 
-2000-06-02  Michael Snyder  <msnyder@seadog.cygnus.com>
+2000-06-02  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.base/annota1.exp (run until main breakpoint): Loosen up
 	the regular expression: accept an (almost) arbitrary sequence of
 	"frames-invalid" and "breakpoints-invalid" messages both before
 	and after the "starting" message.
 
-2000-06-02  Michael Snyder  <msnyder@seadog.cygnus.com>
+2000-06-02  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.c++/local.exp: This test has never been known to work with g++.
 
-2000-05-18  Michael Snyder  <msnyder@seadog.cygnus.com>
+2000-05-18  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.base/annota1.exp (annotate-signal-handler-caller):
 	Relax the regular expression a little, make it pass on Solaris 8.
@@ -372,7 +372,7 @@ Wed Jun  7 13:02:40 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	has no exactly matching line symbol, and GDB reports the breakpoint
 	as if it were in the middle of a line rather than at the beginning.
 
-2000-05-08  Michael Snyder  <msnyder@seadog.cygnus.com>
+2000-05-08  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.base/interrupt.exp: Make "pass" message say "send" 
 	rather than "send_gdb" (for consistancy).
@@ -383,12 +383,12 @@ Mon May  1 15:37:58 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* gdb.c++/templates.cc: Properly check for GCC version number.
 	* lib/compiler.cc: Likewise
 
-2000-04-28  Michael Snyder  <msnyder@seadog.cygnus.com>
+2000-04-28  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.base/break.exp: When compiled with -O2 optimization, 
 	gdb may not stop at the first line of main, due to code motion.
 
-2000-04-26  Michael Snyder  <msnyder@seadog.cygnus.com>
+2000-04-26  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.base/call-ar-st.exp: Bail out if target is sparclet.
 	This test depends on parsing the printf output from the target.
@@ -396,7 +396,7 @@ Mon May  1 15:37:58 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* gdb.base/call-rt-st.exp: ditto.
 	* gdb.base/call-strs: ditto.
 
-2000-04-24  Michael Snyder  <msnyder@seadog.cygnus.com>
+2000-04-24  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.base/miscexprs.exp: make sizeof long array test portable.
 
@@ -554,7 +554,7 @@ Mon Feb 21 13:05:36 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.base/selftest.exp: Update to reflect changes to main.c.
 
-2000-01-07  Michael Snyder  <msnyder@cleaver.cygnus.com>
+2000-01-07  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.base/display.exp: Some yacc parsers like to say 
 	"A syntax error" rather than "A parse error".  Accept both.
@@ -1814,7 +1814,7 @@ Wed Jan  6 13:50:57 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdb.base/default.exp: Reflect wording change in remote.c.
 
-Tue Jan  5 19:14:51 1999  Michael Snyder  <msnyder@cleaver.cygnus.com>
+Tue Jan  5 19:14:51 1999  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.base/help.exp: Update to reflect current text.
 
@@ -2038,11 +2038,11 @@ Mon Sep 21 14:39:27 1998  Nick Clifton  <nickc@cygnus.com>
 	* gdb.base/default.exp: Support test for info float for all
 	varieties of arm toolchain.
 
-Fri Sep 18 14:07:44 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+Fri Sep 18 14:07:44 1998  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.trace/*.exp: remove "remote_download" command.
 
-Wed Sep 16 11:38:21 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+Wed Sep 16 11:38:21 1998  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.trace/*.exp: remove -gdwarf from compile.
 
@@ -2051,7 +2051,7 @@ Wed Sep 16 01:23:11 1998  Felix Lee  <flee@cygnus.com>
 	* gdb.trace/configure.in(AC_INIT): typo
 	* gdb.trace/configure: regenerated
 
-Mon Sep 14 20:00:04 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+Mon Sep 14 20:00:04 1998  Michael Snyder  <msnyder@cygnus.com>
 
 	* config/m68k-emc.exp: New file.
 	* lib/<emc-support.exp trace-support.exp}: New files.
@@ -2065,7 +2065,7 @@ Mon Sep 14 20:00:04 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 	* gdb.trace/{report.exp save-trace.exp tracecmd.exp}: New files.
 	* gdb.trace/{while-dyn.exp while-stepping.exp}: New files.
 	
-Fri Sep 11 13:58:02 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+Fri Sep 11 13:58:02 1998  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.c++/classes.exp: Change all regular expressions to match
 	arbitrary combinations of newline/carriage-return, so that they
@@ -2139,17 +2139,17 @@ Wed Jun 24 13:03:15 1998  Jeffrey A Law  (law@cygnus.com)
 	* gdb.disasm/am33.s: New disassembler testfile for the am33.
 	* gdb.disasm/am33.exp: Run it.
 
-Tue Jun 23 11:45:01 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+Tue Jun 23 11:45:01 1998  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.base/funcargs.exp: simplify expect strings to ease pattern
 	match processing (and eliminate spurious timeouts when running).
 
-Fri Jun 12 17:28:22 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+Fri Jun 12 17:28:22 1998  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.base/signals.exp (test_handle_all_print): put back Mach
 	exception test, but conditionalize it on target [mach | gnu].
 
-Wed Jun 10 10:40:03 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+Wed Jun 10 10:40:03 1998  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.base/overlays.exp: fixup compile line for linker script.
 
@@ -2270,7 +2270,7 @@ Mon Feb 23 08:22:44 1998  Mark Alexander  <marka@cygnus.com>
 
 	* config/mn10300-eval.exp: New file to support MN10300 eval board.
 
-Wed Feb 18 16:43:46 1998  Michael Snyder  (msnyder@cleaver.cygnus.com)
+Wed Feb 18 16:43:46 1998  Michael Snyder  (msnyder@cygnus.com)
  
         * gdb.base/overlays (several files): Merge the two overlay
         managers into one.  Change variables (foox, barx, bazx, grbxx)
@@ -2309,7 +2309,7 @@ Fri Feb  6 14:13:12 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	* gdb.base/overlays.exp: Expect variables barx, bazx, foox, grbxx
  	to be arrays.
 	
-Thu Jan 29 14:48:19 1998  Michael Snyder  (msnyder@cleaver.cygnus.com)
+Thu Jan 29 14:48:19 1998  Michael Snyder  (msnyder@cygnus.com)
  
         * gdb.base/overlays.exp: fix up and get working again.
         Add tests for backtraces from an overlay function.
@@ -2627,7 +2627,7 @@ Thu May  1 18:01:50 1997  Bob Manson  <manson@charmed.cygnus.com>
 	* gdb.base/funcargs.exp: Check for gdb,short_int target
 	feature instead of looking for explicit target triplets.
 
-Mon Apr 28 17:27:40 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
+Mon Apr 28 17:27:40 1997  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.base/printcmds.exp: add a couple more tests a la 
 	"p 123DEADBEEF", to check parse_number.
@@ -2673,7 +2673,7 @@ Tue Apr  8 16:38:46 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* gdb.disasm/mn10300.exp: Fix buglets in "other" tests.
 
-Thu Apr  3 15:21:26 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
+Thu Apr  3 15:21:26 1997  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.base/help.exp: update help msg for INFO ADDR; add help test
 	for INFO SYMBOL; add help tests for OVERLAY commands.
@@ -3088,7 +3088,7 @@ Sun Dec  1 00:18:59 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.base/nodebug.exp:  Add mips*-sgi-irix6* xfails.
 
-Tue Nov 26 18:29:23 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
+Tue Nov 26 18:29:23 1996  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.base/callfuncs.exp: Turn on function call tests for h8300.
 	* gdb.base/default.exp:   ditto.
@@ -3183,17 +3183,17 @@ Sat Nov  9 01:05:10 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 	* gdb.base/corefile.exp:  Consume $prompt in mmap fail cases.
 	* gdb.stabs/weird.exp:  Remove v_comb xfails.
 
-Tue Nov  5 10:44:23 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
+Tue Nov  5 10:44:23 1996  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.base/[bitfields.exp crossload.exp funcargs.exp interrupt.exp
 	            list.exp scope.exp watchpoint.exp]
 	  Make all timeout error msgs explicitly say "(timeout)".
 	
-Mon Nov  4 12:03:06 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
+Mon Nov  4 12:03:06 1996  Michael Snyder  <msnyder@cygnus.com>
 
 	* config/monitor.exp: Increase download timeout to 1000 seconds.
 
-Mon Nov  4 12:02:26 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
+Mon Nov  4 12:02:26 1996  Michael Snyder  <msnyder@cygnus.com>
 
 	* config/m32r.exp: Increase timeout to 120 seconds.
 
@@ -3211,7 +3211,7 @@ Fri Nov  1 11:56:09 1996  Fred Fish  <fnf@cygnus.com>
 	* gdb.base/corefile.exp: Add test to read mmapped data
 	from core file.
 
-Wed Oct 30 18:19:16 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
+Wed Oct 30 18:19:16 1996  Michael Snyder  <msnyder@cygnus.com>
 
 	* config/m32r.exp: New file.
 
@@ -3220,7 +3220,7 @@ Mon Oct 21 14:40:50 1996  Stu Grossman  (grossman@critters.cygnus.com)
 	* testsuite/gdb.base/nodebug.exp:  Whack out -g options by hand so
 	that cflags can contains -gstabs, and work correctly for other tests.
 
-Mon Oct 21 14:00:37 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
+Mon Oct 21 14:00:37 1996  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdb.base/setshow.exp: New file, tests show and set.
 	* gdb.base/setshow.c:   New file, tests show and set.
