@@ -172,9 +172,16 @@ CGENFILES = $(CGENDIR)/object.scm $(CGENDIR)/utils.scm \
 	$(CGENDIR)/mode.scm $(CGENDIR)/mach.scm \
 	$(CGENDIR)/model.scm $(CGENDIR)/hardware.scm \
 	$(CGENDIR)/ifield.scm $(CGENDIR)/iformat.scm \
-	$(CGENDIR)/operand.scm $(CGENDIR)/insn.scm \
+	$(CGENDIR)/operand.scm $(CGENDIR)/insn.scm $(CGENDIR)/minsn.scm \
 	$(CGENDIR)/opcodes.scm $(CGENDIR)/cdl-c.scm \
 	$(CGENDIR)/cgen-opc.scm cgen-opc.in cgen-asm.in cgen-dis.in
+# The CGEN_MAINT conditional is put here so it end up in Makefile.in
+# properly sanitized.
+if CGEN_MAINT
+M32R_DEPS = stamp-m32r
+else
+M32R_DEPS =
+endif
 # The end marker is written this way to pass through automake unscathed.
 ENDSAN = end-sanitize-cygnus
 
@@ -185,9 +192,8 @@ cgen:
 
 .PHONY: cgen
 
-# For now, require developers to configure with --enable-maintainer-mode.
-# ??? Do we need to use a different option?
-m32r-opc.h m32r-opc.c m32r-asm.c m32r-dis.c: @MAINT@ stamp-m32r
+# For now, require developers to configure with --enable-cgen-maint.
+m32r-opc.h m32r-opc.c m32r-asm.c m32r-dis.c: $(M32R_DEPS)
 	@true
 stamp-m32r: $(CGENFILES) $(CGENDIR)/m32r.cpu $(CGENDIR)/m32r.opc
 	$(MAKE) cgen arch=m32r prefix=m32r

@@ -1,8 +1,23 @@
+start-sanitize-cygnus
+Fri May  1 13:47:42 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* configure.in: Add support for --enable-cgen-maint.
+	* Makefile.am (M32R_DEPS): New variable.
+	(m32r-opc.h,m32r-opc.c,m32r-asm.c,m32r-dis.c): Update dependencies.
+	* aclocal.m4: Regenerate.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
+	* Makefile.am (CGENFILES): Add minsn.scm.
+
+end-sanitize-cygnus
 Tue Apr 28 14:12:12 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* cgen-asm.c: Internationalised.
+start-sanitize-cygnus
 	* cgen-asm.in: Internationalised.
 	* cgen-opc.in: Internationalised.
+end-sanitize-cygnus
 	* m32r-asm.c: Internationalised.
 	* m32r-dis.c: Internationalised.
 	* m32r-opc.c: Internationalised.
