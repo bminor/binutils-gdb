@@ -1,3 +1,18 @@
+2004-01-17  J. Brobecker  <brobecker@gnat.com>
+
+	* dwarf2read.c (dwarf2_non_const_array_bound_ignored_complaint):
+	Delete, no longer used.
+	(read_subrange_type): New function, mostly extracted from
+	read_array_type().
+	(read_array_type): Replace extracted code by call to
+	read_subrange_type().
+	(dwarf2_get_attr_constant_value): New function.
+	(scan_partial_symbols): Add handling for DW_TAG_subrange_type.
+	(add_partial_symbol): Likewise.
+	(process_die): Likewise.
+	(new_symbol): Likewise.
+	(read_type_die): Likewise.
+
 2004-01-16  Andrew Cagney  <cagney@redhat.com>
 
 	* symfile.c: Update copyright year.

@@ -592,13 +592,6 @@ struct field_info
 /* Various complaints about symbol reading that don't abort the process */
 
 static void
-dwarf2_non_const_array_bound_ignored_complaint (const char *arg1)
-{
-  complaint (&symfile_complaints, "non-constant array bounds form '%s' ignored",
-	     arg1);
-}
-
-static void
 dwarf2_statement_list_fits_in_line_number_section_complaint (void)
 {
   complaint (&symfile_complaints,
@@ -789,6 +782,8 @@ static void read_typedef (struct die_info *, struct dwarf2_cu *);
 
 static void read_base_type (struct die_info *, struct dwarf2_cu *);
 
+static void read_subrange_type (struct die_info *die, struct dwarf2_cu *cu);
+
 static void read_file_scope (struct die_info *, struct dwarf2_cu *);
 
 static void read_func_scope (struct die_info *, struct dwarf2_cu *);
@@ -896,6 +891,8 @@ static void store_in_ref_table (unsigned int, struct die_info *);
 static void dwarf2_empty_hash_tables (void);
 
 static unsigned int dwarf2_get_ref_die_offset (struct attribute *);
+
+static int dwarf2_get_attr_constant_value (struct attribute *, int);
 
 static struct die_info *follow_die_ref (unsigned int);
 
@@ -1399,6 +1396,7 @@ scan_partial_symbols (char *info_ptr, CORE_ADDR *lowpc,
 		}
 	      break;
 	    case DW_TAG_base_type:
+            case DW_TAG_subrange_type:
 	      /* File scope base type definitions are added to the partial
 	         symbol table.  */
 	      add_partial_symbol (&pdi, cu, namespace);
@@ -1522,6 +1520,7 @@ add_partial_symbol (struct partial_die_info *pdi,
       break;
     case DW_TAG_typedef:
     case DW_TAG_base_type:
+    case DW_TAG_subrange_type:
       add_psymbol_to_list (actual_name, strlen (actual_name),
 			   VAR_DOMAIN, LOC_TYPEDEF,
 			   &objfile->static_psymbols,
@@ -1974,6 +1973,14 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
 	  /* Add a typedef symbol for the base type definition.  */
 	  new_symbol (die, die->type, cu);
 	}
+      break;
+    case DW_TAG_subrange_type:
+      read_subrange_type (die, cu);
+      if (dwarf_attr (die, DW_AT_name))
+       {
+         /* Add a typedef symbol for the base type definition.  */
+         new_symbol (die, die->type, cu);
+       }
       break;
     case DW_TAG_common_block:
       read_common_block (die, cu);
@@ -3261,88 +3268,22 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
     {
       if (child_die->tag == DW_TAG_subrange_type)
 	{
-	  unsigned int low, high;
+          read_subrange_type (child_die, cu);
 
-	  /* Default bounds to an array with unspecified length.  */
-	  low = 0;
-	  high = -1;
-	  if (cu_language == language_fortran)
-	    {
-	      /* FORTRAN implies a lower bound of 1, if not given.  */
-	      low = 1;
-	    }
-
-	  index_type = die_type (child_die, cu);
-	  attr = dwarf_attr (child_die, DW_AT_lower_bound);
-	  if (attr)
-	    {
-	      if (attr->form == DW_FORM_sdata)
-		{
-		  low = DW_SND (attr);
-		}
-	      else if (attr->form == DW_FORM_udata
-		       || attr->form == DW_FORM_data1
-		       || attr->form == DW_FORM_data2
-		       || attr->form == DW_FORM_data4
-		       || attr->form == DW_FORM_data8)
-		{
-		  low = DW_UNSND (attr);
-		}
-	      else
-		{
-		  dwarf2_non_const_array_bound_ignored_complaint
-		    (dwarf_form_name (attr->form));
-		  low = 0;
-		}
-	    }
-	  attr = dwarf_attr (child_die, DW_AT_upper_bound);
-	  if (attr)
-	    {
-	      if (attr->form == DW_FORM_sdata)
-		{
-		  high = DW_SND (attr);
-		}
-	      else if (attr->form == DW_FORM_udata
-		       || attr->form == DW_FORM_data1
-		       || attr->form == DW_FORM_data2
-		       || attr->form == DW_FORM_data4
-		       || attr->form == DW_FORM_data8)
-		{
-		  high = DW_UNSND (attr);
-		}
-	      else if (attr->form == DW_FORM_block1)
-		{
-		  /* GCC encodes arrays with unspecified or dynamic length
-		     with a DW_FORM_block1 attribute.
-		     FIXME: GDB does not yet know how to handle dynamic
-		     arrays properly, treat them as arrays with unspecified
-		     length for now.
-
-                     FIXME: jimb/2003-09-22: GDB does not really know
-                     how to handle arrays of unspecified length
-                     either; we just represent them as zero-length
-                     arrays.  Choose an appropriate upper bound given
-                     the lower bound we've computed above.  */
-		  high = low - 1;
-		}
-	      else
-		{
-		  dwarf2_non_const_array_bound_ignored_complaint
-		    (dwarf_form_name (attr->form));
-		  high = 1;
-		}
-	    }
-
-	  /* Create a range type and save it for array type creation.  */
-	  if ((ndim % DW_FIELD_ALLOC_CHUNK) == 0)
-	    {
-	      range_types = (struct type **)
-		xrealloc (range_types, (ndim + DW_FIELD_ALLOC_CHUNK)
-			  * sizeof (struct type *));
-	      if (ndim == 0)
-		make_cleanup (free_current_contents, &range_types);
-	    }
-	  range_types[ndim++] = create_range_type (NULL, index_type, low, high);
+          if (child_die->type != NULL)
+            {
+	      /* The range type was succesfully read. Save it for
+                 the array type creation.  */
+              if ((ndim % DW_FIELD_ALLOC_CHUNK) == 0)
+                {
+                  range_types = (struct type **)
+                    xrealloc (range_types, (ndim + DW_FIELD_ALLOC_CHUNK)
+                              * sizeof (struct type *));
+                  if (ndim == 0)
+                    make_cleanup (free_current_contents, &range_types);
+	        }
+	      range_types[ndim++] = child_die->type;
+            }
 	}
       child_die = sibling_die (child_die);
     }
@@ -3887,6 +3828,78 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
     }
   die->type = type;
 }
+
+/* Read the given DW_AT_subrange DIE.  */
+
+static void
+read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
+{
+  struct type *base_type;
+  struct type *range_type;
+  struct attribute *attr;
+  int low = 0;
+  int high = -1;
+  
+  /* If we have already decoded this die, then nothing more to do.  */
+  if (die->type)
+    return;
+
+  base_type = die_type (die, cu);
+  if (base_type == NULL)
+    {
+      complaint (&symfile_complaints,
+                "DW_AT_type missing from DW_TAG_subrange_type");
+      return;
+    }
+
+  if (TYPE_CODE (base_type) == TYPE_CODE_VOID)
+    base_type = alloc_type (NULL);
+
+  if (cu_language == language_fortran)
+    { 
+      /* FORTRAN implies a lower bound of 1, if not given.  */
+      low = 1;
+    }
+
+  attr = dwarf_attr (die, DW_AT_lower_bound);
+  if (attr)
+    low = dwarf2_get_attr_constant_value (attr, 0);
+
+  attr = dwarf_attr (die, DW_AT_upper_bound);
+  if (attr)
+    {       
+      if (attr->form == DW_FORM_block1)
+        {
+          /* GCC encodes arrays with unspecified or dynamic length
+             with a DW_FORM_block1 attribute.
+             FIXME: GDB does not yet know how to handle dynamic
+             arrays properly, treat them as arrays with unspecified
+             length for now.
+
+             FIXME: jimb/2003-09-22: GDB does not really know
+             how to handle arrays of unspecified length
+             either; we just represent them as zero-length
+             arrays.  Choose an appropriate upper bound given
+             the lower bound we've computed above.  */
+          high = low - 1;
+        }
+      else
+        high = dwarf2_get_attr_constant_value (attr, 1);
+    }
+
+  range_type = create_range_type (NULL, base_type, low, high);
+
+  attr = dwarf_attr (die, DW_AT_name);
+  if (attr && DW_STRING (attr))
+    TYPE_NAME (range_type) = DW_STRING (attr);
+  
+  attr = dwarf_attr (die, DW_AT_byte_size);
+  if (attr)
+    TYPE_LENGTH (range_type) = DW_UNSND (attr);
+
+  die->type = range_type;
+}
+  
 
 /* Read a whole compilation unit into a linked list of dies.  */
 
@@ -5606,6 +5619,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	  add_symbol_to_list (sym, list_in_scope);
 	  break;
 	case DW_TAG_base_type:
+        case DW_TAG_subrange_type:
 	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
 	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	  add_symbol_to_list (sym, list_in_scope);
@@ -5911,6 +5925,9 @@ read_type_die (struct die_info *die, struct dwarf2_cu *cu)
       break;
     case DW_TAG_typedef:
       read_typedef (die, cu);
+      break;
+    case DW_TAG_subrange_type:
+      read_subrange_type (die, cu);
       break;
     case DW_TAG_base_type:
       read_base_type (die, cu);
@@ -7127,6 +7144,28 @@ dwarf2_get_ref_die_offset (struct attribute *attr)
 		 dwarf_form_name (attr->form));
     }
   return result;
+}
+
+/* Return the constant value held by the given attribute.  Return -1
+   if the value held by the attribute is not constant.  */
+
+static int
+dwarf2_get_attr_constant_value (struct attribute *attr, int default_value)
+{
+  if (attr->form == DW_FORM_sdata)
+    return DW_SND (attr);
+  else if (attr->form == DW_FORM_udata
+           || attr->form == DW_FORM_data1
+           || attr->form == DW_FORM_data2
+           || attr->form == DW_FORM_data4
+           || attr->form == DW_FORM_data8)
+    return DW_UNSND (attr);
+  else
+    {
+      complaint (&symfile_complaints, "Attribute value is not a constant (%s)",
+                 dwarf_form_name (attr->form));
+      return default_value;
+    }
 }
 
 static struct die_info *
