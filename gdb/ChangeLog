@@ -1,3 +1,12 @@
+2000-04-19  Jim Blandy  <jimb@redhat.com>
+
+	* i386v-nat.c (i386_insert_nonaligned_watchpoint): Use a
+	two-dimensional array, instead of faking it with explicit index
+	arithmetic.
+
+	* minsyms.c (prim_record_minimal_symbol_and_info): Doc fix.
+	(Thanks to Guy Harris.)
+
 2000-04-19  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
         * xcoffsolib.c (solib_add): Fix call to vmap_symtab().
