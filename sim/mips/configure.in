@@ -36,7 +36,7 @@ AC_SUBST(CC_FOR_BUILD)
 
 AC_CHECK_HEADERS(string.h strings.h stdlib.h)
 AC_CHECK_LIB(m, fabs)
-AC_CHECK_FUNCS(aint anint)
+AC_CHECK_FUNCS(aint anint sqrt)
 
 AC_SUBST(SIMCONF)
 
