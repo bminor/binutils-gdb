@@ -1,7 +1,8 @@
 2000-10-13  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/pe.em (_after_open): Delete 'is2' and 'nsyms'
-	local variables - they are not used.
+	local variables - they are not used, but leave in the call to
+	bfd_canonicalize_symtab.
 	(_open_dynamic_archive): Add #ifdef DLL_SUPPORT around use of
 	pe_dll_search_prefix.
 

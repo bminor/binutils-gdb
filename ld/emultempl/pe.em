@@ -855,11 +855,18 @@ gld_${EMULATION_NAME}_after_open ()
 		for (sec = is->the_bfd->sections; sec; sec = sec->next)
 		  {
 		    int i;
-		    int symsize = bfd_get_symtab_upper_bound (is->the_bfd);
-		    asymbol **symbols = (asymbol **) xmalloc (symsize);
-		    int relsize = bfd_get_reloc_upper_bound (is->the_bfd, sec);
-		    arelent **relocs = (arelent **) xmalloc ((size_t) relsize);
-		    int nrelocs = bfd_canonicalize_reloc (is->the_bfd, sec,
+		    int symsize;
+		    asymbol **symbols;
+		    int relsize;
+		    arelent **relocs;
+		    int nrelocs;
+		    
+		    symsize = bfd_get_symtab_upper_bound (is->the_bfd);
+		    symbols = (asymbol **) xmalloc (symsize);
+ 		    bfd_canonicalize_symtab (is->the_bfd, symbols);
+		    relsize = bfd_get_reloc_upper_bound (is->the_bfd, sec);
+		    relocs = (arelent **) xmalloc ((size_t) relsize);
+		    nrelocs = bfd_canonicalize_reloc (is->the_bfd, sec,
 							  relocs, symbols);
 		    for (i=0; i<nrelocs; i++)
 		      {
