@@ -32,6 +32,7 @@
 #include "gdbthread.h"
 #include "gdbcore.h"
 #include "breakpoint.h"
+#include "completer.h"
 
 #ifdef USG
 #include <sys/types.h>
@@ -1021,6 +1022,8 @@ rdilogenable_command (char *args, int from_tty)
 void
 _initialize_remote_rdi (void)
 {
+  struct cmd_list_element *c;
+
   init_rdi_ops ();
   add_target (&arm_rdi_ops);
 
@@ -1028,14 +1031,15 @@ _initialize_remote_rdi (void)
   Adp_SetLogfile (log_filename);
   Adp_SetLogEnable (log_enable);
 
-  add_cmd ("rdilogfile", class_maintenance,
-	   rdilogfile_command,
-	   "Set filename for ADP packet log.\n\
+  c = add_cmd ("rdilogfile", class_maintenance,
+	       rdilogfile_command,
+	       "Set filename for ADP packet log.\n\
 This file is used to log Angel Debugger Protocol packets.\n\
 With a single argument, sets the logfile name to that value.\n\
 Without an argument, shows the current logfile name.\n\
 See also: rdilogenable\n",
 	   &maintenancelist);
+  c->completer = filename_completer;
 
   add_cmd ("rdilogenable", class_maintenance,
 	   rdilogenable_command,

@@ -1,3 +1,31 @@
+2001-02-19  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* demangle.c (demangling_style_names): New variable.
+	(_initialize_demangler): Fill demangling_style_names with the
+	names of known demangling styles from libiberty_demanglers[].  Use
+	add_set_enum_cmd instead of add_set_cmd, to get completion on
+	demangling style names.
+
+	* proc-api.c (_initialize_proc_api): Make `procfs-file' use
+	file-name completion.
+
+	* remote-rdi.c (_initialize_remote_rdi): Ditto for `rdilogfile'.
+
+	* solib.c (_initialize_solib): Ditto for `solib-search-path' and
+	`solib-absolute-prefix'.
+
+	* tracepoint.c (_initialize_tracepoint): Ditto for
+	`save-tracepoints'.
+
+	* win32-nat.c (_initialize_inftarg): Ditto for `dll-symbols'.
+
+	* cli/cli-cmds.c (init_cli_cmds): Make `shell' and `make' use
+	file-name completion.
+
+	* infcmd.c (_initialize_infcmd): Make the following commands use
+	the file-name completer: `tty', `args', `path', `paths', and
+	`run'.
+
 2001-02-18  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* go32-nat.c: Include i387-nat.h.

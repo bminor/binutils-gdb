@@ -30,6 +30,7 @@
 #include "target.h"
 #include "gdbcore.h"
 #include "command.h"
+#include "completer.h"
 #include <signal.h>
 #include <sys/types.h>
 #include <fcntl.h>
@@ -1377,10 +1378,13 @@ init_child_ops (void)
 void
 _initialize_inftarg (void)
 {
+  struct cmd_list_element *c;
+
   init_child_ops ();
 
-  add_com ("dll-symbols", class_files, dll_symbol_command,
-	   "Load dll library symbols from FILE.");
+  c = add_com ("dll-symbols", class_files, dll_symbol_command,
+	       "Load dll library symbols from FILE.");
+  c->completer = filename_completer;
 
   auto_solib_add = 1;
   add_com_alias ("sharedlibrary", "dll-symbols", class_alias, 1);

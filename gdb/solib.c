@@ -37,6 +37,7 @@
 #include "environ.h"
 #include "language.h"
 #include "gdbcmd.h"
+#include "completer.h"
 
 #include "solist.h"
 
@@ -790,6 +791,8 @@ sharedlibrary_command (char *args, int from_tty)
 void
 _initialize_solib (void)
 {
+  struct cmd_list_element *c;
+
   add_com ("sharedlibrary", class_files, sharedlibrary_command,
 	   "Load shared object library symbols for files matching REGEXP.");
   add_info ("sharedlibrary", info_sharedlibrary_command,
@@ -806,19 +809,19 @@ must be loaded manually, using `sharedlibrary'.",
 		  &setlist),
      &showlist);
 
-  add_show_from_set
-    (add_set_cmd ("solib-absolute-prefix", class_support, var_filename,
-		  (char *) &solib_absolute_prefix,
-		  "Set prefix for loading absolute shared library symbol files.\n\
+  c = add_set_cmd ("solib-absolute-prefix", class_support, var_filename,
+		   (char *) &solib_absolute_prefix,
+		   "Set prefix for loading absolute shared library symbol files.\n\
 For other (relative) files, you can add values using `set solib-search-path'.",
-		  &setlist),
-     &showlist);
-  add_show_from_set
-    (add_set_cmd ("solib-search-path", class_support, var_string,
-		  (char *) &solib_search_path,
-		  "Set the search path for loading non-absolute shared library symbol files.\n\
-This takes precedence over the environment variables PATH and LD_LIBRARY_PATH.",
-		  &setlist),
-     &showlist);
+		   &setlist);
+  add_show_from_set (c, &showlist);
+  c->completer = filename_completer;
 
+  c = add_set_cmd ("solib-search-path", class_support, var_string,
+		   (char *) &solib_search_path,
+		   "Set the search path for loading non-absolute shared library symbol files.\n\
+This takes precedence over the environment variables PATH and LD_LIBRARY_PATH.",
+		   &setlist);
+  add_show_from_set (c, &showlist);
+  c->completer = filename_completer;
 }

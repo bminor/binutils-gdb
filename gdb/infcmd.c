@@ -40,6 +40,7 @@
 #endif
 #include "event-top.h"
 #include "parser-defs.h"
+#include "completer.h"
 
 /* Functions exported for general use: */
 
@@ -1794,16 +1795,17 @@ _initialize_infcmd (void)
 {
   struct cmd_list_element *c;
 
-  add_com ("tty", class_run, tty_command,
-	   "Set terminal for future runs of program being debugged.");
+  c= add_com ("tty", class_run, tty_command,
+	      "Set terminal for future runs of program being debugged.");
+  c->completer = filename_completer;
 
-  add_show_from_set
-    (add_set_cmd ("args", class_run, var_string_noescape,
-		  (char *) &inferior_args,
-		  "Set argument list to give program being debugged when it is started.\n\
+  c = add_set_cmd ("args", class_run, var_string_noescape,
+		   (char *) &inferior_args,
+		   "Set argument list to give program being debugged when it is started.\n\
 Follow this command with any number of args, to be passed to the program.",
-		  &setlist),
-     &showlist);
+		   &setlist);
+  add_show_from_set (c, &showlist);
+  c->completer = filename_completer;
 
   c = add_cmd
     ("environment", no_class, environment_info,
@@ -1831,12 +1833,13 @@ This does not affect the program until the next \"run\" command.",
 	       &setlist);
   c->completer = noop_completer;
 
-  add_com ("path", class_files, path_command,
-	   "Add directory DIR(s) to beginning of search path for object files.\n\
+  c = add_com ("path", class_files, path_command,
+	       "Add directory DIR(s) to beginning of search path for object files.\n\
 $cwd in the path means the current working directory.\n\
 This path is equivalent to the $PATH shell variable.  It is a list of\n\
 directories, separated by colons.  These directories are searched to find\n\
 fully linked executable files and separately compiled object files as needed.");
+  c->completer = filename_completer;
 
   c = add_cmd ("paths", no_class, path_info,
 	       "Current search path for finding object files.\n\
@@ -1928,13 +1931,14 @@ the breakpoint won't break until the Nth time it is reached).");
   add_com_alias ("c", "cont", class_run, 1);
   add_com_alias ("fg", "cont", class_run, 1);
 
-  add_com ("run", class_run, run_command,
+  c = add_com ("run", class_run, run_command,
 	   "Start debugged program.  You may specify arguments to give it.\n\
 Args may include \"*\", or \"[...]\"; they are expanded using \"sh\".\n\
 Input and output redirection with \">\", \"<\", or \">>\" are also allowed.\n\n\
 With no arguments, uses arguments last specified (with \"run\" or \"set args\").\n\
 To cancel previous arguments and run with no arguments,\n\
 use \"set args\" without arguments.");
+  c->completer = filename_completer;
   add_com_alias ("r", "run", class_run, 1);
   if (xdb_commands)
     add_com ("R", class_run, run_no_args_command,

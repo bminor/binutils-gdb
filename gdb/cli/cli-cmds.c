@@ -778,9 +778,10 @@ from the target.", &setlist),
 		  "Generic command for showing gdb debugging flags",
 		  &showdebuglist, "show debug ", 0, &showlist);
 
-  add_com ("shell", class_support, shell_escape,
-	   "Execute the rest of the line as a shell command.  \n\
+  c = add_com ("shell", class_support, shell_escape,
+	       "Execute the rest of the line as a shell command.  \n\
 With no arguments, run an inferior shell.");
+  c->completer = filename_completer;
 
   /* NOTE: cagney/2000-03-20: Being able to enter ``(gdb) !ls'' would
      be a really useful feature.  Unfortunately, the below wont do
@@ -791,8 +792,9 @@ With no arguments, run an inferior shell.");
   if (xdb_commands)
     add_com_alias ("!", "shell", class_support, 0);
 
-  add_com ("make", class_support, make_command,
-       "Run the ``make'' program using the rest of the line as arguments.");
+  c = add_com ("make", class_support, make_command,
+          "Run the ``make'' program using the rest of the line as arguments.");
+  c->completer = filename_completer;
   add_cmd ("user", no_class, show_user,
 	   "Show definitions of user defined commands.\n\
 Argument is the name of the user defined command.\n\

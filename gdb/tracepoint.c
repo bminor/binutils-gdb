@@ -32,6 +32,7 @@
 #include "tracepoint.h"
 #include "remote.h"
 #include "linespec.h"
+#include "completer.h"
 
 #include "ax.h"
 #include "ax-gdb.h"
@@ -2600,6 +2601,8 @@ get_traceframe_number (void)
 void
 _initialize_tracepoint (void)
 {
+  struct cmd_list_element *c;
+
   tracepoint_chain = 0;
   tracepoint_count = 0;
   traceframe_number = -1;
@@ -2651,9 +2654,10 @@ last tracepoint set.");
 
   add_info_alias ("tp", "tracepoints", 1);
 
-  add_com ("save-tracepoints", class_trace, tracepoint_save_command,
-	   "Save current tracepoint definitions as a script.\n\
+  c = add_com ("save-tracepoints", class_trace, tracepoint_save_command,
+	       "Save current tracepoint definitions as a script.\n\
 Use the 'source' command in another debug session to restore them.");
+  c->completer = filename_completer;
 
   add_com ("tdump", class_trace, trace_dump_command,
 	   "Print everything collected at the current tracepoint.");
