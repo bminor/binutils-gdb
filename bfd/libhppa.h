@@ -72,7 +72,7 @@ static INLINE void low_sign_unext (unsigned int, unsigned int, unsigned int *)
 static INLINE unsigned long hppa_field_adjust (unsigned long, unsigned long,
 					       unsigned short)
      __attribute__ ((__unused__));
-static INLINE char bfd_hppa_insn2fmt (unsigned long)
+static INLINE int bfd_hppa_insn2fmt (unsigned long)
      __attribute__ ((__unused__));
 static INLINE  unsigned long hppa_rebuild_insn (bfd *, unsigned long,
 						unsigned long, unsigned long)
@@ -579,11 +579,11 @@ hppa_field_adjust (value, constant_value, r_field)
    FIXME:  opcodes which do not map to a known format
    should return an error of some sort.  */
 
-static INLINE char
+static INLINE int
 bfd_hppa_insn2fmt (insn)
      unsigned long insn;
 {
-  char fmt = -1;
+  char int = -1;
   unsigned char op = get_opcode (insn);
   
   switch (op)

@@ -1,3 +1,7 @@
+Sun Oct 17 17:19:00 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* libhppa.h (bfd_hppa_insn2fmt): Change to return an int.
+
 1999-10-08  Ian Lance Taylor  <ian@zembu.com>
 
 	* elflink.h (elf_merge_symbol): When overriding a weak symbol with
