@@ -370,7 +370,7 @@ setup_xfail "thumb-*-elf*"
 setup_xfail "arm*-*-linux*"
 
 # The S-record linker doesn't build special EABI sections.
-setup_xfail "powerpc*-*-eabi*"
+# setup_xfail "powerpc*-*-eabi*"
 
 # The S-record linker doesn't include the .{zda} sections.
 setup_xfail "v850*-*-elf"

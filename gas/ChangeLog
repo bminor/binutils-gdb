@@ -1,3 +1,8 @@
+2002-12-03  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-ppc.c (ppc_cleanup): Do not set SEC_MERGE flag on
+	.PPC.EMB>apuinfo sections.
+
 2002-12-03  Richard Henderson  <rth@redhat.com>
 
 	* config/tc-ia64.c (operand_match): Add IA64_OPND_LDXMOV case.

@@ -1,3 +1,11 @@
+2002-12-03  Nick Clifton  <nickc@redhat.com>
+
+	* ld-powerpc/powerpc.exp (ppcelftests): Add apuinfo merging
+	test.
+	* ld-powerpc/apuinfo1.s: New assembler source file.
+	* ld-powerpc/apuinfo2.s: New assembler source file.
+	* ld-powerpc/apuinfo.rd: New expected output file.
+
 2002-12-01  Stephane Carrez  <stcarrez@nerim.fr>
 
 	Fix PR savannah/1417:

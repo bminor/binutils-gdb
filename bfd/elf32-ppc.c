@@ -3783,6 +3783,303 @@ ppc_elf_grok_psinfo (abfd, note)
   return TRUE;
 }
 
+/* Very simple linked list structure for recording apuinfo values.  */
+typedef struct apuinfo_list
+{
+  struct apuinfo_list *	next;
+  unsigned long         value;
+}
+apuinfo_list;
+
+static apuinfo_list * head;
+
+static void          apuinfo_list_init    PARAMS ((void));
+static void          apuinfo_list_add     PARAMS ((unsigned long));
+static unsigned      apuinfo_list_length  PARAMS ((void));
+static unsigned long apuinfo_list_element PARAMS ((unsigned long));
+static void          apuinfo_list_finish  PARAMS ((void));
+
+extern void          ppc_elf_begin_write_processing
+  PARAMS ((bfd *, struct bfd_link_info *));
+extern void          ppc_elf_final_write_processing
+  PARAMS ((bfd *, bfd_boolean));
+extern bfd_boolean   ppc_elf_write_section
+  PARAMS ((bfd *, asection *, bfd_byte *));
+
+
+
+static void
+apuinfo_list_init PARAMS ((void))
+{
+  head = NULL;
+}
+
+static void
+apuinfo_list_add (value)
+     unsigned long value;
+{
+  apuinfo_list * entry = head;
+
+  while (entry != NULL)
+    {
+      if (entry->value == value)
+	return;
+      entry = entry->next;
+    }
+
+  entry = bfd_malloc (sizeof (* entry));
+  if (entry == NULL)
+    return;
+
+  entry->value = value;
+  entry->next  = head;
+  head = entry;
+}
+
+static unsigned
+apuinfo_list_length PARAMS ((void))
+{
+  apuinfo_list * entry;
+  unsigned long count;
+
+  for (entry = head, count = 0;
+       entry;
+       entry = entry->next)
+    ++ count;
+
+  return count;
+}
+
+static inline unsigned long
+apuinfo_list_element (number)
+     unsigned long number;
+{
+  apuinfo_list * entry;
+
+  for (entry = head;
+       entry && number --;
+       entry = entry->next)
+    ;
+
+  return entry ? entry->value : 0;
+}
+
+static void
+apuinfo_list_finish PARAMS ((void))
+{
+  apuinfo_list * entry;
+
+  for (entry = head; entry;)
+    {
+      apuinfo_list * next = entry->next;
+      free (entry);
+      entry = next;
+    }
+
+  head = NULL;
+}
+
+#define APUINFO_SECTION_NAME ".PPC.EMB.apuinfo"
+#define APUINFO_LABEL        "APUinfo"
+
+/* Scan the input BFDs and create a linked list of
+   the APUinfo values that will need to be emitted.  */
+
+void
+ppc_elf_begin_write_processing (abfd, link_info)
+     bfd *abfd;
+     struct bfd_link_info *link_info;
+{
+  bfd *         ibfd;
+  asection *    asec;
+  char *        buffer;
+  unsigned 	num_input_sections;
+  bfd_size_type	output_section_size;
+  unsigned      i;
+  unsigned      num_entries;
+  unsigned long	offset;
+  unsigned long length;
+  const char *  error_message = NULL;
+
+  /* Scan the input bfds, looking for apuinfo sections.  */
+  num_input_sections = 0;
+  output_section_size = 0;
+
+  for (ibfd = link_info->input_bfds; ibfd; ibfd = ibfd->link_next)
+    {
+      asec = bfd_get_section_by_name (ibfd, APUINFO_SECTION_NAME);
+      if (asec)
+	{
+	  ++ num_input_sections;
+	  output_section_size += asec->_raw_size;
+	}
+    }
+
+  /* We need at least one input sections
+     in order to make merging worthwhile.  */
+  if (num_input_sections < 1)
+    return;
+
+  /* Just make sure that the output section exists as well.  */
+  asec = bfd_get_section_by_name (abfd, APUINFO_SECTION_NAME);
+  if (asec == NULL)
+    return;
+
+  /* Allocate a buffer for the contents of the input sections.  */
+  buffer = bfd_malloc (output_section_size);
+  if (buffer == NULL)
+    return;
+
+  offset = 0;
+  apuinfo_list_init ();
+
+  /* Read in the input sections contents.  */
+  for (ibfd = link_info->input_bfds; ibfd; ibfd = ibfd->link_next)
+    {
+      unsigned long	datum;
+      char *		ptr;
+
+      
+      asec = bfd_get_section_by_name (ibfd, APUINFO_SECTION_NAME);
+      if (asec == NULL)
+	continue;
+
+      length = asec->_raw_size;
+      if (length < 24)
+	{
+	  error_message = _("corrupt or empty %s section in %s");
+	  goto fail;
+	}
+      
+      if (bfd_seek (ibfd, asec->filepos, SEEK_SET) != 0
+	  || (bfd_bread (buffer + offset, length, ibfd) != length))
+	{
+	  error_message = _("unable to read in %s section from %s");
+	  goto fail;
+	}
+
+      /* Process the contents of the section.  */
+      ptr = buffer + offset;
+      error_message = _("corrupt %s section in %s");
+
+      /* Verify the contents of the header.  Note - we have to
+	 extract the values this way in order to allow for a
+	 host whose endian-ness is different from the target.  */
+      datum = bfd_get_32 (ibfd, ptr);
+      if (datum != sizeof APUINFO_LABEL)
+	goto fail;
+
+      datum = bfd_get_32 (ibfd, ptr + 8);
+      if (datum != 0x2)
+	goto fail;
+
+      if (strcmp (ptr + 12, APUINFO_LABEL) != 0)
+	goto fail;
+
+      /* Get the number of apuinfo entries.  */
+      datum = bfd_get_32 (ibfd, ptr + 4);
+      if ((datum * 4 + 20) != length)
+	goto fail;
+
+      /* Make sure that we do not run off the end of the section.  */
+      if (offset + length > output_section_size)
+	goto fail;
+
+      /* Scan the apuinfo section, building a list of apuinfo numbers.  */
+      for (i = 0; i < datum; i++)
+	apuinfo_list_add (bfd_get_32 (ibfd, ptr + 20 + (i * 4)));
+
+      /* Update the offset.  */
+      offset += length;
+    }
+
+  error_message = NULL;
+
+  /* Compute the size of the output section.  */
+  num_entries = apuinfo_list_length ();
+  output_section_size = 20 + num_entries * 4;
+
+  asec = bfd_get_section_by_name (abfd, APUINFO_SECTION_NAME);
+
+  if (! bfd_set_section_size  (abfd, asec, output_section_size))
+    ibfd = abfd,
+      error_message = _("warning: unable to set size of %s section in %s");
+  
+ fail:
+  free (buffer);
+
+  if (error_message)
+    _bfd_error_handler (error_message, APUINFO_SECTION_NAME,
+			bfd_archive_filename (ibfd));
+}
+
+
+/* Prevent the output section from accumulating the input sections'
+   contents.  We have already stored this in our linked list structure.  */
+
+bfd_boolean
+ppc_elf_write_section (abfd, asec, contents)
+     bfd * abfd ATTRIBUTE_UNUSED;
+     asection * asec;
+     bfd_byte * contents ATTRIBUTE_UNUSED;
+{
+  return strcmp (asec->name, APUINFO_SECTION_NAME) == 0;
+}
+
+
+/* Finally we can generate the output section.  */
+
+void
+ppc_elf_final_write_processing (abfd, linker)
+     bfd * abfd;
+     bfd_boolean linker ATTRIBUTE_UNUSED;
+{
+  bfd_byte *    buffer;
+  asection *    asec;
+  unsigned      i;
+  unsigned      num_entries;
+  bfd_size_type length;
+
+  asec = bfd_get_section_by_name (abfd, APUINFO_SECTION_NAME);
+  if (asec == NULL)
+    return;
+
+  length = asec->_raw_size;
+  if (length < 20)
+    return;
+
+  buffer = bfd_malloc (length);
+  if (buffer == NULL)
+    {
+      _bfd_error_handler (_("failed to allocate space for new APUinfo section."));
+      return;
+    }
+
+  /* Create the apuinfo header.  */
+  num_entries = apuinfo_list_length ();
+  bfd_put_32 (abfd, sizeof APUINFO_LABEL, buffer);
+  bfd_put_32 (abfd, num_entries, buffer + 4);
+  bfd_put_32 (abfd, 0x2, buffer + 8);
+  strcpy (buffer + 12, APUINFO_LABEL);
+  
+  length = 20;
+  for (i = 0; i < num_entries; i++)
+    {
+      bfd_put_32 (abfd, apuinfo_list_element (i), buffer + length);
+      length += 4;
+    }
+
+  if (length != asec->_raw_size)
+    _bfd_error_handler (_("failed to compute new APUinfo section."));
+  
+  if (! bfd_set_section_contents (abfd, asec, buffer, (file_ptr) 0, length))
+    _bfd_error_handler (_("failed to install new APUinfo section."));
+    
+  free (buffer);
+
+  apuinfo_list_finish ();
+}
+
 #define TARGET_LITTLE_SYM	bfd_elf32_powerpcle_vec
 #define TARGET_LITTLE_NAME	"elf32-powerpcle"
 #define TARGET_BIG_SYM		bfd_elf32_powerpc_vec
@@ -3832,5 +4129,8 @@ ppc_elf_grok_psinfo (abfd, note)
 #define elf_backend_grok_prstatus		ppc_elf_grok_prstatus
 #define elf_backend_grok_psinfo			ppc_elf_grok_psinfo
 #define elf_backend_reloc_type_class		ppc_elf_reloc_type_class
+#define elf_backend_begin_write_processing      ppc_elf_begin_write_processing
+#define elf_backend_final_write_processing      ppc_elf_final_write_processing
+#define elf_backend_write_section               ppc_elf_write_section
 
 #include "elf32-target.h"

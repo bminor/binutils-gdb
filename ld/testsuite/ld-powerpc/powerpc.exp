@@ -41,6 +41,8 @@ if { [istarget "*-*-macos*"] || [istarget "*-*-netware*"]
 set ppcelftests {
     {"Reloc section order" "-shared -z nocombreloc" "" {reloc.s}
      {{objdump -hw reloc.d}} "reloc.so"}
+    {"APUinfo section processing" "" "-me500" {apuinfo1.s apuinfo2.s}
+   {{readelf -x5 apuinfo.rd}} "apuinfo"}
 }
 
 run_ld_link_tests $ppcelftests

@@ -1330,7 +1330,7 @@ ppc_cleanup ()
     apuinfo_secp = subseg_new (".PPC.EMB.apuinfo", 0);
     bfd_set_section_flags (stdoutput,
 			   apuinfo_secp,
-			   SEC_HAS_CONTENTS | SEC_READONLY | SEC_MERGE);
+			   SEC_HAS_CONTENTS | SEC_READONLY);
 
     p = frag_more (4);
     md_number_to_chars (p, (valueT) 8, 4);
