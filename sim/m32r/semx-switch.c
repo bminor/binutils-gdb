@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
+Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
 
 This file is part of the GNU Simulators.
 
@@ -370,7 +370,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_empty.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   {
@@ -393,7 +393,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_empty.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   {
@@ -412,7 +412,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_empty.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   {
@@ -431,7 +431,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_empty.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   {
@@ -459,7 +459,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_empty.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   {
@@ -481,7 +481,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_empty.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   {
@@ -506,7 +506,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_add.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -525,7 +525,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_add3.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
@@ -544,7 +544,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_add.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -563,7 +563,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_and3.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
@@ -582,7 +582,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_add.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -601,7 +601,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_or3.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
@@ -620,7 +620,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_add.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -639,7 +639,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_and3.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
@@ -658,7 +658,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_addi.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -677,7 +677,7 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_addv.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 do {
@@ -706,7 +706,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_addv3.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
 do {
@@ -735,7 +735,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_addx.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 do {
@@ -764,7 +764,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.cti.fields.fmt_bc8.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
@@ -789,7 +789,7 @@ if (CPU (h_cond)) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.cti.fields.fmt_bc24.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
@@ -814,7 +814,7 @@ if (CPU (h_cond)) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.cti.fields.fmt_beq.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
@@ -839,7 +839,7 @@ if (EQSI (* FLD (i_src1), * FLD (i_src2))) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.cti.fields.fmt_beqz.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
@@ -864,7 +864,7 @@ if (EQSI (* FLD (i_src2), 0)) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.cti.fields.fmt_beqz.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
@@ -889,7 +889,7 @@ if (GESI (* FLD (i_src2), 0)) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.cti.fields.fmt_beqz.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
@@ -914,7 +914,7 @@ if (GTSI (* FLD (i_src2), 0)) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.cti.fields.fmt_beqz.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
@@ -939,7 +939,7 @@ if (LESI (* FLD (i_src2), 0)) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.cti.fields.fmt_beqz.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
@@ -964,7 +964,7 @@ if (LTSI (* FLD (i_src2), 0)) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.cti.fields.fmt_beqz.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
@@ -989,7 +989,7 @@ if (NESI (* FLD (i_src2), 0)) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.cti.fields.fmt_bl8.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
@@ -1017,7 +1017,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.cti.fields.fmt_bl24.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
@@ -1045,7 +1045,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.cti.fields.fmt_bcl8.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
@@ -1078,7 +1078,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.cti.fields.fmt_bcl24.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
@@ -1111,7 +1111,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.cti.fields.fmt_bc8.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
@@ -1136,7 +1136,7 @@ if (NOTBI (CPU (h_cond))) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.cti.fields.fmt_bc24.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
@@ -1161,7 +1161,7 @@ if (NOTBI (CPU (h_cond))) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.cti.fields.fmt_beq.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
@@ -1186,7 +1186,7 @@ if (NESI (* FLD (i_src1), * FLD (i_src2))) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.cti.fields.fmt_bra8.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
@@ -1207,7 +1207,7 @@ if (NESI (* FLD (i_src1), * FLD (i_src2))) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.cti.fields.fmt_bra24.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
@@ -1228,7 +1228,7 @@ if (NESI (* FLD (i_src1), * FLD (i_src2))) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.cti.fields.fmt_bcl8.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
@@ -1261,7 +1261,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.cti.fields.fmt_bcl24.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
@@ -1294,7 +1294,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_cmp.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -1313,7 +1313,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_cmpi.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
@@ -1332,7 +1332,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_cmp.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -1351,7 +1351,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_cmpi.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
@@ -1370,7 +1370,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_cmp.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -1389,7 +1389,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_cmpz.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -1408,7 +1408,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_div.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
 if (NESI (* FLD (i_sr), 0)) {
@@ -1431,7 +1431,7 @@ if (NESI (* FLD (i_sr), 0)) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_div.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
 if (NESI (* FLD (i_sr), 0)) {
@@ -1454,7 +1454,7 @@ if (NESI (* FLD (i_sr), 0)) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_div.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
 if (NESI (* FLD (i_sr), 0)) {
@@ -1477,7 +1477,7 @@ if (NESI (* FLD (i_sr), 0)) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_div.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
 if (NESI (* FLD (i_sr), 0)) {
@@ -1500,7 +1500,7 @@ if (NESI (* FLD (i_sr), 0)) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_div.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
 if (NESI (* FLD (i_sr), 0)) {
@@ -1523,7 +1523,7 @@ if (NESI (* FLD (i_sr), 0)) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.cti.fields.fmt_jc.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
@@ -1548,7 +1548,7 @@ if (CPU (h_cond)) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.cti.fields.fmt_jc.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
@@ -1573,7 +1573,7 @@ if (NOTBI (CPU (h_cond))) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.cti.fields.fmt_jl.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
@@ -1604,7 +1604,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.cti.fields.fmt_jmp.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
@@ -1625,7 +1625,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_ld.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -1644,7 +1644,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_ld_d.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
@@ -1663,7 +1663,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_ldb.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -1682,7 +1682,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_ldb_d.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
@@ -1701,7 +1701,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_ldh.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -1720,7 +1720,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_ldh_d.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
@@ -1739,7 +1739,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_ldb.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -1758,7 +1758,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_ldb_d.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
@@ -1777,7 +1777,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_ldh.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -1796,7 +1796,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_ldh_d.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
@@ -1815,7 +1815,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_ld_plus.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 do {
@@ -1844,7 +1844,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_ld24.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
@@ -1863,7 +1863,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_ldi8.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -1882,7 +1882,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_ldi16.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
@@ -1901,7 +1901,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_lock.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 do {
@@ -1927,12 +1927,12 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_machi_a.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    DI opval = SRADI (SLLDI (ADDDI (m32rxf_h_accums_get (current_cpu, FLD (f_acc)), MULDI (EXTSIDI (ANDSI (* FLD (i_src1), 0xffff0000)), EXTHIDI (TRUNCSIHI (SRASI (* FLD (i_src2), 16))))), 8), 8);
-    m32rxf_h_accums_set (current_cpu, FLD (f_acc), opval);
+    DI opval = SRADI (SLLDI (ADDDI (GET_H_ACCUMS (FLD (f_acc)), MULDI (EXTSIDI (ANDSI (* FLD (i_src1), 0xffff0000)), EXTHIDI (TRUNCSIHI (SRASI (* FLD (i_src2), 16))))), 8), 8);
+    SET_H_ACCUMS (FLD (f_acc), opval);
     TRACE_RESULT (current_cpu, abuf, "acc", 'D', opval);
   }
 
@@ -1946,12 +1946,12 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_machi_a.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    DI opval = SRADI (SLLDI (ADDDI (m32rxf_h_accums_get (current_cpu, FLD (f_acc)), MULDI (EXTSIDI (SLLSI (* FLD (i_src1), 16)), EXTHIDI (TRUNCSIHI (* FLD (i_src2))))), 8), 8);
-    m32rxf_h_accums_set (current_cpu, FLD (f_acc), opval);
+    DI opval = SRADI (SLLDI (ADDDI (GET_H_ACCUMS (FLD (f_acc)), MULDI (EXTSIDI (SLLSI (* FLD (i_src1), 16)), EXTHIDI (TRUNCSIHI (* FLD (i_src2))))), 8), 8);
+    SET_H_ACCUMS (FLD (f_acc), opval);
     TRACE_RESULT (current_cpu, abuf, "acc", 'D', opval);
   }
 
@@ -1965,12 +1965,12 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_machi_a.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    DI opval = ADDDI (m32rxf_h_accums_get (current_cpu, FLD (f_acc)), MULDI (EXTSIDI (* FLD (i_src1)), EXTHIDI (TRUNCSIHI (SRASI (* FLD (i_src2), 16)))));
-    m32rxf_h_accums_set (current_cpu, FLD (f_acc), opval);
+    DI opval = ADDDI (GET_H_ACCUMS (FLD (f_acc)), MULDI (EXTSIDI (* FLD (i_src1)), EXTHIDI (TRUNCSIHI (SRASI (* FLD (i_src2), 16)))));
+    SET_H_ACCUMS (FLD (f_acc), opval);
     TRACE_RESULT (current_cpu, abuf, "acc", 'D', opval);
   }
 
@@ -1984,12 +1984,12 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_machi_a.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    DI opval = ADDDI (m32rxf_h_accums_get (current_cpu, FLD (f_acc)), MULDI (EXTSIDI (* FLD (i_src1)), EXTHIDI (TRUNCSIHI (* FLD (i_src2)))));
-    m32rxf_h_accums_set (current_cpu, FLD (f_acc), opval);
+    DI opval = ADDDI (GET_H_ACCUMS (FLD (f_acc)), MULDI (EXTSIDI (* FLD (i_src1)), EXTHIDI (TRUNCSIHI (* FLD (i_src2)))));
+    SET_H_ACCUMS (FLD (f_acc), opval);
     TRACE_RESULT (current_cpu, abuf, "acc", 'D', opval);
   }
 
@@ -2003,7 +2003,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_add.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -2022,12 +2022,12 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_mulhi_a.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
     DI opval = SRADI (SLLDI (MULDI (EXTSIDI (ANDSI (* FLD (i_src1), 0xffff0000)), EXTHIDI (TRUNCSIHI (SRASI (* FLD (i_src2), 16)))), 16), 16);
-    m32rxf_h_accums_set (current_cpu, FLD (f_acc), opval);
+    SET_H_ACCUMS (FLD (f_acc), opval);
     TRACE_RESULT (current_cpu, abuf, "acc", 'D', opval);
   }
 
@@ -2041,12 +2041,12 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_mulhi_a.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
     DI opval = SRADI (SLLDI (MULDI (EXTSIDI (SLLSI (* FLD (i_src1), 16)), EXTHIDI (TRUNCSIHI (* FLD (i_src2)))), 16), 16);
-    m32rxf_h_accums_set (current_cpu, FLD (f_acc), opval);
+    SET_H_ACCUMS (FLD (f_acc), opval);
     TRACE_RESULT (current_cpu, abuf, "acc", 'D', opval);
   }
 
@@ -2060,12 +2060,12 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_mulhi_a.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
     DI opval = MULDI (EXTSIDI (* FLD (i_src1)), EXTHIDI (TRUNCSIHI (SRASI (* FLD (i_src2), 16))));
-    m32rxf_h_accums_set (current_cpu, FLD (f_acc), opval);
+    SET_H_ACCUMS (FLD (f_acc), opval);
     TRACE_RESULT (current_cpu, abuf, "acc", 'D', opval);
   }
 
@@ -2079,12 +2079,12 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_mulhi_a.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
     DI opval = MULDI (EXTSIDI (* FLD (i_src1)), EXTHIDI (TRUNCSIHI (* FLD (i_src2))));
-    m32rxf_h_accums_set (current_cpu, FLD (f_acc), opval);
+    SET_H_ACCUMS (FLD (f_acc), opval);
     TRACE_RESULT (current_cpu, abuf, "acc", 'D', opval);
   }
 
@@ -2098,7 +2098,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_mv.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -2117,11 +2117,11 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_mvfachi_a.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    SI opval = TRUNCDISI (SRADI (m32rxf_h_accums_get (current_cpu, FLD (f_accs)), 32));
+    SI opval = TRUNCDISI (SRADI (GET_H_ACCUMS (FLD (f_accs)), 32));
     * FLD (i_dr) = opval;
     TRACE_RESULT (current_cpu, abuf, "dr", 'x', opval);
   }
@@ -2136,11 +2136,11 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_mvfachi_a.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    SI opval = TRUNCDISI (m32rxf_h_accums_get (current_cpu, FLD (f_accs)));
+    SI opval = TRUNCDISI (GET_H_ACCUMS (FLD (f_accs)));
     * FLD (i_dr) = opval;
     TRACE_RESULT (current_cpu, abuf, "dr", 'x', opval);
   }
@@ -2155,11 +2155,11 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_mvfachi_a.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    SI opval = TRUNCDISI (SRADI (m32rxf_h_accums_get (current_cpu, FLD (f_accs)), 16));
+    SI opval = TRUNCDISI (SRADI (GET_H_ACCUMS (FLD (f_accs)), 16));
     * FLD (i_dr) = opval;
     TRACE_RESULT (current_cpu, abuf, "dr", 'x', opval);
   }
@@ -2174,11 +2174,11 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_mvfc.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    SI opval = m32rxf_h_cr_get (current_cpu, FLD (f_r2));
+    SI opval = GET_H_CR (FLD (f_r2));
     * FLD (i_dr) = opval;
     TRACE_RESULT (current_cpu, abuf, "dr", 'x', opval);
   }
@@ -2193,12 +2193,12 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_mvtachi_a.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    DI opval = ORDI (ANDDI (m32rxf_h_accums_get (current_cpu, FLD (f_accs)), MAKEDI (0, 0xffffffff)), SLLDI (EXTSIDI (* FLD (i_src1)), 32));
-    m32rxf_h_accums_set (current_cpu, FLD (f_accs), opval);
+    DI opval = ORDI (ANDDI (GET_H_ACCUMS (FLD (f_accs)), MAKEDI (0, 0xffffffff)), SLLDI (EXTSIDI (* FLD (i_src1)), 32));
+    SET_H_ACCUMS (FLD (f_accs), opval);
     TRACE_RESULT (current_cpu, abuf, "accs", 'D', opval);
   }
 
@@ -2212,12 +2212,12 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_mvtachi_a.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    DI opval = ORDI (ANDDI (m32rxf_h_accums_get (current_cpu, FLD (f_accs)), MAKEDI (0xffffffff, 0)), ZEXTSIDI (* FLD (i_src1)));
-    m32rxf_h_accums_set (current_cpu, FLD (f_accs), opval);
+    DI opval = ORDI (ANDDI (GET_H_ACCUMS (FLD (f_accs)), MAKEDI (0xffffffff, 0)), ZEXTSIDI (* FLD (i_src1)));
+    SET_H_ACCUMS (FLD (f_accs), opval);
     TRACE_RESULT (current_cpu, abuf, "accs", 'D', opval);
   }
 
@@ -2231,12 +2231,12 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_mvtc.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
     USI opval = * FLD (i_sr);
-    m32rxf_h_cr_set (current_cpu, FLD (f_r1), opval);
+    SET_H_CR (FLD (f_r1), opval);
     TRACE_RESULT (current_cpu, abuf, "dcr", 'x', opval);
   }
 
@@ -2250,7 +2250,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_mv.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -2269,7 +2269,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_nop.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 PROFILE_COUNT_FILLNOPS (current_cpu, abuf->addr);
@@ -2284,7 +2284,7 @@ PROFILE_COUNT_FILLNOPS (current_cpu, abuf->addr);
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_mv.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -2303,16 +2303,16 @@ PROFILE_COUNT_FILLNOPS (current_cpu, abuf->addr);
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_rac_dsi.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 do {
   DI tmp_tmp1;
-  tmp_tmp1 = SLLDI (m32rxf_h_accums_get (current_cpu, FLD (f_accs)), FLD (f_imm1));
+  tmp_tmp1 = SLLDI (GET_H_ACCUMS (FLD (f_accs)), FLD (f_imm1));
   tmp_tmp1 = ADDDI (tmp_tmp1, MAKEDI (0, 32768));
   {
     DI opval = (GTDI (tmp_tmp1, MAKEDI (32767, 0xffff0000))) ? (MAKEDI (32767, 0xffff0000)) : (LTDI (tmp_tmp1, MAKEDI (0xffff8000, 0))) ? (MAKEDI (0xffff8000, 0)) : (ANDDI (tmp_tmp1, MAKEDI (0xffffffff, 0xffff0000)));
-    m32rxf_h_accums_set (current_cpu, FLD (f_accd), opval);
+    SET_H_ACCUMS (FLD (f_accd), opval);
     TRACE_RESULT (current_cpu, abuf, "accd", 'D', opval);
   }
 } while (0);
@@ -2327,16 +2327,16 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_rac_dsi.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 do {
   DI tmp_tmp1;
-  tmp_tmp1 = SLLDI (m32rxf_h_accums_get (current_cpu, FLD (f_accs)), FLD (f_imm1));
+  tmp_tmp1 = SLLDI (GET_H_ACCUMS (FLD (f_accs)), FLD (f_imm1));
   tmp_tmp1 = ADDDI (tmp_tmp1, MAKEDI (0, 0x80000000));
   {
     DI opval = (GTDI (tmp_tmp1, MAKEDI (32767, 0))) ? (MAKEDI (32767, 0)) : (LTDI (tmp_tmp1, MAKEDI (0xffff8000, 0))) ? (MAKEDI (0xffff8000, 0)) : (ANDDI (tmp_tmp1, MAKEDI (0xffffffff, 0)));
-    m32rxf_h_accums_set (current_cpu, FLD (f_accd), opval);
+    SET_H_ACCUMS (FLD (f_accd), opval);
     TRACE_RESULT (current_cpu, abuf, "accd", 'D', opval);
   }
 } while (0);
@@ -2351,24 +2351,24 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.cti.fields.fmt_rte.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 do {
   {
-    USI opval = ANDSI (m32rxf_h_cr_get (current_cpu, ((UINT) 6)), -4);
+    USI opval = ANDSI (GET_H_CR (((UINT) 6)), -4);
     SEM_BRANCH_VIA_ADDR (current_cpu, sem_arg, opval, vpc);
     TRACE_RESULT (current_cpu, abuf, "pc", 'x', opval);
   }
   {
-    USI opval = m32rxf_h_cr_get (current_cpu, ((UINT) 14));
-    m32rxf_h_cr_set (current_cpu, ((UINT) 6), opval);
+    USI opval = GET_H_CR (((UINT) 14));
+    SET_H_CR (((UINT) 6), opval);
     TRACE_RESULT (current_cpu, abuf, "cr-6", 'x', opval);
   }
   {
     UQI opval = CPU (h_bpsw);
-    m32rxf_h_psw_set (current_cpu, opval);
+    SET_H_PSW (opval);
     TRACE_RESULT (current_cpu, abuf, "psw-0", 'x', opval);
   }
   {
@@ -2389,7 +2389,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_seth.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
@@ -2408,7 +2408,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_add.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -2427,7 +2427,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_sll3.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
@@ -2446,7 +2446,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_slli.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -2465,7 +2465,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_add.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -2484,7 +2484,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_sll3.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
@@ -2503,7 +2503,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_slli.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -2522,7 +2522,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_add.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -2541,7 +2541,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_sll3.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
@@ -2560,7 +2560,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_slli.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -2579,7 +2579,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_st.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -2598,7 +2598,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_st_d.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
@@ -2617,7 +2617,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_stb.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -2636,7 +2636,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_stb_d.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
@@ -2655,7 +2655,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_sth.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -2674,7 +2674,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_sth_d.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
@@ -2693,7 +2693,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_st_plus.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 do {
@@ -2721,7 +2721,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_st_plus.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 do {
@@ -2749,7 +2749,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_add.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -2768,7 +2768,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_addv.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 do {
@@ -2797,7 +2797,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_addx.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 do {
@@ -2826,19 +2826,19 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.cti.fields.fmt_trap.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 do {
   {
-    USI opval = m32rxf_h_cr_get (current_cpu, ((UINT) 6));
-    m32rxf_h_cr_set (current_cpu, ((UINT) 14), opval);
+    USI opval = GET_H_CR (((UINT) 6));
+    SET_H_CR (((UINT) 14), opval);
     TRACE_RESULT (current_cpu, abuf, "cr-14", 'x', opval);
   }
   {
     USI opval = ADDSI (pc, 4);
-    m32rxf_h_cr_set (current_cpu, ((UINT) 6), opval);
+    SET_H_CR (((UINT) 6), opval);
     TRACE_RESULT (current_cpu, abuf, "cr-6", 'x', opval);
   }
   {
@@ -2847,13 +2847,13 @@ do {
     TRACE_RESULT (current_cpu, abuf, "bbpsw-0", 'x', opval);
   }
   {
-    UQI opval = m32rxf_h_psw_get (current_cpu);
+    UQI opval = GET_H_PSW ();
     CPU (h_bpsw) = opval;
     TRACE_RESULT (current_cpu, abuf, "bpsw-0", 'x', opval);
   }
   {
-    UQI opval = ANDQI (m32rxf_h_psw_get (current_cpu), 128);
-    m32rxf_h_psw_set (current_cpu, opval);
+    UQI opval = ANDQI (GET_H_PSW (), 128);
+    SET_H_PSW (opval);
     TRACE_RESULT (current_cpu, abuf, "psw-0", 'x', opval);
   }
   {
@@ -2874,7 +2874,7 @@ do {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_unlock.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 do {
@@ -2882,7 +2882,7 @@ if (CPU (h_lock)) {
   {
     SI opval = * FLD (i_src1);
     SETMEMSI (current_cpu, pc, * FLD (i_src2), opval);
-    written |= (1 << 3);
+    written |= (1 << 4);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
 }
@@ -2904,7 +2904,7 @@ if (CPU (h_lock)) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_satb.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
@@ -2923,7 +2923,7 @@ if (CPU (h_lock)) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_satb.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
@@ -2942,7 +2942,7 @@ if (CPU (h_lock)) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_sat.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
@@ -2961,7 +2961,7 @@ if (CPU (h_lock)) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_cmpz.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -2980,12 +2980,12 @@ if (CPU (h_lock)) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_sadd.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    DI opval = ADDDI (SRADI (m32rxf_h_accums_get (current_cpu, ((UINT) 1)), 16), m32rxf_h_accums_get (current_cpu, ((UINT) 0)));
-    m32rxf_h_accums_set (current_cpu, ((UINT) 0), opval);
+    DI opval = ADDDI (SRADI (GET_H_ACCUMS (((UINT) 1)), 16), GET_H_ACCUMS (((UINT) 0)));
+    SET_H_ACCUMS (((UINT) 0), opval);
     TRACE_RESULT (current_cpu, abuf, "accums-0", 'D', opval);
   }
 
@@ -2999,12 +2999,12 @@ if (CPU (h_lock)) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_macwu1.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    DI opval = SRADI (SLLDI (ADDDI (m32rxf_h_accums_get (current_cpu, ((UINT) 1)), MULDI (EXTSIDI (* FLD (i_src1)), EXTSIDI (ANDSI (* FLD (i_src2), 65535)))), 8), 8);
-    m32rxf_h_accums_set (current_cpu, ((UINT) 1), opval);
+    DI opval = SRADI (SLLDI (ADDDI (GET_H_ACCUMS (((UINT) 1)), MULDI (EXTSIDI (* FLD (i_src1)), EXTSIDI (ANDSI (* FLD (i_src2), 65535)))), 8), 8);
+    SET_H_ACCUMS (((UINT) 1), opval);
     TRACE_RESULT (current_cpu, abuf, "accums-1", 'D', opval);
   }
 
@@ -3018,12 +3018,12 @@ if (CPU (h_lock)) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_msblo.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    DI opval = SRADI (SLLDI (SUBDI (m32rxf_h_accum_get (current_cpu), SRADI (SLLDI (MULDI (EXTHIDI (TRUNCSIHI (* FLD (i_src1))), EXTHIDI (TRUNCSIHI (* FLD (i_src2)))), 32), 16)), 8), 8);
-    m32rxf_h_accum_set (current_cpu, opval);
+    DI opval = SRADI (SLLDI (SUBDI (GET_H_ACCUM (), SRADI (SLLDI (MULDI (EXTHIDI (TRUNCSIHI (* FLD (i_src1))), EXTHIDI (TRUNCSIHI (* FLD (i_src2)))), 32), 16)), 8), 8);
+    SET_H_ACCUM (opval);
     TRACE_RESULT (current_cpu, abuf, "accum", 'D', opval);
   }
 
@@ -3037,12 +3037,12 @@ if (CPU (h_lock)) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_mulwu1.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
     DI opval = SRADI (SLLDI (MULDI (EXTSIDI (* FLD (i_src1)), EXTSIDI (ANDSI (* FLD (i_src2), 65535))), 16), 16);
-    m32rxf_h_accums_set (current_cpu, ((UINT) 1), opval);
+    SET_H_ACCUMS (((UINT) 1), opval);
     TRACE_RESULT (current_cpu, abuf, "accums-1", 'D', opval);
   }
 
@@ -3056,12 +3056,12 @@ if (CPU (h_lock)) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.fmt_macwu1.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    DI opval = SRADI (SLLDI (ADDDI (m32rxf_h_accums_get (current_cpu, ((UINT) 1)), SLLDI (EXTSIDI (MULSI (EXTHISI (TRUNCSIHI (* FLD (i_src1))), SRASI (* FLD (i_src2), 16))), 16)), 8), 8);
-    m32rxf_h_accums_set (current_cpu, ((UINT) 1), opval);
+    DI opval = SRADI (SLLDI (ADDDI (GET_H_ACCUMS (((UINT) 1)), SLLDI (EXTSIDI (MULSI (EXTHISI (TRUNCSIHI (* FLD (i_src1))), SRASI (* FLD (i_src2), 16))), 16)), 8), 8);
+    SET_H_ACCUMS (((UINT) 1), opval);
     TRACE_RESULT (current_cpu, abuf, "accums-1", 'D', opval);
   }
 
@@ -3075,7 +3075,7 @@ if (CPU (h_lock)) {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.cti.fields.fmt_sc.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
@@ -3094,7 +3094,7 @@ SEM_SKIP_INSN (current_cpu, 1);
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 #define FLD(f) abuf->fields.cti.fields.fmt_sc.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
@@ -3114,7 +3114,7 @@ SEM_SKIP_INSN (current_cpu, 1);
 #define FLD(f) abuf->fields.fmt_add.f
 #define OPRND(f) par_exec->operands.fmt_add.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -3135,7 +3135,7 @@ SEM_SKIP_INSN (current_cpu, 1);
 #define FLD(f) abuf->fields.fmt_add.f
 #define OPRND(f) par_exec->operands.fmt_add.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   * FLD (i_dr) = OPRND (dr);
@@ -3152,7 +3152,7 @@ SEM_SKIP_INSN (current_cpu, 1);
 #define FLD(f) abuf->fields.fmt_add.f
 #define OPRND(f) par_exec->operands.fmt_add.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -3173,7 +3173,7 @@ SEM_SKIP_INSN (current_cpu, 1);
 #define FLD(f) abuf->fields.fmt_add.f
 #define OPRND(f) par_exec->operands.fmt_add.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   * FLD (i_dr) = OPRND (dr);
@@ -3190,7 +3190,7 @@ SEM_SKIP_INSN (current_cpu, 1);
 #define FLD(f) abuf->fields.fmt_add.f
 #define OPRND(f) par_exec->operands.fmt_add.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -3211,7 +3211,7 @@ SEM_SKIP_INSN (current_cpu, 1);
 #define FLD(f) abuf->fields.fmt_add.f
 #define OPRND(f) par_exec->operands.fmt_add.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   * FLD (i_dr) = OPRND (dr);
@@ -3228,7 +3228,7 @@ SEM_SKIP_INSN (current_cpu, 1);
 #define FLD(f) abuf->fields.fmt_add.f
 #define OPRND(f) par_exec->operands.fmt_add.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -3249,7 +3249,7 @@ SEM_SKIP_INSN (current_cpu, 1);
 #define FLD(f) abuf->fields.fmt_add.f
 #define OPRND(f) par_exec->operands.fmt_add.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   * FLD (i_dr) = OPRND (dr);
@@ -3266,7 +3266,7 @@ SEM_SKIP_INSN (current_cpu, 1);
 #define FLD(f) abuf->fields.fmt_addi.f
 #define OPRND(f) par_exec->operands.fmt_addi.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -3287,7 +3287,7 @@ SEM_SKIP_INSN (current_cpu, 1);
 #define FLD(f) abuf->fields.fmt_addi.f
 #define OPRND(f) par_exec->operands.fmt_addi.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   * FLD (i_dr) = OPRND (dr);
@@ -3304,7 +3304,7 @@ SEM_SKIP_INSN (current_cpu, 1);
 #define FLD(f) abuf->fields.fmt_addv.f
 #define OPRND(f) par_exec->operands.fmt_addv.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 do {
@@ -3335,11 +3335,11 @@ do {
 #define FLD(f) abuf->fields.fmt_addv.f
 #define OPRND(f) par_exec->operands.fmt_addv.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  * FLD (i_dr) = OPRND (dr);
   CPU (h_cond) = OPRND (condbit);
+  * FLD (i_dr) = OPRND (dr);
 
 #undef OPRND
 #undef FLD
@@ -3353,7 +3353,7 @@ do {
 #define FLD(f) abuf->fields.fmt_addx.f
 #define OPRND(f) par_exec->operands.fmt_addx.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 do {
@@ -3384,11 +3384,11 @@ do {
 #define FLD(f) abuf->fields.fmt_addx.f
 #define OPRND(f) par_exec->operands.fmt_addx.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  * FLD (i_dr) = OPRND (dr);
   CPU (h_cond) = OPRND (condbit);
+  * FLD (i_dr) = OPRND (dr);
 
 #undef OPRND
 #undef FLD
@@ -3402,7 +3402,7 @@ do {
 #define FLD(f) abuf->fields.cti.fields.fmt_bc8.f
 #define OPRND(f) par_exec->operands.fmt_bc8.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 if (CPU (h_cond)) {
@@ -3427,7 +3427,7 @@ if (CPU (h_cond)) {
 #define FLD(f) abuf->fields.cti.fields.fmt_bc8.f
 #define OPRND(f) par_exec->operands.fmt_bc8.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
@@ -3449,7 +3449,7 @@ if (CPU (h_cond)) {
 #define FLD(f) abuf->fields.cti.fields.fmt_bl8.f
 #define OPRND(f) par_exec->operands.fmt_bl8.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 do {
@@ -3477,7 +3477,7 @@ do {
 #define FLD(f) abuf->fields.cti.fields.fmt_bl8.f
 #define OPRND(f) par_exec->operands.fmt_bl8.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
@@ -3497,7 +3497,7 @@ do {
 #define FLD(f) abuf->fields.cti.fields.fmt_bcl8.f
 #define OPRND(f) par_exec->operands.fmt_bcl8.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 if (CPU (h_cond)) {
@@ -3530,7 +3530,7 @@ do {
 #define FLD(f) abuf->fields.cti.fields.fmt_bcl8.f
 #define OPRND(f) par_exec->operands.fmt_bcl8.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
@@ -3556,7 +3556,7 @@ do {
 #define FLD(f) abuf->fields.cti.fields.fmt_bc8.f
 #define OPRND(f) par_exec->operands.fmt_bc8.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 if (NOTBI (CPU (h_cond))) {
@@ -3581,7 +3581,7 @@ if (NOTBI (CPU (h_cond))) {
 #define FLD(f) abuf->fields.cti.fields.fmt_bc8.f
 #define OPRND(f) par_exec->operands.fmt_bc8.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
@@ -3603,7 +3603,7 @@ if (NOTBI (CPU (h_cond))) {
 #define FLD(f) abuf->fields.cti.fields.fmt_bra8.f
 #define OPRND(f) par_exec->operands.fmt_bra8.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -3624,7 +3624,7 @@ if (NOTBI (CPU (h_cond))) {
 #define FLD(f) abuf->fields.cti.fields.fmt_bra8.f
 #define OPRND(f) par_exec->operands.fmt_bra8.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
@@ -3643,7 +3643,7 @@ if (NOTBI (CPU (h_cond))) {
 #define FLD(f) abuf->fields.cti.fields.fmt_bcl8.f
 #define OPRND(f) par_exec->operands.fmt_bcl8.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 if (NOTBI (CPU (h_cond))) {
@@ -3676,7 +3676,7 @@ do {
 #define FLD(f) abuf->fields.cti.fields.fmt_bcl8.f
 #define OPRND(f) par_exec->operands.fmt_bcl8.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
@@ -3702,7 +3702,7 @@ do {
 #define FLD(f) abuf->fields.fmt_cmp.f
 #define OPRND(f) par_exec->operands.fmt_cmp.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -3723,7 +3723,7 @@ do {
 #define FLD(f) abuf->fields.fmt_cmp.f
 #define OPRND(f) par_exec->operands.fmt_cmp.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   CPU (h_cond) = OPRND (condbit);
@@ -3740,7 +3740,7 @@ do {
 #define FLD(f) abuf->fields.fmt_cmp.f
 #define OPRND(f) par_exec->operands.fmt_cmp.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -3761,7 +3761,7 @@ do {
 #define FLD(f) abuf->fields.fmt_cmp.f
 #define OPRND(f) par_exec->operands.fmt_cmp.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   CPU (h_cond) = OPRND (condbit);
@@ -3778,7 +3778,7 @@ do {
 #define FLD(f) abuf->fields.fmt_cmp.f
 #define OPRND(f) par_exec->operands.fmt_cmp.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -3799,7 +3799,7 @@ do {
 #define FLD(f) abuf->fields.fmt_cmp.f
 #define OPRND(f) par_exec->operands.fmt_cmp.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   CPU (h_cond) = OPRND (condbit);
@@ -3816,7 +3816,7 @@ do {
 #define FLD(f) abuf->fields.fmt_cmpz.f
 #define OPRND(f) par_exec->operands.fmt_cmpz.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -3837,7 +3837,7 @@ do {
 #define FLD(f) abuf->fields.fmt_cmpz.f
 #define OPRND(f) par_exec->operands.fmt_cmpz.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   CPU (h_cond) = OPRND (condbit);
@@ -3854,7 +3854,7 @@ do {
 #define FLD(f) abuf->fields.cti.fields.fmt_jc.f
 #define OPRND(f) par_exec->operands.fmt_jc.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 if (CPU (h_cond)) {
@@ -3879,7 +3879,7 @@ if (CPU (h_cond)) {
 #define FLD(f) abuf->fields.cti.fields.fmt_jc.f
 #define OPRND(f) par_exec->operands.fmt_jc.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
@@ -3901,7 +3901,7 @@ if (CPU (h_cond)) {
 #define FLD(f) abuf->fields.cti.fields.fmt_jc.f
 #define OPRND(f) par_exec->operands.fmt_jc.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 if (NOTBI (CPU (h_cond))) {
@@ -3926,7 +3926,7 @@ if (NOTBI (CPU (h_cond))) {
 #define FLD(f) abuf->fields.cti.fields.fmt_jc.f
 #define OPRND(f) par_exec->operands.fmt_jc.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
@@ -3948,7 +3948,7 @@ if (NOTBI (CPU (h_cond))) {
 #define FLD(f) abuf->fields.cti.fields.fmt_jl.f
 #define OPRND(f) par_exec->operands.fmt_jl.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 do {
@@ -3979,7 +3979,7 @@ do {
 #define FLD(f) abuf->fields.cti.fields.fmt_jl.f
 #define OPRND(f) par_exec->operands.fmt_jl.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
@@ -3999,7 +3999,7 @@ do {
 #define FLD(f) abuf->fields.cti.fields.fmt_jmp.f
 #define OPRND(f) par_exec->operands.fmt_jmp.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -4020,7 +4020,7 @@ do {
 #define FLD(f) abuf->fields.cti.fields.fmt_jmp.f
 #define OPRND(f) par_exec->operands.fmt_jmp.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
@@ -4039,7 +4039,7 @@ do {
 #define FLD(f) abuf->fields.fmt_ld.f
 #define OPRND(f) par_exec->operands.fmt_ld.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -4060,7 +4060,7 @@ do {
 #define FLD(f) abuf->fields.fmt_ld.f
 #define OPRND(f) par_exec->operands.fmt_ld.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   * FLD (i_dr) = OPRND (dr);
@@ -4077,7 +4077,7 @@ do {
 #define FLD(f) abuf->fields.fmt_ldb.f
 #define OPRND(f) par_exec->operands.fmt_ldb.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -4098,7 +4098,7 @@ do {
 #define FLD(f) abuf->fields.fmt_ldb.f
 #define OPRND(f) par_exec->operands.fmt_ldb.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   * FLD (i_dr) = OPRND (dr);
@@ -4115,7 +4115,7 @@ do {
 #define FLD(f) abuf->fields.fmt_ldh.f
 #define OPRND(f) par_exec->operands.fmt_ldh.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -4136,7 +4136,7 @@ do {
 #define FLD(f) abuf->fields.fmt_ldh.f
 #define OPRND(f) par_exec->operands.fmt_ldh.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   * FLD (i_dr) = OPRND (dr);
@@ -4153,7 +4153,7 @@ do {
 #define FLD(f) abuf->fields.fmt_ldb.f
 #define OPRND(f) par_exec->operands.fmt_ldb.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -4174,7 +4174,7 @@ do {
 #define FLD(f) abuf->fields.fmt_ldb.f
 #define OPRND(f) par_exec->operands.fmt_ldb.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   * FLD (i_dr) = OPRND (dr);
@@ -4191,7 +4191,7 @@ do {
 #define FLD(f) abuf->fields.fmt_ldh.f
 #define OPRND(f) par_exec->operands.fmt_ldh.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -4212,7 +4212,7 @@ do {
 #define FLD(f) abuf->fields.fmt_ldh.f
 #define OPRND(f) par_exec->operands.fmt_ldh.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   * FLD (i_dr) = OPRND (dr);
@@ -4229,7 +4229,7 @@ do {
 #define FLD(f) abuf->fields.fmt_ld_plus.f
 #define OPRND(f) par_exec->operands.fmt_ld_plus.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 do {
@@ -4260,7 +4260,7 @@ do {
 #define FLD(f) abuf->fields.fmt_ld_plus.f
 #define OPRND(f) par_exec->operands.fmt_ld_plus.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   * FLD (i_dr) = OPRND (dr);
@@ -4278,7 +4278,7 @@ do {
 #define FLD(f) abuf->fields.fmt_ldi8.f
 #define OPRND(f) par_exec->operands.fmt_ldi8.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -4299,7 +4299,7 @@ do {
 #define FLD(f) abuf->fields.fmt_ldi8.f
 #define OPRND(f) par_exec->operands.fmt_ldi8.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   * FLD (i_dr) = OPRND (dr);
@@ -4316,7 +4316,7 @@ do {
 #define FLD(f) abuf->fields.fmt_lock.f
 #define OPRND(f) par_exec->operands.fmt_lock.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 do {
@@ -4344,11 +4344,11 @@ do {
 #define FLD(f) abuf->fields.fmt_lock.f
 #define OPRND(f) par_exec->operands.fmt_lock.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  CPU (h_lock) = OPRND (h_lock_0);
   * FLD (i_dr) = OPRND (dr);
+  CPU (h_lock) = OPRND (h_lock_0);
 
 #undef OPRND
 #undef FLD
@@ -4362,11 +4362,11 @@ do {
 #define FLD(f) abuf->fields.fmt_machi_a.f
 #define OPRND(f) par_exec->operands.fmt_machi_a.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    DI opval = SRADI (SLLDI (ADDDI (m32rxf_h_accums_get (current_cpu, FLD (f_acc)), MULDI (EXTSIDI (ANDSI (* FLD (i_src1), 0xffff0000)), EXTHIDI (TRUNCSIHI (SRASI (* FLD (i_src2), 16))))), 8), 8);
+    DI opval = SRADI (SLLDI (ADDDI (GET_H_ACCUMS (FLD (f_acc)), MULDI (EXTSIDI (ANDSI (* FLD (i_src1), 0xffff0000)), EXTHIDI (TRUNCSIHI (SRASI (* FLD (i_src2), 16))))), 8), 8);
     OPRND (acc) = opval;
     TRACE_RESULT (current_cpu, abuf, "acc", 'D', opval);
   }
@@ -4383,10 +4383,10 @@ do {
 #define FLD(f) abuf->fields.fmt_machi_a.f
 #define OPRND(f) par_exec->operands.fmt_machi_a.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  m32rxf_h_accums_set (current_cpu, FLD (f_acc), OPRND (acc));
+  SET_H_ACCUMS (FLD (f_acc), OPRND (acc));
 
 #undef OPRND
 #undef FLD
@@ -4400,11 +4400,11 @@ do {
 #define FLD(f) abuf->fields.fmt_machi_a.f
 #define OPRND(f) par_exec->operands.fmt_machi_a.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    DI opval = SRADI (SLLDI (ADDDI (m32rxf_h_accums_get (current_cpu, FLD (f_acc)), MULDI (EXTSIDI (SLLSI (* FLD (i_src1), 16)), EXTHIDI (TRUNCSIHI (* FLD (i_src2))))), 8), 8);
+    DI opval = SRADI (SLLDI (ADDDI (GET_H_ACCUMS (FLD (f_acc)), MULDI (EXTSIDI (SLLSI (* FLD (i_src1), 16)), EXTHIDI (TRUNCSIHI (* FLD (i_src2))))), 8), 8);
     OPRND (acc) = opval;
     TRACE_RESULT (current_cpu, abuf, "acc", 'D', opval);
   }
@@ -4421,10 +4421,10 @@ do {
 #define FLD(f) abuf->fields.fmt_machi_a.f
 #define OPRND(f) par_exec->operands.fmt_machi_a.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  m32rxf_h_accums_set (current_cpu, FLD (f_acc), OPRND (acc));
+  SET_H_ACCUMS (FLD (f_acc), OPRND (acc));
 
 #undef OPRND
 #undef FLD
@@ -4438,11 +4438,11 @@ do {
 #define FLD(f) abuf->fields.fmt_machi_a.f
 #define OPRND(f) par_exec->operands.fmt_machi_a.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    DI opval = ADDDI (m32rxf_h_accums_get (current_cpu, FLD (f_acc)), MULDI (EXTSIDI (* FLD (i_src1)), EXTHIDI (TRUNCSIHI (SRASI (* FLD (i_src2), 16)))));
+    DI opval = ADDDI (GET_H_ACCUMS (FLD (f_acc)), MULDI (EXTSIDI (* FLD (i_src1)), EXTHIDI (TRUNCSIHI (SRASI (* FLD (i_src2), 16)))));
     OPRND (acc) = opval;
     TRACE_RESULT (current_cpu, abuf, "acc", 'D', opval);
   }
@@ -4459,10 +4459,10 @@ do {
 #define FLD(f) abuf->fields.fmt_machi_a.f
 #define OPRND(f) par_exec->operands.fmt_machi_a.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  m32rxf_h_accums_set (current_cpu, FLD (f_acc), OPRND (acc));
+  SET_H_ACCUMS (FLD (f_acc), OPRND (acc));
 
 #undef OPRND
 #undef FLD
@@ -4476,11 +4476,11 @@ do {
 #define FLD(f) abuf->fields.fmt_machi_a.f
 #define OPRND(f) par_exec->operands.fmt_machi_a.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    DI opval = ADDDI (m32rxf_h_accums_get (current_cpu, FLD (f_acc)), MULDI (EXTSIDI (* FLD (i_src1)), EXTHIDI (TRUNCSIHI (* FLD (i_src2)))));
+    DI opval = ADDDI (GET_H_ACCUMS (FLD (f_acc)), MULDI (EXTSIDI (* FLD (i_src1)), EXTHIDI (TRUNCSIHI (* FLD (i_src2)))));
     OPRND (acc) = opval;
     TRACE_RESULT (current_cpu, abuf, "acc", 'D', opval);
   }
@@ -4497,10 +4497,10 @@ do {
 #define FLD(f) abuf->fields.fmt_machi_a.f
 #define OPRND(f) par_exec->operands.fmt_machi_a.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  m32rxf_h_accums_set (current_cpu, FLD (f_acc), OPRND (acc));
+  SET_H_ACCUMS (FLD (f_acc), OPRND (acc));
 
 #undef OPRND
 #undef FLD
@@ -4514,7 +4514,7 @@ do {
 #define FLD(f) abuf->fields.fmt_add.f
 #define OPRND(f) par_exec->operands.fmt_add.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -4535,7 +4535,7 @@ do {
 #define FLD(f) abuf->fields.fmt_add.f
 #define OPRND(f) par_exec->operands.fmt_add.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   * FLD (i_dr) = OPRND (dr);
@@ -4552,7 +4552,7 @@ do {
 #define FLD(f) abuf->fields.fmt_mulhi_a.f
 #define OPRND(f) par_exec->operands.fmt_mulhi_a.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -4573,10 +4573,10 @@ do {
 #define FLD(f) abuf->fields.fmt_mulhi_a.f
 #define OPRND(f) par_exec->operands.fmt_mulhi_a.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  m32rxf_h_accums_set (current_cpu, FLD (f_acc), OPRND (acc));
+  SET_H_ACCUMS (FLD (f_acc), OPRND (acc));
 
 #undef OPRND
 #undef FLD
@@ -4590,7 +4590,7 @@ do {
 #define FLD(f) abuf->fields.fmt_mulhi_a.f
 #define OPRND(f) par_exec->operands.fmt_mulhi_a.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -4611,10 +4611,10 @@ do {
 #define FLD(f) abuf->fields.fmt_mulhi_a.f
 #define OPRND(f) par_exec->operands.fmt_mulhi_a.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  m32rxf_h_accums_set (current_cpu, FLD (f_acc), OPRND (acc));
+  SET_H_ACCUMS (FLD (f_acc), OPRND (acc));
 
 #undef OPRND
 #undef FLD
@@ -4628,7 +4628,7 @@ do {
 #define FLD(f) abuf->fields.fmt_mulhi_a.f
 #define OPRND(f) par_exec->operands.fmt_mulhi_a.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -4649,10 +4649,10 @@ do {
 #define FLD(f) abuf->fields.fmt_mulhi_a.f
 #define OPRND(f) par_exec->operands.fmt_mulhi_a.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  m32rxf_h_accums_set (current_cpu, FLD (f_acc), OPRND (acc));
+  SET_H_ACCUMS (FLD (f_acc), OPRND (acc));
 
 #undef OPRND
 #undef FLD
@@ -4666,7 +4666,7 @@ do {
 #define FLD(f) abuf->fields.fmt_mulhi_a.f
 #define OPRND(f) par_exec->operands.fmt_mulhi_a.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -4687,10 +4687,10 @@ do {
 #define FLD(f) abuf->fields.fmt_mulhi_a.f
 #define OPRND(f) par_exec->operands.fmt_mulhi_a.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  m32rxf_h_accums_set (current_cpu, FLD (f_acc), OPRND (acc));
+  SET_H_ACCUMS (FLD (f_acc), OPRND (acc));
 
 #undef OPRND
 #undef FLD
@@ -4704,7 +4704,7 @@ do {
 #define FLD(f) abuf->fields.fmt_mv.f
 #define OPRND(f) par_exec->operands.fmt_mv.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -4725,7 +4725,7 @@ do {
 #define FLD(f) abuf->fields.fmt_mv.f
 #define OPRND(f) par_exec->operands.fmt_mv.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   * FLD (i_dr) = OPRND (dr);
@@ -4742,11 +4742,11 @@ do {
 #define FLD(f) abuf->fields.fmt_mvfachi_a.f
 #define OPRND(f) par_exec->operands.fmt_mvfachi_a.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    SI opval = TRUNCDISI (SRADI (m32rxf_h_accums_get (current_cpu, FLD (f_accs)), 32));
+    SI opval = TRUNCDISI (SRADI (GET_H_ACCUMS (FLD (f_accs)), 32));
     OPRND (dr) = opval;
     TRACE_RESULT (current_cpu, abuf, "dr", 'x', opval);
   }
@@ -4763,7 +4763,7 @@ do {
 #define FLD(f) abuf->fields.fmt_mvfachi_a.f
 #define OPRND(f) par_exec->operands.fmt_mvfachi_a.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   * FLD (i_dr) = OPRND (dr);
@@ -4780,11 +4780,11 @@ do {
 #define FLD(f) abuf->fields.fmt_mvfachi_a.f
 #define OPRND(f) par_exec->operands.fmt_mvfachi_a.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    SI opval = TRUNCDISI (m32rxf_h_accums_get (current_cpu, FLD (f_accs)));
+    SI opval = TRUNCDISI (GET_H_ACCUMS (FLD (f_accs)));
     OPRND (dr) = opval;
     TRACE_RESULT (current_cpu, abuf, "dr", 'x', opval);
   }
@@ -4801,7 +4801,7 @@ do {
 #define FLD(f) abuf->fields.fmt_mvfachi_a.f
 #define OPRND(f) par_exec->operands.fmt_mvfachi_a.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   * FLD (i_dr) = OPRND (dr);
@@ -4818,11 +4818,11 @@ do {
 #define FLD(f) abuf->fields.fmt_mvfachi_a.f
 #define OPRND(f) par_exec->operands.fmt_mvfachi_a.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    SI opval = TRUNCDISI (SRADI (m32rxf_h_accums_get (current_cpu, FLD (f_accs)), 16));
+    SI opval = TRUNCDISI (SRADI (GET_H_ACCUMS (FLD (f_accs)), 16));
     OPRND (dr) = opval;
     TRACE_RESULT (current_cpu, abuf, "dr", 'x', opval);
   }
@@ -4839,7 +4839,7 @@ do {
 #define FLD(f) abuf->fields.fmt_mvfachi_a.f
 #define OPRND(f) par_exec->operands.fmt_mvfachi_a.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   * FLD (i_dr) = OPRND (dr);
@@ -4856,11 +4856,11 @@ do {
 #define FLD(f) abuf->fields.fmt_mvfc.f
 #define OPRND(f) par_exec->operands.fmt_mvfc.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    SI opval = m32rxf_h_cr_get (current_cpu, FLD (f_r2));
+    SI opval = GET_H_CR (FLD (f_r2));
     OPRND (dr) = opval;
     TRACE_RESULT (current_cpu, abuf, "dr", 'x', opval);
   }
@@ -4877,7 +4877,7 @@ do {
 #define FLD(f) abuf->fields.fmt_mvfc.f
 #define OPRND(f) par_exec->operands.fmt_mvfc.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   * FLD (i_dr) = OPRND (dr);
@@ -4894,11 +4894,11 @@ do {
 #define FLD(f) abuf->fields.fmt_mvtachi_a.f
 #define OPRND(f) par_exec->operands.fmt_mvtachi_a.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    DI opval = ORDI (ANDDI (m32rxf_h_accums_get (current_cpu, FLD (f_accs)), MAKEDI (0, 0xffffffff)), SLLDI (EXTSIDI (* FLD (i_src1)), 32));
+    DI opval = ORDI (ANDDI (GET_H_ACCUMS (FLD (f_accs)), MAKEDI (0, 0xffffffff)), SLLDI (EXTSIDI (* FLD (i_src1)), 32));
     OPRND (accs) = opval;
     TRACE_RESULT (current_cpu, abuf, "accs", 'D', opval);
   }
@@ -4915,10 +4915,10 @@ do {
 #define FLD(f) abuf->fields.fmt_mvtachi_a.f
 #define OPRND(f) par_exec->operands.fmt_mvtachi_a.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  m32rxf_h_accums_set (current_cpu, FLD (f_accs), OPRND (accs));
+  SET_H_ACCUMS (FLD (f_accs), OPRND (accs));
 
 #undef OPRND
 #undef FLD
@@ -4932,11 +4932,11 @@ do {
 #define FLD(f) abuf->fields.fmt_mvtachi_a.f
 #define OPRND(f) par_exec->operands.fmt_mvtachi_a.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    DI opval = ORDI (ANDDI (m32rxf_h_accums_get (current_cpu, FLD (f_accs)), MAKEDI (0xffffffff, 0)), ZEXTSIDI (* FLD (i_src1)));
+    DI opval = ORDI (ANDDI (GET_H_ACCUMS (FLD (f_accs)), MAKEDI (0xffffffff, 0)), ZEXTSIDI (* FLD (i_src1)));
     OPRND (accs) = opval;
     TRACE_RESULT (current_cpu, abuf, "accs", 'D', opval);
   }
@@ -4953,10 +4953,10 @@ do {
 #define FLD(f) abuf->fields.fmt_mvtachi_a.f
 #define OPRND(f) par_exec->operands.fmt_mvtachi_a.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  m32rxf_h_accums_set (current_cpu, FLD (f_accs), OPRND (accs));
+  SET_H_ACCUMS (FLD (f_accs), OPRND (accs));
 
 #undef OPRND
 #undef FLD
@@ -4970,7 +4970,7 @@ do {
 #define FLD(f) abuf->fields.fmt_mvtc.f
 #define OPRND(f) par_exec->operands.fmt_mvtc.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -4991,10 +4991,10 @@ do {
 #define FLD(f) abuf->fields.fmt_mvtc.f
 #define OPRND(f) par_exec->operands.fmt_mvtc.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  m32rxf_h_cr_set (current_cpu, FLD (f_r1), OPRND (dcr));
+  SET_H_CR (FLD (f_r1), OPRND (dcr));
 
 #undef OPRND
 #undef FLD
@@ -5008,7 +5008,7 @@ do {
 #define FLD(f) abuf->fields.fmt_mv.f
 #define OPRND(f) par_exec->operands.fmt_mv.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -5029,7 +5029,7 @@ do {
 #define FLD(f) abuf->fields.fmt_mv.f
 #define OPRND(f) par_exec->operands.fmt_mv.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   * FLD (i_dr) = OPRND (dr);
@@ -5046,7 +5046,7 @@ do {
 #define FLD(f) abuf->fields.fmt_nop.f
 #define OPRND(f) par_exec->operands.fmt_nop.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 PROFILE_COUNT_FILLNOPS (current_cpu, abuf->addr);
@@ -5063,7 +5063,7 @@ PROFILE_COUNT_FILLNOPS (current_cpu, abuf->addr);
 #define FLD(f) abuf->fields.fmt_nop.f
 #define OPRND(f) par_exec->operands.fmt_nop.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
 
@@ -5079,7 +5079,7 @@ PROFILE_COUNT_FILLNOPS (current_cpu, abuf->addr);
 #define FLD(f) abuf->fields.fmt_mv.f
 #define OPRND(f) par_exec->operands.fmt_mv.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -5100,7 +5100,7 @@ PROFILE_COUNT_FILLNOPS (current_cpu, abuf->addr);
 #define FLD(f) abuf->fields.fmt_mv.f
 #define OPRND(f) par_exec->operands.fmt_mv.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   * FLD (i_dr) = OPRND (dr);
@@ -5117,12 +5117,12 @@ PROFILE_COUNT_FILLNOPS (current_cpu, abuf->addr);
 #define FLD(f) abuf->fields.fmt_rac_dsi.f
 #define OPRND(f) par_exec->operands.fmt_rac_dsi.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 do {
   DI tmp_tmp1;
-  tmp_tmp1 = SLLDI (m32rxf_h_accums_get (current_cpu, FLD (f_accs)), FLD (f_imm1));
+  tmp_tmp1 = SLLDI (GET_H_ACCUMS (FLD (f_accs)), FLD (f_imm1));
   tmp_tmp1 = ADDDI (tmp_tmp1, MAKEDI (0, 32768));
   {
     DI opval = (GTDI (tmp_tmp1, MAKEDI (32767, 0xffff0000))) ? (MAKEDI (32767, 0xffff0000)) : (LTDI (tmp_tmp1, MAKEDI (0xffff8000, 0))) ? (MAKEDI (0xffff8000, 0)) : (ANDDI (tmp_tmp1, MAKEDI (0xffffffff, 0xffff0000)));
@@ -5143,10 +5143,10 @@ do {
 #define FLD(f) abuf->fields.fmt_rac_dsi.f
 #define OPRND(f) par_exec->operands.fmt_rac_dsi.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  m32rxf_h_accums_set (current_cpu, FLD (f_accd), OPRND (accd));
+  SET_H_ACCUMS (FLD (f_accd), OPRND (accd));
 
 #undef OPRND
 #undef FLD
@@ -5160,12 +5160,12 @@ do {
 #define FLD(f) abuf->fields.fmt_rac_dsi.f
 #define OPRND(f) par_exec->operands.fmt_rac_dsi.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 do {
   DI tmp_tmp1;
-  tmp_tmp1 = SLLDI (m32rxf_h_accums_get (current_cpu, FLD (f_accs)), FLD (f_imm1));
+  tmp_tmp1 = SLLDI (GET_H_ACCUMS (FLD (f_accs)), FLD (f_imm1));
   tmp_tmp1 = ADDDI (tmp_tmp1, MAKEDI (0, 0x80000000));
   {
     DI opval = (GTDI (tmp_tmp1, MAKEDI (32767, 0))) ? (MAKEDI (32767, 0)) : (LTDI (tmp_tmp1, MAKEDI (0xffff8000, 0))) ? (MAKEDI (0xffff8000, 0)) : (ANDDI (tmp_tmp1, MAKEDI (0xffffffff, 0)));
@@ -5186,10 +5186,10 @@ do {
 #define FLD(f) abuf->fields.fmt_rac_dsi.f
 #define OPRND(f) par_exec->operands.fmt_rac_dsi.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  m32rxf_h_accums_set (current_cpu, FLD (f_accd), OPRND (accd));
+  SET_H_ACCUMS (FLD (f_accd), OPRND (accd));
 
 #undef OPRND
 #undef FLD
@@ -5203,17 +5203,17 @@ do {
 #define FLD(f) abuf->fields.cti.fields.fmt_rte.f
 #define OPRND(f) par_exec->operands.fmt_rte.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 do {
   {
-    USI opval = ANDSI (m32rxf_h_cr_get (current_cpu, ((UINT) 6)), -4);
+    USI opval = ANDSI (GET_H_CR (((UINT) 6)), -4);
     OPRND (pc) = opval;
     TRACE_RESULT (current_cpu, abuf, "pc", 'x', opval);
   }
   {
-    USI opval = m32rxf_h_cr_get (current_cpu, ((UINT) 14));
+    USI opval = GET_H_CR (((UINT) 14));
     OPRND (h_cr_6) = opval;
     TRACE_RESULT (current_cpu, abuf, "cr-6", 'x', opval);
   }
@@ -5241,14 +5241,14 @@ do {
 #define FLD(f) abuf->fields.cti.fields.fmt_rte.f
 #define OPRND(f) par_exec->operands.fmt_rte.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  SEM_BRANCH_VIA_ADDR (current_cpu, sem_arg, OPRND (pc), vpc);
-  m32rxf_h_cr_set (current_cpu, ((UINT) 6), OPRND (h_cr_6));
-  m32rxf_h_psw_set (current_cpu, OPRND (h_psw_0));
   CPU (h_bpsw) = OPRND (h_bpsw_0);
+  SET_H_CR (((UINT) 6), OPRND (h_cr_6));
+  SET_H_PSW (OPRND (h_psw_0));
+  SEM_BRANCH_VIA_ADDR (current_cpu, sem_arg, OPRND (pc), vpc);
 
   SEM_BRANCH_FINI (vpc);
 #undef OPRND
@@ -5263,7 +5263,7 @@ do {
 #define FLD(f) abuf->fields.fmt_add.f
 #define OPRND(f) par_exec->operands.fmt_add.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -5284,7 +5284,7 @@ do {
 #define FLD(f) abuf->fields.fmt_add.f
 #define OPRND(f) par_exec->operands.fmt_add.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   * FLD (i_dr) = OPRND (dr);
@@ -5301,7 +5301,7 @@ do {
 #define FLD(f) abuf->fields.fmt_slli.f
 #define OPRND(f) par_exec->operands.fmt_slli.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -5322,7 +5322,7 @@ do {
 #define FLD(f) abuf->fields.fmt_slli.f
 #define OPRND(f) par_exec->operands.fmt_slli.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   * FLD (i_dr) = OPRND (dr);
@@ -5339,7 +5339,7 @@ do {
 #define FLD(f) abuf->fields.fmt_add.f
 #define OPRND(f) par_exec->operands.fmt_add.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -5360,7 +5360,7 @@ do {
 #define FLD(f) abuf->fields.fmt_add.f
 #define OPRND(f) par_exec->operands.fmt_add.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   * FLD (i_dr) = OPRND (dr);
@@ -5377,7 +5377,7 @@ do {
 #define FLD(f) abuf->fields.fmt_slli.f
 #define OPRND(f) par_exec->operands.fmt_slli.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -5398,7 +5398,7 @@ do {
 #define FLD(f) abuf->fields.fmt_slli.f
 #define OPRND(f) par_exec->operands.fmt_slli.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   * FLD (i_dr) = OPRND (dr);
@@ -5415,7 +5415,7 @@ do {
 #define FLD(f) abuf->fields.fmt_add.f
 #define OPRND(f) par_exec->operands.fmt_add.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -5436,7 +5436,7 @@ do {
 #define FLD(f) abuf->fields.fmt_add.f
 #define OPRND(f) par_exec->operands.fmt_add.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   * FLD (i_dr) = OPRND (dr);
@@ -5453,7 +5453,7 @@ do {
 #define FLD(f) abuf->fields.fmt_slli.f
 #define OPRND(f) par_exec->operands.fmt_slli.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -5474,7 +5474,7 @@ do {
 #define FLD(f) abuf->fields.fmt_slli.f
 #define OPRND(f) par_exec->operands.fmt_slli.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   * FLD (i_dr) = OPRND (dr);
@@ -5491,7 +5491,7 @@ do {
 #define FLD(f) abuf->fields.fmt_st.f
 #define OPRND(f) par_exec->operands.fmt_st.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -5513,7 +5513,7 @@ do {
 #define FLD(f) abuf->fields.fmt_st.f
 #define OPRND(f) par_exec->operands.fmt_st.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   SETMEMSI (current_cpu, pc, OPRND (h_memory_src2_idx), OPRND (h_memory_src2));
@@ -5530,7 +5530,7 @@ do {
 #define FLD(f) abuf->fields.fmt_stb.f
 #define OPRND(f) par_exec->operands.fmt_stb.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -5552,7 +5552,7 @@ do {
 #define FLD(f) abuf->fields.fmt_stb.f
 #define OPRND(f) par_exec->operands.fmt_stb.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   SETMEMQI (current_cpu, pc, OPRND (h_memory_src2_idx), OPRND (h_memory_src2));
@@ -5569,7 +5569,7 @@ do {
 #define FLD(f) abuf->fields.fmt_sth.f
 #define OPRND(f) par_exec->operands.fmt_sth.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -5591,7 +5591,7 @@ do {
 #define FLD(f) abuf->fields.fmt_sth.f
 #define OPRND(f) par_exec->operands.fmt_sth.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   SETMEMHI (current_cpu, pc, OPRND (h_memory_src2_idx), OPRND (h_memory_src2));
@@ -5608,7 +5608,7 @@ do {
 #define FLD(f) abuf->fields.fmt_st_plus.f
 #define OPRND(f) par_exec->operands.fmt_st_plus.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 do {
@@ -5639,7 +5639,7 @@ do {
 #define FLD(f) abuf->fields.fmt_st_plus.f
 #define OPRND(f) par_exec->operands.fmt_st_plus.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   SETMEMSI (current_cpu, pc, OPRND (h_memory_new_src2_idx), OPRND (h_memory_new_src2));
@@ -5657,7 +5657,7 @@ do {
 #define FLD(f) abuf->fields.fmt_st_plus.f
 #define OPRND(f) par_exec->operands.fmt_st_plus.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 do {
@@ -5688,7 +5688,7 @@ do {
 #define FLD(f) abuf->fields.fmt_st_plus.f
 #define OPRND(f) par_exec->operands.fmt_st_plus.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   SETMEMSI (current_cpu, pc, OPRND (h_memory_new_src2_idx), OPRND (h_memory_new_src2));
@@ -5706,7 +5706,7 @@ do {
 #define FLD(f) abuf->fields.fmt_add.f
 #define OPRND(f) par_exec->operands.fmt_add.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -5727,7 +5727,7 @@ do {
 #define FLD(f) abuf->fields.fmt_add.f
 #define OPRND(f) par_exec->operands.fmt_add.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   * FLD (i_dr) = OPRND (dr);
@@ -5744,7 +5744,7 @@ do {
 #define FLD(f) abuf->fields.fmt_addv.f
 #define OPRND(f) par_exec->operands.fmt_addv.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 do {
@@ -5775,11 +5775,11 @@ do {
 #define FLD(f) abuf->fields.fmt_addv.f
 #define OPRND(f) par_exec->operands.fmt_addv.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  * FLD (i_dr) = OPRND (dr);
   CPU (h_cond) = OPRND (condbit);
+  * FLD (i_dr) = OPRND (dr);
 
 #undef OPRND
 #undef FLD
@@ -5793,7 +5793,7 @@ do {
 #define FLD(f) abuf->fields.fmt_addx.f
 #define OPRND(f) par_exec->operands.fmt_addx.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 do {
@@ -5824,11 +5824,11 @@ do {
 #define FLD(f) abuf->fields.fmt_addx.f
 #define OPRND(f) par_exec->operands.fmt_addx.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  * FLD (i_dr) = OPRND (dr);
   CPU (h_cond) = OPRND (condbit);
+  * FLD (i_dr) = OPRND (dr);
 
 #undef OPRND
 #undef FLD
@@ -5842,12 +5842,12 @@ do {
 #define FLD(f) abuf->fields.cti.fields.fmt_trap.f
 #define OPRND(f) par_exec->operands.fmt_trap.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 do {
   {
-    USI opval = m32rxf_h_cr_get (current_cpu, ((UINT) 6));
+    USI opval = GET_H_CR (((UINT) 6));
     OPRND (h_cr_14) = opval;
     TRACE_RESULT (current_cpu, abuf, "cr-14", 'x', opval);
   }
@@ -5862,12 +5862,12 @@ do {
     TRACE_RESULT (current_cpu, abuf, "bbpsw-0", 'x', opval);
   }
   {
-    UQI opval = m32rxf_h_psw_get (current_cpu);
+    UQI opval = GET_H_PSW ();
     OPRND (h_bpsw_0) = opval;
     TRACE_RESULT (current_cpu, abuf, "bpsw-0", 'x', opval);
   }
   {
-    UQI opval = ANDQI (m32rxf_h_psw_get (current_cpu), 128);
+    UQI opval = ANDQI (GET_H_PSW (), 128);
     OPRND (h_psw_0) = opval;
     TRACE_RESULT (current_cpu, abuf, "psw-0", 'x', opval);
   }
@@ -5890,15 +5890,15 @@ do {
 #define FLD(f) abuf->fields.cti.fields.fmt_trap.f
 #define OPRND(f) par_exec->operands.fmt_trap.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  m32rxf_h_cr_set (current_cpu, ((UINT) 14), OPRND (h_cr_14));
-  m32rxf_h_cr_set (current_cpu, ((UINT) 6), OPRND (h_cr_6));
   CPU (h_bbpsw) = OPRND (h_bbpsw_0);
   CPU (h_bpsw) = OPRND (h_bpsw_0);
-  m32rxf_h_psw_set (current_cpu, OPRND (h_psw_0));
+  SET_H_CR (((UINT) 14), OPRND (h_cr_14));
+  SET_H_CR (((UINT) 6), OPRND (h_cr_6));
+  SET_H_PSW (OPRND (h_psw_0));
   SEM_BRANCH_VIA_ADDR (current_cpu, sem_arg, OPRND (pc), vpc);
 
   SEM_BRANCH_FINI (vpc);
@@ -5914,7 +5914,7 @@ do {
 #define FLD(f) abuf->fields.fmt_unlock.f
 #define OPRND(f) par_exec->operands.fmt_unlock.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 do {
@@ -5923,7 +5923,7 @@ if (CPU (h_lock)) {
     SI opval = * FLD (i_src1);
     OPRND (h_memory_src2_idx) = * FLD (i_src2);
     OPRND (h_memory_src2) = opval;
-    written |= (1 << 3);
+    written |= (1 << 4);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
 }
@@ -5947,14 +5947,14 @@ if (CPU (h_lock)) {
 #define FLD(f) abuf->fields.fmt_unlock.f
 #define OPRND(f) par_exec->operands.fmt_unlock.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  if (written & (1 << 3))
+  CPU (h_lock) = OPRND (h_lock_0);
+  if (written & (1 << 4))
     {
       SETMEMSI (current_cpu, pc, OPRND (h_memory_src2_idx), OPRND (h_memory_src2));
     }
-  CPU (h_lock) = OPRND (h_lock_0);
 
 #undef OPRND
 #undef FLD
@@ -5968,7 +5968,7 @@ if (CPU (h_lock)) {
 #define FLD(f) abuf->fields.fmt_cmpz.f
 #define OPRND(f) par_exec->operands.fmt_cmpz.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -5989,7 +5989,7 @@ if (CPU (h_lock)) {
 #define FLD(f) abuf->fields.fmt_cmpz.f
 #define OPRND(f) par_exec->operands.fmt_cmpz.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   CPU (h_cond) = OPRND (condbit);
@@ -6006,11 +6006,11 @@ if (CPU (h_lock)) {
 #define FLD(f) abuf->fields.fmt_sadd.f
 #define OPRND(f) par_exec->operands.fmt_sadd.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    DI opval = ADDDI (SRADI (m32rxf_h_accums_get (current_cpu, ((UINT) 1)), 16), m32rxf_h_accums_get (current_cpu, ((UINT) 0)));
+    DI opval = ADDDI (SRADI (GET_H_ACCUMS (((UINT) 1)), 16), GET_H_ACCUMS (((UINT) 0)));
     OPRND (h_accums_0) = opval;
     TRACE_RESULT (current_cpu, abuf, "accums-0", 'D', opval);
   }
@@ -6027,10 +6027,10 @@ if (CPU (h_lock)) {
 #define FLD(f) abuf->fields.fmt_sadd.f
 #define OPRND(f) par_exec->operands.fmt_sadd.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  m32rxf_h_accums_set (current_cpu, ((UINT) 0), OPRND (h_accums_0));
+  SET_H_ACCUMS (((UINT) 0), OPRND (h_accums_0));
 
 #undef OPRND
 #undef FLD
@@ -6044,11 +6044,11 @@ if (CPU (h_lock)) {
 #define FLD(f) abuf->fields.fmt_macwu1.f
 #define OPRND(f) par_exec->operands.fmt_macwu1.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    DI opval = SRADI (SLLDI (ADDDI (m32rxf_h_accums_get (current_cpu, ((UINT) 1)), MULDI (EXTSIDI (* FLD (i_src1)), EXTSIDI (ANDSI (* FLD (i_src2), 65535)))), 8), 8);
+    DI opval = SRADI (SLLDI (ADDDI (GET_H_ACCUMS (((UINT) 1)), MULDI (EXTSIDI (* FLD (i_src1)), EXTSIDI (ANDSI (* FLD (i_src2), 65535)))), 8), 8);
     OPRND (h_accums_1) = opval;
     TRACE_RESULT (current_cpu, abuf, "accums-1", 'D', opval);
   }
@@ -6065,10 +6065,10 @@ if (CPU (h_lock)) {
 #define FLD(f) abuf->fields.fmt_macwu1.f
 #define OPRND(f) par_exec->operands.fmt_macwu1.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  m32rxf_h_accums_set (current_cpu, ((UINT) 1), OPRND (h_accums_1));
+  SET_H_ACCUMS (((UINT) 1), OPRND (h_accums_1));
 
 #undef OPRND
 #undef FLD
@@ -6082,11 +6082,11 @@ if (CPU (h_lock)) {
 #define FLD(f) abuf->fields.fmt_msblo.f
 #define OPRND(f) par_exec->operands.fmt_msblo.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    DI opval = SRADI (SLLDI (SUBDI (m32rxf_h_accum_get (current_cpu), SRADI (SLLDI (MULDI (EXTHIDI (TRUNCSIHI (* FLD (i_src1))), EXTHIDI (TRUNCSIHI (* FLD (i_src2)))), 32), 16)), 8), 8);
+    DI opval = SRADI (SLLDI (SUBDI (GET_H_ACCUM (), SRADI (SLLDI (MULDI (EXTHIDI (TRUNCSIHI (* FLD (i_src1))), EXTHIDI (TRUNCSIHI (* FLD (i_src2)))), 32), 16)), 8), 8);
     OPRND (accum) = opval;
     TRACE_RESULT (current_cpu, abuf, "accum", 'D', opval);
   }
@@ -6103,10 +6103,10 @@ if (CPU (h_lock)) {
 #define FLD(f) abuf->fields.fmt_msblo.f
 #define OPRND(f) par_exec->operands.fmt_msblo.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  m32rxf_h_accum_set (current_cpu, OPRND (accum));
+  SET_H_ACCUM (OPRND (accum));
 
 #undef OPRND
 #undef FLD
@@ -6120,7 +6120,7 @@ if (CPU (h_lock)) {
 #define FLD(f) abuf->fields.fmt_mulwu1.f
 #define OPRND(f) par_exec->operands.fmt_mulwu1.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
@@ -6141,10 +6141,10 @@ if (CPU (h_lock)) {
 #define FLD(f) abuf->fields.fmt_mulwu1.f
 #define OPRND(f) par_exec->operands.fmt_mulwu1.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  m32rxf_h_accums_set (current_cpu, ((UINT) 1), OPRND (h_accums_1));
+  SET_H_ACCUMS (((UINT) 1), OPRND (h_accums_1));
 
 #undef OPRND
 #undef FLD
@@ -6158,11 +6158,11 @@ if (CPU (h_lock)) {
 #define FLD(f) abuf->fields.fmt_macwu1.f
 #define OPRND(f) par_exec->operands.fmt_macwu1.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    DI opval = SRADI (SLLDI (ADDDI (m32rxf_h_accums_get (current_cpu, ((UINT) 1)), SLLDI (EXTSIDI (MULSI (EXTHISI (TRUNCSIHI (* FLD (i_src1))), SRASI (* FLD (i_src2), 16))), 16)), 8), 8);
+    DI opval = SRADI (SLLDI (ADDDI (GET_H_ACCUMS (((UINT) 1)), SLLDI (EXTSIDI (MULSI (EXTHISI (TRUNCSIHI (* FLD (i_src1))), SRASI (* FLD (i_src2), 16))), 16)), 8), 8);
     OPRND (h_accums_1) = opval;
     TRACE_RESULT (current_cpu, abuf, "accums-1", 'D', opval);
   }
@@ -6179,10 +6179,10 @@ if (CPU (h_lock)) {
 #define FLD(f) abuf->fields.fmt_macwu1.f
 #define OPRND(f) par_exec->operands.fmt_macwu1.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
-  m32rxf_h_accums_set (current_cpu, ((UINT) 1), OPRND (h_accums_1));
+  SET_H_ACCUMS (((UINT) 1), OPRND (h_accums_1));
 
 #undef OPRND
 #undef FLD
@@ -6196,7 +6196,7 @@ if (CPU (h_lock)) {
 #define FLD(f) abuf->fields.cti.fields.fmt_sc.f
 #define OPRND(f) par_exec->operands.fmt_sc.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 if (CPU (h_cond)) {
@@ -6215,7 +6215,7 @@ SEM_SKIP_INSN (current_cpu, 1);
 #define FLD(f) abuf->fields.cti.fields.fmt_sc.f
 #define OPRND(f) par_exec->operands.fmt_sc.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
@@ -6233,7 +6233,7 @@ SEM_SKIP_INSN (current_cpu, 1);
 #define FLD(f) abuf->fields.cti.fields.fmt_sc.f
 #define OPRND(f) par_exec->operands.fmt_sc.f
   int UNUSED written = 0;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 if (NOTBI (CPU (h_cond))) {
@@ -6252,7 +6252,7 @@ SEM_SKIP_INSN (current_cpu, 1);
 #define FLD(f) abuf->fields.cti.fields.fmt_sc.f
 #define OPRND(f) par_exec->operands.fmt_sc.f
   int UNUSED written = abuf->written;
-  PCADDR UNUSED pc = abuf->addr;
+  IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 

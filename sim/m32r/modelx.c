@@ -44,14 +44,16 @@ model_m32rx_add (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    in_dr = FLD (in_dr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
+    referenced |= 1 << 1;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -67,14 +69,14 @@ model_m32rx_add3 (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -90,14 +92,16 @@ model_m32rx_and (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    in_dr = FLD (in_dr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
+    referenced |= 1 << 1;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -113,14 +117,14 @@ model_m32rx_and3 (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -136,14 +140,16 @@ model_m32rx_or (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    in_dr = FLD (in_dr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
+    referenced |= 1 << 1;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -159,14 +165,14 @@ model_m32rx_or3 (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -182,14 +188,16 @@ model_m32rx_xor (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    in_dr = FLD (in_dr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
+    referenced |= 1 << 1;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -205,14 +213,14 @@ model_m32rx_xor3 (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -228,14 +236,14 @@ model_m32rx_addi (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    dr = FLD (out_dr);
-    sr = FLD (in_dr);
-    referenced |= 1 << 0;
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_dr = FLD (in_dr);
+    out_dr = FLD (out_dr);
+    referenced |= 1 << 1;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -251,14 +259,16 @@ model_m32rx_addv (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    in_dr = FLD (in_dr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
+    referenced |= 1 << 1;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -274,14 +284,14 @@ model_m32rx_addv3 (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -297,14 +307,16 @@ model_m32rx_addx (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    in_dr = FLD (in_dr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
+    referenced |= 1 << 1;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -320,9 +332,9 @@ model_m32rx_bc8 (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
+    INT in_sr = -1;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, sr);
+    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, in_sr);
   }
   return cycles;
 #undef FLD
@@ -338,9 +350,9 @@ model_m32rx_bc24 (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
+    INT in_sr = -1;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, sr);
+    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, in_sr);
   }
   return cycles;
 #undef FLD
@@ -356,20 +368,20 @@ model_m32rx_beq (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
+    INT in_sr = -1;
     if (insn_referenced & (1 << 3)) referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, sr);
+    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, in_sr);
   }
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    src1 = FLD (in_src1);
-    src2 = FLD (in_src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    in_src1 = FLD (in_src1);
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 1, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 1, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -385,18 +397,18 @@ model_m32rx_beqz (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
+    INT in_sr = -1;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, sr);
+    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, in_sr);
   }
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    src2 = FLD (in_src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 1, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 1, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -412,18 +424,18 @@ model_m32rx_bgez (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
+    INT in_sr = -1;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, sr);
+    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, in_sr);
   }
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    src2 = FLD (in_src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 1, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 1, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -439,18 +451,18 @@ model_m32rx_bgtz (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
+    INT in_sr = -1;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, sr);
+    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, in_sr);
   }
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    src2 = FLD (in_src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 1, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 1, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -466,18 +478,18 @@ model_m32rx_blez (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
+    INT in_sr = -1;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, sr);
+    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, in_sr);
   }
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    src2 = FLD (in_src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 1, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 1, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -493,18 +505,18 @@ model_m32rx_bltz (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
+    INT in_sr = -1;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, sr);
+    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, in_sr);
   }
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    src2 = FLD (in_src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 1, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 1, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -520,18 +532,18 @@ model_m32rx_bnez (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
+    INT in_sr = -1;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, sr);
+    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, in_sr);
   }
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    src2 = FLD (in_src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 1, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 1, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -547,9 +559,9 @@ model_m32rx_bl8 (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
+    INT in_sr = -1;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, sr);
+    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, in_sr);
   }
   return cycles;
 #undef FLD
@@ -565,9 +577,9 @@ model_m32rx_bl24 (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
+    INT in_sr = -1;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, sr);
+    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, in_sr);
   }
   return cycles;
 #undef FLD
@@ -583,9 +595,9 @@ model_m32rx_bcl8 (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
+    INT in_sr = -1;
     if (insn_referenced & (1 << 4)) referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, sr);
+    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, in_sr);
   }
   return cycles;
 #undef FLD
@@ -601,9 +613,9 @@ model_m32rx_bcl24 (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
+    INT in_sr = -1;
     if (insn_referenced & (1 << 4)) referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, sr);
+    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, in_sr);
   }
   return cycles;
 #undef FLD
@@ -619,9 +631,9 @@ model_m32rx_bnc8 (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
+    INT in_sr = -1;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, sr);
+    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, in_sr);
   }
   return cycles;
 #undef FLD
@@ -637,9 +649,9 @@ model_m32rx_bnc24 (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
+    INT in_sr = -1;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, sr);
+    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, in_sr);
   }
   return cycles;
 #undef FLD
@@ -655,20 +667,20 @@ model_m32rx_bne (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
+    INT in_sr = -1;
     if (insn_referenced & (1 << 3)) referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, sr);
+    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, in_sr);
   }
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    src1 = FLD (in_src1);
-    src2 = FLD (in_src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    in_src1 = FLD (in_src1);
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 1, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 1, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -684,9 +696,9 @@ model_m32rx_bra8 (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
+    INT in_sr = -1;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, sr);
+    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, in_sr);
   }
   return cycles;
 #undef FLD
@@ -702,9 +714,9 @@ model_m32rx_bra24 (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
+    INT in_sr = -1;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, sr);
+    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, in_sr);
   }
   return cycles;
 #undef FLD
@@ -720,9 +732,9 @@ model_m32rx_bncl8 (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
+    INT in_sr = -1;
     if (insn_referenced & (1 << 4)) referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, sr);
+    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, in_sr);
   }
   return cycles;
 #undef FLD
@@ -738,9 +750,9 @@ model_m32rx_bncl24 (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
+    INT in_sr = -1;
     if (insn_referenced & (1 << 4)) referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, sr);
+    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, in_sr);
   }
   return cycles;
 #undef FLD
@@ -756,13 +768,13 @@ model_m32rx_cmp (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    src1 = FLD (in_src1);
-    src2 = FLD (in_src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    in_src1 = FLD (in_src1);
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 0, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -778,11 +790,11 @@ model_m32rx_cmpi (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    src2 = FLD (in_src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 0, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -798,13 +810,13 @@ model_m32rx_cmpu (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    src1 = FLD (in_src1);
-    src2 = FLD (in_src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    in_src1 = FLD (in_src1);
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 0, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -820,11 +832,11 @@ model_m32rx_cmpui (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    src2 = FLD (in_src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 0, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -840,13 +852,13 @@ model_m32rx_cmpeq (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    src1 = FLD (in_src1);
-    src2 = FLD (in_src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    in_src1 = FLD (in_src1);
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 0, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -862,11 +874,11 @@ model_m32rx_cmpz (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    src2 = FLD (in_src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 0, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -882,14 +894,16 @@ model_m32rx_div (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    in_dr = FLD (in_dr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 1;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -905,14 +919,16 @@ model_m32rx_divu (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    in_dr = FLD (in_dr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 1;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -928,14 +944,16 @@ model_m32rx_rem (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    in_dr = FLD (in_dr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 1;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -951,14 +969,16 @@ model_m32rx_remu (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    in_dr = FLD (in_dr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 1;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -974,14 +994,16 @@ model_m32rx_divh (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    in_dr = FLD (in_dr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
+    if (insn_referenced & (1 << 0)) referenced |= 1 << 1;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -997,11 +1019,11 @@ model_m32rx_jc (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    sr = FLD (in_sr);
+    INT in_sr = -1;
+    in_sr = FLD (in_sr);
     if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, sr);
+    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, in_sr);
   }
   return cycles;
 #undef FLD
@@ -1017,11 +1039,11 @@ model_m32rx_jnc (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    sr = FLD (in_sr);
+    INT in_sr = -1;
+    in_sr = FLD (in_sr);
     if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, sr);
+    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, in_sr);
   }
   return cycles;
 #undef FLD
@@ -1037,11 +1059,11 @@ model_m32rx_jl (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    sr = FLD (in_sr);
+    INT in_sr = -1;
+    in_sr = FLD (in_sr);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, sr);
+    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, in_sr);
   }
   return cycles;
 #undef FLD
@@ -1057,11 +1079,11 @@ model_m32rx_jmp (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    sr = FLD (in_sr);
+    INT in_sr = -1;
+    in_sr = FLD (in_sr);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, sr);
+    cycles += m32rxf_model_m32rx_u_cti (current_cpu, idesc, 0, referenced, in_sr);
   }
   return cycles;
 #undef FLD
@@ -1077,13 +1099,13 @@ model_m32rx_ld (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = 0;
-    INT dr = 0;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = 0;
+    INT out_dr = 0;
+    in_sr = FLD (in_sr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_load (current_cpu, idesc, 0, referenced, sr, dr);
+    cycles += m32rxf_model_m32rx_u_load (current_cpu, idesc, 0, referenced, in_sr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1099,13 +1121,13 @@ model_m32rx_ld_d (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = 0;
-    INT dr = 0;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = 0;
+    INT out_dr = 0;
+    in_sr = FLD (in_sr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_load (current_cpu, idesc, 0, referenced, sr, dr);
+    cycles += m32rxf_model_m32rx_u_load (current_cpu, idesc, 0, referenced, in_sr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1121,13 +1143,13 @@ model_m32rx_ldb (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = 0;
-    INT dr = 0;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = 0;
+    INT out_dr = 0;
+    in_sr = FLD (in_sr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_load (current_cpu, idesc, 0, referenced, sr, dr);
+    cycles += m32rxf_model_m32rx_u_load (current_cpu, idesc, 0, referenced, in_sr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1143,13 +1165,13 @@ model_m32rx_ldb_d (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = 0;
-    INT dr = 0;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = 0;
+    INT out_dr = 0;
+    in_sr = FLD (in_sr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_load (current_cpu, idesc, 0, referenced, sr, dr);
+    cycles += m32rxf_model_m32rx_u_load (current_cpu, idesc, 0, referenced, in_sr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1165,13 +1187,13 @@ model_m32rx_ldh (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = 0;
-    INT dr = 0;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = 0;
+    INT out_dr = 0;
+    in_sr = FLD (in_sr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_load (current_cpu, idesc, 0, referenced, sr, dr);
+    cycles += m32rxf_model_m32rx_u_load (current_cpu, idesc, 0, referenced, in_sr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1187,13 +1209,13 @@ model_m32rx_ldh_d (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = 0;
-    INT dr = 0;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = 0;
+    INT out_dr = 0;
+    in_sr = FLD (in_sr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_load (current_cpu, idesc, 0, referenced, sr, dr);
+    cycles += m32rxf_model_m32rx_u_load (current_cpu, idesc, 0, referenced, in_sr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1209,13 +1231,13 @@ model_m32rx_ldub (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = 0;
-    INT dr = 0;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = 0;
+    INT out_dr = 0;
+    in_sr = FLD (in_sr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_load (current_cpu, idesc, 0, referenced, sr, dr);
+    cycles += m32rxf_model_m32rx_u_load (current_cpu, idesc, 0, referenced, in_sr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1231,13 +1253,13 @@ model_m32rx_ldub_d (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = 0;
-    INT dr = 0;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = 0;
+    INT out_dr = 0;
+    in_sr = FLD (in_sr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_load (current_cpu, idesc, 0, referenced, sr, dr);
+    cycles += m32rxf_model_m32rx_u_load (current_cpu, idesc, 0, referenced, in_sr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1253,13 +1275,13 @@ model_m32rx_lduh (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = 0;
-    INT dr = 0;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = 0;
+    INT out_dr = 0;
+    in_sr = FLD (in_sr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_load (current_cpu, idesc, 0, referenced, sr, dr);
+    cycles += m32rxf_model_m32rx_u_load (current_cpu, idesc, 0, referenced, in_sr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1275,13 +1297,13 @@ model_m32rx_lduh_d (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = 0;
-    INT dr = 0;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = 0;
+    INT out_dr = 0;
+    in_sr = FLD (in_sr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_load (current_cpu, idesc, 0, referenced, sr, dr);
+    cycles += m32rxf_model_m32rx_u_load (current_cpu, idesc, 0, referenced, in_sr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1297,25 +1319,25 @@ model_m32rx_ld_plus (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = 0;
-    INT dr = 0;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = 0;
+    INT out_dr = 0;
+    in_sr = FLD (in_sr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_load (current_cpu, idesc, 0, referenced, sr, dr);
+    cycles += m32rxf_model_m32rx_u_load (current_cpu, idesc, 0, referenced, in_sr, out_dr);
   }
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_sr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_dr = FLD (in_sr);
+    out_dr = FLD (out_sr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 1, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 1, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1331,12 +1353,12 @@ model_m32rx_ld24 (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    out_dr = FLD (out_dr);
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1352,12 +1374,12 @@ model_m32rx_ldi8 (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    out_dr = FLD (out_dr);
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1373,12 +1395,12 @@ model_m32rx_ldi16 (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    out_dr = FLD (out_dr);
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1394,13 +1416,13 @@ model_m32rx_lock (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = 0;
-    INT dr = 0;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = 0;
+    INT out_dr = 0;
+    in_sr = FLD (in_sr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_load (current_cpu, idesc, 0, referenced, sr, dr);
+    cycles += m32rxf_model_m32rx_u_load (current_cpu, idesc, 0, referenced, in_sr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1416,13 +1438,13 @@ model_m32rx_machi_a (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    src1 = FLD (in_src1);
-    src2 = FLD (in_src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    in_src1 = FLD (in_src1);
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -1438,13 +1460,13 @@ model_m32rx_maclo_a (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    src1 = FLD (in_src1);
-    src2 = FLD (in_src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    in_src1 = FLD (in_src1);
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -1460,13 +1482,13 @@ model_m32rx_macwhi_a (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    src1 = FLD (in_src1);
-    src2 = FLD (in_src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    in_src1 = FLD (in_src1);
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -1482,13 +1504,13 @@ model_m32rx_macwlo_a (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    src1 = FLD (in_src1);
-    src2 = FLD (in_src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    in_src1 = FLD (in_src1);
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -1504,14 +1526,16 @@ model_m32rx_mul (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    in_dr = FLD (in_dr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
+    referenced |= 1 << 1;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1527,13 +1551,13 @@ model_m32rx_mulhi_a (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    src1 = FLD (in_src1);
-    src2 = FLD (in_src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    in_src1 = FLD (in_src1);
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -1549,13 +1573,13 @@ model_m32rx_mullo_a (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    src1 = FLD (in_src1);
-    src2 = FLD (in_src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    in_src1 = FLD (in_src1);
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -1571,13 +1595,13 @@ model_m32rx_mulwhi_a (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    src1 = FLD (in_src1);
-    src2 = FLD (in_src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    in_src1 = FLD (in_src1);
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -1593,13 +1617,13 @@ model_m32rx_mulwlo_a (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    src1 = FLD (in_src1);
-    src2 = FLD (in_src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    in_src1 = FLD (in_src1);
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -1615,14 +1639,14 @@ model_m32rx_mv (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1638,12 +1662,12 @@ model_m32rx_mvfachi_a (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    out_dr = FLD (out_dr);
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1659,12 +1683,12 @@ model_m32rx_mvfaclo_a (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    out_dr = FLD (out_dr);
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1680,12 +1704,12 @@ model_m32rx_mvfacmi_a (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    out_dr = FLD (out_dr);
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1701,12 +1725,12 @@ model_m32rx_mvfc (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    out_dr = FLD (out_dr);
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1722,12 +1746,11 @@ model_m32rx_mvtachi_a (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_src1);
-    referenced |= 1 << 0;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_src1);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1743,12 +1766,11 @@ model_m32rx_mvtaclo_a (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_src1);
-    referenced |= 1 << 0;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_src1);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1764,12 +1786,12 @@ model_m32rx_mvtc (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
     referenced |= 1 << 0;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1785,14 +1807,14 @@ model_m32rx_neg (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1808,10 +1830,10 @@ model_m32rx_nop (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1827,14 +1849,14 @@ model_m32rx_not (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1850,9 +1872,9 @@ model_m32rx_rac_dsi (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, src1, src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -1868,9 +1890,9 @@ model_m32rx_rach_dsi (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, src1, src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -1886,10 +1908,10 @@ model_m32rx_rte (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1905,12 +1927,12 @@ model_m32rx_seth (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    out_dr = FLD (out_dr);
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1926,14 +1948,16 @@ model_m32rx_sll (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    in_dr = FLD (in_dr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
+    referenced |= 1 << 1;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1949,14 +1973,14 @@ model_m32rx_sll3 (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1972,12 +1996,14 @@ model_m32rx_slli (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_dr = FLD (in_dr);
+    out_dr = FLD (out_dr);
+    referenced |= 1 << 1;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -1993,14 +2019,16 @@ model_m32rx_sra (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    in_dr = FLD (in_dr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
+    referenced |= 1 << 1;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -2016,14 +2044,14 @@ model_m32rx_sra3 (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -2039,12 +2067,14 @@ model_m32rx_srai (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_dr = FLD (in_dr);
+    out_dr = FLD (out_dr);
+    referenced |= 1 << 1;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -2060,14 +2090,16 @@ model_m32rx_srl (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    in_dr = FLD (in_dr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
+    referenced |= 1 << 1;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -2083,14 +2115,14 @@ model_m32rx_srl3 (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -2106,12 +2138,14 @@ model_m32rx_srli (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_dr = FLD (in_dr);
+    out_dr = FLD (out_dr);
+    referenced |= 1 << 1;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -2127,13 +2161,13 @@ model_m32rx_st (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = 0;
-    INT src2 = 0;
-    src1 = FLD (in_src1);
-    src2 = FLD (in_src2);
+    INT in_src1 = 0;
+    INT in_src2 = 0;
+    in_src1 = FLD (in_src1);
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_store (current_cpu, idesc, 0, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_store (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -2149,13 +2183,13 @@ model_m32rx_st_d (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = 0;
-    INT src2 = 0;
-    src1 = FLD (in_src1);
-    src2 = FLD (in_src2);
+    INT in_src1 = 0;
+    INT in_src2 = 0;
+    in_src1 = FLD (in_src1);
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_store (current_cpu, idesc, 0, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_store (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -2171,13 +2205,13 @@ model_m32rx_stb (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = 0;
-    INT src2 = 0;
-    src1 = FLD (in_src1);
-    src2 = FLD (in_src2);
+    INT in_src1 = 0;
+    INT in_src2 = 0;
+    in_src1 = FLD (in_src1);
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_store (current_cpu, idesc, 0, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_store (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -2193,13 +2227,13 @@ model_m32rx_stb_d (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = 0;
-    INT src2 = 0;
-    src1 = FLD (in_src1);
-    src2 = FLD (in_src2);
+    INT in_src1 = 0;
+    INT in_src2 = 0;
+    in_src1 = FLD (in_src1);
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_store (current_cpu, idesc, 0, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_store (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -2215,13 +2249,13 @@ model_m32rx_sth (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = 0;
-    INT src2 = 0;
-    src1 = FLD (in_src1);
-    src2 = FLD (in_src2);
+    INT in_src1 = 0;
+    INT in_src2 = 0;
+    in_src1 = FLD (in_src1);
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_store (current_cpu, idesc, 0, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_store (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -2237,13 +2271,13 @@ model_m32rx_sth_d (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = 0;
-    INT src2 = 0;
-    src1 = FLD (in_src1);
-    src2 = FLD (in_src2);
+    INT in_src1 = 0;
+    INT in_src2 = 0;
+    in_src1 = FLD (in_src1);
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_store (current_cpu, idesc, 0, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_store (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -2259,25 +2293,23 @@ model_m32rx_st_plus (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = 0;
-    INT src2 = 0;
-    src1 = FLD (in_src1);
-    src2 = FLD (in_src2);
+    INT in_src1 = 0;
+    INT in_src2 = 0;
+    in_src1 = FLD (in_src1);
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_store (current_cpu, idesc, 0, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_store (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    dr = FLD (out_src2);
-    sr = FLD (in_src2);
-    referenced |= 1 << 0;
-    referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 1, referenced, sr, sr2, dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_dr = FLD (in_src2);
+    out_dr = FLD (out_src2);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 1, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -2293,25 +2325,23 @@ model_m32rx_st_minus (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = 0;
-    INT src2 = 0;
-    src1 = FLD (in_src1);
-    src2 = FLD (in_src2);
+    INT in_src1 = 0;
+    INT in_src2 = 0;
+    in_src1 = FLD (in_src1);
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_store (current_cpu, idesc, 0, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_store (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    dr = FLD (out_src2);
-    sr = FLD (in_src2);
-    referenced |= 1 << 0;
-    referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 1, referenced, sr, sr2, dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_dr = FLD (in_src2);
+    out_dr = FLD (out_src2);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 1, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -2327,14 +2357,16 @@ model_m32rx_sub (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    in_dr = FLD (in_dr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
+    referenced |= 1 << 1;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -2350,14 +2382,16 @@ model_m32rx_subv (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    in_dr = FLD (in_dr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
+    referenced |= 1 << 1;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -2373,14 +2407,16 @@ model_m32rx_subx (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    in_dr = FLD (in_dr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
+    referenced |= 1 << 1;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -2396,10 +2432,10 @@ model_m32rx_trap (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -2415,9 +2451,9 @@ model_m32rx_unlock (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = 0;
-    INT dr = 0;
-    cycles += m32rxf_model_m32rx_u_load (current_cpu, idesc, 0, referenced, sr, dr);
+    INT in_sr = 0;
+    INT out_dr = 0;
+    cycles += m32rxf_model_m32rx_u_load (current_cpu, idesc, 0, referenced, in_sr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -2433,14 +2469,14 @@ model_m32rx_satb (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -2456,14 +2492,14 @@ model_m32rx_sath (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    out_dr = FLD (out_dr);
     referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -2479,14 +2515,14 @@ model_m32rx_sat (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    sr = FLD (in_sr);
-    dr = FLD (out_dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    out_dr = FLD (out_dr);
     if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
     referenced |= 1 << 2;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -2502,11 +2538,11 @@ model_m32rx_pcmpbz (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    src2 = FLD (in_src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 0, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_cmp (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -2522,9 +2558,9 @@ model_m32rx_sadd (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, src1, src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -2540,13 +2576,13 @@ model_m32rx_macwu1 (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    src1 = FLD (in_src1);
-    src2 = FLD (in_src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    in_src1 = FLD (in_src1);
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -2562,13 +2598,13 @@ model_m32rx_msblo (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    src1 = FLD (in_src1);
-    src2 = FLD (in_src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    in_src1 = FLD (in_src1);
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -2584,13 +2620,13 @@ model_m32rx_mulwu1 (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    src1 = FLD (in_src1);
-    src2 = FLD (in_src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    in_src1 = FLD (in_src1);
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -2606,13 +2642,13 @@ model_m32rx_maclh1 (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT src1 = -1;
-    INT src2 = -1;
-    src1 = FLD (in_src1);
-    src2 = FLD (in_src2);
+    INT in_src1 = -1;
+    INT in_src2 = -1;
+    in_src1 = FLD (in_src1);
+    in_src2 = FLD (in_src2);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, src1, src2);
+    cycles += m32rxf_model_m32rx_u_mac (current_cpu, idesc, 0, referenced, in_src1, in_src2);
   }
   return cycles;
 #undef FLD
@@ -2628,10 +2664,10 @@ model_m32rx_sc (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD
@@ -2647,10 +2683,10 @@ model_m32rx_snc (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT sr = -1;
-    INT sr2 = -1;
-    INT dr = -1;
-    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, sr, sr2, dr);
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    cycles += m32rxf_model_m32rx_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
   }
   return cycles;
 #undef FLD

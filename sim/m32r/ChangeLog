@@ -1,3 +1,17 @@
+1999-01-27  Doug Evans  <devans@casey.cygnus.com>
+
+	* cpu.h,decode.c,model.c,sem-switch.c,sem.c: Rebuild.
+start-sanitize-m32rx
+	* cpux.h,decodex.c,modelx.c,semx-switch.c: Rebuild.
+end-sanitize-m32rx
+
+1999-01-15  Doug Evans  <devans@casey.cygnus.com>
+
+	* decode.h,model.c: Regenerate.
+start-sanitize-m32rx
+	* decodex.h,modelx.c: Regenerate.
+end-sanitize-m32rx
+
 1999-01-14  Doug Evans  <devans@casey.cygnus.com>
 
 start-sanitize-cygnus
