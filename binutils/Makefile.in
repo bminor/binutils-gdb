@@ -121,7 +121,7 @@ STAGESTUFF = $(PROGS) *.o
 DISTSTUFF=arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h syslex.c
 
 # Stuff that goes in tooldir/ if appropriate
-TOOL_PROGS = nm.new strip.new ar ranlib $(DLLTOOL)
+TOOL_PROGS = nm.new strip.new ar ranlib $(DLLTOOL_PROG)
 
 BASEDIR = $(srcdir)/..
 BFDDIR = $(BASEDIR)/bfd
@@ -347,7 +347,7 @@ srconv.o: srconv.c sysroff.h sysroff.c coffgrok.h $(INCDIR)/coff/internal.h \
 srconv: srconv.o coffgrok.o $(ADDL_LIBS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ srconv.o coffgrok.o $(ADDL_LIBS) $(EXTRALIBS)
 
-dlltool:dlltool.o defparse.o deflex.o
+dlltool:dlltool.o defparse.o deflex.o cplus-dem.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ dlltool.o defparse.o deflex.o $(ADDL_LIBS) $(EXTRALIBS)
 
 defparse.c:defparse.y

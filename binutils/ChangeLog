@@ -1,3 +1,7 @@
+Tue Oct 10 09:39:09 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* Makefile.in (TOOL_PROGS): Include DLLTOOL_PROG.
+
 Mon Oct  9 13:06:31 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* dlltool.c (add_underscore): New.
