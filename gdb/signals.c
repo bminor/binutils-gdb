@@ -214,7 +214,10 @@ target_signal_to_name (enum target_signal sig)
     /* I think the code which prints this will always print it along with
        the string, so no need to be verbose.  */
     return "?";
-  return signals[sig].name;
+  else if ((sig >= TARGET_SIGNAL_FIRST) && (sig <= TARGET_SIGNAL_LAST))
+    return signals[sig].name;
+  else
+    return signals[sig].name;
 }
 
 /* Given a name, return its signal.  */
