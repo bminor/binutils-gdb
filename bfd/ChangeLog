@@ -1,3 +1,14 @@
+2001-08-31  Eric Christopher  <echristo@redhat.com>
+	    Jason Eckhardt  <jle@redhat.com>
+
+	* bfd/archures.c: Add mipsisa32 and mipsisa64. Remove mips32,
+	mips32_4k and mips64.
+	* bfd/aoutx.h: Remove bfd_mach_mips32, bfd_mach_mips32_4k,
+	bfd_mach_mips64.  Add bfd_mach_mipsisa32, bfd_mach_mipsisa64.
+	* bfd/cpu-mips.c: Ditto.
+	* bfd/elf32-mips.c (_bfd_mips_elf_final_write_processing): Ditto.
+	* bfd/bfd-in2.h: Regenerate.
+
 2001-08-31  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf64-alpha.c (elf64_alpha_relocate_section): Duplicate memory
@@ -33,7 +44,7 @@
 
 2001-08-29  Joel Sherrill <joel@OARcorp.com>
 
-	* config.bfd (i[3456]86-*-rtems*, m68*-*-rtems*): Change 
+	* config.bfd (i[3456]86-*-rtems*, m68*-*-rtems*): Change
 	default from coff to elf.
 
 2001-08-29  Jeff Law <law@redhat.com>
@@ -61,7 +72,7 @@
 
 2001-08-29  Tom Rix <trix@redhat.com>
 
- 	* xcofflink.c (xcoff_link_add_symbols):  Fix XTY_LD symbol that 
+ 	* xcofflink.c (xcoff_link_add_symbols):  Fix XTY_LD symbol that
  	does not follow a XTY_SD.
 
 2001-08-29  Alan Modra  <amodra@bigpond.net.au>

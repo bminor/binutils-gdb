@@ -1886,9 +1886,6 @@ elf_mips_mach (flags)
     case E_MIPS_MACH_4650:
       return bfd_mach_mips4650;
 
-    case E_MIPS_MACH_MIPS32_4K:
-      return bfd_mach_mips32_4k;
-
     case E_MIPS_MACH_SB1:
       return bfd_mach_mips_sb1;
 
@@ -1917,11 +1914,11 @@ elf_mips_mach (flags)
 	  break;
 
 	case E_MIPS_ARCH_32:
-	  return bfd_mach_mips32;
+	  return bfd_mach_mipsisa32;
 	  break;
 
 	case E_MIPS_ARCH_64:
-	  return bfd_mach_mips64;
+	  return bfd_mach_mipsisa64;
 	  break;
 	}
     }
@@ -2412,25 +2409,20 @@ _bfd_mips_elf_final_write_processing (abfd, linker)
       val = E_MIPS_ARCH_4;
       break;
 
-    case bfd_mach_mips32:
-      val = E_MIPS_ARCH_32;
-      break;
-
-    case bfd_mach_mips32_4k:
-      val = E_MIPS_ARCH_32 | E_MIPS_MACH_MIPS32_4K;
-      break;
-
     case bfd_mach_mips5:
       val = E_MIPS_ARCH_5;
-      break;
-
-    case bfd_mach_mips64:
-      val = E_MIPS_ARCH_64;
       break;
 
     case bfd_mach_mips_sb1:
       val = E_MIPS_ARCH_64 | E_MIPS_MACH_SB1;
       break;
+
+    case bfd_mach_mipsisa32:
+      val = E_MIPS_ARCH_32;
+      break;
+
+    case bfd_mach_mipsisa64:
+      val = E_MIPS_ARCH_64;
     }
 
   elf_elfheader (abfd)->e_flags &= ~(EF_MIPS_ARCH | EF_MIPS_MACH);
