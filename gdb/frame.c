@@ -717,31 +717,37 @@ get_prev_frame (struct frame_info *next_frame)
 {
   CORE_ADDR address = 0;
   struct frame_info *prev;
-  int fromleaf = 0;
+  int fromleaf;
   char *name;
 
-  /* If the requested entry is in the cache, return it.
-     Otherwise, figure out what the address should be for the entry
-     we're about to add to the cache. */
-
-  if (!next_frame)
+  /* Return the inner-most frame, when the caller passes in NULL.  */
+  /* NOTE: cagney/2002-11-09: Not sure how this would happen.  The
+     caller should have previously obtained a valid frame using
+     get_selected_frame() and then called this code - only possibility
+     I can think of is code behaving badly.  */
+  if (next_frame == NULL)
     {
-#if 0
-      /* This screws value_of_variable, which just wants a nice clean
-         NULL return from block_innermost_frame if there are no frames.
-         I don't think I've ever seen this message happen otherwise.
-         And returning NULL here is a perfectly legitimate thing to do.  */
-      if (!current_frame)
-	{
-	  error ("You haven't set up a process's stack to examine.");
-	}
-#endif
+      /* NOTE: cagney/2002-11-09: There was a code segment here that
+	 would error out when CURRENT_FRAME was NULL.  The comment
+	 that went with it made the claim ...
 
+	 ``This screws value_of_variable, which just wants a nice
+	 clean NULL return from block_innermost_frame if there are no
+	 frames.  I don't think I've ever seen this message happen
+	 otherwise.  And returning NULL here is a perfectly legitimate
+	 thing to do.''
+
+         Per the above, this code shouldn't even be called with a NULL
+         NEXT_FRAME.  */
       return current_frame;
     }
 
-  /* If we have the prev one, return it */
+  /* If we have the prev one, return it.  */
   if (next_frame->prev)
+    /* FIXME: cagney/2002-11-09: Rather than relying on ->PREV being
+       non-NULL, there should be a predicate (->prev_p?).  That would
+       stop this function constantly trying to chain beyond the
+       outermost frame.  */
     return next_frame->prev;
 
   /* On some machines it is possible to call a function without
@@ -751,20 +757,32 @@ get_prev_frame (struct frame_info *next_frame)
      or isn't leafless.  */
 
   /* Still don't want to worry about this except on the innermost
-     frame.  This macro will set FROMLEAF if NEXT_FRAME is a
-     frameless function invocation.  */
-  if (!(next_frame->next))
-    {
-      fromleaf = FRAMELESS_FUNCTION_INVOCATION (next_frame);
-      if (fromleaf)
-	address = FRAME_FP (next_frame);
-    }
+     frame.  This macro will set FROMLEAF if NEXT_FRAME is a frameless
+     function invocation.  */
+  if (next_frame->next == NULL)
+    /* FIXME: 2002-11-09: Frameless functions can occure anywhere in
+       the frame chain, not just the inner most frame!  The generic,
+       per-architecture, frame code should handle this and the below
+       should simply be removed.  */
+    fromleaf = FRAMELESS_FUNCTION_INVOCATION (next_frame);
+  else
+    fromleaf = 0;
 
-  if (!fromleaf)
+  if (fromleaf)
+    /* A frameless inner-most frame.  The `FP' (which isn't an
+       architecture frame-pointer register!) of the caller is the same
+       as the callee.  */
+    /* FIXME: 2002-11-09: There isn't any reason to special case this
+       edge condition.  Instead the per-architecture code should hande
+       it locally.  */
+    address = FRAME_FP (next_frame);
+  else
     {
       /* Two macros defined in tm.h specify the machine-dependent
          actions to be performed here.
+
          First, get the frame's chain-pointer.
+
          If that is zero, the frame is the outermost frame or a leaf
          called by the outermost frame.  This means that if start
          calls main without a frame, we'll return 0 (which is fine
@@ -791,59 +809,86 @@ get_prev_frame (struct frame_info *next_frame)
   if (address == 0)
     return 0;
 
+  /* Create an initially zero previous frame.  */
   prev = (struct frame_info *)
     obstack_alloc (&frame_cache_obstack,
 		   sizeof (struct frame_info));
-
-  /* Zero all fields by default.  */
   memset (prev, 0, sizeof (struct frame_info));
 
-  if (next_frame)
-    next_frame->prev = prev;
+  /* Link it in.  */
+  next_frame->prev = prev;
   prev->next = next_frame;
   prev->frame = address;
   prev->level = next_frame->level + 1;
 
-/* This change should not be needed, FIXME!  We should
-   determine whether any targets *need* INIT_FRAME_PC to happen
-   after INIT_EXTRA_FRAME_INFO and come up with a simple way to
-   express what goes on here.
+  /* This change should not be needed, FIXME!  We should determine
+     whether any targets *need* INIT_FRAME_PC to happen after
+     INIT_EXTRA_FRAME_INFO and come up with a simple way to express
+     what goes on here.
 
-   INIT_EXTRA_FRAME_INFO is called from two places: create_new_frame
-   (where the PC is already set up) and here (where it isn't).
-   INIT_FRAME_PC is only called from here, always after
-   INIT_EXTRA_FRAME_INFO.
+     INIT_EXTRA_FRAME_INFO is called from two places: create_new_frame
+     (where the PC is already set up) and here (where it isn't).
+     INIT_FRAME_PC is only called from here, always after
+     INIT_EXTRA_FRAME_INFO.
 
-   The catch is the MIPS, where INIT_EXTRA_FRAME_INFO requires the PC
-   value (which hasn't been set yet).  Some other machines appear to
-   require INIT_EXTRA_FRAME_INFO before they can do INIT_FRAME_PC.  Phoo.
+     The catch is the MIPS, where INIT_EXTRA_FRAME_INFO requires the
+     PC value (which hasn't been set yet).  Some other machines appear
+     to require INIT_EXTRA_FRAME_INFO before they can do
+     INIT_FRAME_PC.  Phoo.
 
-   We shouldn't need INIT_FRAME_PC_FIRST to add more complication to
-   an already overcomplicated part of GDB.   gnu@cygnus.com, 15Sep92.
+     We shouldn't need INIT_FRAME_PC_FIRST to add more complication to
+     an already overcomplicated part of GDB.  gnu@cygnus.com, 15Sep92.
 
-   Assuming that some machines need INIT_FRAME_PC after
-   INIT_EXTRA_FRAME_INFO, one possible scheme:
+     Assuming that some machines need INIT_FRAME_PC after
+     INIT_EXTRA_FRAME_INFO, one possible scheme:
 
-   SETUP_INNERMOST_FRAME()
-   Default version is just create_new_frame (read_fp ()),
-   read_pc ()).  Machines with extra frame info would do that (or the
-   local equivalent) and then set the extra fields.
-   SETUP_ARBITRARY_FRAME(argc, argv)
-   Only change here is that create_new_frame would no longer init extra
-   frame info; SETUP_ARBITRARY_FRAME would have to do that.
-   INIT_PREV_FRAME(fromleaf, prev)
-   Replace INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC.  This should
-   also return a flag saying whether to keep the new frame, or
-   whether to discard it, because on some machines (e.g.  mips) it
-   is really awkward to have FRAME_CHAIN_VALID called *before*
-   INIT_EXTRA_FRAME_INFO (there is no good way to get information
-   deduced in FRAME_CHAIN_VALID into the extra fields of the new frame).
-   std_frame_pc(fromleaf, prev)
-   This is the default setting for INIT_PREV_FRAME.  It just does what
-   the default INIT_FRAME_PC does.  Some machines will call it from
-   INIT_PREV_FRAME (either at the beginning, the end, or in the middle).
-   Some machines won't use it.
-   kingdon@cygnus.com, 13Apr93, 31Jan94, 14Dec94.  */
+     SETUP_INNERMOST_FRAME(): Default version is just create_new_frame
+     (read_fp ()), read_pc ()).  Machines with extra frame info would
+     do that (or the local equivalent) and then set the extra fields.
+
+     SETUP_ARBITRARY_FRAME(argc, argv): Only change here is that
+     create_new_frame would no longer init extra frame info;
+     SETUP_ARBITRARY_FRAME would have to do that.
+
+     INIT_PREV_FRAME(fromleaf, prev) Replace INIT_EXTRA_FRAME_INFO and
+     INIT_FRAME_PC.  This should also return a flag saying whether to
+     keep the new frame, or whether to discard it, because on some
+     machines (e.g.  mips) it is really awkward to have
+     FRAME_CHAIN_VALID called *before* INIT_EXTRA_FRAME_INFO (there is
+     no good way to get information deduced in FRAME_CHAIN_VALID into
+     the extra fields of the new frame).  std_frame_pc(fromleaf, prev)
+
+     This is the default setting for INIT_PREV_FRAME.  It just does
+     what the default INIT_FRAME_PC does.  Some machines will call it
+     from INIT_PREV_FRAME (either at the beginning, the end, or in the
+     middle).  Some machines won't use it.
+
+     kingdon@cygnus.com, 13Apr93, 31Jan94, 14Dec94.  */
+
+  /* NOTE: cagney/2002-11-09: Just ignore the above!  There is no
+     reason for things to be this complicated.
+
+     The trick is to assume that there is always a frame.  Instead of
+     special casing the inner-most frame, create fake frame
+     (containing the hardware registers) that is inner to the
+     user-visible inner-most frame (...) and then unwind from that.
+     That way architecture code can use use the standard
+     frame_XX_unwind() functions and not differentiate between the
+     inner most and any other case.
+
+     Since there is always a frame to unwind from, there is always
+     somewhere (NEXT_FRAME) to store all the info needed to construct
+     a new (previous) frame without having to first create it.  This
+     means that the convolution below - needing to carefully order a
+     frame's initialization - isn't needed.
+
+     The irony here though, is that FRAME_CHAIN(), at least for a more
+     up-to-date architecture, always calls FRAME_SAVED_PC(), and
+     FRAME_SAVED_PC() computes the PC but without first needing the
+     frame!  Instead of the convolution below, we could have simply
+     called FRAME_SAVED_PC() and been done with it!  Note that
+     FRAME_SAVED_PC() is being superseed by frame_pc_unwind() and that
+     function does have somewhere to cache that PC value.  */
 
   INIT_FRAME_PC_FIRST (fromleaf, prev);
 
@@ -851,23 +896,20 @@ get_prev_frame (struct frame_info *next_frame)
     INIT_EXTRA_FRAME_INFO (fromleaf, prev);
 
   /* This entry is in the frame queue now, which is good since
-     FRAME_SAVED_PC may use that queue to figure out its value
-     (see tm-sparc.h).  We want the pc saved in the inferior frame. */
+     FRAME_SAVED_PC may use that queue to figure out its value (see
+     tm-sparc.h).  We want the pc saved in the inferior frame. */
   INIT_FRAME_PC (fromleaf, prev);
 
-  /* If ->frame and ->pc are unchanged, we are in the process of getting
-     ourselves into an infinite backtrace.  Some architectures check this
-     in FRAME_CHAIN or thereabouts, but it seems like there is no reason
-     this can't be an architecture-independent check.  */
-  if (next_frame != NULL)
+  /* If ->frame and ->pc are unchanged, we are in the process of
+     getting ourselves into an infinite backtrace.  Some architectures
+     check this in FRAME_CHAIN or thereabouts, but it seems like there
+     is no reason this can't be an architecture-independent check.  */
+  if (prev->frame == next_frame->frame
+      && prev->pc == next_frame->pc)
     {
-      if (prev->frame == next_frame->frame
-	  && prev->pc == next_frame->pc)
-	{
-	  next_frame->prev = NULL;
-	  obstack_free (&frame_cache_obstack, prev);
-	  return NULL;
-	}
+      next_frame->prev = NULL;
+      obstack_free (&frame_cache_obstack, prev);
+      return NULL;
     }
 
   /* Initialize the code used to unwind the frame PREV based on the PC

@@ -1,3 +1,9 @@
+2002-11-09  Andrew Cagney  <ac131313@redhat.com>
+
+	* frame.c (get_prev_frame): Cleanups.  Eliminate redundant tests
+	for a NULL NEXT_FRAME.  Simplify fromleaf initialization.  Add
+	more comments.  Zap dead code.
+
 2002-11-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* infcmd.c (print_vector_info, print_float_info): Move code that
