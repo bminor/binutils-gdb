@@ -1,4 +1,9 @@
 start-sanitize-tic80
+Fri May 23 12:38:24 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-tic80.c (tic80_howto_table): Change overflow check for most
+	PP relocations to complain_overflow_dont.
+
 Thu May 22 20:22:14 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coff-tic80.c (tic80_howto_table): Add PP relocations.  Change

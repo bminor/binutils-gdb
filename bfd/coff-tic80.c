@@ -97,7 +97,7 @@ static reloc_howto_type tic80_howto_table[] =
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
-	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 complain_overflow_dont,	/* complain_on_overflow */
 	 ppbase_reloc,			/* special_function */
 	 "PPBASE",			/* name */
 	 true,				/* partial_inplace */
@@ -111,7 +111,7 @@ static reloc_howto_type tic80_howto_table[] =
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
-	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 complain_overflow_dont,	/* complain_on_overflow */
 	 ppbase_reloc,			/* special_function */
 	 "PPLBASE",			/* name */
 	 true,				/* partial_inplace */
@@ -125,7 +125,7 @@ static reloc_howto_type tic80_howto_table[] =
 	 15,				/* bitsize */
 	 false,				/* pc_relative */
 	 6,				/* bitpos */
-	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 complain_overflow_dont,	/* complain_on_overflow */
 	 glob15_reloc,			/* special_function */
 	 "PP15",			/* name */
 	 true,				/* partial_inplace */
@@ -139,7 +139,7 @@ static reloc_howto_type tic80_howto_table[] =
 	 15,				/* bitsize */
 	 false,				/* pc_relative */
 	 6,				/* bitpos */
-	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 complain_overflow_dont,	/* complain_on_overflow */
 	 glob15_reloc,			/* special_function */
 	 "PP15W",			/* name */
 	 true,				/* partial_inplace */
@@ -153,7 +153,7 @@ static reloc_howto_type tic80_howto_table[] =
 	 15,				/* bitsize */
 	 false,				/* pc_relative */
 	 6,				/* bitpos */
-	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 complain_overflow_dont,	/* complain_on_overflow */
 	 glob15_reloc,			/* special_function */
 	 "PP15H",			/* name */
 	 true,				/* partial_inplace */
@@ -167,7 +167,7 @@ static reloc_howto_type tic80_howto_table[] =
 	 16,				/* bitsize */
 	 false,				/* pc_relative */
 	 6,				/* bitpos */
-	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 complain_overflow_dont,	/* complain_on_overflow */
 	 glob16_reloc,			/* special_function */
 	 "PP16B",			/* name */
 	 true,				/* partial_inplace */
@@ -181,7 +181,7 @@ static reloc_howto_type tic80_howto_table[] =
 	 15,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
-	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 complain_overflow_dont,	/* complain_on_overflow */
 	 NULL,				/* special_function */
 	 "PPL15",			/* name */
 	 true,				/* partial_inplace */
@@ -195,7 +195,7 @@ static reloc_howto_type tic80_howto_table[] =
 	 15,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
-	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 complain_overflow_dont,	/* complain_on_overflow */
 	 NULL,				/* special_function */
 	 "PPL15W",			/* name */
 	 true,				/* partial_inplace */
@@ -209,7 +209,7 @@ static reloc_howto_type tic80_howto_table[] =
 	 15,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
-	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 complain_overflow_dont,	/* complain_on_overflow */
 	 NULL,				/* special_function */
 	 "PPL15H",			/* name */
 	 true,				/* partial_inplace */
@@ -223,7 +223,7 @@ static reloc_howto_type tic80_howto_table[] =
 	 16,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
-	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 complain_overflow_dont,	/* complain_on_overflow */
 	 local16_reloc,			/* special_function */
 	 "PPL16B",			/* name */
 	 true,				/* partial_inplace */
@@ -237,7 +237,7 @@ static reloc_howto_type tic80_howto_table[] =
 	 15,				/* bitsize */
 	 false,				/* pc_relative */
 	 6,				/* bitpos */
-	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 complain_overflow_dont,	/* complain_on_overflow */
 	 glob15_reloc,			/* special_function */
 	 "PPN15",			/* name */
 	 true,				/* partial_inplace */
@@ -251,7 +251,7 @@ static reloc_howto_type tic80_howto_table[] =
 	 15,				/* bitsize */
 	 false,				/* pc_relative */
 	 6,				/* bitpos */
-	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 complain_overflow_dont,	/* complain_on_overflow */
 	 glob15_reloc,			/* special_function */
 	 "PPN15W",			/* name */
 	 true,				/* partial_inplace */
@@ -265,7 +265,7 @@ static reloc_howto_type tic80_howto_table[] =
 	 15,				/* bitsize */
 	 false,				/* pc_relative */
 	 6,				/* bitpos */
-	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 complain_overflow_dont,	/* complain_on_overflow */
 	 glob15_reloc,			/* special_function */
 	 "PPN15H",			/* name */
 	 true,				/* partial_inplace */
@@ -279,7 +279,7 @@ static reloc_howto_type tic80_howto_table[] =
 	 16,				/* bitsize */
 	 false,				/* pc_relative */
 	 6,				/* bitpos */
-	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 complain_overflow_dont,	/* complain_on_overflow */
 	 glob16_reloc,			/* special_function */
 	 "PPN16B",			/* name */
 	 true,				/* partial_inplace */
@@ -293,7 +293,7 @@ static reloc_howto_type tic80_howto_table[] =
 	 15,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
-	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 complain_overflow_dont,	/* complain_on_overflow */
 	 NULL,				/* special_function */
 	 "PPLN15",			/* name */
 	 true,				/* partial_inplace */
@@ -307,7 +307,7 @@ static reloc_howto_type tic80_howto_table[] =
 	 15,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
-	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 complain_overflow_dont,	/* complain_on_overflow */
 	 NULL,				/* special_function */
 	 "PPLN15W",			/* name */
 	 true,				/* partial_inplace */
@@ -321,7 +321,7 @@ static reloc_howto_type tic80_howto_table[] =
 	 15,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
-	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 complain_overflow_dont,	/* complain_on_overflow */
 	 NULL,				/* special_function */
 	 "PPLN15H",			/* name */
 	 true,				/* partial_inplace */
@@ -335,7 +335,7 @@ static reloc_howto_type tic80_howto_table[] =
 	 15,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
-	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 complain_overflow_dont,	/* complain_on_overflow */
 	 local16_reloc,			/* special_function */
 	 "PPLN16B",			/* name */
 	 true,				/* partial_inplace */
