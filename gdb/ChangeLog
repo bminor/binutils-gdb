@@ -1,3 +1,9 @@
+2002-01-24  Andrew Cagney  <ac131313@redhat.com>
+
+	GDB 5.1.1 released from 5.1 branch.
+	* NEWS: Add 5.1.1 news.
+	* README: Sync with 5.1 branch.
+
 2002-01-23  Fred Fish  <fnf@redhat.com>
 
 	* mdebugread.c (parse_partial_symbols): Only copy stabstring1 to

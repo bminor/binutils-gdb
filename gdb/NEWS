@@ -69,6 +69,19 @@ for the inferior from gdb's command line.
 
 There is a new `operate-and-get-next' function bound to `C-o'.
 
+*** Changes in GDB 5.1.1 
+
+Fix compile problem on DJGPP.
+
+Fix a problem with floating-point registers on the i386 being
+corrupted.
+
+Fix to stop GDB crashing on .debug_str debug info.
+
+Numerous documentation fixes.
+
+Numerous testsuite fixes.
+
 *** Changes in GDB 5.1:
 
 * New native configurations
