@@ -1,3 +1,23 @@
+Tue Jul 26 16:36:03 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* i960-dis.c (reg_names): Now const.
+	(struct sparse_tabent): New type, copied from array type in mem
+	function.
+	(ctrl): Local static array ctrl_tab now const.
+	(cobr): Local static array cobr_tab now const.
+	(mem): Local variables reg1, reg2, reg3 now point to const.  Local
+	static variable mem_tab no longer explicitly initialized.  Changed
+	mem_init to const array of struct sparse_tabent.
+	(reg): Local static variable reg_tab no longer explicitly
+	initialized.  Changed reg_init to const array of struct
+	sparse_tabent.
+	(ea): Local static array scale_tab now const.
+
+	start-sanitize-i960xl
+	* i960-dis.c (reg): Added i960XL instructions to reg_init table.
+	(REG_MAX): Updated.
+	end-sanitize-i960xl
+
 Tue Jul 19 21:00:00 1994  DJ Delorie (dj@ctron.com)
 
 	* configure.bat: the disassember needs to be enabled for

@@ -50,6 +50,7 @@ m68k-dis.c
 m88k-dis.c
 mips-dis.c
 mips-opc.c
+ns32k-dis.c
 ppc-dis.c
 ppc-opc.c
 sh-opc.h
@@ -63,5 +64,26 @@ z8kgen.c
 Things-to-lose:
 
 Do-last:
+
+i960xl_files="ChangeLog i960-dis.c"
+if ( echo $* | grep keep\-i960xl > /dev/null ) ; then
+	if [ -n "${verbose}" ] ; then
+		echo Keeping i960xl stuff in $i960xl_files.
+	fi
+else
+	if [ -n "${verbose}" ]; then
+		echo -n Cleaning i960xl in `pwd`:
+	fi
+	for f in $i960xl_files ; do
+		if [ -n "${verbose}" ] ; then
+			echo -n " " $f
+		fi
+		sed -e '/start\-sanitize\-i960xl/,/end\-sanitize\-i960xl/d' -e '/ xl /d' < $f > new
+		if [ -n "${safe}" ] ; then
+			mv $f .Recover
+		fi
+		mv new $f
+	done
+fi
 
 # End of file.
