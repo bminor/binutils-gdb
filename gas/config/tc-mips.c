@@ -8217,6 +8217,27 @@ md_apply_fix (fixP, valueP)
 	  || fixP->fx_r_type == BFD_RELOC_64);
 
   value = *valueP;
+
+  /* If we aren't adjusting this fixup to be against the section
+     symbol, we need to adjust the value.  */
+#ifdef S_GET_OTHER
+  if (fixP->fx_addsy != NULL
+      && (S_IS_EXTERNAL (fixP->fx_addsy)
+	  || S_IS_WEAK (fixP->fx_addsy))
+      && OUTPUT_FLAVOR == bfd_target_elf_flavour
+      && S_GET_OTHER (fixP->fx_addsy) == STO_MIPS16)
+    {
+      value -= S_GET_VALUE (fixP->fx_addsy);
+      if (value != 0 && ! fixP->fx_pcrel)
+	{
+	  /* In this case, the bfd_install_relocation routine will
+             incorrectly add the symbol value back in.  We just want
+             the addend to appear in the object file.  */
+	  value -= S_GET_VALUE (fixP->fx_addsy);
+	}
+    }
+#endif
+
   fixP->fx_addnumber = value;	/* Remember value for tc_gen_reloc */
 
   if (fixP->fx_addsy == NULL && ! fixP->fx_pcrel)

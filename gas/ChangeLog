@@ -1,5 +1,9 @@
 Mon Feb  3 12:35:54 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (md_apply_fix): If we aren't adjusting this
+	fixup to be against the section symbol, adjust the value
+	accordingly.
+
 	* symbols.c (resolve_symbol_value): Don't change X_add_number for
 	an equated symbol.
 	* write.c (write_relocs): Avoid looping on equated symbols.
