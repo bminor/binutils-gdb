@@ -1,3 +1,12 @@
+2002-05-23  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* size.c: Fix formatting.
+	* srconv.c: Likewise.
+	* stabs.c: Likewise.
+	* sysdump.c: Likewise.
+	* unwind-ia64.c: Likewise.
+	* wrstabs.c: Likewise.
+
 2002-05-23  Jakub Jelinek  <jakub@redhat.com>
 
 	* readelf.c (get_segment_type): Add PT_TLS.

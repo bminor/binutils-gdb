@@ -795,7 +795,7 @@ stab_bool_type (p, size)
     case 2:
       index = -22;
       break;
-      
+
     default:
     case 4:
       index = -16;
@@ -963,7 +963,7 @@ stab_modify_type (info, mod, size, cache, cache_alloc)
     }
 
   return true;
-}  
+}
 
 /* Push a pointer type.  */
 
