@@ -1612,6 +1612,22 @@ d10v_frame_p (CORE_ADDR pc)
   return &d10v_frame_unwind;
 }
 
+/* Assuming NEXT_FRAME->prev is a dummy, return the frame ID of that
+   dummy frame.  The frame ID's base needs to match the TOS value
+   saved by save_dummy_frame_tos(), and the PC match the dummy frame's
+   breakpoint.  */
+
+static struct frame_id
+d10v_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
+{
+  ULONGEST base;
+  struct frame_id id;
+  id.pc = frame_pc_unwind (next_frame);
+  frame_unwind_unsigned_register (next_frame, SP_REGNUM, &base);
+  id.base = d10v_make_daddr (base);
+  return id;
+}
+
 static gdbarch_init_ftype d10v_gdbarch_init;
 
 static struct gdbarch *
@@ -1748,6 +1764,10 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_print_registers_info (gdbarch, d10v_print_registers_info);
 
   frame_unwind_append_predicate (gdbarch, d10v_frame_p);
+
+  /* Methods for saving / extracting a dummy frame's ID.  */
+  set_gdbarch_unwind_dummy_id (gdbarch, d10v_unwind_dummy_id);
+  set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
 
   return gdbarch;
 }

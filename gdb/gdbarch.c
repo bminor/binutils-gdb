@@ -251,6 +251,7 @@ struct gdbarch
   int extra_stack_alignment_needed;
   gdbarch_reg_struct_has_addr_ftype *reg_struct_has_addr;
   gdbarch_save_dummy_frame_tos_ftype *save_dummy_frame_tos;
+  gdbarch_unwind_dummy_id_ftype *unwind_dummy_id;
   int parm_boundary;
   const struct floatformat * float_format;
   const struct floatformat * double_format;
@@ -357,6 +358,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   generic_pc_in_call_dummy,
+  0,
   0,
   0,
   0,
@@ -770,6 +772,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of extra_stack_alignment_needed, invalid_p == 0 */
   /* Skip verify of reg_struct_has_addr, has predicate */
   /* Skip verify of save_dummy_frame_tos, has predicate */
+  /* Skip verify of unwind_dummy_id, has predicate */
   if (gdbarch->float_format == 0)
     gdbarch->float_format = default_float_format (gdbarch);
   if (gdbarch->double_format == 0)
@@ -2567,6 +2570,14 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->write_sp
                         /*TARGET_WRITE_SP ()*/);
 #endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: gdbarch_unwind_dummy_id_p() = %d\n",
+                        gdbarch_unwind_dummy_id_p (current_gdbarch));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: unwind_dummy_id = 0x%08lx\n",
+                        (long) current_gdbarch->unwind_dummy_id);
 #ifdef USE_STRUCT_CONVENTION
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -5029,6 +5040,32 @@ set_gdbarch_save_dummy_frame_tos (struct gdbarch *gdbarch,
                                   gdbarch_save_dummy_frame_tos_ftype save_dummy_frame_tos)
 {
   gdbarch->save_dummy_frame_tos = save_dummy_frame_tos;
+}
+
+int
+gdbarch_unwind_dummy_id_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->unwind_dummy_id != 0;
+}
+
+struct frame_id
+gdbarch_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *info)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->unwind_dummy_id == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_unwind_dummy_id invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_unwind_dummy_id called\n");
+  return gdbarch->unwind_dummy_id (gdbarch, info);
+}
+
+void
+set_gdbarch_unwind_dummy_id (struct gdbarch *gdbarch,
+                             gdbarch_unwind_dummy_id_ftype unwind_dummy_id)
+{
+  gdbarch->unwind_dummy_id = unwind_dummy_id;
 }
 
 int

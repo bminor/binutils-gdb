@@ -3697,10 +3697,11 @@ rather than directly.
 
 @item SAVE_DUMMY_FRAME_TOS (@var{sp})
 @findex SAVE_DUMMY_FRAME_TOS
-Used in @samp{call_function_by_hand} to notify the target dependent code
-of the top-of-stack value that will be passed to the the inferior code.
-This is the value of the @code{SP} after both the dummy frame and space
-for parameters/results have been allocated on the stack.
+@anchor{SAVE_DUMMY_FRAME_TOS} Used in @samp{call_function_by_hand} to
+notify the target dependent code of the top-of-stack value that will be
+passed to the the inferior code.  This is the value of the @code{SP}
+after both the dummy frame and space for parameters/results have been
+allocated on the stack.  @xref{unwind_dummy_id}.
 
 @item SDB_REG_TO_REGNUM
 @findex SDB_REG_TO_REGNUM
@@ -3883,6 +3884,14 @@ usually points to a function in the @code{opcodes} library (@pxref{Support
 Libraries, ,Opcodes}).  @var{info} is a structure (of type
 @code{disassemble_info}) defined in @file{include/dis-asm.h} used to
 pass information to the instruction decoding routine.
+
+@item struct frame_id unwind_dummy_id (struct frame_info *@var{frame})
+@findex unwind_dummy_id
+@anchor{unwind_dummy_id} Given @var{frame} return a @code{struct
+frame_id} that uniquely identifies an inferior function call's dummy
+frame.  The value returned must match the dummy frame stack value
+previously saved using @code{SAVE_DUMMY_FRAME_TOS}.
+@xref{SAVE_DUMMY_FRAME_TOS}.
 
 @item USE_STRUCT_CONVENTION (@var{gcc_p}, @var{type})
 @findex USE_STRUCT_CONVENTION
