@@ -1,3 +1,7 @@
+Thu Apr 17 13:57:06 1997  Per Fogelstrom  <pefo@openbsd.org>
+
+	* config.guess: Fixes for MIPS OpenBSD systems.
+
 Tue Apr 15 12:21:07 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (INSTALL_XFORM): Remove.
