@@ -163,8 +163,8 @@ proc sim_run { prog sim_opts prog_opts redir options } {
 # sim[(mach-list)]: <simulator options>
 # output: program output pattern to match with string-match
 # xerror: program is expected to return with a "failure" exit code
-# xfail: <PRMS-opt> <target-triples-where-test-fails>
-# kfail: <PRMS> <target-triples-where-test-fails>
+# xfail: <PRMS-opt> <target-triplets-where-test-fails>
+# kfail: <PRMS> <target-triplets-where-test-fails>
 # If `output' is not specified, the program must output "pass" if !xerror or
 # "fail" if xerror.
 # The parens in "optname()" are optional if the specification is for all machs.
