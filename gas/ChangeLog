@@ -1,3 +1,7 @@
+Fri Aug  6 12:12:44 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-hppa.c (pa_ip, case '?'): Add missing break.
+
 Fri Aug  6 09:46:35 1999  Jerry Quinn <jquinn@nortelnetworks.com>
 
 	* config/tc-hppa.c (pa_ip):  Add 64 bit condition completers.

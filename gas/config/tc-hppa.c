@@ -2230,6 +2230,7 @@ pa_ip (str)
 		  default:
 		    abort ();
 		  }
+		break;
 	      }
 
 	    /* Handle a system control completer.  */
