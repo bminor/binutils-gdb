@@ -1,7 +1,7 @@
 /* ELF executable support for BFD.
 
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -5977,10 +5977,10 @@ _bfd_elf_canonicalize_dynamic_symtab (bfd *abfd,
   return symcount;
 }
 
-/* Return the size required for the dynamic reloc entries.  Any
-   section that was actually installed in the BFD, and has type
-   SHT_REL or SHT_RELA, and uses the dynamic symbol table, is
-   considered to be a dynamic reloc section.  */
+/* Return the size required for the dynamic reloc entries.  Any loadable
+   section that was actually installed in the BFD, and has type SHT_REL
+   or SHT_RELA, and uses the dynamic symbol table, is considered to be a
+   dynamic reloc section.  */
 
 long
 _bfd_elf_get_dynamic_reloc_upper_bound (bfd *abfd)
@@ -5996,7 +5996,8 @@ _bfd_elf_get_dynamic_reloc_upper_bound (bfd *abfd)
 
   ret = sizeof (arelent *);
   for (s = abfd->sections; s != NULL; s = s->next)
-    if (elf_section_data (s)->this_hdr.sh_link == elf_dynsymtab (abfd)
+    if ((s->flags & SEC_LOAD) != 0
+	&& elf_section_data (s)->this_hdr.sh_link == elf_dynsymtab (abfd)
 	&& (elf_section_data (s)->this_hdr.sh_type == SHT_REL
 	    || elf_section_data (s)->this_hdr.sh_type == SHT_RELA))
       ret += ((s->size / elf_section_data (s)->this_hdr.sh_entsize)
@@ -6005,14 +6006,13 @@ _bfd_elf_get_dynamic_reloc_upper_bound (bfd *abfd)
   return ret;
 }
 
-/* Canonicalize the dynamic relocation entries.  Note that we return
-   the dynamic relocations as a single block, although they are
-   actually associated with particular sections; the interface, which
-   was designed for SunOS style shared libraries, expects that there
-   is only one set of dynamic relocs.  Any section that was actually
-   installed in the BFD, and has type SHT_REL or SHT_RELA, and uses
-   the dynamic symbol table, is considered to be a dynamic reloc
-   section.  */
+/* Canonicalize the dynamic relocation entries.  Note that we return the
+   dynamic relocations as a single block, although they are actually
+   associated with particular sections; the interface, which was
+   designed for SunOS style shared libraries, expects that there is only
+   one set of dynamic relocs.  Any loadable section that was actually
+   installed in the BFD, and has type SHT_REL or SHT_RELA, and uses the
+   dynamic symbol table, is considered to be a dynamic reloc section.  */
 
 long
 _bfd_elf_canonicalize_dynamic_reloc (bfd *abfd,
@@ -6033,7 +6033,8 @@ _bfd_elf_canonicalize_dynamic_reloc (bfd *abfd,
   ret = 0;
   for (s = abfd->sections; s != NULL; s = s->next)
     {
-      if (elf_section_data (s)->this_hdr.sh_link == elf_dynsymtab (abfd)
+      if ((s->flags & SEC_LOAD) != 0
+	  && elf_section_data (s)->this_hdr.sh_link == elf_dynsymtab (abfd)
 	  && (elf_section_data (s)->this_hdr.sh_type == SHT_REL
 	      || elf_section_data (s)->this_hdr.sh_type == SHT_RELA))
 	{
@@ -7908,7 +7909,7 @@ long
 _bfd_elf_get_synthetic_symtab (bfd *abfd,
 			       long symcount ATTRIBUTE_UNUSED,
 			       asymbol **syms ATTRIBUTE_UNUSED,
-			       long dynsymcount ATTRIBUTE_UNUSED,
+			       long dynsymcount,
 			       asymbol **dynsyms,
 			       asymbol **ret)
 {
@@ -7924,10 +7925,14 @@ _bfd_elf_get_synthetic_symtab (bfd *abfd,
   char *names;
   asection *plt;
 
+  *ret = NULL;
+
   if ((abfd->flags & (DYNAMIC | EXEC_P)) == 0)
     return 0;
 
-  *ret = NULL;
+  if (dynsymcount <= 0)
+    return 0;
+
   if (!bed->plt_sym_val)
     return 0;
 

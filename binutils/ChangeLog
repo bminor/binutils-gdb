@@ -1,3 +1,8 @@
+2005-01-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* nm.c (display_rel_file): Read dynamic syms before calling
+	bfd_get_synthetic_symtab.
+
 2005-01-21  Ben Elliston  <bje@au.ibm.com>
 
 	* dlltool.c (dump_iat): Remove unused function.
@@ -47,7 +52,7 @@
 
 	* dlltool.c (set_dll_name_from_def): New function.  Strip name
 	to basename, with warning.
-	(def_name): Use it. 
+	(def_name): Use it.
 	(def_library): Likwise.
 	(main): Strip arg of --dllname to basename, with warning.
 	Only use basename of exp_name when inferring dll_name.
@@ -163,7 +168,7 @@
 	decode_location_expression.
 	(display_debug_frames): Pass 0 as the comp_unit offset to
 	decode_location_expression.
-	
+
 2004-12-22  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (last_pointer_size, warned_about_missing_comp_units):
@@ -276,7 +281,7 @@
 	of a 64-bit format .debug_ranges section.
 	(display_debug_ranges): New function: Displays the contents of a
 	32-bit .debug_ranges section.
-	
+
 	(main): Move cmdline_dump_sects and num_cmdline_dump_sects into the
 	global scope.
 	(process_object): Initialise the dump_sects array from the
@@ -295,7 +300,7 @@
 	get_debug_line_pointer_sizes.
 	(display_debug_lines): Use the new functions.
 	(display_debug_loc): Likewise.
-	
+
 	(disassemble_section): Change return type to int.
 	(display_debug_lines): Move local variables to their
 	innermost scope.
@@ -306,7 +311,7 @@
 
 	(debug_apply_rela_addends): Allow relocations against STT_OBJECT
 	types as well.
-	
+
 	* NEWS: Mention the support for decoding .debug_ranges sections.
 	* doc/binutils.texi: Document the new command line switch to
 	readelf.

@@ -1,6 +1,6 @@
 /* nm.c -- Describe symbol table of a rel file.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004
+   2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -1026,8 +1026,18 @@ display_rel_file (bfd *abfd, bfd *archive_bfd)
 	}
       else
 	{
+	  long storage = bfd_get_dynamic_symtab_upper_bound (abfd);
+
 	  static_count = symcount;
 	  static_syms = minisyms;
+
+	  if (storage > 0)
+	    {
+	      dyn_syms = xmalloc (storage);
+	      dyn_count = bfd_canonicalize_dynamic_symtab (abfd, dyn_syms);
+	      if (dyn_count < 0)
+		bfd_fatal (bfd_get_filename (abfd));
+	    }
 	}
       synth_count = bfd_get_synthetic_symtab (abfd, static_count, static_syms,
 					      dyn_count, dyn_syms, &synthsyms);

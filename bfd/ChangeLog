@@ -1,5 +1,12 @@
 2005-01-25  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf.c (_bfd_elf_get_dynamic_reloc_upper_bound): Only include
+	loadable reloc sections.
+	(_bfd_elf_canonicalize_dynamic_reloc): Likewise.
+	(_bfd_elf_get_synthetic_symtab): Return 0 if no dynamic syms.
+
+2005-01-25  Alan Modra  <amodra@bigpond.net.au>
+
 	* elflink.c (elf_link_add_object_symbols): Don't create link dynamic
 	sections immediately when linking shared libs.  Instead, wait until
 	we know a lib is needed.
@@ -92,7 +99,7 @@
 	BFD_HAVE_SYS_PROCFS_TYPE and BFD_HAVE_SYS_PROCFS_TYPE_MEMBER to
 	the new file bfd.m4.  Include ../bfd/bfd.m4.
 	* configure: Re-generate.
-	
+
 2005-01-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_howto_raw): Delete RELAX32* entries.
