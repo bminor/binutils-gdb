@@ -1,4 +1,16 @@
 start-sanitize-sky
+Mon Apr  6 19:55:56 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* interp.c (cop_[ls]q): Replaced stub with proper COP2 code.
+
+	* sim-main.h (LOADADDRMASK): Redefine to allow 128-bit accesses
+ 	for TARGET_SKY.
+
+	* r5900.igen (SQC2): Thinko.
+	
+end-sanitize-sky
+	
+start-sanitize-sky
 Sun Apr  5 12:05:44 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* interp.c (*): Adapt code to merged VU device & state structs.

@@ -2971,9 +2971,22 @@ cop_lq (SIM_DESC sd,
   switch (coproc_num)
     {
     case 2:
-      /* XXX COP2 */
-      break;
-      
+      {
+	unsigned_16 xyzw;
+
+	while(vu0_busy())
+	  vu0_issue(sd);
+	
+	memcpy(& xyzw, & memword, sizeof(xyzw));
+	xyzw = H2T_16(xyzw);
+	/* one word at a time, argh! */
+	write_vu_vec_reg(&(vu0_device.regs), coproc_reg, 0, A4_16(& xyzw, 3));
+	write_vu_vec_reg(&(vu0_device.regs), coproc_reg, 1, A4_16(& xyzw, 2));
+	write_vu_vec_reg(&(vu0_device.regs), coproc_reg, 2, A4_16(& xyzw, 1));
+	write_vu_vec_reg(&(vu0_device.regs), coproc_reg, 3, A4_16(& xyzw, 0));
+      }
+    break;
+    
     default:
       sim_io_printf(sd,"COP_LQ(%d,%d,??) at PC = 0x%s : TODO (architecture specific)\n",
 		    coproc_num,coproc_reg,pr_addr(cia));
@@ -3059,9 +3072,22 @@ cop_sq (SIM_DESC sd,
   switch (coproc_num)
     {
     case 2:
-      /* XXX COP2 */
-      break;
+      {
+	unsigned_16 xyzw;
 
+	while(vu0_busy())
+	  vu0_issue(sd);
+	
+	/* one word at a time, argh! */
+	read_vu_vec_reg(&(vu0_device.regs), coproc_reg, 0, A4_16(& xyzw, 3));
+	read_vu_vec_reg(&(vu0_device.regs), coproc_reg, 1, A4_16(& xyzw, 2));
+	read_vu_vec_reg(&(vu0_device.regs), coproc_reg, 2, A4_16(& xyzw, 1));
+	read_vu_vec_reg(&(vu0_device.regs), coproc_reg, 3, A4_16(& xyzw, 0));
+	xyzw = T2H_16(xyzw);
+	return xyzw;
+      }
+    break;
+    
     default:
       sim_io_printf(sd,"COP_SQ(%d,%d) at PC = 0x%s : TODO (architecture specific)\n",
 		    coproc_num,coproc_reg,pr_addr(cia));

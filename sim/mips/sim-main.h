@@ -837,6 +837,17 @@ decode_coproc (SD, CPU, cia, (instruction))
 #define PSIZE (WITH_TARGET_ADDRESS_BITSIZE)
 #endif
 
+/* start-sanitize-sky */
+#ifdef TARGET_SKY
+     /* 128-bit accesses are allowed */
+#undef LOADDRMASK
+#define LOADDRMASK AccessLength_QUADWORD
+#undef PSIZE
+#define PSIZE (WITH_TARGET_ADDRESS_BITSIZE)
+#endif /* TARGET_SKY */
+/* end-sanitize-sky */
+
+
 INLINE_SIM_MAIN (int) address_translation PARAMS ((SIM_DESC sd, sim_cpu *, address_word cia, address_word vAddr, int IorD, int LorS, address_word *pAddr, int *CCA, int raw));
 #define AddressTranslation(vAddr,IorD,LorS,pAddr,CCA,host,raw) \
 address_translation (SD, CPU, cia, vAddr, IorD, LorS, pAddr, CCA, raw)
