@@ -1,3 +1,9 @@
+2001-05-14  J.T. Conklin  <jtc@redback.com>
+
+	* ppc-opc.c (powerpc_opcodes): Fixed extended opcode field of
+ 	simplified mnemonics used for setting PPC750-specific special
+	purpose	registers.
+
 2001-05-12  H.J. Lu  <hjl@gnu.org>
 
 	* i386-dis.c (print_insn_i386): Always set `mod', `reg' and
