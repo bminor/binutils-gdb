@@ -1,3 +1,9 @@
+Fri May 17 14:26:19 2002  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* sh-tdep.c (gdb_print_insn_sh64): Delete.
+	(gdb_print_insn_sh): Just set info->endian and use print_insn_sh.
+	(sh_gdbarch_init): Always use gdb_print_insn_sh.
+
 2002-05-17  Corinna Vinschen  <vinschen@redhat.com>
 
 	* NEWS: Add section for multi-arched targets.  Add v850 to that section.

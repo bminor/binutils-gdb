@@ -232,15 +232,5 @@ sh64_disassemble_insn (SIM_CPU *cpu, const CGEN_INSN *insn,
   if (sh64_h_ism_get (cpu) == ISM_MEDIA)
     print_insn_sh64x_media (pc, &disasm_info);
   else
-    switch (disasm_info.endian)
-    {
-    case BFD_ENDIAN_BIG:
-      print_insn_sh (pc, &disasm_info);
-      break;
-    case BFD_ENDIAN_LITTLE:
-      print_insn_shl (pc, &disasm_info);
-      break;
-    default:
-      abort();
-    }
+    print_insn_sh (pc, &disasm_info);
 }

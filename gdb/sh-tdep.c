@@ -908,29 +908,8 @@ sh_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 static int
 gdb_print_insn_sh (bfd_vma memaddr, disassemble_info *info)
 {
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-    return print_insn_sh (memaddr, info);
-  else
-    return print_insn_shl (memaddr, info);
-}
-
-/* Disassemble an instruction.  */
-static int
-gdb_print_insn_sh64 (bfd_vma memaddr, disassemble_info *info)
-{
-  if (pc_is_isa32 (memaddr))
-    {
-      /* Round down the instruction address to the appropriate boundary
-	 before disassembling it. */
-      return print_insn_sh64x_media (UNMAKE_ISA32_ADDR (memaddr), info);
-    }
-  else
-    {
-      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-	return print_insn_sh (memaddr, info);
-      else
-	return print_insn_shl (memaddr, info);
-    }
+  info->endian = TARGET_BYTE_ORDER;
+  return print_insn_sh (memaddr, info);
 }
 
 /* Given a GDB frame, determine the address of the calling function's frame.
@@ -4684,7 +4663,6 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       sh_store_return_value = sh64_store_return_value;
       skip_prologue_hard_way = sh64_skip_prologue_hard_way;
       do_pseudo_register = sh64_do_pseudo_register;
-      set_gdbarch_print_insn (gdbarch, gdb_print_insn_sh64);
       set_gdbarch_register_raw_size (gdbarch, sh_sh64_register_raw_size);
       set_gdbarch_register_virtual_size (gdbarch, sh_sh64_register_raw_size);
       set_gdbarch_register_byte (gdbarch, sh_sh64_register_byte);

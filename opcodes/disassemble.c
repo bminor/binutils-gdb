@@ -278,20 +278,7 @@ disassembler (abfd)
 #endif
 #ifdef ARCH_sh
     case bfd_arch_sh:
-#ifdef INCLUDE_SHMEDIA
-      if (bfd_get_mach (abfd) == bfd_mach_sh5)
-	{
-	  if (bfd_big_endian (abfd))
-	    disassemble = print_insn_sh64;
-	  else
-	    disassemble = print_insn_sh64l;
-	  break;
-	}
-#endif
-      if (bfd_big_endian (abfd))
-	disassemble = print_insn_sh;
-      else
-	disassemble = print_insn_shl;
+      disassemble = print_insn_sh;
       break;
 #endif
 #ifdef ARCH_sparc

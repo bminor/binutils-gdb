@@ -1,3 +1,17 @@
+Fri May 17 14:26:44 2002  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* disassemble.c (disassembler): Just use print_insn_sh for bfd_arch_sh.
+	* sh-dis.c (LITTLE_BIT): Delete.
+	(print_insn_sh, print_insn_shl): Deleted.
+	(print_insn_shx): Renamed to
+	(print_insn_sh).  No longer static.  Handle SHmedia instructions.
+	Use info->endian to determine endianness.
+	* sh64-dis.c (print_insn_sh64, print_insn_sh64l): Delete.
+	(print_insn_sh64x): No longer static.  Renamed to
+	(print_insn_sh64).  Removed pfun_compact and endian arguments.
+	If we got an uneven address to indicate SHmedia, adjust it.
+	Return -2 for SHcompact instructions.
+
 2002-05-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* acinclude.m4 (AM_INSTALL_LIBBFD): Fake to fool autotools.
