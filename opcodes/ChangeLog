@@ -1,3 +1,44 @@
+Wed Aug 13 18:52:11 1997  Nick Clifton  <nickc@cygnus.com>
+
+start-sanitize-v850e
+	* .Sanitize (Do-first): Add support for keep-v850e command line
+	option. 
+end-sanitize-v850e
+start-sanitize-v850eq
+	* .Sanitize (Do-first): Add support for keep-v850eq command line
+	option. 
+end-sanitize-v850eq
+
+start-sanitize-v850e
+	* v850-dis.c (disassemble): Add support for v850E instructions.
+end-sanitize-v850e
+start-sanitize-v850eq
+	* v850-dis.c (disassemble): Add support for v850EQ instructions.
+end-sanitize-v850eq
+
+	* v850-opc.c: Reorganised and re-layed out to improve readability
+	and portability.
+
+start-sanitize-v850e
+	* v850-opc.c (insert_d5_4, extract_d5_4, insert_d16_16,
+	extract_d16_16, insert_i9, extract_i9, insert_u9, extract_u9,
+	insert_spe, extract_spe): New Functions.
+	(v850_opcodes): Add v850E instructions.
+start-sanitize-v850e
+	
+start-sanitize-v850eq
+	* v850-opc.c (insert_i5div, extract_i5div): New Functions.
+	(v850_opcodes): Add v850EQ instructions.
+start-sanitize-v850eq
+
+Tue Aug  5 23:09:31 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: Rebuild with autoconf 2.12.1.
+
+Mon Aug  4 12:02:16 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* aclocal.m4, configure: Rebuild with new automake patches.
+
 Fri Aug  1 13:02:04 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Set enable_shared before AM_PROG_LIBTOOL.
