@@ -476,40 +476,38 @@ store_inferior_registers (int regno)
 
 #if !defined (CHILD_XFER_MEMORY)
 /* NOTE! I tried using PTRACE_READDATA, etc., to read and write memory
-   in the NEW_SUN_PTRACE case.
-   It ought to be straightforward.  But it appears that writing did
-   not write the data that I specified.  I cannot understand where
-   it got the data that it actually did write.  */
+   in the NEW_SUN_PTRACE case.  It ought to be straightforward.  But
+   it appears that writing did not write the data that I specified.  I
+   cannot understand where it got the data that it actually did write.  */
 
-/* Copy LEN bytes to or from inferior's memory starting at MEMADDR
-   to debugger memory starting at MYADDR.   Copy to inferior if
-   WRITE is nonzero.  TARGET is ignored.
+/* Copy LEN bytes to or from inferior's memory starting at MEMADDR to
+   debugger memory starting at MYADDR.  Copy to inferior if WRITE is
+   nonzero.  TARGET is ignored.
 
-   Returns the length copied, which is either the LEN argument or zero.
-   This xfer function does not do partial moves, since child_ops
-   doesn't allow memory operations to cross below us in the target stack
-   anyway.  */
+   Returns the length copied, which is either the LEN argument or
+   zero.  This xfer function does not do partial moves, since
+   child_ops doesn't allow memory operations to cross below us in the
+   target stack anyway.  */
 
 int
 child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 		   struct mem_attrib *attrib ATTRIBUTE_UNUSED,
 		   struct target_ops *target)
 {
-  register int i;
+  int i;
   /* Round starting address down to longword boundary.  */
-  register CORE_ADDR addr = memaddr & -(CORE_ADDR) sizeof (PTRACE_XFER_TYPE);
+  CORE_ADDR addr = memaddr & -(CORE_ADDR) sizeof (PTRACE_XFER_TYPE);
   /* Round ending address up; get number of longwords that makes.  */
-  register int count
-  = (((memaddr + len) - addr) + sizeof (PTRACE_XFER_TYPE) - 1)
-  / sizeof (PTRACE_XFER_TYPE);
+  int count = ((((memaddr + len) - addr) + sizeof (PTRACE_XFER_TYPE) - 1)
+	       / sizeof (PTRACE_XFER_TYPE));
   /* Allocate buffer of that many longwords.  */
-  register PTRACE_XFER_TYPE *buffer
-  = (PTRACE_XFER_TYPE *) alloca (count * sizeof (PTRACE_XFER_TYPE));
+  PTRACE_XFER_TYPE *buffer =
+    (PTRACE_XFER_TYPE *) alloca (count * sizeof (PTRACE_XFER_TYPE));
 
   if (write)
     {
-      /* Fill start and end extra bytes of buffer with existing memory data.  */
-
+      /* Fill start and end extra bytes of buffer with existing memory
+         data.  */
       if (addr != memaddr || len < (int) sizeof (PTRACE_XFER_TYPE))
 	{
 	  /* Need part of initial word -- fetch it.  */
@@ -517,23 +515,19 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 			      (PTRACE_ARG3_TYPE) addr, 0);
 	}
 
-      if (count > 1)		/* FIXME, avoid if even boundary */
+      if (count > 1)		/* FIXME, avoid if even boundary.  */
 	{
-	  buffer[count - 1] 
-	    = ptrace (PT_READ_I, PIDGET (inferior_ptid),
-		      ((PTRACE_ARG3_TYPE)
-		       (addr + (count - 1) * sizeof (PTRACE_XFER_TYPE))),
-		      0);
+	  buffer[count - 1] =
+	    ptrace (PT_READ_I, PIDGET (inferior_ptid),
+		    ((PTRACE_ARG3_TYPE)
+		     (addr + (count - 1) * sizeof (PTRACE_XFER_TYPE))), 0);
 	}
 
-      /* Copy data to be written over corresponding part of buffer */
-
+      /* Copy data to be written over corresponding part of buffer.  */
       memcpy ((char *) buffer + (memaddr & (sizeof (PTRACE_XFER_TYPE) - 1)),
-	      myaddr,
-	      len);
+	      myaddr, len);
 
       /* Write the entire buffer.  */
-
       for (i = 0; i < count; i++, addr += sizeof (PTRACE_XFER_TYPE))
 	{
 	  errno = 0;
@@ -556,7 +550,7 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
     }
   else
     {
-      /* Read all the longwords */
+      /* Read all the longwords.  */
       for (i = 0; i < count; i++, addr += sizeof (PTRACE_XFER_TYPE))
 	{
 	  errno = 0;
@@ -572,6 +566,7 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	      (char *) buffer + (memaddr & (sizeof (PTRACE_XFER_TYPE) - 1)),
 	      len);
     }
+
   return len;
 }
 
