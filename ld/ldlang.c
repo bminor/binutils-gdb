@@ -867,7 +867,7 @@ open_output (name)
 
   if (output == (bfd *) NULL)
     {
-      if (bfd_error == invalid_target)
+      if (bfd_get_error () == bfd_error_invalid_target)
 	{
 	  einfo ("%P%F: target %s not found\n", output_target);
 	}
@@ -1792,10 +1792,10 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	    i->owner->symcount = is->ifile->symbol_count;
 	  }
 
-	bfd_error = no_error;
+	bfd_set_error (bfd_error_no_error);
 	if (bfd_relax_section (i->owner, i, &link_info, is->ifile->asymbols))
 	  had_relax = true;
-	else if (bfd_error != no_error)
+	else if (bfd_get_error () != bfd_error_no_error)
 	  einfo ("%P%F: can't relax section: %E");
       }
       else  {

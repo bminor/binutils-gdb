@@ -1,5 +1,5 @@
 /* ldmisc.c
-   Copyright (C) 1991, 1993 Free Software Foundation, Inc.
+   Copyright (C) 1991, 92, 93, 94 Free Software Foundation, Inc.
 
    Written by Steve Chamberlain of Cygnus Support.
 
@@ -170,7 +170,7 @@ vfinfo(fp, fmt, arg)
 
        case 'E':
 	/* current bfd error or errno */
-	fprintf(fp, bfd_errmsg(bfd_error));
+	fprintf(fp, bfd_errmsg(bfd_get_error ()));
 	break;
 
        case 'I':
@@ -237,7 +237,7 @@ vfinfo(fp, fmt, arg)
 	      unsigned int symbol_count;
 
 	      symsize = get_symtab_upper_bound (abfd);
-	      asymbols = (asymbol **) ldmalloc (symsize);
+	      asymbols = (asymbol **) xmalloc (symsize);
 	      symbol_count = bfd_canonicalize_symtab (abfd, asymbols);
 	      if (entry != (lang_input_statement_type *) NULL)
 		{
@@ -280,16 +280,7 @@ vfinfo(fp, fmt, arg)
   }
 
   if (fatal == true) 
-  {
-    if (output_filename) 
-    {
-      if (output_bfd && output_bfd->iostream)
-       fclose((FILE *)(output_bfd->iostream));
-      if (delete_output_file_on_failure)
-	unlink (output_filename);
-    }
-    exit(1);
-  }
+    xexit(1);
 }
 
 /* Format info message and print on stdout. */
@@ -370,7 +361,7 @@ concat (s1, s2, s3)
   size_t len1 = strlen (s1);
   size_t len2 = strlen (s2);
   size_t len3 = strlen (s3);
-  char *result = ldmalloc (len1 + len2 + len3 + 1);
+  char *result = xmalloc (len1 + len2 + len3 + 1);
 
   if (len1 != 0)
     memcpy(result, s1, len1);
@@ -383,55 +374,12 @@ concat (s1, s2, s3)
   return result;
 }
 
-
-PTR
-ldmalloc (size)
-     size_t size;
-{
-  PTR result =  malloc ((int)size);
-
-  if (result == (char *)NULL && size != 0)
-    einfo("%F%P: virtual memory exhausted\n");
-
-  return result;
-} 
-
-PTR
-xmalloc (size)
-     int size;
-{
-  return ldmalloc ((size_t) size);
-}
-
-
-PTR
-ldrealloc (ptr, size)
-     PTR ptr;
-     size_t size;
-{
-  PTR result =  realloc (ptr, (int)size);
-
-  if (result == (char *)NULL && size != 0)
-    einfo("%F%P: virtual memory exhausted\n");
-
-  return result;
-} 
-
-PTR
-xrealloc (ptr, size)
-     PTR ptr;
-     int size;
-{
-  return ldrealloc (ptr, (size_t) size);
-}
-
-
 char *
 buystring (x)
      CONST char *CONST x;
 {
   size_t l = strlen(x)+1;
-  char *r = ldmalloc(l);
+  char *r = xmalloc(l);
   memcpy(r, x,l);
   return r;
 }

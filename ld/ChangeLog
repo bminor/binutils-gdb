@@ -1,3 +1,8 @@
+Thu Feb 17 09:32:14 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* ldlang.c, ldmain.c, ldmisc.c: Use bfd_get_error and
+	bfd_set_error and new error names. 
+
 Tue Feb 15 20:14:53 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* ldwrite.c (build_link_order): If the cooked size of the section

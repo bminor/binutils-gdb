@@ -153,10 +153,11 @@ main (argc, argv)
   long start_time = get_run_time ();
 
   program_name = argv[0];
+  xmalloc_set_program_name (program_name);
 
   bfd_init ();
 
-  atexit (remove_output);
+  xatexit (remove_output);
 
   /* Initialize the data about options.  */
   trace_files = trace_file_tries = version_printed = false;
@@ -308,7 +309,7 @@ main (argc, argv)
       char *lim = (char *) sbrk (0);
       long run_time = get_run_time () - start_time;
 
-      fprintf (stderr, "%s: total time in link: %d.%06d\n",
+      fprintf (stderr, "%s: total time in link: %ld.%06ld\n",
 	       program_name, run_time / 1000000, run_time % 1000000);
       fprintf (stderr, "%s: data size %ld\n", program_name,
 	       (long) (lim - (char *) &environ));
@@ -483,7 +484,7 @@ add_keepsyms_file (filename)
   file = fopen (filename, "r");
   if (file == (FILE *) NULL)
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       einfo ("%X%P: %s: %E", filename);
       return;
     }
