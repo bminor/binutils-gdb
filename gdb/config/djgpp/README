@@ -65,21 +65,33 @@ use unzip32.exe available with the rest of DJGPP), and proceed to the
 section "How to build" below.
 
 Source distributions downloaded from one of the GNU FTP sites need
-some more work to unpack.  First, you MUST use the `djtar' program to
-unzip the package.  That's because some file names in the official
-distributions need to be changed to avoid problems on the various
-platforms supported by DJGPP.  `djtar' can rename files on the fly
-given a file with name mappings; the distribution includes a file
-`gdb/config/djgpp/fnchange.lst' with the necessary mappings.  So you
-need first to retrieve that file, and then invoke `djtar' to unpack
-the distribution.  Here's how:
+some more work to unpack.  First, you MUST use the `djunpack' batch
+file to unzip the package.  That's because some file names in the
+official distributions need to be changed to avoid problems on the
+various platforms supported by DJGPP.  `djunpack' invokes the `djtar'
+program (that is part of the basic DJGPP development kit) to rename
+these files on the fly given a file with name mappings; the
+distribution includes a file `gdb/config/djgpp/fnchange.lst' with the
+necessary mappings.  So you need first to retrieve that batch file,
+and then invoke it to unpack the distribution.  Here's how:
 
+ djtar -x -p -o gdb-5.0/djunpack.bat gdb-5.0.tar.gz > djunpack.bat
+ djunpack gdb-5.0.tar.gz
 
- djtar -x -p -o gdb-5.0/gdb/config/djgpp/fnchange.lst gdb-5.0.tar.gz > lst
- djtar -x -n lst gdb-5.0.tar.gz
+(The name of the distribution archive and the leading directory of the
+path to `djunpack.bat' in the distribution will be different for
+versions of GDB other than 5.0.)
 
-(The name of the distribution archive and the top-level directory will
-be different for versions other than 5.0.)
+If the argument to `djunpack.bat' include leading directories, it MUST
+be given with the DOS-style backslashes; Unix-style forward slashes
+will NOT work.
+
+If the distribution comes as a .tar.bz2 archive, you need to unpack it
+as follows:
+
+ bnzip2 gdb-5.0.tar.bz2
+ djtar -x -p -o gdb-5.0/djunpack.bat gdb-5.0.tar > djunpack.bat
+ djunpack gdb-5.0.tar
 
 
 3. How to build
