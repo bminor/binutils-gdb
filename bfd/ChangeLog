@@ -1,3 +1,15 @@
+Fri May 10 12:34:48 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
+
+	* Makefile.in, m68kcoff.c, targets.c
+	Test new structure code with a 68k coff implementaion
+
+	* coff-code.h, icoff.c, coffswap.c, libcoff.h 
+	Fixed all the places where there were problems with the size and
+	alignments of structures on disk and structures in memory. #ifed out
+	all the code in coffswap.c, since it should be done using the target
+	swap routines now.
+
+
 Thu May  9 11:00:45 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
 	* ieee.c (do_one, ieee_slurp_section_data): now supports the load
