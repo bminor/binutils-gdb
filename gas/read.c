@@ -1,5 +1,5 @@
 /* read.c - read a source file -
-   Copyright (C) 1986, 1987, 1990, 1991, 1993, 1994
+   Copyright (C) 1986, 87, 90, 91, 92, 93, 94, 95, 1996
    Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
@@ -331,6 +331,7 @@ static const pseudo_typeS potable[] =
   {"lsym", s_lsym, 0},
   {"macro", s_macro, 0},
   {"mexit", s_mexit, 0},
+  {"name", s_ignore, 0},
   {"noformat", s_ignore, 0},
   {"nolist", listing_list, 0},	/* Turn listing off */
   {"nopage", listing_nopage, 0},
@@ -506,7 +507,7 @@ read_a_source_file (name)
 
 	      line_label = NULL;
 
-	      if (flag_mri
+	      if (flag_m68k_mri
 #ifdef LABELS_WITHOUT_COLONS
 		  || 1
 #endif
@@ -525,7 +526,7 @@ read_a_source_file (name)
 
 		      /* In MRI mode, the EQU pseudoop must be
 			 handled specially.  */
-		      if (flag_mri)
+		      if (flag_m68k_mri)
 			{
 			  char *rest = input_line_pointer + 1;
 
@@ -595,7 +596,7 @@ read_a_source_file (name)
 	       */
 	      if (TC_START_LABEL(c, input_line_pointer))
 		{
-		  if (flag_mri)
+		  if (flag_m68k_mri)
 		    {
 		      char *rest = input_line_pointer + 1;
 
@@ -649,11 +650,7 @@ read_a_source_file (name)
 		  }
 #endif
 
-#ifndef MRI_MODE_NEEDS_PSEUDO_DOT
-#define MRI_MODE_NEEDS_PSEUDO_DOT 0
-#endif
-
-		  if ((flag_mri && ! MRI_MODE_NEEDS_PSEUDO_DOT)
+		  if (flag_m68k_mri
 #ifdef NO_PSEUDO_DOT
 		      || 1
 #endif
@@ -667,8 +664,7 @@ read_a_source_file (name)
 		    }
 
 		  if (pop != NULL
-		      || ((! flag_mri || MRI_MODE_NEEDS_PSEUDO_DOT)
-			  && *s == '.'))
+		      || (! flag_m68k_mri && *s == '.'))
 		    {
 		      /*
 		       * PSEUDO - OP.
@@ -742,7 +738,7 @@ read_a_source_file (name)
 #endif
 			     )
 			{
-			  if (flag_mri && *input_line_pointer == '\'')
+			  if (flag_m68k_mri && *input_line_pointer == '\'')
 			    inquote = ! inquote;
 			  input_line_pointer++;
 			}
@@ -941,6 +937,11 @@ read_a_source_file (name)
 
 	  HANDLE_CONDITIONAL_ASSEMBLY ();
 
+#ifdef tc_unrecognized_line
+	  if (tc_unrecognized_line (c))
+	    continue;
+#endif
+
 	  /* as_warn("Junk character %d.",c);  Now done by ignore_rest */
 	  input_line_pointer--;	/* Report unknown char as ignored. */
 	  ignore_rest_of_line ();
@@ -986,7 +987,7 @@ mri_comment_field (stopcp)
   char *s;
   int inquote = 0;
 
-  know (flag_mri);
+  know (flag_m68k_mri);
 
   for (s = input_line_pointer;
        ((! is_end_of_line[(unsigned char) *s] && *s != ' ' && *s != '\t')
@@ -1388,6 +1389,14 @@ s_app_file (appfile)
 	 the buffer.  Passing -2 to new_logical_line tells it to
 	 account for it.  */
       new_logical_line (s, appfile ? -2 : -1);
+
+      /* In MRI mode, the preprocessor may have inserted an extraneous
+         backquote.  */
+      if (flag_m68k_mri
+	  && *input_line_pointer == '\''
+	  && is_end_of_line[(unsigned char) input_line_pointer[1]])
+	++input_line_pointer;
+
       demand_empty_rest_of_line ();
 #ifdef LISTING
       if (listing)
@@ -1765,6 +1774,10 @@ s_lcomm (needs_align)
 	  S_SET_STORAGE_CLASS (symbolP, C_STAT);
 	}
 #endif /* OBJ_COFF */
+
+#ifdef S_SET_SIZE
+      S_SET_SIZE (symbolP, temp);
+#endif
     }
   else
     as_bad ("Ignoring attempt to re-define symbol `%s'.",
@@ -1957,17 +1970,15 @@ s_org (ignore)
   expressionS exp;
   register long temp_fill;
 
-#ifdef TC_M68K
   /* The m68k MRI assembler has a different meaning for .org.  It
      means to create an absolute section at a given address.  We can't
      support that--use a linker script instead.  */
-  if (flag_mri)
+  if (flag_m68k_mri)
     {
       as_bad ("MRI style ORG pseudo-op not supported");
       ignore_rest_of_line ();
       return;
     }
-#endif
 
   /* Don't believe the documentation of BSD 4.2 AS.  There is no such
      thing as a sub-segment-relative origin.  Any absolute origin is
@@ -2717,7 +2728,8 @@ cons_worker (nbytes, rva)
 
   if (is_it_end_of_statement ())
     {
-      mri_comment_end (stop, stopc);
+      if (flag_mri)
+	mri_comment_end (stop, stopc);
       demand_empty_rest_of_line ();
       return;
     }
@@ -2725,7 +2737,7 @@ cons_worker (nbytes, rva)
   c = 0;
   do
     {
-      if (flag_mri)
+      if (flag_m68k_mri)
 	parse_mri_cons (&exp, (unsigned int) nbytes);
       else
 	TC_PARSE_CONS_EXPRESSION (&exp, (unsigned int) nbytes);
@@ -3850,7 +3862,7 @@ s_include (arg)
   FILE *try;
   char *path;
 
-  if (! flag_mri)
+  if (! flag_m68k_mri)
     filename = demand_copy_string (&i);
   else
     {

@@ -1,5 +1,6 @@
 /* This is the Assembler Pre-Processor
-   Copyright (C) 1987, 1990, 1991, 1992, 1994 Free Software Foundation, Inc.
+   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 1996
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -71,7 +72,7 @@ do_scrub_begin ()
   lex[';'] = LEX_IS_LINE_SEPARATOR;
   lex[':'] = LEX_IS_COLON;
 
-  if (! flag_mri)
+  if (! flag_m68k_mri)
     {
       lex['"'] = LEX_IS_STRINGQUOTE;
 
@@ -121,7 +122,7 @@ do_scrub_begin ()
       lex['*'] = LEX_IS_TWOCHAR_COMMENT_2ND;
     }
 
-  if (flag_mri)
+  if (flag_m68k_mri)
     {
       lex['\''] = LEX_IS_STRINGQUOTE;
       lex[';'] = LEX_IS_COMMENT_START;
@@ -393,7 +394,10 @@ do_scrub_chars (get, tostart, tolen)
 	      if (ch == '"')
 		{
 		  UNGET (ch);
-		  out_string = "\n\t.appfile ";
+		  if (flag_m68k_mri)
+		    out_string = "\n\tappfile ";
+		  else
+		    out_string = "\n\t.appfile ";
 		  old_state = 7;
 		  state = -1;
 		  PUT (*out_string++);
@@ -459,7 +463,7 @@ do_scrub_chars (get, tostart, tolen)
 	      PUT (ch);
 	    }
 #endif
-	  else if (flag_mri && ch == '\n')
+	  else if (flag_m68k_mri && ch == '\n')
 	    {
 	      /* Just quietly terminate the string.  This permits lines like
 		   bne	label	loop if we haven't reach end yet
@@ -563,14 +567,6 @@ do_scrub_chars (get, tostart, tolen)
       switch (lex[ch])
 	{
 	case LEX_IS_WHITESPACE:
-	  if (state == 0)
-	    {
-	      /* Preserve a single whitespace character at the
-		 beginning of a line.  */
-	      state = 1;
-	      PUT (ch);
-	      break;
-	    }
 	  do
 	    {
 	      ch = GET ();
@@ -579,15 +575,24 @@ do_scrub_chars (get, tostart, tolen)
 	  if (ch == EOF)
 	    goto fromeof;
 
+	  if (state == 0)
+	    {
+	      /* Preserve a single whitespace character at the
+		 beginning of a line.  */
+	      state = 1;
+	      UNGET (ch);
+	      PUT (' ');
+	      break;
+	    }
+
 	  if (IS_COMMENT (ch)
-	      || (state == 0 && IS_LINE_COMMENT (ch))
 	      || ch == '/'
 	      || IS_LINE_SEPARATOR (ch))
 	    {
 	      /* cpp never outputs a leading space before the #, so
 		 try to avoid being confused.  */
 	      not_cpp_line = 1;
-	      if (flag_mri)
+	      if (flag_m68k_mri)
 		{
 		  /* In MRI mode, we keep these spaces.  */
 		  UNGET (ch);
@@ -604,7 +609,7 @@ do_scrub_chars (get, tostart, tolen)
 	     not permitted between the label and the colon.  */
 	  if ((state == 2 || state == 11)
 	      && lex[ch] == LEX_IS_COLON
-	      && ! flag_mri)
+	      && ! flag_m68k_mri)
 	    {
 	      state = 1;
 	      PUT (ch);
@@ -632,7 +637,7 @@ do_scrub_chars (get, tostart, tolen)
 	      PUT (' ');
 	      break;
 	    case 3:
-	      if (flag_mri)
+	      if (flag_m68k_mri)
 		{
 		  /* In MRI mode, we keep these spaces.  */
 		  UNGET (ch);
@@ -642,7 +647,7 @@ do_scrub_chars (get, tostart, tolen)
 	      goto recycle;	/* Sp in operands */
 	    case 9:
 	    case 10:
-	      if (flag_mri)
+	      if (flag_m68k_mri)
 		{
 		  /* In MRI mode, we keep these spaces.  */
 		  state = 3;
@@ -852,7 +857,10 @@ do_scrub_chars (get, tostart, tolen)
 	      UNGET (ch);
 	      old_state = 4;
 	      state = -1;
-	      out_string = "\t.appline ";
+	      if (flag_m68k_mri)
+		out_string = "\tappline ";
+	      else
+		out_string = "\t.appline ";
 	      PUT (*out_string++);
 	      break;
 	    }
@@ -862,10 +870,10 @@ do_scrub_chars (get, tostart, tolen)
 	     character, fall through.  Otherwise treat it as a default
 	     character.  */
 	  if (strchr (comment_chars, ch) == NULL
-	      && (! flag_mri
+	      && (! flag_m68k_mri
 		  || (ch != '!' && ch != '*')))
 	    goto de_fault;
-	  if (flag_mri
+	  if (flag_m68k_mri
 	      && (ch == '!' || ch == '*')
 	      && state != 1
 	      && state != 10)
