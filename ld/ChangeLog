@@ -1,3 +1,8 @@
+Thu Mar 27 17:14:32 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* lexsup.c (parse_args): Update copyright date in version
+	message.
+
 Fri Mar 21 12:28:41 1997  Philippe De Muyter  <phdm@info.ucl.ac.be>
 
 	* emulparams/delta68.sh (OUTPUT_FORMAT): Set to "coff-m68k-sysv".
@@ -230,13 +235,11 @@ Fri Jan 24 10:44:09 1997  Jeffrey A Law  (law@cygnus.com)
 	stack up to 0x80000.
 	* emulparms/mn10300.sh (OTHER_RELOCATING_SECTIONS): Likewise.
 
-start-sanitize-m32r
 Tue Jan 21 12:11:10 1997  Doug Evans  <dje@seba.cygnus.com>
 
 	* emulparams/m32relf.sh (OTHER_RELOCATING_SECTIONS): Use PROVIDE
 	to define `_stack'.
 
-end-sanitize-m32r
 Thu Jan 16 17:07:52 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld.h (args_type): Rename auxiliary_filter_shlib to
@@ -444,12 +447,10 @@ Mon Oct 21 17:16:59 1996  Michael Meissner  <meissner@wogglebug.tiac.net>
 
 	* Makefile.in (ed10velf.c): Depend on elfd10v.sc, not elf.sc.
 
-start-sanitize-m32r
 Fri Oct 18 22:12:49 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* emulparams/m32relf.sh	(TEXT_START_ADDR): Change from 0 to 0x100.
 
-end-sanitize-m32r
 Fri Oct 18 15:43:38 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (ALL_EMULATIONS): Remove eelf64alpha.o.
@@ -470,12 +471,10 @@ Thu Oct 17 18:14:07 1996  Ian Lance Taylor  <ian@cygnus.com>
 	* ld.texinfo: Try to consistently use a single or a double dash
 	for each option.
 
-start-sanitize-m32r
 Thu Oct 17 10:17:20 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* emulparams/m32relf.sh (EMBEDDED): Define.
 
-end-sanitize-m32r
 start-sanitize-v850
 Thu Oct 17 10:56:49 1996  Jeffrey A Law  (law@cygnus.com)
 
@@ -581,14 +580,12 @@ Tue Oct  1 15:50:34 1996  Ian Lance Taylor  <ian@cygnus.com>
 	standards.
 	(help): Print bug report address.
 
-start-sanitize-m32r
 Mon Sep 30 12:14:43 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* Makefile.in (em32relf.c): Add rule for.
 	* configure.tgt (m32r-*-*): Recognize.
 	* emulparams/m32relf.sh: New file.
 
-end-sanitize-m32r
 Thu Sep 26 13:58:47 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-make.sed: Add symbolic doublequoting to ldmain compile edit.
