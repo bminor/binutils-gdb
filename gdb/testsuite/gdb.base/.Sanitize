@@ -33,6 +33,7 @@ break.c
 break.exp
 callfuncs.c
 callfuncs.exp
+commands.exp
 configure.in
 corefile.exp
 coremaker.c

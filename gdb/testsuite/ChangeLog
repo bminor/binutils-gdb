@@ -1,3 +1,7 @@
+Wed Sep  7 23:33:51 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gdb.base/commands.exp: New tests for if/while commands.
+
 Tue Sep  6 13:16:11 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* lib/gdb.exp (runto):  Replace sub-pattern for hex value
