@@ -13,7 +13,7 @@
 
 # The lines between the "Do-first:" line and the "Things-to-keep:"
 # line are executed as a /bin/sh shell script before anything else is
-# done in this 
+# done in this
 
 Do-first:
 
@@ -56,6 +56,10 @@ gld960.em
 gld960.sh
 go32.sh
 hp300bsd.sh
+hp3hpux.sh
+hppaosf.em
+hppaosf.sc-sh
+hppaosf.sh
 h8300hms.em
 h8300hms.sc-sh
 h8300hms.sh
@@ -118,8 +122,8 @@ mkscript.c
 news.sh
 relax.c
 relax.h
-sh.em 
-sh.sc-sh 
+sh.em
+sh.sc-sh
 sh.sh
 st2000.em
 st2000.sc-sh
