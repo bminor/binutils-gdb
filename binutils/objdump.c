@@ -199,7 +199,7 @@ dump_section_header (abfd, section, ignored)
 {
   char *comma = "";
 
-  printf ("%3d %-14s%08lx  ", section->index,
+  printf ("%3d %-13s %08lx  ", section->index,
 	  bfd_get_section_name (abfd, section),
 	  (unsigned long) bfd_section_size (abfd, section));
   printf_vma (bfd_get_section_vma (abfd, section));
@@ -232,7 +232,33 @@ dump_section_header (abfd, section, ignored)
   PF (SEC_DEBUGGING, "DEBUGGING");
   PF (SEC_NEVER_LOAD, "NEVER_LOAD");
   PF (SEC_EXCLUDE, "EXCLUDE");
-  PF (SEC_SORT_ENTRIES, "SORT ENTRIES");
+  PF (SEC_SORT_ENTRIES, "SORT_ENTRIES");
+
+  if ((section->flags & SEC_LINK_ONCE) != 0)
+    {
+      const char *ls;
+
+      switch (section->flags & SEC_LINK_DUPLICATES)
+	{
+	default:
+	  abort ();
+	case SEC_LINK_DUPLICATES_DISCARD:
+	  ls = "LINK_ONCE_DISCARD";
+	  break;
+	case SEC_LINK_DUPLICATES_ONE_ONLY:
+	  ls = "LINK_ONCE_ONE_ONLY";
+	  break;
+	case SEC_LINK_DUPLICATES_SAME_SIZE:
+	  ls = "LINK_ONCE_SAME_SIZE";
+	  break;
+	case SEC_LINK_DUPLICATES_SAME_CONTENTS:
+	  ls = "LINK_ONCE_SAME_CONTENTS";
+	  break;
+	}
+      printf ("%s%s", comma, ls);
+      comma = ", ";
+    }
+
   printf ("\n");
 #undef PF
 }
@@ -1089,6 +1115,8 @@ disassemble_data (abfd)
 			    sym_name = "*unknown*";
 			}
 		    }
+		  else
+		    sym_name = "*unknown*";
 
 		  printf ("%s", sym_name);
 
@@ -1328,6 +1356,7 @@ dump_bfd_header (abfd)
   PF (BFD_IS_RELAXABLE, "BFD_IS_RELAXABLE");
   printf ("\nstart address 0x");
   printf_vma (abfd->start_address);
+  printf ("\n");
 }
 
 static void

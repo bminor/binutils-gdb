@@ -1,3 +1,8 @@
+Fri Mar 29 16:11:33 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objdump.c (dump_section_header): Print the SEC_LINK_ONCE flag
+	and the SEC_LINK_DUPLICATES field.
+
 Fri Mar 29 11:35:55 1996  J.T. Conklin  (jtc@lisa.cygnus.com)
 
 	* nlmconv.1: Changed to be recognized by catman -w on Solaris.
