@@ -247,7 +247,7 @@ extern void discard_cleanups PARAMS ((struct cleanup *));
 extern void discard_final_cleanups PARAMS ((struct cleanup *));
 extern void discard_my_cleanups PARAMS ((struct cleanup **, struct cleanup *));
 
-typedef void (*make_cleanup_func) (void *);
+typedef void (*make_cleanup_func) PARAMS ((void *));
 
 extern struct cleanup *make_cleanup PARAMS ((make_cleanup_func, void *));
 
@@ -286,9 +286,13 @@ extern void mfree PARAMS ((PTR, PTR));
 extern void set_demangling_style PARAMS ((char *));
 
 /* From tm.h */
+
 struct type;
 typedef int (use_struct_convention_fn) PARAMS ((int gcc_p, struct type *value_type));
 extern use_struct_convention_fn generic_use_struct_convention;
+
+typedef unsigned char *(breakpoint_from_pc_fn) PARAMS ((CORE_ADDR *pcptr, int *lenptr));
+
 
 
 /* Annotation stuff.  */

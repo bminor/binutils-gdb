@@ -105,7 +105,7 @@ struct target_thread_vector
 
 extern void bind_target_thread_vector PARAMS((struct target_thread_vector * vec)) ;
 
-extern struct target_thread_vector * unbind_target_thread_vector(void) ;
+extern struct target_thread_vector * unbind_target_thread_vector PARAMS ((void)) ;
 
 extern int target_get_thread_info PARAMS((
 				  gdb_threadref * ref,

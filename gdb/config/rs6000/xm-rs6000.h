@@ -1,5 +1,5 @@
 /* Parameters for hosting on an RS6000, for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1986-87, 1989, 1991-96, 1998 Free Software Foundation, Inc.
    Contributed by IBM Corporation.
 
 This file is part of GDB.
@@ -72,7 +72,7 @@ extern char *strdup PARAMS ((char *));
 /* Signal handler for SIGWINCH `window size changed'. */
 
 #define	SIGWINCH_HANDLER  aix_resizewindow
-extern	void	aix_resizewindow PARAMS ((void));
+extern void aix_resizewindow PARAMS ((int));
 
 /* This doesn't seem to be declared in any header file I can find.  */
 char *termdef PARAMS ((int, int));
@@ -82,10 +82,11 @@ char *termdef PARAMS ((int, int));
 #define	SIGWINCH_HANDLER_BODY	\
 									\
 /* Respond to SIGWINCH `window size changed' signal, and reset GDB's	\
-   window settings approproatelt. */					\
+   window settings appropriately. */					\
 									\
 void 						\
-aix_resizewindow ()				\
+aix_resizewindow (signo)			\
+     int signo;					\
 {						\
   int fd = fileno (stdout);			\
   if (isatty (fd)) {				\

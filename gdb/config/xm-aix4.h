@@ -1,5 +1,5 @@
 /* Parameters for hosting on an PowerPC, for GDB, the GNU debugger.
-   Copyright 1995 Free Software Foundation, Inc.
+   Copyright 1995, 1998 Free Software Foundation, Inc.
    Contributed by Cygnus Corporation.
 
 This file is part of GDB.
@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* The following text is taken from config/rs6000.mh:
  * # The IBM version of /usr/include/rpc/rpc.h has a bug -- it says
@@ -70,17 +70,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Signal handler for SIGWINCH `window size changed'. */
 
 #define	SIGWINCH_HANDLER  aix_resizewindow
-extern void aix_resizewindow PARAMS ((void));
+extern void aix_resizewindow PARAMS ((int));
 
 /* `lines_per_page' and `chars_per_line' are local to utils.c. Rectify this. */
 
 #define	SIGWINCH_HANDLER_BODY	\
 									\
 /* Respond to SIGWINCH `window size changed' signal, and reset GDB's	\
-   window settings approproatelt. */					\
+   window settings appropriately. */					\
 									\
 void 						\
-aix_resizewindow ()				\
+aix_resizewindow (signo)			\
+     int signo;					\
 {						\
   int fd = fileno (stdout);			\
   if (isatty (fd)) {				\

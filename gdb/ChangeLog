@@ -1,3 +1,17 @@
+1998-12-08  Philippe De Muyter  <phdm@macqel.be>
+
+        * config/xm-aix4.h (SIGWINCH_HANDLER): Function `aix_resize_window'
+        must accept a signal number as parameter.
+        * config/rs6000/xm-rs6000.h (SIGWINCH_HANDLER): Ditto.
+        * utils.c (initialize_utils): Give a parameter to `SIGWINCH_HANDLER'.
+
+        * inferior.h (register_valid): Variable's type is `SIGNED char', not
+        `char'.
+        * findvar.c (register_valid): Ditto.
+
+        * defs.h (make_cleanup_func): Protect parameter list by `PARAMS'.
+        * gdbthread.h (unbind_target_thread_vector): Likewise. 
+
 Tue Dec  8 15:09:44 1998  Edith Epstein  <eepstein@sophia.cygnus.com>
 
         Merged in m68k-linux patch from Andreas Schwab
