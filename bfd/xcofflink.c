@@ -878,7 +878,8 @@ xcoff_link_add_symbols (abfd, info)
   struct xcoff_link_hash_entry **sym_hash;
   asection **csect_cache;
   bfd_size_type linesz;
-  asection *sub;
+  asection *o;
+  asection *last_real;
   boolean keep_syms;
   asection *csect;
   unsigned int csect_index;
@@ -1004,39 +1005,41 @@ xcoff_link_add_symbols (abfd, info)
 
   /* Read in the relocs and line numbers for each section.  */
   linesz = bfd_coff_linesz (abfd);
-  for (sub = abfd->sections; sub != NULL; sub = sub->next)
+  last_real = NULL;
+  for (o = abfd->sections; o != NULL; o = o->next)
     {
-      if ((sub->flags & SEC_RELOC) != 0)
+      last_real = o;
+      if ((o->flags & SEC_RELOC) != 0)
 	{
-	  reloc_info[sub->target_index].relocs =
-	    xcoff_read_internal_relocs (abfd, sub, true, (bfd_byte *) NULL,
+	  reloc_info[o->target_index].relocs =
+	    xcoff_read_internal_relocs (abfd, o, true, (bfd_byte *) NULL,
 					false, (struct internal_reloc *) NULL);
-	  reloc_info[sub->target_index].csects =
-	    (asection **) malloc (sub->reloc_count * sizeof (asection *));
-	  if (reloc_info[sub->target_index].csects == NULL)
+	  reloc_info[o->target_index].csects =
+	    (asection **) malloc (o->reloc_count * sizeof (asection *));
+	  if (reloc_info[o->target_index].csects == NULL)
 	    {
 	      bfd_set_error (bfd_error_no_memory);
 	      goto error_return;
 	    }
-	  memset (reloc_info[sub->target_index].csects, 0,
-		  sub->reloc_count * sizeof (asection *));
+	  memset (reloc_info[o->target_index].csects, 0,
+		  o->reloc_count * sizeof (asection *));
 	}
 
       if ((info->strip == strip_none || info->strip == strip_some)
-	  && sub->lineno_count > 0)
+	  && o->lineno_count > 0)
 	{
 	  bfd_byte *linenos;
 
-	  linenos = (bfd_byte *) malloc (sub->lineno_count * linesz);
+	  linenos = (bfd_byte *) malloc (o->lineno_count * linesz);
 	  if (linenos == NULL)
 	    {
 	      bfd_set_error (bfd_error_no_memory);
 	      goto error_return;
 	    }
-	  reloc_info[sub->target_index].linenos = linenos;
-	  if (bfd_seek (abfd, sub->line_filepos, SEEK_SET) != 0
-	      || (bfd_read (linenos, linesz, sub->lineno_count, abfd)
-		  != linesz * sub->lineno_count))
+	  reloc_info[o->target_index].linenos = linenos;
+	  if (bfd_seek (abfd, o->line_filepos, SEEK_SET) != 0
+	      || (bfd_read (linenos, linesz, o->lineno_count, abfd)
+		  != linesz * o->lineno_count))
 	    goto error_return;
 	}
     }
@@ -1606,11 +1609,24 @@ xcoff_link_add_symbols (abfd, info)
 		}
 	    }
 
+	  /* _bfd_generic_link_add_one_symbol may call the linker to
+	     generate an error message, and the linker may try to read
+	     the symbol table to give a good error.  Right now, the
+	     line numbers are in an inconsistent state, since they are
+	     counted both in the real sections and in the new csects.
+	     We need to leave the count in the real sections so that
+	     the linker can report the line number of the error
+	     correctly, so temporarily clobber the link to the csects
+	     so that the linker will not try to read the line numbers
+	     a second time from the csects.  */
+	  BFD_ASSERT (last_real->next == first_csect);
+	  last_real->next = NULL;
 	  if (! (_bfd_generic_link_add_one_symbol
 		 (info, abfd, name, flags, section, value,
 		  (const char *) NULL, copy, true,
 		  (struct bfd_link_hash_entry **) sym_hash)))
 	    goto error_return;
+	  last_real->next = first_csect;
 
 	  if (smtyp == XTY_CM)
 	    {
@@ -1650,30 +1666,34 @@ xcoff_link_add_symbols (abfd, info)
       csect_cache += sym.n_numaux + 1;
     }
 
-  /* Make sure that we have seen all the relocs.  */
-  for (sub = abfd->sections; sub != first_csect; sub = sub->next)
-    {
-      /* Reset the section size, since the data is now attached to the
-	 csects.  Don't reset the size of the .debug section, since we
-	 need to read it below in bfd_xcoff_size_dynamic_sections.  */
-      if (strcmp (bfd_get_section_name (abfd, sub), ".debug") != 0)
-	sub->_raw_size = 0;
+  BFD_ASSERT (last_real == NULL || last_real->next == first_csect);
 
-      if ((sub->flags & SEC_RELOC) != 0)
+  /* Make sure that we have seen all the relocs.  */
+  for (o = abfd->sections; o != first_csect; o = o->next)
+    {
+      /* Reset the section size and the line numebr count, since the
+	 data is now attached to the csects.  Don't reset the size of
+	 the .debug section, since we need to read it below in
+	 bfd_xcoff_size_dynamic_sections.  */
+      if (strcmp (bfd_get_section_name (abfd, o), ".debug") != 0)
+	o->_raw_size = 0;
+      o->lineno_count = 0;
+
+      if ((o->flags & SEC_RELOC) != 0)
 	{
 	  bfd_size_type i;
 	  struct internal_reloc *rel;
 	  asection **rel_csect;
 
-	  rel = reloc_info[sub->target_index].relocs;
-	  rel_csect = reloc_info[sub->target_index].csects;
-	  for (i = 0; i < sub->reloc_count; i++, rel++, rel_csect++)
+	  rel = reloc_info[o->target_index].relocs;
+	  rel_csect = reloc_info[o->target_index].csects;
+	  for (i = 0; i < o->reloc_count; i++, rel++, rel_csect++)
 	    {
 	      if (*rel_csect == NULL)
 		{
 		  (*_bfd_error_handler)
 		    ("%s: reloc %s:%d not in csect",
-		     bfd_get_filename (abfd), sub->name, i);
+		     bfd_get_filename (abfd), o->name, i);
 		  bfd_set_error (bfd_error_bad_value);
 		  goto error_return;
 		}
@@ -1725,33 +1745,31 @@ xcoff_link_add_symbols (abfd, info)
 		}
 	    }
 
-	  free (reloc_info[sub->target_index].csects);
-	  reloc_info[sub->target_index].csects = NULL;
+	  free (reloc_info[o->target_index].csects);
+	  reloc_info[o->target_index].csects = NULL;
 
-	  /* Reset SEC_RELOC, the reloc_count, and the lineno_count,
-	     since the reloc and lineno information is now attached to
-	     the csects.  */
-	  sub->flags &=~ SEC_RELOC;
-	  sub->reloc_count = 0;
-	  sub->lineno_count = 0;
+	  /* Reset SEC_RELOC and the reloc_count, since the reloc
+	     information is now attached to the csects.  */
+	  o->flags &=~ SEC_RELOC;
+	  o->reloc_count = 0;
 
 	  /* If we are not keeping memory, free the reloc information.  */
 	  if (! info->keep_memory
-	      && coff_section_data (abfd, sub) != NULL
-	      && coff_section_data (abfd, sub)->relocs != NULL
-	      && ! coff_section_data (abfd, sub)->keep_relocs)
+	      && coff_section_data (abfd, o) != NULL
+	      && coff_section_data (abfd, o)->relocs != NULL
+	      && ! coff_section_data (abfd, o)->keep_relocs)
 	    {
-	      free (coff_section_data (abfd, sub)->relocs);
-	      coff_section_data (abfd, sub)->relocs = NULL;
+	      free (coff_section_data (abfd, o)->relocs);
+	      coff_section_data (abfd, o)->relocs = NULL;
 	    }
 	}
 
       /* Free up the line numbers.  FIXME: We could cache these
          somewhere for the final link, to avoid reading them again.  */
-      if (reloc_info[sub->target_index].linenos != NULL)
+      if (reloc_info[o->target_index].linenos != NULL)
 	{
-	  free (reloc_info[sub->target_index].linenos);
-	  reloc_info[sub->target_index].linenos = NULL;
+	  free (reloc_info[o->target_index].linenos);
+	  reloc_info[o->target_index].linenos = NULL;
 	}
     }
 
@@ -1764,12 +1782,12 @@ xcoff_link_add_symbols (abfd, info)
  error_return:
   if (reloc_info != NULL)
     {
-      for (sub = abfd->sections; sub != NULL; sub = sub->next)
+      for (o = abfd->sections; o != NULL; o = o->next)
 	{
-	  if (reloc_info[sub->target_index].csects != NULL)
-	    free (reloc_info[sub->target_index].csects);
-	  if (reloc_info[sub->target_index].linenos != NULL)
-	    free (reloc_info[sub->target_index].linenos);
+	  if (reloc_info[o->target_index].csects != NULL)
+	    free (reloc_info[o->target_index].csects);
+	  if (reloc_info[o->target_index].linenos != NULL)
+	    free (reloc_info[o->target_index].linenos);
 	}
     free (reloc_info);
     }
@@ -2893,6 +2911,9 @@ _bfd_xcoff_bfd_final_link (abfd, info)
   bfd *sub;
   bfd_byte *external_relocs = NULL;
   char strbuf[STRING_SIZE_SIZE];
+
+  if (info->shared)
+    abfd->flags |= DYNAMIC;
 
   symesz = bfd_coff_symesz (abfd);
 

@@ -1,3 +1,15 @@
+Fri Nov  3 15:54:59 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* xcofflink.c (xcoff_link_add_symbols): Rename local variable sub
+	to o.  Clobber and restore the list of new csects around the call
+	to _bfd_generic_link_add_one_symbol, in case it wants to report a
+	linker error and the linker wants to read the symbol table.  Reset
+	the line number count of a real section even if it has no relocs.
+	(_bfd_xcoff_bfd_final_link): If shared, set the DYNAMIC flag.
+
+	* coffgen.c (_bfd_coff_read_string_table): Warn if the string size
+	is too small.
+
 Thu Nov  2 23:16:39 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* xcofflink.c (_bfd_ppc_xcoff_relocate_section): Don't warn about
