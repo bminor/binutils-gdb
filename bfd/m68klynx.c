@@ -38,4 +38,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define TARGET_IS_BIG_ENDIAN_P
 
+#ifdef HOST_LYNX
+
+char *lynx_core_file_failing_command();
+int lynx_core_file_failing_signal();
+boolean lynx_core_file_matches_executable_p();
+bfd_target *lynx_core_file_p();
+
+#define	MY_core_file_failing_command lynx_core_file_failing_command
+#define	MY_core_file_failing_signal lynx_core_file_failing_signal
+#define	MY_core_file_matches_executable_p lynx_core_file_matches_executable_p
+#define	MY_core_file_p lynx_core_file_p
+
+#endif /* HOST_LYNX */
+
 #include "aout-target.h"

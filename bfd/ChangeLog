@@ -1,3 +1,10 @@
+Tue Nov 16 17:03:41 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* lynx-core.c (lynx_core_file_p):  Change bfd_zalloc to bfd_alloc.
+	* m68klynx.c:  Define core file macros.
+	* hosts/i386lynx.h, hosts/m68klynx.h, hosts/lynx.h:  Move all
+	non-architecture specific stuff into lynx.h.
+
 Tue Nov 16 15:45:54 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* i386linux.c: Define new macro ZMAGIC_DISK_BLOCK_SIZE to 1024, and
