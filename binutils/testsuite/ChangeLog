@@ -1,3 +1,7 @@
+1999-09-02  Steve Chamberlain  <sac@pobox.com>
+
+	* binutils-all/objdump.exp: Add pj to cpus_expected.
+
 Sat Aug 28 00:24:27 1999  Jerry Quinn <jquinn@nortelnetworks.com>
 
 	* binutils-all/hppa/freg.s:  New file.
