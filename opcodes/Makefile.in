@@ -1065,7 +1065,7 @@ arm-dis.lo: arm-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
   opintl.h $(INCDIR)/safe-ctype.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h
+  $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h $(INCDIR)/opcode/arm.h
 avr-dis.lo: avr-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h opintl.h \
   $(INCDIR)/libiberty.h $(INCDIR)/opcode/avr.h

@@ -1,3 +1,13 @@
+2004-11-27  Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-opc.h (arm_opcode, thumb_opcode): Add extra field for the
+	architecuture defining the insn.
+	(arm_opcodes, thumb_opcodes): Delete.  Move to ...
+	* arm-dis.c (arm_opcodes, thumb_opcodes): Here.
+	Also include opcode/arm.h.
+	* Makefile.am (arm-dis.lo): Update dependency list.
+	* Makefile.in: Regenerate.
+
 2004-11-22  Ravi Ramaseshan  <ravi.ramaseshan@codito.com>
 
 	* opcode/arc-opc.c (insert_base): Modify ls_operand[LS_OFFSET] to
