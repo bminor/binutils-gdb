@@ -1,3 +1,7 @@
+2003-07-30  Nick Clifton  <nickc@redhat.com>
+
+	* po/ro.po: Updated Romanian translation.
+
 2003-07-29  Jakub Jelinek  <jakub@redhat.com>
 
 	* ppc-opc.c (insert_mbe, extract_mbe): Shift 1L instead of 1 up.
