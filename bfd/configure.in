@@ -181,7 +181,7 @@ changequote([,])dnl
 	AC_DEFINE(TRAD_HEADER,"hosts/i386bsd.h")
 	;;
 changequote(,)dnl
-  i[3456]86-*-netbsd*)
+  i[3456]86-*-netbsd* | i[3456]86-*-openbsd*)
 changequote([,])dnl
 	COREFILE=netbsd-core.o
 	;;
@@ -225,7 +225,7 @@ changequote([,])dnl
 	COREFILE=trad-core.o
 	AC_DEFINE(TRAD_HEADER,"hosts/mipsmach3.h")
 	;;
-  mips-*-netbsd*)
+  mips-*-netbsd* | mips*-*-openbsd*)
 	COREFILE=netbsd-core.o
 	;;
   mips-dec-*)
@@ -269,7 +269,7 @@ changequote([,])dnl
 	COREFILE=trad-core.o
 	AC_DEFINE(TRAD_HEADER,"hosts/news.h")
 	;;
-  m68*-*-netbsd*)
+  m68*-*-netbsd* | m68*-*-openbsd*)
 	COREFILE=netbsd-core.o
 	;;
   m68*-apple-aux*)
@@ -286,16 +286,17 @@ changequote([,])dnl
 	COREFILE=trad-core.o
 	AC_DEFINE(TRAD_HEADER,"hosts/pc532mach.h")
 	;;
-  ns32k-*-netbsd*)
+  ns32k-*-netbsd* | ns32k-*-openbsd*)
 	COREFILE=netbsd-core.o
 	;;
   rs6000-*-lynx*)	COREFILE=lynx-core.o ;;
   rs6000-*-aix4*)	COREFILE=rs6000-core.o ;;
   rs6000-*-*)		COREFILE=rs6000-core.o ;;
+  powerpc-*-*bsd*)	COREFILE=netbsd-core.o ;;
   powerpc-*-aix4*)	COREFILE=rs6000-core.o ;;
   powerpc-*-aix*)	COREFILE=rs6000-core.o ;;
   powerpc-*-beos*)	;;
-  sparc-*-netbsd*)
+  sparc-*-netbsd* | sparc-*-openbsd*)
 	COREFILE=netbsd-core.o
 	;;
   tahoe-*-*)

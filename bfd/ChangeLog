@@ -1,3 +1,13 @@
+Fri Apr 11 11:57:15 1997  Niklas Hallqvist  <niklas@appli.se>
+
+	* config.bfd: (i[3456]86-*-openbsd*, m68*-*-openbsd*,
+	mips*el*-*-openbsd*, mips*-*-openbsd*, ns32k-*-openbsd*,
+	powerpc-*-*bsd*, sparc-*-openbsd*): New targets.
+	* configure.in (i[3456]86-*-openbsd*, mips*-*-openbsd*,
+	m68*-*-openbsd*, ns32k-*-openbsd*, powerpc-*-*bsd*,
+	sparc-*-openbsd*): New targets.
+	* configure: Rebuild.
+
 Tue Apr  8 18:09:29 1997  Jamie Lokier  <jamie@rebellion.co.uk>
 
 	* stabs.c (struct stab_section_info): New field
