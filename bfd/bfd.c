@@ -512,6 +512,9 @@ DESCRIPTION
 const char *
 bfd_archive_filename (bfd *abfd)
 {
+  if (abfd == NULL)
+    return _("<unknown>");
+  
   if (abfd->my_archive)
     {
       static size_t curr = 0;
