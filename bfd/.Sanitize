@@ -15,6 +15,10 @@
 
 Do-first:
 
+if ( echo $* | grep keep\-v9 > /dev/null ) ; then
+	keep_these_too="elf64-sparc.c"
+fi
+
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -153,33 +157,25 @@ Things-to-lose:
 
 Do-last:
 
-v9files="configure.in elfcode.h"
+v9files="configure.in elfcode.h reloc.c bfd-in2.h"
 if ( echo $* | grep keep\-v9 > /dev/null ) ; then
 	if [ -n "${verbose}" ] ; then
 		echo Keeping v9 stuff in $v9files.
 	fi
 else
 	if [ -n "${verbose}" ]; then
-		echo -n Cleaning v9 from
+		echo -n Cleaning v9 in `pwd`:
 	fi
 	for f in $v9files ; do
 		if [ -n "${verbose}" ] ; then
 			echo -n " " $f
 		fi
-		grep -v v9 < $f > new
+		sed '/start\-sanitize\-v9/,/end\-sanitize\-v9/d' < $f > new
 		if [ -n "${safe}" ] ; then
-			cp $f .Recover
+			mv $f .Recover
 		fi
 		mv new $f
 	done
-	if [ -n "${safe}" ] ; then
-		mv elf64-sparc.c .Recover
-	else
-		rm elf64-sparc.c
-	fi
-	if [ -n "${verbose}" ] ; then
-		echo " ..." deleting elf64-sparc.c.
-	fi
 fi
 
 # End of file.
