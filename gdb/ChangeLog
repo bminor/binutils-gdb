@@ -1,5 +1,7 @@
 2002-07-01  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386bsd-tdep.c (i386bsd_frame_saved_pc): Removed.
+
 	* config/i386/tm-i386sol2.h (COERCE_FLOAT_TO_DOUBLE): Removed.
 	* i386-sol2-tdep.c (i386_sol2_init_abi): Adjust for the removal of
 	this macro.  Include "value.h".

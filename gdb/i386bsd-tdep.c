@@ -71,17 +71,6 @@ i386bsd_sigtramp_saved_pc (struct frame_info *frame)
   return read_memory_unsigned_integer (addr + sc_pc_offset, 4);
 }
 
-/* Return the saved program counter for FRAME.  */
-
-static CORE_ADDR
-i386bsd_frame_saved_pc (struct frame_info *frame)
-{
-  if (frame->signal_handler_caller)
-    return i386bsd_sigtramp_saved_pc (frame);
-
-  return read_memory_unsigned_integer (frame->frame + 4, 4);
-}
-
 /* Return the start address of the sigtramp routine.  */
 
 CORE_ADDR
