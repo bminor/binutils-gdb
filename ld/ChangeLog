@@ -1,3 +1,8 @@
+Tue Oct 10 17:53:22 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldlang.c (lang_finish): Don't try to use an entry_symbol from a
+	section which was not linked into the final output.
+
 Tue Oct 10 10:17:22 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* emultempl/pe.em (gld_${EMULATION_NAME}_parse_args): Fix
