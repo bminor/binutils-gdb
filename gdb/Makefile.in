@@ -1326,7 +1326,7 @@ ALLDEPFILES = \
 	bsd-kvm.c \
 	coff-solib.c \
 	core-regset.c core-aout.c corelow.c \
-	dcache.c dpx2-nat.c exec.c fork-child.c \
+	dcache.c exec.c fork-child.c \
 	glibc-tdep.c \
 	go32-nat.c h8300-tdep.c \
 	hppa-tdep.c hppa-hpux-tdep.c \
@@ -1712,7 +1712,6 @@ disasm.o: disasm.c $(defs_h) $(target_h) $(value_h) $(ui_out_h) \
 	$(gdb_string_h) $(disasm_h) $(gdbcore_h) $(dis_asm_h)
 doublest.o: doublest.c $(defs_h) $(doublest_h) $(floatformat_h) \
 	$(gdb_assert_h) $(gdb_string_h) $(gdbtypes_h)
-dpx2-nat.o: dpx2-nat.c $(defs_h) $(gdbcore_h) $(gdb_string_h)
 dsrec.o: dsrec.c $(defs_h) $(serial_h) $(srec_h) $(gdb_assert_h) \
 	$(gdb_string_h)
 dummy-frame.o: dummy-frame.c $(defs_h) $(dummy_frame_h) $(regcache_h) \
