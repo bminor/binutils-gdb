@@ -5,7 +5,7 @@
 @ifinfo
 @format
 START-INFO-DIR-ENTRY
-* Gdb-Internals: (gdbint).	The GNU debugger internals.
+* Gdb-Internals: (gdbint).	The GNU debugger's internals.
 END-INFO-DIR-ENTRY
 @end format
 @end ifinfo
@@ -13,7 +13,7 @@ END-INFO-DIR-ENTRY
 @ifinfo
 This file documents the internals of the GNU debugger GDB.
 
-Copyright (C) 1990, 1991, 1992 Free Software Foundation, Inc.
+Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
 Contributed by Cygnus Support.  Written by John Gilmore.
 
 Permission is granted to make and distribute verbatim copies of
@@ -59,9 +59,9 @@ are preserved on all copies.
 
 @end titlepage
 
-@node Top, README, (dir), (dir)
-
-This file documents the internals of the GNU debugger GDB.  It is a
+@node Top
+@top
+This documents the internals of the GNU debugger, GDB.  It is a
 collection of miscellaneous information with little form at this point.
 Mostly, it is a repository into which you can put information about
 GDB as you discover it (or as you design changes to GDB).
@@ -81,20 +81,21 @@ GDB as you discover it (or as you design changes to GDB).
 * Wrapping::			Wrapping Output Lines
 * Frames::			Keeping track of function calls
 * Coding Style::		Strunk and White for GDB maintainers
-* Host Conditionals::		Controlling what features exist in the host
-* Target Conditionals::		Controlling what features exist in the target
-* Native Conditionals::		Native Conditionals
+* Host Conditionals::		What features exist in the host
+* Target Conditionals::		What features exist in the target
+* Native Conditionals::		Conditionals for when host and target are same
+* Obsolete Conditionals::	Conditionals that don't exist any more
 
 @end menu
 
-@node README, New Architectures, Top, Top
+@node README
 @chapter The @file{README} File
 
 Check the @file{README} file, it often has useful information that does not
 appear anywhere else in the directory.
 
 
-@node New Architectures, Config, README, Top
+@node New Architectures
 @chapter Defining a New Host or Target Architecture
 
 When building support for a new host and/or target, much of the work you
@@ -138,7 +139,7 @@ files actually, partly as a result of BFD and partly by removing
 duplicated code.
 
 
-@node Config, Host, New Architectures, Top
+@node Config
 @chapter Adding a New Configuration
 
 Most of the work in making GDB compile on a new machine is in specifying
@@ -210,7 +211,7 @@ target-dependent @file{.h} and @file{.c} files used for your
 configuration; the next two chapters discuss those.
 
 
-@node Host, Target, Config, Top
+@node Host
 @chapter Adding a New Host
 
 Once you have specified a new configuration for your host
@@ -349,7 +350,7 @@ register values and install them into GDB's ``registers'' array.
 for more info about this.)
 
 
-@node Target, Languages, Host, Top
+@node Target
 @chapter Adding a New Target
 
 For a new target called @var{ttt}, first specify the configuration as
@@ -437,7 +438,7 @@ separate the @var{xos} configuration from the @var{xarch}
 configuration.)
 
 
-@node Languages, Releases, Target, Top
+@node Languages
 @chapter Adding a Source Language to GDB
 
 To add other languages to GDB's expression parser, follow the following steps:
@@ -552,7 +553,7 @@ distribution!
 @end table
 
 
-@node Releases, Partial Symbol Tables, Languages, Top
+@node Releases
 @chapter Configuring GDB for Release
 
 From the top level directory (containing @file{gdb}, @file{bfd},
@@ -592,7 +593,7 @@ distribution, generate @file{gdb-all.texinfo} locally, and include the files
 split the document into one overall file and five or so included files.
 
 
-@node Partial Symbol Tables, BFD support for GDB, Releases, Top
+@node Partial Symbol Tables
 @chapter Partial Symbol Tables
 
 GDB has three types of symbol tables.
@@ -672,7 +673,7 @@ are allocated in a pair of large arrays on an obstack, so there is
 little to be gained by trying to free them unless you want to do a lot
 more work.
 
-@node BFD support for GDB, Symbol Reading, Partial Symbol Tables, Top
+@node BFD support for GDB
 @chapter Binary File Descriptor Library Support for GDB
 
 BFD provides support for GDB in several ways:
@@ -706,7 +707,7 @@ string table, etc.
 @c Reading,,Symbol Reading}.
 
 
-@node Symbol Reading, Cleanups, BFD support for GDB, Top
+@node Symbol Reading
 @chapter Symbol Reading
 
 GDB reads symbols from "symbol files".  The usual symbol file is the
@@ -793,7 +794,7 @@ were no symbols in that part of the symbol file.
 @end table
 
 
-@node Cleanups, Wrapping, Symbol Reading, Top
+@node Cleanups
 @chapter Cleanups
 
 Cleanups are a structured way to deal with things that need to be done
@@ -842,7 +843,7 @@ interruption must be on the cleanup chain before you call these functions,
 since they might never return to your code (they @samp{longjmp} instead).
 
 
-@node Wrapping, Frames, Cleanups, Top
+@node Wrapping
 @chapter Wrapping Output Lines
 
 Output that goes through @code{printf_filtered} or @code{fputs_filtered} or
@@ -867,7 +868,7 @@ unfiltered (``@code{printf}'') output.  Symbol reading routines that print
 warnings are a good example.
 
 
-@node Frames, Coding Style, Wrapping, Top
+@node Frames
 @chapter Frames
 
 A frame is a construct that GDB uses to keep track of calling and called
@@ -896,7 +897,7 @@ frame.  This will be used to create a new GDB frame struct, and then
 the new frame.
 @end table
 
-@node Coding Style, Host Conditionals, Frames, Top
+@node Coding Style
 @chapter Coding Style
 
 GDB is generally written using the GNU coding standards, as described in
@@ -938,7 +939,7 @@ We don't have a gcc option that will properly check that these rules
 have been followed, but it's GDB policy, and we periodically check it
 using the tools available (plus manual labor), and clean up any remnants.
 
-@node Host Conditionals, Target Conditionals, Coding Style, Top
+@node Host Conditionals
 @chapter Host Conditionals
 
 When GDB is configured and compiled, various macros are defined or left
@@ -1571,7 +1572,7 @@ coffread.c
 coffread.c
 @end table
 
-@node Target Conditionals, Native Conditionals, Host Conditionals, Top
+@node Target Conditionals
 @chapter Target Conditionals
 
 When GDB is configured and compiled, various macros are defined or left
@@ -2143,15 +2144,18 @@ coffread.c
 coffread.c
 @end table
 
-@node Native Conditionals,  , Target Conditionals, Top
+@node Native Conditionals
 @chapter Native Conditionals
 
+When GDB is configured and compiled, various macros are defined or left
+undefined, to control compilation when the host and target systems
+are the same.  These macros should be defined (or left undefined)
+in @file{nm-@var{system}.h}.
 
 @table @code
 @item ATTACH_DETACH
 If defined, then gdb will include support for the @code{attach} and
 @code{detach} commands.
-commands.
 @item FETCH_INFERIOR_REGISTERS
 Define this if the native-dependent code will provide its
 own routines
@@ -2190,5 +2194,25 @@ registers.  I'm guessing that @code{#define U_REGS_OFFSET 0} means that
 u.u_ar0 @emph{is} the location of the registers.
 @end table
 
+@node Obsolete Conditionals
+@chapter Obsolete Conditionals
+
+Fragments of old code in GDB sometimes reference or set the following
+configuration macros.  They should not be used by new code, and
+old uses should be removed as those parts of the debugger are 
+otherwise touched.
+
+@table @code
+@item STACK_END_ADDR
+This macro used to define where the end of the stack appeared, for use
+in interpreting core file formats that don't record this address in the
+core file itself.  This information is now configured in BFD, and GDB
+gets the info portably from there.  The values in GDB's configuration
+files should be moved into BFD configuration files (if needed there),
+and deleted from all of GDB's config files.
+
+Any @file{@var{foo}-xdep.c} file that references STACK_END_ADDR
+is so old that it has never been converted to use BFD.  Now that's old!
+@end table
 @contents
 @bye
