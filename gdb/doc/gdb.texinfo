@@ -1219,8 +1219,12 @@ of a word.  If there's only one possibility, _GDBN__ will fill in the
 word, and wait for you to finish the command (or press @key{RET} to
 enter it).  For example, if you type
 
+@c FIXME "@key" doesn't distinguish its argument sufficiently to permit
+@c complete accuracy in these examples; space introduced for clarity.
+@c If texinfo enhancements make it unnecessary, it would be nice to
+@c replace " @key" by "@key" in the following...
 @example
-(_GDBP__) info bre@key{TAB}
+(_GDBP__) info bre @key{TAB}
 @end example
 
 @noindent
@@ -1250,7 +1254,7 @@ function names in your program that begin with those characters, for
 example:
 
 @example
-(_GDBP__) b make_@key{TAB}
+(_GDBP__) b make_ @key{TAB}
 @exdent _GDBN__ sounds bell; press @key{TAB} again, to see:
 make_a_section_from_file     make_environ               
 make_abs_section             make_function_type         
@@ -1291,10 +1295,27 @@ consider more information than usual when you press @key{TAB} or
 @kbd{M-?} to request word completion:
 
 @example
-(_GDBP__) b 'name(@key{M-?}
-name(int)    name(float)
-(_GDBP__) b 'name(
+(_GDBP__) b 'bubble( @key{M-?}
+bubble(double,double)    bubble(int,int)
+(_GDBP__) b 'bubble(
 @end example
+
+In some cases, _GDBN__ can tell that completing a name will require
+quotes.  When this happens, _GDBN__ will insert the quote for you (while
+completing as much as it can) if you do not type the quote in the first
+place:
+
+@example
+(_GDBP__) b bub @key{TAB}
+@exdent _GDBN__ alters your input line to the following, and rings a bell:
+(_GDBP__) b 'bubble(
+@end example
+
+@noindent
+In general, _GDBN__ can tell that a quote is needed (and inserts it) if
+you have not yet started typing the argument list when you ask for
+completion on an overloaded symbol.
+
 
 @node Help,  , Completion, Commands
 @section Getting Help
