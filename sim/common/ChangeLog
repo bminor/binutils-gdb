@@ -1,6 +1,8 @@
 Mon Feb  9 14:48:37 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* cgen-sim.h (DECODE): Always use switch for `read' for now.
+	(PAREXEC): Renamed from PARALLEL_EXEC.  All uses updated.
+	(SEMANTIC{,_CACHE}_FN): Fix return type.
 	* cgen.sh (decode): Add s/@arch@/$arch/.
 	* genmloop.sh (@cpu@_engine_run): Delete `current_state'.
 	(engine_resume): Likewise.  Make `engine' volatile.  Save copy
