@@ -91,6 +91,10 @@ static reloc_howto_type elf_howto_table[]=
 	bfd_elf_generic_reloc, "R_386_GOTPC",
 	true, 0xffffffff, 0xffffffff, true),
 
+  /* We have a gap in the reloc numbers here.
+     R_386_standard counts the number up to this point, and
+     R_386_ext_offset is the value to subtract from a reloc type of
+     R_386_16 thru R_386_PC8 to form an index into this table.  */
 #define R_386_standard ((unsigned int) R_386_GOTPC + 1)
 #define R_386_ext_offset ((unsigned int) R_386_16 - R_386_standard)
 
@@ -106,11 +110,13 @@ static reloc_howto_type elf_howto_table[]=
 	true, 0xff, 0xff, false),
   HOWTO(R_386_PC8, 0, 0, 8, true, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_386_PC8",
-	true, 0xff, 0xff, true)
-};
+	true, 0xff, 0xff, true),
+
+  /* Another gap.  */
+#define R_386_ext ((unsigned int) R_386_PC8 + 1 - R_386_ext_offset)
+#define R_386_vt_offset ((unsigned int) R_386_GNU_VTINHERIT - R_386_ext)
 
 /* GNU extension to record C++ vtable hierarchy.  */
-static reloc_howto_type elf32_i386_vtinherit_howto =
   HOWTO (R_386_GNU_VTINHERIT,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -123,10 +129,9 @@ static reloc_howto_type elf32_i386_vtinherit_howto =
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 false);
+	 false),
 
 /* GNU extension to record C++ vtable member usage.  */
-static reloc_howto_type elf32_i386_vtentry_howto =
   HOWTO (R_386_GNU_VTENTRY,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -139,7 +144,12 @@ static reloc_howto_type elf32_i386_vtentry_howto =
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 false);
+	 false)
+
+#define R_386_vt ((unsigned int) R_386_GNU_VTENTRY + 1 - R_386_vt_offset)
+
+};
+
 
 #ifdef DEBUG_GEN_RELOC
 #define TRACE(str) fprintf (stderr, "i386 bfd reloc lookup %d (%s)\n", code, str)
@@ -221,11 +231,13 @@ elf_i386_reloc_type_lookup (abfd, code)
 
     case BFD_RELOC_VTABLE_INHERIT:
       TRACE ("BFD_RELOC_VTABLE_INHERIT");
-      return &elf32_i386_vtinherit_howto;
+      return &elf_howto_table[(unsigned int) R_386_GNU_VTINHERIT
+			     - R_386_vt_offset];
 
     case BFD_RELOC_VTABLE_ENTRY:
       TRACE ("BFD_RELOC_VTABLE_ENTRY");
-      return &elf32_i386_vtentry_howto;
+      return &elf_howto_table[(unsigned int) R_386_GNU_VTENTRY
+			     - R_386_vt_offset];
 
     default:
       break;
@@ -250,27 +262,20 @@ elf_i386_info_to_howto_rel (abfd, cache_ptr, dst)
      arelent *cache_ptr;
      Elf32_Internal_Rel *dst;
 {
-  enum elf_i386_reloc_type type;
+  unsigned int r_type = ELF32_R_TYPE (dst->r_info);
+  unsigned int indx;
 
-  type = (enum elf_i386_reloc_type) ELF32_R_TYPE (dst->r_info);
-  if (type == R_386_GNU_VTINHERIT)
-    cache_ptr->howto = &elf32_i386_vtinherit_howto;
-  else if (type == R_386_GNU_VTENTRY)
-    cache_ptr->howto = &elf32_i386_vtentry_howto;
-  else
+  if ((indx = r_type) >= R_386_standard
+      && ((indx = r_type - R_386_ext_offset) - R_386_standard
+	  >= R_386_ext - R_386_standard)
+      && ((indx = r_type - R_386_vt_offset) - R_386_ext
+	  >= R_386_vt - R_386_ext))
     {
-      unsigned int indx;
-
-      if ((indx = (unsigned int) type) >= R_386_standard
-	  && ((indx = (unsigned int) type - R_386_ext_offset)
-	      >= sizeof (elf_howto_table) / sizeof (elf_howto_table[0])))
-	{
-	  (*_bfd_error_handler) (_("%s: invalid relocation type %d"),
-				 bfd_get_filename (abfd), (int) type);
-	  indx = (unsigned int) R_386_NONE;
-	}
-      cache_ptr->howto = &elf_howto_table[indx];
+      (*_bfd_error_handler) (_("%s: invalid relocation type %d"),
+			     bfd_get_filename (abfd), (int) r_type);
+      indx = (unsigned int) R_386_NONE;
     }
+  cache_ptr->howto = &elf_howto_table[indx];
 }
 
 /* Return whether a symbol name implies a local label.  The UnixWare
@@ -1317,12 +1322,13 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
       unsigned int indx;
 
       r_type = ELF32_R_TYPE (rel->r_info);
-      if (r_type == R_386_GNU_VTINHERIT
-	  || r_type == R_386_GNU_VTENTRY)
+      if (r_type == (int) R_386_GNU_VTINHERIT
+	  || r_type == (int) R_386_GNU_VTENTRY)
 	continue;
+
       if ((indx = (unsigned) r_type) >= R_386_standard
-	  && ((indx = (unsigned) r_type - R_386_ext_offset)
-	      >= sizeof (elf_howto_table) / sizeof (elf_howto_table[0])))
+	  && ((indx = (unsigned) r_type - R_386_ext_offset) - R_386_standard
+	      >= R_386_ext - R_386_standard))
 	{
 	  bfd_set_error (bfd_error_bad_value);
 	  return false;

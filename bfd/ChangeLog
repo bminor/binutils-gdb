@@ -9,9 +9,12 @@
 	* Makefile.in: Regenerate.
 
 	* elf32-i386.c (elf_howto_table): Remove EMPTY_HOWTOs.
+	(elf32_i386_vtinherit_howto, elf32_i386_vtentry_howto): Delete and
+	move HOWTOs into elf_howto_table.
 	(R_386_standard, R_386_ext_offset): Define.
+	(R_386_ext, R_386_vt_offset, R_386_vt): Define.
 	(elf_i386_reloc_type_lookup): Modify calculation of index into
-	elf_howto_table since we've removed the gap.
+	elf_howto_table since we've removed the padding.
 	(elf_i386_info_to_howto_rel): Likewise.
 	(elf_i386_relocate_section): Likewise.
 
