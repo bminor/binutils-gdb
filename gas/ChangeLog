@@ -1,4 +1,10 @@
 start-sanitize-d10v
+Wed Aug 21 15:50:54 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* doc/c-d10v.texi: New file.
+	* doc/all.texi: Added D10V stuff.
+	* doc/as.texinfo: Added D10V stuff.
+
 Tue Aug 20 14:10:02 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.c: All references to defined symbols should
