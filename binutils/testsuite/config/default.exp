@@ -23,7 +23,7 @@ load_lib util-defs.exp
 
 global NM
 if ![info exists NM] then {
-    set NM [transform nm]
+    set NM [findfile $base_dir/../nm]
 }
 global NMFLAGS
 if ![info exists NMFLAGS] then {
@@ -31,7 +31,7 @@ if ![info exists NMFLAGS] then {
 }
 global SIZE
 if ![info exists SIZE] then {
-    set SIZE [transform size]
+    set SIZE [findfile $base_dir/../size]
 }
 global SIZEFLAGS
 if ![info exists SIZEFLAGS] then {
@@ -39,7 +39,7 @@ if ![info exists SIZEFLAGS] then {
 }
 global OBJDUMP
 if ![info exists OBJDUMP] then {
-    set OBJDUMP [transform objdump]
+    set OBJDUMP [findfile $base_dir/../objdump]
 }
 global OBJDUMPFLAGS
 if ![info exists OBJDUMPFLAGS] then {
@@ -51,8 +51,8 @@ if ![info exists OBJDUMPFLAGS] then {
 # within the tests themselves
 #
 expect_before {
-    buffer_full		   { error "internal buffer is full." }
-    "can't open '*'" { error "Can't open test file." }
+    buffer_full		   { perror "internal buffer is full." }
+    "can't open '*'" { perror "Can't open test file." }
 }
 
 

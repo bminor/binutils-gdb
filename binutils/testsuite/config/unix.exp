@@ -51,8 +51,8 @@ if ![info exists OBJDUMPFLAGS] then {
 # within the tests themselves
 #
 expect_before {
-    buffer_full		   { error "internal buffer is full." }
-    "can't open '*'" { error "Can't open test file." }
+    buffer_full		   { perror "internal buffer is full." }
+    "can't open '*'" { perror "Can't open test file." }
 }
 
 
