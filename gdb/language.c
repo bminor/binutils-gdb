@@ -720,7 +720,7 @@ longest_local_hex_string_custom (LONGEST num, char *width)
   num_pad_chars = field_width - strlen (temp_nbr_buf);	/* possibly negative */
 
   if (strlen (local_hex_format_prefix ()) + num_len + num_pad_chars
-      < RESULT_BUF_LEN)		/* paranoia */
+      >= RESULT_BUF_LEN)		/* paranoia */
     internal_error (__FILE__, __LINE__,
 		    "longest_local_hex_string_custom: insufficient space to store result");
 
