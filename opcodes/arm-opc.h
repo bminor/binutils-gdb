@@ -33,6 +33,7 @@ struct thumb_opcode
    %%			%
    %<bitfield>d		print the bitfield in decimal
    %<bitfield>x		print the bitfield in hex
+   %<bitfield>X		print the bitfield as 1 hex digit without leading "0x"
    %<bitfield>r		print as an ARM register
    %<bitfield>f		print a floating point constant if >7 else a
 			floating point register

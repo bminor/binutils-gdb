@@ -491,6 +491,14 @@ print_insn_arm (pc, info, given)
 				    func (stream, "\t; IMBRange");
 				}
 				break;
+			      case 'X':
+				{
+				  long reg;
+				  reg = given >> bitstart;
+				  reg &= (2 << (bitend - bitstart)) - 1;
+				  func (stream, "%01x", reg & 0xf);
+				}
+				break;
 			      case 'f':
 				{
 				  long reg;
