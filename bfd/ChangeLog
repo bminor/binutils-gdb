@@ -1,5 +1,9 @@
 2002-08-07  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* elfxx-mips.c (ABI_64_P): Remove superfluous check.
+
+2002-08-07  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* elf32-mips.c (mips_reloc_map): Fix typo.
 
 2002-08-06  Alan Modra  <amodra@bigpond.net.au>
