@@ -1,4 +1,4 @@
-static int bazx __attribute__ ((section (".data02"))) = 'b' + 'a' + 'z';
+static int bazx = 'b' + 'a' + 'z';
 
 int baz (int x)
 {

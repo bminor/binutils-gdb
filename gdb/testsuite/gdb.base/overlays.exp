@@ -178,6 +178,42 @@ gdb_expect {
     timeout			{ fail "(timeout) Automatic unmapping"   }
 }
 
+# Verify that both sec1 and sec2 can be loaded simultaneously.
+proc simultaneous_pair { sec1 sec2 } {
+    global gdb_prompt
+
+    set pairname "$sec1 and $sec2 mapped simultaneously"
+    gdb_test "overlay map $sec1" "" "$pairname: map $sec1"
+    gdb_test "overlay map $sec2" "" "$pairname: map $sec2"
+
+    set seen_sec1 0
+    set seen_sec2 0
+
+    send_gdb "overlay list\n"
+    gdb_expect {
+        -re ".*[string_to_regexp $sec1], " { set seen_sec1 1; exp_continue }
+        -re ".*[string_to_regexp $sec2], " { set seen_sec2 1; exp_continue }
+        -re ".*$gdb_prompt $" {
+            if {$seen_sec1 && $seen_sec2} {
+                pass "$pairname"
+            } else {
+                fail "$pairname"
+            }
+        }
+        timeout { fail "(timeout) $pairname" }
+    }
+}
+
+simultaneous_pair .ovly0 .ovly2
+simultaneous_pair .ovly0 .ovly3
+simultaneous_pair .ovly1 .ovly2
+simultaneous_pair .ovly1 .ovly3
+
+simultaneous_pair .data00 .data02
+simultaneous_pair .data00 .data03
+simultaneous_pair .data01 .data02
+simultaneous_pair .data01 .data03
+
 # test automatic mode
 
 gdb_test "overlay auto" ""

@@ -1,3 +1,14 @@
+2002-04-12  Michael Snyder  <msnyder@redhat.com>
+From Jim Blandy  <jimb@redhat.com>
+        * gdb.base/foo.c (foox): Remove section attribute; the linker
+	script can handle this instead.
+	* gdb.base/bar.c (barx): Same.
+	* gdb.base/baz.c (bazx): Same.
+	* gdb.base/grbx.c (grbxx): Same.
+
+	* gdb.base/overlays.exp: New test: check that GDB's manual overlay
+	manager doesn't automatically unmap overlays unnecessarily.
+
 2002-04-10  Martin M. Hunt  <hunt@redhat.com>
 
 	* gdb.base/ending-run.exp: Fix pattern for Mips targets
