@@ -11415,6 +11415,7 @@ arm_canonicalize_symbol_name (name)
   return name;
 }
 
+#if defined OBJ_COFF || defined OBJ_ELF
 void
 arm_validate_fix (fixP)
      fixS * fixP;
@@ -11431,6 +11432,7 @@ arm_validate_fix (fixP)
       fixP->fx_addsy = find_real_start (fixP->fx_addsy);
     }
 }
+#endif
 
 int
 arm_force_relocation (fixp)

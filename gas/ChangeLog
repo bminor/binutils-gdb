@@ -1,5 +1,15 @@
 2002-12-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-a29k.c (insert_sreg): Prototype.
+	(define_some_regs): Prototype, make static.
+	(parse_operand): Likewise.
+	(md_parse_option <c,arg>): Add ATTRIBUTE_UNUSED.
+	(md_show_usage <stream>): Likewise.
+	(md_section_align <segment>): Likewise.
+	(md_convert_frag <all args>): Likewise.
+	(md_estimate_size_before_relax <all args>): Likewise.
+	(md_apply_fix3): Don't cast valP pointer type.  Fix bogus >>='s.
+	* config/tc-arm.c (arm_validate_fix): Only for OBJ_COFF or OBJ_ELF.
 	* config/tc-d30v.c (md_parse_option <arg>): Add ATTRIBUTE_UNUSED.
 	(md_undefined_symbol <name>): Likewise.
 	(md_convert_frag <all args>): Likewise.

@@ -61,6 +61,9 @@ static void machine_ip PARAMS ((char *str));
 static void s_data1 PARAMS ((void));
 static void s_use PARAMS ((int));
 #endif
+static void insert_sreg PARAMS ((char *, int));
+static void define_some_regs PARAMS ((void));
+static char *parse_operand PARAMS ((char *, expressionS *, int));
 
 const pseudo_typeS
 md_pseudo_table[] =
@@ -198,7 +201,7 @@ insert_sreg (regname, regnum)
 /* Install symbol definitions for assorted special registers.
    See ASM29K Ref page 2-9.  */
 
-void
+static void
 define_some_regs ()
 {
 #define SREG	256
@@ -360,7 +363,7 @@ md_assemble (str)
     }
 }
 
-char *
+static char *
 parse_operand (s, operandp, opt)
      char *s;
      expressionS *operandp;
@@ -787,7 +790,7 @@ md_apply_fix3 (fixP, valP, seg)
      valueT * valP;
      segT seg ATTRIBUTE_UNUSED;
 {
-  long val = * (long *) valP;
+  long val = *valP;
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
 
   fixP->fx_addnumber = val;	/* Remember value for emit_reloc.  */
@@ -813,7 +816,7 @@ md_apply_fix3 (fixP, valP, seg)
       break;
 
     case RELOC_WDISP30:
-      val = (val >>= 2) + 1;
+      val = (val >> 2) + 1;
       buf[0] |= (val >> 24) & 0x3f;
       buf[1] = (val >> 16);
       buf[2] = val >> 8;
@@ -837,7 +840,7 @@ md_apply_fix3 (fixP, valP, seg)
       break;
 
     case RELOC_WDISP22:
-      val = (val >>= 2) + 1;
+      val = (val >> 2) + 1;
       /* FALLTHROUGH */
     case RELOC_BASE22:
       buf[1] |= (val >> 16) & 0x3f;
@@ -925,9 +928,9 @@ tc_coff_fix2rtype (fixP)
 /* should never be called for 29k */
 void
 md_convert_frag (headers, seg, fragP)
-     object_headers *headers;
-     segT seg;
-     register fragS *fragP;
+     object_headers *headers ATTRIBUTE_UNUSED;
+     segT seg ATTRIBUTE_UNUSED;
+     register fragS *fragP ATTRIBUTE_UNUSED;
 {
   as_fatal (_("a29k_convert_frag\n"));
 }
@@ -935,8 +938,8 @@ md_convert_frag (headers, seg, fragP)
 /* should never be called for a29k */
 int
 md_estimate_size_before_relax (fragP, segtype)
-     register fragS *fragP;
-     segT segtype;
+     register fragS *fragP ATTRIBUTE_UNUSED;
+     segT segtype ATTRIBUTE_UNUSED;
 {
   as_fatal (_("a29k_estimate_size_before_relax\n"));
   return 0;
@@ -1046,15 +1049,15 @@ size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (c, arg)
-     int c;
-     char *arg;
+     int c ATTRIBUTE_UNUSED;
+     char *arg ATTRIBUTE_UNUSED;
 {
   return 0;
 }
 
 void
 md_show_usage (stream)
-     FILE *stream;
+     FILE *stream ATTRIBUTE_UNUSED;
 {
 }
 
@@ -1277,7 +1280,7 @@ md_operand (expressionP)
 /* Round up a section size to the appropriate boundary.  */
 valueT
 md_section_align (segment, size)
-     segT segment;
+     segT segment ATTRIBUTE_UNUSED;
      valueT size;
 {
   return size;			/* Byte alignment is fine */
