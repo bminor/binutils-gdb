@@ -1,3 +1,9 @@
+2003-03-28  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* thread.c: Reindented.
+	* lin-lwp.c: Ditto.
+	* linux-proc.c: Ditto.
+
 2003-03-28  Bob Rossi  <bob_rossi@cox.net>
 
         * MAINTAINERS (write after approval): Add myself.
