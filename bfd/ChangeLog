@@ -1,5 +1,16 @@
 Fri Oct  3 11:23:47 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	Make ld -s work on AIX:
+	* xcofflink.c (xcoff_link_add_symbols): Don't create the .debug
+	section if we are stripping.
+	(bfd_xcoff_size_dynamic_sections): Don't set the .debug section
+	size if we are stripping.
+	(_bfd_xcoff_bfd_final_link): Don't set SEC_RELOC or rel_filepos,
+	and don't write out relocs, if we are stripping.
+	(xcoff_link_input_bfd): Don't set up reloc if we are stripping.
+	(xcoff_write_global_symbol): Don't write out symbol or reloc if we
+	are stripping.
+
 	* configure.in: Don't include elf.lo again for ELF targets; it's
 	always in the library anyhow.
 	* configure: Rebuild.
