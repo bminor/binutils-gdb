@@ -1,5 +1,32 @@
 2003-06-19  Andrew Cagney  <cagney@redhat.com>
 
+	* ld-insn.h: Update copyright.
+	(cache_fields): Define.
+	(insn_table_fields): Add insn_field_6 and insn_field_7.
+	(load_insn_table): Pass in the "cache_rules".
+	* ld-insn.c: Update copyright.
+	(load_insn_table): Add parameter "cache_rules".  Handle "cache",
+	"computed" and "scratch" fields.
+	(main): Pass "cache_rules" to load_insn_table.
+	* ld-cache.h: Update copyright.
+	(append_cache_table): Declare.
+	* ld-cache.c: Update copyright.
+	(append_cache_table): New function.
+	(load_cache_table): Call.
+	* gen-model.c: Include "ld-cache.h".
+	* gen-itable.c: Include "ld-cache.h".
+	* igen.c: Move #include "ld-cache.h" to earlier.  Update
+	copyright.
+	(main): Permit a NULL "cache_rules".  Pass address of
+	"cache_rules" to load_insn_table.
+	* Makefile.in (tmp-ld-insn): Add "ld-cache.o".
+	(tmp-igen): Do not include ppc-cache-rules.
+	(gen-itable.o, gen-model.o): Add "ld-cache.h".
+	* ppc-cache-rules: Delete file.
+	* ppc-instructions: Add cache rules.
+
+2003-06-19  Andrew Cagney  <cagney@redhat.com>
+
 	* Makefile.in (ICACHE_CFLAGS, SEMANTICS_CFLAGS): Delete.
 	(SIM_FPU_FLAGS): Define.
 	(icache.o): Delete explicit compile command.

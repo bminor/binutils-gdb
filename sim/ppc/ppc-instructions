@@ -1,7 +1,7 @@
 #
 #   This file is part of the program psim.
 #
-#   Copyright (C) 1994-1997, Andrew Cagney <cagney@highland.com.au>
+#   Copyright 1994, 1995, 1996, 1997, 2003 Andrew Cagney
 #
 #   --
 #
@@ -33,6 +33,53 @@
 #   along with this program; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
+
+:cache::::RA:RA:
+:cache:::signed_word *:rA:RA:(cpu_registers(processor)->gpr + RA)
+:cache:::unsigned32:RA_BITMASK:RA:(1 << RA)
+:compute:::int:RA_is_0:RA:(RA == 0)
+:cache::::RT:RT:
+:cache:::signed_word *:rT:RT:(cpu_registers(processor)->gpr + RT)
+:cache:::unsigned32:RT_BITMASK:RT:(1 << RT)
+:cache::::RS:RS:
+:cache:::signed_word *:rS:RS:(cpu_registers(processor)->gpr + RS)
+:cache:::unsigned32:RS_BITMASK:RS:(1 << RS)
+:cache::::RB:RB:
+:cache:::signed_word *:rB:RB:(cpu_registers(processor)->gpr + RB)
+:cache:::unsigned32:RB_BITMASK:RB:(1 << RB)
+:scratch::::FRA:FRA:
+:cache:::unsigned64 *:frA:FRA:(cpu_registers(processor)->fpr + FRA)
+:cache:::unsigned32:FRA_BITMASK:FRA:(1 << FRA)
+:scratch::::FRB:FRB:
+:cache:::unsigned64 *:frB:FRB:(cpu_registers(processor)->fpr + FRB)
+:cache:::unsigned32:FRB_BITMASK:FRB:(1 << FRB)
+:scratch::::FRC:FRC:
+:cache:::unsigned64 *:frC:FRC:(cpu_registers(processor)->fpr + FRC)
+:cache:::unsigned32:FRC_BITMASK:FRC:(1 << FRC)
+:scratch::::FRS:FRS:
+:cache:::unsigned64 *:frS:FRS:(cpu_registers(processor)->fpr + FRS)
+:cache:::unsigned32:FRS_BITMASK:FRS:(1 << FRS)
+:scratch::::FRT:FRT:
+:cache:::unsigned64 *:frT:FRT:(cpu_registers(processor)->fpr + FRT)
+:cache:::unsigned32:FRT_BITMASK:FRT:(1 << FRT)
+:cache:::unsigned_word:EXTS_SI:SI:((signed_word)(signed16)instruction)
+:scratch::::BI:BI:
+:cache::::BIT32_BI:BI:BIT32(BI)
+:cache::::BF:BF:
+:cache:::unsigned32:BF_BITMASK:BF:(1 << BF)
+:scratch::::BA:BA:
+:cache::::BIT32_BA:BA:BIT32(BA)
+:cache:::unsigned32:BA_BITMASK:BA:(1 << BA)
+:scratch::::BB:BB:
+:cache::::BIT32_BB:BB:BIT32(BB)
+:cache:::unsigned32:BB_BITMASK:BB:(1 << BB)
+:cache::::BT:BT:
+:cache:::unsigned32:BT_BITMASK:BT:(1 << BT)
+:cache:::unsigned_word:EXTS_BD_0b00:BD:(((signed_word)(signed16)instruction) & ~3)
+:cache:::unsigned_word:EXTS_LI_0b00:LI:((((signed_word)(signed32)(instruction << 6)) >> 6) & ~0x3)
+:cache:::unsigned_word:EXTS_D:D:((signed_word)(signed16)(instruction))
+:cache:::unsigned_word:EXTS_DS_0b00:DS:(((signed_word)(signed16)instruction) & ~0x3)
+#:compute:::int:SPR_is_256:SPR:(SPR == 256)
 
 # PowerPC models
 ::model:604:ppc604:  PPC_UNIT_BAD,   PPC_UNIT_BAD,   1,  1,  0

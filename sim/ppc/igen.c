@@ -29,8 +29,8 @@
 
 #include "filter.h"
 
-#include "ld-decode.h"
 #include "ld-cache.h"
+#include "ld-decode.h"
 #include "ld-insn.h"
 
 #include "igen.h"
@@ -480,11 +480,12 @@ main(int argc,
       force_decode_gen_type(optarg);
       break;
     case 'i':
-      if (decode_rules == NULL || cache_rules == NULL) {
-	fprintf(stderr, "Must specify decode and cache tables\n");
+      if (decode_rules == NULL) {
+	fprintf(stderr, "Must specify decode tables\n");
 	exit (1);
       }
-      instructions = load_insn_table(optarg, decode_rules, filters, includes);
+      instructions = load_insn_table(optarg, decode_rules, filters, includes,
+				     &cache_rules);
       fprintf(stderr, "\texpanding ...\n");
       insn_table_expand_insns(instructions);
       break;

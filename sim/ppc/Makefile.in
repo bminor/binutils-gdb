@@ -460,10 +460,9 @@ tmp-dgen: dgen ppc-spr-table $(srcdir)/../../move-if-change
 	touch tmp-dgen
 
 
-tmp-igen: igen ppc-instructions $(IGEN_OPCODE_RULES) ppc-cache-rules $(srcdir)/../../move-if-change tmp-ld-decode tmp-ld-cache tmp-ld-insn tmp-filter
+tmp-igen: igen ppc-instructions $(IGEN_OPCODE_RULES) $(srcdir)/../../move-if-change tmp-ld-decode tmp-ld-cache tmp-ld-insn tmp-filter
 	./igen	$(IGEN_FLAGS) \
 		-o $(srcdir)/$(IGEN_OPCODE_RULES) \
-		-k $(srcdir)/ppc-cache-rules \
 		-I $(srcdir) -i $(srcdir)/ppc-instructions \
 		-n icache.h    -hc tmp-icache.h \
 		-n icache.c    -c  tmp-icache.c \
@@ -534,12 +533,12 @@ tmp-ld-cache: ld-cache.o misc.o lf.o table.o filter_host.o
 ld-insn.o: ld-insn.c misc.h lf.h table.h ld-insn.h ld-decode.h igen.h
 	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/ld-insn.c
 tmp-ld-insn: ld-insn.o misc.o lf.o table.o ld-decode.o filter_host.o filter.o
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o tmp-ld-insn -DMAIN $(srcdir)/ld-insn.c misc.o lf.o table.o ld-decode.o filter_host.o filter.o $(BUILD_LIBS)
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o tmp-ld-insn -DMAIN $(srcdir)/ld-insn.c ld-cache.o misc.o lf.o table.o ld-decode.o filter_host.o filter.o $(BUILD_LIBS)
 
-gen-model.o: gen-model.c misc.h lf.h table.h gen-model.h ld-decode.h igen.h ld-insn.h
+gen-model.o: gen-model.c misc.h lf.h table.h gen-model.h ld-decode.h igen.h ld-insn.h ld-cache.h
 	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/gen-model.c
 
-gen-itable.o: gen-itable.c misc.h lf.h table.h gen-itable.h ld-decode.h igen.h ld-insn.h igen.h
+gen-itable.o: gen-itable.c misc.h lf.h table.h gen-itable.h ld-decode.h igen.h ld-insn.h igen.h ld-cache.h
 	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/gen-itable.c
 
 gen-icache.o: gen-icache.c misc.h lf.h table.h gen-icache.h ld-decode.h igen.h ld-insn.h gen-semantics.h gen-idecode.h
