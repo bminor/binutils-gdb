@@ -1,3 +1,8 @@
+2004-10-26  Mark Mitchell  <mark@codesourcery.com>
+
+	* emulparams/armelf.sh (OTHER_READONLY_SECTIONS): Do not emit
+	__exidx_{start,end} when not relocating.
+
 2004-10-25  Mark Mitchell  <mark@codesourcery.com>
 
 	* Makefile.in (earmsymbian.c): Depend on armbpabi.sc, not elf.sc.

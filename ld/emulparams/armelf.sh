@@ -12,9 +12,9 @@ OTHER_BSS_END_SYMBOLS='_bss_end__ = . ; __bss_end__ = . ; __end__ = . ;'
 OTHER_SECTIONS='.note.gnu.arm.ident 0 : { KEEP (*(.note.gnu.arm.ident)) }'
 OTHER_READONLY_SECTIONS="
   .ARM.extab ${RELOCATING-0} : { *(.ARM.extab${RELOCATING+* .gnu.linkonce.armextab.*}) }
-  __exidx_start = .;
+  ${RELOCATING+ __exidx_start = .; }
   .ARM.exidx ${RELOCATING-0} : { *(.ARM.exidx${RELOCATING+* .gnu.linkonce.armexidx.*}) }
-  __exidx_end = .;"
+  ${RELOCATING+ __exidx_end = .; }"
 
 DATA_START_SYMBOLS='__data_start = . ;';
 
