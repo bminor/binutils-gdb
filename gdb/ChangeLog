@@ -1,5 +1,7 @@
 Wed Nov 25 07:17:13 1992  Fred Fish  (fnf@cygnus.com)
 
+	* munch:  Backslash escape vertical bar characters inside
+	grep patterns since they have special meaning for some greps.
 	* parse.c (write_exp_string):  Complete rewrite to store string
 	contants as a leading explicit length, followed by the string data,
 	followed by a trailing explicit length.

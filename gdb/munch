@@ -18,7 +18,7 @@ esac
 MUNCH_NM="${MUNCH_NM-nm} $NMOPT"
 if test "`$MUNCH_NM main.o | egrep main | egrep FUNC | egrep GLOB`" != "" ; then
     # System V Release 4 style nm
-    $MUNCH_NM $* | egrep '|__?initialize_' | egrep FUNC | \
+    $MUNCH_NM $* | egrep '\|__?initialize_' | egrep FUNC | \
       sed -e \
         's/^.*\(_initialize_[a-zA-Z0-9_]*\).*$/  {extern void \1 (); \1 ();}/'\
       | sort -u
