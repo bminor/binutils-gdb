@@ -81,6 +81,9 @@ FLOAT_CFLAGS = @sim_float@
 TRACE_CFLAGS = @sim_trace@
 ASSERT_CFLAGS = @sim_assert@
 MONITOR_CFLAGS = @sim_monitor@
+FUNC_CFLAGS = @sim_func@
+MODEL_CFLAGS = @sim_model@ @sim_default_model@
+WARNING_CFLAGS = @sim_warnings@
 CONFIG_CFLAGS = $(BSWAP_CFLAGS) \
   $(ENDIAN_CFLAGS) \
   $(HOSTENDIAN_CFLAGS) \
@@ -93,7 +96,9 @@ CONFIG_CFLAGS = $(BSWAP_CFLAGS) \
   $(FLOAT_CFLAGS) \
   $(TRACE_CFLAGS) \
   $(ASSERT_CFLAGS) \
-  $(MONITOR_CFLAGS)
+  $(MONITOR_CFLAGS) \
+  $(FUNC_CFLAGS) \
+  $(MODEL_CFLAGS)
 
 CONFIG_FILE = @sim_config@
 IGEN_OPCODE_RULES = @sim_opcode@
@@ -122,7 +127,7 @@ TARGETLIB	= libsim.a
 all:	run $(TARGETLIB) $(GDB_OBJ)
 
 .c.o:
-	$(CC) -c $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES) $<
+	$(CC) -c $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(WARNING_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES) $<
 
 
 
@@ -130,7 +135,7 @@ BASICS_H = \
 	config.h \
 	ppc-config.h \
 	words.h \
-	ppc-endian.h \
+	sim-endian.h \
 	debug.h \
 	filter_filename.h \
 	bits.h \
@@ -163,7 +168,8 @@ CPU_H = \
 	psim.h \
 	icache.h \
 	itable.h \
-	mon.h
+	mon.h \
+	function_unit.h
 
 EMUL_GENERIC_H = \
 	$(CPU_H) \
@@ -176,12 +182,15 @@ INLINE = \
 	inline.h \
 	inline.c
 
-BUILT_SRC = \
+BUILT_SRC_WO_CONFIG = \
 	icache.h \
 	idecode.h idecode.c \
 	semantics.h semantics.c \
 	itable.h itable.c \
-	spreg.h spreg.c \
+	spreg.h spreg.c
+
+BUILT_SRC = \
+	$(BUILT_SRC_WO_CONFIG) \
 	config.h \
 	ppc-config.h 
 
@@ -189,9 +198,13 @@ LIB_SRC = \
 	psim.c \
 	bits.c \
 	debug.c \
-	ppc-endian.c \
+	sim-endian.c \
+	sim-endian.h \
+	sim-endian-n.h \
 	vm.c \
+	vm_n.h \
 	corefile.c \
+	function_unit.c \
 	events.c \
 	os_emul.c \
 	emul_generic.c \
@@ -214,13 +227,14 @@ LIB_OBJ = \
 	debug.o \
 	filter_filename.o \
 	bits.o \
-	ppc-endian.o \
+	sim-endian.o \
 	os_emul.o \
 	emul_generic.o \
 	emul_netbsd.o \
 	registers.o \
 	vm.o \
 	corefile.o \
+	function_unit.o \
 	spreg.o \
 	cpu.o \
 	interrupts.o \
@@ -256,10 +270,9 @@ psim.o: psim.c psim.h $(CPU_H) $(IDECODE_H) $(INLINE) $(LIB_SRC) $(BUILT_SRC)
 bits.o: bits.c $(BASICS_H)
 
 debug.o: debug.c $(BASICS_H)
-filter_filename.o: filter_filename.c $(BASICS_H)
+filter_filename.o: filter_filename.c config.h ppc-config.h
 
-ppc-endian.o: ppc-endian.c ppc-endian.h \
-	config.h ppc-config.h words.h sim_callbacks.h
+sim-endian.o: sim-endian.c sim-endian-n.h $(BASICS_H)
 
 os_emul.o: os_emul.c $(EMUL_GENERIC_H)
 emul_generic.o: emul_generic.c $(EMUL_GENERIC_H)
@@ -272,6 +285,7 @@ cpu.o: cpu.c $(CPU_H) $(IDECODE_H)
 interrupts.o: interrupts.c $(CPU_H) $(IDECODE_H) os_emul.h
 
 idecode.o: idecode.c $(CPU_H) $(IDECODE_H) semantics.h
+	$(CC) -c $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES) $<
 
 # double.o: double.c dp-bit.c
 
@@ -280,13 +294,15 @@ vm.o: vm.c vm.h vm_n.h $(BASICS_H) $(REGISTERS_H) \
 
 corefile.o: corefile.c corefile.h $(BASICS_H) device_tree.h
 
+function_unit.o: function_unit.c $(CPU_H)
+
 events.o: events.c events.h $(BASICS_H) 
 
-sim_calls.o: sim_calls.c $(PSIM_H) ../../gdb/tm.h devices.h
+sim_calls.o: sim_calls.c $(PSIM_H) function_unit.h itable.h ../../gdb/tm.h devices.h
 
 spreg.o: spreg.h spreg.c words.h
 
-main.o: main.c $(PSIM_H)
+main.o: main.c $(PSIM_H) function_unit.h itable.h
 
 devices.o: devices.c devices.h $(BASICS_H) \
 	device_tree.h events.h
@@ -294,10 +310,11 @@ devices.o: devices.c devices.h $(BASICS_H) \
 device_tree.o: device_tree.c device_tree.h devices.h $(BASICS_H)
 
 semantics.o: semantics.c semantics.h $(CPU_H) $(IDECODE_H)
+	$(CC) -c $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES) $<
 
 itable.o: itable.c itable.h
 
-mon.o: $(CPU_H)
+mon.o: mon.c $(CPU_H)
 
 #
 # Rules to create the built c source code files
@@ -359,11 +376,11 @@ misc.o: misc.h filter_filename.h
 
 tags etags: TAGS
 
-TAGS: tmp-igen tmp-dgen config.h ppc-config.h
+TAGS: $(BUILT_SRC)
 	etags $(srcdir)/*.h $(srcdir)/*.c $(BUILT_SRC)
 
 clean mostlyclean:
-	rm -f tmp-* *.[oas] core psim run igen dgen config.log $(BUILT_SRC)
+	rm -f tmp-* *.[oasi] core psim run igen dgen config.log $(BUILT_SRC_WO_CONFIG)
 
 distclean maintainer-clean realclean: clean
 	rm -f TAGS Makefile config.cache config.status config.h stamp-h

@@ -53,7 +53,6 @@ XCONCAT2(vm_data_map_read_,N)(vm_data_map *map,
       return 0;
     case NONSTRICT_ALIGNMENT:
       {
-	unsigned_N rval;
 	unsigned_N val;
 	if (vm_data_map_read_buffer(map, &val, ea, sizeof(unsigned_N))
 	    != sizeof(unsigned_N))

@@ -12,52 +12,55 @@ ac_help=
 ac_default_prefix=/usr/local
 # Any additions from configure.in:
 ac_help="$ac_help
-  --enable-sim-cflags=opts	Extra CFLAGS for use in building simulator"
+  --enable-sim-cflags=opts		Extra CFLAGS for use in building simulator"
 ac_help="$ac_help
-  --enable-sim-config=file	Override default config file"
+  --enable-sim-warnings=opts		Extra CFLAGS for turning on compiler warnings"
 ac_help="$ac_help
-  --enable-sim-opcode=which	Override default opcode lookup."
+  --enable-sim-config=file		Override default config file"
 ac_help="$ac_help
-  --enable-sim-switch		Use a switch instead of a table for instruction call."
+  --enable-sim-opcode=which		Override default opcode lookup."
 ac_help="$ac_help
-  --enable-sim-duplicate	Expand (duplicate) semantic functions."
+  --enable-sim-switch			Use a switch instead of a table for instruction call."
 ac_help="$ac_help
-  --enable-sim-filter=rule	Specify filter rules."
+  --enable-sim-duplicate		Expand (duplicate) semantic functions."
 ac_help="$ac_help
-  --enable-sim-icache=size	Specify instruction cache size."
+  --enable-sim-filter=rule		Specify filter rules."
 ac_help="$ac_help
-  --enable-sim-inline=inlines	Specify which functions should be inlined."
+  --enable-sim-icache=size		Specify instruction cache size."
 ac_help="$ac_help
-  --enable-sim-bswap		Use the BSWAP instruction on Intel 486s and Pentiums."
+  --enable-sim-inline=inlines		Specify which functions should be inlined."
 ac_help="$ac_help
-  --enable-sim-endian=endian	Specify target byte endian orientation."
+  --enable-sim-bswap			Use the BSWAP instruction on Intel 486s and Pentiums."
 ac_help="$ac_help
-  --enable-sim-hostendain=end	Specify host byte endian orientation."
+  --enable-sim-endian=endian		Specify target byte endian orientation."
 ac_help="$ac_help
-  --enable-sim-smp=n		Specify number of processors to configure for."
+  --enable-sim-hostendain=end		Specify host byte endian orientation."
 ac_help="$ac_help
-  --enable-sim-bitsize=n	Specify target bitsize (32 or 64)."
+  --enable-sim-smp=n			Specify number of processors to configure for."
 ac_help="$ac_help
-  --enable-sim-hostbitsize=n	Specify host bitsize (32 or 64)."
+  --enable-sim-bitsize=n		Specify target bitsize (32 or 64)."
 ac_help="$ac_help
-  --enable-sim-env=env		Specify target environment (operating, virtual, user)."
+  --enable-sim-hostbitsize=n		Specify host bitsize (32 or 64)."
 ac_help="$ac_help
-  --enable-sim-timebase	Specify whether the PPC timebase is supported."
+  --enable-sim-env=env			Specify target environment (operating, virtual, user)."
 ac_help="$ac_help
-  --enable-sim-alignment=align	Specify strict or nonstrict alignment.
-case "${enableval}" in
-  yes | strict | STRICT)	sim_alignment="-DWITH_ALIGNMENT=STRICT_ALIGNMENT";;
-  no | nonstrict | NONSTRICT)	sim_alignment="-DWITH_ALIGNMENT=NOSTRICT_ALIGNMENT";;
-  *)				sim_alignment="-DWITH_ALIGNMENT=$enableval";;
-esac"
+  --enable-sim-timebase			Specify whether the PPC timebase is supported."
 ac_help="$ac_help
-  --enable-sim-trace		Specify whether tracing is supported."
+  --enable-sim-alignment=align		Specify strict or nonstrict alignment."
 ac_help="$ac_help
-  --enable-sim-assert		Specify whether to perform random assertions."
+  --enable-sim-trace			Specify whether tracing is supported."
 ac_help="$ac_help
-  --enable-sim-float		Specify whether to use host floating point or simulate."
+  --enable-sim-assert			Specify whether to perform random assertions."
 ac_help="$ac_help
-  --enable-sim-monitor=mon	Specify whether to enable monitoring events."
+  --enable-sim-float			Specify whether to use host floating point or simulate."
+ac_help="$ac_help
+  --enable-sim-monitor=mon		Specify whether to enable monitoring events."
+ac_help="$ac_help
+  --enable-sim-function-unit		Specify whether detailed functional unit support is built."
+ac_help="$ac_help
+  --enable-sim-model=which		Specify PowerPC to model."
+ac_help="$ac_help
+  --enable-sim-default-model=which	Specify default PowerPC to model."
 
 # Initialize some variables set by options.
 # The variables have the same names as the options, with
@@ -458,6 +461,18 @@ else
   sim_cflags=""
 fi
 
+# Check whether --enable-sim-warnings or --disable-sim-warnings was given.
+enableval="$enable_sim_warnings"
+if test -n "$enableval"; then
+  case "${enableval}" in
+  yes)	sim_warnings="-Wall";;
+  no)	sim_warnings="-w";;
+  *)	sim_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
+esac
+else
+  sim_warnings=""
+fi
+
 # Check whether --enable-sim-config or --disable-sim-config was given.
 enableval="$enable_sim_config"
 if test -n "$enableval"; then
@@ -661,6 +676,12 @@ fi
 # Check whether --enable-sim-alignment or --disable-sim-alignment was given.
 enableval="$enable_sim_alignment"
 if test -n "$enableval"; then
+  case "${enableval}" in
+  yes | strict | STRICT)	sim_alignment="-DWITH_ALIGNMENT=STRICT_ALIGNMENT";;
+  no | nonstrict | NONSTRICT)	sim_alignment="-DWITH_ALIGNMENT=NOSTRICT_ALIGNMENT";;
+  *)				sim_alignment="-DWITH_ALIGNMENT=$enableval";;
+esac
+else
   sim_alignment=""
 fi
 
@@ -712,6 +733,42 @@ if test -n "$enableval"; then
 esac
 else
   sim_float=""
+fi
+
+# Check whether --enable-sim-function-unit or --disable-sim-function-unit was given.
+enableval="$enable_sim_function_unit"
+if test -n "$enableval"; then
+  case "${enableval}" in
+  yes)	sim_func="-DWITH_FUNCTION_UNIT=1";;
+  no)	sim_func="-DWITH_FUNCTION_UNIT=0";;
+  *)	sim_func="";;
+esac
+else
+  sim_func=""
+fi
+
+# Check whether --enable-sim-model or --disable-sim-model was given.
+enableval="$enable_sim_model"
+if test -n "$enableval"; then
+  case "${enableval}" in
+  yes)	sim_model="";;
+  no)	sim_model="";;
+  *)	sim_model="-DWITH_PPC_MODEL=${enableval}";;
+esac
+else
+  sim_model=""
+fi
+
+# Check whether --enable-sim-default-model or --disable-sim-default-model was given.
+enableval="$enable_sim_default_model"
+if test -n "$enableval"; then
+  case "${enableval}" in
+  yes)	sim_default_model="";;
+  no)	sim_default_model="";;
+  *)	sim_default_model="-DWITH_DEFAULT_PPC_MODEL=${enableval}";;
+esac
+else
+  sim_model=""
 fi
 
 
@@ -968,6 +1025,10 @@ fi
 
 
 
+
+
+
+
 for ac_func in getrusage
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
@@ -975,7 +1036,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 979 "configure"
+#line 1040 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1030,7 +1091,7 @@ else
   ac_cv_c_cross=yes
 else
 cat > conftest.$ac_ext <<EOF
-#line 1034 "configure"
+#line 1095 "configure"
 #include "confdefs.h"
 main(){return(0);}
 EOF
@@ -1068,7 +1129,7 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 1072 "configure"
+#line 1133 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -1082,7 +1143,7 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 1086 "configure"
+#line 1147 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -1115,7 +1176,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1119 "configure"
+#line 1180 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
@@ -1266,6 +1327,7 @@ s%@HDEFINES@%$HDEFINES%g
 s%@AR@%$AR%g
 s%@RANLIB@%$RANLIB%g
 s%@sim_cflags@%$sim_cflags%g
+s%@sim_warnings@%$sim_warnings%g
 s%@sim_config@%$sim_config%g
 s%@sim_opcode@%$sim_opcode%g
 s%@sim_switch@%$sim_switch%g
@@ -1286,6 +1348,9 @@ s%@sim_float@%$sim_float%g
 s%@sim_trace@%$sim_trace%g
 s%@sim_assert@%$sim_assert%g
 s%@sim_monitor@%$sim_monitor%g
+s%@sim_func@%$sim_func%g
+s%@sim_model@%$sim_model%g
+s%@sim_default_model@%$sim_default_model%g
 s%@CC_FOR_BUILD@%$CC_FOR_BUILD%g
 s%@CPP@%$CPP%g
 

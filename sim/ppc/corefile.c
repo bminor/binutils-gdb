@@ -398,7 +398,6 @@ core_attach_address_callback(const device *me,
 			     const device *who) /*callback/default*/
 {
   core *memory = (core*)me->data;
-  unsigned_word device_address;
   DTRACE_ATTACH_ADDRESS(core);
   if (space != 0)
     error("core_attach_address_callback() invalid address space\n");

@@ -544,7 +544,6 @@ icu_io_write_buffer_callback(const device *me,
 			     cpu *processor,
 			     unsigned_word cia)
 {
-  psim *system = cpu_system(processor);
   unsigned_1 val = H2T_1(*(unsigned_1*)source);
   DTRACE_IO_WRITE_BUFFER(icu);
   /* tell the parent device that the interrupt lines have changed.

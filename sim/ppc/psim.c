@@ -97,6 +97,7 @@ int current_host_byte_order;
 int current_environment;
 int current_alignment;
 int current_floating_point;
+ppc_model current_ppc_model = WITH_DEFAULT_PPC_MODEL;
 
 
 /* create a device tree from the image */
@@ -1015,7 +1016,7 @@ INLINE_PSIM void
 psim_print_info(psim *system,
 		int verbose)
 {
-  mon_print_info(system->monitor, verbose);
+  mon_print_info(system, system->monitor, verbose);
 }
 
 

@@ -29,6 +29,7 @@
 #include "basics.h"
 #include "cpu.h"
 #include "mon.h"
+#include <stdio.h>
 
 #ifdef HAVE_STRING_H
 #include <string.h>
@@ -58,6 +59,7 @@ struct _cpu_mon {
   unsigned issue_count[nr_itable_entries];
   unsigned read_count;
   unsigned write_count;
+  function_unit_print *func_unit_print;
 };
 
 struct _mon {
@@ -101,6 +103,9 @@ mon_issue(itable_index index,
   cpu_mon *monitor = cpu_monitor(processor);
   ASSERT(index <= nr_itable_entries);
   monitor->issue_count[index] += 1;
+
+  if (WITH_FUNCTION_UNIT)
+    function_unit_issue(index, cpu_function_unit(processor), cia);
 }
 
 
@@ -126,7 +131,6 @@ mon_write(unsigned_word ea,
   cpu_mon *monitor = cpu_monitor(processor);
   monitor->write_count += 1;
 }
-
 
 STATIC_INLINE_MON unsigned
 mon_get_number_of_insns(cpu_mon *monitor)
@@ -163,7 +167,8 @@ mon_add_commas(char *buf,
 
 
 INLINE_MON void
-mon_print_info(mon *monitor,
+mon_print_info(psim *system,
+	       mon *monitor,
 	       int verbose)
 {
   char buffer[20];
@@ -172,7 +177,7 @@ mon_print_info(mon *monitor,
   int len_num = 0;
   int len;
   long total_insns = 0;
-  long cpu_insns_second;
+  long cpu_insns_second = 0;
   double cpu_time = 0.0;
 
   for (cpu_nr = 0; cpu_nr < monitor->nr_cpus; cpu_nr++) {
@@ -219,26 +224,55 @@ mon_print_info(mon *monitor,
 			  (monitor->cpu_monitor[cpu_nr].issue_count[index] == 1) ? "" : "s");
       }
 
-      if (monitor->cpu_monitor[cpu_nr].read_count)
-	printf_filtered ("CPU #%*d executed %*s data reads.\n",
-			 len_cpu, cpu_nr+1,
-			 len_num, mon_add_commas(buffer,
-						 sizeof(buffer),
-						 monitor->cpu_monitor[cpu_nr].read_count));
-
-      if (monitor->cpu_monitor[cpu_nr].write_count)
-	printf_filtered ("CPU #%*d executed %*s data writes.\n",
-			 len_cpu, cpu_nr+1,
-			 len_num, mon_add_commas(buffer,
-						 sizeof(buffer),
-						 monitor->cpu_monitor[cpu_nr].write_count));
+      printf_filtered ("\n");
     }
+
+    if (WITH_FUNCTION_UNIT)
+      {
+	function_unit *func_unit = cpu_function_unit(psim_cpu(system, cpu_nr));
+	function_unit_print *ptr = function_unit_mon_info(func_unit);
+	function_unit_print *orig_ptr = ptr;
+
+	while (ptr) {
+	  if (ptr->count)
+	    printf_filtered("CPU #%*d executed %*s %s%s.\n",
+			    len_cpu, cpu_nr+1,
+			    len_num, mon_add_commas(buffer,
+						    sizeof(buffer),
+						    ptr->count),
+			    ptr->name,
+			    ((ptr->count == 1)
+			     ? ptr->suffix_singular
+			     : ptr->suffix_plural));
+
+	  ptr = ptr->next;
+	}
+
+	function_unit_mon_free(func_unit, orig_ptr);
+      }
+
+    if (monitor->cpu_monitor[cpu_nr].read_count)
+      printf_filtered ("CPU #%*d executed %*s data read%s.\n",
+		       len_cpu, cpu_nr+1,
+		       len_num, mon_add_commas(buffer,
+					       sizeof(buffer),
+					       monitor->cpu_monitor[cpu_nr].read_count),
+		       (monitor->cpu_monitor[cpu_nr].read_count == 1) ? "" : "s");
+
+    if (monitor->cpu_monitor[cpu_nr].write_count)
+      printf_filtered ("CPU #%*d executed %*s data write%s.\n",
+		       len_cpu, cpu_nr+1,
+		       len_num, mon_add_commas(buffer,
+					       sizeof(buffer),
+					       monitor->cpu_monitor[cpu_nr].write_count),
+		       (monitor->cpu_monitor[cpu_nr].write_count == 1) ? "" : "s");
     
     printf_filtered("CPU #%*d executed %*s instructions in total.\n",
 		    len_cpu, cpu_nr+1,
 		    len_num, mon_add_commas(buffer,
 					    sizeof(buffer),
 					    mon_get_number_of_insns(&monitor->cpu_monitor[cpu_nr])));
+
   }
 
   if (monitor->nr_cpus > 1)
@@ -246,7 +280,8 @@ mon_print_info(mon *monitor,
 		    mon_add_commas(buffer, sizeof(buffer), total_insns));
 
   if (cpu_insns_second)
-    printf_filtered ("\nSimulator speed was %s instructions/second\n",
+    printf_filtered ("%sSimulator speed was %s instructions/second\n",
+		     (monitor->nr_cpus <= 1 && verbose <= 1) ? "" : "\n",
 		     mon_add_commas(buffer, sizeof(buffer), cpu_insns_second));
 }
 

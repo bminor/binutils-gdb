@@ -246,6 +246,41 @@ extern int current_floating_point;
 #endif
 
 
+/* Include code that simulates function units to model particular
+   machines more closely and provide more detailed information about
+   optimization potential.  */
+
+#ifndef WITH_FUNCTION_UNIT
+#define	WITH_FUNCTION_UNIT		1
+#endif
+
+/* Which specific processor to model */
+typedef enum _ppc_model {
+  PPC_MODEL_UNKNOWN,
+  PPC_MODEL_601,
+  PPC_MODEL_602,
+  PPC_MODEL_603,
+  PPC_MODEL_603e,
+  PPC_MODEL_604,
+  PPC_MODEL_403,
+  PPC_MODEL_505,
+  PPC_MODEL_821,
+  PPC_MODEL_860
+} ppc_model;
+
+#ifndef WITH_DEFAULT_PPC_MODEL
+#define	WITH_DEFAULT_PPC_MODEL PPC_MODEL_603e
+#endif
+
+extern ppc_model current_ppc_model;
+
+#ifndef WITH_PPC_MODEL
+#define	WITH_PPC_MODEL			0
+#endif
+
+#define CURRENT_PPC_MODEL (WITH_PPC_MODEL	\
+			   ? WITH_PPC_MODEL	\
+			   : current_ppc_model)
 
 /* INLINE CODE SELECTION:
 
@@ -309,11 +344,18 @@ extern int current_floating_point;
 #endif
 
 /* Code that converts between hosts and target byte order.  Used on
-   every memory access (instruction and data).  (See ppc-endian.h for
+   every memory access (instruction and data).  (See sim-endian.h for
    additional byte swapping configuration information) */
 
-#ifndef ENDIAN_INLINE
-#define ENDIAN_INLINE			DEFAULT_INLINE
+#ifndef SIM_ENDIAN_INLINE
+#define SIM_ENDIAN_INLINE		DEFAULT_INLINE
+#endif
+
+/* Low level bit manipulation routines used to work around a compiler
+   bug in 2.6.3.  */
+
+#ifndef BITS_INLINE
+#define BITS_INLINE			DEFAULT_INLINE
 #endif
 
 /* Code that gives access to various CPU internals such as registers.
@@ -410,6 +452,12 @@ extern int current_floating_point;
 
 #ifndef IDECODE_INLINE
 #define IDECODE_INLINE			DEFAULT_INLINE
+#endif
+
+/* Code to simule functional units of real machines */
+
+#ifndef FUNCTION_UNIT_INLINE
+#define FUNCTION_UNIT_INLINE		DEFAULT_INLINE
 #endif
 
 #endif /* _CONFIG_H */

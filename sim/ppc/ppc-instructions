@@ -905,34 +905,34 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #
 
 0.31,6.RT,11.RA,16.RB,21.790,31./:X:::Load Halfword Byte-Reverse Indexed
-#	unsigned_word b;
-#	unsigned_word EA;
-#	if (RA == 0) b = 0;
-#	else         b = *rA;
-#	EA = b + *rB;
-#	*rT = SWAP2(MEM(unsigned, EA, 2));
+	unsigned_word b;
+	unsigned_word EA;
+	if (RA == 0) b = 0;
+	else         b = *rA;
+	EA = b + *rB;
+	*rT = SWAP_2(MEM(unsigned, EA, 2));
 0.31,6.RT,11.RA,16.RB,21.534,31./:X:::Load Word Byte-Reverse Indexed
-#	unsigned_word b;
-#	unsigned_word EA;
-#	if (RA == 0) b = 0;
-#	else         b = *rA;
-#	EA = b + *rB;
-#	*rT = SWAP4(MEM(unsigned, EA, 4));
+	unsigned_word b;
+	unsigned_word EA;
+	if (RA == 0) b = 0;
+	else         b = *rA;
+	EA = b + *rB;
+	*rT = SWAP_4(MEM(unsigned, EA, 4));
 
 0.31,6.RS,11.RA,16.RB,21.918,31./:X:::Store Half Word Byte-Reversed Indexed
-#	unsigned_word b;
-#	unsigned_word EA;
-#	if (RA == 0) b = 0;
-#	else         b = *rA;
-#	EA = b + *rB;
-#	STORE(EA, 2, SWAP2(*rS));
+	unsigned_word b;
+	unsigned_word EA;
+	if (RA == 0) b = 0;
+	else         b = *rA;
+	EA = b + *rB;
+	STORE(EA, 2, SWAP_2(*rS));
 0.31,6.RS,11.RA,16.RB,21.662,31./:X:::Store Word Byte-Reversed Indexed
-#	unsigned_word b;
-#	unsigned_word EA;
-#	if (RA == 0) b = 0;
-#	else         b = *rA;
-#	EA = b + *rB;
-#	STORE(EA, 4, SWAP4(*rS));
+	unsigned_word b;
+	unsigned_word EA;
+	if (RA == 0) b = 0;
+	else         b = *rA;
+	EA = b + *rB;
+	STORE(EA, 4, SWAP_4(*rS));
 
 
 #

@@ -23,9 +23,14 @@
 #include <stdio.h>
 
 #include "psim.h"
+#include "function_unit.h"
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
 #endif
 
 #ifdef HAVE_STRING_H
@@ -80,7 +85,7 @@ zfree(void *chunk)
 static void
 usage(void)
 {
-  printf_filtered("Usage:\n\tpsim [ -t <trace-option> ] <image> [ <image-args> ... ]\n");
+  printf_filtered("Usage:\n\tpsim [ -t <trace-option> ] [-m model] [-i] [-I] <image> [ <image-args> ... ]\n");
   trace_usage();
   error("");
 }
@@ -91,22 +96,26 @@ main(int argc, char **argv)
   psim *system;
   const char *name_of_file;
   char *arg_;
-  unsigned_word stack_pointer;
   psim_status status;
   int letter;
-  int i;
   int print_info = 0;
 
   /* check for arguments -- note sim_calls.c also contains argument processing
      code for the simulator linked within gdb.  */
-  while ((letter = getopt (argc, argv, "It:")) != EOF)
+  while ((letter = getopt (argc, argv, "Iim:t:")) != EOF)
     {
       switch (letter) {
       case 't':
 	trace_option(optarg);
 	break;
-      case 'I':
+      case 'm':
+	function_unit_model(optarg);
+	break;
+      case 'i':
 	print_info = 1;
+	break;
+      case 'I':
+	print_info = 2;
 	break;
       default:
 	usage();
@@ -133,7 +142,7 @@ main(int argc, char **argv)
 
   /* any final clean up */
   if (print_info)
-    psim_print_info (system, 2);
+    psim_print_info (system, print_info);
 
   /* why did we stop */
   status = psim_get_status(system);

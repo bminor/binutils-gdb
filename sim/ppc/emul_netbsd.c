@@ -248,7 +248,6 @@ do_read(emulation *emul,
   unsigned_word buf = cpu_registers(processor)->gpr[arg0+1];
   int nbytes = cpu_registers(processor)->gpr[arg0+2];
   int status;
-  int nr_moved;
   SYS(read);
   
   if (WITH_TRACE && ppc_trace[trace_os_emul])

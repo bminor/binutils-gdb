@@ -22,9 +22,10 @@
 #ifndef _DEBUG_C_
 #define _DEBUG_C_
 
+#include "config.h"
 #include "basics.h"
 
-#ifdef HAVE_STDLIB
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 

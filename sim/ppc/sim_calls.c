@@ -24,6 +24,7 @@
 #include <ctype.h>
 
 #include "basics.h"
+#include "function_unit.h"
 #include "psim.h"
 
 #ifdef HAVE_STDLIB_H
@@ -55,8 +56,6 @@ static int print_info = 0;
 void
 sim_open (char *args)
 {
-  int i;
-
   /* trace the call */
   TRACE(trace_gdb, ("sim_open(args=%s) called\n", args ? args : "(null)"));
 
@@ -77,18 +76,37 @@ sim_open (char *args)
 	while (*p != '\0') {
 	  switch (*p) {
 	  default:
-	    printf_filtered("Usage:\n\ttarget sim [ -t <trace-option> ]\n");
+	    printf_filtered("Usage:\n\ttarget sim [ -t <trace-option> ] [-m model] [-i] [-I]\n");
 	    trace_usage();
 	    error ("");
 	    break;
 	  case 't':
-	    argp += 1;
-	    if (argv[argp] == NULL)
-	      error("Missing <trace> option for -t\n");
-	    trace_option(argv[argp]); /* better fail if NULL */
+	    if (p[1])
+	      trace_option(p+1);
+	    else {
+	      argp += 1;
+	      if (argv[argp] == NULL)
+		error("Missing <trace> option for -t\n");
+	      else
+		trace_option(argv[argp]);
+	    }
+	    break;
+	  case 'm':
+	    if (p[1])
+	      function_unit_model(p+1);
+	    else {
+	      argp += 1;
+	      if (argv[argp] == NULL)
+		error("Missing <trace> option for -t\n");
+	      else
+		function_unit_model(argv[argp]);
+	    }
+	    break;
+	  case 'i':
+	    print_info = 1;
 	    break;
 	  case 'I':
-	    print_info = 1;
+	    print_info = 2;
 	    break;
 	  }
 	  p += 1;
@@ -109,7 +127,7 @@ sim_close (int quitting)
 {
   TRACE(trace_gdb, ("sim_close(quitting=%d) called\n", quitting));
   if (print_info)
-    psim_print_info (simulator, 1);
+    psim_print_info (simulator, print_info);
 
   /* nothing to do */
 }
@@ -285,7 +303,6 @@ void
 sim_resume (int step, int siggnal)
 {
   void (*prev) ();
-  unsigned_word program_counter;
 
   TRACE(trace_gdb, ("sim_resume(step=%d, siggnal=%d)\n",
 		    step, siggnal));

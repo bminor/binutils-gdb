@@ -59,6 +59,8 @@ events.c
 events.h
 filter_filename.c
 filter_filename.h
+function_unit.c
+function_unit.h
 idecode_branch.h
 idecode_expression.h
 idecode_fields.h
@@ -77,8 +79,6 @@ mon.h
 os_emul.c
 os_emul.h
 ppc-cache-rules
-ppc-endian.c
-ppc-endian.h
 ppc-instructions
 ppc-opcode-complex
 ppc-opcode-simple
@@ -91,6 +91,9 @@ registers.c
 registers.h
 sim_callbacks.h
 sim_calls.c
+sim-endian.c
+sim-endian.h
+sim-endian-n.h
 spa-reporter.c
 spa-system-calls.c
 spa-system-calls.h

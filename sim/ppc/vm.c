@@ -485,7 +485,9 @@ om_virtual_to_real(om_map *map,
 	  core_map_read_word(map->physical,
 			     real_address_of_pte + sizeof_pte / 2,
 			     processor, cia);
-	error("fixme - check pte hit\n");
+	error("fixme - check pte hit %ld %ld\n",
+	      (long)pte_word_0,
+	      (long)pte_word_1);
 	if (1) {
 	  error("fixme - update the page_tlb\n");
 	  page_tlb_entry->valid = 1;

@@ -19,71 +19,47 @@
     */
 
 
-#ifndef _INLINE_C_
-#define _INLINE_C_
-
-#if BITS_INLINE
-#include "bits.c"
+#ifndef N
+#error "N must be #defined"
 #endif
 
-#if SIM_ENDIAN_INLINE
-#include "sim-endian.c"
-#endif
+#undef unsigned_N
+#define unsigned_N XCONCAT2(unsigned_,N)
+#undef _SWAP_N
+#define _SWAP_N XCONCAT2(_SWAP_,N)
+#undef endian_t2h_N
+#define endian_t2h_N XCONCAT2(endian_t2h_,N)
+#undef endian_h2t_N
+#define endian_h2t_N XCONCAT2(endian_h2t_,N)
+#undef swap_N
+#define swap_N XCONCAT2(swap_,N)
 
-#if ICACHE_INLINE
-#include "icache.c"
-#endif
+INLINE_SIM_ENDIAN unsigned_N
+endian_t2h_N(unsigned_N raw_in)
+{
+  if (CURRENT_TARGET_BYTE_ORDER == CURRENT_HOST_BYTE_ORDER) {
+    return raw_in;
+  }
+  else {
+    _SWAP_N(return,raw_in);
+  }
+}
 
-#if CORE_INLINE
-#include "corefile.c"
-#endif
 
-#if VM_INLINE
-#include "vm.c"
-#endif
+INLINE_SIM_ENDIAN unsigned_N
+endian_h2t_N(unsigned_N raw_in)
+{
+  if (CURRENT_TARGET_BYTE_ORDER == CURRENT_HOST_BYTE_ORDER) {
+    return raw_in;
+  }
+  else {
+    _SWAP_N(return,raw_in);
+  }
+}
 
-#if CPU_INLINE
-#include "cpu.c"
-#endif
 
-#if EVENTS_INLINE
-#include "events.c"
-#endif
-
-#if MON_INLINE
-#include "mon.c"
-#endif
-
-#if FUNCTION_UNIT_INLINE
-#include "function_unit.c"
-#endif
-
-#if REGISTERS_INLINE
-#include "registers.c"
-#endif
-
-#if INTERRUPTS_INLINE
-#include "interrupts.c"
-#endif
-
-#if DEVICE_TREE_INLINE
-#include "device_tree.c"
-#endif
-
-#if DEVICES_INLINE
-#include "devices.c"
-#endif
-
-#if SPREG_INLINE
-#include "spreg.c"
-#endif
-
-#if SEMANTICS_INLINE
-#include "semantics.c"
-#endif
-
-#if IDECODE_INLINE
-#include "idecode.c"
-#endif
-
-#endif
+INLINE_SIM_ENDIAN unsigned_N
+swap_N(unsigned_N raw_in)
+{
+  _SWAP_N(return,raw_in);
+}

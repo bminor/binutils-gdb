@@ -37,6 +37,7 @@
 #include "icache.h"
 #include "itable.h"
 #include "mon.h"
+#include "function_unit.h"
 
 
 /* typedef struct _cpu cpu;
@@ -174,6 +175,9 @@ INLINE_CPU registers *cpu_registers
 (cpu *processor);
 
 INLINE_CPU void cpu_synchronize_context
+(cpu *processor);
+
+INLINE_CPU function_unit *cpu_function_unit
 (cpu *processor);
 
 #define IS_PROBLEM_STATE(PROCESSOR) \

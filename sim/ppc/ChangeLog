@@ -1,3 +1,132 @@
+Wed Nov  8 13:19:47 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* Makefile.in ({FUNC,MODEL,WARNING}_CFLAGS): New flags set by
+	configure --enable switches.
+	(CONFIG_CFLAGS): Include FUNC_CFLAGS and MODE_CFLAGS.
+	(.c.o): Include WARNING_CFLAGS.
+	(CPU_H): Include function_unit.h.
+	(LIB_OBJ): Include function_unit.o.
+	(BUILT_SRC_WO_CONFIG): Split from BUILT_SRC and do not include
+	config.h or ppc-config.h.
+	(BUILT_SRC): Include BUILT_SRC_WO_CONFIG, config.h and
+	ppc-config.h.
+	(filter_filename.o): Include config.h/ppc-config.h dependencies.
+	(idecode.o, semantics.o): Specify CC line without WARNING_CFLAGS
+	so that we don't get all of the unused variable warnings that are
+	generated.
+	(function_unit.o): Add rule to build.
+	(main.o, sim_calls.o): Add function_unit.h, itable.h dependencies.
+	(mon.o): Include mon.c dependency.
+	(TAGS): Depend on BUILT_SRC.
+	(clean): Don't delete config.h or ppc-config.h
+
+	* basics.h (sim_callbacks.h): Move include after the include of
+	config.h and ppc-config.h.
+
+	* bits.{h,c} (ROTL32,ROTL64): Move these functions to bits.c.  Add
+	support for BITS_INLINE to inline these.  Add declarations to
+	bits.h.
+
+	* configure.in (--enable-sim-warnings): Add new option to specify
+	compiler warnings for all modules except idecode.o and semantics.o
+	which have lots of unused variables because they are machine
+	generated.
+	(--enable-sim-function-unit): New switch to configure whether
+	function unit support is compiled in or not.
+	(--enable-sim-{,default-}mode): New switches to control which cpu
+	model is used.
+	* configure: Regenerate.
+
+	* corefile.c (core_attach_address_callback): Delete unused
+	variable device_address.
+
+	* cpu.c (struct _cpu): Add function unit pointer field func_unit.
+	(cpu_create): If WITH_FUNCTION_UNIT, call function_unit_create.
+	(cpu_init): If WITH_FUNCTION_UNIT, call function_unit_init.
+	(cpu_halt): If WITH_FUNCTION_UNIT, call function_unit_halt.
+	(cpu_function_unit): New function to return func_unit field.
+
+	* cpu.h (function_unit.h): Include new include file.
+	(cpu_function_unit): Declare.
+
+	* debug.c (stdlib.h): Test HAVE_STDLIB_H, not HAVE_STDLIB.
+	(config.h): Include config.h.
+
+	* devices.c (icu_io_write_buffer_callback): Delete unused variable
+	system.
+
+	* emul_generic.c (emul_exit_call): Print out status value.
+
+	* emul_netbsd.c (do_read): Delete unused variable nr_moved.
+
+	* filter_filename.h (includes): Include config.h, ppc-config.h,
+	not basics.h.
+
+	* inline.c: Include bits.c if BITS_INLINE.  Include
+	function_unit.c if FUNCTION_UNIT_INLINE.
+
+	* inline.h (INLINE_BITS): Define if BITS_INLINE.
+	(INLINE_FUNCTION_UNIT): Define if FUNCTION_UNIT_INLINE.
+
+	* interrupts.c (instruction_storage_interrupt): Delete unused
+	variable nia.
+
+	* lf.h (config.h): Include config.h.
+
+	* main.c (includes): Include function_unit.c.  If HAVE_UNISTD_H,
+	include unistd.h.
+	(usage): Update for -m model, -i, and -I options.
+	(main): Delete unused variables stack_pointer and i.  Add support
+	for -i, -m model arguments.  Call psim_print_info with verbose ==
+	1 if -i, and verbose == 2 if -I.
+
+	* mon.c (stdio.h): Include stdio.h to pick up sprintf prototype.
+	(mon_issue): Call function_unit_issue if function units are
+	supported.
+	(mon_print_info): Take psim * argument.  Print out information
+	from function_unit if available.  Move read/write stats to always
+	print, instead of printing if verbose > 1.  Fix up plural
+	vs. singular usage.
+
+	* mon.h (mon_print_info): Update prototype.
+
+	* psim.c (current_ppc_model): Add global variable.
+	(psim_print_info): Pass system argument to mon_print_info.
+
+	* sim_calls.c (function_unit.h): Include.
+	(sim_open): Add support for -i and -m model options.  If -i call
+	psim_print_info with verbose == 1, if -I, with verbose == 2.
+	(sim_resume): Delete unused variable program_counter.
+
+	* std-config.h (WITH_FUNCTION_UNIT): Define.
+	(ppc_model): Add enumeration giving all PowerPC models currently
+	known about.
+	({WITH,CURRENT}_PPC_MODEL): Define.
+	(FUNCTION_UNIT_INLINE): Define.
+
+	* table.c (config.h): Include config.h.
+
+	* vm.c (om_virtual_to_real): Print pte_word_{0,1} so the compiler
+	doesn't complain that they're unused.
+
+	* vm_n.h (vm_data_map_read_N): Delete unused variable rval.
+	
+Mon Nov  6 23:15:54 1995  Andrew Cagney  <cagney@highland.com.au>
+
+	* sim-endian.c (ppc-endian.c), sim-endian.h (ppc-endian.h):
+        renameed.  These files are target independant.
+	* Makefile.in, basics.h: update for new name.
+
+	* sim-endian.h (SWAP_N), sim-endian.c (_SWAP_1): Rename existing
+        SWAP_<N> to _SWAP_<N> so that sim-endian.h can contain SWAP_N
+        macro's as required.
+
+	* sim-endian.c, sim-endian-n.h (new file): Move endian code into a
+        debugable header file.
+
+	* ppc-instructions (Byte-Reverse): Enable byte reverse
+        instructions using SWAP_N macros.
+
 Mon Nov  6 10:39:28 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* Makefile.in (config.status): Remove references to config.make
