@@ -24,7 +24,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define _RELOC_H_READ_ 1
 
 enum reloc_type
-{
+  {
     RELOC_8,        RELOC_16,        RELOC_32, /* simple relocations */
     RELOC_DISP8,    RELOC_DISP16,    RELOC_DISP32, /* pc-rel displacement */
     RELOC_WDISP30,  RELOC_WDISP22,
@@ -36,17 +36,14 @@ enum reloc_type
     RELOC_JMP_TBL,		/* P.I.C. jump table */
     RELOC_SEGOFF16,		/* reputedly for shared libraries somehow */
     RELOC_GLOB_DAT,  RELOC_JMP_SLOT, RELOC_RELATIVE,
-
-/* 29K relocation types */
+    
+    /* 29K relocation types */
     RELOC_JUMPTARG, RELOC_CONST,     RELOC_CONSTH,
-
-#ifndef NO_V9
-/* sparc v9 */
+    
     RELOC_WDISP14, RELOC_WDISP21,
-#endif /* NO_V9 */
-
+    
     NO_RELOC
-};
+    };
 
 #define	RELOC_TYPE_NAMES \
 "8",		"16",		"32",		"DISP8",	\
