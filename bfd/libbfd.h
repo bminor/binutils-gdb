@@ -562,7 +562,7 @@ extern bfd *bfd_last_cache;
 
 #define bfd_cache_lookup(x) \
     ((x)==bfd_last_cache? \
-      (FILE*)(bfd_last_cache->iostream): \
+      (FILE*) (bfd_last_cache->iostream): \
        bfd_cache_lookup_worker(x))
 boolean 
 bfd_cache_init  PARAMS ((bfd *abfd));
@@ -714,6 +714,14 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_386_RELATIVE",
   "BFD_RELOC_386_GOTOFF",
   "BFD_RELOC_386_GOTPC",
+  "BFD_RELOC_X86_64_GOT32",
+  "BFD_RELOC_X86_64_PLT32",
+  "BFD_RELOC_X86_64_COPY",
+  "BFD_RELOC_X86_64_GLOB_DAT",
+  "BFD_RELOC_X86_64_JUMP_SLOT",
+  "BFD_RELOC_X86_64_RELATIVE",
+  "BFD_RELOC_X86_64_GOTPCREL",
+  "BFD_RELOC_X86_64_32S",
   "BFD_RELOC_NS32K_IMM_8",
   "BFD_RELOC_NS32K_IMM_16",
   "BFD_RELOC_NS32K_IMM_32",

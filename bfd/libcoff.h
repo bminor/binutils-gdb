@@ -823,12 +823,12 @@ typedef struct
        struct bfd_link_info *info,
        bfd *abfd,
        const char *name,
-       flagword flags, 
+       flagword flags,
        asection *section,
        bfd_vma value,
        const char *string,
        boolean copy,
-       boolean collect, 
+       boolean collect,
        struct bfd_link_hash_entry **hashp));
 
  boolean (*_bfd_coff_link_output_has_begun) PARAMS ((

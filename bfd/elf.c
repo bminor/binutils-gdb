@@ -3306,6 +3306,9 @@ prep_headers (abfd)
       i_ehdrp->e_machine = EM_S370;
       break;
     case bfd_arch_i386:
+      if (bfd_get_arch_size (abfd) == 64)
+      i_ehdrp->e_machine = EM_X86_64;
+      else
       i_ehdrp->e_machine = EM_386;
       break;
     case bfd_arch_ia64:

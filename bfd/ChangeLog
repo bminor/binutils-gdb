@@ -1,3 +1,20 @@
+2000-11-30  Jan Hubicka  <jh@suse.cz>
+	
+        * Makefile.am (BFD64_BACKENDS): Add elf64-x86-64.lo
+        BFD64_BACKENDS_CFILES): Add elf64-x86-64.c
+        (elf64-x86-64.lo): Add dependencies.
+        * archures.c (DESCRIPTION): Add bfd_mach_x86_64,
+        bfd_mach_x86_64_intel_syntax.
+        * elf.c (prep_headers): Use EM_x86_64 for 64bit output.
+        * config.bfd (x86_64): Add.
+        * configure.in: Add support for bfd_elf64_x86_64_vec.
+        * cpu-i386.c (bfd_x86_64_arch_intel_syntax, bfd_x86_64_arch): Add.
+        (bfd_i386_arch, i8086_ar): Link in.
+        * elf64-x86-64.c: New file.
+        * reloc.c (ENUMDOC): Add BFD_RELOC_X86_64*.
+        * targets.c (bfd_elf64_x86_64_vec): Add.
+        (bfd_target_vect): Add bfd_elf64_x86_64_vec.
+
 2000-11-30  Kazu Hirata  <kazu@hxi.com>
 
 	* xcofflink.c: Fix formatting.
@@ -306,7 +323,7 @@
 	if a relocation for an undefined symbol also results in an
 	overflow.
 
-Mon Nov  6 13:35:07 2000  Christopher Faylor <cgf@cygnus.com>
+2000-11-06  Christopher Faylor <cgf@cygnus.com>
 
 	* config.bfd: Add support for Sun Chorus.
 
@@ -762,7 +779,7 @@ Mon Nov  6 13:35:07 2000  Christopher Faylor <cgf@cygnus.com>
  	* elf32-mips.c (_bfd_mips_elf_final_write_processing): Return
 	E_MIPS_ARCH_2 for bfd_mach_mips4K.
 
-Wed Sep 13 19:31:39 2000  Marco Franzen <marcof@thyron.com>
+2000-09-13  Marco Franzen <marcof@thyron.com>
 
 	* som.c (som_write_symbol_strings): Do not used fixed buffers,
 	use size_t as a counter.
@@ -1062,7 +1079,7 @@ Wed Sep 13 19:31:39 2000  Marco Franzen <marcof@thyron.com>
 	* elf32-i386.c (elf_i386_finish_dynamic_symbol): Revert 2000-08-27
 	change.
 
-Thu Aug 31 22:49:30 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
+2000-08-31  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* elf32-sh.c (sh_elf_merge_private_data): If ibfd's elf header flags
 	not initialized, set them to indicate the SH1 instruction set.
@@ -1450,7 +1467,7 @@ Thu Aug 31 22:49:30 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 	DT_PLTPAD, DT_MOVETAB, DT_SYMINFO, DT_RELACOUNT, DT_RELCOUNT,
 	DT_FLAGS_1, DT_USED and DT_CHECKSUM.
 
-Tue Jul 18 13:11:54 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+2000-07-18  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* elf.c (bfd_elf_get_sign_extend_vma, bfd_elf_get_arch_size): Move
 	renamed functions from here...
@@ -1518,14 +1535,14 @@ Tue Jul 18 13:11:54 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* elf64-hppa.c (elf64_hppa_check_relocs): Fix some warnings.
 	(elf64_hppa_modify_segment_map): Likewise.
 
-Tue Jul 11 17:21:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+2000-07-11  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* elf.c (bfd_elf_get_sign_extend_vma): Return tendency of VMA
 	addresses to be "naturally" sign extended.  Return -1 if unknown.
 	* bfd-in.h (bfd_elf_get_sign_extend_vma): Add declaration.
 	* bfd-in2.h: Regenerate.
 
-Tue Jul 11 16:25:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+2000-07-11  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* ecoffswap.h (ecoff_get_off, ecoff_put_off): Add ECOFF_SIGNED_32
 	and ECOF_SIGNED_64 to list ways to extract an offset.
@@ -1535,7 +1552,7 @@ Tue Jul 11 16:25:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* elf64-mips.c (ECOFF_SIGNED_64): Define instead of ECOFF_64.
 	* elf32-mips.c (ECOFF_SIGNED_32): Define instead of ECOFF_32.
 
-Tue Jul 11 16:03:04 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+2000-07-11  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* elfcode.h (elf_object_p): Use bfd_set_start_address and not
 	bfd_get_start_address.
@@ -2045,7 +2062,7 @@ Tue Jul 11 16:03:04 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerate.
 
-Tue Jun 13 01:28:57 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
+2000-06-13  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* peicode.h (pe_ILF_object_p): Use TARGET_LITTLE_SYM instead of
 	armpei_little_vec.
@@ -2098,7 +2115,7 @@ Tue Jun 13 01:28:57 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 	(i[3456]86-*-netbsd*): Add bfd_elf32_i386_vec to targ_selvecs.
 	(i[3456]86-*-openbsd*): Likewise.
 
-Tue May 30 15:39:04 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+2000-05-30  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* trad-core.c: From hpux-core.c, include <dirent.h> or
 	<sys/ndir.h> when possible.
@@ -2271,7 +2288,7 @@ Tue May 30 15:39:04 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* elflink.h (elf_bfd_final_link, elf_link_input_bfd): When emiting
 	relocs for an executable, ensure that they are virtual addresses.
 
-Thu May 18 10:55:47 2000  Jeffrey A Law  (law@cygnus.com)
+2000-05-18  Jeffrey A Law  (law@cygnus.com)
 
 	* config.bfd (hppa*64*-*-hpux11*): New target triplet.
 
@@ -2295,7 +2312,7 @@ Thu May 18 10:55:47 2000  Jeffrey A Law  (law@cygnus.com)
 	read idata section only from dataoff.
 	(pe_print_edata): Correctly check for valid eat_member.
 
-Tue May 16 00:04:11 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
+2000-05-16  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* elf32-sh.c (sh_elf_relax_delete_bytes): Handle R_SH_SWITCH8.
 
@@ -2349,7 +2366,7 @@ Tue May 16 00:04:11 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 	(_bfd_pe_print_private_bfd_data_common): Print Reserved1 field as
 	Win32Version.
 
-Fri May  5 20:44:40 2000  Clinton Popetz  <cpopetz@cygnus.com>
+2000-05-05  Clinton Popetz  <cpopetz@cygnus.com>
 
 	* xcoff.h: Rename to xcoff-target.h
 	* Makefile.am: Change all instances of xcoff.h to xcoff-target.h
@@ -2358,7 +2375,7 @@ Fri May  5 20:44:40 2000  Clinton Popetz  <cpopetz@cygnus.com>
 	* coff-pmac.c: Ditto.
 	* Makefile.in: Regenerate.
 
-Fri May  5 16:51:03 2000  Clinton Popetz  <cpopetz@cygnus.com>
+2000-05-05  Clinton Popetz  <cpopetz@cygnus.com>
 
 	* coffcode.h (coff_set_arch_mach_hook, coff_set_flags):
 	Change U802TOC64MAGIC to U803XTOCMAGIC.
@@ -2401,7 +2418,7 @@ Fri May  5 16:51:03 2000  Clinton Popetz  <cpopetz@cygnus.com>
 	dependencies.
 	* Makefile.in: Regenerate.
 
-Mon May  1 16:56:47 2000  Jim Wilson  <wilson@cygnus.com>
+2000-05-01  Jim Wilson  <wilson@cygnus.com>
 
 	* Makefile.am (BFD32_BACKENDS): Add efi-app-ia32.lo.
 	(BFD32_BACKENDS_CFILES): Add efi-app-ia32.c.
@@ -2492,7 +2509,7 @@ Mon May  1 16:56:47 2000  Jim Wilson  <wilson@cygnus.com>
 	* coff-sh.c (bfd_coff_small_swap_table): Fix Fri Apr 28 change.
 	* vms.c (vms_openr_next_archived_file): Return NULL.
 
-Fri Apr 28 21:34:44 2000  Clinton Popetz  <cpopetz@cygnus.com>
+2000-04-28  Clinton Popetz  <cpopetz@cygnus.com>
 
 	* coffcode.h Copy changes mistakenly done to libcoff.h in
 	4/24/2000 patch.
@@ -2505,7 +2522,7 @@ Fri Apr 28 21:34:44 2000  Clinton Popetz  <cpopetz@cygnus.com>
 	* libbfd.h: Regenerate.
 	* bfd-in2.h: Regenerate.
 
-Fri Apr 28 14:58:37 2000  Clinton Popetz  <cpopetz@cygnus.com>
+2000-04-28  Clinton Popetz  <cpopetz@cygnus.com>
 
 	* Makefile.am (BFD64_BACKENDS, BFD64_BACKENDS_CFILES): Add
 	coffdu-rs6000.{lo,c}.
@@ -2518,14 +2535,14 @@ Fri Apr 28 14:58:37 2000  Clinton Popetz  <cpopetz@cygnus.com>
 	common to the xcoff backends into xcoff.h
 	* coff64-rs6000.c: Ditto,
 
-Fri Apr 28 08:35:21 2000  Clinton Popetz  <cpopetz@cygnus.com>
+2000-04-28  Clinton Popetz  <cpopetz@cygnus.com>
 
 	* coff-mips.c (mips_ecoff_backend_data):  Add initialization of
 	_bfd_coff_force_symnames in strings and
 	_bfd_coff_debug_string_prefix_length to their default values.
 	* coff-sh.c: (bfd_coff_small_swap_table): Ditto.
 
-Fri Apr 28 08:05:12 2000  Clinton Popetz  <cpopetz@cygnus.com>
+2000-04-28  Clinton Popetz  <cpopetz@cygnus.com>
 
 	* coff-alpha.c (alpha_ecoff_backend_data): Add initialization of
 	_bfd_coff_force_symnames in strings and
@@ -2552,11 +2569,11 @@ Fri Apr 28 08:05:12 2000  Clinton Popetz  <cpopetz@cygnus.com>
 	can use a relative reloc for got as elf_i386_relocate_section.
 	(bfd_elf32_bfd_final_link): Define to use gc form of final link.
 
-Wed Apr 26 16:31:28 2000  Clinton Popetz  <cpopetz@cygnus.com>
+2000-04-26  Clinton Popetz  <cpopetz@cygnus.com>
 
 	* config.bfd: Remove extraneous bfd_powerpc_64_arch.
 
-Mon Apr 24 15:20:35 2000  Clinton Popetz  <cpopetz@cygnus.com>
+2000-04-24  Clinton Popetz  <cpopetz@cygnus.com>
 
 	* Makefile.am (coff64-rs6000.lo): New rule.
 	* Makefile.in: Regenerate.
@@ -2616,7 +2633,7 @@ Mon Apr 24 15:20:35 2000  Clinton Popetz  <cpopetz@cygnus.com>
 	* configure.in: Add rs6000coff64_vec case.
 	* cpu-powerpc.c: New bfd_arch_info_type.
 
-Mon Apr 24 02:17:31 2000  Jeffrey A Law  (law@cygnus.com)
+2000-04-24  Jeffrey A Law  (law@cygnus.com)
 
 	* config.bfd: Only disable elf32-hppa vectors, not all of the
 	BSD and OSF configuration support.  Provide (disabled) clauses
@@ -2634,12 +2651,12 @@ Mon Apr 24 02:17:31 2000  Jeffrey A Law  (law@cygnus.com)
 
 	* elf64-hppa.c, elf64-hppa.h: New files with PA64 support.
 
-Mon Apr 24 02:14:29 2000  Jason Eckhardt  <jle@cygnus.com>
+2000-04-24  Jason Eckhardt  <jle@cygnus.com>
 
 	* libhppa.h (dis_assemble_16): New function.
 	(pa_arch): Added pa20w element.
 
-Mon Apr 24 01:49:03 2000  Ulrich Drepper  <drepper@cygnus.com>
+2000-04-24  Ulrich Drepper  <drepper@cygnus.com>
 
 	* elf-bfd.h: Add prototypes for bfd_elf32_write_relocs,
 	bfd_elf32_slurp_reloc_table, bfd_elf64_write_relocs, and

@@ -774,7 +774,7 @@ extern int bfd_ticoff_get_section_load_page
   PARAMS ((struct sec *));
 
 /* And more from the source.  */
-void
+void 
 bfd_init PARAMS ((void));
 
 bfd *
@@ -789,31 +789,32 @@ bfd_openstreamr PARAMS ((const char *, const char *, PTR));
 bfd *
 bfd_openw PARAMS ((CONST char *filename, CONST char *target));
 
-boolean
+boolean 
 bfd_close PARAMS ((bfd *abfd));
 
-boolean
+boolean 
 bfd_close_all_done PARAMS ((bfd *));
 
 bfd *
 bfd_create PARAMS ((CONST char *filename, bfd *templ));
 
-boolean
+boolean 
 bfd_make_writable PARAMS ((bfd *abfd));
 
-boolean
+boolean 
 bfd_make_readable PARAMS ((bfd *abfd));
+
 
 /* Byte swapping macros for user section data.  */
 
 #define bfd_put_8(abfd, val, ptr) \
-                ((void) (*((unsigned char *) (ptr)) = (unsigned char) (val)))
+                ((void) (*((unsigned char *)(ptr)) = (unsigned char)(val)))
 #define bfd_put_signed_8 \
                bfd_put_8
 #define bfd_get_8(abfd, ptr) \
-                (*(unsigned char *) (ptr))
+                (*(unsigned char *)(ptr))
 #define bfd_get_signed_8(abfd, ptr) \
-               ((*(unsigned char *) (ptr) ^ 0x80) - 0x80)
+               ((*(unsigned char *)(ptr) ^ 0x80) - 0x80)
 
 #define bfd_put_16(abfd, val, ptr) \
                 BFD_SEND(abfd, bfd_putx16, ((val),(ptr)))
@@ -855,6 +856,7 @@ bfd_make_readable PARAMS ((bfd *abfd));
                 : (bits) == 32 ? bfd_put_32 (abfd, val, ptr)   \
                 : (bits) == 64 ? bfd_put_64 (abfd, val, ptr)   \
                 : (abort (), (void) 0))
+
 
 /* Byte swapping macros for file header data.  */
 
@@ -1127,7 +1129,7 @@ typedef struct sec
 
   /*  The load address of the section - where it would be in a
       rom image; really only used for writing section header
-      information.  */
+      information. */
 
   bfd_vma lma;
 
@@ -1296,20 +1298,20 @@ bfd_make_section_anyway PARAMS ((bfd *abfd, const char *name));
 asection *
 bfd_make_section PARAMS ((bfd *, const char *name));
 
-boolean
+boolean 
 bfd_set_section_flags PARAMS ((bfd *abfd, asection *sec, flagword flags));
 
-void
+void 
 bfd_map_over_sections PARAMS ((bfd *abfd,
-    void (*func) (bfd *abfd,
+    void (*func)(bfd *abfd,
     asection *sect,
     PTR obj),
     PTR obj));
 
-boolean
+boolean 
 bfd_set_section_size PARAMS ((bfd *abfd, asection *sec, bfd_size_type val));
 
-boolean
+boolean 
 bfd_set_section_contents
  PARAMS ((bfd *abfd,
     asection *section,
@@ -1317,18 +1319,18 @@ bfd_set_section_contents
     file_ptr offset,
     bfd_size_type count));
 
-boolean
+boolean 
 bfd_get_section_contents
  PARAMS ((bfd *abfd, asection *section, PTR location,
     file_ptr offset, bfd_size_type count));
 
-boolean
+boolean 
 bfd_copy_private_section_data PARAMS ((bfd *ibfd, asection *isec, bfd *obfd, asection *osec));
 
 #define bfd_copy_private_section_data(ibfd, isection, obfd, osection) \
      BFD_SEND (obfd, _bfd_copy_private_section_data, \
                (ibfd, isection, obfd, osection))
-void
+void 
 _bfd_strip_section_from_output
  PARAMS ((struct bfd_link_info *info, asection *section));
 
@@ -1353,7 +1355,7 @@ enum bfd_architecture
        available to machines with higher numbers.
        The exception is the "ca", which is
        incompatible with all other machines except
-       "core".  */
+       "core". */
 
 #define bfd_mach_i960_core      1
 #define bfd_mach_i960_ka_sa     2
@@ -1402,6 +1404,8 @@ enum bfd_architecture
 #define bfd_mach_i386_i386 0
 #define bfd_mach_i386_i8086 1
 #define bfd_mach_i386_i386_intel_syntax 2
+#define bfd_mach_x86_64 3
+#define bfd_mach_x86_64_intel_syntax 4
   bfd_arch_we32k,     /* AT&T WE32xxx */
   bfd_arch_tahoe,     /* CCI/Harris Tahoe */
   bfd_arch_i860,      /* Intel 860 */
@@ -1542,22 +1546,22 @@ bfd_arch_get_compatible PARAMS ((
     const bfd *abfd,
     const bfd *bbfd));
 
-void
+void 
 bfd_set_arch_info PARAMS ((bfd *abfd, const bfd_arch_info_type *arg));
 
-enum bfd_architecture
+enum bfd_architecture 
 bfd_get_arch PARAMS ((bfd *abfd));
 
-unsigned long
+unsigned long 
 bfd_get_mach PARAMS ((bfd *abfd));
 
-unsigned int
+unsigned int 
 bfd_arch_bits_per_byte PARAMS ((bfd *abfd));
 
-unsigned int
+unsigned int 
 bfd_arch_bits_per_address PARAMS ((bfd *abfd));
 
-const bfd_arch_info_type *
+const bfd_arch_info_type * 
 bfd_get_arch_info PARAMS ((bfd *abfd));
 
 const bfd_arch_info_type *
@@ -1570,10 +1574,10 @@ const char *
 bfd_printable_arch_mach
  PARAMS ((enum bfd_architecture arch, unsigned long machine));
 
-unsigned int
+unsigned int 
 bfd_octets_per_byte PARAMS ((bfd *abfd));
 
-unsigned int
+unsigned int 
 bfd_arch_mach_octets_per_byte PARAMS ((enum bfd_architecture arch,
     unsigned long machine));
 
@@ -1582,22 +1586,22 @@ typedef enum bfd_reloc_status
        /* No errors detected */
   bfd_reloc_ok,
 
-       /* The relocation was performed, but there was an overflow.  */
+       /* The relocation was performed, but there was an overflow. */
   bfd_reloc_overflow,
 
-       /* The address to relocate was not within the section supplied.  */
+       /* The address to relocate was not within the section supplied. */
   bfd_reloc_outofrange,
 
        /* Used by special functions */
   bfd_reloc_continue,
 
-       /* Unsupported relocation size requested.  */
+       /* Unsupported relocation size requested. */
   bfd_reloc_notsupported,
 
        /* Unused */
   bfd_reloc_other,
 
-       /* The symbol to relocate against was undefined.  */
+       /* The symbol to relocate against was undefined. */
   bfd_reloc_undefined,
 
        /* The relocation was performed, but may not be ok - presently
@@ -1607,6 +1611,7 @@ typedef enum bfd_reloc_status
   bfd_reloc_dangerous
  }
  bfd_reloc_status_type;
+
 
 typedef struct reloc_cache_entry
 {
@@ -1625,19 +1630,19 @@ typedef struct reloc_cache_entry
 } arelent;
 enum complain_overflow
 {
-       /* Do not complain on overflow.  */
+       /* Do not complain on overflow. */
   complain_overflow_dont,
 
        /* Complain if the bitfield overflows, whether it is considered
-          as signed or unsigned.  */
+          as signed or unsigned. */
   complain_overflow_bitfield,
 
        /* Complain if the value overflows when considered as signed
-          number.  */
+          number. */
   complain_overflow_signed,
 
        /* Complain if the value overflows when considered as an
-          unsigned number.  */
+          unsigned number. */
   complain_overflow_unsigned
 };
 
@@ -1648,7 +1653,7 @@ struct reloc_howto_struct
            external idea of what a reloc number is stored
            in this field. For example, a PC relative word relocation
            in a coff environment has the type 023 - because that's
-           what the outside world calls a R_PCRWORD reloc.  */
+           what the outside world calls a R_PCRWORD reloc. */
   unsigned int type;
 
        /*  The value the final relocation is shifted right by. This drops
@@ -1667,21 +1672,21 @@ struct reloc_howto_struct
        /*  Notes that the relocation is relative to the location in the
            data section of the addend. The relocation function will
            subtract from the relocation value the address of the location
-           being relocated.  */
+           being relocated. */
   boolean pc_relative;
 
        /*  The bit position of the reloc value in the destination.
-           The relocated value is left shifted by this amount.  */
+           The relocated value is left shifted by this amount. */
   unsigned int bitpos;
 
        /* What type of overflow error should be checked for when
-          relocating.  */
+          relocating. */
   enum complain_overflow complain_on_overflow;
 
        /* If this field is non null, then the supplied function is
           called rather than the normal function. This allows really
           strange relocation methods to be accomodated (e.g., i960 callj
-          instructions).  */
+          instructions). */
   bfd_reloc_status_type (*special_function)
                                    PARAMS ((bfd *abfd,
                                             arelent *reloc_entry,
@@ -1691,7 +1696,7 @@ struct reloc_howto_struct
                                             bfd *output_bfd,
                                             char **error_message));
 
-       /* The textual name of the relocation type.  */
+       /* The textual name of the relocation type. */
   char *name;
 
        /* Some formats record a relocation addend in the section contents
@@ -1717,7 +1722,7 @@ struct reloc_howto_struct
           0x000000ff. When we have relocs which have an addend, such as
           sun4 extended relocs, the value in the offset part of a
           relocating field is garbage so we never use it. In this case
-          the mask would be 0x00000000.  */
+          the mask would be 0x00000000. */
   bfd_vma src_mask;
 
        /* The dst_mask selects which parts of the instruction are replaced
@@ -1753,7 +1758,7 @@ struct reloc_howto_struct
     }                                          \
   }                                            \
 }
-unsigned int
+unsigned int 
 bfd_get_reloc_size  PARAMS ((reloc_howto_type *));
 
 typedef struct relent_chain {
@@ -1791,7 +1796,8 @@ bfd_install_relocation
 enum bfd_reloc_code_real {
   _dummy_first_bfd_reloc_code_real,
 
-/* Basic absolute relocations of N bits.  */
+
+/* Basic absolute relocations of N bits. */
   BFD_RELOC_64,
   BFD_RELOC_32,
   BFD_RELOC_26,
@@ -1804,7 +1810,7 @@ enum bfd_reloc_code_real {
 of the relocation itself; sometimes they are relative to the start of
 the section containing the relocation.  It depends on the specific target.
 
-The 24-bit relocation is used in some Intel 960 configurations.  */
+The 24-bit relocation is used in some Intel 960 configurations. */
   BFD_RELOC_64_PCREL,
   BFD_RELOC_32_PCREL,
   BFD_RELOC_24_PCREL,
@@ -1812,7 +1818,7 @@ The 24-bit relocation is used in some Intel 960 configurations.  */
   BFD_RELOC_12_PCREL,
   BFD_RELOC_8_PCREL,
 
-/* For ELF.  */
+/* For ELF. */
   BFD_RELOC_32_GOT_PCREL,
   BFD_RELOC_16_GOT_PCREL,
   BFD_RELOC_8_GOT_PCREL,
@@ -1833,12 +1839,12 @@ The 24-bit relocation is used in some Intel 960 configurations.  */
   BFD_RELOC_HI16_S_PLTOFF,
   BFD_RELOC_8_PLTOFF,
 
-/* Relocations used by 68K ELF.  */
+/* Relocations used by 68K ELF. */
   BFD_RELOC_68K_GLOB_DAT,
   BFD_RELOC_68K_JMP_SLOT,
   BFD_RELOC_68K_RELATIVE,
 
-/* Linkage-table relative.  */
+/* Linkage-table relative. */
   BFD_RELOC_32_BASEREL,
   BFD_RELOC_16_BASEREL,
   BFD_RELOC_LO16_BASEREL,
@@ -1847,7 +1853,7 @@ The 24-bit relocation is used in some Intel 960 configurations.  */
   BFD_RELOC_8_BASEREL,
   BFD_RELOC_RVA,
 
-/* Absolute 8-bit relocation, but used to form an address like 0xFFnn.  */
+/* Absolute 8-bit relocation, but used to form an address like 0xFFnn. */
   BFD_RELOC_8_FFnn,
 
 /* These PC-relative relocations are stored as word displacements --
@@ -1855,28 +1861,28 @@ i.e., byte displacements shifted right two bits.  The 30-bit word
 displacement (<<32_PCREL_S2>> -- 32 bits, shifted 2) is used on the
 SPARC.  (SPARC tools generally refer to this as <<WDISP30>>.)  The
 signed 16-bit displacement is used on the MIPS, and the 23-bit
-displacement is used on the Alpha.  */
+displacement is used on the Alpha. */
   BFD_RELOC_32_PCREL_S2,
   BFD_RELOC_16_PCREL_S2,
   BFD_RELOC_23_PCREL_S2,
 
 /* High 22 bits and low 10 bits of 32-bit value, placed into lower bits of
-the target word.  These are used on the SPARC.  */
+the target word.  These are used on the SPARC. */
   BFD_RELOC_HI22,
   BFD_RELOC_LO10,
 
 /* For systems that allocate a Global Pointer register, these are
 displacements off that register.  These relocation types are
 handled specially, because the value the register will have is
-decided relatively late.  */
+decided relatively late. */
   BFD_RELOC_GPREL16,
   BFD_RELOC_GPREL32,
 
-/* Reloc types used for i960/b.out.  */
+/* Reloc types used for i960/b.out. */
   BFD_RELOC_I960_CALLJ,
 
 /* SPARC ELF relocations.  There is probably some overlap with other
-relocation types already defined.  */
+relocation types already defined. */
   BFD_RELOC_NONE,
   BFD_RELOC_SPARC_WDISP22,
   BFD_RELOC_SPARC22,
@@ -1893,7 +1899,7 @@ relocation types already defined.  */
   BFD_RELOC_SPARC_RELATIVE,
   BFD_RELOC_SPARC_UA32,
 
-/* I think these are specific to SPARC a.out (e.g., Sun 4).  */
+/* I think these are specific to SPARC a.out (e.g., Sun 4). */
   BFD_RELOC_SPARC_BASE13,
   BFD_RELOC_SPARC_BASE22,
 
@@ -1930,18 +1936,18 @@ relocation types already defined.  */
 For GPDISP_HI16 ("gpdisp") relocations, the symbol is ignored when
 writing; when reading, it will be the absolute section symbol.  The
 addend is the displacement in bytes of the "lda" instruction from
-the "ldah" instruction (which is at the address of this reloc).  */
+the "ldah" instruction (which is at the address of this reloc). */
   BFD_RELOC_ALPHA_GPDISP_HI16,
 
 /* For GPDISP_LO16 ("ignore") relocations, the symbol is handled as
 with GPDISP_HI16 relocs.  The addend is ignored when writing the
 relocations out, and is filled in with the file's GP value on
-reading, for convenience.  */
+reading, for convenience. */
   BFD_RELOC_ALPHA_GPDISP_LO16,
 
 /* The ELF GPDISP relocation is exactly the same as the GPDISP_HI16
 relocation except that there is no accompanying GPDISP_LO16
-relocation.  */
+relocation. */
   BFD_RELOC_ALPHA_GPDISP,
 
 /* The Alpha LITERAL/LITUSE relocs are produced by a symbol reference;
@@ -1968,14 +1974,14 @@ of instruction using the register:
 2 - byte-manipulation (byte offset reg)
 3 - jsr (target of branch)
 
-The GNU linker currently doesn't do any of this optimizing.  */
+The GNU linker currently doesn't do any of this optimizing. */
   BFD_RELOC_ALPHA_LITERAL,
   BFD_RELOC_ALPHA_ELF_LITERAL,
   BFD_RELOC_ALPHA_LITUSE,
 
 /* The BFD_RELOC_ALPHA_USER_* relocations are used by the assembler to
 process the explicit !<reloc>!sequence relocations, and are mapped
-into the normal relocations at the end of processing.  */
+into the normal relocations at the end of processing. */
   BFD_RELOC_ALPHA_USER_LITERAL,
   BFD_RELOC_ALPHA_USER_LITUSE_BASE,
   BFD_RELOC_ALPHA_USER_LITUSE_BYTOFF,
@@ -1986,52 +1992,52 @@ into the normal relocations at the end of processing.  */
 
 /* The HINT relocation indicates a value that should be filled into the
 "hint" field of a jmp/jsr/ret instruction, for possible branch-
-prediction logic which may be provided on some processors.  */
+prediction logic which may be provided on some processors. */
   BFD_RELOC_ALPHA_HINT,
 
 /* The LINKAGE relocation outputs a linkage pair in the object file,
-which is filled by the linker.  */
+which is filled by the linker. */
   BFD_RELOC_ALPHA_LINKAGE,
 
 /* The CODEADDR relocation outputs a STO_CA in the object file,
-which is filled by the linker.  */
+which is filled by the linker. */
   BFD_RELOC_ALPHA_CODEADDR,
 
 /* Bits 27..2 of the relocation address shifted right 2 bits;
-simple reloc otherwise.  */
+simple reloc otherwise. */
   BFD_RELOC_MIPS_JMP,
 
-/* The MIPS16 jump instruction.  */
+/* The MIPS16 jump instruction. */
   BFD_RELOC_MIPS16_JMP,
 
-/* MIPS16 GP relative reloc.  */
+/* MIPS16 GP relative reloc. */
   BFD_RELOC_MIPS16_GPREL,
 
-/* High 16 bits of 32-bit value; simple reloc.  */
+/* High 16 bits of 32-bit value; simple reloc. */
   BFD_RELOC_HI16,
 
 /* High 16 bits of 32-bit value but the low 16 bits will be sign
 extended and added to form the final result.  If the low 16
 bits form a negative number, we need to add one to the high value
-to compensate for the borrow when the low bits are added.  */
+to compensate for the borrow when the low bits are added. */
   BFD_RELOC_HI16_S,
 
-/* Low 16 bits.  */
+/* Low 16 bits. */
   BFD_RELOC_LO16,
 
-/* Like BFD_RELOC_HI16_S, but PC relative.  */
+/* Like BFD_RELOC_HI16_S, but PC relative. */
   BFD_RELOC_PCREL_HI16_S,
 
-/* Like BFD_RELOC_LO16, but PC relative.  */
+/* Like BFD_RELOC_LO16, but PC relative. */
   BFD_RELOC_PCREL_LO16,
 
-/* Relocation relative to the global pointer.  */
+/* Relocation relative to the global pointer. */
 #define BFD_RELOC_MIPS_GPREL BFD_RELOC_GPREL16
 
-/* Relocation against a MIPS literal section.  */
+/* Relocation against a MIPS literal section. */
   BFD_RELOC_MIPS_LITERAL,
 
-/* MIPS ELF relocations.  */
+/* MIPS ELF relocations. */
   BFD_RELOC_MIPS_GOT16,
   BFD_RELOC_MIPS_CALL16,
 #define BFD_RELOC_MIPS_GPREL32 BFD_RELOC_GPREL32
@@ -2044,6 +2050,7 @@ to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_MIPS_GOT_OFST,
   BFD_RELOC_MIPS_GOT_DISP,
 
+
 /* i386/elf relocations */
   BFD_RELOC_386_GOT32,
   BFD_RELOC_386_PLT32,
@@ -2053,6 +2060,16 @@ to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_386_RELATIVE,
   BFD_RELOC_386_GOTOFF,
   BFD_RELOC_386_GOTPC,
+
+/* x86-64/elf relocations */
+  BFD_RELOC_X86_64_GOT32,
+  BFD_RELOC_X86_64_PLT32,
+  BFD_RELOC_X86_64_COPY,
+  BFD_RELOC_X86_64_GLOB_DAT,
+  BFD_RELOC_X86_64_JUMP_SLOT,
+  BFD_RELOC_X86_64_RELATIVE,
+  BFD_RELOC_X86_64_GOTPCREL,
+  BFD_RELOC_X86_64_32S,
 
 /* ns32k relocations */
   BFD_RELOC_NS32K_IMM_8,
@@ -2068,7 +2085,7 @@ to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_NS32K_DISP_16_PCREL,
   BFD_RELOC_NS32K_DISP_32_PCREL,
 
-/* Picojava relocs.  Not all of these appear in object files.  */
+/* Picojava relocs.  Not all of these appear in object files. */
   BFD_RELOC_PJ_CODE_HI16,
   BFD_RELOC_PJ_CODE_LO16,
   BFD_RELOC_PJ_CODE_DIR16,
@@ -2076,7 +2093,7 @@ to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_PJ_CODE_REL16,
   BFD_RELOC_PJ_CODE_REL32,
 
-/* Power(rs6000) and PowerPC relocations.  */
+/* Power(rs6000) and PowerPC relocations. */
   BFD_RELOC_PPC_B26,
   BFD_RELOC_PPC_BA26,
   BFD_RELOC_PPC_TOC16,
@@ -2113,25 +2130,25 @@ to compensate for the borrow when the low bits are added.  */
 
 /* The type of reloc used to build a contructor table - at the moment
 probably a 32 bit wide absolute relocation, but the target can choose.
-It generally does map to one of the other relocation types.  */
+It generally does map to one of the other relocation types. */
   BFD_RELOC_CTOR,
 
 /* ARM 26 bit pc-relative branch.  The lowest two bits must be zero and are
-not stored in the instruction.  */
+not stored in the instruction. */
   BFD_RELOC_ARM_PCREL_BRANCH,
 
 /* ARM 26 bit pc-relative branch.  The lowest bit must be zero and is
 not stored in the instruction.  The 2nd lowest bit comes from a 1 bit
-field in the instruction.  */
+field in the instruction. */
   BFD_RELOC_ARM_PCREL_BLX,
 
 /* Thumb 22 bit pc-relative branch.  The lowest bit must be zero and is
 not stored in the instruction.  The 2nd lowest bit comes from a 1 bit
-field in the instruction.  */
+field in the instruction. */
   BFD_RELOC_THUMB_PCREL_BLX,
 
 /* These relocs are only used within the ARM assembler.  They are not
-(at present) written to any object files.  */
+(at present) written to any object files. */
   BFD_RELOC_ARM_IMMEDIATE,
   BFD_RELOC_ARM_ADRL_IMMEDIATE,
   BFD_RELOC_ARM_OFFSET_IMM,
@@ -2159,7 +2176,7 @@ field in the instruction.  */
   BFD_RELOC_ARM_GOTOFF,
   BFD_RELOC_ARM_GOTPC,
 
-/* Hitachi SH relocs.  Not all of these appear in object files.  */
+/* Hitachi SH relocs.  Not all of these appear in object files. */
   BFD_RELOC_SH_PCDISP8BY2,
   BFD_RELOC_SH_PCDISP12BY2,
   BFD_RELOC_SH_IMM4,
@@ -2187,7 +2204,7 @@ field in the instruction.  */
   BFD_RELOC_SH_GOTPC,
 
 /* Thumb 23-, 12- and 9-bit pc-relative branches.  The lowest bit must
-be zero and is not stored in the instruction.  */
+be zero and is not stored in the instruction. */
   BFD_RELOC_THUMB_PCREL_BRANCH9,
   BFD_RELOC_THUMB_PCREL_BRANCH12,
   BFD_RELOC_THUMB_PCREL_BRANCH23,
@@ -2195,108 +2212,108 @@ be zero and is not stored in the instruction.  */
 /* Argonaut RISC Core (ARC) relocs.
 ARC 22 bit pc-relative branch.  The lowest two bits must be zero and are
 not stored in the instruction.  The high 20 bits are installed in bits 26
-through 7 of the instruction.  */
+through 7 of the instruction. */
   BFD_RELOC_ARC_B22_PCREL,
 
 /* ARC 26 bit absolute branch.  The lowest two bits must be zero and are not
 stored in the instruction.  The high 24 bits are installed in bits 23
-through 0.  */
+through 0. */
   BFD_RELOC_ARC_B26,
 
 /* Mitsubishi D10V relocs.
 This is a 10-bit reloc with the right 2 bits
-assumed to be 0.  */
+assumed to be 0. */
   BFD_RELOC_D10V_10_PCREL_R,
 
 /* Mitsubishi D10V relocs.
 This is a 10-bit reloc with the right 2 bits
 assumed to be 0.  This is the same as the previous reloc
 except it is in the left container, i.e.,
-shifted left 15 bits.  */
+shifted left 15 bits. */
   BFD_RELOC_D10V_10_PCREL_L,
 
 /* This is an 18-bit reloc with the right 2 bits
-assumed to be 0.  */
+assumed to be 0. */
   BFD_RELOC_D10V_18,
 
 /* This is an 18-bit reloc with the right 2 bits
-assumed to be 0.  */
+assumed to be 0. */
   BFD_RELOC_D10V_18_PCREL,
 
 /* Mitsubishi D30V relocs.
-This is a 6-bit absolute reloc.  */
+This is a 6-bit absolute reloc. */
   BFD_RELOC_D30V_6,
 
 /* This is a 6-bit pc-relative reloc with
-the right 3 bits assumed to be 0.  */
+the right 3 bits assumed to be 0. */
   BFD_RELOC_D30V_9_PCREL,
 
 /* This is a 6-bit pc-relative reloc with
 the right 3 bits assumed to be 0. Same
 as the previous reloc but on the right side
-of the container.  */
+of the container. */
   BFD_RELOC_D30V_9_PCREL_R,
 
 /* This is a 12-bit absolute reloc with the
-right 3 bitsassumed to be 0.  */
+right 3 bitsassumed to be 0. */
   BFD_RELOC_D30V_15,
 
 /* This is a 12-bit pc-relative reloc with
-the right 3 bits assumed to be 0.  */
+the right 3 bits assumed to be 0. */
   BFD_RELOC_D30V_15_PCREL,
 
 /* This is a 12-bit pc-relative reloc with
 the right 3 bits assumed to be 0. Same
 as the previous reloc but on the right side
-of the container.  */
+of the container. */
   BFD_RELOC_D30V_15_PCREL_R,
 
 /* This is an 18-bit absolute reloc with
-the right 3 bits assumed to be 0.  */
+the right 3 bits assumed to be 0. */
   BFD_RELOC_D30V_21,
 
 /* This is an 18-bit pc-relative reloc with
-the right 3 bits assumed to be 0.  */
+the right 3 bits assumed to be 0. */
   BFD_RELOC_D30V_21_PCREL,
 
 /* This is an 18-bit pc-relative reloc with
 the right 3 bits assumed to be 0. Same
 as the previous reloc but on the right side
-of the container.  */
+of the container. */
   BFD_RELOC_D30V_21_PCREL_R,
 
-/* This is a 32-bit absolute reloc.  */
+/* This is a 32-bit absolute reloc. */
   BFD_RELOC_D30V_32,
 
-/* This is a 32-bit pc-relative reloc.  */
+/* This is a 32-bit pc-relative reloc. */
   BFD_RELOC_D30V_32_PCREL,
 
 /* Mitsubishi M32R relocs.
-This is a 24 bit absolute address.  */
+This is a 24 bit absolute address. */
   BFD_RELOC_M32R_24,
 
-/* This is a 10-bit pc-relative reloc with the right 2 bits assumed to be 0.  */
+/* This is a 10-bit pc-relative reloc with the right 2 bits assumed to be 0. */
   BFD_RELOC_M32R_10_PCREL,
 
-/* This is an 18-bit reloc with the right 2 bits assumed to be 0.  */
+/* This is an 18-bit reloc with the right 2 bits assumed to be 0. */
   BFD_RELOC_M32R_18_PCREL,
 
-/* This is a 26-bit reloc with the right 2 bits assumed to be 0.  */
+/* This is a 26-bit reloc with the right 2 bits assumed to be 0. */
   BFD_RELOC_M32R_26_PCREL,
 
 /* This is a 16-bit reloc containing the high 16 bits of an address
-used when the lower 16 bits are treated as unsigned.  */
+used when the lower 16 bits are treated as unsigned. */
   BFD_RELOC_M32R_HI16_ULO,
 
 /* This is a 16-bit reloc containing the high 16 bits of an address
-used when the lower 16 bits are treated as signed.  */
+used when the lower 16 bits are treated as signed. */
   BFD_RELOC_M32R_HI16_SLO,
 
-/* This is a 16-bit reloc containing the lower 16 bits of an address.  */
+/* This is a 16-bit reloc containing the lower 16 bits of an address. */
   BFD_RELOC_M32R_LO16,
 
 /* This is a 16-bit reloc containing the small data area offset for use in
-add3, load, and store instructions.  */
+add3, load, and store instructions. */
   BFD_RELOC_M32R_SDA16,
 
 /* This is a 9-bit reloc */
@@ -2305,123 +2322,124 @@ add3, load, and store instructions.  */
 /* This is a 22-bit reloc */
   BFD_RELOC_V850_22_PCREL,
 
-/* This is a 16 bit offset from the short data area pointer.  */
+/* This is a 16 bit offset from the short data area pointer. */
   BFD_RELOC_V850_SDA_16_16_OFFSET,
 
 /* This is a 16 bit offset (of which only 15 bits are used) from the
-short data area pointer.  */
+short data area pointer. */
   BFD_RELOC_V850_SDA_15_16_OFFSET,
 
-/* This is a 16 bit offset from the zero data area pointer.  */
+/* This is a 16 bit offset from the zero data area pointer. */
   BFD_RELOC_V850_ZDA_16_16_OFFSET,
 
 /* This is a 16 bit offset (of which only 15 bits are used) from the
-zero data area pointer.  */
+zero data area pointer. */
   BFD_RELOC_V850_ZDA_15_16_OFFSET,
 
 /* This is an 8 bit offset (of which only 6 bits are used) from the
-tiny data area pointer.  */
+tiny data area pointer. */
   BFD_RELOC_V850_TDA_6_8_OFFSET,
 
 /* This is an 8bit offset (of which only 7 bits are used) from the tiny
-data area pointer.  */
+data area pointer. */
   BFD_RELOC_V850_TDA_7_8_OFFSET,
 
-/* This is a 7 bit offset from the tiny data area pointer.  */
+/* This is a 7 bit offset from the tiny data area pointer. */
   BFD_RELOC_V850_TDA_7_7_OFFSET,
 
-/* This is a 16 bit offset from the tiny data area pointer.  */
+/* This is a 16 bit offset from the tiny data area pointer. */
   BFD_RELOC_V850_TDA_16_16_OFFSET,
 
 /* This is a 5 bit offset (of which only 4 bits are used) from the tiny
-data area pointer.  */
+data area pointer. */
   BFD_RELOC_V850_TDA_4_5_OFFSET,
 
-/* This is a 4 bit offset from the tiny data area pointer.  */
+/* This is a 4 bit offset from the tiny data area pointer. */
   BFD_RELOC_V850_TDA_4_4_OFFSET,
 
 /* This is a 16 bit offset from the short data area pointer, with the
-bits placed non-contigously in the instruction.  */
+bits placed non-contigously in the instruction. */
   BFD_RELOC_V850_SDA_16_16_SPLIT_OFFSET,
 
 /* This is a 16 bit offset from the zero data area pointer, with the
-bits placed non-contigously in the instruction.  */
+bits placed non-contigously in the instruction. */
   BFD_RELOC_V850_ZDA_16_16_SPLIT_OFFSET,
 
-/* This is a 6 bit offset from the call table base pointer.  */
+/* This is a 6 bit offset from the call table base pointer. */
   BFD_RELOC_V850_CALLT_6_7_OFFSET,
 
-/* This is a 16 bit offset from the call table base pointer.  */
+/* This is a 16 bit offset from the call table base pointer. */
   BFD_RELOC_V850_CALLT_16_16_OFFSET,
 
+
 /* This is a 32bit pcrel reloc for the mn10300, offset by two bytes in the
-instruction.  */
+instruction. */
   BFD_RELOC_MN10300_32_PCREL,
 
 /* This is a 16bit pcrel reloc for the mn10300, offset by two bytes in the
-instruction.  */
+instruction. */
   BFD_RELOC_MN10300_16_PCREL,
 
 /* This is a 8bit DP reloc for the tms320c30, where the most
 significant 8 bits of a 24 bit word are placed into the least
-significant 8 bits of the opcode.  */
+significant 8 bits of the opcode. */
   BFD_RELOC_TIC30_LDP,
 
 /* This is a 7bit reloc for the tms320c54x, where the least
 significant 7 bits of a 16 bit word are placed into the least
-significant 7 bits of the opcode.  */
+significant 7 bits of the opcode. */
   BFD_RELOC_TIC54X_PARTLS7,
 
 /* This is a 9bit DP reloc for the tms320c54x, where the most
 significant 9 bits of a 16 bit word are placed into the least
-significant 9 bits of the opcode.  */
+significant 9 bits of the opcode. */
   BFD_RELOC_TIC54X_PARTMS9,
 
-/* This is an extended address 23-bit reloc for the tms320c54x.  */
+/* This is an extended address 23-bit reloc for the tms320c54x. */
   BFD_RELOC_TIC54X_23,
 
-/* This is a 16-bit reloc for the tms320c54x, where the least
-significant 16 bits of a 23-bit extended address are placed into
-the opcode.  */
+/* This is a 16-bit reloc for the tms320c54x, where the least 
+significant 16 bits of a 23-bit extended address are placed into 
+the opcode. */
   BFD_RELOC_TIC54X_16_OF_23,
 
 /* This is a reloc for the tms320c54x, where the most
-significant 7 bits of a 23-bit extended address are placed into
-the opcode.  */
+significant 7 bits of a 23-bit extended address are placed into 
+the opcode. */
   BFD_RELOC_TIC54X_MS7_OF_23,
 
-/* This is a 48 bit reloc for the FR30 that stores 32 bits.  */
+/* This is a 48 bit reloc for the FR30 that stores 32 bits. */
   BFD_RELOC_FR30_48,
 
 /* This is a 32 bit reloc for the FR30 that stores 20 bits split up into
-two sections.  */
+two sections. */
   BFD_RELOC_FR30_20,
 
 /* This is a 16 bit reloc for the FR30 that stores a 6 bit word offset in
-4 bits.  */
+4 bits. */
   BFD_RELOC_FR30_6_IN_4,
 
 /* This is a 16 bit reloc for the FR30 that stores an 8 bit byte offset
-into 8 bits.  */
+into 8 bits. */
   BFD_RELOC_FR30_8_IN_8,
 
 /* This is a 16 bit reloc for the FR30 that stores a 9 bit short offset
-into 8 bits.  */
+into 8 bits. */
   BFD_RELOC_FR30_9_IN_8,
 
 /* This is a 16 bit reloc for the FR30 that stores a 10 bit word offset
-into 8 bits.  */
+into 8 bits. */
   BFD_RELOC_FR30_10_IN_8,
 
 /* This is a 16 bit reloc for the FR30 that stores a 9 bit pc relative
-short offset into 8 bits.  */
+short offset into 8 bits. */
   BFD_RELOC_FR30_9_PCREL,
 
 /* This is a 16 bit reloc for the FR30 that stores a 12 bit pc relative
-short offset into 11 bits.  */
+short offset into 11 bits. */
   BFD_RELOC_FR30_12_PCREL,
 
-/* Motorola Mcore relocations.  */
+/* Motorola Mcore relocations. */
   BFD_RELOC_MCORE_PCREL_IMM8BY4,
   BFD_RELOC_MCORE_PCREL_IMM11BY2,
   BFD_RELOC_MCORE_PCREL_IMM4BY2,
@@ -2430,71 +2448,71 @@ short offset into 11 bits.  */
   BFD_RELOC_MCORE_RVA,
 
 /* This is a 16 bit reloc for the AVR that stores 8 bit pc relative
-short offset into 7 bits.  */
+short offset into 7 bits. */
   BFD_RELOC_AVR_7_PCREL,
 
 /* This is a 16 bit reloc for the AVR that stores 13 bit pc relative
-short offset into 12 bits.  */
+short offset into 12 bits. */
   BFD_RELOC_AVR_13_PCREL,
 
 /* This is a 16 bit reloc for the AVR that stores 17 bit value (usually
-program memory address) into 16 bits.  */
+program memory address) into 16 bits. */
   BFD_RELOC_AVR_16_PM,
 
 /* This is a 16 bit reloc for the AVR that stores 8 bit value (usually
-data memory address) into 8 bit immediate value of LDI insn.  */
+data memory address) into 8 bit immediate value of LDI insn. */
   BFD_RELOC_AVR_LO8_LDI,
 
 /* This is a 16 bit reloc for the AVR that stores 8 bit value (high 8 bit
-of data memory address) into 8 bit immediate value of LDI insn.  */
+of data memory address) into 8 bit immediate value of LDI insn. */
   BFD_RELOC_AVR_HI8_LDI,
 
 /* This is a 16 bit reloc for the AVR that stores 8 bit value (most high 8 bit
-of program memory address) into 8 bit immediate value of LDI insn.  */
+of program memory address) into 8 bit immediate value of LDI insn. */
   BFD_RELOC_AVR_HH8_LDI,
 
 /* This is a 16 bit reloc for the AVR that stores negated 8 bit value
-(usually data memory address) into 8 bit immediate value of SUBI insn.  */
+(usually data memory address) into 8 bit immediate value of SUBI insn. */
   BFD_RELOC_AVR_LO8_LDI_NEG,
 
 /* This is a 16 bit reloc for the AVR that stores negated 8 bit value
 (high 8 bit of data memory address) into 8 bit immediate value of
-SUBI insn.  */
+SUBI insn. */
   BFD_RELOC_AVR_HI8_LDI_NEG,
 
 /* This is a 16 bit reloc for the AVR that stores negated 8 bit value
 (most high 8 bit of program memory address) into 8 bit immediate value
-of LDI or SUBI insn.  */
+of LDI or SUBI insn. */
   BFD_RELOC_AVR_HH8_LDI_NEG,
 
 /* This is a 16 bit reloc for the AVR that stores 8 bit value (usually
-command address) into 8 bit immediate value of LDI insn.  */
+command address) into 8 bit immediate value of LDI insn. */
   BFD_RELOC_AVR_LO8_LDI_PM,
 
 /* This is a 16 bit reloc for the AVR that stores 8 bit value (high 8 bit
-of command address) into 8 bit immediate value of LDI insn.  */
+of command address) into 8 bit immediate value of LDI insn. */
   BFD_RELOC_AVR_HI8_LDI_PM,
 
 /* This is a 16 bit reloc for the AVR that stores 8 bit value (most high 8 bit
-of command address) into 8 bit immediate value of LDI insn.  */
+of command address) into 8 bit immediate value of LDI insn. */
   BFD_RELOC_AVR_HH8_LDI_PM,
 
 /* This is a 16 bit reloc for the AVR that stores negated 8 bit value
-(usually command address) into 8 bit immediate value of SUBI insn.  */
+(usually command address) into 8 bit immediate value of SUBI insn. */
   BFD_RELOC_AVR_LO8_LDI_PM_NEG,
 
 /* This is a 16 bit reloc for the AVR that stores negated 8 bit value
 (high 8 bit of 16 bit command address) into 8 bit immediate value
-of SUBI insn.  */
+of SUBI insn. */
   BFD_RELOC_AVR_HI8_LDI_PM_NEG,
 
 /* This is a 16 bit reloc for the AVR that stores negated 8 bit value
 (high 6 bit of 22 bit command address) into 8 bit immediate
-value of SUBI insn.  */
+value of SUBI insn. */
   BFD_RELOC_AVR_HH8_LDI_PM_NEG,
 
 /* This is a 32 bit reloc for the AVR that stores 23 bit value
-into 22 bits.  */
+into 22 bits. */
   BFD_RELOC_AVR_CALL,
 
 /* These two relocations are used by the linker to determine which of
@@ -2513,11 +2531,11 @@ virtual function table entry.  The reloc's symbol should refer to the
 table of the class mentioned in the code.  Off of that base, an offset
 describes the entry that is being used.  For Rela hosts, this offset
 is stored in the reloc's addend.  For Rel hosts, we are forced to put
-this offset in the reloc's section offset.  */
+this offset in the reloc's section offset. */
   BFD_RELOC_VTABLE_INHERIT,
   BFD_RELOC_VTABLE_ENTRY,
 
-/* Intel IA64 Relocations.  */
+/* Intel IA64 Relocations. */
   BFD_RELOC_IA64_IMM14,
   BFD_RELOC_IA64_IMM22,
   BFD_RELOC_IA64_IMM64,
@@ -2584,26 +2602,26 @@ this offset in the reloc's section offset.  */
   BFD_RELOC_IA64_LDXMOV,
 
 /* Motorola 68HC11 reloc.
-This is the 8 bits high part of an absolute address.  */
+This is the 8 bits high part of an absolute address. */
   BFD_RELOC_M68HC11_HI8,
 
 /* Motorola 68HC11 reloc.
-This is the 8 bits low part of an absolute address.  */
+This is the 8 bits low part of an absolute address. */
   BFD_RELOC_M68HC11_LO8,
 
 /* Motorola 68HC11 reloc.
-This is the 3 bits of a value.  */
+This is the 3 bits of a value. */
   BFD_RELOC_M68HC11_3B,
 
 /* These relocs are only used within the CRIS assembler.  They are not
-(at present) written to any object files.  */
+(at present) written to any object files. */
   BFD_RELOC_CRIS_BDISP8,
   BFD_RELOC_CRIS_UNSIGNED_5,
   BFD_RELOC_CRIS_SIGNED_6,
   BFD_RELOC_CRIS_UNSIGNED_6,
   BFD_RELOC_CRIS_UNSIGNED_4,
 
-/* Intel i860 Relocations.  */
+/* Intel i860 Relocations. */
   BFD_RELOC_860_COPY,
   BFD_RELOC_860_GLOB_DAT,
   BFD_RELOC_860_JUMP_SLOT,
@@ -2645,6 +2663,7 @@ bfd_reloc_type_lookup  PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 const char *
 bfd_get_reloc_code_name  PARAMS ((bfd_reloc_code_real_type code));
 
+
 typedef struct symbol_cache_entry
 {
        /* A pointer to the BFD which owns the symbol. This information
@@ -2655,12 +2674,12 @@ typedef struct symbol_cache_entry
           This field is *almost* redundant, since you can use section->owner
           instead, except that some symbols point to the global sections
           bfd_{abs,com,und}_section.  This could be fixed by making
-          these globals be per-bfd (or per-target-flavor).  FIXME.  */
+          these globals be per-bfd (or per-target-flavor).  FIXME. */
 
-  struct _bfd *the_bfd; /* Use bfd_asymbol_bfd(sym) to access this field.  */
+  struct _bfd *the_bfd; /* Use bfd_asymbol_bfd(sym) to access this field. */
 
        /* The text of the symbol. The name is left alone, and not copied; the
-          application may not alter it.  */
+          application may not alter it. */
   CONST char *name;
 
        /* The value of the symbol.  This really should be a union of a
@@ -2673,15 +2692,15 @@ typedef struct symbol_cache_entry
 #define BSF_NO_FLAGS    0x00
 
        /* The symbol has local scope; <<static>> in <<C>>. The value
-          is the offset into the section of the data.  */
+          is the offset into the section of the data. */
 #define BSF_LOCAL      0x01
 
        /* The symbol has global scope; initialized data in <<C>>. The
-          value is the offset into the section of the data.  */
+          value is the offset into the section of the data. */
 #define BSF_GLOBAL     0x02
 
        /* The symbol has global scope and is exported. The value is
-          the offset into the section of the data.  */
+          the offset into the section of the data. */
 #define BSF_EXPORT     BSF_GLOBAL /* no real difference */
 
        /* A normal C symbol would be one of:
@@ -2696,7 +2715,7 @@ typedef struct symbol_cache_entry
           perhaps others someday.  */
 #define BSF_FUNCTION    0x10
 
-       /* Used by the linker.  */
+       /* Used by the linker. */
 #define BSF_KEEP        0x20
 #define BSF_KEEP_G      0x40
 
@@ -2709,31 +2728,31 @@ typedef struct symbol_cache_entry
 #define BSF_SECTION_SYM 0x100
 
        /* The symbol used to be a common symbol, but now it is
-          allocated.  */
+          allocated. */
 #define BSF_OLD_COMMON  0x200
 
-       /* The default value for common data.  */
+       /* The default value for common data. */
 #define BFD_FORT_COMM_DEFAULT_VALUE 0
 
        /* In some files the type of a symbol sometimes alters its
           location in an output file - ie in coff a <<ISFCN>> symbol
           which is also <<C_EXT>> symbol appears where it was
           declared and not at the end of a section.  This bit is set
-          by the target BFD part to convey this information.  */
+          by the target BFD part to convey this information. */
 
 #define BSF_NOT_AT_END    0x400
 
-       /* Signal that the symbol is the label of constructor section.  */
+       /* Signal that the symbol is the label of constructor section. */
 #define BSF_CONSTRUCTOR   0x800
 
        /* Signal that the symbol is a warning symbol.  The name is a
           warning.  The name of the next symbol is the one to warn about;
           if a reference is made to a symbol with the same name as the next
-          symbol, a warning is issued by the linker.  */
+          symbol, a warning is issued by the linker. */
 #define BSF_WARNING       0x1000
 
        /* Signal that the symbol is indirect.  This symbol is an indirect
-          pointer to the symbol with the same name as the next symbol.  */
+          pointer to the symbol with the same name as the next symbol. */
 #define BSF_INDIRECT      0x2000
 
        /* BSF_FILE marks symbols that contain a file name.  This is used
@@ -2769,10 +2788,10 @@ typedef struct symbol_cache_entry
 } asymbol;
 #define bfd_get_symtab_upper_bound(abfd) \
      BFD_SEND (abfd, _bfd_get_symtab_upper_bound, (abfd))
-boolean
+boolean 
 bfd_is_local_label PARAMS ((bfd *abfd, asymbol *sym));
 
-boolean
+boolean 
 bfd_is_local_label_name PARAMS ((bfd *abfd, const char *name));
 
 #define bfd_is_local_label_name(abfd, name) \
@@ -2780,26 +2799,26 @@ bfd_is_local_label_name PARAMS ((bfd *abfd, const char *name));
 #define bfd_canonicalize_symtab(abfd, location) \
      BFD_SEND (abfd, _bfd_canonicalize_symtab,\
                   (abfd, location))
-boolean
+boolean 
 bfd_set_symtab  PARAMS ((bfd *abfd, asymbol **location, unsigned int count));
 
-void
+void 
 bfd_print_symbol_vandf PARAMS ((PTR file, asymbol *symbol));
 
 #define bfd_make_empty_symbol(abfd) \
      BFD_SEND (abfd, _bfd_make_empty_symbol, (abfd))
 #define bfd_make_debug_symbol(abfd,ptr,size) \
         BFD_SEND (abfd, _bfd_make_debug_symbol, (abfd, ptr, size))
-int
+int 
 bfd_decode_symclass PARAMS ((asymbol *symbol));
 
-boolean
+boolean 
 bfd_is_undefined_symclass  PARAMS ((int symclass));
 
-void
+void 
 bfd_symbol_info PARAMS ((asymbol *symbol, symbol_info *ret));
 
-boolean
+boolean 
 bfd_copy_private_symbol_data PARAMS ((bfd *ibfd, asymbol *isym, bfd *obfd, asymbol *osym));
 
 #define bfd_copy_private_symbol_data(ibfd, isymbol, obfd, osymbol) \
@@ -2829,7 +2848,7 @@ struct _bfd
 
     /* Marks whether there was a default target specified when the
        BFD was opened. This is used to select which matching algorithm
-       to use to choose the back end.  */
+       to use to choose the back end. */
 
     boolean target_defaulted;
 
@@ -2882,7 +2901,7 @@ struct _bfd
     file_ptr origin;
 
     /* Remember when output has begun, to stop strange things
-       from happening.  */
+       from happening. */
     boolean output_has_begun;
 
     /* Pointer to linked list of sections*/
@@ -2892,7 +2911,7 @@ struct _bfd
     unsigned int section_count;
 
     /* Stuff only useful for object files:
-       The start address.  */
+       The start address. */
     bfd_vma start_address;
 
     /* Used for input and output*/
@@ -2918,7 +2937,7 @@ struct _bfd
        be used only for archive elements.  */
     int archive_pass;
 
-    /* Used by the back end to hold private data.  */
+    /* Used by the back end to hold private data. */
 
     union
       {
@@ -2985,85 +3004,85 @@ typedef enum bfd_error
   bfd_error_invalid_error_code
 } bfd_error_type;
 
-bfd_error_type
+bfd_error_type 
 bfd_get_error  PARAMS ((void));
 
-void
+void 
 bfd_set_error  PARAMS ((bfd_error_type error_tag));
 
 CONST char *
 bfd_errmsg  PARAMS ((bfd_error_type error_tag));
 
-void
+void 
 bfd_perror  PARAMS ((CONST char *message));
 
 typedef void (*bfd_error_handler_type) PARAMS ((const char *, ...));
 
-bfd_error_handler_type
+bfd_error_handler_type 
 bfd_set_error_handler  PARAMS ((bfd_error_handler_type));
 
-void
+void 
 bfd_set_error_program_name  PARAMS ((const char *));
 
-bfd_error_handler_type
+bfd_error_handler_type 
 bfd_get_error_handler  PARAMS ((void));
 
-long
+long 
 bfd_get_reloc_upper_bound PARAMS ((bfd *abfd, asection *sect));
 
-long
+long 
 bfd_canonicalize_reloc
  PARAMS ((bfd *abfd,
     asection *sec,
     arelent **loc,
     asymbol **syms));
 
-void
+void 
 bfd_set_reloc
  PARAMS ((bfd *abfd, asection *sec, arelent **rel, unsigned int count)
-
+    
     );
 
-boolean
+boolean 
 bfd_set_file_flags PARAMS ((bfd *abfd, flagword flags));
 
-int
+int 
 bfd_get_arch_size  PARAMS ((bfd *abfd));
 
-int
+int 
 bfd_get_sign_extend_vma  PARAMS ((bfd *abfd));
 
-boolean
+boolean 
 bfd_set_start_address PARAMS ((bfd *abfd, bfd_vma vma));
 
-long
+long 
 bfd_get_mtime PARAMS ((bfd *abfd));
 
-long
+long 
 bfd_get_size PARAMS ((bfd *abfd));
 
-int
+int 
 bfd_get_gp_size PARAMS ((bfd *abfd));
 
-void
+void 
 bfd_set_gp_size PARAMS ((bfd *abfd, int i));
 
-bfd_vma
+bfd_vma 
 bfd_scan_vma PARAMS ((CONST char *string, CONST char **end, int base));
 
-boolean
+boolean 
 bfd_copy_private_bfd_data PARAMS ((bfd *ibfd, bfd *obfd));
 
 #define bfd_copy_private_bfd_data(ibfd, obfd) \
      BFD_SEND (obfd, _bfd_copy_private_bfd_data, \
                (ibfd, obfd))
-boolean
+boolean 
 bfd_merge_private_bfd_data PARAMS ((bfd *ibfd, bfd *obfd));
 
 #define bfd_merge_private_bfd_data(ibfd, obfd) \
      BFD_SEND (obfd, _bfd_merge_private_bfd_data, \
                (ibfd, obfd))
-boolean
+boolean 
 bfd_set_private_flags PARAMS ((bfd *abfd, flagword flags));
 
 #define bfd_set_private_flags(abfd, flags) \
@@ -3084,6 +3103,7 @@ bfd_set_private_flags PARAMS ((bfd *abfd, flagword flags));
 
 #define bfd_debug_info_accumulate(abfd, section) \
         BFD_SEND (abfd, _bfd_debug_info_accumulate, (abfd, section))
+
 
 #define bfd_stat_arch_elt(abfd, stat) \
         BFD_SEND (abfd, _bfd_stat_arch_elt,(abfd, stat))
@@ -3132,10 +3152,10 @@ extern bfd_byte *bfd_get_relocated_section_contents
                  struct bfd_link_order *, bfd_byte *,
                  boolean, asymbol **));
 
-symindex
+symindex 
 bfd_get_next_mapent PARAMS ((bfd *abfd, symindex previous, carsym **sym));
 
-boolean
+boolean 
 bfd_set_archive_head PARAMS ((bfd *output, bfd *new_head));
 
 bfd *
@@ -3144,10 +3164,10 @@ bfd_openr_next_archived_file PARAMS ((bfd *archive, bfd *previous));
 CONST char *
 bfd_core_file_failing_command PARAMS ((bfd *abfd));
 
-int
+int 
 bfd_core_file_failing_signal PARAMS ((bfd *abfd));
 
-boolean
+boolean 
 core_file_matches_executable_p
  PARAMS ((bfd *core_bfd, bfd *exec_bfd));
 
@@ -3162,13 +3182,13 @@ core_file_matches_executable_p
     (bfd_assert (__FILE__,__LINE__), NULL))
 #endif
 #define BFD_SEND_FMT(bfd, message, arglist) \
-            (((bfd)->xvec->message[(int) ((bfd)->format)]) arglist)
+            (((bfd)->xvec->message[(int)((bfd)->format)]) arglist)
 
 #ifdef DEBUG_BFD_SEND
 #undef BFD_SEND_FMT
 #define BFD_SEND_FMT(bfd, message, arglist) \
   (((bfd) && (bfd)->xvec && (bfd)->xvec->message) ? \
-   (((bfd)->xvec->message[(int) ((bfd)->format)]) arglist) : \
+   (((bfd)->xvec->message[(int)((bfd)->format)]) arglist) : \
    (bfd_assert (__FILE__,__LINE__), NULL))
 #endif
 enum bfd_flavour {
@@ -3203,10 +3223,10 @@ typedef struct bfd_target
   enum bfd_flavour flavour;
   enum bfd_endian byteorder;
   enum bfd_endian header_byteorder;
-  flagword object_flags;
+  flagword object_flags;       
   flagword section_flags;
   char symbol_leading_char;
-  char ar_pad_char;
+  char ar_pad_char;            
   unsigned short ar_max_namelen;
   bfd_vma      (*bfd_getx64) PARAMS ((const bfd_byte *));
   bfd_signed_vma (*bfd_getx_signed_64) PARAMS ((const bfd_byte *));
@@ -3245,7 +3265,7 @@ CAT(NAME,_get_section_contents_in_window)
   /* Called when a new section is created.  */
   boolean       (*_new_section_hook) PARAMS ((bfd *, sec_ptr));
   /* Read the contents of a section.  */
-  boolean       (*_bfd_get_section_contents) PARAMS ((bfd *, sec_ptr, PTR,
+  boolean       (*_bfd_get_section_contents) PARAMS ((bfd *, sec_ptr, PTR, 
                                             file_ptr, bfd_size_type));
   boolean       (*_bfd_get_section_contents_in_window)
                           PARAMS ((bfd *, sec_ptr, bfd_window *,
@@ -3269,7 +3289,7 @@ CAT(NAME,_bfd_print_private_bfd_data)\
      to another.  */
   boolean       (*_bfd_copy_private_section_data) PARAMS ((bfd *, sec_ptr,
                                                        bfd *, sec_ptr));
-  /* Called to copy BFD private symbol data from one symbol
+  /* Called to copy BFD private symbol data from one symbol 
      to another.  */
   boolean       (*_bfd_copy_private_symbol_data) PARAMS ((bfd *, asymbol *,
                                                           bfd *, asymbol *));
@@ -3305,10 +3325,10 @@ CAT(NAME,_update_armap_timestamp)
   boolean  (*_bfd_construct_extended_name_table)
              PARAMS ((bfd *, char **, bfd_size_type *, const char **));
   void     (*_bfd_truncate_arname) PARAMS ((bfd *, CONST char *, char *));
-  boolean  (*write_armap) PARAMS ((bfd *arch,
+  boolean  (*write_armap) PARAMS ((bfd *arch, 
                               unsigned int elength,
                               struct orl *map,
-                              unsigned int orl_count,
+                              unsigned int orl_count, 
                               int stridx));
   PTR (*_bfd_read_ar_hdr_fn) PARAMS ((bfd *));
   bfd *    (*openr_next_archived_file) PARAMS ((bfd *arch, bfd *prev));
@@ -3430,7 +3450,7 @@ CAT(NAME,_get_dynamic_symtab_upper_bound),\
 CAT(NAME,_canonicalize_dynamic_symtab),\
 CAT(NAME,_get_dynamic_reloc_upper_bound),\
 CAT(NAME,_canonicalize_dynamic_reloc)
-  /* Get the amount of memory required to hold the dynamic symbols.  */
+  /* Get the amount of memory required to hold the dynamic symbols. */
   long  (*_bfd_get_dynamic_symtab_upper_bound) PARAMS ((bfd *));
   /* Read in the dynamic symbols.  */
   long  (*_bfd_canonicalize_dynamic_symtab)
@@ -3441,13 +3461,13 @@ CAT(NAME,_canonicalize_dynamic_reloc)
   long  (*_bfd_canonicalize_dynamic_reloc)
     PARAMS ((bfd *, arelent **, struct symbol_cache_entry **));
 
- /* Opposite endian version of this target.  */
+ /* Opposite endian version of this target.  */  
  const struct bfd_target * alternative_target;
-
+ 
  PTR backend_data;
-
+ 
 } bfd_target;
-boolean
+boolean 
 bfd_set_default_target  PARAMS ((const char *name));
 
 const bfd_target *
@@ -3456,16 +3476,16 @@ bfd_find_target PARAMS ((CONST char *target_name, bfd *abfd));
 const char **
 bfd_target_list PARAMS ((void));
 
-const bfd_target *
-bfd_search_for_target  PARAMS ((int (* search_func) (const bfd_target *, void *), void *));
+const bfd_target * 
+bfd_search_for_target  PARAMS ((int (* search_func)(const bfd_target *, void *), void *));
 
-boolean
+boolean 
 bfd_check_format PARAMS ((bfd *abfd, bfd_format format));
 
-boolean
+boolean 
 bfd_check_format_matches PARAMS ((bfd *abfd, bfd_format format, char ***matching));
 
-boolean
+boolean 
 bfd_set_format PARAMS ((bfd *abfd, bfd_format format));
 
 CONST char *

@@ -36,6 +36,21 @@ const bfd_arch_info_type bfd_i386_arch_intel_syntax =
   bfd_default_scan ,
   0,
 };
+const bfd_arch_info_type bfd_x86_64_arch_intel_syntax =
+{
+  64, /* 64 bits in a word */
+  64, /* 64 bits in an address */
+  8,  /* 8 bits in a byte */
+  bfd_arch_i386,
+  bfd_mach_x86_64_intel_syntax,
+  "x86_64:intel",
+  "x86_64:intel",
+  3,
+  true,
+  bfd_default_compatible, 
+  bfd_default_scan ,
+  &bfd_i386_arch_intel_syntax,
+};
 static const bfd_arch_info_type i8086_arch =
 {
   32,	/* 32 bits in a word */
@@ -49,7 +64,23 @@ static const bfd_arch_info_type i8086_arch =
   false,
   bfd_default_compatible,
   bfd_default_scan ,
-  &bfd_i386_arch_intel_syntax,
+  &bfd_x86_64_arch_intel_syntax,
+};
+
+const bfd_arch_info_type bfd_x86_64_arch =
+{
+  64, /* 32 bits in a word */
+  64, /* 32 bits in an address */
+  8,  /* 8 bits in a byte */
+  bfd_arch_i386,
+  bfd_mach_x86_64,
+  "x86_64",
+  "x86_64",
+  3,
+  true,
+  bfd_default_compatible, 
+  bfd_default_scan ,
+  &i8086_arch,
 };
 
 const bfd_arch_info_type bfd_i386_arch =
@@ -65,6 +96,6 @@ const bfd_arch_info_type bfd_i386_arch =
   true,
   bfd_default_compatible,
   bfd_default_scan ,
-  &i8086_arch,
+  &bfd_x86_64_arch 
 };
 
