@@ -1,3 +1,19 @@
+1999-05-15  Nick Clifton  <nickc@cygnus.com>
+
+	* configure.in (BUILD_MISC): Build dlltool for mcore
+	* configure: Regenerate.
+	* dlltool.c: Update example in comment.
+	(DLLTOOL_MCORE): Define.
+	(DLLTOOL_MCORE_ELF): Define.
+	(DRECTVE_SECTION_NAME): Define.
+	(mcore_be_jtab, mcore_le_jtab): Binary for performing an mcore
+	jump to address.
+	(mtable): Add entries for mcore variants.
+	(rvaafter, rvabefore, asm_prefix): Add mcore suppport.
+	(scan_drectve_symbols): Use DRECTVE_SECTION_NAME.
+	(make_head, make_tail): Cope if file cannot be created.
+	(usage): Improve layout.
+	
 1999-05-13  DJ Delorie  <dj@cygnus.com>
 
 	* rclex.l: add code to suppress certain output from cpp, replace

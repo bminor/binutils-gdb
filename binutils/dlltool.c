@@ -121,16 +121,16 @@
      printf ("hello from the dll and the other entry point %s\n", s);
    }
 
-   printf()
+   int printf (void)
    {
      return 9;
    }
 
- main.c
-
-   void main()
+ themain.c:
+   int main (void)
    {
-     cdef();
+     cdef ();
+     return 0;
    }
 
  thedll.def
@@ -164,7 +164,7 @@
    gcc -c themain.c
 
  # link the executable with the import library
-   ld -e main -Tthemain.ld -o themain.exe themain.o thedll.a
+   gcc -o themain.exe themain.o thedll.a
 
  */
 
@@ -357,6 +357,19 @@ static const char *mname = "i386";
 static const char *mname = "ppc";
 #endif
 
+#ifdef DLLTOOL_MCORE
+static const char * mname = "mcore";
+#endif
+
+#ifdef DLLTOOL_MCORE_ELF
+static const char * mname = "mcore-elf";
+#define DRECTVE_SECTION_NAME ((machine == MMCORE_ELF || machine == MMCORE_ELF_LE) ? ".exports" : ".drectve")
+#endif
+
+#ifndef DRECTVE_SECTION_NAME
+#define DRECTVE_SECTION_NAME ".drectve"
+#endif
+
 #define PATHMAX 250		/* What's the right name for this ? */
 
 #define TMP_ASM		"dc.s"
@@ -366,8 +379,7 @@ static const char *mname = "ppc";
 #define TMP_TAIL_O	"dt.o"
 #define TMP_STUB	"ds"
 
-/* This bit of assemly does jmp * ....
-s set how_jtab_roff to mark where the 32bit abs branch should go */
+/* This bit of assemly does jmp * .... */
 static const unsigned char i386_jtab[] =
 {
   0xff, 0x25, 0x00, 0x00, 0x00, 0x00, 0x90, 0x90
@@ -397,6 +409,20 @@ static const unsigned char thumb_jtab[] =
   0x40, 0xbc,           /* pop  {r6}         */
   0x60, 0x47,           /* bx   ip           */
   0,    0,    0,    0
+};
+
+static const unsigned char mcore_be_jtab[] =
+{
+  0x70, 0x01,            /* jmpi 1     */
+  0x12, 0x11,            /* nop */
+  0x00, 0x00, 0x00, 0x00 /* <address>  */  
+};
+
+static const unsigned char mcore_le_jtab[] =
+{
+  0x01, 0x70,            /* jmpi 1     */
+  0x11, 0x12,            /* nop */
+  0x00, 0x00, 0x00, 0x00 /* <address>  */  
 };
 
 /* This is the glue sequence for PowerPC PE. There is a  */
@@ -486,7 +512,39 @@ mtable[] =
     arm_interwork_jtab, sizeof (arm_interwork_jtab), 12
   }
   ,
-{    0}
+  {
+#define MMCORE_BE 5
+    "mcore", ".byte", ".short", ".long", ".asciz", "//",
+    "jmpi\t1\n\tnop\n\t.long",
+    ".global", ".space", ".align\t2",".align\t4","pe-mcore-big", bfd_arch_mcore,
+    mcore_be_jtab, sizeof (mcore_be_jtab), 8
+  }
+  ,
+  {
+#define MMCORE_LE 6
+    "mcore-le", ".byte", ".short", ".long", ".asciz", "//",
+    "jmpi\t1\n\tnop\n\t.long",
+    ".global", ".space", ".align\t2",".align\t4","pe-mcore-little", bfd_arch_mcore,
+    mcore_le_jtab, sizeof (mcore_le_jtab), 8
+  }
+  ,
+  {
+#define MMCORE_ELF 7
+    "mcore-elf", ".byte", ".short", ".long", ".asciz", "//",
+    "jmpi\t1\n\tnop\n\t.long",
+    ".global", ".space", ".align\t2",".align\t4","elf32-mcore-big", bfd_arch_mcore,
+    mcore_be_jtab, sizeof (mcore_be_jtab), 8
+  }
+  ,
+  {
+#define MMCORE_ELF_LE 8
+    "mcore-elf-le", ".byte", ".short", ".long", ".asciz", "//",
+    "jmpi\t1\n\tnop\n\t.long",
+    ".global", ".space", ".align\t2",".align\t4","elf32-mcore-little", bfd_arch_mcore,
+    mcore_le_jtab, sizeof (mcore_le_jtab), 8
+  }
+  ,
+ {    0}
 };
 
 typedef struct dlist
@@ -634,6 +692,10 @@ rvaafter (machine)
     case MPPC:
     case MTHUMB:
     case MARM_INTERWORK:
+    case MMCORE_BE:
+    case MMCORE_LE:
+    case MMCORE_ELF:
+    case MMCORE_ELF_LE:
       break;
     default:
       /* xgettext:c-format */
@@ -654,6 +716,10 @@ rvabefore (machine)
     case MPPC:
     case MTHUMB:
     case MARM_INTERWORK:
+    case MMCORE_BE:
+    case MMCORE_LE:
+    case MMCORE_ELF:
+    case MMCORE_ELF_LE:
       return ".rva\t";
     default:
       /* xgettext:c-format */
@@ -673,6 +739,10 @@ asm_prefix (machine)
     case MPPC:
     case MTHUMB:
     case MARM_INTERWORK:
+    case MMCORE_BE:
+    case MMCORE_LE:
+    case MMCORE_ELF:
+    case MMCORE_ELF_LE:
       break;
     case M386:
       return "_";
@@ -696,12 +766,12 @@ asm_prefix (machine)
 #define ASM_RVA_BEFORE 	rvabefore(machine)
 #define ASM_RVA_AFTER  	rvaafter(machine)
 #define ASM_PREFIX	asm_prefix(machine)
-#define ASM_ALIGN_LONG mtable[machine].how_align_long
+#define ASM_ALIGN_LONG  mtable[machine].how_align_long
 #define HOW_BFD_TARGET  0  /* always default*/
-#define HOW_BFD_ARCH   mtable[machine].how_bfd_arch
-#define HOW_JTAB       mtable[machine].how_jtab
-#define HOW_JTAB_SIZE      mtable[machine].how_jtab_size
-#define HOW_JTAB_ROFF      mtable[machine].how_jtab_roff
+#define HOW_BFD_ARCH    mtable[machine].how_bfd_arch
+#define HOW_JTAB        mtable[machine].how_jtab
+#define HOW_JTAB_SIZE   mtable[machine].how_jtab_size
+#define HOW_JTAB_ROFF   mtable[machine].how_jtab_roff
 static char **oav;
 
 void
@@ -1086,9 +1156,9 @@ scan_drectve_symbols (abfd)
   char *     buf;
   char *     p;
   char *     e;
-  
+
   /* Look for .drectve's */
-  s = bfd_get_section_by_name (abfd, ".drectve");
+  s = bfd_get_section_by_name (abfd, DRECTVE_SECTION_NAME);
   
   if (s == NULL)
     return;
@@ -1099,8 +1169,8 @@ scan_drectve_symbols (abfd)
   bfd_get_section_contents (abfd, s, buf, 0, size);
       
   /* xgettext:c-format */
-  inform (_("Sucking in info from .drective section in %s\n"),
-	  bfd_get_filename (abfd));
+  inform (_("Sucking in info from %s section in %s\n"),
+	  DRECTVE_SECTION_NAME, bfd_get_filename (abfd));
 
   /* Search for -export: strings */
   p = buf;
@@ -1693,12 +1763,13 @@ gen_exp_file ()
 
       if (a_list)
 	{
-	  fprintf (f, "\t.section .drectve\n");
+	  fprintf (f, "\t.section %s\n", DRECTVE_SECTION_NAME);
 	  for (dl = a_list; dl; dl = dl->next)
 	    {
 	      fprintf (f, "\t%s\t\"%s\"\n", ASM_TEXT, dl->text);
 	    }
 	}
+      
       if (d_list)
 	{
 	  fprintf (f, "\t.section .rdata\n");
@@ -2477,6 +2548,12 @@ make_head ()
 {
   FILE *  f = fopen (TMP_HEAD_S, FOPEN_WT);
 
+  if (f == NULL)
+    {
+      fatal (_("failed to open temporary head file: %s"), TMP_HEAD_S);
+      return NULL;
+    }
+  
   fprintf (f, "%s IMAGE_IMPORT_DESCRIPTOR\n", ASM_C);
   fprintf (f, "\t.section	.idata$2\n");
 
@@ -2508,6 +2585,7 @@ make_head ()
       fprintf (f, "\t%s\t0\n", ASM_LONG);
       fprintf (f, "fthunk:\n");
     }
+  
   if (!no_idata4)
     {
       fprintf (f, "\t.section\t.idata$4\n");
@@ -2516,6 +2594,7 @@ make_head ()
       fprintf (f, "\t.section	.idata$4\n");
       fprintf (f, "hname:\n");
     }
+  
   fclose (f);
 
   sprintf (outfile, "%s -o %s %s", as_flags, TMP_HEAD_O, TMP_HEAD_S);
@@ -2535,11 +2614,18 @@ make_tail ()
 {
   FILE *  f = fopen (TMP_TAIL_S, FOPEN_WT);
 
+  if (f == NULL)
+    {
+      fatal (_("failed to open temporary tail file: %s"), TMP_TAIL_S);
+      return NULL;
+    }
+  
   if (!no_idata4)
     {
       fprintf (f, "\t.section	.idata$4\n");
       fprintf (f, "\t%s\t0\n", ASM_LONG);
     }
+  
   if (!no_idata5)
     {
       fprintf (f, "\t.section	.idata$5\n");
@@ -2953,17 +3039,18 @@ usage (file, status)
   /* xgetext:c-format */
   fprintf (file, _("Usage %s <options> <object-files>\n"), program_name);
   /* xgetext:c-format */
-  fprintf (file, _("   -m --machine <machine>    Create {arm, arm_interwork, i386, ppc, thumb} DLL. [default: %s]\n"), mname);
+  fprintf (file, _("   -m --machine <machine>    Create as DLL for <machine>.  [default: %s]\n"), mname);
+  fprintf (file, _("        possible <machine>: arm[_interwork], i386, mcore[-elf][-le], ppc, thumb\n"));
   fprintf (file, _("   -e --output-exp <outname> Generate an export file.\n"));
   fprintf (file, _("   -l --output-lib <outname> Generate an interface library.\n"));
   fprintf (file, _("   -a --add-indirect         Add dll indirects to export file.\n"));
   fprintf (file, _("   -D --dllname <name>       Name of input dll to put into interface lib.\n"));
   fprintf (file, _("   -d --input-def <deffile>  Name of .def file to be read in.\n"));
   fprintf (file, _("   -z --output-def <deffile> Name of .def file to be created.\n"));
-  fprintf (file, _("   --export-all-symbols      Export all symbols to .def\n"));
-  fprintf (file, _("   --no-export-all-symbols   Only export listed symbols\n"));
-  fprintf (file, _("   --exclude-symbols <list>  Don't export <list>\n"));
-  fprintf (file, _("   --no-default-excludes     Clear default exclude symbols\n"));
+  fprintf (file, _("      --export-all-symbols   Export all symbols to .def\n"));
+  fprintf (file, _("      --no-export-all-symbols  Only export listed symbols\n"));
+  fprintf (file, _("      --exclude-symbols <list> Don't export <list>\n"));
+  fprintf (file, _("      --no-default-excludes  Clear default exclude symbols\n"));
   fprintf (file, _("   -b --base-file <basefile> Read linker generated base file.\n"));
   fprintf (file, _("   -x --no-idata4            Don't generate idata$4 section.\n"));
   fprintf (file, _("   -c --no-idata5            Don't generate idata$5 section.\n"));
