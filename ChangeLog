@@ -1,3 +1,9 @@
+Thu Jan 30 16:17:30 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* bfd/configure.in, config/mh-sco, gdb/config/mh-i386sco,
+	gdb/config/mt-i386v32, gdb/configure.in, readline/configure.in:
+	Fix SCO configuration stuff.
+
 Tue Jan 28 23:51:07 1992  Per Bothner  (bothner at cygnus.com)
 
 	* Makefile.in:  For libg++, make sure the -I pointing
