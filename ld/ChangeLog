@@ -1,3 +1,16 @@
+2003-04-19  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* emultempl/m68hc1xelf.em: New file to generate far trampolines on
+	68HC11 and 68HC12.
+	(LDEMUL_BEFORE_ALLOCATION): Override to gather the trampolines to
+	generate.
+	(LDEMUL_FINISH): Override to generate the trampolines after gc and
+	linker relaxation.
+	(LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS): Override to create the
+	stub file for trampolines.
+	(PARSE_AND_LIST_OPTIONS, PARSE_AND_LIST_LONGOPTS): New options
+	--no-trampoline and --bank-window to control the memory bank window.
+
 2003-04-18  H.J. Lu <hjl@gnu.org>
 
 	* ldfile.c (ldfile_add_library_path): Remove the unused
