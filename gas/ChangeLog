@@ -23,6 +23,8 @@
 	(emit_insn): Handle TLS relocations.
 	(ldX_op): Remove.
 
+	* doc/c-alpha.texi: Add docs for tls relocations.
+
 2002-05-30  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (mips_gprel_offset): New variable.
