@@ -1,3 +1,15 @@
+Tue Feb  4 13:24:44 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in (libcommon.a): Delete.
+	(callback.o,targ-map.o): Delete, moved to Make-common.in.
+	(gentmap,targ-vals.h,targ-map.c): Likewise.
+	(run-autoconf): Delete.
+	* aclocal.m4 (SIM_AC_OUTPUT): Redo creation of Makefile.
+	(common makefile fragment): Moved back into ...
+	* Make-common.in: Resurrect.
+	* configure.in (AC_LINK_FILES): Delete, unnecessary now.
+	* configure: Regenerated.
+
 Fri Jan 31 07:16:49 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* aclocal.m4 (SIM_AC_COMMON): Move COMMON_MAKEFILE_FRAG from here.

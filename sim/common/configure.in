@@ -33,16 +33,6 @@ else
 fi
 AC_SUBST(TARGET_SUBDIR)
 
-case "${target}" in
-*-*-*) TARG_VALS_DEF=nltvals.def ;;
-esac
-
-# Discard what SIM_AC_COMMON sets for these.
-sim_link_files="${TARG_VALS_DEF}"
-sim_link_links="targ-vals.def"
-
-AC_LINK_FILES($sim_link_files, $sim_link_links)
-
 # These aren't all needed yet, but will be eventually.
 AC_CHECK_HEADERS(stdlib.h string.h strings.h time.h sys/times.h)
 
