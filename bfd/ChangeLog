@@ -1,3 +1,10 @@
+Mon Oct 20 09:38:31 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* som.c (normalize): Delete function.
+	(som_bfd_ar_write_symbol_stuff): New parameter elength.  All callers
+	changed.  Use passed in elength to determine size of the extended
+	name table instead of computing it again.
+
 Sun Oct 19 23:36:21 1997  Jim Wilson  <wilson@cygnus.com>
 
 	* peicode.h (coff_swap_scnhdr_out): Use |= not = to set
