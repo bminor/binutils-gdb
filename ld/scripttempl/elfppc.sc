@@ -159,6 +159,7 @@ SECTIONS
     ${RELOCATING+PROVIDE (__sbss_start = .);}
     *(.sbss)
     *(.scommon)
+    *(.dynsbss)
     ${RELOCATING+PROVIDE (__sbss_end = .);}
   }
   ${PLT}

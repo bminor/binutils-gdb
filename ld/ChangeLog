@@ -1,3 +1,7 @@
+Fri Jan 30 19:15:17 1998  Geoff Keating  <geoffk@ozemail.com.au>
+
+	* scripttempl/elfppc.sc: Put .dynsbss in .sbss.
+
 Fri Jan 30 11:43:49 1998  H.J. Lu  <hjl@gnu.ai.mit.edu>
 
 	* Makefile.am (eelf32bsmip.c, eelf32lsmip.c): New targets.
