@@ -2718,7 +2718,7 @@ pa_ip (str)
 
 	    /* Handle ,gate completer for new syntax branches.  */
 	    case 'g':
-	      if (*s == ',' && strcasecmp (s + 1, "gate") == 0)
+	      if (*s == ',' && strncasecmp (s + 1, "gate", 4) == 0)
 		s += 5;
 	      else
 		break;
@@ -2726,7 +2726,7 @@ pa_ip (str)
 
 	    /* Handle ,l completer for new syntax branches.  */
 	    case 'l':
-	      if (*s == ',' && strcasecmp (s + 1, "l") == 0)
+	      if (*s == ',' && strncasecmp (s + 1, "l", 1) == 0)
 		s += 2;
 	      else
 		break;
@@ -2734,7 +2734,7 @@ pa_ip (str)
 
 	    /* Handle ,push completer for new syntax branches.  */
 	    case 'M':
-	      if (*s == ',' && strcasecmp (s + 1, "push") == 0)
+	      if (*s == ',' && strncasecmp (s + 1, "push", 4) == 0)
 		s += 5;
 	      else
 		break;
@@ -2742,7 +2742,7 @@ pa_ip (str)
 
 	    /* Handle ,pop completer for new syntax branches.  */
 	    case 'B':
-	      if (*s == ',' && strcasecmp (s + 1, "pop") == 0)
+	      if (*s == ',' && strncasecmp (s + 1, "pop", 3) == 0)
 		s += 4;
 	      else
 		break;
@@ -2750,9 +2750,9 @@ pa_ip (str)
 
 	    /* Handle ,%r2 completer for new syntax branches.  */
 	    case 'L':
-	      if (*s == ',' && strcasecmp (s + 1, "%r2") == 0)
+	      if (*s == ',' && strncasecmp (s + 1, "%r2", 3) == 0)
 		s += 4;
-	      else if (*s == ',' && strcasecmp (s + 1, "%rp") == 0)
+	      else if (*s == ',' && strncasecmp (s + 1, "%rp", 3) == 0)
 		s += 4;
 	      else
 		break;
