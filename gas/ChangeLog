@@ -1,6 +1,8 @@
 start-sanitize-r5900
 Sun Mar 22 13:21:01 1998  Jeffrey A Law  (law@cygnus.com)
 
+	* config/tc-mips.c (validate_mips_insn): Handle r5900 operands.
+
         * config/tc-mips.c (append_insn): Handle BFD_RELOC_MIPS16_S3.
         (mips_ip): Handle 'O' operand.
         (md_apply_fix): Handle BFD_RELOC_MIPS16_S3.
