@@ -35,6 +35,7 @@
 #endif
 
 #include "dwarf2dbg.h"
+#include "dw2gencfi.h"
 
 typedef struct
   {
@@ -4295,4 +4296,53 @@ sh_parse_name (char const *name, expressionS *exprP, char *nextcharP)
   return 1;
 }
 #endif
+
+void
+sh_cfi_frame_initial_instructions (void)
+{
+  cfi_add_CFA_def_cfa (15, 0);
+}
+
+int
+sh_regname_to_dw2regnum (const char *regname)
+{
+  unsigned int regnum = -1;
+  unsigned int i;
+  const char *p;
+  char *q;
+  static struct { char *name; int dw2regnum; } regnames[] =
+    {
+      { "pr", 17 }, { "t", 18 }, { "gbr", 19 }, { "mach", 20 },
+      { "macl", 21 }, { "fpul", 23 }
+    };
+
+  for (i = 0; i < ARRAY_SIZE (regnames); ++i)
+    if (strcmp (regnames[i].name, regname) == 0)
+      return regnames[i].dw2regnum;
+
+  if (regname[0] == 'r')
+    {
+      p = regname + 1;
+      regnum = strtoul (p, &q, 10);
+      if (p == q || *q || regnum >= 16)
+	return -1;
+    }
+  else if (regname[0] == 'f' && regname[1] == 'r')
+    {
+      p = regname + 2;
+      regnum = strtoul (p, &q, 10);
+      if (p == q || *q || regnum >= 16)
+	return -1;
+      regnum += 25;
+    }
+  else if (regname[0] == 'x' && regname[1] == 'd')
+    {
+      p = regname + 2;
+      regnum = strtoul (p, &q, 10);
+      if (p == q || *q || regnum >= 8)
+	return -1;
+      regnum += 87;
+    }
+  return regnum;
+}
 #endif /* BFD_ASSEMBLER */

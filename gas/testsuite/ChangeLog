@@ -1,3 +1,9 @@
+2004-03-17  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* gas/cfi/cfi-sh-1.d: New file.
+	* gas/cfi/cfi-sh-1.s: Likewise.	
+	* gas/cfi/cfi.exp: Add SH case.
+
 2004-03-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/ppc/altivec.d: Update.

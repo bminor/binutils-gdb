@@ -49,6 +49,13 @@ if [istarget "x86_64-*"] then {
     if { [regexp "elf64\[_-\]sparc" $nm_help] } then {
 	run_dump_test "cfi-sparc64-1"
     }
+
+} elseif [istarget "sh*-*"] then {
+    if { [istarget sh64*-*-*] || [istarget sh5*-*-*] } then {
+    } else {
+	run_dump_test "cfi-sh-1"
+    }
+
 } else {
     return
 }
