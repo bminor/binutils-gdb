@@ -1,3 +1,12 @@
+Thu Mar 16 13:59:14 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* ldlang.c (load_symbols): If whole_archive is true and ENTRY
+	describes an archive, call bfd_link_add_symbols on each member.
+	* ldmain.c (whole_archive): New variable.
+	(main): Initialize it to false.
+	* ldmain.h: Declare whole_archive.
+	* lexsup.c (parse_args): Grok --whole-archive switch.
+
 Thu Mar 16 11:38:48 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* genscripts.sh (EMULATION_NAME): Set LIB_PATH to empty when not

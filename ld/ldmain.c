@@ -72,6 +72,9 @@ boolean trace_file_tries;
    instead of complaining if no input files are given.  */
 boolean version_printed;
 
+/* Nonzero means link in every member of an archive.  */
+boolean whole_archive;
+
 args_type command_line;
 
 ld_config_type config;
@@ -158,6 +161,7 @@ main (argc, argv)
 
   /* Initialize the data about options.  */
   trace_files = trace_file_tries = version_printed = false;
+  whole_archive = false;
   config.traditional_format = false;
   config.build_constructors = true;
   config.dynamic_link = false;
