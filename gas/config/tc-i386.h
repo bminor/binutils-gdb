@@ -101,9 +101,8 @@ extern int tc_i386_fix_adjustable PARAMS ((struct fix *));
 #define AOUT_TARGET_FORMAT	"a.out-i386"
 #endif
 
-#if ((defined (OBJ_MAYBE_ELF) && defined (OBJ_MAYBE_COFF)) \
-     || (defined (OBJ_MAYBE_ELF) && defined (OBJ_MAYBE_AOUT)) \
-     || (defined (OBJ_MAYBE_COFF) && defined (OBJ_MAYBE_AOUT)))
+#if ((defined (OBJ_MAYBE_COFF) && defined (OBJ_MAYBE_AOUT)) \
+     || defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF))
 extern const char *i386_target_format PARAMS ((void));
 #define TARGET_FORMAT i386_target_format ()
 #else
@@ -202,7 +201,8 @@ extern const char extra_symbol_chars[];
 #define ADDR_PREFIX	2
 #define DATA_PREFIX	3
 #define SEG_PREFIX	4
-#define MAX_PREFIXES	5	/* max prefixes per opcode */
+#define REX_PREFIX	5       /* must come last.  */
+#define MAX_PREFIXES	6	/* max prefixes per opcode */
 
 /* we define the syntax here (modulo base,index,scale syntax) */
 #define REGISTER_PREFIX '%'
@@ -229,6 +229,7 @@ extern const char extra_symbol_chars[];
 #define BYTE_MNEM_SUFFIX  'b'
 #define SHORT_MNEM_SUFFIX 's'
 #define LONG_MNEM_SUFFIX  'l'
+#define QWORD_MNEM_SUFFIX  'q'
 /* Intel Syntax */
 #define LONG_DOUBLE_MNEM_SUFFIX 'x'
 
@@ -278,9 +279,20 @@ typedef struct
 #define Cpu486		 0x10	/* i486 or better required */
 #define Cpu586		 0x20	/* i585 or better required */
 #define Cpu686		 0x40	/* i686 or better required */
-#define CpuMMX		 0x80	/* MMX support required */
-#define CpuSSE		0x100	/* Streaming SIMD extensions required */
-#define Cpu3dnow	0x200	/* 3dnow! support required */
+#define CpuK6		 0x80	/* AMD K6 or better required*/
+#define CpuAthlon	0x100	/* AMD Athlon or better required*/
+#define CpuSledgehammer 0x200	/* Sledgehammer or better required */
+#define CpuMMX		0x400	/* MMX support required */
+#define CpuSSE		0x800	/* Streaming SIMD extensions required */
+#define Cpu3dnow       0x1000	/* 3dnow! support required */
+#define CpuUnknown     0x2000	/* The CPU is unknown,  be on the safe side.  */
+
+  /* These flags are set by gas depending on the flag_code.  */
+#define Cpu64	     0x4000000   /* 64bit support required  */
+#define CpuNo64      0x8000000   /* Not supported in the 64bit mode  */
+
+  /* The default value for unknown CPUs - enable all features to avoid problems.  */
+#define CpuUnknownFlags (Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuSledgehammer|CpuMMX|CpuSSE|Cpu3dnow|CpuK6|CpuAthlon)
 
   /* the bits in opcode_modifier are used to generate the final opcode from
      the base_opcode.  These bits also are used to detect alternate forms of
@@ -305,19 +317,23 @@ typedef struct
 #define Seg3ShortForm	0x1000	/* fs/gs segment register insns.  */
 #define Size16		0x2000	/* needs size prefix if in 32-bit mode */
 #define Size32		0x4000	/* needs size prefix if in 16-bit mode */
-#define IgnoreSize	0x8000  /* instruction ignores operand size prefix */
-#define DefaultSize    0x10000  /* default insn size depends on mode */
-#define No_bSuf	       0x20000	/* b suffix on instruction illegal */
-#define No_wSuf	       0x40000	/* w suffix on instruction illegal */
-#define No_lSuf	       0x80000	/* l suffix on instruction illegal */
-#define No_sSuf	      0x100000	/* s suffix on instruction illegal */
-#define No_xSuf       0x200000  /* x suffix on instruction illegal */
-#define FWait	      0x400000	/* instruction needs FWAIT */
-#define IsString      0x800000	/* quick test for string instructions */
-#define regKludge    0x1000000	/* fake an extra reg operand for clr, imul */
-#define IsPrefix     0x2000000	/* opcode is a prefix */
-#define ImmExt	     0x4000000	/* instruction has extension in 8 bit imm */
-#define Ugh	     0x8000000	/* deprecated fp insn, gets a warning */
+#define Size64		0x8000	/* needs size prefix if in 16-bit mode */
+#define IgnoreSize     0x10000  /* instruction ignores operand size prefix */
+#define DefaultSize    0x20000  /* default insn size depends on mode */
+#define No_bSuf	       0x40000	/* b suffix on instruction illegal */
+#define No_wSuf	       0x80000	/* w suffix on instruction illegal */
+#define No_lSuf	      0x100000 	/* l suffix on instruction illegal */
+#define No_sSuf	      0x200000	/* s suffix on instruction illegal */
+#define No_qSuf       0x400000  /* q suffix on instruction illegal */
+#define No_xSuf       0x800000  /* x suffix on instruction illegal */
+#define FWait	     0x1000000	/* instruction needs FWAIT */
+#define IsString     0x2000000	/* quick test for string instructions */
+#define regKludge    0x4000000	/* fake an extra reg operand for clr, imul */
+#define IsPrefix     0x8000000	/* opcode is a prefix */
+#define ImmExt	    0x10000000	/* instruction has extension in 8 bit imm */
+#define NoRex64	    0x20000000  /* instruction don't need Rex64 prefix.  */
+#define Rex64	    0x40000000  /* instruction require Rex64 prefix.  */
+#define Ugh	    0x80000000	/* deprecated fp insn, gets a warning */
 
   /* operand_types[i] describes the type of operand i.  This is made
      by OR'ing together all of the possible type masks.  (e.g.
@@ -330,51 +346,58 @@ typedef struct
 #define Reg8		   0x1	/* 8 bit reg */
 #define Reg16		   0x2	/* 16 bit reg */
 #define Reg32		   0x4	/* 32 bit reg */
+#define Reg64		   0x8	/* 64 bit reg */
   /* immediate */
-#define Imm8		   0x8	/* 8 bit immediate */
-#define Imm8S		  0x10	/* 8 bit immediate sign extended */
-#define Imm16		  0x20	/* 16 bit immediate */
-#define Imm32		  0x40	/* 32 bit immediate */
-#define Imm1		  0x80	/* 1 bit immediate */
+#define Imm8		  0x10	/* 8 bit immediate */
+#define Imm8S		  0x20	/* 8 bit immediate sign extended */
+#define Imm16		  0x40	/* 16 bit immediate */
+#define Imm32		  0x80	/* 32 bit immediate */
+#define Imm32S		 0x100	/* 32 bit immediate sign extended */
+#define Imm64		 0x200	/* 64 bit immediate */
+#define Imm1		 0x400	/* 1 bit immediate */
   /* memory */
-#define BaseIndex	 0x100
+#define BaseIndex	 0x800
   /* Disp8,16,32 are used in different ways, depending on the
      instruction.  For jumps, they specify the size of the PC relative
      displacement, for baseindex type instructions, they specify the
      size of the offset relative to the base register, and for memory
      offset instructions such as `mov 1234,%al' they specify the size of
      the offset relative to the segment base.  */
-#define Disp8		 0x200	/* 8 bit displacement */
-#define Disp16		 0x400	/* 16 bit displacement */
-#define Disp32		 0x800	/* 32 bit displacement */
+#define Disp8		0x1000	/* 8 bit displacement */
+#define Disp16		0x2000	/* 16 bit displacement */
+#define Disp32		0x4000	/* 32 bit displacement */
+#define Disp32S	        0x8000	/* 32 bit signed displacement */
+#define Disp64	       0x10000	/* 64 bit displacement */
   /* specials */
-#define InOutPortReg	0x1000	/* register to hold in/out port addr = dx */
-#define ShiftCount	0x2000	/* register to hold shift cound = cl */
-#define Control	        0x4000	/* Control register */
-#define Debug	        0x8000	/* Debug register */
-#define Test	       0x10000	/* Test register */
-#define FloatReg       0x20000	/* Float register */
-#define FloatAcc       0x40000	/* Float stack top %st(0) */
-#define SReg2	       0x80000	/* 2 bit segment register */
-#define SReg3	      0x100000	/* 3 bit segment register */
-#define Acc	      0x200000	/* Accumulator %al or %ax or %eax */
-#define JumpAbsolute  0x400000
-#define RegMMX	      0x800000	/* MMX register */
-#define RegXMM	     0x1000000	/* XMM registers in PIII */
-#define EsSeg	     0x2000000	/* String insn operand with fixed es segment */
+#define InOutPortReg   0x20000	/* register to hold in/out port addr = dx */
+#define ShiftCount     0x40000	/* register to hold shift cound = cl */
+#define Control	       0x80000	/* Control register */
+#define Debug	      0x100000	/* Debug register */
+#define Test	      0x200000	/* Test register */
+#define FloatReg      0x400000	/* Float register */
+#define FloatAcc      0x800000	/* Float stack top %st(0) */
+#define SReg2	     0x1000000	/* 2 bit segment register */
+#define SReg3	     0x2000000	/* 3 bit segment register */
+#define Acc	     0x4000000	/* Accumulator %al or %ax or %eax */
+#define JumpAbsolute 0x8000000
+#define RegMMX	    0x10000000	/* MMX register */
+#define RegXMM	    0x20000000	/* XMM registers in PIII */
+#define EsSeg	    0x40000000	/* String insn operand with fixed es segment */
+
   /* InvMem is for instructions with a modrm byte that only allow a
      general register encoding in the i.tm.mode and i.tm.regmem fields,
      eg. control reg moves.  They really ought to support a memory form,
      but don't, so we add an InvMem flag to the register operand to
      indicate that it should be encoded in the i.tm.regmem field.  */
-#define InvMem	     0x4000000
+#define InvMem	    0x80000000
 
-#define Reg	(Reg8|Reg16|Reg32)	/* gen'l register */
-#define WordReg (Reg16|Reg32)
+#define Reg	(Reg8|Reg16|Reg32|Reg64) /* gen'l register */
+#define WordReg (Reg16|Reg32|Reg64)
 #define ImplicitRegister (InOutPortReg|ShiftCount|Acc|FloatAcc)
-#define Imm	(Imm8|Imm8S|Imm16|Imm32) /* gen'l immediate */
-#define Disp	(Disp8|Disp16|Disp32)	/* General displacement */
-#define AnyMem	(Disp|BaseIndex|InvMem)	/* General memory */
+#define Imm	(Imm8|Imm8S|Imm16|Imm32S|Imm32|Imm64) /* gen'l immediate */
+#define EncImm	(Imm8|Imm16|Imm32|Imm32S) /* Encodable gen'l immediate */
+#define Disp	(Disp8|Disp16|Disp32|Disp32S|Disp64) /* General displacement */
+#define AnyMem	(Disp8|Disp16|Disp32|Disp32S|BaseIndex|InvMem)	/* General memory */
   /* The following aliases are defined because the opcode table
      carefully specifies the allowed memory types for each instruction.
      At the moment we can only tell a memory reference size by the
@@ -408,6 +431,9 @@ typedef struct
 {
   char *reg_name;
   unsigned int reg_type;
+  unsigned int reg_flags;
+#define RegRex	    0x1  /* Extended register.  */
+#define RegRex64    0x2  /* Extended 8 bit register.  */
   unsigned int reg_num;
 }
 reg_entry;
@@ -427,6 +453,17 @@ typedef struct
   unsigned int mode;	/* how to interpret regmem & reg */
 }
 modrm_byte;
+
+/* x86-64 extension prefix.  */
+typedef struct
+  {
+    unsigned int mode64;
+    unsigned int extX;		/* Used to extend modrm reg field.  */
+    unsigned int extY;		/* Used to extend SIB index field.  */
+    unsigned int extZ;		/* Used to extend modrm reg/mem, SIB base, modrm base fields.  */
+    unsigned int empty;		/* Used to old-style byte registers to new style.  */
+  }
+rex_byte;
 
 /* 386 opcode byte to code indirect addressing.  */
 typedef struct

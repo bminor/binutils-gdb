@@ -117,7 +117,6 @@ changequote([,])dnl
       armb*)		cpu_type=arm endian=little ;;
       armv*l)		cpu_type=arm endian=little ;;
       armv*b)		cpu_type=arm endian=big ;;
-      xscale*)		cpu_type=arm endian=little ;;
       strongarm*)	cpu_type=arm endian=little ;;
       thumb*)		cpu_type=arm endian=little ;;
       hppa*)		cpu_type=hppa ;;

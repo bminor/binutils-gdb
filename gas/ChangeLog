@@ -1,3 +1,62 @@
+Wed Dec 20 14:21:22 MET 2000  Jan Hubicka  <jh@suse.cz>
+
+	* tc-i386.h (i386_target_format): Define even for ELFs.
+	(QWORD_MNEM_SUFFIX): New macro.
+	(CpuK6,CpuAthlon,CpuSledgehammer, Cpu64, CpuNo64, CpuUnknownFlags):
+	New macros
+	(CpuMMX,CpuSSE,Cpu3dnow, CpuUnknown): Renumber.
+	(IgnoreSize, DefaultSize, No_?Suf, FWait, IsString, regKludge, IsPrefix,
+	ImmExt): Renumber.
+	(Size64, No_qSuf, NoRex64, Rex64): New macros.
+	(Reg64, Imm32S, Imm64, Disp32S, Disp64): New macros.
+	(Imm8, Imm8S, Imm16, Imm32, Imm1, BaseIndex, Disp8, Disp16, Disp32,
+	InOutPortReg,ShiftCount, Control, Debug, Test, FloatReg, FloatAcc,
+	SReg2, SReg3, Acc, JumpAbsolute, RegMMX, RegXMM, EsSeg, InvMem):
+	Renumber.
+	(Reg, WordReg): Add Reg64.
+	(Imm): Add Imm32S and Imm64.
+	(EncImm): New.
+	(Disp): Add Disp64 and Disp32S.
+	(AnyMem): Add Disp32S.
+	(RegRex, RegRex64): New macros.
+	(rex_byte): New type.
+	* tc-i386.c (set_16bit_code_flag): Kill.
+	(fits_in_unsigned_long, fits_in_signed_long): New functions.
+	(reloc): New parameter "signed"; support x86_64.
+	(set_code_flag): New.
+	(DEFAULT_ARCH): New macro; default to "i386".
+	(default_arch): New static variable.
+	(struct _i386_insn): New fields Operand_PCrel; rex.
+	(flag_16bit_code): Kill; All tests replaced to "flag_code == CODE_64BIT"
+	(flag_code): New enum and static variable.
+	(use_rela_relocations): New static variable.
+	(flag_code_names): New static variable.
+	(cpu_arch_flags): Default to CpuUnknownFlags|CpuNo64.
+	(cpu_arch): Add "sledgehammer"; Add CPUAthlon to Athlon and CpuK6 to
+	K6 and Athlon.
+	(i386_align_code): Return plain "nop" for x86_64.
+	(mode_from_disp_size): Support Disp32S.
+	(smallest_imm_type): Support Imm32S and Imm64.
+	(offset_in_range): Support size of 8.
+	(set_cpu_arch): Do not clobber to Cpu64/CpuNo64.
+	(md_pseudo_table): Add "code64"; use set_code_flat.
+	(md_begin): Emit sane error message on hash failure.
+	(tc_i386_fix_adjustable): Support x86_64 relocations.
+	(md_assemble): Support QWORD_MNEM_SUFFIX, REX registers,
+	instructions supported on particular arch just partially,
+	output of 64bit immediates, handling of Imm32S and Disp32S type.
+	(i386_immedaite): Support x86_64 relocations; support 64bit constants.
+	(i386_displacement): Likewise.
+	(i386_index_check): Cleanup; support 64bit addresses.
+	(md_apply_fix3): Support x86_64 relocation and rela.
+	(md_longopts): Add "32" and "64".
+	(md_parse_option): Add OPTION_32 and OPTION_64.
+	(i386_target_format): Call even for ELFs; choose between
+	elf64-x86-64 and elf32-i386.
+	(i386_validate_fix): Refuse GOTOFF in 64bit mode.
+	(tc_gen_reloc): Support rela relocations and x86_64.
+	(intel_e09_1): Support QWORD.
+
 2000-12-15  Diego Novillo  <dnovillo@redhat.com>
 
 	* config/tc-i386.c (intel_e09_1): Only flag as a memory operand if
