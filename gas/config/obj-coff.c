@@ -732,14 +732,11 @@ obj_coff_endef (ignore)
     case C_ARG:
     case C_REGPARM:
     case C_FIELD:
-      SF_SET_DEBUG (def_symbol_in_progress);
-      S_SET_SEGMENT (def_symbol_in_progress, absolute_section);
-      break;
-
     case C_MOS:
     case C_MOE:
     case C_MOU:
     case C_EOS:
+      SF_SET_DEBUG (def_symbol_in_progress);
       S_SET_SEGMENT (def_symbol_in_progress, absolute_section);
       break;
 

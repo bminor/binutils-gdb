@@ -1,3 +1,9 @@
+2000-08-14  Mark Elbrecht  <snowball3@bigfoot.com>
+
+	* config/obj-coff.c (obj_coff_endef) [BFD_ASSEMBLER]: Set the debug
+	  flag for storage types C_ARG, C_REGPARM, C_FIELD, C_MOS, C_MOE,
+	  C_MOU, and C_EOS.
+
 2000-08-14  Jason Eckhardt  <jle@cygnus.com>
 
 	* NEWS: Mention i860 support.
