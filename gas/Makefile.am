@@ -1,6 +1,6 @@
 ## Process this file with automake to generate Makefile.in
 
-AUTOMAKE_OPTIONS = dejagnu
+AUTOMAKE_OPTIONS = cygnus dejagnu
 
 SUBDIRS = doc
 
@@ -351,6 +351,11 @@ stamp-mk.com: vmsconf.sh Makefile
 
 EXTRA_DIST = make-gas.com
 
+DISTSTUFF = make-gas.com m68k-parse.c itbl-parse.c itbl-parse.h itbl-lex.c
+diststuff: $(DISTSTUFF) info
+
+DISTCLEANFILES = targ-cpu.h obj-format.h targ-env.h itbl-cpu.h cgen-opc.h
+
 # Now figure out from those variables how to compile and link.
 
 BASEDIR = $(srcdir)/..
@@ -363,6 +368,12 @@ INCDIR = $(BASEDIR)/include
 # so that tm.h and config.h will be found in the compilation
 # subdirectory rather than in the source directory.
 INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(srcdir)/config -I$(INCDIR) -I$(srcdir)/.. -I$(BFDDIR)
+
+# This should be parallel to INCLUDES, but should replace $(srcdir)
+# with $${srcdir}, and should work in a subdirectory.  This is used
+# when building dependencies, because the dependency building is done
+# in a subdirectory.
+DEP_INCLUDES = -D_GNU_SOURCE -I.. -I$${srcdir} -I../../bfd -I$${srcdir}/config -I$${srcdir}/../include -I$${srcdir}/.. -I$${srcdir}/../bfd
 
 # How to link with both our special library facilities
 # and the system's installed libraries.
@@ -519,8 +530,6 @@ MOSTLYCLEANFILES = $(STAGESTUFF) core stamp-mk.com \
 
 CLEANFILES = dep.sed .tcdep .objdep .dep2 .dep1 .depa .dep .depdir
 
-DISTCLEANFILES = targ-cpu.h obj-format.h targ-env.h itbl-cpu.h cgen-opc.h
-
 .PHONY: install-exec-local install-data-local
 
 install-exec-local: $(noinst_PROGRAMS)
@@ -533,8 +542,10 @@ install-exec-local: $(noinst_PROGRAMS)
 	done
 	rm -f $(tooldir)/bin/as$(EXEEXT)
 	n=`echo as | sed '$(transform)'`; \
-	ln $(bindir)/$$n$(EXEEXT) $(tooldir)/bin/as$(EXEEXT) >/dev/null 2>/dev/null \
-	  || $(INSTALL_PROGRAM) as-new$(EXEEXT) $(tooldir)/bin/as$(EXEEXT)
+	if [ "$(bindir)/$$n$(EXEEXT)" != "$(tooldir)/bin/as$(EXEEXT)" ]; then \
+	  ln $(bindir)/$$n$(EXEEXT) $(tooldir)/bin/as$(EXEEXT) >/dev/null 2>/dev/null \
+	    || $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) as-new$(EXEEXT) $(tooldir)/bin/as$(EXEEXT); \
+	fi
 
 # These exist for maintenance purposes.
 
@@ -635,22 +646,23 @@ DEP_FILE_DEPS =  $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 	$(SHELL) $(srcdir)/../move-if-change .depa .dep
 
 # This rule needs a mkdep that runs "gcc -MM".
-# FIXME: This only works correctly if $(srcdir) is an absolute path.
 .dep1: $(CFILES) $(MULTI_CFILES)
 	if [ -d .depdir ]; then true; else mkdir .depdir; fi
+	srcdir=`cd $(srcdir); pwd`; \
 	cd .depdir; \
 	echo '' > targ-cpu.h; \
 	echo '' > obj-format.h; \
 	echo '' > targ-env.h; \
 	echo '' > itbl-cpu.h; \
 	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep; \
-	$(DEP) -f .dep -DBFD_ASSEMBLER -I. -I.. -I$(srcdir) -I../../bfd $(INCLUDES) $?
+	$(DEP) -f .dep -DBFD_ASSEMBLER -I. -I.. -I$${srcdir} -I../../bfd $(DEP_INCLUDES) $?
 	mv -f .depdir/.dep .dep1
 
 # Work out the special dependencies for the tc-*.c files.
 .tcdep: $(TARGET_CPU_CFILES)
 	rm -f .tcdepa
 	if [ -d .depdir ]; then true; else mkdir .depdir; fi
+	srcdir=`cd $(srcdir); pwd`; \
 	cd .depdir; \
 	for c in $(CPU_TYPES); do \
 	  for o in $(OBJ_FORMATS); do \
@@ -662,9 +674,9 @@ DEP_FILE_DEPS =  $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 	      echo '' > itbl-cpu.h; \
 	      echo '#include "opcodes/'"$${c}"'-opc.h"' > cgen-opc.h; \
 	      rm -f dummy.c; \
-	      cp $(srcdir)/config/tc-$${c}.c dummy.c; \
+	      cp $${srcdir}/config/tc-$${c}.c dummy.c; \
 	      echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep; \
-	      $(DEP) -f .dep -DBFD_ASSEMBLER -I. -I.. -I$(srcdir) -I../../bfd $(INCLUDES) dummy.c; \
+	      $(DEP) -f .dep -DBFD_ASSEMBLER -I. -I.. -I$${srcdir} -I../../bfd $(DEP_INCLUDES) dummy.c; \
 	      sed -e "s/dummy.o: dummy.c/TCDEP_$${c}_$${o} =/" \
 		  -e '1,/DO NOT PUT ANYTHING AFTER/d' \
 		  -e '/IF YOU PUT ANYTHING/,$$d' \
@@ -696,6 +708,7 @@ DEP_FILE_DEPS =  $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 .objdep: $(OBJ_FORMAT_CFILES)
 	rm -f .objdepa
 	if [ -d .depdir ]; then true; else mkdir .depdir; fi
+	srcdir=`cd $(srcdir); pwd`; \
 	cd .depdir; \
 	for c in $(CPU_TYPES); do \
 	  for o in $(OBJ_FORMATS); do \
@@ -706,9 +719,9 @@ DEP_FILE_DEPS =  $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 	      echo '#include "te-generic.h"' > targ-env.h; \
 	      echo '' > itbl-cpu.h; \
 	      rm -f dummy.c; \
-	      cp $(srcdir)/config/obj-$${o}.c dummy.c; \
+	      cp $${srcdir}/config/obj-$${o}.c dummy.c; \
 	      echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep; \
-	      $(DEP) -f .dep -DBFD_ASSEMBLER -I. -I.. -I$(srcdir) -I../../bfd $(INCLUDES) dummy.c; \
+	      $(DEP) -f .dep -DBFD_ASSEMBLER -I. -I.. -I$${srcdir} -I../../bfd $(DEP_INCLUDES) dummy.c; \
 	      sed -e "s/dummy.o: dummy.c/OBJDEP_$${c}_$${o} =/" \
 		  -e '1,/DO NOT PUT ANYTHING AFTER/d' \
 		  -e '/IF YOU PUT ANYTHING/,$$d' \
@@ -739,10 +752,10 @@ DEP_FILE_DEPS =  $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 
 # Work out the dependencies for each CPU/OBJ combination.
 # Note that SOM is a special case, because it only works native.
-# FIXME: This only works correctly if $(srcdir) is an absolute path.
 .dep2: $(TARGET_CPU_HFILES) $(OBJ_FORMAT_HFILES)
 	rm -f .dep2a
 	if [ -d .depdir ]; then true; else mkdir .depdir; fi
+	srcdir=`cd $(srcdir); pwd`; \
 	cd .depdir; \
 	for c in $(CPU_TYPES); do \
 	  for o in $(OBJ_FORMATS); do \
@@ -751,7 +764,7 @@ DEP_FILE_DEPS =  $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 	      echo '#include "tc-'"$${c}"'.h"' > targ-cpu.h; \
 	      echo '#include "obj-'"$${o}"'.h"' > dummy.c; \
 	      echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep; \
-	      $(DEP) -f .dep -DBFD_ASSEMBLER -I. -I.. -I$(srcdir) -I../../bfd $(INCLUDES) dummy.c; \
+	      $(DEP) -f .dep -DBFD_ASSEMBLER -I. -I.. -I$${srcdir} -I../../bfd $(DEP_INCLUDES) dummy.c; \
 	      sed -e "s/dummy.o: dummy.c/DEP_$${c}_$${o} =/" \
 		  -e '1,/DO NOT PUT ANYTHING AFTER/d' \
 		  -e '/IF YOU PUT ANYTHING/,$$d' \
@@ -810,6 +823,7 @@ bignum-copy.o: bignum-copy.c
 cond.o: cond.c macro.h sb.h $(INCDIR)/obstack.h
 depend.o: depend.c
 ecoff.o: ecoff.c
+ehopt.o: ehopt.c subsegs.h $(INCDIR)/obstack.h $(INCDIR)/elf/dwarf2.h
 expr.o: expr.c $(INCDIR)/obstack.h
 flonum-copy.o: flonum-copy.c
 flonum-konst.o: flonum-konst.c

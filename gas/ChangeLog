@@ -1,3 +1,10 @@
+Tue Mar 31 17:52:40 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (DEP_INCLUDES): New variable.
+	(.dep1): Change to work when srcdir is not an absolute path.
+	(.tcdep, .objdep, .dep2): Likewise.
+	* Makefile.in: Rebuild.
+
 Mon Mar 30 12:46:48 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-i386.h, config/tc-i386.c: Revert March 24
