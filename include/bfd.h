@@ -52,7 +52,7 @@ here.  */
 #	endif
 #endif
 
-#define BFD_VERSION "0.18"
+#define BFD_VERSION "1.96"
 
 /* forward declaration */
 typedef struct _bfd bfd;
@@ -794,7 +794,8 @@ typedef CONST struct reloc_howto_struct
 					     arelent *reloc_entry,
                                             struct symbol_cache_entry *symbol,
                                             PTR data,
-                                            asection *input_section));
+                                            asection *input_section, 
+                                            bfd *output_bfd     ));
 
         /* The textual name of the relocation type. */
   char *name;
@@ -1107,7 +1108,7 @@ struct _bfd
       struct ieee_data_struct *ieee_data;
       struct ieee_ar_data_struct *ieee_ar_data;
       struct srec_data_struct *srec_data;
-      struct tekhex_data_struct *tekhex_data;
+      struct srec_data_struct *tekhex_data;
       struct elf_obj_tdata_struct *elf_obj_data;
       struct elf_core_tdata_struct *elf_core_data;
       struct bout_data_struct *bout_data;
@@ -1189,9 +1190,9 @@ long EXFUN(bfd_get_mtime, (bfd *));
 #define bfd_coff_swap_aouthdr_out(abfd, i,o) \
         BFD_SEND (abfd, _bfd_coff_swap_aouthdr_out, (abfd, i, o))
 
-#define bfd_get_relocated_section_contents(abfd, seclet) \
-	BFD_SEND (abfd, _bfd_get_relocated_section_contents, (abfd, seclet))
-
+#define bfd_get_relocated_section_contents(abfd, seclet, data) \
+	BFD_SEND (abfd, _bfd_get_relocated_section_contents, (abfd, seclet, data))
+ 
 #define bfd_relax_section(abfd, section, symbols) \
        BFD_SEND (abfd, _bfd_relax_section, (abfd, section, symbols))
 symindex EXFUN(bfd_get_next_mapent, (bfd *, symindex previous, carsym ** sym));
@@ -1288,7 +1289,7 @@ typedef struct bfd_target
   SDEF (void, _bfd_debug_info_start, (bfd *));
   SDEF (void, _bfd_debug_info_end, (bfd *));
   SDEF (void, _bfd_debug_info_accumulate, (bfd *, struct sec  *));
-  SDEF (bfd_byte *, _bfd_get_relocated_section_contents, (bfd*,struct bfd_seclet_struct *));
+  SDEF (bfd_byte *, _bfd_get_relocated_section_contents, (bfd*,struct bfd_seclet_struct *, bfd_byte *data));
   SDEF (boolean,_bfd_relax_section,(bfd *, struct sec *, struct symbol_cache_entry **));
   SDEF(void, _bfd_coff_swap_aux_in,(
        bfd            *abfd ,
