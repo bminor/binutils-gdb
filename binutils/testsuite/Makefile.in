@@ -40,6 +40,9 @@ CXXFLAGS = -g -O
 LINK=		ln -s
 SUBDIRS=
 
+RUNTEST = runtest
+RUNTESTFLAGS = 
+
 CC_FOR_TARGET = ` \
   if [ -f $${rootme}../gcc/Makefile ] ; then \
     echo $${rootme}../gcc/xgcc -B$${rootme}../gcc/; \
@@ -138,26 +141,11 @@ install-info:
 	@rootme=`pwd`/ ; export rootme ; \
 	$(MAKE) subdir_do DO=install-info "DODIRS=$(INFODIRS)" $(FLAGS_TO_PASS)
 
-install:
-	-parent=`echo $(bindir)|sed -e 's@/[^/]*$$@@'`; \
-	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(man1dir) ] ; then true ; else mkdir $(man1dir) ; fi
-	-if [ -d $(bindir) ] ; then true ; else mkdir $(bindir) ; fi
-	-if [ -d $(libdir) ] ; then true ; else mkdir $(libdir) ; fi
-	-if [ -d $(datadir) ] ; then true ; else mkdir $(datadir) ; fi
-	-if [ -d $(targetdir) ] ; then true ; else mkdir $(targetdir) ; fi
-	-for file in ./lib/*.exp; \
-	do \
-		$(INSTALL_DATA) $$file $(datadir) ; \
-	done
-	-for file in ./*-init.exp; \
-	do \
-		$(INSTALL_DATA) $$file $(targetdir) ; \
-	done
+check: all
+	$(RUNTEST) $(RUNTESTFLAGS) --tool binutils --srcdir $(srcdir)
 
+install:
 uninstall: force
-#	-rm -f $(datadir)/*.exp
-	-rm -fr $(targetdir)
 
 subdir_do: force
 	@for i in $(DODIRS); do \
