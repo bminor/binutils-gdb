@@ -1157,7 +1157,6 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_stack_align (gdbarch, m68hc11_stack_align);
 
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
-  set_gdbarch_ieee_float (gdbarch, 1);
 
   return gdbarch;
 }

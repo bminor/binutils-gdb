@@ -3071,10 +3071,6 @@ On HP-UX, certain system routines (millicode) have names beginning with
 @samp{$} or @samp{$$}.  For example, @code{$$dyncall} is a millicode
 routine that handles inter-space procedure calls on PA-RISC.
 
-@item IEEE_FLOAT
-@findex IEEE_FLOAT
-Define this if the target system uses IEEE-format floating point numbers.
-
 @item INIT_EXTRA_FRAME_INFO (@var{fromleaf}, @var{frame})
 @findex INIT_EXTRA_FRAME_INFO
 If additional information about the frame is required this should be

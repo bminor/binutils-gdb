@@ -35,7 +35,6 @@ struct value;
 #define TARGET_BYTE_ORDER_DEFAULT BFD_ENDIAN_LITTLE
 
 /* IEEE format floating point.  */
-#define IEEE_FLOAT (1)
 #define TARGET_DOUBLE_FORMAT  (target_byte_order == BFD_ENDIAN_BIG \
 			       ? &floatformat_ieee_double_big	 \
 			       : &floatformat_ieee_double_littlebyte_bigword)

@@ -68,6 +68,12 @@ extern char *floatformat_mantissa (const struct floatformat *, char *);
 extern DOUBLEST extract_floating (const void *addr, int len);
 extern void store_floating (void *addr, int len, DOUBLEST val);
 
+/* Given TYPE, return its floatformat.  TYPE_FLOATFORMAT() may return
+   NULL.  type_floatformat() detects that and returns a floatformat
+   based on the type size when FLOATFORMAT is NULL.  */
+
+const struct floatformat *floatformat_from_type (const struct type *type);
+
 extern DOUBLEST extract_typed_floating (const void *addr,
 					const struct type *type);
 extern void store_typed_floating (void *addr, const struct type *type,

@@ -834,8 +834,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_ptr_bit (gdbarch, 64);
 
   set_gdbarch_long_double_format (gdbarch, &floatformat_i387_ext);
-  set_gdbarch_ieee_float (gdbarch, 1);
-
 
   set_gdbarch_num_regs (gdbarch, X86_64_NUM_REGS);
   set_gdbarch_register_name (gdbarch, x86_64_register_name);

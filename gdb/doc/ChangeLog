@@ -1,3 +1,8 @@
+2002-01-20  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Remove
+	definition of IEEE_FLOAT.
+
 2002-01-20  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* gdb.texinfo: Beautify copyright years; fix a typo.

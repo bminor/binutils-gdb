@@ -1785,7 +1785,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      but not always.  */
   set_gdbarch_decr_pc_after_break (gdbarch, 2);
   set_gdbarch_pop_frame (gdbarch, s390_pop_frame);
-  set_gdbarch_ieee_float (gdbarch, 1);
   /* Stack grows downward.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   /* Offset from address of function to start of its code.

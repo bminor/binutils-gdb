@@ -25,8 +25,6 @@
 
 #define GDB_TARGET_IS_H8500
 
-#define IEEE_FLOAT (1)
-
 /* Define the bit, byte, and word ordering of the machine.  */
 
 #define TARGET_BYTE_ORDER BFD_ENDIAN_BIG

@@ -4283,7 +4283,6 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_breakpoint_from_pc (gdbarch, mips_breakpoint_from_pc);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
-  set_gdbarch_ieee_float (gdbarch, 1);
 
   set_gdbarch_skip_prologue (gdbarch, mips_skip_prologue);
   set_gdbarch_saved_pc_after_call (gdbarch, mips_saved_pc_after_call);

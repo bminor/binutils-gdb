@@ -403,8 +403,6 @@ v::TARGET_BFD_VMA_BIT:int:bfd_vma_bit::::8 * sizeof (void*):TARGET_ARCHITECTURE-
 # One if \`char' acts like \`signed char', zero if \`unsigned char'.
 v::TARGET_CHAR_SIGNED:int:char_signed::::1:-1:1::::
 #
-v::IEEE_FLOAT:int:ieee_float::::0:0::0:::
-#
 f::TARGET_READ_PC:CORE_ADDR:read_pc:ptid_t ptid:ptid::0:generic_target_read_pc::0
 f::TARGET_WRITE_PC:void:write_pc:CORE_ADDR val, ptid_t ptid:val, ptid::0:generic_target_write_pc::0
 f::TARGET_READ_FP:CORE_ADDR:read_fp:void:::0:generic_target_read_fp::0

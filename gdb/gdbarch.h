@@ -305,22 +305,6 @@ extern void set_gdbarch_char_signed (struct gdbarch *gdbarch, int char_signed);
 #endif
 #endif
 
-/* Default (value) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (IEEE_FLOAT)
-#define IEEE_FLOAT (0)
-#endif
-
-extern int gdbarch_ieee_float (struct gdbarch *gdbarch);
-extern void set_gdbarch_ieee_float (struct gdbarch *gdbarch, int ieee_float);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (IEEE_FLOAT)
-#error "Non multi-arch definition of IEEE_FLOAT"
-#endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (IEEE_FLOAT)
-#define IEEE_FLOAT (gdbarch_ieee_float (current_gdbarch))
-#endif
-#endif
-
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (TARGET_READ_PC)
 #define TARGET_READ_PC(ptid) (generic_target_read_pc (ptid))

@@ -43,9 +43,6 @@ struct symbol;
 #define TARGET_LONG_LONG_BIT 64
 #define TARGET_PTR_BIT 64
 
-/* Floating point is IEEE compliant */
-#define IEEE_FLOAT (1)
-
 /* Number of traps that happen between exec'ing the shell 
  * to run an inferior, and when we finally get to 
  * the inferior code.  This is 2 on most implementations.

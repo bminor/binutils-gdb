@@ -548,20 +548,8 @@ print_floating (char *valaddr, struct type *type, struct ui_file *stream)
 {
   DOUBLEST doub;
   int inv;
-  const struct floatformat *fmt = &floatformat_unknown;
+  const struct floatformat *fmt = floatformat_from_type (type);
   unsigned len = TYPE_LENGTH (type);
-
-  /* FIXME: kettenis/2001-01-20: The check for IEEE_FLOAT is probably
-     still necessary since GDB by default assumes that the target uses
-     the IEEE 754 representation for its floats and doubles.  Of
-     course this is all crock and should be cleaned up.  */
-
-  if (len == TARGET_FLOAT_BIT / TARGET_CHAR_BIT && IEEE_FLOAT)
-    fmt = TARGET_FLOAT_FORMAT;
-  else if (len == TARGET_DOUBLE_BIT / TARGET_CHAR_BIT && IEEE_FLOAT)
-    fmt = TARGET_DOUBLE_FORMAT;
-  else if (len == TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT)
-    fmt = TARGET_LONG_DOUBLE_FORMAT;
 
   if (floatformat_is_nan (fmt, valaddr))
     {
@@ -575,6 +563,13 @@ print_floating (char *valaddr, struct type *type, struct ui_file *stream)
       return;
     }
 
+  /* FIXME: cagney/2002-01-15: The simpler extract_typed_floating()
+     routine could be used here only that routine has no way of
+     indicating that the floating point it extracted was invalid (As
+     indicated by INVALID_FLOAT).  Instead, this code here could call
+     something like floating_invalid() to check for an invalid
+     floating point.  */
+
   doub = unpack_double (type, valaddr, &inv);
   if (inv)
     {
@@ -584,6 +579,10 @@ print_floating (char *valaddr, struct type *type, struct ui_file *stream)
 
   /* FIXME: kettenis/2001-01-20: The following code makes too much
      assumptions about the host and target floating point format.  */
+
+  /* FIXME: cagney/2002-01-15: The floatformat pointed to by FMT
+     should contain all the information needed to print the
+     floating-point value without host dependencies.  */
 
   if (len < sizeof (double))
       fprintf_filtered (stream, "%.9g", (double) doub);

@@ -619,7 +619,7 @@ floatformat_from_doublest (const struct floatformat *fmt,
    target-dependent code, the format of floating-point types is known,
    but not passed on by GDB.  This should be fixed.  */
 
-static const struct floatformat *
+const struct floatformat *
 floatformat_from_length (int len)
 {
   if (len * TARGET_CHAR_BIT == TARGET_FLOAT_BIT)
@@ -630,6 +630,16 @@ floatformat_from_length (int len)
     return TARGET_LONG_DOUBLE_FORMAT;
 
   return NULL;
+}
+
+const struct floatformat *
+floatformat_from_type (const struct type *type)
+{
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
+  if (TYPE_FLOATFORMAT (type) != NULL)
+    return TYPE_FLOATFORMAT (type);
+  else
+    return floatformat_from_length (TYPE_LENGTH (type));
 }
 
 /* If the host doesn't define NAN, use zero instead.  */
@@ -732,18 +742,11 @@ void
 convert_typed_floating (const void *from, const struct type *from_type,
                         void *to, const struct type *to_type)
 {
-  const struct floatformat *from_fmt = TYPE_FLOATFORMAT (from_type);
-  const struct floatformat *to_fmt = TYPE_FLOATFORMAT (to_type);
+  const struct floatformat *from_fmt = floatformat_from_type (from_type);
+  const struct floatformat *to_fmt = floatformat_from_type (to_type);
 
   gdb_assert (TYPE_CODE (from_type) == TYPE_CODE_FLT);
   gdb_assert (TYPE_CODE (to_type) == TYPE_CODE_FLT);
-
-  /* If the floating-point format of FROM_TYPE or TO_TYPE isn't known,
-     try to guess it from the type's length.  */
-  if (from_fmt == NULL)
-    from_fmt = floatformat_from_length (TYPE_LENGTH (from_type));
-  if (to_fmt == NULL)
-    to_fmt = floatformat_from_length (TYPE_LENGTH (to_type));
 
   if (from_fmt == NULL || to_fmt == NULL)
     {

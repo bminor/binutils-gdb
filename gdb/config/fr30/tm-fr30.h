@@ -187,9 +187,6 @@ extern void fr30_store_return_value (struct type *type, char *valbuf);
 /* Define this for Wingdb */
 #define TARGET_FR30
 
-/* IEEE format floating point */
-#define IEEE_FLOAT (1)
-
 /* Define other aspects of the stack frame.  */
 
 /* An expression that tells us whether the function invocation represented

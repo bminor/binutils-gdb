@@ -1,3 +1,36 @@
+2002-01-20  Andrew Cagney  <ac131313@redhat.com>
+
+	* doublest.h (floatformat_from_type): Declare.
+	* doublest.c (floatformat_from_type): New function.
+	(convert_typed_floating): Use.
+
+	* valprint.c (print_floating): Replace checks for IEEE_FLOAT with
+	call to function floatformat_from_type.
+
+	* gdbarch.sh (IEEE_FLOAT): Delete.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* config/i960/tm-i960.h (IEEE_FLOAT): Delete macro.
+	* config/i386/tm-i386.h (IEEE_FLOAT): Ditto.
+	* config/z8k/tm-z8k.h (IEEE_FLOAT): Ditto.
+	* config/sparc/tm-sparc.h (IEEE_FLOAT): Ditto.
+	* config/pa/tm-hppa.h (IEEE_FLOAT): Ditto.
+	* config/m88k/tm-m88k.h (IEEE_FLOAT): Ditto.
+	* config/m68k/tm-m68k.h (IEEE_FLOAT): Ditto.
+	* config/h8500/tm-h8500.h (IEEE_FLOAT): Ditto.
+	* config/h8300/tm-h8300.h (IEEE_FLOAT): Ditto.
+	* config/fr30/tm-fr30.h (IEEE_FLOAT): Ditto.
+	* config/arm/tm-arm.h (IEEE_FLOAT): Ditto.
+	* config/arc/tm-arc.h (IEEE_FLOAT): Ditto.
+	* config/alpha/tm-alpha.h (IEEE_FLOAT): Ditto.
+
+	* s390-tdep.c (s390_gdbarch_init): Do not set ieee_float.
+	* x86-64-tdep.c (i386_gdbarch_init): Ditto.
+	* sparc-tdep.c (sparc_gdbarch_init): Ditto.
+	* sh-tdep.c (sh_gdbarch_init): Ditto.
+	* mips-tdep.c (mips_gdbarch_init): Ditto.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Ditto.
+	* cris-tdep.c (cris_gdbarch_init): Ditto.
+
 2002-01-20  Jiri Smid  <smid@suse.cz>
 
 	* configure.host, configure.tgt: Support x86-64.

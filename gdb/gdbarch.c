@@ -145,7 +145,6 @@ struct gdbarch
   int addr_bit;
   int bfd_vma_bit;
   int char_signed;
-  int ieee_float;
   gdbarch_read_pc_ftype *read_pc;
   gdbarch_write_pc_ftype *write_pc;
   gdbarch_read_fp_ftype *read_fp;
@@ -287,7 +286,6 @@ struct gdbarch startup_gdbarch =
   8 * sizeof (void*),
   8 * sizeof (void*),
   1,
-  0,
   0,
   0,
   0,
@@ -566,7 +564,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of bfd_vma_bit, invalid_p == 0 */
   if (gdbarch->char_signed == -1)
     gdbarch->char_signed = 1;
-  /* Skip verify of ieee_float, invalid_p == 0 */
   /* Skip verify of read_pc, invalid_p == 0 */
   /* Skip verify of write_pc, invalid_p == 0 */
   /* Skip verify of read_fp, invalid_p == 0 */
@@ -1255,14 +1252,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: GET_SAVED_REGISTER = 0x%08lx\n",
                         (long) current_gdbarch->get_saved_register
                         /*GET_SAVED_REGISTER ()*/);
-#endif
-#ifdef IEEE_FLOAT
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: IEEE_FLOAT # %s\n",
-                      XSTRING (IEEE_FLOAT));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: IEEE_FLOAT = %d\n",
-                      IEEE_FLOAT);
 #endif
 #ifdef INIT_EXTRA_FRAME_INFO
 #if GDB_MULTI_ARCH
@@ -2294,22 +2283,6 @@ set_gdbarch_char_signed (struct gdbarch *gdbarch,
                          int char_signed)
 {
   gdbarch->char_signed = char_signed;
-}
-
-int
-gdbarch_ieee_float (struct gdbarch *gdbarch)
-{
-  /* Skip verify of ieee_float, invalid_p == 0 */
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_ieee_float called\n");
-  return gdbarch->ieee_float;
-}
-
-void
-set_gdbarch_ieee_float (struct gdbarch *gdbarch,
-                        int ieee_float)
-{
-  gdbarch->ieee_float = ieee_float;
 }
 
 CORE_ADDR

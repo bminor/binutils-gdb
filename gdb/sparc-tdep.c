@@ -2963,7 +2963,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frameless_function_invocation (gdbarch, 
 					     frameless_look_for_prologue);
   set_gdbarch_get_saved_register (gdbarch, sparc_get_saved_register);
-  set_gdbarch_ieee_float (gdbarch, 1);
   set_gdbarch_init_extra_frame_info (gdbarch, sparc_init_extra_frame_info);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_int_bit (gdbarch, 4 * TARGET_CHAR_BIT);

@@ -4154,9 +4154,6 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      which means we have to set this explicitly.  */
   set_gdbarch_long_double_bit (gdbarch, 64);
     
-  /* Floating point is IEEE compatible.  */
-  set_gdbarch_ieee_float (gdbarch, 1);
-
   /* There are 32 registers (some of which may not be implemented).  */
   set_gdbarch_num_regs (gdbarch, 32);
   set_gdbarch_sp_regnum (gdbarch, 14);

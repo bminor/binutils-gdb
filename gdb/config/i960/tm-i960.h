@@ -41,10 +41,6 @@
 /* Byte order is configurable, but this machine runs little-endian.  */
 #define	TARGET_BYTE_ORDER BFD_ENDIAN_LITTLE
 
-/* We have IEEE floating point, if we have any float at all.  */
-
-#define IEEE_FLOAT (1)
-
 /* Offset from address of function to start of its code.
    Zero on most machines.  */
 

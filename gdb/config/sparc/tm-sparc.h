@@ -298,9 +298,6 @@ extern CORE_ADDR sparc_extract_struct_value_address (char *);
 #define STACK_ALIGN(ADDR) sparc32_stack_align (ADDR)
 extern CORE_ADDR sparc32_stack_align (CORE_ADDR addr);
 
-/* Floating point is IEEE compatible.  */
-#define IEEE_FLOAT (1)
-
 /* The Sparc returns long doubles on the stack.  */
 
 #define RETURN_VALUE_ON_STACK(TYPE) \

@@ -2123,7 +2123,6 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_saved_pc_after_call (gdbarch, sh_saved_pc_after_call);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
-  set_gdbarch_ieee_float (gdbarch, 1);
 
   return gdbarch;
 }
