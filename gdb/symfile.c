@@ -690,11 +690,11 @@ symbol_file_command (args, from_tty)
               if (text_relocation == (CORE_ADDR)0)
                 return;
               else if (text_relocation == (CORE_ADDR)-1)
-                symbol_file_add (name, from_tty, (CORE_ADDR)0, 1, mapped, readno
-w);
+                symbol_file_add (name, from_tty, (CORE_ADDR)0, 1, mapped,
+				 readnow);
               else
-                symbol_file_add (name, from_tty, (CORE_ADDR)text_relocation, 0,
-mapped, readnow);
+                symbol_file_add (name, from_tty, (CORE_ADDR)text_relocation,
+				 0, mapped, readnow);
               set_initial_language ();
 	    }
 	  argv++;
@@ -1202,7 +1202,8 @@ deduce_language_from_filename (filename)
     return language_m2;
   else if (STREQ(c,".c"))
     return language_c;
-  else if (STREQ (c,".cc") || STREQ (c,".C") || STREQ (c, ".cxx"))
+  else if (STREQ (c,".cc") || STREQ (c,".C") || STREQ (c, ".cxx")
+	   || STREQ (c, ".cpp"))
     return language_cplus;
   else if (STREQ (c,".ch") || STREQ (c,".c186") || STREQ (c,".c286"))
     return language_chill;
