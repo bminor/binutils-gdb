@@ -1,3 +1,11 @@
+2002-04-19  Elena Zannoni  <ezannoni@redhat.com>
+
+        Fix PR gdb/471.
+	* gdbtypes.c (init_simd_type): Rewrite using new functions.
+	(build_builtin_type_vec128): Ditto.
+	(append_composite_type_field): Fix calculation of type length in
+	union case.
+
 2002-04-19  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* config/djgpp/README: Update.

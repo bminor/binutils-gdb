@@ -777,7 +777,6 @@ create_set_type (struct type *result_type, struct type *domain_type)
   return (result_type);
 }
 
-
 /* Construct and return a type of the form:
 	struct NAME { ELT_TYPE ELT_NAME[N]; }
    We use these types for SIMD registers.  For example, the type of
@@ -793,25 +792,15 @@ init_simd_type (char *name,
 		char *elt_name,
 		int n)
 {
-  struct type *t;
-  struct field *f;
-
-  /* Build the field structure.  */
-  f = xmalloc (sizeof (*f));
-  memset (f, 0, sizeof (*f));
-  f->loc.bitpos = 0;
-  f->type = create_array_type (0, elt_type,
-			       create_range_type (0, builtin_type_int,
-						  0, n-1));
-  f->name = elt_name;
-
-  /* Build a struct type with that field.  */
-  t = init_type (TYPE_CODE_STRUCT, n * TYPE_LENGTH (elt_type), 0, 0, 0);
-  t->nfields = 1;
-  t->fields = f;
-  TYPE_TAG_NAME (t) = name;
-
-  return t;
+  struct type *simd_type;
+  struct type *array_type;
+  
+  simd_type = init_composite_type (name, TYPE_CODE_STRUCT);
+  array_type = create_array_type (0, elt_type,
+				  create_range_type (0, builtin_type_int,
+						     0, n-1));
+  append_composite_type_field (simd_type, elt_name, array_type);
+  return simd_type;
 }
 
 static struct type *
@@ -831,30 +820,13 @@ build_builtin_type_vec128 (void)
 #endif
 
   struct type *t;
-  struct field *f;
 
-  f = (struct field *) xcalloc (5, sizeof (*f));
-
-  FIELD_TYPE (f[0]) = builtin_type_int128;
-  FIELD_NAME (f[0]) = "uint128";
-
-  FIELD_TYPE (f[1]) = builtin_type_v4sf;
-  FIELD_NAME (f[1]) = "v4sf";
-
-  FIELD_TYPE (f[2]) = builtin_type_v4si;
-  FIELD_NAME (f[2]) = "v4si";
-
-  FIELD_TYPE (f[3]) = builtin_type_v8hi;
-  FIELD_NAME (f[3]) = "v8hi";
-
-  FIELD_TYPE (f[4]) = builtin_type_v16qi;
-  FIELD_NAME (f[4]) = "v16qi";
-
-  /* Build a union type with those fields.  */
-  t = init_type (TYPE_CODE_UNION, 16, 0, 0, 0);
-  TYPE_NFIELDS (t) = 5;
-  TYPE_FIELDS (t) = f;
-  TYPE_TAG_NAME (t) = "__gdb_builtin_type_vec128";
+  t = init_composite_type ("__gdb_builtin_type_vec128", TYPE_CODE_UNION);
+  append_composite_type_field (t, "uint128", builtin_type_int128);
+  append_composite_type_field (t, "v4sf", builtin_type_v4sf);
+  append_composite_type_field (t, "v4si", builtin_type_v4si);
+  append_composite_type_field (t, "v8hi", builtin_type_v8hi);
+  append_composite_type_field (t, "v16qi", builtin_type_v16qi);
 
   return t;
 }
@@ -1781,7 +1753,7 @@ append_composite_type_field (struct type *t, char *name, struct type *field)
   FIELD_NAME (f[0]) = name;
   if (TYPE_CODE (t) == TYPE_CODE_UNION)
     {
-      if (TYPE_LENGTH (t) > TYPE_LENGTH (field))
+      if (TYPE_LENGTH (t) < TYPE_LENGTH (field))
 	TYPE_LENGTH (t) = TYPE_LENGTH (field);
     }
   else if (TYPE_CODE (t) == TYPE_CODE_STRUCT)
