@@ -2350,7 +2350,7 @@ read_one_struct_field (fip, pp, p, type, objfile)
      The stabs contains full mangled name for each field.
      We try to demangle the name and extract the field name out of it.
   */
-  if (current_language->la_language == language_cplus)
+  if (ARM_DEMANGLING && current_subfile->language == language_cplus)
     {
       char save_p;
       char *dem, *dem_p;

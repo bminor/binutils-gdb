@@ -1,3 +1,8 @@
+Wed Sep 13 13:33:58 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* stbsread.c (read_one_struct_field): Use subfile language instead of
+	global language. Improve efficiency.
+
 Wed Sep 13 08:45:02 1995  Jeff Law  (law@fast.cs.utah.edu)
 
 	* somsolib.c (auto_solib_add_at_startup): Define new global variable.
