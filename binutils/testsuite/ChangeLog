@@ -1,3 +1,35 @@
+Tue Aug  8 17:48:37 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* binutils-all/objcopy.exp: Add setup_xfail for a29k-*-vxworks*
+	for simple copy test.
+
+Tue Jul 25 11:57:12 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* binutils-all/objcopy.exp: Change setup_xfail for simple copy
+	test from i960-*-vxworks5.1 to i960-*-vxworks*.
+
+Mon Jul 10 12:25:46 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* binutils-all/objcopy.exp: Add setup_xfail for z8*-*-coff for
+	simple copy test.
+	* binutils-all/objdump.exp (cpus_expected): Add z8001 and z8002.
+
+Sun May 21 20:32:53 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* binutils-all/hppa/objdump.exp (addendbug): Handle PA ELF targets
+	too.
+	* binutils-all/objcopy.exp (simple copy): Don't expect PA ELF
+	targets to fail.
+
+Tue Apr  4 14:52:08 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* binutils-all/hppa: Renamed from binutils-hppa.
+
+Wed Mar 29 12:02:43 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* binutils-all/objcopy.exp: Add setup_xfail for simple copy test
+	for h8500-*-hms and h8500-*-coff.
+
 Tue Mar 28 11:18:28 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* binutils-all/objcopy.exp: Add setup_xfail for simple copy test
