@@ -3227,6 +3227,7 @@ lang_size_sections
    bfd_boolean check_regions)
 {
   bfd_vma result;
+  asection *o;
 
   /* Callers of exp_fold_tree need to increment this.  */
   lang_statement_iteration++;
@@ -3252,6 +3253,14 @@ lang_size_sections
 					 fill, dot, relax, check_regions);
 	}
     }
+
+  /* Some backend relaxers want to refer to the output section size.  Give
+     them a section size that does not change on the next call while they
+     relax.  We can't set this at top because lang_reset_memory_regions
+     which is called before we get here, sets _raw_size to 0 on relaxing
+     rounds.  */
+  for (o = output_bfd->sections; o != NULL; o = o->next)
+    o->_cooked_size = o->_raw_size;
 
   return result;
 }

@@ -1,3 +1,8 @@
+2003-10-18  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ldlang.c (lang_size_sections): Last, set _cooked_size for output
+	sections.
+
 2003-10-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (GENSCRIPTS_EXTRA, GEN_EXTRA_DEPENDS): Remove.  Use
