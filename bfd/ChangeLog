@@ -1,3 +1,12 @@
+Tue Oct  1 12:29:44 1991  John Gilmore  (gnu at cygnus.com)
+
+	* Makefile.in, configure.in, targets.c, elf.c:  Add preliminary
+	ELF support good enough for GDB.
+	* configure.in, config/h-amix, config/t-m68k-elf:  Handle
+	m68k-cbm-svr4 host and target.
+	* config/t-m68k-coff, t-m88k-coff, t-m88k-aout:  Make files nonempty
+	so `diff' and `patch' can cope.
+
 Tue Oct  1 11:24:31 1991  Steve Chamberlain  (steve at cygnus.com)
 
 	* archures.c: removed texinfo error

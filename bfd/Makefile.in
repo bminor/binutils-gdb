@@ -48,7 +48,7 @@ BFD_MACHINES=cpu-h8300.o cpu-i960.o  cpu-sparc.o cpu-m68k.o cpu-m88k.o \
 
 BFD_BACKENDS = oasys.o ieee.o srec.o \
 	aout64.o aout32.o demo64.o sunos.o newsos3.o bout.o \
-	icoff.o amdcoff.o m68kcoff.o i386coff.o m88k-bcs.o ecoff.o
+	icoff.o amdcoff.o m68kcoff.o i386coff.o m88k-bcs.o ecoff.o elf.o
 
 
 OPTIONAL_BACKENDS = trad-core.o
@@ -61,10 +61,9 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c archures.c \
 	 i386coff.c aout64.c aout32.c sunos.c demo64.c icoff.c srec.c \
 	 oasys.c ieee.c m68kcoff.c amdcoff.c \
 	 format.c section.c core.c syms.c reloc.c init.c \
-	 m88k-bcs.c ecoff.c trad-core.c newsos3.c bout.c \
-	cpu-h8300.c cpu-i960.c   cpu-sparc.c cpu-m68k.c cpu-m88k.c \
+	 m88k-bcs.c ecoff.c trad-core.c newsos3.c bout.c elf.c \
+	cpu-h8300.c cpu-i960.c cpu-sparc.c cpu-m68k.c cpu-m88k.c \
  	cpu-vax.c cpu-mips.c cpu-a29k.c cpu-i386.o
-
 
 STAGESTUFF = $(TARGETLIB) $(OFILES)
 

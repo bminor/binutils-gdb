@@ -34,7 +34,7 @@ through a pointer into calls to the back end routines.
 
 When a file is opened with @code{bfd_openr}, its format and target are
 unknown. BFD uses various mechanisms to determine how to interpret the
-file. The operatios performed are:
+file. The operations performed are:
 @itemize @bullet
 @item
 First a BFD is created by calling the internal routine
@@ -122,6 +122,7 @@ of a file.
 $  enum target_flavour_enum {
 $    bfd_target_aout_flavour_enum,
 $    bfd_target_coff_flavour_enum,
+$    bfd_target_elf_flavour_enum,
 $    bfd_target_ieee_flavour_enum,
 $    bfd_target_oasys_flavour_enum,
 $    bfd_target_srec_flavour_enum} flavour;
@@ -285,6 +286,8 @@ extern bfd_target b_out_vec_little_host;
 extern bfd_target b_out_vec_big_host;
 extern bfd_target icoff_little_vec;
 extern bfd_target icoff_big_vec;
+extern bfd_target elf_little_vec;
+extern bfd_target elf_big_vec;
 extern bfd_target ieee_vec;
 extern bfd_target oasys_vec;
 extern bfd_target m88k_bcs_vec;
@@ -316,6 +319,8 @@ extern bfd_target DEFAULT_VECTOR;
 #define ECOFF_BIG_VEC           ecoff_big_vec
 #define ICOFF_LITTLE_VEC        icoff_little_vec
 #define ICOFF_BIG_VEC           icoff_big_vec
+#define ELF_LITTLE_VEC		elf_little_vec
+#define ELF_BIG_VEC		elf_big_vec
 #define ZB_OUT_VEC_LITTLE_HOST  b_out_vec_little_host
 #define ZB_OUT_VEC_BIG_HOST     b_out_vec_big_host
 #define SUNOS_VEC_BIG_HOST      sunos_big_vec
@@ -380,6 +385,14 @@ bfd_target *target_vector[] = {
 #ifdef ICOFF_BIG_VEC
         &ICOFF_BIG_VEC,
 #endif /* ICOFF_BIG_VEC */
+
+#ifdef ELF_LITTLE_VEC
+        &ELF_LITTLE_VEC,
+#endif /* ELF_LITTLE_VEC */
+
+#ifdef ELF_BIG_VEC
+        &ELF_BIG_VEC,
+#endif /* ELF_BIG_VEC */
 
 #ifdef B_OUT_VEC_LITTLE_HOST
         &B_OUT_VEC_LITTLE_HOST,
