@@ -1,3 +1,15 @@
+2005-01-16  Mark Kettenis  <kettenis@gnu.org>
+
+	* amd64fbsd-tdep.c: Update copyright year.  Include "gdb_assert.h"
+	and "bsd-uthread.h".
+	(amd64fbsd_jmp_buf_reg_offset): New variable.
+	(amd64fbsd_supply_uthread, amd64fbsd_collect_uthread): New
+	functions.
+	(amd64fbsd_init_abi): Set supply_uthread and collect_uthread.
+	* i386fbsd-tdep.c: Fix typo.
+	* Makefile.in (amd64fbsd-tdep.o): Update dependencies.
+	* config/i386/fbsd64.mt (TDEPFILES): Add bsd-uthread.o.
+
 2005-01-16  Andrew Cagney  <cagney@gnu.org>
 
 	* cli/cli-script.c: Include "exceptions.h".

@@ -70,7 +70,7 @@ static int i386fbsd_sc_reg_offset[] =
   8 + 16 * 4			/* %gs */
 };
 
-/* From /usr/src/lib/libc/i386/_setjmp.S.  */
+/* From /usr/src/lib/libc/i386/gen/_setjmp.S.  */
 static int i386fbsd_jmp_buf_reg_offset[] =
 {
   -1,				/* %eax */
