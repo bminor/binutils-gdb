@@ -19,12 +19,36 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* This file holds definitions specific to the PPC ELF ABI.  Note
    that most of this is not actually implemented by BFD.  */
 
+#ifndef _ELF_PPC_H
+#define _ELF_PPC_H
+
 /* Processor specific flags for the ELF header e_flags field.  */
 
 #define	EF_PPC_EMB		0x80000000	/* PowerPC embedded flag  */
-#define	EF_PPC_RELOCATABLE	0x00010000	/* PowerPC -mrelocatable flag (CYGNUS local) */
+
+						/* CYGNUS local bits below */
+#define	EF_PPC_RELOCATABLE	0x00010000	/* PowerPC -mrelocatable flag */
+#define	EF_PPC_RELOCATABLE_LIB	0x00008000	/* PowerPC -mrelocatable-lib flag */
+
+/* Processor specific section headers, sh_type field */
+
+#define SHT_ORDERED		SHT_HIPROC	/* Link editor is to sort the \
+						   entries in this section \
+						   based on the address \
+						   specified in the associated \
+						   symbol table entry.  */
+
+/* Processor specific section flags, sh_flags field */
+
+#define SHF_EXCLUDE		0x80000000	/* Link editor is to exclude \
+						   this section from executable \
+						   and shared objects that it \
+						   builds when those objects \
+						   are not to be furhter \
+						   relocated.  */
+#endif /* _ELF_PPC_H */
