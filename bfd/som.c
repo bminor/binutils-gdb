@@ -329,7 +329,8 @@ static const struct section_to_type stt[] = {
    O = stack operation
    R = parameter relocation bits
    S = symbol index
-   U = 64 bits of stack unwind and frame size info (we only keep 32 bits)
+   T = first 32 bits of stack unwind information
+   U = second 32 bits of stack unwind information
    V = a literal constant (usually used in the next relocation)
    P = a previous relocation
   
@@ -570,7 +571,7 @@ static const struct fixup_format som_fixup_formats[256] =
   /* R_BREAKPOINT */
   0,    "L4=",	        /* 0xb2 */
   /* R_ENTRY */
-  0,    "Ui=",	        /* 0xb3 */
+  0,    "Te=Ue=",       /* 0xb3 */
   1,    "Uf=",	        /* 0xb4 */
   /* R_ALT_ENTRY */
   0,    "",	        /* 0xb5 */
@@ -3993,7 +3994,7 @@ som_set_reloc_info (fixup, end, internal_relocs, section, symbols, just_count)
   const struct fixup_format *fp;
   char *cp;
   unsigned char *save_fixup;
-  int variables[26], stack[20], c, v, count, prev_fixup, *sp;
+  int variables[26], stack[20], c, v, count, prev_fixup, *sp, saved_unwind_bits;
   const int *subop;
   arelent *rptr= internal_relocs;
   unsigned int offset = 0;
@@ -4008,6 +4009,7 @@ som_set_reloc_info (fixup, end, internal_relocs, section, symbols, just_count)
   memset (stack, 0, sizeof (stack));
   count = 0;
   prev_fixup = 0;
+  saved_unwind_bits = 0;
   sp = stack;
 
   while (fixup < end_fixups)
@@ -4051,6 +4053,7 @@ som_set_reloc_info (fixup, end, internal_relocs, section, symbols, just_count)
 	 into D.  */
       var ('L') = 0;
       var ('D') = fp->D;
+      var ('U') = saved_unwind_bits;
 
       /* Get the opcode format.  */
       cp = fp->format;
@@ -4160,6 +4163,11 @@ som_set_reloc_info (fixup, end, internal_relocs, section, symbols, just_count)
 		++subop;
 	      --subop;
 	      break;
+	    /* The lower 32unwind bits must be persistent.  */
+	    case 'U':
+	      saved_unwind_bits = var ('U');
+	      break;
+
 	    default:
 	      break;
 	    }
@@ -4183,7 +4191,12 @@ som_set_reloc_info (fixup, end, internal_relocs, section, symbols, just_count)
 	  /* Done with a single reloction. Loop back to the top.  */
 	  if (! just_count)
 	    {
-	      rptr->addend = var ('V');
+	      if (som_hppa_howto_table[op].type == R_ENTRY)
+		rptr->addend = var ('T');
+	      else if (som_hppa_howto_table[op].type == R_EXIT)
+		rptr->addend = var ('U');
+	      else
+		rptr->addend = var ('V');
 	      rptr++;
 	    }
 	  count++;

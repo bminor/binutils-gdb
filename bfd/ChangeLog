@@ -1,5 +1,12 @@
 Tue Sep 13 17:57:00 1994  Jeff Law  (law@snake.cs.utah.edu)
 
+	* som.c (som_fixup_formats): Case R_ENTRY (0xb3), set both
+	'T' and 'U' to grab all the unwind information.
+	(som_set_reloc_info): Make 'U' unwind bits persist across
+	multiple SOM relocations.  Set the addend field of an R_ENTRY
+	relocation to the value in 'T'; set the addend field on an
+	R_EXIT relocation to the value in 'U'.
+
 	* som.h (som_symbol_type): Delete unwind field.
 
 	* som.c (som_write_fixups): For R_ENTRY fixups, get 32bits of
