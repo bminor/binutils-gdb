@@ -2,6 +2,7 @@
 
 	* config/tc-sparc.c (md_pseudo_table): Add .file and .loc.
 	(output_insn): Call dwarf2_emit_insn.
+	* config/tc-sparc.h (DWARF2_LINE_MIN_INSN_LENGTH): New.
 
 2000-11-17  Richard Henderson  <rth@redhat.com>
 
