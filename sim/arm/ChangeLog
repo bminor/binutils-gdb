@@ -1,3 +1,33 @@
+2001-02-27  Nick Clifton  <nickc@redhat.com>
+
+	* armvirt.c (GetWord): Add new parameter - check - to enable or
+	disable the alignment checking.
+	(PutWord):  Add new parameter - check - to enable or disable the
+	alignment checking.
+	(ARMul_ReLoadInstr): Pass extra parameter to GetWord.
+	(ARMul_ReadWord): Pass extra parameter to GetWord.
+	(ARMul_WriteWord): Pass extra parameter to PutWord.
+	(ARMul_StoreHalfWord): Pass extra parameter to PutWord.
+	(ARMul_WriteByte): Pass extra parameter to GetWord.
+	(ARMul_SwapWord): Pass extra parameter to PutWord.
+	(ARMul_SafeReadByte): New Function: Read a byte but do not abort.
+	(ARMul_SafeWriteByte): New Function: Write a byte but do not abort.
+	
+	* armdefs.h: Add prototypes for ARMul_SafeReadByte and
+	ARMul_SafeWriteByte.
+	
+	* wrapper.c (sim_write): Use ARMul_SafeWriteByte.
+	(sim_read): Use ARMul_SafeReadByte.
+
+	* armos.c (in_SWI_handler): Remove.
+	(SWIWrite0): Use ARMul_SafeReadByte.
+	(WriteCommandLineTo): Use ARMul_SafeWriteByte.
+	(SWIopen): Use ARMul_SafeReadByte.
+	(SWIread): Use ARMul_SafeWriteByte.
+	(SWIwrite): Use ARMul_SafeReadByte.
+	(ARMul_OSHandleSWI): Remove use of is_SWI_handler.
+	(ARMul_OSException): Remove use of is_SWI_handler.
+	
 2001-02-16  Nick Clifton  <nickc@redhat.com>
 
 	* armemu.c: Remove Prefetch abort for breakpoints.  Instead set

@@ -491,6 +491,6 @@ extern void     ARMul_CoProAttach (ARMul_State *, unsigned, ARMul_CPInits *, ARM
 				   ARMul_LDCs *, ARMul_STCs *, ARMul_MRCs *, ARMul_MCRs *,
 				   ARMul_CDPs *, ARMul_CPReads *, ARMul_CPWrites *);
 extern void     ARMul_CoProDetach (ARMul_State *, unsigned);
-extern void     write_cp15_reg (unsigned, unsigned, unsigned, ARMword);
+extern void     write_cp15_reg (ARMul_State *, unsigned, unsigned, unsigned, ARMword);
 extern void     write_cp14_reg (unsigned, ARMword);
 extern ARMword  read_cp14_reg  (unsigned);

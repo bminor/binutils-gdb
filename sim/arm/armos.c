@@ -139,9 +139,6 @@ static ARMword softvectorcode[] =
   0xe1a0f00e			/* Default handler */
 };
 
-/* Set to prevent aborts when emulating SWI routines.  */
-static int in_SWI_handler = 0;
-
 /* Time for the Operating System to initialise itself.  */
 
 unsigned
@@ -260,7 +257,7 @@ SWIWrite0 (ARMul_State * state, ARMword addr)
   ARMword temp;
   struct OSblock *OSptr = (struct OSblock *) state->OSptr;
 
-  while ((temp = ARMul_ReadByte (state, addr++)) != 0)
+  while ((temp = ARMul_SafeReadByte (state, addr++)) != 0)
     (void) fputc ((char) temp, stdout);
 
   OSptr->ErrorNo = errno;
@@ -277,7 +274,7 @@ WriteCommandLineTo (ARMul_State * state, ARMword addr)
   do
     {
       temp = (ARMword) * cptr++;
-      ARMul_WriteByte (state, addr++, temp);
+      ARMul_SafeWriteByte (state, addr++, temp);
     }
   while (temp != 0);
 }
@@ -290,7 +287,7 @@ SWIopen (ARMul_State * state, ARMword name, ARMword SWIflags)
   int flags;
   int i;
 
-  for (i = 0; (dummy[i] = ARMul_ReadByte (state, name + i)); i++)
+  for (i = 0; (dummy[i] = ARMul_SafeReadByte (state, name + i)); i++)
     ;
 
   /* Now we need to decode the Demon open mode.  */
@@ -329,7 +326,7 @@ SWIread (ARMul_State * state, ARMword f, ARMword ptr, ARMword len)
   res = read (f, local, len);
   if (res > 0)
     for (i = 0; i < res; i++)
-      ARMul_WriteByte (state, ptr + i, local[i]);
+      ARMul_SafeWriteByte (state, ptr + i, local[i]);
 
   free (local);
   state->Reg[0] = res == -1 ? -1 : len - res;
@@ -352,7 +349,7 @@ SWIwrite (ARMul_State * state, ARMword f, ARMword ptr, ARMword len)
     }
 
   for (i = 0; i < len; i++)
-    local[i] = ARMul_ReadByte (state, ptr + i);
+    local[i] = ARMul_SafeReadByte (state, ptr + i);
 
   res = write (f, local, len);
   state->Reg[0] = res == -1 ? -1 : len - res;
@@ -393,8 +390,6 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
   ARMword          saved_number = 0;
   struct OSblock * OSptr = (struct OSblock *) state->OSptr;
   
-  in_SWI_handler = 1;
-
   /* Intel do not want DEMON SWI support.  */
   if (state->is_XScale)
     switch (number)
@@ -516,7 +511,6 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	case AngelSWI_Reason_EnterSVC:
 	default:
 	  state->Emulate = FALSE;
-	  in_SWI_handler = 0;
 	  return FALSE;
 
 	case AngelSWI_Reason_Clock:
@@ -539,7 +533,7 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	  break;
 
 	case AngelSWI_Reason_WriteC:
-	  (void) fputc ((int) ARMul_ReadByte (state, addr), stdout);
+	  (void) fputc ((int) ARMul_SafeReadByte (state, addr), stdout);
 	  OSptr->ErrorNo = errno;
 	  /* Fall thgrough.  */
 
@@ -633,8 +627,6 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
       break;
       
     default:
-      in_SWI_handler = 0;
-
       /* If there is a SWI vector installed use it.  */
       if (state->is_XScale && saved_number != -1)
 	number = saved_number;
@@ -665,7 +657,6 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	}
     }
 
-  in_SWI_handler = 0;
   return TRUE;
 }
 
@@ -682,11 +673,7 @@ ARMul_OSException (ARMul_State * state  ATTRIBUTE_UNUSED,
 		   ARMword       vector ATTRIBUTE_UNUSED,
 		   ARMword       pc     ATTRIBUTE_UNUSED)
 {
-  /* If we are inside a SWI handler routine, then ignore any exceptions.
-     They could be caused by data exceptions for misaligned reads, for
-     example, but for the purposes of emulating a SWI, we do not care.  */
-   
-  return in_SWI_handler;
+  return FALSE;
 }
 
 #endif

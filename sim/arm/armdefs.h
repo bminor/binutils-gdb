@@ -317,9 +317,12 @@ extern void ARMul_Ccycles (ARMul_State * state, unsigned number,
 
 extern ARMword ARMul_ReadWord (ARMul_State * state, ARMword address);
 extern ARMword ARMul_ReadByte (ARMul_State * state, ARMword address);
+extern ARMword ARMul_SafeReadByte (ARMul_State * state, ARMword address);
 extern void ARMul_WriteWord (ARMul_State * state, ARMword address,
 			     ARMword data);
 extern void ARMul_WriteByte (ARMul_State * state, ARMword address,
+			     ARMword data);
+extern void ARMul_SafeWriteByte (ARMul_State * state, ARMword address,
 			     ARMword data);
 
 extern ARMword ARMul_MemAccess (ARMul_State * state, ARMword, ARMword,

@@ -16,6 +16,7 @@
     Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #include "armdefs.h"
+#include "armos.h"
 #include "armemu.h"
 #include "ansidecl.h"
 
@@ -211,7 +212,7 @@ check_cp15_access (ARMul_State * state,
 /* Store a value into one of coprocessor 15's registers.  */
 
 void
-write_cp15_reg (unsigned reg, unsigned opcode_2, unsigned CRm, ARMword value)
+write_cp15_reg (ARMul_State * state, unsigned reg, unsigned opcode_2, unsigned CRm, ARMword value)
 {
   if (opcode_2)
     {
@@ -324,9 +325,9 @@ write_cp15_reg (unsigned reg, unsigned opcode_2, unsigned CRm, ARMword value)
   return;
 }
 
-/* Return the value in a cp13 register.  */
+/* Return the value in a cp15 register.  */
 
-static ARMword
+ARMword
 read_cp15_reg (unsigned reg, unsigned opcode_2, unsigned CRm)
 {
   if (opcode_2 == 0)
@@ -364,7 +365,7 @@ XScale_cp15_LDC (ARMul_State * state, unsigned type, ARMword instr, ARMword data
   result = check_cp15_access (state, reg, 0, 0, 0);
   
   if (result == ARMul_DONE && type == ARMul_DATA)
-    write_cp15_reg (reg, 0, 0, data);
+    write_cp15_reg (state, reg, 0, 0, data);
 
   return result;
 }
@@ -416,7 +417,7 @@ XScale_cp15_MCR (ARMul_State * state,
   result = check_cp15_access (state, reg, CRm, BITS (21, 23), opcode_2);
   
   if (result == ARMul_DONE)
-    write_cp15_reg (reg, opcode_2, CRm, value);
+    write_cp15_reg (state, reg, opcode_2, CRm, value);
   
   return result;
 }
@@ -440,7 +441,7 @@ XScale_cp15_write_reg (ARMul_State * state ATTRIBUTE_UNUSED,
 {
   /* FIXME: Not sure what to do about the alternative register set
      here.  For now default to just accessing CRm == 0 registers.  */
-  write_cp15_reg (reg, 0, 0, value);
+  write_cp15_reg (state, reg, 0, 0, value);
   
   return TRUE;
 }

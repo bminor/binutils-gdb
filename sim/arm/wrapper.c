@@ -1,5 +1,5 @@
 /* run front end support for arm
-   Copyright (C) 1995, 1996, 1997, 2000 Free Software Foundation, Inc.
+   Copyright (C) 1995, 1996, 1997, 2000, 2001 Free Software Foundation, Inc.
 
 This file is part of ARM SIM.
 
@@ -126,7 +126,7 @@ sim_write (sd, addr, buffer, size)
   init ();
 
   for (i = 0; i < size; i++)
-    ARMul_WriteByte (state, addr + i, buffer[i]);
+    ARMul_SafeWriteByte (state, addr + i, buffer[i]);
 
   return size;
 }
@@ -139,11 +139,11 @@ sim_read (sd, addr, buffer, size)
      int size;
 {
   int i;
+
   init ();
   for (i = 0; i < size; i++)
-    {
-      buffer[i] = ARMul_ReadByte (state, addr + i);
-    }
+    buffer[i] = ARMul_SafeReadByte (state, addr + i);
+
   return size;
 }
 

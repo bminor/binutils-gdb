@@ -1369,8 +1369,8 @@ ARMul_Emulate26 (register ARMul_State * state)
 				  value |= 0xc;
 				  
 				  write_cp14_reg (10, value);
-				  write_cp15_reg (5, 0, 0, 0x200);  /* Set FSR.  */
-				  write_cp15_reg (6, 0, 0, pc);     /* Set FAR.  */
+				  write_cp15_reg (state, 5, 0, 0, 0x200);  /* Set FSR.  */
+				  write_cp15_reg (state, 6, 0, 0, pc);     /* Set FAR.  */
 				}
 			      else
 				break;
