@@ -1202,7 +1202,7 @@ const struct m68k_opcode m68k_opcodes[] =
 
 {"linkw",	one(0047120),	one(0177770), "As#w", m68000up },
 {"linkl",	one(0044010),	one(0177770), "As#l", m68020up | cpu32 },
-{"link",	one(0047120),	one(0177770), "As#w", m68000up },
+{"link",	one(0047120),	one(0177770), "As#W", m68000up },
 {"link",	one(0044010),	one(0177770), "As#l", m68020up | cpu32 },
 
 {"lslb",	one(0160410),		one(0170770), "QdDs", m68000up },

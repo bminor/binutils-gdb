@@ -1,3 +1,8 @@
+Thu Nov  2 23:06:33 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* m68k-opc.c: Use #W rather than #w.
+	* m68k-dis.c (print_insn_arg): Handle new 'W' place.
+
 Wed Nov  1 13:30:24 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* m68k-opc.c (m68k_opcode_aliases): Add dbfw as an alias for dbf,
