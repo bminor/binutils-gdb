@@ -62,17 +62,17 @@ case "${target}" in
 			;;
   *-tandem-none)	my_target=st2000 # FIXME needs better name
 			;;
-  i386-*-go32)		my_target=go32
+  i[34]86-*-go32)	my_target=go32
 			;;
-  i386-*-sco*)		my_target=i386-coff
+  i[34]86-*-sco*)	my_target=i386-coff
 			;;
-  i386-*-coff)          my_target=i386-coff
+  i[34]86-*-coff)	my_target=i386-coff
 			;;
   i[34]86-*-bsd)	my_target=i386-bsd
 			;;
-  i386-*-aout)		my_target=i386-aout
+  i[34]86-*-aout)	my_target=i386-aout
 			;;
-  i386-*-sysv*)		my_target=i386-coff
+  i[34]86-*-sysv*)	my_target=i386-coff
 			;;
   m88k-*-*)		my_target=m88k-bcs
 			;;
@@ -84,8 +84,12 @@ case "${target}" in
 			;;
   h8300-*-hms)		my_target=coff-h8300
 			;;
-  h8300-*-xray)		my_target=ieee-h8300
+  h8500-*-hms)		my_target=coff-h8500
 			;;
+# start-sanitize-sh
+  sh-*-*)		my_target=coff-sh	
+			;;
+# end-sanitize-sh
   m68k-sony-*)		my_target=news
 			;;
   m68k-hp-bsd*)		my_target=hp300bsd
@@ -97,9 +101,13 @@ case "${target}" in
   m68*-*-*)		echo '***' "Unknown m68k target vendor for ld:" ${target_vendor} 1>&2
 			exit 1
 			;;
+  vax-dec-ultrix* | vax-dec-bsd*) my_target=vax
+			;;
   mips-dec-ultrix*)	my_target=mips-lit
 			;;
   mips-sgi-irix*)	my_target=mips-big
+			;;
+  mips-idt-ecoff)	my_target=mips-idt
 			;;
   mips-dec-bsd*)	my_target=mipsbsd
 			;;

@@ -1,3 +1,30 @@
+Mon May  3 19:43:39 1993  Per Bothner  (bothner@cygnus.com)
+
+	* Makefile.in:  Change definition of $(tooldir) to match FSF.
+	* vax.sh, config/vax.mt, configure.in, Makefile.in:
+	Support VAX Ultrix and BSD.
+
+Mon Apr 26 18:35:47 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* sh.em, sh.sh, sh.sc-sh: New files supporting Hitachi SH.
+
+Wed Apr 14 21:01:51 1993  John Gilmore  (gnu@cygnus.com)
+
+	* ldlang.h (struct memory_region):  Change `length' and
+	`old_length' fields to bfd_size_type.  Eliminate use of bfd_offset.
+	* ldlang.c, mri.c:  Corresponding changes, plus lint.
+
+Thu Apr  8 22:08:18 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* configure.in: For all i386 targets, accept i486 as well.
+
+Mon Apr  5 17:33:39 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* ldlang.c (wild_doit): Preserve all flags for a
+	SEC_SHARED_LIBRARY section.
+	(size_input_section): Consider any SEC_HAS_CONTENTS section when
+	computing largest_section.
+
 Fri Apr  2 14:33:52 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* ldlang.c (lang_output_section_statement_lookup): Initialize all

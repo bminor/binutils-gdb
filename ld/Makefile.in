@@ -26,7 +26,7 @@ program_transform_name =
 exec_prefix = $(prefix)
 bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
-tooldir = $(bindir)/$(target_alias)
+tooldir = $(exec_prefix)/$(target_alias)
 datadir = $(prefix)/lib
 mandir = $(prefix)/man
 man1dir = $(mandir)/man1
@@ -122,12 +122,16 @@ LIBIBERTY=./../libiberty/libiberty.a
 ALL_EMULATIONS=em_lnk960.o em_sun3.o em_i386aout.o em_go32.o \
 	em_m88kbcs.o em_a29k.o em_news.o em_hp300bsd.o \
 	em_h8300hms.o em_ebmon29k.o em_sun4.o em_gld960.o \
-	em_m68kcoff.o em_h8300xray.o em_st2000.o em_sa29200.o \
+	em_m68kcoff.o em_st2000.o em_sa29200.o \
 	em_vanilla.o em_i386coff.o em_z8ksim.o em_mipslit.o em_i386bsd.o \
-	em_mipsbig.o em_mipsbsd.o em_mipsidt.o
+	em_mipsbig.o em_mipsbsd.o em_mipsidt.o em_vax.o em_h8500hms.o
 
-EMULATION_OFILES=${ALL_EMULATIONS}
-#EMULATION_OFILES=em_${EMUL}.o ${OTHER_EMULATIONS}
+# start-sanitize-sh
+OTHER_EMULATIONS=em_sh.o
+# end-sanitize-sh
+
+#EMULATION_OFILES=${ALL_EMULATIONS}
+EMULATION_OFILES=${ALL_EMULATIONS} ${OTHER_EMULATIONS}
 
 OFILES= ldgram.o ldlex.o lexsup.o ldlang.o mri.o ldctor.o ldmain.o ldindr.o \
 	ldwarn.o ldwrite.o ldexp.o  ldemul.o ldver.o ldmisc.o ldsym.o \
@@ -215,6 +219,9 @@ em_go32.c: $(srcdir)/go32.sh \
 em_news.c: $(srcdir)/news.sh \
   $(srcdir)/generic.em $(srcdir)/aout.sc-sh ${GEN_DEPENDS}
 	${GENSCRIPTS} news.sh
+em_vax.c: $(srcdir)/vax.sh \
+  $(srcdir)/generic.em $(srcdir)/aout.sc-sh ${GEN_DEPENDS}
+	${GENSCRIPTS} vax.sh
 em_hp300bsd.c: $(srcdir)/hp300bsd.sh \
   $(srcdir)/generic.em $(srcdir)/aout.sc-sh ${GEN_DEPENDS}
 	${GENSCRIPTS} hp300bsd.sh
@@ -236,9 +243,14 @@ em_m88kbcs.c: $(srcdir)/m88kbcs.sh \
 em_h8300hms.c: $(srcdir)/h8300hms.sh \
   $(srcdir)/h8300hms.em $(srcdir)/h8300hms.sc-sh ${GEN_DEPENDS}
 	${GENSCRIPTS} h8300hms.sh
-em_h8300xray.c: $(srcdir)/h8300xray.sh \
-  $(srcdir)/h8300xray.em $(srcdir)/h8300xray.sc-sh ${GEN_DEPENDS}
-	${GENSCRIPTS} h8300xray.sh
+em_h8500hms.c: $(srcdir)/h8500hms.sh \
+  $(srcdir)/h8500hms.em $(srcdir)/h8500hms.sc-sh ${GEN_DEPENDS}
+	${GENSCRIPTS} h8500hms.sh
+# start-sanitize-sh
+em_sh.c: $(srcdir)/sh.sh \
+  $(srcdir)/sh.em $(srcdir)/sh.sc-sh ${GEN_DEPENDS}
+	${GENSCRIPTS} sh.sh
+# end-sanitize-sh
 em_st2000.c: $(srcdir)/st2000.sh \
   $(srcdir)/st2000.em $(srcdir)/st2000.sc-sh ${GEN_DEPENDS}
 	${GENSCRIPTS} st2000.sh
@@ -312,9 +324,9 @@ check-cdtest: cdtest $(srcdir)/cdtest.exp
 # because almost all configs use "gen" version of manual.
 #  Set DOCVER above to change.
 configdoc.texi:	${DOCVER}-doc.texi
-	ln -s ${DOCVER}-doc.texi configdoc.texi || \
-	ln ${DOCVER}-doc.texi configdoc.texi || \
-	cp ${DOCVER}-doc.texi configdoc.texi
+	ln -s ${srcdir}/${DOCVER}-doc.texi ./configdoc.texi || \
+	ln ${srcdir}/${DOCVER}-doc.texi ./configdoc.texi || \
+	cp ${srcdir}/${DOCVER}-doc.texi ./configdoc.texi
 
 # TeX output
 dvi: ld.dvi
