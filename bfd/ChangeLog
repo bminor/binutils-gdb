@@ -1,3 +1,8 @@
+2002-11-03  Stephen Clarke <stephen.clarke@earthling.net>
+
+	 * elf32-sh64-com.c (sh64_address_in_cranges): Use
+	_raw_size of cranges section if _cooked_size not yet set.
+
 2002-11-03  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-v850.c (v850_elf_relax_delete_bytes): Correct parameters
