@@ -228,7 +228,6 @@ $(end-sanitize-chill)\
 	"LOADLIBES=$(LOADLIBES)" \
 	"MAKEINFO=$(MAKEINFO)" \
 	"NM_FOR_TARGET=$(NM_FOR_TARGET)" \
-	"PRMS=$(PRMS)" \
 	"RANLIB_FOR_TARGET=$(RANLIB_FOR_TARGET)" \
 	"XTRAFLAGS_FOR_TARGET=$(XTRAFLAGS)" \
 	"exec_prefix=$(exec_prefix)" \
