@@ -45,19 +45,19 @@ Wed May 13 14:40:11 1998  Gavin Koch  <gavin@cygnus.com>
 
 	* mips.igen (check_mt_hilo): Create a separate r3900 version.
 
+start-sanitize-r5900
 Wed May 13 14:27:53 1998  Gavin Koch  <gavin@cygnus.com>
 
 	* r5900.igen: Replace the calls and the definition of the
 	function check_op_hilo_hi1lo1 with the pair 
 	check_mult_hilo_hi1lo1 and check_mult_hilo_hi1lo1.
 
-start-sanitize-r5900
+end-sanitize-r5900
 Wed May 13 14:11:46 1998  Gavin Koch  <gavin@cygnus.com>
 
 	* tx.igen (madd,maddu):  Replace calls to check_op_hilo
 	with calls to check_div_hilo.
 
-end-sanitize-r5900
 Wed May 13 09:59:27 1998  Gavin Koch  <gavin@cygnus.com>
 
 	* mips/mips.igen (check_op_hilo,check_mult_hilo,check_div_hilo):
