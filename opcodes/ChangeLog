@@ -1,3 +1,8 @@
+Tue Dec 12 12:22:24 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (distclean): Remove stamp-h.  From Ronald
+	F. Guilmette <rfg@monkeys.com>.
+
 Tue Dec  5 13:42:44 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	From David Mosberger-Tang  <davidm@azstarnet.com>:
