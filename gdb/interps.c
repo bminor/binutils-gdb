@@ -399,7 +399,7 @@ interpreter_exec_cmd (char *args, int from_tty)
   for (i = 1; i < nrules; i++)
     {
       struct exception e = interp_exec (interp_to_use, prules[i]);
-      if (!e.reason)
+      if (e.reason < 0)
 	{
 	  interp_set (old_interp);
 	  interp_set_quiet (interp_to_use, old_quiet);
