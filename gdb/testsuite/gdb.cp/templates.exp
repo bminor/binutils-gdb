@@ -37,7 +37,6 @@ set binfile ${objdir}/${subdir}/${testfile}
 if [get_compiler_info ${binfile} "c++"] {
     return -1
 }
-source ${binfile}.ci
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++}] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
