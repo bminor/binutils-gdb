@@ -366,10 +366,10 @@ Stephane Carrez					stcarrez@nerim.fr
 Michael Chastain				mec@shout.net
 Eric Christopher				echristo@redhat.com
 Nick Clifton					nickc@redhat.com
-Philippe De Muyter				phdm@macqel.be
-Chris G. Demetriou				cgd@broadcom.com
-Klee Dienes					kdienes@apple.com
 DJ Delorie					dj@redhat.com
+Chris G. Demetriou				cgd@broadcom.com
+Philippe De Muyter				phdm@macqel.be
+Klee Dienes					kdienes@apple.com
 Richard Earnshaw				rearnsha@arm.com
 Frank Ch. Eigler				fche@redhat.com
 Ben Elliston					bje@redhat.com
@@ -393,8 +393,8 @@ Andreas Jaeger					aj@suse.de
 Geoff Keating					geoffk@redhat.com
 Mark Kettenis					kettenis@gnu.org
 Jim Kingdon					jkingdon@engr.sgi.com  ++
-Jeff Law					law@redhat.com
 Jonathan Larmour				jlarmour@redhat.co.uk
+Jeff Law					law@redhat.com
 Robert Lipe					rjl@sco.com
 H.J. Lu						hjl@lucon.org
 Michal Ludvig                                   mludvig@suse.cz
@@ -416,12 +416,12 @@ Mark Salter					msalter@redhat.com
 Peter Schauer					Peter.Schauer@regent
 Andreas Schwab					schwab@suse.de
 Keith Seitz					keiths@redhat.com
+Stan Shebs					shebs@apple.com
 Aidan Skinner					aidan@velvet.net
 Jiri Smid					smid@suse.cz
 David Smith					dsmith@redhat.com
 Stephen P. Smith				ischis2@home.com
 Jackie Smith Cashion				jsmith@redhat.com
-Stan Shebs					shebs@apple.com
 Michael Snyder					msnyder@redhat.com
 Petr Sorfa					petrs@caldera.com
 Gary Thomas					gthomas@redhat.com

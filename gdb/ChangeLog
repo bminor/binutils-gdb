@@ -1,3 +1,7 @@
+2002-09-18  David Carlton  <carlton@math.stanford.edu>
+
+	* MAINTAINERS: Alphabetize Write After Approval list.
+
 2002-09-18  Daniel Jacobowitz  <drow@mvista.com>
 
 	Fix PR gdb/709
