@@ -1,3 +1,11 @@
+Tue Sep 10 20:34:12 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* aoutf1.h (sunos4_core_file_p):  Release the right storage in
+	error case.
+	(sunos4_core_file_matches_executable_p):  Fix header comparison.
+	* aoutx.h:  Avoid shifts of 32 bits, undefined in C.  Lint.
+	* bout.c, icoff.c, ieee.c, libbfd.c, oasys.c:  gcc -O -W lint.
+
 Wed Sep  4 00:44:52 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	Allow GDB to patch object files.
