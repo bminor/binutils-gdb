@@ -1,3 +1,18 @@
+2002-06-19  Daniel Jacobowitz  <drow@mvista.com>
+
+	* mips-tdep.c (enum mips_abi): Explicitly start at 0.  Add
+	MIPS_ABI_LAST.
+	(mips_abi_string, mips_abi_strings): New.
+	(struct gdbarch_tdep): Remove mips_abi_string, add found_abi.
+	(mips_gdbarch_init): Set tdep->found_abi.  Don't set
+	tdep->mips_abi_string.  Honor mips_abi_string.  Default to
+	O32 if no ABI is found.
+	(mips_dump_tdep): Use mips_abi_strings.
+	(mips_abi_update): New function.
+	(_initialize_mips_tdep): Initialize mips_abi_string.  Add  
+	``set mips abi'' and ``show mips abi''.  Check the size of
+	mips_abi_strings.
+
 2002-06-19  Andrew Cagney  <cagney@redhat.com>
 
 	* i386-linux-tdep.c (i386_linux_register_name): Make return type

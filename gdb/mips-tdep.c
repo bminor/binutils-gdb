@@ -61,13 +61,26 @@ enum
 
 enum mips_abi
   {
-    MIPS_ABI_UNKNOWN,
+    MIPS_ABI_UNKNOWN = 0,
     MIPS_ABI_N32,
     MIPS_ABI_O32,
     MIPS_ABI_O64,
     MIPS_ABI_EABI32,
-    MIPS_ABI_EABI64
+    MIPS_ABI_EABI64,
+    MIPS_ABI_LAST
   };
+
+static const char *mips_abi_string;
+
+static const char *mips_abi_strings[] = {
+  "auto",
+  "n32",
+  "o32",
+  "o64",
+  "eabi32",
+  "eabi64",
+  NULL
+};
 
 struct frame_extra_info
   {
@@ -117,7 +130,7 @@ struct gdbarch_tdep
 
     /* mips options */
     enum mips_abi mips_abi;
-    const char *mips_abi_string;
+    enum mips_abi found_abi;
     enum mips_fpu_type mips_fpu_type;
     int mips_last_arg_regnum;
     int mips_last_fp_arg_regnum;
@@ -4247,6 +4260,19 @@ mips_find_abi_section (bfd *abfd, asection *sect, void *obj)
     warning ("unsupported ABI %s.", name + 8);
 }
 
+static enum mips_abi
+global_mips_abi (void)
+{
+  int i;
+
+  for (i = 0; mips_abi_strings[i] != NULL; i++)
+    if (mips_abi_strings[i] == mips_abi_string)
+      return (enum mips_abi) i;
+
+  internal_error (__FILE__, __LINE__,
+		  "unknown ABI string");
+}
+
 static struct gdbarch *
 mips_gdbarch_init (struct gdbarch_info info,
 		   struct gdbarch_list *arches)
@@ -4256,7 +4282,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
   int elf_flags;
-  enum mips_abi mips_abi;
+  enum mips_abi mips_abi, found_abi, wanted_abi;
   enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
   /* Reset the disassembly info, in case it was set to something
@@ -4305,6 +4331,11 @@ mips_gdbarch_init (struct gdbarch_info info,
   if (mips_abi == MIPS_ABI_UNKNOWN && info.abfd != NULL)
     bfd_map_over_sections (info.abfd, mips_find_abi_section, &mips_abi);
 
+  /* If we have no bfd, then mips_abi will still be MIPS_ABI_UNKNOWN.
+     Use the ABI from the last architecture if there is one.  */
+  if (info.abfd == NULL && arches != NULL)
+    mips_abi = gdbarch_tdep (arches->gdbarch)->found_abi;
+
   /* Try the architecture for any hint of the corect ABI */
   if (mips_abi == MIPS_ABI_UNKNOWN
       && info.bfd_arch_info != NULL
@@ -4325,10 +4356,21 @@ mips_gdbarch_init (struct gdbarch_info info,
 	  break;
 	}
     }
+
 #ifdef MIPS_DEFAULT_ABI
   if (mips_abi == MIPS_ABI_UNKNOWN)
     mips_abi = MIPS_DEFAULT_ABI;
 #endif
+
+  if (mips_abi == MIPS_ABI_UNKNOWN)
+    mips_abi = MIPS_ABI_O32;
+
+  /* Now that we have found what the ABI for this binary would be,
+     check whether the user is overriding it.  */
+  found_abi = mips_abi;
+  wanted_abi = global_mips_abi ();
+  if (wanted_abi != MIPS_ABI_UNKNOWN)
+    mips_abi = wanted_abi;
 
   if (gdbarch_debug)
     {
@@ -4338,6 +4380,9 @@ mips_gdbarch_init (struct gdbarch_info info,
       fprintf_unfiltered (gdb_stdlog,
 			  "mips_gdbarch_init: mips_abi = %d\n",
 			  mips_abi);
+      fprintf_unfiltered (gdb_stdlog,
+			  "mips_gdbarch_init: found_mips_abi = %d\n",
+			  found_abi);
     }
 
   /* try to find a pre-existing architecture */
@@ -4368,12 +4413,12 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_double_bit (gdbarch, 64);
   set_gdbarch_long_double_bit (gdbarch, 64);
   set_gdbarch_register_raw_size (gdbarch, mips_register_raw_size);
+  tdep->found_abi = found_abi;
   tdep->mips_abi = mips_abi;
 
   switch (mips_abi)
     {
     case MIPS_ABI_O32:
-      tdep->mips_abi_string = "o32";
       tdep->mips_default_saved_regsize = 4;
       tdep->mips_default_stack_argsize = 4;
       tdep->mips_fp_register_double = 0;
@@ -4387,7 +4432,6 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_long_bit (gdbarch, 64);
       break;
     case MIPS_ABI_O64:
-      tdep->mips_abi_string = "o64";
       tdep->mips_default_saved_regsize = 8;
       tdep->mips_default_stack_argsize = 8;
       tdep->mips_fp_register_double = 1;
@@ -4401,7 +4445,6 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_long_bit (gdbarch, 64);
       break;
     case MIPS_ABI_EABI32:
-      tdep->mips_abi_string = "eabi32";
       tdep->mips_default_saved_regsize = 4;
       tdep->mips_default_stack_argsize = 4;
       tdep->mips_fp_register_double = 0;
@@ -4415,7 +4458,6 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_long_bit (gdbarch, 64);
       break;
     case MIPS_ABI_EABI64:
-      tdep->mips_abi_string = "eabi64";
       tdep->mips_default_saved_regsize = 8;
       tdep->mips_default_stack_argsize = 8;
       tdep->mips_fp_register_double = 1;
@@ -4429,7 +4471,6 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_long_bit (gdbarch, 64);
       break;
     case MIPS_ABI_N32:
-      tdep->mips_abi_string = "n32";
       tdep->mips_default_saved_regsize = 4;
       tdep->mips_default_stack_argsize = 8;
       tdep->mips_fp_register_double = 1;
@@ -4454,19 +4495,8 @@ mips_gdbarch_init (struct gdbarch_info info,
 	tm_print_insn_info.mach = bfd_mach_mips8000;
       break;
     default:
-      tdep->mips_abi_string = "default";
-      tdep->mips_default_saved_regsize = MIPS_REGSIZE;
-      tdep->mips_default_stack_argsize = MIPS_REGSIZE;
-      tdep->mips_fp_register_double = (REGISTER_VIRTUAL_SIZE (FP0_REGNUM) == 8);
-      tdep->mips_last_arg_regnum = A0_REGNUM + 8 - 1;
-      tdep->mips_last_fp_arg_regnum = FPA0_REGNUM + 8 - 1;
-      tdep->mips_regs_have_home_p = 1;
-      tdep->gdb_target_is_mips64 = 0;
-      tdep->default_mask_address_p = 0;
-      set_gdbarch_long_bit (gdbarch, 32);
-      set_gdbarch_ptr_bit (gdbarch, 32);
-      set_gdbarch_long_long_bit (gdbarch, 64);
-      break;
+      internal_error (__FILE__, __LINE__,
+		      "unknown ABI in switch");
     }
 
   /* FIXME: jlarmour/2000-04-07: There *is* a flag EF_MIPS_32BIT_MODE
@@ -4579,6 +4609,18 @@ mips_gdbarch_init (struct gdbarch_info info,
 }
 
 static void
+mips_abi_update (char *ignore_args, int from_tty, 
+		 struct cmd_list_element *c)
+{
+  struct gdbarch_info info;
+
+  /* Force the architecture to update, and (if it's a MIPS architecture)
+     mips_gdbarch_init will take care of the rest.  */
+  gdbarch_info_init (&info);
+  gdbarch_update_p (info);
+}
+
+static void
 mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
@@ -4619,7 +4661,7 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
       fprintf_unfiltered (file,
 			  "mips_dump_tdep: tdep->mips_abi = %d (%s)\n",
 			  tdep->mips_abi,
-			  tdep->mips_abi_string);
+			  mips_abi_strings[tdep->mips_abi]);
       fprintf_unfiltered (file,
 			  "mips_dump_tdep: mips_mask_address_p() %d (default %d)\n",
 			  mips_mask_address_p (),
@@ -4995,6 +5037,11 @@ _initialize_mips_tdep (void)
   static struct cmd_list_element *mipsfpulist = NULL;
   struct cmd_list_element *c;
 
+  mips_abi_string = mips_abi_strings [MIPS_ABI_UNKNOWN];
+  if (MIPS_ABI_LAST + 1
+      != sizeof (mips_abi_strings) / sizeof (mips_abi_strings[0]))
+    internal_error (__FILE__, __LINE__, "mips_abi_strings out of sync");
+
   gdbarch_register (bfd_arch_mips, mips_gdbarch_init, mips_dump_tdep);
   if (!tm_print_insn)		/* Someone may have already set it */
     tm_print_insn = gdb_print_insn_mips;
@@ -5036,6 +5083,21 @@ This option can be set to one of:\n\
           target and executable (default)",
 				       &setmipscmdlist),
 		     &showmipscmdlist);
+
+  /* Allow the user to override the ABI. */
+  c = add_set_enum_cmd
+    ("abi", class_obscure, mips_abi_strings, &mips_abi_string,
+     "Set the ABI used by this program.\n"
+     "This option can be set to one of:\n"
+     "  auto  - the default ABI associated with the current binary\n"
+     "  o32\n"
+     "  o64\n"
+     "  n32\n"
+     "  eabi32\n"
+     "  eabi64",
+     &setmipscmdlist);
+  add_show_from_set (c, &showmipscmdlist);
+  set_cmd_sfunc (c, mips_abi_update);
 
   /* Let the user turn off floating point and set the fence post for
      heuristic_proc_start.  */
