@@ -1,3 +1,12 @@
+2000-07-27  H.J. Lu  <hjl@gnu.org>
+
+	* elflink.h (elf_merge_symbol): Take one more argument,
+	dt_needed, to indicate if the symbol comes from a DT_NEEDED
+	entry. Don't overide the existing weak definition if dt_needed
+	is true.
+	(elf_link_add_object_symbols): Pass dt_needed to
+	elf_merge_symbol ().
+
 2000-07-27  Nick Clifton  <nickc@cygnus.com>
 
 	* elflink.h (elf_link_size_reloc_section): Zeroes the section's

@@ -35,7 +35,7 @@ static boolean elf_link_add_archive_symbols
 static boolean elf_merge_symbol
   PARAMS ((bfd *, struct bfd_link_info *, const char *, Elf_Internal_Sym *,
 	   asection **, bfd_vma *, struct elf_link_hash_entry **,
-	   boolean *, boolean *, boolean *));
+	   boolean *, boolean *, boolean *, boolean));
 static boolean elf_export_symbol
   PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean elf_fix_symbol_flags
@@ -433,11 +433,12 @@ elf_link_add_archive_symbols (abfd, info)
    TYPE_CHANGE_OK if it is OK for the type to change.  We set
    SIZE_CHANGE_OK if it is OK for the size to change.  By OK to
    change, we mean that we shouldn't warn if the type or size does
-   change.  */
+   change. DT_NEEDED indicates if it comes from a DT_NEEDED entry of
+   a shared object.  */
 
 static boolean
 elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
-		  override, type_change_ok, size_change_ok)
+		  override, type_change_ok, size_change_ok, dt_needed)
      bfd *abfd;
      struct bfd_link_info *info;
      const char *name;
@@ -448,6 +449,7 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
      boolean *override;
      boolean *type_change_ok;
      boolean *size_change_ok;
+     boolean dt_needed;
 {
   asection *sec;
   struct elf_link_hash_entry *h;
@@ -624,9 +626,11 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
     olddyncommon = false;
 
   /* It's OK to change the type if either the existing symbol or the
-     new symbol is weak.  */
+     new symbol is weak unless it comes from a DT_NEEDED entry of
+     a shared object, in which case, the DT_NEEDED entry may not be
+     required at the run time. */
 
-  if (h->root.type == bfd_link_hash_defweak
+  if ((! dt_needed && h->root.type == bfd_link_hash_defweak)
       || h->root.type == bfd_link_hash_undefweak
       || bind == STB_WEAK)
     *type_change_ok = true;
@@ -678,7 +682,9 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
      object to override a weak symbol in a shared object.
 
      We prefer a non-weak definition in a shared library to a weak
-     definition in the executable.  */
+     definition in the executable unless it comes from a DT_NEEDED
+     entry of a shared object, in which case, the DT_NEEDED entry
+     may not be required at the run time. */
 
   if (newdyn
       && newdef
@@ -686,7 +692,8 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
 	  || (h->root.type == bfd_link_hash_common
 	      && (bind == STB_WEAK
 		  || ELF_ST_TYPE (sym->st_info) == STT_FUNC)))
-      && (h->root.type != bfd_link_hash_defweak
+      && (h->root.type != bfd_link_hash_defweak 
+	  || dt_needed
 	  || bind == STB_WEAK))
     {
       *override = true;
@@ -821,8 +828,11 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
 
   /* Handle the special case of a weak definition in a regular object
      followed by a non-weak definition in a shared object.  In this
-     case, we prefer the definition in the shared object.  */
+     case, we prefer the definition in the shared object unless it
+     comes from a DT_NEEDED entry of a shared object, in which case,
+     the DT_NEEDED entry may not be required at the run time. */
   if (olddef
+      && ! dt_needed
       && h->root.type == bfd_link_hash_defweak
       && newdef
       && newdyn
@@ -1465,7 +1475,7 @@ elf_link_add_object_symbols (abfd, info)
 
 	  if (! elf_merge_symbol (abfd, info, name, &sym, &sec, &value,
 				  sym_hash, &override, &type_change_ok,
-				  &size_change_ok))
+				  &size_change_ok, dt_needed))
 	    goto error_return;
 
 	  if (override)
@@ -1668,7 +1678,8 @@ elf_link_add_object_symbols (abfd, info)
 		  size_change_ok = false;
 		  if (! elf_merge_symbol (abfd, info, shortname, &sym, &sec,
 					  &value, &hi, &override,
-					  &type_change_ok, &size_change_ok))
+					  &type_change_ok,
+					  &size_change_ok, dt_needed))
 		    goto error_return;
 
 		  if (! override)
@@ -1785,7 +1796,8 @@ elf_link_add_object_symbols (abfd, info)
 		  size_change_ok = false;
 		  if (! elf_merge_symbol (abfd, info, shortname, &sym, &sec,
 					  &value, &hi, &override,
-					  &type_change_ok, &size_change_ok))
+					  &type_change_ok,
+					  &size_change_ok, dt_needed))
 		    goto error_return;
 
 		  if (override)
