@@ -1,3 +1,12 @@
+2004-08-06  Paul Brook  <paul@codesourcery.com>
+
+	* elfarm-nabi.c (elf32_arm_howto_table): Add new EABI relocations.
+	(elf32_arm_reloc_map): Add BFD_RELOC_ARM_RELABS32,
+	BFD_RELOC_ARM_ROSEGREL32 and BFD_RELOC_ARM_SBREL32.
+	* reloc.c: Add BFD_RELOC_ARM_RELABS32, BFD_RELOC_ARM_ROSEGREL32
+	and BFD_RELOC_ARM_SBREL32.
+	* bfd-in2.h, bbfd.h: Regenerate.
+
 2004-08-01  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
 
 	* elfxx-mips.c (mips_elf_calculate_relocation): Test only for

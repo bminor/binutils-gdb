@@ -1,3 +1,9 @@
+2004-08-06  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (md_apply_fix3, tc_gen_reloc, arm_parse_reloc):
+	Handle new relocations.
+	* include/elf/arm.h (elf_arm_reloc_type): Add new EABI relocations.
+
 2004-08-05  Bob Wilson  <bob.wilson@acm.org>
 
 	* write.c (relax_segment): Use was_address instead of address when

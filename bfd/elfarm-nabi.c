@@ -188,16 +188,16 @@ static reloc_howto_type elf32_arm_howto_table[] =
 
   HOWTO (R_ARM_SBREL32,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
-	 0,			/* bitsize */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_ARM_SBREL32",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0,			/* dst_mask */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   HOWTO (R_ARM_THM_PC22,	/* type */
@@ -557,6 +557,90 @@ static reloc_howto_type elf32_arm_howto_table[] =
 	 0x00000fff,		/* src_mask */
 	 0x00000fff,		/* dst_mask */
 	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_LDR_SBREL_11_0,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 12,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_LDR_SBREL_11_0",/* name */
+	 FALSE,			/* partial_inplace */
+	 0x00000fff,		/* src_mask */
+	 0x00000fff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_ARM_ALU_SBREL_19_12,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 12,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_ALU_SBREL_19_12",/* name */
+	 FALSE,			/* partial_inplace */
+	 0x000ff000,		/* src_mask */
+	 0x000ff000,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_ARM_ALU_SBREL_27_20,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 20,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_ALU_SBREL_27_20",/* name */
+	 FALSE,			/* partial_inplace */
+	 0x0ff00000,		/* src_mask */
+	 0x0ff00000,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_ARM_RELABS32,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_RELABS32",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_ARM_ROSEGREL32,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_ROSEGREL32",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_ARM_V4BX,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_V4BX",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 };
 
   /* GNU extension to record C++ vtable hierarchy */
@@ -689,7 +773,10 @@ static const struct elf32_arm_reloc_map elf32_arm_reloc_map[] =
     {BFD_RELOC_ARM_GOTOFF,           R_ARM_GOTOFF},
     {BFD_RELOC_ARM_GOTPC,            R_ARM_GOTPC},
     {BFD_RELOC_ARM_GOT32,            R_ARM_GOT32},
-    {BFD_RELOC_ARM_PLT32,            R_ARM_PLT32}
+    {BFD_RELOC_ARM_PLT32,            R_ARM_PLT32},
+    {BFD_RELOC_ARM_RELABS32,	     R_ARM_RELABS32},
+    {BFD_RELOC_ARM_ROSEGREL32,	     R_ARM_ROSEGREL32},
+    {BFD_RELOC_ARM_SBREL32,	     R_ARM_SBREL32}
   };
 
 static reloc_howto_type *

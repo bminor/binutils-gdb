@@ -1,3 +1,7 @@
+2004-08-06  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/pic.s,d: Test RELABS and SBREL relocations.
+
 2004-08-05  Nitin Yewale  <nitiny@kpitcummins.com>
 
 	* h8300/h8300.exp: Addition of new test case to check rx

@@ -2639,6 +2639,16 @@ field in the instruction.  */
   BFD_RELOC_ARM_GOTOFF,
   BFD_RELOC_ARM_GOTPC,
 
+/* PC-relative or absolute relocation depending on target.  Used for
+entries in .init_array sections.  */
+  BFD_RELOC_ARM_RELABS32,
+
+/* Read-only segment base relative address.  */
+  BFD_RELOC_ARM_ROSEGREL32,
+
+/* Data segment base relative address.  */
+  BFD_RELOC_ARM_SBREL32,
+
 /* Renesas / SuperH SH relocs.  Not all of these appear in object files.  */
   BFD_RELOC_SH_PCDISP8BY2,
   BFD_RELOC_SH_PCDISP12BY2,

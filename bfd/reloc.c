@@ -2608,6 +2608,19 @@ ENUMX
 ENUMDOC
   These relocs are only used within the ARM assembler.  They are not
   (at present) written to any object files.
+ENUM
+  BFD_RELOC_ARM_RELABS32
+ENUMDOC
+  Pc-relative or absolute relocation depending on target.  Used for
+  entries in .init_array sections.
+ENUM
+  BFD_RELOC_ARM_ROSEGREL32
+ENUMDOC
+  Read-only segment base relative address.
+ENUM
+  BFD_RELOC_ARM_SBREL32
+ENUMDOC
+  Data segment base relative address.
 
 ENUM
   BFD_RELOC_SH_PCDISP8BY2
