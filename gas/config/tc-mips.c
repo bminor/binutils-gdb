@@ -113,6 +113,8 @@ static int mips_nobopt;
 #ifdef GPOPT
 /* The size of the small data section.  */
 static int g_switch_value = 8;
+/* Whether the -G option was used.  */
+static int g_switch_seen = 0;
 #endif
 
 #define N_RMASK 0xc4
@@ -4684,6 +4686,7 @@ md_parse_option (argP, cntP, vecP)
 	}
       else
 	as_warn ("Number expected after -G");
+      g_switch_seen = 1;
       *argP = "";
       return 1;
     }
@@ -5120,6 +5123,14 @@ s_option (x)
       mips_pic = atoi (opt + 3);
       /* Supposedly no other values are used.  */
       assert (mips_pic == 0 || mips_pic == 2);
+
+      if (mips_pic == 2)
+	{
+	  if (g_switch_seen && g_switch_value != 0)
+	    as_warn ("-G may not be used with PIC code");
+	  g_switch_value = 0;
+	  bfd_set_gp_size (stdoutput, 0);
+	}
     }
   else
     as_warn ("Unrecognized option \"%s\"", opt);
