@@ -1,3 +1,12 @@
+Mon Aug 24 14:05:14 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in: don't create all directories for ``make install'';
+	let the subdirectories create the ones they need.
+
+Tue Aug 11 23:13:17 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+        * COPYING: new file, GPL v2
+
 Tue Aug  4 01:12:43 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* Makefile.in: use the new gen-info-dir, which needs a template
