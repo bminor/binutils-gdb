@@ -1,5 +1,7 @@
 Tue Apr 28 14:12:12 1998  Nick Clifton  <nickc@cygnus.com>
 
+	* aclocal.m4: Regenerated.
+	* configure: Regenerated.
 	* Makefile.am (POTFILES): Remove inclusion of BFD_H.
 	* Makefile.in: Rebuild.
 	* po/POTFILES.in: Rebuilt using rule in Makefile.in.

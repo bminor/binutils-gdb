@@ -479,4 +479,29 @@ for i in * ; do
 	fi
 done
 
+# This must come after all other sanitizations.  Re-sanitize the .pot
+# file.
+if [ -n "${verbose}" ]; then
+   echo Re-computing files for gettext ...
+fi
+
+if [ -n "${safe}" -a ! -f po/.Recover/POTFILES.in ]; then
+   if [ -n "${verbose}" ]; then
+      echo Caching po/POTFILES.in in .Recover...
+   fi
+   mv po/POTFILES.in po/.Recover
+fi
+
+'\ls -1 *.[ch] *.in' | sed -e 's,^\./,,' > po/POTFILES.in
+
+if [ -n "${safe}" -a ! -f po/.Recover/opcodes.pot ]; then
+   if [ -n "${verbose}" ]; then
+      echo Caching po/opcodes.pot in .Recover...
+   fi
+   mv po/opcodes.pot po/.Recover
+fi
+
+# If this fails, Sanitization must fail.
+xgettext -k_ -kN_ -C `cat po/POTFILES.in` -o po/opcodes.pot || exit 1
+
 # End of file.

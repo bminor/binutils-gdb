@@ -163,17 +163,11 @@ case "$host" in
   # On SCO OpenServer 5, we need -belf to get full-featured binaries.
   CFLAGS="$CFLAGS -belf"
   ;;
-
-*-*-cygwin32*)
-  AM_SYS_LIBTOOL_CYGWIN32
-  ;;
-
 esac
 
 # Actually configure libtool.  ac_aux_dir is where install-sh is found.
 CC="$CC" CFLAGS="$CFLAGS" CPPFLAGS="$CPPFLAGS" \
 LD="$LD" NM="$NM" RANLIB="$RANLIB" LN_S="$LN_S" \
-DLLTOOL="$DLLTOOL" AS="$AS" \
 ${CONFIG_SHELL-/bin/sh} $ac_aux_dir/ltconfig \
 $libtool_flags --no-verify $ac_aux_dir/ltmain.sh $host \
 || AC_MSG_ERROR([libtool configure failed])
@@ -263,9 +257,7 @@ if test "$ac_cv_prog_gcc" = yes; then
   ac_prog=`($CC -print-prog-name=ld) 2>&5`
   case "$ac_prog" in
   # Accept absolute paths.
-changequote(,)dnl
   /* | [A-Za-z]:\\*)
-changequote([,])dnl
     test -z "$LD" && LD="$ac_prog"
     ;;
   "")
@@ -328,7 +320,11 @@ fi])
 AC_DEFUN(AM_PROG_NM,
 [AC_MSG_CHECKING([for BSD-compatible nm])
 AC_CACHE_VAL(ac_cv_path_NM,
-[if test -z "$NM"; then
+[case "$NM" in
+/* | [A-Za-z]:\\*)
+  ac_cv_path_NM="$NM" # Let the user override the test with a path.
+  ;;
+*)
   IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS="${IFS}:"
   for ac_dir in /usr/ucb /usr/ccs/bin $PATH /bin; do
     test -z "$ac_dir" && ac_dir=.
@@ -348,18 +344,11 @@ AC_CACHE_VAL(ac_cv_path_NM,
   done
   IFS="$ac_save_ifs"
   test -z "$ac_cv_path_NM" && ac_cv_path_NM=nm
-else
-  ac_cv_path_NM="$NM" # Let the user override the test with a path.
-fi])
+  ;;
+esac])
 NM="$ac_cv_path_NM"
 AC_MSG_RESULT([$NM])
 AC_SUBST(NM)
-])
-
-# AM_SYS_LIBTOOL_CYGWIN32 - find tools needed on cygwin32
-AC_DEFUN(AM_SYS_LIBTOOL_CYGWIN32,
-[AC_CHECK_TOOL(DLLTOOL, dlltool, false)
-AC_CHECK_TOOL(AS, as, false)
 ])
 
 # Like AC_CONFIG_HEADER, but automatically create stamp file.
