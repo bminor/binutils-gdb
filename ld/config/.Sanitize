@@ -44,6 +44,7 @@ t-sun4
 t-m68k
 t-m88k-bcs
 t-coff-a29k
+t-ebmon29k
 t-news
 Do-last:
 
@@ -52,7 +53,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.8  1991/10/10 11:59:20  rich
+# Revision 1.9  1991/10/11 19:32:25  steve
+# *** empty log message ***
+#
+# Revision 1.8  1991/10/10  11:59:20  rich
 # updating
 #
 # Revision 1.7  1991/09/27  20:20:01  bothner

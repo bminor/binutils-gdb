@@ -53,6 +53,7 @@ ldglda29k.sc
 ldgld68k.sc
 h8300hds.c
 h8300hds.sc
+embon29k.sc
 ldgram.y
 ldlang.c
 ldlang.h
@@ -84,7 +85,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.16  1991/10/10 11:59:25  rich
+# Revision 1.17  1991/10/11 19:31:38  steve
+# *** empty log message ***
+#
+# Revision 1.16  1991/10/10  11:59:25  rich
 # updating
 #
 # Revision 1.15  1991/10/09  20:40:37  bothner
