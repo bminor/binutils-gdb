@@ -1,3 +1,8 @@
+2000-08-11  Andrew Cagney  <cagney@lulu.cygnus.com>
+
+	* regcache.c (GET_SAVED_REGISTER): Restore definition.  Was lost
+	as part of 2000-08-10 Andrew Cagney <cagney@ops1.cygnus.com>.
+
 2000-08-11  J.T. Conklin  <jtc@redback.com>
 
 	* dcache.c (dcache_info): Don't print cache state if last_cache 

@@ -200,6 +200,11 @@ default_get_saved_register (char *raw_buffer,
     *addrp = addr;
 }
 
+#if !defined (GET_SAVED_REGISTER)
+#define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
+  default_get_saved_register(raw_buffer, optimized, addrp, frame, regnum, lval)
+#endif
+
 void
 get_saved_register (char *raw_buffer,
 		    int *optimized,
