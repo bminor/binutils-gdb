@@ -1,3 +1,15 @@
+Wed Aug 20 13:56:35 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* simops.c (OP_107E0, OP_107F0, OP_307E0, OP_307F0): Use correct
+	interpretation of SR bit in list18 structure.
+
+start-sanitize-v850eq
+Mon Aug 18 10:59:02 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* simops.c (OP_300, OP_400, OP_60, OP_70): Support variant opcodes
+	with US bit set in the PSW.
+start-sanitize-v850eq
+
 Wed Aug 13 19:06:55 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* interp.c (sim_resume): Opcode functions return amount to be
