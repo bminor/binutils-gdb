@@ -600,6 +600,10 @@ obj_elf_change_section (const char *name,
 		       || strcmp (name, ".strtab") == 0
 		       || strcmp (name, ".symtab") == 0))
 	    override = TRUE;
+	  /* .note.GNU-stack can have SHF_EXECINSTR.  */
+	  else if (attr == SHF_EXECINSTR
+		   && strcmp (name, ".note.GNU-stack") == 0)
+	    override = TRUE;
 	  else
 	    {
 	      if (group_name == NULL)
