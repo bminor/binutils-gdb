@@ -3224,7 +3224,24 @@ void
 sparc_handle_align (fragp)
      fragS *fragp;
 {
-  if (fragp->fr_type == rs_align_code
+  if (fragp->fr_type == rs_align_code && !fragp->fr_subtype
       && fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix != 0)
     as_bad_where (fragp->fr_file, fragp->fr_line, "misaligned data");
+  if (fragp->fr_type == rs_align_code && fragp->fr_subtype == 1024)
+    {
+      int count = fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix;
+      
+      if (count >= 4 && !(count & 3) && count <= 1024 && !((long)(fragp->fr_literal + fragp->fr_fix) & 3))
+        {
+          unsigned *p = (unsigned *)(fragp->fr_literal + fragp->fr_fix);
+          int i;
+          
+          for (i = 0; i < count; i += 4)
+            *p++ = 0x01000000; /* nop */
+          if (SPARC_OPCODE_ARCH_V9_P (max_architecture) && count > 8)
+            *(unsigned *)(fragp->fr_literal + fragp->fr_fix) =
+              0x30680000 | (count >> 2); /* ba,a,pt %xcc, 1f */
+          fragp->fr_var = count;
+        }
+    }
 }

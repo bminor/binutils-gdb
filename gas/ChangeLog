@@ -1,3 +1,9 @@
+Wed Oct 22 17:22:59 1997  Richard Henderson  <rth@cygnus.com>
+
+	* config/tc-sparc.h (md_do_align): New macro.
+	* config/tc-sparc.c (sparc_handle_align): Handle rs_align_code.
+	Patch from Jakub Jelinek <jj@sunsite.mff.cuni.cz>.
+
 Wed Oct 22 12:51:18 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-sh.c (sh_small): New variable.
