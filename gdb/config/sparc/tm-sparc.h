@@ -554,6 +554,8 @@ arguments.  */
 
 #define CALL_DUMMY_START_OFFSET 148
 
+#define CALL_DUMMY_BREAKPOINT_OFFSET (CALL_DUMMY_START_OFFSET + (8 * 4))
+
 #define CALL_DUMMY_STACK_ADJUST 68
 
 /* Insert the specified number of args and function address

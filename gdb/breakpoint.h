@@ -29,141 +29,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define	BREAKPOINT_MAX	16
 
-/* The follow stuff is an abstract data type "bpstat" ("breakpoint status").
-   This provides the ability to determine whether we have stopped at a
-   breakpoint, and what we should do about it.  */
-
-typedef struct bpstat *bpstat;
-
-/* Interface:  */
-/* Clear a bpstat so that it says we are not at any breakpoint.
-   Also free any storage that is part of a bpstat.  */
-extern void bpstat_clear PARAMS ((bpstat *));
-
-/* Return a copy of a bpstat.  Like "bs1 = bs2" but all storage that
-   is part of the bpstat is copied as well.  */
-extern bpstat bpstat_copy PARAMS ((bpstat));
-
-/* Get a bpstat associated with having just stopped at address *PC
-   and frame address FRAME_ADDRESS.  Update *PC to point at the
-   breakpoint (if we hit a breakpoint).  */
-/* FIXME:  prototypes uses equivalence between FRAME_ADDR and CORE_ADDR */
-extern bpstat bpstat_stop_status PARAMS ((CORE_ADDR *, CORE_ADDR));
-
-/* Return values from bpstat_what.  */
-enum bpstat_what {
-  /* Perform various other tests; that is, this bpstat does not
-     say to perform any action (e.g. failed watchpoint and nothing
-     else).  */
-  BPSTAT_WHAT_KEEP_CHECKING,
-
-  /* Rather than distinguish between noisy and silent stops here, it
-     might be cleaner to have bpstat_print make that decision (also
-     taking into account stop_print_frame and source_only).  But the
-     implications are a bit scary (interaction with auto-displays, etc.),
-     so I won't try it.  */
-     
-  /* Stop silently.  */
-  BPSTAT_WHAT_STOP_SILENT,
-
-  /* Stop and print.  */
-  BPSTAT_WHAT_STOP_NOISY,
-
-  /* Remove breakpoints, single step once, then put them back in and
-     go back to what we were doing.  */
-  BPSTAT_WHAT_SINGLE,
-
-  /* Set longjmp_resume breakpoint, remove all other breakpoints,
-     and continue.  The "remove all other breakpoints" part is required
-     if we are also stepping over another breakpoint as well as doing
-     the longjmp handling.  */
-  BPSTAT_WHAT_SET_LONGJMP_RESUME,
-
-  /* Clear longjmp_resume breakpoint, then handle as
-     BPSTAT_WHAT_KEEP_CHECKING.  */
-  BPSTAT_WHAT_CLEAR_LONGJMP_RESUME,
-
-  /* Clear longjmp_resume breakpoint, then handle as BPSTAT_WHAT_SINGLE.  */
-  BPSTAT_WHAT_CLEAR_LONGJMP_RESUME_SINGLE,
-
-  /* This is just used to keep track of how many enums there are.  */
-  BPSTAT_WHAT_LAST
-};
-
-/* Tell what to do about this bpstat.  */
-enum bpstat_what bpstat_what PARAMS ((bpstat));
-
-/* Find the bpstat associated with a breakpoint.  NULL otherwise. */
-bpstat bpstat_find_breakpoint PARAMS ((bpstat, struct breakpoint *));
-
-/* Nonzero if a signal that we got in wait() was due to circumstances
-   explained by the BS.  */
-/* Currently that is true if we have hit a breakpoint, or if there is
-   a watchpoint enabled.  */
-#define bpstat_explains_signal(bs) ((bs) != NULL)
-
-/* Nonzero if we should step constantly (e.g. watchpoints on machines
-   without hardware support).  This isn't related to a specific bpstat,
-   just to things like whether watchpoints are set.  */
-extern int bpstat_should_step PARAMS ((void));
-
-/* Print a message indicating what happened.  Returns nonzero to
-   say that only the source line should be printed after this (zero
-   return means print the frame as well as the source line).  */
-extern int bpstat_print PARAMS ((bpstat));
-
-/* Return the breakpoint number of the first breakpoint we are stopped
-   at.  *BSP upon return is a bpstat which points to the remaining
-   breakpoints stopped at (but which is not guaranteed to be good for
-   anything but further calls to bpstat_num).
-   Return 0 if passed a bpstat which does not indicate any breakpoints.  */
-extern int bpstat_num PARAMS ((bpstat *));
-
-/* Perform actions associated with having stopped at *BSP.  */
-extern void bpstat_do_actions PARAMS ((bpstat *));
-
-/* Modify BS so that the actions will not be performed.  */
-extern void bpstat_clear_actions PARAMS ((bpstat));
-
-/* Implementation:  */
-struct bpstat
-{
-  /* Linked list because there can be two breakpoints at the
-     same place, and a bpstat reflects the fact that both have been hit.  */
-  bpstat next;
-  /* Breakpoint that we are at.  */
-  struct breakpoint *breakpoint_at;
-  /* Commands left to be done.  */
-  struct command_line *commands;
-  /* Old value associated with a watchpoint.  */
-  value old_val;
-
-  /* Nonzero if this breakpoint tells us to print the frame.  */
-  char print;
-
-  /* Nonzero if this breakpoint tells us to stop.  */
-  char stop;
-
-  /* Function called by bpstat_print to print stuff associated with
-     this element of the bpstat chain.  Returns 0 or 1 just like
-     bpstat_print, or -1 if it can't deal with it.  */
-  int (*print_it) PARAMS((bpstat bs));
-};
-
 /* Type of breakpoint. */
 /* FIXME In the future, we should fold all other breakpoint-like things into
    here.  This includes:
 
-   1) single-step (for machines where we have to simulate single stepping),
-   2) step-resume (for 'next'ing over subroutine calls),
-   3) call-dummy (the breakpoint at the end of a subroutine stub that gdb
-      uses to call functions in the target).
+   * call-dummy (the breakpoint at the end of a subroutine stub that gdb
+      uses to call functions in the target) (definately). 
 
-   I definately agree with (2) and (3); I'm not as sure about (1)
-   (it is a low-level thing, perhaps the best thing is that it looks
-   as much as possible like a single-step to wait_for_inferior)
-   -kingdon, 8 Apr 93.
-*/
+   * single-step (for machines where we have to simulate single stepping)
+      (probably, though perhaps it is better for it to look as much as
+      possible like a single-step to wait_for_inferior).  */
 
 enum bptype {
   bp_breakpoint,		/* Normal breakpoint */
@@ -171,7 +46,14 @@ enum bptype {
   bp_finish,			/* used by finish command */
   bp_watchpoint,		/* Watchpoint */
   bp_longjmp,			/* secret breakpoint to find longjmp() */
-  bp_longjmp_resume		/* secret breakpoint to escape longjmp() */
+  bp_longjmp_resume,		/* secret breakpoint to escape longjmp() */
+
+  /* Used by wait_for_inferior for stepping over subroutine calls, for
+     stepping over signal handlers, and for skipping prologues.  */
+  bp_step_resume,
+
+  /* The breakpoint at the end of a call dummy.  */
+  bp_call_dummy
 };
 
 /* States of enablement of breakpoint. */
@@ -205,14 +87,20 @@ struct breakpoint
   enum bpdisp disposition;
   /* Number assigned to distinguish breakpoints.  */
   int number;
+
   /* Address to break at, or NULL if not a breakpoint.  */
   CORE_ADDR address;
-  /* Line number of this address.  Redundant.  Only matters if address
-     is non-NULL.  */
+
+  /* Line number of this address.  Only matters if address is
+     non-NULL.  */
+
   int line_number;
-  /* Symtab of file of this address.  Redundant.  Only matters if address
-     is non-NULL.  */
-  struct symtab *symtab;
+
+  /* Source file name of this address.  Only matters if address is
+     non-NULL.  */
+
+  char *source_file;
+
   /* Non-zero means a silent breakpoint (don't print frame info
      if we stop here). */
   unsigned char silent;
@@ -254,6 +142,148 @@ struct breakpoint
   struct block *exp_valid_block;
   /* Value of the watchpoint the last time we checked it.  */
   value val;
+};
+
+/* The following stuff is an abstract data type "bpstat" ("breakpoint status").
+   This provides the ability to determine whether we have stopped at a
+   breakpoint, and what we should do about it.  */
+
+typedef struct bpstat *bpstat;
+
+/* Interface:  */
+/* Clear a bpstat so that it says we are not at any breakpoint.
+   Also free any storage that is part of a bpstat.  */
+extern void bpstat_clear PARAMS ((bpstat *));
+
+/* Return a copy of a bpstat.  Like "bs1 = bs2" but all storage that
+   is part of the bpstat is copied as well.  */
+extern bpstat bpstat_copy PARAMS ((bpstat));
+
+/* Get a bpstat associated with having just stopped at address *PC
+   and frame address FRAME_ADDRESS.  Update *PC to point at the
+   breakpoint (if we hit a breakpoint).  */
+/* FIXME:  prototypes uses equivalence between FRAME_ADDR and CORE_ADDR */
+extern bpstat bpstat_stop_status PARAMS ((CORE_ADDR *, CORE_ADDR));
+
+/* This bpstat_what stuff tells wait_for_inferior what to do with a
+   breakpoint (a challenging task).  */
+
+enum bpstat_what_main_action {
+  /* Perform various other tests; that is, this bpstat does not
+     say to perform any action (e.g. failed watchpoint and nothing
+     else).  */
+  BPSTAT_WHAT_KEEP_CHECKING,
+
+  /* Rather than distinguish between noisy and silent stops here, it
+     might be cleaner to have bpstat_print make that decision (also
+     taking into account stop_print_frame and source_only).  But the
+     implications are a bit scary (interaction with auto-displays, etc.),
+     so I won't try it.  */
+     
+  /* Stop silently.  */
+  BPSTAT_WHAT_STOP_SILENT,
+
+  /* Stop and print.  */
+  BPSTAT_WHAT_STOP_NOISY,
+
+  /* Remove breakpoints, single step once, then put them back in and
+     go back to what we were doing.  It's possible that this should be
+     removed from the main_action and put into a separate field, to more
+     cleanly handle BPSTAT_WHAT_CLEAR_LONGJMP_RESUME_SINGLE.  */
+  BPSTAT_WHAT_SINGLE,
+
+  /* Set longjmp_resume breakpoint, remove all other breakpoints,
+     and continue.  The "remove all other breakpoints" part is required
+     if we are also stepping over another breakpoint as well as doing
+     the longjmp handling.  */
+  BPSTAT_WHAT_SET_LONGJMP_RESUME,
+
+  /* Clear longjmp_resume breakpoint, then handle as
+     BPSTAT_WHAT_KEEP_CHECKING.  */
+  BPSTAT_WHAT_CLEAR_LONGJMP_RESUME,
+
+  /* Clear longjmp_resume breakpoint, then handle as BPSTAT_WHAT_SINGLE.  */
+  BPSTAT_WHAT_CLEAR_LONGJMP_RESUME_SINGLE,
+
+  /* This is just used to keep track of how many enums there are.  */
+  BPSTAT_WHAT_LAST
+};
+
+struct bpstat_what {
+  enum bpstat_what_main_action main_action : 4;
+
+  /* Did we hit the step resume breakpoint?  This is separate from the
+     main_action to allow for it to be combined with any of the main
+     actions.  */
+  unsigned int step_resume : 1;
+
+  /* Did we hit a call dummy breakpoint?  This only goes with a main_action
+     of BPSTAT_WHAT_STOP_SILENT or BPSTAT_WHAT_STOP_NOISY (the concept of
+     continuing from a call dummy without popping the frame is not a
+     useful one).  */
+  unsigned int call_dummy : 1;
+};
+
+/* Tell what to do about this bpstat.  */
+struct bpstat_what bpstat_what PARAMS ((bpstat));
+
+/* Find the bpstat associated with a breakpoint.  NULL otherwise. */
+bpstat bpstat_find_breakpoint PARAMS ((bpstat, struct breakpoint *));
+
+/* Nonzero if a signal that we got in wait() was due to circumstances
+   explained by the BS.  */
+/* Currently that is true if we have hit a breakpoint, or if there is
+   a watchpoint enabled.  */
+#define bpstat_explains_signal(bs) ((bs) != NULL)
+
+/* Nonzero if we should step constantly (e.g. watchpoints on machines
+   without hardware support).  This isn't related to a specific bpstat,
+   just to things like whether watchpoints are set.  */
+extern int bpstat_should_step PARAMS ((void));
+
+/* Print a message indicating what happened.  Returns nonzero to
+   say that only the source line should be printed after this (zero
+   return means print the frame as well as the source line).  */
+extern int bpstat_print PARAMS ((bpstat));
+
+/* Return the breakpoint number of the first breakpoint we are stopped
+   at.  *BSP upon return is a bpstat which points to the remaining
+   breakpoints stopped at (but which is not guaranteed to be good for
+   anything but further calls to bpstat_num).
+   Return 0 if passed a bpstat which does not indicate any breakpoints.  */
+extern int bpstat_num PARAMS ((bpstat *));
+
+/* Perform actions associated with having stopped at *BSP.  Actually, we just
+   use this for breakpoint commands.  Perhaps other actions will go here
+   later, but this is executed at a late time (from the command loop).  */
+extern void bpstat_do_actions PARAMS ((bpstat *));
+
+/* Modify BS so that the actions will not be performed.  */
+extern void bpstat_clear_actions PARAMS ((bpstat));
+
+/* Implementation:  */
+struct bpstat
+{
+  /* Linked list because there can be two breakpoints at the
+     same place, and a bpstat reflects the fact that both have been hit.  */
+  bpstat next;
+  /* Breakpoint that we are at.  */
+  struct breakpoint *breakpoint_at;
+  /* Commands left to be done.  */
+  struct command_line *commands;
+  /* Old value associated with a watchpoint.  */
+  value old_val;
+
+  /* Nonzero if this breakpoint tells us to print the frame.  */
+  char print;
+
+  /* Nonzero if this breakpoint tells us to stop.  */
+  char stop;
+
+  /* Function called by bpstat_print to print stuff associated with
+     this element of the bpstat chain.  Returns 0 or 1 just like
+     bpstat_print, or -1 if it can't deal with it.  */
+  int (*print_it) PARAMS((bpstat bs));
 };
 
 /* Prototypes for breakpoint-related functions.  */

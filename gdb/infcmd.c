@@ -497,6 +497,15 @@ signal_command (signum_exp, from_tty)
   proceed (stop_pc, signum, 0);
 }
 
+/* Call breakpoint_auto_delete on the current contents of the bpstat
+   pointed to by arg (which is really a bpstat *).  */
+void
+breakpoint_auto_delete_contents (arg)
+     PTR arg;
+{
+  breakpoint_auto_delete (*(bpstat *)arg);
+}
+
 /* Execute a "stack dummy", a piece of code stored in the stack
    by the debugger to be executed in the inferior.
 
@@ -522,6 +531,8 @@ run_stack_dummy (addr, buffer)
      CORE_ADDR addr;
      char buffer[REGISTER_BYTES];
 {
+  struct cleanup *old_cleanups = make_cleanup (null_cleanup, 0);
+
   /* Now proceed, having reached the desired place.  */
   clear_proceed_status ();
   if (stack_dummy_testing & 4)
@@ -529,8 +540,37 @@ run_stack_dummy (addr, buffer)
       POP_FRAME;
       return(0);
     }
+#ifdef CALL_DUMMY_BREAKPOINT_OFFSET
+  {
+    struct breakpoint *bpt;
+    struct symtab_and_line sal;
+
+    sal.pc = addr - CALL_DUMMY_START_OFFSET + CALL_DUMMY_BREAKPOINT_OFFSET;
+    sal.symtab = NULL;
+    sal.line = 0;
+
+    /* If defined, CALL_DUMMY_BREAKPOINT_OFFSET is where we need to put
+       a breakpoint instruction.  If not, the call dummy already has the
+       breakpoint instruction in it.
+
+       addr is the address of the call dummy plus the CALL_DUMMY_START_OFFSET,
+       so we need to subtract the CALL_DUMMY_START_OFFSET.  */
+    bpt = set_momentary_breakpoint (sal,
+				    NULL,
+				    bp_call_dummy);
+    bpt->disposition = delete;
+
+    /* If all error()s out of proceed ended up calling normal_stop (and
+       perhaps they should; it already does in the special case of error
+       out of resume()), then we wouldn't need this.  */
+    make_cleanup (breakpoint_auto_delete_contents, &stop_bpstat);
+  }
+#endif /* CALL_DUMMY_BREAKPOINT_OFFSET.  */
+
   proceed_to_finish = 1;	/* We want stop_registers, please... */
   proceed (addr, 0, 0);
+
+  discard_cleanups (old_cleanups);
 
   if (!stop_stack_dummy)
     return 1;

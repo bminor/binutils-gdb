@@ -721,7 +721,9 @@ wait_for_inferior ()
 	    random_signal
 	      = !(bpstat_explains_signal (stop_bpstat)
 		  || trap_expected
+#ifndef CALL_DUMMY_BREAKPOINT_OFFSET
 		  || PC_IN_CALL_DUMMY (stop_pc, stop_sp, stop_frame_address)
+#endif /* No CALL_DUMMY_BREAKPOINT_OFFSET.  */
 		  || (step_range_end && step_resume_breakpoint == NULL));
 	  else
 	    {
@@ -730,7 +732,9 @@ wait_for_inferior ()
 		    /* End of a stack dummy.  Some systems (e.g. Sony
 		       news) give another signal besides SIGTRAP,
 		       so check here as well as above.  */
+#ifndef CALL_DUMMY_BREAKPOINT_OFFSET
 		    || PC_IN_CALL_DUMMY (stop_pc, stop_sp, stop_frame_address)
+#endif /* No CALL_DUMMY_BREAKPOINT_OFFSET.  */
 		    );
 	      if (!random_signal)
 		stop_signal = SIGTRAP;
@@ -792,6 +796,14 @@ wait_for_inferior ()
 	struct bpstat_what what;
 
 	what = bpstat_what (stop_bpstat);
+
+	if (what.call_dummy)
+	  {
+	    stop_stack_dummy = 1;
+#ifdef HP_OS_BUG
+	    trap_expected_after_continue = 1;
+#endif
+	  }
 
 	switch (what.main_action)
 	  {
@@ -887,6 +899,12 @@ wait_for_inferior ()
 	 test for stepping.  But, if not stepping,
 	 do not stop.  */
 
+#ifndef CALL_DUMMY_BREAKPOINT_OFFSET
+      /* This is the old way of detecting the end of the stack dummy.
+	 An architecture which defines CALL_DUMMY_BREAKPOINT_OFFSET gets
+	 handled above.  As soon as we can test it on all of them, all
+	 architectures should define it.  */
+
       /* If this is the breakpoint at the end of a stack dummy,
 	 just stop silently, unless the user was doing an si/ni, in which
 	 case she'd better know what she's doing.  */
@@ -901,7 +919,8 @@ wait_for_inferior ()
 #endif
 	  break;
 	}
-      
+#endif /* No CALL_DUMMY_BREAKPOINT_OFFSET.  */
+
       if (step_resume_breakpoint)
 	/* Having a step-resume breakpoint overrides anything
 	   else having to do with stepping commands until
@@ -1081,8 +1100,7 @@ step_into_function:
 		 since on some machines the prologue
 		 is where the new fp value is established.  */
 	      step_resume_breakpoint =
-		set_momentary_breakpoint (sr_sal, (CORE_ADDR)0,
-					  bp_step_resume);
+		set_momentary_breakpoint (sr_sal, NULL, bp_step_resume);
 	      if (breakpoints_inserted)
 		insert_breakpoints ();
 

@@ -180,7 +180,7 @@ discard_cleanups PARAMS ((struct cleanup *));
 
    Should be, once all calls and called-functions are cleaned up:
 extern struct cleanup *
-make_cleanup PARAMS ((void (*function) (PTR), PTR));
+make_cleanup PARAMS ((void (*function) (void *), void *));
 
    Until then, lint and/or various type-checking compiler options will
    complain about make_cleanup calls.  It'd be wrong to just cast things,

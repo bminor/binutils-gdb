@@ -1221,6 +1221,12 @@ bpstat_what (bs)
 #define err BPSTAT_WHAT_STOP_NOISY
 
   /* Given an old action and a class, come up with a new action.  */
+  /* One interesting property of this table is that wp_silent is the same
+     as bp_silent and wp_noisy is the same as bp_noisy.  That is because
+     after stopping, the check for whether to step over a breakpoint
+     (BPSTAT_WHAT_SINGLE type stuff) is handled in proceed() without
+     reference to how we stopped.  We retain separate wp_silent and bp_silent
+     codes in case we want to change that someday.  */
   static const enum bpstat_what_main_action
     table[(int)class_last][(int)BPSTAT_WHAT_LAST] =
       {
@@ -1245,7 +1251,7 @@ bpstat_what (bs)
 #undef clrlrs
 #undef err
   enum bpstat_what_main_action current_action = BPSTAT_WHAT_KEEP_CHECKING;
-  int found_step_resume = 0;
+  struct bpstat_what retval;
 
   for (; bs != NULL; bs = bs->next)
     {
@@ -1297,7 +1303,7 @@ bpstat_what (bs)
 	  if (bs->stop)
 	    {
 #endif
-	      found_step_resume = 1;
+	      retval.step_resume = 1;
 	      /* We don't handle this via the main_action.  */
 	      bs_class = no_effect;
 #if 0
@@ -1307,15 +1313,16 @@ bpstat_what (bs)
 	    bs_class = bp_nostop;
 #endif
 	  break;
+	case bp_call_dummy:
+	  /* Make sure the action is stop (silent or noisy), so infrun.c
+	     pops the dummy frame.  */
+	  bs_class = bp_silent;
+	  retval.call_dummy = 1;
 	}
       current_action = table[(int)bs_class][(int)current_action];
     }
-  {
-    struct bpstat_what retval;
-    retval.main_action = current_action;
-    retval.step_resume = found_step_resume;
-    return retval;
-  }
+  retval.main_action = current_action;
+  return retval;
 }
 
 /* Nonzero if we should step constantly (e.g. watchpoints on machines
@@ -1347,7 +1354,7 @@ breakpoint_1 (bnum, allflag)
   CORE_ADDR last_addr = (CORE_ADDR)-1;
   int found_a_breakpoint = 0;
   static char *bptypes[] = {"breakpoint", "until", "finish", "watchpoint",
-			      "longjmp", "longjmp resume"};
+			      "longjmp", "longjmp resume", "step resume"};
   static char *bpdisps[] = {"del", "dis", "keep"};
   static char bpenables[] = "ny";
   char wrap_indent[80];
@@ -1379,11 +1386,13 @@ breakpoint_1 (bnum, allflag)
 	  case bp_watchpoint:
 	    print_expression (b->exp, stdout);
 	    break;
+
 	  case bp_breakpoint:
 	  case bp_until:
 	  case bp_finish:
 	  case bp_longjmp:
 	  case bp_longjmp_resume:
+	  case bp_step_resume:
 	    if (addressprint)
 	      printf_filtered ("%s ", local_hex_string_custom(b->address, "08"));
 
@@ -1403,8 +1412,6 @@ breakpoint_1 (bnum, allflag)
 	      }
 	    else
 	      print_address_symbolic (b->address, stdout, demangle, " ");
-	    /* intentional fall-through */
-	  case bp_step_resume: /* do nothing. */
 	    break;
 	  }
 
