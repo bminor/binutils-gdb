@@ -1,4 +1,11 @@
+Wed May 19 15:51:19 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* trad-core.c: Check macro TRAD_CORE_EXTRA_SIZE_ALLOWED.
+	hosts/i386linux.h: Define it.
+
 Mon May 17 15:00:33 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
+
+	* VERSION, bfd-in.h: Bump version number to 2.2.
 
 	* hppa.c (assemble_3, dis_assemble_3, assemble_12,
 	dis_assemble_12, assemble_17, dis_assemble_17, assemble_21,
