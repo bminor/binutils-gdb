@@ -41,7 +41,6 @@ Makefile.in
 PORTING
 README
 TODO
-acconfig.h
 acinclude.m4
 aclocal.m4
 aix386-core.c

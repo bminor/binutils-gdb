@@ -1,3 +1,15 @@
+Thu Feb  4 22:30:13 1999  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Change AC_PREREQ to 2.13.  Remove AM_CYGWIN32.
+	Change AM_EXEEXT to AC_EXEEXT and AM_PROG_INSTALL to
+	AC_PROG_INSTALL.  Add comments to uses of AC_DEFINE.
+	* acinclude.m4: Add comments to uses of AC_DEFINE.
+	* acconfig.h: Remove.
+	* configure: Rebuild with current autoconf/automake.
+	* aclocal.m4: Likewise.
+	* config.in: Likewise.
+	* Makefile.in: Likewise.
+
 1999-02-04  DJ Delorie  <dj@cygnus.com>
 
 	* libbfd.c (real_read): don't call fread for zero bytes.  This
