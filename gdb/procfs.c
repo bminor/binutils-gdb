@@ -2750,6 +2750,8 @@ proc_set_exec_trap ()
 
   modify_run_on_last_close_flag (fd, 1);
 
+#ifndef UNIXWARE	/* since this is a solaris-ism, we don't want it */
+			/* NOTE: revisit when doing thread support for UW */
 #ifdef PR_ASYNC
   {
     long pr_flags;
@@ -2769,6 +2771,7 @@ proc_set_exec_trap ()
 #endif
   }
 #endif	/* PR_ASYNC */
+#endif	/* !UNIXWARE */
 }
 
 /*

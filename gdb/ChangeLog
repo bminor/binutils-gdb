@@ -67,6 +67,12 @@ Thu Nov 12 17:19:43 1998  John Metzler  <jmetzler@cygnus.com>
         command than what might be expected of host based threads. This
         is for embedded systems.
 
+Wed Nov 11 15:47:00 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* procfs.c (proc_set_exec_trap): don't set PR_ASYNC or PR_FORK
+        in the child process for UnixWare (causes processes forked by 
+        the debuggee to hang).
+
 Mon Nov  9 12:00:36 1998  Dave Brolley  <brolley@cygnus.com>
 
 	* config/fr30/fr30.mt: New file.
@@ -74,8 +80,9 @@ Mon Nov  9 12:00:36 1998  Dave Brolley  <brolley@cygnus.com>
 
 1998-11-05  Jim Wilson  <wilson@cygnus.com>
 
-	* remote-vx.c (net_read_registers, net_write_registers, vx_xver_memory,
-	vx_resume, vx_attach, vx_detach, vx_kill): Change errno to errno_num.
+	* remote-vx.c (net_read_registers, net_write_registers, 
+	vx_xver_memory, vx_resume, vx_attach, vx_detach, vx_kill): 
+	Change errno to errno_num.
 	* vx-share/xdr_ptrace.c (xdr_ptrace_return): Likewise.
 	* vx-share/xdr_ptrace.h (struct ptrace_return): Likewise.
 
@@ -415,18 +422,18 @@ Fri Oct  2 19:42:31 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
 	* c-lang.c (emit_char c_printchar c_printstr), c-lang.h (c_printstr)
 	ch-lang.c (chill_printstr chill_printchar) c-valprint.c (c_val_print)
 	ch-valprint.c (chill_val_print) expprint.c (print_subexp) f-lang.c
-	(f_printstr f_printchar emit_char) f-valprint.c (f_val_print) jv-lang.c
-	(java_printchar java_emit_char) jv-valprint.c (java_value_print
-	java_val_print) language.c (unk_lang_printchar unk_lang_printstr
-	unk_lang_emit_char) language.h (struct language_defn LA_PRINT_STRING
-	LA_EMIT_CHAR) m2-lang.c (m2_printstr m2_printchar emit_char) printcmd.c
-	(print_formatted) scm-lang.c (scm_printstr) valprint.c
-	(val_print_string) value.h (val_print_string):  Add emit_char routines
-	to language_desc struct to allow finer control over language specific
-	character output issues.  Add character width arg to printstr routines
-	to allow handling of wchar_t/Unicode strings.  Fix c_printstr to handle
-	wide characters.  Supply width argument to LA_PRINT_STRING and
-	val_print_string.
+	(f_printstr f_printchar emit_char) f-valprint.c (f_val_print) 
+	jv-lang.c (java_printchar java_emit_char) jv-valprint.c 
+	(java_value_print java_val_print) language.c (unk_lang_printchar 
+	unk_lang_printstr unk_lang_emit_char) language.h (struct 
+	language_defn LA_PRINT_STRING LA_EMIT_CHAR) m2-lang.c (m2_printstr 
+	m2_printchar emit_char) printcmd.c (print_formatted) scm-lang.c 
+	(scm_printstr) valprint.c (val_print_string) value.h 
+	(val_print_string):  Add emit_char routines to language_desc struct 
+	to allow finer control over language specific character output issues.
+  	Add character width arg to printstr routines to allow handling of 
+	wchar_t/Unicode strings.  Fix c_printstr to handle wide characters.
+  	Supply width argument to LA_PRINT_STRING and val_print_string.
 
 	* jv-lang.c (java_object_type dynamics_objfile java_link_class_type
 	get_dynamics_objfile get_java_object_type) jv-lang.h
