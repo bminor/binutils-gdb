@@ -110,12 +110,12 @@ if {$i >= [llength $lines]} {
 gdb_run_cmd
 gdb_test_multiple "" "run program with breakpoint commands" {
     -re "warning: Invalid control type in command structure" {
-        fail "run program with breakpoint commands"
+        kfail "gdb/1489" "run program with breakpoint commands"
     }
     -re "$gdb_prompt $" {
         pass "run program with breakpoint commands"
     }
     eof {
-        fail "run program with breakpoint commands (GDB died)"
+        kfail "gdb/1489" "run program with breakpoint commands (GDB died)"
     }
 }
