@@ -1,3 +1,12 @@
+2004-06-18 Jan Beulich <jbeulich@novell.com>
+
+	* ld-elfvsb/main.c: Ensure visibility_def and visibility_func are
+	actually referenced (gcc 3.4 eliminates comparisons of addresses
+	of global symbols with NULL).
+	* ld-selective/selective.exp: Suppress -fvtable-gc tests for gcc
+	3.4.0 and above, as this option and its functionality is no longer
+	supported, making these tests fail).
+
 2004-05-18  Nick Clifton  <nickc@redhat.com>
 
 	* ld-elf/frame.s: Replace @ with % so that the file can be
