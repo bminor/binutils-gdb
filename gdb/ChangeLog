@@ -1,3 +1,7 @@
+Wed Apr 12 16:36:44 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* values.c (set_internalvar): Set modifiable flag of newval.
+
 Wed Apr 12 14:34:31 1995  Jim Kingdon  <kingdon@deneb.cygnus.com>
 
 	* xcoffread.c: Call complain() rather than error() or printing a

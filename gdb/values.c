@@ -485,6 +485,7 @@ set_internalvar (var, val)
 #endif
 
   newval = value_copy (val);
+  newval->modifiable = 1;
 
   /* Force the value to be fetched from the target now, to avoid problems
      later when this internalvar is referenced and the target is gone or
