@@ -964,7 +964,7 @@ decode_die_type (dip)
     }
   else
     {
-      type = dwarf_fundamental_type (current_objfile, FT_INTEGER);
+      type = dwarf_fundamental_type (current_objfile, FT_VOID);
     }
   return (type);
 }
@@ -2957,6 +2957,8 @@ new_symbol (dip, objfile)
 	case TAG_subroutine:
 	  SYMBOL_VALUE_ADDRESS (sym) = dip -> at_low_pc;
 	  SYMBOL_TYPE (sym) = lookup_function_type (SYMBOL_TYPE (sym));
+	  if (dip -> at_prototyped)
+	    TYPE_FLAGS (SYMBOL_TYPE (sym)) |= TYPE_FLAG_PROTOTYPED;
 	  SYMBOL_CLASS (sym) = LOC_BLOCK;
 	  if (dip -> die_tag == TAG_global_subroutine)
 	    {

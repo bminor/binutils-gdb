@@ -268,6 +268,8 @@ finish_block (symbol, listhead, old_blocks, start, end, objfile)
 		case LOC_REF_ARG:
 		case LOC_REGPARM:
 		case LOC_REGPARM_ADDR:
+		case LOC_BASEREG_ARG:
+		case LOC_LOCAL_ARG:
 		  nparams++;
 		  break;
 		case LOC_UNDEF:
@@ -279,9 +281,7 @@ finish_block (symbol, listhead, old_blocks, start, end, objfile)
 		case LOC_LABEL:
 		case LOC_BLOCK:
 		case LOC_CONST_BYTES:
-		case LOC_LOCAL_ARG:
 		case LOC_BASEREG:
-		case LOC_BASEREG_ARG:
 		case LOC_UNRESOLVED:
 		case LOC_OPTIMIZED_OUT:
 		default:
@@ -303,6 +303,8 @@ finish_block (symbol, listhead, old_blocks, start, end, objfile)
 		    case LOC_REF_ARG:
 		    case LOC_REGPARM:
 		    case LOC_REGPARM_ADDR:
+		    case LOC_BASEREG_ARG:
+		    case LOC_LOCAL_ARG:
 		      TYPE_FIELD_TYPE (ftype, iparams) = SYMBOL_TYPE (sym);
 		      iparams++;
 		      break;
@@ -315,9 +317,7 @@ finish_block (symbol, listhead, old_blocks, start, end, objfile)
 		    case LOC_LABEL:
 		    case LOC_BLOCK:
 		    case LOC_CONST_BYTES:
-		    case LOC_LOCAL_ARG:
 		    case LOC_BASEREG:
-		    case LOC_BASEREG_ARG:
 		    case LOC_UNRESOLVED:
 		    case LOC_OPTIMIZED_OUT:
 		    default:

@@ -68,6 +68,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 struct frame_info;
 struct frame_saved_regs;
 struct type;
+struct value;
 #endif
 
 #define EXTRA_FRAME_INFO struct frame_saved_regs fsr;
@@ -106,3 +107,35 @@ extern CORE_ADDR v850_skip_prologue PARAMS ((CORE_ADDR pc));
 
 extern struct frame_info *v850_pop_frame PARAMS ((struct frame_info *frame));
 #define POP_FRAME v850_pop_frame (get_current_frame ())
+
+#define CALL_DUMMY { 0 }
+
+#define CALL_DUMMY_START_OFFSET (0)
+
+#define CALL_DUMMY_BREAKPOINT_OFFSET (0)
+
+extern void v850_push_dummy_frame PARAMS ((void));
+#define PUSH_DUMMY_FRAME v850_push_dummy_frame ()
+
+#define FIX_CALL_DUMMY(DUMMY1, START_SP, FUNADDR, NARGS, ARGS, VALUE_TYPE, USING_GCC)
+
+#define CALL_DUMMY_LOCATION AT_ENTRY_POINT
+
+#define STACK_ALIGN(x) ((x + 3) & ~3)
+
+extern CORE_ADDR
+v850_push_arguments PARAMS ((int nargs, struct value **args, CORE_ADDR sp,
+			     unsigned char struct_return,
+			     CORE_ADDR struct_addr));
+#define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
+  (SP) = v850_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR)
+
+#define STORE_STRUCT_RETURN(STRUCT_ADDR, SP)
+
+#define CALL_DUMMY_ADDRESS() (entry_point_address ())
+
+extern int v850_pc_in_call_dummy PARAMS ((CORE_ADDR pc));
+#define PC_IN_CALL_DUMMY(PC, SP, FP) v850_pc_in_call_dummy (PC)
+
+#define USE_STRUCT_CONVENTION(GCC_P, TYPE) \
+  	(TYPE_NFIELDS (TYPE) > 1 || TYPE_LENGTH (TYPE) > 4)

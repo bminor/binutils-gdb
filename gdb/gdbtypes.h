@@ -154,6 +154,12 @@ enum type_code
 
 #define TYPE_FLAG_TARGET_STUB (1 << 3)
 
+/* This is a function type which appears to have a prototype.  We need this
+   for function calls in order to tell us if it's necessary to coerce the args,
+   or to just do the standard conversions.  */
+
+#define TYPE_FLAG_PROTOTYPED (1 << 4)
+
 struct type
 {
 

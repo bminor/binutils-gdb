@@ -1,3 +1,25 @@
+Tue Oct 15 16:30:07 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* buildsym.c (finish_block):  Treat LOC_BASEREG_ARG and
+	LOC_LOCAL_ARG as arguments so that GDB will know about function
+	args declared this way.  Mostly affects dwarf.
+	* dwarfread.c (decode_die_type):  Change default type from int to
+	void.  This allows GDB to recognize void functions.
+	* (new_symbol):  If AT_PROTOTYPED is present, set a flag in the
+	type structure.
+	* findvar.c (extract_floating store_floating):  Clean up comments
+	to reflect reality.
+	* gdbtypes.h:  Add TYPE_FLAG_PROTOTYPED so that we can tell if a
+	function has a prototype.  Currently, only dwarf supports this.
+	* utils.c (floatformat_from_doublest):  Fix logic error with
+	converting from double to float.  (It wasn't shifting mant_long if
+	it had a hidden bit.)
+
+start-sanitize-v850
+	* v850-tdep.c:  Add support for function calling.  Fix some
+	problems with debugging code w/o debug symbols.
+	* config/v850/tm-v850.h:  Ditto.
+end-sanitize-v850
 Tue Oct 15 18:19:42 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* utils.c: Always ensure that size_t is defined.  Check
@@ -16,8 +38,8 @@ Sun Oct 13 11:38:25 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 Fri Oct 11 15:43:54 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
-	* frame.h:  Move definition of struct frame_saved_args to before
-	struct frame to make it possible to use frame_saved_args in
+	* frame.h:  Move definition of struct frame_saved_regs to before
+	struct frame to make it possible to use frame_saved_regs in
 	EXTRA_FRAME_INFO macro.
 
 start-sanitize-v850
