@@ -6,6 +6,9 @@ Wed Feb 23 16:28:55 1994  Jeffrey A. Law  (law@cygnus.com)
 
 Wed Feb 23 16:21:25 1994  Stu Grossman  (grossman at cygnus.com)
 
+	* sparc-stub.c (trap_low):  Make trap handler work for arbitrary
+	numbers of register windows.
+
 	* sparclite/hello.c:  Add factorial function for testing.
 	* salib.c:  Use macros instead of constants for I/O addresses to
 	make 931 support easier.

@@ -157,9 +157,27 @@ _trap_low:
 
 	mov	%g1, %l4		! Save g1, we use it to hold the wim
 	srl	%l3, 1, %g1		! Rotate wim right
-	sll	%l3, 8-1, %l5
-	or	%l5, %g1, %g1
+	tst	%g1
+	bg	good_wim		! Branch if new wim is non-zero
 
+! At this point, we need to bring a 1 into the high order bit of the wim.
+! Since we don't want to make any assumptions about the number of register
+! windows, we figure it out dynamically so as to setup the wim correctly.
+
+	not	%g1			! Fill g1 with ones
+	mov	%g1, %wim		! Fill the wim with ones
+	nop
+	nop
+	nop
+	mov	%wim, %g1		! Read back the wim
+	inc	%g1			! Now g1 has 1 just to left of wim
+	srl	%g1, 1, %g1		! Now put 1 at top of wim
+	mov	%g0, %wim		! Clear wim so that subsequent save
+	nop				!  won't trap
+	nop
+	nop
+
+good_wim:
 	save	%g0, %g0, %g0		! Slip into next window
 	mov	%g1, %wim		! Install the new wim
 
@@ -758,7 +776,7 @@ handle_exception (registers)
 	  break;
 #if 0
 	case 't':		/* Test feature */
-	  asm (" std %f31,[%sp]");
+	  asm (" std %f30,[%sp]");
 	  break;
 #endif
 	case 'r':		/* Reset */
