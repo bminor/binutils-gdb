@@ -66,6 +66,7 @@ generic symtabs		Jim Blandy		jimb@cygnus.com
 dwarf readers		Jim Blandy		jimb@cygnus.com
 elf reader		Jim Blandy		jimb@cygnus.com
 stabs reader		Jim Blandy		jimb@cygnus.com
+tracing bytecode stuff  Jim Blandy		jimb@cygnus.com
 tracing			Michael Snyder		msnyder@cygnus.com
 threads			Michael Snyder		msnyder@cygnus.com
 breakpoint.c		Michael Snyder		msnyder@cygnus.com
