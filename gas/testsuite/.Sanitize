@@ -1,5 +1,4 @@
-# Sanitize.in for devo.
-# $Id$
+# Sanitize.in for gas test suite.
 #
 
 # Each directory to survive it's way into a release will need a file
