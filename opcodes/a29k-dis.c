@@ -317,7 +317,7 @@ print_insn (memaddr, info)
     }
   /* This used to be %8x for binutils.  */
   (*info->fprintf_func)
-    (info->stream, ".word 0x%8x",
+    (info->stream, ".word 0x%08x",
      (insn24 << 24) + (insn16 << 16) + (insn8 << 8) + insn0);
   return 4;
 }
