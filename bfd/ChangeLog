@@ -1,3 +1,19 @@
+Tue Aug  3 18:17:25 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coffswap.h: Added macros used when accessing several fields;
+	default is the same as before.
+	(coff_swap_aouthdr_{in,out}): Handle the Alpha ECOFF fields.
+	* coff-alpha.c: Defined macros to use the right sizes in
+	coffswap.h.
+	* libecoff.h: Backend information is now in target vector, not
+	BFD.  Start of backend information is COFF backend information.
+	* coff-alpha.c, coff-mips.c: Changed accordingly.
+	* ecoff.c (ecoff_mkobject): New function.
+	(ARMAP_START): Changed into backend information, since Alpha uses
+	a different name.
+	(ecoff_slurp_armap): Don't overlay archive header.
+	* bfd.c: Include libcoff.h.
+
 Tue Aug  3 16:33:11 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* Makefile.in (install): Fix sh syntax error.

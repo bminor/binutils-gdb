@@ -179,6 +179,7 @@ CODE_FRAGMENT
 #include "libbfd.h"
 #include "coff/internal.h"
 #include "coff/sym.h"
+#include "libcoff.h"
 #include "libecoff.h"
 
 #undef strerror

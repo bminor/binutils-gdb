@@ -234,6 +234,27 @@ static reloc_howto_type ecoff_howto_table[] =
 
 static asection bfd_debug_section = { "*DEBUG*" };
 
+/* Create an ECOFF object.  */
+
+boolean
+ecoff_mkobject (abfd)
+     bfd *abfd;
+{
+  abfd->tdata.ecoff_obj_data = ((struct ecoff_tdata *)
+				bfd_zalloc (abfd, sizeof (ecoff_data_type)));
+  if (abfd->tdata.ecoff_obj_data == NULL)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
+
+  /* Always create a .scommon section for every BFD.  This is a hack so
+     that the linker has something to attach scSCommon symbols to.  */
+  bfd_make_section (abfd, SCOMMON);
+
+  return true;
+}
+
 /* This is a hook needed by SCO COFF, but we have nothing to do.  */
 
 asection *
@@ -653,7 +674,7 @@ ecoff_slurp_symbolic_info (abfd)
   internal_symhdr = &ecoff_data (abfd)->symbolic_header;
   (*backend->swap_hdr_in) (abfd, raw, internal_symhdr);
 
-  if (internal_symhdr->magic != magicSym)
+  if (internal_symhdr->magic != backend->sym_magic)
     {
       bfd_error = bad_value;
       return false;
@@ -1121,7 +1142,11 @@ ecoff_slurp_symbol_table (abfd)
 				   + internal_esym.asym.iss);
       ecoff_set_symbol_info (abfd, &internal_esym.asym,
 			     &internal_ptr->symbol, 1, &indirect_ptr);
-      internal_ptr->fdr = ecoff_data (abfd)->fdr + internal_esym.ifd;
+      /* The alpha uses a negative ifd field for section symbols.  */
+      if (internal_esym.ifd >= 0)
+	internal_ptr->fdr = ecoff_data (abfd)->fdr + internal_esym.ifd;
+      else
+	internal_ptr->fdr = NULL;
       internal_ptr->local = false;
       internal_ptr->native = (PTR) eraw_src;
     }
@@ -2973,11 +2998,14 @@ ecoff_get_debug (output_bfd, seclet, section, relocateable)
       output_symhdr->crfd += input_symhdr->ifdMax;
     }
 
-  /* Combine the register masks.  */
+  /* Combine the register masks.  Not all of these are used on all
+     targets, but that's OK because only the relevant ones will be
+     swapped in and out.  */
   {
     int i;
 
     output_ecoff->gprmask |= input_ecoff->gprmask;
+    output_ecoff->fprmask |= input_ecoff->fprmask;
     for (i = 0; i < 4; i++)
       output_ecoff->cprmask[i] |= input_ecoff->cprmask[i];
   }
@@ -3018,7 +3046,7 @@ ecoff_bfd_seclet_link (abfd, data, relocateable)
   /* We accumulate the debugging information counts in the symbolic
      header.  */
   symhdr = &ecoff_data (abfd)->symbolic_header;
-  symhdr->magic = magicSym;
+  symhdr->magic = backend->sym_magic;
   /* FIXME: What should the version stamp be?  */
   symhdr->vstamp = 0;
   symhdr->ilineMax = 0;
@@ -3640,6 +3668,7 @@ ecoff_write_object_contents (abfd)
   internal_a.gp_value = ecoff_data (abfd)->gp;
 
   internal_a.gprmask = ecoff_data (abfd)->gprmask;
+  internal_a.fprmask = ecoff_data (abfd)->fprmask;
   for (i = 0; i < 4; i++)
     internal_a.cprmask[i] = ecoff_data (abfd)->cprmask[i];
 
@@ -3852,12 +3881,14 @@ ecoff_write_object_contents (abfd)
 /* The name of an archive headers looks like this:
    __________E[BL]E[BL]_ (with a trailing space).
    The trailing space is changed to an X if the archive is changed to
-   indicate that the armap is out of date.  */
+   indicate that the armap is out of date.
+
+   The Alpha seems to use ________64E[BL]E[BL]_.  */
 
 #define ARMAP_BIG_ENDIAN 'B'
 #define ARMAP_LITTLE_ENDIAN 'L'
 #define ARMAP_MARKER 'E'
-#define ARMAP_START "__________"
+#define ARMAP_START_LENGTH 10
 #define ARMAP_HEADER_MARKER_INDEX 10
 #define ARMAP_HEADER_ENDIAN_INDEX 11
 #define ARMAP_OBJECT_MARKER_INDEX 12
@@ -3917,7 +3948,8 @@ ecoff_slurp_armap (abfd)
   bfd_seek (abfd, (file_ptr) -16, SEEK_CUR);
 
   /* See if the first element is an armap.  */
-  if (strncmp (nextname, ARMAP_START, sizeof ARMAP_START - 1) != 0
+  if (strncmp (nextname, ecoff_backend (abfd)->armap_start,
+	       ARMAP_START_LENGTH) != 0
       || nextname[ARMAP_HEADER_MARKER_INDEX] != ARMAP_MARKER
       || (nextname[ARMAP_HEADER_ENDIAN_INDEX] != ARMAP_BIG_ENDIAN
 	  && nextname[ARMAP_HEADER_ENDIAN_INDEX] != ARMAP_LITTLE_ENDIAN)
@@ -3968,11 +4000,9 @@ ecoff_slurp_armap (abfd)
   ardata->symdef_count = 0;
   ardata->cache = (struct ar_cache *) NULL;
 
-  /* Hack: overlay the symdefs on top of the raw archive data.  This
-     is the way do_slurp_bsd_armap works.  */
-  raw_ptr = raw_armap + LONG_SIZE;
-  symdef_ptr = (struct symdef *) raw_ptr;
-  ardata->symdefs = (carsym *) symdef_ptr;
+  /* This code used to overlay the symdefs over the raw archive data,
+     but that doesn't work on a 64 bit host.  */
+
   stringbase = raw_ptr + count * (2 * LONG_SIZE) + LONG_SIZE;
 
 #ifdef CHECK_ARMAP_HASH
@@ -3986,6 +4016,7 @@ ecoff_slurp_armap (abfd)
       hlog++;
     BFD_ASSERT (i == count);
 
+    raw_ptr = raw_armap + LONG_SIZE;
     for (i = 0; i < count; i++, raw_ptr += 2 * LONG_SIZE)
       {
 	unsigned int name_offset, file_offset;
@@ -4014,21 +4045,30 @@ ecoff_slurp_armap (abfd)
       }
   }
 
-  raw_ptr = raw_armap + LONG_SIZE;
 #endif /* CHECK_ARMAP_HASH */
 
+  raw_ptr = raw_armap + LONG_SIZE;
+  for (i = 0; i < count; i++, raw_ptr += 2 * LONG_SIZE)
+    if (bfd_h_get_32 (abfd, (PTR) (raw_ptr + LONG_SIZE)) != 0)
+      ++ardata->symdef_count;
+
+  symdef_ptr = ((struct symdef *)
+		bfd_alloc (abfd,
+			   ardata->symdef_count * sizeof (struct symdef)));
+  ardata->symdefs = (carsym *) symdef_ptr;
+
+  raw_ptr = raw_armap + LONG_SIZE;
   for (i = 0; i < count; i++, raw_ptr += 2 * LONG_SIZE)
     {
       unsigned int name_offset, file_offset;
 
-      name_offset = bfd_h_get_32 (abfd, (PTR) raw_ptr);
       file_offset = bfd_h_get_32 (abfd, (PTR) (raw_ptr + LONG_SIZE));
       if (file_offset == 0)
 	continue;
+      name_offset = bfd_h_get_32 (abfd, (PTR) raw_ptr);
       symdef_ptr->s.name = stringbase + name_offset;
       symdef_ptr->file_offset = file_offset;
       ++symdef_ptr;
-      ++ardata->symdef_count;
     }
 
   ardata->first_file_filepos = bfd_tell (abfd);
@@ -4082,7 +4122,7 @@ ecoff_write_armap (abfd, elength, map, orl_count, stridx)
   memset ((PTR) &hdr, 0, sizeof hdr);
 
   /* Work out the ECOFF armap name.  */
-  strcpy (hdr.ar_name, ARMAP_START);
+  strcpy (hdr.ar_name, ecoff_backend (abfd)->armap_start);
   hdr.ar_name[ARMAP_HEADER_MARKER_INDEX] = ARMAP_MARKER;
   hdr.ar_name[ARMAP_HEADER_ENDIAN_INDEX] =
     (abfd->xvec->header_byteorder_big_p
