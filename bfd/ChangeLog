@@ -1,5 +1,8 @@
 Thu Feb  1 16:04:06 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in (bfd-in2.h): Make bfd.h, not protos, in docdir.
+	(libbfd.h, libcoff.h): Corresponding change.
+
 	* elf32-i386.c (elf_i386_check_relocs): Don't record a symbol with
 	a PLT32 reloc as dynamic.
 	(elf_i386_adjust_dynamic_symbol): If a symbol with a PLT32 reloc
