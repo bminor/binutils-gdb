@@ -1,3 +1,17 @@
+2005-02-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (elf_string_from_elf_strtab): Delete macro.
+	* elf.c (bfd_elf_string_from_elf_section): Expand occurrence of
+	elf_string_from_elf_strtab.
+	(_bfd_elf_setup_group_pointers, bfd_section_from_shdr): Likewise.
+	(bfd_section_from_shdr): For SHT_SYMTAB, load SHT_SYMTAB_SHNDX too
+	if it exists.  Don't do the reverse for SHT_SYMTAB_SHNDX.  For
+	SHT_STRTAB, check whether the strtab is for symtab or dynsymtab by
+	looking at cached symtab info first, before iterating over headers.
+	For SHT_REL and SHT_RELA, load dynsymtab if needed.
+	* elfcode.h (elf_object_p): Don't load section header stringtab
+	specially.
+
 2005-02-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_relocate_section): Disallow R_386_GOTOFF

@@ -475,7 +475,6 @@ elf_object_p (bfd *abfd)
   Elf_Internal_Shdr i_shdr;
   Elf_Internal_Shdr *i_shdrp;	/* Section header table, internal form */
   unsigned int shindex;
-  char *shstrtab;		/* Internal copy of section header stringtab */
   const struct elf_backend_data *ebd;
   struct bfd_preserve preserve;
   asection *s;
@@ -686,12 +685,6 @@ elf_object_p (bfd *abfd)
 	}
     }
 
-  if (i_ehdrp->e_shstrndx && i_ehdrp->e_shoff)
-    {
-      if (! bfd_section_from_shdr (abfd, i_ehdrp->e_shstrndx))
-	goto got_no_match;
-    }
-
   /* Read in the program headers.  */
   if (i_ehdrp->e_phnum == 0)
     elf_tdata (abfd)->phdr = NULL;
@@ -717,19 +710,9 @@ elf_object_p (bfd *abfd)
 	}
     }
 
-  /* Read in the string table containing the names of the sections.  We
-     will need the base pointer to this table later.  */
-  /* We read this inline now, so that we don't have to go through
-     bfd_section_from_shdr with it (since this particular strtab is
-     used to find all of the ELF section names.) */
-
-  if (i_ehdrp->e_shstrndx != 0 && i_ehdrp->e_shoff)
+  if (i_ehdrp->e_shstrndx != 0 && i_ehdrp->e_shoff != 0)
     {
       unsigned int num_sec;
-
-      shstrtab = bfd_elf_get_str_section (abfd, i_ehdrp->e_shstrndx);
-      if (!shstrtab)
-	goto got_no_match;
 
       /* Once all of the section headers have been read and converted, we
 	 can start processing them.  Note that the first section header is

@@ -291,13 +291,13 @@ bfd_elf_string_from_elf_section (bfd *abfd,
 
   if (strindex >= hdr->sh_size)
     {
+      unsigned int shstrndx = elf_elfheader(abfd)->e_shstrndx;
       (*_bfd_error_handler)
 	(_("%B: invalid string offset %u >= %lu for section `%s'"),
 	 abfd, strindex, (unsigned long) hdr->sh_size,
-	 ((shindex == elf_elfheader(abfd)->e_shstrndx
-	   && strindex == hdr->sh_name)
+	 (shindex == shstrndx && strindex == hdr->sh_name
 	  ? ".shstrtab"
-	  : elf_string_from_elf_strtab (abfd, hdr->sh_name)));
+	  : bfd_elf_string_from_elf_section (abfd, shstrndx, hdr->sh_name)));
       return "";
     }
 
@@ -650,7 +650,10 @@ _bfd_elf_setup_group_pointers (bfd *abfd)
 	      (_("%B: unknown [%d] section `%s' in group [%s]"),
 	       abfd,
 	       (unsigned int) idx->shdr->sh_type,
-	       elf_string_from_elf_strtab (abfd, idx->shdr->sh_name),
+	       bfd_elf_string_from_elf_section (abfd,
+						(elf_elfheader (abfd)
+						 ->e_shstrndx),
+						idx->shdr->sh_name),
 	       shdr->bfd_section->name);
 	    result = FALSE;
 	  }
@@ -1706,7 +1709,9 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   const char *name;
 
-  name = elf_string_from_elf_strtab (abfd, hdr->sh_name);
+  name = bfd_elf_string_from_elf_section (abfd,
+					  elf_elfheader (abfd)->e_shstrndx,
+					  hdr->sh_name);
 
   switch (hdr->sh_type)
     {
@@ -1779,6 +1784,32 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	  && ! _bfd_elf_make_section_from_shdr (abfd, hdr, name))
 	return FALSE;
 
+      /* Go looking for SHT_SYMTAB_SHNDX too, since if there is one we
+	 can't read symbols without that section loaded as well.  It
+	 is most likely specified by the next section header.  */
+      if (elf_elfsections (abfd)[elf_symtab_shndx (abfd)]->sh_link != shindex)
+	{
+	  unsigned int i, num_sec;
+
+	  num_sec = elf_numsections (abfd);
+	  for (i = shindex + 1; i < num_sec; i++)
+	    {
+	      Elf_Internal_Shdr *hdr2 = elf_elfsections (abfd)[i];
+	      if (hdr2->sh_type == SHT_SYMTAB_SHNDX
+		  && hdr2->sh_link == shindex)
+		break;
+	    }
+	  if (i == num_sec)
+	    for (i = 1; i < shindex; i++)
+	      {
+		Elf_Internal_Shdr *hdr2 = elf_elfsections (abfd)[i];
+		if (hdr2->sh_type == SHT_SYMTAB_SHNDX
+		    && hdr2->sh_link == shindex)
+		  break;
+	      }
+	  if (i != shindex)
+	    return bfd_section_from_shdr (abfd, i);
+	}
       return TRUE;
 
     case SHT_DYNSYM:		/* A dynamic symbol table */
@@ -1800,11 +1831,7 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
       if (elf_symtab_shndx (abfd) == shindex)
 	return TRUE;
 
-      /* Get the associated symbol table.  */
-      if (! bfd_section_from_shdr (abfd, hdr->sh_link)
-	  || hdr->sh_link != elf_onesymtab (abfd))
-	return FALSE;
-
+      BFD_ASSERT (elf_symtab_shndx (abfd) == 0);
       elf_symtab_shndx (abfd) = shindex;
       elf_tdata (abfd)->symtab_shndx_hdr = *hdr;
       elf_elfsections (abfd)[shindex] = &elf_tdata (abfd)->symtab_shndx_hdr;
@@ -1819,37 +1846,46 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	  elf_elfsections (abfd)[shindex] = &elf_tdata (abfd)->shstrtab_hdr;
 	  return TRUE;
 	}
-      {
-	unsigned int i, num_sec;
+      if (elf_elfsections (abfd)[elf_onesymtab (abfd)]->sh_link == shindex)
+	{
+	symtab_strtab:
+	  elf_tdata (abfd)->strtab_hdr = *hdr;
+	  elf_elfsections (abfd)[shindex] = &elf_tdata (abfd)->strtab_hdr;
+	  return TRUE;
+	}
+      if (elf_elfsections (abfd)[elf_dynsymtab (abfd)]->sh_link == shindex)
+	{
+	dynsymtab_strtab:
+	  elf_tdata (abfd)->dynstrtab_hdr = *hdr;
+	  hdr = &elf_tdata (abfd)->dynstrtab_hdr;
+	  elf_elfsections (abfd)[shindex] = hdr;
+	  /* We also treat this as a regular section, so that objcopy
+	     can handle it.  */
+	  return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
+	}
 
-	num_sec = elf_numsections (abfd);
-	for (i = 1; i < num_sec; i++)
-	  {
-	    Elf_Internal_Shdr *hdr2 = elf_elfsections (abfd)[i];
-	    if (hdr2->sh_link == shindex)
-	      {
-		if (! bfd_section_from_shdr (abfd, i))
-		  return FALSE;
-		if (elf_onesymtab (abfd) == i)
-		  {
-		    elf_tdata (abfd)->strtab_hdr = *hdr;
-		    elf_elfsections (abfd)[shindex] =
-		      &elf_tdata (abfd)->strtab_hdr;
-		    return TRUE;
-		  }
-		if (elf_dynsymtab (abfd) == i)
-		  {
-		    elf_tdata (abfd)->dynstrtab_hdr = *hdr;
-		    elf_elfsections (abfd)[shindex] = hdr =
-		      &elf_tdata (abfd)->dynstrtab_hdr;
-		    /* We also treat this as a regular section, so
-		       that objcopy can handle it.  */
-		    break;
-		  }
-	      }
-	  }
-      }
+      /* If the string table isn't one of the above, then treat it as a
+	 regular section.  We need to scan all the headers to be sure,
+	 just in case this strtab section appeared before the above.  */
+      if (elf_onesymtab (abfd) == 0 || elf_dynsymtab (abfd) == 0)
+	{
+	  unsigned int i, num_sec;
 
+	  num_sec = elf_numsections (abfd);
+	  for (i = 1; i < num_sec; i++)
+	    {
+	      Elf_Internal_Shdr *hdr2 = elf_elfsections (abfd)[i];
+	      if (hdr2->sh_link == shindex)
+		{
+		  if (! bfd_section_from_shdr (abfd, i))
+		    return FALSE;
+		  if (elf_onesymtab (abfd) == i)
+		    goto symtab_strtab;
+		  if (elf_dynsymtab (abfd) == i)
+		    goto dynsymtab_strtab;
+		}
+	    }
+	}
       return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
 
     case SHT_REL:
@@ -1902,7 +1938,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	  }
 
 	/* Get the symbol table.  */
-	if (elf_elfsections (abfd)[hdr->sh_link]->sh_type == SHT_SYMTAB
+	if ((elf_elfsections (abfd)[hdr->sh_link]->sh_type == SHT_SYMTAB
+	     || elf_elfsections (abfd)[hdr->sh_link]->sh_type == SHT_DYNSYM)
 	    && ! bfd_section_from_shdr (abfd, hdr->sh_link))
 	  return FALSE;
 
@@ -2001,10 +2038,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 
     default:
       /* Check for any processor-specific section types.  */
-      {
-	if (bed->elf_backend_section_from_shdr)
-	  (*bed->elf_backend_section_from_shdr) (abfd, hdr, name);
-      }
+      if (bed->elf_backend_section_from_shdr)
+	(*bed->elf_backend_section_from_shdr) (abfd, hdr, name);
       break;
     }
 

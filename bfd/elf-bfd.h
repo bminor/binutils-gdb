@@ -1378,10 +1378,6 @@ extern bfd_boolean _bfd_elf_print_private_bfd_data
 extern void bfd_elf_print_symbol
   (bfd *, void *, asymbol *, bfd_print_symbol_type);
 
-#define elf_string_from_elf_strtab(abfd, strindex) \
-  bfd_elf_string_from_elf_section (abfd, elf_elfheader(abfd)->e_shstrndx, \
-				   strindex)
-
 extern void _bfd_elf_sprintf_vma
   (bfd *, char *, bfd_vma);
 extern void _bfd_elf_fprintf_vma
