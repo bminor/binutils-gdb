@@ -319,7 +319,7 @@ proc test_dis { command var } {
     global gdb_prompt
     send_gdb "${command}\n"
     gdb_expect {
-	-re "${var}.*:.*Cannot access" {
+	-re "${var}.*:.*(Cannot access|Bad address)" {
 	    # The "disassembler" was only accessing the local
 	    # executable and that would cause attempts to disassemble
 	    # variables to fail (memory not valid).

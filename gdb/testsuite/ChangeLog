@@ -1,3 +1,8 @@
+2003-06-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.asm/asm-source.exp: Check for memory read errors in
+	disassembler test on *BSD too.
+
 2003-06-01  Richard Henderson  <rth@redhat.com>
 
 	* gdb.asm/alpha.inc (gdbasm_enter): Use numeric register names
