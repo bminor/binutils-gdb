@@ -6,6 +6,8 @@
 /^host_makefile_frag@$/d
 /^target_makefile_frag@$/d
 
+/@ENABLE_CFLAGS@/s/@ENABLE_CFLAGS@//g
+
 # Edit all the symbolic definitions pointing to various libraries and such.
 
 /^INCLUDE_DIR = /s/"{srcdir}":include/"{topsrcdir}"include:/

@@ -1,3 +1,8 @@
+Wed Nov  8 19:25:22 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-make.sed: Edit @ENABLE_CFLAGS@ out, mpw-configure can
+	add back in if necessary.
+
 Wed Nov  8 15:59:52 1995  James G. Smith  <jsmith@pasanda.cygnus.co.uk>
 
 	* config/mips/vr4300.mt: Added simulator to default VR4300 build.
