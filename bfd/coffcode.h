@@ -796,7 +796,7 @@ dependent COFF routines:
 . boolean (*_bfd_coff_sym_is_global) PARAMS ((
 .       bfd *abfd,
 .       struct internal_syment *));
-. void (*_bfd_coff_compute_section_file_positions) PARAMS ((
+. boolean (*_bfd_coff_compute_section_file_positions) PARAMS ((
 .       bfd *abfd));
 . boolean (*_bfd_coff_start_final_link) PARAMS ((
 .       bfd *output_bfd,
@@ -2069,13 +2069,14 @@ coff_set_arch_mach (abfd, arch, machine)
 
 /* Calculate the file position for each section. */
 
-static void
+static boolean
 coff_compute_section_file_positions (abfd)
      bfd * abfd;
 {
   asection *current;
   asection *previous = (asection *) NULL;
   file_ptr sofar = FILHSZ;
+  boolean align_adjust;
 
 #ifndef I960
   file_ptr old_sofar;
@@ -2161,6 +2162,7 @@ coff_compute_section_file_positions (abfd)
       sofar += SCNHSZ;
 #endif
 
+  align_adjust = false;
   for (current = abfd->sections, count = 1;
        current != (asection *) NULL;
        current = current->next, ++count)
@@ -2209,20 +2211,14 @@ coff_compute_section_file_positions (abfd)
 	  current->used_by_bfd =
 	    (PTR) bfd_zalloc (abfd, sizeof (struct coff_section_tdata));
 	  if (current->used_by_bfd == NULL)
-	    {
-	      /* FIXME: Return error.  */
-	      abort ();
-	    }
+	    return false;
 	}
       if (pei_section_data (abfd, current) == NULL)
 	{
 	  coff_section_data (abfd, current)->tdata =
 	    (PTR) bfd_zalloc (abfd, sizeof (struct pei_section_tdata));
 	  if (coff_section_data (abfd, current)->tdata == NULL)
-	    {
-	      /* FIXME: Return error.  */
-	      abort ();
-	    }
+	    return false;
 	}
       if (pei_section_data (abfd, current)->virt_size == 0)
 	pei_section_data (abfd, current)->virt_size = current->_raw_size;
@@ -2241,12 +2237,14 @@ coff_compute_section_file_positions (abfd)
 	  old_size = current->_raw_size;
 	  current->_raw_size = BFD_ALIGN (current->_raw_size,
 					  1 << current->alignment_power);
+	  align_adjust = current->_raw_size != old_size;
 	  sofar += current->_raw_size - old_size;
 	}
       else
 	{
 	  old_sofar = sofar;
 	  sofar = BFD_ALIGN (sofar, 1 << current->alignment_power);
+	  align_adjust = sofar != old_sofar;
 	  current->_raw_size += sofar - old_sofar;
 	}
 #endif
@@ -2262,12 +2260,30 @@ coff_compute_section_file_positions (abfd)
       previous = current;
     }
 
-  /* Make sure the relocations are aligned.  */
+  /* It is now safe to write to the output file.  If we needed an
+     alignment adjustment for the last section, then make sure that
+     there is a byte at offset sofar.  If there are no symbols and no
+     relocs, then nothing follows the last section.  If we don't force
+     the last byte out, then the file may appear to be truncated.  */
+  if (align_adjust)
+    {
+      bfd_byte b;
+
+      b = 0;
+      if (bfd_seek (abfd, sofar - 1, SEEK_SET) != 0
+	  || bfd_write (&b, 1, 1, abfd) != 1)
+	return false;
+    }
+
+  /* Make sure the relocations are aligned.  We don't need to make
+     sure that this byte exists, because it will only matter if there
+     really are relocs.  */
   sofar = BFD_ALIGN (sofar, 1 << COFF_DEFAULT_SECTION_ALIGNMENT_POWER);
 
   obj_relocbase (abfd) = sofar;
   abfd->output_has_begun = true;
 
+  return true;
 }
 
 #if 0
@@ -2324,7 +2340,7 @@ coff_add_missing_symbols (abfd)
   if (!need_text && !need_data && !need_bss && !need_file)
     return true;
   nsyms += need_text + need_data + need_bss + need_file;
-  sympp2 = (asymbol **) bfd_alloc_by_size_t (abfd, nsyms * sizeof (asymbol *));
+  sympp2 = (asymbol **) bfd_alloc (abfd, nsyms * sizeof (asymbol *));
   if (!sympp2)
     return false;
   memcpy (sympp2, sympp, i * sizeof (asymbol *));
@@ -2379,7 +2395,10 @@ coff_write_object_contents (abfd)
   lnno_size = coff_count_linenumbers (abfd) * LINESZ;
 
   if (abfd->output_has_begun == false)
-    coff_compute_section_file_positions (abfd);
+    {
+      if (! coff_compute_section_file_positions (abfd))
+	return false;
+    }
 
   reloc_base = obj_relocbase (abfd);
 
@@ -3015,7 +3034,10 @@ coff_set_section_contents (abfd, section, location, offset, count)
      bfd_size_type count;
 {
   if (abfd->output_has_begun == false)	/* set by bfd.c handler */
-    coff_compute_section_file_positions (abfd);
+    {
+      if (! coff_compute_section_file_positions (abfd))
+	return false;
+    }
 
 #if defined(_LIB) && !defined(TARG_AUX)
 

@@ -1,5 +1,7 @@
 /* opncls.c -- open and close a BFD.
-   Copyright (C) 1990 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 1997
+   Free Software Foundation, Inc.
+
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -226,7 +228,7 @@ bfd_fdopenr (filename, target, fd)
     bfd_set_error (bfd_error_invalid_target);
     return NULL;
   }
-#if defined(VMS) || defined(__GO32__) || defined (WINGDB)
+#if defined(VMS) || defined(__GO32__)
   nbfd->iostream = (PTR)fopen(filename, FOPEN_RB);
 #else
   /* (O_ACCMODE) parens are to avoid Ultrix header file bug */
@@ -539,19 +541,19 @@ bfd_create (filename, templ)
 
 /*
 INTERNAL_FUNCTION
-	bfd_alloc_by_size_t
+	bfd_alloc
 
 SYNOPSIS
-	PTR bfd_alloc_by_size_t(bfd *abfd, size_t wanted);
+	PTR bfd_alloc (bfd *abfd, size_t wanted);
 
 DESCRIPTION
 	Allocate a block of @var{wanted} bytes of memory in the obstack
-	attatched to <<abfd>> and return a pointer to it.
+	attached to <<abfd>> and return a pointer to it.
 */
 
 
 PTR
-bfd_alloc_by_size_t (abfd, size)
+bfd_alloc (abfd, size)
      bfd *abfd;
      size_t size;
 {
@@ -582,14 +584,6 @@ bfd_alloc_finish (abfd)
   if (ret == NULL)
     bfd_set_error (bfd_error_no_memory);
   return ret;
-}
-
-PTR
-bfd_alloc (abfd, size)
-     bfd *abfd;
-     size_t size;
-{
-  return bfd_alloc_by_size_t(abfd, (size_t)size);
 }
 
 PTR

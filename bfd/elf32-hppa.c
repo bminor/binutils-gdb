@@ -1,5 +1,6 @@
 /* BFD back-end for HP PA-RISC ELF files.
-   Copyright (C) 1990, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 1997
+   Free Software Foundation, Inc.
 
    Written by
 
@@ -234,7 +235,7 @@ static void add_entry_to_symext_chain
 static void
 elf_hppa_tc_make_sections PARAMS ((bfd *, symext_chainS *));
 
-static boolean hppa_elf_is_local_label PARAMS ((bfd *, asymbol *));
+static boolean hppa_elf_is_local_label_name PARAMS ((bfd *, const char *));
 
 static boolean elf32_hppa_add_symbol_hook
   PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
@@ -953,14 +954,14 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
   elf32_hppa_reloc_type **final_types;
 
   /* Allocate slots for the BFD relocation.  */
-  final_types = (elf32_hppa_reloc_type **)
-    bfd_alloc_by_size_t (abfd, sizeof (elf32_hppa_reloc_type *) * 2);
+  final_types = ((elf32_hppa_reloc_type **)
+		 bfd_alloc (abfd, sizeof (elf32_hppa_reloc_type *) * 2));
   if (final_types == NULL)
     return NULL;
 
   /* Allocate space for the relocation itself.  */
-  finaltype = (elf32_hppa_reloc_type *)
-    bfd_alloc_by_size_t (abfd, sizeof (elf32_hppa_reloc_type));
+  finaltype = ((elf32_hppa_reloc_type *)
+	       bfd_alloc (abfd, sizeof (elf32_hppa_reloc_type)));
   if (finaltype == NULL)
     return NULL;
 
@@ -1553,11 +1554,11 @@ elf_hppa_reloc_type_lookup (abfd, code)
 /* Return true if SYM represents a local label symbol.  */
 
 static boolean
-hppa_elf_is_local_label (abfd, sym)
+hppa_elf_is_local_label_name (abfd, name)
      bfd *abfd;
-     asymbol *sym;
+     const char *name;
 {
-  return (sym->name[0] == 'L' && sym->name[1] == '$');
+  return (name[0] == 'L' && name[1] == '$');
 }
 
 /* Do any backend specific processing when beginning to write an object
@@ -2959,7 +2960,7 @@ error_return:
 
 /* Misc BFD support code.  */
 #define bfd_elf32_bfd_reloc_type_lookup		elf_hppa_reloc_type_lookup
-#define bfd_elf32_bfd_is_local_label		hppa_elf_is_local_label
+#define bfd_elf32_bfd_is_local_label_name	hppa_elf_is_local_label_name
 
 /* Symbol extension stuff.  */
 #define bfd_elf32_set_section_contents		elf32_hppa_set_section_contents

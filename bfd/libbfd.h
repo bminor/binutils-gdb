@@ -93,7 +93,6 @@ PTR	bfd_alloc PARAMS ((bfd *abfd, size_t size));
 PTR	bfd_zalloc PARAMS ((bfd *abfd, size_t size));
 void	bfd_alloc_grow PARAMS ((bfd *abfd, PTR thing, size_t size));
 PTR	bfd_alloc_finish PARAMS ((bfd *abfd));
-PTR	bfd_alloc_by_size_t PARAMS ((bfd *abfd, size_t wanted));
 
 #define	bfd_release(x,y) (void) obstack_free(&(x->memory),y)
 
@@ -486,7 +485,7 @@ extern bfd *bfd_last_cache;
 /* List of supported target vectors, and the default vector (if
    bfd_default_vector[0] is NULL, there is no default).  */
 extern const bfd_target * const bfd_target_vector[];
-extern const bfd_target * const bfd_default_vector[];
+extern const bfd_target *bfd_default_vector[];
 
 /* Functions shared by the ECOFF and MIPS ELF backends, which have no
    other common header files.  */
