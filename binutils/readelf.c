@@ -1097,7 +1097,7 @@ get_dynamic_type (type)
     case DT_VERNEED:	return "VERNEED";
     case DT_VERNEEDNUM:	return "VERNEEDNUM";
 
-    case DT_AUXILIARY:	return "AUXILARY";
+    case DT_AUXILIARY:	return "AUXILIARY";
     case DT_USED:	return "USED";
     case DT_FILTER:	return "FILTER";
 
@@ -3329,12 +3329,33 @@ process_dynamic_segment (file)
 	  
 	case DT_AUXILIARY:
 	case DT_FILTER:
+	case DT_CONFIG:
+	case DT_DEPAUDIT:
+	case DT_AUDIT:
 	  if (do_dynamic)
 	    {
-	      if (entry->d_tag == DT_AUXILIARY)
-		printf (_("Auxiliary library"));
-	      else
-		printf (_("Filter library"));
+	      switch (entry->d_tag)
+	        {
+		case DT_AUXILIARY:
+		  printf (_("Auxiliary library"));
+		  break;
+
+		case DT_FILTER:
+		  printf (_("Filter library"));
+		  break;
+
+	        case DT_CONFIG:
+		  printf (_("Configuration file"));
+		  break;
+
+		case DT_DEPAUDIT:
+		  printf (_("Dependency audit library"));
+		  break;
+
+		case DT_AUDIT:
+		  printf (_("Audit library"));
+		  break;
+		}
 
 	      if (dynamic_strings)
 		printf (": [%s]\n", dynamic_strings + entry->d_un.d_val);
@@ -3506,6 +3527,7 @@ process_dynamic_segment (file)
 	case DT_DEBUG	:
 	case DT_TEXTREL	:
 	case DT_JMPREL	:
+	case DT_RUNPATH	:
 	  dynamic_info[entry->d_tag] = entry->d_un.d_val;
 
 	  if (do_dynamic)
@@ -3534,6 +3556,10 @@ process_dynamic_segment (file)
 
 		    case DT_RPATH:
 		      printf (_("Library rpath: [%s]"), name);
+		      break;
+
+		    case DT_RUNPATH:
+		      printf (_("Library runpath: [%s]"), name);
 		      break;
 
 		    default:

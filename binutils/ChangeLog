@@ -1,3 +1,10 @@
+2000-07-19  H.J. Lu  <hjl@gnu.org>
+
+	* readelf.c (get_dynamic_type): Change "AUXILARY" to
+	"AUXILIARY".
+	(process_dynamic_segment): Print out strings for DT_CONFIG,
+	DT_DEPAUDIT, DT_AUDIT and DT_RUNPATH.
+
 2000-07-19  Mark Kettenis  <kettenis@gnu.org>
 
 	* nm.c (usage): Change output of `nm --help' to include a
