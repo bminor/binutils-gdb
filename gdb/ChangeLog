@@ -1,3 +1,8 @@
+Sun Oct 18 00:36:30 1992  Fred Fish  (fnf@cygnus.com)
+
+	* breakpoint.c (breakpoint_re_set_one):  Don't delete watchpoints
+	from breakpoint table when reseting breakpoints.
+
 Sat Oct 17 00:59:23 1992  Fred Fish  (fnf@cygnus.com)
 
 	Native support cleanup and corefile fixes for i386 SVR4 systems.
