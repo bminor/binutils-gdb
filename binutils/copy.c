@@ -185,7 +185,7 @@ filter_symbols (abfd, syms, symcount)
     sym = from[src_count];
     if ((flags & BSF_GLOBAL) /* Keep if external */
 	|| (sym->section == &bfd_und_section)
-	||   (sym->section == &bfd_com_section))
+	|| (bfd_is_com_section (sym->section)))
 	keep = 1;
     else if ((flags & BSF_DEBUGGING) != 0) /* debugging symbol */
 	keep = strip_symbols != strip_debug;
