@@ -1,5 +1,8 @@
 2005-02-07  Hans-Peter Nilsson  <hp@axis.com>
 
+	* ld-elf/start.s, ld-elf/symbolref.s, ld-elf/symbol1w.s,
+	ld-elf/warn1.d: New test.
+
 	* lib/ld-lib.exp: Support new directive "warning".
 
 2005-02-02  Daniel Jacobowitz  <dan@codesourcery.com>
