@@ -1,5 +1,10 @@
 2002-01-04  Daniel Jacobowitz  <drow@mvista.com>
 
+	* p-valprint.c: Include "cp-abi.h" for baseclass_offset
+	prototype.
+
+2002-01-04  Daniel Jacobowitz  <drow@mvista.com>
+
 	* cp-abi.c: Fix whitespace.
 	(baseclass_offset): New wrapper function.
 	* cp-abi.h (baseclass_offset): Add prototype.
