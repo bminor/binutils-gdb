@@ -1,3 +1,8 @@
+Mon Sep 13 00:17:18 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* emulparms/elf64hppa.sh (OTHER_READWRITE_SECTIONS): Put .plt
+	at the start of the .dlt output section.
+
 1999-09-12  Ian Lance Taylor  <ian@zembu.com>
 
 	* pe.em: Don't include "../bfd/libbfd.h".

@@ -18,7 +18,16 @@ OTHER_READONLY_SECTIONS='.PARISC.unwind : { *(.PARISC.unwind) } .stubs : { *(.st
 # The PA64 ELF port treats .plt sections differently than most.  We also have
 # to create a .opd section.  Combine the .opd, .plt and .dlt together into a
 # single .dlt section in the output file.
-OTHER_READWRITE_SECTIONS='.dlt : { *(.opd) *(.plt) *(.dlt) }'
+#
+# We have temporarily moved the .plt input section to the front of the
+# .dlt output section.  This was __gp will be near .plt, regardless of the
+# size of .opd.
+#
+# In the near future the code to compute __gp will be improved and we can
+# move .opd to the start of the .dlt again.
+#
+#
+OTHER_READWRITE_SECTIONS='.dlt : { *(.plt) *(.dlt) *(.opd) }'
 
 # The PA64 ELF port has two additional bss sections. huge bss and thread bss.
 # Make sure they end up in the appropriate location.  We also have to set
