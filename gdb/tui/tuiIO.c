@@ -185,7 +185,12 @@ tui_redisplay_readline (void)
   WINDOW *w;
   char *prompt;
   int start_line;
-  
+
+  /* Detect when we temporarily left SingleKey and now the readline
+     edit buffer is empty, automatically restore the SingleKey mode.  */
+  if (tui_current_key_mode == tui_one_command_mode && rl_end == 0)
+    tui_set_key_mode (tui_single_key_mode);
+
   if (tui_current_key_mode == tui_single_key_mode)
     prompt = "";
   else

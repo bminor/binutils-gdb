@@ -106,14 +106,11 @@ tui_rl_switch_mode (void)
     {
       tui_disable ();
       rl_prep_terminal (0);
-
-      printf_filtered ("Left the TUI mode\n");
     }
   else
     {
       rl_deprep_terminal ();
       tui_enable ();
-      printf_filtered ("Entered the TUI mode\n");
     }
 
   /* Clear the readline in case switching occurred in middle of something.  */
@@ -312,7 +309,7 @@ tui_initialize_readline ()
 
   /* Bind all other keys to tui_rl_command_mode so that we switch
      temporarily from SingleKey mode and can enter a gdb command.  */
-  for (i = ' ' + 1; i < 0x7f; i++)
+  for (i = ' '; i < 0x7f; i++)
     {
       int j;
 
@@ -399,6 +396,8 @@ tui_enable (void)
   if (selected_frame)
      tuiShowFrameInfo (selected_frame);
 
+  /* Restore TUI keymap.  */
+  tui_set_key_mode (tui_current_key_mode);
   refresh ();
 
   /* Update gdb's knowledge of its terminal.  */
@@ -415,6 +414,9 @@ tui_disable (void)
 {
   if (!tui_active)
     return;
+
+  /* Restore initial readline keymap.  */
+  rl_set_keymap (tui_readline_standard_keymap);
 
   /* Remove TUI hooks.  */
   tui_remove_hooks ();

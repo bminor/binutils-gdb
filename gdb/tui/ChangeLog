@@ -1,5 +1,15 @@
 2002-09-13  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* tui.c (tui_rl_switch_mode): Remove unecessary TUI switch printfs.
+	(tui_initialize_readline): Allow to use space to leave SingleKey
+	to enter one gdb command.
+	(tui_enable): Restore the TUI keymap when we are back to TUI.
+	(tui_disable): Restore normal keymap when leaving TUI.
+	* tuiIO.c (tui_redisplay_readline): Restore the SingleKey mode
+	when the buffer becomes empty and we are in tui_one_command_mode.
+
+2002-09-13  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* tuiIO.c (tui_setup_io): rl_already_prompted must be cleared
 	when leaving TUI mode so that gdb prompt is displayed.
 
