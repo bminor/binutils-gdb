@@ -21,8 +21,14 @@
 
 #ifdef ECOFF_DEBUGGING
 
+#ifndef GAS_ECOFF_H
+#define GAS_ECOFF_H
+
 #include "coff/sym.h"
 #include "coff/ecoff.h"
+
+/* Whether we have seen any ECOFF debugging information.  */
+extern int ecoff_debugging_seen;
 
 /* This function should be called at the start of assembly, by
    obj_read_begin_hook.  */
@@ -65,7 +71,7 @@ extern void ecoff_directive_type PARAMS ((int));
 extern void ecoff_directive_val PARAMS ((int));
 
 /* Handle stabs.  */
-extern void ecoff_stab PARAMS ((int what, const char *string,
+extern void ecoff_stab PARAMS ((segT sec, int what, const char *string,
 				int type, int other, int desc));
 
 /* Set the GP prologue size.  */
@@ -77,7 +83,16 @@ extern void ecoff_set_gp_prolog_size PARAMS ((int sz));
 extern void obj_ecoff_set_ext PARAMS ((struct symbol *, EXTR *));
 #endif
 
+/* This function is called from read.c to peek at cur_file_ptr */
+extern int ecoff_no_current_file PARAMS ((void));
+
+/* This routine is called from read.c to generate line number for .s file
+*/
+extern void ecoff_generate_asm_lineno PARAMS ((const char *, int));
+
 /* This routine is called from read.c to generate line number stabs for .s file
 */
-extern void ecoff_generate_asm_line_stab PARAMS ((int));
+extern void ecoff_generate_asm_line_stab PARAMS ((char *, int));
+
+#endif /* ! GAS_ECOFF_H */
 #endif /* ECOFF_DEBUGGING */

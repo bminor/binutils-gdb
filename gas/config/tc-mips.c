@@ -66,6 +66,8 @@ static int mips_output_flavor () { return OUTPUT_FLAVOR; }
 #define ECOFF_DEBUGGING 0
 #endif
 
+#include "ecoff.h"
+
 static char *mips_regmask_frag;
 
 #define AT  1
@@ -213,7 +215,7 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
 static char *insn_error;
 
-static int byte_order = BYTE_ORDER;
+static int byte_order;
 
 static int auto_align = 1;
 
@@ -238,6 +240,10 @@ static int mips_frame_reg = SP;
    of 1 means to not swap branches.  A value of 0 means to always
    insert NOPs.  */
 static int mips_optimize = 2;
+
+/* Debugging level.  -g sets this to 2.  -gN sets this to N.  -g0 is
+   equivalent to seeing no -g option at all.  */
+static int mips_debug = 0;
 
 /* The previous instruction.  */
 static struct mips_cl_insn prev_insn;
@@ -384,7 +390,6 @@ static void my_getExpression PARAMS ((expressionS * ep, char *str));
 static symbolS *get_symbol PARAMS ((void));
 static void mips_align PARAMS ((int to, int fill, symbolS *label));
 static void s_align PARAMS ((int));
-static void s_stringer PARAMS ((int));
 static void s_change_sec PARAMS ((int));
 static void s_cons PARAMS ((int));
 static void s_err PARAMS ((int));
@@ -393,7 +398,6 @@ static void s_float_cons PARAMS ((int));
 static void s_mips_globl PARAMS ((int));
 static void s_option PARAMS ((int));
 static void s_mipsset PARAMS ((int));
-static void s_mips_space PARAMS ((int));
 static void s_abicalls PARAMS ((int));
 static void s_cpload PARAMS ((int));
 static void s_cprestore PARAMS ((int));
@@ -5266,12 +5270,10 @@ md_parse_option (c, arg)
       break;
 
     case OPTION_EB:
-      byte_order = BIG_ENDIAN;
       target_big_endian = 1;
       break;
 
     case OPTION_EL:
-      byte_order = LITTLE_ENDIAN;
       target_big_endian = 0;
       break;
 
@@ -5283,7 +5285,14 @@ md_parse_option (c, arg)
       break;
 
     case 'g':
-      if (arg == NULL || arg[1] == '2')
+      if (arg == NULL)
+	mips_debug = 2;
+      else
+	mips_debug = atoi (arg);
+      /* When the MIPS assembler sees -g or -g2, it does not do
+         optimizations which limit full symbolic debugging.  We take
+         that to be equivalent to -O0.  */
+      if (mips_debug == 2)
 	mips_optimize = 0;
       break;
 
@@ -5491,6 +5500,15 @@ MIPS options:\n\
 -KPIC, -call_shared	generate SVR4 position independent code\n\
 -non_shared		do not generate position independent code\n");
 #endif
+}
+
+void
+mips_init_after_args ()
+{
+  if (target_big_endian)
+    byte_order = BIG_ENDIAN;
+  else
+    byte_order = LITTLE_ENDIAN;
 }
 
 long
@@ -6445,15 +6463,13 @@ md_section_align (seg, addr)
   return ((addr + (1 << align) - 1) & (-1 << align));
 }
 
-/* Estimate the size of a frag before relaxing.  We are not really
-   relaxing here, and the final size is encoded in the subtype
-   information.  */
-
 /* Utility routine, called from above as well.  If called while the
    input file is still being read, it's only an approximation.  (For
    example, a symbol may later become defined which appeared to be
    undefined earlier.)  */
-static int nopic_need_relax (sym)
+
+static int
+nopic_need_relax (sym)
      symbolS *sym;
 {
   if (sym == 0)
@@ -6503,6 +6519,10 @@ static int nopic_need_relax (sym)
     /* We are not optimizing for the GP register.  */
     return 1;
 }
+
+/* Estimate the size of a frag before relaxing.  We are not really
+   relaxing here, and the final size is encoded in the subtype
+   information.  */
 
 /*ARGSUSED*/
 int
@@ -6725,6 +6745,42 @@ mips_define_label (sym)
      symbolS *sym;
 {
   insn_label = sym;
+}
+
+/* Decide whether a label is local.  This is called by LOCAL_LABEL.
+   In order to work with gcc when using mips-tfile, we must keep all
+   local labels.  However, in other cases, we want to discard them,
+   since they are useless.  */
+
+int
+mips_local_label (name)
+     const char *name;
+{
+  if (ECOFF_DEBUGGING
+      && mips_debug != 0
+      && ! ecoff_debugging_seen)
+    {
+      /* We were called with -g, but we didn't see any debugging
+         information.  That may mean that gcc is smuggling debugging
+         information through to mips-tfile, in which case we must
+         generate all local labels.  */
+      return 0;
+    }
+
+  /* Here it's OK to discard local labels.  */
+
+  if (name[0] == '$')
+    return 1;
+
+#ifdef TE_IRIX
+  /* gcc for the SGI generates a bunch of local labels named LM%d.  I
+     don't know why they don't start with '$'. We must check specially
+     for these.  */
+  if (name[0] == 'L' && name[1] == 'M')
+    return 1;
+#endif
+
+  return 0;
 }
 
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)

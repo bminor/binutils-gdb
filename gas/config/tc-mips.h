@@ -20,6 +20,8 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#ifndef TC_MIPS
+
 #define TC_MIPS
 
 #define TARGET_ARCH bfd_arch_mips
@@ -33,8 +35,8 @@
 #define MAX_RELOC_EXPANSION 3
 #define LOCAL_LABELS_FB 1
 
-/* The MIPS assembler appears to keep all symbols.  */
-#define LOCAL_LABEL(name) 0
+#define LOCAL_LABEL(name) mips_local_label (name)
+extern int mips_local_label PARAMS ((const char *));
 
 #define md_relax_frag(fragp, stretch)	(0)
 #define md_undefined_symbol(name)	(0)
@@ -115,3 +117,17 @@ extern void md_mips_end PARAMS ((void));
 
 #define USE_GLOBAL_POINTER_OPT	(OUTPUT_FLAVOR == bfd_target_ecoff_flavour \
 				 || OUTPUT_FLAVOR == bfd_target_elf_flavour)
+
+extern void mips_pop_insert PARAMS ((void));
+#define md_pop_insert()		mips_pop_insert()
+
+extern void mips_flush_pending_output PARAMS ((void));
+#define md_flush_pending_output mips_flush_pending_output
+
+extern void mips_enable_auto_align PARAMS ((void));
+#define md_elf_section_change_hook()	mips_enable_auto_align()
+
+extern void mips_init_after_args PARAMS ((void));
+#define tc_init_after_args mips_init_after_args
+
+#endif /* TC_MIPS */

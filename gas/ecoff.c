@@ -1390,6 +1390,9 @@ static const st_t map_coff_sym_type[] = {
 /* Keep track of different sized allocation requests.  */
 static alloc_info_t alloc_counts[ (int)alloc_type_last ];
 
+/* Record whether we have seen any debugging information.  */
+int ecoff_debugging_seen = 0;
+
 /* Various statics.  */
 static efdr_t  *cur_file_ptr	= (efdr_t *) 0;	/* current file desc. header */
 static proc_t  *cur_proc_ptr	= (proc_t *) 0;	/* current procedure header */
@@ -2489,6 +2492,8 @@ ecoff_directive_def (ignore)
   char *name;
   char name_end;
 
+  ecoff_debugging_seen = 1;
+
   SKIP_WHITESPACE ();
 
   name = input_line_pointer;
@@ -2675,7 +2680,11 @@ ecoff_directive_type (ignore)
     {
       if (tq_ptr == &coff_type.type_qualifiers[0])
 	{
-	  as_warn ("Too derived values in .type argument");
+	  /* FIXME: We could handle this by setting the continued bit.
+             There would still be a limit: the .type argument can not
+             be infinite.  */
+	  as_warn ("The type of %s is too complex; it will be simplified",
+		   coff_sym_name);
 	  break;
 	}
       if (ISPTR (val))
@@ -3328,7 +3337,8 @@ mark_stabs (ignore)
 	value		a numeric value or an address.  */
 
 void
-ecoff_stab (what, string, type, other, desc)
+ecoff_stab (sec, what, string, type, other, desc)
+     segT sec;
      int what;
      const char *string;
      int type;
@@ -3342,6 +3352,8 @@ ecoff_stab (what, string, type, other, desc)
   sc_t sc;
   symint_t indx;
   localsym_t *hold = NULL;
+
+  ecoff_debugging_seen = 1;
 
   /* We don't handle .stabd.  */
   if (what != 's' && what != 'n')
@@ -4540,7 +4552,8 @@ ecoff_build_debug (hdr, bufp, backend)
        fil_ptr = fil_ptr->next_file)
     {
       cur_file_ptr = fil_ptr;
-      while (cur_file_ptr->cur_scope->prev != (scope_t *) NULL)
+      while (cur_file_ptr->cur_scope != (scope_t *) NULL
+	     && cur_file_ptr->cur_scope->prev != (scope_t *) NULL)
 	{
 	  cur_file_ptr->cur_scope = cur_file_ptr->cur_scope->prev;
 	  if (! end_warning)
@@ -4549,11 +4562,12 @@ ecoff_build_debug (hdr, bufp, backend)
 	      end_warning = 1;
 	    }
 	}
-      (void) add_ecoff_symbol ((const char *) NULL,
-			       st_End, sc_Text,
-			       (symbolS *) NULL,
-			       (symint_t) 0,
-			       (symint_t) 0);
+      if (cur_file_ptr->cur_scope != (scope_t *) NULL)
+	(void) add_ecoff_symbol ((const char *) NULL,
+				 st_End, sc_Text,
+				 (symbolS *) NULL,
+				 (symint_t) 0,
+				 (symint_t) 0);
     }
 
   /* Build the symbolic information.  */
@@ -5029,7 +5043,7 @@ ecoff_set_gp_prolog_size (sz)
      int sz;
 {
   if (cur_proc_ptr == 0)
-    abort ();
+    return;
 
   cur_proc_ptr->pdr.gp_prologue = sz;
   if (cur_proc_ptr->pdr.gp_prologue != sz)
@@ -5146,8 +5160,8 @@ ecoff_no_current_file ()
 
 void
 ecoff_generate_asm_lineno (filename, lineno)
-    char *filename;
-    int lineno;
+     const char *filename;
+     int lineno;
 {
   lineno_list_t *list;
 
