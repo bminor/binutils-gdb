@@ -1,3 +1,8 @@
+2005-02-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/packed_array/pa.adb: New file.
+	* gdb.ada/packed_array.exp: New testcase.
+
 2005-02-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.dwarf2/dw2-intermix.exp, gdb.dwarf2/dw2-intermix.S: New
