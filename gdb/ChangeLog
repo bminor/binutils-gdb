@@ -1,5 +1,11 @@
 2004-05-07  Jim Blandy  <jimb@redhat.com>
 
+	* aix-thread.c (fetch_regs_kernel_thread, fill_gprs64,
+	fill_gprs32, store_regs_kernel_thread): Use tdep->ppc_gp0_regnum
+	to recognize gpr regnums, instead of assuming that
+	tdep->ppc_fp0_regnum marks the end of the general-purpose
+	registers.
+
 	* ppc-sysv-tdep.c (ppc64_sysv_abi_return_value): Assert that
 	the given architecture has floating-point registers. 
 
