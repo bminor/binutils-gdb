@@ -26,6 +26,10 @@
 
 #define TARGET_ARCH bfd_arch_h8300
 
+#ifdef BFD_ASSEMBLER
+/* Fixup debug sections since we will never relax them.  */
+#define TC_LINKRELAX_FIXUP(seg) (seg->flags & SEC_ALLOC)
+#endif
 #ifdef OBJ_ELF
 #define TARGET_FORMAT "elf32-h8300"
 #endif
