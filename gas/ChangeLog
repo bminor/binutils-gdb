@@ -1,3 +1,12 @@
+start-sanitize-armelf
+Sun Aug  9 20:45:32 1998  Catherine Moore  <clm@cygnus.com>
+
+        * config/obj-elf.h:  Check for redefinition of obj_frob_symbol.
+        * config/tc-arm.c:  Define S_GET_STORAGE_CLASS and S_SET_STORAGE_CLASS.
+        (armelf_frob_symbol):  New Routine.
+        * config/tc-arm.h:  Define obj_frob_symbol if OBJ_ELF.
+
+end-sanitize-armelf
 Sat Aug  8 15:21:28 1998  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-alpha.c (alpha_fix_adjustable): Don't adjust weak syms.
