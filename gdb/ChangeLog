@@ -1,5 +1,8 @@
 Wed Dec 29 12:32:08 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* valprint.c (val_print_string): Change chunksize from 200
+	to 8.
+
 	* symfile.c (generic_load): If no arguments, get file name
 	from get_exec_file.
 
