@@ -242,11 +242,6 @@ CHILL_FOR_TARGET = ` \
   fi`
 CHILL_LIB = -lchill
 
-## This is ugly, but I don't want GNU make to put these variables in
-## the environment.  Older makes will see this as a set of targets
-## with no dependencies and no actions.
-unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
-
 $(end-sanitize-chill)
 
 # The use of $$(x_FOR_TARGET) reduces the command line length by not
@@ -913,6 +908,13 @@ force_update:
 # overrides onto the definition of $(MAKE).  This variable setting
 # will remove them.
 MAKEOVERRIDES=
+
+$(start-sanitize-chill)
+## This is ugly, but I don't want GNU make to put these variables in
+## the environment.  Older makes will see this as a set of targets
+## with no dependencies and no actions.
+unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
+$(end-sanitize-chill)
 
 # This is the end of "Makefile.in".  When built into "Makefile"
 # by the configure script, two things are added below this point:
