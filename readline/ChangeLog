@@ -1,3 +1,7 @@
+Tue Oct  8 08:59:24 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* tilde.c (tilde_word_expand):  __MSDOS___ -> __MSDOS__
+
 Sat Oct 05 11:24:34 1996  Mark Alexander  <marka@cygnus.com>
 
 	* rldefs.h: On Linux, include <termios.h> to fix compile error
