@@ -1,3 +1,14 @@
+Wed Sep 24 13:08:14 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* lib/gdb.exp(gdb_compile): If is_vxworks target feature is set,
+ 	define vxworks when building the testcase.
+
+	* gdb.base/ptype.exp: Fix testnames to be unique.
+	* gdb.base/radix.exp: Ditto.
+	* gdb.base/term.exp: Ditto.
+	* gdb.base/whatis.exp: Ditto.
+	* gdb.c++/classes.exp: Ditto.
+
 Tue Sep 16 22:21:48 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* gdb.base/callfuncs.exp: Fix indentation.
