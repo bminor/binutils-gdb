@@ -1,3 +1,8 @@
+Mon May  5 18:19:55 1997  Philip Blundell  <pjb27@cam.ac.uk>
+
+	* configure.tgt, configure.host: cope with '*-*-linux-gnuaout'
+	targets.
+
 start-sanitize-tic80
 Fri May  2 15:54:28 1997  Mike Meissner  <meissner@cygnus.com>
 
