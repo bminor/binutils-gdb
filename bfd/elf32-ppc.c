@@ -2606,15 +2606,16 @@ ppc_elf_create_linker_section (bfd *abfd,
   const char *sym_name;
   bfd_vma sym_offset;
 
-  /* Both of these sections are (technically) created by the user
-     putting data in them, so they shouldn't be marked
-     SEC_LINKER_CREATED.
-
-     The linker creates them so it has somewhere to attach their
-     respective symbols. In fact, if they were empty it would
-     be OK to leave the symbol set to 0 (or any random number), because
-     the appropriate register should never be used.  */
-  flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY;
+  /* The linker creates these sections so it has somewhere to attach
+     their respective symbols.  Startup code (crt1.o) uses these symbols
+     to initialize a register pointing to the section.  If the output
+     sections corresponding to these input sections were empty it would
+     be OK to set the symbol to 0 (or any random number), because the
+     associated register should never be used.
+     FIXME: Setting a symbol this way is silly.  The symbols ought to 
+     be set the same way other backends set gp.  */
+  flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
+	   | SEC_LINKER_CREATED);
   sym_offset = 32768;
 
   switch (which)
@@ -2711,27 +2712,21 @@ ppc_elf_create_linker_section (bfd *abfd,
   return lsect;
 }
 
-/* If we have a non-zero sized .sbss2 or .PPC.EMB.sbss0 sections, we
+/* If we have .sbss2 or .PPC.EMB.sbss0 output sections, we
    need to bump up the number of section headers.  */
 
 static int
 ppc_elf_additional_program_headers (bfd *abfd)
 {
   asection *s;
-  int ret;
-
-  ret = 0;
-
-  s = bfd_get_section_by_name (abfd, ".interp");
-  if (s != NULL)
-    ++ret;
+  int ret = 0;
 
   s = bfd_get_section_by_name (abfd, ".sbss2");
-  if (s != NULL && (s->flags & SEC_LOAD) != 0 && s->size > 0)
+  if (s != NULL && (s->flags & SEC_ALLOC) != 0)
     ++ret;
 
   s = bfd_get_section_by_name (abfd, ".PPC.EMB.sbss0");
-  if (s != NULL && (s->flags & SEC_LOAD) != 0 && s->size > 0)
+  if (s != NULL && (s->flags & SEC_ALLOC) != 0)
     ++ret;
 
   return ret;
@@ -3394,12 +3389,19 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	continue;
 
       if (s == htab->plt
-	  || s == htab->got
-	  || (htab->sdata != NULL && s == htab->sdata->section)
-	  || (htab->sdata2 != NULL && s == htab->sdata2->section))
+	  || s == htab->got)
 	{
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
+	}
+      else if ((htab->sdata != NULL && s == htab->sdata->section)
+	       || (htab->sdata2 != NULL && s == htab->sdata2->section))
+	{
+	  if (s->size == 0)
+	    /* Don't strip these sections.  We need them because they
+	       define _SDA_BASE_ and _SDA2_BASE_.  crt1.o makes a
+	       reference to _SDA_BASE_ to set up r13.  */
+	    continue;
 	}
       else if (strncmp (bfd_get_section_name (dynobj, s), ".rela", 5) == 0)
 	{

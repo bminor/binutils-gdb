@@ -1,3 +1,12 @@
+2005-03-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_create_linker_section): Set SEC_LINKER_CREATED
+	on section.  Correct comment, and add FIXME.
+	(ppc_elf_additional_program_headers): Don't bump header count for
+	interp.  Test SEC_ALLOC, not SEC_LOAD, and don't test size.
+	(ppc_elf_size_dynamic_sections): Don't strip sdata and sdata2, but
+	do allocate memory if they need it.
+
 2005-03-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/es.po: Commit new Spanish translation.
