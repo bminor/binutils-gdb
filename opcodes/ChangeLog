@@ -1,3 +1,10 @@
+2001-03-19  Jim Wilson  <wilson@redhat.com>
+
+	* ia64-gen.c (fetch_insn_class): If xsect, then ignore comment and
+	notestr if larger than xsect.
+	(in_class): Handle format M5.
+	* ia64-asmtab.c: Regnerate.
+
 2001-03-19  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* vax-dis.c (print_insn_vax): Only fetch two bytes if the info buffer
