@@ -1,3 +1,13 @@
+Mon Apr  4 13:22:00 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ppc-opc.c (powerpc_operands): The signedp field has been
+	removed, so don't initialize it.  Set the PPC_OPERAND_SIGNED flag
+	instead.  Add new operand SISIGNOPT.
+	(powerpc_opcodes): For lis, liu, addis, and cau use SISIGNOPT.
+	Based on patch from David Edelsohn (edelsohn@npac.syr.edu).
+	* ppc-dis.c (print_insn_powerpc): Check PPC_OPERAND_SIGNED rather
+	than signedp field.
+
 Wed Mar 30 00:31:49 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* i386-dis.c (struct private):  Renamed to dis_private. `private'
