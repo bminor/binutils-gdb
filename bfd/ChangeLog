@@ -1,5 +1,19 @@
 2001-09-28  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-i386.c (elf_i386_check_relocs): Update comment since we
+	no longer allocate here.  Localise some vars to blocks where they
+	are used.  Remove separate switch stmt for creating .got sec.
+	(elf_i386_adjust_dynamic_symbol): Correct a comment.  Remove
+	redundant casts and aborts.  Delay setting of vars until needed.
+	(allocate_dynrelocs): Remove redundant casts and aborts.
+	(elf_i386_size_dynamic_sections): Move comment.
+	(elf_i386_finish_dynamic_symbol): Move expressions out of function
+	calls.
+	(elf_i386_relocate_section): Likewise.  Comment typo fix.
+	(elf_i386_finish_dynamic_sections): Migrate common code out of
+	switch statement.
+	(elf_backend_* defines): Sort.
+
 	* elf32-i386.c (allocate_dynrelocs): Don't create a .plt entry
 	without a reloc when symbol visibilty makes a function local.
 
@@ -61,7 +75,7 @@
 
 2001-09-25  Alan Modra  <amodra@bigpond.net.au>
 
-	* elf32-hppa.c: Rename all occurrences of "hplink" to "htab"
+	* elf32-hppa.c: Rename occurrences of "hplink" to "htab"
 	throughout file.
 
 	* elf32-hppa.c: (LONG_BRANCH_PIC_IN_SHLIB): Delete.  Remove all
