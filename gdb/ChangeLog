@@ -1,3 +1,8 @@
+2003-08-14  Elena Zannoni  <ezannoni@redhat.com>
+
+	* symfile.c (symbol_file_add_with_addrs_or_offsets): Make sure
+	orig_addrs is set up properly.
+
 2003-08-10  Mark Kettenis  <kettenis@gnu.org>
 
 	Based on a patch from Michael Elizabeth Chastain (mec@shout.net):
