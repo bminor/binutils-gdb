@@ -1,5 +1,7 @@
 Thu Mar 14 19:15:06 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* install.sh: Correct misspelling of transformbasename.
+
 	* config.guess: Recognize mips-*-sysv*.
 
 Mon Mar 11 15:36:42 1996  Dawn Perchik  <dawn@critters.cygnus.com>

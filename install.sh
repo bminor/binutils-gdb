@@ -27,7 +27,7 @@ stripprog="${STRIPPROG-strip}"
 rmprog="${RMPROG-rm}"
 mkdirprog="${MKDIRPROG-mkdir}"
 
-tranformbasename=""
+transformbasename=""
 transform_arg=""
 instcmd="$mvprog"
 chmodcmd="$chmodprog 0755"
