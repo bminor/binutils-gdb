@@ -64,10 +64,10 @@
         a relocation directive.  */
 
 #include <stdio.h>
-#include <ctype.h>
 
 #include "as.h"
 
+#include "safe-ctype.h"
 #include "obstack.h"
 
 #include "opcode/i960.h"
@@ -1389,8 +1389,8 @@ get_args (p, args)
     {
 
       if (*p == ' '
-	  && (! isalnum ((unsigned char) p[1])
-	      || ! isalnum ((unsigned char) p[-1])))
+	  && (! ISALNUM (p[1])
+	      || ! ISALNUM (p[-1])))
 	{
 	  p++;
 

@@ -26,10 +26,10 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
  */
 
 
-#include <ctype.h>
 #include "bfd.h"
 #include "sysdep.h"
 #include "libiberty.h"
+#include "safe-ctype.h"
 #include "bfdlink.h"
 
 #include "ld.h"
@@ -96,8 +96,7 @@ gld960_set_output_arch()
 
       s = concat ("i960:", ldfile_output_machine_name, (char *) NULL);
       for (s1 = s; *s1 != '\0'; s1++)
-	if (isupper ((unsigned char) *s1))
-	  *s1 = tolower ((unsigned char) *s1);
+	*s1 = TOLOWER (*s1);
       ldfile_set_output_arch (s);
       free (s);
     }

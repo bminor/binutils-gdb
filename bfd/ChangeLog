@@ -1,3 +1,48 @@
+2001-09-18  Bruno Haible  <haible@clisp.cons.org>
+
+	* aoutx.h: Include "safe-ctype.h" instead of <ctype.h>.
+	(aout_link_write_symbols): Use ISDIGIT instead of isdigit.
+	* archive.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(_bfd_generic_read_ar_hdr_mag): Use ISDIGIT instead of isdigit.
+	* archures.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(bfd_default_scan): Use ISDIGIT instead of isdigit.
+	* bfd.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(bfd_scan_vma): Use ISXDIGIT/ISDIGIT/ISLOWER instead of
+	isxdigit/isdigit/islower.
+	* binary.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(mangle_name): Use ISALNUM instead of isalnum.
+	* cpu-v850.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(scan): Use ISDIGIT instead of isdigit.
+	* hosts/alphavms.h: Don't include <ctype.h>.
+	* ieee.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(ieee_object_p): Use TOUPPER instead of toupper.
+	* ihex.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(ihex_bad_byte): Use ISPRINT instead of isprint.
+	* merge.c: Don't include <ctype.h>.
+	* oasys.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(oasys_write_sections): Use ISDIGIT instead of isdigit.
+	* pdp11.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(aout_link_write_symbols): Use ISDIGIT instead of isdigit.
+	* ppcboot.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(mangle_name): Use ISALNUM instead of isalnum.
+	* som.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(som_set_reloc_info): Use ISUPPER/ISLOWER/ISDIGIT instead of
+	isupper/islower/isdigit.
+	(som_decode_symclass): Use TOUPPER instead of toupper.
+	* srec.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(srec_bad_byte): Use ISPRINT instead of isprint.
+	(srec_scan): Use ISSPACE instead of isspace.
+	* stabs.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(_bfd_link_section_stabs): Use ISDIGIT instead of isdigit.
+	* syms.c: Include "safe-ctype.h"
+	(islower, toupper): Remove macro definitions.
+	(bfd_decode_symclass): Use TOUPPER instead of toupper.
+	* vms-gsd.c: Don't include <ctype.h>.
+	* vms-hdr.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(_bfd_vms_write_hdr): Use ISLOWER/TOUPPER instead of
+	islower/toupper.
+	* vms-tir.c: Don't include <ctype.h>.
+
 2001-09-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* libbfd.c (bfd_bread): New function replacing bfd_read without

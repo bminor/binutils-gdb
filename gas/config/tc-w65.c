@@ -26,7 +26,6 @@
 #include "subsegs.h"
 #define DEFINE_TABLE
 #include "../opcodes/w65-opc.h"
-#include <ctype.h>
 
 const char comment_chars[] = "!";
 CONST char line_separator_chars[] = ";";

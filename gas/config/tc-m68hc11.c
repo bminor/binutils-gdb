@@ -20,8 +20,8 @@
    Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
-#include <ctype.h>
 #include "as.h"
+#include "safe-ctype.h"
 #include "subsegs.h"
 #include "opcode/m68hc11.h"
 #include "dwarf2dbg.h"
@@ -2234,7 +2234,7 @@ md_assemble (str)
        *op_end && nlen < 20 && !is_end_of_line[*op_end] && *op_end != ' ';
        op_end++)
     {
-      name[nlen] = tolower (op_start[nlen]);
+      name[nlen] = TOLOWER (op_start[nlen]);
       nlen++;
     }
   name[nlen] = 0;
@@ -2276,14 +2276,14 @@ md_assemble (str)
 	      && (*op_end &&
 		  (is_end_of_line[op_end[1]]
 		   || op_end[1] == ' ' || op_end[1] == '\t'
-		   || !isalnum (op_end[1])))
+		   || !ISALNUM (op_end[1])))
 	      && (*op_end == 'a' || *op_end == 'b'
 		  || *op_end == 'A' || *op_end == 'B'
 		  || *op_end == 'd' || *op_end == 'D'
 		  || *op_end == 'x' || *op_end == 'X'
 		  || *op_end == 'y' || *op_end == 'Y'))
 	    {
-	      name[nlen++] = tolower (*op_end++);
+	      name[nlen++] = TOLOWER (*op_end++);
 	      name[nlen] = 0;
 	      opc = (struct m68hc11_opcode_def *) hash_find (m68hc11_hash,
 							     name);

@@ -21,10 +21,10 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-#include <ctype.h>
 #include <string.h>
 #define  NO_RELOC 0
 #include "as.h"
+#include "safe-ctype.h"
 
 /* Need TARGET_CPU.  */
 #include "config.h"
@@ -1864,7 +1864,7 @@ arm_psr_parse (ccp)
     {
       c = *p++;
     }
-  while (isalpha (c) || c == '_');
+  while (ISALPHA (c) || c == '_');
 
   /* Terminate the word.  */
   *--p = 0;
@@ -2517,7 +2517,7 @@ accum0_required_here (str)
 
   *str = p;			/* Advance caller's string pointer too.  */
   c = *p++;
-  while (isalnum (c))
+  while (ISALNUM (c))
     c = *p++;
 
   *--p = 0;			/* Aap nul into input buffer at non-alnum.  */
@@ -3513,7 +3513,7 @@ do_ldrd (str, flags)
       static char buff[128];
 
       --str;
-      while (isspace (*str))
+      while (ISSPACE (*str))
 	--str;
       str -= 4;
 
@@ -3710,7 +3710,7 @@ decode_shift (str, unrestrict)
 
   skip_whitespace (* str);
 
-  for (p = * str; isalpha (* p); p ++)
+  for (p = * str; ISALPHA (* p); p ++)
     ;
 
   if (p == * str)
@@ -6407,7 +6407,7 @@ insert_reg (entry)
   strcpy (buf + i, reg_table[entry].name);
 
   for (i = 0; buf[i]; i++)
-    buf2[i] = islower (buf[i]) ? toupper (buf[i]) : buf[i];
+    buf2[i] = TOUPPER (buf[i]);
 
   buf2[i] = '\0';
 
@@ -6775,11 +6775,11 @@ arm_reg_parse (ccp)
     p++, start++;
 #endif
 #endif
-  if (!isalpha (*p) || !is_name_beginner (*p))
+  if (!ISALPHA (*p) || !is_name_beginner (*p))
     return FAIL;
 
   c = *p++;
-  while (isalpha (c) || isdigit (c) || c == '_')
+  while (ISALPHA (c) || ISDIGIT (c) || c == '_')
     c = *p++;
 
   *--p = 0;
@@ -8724,9 +8724,9 @@ arm_parse_reloc ()
   };
 
   for (i = 0, ip = input_line_pointer;
-       i < sizeof (id) && (isalnum (*ip) || ispunct (*ip));
+       i < sizeof (id) && (ISALNUM (*ip) || ISPUNCT (*ip));
        i++, ip++)
-    id[i] = tolower (*ip);
+    id[i] = TOLOWER (*ip);
 
   for (i = 0; reloc_map[i].str; i++)
     if (strncmp (id, reloc_map[i].str, reloc_map[i].len) == 0)

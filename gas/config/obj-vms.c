@@ -28,6 +28,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 
 #include "as.h"
 #include "config.h"
+#include "safe-ctype.h"
 #include "subsegs.h"
 #include "obstack.h"
 
@@ -3071,7 +3072,7 @@ Write_VMS_MHD_Records ()
 	  cp++;
 	  continue;
 	}
-      *cp1++ = islower (*cp) ? toupper (*cp++) : *cp++;
+      *cp1++ = TOUPPER (*cp++);
     }
   *cp1 = '\0';
 
@@ -3254,20 +3255,20 @@ VMS_Case_Hack_Symbol (In, Out)
       switch (vms_name_mapping)
 	{
 	case 0:
-	  if (isupper (*In)) {
+	  if (ISUPPER (*In)) {
 	    *Out++ = *In++;
 	    Case_Hack_Bits |= 1;
 	  } else {
-	    *Out++ = islower (*In) ? toupper (*In++) : *In++;
+	    *Out++ = TOUPPER (*In++);
 	  }
 	  break;
 	case 3: *Out++ = *In++;
 	  break;
 	case 2:
-	  if (islower (*In)) {
+	  if (ISLOWER (*In)) {
 	    *Out++ = *In++;
 	  } else {
-	    *Out++ = isupper (*In) ? tolower (*In++) : *In++;
+	    *Out++ = TOLOWER (*In++);
 	  }
 	  break;
 	}
@@ -3298,7 +3299,7 @@ VMS_Case_Hack_Symbol (In, Out)
 	   *		and ensure that they are lowercase
 	   */
 	  for (i = 0; (In[i] != 0) && (i < 8); i++)
-	    if (isupper (In[i]) && !Saw_Dollar && !flag_no_hash_mixed_case)
+	    if (ISUPPER (In[i]) && !Saw_Dollar && !flag_no_hash_mixed_case)
 	      break;
 
 	  if (In[i] == 0)
@@ -3313,11 +3314,11 @@ VMS_Case_Hack_Symbol (In, Out)
 	      i = 8;
 	      while ((--i >= 0) && (*In))
 		switch (vms_name_mapping){
-		case 0: *Out++ = islower (*In) ? toupper (*In++) : *In++;
+		case 0: *Out++ = TOUPPER (*In++);
 		  break;
 		case 3: *Out++ = *In++;
 		  break;
-		case 2: *Out++ = isupper (*In) ? tolower (*In++) : *In++;
+		case 2: *Out++ = TOLOWER (*In++);
 		  break;
 		}
 	    }

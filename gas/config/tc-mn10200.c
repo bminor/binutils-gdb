@@ -20,8 +20,8 @@
    Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
-#include <ctype.h>
 #include "as.h"
+#include "safe-ctype.h"
 #include "subsegs.h"
 #include "opcode/mn10200.h"
 
@@ -781,7 +781,7 @@ md_assemble (str)
   int match;
 
   /* Get the opcode.  */
-  for (s = str; *s != '\0' && !isspace (*s); s++)
+  for (s = str; *s != '\0' && !ISSPACE (*s); s++)
     ;
   if (*s != '\0')
     *s++ = '\0';
@@ -795,7 +795,7 @@ md_assemble (str)
     }
 
   str = s;
-  while (isspace (*str))
+  while (ISSPACE (*str))
     ++str;
 
   input_line_pointer = str;
@@ -1029,7 +1029,7 @@ keep_going:
       break;
     }
 
-  while (isspace (*str))
+  while (ISSPACE (*str))
     ++str;
 
   if (*str != '\0')

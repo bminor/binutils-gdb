@@ -1,6 +1,6 @@
 /* CGEN generic assembler support code.
 
-   Copyright 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils and GDB, the GNU debugger.
 
@@ -20,9 +20,9 @@
 
 #include "sysdep.h"
 #include <stdio.h>
-#include <ctype.h>
 #include "ansidecl.h"
 #include "libiberty.h"
+#include "safe-ctype.h"
 #include "bfd.h"
 #include "symcat.h"
 #include "opcode/cgen.h"
@@ -221,8 +221,7 @@ cgen_parse_keyword (cd, strp, keyword_table, valuep)
   /* Allow letters, digits, and any special characters.  */
   while (((p - start) < (int) sizeof (buf))
 	 && *p
-	 && (isalnum ((unsigned char) *p) 
-	     || strchr (keyword_table->nonalpha_chars, *p)))
+	 && (ISALNUM (*p) || strchr (keyword_table->nonalpha_chars, *p)))
     ++p;
 
   if (p - start >= (int) sizeof (buf))

@@ -20,8 +20,8 @@
    02111-1307, USA. */
 
 #include <stdio.h>
-#include <ctype.h>
 #include "as.h"
+#include "safe-ctype.h"
 #include "subsegs.h"
 #include "struc-symbol.h"
 
@@ -263,7 +263,7 @@ register_name (expressionP)
 
   /* Find the spelling of the operand.  */
   start = name = input_line_pointer;
-  if (name[0] == '%' && isalpha (name[1]))
+  if (name[0] == '%' && ISALPHA (name[1]))
     name = ++input_line_pointer;
   else
     return false;
@@ -633,7 +633,7 @@ s390_elf_suffix (str_p, exp_p)
     return ELF_SUFFIX_NONE;
 
   ident = str;
-  while (isalnum (*str))
+  while (ISALNUM (*str))
     str++;
   len = str - ident;
 
@@ -782,7 +782,7 @@ s390_lit_suffix (str_p, exp_p, suffix)
 
   /* We look for a suffix of the form "@lit1", "@lit2", "@lit4" or "@lit8".  */
   ident = str;
-  while (isalnum (*str))
+  while (ISALNUM (*str))
     str++;
   len = str - ident;
   if (len != 4 || strncasecmp (ident, "lit", 3) != 0 ||
@@ -1006,7 +1006,7 @@ md_gather_operands (str, insn, opcode)
   char *f;
   int fc, i;
 
-  while (isspace(*str)) str++;
+  while (ISSPACE (*str)) str++;
 
   parentheses = 0;
   skip_optional = 0;
@@ -1193,7 +1193,7 @@ md_gather_operands (str, insn, opcode)
 	}
     }
 
-  while (isspace (*str))
+  while (ISSPACE (*str))
     ++str;
 
   if (*str != '\0')
@@ -1267,7 +1267,7 @@ md_assemble (str)
   char *s;
 
   /* Get the opcode.  */
-  for (s = str; *s != '\0' && ! isspace (*s); s++)
+  for (s = str; *s != '\0' && ! ISSPACE (*s); s++)
     ;
   if (*s != '\0')
     *s++ = '\0';
@@ -1336,7 +1336,7 @@ s390_insn (ignore)
 
   /* Get the opcode format.  */
   s = input_line_pointer;
-  while (*s != '\0' && *s != ',' && ! isspace (*s))
+  while (*s != '\0' && *s != ',' && ! ISSPACE (*s))
     s++;
   if (*s != ',')
     as_bad (_("Invalid .insn format\n"));

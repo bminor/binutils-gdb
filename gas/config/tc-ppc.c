@@ -21,8 +21,8 @@
    02111-1307, USA.  */
 
 #include <stdio.h>
-#include <ctype.h>
 #include "as.h"
+#include "safe-ctype.h"
 #include "subsegs.h"
 
 #include "opcode/ppc.h"
@@ -618,10 +618,10 @@ register_name (expressionP)
 
   /* Find the spelling of the operand.  */
   start = name = input_line_pointer;
-  if (name[0] == '%' && isalpha (name[1]))
+  if (name[0] == '%' && ISALPHA (name[1]))
     name = ++input_line_pointer;
 
-  else if (!reg_names_p || !isalpha (name[0]))
+  else if (!reg_names_p || !ISALPHA (name[0]))
     return false;
 
   c = get_symbol_end ();
@@ -1383,10 +1383,10 @@ ppc_elf_suffix (str_p, exp_p)
 
   for (ch = *str, str2 = ident;
        (str2 < ident + sizeof (ident) - 1
-	&& (isalnum (ch) || ch == '@'));
+	&& (ISALNUM (ch) || ch == '@'));
        ch = *++str)
     {
-      *str2++ = (islower (ch)) ? ch : tolower (ch);
+      *str2++ = TOLOWER (ch);
     }
 
   *str2 = '\0';
@@ -1820,7 +1820,7 @@ md_assemble (str)
 #endif
 
   /* Get the opcode.  */
-  for (s = str; *s != '\0' && ! isspace (*s); s++)
+  for (s = str; *s != '\0' && ! ISSPACE (*s); s++)
     ;
   if (*s != '\0')
     *s++ = '\0';
@@ -1843,7 +1843,7 @@ md_assemble (str)
   insn = opcode->opcode;
 
   str = s;
-  while (isspace (*str))
+  while (ISSPACE (*str))
     ++str;
 
   /* PowerPC operands are just expressions.  The only real issue is
@@ -2266,7 +2266,7 @@ md_assemble (str)
 	++str;
     }
 
-  while (isspace (*str))
+  while (ISSPACE (*str))
     ++str;
 
   if (*str != '\0')
@@ -4267,8 +4267,7 @@ ppc_canonicalize_symbol_name (name)
 	}
 
       for (s++; *s != '\0' && *s != brac; s++)
-	if (islower (*s))
-	  *s = toupper (*s);
+	*s = TOUPPER (*s);
 
       if (*s == '\0' || s[1] != '\0')
 	as_bad (_("bad symbol suffix"));

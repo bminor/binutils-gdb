@@ -26,6 +26,7 @@
 */
 
 #include "as.h"
+#include "safe-ctype.h"
 #include "opcode/pdp11.h"
 
 static int set_option PARAMS ((char *arg));
@@ -252,19 +253,11 @@ find_whitespace (char *str)
   return str;
 }
 
-static char
-mklower (char c)
-{
-  if (isupper (c))
-    return tolower (c);
-  return c;
-}
-
 static char *
 parse_reg (char *str, struct pdp11_code *operand)
 {
   str = skip_whitespace (str);
-  if (mklower (*str) == 'r')
+  if (TOLOWER (*str) == 'r')
     {
       str++;
       switch (*str)

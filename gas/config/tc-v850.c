@@ -20,8 +20,8 @@
    Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
-#include <ctype.h>
 #include "as.h"
+#include "safe-ctype.h"
 #include "subsegs.h"
 #include "opcode/v850.h"
 #include "dwarf2dbg.h"
@@ -858,7 +858,7 @@ system_register_name (expressionP, accept_numbers, accept_list_names)
       /* Reset input_line pointer.  */
       input_line_pointer = start;
 
-      if (isdigit (*input_line_pointer))
+      if (ISDIGIT (*input_line_pointer))
 	{
 	  reg_number = strtol (input_line_pointer, &input_line_pointer, 10);
 
@@ -1711,7 +1711,7 @@ md_assemble (str)
   strncpy (copy_of_instruction, str, sizeof (copy_of_instruction) - 1);
 
   /* Get the opcode.  */
-  for (s = str; *s != '\0' && ! isspace (*s); s++)
+  for (s = str; *s != '\0' && ! ISSPACE (*s); s++)
     continue;
 
   if (*s != '\0')
@@ -1728,7 +1728,7 @@ md_assemble (str)
     }
 
   str = s;
-  while (isspace (*str))
+  while (ISSPACE (*str))
     ++str;
 
   start_of_operands = str;
@@ -2141,7 +2141,7 @@ md_assemble (str)
       break;
     }
 
-  while (isspace (*str))
+  while (ISSPACE (*str))
     ++str;
 
   if (*str != '\0')

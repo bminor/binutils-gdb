@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
-#include <ctype.h>
+#include "safe-ctype.h"
 
 /*
 
@@ -813,7 +813,7 @@ bfd_default_scan (info, string)
     }
 
   number = 0;
-  while (isdigit ((unsigned char) *ptr_src))
+  while (ISDIGIT (*ptr_src))
     {
       number = number * 10 + *ptr_src - '0';
       ptr_src++;

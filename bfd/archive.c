@@ -132,7 +132,7 @@ DESCRIPTION
 #include "libbfd.h"
 #include "aout/ar.h"
 #include "aout/ranlib.h"
-#include <ctype.h>
+#include "safe-ctype.h"
 
 #ifndef errno
 extern int errno;
@@ -407,7 +407,7 @@ _bfd_generic_read_ar_hdr_mag (abfd, mag)
   else if (hdr.ar_name[0] == '#'
 	   && hdr.ar_name[1] == '1'
 	   && hdr.ar_name[2] == '/'
-	   && isdigit ((unsigned char) hdr.ar_name[3]))
+	   && ISDIGIT (hdr.ar_name[3]))
     {
       /* BSD-4.4 extended name */
       namelen = atoi (&hdr.ar_name[3]);

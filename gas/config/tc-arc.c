@@ -21,9 +21,9 @@
    02111-1307, USA.  */
 
 #include <stdio.h>
-#include <ctype.h>
 #include "libiberty.h"
 #include "as.h"
+#include "safe-ctype.h"
 #include "subsegs.h"
 #include "opcode/arc.h"
 #include "../opcodes/arc-ext.h"
@@ -393,7 +393,7 @@ md_assemble (str)
     }
 
   /* Skip leading white space.  */
-  while (isspace (*str))
+  while (ISSPACE (*str))
     str++;
 
   /* The instructions are stored in lists hashed by the first letter (though
@@ -544,7 +544,7 @@ md_assemble (str)
 		}
 
 	      /* Pick the suffix out and look it up via the hash table.  */
-	      for (t = s; *t && isalnum (*t); ++t)
+	      for (t = s; *t && ISALNUM (*t); ++t)
 		continue;
 	      c = *t;
 	      *t = '\0';
@@ -736,7 +736,7 @@ md_assemble (str)
 	     insn and it is assumed that longer versions of insns appear
 	     before shorter ones (eg: lsr r2,r3,1 vs lsr r2,r3).  */
 
-	  while (isspace (*str))
+	  while (ISSPACE (*str))
 	    ++str;
 
 	  if (!is_end_of_line[(unsigned char) *str])
@@ -913,8 +913,7 @@ arc_extoper (opertype)
   p = name;
   while (*p)
     {
-      if (isupper (*p))
-	*p = tolower (*p);
+      *p = TOLOWER (*p);
       p++;
     }
 
@@ -1703,7 +1702,7 @@ md_operand (expressionP)
 	while (ext_oper)
 	  {
 	    l = strlen (ext_oper->operand.name);
-	    if (!strncmp (p, ext_oper->operand.name, l) && !isalnum (*(p + l)))
+	    if (!strncmp (p, ext_oper->operand.name, l) && !ISALNUM (*(p + l)))
 	      {
 		input_line_pointer += l + 1;
 		expressionP->X_op = O_register;
@@ -1715,7 +1714,7 @@ md_operand (expressionP)
 	for (i = 0; i < arc_reg_names_count; i++)
 	  {
 	    l = strlen (arc_reg_names[i].name);
-	    if (!strncmp (p, arc_reg_names[i].name, l) && !isalnum (*(p + l)))
+	    if (!strncmp (p, arc_reg_names[i].name, l) && !ISALNUM (*(p + l)))
 	      {
 		input_line_pointer += l + 1;
 		expressionP->X_op = O_register;

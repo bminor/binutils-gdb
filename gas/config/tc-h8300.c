@@ -28,7 +28,7 @@
 #define DEFINE_TABLE
 #define h8_opcodes ops
 #include "opcode/h8300.h"
-#include <ctype.h>
+#include "safe-ctype.h"
 
 #ifdef OBJ_ELF
 #include "elf/h8.h"
@@ -347,7 +347,7 @@ skip_colonthing (ptr, exp, mode)
 	    {
 	      *mode |= L_16;
 	    }
-	  while (isdigit (*ptr))
+	  while (ISDIGIT (*ptr))
 	    ptr++;
 	}
     }
@@ -418,8 +418,8 @@ get_operand (ptr, op, dst, direction)
 
   /* Gross.  Gross.  ldm and stm have a format not easily handled
      by get_operand.  We deal with it explicitly here.  */
-  if (src[0] == 'e' && src[1] == 'r' && isdigit (src[2])
-      && src[3] == '-' && src[4] == 'e' && src[5] == 'r' && isdigit (src[6]))
+  if (src[0] == 'e' && src[1] == 'r' && ISDIGIT (src[2])
+      && src[3] == '-' && src[4] == 'e' && src[5] == 'r' && ISDIGIT (src[6]))
     {
       int low, high;
 

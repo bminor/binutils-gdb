@@ -23,9 +23,9 @@
 #include "sysdep.h"
 #include "bfdlink.h"
 #include "libiberty.h"
+#include "safe-ctype.h"
 
 #include <time.h>
-#include <ctype.h>
 
 #include "ld.h"
 #include "ldexp.h"
@@ -1254,7 +1254,7 @@ quoteput (s, f, needs_quotes)
     if (*cp == '\''
 	|| *cp == '"'
 	|| *cp == '\\'
-	|| isspace ((unsigned char) *cp)
+	|| ISSPACE (*cp)
 	|| *cp == ','
 	|| *cp == ';')
       needs_quotes = 1;
@@ -2088,7 +2088,7 @@ pe_dll_generate_implib (def, impfilename)
   dll_filename = (def->name) ? def->name : dll_name;
   dll_symname = xstrdup (dll_filename);
   for (i = 0; dll_symname[i]; i++)
-    if (!isalnum ((unsigned char) dll_symname[i]))
+    if (!ISALNUM (dll_symname[i]))
       dll_symname[i] = '_';
 
   unlink (impfilename);
@@ -2185,7 +2185,7 @@ pe_process_import_defs (output_bfd, link_info)
       dll_filename = module->name;
       dll_symname = xstrdup (module->name);
       for (i = 0; dll_symname[i]; i++)
-	if (!isalnum (dll_symname[i]))
+	if (!ISALNUM (dll_symname[i]))
 	  dll_symname[i] = '_';
 
       do_this_dll = 0;

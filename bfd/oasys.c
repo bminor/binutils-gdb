@@ -22,7 +22,7 @@
 #define UNDERSCORE_HACK 1
 #include "bfd.h"
 #include "sysdep.h"
-#include <ctype.h>
+#include "safe-ctype.h"
 #include "libbfd.h"
 #include "oasys.h"
 #include "liboasys.h"
@@ -1030,7 +1030,7 @@ oasys_write_sections (abfd)
 
   for (s = abfd->sections; s != (asection *) NULL; s = s->next)
     {
-      if (!isdigit ((unsigned char) s->name[0]))
+      if (!ISDIGIT (s->name[0]))
 	{
 	  (*_bfd_error_handler)
 	    (_("%s: can not represent section `%s' in oasys"),

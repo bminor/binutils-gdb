@@ -1,5 +1,5 @@
 /* windres.c -- a program to manipulate Windows resources
-   Copyright 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GNU Binutils.
@@ -39,11 +39,11 @@
 #include "getopt.h"
 #include "bucomm.h"
 #include "libiberty.h"
+#include "safe-ctype.h"
 #include "obstack.h"
 #include "windres.h"
 
 #include <assert.h>
-#include <ctype.h>
 #include <time.h>
 
 /* used by resrc.c at least */
@@ -679,11 +679,11 @@ format_from_filename (filename, input)
     return RES_FORMAT_RES;
 
   /* If every character is printable or space, assume it's an RC file.  */
-  if ((isprint (b1) || isspace (b1))
-      && (isprint (b2) || isspace (b2))
-      && (isprint (b3) || isspace (b3))
-      && (isprint (b4) || isspace (b4))
-      && (isprint (b5) || isspace (b5)))
+  if ((ISPRINT (b1) || ISSPACE (b1))
+      && (ISPRINT (b2) || ISSPACE (b2))
+      && (ISPRINT (b3) || ISSPACE (b3))
+      && (ISPRINT (b4) || ISSPACE (b4))
+      && (ISPRINT (b5) || ISSPACE (b5)))
     return RES_FORMAT_RC;
 
   /* Otherwise, we give up.  */
@@ -788,6 +788,9 @@ main (argc, argv)
 
 #if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
   setlocale (LC_MESSAGES, "");
+#endif
+#if defined (HAVE_SETLOCALE)
+  setlocale (LC_CTYPE, "");
 #endif
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);

@@ -20,8 +20,8 @@
    Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
-#include <ctype.h>
 #include "as.h"
+#include "safe-ctype.h"
 #include "subsegs.h"
 #include "symcat.h"
 #include "opcodes/m32r-desc.h"
@@ -819,15 +819,14 @@ assemble_two_insns (str, str2, parallel_p)
   {
     char *s2 = str;
 
-    while (isspace (*s2++))
+    while (ISSPACE (*s2++))
       continue;
 
     --s2;
 
-    while (isalnum (*s2))
+    while (ISALNUM (*s2))
       {
-	if (isupper ((unsigned char) *s2))
-	  *s2 = tolower (*s2);
+	*s2 = TOLOWER (*s2);
 	s2++;
       }
   }

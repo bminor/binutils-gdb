@@ -31,12 +31,12 @@
 
 #include "libbfd.h"
 #include "som.h"
+#include "safe-ctype.h"
 
 #include <sys/param.h>
 #include <signal.h>
 #include <machine/reg.h>
 #include <sys/file.h>
-#include <ctype.h>
 
 /* Magic not defined in standard HP-UX header files until 8.0 */
 
@@ -4672,13 +4672,13 @@ som_set_reloc_info (fixup, end, internal_relocs, section, symbols, just_count)
 	      c = *cp++;
 
 	      /* If this is a variable, push it on the stack.  */
-	      if (isupper (c))
+	      if (ISUPPER (c))
 		push (var (c));
 
 	      /* If this is a lower case letter, then it represents
 		 additional data from the fixup stream to be pushed onto
 		 the stack.  */
-	      else if (islower (c))
+	      else if (ISLOWER (c))
 		{
 		  int bits = (c - 'a') * 8;
 		  for (v = 0; c > 'a'; --c)
@@ -4689,10 +4689,10 @@ som_set_reloc_info (fixup, end, internal_relocs, section, symbols, just_count)
 		}
 
 	      /* A decimal constant.  Push it on the stack.  */
-	      else if (isdigit (c))
+	      else if (ISDIGIT (c))
 		{
 		  v = c - '0';
-		  while (isdigit (*cp))
+		  while (ISDIGIT (*cp))
 		    v = (v * 10) + (*cp++ - '0');
 		  push (v);
 		}
@@ -5438,7 +5438,7 @@ som_decode_symclass (symbol)
   else
     return '?';
   if (symbol->flags & BSF_GLOBAL)
-    c = toupper (c);
+    c = TOUPPER (c);
   return c;
 }
 

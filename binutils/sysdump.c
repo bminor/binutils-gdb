@@ -26,9 +26,9 @@
 
 #include "bfd.h"
 #include "bucomm.h"
+#include "safe-ctype.h"
 
 #include <stdio.h>
-#include <ctype.h>
 #include <libiberty.h>
 #include <getopt.h>
 #include "sysroff.h"
@@ -260,7 +260,8 @@ pbarray (y)
   printf ("%d (", y->len);
   for (x = 0; x < y->len; x++)
     {
-      printf ("(%02x %c)", y->data[x], isprint (y->data[x]) ? y->data[x] : '.');
+      printf ("(%02x %c)", y->data[x],
+	      ISPRINT (y->data[x]) ? y->data[x] : '.');
     }
   printf (")\n");
 }
@@ -759,6 +760,9 @@ main (ac, av)
 
 #if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
   setlocale (LC_MESSAGES, "");
+#endif
+#if defined (HAVE_SETLOCALE)
+  setlocale (LC_CTYPE, "");
 #endif
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);

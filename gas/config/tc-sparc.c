@@ -20,9 +20,9 @@
    Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
-#include <ctype.h>
 
 #include "as.h"
+#include "safe-ctype.h"
 #include "subsegs.h"
 
 #include "opcode/sparc.h"
@@ -1385,11 +1385,11 @@ sparc_ip (str, pinsn)
   int special_case = SPECIAL_CASE_NONE;
 
   s = str;
-  if (islower ((unsigned char) *s))
+  if (ISLOWER (*s))
     {
       do
 	++s;
-      while (islower ((unsigned char) *s) || isdigit ((unsigned char) *s));
+      while (ISLOWER (*s) || ISDIGIT (*s));
     }
 
   switch (*s)
@@ -1617,11 +1617,11 @@ sparc_ip (str, pinsn)
 		{
 		  s += 4;
 
-		  if (isdigit ((unsigned char) *s))
+		  if (ISDIGIT (*s))
 		    {
 		      long num = 0;
 
-		      while (isdigit ((unsigned char) *s))
+		      while (ISDIGIT (*s))
 			{
 			  num = num * 10 + *s - '0';
 			  ++s;
@@ -1825,9 +1825,9 @@ sparc_ip (str, pinsn)
 	      break;
 
 	    case '#':		/* Must be at least one digit.  */
-	      if (isdigit ((unsigned char) *s++))
+	      if (ISDIGIT (*s++))
 		{
-		  while (isdigit ((unsigned char) *s))
+		  while (ISDIGIT (*s))
 		    {
 		      ++s;
 		    }
@@ -1846,10 +1846,10 @@ sparc_ip (str, pinsn)
 	    case 'b':		/* Next operand is a coprocessor register.  */
 	    case 'c':
 	    case 'D':
-	      if (*s++ == '%' && *s++ == 'c' && isdigit ((unsigned char) *s))
+	      if (*s++ == '%' && *s++ == 'c' && ISDIGIT (*s))
 		{
 		  mask = *s++;
-		  if (isdigit ((unsigned char) *s))
+		  if (ISDIGIT (*s))
 		    {
 		      mask = 10 * (mask - '0') + (*s++ - '0');
 		      if (mask >= 32)
@@ -1942,7 +1942,7 @@ sparc_ip (str, pinsn)
 		      goto error;
 
 		    case 'r':	/* any register */
-		      if (!isdigit ((unsigned char) (c = *s++)))
+		      if (!ISDIGIT ((c = *s++)))
 			{
 			  goto error;
 			}
@@ -1957,7 +1957,7 @@ sparc_ip (str, pinsn)
 		    case '7':
 		    case '8':
 		    case '9':
-		      if (isdigit ((unsigned char) *s))
+		      if (ISDIGIT (*s))
 			{
 			  if ((c = 10 * (c - '0') + (*s++ - '0')) >= 32)
 			    {
@@ -2022,9 +2022,9 @@ sparc_ip (str, pinsn)
 
 		if (*s++ == '%'
 		    && ((format = *s) == 'f')
-		    && isdigit ((unsigned char) *++s))
+		    && ISDIGIT (*++s))
 		  {
-		    for (mask = 0; isdigit ((unsigned char) *s); ++s)
+		    for (mask = 0; ISDIGIT (*s); ++s)
 		      {
 			mask = 10 * mask + (*s - '0');
 		      }		/* read the number */
@@ -2240,7 +2240,7 @@ sparc_ip (str, pinsn)
 		for (s1 = s; *s1 && *s1 != ',' && *s1 != ']'; s1++)
 		  ;
 
-		if (s1 != s && isdigit ((unsigned char) s1[-1]))
+		if (s1 != s && ISDIGIT (s1[-1]))
 		  {
 		    if (s1[-2] == '%' && s1[-3] == '+')
 		      s1 -= 3;
@@ -2663,7 +2663,7 @@ parse_keyword_arg (lookup_fn, input_pointerP, valueP)
 
   p = *input_pointerP;
   for (q = p + (*p == '#' || *p == '%');
-       isalnum ((unsigned char) *q) || *q == '_';
+       ISALNUM (*q) || *q == '_';
        ++q)
     continue;
   c = *q;

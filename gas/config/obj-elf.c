@@ -21,6 +21,7 @@
 
 #define OBJ_HEADER "obj-elf.h"
 #include "as.h"
+#include "safe-ctype.h"
 #include "subsegs.h"
 #include "obstack.h"
 
@@ -1236,7 +1237,7 @@ obj_elf_vtable_inherit (ignore)
 
   if (input_line_pointer[0] == '0'
       && (input_line_pointer[1] == '\0'
-	  || isspace ((unsigned char) input_line_pointer[1])))
+	  || ISSPACE (input_line_pointer[1])))
     {
       psym = section_symbol (absolute_section);
       ++input_line_pointer;

@@ -308,6 +308,7 @@ CODE_FRAGMENT
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
+#include "safe-ctype.h"
 #include "bfdlink.h"
 #include "aout/stab_gnu.h"
 
@@ -556,13 +557,6 @@ coff_section_type (s)
   return '?';
 }
 
-#ifndef islower
-#define islower(c) ((c) >= 'a' && (c) <= 'z')
-#endif
-#ifndef toupper
-#define toupper(c) (islower(c) ? ((c) & ~0x20) : (c))
-#endif
-
 /*
 FUNCTION
 	bfd_decode_symclass
@@ -617,7 +611,7 @@ bfd_decode_symclass (symbol)
   else
     return '?';
   if (symbol->flags & BSF_GLOBAL)
-    c = toupper (c);
+    c = TOUPPER (c);
   return c;
 
   /* We don't have to handle these cases just yet, but we will soon:

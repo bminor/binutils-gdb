@@ -91,10 +91,9 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
                         on a line
 */
 
-#include <ctype.h>
-
 #include "as.h"
 #include <obstack.h>
+#include "safe-ctype.h"
 #include "input-file.h"
 #include "subsegs.h"
 
@@ -370,7 +369,7 @@ listing_newline (ps)
 		  unsigned char c = *src++;
 
 		  /* Omit control characters in the listing.  */
-		  if (isascii (c) && ! iscntrl (c))
+		  if (!ISCNTRL (c))
 		    *dest++ = c;
 		}
 
@@ -908,7 +907,7 @@ debugging_pseudo (list, line)
   was_debug = in_debug;
   in_debug = 0;
 
-  while (isspace ((unsigned char) *line))
+  while (ISSPACE (*line))
     line++;
 
   if (*line != '.')

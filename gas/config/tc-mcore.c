@@ -24,7 +24,7 @@
 #include "subsegs.h"
 #define DEFINE_TABLE
 #include "../opcodes/mcore-opc.h"
-#include <ctype.h>
+#include "safe-ctype.h"
 #include <string.h>
 
 #ifdef OBJ_ELF
@@ -390,11 +390,11 @@ mcore_s_section (ignore)
      pool.  */
   char * ilp = input_line_pointer;
 
-  while (*ilp != 0 && isspace(*ilp))
+  while (*ilp != 0 && ISSPACE (*ilp))
     ++ ilp;
 
   if (strncmp (ilp, ".line", 5) == 0
-      && (isspace (ilp[5]) || *ilp == '\n' || *ilp == '\r'))
+      && (ISSPACE (ilp[5]) || *ilp == '\n' || *ilp == '\r'))
     ;
   else
     dump_literals (0);
@@ -480,10 +480,10 @@ parse_reg (s, reg)
      unsigned * reg;
 {
   /* Strip leading whitespace.  */
-  while (isspace (* s))
+  while (ISSPACE (* s))
     ++ s;
 
-  if (tolower (s[0]) == 'r')
+  if (TOLOWER (s[0]) == 'r')
     {
       if (s[1] == '1' && s[2] >= '0' && s[2] <= '5')
 	{
@@ -497,9 +497,9 @@ parse_reg (s, reg)
 	  return s + 2;
 	}
     }
-  else if (   tolower (s[0]) == 's'
-	   && tolower (s[1]) == 'p'
-	   && ! isalnum (s[2]))
+  else if (   TOLOWER (s[0]) == 's'
+	   && TOLOWER (s[1]) == 'p'
+	   && ! ISALNUM (s[2]))
     {
       * reg = 0;
       return s + 2;
@@ -540,10 +540,10 @@ parse_creg (s, reg)
   int i;
 
   /* Strip leading whitespace.  */
-  while (isspace (* s))
+  while (ISSPACE (* s))
     ++s;
 
-  if ((tolower (s[0]) == 'c' && tolower (s[1]) == 'r'))
+  if ((TOLOWER (s[0]) == 'c' && TOLOWER (s[1]) == 'r'))
     {
       if (s[2] == '3' && s[3] >= '0' && s[3] <= '1')
 	{
@@ -580,7 +580,7 @@ parse_creg (s, reg)
       length = strlen (cregs[i].name);
 
       for (j = 0; j < length; j++)
-	buf[j] = tolower (s[j]);
+	buf[j] = TOLOWER (s[j]);
 
       if (strncmp (cregs[i].name, buf, length) == 0)
 	{
@@ -615,7 +615,7 @@ parse_psrmod (s, reg)
   };
 
   for (i = 0; i < 2; i++)
-    buf[i] = isascii (s[i]) ? tolower (s[i]) : 0;
+    buf[i] = TOLOWER (s[i]);
 
   for (i = sizeof (psrmods) / sizeof (psrmods[0]); i--;)
     {
@@ -643,7 +643,7 @@ parse_exp (s, e)
   char * new;
 
   /* Skip whitespace.  */
-  while (isspace (* s))
+  while (ISSPACE (* s))
     ++ s;
 
   save = input_line_pointer;
@@ -903,14 +903,14 @@ parse_mem (s, reg, off, siz)
 
   * off = 0;
 
-  while (isspace (* s))
+  while (ISSPACE (* s))
     ++ s;
 
   if (* s == '(')
     {
       s = parse_reg (s + 1, reg);
 
-      while (isspace (* s))
+      while (ISSPACE (* s))
 	++ s;
 
       if (* s == ',')
@@ -936,7 +936,7 @@ parse_mem (s, reg, off, siz)
 	    }
 	}
 
-      while (isspace (* s))
+      while (ISSPACE (* s))
 	++ s;
 
       if (* s == ')')
@@ -969,7 +969,7 @@ md_assemble (str)
   char name[20];
 
   /* Drop leading whitespace.  */
-  while (isspace (* str))
+  while (ISSPACE (* str))
     str ++;
 
   /* Find the op code end.  */
@@ -1068,7 +1068,7 @@ md_assemble (str)
       inst |= reg;
 
       /* Skip whitespace.  */
-      while (isspace (* op_end))
+      while (ISSPACE (* op_end))
 	++ op_end;
 
       if (*op_end == ',')
@@ -1092,7 +1092,7 @@ md_assemble (str)
       inst |= reg;
 
       /* Skip whitespace.  */
-      while (isspace (* op_end))
+      while (ISSPACE (* op_end))
 	++ op_end;
 
       if (* op_end == ',')
@@ -1110,7 +1110,7 @@ md_assemble (str)
       op_end = parse_reg (op_end + 1, & reg);
 
       /* Skip whitespace.  */
-      while (isspace (* op_end))
+      while (ISSPACE (* op_end))
 	++ op_end;
 
       if (* op_end == ',')	/* xtrb- r1,rx */
@@ -1130,7 +1130,7 @@ md_assemble (str)
       inst |= reg;
 
       /* Skip whitespace.  */
-      while (isspace (* op_end))
+      while (ISSPACE (* op_end))
 	++ op_end;
 
       if (* op_end == ',')
@@ -1150,7 +1150,7 @@ md_assemble (str)
       inst |= reg;
 
       /* Skip whitespace.  */
-      while (isspace (* op_end))
+      while (ISSPACE (* op_end))
 	++ op_end;
 
       if (* op_end == ',')
@@ -1169,7 +1169,7 @@ md_assemble (str)
       inst |= reg;
 
       /* Skip whitespace.  */
-      while (isspace (* op_end))
+      while (ISSPACE (* op_end))
 	++ op_end;
 
       if (* op_end == ',')
@@ -1188,7 +1188,7 @@ md_assemble (str)
       inst |= reg;
 
       /* Skip whitespace.  */
-      while (isspace (* op_end))
+      while (ISSPACE (* op_end))
 	++ op_end;
 
       if (* op_end == ',')
@@ -1217,7 +1217,7 @@ md_assemble (str)
       inst |= reg;
 
       /* Skip whitespace.  */
-      while (isspace (* op_end))
+      while (ISSPACE (* op_end))
 	++ op_end;
 
       if (* op_end == ',')
@@ -1244,7 +1244,7 @@ md_assemble (str)
       inst |= reg;
 
       /* Skip whitespace.  */
-      while (isspace (* op_end))
+      while (ISSPACE (* op_end))
 	++ op_end;
 
       if (* op_end == ',')
@@ -1283,7 +1283,7 @@ md_assemble (str)
       inst |= reg;
 
       /* Skip whitespace.  */
-      while (isspace (* op_end))
+      while (ISSPACE (* op_end))
 	++ op_end;
 
       if (* op_end == ',')
@@ -1316,7 +1316,7 @@ md_assemble (str)
       inst |= reg;
 
       /* Skip whitespace.  */
-      while (isspace (* op_end))
+      while (ISSPACE (* op_end))
 	++ op_end;
 
       if (* op_end == ',')
@@ -1335,7 +1335,7 @@ md_assemble (str)
       inst |= reg;
 
       /* Skip whitespace.  */
-      while (isspace (* op_end))
+      while (ISSPACE (* op_end))
 	++ op_end;
 
       if (* op_end == ',')
@@ -1354,7 +1354,7 @@ md_assemble (str)
       inst |= reg << 8;
 
       /* Skip whitespace.  */
-      while (isspace (* op_end))
+      while (ISSPACE (* op_end))
 	++ op_end;
 
       if (* op_end == ',')
@@ -1390,7 +1390,7 @@ md_assemble (str)
       inst |= (reg << 8);
 
       /* Skip whitespace.  */
-      while (isspace (* op_end))
+      while (ISSPACE (* op_end))
 	++ op_end;
 
       if (* op_end == ',')
@@ -1421,7 +1421,7 @@ md_assemble (str)
       inst |= reg;
 
       /* Skip whitespace.  */
-      while (isspace (* op_end))
+      while (ISSPACE (* op_end))
 	++ op_end;
 
       if (* op_end == '-')
@@ -1432,7 +1432,7 @@ md_assemble (str)
 	    as_bad (_("ending register must be r15"));
 
 	  /* Skip whitespace.  */
-	  while (isspace (* op_end))
+	  while (ISSPACE (* op_end))
 	    ++ op_end;
 	}
 
@@ -1441,7 +1441,7 @@ md_assemble (str)
 	  op_end ++;
 
 	  /* Skip whitespace.  */
-	  while (isspace (* op_end))
+	  while (ISSPACE (* op_end))
 	    ++ op_end;
 
 	  if (* op_end == '(')
@@ -1470,7 +1470,7 @@ md_assemble (str)
 	as_fatal (_("first register must be r4"));
 
       /* Skip whitespace.  */
-      while (isspace (* op_end))
+      while (ISSPACE (* op_end))
 	++ op_end;
 
       if (* op_end == '-')
@@ -1481,7 +1481,7 @@ md_assemble (str)
 	    as_fatal (_("last register must be r7"));
 
 	  /* Skip whitespace.  */
-	  while (isspace (* op_end))
+	  while (ISSPACE (* op_end))
 	    ++ op_end;
 
 	  if (* op_end == ',')
@@ -1489,7 +1489,7 @@ md_assemble (str)
 	      op_end ++;
 
 	      /* Skip whitespace.  */
-	      while (isspace (* op_end))
+	      while (ISSPACE (* op_end))
 		++ op_end;
 
 	      if (* op_end == '(')
@@ -1502,7 +1502,7 @@ md_assemble (str)
 		  inst |= reg;
 
 		  /* Skip whitespace.  */
-		  while (isspace (* op_end))
+		  while (ISSPACE (* op_end))
 		    ++ op_end;
 
 		  if (* op_end == ')')
@@ -1535,7 +1535,7 @@ md_assemble (str)
       inst |= reg << 4;
 
       /* Skip whitespace.  */
-      while (isspace (* op_end))
+      while (ISSPACE (* op_end))
 	++ op_end;
 
       if (* op_end == ',')
@@ -1595,7 +1595,7 @@ md_assemble (str)
       inst |= reg;
 
       /* Skip whitespace.  */
-      while (isspace (* op_end))
+      while (ISSPACE (* op_end))
 	++ op_end;
 
       if (* op_end == ',')
@@ -1617,7 +1617,7 @@ md_assemble (str)
       inst |= reg << 4;
 
       /* Skip whitespace.  */
-      while (isspace (* op_end))
+      while (ISSPACE (* op_end))
 	++ op_end;
 
       if (* op_end == ',')
@@ -1638,7 +1638,7 @@ md_assemble (str)
       inst |= reg;
 
       /* Skip whitespace.  */
-      while (isspace (* op_end))
+      while (ISSPACE (* op_end))
 	++ op_end;
 
       if (* op_end == ',')
@@ -1690,7 +1690,7 @@ md_assemble (str)
     }
 
   /* Drop whitespace after all the operands have been parsed.  */
-  while (isspace (* op_end))
+  while (ISSPACE (* op_end))
     op_end ++;
 
   /* Give warning message if the insn has more operands than required.  */

@@ -62,7 +62,7 @@
 #include "dwarf2dbg.h"
 #endif
 
-#include <ctype.h>
+#include "safe-ctype.h"
 
 /* Local types */
 
@@ -1299,7 +1299,7 @@ md_undefined_symbol (name)
 	  /* FALLTHRU */
 
 	case 'r':
-	  if (!isdigit (*++name))
+	  if (!ISDIGIT (*++name))
 	    break;
 	  /* FALLTHRU */
 
@@ -1307,7 +1307,7 @@ md_undefined_symbol (name)
 	case '5': case '6': case '7': case '8': case '9':
 	  if (name[1] == '\0')
 	    num = name[0] - '0';
-	  else if (name[0] != '0' && isdigit (name[1]) && name[2] == '\0')
+	  else if (name[0] != '0' && ISDIGIT (name[1]) && name[2] == '\0')
 	    {
 	      num = (name[0] - '0') * 10 + name[1] - '0';
 	      if (num >= 32)
@@ -4214,7 +4214,7 @@ s_alpha_ent (dummy)
 	      input_line_pointer++;
 	      SKIP_WHITESPACE ();
 	    }
-	  if (isdigit (*input_line_pointer) || *input_line_pointer == '-')
+	  if (ISDIGIT (*input_line_pointer) || *input_line_pointer == '-')
 	    (void) get_absolute_expression ();
 	}
       demand_empty_rest_of_line ();

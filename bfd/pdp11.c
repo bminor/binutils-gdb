@@ -304,9 +304,9 @@ DESCRIPTION
 #define KEEPIT udata.i
 
 #include <string.h>		/* For strchr and friends */
-#include <ctype.h>
 #include "bfd.h"
 #include "sysdep.h"
+#include "safe-ctype.h"
 #include "bfdlink.h"
 
 #include "libaout.h"
@@ -4176,7 +4176,7 @@ aout_link_write_symbols (finfo, input_bfd)
 			    {
 			      /* Skip the file number.  */
 			      ++s;
-			      while (isdigit ((unsigned char) *s))
+			      while (ISDIGIT (*s))
 				++s;
 			      --s;
 			    }

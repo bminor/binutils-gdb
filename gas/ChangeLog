@@ -1,3 +1,232 @@
+2001-09-18  Bruno Haible  <haible@clisp.cons.org>
+
+	* as.h: Don't include <ctype.h>.
+	* as.c (main): For gettext, also set the LC_CTYPE locate facet.
+	* atof-generic.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(atof_generic): Use ISDIGIT instead of isdigit.
+	* config/m68k-parse.y: Include "safe-ctype.h".
+	(yylex): Use ISDIGIT/ISALNUM instead of isdigit/isalnum.
+	* config/obj-elf.c: Include "safe-ctype.h".
+	(obj_elf_vtable_inherit): Use ISSPACE instead of isspace.
+	* config/obj-vms.c: Include "safe-ctype.h".
+	(Write_VMS_MHD_Records): Use TOUPPER instead of islower/toupper.
+	(VMS_Case_Hack_Symbol): Use ISUPPER/ISLOWER/TOUPPER/TOLOWER
+	instead of isupper/islower/toupper/tolower.
+	* config/tc-a29k.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(insert_sreg): Use TOUPPER instead of islower/toupper.
+	(machine_ip): Use ISALPHA/ISALNUM/ISUPPER/TOLOWER instead of
+	isalpha/isalnum/isupper/tolower.
+	(a29k_unrecognized_line, md_operand): Use ISDIGIT instead of
+	isdigit.
+	* config/tc-alpha.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(md_undefined_symbol, s_alpha_ent): Use ISDIGIT instead of isdigit.
+	* config/tc-arc.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(md_assemble): Use ISSPACE/ISALNUM instead of isspace/isalnum.
+	(arc_extoper): Use TOLOWER instead of isupper/tolower.
+	* config/tc-arm.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(arm_psr_parse): Use ISALPHA instead of isalpha.
+	(accum0_required_here): Use ISALNUM instead of isalnum.
+	(do_ldrd): Use ISSPACE instead of isspace.
+	(decode_shift): Use ISALPHA instead of isalpha.
+	(insert_reg): Use TOUPPER instead of islower/toupper.
+	(arm_reg_parse): Use ISALPHA instead of isalpha.
+	(arm_parse_reloc): Use ISALNUM/ISPUNCT/TOLOWER instead of
+	isalnum/ispunct/tolower.
+	* config/tc-avr.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(md_parse_option): Use TOLOWER instead of tolower.
+	(avr_operand): Use ISDIGIT/TOLOWER instead of isdigit/tolower.
+	* config/tc-cris.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(cris_process_instruction): Use ISLOWER instead of islower.
+	(get_gen_reg): Use ISALNUM/ISDIGIT instead of isalnum/isdigit.
+	(get_spec_reg): Use TOLOWER/ISALNUM instead of isupper/tolower/isalnum.
+	(get_flags): Use ISSPACE instead of isspace.
+	* config/tc-d10v.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(do_assemble): Use TOLOWER instead of tolower.
+	* config/tc-d30v.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(do_assemble): Use TOLOWER instead of tolower.
+	(d30v_start_line): Use ISSPACE instead of isspace.
+	* config/tc-fr30.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(fr30_is_colon_insn): Use TOLOWER instead of tolower.
+	* config/tc-h8300.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(skip_colonthing, get_operand): Use ISDIGIT instead of isdigit.
+	* config/tc-h8500.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(start_label): Use ISALPHA instead of isalpha.
+	* config/tc-hppa.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(pa_ip): Use ISUPPER/ISLOWER/TOLOWER instead of
+	isupper/islower/tolower.
+	(pa_parse_number): Use ISDIGIT instead of isdigit.
+	(pa_chk_field_selector): Use TOLOWER instead of tolower.
+	(pa_stringer): Use ISDIGIT instead of isdigit.
+	* config/tc-i370.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(register_name): Use ISALPHA instead of isalpha.
+	(i370_elf_suffix): Use ISALNUM/TOLOWER instead of
+	isalnum/islower/tolower.
+	(i370_addr_offset): Use ISDIGIT/ISALPHA instead of
+	isdigit/isalpha.
+	(i370_addr_cons): Use ISALPHA/ISXDIGIT instead of
+	isalpha/isxdigit.
+	(md_assemble): Use ISSPACE instead of isspace.
+	* config/tc-i386.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(md_begin): Use ISDIGIT/ISLOWER/ISUPPER/TOLOWER/ISALPHA
+	instead of isdigit/islower/isupper/tolower/isalpha.
+	(output_invalid): Use ISPRINT instead of isprint.
+	* config/tc-i860.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(i860_ip): Use ISLOWER/ISDIGIT instead of islower/isdigit.
+	* config/tc-i960.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(get_args): Use ISALNUM instead of isalnum.
+	* config/tc-ia64.c: Include "safe-ctype.h".
+	(dot_pred_rel): Use TOUPPER/ISDIGIT instead of toupper/isdigit.
+	(ia64_unrecognized_line): Use ISDIGIT instead of isdigit.
+	(ia64_parse_name): Likewise.
+	* config/tc-m32r.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(assemble_two_insns): Use ISSPACE/ISALNUM/ISUPPER/TOLOWER
+	instead of isspace/isalnum/isupper/tolower.
+	* config/tc-m68hc11.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(md_assemble): Use TOLOWER/ISALNUM instead of tolower/isalnum.
+	* config/tc-m68k.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(mklower_table): Remove variable.
+	(mklower): Remove macro.
+	(insert_reg): Use TOUPPER instead of islower/toupper.
+	(md_begin): Remove initialization of mklower_table.
+	(s_reg): Use ISALNUM instead of isalnum.
+	(mri_assemble): Use ISUPPER/TOLOWER instead of isupper/tolower.
+	(parse_mri_condition): Use TOLOWER instead of isupper/tolower.
+	(build_mri_control_operand): Use TOLOWER instead of tolower.
+	(s_mri_else, s_mri_break, s_mri_next, s_mri_for): Likewise.
+	* config/tc-m88k.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(md_assemble): Use ISSPACE instead of isspace.
+	(get_imm16): Use ISALNUM instead of isalnum.
+	(get_cnd): Use ISDIGIT/ISUPPER/TOLOWER instead of
+	isdigit/isupper/tolower.
+	(get_bf_offset_expression): Use ISALPHA/ISUPPER/TOLOWER
+	instead of isalpha/isupper/tolower.
+	(hexval): Use ISDIGIT/ISLOWER/ISUPPER instead of
+	isdigit/islower/isupper.
+	* config/tc-mcore.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(mcore_s_section): Use ISSPACE instead of isspace.
+	(parse_reg): Use ISSPACE/TOLOWER/ISALNUM instead of
+	isspace/tolower/isalnum.
+	(parse_creg): Use ISSPACE/TOLOWER instead of isspace/tolower.
+	(parse_psrmod): Use TOLOWER instead of isascii/tolower.
+	(parse_exp, parse_mem, md_assemble): Use ISSPACE instead of
+	isspace.
+	* config/tc-mips.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(mips_ip): Use ISSPACE/ISDIGIT instead of isspace/isdigit.
+	(mips16_ip): Use ISLOWER/ISDIGIT instead of islower/isdigit.
+	(my_getSmallExpression): Use ISDIGIT/TOLOWER instead of
+	isdigit/tolower.
+	(tc_get_register): Likewise.
+	(get_number): Use ISDIGIT/ISXDIGIT instead of isdigit/isxdigit.
+	(s_mips_ent): Use ISDIGIT instead of isdigit.
+	* config/tc-mn10200.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(md_assemble): Use ISSPACE instead of isspace.
+	* config/tc-mn10300.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(md_assemble): Use ISSPACE instead of isspace.
+	* config/tc-ns32k.c: Don't include <ctype.h>.
+	* config/tc-pdp11.c: Include "safe-ctype.h".
+	(mklower): Remove function.
+	(parse_reg): Use TOLOWER instead of mklower.
+	* config/tc-pj.c: Include "safe-ctype.h".
+	(md_assemble): Use ISSPACE instead of isspace.
+	* config/tc-ppc.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(register_name): Use ISALPHA instead of isalpha.
+	(ppc_elf_suffix): Use ISALNUM/TOLOWER instead of
+	isalnum/islower/tolower.
+	(md_assemble): Use ISSPACE instead of isspace.
+	(ppc_canonicalize_symbol_name): Use ISLOWER/TOUPPER instead of
+	islower/toupper.
+	* config/tc-s390.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(register_name): Use ISALPHA instead of isalpha.
+	(s390_elf_suffix, s390_lit_suffix): Use ISALNUM instead of isalnum.
+	(md_gather_operands, md_assemble, s390_insn): Use ISSPACE instead of
+	isspace.
+	* config/tc-sh.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(sh_elf_suffix): Use ISALNUM/TOLOWER instead of
+	isalnum/islower/tolower.
+	(IDENT_CHAR): Use ISALNUM instead of isalnum.
+	(parse_reg): Use TOLOWER instead of tolower.
+	(find_cooked_opcode): Use TOLOWER instead of isupper/tolower.
+	* config/tc-sparc.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(sparc_ip): Use ISLOWER/ISDIGIT instead of islower/isdigit.
+	(parse_keyword_arg): Use ISALNUM instead of isalnum.
+	* config/tc-tahoe.c: Include "safe-ctype.h".
+	(tahoe_reg_parse): Use ISDIGIT instead of isdigit.
+	(tip_op): Use TOLOWER instead of isupper/tolower.
+	* config/tc-tic30.c: Include "safe-ctype.h".
+	(md_begin): Use ISLOWER/ISDIGIT/ISUPPER/TOLOWER/ISLOWER/
+	ISALPHA instead of islower/isdigit/isupper/tolower/islower/isalpha.
+	(tic30_operand): Use TOLOWER instead of tolower.
+	(tic30_find_parallel_insn): Likewise.
+	(output_invalid): Use ISPRINT instead of isprint.
+	* config/tc-tic54x.c: Include "safe-ctype.h".
+	(tic54x_asg, tic54x_eval): Use ISALPHA instead of isalpha.
+	(lookup_version): Use TOUPPER instead of toupper.
+	(tic54x_var): Use ISALPHA instead of isalpha.
+	(tic54x_mlib): Use ISSPACE instead of isspace.
+	(subsym_iscons): Use TOUPPER instead of toupper.
+	(get_operands): Use ISSPACE instead of isspace.
+	(is_type): Use TOUPPER/ISDIGIT instead of toupper/isdigit.
+	(encode_indirect, encode_operand): Use TOUPPER instead of toupper.
+	(next_line_shows_parallel): Use ISSPACE instead of isspace.
+	(subsym_get_arg, subsym_substitute): Use ISDIGIT instead of isdigit.
+	(tic54x_start_line_hook, md_assemble, tic54x_start_label): Use
+	ISSPACE instead of isspace.
+	* config/tc-tic80.c: Include "safe-ctype.h".
+	(md_assemble): Use ISSPACE instead of isspace.
+	* config/tc-v850.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(system_register_name): Use ISDIGIT instead of isdigit.
+	(md_assemble): Use ISSPACE instead of isspace.
+	* config/tc-vax.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(vax_reg_parse): Use TOLOWER/ISDIGIT instead of
+	isupper/tolower/isdigit.
+	(vip_op): Use TOLOWER instead of isupper/tolower.
+	* config/tc-w65.c: Don't include <ctype.h>.
+	* config/tc-z8k.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(tohex): Use ISDIGIT/ISLOWER instead of isdigit/islower.
+	(whatreg): Use ISDIGIT instead of isdigit.
+	* ecoff.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(ecoff_directive_ent, ecoff_stab): Use ISDIGIT instead of isdigit.
+	* expr.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(integer_constant): Use ISALNUM/TOUPPER instead of
+	isalnum/islower/toupper.
+	(operand): Use TOLOWER instead of isupper/tolower.
+	* gasp.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(sb_strtol, level_0, change_base, doinstr): Use ISDIGIT instead
+	of isdigit.
+	(process_assigns, whatcond): Use TOUPPER instead of toupper.
+	(chartype_init): Use ISALPHA/ISDIGIT instead of isalpha/isdigit.
+	(main): For gettext, also set the LC_CTYPE locate facet.
+	* hash.c: Include "safe-ctype.h".
+	(main): Use TOLOWER instead of isupper/tolower.
+	* itbl-lex.l: Don't include <ctype.h>.
+	* listing.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(listing_newline): Use ISCNTRL instead of isascii/iscntrl. Don't
+	omit non-ASCII characters.
+	(debugging_pseudo): Use ISSPACE instead of isspace.
+	* macro.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(buffer_and_nest): Use ISALNUM instead of isalnum.
+	(get_token): Use ISALPHA/ISALNUM instead of isalpha/isalnum.
+	(define_macro): Use ISUPPER/TOLOWER instead of isupper/tolower.
+	(macro_expand_body): Use ISALNUM/ISDIGIT/ISUPPER/ISALPHA
+	instead of isalnum/isdigit/isupper/isalpha.
+	(check_macro): Use ISALPHA/ISALNUM/ISUPPER/TOLOWER instead
+	of isalpha/isalnum/isupper/tolower.
+	* read.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(read_a_source_file): Use ISUPPER/TOLOWER/ISDIGIT instead of
+	isupper/tolower/isdigit.
+	(s_mri_common): Use ISDIGIT instead of isdigit.
+	(s_mri_sect): Use ISDIGIT/TOUPPER instead of isdigit/toupper.
+	(s_float_space): Use ISALPHA instead of isalpha.
+	(ignore_rest_of_line): Use ISPRINT instead of isprint.
+	(float_cons): Use ISALPHA instead of isalpha.
+	(next_char_of_string): Use ISDIGIT/ISXDIGIT instead of
+	isdigit/isxdigit.
+	* symbols.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(save_symbol_name): Use ISLOWER/TOUPPER instead of
+	islower/toupper.
+	(symbol_find_base): Use TOUPPER instead of islower/toupper.
+	(decode_local_label_name): Use ISDIGIT instead of isdigit.
+
 2001-09-18  Martin Schwidefsky <schwidefsky@de.ibm.com>
 
 	* tc-s390.c (s390_insn): Add code to cope with 6 byte O_constants

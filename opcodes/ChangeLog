@@ -1,3 +1,32 @@
+2001-09-18  Bruno Haible  <haible@clisp.cons.org>
+
+	* cgen-asm.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(cgen_parse_keyword): Use ISALNUM instead of isalnum.
+	* cgen-opc.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(cgen_keyword_lookup_name): Use ISALPHA/TOLOWER instead of
+	isalpha/tolower.
+	(cgen_keyword_add): Use ISALNUM instead of isalnum.
+	(hash_keyword_name): Use TOLOWER instead of tolower.
+	* fr30-asm.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(parse_insn_normal): Use TOLOWER/ISSPACE instead of
+	tolower/isspace.
+	(fr30_cgen_assemble_insn): Use ISSPACE instead of isspace.
+	* fr30-desc.c: Don't include <ctype.h>.
+	* fr30-ibld.c: Likewise.
+	* ia64-gen.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(load_insn_classes, parse_resource_users, load_depfile): Use
+	ISSPACE instead of isspace.
+	* m32r-asm.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(parse_insn_normal): Use TOLOWER/ISSPACE instead of
+	tolower/isspace.
+	(m32r_cgen_assemble_insn): Use ISSPACE instead of isspace.
+	* m32r-desc.c: Don't include <ctype.h>.
+	* m32r-ibld.c: Likewise.
+	* openrisc-asm.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(parse_insn_normal): Use TOLOWER/ISSPACE instead of
+	tolower/isspace.
+	(openrisc_cgen_assemble_insn): Use ISSPACE instead of isspace.
+
 2001-09-18  Martin Schwidefsky <schwidefsky@de.ibm.com>
 
 	* Makefile.am: Add rules and dependencies to create the s/390 opcode

@@ -19,9 +19,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-#include <ctype.h>
-
 #include "libiberty.h"
+#include "safe-ctype.h"
 #include "cg_arcs.h"
 #include "sym_ids.h"
 
@@ -123,7 +122,7 @@ DEFUN (parse_spec, (spec, sym), char *spec AND Sym * sym)
 
       if (strlen (spec))
 	{
-	  if (isdigit ((unsigned char) spec[0]))
+	  if (ISDIGIT (spec[0]))
 	    sym->line_num = atoi (spec);
 	  else
 	    sym->name = spec;
@@ -139,7 +138,7 @@ DEFUN (parse_spec, (spec, sym), char *spec AND Sym * sym)
 	  if (!sym->file)
 	    sym->file = &non_existent_file;
 	}
-      else if (isdigit ((unsigned char) *spec))
+      else if (ISDIGIT (*spec))
 	{
 	  sym->line_num = atoi (spec);
 	}

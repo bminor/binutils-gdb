@@ -26,8 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
-
-#include <ctype.h>
+#include "safe-ctype.h"
 
 #include "bfdlink.h"
 
@@ -667,7 +666,7 @@ gldelf32ebmip_place_orphan (file, s)
   /* If the name of the section is representable in C, then create
      symbols to mark the start and the end of the section.  */
   for (ps = secname; *ps != '\0'; ps++)
-    if (! isalnum (*ps) && *ps != '_')
+    if (! ISALNUM (*ps) && *ps != '_')
       break;
   if (*ps == '\0' && config.build_constructors)
     {

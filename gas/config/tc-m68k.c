@@ -20,8 +20,8 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-#include <ctype.h>
 #include "as.h"
+#include "safe-ctype.h"
 #include "obstack.h"
 #include "subsegs.h"
 #include "dwarf2dbg.h"
@@ -648,8 +648,6 @@ CONST pseudo_typeS mote_pseudo_table[] =
 
 extern char *input_line_pointer;
 
-static char mklower_table[256];
-#define mklower(c) (mklower_table[(unsigned char) (c)])
 static char notend_table[256];
 static char alt_notend_table[256];
 #define notend(s)						\
@@ -3311,7 +3309,7 @@ insert_reg (regname, regnum)
 				   &zero_address_frag));
 
   for (i = 0; regname[i]; i++)
-    buf[i] = islower (regname[i]) ? toupper (regname[i]) : regname[i];
+    buf[i] = TOUPPER (regname[i]);
   buf[i] = '\0';
 
   symbol_table_insert (symbol_new (buf, reg_section, regnum,
@@ -3879,9 +3877,6 @@ md_begin ()
 	    as_fatal (_("Internal Error: Can't hash %s: %s"), alias, retval);
 	}
     }
-
-  for (i = 0; i < (int) sizeof (mklower_table); i++)
-    mklower_table[i] = (isupper (c = (char) i)) ? tolower (c) : c;
 
   for (i = 0; i < (int) sizeof (notend_table); i++)
     {
@@ -5370,7 +5365,7 @@ s_reg (ignore)
   SKIP_WHITESPACE ();
 
   s = input_line_pointer;
-  while (isalnum ((unsigned char) *input_line_pointer)
+  while (ISALNUM (*input_line_pointer)
 #ifdef REGISTER_PREFIX
 	 || *input_line_pointer == REGISTER_PREFIX
 #endif
@@ -5582,10 +5577,7 @@ mri_assemble (str)
 
   /* md_assemble expects the opcode to be in lower case.  */
   for (s = str; *s != ' ' && *s != '\0'; s++)
-    {
-      if (isupper ((unsigned char) *s))
-	*s = tolower ((unsigned char) *s);
-    }
+    *s = TOLOWER (*s);
 
   md_assemble (str);
 }
@@ -5667,10 +5659,8 @@ parse_mri_condition (pcc)
   ++input_line_pointer;
   SKIP_WHITESPACE ();
 
-  if (isupper (c1))
-    c1 = tolower (c1);
-  if (isupper (c2))
-    c2 = tolower (c2);
+  c1 = TOLOWER (c1);
+  c2 = TOLOWER (c2);
 
   *pcc = (c1 << 8) | c2;
 
@@ -5912,7 +5902,7 @@ build_mri_control_operand (qual, cc, leftstart, leftstop, rightstart,
       *s++ = 'm';
       *s++ = 'p';
       if (qual != '\0')
-	*s++ = tolower (qual);
+	*s++ = TOLOWER (qual);
       *s++ = ' ';
       memcpy (s, leftstart, leftstop - leftstart);
       s += leftstop - leftstart;
@@ -5930,7 +5920,7 @@ build_mri_control_operand (qual, cc, leftstart, leftstop, rightstart,
   *s++ = cc >> 8;
   *s++ = cc & 0xff;
   if (extent != '\0')
-    *s++ = tolower (extent);
+    *s++ = TOLOWER (extent);
   *s++ = ' ';
   strcpy (s, truelab);
   mri_assemble (buf);
@@ -6180,7 +6170,7 @@ s_mri_else (qual)
   mri_control_stack->else_seen = 1;
 
   buf = (char *) xmalloc (20 + strlen (mri_control_stack->bottom));
-  q[0] = tolower (qual);
+  q[0] = TOLOWER (qual);
   q[1] = '\0';
   sprintf (buf, "bra%s %s", q, mri_control_stack->bottom);
   mri_assemble (buf);
@@ -6253,7 +6243,7 @@ s_mri_break (extent)
     }
 
   buf = (char *) xmalloc (20 + strlen (n->bottom));
-  ex[0] = tolower (extent);
+  ex[0] = TOLOWER (extent);
   ex[1] = '\0';
   sprintf (buf, "bra%s %s", ex, n->bottom);
   mri_assemble (buf);
@@ -6292,7 +6282,7 @@ s_mri_next (extent)
     }
 
   buf = (char *) xmalloc (20 + strlen (n->next));
-  ex[0] = tolower (extent);
+  ex[0] = TOLOWER (extent);
   ex[1] = '\0';
   sprintf (buf, "bra%s %s", ex, n->next);
   mri_assemble (buf);
@@ -6476,7 +6466,7 @@ s_mri_for (qual)
   *s++ = 'v';
   *s++ = 'e';
   if (qual != '\0')
-    *s++ = tolower (qual);
+    *s++ = TOLOWER (qual);
   *s++ = ' ';
   memcpy (s, initstart, initstop - initstart);
   s += initstop - initstart;
@@ -6494,7 +6484,7 @@ s_mri_for (qual)
   *s++ = 'm';
   *s++ = 'p';
   if (qual != '\0')
-    *s++ = tolower (qual);
+    *s++ = TOLOWER (qual);
   *s++ = ' ';
   memcpy (s, endstart, endstop - endstart);
   s += endstop - endstart;
@@ -6505,7 +6495,7 @@ s_mri_for (qual)
   mri_assemble (buf);
 
   /* bcc bottom */
-  ex[0] = tolower (extent);
+  ex[0] = TOLOWER (extent);
   ex[1] = '\0';
   if (up)
     sprintf (buf, "blt%s %s", ex, n->bottom);
@@ -6521,7 +6511,7 @@ s_mri_for (qual)
     strcpy (s, "sub");
   s += 3;
   if (qual != '\0')
-    *s++ = tolower (qual);
+    *s++ = TOLOWER (qual);
   *s++ = ' ';
   memcpy (s, bystart, bystop - bystart);
   s += bystop - bystart;

@@ -25,7 +25,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "libiberty.h"
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
+#include "safe-ctype.h"
 #include "getopt.h"
 #include "bfdlink.h"
 #include "ld.h"
@@ -419,7 +419,7 @@ is_num (string, min, max, err)
 
   for (; *string; ++string)
     {
-      if (! isdigit (*string))
+      if (! ISDIGIT (*string))
 	{
 	  result = err;
 	  break;
@@ -504,7 +504,7 @@ parse_args (argc, argv)
   for (i = 1; i < argc; i++)
     if (strcmp (argv[i], "-G") == 0
 	&& (i + 1 >= argc
-	    || ! isdigit ((unsigned char) argv[i + 1][0])))
+	    || ! ISDIGIT (argv[i + 1][0])))
       argv[i] = (char *) "--shared";
 
   /* Because we permit long options to start with a single dash, and

@@ -59,10 +59,10 @@
 #include "bfd.h"
 #include <stdio.h>
 #include <getopt.h>
-#include <ctype.h>
 #include <errno.h>
 #include "bucomm.h"
 #include "libiberty.h"
+#include "safe-ctype.h"
 
 /* Some platforms need to put stdin into binary mode, to read
     binary files.  */
@@ -81,14 +81,7 @@
 #endif
 #endif
 
-/* Not all printable characters have ASCII codes (depending upon the
-   LOCALE set) but on some older systems it is not safe to test isprint
-   without first testing isascii...  */
-#if defined isascii && !defined HAVE_LOCALE_H
-#define isgraphic(c) (isascii (c) && (isprint (c) || (c) == '\t'))
-#else
-#define isgraphic(c) (isprint (c) || (c) == '\t')
-#endif
+#define isgraphic(c) (ISPRINT (c) || (c) == '\t')
 
 #ifndef errno
 extern int errno;
@@ -153,7 +146,7 @@ main (argc, argv)
   int exit_status = 0;
   boolean files_given = false;
 
-#if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
+#if defined (HAVE_SETLOCALE)
   setlocale (LC_ALL, "");
 #endif
   bindtextdomain (PACKAGE, LOCALEDIR);

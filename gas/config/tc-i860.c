@@ -1,5 +1,5 @@
 /* tc-i860.c -- Assembler for the Intel i860 architecture.
-   Copyright 1989, 1992, 1993, 1994, 1995, 1998, 1999, 2000
+   Copyright 1989, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
    Brought back from the dead and completely reworked
@@ -21,10 +21,10 @@
    with GAS; see the file COPYING.  If not, write to the Free Software
    Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 #include "as.h"
+#include "safe-ctype.h"
 #include "subsegs.h"
 #include "opcode/i860.h"
 #include "elf/i860.h"
@@ -409,7 +409,7 @@ i860_process_insn (str)
   opcode = 0;
 #endif
 
-  for (s = str; islower (*s) || *s == '.' || *s == '3'
+  for (s = str; ISLOWER (*s) || *s == '.' || *s == '3'
        || *s == '2' || *s == '1'; ++s)
     ;
 
@@ -485,9 +485,9 @@ i860_process_insn (str)
 
 	    /* Must be at least one digit.  */
 	    case '#':
-	      if (isdigit (*s++))
+	      if (ISDIGIT (*s++))
 		{
-		  while (isdigit (*s))
+		  while (ISDIGIT (*s))
 		    ++s;
 		  continue;
 		}
@@ -528,11 +528,11 @@ i860_process_insn (str)
 		/* Any register r0..r31.  */
 		case 'r':
 		  s++;
-		  if (!isdigit (c = *s++))
+		  if (!ISDIGIT (c = *s++))
 		    {
 		      goto error;
 		    }
-		  if (isdigit (*s))
+		  if (ISDIGIT (*s))
 		    {
 		      if ((c = 10 * (c - '0') + (*s++ - '0')) >= 32)
 			goto error;
@@ -575,10 +575,10 @@ i860_process_insn (str)
 	      else
 		s++;
 
-	      if (*s++ == 'f' && isdigit (*s))
+	      if (*s++ == 'f' && ISDIGIT (*s))
 		{
 		  mask = *s++;
-		  if (isdigit (*s))
+		  if (ISDIGIT (*s))
 		    {
 		      mask = 10 * (mask - '0') + (*s++ - '0');
 		      if (mask >= 32)

@@ -1,3 +1,44 @@
+2001-09-18  Bruno Haible  <haible@clisp.cons.org>
+
+	* deffilep.y: Include "safe-ctype.h" instead of <ctype.h>.
+	(def_file_add_directive): Use ISSPACE instead of isspace.
+	(def_lex): Use ISDIGIT/ISXDIGIT/ISALPHA/ISALNUM instead of
+	isdigit/isxdigit/isalpha/isalnum.
+	* emultempl/aix.em: Include "safe-ctype.h" instead of <ctype.h>.
+	(gld${EMULATION_NAME}_read_file): Use ISSPACE instead of isspace.
+	* emultempl/elf32.em: Include "safe-ctype.h" instead of <ctype.h>.
+	(gld${EMULATION_NAME}_place_orphan): Use ISALNUM instead of
+	isalnum.
+	* emultempl/gld960c.em: Include "safe-ctype.h" instead of <ctype.h>.
+	(gld960_set_output_arch): Use ISUPPER/TOLOWER instead of
+	isupper/tolower.
+	* emultempl/sunos.em: Include "safe-ctype.h" instead of <ctype.h>.
+	(gld${EMULATION_NAME}_search_dir): Use ISDIGIT instead of isdigit.
+	* ldctor.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(ctor_prio): Use ISDIGIT instead of isdigit.
+	* ldfile.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(ldfile_open_file_search): Use ISALPHA instead of isalpha.
+	(ldfile_add_arch): Use ISUPPER/TOLOWER instead of
+	isupper/tolower.
+	* ldlang.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(stricpy): Use TOLOWER instead of isupper/tolower.
+	(lang_leave_overlay_section): Use ISALNUM instead of isalnum.
+	* ldlex.l: Include "safe-ctype.h" instead of <ctype.h>.
+	(lex_warn_invalid): Use ISPRINT instead of isprint.
+	* ldmain.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(main): For gettext, also set the LC_CTYPE locate facet.
+	(add_keepsyms_file): Use ISSPACE instead of isspace.
+	* lexsup.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(is_num, parse_args): Use ISDIGIT instead of isdigit.
+	* mpw-elfmips.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(gldelf32ebmip_place_orphan): Use ISALNUM instead of isalnum.
+	* mpw-eppcmac.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(gldppcmacos_read_file): Use ISSPACE instead of isspace.
+	* pe-dll.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(quoteput): Use ISSPACE instead of isspace.
+	(pe_dll_generate_implib, pe_process_import_defs): Use ISALNUM
+	instead of isalnum.
+
 2001-09-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* deffilep.y (def_stash_module): Constify "name" param.

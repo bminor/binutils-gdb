@@ -20,8 +20,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
-#include <ctype.h>
 #include "libiberty.h"
+#include "safe-ctype.h"
 #include "bfd.h"
 #include "sysdep.h"
 #include "ld.h"
@@ -572,10 +572,10 @@ def_file_add_directive (my_def, param, len)
 
   while (param < pend)
     {
-      while (param < pend && isspace (*param))
+      while (param < pend && ISSPACE (*param))
 	param++;
       for (tend = param + 1;
-	   tend < pend && !(isspace (tend[-1]) && *tend == '-');
+	   tend < pend && !(ISSPACE (tend[-1]) && *tend == '-');
 	   tend++);
 
       for (i = 0; diropts[i].param; i++)
@@ -949,10 +949,10 @@ def_lex ()
   /* must be something else */
   saw_newline = 0;
 
-  if (isdigit (c))
+  if (ISDIGIT (c))
     {
       bufptr = 0;
-      while (c != EOF && (isxdigit (c) || (c == 'x')))
+      while (c != EOF && (ISXDIGIT (c) || (c == 'x')))
 	{
 	  put_buf (c);
 	  c = def_getc ();
@@ -966,10 +966,10 @@ def_lex ()
       return NUMBER;
     }
 
-  if (isalpha (c) || strchr ("$:-_?", c))
+  if (ISALPHA (c) || strchr ("$:-_?", c))
     {
       bufptr = 0;
-      while (c != EOF && (isalnum (c) || strchr ("$:-_?/@", c)))
+      while (c != EOF && (ISALNUM (c) || strchr ("$:-_?/@", c)))
 	{
 	  put_buf (c);
 	  c = def_getc ();

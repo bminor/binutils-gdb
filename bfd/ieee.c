@@ -32,8 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "libbfd.h"
 #include "ieee.h"
 #include "libieee.h"
-
-#include <ctype.h>
+#include "safe-ctype.h"
 
 struct output_buffer_struct
 {
@@ -1626,12 +1625,12 @@ ieee_object_p (abfd)
 		strcpy (family, "68332");   /* Guess it will be CPU32 */
 	      }
 	  }
-	else if (toupper (processor[3]) == 'F')   /* 68F333 */
-	  strcpy (family, "68332");	          /* CPU32 */
-	else if ((toupper (processor[3]) == 'C')  /* Embedded controllers */
-		 && ((toupper (processor[2]) == 'E')
-		     || (toupper (processor[2]) == 'H')
-		     || (toupper (processor[2]) == 'L')))
+	else if (TOUPPER (processor[3]) == 'F')  /* 68F333 */
+	  strcpy (family, "68332");	           /* CPU32 */
+	else if ((TOUPPER (processor[3]) == 'C') /* Embedded controllers */
+		 && ((TOUPPER (processor[2]) == 'E')
+		     || (TOUPPER (processor[2]) == 'H')
+		     || (TOUPPER (processor[2]) == 'L')))
 	  {
 	    strcpy (family, "68");
 	    strncat (family, processor + 4, 7);

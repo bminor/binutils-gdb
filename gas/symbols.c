@@ -22,10 +22,9 @@
 
 /* #define DEBUG_SYMS / * to debug symbol list maintenance.  */
 
-#include <ctype.h>
-
 #include "as.h"
 
+#include "safe-ctype.h"
 #include "obstack.h"		/* For "symbols.h" */
 #include "subsegs.h"
 
@@ -124,11 +123,10 @@ save_symbol_name (name)
 
   if (! symbols_case_sensitive)
     {
-      unsigned char *s;
+      char *s;
 
-      for (s = (unsigned char *) ret; *s != '\0'; s++)
-	if (islower (*s))
-	  *s = toupper (*s);
+      for (s = ret; *s != '\0'; s++)
+	*s = TOUPPER (*s);
     }
 
   return ret;
@@ -630,9 +628,7 @@ symbol_find_base (name, strip_underscore)
 
       while ((c = *orig++) != '\0')
 	{
-	  if (islower (c))
-	    c = toupper (c);
-	  *copy++ = c;
+	  *copy++ = TOUPPER (c);
 	}
       *copy = '\0';
     }
@@ -1584,7 +1580,7 @@ decode_local_label_name (s)
   if (s[index] != 'L')
     return s;
 
-  for (label_number = 0, p = s + index + 1; isdigit ((unsigned char) *p); ++p)
+  for (label_number = 0, p = s + index + 1; ISDIGIT (*p); ++p)
     label_number = (10 * label_number) + *p - '0';
 
   if (*p == DOLLAR_LABEL_CHAR)
@@ -1594,7 +1590,7 @@ decode_local_label_name (s)
   else
     return s;
 
-  for (instance_number = 0, p++; isdigit ((unsigned char) *p); ++p)
+  for (instance_number = 0, p++; ISDIGIT (*p); ++p)
     instance_number = (10 * instance_number) + *p - '0';
 
   message_format = _("\"%d\" (instance number %d of a %s label)");

@@ -25,11 +25,11 @@
    (It also gives smaller files to re-compile.)
    Here, "operand"s are of expressions, not instructions.  */
 
-#include <ctype.h>
 #include <string.h>
 #define min(a, b)       ((a) < (b) ? (a) : (b))
 
 #include "as.h"
+#include "safe-ctype.h"
 #include "obstack.h"
 
 static void floating_constant PARAMS ((expressionS * expressionP));
@@ -331,9 +331,7 @@ integer_constant (radix, expressionP)
       /* In MRI mode, the number may have a suffix indicating the
          radix.  For that matter, it might actually be a floating
          point constant.  */
-      for (suffix = input_line_pointer;
-	   isalnum ((unsigned char) *suffix);
-	   suffix++)
+      for (suffix = input_line_pointer; ISALNUM (*suffix); suffix++)
 	{
 	  if (*suffix == 'e' || *suffix == 'E')
 	    flt = 1;
@@ -347,8 +345,7 @@ integer_constant (radix, expressionP)
       else
 	{
 	  c = *--suffix;
-	  if (islower ((unsigned char) c))
-	    c = toupper (c);
+	  c = TOUPPER (c);
 	  if (c == 'B')
 	    radix = 2;
 	  else if (c == 'D')
@@ -862,8 +859,7 @@ operand (expressionP)
 	    {
 	      input_line_pointer++;
 	      floating_constant (expressionP);
-	      expressionP->X_add_number =
-		- (isupper ((unsigned char) c) ? tolower (c) : c);
+	      expressionP->X_add_number = - TOLOWER (c);
 	    }
 	  else
 	    {
@@ -985,8 +981,7 @@ operand (expressionP)
 	case 'G':
 	  input_line_pointer++;
 	  floating_constant (expressionP);
-	  expressionP->X_add_number =
-	    - (isupper ((unsigned char) c) ? tolower (c) : c);
+	  expressionP->X_add_number = - TOLOWER (c);
 	  break;
 
 	case '$':

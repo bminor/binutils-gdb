@@ -23,9 +23,9 @@
    at the University of Utah.  */
 
 #include <stdio.h>
-#include <ctype.h>
 
 #include "as.h"
+#include "safe-ctype.h"
 #include "subsegs.h"
 
 #include "bfd/libhppa.h"
@@ -1571,11 +1571,12 @@ pa_ip (str)
   /* Convert everything up to the first whitespace character into lower
      case.  */
   for (s = str; *s != ' ' && *s != '\t' && *s != '\n' && *s != '\0'; s++)
-    if (isupper (*s))
-      *s = tolower (*s);
+    *s = TOLOWER (*s);
 
   /* Skip to something interesting.  */
-  for (s = str; isupper (*s) || islower (*s) || (*s >= '0' && *s <= '3'); ++s)
+  for (s = str;
+       ISUPPER (*s) || ISLOWER (*s) || (*s >= '0' && *s <= '3');
+       ++s)
     ;
 
   switch (*s)
@@ -4687,7 +4688,7 @@ pa_parse_number (s, is_float)
   pa_number = -1;
   have_prefix = 0;
   num = 0;
-  if (!strict && isdigit (*p))
+  if (!strict && ISDIGIT (*p))
     {
       /* Looks like a number.  */
 
@@ -4695,10 +4696,10 @@ pa_parse_number (s, is_float)
 	{
 	  /* The number is specified in hex.  */
 	  p += 2;
-	  while (isdigit (*p) || ((*p >= 'a') && (*p <= 'f'))
+	  while (ISDIGIT (*p) || ((*p >= 'a') && (*p <= 'f'))
 		 || ((*p >= 'A') && (*p <= 'F')))
 	    {
-	      if (isdigit (*p))
+	      if (ISDIGIT (*p))
 		num = num * 16 + *p - '0';
 	      else if (*p >= 'a' && *p <= 'f')
 		num = num * 16 + *p - 'a' + 10;
@@ -4710,7 +4711,7 @@ pa_parse_number (s, is_float)
       else
 	{
 	  /* The number is specified in decimal.  */
-	  while (isdigit (*p))
+	  while (ISDIGIT (*p))
 	    {
 	      num = num * 10 + *p - '0';
 	      ++p;
@@ -4762,7 +4763,7 @@ pa_parse_number (s, is_float)
 	      num = 2;
 	      p++;
 	    }
-	  else if (!isdigit (*p))
+	  else if (!ISDIGIT (*p))
 	    {
 	      if (print_errors)
 		as_bad (_("Undefined register: '%s'."), name);
@@ -4772,7 +4773,7 @@ pa_parse_number (s, is_float)
 	    {
 	      do
 		num = num * 10 + *p++ - '0';
-	      while (isdigit (*p));
+	      while (ISDIGIT (*p));
 	    }
 	}
       else
@@ -5124,16 +5125,16 @@ pa_chk_field_selector (str)
     *str = *str + 1;
 
   if ((*str)[1] == '\'' || (*str)[1] == '%')
-    name[0] = tolower ((*str)[0]),
+    name[0] = TOLOWER ((*str)[0]),
     name[1] = 0;
   else if ((*str)[2] == '\'' || (*str)[2] == '%')
-    name[0] = tolower ((*str)[0]),
-    name[1] = tolower ((*str)[1]),
+    name[0] = TOLOWER ((*str)[0]),
+    name[1] = TOLOWER ((*str)[1]),
     name[2] = 0;
   else if ((*str)[3] == '\'' || (*str)[3] == '%')
-    name[0] = tolower ((*str)[0]),
-    name[1] = tolower ((*str)[1]),
-    name[2] = tolower ((*str)[2]),
+    name[0] = TOLOWER ((*str)[0]),
+    name[1] = TOLOWER ((*str)[1]),
+    name[2] = TOLOWER ((*str)[2]),
     name[3] = 0;
   else
     return e_fsel;
@@ -8196,11 +8197,11 @@ pa_stringer (append_zero)
 		s++;
 		for (num_digit = 0, number = 0, dg = *s;
 		     num_digit < 2
-		     && (isdigit (dg) || (dg >= 'a' && dg <= 'f')
+		     && (ISDIGIT (dg) || (dg >= 'a' && dg <= 'f')
 			 || (dg >= 'A' && dg <= 'F'));
 		     num_digit++)
 		  {
-		    if (isdigit (dg))
+		    if (ISDIGIT (dg))
 		      number = number * 16 + dg - '0';
 		    else if (dg >= 'a' && dg <= 'f')
 		      number = number * 16 + dg - 'a' + 10;

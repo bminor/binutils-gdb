@@ -203,6 +203,7 @@ CODE_FRAGMENT
 #endif
 
 #include "libiberty.h"
+#include "safe-ctype.h"
 #include "bfdlink.h"
 #include "libbfd.h"
 #include "coff/internal.h"
@@ -211,8 +212,6 @@ CODE_FRAGMENT
 #include "libecoff.h"
 #undef obj_symbols
 #include "elf-bfd.h"
-
-#include <ctype.h>
 
 /* provide storage for subsystem, stack and heap data which may have been
    passed in on the command line.  Ld puts this data into a bfd_link_info
@@ -1034,10 +1033,10 @@ bfd_scan_vma (string, end, base)
 
 /* Speed could be improved with a table like hex_value[] in gas.  */
 #define HEX_VALUE(c) \
-  (isxdigit ((unsigned char) c)					\
-   ? (isdigit ((unsigned char) c)				\
+  (ISXDIGIT (c)							\
+   ? (ISDIGIT (c)						\
       ? (c - '0')						\
-      : (10 + c - (islower ((unsigned char) c) ? 'a' : 'A')))	\
+      : (10 + c - (ISLOWER (c) ? 'a' : 'A')))			\
    : 42)
 
   for (value = 0; (digit = HEX_VALUE (* string)) < base; string ++)

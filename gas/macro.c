@@ -1,5 +1,5 @@
 /* macro.c - macro support for gas and gasp
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
    Written by Steve and Judy Chamberlain of Cygnus Support,
@@ -51,11 +51,11 @@ extern void *alloca ();
 #else
 #include <strings.h>
 #endif
-#include <ctype.h>
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 #include "libiberty.h"
+#include "safe-ctype.h"
 #include "sb.h"
 #include "hash.h"
 #include "macro.h"
@@ -183,7 +183,7 @@ buffer_and_nest (from, to, ptr, get_line)
 
 	  /* Skip over a label.  */
 	  while (i < ptr->len
-		 && (isalnum ((unsigned char) ptr->ptr[i])
+		 && (ISALNUM (ptr->ptr[i])
 		     || ptr->ptr[i] == '_'
 		     || ptr->ptr[i] == '$'))
 	    i++;
@@ -206,11 +206,11 @@ buffer_and_nest (from, to, ptr, get_line)
 	    i++;
 	  if (strncasecmp (ptr->ptr + i, from, from_len) == 0
 	      && (ptr->len == (i + from_len)
-		  || ! isalnum (ptr->ptr[i + from_len])))
+		  || ! ISALNUM (ptr->ptr[i + from_len])))
 	    depth++;
 	  if (strncasecmp (ptr->ptr + i, to, to_len) == 0
 	      && (ptr->len == (i + to_len)
-		  || ! isalnum (ptr->ptr[i + to_len])))
+		  || ! ISALNUM (ptr->ptr[i + to_len])))
 	    {
 	      depth--;
 	      if (depth == 0)
@@ -241,13 +241,13 @@ get_token (idx, in, name)
      sb *name;
 {
   if (idx < in->len
-      && (isalpha ((unsigned char) in->ptr[idx])
+      && (ISALPHA (in->ptr[idx])
 	  || in->ptr[idx] == '_'
 	  || in->ptr[idx] == '$'))
     {
       sb_add_char (name, in->ptr[idx++]);
       while (idx < in->len
-	     && (isalnum ((unsigned char) in->ptr[idx])
+	     && (ISALNUM (in->ptr[idx])
 		 || in->ptr[idx] == '_'
 		 || in->ptr[idx] == '$'))
 	{
@@ -567,8 +567,7 @@ define_macro (idx, in, label, get_line, namep)
 
   /* And stick it in the macro hash table.  */
   for (idx = 0; idx < name.len; idx++)
-    if (isupper ((unsigned char) name.ptr[idx]))
-      name.ptr[idx] = tolower (name.ptr[idx]);
+    name.ptr[idx] = TOLOWER (name.ptr[idx]);
   namestr = sb_terminate (&name);
   hash_jam (macro_hash, namestr, (PTR) macro);
 
@@ -726,15 +725,14 @@ macro_expand_body (in, out, formals, formal_hash, comment_char, locals)
 	      sb_add_char (out, '&');
 	      src++;
 	    }
-	  else if (macro_mri
-		   && isalnum ((unsigned char) in->ptr[src]))
+	  else if (macro_mri && ISALNUM (in->ptr[src]))
 	    {
 	      int ind;
 	      formal_entry *f;
 
-	      if (isdigit ((unsigned char) in->ptr[src]))
+	      if (ISDIGIT (in->ptr[src]))
 		ind = in->ptr[src] - '0';
-	      else if (isupper ((unsigned char) in->ptr[src]))
+	      else if (ISUPPER (in->ptr[src]))
 		ind = in->ptr[src] - 'A' + 10;
 	      else
 		ind = in->ptr[src] - 'a' + 10;
@@ -758,7 +756,7 @@ macro_expand_body (in, out, formals, formal_hash, comment_char, locals)
 	    }
 	}
       else if ((macro_alternate || macro_mri)
-	       && (isalpha ((unsigned char) in->ptr[src])
+	       && (ISALPHA (in->ptr[src])
 		   || in->ptr[src] == '_'
 		   || in->ptr[src] == '$')
 	       && (! inquote
@@ -1107,14 +1105,14 @@ check_macro (line, expand, comment_char, error, info)
   macro_entry *macro;
   sb line_sb;
 
-  if (! isalpha ((unsigned char) *line)
+  if (! ISALPHA (*line)
       && *line != '_'
       && *line != '$'
       && (! macro_mri || *line != '.'))
     return 0;
 
   s = line + 1;
-  while (isalnum ((unsigned char) *s)
+  while (ISALNUM (*s)
 	 || *s == '_'
 	 || *s == '$')
     ++s;
@@ -1123,8 +1121,7 @@ check_macro (line, expand, comment_char, error, info)
   memcpy (copy, line, s - line);
   copy[s - line] = '\0';
   for (cs = copy; *cs != '\0'; cs++)
-    if (isupper ((unsigned char) *cs))
-      *cs = tolower (*cs);
+    *cs = TOLOWER (*cs);
 
   macro = (macro_entry *) hash_find (macro_hash, copy);
 

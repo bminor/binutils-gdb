@@ -1,6 +1,6 @@
 /*-
    tc-pj.c -- Assemble code for Pico Java
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -22,6 +22,7 @@
 /* Contributed by Steve Chamberlain of Transmeta <sac@pobox.com>.  */
 
 #include "as.h"
+#include "safe-ctype.h"
 #include "opcode/pj.h"
 
 extern const pj_opc_info_t pj_opc_info[512];
@@ -312,7 +313,7 @@ md_assemble (str)
 	  pending_reloc = 0;
 	}
 
-      while (isspace (*op_end))
+      while (ISSPACE (*op_end))
 	op_end++;
 
       if (*op_end != 0)

@@ -45,6 +45,7 @@
 #include <limits.h>
 #include <errno.h>
 #include "as.h"
+#include "safe-ctype.h"
 #include "sb.h"
 #include "macro.h"
 #include "subsegs.h"
@@ -355,7 +356,7 @@ tic54x_asg (x)
 
   name = ++input_line_pointer;
   c = get_symbol_end ();	/* Get terminator.  */
-  if (!isalpha (*name))
+  if (!ISALPHA (*name))
     {
       as_bad ("symbols assigned with .asg must begin with a letter");
       ignore_rest_of_line ();
@@ -420,7 +421,7 @@ tic54x_eval (x)
   name = strcpy (tmp, name);
   *input_line_pointer = c;
 
-  if (!isalpha (*name))
+  if (!ISALPHA (*name))
     {
       as_bad (_("symbols assigned with .eval must begin with a letter"));
       ignore_rest_of_line ();
@@ -1464,8 +1465,8 @@ lookup_version (ver)
 	      || ver[2] == '5' || ver[2] == '8' || ver[2] == '9'))
 	version = ver[2] - '0';
       else if (strlen (ver) == 5
-	       && toupper (ver[3]) == 'L'
-	       && toupper (ver[4]) == 'P'
+	       && TOUPPER (ver[3]) == 'L'
+	       && TOUPPER (ver[4]) == 'P'
 	       && (ver[2] == '5' || ver[2] == '6'))
 	version = ver[2] - '0' + 10;
     }
@@ -2272,7 +2273,7 @@ tic54x_var (ignore)
     }
   do
     {
-      if (!isalpha (*input_line_pointer))
+      if (!ISALPHA (*input_line_pointer))
 	{
 	  as_bad (_("Substitution symbols must begin with a letter"));
 	  ignore_rest_of_line ();
@@ -2325,7 +2326,7 @@ tic54x_mlib (ignore)
       SKIP_WHITESPACE ();
       len = 0;
       while (!is_end_of_line[(int) *input_line_pointer]
-	     && !isspace (*input_line_pointer))
+	     && !ISSPACE (*input_line_pointer))
 	{
 	  obstack_1grow (&notes, *input_line_pointer);
 	  ++input_line_pointer;
@@ -2739,7 +2740,7 @@ subsym_iscons (a, ignore)
     {
       int len = strlen (a);
 
-      switch (toupper (a[len - 1]))
+      switch (TOUPPER (a[len - 1]))
 	{
 	case 'B':
 	  return 1;
@@ -2755,7 +2756,7 @@ subsym_iscons (a, ignore)
       /* No suffix; either octal, hex, or decimal.  */
       if (*a == '0' && len > 1)
 	{
-	  if (toupper (a[1]) == 'X')
+	  if (TOUPPER (a[1]) == 'X')
 	    return 3;
 	  return 2;
 	}
@@ -3294,7 +3295,7 @@ get_operands (operands, line)
     {
       int paren_not_balanced = 0;
       char *op_start, *op_end;
-      while (*lptr && isspace (*lptr))
+      while (*lptr && ISSPACE (*lptr))
 	++lptr;
       op_start = lptr;
       while (paren_not_balanced || *lptr != ',')
@@ -3324,7 +3325,7 @@ get_operands (operands, line)
 	  /* Trim trailing spaces; while the preprocessor gets rid of most,
 	     there are weird usage patterns that can introduce them
 	     (i.e. using strings for macro args).  */
-	  while (len > 0 && isspace (operands[numexp].buf[len - 1]))
+	  while (len > 0 && ISSPACE (operands[numexp].buf[len - 1]))
 	    operands[numexp].buf[--len] = 0;
 	  lptr = op_end;
 	  ++numexp;
@@ -3348,7 +3349,7 @@ get_operands (operands, line)
 	}
     }
 
-  while (*lptr && isspace (*lptr++))
+  while (*lptr && ISSPACE (*lptr++))
     ;
   if (!is_end_of_line[(int) *lptr])
     {
@@ -3501,12 +3502,12 @@ is_type (operand, type)
     case OP_DST:
       return is_accumulator (operand);
     case OP_B:
-      return is_accumulator (operand) && toupper (operand->buf[0]) == 'B';
+      return is_accumulator (operand) && TOUPPER (operand->buf[0]) == 'B';
     case OP_A:
-      return is_accumulator (operand) && toupper (operand->buf[0]) == 'A';
+      return is_accumulator (operand) && TOUPPER (operand->buf[0]) == 'A';
     case OP_ARX:
       return strncasecmp ("ar", operand->buf, 2) == 0
-	&& isdigit (operand->buf[2]);
+	&& ISDIGIT (operand->buf[2]);
     case OP_SBIT:
       return hash_find (sbit_hash, operand->buf) != 0 || is_absolute (operand);
     case OP_CC:
@@ -3736,7 +3737,7 @@ encode_indirect (insn, operand)
   if (insn->is_lkaddr)
     {
       /* lk addresses always go in the second insn word.  */
-      mod = ((toupper (operand->buf[1]) == 'A') ? 12 :
+      mod = ((TOUPPER (operand->buf[1]) == 'A') ? 12 :
 	     (operand->buf[1] == '(') ? 15 :
 	     (strchr (operand->buf, '%') != NULL) ? 14 : 13);
       arf = ((mod == 12) ? operand->buf[3] - '0' :
@@ -3761,7 +3762,7 @@ encode_indirect (insn, operand)
     }
   else
     {
-      arf = (toupper (operand->buf[1]) == 'A' ?
+      arf = (TOUPPER (operand->buf[1]) == 'A' ?
 	     operand->buf[3] : operand->buf[4]) - '0';
 
       if (operand->buf[1] == '+')
@@ -3782,9 +3783,9 @@ encode_indirect (insn, operand)
 	  else
 	    mod = (operand->buf[4] == '-' ? 8 : 10);/* *ARx+% / *ARx-%  */
 	}
-      else if (toupper (operand->buf[6]) == 'B')
+      else if (TOUPPER (operand->buf[6]) == 'B')
 	mod = (operand->buf[4] == '-' ? 4 : 7); /* ARx+0B / *ARx-0B  */
-      else if (toupper (operand->buf[6]) == '%')
+      else if (TOUPPER (operand->buf[6]) == '%')
 	mod = (operand->buf[4] == '-' ? 9 : 11); /* ARx+0% / *ARx - 0%  */
       else
 	{
@@ -4002,7 +4003,7 @@ encode_operand (insn, type, operand)
       /* 16-bit immediate value.  */
       return encode_dmad (insn, operand, 0);
     case OP_SRC:
-      if (toupper (*operand->buf) == 'B')
+      if (TOUPPER (*operand->buf) == 'B')
 	{
 	  insn->opcode[ext ? (1 + insn->is_lkaddr) : 0].word |= (1 << 9);
 	  if (insn->using_default_dst)
@@ -4011,7 +4012,7 @@ encode_operand (insn, type, operand)
       return 1;
     case OP_RND:
       /* Make sure this agrees with with the OP_DST operand.  */
-      if (!((toupper (operand->buf[0]) == 'B') ^
+      if (!((TOUPPER (operand->buf[0]) == 'B') ^
 	    ((insn->opcode[0].word & (1 << 8)) != 0)))
 	{
 	  as_bad (_("Destination accumulator for each part of this parallel "
@@ -4021,7 +4022,7 @@ encode_operand (insn, type, operand)
       return 1;
     case OP_SRC1:
     case OP_DST:
-      if (toupper (operand->buf[0]) == 'B')
+      if (TOUPPER (operand->buf[0]) == 'B')
 	insn->opcode[ext ? (1 + insn->is_lkaddr) : 0].word |= (1 << 8);
       return 1;
     case OP_Xmem:
@@ -4418,7 +4419,7 @@ next_line_shows_parallel (next_line)
      char *next_line;
 {
   /* Look for the second half.  */
-  while (isspace (*next_line))
+  while (ISSPACE (*next_line))
     ++next_line;
 
   return (next_line[0] == PARALLEL_SEPARATOR
@@ -4505,11 +4506,11 @@ subsym_get_arg (char *line, char *terminators, char **str, int nosub)
   char *ptr = line;
   char *endp;
   int is_string = *line == '"';
-  int is_char = isdigit (*line);
+  int is_char = ISDIGIT (*line);
 
   if (is_char)
     {
-      while (isdigit (*ptr))
+      while (ISDIGIT (*ptr))
 	++ptr;
       endp = ptr;
       *str = xmalloc (ptr - line + 1);
@@ -4728,7 +4729,7 @@ subsym_substitute (char *line, int forced)
 
 	  /* Check for local labels; replace them with the appropriate
 	     substitution.  */
-	  if ((*name == '$' && isdigit (name[1]) && name[2] == '\0')
+	  if ((*name == '$' && ISDIGIT (name[1]) && name[2] == '\0')
 	      || name[strlen (name) - 1] == '?')
 	    {
 	      /* Use an existing identifier for that label if, available, or
@@ -4821,7 +4822,7 @@ subsym_substitute (char *line, int forced)
 			}
 		      /* Character constants are converted to numerics
 			 by the preprocessor.  */
-		      arg_type[1] = (isdigit (*ptr)) ? 2 : (*ptr == '"');
+		      arg_type[1] = (ISDIGIT (*ptr)) ? 2 : (*ptr == '"');
 		      ptr = subsym_get_arg (ptr, ")", &arg2, ismember);
 		    }
 		  /* Args checking.  */
@@ -5026,7 +5027,7 @@ tic54x_start_line_hook ()
 	comment = replacement + strlen (replacement) - 1;
 
       /* Trim trailing whitespace.  */
-      while (isspace (*comment))
+      while (ISSPACE (*comment))
 	{
 	  comment[0] = endc;
 	  comment[1] = 0;
@@ -5034,7 +5035,7 @@ tic54x_start_line_hook ()
 	}
 
       /* Compact leading whitespace.  */
-      while (isspace (tmp[0]) && isspace (tmp[1]))
+      while (ISSPACE (tmp[0]) && ISSPACE (tmp[1]))
 	++tmp;
 
       input_line_pointer = endp;
@@ -5135,7 +5136,7 @@ md_assemble (line)
 	     otherwise let the assembler pick up the next line for us.  */
 	  if (tmp != NULL)
 	    {
-	      while (isspace (tmp[2]))
+	      while (ISSPACE (tmp[2]))
 		++tmp;
 	      md_assemble (tmp + 2);
 	    }
@@ -5673,18 +5674,18 @@ tic54x_start_label (c, rest)
   if (is_end_of_line[(int) c])
     return 1;
 
-  if (isspace (c))
-    while (isspace (c = *++rest))
+  if (ISSPACE (c))
+    while (ISSPACE (c = *++rest))
       ;
   if (c == '.')
     {
       /* Don't let colon () define a label for any of these...  */
-      return (strncasecmp (rest, ".tag", 4) != 0 || !isspace (rest[4]))
-	&& (strncasecmp (rest, ".struct", 7) != 0 || !isspace (rest[7]))
-	&& (strncasecmp (rest, ".union", 6) != 0 || !isspace (rest[6]))
-	&& (strncasecmp (rest, ".macro", 6) != 0 || !isspace (rest[6]))
-	&& (strncasecmp (rest, ".set", 4) != 0 || !isspace (rest[4]))
-	&& (strncasecmp (rest, ".equ", 4) != 0 || !isspace (rest[4]));
+      return (strncasecmp (rest, ".tag", 4) != 0 || !ISSPACE (rest[4]))
+	&& (strncasecmp (rest, ".struct", 7) != 0 || !ISSPACE (rest[7]))
+	&& (strncasecmp (rest, ".union", 6) != 0 || !ISSPACE (rest[6]))
+	&& (strncasecmp (rest, ".macro", 6) != 0 || !ISSPACE (rest[6]))
+	&& (strncasecmp (rest, ".set", 4) != 0 || !ISSPACE (rest[4]))
+	&& (strncasecmp (rest, ".equ", 4) != 0 || !ISSPACE (rest[4]));
     }
 
   return 1;

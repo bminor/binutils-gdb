@@ -43,6 +43,7 @@
  */
 
 #include "as.h"
+#include "safe-ctype.h"
 #include "dwarf2dbg.h"
 #include "subsegs.h"
 
@@ -4514,7 +4515,7 @@ dot_pred_rel (type)
       valueT bit = 1;
       int regno;
 
-      if (toupper (*input_line_pointer) != 'P'
+      if (TOUPPER (*input_line_pointer) != 'P'
 	  || (regno = atoi (++input_line_pointer)) < 0
 	  || regno > 63)
 	{
@@ -4522,7 +4523,7 @@ dot_pred_rel (type)
 	  ignore_rest_of_line ();
 	  return;
 	}
-      while (isdigit (*input_line_pointer))
+      while (ISDIGIT (*input_line_pointer))
 	++input_line_pointer;
       if (p1 == -1)
 	p1 = regno;
@@ -4539,7 +4540,7 @@ dot_pred_rel (type)
 	  valueT stop = 1;
 	  ++input_line_pointer;
 
-	  if (toupper (*input_line_pointer) != 'P'
+	  if (TOUPPER (*input_line_pointer) != 'P'
 	      || (regno = atoi (++input_line_pointer)) < 0
 	      || regno > 63)
 	    {
@@ -4547,7 +4548,7 @@ dot_pred_rel (type)
 	      ignore_rest_of_line ();
 	      return;
 	    }
-	  while (isdigit (*input_line_pointer))
+	  while (ISDIGIT (*input_line_pointer))
 	    ++input_line_pointer;
 	  stop <<= regno;
 	  if (bit >= stop)
@@ -6779,10 +6780,10 @@ ia64_unrecognized_line (ch)
 	    c = get_symbol_end ();
 	  }
 	else if (LOCAL_LABELS_FB
-		 && isdigit ((unsigned char) *input_line_pointer))
+		 && ISDIGIT (*input_line_pointer))
 	  {
 	    temp = 0;
-	    while (isdigit ((unsigned char) *input_line_pointer))
+	    while (ISDIGIT (*input_line_pointer))
 	      temp = (temp * 10) + *input_line_pointer++ - '0';
 	    fb_label_instance_inc (temp);
 	    s = fb_label_name (temp, 0);
@@ -6955,7 +6956,7 @@ ia64_parse_name (name, e)
   switch (name[0])
     {
     case 'i':
-      if (name[1] == 'n' && isdigit (name[2]))
+      if (name[1] == 'n' && ISDIGIT (name[2]))
 	{
 	  dr = &md.in;
 	  name += 2;
@@ -6963,7 +6964,7 @@ ia64_parse_name (name, e)
       break;
 
     case 'l':
-      if (name[1] == 'o' && name[2] == 'c' && isdigit (name[3]))
+      if (name[1] == 'o' && name[2] == 'c' && ISDIGIT (name[3]))
 	{
 	  dr = &md.loc;
 	  name += 3;
@@ -6971,7 +6972,7 @@ ia64_parse_name (name, e)
       break;
 
     case 'o':
-      if (name[1] == 'u' && name[2] == 't' && isdigit (name[3]))
+      if (name[1] == 'u' && name[2] == 't' && ISDIGIT (name[3]))
 	{
 	  dr = &md.out;
 	  name += 3;

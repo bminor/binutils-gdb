@@ -23,6 +23,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "bfd.h"
 #include "sysdep.h"
 #include "libiberty.h"
+#include "safe-ctype.h"
 #include "obstack.h"
 #include "bfdlink.h"
 
@@ -38,8 +39,6 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "ldemul.h"
 #include "fnmatch.h"
 #include "demangle.h"
-
-#include <ctype.h>
 
 /* FORWARDS */
 static lang_statement_union_type *new_statement
@@ -1618,12 +1617,7 @@ stricpy (dest, src)
   char c;
 
   while ((c = *src++) != 0)
-    {
-      if (isupper ((unsigned char) c))
-	c = tolower (c);
-
-      *dest++ = c;
-    }
+    *dest++ = TOLOWER (c);
 
   *dest = 0;
 }
@@ -4786,7 +4780,7 @@ lang_leave_overlay_section (fill, phdrs)
   clean = xmalloc (strlen (name) + 1);
   s2 = clean;
   for (s1 = name; *s1 != '\0'; s1++)
-    if (isalnum ((unsigned char) *s1) || *s1 == '_')
+    if (ISALNUM (*s1) || *s1 == '_')
       *s2++ = *s1;
   *s2 = '\0';
 

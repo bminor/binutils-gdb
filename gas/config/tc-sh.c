@@ -27,7 +27,7 @@
 #include "subsegs.h"
 #define DEFINE_TABLE
 #include "opcodes/sh-opc.h"
-#include <ctype.h>
+#include "safe-ctype.h"
 #include "struc-symbol.h"
 
 #ifdef OBJ_ELF
@@ -282,11 +282,9 @@ sh_elf_suffix (str_p, exp_p, new_exp_p)
 
   for (ch = *str, str2 = ident;
        (str2 < ident + sizeof (ident) - 1
-	&& (isalnum (ch) || ch == '@'));
+	&& (ISALNUM (ch) || ch == '@'));
        ch = *++str)
-    {
-      *str2++ = (islower (ch)) ? ch : tolower (ch);
-    }
+    *str2++ = TOLOWER (ch);
 
   *str2 = '\0';
   len = str2 - ident;
@@ -479,7 +477,7 @@ static int reg_x, reg_y;
 static int reg_efg;
 static int reg_b;
 
-#define IDENT_CHAR(c) (isalnum (c) || (c) == '_')
+#define IDENT_CHAR(c) (ISALNUM (c) || (c) == '_')
 
 /* Try to parse a reg name.  Return the number of chars consumed.  */
 
@@ -489,8 +487,8 @@ parse_reg (src, mode, reg)
      int *mode;
      int *reg;
 {
-  char l0 = tolower (src[0]);
-  char l1 = l0 ? tolower (src[1]) : 0;
+  char l0 = TOLOWER (src[0]);
+  char l1 = l0 ? TOLOWER (src[1]) : 0;
 
   /* We use ! IDENT_CHAR for the next character after the register name, to
      make sure that we won't accidentally recognize a symbol name such as
@@ -545,7 +543,7 @@ parse_reg (src, mode, reg)
 	      *reg = A_A0_NUM;
 	      return 2;
 	    }
-	  if (tolower (src[2]) == 'g' && ! IDENT_CHAR ((unsigned char) src[3]))
+	  if (TOLOWER (src[2]) == 'g' && ! IDENT_CHAR ((unsigned char) src[3]))
 	    {
 	      *mode = DSP_REG_N;
 	      *reg = A_A0G_NUM;
@@ -560,7 +558,7 @@ parse_reg (src, mode, reg)
 	      *reg = A_A1_NUM;
 	      return 2;
 	    }
-	  if (tolower (src[2]) == 'g' && ! IDENT_CHAR ((unsigned char) src[3]))
+	  if (TOLOWER (src[2]) == 'g' && ! IDENT_CHAR ((unsigned char) src[3]))
 	    {
 	      *mode = DSP_REG_N;
 	      *reg = A_A1G_NUM;
@@ -641,34 +639,34 @@ parse_reg (src, mode, reg)
 
   if (l0 == 's'
       && l1 == 's'
-      && tolower (src[2]) == 'r' && ! IDENT_CHAR ((unsigned char) src[3]))
+      && TOLOWER (src[2]) == 'r' && ! IDENT_CHAR ((unsigned char) src[3]))
     {
       *mode = A_SSR;
       return 3;
     }
 
-  if (l0 == 's' && l1 == 'p' && tolower (src[2]) == 'c'
+  if (l0 == 's' && l1 == 'p' && TOLOWER (src[2]) == 'c'
       && ! IDENT_CHAR ((unsigned char) src[3]))
     {
       *mode = A_SPC;
       return 3;
     }
 
-  if (l0 == 's' && l1 == 'g' && tolower (src[2]) == 'r'
+  if (l0 == 's' && l1 == 'g' && TOLOWER (src[2]) == 'r'
       && ! IDENT_CHAR ((unsigned char) src[3]))
     {
       *mode = A_SGR;
       return 3;
     }
 
-  if (l0 == 'd' && l1 == 's' && tolower (src[2]) == 'r'
+  if (l0 == 'd' && l1 == 's' && TOLOWER (src[2]) == 'r'
       && ! IDENT_CHAR ((unsigned char) src[3]))
     {
       *mode = A_DSR;
       return 3;
     }
 
-  if (l0 == 'd' && l1 == 'b' && tolower (src[2]) == 'r'
+  if (l0 == 'd' && l1 == 'b' && TOLOWER (src[2]) == 'r'
       && ! IDENT_CHAR ((unsigned char) src[3]))
     {
       *mode = A_DBR;
@@ -700,34 +698,34 @@ parse_reg (src, mode, reg)
       *mode = A_PC;
       return 2;
     }
-  if (l0 == 'g' && l1 == 'b' && tolower (src[2]) == 'r'
+  if (l0 == 'g' && l1 == 'b' && TOLOWER (src[2]) == 'r'
       && ! IDENT_CHAR ((unsigned char) src[3]))
     {
       *mode = A_GBR;
       return 3;
     }
-  if (l0 == 'v' && l1 == 'b' && tolower (src[2]) == 'r'
+  if (l0 == 'v' && l1 == 'b' && TOLOWER (src[2]) == 'r'
       && ! IDENT_CHAR ((unsigned char) src[3]))
     {
       *mode = A_VBR;
       return 3;
     }
 
-  if (l0 == 'm' && l1 == 'a' && tolower (src[2]) == 'c'
+  if (l0 == 'm' && l1 == 'a' && TOLOWER (src[2]) == 'c'
       && ! IDENT_CHAR ((unsigned char) src[4]))
     {
-      if (tolower (src[3]) == 'l')
+      if (TOLOWER (src[3]) == 'l')
 	{
 	  *mode = A_MACL;
 	  return 4;
 	}
-      if (tolower (src[3]) == 'h')
+      if (TOLOWER (src[3]) == 'h')
 	{
 	  *mode = A_MACH;
 	  return 4;
 	}
     }
-  if (l0 == 'm' && l1 == 'o' && tolower (src[2]) == 'd'
+  if (l0 == 'm' && l1 == 'o' && TOLOWER (src[2]) == 'd'
       && ! IDENT_CHAR ((unsigned char) src[4]))
     {
       *mode = A_MOD;
@@ -809,25 +807,25 @@ parse_reg (src, mode, reg)
 	  return 3;
 	}
     }
-  if (l0 == 'f' && l1 == 'p' && tolower (src[2]) == 'u'
-      && tolower (src[3]) == 'l'
+  if (l0 == 'f' && l1 == 'p' && TOLOWER (src[2]) == 'u'
+      && TOLOWER (src[3]) == 'l'
       && ! IDENT_CHAR ((unsigned char) src[4]))
     {
       *mode = FPUL_N;
       return 4;
     }
 
-  if (l0 == 'f' && l1 == 'p' && tolower (src[2]) == 's'
-      && tolower (src[3]) == 'c'
-      && tolower (src[4]) == 'r' && ! IDENT_CHAR ((unsigned char) src[5]))
+  if (l0 == 'f' && l1 == 'p' && TOLOWER (src[2]) == 's'
+      && TOLOWER (src[3]) == 'c'
+      && TOLOWER (src[4]) == 'r' && ! IDENT_CHAR ((unsigned char) src[5]))
     {
       *mode = FPSCR_N;
       return 5;
     }
 
-  if (l0 == 'x' && l1 == 'm' && tolower (src[2]) == 't'
-      && tolower (src[3]) == 'r'
-      && tolower (src[4]) == 'x' && ! IDENT_CHAR ((unsigned char) src[5]))
+  if (l0 == 'x' && l1 == 'm' && TOLOWER (src[2]) == 't'
+      && TOLOWER (src[3]) == 'r'
+      && TOLOWER (src[4]) == 'x' && ! IDENT_CHAR ((unsigned char) src[5]))
     {
       *mode = XMTRX_M4;
       return 5;
@@ -1637,9 +1635,9 @@ find_cooked_opcode (str_p)
       /* The machine independent code will convert CMP/EQ into cmp/EQ
 	 because it thinks the '/' is the end of the symbol.  Moreover,
 	 all but the first sub-insn is a parallel processing insn won't
-	 be capitailzed.  Instead of hacking up the machine independent
+	 be capitalized.  Instead of hacking up the machine independent
 	 code, we just deal with it here.  */
-      c = isupper (c) ? tolower (c) : c;
+      c = TOLOWER (c);
       name[nlen] = c;
       nlen++;
     }

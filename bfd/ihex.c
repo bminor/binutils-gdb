@@ -123,8 +123,7 @@ The MRI compiler uses this, which is a repeat of type 5:
 #include "sysdep.h"
 #include "libbfd.h"
 #include "libiberty.h"
-
-#include <ctype.h>
+#include "safe-ctype.h"
 
 static void ihex_init PARAMS ((void));
 static boolean ihex_mkobject PARAMS ((bfd *));
@@ -249,7 +248,7 @@ ihex_bad_byte (abfd, lineno, c, error)
     {
       char buf[10];
 
-      if (! isprint (c))
+      if (! ISPRINT (c))
 	sprintf (buf, "\\%03o", (unsigned int) c);
       else
 	{

@@ -1,5 +1,5 @@
 /* nlmconv.c -- NLM conversion program
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
@@ -35,10 +35,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bfd.h"
 #include "libiberty.h"
 #include "bucomm.h"
+#include "safe-ctype.h"
 
 #include <ansidecl.h>
 #include <time.h>
-#include <ctype.h>
 #include <sys/stat.h>
 #include <sys/file.h>
 #include <assert.h>
@@ -213,6 +213,9 @@ main (argc, argv)
 
 #if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
   setlocale (LC_MESSAGES, "");
+#endif
+#if defined (HAVE_SETLOCALE)
+  setlocale (LC_CTYPE, "");
 #endif
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
@@ -1071,8 +1074,7 @@ main (argc, argv)
   for (modname = nlm_fixed_header (outbfd)->moduleName;
        *modname != '\0';
        modname++)
-    if (islower ((unsigned char) *modname))
-      *modname = toupper (*modname);
+    *modname = TOUPPER (*modname);
 
   strncpy (nlm_variable_header (outbfd)->oldThreadName, " LONG",
 	   NLM_OLD_THREAD_NAME_LENGTH);

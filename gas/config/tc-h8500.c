@@ -28,7 +28,7 @@
 #define DEFINE_TABLE
 #define ASSEMBLER_TABLE
 #include "opcodes/h8500-opc.h"
-#include <ctype.h>
+#include "safe-ctype.h"
 
 const char comment_chars[] = "!";
 const char line_separator_chars[] = ";";
@@ -1589,10 +1589,10 @@ start_label (ptr)
      char *ptr;
 {
   /* Check for :s.w */
-  if (isalpha (ptr[1]) && ptr[2] == '.')
+  if (ISALPHA (ptr[1]) && ptr[2] == '.')
     return 0;
   /* Check for :s */
-  if (isalpha (ptr[1]) && !isalpha (ptr[2]))
+  if (ISALPHA (ptr[1]) && !ISALPHA (ptr[2]))
     return 0;
   return 1;
 }

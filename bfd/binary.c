@@ -32,8 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    the file.  objcopy cooperates by specially setting the start
    address to zero by default.  */
 
-#include <ctype.h>
-
+#include "safe-ctype.h"
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
@@ -167,7 +166,7 @@ mangle_name (abfd, suffix)
 
   /* Change any non-alphanumeric characters to underscores.  */
   for (p = buf; *p; p++)
-    if (! isalnum ((unsigned char) *p))
+    if (! ISALNUM (*p))
       *p = '_';
 
   return buf;

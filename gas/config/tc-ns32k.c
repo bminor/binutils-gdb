@@ -23,7 +23,6 @@
 /*#define SHOW_NUM 1*//* Uncomment for debugging.  */
 
 #include <stdio.h>
-#include <ctype.h>
 
 #include "as.h"
 #include "opcode/ns32k.h"

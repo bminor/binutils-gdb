@@ -20,10 +20,10 @@
    59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "sysdep.h"
-#include <ctype.h>
 #include <stdio.h>
 #include "ansidecl.h"
 #include "libiberty.h"
+#include "safe-ctype.h"
 #include "bfd.h"
 #include "symcat.h"
 #include "opcode/cgen.h"
@@ -69,9 +69,7 @@ cgen_keyword_lookup_name (kt, name)
 
       while (*p
 	     && (*p == *n
-		 || (isalpha ((unsigned char) *p)
-		     && (tolower ((unsigned char) *p)
-			 == tolower ((unsigned char) *n)))))
+		 || (ISALPHA (*p) && (TOLOWER (*p) == TOLOWER (*n)))))
 	++n, ++p;
 
       if (!*p && !*n)
@@ -135,7 +133,7 @@ cgen_keyword_add (kt, ke)
     kt->null_entry = ke;
 
   for (i = 1; i < strlen (ke->name); i++)
-    if (! isalnum ((unsigned char) ke->name[i])
+    if (! ISALNUM (ke->name[i])
 	&& ! strchr (kt->nonalpha_chars, ke->name[i]))
       {
 	size_t idx = strlen (kt->nonalpha_chars);
@@ -232,7 +230,7 @@ hash_keyword_name (kt, name, case_sensitive_p)
       hash = (hash * 97) + (unsigned char) *name;
   else
     for (hash = 0; *name; ++name)
-      hash = (hash * 97) + (unsigned char) tolower (*name);
+      hash = (hash * 97) + (unsigned char) TOLOWER (*name);
   return hash % kt->hash_table_size;
 }
 

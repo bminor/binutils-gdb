@@ -1,5 +1,5 @@
 /* tc-z8k.c -- Assemble code for the Zilog Z800n
-   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 2000
+   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -28,7 +28,7 @@
 
 #include "as.h"
 #include "bfd.h"
-#include <ctype.h>
+#include "safe-ctype.h"
 
 const char comment_chars[] = "!";
 const char line_comment_chars[] = "#";
@@ -70,9 +70,9 @@ int
 tohex (c)
      int c;
 {
-  if (isdigit (c))
+  if (ISDIGIT (c))
     return c - '0';
-  if (islower (c))
+  if (ISLOWER (c))
     return c - 'a' + 10;
   return c - 'A' + 10;
 }
@@ -221,7 +221,7 @@ whatreg (reg, src)
      int *reg;
      char *src;
 {
-  if (isdigit (src[1]))
+  if (ISDIGIT (src[1]))
     {
       *reg = (src[0] - '0') * 10 + src[1] - '0';
       return src + 2;

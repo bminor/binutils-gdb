@@ -1,6 +1,6 @@
 /* This file is tc-tahoe.c
 
-   Copyright 1987, 1988, 1989, 1990, 1991, 1992, 1995, 2000
+   Copyright 1987, 1988, 1989, 1990, 1991, 1992, 1995, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -20,6 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 #include "as.h"
+#include "safe-ctype.h"
 #include "obstack.h"
 
 /* This bit glommed from tahoe-inst.h.  */
@@ -885,11 +886,11 @@ tahoe_reg_parse (start)
 				   R or r, and then a number.  */
     case 'R':
     case 'r':
-      if (isdigit (*regpoint))
+      if (ISDIGIT (*regpoint))
 	{
 	  /* Got the first digit.  */
 	  regnum = *regpoint++ - '0';
-	  if ((regnum == 1) && isdigit (*regpoint))
+	  if ((regnum == 1) && ISDIGIT (*regpoint))
 	    {
 	      /* Its a two digit number.  */
 	      regnum = 10 + (*regpoint++ - '0');
@@ -1064,7 +1065,7 @@ tip_op (optex, topP)
 	  as_warn (_("Casting a branch displacement is bad form, and is ignored."));
 	else
 	  {
-	    c = (isupper (*point) ? tolower (*point) : *point);
+	    c = TOLOWER (*point);
 	    call_width = ((c == 'b') ? 1 :
 			  ((c == 'w') ? 2 : 4));
 	  }

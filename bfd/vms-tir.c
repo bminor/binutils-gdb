@@ -33,8 +33,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 	qw	quadword (8 byte, 64 bit)
 	da	data stream  */
 
-#include <ctype.h>
-
 #include "bfd.h"
 #include "sysdep.h"
 #include "bfdlink.h"

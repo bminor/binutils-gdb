@@ -2,7 +2,7 @@
    Contributed by Devon Bowen of Buffalo University
    and Torbjorn Granlund of the Swedish Institute of Computer Science.
    Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
-   2000
+   2000, 2001
    Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
@@ -22,8 +22,8 @@ along with GAS; see the file COPYING.  If not, write to the Free
 Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 02111-1307, USA.  */
 
-#include <ctype.h>
 #include "as.h"
+#include "safe-ctype.h"
 #include "subsegs.h"
 #include "m88k-opcode.h"
 
@@ -239,7 +239,7 @@ md_assemble (op)
   assert (op);
 
   /* Skip over instruction to find parameters.  */
-  for (param = op; *param != 0 && !isspace (*param); param++)
+  for (param = op; *param != 0 && !ISSPACE (*param); param++)
     ;
   c = *param;
   *param++ = '\0';
@@ -517,17 +517,17 @@ get_imm16 (param, insn)
   unsigned int val;
   char *save_ptr;
 
-  if (!strncmp (param, "hi16", 4) && !isalnum (param[4]))
+  if (!strncmp (param, "hi16", 4) && !ISALNUM (param[4]))
     {
       reloc = RELOC_HI16;
       param += 4;
     }
-  else if (!strncmp (param, "lo16", 4) && !isalnum (param[4]))
+  else if (!strncmp (param, "lo16", 4) && !ISALNUM (param[4]))
     {
       reloc = RELOC_LO16;
       param += 4;
     }
-  else if (!strncmp (param, "iw16", 4) && !isalnum (param[4]))
+  else if (!strncmp (param, "iw16", 4) && !ISALNUM (param[4]))
     {
       reloc = RELOC_IW16;
       param += 4;
@@ -630,7 +630,7 @@ get_cnd (param, valp)
 {
   unsigned int val;
 
-  if (isdigit (*param))
+  if (ISDIGIT (*param))
     {
       param = getval (param, &val);
 
@@ -642,11 +642,8 @@ get_cnd (param, valp)
     }
   else
     {
-      if (isupper (*param))
-	*param = tolower (*param);
-
-      if (isupper (param[1]))
-	param[1] = tolower (param[1]);
+      param[0] = TOLOWER (param[0]);
+      param[1] = TOLOWER (param[1]);
 
       param = match_name (param, cndmsk, valp);
 
@@ -690,12 +687,10 @@ get_bf_offset_expression (param, offsetp)
 {
   unsigned offset;
 
-  if (isalpha (param[0]))
+  if (ISALPHA (param[0]))
     {
-      if (isupper (param[0]))
-	param[0] = tolower (param[0]);
-      if (isupper (param[1]))
-	param[1] = tolower (param[1]);
+      param[0] = TOLOWER (param[0]);
+      param[1] = TOLOWER (param[1]);
 
       param = match_name (param, cmpslot, offsetp);
 
@@ -888,9 +883,9 @@ get_o6 (param, valp)
 }
 
 #define hexval(z) \
-  (isdigit (z) ? (z) - '0' :						\
-   islower (z) ? (z) - 'a' + 10 : 					\
-   isupper (z) ? (z) - 'A' + 10 : -1)
+  (ISDIGIT (z) ? (z) - '0' :						\
+   ISLOWER (z) ? (z) - 'a' + 10 : 					\
+   ISUPPER (z) ? (z) - 'A' + 10 : -1)
 
 static char *
 getval (param, valp)

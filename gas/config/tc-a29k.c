@@ -1,5 +1,5 @@
 /* tc-a29k.c -- Assemble for the AMD 29000.
-   Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1998, 2000
+   Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1998, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -23,8 +23,8 @@
    to convert it to new machines' assemblers as desired.  There was too
    much bloody rewriting required before.  There still probably is.  */
 
-#include <ctype.h>
 #include "as.h"
+#include "safe-ctype.h"
 
 #include "opcode/a29k.h"
 
@@ -188,7 +188,7 @@ insert_sreg (regname, regnum)
   symbol_table_insert (symbol_new (regname, SEG_REGISTER, (valueT) regnum,
 				   &zero_address_frag));
   for (i = 0; regname[i]; i++)
-    buf[i] = islower (regname[i]) ? toupper (regname[i]) : regname[i];
+    buf[i] = TOUPPER (regname[i]);
   buf[i] = '\0';
 
   symbol_table_insert (symbol_new (buf, SEG_REGISTER, (valueT) regnum,
@@ -397,10 +397,9 @@ machine_ip (str)
 
   /* Must handle `div0' opcode.  */
   s = str;
-  if (isalpha (*s))
-    for (; isalnum (*s); ++s)
-      if (isupper (*s))
-	*s = tolower (*s);
+  if (ISALPHA (*s))
+    for (; ISALNUM (*s); ++s)
+      *s = TOLOWER (*s);
 
   switch (*s)
     {
@@ -1067,13 +1066,13 @@ a29k_unrecognized_line (c)
   char *s;
 
   if (c != '$'
-      || ! isdigit ((unsigned char) input_line_pointer[0]))
+      || ! ISDIGIT (input_line_pointer[0]))
     return 0;
 
   s = input_line_pointer;
 
   lab = 0;
-  while (isdigit ((unsigned char) *s))
+  while (ISDIGIT (*s))
     {
       lab = lab * 10 + *s - '0';
       ++s;
@@ -1176,7 +1175,7 @@ md_operand (expressionP)
 	expressionP->X_op = O_constant;
     }
   else if (input_line_pointer[0] == '$'
-	   && isdigit ((unsigned char) input_line_pointer[1]))
+	   && ISDIGIT (input_line_pointer[1]))
     {
       long lab;
       char *name;
@@ -1238,7 +1237,7 @@ md_operand (expressionP)
 	  return;
 	}
 
-      if (isdigit (*s))
+      if (ISDIGIT (*s))
 	{
 	  fieldnum = *s - '0';
 	  ++s;

@@ -32,12 +32,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define TARGET_IS_${EMULATION_NAME}
 
-#include <ctype.h>
-
 #include "bfd.h"
 #include "sysdep.h"
 #include "bfdlink.h"
 #include "libiberty.h"
+#include "safe-ctype.h"
 
 #include "ld.h"
 #include "ldmain.h"
@@ -311,13 +310,13 @@ gld${EMULATION_NAME}_search_dir (dirname, filename, found_static)
       if (entry->d_name[6 + len] == '\0')
 	;
       else if (entry->d_name[6 + len] == '.'
-	       && isdigit ((unsigned char) entry->d_name[7 + len]))
+	       && ISDIGIT (entry->d_name[7 + len]))
 	;
       else
 	continue;
 
       for (s = entry->d_name + 6 + len; *s != '\0'; s++)
-	if (*s != '.' && ! isdigit ((unsigned char) *s))
+	if (*s != '.' && ! ISDIGIT (*s))
 	  break;
       if (*s != '\0')
 	continue;

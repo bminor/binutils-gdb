@@ -1,5 +1,5 @@
 /* dlltool.c -- tool to generate stuff for PE style DLLs
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -253,8 +253,8 @@
 #include "demangle.h"
 #include "dyn-string.h"
 #include "dlltool.h"
+#include "safe-ctype.h"
 
-#include <ctype.h>
 #include <time.h>
 #include <sys/stat.h>
 
@@ -3220,6 +3220,9 @@ main (ac, av)
 #if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
   setlocale (LC_MESSAGES, "");
 #endif
+#if defined (HAVE_SETLOCALE)
+  setlocale (LC_CTYPE, "");
+#endif
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 
@@ -3386,7 +3389,7 @@ main (ac, av)
       imp_name_lab = xstrdup (imp_name);
       for (p = imp_name_lab; *p; p++)
 	{
-	  if (!isalpha ((unsigned char) *p) && !isdigit ((unsigned char) *p))
+	  if (!ISALNUM (*p))
 	    *p = '_';
 	}
       head_label = make_label("_head_", imp_name_lab);

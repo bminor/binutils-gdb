@@ -1,5 +1,5 @@
 /* Main program of GNU linker.
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000
+   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
 
@@ -23,7 +23,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "bfd.h"
 #include "sysdep.h"
 #include <stdio.h>
-#include <ctype.h>
+#include "safe-ctype.h"
 #include "libiberty.h"
 #include "progress.h"
 #include "bfdlink.h"
@@ -168,6 +168,9 @@ main (argc, argv)
 
 #if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
   setlocale (LC_MESSAGES, "");
+#endif
+#if defined (HAVE_SETLOCALE)
+  setlocale (LC_CTYPE, "");
 #endif
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
@@ -721,14 +724,14 @@ add_keepsyms_file (filename)
   c = getc (file);
   while (c != EOF)
     {
-      while (isspace (c))
+      while (ISSPACE (c))
 	c = getc (file);
 
       if (c != EOF)
 	{
 	  size_t len = 0;
 
-	  while (! isspace (c) && c != EOF)
+	  while (! ISSPACE (c) && c != EOF)
 	    {
 	      buf[len] = c;
 	      ++len;

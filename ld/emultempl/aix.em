@@ -36,11 +36,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bfd.h"
 #include "sysdep.h"
 #include "libiberty.h"
+#include "safe-ctype.h"
 #include "getopt.h"
 #include "obstack.h"
 #include "bfdlink.h"
-
-#include <ctype.h>
 
 #include "ld.h"
 #include "ldmain.h"
@@ -950,7 +949,7 @@ gld${EMULATION_NAME}_read_file (filename, import)
       ++lineno;
 
       s = (char *) obstack_base (o);
-      while (isspace ((unsigned char) *s))
+      while (ISSPACE (*s))
 	++s;
       if (*s == '\0'
 	  || *s == '*'
@@ -965,7 +964,7 @@ gld${EMULATION_NAME}_read_file (filename, import)
       if (*s == '#' && s[1] == '!')
 	{
 	  s += 2;
-	  while (isspace ((unsigned char) *s))
+	  while (ISSPACE (*s))
 	    ++s;
 	  if (*s == '\0')
 	    {
@@ -986,7 +985,8 @@ gld${EMULATION_NAME}_read_file (filename, import)
 	      keep = true;
 	      imppath = s;
 	      file = NULL;
-	      while (! isspace ((unsigned char) *s) && *s != '(' && *s != '\0')
+	      while (! ISSPACE (*s)
+		     && *s != '(' && *s != '\0')
 		{
 		  if (*s == '/')
 		    file = s + 1;
@@ -1006,7 +1006,7 @@ gld${EMULATION_NAME}_read_file (filename, import)
 		}
 	      cs = *s;
 	      *s = '\0';
-	      while (isspace ((unsigned char) cs))
+	      while (ISSPACE (cs))
 		{
 		  ++s;
 		  cs = *s;
@@ -1042,7 +1042,7 @@ gld${EMULATION_NAME}_read_file (filename, import)
 	  syscall_flag = 0;
 	  address = (bfd_vma) -1;
 
-	  while (! isspace ((unsigned char) *s) && *s != '\0')
+	  while (! ISSPACE (*s) && *s != '\0')
 	    ++s;
 	  if (*s != '\0')
 	    {
@@ -1050,16 +1050,16 @@ gld${EMULATION_NAME}_read_file (filename, import)
 
 	      *s++ = '\0';
 
-	      while (isspace ((unsigned char) *s))
+	      while (ISSPACE (*s))
 		++s;
 
 	      se = s;
-	      while (! isspace ((unsigned char) *se) && *se != '\0')
+	      while (! ISSPACE (*se) && *se != '\0')
 		++se;
 	      if (*se != '\0')
 		{
 		  *se++ = '\0';
-		  while (isspace ((unsigned char) *se))
+		  while (ISSPACE (*se))
 		    ++se;
 		  if (*se != '\0')
 		    einfo ("%s%d: warning: syntax error in import/export file\n",

@@ -108,7 +108,7 @@ DESCRIPTION
 #include "sysdep.h"
 #include "libbfd.h"
 #include "libiberty.h"
-#include <ctype.h>
+#include "safe-ctype.h"
 
 static void srec_get_symbol_info PARAMS ((bfd *, asymbol *, symbol_info *));
 static void srec_print_symbol
@@ -291,7 +291,7 @@ srec_bad_byte (abfd, lineno, c, error)
     {
       char buf[10];
 
-      if (! isprint (c))
+      if (! ISPRINT (c))
 	sprintf (buf, "\\%03o", (unsigned int) c);
       else
 	{
@@ -418,7 +418,7 @@ srec_scan (abfd)
 
 	      *p++ = c;
 	      while ((c = srec_get_byte (abfd, &error)) != EOF
-		     && ! isspace (c))
+		     && ! ISSPACE (c))
 		{
 		  if ((bfd_size_type) (p - symbuf) >= alc)
 		    {

@@ -1,6 +1,6 @@
 /* tc-avr.c -- Assembler code for the ATMEL AVR
 
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
    Contributed by Denis Chertykov <denisc@overta.ru>
 
    This file is part of GAS, the GNU Assembler.
@@ -21,8 +21,8 @@
    Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
-#include <ctype.h>
 #include "as.h"
+#include "safe-ctype.h"
 #include "subsegs.h"
 
 struct avr_opcodes_s
@@ -298,7 +298,7 @@ md_parse_option (c, arg)
 	  char *arg1 = arg;
 
 	  do
-	    *t = tolower (*arg1++);
+	    *t = TOLOWER (*arg1++);
 	  while (*t++);
 	}
 
@@ -555,12 +555,12 @@ avr_operand (opcode, where, op, line)
 
 	  str = extract_word (str, r_name, sizeof (r_name));
 	  op_mask = 0xff;
-	  if (isdigit (r_name[1]))
+	  if (ISDIGIT (r_name[1]))
 	    {
 	      if (r_name[2] == '\0')
 		op_mask = r_name[1] - '0';
 	      else if (r_name[1] != '0'
-		       && isdigit (r_name[2])
+		       && ISDIGIT (r_name[2])
 		       && r_name[3] == '\0')
 		op_mask = (r_name[1] - '0') * 10 + r_name[2] - '0';
 	    }
@@ -613,7 +613,7 @@ avr_operand (opcode, where, op, line)
 	    str = skip_space (str + 1);
 	    op_mask = 0x1002;
 	  }
-	c = tolower (*str);
+	c = TOLOWER (*str);
 	if (c == 'x')
 	  op_mask |= 0x100c;
 	else if (c == 'y')
@@ -656,7 +656,7 @@ avr_operand (opcode, where, op, line)
 
     case 'b':
       {
-	char c = tolower (*str++);
+	char c = TOLOWER (*str++);
 
 	if (c == 'y')
 	  op_mask |= 0x8;

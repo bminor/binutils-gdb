@@ -26,9 +26,9 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
    Keep that in mind.  */
 
 #include "sysdep.h"
-#include <ctype.h>
 #include <stdio.h>
 #include "ansidecl.h"
+#include "safe-ctype.h"
 #include "bfd.h"
 #include "symcat.h"
 #include "openrisc-desc.h"
@@ -393,14 +393,14 @@ parse_insn_normal (cd, insn, strp, fields)
      GAS's input scrubber will ensure mnemonics are lowercase, but we may
      not be called from GAS.  */
   p = CGEN_INSN_MNEMONIC (insn);
-  while (*p && tolower (*p) == tolower (*str))
+  while (*p && TOLOWER (*p) == TOLOWER (*str))
     ++p, ++str;
 
   if (* p)
     return _("unrecognized instruction");
 
 #ifndef CGEN_MNEMONIC_OPERANDS
-  if (* str && !isspace (* str))
+  if (* str && !ISSPACE (* str))
     return _("unrecognized instruction");
 #endif
 
@@ -429,7 +429,7 @@ parse_insn_normal (cd, insn, strp, fields)
 	     first char after the mnemonic part is a space.  */
 	  /* FIXME: We also take inappropriate advantage of the fact that
 	     GAS's input scrubber will remove extraneous blanks.  */
-	  if (tolower (*str) == tolower (CGEN_SYNTAX_CHAR (* syn)))
+	  if (TOLOWER (*str) == TOLOWER (CGEN_SYNTAX_CHAR (* syn)))
 	    {
 #ifdef CGEN_MNEMONIC_OPERANDS
 	      if (CGEN_SYNTAX_CHAR(* syn) == ' ')
@@ -476,7 +476,7 @@ parse_insn_normal (cd, insn, strp, fields)
 	 blanks now.  IE: We needn't try again with a longer version of
 	 the insn and it is assumed that longer versions of insns appear
 	 before shorter ones (eg: lsr r2,r3,1 vs lsr r2,r3).  */
-      while (isspace (* str))
+      while (ISSPACE (* str))
 	++ str;
 
       if (* str != '\0')
@@ -525,7 +525,7 @@ openrisc_cgen_assemble_insn (cd, str, fields, buf, errmsg)
   int recognized_mnemonic = 0;
 
   /* Skip leading white space.  */
-  while (isspace (* str))
+  while (ISSPACE (* str))
     ++ str;
 
   /* The instructions are stored in hashed lists.

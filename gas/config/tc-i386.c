@@ -26,9 +26,8 @@
    Bugs & suggestions are completely welcome.  This is free software.
    Please help us make it better.  */
 
-#include <ctype.h>
-
 #include "as.h"
+#include "safe-ctype.h"
 #include "subsegs.h"
 #include "dwarf2dbg.h"
 #include "opcode/i386.h"
@@ -891,27 +890,27 @@ md_begin ()
 
     for (c = 0; c < 256; c++)
       {
-	if (isdigit (c))
+	if (ISDIGIT (c))
 	  {
 	    digit_chars[c] = c;
 	    mnemonic_chars[c] = c;
 	    register_chars[c] = c;
 	    operand_chars[c] = c;
 	  }
-	else if (islower (c))
+	else if (ISLOWER (c))
 	  {
 	    mnemonic_chars[c] = c;
 	    register_chars[c] = c;
 	    operand_chars[c] = c;
 	  }
-	else if (isupper (c))
+	else if (ISUPPER (c))
 	  {
-	    mnemonic_chars[c] = tolower (c);
+	    mnemonic_chars[c] = TOLOWER (c);
 	    register_chars[c] = mnemonic_chars[c];
 	    operand_chars[c] = c;
 	  }
 
-	if (isalpha (c) || isdigit (c))
+	if (ISALPHA (c) || ISDIGIT (c))
 	  identifier_chars[c] = c;
 	else if (c >= 128)
 	  {
@@ -4461,7 +4460,7 @@ static char *
 output_invalid (c)
      int c;
 {
-  if (isprint (c))
+  if (ISPRINT (c))
     sprintf (output_invalid_buf, "'%c'", c);
   else
     sprintf (output_invalid_buf, "(0x%x)", (unsigned) c);

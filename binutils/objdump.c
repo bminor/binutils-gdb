@@ -23,7 +23,7 @@ Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "getopt.h"
 #include "progress.h"
 #include "bucomm.h"
-#include <ctype.h>
+#include "safe-ctype.h"
 #include "dis-asm.h"
 #include "libiberty.h"
 #include "demangle.h"
@@ -1345,7 +1345,7 @@ disassemble_bytes (info, disassemble_fn, insns, data,
 
 	      for (j = addr_offset * opb; j < addr_offset * opb + octets; ++j)
 		{
-		  if (isprint (data[j]))
+		  if (ISPRINT (data[j]))
 		    buf[j - addr_offset * opb] = data[j];
 		  else
 		    buf[j - addr_offset * opb] = '.';
@@ -1999,7 +1999,7 @@ dump_section_stabs (abfd, stabsect_name, strsect_name)
 	 match or a section followed by a number.  */
       if (strncmp (stabsect_name, s->name, len) == 0
 	  && (s->name[len] == '\000'
-	      || isdigit ((unsigned char) s->name[len])))
+	      || ISDIGIT (s->name[len])))
 	{
 	  if (read_section_stabs (abfd, s->name, strsect_name))
 	    {
@@ -2286,7 +2286,7 @@ dump_data (abfd)
 		      if (j >= stop_offset * opb)
 			printf (" ");
 		      else
-			printf ("%c", isprint (data[j]) ? data[j] : '.');
+			printf ("%c", ISPRINT (data[j]) ? data[j] : '.');
 		    }
 		  putchar ('\n');
 		}
@@ -2765,6 +2765,9 @@ main (argc, argv)
 
 #if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
   setlocale (LC_MESSAGES, "");
+#endif
+#if defined (HAVE_SETLOCALE)
+  setlocale (LC_CTYPE, "");
 #endif
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);

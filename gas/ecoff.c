@@ -37,7 +37,7 @@
 #include "coff/symconst.h"
 #include "aout/stab_gnu.h"
 
-#include <ctype.h>
+#include "safe-ctype.h"
 
 /* Why isn't this in coff/sym.h?  */
 #define ST_RFDESCAPE 0xfff
@@ -3101,7 +3101,7 @@ ecoff_directive_ent (ignore)
       ++input_line_pointer;
       SKIP_WHITESPACE ();
     }
-  if (isdigit ((unsigned char) *input_line_pointer)
+  if (ISDIGIT (*input_line_pointer)
       || *input_line_pointer == '-')
     (void) get_absolute_expression ();
 
@@ -3546,7 +3546,7 @@ ecoff_stab (sec, what, string, type, other, desc)
 	listing_source_file (string);
 #endif
 
-      if (isdigit ((unsigned char) *input_line_pointer)
+      if (ISDIGIT (*input_line_pointer)
 	  || *input_line_pointer == '-'
 	  || *input_line_pointer == '+')
 	{

@@ -23,8 +23,8 @@
    MA 02111-1307, USA.  */
 
 #include <stdio.h>
-#include <ctype.h>
 #include "as.h"
+#include "safe-ctype.h"
 #include "subsegs.h"
 #include "opcode/cris.h"
 #include "dwarf2dbg.h"
@@ -925,7 +925,7 @@ cris_process_instruction (insn_text, out_insnp, prefixp)
   /* Find the end of the opcode mnemonic.  We assume (true in 2.9.1)
      that the caller has translated the opcode to lower-case, up to the
      first non-letter.  */
-  for (operands = insn_text; islower (*operands); ++operands)
+  for (operands = insn_text; ISLOWER (*operands); ++operands)
     ;
 
   /* Terminate the opcode after letters, but save the character there if
@@ -1586,7 +1586,7 @@ get_gen_reg (cPP, regnop)
       (*cPP)++;
 
       if ((**cPP == 'C' || **cPP == 'c')
-	  && ! isalnum ((*cPP)[1]))
+	  && ! ISALNUM ((*cPP)[1]))
 	{
 	  /* It's "PC": consume the "c" and we're done.  */
 	  (*cPP)++;
@@ -1600,13 +1600,13 @@ get_gen_reg (cPP, regnop)
       /* Hopefully r[0-9] or r1[0-5].  Consume 'R' or 'r'.  */
       (*cPP)++;
 
-      if (isdigit (**cPP))
+      if (ISDIGIT (**cPP))
 	{
 	  /* It's r[0-9].  Consume and check the next digit.  */
 	  *regnop = **cPP - '0';
 	  (*cPP)++;
 
-	  if (! isalnum (**cPP))
+	  if (! ISALNUM (**cPP))
 	    {
 	      /* No more digits, we're done.  */
 	      return 1;
@@ -1688,8 +1688,7 @@ get_spec_reg (cPP, sregpp)
       s1 = name_begin;
       s2 = sregp->name;
 
-      while (*s2 != '\0'
-	     && (isupper (*s1) ? tolower (*s1) == *s2 : *s1 == *s2))
+      while (*s2 != '\0' && TOLOWER (*s1) == *s2)
 	{
 	  s1++;
 	  s2++;
@@ -1698,7 +1697,7 @@ get_spec_reg (cPP, sregpp)
       /* For a match, we must have consumed the name in the table, and we
 	 must be outside what could be part of a name.	Assume here that a
 	 test for alphanumerics is sufficient for a name test.  */
-      if (*s2 == 0 && ! isalnum (*s1))
+      if (*s2 == 0 && ! ISALNUM (*s1))
 	{
 	  /* We have a match.  Update the pointer and be done.  */
 	  *cPP = s1;
@@ -2321,7 +2320,7 @@ get_flags (cPP, flagsp)
 	     whitespace.  Anything else, and we consider it a failure.  */
 	  if (**cPP != ','
 	      && **cPP != 0
-	      && ! isspace (**cPP))
+	      && ! ISSPACE (**cPP))
 	    return 0;
 	  else
 	    return 1;

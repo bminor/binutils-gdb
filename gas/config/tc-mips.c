@@ -26,8 +26,7 @@
 #include "as.h"
 #include "config.h"
 #include "subsegs.h"
-
-#include <ctype.h>
+#include "safe-ctype.h"
 
 #ifdef USE_STDARG
 #include <stdarg.h>
@@ -6946,13 +6945,13 @@ mips_ip (str, ip)
   /* If the instruction contains a '.', we first try to match an instruction
      including the '.'.  Then we try again without the '.'.  */
   insn = NULL;
-  for (s = str; *s != '\0' && !isspace ((unsigned char) *s); ++s)
+  for (s = str; *s != '\0' && !ISSPACE (*s); ++s)
     continue;
 
   /* If we stopped on whitespace, then replace the whitespace with null for
      the call to hash_find.  Save the character we replaced just in case we
      have to re-parse the instruction.  */
-  if (isspace ((unsigned char) *s))
+  if (ISSPACE (*s))
     {
       save_c = *s;
       *s++ = '\0';
@@ -6970,7 +6969,9 @@ mips_ip (str, ip)
 	*(--s) = save_c;
 
       /* Scan up to the first '.' or whitespace.  */
-      for (s = str; *s != '\0' && *s != '.' && !isspace ((unsigned char) *s); ++s)
+      for (s = str;
+	   *s != '\0' && *s != '.' && !ISSPACE (*s);
+	   ++s)
 	continue;
 
       /* If we did not find a '.', then we can quit now.  */
@@ -7234,7 +7235,7 @@ mips_ip (str, ip)
 	      if (s[0] == '$')
 		{
 
-		  if (isdigit ((unsigned char) s[1]))
+		  if (ISDIGIT (s[1]))
 		    {
 		      ++s;
 		      regno = 0;
@@ -7244,7 +7245,7 @@ mips_ip (str, ip)
 			  regno += *s - '0';
 			  ++s;
 			}
-		      while (isdigit ((unsigned char) *s));
+		      while (ISDIGIT (*s));
 		      if (regno > 31)
 			as_bad (_("Invalid register number (%d)"), regno);
 		    }
@@ -7397,7 +7398,8 @@ mips_ip (str, ip)
 	    case 'V':
 	    case 'W':
 	      s_reset = s;
-	      if (s[0] == '$' && s[1] == 'f' && isdigit ((unsigned char) s[2]))
+	      if (s[0] == '$' && s[1] == 'f'
+		  && ISDIGIT (s[2]))
 		{
 		  s += 2;
 		  regno = 0;
@@ -7407,7 +7409,7 @@ mips_ip (str, ip)
 		      regno += *s - '0';
 		      ++s;
 		    }
-		  while (isdigit ((unsigned char) *s));
+		  while (ISDIGIT (*s));
 
 		  if (regno > 31)
 		    as_bad (_("Invalid float register number (%d)"), regno);
@@ -7860,7 +7862,7 @@ mips_ip (str, ip)
 		  regno += *s - '0';
 		  ++s;
 		}
-	      while (isdigit ((unsigned char) *s));
+	      while (ISDIGIT (*s));
 	      if (regno > 7)
 		as_bad (_("invalid condition code register $fcc%d"), regno);
 	      if (*args == 'N')
@@ -7872,7 +7874,7 @@ mips_ip (str, ip)
 	    case 'H':
 	      if (s[0] == '0' && (s[1] == 'x' || s[1] == 'X'))
 		s += 2;
-	      if (isdigit ((unsigned char) *s))
+	      if (ISDIGIT (*s))
 		{
 		  c = 0;
 		  do
@@ -7881,7 +7883,7 @@ mips_ip (str, ip)
 		      c += *s - '0';
 		      ++s;
 		    }
-		  while (isdigit ((unsigned char) *s));
+		  while (ISDIGIT (*s));
 		}
 	      else
 		c = 8; /* Invalid sel value.  */
@@ -7938,7 +7940,7 @@ mips16_ip (str, ip)
   mips16_small = false;
   mips16_ext = false;
 
-  for (s = str; islower ((unsigned char) *s); ++s)
+  for (s = str; ISLOWER (*s); ++s)
     ;
   switch (*s)
     {
@@ -8071,7 +8073,7 @@ mips16_ip (str, ip)
 	      if (s[0] != '$')
 		break;
 	      s_reset = s;
-	      if (isdigit ((unsigned char) s[1]))
+	      if (ISDIGIT (s[1]))
 		{
 		  ++s;
 		  regno = 0;
@@ -8081,7 +8083,7 @@ mips16_ip (str, ip)
 		      regno += *s - '0';
 		      ++s;
 		    }
-		  while (isdigit ((unsigned char) *s));
+		  while (ISDIGIT (*s));
 		  if (regno > 31)
 		    {
 		      as_bad (_("invalid register number (%d)"), regno);
@@ -8352,7 +8354,7 @@ mips16_ip (str, ip)
 			++s;
 		      }
 		    reg1 = 0;
-		    while (isdigit ((unsigned char) *s))
+		    while (ISDIGIT (*s))
 		      {
 			reg1 *= 10;
 			reg1 += *s - '0';
@@ -8379,7 +8381,7 @@ mips16_ip (str, ip)
 			      }
 			  }
 			reg2 = 0;
-			while (isdigit ((unsigned char) *s))
+			while (ISDIGIT (*s))
 			  {
 			    reg2 *= 10;
 			    reg2 += *s - '0';
@@ -8641,41 +8643,41 @@ my_getSmallExpression (ep, str)
   if (*str == '(')
     c = S_EX_NONE;
   else if (str[0] == '%'
-	   && tolower(str[1]) == 'l'
-	   && tolower(str[2]) == 'o'
+	   && TOLOWER (str[1]) == 'l'
+	   && TOLOWER (str[2]) == 'o'
 	   && str[3] == '(')
     {
       c = S_EX_LO;
       str += sizeof ("%lo(") - 2;
     }
   else if (str[0] == '%'
-	   && tolower(str[1]) == 'h'
-	   && tolower(str[2]) == 'i'
+	   && TOLOWER (str[1]) == 'h'
+	   && TOLOWER (str[2]) == 'i'
 	   && str[3] == '(')
     {
       c = S_EX_HI;
       str += sizeof ("%hi(") - 2;
     }
   else if (str[0] == '%'
-	   && tolower(str[1]) == 'h'
-	   && tolower(str[2]) == 'i'
-	   && tolower(str[3]) == 'g'
-	   && tolower(str[4]) == 'h'
-	   && tolower(str[5]) == 'e'
-	   && tolower(str[6]) == 'r'
+	   && TOLOWER (str[1]) == 'h'
+	   && TOLOWER (str[2]) == 'i'
+	   && TOLOWER (str[3]) == 'g'
+	   && TOLOWER (str[4]) == 'h'
+	   && TOLOWER (str[5]) == 'e'
+	   && TOLOWER (str[6]) == 'r'
 	   && str[7] == '(')
     {
       c = S_EX_HIGHER;
       str += sizeof ("%higher(") - 2;
     }
   else if (str[0] == '%'
-	   && tolower(str[1]) == 'h'
-	   && tolower(str[2]) == 'i'
-	   && tolower(str[3]) == 'g'
-	   && tolower(str[4]) == 'h'
-	   && tolower(str[5]) == 'e'
-	   && tolower(str[6]) == 's'
-	   && tolower(str[7]) == 't'
+	   && TOLOWER (str[1]) == 'h'
+	   && TOLOWER (str[2]) == 'i'
+	   && TOLOWER (str[3]) == 'g'
+	   && TOLOWER (str[4]) == 'h'
+	   && TOLOWER (str[5]) == 'e'
+	   && TOLOWER (str[6]) == 's'
+	   && TOLOWER (str[7]) == 't'
 	   && str[8] == '(')
     {
       c = S_EX_HIGHEST;
@@ -8684,21 +8686,21 @@ my_getSmallExpression (ep, str)
 /* currently unsupported */
 #if 0
   else if (str[0] == '%'
-	   && tolower(str[1]) == 'g'
-	   && tolower(str[2]) == 'p'
-	   && tolower(str[3]) == '_'
-	   && tolower(str[4]) == 'r'
-	   && tolower(str[5]) == 'e'
-	   && tolower(str[6]) == 'l'
+	   && TOLOWER (str[1]) == 'g'
+	   && TOLOWER (str[2]) == 'p'
+	   && TOLOWER (str[3]) == '_'
+	   && TOLOWER (str[4]) == 'r'
+	   && TOLOWER (str[5]) == 'e'
+	   && TOLOWER (str[6]) == 'l'
 	   && str[7] == '(')
     {
       c = S_EX_GPREL;
       str += sizeof ("%gp_rel(") - 2;
     }
   else if (str[0] == '%'
-	   && tolower(str[1]) == 'n'
-	   && tolower(str[2]) == 'e'
-	   && tolower(str[3]) == 'g'
+	   && TOLOWER (str[1]) == 'n'
+	   && TOLOWER (str[2]) == 'e'
+	   && TOLOWER (str[3]) == 'g'
 	   && str[4] == '(')
     {
       c = S_EX_NEG;
@@ -8721,9 +8723,9 @@ my_getSmallExpression (ep, str)
     ;
   if (sp - 4 >= str && sp[-1] == ')')
     {
-      if (isdigit ((unsigned char) sp[-2]))
+      if (ISDIGIT (sp[-2]))
 	{
-	  for (sp -= 3; sp >= str && isdigit ((unsigned char) *sp); sp--)
+	  for (sp -= 3; sp >= str && ISDIGIT (*sp); sp--)
 	    ;
 	  if (*sp == '$' && sp > str && sp[-1] == '(')
 	    {
@@ -10777,7 +10779,7 @@ tc_get_register (frame)
       as_warn (_("expected `$'"));
       reg = 0;
     }
-  else if (isdigit ((unsigned char) *input_line_pointer))
+  else if (ISDIGIT (*input_line_pointer))
     {
       reg = get_absolute_expression ();
       if (reg < 0 || reg >= 32)
@@ -11796,14 +11798,14 @@ get_number ()
       ++input_line_pointer;
       negative = 1;
     }
-  if (!isdigit ((unsigned char) *input_line_pointer))
+  if (!ISDIGIT (*input_line_pointer))
     as_bad (_("Expected simple number."));
   if (input_line_pointer[0] == '0')
     {
       if (input_line_pointer[1] == 'x')
 	{
 	  input_line_pointer += 2;
-	  while (isxdigit ((unsigned char) *input_line_pointer))
+	  while (ISXDIGIT (*input_line_pointer))
 	    {
 	      val <<= 4;
 	      val |= hex_value (*input_line_pointer++);
@@ -11813,7 +11815,7 @@ get_number ()
       else
 	{
 	  ++input_line_pointer;
-	  while (isdigit ((unsigned char) *input_line_pointer))
+	  while (ISDIGIT (*input_line_pointer))
 	    {
 	      val <<= 3;
 	      val |= *input_line_pointer++ - '0';
@@ -11821,14 +11823,14 @@ get_number ()
 	  return negative ? -val : val;
 	}
     }
-  if (!isdigit ((unsigned char) *input_line_pointer))
+  if (!ISDIGIT (*input_line_pointer))
     {
       printf (_(" *input_line_pointer == '%c' 0x%02x\n"),
 	      *input_line_pointer, *input_line_pointer);
       as_warn (_("Invalid number"));
       return -1;
     }
-  while (isdigit ((unsigned char) *input_line_pointer))
+  while (ISDIGIT (*input_line_pointer))
     {
       val *= 10;
       val += *input_line_pointer++ - '0';
@@ -11951,7 +11953,7 @@ s_mips_ent (aent)
   if (*input_line_pointer == ',')
     input_line_pointer++;
   SKIP_WHITESPACE ();
-  if (isdigit ((unsigned char) *input_line_pointer)
+  if (ISDIGIT (*input_line_pointer)
       || *input_line_pointer == '-')
     number = get_number ();
 

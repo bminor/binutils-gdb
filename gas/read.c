@@ -35,10 +35,8 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 /* Routines that read assembler source text to build spagetti in memory.
    Another group of these functions is in the expr.c module.  */
 
-/* For isdigit ().  */
-#include <ctype.h>
-
 #include "as.h"
+#include "safe-ctype.h"
 #include "subsegs.h"
 #include "sb.h"
 #include "macro.h"
@@ -739,8 +737,7 @@ read_a_source_file (name)
 
 		    while (*s2)
 		      {
-			if (isupper ((unsigned char) *s2))
-			  *s2 = tolower (*s2);
+			*s2 = TOLOWER (*s2);
 			s2++;
 		      }
 		  }
@@ -907,8 +904,7 @@ read_a_source_file (name)
 	  if (is_end_of_line[(unsigned char) c])
 	    continue;
 
-	  if ((LOCAL_LABELS_DOLLAR || LOCAL_LABELS_FB)
-	      && isdigit ((unsigned char) c))
+	  if ((LOCAL_LABELS_DOLLAR || LOCAL_LABELS_FB) && ISDIGIT (c))
 	    {
 	      /* local label  ("4:")  */
 	      char *backup = input_line_pointer;
@@ -918,7 +914,7 @@ read_a_source_file (name)
 	      temp = c - '0';
 
 	      /* Read the whole number.  */
-	      while (isdigit ((unsigned char) *input_line_pointer))
+	      while (ISDIGIT (*input_line_pointer))
 		{
 		  temp = (temp * 10) + *input_line_pointer - '0';
 		  ++input_line_pointer;
@@ -1453,7 +1449,7 @@ s_mri_common (small)
   SKIP_WHITESPACE ();
 
   name = input_line_pointer;
-  if (!isdigit ((unsigned char) *name))
+  if (!ISDIGIT (*name))
     c = get_symbol_end ();
   else
     {
@@ -1461,7 +1457,7 @@ s_mri_common (small)
 	{
 	  ++input_line_pointer;
 	}
-      while (isdigit ((unsigned char) *input_line_pointer));
+      while (ISDIGIT (*input_line_pointer));
 
       c = *input_line_pointer;
       *input_line_pointer = '\0';
@@ -2488,7 +2484,7 @@ s_mri_sect (type)
   SKIP_WHITESPACE ();
 
   name = input_line_pointer;
-  if (!isdigit ((unsigned char) *name))
+  if (!ISDIGIT (*name))
     c = get_symbol_end ();
   else
     {
@@ -2496,7 +2492,7 @@ s_mri_sect (type)
 	{
 	  ++input_line_pointer;
 	}
-      while (isdigit ((unsigned char) *input_line_pointer));
+      while (ISDIGIT (*input_line_pointer));
 
       c = *input_line_pointer;
       *input_line_pointer = '\0';
@@ -2521,7 +2517,7 @@ s_mri_sect (type)
   if (*input_line_pointer == ',')
     {
       c = *++input_line_pointer;
-      c = toupper ((unsigned char) c);
+      c = TOUPPER (c);
       if (c == 'C' || c == 'D' || c == 'M' || c == 'R')
 	*type = c;
       else
@@ -3044,7 +3040,7 @@ s_float_space (float_type)
   /* Skip any 0{letter} that may be present.  Don't even check if the
    * letter is legal.  */
   if (input_line_pointer[0] == '0'
-      && isalpha ((unsigned char) input_line_pointer[1]))
+      && ISALPHA (input_line_pointer[1]))
     input_line_pointer += 2;
 
   /* Accept :xxxx, where the x's are hex digits, for a floating point
@@ -3141,7 +3137,7 @@ ignore_rest_of_line ()
   /* For suspect lines: gives warning.  */
   if (!is_end_of_line[(unsigned char) *input_line_pointer])
     {
-      if (isprint ((unsigned char) *input_line_pointer))
+      if (ISPRINT (*input_line_pointer))
 	as_warn (_("rest of line ignored; first ignored character is `%c'"),
 		 *input_line_pointer);
       else
@@ -4130,7 +4126,7 @@ float_cons (float_type)
          has no use for such information. Lusers beware: you get
          diagnostics if your input is ill-conditioned.  */
       if (input_line_pointer[0] == '0'
-	  && isalpha ((unsigned char) input_line_pointer[1]))
+	  && ISALPHA (input_line_pointer[1]))
 	input_line_pointer += 2;
 
       /* Accept :xxxx, where the x's are hex digits, for a floating
@@ -4668,7 +4664,7 @@ next_char_of_string ()
 	    int i;
 
 	    for (i = 0, number = 0;
-		 isdigit (c) && i < 3;
+		 ISDIGIT (c) && i < 3;
 		 c = *input_line_pointer++, i++)
 	      {
 		number = number * 8 + c - '0';
@@ -4686,11 +4682,11 @@ next_char_of_string ()
 
 	    number = 0;
 	    c = *input_line_pointer++;
-	    while (isxdigit (c))
+	    while (ISXDIGIT (c))
 	      {
-		if (isdigit (c))
+		if (ISDIGIT (c))
 		  number = number * 16 + c - '0';
-		else if (isupper (c))
+		else if (ISUPPER (c))
 		  number = number * 16 + c - 'A' + 10;
 		else
 		  number = number * 16 + c - 'a' + 10;

@@ -1965,7 +1965,7 @@ main ()
  *
  */
 
-#include <ctype.h>
+#include "safe-ctype.h"
 #define AP (12)
 #define FP (13)
 #define SP (14)
@@ -1979,14 +1979,12 @@ vax_reg_parse (c1, c2, c3)	/* 3 chars of register name */
 
   retval = -1;
 
-  if (isupper (c1))
-    c1 = tolower (c1);
-  if (isupper (c2))
-    c2 = tolower (c2);
-  if (isdigit (c2) && c1 == 'r')
+  c1 = TOLOWER (c1);
+  c2 = TOLOWER (c2);
+  if (ISDIGIT (c2) && c1 == 'r')
     {
       retval = c2 - '0';
-      if (isdigit (c3))
+      if (ISDIGIT (c3))
 	{
 	  retval = retval * 10 + c3 - '0';
 	  retval = (retval > 15) ? -1 : retval;
@@ -2332,8 +2330,7 @@ vip_op (optext, vopP)
     char c;
 
     c = *p;
-    if (isupper (c))
-      c = tolower (c);
+    c = TOLOWER (c);
     if (DISPLENP (p[1]) && strchr ("bilws", len = c))
       p += 2;			/* skip (letter) '^' */
     else			/* no (letter) '^' seen */

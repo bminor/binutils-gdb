@@ -1,6 +1,6 @@
 %{
 
-/* Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000
+/* Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
@@ -28,7 +28,6 @@ This was written by steve chamberlain
 
 #include <ansidecl.h>
 #include <stdio.h>
-#include <ctype.h>
 
 #ifdef MPW
 /* Prevent enum redefinition problems. */
@@ -37,6 +36,7 @@ This was written by steve chamberlain
 
 #include "bfd.h"
 #include "sysdep.h"
+#include "safe-ctype.h"
 #include "ld.h"
 #include "ldgram.h"
 #include "ldmisc.h"
@@ -658,7 +658,7 @@ lex_warn_invalid (where, what)
       einfo ("%F%s: file not recognized: %E\n", ldfile_input_filename);
     }
 
-  if (! isprint ((unsigned char) *what))
+  if (! ISPRINT (*what))
     {
       sprintf (buf, "\\%03o", (unsigned int) *what);
       what = buf;

@@ -29,8 +29,8 @@
  */
 
 #include <stdio.h>
-#include <ctype.h>
 #include "as.h"
+#include "c=ctype.h"
 #include "subsegs.h"
 #include "struc-symbol.h"
 
@@ -334,7 +334,7 @@ register_name (expressionP)
 
   /* Find the spelling of the operand.  */
   start = name = input_line_pointer;
-  if (name[0] == '%' && isalpha (name[1]))
+  if (name[0] == '%' && ISALPHA (name[1]))
     name = ++input_line_pointer;
 
   else if (!reg_names_p)
@@ -345,7 +345,7 @@ register_name (expressionP)
 
   /* If it's a number, treat it as a number.  If it's alpha, look to
      see if it's in the register table.  */
-  if (!isalpha (name[0]))
+  if (!ISALPHA (name[0]))
     {
       reg_number = get_single_number ();
     }
@@ -702,10 +702,10 @@ i370_elf_suffix (str_p, exp_p)
 
   for (ch = *str, str2 = ident;
        (str2 < ident + sizeof (ident) - 1
-        && (isalnum (ch) || ch == '@'));
+        && (ISALNUM (ch) || ch == '@'));
        ch = *++str)
     {
-      *str2++ = (islower (ch)) ? ch : tolower (ch);
+      *str2++ = TOLOWER (ch);
     }
 
   *str2 = '\0';
@@ -1489,11 +1489,11 @@ i370_addr_offset (expressionS *exx)
   lab = input_line_pointer;
   while (*lab && (',' != *lab) && ('(' != *lab))
     {
-      if (isdigit (*lab))
+      if (ISDIGIT (*lab))
 	{
 	  all_digits = 1;
 	}
-      else if (isalpha (*lab))
+      else if (ISALPHA (*lab))
 	{
 	  if (!all_digits)
 	    {
@@ -1562,7 +1562,7 @@ i370_addr_cons (expressionS *exp)
   name = input_line_pointer;
   sym_name = input_line_pointer;
   /* Find the spelling of the operand */
-  if (name[0] == '=' && isalpha (name[1]))
+  if (name[0] == '=' && ISALPHA (name[1]))
     {
       name = ++input_line_pointer;
     }
@@ -1652,7 +1652,7 @@ i370_addr_cons (expressionS *exp)
 	      save = input_line_pointer;
 	      while (*save)
 		{
-		  if (isxdigit (*save))
+		  if (ISXDIGIT (*save))
 		    hex_len++;
 		  save++;
 		}
@@ -1979,7 +1979,7 @@ md_assemble (str)
 #endif
 
   /* Get the opcode.  */
-  for (s = str; *s != '\0' && ! isspace (*s); s++)
+  for (s = str; *s != '\0' && ! ISSPACE (*s); s++)
     ;
   if (*s != '\0')
     *s++ = '\0';
@@ -2004,7 +2004,7 @@ md_assemble (str)
   insn = opcode->opcode;
 
   str = s;
-  while (isspace (*str))
+  while (ISSPACE (*str))
     ++str;
 
   /* I370 operands are either expressions or address constants.
@@ -2289,7 +2289,7 @@ md_assemble (str)
 	++str;
     }
 
-  while (isspace (*str))
+  while (ISSPACE (*str))
     ++str;
 
   if (*str != '\0')

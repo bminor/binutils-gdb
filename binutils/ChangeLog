@@ -1,3 +1,59 @@
+2001-09-18  Bruno Haible  <haible@clisp.cons.org>
+
+	* addr2line.c: Don't include <ctype.h>.
+	(main): For gettext, also set the LC_CTYPE locate facet.
+	* ar.c (main): Likewise.
+	* coffdump.c (main): Likewise.
+	* dlltool.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(main): For gettext, also set the LC_CTYPE locate facet.
+	Use ISALNUM instead of isalpha/isdigit.
+	* dllwrap.c: Don't include <ctype.h>.
+	(main): For gettext, also set the LC_CTYPE locate facet.
+	* nlmconv.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(main): For gettext, also set the LC_CTYPE locate facet.
+	Use TOUPPER instead of islower/toupper.
+	* nlmheader.y: Include "safe-ctype.h" instead of <ctype.h>.
+	(yylex): Use ISSPACE/ISALNUM instead of isspace/isalnum.
+	Use TOUPPER instead of islower/toupper.
+	* nm.c (main): For gettext, also set the LC_CTYPE locate facet.
+	* objcopy.c (main): Likewise.
+	* objdump.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(disassemble_bytes): Use ISPRINT instead of isprint.
+	(dump_section_stabs): Use ISDIGIT instead of isdigit.
+	(dump_data): Use ISPRINT instead of isprint.
+	(main): For gettext, also set the LC_CTYPE locate facet.
+	* rclex.l: Include "safe-ctype.h" instead of <ctype.h>.
+	(cpp_line, handle_quotes): Use ISSPACE instead of isspace.
+	* rcparse.y: Include "safe-ctype.h" instead of <ctype.h>.
+	Use TOUPPER instead of islower/toupper.
+	* readelf.c (main): For gettext, also set the LC_CTYPE locate facet.
+	* resrc.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(write_rc_accelerators): Use ISPRINT instead of isprint.
+	(write_rc_rcdata): Likewise.
+	* size.c (main): For gettext, also set the LC_CTYPE locate facet.
+	* srconv.c (main): Likewise.
+	* stabs.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(parse_number): Use ISDIGIT/ISUPPER/ISLOWER instead of
+	isdigit/isupper/islower.
+	(parse_stab_string, parse_stab_type, parse_stab_argtypes,
+	parse_stab_array_type, stab_demangle_count, stab_demangle_get_count,
+	stab_demangle_prefix, stab_demangle_qualified,
+	stab_demangle_template, stab_demangle_type,
+	stab_demangle_fund_type): Use ISDIGIT instead of isdigit.
+	* strings.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(isgraphic): Use ISPRINT instead of isascii/isprint.
+	(main): Remove HAVE_LC_MESSAGES dependency.
+	* sysdump.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(pbarray): Use ISPRINT instead of isprint.
+	(main): For gettext, also set the LC_CTYPE locate facet.
+	* windres.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(format_from_filename): Use ISPRINT instead of isprint.
+	(main): For gettext, also set the LC_CTYPE locate facet.
+	* winduni.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(unicode_print): Use ISPRINT instead of isprint.
+	* wrstabs.c: Include "safe-ctype.h" instead of <ctype.h>.
+	(stab_variable): Use ISDIGIT instead of isdigit.
+
 2001-09-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* ar.c (print_contents): Cast args of bfd_seek to the right types.

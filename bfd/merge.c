@@ -26,8 +26,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "libbfd.h"
 #include "hashtab.h"
 
-#include <ctype.h>
-
 struct sec_merge_sec_info;
 
 /* An entry in the section merge hash table.  */

@@ -26,8 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 #include "aout/stab_gnu.h"
-
-#include <ctype.h>
+#include "safe-ctype.h"
 
 /* Stabs entries use a 12 byte format:
      4 byte string table index
@@ -364,7 +363,7 @@ _bfd_link_section_stabs (abfd, psinfo, stabsec, stabstrsec, psecinfo)
 			{
 			  /* Skip the file number.  */
 			  ++str;
-			  while (isdigit ((unsigned char) *str))
+			  while (ISDIGIT (*str))
 			    ++str;
 			  --str;
 			}
