@@ -1,3 +1,8 @@
+2003-03-26  Daniel Jacobowitz  <drow@mvista.com>
+
+	* linux-low.c (linux_create_inferior): Use __SIGRTMIN.
+	(linux_wait_for_event, linux_init_signals): Likewise.
+
 2003-03-17  Daniel Jacobowitz  <drow@mvista.com>
 
 	* configure.in: Check for stdlib.h.
