@@ -419,9 +419,6 @@ mips_stack_argsize (struct gdbarch *gdbarch)
 #define VM_MIN_ADDRESS (CORE_ADDR)0x400000
 
 struct mips_frame_cache;
-static mips_extra_func_info_t heuristic_proc_desc (CORE_ADDR, CORE_ADDR,
-						   struct frame_info *,
-						   struct mips_frame_cache *);
 static mips_extra_func_info_t non_heuristic_proc_desc (CORE_ADDR pc,
 						       CORE_ADDR *addrptr);
 
@@ -430,8 +427,6 @@ static CORE_ADDR heuristic_proc_start (CORE_ADDR);
 static CORE_ADDR read_next_frame_reg (struct frame_info *, int);
 
 static void reinit_frame_cache_sfunc (char *, int, struct cmd_list_element *);
-
-static CORE_ADDR after_prologue (CORE_ADDR pc);
 
 static struct type *mips_float_register_type (void);
 static struct type *mips_double_register_type (void);
@@ -872,76 +867,6 @@ static void
 mips_write_pc (CORE_ADDR pc, ptid_t ptid)
 {
   write_register_pid (mips_regnum (current_gdbarch)->pc, pc, ptid);
-}
-
-/* This returns the PC of the first inst after the prologue.  If we can't
-   find the prologue, then return 0.  */
-
-static CORE_ADDR
-after_prologue (CORE_ADDR pc)
-{
-  mips_extra_func_info_t proc_desc;
-  struct symtab_and_line sal;
-  CORE_ADDR func_addr, func_end;
-  CORE_ADDR startaddr = 0;
-
-  /* Pass a NULL next_frame to heuristic_proc_desc.  We should not
-     attempt to read the stack pointer from the current machine state,
-     because the current machine state has nothing to do with the
-     information we need from the proc_desc; and the process may or
-     may not exist right now.  */
-  proc_desc = non_heuristic_proc_desc (pc, &startaddr);
-  if (proc_desc)
-    {
-      /* IF this is the topmost frame AND (this proc does not have
-	 debugging information OR the PC is in the procedure prologue)
-	 THEN create a "heuristic" proc_desc (by analyzing the actual
-	 code) to replace the "official" proc_desc.  */
-      struct symtab_and_line val;
-      if (PROC_SYMBOL (proc_desc))
-	{
-	  val = find_pc_line (BLOCK_START
-			      (SYMBOL_BLOCK_VALUE (PROC_SYMBOL (proc_desc))),
-			      0);
-	  val.pc = val.end ? val.end : pc;
-	}
-      if (!PROC_SYMBOL (proc_desc) || pc < val.pc)
-	{
-	  mips_extra_func_info_t found_heuristic =
-	    heuristic_proc_desc (PROC_LOW_ADDR (proc_desc), pc, NULL, NULL);
-	  if (found_heuristic)
-	    proc_desc = found_heuristic;
-	}
-    }
-  else
-    {
-      if (startaddr == 0)
-	startaddr = heuristic_proc_start (pc);
-
-      proc_desc = heuristic_proc_desc (startaddr, pc, NULL, NULL);
-    }
-
-  if (proc_desc)
-    {
-      /* If function is frameless, then we need to do it the hard way.  I
-         strongly suspect that frameless always means prologueless... */
-      if (PROC_FRAME_REG (proc_desc) == MIPS_SP_REGNUM
-	  && PROC_FRAME_OFFSET (proc_desc) == 0)
-	return 0;
-    }
-
-  if (!find_pc_partial_function (pc, NULL, &func_addr, &func_end))
-    return 0;			/* Unknown */
-
-  sal = find_pc_line (func_addr, 0);
-
-  if (sal.end < func_end)
-    return sal.end;
-
-  /* The line after the prologue is after the end of the function.  In this
-     case, tell the caller to find the prologue the hard way.  */
-
-  return 0;
 }
 
 /* Fetch and return instruction from the specified location.  If the PC
@@ -2663,27 +2588,6 @@ heuristic-fence-post' command.\n", paddr_nz (pc), paddr_nz (pc));
       }
 
   return start_pc;
-}
-
-static mips_extra_func_info_t
-heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
-		     struct frame_info *next_frame,
-		     struct mips_frame_cache *this_cache)
-{
-  if (start_pc == 0)
-    return NULL;
-
-  memset (&temp_proc_desc, '\0', sizeof (temp_proc_desc));
-  PROC_LOW_ADDR (&temp_proc_desc) = start_pc;
-  PROC_FRAME_REG (&temp_proc_desc) = MIPS_SP_REGNUM;
-  PROC_PC_REG (&temp_proc_desc) = MIPS_RA_REGNUM;
-
-  if (mips_pc_is_mips16 (start_pc))
-    mips16_scan_prologue (start_pc, limit_pc, next_frame, this_cache);
-  else
-    mips32_scan_prologue (start_pc, limit_pc, next_frame, this_cache);
-
-  return &temp_proc_desc;
 }
 
 struct mips_objfile_private
@@ -4774,15 +4678,18 @@ mips_step_skips_delay (CORE_ADDR pc)
 static CORE_ADDR
 mips_skip_prologue (CORE_ADDR pc)
 {
+  CORE_ADDR limit_pc;
+  CORE_ADDR func_addr;
+
   /* See if we can determine the end of the prologue via the symbol table.
      If so, then return either PC, or the PC after the prologue, whichever
      is greater.  */
-
-  CORE_ADDR post_prologue_pc = after_prologue (pc);
-  CORE_ADDR limit_pc;
-
-  if (post_prologue_pc != 0)
-    return max (pc, post_prologue_pc);
+  if (find_pc_partial_function (pc, NULL, &func_addr, NULL))
+    {
+      CORE_ADDR post_prologue_pc = skip_prologue_using_sal (func_addr);
+      if (post_prologue_pc != 0)
+	return max (pc, post_prologue_pc);
+    }
 
   /* Can't determine prologue from the symbol table, need to examine
      instructions.  */

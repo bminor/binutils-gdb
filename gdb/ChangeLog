@@ -1,3 +1,10 @@
+2004-10-30  Andrew Cagney  <cagney@gnu.org>
+
+	Total breakage identified by Joel Brobecker.
+	* mips-tdep.c (after_prologue): Delete.
+	(mips_skip_prologue): Use skip_prologue_using_sal.
+	(heuristic_proc_desc): Delete, unused.
+
 2004-10-30  Mark Kettenis  <kettenis@gnu.org>
 
 	* procfs.c (proc_get_gregs, proc_get_fpregs, proc_set_gregs)
