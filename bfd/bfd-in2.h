@@ -3122,6 +3122,7 @@ typedef enum bfd_error
   bfd_error_system_call,
   bfd_error_invalid_target,
   bfd_error_wrong_format,
+  bfd_error_wrong_object_format,
   bfd_error_invalid_operation,
   bfd_error_no_memory,
   bfd_error_no_symbols,
@@ -3627,7 +3628,7 @@ bfd_check_format_matches PARAMS ((bfd *abfd, bfd_format format, char ***matching
 boolean
 bfd_set_format PARAMS ((bfd *abfd, bfd_format format));
 
-CONST char *
+const char *
 bfd_format_string PARAMS ((bfd_format format));
 
 #ifdef __cplusplus

@@ -684,15 +684,19 @@ bfd_generic_archive_p (abfd)
 	  if (bfd_check_format (first, bfd_object)
 	      && first->xvec != abfd->xvec)
 	    {
+#if 0
+	      /* We ought to close `first' here, but we can't, because
+		 we have no way to remove it from the archive cache.
+		 It's close to impossible to figure out when we can
+		 release bfd_ardata.  FIXME.  */
 	      (void) bfd_close (first);
 	      bfd_release (abfd, bfd_ardata (abfd));
 	      abfd->tdata.aout_ar_data = tdata_hold;
-	      bfd_set_error (bfd_error_wrong_format);
+#endif
+	      bfd_set_error (bfd_error_wrong_object_format);
 	      return NULL;
 	    }
-
-	  /* We ought to close first here, but we can't, because we
-             have no way to remove it from the archive cache.  FIXME.  */
+	  /* And we ought to close `first' here too.  */
 	}
     }
 

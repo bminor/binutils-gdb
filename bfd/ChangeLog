@@ -1,3 +1,18 @@
+2001-08-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* bfd.c (enum bfd_error): Add bfd_error_wrong_object_format.
+	(bfd_errmsgs): Add corresponding message.
+	* archive.c (bfd_generic_archive_p): Don't release bfd_ardata when
+	finding an archive that contains different format object files.
+	Return bfd_error_wrong_object_format for this case.
+	* format.c: Formatting fixes.  s/CONST/const/.
+	(bfd_check_format_matches): Accept archives that give
+	bfd_error_wrong_object_format if no full match is found.  Tidy
+	code handling matching_vector.  Don't return a pointer to freed
+	memory in `matching'.  Handle ambiguous matches as for partial
+	archive matches.
+	* bfd-in2.h: Regenerate.
+
 2001-08-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* libieee.h (common_header_type): Add last_byte field.
