@@ -1,3 +1,25 @@
+Thu Jun  4 10:15:03 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* gdbtk.c: merged:
+	
+	- Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+        (call_obj_wrapper): in case of error, copy the
+        error message from the result to the error_string.
+        (gdbtk_fputs): add comments.
+        (gdb_actions_command): call validate_actionline when installing the
+        tracepoint, to do the syntax checking of the actions for us.
+        - Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+        (gdb_get_trace_frame_num): new function to get the
+        trace frame number from gdb.
+        (gdbtk_init): added new command gdb_get_trace_frame_num.
+        - Jim Blandy  <jimb@zwingli.cygnus.com>
+        (struct wrapped_call_objs): Change the `func' member to
+        be a Tcl_ObjCmdProc, not an Tcl_CmdProc, since it accepts a vector
+        of objects as arguments.  Change the object vector to be const,
+        since that's what all the users of this structure seem to expect.
+        (call_obj_wrapper): Cast clientData properly before storing it in
+        the wrapped_args structure.
+	
 Thu May 28 17:19:14 1998  Keith Seitz  <keiths@cygnus.com>
 
 	* gdbtk.c (_initialize_gdbtk): Get rid of the console. Patch from

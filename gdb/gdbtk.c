@@ -172,6 +172,7 @@ static int gdb_loadfile PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST o
 static int gdb_set_bp PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 static struct symtab *full_lookup_symtab PARAMS ((char *file));
 static int gdb_get_mem PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
+static int gdb_get_trace_frame_num PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 
 /* Handle for TCL interpreter */
 static Tcl_Interp *interp = NULL;
@@ -293,6 +294,12 @@ gdbtk_flush (stream)
 #endif
 }
 
+/* Print the string PTR, with necessary hair for dealing with the
+   GDB console thingy, etc.  To wit:
+
+   Append the string PTR to result_ptr or error_string_ptr, if they
+   are set.  Otherwise, call the Tcl function `gdbtk_tcl_fputs', with
+   the string PTR as its only argument. */
 static void
 gdbtk_fputs (ptr, stream)
      const char *ptr;
@@ -1181,9 +1188,9 @@ wrapped_call (args)
 struct wrapped_call_objs
 {
   Tcl_Interp *interp;
-  Tcl_CmdProc *func;
+  Tcl_ObjCmdProc *func;
   int objc;
-  Tcl_Obj **objv;
+  Tcl_Obj * CONST *objv;
   int val;
 };
 
@@ -1306,7 +1313,7 @@ call_obj_wrapper (clientData, interp, objc, objv)
   old_error_string_ptr = error_string_ptr;
   error_string_ptr = &error_string;
 
-  wrapped_args.func = (Tcl_CmdProc *)clientData;
+  wrapped_args.func = (Tcl_ObjCmdProc *)clientData;
   wrapped_args.interp = interp;
   wrapped_args.objc = objc;
   wrapped_args.objv = objv;
@@ -1329,6 +1336,17 @@ call_obj_wrapper (clientData, interp, objc, objv)
 
       running_now = 0;
       Tcl_Eval (interp, "gdbtk_tcl_idle");
+
+
+      /* if the error message is in RESULT instead of ERROR_STRING we copy it
+         back to ERROR_STRING and free RESULT */
+
+      if ((Tcl_DStringLength (&error_string) == 0) && (Tcl_DStringLength (&result) > 0))
+        {
+          Tcl_DStringAppend (&error_string, Tcl_DStringValue (&result), Tcl_DStringLength (&result));
+          Tcl_DStringFree (&result);
+        }
+
     }
   
   /* do not suppress any errors -- a remote target could have errored */
@@ -2021,13 +2039,21 @@ gdbtk_call_command (cmdblk, arg, from_tty)
 
 /* HACK! HACK! This is to get the gui to update the tstart/tstop
    button only incase of tstart/tstop commands issued from the console
-   We don't want to update the src window, s we need to have specific
+   We don't want to update the src window, so we need to have specific
    procedures to do tstart and tstop
-*/
+   Unfortunately this will not display errors from tstart or tstop in the 
+   console window itself, but as dialogs.*/
+
       if (!strcmp(cmdblk->name, "tstart") && !No_Update)
+        {
               Tcl_Eval (interp, "gdbtk_tcl_tstart"); 
+              (*cmdblk->function.cfunc)(arg, from_tty);
+        }
       else if (!strcmp(cmdblk->name, "tstop") && !No_Update) 
+             {
               Tcl_Eval (interp, "gdbtk_tcl_tstop"); 
+              (*cmdblk->function.cfunc)(arg, from_tty);
+             }
 /* end of hack */
            else 
              {
@@ -2299,6 +2325,8 @@ gdbtk_init ( argv0 )
   Tcl_CreateCommand (interp, "gdb_pc_reg", get_pc_register, NULL, NULL);
   Tcl_CreateObjCommand (interp, "gdb_loadfile", call_obj_wrapper, gdb_loadfile,  NULL);
   Tcl_CreateObjCommand (interp, "gdb_set_bp", call_obj_wrapper, gdb_set_bp,  NULL);
+  Tcl_CreateObjCommand (interp, "gdb_get_trace_frame_num",
+                        call_obj_wrapper, gdb_get_trace_frame_num,  NULL);  
 
   command_loop_hook = tk_command_loop;
   print_frame_info_listing_hook = gdbtk_print_frame_info;
@@ -2707,6 +2735,28 @@ gdb_get_line_command (clientData, interp, objc, objv)
     return TCL_OK;
 }
 
+
+static int
+gdb_get_trace_frame_num (clientData, interp, objc, objv)
+     ClientData clientData;
+     Tcl_Interp *interp;
+     int objc;
+     Tcl_Obj *CONST objv[];
+{
+  if (objc != 1)
+    {
+      Tcl_AppendResult (interp, "wrong # of args: should be \"",
+                        Tcl_GetStringFromObj (objv[0], NULL),
+                        " linespec\"");
+      return TCL_ERROR;
+    }
+ 
+      Tcl_SetObjResult (interp, Tcl_NewIntObj (get_traceframe_number ()));
+      return TCL_OK;
+}
+ 
+
+
 static int
 gdb_get_file_command (clientData, interp, objc, objv)
      ClientData clientData;
@@ -3001,6 +3051,7 @@ gdb_actions_command (clientData, interp, objc, objv)
   char *number, *args, *action;
   long step_count;
   struct action_line *next = NULL, *temp;
+  enum actionline_type linetype;
 
   if (objc != 3)
     {
@@ -3025,14 +3076,23 @@ gdb_actions_command (clientData, interp, objc, objv)
   step_count = 0;
 
   Tcl_ListObjGetElements (interp, objv[2], &nactions, &actions);
+
+  /* Add the actions to the tracepoint */
   for (i = 0; i < nactions; i++)
     {
       temp = xmalloc (sizeof (struct action_line));
       temp->next = NULL;
       action = Tcl_GetStringFromObj (actions[i], &len);
       temp->action = savestring (action, len);
-      if (sscanf (temp->action, "while-stepping %d", &step_count) !=0)
-        tp->step_count = step_count;
+
+      linetype = validate_actionline (&(temp->action), tp);
+
+      if (linetype == BADLINE) 
+       {
+         free (temp);
+         continue;
+       }
+
       if (next == NULL)
         {
           tp->actions = temp;
