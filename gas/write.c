@@ -718,6 +718,24 @@ adjust_reloc_syms (abfd, sec, xxx)
 	    goto done;
 	  }
 
+#ifdef BFD_ASSEMBLER
+	/* Don't try to reduce relocs which refer to .linkonce
+           sections.  It can lead to confusion when a debugging
+           section refers to a .linkonce section.  I hope this will
+           always be correct.  */
+	if (symsec != sec
+	    && ((bfd_get_section_flags (stdoutput, symsec) & SEC_LINK_ONCE)
+		!= 0))
+	  {
+	    fixp->fx_addsy->sy_used_in_reloc = 1;
+#ifdef UNDEFINED_DIFFERENCE_OK
+	    if (fixp->fx_subsy != NULL)
+	      fixp->fx_subsy->sy_used_in_reloc = 1;
+#endif
+	    goto done;
+	  }
+#endif
+
 	/* Since we're reducing to section symbols, don't attempt to reduce
 	   anything that's already using one.  */
 	if (sym->bsym->flags & BSF_SECTION_SYM)

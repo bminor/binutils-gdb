@@ -1,5 +1,8 @@
 Fri Dec 13 13:00:33 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* write.c (adjust_reloc_syms): Don't reduce a reloc against a
+	linkonce section into a reloc against the section symbol.
+
 	* config/tc-mips.c (mips16_macro): Remove nop instructions after
 	branch instructions.
 
