@@ -15,7 +15,7 @@ TREE	= devo
 
 NATIVE  = native
 
-DATE	= 921213
+DATE	= 921217
 
 TAG	= latest-$(DATE)
 
@@ -73,9 +73,9 @@ all: all-native
 endif
 
 ifeq ($(canonhost),hppa1.1-hp-hpux)
-TARGETS	= m68k-coff m68k-aout m68k-vxworks i960-vxworks a29k-amd-udi
+TARGETS	= m68k-aout m68k-coff m68k-vxworks i960-vxworks a29k-amd-udi
 CC = cc 
-CFLAGS =
+CFLAGS = -g
 all: all-native
 endif
 
