@@ -1,3 +1,8 @@
+2003-12-18  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/sect-cmd.exp: Handle compiling test case from multiple
+	source files.
+
 2003-12-16  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.base/environ.exp: Handle compiling test case from multiple
