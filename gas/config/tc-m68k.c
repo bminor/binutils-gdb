@@ -408,7 +408,8 @@ static int reverse_8_bits();
 static int try_index();
 static void install_gen_operand();
 static void install_operand();
- void s_bss();
+void s_bss();
+void s_align_bytes();
 static void s_data1();
 static void s_data2();
 static void s_even();
@@ -490,6 +491,7 @@ const pseudo_typeS md_pseudo_table[] = {
 	{ "even",	s_even,		0	},
 	{ "skip",	s_space,	0	},
 	{ "proc",	s_proc,		0	},
+        { "align",      s_align_bytes,  0       },
 	{ 0,		0,		0	}
 };
 
