@@ -1,3 +1,18 @@
+Fri Apr 23 16:17:00 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* Merge in HPPA/BSD patches from Utah:
+	* defs.h:  Add const to 2nd arg of psignal prototype.
+	* hppah-tdep.c:  Renamed to hppa-tdep.c 'cuz it's common code with
+	BSD now.
+	* hppab-core.c:  Deleted.  No longer useful.
+	* hppab-nat.c:  #include more files.  Use PT_WUREGS, not
+	PT_WRITE_U.
+	* hppab-tdep.c:  Deleted.  Supplanted by hppa-tdep.c.
+	* config/pa/hppabsd.mh (NATDEPFILES):  Remove hppab-core.o.
+	* config/pa/hppabsd.mt (TDEPFILES):  hppab-tdep.o => hppa-tdep.o
+	* config/pa/hppahpux.mt (TDEPFILES):  hppab-tdep.o => hppa-tdep.o
+	* config/pa/xm-hppab.h:  #define SET_STACK_LIMIT_HUGE.
+
 Fri Apr 23 10:34:02 1993  Stu Grossman  (grossman@cygnus.com)
 
         * Fix two bugs found by deja-gnu.  One is the incorrect reporting

@@ -107,11 +107,9 @@ h8300-tdep.c
 h8500-tdep.c
 hp300ux-nat.c
 hppa-pinsn.c
-hppab-core.c
+hppa-tdep.c
 hppab-nat.c
-hppab-tdep.c
 hppah-nat.c
-hppah-tdep.c
 i386-pinsn.c
 i386-stub.c
 i386-tdep.c

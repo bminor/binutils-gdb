@@ -1,7 +1,7 @@
 /* Machine-dependent hooks for the unix child process stratum.  This
    code is for the HP PA-RISC cpu.
 
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
@@ -24,6 +24,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "inferior.h"
+#include "target.h"
+#include <sys/ptrace.h>
 
 #ifndef PT_ATTACH
 #define PT_ATTACH PTRACE_ATTACH
@@ -239,7 +241,7 @@ store_inferior_registers (regno)
       for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof(int))
 	{
 	  errno = 0;
-	  ptrace (PT_WRITE_U, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
+	  ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
 		  *(int *) &registers[REGISTER_BYTE (regno) + i]);
 	  if (errno != 0)
 	    {
@@ -259,7 +261,7 @@ store_inferior_registers (regno)
 	  for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof(int))
 	    {
 	      errno = 0;
-	      ptrace (PT_WRITE_U, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
+	      ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
 		      *(int *) &registers[REGISTER_BYTE (regno) + i]);
 	      if (errno != 0)
 		{
