@@ -168,14 +168,14 @@ SUBDIR_CLI_UNINSTALL=
 SUBDIR_MI_OBS = \
 	mi-out.o mi-console.o \
 	mi-cmds.o mi-cmd-env.o mi-cmd-var.o mi-cmd-break.o mi-cmd-stack.o \
-	mi-cmd-file.o mi-cmd-disas.o \
+	mi-cmd-file.o mi-cmd-disas.o mi-cmd-symbol.o \
 	mi-interp.o \
 	mi-main.o mi-parse.o mi-getopt.o
 SUBDIR_MI_SRCS = \
 	mi/mi-out.c mi/mi-console.c \
 	mi/mi-cmds.c mi/mi-cmd-env.c \
 	mi/mi-cmd-var.c mi/mi-cmd-break.c mi/mi-cmd-stack.c \
-	mi/mi-cmd-file.c mi/mi-cmd-disas.c \
+	mi/mi-cmd-file.c mi/mi-cmd-disas.c mi/mi-cmd-symbol.c \
 	mi/mi-interp.c \
 	mi/mi-main.c mi/mi-parse.c mi/mi-getopt.c
 SUBDIR_MI_DEPS =
@@ -2575,6 +2575,9 @@ mi-cmd-env.o: $(srcdir)/mi/mi-cmd-env.c $(defs_h) $(inferior_h) $(value_h) \
 mi-cmd-stack.o: $(srcdir)/mi/mi-cmd-stack.c $(defs_h) $(target_h) $(frame_h) \
 	$(value_h) $(mi_cmds_h) $(ui_out_h) $(symtab_h) $(block_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-stack.c
+mi-cmd-symbol.o: $(srcdir)/mi/mi-cmd-symbol.c $(defs_h) \
+	$(mi_cmds_h) $(ui_out_h) $(symtab_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-symbol.c
 mi-cmd-var.o: $(srcdir)/mi/mi-cmd-var.c $(defs_h) $(mi_cmds_h) $(ui_out_h) \
 	$(mi_out_h) $(varobj_h) $(value_h) $(gdb_string_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-var.c

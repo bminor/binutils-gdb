@@ -1,3 +1,10 @@
+2003-05-03  J. Brobecker  <brobecker@gnat.com>
+
+	From Thierry Schneider <tpschneider1@yahoo.com>
+	* Makfile.in (SUBDIR_MI_OBS): Add dependency on mi-cmd-symbol.o.
+	(SUBDIR_MI_SRCS): Add mi-cmd-symbol.c.
+	(mi-cmd-symbol.o): Add rule.
+
 2003-05-03  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (PUSH_DUMMY_CODE): New architecture method, add
