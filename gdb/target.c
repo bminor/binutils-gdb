@@ -488,9 +488,6 @@ cleanup_target (struct target_ops *t)
   de_fault (to_stop, 
 	    (void (*) (void)) 
 	    target_ignore);
-  de_fault (to_query, 
-	    (int (*) (int, char *, char *, int *)) 
-	    return_zero);
   de_fault (to_rcmd, 
 	    (void (*) (char *, struct ui_file *)) 
 	    tcomplain);

@@ -1,3 +1,8 @@
+2001-12-05  Andrew Cagney  <cagney@redhat.com>
+
+	* target.c (cleanup_target): Do not initialize to_query to
+	return_zero.
+
 2001-12-05  Jim Blandy  <jimb@redhat.com>
 
 	* s390-tdep.c (s390_get_frame_info): Recognize argument register
