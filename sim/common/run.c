@@ -1,8 +1,6 @@
 /* run front end support for all the simulators.
    Copyright (C) 1992, 1993 1994, 1995 Free Software Foundation, Inc.
 
-This file is part of SH SIM
-
 GNU CC is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2, or (at your option)
@@ -34,6 +32,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 void usage();
 extern int optind;
 extern char *optarg;
+
+bfd *sim_bfd;
 
 int target_byte_order;
 
@@ -87,7 +87,7 @@ main (ac, av)
       printf ("run %s\n", name);
     }
 
-  abfd = bfd_openr (name, 0);
+  sim_bfd = abfd = bfd_openr (name, 0);
   if (!abfd) 
     {
       fprintf (stderr, "run: can't open %s: %s\n", 
@@ -102,12 +102,15 @@ main (ac, av)
       exit (1);
     }
 
-
   sim_set_callbacks (&default_callback);
   default_callback.init (&default_callback);
 
+  /* Ensure that any run-time initialisation that needs to be
+     performed by the simulator can occur. */
+  sim_open(NULL);
+
   for (s = abfd->sections; s; s = s->next)
-  if (abfd)
+  if (abfd && (s->flags & SEC_LOAD))
     {
       unsigned char *buffer = (unsigned char *)malloc (bfd_section_size (abfd, s));
       bfd_get_section_contents (abfd,
@@ -121,7 +124,7 @@ main (ac, av)
   start_address = bfd_get_start_address (abfd);
   sim_create_inferior (start_address, NULL, NULL);
 
-  target_byte_order = abfd->xvec->byteorder_big_p ? 4321 : 1234;
+  target_byte_order = bfd_big_endian (abfd) ? 4321 : 1234;
 
   if (trace)
     {
@@ -139,6 +142,8 @@ main (ac, av)
     sim_info (0);
 
   sim_stop_reason (&reason, &sigrc);
+
+  sim_close(0);
 
   /* If reason is sim_exited, then sigrc holds the exit code which we want
      to return.  If reason is sim_stopped or sim_signalled, then sigrc holds

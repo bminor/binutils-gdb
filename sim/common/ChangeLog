@@ -1,3 +1,21 @@
+Thu Sep 12 11:27:21 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* run.c (sim_bfd): New global to hold the bfd pointer for the
+	executable.
+	(main): Initialize sim_bfd.
+
+Fri Dec 15 16:27:49 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* run.c (main): Use new bfd_big_endian macro.
+
+Wed Nov  8 15:49:49 1995  James G. Smith  <jsmith@pasanda.cygnus.co.uk>
+
+	* run.c (main): Removed SH specific comments, so source is
+ 	generic. Also updated to only load relevant sections. Moved
+ 	sim_open() to after callback attach (to match GDB).
+
+  	* run.1: Removed SH specific comments.
+
 Sat Oct 21 12:31:01 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* run.c (main): Always return sigrc at end.
