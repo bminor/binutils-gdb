@@ -2,5 +2,5 @@
 XDEPFILES=
 XM_FILE= xm-nbsd.h
 NAT_FILE= nm-nbsd.h
-NATDEPFILES= fork-child.o infptrace.o inftarg.o corelow.o sparc-nat.o solib.o
+NATDEPFILES= fork-child.o infptrace.o inftarg.o corelow.o sparc-nat.o solib.o solib-svr4.o
 HOST_IPC=-DBSD_IPC

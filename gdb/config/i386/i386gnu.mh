@@ -1,6 +1,6 @@
 # Host: Intel 386 running the GNU Hurd
 XDEPFILES= i387-tdep.o
-NATDEPFILES= i386gnu-nat.o gnu-nat.o fork-child.o solib.o corelow.o notify_S.o process_reply_S.o msg_reply_S.o msg_U.o exc_request_U.o exc_request_S.o
+NATDEPFILES= i386gnu-nat.o gnu-nat.o fork-child.o solib.o solib-svr4.o corelow.o notify_S.o process_reply_S.o msg_reply_S.o msg_U.o exc_request_U.o exc_request_S.o
 XM_FILE= xm-i386gnu.h
 NAT_FILE= nm-gnu.h
 MH_CFLAGS = -D_GNU_SOURCE

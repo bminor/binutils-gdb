@@ -1,5 +1,97 @@
 2000-10-24  Kevin Buettner  <kevinb@redhat.com>
 
+	* solib-svr4.c: New file created out of much of solib.c...
+
+	* solib.c (_SYSCALL32, BKPT_AT_SYMBOL): Move these defines to
+	solib-svr4.c.
+	(sys/types.h, signal.h, sys/param.h, fcntl.h, a.out.h,
+	elf/external.h, link.h): Move these includes to solib-svr4.c.
+	(bkpt_names, debug_base_symbols, main_name_list,
+	solib_extract_address, SOLIB_EXTRACT_ADDRESS, dynamic_copy,
+	ld_2_copy, debug_addr, flag_addr, LM_ADDR, LM_NEXT, LM_NAME,
+	IGNORE_FIRST_LINK_MAP_ENTRY, breakpoint_addr,
+	allocate_rt_common_objfile, solib_add_common_symbols,
+	bfd_lookup_symbol, look_for_base, elf_locate_base, locate_base,
+	first_link_map_member, open_symbol_file_object, match_main,
+	current_sos, interp_text_sect_low, interp_text_sect_high,
+	interp_plt_sect_low, interp_plt_sect_high,
+	in_svr4_dynsym_resolve_code, disable_break, enable_break,
+	special_symbol_handling): Moved to solib-svr4.c.
+	(debug32_copy, shadow_contents, fdmatch)
+	Removed entirely.
+	(struct so_list): Moved to solist.h
+	(MAX_PATH_SIZE): Moved to solist.h and renamed to
+	SO_NAME_MAX_PATH_SIZE.
+
+	* solist.h: New file created from struct so_list in solib.c.
+	(struct lm_info): Add forward declaration.
+	(struct so_list): Remove fields lm, lm32, lmaddr.  Replace with a
+	single field, lm_info, which will be a pointer to target specific
+	data.
+	(struct target_so_ops): New struct.
+	(free_so): Add extern declaration.
+	(current_target_so_ops): Declare new global variable.
+	(solib_map_sections): 
+	(TARGET_SO_LM_ADDR, TARGET_SO_FREE_SO, TARGET_SO_CLEAR_SOLIB,
+	TARGET_SO_SOLIB_CREATE_INFERIOR_HOOK,
+	TARGET_SO_SPECIAL_SYMBOL_HANDLING, TARGET_SO_CURRENT_SOS,
+	TARGET_SO_OPEN_SYMBOL_FILE_OBJECT):  New macros.
+
+	* solib.c (solib_map_sections, free_so, symbol_add_stub,
+	update_solib_list, solib_add, info_shared_library_command,
+	solib_address, clear_solib, solib_create_inferior_hook):  Use
+	new TARGET_SO_* macros to call function on target specific
+	side indirectly.
+	(current_target_so_ops): Define new global variable.
+	(_initialize_solib): Eliminate HAVE_LINK_H ifdef.
+
+	* solib-svr4.h: New file; defines struct link_map_offsets and
+	SVR4_FETCH_LINK_MAP_OFFSETS.
+
+	* solib-svr4.c (_initialize_svr4_solib, svr4_clear_solib,
+	svr4_free_so): New functions.
+	(special_symbol_handling, solib_create_inferior_function_hook,
+	current_sos): Rename by adding a svr4_ prefix.
+	(default_svr4_fetch_link_map_offsets): New function.
+	(LM_ADDR, LM_NEXT, LM_NAME, IGNORE_FIRST_LINK_MAP_ENTRY,
+	first_link_map_member, open_symbol_file_object, svr4_current_sos):
+	Remove dependence on existence of link.h by calling
+	SVR4_FETCH_LINK_MAP_OFFSETS to obtain the offsets of shared library
+	data.  As a result, SVR4 and non-SVR4 versions of many of these
+	functions coalesce into a single function and HAVE_STRUCT_LINK_MAP32
+	ugliness is moved into default_svr4_fetch_link_map_offsets where it
+	is relatively contained.
+	(SOLIB_EXTRACT_ADDRESS): Revert 2000-08-29 change in which
+	solib_extract_address() is called instead of extract_address().
+	(solib_extract_address): Removed.
+
+	* Makefile.in (solib.o): Add solist.h as a dependency.
+	(solib-svr4.o): Add dependencies.
+
+	* sparc-tdep.c (gregset.h): Don't include unless USE_PROC_FS is
+	defined.
+
+	* config/alpha/alpha-linux.mh, config/alpha/fbsd.mh,
+	config/arm/linux.mh, config/i386/fbsd.mh,
+	config/i386/i386dgux.mh, config/i386/i386gnu.mh,
+	config/i386/i386sco5.mh, config/i386/i386sol2.mt,
+	config/i386/i386v4.mh, config/i386/i386v42mp.mh,
+	config/i386/linux.mh, config/i386/nbsd.mh,
+	config/i386/nbsdelf.mh, config/i386/ncr3000.mt,
+	config/i386/ptx4.mh, config/i386/sun386.mt,
+	config/ia64/linux.mh, config/m68k/linux.mh,
+	config/m68k/m68kv4.mh, config/m68k/nbsd.mh,
+	config/m68k/sun2os4.mt, config/m68k/sun3os4.mt,
+	config/m88k/delta88v4.mh, config/mips/mipsv4.mh,
+	config/ns32k/nbsd.mh, config/powerpc/linux.mh,
+	config/powerpc/nbsd.mh, config/powerpc/solaris.mh,
+	config/rs6000/rs6000lynx.mt, config/sparc/linux.mt,
+	config/sparc/nbsd.mh, config/sparc/nbsdelf.mh,
+	config/sparc/sun4os4.mt, config/sparc/sun4sol2.mh
+	(NATDEPFILES):  Add solib-svr4.o to list.
+
+2000-10-24  Kevin Buettner  <kevinb@redhat.com>
+
 	* stabsread.c (dbx_lookup_type, dbx_alloc_type,
 	read_sun_builtin_type, read_sun_floating_type,
 	read_range_type): Protoize.

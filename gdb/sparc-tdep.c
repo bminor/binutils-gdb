@@ -33,14 +33,13 @@
 
 #ifdef	USE_PROC_FS
 #include <sys/procfs.h>
+/* Prototypes for supply_gregset etc. */
+#include "gregset.h"
 #endif
 
 #include "gdbcore.h"
 
 #include "symfile.h" 	/* for 'entry_point_address' */
-
-/* Prototypes for supply_gregset etc. */
-#include "gregset.h"
 
 /*
  * Some local macros that have multi-arch and non-multi-arch versions:

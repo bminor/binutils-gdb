@@ -3,7 +3,7 @@ XDEPFILES=
 XM_FILE= xm-alphalinux.h
 NAT_FILE= nm-linux.h
 NATDEPFILES= infptrace.o inftarg.o corelow.o alpha-nat.o \
-	fork-child.o solib.o linux-thread.o lin-thread.o 
+	fork-child.o solib.o solib-svr4.o linux-thread.o lin-thread.o 
 
 LOADLIBES = -ldl -rdynamic
 

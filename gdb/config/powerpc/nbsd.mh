@@ -1,5 +1,5 @@
 # Host: PowerPC, running NetBSD
 XDEPFILES=
-NATDEPFILES= fork-child.o infptrace.o inftarg.o corelow.o solib.o ppcnbsd-nat.o
+NATDEPFILES= fork-child.o infptrace.o inftarg.o corelow.o solib.o solib-svr4.o ppcnbsd-nat.o
 XM_FILE= xm-nbsd.h
 NAT_FILE= nm-nbsd.h

@@ -5,7 +5,7 @@ XDEPFILES=
 XM_CLIBS= -lsocket -lnsl
 
 NAT_FILE= nm-solaris.h
-NATDEPFILES= corelow.o core-sol2.o solib.o fork-child.o procfs.o \
+NATDEPFILES= corelow.o core-sol2.o solib.o solib-svr4.o fork-child.o procfs.o \
 	proc-api.o proc-events.o proc-flags.o proc-why.o
 
 # If you are compiling with Sun's compiler, add the -xs option to CC

@@ -1840,7 +1840,11 @@ mon960-rom.o: mon960-rom.c monitor.h $(bfd_h) gdb_wait.h $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) target.h serial.h terminal.h
 
 solib.o: solib.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
-	objfiles.h gnu-regex.h symfile.h target.h gdb_string.h
+	objfiles.h gnu-regex.h symfile.h target.h gdb_string.h solist.h
+
+solib-svr4.o: solib.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
+	objfiles.h gnu-regex.h symfile.h target.h gdb_string.h solist.h \
+	solib-svr4.h
 
 source.o: source.c $(defs_h) $(expression_h) $(frame_h) $(gdbcmd_h) \
 	$(gdbcore_h) language.h objfiles.h gnu-regex.h symfile.h $(symtab_h) \

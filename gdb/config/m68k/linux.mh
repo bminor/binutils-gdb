@@ -4,7 +4,7 @@ XM_FILE= xm-linux.h
 XDEPFILES=
 
 NAT_FILE= nm-linux.h
-NATDEPFILES= infptrace.o solib.o inftarg.o fork-child.o \
+NATDEPFILES= infptrace.o solib.o solib-svr4.o inftarg.o fork-child.o \
 	corelow.o core-aout.o core-regset.o m68klinux-nat.o linux-thread.o
 
 GDBSERVER_DEPFILES= low-linux.o

@@ -6,5 +6,5 @@ XDEPFILES=
 XM_CLIBS= -lsocket -lnsl
 
 NAT_FILE= nm-i386v4.h
-NATDEPFILES= corelow.o core-regset.o solib.o fork-child.o i386v4-nat.o \
+NATDEPFILES= corelow.o core-regset.o solib.o solib-svr4.o fork-child.o i386v4-nat.o \
 	procfs.o proc-api.o proc-events.o proc-flags.o proc-why.o
