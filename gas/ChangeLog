@@ -1,3 +1,7 @@
+2002-10-17  Johannes Stezenbach  <js@convergence.de>
+
+	* itbl-parse.y (entry): Provide empty action.
+
 2002-10-14  Momchil Velikov  <velco@fadata.bg>
 
 	* config/tc-v850.c (CHECK_): Remove token pasting operator.
