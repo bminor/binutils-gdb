@@ -55,27 +55,27 @@ gdb_test "show annotate" "Annotation_level is 0..*"  "default annotation_level i
 
 #test set annotate 2
 send_gdb "set annotate 2\n"
-expect {
-	-re ".*\032\032pre-prompt.*$prompt .*\032\032prompt.*$" \
+gdb_expect {
+	-re ".*\032\032pre-prompt.*$gdb_prompt .*\032\032prompt.*$" \
 				{ pass "set annotate 2" }
- 	-re ".*$prompt $"	{ fail "set annotate 2" }
+ 	-re ".*$gdb_prompt $"	{ fail "set annotate 2" }
 	timeout			{ fail "(timeout) set annotate 2" }
     }
 
 send_gdb "show annotate\n"
-expect {
-	-re ".*\032\032post-prompt.*Annotation_level is 2..*\032\032pre-prompt.*$prompt .*\032\032prompt.*$" \
+gdb_expect {
+	-re ".*\032\032post-prompt.*Annotation_level is 2..*\032\032pre-prompt.*$gdb_prompt .*\032\032prompt.*$" \
 				{ pass "show annotate (2)" }
- 	-re ".*$prompt $"	{ fail "show annotate (2)" }
+ 	-re ".*$gdb_prompt $"	{ fail "show annotate (2)" }
 	timeout			{ fail "(timeout) show annotate (2)" }
     }
 
 #test annotation_level 2
 send_gdb "info line 1\n"
-expect {
-	-re ".*\032\032post-prompt.*Line 1 of .* is at address .* but contains no code.*:1:0:beg:0x.*\032\032pre-prompt.*$prompt .*\032\032prompt.*$" \
+gdb_expect {
+	-re ".*\032\032post-prompt.*Line 1 of .* is at address .* but contains no code.*:1:0:beg:0x.*\032\032pre-prompt.*$gdb_prompt .*\032\032prompt.*$" \
 				{ pass "annotation_level 2" }
-	-re ".*$prompt $"	{ fail "annotation_level 2" }
+	-re ".*$gdb_prompt $"	{ fail "annotation_level 2" }
 	timeout			{ fail "(timeout) annotation_level 2" }
     }
 
@@ -166,7 +166,7 @@ gdb_test "show language" "The current source language is \"asm\"..*" "show langu
 #test set language auto
 gdb_test "set language auto" "" "set language auto" 
 #test show language
-gdb_test "show language" "The current source language is \"auto\"..*" "show language (auto)" 
+gdb_test "show language" "The current source language is \"auto.*\"..*" "show language (auto)" 
 #test set listsize 100
 gdb_test "set listsize 100" "" "set listsize 100" 
 #test show listsize 100
@@ -175,14 +175,14 @@ gdb_test "show listsize" "Number of source lines gdb will list by default is 100
 #test set prompt (FooBarBaz) 
 set newprompt "\\(FooBarBaz\\)"
 send_gdb "set prompt (FooBarBaz) \n"
-expect {
+gdb_expect {
 	-re "$newprompt $"	{ pass "set prompt (FooBarBaz) " }
 	timeout			{ fail "(timeout) set prompt (FooBarBaz) " }
 	}
 
 #test show prompt (FooBarBaz) 
 send_gdb "show prompt\n"
-expect {
+gdb_expect {
 	-re "Gdb's prompt is \"$newprompt \"..* $" \
 				{ pass "show prompt (FooBarBaz) " }
 	timeout			{ fail "(timeout) show prompt (FooBarBaz) " }
@@ -190,8 +190,8 @@ expect {
 
 #test set prompt (gdb) 
 send_gdb "set prompt (gdb) \n"
-expect {
-	-re "$prompt $"		{ pass "set prompt (gdb) " }
+gdb_expect {
+	-re "$gdb_prompt $"		{ pass "set prompt (gdb) " }
 	timeout			{ fail "(timeout) set prompt (gdb) " }
 	}
 

@@ -67,6 +67,7 @@ proc gdb_target_monitor { } {
 		    verbose "Set target to $targetname"
 		    return
 		}
+		-re "Ending remote.*$gdb_prompt" { }
 		-re "Connection refused.*$gdb_prompt" {
 		    verbose "Connection refused by remote target.  Pausing, and trying again."
 		    sleep 30
@@ -99,32 +100,44 @@ proc gdb_load { arg } {
     global gdb_prompt
     global timeout
 
-    if { $arg != "" } {
-	if [gdb_file_cmd $arg] { return -1 }
-    }
-
-    gdb_target_monitor
-
-    if [is_remote host] {
-	# FIXME:
-	set arg a.out;
-    }
-
-    verbose "Loading $arg"
-    send_gdb "load $arg\n"
-    set timeout 1000
-    verbose "Timeout is now $timeout seconds" 2
-    gdb_expect {
-	-re ".*$gdb_prompt $" {
-	    verbose "Loaded $arg into $GDB\n"
-	    return 1
+    for { set j 1; } { $j <= 2 } {incr j; } {
+	if { $arg != "" } {
+	    if [gdb_file_cmd $arg] { return -1 }
 	}
-	timeout {
-	    if { $verbose > 1 } {
-		perror "Timed out trying to load $arg."
+	
+	gdb_target_monitor
+
+	if [is_remote host] {
+	    # FIXME:
+	    set arg a.out;
+	}
+
+	verbose "Loading $arg"
+	send_gdb "load $arg\n"
+	set timeout 1000
+	verbose "Timeout is now $timeout seconds" 2
+	gdb_expect {
+	    -re ".*\[Ff\]ailed.*$gdb_prompt $" {
+		verbose "load failed";
+	    }
+	    -re ".*$gdb_prompt $" {
+		verbose "Loaded $arg into $GDB\n"
+		return 1
+	    }
+	    timeout {
+		if { $verbose > 1 } {
+		    perror "Timed out trying to load $arg."
+		}
 	    }
 	}
+	gdb_test "target exec" "No exec file now." "" ".*Kill it.*y or n.*" "y"
+
+	if { $j == 1 && ![reboot_target] } {
+	    break;
+	}
     }
+    perror "Couldn't load file into GDB.";
+    return -1;
 }
 
 proc gdb_start { } {

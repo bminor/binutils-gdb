@@ -1,5 +1,10 @@
 Wed Mar  5 00:00:43 1997  Bob Manson  <manson@charmed.cygnus.com>
 
+	* config/monitor.exp(gdb_target_monitor): Add pattern for
+	"Ending remote" to detect errors in connecting.
+
+	* gdb.base/setshow.exp: Add .* within auto language test.
+
 	* lib/gdb.exp(gdb_run_cmd): Add check for gdb_init_command
 	target feature.
 
