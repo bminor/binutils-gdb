@@ -1,3 +1,10 @@
+2002-10-03  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* contig/tc-sh.c (sh_local_pcrel): New.
+	(sh_force_relocation): Use sh_local_pcrel.
+	(md_pcrel_from_section): Check the relocation type whether it
+	should be resolved locally. Use S_FORCE_RELOC.
+
 2002-10-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-mips.h (TC_FORCE_RELOCATION_SUB_SAME): Define.

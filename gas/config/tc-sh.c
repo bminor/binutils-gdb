@@ -71,6 +71,7 @@ static void build_relax PARAMS ((sh_opcode_info *, sh_operand_info *));
 static char *insert_loop_bounds PARAMS ((char *, sh_operand_info *));
 static unsigned int build_Mytes
   PARAMS ((sh_opcode_info *, sh_operand_info *));
+static boolean sh_local_pcrel PARAMS ((fixS *fix));
 
 #ifdef OBJ_ELF
 static void sh_elf_cons PARAMS ((int));
@@ -3211,6 +3212,22 @@ sh_handle_align (frag)
 	     BFD_RELOC_SH_ALIGN);
 }
 
+/* See whether the relocation should be resolved locally.  */
+
+static boolean
+sh_local_pcrel (fix)
+     fixS *fix;
+{
+  return (! sh_relax && 
+	  (fix->fx_r_type == BFD_RELOC_SH_PCDISP8BY2
+	   || fix->fx_r_type == BFD_RELOC_SH_PCDISP12BY2
+	   || fix->fx_r_type == BFD_RELOC_SH_PCRELIMM8BY2
+	   || fix->fx_r_type == BFD_RELOC_SH_PCRELIMM8BY4
+	   || fix->fx_r_type == BFD_RELOC_8_PCREL
+	   || fix->fx_r_type == BFD_RELOC_SH_SWITCH16
+	   || fix->fx_r_type == BFD_RELOC_SH_SWITCH32));
+}
+
 /* See whether we need to force a relocation into the output file.
    This is used to force out switch and PC relative relocations when
    relaxing.  */
@@ -3221,14 +3238,7 @@ sh_force_relocation (fix)
 {
   /* These relocations can't make it into a DSO, so no use forcing
      them for global symbols.  */
-  if (! sh_relax
-      && (fix->fx_r_type == BFD_RELOC_SH_PCDISP8BY2
-	  || fix->fx_r_type == BFD_RELOC_SH_PCDISP12BY2
-	  || fix->fx_r_type == BFD_RELOC_SH_PCRELIMM8BY2
-	  || fix->fx_r_type == BFD_RELOC_SH_PCRELIMM8BY4
-	  || fix->fx_r_type == BFD_RELOC_8_PCREL
-	  || fix->fx_r_type == BFD_RELOC_SH_SWITCH16
-	  || fix->fx_r_type == BFD_RELOC_SH_SWITCH32))
+  if (sh_local_pcrel (fix))
     return 0;
 
   if (fix->fx_r_type == BFD_RELOC_VTABLE_INHERIT
@@ -3684,10 +3694,9 @@ md_pcrel_from_section (fixP, sec)
      fixS *fixP;
      segT sec;
 {
-  if (fixP->fx_addsy != (symbolS *) NULL
-      && (! S_IS_DEFINED (fixP->fx_addsy)
-	  || S_IS_EXTERN (fixP->fx_addsy)
-	  || S_IS_WEAK (fixP->fx_addsy)
+  if (! sh_local_pcrel (fixP)
+      && fixP->fx_addsy != (symbolS *) NULL
+      && (S_FORCE_RELOC (fixP->fx_addsy)
 	  || S_GET_SEGMENT (fixP->fx_addsy) != sec))
     {
       /* The symbol is undefined (or is defined but not in this section,

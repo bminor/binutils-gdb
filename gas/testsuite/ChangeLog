@@ -1,3 +1,7 @@
+2002-10-03  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* testsuite/gas/sh/pcrel2.d: Check code also.
+
 2002-10-02  Stephen Clarke <stephen.clarke@superh.com>
 
 	* gas/sh/sh64/ptc32-noexp-1.d: Adjust for changes to *ABS*
