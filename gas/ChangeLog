@@ -1,4 +1,4 @@
-2000-07-25  Dave Brolley  <brolley@redhat.com>
+2000-07-26  Dave Brolley  <brolley@redhat.com>
 
 	* cgen.c (queue_fixup): Declare opinfo.
 	(gas_cgen_parse_operand): Mark unused parameters with ATTRIBUTE_UNUSED.
