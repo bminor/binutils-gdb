@@ -65,16 +65,12 @@ proc util_test { args } {
     set comp_output [util_start $cmd $cmd_arg $file]
 
     if [regexp "$pattern" $comp_output] then {
-	pass "$message"
 	return 0
     }
 
     if [string match "" $comp_output] then {
-	warning "Got no output."
 	return 1
     }
-
-    fail "$message"
     return 1
 }
 
