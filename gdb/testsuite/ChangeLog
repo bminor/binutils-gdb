@@ -1,3 +1,26 @@
+Thu Sep 16 13:45:44 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/mips-gdb.exp (gdb_load): Increase timeout to 2400.
+	Rework board rebooting slightly.
+	(gdb_exit): Don't exit from the remote shell; there isn't one.
+	* gdb.stabs/weird.exp: If a program is being debugged already,
+	kill it.
+	* gdb.t04/setvar.exp: Stop and restart gdb.
+	* gdb.t05/expr.exp: Likewise.
+	* gdb.t07/watchpoint.exp: If target is mips-idt-*, stop and
+	restart gdb and reload the program.
+	* gdb.t08/opaque.exp: Likewise.
+	* gdb.t12/scope.exp: Likewise.
+	* gdb.t13/bitfields.exp: Likewise.
+	* gdb.t15/funcargs.exp: Likewise.
+	* gdb.t20/classes.exp: Likewise.
+	* gdb.t03/ptype.exp: Increase timeout.
+	* gdb.t16/printcmds.exp (test_print_string_constants,
+	test_print_array_constants): Likewise.
+	* gdb.t17/callfuncs.exp (do_function_calls): Likewise.
+	* gdb.t20/classes.exp (do_tests): Likewise.
+	* gdb.t22/virtfunc.exp (test_virtual_calls): Likewise.
+
 Wed Sep 15 14:24:36 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* gdb.stabs: Renamed *wierd* to *weird*.

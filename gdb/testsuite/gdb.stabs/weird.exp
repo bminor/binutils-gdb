@@ -236,6 +236,10 @@ if ![file exists $binfile] then {
 		-re "^file \[^ \]*\r*\nReading symbols from $binfile\.\.\.done\.\r*\n$prompt $" {
 			pass "weird.o read without error"
 		}
+		-re "A program is being debugged already.  Kill it\? \(y or n\)" {
+		    send "y\n"
+		    continue -expect
+		}
 		-re ".*$prompt $" {
 			fail "Errors reading weird.o"
 		}

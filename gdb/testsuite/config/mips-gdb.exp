@@ -79,7 +79,7 @@ proc gdb_load { arg } {
     if $verbose>1 then {
 	send_user "Loading $arg into $GDB\n"
     }
-    set timeout 1200
+    set timeout 2400
     expect {
 	-re "Loading.*$prompt $" {
 	    if $verbose>1 then {
@@ -130,16 +130,25 @@ proc gdb_start { } {
 	    set baud 9600
 	}
 	set shell_id [ eval $connectmode "$targetname" $baud ]
-	send -i $shell_id "\CC"
-	expect -i $shell_id {
-	    -re "<IDT>$" { }
+	send -i $shell_id "\n"
+	expect {
+	    -i $shell_id -re "<IDT>$" { }
+	    timeout {
+		send -i $shell_id "\CC"
+		expect {
+		    -i $shell_id -re "<IDT>$" { }
+		    timeout {
+			error "(timeout) board did not come up."; return -1
+		    }
+		}
+	    }
+	}
+	send -i $shell_id "go 0xbfc00000\n"
+	expect {
+	    -i $shell_id -re "<IDT>$" { }
 	    timeout     { error "(timeout) board did not come up."; return -1 }
 	}
-	send -i $shell_id "go 0xbfc00000"
-	expect -i $shell_id {
-	    -re "<IDT>$" { }
-	    timeout     { error "(timeout) board did not come up."; return -1 }
-	}
+	verbose "about to exit kermit"
 	exit_remote_shell $shell_id
     }
 
@@ -204,8 +213,6 @@ expect_after {
 }
 
 proc gdb_exit { } {
-    global shell_id
-    exit_remote_shell $shell_id
     catch default_gdb_exit
 }
 
