@@ -1,3 +1,9 @@
+Fri Jul 23 10:20:27 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* bfd.c (bfd_nonrepresentable_section, bfd_undefined_symbol,
+	bfd_reloc_value_truncated, bfd_reloc_is_dangerous, bfd_assert):
+	Send error messages to stderr.
+
 Thu Jul 22 15:57:29 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
 	* nlm{32,64}-target.h:  Remove.
