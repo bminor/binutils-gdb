@@ -2138,38 +2138,7 @@ gdbarch_update_p (struct gdbarch_info info)
 
   /* Fill in missing parts of the INFO struct using a number of
      sources: \`\`set ...''; INFOabfd supplied; existing target.  */
-
-  /* \`\`(gdb) set architecture ...'' */
-  if (info.bfd_arch_info == NULL
-      && !TARGET_ARCHITECTURE_AUTO)
-    info.bfd_arch_info = TARGET_ARCHITECTURE;
-  if (info.bfd_arch_info == NULL
-      && info.abfd != NULL
-      && bfd_get_arch (info.abfd) != bfd_arch_unknown
-      && bfd_get_arch (info.abfd) != bfd_arch_obscure)
-    info.bfd_arch_info = bfd_get_arch_info (info.abfd);
-  if (info.bfd_arch_info == NULL)
-    info.bfd_arch_info = TARGET_ARCHITECTURE;
-
-  /* \`\`(gdb) set byte-order ...'' */
-  if (info.byte_order == BFD_ENDIAN_UNKNOWN
-      && !TARGET_BYTE_ORDER_AUTO)
-    info.byte_order = TARGET_BYTE_ORDER;
-  /* From the INFO struct. */
-  if (info.byte_order == BFD_ENDIAN_UNKNOWN
-      && info.abfd != NULL)
-    info.byte_order = (bfd_big_endian (info.abfd) ? BFD_ENDIAN_BIG
-		       : bfd_little_endian (info.abfd) ? BFD_ENDIAN_LITTLE
-		       : BFD_ENDIAN_UNKNOWN);
-  /* From the current target. */
-  if (info.byte_order == BFD_ENDIAN_UNKNOWN)
-    info.byte_order = TARGET_BYTE_ORDER;
-
-  /* \`\`(gdb) set osabi ...'' is handled by gdbarch_lookup_osabi.  */
-  if (info.osabi == GDB_OSABI_UNINITIALIZED)
-    info.osabi = gdbarch_lookup_osabi (info.abfd);
-  if (info.osabi == GDB_OSABI_UNINITIALIZED)
-    info.osabi = current_gdbarch->osabi;
+  gdbarch_info_fill (current_gdbarch, &info);
 
   /* Must have found some sort of architecture. */
   gdb_assert (info.bfd_arch_info != NULL);

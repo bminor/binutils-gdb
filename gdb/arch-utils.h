@@ -153,6 +153,12 @@ extern int legacy_register_sim_regno (int regnum);
    default values are not zero.  */
 extern void gdbarch_info_init (struct gdbarch_info *info);
 
+/* Similar it init, but this time fill in the blanks.  Information is
+   obtained from the specified architecture, global "set ..." options,
+   and explicitly initialized INFO fields.  */
+extern void gdbarch_info_fill (struct gdbarch *gdbarch,
+			       struct gdbarch_info *info);
+
 /* Return the architecture for ABFD.  If no suitable architecture
    could be find, return NULL.  */
 

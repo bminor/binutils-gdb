@@ -1,3 +1,12 @@
+2003-11-09  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (arch-utils.o): Update dependencies.
+	* arch-utils.c: Include "osabi.h".
+	(gdbarch_info_fill): New function.
+	* arch-utils.h (gdbarch_info_fill): Declare.
+	* gdbarch.sh (gdbarch_update_p): Call "gdbarch_info_fill".
+	* gdbarch.c: Re-generate.
+
 2003-11-09  Mark Kettenis  <kettenis@gnu.org>
             David S. Miller  <davem@redhat.com>
 
