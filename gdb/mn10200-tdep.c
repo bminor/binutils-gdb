@@ -135,13 +135,15 @@ mn10200_analyze_prologue (fi, pc)
       status = target_read_memory (fi->pc, buf, 1);
       if (status != 0)
 	{
-	  fi->frame = read_sp ();
+	  if (fi->next == NULL)
+	    fi->frame = read_sp ();
 	  return fi->pc;
 	}
 
       if (buf[0] == 0xfe)
 	{
-	  fi->frame = read_sp ();
+	  if (fi->next == NULL)
+	    fi->frame = read_sp ();
 	  return fi->pc;
 	}
     }
@@ -150,7 +152,8 @@ mn10200_analyze_prologue (fi, pc)
      frame hasn't been allocated yet.  */
   if (fi && fi->pc == func_addr)
     {
-      fi->frame = read_sp ();
+      if (fi->next == NULL)
+	fi->frame = read_sp ();
       return fi->pc;
     }
 
@@ -166,7 +169,7 @@ mn10200_analyze_prologue (fi, pc)
   status = target_read_memory (addr, buf, 2);
   if (status != 0)
     {
-      if (fi && fi->status & MY_FRAME_IN_SP)
+      if (fi && fi->next == NULL && fi->status & MY_FRAME_IN_SP)
 	fi->frame = read_sp ();
       return addr;
     }
@@ -197,7 +200,7 @@ mn10200_analyze_prologue (fi, pc)
 	{
 	  /* We still haven't allocated our local stack.  Handle this
 	     as if we stopped on the first or last insn of a function.   */
-	  if (fi)
+	  if (fi && fi->next == NULL)
 	    fi->frame = read_sp ();
 	  return addr;
 	}
@@ -205,7 +208,7 @@ mn10200_analyze_prologue (fi, pc)
       status = target_read_memory (addr, buf, 2);
       if (status != 0)
 	{
-	  if (fi)
+	  if (fi && fi->next == NULL)
 	    fi->frame = read_sp ();
 	  return addr;
 	}
@@ -224,7 +227,7 @@ mn10200_analyze_prologue (fi, pc)
 	}
       else
 	{
-	  if (fi)
+	  if (fi && fi->next == NULL)
 	    fi->frame = read_sp ();
 	  return addr;
 	}
@@ -242,7 +245,7 @@ mn10200_analyze_prologue (fi, pc)
   status = target_read_memory (addr, buf, 2);
   if (status != 0)
     {
-      if (fi && (fi->status & MY_FRAME_IN_SP))
+      if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
 	fi->frame = read_sp ();
       return addr;
     }
@@ -254,8 +257,8 @@ mn10200_analyze_prologue (fi, pc)
       addr += 2;
       if (addr >= stop)
 	{
-	  if (fi && (fi->status & MY_FRAME_IN_SP))
-	    fi->frame = read_sp () + stack_size;
+	  if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
+	    fi->frame = read_sp () - stack_size;
 	  return addr;
 	}
     }
@@ -264,7 +267,7 @@ mn10200_analyze_prologue (fi, pc)
       status = target_read_memory (addr + 2, buf, 2);
       if (status != 0)
 	{
-	  if (fi && (fi->status & MY_FRAME_IN_SP))
+	  if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
 	    fi->frame = read_sp ();
 	  return addr;
 	}
@@ -274,8 +277,8 @@ mn10200_analyze_prologue (fi, pc)
       addr += 4;
       if (addr >= stop)
 	{
-	  if (fi && (fi->status & MY_FRAME_IN_SP))
-	    fi->frame = read_sp () + stack_size;
+	  if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
+	    fi->frame = read_sp () - stack_size;
 	  return addr;
 	}
     }
@@ -284,7 +287,7 @@ mn10200_analyze_prologue (fi, pc)
       status = target_read_memory (addr + 2, buf, 3);
       if (status != 0)
 	{
-	  if (fi && (fi->status & MY_FRAME_IN_SP))
+	  if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
 	    fi->frame = read_sp ();
 	  return addr;
 	}
@@ -294,23 +297,24 @@ mn10200_analyze_prologue (fi, pc)
       addr += 5;
       if (addr >= stop)
 	{
-	  if (fi && (fi->status & MY_FRAME_IN_SP))
-	    fi->frame = read_sp () + stack_size;
+	  if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
+	    fi->frame = read_sp () - stack_size;
 	  return addr;
 	}
     }
   else
     {
-      if (fi && (fi->status & MY_FRAME_IN_SP))
+      if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
 	fi->frame = read_sp ();
       return addr;
     }
 
   /* At this point fi->frame needs to be correct.
 
-     If MY_FRAME_IN_SP is set, then we need to fix fi->frame so
-     that backtracing, find_frame_saved_regs, etc work correctly.  */
-  if (fi && (fi->status & MY_FRAME_IN_SP) != 0)
+     If MY_FRAME_IN_SP is set and we're the innermost frame, then we
+     need to fix fi->frame so that backtracing, find_frame_saved_regs,
+     etc work correctly.  */
+  if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP) != 0)
     fi->frame = read_sp () - fi->stack_size;
 
   /* And last we have the register saves.  These are relatively
@@ -416,7 +420,7 @@ mn10200_frame_chain (fi)
 	 Else it's still in $a2.
 
        If our caller does not have a frame pointer, then his
-       frame base is fi->frame + caller's stack size + 4.  */
+       frame base is fi->frame + -caller's stack size + 4.  */
        
   /* The easiest way to get that info is to analyze our caller's frame.
 
@@ -445,7 +449,7 @@ mn10200_frame_chain (fi)
     {
       /* Our caller does not have a frame pointer.  So his frame starts
 	 at the base of our frame (fi->frame) + <his size> + 4 (saved pc).  */
-      return fi->frame + dummy_frame.stack_size + 4;
+      return fi->frame + -dummy_frame.stack_size + 4;
     }
 }
 
