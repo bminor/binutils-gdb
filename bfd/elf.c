@@ -451,7 +451,7 @@ bfd_elf_set_dt_needed_name (abfd, name)
 
 /* Get the list of DT_NEEDED entries for a link.  */
 
-struct bfd_elf_link_needed_list *
+struct bfd_link_needed_list *
 bfd_elf_get_needed_list (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
@@ -929,13 +929,7 @@ elf_fake_sections (abfd, asect, failedptrarg)
     this_hdr->sh_type = SHT_PROGBITS;
   else if ((asect->flags & SEC_ALLOC) != 0
 	   && ((asect->flags & SEC_LOAD) == 0))
-    {
-      BFD_ASSERT (strcmp (asect->name, ".bss") == 0
-		  || strcmp (asect->name, ".sbss") == 0
-		  || strcmp (asect->name, ".scommon") == 0
-		  || strcmp (asect->name, "COMMON") == 0);
-      this_hdr->sh_type = SHT_NOBITS;
-    }
+    this_hdr->sh_type = SHT_NOBITS;
   else
     {
       /* Who knows?  */
@@ -1420,21 +1414,23 @@ align_file_position (off, align)
   return (off + align - 1) & ~(align - 1);
 }
 
-/* Assign a file position to a section, aligning to the required
-   section alignment.  */
+/* Assign a file position to a section, optionally aligning to the
+   required section alignment.  */
 
 INLINE file_ptr
-_bfd_elf_assign_file_position_for_section (i_shdrp, offset)
+_bfd_elf_assign_file_position_for_section (i_shdrp, offset, align)
      Elf_Internal_Shdr *i_shdrp;
      file_ptr offset;
+     boolean align;
 {
-  unsigned int al;
+  if (align)
+    {
+      unsigned int al;
 
-  /* Align the offst.  */
-  al = i_shdrp->sh_addralign;
-  if (al > 1)
-    offset = BFD_ALIGN (offset, al);
-
+      al = i_shdrp->sh_addralign;
+      if (al > 1)
+	offset = BFD_ALIGN (offset, al);
+    }
   i_shdrp->sh_offset = offset;
   if (i_shdrp->bfd_section != NULL)
     i_shdrp->bfd_section->filepos = offset;
@@ -1883,7 +1879,7 @@ assign_file_positions_except_relocs (abfd, dosyms)
 	      continue;
 	    }
 	  
-	  off = _bfd_elf_assign_file_position_for_section (hdr, off);
+	  off = _bfd_elf_assign_file_position_for_section (hdr, off, true);
 	}
     }
   else
@@ -1953,7 +1949,8 @@ assign_file_positions_except_relocs (abfd, dosyms)
 		  hdr->sh_offset = -1;
 		  continue;
 		}
-	      off = _bfd_elf_assign_file_position_for_section (hdr, off);
+	      off = _bfd_elf_assign_file_position_for_section (hdr, off,
+							       true);
 	    }
 	  else
 	    {
@@ -1964,7 +1961,8 @@ assign_file_positions_except_relocs (abfd, dosyms)
 		 the page size.  This is required by the program
 		 header.  */
 	      off += (hdr->sh_addr - off) % maxpagesize;
-	      off = _bfd_elf_assign_file_position_for_section (hdr, off);
+	      off = _bfd_elf_assign_file_position_for_section (hdr, off,
+							       false);
 	    }
 	}
 
@@ -2180,7 +2178,7 @@ _bfd_elf_assign_file_positions_for_relocs (abfd)
       shdrp = *shdrpp;
       if ((shdrp->sh_type == SHT_REL || shdrp->sh_type == SHT_RELA)
 	  && shdrp->sh_offset == -1)
-	off = _bfd_elf_assign_file_position_for_section (shdrp, off);
+	off = _bfd_elf_assign_file_position_for_section (shdrp, off, true);
     }
 
   elf_tdata (abfd)->next_file_pos = off;
