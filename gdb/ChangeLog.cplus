@@ -1,3 +1,22 @@
+2003-12-19  Daniel Jacobowitz  <drow@mvista.com>
+
+	* cp-names.y (demangler_special): New non-terminal.
+	(DEMANGLER_SPECIAL, CONSTRUCTION_VTABLE, CONSTRUCTION_IN): New
+	terminals.
+	(GLOBAL_CONSTRUCTORS, GLOBAL_DESTRUCTORS): New enums.
+	(tokentab_big): New struct.
+	(yylex): Recognize them.  Handle negative literals.
+	(parse_number): Handle negative literals.
+	(start): Use demangler_special.
+	(operator): Correct typos for ->* and ().  Use typespec_2 instead of
+	typespec.
+	(unqualified_name): Allow operator templates.
+	(template_arg): Create a unary operation, not a reference type.
+	(exp): Set the type of D_COMP_LITERALs instead of adding a cast
+	operation.
+	(cp_print, trim_chars): New helper functions.
+	(main): Use them.
+
 2003-12-18  Daniel Jacobowitz  <drow@mvista.com>
 
 	* cp-names.y (ext_name): Remove.
