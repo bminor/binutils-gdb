@@ -22,3 +22,5 @@
 #include "regcache.h"
 
 #define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
+
+extern int m68k_get_longjmp_target (CORE_ADDR *);

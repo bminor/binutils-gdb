@@ -1,5 +1,21 @@
 2003-05-18  Andreas Schwab  <schwab@suse.de>
 
+	* Makefile (m68klinux-nat.o, m68klinux-tdep.o): Update
+	dependencies.
+	* config/m68k/tm-linux.h (DEPRECATED_EXTRACT_RETURN_VALUE): Define
+	as m68k_linux_extract_return_value.
+	(DEPRECATED_STORE_RETURN_VALUE): Define as
+	m68k_linux_store_return_value.
+	(DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS): Define as
+	m68k_linux_extract_struct_value_address.
+	* m68klinux-tdep.c (m68k_linux_sigtramp_saved_pc): Use
+	get_next_frame, get_frame_base, get_frame_pc.
+	(m68k_linux_frame_saved_pc): Use get_frame_base.
+	(m68k_linux_extract_return_value): New function.
+	(m68k_linux_store_return_value): New function.
+	(m68k_linux_extract_struct_value_address): New function.
+	* config/m68k/tm-m68k.h: Declare m68k_get_longjmp_target.
+
 	* c-exp.y (typebase): Remove duplicate occurence of
 	`SIGNED_KEYWORD LONG LONG'.  Use builtin_type_long_long instead
 	of lookup_signed_typename. 

@@ -1,6 +1,6 @@
 /* Motorola m68k target-dependent support for GNU/Linux.
 
-   Copyright 1996, 1998, 2000, 2001, 2002 Free Software Foundation,
+   Copyright 1996, 1998, 2000, 2001, 2002, 2003 Free Software Foundation,
    Inc.
 
    This file is part of GDB.
@@ -24,7 +24,9 @@
 #include "gdbcore.h"
 #include "frame.h"
 #include "target.h"
-
+#include "gdb_string.h"
+#include "gdbtypes.h"
+#include "m68k-tdep.h"
 
 /* Check whether insn1 and insn2 are parts of a signal trampoline.  */
 
@@ -93,9 +95,9 @@ m68k_linux_sigtramp_saved_pc (struct frame_info *frame)
   int sigcontext_offs = (2 * TARGET_INT_BIT) / TARGET_CHAR_BIT;
 
   /* Get sigcontext address, it is the third parameter on the stack.  */
-  if (frame->next)
+  if (get_next_frame (frame))
     sigcontext_addr
-      = read_memory_unsigned_integer (FRAME_ARGS_ADDRESS (frame->next)
+      = read_memory_unsigned_integer (get_frame_base (get_next_frame (frame))
 				      + FRAME_ARGS_SKIP
 				      + sigcontext_offs,
 				      ptrbytes);
@@ -107,7 +109,7 @@ m68k_linux_sigtramp_saved_pc (struct frame_info *frame)
 
   /* Don't cause a memory_error when accessing sigcontext in case the
      stack layout has changed or the stack is corrupt.  */
-  if (m68k_linux_in_sigtramp (frame->pc) == 2)
+  if (m68k_linux_in_sigtramp (get_frame_pc (frame)) == 2)
     target_read_memory (sigcontext_addr + UCONTEXT_PC_OFFSET, buf, ptrbytes);
   else
     target_read_memory (sigcontext_addr + SIGCONTEXT_PC_OFFSET, buf, ptrbytes);
@@ -122,5 +124,48 @@ m68k_linux_frame_saved_pc (struct frame_info *frame)
   if (get_frame_type (frame) == SIGTRAMP_FRAME)
     return m68k_linux_sigtramp_saved_pc (frame);
 
-  return read_memory_unsigned_integer (frame->frame + 4, 4);
+  return read_memory_unsigned_integer (get_frame_base (frame) + 4, 4);
+}
+
+void
+m68k_linux_extract_return_value (struct type *type, char *regbuf, char *valbuf)
+{
+  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+    {
+       REGISTER_CONVERT_TO_VIRTUAL (FP0_REGNUM, type,
+				    regbuf + REGISTER_BYTE (FP0_REGNUM),
+				    valbuf);
+    }
+  else if (TYPE_CODE (type) == TYPE_CODE_PTR)
+    memcpy (valbuf, regbuf + REGISTER_BYTE (M68K_A0_REGNUM),
+	    TYPE_LENGTH (type));
+  else
+    memcpy (valbuf,
+	    regbuf + (TYPE_LENGTH (type) >= 4 ? 0 : 4 - TYPE_LENGTH (type)),
+	    TYPE_LENGTH (type));
+}
+
+void
+m68k_linux_store_return_value (struct type *type, char *valbuf)
+{
+  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+    {
+      char raw_buffer[REGISTER_RAW_SIZE (FP0_REGNUM)];
+      REGISTER_CONVERT_TO_RAW (type, FP0_REGNUM, valbuf, raw_buffer);
+      deprecated_write_register_bytes (REGISTER_BYTE (FP0_REGNUM),
+				       raw_buffer, TYPE_LENGTH (type));
+    }
+  else
+    {
+      if (TYPE_CODE (type) == TYPE_CODE_PTR)
+	deprecated_write_register_bytes (REGISTER_BYTE (M68K_A0_REGNUM),
+					 valbuf, TYPE_LENGTH (type));
+      deprecated_write_register_bytes (0, valbuf, TYPE_LENGTH (type));
+    }
+}
+
+CORE_ADDR
+m68k_linux_extract_struct_value_address (char *regbuf)
+{
+  return *(CORE_ADDR *) (regbuf + REGISTER_BYTE (M68K_A0_REGNUM));
 }
