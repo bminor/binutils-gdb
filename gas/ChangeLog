@@ -1,3 +1,16 @@
+1999-06-10  Jakub Jelinek  <jj@ultra.linux.cz>
+
+        * config/tc-sparc.c (sparc_ip): Don't use side-effect expression
+	with isoctal.
+
+	* config/tc-sparc.c (synthetize_setuw, synthetize_setsw,
+	synthetize_setx): New functions.
+	(md_assemble): Broken the special cases into the above
+	functions. Make compiler happy if sizeof(bfd_vma)==4.
+	Fix sethi generated from set/setuw. If instructions have a relloc,
+	always clear the fields to be relocated in the opcode.
+	(sparc_ip): Remove special_case global variable.
+
 1999-06-10  Ian Lance Taylor  <ian@zembu.com>
 
 	Based on patches from John W. Woznack <jwoznack@concentric.net>:
