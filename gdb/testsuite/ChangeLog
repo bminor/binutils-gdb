@@ -1,5 +1,9 @@
 2004-06-15  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.base/long_long.c: Add copyright notice.
+
+2004-06-15  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.base/long_long.exp: Remove reference to
 	bug-gdb@prep.ai.mit.edu.  Change line-number-specific breakpoint
 	to gdb_breakpoint and gdb_continue_to_breakpoint.
