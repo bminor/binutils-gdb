@@ -1142,11 +1142,12 @@ standard_coerce_float_to_double (struct type *formal, struct type *actual)
    IS_PROTOTYPED is non-zero if the function declaration is prototyped.  */
 
 static struct value *
-value_arg_coerce (struct value *arg, struct type *param_type, int is_prototyped)
+value_arg_coerce (struct value *arg, struct type *param_type,
+		  int is_prototyped)
 {
   register struct type *arg_type = check_typedef (VALUE_TYPE (arg));
   register struct type *type
-  = param_type ? check_typedef (param_type) : arg_type;
+    = param_type ? check_typedef (param_type) : arg_type;
 
   switch (TYPE_CODE (type))
     {
