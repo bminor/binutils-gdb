@@ -1,3 +1,9 @@
+2002-10-16  Klee Dienes  <kdienes@apple.com>
+
+	* stabsread.c (read_tilde_fields): Use name[sizeof(vptr_name)-2]
+	to get the last character of a char[] buffer, not
+	name[sizeof(vptr_name)-1].
+
 2002-10-14  Adam Fedor  <fedor@gnu.org>
 
 	* symtab.h: New objc_specific struct.

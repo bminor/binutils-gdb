@@ -4137,7 +4137,7 @@ read_tilde_fields (struct field_info *fip, char **pp, struct type *type,
 		{
 		  char *name = TYPE_FIELD_NAME (t, i);
 		  if (!strncmp (name, vptr_name, sizeof (vptr_name) - 2)
-		      && is_cplus_marker (name[sizeof (vptr_name) - 1]))
+		      && is_cplus_marker (name[sizeof (vptr_name) - 2]))
 		    {
 		      TYPE_VPTR_FIELDNO (type) = i;
 		      goto gotit;
