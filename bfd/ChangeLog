@@ -1,3 +1,9 @@
+2002-03-20  Tom Rix  <trix@redhat.com>
+
+	* coff-rs6000.c (_bfd_xcoff_stat_arch_elt): Renamed from 
+	_bfd_xcoff_generic_stat_arch_elt.  Fix format check.
+	* coff64-rs6000.c :  Use _bfd_xcoff_stat_arch_elt. 
+
 2002-03-19  Tom Rix  <trix@redhat.com>
 
 	* xcofflink.c (_bfd_xcoff_bfd_link_add_symbols): Look through all 
