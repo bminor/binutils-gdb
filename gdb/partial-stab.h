@@ -601,8 +601,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #endif /* DBXREAD_ONLY */
 	      add_psymbol_to_list (namestring, p - namestring,
 				   VAR_NAMESPACE, LOC_BLOCK,
-				   &objfile->static_psymbols, CUR_SYMBOL_VALUE,
-				   0, psymtab_language, objfile);
+				   &objfile->static_psymbols,
+				   0, CUR_SYMBOL_VALUE,
+				   psymtab_language, objfile);
 	      continue;
 
 	      /* Global functions were ignored here, but now they
@@ -646,8 +647,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #endif /* DBXREAD_ONLY */
 	      add_psymbol_to_list (namestring, p - namestring,
 				   VAR_NAMESPACE, LOC_BLOCK,
-				   &objfile->global_psymbols, CUR_SYMBOL_VALUE,
-				   0, psymtab_language, objfile);
+				   &objfile->global_psymbols,
+				   0, CUR_SYMBOL_VALUE,
+				   psymtab_language, objfile);
 	      continue;
 
 	      /* Two things show up here (hopefully); static symbols of

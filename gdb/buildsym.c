@@ -44,13 +44,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    questionable--see comment where we call them).  */
 #include "stabsread.h"
 
-/* Pointer to the head of a linked list of symbol blocks which have
-   already been finalized (lexical contexts already closed) and which are
-   just waiting to be built into a blockvector when finalizing the
-   associated symtab. */
-
-static struct pending_block *pending_blocks = NULL;
-
 /* List of free `struct pending' structures for reuse.  */
 
 static struct pending *free_pendings;

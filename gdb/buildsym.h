@@ -166,6 +166,13 @@ struct pending_block
   struct block *block;
 };
 
+/* Pointer to the head of a linked list of symbol blocks which have
+   already been finalized (lexical contexts already closed) and which are
+   just waiting to be built into a blockvector when finalizing the
+   associated symtab. */
+
+EXTERN struct pending_block *pending_blocks;
+
 
 struct subfile_stack
 {
