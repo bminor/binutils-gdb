@@ -17,10 +17,12 @@ Disassembly of section .text:
  +1006:	90[ 	]+nop *
  +1007:	90[ 	]+nop *
 #  GD
- +1008:	66 66 66 66 48 8d 3d[ 	]+lea    1053165\(%rip\),%rdi +# 102200 <_GLOBAL_OFFSET_TABLE_\+0x70>
- +100f:	ed 11 10 00 *
+ +1008:	66 48 8d 3d f0 11 10[ 	]+lea    1053168\(%rip\),%rdi +# 102200 <_GLOBAL_OFFSET_TABLE_\+0x70>
+ +100f:	00 *
 #				-> R_X86_64_DTPMOD64	sg1
- +1013:	e8 68 f6 ff ff[ 	]+callq  [0-9a-f]+ <.*>
+ +1010:	66[ 	]+data16
+ +1011:	66[ 	]+data16
+ +1012:	48 e8 68 f6 ff ff[ 	]+rex64 callq  [0-9a-f]+ <.*>
 #				-> R_X86_64_JUMP_SLOT	__tls_get_addr
  +1018:	90[ 	]+nop *
  +1019:	90[ 	]+nop *
@@ -36,10 +38,12 @@ Disassembly of section .text:
  +102e:	90[ 	]+nop *
  +102f:	90[ 	]+nop *
 #  GD against local variable
- +1030:	66 66 66 66 48 8d 3d[ 	]+lea    1053045\(%rip\),%rdi +# 1021b0 <_GLOBAL_OFFSET_TABLE_\+0x20>
- +1037:	75 11 10 00 *
+ +1030:	66 48 8d 3d 78 11 10[ 	]+lea    1053048\(%rip\),%rdi +# 1021b0 <_GLOBAL_OFFSET_TABLE_\+0x20>
+ +1037:	00 *
 #				-> R_X86_64_DTPMOD64	[0 0x2000000000000000]
- +103b:	e8 40 f6 ff ff[ 	]+callq  [0-9a-f]+ <.*>
+ +1038:	66[ 	]+data16
+ +1039:	66[ 	]+data16
+ +103a:	48 e8 40 f6 ff ff[ 	]+rex64 callq  [0-9a-f]+ <.*>
 #				-> R_X86_64_JUMP_SLOT	__tls_get_addr
  +1040:	90[ 	]+nop *
  +1041:	90[ 	]+nop *
@@ -55,10 +59,12 @@ Disassembly of section .text:
  +1056:	90[ 	]+nop *
  +1057:	90[ 	]+nop *
 #  GD against hidden and local variable
- +1058:	66 66 66 66 48 8d 3d[ 	]+lea    1053125\(%rip\),%rdi +# 102228 <_GLOBAL_OFFSET_TABLE_\+0x98>
- +105f:	c5 11 10 00 *
+ +1058:	66 48 8d 3d c8 11 10[ 	]+lea    1053128\(%rip\),%rdi +# 102228 <_GLOBAL_OFFSET_TABLE_\+0x98>
+ +105f:	00 *
 #				-> R_X86_64_DTPMOD64	[0 0x4000000000000000]
- +1063:	e8 18 f6 ff ff[ 	]+callq  [0-9a-f]+ <.*>
+ +1060:	66[ 	]+data16
+ +1061:	66[ 	]+data16
+ +1062:	48 e8 18 f6 ff ff[ 	]+rex64 callq  [0-9a-f]+ <.*>
 #				-> R_X86_64_JUMP_SLOT	__tls_get_addr
  +1068:	90[ 	]+nop *
  +1069:	90[ 	]+nop *
@@ -74,10 +80,12 @@ Disassembly of section .text:
  +107e:	90[ 	]+nop *
  +107f:	90[ 	]+nop *
 #  GD against hidden but not local variable
- +1080:	66 66 66 66 48 8d 3d[ 	]+lea    1053013\(%rip\),%rdi +# 1021e0 <_GLOBAL_OFFSET_TABLE_\+0x50>
- +1087:	55 11 10 00 *
+ +1080:	66 48 8d 3d 58 11 10[ 	]+lea    1053016\(%rip\),%rdi +# 1021e0 <_GLOBAL_OFFSET_TABLE_\+0x50>
+ +1087:	00 *
 #				-> R_X86_64_DTPMOD64	[0 0x6000000000000000]
- +108b:	e8 f0 f5 ff ff[ 	]+callq  [0-9a-f]+ <.*>
+ +1088:	66[ 	]+data16
+ +1089:	66[ 	]+data16
+ +108a:	48 e8 f0 f5 ff ff[ 	]+rex64 callq  [0-9a-f]+ <.*>
 #				-> R_X86_64_JUMP_SLOT	__tls_get_addr
  +1090:	90[ 	]+nop *
  +1091:	90[ 	]+nop *

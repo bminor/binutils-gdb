@@ -40,33 +40,43 @@ fn2:
 	movq	%rsp, %rbp
 
 	/* GD -> IE because variable is not defined in executable */
-	.long	0x66666666
+	.byte	0x66
 	leaq	sG1@tlsgd(%rip), %rdi
+	.word	0x6666
+	rex64
 	call	__tls_get_addr@plt
 	nop;nop;nop;nop
 
 	/* GD -> IE because variable is not defined in executable where
 	   the variable is referenced through IE too */
-	.long	0x66666666
+	.byte	0x66
 	leaq	sG2@tlsgd(%rip), %rdi
+	.word	0x6666
+	rex64
 	call	__tls_get_addr@plt
 	nop;nop;nop;nop
 
 	/* GD -> LE with global variable defined in executable */
-	.long	0x66666666
+	.byte	0x66
 	leaq	sg1@tlsgd(%rip), %rdi
+	.word	0x6666
+	rex64
 	call	__tls_get_addr@plt
 	nop;nop;nop;nop
 
 	/* GD -> LE with local variable defined in executable */
-	.long	0x66666666
+	.byte	0x66
 	leaq	sl1@tlsgd(%rip), %rdi
+	.word	0x6666
+	rex64
 	call	__tls_get_addr@plt
 	nop;nop;nop;nop
 
 	/* GD -> LE with hidden variable defined in executable */
-	.long	0x66666666
+	.byte	0x66
 	leaq	sh1@tlsgd(%rip), %rdi
+	.word	0x6666
+	rex64
 	call	__tls_get_addr@plt
 	nop;nop;nop;nop
 

@@ -1,5 +1,10 @@
 2002-10-01  Jakub Jelinek  <jakub@redhat.com>
 
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Change TLSGD
+	sequence and its transitions.
+
+2002-10-01  Jakub Jelinek  <jakub@redhat.com>
+
 	* elf32-i386.c (elf_i386_relocate_section): Resolve R_386_TLS_LDO_32
 	to st_value + addend in non-code sections.
 	* elf64-x86-64.c (elf64_x86_64_relocate_section): Resolve

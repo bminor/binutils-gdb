@@ -41,52 +41,68 @@ fn1:
 	nop;nop;nop;nop
 
 	/* GD */
-	.long	0x66666666
+	.byte	0x66
 	leaq	sg1@tlsgd(%rip), %rdi
+	.word	0x6666
+	rex64
 	call	__tls_get_addr@plt
 	nop;nop;nop;nop
 
 	/* GD -> IE because variable is referenced through IE too */
-	.long	0x66666666
+	.byte	0x66
 	leaq	sg2@tlsgd(%rip), %rdi
+	.word	0x6666
+	rex64
 	call	__tls_get_addr@plt
 	nop;nop;nop;nop
 
 	/* GD against local variable */
-	.long	0x66666666
+	.byte	0x66
 	leaq	sl1@tlsgd(%rip), %rdi
+	.word	0x6666
+	rex64
 	call	__tls_get_addr@plt
 	nop;nop;nop;nop
 
 	/* GD -> IE against local variable referenced through IE too */
-	.long	0x66666666
+	.byte	0x66
 	leaq	sl2@tlsgd(%rip), %rdi
+	.word	0x6666
+	rex64
 	call	__tls_get_addr@plt
 	nop;nop;nop;nop
 
 	/* GD against hidden and local variable */
-	.long	0x66666666
+	.byte	0x66
 	leaq	sh1@tlsgd(%rip), %rdi
+	.word	0x6666
+	rex64
 	call	__tls_get_addr@plt
 	nop;nop;nop;nop
 
 	/* GD -> IE against hidden and local variable referenced through
 	   IE too */
-	.long	0x66666666
+	.byte	0x66
 	leaq	sh2@tlsgd(%rip), %rdi
+	.word	0x6666
+	rex64
 	call	__tls_get_addr@plt
 	nop;nop;nop;nop
 
 	/* GD against hidden but not local variable */
-	.long	0x66666666
+	.byte	0x66
 	leaq	sH1@tlsgd(%rip), %rdi
+	.word	0x6666
+	rex64
 	call	__tls_get_addr@plt
 	nop;nop;nop;nop
 
 	/* GD -> IE against hidden but not local variable referenced through
 	   IE too */
-	.long	0x66666666
+	.byte	0x66
 	leaq	sH2@tlsgd(%rip), %rdi
+	.word	0x6666
+	rex64
 	call	__tls_get_addr@plt
 	nop;nop;nop;nop
 

@@ -2224,31 +2224,32 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 	      if (ELF64_R_TYPE (rel->r_info) == R_X86_64_TLSGD)
 		{
 		  unsigned int i;
-		  static unsigned char tlsgd[7]
-		    = { 0x66, 0x66, 0x66, 0x66, 0x48, 0x8d, 0x3d };
+		  static unsigned char tlsgd[8]
+		    = { 0x66, 0x48, 0x8d, 0x3d, 0x66, 0x66, 0x48, 0xe8 };
 
 		  /* GD->LE transition.
-		     .long 0x66666666; leaq foo@tlsgd(%rip), %rdi
-		     callq __tls_get_addr@plt
+		     .byte 0x66; leaq foo@tlsgd(%rip), %rdi
+		     .word 0x6666; rex64; call __tls_get_addr@plt
 		     Change it into:
 		     movq %fs:0, %rax
 		     leaq foo@tpoff(%rax), %rax */
-		  BFD_ASSERT (rel->r_offset >= 7);
-		  for (i = 0; i < 7; i++)
+		  BFD_ASSERT (rel->r_offset >= 4);
+		  for (i = 0; i < 4; i++)
 		    BFD_ASSERT (bfd_get_8 (input_bfd,
-					   contents + rel->r_offset - 7 + i)
+					   contents + rel->r_offset - 4 + i)
 				== tlsgd[i]);
-		  BFD_ASSERT (rel->r_offset + 9 <= input_section->_raw_size);
-		  BFD_ASSERT (bfd_get_8 (input_bfd,
-					 contents + rel->r_offset + 4)
-			      == 0xe8);
+		  BFD_ASSERT (rel->r_offset + 12 <= input_section->_raw_size);
+		  for (i = 0; i < 4; i++)
+		    BFD_ASSERT (bfd_get_8 (input_bfd,
+					   contents + rel->r_offset + 4 + i)
+				== tlsgd[i+4]);
 		  BFD_ASSERT (rel + 1 < relend);
 		  BFD_ASSERT (ELF64_R_TYPE (rel[1].r_info) == R_X86_64_PLT32);
-		  memcpy (contents + rel->r_offset - 7,
+		  memcpy (contents + rel->r_offset - 4,
 			  "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x8d\x80\0\0\0",
 			  16);
 		  bfd_put_32 (output_bfd, tpoff (info, relocation),
-			      contents + rel->r_offset + 5);
+			      contents + rel->r_offset + 8);
 		  /* Skip R_X86_64_PLT32.  */
 		  rel++;
 		  continue;
@@ -2397,27 +2398,28 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 	  else
 	    {
 	      unsigned int i;
-	      static unsigned char tlsgd[7]
-		= { 0x66, 0x66, 0x66, 0x66, 0x48, 0x8d, 0x3d };
+	      static unsigned char tlsgd[8]
+		= { 0x66, 0x48, 0x8d, 0x3d, 0x66, 0x66, 0x48, 0xe8 };
 
 	      /* GD->IE transition.
-		 .long 0x66666666; leaq foo@tlsgd(%rip), %rdi
-		 callq __tls_get_addr@plt
+		 .byte 0x66; leaq foo@tlsgd(%rip), %rdi
+		 .word 0x6666; rex64; call __tls_get_addr@plt
 		 Change it into:
 		 movq %fs:0, %rax
 		 addq foo@gottpoff(%rip), %rax */
-	      BFD_ASSERT (rel->r_offset >= 7);
-	      for (i = 0; i < 7; i++)
+	      BFD_ASSERT (rel->r_offset >= 4);
+	      for (i = 0; i < 4; i++)
 	        BFD_ASSERT (bfd_get_8 (input_bfd,
-				       contents + rel->r_offset - 7 + i)
+				       contents + rel->r_offset - 4 + i)
 			    == tlsgd[i]);
-	      BFD_ASSERT (rel->r_offset + 9 <= input_section->_raw_size);
-	      BFD_ASSERT (bfd_get_8 (input_bfd,
-				     contents + rel->r_offset + 4)
-			  == 0xe8);
+	      BFD_ASSERT (rel->r_offset + 12 <= input_section->_raw_size);
+	      for (i = 0; i < 4; i++)
+	        BFD_ASSERT (bfd_get_8 (input_bfd,
+				       contents + rel->r_offset + 4 + i)
+			    == tlsgd[i+4]);
 	      BFD_ASSERT (rel + 1 < relend);
 	      BFD_ASSERT (ELF64_R_TYPE (rel[1].r_info) == R_X86_64_PLT32);
-	      memcpy (contents + rel->r_offset - 7,
+	      memcpy (contents + rel->r_offset - 4,
 		      "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x03\x05\0\0\0",
 		      16);
 
@@ -2426,9 +2428,9 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 			    - rel->r_offset
 			    - input_section->output_section->vma
 			    - input_section->output_offset
-			    - 9);
+			    - 12);
 	      bfd_put_32 (output_bfd, relocation,
-			  contents + rel->r_offset + 5);
+			  contents + rel->r_offset + 8);
 	      /* Skip R_X86_64_PLT32.  */
 	      rel++;
 	      continue;
