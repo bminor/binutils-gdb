@@ -13,10 +13,12 @@ Mon Dec 22 12:47:16 1997  Ian Lance Taylor  <ian@cygnus.com>
 end-sanitize-r5900
 Thu Dec 18 11:10:42 1997  Nick Clifton  <nickc@cygnus.com>
 
+start-sanitize-m32rx
 	* gas/m32r/m32rx.d: New file.
 	* gas/m32r/m32rx.s: New file.
 	* gas/m32r/m32rx.exp: New file.
 
+end-sanitize-m32rx
 	* gas/arm/inst.d: Updated to match latest disassembler changes.
 
 	* gas/arm/arm7t.d: Updated to match latest disassembler changes.
