@@ -2563,8 +2563,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_store_struct_return (gdbarch, rs6000_store_struct_return);
   set_gdbarch_store_return_value (gdbarch, rs6000_store_return_value);
   set_gdbarch_extract_struct_value_address (gdbarch, rs6000_extract_struct_value_address);
-  set_gdbarch_use_struct_convention (gdbarch, generic_use_struct_convention);
-
   set_gdbarch_pop_frame (gdbarch, rs6000_pop_frame);
 
   set_gdbarch_skip_prologue (gdbarch, rs6000_skip_prologue);
@@ -2575,6 +2573,27 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Not sure on this. FIXMEmgo */
   set_gdbarch_frame_args_skip (gdbarch, 8);
+
+  /* Until November 2001, gcc was not complying to the SYSV ABI for
+     returning structures less than or equal to 8 bytes in size. It was
+     returning everything in memory. When this was corrected, it wasn't
+     fixed for native platforms. */
+  if (sysv_abi)
+    {
+      if (osabi == ELFOSABI_LINUX
+          || osabi == ELFOSABI_NETBSD
+          || osabi == ELFOSABI_FREEBSD)
+	set_gdbarch_use_struct_convention (gdbarch,
+					   generic_use_struct_convention);
+      else
+	set_gdbarch_use_struct_convention (gdbarch,
+					   ppc_sysv_abi_use_struct_convention);
+    }
+  else
+    {
+      set_gdbarch_use_struct_convention (gdbarch,
+					 generic_use_struct_convention);
+    }
 
   set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
   if (osabi == ELFOSABI_LINUX)

@@ -414,6 +414,14 @@ ppc_linux_frame_chain (struct frame_info *thisframe)
    it may be used generically by ports which use either the SysV ABI or
    the EABI */
 
+/* Structures 8 bytes or less long are returned in the r3 & r4
+   registers, according to the SYSV ABI. */
+int
+ppc_sysv_abi_use_struct_convention (int gcc_p, struct type *value_type)
+{
+  return (TYPE_LENGTH (value_type) > 8);
+}
+
 /* round2 rounds x up to the nearest multiple of s assuming that s is a
    power of 2 */
 

@@ -1,3 +1,12 @@
+2002-03-22  Elena Zannoni  <ezannoni@redhat.com>
+
+        * ppc-linux-tdep.c (ppc_sysv_abi_use_struct_convention): New
+        function.  
+	* ppc-tdep.h (ppc_sysv_abi_use_struct_convention): Export.
+        * rs6000-tdep.c (rs6000_gdbarch_init): Use different
+        structure returning convention for SYSV ABI case, but not
+        for GNU/Linux, FreeBSD, or NetBSD.
+
 2002-03-22  Daniel Jacobowitz  <drow@mvista.com>
 
 	* symtab.h (lookup_block_symbol): Add mangled_name argument
