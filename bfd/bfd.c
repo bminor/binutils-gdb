@@ -417,6 +417,15 @@ bfd_get_mtime (abfd)
 
 #define bfd_stat_arch_elt(abfd, stat) \
         BFD_SEND (abfd, _bfd_stat_arch_elt,(abfd, stat))
+
+#define bfd_coff_swap_aux_in(a,e,t,c,i) \
+        BFD_SEND (a, _bfd_coff_swap_aux_in, (a,e,t,c,i))
+
+#define bfd_coff_swap_sym_in(a,e,i) \
+        BFD_SEND (a, _bfd_coff_swap_sym_in, (a,e,i))
+
+#define bfd_coff_swap_lineno_in(a,e,i) \
+        BFD_SEND ( a, _bfd_coff_swap_lineno_in, (a,e,i))
 *-
 
 */
