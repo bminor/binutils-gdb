@@ -23,8 +23,6 @@
 
 struct trad_frame_saved_reg;
 
-enum { HPPA_INSTRUCTION_SIZE = 4 };
-
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,
    and correspond to the general registers of the machine,

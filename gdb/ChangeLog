@@ -1,3 +1,10 @@
+2004-05-24  Randolph Chung  <tausq@debian.org>
+
+	* hppa-tdep.c (SR4EXPORT_LDIL_OFFSET, SR4EXPORT_LDO_OFFSET): Remove
+	unused symbols.
+	* hppa-tdep.h (HPPA_INSTRUCTION_SIZE): Remove, since there are no more
+	references.
+
 2004-05-24  Joel Brobecker  <brobecker@gnat.com>
 
 	* infcmd.c (kill_if_already_running): New function, extracted

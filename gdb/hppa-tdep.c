@@ -64,11 +64,6 @@ const struct objfile_data *hppa_objfile_priv_data = NULL;
 #define MASK_14 0x3fff
 #define MASK_21 0x1fffff
 
-/* Define offsets into the call dummy for the _sr4export address.
-   See comments related to CALL_DUMMY for more info.  */
-#define SR4EXPORT_LDIL_OFFSET (HPPA_INSTRUCTION_SIZE * 12)
-#define SR4EXPORT_LDO_OFFSET (HPPA_INSTRUCTION_SIZE * 13)
-
 /* Sizes (in bytes) of the native unwind entries.  */
 #define UNWIND_ENTRY_SIZE 16
 #define STUB_UNWIND_ENTRY_SIZE 8
