@@ -1,4 +1,4 @@
-This is a BETA release of a completely rewritten binutils distribution.
+This is a beta release of a completely rewritten binutils distribution.
 The linker (ld) has been moved into a separate directory,
 which should be ../ld.  Linker-specific notes are in ../ld/README.
 
@@ -12,20 +12,23 @@ old binutils.  There are also features of the old versions
 that are missing on the new programs.  We would appreciate
 patches to make things run on other machines; especially welcome
 are fixes for what used to work on the old programs!
+(See ./TODO, as well a ../bfd/TODO and ../ld/TODO.)
+
+Recent changes are in ./NEWS.
 
 Unpacking and Installation -- quick overview
 ==========================
 
 In this release, the binary utilities, the linker, the generic GNU include
-files, the BFD ("binary file description") library, and getopt all have
-directories of their own underneath the binutils-2.0 directory.
+files, the BFD ("binary file description") library, gprof, and getopt all
+have directories of their own underneath the binutils-2.1 directory.
 The idea is that a variety of GNU tools can
 share a common copy of these things.  Configuration scripts and
 makefiles exist to cruise up and down this directory tree and
 automatically build all the pieces in the right order.
 
-When you unpack the binutils-2.0.tar.Z file, you'll get a directory called
-something like `binutils-2.0', which contains:
+When you unpack the binutils-2.1.tar.Z file, you'll get a directory called
+something like `binutils-2.1', which contains:
 
 	DOC.configure  README         config/        configure*     ld/
 	Makefile       bfd/           config.status* configure.in   libiberty/
@@ -33,10 +36,14 @@ something like `binutils-2.0', which contains:
 
 To build binutils, you can just do:
 
-	cd binutils-2.0
-	./configure HOSTTYPE		(e.g. sun4, decstation)
+	cd binutils-2.1
+	./configure [ --with-minimal-bfd=yes ]
 	make
 	make install # copies the programs files into /usr/local/bin by default.
+
+The --with-minimal-bfd-yes flag is a temporary kludge.  Using it makes
+the executables smaller, at the price of only being able to handle
+the default binary file format.  A more flexible mechanism is planned.
 
 This will configure and build all the libraries as well as binutils
 and the linker.
@@ -46,7 +53,7 @@ The file DOC.configure contains more information.
 
 Porting
 =======
-Binutils-2.0 supports many different architectures, but there
+Binutils-2.1 supports many different architectures, but there
 are many more not supported, including some that were supported
 by earlier versions.  We are hoping for volunteers to
 improve this situation.
@@ -54,7 +61,7 @@ improve this situation.
 The major effort in porting binutils to a new host and/or target
 architecture involves the BFD library.  There is some documentation
 in ../bfd/doc.  The file ../gdb/doc/gdbint.texinfo (distributed
-with gdb-3.2) may also be of help.
+with gdb-4.x) may also be of help.
 
 If your system uses some variant of old-style a.out-format,
 you can start with a copy of bfd/newsos3.c, and edit it to fit.
@@ -66,8 +73,10 @@ Reporting bugs
 ==============
 If you can't track down a bug and send suggestions/patches
 for fixes, you should probably *not* be using this release.
-I cannot work on finding bugs at this stage (except for
-Cygnus-supported configurations).  But if you have suggestions
-or patches, send them to bothner@cygnus.com, for now.
-(After the official release, the correct address will
-be bug-gnu-utils@ai.mit.edu.)
+We have little time to spend tracking down whatever random bugs you
+may run into (except for configurations that Cygnus supports for
+its customers).  The general place to send bug reports or patches
+is to bug-gnu-utils@ai.mit.edu; you can also send them directly to
+bothner@cygnus.com or sac@cygnus.com.
+
+
