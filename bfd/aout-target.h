@@ -29,8 +29,9 @@ DEFUN(MY(callback),(abfd),
       bfd *abfd)
 {
   struct internal_exec *execp = exec_hdr (abfd);
-  
-/* Calculate the file positions of the parts of a newly read aout header */
+  struct aout_backend_data *abdp;
+
+  /* Calculate the file positions of the parts of a newly read aout header */
   obj_textsec (abfd)->_raw_size = N_TXTSIZE(*execp);
 
   /* The virtual memory addresses of the sections */
@@ -57,6 +58,9 @@ DEFUN(MY(callback),(abfd),
   bfd_default_set_arch_mach(abfd, DEFAULT_ARCH, 0);
 #endif
 
+  /* Don't set sizes now -- can't be sure until we know arch & mach.
+     Sizes get set in set_sizes callback, later.  */
+#if 0
   adata(abfd).page_size = PAGE_SIZE;
 #ifdef SEGMENT_SIZE
   adata(abfd).segment_size = SEGMENT_SIZE;
@@ -64,6 +68,7 @@ DEFUN(MY(callback),(abfd),
   adata(abfd).segment_size = PAGE_SIZE;
 #endif
   adata(abfd).exec_bytes_size = EXEC_BYTES_SIZE;
+#endif
 
   return abfd->xvec;
 }
@@ -124,6 +129,8 @@ DEFUN(MY(mkobject),(abfd),
 {
   if (NAME(aout,mkobject)(abfd) == false)
     return false;
+#if 0 /* Sizes get set in set_sizes callback, later, after we know
+	 the architecture and machine.  */
   adata(abfd).page_size = PAGE_SIZE;
 #ifdef SEGMENT_SIZE
   adata(abfd).segment_size = SEGMENT_SIZE;
@@ -131,6 +138,7 @@ DEFUN(MY(mkobject),(abfd),
   adata(abfd).segment_size = PAGE_SIZE;
 #endif
   adata(abfd).exec_bytes_size = EXEC_BYTES_SIZE;
+#endif
   return true;
 }
 #define MY_mkobject MY(mkobject)
@@ -160,6 +168,32 @@ DEFUN(MY(write_object_contents),(abfd),
   return true;
 }
 #define MY_write_object_contents MY(write_object_contents)
+#endif
+
+#ifndef MY_set_sizes
+static boolean
+DEFUN(MY(set_sizes),(abfd), bfd *abfd)
+{
+  adata(abfd).page_size = PAGE_SIZE;
+#ifdef SEGMENT_SIZE
+  adata(abfd).segment_size = SEGMENT_SIZE;
+#else
+  adata(abfd).segment_size = PAGE_SIZE;
+#endif
+  adata(abfd).exec_bytes_size = EXEC_BYTES_SIZE;
+  return true;
+}
+#define MY_set_sizes MY(set_sizes)
+#endif
+
+#ifndef MY_backend_data
+static CONST struct aout_backend_data MY(backend_data) = {
+  0,				/* zmagic contiguous */
+  0,				/* text incl header */
+  0,				/* text vma? */
+  MY_set_sizes,
+};
+#define MY_backend_data &MY(backend_data)
 #endif
 
 /* We assume BFD generic archive files.  */
@@ -291,8 +325,10 @@ DEFUN(MY(write_object_contents),(abfd),
 #ifndef MY_make_debug_symbol
 #define MY_make_debug_symbol 0
 #endif
-#ifndef MY_backend_data
-#define MY_backend_data (PTR) 0
+
+/* Aout symbols normally have leading underscores */
+#ifndef MY_symbol_leading_char 
+#define MY_symbol_leading_char '_'
 #endif
 
 bfd_target MY(vec) =
@@ -310,6 +346,7 @@ bfd_target MY(vec) =
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+  MY_symbol_leading_char,
   ' ',				/* ar_pad_char */
   15,				/* ar_max_namelen */
   1,				/* minimum alignment */

@@ -33,8 +33,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 #include "obstack.h"
-#include "internalcoff.h"
-#include "coff-rs6000.h"
+#include "coff/internal.h"
+#include "coff/rs6000.h"
 #include "libcoff.h"
 
 /* The main body of code is in coffcode.h.  */
@@ -234,7 +234,8 @@ rs6000coff_archive_p (abfd)
 	/*
 	 * bfd_ardata() accesses the bfd->tdata field.
 	 */
-	abfd->tdata = (void *) bfd_zalloc(abfd, sizeof (*art) + sizeof (hdr));
+	abfd->tdata.aout_ar_data =
+	  (void *) bfd_zalloc(abfd, sizeof (*art) + sizeof (hdr));
 	if ((art = bfd_ardata (abfd)) == NULL) {
 		bfd_error = no_memory;
 		return 0;
@@ -292,7 +293,11 @@ rs6000coff_write_armap (arch, elength, map, orl_count, stridx)
 }
 #endif	/* ARCHIVES_PLEASE */
 
-#ifdef	COREFILES_PLEASE
+
+#ifdef COREFILES_PLEASE
+extern bfd_target * rs6000coff_core_p ();
+extern boolean rs6000coff_get_section_contents ();
+extern boolean rs6000coff_core_file_matches_executable_p ();
 
 #undef	coff_core_file_matches_executable_p
 #define coff_core_file_matches_executable_p  \
@@ -300,232 +305,8 @@ rs6000coff_write_armap (arch, elength, map, orl_count, stridx)
 
 #undef	coff_get_section_contents
 #define	coff_get_section_contents	rs6000coff_get_section_contents
-
-
-/* AOUTHDR is defined by the above.  We need another defn of it, from the
-   system include files.  Punt the old one and get us a new name for the
-   typedef in the system include files.  */
-#ifdef AOUTHDR
-#undef AOUTHDR
 #endif
-#define	AOUTHDR	second_AOUTHDR
 
-#undef	SCNHDR
-
-
-/* ------------------------------------------------------------------------ */
-/*	Support for core file stuff.. 					    */
-/* ------------------------------------------------------------------------ */
-
-#include <sys/user.h>
-#include <sys/ldr.h>
-#include <sys/core.h>
-
-
-/* Number of special purpose registers supported by gdb.  This value
-   should match `tm.h' in gdb directory.  Clean this mess up and use
-   the macros in sys/reg.h.  FIXMEmgo. */
-
-#define	NUM_OF_SPEC_REGS  7
-#define	STACK_END_ADDR 0x2ff80000
-
-#define	core_hdr(bfd)		(((Rs6kCorData*)(bfd->tdata))->hdr)
-#define	core_datasec(bfd)	(((Rs6kCorData*)(bfd->tdata))->data_section)
-#define	core_stacksec(bfd)	(((Rs6kCorData*)(bfd->tdata))->stack_section)
-#define	core_regsec(bfd)	(((Rs6kCorData*)(bfd->tdata))->reg_section)
-#define	core_reg2sec(bfd)	(((Rs6kCorData*)(bfd->tdata))->reg2_section)
-
-/* These are stored in the bfd's tdata */
-typedef struct {
-  struct core *hdr;		/* core file header */
-  asection *data_section,
-  	   *stack_section,
-	   *reg_section,	/* section for GPRs and special registers. */
-	   *reg2_section;	/* section for FPRs. */
-} Rs6kCorData;
-
-
-/* Decide if a given bfd represents a `core' file or not. There really is no
-   magic number or anything like, in rs6000coff. */
-
-static bfd_target *
-rs6000coff_core_p (abfd)
-     bfd *abfd;
-{
-  int fd;
-  struct core_dump coredata;
-  struct stat statbuf;
-  char *tmpptr;
-
-  /* Use bfd_xxx routines, rather than O/S primitives to read coredata. FIXMEmgo */
-  fd = open (abfd->filename, O_RDONLY);
-
-  fstat (fd, &statbuf);
-  read (fd, &coredata, sizeof (struct core_dump));
-
-  close (fd);
-
-  if (coredata.c_tab < (sizeof (coredata.c_u) + (int)&coredata.c_u - (int)&coredata.c_signo) ||
-      coredata.c_tab >= statbuf.st_size ||
-      (long)coredata.c_stack <= (long)coredata.c_tab ) {
-    return NULL;
-  }
-
-/*
-  If it looks like core file, then.....
-  read core file header..... (maybe you've done it above..)
-*/
-
-  /* maybe you should alloc space for the whole core chunk over here!! FIXMEmgo */
-  tmpptr = (char*)bfd_zalloc (abfd, sizeof (Rs6kCorData));
-  set_tdata (abfd, tmpptr);
-
-  /* .stack section. */
-  if ((core_stacksec (abfd) = (asection*) bfd_zalloc (abfd, sizeof (asection)))
-       == NULL)  {
-    bfd_error = no_memory;
-    /* bfd_release (abfd, ???? ) */
-    return NULL;
-  }
-  core_stacksec (abfd)->name = ".stack";
-  core_stacksec (abfd)->flags = SEC_ALLOC + SEC_LOAD;
-  core_stacksec (abfd)->size = coredata.c_size;
-  core_stacksec (abfd)->vma = STACK_END_ADDR - coredata.c_size;
-  core_stacksec (abfd)->filepos = coredata.c_stack;	/*???? */
-
-  /* .reg section for GPRs and special registers. */
-  if ((core_regsec (abfd) = (asection*) bfd_zalloc (abfd, sizeof (asection)))
-       == NULL)  {
-    bfd_error = no_memory;
-    /* bfd_release (abfd, ???? ) */
-    return NULL;
-  }
-  core_regsec (abfd)->name = ".reg";
-  core_regsec (abfd)->flags = SEC_ALLOC;
-  core_regsec (abfd)->size = (32 + NUM_OF_SPEC_REGS) * 4;
-  core_regsec (abfd)->vma = NULL;			/* not used?? */
-  core_regsec (abfd)->filepos = 
-  	(char*)&coredata.c_u.u_save - (char*)&coredata;
-
-  /* .reg2 section for FPRs (floating point registers). */
-  if ((core_reg2sec (abfd) = (asection*) bfd_zalloc (abfd, sizeof (asection)))
-       == NULL)  {
-    bfd_error = no_memory;
-    /* bfd_release (abfd, ???? ) */
-    return NULL;
-  }
-  core_reg2sec (abfd)->name = ".reg2";
-  core_reg2sec (abfd)->flags = SEC_ALLOC;
-  core_reg2sec (abfd)->size = 8 * 32;			/* 32 FPRs. */
-  core_reg2sec (abfd)->vma = NULL;			/* not used?? */
-  core_reg2sec (abfd)->filepos = 
-  	(char*)&coredata.c_u.u_save.fpr[0] - (char*)&coredata;
-
-  /* set up section chain here. */
-  abfd->section_count = 3;
-  abfd->sections = core_stacksec (abfd);
-  core_stacksec (abfd)->next = core_regsec(abfd);
-  core_regsec (abfd)->next = core_reg2sec (abfd);
-  core_reg2sec (abfd)->next = NULL;
-
-  return abfd->xvec;				/* this is garbage for now. */
-}
-
-
-
-/* return `true' if given core is from the given executable.. */
-static boolean
-rs6000coff_core_file_matches_executable_p (core_bfd, exec_bfd)
-     bfd *core_bfd;
-     bfd *exec_bfd;
-{
-  FILE *fd;
-  struct core_dump coredata;
-  struct ld_info ldinfo;
-  char pathname [1024];
-  char *str1, *str2;
-
-  /* Use bfd_xxx routines, rather than O/S primitives, do error checking!!
-  								FIXMEmgo */
-  fd = fopen (core_bfd->filename, "r");
-
-  fread (&coredata, sizeof (struct core_dump), 1, fd);
-  fseek (fd, (long)coredata.c_tab, 0);
-  fread (&ldinfo, (char*)&ldinfo.ldinfo_filename[0] - (char*)&ldinfo.ldinfo_next,
-	 1, fd);
-  fscanf (fd, "%s", pathname);
-  printf ("path: %s\n", pathname);
-  
-  str1 = strrchr (pathname, '/');
-  str2 = strrchr (exec_bfd->filename, '/');
-
-  /* step over character '/' */
-  str1 = str1 ? str1+1 : &pathname[0];
-  str2 = str2 ? str2+1 : exec_bfd->filename;
-
-  fclose (fd);
-  return strcmp (str1, str2);
-}
-
-
-static boolean
-rs6000coff_get_section_contents (abfd, section, location, offset, count)
-     bfd *abfd;
-     sec_ptr section;
-     PTR location;
-     file_ptr offset;
-     int count;
-{
-    if (count == 0)
-	return true;
-
-    /* Reading a core file's sections will be slightly different. For the
-       rest of them we can use bfd_generic_get_section_contents () I suppose. */
-    /* Make sure this routine works for any bfd and any section. FIXMEmgo. */
-
-    if (abfd->format == bfd_core && strcmp (section->name, ".reg") == 0) {
-
-      struct mstsave mstatus;
-      int    regoffset = (char*)&mstatus.gpr[0] - (char*)&mstatus;
-
-      /* Assert that the only way this code will be executed is reading the
-         whole section. */
-      if (offset || count != (sizeof(mstatus.gpr) + (4 * NUM_OF_SPEC_REGS)))
-        printf ("ERROR! in rs6000coff_get_section_contents()\n");
-
-      /* for `.reg' section, `filepos' is a pointer to the `mstsave' structure
-         in the core file. */
-
-      /* read GPR's into the location. */
-      if ( bfd_seek(abfd, section->filepos + regoffset, SEEK_SET) == -1
-	|| bfd_read(location, sizeof (mstatus.gpr), 1, abfd) != sizeof (mstatus.gpr))
-	return (false); /* on error */
-
-      /* increment location to the beginning of special registers in the section,
-         reset register offset value to the beginning of first special register
-	 in mstsave structure, and read special registers. */
-
-      location = (PTR) ((char*)location + sizeof (mstatus.gpr));
-      regoffset = (char*)&mstatus.iar - (char*)&mstatus;
-
-      if ( bfd_seek(abfd, section->filepos + regoffset, SEEK_SET) == -1
-	|| bfd_read(location, 4 * NUM_OF_SPEC_REGS, 1, abfd) != 
-							4 * NUM_OF_SPEC_REGS)
-	return (false); /* on error */
-      
-      /* increment location address, and read the special registers.. */
-      /* FIXMEmgo */
-      return (true);
-    }
-
-    /* else, use default bfd section content transfer. */
-    else
-      return bfd_generic_get_section_contents 
-      			(abfd, section, location, offset, count);
-}
-
-#endif /* COREFILES_PLEASE */
-
 /* The transfer vector that leads the outside world to all of the above. */
 
 bfd_target rs6000coff_vec =
@@ -540,6 +321,7 @@ bfd_target rs6000coff_vec =
    HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+  0,				/* leading char */
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen??? FIXMEmgo */
   3,				/* default alignment power */
@@ -548,7 +330,13 @@ bfd_target rs6000coff_vec =
   _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
 
   {_bfd_dummy_target, coff_object_p, 	/* bfd_check_format */
-     coff_archive_p, _bfd_dummy_target},
+     coff_archive_p,
+#ifdef	COREFILES_PLEASE
+     rs6000coff_core_p
+#else
+     _bfd_dummy_target
+#endif
+       },
   {bfd_false, coff_mkobject, coff_mkarchive, /* bfd_set_format */
      bfd_false},
   {bfd_false, coff_write_object_contents,	/* bfd_write_contents */

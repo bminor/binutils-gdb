@@ -18,8 +18,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* $Id$ */
-
 #define I960 1
 #define BADMAG(x) I960BADMAG(x)
 
@@ -30,19 +28,21 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "coff/i960.h"
 #include "coff/internal.h"
 #include "libcoff.h"		/* to allow easier abstraction-breaking */
-
+#define COFF_LONG_FILENAMES
 
 #define CALLS	 0x66003800	/* Template for 'calls' instruction	*/
 #define BAL	 0x0b000000	/* Template for 'bal' instruction	*/
 #define BAL_MASK 0x00ffffff
 
 static bfd_reloc_status_type 
-DEFUN (optcall_callback, (abfd, reloc_entry, symbol_in, data, ignore_input_section),
+DEFUN (optcall_callback, (abfd, reloc_entry, symbol_in, data,
+			  ignore_input_section, ignore_bfd),
        bfd *abfd AND
        arelent *reloc_entry AND
        asymbol *symbol_in AND
        PTR data AND
-       asection *ignore_input_section)
+       asection *ignore_input_section AND
+       bfd *ignore_bfd)
 {
   /* This item has already been relocated correctly, but we may be
    * able to patch in yet better code - done by digging out the
@@ -110,7 +110,7 @@ static reloc_howto_type howto_optcall =
 static reloc_howto_type *
 DEFUN (coff_i960_reloc_type_lookup, (abfd, code),
        bfd *abfd AND
-       bfd_reloc_code_type code)
+       bfd_reloc_code_real_type code)
 {
   switch (code)
     {
@@ -153,19 +153,20 @@ bfd_target icoff_little_vec =
    HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+  0,				/* leading underscore */
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
 
-     3,				/* minimum alignment power */
+  3,				/* minimum alignment power */
   _do_getl64, _do_putl64, _do_getl32, _do_putl32, _do_getl16, _do_putl16, /* data */
   _do_getl64, _do_putl64, _do_getl32, _do_putl32, _do_getl16, _do_putl16, /* hdrs */
 
-    {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
-       bfd_generic_archive_p, _bfd_dummy_target},
-    {bfd_false, coff_mkobject,	/* bfd_set_format */
-       _bfd_generic_mkarchive, bfd_false},
-    {bfd_false, coff_write_object_contents, /* bfd_write_contents */
-       _bfd_write_archive_contents, bfd_false},
+ {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
+   bfd_generic_archive_p, _bfd_dummy_target},
+ {bfd_false, coff_mkobject,	/* bfd_set_format */
+   _bfd_generic_mkarchive, bfd_false},
+ {bfd_false, coff_write_object_contents, /* bfd_write_contents */
+   _bfd_write_archive_contents, bfd_false},
   JUMP_TABLE(coff),
   COFF_SWAP_TABLE,
   coff_i960_reloc_type_lookup,
@@ -185,6 +186,7 @@ bfd_target icoff_big_vec =
    HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+  0,				/* leading underscore */
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
 

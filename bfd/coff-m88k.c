@@ -18,22 +18,20 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* $Id$ */
-
 #define M88 1		/* Customize various include files */
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
 #include "obstack.h"
-#include "coff-m88k.h"
-#include "internalcoff.h"
+#include "coff/m88k.h"
+#include "coff/internal.h"
 #include "libcoff.h"
-
+#undef HOWTO_PREPARE
 /* Provided the symbol, returns the value reffed */
 #define HOWTO_PREPARE(relocation, symbol) 	\
   {						\
   if (symbol != (asymbol *)NULL) {		\
-    if (symbol->flags & BSF_FORT_COMM) {	\
+    if (symbol->section == &bfd_com_section) {	\
       relocation = 0;				\
     }						\
     else {					\
@@ -49,14 +47,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 
 static bfd_reloc_status_type 
-DEFUN(howto_hvrt16,(abfd, reloc_entry, symbol_in, data, ignore_input_section),
-bfd *abfd AND
-arelent *reloc_entry AND
-asymbol *symbol_in AND
-unsigned char *data AND
-asection *ignore_input_section)
+DEFUN(howto_hvrt16,(abfd, reloc_entry, symbol_in, data,
+		    ignore_input_section, ignore_bfd),
+      bfd *abfd AND
+      arelent *reloc_entry AND
+      asymbol *symbol_in AND
+      PTR data AND
+      asection *ignore_input_section AND
+      bfd *ignore_bfd)
 {
-  long relocation;
+  long relocation = 0;
   bfd_vma addr = reloc_entry->address;
   long x = bfd_get_16(abfd, (bfd_byte *)data + addr);
 
@@ -89,9 +89,9 @@ static reloc_howto_type howto_table[] =
 /* Code to turn an external r_type into a pointer to an entry in the
    above howto table */
 #define RTYPE2HOWTO(cache_ptr, dst)					\
-	    if (dst.r_type >= R_PCR16L && dst.r_type <= R_VRT32) {	\
-		cache_ptr->howto = howto_table + dst.r_type - R_PCR16L;	\
-		cache_ptr->addend += dst.r_offset << 16;		\
+	    if ((dst)->r_type >= R_PCR16L && (dst)->r_type <= R_VRT32) {\
+		cache_ptr->howto = howto_table + (dst)->r_type - R_PCR16L;\
+		cache_ptr->addend += (dst)->r_offset << 16;		\
 	    }								\
 	    else {							\
 		BFD_ASSERT(0);						\
@@ -116,6 +116,7 @@ bfd_target m88kbcs_vec =
    HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+  0,				/* leading underscore */
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
   3,				/* default alignment power */

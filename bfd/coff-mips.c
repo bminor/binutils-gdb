@@ -21,8 +21,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
-#include "coff-mips.h"
-#include "internalcoff.h"
+#include "coff/mips.h"
+#include "coff/internal.h"
 #include "libcoff.h"		/* to allow easier abstraction-breaking */
 #include "trad-core.h"
 
@@ -57,52 +57,57 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define coff_swap_lineno_out  (PROTO(unsigned,(*),(bfd *,PTR,PTR))) bfd_void
 
 bfd_target ecoff_little_vec =
-    {"ecoff-littlemips",      /* name */
-	bfd_target_coff_flavour,
-	false,			/* data byte order is little */
-	false,			/* header byte order is little */
+{
+  "ecoff-littlemips",		/* name */
+  bfd_target_coff_flavour,
+  false,			/* data byte order is little */
+  false,			/* header byte order is little */
 
-	(HAS_RELOC | EXEC_P |	/* object flags */
-	 HAS_LINENO | HAS_DEBUG |
-	 HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
+  (HAS_RELOC | EXEC_P |		/* object flags */
+   HAS_LINENO | HAS_DEBUG |
+   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
 
-	(SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* sect flags */
-	'/',			/* ar_pad_char */
-	15,			/* ar_max_namelen */
-	   3,			/* minimum alignment power */
-_do_getl64, _do_putl64,	_do_getl32, _do_putl32, _do_getl16, _do_putl16, /* data */
-_do_getl64, _do_putl64,	_do_getl32, _do_putl32, _do_getl16, _do_putl16, /* hdrs */
+  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* sect
+							    flags */
+  0,				/* leading underscore */
+  '/',				/* ar_pad_char */
+  15,				/* ar_max_namelen */
+  3,				/* minimum alignment power */
+  _do_getl64, _do_putl64,	_do_getl32, _do_putl32, _do_getl16, _do_putl16, /* data */
+  _do_getl64, _do_putl64,	_do_getl32, _do_putl32, _do_getl16, _do_putl16, /* hdrs */
 
-	{_bfd_dummy_target, coff_object_p, /* bfd_check_format */
-	  bfd_generic_archive_p, _bfd_dummy_target},
-	{bfd_false, coff_mkobject, bfd_false, /* bfd_set_format */
-	  bfd_false},
-	{bfd_false, coff_write_object_contents, bfd_false, bfd_false},
-	JUMP_TABLE (coff)
-};
+ {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
+   bfd_generic_archive_p, _bfd_dummy_target},
+ {bfd_false, coff_mkobject, bfd_false, /* bfd_set_format */
+   bfd_false},
+ {bfd_false, coff_write_object_contents, bfd_false, bfd_false},
+  JUMP_TABLE (coff)
+ };
 
 bfd_target ecoff_big_vec =
-    {"ecoff-bigmips",      /* name */
-	bfd_target_coff_flavour,
-	true,			/* data byte order is big */
-	true,			/* header byte order is big */
+{
+  "ecoff-bigmips",		/* name */
+  bfd_target_coff_flavour,
+  true,				/* data byte order is big */
+  true,				/* header byte order is big */
 
-	(HAS_RELOC | EXEC_P |	/* object flags */
-	 HAS_LINENO | HAS_DEBUG |
-	 HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
+  (HAS_RELOC | EXEC_P |		/* object flags */
+   HAS_LINENO | HAS_DEBUG |
+   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
 
-	(SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* sect flags */
-	' ',			/* ar_pad_char */
-	16,			/* ar_max_namelen */
-	   3,			/* minimum alignment power */
-	_do_getb64, _do_putb64,	_do_getb32, _do_putb32, _do_getb16, _do_putb16,
-	_do_getb64, _do_putb64,	_do_getb32, _do_putb32, _do_getb16, _do_putb16,
-	{_bfd_dummy_target, coff_object_p, /* bfd_check_format */
-	  bfd_generic_archive_p, _bfd_dummy_target},
-	{bfd_false, coff_mkobject, bfd_false, /* bfd_set_format */
-	  bfd_false},
-	{bfd_false, coff_write_object_contents, /* bfd_write_contents */
-	  bfd_false, bfd_false},
-	JUMP_TABLE(coff),
-	  COFF_SWAP_TABLE
-};
+  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* sect flags */
+  0,				/* leading underscore */
+  ' ',				/* ar_pad_char */
+  16,				/* ar_max_namelen */
+  3,				/* minimum alignment power */
+  _do_getb64, _do_putb64,	_do_getb32, _do_putb32, _do_getb16, _do_putb16,
+  _do_getb64, _do_putb64,	_do_getb32, _do_putb32, _do_getb16, _do_putb16,
+ {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
+   bfd_generic_archive_p, _bfd_dummy_target},
+ {bfd_false, coff_mkobject, bfd_false, /* bfd_set_format */
+   bfd_false},
+ {bfd_false, coff_write_object_contents, /* bfd_write_contents */
+   bfd_false, bfd_false},
+  JUMP_TABLE(coff),
+  COFF_SWAP_TABLE
+ };

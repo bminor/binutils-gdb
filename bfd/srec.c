@@ -43,7 +43,7 @@ DESCRIPTION
 	An s record looks like:
 	
 EXAMPLE
-	S<length><type><address><data><checksum>
+	S<type><length><address><data><checksum>
 	
 DESCRIPTION
 	Where
@@ -346,9 +346,12 @@ DEFUN(srec_set_section_contents,(abfd, section, location, offset, bytes_to_do),
       file_ptr offset AND
       bfd_size_type bytes_to_do)
 {
-    tdata_type  *tdata = abfd->tdata.srec_data;
-    srec_data_list_type *entry = (srec_data_list_type *)
-     bfd_alloc(abfd, sizeof(srec_data_list_type));
+  tdata_type  *tdata = abfd->tdata.srec_data;
+  srec_data_list_type *entry = (srec_data_list_type *)
+   bfd_alloc(abfd, sizeof(srec_data_list_type));
+  if ((section->flags & SEC_ALLOC)
+      && (section->flags & SEC_LOAD)) 
+  {
     unsigned  char *data = (unsigned char *) bfd_alloc(abfd, bytes_to_do);
     memcpy(data, location, bytes_to_do);
 
@@ -359,11 +362,11 @@ DEFUN(srec_set_section_contents,(abfd, section, location, offset, bytes_to_do),
     else if ((section->vma + offset + bytes_to_do) <= 0xffffff 
 	     && tdata->type < 2) 
     {
-	tdata->type = 2;
+      tdata->type = 2;
     }
     else 
     {
-	tdata->type = 3;
+      tdata->type = 3;
     }
 
     entry->data = data;
@@ -371,7 +374,8 @@ DEFUN(srec_set_section_contents,(abfd, section, location, offset, bytes_to_do),
     entry->size = bytes_to_do;
     entry->next = tdata->head;
     tdata->head = entry;
-    return true;    
+  }
+  return true;    
 }
 
 /* Write a record of type, of the supplied number of bytes. The
@@ -468,8 +472,6 @@ DEFUN(srec_write_section,(abfd, tdata, list),
 
     while (bytes_written < list->size)
     {
-	char buffer[MAXCHUNK];
-	char *dst = buffer;
 	bfd_vma address;
 	
 	unsigned int bytes_this_chunk = list->size - bytes_written;
@@ -587,7 +589,7 @@ DEFUN(srec_make_empty_symbol, (abfd),
 #define srec_bfd_debug_info_end bfd_void
 #define srec_bfd_debug_info_accumulate  (FOO(void, (*), (bfd *,	 asection *))) bfd_void
 #define srec_bfd_get_relocated_section_contents bfd_generic_get_relocated_section_contents
-
+#define srec_bfd_relax_section bfd_generic_relax_section
 bfd_target srec_vec =
 {
     "srec",			/* name */
@@ -599,6 +601,7 @@ bfd_target srec_vec =
      HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
     (SEC_CODE|SEC_DATA|SEC_ROM|SEC_HAS_CONTENTS
      |SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+     0,				/* leading underscore */
     ' ',			/* ar_pad_char */
     16,				/* ar_max_namelen */
     1,				/* minimum alignment */

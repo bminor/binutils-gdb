@@ -100,7 +100,7 @@ struct internal_reloc *dst)
       break;
       
     default:
-      abort();
+fprintf(stderr,"Bad reloc\n");
       break;
     }
 }
@@ -125,8 +125,6 @@ static void DEFUN(reloc_processing,(relent,reloc, symbols, abfd, section) ,
 	   bfd *abfd AND
 	   asection *section)
 {
-
-  asymbol *ptr;
   relent->address = reloc->r_vaddr;		
   rtype2howto(relent,reloc);
 
@@ -152,7 +150,10 @@ static void DEFUN(reloc_processing,(relent,reloc, symbols, abfd, section) ,
 #include "coffcode.h"
 
 
-#define coff_write_armap bsd_write_armap
+#undef  coff_bfd_get_relocated_section_contents 
+#undef coff_bfd_relax_section
+#define  coff_bfd_get_relocated_section_contents bfd_coff_get_relocated_section_contents
+#define coff_bfd_relax_section bfd_coff_relax_section
 
 bfd_target h8300coff_vec =
 {
@@ -164,8 +165,8 @@ bfd_target h8300coff_vec =
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
-
   ( SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+    '_',			/* leading char */
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
   1,				/* minimum section alignment */

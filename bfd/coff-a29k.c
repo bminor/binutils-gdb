@@ -290,49 +290,50 @@ static void DEFUN(reloc_processing,(relent,reloc, symbols, abfd, section) ,
 
 bfd_target a29kcoff_big_vec =
 {
-    "coff-a29k-big",		/* name */
-    bfd_target_coff_flavour,
-    true,			/* data byte order is big */
-    true,			/* header byte order is big */
+  "coff-a29k-big",		/* name */
+  bfd_target_coff_flavour,
+  true,				/* data byte order is big */
+  true,				/* header byte order is big */
 
-    (HAS_RELOC | EXEC_P |	/* object flags */
-     HAS_LINENO | HAS_DEBUG |
-     HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
+  (HAS_RELOC | EXEC_P |		/* object flags */
+   HAS_LINENO | HAS_DEBUG |
+   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
 
-    (SEC_HAS_CONTENTS | SEC_ALLOC /* section flags */
-     | SEC_LOAD | SEC_RELOC  
-     | SEC_READONLY ),
-    '/',			/* ar_pad_char */
-    15,				/* ar_max_namelen */
-    2,				/* minimum section alignment */
-    /* data */
-    _do_getb64, _do_putb64, _do_getb32,
-    _do_putb32, _do_getb16, _do_putb16,
-    /* hdrs */
-    _do_getb64, _do_putb64, _do_getb32,
-    _do_putb32, _do_getb16, _do_putb16,
+  (SEC_HAS_CONTENTS | SEC_ALLOC /* section flags */
+   | SEC_LOAD | SEC_RELOC  
+   | SEC_READONLY ),
+  '_',				/* leading underscore */
+  '/',				/* ar_pad_char */
+  15,				/* ar_max_namelen */
+  2,				/* minimum section alignment */
+  /* data */
+  _do_getb64, _do_putb64, _do_getb32,
+  _do_putb32, _do_getb16, _do_putb16,
+  /* hdrs */
+  _do_getb64, _do_putb64, _do_getb32,
+  _do_putb32, _do_getb16, _do_putb16,
 
-  {
+ {
 	    
-      _bfd_dummy_target,
-      coff_object_p,
-      bfd_generic_archive_p,
-      _bfd_dummy_target
-   },
-  {
-      bfd_false,
-      coff_mkobject,
-      _bfd_generic_mkarchive,
-      bfd_false
-   },
-  {
-      bfd_false,
-      coff_write_object_contents,
-      _bfd_write_archive_contents,
-      bfd_false
-   },
+   _bfd_dummy_target,
+   coff_object_p,
+   bfd_generic_archive_p,
+   _bfd_dummy_target
+  },
+ {
+   bfd_false,
+   coff_mkobject,
+   _bfd_generic_mkarchive,
+   bfd_false
+  },
+ {
+   bfd_false,
+   coff_write_object_contents,
+   _bfd_write_archive_contents,
+   bfd_false
+  },
 
-    JUMP_TABLE(coff),
-    COFF_SWAP_TABLE
+  JUMP_TABLE(coff),
+  COFF_SWAP_TABLE
  };
 

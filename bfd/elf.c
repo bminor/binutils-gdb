@@ -781,7 +781,7 @@ DEFUN(bfd_prpsinfo,(abfd, descdata, descsz, filepos),
     {
       if ((core_prpsinfo (abfd) = bfd_alloc (abfd, descsz)) != NULL)
 	{
-	  bcopy (descdata, core_prpsinfo (abfd), descsz);
+	  memcpy (core_prpsinfo (abfd), descdata, descsz);
 	}
     }
 }
@@ -2484,6 +2484,11 @@ bfd_target elf_big_vec =
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_READONLY |
    SEC_CODE | SEC_DATA), 
 
+
+   /* leading_symbol_char: is the first char of a user symbol
+      predictable, and if so what is it */
+   0,
+
   /* ar_pad_char: pad character for filenames within an archive header
      FIXME:  this really has nothing to do with ELF, this is a characteristic
      of the archiver and/or os and should be independently tunable */
@@ -2555,6 +2560,10 @@ bfd_target elf_little_vec =
   /* section_flags: mask of all section flags */
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_READONLY |
    SEC_DATA), 
+
+   /* leading_symbol_char: is the first char of a user symbol
+      predictable, and if so what is it */
+   0,
 
   /* ar_pad_char: pad character for filenames within an archive header
      FIXME:  this really has nothing to do with ELF, this is a characteristic

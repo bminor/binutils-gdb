@@ -18,14 +18,12 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* $Id$ */
-
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
 #include "obstack.h"
-#include "coff-i386.h"
-#include "internalcoff.h"
+#include "coff/i386.h"
+#include "coff/internal.h"
 #include "libcoff.h"
 
 
@@ -61,7 +59,7 @@ static reloc_howto_type howto_table[] =
 #define I386 1			/* Customize coffcode.h */
 
 #define RTYPE2HOWTO(cache_ptr, dst) \
-	    cache_ptr->howto = howto_table + dst.r_type;
+	    cache_ptr->howto = howto_table + (dst)->r_type;
 
 #include "coffcode.h"
 
@@ -83,6 +81,7 @@ bfd_target i386coff_vec =
    HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+  0,				/* leading underscore */
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
 

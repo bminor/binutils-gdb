@@ -28,9 +28,32 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "coff/internal.h"
 #include "libcoff.h"
 #include "seclet.h"
+
 extern bfd_error_vector_type bfd_error_vector;
-func_da() {}
-func_jr() {}
+
+/* Dummy for now */
+static bfd_reloc_status_type
+DEFUN(func_da, (abfd, reloc_entry, symbol, data, input_section, output_bfd),
+    bfd *abfd AND
+    arelent *reloc_entry AND
+    struct symbol_cache_entry *symbol AND
+    PTR data AND
+    asection *input_section AND 
+    bfd *output_bfd)
+{
+}
+
+/* Dummy for now */
+static bfd_reloc_status_type
+DEFUN(func_jr, (abfd, reloc_entry, symbol, data, input_section, output_bfd),
+    bfd *abfd AND
+    arelent *reloc_entry AND
+    struct symbol_cache_entry *symbol AND
+    PTR data AND
+    asection *input_section AND 
+    bfd *output_bfd)
+{
+}
 
 static reloc_howto_type r_da =
   HOWTO(R_DA , 0,  1, 	16, false, 0, true,
@@ -183,7 +206,7 @@ unsigned int *dst_ptr;
 
 bfd_target z8kcoff_vec =
 {
-  "coff-z8k",		/* name */
+  "coff-z8k",			/* name */
   bfd_target_coff_flavour,
   true,				/* data byte order is big */
   true,				/* header byte order is big */
@@ -193,19 +216,20 @@ bfd_target z8kcoff_vec =
    HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
 
   ( SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+  '_',				/* leading symbol underscore */
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
   1,				/* minimum section alignment */
-_do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
-_do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
+  _do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
+  _do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
 
-  {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
-     bfd_generic_archive_p, _bfd_dummy_target},
-  {bfd_false, coff_mkobject, _bfd_generic_mkarchive, /* bfd_set_format */
-     bfd_false},
-  {bfd_false, coff_write_object_contents,	/* bfd_write_contents */
-     _bfd_write_archive_contents, bfd_false},
+ {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
+   bfd_generic_archive_p, _bfd_dummy_target},
+ {bfd_false, coff_mkobject, _bfd_generic_mkarchive, /* bfd_set_format */
+   bfd_false},
+ {bfd_false, coff_write_object_contents, /* bfd_write_contents */
+   _bfd_write_archive_contents, bfd_false},
 
-     JUMP_TABLE(coff),
-    COFF_SWAP_TABLE
-};
+  JUMP_TABLE(coff),
+  COFF_SWAP_TABLE
+ };

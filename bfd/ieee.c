@@ -767,52 +767,50 @@ DEFUN(ieee_get_symtab,(abfd, location),
   ieee_symbol_type *symp;
   static bfd dummy_bfd;
   static asymbol empty_symbol =
-    { &dummy_bfd," ieee empty",(symvalue)0,BSF_DEBUGGING , &bfd_abs_section};
+  { &dummy_bfd," ieee empty",(symvalue)0,BSF_DEBUGGING , &bfd_abs_section};
 
-if (abfd->symcount) {
+  if (abfd->symcount) 
+{
+    ieee_data_type *ieee = IEEE_DATA(abfd);
+    dummy_bfd.xvec= &ieee_vec;
+    ieee_slurp_symbol_table(abfd);
 
-
-
-
-  ieee_data_type *ieee = IEEE_DATA(abfd);
-  dummy_bfd.xvec= &ieee_vec;
-  ieee_slurp_symbol_table(abfd);
-
-  if (ieee->symbol_table_full == false) {
-    /* Arrgh - there are gaps in the table, run through and fill them */
-    /* up with pointers to a null place */
-    unsigned int i;
-    for (i= 0; i < abfd->symcount; i++) {
-      location[i] = &empty_symbol;
+    if (ieee->symbol_table_full == false) {
+      /* Arrgh - there are gaps in the table, run through and fill them */
+      /* up with pointers to a null place */
+      unsigned int i;
+      for (i= 0; i < abfd->symcount; i++) {
+	location[i] = &empty_symbol;
+      }
     }
+
+
+    ieee->external_symbol_base_offset= -  ieee->external_symbol_min_index;
+    for (symp = IEEE_DATA(abfd)->external_symbols;
+	 symp != (ieee_symbol_type *)NULL;
+	 symp = symp->next) {
+      /* Place into table at correct index locations */
+      location[symp->index + ieee->external_symbol_base_offset] = &symp->symbol;
+
+    }
+
+    /* The external refs are indexed in a bit */
+    ieee->external_reference_base_offset   =
+     -  ieee->external_reference_min_index +ieee->external_symbol_count ;
+
+    for (symp = IEEE_DATA(abfd)->external_reference;
+	 symp != (ieee_symbol_type *)NULL;
+	 symp = symp->next) {
+      location[symp->index + ieee->external_reference_base_offset] =
+       &symp->symbol;
+
+    }
+
+
+
+
   }
-
-
-  ieee->external_symbol_base_offset= -  ieee->external_symbol_min_index;
-  for (symp = IEEE_DATA(abfd)->external_symbols;
-       symp != (ieee_symbol_type *)NULL;
-       symp = symp->next) {
-    /* Place into table at correct index locations */
-    location[symp->index + ieee->external_symbol_base_offset] = &symp->symbol;
-
-  }
-
-  /* The external refs are indexed in a bit */
-  ieee->external_reference_base_offset   =
-    -  ieee->external_reference_min_index +ieee->external_symbol_count ;
-
-  for (symp = IEEE_DATA(abfd)->external_reference;
-       symp != (ieee_symbol_type *)NULL;
-       symp = symp->next) {
-    location[symp->index + ieee->external_reference_base_offset] =
-      &symp->symbol;
-
-  }
-
-
-
   location[abfd->symcount] = (asymbol *)NULL;
-}
   return abfd->symcount;
 }
 static asection *
@@ -1064,7 +1062,7 @@ uint8e_type buffer[512];
     else loop = false;
   }
 
-  ieee->elements = obstack_finish(&ob);
+  ieee->elements = (ieee_ar_obstack_type *)obstack_finish(&ob);
 
   /* Now scan the area again, and replace BB offsets with file */
   /* offsets */
@@ -1180,7 +1178,6 @@ DEFUN(ieee_object_p,(abfd),
 
   }
   abfd->flags = HAS_SYMS;
-
 /* By now we know that this is a real IEEE file, we're going to read
    the whole thing into memory so that we can run up and down it
    quickly. We can work out how big the file is from the trailer
@@ -2972,6 +2969,7 @@ bfd_target ieee_vec =
    HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
   ( SEC_CODE|SEC_DATA|SEC_ROM|SEC_HAS_CONTENTS
    |SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+   0,				/* leading underscore */
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
     1,				/* minimum alignment */

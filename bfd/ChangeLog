@@ -1,3 +1,16 @@
+Thu Oct  8 08:52:48 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	 Now a bfd knows whether underscores are normally prepended
+	 to symbols in its file format.
+
+	* aout-adobe.c, aout-target.h, bout.c, coff-a29k.c, coff-h8300.c,
+	coff-z8k.c: targets set so they have leading underscore
+	* coff-i386.c, coff-i960.c, coff-m68k.c, coff-mips.c, coff-m88k.c,
+	coff-rs6000.c, coff-we32k.c, elf.c, ieee.c, srec.c: targets set 
+	without leading underscore flag
+	* targets.c: add symbol leading char to xvec description
+	* bfd-in.h (bfd_get_symbol_leading_char): new macro.
+
 Mon Oct  5 14:32:55 1992  Per Bothner  (bothner@cygnus.com)
 
 	* archive.c:  Make errno global.

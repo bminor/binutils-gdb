@@ -391,18 +391,17 @@ static  reloc_howto_type howto_reloc_abs32code =
 HOWTO(ABS32CODE, 0, 2, 32, false, 0, true, true,0,"callx", true, 0xffffffff,0xffffffff,false);
 
 static reloc_howto_type howto_align_table[] = {
-  HOWTO (ALIGN, 0, 0x1, 0, 0, 0, 0, 0, 0, "align16", 0, 0, 0, 0),
-  HOWTO (ALIGN, 0, 0x3, 0, 0, 0, 0, 0, 0, "align32", 0, 0, 0, 0),
-  HOWTO (ALIGN, 0, 0x7, 0, 0, 0, 0, 0, 0, "align64", 0, 0, 0, 0),
-  HOWTO (ALIGN, 0, 0xf, 0, 0, 0, 0, 0, 0, "align128", 0, 0, 0, 0),
+  HOWTO (ALIGN, 0, 0x1, 0, false, 0, false, false, 0, "align16", false, 0, 0, false),
+  HOWTO (ALIGN, 0, 0x3, 0, false, 0, false, false, 0, "align32", false, 0, 0, false),
+  HOWTO (ALIGN, 0, 0x7, 0, false, 0, false, false, 0, "align64", false, 0, 0, false),
+  HOWTO (ALIGN, 0, 0xf, 0, false, 0, false, false, 0, "align128", false, 0, 0, false),
 };
 
 static reloc_howto_type howto_done_align_table[] = {
-  HOWTO (ALIGNDONE, 0x1, 0x1, 0, 0, 0, 0, 0, 0, "donealign16", 0, 0, 0,0),
-  HOWTO (ALIGNDONE, 0x3, 0x3, 0, 0, 0, 0, 0, 0, "donealign32", 0, 0, 0,0),
-  HOWTO (ALIGNDONE, 0x7, 0x7, 0, 0, 0, 0, 0, 0, "donealign64", 0, 0, 0,0),
-  HOWTO (ALIGNDONE, 0xf, 0xf, 0, 0, 0, 0, 0, 0, "donealign128", 0, 0, 0,0),
-
+  HOWTO (ALIGNDONE, 0x1, 0x1, 0, false, 0, false, false, 0, "donealign16", false, 0, 0, false),
+  HOWTO (ALIGNDONE, 0x3, 0x3, 0, false, 0, false, false, 0, "donealign32", false, 0, 0, false),
+  HOWTO (ALIGNDONE, 0x7, 0x7, 0, false, 0, false, false, 0, "donealign64", false, 0, 0, false),
+  HOWTO (ALIGNDONE, 0xf, 0xf, 0, false, 0, false, false, 0, "donealign128", false, 0, 0, false),
 };
 
 static reloc_howto_type *
@@ -509,6 +508,7 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
     unsigned char *raw = (unsigned char *)rptr;
     unsigned int symnum;
     cache_ptr->address = bfd_h_get_32 (abfd, raw + 0);
+    cache_ptr->howto = 0;
     if (abfd->xvec->header_byteorder_big_p) 
     {
       symnum = (raw[4] << 16) | (raw[5] << 8) | raw[6];
@@ -617,7 +617,6 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
        */
       arelent tmp;
       arelent *cursor = cache_ptr-1;
-      unsigned int where = counter;
       bfd_vma stop = cache_ptr->address;
       tmp  = *cache_ptr;
       while (cursor->address > stop && cursor >= reloc_cache)
@@ -652,21 +651,19 @@ b_out_squirt_out_relocs (abfd, section)
   arelent **generic;
   int r_extern;
   int r_idx;
-  int r_addend;
   int incode_mask;  
   int len_1;
   unsigned int count = section->reloc_count;
   struct relocation_info *native, *natptr;
   size_t natsize = count * sizeof (struct relocation_info);
   int extern_mask, pcrel_mask,  len_2, callj_mask;
-  int len1;
   if (count == 0) return true;
   generic   = section->orelocation;
   native = ((struct relocation_info *) bfd_xmalloc (natsize));
   if (!native) {
-      bfd_error = no_memory;
-      return false;
-    }
+    bfd_error = no_memory;
+    return false;
+  }
 
   if (abfd->xvec->header_byteorder_big_p) 
   {
@@ -678,7 +675,7 @@ b_out_squirt_out_relocs (abfd, section)
     callj_mask  = 0x02;
     incode_mask = 0x08;
   } 
-else 
+  else 
   {
     /* Little-endian bit field allocation order */
     pcrel_mask  = 0x01;
@@ -719,15 +716,27 @@ else
       raw[7] = len_2 + incode_mask;
     }
     else {
-	raw[7] = len_2;
-      }
+      raw[7] = len_2;
+    }
     if (output_section == &bfd_com_section 
 	|| output_section == &bfd_abs_section
 	|| output_section == &bfd_und_section) 
     {
-      /* Fill in symbol */
-      r_extern = 1;
-      r_idx =  stoi((*(g->sym_ptr_ptr))->flags);
+
+      if (bfd_abs_section.symbol == sym)
+      {
+	/* Whoops, looked like an abs symbol, but is really an offset
+	   from the abs section */
+	r_idx = 0;
+	r_extern = 0;
+       }
+      else 
+      {
+	/* Fill in symbol */
+
+	r_extern = 1;
+	r_idx =  stoi((*(g->sym_ptr_ptr))->flags);
+      }
     }
     else 
     {
@@ -737,22 +746,22 @@ else
     }
 
     if (abfd->xvec->header_byteorder_big_p) {
-	raw[4] = (unsigned char) (r_idx >> 16);
-	raw[5] = (unsigned char) (r_idx >>  8);
-	raw[6] = (unsigned char) (r_idx     );
-      } else {
-	  raw[6] = (unsigned char) (r_idx >> 16);
-	  raw[5] = (unsigned char) (r_idx>>  8);
-	  raw[4] = (unsigned char) (r_idx     );
-	}  
-if (r_extern)
-    raw[7] |= extern_mask; 
+      raw[4] = (unsigned char) (r_idx >> 16);
+      raw[5] = (unsigned char) (r_idx >>  8);
+      raw[6] = (unsigned char) (r_idx     );
+    } else {
+      raw[6] = (unsigned char) (r_idx >> 16);
+      raw[5] = (unsigned char) (r_idx>>  8);
+      raw[4] = (unsigned char) (r_idx     );
+    }  
+    if (r_extern)
+     raw[7] |= extern_mask; 
   }
 
   if (bfd_write ((PTR) native, 1, natsize, abfd) != natsize) {
-      free((PTR)native);
-      return false;
-    }
+    free((PTR)native);
+    return false;
+  }
   free ((PTR)native);
 
   return true;
@@ -979,11 +988,9 @@ DEFUN(aligncode,(input_section, symbols, r, shrink),
       unsigned int shrink) 
 {
   bfd_vma value = get_value(r,0);
-	
 
   bfd_vma dot = input_section->output_section->vma +  input_section->output_offset + r->address;	
   bfd_vma gap;
-  bfd_vma this_dot;
   bfd_vma old_end;
   bfd_vma new_end;
     int shrink_delta;
@@ -1259,18 +1266,19 @@ bfd_target b_out_vec_big_host =
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT ),
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+  '_',				/* symbol leading char */
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
-     2,				/* minumum alignment power */
+  2,				/* minumum alignment power */
 
-_do_getl64, _do_putl64,  _do_getl32, _do_putl32, _do_getl16, _do_putl16, /* data */
-_do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
-    {_bfd_dummy_target, b_out_object_p, /* bfd_check_format */
-       bfd_generic_archive_p, _bfd_dummy_target},
-    {bfd_false, b_out_mkobject,	/* bfd_set_format */
-       _bfd_generic_mkarchive, bfd_false},
-    {bfd_false, b_out_write_object_contents,	/* bfd_write_contents */
-       _bfd_write_archive_contents, bfd_false},
+  _do_getl64, _do_putl64,  _do_getl32, _do_putl32, _do_getl16, _do_putl16, /* data */
+  _do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
+ {_bfd_dummy_target, b_out_object_p, /* bfd_check_format */
+   bfd_generic_archive_p, _bfd_dummy_target},
+ {bfd_false, b_out_mkobject,	/* bfd_set_format */
+   _bfd_generic_mkarchive, bfd_false},
+ {bfd_false, b_out_write_object_contents, /* bfd_write_contents */
+   _bfd_write_archive_contents, bfd_false},
 
   JUMP_TABLE(aout_32),
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* COFF stuff?! */
@@ -1288,6 +1296,7 @@ bfd_target b_out_vec_little_host =
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT ),
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+    '_',			/* symbol leading char */
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
      2,				/* minum align */
