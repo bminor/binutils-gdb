@@ -493,7 +493,8 @@ static void
 store_register (int regno)
 {
   void *rp;
-  void *v = (void *) register_buffer (regno);
+  void *v = alloca (MAX_REGISTER_RAW_SIZE);
+  regcache_collect (regno, v);
 
   if (regno < FP0_REGNUM)
     memcpy ((char *) &a_tss + regno_mapping[regno].tss_ofs,

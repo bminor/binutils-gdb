@@ -1,3 +1,15 @@
+2001-11-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* TODO (register_buffer): Delete.
+	* regcache.c (register_buffer): Make static.
+	(regcache_collect): New function.
+	* regcache.h (register_buffer): Delete declaration.
+	(regcache_collect): Declare.
+	* remote.c (store_register_using_P): Rewrite using
+	regcache_collect.
+	(remote_store_registers): Ditto.
+	* go32-nat.c (store_register): Ditto.
+
 2001-11-14  Andrew Cagney  <ac131313@redhat.com>
 
 	* remote.c (struct remote_state): Declare.

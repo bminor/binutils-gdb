@@ -3444,13 +3444,13 @@ store_register_using_P (int regno)
   struct remote_state *rs = get_remote_state ();
   /* Try storing a single register.  */
   char *buf = alloca (rs->remote_packet_size);
-  char *regp;
+  char *regp = alloca (MAX_REGISTER_RAW_SIZE);
   char *p;
   int i;
 
   sprintf (buf, "P%x=", regno);
   p = buf + strlen (buf);
-  regp = register_buffer (regno);
+  regcache_collect (regno, regp);
   bin2hex (regp, p, REGISTER_RAW_SIZE (regno));
   remote_send (buf, (rs->remote_packet_size));
 
@@ -3465,10 +3465,10 @@ static void
 remote_store_registers (int regno)
 {
   struct remote_state *rs = get_remote_state ();
-  char *buf = alloca (rs->remote_packet_size);
+  char *buf;
+  char *regs;
   int i;
   char *p;
-  char *regs;
 
   set_thread (PIDGET (inferior_ptid), 1);
 
@@ -3501,13 +3501,23 @@ remote_store_registers (int regno)
 	}
     }
 
-  buf[0] = 'G';
+  /* Extract all the registers in the regcache copying them into a
+     local buffer.  */
+  {
+    int i;
+    regs = alloca (REGISTER_BYTES);
+    memset (regs, REGISTER_BYTES, 0);
+    for (i = 0; i < NUM_REGS; i++)
+      {
+	regcache_collect (i, regs + REGISTER_BYTE (i));
+      }
+  }
 
   /* Command describes registers byte by byte,
      each byte encoded as two hex characters.  */
-
-  regs = register_buffer (-1);
-  p = buf + 1;
+  buf = alloca (rs->remote_packet_size);
+  p = buf;
+  *p++ = 'G';
   /* remote_prepare_to_store insures that register_bytes_found gets set.  */
   bin2hex (regs, p, register_bytes_found);
   remote_send (buf, (rs->remote_packet_size));

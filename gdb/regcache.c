@@ -90,7 +90,7 @@ register_changed (int regnum)
 /* If REGNUM >= 0, return a pointer to register REGNUM's cache buffer area,
    else return a pointer to the start of the cache buffer.  */
 
-char *
+static char *
 register_buffer (int regnum)
 {
   if (regnum < 0)
@@ -567,6 +567,13 @@ supply_register (int regnum, char *val)
   CLEAN_UP_REGISTER_VALUE (regnum, register_buffer (regnum));
 #endif
 }
+
+void
+regcache_collect (int regnum, void *buf)
+{
+  memcpy (buf, register_buffer (regnum), REGISTER_RAW_SIZE (regnum));
+}
+
 
 /* read_pc, write_pc, read_sp, write_sp, read_fp, write_fp, etc.
    Special handling for registers PC, SP, and FP.  */

@@ -136,7 +136,6 @@ Deprecate, if not delete, the following:
 
         register[]
         register_valid[]
-        register_buffer()
 	REGISTER_BYTE()
                 Replaced by, on the target side
                   supply_register()

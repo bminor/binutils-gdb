@@ -28,6 +28,14 @@
 void regcache_read (int rawnum, char *buf);
 void regcache_write (int rawnum, char *buf);
 
+/* Transfer a raw register [0..NUM_REGS) between the regcache and the
+   target.  These functions are called by the target in response to a
+   target_fetch_registers() or target_store_registers().  */
+
+extern void supply_register (int regnum, char *val);
+extern void regcache_collect (int regnum, void *buf);
+
+
 /* DEPRECATED: Character array containing an image of the inferior
    programs' registers for the most recently referenced thread. */
 
@@ -44,11 +52,6 @@ extern int register_cached (int regnum);
 extern void set_register_cached (int regnum, int state);
 
 extern void register_changed (int regnum);
-
-/* DEPRECATED: Functional interface returning pointer into registers[]
-   array. */
-
-extern char *register_buffer (int regnum);
 
 extern void registers_changed (void);
 
@@ -75,7 +78,5 @@ extern LONGEST read_signed_register_pid (int regnum, ptid_t ptid);
 extern void write_register (int regnum, LONGEST val);
 
 extern void write_register_pid (int regnum, CORE_ADDR val, ptid_t ptid);
-
-extern void supply_register (int regnum, char *val);
 
 #endif /* REGCACHE_H */
