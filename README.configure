@@ -2,8 +2,7 @@
 
 		   On Configuring Development Tools
 
-	 Last Mod Fri May 3 13:02:35 PDT 1991, by rich@sendai
-
+	 Last Mod Fri Jul 19 17:59:52 PDT 1991 by gnu@cygnus.com
 
 INTRO
 -----
@@ -514,13 +513,6 @@ The Three Party Cross:
 FINAL NOTES
 -----------
 
-Gdb's config has features not yet present in the uniform configuration
-scheme described here.  For this reason, configuration of gdb must
-currently be done separately from that of the rest of this package.
-This will be corrected soon.  For more information on the
-configuration of gdb, please refer to the documents in gdb.{your
-target} if it exists, otherwise gdb.
-
 By "configures", I mean that links, Makefile, .gdbinit, and
 config.status are built.  Configuration is always done from the source
 directory.
@@ -558,7 +550,7 @@ the chosen host+target pair and build style, that is, if you use
 subdirectories or not.  The host and target specific Makefile may or
 may not exist.  If fragments
 
-* Makefiles can be editted directly, but those changes will eventually
+* Makefiles can be edited directly, but those changes will eventually
   be lost.  Changes intended to be permanent for a specific host
   should be made to the host specific Makefile fragment.  This should
   be in ./config/hmake-host if it exists.  Changes intended to be
@@ -569,14 +561,14 @@ may not exist.  If fragments
   these, either use "make Makefile" or re-configure from the source
   directory.
 
-* configure can be editted directly, but those changes will eventually
+* configure can be edited directly, but those changes will eventually
   be lost.  Changes intended to be permanent for a specific directory
   should be made to configure.in.  Changes intended to be permanent
   for all configure scripts should be made to configure.template.
   Propogating changes to configure.in requires the presence of
   configure.template which normally resides in the uppermost directory
   you received.  To propogate changes to either configure.template or
-  a configure.in, use "configure +template=absolutepathtothetemplate".
+  a configure.in, use "configure +template=pathtothetemplate".
   This will configure the configure scripts themselves, recursively if
   appropriate.
 
