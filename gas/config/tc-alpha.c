@@ -1050,12 +1050,18 @@ md_apply_fix (fixP, valueP)
       break;
 
     case BFD_RELOC_16:
+      if (fixP->fx_pcrel)
+	fixP->fx_r_type = BFD_RELOC_16_PCREL;
       size = 2;
       goto do_reloc_xx;
     case BFD_RELOC_32:
+      if (fixP->fx_pcrel)
+	fixP->fx_r_type = BFD_RELOC_32_PCREL;
       size = 4;
       goto do_reloc_xx;
     case BFD_RELOC_64:
+      if (fixP->fx_pcrel)
+	fixP->fx_r_type = BFD_RELOC_64_PCREL;
       size = 8;
     do_reloc_xx:
       if (fixP->fx_pcrel == 0 && fixP->fx_addsy == 0)

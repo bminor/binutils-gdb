@@ -1,3 +1,14 @@
+Tue Oct 14 19:12:45 1997  Richard Henderson  <rth@cygnus.com>
+
+	* config/tc-alpha.h (DIFF_EXPR_OK): Define.
+	* config/tc-i386.h (DIFF_EXPR_OK): Define.
+	* config/tc-alpha.c (md_apply_fix): Notice fx_pcrel and substitute
+	the correct relocation when it exists.
+	* config/tc-i386.c (md_apply_fix3): Likewise.
+
+	* config/tc-ppc.h: Correct typo in comment.
+	* config/tc-v850.h: Likewise.
+
 Fri Oct 10 16:09:35 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* config/tc-d10v.c (parallel_ok): Allow parallel instruction issue
