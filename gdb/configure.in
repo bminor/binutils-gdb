@@ -317,8 +317,7 @@ case $host_os in
       LIBS="../libtermcap/libtermcap.a $LIBS"
       ac_cv_search_tgetent="../libtermcap/libtermcap.a"
     fi ;;
-  go32*)
-    # ??? Is this really true?
+  go32* | *djgpp*)
     ac_cv_search_tgetent="none required"
     ;;
   aix*)

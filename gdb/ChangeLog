@@ -1,3 +1,15 @@
+2003-12-29  Eli Zaretskii  <eliz@elta.co.il>
+
+	* configure.in: Set ac_cv_search_tgetent to "none required" for
+	"*djgpp*" targets as well (DJGPP doesn't have termcap and doesn't
+	need one).
+
+	* config/djgpp/config.sed: Tweak to adapt to the changes in
+	configury.
+
+	* config/djgpp/djconfig.sh: Fix the test of unpacked
+	distribution, since there's no gdb.cxx directory anymore.
+
 2003-12-28  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-sol2-tdep.c (i386_sol2_mcontext_addr): New function.
