@@ -1,3 +1,8 @@
+2003-11-21  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* ecoff.c: Convert to ISO-C.
+	* ecoff.h: Likewise.
+
 2003-11-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.c (parse_cpu): New function, broken out from..
