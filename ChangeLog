@@ -1,3 +1,11 @@
+Tue Oct 11 12:12:29 1994  Jason Merrill  (jason@phydeaux.cygnus.com)
+
+	* Makefile.in (CXXFLAGS): Use -fno-implicit-templates instead of
+	-fexternal-templates.
+
+	* configure.in (target_libs): Add libstdc++.
+	(noconfigdirs): Add libstdc++ as appropriate.
+
 Thu Oct  6 18:00:54 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* config.guess:  Update from FSF.

@@ -74,7 +74,7 @@ CHILL_LIB = -lchill
 CXX = gcc
 
 # Use -O2 to stress test the compiler.
-CXXFLAGS = -g -O2 -fexternal-templates
+CXXFLAGS = -g -O2 -fno-implicit-templates
 
 RANLIB = ranlib
 NM = nm
@@ -926,7 +926,7 @@ all-mmalloc:
 all-newlib: all-binutils all-gas all-pagas all-gcc
 all-opcodes: all-bfd
 all-patch:
-all-prms: all-libiberty all-librx
+all-prms: all-libiberty
 all-rcs:
 all-readline:
 all-recode: all-libiberty
