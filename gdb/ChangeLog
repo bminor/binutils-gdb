@@ -7,7 +7,7 @@
 2003-10-09  Elena Zannoni  <ezannoni@redhat.com>
 
 	* sh-tdep.c (sh_gdbarch_init): Delete setting of push_dummy_code.
-	(sh_gdbarch_init): Delete function, it's only used for dummy calls
+	(sh_push_dummy_code): Delete function, it's only used for dummy calls
 	on stack.
 	
 	Based on input by Stephen Clarke (stephen.clarke@superh.com):
