@@ -346,7 +346,9 @@ static int level_5 PARAMS ((int, sb *, exp_t *));
 static int exp_parse PARAMS ((int, sb *, exp_t *));
 static void exp_string PARAMS ((exp_t *, sb *));
 static int exp_get_abs PARAMS ((const char *, int, sb *, int *));
+#if 0
 static void strip_comments PARAMS ((sb *));
+#endif
 static void unget PARAMS ((int));
 static void include_buf PARAMS ((sb *, sb *, include_type, int));
 static void include_print_where_line PARAMS ((FILE *));
@@ -354,7 +356,7 @@ static void include_print_line PARAMS ((FILE *));
 static int get_line PARAMS ((sb *));
 static int grab_label PARAMS ((sb *, sb *));
 static void change_base PARAMS ((int, sb *, sb *));
-static void do_end PARAMS ((void));
+static void do_end PARAMS ((sb *));
 static void do_assign PARAMS ((int, int, sb *));
 static void do_radix PARAMS ((sb *));
 static int get_opsize PARAMS ((int, sb *, int *));
@@ -398,13 +400,16 @@ static void do_aendw PARAMS ((void));
 static void do_exitm PARAMS ((void));
 static void do_arepeat PARAMS ((int, sb *));
 static void do_endm PARAMS ((void));
+static void do_irp PARAMS ((int, sb *, int));
 static int do_formals PARAMS ((macro_entry *, int, sb *));
 static void do_local PARAMS ((int, sb *));
 static void do_macro PARAMS ((int, sb *));
 static int get_token PARAMS ((int, sb *, sb *));
 static int get_apost_token PARAMS ((int, sb *, sb *, int));
 static int sub_actual
-  PARAMS ((int, sb *, sb *, macro_entry *, int, sb *, int));
+  PARAMS ((int, sb *, sb *, hash_table *, int, sb *, int));
+static void macro_expand_body
+  PARAMS ((sb *, sb *, sb *, formal_entry *, hash_table *));
 static void macro_expand PARAMS ((sb *, int, sb *, macro_entry *));
 static int macro_op PARAMS ((int, sb *));
 static int getstring PARAMS ((int, sb *, sb *));
@@ -1202,7 +1207,7 @@ hash_table vars;  /* hash table for  eq variables */
 
 #define in_comment ';'
 
-#if 1
+#if 0
 static void
 strip_comments (out)
      sb *out;
@@ -1493,9 +1498,12 @@ change_base (idx, in, out)
 
 /* .end */
 static void
-do_end ()
+do_end (in)
+     sb *in;
 {
   had_end = 1;
+  if (mri)
+    fprintf (outfile, "%s\n", sb_name (in));
 }
 
 /* .assign */
@@ -2923,8 +2931,91 @@ do_endm ()
   ERROR ((stderr, ".ENDM without a matching .MACRO.\n"));
 }
 
+/* MRI IRP pseudo-op.  */
 
-/* MARRO PROCESSING */
+static void
+do_irp (idx, in, irpc)
+     int idx;
+     sb *in;
+     int irpc;
+{
+  const char *mn;
+  sb sub;
+  formal_entry f;
+  hash_table h;
+  hash_entry *p;
+  sb name;
+  sb out;
+
+  if (irpc)
+    mn = "IRPC";
+  else
+    mn = "IRP";
+
+  idx = sb_skip_white (idx, in);
+
+  sb_new (&sub);
+  buffer_and_nest (mn, "ENDR", &sub);
+  
+  sb_new (&f.name);
+  sb_new (&f.def);
+  sb_new (&f.actual);
+
+  idx = get_token (idx, in, &f.name);
+  if (f.name.len == 0)
+    {
+      ERROR ((stderr, "Missing model parameter in %s", mn));
+      return;
+    }
+
+  hash_new_table (1, &h);
+  p = hash_create (&h, &f.name);
+  p->type = hash_formal;
+  p->value.f = &f;
+
+  f.index = 1;
+  f.next = NULL;
+
+  sb_new (&name);
+  sb_add_string (&name, mn);
+
+  sb_new (&out);
+
+  idx = sb_skip_comma (idx, in);
+  if (eol (idx, in))
+    {
+      /* Expand once with a null string.  */
+      macro_expand_body (&name, &sub, &out, &f, &h);
+      fprintf (outfile, "%s", sb_name (&out));
+    }
+  else
+    {
+      while (!eol (idx, in))
+	{
+	  if (!irpc)
+	    idx = get_any_string (idx, in, &f.actual, 1, 0);
+	  else
+	    {
+	      sb_reset (&f.actual);
+	      sb_add_char (&f.actual, in->ptr[idx]);
+	      ++idx;
+	    }
+	  sb_reset (&out);
+	  macro_expand_body (&name, &sub, &out, &f, &h);
+	  fprintf (outfile, "%s", sb_name (&out));
+	  if (!irpc)
+	    idx = sb_skip_comma (idx, in);
+	  else
+	    idx = sb_skip_white (idx, in);
+	}
+    }
+
+  sb_kill (&sub);
+  sb_kill (&name);
+  sb_kill (&out);
+}
+
+/* MACRO PROCESSING */
 
 static int number;
 hash_table macro_table;
@@ -3128,11 +3219,11 @@ get_apost_token (idx, in, name, kind)
 }
 
 static int
-sub_actual (src, in, t, m, kind, out, copyifnotthere)
+sub_actual (src, in, t, formal_hash, kind, out, copyifnotthere)
      int src;
      sb *in;
      sb *t;
-     macro_entry *m;
+     hash_table *formal_hash;
      int kind;
      sb *out;
      int copyifnotthere;
@@ -3141,7 +3232,7 @@ sub_actual (src, in, t, m, kind, out, copyifnotthere)
   hash_entry *ptr;
   src = get_apost_token (src, in, t, kind);
   /* See if it's in the macro's hash table */
-  ptr = hash_lookup (&m->formal_hash, t);
+  ptr = hash_lookup (formal_hash, t);
   if (ptr)
     {
       if (ptr->value.f->actual.len)
@@ -3165,8 +3256,167 @@ sub_actual (src, in, t, m, kind, out, copyifnotthere)
   return src;
 }
 
-static
-void
+/* Copy the body from the macro buffer into a safe place and
+   substitute any args.  */
+
+static void
+macro_expand_body (name, in, out, formals, formal_hash)
+     sb *name;
+     sb *in;
+     sb *out;
+     formal_entry *formals;
+     hash_table *formal_hash;
+{
+  sb t;
+  int src = 0;
+  int inquote = 0;
+
+  sb_new (&t);
+
+  while (src < in->len)
+    {
+      if (in->ptr[src] == '&')
+	{
+	  sb_reset (&t);
+	  if (mri && src + 1 < in->len && in->ptr[src + 1] == '&')
+	    {
+	      src = sub_actual (src + 2, in, &t, formal_hash, '\'', out, 1);
+	    }
+	  else
+	    {
+	      src = sub_actual (src + 1, in, &t, formal_hash, '&', out, 0);
+	    }
+	}
+      else if (in->ptr[src] == '\\')
+	{
+	  src++;
+	  if (in->ptr[src] == comment_char)
+	    {
+	      /* This is a comment, just drop the rest of the line */
+	      while (src < in->len
+		     && in->ptr[src] != '\n')
+		src++;
+
+	    }
+	  else if (in->ptr[src] == '(')
+	    {
+	      /* Sub in till the next ')' literally */
+	      src++;
+	      while (src < in->len && in->ptr[src] != ')')
+		{
+		  sb_add_char (out, in->ptr[src++]);
+		}
+	      if (in->ptr[src] == ')')
+		src++;
+	      else
+		ERROR ((stderr, "Missplaced ).\n"));
+	    }
+	  else if (in->ptr[src] == '@')
+	    {
+	      /* Sub in the macro invocation number */
+
+	      char buffer[6];
+	      src++;
+	      sprintf (buffer, "%05d", number);
+	      sb_add_string (out, buffer);
+	    }
+	  else if (in->ptr[src] == '&')
+	    {
+	      /* This is a preprocessor variable name, we don't do them
+		 here */
+	      sb_add_char (out, '\\');
+	      sb_add_char (out, '&');
+	      src++;
+	    }
+	  else if (mri
+		   && isalnum ((unsigned char) in->ptr[src]))
+	    {
+	      int ind;
+	      formal_entry *f;
+
+	      if (isdigit ((unsigned char) in->ptr[src]))
+		ind = in->ptr[src] - '0';
+	      else if (isupper ((unsigned char) in->ptr[src]))
+		ind = in->ptr[src] - 'A' + 10;
+	      else
+		ind = in->ptr[src] - 'a' + 10;
+	      ++src;
+	      for (f = formals; f != NULL; f = f->next)
+		{
+		  if (f->index == ind - 1)
+		    {
+		      if (f->actual.len != 0)
+			sb_add_sb (out, &f->actual);
+		      else
+			sb_add_sb (out, &f->def);
+		      break;
+		    }
+		}
+	    }
+	  else
+	    {
+	      sb_reset (&t);
+	      src = sub_actual (src, in, &t, formal_hash, '\'', out, 0);
+	    }
+	}
+      else if (ISFIRSTCHAR (in->ptr[src]) && (alternate || mri))
+	{
+	  sb_reset (&t);
+	  src = sub_actual (src, in, &t, formal_hash, '\'', out, 1);
+	}
+      else if (ISCOMMENTCHAR (in->ptr[src])
+	       && src + 1 <  in->len
+	       && ISCOMMENTCHAR (in->ptr[src+1])
+	       && !inquote)
+	{
+	  /* Two comment chars in a row cause the rest of the line to
+             be dropped.  */
+	  while (src < in->len && in->ptr[src] != '\n')
+	    src++;
+	}
+      else if (in->ptr[src] == '"'
+	       || (mri && in->ptr[src] == '\''))
+	{
+	  inquote = !inquote;
+	  sb_add_char (out, in->ptr[src++]);
+	}
+      else if (mri
+	       && in->ptr[src] == '='
+	       && src + 1 < in->len
+	       && in->ptr[src + 1] == '=')
+	{
+	  hash_entry *ptr;
+
+	  sb_reset (&t);
+	  src = get_token (src + 2, in, &t);
+	  ptr = hash_lookup (formal_hash, &t);
+	  if (ptr == NULL)
+	    {
+	      ERROR ((stderr, "MACRO formal argument %s does not exist.\n",
+		      sb_name (&t)));
+	    }
+	  else
+	    {
+	      if (ptr->value.f->actual.len)
+		{
+		  sb_add_string (out, "-1");
+		}
+	      else
+		{
+		  sb_add_char (out, '0');
+		}
+	    }
+	}
+      else
+	{
+	  sb_add_char (out, in->ptr[src++]);
+	}
+    }
+
+  sb_kill (&t);
+}
+
+static void
 macro_expand (name, idx, in, m)
      sb *name;
      int idx;
@@ -3311,150 +3561,9 @@ macro_expand (name, idx, in, m)
       sb_add_string (&ptr->value.f->actual, buffer);
     }
 
-  /* Copy the stuff from the macro buffer into a safe place and substitute any args */
+  macro_expand_body (name, &m->sub, &out, m->formals, &m->formal_hash);
 
-  {
-    int src = 0;
-    int inquote = 0;
-    sb *in = &m->sub;
-    sb_reset (&out);
-
-    while (src < in->len)
-      {
-	if (in->ptr[src] == '&')
-	  {
-	    sb_reset (&t);
-	    if (mri && src + 1 < in->len && in->ptr[src + 1] == '&')
-	      {
-		src = sub_actual (src + 2, in, &t, m, '\'', &out, 1);
-	      }
-	    else
-	      {
-		src = sub_actual (src + 1, in, &t, m, '&', &out, 0);
-	      }
-	  }
-	else if (in->ptr[src] == '\\')
-	  {
-	    src++;
-	    if (in->ptr[src] == comment_char)
-	      {
-		/* This is a comment, just drop the rest of the line */
-		while (src < in->len
-		       && in->ptr[src] != '\n')
-		  src++;
-
-	      }
-	    else if (in->ptr[src] == '(')
-	      {
-		/* Sub in till the next ')' literally */
-		src++;
-		while (src < in->len && in->ptr[src] != ')')
-		  {
-		    sb_add_char (&out, in->ptr[src++]);
-		  }
-		if (in->ptr[src] == ')')
-		  src++;
-		else
-		  ERROR ((stderr, "Missplaced ).\n"));
-	      }
-	    else if (in->ptr[src] == '@')
-	      {
-		/* Sub in the macro invocation number */
-
-		char buffer[6];
-		src++;
-		sprintf (buffer, "%05d", number);
-		sb_add_string (&out, buffer);
-	      }
-	    else if (in->ptr[src] == '&')
-	      {
-		/* This is a preprocessor variable name, we don't do them
-		   here */
-		sb_add_char (&out, '\\');
-		sb_add_char (&out, '&');
-		src++;
-	      }
-	    else if (mri
-		     && isalnum ((unsigned char) in->ptr[src]))
-	      {
-		int ind;
-
-		if (isdigit ((unsigned char) in->ptr[src]))
-		  ind = in->ptr[src] - '0';
-		else if (isupper ((unsigned char) in->ptr[src]))
-		  ind = in->ptr[src] - 'A' + 10;
-		else
-		  ind = in->ptr[src] - 'a' + 10;
-		++src;
-		for (f = m->formals; f != NULL; f = f->next)
-		  {
-		    if (f->index == ind - 1)
-		      {
-			if (f->actual.len != 0)
-			  sb_add_sb (&out, &f->actual);
-			else
-			  sb_add_sb (&out, &f->def);
-			break;
-		      }
-		  }
-	      }
-	    else
-	      {
-		sb_reset (&t);
-		src = sub_actual (src, in, &t, m, '\'', &out, 0);
-	      }
-	  }
-	else if (ISFIRSTCHAR (in->ptr[src]) && (alternate || mri))
-	  {
-		sb_reset (&t);
-		src = sub_actual (src, in, &t, m, '\'', &out, 1);
-	  }
-	else if (ISCOMMENTCHAR (in->ptr[src])
-		 && src + 1 <  in->len
-		 && ISCOMMENTCHAR (in->ptr[src+1])
-		 && !inquote)
-	  {
-	    /* Two comment chars in a row cause the rest of the line to be dropped */
-	    while (src < in->len && in->ptr[src] != '\n')
-	      src++;
-	  }
-	else if (in->ptr[src] == '"') 
-	  {
-	    inquote = !inquote;
-	    sb_add_char (&out, in->ptr[src++]);
-	  }
-	else if (mri
-		 && in->ptr[src] == '='
-		 && src + 1 < in->len
-		 && in->ptr[src + 1] == '=')
-	  {
-	    sb_reset (&t);
-	    src = get_token (src + 2, in, &t);
-	    ptr = hash_lookup (&m->formal_hash, &t);
-	    if (ptr == NULL)
-	      {
-		ERROR ((stderr, "MACRO formal argument %s does not exist.\n",
-			sb_name (&t)));
-	      }
-	    else
-	      {
-		if (ptr->value.f->actual.len)
-		  {
-		    sb_add_string (&out, "-1");
-		  }
-		else
-		  {
-		    sb_add_char (&out, '0');
-		  }
-	      }
-	  }
-	else
-	  {
-	    sb_add_char (&out, in->ptr[src++]);
-	  }
-      }
-    include_buf (name, &out, include_macro, include_next_index ());
-  }
+  include_buf (name, &out, include_macro, include_next_index ());
 
   if (mri)
     {
@@ -3864,58 +3973,60 @@ chartype_init ()
 #define PROCESS 	0x1000  /* Run substitution over the line */
 #define LAB		0x2000  /* Spit out the label */
 
-#define K_EQU 		PROCESS|1
-#define K_ASSIGN 	PROCESS|2
-#define K_REG 		PROCESS|3
-#define K_ORG 		PROCESS|4
-#define K_RADIX 	PROCESS|5
-#define K_DATA 		LAB|PROCESS|6
-#define K_DATAB 	LAB|PROCESS|7
-#define K_SDATA 	LAB|PROCESS|8
-#define K_SDATAB 	LAB|PROCESS|9
-#define K_SDATAC 	LAB|PROCESS|10
-#define K_SDATAZ	LAB|PROCESS|11
-#define K_RES 		LAB|PROCESS|12
-#define K_SRES 		LAB|PROCESS|13
-#define K_SRESC 	LAB|PROCESS|14
-#define K_SRESZ 	LAB|PROCESS|15
-#define K_EXPORT 	LAB|PROCESS|16
-#define K_GLOBAL 	LAB|PROCESS|17
-#define K_PRINT 	LAB|PROCESS|19
-#define K_FORM 		LAB|PROCESS|20
-#define K_HEADING	LAB|PROCESS|21
-#define K_PAGE		LAB|PROCESS|22
-#define K_IMPORT	LAB|PROCESS|23
-#define K_PROGRAM	LAB|PROCESS|24
-#define K_END		PROCESS|25
-#define K_INCLUDE	PROCESS|26
-#define K_IGNORED	PROCESS|27
-#define K_ASSIGNA	PROCESS|28
-#define K_ASSIGNC	29
-#define K_AIF		PROCESS|30
-#define K_AELSE		PROCESS|31
-#define K_AENDI		PROCESS|32
-#define K_AREPEAT	PROCESS|33
-#define K_AENDR		PROCESS|34
-#define K_AWHILE	35
-#define K_AENDW		PROCESS|36
-#define K_EXITM		37
-#define K_MACRO		PROCESS|38
-#define K_ENDM		39
-#define K_ALIGN		PROCESS|LAB|40
-#define K_ALTERNATE     41
-#define K_DB		LAB|PROCESS|42
-#define K_DW		LAB|PROCESS|43
-#define K_DL		LAB|PROCESS|44
-#define K_LOCAL		45
-#define K_IFEQ		PROCESS|46
-#define K_IFNE		PROCESS|47
-#define K_IFLT		PROCESS|48
-#define K_IFLE		PROCESS|49
-#define K_IFGE		PROCESS|50
-#define K_IFGT		PROCESS|51
-#define K_IFC		PROCESS|52
-#define K_IFNC		PROCESS|53
+#define K_EQU 		(PROCESS|1)
+#define K_ASSIGN 	(PROCESS|2)
+#define K_REG 		(PROCESS|3)
+#define K_ORG 		(PROCESS|4)
+#define K_RADIX 	(PROCESS|5)
+#define K_DATA 		(LAB|PROCESS|6)
+#define K_DATAB 	(LAB|PROCESS|7)
+#define K_SDATA 	(LAB|PROCESS|8)
+#define K_SDATAB 	(LAB|PROCESS|9)
+#define K_SDATAC 	(LAB|PROCESS|10)
+#define K_SDATAZ	(LAB|PROCESS|11)
+#define K_RES 		(LAB|PROCESS|12)
+#define K_SRES 		(LAB|PROCESS|13)
+#define K_SRESC 	(LAB|PROCESS|14)
+#define K_SRESZ 	(LAB|PROCESS|15)
+#define K_EXPORT 	(LAB|PROCESS|16)
+#define K_GLOBAL 	(LAB|PROCESS|17)
+#define K_PRINT 	(LAB|PROCESS|19)
+#define K_FORM 		(LAB|PROCESS|20)
+#define K_HEADING	(LAB|PROCESS|21)
+#define K_PAGE		(LAB|PROCESS|22)
+#define K_IMPORT	(LAB|PROCESS|23)
+#define K_PROGRAM	(LAB|PROCESS|24)
+#define K_END		(PROCESS|25)
+#define K_INCLUDE	(PROCESS|26)
+#define K_IGNORED	(PROCESS|27)
+#define K_ASSIGNA	(PROCESS|28)
+#define K_ASSIGNC	(29)
+#define K_AIF		(PROCESS|30)
+#define K_AELSE		(PROCESS|31)
+#define K_AENDI		(PROCESS|32)
+#define K_AREPEAT	(PROCESS|33)
+#define K_AENDR		(PROCESS|34)
+#define K_AWHILE	(35)
+#define K_AENDW		(PROCESS|36)
+#define K_EXITM		(37)
+#define K_MACRO		(PROCESS|38)
+#define K_ENDM		(39)
+#define K_ALIGN		(PROCESS|LAB|40)
+#define K_ALTERNATE     (41)
+#define K_DB		(LAB|PROCESS|42)
+#define K_DW		(LAB|PROCESS|43)
+#define K_DL		(LAB|PROCESS|44)
+#define K_LOCAL		(45)
+#define K_IFEQ		(PROCESS|46)
+#define K_IFNE		(PROCESS|47)
+#define K_IFLT		(PROCESS|48)
+#define K_IFLE		(PROCESS|49)
+#define K_IFGE		(PROCESS|50)
+#define K_IFGT		(PROCESS|51)
+#define K_IFC		(PROCESS|52)
+#define K_IFNC		(PROCESS|53)
+#define K_IRP		(PROCESS|54)
+#define K_IRPC		(PROCESS|55)
 
 
 struct keyword
@@ -3992,6 +4103,8 @@ static struct keyword mrikinfo[] =
   { "ENDC", K_AENDI, 0 },
   { "MEXIT", K_EXITM, 0 },
   { "REPT", K_AREPEAT, 0 },
+  { "IRP", K_IRP, 0 },
+  { "IRPC", K_IRPC, 0 },
   { "ENDR", K_AENDR, 0 },
   { NULL, 0, 0 }
 };
@@ -4005,7 +4118,7 @@ process_pseudo_op (idx, line, acc)
      sb *line;
      sb *acc;
 {
-
+  int oidx = idx;
 
   if (line->ptr[idx] == '.' || alternate || mri)
     {
@@ -4048,6 +4161,16 @@ process_pseudo_op (idx, line, acc)
 	    }
 	  else
 	    fprintf (outfile, "\t");
+	}
+
+      if (mri && ptr->value.i == K_END)
+	{
+	  sb t;
+
+	  sb_new (&t);
+	  sb_add_buffer (&t, line->ptr + oidx, idx - oidx);
+	  fprintf (outfile, "\t%s", sb_name (&t));
+	  sb_kill (&t);
 	}
 
       if (ptr->value.i & PROCESS)
@@ -4193,7 +4316,7 @@ process_pseudo_op (idx, line, acc)
 	    case K_IGNORED:
 	      return 1;
 	    case K_END:
-	      do_end ();
+	      do_end (line);
 	      return 1;
 	    case K_ASSIGNA:
 	      do_assigna (idx, line);
@@ -4230,6 +4353,12 @@ process_pseudo_op (idx, line, acc)
 	      return 1;
 	    case K_IFNC:
 	      do_ifc (idx, line, 1);
+	      return 1;
+	    case K_IRP:
+	      do_irp (idx, line, 0);
+	      return 1;
+	    case K_IRPC:
+	      do_irp (idx, line, 1);
 	      return 1;
 	    }
 	}

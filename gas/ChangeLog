@@ -1,3 +1,22 @@
+Mon Aug 14 15:45:07 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gasp.c (strip_comments): Comment out; it's not used.
+	(do_end): Add parameter.  In MRI mode, print it out.
+	(do_irp): New static function.
+	(sub_actual): Change parameter m to formal_hash, changing type
+	from macro_entryh * to hash_table *.
+	(macro_expand_body): New static function, broken out of
+	macro_expand.
+	(macro_expand): Call macro_expand_body.
+	(K_*): Fully parenthesize.
+	(K_IRP, K_IRPC): Define.
+	(mrikinfo): Add IRP and IRPC.
+	(process_pseudo_op): In MRI mode, print out END pseudo-op.  Pass
+	line to do_end.  Handle K_IRP and K_IRPC.
+
+	* config/tc-m68k.c (s_opt): Reset *input_line_pointer even if we
+	don't do anything with the option.
+
 Sun Aug 13 17:03:58 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* frags.c (frag_align): Handle absolute_section.
