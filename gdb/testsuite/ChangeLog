@@ -1,3 +1,8 @@
+2002-08-29  Keith Seitz  <keiths@redhat.com>
+
+	* lib/mi-support.exp (mi_gdb_test): Add global declaration for
+	expect_out so that callers can get at it.
+
 2002-08-23  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.threads/print-threads.c: New file.

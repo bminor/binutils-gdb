@@ -382,7 +382,7 @@ proc mi_gdb_load { arg } {
 proc mi_gdb_test { args } {
     global verbose
     global mi_gdb_prompt
-    global GDB
+    global GDB expect_out
     upvar timeout timeout
 
     if [llength $args]>2 then {
