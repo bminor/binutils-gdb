@@ -1,3 +1,8 @@
+2004-08-19  Mark Mitchell  <mark@codesourcery.com>
+
+	* config.bfd (arm*-*-symbianelf*): New target.
+	(arm*-*-eabi*): Likewise.
+
 2004-08-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc_get_stub_entry): Change third param to a
