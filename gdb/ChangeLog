@@ -1,3 +1,25 @@
+2002-03-06  Andrew Cagney  <ac131313@redhat.com>
+
+	* cli/cli-decode.c (set_cmd_completer): New function.
+	* command.h (set_cmd_completer): Declare.
+	* cli/cli-decode.h (set_cmd_completer): Ditto.
+
+	* breakpoint.c (_initialize_breakpoint): Use set_cmd_completer.
+	* cli/cli-cmds.c (init_cli_cmds): Ditto.
+	* win32-nat.c (_initialize_inftarg): Ditto.
+	* remote-rdi.c (_initialize_remote_rdi): Ditto.
+	* proc-api.c (_initialize_proc_api): Ditto.
+	* hppa-tdep.c (_initialize_hppa_tdep): Ditto.
+	* source.c (_initialize_source): Ditto.
+	* exec.c (_initialize_exec): Ditto.
+	* solib.c (_initialize_solib): Ditto.
+	* top.c (init_main): Ditto.
+	* tracepoint.c (_initialize_tracepoint): Ditto.
+	* symfile.c (_initialize_symfile): Ditto.
+	* printcmd.c (_initialize_printcmd): Ditto.
+	* infcmd.c (_initialize_infcmd): Ditto.
+	* corefile.c (_initialize_core): Ditto.
+
 2002-03-05  Andrew Cagney  <ac131313@redhat.com>
 
 	* MAINTAINERS (Past Maintainers): Add Frank Ch. Eigler.

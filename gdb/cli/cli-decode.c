@@ -86,6 +86,13 @@ cmd_cfunc_eq (struct cmd_list_element *cmd,
   return cmd->func == do_cfunc && cmd->function.cfunc == cfunc;
 }
 
+void
+set_cmd_completer (struct cmd_list_element *cmd,
+		   char **(*completer) (char *text, char *word))
+{
+  cmd->completer = completer; /* Ok.  */
+}
+
 
 /* Add element named NAME.
    CLASS is the top level category into which commands are broken down
@@ -144,7 +151,7 @@ add_cmd (char *name, enum command_class class, void (*fun) (char *, int),
   c->prefixname = NULL;
   c->allow_unknown = 0;
   c->abbrev_flag = 0;
-  c->completer = make_symbol_completion_list;
+  set_cmd_completer (c, make_symbol_completion_list);
   c->type = not_set_cmd;
   c->var = NULL;
   c->var_type = var_boolean;

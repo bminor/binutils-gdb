@@ -2436,7 +2436,7 @@ with this command or \"print\".", NULL));
 Default is the function surrounding the pc of the selected frame.\n\
 With a single argument, the function surrounding that address is dumped.\n\
 Two arguments are taken as a range of memory to dump.");
-  c->completer = location_completer;
+  set_cmd_completer (c, location_completer);
   if (xdb_commands)
     add_com_alias ("va", "disassemble", class_xdb, 0);
 
@@ -2519,7 +2519,7 @@ You can see these environment settings with the \"show\" command.", NULL));
 The argument is the function name and arguments, in the notation of the\n\
 current working language.  The result is printed and saved in the value\n\
 history, if it is not void.");
-  c->completer = location_completer;
+  set_cmd_completer (c, location_completer);
 
   add_cmd ("variable", class_vars, set_command,
 	   "Evaluate expression EXP and assign result to variable VAR, using assignment\n\
@@ -2552,13 +2552,13 @@ resides in memory.\n",
 		   "\n\
 EXP may be preceded with /FMT, where FMT is a format letter\n\
 but no count or size letter (see \"x\" command).", NULL));
-  c->completer = location_completer;
+  set_cmd_completer (c, location_completer);
   add_com_alias ("p", "print", class_vars, 1);
 
   c = add_com ("inspect", class_vars, inspect_command,
 	   "Same as \"print\" command, except that if you are running in the epoch\n\
 environment, the value is printed in its own window.");
-  c->completer = location_completer;
+  set_cmd_completer (c, location_completer);
 
   add_show_from_set (
 		 add_set_cmd ("max-symbolic-offset", no_class, var_uinteger,

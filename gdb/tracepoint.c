@@ -2677,7 +2677,7 @@ last tracepoint set.");
   c = add_com ("save-tracepoints", class_trace, tracepoint_save_command,
 	       "Save current tracepoint definitions as a script.\n\
 Use the 'source' command in another debug session to restore them.");
-  c->completer = filename_completer;
+  set_cmd_completer (c, filename_completer);
 
   add_com ("tdump", class_trace, trace_dump_command,
 	   "Print everything collected at the current tracepoint.");
@@ -2800,7 +2800,7 @@ Argument may be a line number, function name, or '*' plus an address.\n\
 For a line number or function, trace at the start of its code.\n\
 If an address is specified, trace at that exact address.\n\n\
 Do \"help tracepoints\" for info on other tracepoint commands.");
-  c->completer = location_completer;
+  set_cmd_completer (c, location_completer);
 
   add_com_alias ("tp", "trace", class_alias, 0);
   add_com_alias ("tr", "trace", class_alias, 1);

@@ -2008,7 +2008,7 @@ ie. the number of previous commands to keep a record of.", &sethistlist);
 		   (char *) &history_filename,
 		   "Set the filename in which to record the command history\n\
  (the list of previous commands of which a record is kept).", &sethistlist);
-  c->completer = filename_completer;
+  set_cmd_completer (c, filename_completer);
   add_show_from_set (c, &showhistlist);
 
   add_show_from_set

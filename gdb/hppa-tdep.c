@@ -4709,7 +4709,7 @@ Do \"help breakpoints\" for info on other commands dealing with breakpoints.", N
 			      tbreak_at_finish_command,
 "Set temporary breakpoint at procedure exit.  Either there should\n\
 be no argument or the argument must be a depth.\n"), NULL);
-  c->completer = location_completer;
+  set_cmd_completer (c, location_completer);
   
   if (xdb_commands)
     deprecate_cmd (add_com ("bx", class_breakpoint, 

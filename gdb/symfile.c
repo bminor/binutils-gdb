@@ -3214,7 +3214,7 @@ _initialize_symfile (void)
 	       "Load symbol table from executable file FILE.\n\
 The `file' command can also load symbol tables, as well as setting the file\n\
 to execute.", &cmdlist);
-  c->completer = filename_completer;
+  set_cmd_completer (c, filename_completer);
 
   c = add_cmd ("add-symbol-file", class_files, add_symbol_file_command,
 	       "Usage: add-symbol-file FILE ADDR [-s <SECT> <SECT_ADDR> -s <SECT> <SECT_ADDR> ...]\n\
@@ -3224,7 +3224,7 @@ The optional arguments are section-name section-address pairs and\n\
 should be specified if the data and bss segments are not contiguous\n\
 with the text. SECT is a section name to be loaded at SECT_ADDR.",
 	       &cmdlist);
-  c->completer = filename_completer;
+  set_cmd_completer (c, filename_completer);
 
   c = add_cmd ("add-shared-symbol-files", class_files,
 	       add_shared_symbol_files_command,
@@ -3236,7 +3236,7 @@ with the text. SECT is a section name to be loaded at SECT_ADDR.",
   c = add_cmd ("load", class_files, load_command,
 	       "Dynamically load FILE into the running program, and record its symbols\n\
 for access from GDB.", &cmdlist);
-  c->completer = filename_completer;
+  set_cmd_completer (c, filename_completer);
 
   add_show_from_set
     (add_set_cmd ("symbol-reloading", class_support, var_boolean,

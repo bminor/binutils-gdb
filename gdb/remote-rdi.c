@@ -1044,7 +1044,7 @@ With a single argument, sets the logfile name to that value.\n\
 Without an argument, shows the current logfile name.\n\
 See also: rdilogenable\n",
 	   &maintenancelist);
-  c->completer = filename_completer;
+  set_cmd_completer (c, filename_completer);
 
   add_cmd ("rdilogenable", class_maintenance,
 	   rdilogenable_command,

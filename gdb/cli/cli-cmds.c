@@ -673,7 +673,7 @@ The commands below can be used to select other frames by number or address.",
 	       "Set working directory to DIR for debugger and program being debugged.\n\
 The change does not take effect for the program being debugged\n\
 until the next time it is started.", &cmdlist);
-  c->completer = filename_completer;
+  set_cmd_completer (c, filename_completer);
 
   add_com ("echo", class_support, echo_command,
 	   "Print a constant string.  Give string as argument.\n\
@@ -698,11 +698,11 @@ Commands defined in this way may have up to ten arguments.");
 	       "Read commands from a file named FILE.\n\
 Note that the file \"" GDBINIT_FILENAME "\" is read automatically in this way\n\
 when gdb is started.", &cmdlist);
-  c->completer = filename_completer;
+  set_cmd_completer (c, filename_completer);
 
   add_com ("quit", class_support, quit_command, "Exit gdb.");
   c = add_com ("help", class_support, help_command, "Print list of commands.");
-  c->completer = command_completer;
+  set_cmd_completer (c, command_completer);
   add_com_alias ("q", "quit", class_support, 1);
   add_com_alias ("h", "help", class_support, 1);
 
@@ -804,7 +804,7 @@ from the target.", &setlist),
   c = add_com ("shell", class_support, shell_escape,
 	       "Execute the rest of the line as a shell command.  \n\
 With no arguments, run an inferior shell.");
-  c->completer = filename_completer;
+  set_cmd_completer (c, filename_completer);
 
   /* NOTE: cagney/2000-03-20: Being able to enter ``(gdb) !ls'' would
      be a really useful feature.  Unfortunately, the below wont do
@@ -817,7 +817,7 @@ With no arguments, run an inferior shell.");
 
   c = add_com ("make", class_support, make_command,
           "Run the ``make'' program using the rest of the line as arguments.");
-  c->completer = filename_completer;
+  set_cmd_completer (c, filename_completer);
   add_cmd ("user", no_class, show_user,
 	   "Show definitions of user defined commands.\n\
 Argument is the name of the user defined command.\n\

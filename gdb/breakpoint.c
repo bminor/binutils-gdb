@@ -7381,19 +7381,19 @@ expression to be evaluated whenever breakpoint N is reached.  ");
 Like \"break\" except the breakpoint is only temporary,\n\
 so it will be deleted when hit.  Equivalent to \"break\" followed\n\
 by using \"enable delete\" on the breakpoint number.");
-  c->completer = location_completer;
+  set_cmd_completer (c, location_completer);
 
   c = add_com ("hbreak", class_breakpoint, hbreak_command,
 	       "Set a hardware assisted  breakpoint. Args like \"break\" command.\n\
 Like \"break\" except the breakpoint requires hardware support,\n\
 some target hardware may not have this support.");
-  c->completer = location_completer;
+  set_cmd_completer (c, location_completer);
 
   c = add_com ("thbreak", class_breakpoint, thbreak_command,
 	       "Set a temporary hardware assisted breakpoint. Args like \"break\" command.\n\
 Like \"hbreak\" except the breakpoint is only temporary,\n\
 so it will be deleted when hit.");
-  c->completer = location_completer;
+  set_cmd_completer (c, location_completer);
 
   add_prefix_cmd ("enable", class_breakpoint, enable_command,
 		  "Enable some breakpoints.\n\
@@ -7507,7 +7507,7 @@ This is useful for breaking on return to a stack frame.\n\
 Multiple breakpoints at one place are permitted, and useful if conditional.\n\
 \n\
 Do \"help breakpoints\" for info on other commands dealing with breakpoints.", NULL));
-  c->completer = location_completer;
+  set_cmd_completer (c, location_completer);
 
   add_com_alias ("b", "break", class_run, 1);
   add_com_alias ("br", "break", class_run, 1);
@@ -7638,19 +7638,19 @@ by using \"enable delete\" on the catchpoint number.");
 	       "Set a watchpoint for an expression.\n\
 A watchpoint stops execution of your program whenever the value of\n\
 an expression changes.");
-  c->completer = location_completer;
+  set_cmd_completer (c, location_completer);
 
   c = add_com ("rwatch", class_breakpoint, rwatch_command,
 	       "Set a read watchpoint for an expression.\n\
 A watchpoint stops execution of your program whenever the value of\n\
 an expression is read.");
-  c->completer = location_completer;
+  set_cmd_completer (c, location_completer);
 
   c = add_com ("awatch", class_breakpoint, awatch_command,
 	       "Set a watchpoint for an expression.\n\
 A watchpoint stops execution of your program whenever the value of\n\
 an expression is either read or written.");
-  c->completer = location_completer;
+  set_cmd_completer (c, location_completer);
 
   add_info ("watchpoints", breakpoints_info,
 	    "Synonym for ``info breakpoints''.");

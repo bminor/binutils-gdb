@@ -778,7 +778,7 @@ _initialize_proc_api (void)
 
   add_show_from_set (c, &showlist);
   set_cmd_sfunc (c, set_procfs_trace_cmd);
-  c->completer = filename_completer;
+  set_cmd_completer (c, filename_completer);
 
   c = add_set_cmd ("procfs-file", no_class, var_filename,
 		   (char *) &procfs_filename, 

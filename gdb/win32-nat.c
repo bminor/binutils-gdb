@@ -1819,7 +1819,7 @@ _initialize_inftarg (void)
 
   c = add_com ("dll-symbols", class_files, dll_symbol_command,
 	       "Load dll library symbols from FILE.");
-  c->completer = filename_completer;
+  set_cmd_completer (c, filename_completer);
 
   sh = getenv ("SHELL");
   if (!sh)

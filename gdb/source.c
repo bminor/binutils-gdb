@@ -1586,7 +1586,7 @@ With no argument, reset the search path to $cdir:$cwd, the default.",
   if (dbx_commands)
     add_com_alias ("use", "directory", class_files, 0);
 
-  c->completer = filename_completer;
+  set_cmd_completer (c, filename_completer);
 
   add_cmd ("directories", no_class, show_directories,
 	   "Current search path for finding source files.\n\
