@@ -1,3 +1,7 @@
+2003-03-04  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* MAINTAINERS (Write after approval): Update my email address.
+
 2003-03-03  Andrew Cagney  <cagney@redhat.com>
 
 	Make MAX_REGISTER_RAW_SIZE and MAX_REGISTER_VIRTUAL_SIZE optional.
