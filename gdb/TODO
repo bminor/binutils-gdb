@@ -320,6 +320,22 @@ IRIX 3.x support is probably broken.
 
 --
 
+Delete sim/SIM_HAVE_BREAKPOINTS and gdb/SIM_HAS_BREAKPOINTS.
+http://sourceware.cygnus.com/ml/gdb-patches/2000-07/msg00042.html
+
+Apart from the d30v, are there any sim/common simulators that make use
+of this?
+
+A brief summary of what happended is that sim/common/sim-break.c was
+created as a good idea.  It turned out a better idea was to use
+SIM_SIGBREAK and have GDB pass back sim_resume (..., SIGBREAK).
+
+--
+
+parse.c:build_parse() has a buffer overrun.
+
+--
+
 			New Features and Fixes
 			======================
 
@@ -689,6 +705,12 @@ conversions.
 
 Consequence of recent symtab clarification.  No marks for figuring out
 who maintains the MIPS.
+
+--
+
+GDB truncates 64 bit enums.
+
+http://sourceware.cygnus.com/ml/gdb-patches/2000-06/msg00290.html
 
 --
 
