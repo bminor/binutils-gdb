@@ -6,6 +6,10 @@ Mon Aug  9 14:26:45 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 Mon Aug  9 11:29:53 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* bfd-in.h (bfd_get_architecture, bfd_get_machine): Removed
+	obsolete macros.
+	* bfd-in2.h: Updated.
+
 	* ecoff.c (ecoff_slurp_armap): Correct bug in initialization of
 	stringbase.
 
