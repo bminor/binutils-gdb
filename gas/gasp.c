@@ -34,7 +34,7 @@ suitable for gas to consume.
 
 
 #include <stdio.h>
-#include <stdlib.h>
+#include "host.h"
 
 extern char *malloc ();
 
