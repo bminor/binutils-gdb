@@ -1,0 +1,38 @@
+# syntax:
+#
+# gas_test_stdout args regexp testname
+#	looks for regexp on stdout
+#
+# gas_test args testname
+#	just checks that exit status is zero
+#
+
+set testdir $srcdir/gas
+
+#
+# Test empty file, and version number
+#
+#gas_test_stdout "" "GNU assembler version .* (.*)"
+
+#
+# Target-independent tests
+#
+
+gas_test "$testdir/p2425.s" "pcrel values in assignment"
+
+gas_test "-al $testdir/p2425.s" "pcrel values in assignment, with listing"
+
+#
+# Some m68k-coff tests
+#
+if [istarget m68k-*-coff] then {
+    #
+    # Local branch in non-text section
+    #
+    gas_test "$testdir/p2430.s" "local branch not in text section"
+
+    #
+    # Multiple (implicit) .file directives
+    #
+    gas_test "$testdir/t1.s" "multiple .file directives"
+}

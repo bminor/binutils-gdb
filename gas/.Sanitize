@@ -85,6 +85,7 @@ symbols.c
 symbols.h
 tc.h
 testscripts
+testsuite
 version.c
 write.c
 write.h
@@ -107,7 +108,10 @@ fi
 #
 #
 # $Log$
-# Revision 1.15  1993/02/13 10:12:16  zoo
+# Revision 1.16  1993/03/29 13:26:44  raeburn
+# First crack at a test suite.
+#
+# Revision 1.15  1993/02/13  10:12:16  zoo
 # removing excess verbosity
 #
 # Revision 1.14  1993/01/08  14:40:59  raeburn

@@ -30,7 +30,7 @@
 srctrigger=as.c
 srcname="gas"
 need_bfd=no
-configdirs=doc
+configdirs="doc testsuite"
 
 # per-host:
 
@@ -45,9 +45,9 @@ case "${host}" in
     esac
     ;;	
   mips-dec-ultrix) 
-    gas_host=decstation 
+    gas_host=decstatn 
     ;;
-  mips-*-bsd)
+  mips-*-bsd*)
     gas_host=mipsbsd
     ;;
   i[34]86-ibm-aix*)
@@ -101,12 +101,15 @@ case ${target_cpu} in
   sparc64)	cpu_type=sparc obj_format=aout ;;
   m680[01234]0) cpu_type=m68k ;;
   m683??)       cpu_type=m68k ;;
+  i486)		cpu_type=i386 ;;
 esac
 
 gas_target=${cpu_type}
 
+generic_target=${cpu_type}-${target_vendor}-${target_os}
+
 # assign object format
-case ${target} in
+case ${generic_target} in
   a29k-amd-udi)
     obj_format=coffbfd
     need_bfd=yes
@@ -122,21 +125,21 @@ case ${target} in
     need_bfd=yes
     gas_target=ebmon29k
     ;;
-  i[34]86-ibm-aix*)
+  i386-ibm-aix*)
     obj_format=coffbfd
     need_bfd=yes
     gas_target=i386coff
     emulation=i386aix
     ;;
-  i[34]86-*-bsd*) 
+  i386-*-bsd*) 
     obj_format=aout 
     ;;
-  i[34]86-*-coff | i[34]86-*-sysv* | i[34]86-*-sco* | i[34]86-*-isc*)
+  i386-*-coff | i386-*-sysv* | i386-*-sco* | i386-*-isc*)
     obj_format=coffbfd
     need_bfd=yes
     gas_target=i386coff
     ;; 
-  i[34]86-*-go32) 
+  i386-*-go32) 
     obj_format=aout 
     ;;
   i960-wrs-vxworks)
