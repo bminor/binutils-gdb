@@ -1,3 +1,13 @@
+2000-02-16  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/break.exp ("breakpoint line number"): Make sure the
+	default source file is set properly before running this test.
+
+2000-02-15  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/break.exp ("breakpoint line number"): Make sure the
+	default source file is set properly before running this test.
+
 2000-02-14  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* lib/gdb.exp: Tell the testsuite that now gdbtk is in the
