@@ -178,9 +178,9 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @c We don't use deffn and friends for the following because they seem
 @c to be limited to one line for the header.
 @smallexample
-  @value{AS} [ -a[dhlns] ] [ -D ] [ -f ]
-   [ -I @var{path} ] [ -K ] [ -L ]
-   [ -o @var{objfile} ] [ -R ] [ -v ] [ -w ]
+@value{AS} [ -a[dhlns] ] [ -D ] [ -f ] [ -I @var{path} ] 
+ [ -K ] [ -L ] [ -o @var{objfile} ] [ -R ] 
+ [ --statistics] [ -v ] [ -W ] [ -Z ]
 @ifset A29K
 @c am29k has no machine-dependent assembler options
 @end ifset
@@ -263,11 +263,18 @@ Name the object-file output from @code{@value{AS}}
 @item -R
 Fold data section into text section
 
+@item --statistics
+Display maximum space (in bytes), and total time (in seconds), taken by
+assembly.
+
 @item -v
 Announce @code{as} version
 
 @item -W
 Suppress warning messages
+
+@item -Z
+Generate object file even after errors
 
 @item -- | @var{files} @dots{}
 Standard input, or source files to assemble.
@@ -726,8 +733,10 @@ passes to each compilation pass, including the assembler.)
 * L::             -L to retain local labels
 * o::             -o to name the object file
 * R::             -R to join data and text sections
+* statistics::    --statistics to see statistics about assembly
 * v::             -v to announce version
 * W::             -W to suppress warnings
+* Z::             -Z to make object file even after errors
 @end menu
 
 @node a
@@ -912,6 +921,18 @@ this option is only useful if you use sections named @samp{.text} and
 @code{-R} generates a warning from @code{@value{AS}}.
 @end ifset
 
+@node statistics
+@section Display Statistics about Assembly: @code{--statistics}
+
+@kindex --statistics
+@cindex statistics, about assembly
+@cindex time, total for assembly
+@cindex space used, maximum for assembly
+Use @samp{--statistics} to display two statistics about the resources used by
+@code{@value{AS}}: the maximum amount of space allocated during the assembly
+(in bytes), and the total execution time taken for the assembly (in @sc{cpu}
+seconds).
+
 @node v
 @section Announce Version: @code{-v}
 
@@ -937,6 +958,17 @@ If you use this option, no warnings are issued.  This option only
 affects the warning messages: it does not change any particular of how
 @code{@value{AS}} assembles your file.  Errors, which stop the assembly, are
 still reported.
+
+@node Z
+@section Generate Object File in Spite of Errors: @code{-Z}
+@cindex object file, after errors
+@cindex errors, continuing after
+After an error message, @code{@value{AS}} normally produces no output.  If for
+some reason you are interested in object file output even after
+@code{@value{AS}} gives an error message on your program, use the @samp{-Z}
+option.  If there are any errors, @code{@value{AS}} continues anyways, and
+writes an object file after a final warning message of the form @samp{@var{n}
+errors, @var{m} warnings, generating bad object file.}
 
 @node Syntax
 @chapter Syntax
