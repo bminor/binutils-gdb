@@ -196,6 +196,8 @@ static bfd_boolean som_bfd_copy_private_bfd_data
   _bfd_generic_bfd_copy_private_header_data
 #define som_bfd_merge_private_bfd_data _bfd_generic_bfd_merge_private_bfd_data
 #define som_bfd_set_private_flags _bfd_generic_bfd_set_private_flags
+static bfd_boolean som_bfd_print_private_bfd_data
+  (bfd *, void *);
 static bfd_boolean som_bfd_is_local_label_name
   PARAMS ((bfd *, const char *));
 static bfd_boolean som_set_section_contents
@@ -1772,7 +1774,6 @@ som_object_setup (abfd, file_hdrp, aux_hdrp, current_offset)
      unsigned long current_offset;
 {
   asection *section;
-  int found;
 
   /* som_mkobject will set bfd_error if som_mkobject fails.  */
   if (! som_mkobject (abfd))
@@ -1810,6 +1811,9 @@ som_object_setup (abfd, file_hdrp, aux_hdrp, current_offset)
       break;
     }
 
+  /* Save the auxiliary header.  */
+  obj_som_exec_hdr (abfd) = aux_hdrp;
+
   /* Allocate space to hold the saved exec header information.  */
   obj_som_exec_data (abfd) = (struct som_exec_data *)
     bfd_zalloc (abfd, (bfd_size_type) sizeof (struct som_exec_data));
@@ -1824,32 +1828,40 @@ som_object_setup (abfd, file_hdrp, aux_hdrp, current_offset)
      It's about time, OSF has used the new id since at least 1992;
      HPUX didn't start till nearly 1995!.
 
-     The new approach examines the entry field.  If it's zero or not 4
-     byte aligned then it's not a proper code address and we guess it's
-     really the executable flags.  */
-  found = 0;
-  for (section = abfd->sections; section; section = section->next)
+     The new approach examines the entry field for an executable.  If
+     it is not 4-byte aligned then it's not a proper code address and
+     we guess it's really the executable flags.  For a main program,
+     we also consider zero to be indicative of a buggy linker, since
+     that is not a valid entry point.  The entry point for a shared
+     library, however, can be zero so we do not consider that to be
+     indicative of a buggy linker.  */
+  if (aux_hdrp)
     {
-      bfd_vma entry;
+      int found = 0;
 
-      if ((section->flags & SEC_CODE) == 0)
-	continue;
-      entry = aux_hdrp->exec_entry;
-      if (entry >= section->vma
-	  && entry < section->vma + section->size)
-	found = 1;
-    }
-  if (aux_hdrp->exec_entry == 0
-      || (aux_hdrp->exec_entry & 0x3) != 0
-      || ! found)
-    {
-      bfd_get_start_address (abfd) = aux_hdrp->exec_flags;
-      obj_som_exec_data (abfd)->exec_flags = aux_hdrp->exec_entry;
-    }
-  else
-    {
-      bfd_get_start_address (abfd) = aux_hdrp->exec_entry + current_offset;
-      obj_som_exec_data (abfd)->exec_flags = aux_hdrp->exec_flags;
+      for (section = abfd->sections; section; section = section->next)
+	{
+	  bfd_vma entry;
+
+	  if ((section->flags & SEC_CODE) == 0)
+	    continue;
+	  entry = aux_hdrp->exec_entry + aux_hdrp->exec_tmem;
+	  if (entry >= section->vma
+	      && entry < section->vma + section->size)
+	    found = 1;
+	}
+      if ((aux_hdrp->exec_entry == 0 && !(abfd->flags & DYNAMIC))
+	  || (aux_hdrp->exec_entry & 0x3) != 0
+	  || ! found)
+	{
+	  bfd_get_start_address (abfd) = aux_hdrp->exec_flags;
+	  obj_som_exec_data (abfd)->exec_flags = aux_hdrp->exec_entry;
+	}
+      else
+	{
+	  bfd_get_start_address (abfd) = aux_hdrp->exec_entry + current_offset;
+	  obj_som_exec_data (abfd)->exec_flags = aux_hdrp->exec_flags;
+	}
     }
 
   obj_som_exec_data (abfd)->version_id = file_hdrp->version_id;
@@ -2183,7 +2195,7 @@ som_object_p (abfd)
      bfd *abfd;
 {
   struct header file_hdr;
-  struct som_exec_auxhdr aux_hdr;
+  struct som_exec_auxhdr *aux_hdr_ptr = NULL;
   unsigned long current_offset = 0;
   struct lst_header lst_header;
   struct som_entry som_entry;
@@ -2295,11 +2307,14 @@ som_object_p (abfd)
   /* If the aux_header_size field in the file header is zero, then this
      object is an incomplete executable (a .o file).  Do not try to read
      a non-existant auxiliary header.  */
-  memset (&aux_hdr, 0, sizeof (struct som_exec_auxhdr));
   if (file_hdr.aux_header_size != 0)
     {
+      aux_hdr_ptr = bfd_zalloc (abfd, 
+				(bfd_size_type) sizeof (*aux_hdr_ptr));
+      if (aux_hdr_ptr == NULL)
+	return NULL;
       amt = AUX_HDR_SIZE;
-      if (bfd_bread ((PTR) &aux_hdr, amt, abfd) != amt)
+      if (bfd_bread ((PTR) aux_hdr_ptr, amt, abfd) != amt)
 	{
 	  if (bfd_get_error () != bfd_error_system_call)
 	    bfd_set_error (bfd_error_wrong_format);
@@ -2315,7 +2330,7 @@ som_object_p (abfd)
     }
 
   /* This appears to be a valid SOM object.  Do some initialization.  */
-  return som_object_setup (abfd, &file_hdr, &aux_hdr, current_offset);
+  return som_object_setup (abfd, &file_hdr, aux_hdr_ptr, current_offset);
 }
 
 /* Create a SOM object.  */
@@ -5242,6 +5257,49 @@ som_bfd_copy_private_bfd_data (ibfd, obfd)
   return TRUE;
 }
 
+/* Display the SOM header.  */
+
+static bfd_boolean
+som_bfd_print_private_bfd_data (bfd *abfd, void *farg)
+{
+  struct som_exec_auxhdr *exec_header;
+  struct aux_id* auxhdr;
+  FILE *f;
+
+  f = (FILE *) farg;
+
+  exec_header = obj_som_exec_hdr (abfd);
+  if (exec_header)
+    {
+      fprintf (f, _("\nExec Auxiliary Header\n"));
+      fprintf (f, "  flags              ");
+      auxhdr = &exec_header->som_auxhdr;
+      if (auxhdr->mandatory)
+	fprintf (f, "mandatory ");
+      if (auxhdr->copy)
+	fprintf (f, "copy ");
+      if (auxhdr->append)
+	fprintf (f, "append ");
+      if (auxhdr->ignore)
+	fprintf (f, "ignore ");
+      fprintf (f, "\n");
+      fprintf (f, "  type               %#x\n", auxhdr->type);
+      fprintf (f, "  length             %#x\n", auxhdr->length);
+      fprintf (f, "  text size          %#x\n", exec_header->exec_tsize);
+      fprintf (f, "  text memory offset %#x\n", exec_header->exec_tmem);
+      fprintf (f, "  text file offset   %#x\n", exec_header->exec_tfile);
+      fprintf (f, "  data size          %#x\n", exec_header->exec_dsize);
+      fprintf (f, "  data memory offset %#x\n", exec_header->exec_dmem);
+      fprintf (f, "  data file offset   %#x\n", exec_header->exec_dfile);
+      fprintf (f, "  bss size           %#x\n", exec_header->exec_bsize);
+      fprintf (f, "  entry point        %#x\n", exec_header->exec_entry);
+      fprintf (f, "  loader flags       %#x\n", exec_header->exec_flags);
+      fprintf (f, "  bss initializer    %#x\n", exec_header->exec_bfill);
+    }
+
+  return TRUE;
+}
+
 /* Set backend info for sections which can not be described
    in the BFD data structures.  */
 
@@ -6400,7 +6458,6 @@ som_bfd_link_split_section (abfd, sec)
 #define som_construct_extended_name_table \
   _bfd_archive_coff_construct_extended_name_table
 #define som_update_armap_timestamp	bfd_true
-#define som_bfd_print_private_bfd_data  _bfd_generic_bfd_print_private_bfd_data
 
 #define som_bfd_is_target_special_symbol \
   ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)

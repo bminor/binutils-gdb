@@ -1,5 +1,10 @@
 2004-11-09  Mark Mitchell  <mark@codesourcery.com>
 
+	* som.c (som_bfd_print_private_bfd_data): New function.
+	(som_object_setup): Save the auxiliary header.  Don't assume that
+	zero is an invalid entry point for a shared library.
+	(som_object_p): Allocate the auxiliary header on the heap.
+
 	* elf32-arm.c (elf32_arm_begin_write_processing): Do not use a K&R
 	declaration.
 	(elf32_arm_symbian_modify_segment_map): Likewise.
