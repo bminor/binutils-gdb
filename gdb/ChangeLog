@@ -1,3 +1,8 @@
+Thu Apr  9 19:20:32 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mips-tdep.c (do_fp_register_row): Use alloca rather than arrays
+	with dynamic size.
+
 Wed Apr  8 19:21:42 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
 	* top.c (print_gdb_version): Print 1998 now.

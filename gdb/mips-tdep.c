@@ -1700,14 +1700,18 @@ static int
 do_fp_register_row (regnum)
      int regnum;
 { /* do values for FP (float) regs */
-  char raw_buffer[2] [REGISTER_RAW_SIZE(FP0_REGNUM)];
-  char dbl_buffer[2 * REGISTER_RAW_SIZE(FP0_REGNUM)];
+  char *raw_buffer[2];
+  char *dbl_buffer;
   /* use HI and LO to control the order of combining two flt regs */
   int HI = (TARGET_BYTE_ORDER == BIG_ENDIAN);
   int LO = (TARGET_BYTE_ORDER != BIG_ENDIAN);
   double doub, flt1, flt2;	/* doubles extracted from raw hex data */
   int inv1, inv2, inv3;
    
+  raw_buffer[0] = (char *) alloca (REGISTER_RAW_SIZE (FP0_REGNUM));
+  raw_buffer[1] = (char *) alloca (REGISTER_RAW_SIZE (FP0_REGNUM));
+  dbl_buffer = (char *) alloca (2 * REGISTER_RAW_SIZE (FP0_REGNUM));
+
   /* Get the data in raw format.  */
   if (read_relative_register_raw_bytes (regnum, raw_buffer[HI]))
     error ("can't read register %d (%s)", regnum, reg_names[regnum]);
