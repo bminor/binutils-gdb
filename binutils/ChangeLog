@@ -1,3 +1,7 @@
+2002-04-10  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* rcparse.y: Set MEMFLAG_PURE by default.
+
 2002-04-09  Bernd Herd <info@herdsoft.com>
 
 	* rcparse.y: CLASS definitions in DIALOG resources 

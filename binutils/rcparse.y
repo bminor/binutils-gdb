@@ -1320,7 +1320,7 @@ suboptions:
 	    memset (&$$, 0, sizeof (struct res_res_info));
 	    $$.language = language;
 	    /* FIXME: Is this the right default?  */
-	    $$.memflags = MEMFLAG_MOVEABLE;
+	    $$.memflags = MEMFLAG_MOVEABLE | MEMFLAG_PURE;
 	  }
 	| suboptions memflag
 	  {
@@ -1369,7 +1369,7 @@ memflags_move:
 	  {
 	    memset (&$$, 0, sizeof (struct res_res_info));
 	    $$.language = language;
-	    $$.memflags = MEMFLAG_MOVEABLE;
+	    $$.memflags = MEMFLAG_MOVEABLE | MEMFLAG_PURE;
 	  }
 	| memflags_move memflag
 	  {
