@@ -2722,6 +2722,10 @@ yank_symbols ()
 	    }			/* no one points at the first .file symbol */
 	}			/* if debug or tag or eos or file */
 
+#ifdef tc_frob_coff_symbol
+      tc_frob_coff_symbol (symbolP);
+#endif
+
       /* We must put the external symbols apart. The loader
 	 does not bomb if we do not. But the references in
 	 the endndx field for a .bb symbol are not corrected
