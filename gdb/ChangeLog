@@ -1,3 +1,8 @@
+2004-01-02  Andrew Cagney  <cagney@redhat.com>
+
+	From 2003-12-18 Kazuhiro Inaoka:
+        * configure.host: Add m32r-linux target.
+
 2004-01-02  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* top.c (print_gdb_version): Update year to 2004.
