@@ -1,3 +1,8 @@
+2001-10-11  Danny Smith  <danny_r_smith_2001@yahoo.co.nz>
+
+	* pe-dll.c (autofilter_entry_type autofilter_liblist: Add
+	startup files for mingw32 dlls to list.
+
 2001-10-10  Chris Demetriou  <cgd@broadcom.com>
 
 	* emultempl/elf32.em: Fix shell 'if' usage for portability.

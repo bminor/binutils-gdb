@@ -239,6 +239,8 @@ static autofilter_entry_type autofilter_objlist[] =
   { "crt0.o", 6 },
   { "crt1.o", 6 },
   { "crt2.o", 6 },
+  { "dllcrt1.o", 9 },
+  { "dllcrt2.o", 9 },
   { NULL, 0 }
 };
 
