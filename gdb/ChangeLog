@@ -1,4 +1,4 @@
-2002-05-24  Michal Ludvig  <mludvig@suse.cz>
+2002-05-27  Michal Ludvig  <mludvig@suse.cz>
 
 	* x86-64-tdep.c (x86_64_skip_prologue): Remove obsolete note.
 	Let PC point right after the prologue before looking up symbols.
