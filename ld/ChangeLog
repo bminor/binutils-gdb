@@ -1,3 +1,9 @@
+2005-01-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (section_already_linked): Adjust bfd_link_just_syms call.
+	(lang_place_orphans): Don't abort on just_syms_flag, instead call
+	bfd_link_just_syms.
+
 2005-01-16  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* defilep.y (def_name, def_library): Combine into...

@@ -1,6 +1,6 @@
 /* Linker command language support.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004
+   2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
@@ -1284,7 +1284,7 @@ section_already_linked (bfd *abfd, asection *sec, void *data)
      discard all sections.  */
   if (entry->just_syms_flag)
     {
-      bfd_link_just_syms (sec, &link_info);
+      bfd_link_just_syms (abfd, sec, &link_info);
       return;
     }
 
@@ -4442,9 +4442,8 @@ lang_place_orphans (void)
 		 around for a sensible place for it to go.  */
 
 	      if (file->just_syms_flag)
-		abort ();
-
-	      if ((s->flags & SEC_EXCLUDE) != 0)
+		bfd_link_just_syms (file->the_bfd, s, &link_info);
+	      else if ((s->flags & SEC_EXCLUDE) != 0)
 		s->output_section = bfd_abs_section_ptr;
 	      else if (strcmp (s->name, "COMMON") == 0)
 		{

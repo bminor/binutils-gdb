@@ -4193,7 +4193,7 @@ bfd_boolean bfd_set_private_flags (bfd *abfd, flagword flags);
 #define bfd_link_add_symbols(abfd, info) \
        BFD_SEND (abfd, _bfd_link_add_symbols, (abfd, info))
 
-#define bfd_link_just_syms(sec, info) \
+#define bfd_link_just_syms(abfd, sec, info) \
        BFD_SEND (abfd, _bfd_link_just_syms, (sec, info))
 
 #define bfd_final_link(abfd, info) \
