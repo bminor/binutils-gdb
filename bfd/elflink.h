@@ -258,6 +258,52 @@ elf_link_add_object_symbols (abfd, info)
   add_symbol_hook = get_elf_backend_data (abfd)->elf_add_symbol_hook;
   collect = get_elf_backend_data (abfd)->collect;
 
+  /* As a GNU extension, any input sections which are named
+     .gnu.warning.SYMBOL are treated as warning symbols for the given
+     symbol.  This differs from .gnu.warning sections, which generate
+     warnings when they are included in an output file.  */
+  if (! info->shared)
+    {
+      asection *s;
+
+      for (s = abfd->sections; s != NULL; s = s->next)
+	{
+	  const char *name;
+
+	  name = bfd_get_section_name (abfd, s);
+	  if (strncmp (name, ".gnu.warning.", sizeof ".gnu.warning." - 1) == 0)
+	    {
+	      char *msg;
+	      bfd_size_type sz;
+
+	      sz = bfd_section_size (abfd, s);
+	      msg = (char *) bfd_alloc (abfd, sz);
+	      if (msg == NULL)
+		{
+		  bfd_set_error (bfd_error_no_memory);
+		  goto error_return;
+		}
+
+	      if (! bfd_get_section_contents (abfd, s, msg, (file_ptr) 0, sz))
+		goto error_return;
+
+	      if (! (_bfd_generic_link_add_one_symbol
+		     (info, abfd, 
+		      name + sizeof ".gnu.warning." - 1,
+		      BSF_WARNING, s, (bfd_vma) 0, msg, false, collect,
+		      (struct bfd_link_hash_entry **) NULL)))
+		goto error_return;
+
+	      if (! info->relocateable)
+		{
+		  /* Clobber the section size so that the warning does
+                     not get copied into the output file.  */
+		  s->_raw_size = 0;
+		}
+	    }
+	}
+    }
+
   /* A stripped shared library might only have a dynamic symbol table,
      not a regular symbol table.  In that case we can still go ahead
      and link using the dynamic symbol table.  */
@@ -507,7 +553,7 @@ elf_link_add_object_symbols (abfd, info)
       asection *sec;
       flagword flags;
       const char *name;
-      struct elf_link_hash_entry *h = NULL;
+      struct elf_link_hash_entry *h;
       boolean definition;
       boolean new_weakdef;
 
@@ -607,6 +653,10 @@ elf_link_add_object_symbols (abfd, info)
 	    goto error_return;
 	  *sym_hash = h;
 
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
 	  /* If we are looking at a dynamic object, and this is a
 	     definition, we need to see if it has already been defined
 	     by some other object.  If it has, we want to use the
@@ -649,13 +699,19 @@ elf_link_add_object_symbols (abfd, info)
 	      false, collect, (struct bfd_link_hash_entry **) sym_hash)))
 	goto error_return;
 
+      h = *sym_hash;
+      while (h->root.type == bfd_link_hash_indirect
+	     || h->root.type == bfd_link_hash_warning)
+	h = (struct elf_link_hash_entry *) h->root.u.i.link;
+      *sym_hash = h;
+
       new_weakdef = false;
       if (dynamic
 	  && definition
 	  && (flags & BSF_WEAK) != 0
 	  && ELF_ST_TYPE (sym.st_info) != STT_FUNC
 	  && info->hash->creator->flavour == bfd_target_elf_flavour
-	  && (*sym_hash)->weakdef == NULL)
+	  && h->weakdef == NULL)
 	{
 	  /* Keep a list of all weak defined non function symbols from
 	     a dynamic object, using the weakdef field.  Later in this
@@ -669,15 +725,15 @@ elf_link_add_object_symbols (abfd, info)
 	     dynamic object, and we will be using that previous
 	     definition anyhow.  */
 
-	  (*sym_hash)->weakdef = weaks;
-	  weaks = *sym_hash;
+	  h->weakdef = weaks;
+	  weaks = h;
 	  new_weakdef = true;
 	}
 
       /* Get the alignment of a common symbol.  */
       if (sym.st_shndx == SHN_COMMON
-	  && (*sym_hash)->root.type == bfd_link_hash_common)
-	(*sym_hash)->root.u.c.p->alignment_power = bfd_log2 (sym.st_value);
+	  && h->root.type == bfd_link_hash_common)
+	h->root.u.c.p->alignment_power = bfd_log2 (sym.st_value);
 
       if (info->hash->creator->flavour == bfd_target_elf_flavour)
 	{
@@ -2451,8 +2507,8 @@ elf_link_output_extsym (h, data)
 
     case bfd_link_hash_indirect:
     case bfd_link_hash_warning:
-      /* I have no idea how these should be handled.  */
-      return true;
+      return (elf_link_output_extsym
+	      ((struct elf_link_hash_entry *) h->root.u.i.link, data));
     }
 
   /* If this symbol should be put in the .dynsym section, then put it

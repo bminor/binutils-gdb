@@ -1,3 +1,26 @@
+Fri Sep  1 13:20:25 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.h (elf_link_add_object_symbols): Handle indirect and
+	warning symbols.  If any section is named .gnu.warning.XXX, treat
+	the contents as a warning to be issued if the symbol XXX is
+	referenced.
+	(elf_link_output_extsym): For an indirect or warning symbol, just
+	output the symbol it points to.
+
+	* linker.c (_bfd_link_hash_newfunc): Don't bother to set bfd_error
+	if bfd_hash_allocate fails, since it will already be set.
+	(generic_link_hash_newfunc): Likewise.
+	(archive_hash_newfunc): Likewise.
+	(hash_entry_bfd): New static function.
+	(_bfd_generic_link_add_one_symbol): Pass new arguments to warning
+	callback.  Allocate a new warning using the hash table newfunc.
+	Use bfd_hash_replace to update the entry in the hash table, rather
+	than assuming we can copy the fields with structure assignment.
+
+	* hash.c (bfd_hash_replace): New function.
+	* bfd-in.h (bfd_hash_replace): Declare.
+	* bfd-in2.h: Rebuild.
+
 Fri Sep  1 08:12:50 1995  James G. Smith  <jsmith@beauty.cygnus.com>
 
 	* config.bfd: Add mips*vr4300-*-elf* target.
