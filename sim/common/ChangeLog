@@ -1,3 +1,7 @@
+Wed Feb 25 11:00:26 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* Make-common.in (check): Run `make check' in testsuite dir.
+
 Wed Feb 25 14:40:24 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-trace.c (trace_result0): New function.

@@ -237,14 +237,14 @@ targ-map.o: targ-map.c targ-vals.h
 gentmap: Makefile $(srccom)/gentmap.c targ-vals.def
 	$(CC_FOR_BUILD) $(srccom)/gentmap.c -o gentmap $(BUILD_CFLAGS) $(NL_TARGET)
 
-targ-vals.h: gentmap
-	rm -f targ-vals.h
-	./gentmap -h >targ-vals.h
-
-targ-map.c: gentmap
-	rm -f targ-map.c
-	./gentmap -c >targ-map.c
-
+targ-vals.h targ-map.c: stamp-tvals
+stamp-tvals: gentmap
+	rm -f tmp-tvals.h tmp-tmap.c
+	./gentmap -h >tmp-tvals.h
+	$(srcroot)/move-if-change tmp-tvals.h targ-vals.h
+	./gentmap -c >tmp-tmap.c
+	$(srcroot)/move-if-change tmp-tmap.c targ-map.c
+	touch stamp-tvals
 
 #
 # Rules for building sim-* components.  Triggered by listing the corresponding
@@ -431,6 +431,7 @@ installdirs:
 	$(SHELL) $(srcdir)/../../mkinstalldirs $(bindir)
 
 check:
+	cd ../testsuite && $(MAKE) check
 
 info:
 clean-info:
@@ -447,7 +448,7 @@ TAGS: force
 clean: $(SIM_EXTRA_CLEAN)
 	rm -f *.[oa] *~ core
 	rm -f run libsim.a
-	rm -f gentmap targ-map.c targ-vals.h
+	rm -f gentmap targ-map.c targ-vals.h stamp-tvals
 	if [ ! -f Make-common.in ] ; then \
 		rm -f $(BUILT_SRC_FROM_COMMON) ; \
 	fi
@@ -482,23 +483,20 @@ stamp-h: config.in config.status
 # CGEN support
 
 SCHEME = @SCHEME@
-SCHEME = guile-ss
-SCHEME = guile
-#SCHEMEFLAGS = -b
 SCHEMEFLAGS = -s
 srccgen = $(srcroot)/cgen
 
 CGEN_VERBOSE = -v
-CGEN_MAIN_SCM = $(srccgen)/object.scm \
-	$(srccgen)/utils.scm $(srccgen)/utils-cgen.scm \
-	$(srccgen)/mode.scm \
-	$(srccgen)/cpu.scm $(srccgen)/mach.scm \
+CGEN_MAIN_SCM = $(srccgen)/object.scm $(srccgen)/utils.scm \
+	$(srccgen)/attr.scm $(srccgen)/enum.scm $(srccgen)/types.scm \
+	$(srccgen)/utils-cgen.scm $(srccgen)/cpu.scm \
+	$(srccgen)/mode.scm $(srccgen)/mach.scm \
+	$(srccgen)/model.scm $(srccgen)/hardware.scm \
 	$(srccgen)/ifield.scm $(srccgen)/iformat.scm \
 	$(srccgen)/operand.scm $(srccgen)/insn.scm \
-	$(srccgen)/sim.scm
-CGEN_CPU_SCM = $(srccgen)/sim-cpu.scm $(srccgen)/sim-model.scm \
-	$(srccgen)/sem-ccode.scm
-CGEN_DECODE_SCM = $(srccgen)/decode.scm
+	$(srccgen)/cdl-c.scm $(srccgen)/sim.scm
+CGEN_CPU_SCM = $(srccgen)/sim-cpu.scm $(srccgen)/sim-model.scm
+CGEN_DECODE_SCM = $(srccgen)/sim-decode.scm
 
 # Various choices for which cpu specific files to generate.
 CGEN_CPU_EXTR = -E tmp-ext.c1
