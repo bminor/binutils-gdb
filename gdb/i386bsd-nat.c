@@ -166,7 +166,7 @@ supply_fpregset (fpregset_t *fpregsetp)
 void
 fill_fpregset (fpregset_t *fpregsetp, int regno)
 {
-  i387_fill_fsave ((char *) fpregsetp, regno);
+  i387_collect_fsave (current_regcache, regno, fpregsetp);
 }
 
 /* Fetch register REGNO from the inferior.  If REGNO is -1, do this
@@ -255,7 +255,7 @@ store_inferior_registers (int regno)
 	{
 	  have_ptrace_xmmregs = 1;
 
-	  i387_fill_fxsave (xmmregs, regno);
+	  i387_collect_fxsave (current_regcache, regno, xmmregs);
 
 	  if (ptrace (PT_SETXMMREGS, PIDGET (inferior_ptid),
 		      (PTRACE_ARG3_TYPE) xmmregs, 0) == -1)
@@ -269,8 +269,8 @@ store_inferior_registers (int regno)
 		      (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	    perror_with_name ("Couldn't get floating point status");
 
-          i387_fill_fsave ((char *) &fpregs, regno);
-  
+          i387_collect_fsave (current_regcache, regno, &fpregs);
+
           if (ptrace (PT_SETFPREGS, PIDGET (inferior_ptid),
 		      (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	    perror_with_name ("Couldn't write floating point status");
