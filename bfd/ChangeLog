@@ -1,3 +1,8 @@
+2000-09-06  Philip Blundell  <philb@gnu.org>
+
+	* config.bfd (arm*-*-uclinux*): New target.
+	(armeb-*-elf, arm*b-*-linux-gnu*): Likewise.
+
 2000-08-22  Doug Kwan <dkwan@transmeta.com>
 
 	* coff-w65.c (CREATE_LITTLE_COFF_TARGET): Fix typo.
