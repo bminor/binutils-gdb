@@ -1337,13 +1337,15 @@ mips_elf64_be_swap_reloc_out (abfd, src, dst)
 
   mirel.r_offset = src[0].r_offset;
   BFD_ASSERT(src[0].r_offset == src[1].r_offset);
+#if 0  
   BFD_ASSERT(src[0].r_offset == src[2].r_offset);
+#endif
 
   mirel.r_type = ELF64_MIPS_R_TYPE (src[0].r_info);
   mirel.r_sym = ELF64_R_SYM (src[0].r_info);
-  mirel.r_type2 = ELF64_MIPS_R_TYPE2 (src[1].r_info);
+  mirel.r_type2 = ELF64_MIPS_R_TYPE (src[1].r_info);
   mirel.r_ssym = ELF64_MIPS_R_SSYM (src[1].r_info);
-  mirel.r_type3 = ELF64_MIPS_R_TYPE3 (src[2].r_info);
+  mirel.r_type3 = ELF64_MIPS_R_TYPE (src[2].r_info);
 
   mips_elf64_swap_reloc_out (abfd, &mirel,
 			     (Elf64_Mips_External_Rel *) dst);
@@ -1525,7 +1527,7 @@ mips_elf64_final_gp (output_bfd, symbol, relocateable, error_message, pgp)
       if (relocateable)
 	{
 	  /* Make up a value.  */
-	  *pgp = symbol->section->output_section->vma + 0x4000;
+	  *pgp = symbol->section->output_section->vma /*+ 0x4000*/;
 	  _bfd_set_gp_value (output_bfd, *pgp);
 	}
       else if (!mips_elf64_assign_gp (output_bfd, pgp))

@@ -6984,6 +6984,8 @@ _bfd_mips_elf_final_link (abfd, info)
 		    <= g->global_gotno);
     }
 
+#if 0
+  /* We want to set the GP value for ld -r.  */
   /* On IRIX5, we omit the .options section.  On IRIX6, however, we
      include it, even though we don't process it quite right.  (Some
      entries are supposed to be merged.)  Empirically, we seem to be
@@ -7021,6 +7023,7 @@ _bfd_mips_elf_final_link (abfd, info)
 	  break;
 	}
     }
+#endif
 
   /* Get a value for the GP register.  */
   if (elf_gp (abfd) == 0)

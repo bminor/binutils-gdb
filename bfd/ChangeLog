@@ -1,3 +1,11 @@
+2002-09-17  Stan Cox <scox@redhat.com>	
+
+	* elf64-mips.c (mips_elf64_be_swap_reloca_out): Handle type2 and type3.
+	(mips_elf64_final_gp): Don't make up gp value.
+	* elfn32-mips.c (mips_elf_final_gp): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_final_link): Always create
+	.MIPS.options/.options section.
+
 2002-09-17  David O'Brien  <obrien@FreeBSD.org>
 
 	* elf32-i386-fbsd.c: Always label using the EI_OSABI method.

@@ -1505,7 +1505,7 @@ mips_elf_final_gp (output_bfd, symbol, relocateable, error_message, pgp)
       if (relocateable)
 	{
 	  /* Make up a value.  */
-	  *pgp = symbol->section->output_section->vma + 0x4000;
+	  *pgp = symbol->section->output_section->vma /*+ 0x4000*/;
 	  _bfd_set_gp_value (output_bfd, *pgp);
 	}
       else if (!mips_elf_assign_gp (output_bfd, pgp))
