@@ -3734,6 +3734,7 @@ aout_link_write_symbols (finfo, input_bfd, symbol_map)
     {
       const char *name;
       int type;
+      struct aout_link_hash_entry *h;
       boolean skip;
       asection *symsec;
       bfd_vma val = 0;
@@ -3742,6 +3743,8 @@ aout_link_write_symbols (finfo, input_bfd, symbol_map)
 
       type = bfd_h_get_8 (input_bfd, sym->e_type);
       name = strings + GET_WORD (input_bfd, sym->e_strx);
+
+      h = NULL;
 
       if (pass)
 	{
@@ -3760,7 +3763,6 @@ aout_link_write_symbols (finfo, input_bfd, symbol_map)
 	}
       else
 	{
-	  struct aout_link_hash_entry *h;
 	  struct aout_link_hash_entry *hresolve;
 
 	  /* We have saved the hash table entry for this symbol, if
@@ -3949,6 +3951,22 @@ aout_link_write_symbols (finfo, input_bfd, symbol_map)
 		   outsym->e_other);
       bfd_h_put_16 (output_bfd, bfd_h_get_16 (input_bfd, sym->e_desc),
 		    outsym->e_desc);
+      if (! finfo->info->keep_memory)
+	{
+	  /* name points into a string table which we are going to
+	     free.  If there is a hash table entry, use that string.
+	     Otherwise, copy name into memory.  */
+	  if (h != (struct aout_link_hash_entry *) NULL)
+	    name = (*sym_hash)->root.root.string;
+	  else
+	    {
+	      char *n;
+
+	      n = bfd_alloc (output_bfd, strlen (name) + 1);
+	      strcpy (n, name);
+	      name = n;
+	    }
+	}
       PUT_WORD (output_bfd,
 		add_to_stringtab (output_bfd, name, &finfo->strtab),
 		outsym->e_strx);

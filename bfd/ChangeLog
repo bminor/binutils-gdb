@@ -1,5 +1,9 @@
 Fri Apr  1 12:40:58 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* aoutx.h (aout_link_write_symbols): If keep_memory is false, make
+	sure the symbol name is stored in permanent memory before adding
+	it to the string table.
+
 	* archive.c (_bfd_write_archive_contents): Once we've found an
 	object, don't bother to look for more when deciding whether to
 	build a map.
