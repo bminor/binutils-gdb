@@ -2759,7 +2759,9 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd ATTRIBUTE_UNUSED,
 
       case R_ARM_ABS32:
       case R_ARM_REL32:
+#ifndef OLD_ARM_ABI
       case R_ARM_TARGET1:
+#endif
       case R_ARM_PC24:
       case R_ARM_PLT32:
 	r_symndx = ELF32_R_SYM (rel->r_info);
@@ -2775,8 +2777,10 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd ATTRIBUTE_UNUSED,
 	      h->plt.refcount -= 1;
 
 	    if (ELF32_R_TYPE (rel->r_info) == R_ARM_ABS32
-		|| ELF32_R_TYPE (rel->r_info) == R_ARM_REL32
-		|| ELF32_R_TYPE (rel->r_info) == R_ARM_TARGET1)
+#ifndef OLD_ARM_ABI
+		|| ELF32_R_TYPE (rel->r_info) == R_ARM_TARGET1
+#endif
+		|| ELF32_R_TYPE (rel->r_info) == R_ARM_REL32)
 	      {
 		eh = (struct elf32_arm_link_hash_entry *) h;
 
@@ -2887,7 +2891,9 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	  case R_ARM_ABS32:
 	  case R_ARM_REL32:
+#ifndef OLD_ARM_ABI
 	  case R_ARM_TARGET1:
+#endif
 	  case R_ARM_PC24:
 	  case R_ARM_PLT32:
 	    if (h != NULL)
@@ -2930,8 +2936,10 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		&& (sec->flags & SEC_ALLOC) != 0
 		&& ((ELF32_R_TYPE (rel->r_info) != R_ARM_PC24
 		     && ELF32_R_TYPE (rel->r_info) != R_ARM_PLT32
-		     && ELF32_R_TYPE (rel->r_info) != R_ARM_REL32
-		     && ELF32_R_TYPE (rel->r_info) != R_ARM_TARGET1)
+#ifndef OLD_ARM_ABI
+		     && ELF32_R_TYPE (rel->r_info) != R_ARM_TARGET1
+#endif
+		     && ELF32_R_TYPE (rel->r_info) != R_ARM_REL32)
 		    || (h != NULL
 			&& (! info->symbolic
 			    || (h->elf_link_hash_flags
@@ -3016,8 +3024,10 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  }
 
 		if (ELF32_R_TYPE (rel->r_info) == R_ARM_ABS32
-		    || ELF32_R_TYPE (rel->r_info) == R_ARM_REL32
-		    || ELF32_R_TYPE (rel->r_info) == R_ARM_TARGET1)
+#ifndef OLD_ARM_ABI
+		    || ELF32_R_TYPE (rel->r_info) == R_ARM_TARGET1
+#endif
+		    || ELF32_R_TYPE (rel->r_info) == R_ARM_REL32)
 		  p->count += 1;
 	      }
 	    break;

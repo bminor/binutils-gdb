@@ -1,3 +1,8 @@
+2004-09-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/armelf_oabi.em (before_allocation): Add extra zero param
+	to bfd_elf32_arm_process_before_allocation call.
+
 2004-09-13  Paul Brook  <paul@codesourcery.com>
 
 	* emulparams/armsymbian.sh: Set TARGET1_IS_REL.

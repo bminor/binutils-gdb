@@ -1,3 +1,9 @@
+2004-09-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-arm.h (elf32_arm_gc_sweep_hook): Add #ifndef OLD_ARM_ABI
+	around uses of R_ARM_TARGET1.
+	(elf32_arm_check_relocs): Likewise.
+
 2004-09-13  Paul Brook  <paul@codesourcery.com>
 
 	* bfd-in.h (bfd_elf32_arm_process_before_allocation): Update
