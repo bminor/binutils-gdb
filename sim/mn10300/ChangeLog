@@ -1,5 +1,8 @@
 Fri Dec  6 14:13:34 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* simops.c: Define accessor macros to extract register
+	values from instructions.  Use them consistently.
+
 	* interp.c: Delete unused global variable "OP".
 	(sim_resume): Remove unused variable "opcode".
 	* simops.c: Fix some uninitialized variable problems, add
