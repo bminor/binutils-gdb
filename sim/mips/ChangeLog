@@ -1,5 +1,9 @@
 2003-01-14  Chris Demetriou  <cgd@broadcom.com>
 
+	* mips.igen (LUXC1, SUXC1): New, for mipsV and mips64.
+
+2003-01-14  Chris Demetriou  <cgd@broadcom.com>
+
 	* mips.igen (EI, DI): Remove.
 
 2003-01-05  Richard Sandiford  <rsandifo@redhat.com>

@@ -4271,6 +4271,22 @@
 }
 
 
+010011,5.BASE,5.INDEX,5.0,5.FD,000101:COP1X:64,f::LUXC1
+"luxc1 f<FD>, r<INDEX>(r<BASE>)"
+*mipsV:
+*mips64:
+{
+  address_word base = GPR[BASE];
+  address_word index = GPR[INDEX];
+  address_word vaddr = base + index;
+  check_fpu (SD_);
+  check_u64 (SD_, instruction_0);
+  /* Arrange for the bottom 3 bits of (base + index) to be 0.  */
+  if ((vaddr & 0x7) != 0)
+    index -= (vaddr & 0x7);
+  COP_LD (1, FD, do_load (SD_, AccessLength_DOUBLEWORD, base, index));
+}
+
 
 110001,5.BASE,5.FT,16.OFFSET:COP1:32,f::LWC1
 "lwc1 f<FT>, <OFFSET>(r<BASE>)"
@@ -4740,6 +4756,24 @@
   check_fpu (SD_);
   check_u64 (SD_, instruction_0);
   do_store (SD_, AccessLength_DOUBLEWORD, GPR[BASE], GPR[INDEX], COP_SD (1, FS));
+}
+
+
+010011,5.BASE,5.INDEX,5.FS,00000,001101:COP1X:64,f::SUXC1
+"suxc1 f<FS>, r<INDEX>(r<BASE>)"
+*mipsV:
+*mips64:
+{
+  unsigned64 v;
+  address_word base = GPR[BASE];
+  address_word index = GPR[INDEX];
+  address_word vaddr = base + index;
+  check_fpu (SD_);
+  check_u64 (SD_, instruction_0);
+  /* Arrange for the bottom 3 bits of (base + index) to be 0.  */
+  if ((vaddr & 0x7) != 0)
+    index -= (vaddr & 0x7);
+  do_store (SD_, AccessLength_DOUBLEWORD, base, index, COP_SD (1, FS));
 }
 
 
