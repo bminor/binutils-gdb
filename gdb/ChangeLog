@@ -1,3 +1,7 @@
+2004-12-21  Jim Blandy  <jimb@redhat.com>
+
+	* remote.c (fetch_register_using_p): Fix formatting.
+	
 2004-12-21  Paul N. Hilfinger  <hilfingr@otisco.mckusick.com>
 
 	* ada-lang.c (ada_print_subexp): Remove i18n markup from Ada code

@@ -3192,20 +3192,23 @@ fetch_register_using_p (int regnum)
   p += hexnumstr (p, regnum);
   *p++ = '\0';
   remote_send (buf, rs->remote_packet_size);
-  if (buf[0] != 0 && buf[0] != 'E') {
-    p = buf;
-    i = 0;
-    while (p[0] != 0) {
-      if (p[1] == 0) {
-        error("fetch_register_using_p: early buf termination");
-        return 0;
-      }
-      regp[i++] = fromhex (p[0]) * 16 + fromhex (p[1]);
-      p += 2;
+  if (buf[0] != 0 && buf[0] != 'E')
+    {
+      p = buf;
+      i = 0;
+      while (p[0] != 0)
+	{
+	  if (p[1] == 0)
+	    {
+	      error ("fetch_register_using_p: early buf termination");
+	      return 0;
+	    }
+	  regp[i++] = fromhex (p[0]) * 16 + fromhex (p[1]);
+	  p += 2;
+	}
+      regcache_raw_supply (current_regcache, regnum, regp);
+      return 1;
     }
-    regcache_raw_supply (current_regcache, regnum, regp);
-    return 1;
-  }
 
   return 0;
 }
