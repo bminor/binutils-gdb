@@ -1678,8 +1678,8 @@ DEFUN (w_strings, (where),
   symbolS *symbolP;
 
   /* Gotta do md_ byte-ordering stuff for string_byte_count first - KWK */
-  md_number_to_chars (where, string_byte_count, sizeof (string_byte_count));
-  where += sizeof (string_byte_count);
+  md_number_to_chars (where, string_byte_count, 4);
+  where += 4;
   for (symbolP = symbol_rootP;
        symbolP;
        symbolP = symbol_next (symbolP))
