@@ -1305,6 +1305,61 @@ md_assemble (line)
 	    i.seg[1] = temp_seg;
 	  }
       }
+
+    if (i.imm_operands)
+      {
+	/* Try to ensure constant immediates are represented in the smallest
+	   opcode possible.  */
+	char guess_suffix = 0;
+	int op;
+
+	if (i.suffix)
+	  guess_suffix = i.suffix;
+	else if (i.reg_operands)
+	  {
+	    /* Figure out a suffix from the last register operand specified.
+	       We can't do this properly yet, ie. excluding InOutPortReg,
+	       but the following works for instructions with immediates.
+	       In any case, we can't set i.suffix yet.  */
+	    for (op = i.operands; --op >= 0; )
+	      if (i.types[op] & Reg)
+		{
+		  if (i.types[op] & Reg8)
+		    guess_suffix = BYTE_MNEM_SUFFIX;
+		  else if (i.types[op] & Reg16)
+		    guess_suffix = WORD_MNEM_SUFFIX;
+		  break;
+		}
+	  }
+	for (op = i.operands; --op >= 0; )
+	  if ((i.types[op] & Imm)
+	      && i.op[op].imms->X_op == O_constant)
+	    {
+	      /* If a suffix is given, this operand may be shortened.  */
+	      switch (guess_suffix)
+		{
+		case WORD_MNEM_SUFFIX:
+		  i.types[op] |= Imm16;
+		  break;
+		case BYTE_MNEM_SUFFIX:
+		  i.types[op] |= Imm16 | Imm8 | Imm8S;
+		  break;
+		}
+
+	      /* If this operand is at most 16 bits, convert it to a
+		 signed 16 bit number before trying to see whether it will
+		 fit in an even smaller size.  This allows a 16-bit operand
+		 such as $0xffe0 to be recognised as within Imm8S range.  */
+	      if ((i.types[op] & Imm16)
+		  && (i.op[op].imms->X_add_number & ~(offsetT)0xffff) == 0)
+		{
+		  i.op[op].imms->X_add_number =
+		    (((i.op[op].imms->X_add_number & 0xffff) ^ 0x8000) - 0x8000);
+		}
+	      i.types[op] |= smallest_imm_type ((long) i.op[op].imms->X_add_number);
+	    }
+      }
+
     overlap0 = 0;
     overlap1 = 0;
     overlap2 = 0;
@@ -2200,7 +2255,9 @@ md_assemble (line)
 	  {
 	    long n = (long) i.op[1].imms->X_add_number;
 
-	    if (size == 2 && !fits_in_unsigned_word (n))
+	    if (size == 2
+		&& !fits_in_unsigned_word (n)
+		&& !fits_in_signed_word (n))
 	      {
 		as_bad (_("16-bit jump out of range"));
 		return;
@@ -2530,20 +2587,7 @@ i386_immediate (imm_start)
       int bigimm = Imm32;
       if (flag_16bit_code ^ (i.prefix[DATA_PREFIX] != 0))
 	bigimm = Imm16;
-
-      i.types[this_operand] |=
-	(bigimm | smallest_imm_type ((long) exp->X_add_number));
-
-      /* If a suffix is given, this operand may be shortened.  */
-      switch (i.suffix)
-	{
-	case WORD_MNEM_SUFFIX:
-	  i.types[this_operand] |= Imm16;
-	  break;
-	case BYTE_MNEM_SUFFIX:
-	  i.types[this_operand] |= Imm16 | Imm8 | Imm8S;
-	  break;
-	}
+      i.types[this_operand] |= bigimm;
     }
 #if (defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT))
   else if (
@@ -2784,6 +2828,14 @@ i386_displacement (disp_start, disp_end)
 
   if (exp->X_op == O_constant)
     {
+      if (i.types[this_operand] & Disp16)
+	{
+	  /* We know this operand is at most 16 bits, so convert to a
+	     signed 16 bit number before trying to see whether it will
+	     fit in an even smaller size.  */
+	  exp->X_add_number =
+	    (((exp->X_add_number & 0xffff) ^ 0x8000) - 0x8000);
+	}
       if (fits_in_signed_byte (exp->X_add_number))
 	i.types[this_operand] |= Disp8;
     }

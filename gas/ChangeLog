@@ -1,3 +1,18 @@
+2000-02-26  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.c (i386_immediate): Move constant operand sizing
+	from here..
+	(md_assemble): To here, before template operands are matched.
+	Also ensure a constant immediate is sign extended when we know the
+	size is at most 16 bits.  This is to catch cases like "add
+	$0xffc0,%ax" where we don't know the size, and thus that the
+	immediate can be represented as Imm8S until after parsing the
+	register operand.
+	(i386_displacement): Similarly sign extend 16 bit constant
+	displacements.
+	(md_assemble): Relax 16-bit jump constant range check to suit sign
+	extended displacements.
+
 2000-02-26  Andreas Jaeger  <aj@suse.de>
 
 	* doc/c-mips.texi (MIPS Opts): Fix typo in last patch.
