@@ -1,7 +1,15 @@
+start-sanitize-sky
+Fri Apr  3 12:19:33 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* gas/dvp/relax-1.[sd]: New testcase.
+	* gas/dvp/dvp.exp: Run it.
+
+end-sanitize-sky
 start-sanitize-m32rx
 Thu Apr  2 16:49:29 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/m32r/m32rx.d: Fix SATB and SAT bit patterns.
+	* gas/m32r/allinsn.d: Fix expected result for CMPUI insn.
 
 Wed Apr  1 14:59:29 1998  Nick Clifton  <nickc@cygnus.com>
 
