@@ -8988,7 +8988,8 @@ md_parse_option (c, arg)
 
             case 'x':
  	      if (streq (str, "xscale"))
- 		cpu_variant = ARM_9 | ARM_ARCH_XSCALE;
+ 		cpu_variant = (cpu_variant & ~ARM_ANY)
+		  | ARM_9 | ARM_ARCH_XSCALE;
  	      else
  		goto bad;
       	      break;
