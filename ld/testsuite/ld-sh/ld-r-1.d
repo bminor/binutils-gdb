@@ -4,6 +4,7 @@
 #ld: -r -EL
 #readelf: -r -x1 -x2
 #target: sh*-*-elf sh*-*-linux*
+#notarget: sh64*-*-linux*
 
 # Make sure relocations against global and local symbols with relative and
 # absolute 32-bit relocs don't come out wrong after ld -r.  Remember that

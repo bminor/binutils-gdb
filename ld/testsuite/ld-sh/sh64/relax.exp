@@ -33,19 +33,25 @@ if ![istarget sh64-*-*] {
 #   1/0 whether relaxing should have been done or not, or -1 if we expect
 #     the linker to not produce an output file.
 
+if [istarget sh64*-*-linux*] {
+    set emul32 "shlelf32_linux"
+} else {
+    set emul32 "shelf32"
+}
+
 set sh64relaxtests {
     {"SH64 not relaxing, shcompact"
-      {"-relax -isa shcompact" "n/a" "n/a" "n/a"} "-mshelf32" 0}
+      {"-relax -isa shcompact" "n/a" "n/a" "n/a"} "-m$emul32" 0}
     {"SH64 relaxing, shcompact"
-      {"-relax -isa shcompact" "n/a" "n/a" "n/a"} "-relax -mshelf32" 1}
+      {"-relax -isa shcompact" "n/a" "n/a" "n/a"} "-relax -m$emul32" 1}
     {"SH64 relaxing, shcompacts"
-      {"-relax -isa shcompact" "-isa shcompact" "n/a" "n/a"} "-relax -mshelf32" 1}
+      {"-relax -isa shcompact" "-isa shcompact" "n/a" "n/a"} "-relax -m$emul32" 1}
     {"SH64 relaxing disabled, shmedia"
-      {"-relax -isa shcompact" "-isa shmedia -no-mix" "n/a" "n/a"} "-relax -mshelf32" 0}
+      {"-relax -isa shcompact" "-isa shmedia -no-mix" "n/a" "n/a"} "-relax -m$emul32" 0}
     {"SH64 relaxing disabled, mixed"
-      {"-relax -isa shcompact" "n/a" "-isa shcompact" "n/a"} "-relax -mshelf32" 0}
+      {"-relax -isa shcompact" "n/a" "-isa shcompact" "n/a"} "-relax -m$emul32" 0}
     {"SH64 relaxing disabled, cranges"
-      {"-relax -isa shcompact" "n/a" "n/a" ""} "-relax -mshelf32" 0}
+      {"-relax -isa shcompact" "n/a" "n/a" ""} "-relax -m$emul32" 0}
 }
 
 proc run_sh64relaxtest {sh64relaxtests} {
@@ -56,6 +62,7 @@ proc run_sh64relaxtest {sh64relaxtests} {
     global readelf
     global srcdir
     global subdir
+    global emul32
 
     set testindex 0
     
@@ -66,7 +73,7 @@ proc run_sh64relaxtest {sh64relaxtests} {
     foreach testentry $sh64relaxtests {
 	set testname [lindex $testentry 0]
 	set as_options [lindex $testentry 1]
-	set ld_options [lindex $testentry 2]
+	set ld_options [subst [lindex $testentry 2]]
 	set expect_relaxed [lindex $testentry 3]
 	
 	set is_unresolved 0

@@ -22,12 +22,26 @@ if ![istarget sh64-*-*] {
     return
 }
 
+if [istarget sh64-*-linux*] {
+    set emul32 "shlelf32_linux"
+    set oformat32 "elf32-sh64-linux"
+    set startsym "_start"
+    set doabi64 0
+} else {
+    set emul32 "shelf32"
+    set oformat32 "elf32-sh64"
+    set startsym "start"
+    set doabi64 1
+    set emul64 "shelf64"
+    set oformat64 "elf64-sh64"
+}
+
 # opcode, asflags, ldflags, expected or "" for fail
 # opcode blank means rebuild relfail.o and set default as/ld options
 
-set sh64relfailtests {
+set sh64abi32relfailtests {
 
-    { "" "-isa=shcompact -abi=32" "-m shelf32 --oformat elf32-sh" "" }
+    { "" "-isa=shcompact -abi=32" "-m $emul32 -Ttext 0x1000 --oformat $oformat32" "" }
     { "mov.l lab,r0;.align 3;lab:nop" "" "" "mov.l 1008" }
     { "mov.l to0,r0" "" "" "mov.l 1010" }
     { "mov.l to1,r0" "" "" "" }
@@ -35,7 +49,32 @@ set sh64relfailtests {
     { "mov.l to3,r0" "" "" "" }
     { "mov.l to4,r0" "" "" "mov.l 1014" }
 
-    { "" "-isa=shmedia -abi=64 -no-expand" "-m shelf64 --oformat elf64-sh64" "" }
+    { "" "-isa=shmedia -abi=32 -no-expand" "-m $emul32 -Ttext 0x1000 --oformat $oformat32" "" }
+    { "pta lab,tr0;.align 3;lab:nop" "" "" "pta.*1008" }
+
+    { "ld.q r0,datalabel to0 - 0x1000,r0" "" "" "ld.q.*,16," }
+    { "ld.q r0,datalabel to1 - 0x1000,r0" "" "" "" }
+    { "ld.q r0,datalabel to2 - 0x1000,r0" "" "" "" }
+    { "ld.q r0,datalabel to3 - 0x1000,r0" "" "" "" }
+    { "ld.q r0,datalabel to4 - 0x1000,r0" "" "" "" }
+
+    { "ld.l r0,datalabel to0 - 0x1000,r0" "" "" "ld.l.*,16," }
+    { "ld.l r0,datalabel to1 - 0x1000,r0" "" "" "" }
+    { "ld.l r0,datalabel to2 - 0x1000,r0" "" "" "" }
+    { "ld.l r0,datalabel to3 - 0x1000,r0" "" "" "" }
+    { "ld.l r0,datalabel to4 - 0x1000,r0" "" "" "ld.l.*,20," }
+
+    { "ld.w r0,datalabel to0 - 0x1000,r0" "" "" "ld.w.*,16," }
+    { "ld.w r0,datalabel to1 - 0x1000,r0" "" "" "" }
+    { "ld.w r0,datalabel to2 - 0x1000,r0" "" "" "ld.w.*,18," }
+    { "ld.w r0,datalabel to3 - 0x1000,r0" "" "" "" }
+    { "ld.w r0,datalabel to4 - 0x1000,r0" "" "" "ld.w.*,20," }
+
+}
+
+set sh64abi64relfailtests {
+
+    { "" "-isa=shmedia -abi=64 -no-expand" "-m $emul64 -Ttext 0x1000 --oformat $oformat64" "" }
     { "pta lab,tr0;.align 3;lab:nop" "" "" "pta.*1008" }
     { "pta datalabel to0,tr0" "" "" "pta.*1010" }
     { "pta datalabel to1,tr0" "" "" "pta.*1011" }
@@ -71,14 +110,19 @@ proc run_sh64relfailtests {sh64relfailtests} {
     global readelf
     global srcdir
     global subdir
+    global emul32
+    global emul64
+    global oformat32
+    global oformat64
+    global startsym
 
     set testindex 0
     set is_unresolved 0
-    
+
     foreach testentry $sh64relfailtests {
 	set opcode [lindex $testentry 0]
 	set as_options [lindex $testentry 1]
-	set ld_options [lindex $testentry 2]
+	set ld_options [subst [lindex $testentry 2]]
 	set expect_fail [lindex $testentry 3]
 	
 	set testname "SH64 relfail $opcode $as_options $ld_options"
@@ -112,8 +156,8 @@ proc run_sh64relfailtests {sh64relfailtests} {
 	
 	set asm [open "tmpdir/relfail-$testindex.s" "w"]
 	puts $asm " .text"
-	puts $asm " .global start"
-	puts $asm "start:"
+	puts $asm " .global $startsym"
+	puts $asm "$startsym:"
 	puts $asm " $opcode";
 	close $asm
 	
@@ -159,4 +203,7 @@ proc run_sh64relfailtests {sh64relfailtests} {
     }
 }
 
-run_sh64relfailtests $sh64relfailtests
+run_sh64relfailtests $sh64abi32relfailtests
+if {$doabi64} {
+    run_sh64relfailtests $sh64abi64relfailtests
+}

@@ -23,6 +23,10 @@ if ![istarget sh64-*-*] {
     return
 }
 
+if [istarget sh64*-*-linux*] {
+    return
+}
+
 # List contains test-items with 3 items followed by 2 lists:
 # 0:name 1:ld options 2:assembler options
 # 3:filenames of assembler files 4: action and options. 5: name of output file

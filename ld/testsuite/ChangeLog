@@ -1,3 +1,15 @@
+2002-10-14  Stephen Clarke <stephen.clarke@superh.com>
+	* ld-sh/ld-r-1.d: Disable for sh64*-*-linux*.
+	* ld-sh/sh64/sh64.exp: Likewise.
+	* ld-sh/sh.exp: Disable relaxing tests for sh64*-*-linux*.
+	* ld-sh/sh64/abi32.sd: Adjust expected output to include
+	sh64*-*-linux* formats too.
+	* ld-sh/sh64/relax.exp: Add emul32 variable to hold target
+	emulation, and set it appropriately for sh*-*-linux*.
+	* ld-sh/sh64/relfail.exp: Add variables to hold target
+	emulation, output format, start symbol, and whether target
+	supports 64-bit ABI.  Set appropriately for sh*-*-linux*.
+
 2002-10-12  H.J. Lu  (hjl@gnu.org)
 
 	* ld-discard/extern.d: Remove $srcdir/$subdir/.

@@ -1,5 +1,5 @@
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 Contents of section \.text:
  1000 cc000190 c8015590 6bf56630 6ff0fff0  .*

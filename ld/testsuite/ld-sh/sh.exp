@@ -25,7 +25,8 @@ if ![istarget sh*-*-*] {
     return
 }
 
-if [istarget sh64-*-elf] {
+if { ([istarget sh64-*-elf]
+      || [istarget sh64*-*-linux*])} {
     # relaxing not supported on sh64 yet.
     return
 }
