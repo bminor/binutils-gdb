@@ -1,8 +1,8 @@
 2002-07-25  Kevin Buettner  <kevinb@redhat.com>
 
 	* rs6000-nat.c (ppc-tdep.h): Include.
-	(fetch_registers, store_register): Don't access registers[]
-	directly.  Instead, use supply_register() or
+	(fetch_registers, store_register, fetch_core_registers): Don't
+	access registers[] directly.  Instead, use supply_register() or
 	regcache_collect() as appropriate.
 	(find_toc_address): Format hex address with local_hex_string().
 
