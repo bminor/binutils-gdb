@@ -420,12 +420,14 @@ typedef enum {
 #define TO           RIGHT       /* move to special register                  */
 
 /* For bitwise parallel operations */ 
-#define POP_AND      BYTE        /* for POP, op = &                           */
-#define POP_OR       HALFWORD    /* for POP, op = |                           */
-#define POP_NOR      WORD        /* for POP, op = ~(x | y)                    */
-#define POP_XOR      DOUBLEWORD  /* for POP, op = ^                           */
+#define POP_AND      0            /* for POP, op = &                           */
+#define POP_OR       LEFT         /* for POP, op = |                           */
+#define POP_NOR      LIKELY       /* for POP, op = ~(x | y)                    */
+#define POP_XOR      LEFT|LIKELY  /* for POP, op = ^                           */
 
-#define GET_OP_FROM_INSN(insn) GETDATASIZEINSN(insn)
+#define GET_OP_FROM_INSN(insn) (((insn)->flags)&(LEFT|LIKELY))
+
+
    
 typedef struct instruction {
  char         *name;   /* ASCII mnemonic name */
@@ -663,7 +665,6 @@ struct instruction MIPS_DECODE[] = {
  {"ORI",     1,"001101ssssstttttzzzzzzzzzzzzzzzz",NORMAL, OR,       (NONE)},
 
  /* start-sanitize-r5900 */
-#ifdef TARGET_5900
  {"PABSH",  T5,"01110000000TTTTTddddd00101101000",MMI1,   PABS,     (HALFWORD)},
  {"PABSW",  T5,"01110000000TTTTTddddd00001101000",MMI1,   PABS,     (WORD)},
 
@@ -783,7 +784,6 @@ struct instruction MIPS_DECODE[] = {
  {"PSUBW",  T5,"011100SSSSSTTTTTddddd00001001000",MMI0,   PADD,     (SUBTRACT | WORD)},
 
  {"PXOR",   T5,"011100SSSSSTTTTTddddd10011001001",MMI2,   POP,      (POP_XOR)},
-#endif /* TARGET_5900 */
  /* end-sanitize-r5900 */
 
  {"PREF",   G2,"110011sssssnnnnnyyyyyyyyyyyyyyyy",NORMAL, PREFETCH, (NONE)},
