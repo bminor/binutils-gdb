@@ -845,7 +845,7 @@ evaluate_subexp_standard (struct type *expect_type,
 
 	      (void) find_overload_match (arg_types, nargs, tstr,
 				     1 /* method */ , 0 /* strict match */ ,
-					  arg2 /* the object */ , NULL,
+					  &arg2 /* the object */ , NULL,
 					  &valp, NULL, &static_memfuncp);
 
 

@@ -2636,12 +2636,13 @@ value_find_oload_method_list (struct value **argp, char *method, int offset,
 
 int
 find_overload_match (struct type **arg_types, int nargs, char *name, int method,
-		     int lax, struct value *obj, struct symbol *fsym,
+		     int lax, struct value **objp, struct symbol *fsym,
 		     struct value **valp, struct symbol **symp, int *staticp)
 {
   int nparms;
   struct type **parm_types;
   int champ_nparms = 0;
+  struct value *obj = (objp ? *objp : NULL);
 
   short oload_champ = -1;	/* Index of best overloaded function */
   short oload_ambiguous = 0;	/* Current ambiguity state for overload resolution */
@@ -2865,6 +2866,15 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
       xfree (func_name);
     }
 
+  if (objp)
+    {
+      if (TYPE_CODE (VALUE_TYPE (temp)) != TYPE_CODE_PTR
+	  && TYPE_CODE (VALUE_TYPE (*objp)) == TYPE_CODE_PTR)
+	{
+	  temp = value_addr (temp);
+	}
+      *objp = temp;
+    }
   return oload_incompatible ? 100 : (oload_non_standard ? 10 : 0);
 }
 
