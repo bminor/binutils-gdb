@@ -146,6 +146,7 @@ alloc_type (struct objfile *objfile)
   TYPE_OBJFILE (type) = objfile;
   TYPE_VPTR_FIELDNO (type) = -1;
   TYPE_CV_TYPE (type) = type;	/* chain back to itself */
+  TYPE_AS_TYPE (type) = type;	/* ditto */
 
   return (type);
 }
@@ -323,6 +324,73 @@ lookup_function_type (struct type *type)
   return make_function_type (type, (struct type **) 0);
 }
 
+/* Identify address space identifier by name --
+   return the integer flag defined in gdbtypes.h.  */
+extern int
+address_space_name_to_int (char *space_identifier)
+{
+  /* Check for known address space delimiters. */
+  if (!strcmp (space_identifier, "code"))
+    return TYPE_FLAG_CODE_SPACE;
+  else if (!strcmp (space_identifier, "data"))
+    return TYPE_FLAG_DATA_SPACE;
+  else
+    error ("Unknown address space specifier: \"%s\"", space_identifier);
+}
+
+/* Identify address space identifier by integer flag as defined in 
+   gdbtypes.h -- return the string version of the adress space name. */
+
+extern char *
+address_space_int_to_name (int space_flag)
+{
+  if (space_flag & TYPE_FLAG_CODE_SPACE)
+    return "code";
+  else if (space_flag & TYPE_FLAG_DATA_SPACE)
+    return "data";
+  else
+    return NULL;
+}
+
+/* Make an address-space-delimited variant of a type -- a type that
+   is identical to the one supplied except that it has an address
+   space attribute attached to it (such as "code" or "data").
+
+   This is for Harvard architectures. */
+
+struct type *
+make_type_with_address_space (struct type *type, int space_flag)
+{
+  struct type *ntype;
+
+  ntype = type;
+  do {
+    if ((ntype->flags & space_flag) != 0)
+      return ntype;
+    ntype = TYPE_AS_TYPE (ntype);
+  } while (ntype != type);
+
+  /* Create a new, duplicate type. */
+  ntype = alloc_type (TYPE_OBJFILE (type));
+  /* Copy original type. */
+  memcpy ((char *) ntype, (char *) type, sizeof (struct type));
+
+  /* Pointers or references to the original type are not relevant to
+     the new type; but if the original type is a pointer, the new type
+     points to the same thing (so TYPE_TARGET_TYPE remains unchanged). */
+  TYPE_POINTER_TYPE (ntype) = (struct type *) 0;
+  TYPE_REFERENCE_TYPE (ntype) = (struct type *) 0;
+  TYPE_CV_TYPE (ntype) = ntype;
+
+  /* Chain the new address-space-specific type to the old type. */
+  ntype->as_type = type->as_type;
+  type->as_type = ntype;
+
+  /* Now set the address-space flag, and return the new type. */
+  ntype->flags |= space_flag;
+  return ntype;
+}
+
 
 /* Make a "c-v" variant of a type -- a type that is identical to the
    one supplied except that it may have const or volatile attributes
@@ -380,6 +448,7 @@ make_cv_type (int cnst, int voltl, struct type *type, struct type **typeptr)
   /* But zero out fields that shouldn't be copied */
   TYPE_POINTER_TYPE (ntype) = (struct type *) 0;	/* Need new pointer kind */
   TYPE_REFERENCE_TYPE (ntype) = (struct type *) 0;	/* Need new referene kind */
+  TYPE_AS_TYPE (ntype) = ntype;		/* Need new address-space kind. */
   /* Note: TYPE_TARGET_TYPE can be left as is */
 
   /* Set flags appropriately */

@@ -718,24 +718,28 @@ variable:	name_not_typename
 			}
 	;
 
+space_identifier : '@' NAME
+		{ push_type_address_space (copy_name ($2.stoken));
+		  push_type (tp_space_identifier);
+		}
+	;
 
-ptype	:	typebase
-	|	ptype const_or_volatile abs_decl const_or_volatile
-		{ $$ = follow_types ($1); }
-	;
-const_and_volatile: 	CONST_KEYWORD VOLATILE_KEYWORD
-	| 		VOLATILE_KEYWORD CONST_KEYWORD
-	;
-const_or_volatile_noopt:  	const_and_volatile 
-			{ push_type (tp_const); push_type (tp_volatile);}
-	| 		CONST_KEYWORD
-			{ push_type (tp_const);}
-	| 		VOLATILE_KEYWORD
-			{ push_type (tp_volatile); }
-	;
 const_or_volatile: const_or_volatile_noopt
-	| 
+	|
 	;
+
+cv_with_space_id : const_or_volatile space_identifier const_or_volatile
+	;
+
+const_or_volatile_or_space_identifier_noopt: cv_with_space_id
+	| const_or_volatile_noopt 
+	;
+
+const_or_volatile_or_space_identifier: 
+		const_or_volatile_or_space_identifier_noopt
+	|
+	;
+
 abs_decl:	'*'
 			{ push_type (tp_pointer); $$ = 0; }
 	|	'*' abs_decl
@@ -852,8 +856,10 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 			{ $$ = lookup_template_type(copy_name($2), $4,
 						    expression_context_block);
 			}
-	| const_or_volatile_noopt typebase { $$ = follow_types ($2); }
-	| typebase const_or_volatile_noopt { $$ = follow_types ($1); }
+	| const_or_volatile_or_space_identifier_noopt typebase 
+			{ $$ = follow_types ($2); }
+	| typebase const_or_volatile_or_space_identifier_noopt 
+			{ $$ = follow_types ($1); }
 	;
 
 typename:	TYPENAME
@@ -888,6 +894,25 @@ nonempty_typelist
 		  $$ = (struct type **) realloc ((char *) $1, len);
 		  $$[$<ivec>$[0]] = $3;
 		}
+	;
+
+ptype	:	typebase
+	|	ptype const_or_volatile_or_space_identifier abs_decl const_or_volatile_or_space_identifier
+		{ $$ = follow_types ($1); }
+	;
+
+const_and_volatile: 	CONST_KEYWORD VOLATILE_KEYWORD
+	| 		VOLATILE_KEYWORD CONST_KEYWORD
+	;
+
+const_or_volatile_noopt:  	const_and_volatile 
+			{ push_type (tp_const);
+			  push_type (tp_volatile); 
+			}
+	| 		CONST_KEYWORD
+			{ push_type (tp_const); }
+	| 		VOLATILE_KEYWORD
+			{ push_type (tp_volatile); }
 	;
 
 name	:	NAME { $$ = $1.stoken; }
@@ -1683,7 +1708,7 @@ yylex ()
 	  return TYPENAME;
         }
     if ((yylval.tsym.type = lookup_primitive_typename (tmp)) != 0)
-	return TYPENAME;
+      return TYPENAME;
 
     /* Input names that aren't symbols but ARE valid hex numbers,
        when the input radix permits them, can be names or numbers

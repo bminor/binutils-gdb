@@ -1208,8 +1208,8 @@ parse_expression (char *string)
 /* Stuff for maintaining a stack of types.  Currently just used by C, but
    probably useful for any language which declares its types "backwards".  */
 
-void
-push_type (enum type_pieces tp)
+static void
+check_type_stack_depth (void)
 {
   if (type_stack_depth == type_stack_size)
     {
@@ -1217,19 +1217,26 @@ push_type (enum type_pieces tp)
       type_stack = (union type_stack_elt *)
 	xrealloc ((char *) type_stack, type_stack_size * sizeof (*type_stack));
     }
+}
+
+void
+push_type (enum type_pieces tp)
+{
+  check_type_stack_depth ();
   type_stack[type_stack_depth++].piece = tp;
 }
 
 void
 push_type_int (int n)
 {
-  if (type_stack_depth == type_stack_size)
-    {
-      type_stack_size *= 2;
-      type_stack = (union type_stack_elt *)
-	xrealloc ((char *) type_stack, type_stack_size * sizeof (*type_stack));
-    }
+  check_type_stack_depth ();
   type_stack[type_stack_depth++].int_val = n;
+}
+
+void
+push_type_address_space (char *string)
+{
+  push_type_int (address_space_name_to_int (string));
 }
 
 enum type_pieces
@@ -1257,6 +1264,7 @@ follow_types (struct type *follow_type)
   int done = 0;
   int make_const = 0;
   int make_volatile = 0;
+  int make_addr_space = 0;
   int array_size;
   struct type *range_type;
 
@@ -1273,12 +1281,20 @@ follow_types (struct type *follow_type)
 	  follow_type = make_cv_type (TYPE_CONST (follow_type), 
 				      make_volatile, 
 				      follow_type, 0);
+	if (make_addr_space)
+	  follow_type = make_type_with_address_space (follow_type, 
+						      make_addr_space);
+	make_const = make_volatile = 0;
+	make_addr_space = 0;
 	break;
       case tp_const:
 	make_const = 1;
 	break;
       case tp_volatile:
 	make_volatile = 1;
+	break;
+      case tp_space_identifier:
+	make_addr_space = pop_type_int ();
 	break;
       case tp_pointer:
 	follow_type = lookup_pointer_type (follow_type);
@@ -1290,15 +1306,27 @@ follow_types (struct type *follow_type)
 	  follow_type = make_cv_type (TYPE_CONST (follow_type), 
 				      make_volatile, 
 				      follow_type, 0);
+	if (make_addr_space)
+	  follow_type = make_type_with_address_space (follow_type, 
+						      make_addr_space);
 	make_const = make_volatile = 0;
+	make_addr_space = 0;
 	break;
       case tp_reference:
 	follow_type = lookup_reference_type (follow_type);
 	if (make_const)
-	  follow_type = make_cv_type (make_const, TYPE_VOLATILE (follow_type), follow_type, 0);
+	  follow_type = make_cv_type (make_const, 
+				      TYPE_VOLATILE (follow_type), 
+				      follow_type, 0);
 	if (make_volatile)
-	  follow_type = make_cv_type (TYPE_CONST (follow_type), make_volatile, follow_type, 0);
+	  follow_type = make_cv_type (TYPE_CONST (follow_type), 
+				      make_volatile, 
+				      follow_type, 0);
+	if (make_addr_space)
+	  follow_type = make_type_with_address_space (follow_type, 
+						      make_addr_space);
 	make_const = make_volatile = 0;
+	make_addr_space = 0;
 	break;
       case tp_array:
 	array_size = pop_type_int ();

@@ -1,3 +1,27 @@
+2001-11-14  Michael Snyder  <msnyder@redhat.com>
+	Add address space identifiers to expression language for types.
+	* c-exp.y (space_identifier, cv_with_space_id, 
+	const_or_volatile_or_space_identifier_noopt, 
+	const_or_volatile_or_space_identifier): New terminals.
+	(ptype): Accept const_or_volatile_or_space_identifier.
+	(typebase): Accept const_or_volatile_or_space_identifier.
+	* c-typeprint.c (c_type_print_cv_qualifier): Rename to
+	c_type_print_modifier.  Handle address space modified types.
+	* gdbtypes.h (TYPE_FLAG_CODE_SPACE, TYPE_FLAG_DATA_SPACE):
+	New type flags.
+	(struct type): Add new field as_type for addr-space qualified types.
+	(TYPE_AS_TYPE): New macro, retrieves the chain of types that are
+	identical to this one except for address-space qualification.
+	* gdbtypes.c (alloc_type): Initialize new field 'as_type'.
+	(address_space_name_to_int): New function.
+	(address_space_int_to_name): New function.
+	(make_type_with_address_space): New function.
+	(make_cv_type): Handle as_type field of new struct type object.
+	* parse.c (check_type_stack_depth): New function.
+	(push_type_address_space): New function.
+	(follow_types): Handle types with address-space qualifier.
+	* parser-defs.h (enum type_pieces): Add enum tp_space_identifier.
+
 2001-11-14  Jim Blandy  <jimb@redhat.com>
 
 	* s390-tdep.c (s390_pop_frame_regular): On the S/390, the frame

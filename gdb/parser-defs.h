@@ -90,7 +90,8 @@ enum type_pieces
     tp_array, 
     tp_function, 
     tp_const, 
-    tp_volatile
+    tp_volatile, 
+    tp_space_identifier
   };
 /* The stack can contain either an enum type_pieces or an int.  */
 union type_stack_elt
@@ -140,6 +141,8 @@ extern char *copy_name (struct stoken);
 extern void push_type (enum type_pieces);
 
 extern void push_type_int (int);
+
+extern void push_type_address_space (char *);
 
 extern enum type_pieces pop_type (void);
 

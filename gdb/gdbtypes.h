@@ -206,6 +206,28 @@ enum type_code
 
 #define TYPE_FLAG_INCOMPLETE (1 << 8)
 
+/* Instruction-space delimited type.  This is for Harvard architectures
+   which have separate instruction and data address spaces (and perhaps
+   others).
+
+   GDB usually defines a flat address space that is a superset of the
+   architecture's two (or more) address spaces, but this is an extension
+   of the architecture's model.
+
+   If TYPE_FLAG_INST is set, an object of the corresponding type
+   resides in instruction memory, even if its address (in the extended
+   flat address space) does not reflect this.
+
+   Similarly, if TYPE_FLAG_DATA is set, then an object of the 
+   corresponding type resides in the data memory space, even if
+   this is not indicated by its (flat address space) address.
+
+   If neither flag is set, the default space for functions / methods
+   is instruction space, and for data objects is data memory.  */
+
+#define TYPE_FLAG_CODE_SPACE (1 << 9)
+#define TYPE_FLAG_DATA_SPACE (1 << 10)
+
 
 struct type
   {
@@ -309,6 +331,12 @@ struct type
        attribute (or both). The various c-v variants
        are chained together in a ring. */
     struct type *cv_type;
+
+    /* Address-space delimited variant chain.  This points to a type
+       that differs from this one only in an address-space qualifier
+       attribute.  The otherwise-identical address-space delimited 
+       types are chained together in a ring. */
+    struct type *as_type;
 
     /* Flags about this type.  */
 
@@ -689,6 +717,7 @@ extern void allocate_cplus_struct_type (struct type *);
 #define TYPE_POINTER_TYPE(thistype) (thistype)->pointer_type
 #define TYPE_REFERENCE_TYPE(thistype) (thistype)->reference_type
 #define TYPE_CV_TYPE(thistype) (thistype)->cv_type
+#define TYPE_AS_TYPE(thistype) (thistype)->as_type
 /* Note that if thistype is a TYPEDEF type, you have to call check_typedef.
    But check_typedef does set the TYPE_LENGTH of the TYPEDEF type,
    so you only have to call check_typedef once.  Since allocate_value
@@ -1007,6 +1036,13 @@ extern struct type *lookup_reference_type (struct type *);
 extern struct type *make_reference_type (struct type *, struct type **);
 
 extern struct type *make_cv_type (int, int, struct type *, struct type **);
+
+extern int address_space_name_to_int (char *);
+
+extern char *address_space_int_to_name (int);
+
+extern struct type *make_type_with_address_space (struct type *type, 
+						  int space_identifier);
 
 extern struct type *lookup_member_type (struct type *, struct type *);
 

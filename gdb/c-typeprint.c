@@ -52,8 +52,9 @@ static void cp_type_print_derivation_info (struct ui_file *, struct type *);
 void c_type_print_varspec_prefix (struct type *, struct ui_file *, int,
 				  int);
 
-static void c_type_print_cv_qualifier (struct type *, struct ui_file *,
-				       int, int);
+/* Print "const", "volatile", or address space modifiers. */
+static void c_type_print_modifier (struct type *, struct ui_file *,
+				   int, int);
 
 
 
@@ -211,7 +212,7 @@ c_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
     case TYPE_CODE_PTR:
       c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 1);
       fprintf_filtered (stream, "*");
-      c_type_print_cv_qualifier (type, stream, 1, 0);
+      c_type_print_modifier (type, stream, 1, 0);
       break;
 
     case TYPE_CODE_MEMBER:
@@ -242,7 +243,7 @@ c_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
     case TYPE_CODE_REF:
       c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 1);
       fprintf_filtered (stream, "&");
-      c_type_print_cv_qualifier (type, stream, 1, 0);
+      c_type_print_modifier (type, stream, 1, 0);
       break;
 
     case TYPE_CODE_FUNC:
@@ -289,10 +290,11 @@ c_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
    NEED_SPACE = 1 indicates an initial white space is needed */
 
 static void
-c_type_print_cv_qualifier (struct type *type, struct ui_file *stream,
-			   int need_pre_space, int need_post_space)
+c_type_print_modifier (struct type *type, struct ui_file *stream,
+		       int need_pre_space, int need_post_space)
 {
-  int flag = 0;
+  int did_print_modifier = 0;
+  char *address_space_id;
 
   /* We don't print `const' qualifiers for references --- since all
      operators affect the thing referenced, not the reference itself,
@@ -303,18 +305,27 @@ c_type_print_cv_qualifier (struct type *type, struct ui_file *stream,
       if (need_pre_space)
 	fprintf_filtered (stream, " ");
       fprintf_filtered (stream, "const");
-      flag = 1;
+      did_print_modifier = 1;
     }
 
   if (TYPE_VOLATILE (type))
     {
-      if (flag || need_pre_space)
+      if (did_print_modifier || need_pre_space)
 	fprintf_filtered (stream, " ");
       fprintf_filtered (stream, "volatile");
-      flag = 1;
+      did_print_modifier = 1;
     }
 
-  if (flag && need_post_space)
+  address_space_id = address_space_int_to_name (TYPE_FLAGS (type));
+  if (address_space_id)
+    {
+      if (did_print_modifier || need_pre_space)
+	fprintf_filtered (stream, " ");
+      fprintf_filtered (stream, "@%s", address_space_id);
+      did_print_modifier = 1;
+    }
+
+  if (did_print_modifier && need_post_space)
     fprintf_filtered (stream, " ");
 }
 
@@ -655,7 +666,7 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
   if (show <= 0
       && TYPE_NAME (type) != NULL)
     {
-      c_type_print_cv_qualifier (type, stream, 0, 1);
+      c_type_print_modifier (type, stream, 0, 1);
       fputs_filtered (TYPE_NAME (type), stream);
       return;
     }
@@ -675,7 +686,7 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
       break;
 
     case TYPE_CODE_STRUCT:
-      c_type_print_cv_qualifier (type, stream, 0, 1);
+      c_type_print_modifier (type, stream, 0, 1);
       /* Note TYPE_CODE_STRUCT and TYPE_CODE_CLASS have the same value,
        * so we use another means for distinguishing them.
        */
@@ -708,7 +719,7 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
       goto struct_union;
 
     case TYPE_CODE_UNION:
-      c_type_print_cv_qualifier (type, stream, 0, 1);
+      c_type_print_modifier (type, stream, 0, 1);
       fprintf_filtered (stream, "union ");
 
     struct_union:
@@ -1023,7 +1034,7 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
       break;
 
     case TYPE_CODE_ENUM:
-      c_type_print_cv_qualifier (type, stream, 0, 1);
+      c_type_print_modifier (type, stream, 0, 1);
       /* HP C supports sized enums */
       if (hp_som_som_object_present)
 	switch (TYPE_LENGTH (type))
@@ -1104,7 +1115,7 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
          template <class T1, class T2> class "
          and then merges with the struct/union/class code to
          print the rest of the definition. */
-      c_type_print_cv_qualifier (type, stream, 0, 1);
+      c_type_print_modifier (type, stream, 0, 1);
       fprintf_filtered (stream, "template <");
       for (i = 0; i < TYPE_NTEMPLATE_ARGS (type); i++)
 	{
@@ -1139,7 +1150,7 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
          is no type name, then complain. */
       if (TYPE_NAME (type) != NULL)
 	{
-	  c_type_print_cv_qualifier (type, stream, 0, 1);
+	  c_type_print_modifier (type, stream, 0, 1);
 	  fputs_filtered (TYPE_NAME (type), stream);
 	}
       else
