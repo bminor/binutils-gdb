@@ -1505,7 +1505,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	  OBITOP (O_BIAND, 1, 0, c = !(ea & m) && C);
 	  OBITOP (O_BOR, 1, 0, c = (ea & m) || C);
 	  OBITOP (O_BIOR, 1, 0, c = !(ea & m) || C);
-	  OBITOP (O_BXOR, 1, 0, c = (ea & m) != C);
+	  OBITOP (O_BXOR, 1, 0, c = ((ea & m) != 0) != C);
 	  OBITOP (O_BIXOR, 1, 0, c = !(ea & m) != C);
 
 #define MOP(bsize, signed)			\
