@@ -133,7 +133,7 @@ proc test_running_the_program {} {
     mi_run_cmd
     # The running part has been checked already by mi_run_cmd
         gdb_expect {
-	    -re "\[\r\n\]*000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"callee4\",args=\{\},file=\".*basics.c\",line=\"8\"\}\r\n$mi_gdb_prompt$" \
+	    -re "\[\r\n\]*000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"callee4\",args=\\\[\\\],file=\".*basics.c\",line=\"8\"\}\r\n$mi_gdb_prompt$" \
 		    { pass "run to callee4" }
           -re ".*$mi_gdb_prompt$" {fail "run to callee4 (2)"}
           timeout {fail "run to callee4 (timeout 2)"}
@@ -154,7 +154,7 @@ proc test_watchpoint_triggering {} {
     gdb_expect {
       -re "222\\^running\r\n$mi_gdb_prompt" {
         gdb_expect {
-	    -re "222\\*stopped,reason=\"watchpoint-trigger\",wpt=\{number=\"2\",exp=\"C\"\},value=\{old=\".*\",new=\"3\"\},thread-id=\"0\",frame=\{addr=\"$hex\",func=\"callee4\",args=\{\},file=\".*basics.c\",line=\"13\"\}\r\n$mi_gdb_prompt$" {
+	    -re "222\\*stopped,reason=\"watchpoint-trigger\",wpt=\{number=\"2\",exp=\"C\"\},value=\{old=\".*\",new=\"3\"\},thread-id=\"0\",frame=\{addr=\"$hex\",func=\"callee4\",args=\\\[\\\],file=\".*basics.c\",line=\"13\"\}\r\n$mi_gdb_prompt$" {
             pass "watchpoint trigger"
           }
           -re ".*$mi_gdb_prompt$" {fail "watchpoint trigger (2)"}
@@ -169,7 +169,7 @@ proc test_watchpoint_triggering {} {
     gdb_expect {
       -re "223\\^running\r\n$mi_gdb_prompt" {
         gdb_expect {
-	    -re "\[\r\n\]*223\\*stopped,reason=\"watchpoint-scope\",wpnum=\"2\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"callee3\",args=\{.*\},file=\".*basics.c\",line=\"18\"\}\r\n$mi_gdb_prompt$" {
+	    -re "\[\r\n\]*223\\*stopped,reason=\"watchpoint-scope\",wpnum=\"2\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"callee3\",args=\\\[.*\\\],file=\".*basics.c\",line=\"18\"\}\r\n$mi_gdb_prompt$" {
             pass "wp out of scope"
           }
           -re ".*$mi_gdb_prompt$" {fail "wp out of scope (2)"}

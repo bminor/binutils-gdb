@@ -49,7 +49,7 @@ mi_gdb_test "200-break-insert do_block_tests" \
 mi_run_cmd
 # The running part has been checked already by mi_run_cmd
 gdb_expect {
-    -re "\[\r\n\]*000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_block_tests\",args=\{\},file=\".*var-cmd.c\",line=\"154\"\}\r\n$mi_gdb_prompt$" {
+    -re "\[\r\n\]*000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_block_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"154\"\}\r\n$mi_gdb_prompt$" {
 	pass "run to do_block_tests"
     }
     -re ".*$mi_gdb_prompt$" {fail "run to do_block_tests (2)"}
@@ -69,7 +69,7 @@ mi_gdb_test "-var-create foo * foo" \
 # step to "foo = 123;"
 send_gdb "-exec-step\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_block_tests\",args=\{\},file=\".*var-cmd.c\",line=\"158\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_block_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"158\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_block_tests"
     }
     timeout {
@@ -93,7 +93,7 @@ mi_gdb_test "-var-create foo * foo" \
 # step to "foo2 = 123;"
 send_gdb "-exec-step\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_block_tests\",args=\{\},file=\".*var-cmd.c\",line=\"161\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_block_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"161\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_block_tests"
     }
     timeout {
@@ -110,7 +110,7 @@ mi_gdb_test "-var-update *" \
 # step to "foo = 321;"
 send_gdb "-exec-step\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_block_tests\",args=\{\},file=\".*var-cmd.c\",line=\"164\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_block_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"164\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_block_tests"
     }
     timeout {
@@ -127,7 +127,7 @@ mi_gdb_test "-var-create inner_foo * foo" \
 # step to "foo2 = 0;"
 send_gdb "-exec-step\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_block_tests\",args=\{\},file=\".*var-cmd.c\",line=\"166\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_block_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"166\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_block_tests"
     }
     timeout { fail "step at do_block_tests (timeout)" }
@@ -165,7 +165,7 @@ mi_gdb_test "-var-delete inner_foo" \
 # step to "foo = 0;"
 send_gdb "-exec-step\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_block_tests\",args=\{\},file=\".*var-cmd.c\",line=\"168\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_block_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"168\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_block_tests"
     }
     timeout { fail "step at do_block_tests (timeout)" }
@@ -182,7 +182,7 @@ clear_xfail *-*-*
 # step to "cb = 21;"
 send_gdb "-exec-step\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_block_tests\",args=\{\},file=\".*var-cmd.c\",line=\"171\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_block_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"171\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_block_tests"
     }
     timeout { fail "step at do_block_tests (timeout)" }

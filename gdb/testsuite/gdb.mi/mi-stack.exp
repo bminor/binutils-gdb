@@ -54,7 +54,7 @@ mi_gdb_test "200-break-insert callee4" \
 mi_run_cmd
 # The running part has been checked already by mi_run_cmd
 gdb_expect {
-    -re "\[\r\n\]*000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"callee4\",args=\{\},file=\".*basics.c\",line=\"8\"\}\r\n$mi_gdb_prompt$" {
+    -re "\[\r\n\]*000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"callee4\",args=\\\[\\\],file=\".*basics.c\",line=\"8\"\}\r\n$mi_gdb_prompt$" {
 	pass "run to callee4"
     }
     -re ".*$mi_gdb_prompt$" {fail "run to callee4 (2)"}
@@ -174,7 +174,7 @@ proc test_stack_locals_listing {} {
 # step until A, B, C, have some reasonable values.
 send_gdb "-exec-next 3\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"callee4\",args=\{\},file=\".*basics.c\",line=\"13\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"callee4\",args=\\\[\\\],file=\".*basics.c\",line=\"13\"\}\r\n$mi_gdb_prompt$" {
 	pass "next's in callee4"
     }
     timeout { fail "next in callee4 (timeout)" }

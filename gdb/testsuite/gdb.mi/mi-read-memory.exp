@@ -52,7 +52,7 @@ send_gdb "101-exec-next\n"
 gdb_expect {
     -re "101\\^running\r\n$mi_gdb_prompt" {
 	gdb_expect {
-	    -re "\[\r\n\]*101\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"main\",args=\{\},file=\".*mi-read-memory.c\",line=\"20\"\}.*$mi_gdb_prompt$" \
+	    -re "\[\r\n\]*101\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*mi-read-memory.c\",line=\"20\"\}.*$mi_gdb_prompt$" \
 		    { pass "do initialization" }
 	    -re ".*$mi_gdb_prompt$" {fail "do initialization (2)"}
 	    timeout {fail "do initialization (timeout 2)"}

@@ -632,7 +632,7 @@ proc mi_run_to_main { } {
 
     mi_run_cmd
     gdb_expect {
-	-re "000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\"main\",args=\{\},file=\".*\",line=\"\[0-9\]*\"\}\r\n$mi_gdb_prompt$" {
+	-re "000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\"main\",args=\(\\\[\\\]\|\{\}\),file=\".*\",line=\"\[0-9\]*\"\}\r\n$mi_gdb_prompt$" {
 	    pass "$test"
 	    return 0
 	}
@@ -654,7 +654,7 @@ proc mi_next { test } {
     global mi_gdb_prompt
     send_gdb "220-exec-next\n"
     gdb_expect {
-	-re "220\\^running\r\n${mi_gdb_prompt}220\\*stopped,reason=\"end-stepping-range\",thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\".*\",args=\{.*\},,file=\".*\",line=\"\[0-9\]*\"\}\r\n$mi_gdb_prompt$" {
+	-re "220\\^running\r\n${mi_gdb_prompt}220\\*stopped,reason=\"end-stepping-range\",thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\".*\",args=\[\\\[\{].*[\\\]\}\],,file=\".*\",line=\"\[0-9\]*\"\}\r\n$mi_gdb_prompt$" {
 	    pass "$test"
 	    return 0
 	}
@@ -676,7 +676,7 @@ proc mi_step { test } {
     global mi_gdb_prompt
     send_gdb "220-exec-step\n"
     gdb_expect {
-	-re "220\\^running\r\n${mi_gdb_prompt}220\\*stopped,reason=\"end-stepping-range\",thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\".*\",args=\{.*\},,file=\".*\",line=\"\[0-9\]*\"\}\r\n$mi_gdb_prompt$" {
+	-re "220\\^running\r\n${mi_gdb_prompt}220\\*stopped,reason=\"end-stepping-range\",thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\".*\",args=\[\\\[\{\].*\[\\\]\}\],,file=\".*\",line=\"\[0-9\]*\"\}\r\n$mi_gdb_prompt$" {
 	    pass "$test"
 	    return 0
 	}

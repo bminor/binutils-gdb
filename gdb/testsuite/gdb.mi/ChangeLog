@@ -1,5 +1,24 @@
 2001-06-25  Andrew Cagney  <ac131313@redhat.com>
 
+	* mi-console.exp: Update args=... part of stop-reason
+	patterns. Output changed to a list of arguments.
+	* mi-disassemble.exp: Ditto.
+	* mi-simplerun.exp: Ditto.
+	* mi-return.exp: Ditto.
+	* mi-read-memory.exp: Ditto.
+	* mi-eval.exp: Ditto.
+	* mi-watch.exp: Ditto.
+	* mi-var-display.exp: Ditto.
+	* mi-var-cmd.exp: Ditto.
+	* mi-var-child.exp: Ditto.
+	* mi-var-block.exp: Ditto.
+	* mi-until.exp: Ditto.
+	* mi-stepi.exp: Ditto.
+	* mi-stack.exp: Ditto.
+	* mi-regs.exp: Ditto.
+
+2001-06-25  Andrew Cagney  <ac131313@redhat.com>
+
 	* mi-read-memory.exp: Update patterns matching data-read-memory.
 	Outputs a list.
 

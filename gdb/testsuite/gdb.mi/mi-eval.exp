@@ -64,7 +64,7 @@ proc test_running_the_program {} {
     mi_run_cmd
     # The running part has been checked already by mi_run_cmd
         gdb_expect {
-	    -re "\[\r\n\]*000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"callee4\",args=\{\},file=\".*basics.c\",line=\"8\"\}\r\n$mi_gdb_prompt$" \
+	    -re "\[\r\n\]*000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"callee4\",args=\\\[\\\],file=\".*basics.c\",line=\"8\"\}\r\n$mi_gdb_prompt$" \
 		    { pass "run to callee4" }
           -re ".*$mi_gdb_prompt$" {fail "run to callee4 (2)"}
           timeout {fail "run to callee4 (timeout 2)"}
@@ -74,7 +74,7 @@ proc test_running_the_program {} {
         gdb_expect {
 	    -re "101\\^running\r\n$mi_gdb_prompt" {
 		gdb_expect {
-		    -re "\[\r\n\]*101\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"callee4\",args=\{\},file=\".*basics.c\",line=\"9\"\}\r\n$mi_gdb_prompt$" \
+		    -re "\[\r\n\]*101\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"callee4\",args=\\\[\\\],file=\".*basics.c\",line=\"9\"\}\r\n$mi_gdb_prompt$" \
 		    { pass "next in callee4" }
 	    -re ".*$mi_gdb_prompt$" {fail "next in callee4 (2)"}
 	    timeout {fail "next in callee4 (timeout 2)"}

@@ -77,7 +77,7 @@ mi_gdb_test "200-break-insert do_locals_tests" \
 mi_run_cmd
 # The running part has been checked already by mi_run_cmd
 gdb_expect {
-    -re "\[\r\n\]*000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_locals_tests\",args=\{\},file=\".*var-cmd.c\",line=\"106\"\}\r\n$mi_gdb_prompt$" {
+    -re "\[\r\n\]*000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_locals_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"106\"\}\r\n$mi_gdb_prompt$" {
 	pass "run to do_locals_tests"
     }
     -re ".*$mi_gdb_prompt$" {fail "run todo_locals_tests (2)"}
@@ -182,7 +182,7 @@ mi_gdb_test "-var-update *" \
 # Step over "linteger = 1234;"
 send_gdb "-exec-step\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_locals_tests\",args=\{\},file=\".*var-cmd.c\",line=\"107\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_locals_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"107\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_locals_tests"
     }
     timeout {
@@ -199,7 +199,7 @@ mi_gdb_test "-var-update *" \
 # Step over "lpinteger = &linteger;"
 send_gdb "-exec-step\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_locals_tests\",args=\{\},file=\".*var-cmd.c\",line=\"108\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_locals_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"108\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_locals_tests"
     }
     timeout {
@@ -216,7 +216,7 @@ mi_gdb_test "-var-update *" \
 # Step over "lcharacter = 'a';"
 send_gdb "-exec-step\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_locals_tests\",args=\{\},file=\".*var-cmd.c\",line=\"109\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_locals_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"109\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_locals_tests"
     }
     timeout {
@@ -233,7 +233,7 @@ mi_gdb_test "-var-update *" \
 # Step over "lpcharacter = &lcharacter;"
 send_gdb "-exec-step\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_locals_tests\",args=\{\},file=\".*var-cmd.c\",line=\"110\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_locals_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"110\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_locals_tests"
     }
     timeout {
@@ -261,7 +261,7 @@ mi_gdb_test "-var-update *" \
 
 send_gdb "-exec-step 9\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_locals_tests\",args=\{\},file=\".*var-cmd.c\",line=\"119\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_locals_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"119\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_locals_tests"
     }
     timeout {
@@ -284,7 +284,7 @@ mi_gdb_test "-var-update *" \
 
 send_gdb "-exec-step 4\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_locals_tests\",args=\{\},file=\".*var-cmd.c\",line=\"125\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_locals_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"125\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_locals_tests"
     }
     timeout {
@@ -310,7 +310,7 @@ mi_gdb_test "-var-update *" \
 
 send_gdb "-exec-step 8\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_locals_tests\",args=\{\},file=\".*var-cmd.c\",line=\"133\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_locals_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"133\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_locals_tests"
     }
     timeout {
@@ -434,7 +434,7 @@ mi_gdb_test "-break-insert subroutine1" \
 	"break-insert subroutine1"
 send_gdb "-exec-continue\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"breakpoint-hit\",bkptno=\"2\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"subroutine1\",args=\{\{name=\"i\",value=\"4321\"\},\{name=\"l\",value=\"$hex\"\}\},file=\".*var-cmd.c\",line=\"146\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"breakpoint-hit\",bkptno=\"2\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"subroutine1\",args=\\\[\{name=\"i\",value=\"4321\"\},\{name=\"l\",value=\"$hex\"\}\\\],file=\".*var-cmd.c\",line=\"146\"\}\r\n$mi_gdb_prompt$" {
 	pass "continue to subroutine1"
     }
     timeout {
@@ -460,7 +460,7 @@ mi_gdb_test "-var-create linteger * linteger" \
 
 send_gdb "-exec-step\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"subroutine1\",args=\{\{name=\"i\",value=\".*\"\},\{name=\"l\",value=\".*\"\}\},file=\".*var-cmd.c\",line=\"147\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"subroutine1\",args=\\\[\{name=\"i\",value=\".*\"\},\{name=\"l\",value=\".*\"\}\\\],file=\".*var-cmd.c\",line=\"147\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at subroutine1"
     }
     timeout {
@@ -483,7 +483,7 @@ clear_xfail *-*-*
 
 send_gdb "-exec-step\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"subroutine1\",args=\{\{name=\"i\",value=\".*\"\},\{name=\"l\",value=\".*\"\}\},file=\".*var-cmd.c\",line=\"148\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"subroutine1\",args=\\\[\{name=\"i\",value=\".*\"\},\{name=\"l\",value=\".*\"\}\\\],file=\".*var-cmd.c\",line=\"148\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at subroutine1"
     }
     timeout { fail "step at subroutine1 (timeout)" }
@@ -497,7 +497,7 @@ mi_gdb_test "-var-update *" \
 
 send_gdb "-exec-step\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"subroutine1\",args=\{\{name=\"i\",value=\".*\"\},\{name=\"l\",value=\".*\"\}\},file=\".*var-cmd.c\",line=\"149\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"subroutine1\",args=\\\[\{name=\"i\",value=\".*\"\},\{name=\"l\",value=\".*\"\}\\\],file=\".*var-cmd.c\",line=\"149\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at subroutine1"
     }
     timeout { fail "step at subroutine1 (timeout)" }
@@ -511,7 +511,7 @@ mi_gdb_test "-var-update *" \
 
 send_gdb "-exec-next\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_locals_tests\",args=\{\},file=\".*var-cmd.c\",line=\"136\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_locals_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"136\"\}\r\n$mi_gdb_prompt$" {
 	pass "next out of subroutine1"
     }
     timeout { fail "next out of subroutine1 (timeout)" }

@@ -80,7 +80,7 @@ proc test_running_the_program {} {
     mi_run_cmd
     # The running part has been checked already by mi_run_cmd
         gdb_expect {
-	    -re "\[\r\n\]*000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"main\",args=\{\},file=\".*basics.c\",line=\"32\"\}\r\n$mi_gdb_prompt$" {
+	    -re "\[\r\n\]*000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*basics.c\",line=\"32\"\}\r\n$mi_gdb_prompt$" {
             pass "run to main"
           }
           -re ".*$mi_gdb_prompt$" {fail "run to main (2)"}

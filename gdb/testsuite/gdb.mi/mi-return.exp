@@ -57,7 +57,7 @@ proc test_running_to_callee4 {} {
     mi_run_cmd
 
     gdb_expect {
-	-re "000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"callee4\",args=\{\},file=\".*basics.c\",line=\"8\"\}\r\n$mi_gdb_prompt$" {
+	-re "000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"callee4\",args=\\\[\\\],file=\".*basics.c\",line=\"8\"\}\r\n$mi_gdb_prompt$" {
 	    pass "run to callee4"
 	}
 	timeout {
@@ -77,7 +77,7 @@ proc test_return_simple {} {
 
     send_gdb "111-exec-return\n"
     gdb_expect {
-	-re "111\\^done,frame=\{level=\"0 \",addr=\"$hex\",func=\"callee3\",args=\{.*\},file=\".*basics.c\",line=\"18\"\}\r\n$mi_gdb_prompt$" {pass "return from callee4 now"}
+	-re "111\\^done,frame=\{level=\"0 \",addr=\"$hex\",func=\"callee3\",args=\\\[.*\\\],file=\".*basics.c\",line=\"18\"\}\r\n$mi_gdb_prompt$" {pass "return from callee4 now"}
 	-re ".*\r\n$mi_gdb_prompt$" { fail "return from callee4 now" }
 	timeout { fail "return from callee4 now (timeout)"
 	}

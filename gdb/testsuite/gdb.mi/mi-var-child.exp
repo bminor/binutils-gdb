@@ -49,7 +49,7 @@ mi_gdb_test "200-break-insert do_children_tests" \
 mi_run_cmd
 # The running part has been checked already by mi_run_cmd
 gdb_expect {
-    -re "\[\r\n\]*000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\{\},file=\".*var-cmd.c\",line=\"190\"\}\r\n$mi_gdb_prompt$" {
+    -re "\[\r\n\]*000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"190\"\}\r\n$mi_gdb_prompt$" {
 	pass "run to do_children_tests"
     }
     -re ".*$mi_gdb_prompt$" {fail "run to do_children_tests (2)"}
@@ -567,7 +567,7 @@ mi_gdb_test "-var-info-num-children struct_declarations.int_ptr_ptr.*int_ptr_ptr
 # Step to "struct_declarations.integer = 123;"
 send_gdb "-exec-step\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\{\},file=\".*var-cmd.c\",line=\"192\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"192\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_children_tests"
     }
     timeout {
@@ -774,7 +774,7 @@ mi_gdb_test "-var-update *" \
 # Step over "struct_declarations.integer = 123;"
 send_gdb "-exec-step\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\{\},file=\".*var-cmd.c\",line=\"193\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"193\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_children_tests"
     }
     timeout {
@@ -795,7 +795,7 @@ mi_gdb_test "-var-update *" \
 
 send_gdb "-exec-step 3\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\{\},file=\".*var-cmd.c\",line=\"196\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"196\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_children_tests"
     }
     timeout {
@@ -812,7 +812,7 @@ mi_gdb_test "-var-update *" \
 # Step over "struct_declarations.int_ptr_ptr = &foo;"
 send_gdb "-exec-step\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\{\},file=\".*var-cmd.c\",line=\"197\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"197\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_children_tests"
     }
     timeout {
@@ -829,7 +829,7 @@ mi_gdb_test "-var-update *" \
 # Step over "weird->long_array[0] = 1234;"
 send_gdb "-exec-step\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\{\},file=\".*var-cmd.c\",line=\"198\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"198\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_children_tests"
     }
     timeout {
@@ -846,7 +846,7 @@ mi_gdb_test "-var-update *" \
 # Step over "struct_declarations.long_array[1] = 2345;"
 send_gdb "-exec-step\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\{\},file=\".*var-cmd.c\",line=\"199\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"199\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_children_tests"
     }
     timeout {
@@ -863,7 +863,7 @@ mi_gdb_test "-var-update *" \
 # Step over "weird->long_array[2] = 3456;"
 send_gdb "-exec-step\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\{\},file=\".*var-cmd.c\",line=\"200\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"200\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_children_tests"
     }
     timeout {
@@ -887,7 +887,7 @@ mi_gdb_test "-var-update *" \
 #    struct_declarations.long_array[9] = 1234;
 send_gdb "-exec-step 7\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\{\},file=\".*var-cmd.c\",line=\"208\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"208\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_children_tests"
     }
     timeout {
@@ -905,7 +905,7 @@ mi_gdb_test "-var-update *" \
 # Step over "weird->func_ptr = nothing;"
 send_gdb "-exec-step\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\{\},file=\".*var-cmd.c\",line=\"211\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"211\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_children_tests"
     }
     timeout {
@@ -933,7 +933,7 @@ mi_gdb_test "-var-delete weird->int_ptr_ptr" \
 #   psnp = &snp0;
 send_gdb "-exec-step 43\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\{\},file=\".*var-cmd.c\",line=\"254\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"254\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_children_tests"
     }
     timeout {
@@ -1211,7 +1211,7 @@ mi_gdb_test "-var-list-children psnp->ptrs.0.next.next.ptrs" \
 #  Step over "snp0.char_ptr = &b3;"
 send_gdb "-exec-step\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\{\},file=\".*var-cmd.c\",line=\"255\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"255\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_children_tests"
     }
     timeout {
@@ -1228,7 +1228,7 @@ mi_gdb_test "-var-update *" \
 #  Step over "snp1.char_ptr = &c3;"
 send_gdb "-exec-step\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\{\},file=\".*var-cmd.c\",line=\"256\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"256\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_children_tests"
     }
     timeout {
@@ -1247,7 +1247,7 @@ mi_gdb_test "-var-update *" \
 #  Step over "snp2.char_ptr = &a3;"
 send_gdb "-exec-step\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\{\},file=\".*var-cmd.c\",line=\"257\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"257\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_children_tests"
     }
     timeout {
@@ -1266,7 +1266,7 @@ mi_gdb_test "-var-update *" \
 #  Step over "snp0.long_ptr = &y3;"
 send_gdb "-exec-step\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\{\},file=\".*var-cmd.c\",line=\"258\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"258\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_children_tests"
     }
     timeout {
@@ -1284,7 +1284,7 @@ mi_gdb_test "-var-update *" \
 #  Step over "snp1.long_ptr = &x3;"
 send_gdb "-exec-step\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\{\},file=\".*var-cmd.c\",line=\"259\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"259\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_children_tests"
     }
     timeout {
@@ -1309,7 +1309,7 @@ clear_xfail *-*-*
 #  Step over "snp2.long_ptr = &z3;"
 send_gdb "-exec-step\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\{\},file=\".*var-cmd.c\",line=\"260\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"260\"\}\r\n$mi_gdb_prompt$" {
 	pass "step at do_children_tests"
     }
     timeout {

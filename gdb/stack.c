@@ -586,7 +586,7 @@ print_frame (struct frame_info *fi,
       args.func = func;
       args.stream = gdb_stdout;
 #ifdef UI_OUT
-      args_list_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "args");
+      args_list_chain = make_cleanup_ui_out_list_begin_end (uiout, "args");
       catch_errors (print_args_stub, &args, "", RETURN_MASK_ALL);
       /* FIXME: args must be a list. If one argument is a string it will
 		 have " that will not be properly escaped.  */

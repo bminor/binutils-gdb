@@ -1,5 +1,11 @@
 2001-06-25  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdbmi.texinfo: Update output examples that contain stop reason
+	output, change the args=.... to a list.
+	(exec-return): Ditto.
+
+2001-06-25  Andrew Cagney  <ac131313@redhat.com>
+
 	* mi-main.c (mi_cmd_data_read_memory): Output the memory contents
 	- memory and data - as a list.
 	* gdbmi.texinfo (data-read-memory): Update documentation.

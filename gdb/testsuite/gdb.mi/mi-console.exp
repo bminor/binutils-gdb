@@ -57,7 +57,7 @@ mi_gdb_test "200-break-insert main" \
 	"break-insert operation"
 mi_run_cmd
 gdb_expect {
-    -re "000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"main\",args=\{\},file=\".*mi-console.c\",line=\"13\"\}\r\n$mi_gdb_prompt$" {
+    -re "000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*mi-console.c\",line=\"13\"\}\r\n$mi_gdb_prompt$" {
 	    pass "run to main"
     }
     timeout {

@@ -57,7 +57,7 @@ proc test_running_to_foo {} {
     mi_run_cmd
 
     gdb_expect {
-	-re "000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"foo\",args=\{\},file=\".*until.c\",line=\"10\"\}\r\n$mi_gdb_prompt$" {
+	-re "000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"foo\",args=\\\[\\\],file=\".*until.c\",line=\"10\"\}\r\n$mi_gdb_prompt$" {
 	    pass "run to main"
 	}
 	timeout {
@@ -75,7 +75,7 @@ proc test_until {} {
 
     send_gdb "111-exec-until\n"
     gdb_expect {
-	-re "111\\^running\r\n${mi_gdb_prompt}111\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"foo\",args=\{\},file=\".*until.c\",line=\"12\"\}\r\n$mi_gdb_prompt$" {
+	-re "111\\^running\r\n${mi_gdb_prompt}111\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"foo\",args=\\\[\\\],file=\".*until.c\",line=\"12\"\}\r\n$mi_gdb_prompt$" {
 	    pass "until after while loop"
 	}
 	timeout {
@@ -85,7 +85,7 @@ proc test_until {} {
 
     send_gdb "222-exec-until 15\n"
     gdb_expect {
-	-re "222\\^running\r\n${mi_gdb_prompt}222\\*stopped,reason=\"location-reached\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"foo\",args=\{\},file=\".*until.c\",line=\"15\"\}\r\n$mi_gdb_prompt$" {
+	-re "222\\^running\r\n${mi_gdb_prompt}222\\*stopped,reason=\"location-reached\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"foo\",args=\\\[\\\],file=\".*until.c\",line=\"15\"\}\r\n$mi_gdb_prompt$" {
 	    pass "until line number"
 	}
 	timeout {
@@ -95,7 +95,7 @@ proc test_until {} {
 
     send_gdb "333-exec-until until.c:17\n"
     gdb_expect {
-	-re "333\\^running\r\n${mi_gdb_prompt}333\\*stopped,reason=\"location-reached\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"foo\",args=\{\},file=\".*until.c\",line=\"17\"\}\r\n$mi_gdb_prompt$" {
+	-re "333\\^running\r\n${mi_gdb_prompt}333\\*stopped,reason=\"location-reached\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"foo\",args=\\\[\\\],file=\".*until.c\",line=\"17\"\}\r\n$mi_gdb_prompt$" {
 	    pass "until line number:file"
 	}
 	timeout {
@@ -107,7 +107,7 @@ proc test_until {} {
 
     send_gdb "444-exec-until until.c:25\n"
     gdb_expect {
-	-re "444\\^running\r\n${mi_gdb_prompt}444\\*stopped,reason=\"location-reached\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"main\",args=\{\},file=\".*until.c\",line=\"24\"\}\r\n$mi_gdb_prompt$" {
+	-re "444\\^running\r\n${mi_gdb_prompt}444\\*stopped,reason=\"location-reached\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*until.c\",line=\"24\"\}\r\n$mi_gdb_prompt$" {
 	    pass "until after current function"
 	}
 	timeout {
