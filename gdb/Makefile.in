@@ -1475,7 +1475,7 @@ v850ice.o: $(srcdir)/v850ice.c
 valprint.o: $(srcdir)/valprint.c
 	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $(srcdir)/valprint.c
 
-
+
 # Message files.  Based on code in gcc/Makefile.in.
 
 # Rules for generating translated message descriptions.  Disabled by
@@ -1548,7 +1548,7 @@ po/$(PACKAGE).pot: force
 	-test -d po || mkdir po
 	sh -e $(srcdir)/po/gdbtext $(XGETTEXT) $(PACKAGE) . $(srcdir)
 
-
+
 #
 # YACC/LEX dependencies
 #

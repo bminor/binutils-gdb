@@ -1,3 +1,7 @@
+2004-08-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* Makefile.in: Remove embedded page breaks.
+
 2004-08-04  Jim Blandy  <jimb@redhat.com>
 
 	* regcache.c (regcache_raw_read): Assert that, after calling
