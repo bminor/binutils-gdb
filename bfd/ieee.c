@@ -1,5 +1,5 @@
 /* BFD back-end for ieee-695 objects.
-   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -209,7 +209,7 @@ DEFUN(ieee_write_expression,(abfd, value, symbol, pcrel, index),
   
      
 
-  if (symbol->section == &bfd_com_section
+  if (bfd_is_com_section (symbol->section)
       || symbol->section == &bfd_und_section) 
   {
     /* Def of a common symbol */
@@ -771,7 +771,8 @@ DEFUN(ieee_get_symtab,(abfd, location),
   ieee_symbol_type *symp;
   static bfd dummy_bfd;
   static asymbol empty_symbol =
-  { &dummy_bfd," ieee empty",(symvalue)0,BSF_DEBUGGING , &bfd_abs_section};
+    /* the_bfd, name, value, attr, section */
+    { &dummy_bfd, " ieee empty", (symvalue)0, BSF_DEBUGGING, &bfd_abs_section};
 
   if (abfd->symcount) 
 {
@@ -917,13 +918,18 @@ DEFUN(ieee_slurp_sections,(abfd),
 		break;
 	      }
 	    }
-	    memcpy(section->name, read_id(&(ieee->h)),8);
+	    memcpy((char*)section->name, read_id(&(ieee->h)),8);
 	    /* Truncate sections to 8 chars */
 	    if (strlen(section->name) > 8) 
 	    {
-	      section->name[8] = 0;
+	      char *copy = bfd_alloc(abfd, 9);
+	      memcpy(copy, section->name, 8);
+	      copy[8] = 0;
+	      section->name = copy;
 	    }
-	      { bfd_vma parent, brother, context;
+	    
+	   {
+	     bfd_vma parent, brother, context;
 		parse_int(&(ieee->h), &parent);
 		parse_int(&(ieee->h), &brother);
 		parse_int(&(ieee->h), &context);
@@ -2606,7 +2612,7 @@ DEFUN(ieee_write_external_part,(abfd),
 	p->value = reference_index;
 	reference_index++;
       }
-      else if(p->section == &bfd_com_section) {
+      else if (bfd_is_com_section (p->section)) {
 	/* This is a weak reference */
 	ieee_write_byte(abfd, ieee_external_reference_enum);
 	ieee_write_int(abfd, reference_index);
@@ -2967,6 +2973,12 @@ DEFUN(ieee_bfd_debug_info_accumulate,(abfd, section),
 #define ieee_set_arch_mach bfd_default_set_arch_mach
 #define ieee_bfd_get_relocated_section_contents  bfd_generic_get_relocated_section_contents
 #define ieee_bfd_relax_section bfd_generic_relax_section
+#define ieee_bfd_seclet_link bfd_generic_seclet_link
+#define ieee_bfd_reloc_type_lookup \
+  ((CONST struct reloc_howto_struct *(*) PARAMS ((bfd *, bfd_reloc_code_real_type))) bfd_nullvoidptr)
+#define ieee_bfd_make_debug_symbol \
+  ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
+
 /*SUPPRESS 460 */
 bfd_target ieee_vec =
 {
@@ -3003,6 +3015,7 @@ _do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs
     _bfd_write_archive_contents,
     bfd_false,
   },
-  JUMP_TABLE(ieee)
+  JUMP_TABLE(ieee),
+  (PTR) 0
 };
 

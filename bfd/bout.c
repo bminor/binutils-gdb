@@ -1,5 +1,5 @@
 /* BFD back-end for Intel 960 b.out binaries.
-   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -935,7 +935,7 @@ DEFUN(get_value,(reloc, seclet),
   }
 
   /* Add the value contained in the relocation */
-  value += (short)((reloc->addend) & 0xffff);
+  value += reloc->addend;
   
   return value;
 }
@@ -1182,7 +1182,10 @@ DEFUN(b_out_get_relocated_section_contents,(in_abfd,
 	  dst_address+=4;
 	  break;
 	 case ABS32:
-	  bfd_put_32(in_abfd, get_value(reloc, seclet), data+dst_address);
+	  bfd_put_32(in_abfd,
+		     (bfd_get_32 (in_abfd, data+src_address)
+		      + get_value(reloc, seclet)),
+		     data+dst_address);
 	  src_address+=4;
 	  dst_address+=4;
 	  break;
@@ -1213,13 +1216,18 @@ DEFUN(b_out_get_relocated_section_contents,(in_abfd,
 	   {
 	     bfd_error_vector.undefined_symbol(reloc, seclet);
 	   }
-	   word = (word & ~BAL_MASK) |
-	    (((word & BAL_MASK) +
-	      symbol->section->output_offset +
-	      symbol->section->output_section->vma+
-	      symbol->value + reloc->addend - dst_address -
-	      ( input_section->output_section->vma + input_section->output_offset))
-	     & BAL_MASK);
+	   word = ((word & ~BAL_MASK)
+		   | (((word & BAL_MASK)
+		       /* value of symbol */
+		       + symbol->value
+		       /* how far it's moving in this relocation */
+		       + (symbol->section->output_offset
+			  + symbol->section->output_section->vma)
+		       - (input_section->output_section->vma
+			  + input_section->output_offset)
+		       /* addend, of course */
+		       + reloc->addend)
+		      & BAL_MASK));
 
 	   bfd_put_32(in_abfd,word,  data+dst_address);
 	   dst_address+=4;
@@ -1236,13 +1244,15 @@ DEFUN(b_out_get_relocated_section_contents,(in_abfd,
 	   {
 	     bfd_error_vector.undefined_symbol(reloc, seclet);
 	   }
-	   word = (word & ~PCREL13_MASK) |
-	    (((word & PCREL13_MASK) +
-	      symbol->section->output_offset +
-	      symbol->section->output_section->vma+
-	      symbol->value + reloc->addend - dst_address -
-	      ( input_section->output_section->vma + input_section->output_offset))
-	     & PCREL13_MASK);
+	   word = ((word & ~PCREL13_MASK)
+		   | (((word & PCREL13_MASK)
+		       + (symbol->section->output_offset
+			  + symbol->section->output_section->vma)
+		       + symbol->value
+		       + reloc->addend
+		       - (input_section->output_section->vma
+			  + input_section->output_offset))
+		      & PCREL13_MASK));
 
 	   bfd_put_32(in_abfd,word,  data+dst_address);
 	   dst_address+=4;
@@ -1292,6 +1302,9 @@ DEFUN(b_out_get_relocated_section_contents,(in_abfd,
 #define aout_32_bfd_get_relocated_section_contents  b_out_get_relocated_section_contents
 #define aout_32_bfd_relax_section                   b_out_relax_section
 #define aout_32_bfd_seclet_link			    bfd_generic_seclet_link
+#define aout_32_bfd_reloc_type_lookup		    b_out_reloc_type_lookup
+#define aout_32_bfd_make_debug_symbol \
+  ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
 
 bfd_target b_out_vec_big_host =
 {
@@ -1318,7 +1331,7 @@ bfd_target b_out_vec_big_host =
    _bfd_write_archive_contents, bfd_false},
 
   JUMP_TABLE(aout_32),
-  b_out_reloc_type_lookup,
+  (PTR) 0,
 };
 
 
@@ -1346,5 +1359,5 @@ _do_getl64, _do_putl64, _do_getl32, _do_putl32, _do_getl16, _do_putl16, /* hdrs 
     {bfd_false, b_out_write_object_contents,	/* bfd_write_contents */
        _bfd_write_archive_contents, bfd_false},
   JUMP_TABLE(aout_32),
-  b_out_reloc_type_lookup,
+  (PTR) 0
 };

@@ -616,6 +616,10 @@ hppa_core_file_matches_executable_p  (core_bfd, exec_bfd)
  bfd_generic_get_relocated_section_contents
 #define hppa_bfd_relax_section bfd_generic_relax_section
 #define hppa_bfd_seclet_link bfd_generic_seclet_link
+#define hppa_bfd_reloc_type_lookup \
+  ((CONST struct reloc_howto_struct *(*) PARAMS ((bfd *, bfd_reloc_code_real_type))) bfd_nullvoidptr)
+#define hppa_bfd_make_debug_symbol \
+  ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
 
 bfd_target hppa_vec =
 {
@@ -655,7 +659,8 @@ _do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs
     bfd_false,
   },
 #undef hppa
-  JUMP_TABLE(hppa)
+  JUMP_TABLE(hppa),
+  (PTR) 0
 };
 
 #endif /* HOST_HPPAHPUX */

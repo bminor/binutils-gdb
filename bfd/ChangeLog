@@ -1,3 +1,12 @@
+Tue Feb 23 12:17:16 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* bfd-in.h (JUMP_TABLE): Added bfd_reloc_type_lookup and
+	bfd_make_debug_symbol; they were already in the target structure.
+	* Adjusted all uses of JUMP_TABLE.
+	* coffgen.c, libcoff-in.h (coff_bfd_make_debug_symbol): Renamed
+	from coff_make_debug_symbol.
+	* libcoff.h: Updated accordingly.
+
 Mon Feb 22 18:40:06 1993  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* libcoff.h (obj_raw_syment_coun):  New macro.

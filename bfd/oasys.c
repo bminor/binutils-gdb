@@ -1,5 +1,5 @@
 /* BFD back-end for oasys objects.
-   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support, <sac@cygnus.com>.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -1311,6 +1311,10 @@ return 0;
 #define oasys_bfd_get_relocated_section_contents bfd_generic_get_relocated_section_contents
 #define oasys_bfd_relax_section bfd_generic_relax_section
 #define oasys_bfd_seclet_link bfd_generic_seclet_link
+#define oasys_bfd_reloc_type_lookup \
+  ((CONST struct reloc_howto_struct *(*) PARAMS ((bfd *, bfd_reloc_code_real_type))) bfd_nullvoidptr)
+#define oasys_bfd_make_debug_symbol \
+  ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
 
 /*SUPPRESS 460 */
 bfd_target oasys_vec =
@@ -1348,5 +1352,6 @@ bfd_target oasys_vec =
       _bfd_write_archive_contents,
       bfd_false,
     },
-  JUMP_TABLE(oasys)
+  JUMP_TABLE(oasys),
+  (PTR) 0
 };

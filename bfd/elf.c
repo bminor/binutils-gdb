@@ -2209,7 +2209,7 @@ DEFUN(elf_info_to_howto, (abfd, cache_ptr, dst),
   switch (abfd->arch_info->arch)
     {
     case bfd_arch_sparc:
-      BFD_ASSERT (ELF_R_TYPE(dst->r_info) < R_SPARC_max);
+      BFD_ASSERT (ELF_R_TYPE(dst->r_info) < (unsigned char) R_SPARC_max);
       cache_ptr->howto = &elf_sparc_howto_table[ELF_R_TYPE(dst->r_info)];
       break;
 
@@ -2525,6 +2525,10 @@ DEFUN(elf_set_section_contents, (abfd, section, location, offset, count),
  bfd_generic_get_relocated_section_contents
 #define elf_bfd_relax_section bfd_generic_relax_section
 #define elf_bfd_seclet_link bfd_generic_seclet_link
+#define elf_bfd_reloc_type_lookup \
+  ((CONST struct reloc_howto_struct *(*) PARAMS ((bfd *, bfd_reloc_code_real_type))) bfd_nullvoidptr)
+#define elf_bfd_make_debug_symbol \
+  ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
 
 bfd_target elf_big_vec =
 {
@@ -2597,14 +2601,6 @@ bfd_target elf_big_vec =
   /* Initialize a jump table with the standard macro.  All names start with
      "elf" */
   JUMP_TABLE(elf),
-
-  /* reloc_type_lookup: How applications can find out about amiga relocation
-     types (see documentation on reloc types).  */
-  NULL,
-
-  /* _bfd_make_debug_symbol:  Back-door to allow format aware applications to
-     create debug symbols while using BFD for everything else. */
-  NULL,
 
   /* backend_data: */
   NULL
@@ -2681,14 +2677,6 @@ bfd_target elf_little_vec =
   /* Initialize a jump table with the standard macro.  All names start with
      "elf" */
   JUMP_TABLE(elf),
-
-  /* reloc_type_lookup: How applications can find out about amiga relocation
-     types (see documentation on reloc types).  */
-  NULL,
-
-  /* _bfd_make_debug_symbol:  Back-door to allow format aware applications to
-     create debug symbols while using BFD for everything else. */
-  NULL,
 
   /* backend_data: */
   NULL

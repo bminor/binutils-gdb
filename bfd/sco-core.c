@@ -251,6 +251,10 @@ sco_core_file_matches_executable_p  (core_bfd, exec_bfd)
 #define sco_bfd_relax_section bfd_generic_relax_section
 #define sco_bfd_seclet_link \
   ((boolean (*) PARAMS ((bfd *, PTR, boolean))) bfd_false)
+#define sco_bfd_reloc_type_lookup \
+  ((CONST struct reloc_howto_struct *(*) PARAMS ((bfd *, bfd_reloc_code_real_type))) bfd_nullvoidptr)
+#define sco_bfd_make_debug_symbol \
+  ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
 
 /* If somebody calls any byte-swapping routines, shoot them.  */
 void
@@ -287,6 +291,7 @@ bfd_target sco_core_vec =
      bfd_false, bfd_false},
     
     JUMP_TABLE(sco),
+    (PTR) 0
 };
 
 
