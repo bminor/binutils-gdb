@@ -3264,8 +3264,13 @@ read_cpp_abbrev (struct field_info *fip, char **pp, struct type *type,
       switch (cpp_abbrev)
 	{
 	case 'f':		/* $vf -- a virtual function table pointer */
+	  name = type_name_no_tag (context);
+	  if (name == NULL)
+	  {
+		  name = "";
+	  }
 	  fip->list->field.name =
-	    obconcat (&objfile->type_obstack, vptr_name, "", "");
+	    obconcat (&objfile->type_obstack, vptr_name, name, "");
 	  break;
 
 	case 'b':		/* $vb -- a virtual bsomethingorother */

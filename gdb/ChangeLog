@@ -1,3 +1,8 @@
+2001-03-23  Jim Blandy  <jimb@redhat.com>
+
+	* stabsread.c (read_cpp_abbrev): Properly construct the names of
+	virtual function table pointer fields.
+
 2001-03-19  Andrew Cagney  <ac131313@redhat.com>
 
 	* defs.h (xfree, mcalloc, mmalloc, mrealloc, mfree, xmmalloc,
