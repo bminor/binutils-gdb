@@ -78,7 +78,13 @@ cp_print_class_method (valaddr, type, stream)
   unsigned len;
   unsigned int i;
 
+  check_stub_type (TYPE_TARGET_TYPE (type));
   domain = TYPE_DOMAIN_TYPE (TYPE_TARGET_TYPE (type));
+  if (domain == (struct type *)NULL)
+    {
+      fprintf_filtered (stream, "<unknown>");
+      return;
+    }
   addr = unpack_pointer (lookup_pointer_type (builtin_type_void), valaddr);
   if (METHOD_PTR_IS_VIRTUAL (addr))
     {

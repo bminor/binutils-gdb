@@ -910,16 +910,16 @@ call_function_by_hand (function, nargs, args)
 	  error ("text segment full -- no place to put call");
     checked = 1;
     sp = old_sp;
-    start_sp = text_end - sizeof dummy;
-    write_memory (start_sp, (char *)dummy1, sizeof dummy);
+    real_pc = text_end - sizeof dummy;
+    write_memory (real_pc, (char *)dummy1, sizeof dummy);
   }
 #else /* After text_end.  */
   {
     extern CORE_ADDR text_end;
     int errcode;
     sp = old_sp;
-    start_sp = text_end;
-    errcode = target_write_memory (start_sp, (char *)dummy1, sizeof dummy);
+    real_pc = text_end;
+    errcode = target_write_memory (real_pc, (char *)dummy1, sizeof dummy);
     if (errcode != 0)
       error ("Cannot write text segment -- call_function failed");
   }
@@ -1072,7 +1072,7 @@ call_function_by_hand (function, nargs, args)
 	   wrong things (like set stop_bpstat to the wrong thing).  */
 	discard_cleanups (old_chain);
 	/* Prevent memory leak.  */
-	bpstat_clear (inf_status.stop_bpstat);
+	bpstat_clear (&inf_status.stop_bpstat);
 
 	/* The following error message used to say "The expression
 	   which contained the function call has been discarded."  It

@@ -1,3 +1,13 @@
+Fri Sep 17 04:41:17 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* findvar.c (extract_signed_integer):  Cast *p to LONGEST before doing
+	the xor and subtract.  Otherwise it will not sign extend if the type
+	of LONGEST is larger than int.
+	* cp-valprint.c (cp_print_class_method):  Inhibit core dump if
+	domain is an undefined cross reference.
+	* valops.c (call_function_by_hand):  Set real_pc to correct
+	value if CALL_DUMMY_LOCATION != ON_STACK.
+
 Thu Sep 16 20:37:06 1993  Jim Kingdon  (kingdon@cirdan.cygnus.com)
 
 	* config/a29k/tm-a29k.h (FRAME_CHAIN): If rsize is zero, return zero.
