@@ -67,6 +67,22 @@ Mon Apr 17 11:26:01 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 2000-04-14  Jim Blandy  <jimb@redhat.com>
 
+	Bring IEEE_FLOAT under gdbarch's control.
+	* gdbarch.sh (IEEE_FLOAT): New entry.
+	* gdbarch.c, gdbarch.h: Regenerated.
+	* valprint.c (IEEE_FLOAT): Provide a default #definition for this.
+	(print_floating): Use IEEE_FLOAT as if it were an expression; use
+ 	the code specific to IEEE-format numbers whenever the value of
+ 	IEEE_FLOAT is non-zero.
+	* config/a29k/tm-a29k.h, config/alpha/tm-alpha.h,
+ 	config/arc/tm-arc.h, config/arm/tm-arm.h, config/fr30/tm-fr30.h,
+ 	config/h8300/tm-h8300.h, config/i386/tm-i386.h,
+ 	config/i960/tm-i960.h, config/m88k/tm-m88k.h,
+ 	config/mips/tm-mips.h, config/pa/tm-hppa.h,
+ 	config/sparc/tm-sparc.h, config/delta/tm-delta.h,
+ 	config/frv/tm-frv.h (IEEE_FLOAT): For all ports that #define
+	IEEE_FLOAT, make sure they give it the value (1).
+
 	Provide the hooks needed to support architectures on which
 	pointers are not always simple byte addresses.
 
