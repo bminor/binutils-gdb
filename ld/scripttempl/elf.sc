@@ -25,6 +25,7 @@
 #	SHLIB_TEXT_START_ADDR - if set, add to SIZEOF_HEADERS to set
 #		start address of shared library.
 #	INPUT_FILES - INPUT command of files to always include
+#	WRITABLE_RODATA - if set, the .rodata section should be writable
 #
 # When adding sections, do note that the names of some sections are used
 # when specifying the start address of the next.
@@ -40,7 +41,7 @@ test "$LD_FLAG" = "N" && DATA_ADDR=.
 INTERP=".interp   ${RELOCATING-0} : { *(.interp) 	}"
 PLT=".plt    ${RELOCATING-0} : { *(.plt)	}"
 DYNAMIC=".dynamic     ${RELOCATING-0} : { *(.dynamic) }"
-
+RODATA=".rodata ${RELOCATING-0} : { *(.rodata) ${RELOCATING+*(.rodata.*)} ${RELOCATING+*(.gnu.linkonce.r*)} }"
 CTOR=".ctors ${CONSTRUCTING-0} : 
   {
     ${CONSTRUCTING+${CTOR_START}}
@@ -180,12 +181,7 @@ SECTIONS
   ${RELOCATING+_etext = .;}
   ${RELOCATING+PROVIDE (etext = .);}
   .fini    ${RELOCATING-0} : { KEEP (*(.fini))		} =${NOP-0}
-  .rodata  ${RELOCATING-0} :
-  {
-    *(.rodata)
-    ${RELOCATING+*(.rodata.*)}
-    ${RELOCATING+*(.gnu.linkonce.r*)}
-  }
+  ${WRITABLE_RODATA-${RODATA}}
   .rodata1 ${RELOCATING-0} : { *(.rodata1) }
   ${RELOCATING+${OTHER_READONLY_SECTIONS}}
 
@@ -205,6 +201,7 @@ SECTIONS
   .data1 ${RELOCATING-0} : { *(.data1) }
   .eh_frame : { *(.eh_frame) }
   .gcc_except_table : { *(.gcc_except_table) }
+  ${WRITABLE_RODATA+${RODATA}}
   ${RELOCATING+${OTHER_READWRITE_SECTIONS}}
   ${RELOCATING+${CTOR}}
   ${RELOCATING+${DTOR}}
