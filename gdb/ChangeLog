@@ -1,3 +1,10 @@
+Thu Sep  3 09:17:05 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* a68v-xdep.c (store_inferior_registers):  Define as type void.
+	* configure.in:  Add host m68k-apollo*-bsd*.
+	* demangle.c (struct demanglers):  Use enum instead of constant
+	value to keep braindamaged HP/Apollo compiler happy.
+
 Wed Sep  2 20:45:31 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* utils.c (strcmp_iw):  Add a hack to allow "FOO(ARGS)" to

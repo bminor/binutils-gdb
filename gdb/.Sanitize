@@ -162,12 +162,14 @@ remote-es1800.c
 remote-hms.c
 remote-mm.c
 remote-nindy.c
+remote-st2000.c
 remote-vx.c
 remote.c
 rs6000-pinsn.c
 rs6000-tdep.c
 rs6000-xdep.c
 saber.suppress
+ser-bsd.c
 ser-go32.c
 ser-termios.c
 serial.h
@@ -234,6 +236,7 @@ tm-rs6000.h
 tm-sparc.h
 tm-spc-noun.h
 tm-spc-un.h
+tm-st2000.h
 tm-stratus.h
 tm-sun2.h
 tm-sun2os4.h
@@ -268,6 +271,7 @@ xcoffsolib.h
 xm-3b1.h
 xm-altos.h
 xm-amix.h
+xm-apollo68b.h
 xm-apollo68v.h
 xm-arm.h
 xm-bigmips.h

@@ -41,6 +41,8 @@ m68k-altos-*)		gdb_host=altos ;;
 
 m68k-apollo*-sysv*)	gdb_host=apollo68v ;;
 
+m68k-apollo*-bsd*)	gdb_host=apollo68b ;;
+
 m68k-att-*)		gdb_host=3b1 ;;
 
 m68k-cbm-sysv4*)	gdb_host=amix ;;

@@ -67,7 +67,7 @@ static const struct demangler
   {CFRONT_DEMANGLING_STYLE_STRING,
      cfront_demangling,
      "ARM (cfront) style demangling"},
-  {NULL, 0, NULL}
+  {NULL, unknown_demangling, NULL}
 };
 
 /* show current demangling style. */
