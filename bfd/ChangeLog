@@ -1,3 +1,8 @@
+2002-02-15  Richard Henderson  <rth@redhat.com>
+
+	* elf64-alpha.c (elf64_alpha_relocate_section) [BRSGP]: A target
+	section with no got matches any got.  Simplify error generaion.
+
 2002-02-15  Alan Modra  <amodra@bigpond.net.au>
 
 	Support arbitrary length fill patterns.
