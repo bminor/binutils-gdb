@@ -1,3 +1,7 @@
+2002-02-27  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* symtab.c (gdb_mangle_name): Handle fully mangled v3 abi physnames.
+
 2002-02-27  Rodney Brown  <rbrown64@csc.com.au>
 
       * utils.c (gdb_realpath): Add pathconf fallback for sco3.2v5.

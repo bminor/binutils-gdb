@@ -291,7 +291,10 @@ gdb_mangle_name (struct type *type, int method_id, int signature_id)
   char buf[20];
   int len = (newname == NULL ? 0 : strlen (newname));
 
-  if (is_operator_name (field_name))
+  /* Nothing to do if physname already contains a fully mangled v3 abi name
+     or an operator name.  */
+  if ((physname[0] == '_' && physname[1] == 'Z')
+      || is_operator_name (field_name))
     return xstrdup (physname);
 
   is_full_physname_constructor = is_constructor_name (physname);
