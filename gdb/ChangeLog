@@ -1,3 +1,12 @@
+2001-03-31  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_extract_return_value): If the type of the
+	return value is TYPE_STRUCT and the number of fields is one, call
+	ourselves with TYPE set tp the type of the first field.
+	(i386_store_return_value): Likewise.
+	This fixes a problem with returning structs consisting of a single
+	`float' or `double' on *BSD.
+
 2001-03-30  Mark Kettenis  <kettenis@gnu.org>
 
 	* lin-lwp.c (lin_lwp_resume): Don't mark LWP as not stopped until
