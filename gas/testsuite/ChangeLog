@@ -3,6 +3,7 @@ Mon Feb 23 10:31:05 1998  Jeffrey A Law  (law@cygnus.com)
 
         * gas/mips/vr5400.s: Use absolute expression for performance
         register number.
+	* gas/mips/vr5400.d: Corresponding changes.
 
 end-sanitize-vr5400
 start-sanitize-r5900
@@ -10,6 +11,7 @@ Mon Feb 23 10:31:05 1998  Jeffrey A Law  (law@cygnus.com)
 
         * gas/mips/r5900.s: Use absolute expression for performance
         register number.
+	* gas/mips/r5900.d: Corresponding changes.
 
 Fri Feb 20 01:29:16 1998  Jeffrey A Law  (law@cygnus.com)
 
