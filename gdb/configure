@@ -10889,7 +10889,7 @@ nativefile=$nativefile
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 
-if test "${target}" != "${host}"; then
+if test "${nativefile}" = ""; then
         < Makefile \
         sed -e '/^NATDEPFILES[ 	]*=.*\\$/,/[^\\]$/s/^/# /' \
             -e '/^NATDEPFILES[ 	]*=/s/^/# /' \
