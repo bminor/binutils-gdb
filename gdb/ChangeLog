@@ -5,6 +5,7 @@
 	(update_context, cfi_read_fp, cfi_write_fp)
 	(cfi_frame_chain, cfi_init_extra_frame_info)
 	(cfi_virtual_frame_pointer): Use the above function.
+	* dwarf2cfi.c: Reindented (using 'indent dwarf2cfi.c').
 
 2002-06-11  Corinna Vinschen  <vinschen@redhat.com>
 
