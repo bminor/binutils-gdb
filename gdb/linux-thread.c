@@ -568,9 +568,7 @@ restore_all_signals (void)
    If ALL is non-zero, process all threads.
    If ALL is zero, skip threads with pending status.  */
 static void
-iterate_active_threads (func, all)
-    void (*func)(int);
-    int all;
+iterate_active_threads (void (*func) (int), int all)
 {
   CORE_ADDR descr;
   int pid;

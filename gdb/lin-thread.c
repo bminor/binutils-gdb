@@ -813,11 +813,8 @@ next_pending_event (void)
 }
 
 static void
-threadlist_iter (func, data, state, type)
-     int (*func) ();
-     void *data;
-     td_thr_state_e state;
-     td_thr_type_e  type;
+threadlist_iter (int (*func) (), void *data, td_thr_state_e state,
+		 td_thr_type_e type)
 {
   int i;
 
@@ -1149,8 +1146,7 @@ get_lwp_from_thread_handle (td_thrhandle_t *th)
  */
 
 static int	/* lwpid_t or pid_t */
-get_lwp_from_thread_id (tid)
-     int tid;	/* thread_t? */
+get_lwp_from_thread_id (int tid	/* thread_t? */)
 {
   td_thrhandle_t th;
   td_err_e       ret;
@@ -1218,12 +1214,8 @@ thread_db_files_info (struct target_ops *tgt_vector)
  */
 
 static int
-thread_db_xfer_memory (memaddr, myaddr, len, dowrite, target)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int dowrite;
-     struct target_ops *target;	/* ignored */
+thread_db_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int dowrite,
+		       struct target_ops *target)
 {
   struct cleanup *old_chain;
   int ret;

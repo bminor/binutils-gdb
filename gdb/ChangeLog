@@ -1,5 +1,11 @@
 2000-09-12  Kevin Buettner  <kevinb@redhat.com>
 
+	* lin-thread.c (threadlist_iter, get_lwp_from_thread_id,
+	thread_db_xfer_memory): Protoize.
+	* linux-thread.c (iterate_active_threads): Protoize.
+
+2000-09-12  Kevin Buettner  <kevinb@redhat.com>
+
 	* objfiles.c (objfile_relocate): Don't assume that offsets
 	associated with one of SECT_OFF_TEXT, SECT_OFF_DATA, or
 	SECT_OFF_BSS will be adequate for relocating all of the
