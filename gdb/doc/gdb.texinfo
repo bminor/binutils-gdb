@@ -14088,7 +14088,7 @@ that command.  Post-execution hooks may exist simultaneously with
 pre-execution hooks, for the same command.
 
 It is valid for a hook to call the command which it hooks.  If this
-occurs, the hook is not re-executed, thereby avoiding infinte recursion.
+occurs, the hook is not re-executed, thereby avoiding infinite recursion.
 
 @c It would be nice if hookpost could be passed a parameter indicating
 @c if the command it hooks executed properly or not.  FIXME!
