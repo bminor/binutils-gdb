@@ -1,5 +1,40 @@
 Fri Aug 30 11:49:19 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	Add SH ELF support.
+	* elf32-sh.c: New file.
+	* elf.c (prep_headers): Handle bfd_arch_sh.
+	* elfcode.h (write_relocs): Handle absolute symbol.
+	* elf-bfd.h (_bfd_elf32_link_read_relocs): Declare.
+	(_bfd_elf64_link_read_relocs): Declare.
+	* elflink.h (NAME(_bfd_elf,link_read_relocs)): Rename from
+	elf_link_read_relocs.  Make globally visible.  Change all
+	callers.
+	(elf_link_input_bfd): Get external symbols from cache in
+	symtab_hdr->contents.  Get contents from cache in
+	elf_section_data.
+	* elfxx-target.h (bfD_elfNN_bfd_relax_section): Only define if not
+	already defined.
+	* reloc.c: Define BFD_RELOC_SH_* relocs.
+	* libbfd-in.h (_bfd_sh_align_load_span): Declare.
+	* coff-sh.c (sh_insns_conflict): Fix a return value.
+	(_bfd_sh_align_load_span): New globally visible function, broken
+	out of sh_align_load.
+	(sh_align_load): Call _bfd_sh_align_load_span.
+	(sh_swap_insns): Change relocs parameter to PTR.
+	* bfd-in2.h, libbfd.h: Rebuild.
+	* targets.c (bfd_elf32_sh_vec): Declare.
+	(bfd_elf32_shl_vec): Declare.
+	* config.bfd (sh-*-elf*): New target.
+	* configure.in (bfd_elf32_sh_vec): New target vector.
+	(bfd_elf32_shl_vec): New target vector.
+	* configure: Rebuild.
+	* Makefile.in: Rebuild dependencies.
+ 	(BFD32_BACKENDS): Add elf32-sh.o.
+	(BFD32_BACKENDS_CFILES): Add elf32-sh.c.
+
+	* elf.c (map_sections_to_segments): Check that LMA does not skip a
+	page before checking D_PAGED.
+
 	* ihex.c (ihex_scan): Removed unnecessary extbase variable.
 	(ihex_write_object_contents): Remove extbase; always use segbase
 	instead.

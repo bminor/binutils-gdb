@@ -23,8 +23,6 @@ static boolean elf_link_add_object_symbols
   PARAMS ((bfd *, struct bfd_link_info *));
 static boolean elf_link_add_archive_symbols
   PARAMS ((bfd *, struct bfd_link_info *));
-static Elf_Internal_Rela *elf_link_read_relocs
-  PARAMS ((bfd *, asection *, PTR, Elf_Internal_Rela *, boolean));
 static boolean elf_export_symbol
   PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean elf_adjust_dynamic_symbol
@@ -961,9 +959,10 @@ elf_link_add_object_symbols (abfd, info)
 	  if ((o->flags & SEC_ALLOC) == 0)
 	    continue;
 
-	  internal_relocs = elf_link_read_relocs (abfd, o, (PTR) NULL,
-						  (Elf_Internal_Rela *) NULL,
-						  info->keep_memory);
+	  internal_relocs = (NAME(_bfd_elf,link_read_relocs)
+			     (abfd, o, (PTR) NULL,
+			      (Elf_Internal_Rela *) NULL,
+			      info->keep_memory));
 	  if (internal_relocs == NULL)
 	    goto error_return;
 
@@ -1163,8 +1162,9 @@ elf_add_dynamic_entry (info, tag, val)
    value is allocated using either malloc or bfd_alloc, according to
    the KEEP_MEMORY argument.  */
 
-static Elf_Internal_Rela *
-elf_link_read_relocs (abfd, o, external_relocs, internal_relocs, keep_memory)
+Elf_Internal_Rela *
+NAME(_bfd_elf,link_read_relocs) (abfd, o, external_relocs, internal_relocs,
+				 keep_memory)
      bfd *abfd;
      asection *o;
      PTR external_relocs;
@@ -2728,6 +2728,7 @@ elf_link_input_bfd (finfo, input_bfd)
   Elf_Internal_Shdr *symtab_hdr;
   size_t locsymcount;
   size_t extsymoff;
+  Elf_External_Sym *external_syms;
   Elf_External_Sym *esym;
   Elf_External_Sym *esymend;
   Elf_Internal_Sym *isym;
@@ -2758,16 +2759,23 @@ elf_link_input_bfd (finfo, input_bfd)
     }
 
   /* Read the local symbols.  */
-  if (locsymcount > 0
-      && (bfd_seek (input_bfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-      	  || (bfd_read (finfo->external_syms, sizeof (Elf_External_Sym),
+  if (symtab_hdr->contents != NULL)
+    external_syms = (Elf_External_Sym *) symtab_hdr->contents;
+  else if (locsymcount == 0)
+    external_syms = NULL;
+  else
+    {
+      external_syms = finfo->external_syms;
+      if (bfd_seek (input_bfd, symtab_hdr->sh_offset, SEEK_SET) != 0
+	  || (bfd_read (external_syms, sizeof (Elf_External_Sym),
 			locsymcount, input_bfd)
-	      != locsymcount * sizeof (Elf_External_Sym))))
-    return false;
+	      != locsymcount * sizeof (Elf_External_Sym)))
+	return false;
+    }
 
   /* Swap in the local symbols and write out the ones which we know
      are going into the output file.  */
-  esym = finfo->external_syms;
+  esym = external_syms;
   esymend = esym + locsymcount;
   isym = finfo->internal_syms;
   pindex = finfo->indices;
@@ -2807,7 +2815,7 @@ elf_link_input_bfd (finfo, input_bfd)
       *ppsection = isec;
 
       /* Don't output the first, undefined, symbol.  */
-      if (esym == finfo->external_syms)
+      if (esym == external_syms)
 	continue;
 
       /* If we are stripping all symbols, we don't want to output this
@@ -2873,6 +2881,8 @@ elf_link_input_bfd (finfo, input_bfd)
   /* Relocate the contents of each section.  */
   for (o = input_bfd->sections; o != NULL; o = o->next)
     {
+      bfd_byte *contents;
+
       if (! o->linker_mark)
 	{
 	  /* This section was omitted from the link.  */
@@ -2891,20 +2901,28 @@ elf_link_input_bfd (finfo, input_bfd)
 	  continue;
 	}
 
-      /* Read the contents of the section.  */
-      if (! bfd_get_section_contents (input_bfd, o, finfo->contents,
-				      (file_ptr) 0, o->_raw_size))
-	return false;
+      /* Get the contents of the section.  They have been cached by a
+         relaxation routine.  Note that o is a section in an input
+         file, so the contents field will not have been set by any of
+         the routines which work on output files.  */
+      if (elf_section_data (o)->this_hdr.contents != NULL)
+	contents = elf_section_data (o)->this_hdr.contents;
+      else
+	{
+	  contents = finfo->contents;
+	  if (! bfd_get_section_contents (input_bfd, o, contents,
+					  (file_ptr) 0, o->_raw_size))
+	    return false;
+	}
 
       if ((o->flags & SEC_RELOC) != 0)
 	{
 	  Elf_Internal_Rela *internal_relocs;
 
 	  /* Get the swapped relocs.  */
-	  internal_relocs = elf_link_read_relocs (input_bfd, o,
-						  finfo->external_relocs,
-						  finfo->internal_relocs,
-						  false);
+	  internal_relocs = (NAME(_bfd_elf,link_read_relocs)
+			     (input_bfd, o, finfo->external_relocs,
+			      finfo->internal_relocs, false));
 	  if (internal_relocs == NULL
 	      && o->reloc_count > 0)
 	    return false;
@@ -2930,8 +2948,7 @@ elf_link_input_bfd (finfo, input_bfd)
 	     the addend to be adjusted.  */
 
 	  if (! (*relocate_section) (output_bfd, finfo->info,
-				     input_bfd, o,
-				     finfo->contents,
+				     input_bfd, o, contents,
 				     internal_relocs,
 				     finfo->internal_syms,
 				     finfo->sections))
@@ -3104,7 +3121,7 @@ elf_link_input_bfd (finfo, input_bfd)
       if (elf_section_data (o)->stab_info == NULL)
 	{
 	  if (! bfd_set_section_contents (output_bfd, o->output_section,
-					  finfo->contents, o->output_offset,
+					  contents, o->output_offset,
 					  (o->_cooked_size != 0
 					   ? o->_cooked_size
 					   : o->_raw_size)))
@@ -3114,7 +3131,7 @@ elf_link_input_bfd (finfo, input_bfd)
 	{
 	  if (! _bfd_write_section_stabs (output_bfd, o,
 					  &elf_section_data (o)->stab_info,
-					  finfo->contents))
+					  contents))
 	    return false;
 	}
     }

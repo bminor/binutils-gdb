@@ -1216,6 +1216,9 @@ enum bfd_architecture
   bfd_arch_arm,        /* Advanced Risc Machines ARM */
   bfd_arch_ns32k,      /* National Semiconductors ns32000 */
   bfd_arch_w65,        /* WDC 65816 */
+  /* start-sanitize-v850 */
+  bfd_arch_v850,       /* NEC V850 */
+  /* end-sanitize-v850 */
   /* start-sanitize-arc */
   bfd_arch_arc,        /* Argonaut RISC Core */
 #define bfd_mach_arc_base 0
@@ -1765,6 +1768,30 @@ not stored in the instruction. */
   BFD_RELOC_ARM_IN_POOL,
   BFD_RELOC_ARM_OFFSET_IMM8,
   BFD_RELOC_ARM_HWLITERAL,
+  BFD_RELOC_ARM_THUMB_ADD,
+  BFD_RELOC_ARM_THUMB_IMM,
+  BFD_RELOC_ARM_THUMB_SHIFT,
+  BFD_RELOC_ARM_THUMB_OFFSET,
+
+/* Hitachi SH relocs.  Not all of these appear in object files. */
+  BFD_RELOC_SH_PCDISP8BY2,
+  BFD_RELOC_SH_PCDISP12BY2,
+  BFD_RELOC_SH_IMM4,
+  BFD_RELOC_SH_IMM4BY2,
+  BFD_RELOC_SH_IMM4BY4,
+  BFD_RELOC_SH_IMM8,
+  BFD_RELOC_SH_IMM8BY2,
+  BFD_RELOC_SH_IMM8BY4,
+  BFD_RELOC_SH_PCRELIMM8BY2,
+  BFD_RELOC_SH_PCRELIMM8BY4,
+  BFD_RELOC_SH_SWITCH16,
+  BFD_RELOC_SH_SWITCH32,
+  BFD_RELOC_SH_USES,
+  BFD_RELOC_SH_COUNT,
+  BFD_RELOC_SH_ALIGN,
+  BFD_RELOC_SH_CODE,
+  BFD_RELOC_SH_DATA,
+  BFD_RELOC_SH_LABEL,
 /* start-sanitize-arc */
 
 /* Argonaut RISC Core (ARC) relocs.
@@ -1801,6 +1828,10 @@ assumed to be 0. */
 assumed to be 0. */
   BFD_RELOC_D10V_18_PCREL,
 /* end-sanitize-d10v */
+
+/* NEC V850 relocs. */
+  BFD_RELOC_V850_9_PCREL,
+  BFD_RELOC_V850_22_PCREL,
 
   BFD_RELOC_UNUSED };
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;

@@ -1,5 +1,5 @@
 /* BFD support for handling relocation entries.
-   Copyright (C) 1990, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -2149,9 +2149,56 @@ ENUMX
   BFD_RELOC_ARM_OFFSET_IMM8
 ENUMX
   BFD_RELOC_ARM_HWLITERAL
+ENUMX
+  BFD_RELOC_ARM_THUMB_ADD
+ENUMX
+  BFD_RELOC_ARM_THUMB_IMM
+ENUMX
+  BFD_RELOC_ARM_THUMB_SHIFT
+ENUMX
+  BFD_RELOC_ARM_THUMB_OFFSET
 ENUMDOC
   These relocs are only used within the ARM assembler.  They are not
   (at present) written to any object files.
+
+ENUM
+  BFD_RELOC_SH_PCDISP8BY2
+ENUMX
+  BFD_RELOC_SH_PCDISP12BY2
+ENUMX
+  BFD_RELOC_SH_IMM4
+ENUMX
+  BFD_RELOC_SH_IMM4BY2
+ENUMX
+  BFD_RELOC_SH_IMM4BY4
+ENUMX
+  BFD_RELOC_SH_IMM8
+ENUMX
+  BFD_RELOC_SH_IMM8BY2
+ENUMX
+  BFD_RELOC_SH_IMM8BY4
+ENUMX
+  BFD_RELOC_SH_PCRELIMM8BY2
+ENUMX
+  BFD_RELOC_SH_PCRELIMM8BY4
+ENUMX
+  BFD_RELOC_SH_SWITCH16
+ENUMX
+  BFD_RELOC_SH_SWITCH32
+ENUMX
+  BFD_RELOC_SH_USES
+ENUMX
+  BFD_RELOC_SH_COUNT
+ENUMX
+  BFD_RELOC_SH_ALIGN
+ENUMX
+  BFD_RELOC_SH_CODE
+ENUMX
+  BFD_RELOC_SH_DATA
+ENUMX
+  BFD_RELOC_SH_LABEL
+ENUMDOC
+  Hitachi SH relocs.  Not all of these appear in object files.
 
 COMMENT
 {* start-sanitize-arc *}
