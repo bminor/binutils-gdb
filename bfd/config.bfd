@@ -45,6 +45,7 @@ case "${canon}" in
   i[34]86-*-lynxos*)	bfd_name=i386-lynx ;;
   i[34]86-*-mach*)	bfd_name=i386-mach3 ;;
   i[34]86-*-osf1mk*)	bfd_name=i386-mach3 ;;
+  i[34]86-*-os9k)	bfd_name=i386-os9k;;
   i[34]86-none-*)	bfd_name=i386-coff ;;
   i960-*-vxworks4*)	bfd_name=i960-bout ;;
   i960-*-vxworks5.0)	bfd_name=i960-bout ;;
@@ -88,6 +89,11 @@ case "${canon}" in
   mips*-*-elf*)		bfd_name=mipsbelf ;;
   # Apparently this is similar enough to 386 mach to use the same target.
   ns32*-*-mach*)	bfd_name=i386-mach3 ;;
+  powerpc-*-aix*)	bfd_name=rs6000 ;;
+  powerpc-*-sysv4*)	bfd_name=ppc-elf ;;
+#	start-sanitize-powerpc-netware
+  powerpc-*-netware*)	bfd_name=ppc-nlm ;;
+#	end-sanitize-powerpc-netware
   rs6000-*-*)		bfd_name=rs6000 ;;
   sparc-*-lynxos*)	bfd_name=sparc-lynx ;;
   sparc-*-solaris2*)	bfd_name=sparc-elf ;;
