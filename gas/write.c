@@ -868,7 +868,8 @@ adjust_reloc_syms (abfd, sec, xxx)
 
 	/* Never adjust a reloc against local symbol in a merge section
 	   with non-zero addend.  */
-	if ((symsec->flags & SEC_MERGE) != 0 && fixp->fx_offset != 0)
+	if ((symsec->flags & SEC_MERGE) != 0
+	    && (fixp->fx_offset != 0 || fixp->fx_subsy != NULL))
 	  continue;
 
 	/* Never adjust a reloc against TLS local symbol.  */

@@ -1,3 +1,8 @@
+2002-11-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* write.c (adjust_reloc_syms): Don't reduce SEC_MERGE fixups with
+	fx_subsy non-NULL.
+
 2002-11-19  Richard Henderson  <rth@redhat.com>
 
 	* config/obj-elf.c (obj_elf_visibility): Overwrite only the
