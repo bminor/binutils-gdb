@@ -24,8 +24,6 @@ extern void EXFUN(bzero,(char *, int));
 extern int strtol();
 #define NO_STDARG 1
  
-#define HOST_BIG_ENDIAN_P
-
 /* EXACT TYPES */
 typedef char int8e_type;
 typedef unsigned char uint8e_type;

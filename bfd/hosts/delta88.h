@@ -59,7 +59,6 @@ extern char *getenv();
 extern int fputc();
 extern int unlink();
 
-#define HOST_BIG_ENDIAN_P
 
 /* EXACT TYPES */
 typedef char int8e_type;

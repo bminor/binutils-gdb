@@ -28,8 +28,6 @@ extern void EXFUN(free, (PTR));
 #define	HOST_TEXT_START_ADDR	0x10000		/* By inspection */
 #define	HOST_STACK_END_ADDR	KERNBASE
 
-#undef HOST_BIG_ENDIAN_P
-
 /* EXACT TYPES */
 typedef char int8e_type;
 typedef unsigned char uint8e_type;

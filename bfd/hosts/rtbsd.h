@@ -17,7 +17,6 @@
 extern char     *malloc();
 extern void     free();
 
-#define HOST_BIG_ENDIAN_P
 
 /* EXACT TYPES */
 typedef char int8e_type;
