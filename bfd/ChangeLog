@@ -4,6 +4,14 @@ Fri Mar  7 11:55:31 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
 
 Fri Mar  7 10:37:30 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coffcode.h (bfd_coff_backend_data): Change
+	_bfd_coff_compute_section_file_positions to return a boolean
+	value.  Change all callers.
+	(coff_compute_section_file_positions): Change return type to
+	boolean.  If the size of the last section changed, then output a
+	zero byte at the end of the file.
+	* libcoff.h: Rebuild.
+
 	* xcofflink.c (_bfd_xcoff_bfd_final_link): Always allocate space
 	for at least 6 output symbols.
 	(xcoff_write_global_symbol): When emitting TOC entry relocs, also
