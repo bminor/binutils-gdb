@@ -1593,7 +1593,7 @@ unsigned int written)
 
   alent          *lineno = symbol->lineno;
 
-  if (lineno) {
+  if (lineno && !symbol->done_lineno) {
     unsigned int    count = 0;
     lineno[count].u.offset = written;
     if (native->u.syment.n_numaux) {
@@ -1613,6 +1613,8 @@ unsigned int written)
 	  symbol->symbol.section->output_offset;
       count++;
     }
+    symbol->done_lineno = true;
+    
     symbol->symbol.section->output_section->moving_line_filepos +=
       count * LINESZ;
   }
@@ -1804,6 +1806,7 @@ bfd            *abfd;
   }				/* on error */
   new->native = 0;
   new->lineno = (alent *) NULL;
+  new->done_lineno = false;
   new->symbol.the_bfd = abfd;
   return &new->symbol;
 }
@@ -1884,6 +1887,22 @@ DEFUN(coff_print_symbol,(ignore_abfd, filep, symbol, how),
 
 	}
 	
+      {
+	struct lineno_cache_entry *l = coffsymbol(symbol)->lineno;
+	if (l) 
+	{
+	  printf("\n%s :", l->u.sym->name);
+	  l++;
+	  while (l->line_number) 
+	  {
+	    printf("\n%4d : %x", 
+		   l->line_number,
+		   l->u.offset);
+	    l++;
+	    
+	  }
+	}
+      }
 
     
 
@@ -3616,7 +3635,7 @@ DEFUN(jmp1,(input_section, symbols, r, shrink),
   return shrink;      
 }
 
-extern boolean 
+static boolean 
 DEFUN(bfd_coff_relax_section,(abfd, i, symbols, seclet),
       bfd *abfd AND
       asection *i AND
@@ -3628,7 +3647,7 @@ DEFUN(bfd_coff_relax_section,(abfd, i, symbols, seclet),
   bfd *input_bfd = i->owner;
   asection *input_section = i;
   int shrink = 0 ;
-  int new = 0;
+  boolean new = false;
   
   bfd_size_type reloc_size = bfd_get_reloc_upper_bound(input_bfd,
 						       input_section);
@@ -3653,12 +3672,12 @@ DEFUN(bfd_coff_relax_section,(abfd, i, symbols, seclet),
 	  
 	case R_MOVB1:
 	  shrink = movb1(input_section, symbols, r, shrink);
-	  new = 1;
+	  new = true;
 	  
 	  break;
 	case R_JMP1:
 	  shrink = jmp1(input_section, symbols, r, shrink);
-	  new = 1;
+	  new = true;
 	  
 	  break;
 	}
@@ -3683,9 +3702,9 @@ DEFUN(bfd_coff_get_relocated_section_contents,(in_abfd, seclet),
   bfd *input_bfd = seclet->u.indirect.section->owner;
   asection *input_section = seclet->u.indirect.section;
 
-  char *data = malloc(input_section->_raw_size);
-  char *dst = data;
-  char *prev_dst = data;
+  bfd_byte  *data = (bfd_byte *)malloc(input_section->_raw_size);
+  bfd_byte *dst = data;
+  bfd_byte *prev_dst = data;
 
   unsigned int gap = 0;
 
