@@ -1,3 +1,12 @@
+Tue Mar 14 07:39:19 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.base/printcmds.exp (test_integer_literals_rejected): Change
+	"p '\'", which is the same as "p ''" once tcl gets done with
+	quoting, to "p '\\'", which I suspect is what is intended (one
+	backslash gets sent to GDB).
+
+	* gdb.base/printcmds.exp (test_artificial_arrays): New tests.
+
 Fri Mar 10 13:31:46 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.base/a1-selftest.exp: Remove xfail for solaris.  The bug (PR

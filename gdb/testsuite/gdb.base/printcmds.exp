@@ -112,7 +112,7 @@ proc test_integer_literals_rejected {} {
 
     test_print_reject "p 0x" 
     test_print_reject "p ''" 
-    test_print_reject "p '\'"
+    test_print_reject "p '\\'"
 
     # Note that this turns into "p '\\\'" at gdb's input.
     test_print_reject "p '\\\\\\'"
@@ -901,6 +901,13 @@ proc test_print_int_arrays {} {
 	"{{{{0, 1}, {2, 3}, {4, 5}}, {{6, 7}, {8, 9}, {10, 11}}}}"
 }
 
+proc test_artificial_arrays {} {
+    test_print_accept {p int1dim[0]@2} "{0, 1}"
+    gdb_test {p int1dim[0]@2@3} "({{0, 1}, {2, 3}, {4, 5}}|\[Cc\]annot)"
+    test_print_accept {p/x (short [])0x12345678} \
+	"({0x1234, 0x5678}|{0x5678, 0x1234})"
+}
+
 proc test_print_char_arrays {} {
     global prompt
     global hex
@@ -974,24 +981,24 @@ proc test_print_array_constants {} {
     setup_xfail "a29k-*-udi" 2416
     gdb_test "print {{0,1,2},{3,4,5}}"  " = {{0, 1, 2}, {3, 4, 5}}"
     setup_xfail "a29k-*-udi" 2416
-    gdb_test "print {4,5,6}\\\[2\\\]"	" = 6"
+    gdb_test "print {4,5,6}\[2\]"	" = 6"
     setup_xfail "a29k-*-udi" 2416
-    gdb_test "print *&{4,5,6}\\\[1\\\]"	" = 5"
+    gdb_test "print *&{4,5,6}\[1\]"	" = 5"
 
     set timeout $otimeout
 }
 
 proc test_printf {} {
-    gdb_test "printf \\\"x=%d,y=%d,z=%d\\\\n\\\", 5, 6, 7" "x=5,y=6,z=7"
-    gdb_test "printf \\\"string=%.4sxx\\\\n\\\", teststring" "string=testxx"
-    gdb_test "printf \\\"string=%sxx\\\\n\\\", teststring" \
+    gdb_test "printf \"x=%d,y=%d,z=%d\\n\", 5, 6, 7" "x=5,y=6,z=7"
+    gdb_test "printf \"string=%.4sxx\\n\", teststring" "string=testxx"
+    gdb_test "printf \"string=%sxx\\n\", teststring" \
 	"string=teststring contentsxx"
 
-    gdb_test "printf \\\"%f is fun\\\\n\\\", 1.0" "1\.0+ is fun"
+    gdb_test "printf \"%f is fun\\n\", 1.0" "1\.0+ is fun"
 
     # Test mixing args of different sizes.
-    gdb_test "printf \\\"x=%d,y=%f,z=%d\\\\n\\\", 5, 6.0, 7" "x=5,y=6\.0+,z=7"
-    gdb_test "printf \\\"%x %f, %c %x, %x, %f\\\\n\\\", 0xbad, -99.541, 'z',\
+    gdb_test "printf \"x=%d,y=%f,z=%d\\n\", 5, 6.0, 7" "x=5,y=6\.0+,z=7"
+    gdb_test "printf \"%x %f, %c %x, %x, %f\\n\", 0xbad, -99.541, 'z',\
 0xfeedface, 0xdeadbeef, 5.0" "bad -99.5410+, z feedface, deadbeef, 5.0+"
 }
 
@@ -1001,7 +1008,7 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 
-gdb_test "print \\\$pc" "No registers"
+gdb_test "print \$pc" "No registers"
 # FIXME: should also test "print $pc" when there is an execfile but no
 # remote debugging target, process or corefile.
 
@@ -1013,10 +1020,10 @@ send "set width 0\n" ; expect -re "$prompt $"
 
 if [set_lang_c] then {
 # On AIX, we can't print variables before we run the program.  This is because
-# the data segment and text segment are in the same address space until
+# the data segment and text segment are in the same range of addresses until
 # they are relocated.  Ick.
     setup_xfail "rs6000-*-aix*"
-    gdb_test "p ctable1\\\[120\\\]" "120 'x'"
+    gdb_test "p ctable1\[120\]" "120 'x'"
 
     if [runto main] then {
 	test_integer_literals_accepted
@@ -1026,6 +1033,7 @@ if [set_lang_c] then {
 	test_print_repeats_10
 	test_print_strings
 	test_print_int_arrays
+	test_artificial_arrays
 	test_print_char_arrays
 # We used to do the runto main here.
 	test_print_string_constants
