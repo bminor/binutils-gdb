@@ -1887,7 +1887,7 @@ extern void set_gdbarch_frame_chain (struct gdbarch *gdbarch, gdbarch_frame_chai
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (FRAME_CHAIN_VALID)
-#define FRAME_CHAIN_VALID(chain, thisframe) (func_frame_chain_valid (chain, thisframe))
+#define FRAME_CHAIN_VALID(chain, thisframe) (generic_func_frame_chain_valid (chain, thisframe))
 #endif
 
 typedef int (gdbarch_frame_chain_valid_ftype) (CORE_ADDR chain, struct frame_info *thisframe);

@@ -523,7 +523,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->remote_translate_xfer_address = generic_remote_translate_xfer_address;
   current_gdbarch->frame_args_skip = -1;
   current_gdbarch->frameless_function_invocation = generic_frameless_function_invocation_not;
-  current_gdbarch->frame_chain_valid = func_frame_chain_valid;
+  current_gdbarch->frame_chain_valid = generic_func_frame_chain_valid;
   current_gdbarch->extra_stack_alignment_needed = 1;
   current_gdbarch->convert_from_func_ptr_addr = core_addr_identity;
   current_gdbarch->addr_bits_remove = core_addr_identity;

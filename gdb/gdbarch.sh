@@ -567,7 +567,7 @@ f:2:FRAME_CHAIN:CORE_ADDR:frame_chain:struct frame_info *frame:frame::0:0
 # XXXX - both default and alternate frame_chain_valid functions are
 # deprecated.  New code should use dummy frames and one of the generic
 # functions.
-f:2:FRAME_CHAIN_VALID:int:frame_chain_valid:CORE_ADDR chain, struct frame_info *thisframe:chain, thisframe:::func_frame_chain_valid::0
+f:2:FRAME_CHAIN_VALID:int:frame_chain_valid:CORE_ADDR chain, struct frame_info *thisframe:chain, thisframe:::generic_func_frame_chain_valid::0
 f:2:FRAME_SAVED_PC:CORE_ADDR:frame_saved_pc:struct frame_info *fi:fi::0:0
 f:2:FRAME_ARGS_ADDRESS:CORE_ADDR:frame_args_address:struct frame_info *fi:fi::0:0
 f:2:FRAME_LOCALS_ADDRESS:CORE_ADDR:frame_locals_address:struct frame_info *fi:fi::0:0

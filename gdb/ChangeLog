@@ -1,5 +1,15 @@
 2002-06-08  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdbarch.sh (FRAME_CHAIN_VALID): Set default to
+	generic_func_frame_chain_valid.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* blockframe.c (generic_func_frame_chain_valid): Only check
+	PC_IN_CALL_DUMMY when generic dummy frames.  Don't worry about
+	passing FP to PC_IN_CALL_DUMMY.
+	Fix PR gdb/360.
+
+2002-06-08  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdbarch.sh (struct gdbarch_data): Add field init_p.
 	(register_gdbarch_data): Initialize init_p.
 	(gdbarch_data): Initialize data pointer using the init function.
