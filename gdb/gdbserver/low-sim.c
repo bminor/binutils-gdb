@@ -23,11 +23,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "callback.h"   /* GDB simulator callback interface */
 #include "remote-sim.h" /* GDB simulator interface */
 
-extern host_callback default_callback;	/* in callback.c */
+extern host_callback default_callback;	/* in sim/common/callback.c */
 
 char registers[REGISTER_BYTES];
 
 int target_byte_order;	/* used by simulator */
+
+/* We record the result of sim_open so we can pass it
+   back to the other sim_foo routines.  */
+static SIM_DESC gdbsim_desc = 0;
 
 /* This version of "load" should be usable for any simulator that
    does not support loading itself.  */
@@ -77,12 +81,16 @@ generic_load (loadfile_bfd)
 }
 
 int
-create_inferior (program, allargs)
+create_inferior (program, argv)
      char *program;
-     char **allargs;
+     char **argv;
 {
   bfd *abfd;
   int pid = 0;
+#ifdef TARGET_BYTE_ORDER_SELECTABLE
+  char **new_argv;
+  int nargs;
+#endif
 
   abfd = bfd_openr (program, 0);
   if (!abfd) 
@@ -99,19 +107,32 @@ create_inferior (program, allargs)
       exit (1);
     }
 
-  /* This must be set before sim_open is called, because gdb assumes that
-     the simulator endianness is known immediately after the sim_open call.  */
-  target_byte_order = bfd_big_endian (abfd) ? 4321 : 1234;
+#ifdef TARGET_BYTE_ORDER_SELECTABLE
+  /* Add "-E big" or "-E little" to the argument list depending on the
+     endianness of the program to be loaded.  */
+  for (nargs = 0; argv[nargs] != NULL; nargs++)		/* count the args */
+    ;
+  new_argv = alloca (sizeof (char *) * (nargs + 3));	/* allocate new args */
+  for (nargs = 0; argv[nargs] != NULL; nargs++)		/* copy old to new */
+    new_argv[nargs] = argv[nargs];
+  new_args[nargs] = "-E";
+  new_args[nargs + 1] = bfd_big_endian (abfd) ? "big" : "little";
+  new_args[nargs + 2] = NULL;
+  argv = new_args;
+#endif
 
-  sim_set_callbacks (&default_callback);
+  /* Create an instance of the simulator.  */
   default_callback.init (&default_callback);
+  gdbsim_desc = sim_open (SIM_OPEN_STANDALONE, &default_callback, argv);
+  if (gdbsim_desc == 0)
+    exit (1);
 
-  /* Should concatenate args here.  FIXME!! */
-  sim_open (allargs[0]);
-
-  /* Load program.  */
-  if (sim_load (allargs[0], 0) != 0)
+  /* Load the program into the simulator.  */
+  if (sim_load (gdbsim_desc, program, NULL, 0) == SIM_RC_FAIL)
     generic_load (abfd);
+
+  /* Create an inferior process in the simulator.  This initializes SP.  */
+  sim_create_inferior (gdbsim_desc, argv, /* env */ NULL);
 
   return pid;
 }
@@ -121,7 +142,7 @@ create_inferior (program, allargs)
 void
 kill_inferior ()
 {
-  sim_close (0);
+  sim_close (gdbsim_desc, 0);
   default_callback.shutdown (&default_callback);
 }
 
@@ -131,7 +152,7 @@ static void
 fetch_register (regno)
      int regno;
 {
-  sim_fetch_register (regno, &registers[REGISTER_BYTE (regno)]);
+  sim_fetch_register (gdbsim_desc, regno, &registers[REGISTER_BYTE (regno)]);
 }
 
 /* Fetch all registers, or just one, from the child process.  */
@@ -161,7 +182,7 @@ store_inferior_registers (regno)
 	store_inferior_registers (regno);
     }
   else
-    sim_store_register (regno, &registers[REGISTER_BYTE (regno)]);
+    sim_store_register (gdbsim_desc, regno, &registers[REGISTER_BYTE (regno)]);
 }
 
 /* Return nonzero if the given thread is still alive.  */
@@ -181,7 +202,7 @@ mywait (status)
   int sigrc;
   enum sim_stop reason;
 
-  sim_stop_reason (&reason, &sigrc);
+  sim_stop_reason (gdbsim_desc, &reason, &sigrc);
   switch (reason)
     {
     case sim_exited:
@@ -215,7 +236,7 @@ myresume (step, signo)
 {
   /* Should be using target_signal_to_host() or signal numbers in target.h
      to convert GDB signal number to target signal number.  */
-  sim_resume (step, signo);
+  sim_resume (gdbsim_desc, step, signo);
 }
 
 /* Copy LEN bytes from inferior's memory starting at MEMADDR
@@ -227,7 +248,7 @@ read_inferior_memory (memaddr, myaddr, len)
      char *myaddr;
      int len;
 {
-  sim_read (memaddr, myaddr, len);
+  sim_read (gdbsim_desc, memaddr, myaddr, len);
 }
 
 /* Copy LEN bytes of data from debugger memory at MYADDR
@@ -241,7 +262,7 @@ write_inferior_memory (memaddr, myaddr, len)
      char *myaddr;
      int len;
 {
-  sim_write (memaddr, myaddr, len);  /* should check for error.  FIXME!! */
+  sim_write (gdbsim_desc, memaddr, myaddr, len);  /* should check for error.  FIXME!! */
   return 0;
 }
 

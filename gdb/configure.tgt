@@ -162,7 +162,8 @@ mips64*vr4300*-*-elf*)	gdb_target=vr4300 ;;
 mips64*vr4100*el-*-elf*)	gdb_target=vr4300el ;;
 mips64*vr4100*-*-elf*)	gdb_target=vr4300 ;;
 mips64*vr5000*el-*-elf*)	gdb_target=vr5000el ;;
-mips64*vr5000*-*-elf*)	gdb_target=vr5000 ;;
+mips64*vr5000*-*-elf*)	gdb_target=vr5000
+		configdirs="${configdirs} gdbserver" ;;
 # start-sanitize-r5900
 mips64*vr5900*el-*-elf*)	gdb_target=vr5000el ;;
 mips64*vr5900*-*-elf*)	gdb_target=vr5000 ;;
@@ -254,7 +255,8 @@ sparc64-*-*)		gdb_target=sp64 ;;
 tahoe-*-*)		gdb_target=tahoe ;;
 
 # start-sanitize-tic80
-tic80-*-*)		gdb_target=tic80 ;;
+tic80-*-*)		gdb_target=tic80
+			configdirs="${configdirs} gdbserver" ;;
 # end-sanitize-tic80
 
 vax-*-*)		gdb_target=vax ;;

@@ -1,3 +1,16 @@
+Fri Aug  8 21:35:44 1997  Mark Alexander  <marka@cygnus.com>
+
+start-sanitize-tic80
+	* config/tic80/tic80.mt:
+	(GDBSERVER-DEPFILES, GDBSERVER_LIBS): Define for gdbserver.
+	(SIM): Remove -lm to prevent make errors.
+	* configure.tgt: add gdbserver to configdirs for tic80.
+end-sanitize-tic80
+	* gdbserver/utils.c (error): Change prototype to match defs.h.
+	* gdbserver/low-sim.c: Change simulator calls to use new interface.
+	* remote.c (remote_write_bytes): Include '$' at start of packet
+	and checksum at end of packet in overhead calculation.
+
 Fri Aug  8 15:59:24 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ser-ocd.c: If _WIN32, include <windows.h>.
