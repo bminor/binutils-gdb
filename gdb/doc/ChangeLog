@@ -1,3 +1,7 @@
+Mon Sep 21 19:32:16 1992  John Gilmore  (gnu@cygnus.com)
+
+	* stabs.texinfo:  Minor wording changes.
+
 Tue Sep 15 02:57:09 1992  John Gilmore  (gnu@cygnus.com)
 
 	* gdbint.texinfo:  Improve release doc slightly.
