@@ -1983,12 +1983,6 @@ frame_relative_level (struct frame_info *fi)
 enum frame_type
 get_frame_type (struct frame_info *frame)
 {
-  /* Some targets still don't use [generic] dummy frames.  Catch them
-     here.  */
-  if (!DEPRECATED_USE_GENERIC_DUMMY_FRAMES
-      && deprecated_frame_in_dummy (frame))
-    return DUMMY_FRAME;
-
   /* Some legacy code, e.g, mips_init_extra_frame_info() wants
      to determine the frame's type prior to it being completely
      initialized.  Don't attempt to lazily initialize ->unwind for

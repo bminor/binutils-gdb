@@ -1767,37 +1767,6 @@ software_breakpoint_inserted_here_p (CORE_ADDR pc)
   return 0;
 }
 
-/* Return nonzero if FRAME is a dummy frame.  We can't use
-   DEPRECATED_PC_IN_CALL_DUMMY because figuring out the saved SP would
-   take too much time, at least using frame_register() on the 68k.
-   This means that for this function to work right a port must use the
-   bp_call_dummy breakpoint.  */
-
-int
-deprecated_frame_in_dummy (struct frame_info *frame)
-{
-  struct breakpoint *b;
-
-  /* This function is used by two files: get_frame_type(), after first
-     checking that !DEPRECATED_USE_GENERIC_DUMMY_FRAMES; and
-     sparc-tdep.c, which doesn't yet use generic dummy frames anyway.  */
-  gdb_assert (!DEPRECATED_USE_GENERIC_DUMMY_FRAMES);
-
-  ALL_BREAKPOINTS (b)
-  {
-    if (b->type == bp_call_dummy
-	&& frame_id_eq (b->frame_id, get_frame_id (frame))
-    /* We need to check the PC as well as the frame on the sparc,
-       for signals.exp in the testsuite.  */
-	&& (get_frame_pc (frame)
-	    >= (b->loc->address
-		- DEPRECATED_SIZEOF_CALL_DUMMY_WORDS / sizeof (LONGEST) * DEPRECATED_REGISTER_SIZE))
-	&& get_frame_pc (frame) <= b->loc->address)
-      return 1;
-  }
-  return 0;
-}
-
 /* breakpoint_thread_match (PC, PTID) returns true if the breakpoint at
    PC is valid for process/thread PTID.  */
 

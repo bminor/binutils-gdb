@@ -1,5 +1,10 @@
 2004-05-08  Andrew Cagney  <cagney@redhat.com>
 
+	* breakpoint.h (deprecated_frame_in_dummy): Delete declaration.
+	(struct frame_info): Delete opaque declaration.
+	* breakpoint.c (deprecated_frame_in_dummy): Delete function.
+	* frame.c (get_frame_type): Delete call.
+
 	* ns32k-tdep.c (ns32k_gdbarch_init): Do not set deprecated
 	pc_in_call_dummy.
 	* inferior.h (deprecated_pc_in_call_dummy_on_stack): Delete.

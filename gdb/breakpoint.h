@@ -619,13 +619,6 @@ extern int breakpoint_inserted_here_p (CORE_ADDR);
 
 extern int software_breakpoint_inserted_here_p (CORE_ADDR);
 
-/* FIXME: cagney/2002-11-10: The current [generic] dummy-frame code
-   implements a functional superset of this function.  The only reason
-   it hasn't been removed is because some architectures still don't
-   use the new framework.  Once they have been fixed, this can go.  */
-struct frame_info;
-extern int deprecated_frame_in_dummy (struct frame_info *);
-
 extern int breakpoint_thread_match (CORE_ADDR, ptid_t);
 
 extern void until_break_command (char *, int, int);
