@@ -6081,6 +6081,7 @@ arm_frob_label (sym)
 void
 arm_adjust_symtab ()
 {
+#ifdef OBJ_COFF
   symbolS *sym;
 
   for (sym = symbol_rootP; sym != NULL; sym = symbol_next (sym))
@@ -6103,8 +6104,7 @@ arm_adjust_symtab ()
             }
         }
     }
-
-  return;
+#endif
 }
 
 int

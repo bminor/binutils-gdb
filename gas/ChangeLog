@@ -1,5 +1,8 @@
 Tue Jun 10 11:18:09 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
 
+	* config/tc-arm.c (arm_adjust_symtab): Only set storage classes if
+	OBJ_COFF.
+
 	* config/tc-arm.c: Add prototypes for many static functions.
 	(struct asm_opcode ): Add prototypes for parms field.
 	(struct thumb_opcode ): Likewise.
