@@ -26,12 +26,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "cgen-mem.h"
 #include "cgen-ops.h"
 
-#include "callback.h"
+#include "gdb/callback.h"
 #include "defs-compact.h"
 
 #include "bfd.h"
-/* From include/.  */
-#include "sim-sh64.h"
+/* From include/gdb/.  */
+#include "gdb/sim-sh.h"
 
 #define SYS_exit        1
 #define	SYS_read	3

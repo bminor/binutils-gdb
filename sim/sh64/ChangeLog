@@ -1,3 +1,11 @@
+2002-06-24  Richard Sandiford  <rsandifo@redhat.com>
+
+        * sh64.c: Update path of "callback.h".
+
+2002-06-20  Elena Zannoni  <ezannoni@redhat.com>
+
+        * sh64.c: Include correct file for register numbers.
+
 Fri May 17 14:27:41 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* sim-if.c (sh64_disassemble_insn): Use  print_insn_sh instead of
