@@ -1334,7 +1334,7 @@ child_pid_to_exec_file (int pid)
   int name_index;
   int i;
   ptid_t saved_inferior_ptid;
-  boolean done;
+  int done;
 
 #ifdef PT_GET_PROCESS_PATHNAME
   /* As of 10.x HP-UX, there's an explicit request to get the pathname. */

@@ -1,5 +1,7 @@
 2003-01-28  Andrew Cagney  <ac131313@redhat.com>
 
+	* hppah-nat.c (child_pid_to_exec_file): Don't use boolean.
+
 	* complaints.c (complain): Delete function.
 	* complaints.h (struct deprecated_complaint): Delete definition.
 	(complain): Delete declaration.
