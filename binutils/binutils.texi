@@ -825,6 +825,9 @@ Do not copy relocation and symbol information from the source file.
 @itemx --strip-debug
 Do not copy debugging symbols from the source file.
 
+@item --strip-unneeded
+Strip all symbols that are not needed for relocation processing.
+
 @item -K @var{symbolname}
 @itemx --keep-symbol=@var{symbolname}
 Copy only symbol @var{symbolname} from the source file.  This option may
@@ -1380,6 +1383,9 @@ Remove all symbols.
 @itemx -S
 @itemx --strip-debug
 Remove debugging symbols only.
+
+@item --strip-unneeded
+Remove all symbols that are not needed for relocation processing.
 
 @item -K @var{symbolname}
 @itemx --keep-symbol=@var{symbolname}

@@ -1,3 +1,22 @@
+Tue Jul  4 14:48:42 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objcopy.c (enum strip_action): Define strip_unneeded.
+	(OPTION_STRIP_UNNEEDED): Define.
+	(strip_options): Add "strip-unneeded".
+	(copy_options): Likewise.
+	(copy_usage): Mention --strip-unneeded.
+	(strip_usage): Likewise.
+	(is_strip_section): Strip debugging sections if strip_unneeded.
+	(filter_symbols): If strip_unneeded, only keep BSF_KEEP symbols.
+	(copy_object): If strip_all, discard symbols without checking
+	discard_locals.
+	(copy_object): Call filter_symbols if strip_unneeded.
+	(setup_section): Strip debugging sections if strip_unneeded.
+	(copy_section): Likewise.
+	(strip_main): Handle OPTION_STRIP_UNNEEDED.
+	(copy_main): Likewise.
+	* binutils.texi, objcopy.1, strip.1: Document --strip-unneeded.
+
 Mon Jul  3 14:16:47 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* configure.in (i386-*-win32): New configuration.

@@ -21,6 +21,7 @@ objcopy \- copy and translate object files
 .RB "[\|" \-R\ \fIsectionname\fR\ |\ \fB\-\-remove\-section=\fIsectionname\fR "\|]"
 .RB "[\|" \-S\fR\ |\ \fB\-\-strip\-all\fR "\|]" 
 .RB "[\|" \-g\fR\ |\ \fB\-\-strip\-debug\fR "\|]" 
+.RB "[\|" \-\-strip\-unneeded\fR "\|]" 
 .RB "[\|" \-K\ \fIsymbolname\fR\ |\ \fB\-\-keep\-symbol=\fIsymbolname\fR "\|]" 
 .RB "[\|" \-N\ \fIsymbolname\fR\ |\ \fB\-\-strip\-symbol=\fIsymbolname\fR "\|]" 
 .RB "[\|" \-x\fR\ |\ \fB\-\-discard\-all\fR "\|]" 
@@ -123,6 +124,9 @@ Do not copy relocation and symbol information from the source file.
 .TP
 .B \-g\fR, \fB\-\-strip\-debug
 Do not copy debugging symbols from the source file.
+.TP
+.B \-\-strip\-unneeded
+Strip all symbols that are not needed for relocation processing.
 .TP
 .B \-K \fIsymbolname\fR, \fB\-\-keep\-symbol=\fIsymbolname
 Copy only symbol \fIsymbolname\fP from the source file. This option

@@ -26,7 +26,6 @@
 
 static bfd_vma parse_vma PARAMS ((const char *, const char *));
 static flagword parse_flags PARAMS ((const char *));
-static char *make_tempname PARAMS ((char *));
 static struct section_list *find_section_list PARAMS ((const char *, boolean));
 static void setup_section PARAMS ((bfd *, asection *, PTR));
 static void copy_section PARAMS ((bfd *, asection *, PTR));
@@ -56,6 +55,7 @@ enum strip_action
     strip_undef,
     strip_none,			/* don't strip */
     strip_debug,		/* strip all debugger symbols */
+    strip_unneeded,		/* strip unnecessary symbols */
     strip_all			/* strip all symbols */
   };
 
@@ -133,30 +133,6 @@ struct section_add
 
 static struct section_add *add_sections;
 
-/* Options to handle if running as "strip".  */
-
-static struct option strip_options[] =
-{
-  {"discard-all", no_argument, 0, 'x'},
-  {"discard-locals", no_argument, 0, 'X'},
-  {"format", required_argument, 0, 'F'}, /* Obsolete */
-  {"help", no_argument, 0, 'h'},
-  {"input-format", required_argument, 0, 'I'}, /* Obsolete */
-  {"input-target", required_argument, 0, 'I'},
-  {"output-format", required_argument, 0, 'O'},	/* Obsolete */
-  {"output-target", required_argument, 0, 'O'},
-  {"remove-section", required_argument, 0, 'R'},
-  {"strip-all", no_argument, 0, 's'},
-  {"strip-debug", no_argument, 0, 'S'},
-  {"strip-symbol", required_argument, 0, 'N'},
-  {"target", required_argument, 0, 'F'},
-  {"verbose", no_argument, 0, 'v'},
-  {"version", no_argument, 0, 'V'},
-  {0, no_argument, 0, 0}
-};
-
-/* Options to handle if running as "objcopy".  */
-
 /* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
 
 #define OPTION_ADD_SECTION 150
@@ -169,6 +145,33 @@ static struct option strip_options[] =
 #define OPTION_PAD_TO (OPTION_NO_ADJUST_WARNINGS + 1)
 #define OPTION_SET_SECTION_FLAGS (OPTION_PAD_TO + 1)
 #define OPTION_SET_START (OPTION_SET_SECTION_FLAGS + 1)
+#define OPTION_STRIP_UNNEEDED (OPTION_SET_START + 1)
+
+/* Options to handle if running as "strip".  */
+
+static struct option strip_options[] =
+{
+  {"discard-all", no_argument, 0, 'x'},
+  {"discard-locals", no_argument, 0, 'X'},
+  {"format", required_argument, 0, 'F'}, /* Obsolete */
+  {"help", no_argument, 0, 'h'},
+  {"input-format", required_argument, 0, 'I'}, /* Obsolete */
+  {"input-target", required_argument, 0, 'I'},
+  {"keep-symbol", required_argument, 0, 'K'},
+  {"output-format", required_argument, 0, 'O'},	/* Obsolete */
+  {"output-target", required_argument, 0, 'O'},
+  {"remove-section", required_argument, 0, 'R'},
+  {"strip-all", no_argument, 0, 's'},
+  {"strip-debug", no_argument, 0, 'S'},
+  {"strip-unneeded", no_argument, 0, OPTION_STRIP_UNNEEDED},
+  {"strip-symbol", required_argument, 0, 'N'},
+  {"target", required_argument, 0, 'F'},
+  {"verbose", no_argument, 0, 'v'},
+  {"version", no_argument, 0, 'V'},
+  {0, no_argument, 0, 0}
+};
+
+/* Options to handle if running as "objcopy".  */
 
 static struct option copy_options[] =
 {
@@ -186,6 +189,7 @@ static struct option copy_options[] =
   {"input-format", required_argument, 0, 'I'}, /* Obsolete */
   {"input-target", required_argument, 0, 'I'},
   {"interleave", required_argument, 0, 'i'},
+  {"keep-symbol", required_argument, 0, 'K'},
   {"no-adjust-warnings", no_argument, 0, OPTION_NO_ADJUST_WARNINGS},
   {"output-format", required_argument, 0, 'O'},	/* Obsolete */
   {"output-target", required_argument, 0, 'O'},
@@ -195,6 +199,7 @@ static struct option copy_options[] =
   {"set-start", required_argument, 0, OPTION_SET_START},
   {"strip-all", no_argument, 0, 'S'},
   {"strip-debug", no_argument, 0, 'g'},
+  {"strip-unneeded", no_argument, 0, OPTION_STRIP_UNNEEDED},
   {"strip-symbol", required_argument, 0, 'N'},
   {"target", required_argument, 0, 'F'},
   {"verbose", no_argument, 0, 'v'},
@@ -221,16 +226,16 @@ copy_usage (stream, exit_status)
 Usage: %s [-vVSgxX] [-I bfdname] [-O bfdname] [-F bfdname] [-b byte]\n\
        [-R section] [-i interleave] [--interleave=interleave] [--byte=byte]\n\
        [--input-target=bfdname] [--output-target=bfdname] [--target=bfdname]\n\
-       [--strip-all] [--strip-debug] [--discard-all] [--discard-locals]\n\
-       [--remove-section=section] [--gap-fill=val] [--pad-to=address]\n",
+       [--strip-all] [--strip-debug] [--strip-unneeded] [--discard-all]\n\
+       [--discard-locals] [--remove-section=section] [--gap-fill=val]\n",
 	   program_name);
   fprintf (stream, "\
-       [--set-start=val] [--adjust-start=incr] [--adjust-vma=incr]\n\
-       [--adjust-section-vma=section{=,+,-}val] [--adjust-warnings]\n\
-       [--no-adjust-warnings] [--set-section-flags=section=flags]\n\
-       [--add-section=sectionname=filename]\n\
-       [--strip-symbol symbol] [-N symbol] [--verbose]\n\
-       [--version] [--help]\n\
+       [--pad-to=address] [--set-start=val] [--adjust-start=incr]\n\
+       [--adjust-vma=incr] [--adjust-section-vma=section{=,+,-}val]\n\
+       [--adjust-warnings] [--no-adjust-warnings]\n\
+       [--set-section-flags=section=flags] [--add-section=sectionname=filename]\n\
+       [--keep-symbol symbol] [-K symbol] [--strip-symbol symbol] [-N symbol]\n\
+       [--verbose] [--version] [--help]\n\
        in-file [out-file]\n");
   list_supported_targets (program_name, stream);
   exit (exit_status);
@@ -244,9 +249,10 @@ strip_usage (stream, exit_status)
   fprintf (stream, "\
 Usage: %s [-vVsSgxX] [-I bfdname] [-O bfdname] [-F bfdname] [-R section]\n\
        [--input-target=bfdname] [--output-target=bfdname] [--target=bfdname]\n\
-       [--strip-all] [--strip-debug] [--discard-all] [--discard-locals]\n\
-       [--strip-symbol symbol] [-N symbol]\n\
-       [--remove-section=section] [--verbose] [--version] [--help] file...\n",
+       [--strip-all] [--strip-debug] [--strip-unneeded] [--discard-all]\n\
+       [--discard-locals] [--keep-symbol symbol] [-K symbol]\n\
+       [--strip-symbol symbol] [-N symbol] [--remove-section=section]\n\
+       [--verbose] [--version] [--help] file...\n",
 	   program_name);
   list_supported_targets (program_name, stream);
   exit (exit_status);
@@ -312,35 +318,6 @@ parse_flags (s)
   return ret;
 }
 
-/* Return the name of a temporary file in the same directory as FILENAME.  */
-
-static char *
-make_tempname (filename)
-     char *filename;
-{
-  static char template[] = "stXXXXXX";
-  char *tmpname;
-  char *slash = strrchr (filename, '/');
-
-  if (slash != (char *) NULL)
-    {
-      *slash = 0;
-      tmpname = xmalloc (strlen (filename) + sizeof (template) + 1);
-      strcpy (tmpname, filename);
-      strcat (tmpname, "/");
-      strcat (tmpname, template);
-      mktemp (tmpname);
-      *slash = '/';
-    }
-  else
-    {
-      tmpname = xmalloc (sizeof (template));
-      strcpy (tmpname, template);
-      mktemp (tmpname);
-    }
-  return tmpname;
-}
-
 /* Find and optionally add an entry in the adjust_sections list.  */
 
 static struct section_list *
@@ -372,9 +349,10 @@ find_section_list (name, add)
   return p;
 }
 
-/* Make a list of symbols to explicitly strip out. A linked list is 
-   good enough for a small number from the command line, but this will
-   slow things down a lot if many symbols are being deleted. */
+/* Make a list of symbols to explicitly strip out, or to keep.  A
+   linked list is good enough for a small number from the command
+   line, but this will slow things down a lot if many symbols are
+   being deleted. */
 
 struct symlist
 {
@@ -382,7 +360,16 @@ struct symlist
   struct symlist *next;
 };
 
+/* List of symbols to strip.  */
+
 static struct symlist *strip_specific_list = NULL;
+
+/* If this is false, we strip the symbols in strip_specific_list.
+   Otherwise, we keep only the symbols in the list.  */
+
+static boolean keep_symbols = false;
+
+/* Add a symbol to strip_specific_list.  */
 
 static void 
 add_strip_symbol (name)
@@ -396,6 +383,9 @@ add_strip_symbol (name)
   strip_specific_list = tmp_list;
 }
 
+/* See whether a symbol should be stripped or kept based on
+   strip_specific_list and keep_symbols.  */
+
 static boolean
 is_strip_symbol (name)
      const char *name;
@@ -405,9 +395,9 @@ is_strip_symbol (name)
   for (tmp_list = strip_specific_list; tmp_list; tmp_list = tmp_list->next)
     {
       if (strcmp (name, tmp_list->name) == 0)
-	return true;
+	return keep_symbols ? false : true;
     }
-  return false;
+  return keep_symbols;
 }
 
 /* See if a section is being removed.  */
@@ -421,6 +411,7 @@ is_strip_section (abfd, sec)
 
   if ((bfd_get_section_flags (abfd, sec) & SEC_DEBUGGING) != 0
       && (strip_symbols == strip_debug
+	  || strip_symbols == strip_unneeded
 	  || strip_symbols == strip_all
 	  || discard_locals == locals_all))
     return true;
@@ -450,17 +441,20 @@ filter_symbols (abfd, osyms, isyms, symcount)
       flagword flags = sym->flags;
       int keep;
 
-      if ((flags & BSF_GLOBAL)	/* Keep if external.  */
-	  || (flags & BSF_KEEP)	/* Keep if used in a relocation.  */
-	  || bfd_is_und_section (bfd_get_section (sym))
-	  || bfd_is_com_section (bfd_get_section (sym)))
+      if ((flags & BSF_KEEP) != 0)		/* Used in relocation.  */
 	keep = 1;
+      else if ((flags & BSF_GLOBAL) != 0	/* Global symbol.  */
+	       || bfd_is_und_section (bfd_get_section (sym))
+	       || bfd_is_com_section (bfd_get_section (sym)))
+	keep = strip_symbols != strip_unneeded;
       else if ((flags & BSF_DEBUGGING) != 0)	/* Debugging symbol.  */
-	keep = strip_symbols != strip_debug;
+	keep = (strip_symbols != strip_debug
+		&& strip_symbols != strip_unneeded);
       else			/* Local symbol.  */
-	keep = discard_locals != locals_all
-	  && (discard_locals != locals_start_L ||
-	      ! bfd_is_local_label (abfd, sym));
+	keep = (strip_symbols != strip_unneeded
+		&& (discard_locals != locals_all
+		    && (discard_locals != locals_start_L
+			|| ! bfd_is_local_label (abfd, sym))));
 
       if (keep && is_strip_symbol (bfd_asymbol_name (sym)))
 	keep = 0;
@@ -679,7 +673,7 @@ copy_object (ibfd, obfd)
 
   /* Symbol filtering must happen after the output sections have
      been created, but before their contents are set.  */
-  if (strip_symbols == strip_all && discard_locals == locals_undef)
+  if (strip_symbols == strip_all)
     {
       osympp = isympp = NULL;
       symcount = 0;
@@ -702,8 +696,9 @@ copy_object (ibfd, obfd)
 	}
 
       if (strip_symbols == strip_debug 
+	  || strip_symbols == strip_unneeded
 	  || discard_locals != locals_undef
-	  || strip_specific_list
+	  || strip_specific_list != NULL
 	  || sections_removed)
 	{
 	  /* Mark symbols used in output relocations so that they
@@ -831,7 +826,11 @@ copy_archive (ibfd, obfd, output_target)
   char *dir = make_tempname (bfd_get_filename (obfd));
 
   /* Make a temp directory to hold the contents.  */
-  mkdir (dir, 0700);
+  if (mkdir (dir, 0700) != 0)
+    {
+      fatal ("cannot mkdir %s for archive copying (error: %s)",
+	     dir, strerror (errno));
+    }
   obfd->has_armap = ibfd->has_armap;
 
   list = NULL;
@@ -989,6 +988,7 @@ setup_section (ibfd, isection, obfdarg)
 
   if ((bfd_get_section_flags (ibfd, isection) & SEC_DEBUGGING) != 0
       && (strip_symbols == strip_debug
+	  || strip_symbols == strip_unneeded
 	  || strip_symbols == strip_all
 	  || discard_locals == locals_all))
     return;
@@ -1090,6 +1090,7 @@ copy_section (ibfd, isection, obfdarg)
 
   if ((bfd_get_section_flags (ibfd, isection) & SEC_DEBUGGING) != 0
       && (strip_symbols == strip_debug
+	  || strip_symbols == strip_unneeded
 	  || strip_symbols == strip_all
 	  || discard_locals == locals_all))
     {
@@ -1337,6 +1338,15 @@ smart_rename (from, to)
 	  chmod (to, s.st_mode & 07777);
 	  chown (to, s.st_uid, s.st_gid);
 	}
+      else
+	{
+	  /* We have to clean up here. */
+	  int saved = errno;
+	  fprintf (stderr, "%s: `%s': ", program_name, to);
+	  errno = saved;
+	  perror ("rename");
+	  unlink (from);
+	}
     }
   else
     {
@@ -1357,7 +1367,7 @@ strip_main (argc, argv)
   int c, i;
   struct section_list *p;
 
-  while ((c = getopt_long (argc, argv, "I:O:F:R:sSgxXVvN:",
+  while ((c = getopt_long (argc, argv, "I:O:F:K:N:R:sSgxXVv",
 			   strip_options, (int *) 0)) != EOF)
     {
       switch (c)
@@ -1383,7 +1393,26 @@ strip_main (argc, argv)
 	case 'g':
 	  strip_symbols = strip_debug;
 	  break;
+	case OPTION_STRIP_UNNEEDED:
+	  strip_symbols = strip_unneeded;
+	  break;
+	case 'K':
+	  if (! keep_symbols && strip_specific_list != NULL)
+	    {
+	      fprintf (stderr, "%s: Can not specify both -K and -N\n",
+		       program_name);
+	      strip_usage (stderr, 1);
+	    }
+	  keep_symbols = true;
+	  add_strip_symbol (optarg);
+	  break;
 	case 'N':
+	  if (keep_symbols)
+	    {
+	      fprintf (stderr, "%s: Can not specify both -K and -N\n",
+		       program_name);
+	      strip_usage (stderr, 1);
+	    }
 	  add_strip_symbol (optarg);
 	  break;
 	case 'x':
@@ -1458,7 +1487,7 @@ copy_main (argc, argv)
   int c;
   struct section_list *p;
 
-  while ((c = getopt_long (argc, argv, "b:i:I:s:O:d:F:R:SgxXVvN:",
+  while ((c = getopt_long (argc, argv, "b:i:I:K:N:s:O:d:F:R:SgxXVv",
 			   copy_options, (int *) 0)) != EOF)
     {
       switch (c)
@@ -1503,7 +1532,26 @@ copy_main (argc, argv)
 	case 'g':
 	  strip_symbols = strip_debug;
 	  break;
+	case OPTION_STRIP_UNNEEDED:
+	  strip_symbols = strip_unneeded;
+	  break;
+	case 'K':
+	  if (! keep_symbols && strip_specific_list != NULL)
+	    {
+	      fprintf (stderr, "%s: Can not specify both -K and -N\n",
+		       program_name);
+	      strip_usage (stderr, 1);
+	    }
+	  keep_symbols = true;
+	  add_strip_symbol (optarg);
+	  break;
 	case 'N':
+	  if (keep_symbols)
+	    {
+	      fprintf (stderr, "%s: Can not specify both -K and -N\n",
+		       program_name);
+	      strip_usage (stderr, 1);
+	    }
 	  add_strip_symbol (optarg);
 	  break;
 	case 'x':
@@ -1555,7 +1603,7 @@ copy_main (argc, argv)
 
 	    pa->size = st.st_size;
 
-	    pa->contents = xmalloc (pa->size);
+	    pa->contents = (bfd_byte *) xmalloc (pa->size);
 	    f = fopen (pa->filename, FOPEN_RB);
 	    if (f == NULL)
 	      {
