@@ -1,3 +1,9 @@
+Wed Feb  5 22:29:59 1992  John Gilmore  (gnu at cygnus.com)
+
+	* mipsread.c (parse_symbol):  Avoid clobbering enum pointer when
+	looking at its members.  Improve guess between struct and union,
+	only assuming union if multiple members have offsets of zero.
+
 Tue Feb  4 18:05:44 1992  Per Bothner  (bothner at cygnus.com)
 
 	* mipsread.c:  Use (FP0_REGNUM-32) instead of magic number 6.

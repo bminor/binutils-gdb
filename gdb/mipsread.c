@@ -1047,8 +1047,8 @@ data:		/* Common code for symbols describing data */
 		       The heuristic is:
 		       If the first member has index==indexNil or a void type,
 		       assume we have an enumeration.
-		       Otherwise, if all the members have offset 0,
-		       assume we have a union.
+		       Otherwise, if there is more than one member, and all
+		       the members have offset 0, assume we have a union.
 		       Otherwise, assume we have a struct.
 
 		       The heuristic could guess wrong in the case of
@@ -1066,8 +1066,10 @@ data:		/* Common code for symbols describing data */
 		       members, we can tell for sure it's an enum here.) */
 
 		    if (type_code == TYPE_CODE_UNDEF)
-			if (max_value == 0) type_code = TYPE_CODE_UNION;
-			else type_code = TYPE_CODE_STRUCT;
+			if (nfields > 1 && max_value == 0)
+			  type_code = TYPE_CODE_UNION;
+			else
+			  type_code = TYPE_CODE_STRUCT;
 		    
 		    /* If this type was expected, use its partial definition */
 		    if (pend)
@@ -1076,6 +1078,7 @@ data:		/* Common code for symbols describing data */
 			t = new_type(prepend_tag_kind(sh->iss, type_code));
 
 		    TYPE_CODE(t) = type_code;
+		    TYPE_LENGTH(t) = sh->value;
 		    TYPE_NFIELDS(t) = nfields;
 		    TYPE_FIELDS(t) = f = (struct field*)
 			obstack_alloc (symbol_obstack,
@@ -1083,12 +1086,11 @@ data:		/* Common code for symbols describing data */
 		    
 		    if (type_code == TYPE_CODE_ENUM) {
 			/* This is a non-empty enum. */
-			while (sh[1].st == stMember) {
+			for (tsym = sh + 1; tsym->st == stMember; tsym++) {
 			    struct symbol *enum_sym;
-			    sh++;
-			    f->bitpos = sh->value;
+			    f->bitpos = tsym->value;
 			    f->type = t;
-			    f->name = (char*)sh->iss;
+			    f->name = (char*)tsym->iss;
 			    f->bitsize = 0;
 			    
 			    enum_sym = (struct symbol *)
@@ -1099,7 +1101,7 @@ data:		/* Common code for symbols describing data */
 			    SYMBOL_CLASS (enum_sym) = LOC_CONST;
 			    SYMBOL_TYPE (enum_sym) = t;
 			    SYMBOL_NAMESPACE (enum_sym) = VAR_NAMESPACE;
-			    SYMBOL_VALUE (enum_sym) = sh->value;
+			    SYMBOL_VALUE (enum_sym) = tsym->value;
 			    add_symbol(enum_sym, top_stack->cur_block);
 			    
 			    /* Skip the stMembers that we've handled. */
@@ -1111,7 +1113,6 @@ data:		/* Common code for symbols describing data */
 		    /* make this the current type */
 		    top_stack->cur_type = t;
 		    top_stack->cur_field = 0;
-		    TYPE_LENGTH(t) = sh->value;
 		    /* Mark that symbol has a type, and say which one */
 		    sh->value = (long) t;
 		} else {
