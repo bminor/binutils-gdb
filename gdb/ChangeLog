@@ -1,3 +1,14 @@
+2003-06-13  Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-tdep.c (solib-svr4.h): Dont' include it.
+	(arm_linux_svr4_fetch_link_map_offsets): Move to ...
+	* arm-linux-tdep.c: ... here.  Make static.
+	(arm_linux_init_abi): Register it.
+	(solib-svr4.h): Include it.
+	* Makefile.in: Update dependencies.
+	* config/arm/tm-linux.h (SVR4_FETCH_LINK_MAP_OFFSETS): Delete.
+	(arm_linux_svr4_fetch_link_map_offsets): Delete declaration.
+
 2003-06-13  Corinna Vinschen  <vinschen@redhat.com>
 
 	* h8300-tdep.c: Add definitions E_RET0_REGNUM and E_RET1_REGNUM to
