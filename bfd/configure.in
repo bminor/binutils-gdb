@@ -170,6 +170,11 @@ changequote([,])dnl
 	TRAD_HEADER='"hosts/symmetry.h"'
 	;;
 changequote(,)dnl
+  i[3456]86-*-bsdi)
+changequote([,])dnl
+	COREFILE=
+	;;
+changequote(,)dnl
   i[3456]86-*-bsd* | i[34567]86-*-freebsd[1234] | i[34567]86-*-freebsd[1234]\.* | i[34567]86-*-freebsd*aout*)
 changequote([,])dnl
 	COREFILE=trad-core.lo

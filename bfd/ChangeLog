@@ -1,3 +1,8 @@
+2001-08-23  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* configure.in (x86-bsdi): No corefile support.
+	* configure: Regenerate.
+
 2001-08-22  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* coff-stgo32.c (COFF_SECTION_ALIGNMENT_ENTRIES): Add missing
