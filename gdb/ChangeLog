@@ -1,3 +1,14 @@
+Tue Oct  5 11:37:02 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* configure.in: Recognize hppa*-*-hiux* (currently synonym for hpux).
+	Change other hppa host entries to use -*- not -hp-.
+
+Mon Oct  4 19:16:14 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* i386-nlmstub.c: New file; debugging stub for i386 NetWare.  Must
+	be compiled with NetWare header files and turned into an NLM with
+	nlmconv.
+
 Mon Oct  4 11:02:11 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* minsyms.c (lookup_minimal_symbol_by_pc): Don't use mst_abs symbols.
