@@ -62,12 +62,12 @@ else
 	esac
 fi
 
-if [ ! -f config/hmake-${bfd_host} ] ; then
-	echo '***' BFD does not support host ${host}: no file config/hmake-${bfd_host}
+if [ ! -f config/h-${bfd_host} ] ; then
+	echo '***' BFD does not support host ${host}: no file config/h-${bfd_host}
 	exit 1
 fi
 
-host_makefile_frag=config/hmake-${bfd_host}
+host_makefile_frag=config/h-${bfd_host}
 
 # per-target:
 
@@ -114,12 +114,12 @@ none)
 	;;
 esac
 
-if [ ! -f config/tmake-${bfd_target} ] ; then
-	echo '***' BFD does not support target ${target}: no file config/tmake-${bfd_target}
+if [ ! -f config/t-${bfd_target} ] ; then
+	echo '***' BFD does not support target ${target}: no file config/t-${bfd_target}
 	exit 1
 fi
 
-target_makefile_fragment=config/tmake-${bfd_target}
+target_makefile_frag=config/t-${bfd_target}
 
 files=
 links=

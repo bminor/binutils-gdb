@@ -323,7 +323,7 @@ for host in ${hosts} ; do
 	host_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
 	host_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
 	host=${host_cpu}-${host_vendor}-${host_os}
-	host_makefile_frag=config/hmake-${host}
+	host_makefile_frag=config/h-${host}
 
 #### configure.in per-host parts come in here.
 
@@ -381,12 +381,12 @@ else
 	esac
 fi
 
-if [ ! -f config/hmake-${bfd_host} ] ; then
-	echo '***' BFD does not support host ${host}: no file config/hmake-${bfd_host}
+if [ ! -f config/h-${bfd_host} ] ; then
+	echo '***' BFD does not support host ${host}: no file config/h-${bfd_host}
 	exit 1
 fi
 
-host_makefile_frag=config/hmake-${bfd_host}
+host_makefile_frag=config/h-${bfd_host}
 
 ## end of per-host part.
 
@@ -397,7 +397,7 @@ host_makefile_frag=config/hmake-${bfd_host}
 		target_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
 		target_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
 		target=${target_cpu}-${target_vendor}-${target_os}
-		target_makefile_frag=config/tmake-${target}
+		target_makefile_frag=config/t-${target}
 
 #### configure.in per-target parts come in here.
 
@@ -444,12 +444,12 @@ none)
 	;;
 esac
 
-if [ ! -f config/tmake-${bfd_target} ] ; then
-	echo '***' BFD does not support target ${target}: no file config/tmake-${bfd_target}
+if [ ! -f config/t-${bfd_target} ] ; then
+	echo '***' BFD does not support target ${target}: no file config/t-${bfd_target}
 	exit 1
 fi
 
-target_makefile_fragment=config/tmake-${bfd_target}
+target_makefile_frag=config/t-${bfd_target}
 
 files=
 links=
@@ -711,7 +711,19 @@ exit 0
 
 #
 # $Log$
-# Revision 1.23  1991/08/23 04:48:43  rich
+# Revision 1.25  1991/09/03 20:48:23  steve
+# *** empty log message ***
+#
+# Revision 1.24  1991/08/23  20:55:21  gnu
+# 	* configure.in:  Tix typo.
+#         * ecoff.c:  If compiling for DEC3100, use trad_unix core files,
+#         else dummy out the core file support.
+#         * trad-core.c (trad_unix_core_file_p):  If HOST_DATA_START_ADDR is
+#         specified, use it to locate the data section.
+#         * coffcode.h (coff_write_symbols):  Declare buffer as bfd_bytes
+#         rather than as chars (lint).
+#
+# Revision 1.23  1991/08/23  04:48:43  rich
 # Minor config polish.
 #
 # Revision 1.22  1991/08/23  03:31:43  rich

@@ -72,6 +72,37 @@ requires all the names from aout32.c, and produces the jump vector
     sunos_big_vec
 @end example
 
+The file host-aout.c is a special case.  It is for a large set of hosts
+that use ``more or less standard'' a.out files, and for which cross-debugging
+is not interesting.  It uses the standard 32-bit a.out support routines,
+but determines the file offsets and addresses of the text, data,
+and BSS sections, the machine architecture and machine type,
+and the entry point address, in a host-dependent manner.  Once these
+values have been determined, generic code is used to handle the 
+object file.
+
+When porting it to run on a new system, you must supply:
+
+        HOST_PAGE_SIZE
+        HOST_SEGMENT_SIZE
+        HOST_MACHINE_ARCH       (optional)
+        HOST_MACHINE_MACHINE    (optional)
+        HOST_TEXT_START_ADDR
+        HOST_STACK_END_ADDR
+
+in the file ../include/sys/h-XXX.h (for your host).  These values, plus
+the structures and macros defined in <a.out.h> on your host system, will
+produce a BFD target that will access ordinary a.out files on your host.
+
+To configure a new machine to use host-aout.c, specify:
+
+TDEFINES = -DDEFAULT_VECTOR=host_aout_big_vec
+TDEPFILES= host-aout.o trad-core.o
+
+in the config/t-XXX file, and modify configure.in to use the
+t-XXX file (by setting "bfd_target=XXX") when your configuration is
+selected.
+
 */
 
 #define KEEPIT flags
