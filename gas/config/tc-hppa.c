@@ -3602,9 +3602,10 @@ evaluate_absolute (insn)
      struct pa_it *insn;
 {
   int value;
-  expressionS exp = insn->exp;
+  expressionS exp;
   int field_selector = insn->field_selector;
 
+  exp = insn->exp;
   value = exp.X_add_number;
 
   switch (field_selector)

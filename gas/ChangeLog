@@ -1,5 +1,8 @@
 Tue Nov  9 00:49:01 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* config/tc-hppa.c (evaluate_absolute): Avoid relying on
+	ANSI-C features.
+
 	* config/tc-hppa.c (pa_type_args): Renamed from pa_export_args.
 	Accept new argument "is_export".  All callers changed.  When
 	processing a .export directive for a function, do not allow
