@@ -1,3 +1,69 @@
+Wed Sep  3 10:18:55 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* simops.c (utime.h): Include if available.
+	(OP_10007E0): Check for UTIME function.
+	(divun): Put parentheses around shift argument.
+	(OP_640): Put parentheses around shift argument, was wrong.
+	(OP_107F0): Return something.
+
+	* interp.c (sim_parse_number): Use strtoul not strtol.
+	(sim_resume): Use sim_elapsed_time_get to keep track of the time.
+
+	* configure.in (SIM_AC_OPTION_WARNINGS): Add.
+ 	(SIM_AC_OPTION_ENDIAN): Set to hardwired big.
+	(SIM_AC_OPTION_HOST_ENDIAN): Add.
+	(AC_CHECK_FUNCS): Add utime.
+	(AC_CHECK_HEADERS): Add stdlib.h, string.h, strings.h, utime.h
+	configure: Regenerate.
+	
+
+	* Makefile.in (SIM_RUN_OBJS): Use nrun.o.
+	(SIM_OBJS): Add sim-io.o, sim-hload.o, sim-utils.o, sim-options.o,
+ 	sim-config.o, sim-module.o, sim-events.o, sim-core.o,
+ 	sim-endian.o, sim-engine.o, sim-trace.o, sim-profile.o
+	(SIM_ENDIAN, SIM_WARNGINS): Define.
+
+	* simops.c (OP_10007E0): Use sim_io_* for transfers.
+
+	* interp.c (sim_resume): Pass sd around.
+
+	* simops.c (sim-main.h): Include.
+
+	* gencode.c (write_template): Generate #include sim-main.h.
+	(write_opcodes): Ditto.
+	
+	* interp.c (prog_bfd, prog_bfd_was_opened_p): Delete.
+	(v850_callback): Ditto.
+	(sim_kind, myname): Ditto.
+	(lookup_hash): Pass SD. Use sim_io_error.
+	(sim_set_memory_map): Pass in SD, use.
+	(init_system): Pass in SD, use.
+	(sim_open): Update.
+	(sim_set_profile): Delete.
+	(sim_set_profile_size): Delete.
+	(do_interrupt): Pass in SD, use.
+	(sim_info): Use sim_io_printf.
+	(sim_create_inferior): Reset registers.  Set PC from prog_bfd
+ 	argument.
+	(sim_load): Delete, use common/sim-hload.c
+	(sim_size): Rename to sim_memory_init.
+	(sim_write): Remove call to init_system.
+	(init_system): Delete.
+	(sim_set_callbacks): Delete.
+	(sim_set_interrupt): Pass in SD, use.
+	(start_time): Delete.
+	
+	* v850_sim.h: Remove everything except `struct simops' from here.
+ 	* sim-main.h: Move most to here.
+	* gencode.c: Move #includes to here.
+
+	* sim-main.h(struct _sim_cpu): Rename struct _state.
+	(#define PC, et.al.): Update
+	(v850_callback): Delete.  Replaced with SIM_DESC arg.
+	(int8, uint8, int16, uint16, int32, uint32): Define types using
+ 	unsigned8 et.al from common/sim-types.h.
+	* sim-main.h (State): Define as STATE_CPU.
+
 Mon Sep  1 12:07:55 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in: Check for time, chmod.

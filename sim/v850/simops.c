@@ -1,9 +1,16 @@
 #include <signal.h>
+#include "sim-main.h"
 #include "v850_sim.h"
 #include "simops.h"
+
+#ifdef HAVE_UTIME_H
+#include <utime.h>
+#endif
+
  /* FIXME - should be including a version of syscall.h that does not
     pollute the name space */
 #include "../../libgloss/v850/sys/syscall.h"
+
 #include "bfd.h"
 #include <errno.h>
 #if !defined(__GO32__) && !defined(_WIN32)
@@ -790,9 +797,6 @@ OP_10760 ()
 static int
 branch (int code)
 {
-  unsigned int psw;
-  int op0;
-
   trace_input ("Bcond", OP_COND_BR, 0);
   trace_output (OP_COND_BR);
 
@@ -1692,7 +1696,7 @@ OP_640 ()
     {
       trace_input ("movhi", OP_UIMM_REG_REG, 16);
       
-      State.regs[ OP[1] ] = State.regs[ OP[0] ] + OP[2] << 16;
+      State.regs[ OP[1] ] = State.regs[ OP[0] ] + (OP[2] << 16);
       
       trace_output (OP_UIMM_REG_REG);
     }
@@ -2275,37 +2279,34 @@ OP_10007E0 ()
 
 #ifdef SYS_read
 	case SYS_read:
-	  RETVAL = v850_callback->read (v850_callback, PARM1, MEMPTR (PARM2),
-					PARM3);
+	  RETVAL = sim_io_read (simulator, PARM1, MEMPTR (PARM2), PARM3);
 	  break;
 #endif
 
 #ifdef SYS_write
 	case SYS_write:
 	  if (PARM1 == 1)
-	    RETVAL = (int)v850_callback->write_stdout (v850_callback,
-				 		       MEMPTR (PARM2), PARM3);
+	    RETVAL = sim_io_write_stdout (simulator, MEMPTR (PARM2), PARM3);
 	  else
-	    RETVAL = (int)v850_callback->write (v850_callback, PARM1,
-						MEMPTR (PARM2), PARM3);
+	    RETVAL = sim_io_write (simulator, PARM1, MEMPTR (PARM2), PARM3);
 	  break;
 #endif
 
 #ifdef SYS_lseek
 	case SYS_lseek:
-	  RETVAL = v850_callback->lseek (v850_callback, PARM1, PARM2, PARM3);
+	  RETVAL = sim_io_lseek (simulator, PARM1, PARM2, PARM3);
 	  break;
 #endif
 
 #ifdef SYS_close
 	case SYS_close:
-	  RETVAL = v850_callback->close (v850_callback, PARM1);
+	  RETVAL = sim_io_close (simulator, PARM1);
 	  break;
 #endif
 
 #ifdef SYS_open
 	case SYS_open:
-	  RETVAL = v850_callback->open (v850_callback, MEMPTR (PARM1), PARM2);
+	  RETVAL = sim_io_open (simulator, MEMPTR (PARM1), PARM2);
 	  break;
 #endif
 
@@ -2408,8 +2409,8 @@ OP_10007E0 ()
 #endif
 #endif
 
-#if !defined(__GO32__) && !defined(_WIN32)
 #ifdef SYS_utime
+#if HAVE_UTIME
 	case SYS_utime:
 	  /* Cast the second argument to void *, to avoid type mismatch
 	     if a prototype is present.  */
@@ -2458,8 +2459,6 @@ OP_2007E0 ()
 int
 OP_4007E0 ()
 {
-  unsigned int op0;
-
   trace_input ("stsr", OP_STSR, 0);
   
   State.regs[ OP[1] ] = State.sregs[ OP[0] ];
@@ -2571,20 +2570,20 @@ divun
   boolean *          overflow_ptr
 )
 {
-  unsigned long   ald = sfi >> N - 1;
+  unsigned long   ald = sfi >> (N - 1);
   unsigned long   alo = als;
   unsigned int    Q   = 1;
   unsigned int    C;
   unsigned int    S   = 0;
   unsigned int    i;
   unsigned int    R1  = 1;
-  unsigned int    OV;
   unsigned int    DBZ = (als == 0) ? 1 : 0;
   unsigned long   alt = Q ? ~als : als;
 
   /* 1st Loop */
   alo = ald + alt + Q;
-  C   = (alt >> 31) & (ald >> 31) | ((alt >> 31) ^ (ald >> 31)) & (~alo >> 31);
+  C   = (((alt >> 31) & (ald >> 31))
+	 | (((alt >> 31) ^ (ald >> 31)) & (~alo >> 31)));
   C   = C ^ Q;
   Q   = ~(C ^ S) & 1;
   R1  = (alo == 0) ? 0 : (R1 & Q);
@@ -2601,7 +2600,8 @@ divun
     {
       alt = Q ? ~als : als;
       alo = ald + alt + Q;
-      C   = (alt >> 31) & (ald >> 31) | ((alt >> 31) ^ (ald >> 31)) & (~alo >> 31);
+      C   = (((alt >> 31) & (ald >> 31))
+	     | (((alt >> 31) ^ (ald >> 31)) & (~alo >> 31)));
       C   = C ^ Q;
       Q   = ~(C ^ S) & 1;
       R1  = (alo == 0) ? 0 : (R1 & Q);
@@ -2617,7 +2617,8 @@ divun
   /* Nth Loop */
   alt = Q ? ~als : als;
   alo = ald + alt + Q;
-  C   = (alt >> 31) & (ald >> 31) | ((alt >> 31) ^ (ald >> 31)) & (~alo >> 31);
+  C   = (((alt >> 31) & (ald >> 31))
+	 | (((alt >> 31) ^ (ald >> 31)) & (~alo >> 31)));
   C   = C ^ Q;
   Q   = ~(C ^ S) & 1;
   R1  = (alo == 0) ? 0 : (R1 & Q);
@@ -2660,7 +2661,8 @@ divn
   /* 1st Loop */
   
   alo = ald + alt + Q;
-  C   = (alt >> 31) & (ald >> 31) | ((alt >> 31) ^ (ald >> 31)) & (~alo >> 31);
+  C   = (((alt >> 31) & (ald >> 31))
+	 | (((alt >> 31) ^ (ald >> 31)) & (~alo >> 31)));
   Q   = C ^ SS;
   R1  = (alo == 0) ? 0 : (R1 & (Q ^ (SS ^ SD)));
   S   = alo >> 31;
@@ -2677,7 +2679,8 @@ divn
     {
       alt = Q ? ~als : als;
       alo = ald + alt + Q;
-      C   = (alt >> 31) & (ald >> 31) | ((alt >> 31) ^ (ald >> 31)) & (~alo >> 31);
+      C   = (((alt >> 31) & (ald >> 31))
+	     | (((alt >> 31) ^ (ald >> 31)) & (~alo >> 31)));
       Q   = C ^ SS;
       R1  = (alo == 0) ? 0 : (R1 & (Q ^ (SS ^ SD)));
       S   = alo >> 31;
@@ -2692,7 +2695,8 @@ divn
   /* Nth Loop */
   alt = Q ? ~als : als;
   alo = ald + alt + Q;
-  C   = (alt >> 31) & (ald >> 31) | ((alt >> 31) ^ (ald >> 31)) & (~alo >> 31);
+  C   = (((alt >> 31) & (ald >> 31))
+	 | (((alt >> 31) ^ (ald >> 31)) & (~alo >> 31)));
   Q   = C ^ SS;
   R1  = (alo == 0) ? 0 : (R1 & (Q ^ (SS ^ SD)));
   sfi = (sfi << (32-N+1));
@@ -2716,7 +2720,8 @@ divn
   * remainder_ptr = alo;
 
   /* Adj */
-  if ((alo != 0) && ((SS ^ SD) ^ R1) || (alo == 0) && (SS ^ R1))
+  if (((alo != 0) && ((SS ^ SD) ^ R1))
+      || ((alo == 0) && (SS ^ R1)))
     alo = ald + 1;
   else
     alo = ald;
@@ -3369,7 +3374,8 @@ OP_10780 (void)
 
       trace_input ("ld.bu", OP_LOAD32, 1);
 
-      adr = State.regs[ OP[0] ] + SEXT16 (OP[2] & ~1) | ((OP[3] >> 5) & 1);
+      adr = (State.regs[ OP[0] ]
+	     + (SEXT16 (OP[2] & ~1) | ((OP[3] >> 5) & 1)));
       
       State.regs[ OP[1] ] = load_mem (adr, 1);
   
@@ -3611,6 +3617,8 @@ OP_107F0 (void)
       }
   
   trace_output (OP_PUSHPOP2);
+
+  return 4;
 }
 
 /* pushmh list18 */

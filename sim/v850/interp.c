@@ -1,8 +1,25 @@
 #include <signal.h>
-#include "sysdep.h"
+#include "sim-main.h"
+#include "sim-options.h"
+#include "v850_sim.h"
+
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
+#endif
+
 #include "bfd.h"
 
-#include "v850_sim.h"
+
+/* For compatibility */
+SIM_DESC simulator;
 
 enum interrupt_type
 {
@@ -66,27 +83,13 @@ static int have_nm_generator;
 
 /* These default values correspond to expected usage for the chip.  */
 
-SIM_ADDR rom_size = 0x8000;
-SIM_ADDR low_end = 0x200000;
-SIM_ADDR high_start = 0xffe000;
-
-SIM_ADDR high_base;
-
-host_callback *v850_callback;
-
 int v850_debug;
-
-/* non-zero if we opened prog_bfd */
-static int prog_bfd_was_opened_p;
-bfd *prog_bfd;
-
-static SIM_OPEN_KIND sim_kind;
-static char *myname;
 
 uint32 OP[4];
 
-static struct hash_entry *lookup_hash PARAMS ((uint32 ins));
+static struct hash_entry *lookup_hash PARAMS ((SIM_DESC sd, uint32 ins));
 static long hash PARAMS ((long));
+#if 0
 static void do_format_1_2 PARAMS ((uint32));
 static void do_format_3 PARAMS ((uint32));
 static void do_format_4 PARAMS ((uint32));
@@ -95,7 +98,7 @@ static void do_format_6 PARAMS ((uint32));
 static void do_format_7 PARAMS ((uint32));
 static void do_format_8 PARAMS ((uint32));
 static void do_format_9_10 PARAMS ((uint32));
-static void init_system PARAMS ((void));
+#endif
 
 #define MAX_HASH  63
 
@@ -132,7 +135,8 @@ hash(insn)
 }
 
 static struct hash_entry *
-lookup_hash (ins)
+lookup_hash (sd, ins)
+     SIM_DESC sd;
      uint32 ins;
 {
   struct hash_entry *h;
@@ -143,8 +147,8 @@ lookup_hash (ins)
     {
       if (h->next == NULL)
 	{
-	  (*v850_callback->printf_filtered) (v850_callback, "ERROR looking up hash for 0x%x, PC=0x%x\n", ins, PC);
-	  exit(1);
+	  sim_io_error (sd, "ERROR looking up hash for 0x%lx, PC=0x%lx",
+			(long) ins, (long) PC);
 	}
       h = h->next;
     }
@@ -212,21 +216,22 @@ uint8 *
 map (addr)
      SIM_ADDR addr;
 {
-  uint8 *p;
-
   /* Mask down to 24 bits. */
   addr &= 0xffffff;
 
-  if (addr < low_end)
+  if (addr < 0x100000)
     {
       /* "Mirror" the addresses below 1MB. */
-      if (addr < 0x100000)
-	addr &= (rom_size - 1);
-      else
-	addr += (rom_size - 0x100000);
-      return (uint8 *) (addr + State.mem);
+      addr = addr & (simulator->rom_size - 1);
+      return (uint8 *) (addr + STATE_MEMORY (simulator));
     }
-  else if (addr >= high_start)
+  else if (addr < simulator->low_end)
+    {
+      /* chunk is just after the rom */
+      addr = addr - 0x100000 + simulator->rom_size;
+      return (uint8 *) (addr + STATE_MEMORY (simulator));
+    }
+  else if (addr >= simulator->high_start)
     {
       /* If in the peripheral I/O region, mirror 1K region across 4K,
 	 and similarly if in the internal RAM region.  */
@@ -234,11 +239,16 @@ map (addr)
 	addr &= 0xfff3ff;
       else if (addr >= 0xffe000)
 	addr &= 0xffe3ff;
-      return (uint8 *) (addr - high_start + high_base + State.mem);
+      addr = addr - simulator->high_start + simulator->high_base;
+      return (uint8 *) (STATE_MEMORY (simulator));
     }
   else
     {
-      fprintf (stderr, "segmentation fault: access address: %x not below %x or above %x [ep = %x]\n", addr, low_end, high_start, State.regs[30]);
+      sim_io_eprintf (simulator, "segmentation fault: access address: %lx not below %lx or above %lx [ep = %lx]\n",
+		      (long) addr,
+		      (long) simulator->low_end,
+		      (long) simulator->high_start,
+		      State.regs[30]);
       
       /* Signal a memory error. */
       State.exception = SIGSEGV;
@@ -296,44 +306,55 @@ store_mem (addr, len, data)
     }
 }
 
-void
-sim_size (power)
-     int power;
-
+static void
+sim_memory_init (SIM_DESC sd)
 {
   int totsize;
 
-  if (State.mem)
-    free (State.mem);
-
-  totsize = rom_size + (low_end - 0x100000) + (0x1000000 - high_start);
-
-  high_base = rom_size + (low_end - 0x100000);
-
-  State.mem = (uint8 *) calloc (1, totsize);
-  if (!State.mem)
+  if (STATE_MEMORY (sd))
+    zfree (STATE_MEMORY (sd));
+  
+  totsize = (simulator->rom_size
+	     + (sd->low_end - 0x100000)
+	     + (0x1000000 - sd->high_start));
+    
+  sd->high_base = sd->rom_size + (sd->low_end - 0x100000);
+	     
+  STATE_MEMORY (sd) = zalloc (totsize);
+  if (!STATE_MEMORY (sd))
     {
-      (*v850_callback->printf_filtered) (v850_callback, "Allocation of main memory failed.\n");
-      exit (1);
+      sim_io_error (sd, "Allocation of main memory failed.");
     }
 }
 
-void
-sim_set_memory_map (spec)
+static int
+sim_parse_number (str, rest)
+     char *str, **rest;
+{
+  if (str[0] == '0' && str[1] == 'x')
+    return strtoul (str, rest, 16);
+  else if (str[0] == '0')
+    return strtoul (str, rest, 16);
+  else
+    return strtoul (str, rest, 10);
+}
+
+static void
+sim_set_memory_map (sd, spec)
+     SIM_DESC sd;
      char *spec;
 {
   char *reststr, *nreststr;
   SIM_ADDR new_low_end, new_high_start;
 
-  new_low_end = low_end;
-  new_high_start = high_start;
+  new_low_end = sd->low_end;
+  new_high_start = sd->high_start;
   if (! strncmp (spec, "hole=", 5))
     {
       new_low_end = sim_parse_number (spec + 5, &reststr);
       if (new_low_end < 0x100000)
 	{
-	  (*v850_callback->printf_filtered) (v850_callback,
-					     "Low end must be at least 0x100000\n");
+	  sim_io_printf (sd, "Low end must be at least 0x100000\n");
 	  return;
 	}
       if (*reststr == ',')
@@ -342,47 +363,24 @@ sim_set_memory_map (spec)
 	  new_high_start = sim_parse_number (reststr, &nreststr);
 	  /* FIXME Check high_start also */
 	}
-      (*v850_callback->printf_filtered) (v850_callback,
-					 "Hole goes from 0x%x to 0x%x\n",
-					 new_low_end, new_high_start);
+      sim_io_printf (sd, "Hole goes from 0x%x to 0x%x\n",
+		     new_low_end, new_high_start);
     }
   else
     {
-      (*v850_callback->printf_filtered) (v850_callback, "Invalid specification for memory map, must be `hole=<m>[,<n>]'\n");
+      sim_io_printf (sd, "Invalid specification for memory map, must be `hole=<m>[,<n>]'\n");
     }
 
-  if (new_low_end != low_end || new_high_start != high_start)
+  if (new_low_end != sd->low_end || new_high_start != sd->high_start)
     {
-      low_end = new_low_end;
-      high_start = new_high_start;
-      if (State.mem)
-	{
-	  (*v850_callback->printf_filtered) (v850_callback, "Reconfiguring memory (old contents will be lost)\n");
-	  sim_size (1);
-	}
+      sd->low_end = new_low_end;
+      sd->high_start = new_high_start;
+      sim_io_printf (sd, "Reconfiguring memory (old contents will be lost)\n");
+      sim_memory_init (sd);
     }
 }
 
 /* Parse a number in hex, octal, or decimal form.  */
-
-int
-sim_parse_number (str, rest)
-     char *str, **rest;
-{
-  if (str[0] == '0' && str[1] == 'x')
-    return strtol (str, rest, 16);
-  else if (str[0] == '0')
-    return strtol (str, rest, 16);
-  else
-    return strtol (str, rest, 10);
-}
-
-static void
-init_system ()
-{
-  if (!State.mem)
-    sim_size(1);
-}
 
 int
 sim_write (sd, addr, buffer, size)
@@ -393,13 +391,12 @@ sim_write (sd, addr, buffer, size)
 {
   int i;
 
-  init_system ();
-
   for (i = 0; i < size; i++)
     store_mem (addr + i, 1, buffer[i]);
 
   return size;
 }
+
 
 SIM_DESC
 sim_open (kind, cb, abfd, argv)
@@ -408,25 +405,58 @@ sim_open (kind, cb, abfd, argv)
      struct _bfd *abfd;
      char **argv;
 {
+  SIM_DESC sd = sim_state_alloc (kind, cb);
   struct simops *s;
   struct hash_entry *h;
-  char **p;
 
-  sim_kind = kind;
-  myname = argv[0];
-  v850_callback = cb;
+  /* for compatibility */
+  simulator = sd;
 
-  if (argv != NULL)
+  sd->rom_size = V850_ROM_SIZE;
+  sd->low_end = V850_LOW_END;
+  sd->high_start = V850_HIGH_START;
+
+  /* Allocate memory */
+  sim_memory_init (sd);
+
+  if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
+    return 0;
+
+  /* getopt will print the error message so we just have to exit if this fails.
+     FIXME: Hmmm...  in the case of gdb we need getopt to call
+     print_filtered.  */
+  if (sim_parse_args (sd, argv) != SIM_RC_OK)
     {
-      for (p = argv + 1; *p; ++p)
-	{
-#ifdef DEBUG
-	  if (strcmp (*p, "-t") == 0)
-	    v850_debug = DEBUG;
-	  else
-#endif
-	    (*v850_callback->printf_filtered) (v850_callback, "ERROR: unsupported option(s): %s\n",*p);
-	}
+      /* Uninstall the modules to avoid memory leaks,
+	 file descriptor leaks, etc.  */
+      sim_module_uninstall (sd);
+      return 0;
+    }
+
+  /* check for/establish the a reference program image */
+  if (sim_analyze_program (sd,
+			   (STATE_PROG_ARGV (sd) != NULL
+			    ? *STATE_PROG_ARGV (sd)
+			    : NULL),
+			   abfd) != SIM_RC_OK)
+    {
+      sim_module_uninstall (sd);
+      return 0;
+    }
+
+  /* establish any remaining configuration options */
+  if (sim_config (sd) != SIM_RC_OK)
+    {
+      sim_module_uninstall (sd);
+      return 0;
+    }
+
+  if (sim_post_argv_init (sd) != SIM_RC_OK)
+    {
+      /* Uninstall the modules to avoid memory leaks,
+	 file descriptor leaks, etc.  */
+      sim_module_uninstall (sd);
+      return 0;
     }
 
   /* put all the opcodes in the hash table */
@@ -448,8 +478,7 @@ sim_open (kind, cb, abfd, argv)
       h->opcode = s->opcode;
     }
 
-  /* fudge our descriptor for now */
-  return (SIM_DESC) 1;
+  return sd;
 }
 
 
@@ -458,27 +487,10 @@ sim_close (sd, quitting)
      SIM_DESC sd;
      int quitting;
 {
-  if (prog_bfd != NULL && prog_bfd_was_opened_p)
-    bfd_close (prog_bfd);
+  sim_module_uninstall (sd);
 }
 
-void
-sim_set_profile (n)
-     int n;
-{
-  (*v850_callback->printf_filtered) (v850_callback, "sim_set_profile %d\n", n);
-}
-
-void
-sim_set_profile_size (n)
-     int n;
-{
-  (*v850_callback->printf_filtered) (v850_callback, "sim_set_profile_size %d\n", n);
-}
-
-time_t start_time;
-
-static void do_interrupt PARAMS ((enum interrupt_type));
+static void do_interrupt PARAMS ((SIM_DESC sd, enum interrupt_type));
 
 int
 sim_stop (sd)
@@ -492,17 +504,18 @@ sim_resume (sd, step, siggnal)
      SIM_DESC sd;
      int step, siggnal;
 {
-  uint32 inst, opcode;
+  SIM_ELAPSED_TIME start_time;
+  uint32 inst;
   reg_t oldpc;
   struct interrupt_generator *intgen;
-  time_t now;
 
   if (step)
     State.exception = SIGTRAP;
   else
     State.exception = 0;
 
-  time (&start_time);
+
+  start_time = sim_elapsed_time_get ();
 
   do
     {
@@ -511,13 +524,13 @@ sim_resume (sd, step, siggnal)
       inst  = RLW (PC);
       oldpc = PC;
 
-      h     = lookup_hash (inst);
+      h     = lookup_hash (sd, inst);
       OP[0] = inst & 0x1f;
       OP[1] = (inst >> 11) & 0x1f;
       OP[2] = (inst >> 16) & 0xffff;
       OP[3] = inst;
 
-//      fprintf (stderr, "PC = %x, SP = %x\n", PC, SP );
+      /* fprintf (stderr, "PC = %x, SP = %x\n", PC, SP ); */
 
       if (inst == 0)
 	{
@@ -529,7 +542,7 @@ sim_resume (sd, step, siggnal)
 
       if (oldpc == PC)
 	{
-	  fprintf (stderr, "simulator loop at %x\n", PC );
+	  sim_io_eprintf (sd, "simulator loop at %lx\n", (long) PC );
 	  break;
 	}
       
@@ -548,8 +561,9 @@ sim_resume (sd, step, siggnal)
 	      else if (intgen->cond_type == int_cond_time
 		       && intgen->enabled)
 		{
-		  time (&now);
-		  if (((long) now - (long) start_time) > intgen->time)
+		  SIM_ELAPSED_TIME delta;
+		  delta = sim_elapsed_time_since (start_time);
+		  if (delta > intgen->time)
 		    {
 		      intgen->enabled = 0;
 		      break;
@@ -557,19 +571,20 @@ sim_resume (sd, step, siggnal)
 		}
 	    }
 	  if (intgen)
-	    do_interrupt (intgen->type);
+	    do_interrupt (sd, intgen->type);
 	}
       else if (State.pending_nmi)
 	{
 	  State.pending_nmi = 0;
-	  do_interrupt (int_nmi);
+	  do_interrupt (sd, int_nmi);
 	}
     }
   while (!State.exception);
 }
 
 static void
-do_interrupt (inttype)
+do_interrupt (sd, inttype)
+     SIM_DESC sd;
      enum interrupt_type inttype;
 {
   /* Disable further interrupts.  */
@@ -659,28 +674,20 @@ sim_info (sd, verbose)
      SIM_DESC sd;
      int verbose;
 {
-  (*v850_callback->printf_filtered) (v850_callback, "sim_info\n");
+  sim_io_printf (sd, "sim_info\n");
 }
 
 SIM_RC
-sim_create_inferior (sd, abfd, argv, env)
+sim_create_inferior (sd, prog_bfd, argv, env)
      SIM_DESC sd;
-     struct _bfd *abfd;
+     struct _bfd *prog_bfd;
      char **argv;
      char **env;
 {
-  if (abfd == NULL)
+  memset (&State, 0, sizeof (State));
+  if (prog_bfd != NULL)
     PC = bfd_get_start_address (prog_bfd);
-  else
-    PC = 0; /* ??? */
   return SIM_RC_OK;
-}
-
-void
-sim_set_callbacks (p)
-     host_callback *p;
-{
-  v850_callback = p;
 }
 
 /* All the code for exiting, signals, etc needs to be revamped.
@@ -739,8 +746,9 @@ sim_read (sd, addr, buffer, size)
 
 int current_intgen_number = 1;
 
-void
-sim_set_interrupt (spec)
+static void
+sim_set_interrupt (sd, spec)
+     SIM_DESC sd;
      char *spec;
 {
   int i, num;
@@ -772,12 +780,12 @@ sim_set_interrupt (spec)
 	}
       if (intgen->type == int_none)
 	{
-	  (*v850_callback->printf_filtered) (v850_callback, "Interrupt type unknown; known types are\n");
+	  sim_io_printf (sd, "Interrupt type unknown; known types are\n");
 	  for (i = 0; i < num_int_types; ++i)
 	    {
-	      (*v850_callback->printf_filtered) (v850_callback, " %s", interrupt_names[i]);
+	      sim_io_printf (sd, " %s", interrupt_names[i]);
 	    }
-	  (*v850_callback->printf_filtered) (v850_callback, "\n");
+	  sim_io_printf (sd, "\n");
 	  free (intgen);
 	  return;
 	}
@@ -798,7 +806,7 @@ sim_set_interrupt (spec)
 	}
       else
 	{
-	  (*v850_callback->printf_filtered) (v850_callback, "Condition type must be `pc' or `time'.\n");
+	  sim_io_printf (sd, "Condition type must be `pc' or `time'.\n");
 	  free (intgen);
 	  return;
 	}
@@ -808,7 +816,7 @@ sim_set_interrupt (spec)
       intgen->enabled = 1;
       intgen->next = intgen_list;
       intgen_list = intgen;
-      (*v850_callback->printf_filtered) (v850_callback, "Interrupt generator %d (NMI) at pc=0x%x, time=%d.\n", intgen_list->number, intgen_list->address, intgen_list->time);
+      sim_io_printf (sd, "Interrupt generator %d (NMI) at pc=0x%x, time=%d.\n", intgen_list->number, intgen_list->address, intgen_list->time);
     }
   else if (*argv && !strcmp (*argv, "remove"))
     {
@@ -837,8 +845,7 @@ sim_set_interrupt (spec)
 	  if (tmpgen)
 	    free (tmpgen);
 	  else
-	    (*v850_callback->printf_filtered) (v850_callback,
-					       "No interrupt generator numbered %d, ignoring.\n", num);
+	    sim_io_printf (sd, "No interrupt generator numbered %d, ignoring.\n", num);
 	}
     }
   else if (*argv && !strcmp (*argv, "info"))
@@ -846,24 +853,22 @@ sim_set_interrupt (spec)
       if (intgen_list)
 	{
 	  for (intgen = intgen_list; intgen != NULL; intgen = intgen->next)
-	    (*v850_callback->printf_filtered) (v850_callback,
-					       "Interrupt generator %d (%s) at pc=0x%x/time=%d%s.\n",
-					       intgen->number,
-					       interrupt_names[intgen->type],
-					       intgen->address,
-					       intgen->time,
-					       (intgen->enabled ? "" : " (disabled)"));
+	    sim_io_printf (sd, "Interrupt generator %d (%s) at pc=0x%x/time=%d%s.\n",
+			   intgen->number,
+			   interrupt_names[intgen->type],
+			   intgen->address,
+			   intgen->time,
+			   (intgen->enabled ? "" : " (disabled)"));
 	}
       else
 	{
-	  (*v850_callback->printf_filtered) (v850_callback, "No interrupt generators defined.\n"); 
+	  sim_io_printf (sd, "No interrupt generators defined.\n"); 
 	}
 
     }
   else
     {
-      (*v850_callback->printf_filtered) (v850_callback,
-					 "Invalid interrupt command, must be one of `add', `remove', or `info'.\n");
+      sim_io_printf (sd, "Invalid interrupt command, must be one of `add', `remove', or `info'.\n");
     }
   /* Cache the presence of a non-maskable generator.  */
   have_nm_generator = 0;
@@ -887,41 +892,22 @@ sim_do_command (sd, cmd)
 
   if (! strncmp (cmd, mm_cmd, strlen (mm_cmd))
       && strchr (" 	", cmd[strlen(mm_cmd)]))
-    sim_set_memory_map (cmd + strlen(mm_cmd) + 1);
+    sim_set_memory_map (sd, cmd + strlen(mm_cmd) + 1);
 
   else if (! strncmp (cmd, int_cmd, strlen (int_cmd))
       && strchr (" 	", cmd[strlen(int_cmd)]))
-    sim_set_interrupt (cmd + strlen(int_cmd) + 1);
+    sim_set_interrupt (sd, cmd + strlen(int_cmd) + 1);
 
   else if (! strcmp (cmd, "help"))
     {
-      (*v850_callback->printf_filtered) (v850_callback, "V850 simulator commands:\n\n");
-      (*v850_callback->printf_filtered) (v850_callback, "interrupt add <inttype> { pc | time } <value> -- Set up an interrupt generator\n");
-      (*v850_callback->printf_filtered) (v850_callback, "interrupt remove <n> -- Remove an existing interrupt generator\n");
-      (*v850_callback->printf_filtered) (v850_callback, "interrupt info -- List all the interrupt generators\n");
-      (*v850_callback->printf_filtered) (v850_callback, "memory-map hole=<m>,<n> -- Set the memory map to have a hole between <m> and <n>\n");
-      (*v850_callback->printf_filtered) (v850_callback, "\n");
+      sim_io_printf (sd, "V850 simulator commands:\n\n");
+      sim_io_printf (sd, "interrupt add <inttype> { pc | time } <value> -- Set up an interrupt generator\n");
+      sim_io_printf (sd, "interrupt remove <n> -- Remove an existing interrupt generator\n");
+      sim_io_printf (sd, "interrupt info -- List all the interrupt generators\n");
+      sim_io_printf (sd, "memory-map hole=<m>,<n> -- Set the memory map to have a hole between <m> and <n>\n");
+      sim_io_printf (sd, "\n");
     }
   else
-    (*v850_callback->printf_filtered) (v850_callback, "\"%s\" is not a valid V850 simulator command.\n",
+    sim_io_printf (sd, "\"%s\" is not a valid V850 simulator command.\n",
 				       cmd);
 }
-
-SIM_RC
-sim_load (sd, prog, abfd, from_tty)
-     SIM_DESC sd;
-     char *prog;
-     bfd *abfd;
-     int from_tty;
-{
-  extern bfd *sim_load_file (); /* ??? Don't know where this should live.  */
-
-  if (prog_bfd != NULL && prog_bfd_was_opened_p)
-    bfd_close (prog_bfd);
-  prog_bfd = sim_load_file (sd, myname, v850_callback, prog, abfd,
-			    sim_kind == SIM_OPEN_DEBUG);
-  if (prog_bfd == NULL)
-    return SIM_RC_FAIL;
-  prog_bfd_was_opened_p = abfd == NULL;
-  return SIM_RC_OK;
-} 

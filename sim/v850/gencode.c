@@ -1,4 +1,8 @@
-#include "v850_sim.h"
+#include <stdio.h>
+#include <ctype.h>
+#include "ansidecl.h"
+#include "opcode/v850.h"
+#include <limits.h>
 
 static void write_header PARAMS ((void));
 static void write_opcodes PARAMS ((void));
@@ -42,12 +46,13 @@ write_template ()
   struct v850_opcode *opcode;
   int i,j;
 
+  printf ("#include \"sim-main.h\"\n");
   printf ("#include \"v850_sim.h\"\n");
   printf ("#include \"simops.h\"\n");
 
   for (opcode = (struct v850_opcode *)v850_opcodes; opcode->name; opcode++)
     {
-      printf("/* %s */\nvoid\nOP_%X ()\n{\n", opcode->name, opcode->opcode);
+      printf("/* %s */\nvoid\nOP_%X (void)\n{\n", opcode->name, opcode->opcode);
 	  
       /* count operands */
       j = 0;
@@ -89,6 +94,7 @@ write_opcodes ()
   int numops;
   
   /* write out opcode table */
+  printf ("#include \"sim-main.h\"\n");
   printf ("#include \"v850_sim.h\"\n");
   printf ("#include \"simops.h\"\n\n");
   printf ("struct simops Simops[] = {\n");
