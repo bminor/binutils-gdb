@@ -32,6 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "c-lang.h"
 #include "jv-lang.h"
 #include "gdbcore.h"
+#include <ctype.h>
 
 struct type *java_int_type;
 struct type *java_byte_type;
@@ -703,67 +704,45 @@ java_value_string (ptr, len)
   error ("not implemented - java_value_string"); /* FIXME */
 }
 
-/* Print the character C on STREAM as part of the contents of a literal
-   string whose delimiter is QUOTER.  Note that that format for printing
-   characters and strings is language specific. */
+static void java_printchar PARAMS ((int c, GDB_FILE *stream));
 
-void
-java_emit_char (c, stream, quoter)
-     register int c;
-     GDB_FILE *stream;
-     int quoter;
-{
-  if (PRINT_LITERAL_FORM (c))
-    {
-      if (c == '\\' || c == quoter)
-	{
-	  fputs_filtered ("\\", stream);
-	}
-      fprintf_filtered (stream, "%c", c);
-    }
-  else
-    {
-      switch (c)
-	{
-	case '\n':
-	  fputs_filtered ("\\n", stream);
-	  break;
-	case '\b':
-	  fputs_filtered ("\\b", stream);
-	  break;
-	case '\t':
-	  fputs_filtered ("\\t", stream);
-	  break;
-	case '\f':
-	  fputs_filtered ("\\f", stream);
-	  break;
-	case '\r':
-	  fputs_filtered ("\\r", stream);
-	  break;
-	case '\033':
-	  fputs_filtered ("\\e", stream);
-	  break;
-	case '\007':
-	  fputs_filtered ("\\a", stream);
-	  break;
-	default:
-	  if (c < 256)
-	    fprintf_filtered (stream, "\\%.3o", (unsigned int) c);
-	  else
-	    fprintf_filtered (stream, "\\u%.4x", (unsigned int) c);
-	  break;
-	}
-    }
-}
-
-void
+static void
 java_printchar (c, stream)
      int c;
      GDB_FILE *stream;
 {
-  fputs_filtered ("'", stream);
-  java_emit_char (c, stream, '\'');
-  fputs_filtered ("'", stream);
+  fputc_filtered ('\'', stream);
+
+  switch (c)
+    {
+    case '\\':
+    case '\'':
+      fprintf_filtered (stream, "\\%c", c);
+      break;
+    case '\b':
+      fputs_filtered ("\\b", stream);
+      break;
+    case '\t':
+      fputs_filtered ("\\t", stream);
+      break;
+    case '\n':
+      fputs_filtered ("\\n", stream);
+      break;
+    case '\f':
+      fputs_filtered ("\\f", stream);
+      break;
+    case '\r':
+      fputs_filtered ("\\r", stream);
+      break;
+    default:
+      if (isprint (c))
+	fputc_filtered (c, stream);
+      else
+	fprintf_filtered (stream, "\\u%.4x", (unsigned int) c);
+      break;
+    }
+
+  fputc_filtered ('\'', stream);
 }
 
 static value_ptr

@@ -318,8 +318,10 @@ set_language PARAMS ((enum language));
    and the "other representation" is '\141'.  The "other representation"
    is program language dependent. */
 
-#define PRINT_LITERAL_FORM(c) \
-  ((c)>=0x20 && ((c)<0x7F || (c)>=0xA0) && (!sevenbit_strings || (c)<0x80))
+#define PRINT_LITERAL_FORM(c)		\
+  ((c) >= 0x20				\
+   && ((c) < 0x7F || (c) >= 0xA0)	\
+   && (!sevenbit_strings || (c) < 0x80))
 
 /* Return a format string for printf that will print a number in one of
    the local (language-specific) formats.  Result is static and is
