@@ -1,9 +1,29 @@
+Wed Oct  2 21:26:43 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* common.h (EM_CYGNUS_MN10x00): Define.
+
+start-sanitize-m32r
+Mon Sep 23 09:18:04 1996  Doug Evans  <dje@seba.cygnus.com>
+
+	* m32r.h: New file.
+end-sanitize-m32r
+
+Fri Aug 30 17:06:21 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* common.h (EM_SH): Define.
+
+start-sanitize-v850
+Tue Aug 20 14:47:54 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
+
+	* common.h (EM_CYGNUS_V850): Define.
+
+end-sanitize-v850
 start-sanitize-m32r
 Mon Aug 19 10:59:10 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* common.h (EM_CYGNUS_M32R): Define.
+	
 end-sanitize-m32r
-
 Mon Jul 22 18:59:55 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips.h (SHT_MIPS_IFACE, SHT_MIPS_CONTENT): Define.

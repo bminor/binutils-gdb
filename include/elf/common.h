@@ -90,6 +90,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define EM_PPC	       20	/* PowerPC */
 
+#define EM_SH	       42	/* Hitachi SH */
+
 /* If it is necessary to assign new unofficial EM_* values, please pick large
    random numbers (0x8523, 0xa7f2, etc.) to minimize the chances of collision
    with official or non-GNU unofficial values.
@@ -121,6 +123,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* D10V backend magic number.  Written in the absence of an ABI.  */
 #define EM_CYGNUS_D10V	0x7650
 /* end-sanitize-d10v */
+
+/* start-sanitize-v850 */
+/* V850 backend magic number.  Written in the absense of an ABI.  */
+#define EM_CYGNUS_V850	0x9080
+/* end-sanitize-v850 */
+
+/* V850 backend magic number.  Written in the absense of an ABI.  */
+#define EM_CYGNUS_MN10x00	0xdead
 
 /* See the above comment before you add a new EM_* value here.  */
 
