@@ -1,4 +1,10 @@
 start-sanitize-m32rx
+Mon Feb 16 12:28:40 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-m32r.c (md_assemble): Only parallelise instructions
+	when m32rx target is enabled and the instructions are not
+	relaxable. 
+
 Fri Feb 13 14:42:16 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-m32r.c (first_writes_to_seconds_operands): Do not

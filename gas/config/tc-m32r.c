@@ -24,6 +24,7 @@
 #include "subsegs.h"     
 #include "cgen-opc.h"
 
+/* Structure to hold all of the different components describing an individual instruction.  */
 typedef struct
 {
   const CGEN_INSN *	insn;
@@ -773,11 +774,15 @@ md_assemble (str)
 	     previous instruction to make one, parallel, 32 bit instruction.
 	     If the previous instruction (potentially) changed the flow of
 	     program control, then it cannot be combined with the current
-	     instruction.  Also if the output of the previous instruction
-	     is used as an input to the current instruction then it cannot
-	     be combined.  Otherwise call can_make_parallel() with both
-	     orderings of the instructions to see if they can be combined.  */
-	  if (! writes_to_pc (& prev_insn)
+	     instruction.  If the current instruction is relaxable, then it
+	     might be replaced with a longer version, so we cannot combine it.
+	     Also if the output of the previous instruction is used as an
+	     input to the current instruction then it cannot be combined.
+	     Otherwise call can_make_parallel() with both orderings of the
+	     instructions to see if they can be combined.  */
+	  if (     enable_m32rx
+	      &&   CGEN_INSN_ATTR (insn.insn, CGEN_INSN_RELAXABLE) == 0
+	      && ! writes_to_pc (& prev_insn)
 	      && ! first_writes_to_seconds_operands (& prev_insn, &insn, false)
 		 )
 	    {
@@ -819,13 +824,9 @@ md_assemble (str)
 
 	  /* Swap any relaxable frags recorded for the two insns.  */
 	  if (prev_insn.frag->fr_opcode == prev_insn.addr)
-	    {
-	      prev_insn.frag->fr_opcode = insn.addr;
-	    }
+	    prev_insn.frag->fr_opcode = insn.addr;
 	  else if (insn.frag->fr_opcode == insn.addr)
-	    {
-	      insn.frag->fr_opcode = prev_insn.addr;
-	    }
+	    insn.frag->fr_opcode = prev_insn.addr;
 	}
 /* end-sanitize-phase2-m32rx */
 
@@ -837,7 +838,7 @@ md_assemble (str)
       
       /* If the insn needs the following one to be on a 32 bit boundary
 	 (e.g. subroutine calls), fill this insn's slot.  */
-      if (prev_insn.insn
+      if (prev_insn.insn != NULL
 	  && CGEN_INSN_ATTR (insn.insn, CGEN_INSN_FILL_SLOT) != 0)
 	fill_insn (0);
 
