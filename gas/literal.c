@@ -59,7 +59,10 @@ add_to_literal_pool (sym, addend, sec, size)
   offset = 0;
   /* @@ This assumes all entries in a given section will be of the same
      size...  Probably correct, but unwise to rely on.  */
-  for (fixp = seginfo->fix_root; fixp; fixp = fixp->fx_next, offset += size)
+  /* This must always be called with the same subsegment.  */
+  for (fixp = frchain_now->fix_root;
+       fixp != (fixS *) NULL;
+       fixp = fixp->fx_next, offset += size)
     {
       if (fixp->fx_addsy == sym && fixp->fx_offset == addend)
 	return offset;

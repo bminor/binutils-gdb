@@ -142,8 +142,8 @@ fix_new_internal (frag, where, size, add_symbol, sub_symbol, offset, pcrel,
   {
 
 #ifdef BFD_ASSEMBLER
-    fixS **seg_fix_rootP = & (seg_info (now_seg)->fix_root);
-    fixS **seg_fix_tailP = & (seg_info (now_seg)->fix_tail);
+    fixS **seg_fix_rootP = &frchain_now->fix_root;
+    fixS **seg_fix_tailP = &frchain_now->fix_tail;
 #endif
 
 #ifdef REVERSE_SORT_RELOCS
@@ -287,10 +287,19 @@ chain_frchains_together_1 (section, frchp)
      struct frchain *frchp;
 {
   fragS dummy, *prev_frag = &dummy;
+  fixS fix_dummy, *prev_fix = &fix_dummy;
+
   for (; frchp && frchp->frch_seg == section; frchp = frchp->frch_next)
     {
       prev_frag->fr_next = frchp->frch_root;
       prev_frag = frchp->frch_last;
+      if (frchp->fix_root != (fixS *) NULL)
+	{
+	  if (seg_info (section)->fix_root == (fixS *) NULL)
+	    seg_info (section)->fix_root = frchp->fix_root;
+	  prev_fix->fx_next = frchp->fix_root;
+	  prev_fix = frchp->fix_tail;
+	}
     }
   prev_frag->fr_next = 0;
   return prev_frag;
@@ -1314,6 +1323,8 @@ write_object_file ()
 
       for (symp = symbol_rootP; symp; symp = symbol_next (symp))
 	{
+	  int punt = 0;
+
 	  if (! symp->sy_resolved)
 	    {
 	      if (symp->sy_value.X_op == O_constant)
@@ -1342,63 +1353,50 @@ write_object_file ()
 #endif
 
 #ifdef obj_frob_symbol
-	  {
-	    int punt = 0;
-	    obj_frob_symbol (symp, punt);
-	    if (punt)
-	      goto punt_it_if_unused;
-	  }
+	  obj_frob_symbol (symp, punt);
 #endif
 #ifdef tc_frob_symbol
-	  {
-	    int punt = 0;
+	  if (! punt || symp->sy_used_in_reloc)
 	    tc_frob_symbol (symp, punt);
-	    if (punt)
-	      goto punt_it_if_unused;
-	  }
 #endif
 
-	  if (! EMIT_SECTION_SYMBOLS
-	      && (symp->bsym->flags & BSF_SECTION_SYM))
-	    goto punt_it;
-
-	  /* If we don't want to keep this symbol, splice it out of the
-	     chain now.  */
-	  if (S_IS_LOCAL (symp))
+	  /* If we don't want to keep this symbol, splice it out of
+	     the chain now.  If EMIT_SECTION_SYMBOLS is 0, we never
+	     want section symbols.  Otherwise, we skip local symbols
+	     and symbols that the frob_symbol macros told us to punt,
+	     but we keep such symbols if they are used in relocs.  */
+	  if ((! EMIT_SECTION_SYMBOLS
+	       && (symp->bsym->flags & BSF_SECTION_SYM) != 0)
+	      || ((S_IS_LOCAL (symp) || punt)
+		  && ! symp->sy_used_in_reloc))
 	    {
-#if defined (obj_frob_symbol) || defined (tc_frob_symbol)
-	    punt_it_if_unused:
+	      symbolS *prev, *next;
+
+	      prev = symbol_previous (symp);
+	      next = symbol_next (symp);
+#ifdef DEBUG_SYMS
+	      verify_symbol_chain_2 (symp);
 #endif
-	      if (! symp->sy_used_in_reloc)
+	      if (prev)
 		{
-		  symbolS *prev, *next;
-		punt_it:
-		  prev = symbol_previous (symp);
-		  next = symbol_next (symp);
-#ifdef DEBUG_SYMS
-		  verify_symbol_chain_2 (symp);
-#endif
-		  if (prev)
-		    {
-		      symbol_next (prev) = next;
-		      symp = prev;
-		    }
-		  else if (symp == symbol_rootP)
-		    symbol_rootP = next;
-		  else
-		    abort ();
-		  if (next)
-		    symbol_previous (next) = prev;
-		  else
-		    symbol_lastP = prev;
-#ifdef DEBUG_SYMS
-		  if (prev)
-		    verify_symbol_chain_2 (prev);
-		  else if (next)
-		    verify_symbol_chain_2 (next);
-#endif
-		  continue;
+		  symbol_next (prev) = next;
+		  symp = prev;
 		}
+	      else if (symp == symbol_rootP)
+		symbol_rootP = next;
+	      else
+		abort ();
+	      if (next)
+		symbol_previous (next) = prev;
+	      else
+		symbol_lastP = prev;
+#ifdef DEBUG_SYMS
+	      if (prev)
+		verify_symbol_chain_2 (prev);
+	      else if (next)
+		verify_symbol_chain_2 (next);
+#endif
+	      continue;
 	    }
 
 	  /* Make sure we really got a value for the symbol.  */
@@ -1536,8 +1534,8 @@ relax_segment (segment_frag_root, segment)
 	    int offset = relax_align (address, (int) fragP->fr_offset);
 	    if (offset % fragP->fr_var != 0)
 	      {
-		as_bad ("alignment padding (%d bytes) not a multiple of %d",
-			offset, fragP->fr_var);
+		as_bad ("alignment padding (%d bytes) not a multiple of %ld",
+			offset, (long) fragP->fr_var);
 		offset -= (offset % fragP->fr_var);
 	      }
 	    address += offset;
