@@ -1950,8 +1950,8 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	case R_X86_64_PC32:
 	  if (info->shared
 	      && !SYMBOL_REFERENCES_LOCAL (info, h)
-	      && (sec->flags & SEC_ALLOC) != 0
-	      && (sec->flags & SEC_READONLY) != 0)
+	      && (input_section->flags & SEC_ALLOC) != 0
+	      && (input_section->flags & SEC_READONLY) != 0)
 	    {
 	      (*_bfd_error_handler)
 		(_("%s: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),

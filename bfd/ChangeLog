@@ -1,3 +1,8 @@
+2004-08-09  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): For -fno-pic
+	error, test input_section flags rather than sec.
+
 2004-08-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-bfd.h (struct elf_backend_data): Add
