@@ -22,7 +22,9 @@
 #define OBJ_ECOFF 1
 
 /* Use the generic ECOFF debugging code.  */
-#define ECOFF_DEBUGGING
+#define ECOFF_DEBUGGING 1
+
+#define OUTPUT_FLAVOR bfd_target_ecoff_flavour
 
 #include "targ-cpu.h"
 
@@ -51,11 +53,11 @@ extern void ecoff_frob_file PARAMS ((void));
 #define obj_symbol_new_hook ecoff_symbol_new_hook
 
 /* At the moment we don't want to do any stabs processing in read.c.  */
-#define OBJ_PROCESS_STAB(what, string, type, other, desc) \
+#define OBJ_PROCESS_STAB(seg, what, string, type, other, desc) \
   ecoff_stab ((what), (string), (type), (other), (desc))
 
-#define OBJ_GENERATE_ASM_LINE_STAB(lineno) \
-  ecoff_generate_asm_line_stab ((lineno))
+#define OBJ_GENERATE_ASM_LINENO(filename, lineno) \
+  ecoff_generate_asm_lineno ((filename), (lineno))
 
 #define EMIT_SECTION_SYMBOLS		0
 #define obj_sec_sym_ok_for_reloc(SEC)	1

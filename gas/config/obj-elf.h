@@ -26,10 +26,16 @@
 
 #define OBJ_ELF 1
 
+#define OUTPUT_FLAVOR bfd_target_elf_flavour
+
 #include <bfd.h>
 
 #define BYTES_IN_WORD 4		/* for now */
-#include "../bfd/libelf.h"
+#include "bfd/libelf.h"
+
+/* Use this to keep track of .size expressions that involve differences
+   that we can't compute yet.  */
+#define OBJ_SYMFIELD_TYPE expressionS *
 
 /* Symbol fields used by the ELF back end.  */
 #define ELF_TARGET_SYMBOL_FIELDS int local:1; unsigned long sy_name_offset;
@@ -57,16 +63,11 @@
 
 extern asection *gdb_section;
 
-/* Copy over the function bit and size of a forwarded symbol.  */
-#define obj_frob_forward_symbol(sym)					\
-  (((sym)->bsym->flags |=						\
-    ((sym)->sy_value.X_add_symbol->bsym->flags & BSF_FUNCTION)),	\
-   S_SET_SIZE ((sym), S_GET_SIZE ((sym)->sy_value.X_add_symbol)))
-
 #define obj_frob_file()	elf_frob_file()
 
 extern void elf_frob_file PARAMS ((void));
 extern void elf_file_symbol PARAMS ((char *));
+#define obj_app_file elf_file_symbol
 
 extern void obj_elf_section PARAMS ((int));
 extern void obj_elf_previous PARAMS ((int));
@@ -92,10 +93,10 @@ extern void obj_elf_init_stab_section PARAMS ((segT));
 
 /* For now, always set ECOFF_DEBUGGING for a MIPS target.  */
 #ifdef TC_MIPS
-#define ECOFF_DEBUGGING
+#define ECOFF_DEBUGGING 1
 #endif
 
-#ifdef ECOFF_DEBUGGING
+#if ECOFF_DEBUGGING
 
 /* If we are generating ECOFF debugging information, we need some
    additional fields for each symbol.  */
@@ -110,15 +111,15 @@ extern void obj_elf_init_stab_section PARAMS ((segT));
    The Irix linker can not handle a separate stabs section.  */
 #undef SEPARATE_STAB_SECTIONS
 #undef INIT_STAB_SECTION
-#define OBJ_PROCESS_STAB(what, string, type, other, desc) \
+#define OBJ_PROCESS_STAB(seg, what, string, type, other, desc) \
   ecoff_stab ((what), (string), (type), (other), (desc))
 
 #define OBJ_GENERATE_ASM_LINENO(filename, lineno) \
   ecoff_generate_asm_lineno ((filename), (lineno))
 
-/* ECOFF requires that we call the ecoff_frob_symbol hook.  */
-#define obj_frob_symbol(symp, punt) ecoff_frob_symbol (symp)
-
 #endif /* ECOFF_DEBUGGING */
+
+extern void elf_frob_symbol PARAMS ((struct symbol *));
+#define obj_frob_symbol(symp, punt) elf_frob_symbol (symp)
 
 #endif /* _OBJ_ELF_H */
