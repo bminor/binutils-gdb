@@ -24,18 +24,9 @@
 #
 cat >>e${EMULATION_NAME}.c <<EOF
 
-#include "elf-bfd.h"
-#include "elf/arm.h"
-
-static int    no_pipeline_knowledge = 0;
-static char * thumb_entry_symbol = NULL;
-static bfd *  bfd_for_interwork;
-
-static void  arm_elf_after_open                PARAMS ((void));
-static void  arm_elf_set_bfd_for_interworking  PARAMS ((lang_statement_union_type *));
-static void  arm_elf_before_allocation         PARAMS ((void));
-static void  arm_elf_stringify_thumb_address   PARAMS ((struct bfd_link_hash_entry *, char *));
-static void  arm_elf_finish                    PARAMS ((void));
+static int no_pipeline_knowledge = 0;
+static char *thumb_entry_symbol = NULL;
+static bfd *bfd_for_interwork;
 
 
 static void
@@ -47,6 +38,8 @@ gld${EMULATION_NAME}_before_parse ()
   config.dynamic_link = ${DYNAMIC_LINK-true};
   config.has_shared = `if test -n "$GENERATE_SHLIB_SCRIPT" ; then echo true ; else echo false ; fi`;
 }
+
+static void arm_elf_after_open PARAMS ((void));
 
 static void
 arm_elf_after_open ()
@@ -72,15 +65,18 @@ arm_elf_after_open ()
   gld${EMULATION_NAME}_after_open ();
 }
 
+static void arm_elf_set_bfd_for_interworking
+  PARAMS ((lang_statement_union_type *));
+
 static void
 arm_elf_set_bfd_for_interworking (statement)
-     lang_statement_union_type * statement;
+     lang_statement_union_type *statement;
 {
   if (statement->header.type == lang_input_section_enum
       && statement->input_section.ifile->just_syms_flag == false)
     {
-      asection * i = statement->input_section.section;
-      asection * output_section = i->output_section;
+      asection *i = statement->input_section.section;
+      asection *output_section = i->output_section;
 
       ASSERT (output_section->owner == output_bfd);
 
@@ -94,10 +90,12 @@ arm_elf_set_bfd_for_interworking (statement)
     }
 }
 
+static void arm_elf_before_allocation PARAMS ((void));
+
 static void
 arm_elf_before_allocation ()
 {
-  bfd * tem;
+  bfd *tem;
 
   /* Call the standard elf routine.  */
   gld${EMULATION_NAME}_before_allocation ();
@@ -136,27 +134,7 @@ arm_elf_before_allocation ()
   bfd_elf32_arm_allocate_interworking_sections (& link_info);
 }
 
-void
-arm_elf_stringify_thumb_address (h, buffer)
-     struct bfd_link_hash_entry * h;
-     char * buffer;
-{
-  bfd_vma val;
-      
-  /* Get the address of the symbol.  */
-  val = (h->u.def.value
-	 + bfd_get_section_vma (output_bfd,
-				h->u.def.section->output_section)
-	 + h->u.def.section->output_offset);
-  /* This is a thumb address, so the bottom bit of its address must be set.  */
-  val |= 1;
-
-  /* Now convert this value into a string.  */
-  buffer[0] = '0';
-  buffer[1] = 'x';
-
-  sprintf_vma (buffer + 2, val);
-}
+static void arm_elf_finish PARAMS ((void));
 
 static void
 arm_elf_finish ()
@@ -166,61 +144,44 @@ arm_elf_finish ()
   /* Call the elf32.em routine.  */
   gld${EMULATION_NAME}_finish ();
 
-  if (thumb_entry_symbol != NULL)
-    {
-      static char buffer[32];
-
-      h = bfd_link_hash_lookup (link_info.hash, thumb_entry_symbol,
-				false, false, true);
-
-      if (h != (struct bfd_link_hash_entry *) NULL
-	  && (h->type == bfd_link_hash_defined
-	      || h->type == bfd_link_hash_defweak)
-	  && h->u.def.section->output_section != NULL)
-	{
-	  if (entry_symbol.name != NULL && entry_from_cmdline)
-	    einfo (_("%P: warning: '--thumb-entry %s' is overriding '-e %s'\n"),
-		   thumb_entry_symbol, entry_symbol.name);
-	  
-	  arm_elf_stringify_thumb_address (h, buffer);
-	  entry_symbol.name = buffer;
-	}
-      else
-	einfo (_("%P: warning: cannot find thumb start symbol %s\n"),
-	       thumb_entry_symbol);
-    }
-
-  /* If init is a Thumb function set the LSB.  */
-  h = bfd_link_hash_lookup (link_info.hash, link_info.init_function, false,
-			    false, true);
+  if (thumb_entry_symbol == NULL)
+    return;
+  
+  h = bfd_link_hash_lookup (link_info.hash, thumb_entry_symbol,
+			    false, false, true);
 
   if (h != (struct bfd_link_hash_entry *) NULL
       && (h->type == bfd_link_hash_defined
 	  || h->type == bfd_link_hash_defweak)
-      && ELF_ST_TYPE (((struct elf_link_hash_entry *)h)->type) == STT_ARM_TFUNC
       && h->u.def.section->output_section != NULL)
     {
       static char buffer[32];
+      bfd_vma val;
+      
+      /* Special procesing is required for a Thumb entry symbol.  The
+	 bottom bit of its address must be set.  */
+      val = (h->u.def.value
+	     + bfd_get_section_vma (output_bfd,
+				    h->u.def.section->output_section)
+	     + h->u.def.section->output_offset);
+      
+      val |= 1;
 
-      arm_elf_stringify_thumb_address (h, buffer);
-      link_info.init_function = buffer;
+      /* Now convert this value into a string and store it in entry_symbol
+         where the lang_finish() function will pick it up.  */
+      buffer[0] = '0';
+      buffer[1] = 'x';
+      
+      sprintf_vma (buffer + 2, val);
+
+      if (entry_symbol.name != NULL && entry_from_cmdline)
+	einfo (_("%P: warning: '--thumb-entry %s' is overriding '-e %s'\n"),
+	       thumb_entry_symbol, entry_symbol.name);
+      entry_symbol.name = buffer;
     }
-
-  /* If fini is a Thumb function set the LSB.  */
-  h = bfd_link_hash_lookup (link_info.hash, link_info.fini_function, false,
-			    false, true);
-
-  if (h != (struct bfd_link_hash_entry *) NULL
-      && (h->type == bfd_link_hash_defined
-	  || h->type == bfd_link_hash_defweak)
-      && ELF_ST_TYPE (((struct elf_link_hash_entry *)h)->type) == STT_ARM_TFUNC
-      && h->u.def.section->output_section != NULL)
-    {
-      static char buffer[32];
-
-      arm_elf_stringify_thumb_address (h, buffer);
-      link_info.fini_function = buffer;
-    }
+  else
+    einfo (_("%P: warning: connot find thumb start symbol %s\n"),
+	   thumb_entry_symbol);
 }
 
 EOF

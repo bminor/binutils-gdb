@@ -3546,6 +3546,31 @@ elf32_arm_finish_dynamic_sections (output_bfd, info)
 		}
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
+
+	      /* Set the bottom bit of DT_INIT/FINI if the
+		 corresponding function is Thumb.  */
+	    case DT_INIT:
+	      name = info->init_function;
+	      goto get_sym;
+	    case DT_FINI:
+	      name = info->fini_function;
+	    get_sym:
+	      /* If it wasn't set by elf_bfd_final_link
+		 then there is nothing to ajdust.  */
+	      if (dyn.d_un.d_val != 0)
+		{
+		  struct elf_link_hash_entry * eh;
+
+		  eh = elf_link_hash_lookup (elf_hash_table (info), name,
+					     false, false, true);
+		  if (eh != (struct elf_link_hash_entry *) NULL
+		      && ELF_ST_TYPE (eh->type) == STT_ARM_TFUNC)
+		    {
+		      dyn.d_un.d_val |= 1;
+		      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);		
+		    }
+		}
+	      break;
 	    }
 	}
 

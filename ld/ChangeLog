@@ -1,3 +1,9 @@
+2002-08-27  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/armelf.em:  Revert this patch, it is not needed.
+	
+	2002-08-22  Adam Nemet  <anemet@lnxw.com>
+
 2002-08-20 Dan Kegel <dank@kegel.com>
 	
 	* configure.in: added --with-lib-path argument to ld's configure

@@ -1,3 +1,8 @@
+2002-08-27  Adam Nemet  <anemet@lnxw.com>
+
+	* elf32-arm.h (elf32_arm_finish_dynamic_sections): Set the last
+	bit of DT_INIT and DT_FINI for Thumb functions.
+
 2002-08-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* coffcode.h (coff_set_arch_mach_hook): Handle W65MAGIC.
