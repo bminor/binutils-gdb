@@ -1,3 +1,13 @@
+Tue Oct 17 18:24:54 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* sunos.c (struct sunos_link_hash_table): Add needed field.
+	(sunos_link_hash_table_create): Call bfd_release, not free.
+	(sunos_link_hash_table_create): Initialize needed field.
+	(sunos_add_dynamic_symbols): Record needed objects.
+	(bfd_sunos_get_needed_list): New function.
+	* bfd-in.h (bfd_sunos_get_needed_list): Declare.
+	* bfd-in2.h: Rebuild.
+
 Mon Oct 16 14:43:59 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* libcoff-in.h (pe_data_type.in_reloc_p): New.

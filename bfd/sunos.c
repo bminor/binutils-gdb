@@ -663,6 +663,10 @@ struct sunos_link_hash_table
 
   /* The number of buckets in the hash table.  */
   size_t bucketcount;
+
+  /* The list of dynamic objects needed by dynamic objects included in
+     the link.  */
+  struct bfd_link_needed_list *needed;
 };
 
 /* Routine to create an entry in an SunOS link hash table.  */
@@ -721,7 +725,7 @@ sunos_link_hash_table_create (abfd)
   if (! NAME(aout,link_hash_table_init) (&ret->root, abfd,
 					 sunos_link_hash_newfunc))
     {
-      free (ret);
+      bfd_release (abfd, ret);
       return (struct bfd_link_hash_table *) NULL;
     }
 
@@ -730,6 +734,7 @@ sunos_link_hash_table_create (abfd)
   ret->dynamic_sections_needed = false;
   ret->dynsymcount = 0;
   ret->bucketcount = 0;
+  ret->needed = NULL;
 
   return &ret->root.root;
 }
@@ -870,6 +875,7 @@ sunos_add_dynamic_symbols (abfd, info, symsp, sym_countp, stringsp)
   asection *s;
   bfd *dynobj;
   struct sunos_dynamic_info *dinfo;
+  unsigned long need;
 
   /* We do not want to include the sections in a dynamic object in the
      output file.  We hack by simply clobbering the list of sections
@@ -943,6 +949,78 @@ sunos_add_dynamic_symbols (abfd, info, symsp, sym_countp, stringsp)
   *sym_countp = dinfo->dynsym_count;
   *stringsp = dinfo->dynstr;
 
+  /* Record information about any other objects needed by this one.  */
+  need = dinfo->dyninfo.ld_need;
+  while (need != 0)
+    {
+      bfd_byte buf[16];
+      unsigned long name, flags;
+      unsigned short major, minor;
+      struct bfd_link_needed_list *needed, **pp;
+      bfd_byte b;
+
+      if (bfd_seek (abfd, need, SEEK_SET) != 0
+	  || bfd_read (buf, 1, 16, abfd) != 16)
+	return false;
+
+      /* For the format of an ld_need entry, see aout/sun4.h.  We
+         should probably define structs for this manipulation.  */
+
+      name = bfd_get_32 (abfd, buf);
+      flags = bfd_get_32 (abfd, buf + 4);
+      major = bfd_get_16 (abfd, buf + 8);
+      minor = bfd_get_16 (abfd, buf + 10);
+      need = bfd_get_32 (abfd, buf + 12);
+
+      needed = bfd_alloc (abfd, sizeof (struct bfd_link_needed_list));
+      if (needed == NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  return false;
+	}
+      needed->by = abfd;
+
+      /* We return the name as [-l]name[.maj][.min].  */
+
+      if ((flags & 0x80000000) != 0)
+	bfd_alloc_grow (abfd, "-l", 2);
+      if (bfd_seek (abfd, name, SEEK_SET) != 0)
+	return false;
+      do
+	{
+	  if (bfd_read (&b, 1, 1, abfd) != 1)
+	    return false;
+	  bfd_alloc_grow (abfd, &b, 1);
+	}
+      while (b != '\0');
+      if (major != 0)
+	{
+	  char verbuf[30];
+
+	  sprintf (verbuf, ".%d", major);
+	  bfd_alloc_grow (abfd, verbuf, strlen (verbuf));
+	  if (minor != 0)
+	    {
+	      sprintf (verbuf, ".%d", minor);
+	      bfd_alloc_grow (abfd, verbuf, strlen (verbuf));
+	    }
+	}
+      needed->name = bfd_alloc_finish (abfd);
+      if (needed->name == NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  return false;
+	}
+
+      needed->next = NULL;
+
+      for (pp = &sunos_hash_table (info)->needed;
+	   *pp != NULL;
+	   pp = &(*pp)->next)
+	;
+      *pp = needed;
+    }
+
   return true;
 }
 
@@ -974,7 +1052,7 @@ sunos_add_one_symbol (info, abfd, name, flags, section, value, string,
          sections will be needed.  This will ensure that the dynamic
          sections are mapped to the right output section.  It does no
          harm to create these sections if they are not needed.  */
-      if (! sunos_create_dynamic_sections (abfd, info, info->shared))
+      if (! sunos_create_dynamic_sections (abfd, info, false))
 	return false;
     }
 
@@ -1067,6 +1145,17 @@ sunos_add_one_symbol (info, abfd, name, flags, section, value, string,
     }
 
   return true;
+}
+
+/* Return the list of objects needed by BFD.  */
+
+/*ARGSUSED*/
+struct bfd_link_needed_list *
+bfd_sunos_get_needed_list (abfd, info)
+     bfd *abfd;
+     struct bfd_link_info *info;
+{
+  return sunos_hash_table (info)->needed;
 }
 
 /* Record an assignment made to a symbol by a linker script.  We need
@@ -1692,15 +1781,6 @@ sunos_scan_ext_relocs (info, abfd, sec, relocs, rel_size)
              generate an absolute reloc.  */
 	  if (info->shared)
 	    {
-	      if (sec == obj_textsec (abfd))
-		{
-		  (*_bfd_error_handler)
-		    ("%s: may not have .text section relocs in shared library",
-		     bfd_get_filename (abfd));
-		  bfd_set_error (bfd_error_nonrepresentable_section);
-		  return false;
-		}
-
 	      if (dynobj == NULL)
 		{
 		  if (! sunos_create_dynamic_sections (abfd, info, true))
@@ -2455,7 +2535,6 @@ sunos_check_dynamic_reloc (info, input_bfd, input_section, harg, reloc,
 	      || strcmp (h->root.root.root.string,
 			 "__GLOBAL_OFFSET_TABLE_") == 0))
 	return true;
-      BFD_ASSERT (input_section != obj_textsec (input_bfd));
     }
 
   /* It looks like this is a reloc we are supposed to copy.  */
