@@ -1,3 +1,8 @@
+2004-06-19  Michael Chastain  <mec.gnu@mindspring.com>
+
+	gdb.texinfo (Bug Reporting): Mention session recording,
+	with the script command or Emacs.
+
 2004-06-18  Andrew Cagney  <cagney@gnu.org>
 
 	* gdbint.texinfo (Target Architecture Definition): Deprecate

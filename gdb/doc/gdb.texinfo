@@ -18960,6 +18960,16 @@ ours fails to crash, we would know that the bug was not happening for
 us.  If you had not told us to expect a crash, then we would not be able
 to draw any conclusion from our observations.
 
+@pindex script
+@cindex recording a session script
+To collect all this information, you can use a session recording program
+such as @command{script}, which is available on many Unix systems.
+Just run your @value{GDBN} session inside @command{script} and then
+include the @file{typescript} file with your bug report.
+
+Another way to record a @value{GDBN} session is to run @value{GDBN}
+inside Emacs and then save the entire buffer to a file.
+
 @item
 If you wish to suggest changes to the @value{GDBN} source, send us context
 diffs.  If you even discuss something in the @value{GDBN} source, refer to
