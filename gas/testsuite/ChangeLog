@@ -1,3 +1,9 @@
+2004-02-01  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* gas/sh/sh4a-fp.d: Fix opcode name fssra to fsrra.
+	* gas/sh/sh4a-fp.s: Likewise.
+	* gas/sh/err-sh4a-fp.s: Likewise.
+
 2004-01-24  Chris Demetriou  <cgd@broadcom.com>
 
 	* gas/mips/relax-swap1.s: Add extra space at end, so the
