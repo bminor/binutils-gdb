@@ -79,7 +79,6 @@ makefile.dos
 messages.c
 obj.h
 objdump.c
-obsolete
 output-file.c
 output-file.h
 read.c
@@ -106,7 +105,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.11  1992/03/13 16:04:15  sac
+# Revision 1.12  1992/07/28 18:58:12  gumby
+# Don't save obsolete/
+#
+# Revision 1.11  1992/03/13  16:04:15  sac
 # Fri Mar 13 08:03:03 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 #
 # 	* flonum-const.c: renamed flonum-konst.c to stop dos name
