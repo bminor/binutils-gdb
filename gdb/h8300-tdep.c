@@ -1074,18 +1074,26 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   switch (info.bfd_arch_info->mach)
     {
-      case bfd_mach_h8300:
-	h8300smode = 0;
-	h8300hmode = 0;
-	break;
-      case bfd_mach_h8300h:
-	h8300smode = 0;
-	h8300hmode = 1;
-	break;
-      case bfd_mach_h8300s:
-	h8300smode = 1;
-	h8300hmode = 1;
-	break;
+    case bfd_mach_h8300:
+      h8300sxmode = 0;
+      h8300smode = 0;
+      h8300hmode = 0;
+      break;
+    case bfd_mach_h8300h:
+      h8300sxmode = 0;
+      h8300smode = 0;
+      h8300hmode = 1;
+      break;
+    case bfd_mach_h8300s:
+      h8300sxmode = 0;
+      h8300smode = 1;
+      h8300hmode = 1;
+      break;
+    case bfd_mach_h8300sx:
+      h8300sxmode = 1;
+      h8300smode = 1;
+      h8300hmode = 1;
+      break;
     }
 
   gdbarch = gdbarch_alloc (&info, 0);

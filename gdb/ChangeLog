@@ -1,3 +1,9 @@
+2003-06-03  Michael Snyder  <msnyder@redhat.com>
+
+	* config/h8300/tm-h8300.h (h8300sxmode): Declare.
+	* h8300-tdep.c (h8300_gdbarch_init): Set machine mode
+	for h8300sx.
+
 2003-06-03  J. Brobecker  <brobecker@gnat.com>
 
 	* alpha-osf1-tdep.c (objfiles.h): #include, needed for symfile_objfile.
@@ -2311,6 +2317,30 @@
  	td_thr_events_t, td_notify_t, td_thr_iter_f, and td_thrinfo_t
 	as types.
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
 2003-04-16  Kevin Buettner  <kevinb@redhat.com>
 
 	* rs6000-tdep.c (rs6000_gdbarch_init): For the SysV ABI, set
