@@ -1,3 +1,8 @@
+Sat Jun  6 00:02:41 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-d30v.c (md_assemble): Set execution type to unknown
+	after emitting a word of noops.
+
 Fri Jun  5 23:27:04 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* config/tc-i386.c (mode_from_disp_size): Disp16 is mode 2.

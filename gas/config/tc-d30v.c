@@ -1185,6 +1185,7 @@ md_assemble (str)
 	      else
 		as_warn (_("word of NOPs added between word multiply and 16-bit multiply"));
 	    }
+	  extype = EXEC_UNKNOWN;
 	}
     }
 
