@@ -1,7 +1,5 @@
 -*- text -*-
 
-Changes in version 2.10:
-
 * Added command line switch --section-start to set the start address of any
   specified section. 
 
@@ -10,6 +8,8 @@ Changes in version 2.10:
   this information in order to be able to correctly identify and perform
   symbol relative addressing in the event of changes in section contents
   (instructions being added or deleted, extending data sections, etc.)
+
+Changes in version 2.10:
 
 * Added AT> to the linker script language to allow load-time allocation of 
   sections into regions.
