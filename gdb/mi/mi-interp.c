@@ -48,7 +48,7 @@ static int mi_interpreter_init (void *data);
 static int mi_interpreter_resume (void *data);
 static int mi_interpreter_suspend (void *data);
 static int mi_interpreter_exec (void *data, char *command);
-static int mi_interpreter_prompt (void *data, char *new_prompt);
+static int mi_interpreter_prompt_p (void);
 
 static void mi_execute_command_wrapper (char *cmd);
 static void mi_command_loop (int mi_version);
@@ -173,10 +173,11 @@ mi_interpreter_exec (void *data, char *command)
   return 1;
 }
 
+/* Never display the default gdb prompt in mi case.  */
 static int
-mi_interpreter_prompt (void *data, char *new_prompt)
+mi_interpreter_prompt_p (void)
 {
-  return 1;
+  return 0;
 }
 
 static void
@@ -418,7 +419,7 @@ _initialize_mi_interp (void)
       mi_interpreter_resume,	/* resume_proc */
       mi_interpreter_suspend,	/* suspend_proc */
       mi_interpreter_exec,	/* exec_proc */
-      mi_interpreter_prompt	/* prompt_proc */
+      mi_interpreter_prompt_p	/* prompt_proc_p */
     };
 
   /* Create MI1 interpreter */

@@ -101,7 +101,7 @@ gdb_new_interpreter (char *name,
   new_interp->procs.resume_proc = procs->resume_proc;
   new_interp->procs.suspend_proc = procs->suspend_proc;
   new_interp->procs.exec_proc = procs->exec_proc;
-  new_interp->procs.prompt_proc = procs->prompt_proc;
+  new_interp->procs.prompt_proc_p = procs->prompt_proc_p;
   new_interp->inited = 0;
 
   return new_interp;
@@ -278,17 +278,15 @@ gdb_current_interpreter_is_named (char *interp_name)
 }
 
 /* This is called in display_gdb_prompt.
-   If the current interpreter defines a prompt_proc, then that proc is 
-   run.  If the proc returns a non-zero value, display_gdb_prompt will
-   return without itself displaying the prompt. */
+   If the proc returns a zero value, display_gdb_prompt will
+   return without displaying the prompt.  */
 int
-gdb_interpreter_display_prompt (char *new_prompt)
+gdb_interpreter_display_prompt_p (void)
 {
-  if (current_interpreter->procs.prompt_proc == NULL)
+  if (current_interpreter->procs.prompt_proc_p == NULL)
     return 0;
   else
-    return current_interpreter->procs.prompt_proc (current_interpreter->data,
-						   new_prompt);
+    return current_interpreter->procs.prompt_proc_p ();
 }
 
 int

@@ -1,5 +1,22 @@
 2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
 
+	* event-top.c (display_gdb_prompt): Use
+	gdb_interpreter_display_prompt_p.
+	* cli/cli-interp.c (cli_interpreter_display_prompt_p): Rename from
+	cli_interpreter_display_prompt and rewrite.
+	(_initialize_cli_interp): New proc name is
+	cli_interpreter_display_prompt_p.
+	* interps.c (gdb_new_interpreter): Initialize prompt_proc_p
+	instead of prompt_proc.
+	(gdb_interpreter_display_prompt_p): Rewrite as a predicate.
+	* interps.h (interp_prompt_ftype): Update typedef.
+	(struct gdb_interpreter_procs): Rename prompt_proc to
+	prompt_proc_p.
+	(gdb_interpreter_display_prompt_p): Export this instead of old
+	function.
+
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
 	* interps.c (list_interpreter_cmd, do_set_interpreter): Remove
 	useless prototypes.
 	Update a few comments, remove gratuitous blank lines.

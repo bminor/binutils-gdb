@@ -25,7 +25,7 @@
 typedef int (*interp_init_ftype) (void *data);
 typedef int (*interp_resume_ftype) (void *data);
 typedef int (*interp_suspend_ftype) (void *data);
-typedef int (*interp_prompt_ftype) (void *data, char *new_prompt);
+typedef int (*interp_prompt_ftype) (void);
 typedef int (*interp_exec_ftype) (void *data, char *command);
 
 struct ui_out;
@@ -37,7 +37,7 @@ struct gdb_interpreter_procs
   interp_resume_ftype resume_proc;
   interp_suspend_ftype suspend_proc;
   interp_exec_ftype exec_proc;
-  interp_prompt_ftype prompt_proc;
+  interp_prompt_ftype prompt_proc_p;
 };
 
 extern struct gdb_interpreter
@@ -51,7 +51,7 @@ extern struct gdb_interpreter *gdb_current_interpreter ();
 extern struct ui_out *gdb_interpreter_ui_out (struct gdb_interpreter *interp);
 extern int gdb_current_interpreter_is_named (char *interp_name);
 extern int gdb_interpreter_exec (char *command_str);
-extern int gdb_interpreter_display_prompt (char *new_prompt);
+extern int gdb_interpreter_display_prompt_p (void);
 extern int gdb_interpreter_set_quiet (struct gdb_interpreter *interp,
 				      int quiet);
 extern int gdb_interpreter_is_quiet (struct gdb_interpreter *interp);

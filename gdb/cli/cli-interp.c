@@ -31,7 +31,7 @@ static int cli_interpreter_init (void *data);
 static int cli_interpreter_resume (void *data);
 static int cli_interpreter_suspend (void *data);
 static int cli_interpreter_exec (void *data, char *command_str);
-static int cli_interpreter_display_prompt (void *data, char *new_prompt);
+static int cli_interpreter_display_prompt_p (void);
 
 /* These are the ui_out and the interpreter for the console interpreter. */
 static struct ui_out *cli_uiout;
@@ -70,17 +70,14 @@ cli_interpreter_suspend (void *data)
   return 1;
 }
 
+/* Don't display the prompt if we are set quiet.  */
 static int
-cli_interpreter_display_prompt (void *data, char *new_prompt)
+cli_interpreter_display_prompt_p (void)
 {
   if (gdb_interpreter_is_quiet (NULL))
-    {
-      return 1;
-    }
+    return 0;
   else
-    {
-      return 0;
-    }
+    return 1;
 }
 
 static int
@@ -129,7 +126,7 @@ _initialize_cli_interp (void)
     cli_interpreter_resume,	/* resume_proc */
     cli_interpreter_suspend,	/* suspend_proc */
     cli_interpreter_exec,	/* exec_proc */
-    cli_interpreter_display_prompt /* prompt_proc */
+    cli_interpreter_display_prompt_p /* prompt_proc_p */
   };
 
   /* Create a default uiout builder for the CLI. */
