@@ -246,7 +246,7 @@ fi
 
 # If we aren't going to be using gcc, see if we can extract a definition
 # of CC from the fragment.
-if [ -z "${CC}" -a "${build}" = "${host}" ]; then
+if [ -z "${CC}" ] && [ "${build}" = "${host}" ]; then
   IFS="${IFS= 	}"; save_ifs="$IFS"; IFS="${IFS}:"
   found=
   for dir in $PATH; do
@@ -257,7 +257,7 @@ if [ -z "${CC}" -a "${build}" = "${host}" ]; then
     fi
   done
   IFS="$save_ifs"
-  if [ -z "${found}" -a -n "${host_makefile_frag}" -a -f "${srcdir}/${host_makefile_frag}" ]; then
+  if [ -z "${found}" ] && [ -n "${host_makefile_frag}" ] && [ -f "${srcdir}/${host_makefile_frag}" ]; then
     xx=`sed -n -e 's/^[ 	]*CC[ 	]*=[ 	]*\(.*\)$/\1/p' < ${srcdir}/${host_makefile_frag}`
     if [ -n "${xx}" ] ; then
       CC=$xx
@@ -923,12 +923,12 @@ fi
 # Deconfigure all subdirectories, in case we are changing the
 # configuration from one where a subdirectory is supported to one where it
 # is not.
-if [ -z "${norecursion}" -a -n "${configdirs}" ]; then
+if [ -z "${norecursion}" ] && [ -n "${configdirs}" ]; then
   for i in `echo ${configdirs} | sed -e s/target-//g` ; do
     rm -f $i/Makefile
   done
 fi
-if [ -z "${norecursion}" -a -n "${target_configdirs}" ]; then
+if [ -z "${norecursion}" ] && [ -n "${target_configdirs}" ]; then
   for i in `echo ${target_configdirs} | sed -e s/target-//g` ; do
     rm -f ${target_subdir}/$i/Makefile
   done
