@@ -13,14 +13,14 @@
 !	LOCAL	lab1, lab2
 !lab1:	DATA.L	lab2
 LL0001:	.long	LL0002
-!lab2:	SDATA	"An example"
-LL0002:	.byte	34,65,110,32,101,120,97,109,112,108,101,34
+!lab2:	SDATA	An example
+LL0002:	.byte	65,110,101,120,97,109,112,108,101
 !	foo	"using LOCAL"
 !	LOCAL	lab1, lab2
 !lab1:	DATA.L	lab2
 LL0003:	.long	LL0004
-!lab2:	SDATA	"using LOCAL"
-LL0004:	.byte	34,117,115,105,110,103,32,76,79,67,65,76,34
+!lab2:	SDATA	using LOCAL
+LL0004:	.byte	117,115,105,110,103,76,79,67,65,76
 !
 
 !! test of LOCAL directive

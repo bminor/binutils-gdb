@@ -1,6 +1,30 @@
 ******** mdouble.amp
 !
 
+!	.MACRO	HI
+!	A
+!	\! this is hidden
+!	B
+!	! this is not
+!	C
+!	.ENDM
+!	Hello 
+	Hello 
+!	HI
+!	A
+	A
+!	
+!	B
+	B
+!	! this is not
+	! this is not
+!	C
+	C
+!	Emily
+	Emily
+!	
+!
+
 !	H'0f
 	15
 !	200+H'0F
@@ -34,8 +58,8 @@
 	ADD #1,@B
 !ENTRY	JMP	@MAIN
 ENTRY:	JMP	@MAIN
-!L00000	ADD 	#1,@HL
-L00000:	ADD 	#1,@HL
+!L00001	ADD 	#1,@HL
+L00001:	ADD 	#1,@HL
 !	MOV	#0,@C	
 	MOV	#0,@C	
 !	ADD	#2,@C
