@@ -111,10 +111,6 @@ Mon Jun  7 11:49:43 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
 	* elfxx-target.h (ELF_MAXPAGESIZE): Default to 0x1000 not 1.
 
-1999-06-03  Ulrich Drepper  <drepper@cygnus.com>
-
-	* elf32-arm.h: Fix typo: change ELF_MAXPAGE_SIZE to ELF_MAXPAGESIZE.
-
 Fri Jun  4 10:05:11 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
 	* elf.c (elf_fake_sections): Undo change of 1999-05-10.
@@ -387,6 +383,7 @@ Wed Jun  2 11:51:12 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
  	1999-03-25.
 
 Mon May 17 13:35:35 1999  Stan Cox  <scox@cygnus.com>
+
 	* coff-arm.c (_bfd_coff_arm_set_private_flags): Changed
 	F_PIC_INT to F_PIC.
 	* coffcode.h (coff_set_arch_mach_hook): Added F_ARM_2a, and
