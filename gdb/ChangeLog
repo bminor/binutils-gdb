@@ -1,3 +1,7 @@
+Tue Jul 7 7:40:13 1998  Ron Unrau  <runrau@cygnus.com>
+
+	* symtab.c (find_pc_sect_psymbol): allow case where textlow is 0
+
 Thu Jul  2 15:57:58 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* breakpoint.c (resolve_sal_pc): Accept absence of innermost
