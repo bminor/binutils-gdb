@@ -1,3 +1,12 @@
+Mon Apr  1 16:55:44 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* read.c (get_line_sb): Bump line counters based on
+	input_line_pointer[-1], not *input_line_pointer.  Don't bother to
+	call LISTING_NEWLINE.
+	(s_macro): Don't call demand_empty_rest_of_line.
+	* app.c (do_scrub_chars): When handling C style comments, unget
+	ch2 rather than ch.
+
 Fri Mar 29 16:15:06 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* read.h (enum linkonce_type): Define.
