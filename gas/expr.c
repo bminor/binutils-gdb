@@ -820,6 +820,12 @@ operand (expressionP)
                         expressionP);
       break;
 
+#ifdef LITERAL_PREFIXDOLLAR_HEX
+    case '$':
+      integer_constant (16, expressionP);
+      break;
+#endif
+
     case '0':
       /* non-decimal radix */
 

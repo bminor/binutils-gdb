@@ -1,3 +1,8 @@
+2000-06-23  Frank Ch. Eigler  <fche@redhat.com>
+
+	* expr.c (operand): Permit $hex literals if LITERAL_PREFIXDOLLAR_HEX
+	is defined.
+
 2000-06-23  matthew green  <mrg@redhat.com>
 
 	* expr.c (operand): Do not as_bad() if RELAX_PAREN_GROUPING is
