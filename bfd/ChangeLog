@@ -1,3 +1,8 @@
+Thu Nov 26 11:19:35 1998  Dave Brolley  <brolley@cygnus.com>
+
+	* elf32-fr30.c (fr30_elf_pc9_reloc,fr30_elf_pc12_reloc): Not
+	needed.
+
 1998-11-25  DJ Delorie  <dj@cygnus.com>
 
 	* coff-i386.c (i3coff_object_p): Remove hack.  Use new emulation
