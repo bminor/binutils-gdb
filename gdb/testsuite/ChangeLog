@@ -1,3 +1,11 @@
+2002-01-07  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/huge.exp: New test.  Print a very large target data object.
+	(skip_huge_test): New test variable.  Define if you want to skip this
+	test.  The test reads an 8 megabyte data object from the target, so it
+	might be very time consuming on remote targets with a slow connection.
+	* gdb.base/huge.c: New file.  Test case for above.
+
 2002-01-07  Fred Fish  <fnf@redhat.com>
 
 	* gdb.c++/derivation.exp: Remove gcc xfails for g_instance.afoo,
