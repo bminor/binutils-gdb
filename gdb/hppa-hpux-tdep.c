@@ -1248,7 +1248,7 @@ hppa_hpux_som_find_global_pointer (struct value *function)
 	return extract_unsigned_integer (buf, sizeof (buf));
     }
 
-  return som_solib_get_got_by_pc (faddr);
+  return gdbarch_tdep (current_gdbarch)->solib_get_got_by_pc (faddr);
 }
 
 static CORE_ADDR

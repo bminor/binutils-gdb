@@ -2,6 +2,8 @@
 
 	* hppa-hpux-tdep.c (internalize_hp_cxx_exception_support): Call
 	solib_get_solib_by_pc method through target vector.
+	(hppa_hpux_som_find_global_pointer): Call solib_get_got_by_pc
+	method through target vector.
 
 2004-12-13  Joel Brobecker  <brobecker@gnat.com>
 
