@@ -34,6 +34,11 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldfile.h"
 #include "ldver.h"
 
+/* Somewhere above, sys/stat.h got included . . . . */
+#if !defined(S_ISDIR) && defined(S_IFDIR)
+#define	S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
+#endif
+
 /* Omit args to avoid the possibility of clashing with a system header
    that might disagree about consts.  */
 unsigned long strtoul ();
@@ -72,8 +77,10 @@ parse_args (argc, argv)
 #define OPTION_OFORMAT			(OPTION_NON_SHARED + 1)
 #define OPTION_RELAX			(OPTION_OFORMAT + 1)
 #define OPTION_RETAIN_SYMBOLS_FILE	(OPTION_RELAX + 1)
-#define OPTION_SHARED			(OPTION_RETAIN_SYMBOLS_FILE + 1)
-#define OPTION_SORT_COMMON		(OPTION_SHARED + 1)
+#define OPTION_RPATH			(OPTION_RETAIN_SYMBOLS_FILE + 1)
+#define OPTION_SHARED			(OPTION_RPATH + 1)
+#define OPTION_SONAME			(OPTION_SHARED + 1)
+#define OPTION_SORT_COMMON		(OPTION_SONAME + 1)
 #define OPTION_STATS			(OPTION_SORT_COMMON + 1)
 #define OPTION_TBSS			(OPTION_STATS + 1)
 #define OPTION_TDATA			(OPTION_TBSS + 1)
@@ -82,6 +89,7 @@ parse_args (argc, argv)
 #define OPTION_UR			(OPTION_TRADITIONAL_FORMAT + 1)
 #define OPTION_VERSION			(OPTION_UR + 1)
 #define OPTION_WARN_COMMON		(OPTION_VERSION + 1)
+#define OPTION_WARN_ONCE		(OPTION_WARN_COMMON + 1)
 
   static struct option longopts[] = {
     {"Bdynamic", no_argument, NULL, OPTION_CALL_SHARED},
@@ -89,6 +97,7 @@ parse_args (argc, argv)
     {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
     {"dc", no_argument, NULL, 'd'},
     {"defsym", required_argument, NULL, OPTION_DEFSYM},
+    {"dll-verbose", no_argument, NULL, OPTION_VERSION}, /* Linux.  */
     {"dn", no_argument, NULL, OPTION_NON_SHARED},
     {"dp", no_argument, NULL, 'd'},
     {"dy", no_argument, NULL, OPTION_CALL_SHARED},
@@ -108,7 +117,9 @@ parse_args (argc, argv)
     {"qmagic", no_argument, NULL, OPTION_IGNORE}, /* Linux compatibility.  */
     {"relax", no_argument, NULL, OPTION_RELAX},
     {"retain-symbols-file", required_argument, NULL, OPTION_RETAIN_SYMBOLS_FILE},
+    {"rpath", required_argument, NULL, OPTION_RPATH},
     {"shared", no_argument, NULL, OPTION_SHARED},
+    {"soname", required_argument, NULL, OPTION_SONAME},
     {"sort-common", no_argument, NULL, OPTION_SORT_COMMON},
     {"sort_common", no_argument, NULL, OPTION_SORT_COMMON},
     {"start-group", no_argument, NULL, '('},
@@ -121,6 +132,7 @@ parse_args (argc, argv)
     {"Ur", no_argument, NULL, OPTION_UR},
     {"version", no_argument, NULL, OPTION_VERSION},
     {"warn-common", no_argument, NULL, OPTION_WARN_COMMON},
+    {"warn-once", no_argument, NULL, OPTION_WARN_ONCE},
     {NULL, no_argument, NULL, 0}
   };
 
@@ -256,9 +268,40 @@ parse_args (argc, argv)
 	  config.dynamic_link = false;
 	  break;
 	case 'R':
-	  lang_add_input_file (optarg,
-			       lang_input_file_is_symbols_only_enum,
-			       (char *) NULL);
+	  /* The GNU linker traditionally uses -R to mean to include
+	     only the symbols from a file.  The Solaris linker uses -R
+	     to set the path used by the runtime linker to find
+	     libraries.  This is the GNU linker -rpath argument.  We
+	     try to support both simultaneously by checking the file
+	     named.  If it is a directory, rather than a regular file,
+	     we assume -rpath was meant.  */
+	  {
+	    struct stat s;
+
+	    if (stat (optarg, &s) >= 0
+		&& ! S_ISDIR (s.st_mode))
+	      {
+		lang_add_input_file (optarg,
+				     lang_input_file_is_symbols_only_enum,
+				     (char *) NULL);
+		break;
+	      }
+	  }
+	  /* Fall through.  */
+	case OPTION_RPATH:
+	  if (command_line.rpath == NULL)
+	    command_line.rpath = buystring (optarg);
+	  else
+	    {
+	      char *buf;
+
+	      buf = xmalloc (strlen (command_line.rpath)
+			     + strlen (optarg)
+			     + 2);
+	      sprintf (buf, "%s:%s", command_line.rpath, optarg);
+	      free (command_line.rpath);
+	      command_line.rpath = buf;
+	    }
 	  break;
 	case OPTION_RELAX:
 	  command_line.relax = true;
@@ -274,6 +317,9 @@ parse_args (argc, argv)
 	  break;
 	case OPTION_SHARED:
 	  link_info.shared = true;
+	  break;
+	case OPTION_SONAME:
+	  command_line.soname = optarg;
 	  break;
 	case OPTION_SORT_COMMON:
 	  config.sort_common = true;
@@ -326,6 +372,9 @@ parse_args (argc, argv)
 	  break;
 	case OPTION_WARN_COMMON:
 	  config.warn_common = true;
+	  break;
+	case OPTION_WARN_ONCE:
+	  config.warn_once = true;
 	  break;
 	case 'X':
 	  link_info.discard = discard_l;

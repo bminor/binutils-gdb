@@ -782,6 +782,27 @@ undefined_symbol (info, name, abfd, section, address)
 
 #define MAX_ERRORS_IN_A_ROW 5
 
+  if (config.warn_once)
+    {
+      static struct bfd_hash_table *hash;
+
+      /* Only warn once about a particular undefined symbol.  */
+
+      if (hash == NULL)
+	{
+	  hash = ((struct bfd_hash_table *)
+		  xmalloc (sizeof (struct bfd_hash_table)));
+	  if (! bfd_hash_table_init (hash, bfd_hash_newfunc))
+	    einfo ("%F%P: bfd_hash_table_init failed: %E\n");
+	}
+
+      if (bfd_hash_lookup (hash, name, false, false) != NULL)
+	return true;
+
+      if (bfd_hash_lookup (hash, name, true, true) == NULL)
+	einfo ("%F%P: bfd_hash_lookup failed: %E\n");
+    }
+
   /* We never print more than a reasonable number of errors in a row
      for a single symbol.  */
   if (error_name != (char *) NULL

@@ -49,6 +49,15 @@ typedef struct
   /* 1 => assign space to common symbols even if `relocatable_output'.  */
   boolean force_common_definition;
   boolean relax;
+
+  /* Name of runtime interpreter to invoke.  */
+  char *interpreter;
+
+  /* Name to give runtime libary from the -soname argument.  */
+  char *soname;
+
+  /* Runtime library search path from the -rpath argument.  */
+  char *rpath;
 } args_type;
 
 extern args_type command_line;
@@ -71,6 +80,9 @@ typedef struct
 
   /* If true, warn about merging common symbols with others.  */
   boolean warn_common;
+
+  /* If true, only warn once about a particular undefined symbol.  */
+  boolean warn_once;
 
   boolean sort_common;
 

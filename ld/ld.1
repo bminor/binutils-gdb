@@ -101,6 +101,7 @@ ld \- the GNU linker
 .RB "[\|" \-v "\|]"
 .RB "[\|" \-\-version "\|]"
 .RB "[\|" \-warn\-common "\|]" 
+.RB "[\|" \-warn\-once "\|]" 
 .RB "[\|" \-X "\|]" 
 .RB "[\|" \-x "\|]" 
 .ad b
@@ -776,6 +777,11 @@ Warn when a common symbol is combined with another common symbol or with
 a symbol definition.  Unix linkers allow this somewhat sloppy practice,
 but linkers on some other operating systems do not.  This option allows
 you to find potential problems from combining global symbols.
+
+.TP
+.B \-warn\-once
+Only warn once for each undefined symbol, rather than once per module
+which refers to it.
 
 .TP
 .B \-X 

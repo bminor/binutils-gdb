@@ -5,6 +5,12 @@ Wed Sep 14 12:49:12 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 Wed Sep 14 12:48:09 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* ld.h (ld_config_type): Add new field warn_once.
+	* ldmain.c (undefined_symbol): Handle -warn-once.
+	* lexsup.c (parse_args): Recognize -warn-once.
+	* ld.texinfo (Options): Document -warn-once.
+	* ld.1: Likewise.
+
 	* ldmisc.c (vfinfo): Handle %D as %C, but never print the function
 	name.  For %C, print the function name on a separate line, to keep
 	the length of error messages under control.
