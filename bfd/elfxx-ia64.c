@@ -2760,7 +2760,7 @@ elfNN_ia64_adjust_dynamic_symbol (info, h)
 
 static bfd_boolean
 elfNN_ia64_size_dynamic_sections (output_bfd, info)
-     bfd *output_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
 {
   struct elfNN_ia64_allocate_data data;

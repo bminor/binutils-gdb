@@ -1,3 +1,8 @@
+2003-07-21  H.J. Lu <hongjiu.lu@intel.com>
+
+	* elfxx-ia64.c (elfNN_ia64_size_dynamic_sections): Mark
+	output_bfd unused to silence gcc.
+
 2003-07-21  Nick Clifton  <nickc@redhat.com>
 
 	* po/sv.po: Updated Swedish translation.
