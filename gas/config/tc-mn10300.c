@@ -91,7 +91,9 @@ static int reg_name_search PARAMS ((const struct reg_name *, int, const char *))
 static boolean data_register_name PARAMS ((expressionS *expressionP));
 static boolean address_register_name PARAMS ((expressionS *expressionP));
 static boolean other_register_name PARAMS ((expressionS *expressionP));
+static void set_arch_mach PARAMS ((int));
 
+static int current_machine;
 
 /* fixups */
 #define MAX_INSN_FIXUPS (5)
@@ -113,7 +115,12 @@ size_t md_longopts_size = sizeof(md_longopts);
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =
 {
-  { NULL,       NULL,           0 }
+  { "am30",	set_arch_mach,		300 },
+  /* start-sanitize-am33 */
+  { "am33",	set_arch_mach,		330 },
+  /* end-sanitize-am33 */
+  { "mn10300",	set_arch_mach,		300 },
+  {NULL, 0, 0}
 };
 
 /* Opcode hash table.  */
@@ -867,6 +874,12 @@ md_begin ()
      and support for future optimizations (branch shortening and similar
      stuff in the linker.  */
   linkrelax = 1;
+
+  /* Set the default machine type.  */
+  if (!bfd_set_arch_mach (stdoutput, bfd_arch_mn10300, 300))
+    as_warn (_("could not set architecture and machine"));
+
+  current_machine = 300;
 }
 
 void
@@ -910,12 +923,20 @@ md_assemble (str)
       char *hold;
       int extra_shift = 0;
 
+
       relaxable = 0;
       fc = 0;
       match = 0;
       next_opindex = 0;
       insn = opcode->opcode;
       extension = 0;
+
+      /* If the instruction is not available on the current machine
+	 then it can not possibly match.  */
+      if (opcode->machine
+	  && (opcode->machine != current_machine))
+	goto error;
+
       for (op_idx = 1, opindex_ptr = opcode->operands;
 	   *opindex_ptr != 0;
 	   opindex_ptr++, op_idx++)
@@ -1929,4 +1950,14 @@ check_operand (insn, operand, val)
 	return 1;
     }
   return 1;
+}
+
+static void
+set_arch_mach (mach)
+     int mach;
+{
+  if (!bfd_set_arch_mach (stdoutput, bfd_arch_mn10300, mach))
+    as_warn (_("could not set architecture and machine"));
+
+  current_machine = mach;
 }

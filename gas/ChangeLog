@@ -1,3 +1,11 @@
+Fri Jun 26 11:21:11 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mn10300.c (set_arch_mach): New function.
+	(md_pseudo_table): Add pseudo-ops to set the current machine type.
+	(md_begin): Default to mn10300 mode.
+	(md_assemble): Only accept instructions for the core mn10300
+	chip and the active machine type.
+
 Wed Jun 24 19:06:04 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* subsegs.h (segment_info_type): Give the struct a name.
