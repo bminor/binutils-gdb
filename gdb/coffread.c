@@ -56,6 +56,13 @@ extern int fclose ();
 extern void free_all_symtabs ();
 extern void free_all_psymtabs ();
 
+/* To be an sdb debug type, type must have at least a basic or primary
+   derived type.  Using this rather than checking against T_NULL is
+   said to prevent core dumps if we try to operate on a coff-encap file.
+   (I'm not sure that can happen with BFD...).  */
+
+#define SDB_TYPE(type) (BTYPE(type) | (type & N_TMASK))
+
 /* external routines from the BFD library -- undocumented interface used
    by GDB to read symbols.  Move to libcoff.h.  FIXME-SOMEDAY!  */
 extern void bfd_coff_swap_sym (/* symfile_bfd, &sym */);
@@ -825,7 +832,8 @@ read_coff_symtab (desc, nsyms)
 	}
 
       /* Special case for file with type declarations only, no text.  */
-      if (!last_source_file && cs->c_type != T_NULL && cs->c_secnum == N_DEBUG)
+      if (!last_source_file && SDB_TYPE (cs->c_type)
+	  && cs->c_secnum == N_DEBUG)
 	complete_symtab (filestring, 0, 0);
 
       /* Typedefs should not be treated as symbol definitions.  */
@@ -894,9 +902,10 @@ read_coff_symtab (desc, nsyms)
 		    /* flush rest of '.' symbols */
 		    break;
 	    }
-	    else if (cs->c_type == T_NULL
+	    else if (!SDB_TYPE (cs->c_type)
 		     && cs->c_name[0] == 'L'
 		     && (strncmp (cs->c_name, "LI%", 3) == 0
+			 || strncmp (cs->c_name, "LF%", 3) == 0
 			 || strncmp (cs->c_name,"LC%",3) == 0
 			 || strncmp (cs->c_name,"LP%",3) == 0
 			 || strncmp (cs->c_name,"LPB%",4) == 0
@@ -912,7 +921,7 @@ read_coff_symtab (desc, nsyms)
 		cs->c_secnum == N_ABS &&
 		strcmp (cs->c_name, _ETEXT) == 0)
 		    end_of_text_addr = cs->c_value;
-	    if (cs->c_type == T_NULL) {
+	    if (!SDB_TYPE (cs->c_type)) {
 		    if (cs->c_secnum <= 1) {	/* text or abs */
 			    record_misc_function (cs->c_name, cs->c_value);
 			    break;
@@ -1138,6 +1147,8 @@ read_one_sym (cs, sym, aux)
   cs->c_sclass = (sym->n_sclass & 0xff);
   cs->c_secnum = sym->n_scnum;
   cs->c_type = (unsigned) sym->n_type;
+  if (!SDB_TYPE (cs->c_type))
+    cs->c_type = 0;
 
   symnum += cs->c_nsyms;
 }
