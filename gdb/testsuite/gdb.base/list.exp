@@ -1,4 +1,4 @@
-# Copyright 1992, 1994, 1995, 1996, 1997, 1998, 1999
+# Copyright 1992, 1994, 1995, 1996, 1997, 1998, 1999, 2002
 # Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -95,12 +95,7 @@ proc test_listsize {} {
     # Show the default lines
     # The second case is for optimized code, it is still correct.
     
-    if [is_remote target] {
-	runto_main;
-	unsupported "list default lines around main";
-    } else {
-	gdb_test "list" "(1\[ \t\]+#include \"list0.h\".*10\[ \t\]+x = 0;|2.*11\[ \t\]+foo .x\[+)\]+;)" "list default lines around main"
-    }
+    gdb_test "list" "(1\[ \t\]+#include \"list0.h\".*10\[ \t\]+x = 0;|2.*11\[ \t\]+foo .x\[+)\]+;)" "list default lines around main"
 
     # Ensure we can limit printouts to one line
 
