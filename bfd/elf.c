@@ -33,6 +33,7 @@ SECTION
 
 #include "bfd.h"
 #include "sysdep.h"
+#include "bfdlink.h"
 #include "libbfd.h"
 #define ARCH_SIZE 0
 #include "libelf.h"
@@ -41,8 +42,8 @@ SECTION
    cause invalid hash tables to be generated.  (Well, you would if this
    were being used yet.)  */
 unsigned long
-DEFUN (bfd_elf_hash, (name),
-       CONST unsigned char *name)
+bfd_elf_hash (name)
+     CONST unsigned char *name;
 {
   unsigned long h = 0;
   unsigned long g;
@@ -65,33 +66,32 @@ DEFUN (bfd_elf_hash, (name),
    buffer. */
 
 static char *
-DEFUN (elf_read, (abfd, offset, size),
-       bfd * abfd AND
-       long offset AND
-       int size)
+elf_read (abfd, offset, size)
+     bfd * abfd;
+     long offset;
+     int size;
 {
   char *buf;
 
   if ((buf = bfd_alloc (abfd, size)) == NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
   if (bfd_seek (abfd, offset, SEEK_SET) == -1)
-    {
-      bfd_error = system_call_error;
-      return NULL;
-    }
+    return NULL;
   if (bfd_read ((PTR) buf, size, 1, abfd) != size)
     {
-      bfd_error = system_call_error;
+      if (bfd_get_error () != bfd_error_system_call)
+	bfd_set_error (bfd_error_file_truncated);
       return NULL;
     }
   return buf;
 }
 
 boolean
-DEFUN (elf_mkobject, (abfd), bfd * abfd)
+elf_mkobject (abfd)
+     bfd * abfd;
 {
   /* this just does initialization */
   /* coff_mkobject zalloc's space for tdata.coff_obj_data ... */
@@ -99,7 +99,7 @@ DEFUN (elf_mkobject, (abfd), bfd * abfd)
     bfd_zalloc (abfd, sizeof (struct elf_obj_tdata));
   if (elf_tdata (abfd) == 0)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   /* since everything is done at close time, do we need any
@@ -109,9 +109,9 @@ DEFUN (elf_mkobject, (abfd), bfd * abfd)
 }
 
 char *
-DEFUN (elf_get_str_section, (abfd, shindex),
-       bfd * abfd AND
-       unsigned int shindex)
+elf_get_str_section (abfd, shindex)
+     bfd * abfd;
+     unsigned int shindex;
 {
   Elf_Internal_Shdr **i_shdrp;
   char *shstrtab = NULL;
@@ -135,10 +135,10 @@ DEFUN (elf_get_str_section, (abfd, shindex),
 }
 
 char *
-DEFUN (elf_string_from_elf_section, (abfd, shindex, strindex),
-       bfd * abfd AND
-       unsigned int shindex AND
-       unsigned int strindex)
+elf_string_from_elf_section (abfd, shindex, strindex)
+     bfd * abfd;
+     unsigned int shindex;
+     unsigned int strindex;
 {
   Elf_Internal_Shdr *hdr;
 
@@ -170,9 +170,9 @@ DESCRIPTION
 */
 
 struct elf_internal_shdr *
-DEFUN (bfd_elf_find_section, (abfd, name),
-       bfd * abfd AND
-       char *name)
+bfd_elf_find_section (abfd, name)
+     bfd * abfd;
+     char *name;
 {
   Elf_Internal_Shdr **i_shdrp;
   char *shstrtab;
@@ -210,6 +210,7 @@ const char *const bfd_elf_section_type_names[] = {
    function.  It just short circuits the reloc if producing
    relocateable output against an external symbol.  */
 
+/*ARGSUSED*/
 bfd_reloc_status_type
 bfd_elf_generic_reloc (abfd,
 		       reloc_entry,
@@ -236,4 +237,80 @@ bfd_elf_generic_reloc (abfd,
     }
 
   return bfd_reloc_continue;
+}
+
+/* Generic ELF link code.  */
+
+static struct bfd_hash_entry *elf_link_hash_newfunc
+  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
+
+/* Create an entry in an ELF linker hash table.  */
+
+static struct bfd_hash_entry *
+elf_link_hash_newfunc (entry, table, string)
+     struct bfd_hash_entry *entry;
+     struct bfd_hash_table *table;
+     const char *string;
+{
+  struct elf_link_hash_entry *ret = (struct elf_link_hash_entry *) entry;
+
+  /* Allocate the structure if it has not already been allocated by a
+     subclass.  */
+  if (ret == (struct elf_link_hash_entry *) NULL)
+    ret = ((struct elf_link_hash_entry *)
+	   bfd_hash_allocate (table, sizeof (struct elf_link_hash_entry)));
+  if (ret == (struct elf_link_hash_entry *) NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return (struct bfd_hash_entry *) ret;
+    }
+
+  /* Call the allocation method of the superclass.  */
+  ret = ((struct elf_link_hash_entry *)
+	 _bfd_link_hash_newfunc ((struct bfd_hash_entry *) ret,
+				 table, string));
+  if (ret != (struct elf_link_hash_entry *) NULL)
+    {
+      /* Set local fields.  */
+      ret->indx = -1;
+      ret->size = 0;
+      ret->align = 0;
+      ret->dynindx = -1;
+      ret->dynstr_index = 0;
+      ret->weakdef = NULL;
+      ret->type = STT_NOTYPE;
+      ret->elf_link_hash_flags = 0;
+    }
+
+  return (struct bfd_hash_entry *) ret;
+}
+
+/* Create an ELF linker hash table.  */
+
+struct bfd_link_hash_table *
+_bfd_elf_link_hash_table_create (abfd)
+     bfd *abfd;
+{
+  struct elf_link_hash_table *ret;
+
+  ret = ((struct elf_link_hash_table *)
+	 bfd_alloc (abfd, sizeof (struct elf_link_hash_table)));
+  if (ret == (struct elf_link_hash_table *) NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return NULL;
+    }
+  if (! _bfd_link_hash_table_init (&ret->root, abfd,
+				   elf_link_hash_newfunc))
+    {
+      bfd_release (abfd, ret);
+      return NULL;
+    }
+
+  ret->dynobj = NULL;
+  ret->dynsymcount = 0;
+  ret->dynstr = NULL;
+  ret->bucketcount = 0;
+
+  return &ret->root;
 }

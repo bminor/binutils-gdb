@@ -519,6 +519,17 @@ extern boolean bfd_ecoff_write_accumulated_debug
 	   const struct ecoff_debug_swap *swap,
 	   struct bfd_link_info *info, file_ptr where));
 
+/* Externally visible ELF routines.  */
+
+extern boolean bfd_elf32_record_link_assignment
+  PARAMS ((bfd *, struct bfd_link_info *, const char *));
+extern boolean bfd_elf64_record_link_assignment
+  PARAMS ((bfd *, struct bfd_link_info *, const char *));
+extern boolean bfd_elf32_size_dynamic_sections
+  PARAMS ((bfd *, struct bfd_link_info *));
+extern boolean bfd_elf64_size_dynamic_sections
+  PARAMS ((bfd *, struct bfd_link_info *));
+
 /* And more from the source.  */
 void 
 bfd_init PARAMS ((void));

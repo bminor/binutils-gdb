@@ -1,3 +1,84 @@
+Thu May 19 11:37:11 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	Add support for ELF shared libraries.  Loosely based on work by
+	Eric Youngdale <ericy@cais.com>.
+	* libelf.h (struct elf_backend_data): Add new fields for dynamic
+	linking: elf_backend_create_dynamic_sections,
+	elf_backend_adjust_dynamic_symbol,
+	elf_backend_size_dynamic_sections,
+	elf_backend_finish_dynamic_symbol,
+	elf_backend_finish_dynamic_sections.
+	(struct elf_link_hash_entry): Change type of align field to
+	bfd_size_type.  Add fields dynindx, dynstr_index, weakdef,
+	elf_link_hash_flags.
+	(struct elf_link_hash_table): Add fields dynobj, dynsymcount,
+	dynstr, bucketcount.
+	(bfd_elf32_swap_reloc_in, bfd_elf32_swap_reloc_out): Declare.
+	(bfd_elf32_swap_reloca_in, bfd_elf32_swap_reloca_out): Declare.
+	(bfd_elf32_swap_dyn_in, bfd_elf32_swap_dyn_out): Declare.
+	(bfd_elf32_add_dynamic_entry): Declare.
+	(bfd_elf64_swap_reloc_in, bfd_elf64_swap_reloc_out): Declare.
+	(bfd_elf64_swap_reloca_in, bfd_elf64_swap_reloca_out): Declare.
+	(bfd_elf64_swap_dyn_in, bfd_elf64_swap_dyn_out): Declare.
+	(bfd_elf64_add_dynamic_entry): Declare.
+	* elfcode.h (Elf_External_Dyn): Define.
+	(elf_swap_reloc_in): Define as macro using NAME.  Make externally
+	visible.
+	(elf_swap_reloc_out): Likewise.
+	(elf_swap_reloca_in, elf_swap_reloca_out): Likewise.
+	(elf_swap_dyn_in, elf_swap_dyn_out): Define as macro using NAME
+	and as new externally visible function.
+	(elf_fake_sections): Set section type of dynamic sections based on
+	section names.
+	(elf_write_phdrs): Remove.
+	(assign_file_position_for_section): Add new align argument.
+	Change all callers.
+	(get_program_header_size): New static function.
+	(struct seg_info): Remove.
+	(map_program_segments): Completely rewrite.
+	(assign_file_positions_except_relocs): Completely rewrite.
+	(assign_file_positions_for_relocs): Don't set a file position for
+	sections which already have one.  Don't bother to align the file
+	position here.
+	(section_from_elf_index): Handle SHT_HASH and SHT_DYNAMIC
+	section types.
+	(elf_section_from_bfd_section): Likewise.
+	(elf_slurp_symbol_table): If section_from_elf_index fails, just
+	use bfd_abs_section rather than returning an error.
+	(elf_sizeof_headers): Make useful.
+	(elf_link_record_dynamic_symbol): New static function.
+	(elf_link_add_object_symbols): Handle dynamic objects.
+	(elf_link_create_dynamic_sections): New static function.
+	(elf_add_dynamic_entry): Define as macro using NAME and as new
+	externally visible function.
+	(NAME(bfd_elf,record_link_assignment)): New function.
+	(elf_buckets): New static variable.
+	(NAME(bfd_elf,size_dynamic_sections)): New function.
+	(struct elf_final_link_info): Add dynsym_sec and hash_sec fields.
+	(elf_bfd_final_link): Handle dynamic linking.  Create a section
+	symbol for all ELF sections, not all BFD sections.  Store section
+	symbol index in target_index field, not index field.  Traverse
+	over global symbols even if stripping.
+	(elf_link_output_extsym): Output dynamic symbols.  Mark symbols
+	defined by dynamic objects as undefined.
+	(elf_link_input_bfd): Ignore dynamic objects.  Use target_index
+	field for section relocs, and make sure it is set.
+	(elf_reloc_link_order): Use target_index field for section relocs,
+	and make sure it is set.
+	* elf.c (elf_link_hash_newfunc): Initialize dynindx, dynstr_index,
+	weakdef and elf_link_hash_flags fields.
+	(_bfd_elf_link_hash_table_create): Initialize dynobj, dynsymcount,
+	dynstr and bucketcount fields.
+	* elf32-target.h: Initialize new dynamic linking fields.
+	* elf64-target.h: Likewise.  
+	* elf32-i386.c: New functions for dynamic linking support.
+	* elf32-sparc.c: Likewise.
+	* bfd-in.h (bfd_elf32_record_link_assignment): Declare.
+	(bfd_elf64_record_link_assignment): Declare.
+	(bfd_elf32_size_dynamic_sections): Declare.
+	(bfd_elf64_size_dynamic_sections): Declare.
+	* bfd-in2.h: Rebuilt.
+
 Wed May 18 08:29:04 1994  Ian Lance Taylor  (ian@cygnus.com)
 
 	* som.c: Don't include <sys/dir.h> or <sys/user.h>.

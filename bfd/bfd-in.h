@@ -463,8 +463,9 @@ void		bfd_putb32	   PARAMS ((bfd_vma, unsigned char *));
 void		bfd_putl32	   PARAMS ((bfd_vma, unsigned char *));
 void		bfd_putb16	   PARAMS ((bfd_vma, unsigned char *));
 void		bfd_putl16	   PARAMS ((bfd_vma, unsigned char *));
+
+/* Externally visible ECOFF routines.  */
 
-/* ECOFF linking routines.  */
 #if defined(__STDC__) || defined(ALMOST_STDC)
 struct ecoff_debug_info;
 struct ecoff_debug_swap;
@@ -472,6 +473,11 @@ struct ecoff_extr;
 struct symbol_cache_entry;
 struct bfd_link_info;
 #endif
+extern bfd_vma bfd_ecoff_get_gp_value PARAMS ((bfd * abfd));
+extern boolean bfd_ecoff_set_gp_value PARAMS ((bfd *abfd, bfd_vma gp_value));
+extern boolean bfd_ecoff_set_regmasks
+  PARAMS ((bfd *abfd, unsigned long gprmask, unsigned long fprmask,
+	   unsigned long *cprmask));
 extern PTR bfd_ecoff_debug_init
   PARAMS ((bfd *output_bfd, struct ecoff_debug_info *output_debug,
 	   const struct ecoff_debug_swap *output_swap,
@@ -512,5 +518,16 @@ extern boolean bfd_ecoff_write_accumulated_debug
   PARAMS ((PTR handle, bfd *abfd, struct ecoff_debug_info *debug,
 	   const struct ecoff_debug_swap *swap,
 	   struct bfd_link_info *info, file_ptr where));
+
+/* Externally visible ELF routines.  */
+
+extern boolean bfd_elf32_record_link_assignment
+  PARAMS ((bfd *, struct bfd_link_info *, const char *));
+extern boolean bfd_elf64_record_link_assignment
+  PARAMS ((bfd *, struct bfd_link_info *, const char *));
+extern boolean bfd_elf32_size_dynamic_sections
+  PARAMS ((bfd *, struct bfd_link_info *));
+extern boolean bfd_elf64_size_dynamic_sections
+  PARAMS ((bfd *, struct bfd_link_info *));
 
 /* And more from the source.  */

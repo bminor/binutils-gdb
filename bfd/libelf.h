@@ -63,7 +63,95 @@ typedef struct
     }
   tc_data;
 } elf_symbol_type;
+
+/* ELF linker hash table entries.  */
 
+struct elf_link_hash_entry
+{
+  struct bfd_link_hash_entry root;
+
+  /* Symbol index in output file.  This is initialized to -1.  It is
+     set to -2 if the symbol is used by a reloc.  */
+  long indx;
+
+  /* Symbol size.  */
+  bfd_size_type size;
+
+  /* Symbol alignment (common symbols only).  */
+  bfd_size_type align;
+
+  /* Symbol index as a dynamic symbol.  Initialized to -1, and remains
+     -1 if this is not a dynamic symbol.  */
+  long dynindx;
+
+  /* String table index in .dynstr if this is a dynamic symbol.  */
+  unsigned long dynstr_index;
+
+  /* If this is a weak defined symbol from a dynamic object, this
+     field points to a defined symbol with the same value, if there is
+     one.  Otherwise it is NULL.  */
+  struct elf_link_hash_entry *weakdef;
+
+  /* Symbol type (STT_NOTYPE, STT_OBJECT, etc.).  */
+  char type;
+
+  /* Some flags; legal values follow.  */
+  unsigned char elf_link_hash_flags;
+  /* Symbol is referenced by a non-shared object.  */
+#define ELF_LINK_HASH_REF_REGULAR 01
+  /* Symbol is defined by a non-shared object.  */
+#define ELF_LINK_HASH_DEF_REGULAR 02
+  /* Symbol is referenced by a shared object.  */
+#define ELF_LINK_HASH_REF_DYNAMIC 04
+  /* Symbol is defined by a shared object.  */
+#define ELF_LINK_HASH_DEF_DYNAMIC 010
+  /* Symbol is referenced by two or more shared objects.  */
+#define ELF_LINK_HASH_REF_DYNAMIC_MULTIPLE 020
+  /* Symbol is defined by two or more shared objects.  */
+#define ELF_LINK_HASH_DEF_DYNAMIC_MULTIPLE 040
+  /* Dynamic symbol has been adjustd.  */
+#define ELF_LINK_HASH_DYNAMIC_ADJUSTED 0100
+};
+
+/* ELF linker hash table.  */
+
+struct elf_link_hash_table
+{
+  struct bfd_link_hash_table root;
+  /* The first dynamic object found during a link.  We create several
+     special input sections when linking against dynamic objects, and
+     we simply attach them to the first one found.  */
+  bfd *dynobj;
+  /* The number of symbols found in the link which must be put into
+     the .dynsym section.  */
+  size_t dynsymcount;
+  /* The string table of dynamic symbols, which becomes the .dynstr
+     section.  */
+  struct strtab *dynstr;
+  /* The number of buckets in the hash table in the .hash section.
+     This is based on the number of dynamic symbols.  */
+  size_t bucketcount;
+};
+
+/* Look up an entry in an ELF linker hash table.  */
+
+#define elf_link_hash_lookup(table, string, create, copy, follow)	\
+  ((struct elf_link_hash_entry *)					\
+   bfd_link_hash_lookup (&(table)->root, (string), (create),		\
+			 (copy), (follow)))
+
+/* Traverse an ELF linker hash table.  */
+
+#define elf_link_hash_traverse(table, func, info)			\
+  (bfd_link_hash_traverse						\
+   (&(table)->root,							\
+    (boolean (*) PARAMS ((struct bfd_link_hash_entry *, PTR))) (func),	\
+    (info)))
+
+/* Get the ELF linker hash table from a link_info structure.  */
+
+#define elf_hash_table(p) ((struct elf_link_hash_table *) ((p)->hash))
+
 /* Constant information held for an ELF backend.  */
 
 struct elf_backend_data
@@ -169,6 +257,44 @@ struct elf_backend_data
 	     const Elf_Internal_Sym *, const char **name,
 	     flagword *flags, asection **sec, bfd_vma *value));
 
+  /* The CREATE_DYNAMIC_SECTIONS function is called by the ELF backend
+     linker the first time it encounters a dynamic object in the link.
+     This function must create any sections required for dynamic
+     linking.  The ABFD argument is a dynamic object.  The .interp,
+     .dynamic, .dynsym, .dynstr, and .hash functions have already been
+     created, and this function may modify the section flags if
+     desired.  This function will normally create the .got and .plt
+     sections, but different backends have different requirements.  */
+  boolean (*elf_backend_create_dynamic_sections)
+    PARAMS ((bfd *abfd, struct bfd_link_info *info));
+
+  /* The ADJUST_DYNAMIC_SYMBOL function is called by the ELF backend
+     linker for every symbol which is defined by a dynamic object and
+     referenced by a regular object.  This is called after all the
+     input files have been seen, but before the SIZE_DYNAMIC_SECTIONS
+     function has been called.  The hash table entry should be
+     bfd_link_hash_defined, and it should be defined in a section from
+     a dynamic object.  Dynamic object sections are not included in
+     the final link, and this function is responsible for changing the
+     value to something which the rest of the link can deal with.
+     This will normally involve adding an entry to the .plt or .got or
+     some such section, and setting the symbol to point to that.  */
+  boolean (*elf_backend_adjust_dynamic_symbol)
+    PARAMS ((struct bfd_link_info *info, struct elf_link_hash_entry *h));
+
+  /* The SIZE_DYNAMIC_SECTIONS function is called by the ELF backend
+     linker after all the linker input files have been seen but before
+     the sections sizes have been set.  This is called after
+     ADJUST_DYNAMIC_SYMBOL has been called on all appropriate symbols.
+     It is only called when linking against a dynamic object.  It must
+     set the sizes of the dynamic sections, and may fill in their
+     contents as well.  The generic ELF linker can handle the .dynsym,
+     .dynstr and .hash sections.  This function must handle the
+     .interp section and any sections created by the
+     CREATE_DYNAMIC_SECTIONS entry point.  */
+  boolean (*elf_backend_size_dynamic_sections)
+    PARAMS ((bfd *output_bfd, struct bfd_link_info *info));
+
   /* The RELOCATE_SECTION function is called by the ELF backend linker
      to handle the relocations for a section.
 
@@ -202,6 +328,24 @@ struct elf_backend_data
 	     bfd *input_bfd, asection *input_section, bfd_byte *contents,
 	     Elf_Internal_Rela *relocs, Elf_Internal_Sym *local_syms,
 	     asection **local_sections));
+
+  /* The FINISH_DYNAMIC_SYMBOL function is called by the ELF backend
+     linker just before it writes a symbol out to the .dynsym section.
+     The processor backend may make any required adjustment to the
+     symbol.  It may also take the opportunity to set contents of the
+     dynamic sections.  Note that FINISH_DYNAMIC_SYMBOL is called on
+     all .dynsym symbols, while ADJUST_DYNAMIC_SYMBOL is only called
+     on those symbols which are defined by a dynamic object.  */
+  boolean (*elf_backend_finish_dynamic_symbol)
+    PARAMS ((bfd *output_bfd, struct bfd_link_info *info,
+	     struct elf_link_hash_entry *h, Elf_Internal_Sym *sym));
+
+  /* The FINISH_DYNAMIC_SECTIONS function is called by the ELF backend
+     linker just before it writes all the dynamic sections out to the
+     output file.  The FINISH_DYNAMIC_SYMBOL will have been called on
+     all dynamic symbols.  */
+  boolean (*elf_backend_finish_dynamic_sections)
+    PARAMS ((bfd *output_bfd, struct bfd_link_info *info));
 
   /* A function to do any beginning processing needed for the ELF file
      before building the ELF headers and computing file positions.  */
@@ -291,48 +435,6 @@ struct elf_obj_tdata
 #define elf_gp_size(bfd)	(elf_tdata(bfd) -> gp_size)
 #define elf_sym_hashes(bfd)	(elf_tdata(bfd) -> sym_hashes)
 
-/* ELF linker hash table entries.  */
-
-struct elf_link_hash_entry
-{
-  struct bfd_link_hash_entry root;
-  /* Symbol index in output file.  This is initialized to -1.  It is
-     set to -2 if the symbol is used by a reloc.  */
-  long indx;
-  /* Symbol size.  */
-  bfd_size_type size;
-  /* Symbol alignment (common symbols only).  */
-  unsigned short align;
-  /* Symbol type (STT_NOTYPE, STT_OBJECT, etc.).  */
-  char type;
-};
-
-/* ELF linker hash table.  */
-
-struct elf_link_hash_table
-{
-  struct bfd_link_hash_table root;
-};
-
-/* Look up an entry in an ELF linker hash table.  */
-
-#define elf_link_hash_lookup(table, string, create, copy, follow)	\
-  ((struct elf_link_hash_entry *)					\
-   bfd_link_hash_lookup (&(table)->root, (string), (create),		\
-			 (copy), (follow)))
-
-/* Traverse an ELF linker hash table.  */
-
-#define elf_link_hash_traverse(table, func, info)			\
-  (bfd_link_hash_traverse						\
-   (&(table)->root,							\
-    (boolean (*) PARAMS ((struct bfd_link_hash_entry *, PTR))) (func),	\
-    (info)))
-
-/* Get the ELF linker hash table from a link_info structure.  */
-
-#define elf_hash_table(p) ((struct elf_link_hash_table *) ((p)->hash))
-
 extern char * elf_string_from_elf_section PARAMS ((bfd *, unsigned, unsigned));
 extern char * elf_get_str_section PARAMS ((bfd *, unsigned));
 
@@ -396,6 +498,21 @@ extern boolean bfd_elf32_bfd_link_add_symbols
 extern boolean bfd_elf32_bfd_final_link
   PARAMS ((bfd *, struct bfd_link_info *));
 
+extern void bfd_elf32_swap_reloc_in
+  PARAMS ((bfd *, Elf32_External_Rel *, Elf_Internal_Rel *));
+extern void bfd_elf32_swap_reloc_out
+  PARAMS ((bfd *, Elf_Internal_Rel *, Elf32_External_Rel *));
+extern void bfd_elf32_swap_reloca_in
+  PARAMS ((bfd *, Elf32_External_Rela *, Elf_Internal_Rela *));
+extern void bfd_elf32_swap_reloca_out
+  PARAMS ((bfd *, Elf_Internal_Rela *, Elf32_External_Rela *));
+extern void bfd_elf32_swap_dyn_in
+  PARAMS ((bfd *, const Elf32_External_Dyn *, Elf_Internal_Dyn *));
+extern void bfd_elf32_swap_dyn_out
+  PARAMS ((bfd *, const Elf_Internal_Dyn *, Elf32_External_Dyn *));
+extern boolean bfd_elf32_add_dynamic_entry
+  PARAMS ((struct bfd_link_info *, bfd_vma, bfd_vma));
+
 /* If the target doesn't have reloc handling written yet:  */
 extern void bfd_elf32_no_info_to_howto PARAMS ((bfd *, arelent *,
 						Elf32_Internal_Rela *));
@@ -437,6 +554,21 @@ extern boolean bfd_elf64_bfd_link_add_symbols
   PARAMS ((bfd *, struct bfd_link_info *));
 extern boolean bfd_elf64_bfd_final_link
   PARAMS ((bfd *, struct bfd_link_info *));
+
+extern void bfd_elf64_swap_reloc_in
+  PARAMS ((bfd *, Elf64_External_Rel *, Elf_Internal_Rel *));
+extern void bfd_elf64_swap_reloc_out
+  PARAMS ((bfd *, Elf_Internal_Rel *, Elf64_External_Rel *));
+extern void bfd_elf64_swap_reloca_in
+  PARAMS ((bfd *, Elf64_External_Rela *, Elf_Internal_Rela *));
+extern void bfd_elf64_swap_reloca_out
+  PARAMS ((bfd *, Elf_Internal_Rela *, Elf64_External_Rela *));
+extern void bfd_elf64_swap_dyn_in
+  PARAMS ((bfd *, const Elf64_External_Dyn *, Elf_Internal_Dyn *));
+extern void bfd_elf64_swap_dyn_out
+  PARAMS ((bfd *, const Elf_Internal_Dyn *, Elf64_External_Dyn *));
+extern boolean bfd_elf64_add_dynamic_entry
+  PARAMS ((struct bfd_link_info *, bfd_vma, bfd_vma));
 
 /* If the target doesn't have reloc handling written yet:  */
 extern void bfd_elf64_no_info_to_howto PARAMS ((bfd *, arelent *,
