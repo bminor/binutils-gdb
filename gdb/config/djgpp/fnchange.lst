@@ -190,6 +190,8 @@
 @V@/gdb/testsuite/gdb.arch/altivec-abi.exp @V@/gdb/testsuite/gdb.arch/av-abi.exp
 @V@/gdb/testsuite/gdb.arch/altivec-regs.c @V@/gdb/testsuite/gdb.arch/av-regs.c
 @V@/gdb/testsuite/gdb.arch/altivec-regs.exp @V@/gdb/testsuite/gdb.arch/av-regs.exp
+@V@/gdb/testsuite/gdb.arch/powerpc-aix-prologue.exp @V@/gdb/testsuite/gdb.arch/ppcaprol.exp
+@V@/gdb/testsuite/gdb.arch/powerpc-aix-prologue.c @V@/gdb/testsuite/gdb.arch/ppcaprol.c
 @V@/gdb/testsuite/gdb.base/coremaker2.c @V@/gdb/testsuite/gdb.base/core2maker.c
 @V@/gdb/testsuite/gdb.cp/m-static1.cc @V@/gdb/testsuite/gdb.cp/m-stat1.cc
 @V@/gdb/testsuite/gdb.cp/namespace1.cc @V@/gdb/testsuite/gdb.cp/namesp1.cc

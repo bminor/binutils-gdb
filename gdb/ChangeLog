@@ -1,3 +1,8 @@
+2004-05-08  Joel Brobecker  <brobecker@gnat.com>
+
+	* config/djgpp/fnchange.lst: Add translation rules for
+	gdb.arch/powerpc-aix-prologue.c and gdb.arch/powerpc-aix-prologue.exp.
+
 2004-05-08  Mark Kettenis  <kettenis@gnu.org>
 
 	* frame.c (get_prev_frame_1): Work around GCC bug.
