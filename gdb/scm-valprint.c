@@ -49,26 +49,26 @@ scm_inferior_print (value, stream, format, deref_ref, recurse, pretty)
 static char *scm_isymnames[] =
 {
   /* This table must agree with the declarations */
-  "#@and",
-  "#@begin",
-  "#@case",
-  "#@cond",
-  "#@do",
-  "#@if",
-  "#@lambda",
-  "#@let",
-  "#@let*",
-  "#@letrec",
-  "#@or",
-  "#@quote",
-  "#@set!",
-  "#@define",
+  "and",
+  "begin",
+  "case",
+  "cond",
+  "do",
+  "if",
+  "lambda",
+  "let",
+  "let*",
+  "letrec",
+  "or",
+  "quote",
+  "set!",
+  "define",
 #if 0
-  "#@literal-variable-ref",
-  "#@literal-variable-set!",
+  "literal-variable-ref",
+  "literal-variable-set!",
 #endif
-  "#@apply",
-  "#@call-with-current-continuation",
+  "apply",
+  "call-with-current-continuation",
 
  /* user visible ISYMS */
  /* other keywords */
@@ -178,7 +178,6 @@ scm_scmval_print (svalue, stream, format, deref_ref, recurse, pretty)
       break;
     case 1:
       /* gloc */
-      fputs_filtered ("#@", stream);
       svalue = SCM_CAR (svalue - 1);
       goto taloop;
     default:

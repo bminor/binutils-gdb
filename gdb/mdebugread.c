@@ -3557,7 +3557,7 @@ cross_ref (fd, ax, tpp, type_code, pname, bigend, sym_name)
     }
 
   /* mips cc uses a rf of -1 for opaque struct definitions.
-     Set TYPE_FLAG_STUB for these types so that check_stub_type will
+     Set TYPE_FLAG_STUB for these types so that check_typedef will
      resolve them if the struct gets defined in another compilation unit.  */
   if (rf == -1)
     {
