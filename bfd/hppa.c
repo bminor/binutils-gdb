@@ -435,6 +435,15 @@ hppa_make_empty_symbol (abfd)
 }
 
 static void
+hppa_get_symbol_info (ignore_abfd, symbol, ret)
+     bfd *ignore_abfd;
+     asymbol *symbol;
+     symbol_info ret;
+{
+  bfd_symbol_info (symbol, ret);
+}
+
+static void
 hppa_print_symbol (ignore_abfd, afile, symbol, how)
      bfd *ignore_abfd;
      PTR afile;
