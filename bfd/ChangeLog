@@ -1,3 +1,7 @@
+2005-03-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/es.po: Commit new Spanish translation.
+
 2005-03-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* configure.in: Bump version to 2.15.96.
