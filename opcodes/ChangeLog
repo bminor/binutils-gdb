@@ -1,3 +1,26 @@
+2003-06-23  H.J. Lu <hongjiu.lu@intel.com>
+
+	* i386-dis.c (PNI_Fixup): New. Fix up "mwait" and "monitor" in
+	Intel Precott New Instructions.
+	(PREGRP27): New. Added for "addsubpd" and "addsubps".
+	(PREGRP28): New. Added for "haddpd" and "haddps".
+	(PREGRP29): New. Added for "hsubpd" and "hsubps".
+	(PREGRP30): New. Added for "movsldup" and "movddup".
+	(PREGRP31): New. Added for "movshdup" and "movhpd".
+	(PREGRP32): New. Added for "lddqu".
+	(dis386_twobyte): Use PREGRP30 to replace the "movlpX" entry.
+	Use PREGRP31 to replace the "movhpX" entry. Use PREGRP28 for
+	entry 0x7c. Use PREGRP29 for entry 0x7d. Use PREGRP27 for
+	entry 0xd0. Use PREGRP32 for entry 0xf0.
+	(twobyte_has_modrm): Updated.
+	(twobyte_uses_SSE_prefix): Likewise.
+	(grps): Use PNI_Fixup in the "sidtQ" entry.
+	(prefix_user_table): Add PREGRP27, PREGRP28, PREGRP29, PREGRP30,
+	PREGRP31 and PREGRP32.
+	(float_mem): Use "fisttp{l||l|}" in entry 1 in opcode 0xdb.
+	Use "fisttpll" in entry 1 in opcode 0xdd.
+	Use "fisttp" in entry 1 in opcode 0xdf.
+
 2003-06-19  Christian Groessler  <chris@groessler.org>
 
 	* z8k-dis.c (instr_data_s): Change tabl_index from long to int.

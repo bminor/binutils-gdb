@@ -251,6 +251,8 @@
 @V@/gdb/testsuite/gdb.c++/ovldbreak.exp @V@/gdb/testsuite/gdb.cxx/ovldbreak.exp
 @V@/gdb/testsuite/gdb.c++/pr-1023.cc @V@/gdb/testsuite/gdb.cxx/pr-1023.cc
 @V@/gdb/testsuite/gdb.c++/pr-1023.exp @V@/gdb/testsuite/gdb.cxx/pr-1023.exp
+@V@/gdb/testsuite/gdb.c++/pr-1210.cc @V@/gdb/testsuite/gdb.cxx/pr-1210.cc
+@V@/gdb/testsuite/gdb.c++/pr-1210.exp @V@/gdb/testsuite/gdb.cxx/pr-1210.exp
 @V@/gdb/testsuite/gdb.c++/pr-574.cc @V@/gdb/testsuite/gdb.cxx/pr-574.cc
 @V@/gdb/testsuite/gdb.c++/pr-574.exp @V@/gdb/testsuite/gdb.cxx/pr-574.exp
 @V@/gdb/testsuite/gdb.c++/printmethod.cc @V@/gdb/testsuite/gdb.cxx/printmethod.cc
@@ -425,6 +427,8 @@
 @V@/sim/mn10300/dv-mn103tim.c @V@/sim/mn10300/dv-mn1tim.c
 @V@/sim/ppc/.gdbinit @V@/sim/ppc/gdb.ini
 @V@/sim/ppc/corefile-n.h @V@/sim/ppc/corefle-n.h
+@V@/sim/ppc/altivec_expression.h @V@/sim/ppc/av_expression.h
+@V@/sim/ppc/altivec_registers.h @V@/sim/ppc/av_registers.h
 @V@/sim/ppc/idecode_branch.h @V@/sim/ppc/idec_branch.h
 @V@/sim/ppc/idecode_expression.h @V@/sim/ppc/idec_expression.h
 @V@/sim/ppc/idecode_fields.h @V@/sim/ppc/idec_fields.h

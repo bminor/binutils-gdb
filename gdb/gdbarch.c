@@ -246,8 +246,8 @@ struct gdbarch
   gdbarch_deprecated_frame_saved_pc_ftype *deprecated_frame_saved_pc;
   gdbarch_unwind_pc_ftype *unwind_pc;
   gdbarch_unwind_sp_ftype *unwind_sp;
-  gdbarch_frame_args_address_ftype *frame_args_address;
-  gdbarch_frame_locals_address_ftype *frame_locals_address;
+  gdbarch_deprecated_frame_args_address_ftype *deprecated_frame_args_address;
+  gdbarch_deprecated_frame_locals_address_ftype *deprecated_frame_locals_address;
   gdbarch_deprecated_saved_pc_after_call_ftype *deprecated_saved_pc_after_call;
   gdbarch_frame_num_args_ftype *frame_num_args;
   gdbarch_stack_align_ftype *stack_align;
@@ -413,8 +413,8 @@ struct gdbarch startup_gdbarch =
   0,  /* deprecated_frame_saved_pc */
   0,  /* unwind_pc */
   0,  /* unwind_sp */
-  0,  /* frame_args_address */
-  0,  /* frame_locals_address */
+  get_frame_base,  /* deprecated_frame_args_address */
+  get_frame_base,  /* deprecated_frame_locals_address */
   0,  /* deprecated_saved_pc_after_call */
   0,  /* frame_num_args */
   0,  /* stack_align */
@@ -547,8 +547,8 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->remote_translate_xfer_address = generic_remote_translate_xfer_address;
   current_gdbarch->frame_args_skip = -1;
   current_gdbarch->frameless_function_invocation = generic_frameless_function_invocation_not;
-  current_gdbarch->frame_args_address = get_frame_base;
-  current_gdbarch->frame_locals_address = get_frame_base;
+  current_gdbarch->deprecated_frame_args_address = get_frame_base;
+  current_gdbarch->deprecated_frame_locals_address = get_frame_base;
   current_gdbarch->convert_from_func_ptr_addr = core_addr_identity;
   current_gdbarch->addr_bits_remove = core_addr_identity;
   current_gdbarch->smash_text_address = core_addr_identity;
@@ -723,8 +723,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of deprecated_frame_saved_pc, has predicate */
   /* Skip verify of unwind_pc, has predicate */
   /* Skip verify of unwind_sp, has predicate */
-  /* Skip verify of frame_args_address, invalid_p == 0 */
-  /* Skip verify of frame_locals_address, invalid_p == 0 */
+  /* Skip verify of deprecated_frame_args_address, has predicate */
+  /* Skip verify of deprecated_frame_locals_address, has predicate */
   /* Skip verify of deprecated_saved_pc_after_call, has predicate */
   /* Skip verify of frame_num_args, has predicate */
   /* Skip verify of stack_align, has predicate */
@@ -1169,6 +1169,26 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: DEPRECATED_FP_REGNUM = %d\n",
                       DEPRECATED_FP_REGNUM);
 #endif
+#ifdef DEPRECATED_FRAME_ARGS_ADDRESS_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_FRAME_ARGS_ADDRESS_P()",
+                      XSTRING (DEPRECATED_FRAME_ARGS_ADDRESS_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_FRAME_ARGS_ADDRESS_P() = %d\n",
+                      DEPRECATED_FRAME_ARGS_ADDRESS_P ());
+#endif
+#ifdef DEPRECATED_FRAME_ARGS_ADDRESS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_FRAME_ARGS_ADDRESS(fi)",
+                      XSTRING (DEPRECATED_FRAME_ARGS_ADDRESS (fi)));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DEPRECATED_FRAME_ARGS_ADDRESS = <0x%08lx>\n",
+                        (long) current_gdbarch->deprecated_frame_args_address
+                        /*DEPRECATED_FRAME_ARGS_ADDRESS ()*/);
+#endif
 #ifdef DEPRECATED_FRAME_CHAIN_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1231,6 +1251,26 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: DEPRECATED_FRAME_INIT_SAVED_REGS = <0x%08lx>\n",
                         (long) current_gdbarch->deprecated_frame_init_saved_regs
                         /*DEPRECATED_FRAME_INIT_SAVED_REGS ()*/);
+#endif
+#ifdef DEPRECATED_FRAME_LOCALS_ADDRESS_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_FRAME_LOCALS_ADDRESS_P()",
+                      XSTRING (DEPRECATED_FRAME_LOCALS_ADDRESS_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_FRAME_LOCALS_ADDRESS_P() = %d\n",
+                      DEPRECATED_FRAME_LOCALS_ADDRESS_P ());
+#endif
+#ifdef DEPRECATED_FRAME_LOCALS_ADDRESS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_FRAME_LOCALS_ADDRESS(fi)",
+                      XSTRING (DEPRECATED_FRAME_LOCALS_ADDRESS (fi)));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DEPRECATED_FRAME_LOCALS_ADDRESS = <0x%08lx>\n",
+                        (long) current_gdbarch->deprecated_frame_locals_address
+                        /*DEPRECATED_FRAME_LOCALS_ADDRESS ()*/);
 #endif
 #ifdef DEPRECATED_FRAME_SAVED_PC_P
   fprintf_unfiltered (file,
@@ -1792,17 +1832,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->frameless_function_invocation
                         /*FRAMELESS_FUNCTION_INVOCATION ()*/);
 #endif
-#ifdef FRAME_ARGS_ADDRESS
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "FRAME_ARGS_ADDRESS(fi)",
-                      XSTRING (FRAME_ARGS_ADDRESS (fi)));
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: FRAME_ARGS_ADDRESS = <0x%08lx>\n",
-                        (long) current_gdbarch->frame_args_address
-                        /*FRAME_ARGS_ADDRESS ()*/);
-#endif
 #ifdef FRAME_ARGS_SKIP
   fprintf_unfiltered (file,
                       "gdbarch_dump: FRAME_ARGS_SKIP # %s\n",
@@ -1810,17 +1839,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: FRAME_ARGS_SKIP = %ld\n",
                       (long) FRAME_ARGS_SKIP);
-#endif
-#ifdef FRAME_LOCALS_ADDRESS
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "FRAME_LOCALS_ADDRESS(fi)",
-                      XSTRING (FRAME_LOCALS_ADDRESS (fi)));
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: FRAME_LOCALS_ADDRESS = <0x%08lx>\n",
-                        (long) current_gdbarch->frame_locals_address
-                        /*FRAME_LOCALS_ADDRESS ()*/);
 #endif
 #ifdef FRAME_NUM_ARGS_P
   fprintf_unfiltered (file,
@@ -5049,42 +5067,58 @@ set_gdbarch_unwind_sp (struct gdbarch *gdbarch,
   gdbarch->unwind_sp = unwind_sp;
 }
 
-CORE_ADDR
-gdbarch_frame_args_address (struct gdbarch *gdbarch, struct frame_info *fi)
+int
+gdbarch_deprecated_frame_args_address_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->frame_args_address == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_frame_args_address invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_frame_args_address called\n");
-  return gdbarch->frame_args_address (fi);
-}
-
-void
-set_gdbarch_frame_args_address (struct gdbarch *gdbarch,
-                                gdbarch_frame_args_address_ftype frame_args_address)
-{
-  gdbarch->frame_args_address = frame_args_address;
+  return gdbarch->deprecated_frame_args_address != get_frame_base;
 }
 
 CORE_ADDR
-gdbarch_frame_locals_address (struct gdbarch *gdbarch, struct frame_info *fi)
+gdbarch_deprecated_frame_args_address (struct gdbarch *gdbarch, struct frame_info *fi)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->frame_locals_address == 0)
+  if (gdbarch->deprecated_frame_args_address == 0)
     internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_frame_locals_address invalid");
+                    "gdbarch: gdbarch_deprecated_frame_args_address invalid");
+  /* Ignore predicate (gdbarch->deprecated_frame_args_address != get_frame_base).  */
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_frame_locals_address called\n");
-  return gdbarch->frame_locals_address (fi);
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_frame_args_address called\n");
+  return gdbarch->deprecated_frame_args_address (fi);
 }
 
 void
-set_gdbarch_frame_locals_address (struct gdbarch *gdbarch,
-                                  gdbarch_frame_locals_address_ftype frame_locals_address)
+set_gdbarch_deprecated_frame_args_address (struct gdbarch *gdbarch,
+                                           gdbarch_deprecated_frame_args_address_ftype deprecated_frame_args_address)
 {
-  gdbarch->frame_locals_address = frame_locals_address;
+  gdbarch->deprecated_frame_args_address = deprecated_frame_args_address;
+}
+
+int
+gdbarch_deprecated_frame_locals_address_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->deprecated_frame_locals_address != get_frame_base;
+}
+
+CORE_ADDR
+gdbarch_deprecated_frame_locals_address (struct gdbarch *gdbarch, struct frame_info *fi)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->deprecated_frame_locals_address == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_deprecated_frame_locals_address invalid");
+  /* Ignore predicate (gdbarch->deprecated_frame_locals_address != get_frame_base).  */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_frame_locals_address called\n");
+  return gdbarch->deprecated_frame_locals_address (fi);
+}
+
+void
+set_gdbarch_deprecated_frame_locals_address (struct gdbarch *gdbarch,
+                                             gdbarch_deprecated_frame_locals_address_ftype deprecated_frame_locals_address)
+{
+  gdbarch->deprecated_frame_locals_address = deprecated_frame_locals_address;
 }
 
 int

@@ -1,5 +1,5 @@
 /* Motorola MCore specific support for 32-bit ELF
-   Copyright 1994, 1995, 1999, 2000, 2001, 2002
+   Copyright 1994, 1995, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -367,7 +367,7 @@ mcore_elf_unsupported_reloc (abfd, reloc_entry, symbol, data, input_section,
 
    This function is responsible for adjust the section contents as
    necessary, and (if using Rela relocs and generating a
-   relocateable output file) adjusting the reloc addend as
+   relocatable output file) adjusting the reloc addend as
    necessary.
 
    This function does not have to worry about setting the reloc
@@ -381,7 +381,7 @@ mcore_elf_unsupported_reloc (abfd, reloc_entry, symbol, data, input_section,
    The global hash table entry for the global symbols can be found
    via elf_sym_hashes (input_bfd).
 
-   When generating relocateable output, this function must handle
+   When generating relocatable output, this function must handle
    STB_LOCAL/STT_SECTION symbols specially.  The output symbol is
    going to be the section symbol corresponding to the output
    section, which means that the addend must be adjusted
@@ -411,10 +411,10 @@ mcore_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	   bfd_archive_filename (input_bfd),
 	   bfd_section_name(input_bfd, input_section),
 	   (long) input_section->reloc_count,
-	   (info->relocateable) ? " (relocatable)" : "");
+	   (info->relocatable) ? " (relocatable)" : "");
 #endif
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   if (! mcore_elf_howto_table [R_MCORE_PCRELIMM8BY4])	/* Initialize howto table if needed */
@@ -637,7 +637,7 @@ mcore_elf_check_relocs (abfd, info, sec, relocs)
   const Elf_Internal_Rela * rel;
   const Elf_Internal_Rela * rel_end;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   symtab_hdr = & elf_tdata (abfd)->symtab_hdr;

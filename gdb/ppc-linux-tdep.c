@@ -731,6 +731,16 @@ insn_ds_field (unsigned int insn)
 }
 
 
+/* If DESC is the address of a 64-bit PowerPC GNU/Linux function
+   descriptor, return the descriptor's entry point.  */
+static CORE_ADDR
+ppc64_desc_entry_point (CORE_ADDR desc)
+{
+  /* The first word of the descriptor is the entry point.  */
+  return (CORE_ADDR) read_memory_unsigned_integer (desc, 8);
+}
+
+
 /* Pattern for the standard linkage function.  These are built by
    build_plt_stub in elf64-ppc.c, whose GLINK argument is always
    zero.  */
@@ -865,7 +875,7 @@ ppc64_standard_linkage_target (CORE_ADDR pc, unsigned int *insn)
        + insn_ds_field (insn[2]));
 
   /* The first word of the descriptor is the entry point.  Return that.  */
-  return (CORE_ADDR) read_memory_unsigned_integer (desc, 8);
+  return ppc64_desc_entry_point (desc);
 }
 
 
@@ -881,6 +891,53 @@ ppc64_skip_trampoline_code (CORE_ADDR pc)
     return ppc64_standard_linkage_target (pc, ppc64_standard_linkage_insn);
   else
     return 0;
+}
+
+
+/* Support for CONVERT_FROM_FUNC_PTR_ADDR(ADDR) on PPC64 GNU/Linux.
+
+   Usually a function pointer's representation is simply the address
+   of the function. On GNU/Linux on the 64-bit PowerPC however, a
+   function pointer is represented by a pointer to a TOC entry. This
+   TOC entry contains three words, the first word is the address of
+   the function, the second word is the TOC pointer (r2), and the
+   third word is the static chain value.  Throughout GDB it is
+   currently assumed that a function pointer contains the address of
+   the function, which is not easy to fix.  In addition, the
+   conversion of a function address to a function pointer would
+   require allocation of a TOC entry in the inferior's memory space,
+   with all its drawbacks.  To be able to call C++ virtual methods in
+   the inferior (which are called via function pointers),
+   find_function_addr uses this function to get the function address
+   from a function pointer.  */
+
+/* Return real function address if ADDR (a function pointer) is in the data
+   space and is therefore a special function pointer.  */
+
+static CORE_ADDR
+ppc64_linux_convert_from_func_ptr_addr (CORE_ADDR addr)
+{
+  struct obj_section *s;
+
+  s = find_pc_section (addr);
+  if (s && s->the_bfd_section->flags & SEC_CODE)
+    return addr;
+
+  /* ADDR is in the data space, so it's a pointer to a descriptor, not
+     the entry point.  */
+  return ppc64_desc_entry_point (addr);
+}
+
+
+/* On 64-bit PowerPC GNU/Linux, the ELF header's e_entry field is the
+   address of a function descriptor for the entry point function, not
+   the actual entry point itself.  So to find the actual address at
+   which execution should begin, we need to fetch the function's entry
+   point from that descriptor.  */
+static CORE_ADDR
+ppc64_call_dummy_address (void)
+{
+  return ppc64_desc_entry_point (entry_point_address ());
 }
 
 
@@ -1005,6 +1062,13 @@ ppc_linux_init_abi (struct gdbarch_info info,
   
   if (tdep->wordsize == 8)
     {
+      /* Handle PPC64 GNU/Linux function pointers (which are really
+         function descriptors).  */
+      set_gdbarch_convert_from_func_ptr_addr
+        (gdbarch, ppc64_linux_convert_from_func_ptr_addr);
+
+      set_gdbarch_call_dummy_address (gdbarch, ppc64_call_dummy_address);
+
       set_gdbarch_in_solib_call_trampoline
         (gdbarch, ppc64_in_solib_call_trampoline);
       set_gdbarch_skip_trampoline_code (gdbarch, ppc64_skip_trampoline_code);

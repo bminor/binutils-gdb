@@ -936,7 +936,7 @@ const char *const bfd_elf_section_type_names[] = {
   "SHT_NOBITS", "SHT_REL", "SHT_SHLIB", "SHT_DYNSYM",
 };
 
-/* ELF relocs are against symbols.  If we are producing relocateable
+/* ELF relocs are against symbols.  If we are producing relocatable
    output, and the reloc is against an external symbol, and nothing
    has given us any additional addend, the resulting reloc will also
    be against the same symbol.  In such a case, we don't want to
@@ -944,7 +944,7 @@ const char *const bfd_elf_section_type_names[] = {
    all be done at final link time.  Rather than put special case code
    into bfd_perform_relocation, all the reloc types use this howto
    function.  It just short circuits the reloc if producing
-   relocateable output against an external symbol.  */
+   relocatable output against an external symbol.  */
 
 bfd_reloc_status_type
 bfd_elf_generic_reloc (abfd,
@@ -1838,7 +1838,7 @@ bfd_section_from_shdr (abfd, shindex)
          SHF_ALLOC is set, and this is a shared object, then we also
          treat this section as a BFD section.  We can not base the
          decision purely on SHF_ALLOC, because that flag is sometimes
-         set in a relocateable object file, which would confuse the
+         set in a relocatable object file, which would confuse the
          linker.  */
       if ((hdr->sh_flags & SHF_ALLOC) != 0
 	  && (abfd->flags & DYNAMIC) != 0

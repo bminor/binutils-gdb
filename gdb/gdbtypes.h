@@ -956,7 +956,10 @@ extern struct type *builtin_type_CORE_ADDR;
    (cf MIPS). */
 extern struct type *builtin_type_bfd_vma;
 
-/* Explicit sizes - see C9X <intypes.h> for naming scheme */
+/* Explicit sizes - see C9X <intypes.h> for naming scheme.  The "int0"
+   is for when an architecture needs to describe a register that has
+   no size.  */
+extern struct type *builtin_type_int0;
 extern struct type *builtin_type_int8;
 extern struct type *builtin_type_uint8;
 extern struct type *builtin_type_int16;

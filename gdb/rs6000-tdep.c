@@ -1894,6 +1894,10 @@ rs6000_register_virtual_type (int n)
       int size = regsize (reg, tdep->wordsize);
       switch (size)
 	{
+	case 0:
+	  return builtin_type_int0;
+	case 4:
+	  return builtin_type_int32;
 	case 8:
 	  if (tdep->ppc_ev0_regnum <= n && n <= tdep->ppc_ev31_regnum)
 	    return builtin_type_vec64;
@@ -1904,8 +1908,8 @@ rs6000_register_virtual_type (int n)
 	  return builtin_type_vec128;
 	  break;
 	default:
-	  return builtin_type_int32;
-	  break;
+	  internal_error (__FILE__, __LINE__, "Register %d size %d unknown",
+			  n, size);
 	}
     }
 }
@@ -2995,8 +2999,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_convert_from_func_ptr_addr (gdbarch,
 	rs6000_convert_from_func_ptr_addr);
     }
-  set_gdbarch_frame_args_address (gdbarch, rs6000_frame_args_address);
-  set_gdbarch_frame_locals_address (gdbarch, rs6000_frame_args_address);
+  set_gdbarch_deprecated_frame_args_address (gdbarch, rs6000_frame_args_address);
+  set_gdbarch_deprecated_frame_locals_address (gdbarch, rs6000_frame_args_address);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, rs6000_saved_pc_after_call);
 
   /* Helpers for function argument information.  */

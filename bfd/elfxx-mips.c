@@ -1080,12 +1080,12 @@ mips_elf_check_mips16_stubs (h, data)
 
 bfd_reloc_status_type
 _bfd_mips_elf_gprel16_with_gp (abfd, symbol, reloc_entry, input_section,
-			       relocateable, data, gp)
+			       relocatable, data, gp)
      bfd *abfd;
      asymbol *symbol;
      arelent *reloc_entry;
      asection *input_section;
-     bfd_boolean relocateable;
+     bfd_boolean relocatable;
      PTR data;
      bfd_vma gp;
 {
@@ -1116,9 +1116,9 @@ _bfd_mips_elf_gprel16_with_gp (abfd, symbol, reloc_entry, input_section,
   _bfd_mips_elf_sign_extend(val, 16);
 
   /* Adjust val for the final section location and GP value.  If we
-     are producing relocateable output, we don't want to do this for
+     are producing relocatable output, we don't want to do this for
      an external symbol.  */
-  if (! relocateable
+  if (! relocatable
       || (symbol->flags & BSF_SECTION_SYM) != 0)
     val += relocation - gp;
 
@@ -1131,7 +1131,7 @@ _bfd_mips_elf_gprel16_with_gp (abfd, symbol, reloc_entry, input_section,
   else
     reloc_entry->addend = val;
 
-  if (relocateable)
+  if (relocatable)
     reloc_entry->address += input_section->output_offset;
   else if (((val & ~0xffff) != ~0xffff) && ((val & ~0xffff) != 0))
     return bfd_reloc_overflow;
@@ -2870,10 +2870,12 @@ mips_elf_create_got_section (abfd, info, maybe_exclude)
   if (maybe_exclude)
     flags |= SEC_EXCLUDE;
 
+  /* We have to use an alignment of 2**4 here because this is hardcoded
+     in the function stub generation and in the linker script.  */
   s = bfd_make_section (abfd, ".got");
   if (s == NULL
       || ! bfd_set_section_flags (abfd, s, flags)
-      || ! bfd_set_section_alignment (abfd, s, MIPS_ELF_LOG_FILE_ALIGN (abfd)))
+      || ! bfd_set_section_alignment (abfd, s, 4))
     return FALSE;
 
   /* Define the symbol _GLOBAL_OFFSET_TABLE_.  We don't do this in the
@@ -3151,7 +3153,7 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
   /* If this is a 32- or 64-bit call to a 16-bit function with a stub, we
      need to redirect the call to the stub, unless we're already *in*
      a stub.  */
-  if (r_type != R_MIPS16_26 && !info->relocateable
+  if (r_type != R_MIPS16_26 && !info->relocatable
       && ((h != NULL && h->fn_stub != NULL)
 	  || (local_p && elf_tdata (input_bfd)->local_stubs != NULL
 	      && elf_tdata (input_bfd)->local_stubs[r_symndx] != NULL))
@@ -3172,7 +3174,7 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
     }
   /* If this is a 16-bit call to a 32- or 64-bit function with a stub, we
      need to redirect the call to the stub.  */
-  else if (r_type == R_MIPS16_26 && !info->relocateable
+  else if (r_type == R_MIPS16_26 && !info->relocatable
 	   && h != NULL
 	   && (h->call_stub != NULL || h->call_fp_stub != NULL)
 	   && !target_is_16_bit_code_p)
@@ -3208,7 +3210,7 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
 
   /* Calls from 16-bit code to 32-bit code and vice versa require the
      special jalx instruction.  */
-  *require_jalxp = (!info->relocateable
+  *require_jalxp = (!info->relocatable
                     && (((r_type == R_MIPS16_26) && !target_is_16_bit_code_p)
                         || ((r_type == R_MIPS_26) && target_is_16_bit_code_p)));
 
@@ -3650,7 +3652,7 @@ mips_elf_perform_relocation (info, howto, relocation, value, input_bfd,
 	 JALX is the 5-bit value 00011.  X is 0 for jal, 1 for jalx.
 	 Note that the immediate value in the first word is swapped.
 
-	 When producing a relocateable object file, R_MIPS16_26 is
+	 When producing a relocatable object file, R_MIPS16_26 is
 	 handled mostly like R_MIPS_26.  In particular, the addend is
 	 stored as a straight 26-bit value in a 32-bit instruction.
 	 (gas makes life simpler for itself by never adjusting a
@@ -3688,13 +3690,13 @@ mips_elf_perform_relocation (info, howto, relocation, value, input_bfd,
 	 where targ26-16 is sub1 followed by sub2 (i.e., the addend field A is
 	 ((sub1 << 16) | sub2)).
 
-	 When producing a relocateable object file, the calculation is
+	 When producing a relocatable object file, the calculation is
 	 (((A < 2) | ((P + 4) & 0xf0000000) + S) >> 2)
 	 When producing a fully linked file, the calculation is
 	 let R = (((A < 2) | ((P + 4) & 0xf0000000) + S) >> 2)
 	 ((R & 0x1f0000) << 5) | ((R & 0x3e00000) >> 5) | (R & 0xffff)  */
 
-      if (!info->relocateable)
+      if (!info->relocatable)
 	/* Shuffle the bits according to the formula above.  */
 	value = (((value & 0x1f0000) << 5)
 		 | ((value & 0x3e00000) >> 5)
@@ -4639,30 +4641,11 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
       hdr->sh_entsize = 8;
     }
 
-  /* The generic elf_fake_sections will set up REL_HDR using the
-     default kind of relocations.  But, we may actually need both
-     kinds of relocations, so we set up the second header here.
-
-     This is not necessary for the O32 ABI since that only uses Elf32_Rel
-     relocations (cf. System V ABI, MIPS RISC Processor Supplement,
-     3rd Edition, p. 4-17).  It breaks the IRIX 5/6 32-bit ld, since one
-     of the resulting empty .rela.<section> sections starts with
-     sh_offset == object size, and ld doesn't allow that.  While the check
-     is arguably bogus for empty or SHT_NOBITS sections, it can easily be
-     avoided by not emitting those useless sections in the first place.  */
-  if (! SGI_COMPAT (abfd) && ! NEWABI_P(abfd)
-      && (sec->flags & SEC_RELOC) != 0)
-    {
-      struct bfd_elf_section_data *esd;
-      bfd_size_type amt = sizeof (Elf_Internal_Shdr);
-
-      esd = elf_section_data (sec);
-      BFD_ASSERT (esd->rel_hdr2 == NULL);
-      esd->rel_hdr2 = (Elf_Internal_Shdr *) bfd_zalloc (abfd, amt);
-      if (!esd->rel_hdr2)
-	return FALSE;
-      _bfd_elf_init_reloc_shdr (abfd, esd->rel_hdr2, sec, !sec->use_rela_p);
-    }
+  /* The generic elf_fake_sections will set up REL_HDR using the default
+   kind of relocations.  We used to set up a second header for the
+   non-default kind of relocations here, but only NewABI would use
+   these, and the IRIX ld doesn't like resulting empty RELA sections.
+   Thus we create those header only on demand now.  */
 
   return TRUE;
 }
@@ -5061,7 +5044,7 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
   asection *sreloc;
   struct elf_backend_data *bed;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   dynobj = elf_hash_table (info)->dynobj;
@@ -5557,7 +5540,7 @@ _bfd_mips_relax_section (abfd, sec, link_info, again)
   /* We are not currently changing any sizes, so only one pass.  */
   *again = FALSE;
 
-  if (link_info->relocateable)
+  if (link_info->relocatable)
     return TRUE;
 
   internal_relocs = _bfd_elf_link_read_relocs (abfd, sec, (PTR) NULL,
@@ -5748,7 +5731,7 @@ _bfd_mips_elf_adjust_dynamic_symbol (info, h)
      any R_MIPS_32 or R_MIPS_REL32 relocs against it into the output
      file.  */
   hmips = (struct mips_elf_link_hash_entry *) h;
-  if (! info->relocateable
+  if (! info->relocatable
       && hmips->possibly_dynamic_relocs != 0
       && (h->root.type == bfd_link_hash_defweak
 	  || (h->elf_link_hash_flags
@@ -5846,7 +5829,7 @@ _bfd_mips_elf_always_size_sections (output_bfd, info)
     bfd_set_section_size (output_bfd, ri,
 			  (bfd_size_type) sizeof (Elf32_External_RegInfo));
 
-  if (! (info->relocateable
+  if (! (info->relocatable
 	 || ! mips_elf_hash_table (info)->mips16_stubs_seen))
     mips_elf_link_hash_traverse (mips_elf_hash_table (info),
 				 mips_elf_check_mips16_stubs,
@@ -6384,7 +6367,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    addend = rel->r_addend;
 	}
 
-      if (info->relocateable)
+      if (info->relocatable)
 	{
 	  Elf_Internal_Sym *sym;
 	  unsigned long r_symndx;
@@ -6398,7 +6381,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	     they're against a section symbol, in which case we need
 	     to adjust by the section offset, or unless they're GP
 	     relative in which case we need to adjust by the amount
-	     that we're adjusting GP in this relocateable object.  */
+	     that we're adjusting GP in this relocatable object.  */
 
 	  if (! mips_elf_local_relocation_p (input_bfd, rel, local_sections,
 					     FALSE))
@@ -8129,12 +8112,12 @@ _bfd_mips_elf_set_section_contents (abfd, section, location, offset, count)
 
 bfd_byte *
 _bfd_elf_mips_get_relocated_section_contents (abfd, link_info, link_order,
-					      data, relocateable, symbols)
+					      data, relocatable, symbols)
      bfd *abfd;
      struct bfd_link_info *link_info;
      struct bfd_link_order *link_order;
      bfd_byte *data;
-     bfd_boolean relocateable;
+     bfd_boolean relocatable;
      asymbol **symbols;
 {
   /* Get enough memory to hold the stuff */
@@ -8242,7 +8225,7 @@ _bfd_elf_mips_get_relocated_section_contents (abfd, link_info, link_order,
 	    {
 	      /* bypass special_function call */
 	      r = _bfd_mips_elf_gprel16_with_gp (input_bfd, sym, *parent,
-						 input_section, relocateable,
+						 input_section, relocatable,
 						 (PTR) data, gp);
 	      goto skip_bfd_perform_relocation;
 	    }
@@ -8252,11 +8235,11 @@ _bfd_elf_mips_get_relocated_section_contents (abfd, link_info, link_order,
 				      *parent,
 				      (PTR) data,
 				      input_section,
-				      relocateable ? abfd : (bfd *) NULL,
+				      relocatable ? abfd : (bfd *) NULL,
 				      &error_message);
 	skip_bfd_perform_relocation:
 
-	  if (relocateable)
+	  if (relocatable)
 	    {
 	      asection *os = input_section->output_section;
 
@@ -8463,7 +8446,7 @@ _bfd_mips_elf_final_link (abfd, info)
 	elf_gp (abfd) = (h->u.def.value
 			 + h->u.def.section->output_section->vma
 			 + h->u.def.section->output_offset);
-      else if (info->relocateable)
+      else if (info->relocatable)
 	{
 	  bfd_vma lo = MINUS_ONE;
 
@@ -8784,7 +8767,7 @@ _bfd_mips_elf_final_link (abfd, info)
 	     information describing how the small data area would
 	     change depending upon the -G switch.  These sections
 	     not used in executables files.  */
-	  if (! info->relocateable)
+	  if (! info->relocatable)
 	    {
 	      for (p = o->link_order_head;
 		   p != (struct bfd_link_order *) NULL;

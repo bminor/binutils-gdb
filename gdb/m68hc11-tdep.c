@@ -1352,6 +1352,9 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_ptr_bit (gdbarch, 16);
   set_gdbarch_long_long_bit (gdbarch, 64);
 
+  /* Characters are unsigned.  */
+  set_gdbarch_char_signed (gdbarch, 0);
+
   /* Set register info.  */
   set_gdbarch_fp0_regnum (gdbarch, -1);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 2);
@@ -1386,7 +1389,7 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
 
   set_gdbarch_deprecated_frame_chain (gdbarch, m68hc11_frame_chain);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, m68hc11_frame_saved_pc);
-  set_gdbarch_frame_args_address (gdbarch, m68hc11_frame_args_address);
+  set_gdbarch_deprecated_frame_args_address (gdbarch, m68hc11_frame_args_address);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, m68hc11_saved_pc_after_call);
 
   set_gdbarch_deprecated_get_saved_register (gdbarch, deprecated_generic_get_saved_register);

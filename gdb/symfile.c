@@ -566,12 +566,8 @@ syms_from_objfile (struct objfile *objfile,
 		   int mainline,
                    int verbo)
 {
-  asection *lower_sect;
-  asection *sect;
-  CORE_ADDR lower_offset;
   struct section_addr_info *local_addr = NULL;
   struct cleanup *old_chain;
-  int i;
 
   gdb_assert (! (addrs && offsets));
 
@@ -626,8 +622,13 @@ syms_from_objfile (struct objfile *objfile,
 
      We no longer warn if the lowest section is not a text segment (as
      happens for the PA64 port.  */
-  if (!mainline)
+  if (!mainline && addrs && addrs->other[0].name)
     {
+      asection *lower_sect;
+      asection *sect;
+      CORE_ADDR lower_offset;
+      int i;
+
       /* Find lowest loadable section to be used as starting point for 
          continguous sections. FIXME!! won't work without call to find
 	 .text first, but this assumes text is lowest section. */
@@ -659,9 +660,7 @@ syms_from_objfile (struct objfile *objfile,
  	 (the loadable section directly below it in memory).
  	 this_offset = lower_offset = lower_addr - lower_orig_addr */
 
-      /* Calculate offsets for sections. */
-      if (addrs)
-        for (i=0 ; i < addrs->num_sections && addrs->other[i].name; i++)
+        for (i = 0; i < addrs->num_sections && addrs->other[i].name; i++)
           {
             if (addrs->other[i].addr != 0)
               {

@@ -1,5 +1,5 @@
 /* BFD back-end for VERSAdos-E objects.
-   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002
+   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
@@ -23,11 +23,11 @@
 
 /*
    SUBSECTION
-   VERSAdos-E relocateable object file format
+   VERSAdos-E relocatable object file format
 
    DESCRIPTION
 
-   This module supports reading of VERSAdos relocateable
+   This module supports reading of VERSAdos relocatable
    object files.
 
    A VERSAdos file looks like contains

@@ -283,12 +283,12 @@ extern CORE_ADDR hppa_frame_saved_pc (struct frame_info *frame);
 
 #if !GDB_MULTI_ARCH
 extern CORE_ADDR hppa_frame_args_address (struct frame_info *fi);
-#define FRAME_ARGS_ADDRESS(fi) hppa_frame_args_address (fi)
+#define DEPRECATED_FRAME_ARGS_ADDRESS(fi) hppa_frame_args_address (fi)
 #endif
 
 #if !GDB_MULTI_ARCH
 extern CORE_ADDR hppa_frame_locals_address (struct frame_info *fi);
-#define FRAME_LOCALS_ADDRESS(fi) hppa_frame_locals_address (fi)
+#define DEPRECATED_FRAME_LOCALS_ADDRESS(fi) hppa_frame_locals_address (fi)
 #endif
 
 #if !GDB_MULTI_ARCH
@@ -445,8 +445,8 @@ extern CORE_ADDR hppa_target_read_fp (void);
 /* We access locals from SP. This may not work for frames which call
    alloca; for those, we may need to consult unwind tables.
    jimb: FIXME.  */
-#undef FRAME_LOCALS_ADDRESS
-#define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
+#undef DEPRECATED_FRAME_LOCALS_ADDRESS
+#define DEPRECATED_FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
 
 /* For a number of horrible reasons we may have to adjust the location
    of variables on the stack.  Ugh.  jimb: why? */

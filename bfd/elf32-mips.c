@@ -803,21 +803,21 @@ mips_elf_hi16_reloc (abfd, reloc_entry, symbol, data, input_section,
 
   if (strcmp (bfd_asymbol_name (symbol), "_gp_disp") == 0)
     {
-      bfd_boolean relocateable;
+      bfd_boolean relocatable;
       bfd_vma gp;
 
       if (ret == bfd_reloc_undefined)
 	abort ();
 
       if (output_bfd != NULL)
-	relocateable = TRUE;
+	relocatable = TRUE;
       else
 	{
-	  relocateable = FALSE;
+	  relocatable = FALSE;
 	  output_bfd = symbol->section->output_section->owner;
 	}
 
-      ret = mips_elf_final_gp (output_bfd, symbol, relocateable,
+      ret = mips_elf_final_gp (output_bfd, symbol, relocatable,
 			       error_message, &gp);
       if (ret != bfd_reloc_ok)
 	return ret;
@@ -887,40 +887,41 @@ mips_elf_lo16_reloc (abfd, reloc_entry, symbol, data, input_section,
 	  unsigned long vallo;
 	  struct mips_hi16 *next;
 
-	  /* Do the HI16 relocation.  Note that we actually don't need
-	     to know anything about the LO16 itself, except where to
-	     find the low 16 bits of the addend needed by the LO16.  */
-	  insn = bfd_get_32 (abfd, l->addr);
-	  vallo = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address);
-
-	  /* The low order 16 bits are always treated as a signed
-	     value.  */
-	  vallo = ((vallo & 0xffff) ^ 0x8000) - 0x8000;
-	  val = ((insn & 0xffff) << 16) + vallo;
-	  val += l->addend;
-
-	  /* If PC-relative, we need to subtract out the address of the LO
-	     half of the HI/LO.  (The actual relocation is relative
-	     to that instruction.)  */
-	  if (reloc_entry->howto->pc_relative)
-	    val -= reloc_entry->address;
-
-	  /* At this point, "val" has the value of the combined HI/LO
-	     pair.  If the low order 16 bits (which will be used for
-	     the LO16 insn) are negative, then we will need an
-	     adjustment for the high order 16 bits.  */
-	  val += 0x8000;
-	  val = (val >> 16) & 0xffff;
-
-	  insn &= ~ (bfd_vma) 0xffff;
-	  insn |= val;
-	  bfd_put_32 (abfd, (bfd_vma) insn, l->addr);
-
 	  if (strcmp (bfd_asymbol_name (symbol), "_gp_disp") == 0)
 	    {
 	      gp_disp_relent = *reloc_entry;
 	      reloc_entry = &gp_disp_relent;
 	      reloc_entry->addend = l->addend;
+	    }
+	  else
+	    {
+	      /* Do the HI16 relocation.  Note that we actually don't need
+		 to know anything about the LO16 itself, except where to
+		 find the low 16 bits of the addend needed by the LO16.  */
+	      insn = bfd_get_32 (abfd, l->addr);
+	      vallo = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address);
+	      /* The low order 16 bits are always treated as a signed
+		 value.  */
+	      vallo = ((vallo & 0xffff) ^ 0x8000) - 0x8000;
+	      val = ((insn & 0xffff) << 16) + vallo;
+	      val += l->addend;
+
+	      /* If PC-relative, we need to subtract out the address of the LO
+		 half of the HI/LO.  (The actual relocation is relative
+		 to that instruction.)  */
+	      if (reloc_entry->howto->pc_relative)
+		val -= reloc_entry->address;
+
+	      /* At this point, "val" has the value of the combined HI/LO
+		 pair.  If the low order 16 bits (which will be used for
+		 the LO16 insn) are negative, then we will need an
+		 adjustment for the high order 16 bits.  */
+	      val += 0x8000;
+	      val = (val >> 16) & 0xffff;
+
+	      insn &= ~ (bfd_vma) 0xffff;
+	      insn |= val;
+	      bfd_put_32 (abfd, (bfd_vma) insn, l->addr);
 	    }
 
 	  next = l->next;
@@ -1053,18 +1054,18 @@ mips_elf_assign_gp (output_bfd, pgp)
    symbol value correctly.  We look up the symbol _gp in the output
    BFD.  If we can't find it, we're stuck.  We cache it in the ELF
    target data.  We don't need to adjust the symbol value for an
-   external symbol if we are producing relocateable output.  */
+   external symbol if we are producing relocatable output.  */
 
 static bfd_reloc_status_type
-mips_elf_final_gp (output_bfd, symbol, relocateable, error_message, pgp)
+mips_elf_final_gp (output_bfd, symbol, relocatable, error_message, pgp)
      bfd *output_bfd;
      asymbol *symbol;
-     bfd_boolean relocateable;
+     bfd_boolean relocatable;
      char **error_message;
      bfd_vma *pgp;
 {
   if (bfd_is_und_section (symbol->section)
-      && ! relocateable)
+      && ! relocatable)
     {
       *pgp = 0;
       return bfd_reloc_undefined;
@@ -1072,10 +1073,10 @@ mips_elf_final_gp (output_bfd, symbol, relocateable, error_message, pgp)
 
   *pgp = _bfd_get_gp_value (output_bfd);
   if (*pgp == 0
-      && (! relocateable
+      && (! relocatable
 	  || (symbol->flags & BSF_SECTION_SYM) != 0))
     {
-      if (relocateable)
+      if (relocatable)
 	{
 	  /* Make up a value.  */
 	  *pgp = symbol->section->output_section->vma + 0x4000;
@@ -1109,7 +1110,7 @@ _bfd_mips_elf32_gprel16_reloc (abfd, reloc_entry, symbol, data, input_section,
      bfd *output_bfd;
      char **error_message;
 {
-  bfd_boolean relocateable;
+  bfd_boolean relocatable;
   bfd_reloc_status_type ret;
   bfd_vma gp;
 
@@ -1124,20 +1125,20 @@ _bfd_mips_elf32_gprel16_reloc (abfd, reloc_entry, symbol, data, input_section,
     }
 
   if (output_bfd != (bfd *) NULL)
-    relocateable = TRUE;
+    relocatable = TRUE;
   else
     {
-      relocateable = FALSE;
+      relocatable = FALSE;
       output_bfd = symbol->section->output_section->owner;
     }
 
-  ret = mips_elf_final_gp (output_bfd, symbol, relocateable, error_message,
+  ret = mips_elf_final_gp (output_bfd, symbol, relocatable, error_message,
 			   &gp);
   if (ret != bfd_reloc_ok)
     return ret;
 
   return _bfd_mips_elf_gprel16_with_gp (abfd, symbol, reloc_entry,
-					input_section, relocateable,
+					input_section, relocatable,
 					data, gp);
 }
 
@@ -1155,7 +1156,7 @@ mips_elf_gprel32_reloc (abfd, reloc_entry, symbol, data, input_section,
      bfd *output_bfd;
      char **error_message;
 {
-  bfd_boolean relocateable;
+  bfd_boolean relocatable;
   bfd_reloc_status_type ret;
   bfd_vma gp;
 
@@ -1171,30 +1172,30 @@ mips_elf_gprel32_reloc (abfd, reloc_entry, symbol, data, input_section,
     }
 
   if (output_bfd != (bfd *) NULL)
-    relocateable = TRUE;
+    relocatable = TRUE;
   else
     {
-      relocateable = FALSE;
+      relocatable = FALSE;
       output_bfd = symbol->section->output_section->owner;
     }
 
-  ret = mips_elf_final_gp (output_bfd, symbol, relocateable,
+  ret = mips_elf_final_gp (output_bfd, symbol, relocatable,
 			   error_message, &gp);
   if (ret != bfd_reloc_ok)
     return ret;
 
   return gprel32_with_gp (abfd, symbol, reloc_entry, input_section,
-			  relocateable, data, gp);
+			  relocatable, data, gp);
 }
 
 static bfd_reloc_status_type
-gprel32_with_gp (abfd, symbol, reloc_entry, input_section, relocateable, data,
+gprel32_with_gp (abfd, symbol, reloc_entry, input_section, relocatable, data,
 		 gp)
      bfd *abfd;
      asymbol *symbol;
      arelent *reloc_entry;
      asection *input_section;
-     bfd_boolean relocateable;
+     bfd_boolean relocatable;
      PTR data;
      bfd_vma gp;
 {
@@ -1219,9 +1220,9 @@ gprel32_with_gp (abfd, symbol, reloc_entry, input_section, relocateable, data,
     val += bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address);
 
   /* Adjust val for the final section location and GP value.  If we
-     are producing relocateable output, we don't want to do this for
+     are producing relocatable output, we don't want to do this for
      an external symbol.  */
-  if (! relocateable
+  if (! relocatable
       || (symbol->flags & BSF_SECTION_SYM) != 0)
     val += relocation - gp;
 
@@ -1230,7 +1231,7 @@ gprel32_with_gp (abfd, symbol, reloc_entry, input_section, relocateable, data,
   else
     reloc_entry->addend = val;
 
-  if (relocateable)
+  if (relocatable)
     reloc_entry->address += input_section->output_offset;
 
   return bfd_reloc_ok;
@@ -1331,7 +1332,7 @@ mips16_gprel_reloc (abfd, reloc_entry, symbol, data, input_section,
      bfd *output_bfd;
      char **error_message;
 {
-  bfd_boolean relocateable;
+  bfd_boolean relocatable;
   bfd_reloc_status_type ret;
   bfd_vma gp;
   unsigned short extend = 0;
@@ -1350,14 +1351,14 @@ mips16_gprel_reloc (abfd, reloc_entry, symbol, data, input_section,
     }
 
   if (output_bfd != NULL)
-    relocateable = TRUE;
+    relocatable = TRUE;
   else
     {
-      relocateable = FALSE;
+      relocatable = FALSE;
       output_bfd = symbol->section->output_section->owner;
     }
 
-  ret = mips_elf_final_gp (output_bfd, symbol, relocateable, error_message,
+  ret = mips_elf_final_gp (output_bfd, symbol, relocatable, error_message,
 			   &gp);
   if (ret != bfd_reloc_ok)
     return ret;
@@ -1387,9 +1388,9 @@ mips16_gprel_reloc (abfd, reloc_entry, symbol, data, input_section,
   _bfd_mips_elf_sign_extend(val, 16);
 
   /* Adjust val for the final section location and GP value.  If we
-     are producing relocateable output, we don't want to do this for
+     are producing relocatable output, we don't want to do this for
      an external symbol.  */
-  if (! relocateable
+  if (! relocatable
       || (symbol->flags & BSF_SECTION_SYM) != 0)
     val += relocation - gp;
 
@@ -1408,7 +1409,7 @@ mips16_gprel_reloc (abfd, reloc_entry, symbol, data, input_section,
   else
     reloc_entry->addend = val;
 
-  if (relocateable)
+  if (relocatable)
     reloc_entry->address += input_section->output_offset;
   else if (((val & ~0xffff) != ~0xffff) && ((val & ~0xffff) != 0))
     return bfd_reloc_overflow;
@@ -1729,7 +1730,7 @@ bfd_mips_elf32_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
   Elf_Internal_Rela *irel, *irelend;
   bfd_byte *p;
 
-  BFD_ASSERT (! info->relocateable);
+  BFD_ASSERT (! info->relocatable);
 
   *errmsg = NULL;
 

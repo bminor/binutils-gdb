@@ -705,7 +705,7 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
   const Elf_Internal_Rela *rel_end;
   asection *sreloc;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   htab = elf64_x86_64_hash_table (info);
@@ -1872,7 +1872,7 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   htab = elf64_x86_64_hash_table (info);

@@ -1005,7 +1005,7 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
 					 (bfd_vma) 0, strsize))
 	return FALSE;
 
-      /* If this is a relocateable object file, we have to relocate
+      /* If this is a relocatable object file, we have to relocate
 	 the entries in .stab.  This should always be simple 32 bit
 	 relocations against symbols defined in this object file, so
 	 this should be no big deal.  */

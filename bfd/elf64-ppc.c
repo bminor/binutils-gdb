@@ -3423,7 +3423,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
   asection *sreloc;
   asection **opd_sym_map;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   htab = ppc_hash_table (info);
@@ -5057,7 +5057,7 @@ ppc64_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
   asection *sec;
   struct ppc_link_hash_table *htab;
 
-  if (info->relocateable || info->shared)
+  if (info->relocatable || info->shared)
     return TRUE;
 
   htab = ppc_hash_table (info);
@@ -7060,7 +7060,7 @@ ppc64_elf_build_stubs (bfd_boolean emit_stub_syms,
 
    This function is responsible for adjust the section contents as
    necessary, and (if using Rela relocs and generating a
-   relocateable output file) adjusting the reloc addend as
+   relocatable output file) adjusting the reloc addend as
    necessary.
 
    This function does not have to worry about setting the reloc
@@ -7074,7 +7074,7 @@ ppc64_elf_build_stubs (bfd_boolean emit_stub_syms,
    The global hash table entry for the global symbols can be found
    via elf_sym_hashes (input_bfd).
 
-   When generating relocateable output, this function must handle
+   When generating relocatable output, this function must handle
    STB_LOCAL/STT_SECTION symbols specially.  The output symbol is
    going to be the section symbol corresponding to the output
    section, which means that the addend must be adjusted
@@ -7104,7 +7104,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
   /* Disabled until we sort out how ld should choose 'y' vs 'at'.  */
   bfd_boolean is_power4 = FALSE;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   /* Initialize howto table if needed.  */

@@ -176,11 +176,6 @@ main (int argc, char **argv)
      the signal that the simulator received; we want to return that to
      indicate failure.  */
   
-#ifdef SIM_H8300 /* FIXME: Ugh.  grep for SLEEP in compile.c  */
-  if (sigrc == SIGILL)
-    abort ();
-  sigrc = 0;
-#else
   /* Why did we stop? */
   switch (reason)
     {
@@ -198,7 +193,6 @@ main (int argc, char **argv)
       break;
 
     }
-#endif
 
   return sigrc;
 }

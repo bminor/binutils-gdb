@@ -2296,8 +2296,8 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_call_dummy_words (gdbarch, ia64_call_dummy_words);
   set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (ia64_call_dummy_words));
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, ia64_init_extra_frame_info);
-  set_gdbarch_frame_args_address (gdbarch, ia64_frame_args_address);
-  set_gdbarch_frame_locals_address (gdbarch, ia64_frame_locals_address);
+  set_gdbarch_deprecated_frame_args_address (gdbarch, ia64_frame_args_address);
+  set_gdbarch_deprecated_frame_locals_address (gdbarch, ia64_frame_locals_address);
 
   /* We won't necessarily have a frame pointer and even if we do, it
      winds up being extraordinarly messy when attempting to find the

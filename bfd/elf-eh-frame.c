@@ -403,7 +403,7 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec,
 		 in which case we can remove it provided we adjust
 		 all FDEs.  Also, it can be removed if we have removed
 		 all FDEs using it.  */
-	      if ((!info->relocateable
+	      if ((!info->relocatable
 		   && cie_compare (&cie, &hdr_info->last_cie) == 0)
 		  || cie_usage_count == 0)
 		{

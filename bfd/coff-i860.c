@@ -1,5 +1,5 @@
 /* BFD back-end for Intel 860 COFF files.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1999, 2000, 2001, 2002
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Created mostly by substituting "860" for "386" in coff-i386.c
    Harry Dolan <dolan@ssd.intel.com>, October 1995
@@ -47,7 +47,7 @@ static const bfd_target * i3coff_object_p PARAMS ((bfd *));
    section for a reference to a common symbol is the value itself plus
    any desired offset.  Ian Taylor, Cygnus Support.  */
 
-/* If we are producing relocateable output, we need to do some
+/* If we are producing relocatable output, we need to do some
    adjustments to the object file that are not done by the
    bfd_perform_relocation function.  This function is called by every
    reloc type to make any required adjustments.  */
@@ -87,7 +87,7 @@ coff_i860_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
     {
       /* For some reason bfd_perform_relocation always effectively
 	 ignores the addend for a COFF target when producing
-	 relocateable output.  This seems to be always wrong for 860
+	 relocatable output.  This seems to be always wrong for 860
 	 COFF, so we handle the addend here instead.  */
       diff = reloc_entry->addend;
     }
@@ -348,7 +348,7 @@ coff_i860_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
     }
 
   /* If the output symbol is common (in which case this must be a
-     relocateable link), we need to add in the final size of the
+     relocatable link), we need to add in the final size of the
      common symbol.  */
   if (h != NULL && h->root.type == bfd_link_hash_common)
     *addendp += h->root.u.c.size;

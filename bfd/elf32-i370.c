@@ -1,5 +1,5 @@
 /* i370-specific support for 32-bit ELF
-   Copyright 1994, 1995, 1996, 1997, 1998, 2000, 2001, 2002
+   Copyright 1994, 1995, 1996, 1997, 1998, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
    Hacked by Linas Vepstas for i370 linas@linas.org
@@ -971,7 +971,7 @@ i370_elf_check_relocs (abfd, info, sec, relocs)
   bfd_vma *local_got_offsets;
   asection *sreloc;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
 #ifdef DEBUG
@@ -1200,7 +1200,7 @@ i370_elf_finish_dynamic_sections (output_bfd, info)
 
    This function is responsible for adjust the section contents as
    necessary, and (if using Rela relocs and generating a
-   relocateable output file) adjusting the reloc addend as
+   relocatable output file) adjusting the reloc addend as
    necessary.
 
    This function does not have to worry about setting the reloc
@@ -1214,7 +1214,7 @@ i370_elf_finish_dynamic_sections (output_bfd, info)
    The global hash table entry for the global symbols can be found
    via elf_sym_hashes (input_bfd).
 
-   When generating relocateable output, this function must handle
+   When generating relocatable output, this function must handle
    STB_LOCAL/STT_SECTION symbols specially.  The output symbol is
    going to be the section symbol corresponding to the output
    section, which means that the addend must be adjusted
@@ -1241,7 +1241,7 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   bfd_vma *local_got_offsets;
   bfd_boolean ret = TRUE;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
 #ifdef DEBUG
@@ -1249,7 +1249,7 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	   bfd_archive_filename (input_bfd),
 	   bfd_section_name(input_bfd, input_section),
 	   (long) input_section->reloc_count,
-	   (info->relocateable) ? " (relocatable)" : "");
+	   (info->relocatable) ? " (relocatable)" : "");
 #endif
 
   if (!i370_elf_howto_table[ R_I370_ADDR31 ])	/* Initialize howto table if needed */

@@ -350,7 +350,7 @@ mn10300_elf_check_relocs (abfd, info, sec, relocs)
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
@@ -550,7 +550,7 @@ mn10300_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   struct elf32_mn10300_link_hash_entry **sym_hashes;
   Elf_Internal_Rela *rel, *relend;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
@@ -1334,10 +1334,10 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
   /* For error_return.  */
   section = sec;
 
-  /* We don't have to do anything for a relocateable link, if
+  /* We don't have to do anything for a relocatable link, if
      this section does not have relocs, or if this is not a
      code section.  */
-  if (link_info->relocateable
+  if (link_info->relocatable
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0
       || (sec->flags & SEC_CODE) == 0)
@@ -2541,12 +2541,12 @@ mn10300_elf_symbol_address_p (abfd, sec, isym, addr)
 
 static bfd_byte *
 mn10300_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
-					    data, relocateable, symbols)
+					    data, relocatable, symbols)
      bfd *output_bfd;
      struct bfd_link_info *link_info;
      struct bfd_link_order *link_order;
      bfd_byte *data;
-     bfd_boolean relocateable;
+     bfd_boolean relocatable;
      asymbol **symbols;
 {
   Elf_Internal_Shdr *symtab_hdr;
@@ -2558,11 +2558,11 @@ mn10300_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
 
   /* We only need to handle the case of relaxing, or of having a
      particular set of section contents, specially.  */
-  if (relocateable
+  if (relocatable
       || elf_section_data (input_section)->this_hdr.contents == NULL)
     return bfd_generic_get_relocated_section_contents (output_bfd, link_info,
 						       link_order, data,
-						       relocateable,
+						       relocatable,
 						       symbols);
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;

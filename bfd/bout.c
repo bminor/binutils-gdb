@@ -1,6 +1,6 @@
 /* BFD back-end for Intel 960 b.out binaries.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002
+   2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -1298,12 +1298,12 @@ b_out_bfd_relax_section (abfd, i, link_info, again)
 
 static bfd_byte *
 b_out_bfd_get_relocated_section_contents (output_bfd, link_info, link_order,
-					  data, relocateable, symbols)
+					  data, relocatable, symbols)
      bfd *output_bfd;
      struct bfd_link_info *link_info;
      struct bfd_link_order *link_order;
      bfd_byte *data;
-     bfd_boolean relocateable;
+     bfd_boolean relocatable;
      asymbol **symbols;
 {
   /* Get enough memory to hold the stuff.  */
@@ -1317,11 +1317,11 @@ b_out_bfd_get_relocated_section_contents (output_bfd, link_info, link_order,
   if (reloc_size < 0)
     goto error_return;
 
-  /* If producing relocateable output, don't bother to relax.  */
-  if (relocateable)
+  /* If producing relocatable output, don't bother to relax.  */
+  if (relocatable)
     return bfd_generic_get_relocated_section_contents (output_bfd, link_info,
 						       link_order,
-						       data, relocateable,
+						       data, relocatable,
 						       symbols);
 
   reloc_vector = (arelent **) bfd_malloc ((bfd_size_type) reloc_size);

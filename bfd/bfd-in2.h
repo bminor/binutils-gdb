@@ -626,7 +626,7 @@ extern bfd_boolean bfd_ecoff_debug_accumulate_other
 extern bfd_boolean bfd_ecoff_debug_externals
   PARAMS ((bfd *abfd, struct ecoff_debug_info *debug,
 	   const struct ecoff_debug_swap *swap,
-	   bfd_boolean relocateable,
+	   bfd_boolean relocatable,
 	   bfd_boolean (*get_extr) (struct symbol_cache_entry *,
 				    struct ecoff_extr *),
 	   void (*set_index) (struct symbol_cache_entry *,
@@ -911,8 +911,11 @@ bfd_calc_gnu_debuglink_crc32 PARAMS ((unsigned long crc, const unsigned char *bu
 char *
 bfd_follow_gnu_debuglink PARAMS ((bfd *abfd, const char *dir));
 
+struct sec *
+bfd_create_gnu_debuglink_section PARAMS ((bfd * abfd, const char * filename));
+
 bfd_boolean
-bfd_add_gnu_debuglink PARAMS ((bfd * abfd, const char * filename));
+bfd_fill_in_gnu_debuglink_section PARAMS ((bfd * abfd, struct sec * sect, const char * filename));
 
 /* Extracted from libbfd.c.  */
 

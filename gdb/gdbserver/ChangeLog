@@ -35,11 +35,6 @@
 	if 'int' is smaller than PTRACE_XFER_TYPE, you end up throwing
 	away part of the register's value.
 
-2003-04-24  Andrew Cagney  <cagney@redhat.com>
-
-	* low-nbsd.c (fetch_inferior_registers): 
-	(store_inferior_registers): 
-
 2003-03-26  Daniel Jacobowitz  <drow@mvista.com>
 
 	* linux-low.c (linux_create_inferior): Use __SIGRTMIN.

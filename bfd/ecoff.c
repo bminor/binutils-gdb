@@ -4160,7 +4160,7 @@ _bfd_ecoff_bfd_final_link (abfd, info)
 			    ecoff_link_write_external,
 			    (PTR) &einfo);
 
-  if (info->relocateable)
+  if (info->relocatable)
     {
       /* We need to make a pass over the link_orders to count up the
 	 number of relocations we will need to output, so that we know
@@ -4190,7 +4190,7 @@ _bfd_ecoff_bfd_final_link (abfd, info)
 
   bfd_ecoff_debug_free (handle, abfd, debug, &backend->debug_swap, info);
 
-  if (info->relocateable)
+  if (info->relocatable)
     {
       /* Now reset the reloc_count field of the sections in the output
 	 BFD to 0, so that we can use them to keep track of how many
@@ -4210,7 +4210,7 @@ _bfd_ecoff_bfd_final_link (abfd, info)
 	ecoff_data (abfd)->gp = (h->u.def.value
 				 + h->u.def.section->output_section->vma
 				 + h->u.def.section->output_offset);
-      else if (info->relocateable)
+      else if (info->relocatable)
 	{
 	  bfd_vma lo;
 
@@ -4608,11 +4608,11 @@ ecoff_indirect_link_order (output_bfd, info, output_section, link_order)
 				  cooked_size))
     goto error_return;
 
-  /* If we are producing relocateable output, the relocs were
+  /* If we are producing relocatable output, the relocs were
      modified, and we write them out now.  We use the reloc_count
      field of output_section to keep track of the number of relocs we
      have output so far.  */
-  if (info->relocateable)
+  if (info->relocatable)
     {
       file_ptr pos = (output_section->rel_filepos
 		      + output_section->reloc_count * external_reloc_size);

@@ -597,7 +597,15 @@ x86_64_push_arguments (struct regcache *regcache, int nargs,
 {
   int intreg = 0;
   int ssereg = 0;
+  /* For varargs functions we have to pass the total number of SSE arguments
+     in %rax.  So, let's count this number.  */
+  int total_sse_args = 0;
+  /* Once an SSE/int argument is passed on the stack, all subsequent
+     arguments are passed there.  */
+  int sse_stack = 0;
+  int int_stack = 0;
   int i;
+  char buf[8];
   static int int_parameter_registers[INT_REGS] =
   {
     X86_64_RDI_REGNUM, 4,	/* %rdi, %rsi */
@@ -623,9 +631,7 @@ x86_64_push_arguments (struct regcache *regcache, int nargs,
       int needed_sseregs;
 
       if (!n ||
-	  !examine_argument (class, n, &needed_intregs, &needed_sseregs)
-	  || intreg / 2 + needed_intregs > INT_REGS
-	  || ssereg / 2 + needed_sseregs > SSE_REGS)
+	  !examine_argument (class, n, &needed_intregs, &needed_sseregs))
 	{			/* memory class */
 	  stack_values[stack_values_count++] = i;
 	}
@@ -633,6 +639,13 @@ x86_64_push_arguments (struct regcache *regcache, int nargs,
 	{
 	  int j;
 	  int offset = 0;
+
+	  if (intreg / 2 + needed_intregs > INT_REGS)
+	    int_stack = 1;
+	  if (ssereg / 2 + needed_sseregs > SSE_REGS)
+	    sse_stack = 1;
+	  total_sse_args += needed_sseregs;
+
 	  for (j = 0; j < n; j++)
 	    {
 	      switch (class[j])
@@ -640,38 +653,56 @@ x86_64_push_arguments (struct regcache *regcache, int nargs,
 		case X86_64_NO_CLASS:
 		  break;
 		case X86_64_INTEGER_CLASS:
-		  regcache_cooked_write
-		    (regcache, int_parameter_registers[(intreg + 1) / 2],
-		     VALUE_CONTENTS_ALL (args[i]) + offset);
-		  offset += 8;
-		  intreg += 2;
+		  if (int_stack)
+		    stack_values[stack_values_count++] = i;
+		  else
+		    {
+		      regcache_cooked_write
+			(regcache, int_parameter_registers[(intreg + 1) / 2],
+			 VALUE_CONTENTS_ALL (args[i]) + offset);
+		      offset += 8;
+		      intreg += 2;
+		    }
 		  break;
 		case X86_64_INTEGERSI_CLASS:
-		  {
-		    LONGEST val = extract_signed_integer
-		      (VALUE_CONTENTS_ALL (args[i]) + offset, 4);
-		    regcache_cooked_write_signed
-		      (regcache, int_parameter_registers[intreg / 2], val);
-
-		    offset += 8;
-		    intreg++;
-		    break;
-		  }
+		  if (int_stack)
+		    stack_values[stack_values_count++] = i;
+		  else
+		    {
+		      LONGEST val = extract_signed_integer
+			(VALUE_CONTENTS_ALL (args[i]) + offset, 4);
+		      regcache_cooked_write_signed
+			(regcache, int_parameter_registers[intreg / 2], val);
+		      
+		      offset += 8;
+		      intreg++;
+		    }
+		  break;
 		case X86_64_SSEDF_CLASS:
 		case X86_64_SSESF_CLASS:
 		case X86_64_SSE_CLASS:
-		  regcache_cooked_write
-		    (regcache, sse_parameter_registers[(ssereg + 1) / 2],
-		     VALUE_CONTENTS_ALL (args[i]) + offset);
-		  offset += 8;
-		  ssereg += 2;
+		  if (sse_stack)
+		    stack_values[stack_values_count++] = i;
+		  else
+		    {
+		      regcache_cooked_write
+			(regcache, sse_parameter_registers[(ssereg + 1) / 2],
+			 VALUE_CONTENTS_ALL (args[i]) + offset);
+		      offset += 8;
+		      ssereg += 2;
+		    }
 		  break;
 		case X86_64_SSEUP_CLASS:
-		  regcache_cooked_write
-		    (regcache, sse_parameter_registers[ssereg / 2],
-		     VALUE_CONTENTS_ALL (args[i]) + offset);
-		  offset += 8;
-		  ssereg++;
+		  if (sse_stack)
+		    stack_values[stack_values_count++] = i;
+		  else
+		    {
+		      regcache_cooked_write
+			(regcache, sse_parameter_registers[ssereg / 2],
+			 VALUE_CONTENTS_ALL (args[i]) + offset);
+		      offset += 8;
+		      ssereg++;
+		    }
 		  break;
 		case X86_64_X87_CLASS:
 		case X86_64_MEMORY_CLASS:
@@ -700,6 +731,11 @@ x86_64_push_arguments (struct regcache *regcache, int nargs,
       write_memory (sp, VALUE_CONTENTS_ALL (arg), len);
     }
 
+  /* Write number of SSE type arguments to RAX to take care of varargs
+     functions.  */
+  store_unsigned_integer (buf, 8, total_sse_args);
+  regcache_cooked_write (regcache, X86_64_RAX_REGNUM, buf);
+
   return sp;
 }
 
@@ -712,7 +748,8 @@ x86_64_store_return_value (struct type *type, struct regcache *regcache,
 {
   int len = TYPE_LENGTH (type);
 
-  if (TYPE_CODE_FLT == TYPE_CODE (type))
+  /* First handle long doubles.  */
+  if (TYPE_CODE_FLT == TYPE_CODE (type)  && len == 16)
     {
       ULONGEST fstat;
       char buf[FPU_REG_RAW_SIZE];
@@ -741,6 +778,12 @@ x86_64_store_return_value (struct type *type, struct regcache *regcache,
          for the tag word is 0x3fff.  */
       regcache_raw_write_unsigned (regcache, FTAG_REGNUM, 0x3fff);
     }
+  else if (TYPE_CODE_FLT == TYPE_CODE (type))
+    {
+      /* Handle double and float variables.  */
+      regcache_cooked_write (regcache,  X86_64_XMM0_REGNUM, valbuf);
+    }
+  /* XXX: What about complex floating point types?  */
   else
     {
       int low_size = REGISTER_RAW_SIZE (0);

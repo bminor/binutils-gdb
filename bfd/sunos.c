@@ -1,6 +1,6 @@
 /* BFD backend for SunOS binaries.
    Copyright 1990, 1991, 1992, 1994, 1995, 1996, 1997, 1998, 2000, 2001,
-   2002 Free Software Foundation, Inc.
+   2002, 2003 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -884,7 +884,7 @@ sunos_add_dynamic_symbols (abfd, info, symsp, sym_countp, stringsp)
     {
       if (! sunos_create_dynamic_sections (abfd, info,
 					   ((abfd->flags & DYNAMIC) != 0
-					    && !info->relocateable)))
+					    && !info->relocatable)))
 	return FALSE;
     }
 
@@ -911,7 +911,7 @@ sunos_add_dynamic_symbols (abfd, info, symsp, sym_countp, stringsp)
 
   /* The native linker seems to just ignore dynamic objects when -r is
      used.  */
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   /* There's no hope of using a dynamic object which does not exactly
@@ -1326,7 +1326,7 @@ bfd_sunos_size_dynamic_sections (output_bfd, info, sdynptr, sneedptr,
   *sneedptr = NULL;
   *srulesptr = NULL;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   if (output_bfd->xvec != &MY(vec))

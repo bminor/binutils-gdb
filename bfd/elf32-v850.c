@@ -652,7 +652,7 @@ v850_elf_check_relocs (abfd, info, sec, relocs)
   int other = 0;
   const char *common = (const char *)0;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
 #ifdef DEBUG
@@ -1632,7 +1632,7 @@ v850_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
@@ -2520,7 +2520,7 @@ v850_elf_relax_section (abfd, sec, link_info, again)
 
   *again = FALSE;
 
-  if (link_info->relocateable
+  if (link_info->relocatable
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0)
     return TRUE;

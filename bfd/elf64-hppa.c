@@ -599,7 +599,7 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
   size_t buf_len;
   int sec_symndx;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   /* If this is the first dynamic object found in the link, create

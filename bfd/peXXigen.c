@@ -961,7 +961,7 @@ _bfd_XXi_swap_scnhdr_out (abfd, in, out)
   }
 
   if (coff_data (abfd)->link_info
-      && ! coff_data (abfd)->link_info->relocateable
+      && ! coff_data (abfd)->link_info->relocatable
       && ! coff_data (abfd)->link_info->shared
       && strcmp (scnhdr_int->s_name, ".text") == 0)
     {
