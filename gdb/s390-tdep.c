@@ -1221,6 +1221,68 @@ is_pointer_like (struct type *type)
 }
 
 
+/* Return non-zero if TYPE is a `float singleton' or `double
+   singleton', zero otherwise.
+
+   A `T singleton' is a struct type with one member, whose type is
+   either T or a `T singleton'.  So, the following are all float
+   singletons:
+
+   struct { float x };
+   struct { struct { float x; } x; };
+   struct { struct { struct { float x; } x; } x; };
+
+   ... and so on.
+
+   WHY THE HECK DO WE CARE ABOUT THIS???  Well, it turns out that GCC
+   passes all float singletons and double singletons as if they were
+   simply floats or doubles.  This is *not* what the ABI says it
+   should do.  */
+static int
+is_float_singleton (struct type *type)
+{
+  return (TYPE_CODE (type) == TYPE_CODE_STRUCT
+          && TYPE_NFIELDS (type) == 1
+          && (TYPE_CODE (TYPE_FIELD_TYPE (type, 0)) == TYPE_CODE_FLT
+              || is_float_singleton (TYPE_FIELD_TYPE (type, 0))));
+}
+
+
+/* Return non-zero if TYPE is a struct-like type, zero otherwise.
+   "Struct-like" types are those that should be passed as structs are:
+   structs and unions.
+
+   As an odd quirk, not mentioned in the ABI, GCC passes float and
+   double singletons as if they were a plain float, double, etc.  (The
+   corresponding union types are handled normally.)  So we exclude
+   those types here.  *shrug* */
+static int
+is_struct_like (struct type *type)
+{
+  enum type_code code = TYPE_CODE (type);
+
+  return (code == TYPE_CODE_UNION
+          || (code == TYPE_CODE_STRUCT && ! is_float_singleton (type)));
+}
+
+
+/* Return non-zero if TYPE is a float-like type, zero otherwise.
+   "Float-like" types are those that should be passed as
+   floating-point values are.
+
+   You'd think this would just be floats, doubles, long doubles, etc.
+   But as an odd quirk, not mentioned in the ABI, GCC passes float and
+   double singletons as if they were a plain float, double, etc.  (The
+   corresponding union types are handled normally.)  So we exclude
+   those types here.  *shrug* */
+static int
+is_float_like (struct type *type)
+{
+  return (TYPE_CODE (type) == TYPE_CODE_FLT
+          || is_float_singleton (type));
+}
+
+
 /* Return non-zero if TYPE is considered a `DOUBLE_OR_FLOAT', as
    defined by the parameter passing conventions described in the
    "Linux for S/390 ELF Application Binary Interface Supplement".
@@ -1228,7 +1290,7 @@ is_pointer_like (struct type *type)
 static int
 is_double_or_float (struct type *type)
 {
-  return (TYPE_CODE (type) == TYPE_CODE_FLT
+  return (is_float_like (type)
           && (TYPE_LENGTH (type) == 4
               || TYPE_LENGTH (type) == 8));
 }
@@ -1240,17 +1302,14 @@ is_double_or_float (struct type *type)
 static int
 is_simple_arg (struct type *type)
 {
-  enum type_code code = TYPE_CODE (type);
   unsigned length = TYPE_LENGTH (type);
 
   /* This is almost a direct translation of the ABI's language, except
      that we have to exclude 8-byte structs; those are DOUBLE_ARGs.  */
   return ((is_integer_like (type) && length <= 4)
           || is_pointer_like (type)
-          || ((code == TYPE_CODE_STRUCT
-               || code == TYPE_CODE_UNION)
-              && length != 8)
-          || (code == TYPE_CODE_FLT && length == 16));
+          || (is_struct_like (type) && length != 8)
+          || (is_float_like (type) && length == 16));
 }
 
 
@@ -1260,12 +1319,10 @@ is_simple_arg (struct type *type)
 static int
 pass_by_copy_ref (struct type *type)
 {
-  enum type_code code = TYPE_CODE (type);
   unsigned length = TYPE_LENGTH (type);
 
-  return (((code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION)
-           && length != 1 && length != 2 && length != 4)
-          || (code == TYPE_CODE_FLT && length == 16));
+  return ((is_struct_like (type) && length != 1 && length != 2 && length != 4)
+          || (is_float_like (type) && length == 16));
 }
 
 
@@ -1294,12 +1351,10 @@ extend_simple_arg (struct value *arg)
 static int
 is_double_arg (struct type *type)
 {
-  enum type_code code = TYPE_CODE (type);
   unsigned length = TYPE_LENGTH (type);
 
   return ((is_integer_like (type)
-           || code == TYPE_CODE_STRUCT
-           || code == TYPE_CODE_UNION)
+           || is_struct_like (type))
           && length == 8);
 }
 
@@ -1512,7 +1567,11 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
               }
             else
               {
-                starg = round_up (starg, alignment_of (type));
+                /* You'd think we should say:
+                   starg = round_up (starg, alignment_of (type));
+                   Unfortunately, GCC seems to simply align the stack on
+                   a four-byte boundary, even when passing doubles.  */
+                starg = round_up (starg, 4);
                 write_memory (starg, VALUE_CONTENTS (arg), length);
                 starg += length;
               }

@@ -1,3 +1,15 @@
+2001-11-16  Jim Blandy  <jimb@redhat.com>
+
+	* s390-tdep.c: Tweak argument-passing to match GCC bugs.
+	(is_float_singleton, is_struct_like, is_float_like): New
+ 	functions, that isolate the weirdness.
+	(is_double_or_float, is_simple_arg, pass_by_copy_ref,
+ 	is_double_arg): Use is_struct_like and is_float_like, rather than
+ 	testing the type codes ourselves.
+	(s390_push_arguments): When passing args on the stack, align each
+ 	on to a four-byte boundary, regardless of what the type itself
+ 	needs.
+
 2001-11-16  Ben Harris  <bjh21@netbsd.org>
 
 	* Makefile.in (os9kread.o): Replace $< with autoconf-approved
