@@ -137,6 +137,15 @@ else
 	lose_these_too="${lose_these_too} ${cgen_files}"
 fi
 
+# Java stuff
+java_files="boehm-gc libjava"
+
+if (echo $* | grep keep\-java > /dev/null); then
+	keep_these_too="${keep_these_too} ${java_files}"
+else
+	lose_these_too="${lose_these_too} ${java_files}"
+fi
+
 # This top-level directory is special.  We often check out only subsets
 # of this directory, and complaining about directories or files we didn't
 # check out just gets obnoxious.

@@ -780,9 +780,11 @@ ALL_TARGET_MODULES = \
 	all-target-gperf \
 	all-target-examples \
 	all-target-libstub \
-	all-target-cygmon \
+	$(start-sanitize-java) \
 	all-target-libjava \
-	all-target-boehm-gc
+	all-target-boehm-gc \
+	$(end-sanitize-java) \
+	all-target-cygmon
 
 # This is a list of the configure targets for all of the modules which
 # are compiled using the target tools.
@@ -798,9 +800,11 @@ CONFIGURE_TARGET_MODULES = \
 	configure-target-gperf \
 	configure-target-examples \
 	configure-target-libstub \
-	configure-target-cygmon \
+	$(start-sanitize-java) \
 	configure-target-libjava \
-	configure-target-boehm-gc
+	configure-target-boehm-gc \
+	$(end-sanitize-java) \
+	configure-target-cygmon
 
 # This is a list of the check targets for all of the modules which are
 # compiled using $(TARGET_FLAGS_TO_PASS).
@@ -811,9 +815,11 @@ CHECK_TARGET_MODULES = \
 	check-target-newlib \
 	check-target-winsup \
 	check-target-libiberty \
-	check-target-gperf \
+	$(start-sanitize-java) \
 	check-target-libjava \
-	check-target-boehm-gc
+	check-target-boehm-gc \
+	$(end-sanitize-java) \
+	check-target-gperf
 
 # This is a list of the install targets for all of the modules which are
 # compiled using $(TARGET_FLAGS_TO_PASS).
@@ -825,9 +831,11 @@ INSTALL_TARGET_MODULES = \
 	install-target-winsup \
 	install-target-libgloss \
 	install-target-libiberty \
-	install-target-gperf \
+	$(start-sanitize-java) \
 	install-target-libjava \
-	install-target-boehm-gc
+	install-target-boehm-gc \
+	$(end-sanitize-java) \
+	install-target-gperf
 
 # This is a list of the targets for which we can do a clean-{target}.
 CLEAN_MODULES = \
@@ -922,9 +930,11 @@ CLEAN_TARGET_MODULES = \
 	clean-target-gperf \
 	clean-target-examples \
 	clean-target-libstub \
-	clean-target-cygmon \
+	$(start-sanitize-java) \
 	clean-target-libjava \
-	clean-target-boehm-gc
+	clean-target-boehm-gc \
+	$(end-sanitize-java) \
+	clean-target-cygmon
 
 # All of the x11 modules that can be cleaned
 CLEAN_X11_MODULES = \
@@ -1502,7 +1512,9 @@ all-bash:
 all-bfd: all-libiberty all-intl
 all-binutils: all-libiberty all-opcodes all-bfd all-flex all-bison all-byacc all-intl
 all-bison: all-texinfo
+# start-sanitize-java
 all-target-boehm-gc: configure-target-boehm-gc
+# end-sanitize-java
 all-byacc:
 all-cvssrc:
 configure-target-cygmon: $(ALL_GCC)
@@ -1570,7 +1582,9 @@ all-libiberty:
 all-libide: all-ilu
 all-libidetcl: all-tcl all-tk all-itcl all-ilu all-libgui all-libide
 # end-sanitize-ide
+# start-sanitize-java
 all-target-libjava: configure-target-libjava
+# end-sanitize-java
 configure-target-librx: $(ALL_GCC) configure-target-newlib
 all-target-librx: configure-target-librx
 configure-target-libstdc++: $(ALL_GCC)
