@@ -630,7 +630,85 @@ print_insn_arm (pc, info, given)
 				abort ();
 			      }
 			    break;
-			    
+
+			  case 'y':
+			  case 'z':
+			    {
+			      int single = *c == 'y';
+			      int regno;
+
+			      switch (bitstart)
+				{
+				case 4: /* Sm pair */
+				  func (stream, "{");
+				  /* Fall through.  */
+				case 0: /* Sm, Dm */
+				  regno = given & 0x0000000f;
+				  if (single)
+				    {
+				      regno <<= 1;
+				      regno += (given >> 5) & 1;
+				    }
+				  break;
+
+				case 1: /* Sd, Dd */
+				  regno = (given >> 12) & 0x0000000f;
+				  if (single)
+				    {
+				      regno <<= 1;
+				      regno += (given >> 22) & 1;
+				    }
+				  break;
+
+				case 2: /* Sn, Dn */
+				  regno = (given >> 16) & 0x0000000f;
+				  if (single)
+				    {
+				      regno <<= 1;
+				      regno += (given >> 7) & 1;
+				    }
+				  break;
+
+				case 3: /* List */
+				  func (stream, "{");
+				  regno = (given >> 12) & 0x0000000f;
+				  if (single)
+				    {
+				      regno <<= 1;
+				      regno += (given >> 22) & 1;
+				    }
+				  break;
+
+				  
+				default:
+				  abort ();
+				}
+
+			      func (stream, "%c%d", single ? 's' : 'd', regno);
+
+			      if (bitstart == 3)
+				{
+				  int count = given & 0xff;
+
+				  if (single == 0)
+				    count >>= 1;
+
+				  if (--count)
+				    {
+				      func (stream, "-%c%d",
+					    single ? 's' : 'd',
+					    regno + count);
+				    }
+
+				  func (stream, "}");
+				}
+			      else if (bitstart == 4)
+				func (stream, ", %c%d}", single ? 's' : 'd',
+				      regno + 1);
+
+			      break;
+			    }
+
 			  case '`':
 			    c++;
 			    if ((given & (1 << bitstart)) == 0)

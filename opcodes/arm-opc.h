@@ -38,6 +38,10 @@ struct thumb_opcode
    %<bitfield>r		print as an ARM register
    %<bitfield>f		print a floating point constant if >7 else a
 			floating point register
+   %<code>y		print a single precision VFP reg.
+			  Codes: 0=>Sm, 1=>Sd, 2=>Sn, 3=>multi-list, 4=>Sm pair
+   %<code>z		print a double precision VFP reg
+			  Codes: 0=>Dm, 1=>Dd, 2=>Dn, 3=>multi-list
    %c			print condition code (always bits 28-31)
    %P			print floating point precision in arithmetic insn
    %Q			print floating point precision in ldf/stf insn
@@ -169,7 +173,7 @@ static struct arm_opcode arm_opcodes[] =
     {0x0a000000, 0x0e000000, "b%24'l%c\t%b"},
     {0x0f000000, 0x0f000000, "swi%c\t%0-23x"},
 
-    /* Floating point coprocessor instructions */
+    /* Floating point coprocessor (FPA) instructions */
     {0x0e000100, 0x0ff08f10, "adf%c%P%R\t%12-14f, %16-18f, %0-3f"},
     {0x0e100100, 0x0ff08f10, "muf%c%P%R\t%12-14f, %16-18f, %0-3f"},
     {0x0e200100, 0x0ff08f10, "suf%c%P%R\t%12-14f, %16-18f, %0-3f"},
@@ -213,6 +217,81 @@ static struct arm_opcode arm_opcodes[] =
     {0x0c100100, 0x0e100f00, "ldf%c%Q\t%12-14f, %A"},
     {0x0c000200, 0x0e100f00, "sfm%c\t%12-14f, %F, %A"},
     {0x0c100200, 0x0e100f00, "lfm%c\t%12-14f, %F, %A"},
+
+    /* Floating point coprocessor (VFP) instructions */
+    {0x0eb00bc0, 0x0fff0ff0, "fabsd%c\t%1z, %0z"},
+    {0x0eb00ac0, 0x0fbf0fd0, "fabss%c\t%1y, %0y"},
+    {0x0e300b00, 0x0ff00ff0, "faddd%c\t%1z, %2z, %0z"},
+    {0x0e300a00, 0x0fb00f50, "fadds%c\t%1y, %2y, %1y"},
+    {0x0eb40b40, 0x0fff0f70, "fcmp%7'ed%c\t%1z, %0z"},
+    {0x0eb40a40, 0x0fbf0f50, "fcmp%7'es%c\t%1y, %0y"},
+    {0x0eb50b40, 0x0fff0f70, "fcmp%7'ezd%c\t%1z"},
+    {0x0eb50a40, 0x0fbf0f70, "fcmp%7'ezs%c\t%1y"},
+    {0x0eb00b40, 0x0fff0ff0, "fcpyd%c\t%1z, %0z"},
+    {0x0eb00a40, 0x0fbf0fd0, "fcpys%c\t%1y, %0y"},
+    {0x0eb70ac0, 0x0fff0fd0, "fcvtds%c\t%1z, %0y"},
+    {0x0eb70bc0, 0x0fbf0ff0, "fcvtsd%c\t%1y, %0z"},
+    {0x0e800b00, 0x0ff00ff0, "fdivd%c\t%1z, %2z, %0z"},
+    {0x0e800a00, 0x0fb00f50, "fdivs%c\t%1y, %2y, %0y"},
+    {0x0d100b00, 0x0f700f00, "fldd%c\t%1z, %A"},
+    {0x0c900b00, 0x0fd00f00, "fldmia%0?xd%c\t%16-19r%21'!, %3z"},
+    {0x0d300b00, 0x0ff00f00, "fldmdb%0?xd%c\t%16-19r!, %3z"},
+    {0x0d100a00, 0x0f300f00, "flds%c\t%1y, %A"},
+    {0x0c900a00, 0x0f900f00, "fldmias%c\t%16-19r%21'!, %3y"},
+    {0x0d300a00, 0x0fb00f00, "fldmdbs%c\t%16-19r!, %3y"},
+    {0x0e000b00, 0x0ff00ff0, "fmacd%c\t%1z, %2z, %0z"},
+    {0x0e000a00, 0x0fb00f50, "fmacs%c\t%1y, %2y, %0y"},
+    {0x0e200b10, 0x0ff00fff, "fmdhr%c\t%2z, %12-15r"},
+    {0x0e000b10, 0x0ff00fff, "fmdlr%c\t%2z, %12-15r"},
+    {0x0c400b10, 0x0ff00ff0, "fmdrr%c\t%0z, %12-15r, %16-19r"},
+    {0x0e300b10, 0x0ff00fff, "fmrdh%c\t%12-15r, %2z"},
+    {0x0e100b10, 0x0ff00fff, "fmrdl%c\t%12-15r, %2z"},
+    {0x0c500b10, 0x0ff00ff0, "fmrrd%c\t%12-15r, %16-19r, %0z"},
+    {0x0c500a10, 0x0ff00fd0, "fmrrs%c\t%12-15r, %16-19r, %4y"},
+    {0x0e100a10, 0x0ff00f7f, "fmrs%c\t%12-15r, %2y"},
+    {0x0ef1fa10, 0x0fffffff, "fmstat%c"},
+    {0x0ef00a10, 0x0fff0fff, "fmrx%c\t%12-15r, fpsid"},
+    {0x0ef10a10, 0x0fff0fff, "fmrx%c\t%12-15r, fpscr"},
+    {0x0ef80a10, 0x0fff0fff, "fmrx%c\t%12-15r, fpexc"},
+    {0x0ef90a10, 0x0fff0fff, "fmrx%c\t%12-15r, fpinst\t@ Impl def"},
+    {0x0efa0a10, 0x0fff0fff, "fmrx%c\t%12-15r, fpinst2\t@ Impl def"},
+    {0x0ef00a10, 0x0ff00fff, "fmrx%c\t%12-15r, <impl def 0x%16-19x>"},
+    {0x0e100b00, 0x0ff00ff0, "fmscd%c\t%1z, %2z, %0z"},
+    {0x0e100a00, 0x0fb00f50, "fmscs%c\t%1y, %2y, %0y"},
+    {0x0e000a10, 0x0ff00f7f, "fmsr%c\t%2y, %12-15r"},
+    {0x0c400a10, 0x0ff00fd0, "fmsrr%c\t%12-15r, %16-19r, %4y"},
+    {0x0e200b00, 0x0ff00ff0, "fmuld%c\t%1z, %2z, %0z"},
+    {0x0e200a00, 0x0fb00f50, "fmuls%c\t%1y, %2y, %0y"},
+    {0x0ee00a10, 0x0fff0fff, "fmxr%c\tfpsid, %12-15r"},
+    {0x0ee10a10, 0x0fff0fff, "fmxr%c\tfpscr, %12-15r"},
+    {0x0ee80a10, 0x0fff0fff, "fmxr%c\tfpexc, %12-15r"},
+    {0x0ee90a10, 0x0fff0fff, "fmxr%c\tfpinst, %12-15r\t@ Impl def"},
+    {0x0eea0a10, 0x0fff0fff, "fmxr%c\tfpinst2, %12-15r\t@ Impl def"},
+    {0x0ee00a10, 0x0ff00fff, "fmxr%c\t<impl def 0x%16-19x>, %12-15r"},
+    {0x0eb10b40, 0x0fff0ff0, "fnegd%c\t%1z, %0z"},
+    {0x0eb10a40, 0x0fbf0fd0, "fnegs%c\t%1y, %0y"},
+    {0x0e000b40, 0x0ff00ff0, "fnmacd%c\t%1z, %2z, %0z"},
+    {0x0e000a40, 0x0fb00f50, "fnmacs%c\t%1y, %2y, %0y"},
+    {0x0e100b40, 0x0ff00ff0, "fnmscd%c\t%1z, %2z, %0z"},
+    {0x0e100a40, 0x0fb00f50, "fnmscs%c\t%1y, %2y, %0y"},
+    {0x0e200b40, 0x0ff00ff0, "fnmuld%c\t%1z, %2z, %0z"},
+    {0x0e200a40, 0x0fb00f50, "fnmuls%c\t%1y, %2y, %0y"},
+    {0x0eb80bc0, 0x0fff0fd0, "fsitod%c\t%1z, %0y"},
+    {0x0eb80ac0, 0x0fbf0fd0, "fsitos%c\t%1y, %0y"},
+    {0x0eb10bc0, 0x0fff0ff0, "fsqrtd%c\t%1z, %0z"},
+    {0x0eb10ac0, 0x0fbf0fd0, "fsqrts%c\t%1y, %0y"},
+    {0x0d000b00, 0x0f700f00, "fstd%c\t%1z, %A"},
+    {0x0c800b00, 0x0fd00f00, "fstmia%0?xd%c\t%16-19r%21'!, %3z"},
+    {0x0d200b00, 0x0ff00f00, "fstmdb%0?xd%c\t%16-19r!, %3z"},
+    {0x0d000a00, 0x0f300f00, "fsts%c\t%1y, %A"},
+    {0x0c800a00, 0x0f900f00, "fstmias%c\t%16-19r%21'!, %3y"},
+    {0x0d200a00, 0x0fb00f00, "fstmdbs%c\t%16-19r!, %3y"},
+    {0x0e300b40, 0x0ff00ff0, "fsubd%c\t%1z, %2z, %0z"},
+    {0x0e300a40, 0x0fb00f50, "fsubs%c\t%1y, %2y, %0y"},
+    {0x0ebc0b40, 0x0fbe0f70, "fto%16?sui%7'zd%c\t%1y, %0z"},
+    {0x0ebc0a40, 0x0fbe0f50, "fto%16?sui%7'zs%c\t%1y, %0y"},
+    {0x0eb80b40, 0x0fff0fd0, "fuitod%c\t%1z, %0y"},
+    {0x0eb80a40, 0x0fbf0fd0, "fuitos%c\t%1y, %0y"},
 
     /* Cirrus coprocessor instructions.  */
     {0x0d100400, 0x0f500f00, "cfldrs%c\tmvf%12-15d, %A"},

@@ -1,3 +1,9 @@
+2002-01-15  Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-opc.h (arm_opcodes): Add patterns for VFP instructions.
+	* arm-dis.c (print_insn_arm): Support new disassembly qualifiers for
+	VFP bitfields.
+
 2002-01-10  matthew green  <mrg@redhat.com>
 
 	* xstormy16-asm.c: Regenerate.
