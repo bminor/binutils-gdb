@@ -1,5 +1,5 @@
-/* A.out "format 1" file handling code
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+/* A.out "format 1" file handling code for BFD.
+   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -171,9 +171,10 @@ DEFUN(NAME(aout,sunos4_write_object_contents),
   }
     
   choose_reloc_size(abfd);
-    
-  /* FIXME */
-  N_SET_FLAGS (*execp, 0x1);
+
+  /* Some tools want this to be 0, some tools want this to be one.
+     Today, it seems that 0 is the most important setting (PR1927) */
+  N_SET_FLAGS (*execp, 0x0);
     
   WRITE_HEADERS(abfd, execp);
 
@@ -272,7 +273,7 @@ struct internal_sunos_core {
   int c_tsize;			  /* Text size (bytes) */
   int c_dsize;			  /* Data size (bytes) */
   int c_ssize;			  /* Stack size (bytes) */
-  long c_stacktop;		  /* Stack top (address) */
+  bfd_vma c_stacktop;		  /* Stack top (address) */
   char c_cmdname[CORE_NAMELEN + 1]; /* Command name */
   long fp_stuff_pos;		/* file offset of external FPU state (regs) */
   int fp_stuff_size;		/* Size of it */
@@ -337,10 +338,30 @@ DEFUN(swapcore_sparc,(abfd, ext, intcore),
   intcore->c_ucode =
     bfd_h_get_32 (abfd, 
 		  intcore->c_len - sizeof (extcore->c_ucode) + (unsigned char *)extcore);
+
   /* Supposedly the user stack grows downward from the bottom of kernel memory.
-     Presuming that this remains true, this definition will work. */
-#define SPARC_USRSTACK (-(128*1024*1024))
-  intcore->c_stacktop = SPARC_USRSTACK;	/* By experimentation */
+     Presuming that this remains true, this definition will work.  */
+  /* Now sun has provided us with another challenge.  The value is different
+     for sparc2 and sparc10 (both running SunOS 4.1.3).  We pick one or
+     the other based on the current value of the stack pointer.  This
+     loses (a) if the stack pointer has been clobbered, or (b) if the stack
+     is larger than 128 megabytes.
+
+     It's times like these you're glad they're switching to ELF.
+
+     Note that using include files or nlist on /vmunix would be wrong,
+     because we want the value for this core file, no matter what kind of
+     machine we were compiled on or are running on.  */
+#define SPARC_USRSTACK_SPARC2 ((bfd_vma)0xf8000000)
+#define SPARC_USRSTACK_SPARC10 ((bfd_vma)0xf0000000)
+  {
+    bfd_vma sp = bfd_h_get_32
+      (abfd, (unsigned char *)&((struct regs *)&extcore->c_regs[0])->r_o6);
+    if (sp < SPARC_USRSTACK_SPARC10)
+      intcore->c_stacktop = SPARC_USRSTACK_SPARC10;
+    else
+      intcore->c_stacktop = SPARC_USRSTACK_SPARC2;
+  }
 }
 
 /* need this cast because ptr is really void * */
@@ -525,32 +546,7 @@ DEFUN(sunos4_core_file_matches_executable_p, (core_bfd, exec_bfd),
 		  sizeof (struct internal_exec)) == 0) ? true : false;
 }
 
-extern reloc_howto_type aout_32_ext_howto_table[];
-
-static reloc_howto_type *
-DEFUN (sunos4_reloc_type_lookup, (abfd, code),
-       bfd *abfd AND
-       bfd_reloc_code_real_type code)
-{
-  switch (bfd_get_arch (abfd))
-    {
-    default:
-      return 0;
-    case bfd_arch_sparc:
-      switch (code)
-	{
-	default:
-	  return 0;
-#define IDX(i,j)	case i: return &aout_32_ext_howto_table[j]
-	  IDX (BFD_RELOC_CTOR, 2);
-	  IDX (BFD_RELOC_32, 2);
-	  IDX (BFD_RELOC_HI22, 8);
-	  IDX (BFD_RELOC_LO10, 11);
-	  IDX (BFD_RELOC_32_PCREL_S2, 6);
-	}
-    }
-}
-
+#define MY_set_sizes sunos4_set_sizes
 static boolean
 DEFUN (sunos4_set_sizes, (abfd),
        bfd *abfd)
@@ -582,9 +578,10 @@ static CONST struct aout_backend_data sunos4_aout_backend = {
 
 #define MY_bfd_debug_info_start		bfd_void
 #define MY_bfd_debug_info_end		bfd_void
-#define MY_bfd_debug_info_accumulate	(PROTO(void,(*),(bfd*, struct sec *))) bfd_void
-#define MY_core_file_p sunos4_core_file_p
-#define MY_write_object_contents NAME(aout,sunos4_write_object_contents)
+#define MY_bfd_debug_info_accumulate	\
+			(void (*) PARAMS ((bfd *, struct sec *))) bfd_void
+#define MY_core_file_p			sunos4_core_file_p
+#define MY_write_object_contents	NAME(aout,sunos4_write_object_contents)
 #define MY_backend_data			&sunos4_aout_backend
 
 #define TARGET_IS_BIG_ENDIAN_P

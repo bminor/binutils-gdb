@@ -1,3 +1,8 @@
+Fri Apr 16 17:49:27 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* aoutf1.h (internal_sunos_core): Make c_stacktop a bfd_vma.
+	(swapcore_sparc): Make sp a bfd_vma.
+
 Thu Apr 15 09:09:18 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* libbfd.c: Add signed versions of bfd_{h_,}{get,put}_signed_<size>.
