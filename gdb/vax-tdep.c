@@ -177,6 +177,63 @@ vax_frame_num_args (struct frame_info *fi)
 {
   return (0xff & read_memory_integer (FRAME_ARGS_ADDRESS (fi), 1));
 }
+
+CORE_ADDR
+vax_frame_chain (struct frame_info *frame)
+{
+  /* In the case of the VAX, the frame's nominal address is the FP value,
+     and 12 bytes later comes the saved previous FP value as a 4-byte word.  */
+  if (inside_entry_file (frame->pc))
+    return (0);
+
+  return (read_memory_integer (frame->frame + 12, 4));
+}
+
+void
+vax_push_dummy_frame (void)
+{
+  CORE_ADDR sp = read_register (SP_REGNUM);
+  int regnum;
+
+  sp = push_word (sp, 0);	/* arglist */
+  for (regnum = 11; regnum >= 0; regnum--)
+    sp = push_word (sp, read_register (regnum));
+  sp = push_word (sp, read_register (PC_REGNUM));
+  sp = push_word (sp, read_register (FP_REGNUM));
+  sp = push_word (sp, read_register (AP_REGNUM));
+  sp = push_word (sp, (read_register (PS_REGNUM) & 0xffef) + 0x2fff0000);
+  sp = push_word (sp, 0);
+  write_register (SP_REGNUM, sp);
+  write_register (FP_REGNUM, sp);
+  write_register (AP_REGNUM, sp + (17 * 4));
+}
+
+void
+vax_pop_frame (void)
+{
+  CORE_ADDR fp = read_register (FP_REGNUM);
+  int regnum;
+  int regmask = read_memory_integer (fp + 4, 4);
+
+  write_register (PS_REGNUM,
+		  (regmask & 0xffff)
+		  | (read_register (PS_REGNUM) & 0xffff0000));
+  write_register (PC_REGNUM, read_memory_integer (fp + 16, 4));
+  write_register (FP_REGNUM, read_memory_integer (fp + 12, 4));
+  write_register (AP_REGNUM, read_memory_integer (fp + 8, 4));
+  fp += 16;
+  for (regnum = 0; regnum < 12; regnum++)
+    if (regmask & (0x10000 << regnum))
+      write_register (regnum, read_memory_integer (fp += 4, 4));
+  fp = fp + 4 + ((regmask >> 30) & 3);
+  if (regmask & 0x20000000)
+    {
+      regnum = read_memory_integer (fp, 4);
+      fp += (regnum + 1) * 4;
+    }
+  write_register (SP_REGNUM, fp);
+  flush_cached_frames ();
+}
 
 void
 vax_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)

@@ -1,5 +1,16 @@
 2002-04-22  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* vax-tdep.c (vax_frame_chain): New function.
+	(vax_push_dummy_frame): Ditto.
+	(vax_pop_frame): Ditto.
+	* config/vax/tm-vax.h (FRAME_CHAIN): vax_frame_chain.
+	(FRAMELESS_FUNCTION_INVOCATION): Use
+	generic_frameless_function_invocation_not.
+	(PUSH_DUMMY_FRAME): Use vax_push_dummy_frame.
+	(POP_FRAME): Use vax_pop_frame.
+
+2002-04-22  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* vax-tdep.c (vax_store_struct_return): New function.
 	(vax_extract_return_value): Ditto.
 	(vax_store_return_value): Ditto.
