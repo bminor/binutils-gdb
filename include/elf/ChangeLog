@@ -1,3 +1,16 @@
+Sun Sep 20 00:54:22 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* m68k.h: Add vtable relocs and R_68K_max.
+
+Tue Sep 15 09:56:49 CDT 1998  Catherine Moore  <clm@cygnus.com>
+
+       * arm.h:  Add vtable relocs.
+
+Mon Aug 31 11:25:27 1998  Catherine Moore  <clm@cygnus.com>
+
+        * arm.h:  Define STT_ARM_TFUNC.  Remove ST_THUMB_xxxx
+        definitions.
+
 Sat Aug 29 22:25:51 1998  Richard Henderson  <rth@cygnus.com>
 
 	* i386.h: Add vtable relocs.
