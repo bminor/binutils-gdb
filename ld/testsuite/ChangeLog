@@ -1,3 +1,22 @@
+Fri May 29 15:02:50 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-srec/srec.exp: Add xfails for powerpc*-*-eabi.
+ 	(run_srec_test): On mn10200, define __truncsipsi2_do_d2.
+	* ld-srec/sr1.c (__main): Change return type to void.
+	* ld-srec/sr3.cc (__main): Likewise.
+	(__builtin_delete, __builtin_new): Likewise.
+	(__get_dynamic_handler_chain): Return 0.
+	(__get_eh_context): Likewise.
+
+Thu May 21 15:21:33 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* ld-undefined/undefined.exp: Add support for thumb-pe target.
+	* ld-srec/srec.exp: Add support for arm-pe and thumb-pe targets.
+
+Mon May  4 17:54:20 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* ld-shared/shared.exp: Remove setup_xfails for m68k-linux.
+
 Mon May  4 17:12:06 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld-shared/main.c (shlib_overriddencall2): New function.
