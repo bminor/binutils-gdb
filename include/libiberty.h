@@ -23,7 +23,7 @@ extern void freeargv PARAMS ((char **));
 
 /* Return the last component of a path name.  */
 
-extern char *basename PARAMS ((char *));
+extern char *basename PARAMS ((const char *));
 
 /* Concatenate an arbitrary number of strings, up to (char *) NULL.
    Allocates memory using xmalloc.  */
@@ -117,7 +117,7 @@ extern PTR xrealloc ();
 #define _hex_bad	99
 extern char _hex_value[_hex_array_size];
 extern void hex_init PARAMS ((void));
-#define hex_p(c)	(hex_value (c) == _hex_bad)
+#define hex_p(c)	(hex_value (c) != _hex_bad)
 /* If you change this, note well: Some code relies on side effects in
    the argument being performed exactly once.  */
 #define hex_value(c)	(_hex_value[(unsigned char) (c)])

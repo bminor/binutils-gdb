@@ -1,3 +1,7 @@
+Thu Feb  9 14:20:27 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* libiberty.h (basename): Change argument to be const.
+
 Wed Feb  8 17:35:38 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* bfdlink.h (struct bfd_link_hash_entry): Change format of common
