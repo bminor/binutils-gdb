@@ -1,3 +1,9 @@
+Wed Feb 28 11:00:24 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf.c (assign_file_positions_for_segments): Adjust the segment
+	memory size for the alignment of a SEC_ALLOC section, not just a
+	SEC_LOAD section.
+
 Tue Feb 27 14:17:31 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* m68klinux.c: New file.

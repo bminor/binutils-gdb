@@ -2070,7 +2070,7 @@ assign_file_positions_for_segments (abfd)
 
 	      /* The section VMA must equal the file position modulo
                  the page size.  */
-	      if ((flags & SEC_LOAD) != 0)
+	      if ((flags & SEC_ALLOC) != 0)
 		{
 		  adjust = (sec->vma - off) % bed->maxpagesize;
 		  if (adjust != 0)
@@ -2079,8 +2079,10 @@ assign_file_positions_for_segments (abfd)
 			abort ();
 		      p->p_memsz += adjust;
 		      if ((flags & SEC_LOAD) != 0)
-			p->p_filesz += adjust;
-		      off += adjust;
+			{
+			  p->p_filesz += adjust;
+			  off += adjust;
+			}
 		    }
 		}
 
