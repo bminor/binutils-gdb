@@ -1,3 +1,8 @@
+2004-08-26  Paul Gilliam  <pgilliam@us.ibm.com>
+
+	* gdb.base/call-sc.exp (test_scalar_returns): Make sure PC is
+	synchronized after the "return".
+
 2004-08-26  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.mi/basics.c: Include <stdio.h>.

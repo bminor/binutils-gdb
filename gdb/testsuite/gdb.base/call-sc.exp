@@ -281,6 +281,30 @@ proc test_scalar_returns { } {
 	}
     }
 
+    # If the previous test did not work, the program counter might
+    # still be inside foo() rather than main().  Make sure the program
+    # counter is is main().
+    #
+    # This happens on ppc64 GNU/Linux with gcc 3.4.1 and a buggy GDB
+
+    set test "return foo; synchronize pc to main()"
+    for {set loop_count 0} {$loop_count < 2} {incr loop_count} {
+      gdb_test_multiple "backtrace 1" $test {
+        -re "#0.*main \\(\\).*${gdb_prompt} $" {
+          pass $test
+          set loop_count 2
+        }
+        -re "#0.*fun \\(\\).*${gdb_prompt} $" {
+          if {$loop_count < 1} {
+            gdb_test "finish" ".*" ""
+          } else {
+            fail $test
+            set loop_count 2
+          }
+        }
+      }
+    }
+
     # Check that the return-value is as expected.  At this stage we're
     # just checking that GDB has returned a value consistent with
     # "return_value_unknown" set above.
