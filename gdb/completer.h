@@ -19,6 +19,8 @@
 #if !defined (COMPLETER_H)
 #define COMPLETER_H 1
 
+extern char **complete_line (char *text, char *line_buffer, int point);
+
 extern char *line_completion_function (char *, int, char *, int);
 
 extern char *readline_line_completion_function (char *text, int matches);

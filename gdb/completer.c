@@ -369,6 +369,242 @@ command_completer (char *text, char *word)
    "file ../gdb.stabs/we" "ird" (needs to not break word at slash)
  */
 
+/* Generate completions all at once.  Returns a NULL-terminated array
+   of strings.  Both the array and each element are allocated with
+   xmalloc.  It can also return NULL if there are no completions.
+
+   TEXT is the caller's idea of the "word" we are looking at.
+
+   LINE_BUFFER is available to be looked at; it contains the entire text
+   of the line.  POINT is the offset in that line of the cursor.  You
+   should pretend that the line ends at POINT.  */
+
+char **
+complete_line (char *text, char *line_buffer, int point)
+{
+  char **list = NULL;
+  char *tmp_command, *p;
+  /* Pointer within tmp_command which corresponds to text.  */
+  char *word;
+  struct cmd_list_element *c, *result_list;
+
+  /* Choose the default set of word break characters to break completions.
+     If we later find out that we are doing completions on command strings
+     (as opposed to strings supplied by the individual command completer
+     functions, which can be any string) then we will switch to the
+     special word break set for command strings, which leaves out the
+     '-' character used in some commands.  */
+
+  rl_completer_word_break_characters =
+    gdb_completer_word_break_characters;
+
+      /* Decide whether to complete on a list of gdb commands or on symbols. */
+  tmp_command = (char *) alloca (point + 1);
+  p = tmp_command;
+
+  strncpy (tmp_command, line_buffer, point);
+  tmp_command[point] = '\0';
+  /* Since text always contains some number of characters leading up
+     to point, we can find the equivalent position in tmp_command
+     by subtracting that many characters from the end of tmp_command.  */
+  word = tmp_command + point - strlen (text);
+
+  if (point == 0)
+    {
+      /* An empty line we want to consider ambiguous; that is, it
+	 could be any command.  */
+      c = (struct cmd_list_element *) -1;
+      result_list = 0;
+    }
+  else
+    {
+      c = lookup_cmd_1 (&p, cmdlist, &result_list, 1);
+    }
+
+  /* Move p up to the next interesting thing.  */
+  while (*p == ' ' || *p == '\t')
+    {
+      p++;
+    }
+
+  if (!c)
+    {
+      /* It is an unrecognized command.  So there are no
+	 possible completions.  */
+      list = NULL;
+    }
+  else if (c == (struct cmd_list_element *) -1)
+    {
+      char *q;
+
+      /* lookup_cmd_1 advances p up to the first ambiguous thing, but
+	 doesn't advance over that thing itself.  Do so now.  */
+      q = p;
+      while (*q && (isalnum (*q) || *q == '-' || *q == '_'))
+	++q;
+      if (q != tmp_command + point)
+	{
+	  /* There is something beyond the ambiguous
+	     command, so there are no possible completions.  For
+	     example, "info t " or "info t foo" does not complete
+	     to anything, because "info t" can be "info target" or
+	     "info terminal".  */
+	  list = NULL;
+	}
+      else
+	{
+	  /* We're trying to complete on the command which was ambiguous.
+	     This we can deal with.  */
+	  if (result_list)
+	    {
+	      list = complete_on_cmdlist (*result_list->prefixlist, p,
+					  word);
+	    }
+	  else
+	    {
+	      list = complete_on_cmdlist (cmdlist, p, word);
+	    }
+	  /* Insure that readline does the right thing with respect to
+	     inserting quotes.  */
+	  rl_completer_word_break_characters =
+	    gdb_completer_command_word_break_characters;
+	}
+    }
+  else
+    {
+      /* We've recognized a full command.  */
+
+      if (p == tmp_command + point)
+	{
+	  /* There is no non-whitespace in the line beyond the command.  */
+
+	  if (p[-1] == ' ' || p[-1] == '\t')
+	    {
+	      /* The command is followed by whitespace; we need to complete
+		 on whatever comes after command.  */
+	      if (c->prefixlist)
+		{
+		  /* It is a prefix command; what comes after it is
+		     a subcommand (e.g. "info ").  */
+		  list = complete_on_cmdlist (*c->prefixlist, p, word);
+
+		  /* Insure that readline does the right thing
+		         with respect to inserting quotes.  */
+		  rl_completer_word_break_characters =
+		    gdb_completer_command_word_break_characters;
+		}
+	      else if (c->enums)
+		{
+		  list = complete_on_enum (c->enums, p, word);
+		  rl_completer_word_break_characters =
+		    gdb_completer_command_word_break_characters;
+		}
+	      else
+		{
+		  /* It is a normal command; what comes after it is
+		     completed by the command's completer function.  */
+		  if (c->completer == filename_completer)
+		    {
+		      /* Many commands which want to complete on
+			 file names accept several file names, as
+			 in "run foo bar >>baz".  So we don't want
+			 to complete the entire text after the
+			 command, just the last word.  To this
+			 end, we need to find the beginning of the
+			 file name by starting at `word' and going
+			 backwards.  */
+		      for (p = word;
+			   p > tmp_command
+			     && strchr (gdb_completer_file_name_break_characters, p[-1]) == NULL;
+			   p--)
+			;
+		      rl_completer_word_break_characters =
+			gdb_completer_file_name_break_characters;
+		    }
+		  else if (c->completer == location_completer)
+		    {
+		      /* Commands which complete on locations want to
+			 see the entire argument.  */
+		      for (p = word;
+			   p > tmp_command
+			     && p[-1] != ' ' && p[-1] != '\t';
+			   p--)
+			;
+		    }
+		  list = (*c->completer) (p, word);
+		}
+	    }
+	  else
+	    {
+	      /* The command is not followed by whitespace; we need to
+		 complete on the command itself.  e.g. "p" which is a
+		 command itself but also can complete to "print", "ptype"
+		 etc.  */
+	      char *q;
+
+	      /* Find the command we are completing on.  */
+	      q = p;
+	      while (q > tmp_command)
+		{
+		  if (isalnum (q[-1]) || q[-1] == '-' || q[-1] == '_')
+		    --q;
+		  else
+		    break;
+		}
+
+	      list = complete_on_cmdlist (result_list, q, word);
+
+		  /* Insure that readline does the right thing
+		     with respect to inserting quotes.  */
+	      rl_completer_word_break_characters =
+		gdb_completer_command_word_break_characters;
+	    }
+	}
+      else
+	{
+	  /* There is non-whitespace beyond the command.  */
+
+	  if (c->prefixlist && !c->allow_unknown)
+	    {
+	      /* It is an unrecognized subcommand of a prefix command,
+		 e.g. "info adsfkdj".  */
+	      list = NULL;
+	    }
+	  else if (c->enums)
+	    {
+	      list = complete_on_enum (c->enums, p, word);
+	    }
+	  else
+	    {
+	      /* It is a normal command.  */
+	      if (c->completer == filename_completer)
+		{
+		  /* See the commentary above about the specifics
+		     of file-name completion.  */
+		  for (p = word;
+		       p > tmp_command
+			 && strchr (gdb_completer_file_name_break_characters, p[-1]) == NULL;
+		       p--)
+		    ;
+		  rl_completer_word_break_characters =
+		    gdb_completer_file_name_break_characters;
+		}
+	      else if (c->completer == location_completer)
+		{
+		  for (p = word;
+		       p > tmp_command
+			 && p[-1] != ' ' && p[-1] != '\t';
+		       p--)
+		    ;
+		}
+	      list = (*c->completer) (p, word);
+	    }
+	}
+    }
+
+  return list;
+}
+
 /* Generate completions one by one for the completer.  Each time we are
    called return another potential completion to the caller.
    line_completion just completes on commands or passes the buck to the
@@ -396,10 +632,6 @@ line_completion_function (char *text, int matches, char *line_buffer, int point)
   static char **list = (char **) NULL;	/* Cache of completions */
   static int index;		/* Next cached completion */
   char *output = NULL;
-  char *tmp_command, *p;
-  /* Pointer within tmp_command which corresponds to text.  */
-  char *word;
-  struct cmd_list_element *c, *result_list;
 
   if (matches == 0)
     {
@@ -413,222 +645,8 @@ line_completion_function (char *text, int matches, char *line_buffer, int point)
 	     This is because rl_complete_internal () frees the strings. */
 	  xfree (list);
 	}
-      list = 0;
       index = 0;
-
-      /* Choose the default set of word break characters to break completions.
-         If we later find out that we are doing completions on command strings
-         (as opposed to strings supplied by the individual command completer
-         functions, which can be any string) then we will switch to the
-         special word break set for command strings, which leaves out the
-         '-' character used in some commands.  */
-
-      rl_completer_word_break_characters =
-	gdb_completer_word_break_characters;
-
-      /* Decide whether to complete on a list of gdb commands or on symbols. */
-      tmp_command = (char *) alloca (point + 1);
-      p = tmp_command;
-
-      strncpy (tmp_command, line_buffer, point);
-      tmp_command[point] = '\0';
-      /* Since text always contains some number of characters leading up
-         to point, we can find the equivalent position in tmp_command
-         by subtracting that many characters from the end of tmp_command.  */
-      word = tmp_command + point - strlen (text);
-
-      if (point == 0)
-	{
-	  /* An empty line we want to consider ambiguous; that is, it
-	     could be any command.  */
-	  c = (struct cmd_list_element *) -1;
-	  result_list = 0;
-	}
-      else
-	{
-	  c = lookup_cmd_1 (&p, cmdlist, &result_list, 1);
-	}
-
-      /* Move p up to the next interesting thing.  */
-      while (*p == ' ' || *p == '\t')
-	{
-	  p++;
-	}
-
-      if (!c)
-	{
-	  /* It is an unrecognized command.  So there are no
-	     possible completions.  */
-	  list = NULL;
-	}
-      else if (c == (struct cmd_list_element *) -1)
-	{
-	  char *q;
-
-	  /* lookup_cmd_1 advances p up to the first ambiguous thing, but
-	     doesn't advance over that thing itself.  Do so now.  */
-	  q = p;
-	  while (*q && (isalnum (*q) || *q == '-' || *q == '_'))
-	    ++q;
-	  if (q != tmp_command + point)
-	    {
-	      /* There is something beyond the ambiguous
-	         command, so there are no possible completions.  For
-	         example, "info t " or "info t foo" does not complete
-	         to anything, because "info t" can be "info target" or
-	         "info terminal".  */
-	      list = NULL;
-	    }
-	  else
-	    {
-	      /* We're trying to complete on the command which was ambiguous.
-	         This we can deal with.  */
-	      if (result_list)
-		{
-		  list = complete_on_cmdlist (*result_list->prefixlist, p,
-					      word);
-		}
-	      else
-		{
-		  list = complete_on_cmdlist (cmdlist, p, word);
-		}
-	      /* Insure that readline does the right thing with respect to
-	         inserting quotes.  */
-	      rl_completer_word_break_characters =
-		gdb_completer_command_word_break_characters;
-	    }
-	}
-      else
-	{
-	  /* We've recognized a full command.  */
-
-	  if (p == tmp_command + point)
-	    {
-	      /* There is no non-whitespace in the line beyond the command.  */
-
-	      if (p[-1] == ' ' || p[-1] == '\t')
-		{
-		  /* The command is followed by whitespace; we need to complete
-		     on whatever comes after command.  */
-		  if (c->prefixlist)
-		    {
-		      /* It is a prefix command; what comes after it is
-		         a subcommand (e.g. "info ").  */
-		      list = complete_on_cmdlist (*c->prefixlist, p, word);
-
-		      /* Insure that readline does the right thing
-		         with respect to inserting quotes.  */
-		      rl_completer_word_break_characters =
-			gdb_completer_command_word_break_characters;
-		    }
-		  else if (c->enums)
-		    {
-		      list = complete_on_enum (c->enums, p, word);
-		      rl_completer_word_break_characters =
-			gdb_completer_command_word_break_characters;
-		    }
-		  else
-		    {
-		      /* It is a normal command; what comes after it is
-		         completed by the command's completer function.  */
-		      if (c->completer == filename_completer)
-			{
-			  /* Many commands which want to complete on
-			     file names accept several file names, as
-			     in "run foo bar >>baz".  So we don't want
-			     to complete the entire text after the
-			     command, just the last word.  To this
-			     end, we need to find the beginning of the
-			     file name by starting at `word' and going
-			     backwards.  */
-			  for (p = word;
-			       p > tmp_command
-				 && strchr (gdb_completer_file_name_break_characters, p[-1]) == NULL;
-			       p--)
-			    ;
-			  rl_completer_word_break_characters =
-			    gdb_completer_file_name_break_characters;
-			}
-		      else if (c->completer == location_completer)
-			{
-			  /* Commands which complete on locations want to
-			     see the entire argument.  */
-			  for (p = word;
-			       p > tmp_command
-				 && p[-1] != ' ' && p[-1] != '\t';
-			       p--)
-			    ;
-			}
-		      list = (*c->completer) (p, word);
-		    }
-		}
-	      else
-		{
-		  /* The command is not followed by whitespace; we need to
-		     complete on the command itself.  e.g. "p" which is a
-		     command itself but also can complete to "print", "ptype"
-		     etc.  */
-		  char *q;
-
-		  /* Find the command we are completing on.  */
-		  q = p;
-		  while (q > tmp_command)
-		    {
-		      if (isalnum (q[-1]) || q[-1] == '-' || q[-1] == '_')
-			--q;
-		      else
-			break;
-		    }
-
-		  list = complete_on_cmdlist (result_list, q, word);
-
-		  /* Insure that readline does the right thing
-		     with respect to inserting quotes.  */
-		  rl_completer_word_break_characters =
-		    gdb_completer_command_word_break_characters;
-		}
-	    }
-	  else
-	    {
-	      /* There is non-whitespace beyond the command.  */
-
-	      if (c->prefixlist && !c->allow_unknown)
-		{
-		  /* It is an unrecognized subcommand of a prefix command,
-		     e.g. "info adsfkdj".  */
-		  list = NULL;
-		}
-	      else if (c->enums)
-		{
-		  list = complete_on_enum (c->enums, p, word);
-		}
-	      else
-		{
-		  /* It is a normal command.  */
-		  if (c->completer == filename_completer)
-		    {
-		      /* See the commentary above about the specifics
-			 of file-name completion.  */
-		      for (p = word;
-			   p > tmp_command
-			     && strchr (gdb_completer_file_name_break_characters, p[-1]) == NULL;
-			   p--)
-			;
-		      rl_completer_word_break_characters =
-			gdb_completer_file_name_break_characters;
-		    }
-		  else if (c->completer == location_completer)
-		    {
-		      for (p = word;
-			   p > tmp_command
-			     && p[-1] != ' ' && p[-1] != '\t';
-			   p--)
-			;
-		    }
-		  list = (*c->completer) (p, word);
-		}
-	    }
-	}
+      list = complete_line (text, line_buffer, point);
     }
 
   /* If we found a list of potential completions during initialization then

@@ -201,6 +201,15 @@ help_command (char *command, int from_tty)
   help_cmd (command, gdb_stdout);
 }
 
+/* String compare function for qsort.  */
+static int
+compare_strings (const void *arg1, const void *arg2)
+{
+  const char **s1 = (const char **) arg1;
+  const char **s2 = (const char **) arg2;
+  return strcmp (*s1, *s2);
+}
+
 /* The "complete" command is used by Emacs to implement completion.  */
 
 /* ARGSUSED */
@@ -209,7 +218,7 @@ complete_command (char *arg, int from_tty)
 {
   int i;
   int argpoint;
-  char *completion;
+  char **completions;
 
   dont_repeat ();
 
@@ -217,12 +226,36 @@ complete_command (char *arg, int from_tty)
     arg = "";
   argpoint = strlen (arg);
 
-  for (completion = line_completion_function (arg, i = 0, arg, argpoint);
-       completion;
-       completion = line_completion_function (arg, ++i, arg, argpoint))
+  completions = complete_line (arg, arg, argpoint);
+
+  if (completions)
     {
-      printf_unfiltered ("%s\n", completion);
-      xfree (completion);
+      int item, size;
+
+      for (size = 0; completions[size]; ++size)
+	;
+      qsort (completions, size, sizeof (char *), compare_strings);
+
+      /* We do extra processing here since we only want to print each
+	 unique item once.  */
+      item = 0;
+      while (item < size)
+	{
+	  int next_item;
+	  printf_unfiltered ("%s\n", completions[item]);
+	  next_item = item + 1;
+	  while (next_item < size
+		 && ! strcmp (completions[item], completions[next_item]))
+	    {
+	      xfree (completions[next_item]);
+	      ++next_item;
+	    }
+
+	  xfree (completions[item]);
+	  item = next_item;
+	}
+
+      xfree (completions);
     }
 }
 

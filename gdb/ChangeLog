@@ -1,3 +1,11 @@
+2002-02-17  Tom Tromey  <tromey@redhat.com>
+
+	* cli/cli-cmds.c (compare_strings): New function.
+	(complete_command): Only print each unique item once.
+	* completer.h (complete_line): Declare.
+	* completer.c (complete_line): New function.
+	(line_completion_function): Use it.
+
 2002-02-16  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh (TARGET_LONG_DOUBLE_BIT): Default to 64.
