@@ -2130,7 +2130,8 @@ m68k_ip (instring)
 		opP->error = "out of range";
 	      insop (tmpreg, opcode);
 	      if (isvar (&opP->disp))
-		the_ins.reloc[the_ins.nrel - 1].n = (opcode->m_codenum) * 2;
+		the_ins.reloc[the_ins.nrel - 1].n =
+		  (opcode->m_codenum) * 2 + 1;
 	      break;
 	    case 'w':
 	      if (!isword (tmpreg))

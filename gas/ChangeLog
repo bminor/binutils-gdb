@@ -1,3 +1,8 @@
+Wed Feb 14 11:22:27 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* config/tc-m68k.c (m68k_ip) [operand kind '#']: When fixing
+	the byte relocation, point it to the low byte of the word.
+
 Tue Feb 13 15:31:18 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Set HDLFLAGS for *-*-hpux with --enable-shared.
