@@ -1,3 +1,14 @@
+2000-08-05  Jason Eckhardt  <jle@cygnus.com>
+
+	* elf32-i860 (elf32_i860_howto_table): New structure.
+	(lookup_howto): New function.
+	(elf32_i860_reloc_type_lookup): New function.
+	(elf32_i860_info_to_howto_rela): New function.
+	(elf_code_to_howto_index): New structure.
+	(elf_info_to_howto): Re-define as elf32_i860_info_to_howto_rela.
+	(bfd_elf32_bfd_reloc_type_lookup): Re-define as
+	elf32_i860_reloc_type_lookup.
+
 2000-08-04  Rodney Brown  <RodneyBrown@pmsc.com>
 
 	* som.c (struct fixup_format): Constify `format'.
