@@ -839,12 +839,15 @@ value_fn_field (arg1, fieldno, subfieldno)
    table pointer.  ARG1 is side-effected in calling this function.
    F is the list of member functions which contains the desired virtual
    function.
-   J is an index into F which provides the desired virtual function.  */
+   J is an index into F which provides the desired virtual function.
+
+   TYPE is the type in which F is located.  */
 value
-value_virtual_fn_field (arg1, f, j)
+value_virtual_fn_field (arg1, f, j, type)
      value arg1;
      struct fn_field *f;
      int j;
+     struct type *type;
 {
   /* First, get the virtual function table pointer.  That comes
      with a strange type, so cast it to type `pointer to long' (which
@@ -853,11 +856,21 @@ value_virtual_fn_field (arg1, f, j)
   value entry, vfn, vtbl;
   value vi = value_from_long (builtin_type_int, 
 			      (LONGEST) TYPE_FN_FIELD_VOFFSET (f, j));
-  struct type *context = lookup_pointer_type (TYPE_FN_FIELD_FCONTEXT (f, j));
+  struct type *fcontext = TYPE_FN_FIELD_FCONTEXT (f, j);
+  struct type *context;
+  if (fcontext == NULL)
+   /* We don't have an fcontext (e.g. the program was compiled with
+      g++ version 1).  Try to get the vtbl from the TYPE_VPTR_BASETYPE.
+      This won't work right for multiple inheritance, but at least we
+      should do as well as GDB 3.x did.  */
+    fcontext = TYPE_VPTR_BASETYPE (type);
+  context = lookup_pointer_type (fcontext);
+  /* Now context is a pointer to the basetype containing the vtbl.  */
   if (TYPE_TARGET_TYPE (context) != VALUE_TYPE (arg1))
     arg1 = value_ind (value_cast (context, value_addr (arg1)));
 
   context = VALUE_TYPE (arg1);
+  /* Now context is the basetype containing the vtbl.  */
 
   /* This type may have been defined before its virtual function table
      was.  If so, fill in the virtual function table entry for the

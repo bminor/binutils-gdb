@@ -1041,7 +1041,7 @@ search_struct_method (name, arg1, args, offset, static_memfuncp, type)
 			    TYPE_FN_FIELD_ARGS (f, j), args))
 		{
 		  if (TYPE_FN_FIELD_VIRTUAL_P (f, j))
-		    return (value)value_virtual_fn_field (arg1, f, j);
+		    return (value)value_virtual_fn_field (arg1, f, j, type);
 		  if (TYPE_FN_FIELD_STATIC_P (f, j) && static_memfuncp)
 		    *static_memfuncp = 1;
 		  return (value)value_fn_field (arg1, i, j);
