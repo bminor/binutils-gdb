@@ -1,3 +1,8 @@
+Mon Jan 18 10:30:51 1999  David Taylor  <taylor@texas.cygnus.com>
+
+	* remote-udi.c (init_udi_ops): change non-existant udi_run_ops to
+	udi_ops; delete NULL initializers.
+
 Mon Jan 18 12:03:47 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* serial.c (serial_close): gdb_fclose tages gdb_file** arg, not
