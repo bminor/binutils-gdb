@@ -1,3 +1,15 @@
+2003-03-28  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (d10v-tdep.o): Update dependencies.
+	* remote.h (target_resume_hook, target_wait_loop_hook): Declare.
+	* d10v-tdep.c: Include "remote.h".
+	(target_resume_hook): Delete extern declaration.
+	(target_wait_loop_hook): Ditto.
+	(tdisassemble_command): Eliminate assignment in "if" conditional.
+	(d10v_ts2_register_sim_regno): Eliminate call to
+	legacy_register_sim_regno.
+	(d10v_ts3_register_sim_regno): Ditto.
+
 2003-03-28  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* thread.c: Reindented.

@@ -38,7 +38,7 @@
 #include "language.h"
 #include "arch-utils.h"
 #include "regcache.h"
-
+#include "remote.h"
 #include "floatformat.h"
 #include "gdb/sim-d10v.h"
 #include "sim-regno.h"
@@ -276,8 +276,8 @@ d10v_imap_register (int reg_nr)
 static int
 d10v_ts2_register_sim_regno (int nr)
 {
-  if (legacy_register_sim_regno (nr) < 0)
-    return legacy_register_sim_regno (nr);
+  /* Only makes sense to supply raw registers.  */
+  gdb_assert (nr >= 0 && nr < NUM_REGS);
   if (nr >= TS2_IMAP0_REGNUM
       && nr < TS2_IMAP0_REGNUM + NR_IMAP_REGS)
     return nr - TS2_IMAP0_REGNUM + SIM_D10V_IMAP0_REGNUM;
@@ -292,8 +292,8 @@ d10v_ts2_register_sim_regno (int nr)
 static int
 d10v_ts3_register_sim_regno (int nr)
 {
-  if (legacy_register_sim_regno (nr) < 0)
-    return legacy_register_sim_regno (nr);
+  /* Only makes sense to supply raw registers.  */
+  gdb_assert (nr >= 0 && nr < NUM_REGS);
   if (nr >= TS3_IMAP0_REGNUM
       && nr < TS3_IMAP0_REGNUM + NR_IMAP_REGS)
     return nr - TS3_IMAP0_REGNUM + SIM_D10V_IMAP0_REGNUM;
@@ -1339,26 +1339,29 @@ tdisassemble_command (char *arg, int from_tty)
 {
   int i, count;
   CORE_ADDR low, high;
-  char *space_index;
 
   if (!arg)
     {
       low = 0;
       high = trace_data.size;
     }
-  else if (!(space_index = (char *) strchr (arg, ' ')))
-    {
-      low = parse_and_eval_address (arg);
-      high = low + 5;
-    }
   else
-    {
-      /* Two arguments.  */
-      *space_index = '\0';
-      low = parse_and_eval_address (arg);
-      high = parse_and_eval_address (space_index + 1);
-      if (high < low)
-	high = low;
+    { 
+      char *space_index = strchr (arg, ' ');
+      if (space_index == NULL)
+	{
+	  low = parse_and_eval_address (arg);
+	  high = low + 5;
+	}
+      else
+	{
+	  /* Two arguments.  */
+	  *space_index = '\0';
+	  low = parse_and_eval_address (arg);
+	  high = parse_and_eval_address (space_index + 1);
+	  if (high < low)
+	    high = low;
+	}
     }
 
   printf_filtered ("Dump of trace from %s to %s:\n", paddr_u (low), paddr_u (high));
@@ -1718,10 +1721,6 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   return gdbarch;
 }
-
-
-extern void (*target_resume_hook) (void);
-extern void (*target_wait_loop_hook) (void);
 
 void
 _initialize_d10v_tdep (void)
