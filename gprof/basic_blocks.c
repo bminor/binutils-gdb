@@ -47,13 +47,13 @@ DEFUN (cmp_bb, (lp, rp), const void *lp AND const void *rp)
       if (r)
 	{
 	  return r;
-	}			/* if */
+	}
 
       if (left->line_num != right->line_num)
 	{
 	  return left->line_num - right->line_num;
-	}			/* if */
-    }				/* if */
+	}
+    }
 
   if (left->addr < right->addr)
     {
@@ -66,8 +66,8 @@ DEFUN (cmp_bb, (lp, rp), const void *lp AND const void *rp)
   else
     {
       return 0;
-    }				/* if */
-}				/* cmp_bb */
+    }
+}
 
 
 /*
@@ -87,15 +87,15 @@ DEFUN (cmp_ncalls, (lp, rp), const void *lp AND const void *rp)
   else if (!right)
     {
       return -1;
-    }				/* if */
+    }
 
   if (right->ncalls != left->ncalls)
     {
       return right->ncalls - left->ncalls;
-    }				/* if */
+    }
 
   return left->line_num - right->line_num;
-}				/* cmp_ncalls */
+}
 
 
 /*
@@ -111,9 +111,9 @@ DEFUN (fskip_string, (fp), FILE * fp)
       if (ch == '\0')
 	{
 	  break;
-	}			/* if */
-    }				/* if */
-}				/* fskip_string */
+	}
+    }
+}
 
 
 /*
@@ -132,13 +132,13 @@ DEFUN (bb_read_rec, (ifp, filename), FILE * ifp AND const char *filename)
     {
       fprintf (stderr, "%s: %s: unexpected end of file\n", whoami, filename);
       done (1);
-    }				/* if */
+    }
 
   nblocks = bfd_get_32 (core_bfd, (bfd_byte *) & nblocks);
   if (gmon_file_version == 0)
     {
       fskip_string (ifp);
-    }				/* if */
+    }
 
   for (b = 0; b < nblocks; ++b)
     {
@@ -157,7 +157,7 @@ DEFUN (bb_read_rec, (ifp, filename), FILE * ifp AND const char *filename)
 	    {
 	      perror (filename);
 	      done (1);
-	    }			/* if */
+	    }
 	}
       else
 	{
@@ -166,8 +166,8 @@ DEFUN (bb_read_rec, (ifp, filename), FILE * ifp AND const char *filename)
 	    {
 	      perror (filename);
 	      done (1);
-	    }			/* if */
-	}			/* if */
+	    }
+	}
 
       /*
        * Basic-block execution counts are meaningful only if we're
@@ -197,11 +197,11 @@ DEFUN (bb_read_rec, (ifp, filename), FILE * ifp AND const char *filename)
 	      fprintf (stderr,
 		       "%s: warning: ignoring basic-block exec counts (use -l or --line)\n",
 		       whoami);
-	    }			/* if */
-	}			/* if */
-    }				/* for */
+	    }
+	}
+    }
   return;
-}				/* bb_read_rec */
+}
 
 
 /*
@@ -225,8 +225,8 @@ DEFUN (bb_write_blocks, (ofp, filename), FILE * ofp AND const char *filename)
       if (sym->ncalls > 0)
 	{
 	  ++nblocks;
-	}			/* if */
-    }				/* for */
+	}
+    }
 
   /* write header: */
   bfd_put_32 (core_bfd, nblocks, (bfd_byte *) & nblocks);
@@ -235,7 +235,7 @@ DEFUN (bb_write_blocks, (ofp, filename), FILE * ofp AND const char *filename)
     {
       perror (filename);
       done (1);
-    }				/* if */
+    }
 
   /* write counts: */
   for (sym = symtab.base; sym < symtab.limit; ++sym)
@@ -243,7 +243,7 @@ DEFUN (bb_write_blocks, (ofp, filename), FILE * ofp AND const char *filename)
       if (sym->ncalls == 0)
 	{
 	  continue;
-	}			/* if */
+	}
 
       put_vma (core_bfd, sym->addr, (bfd_byte *) & addr);
       bfd_put_32 (core_bfd, sym->ncalls, (bfd_byte *) & ncalls);
@@ -253,9 +253,9 @@ DEFUN (bb_write_blocks, (ofp, filename), FILE * ofp AND const char *filename)
 	{
 	  perror (filename);
 	  done (1);
-	}			/* if */
-    }				/* for */
-}				/* bb_write_blocks */
+	}
+    }
+}
 
 
 /*
@@ -277,7 +277,7 @@ DEFUN_VOID (print_exec_counts)
   else
     {
       printf ("\f\n");
-    }				/* if */
+    }
 
   /* sort basic-blocks according to function name and line number: */
 
@@ -297,8 +297,8 @@ DEFUN_VOID (print_exec_counts)
 		  && !sym_lookup (&syms[EXCL_EXEC], sym->addr))))
 	{
 	  sorted_bbs[len++] = sym;
-	}			/* if */
-    }				/* for */
+	}
+    }
   qsort (sorted_bbs, len, sizeof (sorted_bbs[0]), cmp_bb);
 
   /* output basic-blocks: */
@@ -309,9 +309,9 @@ DEFUN_VOID (print_exec_counts)
       printf ("%s:%d: (%s:0x%lx) %d executions\n",
 	      sym->file ? sym->file->name : "<unknown>", sym->line_num,
 	      sym->name, sym->addr, sym->ncalls);
-    }				/* for */
+    }
   free (sorted_bbs);
-}				/* print_exec_counts */
+}
 
 
 /*
@@ -330,13 +330,13 @@ DEFUN (annotate_with_count, (buf, width, line_num, arg),
   if (line_num == 1)
     {
       last_count = -1;
-    }				/* if */
+    }
 
   b = 0;
   if (line_num <= sf->num_lines)
     {
       b = sf->line[line_num - 1];
-    }				/* if */
+    }
   if (!b)
     {
       cnt = -1;
@@ -345,15 +345,15 @@ DEFUN (annotate_with_count, (buf, width, line_num, arg),
     {
       ++num_executable_lines;
       cnt = b->ncalls;
-    }				/* if */
+    }
   if (cnt > 0)
     {
       ++num_lines_executed;
-    }				/* if */
+    }
   if (cnt < 0 && bb_annotate_all_lines)
     {
       cnt = last_count;
-    }				/* if */
+    }
 
   if (cnt < 0)
     {
@@ -366,9 +366,9 @@ DEFUN (annotate_with_count, (buf, width, line_num, arg),
   else
     {
       sprintf (buf, "%12ld -> ", cnt);
-    }				/* if */
+    }
   last_count = cnt;
-}				/* annotate_with_count */
+}
 
 
 /*
@@ -402,8 +402,8 @@ DEFUN_VOID (print_annotated_source)
 		  && !sym_lookup (&syms[EXCL_ANNO], sym->addr))))
 	{
 	  sym->file->num_lines = sym->line_num;
-	}			/* if */
-    }				/* for */
+	}
+    }
 
   /* allocate line descriptors: */
 
@@ -413,8 +413,8 @@ DEFUN_VOID (print_annotated_source)
 	{
 	  sf->line = (void *) xmalloc (sf->num_lines * sizeof (sf->line[0]));
 	  memset (sf->line, 0, sf->num_lines * sizeof (sf->line[0]));
-	}			/* if */
-    }				/* for */
+	}
+    }
 
   /* count executions per line: */
 
@@ -445,9 +445,9 @@ DEFUN_VOID (print_annotated_source)
 	      new_line->addr = 0;
 	      new_line->ncalls += sym->ncalls;
 	      sym->file->line[sym->line_num - 1] = new_line;
-	    }			/* if */
-	}			/* if */
-    }				/* for */
+	    }
+	}
+    }
 
   /* plod over source files, annotating them: */
 
@@ -456,14 +456,14 @@ DEFUN_VOID (print_annotated_source)
       if (!sf->num_lines || (ignore_zeros && sf->ncalls == 0))
 	{
 	  continue;
-	}			/* if */
+	}
 
       num_executable_lines = num_lines_executed = 0;
       ofp = annotate_source (sf, 16, annotate_with_count, sf);
       if (!ofp)
 	{
 	  continue;
-	}			/* if */
+	}
 
       if (bb_table_length > 0)
 	{
@@ -476,17 +476,17 @@ DEFUN_VOID (print_annotated_source)
 	  if (table_len > sf->num_lines)
 	    {
 	      table_len = sf->num_lines;
-	    }			/* if */
+	    }
 	  for (i = 0; i < table_len; ++i)
 	    {
 	      sym = sf->line[i];
 	      if (!sym || sym->ncalls <= 0)
 		{
 		  break;
-		}		/* if */
+		}
 	      fprintf (ofp, "%9d %10d\n", sym->line_num, sym->ncalls);
-	    }			/* for */
-	}			/* if */
+	    }
+	}
 
       free (sf->line);
       sf->line = 0;
@@ -507,8 +507,6 @@ DEFUN_VOID (print_annotated_source)
       if (ofp != stdout)
 	{
 	  fclose (ofp);
-	}			/* if */
-    }				/* for */
-}				/* print_annotated_source */
-
-/*** end of basic_block.c ***/
+	}
+    }
+}

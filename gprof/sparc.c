@@ -38,15 +38,15 @@ find_call (parent, p_lowpc, p_highpc)
   if (core_text_space == 0)
     {
       return;
-    }				/* if */
+    }
   if (p_lowpc < s_lowpc)
     {
       p_lowpc = s_lowpc;
-    }				/* if */
+    }
   if (p_highpc > s_highpc)
     {
       p_highpc = s_highpc;
-    }				/* if */
+    }
   DBG (CALLDEBUG, printf ("[find_call] %s: 0x%lx to 0x%lx\n",
 			  parent->name, p_lowpc, p_highpc));
   for (instr = (unsigned int *) (p_lowpc + delta);
@@ -73,13 +73,12 @@ find_call (parent, p_lowpc, p_highpc)
 		  /* a hit:  */
 		  arc_add (parent, child, 0);
 		  continue;
-		}		/* if */
-	    }			/* if */
+		}
+	    }
 	  /*
 	   * Something funny going on.
 	   */
 	  DBG (CALLDEBUG, printf ("\tbut it's a botch\n"));
-	}			/* if */
-    }				/* for */
-}				/* find_call */
-/*** end of sparc.c ***/
+	}
+    }
+}

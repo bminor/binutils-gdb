@@ -23,7 +23,7 @@ DEFUN (search_list_append, (list, paths),
       else
 	{
 	  len = strlen (beg);
-	}			/* if */
+	}
       new_el = (Search_List_Elem *) xmalloc (sizeof (*new_el) + len);
       memcpy (new_el->path, beg, len);
       new_el->path[len] = '\0';
@@ -37,10 +37,8 @@ DEFUN (search_list_append, (list, paths),
       else
 	{
 	  list->head = new_el;
-	}			/* if */
+	}
       list->tail = new_el;
     }
   while (colon);
-}				/* search_list_append */
-
-/*** end of search_list.c ***/
+}

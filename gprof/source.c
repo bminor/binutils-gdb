@@ -28,8 +28,8 @@ DEFUN (source_file_lookup_path, (path), const char *path)
       if (strcmp (path, sf->name) == 0)
 	{
 	  break;
-	}			/* if */
-    }				/* for */
+	}
+    }
   if (!sf)
     {
       /* create a new source file descriptor: */
@@ -39,9 +39,9 @@ DEFUN (source_file_lookup_path, (path), const char *path)
       sf->name = strdup (path);
       sf->next = first_src_file;
       first_src_file = sf;
-    }				/* if */
+    }
   return sf;
-}				/* source_file_lookup_path */
+}
 
 
 Source_File *
@@ -65,14 +65,14 @@ DEFUN (source_file_lookup_name, (filename), const char *filename)
       else
 	{
 	  fname = sf->name;
-	}			/* if */
+	}
       if (strcmp (filename, fname) == 0)
 	{
 	  break;
-	}			/* if */
-    }				/* for */
+	}
+    }
   return sf;
-}				/* source_file_lookup_name */
+}
 
 
 FILE *
@@ -98,7 +98,7 @@ DEFUN (annotate_source, (sf, max_width, annote, arg),
   if (sf->name[0] == '/')
     {
       sle = 0;			/* don't use search list for absolute paths */
-    }				/* if */
+    }
   name_only = 0;
   while (TRUE)
     {
@@ -108,7 +108,7 @@ DEFUN (annotate_source, (sf, max_width, annote, arg),
       if (ifp)
 	{
 	  break;
-	}			/* if */
+	}
       if (!sle && !name_only)
 	{
 	  name_only = strrchr (sf->name, '/');
@@ -117,8 +117,8 @@ DEFUN (annotate_source, (sf, max_width, annote, arg),
 	      /* try search-list again, but this time with name only: */
 	      ++name_only;
 	      sle = src_search_list.head;
-	    }			/* if */
-	}			/* if */
+	    }
+	}
       if (sle)
 	{
 	  strcpy (fname, sle->path);
@@ -130,7 +130,7 @@ DEFUN (annotate_source, (sf, max_width, annote, arg),
 	  else
 	    {
 	      strcat (fname, sf->name);
-	    }			/* if */
+	    }
 	  sle = sle->next;
 	}
       else
@@ -143,10 +143,10 @@ DEFUN (annotate_source, (sf, max_width, annote, arg),
 	  else
 	    {
 	      perror (sf->name);
-	    }			/* if */
+	    }
 	  return 0;
-	}			/* if */
-    }				/* while */
+	}
+    }
 
   ofp = stdout;
   if (create_annotation_files)
@@ -163,7 +163,7 @@ DEFUN (annotate_source, (sf, max_width, annote, arg),
       else
 	{
 	  filename = sf->name;
-	}			/* if */
+	}
 
       strcpy (fname, filename);
       strcat (fname, EXT_ANNO);
@@ -172,8 +172,8 @@ DEFUN (annotate_source, (sf, max_width, annote, arg),
 	{
 	  perror (fname);
 	  return 0;
-	}			/* if */
-    }				/* if */
+	}
+    }
 
   /*
    * Print file names if output goes to stdout and there are
@@ -188,7 +188,7 @@ DEFUN (annotate_source, (sf, max_width, annote, arg),
       else
 	{
 	  fputc ('\n', ofp);
-	}			/* if */
+	}
       if (first_output)
 	{
 	  first_output = FALSE;
@@ -196,9 +196,9 @@ DEFUN (annotate_source, (sf, max_width, annote, arg),
       else
 	{
 	  fprintf (ofp, "\f\n");
-	}			/* if */
+	}
       fprintf (ofp, "*** File %s:\n", sf->name);
-    }				/* if */
+    }
 
   annotation = xmalloc (max_width + 1);
   line_num = 1;
@@ -213,13 +213,11 @@ DEFUN (annotate_source, (sf, max_width, annote, arg),
 	      fputs (annotation, ofp);
 	      ++line_num;
 	      new_line = FALSE;
-	    }			/* if */
+	    }
 	  new_line = (buf[i] == '\n');
 	  fputc (buf[i], ofp);
-	}			/* for */
-    }				/* while */
+	}
+    }
   free (annotation);
   return ofp;
-}				/* annotate_source */
-
-/*** end of source.c ***/
+}

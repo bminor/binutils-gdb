@@ -28,7 +28,7 @@ DEFUN_VOID (print_header)
   else
     {
       printf ("\f\n");
-    }				/* if */
+    }
   if (!bsd_style_output)
     {
       if (print_descriptions)
@@ -38,8 +38,8 @@ DEFUN_VOID (print_header)
       else
 	{
 	  printf ("\t\t\tCall graph\n\n");
-	}			/* if */
-    }				/* if */
+	}
+    }
   printf ("\ngranularity: each sample hit covers %ld byte(s)",
 	  (long) hist_scale * sizeof (UNIT));
   if (print_time > 0.0)
@@ -54,7 +54,7 @@ DEFUN_VOID (print_header)
        * This doesn't hurt, since all the numerators will be 0.0:
        */
       print_time = 1.0;
-    }				/* if */
+    }
   if (bsd_style_output)
     {
       printf ("%6.6s %5.5s %7.7s %11.11s %7.7s/%-7.7s     %-8.8s\n",
@@ -69,8 +69,8 @@ DEFUN_VOID (print_header)
   else
     {
       printf ("index %% time    self  children    called     name\n");
-    }				/* if */
-}				/* print_header */
+    }
+}
 
 
 /*
@@ -92,9 +92,9 @@ DEFUN (print_cycle, (cyc), Sym * cyc)
   else
     {
       printf (" %7.7s", "");
-    }				/* if */
+    }
   printf (" <cycle %d as a whole>\t[%d]\n", cyc->cg.cyc.num, cyc->cg.index);
-}				/* print_cycle */
+}
 
 
 /*
@@ -112,22 +112,22 @@ DEFUN (cmp_member, (left, right), Sym * left AND Sym * right)
   if (left_time > right_time)
     {
       return GREATERTHAN;
-    }				/* if */
+    }
   if (left_time < right_time)
     {
       return LESSTHAN;
-    }				/* if */
+    }
 
   if (left_calls > right_calls)
     {
       return GREATERTHAN;
-    }				/* if */
+    }
   if (left_calls < right_calls)
     {
       return LESSTHAN;
-    }				/* if */
+    }
   return EQUALTO;
-}				/* cmp_member */
+}
 
 
 /*
@@ -151,12 +151,12 @@ DEFUN (sort_members, (cyc), Sym * cyc)
 	  if (cmp_member (doing, prev->cg.cyc.next) == GREATERTHAN)
 	    {
 	      break;
-	    }			/* if */
-	}			/* for */
+	    }
+	}
       doing->cg.cyc.next = prev->cg.cyc.next;
       prev->cg.cyc.next = doing;
-    }				/* for */
-}				/* sort_members */
+    }
+}
 
 
 /*
@@ -180,12 +180,12 @@ DEFUN (print_members, (cyc), Sym * cyc)
       else
 	{
 	  printf (" %7.7s", "");
-	}			/* if */
+	}
       printf ("     ");
       print_name (member);
       printf ("\n");
-    }				/* for */
-}				/* print_members */
+    }
+}
 
 
 /*
@@ -224,11 +224,11 @@ DEFUN (cmp_arc, (left, right), Arc * left AND Arc * right)
   if (left_parent == left_child)
     {
       return LESSTHAN;		/* left is a self call */
-    }				/* if */
+    }
   if (right_parent == right_child)
     {
       return GREATERTHAN;	/* right is a self call */
-    }				/* if */
+    }
 
   if (left_parent->cg.cyc.num != 0 && left_child->cg.cyc.num != 0
       && left_parent->cg.cyc.num == left_child->cg.cyc.num)
@@ -241,18 +241,18 @@ DEFUN (cmp_arc, (left, right), Arc * left AND Arc * right)
 	  if (left->count < right->count)
 	    {
 	      return LESSTHAN;
-	    }			/* if */
+	    }
 	  if (left->count > right->count)
 	    {
 	      return GREATERTHAN;
-	    }			/* if */
+	    }
 	  return EQUALTO;
 	}
       else
 	{
 	  /* right isn't a call within the cycle */
 	  return LESSTHAN;
-	}			/* if */
+	}
     }
   else
     {
@@ -271,23 +271,23 @@ DEFUN (cmp_arc, (left, right), Arc * left AND Arc * right)
 	  if (left_time < right_time)
 	    {
 	      return LESSTHAN;
-	    }			/* if */
+	    }
 	  if (left_time > right_time)
 	    {
 	      return GREATERTHAN;
-	    }			/* if */
+	    }
 	  if (left->count < right->count)
 	    {
 	      return LESSTHAN;
-	    }			/* if */
+	    }
 	  if (left->count > right->count)
 	    {
 	      return GREATERTHAN;
-	    }			/* if */
+	    }
 	  return EQUALTO;
-	}			/* if */
-    }				/* if */
-}				/* cmp_arc */
+	}
+    }
+}
 
 
 static void
@@ -314,15 +314,15 @@ DEFUN (sort_parents, (child), Sym * child)
 	  if (cmp_arc (arc, prev->next_parent) != GREATERTHAN)
 	    {
 	      break;
-	    }			/* if */
-	}			/* for */
+	    }
+	}
       arc->next_parent = prev->next_parent;
       prev->next_parent = arc;
-    }				/* for */
+    }
 
   /* reattach sorted arcs to child: */
   child->cg.parents = sorted.next_parent;
-}				/* sort_parents */
+}
 
 
 static void
@@ -339,7 +339,7 @@ DEFUN (print_parents, (child), Sym * child)
   else
     {
       cycle_head = child;
-    }				/* if */
+    }
   if (!child->cg.parents)
     {
       printf (bsd_style_output
@@ -347,7 +347,7 @@ DEFUN (print_parents, (child), Sym * child)
 	      : "%6.6s %5.5s %7.7s %7.7s %7.7s %7.7s     <spontaneous>\n",
 	      "", "", "", "", "", "");
       return;
-    }				/* if */
+    }
   sort_parents (child);
   for (arc = child->cg.parents; arc; arc = arc->next_parent)
     {
@@ -375,9 +375,9 @@ DEFUN (print_parents, (child), Sym * child)
 		  arc->count, cycle_head->ncalls);
 	  print_name (parent);
 	  printf ("\n");
-	}			/* if */
-    }				/* for */
-}				/* print_parents */
+	}
+    }
+}
 
 
 static void
@@ -403,15 +403,15 @@ DEFUN (sort_children, (parent), Sym * parent)
 	  if (cmp_arc (arc, prev->next_child) != LESSTHAN)
 	    {
 	      break;
-	    }			/* if */
-	}			/* for */
+	    }
+	}
       arc->next_child = prev->next_child;
       prev->next_child = arc;
-    }				/* for */
+    }
 
   /* reattach sorted children to parent: */
   parent->cg.children = sorted.next_child;
-}				/* sort_children */
+}
 
 
 static void
@@ -447,9 +447,9 @@ DEFUN (print_children, (parent), Sym * parent)
 		  arc->count, child->cg.cyc.head->ncalls);
 	  print_name (child);
 	  printf ("\n");
-	}			/* if */
-    }				/* for */
-}				/* print_children */
+	}
+    }
+}
 
 
 static void
@@ -473,15 +473,15 @@ DEFUN (print_line, (np), Sym * np)
       else
 	{
 	  printf (" %7.7s ", "");
-	}			/* if */
+	}
     }
   else
     {
       printf (" %7.7s %7.7s ", "", "");
-    }				/* if */
+    }
   print_name (np);
   printf ("\n");
-}				/* print_line */
+}
 
 
 /*
@@ -496,7 +496,7 @@ DEFUN (cg_print, (timesortsym), Sym ** timesortsym)
   if (print_descriptions && bsd_style_output)
     {
       bsd_callg_blurb (stdout);
-    }				/* if */
+    }
 
   print_header ();
 
@@ -509,7 +509,7 @@ DEFUN (cg_print, (timesortsym), Sym ** timesortsym)
 	  || !parent->cg.print_flag)
 	{
 	  continue;
-	}			/* if */
+	}
       if (!parent->name && parent->cg.cyc.num != 0)
 	{
 	  /* cycle header: */
@@ -521,7 +521,7 @@ DEFUN (cg_print, (timesortsym), Sym ** timesortsym)
 	  print_parents (parent);
 	  print_line (parent);
 	  print_children (parent);
-	}			/* if */
+	}
       if (bsd_style_output)
 	printf ("\n");
       printf ("-----------------------------------------------\n");
@@ -533,7 +533,7 @@ DEFUN (cg_print, (timesortsym), Sym ** timesortsym)
     {
       fsf_callg_blurb (stdout);
     }
-}				/* cg_print */
+}
 
 
 static int
@@ -543,7 +543,7 @@ DEFUN (cmp_name, (left, right), const PTR left AND const PTR right)
   const Sym **npp2 = (const Sym **) right;
 
   return strcmp ((*npp1)->name, (*npp2)->name);
-}				/* cmp_name */
+}
 
 
 void
@@ -565,14 +565,14 @@ DEFUN_VOID (cg_print_index)
 	  && symtab.base[index].hist.time == 0)
 	{
 	  continue;
-	}			/* if */
+	}
       name_sorted_syms[nnames++] = &symtab.base[index];
-    }				/* for */
+    }
   qsort (name_sorted_syms, nnames, sizeof (Sym *), cmp_name);
   for (index = 1, todo = nnames; index <= num_cycles; index++)
     {
       name_sorted_syms[todo++] = &cycle_header[index];
-    }				/* for */
+    }
   printf ("\f\nIndex by function name\n\n");
   index = (todo + 2) / 3;
   for (i = 0; i < index; i++)
@@ -589,7 +589,7 @@ DEFUN_VOID (cg_print_index)
 	  else
 	    {
 	      sprintf (buf, "(%d)", sym->cg.index);
-	    }			/* if */
+	    }
 	  if (j < nnames)
 	    {
 	      if (bsd_style_output)
@@ -602,7 +602,7 @@ DEFUN_VOID (cg_print_index)
 		  for (; col < starting_col + 5; ++col)
 		    {
 		      putchar (' ');
-		    }		/* for */
+		    }
 		  printf (" %s ", buf);
 		  col += print_name_only (sym);
 		  if (!line_granularity && sym->is_static && sym->file)
@@ -618,24 +618,22 @@ DEFUN_VOID (cg_print_index)
 			  else
 			    {
 			      filename = sym->file->name;
-			    }	/* if */
-			}	/* if */
+			    }
+			}
 		      printf (" (%s)", filename);
 		      col += strlen (filename) + 3;
-		    }		/* if */
-		}		/* if */
+		    }
+		}
 	    }
 	  else
 	    {
 	      printf ("%6.6s ", buf);
 	      sprintf (buf, "<cycle %d>", sym->cg.cyc.num);
 	      printf ("%-19.19s", buf);
-	    }			/* if */
+	    }
 	  starting_col += column_width;
-	}			/* for */
+	}
       printf ("\n");
-    }				/* for */
+    }
   free (name_sorted_syms);
-}				/* cg_print_index */
-
-/*** end of cg_print.c ***/
+}

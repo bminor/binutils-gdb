@@ -41,13 +41,13 @@ DEFUN (print_name_only, (self), Sym * self)
 	  if (name[0] == '_' && name[1] && discard_underscores)
 	    {
 	      name++;
-	    }			/* if */
+	    }
 	  demangled = cplus_demangle (name, DMGL_ANSI | DMGL_PARAMS);
 	  if (demangled)
 	    {
 	      name = demangled;
-	    }			/* if */
-	}			/* if */
+	    }
+	}
       printf ("%s", name);
       size = strlen (name);
       if (line_granularity && self->file)
@@ -63,21 +63,21 @@ DEFUN (print_name_only, (self), Sym * self)
 	      else
 		{
 		  filename = self->file->name;
-		}		/* if */
-	    }			/* if */
+		}
+	    }
 	  sprintf (buf, " (%s:%d)", filename, self->line_num);
 	  printf (buf);
 	  size += strlen (buf);
-	}			/* if */
+	}
       if (demangled)
 	{
 	  free (demangled);
-	}			/* if */
+	}
       DBG (DFNDEBUG, printf ("{%d} ", self->cg.top_order));
       DBG (PROPDEBUG, printf ("%4.0f%% ", 100.0 * self->cg.prop.fract));
-    }				/* if */
+    }
   return size;
-}				/* print_name_only */
+}
 
 
 void
@@ -88,7 +88,7 @@ DEFUN (print_name, (self), Sym * self)
   if (self->cg.cyc.num != 0)
     {
       printf (" <cycle %d>", self->cg.cyc.num);
-    }				/* if */
+    }
   if (self->cg.index != 0)
     {
       if (self->cg.print_flag)
@@ -98,8 +98,6 @@ DEFUN (print_name, (self), Sym * self)
       else
 	{
 	  printf (" (%d)", self->cg.index);
-	}			/* if */
-    }				/* if */
-}				/* print_name */
-
-/*** end of utils.c ***/
+	}
+    }
+}

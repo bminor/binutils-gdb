@@ -19,13 +19,13 @@ DEFUN (core_init, (a_out_name), const char *a_out_name)
     {
       perror (a_out_name);
       done (1);
-    }				/* if */
+    }
 
   if (!bfd_check_format (core_bfd, bfd_object))
     {
       fprintf (stderr, "%s: %s: not in a.out format\n", whoami, a_out_name);
       done (1);
-    }				/* if */
+    }
 
   /* get core's text section: */
   core_text_sect = bfd_get_section_by_name (core_bfd, ".text");
@@ -37,8 +37,8 @@ DEFUN (core_init, (a_out_name), const char *a_out_name)
 	  fprintf (stderr, "%s: can't find .text section in %s\n",
 		   whoami, a_out_name);
 	  done (1);
-	}			/* if */
-    }				/* if */
+	}
+    }
 
   /* read core's symbol table: */
 
@@ -49,7 +49,7 @@ DEFUN (core_init, (a_out_name), const char *a_out_name)
       fprintf (stderr, "%s: %s: %s\n", whoami, a_out_name,
 	       bfd_errmsg (bfd_get_error ()));
       done (1);
-    }				/* if */
+    }
 
   core_syms = (asymbol **) xmalloc (core_num_syms);
   core_num_syms = bfd_canonicalize_symtab (core_bfd, core_syms);
@@ -58,8 +58,8 @@ DEFUN (core_init, (a_out_name), const char *a_out_name)
       fprintf (stderr, "%s: %s: %s\n", whoami, a_out_name,
 	       bfd_errmsg (bfd_get_error ()));
       done (1);
-    }				/* if */
-}				/* core_init */
+    }
+}
 
 
 /*
@@ -75,19 +75,19 @@ DEFUN (core_get_text_space, (core_bfd), bfd * core_bfd)
       fprintf (stderr, "%s: ran out room for %ld bytes of text space\n",
 	       whoami, core_text_sect->_raw_size);
       done (1);
-    }				/* if */
+    }
   if (!bfd_get_section_contents (core_bfd, core_text_sect, core_text_space,
 				 0, core_text_sect->_raw_size))
     {
       bfd_perror ("bfd_get_section_contents");
       free (core_text_space);
       core_text_space = 0;
-    }				/* if */
+    }
   if (!core_text_space)
     {
       fprintf (stderr, "%s: can't do -c\n", whoami);
-    }				/* if */
-}				/* core_get_text_space */
+    }
+}
 
 
 /*
@@ -111,14 +111,14 @@ DEFUN (core_sym_class, (sym), asymbol * sym)
   if (!sym->section)
     {
       return 0;
-    }				/* if */
+    }
 
   if (ignore_static_funcs && (sym->flags & BSF_LOCAL))
     {
       DBG (AOUTDEBUG, printf ("[core_sym_class] %s: not a function\n",
 			      sym->name));
       return 0;
-    }				/* if */
+    }
 
   bfd_get_symbol_info (core_bfd, sym, &syminfo);
   i = syminfo.type;
@@ -126,7 +126,7 @@ DEFUN (core_sym_class, (sym), asymbol * sym)
   if (i == 'T')
     {
       return i;			/* it's a global symbol */
-    }				/* if */
+    }
 
   if (i != 't')
     {
@@ -134,14 +134,14 @@ DEFUN (core_sym_class, (sym), asymbol * sym)
       DBG (AOUTDEBUG, printf ("[core_sym_class] %s is of class %c\n",
 			      sym->name, i));
       return 0;
-    }				/* if */
+    }
 
   /* do some more filtering on static function-names: */
 
   if (ignore_static_funcs)
     {
       return 0;
-    }				/* if */
+    }
   /*
    * Can't zero-length name or funny characters in name, where
    * `funny' includes: `.' (.o file names) and `$' (Pascal labels).
@@ -149,15 +149,15 @@ DEFUN (core_sym_class, (sym), asymbol * sym)
   if (!sym->name || sym->name[0] == '\0')
     {
       return 0;
-    }				/* if */
+    }
 
   for (name = sym->name; *name; ++name)
     {
       if (*name == '.' || *name == '$')
 	{
 	  return 0;
-	}			/* if */
-    }				/* if */
+	}
+    }
   /*
    * On systems where the C compiler adds an underscore to all
    * names, static names without underscores seem usually to be
@@ -178,9 +178,9 @@ DEFUN (core_sym_class, (sym), asymbol * sym)
       || !strncmp (sym->name, "___gnu_compiled", 15))
     {
       return 0;
-    }				/* if */
+    }
   return 't';			/* it's a static text symbol */
-}				/* core_sym_class */
+}
 
 
 /*
@@ -212,8 +212,8 @@ DEFUN (get_src_info, (addr, filename, name, line_num),
 			      (long) addr, fname ? fname : "<unknown>", l,
 			      func_name ? func_name : "<unknown>"));
       return FALSE;
-    }				/* if */
-}				/* get_src_info */
+    }
+}
 
 
 /*
@@ -235,15 +235,15 @@ DEFUN (core_create_function_syms, (core_bfd), bfd * core_bfd)
       if (!core_sym_class (core_syms[i]))
 	{
 	  continue;
-	}			/* if */
+	}
       ++symtab.len;
-    }				/* for */
+    }
 
   if (symtab.len == 0)
     {
       fprintf (stderr, "%s: file `%s' has no symbols\n", whoami, a_out_name);
       done (1);
-    }				/* if */
+    }
 
   /* the "+ 2" is for the sentinels: */
   symtab.base = (Sym *) xmalloc ((symtab.len + 2) * sizeof (Sym));
@@ -260,7 +260,7 @@ DEFUN (core_create_function_syms, (core_bfd), bfd * core_bfd)
 	       printf ("[core_create_function_syms] rejecting: 0x%lx %s\n",
 		       core_syms[i]->value, core_syms[i]->name));
 	  continue;
-	}			/* if */
+	}
 
       sym_init (symtab.limit);
 
@@ -294,8 +294,8 @@ DEFUN (core_create_function_syms, (core_bfd), bfd * core_bfd)
 		printf ("[core_create_function_syms: rej %s (maps to %s)\n",
 			symtab.limit->name, func_name));
 	      continue;
-	    }			/* if */
-	}			/* if */
+	    }
+	}
 #endif
 
       symtab.limit->is_func = TRUE;
@@ -303,7 +303,7 @@ DEFUN (core_create_function_syms, (core_bfd), bfd * core_bfd)
       if (class == 't')
 	{
 	  symtab.limit->is_static = TRUE;
-	}			/* if */
+	}
 
       min_vma = MIN (symtab.limit->addr, min_vma);
       max_vma = MAX (symtab.limit->addr, max_vma);
@@ -316,13 +316,13 @@ DEFUN (core_create_function_syms, (core_bfd), bfd * core_bfd)
 	  && strcmp (symtab.limit->name, "main") == 0)
 	{
 	  discard_underscores = 0;
-	}			/* if */
+	}
 
       DBG (AOUTDEBUG, printf ("[core_create_function_syms] %ld %s 0x%lx\n",
 			      (long) (symtab.limit - symtab.base),
 			      symtab.limit->name, symtab.limit->addr));
       ++symtab.limit;
-    }				/* for */
+    }
 
   /* create sentinels: */
 
@@ -340,7 +340,7 @@ DEFUN (core_create_function_syms, (core_bfd), bfd * core_bfd)
 
   symtab.len = symtab.limit - symtab.base;
   symtab_finalize (&symtab);
-}				/* core_create_function_syms */
+}
 
 
 /*
@@ -393,7 +393,7 @@ DEFUN (core_create_line_syms, (core_bfd), bfd * core_bfd)
 	      && strcmp (prev_filename, filename) == 0))
 	{
 	  continue;
-	}			/* if */
+	}
 
       ++ltab.len;
       prev_line_num = dummy.line_num;
@@ -403,12 +403,12 @@ DEFUN (core_create_line_syms, (core_bfd), bfd * core_bfd)
       if (offset - prev_offset < min_dist)
 	{
 	  min_dist = offset - prev_offset;
-	}			/* if */
+	}
       prev_offset = offset;
 
       min_vma = MIN (vma, min_vma);
       max_vma = MAX (vma, max_vma);
-    }				/* for */
+    }
 
   DBG (AOUTDEBUG, printf ("[core_create_line_syms] min_dist=%lx\n", min_dist));
 
@@ -430,7 +430,7 @@ DEFUN (core_create_line_syms, (core_bfd), bfd * core_bfd)
 	      && strcmp (prev->file->name, filename) == 0))
 	{
 	  continue;
-	}			/* if */
+	}
 
       /* make name pointer a malloc'ed string: */
       ltab.limit->name = strdup (ltab.limit->name);
@@ -447,13 +447,13 @@ DEFUN (core_create_line_syms, (core_bfd), bfd * core_bfd)
 	  && strcmp (ltab.limit->name, "main") == 0)
 	{
 	  discard_underscores = 0;
-	}			/* if */
+	}
 
       DBG (AOUTDEBUG, printf ("[core_create_line_syms] %d %s 0x%lx\n",
 			      ltab.len, ltab.limit->name,
 			      ltab.limit->addr));
       ++ltab.limit;
-    }				/* for */
+    }
 
   /* update sentinels: */
 
@@ -462,13 +462,13 @@ DEFUN (core_create_line_syms, (core_bfd), bfd * core_bfd)
       && min_vma <= sentinel->end_addr)
     {
       sentinel->end_addr = min_vma - 1;
-    }				/* if */
+    }
 
   sentinel = sym_lookup (&symtab, ~0);
   if (strcmp (sentinel->name, "<hicore>") == 0 && max_vma >= sentinel->addr)
     {
       sentinel->addr = max_vma + 1;
-    }				/* if */
+    }
 
   /* copy in function symbols: */
   memcpy (ltab.limit, symtab.base, symtab.len * sizeof (Sym));
@@ -480,7 +480,7 @@ DEFUN (core_create_line_syms, (core_bfd), bfd * core_bfd)
 	       "%s: somebody miscounted: ltab.len=%ld instead of %d\n",
 	       whoami, (long) (ltab.limit - ltab.base), ltab.len);
       done (1);
-    }				/* if */
+    }
 
   /* finalize ltab and make it symbol table: */
 
@@ -502,9 +502,7 @@ DEFUN (core_create_line_syms, (core_bfd), bfd * core_bfd)
 	    }
 	  while (sym->file == sym[-1].file &&
 		 strcmp (sym->name, sym[-1].name) == 0);
-	}			/* if */
-    }				/* for */
+	}
+    }
 
-}				/* core_create_line_syms */
-
-/*** end of core.c ***/
+}

@@ -89,20 +89,20 @@ find_call (parent, p_lowpc, p_highpc)
       indirect_child.name = "<indirect child>";
       indirect_child.cg.prop.fract = 1.0;
       indirect_child.cg.cyc.head = &indirect_child;
-    }				/* if */
+    }
 
   if (!core_text_space)
     {
       return;
-    }				/* if */
+    }
   if (p_lowpc < s_lowpc)
     {
       p_lowpc = s_lowpc;
-    }				/* if */
+    }
   if (p_highpc > s_highpc)
     {
       p_highpc = s_highpc;
-    }				/* if */
+    }
   DBG (CALLDEBUG, printf ("[find_call] %s: 0x%lx to 0x%lx\n",
 			  parent->name, p_lowpc, p_highpc));
   for (pc = (Instruction *) (p_lowpc + delta);
@@ -128,7 +128,7 @@ find_call (parent, p_lowpc, p_highpc)
 			   (bfd_vma) pc - delta,
 			   pc->j.func == Jxx_FUNC_JSR ? "" : "_coroutine"));
 	      arc_add (parent, &indirect_child, 0);
-	    }			/* if */
+	    }
 	  break;
 
 	case OP_BSR:
@@ -153,8 +153,8 @@ find_call (parent, p_lowpc, p_highpc)
 		  /* a hit:  */
 		  arc_add (parent, child, 0);
 		  continue;
-		}		/* if */
-	    }			/* if */
+		}
+	    }
 	  /*
 	   * Something funny going on.
 	   */
@@ -163,7 +163,6 @@ find_call (parent, p_lowpc, p_highpc)
 
 	default:
 	  break;
-	}			/* switch */
-    }				/* for */
-}				/* find_call */
-/*** end of alpha.c ***/
+	}
+    }
+}

@@ -206,7 +206,7 @@ find_call (parent, p_lowpc, p_highpc)
       sym_init (&indirectchild);
       indirectchild.cg.prop.fract = 1.0;
       indirectchild.cg.cyc.head = &indirectchild;
-    }				/* if */
+    }
 
   if (textspace == 0)
     {

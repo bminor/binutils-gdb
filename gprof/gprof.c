@@ -142,7 +142,7 @@ Usage: %s [-[abchilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][name]] [-I dirs]\n\
 	[image-file] [profile-file...]\n",
 	   whoami);
   done (status);
-}				/* usage */
+}
 
 
 int
@@ -169,7 +169,7 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
 	  if (optarg)
 	    {
 	      sym_id_add (optarg, INCL_ANNO);
-	    }			/* if */
+	    }
 	  output_style |= STYLE_ANNOTATED_SOURCE;
 	  user_specified |= STYLE_ANNOTATED_SOURCE;
 	  break;
@@ -187,7 +187,7 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
 	  if (optarg)
 	    {
 	      sym_id_add (optarg, INCL_EXEC);
-	    }			/* if */
+	    }
 	  output_style |= STYLE_EXEC_COUNTS;
 	  user_specified |= STYLE_EXEC_COUNTS;
 	  break;
@@ -200,7 +200,7 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
 	  else
 	    {
 	      debug_level = ~0;
-	    }			/* if */
+	    }
 	  DBG (ANYDEBUG, printf ("[main] debug-level=0x%x\n", debug_level));
 #ifndef DEBUG
 	  printf ("%s: debugging not supported; -d ignored\n", whoami);
@@ -240,7 +240,7 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
 	  else
 	    {
 	      output_style &= ~STYLE_ANNOTATED_SOURCE;
-	    }			/* if */
+	    }
 	  user_specified |= STYLE_ANNOTATED_SOURCE;
 	  break;
 	case 'k':
@@ -280,13 +280,13 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
 	      fprintf (stderr, "%s: unknown file format %s\n",
 		       optarg, whoami);
 	      done (1);
-	    }			/* switch */
+	    }
 	  break;
 	case 'p':
 	  if (optarg)
 	    {
 	      sym_id_add (optarg, INCL_FLAT);
-	    }			/* if */
+	    }
 	  output_style |= STYLE_FLAT_PROFILE;
 	  user_specified |= STYLE_FLAT_PROFILE;
 	  break;
@@ -299,7 +299,7 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
 	  else
 	    {
 	      output_style &= ~STYLE_FLAT_PROFILE;
-	    }			/* if */
+	    }
 	  user_specified |= STYLE_FLAT_PROFILE;
 	  break;
 	case 'q':
@@ -312,8 +312,8 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
 	      else
 		{
 		  sym_id_add (optarg, INCL_GRAPH);
-		}		/* if */
-	    }			/* if */
+		}
+	    }
 	  output_style |= STYLE_CALL_GRAPH;
 	  user_specified |= STYLE_CALL_GRAPH;
 	  break;
@@ -327,13 +327,13 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
 	      else
 		{
 		  sym_id_add (optarg, EXCL_GRAPH);
-		}		/* if */
+		}
 	      output_style |= STYLE_CALL_GRAPH;
 	    }
 	  else
 	    {
 	      output_style &= ~STYLE_CALL_GRAPH;
-	    }			/* if */
+	    }
 	  user_specified |= STYLE_CALL_GRAPH;
 	  break;
 	case 's':
@@ -345,7 +345,7 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
 	  if (bb_table_length < 0)
 	    {
 	      bb_table_length = 0;
-	    }			/* if */
+	    }
 	  break;
 	case 'T':
 	  bsd_style_output = TRUE;
@@ -358,7 +358,7 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
 	  if (output_width < 1)
 	    {
 	      output_width = 1;
-	    }			/* if */
+	    }
 	  break;
 	case 'x':
 	  bb_annotate_all_lines = TRUE;
@@ -378,29 +378,29 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
 	  else
 	    {
 	      output_style &= ~STYLE_EXEC_COUNTS;
-	    }			/* if */
+	    }
 	  user_specified |= STYLE_ANNOTATED_SOURCE;
 	  break;
 	default:
 	  usage (stderr, 1);
-	}			/* switch */
-    }				/* while */
+	}
+    }
 
   /* append value of GPROF_PATH to source search list if set: */
   str = getenv ("GPROF_PATH");
   if (str)
     {
       search_list_append (&src_search_list, str);
-    }				/* if */
+    }
 
   if (optind < argc)
     {
       a_out_name = argv[optind++];
-    }				/* if */
+    }
   if (optind < argc)
     {
       gmon_name = argv[optind++];
-    }				/* if */
+    }
 
   /*
    * Turn off default functions:
@@ -412,7 +412,7 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
 #ifdef __osf__
       sym_id_add (*sp, EXCL_FLAT);
 #endif
-    }				/* for */
+    }
 
   /*
    * For line-by-line profiling, also want to keep those
@@ -423,8 +423,8 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
       for (sp = &default_excluded_list[0]; *sp; sp++)
 	{
 	  sym_id_add (*sp, EXCL_FLAT);
-	}			/* for */
-    }				/* if */
+	}
+    }
 
   /*
    * Read symbol table from core file:
@@ -438,7 +438,7 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
   if (ignore_direct_calls)
     {
       core_get_text_space (core_bfd);
-    }				/* if */
+    }
 
   /*
    * Create symbols from core image:
@@ -450,7 +450,7 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
   else
     {
       core_create_function_syms (core_bfd);
-    }				/* if */
+    }
 
   /*
    * Translate sym specs into syms:
@@ -469,7 +469,7 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
 	  if (optind < argc)
 	    {
 	      gmon_name = argv[optind];
-	    }			/* if */
+	    }
 	}
       while (optind++ < argc);
 #else
@@ -490,10 +490,10 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
 	  if (optind < argc)
 	    {
 	      gmon_name = argv[optind];
-	    }			/* if */
+	    }
 	}
       while (optind++ < argc);
-    }				/* if */
+    }
 
   /*
    * If user did not specify output style, try to guess something
@@ -508,9 +508,9 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
       else
 	{
 	  output_style = STYLE_EXEC_COUNTS;
-	}			/* if */
+	}
       output_style &= ~user_specified;
-    }				/* if */
+    }
 
   /*
    * Dump a gmon.sum file if requested (before any other processing!):
@@ -518,17 +518,17 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
   if (output_style & STYLE_SUMMARY_FILE)
     {
       gmon_out_write (GMONSUM);
-    }				/* if */
+    }
 
   if (gmon_input & INPUT_HISTOGRAM)
     {
       hist_assign_samples ();
-    }				/* if */
+    }
 
   if (gmon_input & INPUT_CALL_GRAPH)
     {
       cg = cg_assemble ();
-    }				/* if */
+    }
 
   /* do some simple sanity checks: */
 
@@ -537,45 +537,45 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
     {
       fprintf (stderr, "%s: gmon.out file is missing histogram\n", whoami);
       done (1);
-    }				/* if */
+    }
 
   if ((output_style & STYLE_CALL_GRAPH) && !(gmon_input & INPUT_CALL_GRAPH))
     {
       fprintf (stderr,
 	       "%s: gmon.out file is missing call-graph data\n", whoami);
       done (1);
-    }				/* if */
+    }
 
   /* output whatever user whishes to see: */
 
   if (cg && (output_style & STYLE_CALL_GRAPH) && bsd_style_output)
     {
       cg_print (cg);		/* print the dynamic profile */
-    }				/* if */
+    }
 
   if (output_style & STYLE_FLAT_PROFILE)
     {
       hist_print ();		/* print the flat profile */
-    }				/* if */
+    }
 
   if (cg && (output_style & STYLE_CALL_GRAPH))
     {
       if (!bsd_style_output)
 	{
 	  cg_print (cg);	/* print the dynamic profile */
-	}			/* if */
+	}
       cg_print_index ();
-    }				/* if */
+    }
 
   if (output_style & STYLE_EXEC_COUNTS)
     {
       print_exec_counts ();
-    }				/* if */
+    }
 
   if (output_style & STYLE_ANNOTATED_SOURCE)
     {
       print_annotated_source ();
-    }				/* if */
+    }
   return 0;
 }
 

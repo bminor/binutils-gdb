@@ -1,3 +1,21 @@
+Mon Mar 13 21:44:24 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* __bb_exit_func.c: New file, from David Mosberger-Tang.
+
+	Thu Feb  9 16:56:07 1995  David Mosberger-Tang  <davidm@piston.cs.arizona.edu>
+
+	* All *.c: More cleanup towards GNU format.
+
+	* gmon_out.h (struct gmon_hist_hdr, struct gmon_cg_arc_record): 
+	replaced sizeof (bfd_vma) by size (char*) because Ken tells me
+	that bfd_vma is only guaranteed to be at least as big as a pointer.
+
+	(GMON_Record_tag): added explicit enumeration values to ensure
+	compatibility across compilers.
+
+	* gmon_io.c (get_vma, put_vma): replaced sizeof(bfd_vma) by
+	sizeof(char*).
+
 Tue Feb  7 17:24:12 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* All *.c and *.h files: Ran "indent -gnu".  Cleaned up a couple

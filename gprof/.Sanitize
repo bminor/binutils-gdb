@@ -25,6 +25,7 @@ Do-first:
 Things-to-keep:
 
 .gdbinit
+__bb_exit_func.c
 ChangeLog
 Makefile.in
 NOTES

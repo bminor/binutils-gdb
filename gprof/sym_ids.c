@@ -64,7 +64,7 @@ DEFUN (sym_id_add, (spec, which_table),
 
   id->next = id_list;
   id_list = id;
-}				/* sym_id_add */
+}
 
 
 /*
@@ -94,8 +94,8 @@ DEFUN (parse_spec, (spec, sym), char *spec AND Sym * sym)
 	  if (!sym->file)
 	    {
 	      sym->file = &non_existent_file;
-	    }			/* if */
-	}			/* if */
+	    }
+	}
       spec = colon + 1;
       if (strlen (spec))
 	{
@@ -106,8 +106,8 @@ DEFUN (parse_spec, (spec, sym), char *spec AND Sym * sym)
 	  else
 	    {
 	      sym->name = spec;
-	    }			/* if */
-	}			/* if */
+	    }
+	}
     }
   else if (strlen (spec))
     {
@@ -118,7 +118,7 @@ DEFUN (parse_spec, (spec, sym), char *spec AND Sym * sym)
 	  if (!sym->file)
 	    {
 	      sym->file = &non_existent_file;
-	    }			/* if */
+	    }
 	}
       else if (isdigit (*spec))
 	{
@@ -127,9 +127,9 @@ DEFUN (parse_spec, (spec, sym), char *spec AND Sym * sym)
       else if (strlen (spec))
 	{
 	  sym->name = spec;
-	}			/* if */
-    }				/* if */
-}				/* parse_spec */
+	}
+    }
+}
 
 
 /*
@@ -149,7 +149,7 @@ DEFUN (parse_id, (id), struct sym_id *id)
       parse_spec (slash + 1, &id->right.sym);
       *slash = '\0';
       id->has_right = TRUE;
-    }				/* if */
+    }
   parse_spec (id->spec, &id->left.sym);
 
 #ifdef DEBUG
@@ -167,7 +167,7 @@ DEFUN (parse_id, (id), struct sym_id *id)
       else
 	{
 	  printf ("*");
-	}			/* if */
+	}
       if (id->has_right)
 	{
 	  printf ("/%s:",
@@ -183,12 +183,12 @@ DEFUN (parse_id, (id), struct sym_id *id)
 	  else
 	    {
 	      printf ("*");
-	    }			/* if */
-	}			/* if */
+	    }
+	}
       printf ("\n");
     }
 #endif
-}				/* parse_id */
+}
 
 
 /*
@@ -200,7 +200,7 @@ DEFUN (match, (pattern, sym), Sym * pattern AND Sym * sym)
   return (pattern->file ? pattern->file == sym->file : TRUE)
     && (pattern->line_num ? pattern->line_num == sym->line_num : TRUE)
     && (pattern->name ? strcmp (pattern->name, sym->name) == 0 : TRUE);
-}				/* match */
+}
 
 
 static void
@@ -218,17 +218,17 @@ DEFUN (extend_match, (m, sym, tab, second_pass),
 	  /* link match into match's chain: */
 	  tab->base[tab->len].next = m->first_match;
 	  m->first_match = &tab->base[tab->len];
-	}			/* if */
+	}
       ++tab->len;
-    }				/* if */
+    }
 
   /* extend match to include this symbol: */
   if (second_pass)
     {
       tab->base[m->prev_index].end_addr = sym->end_addr;
-    }				/* if */
+    }
   m->prev_match = sym;
-}				/* extend_match */
+}
 
 
 /*
@@ -253,7 +253,7 @@ DEFUN_VOID (sym_id_parse)
   for (id = id_list; id; id = id->next)
     {
       parse_id (id);
-    }				/* for */
+    }
 
   /* first determine size of each table: */
 
@@ -264,13 +264,13 @@ DEFUN_VOID (sym_id_parse)
 	  if (match (&id->left.sym, sym))
 	    {
 	      extend_match (&id->left, sym, &syms[id->which_table], FALSE);
-	    }			/* if */
+	    }
 	  if (id->has_right && match (&id->right.sym, sym))
 	    {
 	      extend_match (&id->right, sym, &right_ids, FALSE);
-	    }			/* if */
-	}			/* for */
-    }				/* for */
+	    }
+	}
+    }
 
   /* create tables of appropriate size and reset lengths: */
 
@@ -281,14 +281,14 @@ DEFUN_VOID (sym_id_parse)
 	  tab->base = (Sym *) xmalloc (tab->len * sizeof (Sym));
 	  tab->limit = tab->base + tab->len;
 	  tab->len = 0;
-	}			/* if */
-    }				/* for */
+	}
+    }
   if (right_ids.len)
     {
       right_ids.base = (Sym *) xmalloc (right_ids.len * sizeof (Sym));
       right_ids.limit = right_ids.base + right_ids.len;
       right_ids.len = 0;
-    }				/* if */
+    }
 
   /* make a second pass through symtab, creating syms as necessary: */
 
@@ -299,13 +299,13 @@ DEFUN_VOID (sym_id_parse)
 	  if (match (&id->left.sym, sym))
 	    {
 	      extend_match (&id->left, sym, &syms[id->which_table], TRUE);
-	    }			/* if */
+	    }
 	  if (id->has_right && match (&id->right.sym, sym))
 	    {
 	      extend_match (&id->right, sym, &right_ids, TRUE);
-	    }			/* if */
-	}			/* for */
-    }				/* for */
+	    }
+	}
+    }
 
   /* go through ids creating arcs as needed: */
 
@@ -328,10 +328,10 @@ DEFUN_VOID (sym_id_parse)
 				right->end_addr,
 				table_name[id->which_table]));
 		  arc_add (left, right, 0);
-		}		/* for */
-	    }			/* for */
-	}			/* if */
-    }				/* for */
+		}
+	    }
+	}
+    }
 
   /* finally, we can sort the tables and we're done: */
 
@@ -340,8 +340,8 @@ DEFUN_VOID (sym_id_parse)
       DBG (IDDEBUG, printf ("[sym_id_parse] syms[%s]:\n",
 			    table_name[tab - &syms[0]]));
       symtab_finalize (tab);
-    }				/* for */
-}				/* sym_id_parse */
+    }
+}
 
 
 /*
@@ -364,9 +364,7 @@ DEFUN (sym_id_arc_is_present, (symtab, from, to),
 	  && arc_lookup (sym, to))
 	{
 	  return TRUE;
-	}			/* if */
-    }				/* for */
+	}
+    }
   return FALSE;
-}				/* sym_id_arc_is_present */
-
-/*** end of sym_ids.h ***/
+}

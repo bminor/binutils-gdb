@@ -41,7 +41,7 @@ DEFUN (arc_lookup, (parent, child), Sym * parent AND Sym * child)
     {
       printf ("[arc_lookup] parent == 0 || child == 0\n");
       return 0;
-    }				/* if */
+    }
   DBG (LOOKUPDEBUG, printf ("[arc_lookup] parent %s child %s\n",
 			    parent->name, child->name));
   for (arc = parent->cg.children; arc; arc = arc->next_child)
@@ -52,10 +52,10 @@ DEFUN (arc_lookup, (parent, child), Sym * parent AND Sym * child)
 	  && child->end_addr <= arc->child->end_addr)
 	{
 	  return arc;
-	}			/* if */
-    }				/* for */
+	}
+    }
   return 0;
-}				/* arc_lookup */
+}
 
 
 /*
@@ -79,7 +79,7 @@ DEFUN (arc_add, (parent, child, count),
 			       arc->count, count));
       arc->count += count;
       return;
-    }				/* if */
+    }
   arc = (Arc *) xmalloc (sizeof (*arc));
   arc->parent = parent;
   arc->child = child;
@@ -92,7 +92,7 @@ DEFUN (arc_add, (parent, child, count),
   /* prepend this parent to the parents of this child: */
   arc->next_parent = child->cg.parents;
   child->cg.parents = arc;
-}				/* arc_add */
+}
 
 
 static int
@@ -102,7 +102,7 @@ DEFUN (cmp_topo, (lp, rp), const PTR lp AND const PTR rp)
   const Sym *right = *(const Sym **) rp;
 
   return left->cg.top_order - right->cg.top_order;
-}				/* cmp_topo */
+}
 
 
 static void
@@ -115,7 +115,7 @@ DEFUN (propagate_time, (parent), Sym * parent)
   if (parent->cg.prop.fract == 0.0)
     {
       return;
-    }				/* if */
+    }
 
   /* gather time from children of this parent: */
 
@@ -125,17 +125,17 @@ DEFUN (propagate_time, (parent), Sym * parent)
       if (arc->count == 0 || child == parent || child->cg.prop.fract == 0)
 	{
 	  continue;
-	}			/* if */
+	}
       if (child->cg.cyc.head != child)
 	{
 	  if (parent->cg.cyc.num == child->cg.cyc.num)
 	    {
 	      continue;
-	    }			/* if */
+	    }
 	  if (parent->cg.top_order <= child->cg.top_order)
 	    {
 	      fprintf (stderr, "[propagate] toporder botches\n");
-	    }			/* if */
+	    }
 	  child = child->cg.cyc.head;
 	}
       else
@@ -144,12 +144,12 @@ DEFUN (propagate_time, (parent), Sym * parent)
 	    {
 	      fprintf (stderr, "[propagate] toporder botches\n");
 	      continue;
-	    }			/* if */
-	}			/* if */
+	    }
+	}
       if (child->ncalls == 0)
 	{
 	  continue;
-	}			/* if */
+	}
 
       /* distribute time for this arc: */
       arc->time = child->hist.time * (((double) arc->count)
@@ -172,7 +172,7 @@ DEFUN (propagate_time, (parent), Sym * parent)
 	{
 	  parent->cg.cyc.head->cg.child_time += share;
 	  parent->cg.cyc.head->cg.prop.child += prop_share;
-	}			/* if */
+	}
       DBG (PROPDEBUG,
 	   printf ("[prop_time] child \t");
 	   print_name (child);
@@ -181,8 +181,8 @@ DEFUN (propagate_time, (parent), Sym * parent)
 	   printf ("[prop_time] parent\t");
 	   print_name (parent);
 	   printf ("\n[prop_time] share %f\n", share));
-    }				/* for */
-}				/* propagate_time */
+    }
+}
 
 
 /*
@@ -205,12 +205,12 @@ DEFUN_VOID (cycle_time)
 	       * that were excluded with -E.
 	       */
 	      continue;
-	    }			/* if */
+	    }
 	  cyc->hist.time += member->hist.time;
-	}			/* for */
+	}
       cyc->cg.prop.self = cyc->cg.prop.fract * cyc->hist.time;
-    }				/* for */
-}				/* cycle_time */
+    }
+}
 
 
 static void
@@ -229,8 +229,8 @@ DEFUN_VOID (cycle_link)
       if (sym->cg.cyc.head == sym && sym->cg.cyc.next)
 	{
 	  ++num_cycles;
-	}			/* if */
-    }				/* for */
+	}
+    }
 
   /*
    * cycle_header is indexed by cycle number: i.e. it is origin 1,
@@ -249,7 +249,7 @@ DEFUN_VOID (cycle_link)
       if (!(sym->cg.cyc.head == sym && sym->cg.cyc.next != 0))
 	{
 	  continue;
-	}			/* if */
+	}
       ++num;
       ++cyc;
       sym_init (cyc);
@@ -267,7 +267,7 @@ DEFUN_VOID (cycle_link)
 	{
 	  member->cg.cyc.num = num;
 	  member->cg.cyc.head = cyc;
-	}			/* for */
+	}
 
       /*
        * Count calls from outside the cycle and those among cycle
@@ -280,7 +280,7 @@ DEFUN_VOID (cycle_link)
 	      if (arc->parent == member)
 		{
 		  continue;
-		}		/* if */
+		}
 	      if (arc->parent->cg.cyc.num == num)
 		{
 		  cyc->cg.self_calls += arc->count;
@@ -288,11 +288,11 @@ DEFUN_VOID (cycle_link)
 	      else
 		{
 		  cyc->ncalls += arc->count;
-		}		/* if */
-	    }			/* for */
-	}			/* for */
-    }				/* for */
-}				/* cycle_link */
+		}
+	    }
+	}
+    }
+}
 
 
 /*
@@ -319,7 +319,7 @@ DEFUN (inherit_flags, (child), Sym * child)
 	  if (child == parent)
 	    {
 	      continue;
-	    }			/* if */
+	    }
 	  child->cg.print_flag |= parent->cg.print_flag;
 	  /*
 	   * If the child was never actually called (e.g., this arc
@@ -330,8 +330,8 @@ DEFUN (inherit_flags, (child), Sym * child)
 	    {
 	      child->cg.prop.fract += parent->cg.prop.fract
 		* (((double) arc->count) / ((double) child->ncalls));
-	    }			/* if */
-	}			/* for */
+	    }
+	}
     }
   else
     {
@@ -348,7 +348,7 @@ DEFUN (inherit_flags, (child), Sym * child)
 	      if (arc->parent->cg.cyc.head == head)
 		{
 		  continue;
-		}		/* if */
+		}
 	      parent = arc->parent;
 	      head->cg.print_flag |= parent->cg.print_flag;
 	      /*
@@ -360,16 +360,16 @@ DEFUN (inherit_flags, (child), Sym * child)
 		{
 		  head->cg.prop.fract += parent->cg.prop.fract
 		    * (((double) arc->count) / ((double) head->ncalls));
-		}		/* if */
-	    }			/* for */
-	}			/* for */
+		}
+	    }
+	}
       for (member = head; member; member = member->cg.cyc.next)
 	{
 	  member->cg.print_flag = head->cg.print_flag;
 	  member->cg.prop.fract = head->cg.prop.fract;
-	}			/* for */
-    }				/* if */
-}				/* inherit_flags */
+	}
+    }
+}
 
 
 /*
@@ -399,7 +399,7 @@ DEFUN (propagate_flags, (symbols), Sym ** symbols)
 	{
 	  old_head = child->cg.cyc.head;
 	  inherit_flags (child);
-	}			/* if */
+	}
       DBG (PROPDEBUG,
 	   printf ("[prop_flags] ");
 	   print_name (child);
@@ -417,7 +417,7 @@ DEFUN (propagate_flags, (symbols), Sym ** symbols)
 		  && !sym_lookup (&syms[EXCL_GRAPH], child->addr)))
 	    {
 	      child->cg.print_flag = TRUE;
-	    }			/* if */
+	    }
 	}
       else
 	{
@@ -430,8 +430,8 @@ DEFUN (propagate_flags, (symbols), Sym ** symbols)
 	      && sym_lookup (&syms[EXCL_GRAPH], child->addr))
 	    {
 	      child->cg.print_flag = FALSE;
-	    }			/* if */
-	}			/* if */
+	    }
+	}
       if (child->cg.prop.fract == 0.0)
 	{
 	  /*
@@ -444,7 +444,7 @@ DEFUN (propagate_flags, (symbols), Sym ** symbols)
 		  && !sym_lookup (&syms[EXCL_TIME], child->addr)))
 	    {
 	      child->cg.prop.fract = 1.0;
-	    }			/* if */
+	    }
 	}
       else
 	{
@@ -458,8 +458,8 @@ DEFUN (propagate_flags, (symbols), Sym ** symbols)
 	      && sym_lookup (&syms[EXCL_TIME], child->addr))
 	    {
 	      child->cg.prop.fract = 0.0;
-	    }			/* if */
-	}			/* if */
+	    }
+	}
       child->cg.prop.self = child->hist.time * child->cg.prop.fract;
       print_time += child->cg.prop.self;
       DBG (PROPDEBUG,
@@ -469,8 +469,8 @@ DEFUN (propagate_flags, (symbols), Sym ** symbols)
 		   child->cg.print_flag, child->cg.prop.fract);
 	   printf ("[prop_flags] time %f propself %f print_time %f\n",
 		   child->hist.time, child->cg.prop.self, print_time));
-    }				/* if */
-}				/* propagate_flags */
+    }
+}
 
 
 /*
@@ -491,45 +491,45 @@ DEFUN (cmp_total, (lp, rp), const PTR lp AND const PTR rp)
   if (diff < 0.0)
     {
       return 1;
-    }				/* if */
+    }
   if (diff > 0.0)
     {
       return -1;
-    }				/* if */
+    }
   if (!left->name && left->cg.cyc.num != 0)
     {
       return -1;
-    }				/* if */
+    }
   if (!right->name && right->cg.cyc.num != 0)
     {
       return 1;
-    }				/* if */
+    }
   if (!left->name)
     {
       return -1;
-    }				/* if */
+    }
   if (!right->name)
     {
       return 1;
-    }				/* if */
+    }
   if (left->name[0] != '_' && right->name[0] == '_')
     {
       return -1;
-    }				/* if */
+    }
   if (left->name[0] == '_' && right->name[0] != '_')
     {
       return 1;
-    }				/* if */
+    }
   if (left->ncalls > right->ncalls)
     {
       return -1;
-    }				/* if */
+    }
   if (left->ncalls < right->ncalls)
     {
       return 1;
-    }				/* if */
+    }
   return strcmp (left->name, right->name);
-}				/* cmp_total */
+}
 
 
 /*
@@ -562,7 +562,7 @@ DEFUN_VOID (cg_assemble)
       else
 	{
 	  parent->cg.self_calls = 0;
-	}			/* if */
+	}
       parent->cg.prop.fract = 0.0;
       parent->cg.prop.self = 0.0;
       parent->cg.prop.child = 0.0;
@@ -574,8 +574,8 @@ DEFUN_VOID (cg_assemble)
       if (ignore_direct_calls)
 	{
 	  find_call (parent, parent->addr, (parent + 1)->addr);
-	}			/* if */
-    }				/* for */
+	}
+    }
   /*
    * Topologically order things.  If any node is unnumbered, number
    * it and any of its descendents.
@@ -585,8 +585,8 @@ DEFUN_VOID (cg_assemble)
       if (parent->cg.top_order == DFN_NAN)
 	{
 	  cg_dfn (parent);
-	}			/* if */
-    }				/* for */
+	}
+    }
 
   /* link together nodes on the same cycle: */
   cycle_link ();
@@ -596,7 +596,7 @@ DEFUN_VOID (cg_assemble)
   for (index = 0; index < symtab.len; ++index)
     {
       top_sorted_syms[index] = &symtab.base[index];
-    }				/* for */
+    }
   qsort (top_sorted_syms, symtab.len, sizeof (Sym *), cmp_topo);
   DBG (DFNDEBUG,
        printf ("[cg_assemble] topological sort listing\n");
@@ -606,7 +606,7 @@ DEFUN_VOID (cg_assemble)
        printf ("%d:", top_sorted_syms[index]->cg.top_order);
        print_name (top_sorted_syms[index]);
        printf ("\n");
-       }			/* for */
+       }
   );
   /*
    * Starting from the topological top, propagate print flags to
@@ -624,7 +624,7 @@ DEFUN_VOID (cg_assemble)
   for (index = 0; index < symtab.len; ++index)
     {
       propagate_time (top_sorted_syms[index]);
-    }				/* for */
+    }
 
   free (top_sorted_syms);
 
@@ -636,18 +636,16 @@ DEFUN_VOID (cg_assemble)
   for (index = 0; index < symtab.len; index++)
     {
       time_sorted_syms[index] = &symtab.base[index];
-    }				/* if */
+    }
   for (index = 1; index <= num_cycles; index++)
     {
       time_sorted_syms[symtab.len + index - 1] = &cycle_header[index];
-    }				/* for */
+    }
   qsort (time_sorted_syms, symtab.len + num_cycles, sizeof (Sym *),
 	 cmp_total);
   for (index = 0; index < symtab.len + num_cycles; index++)
     {
       time_sorted_syms[index]->cg.index = index + 1;
-    }				/* for */
+    }
   return time_sorted_syms;
-}				/* cg_assemble */
-
-/*** end of cg_arcs.c ***/
+}

@@ -41,7 +41,7 @@ hertz ()
   if (tim.it_interval.tv_usec < 2)
     {
       return HZ_WRONG;
-    }				/* if */
+    }
   return 1000000 / tim.it_interval.tv_usec;
 #endif
-}				/* hertz */
+}

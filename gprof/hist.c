@@ -101,7 +101,7 @@ DEFUN (hist_read_rec, (ifp, filename), FILE * ifp AND const char *filename)
       fprintf (stderr, "%s: %s: unexpected end of file\n",
 	       whoami, filename);
       done (1);
-    }				/* if */
+    }
 
   n_lowpc = (bfd_vma) get_vma (core_bfd, (bfd_byte *) hdr.low_pc);
   n_highpc = (bfd_vma) get_vma (core_bfd, (bfd_byte *) hdr.high_pc);
@@ -122,7 +122,7 @@ DEFUN (hist_read_rec, (ifp, filename), FILE * ifp AND const char *filename)
       highpc = (bfd_vma) n_highpc / sizeof (UNIT);
       hist_num_bins = ncnt;
       hz = profrate;
-    }				/* if */
+    }
 
   DBG (SAMPLEDEBUG,
        printf ("[hist_read_rec] n_lowpc 0x%lx n_highpc 0x%lx ncnt %d\n",
@@ -138,13 +138,13 @@ DEFUN (hist_read_rec, (ifp, filename), FILE * ifp AND const char *filename)
       fprintf (stderr, "%s: `%s' is incompatible with first gmon file\n",
 	       whoami, filename);
       done (1);
-    }				/* if */
+    }
 
   if (!hist_sample)
     {
       hist_sample = (int *) xmalloc (hist_num_bins * sizeof (hist_sample[0]));
       memset (hist_sample, 0, hist_num_bins * sizeof (hist_sample[0]));
-    }				/* if */
+    }
 
   for (i = 0; i < hist_num_bins; ++i)
     {
@@ -154,10 +154,10 @@ DEFUN (hist_read_rec, (ifp, filename), FILE * ifp AND const char *filename)
 		   "%s: %s: unexpected EOF after reading %d of %d samples\n",
 		   whoami, filename, i, hist_num_bins);
 	  done (1);
-	}			/* if */
+	}
       hist_sample[i] += bfd_get_16 (core_bfd, (bfd_byte *) & count[0]);
-    }				/* for */
-}				/* hist_read_rec */
+    }
+}
 
 
 /*
@@ -187,7 +187,7 @@ DEFUN (hist_write_hist, (ofp, filename), FILE * ofp AND const char *filename)
     {
       perror (filename);
       done (1);
-    }				/* if */
+    }
 
   for (i = 0; i < hist_num_bins; ++i)
     {
@@ -196,9 +196,9 @@ DEFUN (hist_write_hist, (ofp, filename), FILE * ofp AND const char *filename)
 	{
 	  perror (filename);
 	  done (1);
-	}			/* if */
-    }				/* for */
-}				/* hist_write_hist */
+	}
+    }
+}
 
 
 /*
@@ -230,10 +230,10 @@ DEFUN_VOID (scale_and_align_entries)
 	       printf ("[scale_and_align_entries] pushing 0x%lx to 0x%lx\n",
 		 sym->hist.scaled_addr, sym->aligned_addr + UNITS_TO_CODE));
 	  sym->aligned_addr += UNITS_TO_CODE;
-	}			/* if */
+	}
 #endif /* OFFSET_TO_CODE > 0 */
-    }				/* for */
-}				/* scale_and_align_entries */
+    }
+}
 
 
 /*
@@ -296,7 +296,7 @@ DEFUN_VOID (hist_assign_samples)
       if (!bin_count)
 	{
 	  continue;
-	}			/* if */
+	}
       bin_low_pc = lowpc + (bfd_vma) (hist_scale * i);
       bin_high_pc = lowpc + (bfd_vma) (hist_scale * (i + 1));
       time = bin_count;
@@ -320,7 +320,7 @@ DEFUN_VOID (hist_assign_samples)
 	  if (bin_high_pc < sym_low_pc)
 	    {
 	      break;
-	    }			/* if */
+	    }
 	  /*
 	   * If low end of bin is above high end of symbol, go for
 	   * next symbol.
@@ -328,7 +328,7 @@ DEFUN_VOID (hist_assign_samples)
 	  if (bin_low_pc >= sym_high_pc)
 	    {
 	      continue;
-	    }			/* if */
+	    }
 	  overlap =
 	    MIN (bin_high_pc, sym_high_pc) - MAX (bin_low_pc, sym_low_pc);
 	  if (overlap > 0)
@@ -355,13 +355,13 @@ DEFUN_VOID (hist_assign_samples)
 	      else
 		{
 		  total_time -= credit;
-		}		/* if */
-	    }			/* if */
-	}			/* if */
-    }				/* for */
+		}
+	    }
+	}
+    }
   DBG (SAMPLEDEBUG, printf ("[assign_samples] total_time %f\n",
 			    total_time));
-}				/* hist_assign_samples */
+}
 
 
 /*
@@ -382,26 +382,26 @@ DEFUN (print_header, (prefix), const char prefix)
 	{
 	  printf (" for %.2f%% of %.2f %s\n\n",
 		  100.0 / total_time, total_time / hz, hist_dimension);
-	}			/* if */
+	}
     }
   else
     {
       printf ("\nEach sample counts as %g %s.\n", 1.0 / hz, hist_dimension);
-    }				/* if */
+    }
 
   if (total_time <= 0.0)
     {
       printf (" no time accumulated\n\n");
       /* this doesn't hurt since all the numerators will be zero: */
       total_time = 1.0;
-    }				/* if */
+    }
 
   printf ("%5.5s %10.10s %8.8s %8.8s %8.8s %8.8s  %-8.8s\n",
 	  "%  ", "cumulative", "self  ", "", "self  ", "total ", "");
   printf ("%5.5s %9.9s  %8.8s %8.8s %8.8s %8.8s  %-8.8s\n",
 	  "time", hist_dimension, hist_dimension, "calls", unit, unit,
 	  "name");
-}				/* print_header */
+}
 
 
 static void
@@ -410,7 +410,7 @@ DEFUN (print_line, (sym, scale), Sym * sym AND double scale)
   if (ignore_zeros && sym->ncalls == 0 && sym->hist.time == 0)
     {
       return;
-    }				/* if */
+    }
 
   accum_time += sym->hist.time;
   if (bsd_style_output)
@@ -424,7 +424,7 @@ DEFUN (print_line, (sym, scale), Sym * sym AND double scale)
       printf ("%6.2f %9.2f %8.2f",
 	      total_time > 0.0 ? 100 * sym->hist.time / total_time : 0.0,
 	      accum_time / hz, sym->hist.time / hz);
-    }				/* if */
+    }
   if (sym->ncalls)
     {
       printf (" %8d %8.2f %8.2f  ",
@@ -434,7 +434,7 @@ DEFUN (print_line, (sym, scale), Sym * sym AND double scale)
   else
     {
       printf (" %8.8s %8.8s %8.8s  ", "", "", "");
-    }				/* if */
+    }
   if (bsd_style_output)
     {
       print_name (sym);
@@ -442,9 +442,9 @@ DEFUN (print_line, (sym, scale), Sym * sym AND double scale)
   else
     {
       print_name_only (sym);
-    }				/* if */
+    }
   printf ("\n");
-}				/* print_line */
+}
 
 
 /*
@@ -464,24 +464,24 @@ DEFUN (cmp_time, (lp, rp), const PTR lp AND const PTR rp)
   if (time_diff > 0.0)
     {
       return 1;
-    }				/* if */
+    }
   if (time_diff < 0.0)
     {
       return -1;
-    }				/* if */
+    }
 
   call_diff = right->ncalls - left->ncalls;
   if (call_diff > 0)
     {
       return 1;
-    }				/* if */
+    }
   if (call_diff < 0)
     {
       return -1;
-    }				/* if */
+    }
 
   return strcmp (left->name, right->name);
-}				/* cmp_time */
+}
 
 
 /*
@@ -502,7 +502,7 @@ DEFUN_VOID (hist_print)
   else
     {
       printf ("\f\n");
-    }				/* if */
+    }
 
   accum_time = 0.0;
   if (bsd_style_output)
@@ -511,12 +511,12 @@ DEFUN_VOID (hist_print)
 	{
 	  printf ("\n\n\nflat profile:\n");
 	  flat_blurb (stdout);
-	}			/* if */
+	}
     }
   else
     {
       printf ("Flat profile:\n");
-    }				/* if */
+    }
   /*
    * Sort the symbol table by time (call-count and name as secondary
    * and tertiary keys):
@@ -525,7 +525,7 @@ DEFUN_VOID (hist_print)
   for (index = 0; index < symtab.len; ++index)
     {
       time_sorted_syms[index] = &symtab.base[index];
-    }				/* for */
+    }
   qsort (time_sorted_syms, symtab.len, sizeof (Sym *), cmp_time);
 
   if (bsd_style_output)
@@ -551,9 +551,9 @@ DEFUN_VOID (hist_print)
 		{
 		  top_dog = sym;
 		  top_time = time;
-		}		/* if */
-	    }			/* if */
-	}			/* for */
+		}
+	    }
+	}
       if (top_dog && top_dog->ncalls && top_time > 0.0)
 	{
 	  top_time /= hz;
@@ -561,9 +561,9 @@ DEFUN_VOID (hist_print)
 		 && log_scale < sizeof (SItab) / sizeof (SItab[0]) - 1)
 	    {
 	      ++log_scale;
-	    }			/* while */
-	}			/* if */
-    }				/* if */
+	    }
+	}
+    }
 
   /*
    * For now, the dimension is always seconds.  In the future, we
@@ -583,14 +583,12 @@ DEFUN_VOID (hist_print)
 	      && !sym_lookup (&syms[EXCL_FLAT], addr)))
 	{
 	  print_line (time_sorted_syms[index], SItab[log_scale].scale);
-	}			/* if */
-    }				/* for */
+	}
+    }
   free (time_sorted_syms);
 
   if (print_descriptions && !bsd_style_output)
     {
       flat_blurb (stdout);
-    }				/* if */
-}				/* hist_print */
-
-/*** end of hist.c ***/
+    }
+}

@@ -44,7 +44,7 @@ static bool
 DEFUN (is_numbered, (child), Sym * child)
 {
   return child->cg.top_order != DFN_NAN && child->cg.top_order != DFN_BUSY;
-}				/* is_numbered */
+}
 
 
 /*
@@ -56,9 +56,9 @@ DEFUN (is_busy, (child), Sym * child)
   if (child->cg.top_order == DFN_NAN)
     {
       return FALSE;
-    }				/* if */
+    }
   return TRUE;
-}				/* is_busy */
+}
 
 
 /*
@@ -81,17 +81,17 @@ DEFUN (find_cycle, (child), Sym * child)
       if (child == head)
 	{
 	  break;
-	}			/* if */
+	}
       if (child->cg.cyc.head != child && child->cg.cyc.head == head)
 	{
 	  break;
-	}			/* if */
-    }				/* for */
+	}
+    }
   if (cycle_top <= 0)
     {
       fprintf (stderr, "[find_cycle] couldn't find head of cycle\n");
       done (1);
-    }				/* if */
+    }
 #ifdef DEBUG
   if (debug_level & DFNDEBUG)
     {
@@ -104,7 +104,7 @@ DEFUN (find_cycle, (child), Sym * child)
       else
 	{
 	  printf ("<unknown>");
-	}			/* if */
+	}
       printf ("\n");
     }
 #endif
@@ -137,7 +137,7 @@ DEFUN (find_cycle, (child), Sym * child)
 	       printf ("[find_cycle] tail ");
 	       print_name (tail);
 	       printf ("\n"));
-	}			/* for */
+	}
       /*
        * If what we think is the top of the cycle has a cyclehead
        * field, then it's not really the head of the cycle, which is
@@ -149,7 +149,7 @@ DEFUN (find_cycle, (child), Sym * child)
 	  DBG (DFNDEBUG, printf ("[find_cycle] new cyclehead ");
 	       print_name (head);
 	       printf ("\n"));
-	}			/* if */
+	}
       for (index = cycle_top + 1; index <= dfn_depth; ++index)
 	{
 	  child = dfn_stack[index].sym;
@@ -174,16 +174,16 @@ DEFUN (find_cycle, (child), Sym * child)
 		       printf (" onto ");
 		       print_name (head);
 		       printf ("\n"));
-		}		/* for */
+		}
 	    }
 	  else if (child->cg.cyc.head != head /* firewall */ )
 	    {
 	      fprintf (stderr, "[find_cycle] glommed, but not to head\n");
 	      done (1);
-	    }			/* if */
-	}			/* for */
-    }				/* if */
-}				/* find_cycle */
+	    }
+	}
+    }
+}
 
 
 /*
@@ -198,14 +198,14 @@ DEFUN (pre_visit, (parent), Sym * parent)
     {
       fprintf (stderr, "[pre_visit] dfn_stack overflow\n");
       done (1);
-    }				/* if */
+    }
   dfn_stack[dfn_depth].sym = parent;
   dfn_stack[dfn_depth].cycle_top = dfn_depth;
   parent->cg.top_order = DFN_BUSY;
   DBG (DFNDEBUG, printf ("[pre_visit]\t\t%d:", dfn_depth);
        print_name (parent);
        printf ("\n"));
-}				/* pre_visit */
+}
 
 
 /*
@@ -233,14 +233,14 @@ DEFUN (post_visit, (parent), Sym * parent)
 	  DBG (DFNDEBUG, printf ("[post_visit]\t\tmember ");
 	       print_name (member);
 	       printf ("-> cg.top_order = %d\n", dfn_counter));
-	}			/* for */
+	}
     }
   else
     {
       DBG (DFNDEBUG, printf ("[post_visit]\t\tis part of a cycle\n"));
-    }				/* if */
+    }
   --dfn_depth;
-}				/* post_visit */
+}
 
 
 /*
@@ -260,7 +260,7 @@ DEFUN (cg_dfn, (parent), Sym * parent)
   if (is_numbered (parent))
     {
       return;
-    }				/* if */
+    }
   /*
    * If we're already busy, must be a cycle:
    */
@@ -268,7 +268,7 @@ DEFUN (cg_dfn, (parent), Sym * parent)
     {
       find_cycle (parent);
       return;
-    }				/* if */
+    }
   pre_visit (parent);
   /*
    * Recursively visit children:
@@ -276,8 +276,6 @@ DEFUN (cg_dfn, (parent), Sym * parent)
   for (arc = parent->cg.children; arc; arc = arc->next_child)
     {
       cg_dfn (arc->child);
-    }				/* for */
+    }
   post_visit (parent);
-}				/* cg_dfn */
-
-/*** end of cg_dfn.c ***/
+}

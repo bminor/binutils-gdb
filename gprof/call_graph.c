@@ -29,8 +29,8 @@ DEFUN (cg_tally, (from_pc, self_pc, count),
 	   printf ("[cg_tally] arc from %s to %s traversed %d times\n",
 		   parent->name, child->name, count));
       arc_add (parent, child, count);
-    }				/* if */
-}				/* cg_tally */
+    }
+}
 
 
 /*
@@ -51,7 +51,7 @@ DEFUN (cg_read_rec, (ifp, filename), FILE * ifp AND CONST char *filename)
       fprintf (stderr, "%s: %s: unexpected end of file\n",
 	       whoami, filename);
       done (1);
-    }				/* if */
+    }
   from_pc = get_vma (core_bfd, (bfd_byte *) arc.from_pc);
   self_pc = get_vma (core_bfd, (bfd_byte *) arc.self_pc);
   count = bfd_get_32 (core_bfd, (bfd_byte *) arc.count);
@@ -60,7 +60,7 @@ DEFUN (cg_read_rec, (ifp, filename), FILE * ifp AND CONST char *filename)
 	       from_pc, self_pc, count));
   /* add this arc: */
   cg_tally (from_pc, self_pc, count);
-}				/* cg_read_rec */
+}
 
 
 /*
@@ -88,12 +88,10 @@ DEFUN (cg_write_arcs, (ofp, filename), FILE * ofp AND const char *filename)
 	    {
 	      perror (filename);
 	      done (1);
-	    }			/* if */
+	    }
 	  DBG (SAMPLEDEBUG,
 	     printf ("[cg_write_arcs] frompc 0x%lx selfpc 0x%lx count %d\n",
 		     arc->parent->addr, arc->child->addr, arc->count));
-	}			/* for */
-    }				/* for */
-}				/* cg_write_arcs */
-
-/*** end of call_graph.c ***/
+	}
+    }
+}

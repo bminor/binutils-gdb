@@ -13,6 +13,4 @@ DEFUN (find_call, (parent, p_lowpc, p_highpc),
 {
   fprintf (stderr, "%s: -c supported on this machine architecture\n",
 	   whoami);
-}				/* find_call */
-
-/*** end of dummy.c ***/
+}

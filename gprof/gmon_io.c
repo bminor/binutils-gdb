@@ -23,7 +23,7 @@ int gmon_file_version = 0;	/* 0 == old (non-versioned) file format */
 bfd_vma
 DEFUN (get_vma, (abfd, addr), bfd * abfd AND bfd_byte * addr)
 {
-  switch (sizeof (bfd_vma))
+  switch (sizeof (char*))
     {
     case 4:
       return bfd_get_32 (abfd, addr);
@@ -31,10 +31,10 @@ DEFUN (get_vma, (abfd, addr), bfd * abfd AND bfd_byte * addr)
       return bfd_get_64 (abfd, addr);
     default:
       fprintf (stderr, "%s: bfd_vma has unexpected size of %ld bytes\n",
-	       whoami, (long) sizeof (bfd_vma));
+	       whoami, (long) sizeof (char*));
       done (1);
-    }				/* switch */
-}				/* get_vma */
+    }
+}
 
 
 /*
@@ -43,7 +43,7 @@ DEFUN (get_vma, (abfd, addr), bfd * abfd AND bfd_byte * addr)
 void
 DEFUN (put_vma, (abfd, val, addr), bfd * abfd AND bfd_vma val AND bfd_byte * addr)
 {
-  switch (sizeof (bfd_vma))
+  switch (sizeof (char*))
     {
     case 4:
       bfd_put_32 (abfd, val, addr);
@@ -53,10 +53,10 @@ DEFUN (put_vma, (abfd, val, addr), bfd * abfd AND bfd_vma val AND bfd_byte * add
       break;
     default:
       fprintf (stderr, "%s: bfd_vma has unexpected size of %ld bytes\n",
-	       whoami, (long) sizeof (bfd_vma));
+	       whoami, (long) sizeof (char*));
       done (1);
-    }				/* switch */
-}				/* put_vma */
+    }
+}
 
 
 void
@@ -80,14 +80,14 @@ DEFUN (gmon_out_read, (filename), const char *filename)
 	{
 	  perror (filename);
 	  done (1);
-	}			/* if */
-    }				/* if */
+	}
+    }
   if (fread (&ghdr, sizeof (struct gmon_hdr), 1, ifp) != 1)
     {
       fprintf (stderr, "%s: file too short to be a gmon file\n",
 	       filename);
       done (1);
-    }				/* if */
+    }
 
   if ((file_format == FF_MAGIC) ||
       (file_format == FF_AUTO && !strncmp (&ghdr.cookie[0], GMON_MAGIC, 4)))
@@ -97,7 +97,7 @@ DEFUN (gmon_out_read, (filename), const char *filename)
 	  fprintf (stderr, "%s: file `%s' has bad magic cookie\n",
 		   whoami, filename);
 	  done (1);
-	}			/* if */
+	}
 
       /* right magic, so it's probably really a new gmon.out file */
 
@@ -108,7 +108,7 @@ DEFUN (gmon_out_read, (filename), const char *filename)
 		   "%s: file `%s' has unsupported version %d\n",
 		   whoami, filename, gmon_file_version);
 	  done (1);
-	}			/* if */
+	}
 
       /* read in all the records: */
       while (fread (&tag, sizeof (tag), 1, ifp) == 1)
@@ -138,8 +138,8 @@ DEFUN (gmon_out_read, (filename), const char *filename)
 		       "%s: %s: found bad tag %d (file corrupted?)\n",
 		       whoami, filename, tag);
 	      done (1);
-	    }			/* switch */
-	}			/* while */
+	    }
+	}
     }
   else if (file_format == FF_AUTO || file_format == FF_BSD)
     {
@@ -172,14 +172,14 @@ DEFUN (gmon_out_read, (filename), const char *filename)
 	{
 	  perror (filename);
 	  done (1);
-	}			/* if */
+	}
       if (fread (&raw, 1, sizeof (struct raw_phdr), ifp)
 	  != sizeof (struct raw_phdr))
 	{
 	  fprintf (stderr, "%s: file too short to be a gmon file\n",
 		   filename);
 	  done (1);
-	}			/* if */
+	}
       tmp.low_pc = get_vma (core_bfd, (bfd_byte *) & raw.low_pc[0]);
       tmp.high_pc = get_vma (core_bfd, (bfd_byte *) & raw.high_pc[0]);
       tmp.ncnt = bfd_get_32 (core_bfd, (bfd_byte *) & raw.ncnt[0]);
@@ -189,7 +189,7 @@ DEFUN (gmon_out_read, (filename), const char *filename)
 	  fprintf (stderr, "%s: incompatible with first gmon file\n",
 		   filename);
 	  done (1);
-	}			/* if */
+	}
       h = tmp;
       s_lowpc = (bfd_vma) h.low_pc;
       s_highpc = (bfd_vma) h.high_pc;
@@ -210,14 +210,14 @@ DEFUN (gmon_out_read, (filename), const char *filename)
       if (hist_num_bins)
 	{
 	  ++nhist;
-	}			/* if */
+	}
 
       if (!hist_sample)
 	{
 	  hist_sample =
 	    (int *) xmalloc (hist_num_bins * sizeof (hist_sample[0]));
 	  memset (hist_sample, 0, hist_num_bins * sizeof (hist_sample[0]));
-	}			/* if */
+	}
 
       for (i = 0; i < hist_num_bins; ++i)
 	{
@@ -227,9 +227,9 @@ DEFUN (gmon_out_read, (filename), const char *filename)
 		       "%s: unexpected EOF after reading %d/%d bins\n",
 		       whoami, --i, hist_num_bins);
 	      done (1);
-	    }			/* if */
+	    }
 	  hist_sample[i] += bfd_get_16 (core_bfd, (bfd_byte *) raw_bin_count);
-	}			/* for */
+	}
 
       /*
        * The rest of the file consists of a bunch of <from,self,count>
@@ -246,7 +246,7 @@ DEFUN (gmon_out_read, (filename), const char *filename)
 		     from_pc, self_pc, count));
 	  /* add this arc: */
 	  cg_tally (from_pc, self_pc, count);
-	}			/* while */
+	}
       fclose (ifp);
 
       if (hz == HZ_WRONG)
@@ -260,15 +260,15 @@ DEFUN (gmon_out_read, (filename), const char *filename)
 	    {
 	      hz = 1;
 	      fprintf (stderr, "time is in ticks, not seconds\n");
-	    }			/* if */
-	}			/* if */
+	    }
+	}
     }
   else
     {
       fprintf (stderr, "%s: don't know how to deal with file format %d\n",
 	       whoami, file_format);
       done (1);
-    }				/* if */
+    }
 
   if (output_style & STYLE_GMON_INFO)
     {
@@ -281,8 +281,8 @@ DEFUN (gmon_out_read, (filename), const char *filename)
       printf ("\t%d basic-block count record%s\n",
 	      nbbs, nbbs == 1 ? "" : "s");
       first_output = FALSE;
-    }				/* if */
-}				/* gmon_out_read */
+    }
+}
 
 
 void
@@ -296,7 +296,7 @@ DEFUN (gmon_out_write, (filename), const char *filename)
     {
       perror (filename);
       done (1);
-    }				/* if */
+    }
 
   if (file_format == FF_AUTO || file_format == FF_MAGIC)
     {
@@ -308,25 +308,25 @@ DEFUN (gmon_out_write, (filename), const char *filename)
 	{
 	  perror (filename);
 	  done (1);
-	}			/* if */
+	}
 
       /* write execution time histogram if we have one: */
       if (gmon_input & INPUT_HISTOGRAM)
 	{
 	  hist_write_hist (ofp, filename);
-	}			/* if */
+	}
 
       /* write call graph arcs if we have any: */
       if (gmon_input & INPUT_CALL_GRAPH)
 	{
 	  cg_write_arcs (ofp, filename);
-	}			/* if */
+	}
 
       /* write basic-block info if we have it: */
       if (gmon_input & INPUT_BB_COUNTS)
 	{
 	  bb_write_blocks (ofp, filename);
-	}			/* if */
+	}
     }
   else if (file_format == FF_BSD)
     {
@@ -350,7 +350,7 @@ DEFUN (gmon_out_write, (filename), const char *filename)
 	{
 	  perror (filename);
 	  done (1);
-	}			/* if */
+	}
 
       /* dump the samples: */
 
@@ -361,8 +361,8 @@ DEFUN (gmon_out_write, (filename), const char *filename)
 	    {
 	      perror (filename);
 	      done (1);
-	    }			/* if */
-	}			/* for */
+	    }
+	}
 
       /* dump the normalized raw arc information: */
 
@@ -379,12 +379,12 @@ DEFUN (gmon_out_write, (filename), const char *filename)
 		{
 		  perror (filename);
 		  done (1);
-		}		/* if */
+		}
 	      DBG (SAMPLEDEBUG,
 		   printf ("[dumpsum] frompc 0x%lx selfpc 0x%lx count %d\n",
 			   arc->parent->addr, arc->child->addr, arc->count));
-	    }			/* for */
-	}			/* for */
+	    }
+	}
       fclose (ofp);
     }
   else
@@ -392,7 +392,5 @@ DEFUN (gmon_out_write, (filename), const char *filename)
       fprintf (stderr, "%s: don't know how to deal with file format %d\n",
 	       whoami, file_format);
       done (1);
-    }				/* if */
-}				/* gmon_out_write */
-
-/*** gmon_out.c ***/
+    }
+}

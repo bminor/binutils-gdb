@@ -22,7 +22,7 @@ DEFUN (sym_init, (sym), Sym * sym)
   sym->cg.prop.fract = 0.0;
   sym->cg.prop.self = 0.0;
   sym->cg.prop.child = 0.0;
-}				/* sym_init */
+}
 
 
 /*
@@ -48,15 +48,15 @@ DEFUN (cmp_addr, (lp, rp), const PTR lp AND const PTR rp)
   else if (left->addr < right->addr)
     {
       return -1;
-    }				/* if */
+    }
 
   if (left->is_func != right->is_func)
     {
       return right->is_func - left->is_func;
-    }				/* if */
+    }
 
   return left->is_static - right->is_static;
-}				/* cmp_addr */
+}
 
 
 void
@@ -68,7 +68,7 @@ DEFUN (symtab_finalize, (tab), Sym_Table * tab)
   if (!tab->len)
     {
       return;
-    }				/* if */
+    }
 
   /*
    * Sort symbol table in order of increasing function addresses:
@@ -116,27 +116,27 @@ DEFUN (symtab_finalize, (tab), Sym_Table * tab)
 			   src->name, src->is_static ? 't' : 'T',
 			   src->is_func ? 'F' : 'f');
 		   printf (" (addr=%lx)\n", src->addr));
-	    }			/* if */
+	    }
 	}
       else
 	{
 	  if (dst > tab->base && dst[-1].end_addr == 0)
 	    {
 	      dst[-1].end_addr = src->addr - 1;
-	    }			/* if */
+	    }
 
 	  /* retain sym only if it has a non-empty address range: */
 	  if (!src->end_addr || src->addr <= src->end_addr)
 	    {
 	      *dst++ = *src;
 	      prev_addr = src->addr;
-	    }			/* if */
-	}			/* if */
-    }				/* if */
+	    }
+	}
+    }
   if (tab->len > 0 && dst[-1].end_addr == 0)
     {
       dst[-1].end_addr = core_text_sect->vma + core_text_sect->_raw_size - 1;
-    }				/* if */
+    }
 
   DBG (AOUTDEBUG | IDDEBUG,
        printf ("[symtab_finalize]: removed %d duplicate entries\n",
@@ -153,9 +153,9 @@ DEFUN (symtab_finalize, (tab), Sym_Table * tab)
        printf ("[symtab_finalize] 0x%lx-0x%lx\t%s\n",
 	       (long) tab->base[j].addr, (long) tab->base[j].end_addr,
 	       tab->base[j].name);
-       }			/* for */
+       }
   );
-}				/* symtab_finalize */
+}
 
 
 #ifdef DEBUG
@@ -179,7 +179,7 @@ DEFUN (dbg_sym_lookup, (symtab, address), Sym_Table * symtab AND bfd_vma address
       if (sym[mid].addr <= address && sym[mid + 1].addr > address)
 	{
 	  return &sym[mid];
-	}			/* if */
+	}
       if (sym[mid].addr > address)
 	{
 	  high = mid;
@@ -187,11 +187,11 @@ DEFUN (dbg_sym_lookup, (symtab, address), Sym_Table * symtab AND bfd_vma address
       else
 	{
 	  low = mid + 1;
-	}			/* if */
-    }				/* for */
+	}
+    }
   fprintf (stderr, "[sym_lookup] binary search fails???\n");
   return 0;
-}				/* dbg_sym_lookup */
+}
 
 #endif	/* DEBUG */
 
@@ -213,7 +213,7 @@ DEFUN (sym_lookup, (symtab, address), Sym_Table * symtab AND bfd_vma address)
   if (!symtab->len)
     {
       return 0;
-    }				/* if */
+    }
 
   sym = symtab->base;
   for (low = 0, high = symtab->len - 1; low != high;)
@@ -236,8 +236,8 @@ DEFUN (sym_lookup, (symtab, address), Sym_Table * symtab AND bfd_vma address)
 		   printf ("[sym_lookup] %d probes (symtab->len=%d)\n",
 			   probes, symtab->len - 1));
 	      return &sym[mid];
-	    }			/* if */
-	}			/* if */
+	    }
+	}
       if (sym[mid].addr > address)
 	{
 	  high = mid;
@@ -245,8 +245,8 @@ DEFUN (sym_lookup, (symtab, address), Sym_Table * symtab AND bfd_vma address)
       else
 	{
 	  low = mid + 1;
-	}			/* if */
-    }				/* for */
+	}
+    }
   if (sym[mid + 1].addr <= address)
     {
       if (address > sym[mid + 1].end_addr)
@@ -259,9 +259,7 @@ DEFUN (sym_lookup, (symtab, address), Sym_Table * symtab AND bfd_vma address)
 	  DBG (LOOKUPDEBUG, printf ("[sym_lookup] %d (%d) probes, fall off\n",
 				    probes, symtab->len - 1));
 	  return &sym[mid + 1];
-	}			/* if */
-    }				/* if */
+	}
+    }
   return 0;
-}				/* sym_lookup */
-
-/*** end of symtab.c ***/
+}
