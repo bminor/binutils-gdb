@@ -1,5 +1,5 @@
 /* BFD COFF object file private structure.
-   Copyright (C) 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfdlink.h"
 
@@ -24,6 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define coff_data(bfd)		((bfd)->tdata.coff_obj_data)
 #define exec_hdr(bfd)		(coff_data(bfd)->hdr)
+#define obj_pe(bfd)             (coff_data(bfd)->pe)
 #define obj_symbols(bfd)	(coff_data(bfd)->symbols)
 #define	obj_sym_filepos(bfd)	(coff_data(bfd)->sym_filepos)
 
@@ -34,7 +35,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define obj_conv_table_size(bfd) (coff_data(bfd)->conv_table_size)
 
 #define obj_coff_external_syms(bfd) (coff_data (bfd)->external_syms)
+#define obj_coff_keep_syms(bfd)	(coff_data (bfd)->keep_syms)
 #define obj_coff_strings(bfd)	(coff_data (bfd)->strings)
+#define obj_coff_keep_strings(bfd) (coff_data (bfd)->keep_strings)
 #define obj_coff_sym_hashes(bfd) (coff_data (bfd)->sym_hashes)
 
 /* `Tdata' information kept for COFF files.  */
@@ -63,15 +66,47 @@ typedef struct coff_tdata
   unsigned local_auxesz;
   unsigned local_linesz;
 
-  /* Used by the COFF backend linker.  */
+  /* The unswapped external symbols.  May be NULL.  Read by
+     _bfd_coff_get_external_symbols.  */
   PTR external_syms;
+  /* If this is true, the external_syms may not be freed.  */
+  boolean keep_syms;
+
+  /* The string table.  May be NULL.  Read by
+     _bfd_coff_read_string_table.  */
   char *strings;
+  /* If this is true, the strings may not be freed.  */
+  boolean keep_strings;
+
+  /* is this a PE format coff file */
+  int pe;
+  /* Used by the COFF backend linker.  */
   struct coff_link_hash_entry **sym_hashes;
+  struct bfd_link_info *link_info;
 } coff_data_type;
 
 /* We take the address of the first element of a asymbol to ensure that the
  * macro is only ever applied to an asymbol.  */
 #define coffsymbol(asymbol) ((coff_symbol_type *)(&((asymbol)->the_bfd)))
+
+/* The used_by_bfd field of a section may be set to a pointer to this
+   structure.  */
+
+struct coff_section_tdata
+{
+  /* The relocs, swapped into COFF internal form.  This may be NULL.  */
+  struct internal_reloc *relocs;
+  /* If this is true, the relocs entry may not be freed.  */
+  boolean keep_relocs;
+  /* The section contents.  This may be NULL.  */
+  bfd_byte *contents;
+  /* If this is true, the contents entry may not be freed.  */
+  boolean keep_contents;
+};
+
+/* An accessor macro for the coff_section_tdata structure.  */
+#define coff_section_data(abfd, sec) \
+  ((struct coff_section_tdata *) (sec)->used_by_bfd)
 
 /* COFF linker hash table entries.  */
 
@@ -132,12 +167,15 @@ extern long coff_get_symtab_upper_bound PARAMS ((bfd *));
 extern long coff_get_symtab PARAMS ((bfd *, asymbol **));
 extern int coff_count_linenumbers PARAMS ((bfd *));
 extern struct coff_symbol_struct *coff_symbol_from PARAMS ((bfd *, asymbol *));
-extern boolean coff_renumber_symbols PARAMS ((bfd *));
+extern boolean coff_renumber_symbols PARAMS ((bfd *, int *));
 extern void coff_mangle_symbols PARAMS ((bfd *));
 extern boolean coff_write_symbols PARAMS ((bfd *));
 extern boolean coff_write_linenumbers PARAMS ((bfd *));
 extern alent *coff_get_lineno PARAMS ((bfd *, asymbol *));
 extern asymbol *coff_section_symbol PARAMS ((bfd *, char *));
+extern boolean _bfd_coff_get_external_symbols PARAMS ((bfd *));
+extern const char *_bfd_coff_read_string_table PARAMS ((bfd *));
+extern boolean _bfd_coff_free_symbols PARAMS ((bfd *));
 extern struct coff_ptr_struct *coff_get_normalized_symtab PARAMS ((bfd *));
 extern long coff_get_reloc_upper_bound PARAMS ((bfd *, sec_ptr));
 extern asymbol *coff_make_empty_symbol PARAMS ((bfd *));
@@ -175,6 +213,12 @@ extern boolean _bfd_coff_link_add_symbols
   PARAMS ((bfd *, struct bfd_link_info *));
 extern boolean _bfd_coff_final_link
   PARAMS ((bfd *, struct bfd_link_info *));
+extern struct internal_reloc *_bfd_coff_read_internal_relocs
+  PARAMS ((bfd *, asection *, boolean, bfd_byte *, boolean,
+	   struct internal_reloc *));
+extern boolean _bfd_coff_generic_relocate_section
+  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
+	   struct internal_reloc *, struct internal_syment *, asection **));
 
 /* And more taken from the source .. */
 
@@ -365,6 +409,20 @@ typedef struct
        struct internal_reloc *relocs,
        struct internal_syment *syms,
        asection **sections));
+ reloc_howto_type *(*_bfd_coff_rtype_to_howto) PARAMS ((
+       bfd *abfd,
+       asection *sec,
+       struct internal_reloc *rel,
+       struct coff_link_hash_entry *h,
+       struct internal_syment *sym,
+       bfd_vma *addendp));
+ boolean (*_bfd_coff_adjust_symndx) PARAMS ((
+       bfd *obfd,
+       struct bfd_link_info *info,
+       bfd *ibfd,
+       asection *sec,
+       struct internal_reloc *reloc,
+       boolean *adjustedp));
 
 } bfd_coff_backend_data;
 
@@ -462,4 +520,10 @@ typedef struct
 #define bfd_coff_relocate_section(obfd,info,ibfd,o,con,rel,isyms,secs)\
         ((coff_backend_info (ibfd)->_bfd_coff_relocate_section)\
          (obfd, info, ibfd, o, con, rel, isyms, secs))
+#define bfd_coff_rtype_to_howto(abfd, sec, rel, h, sym, addendp)\
+        ((coff_backend_info (abfd)->_bfd_coff_rtype_to_howto)\
+         (abfd, sec, rel, h, sym, addendp))
+#define bfd_coff_adjust_symndx(obfd, info, ibfd, sec, rel, adjustedp)\
+        ((coff_backend_info (abfd)->_bfd_coff_adjust_symndx)\
+         (obfd, info, ibfd, sec, rel, adjustedp))
 

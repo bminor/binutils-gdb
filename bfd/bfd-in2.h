@@ -20,7 +20,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* bfd.h -- The only header file required by users of the bfd library 
 
@@ -458,32 +458,46 @@ extern int bfd_stat PARAMS ((bfd *abfd, struct stat *));
 /* These are the different types of subsystems to be used when linking for
    Windows NT.  This information is passed in as an input parameter (default
    is console) and ultimately ends up in the optional header data */
-enum bfd_link_subsystem
-{
-  native,    /* image doesn't require a subsystem */
-  windows,   /* image runs in the Windows GUI subsystem */
-  console,   /* image runs in the Windows CUI (character) subsystem */
-  os2,       /* image runs in the OS/2 character subsystem */
-  posix      /* image runs in the posix character subsystem */
-};
+
+#define BFD_PE_NATIVE  1 	/* image doesn't require a subsystem */
+#define BFD_PE_WINDOWS 2 	/* image runs in the Windows GUI subsystem */
+#define BFD_PE_CONSOLE 3	/* image runs in the Windows CUI subsystem */
+#define BFD_PE_OS2     5	/* image runs in the OS/2 character subsystem */
+#define BFD_PE_POSIX   7	/* image runs in the posix character subsystem */
+
 /* The NT optional header file allows input of the stack and heap reserve
    and commit size.  This data may be input on the command line and will
    end up in the optional header.  Default sizes are provided. */
-struct _bfd_link_stack_heap
+
+typedef struct 
 {
-  boolean stack_defined;
-  boolean heap_defined;
-  bfd_vma stack_reserve;
-  bfd_vma stack_commit;
-  bfd_vma heap_reserve;
-  bfd_vma heap_commit; 
-};
-typedef struct _bfd_link_stack_heap bfd_link_stack_heap;
+  boolean defined;
+  bfd_vma value;
+} bfd_link_pe_info_dval ;
+
+typedef struct _bfd_link_pe_info
+{
+  bfd_link_pe_info_dval dll;
+  bfd_link_pe_info_dval file_alignment;
+  bfd_link_pe_info_dval heap_commit;
+  bfd_link_pe_info_dval heap_reserve;
+  bfd_link_pe_info_dval image_base;
+  bfd_link_pe_info_dval major_image_version;
+  bfd_link_pe_info_dval major_os_version;
+  bfd_link_pe_info_dval major_subsystem_version;
+  bfd_link_pe_info_dval minor_image_version;
+  bfd_link_pe_info_dval minor_os_version;
+  bfd_link_pe_info_dval minor_subsystem_version;
+  bfd_link_pe_info_dval section_alignment;
+  bfd_link_pe_info_dval stack_commit;
+  bfd_link_pe_info_dval stack_reserve;
+  bfd_link_pe_info_dval subsystem;
+}  bfd_link_pe_info;
 
 /* END OF PE STUFF */
 
-extern enum bfd_link_subsystem NT_subsystem;
-extern bfd_link_stack_heap NT_stack_heap;
+
+extern bfd_link_pe_info pe_info;
 
 /* Cast from const char * to char * so that caller can assign to
    a char * without a warning.  */
@@ -1065,6 +1079,8 @@ enum bfd_architecture
 
   bfd_arch_a29k,       /* AMD 29000 */
   bfd_arch_sparc,      /* SPARC */
+#define bfd_mach_sparc		1
+#define bfd_mach_sparc64	2
   bfd_arch_mips,       /* MIPS Rxxxx */
   bfd_arch_i386,       /* Intel 386 */
   bfd_arch_we32k,      /* AT&T WE32xxx */
@@ -2253,7 +2269,9 @@ CAT(NAME,_get_symbol_info),\
 CAT(NAME,_bfd_is_local_label),\
 CAT(NAME,_get_lineno),\
 CAT(NAME,_find_nearest_line),\
-CAT(NAME,_bfd_make_debug_symbol)
+CAT(NAME,_bfd_make_debug_symbol),\
+CAT(NAME,_read_minisymbols),\
+CAT(NAME,_minisymbol_to_symbol)
   long  (*_bfd_get_symtab_upper_bound) PARAMS ((bfd *));
   long  (*_bfd_canonicalize_symtab) PARAMS ((bfd *,
                                              struct symbol_cache_entry **));
@@ -2277,10 +2295,18 @@ CAT(NAME,_bfd_make_debug_symbol)
   /* Back-door to allow format-aware applications to create debug symbols
     while using BFD for everything else.  Currently used by the assembler
     when creating COFF files.  */
- asymbol *  (*_bfd_make_debug_symbol) PARAMS ((
+  asymbol *  (*_bfd_make_debug_symbol) PARAMS ((
        bfd *abfd,
        void *ptr,
        unsigned long size));
+#define bfd_read_minisymbols(b, d, m, s) \
+  BFD_SEND (b, _read_minisymbols, (b, d, m, s))
+  long  (*_read_minisymbols) PARAMS ((bfd *, boolean, PTR *,
+                                      unsigned int *));
+#define bfd_minisymbol_to_symbol(b, d, m, f) \
+  BFD_SEND (b, _minisymbol_to_symbol, (b, d, m, f))
+  asymbol *(*_minisymbol_to_symbol) PARAMS ((bfd *, boolean, const PTR,
+                                             asymbol *));
 
    /* Routines for relocs.  */
 #define BFD_JUMP_TABLE_RELOCS(NAME)\

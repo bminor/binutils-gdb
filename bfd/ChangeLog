@@ -1,3 +1,22 @@
+Mon Aug 21 17:49:28 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* bfd-in.h (bfd_link_subsystem): Turn enum into #defines.
+	(bfd_link_pe_info_dval): New
+	(bfd_link_stack_heap): Renamed and massaged into bfd_link_pe_info.
+	* bfd-in2.h: rebuilt.
+	* bfd.c (NT_subsystem, NT_stack_heap): Deleted.
+	* coffcode.h (pe_value): New function.
+	(fill_pe_header_info): New function.
+	(coff_write_object_contents): Use new function.
+	* cofflink.c (coff_final_link_info): Remove pe randomness.
+	(dores_com): Update info in bfd_link_pe_info_dval.
+	(process_embedded_commands): Use the bfd_link_pe_info_dval.
+	(_bfd_coff_final_link): Remove PE stuff, initialize
+	coff_data->link_info.
+	* coffswap.h (coff_swap_[aout|filehdr]_out): Use indirect PE pointer.
+	(coff_swap_scnhdr_out): Use real imagebase.
+	* libcoff (coff_data_type.link_info): New field.
+
 Mon Aug 21 11:10:32 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* linker.c (link_action): If an undefined reference follows an

@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /*
 Most of this hacked by  Steve Chamberlain,
@@ -301,6 +301,16 @@ CODE_FRAGMENT
 #ifndef IMAGE_BASE
 #define IMAGE_BASE 0
 #endif
+
+
+static bfd_vma
+pe_value(bfd_link_pe_info_dval *ptr, bfd_vma def)
+{
+  if (ptr && ptr->defined)
+    return ptr->value;
+  return def;
+}
+
 
 #include "coffswap.h"
 
@@ -1661,20 +1671,186 @@ coff_add_missing_symbols (abfd)
 #endif /* ! defined (RS6000COFF_C) */
 
 #ifdef COFF_WITH_PE
-static void add_data_entry (abfd, aout, idx, name)
+static void add_data_entry (abfd, aout, idx, name, base)
      bfd *abfd;
      struct internal_aouthdr *aout;
      int idx;
      char *name;
+     bfd_vma base;
 {
   asection *sec = bfd_get_section_by_name (abfd, name);
 
   /* add import directory information if it exists */
   if (sec != NULL)
     {
-      aout->DataDirectory[idx].VirtualAddress = sec->lma - NT_IMAGE_BASE;
-      aout->DataDirectory[idx].Size = sec->_raw_size;
+      aout->pe->DataDirectory[idx].VirtualAddress = sec->lma - base;
+      aout->pe->DataDirectory[idx].Size = sec->_raw_size;
     }
+}
+
+
+static void 
+fill_pe_header_info (abfd, internal_f, internal_a, end_of_image)
+     bfd *abfd;
+     struct internal_filehdr *internal_f;
+     struct internal_aouthdr *internal_a;
+     bfd_vma end_of_image;
+{
+  /* assign other filehdr fields for DOS header and NT signature */
+
+  bfd_link_pe_info *pe_info = coff_data (abfd)->link_info->pe_info;
+
+  internal_f->f_timdat = time (0);
+
+  if (pe_value  (&pe_info->dll, 0))
+    internal_f->f_flags |=  F_DLL ;
+
+
+  if (bfd_get_section_by_name (abfd, ".reloc"))
+    internal_f->f_flags &= ~F_RELFLG;
+
+
+  memset (internal_f->pe, 0, sizeof (struct internal_extra_pe_filehdr));
+  memset (internal_a->pe, 0, sizeof (struct internal_extra_pe_aouthdr));
+
+
+  internal_a->pe->ImageBase =  pe_value (&pe_info->image_base, IMAGE_BASE);
+
+  if (internal_a->tsize) 
+    internal_a->text_start -= internal_a->pe->ImageBase;
+  if (internal_a->dsize) 
+    internal_a->data_start -= internal_a->pe->ImageBase;
+  if (internal_a->entry) 
+    internal_a->entry -= internal_a->pe->ImageBase;
+
+
+  internal_f->pe->e_magic    = DOSMAGIC;
+  internal_f->pe->e_cblp     = 0x90;
+  internal_f->pe->e_cp       = 0x3;
+  internal_f->pe->e_crlc     = 0x0;
+  internal_f->pe->e_cparhdr  = 0x4;
+  internal_f->pe->e_minalloc = 0x0;
+  internal_f->pe->e_maxalloc = 0xffff;
+  internal_f->pe->e_ss       = 0x0;
+  internal_f->pe->e_sp       = 0xb8;
+  internal_f->pe->e_csum     = 0x0;
+  internal_f->pe->e_ip       = 0x0;
+  internal_f->pe->e_cs       = 0x0;
+  internal_f->pe->e_lfarlc   = 0x40;
+  internal_f->pe->e_ovno     = 0x0;
+  {
+    int idx;
+    for (idx=0; idx < 4; idx++)
+      internal_f->pe->e_res[idx] = 0x0;
+  }
+  internal_f->pe->e_oemid   = 0x0;
+  internal_f->pe->e_oeminfo = 0x0;
+  {
+    int idx;
+    for (idx=0; idx < 10; idx++)
+      internal_f->pe->e_res2[idx] = 0x0;
+  }
+  internal_f->pe->e_lfanew = 0x80;
+
+  /* this next collection of data are mostly just characters.  It appears
+     to be constant within the headers put on NT exes */
+  internal_f->pe->dos_message[0]  = 0x0eba1f0e;
+  internal_f->pe->dos_message[1]  = 0xcd09b400;
+  internal_f->pe->dos_message[2]  = 0x4c01b821;
+  internal_f->pe->dos_message[3]  = 0x685421cd;
+  internal_f->pe->dos_message[4]  = 0x70207369;
+  internal_f->pe->dos_message[5]  = 0x72676f72;
+  internal_f->pe->dos_message[6]  = 0x63206d61;
+  internal_f->pe->dos_message[7]  = 0x6f6e6e61;
+  internal_f->pe->dos_message[8]  = 0x65622074;
+  internal_f->pe->dos_message[9]  = 0x6e757220;
+  internal_f->pe->dos_message[10] = 0x206e6920;
+  internal_f->pe->dos_message[11] = 0x20534f44;
+  internal_f->pe->dos_message[12] = 0x65646f6d;
+  internal_f->pe->dos_message[13] = 0x0a0d0d2e;
+  internal_f->pe->dos_message[14] = 0x24;
+  internal_f->pe->dos_message[15] = 0x0;
+  internal_f->pe->nt_signature = NT_SIGNATURE;
+
+
+  /* write all of the other optional header data */
+
+
+
+  internal_a->pe->SectionAlignment = pe_value (&pe_info->section_alignment,
+					       NT_SECTION_ALIGNMENT);
+
+  internal_a->pe->FileAlignment = pe_value (&pe_info->file_alignment, 
+					    NT_FILE_ALIGNMENT);
+
+  internal_a->pe->MajorOperatingSystemVersion =
+    pe_value (&pe_info->major_os_version, 1);
+
+  internal_a->pe->MinorOperatingSystemVersion =
+    pe_value (&pe_info->minor_os_version, 0);
+
+  internal_a->pe->MajorImageVersion =
+    pe_value (&pe_info->major_image_version, 1);
+
+  internal_a->pe->MinorImageVersion =
+    pe_value (&pe_info->minor_image_version, 0);
+
+
+  internal_a->pe->MajorSubsystemVersion =
+    pe_value (&pe_info->major_subsystem_version, 3);
+
+
+  internal_a->pe->MinorSubsystemVersion =
+    pe_value (&pe_info->minor_subsystem_version, 10);
+
+
+
+  internal_a->pe->Subsystem =
+    pe_value (&pe_info->subsystem, BFD_PE_CONSOLE);
+
+
+
+
+  /* Virtual start address, take virtual start address of last section, 
+     add its physical size and round up the next page (NT_SECTION_ALIGNMENT).
+     An assumption has been made that the sections stored in the abfd
+     structure are in order and that I have successfully saved the last
+     section's address and size. */
+
+  internal_a->pe->SizeOfImage = 
+    (end_of_image - internal_a->pe->ImageBase
+     + internal_a->pe->SectionAlignment - 1)
+      & ~ (internal_a->pe->SectionAlignment-1);
+
+  /* Start of .text section will do here since it is the first section after
+     the headers.  Note that NT_IMAGE_BASE has already been removed above */
+  internal_a->pe->SizeOfHeaders = internal_a->text_start; 
+  internal_a->pe->CheckSum = 0;
+  internal_a->pe->DllCharacteristics = 0;
+
+  internal_a->pe->SizeOfStackReserve = pe_value (&pe_info->stack_reserve,
+						 NT_DEF_RESERVE);
+  internal_a->pe->SizeOfStackCommit = pe_value (&pe_info->stack_commit,
+						NT_DEF_COMMIT);
+
+  internal_a->pe->SizeOfHeapReserve = pe_value (&pe_info->heap_reserve,
+						NT_DEF_RESERVE);
+  internal_a->pe->SizeOfHeapCommit = pe_value (&pe_info->heap_commit,
+					       NT_DEF_COMMIT);
+
+  internal_a->pe->LoaderFlags = 0;
+  internal_a->pe->NumberOfRvaAndSizes = IMAGE_NUMBEROF_DIRECTORY_ENTRIES; /* 0x10 */
+
+  /* first null out all data directory entries .. */
+  memset (internal_a->pe->DataDirectory, sizeof (internal_a->pe->DataDirectory), 0);
+
+  add_data_entry (abfd, internal_a, 0, ".edata", internal_a->pe->ImageBase);
+  add_data_entry (abfd, internal_a, 1, ".idata", internal_a->pe->ImageBase);
+  add_data_entry (abfd, internal_a, 2, ".rsrc" ,internal_a->pe->ImageBase);
+  add_data_entry (abfd, internal_a, 5, ".reloc", internal_a->pe->ImageBase);
+
+
+
 }
 #endif
 
@@ -1699,6 +1875,21 @@ coff_write_object_contents (abfd)
 
   struct internal_filehdr internal_f;
   struct internal_aouthdr internal_a;
+
+#ifdef COFF_IMAGE_WITH_PE
+  struct internal_extra_pe_aouthdr extra_a;
+  struct internal_extra_pe_filehdr extra_f;
+
+  bfd_link_pe_info *pe_info = coff_data (abfd)->link_info->pe_info;
+  bfd_link_pe_info defs;
+  if (!pe_info)
+    {
+      /* Just use sensible defaults */
+      memset (&defs, 0, sizeof (defs));
+      coff_data (abfd)->link_info->pe_info = &defs;
+    }
+
+#endif
 
   bfd_set_error (bfd_error_system_call);
 
@@ -1885,7 +2076,6 @@ coff_write_object_contents (abfd)
      field does not belong here.  We fill it with a 0 so it compares the
      same but is not a reasonable time. -- gnu@cygnus.com
      */
-  internal_f.f_timdat = 0;
 
   internal_f.f_flags = 0;
 
@@ -1905,58 +2095,6 @@ coff_write_object_contents (abfd)
     internal_f.f_flags |= F_AR32WR;
   else
     internal_f.f_flags |= F_AR32W;
-
-#ifdef COFF_WITH_PE
-  /* assign other filehdr fields for DOS header and NT signature */
-  internal_f.e_magic    = DOSMAGIC;
-  internal_f.e_cblp     = 0x90;
-  internal_f.e_cp       = 0x3;
-  internal_f.e_crlc     = 0x0;
-  internal_f.e_cparhdr  = 0x4;
-  internal_f.e_minalloc = 0x0;
-  internal_f.e_maxalloc = 0xffff;
-  internal_f.e_ss       = 0x0;
-  internal_f.e_sp       = 0xb8;
-  internal_f.e_csum     = 0x0;
-  internal_f.e_ip       = 0x0;
-  internal_f.e_cs       = 0x0;
-  internal_f.e_lfarlc   = 0x40;
-  internal_f.e_ovno     = 0x0;
-  {
-    int idx;
-    for (idx=0; idx < 4; idx++)
-      internal_f.e_res[idx] = 0x0;
-  }
-  internal_f.e_oemid   = 0x0;
-  internal_f.e_oeminfo = 0x0;
-  {
-    int idx;
-    for (idx=0; idx < 10; idx++)
-      internal_f.e_res2[idx] = 0x0;
-  }
-  internal_f.e_lfanew = 0x80;
-
-  /* this next collection of data are mostly just characters.  It appears
-     to be constant within the headers put on NT exes */
-  internal_f.dos_message[0]  = 0x0eba1f0e;
-  internal_f.dos_message[1]  = 0xcd09b400;
-  internal_f.dos_message[2]  = 0x4c01b821;
-  internal_f.dos_message[3]  = 0x685421cd;
-  internal_f.dos_message[4]  = 0x70207369;
-  internal_f.dos_message[5]  = 0x72676f72;
-  internal_f.dos_message[6]  = 0x63206d61;
-  internal_f.dos_message[7]  = 0x6f6e6e61;
-  internal_f.dos_message[8]  = 0x65622074;
-  internal_f.dos_message[9]  = 0x6e757220;
-  internal_f.dos_message[10] = 0x206e6920;
-  internal_f.dos_message[11] = 0x20534f44;
-  internal_f.dos_message[12] = 0x65646f6d;
-  internal_f.dos_message[13] = 0x0a0d0d2e;
-  internal_f.dos_message[14] = 0x24;
-  internal_f.dos_message[15] = 0x0;
-  internal_f.nt_signature = NT_SIGNATURE;
-#endif
-
 
   /*
      FIXME, should do something about the other byte orders and
@@ -2077,126 +2215,29 @@ coff_write_object_contents (abfd)
   if (text_sec)
     {
       internal_a.tsize = bfd_get_section_size_before_reloc (text_sec);
-      internal_a.text_start = internal_a.tsize ? 
-	(text_sec->vma - IMAGE_BASE) : 0;
+      internal_a.text_start = internal_a.tsize ? text_sec->vma : 0;
     }
   if (data_sec)
     {
       internal_a.dsize = bfd_get_section_size_before_reloc (data_sec);
-      internal_a.data_start = internal_a.dsize ? 
-	(data_sec->vma - IMAGE_BASE) : 0;
+      internal_a.data_start = internal_a.dsize ? data_sec->vma : 0;
     }
   if (bss_sec)
     {
       internal_a.bsize = bfd_get_section_size_before_reloc (bss_sec);
     }
 
-  internal_a.entry = bfd_get_start_address (abfd) - IMAGE_BASE;
+  internal_a.entry = bfd_get_start_address (abfd);
   internal_f.f_nsyms = obj_raw_syment_count (abfd);
 
-#ifdef COFF_WITH_PE		/* write all of the other optional header data */
-  /* Note; the entries for subsystem, stack reserve, stack commit, heap reserve
-     and heap commit may be supplied on the command line via the -subsystem,
-     -stack and/or -heap switches.  This data is initially stored in variable
-     link_info.  This is eventually passed to the bfd (from ld) in (cofflink.c)
-     _bfd_coff_final_link.  Once this function gets it, we copy it into variables
-     NT_subsystem and NT_stack_heap which are defined in internal.h.  With
-     respect to the stack/heap reserve/commit parameters, if nothing has been
-     defined for these, the input values will be '0' (i.e. the values stored
-     in NT_stack_heap) will be 0. */ 
-
-  internal_a.ImageBase = NT_IMAGE_BASE;	/* 0x400000 */
-  internal_a.SectionAlignment = NT_SECTION_ALIGNMENT; /* 0x1000 */ 
-  internal_a.FileAlignment = NT_FILE_ALIGNMENT;	/* 0x200 */
-  internal_a.MajorOperatingSystemVersion = 1;
-  internal_a.MinorOperatingSystemVersion = 0;
-  internal_a.MajorImageVersion = 0;
-  internal_a.MinorImageVersion = 0;
-  internal_a.MajorSubsystemVersion = 3;
-  internal_a.MinorSubsystemVersion = 0xA;
-  internal_a.Reserved1 = 0;
-  /* Virtual start address, take virtual start address of last section, 
-     add its physical size and round up the next page (NT_SECTION_ALIGNMENT).
-     An assumption has been made that the sections stored in the abfd
-     structure are in order and that I have successfully saved the last
-     section's address and size. */
-
-  internal_a.SizeOfImage = 
-    (end_of_image - NT_IMAGE_BASE + NT_SECTION_ALIGNMENT - 1)
-      & ~ (NT_SECTION_ALIGNMENT-1);
-
-  /* Start of .text section will do here since it is the first section after
-     the headers.  Note that NT_IMAGE_BASE has already been removed above */
-  internal_a.SizeOfHeaders = internal_a.text_start; 
-  internal_a.CheckSum = 0;
-  switch (NT_subsystem)
-    {
-      /* The possible values are:
-	 1 - NATIVE   Doesn't require a subsystem
-	 2 - WINDOWS_GUI runs in Windows GUI subsystem
-	 3 - WINDOWS_CUI runs in Windows char sub. (console app)
-	 5 - OS2_CUI runs in OS/2 character subsystem
-	 7 - POSIX_CUI runs in Posix character subsystem */
-    case native:
-      internal_a.Subsystem = 1;
-      break;
-    case windows:
-      internal_a.Subsystem = 2;
-      break;
-    case console:
-      internal_a.Subsystem = 3;
-      break;
-    case os2:
-      internal_a.Subsystem = 5;
-      break;
-    case posix:
-      internal_a.Subsystem = 7;
-      break;
-    default:
-      internal_a.Subsystem = 3;
-    }
-  internal_a.DllCharacteristics = 0;
-  if (NT_stack_heap.stack_defined)
-    {
-      internal_a.SizeOfStackReserve = NT_stack_heap.stack_reserve;
-      /* since commit is an optional parameter, verify that it is non-zero */
-      if (NT_stack_heap.stack_commit > 0)
-	internal_a.SizeOfStackCommit = NT_stack_heap.stack_commit;
-      else
-	internal_a.SizeOfStackCommit = NT_DEF_COMMIT;
-    }
-  else
-    {
-      internal_a.SizeOfStackReserve = NT_DEF_RESERVE; /* 0x100000 */
-      internal_a.SizeOfStackCommit = NT_DEF_COMMIT; /* 0x1000 */
-    }
-  if (NT_stack_heap.heap_defined)
-    {
-      internal_a.SizeOfHeapReserve = NT_stack_heap.heap_reserve;
-      /* since commit is an optional parameter, verify that it is non-zero */
-      if (NT_stack_heap.heap_commit > 0)
-	internal_a.SizeOfHeapCommit = NT_stack_heap.heap_commit;
-      else
-	internal_a.SizeOfHeapCommit = NT_DEF_COMMIT;
-    }
-  else
-    {
-      internal_a.SizeOfHeapReserve = NT_DEF_RESERVE; /* 0x100000 */
-      internal_a.SizeOfHeapCommit = NT_DEF_COMMIT; /* 0x1000 */
-    }
-  internal_a.LoaderFlags = 0;
-  internal_a.NumberOfRvaAndSizes = IMAGE_NUMBEROF_DIRECTORY_ENTRIES; /* 0x10 */
-
-  /* first null out all data directory entries .. */
-  memset (internal_a.DataDirectory, sizeof (internal_a.DataDirectory), 0);
-
-  add_data_entry (abfd, &internal_a, 0, ".edata");
-  add_data_entry (abfd, &internal_a, 1, ".idata");
-  add_data_entry (abfd, &internal_a, 2, ".rsrc");
-  add_data_entry (abfd, &internal_a, 5, ".reloc");
 
 
+#ifdef COFF_IMAGE_WITH_PE
 
+  internal_f.pe = & extra_f;
+  internal_a.pe = & extra_a;
+
+  fill_pe_header_info (abfd, &internal_f, &internal_a, end_of_image);
 #endif
 
   /* now write them */
@@ -2393,8 +2434,6 @@ coff_slurp_symbol_table (abfd)
 
   if (obj_symbols (abfd))
     return true;
-  if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0)
-    return false;
 
   /* Read in the symbol table */
   if ((native_symbols = coff_get_normalized_symtab (abfd)) == NULL)
@@ -3025,6 +3064,12 @@ static CONST bfd_coff_backend_data bfd_coff_std_swap_table =
 #ifndef coff_bfd_is_local_label
 #define coff_bfd_is_local_label bfd_generic_is_local_label
 #endif
+#ifndef coff_read_minisymbols
+#define coff_read_minisymbols _bfd_generic_read_minisymbols
+#endif
+#ifndef coff_minisymbol_to_symbol
+#define coff_minisymbol_to_symbol _bfd_generic_minisymbol_to_symbol
+#endif
 
 /* The reloc lookup routine must be supplied by each individual COFF
    backend.  */
@@ -3032,6 +3077,10 @@ static CONST bfd_coff_backend_data bfd_coff_std_swap_table =
 #define coff_bfd_reloc_type_lookup _bfd_norelocs_bfd_reloc_type_lookup
 #endif
 
+#ifndef coff_bfd_get_relocated_section_contents
 #define coff_bfd_get_relocated_section_contents \
   bfd_generic_get_relocated_section_contents
+#endif
+#ifndef coff_bfd_relax_section
 #define coff_bfd_relax_section bfd_generic_relax_section
+#endif

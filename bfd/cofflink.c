@@ -79,8 +79,6 @@ struct coff_final_link_info
   /* Buffer large enough to hold swapped relocs of any input section.  */
   struct internal_reloc *internal_relocs;
 
-enum   bfd_link_subsystem  subsystem;
-bfd_link_stack_heap stack_heap_parameters;
 };
 
 static struct bfd_hash_entry *coff_link_hash_newfunc
@@ -524,16 +522,18 @@ coff_link_add_symbols (abfd, info)
 /* parse out a -heap <reserved>,<commit> line */
 
 static char *
-dores_com (ptr, def,res, com)
+dores_com (ptr, res, com)
      char *ptr;
-     int *def;
-     int *res;
-     int *com;
+     bfd_link_pe_info_dval *res;
+     bfd_link_pe_info_dval *com;
 {
-  *def = 1;
-  *res = strtoul (ptr, &ptr, 0);
-  if (ptr[0] == ',')
-    *com = strtoul (ptr+1, &ptr, 0);
+  res->defined = 1;
+  res->value = strtoul (ptr, &ptr, 0);
+  if (ptr[0] == ',') 
+    {
+      com->value = strtoul (ptr+1, &ptr, 0);
+      com->defined =  1;
+    }
   return ptr;
 }
 
@@ -552,7 +552,8 @@ char **dst;
 /* Process any magic embedded commands in a section called .drectve */
 			
 static int
-process_embedded_commands (abfd)
+process_embedded_commands (info,  abfd)
+     struct bfd_link_info *info;
      bfd *abfd;
 {
   asection *sec = bfd_get_section_by_name (abfd, ".drectve");
@@ -624,16 +625,15 @@ process_embedded_commands (abfd)
       else if (strncmp (s,"-heap", 5) == 0)
 	{
 	  s = dores_com (s+5, 
-			 &NT_stack_heap.heap_defined,
-			 &NT_stack_heap.heap_reserve,
-			 &NT_stack_heap.heap_commit);
+			 &info->pe_info->heap_reserve,	
+			 &info->pe_info->heap_commit);
 	}
       else if (strncmp (s,"-stack", 6) == 0)
 	{
 	  s = dores_com (s+6,
-			 &NT_stack_heap.heap_defined,
-			 &NT_stack_heap.heap_reserve,
-			 &NT_stack_heap.heap_commit);
+			 &info->pe_info->stack_reserve,	
+			 &info->pe_info->stack_commit);
+
 	}
       else 
 	s++;
@@ -681,14 +681,7 @@ _bfd_coff_final_link (abfd, info)
   finfo.external_relocs = NULL;
   finfo.internal_relocs = NULL;
 
-  if (obj_pe(abfd))
-    {
-      /* store the subsystem, stack and heap parameters in variables defined
-	 in internal.h so that when they are needed to write the NT optional
-	 file header (coffcode.h), they will be available */
-      NT_subsystem  = info->subsystem;
-      NT_stack_heap = info->stack_heap_parameters;
-    }
+  coff_data (abfd)->link_info = info;
 
   finfo.strtab = _bfd_stringtab_init ();
   if (finfo.strtab == NULL)
@@ -1278,7 +1271,7 @@ coff_link_input_bfd (finfo, input_bfd)
 
   if (obj_pe (output_bfd))
       {
-	if (!process_embedded_commands (input_bfd))
+	if (!process_embedded_commands (finfo->info, input_bfd))
 	  return false;
       }
 
