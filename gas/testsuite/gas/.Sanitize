@@ -56,6 +56,7 @@ h8300
 hppa
 i386
 ieee-fp
+m32r
 m68k
 m68k-coff
 macros
