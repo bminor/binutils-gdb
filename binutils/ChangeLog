@@ -1,3 +1,19 @@
+start-sanitize-powerpc-netware
+Fri Mar 11 22:20:48 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* nlmconv.c (main): For PowerPC, call powerpc_build_stubs and
+	powerpc_resolve_stubs.  Use __GOT0, not __toc_start.  Handle it if
+	the start and end symbols are not in the text section.
+	(struct powerpc_stub): New struct definition.
+	(powerpc_stubs, powerpc_stub_insns): New static variables.
+	(powerpc_initial_got_size): New static variable.
+	(powerpc_build_stubs): New function.
+	(powerpc_resolve_stubs): New function.
+	(powerpc_mangle_relocs): Clear extraneous data in .got section.
+	Rearrange reloc handling to handle ELF relocs that are not
+	partial_inplace.  Resolve PC relative relocs.
+
+end-sanitize-powerpc-netware
 Wed Mar  9 13:48:11 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* ar.c (move_members): Fix it so that the abi positional modifiers

@@ -36,6 +36,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <assert.h>
 #include <getopt.h>
 #include <bfd.h>
+#include <libiberty.h>
 #include "sysdep.h"
 #include "bucomm.h"
 /* Internal BFD NLM header.  */
@@ -123,6 +124,13 @@ static void i386_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
 static void alpha_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
 					 bfd_size_type *, char *,
 					 bfd_size_type));
+/* start-sanitize-powerpc-netware */
+static void powerpc_build_stubs PARAMS ((bfd *, asymbol ***, unsigned int *));
+static void powerpc_resolve_stubs PARAMS ((bfd *, bfd *));
+static void powerpc_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
+					   bfd_size_type *, char *,
+					   bfd_size_type));
+/* end-sanitize-powerpc-netware */
 static void default_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
 					   bfd_size_type *, char *,
 					   bfd_size_type));
@@ -154,7 +162,7 @@ main (argc, argv)
   bfd *outbfd;
   asymbol **newsyms, **outsyms;
   unsigned int symcount, newsymalloc, newsymcount;
-  asection *bss_sec, *data_sec;
+  asection *text_sec, *bss_sec, *data_sec;
   bfd_vma vma;
   bfd_size_type align;
   asymbol *endsym;
@@ -362,9 +370,20 @@ main (argc, argv)
 	  || ! bfd_set_section_alignment (outbfd, bss_sec, 1))
 	bfd_fatal ("make .bss section");
     }
+/* start-sanitize-powerpc-netware */
+
+  /* For PowerPC NetWare we need to build stubs for calls to undefined
+     symbols.  Because each stub requires an entry in the TOC section
+     which must be at the same location as other entries in the TOC
+     section, we must do this before determining where the TOC section
+     goes in setup_sections.  */
+  powerpc_build_stubs (inbfd, &symbols, &symcount);
+/* end-sanitize-powerpc-netware */
 
   /* Set up the sections.  */
   bfd_map_over_sections (inbfd, setup_sections, (PTR) outbfd);
+
+  text_sec = bfd_get_section_by_name (outbfd, NLM_CODE_NAME);
 
   /* The .bss section immediately follows the .data section.  */
   data_sec = bfd_get_section_by_name (outbfd, NLM_INITIALIZED_DATA_NAME);
@@ -462,7 +481,8 @@ main (argc, argv)
       /* Force _edata and _end to be defined.  This would normally be
 	 done by the linker, but the manipulation of the common
 	 symbols will confuse it.  */
-      if (bfd_asymbol_name (sym)[0] == '_'
+      if ((sym->flags & BSF_DEBUGGING) == 0
+	  && bfd_asymbol_name (sym)[0] == '_'
 	  && bfd_get_section (sym) == &bfd_und_section)
 	{
 	  if (strcmp (bfd_asymbol_name (sym), "_edata") == 0)
@@ -475,7 +495,21 @@ main (argc, argv)
 	      sym->section = bss_sec;
 	      endsym = sym;
 	    }
-	}
+/* start-sanitize-powerpc-netware */
+	  /* For PowerPC NetWare, we define __GOT0.  This is the start
+	     of the .got section.  */
+	  if (bfd_get_arch (inbfd) == bfd_arch_powerpc
+	      && strcmp (bfd_asymbol_name (sym), "__GOT0") == 0)
+	    {
+	      asection *got_sec;
+
+	      got_sec = bfd_get_section_by_name (inbfd, ".got");
+	      assert (got_sec != (asection *) NULL);
+	      sym->value = got_sec->output_offset;
+	      sym->section = got_sec->output_section;
+	    }
+/* end-sanitize-powerpc-netware */
+ 	}
 
       /* If this is a global symbol, check the export list.  */
       if ((sym->flags & (BSF_EXPORT | BSF_GLOBAL)) != 0)
@@ -554,29 +588,55 @@ main (argc, argv)
 	}
 	
       /* See if it's one of the special named symbols.  */
-      if (strcmp (bfd_asymbol_name (sym), start_procedure) == 0)
+      if ((sym->flags & BSF_DEBUGGING) == 0)
 	{
-	  if (! bfd_set_start_address (outbfd, bfd_asymbol_value (sym)))
-	    bfd_fatal ("set start address");
-	  gotstart = true;
-	}
-      if (strcmp (bfd_asymbol_name (sym), exit_procedure) == 0)
-	{
-	  nlm_fixed_header (outbfd)->exitProcedureOffset =
-	    bfd_asymbol_value (sym);
-	  gotexit = true;
-	}
-      if (check_procedure != NULL
-	  && strcmp (bfd_asymbol_name (sym), check_procedure) == 0)
-	{
-	  nlm_fixed_header (outbfd)->checkUnloadProcedureOffset =
-	    bfd_asymbol_value (sym);
-	  gotcheck = true;
+	  bfd_vma val;
+
+	  /* FIXME: If these symbols are not in the .text section, we
+	     add the .text section size to the value.  This may not be
+	     correct for all targets.  I'm not sure how this should
+	     really be handled.  */
+	  if (strcmp (bfd_asymbol_name (sym), start_procedure) == 0)
+	    {
+	      val = bfd_asymbol_value (sym);
+	      if (bfd_get_section (sym) == data_sec
+		  && text_sec != (asection *) NULL)
+		val += bfd_section_size (outbfd, text_sec);
+	      if (! bfd_set_start_address (outbfd, val))
+		bfd_fatal ("set start address");
+	      gotstart = true;
+	    }
+	  if (strcmp (bfd_asymbol_name (sym), exit_procedure) == 0)
+	    {
+	      val = bfd_asymbol_value (sym);
+	      if (bfd_get_section (sym) == data_sec
+		  && text_sec != (asection *) NULL)
+		val += bfd_section_size (outbfd, text_sec);
+	      nlm_fixed_header (outbfd)->exitProcedureOffset = val;
+	      gotexit = true;
+	    }
+	  if (check_procedure != NULL
+	      && strcmp (bfd_asymbol_name (sym), check_procedure) == 0)
+	    {
+	      val = bfd_asymbol_value (sym);
+	      if (bfd_get_section (sym) == data_sec
+		  && text_sec != (asection *) NULL)
+		val += bfd_section_size (outbfd, text_sec);
+	      nlm_fixed_header (outbfd)->checkUnloadProcedureOffset = val;
+	      gotcheck = true;
+	    }
 	}
     }
 
   if (endsym != NULL)
-    endsym->value = bfd_get_section_size_before_reloc (bss_sec);
+    {
+      endsym->value = bfd_get_section_size_before_reloc (bss_sec);
+
+      /* FIXME: If any relocs referring to _end use inplace addends,
+	 then I think they need to be updated.  This is handled by
+	 i386_mangle_relocs.  Is it needed for any other object
+	 formats?  */
+    }
 
   if (newsymcount == 0)
     outsyms = symbols;
@@ -788,6 +848,11 @@ main (argc, argv)
       nlm_version_header (outbfd)->year = ptm->tm_year + 1900;
       strncpy (version_hdr->stamp, "VeRsIoN#", 8);
     }
+/* start-sanitize-powerpc-netware */
+
+  /* Resolve the stubs we build for PowerPC NetWare.  */
+  powerpc_resolve_stubs (inbfd, outbfd);
+/* end-sanitize-powerpc-netware */
 
   /* Copy over the sections.  */
   bfd_map_over_sections (inbfd, copy_sections, (PTR) outbfd);
@@ -1034,6 +1099,10 @@ select_output_format (arch, mach, bigendian)
       return "nlm32-sparc";
     case bfd_arch_alpha:
       return "nlm32-alpha";
+/* start-sanitize-powerpc-netware */
+    case bfd_arch_powerpc:
+      return "nlm32-powerpc";
+/* end-sanitize-powerpc-netware */
     default:
       fprintf (stderr, "%s: no default NLM format for %s\n",
 	       program_name, bfd_printable_arch_mach (arch, mach));
@@ -1217,6 +1286,12 @@ mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
       alpha_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr,
 			   contents, contents_size);
       break;
+/* start-sanitize-powerpc-netware */
+    case bfd_arch_powerpc:
+      powerpc_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr,
+			     contents, contents_size);
+      break;
+/* end-sanitize-powerpc-netware */
     default:
       default_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr,
 			     contents, contents_size);
@@ -1514,6 +1589,398 @@ alpha_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
 	(*relocs)->address += insec->output_offset;
     }
 }
+/* start-sanitize-powerpc-netware */
+
+/* We keep a linked list of stubs which we must build.  Because BFD
+   requires us to know the sizes of all sections before we can set the
+   contents of any, we must figure out which stubs we want to build
+   before we can actually build any of them.  */
+
+struct powerpc_stub
+{
+  /* Next stub in linked list.  */
+  struct powerpc_stub *next;
+
+  /* Symbol whose value is the start of the stub.  This is a symbol
+     whose name begins with `.'.  */
+  asymbol *start;
+
+  /* Symbol we are going to create a reloc against.  This is a symbol
+     with the same name as START but without the leading `.'.  */
+  asymbol *reloc;
+
+  /* The TOC index for this stub.  This is the index into the TOC
+     section at which the reloc is created.  */
+  unsigned int toc_index;
+};
+
+/* The linked list of stubs.  */
+
+static struct powerpc_stub *powerpc_stubs;
+
+/* This is what a stub looks like.  The first instruction will get
+   adjusted with the correct TOC index.  */
+
+static unsigned long powerpc_stub_insns[] =
+{
+  0x81820000,		/* lwz	 r12,0(r2) */
+  0x90410014,		/* stw	 r2,20(r1) */
+  0x800c0000,		/* lwz	 r0,0(r12) */
+  0x804c0004,		/* lwz	 r2,r(r12) */
+  0x7c0903a6,		/* mtctr r0 */
+  0x4e800420,		/* bctr */
+  0,			/* Traceback table.  */
+  0xc8000,
+  0
+};
+
+#define POWERPC_STUB_INSN_COUNT \
+  (sizeof powerpc_stub_insns / sizeof powerpc_stub_insns[0])
+
+#define POWERPC_STUB_SIZE (4 * POWERPC_STUB_INSN_COUNT)
+
+/* Each stub uses a four byte TOC entry.  */
+#define POWERPC_STUB_TOC_ENTRY_SIZE (4)
+
+/* The original size of the .got section.  */
+static bfd_size_type powerpc_initial_got_size;
+
+/* Look for all undefined symbols beginning with `.', and prepare to
+   build a stub for each one.  */
+
+static void
+powerpc_build_stubs (inbfd, symbols_ptr, symcount_ptr)
+     bfd *inbfd;
+     asymbol ***symbols_ptr;
+     unsigned int *symcount_ptr;
+{
+  asection *stub_sec;
+  asection *got_sec;
+  unsigned int got_base;
+  unsigned int i;
+  unsigned int symcount;
+  unsigned int stubcount;
+
+  /* Make a section to hold stubs.  We don't set SEC_HAS_CONTENTS for
+     the section to prevent copy_sections from reading from it.  */
+  stub_sec = bfd_make_section (inbfd, ".stubs");
+  if (stub_sec == (asection *) NULL
+      || ! bfd_set_section_flags (inbfd, stub_sec,
+				  (SEC_CODE
+				   | SEC_RELOC
+				   | SEC_ALLOC
+				   | SEC_LOAD))
+      || ! bfd_set_section_alignment (inbfd, stub_sec, 2))
+    bfd_fatal (".stubs");
+
+  /* Get the TOC section, which is named .got.  */
+  got_sec = bfd_get_section_by_name (inbfd, ".got");
+  if (got_sec == (asection *) NULL)
+    {
+      got_sec = bfd_make_section (inbfd, ".got");
+      if (got_sec == (asection *) NULL
+	  || ! bfd_set_section_flags (inbfd, got_sec,
+				      (SEC_DATA
+				       | SEC_RELOC
+				       | SEC_ALLOC
+				       | SEC_LOAD
+				       | SEC_HAS_CONTENTS))
+	  || ! bfd_set_section_alignment (inbfd, got_sec, 2))
+	bfd_fatal (".got");
+    }
+
+  powerpc_initial_got_size = bfd_section_size (inbfd, got_sec);
+  got_base = powerpc_initial_got_size;
+  got_base = (got_base + 3) &~ 3;
+
+  stubcount = 0;
+
+  symcount = *symcount_ptr;
+  for (i = 0; i < symcount; i++)
+    {
+      asymbol *sym;
+      asymbol *newsym;
+      char *newname;
+      struct powerpc_stub *item;
+
+      sym = (*symbols_ptr)[i];
+
+      /* We must make a stub for every undefined symbol whose name
+	 starts with '.'.  */
+      if (bfd_asymbol_name (sym)[0] != '.'
+	  || bfd_get_section (sym) != &bfd_und_section)
+	continue;
+
+      /* Make a new undefined symbol with the same name but without
+	 the leading `.'.  */
+      newsym = (asymbol *) xmalloc (sizeof (asymbol));
+      *newsym = *sym;
+      newname = (char *) xmalloc (strlen (bfd_asymbol_name (sym)));
+      strcpy (newname, bfd_asymbol_name (sym) + 1);
+      newsym->name = newname;
+
+      /* Define the `.' symbol to be in the stub section.  */
+      sym->section = stub_sec;
+      sym->value = stubcount * POWERPC_STUB_SIZE;
+      sym->flags = BSF_LOCAL;
+
+      /* Add this stub to the linked list.  */
+      item = (struct powerpc_stub *) xmalloc (sizeof (struct powerpc_stub));
+      item->start = sym;
+      item->reloc = newsym;
+      item->toc_index = got_base + stubcount * POWERPC_STUB_TOC_ENTRY_SIZE;
+
+      item->next = powerpc_stubs;
+      powerpc_stubs = item;
+      
+      ++stubcount;
+    }
+
+  if (stubcount > 0)
+    {
+      asymbol **s;
+      struct powerpc_stub *l;
+
+      /* Add the new symbols we just created to the symbol table.  */
+      *symbols_ptr = (asymbol **) xrealloc ((char *) *symbols_ptr,
+					    ((symcount + stubcount)
+					     * sizeof (asymbol)));
+      *symcount_ptr += stubcount;
+      s = &(*symbols_ptr)[symcount];
+      for (l = powerpc_stubs; l != (struct powerpc_stub *) NULL; l = l->next)
+	*s++ = l->reloc;
+
+      /* Set the size of the .stubs section and increase the size of
+	 the .got section.  */
+      if (! bfd_set_section_size (inbfd, stub_sec,
+				  stubcount * POWERPC_STUB_SIZE)
+	  || ! bfd_set_section_size (inbfd, got_sec,
+				     (got_base
+				      + (stubcount
+					 * POWERPC_STUB_TOC_ENTRY_SIZE))))
+	bfd_fatal ("stub section sizes");
+    }
+}
+
+/* Resolve all the stubs for PowerPC NetWare.  We fill in the contents
+   of the output section, and create new relocs in the TOC.  */
+
+static void
+powerpc_resolve_stubs (inbfd, outbfd)
+     bfd *inbfd;
+     bfd *outbfd;
+{
+  bfd_byte buf[POWERPC_STUB_SIZE];
+  unsigned int i;
+  unsigned int stubcount;
+  arelent **relocs;
+  asection *got_sec;
+  arelent **r;
+  struct powerpc_stub *l;
+
+  if (powerpc_stubs == (struct powerpc_stub *) NULL)
+    return;
+
+  for (i = 0; i < POWERPC_STUB_INSN_COUNT; i++)
+    bfd_put_32 (outbfd, (bfd_vma) powerpc_stub_insns[i], buf + i * 4);
+
+  got_sec = bfd_get_section_by_name (inbfd, ".got");
+  assert (got_sec != (asection *) NULL);
+  assert (got_sec->output_section->orelocation == (arelent **) NULL);
+
+  stubcount = 0;
+  for (l = powerpc_stubs; l != (struct powerpc_stub *) NULL; l = l->next)
+    ++stubcount;
+  relocs = (arelent **) xmalloc (stubcount * sizeof (arelent *));
+
+  r = relocs;
+  for (l = powerpc_stubs; l != (struct powerpc_stub *) NULL; l = l->next)
+    {
+      arelent *reloc;
+
+      /* Adjust the first instruction to use the right TOC index.  */
+      bfd_put_32 (outbfd, (bfd_vma) powerpc_stub_insns[0] + l->toc_index, buf);
+
+      /* Write this stub out.  */
+      if (! bfd_set_section_contents (outbfd,
+				      bfd_get_section (l->start),
+				      buf,
+				      l->start->value,
+				      POWERPC_STUB_SIZE))
+	bfd_fatal ("writing stub");
+
+      /* Create a new reloc for the TOC entry.  */
+      reloc = (arelent *) xmalloc (sizeof (arelent));
+      reloc->sym_ptr_ptr = &l->reloc;
+      reloc->address = l->toc_index + got_sec->output_offset;
+      reloc->addend = 0;
+      reloc->howto = bfd_reloc_type_lookup (inbfd, BFD_RELOC_32);
+				      
+      *r++ = reloc;
+    }
+
+  bfd_set_reloc (outbfd, got_sec->output_section, relocs, stubcount);
+}
+
+/* Adjust relocation entries for PowerPC NetWare.  We do not output
+   TOC relocations.  The object code already contains the offset from
+   the TOC pointer.  When the function is called, the TOC register,
+   r2, will be set to the correct TOC value, so there is no need for
+   any further reloc.  */
+
+/*ARGSUSED*/
+static void
+powerpc_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
+		       contents_size)
+     bfd *outbfd;
+     asection *insec;
+     register arelent ***relocs_ptr;
+     bfd_size_type *reloc_count_ptr;
+     char *contents;
+     bfd_size_type contents_size;
+{
+  const reloc_howto_type *toc_howto;
+  bfd_size_type reloc_count;
+  register arelent **relocs;
+  register bfd_size_type i;
+
+  toc_howto = bfd_reloc_type_lookup (insec->owner, BFD_RELOC_PPC_TOC16);
+  if (toc_howto == (reloc_howto_type *) NULL)
+    abort ();
+
+  /* If this is the .got section, clear out all the contents beyond
+     the initial size.  We must do this here because copy_sections is
+     going to write out whatever we return in the contents field.  */
+  if (strcmp (bfd_get_section_name (insec->owner, insec), ".got") == 0)
+    memset (contents + powerpc_initial_got_size, 0,
+	    (bfd_get_section_size_after_reloc (insec)
+	     - powerpc_initial_got_size));
+
+  reloc_count = *reloc_count_ptr;
+  relocs = *relocs_ptr;
+  for (i = 0; i < reloc_count; i++)
+    {
+      arelent *rel;
+      asymbol *sym;
+      bfd_vma symvalue;
+
+      rel = *relocs++;
+      sym = *rel->sym_ptr_ptr;
+
+      /* We must be able to resolve all PC relative relocs at this
+	 point.  If we get a branch to an undefined symbol we build a
+	 stub, since NetWare will resolve undefined symbols into a
+	 pointer to a function descriptor.  */
+      if (rel->howto->pc_relative)
+	{
+	  /* This check for whether a symbol is in the same section as
+	     the reloc will be wrong if there is a PC relative reloc
+	     between two sections both of which were placed in the
+	     same output section.  This should not happen.  */
+	  if (bfd_get_section (sym) != insec->output_section)
+	    fprintf (stderr, "%s: unresolved PC relative reloc against %s\n",
+		     program_name, bfd_asymbol_name (sym));
+	  else
+	    {
+	      bfd_vma val;
+
+	      assert (rel->howto->size == 2 && rel->howto->pcrel_offset);
+	      val = bfd_get_32 (outbfd, (bfd_byte *) contents + rel->address);
+	      val = ((val &~ rel->howto->dst_mask)
+		     | (((val & rel->howto->src_mask)
+			 + (sym->value - rel->address)
+			 + rel->addend)
+			& rel->howto->dst_mask));
+	      bfd_put_32 (outbfd, val, (bfd_byte *) contents + rel->address);
+
+	      /* If this reloc is against a symbol whose name begins
+		 with a `.', and the next instruction is
+		     cror 31,31,31
+		 then we replace the next instruction with
+		     lwz  r2,20(r1)
+		 This reloads the TOC pointer after a call.  */
+	      if (bfd_asymbol_name (sym)[0] == '.'
+		  && (bfd_get_32 (outbfd,
+				  (bfd_byte *) contents + rel->address + 4)
+		      == 0x4ffffb82)) /* cror 31,31,31 */
+		bfd_put_32 (outbfd, (bfd_vma) 0x80410014, /* lwz r2,20(r1) */
+			    (bfd_byte *) contents + rel->address + 4);
+
+	      --*reloc_count_ptr;
+	      --relocs;
+	      memmove (relocs, relocs + 1,
+		       (size_t) ((reloc_count - 1) * sizeof (arelent *)));
+	      continue;
+	    }
+	}
+
+      /* When considering a TOC reloc, we do not want to include the
+	 symbol value.  The symbol will be start of the TOC section
+	 (which is named .got).  We do want to include the addend.  */
+      if (rel->howto == toc_howto)
+	symvalue = 0;
+      else
+	symvalue = sym->value;
+
+      /* If this is a relocation against a symbol with a value, or
+	 there is a reloc addend, we need to update the addend in the
+	 object file.  */
+      if (symvalue + rel->addend != 0)
+	{
+	  bfd_vma val;
+
+	  switch (rel->howto->size)
+	    {
+	    case 1:
+	      val = bfd_get_16 (outbfd,
+				(bfd_byte *) contents + rel->address);
+	      val = ((val &~ rel->howto->dst_mask)
+		     | (((val & rel->howto->src_mask)
+			 + symvalue
+			 + rel->addend)
+			& rel->howto->dst_mask));
+	      if ((bfd_signed_vma) val < - 0x8000
+		  || (bfd_signed_vma) val >= 0x8000)
+		fprintf (stderr,
+			 "%s: overflow when adjusting relocation against %s\n",
+			 program_name, bfd_asymbol_name (sym));
+	      bfd_put_16 (outbfd, val, (bfd_byte *) contents + rel->address);
+	      break;
+
+	    case 2:
+	      val = bfd_get_32 (outbfd,
+				(bfd_byte *) contents + rel->address);
+	      val = ((val &~ rel->howto->dst_mask)
+		     | (((val & rel->howto->src_mask)
+			 + symvalue
+			 + rel->addend)
+			& rel->howto->dst_mask));
+	      bfd_put_32 (outbfd, val, (bfd_byte *) contents + rel->address);
+	      break;
+
+	    default:
+	      abort ();
+	    }
+
+	  rel->sym_ptr_ptr = bfd_get_section (sym)->symbol_ptr_ptr;
+	  rel->addend = 0;
+	}
+
+      /* Now that we have incorporated the addend, remove any TOC
+	 relocs.  */
+      if (rel->howto == toc_howto)
+	{
+	  --*reloc_count_ptr;
+	  --relocs;
+	  memmove (relocs, relocs + 1,
+		   (size_t) ((reloc_count - i) * sizeof (arelent *)));
+	  continue;
+	}
+
+      rel->address += insec->output_offset;
+    }
+}
+/* end-sanitize-powerpc-netware */
 
 /* Name of linker.  */
 #ifndef LD_NAME
