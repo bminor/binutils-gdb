@@ -1,3 +1,37 @@
+Wed Mar  1 09:41:26 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	Various changes for sparc64.
+	* sparc-tdep.c (NUM_SPARC_FPREGS): Define.
+	(SPARC_INTREG_SIZE): Define.
+	(*): Use SPARC_INTREG_SIZE instead of REGISTER_RAW_SIZE (intreg)
+	where appropriate.
+	(enum branch_type): New value `done_retry'.
+	(isbranch): Renamed from isannulled.  All callers changed.
+	Support new sparc64 branch insns.
+	(single_step): Handle done_retry.
+	(sparc_extract_struct_value_address): Don't assume 4 byte regs.
+	(get_saved_register): Likewise.
+	(sparc_push_dummy_frame): Likewise.
+	(sparc_frame_find_saved_regs): Likewise.
+	(sparc_pop_frame): Likewise.  Don't refer to FPS_REGNUM, CPS_REGNUM,
+	or PS_REGNUM if not sparc64.  sparc64 has 64 fp regs.
+	(sparc64_extract_struct_value_address): New function.
+	(dump_ccreg, sparc_print_register_hook): Likewise.
+	* sp64-tdep.c: Deleted.
+	* sparc/tm-sp64.h (GDB_TARGET_IS_SPARC64): Define.
+	(NUM_REGS): Reduce by 2, cle/tle are in the pstate reg.
+	(CC_HAS_LONG_LONG): Define.
+	(REGISTER_NAMES): Delete cle/tle and reorganize.
+	(PS_REGNUM, FPS_REGNUM, CPS_REGNUM): Delete, they're ifdef'd out of
+	sparc-tdep.c now.
+	(REGISTER_BYTES): Update.
+	(REGISTER_CONVERT_TO_VIRTUAL, REGISTER_CONVERT_TO_RAW): Delete.
+	(EXTRACT_RETURN_VALUE): Delete.  Use definition in tm-sparc.h.
+	(NO_SINGLE_STEP): Likewise.
+	* sparc/tm-sparc.h (EXTRACT_VALUE_RETURN): Don't assume 4 byte regs.
+	* sparc/sp64.mt: Move simulator support ...
+	* sparc/sp64sim.mt: ... to here.
+
 Wed Mar  1 13:14:42 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
 	* remote-vx960.c: new file for target specific register packaging.
