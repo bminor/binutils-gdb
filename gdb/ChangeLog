@@ -1,5 +1,8 @@
 Sun Jan 16 12:46:01 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* xcoffread.c (process_xcoff_symbol): Only change 'V' to 'S' if not
+	within_function.
+
 	* Makefile.in: Add mostlyclean target.
 
 Sat Jan 15 10:20:13 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)

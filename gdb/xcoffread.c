@@ -1629,24 +1629,25 @@ process_xcoff_symbol (cs, objfile)
 
     case C_STSYM:
 
-	/* If we are going to use Sun dbx's define_symbol(), we need to
-	   massage our stab string a little. Change 'V' type to 'S' to be
-	   comparible with Sun. */
-        /* FIXME: Is this to avoid a Sun-specific hack somewhere?
-	   Needs more investigation.  */
+      /* For xlc (not GCC), the 'V' symbol descriptor is used for all
+	 statics and we need to distinguish file-scope versus function-scope
+	 using within_function.  We do this by changing the string we pass
+	 to define_symbol to use 'S' where we need to, which is not necessarily
+	 super-clean, but seems workable enough.  */
 
-	if (*name == ':' || (pp = (char *) strchr(name, ':')) == NULL)
-	  return NULL;
+      if (*name == ':' || (pp = (char *) strchr(name, ':')) == NULL)
+	return NULL;
 
-	++pp;
-	if (*pp == 'V') *pp = 'S';
-	sym = define_symbol (cs->c_value, cs->c_name, 0, 0, objfile);
-        if (sym != NULL)
-	  {
-	    SYMBOL_VALUE (sym) += static_block_base;
-	    SYMBOL_SECTION (sym) = static_block_section;
-	  }
-	return sym;
+      ++pp;
+      if (*pp == 'V' && !within_function)
+	*pp = 'S';
+      sym = define_symbol (cs->c_value, cs->c_name, 0, 0, objfile);
+      if (sym != NULL)
+	{
+	  SYMBOL_VALUE (sym) += static_block_base;
+	  SYMBOL_SECTION (sym) = static_block_section;
+	}
+      return sym;
 
     case C_LSYM:
       sym = define_symbol (cs->c_value, cs->c_name, 0, N_LSYM, objfile);
