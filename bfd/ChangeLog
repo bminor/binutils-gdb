@@ -1,3 +1,9 @@
+Thu Mar 14 17:12:06 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* coffgen.c (coff_get_normalized_symtab): Call bfd_zalloc instead
+	of bfd_alloc (fixes fix_line not being initialized).
+	Delete zeroing of fix_{value,tag,end,scnlen} fields.
+
 Thu Mar 14 16:06:06 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* coffcode.h: Allow specific backends to override the

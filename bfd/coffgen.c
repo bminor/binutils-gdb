@@ -1,5 +1,5 @@
 /* Support for the generic parts of COFF, for BFD.
-   Copyright 1990, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -1574,7 +1574,7 @@ coff_get_normalized_symtab (abfd)
     return obj_raw_syments (abfd);
 
   size = obj_raw_syment_count (abfd) * sizeof (combined_entry_type);
-  internal = (combined_entry_type *) bfd_alloc (abfd, size);
+  internal = (combined_entry_type *) bfd_zalloc (abfd, size);
   if (internal == NULL && size != 0)
     return NULL;
   internal_end = internal + obj_raw_syment_count (abfd);
@@ -1600,10 +1600,6 @@ coff_get_normalized_symtab (abfd)
       unsigned int i;
       bfd_coff_swap_sym_in (abfd, (PTR) raw_src,
 			    (PTR) & internal_ptr->u.syment);
-      internal_ptr->fix_value = 0;
-      internal_ptr->fix_tag = 0;
-      internal_ptr->fix_end = 0;
-      internal_ptr->fix_scnlen = 0;
       symbol_ptr = internal_ptr;
 
       for (i = 0;
@@ -1612,11 +1608,6 @@ coff_get_normalized_symtab (abfd)
 	{
 	  internal_ptr++;
 	  raw_src += symesz;
-
-	  internal_ptr->fix_value = 0;
-	  internal_ptr->fix_tag = 0;
-	  internal_ptr->fix_end = 0;
-	  internal_ptr->fix_scnlen = 0;
 	  bfd_coff_swap_aux_in (abfd, (PTR) raw_src,
 				symbol_ptr->u.syment.n_type,
 				symbol_ptr->u.syment.n_sclass,
@@ -1925,16 +1916,17 @@ coff_print_symbol (abfd, filep, symbol, how)
 
 /*ARGSUSED*/
 boolean
-coff_find_nearest_line (abfd, section, ignore_symbols, offset, filename_ptr,
+coff_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
 			functionname_ptr, line_ptr)
      bfd *abfd;
      asection *section;
-     asymbol **ignore_symbols;
+     asymbol **symbols;
      bfd_vma offset;
      CONST char **filename_ptr;
      CONST char **functionname_ptr;
      unsigned int *line_ptr;
 {
+  boolean found;
   unsigned int i;
   unsigned int line_base;
   coff_data_type *cof = coff_data (abfd);
@@ -1943,6 +1935,16 @@ coff_find_nearest_line (abfd, section, ignore_symbols, offset, filename_ptr,
   combined_entry_type *pend;
   alent *l;
   struct coff_section_tdata *sec_data;
+
+  /* Before looking through the symbol table, try to use a .stab
+     section to find the information.  */
+  if (! _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset,
+					     &found, filename_ptr,
+					     functionname_ptr, line_ptr,
+					     &coff_data (abfd)->line_info))
+    return false;
+  if (found)
+    return true;
 
   *filename_ptr = 0;
   *functionname_ptr = 0;
@@ -2029,48 +2031,47 @@ coff_find_nearest_line (abfd, section, ignore_symbols, offset, filename_ptr,
       line_base = 0;
     }
 
-  l = &section->lineno[i];
-
-  for (; i < section->lineno_count; i++)
+  if (section->lineno != NULL)
     {
-      if (l->line_number == 0)
+      l = &section->lineno[i];
+
+      for (; i < section->lineno_count; i++)
 	{
-	  /* Get the symbol this line number points at */
-	  coff_symbol_type *coff = (coff_symbol_type *) (l->u.sym);
-	  if (coff->symbol.value > offset)
-	    break;
-	  *functionname_ptr = coff->symbol.name;
-	  if (coff->native)
+	  if (l->line_number == 0)
 	    {
-	      combined_entry_type *s = coff->native;
-	      s = s + 1 + s->u.syment.n_numaux;
-
-	      /* In XCOFF a debugging symbol can follow the function
-	         symbol.  */
-	      if (s->u.syment.n_scnum == N_DEBUG)
-		s = s + 1 + s->u.syment.n_numaux;
-
-	      /*
-	         S should now point to the .bf of the function
-	       */
-	      if (s->u.syment.n_numaux)
+	      /* Get the symbol this line number points at */
+	      coff_symbol_type *coff = (coff_symbol_type *) (l->u.sym);
+	      if (coff->symbol.value > offset)
+		break;
+	      *functionname_ptr = coff->symbol.name;
+	      if (coff->native)
 		{
-		  /*
-		     The linenumber is stored in the auxent
-		   */
-		  union internal_auxent *a = &((s + 1)->u.auxent);
-		  line_base = a->x_sym.x_misc.x_lnsz.x_lnno;
-		  *line_ptr = line_base;
+		  combined_entry_type *s = coff->native;
+		  s = s + 1 + s->u.syment.n_numaux;
+
+		  /* In XCOFF a debugging symbol can follow the
+		     function symbol.  */
+		  if (s->u.syment.n_scnum == N_DEBUG)
+		    s = s + 1 + s->u.syment.n_numaux;
+
+		  /* S should now point to the .bf of the function.  */
+		  if (s->u.syment.n_numaux)
+		    {
+		      /* The linenumber is stored in the auxent.  */
+		      union internal_auxent *a = &((s + 1)->u.auxent);
+		      line_base = a->x_sym.x_misc.x_lnsz.x_lnno;
+		      *line_ptr = line_base;
+		    }
 		}
 	    }
+	  else
+	    {
+	      if (l->u.offset + bfd_get_section_vma (abfd, section) > offset)
+		break;
+	      *line_ptr = l->line_number + line_base - 1;
+	    }
+	  l++;
 	}
-      else
-	{
-	  if (l->u.offset + bfd_get_section_vma (abfd, section) > offset)
-	    break;
-	  *line_ptr = l->line_number + line_base - 1;
-	}
-      l++;
     }
 
   /* Cache the results for the next call.  */
