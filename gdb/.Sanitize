@@ -210,7 +210,6 @@ nindy-share
 nindy-tdep.c
 nlm
 nlmread.c
-nlmstub.def
 ns32k-tdep.c
 ns32km3-nat.c
 objfiles.c
