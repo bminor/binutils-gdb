@@ -1,4 +1,4 @@
-/* coff-msym.c: Byte-swap a symbol table in MIPS' format (Third-Eye, `ecoff').
+/* BFD support to byte-swap a symbol table in MIPS (Third-Eye, `ecoff') format.
    Copyright 1992 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.

@@ -1,7 +1,7 @@
-/* BFD back end for SCO System V 3.2 Unix core files
+/* BFD back-end for SCO System V 3.2 Unix core files.
    This was based on trad-core.c, which was written by John Gilmore of
         Cygnus Support.
-   Copyright (C) 1988, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
    Written by Scott Michel, IntelliMED Corporation. scottm%intime@uunet
 
    NB: This does work with SCO System V 3.2 Unix and ODT. However, it

@@ -1,5 +1,7 @@
 Thu Oct 15 01:32:22 1992  John Gilmore  (gnu@cygnus.com)
 
+	* seclet.h:  Add enum tag to bfd_seclet_enum_type.
+
 	* bfd-in.h (file_ptr):  Update comments, make FIXME re off_t.
 
 	* aout-adobe.c, aoutf1.h, archive.c, bout.c, coff-rs6000.c,

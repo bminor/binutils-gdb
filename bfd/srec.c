@@ -1,5 +1,5 @@
-/* BFD backend for s-record objects.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+/* BFD back-end for s-record objects.
+   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
 This file is part of BFD, the Binary File Descriptor library.
