@@ -1,3 +1,15 @@
+Thu Jan  8 11:03:59 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* remote-rdp.c: Applied patches submitted by Tony.Thompson@arm.com
+	to implement the Angel remote debugging interface.
+
+	* Makefile.in: Add build rules for remote-rdi.c and
+	rdi-share/libangsd.a
+	
+	* configure.tgt: Updated from source on branch.
+	* config/arm/tm-arm.h: Updated from source on branch.
+	* arm-tdep.c: Updated from source on branch.
+
 Mon Jan  5 20:21:59 1998  Mark Alexander  <marka@cygnus.com>
 
 	* monitor.h (MO_PRINT_PROGRAM_OUTPUT): Define.

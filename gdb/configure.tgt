@@ -48,7 +48,17 @@ alpha-*-linux*)		gdb_target=alpha-linux ;;
 
 arc-*-*)		gdb_target=arc ;;
 
-arm-*-* | thumb-*-*)	gdb_target=arm ;;
+arm-*-* | thumb-*-*)	gdb_target=arm
+
+			# rdi doesn't work for wingdb yet
+			case $gdb_host in
+			windows) ;;
+			*)
+			    configdirs="$configdirs rdi-share"
+			    CONFIG_OBS="$CONFIG_OBS remote-rdi.o rdi-share/libangsd.a"
+			    ;;
+			esac
+			;;
 
 c1-*-*)			gdb_target=convex ;;
 c2-*-*)			gdb_target=convex ;;

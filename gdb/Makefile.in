@@ -163,6 +163,10 @@ WIN32LIBS = @WIN32LIBS@
 ENABLE_GDBTK= @ENABLE_GDBTK@
 ENABLE_IDE= @ENABLE_IDE@
 
+LIBGUI = ../libgui/src/libgui.a
+
+GUI_CFLAGS_X = -I$(srcdir)/../libgui/src
+
 IDE_CFLAGS_X = -I$(srcdir)/../libide/src \
   `if [ x"$(ENABLE_IDE)" != x ] ; then \
     echo -DIDE -I$(srcdir)/../ilu/runtime/mainloop;\
@@ -179,7 +183,7 @@ IDE_DEPS = ../ilu/runtime/mainloop/libilu-Tk.a \
 	../ilu/runtime/c/libilu-c.a ../ilu/runtime/kernel/libilu.a
 
 IDE=$(IDE_X) 
-IDE_CFLAGS=$(IDE_CFLAGS_X)
+IDE_CFLAGS=$(GUI_CFLAGS_X) $(IDE_CFLAGS_X)
 #end-sanitize-gdbtk
 
 ENABLE_CFLAGS= @ENABLE_CFLAGS@
@@ -1358,6 +1362,19 @@ remote-adapt.o: remote-adapt.c $(wait_h) $(defs_h) $(gdbcore_h) \
 
 remote-array.o: remote-array.c $(wait_h) $(defs_h) $(gdbcore_h) target.h \
       gdb_string.h $(command_h) serial.h monitor.h $(remote_utils_h)
+
+remote-rdi.o: remote-rdi.c $(wait_h) $(defs_h) $(gdbcore_h) \
+	$(inferior_h) gdb_string.h
+
+rdi-share/libangsd.a:	force
+	@dir=rdi-share; \
+	if [ -f ./$${dir}/Makefile ] ; then \
+	  r=`pwd`; export r; \
+	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	  (cd $${dir}; $(MAKE) $(FLAGS_TO_PASS) all); \
+	else \
+	  true; \
+	fi
 
 remote-rdp.o: remote-rdp.c $(wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) gdb_string.h
