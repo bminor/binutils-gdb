@@ -30,6 +30,7 @@ config
 endian.c
 hosts
 h8300
+h8500
 z8k
 
 Do-last:
