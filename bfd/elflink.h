@@ -5980,7 +5980,7 @@ elf_link_input_bfd (finfo, input_bfd)
 		{
 		  if (isec->symbol->value != isym->st_value)
 		    (*_bfd_error_handler)
-		      (_("%s: invalid section symbol index 0x%x (%s) ingored"),
+		      (_("%s: invalid section symbol index 0x%x (%s) ignored"),
 		       bfd_get_filename (input_bfd), isym->st_shndx,
 		       name);
 		  continue;
