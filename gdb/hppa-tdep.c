@@ -340,7 +340,7 @@ internalize_unwinds (objfile, table, section, entries, size, indexp)
    everything on the psymbol obstack in the objfile so that it automatically
    gets freed when the objfile is destroyed.  */
 
-void
+static void
 read_unwind_info (objfile)
      struct objfile *objfile;
 {
@@ -1205,7 +1205,7 @@ restore_pc_queue (fsr)
         }
     }
   target_terminal_ours ();
-  fetch_inferior_registers (-1);
+  (current_target->to_fetch_registers) (-1);
   return 1;
 }
 

@@ -1,3 +1,23 @@
+Mon Apr 18 10:08:07 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* nm-hppab.h (KERNEL_U_ADDR): Define.
+	(FIVE_ARG_PTRACE): Likewise.
+	(CANNOT_STORE_REGISTER): Likewise.
+	nm-hppah.h (KERNEL_U_ADDR): Define.
+	(FIVE_ARG_PTRACE): Likewise.
+	(CANNOT_STORE_REGISTER): Likewise.
+	(NEED_TEXT_START_END): Likewise.
+
+	* tm-hppah.h (NEED_TEXT_START_END): Delete definition.
+	* xm-hppah.h (KERNEL_U_ADDR): Delete definition.
+	(FIVE_ARG_PTRACE): Likewise.
+	* xm-hppab.h (KERNEL_U_ADDR): Delete definition.
+	(FIVE_ARG_PTRACE): Likewise.
+
+	* hppa-tdep.c (read_unwind_info): Make static.
+	(restore_pc_queue): Indirect through the target vector to
+	reload the register state.
+
 Sat Apr 16 22:20:51 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* paread.c (compare_unwind_entries): Delete function.  It's been
