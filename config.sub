@@ -36,7 +36,7 @@
 # The goal of this file is to map all the various variations of a given
 # machine specification into a single specification in the form:
 #	CPU_TYPE-MANUFACTURER-OPERATING_SYSTEM
-# it is wrong to echo any other type of specification
+# It is wrong to echo any other type of specification.
 
 if [ x$1 = x ]
 then
@@ -63,15 +63,17 @@ if [ $basic_machine != $1 ]
 then os=`echo $1 | sed 's/.*-/-/'`
 else os=; fi
 
-# Lets recognize common machines as not being OS so that things like
-# config.sub decstation-3100 work.
+### Let's recognize common machines as not being operating systems so
+### that things like config.sub decstation-3100 work.  We also
+### recognize some manufacturers as not being operatin systems, so we
+### can provide default operating systems below.
 case $os in
 	-dec* | -mips* | -sequent* | -encore* | -pc532* | -sgi* | -sony* | \
 	-att* | -7300* | -3300* | -delta* | -motorola* | -sun[234]* | \
 	-unicom* | -ibm* | -next* | -hp | -isi* | -apollo | -altos* | \
 	-convergent* | -ncr* | -news | -32* | -3600* | -3100* | \
 	-c[123]* | -convex* | -sun | -crds | -omron* | -dg | -ultra | -tti* | \
-	-harris | -dolphin | \
+	-harris | -dolphin | -highlevel | -gould | -cbm | -ns | -masscomp | \
 	-sim)						# CYGNUS LOCAL
 		os=
 		basic_machine=$1
@@ -82,8 +84,17 @@ case $os in
 		os=vxworks
 		basic_machine=$1
 		;;
+	-sco3.2v[4-9]*)
+		# Don't forget version if it is 3.2v4 or newer.
+		os=-sco3.2v4
+		basic_machine=i386-unknown
+		;;
 	-sco*)
 		os=-sco3.2v2
+		basic_machine=i386-unknown
+		;;
+	-isc)
+		os=-isc2.2
 		basic_machine=i386-unknown
 		;;
 	-isc*)
@@ -112,8 +123,8 @@ case $basic_machine in
 	# Some are omitted here because they have special meanings below.
 	tahoe | i[34]86 | i860 | m68k | m68000 | m88k | ns32k | arm | pyramid \
 		| tron | a29k | 580 | i960 | h8300 | hppa1.0 | hppa1.1 \
-		| alpha | we32k | sparc \
-		| m680[01234]0 | m683?2 | z8k | v70)	# CYGNUS LOCAL
+		| alpha | we32k | ns16k | clipper \
+		| sparc | m680[01234]0 | m683?2 | z8k | v70)	# CYGNUS LOCAL
 		basic_machine=$basic_machine-unknown
 		;;
 	# Recognize the basic CPU types with with company name.
@@ -121,7 +132,8 @@ case $basic_machine in
 	      | sparc-* | ns32k-* | fx80-* | arm-* | c[123]* \
 	      | mips-* | pyramid-* | tron-* | a29k-* | romp-* | rs6000-* \
 	      | none-* | 580-* | cray2-* | h8300-* | i960-* | xmp-* | ymp-* \
-	      | hppa1.0-* | hppa1.1-* | alpha-* | we32k-* \
+	      | hppa1.0-* | hppa1.1-* | alpha-* | we32k-* | cydra-* | ns16k-* \
+	      | pn-* | np1-* | xps100-* | clipper-* | orion-* \
 	      | m680[01234]0-* | m683?2-* | z8k-*)	# CYGNUS LOCAL
 		;;
 	# Recognize the various machine names and aliases which stand
@@ -190,6 +202,14 @@ case $basic_machine in
 		basic_machine=i486-unknown
 		os=-isc
 		;;
+	i386sol2)					# CYGNUS LOCAL
+		basic_machine=i386-unknown
+		os=-solaris2
+		;;
+	i486sol2)					# CYGNUS LOCAL
+		basic_machine=i486-unknown
+		os=-solaris2
+		;;
 	i386v4*)
 		basic_machine=i386-unknown
 		os=-sysv4
@@ -252,7 +272,6 @@ case $basic_machine in
 		;;
 	encore | umax | mmax)
 		basic_machine=ns32k-encore
-		os=-bsd
 		;;
 	genix)
 		basic_machine=ns32k-ns
@@ -360,6 +379,14 @@ case $basic_machine in
 	amiga)
 		basic_machine=m68k-cbm
 		;;
+	amigados)
+		basic_machine=m68k-cbm
+		os=-amigados
+		;;
+	amigaunix | amix)
+		basic_machine=m68k-cbm
+		os=-sysv4
+		;;
 	hp9k3[2-9][0-9])
 		basic_machine=m68k-hp
 		;;
@@ -421,14 +448,6 @@ case $basic_machine in
 	amdahl)
 		basic_machine=580-amdahl
 		os=-sysv
-		;;
-	amigados)
-		basic_machine=m68k-cbm
-		os=-amigados
-		;;
-	amigaunix | amix)
-		basic_machine=m68k-cbm
-		os=-sysv4
 		;;
 	stratus)					# CYGNUS LOCAL
 		basic_machine=i860-stratus
@@ -521,11 +540,9 @@ case $basic_machine in
 		;;
 	pn)
 		basic_machine=pn-gould
-		os=-sysv
 		;;
 	np1)
 		basic_machine=np1-gould
-		os=-sysv
 		;;
 	ultra3)
 		basic_machine=a29k-nyu
@@ -580,6 +597,9 @@ case $basic_machine in
 		os=-scout
 		;;
 
+        xps | xps100)
+		basic_machine=xps100-honeywell
+		;;
 	none)
 		basic_machine=none-none
 		os=-none
@@ -601,6 +621,15 @@ case $basic_machine in
 		;;
 	we32k)
 		basic_machine=we32k-att
+		;;
+        cydra)
+		basic_machine=cydra-cydrome
+		;;
+	orion)
+		basic_machine=orion-highlevel
+		;;
+	orion105)
+		basic_machine=clipper-highlevel
 		;;
 	*)
 		echo Invalid configuration \`$1\': machine \`$basic_machine\' not recognized 1>&2
@@ -633,8 +662,8 @@ case $os in
 	      | -unos* | -osf* | -luna* | -dgux* | -solaris* | -sym* \
 	      | -amigados* | -msdos* | -newsos* | -unicos* | -aos* \
 	      | -nindy* | -vxworks* | -ebmon* | -hds* | -m88kbcs* \
-	      | -riscos* | -linux* \
-	      | -go32 | -linux* | -sim | -es1800* | -udi | -hms* | -xray \
+	      | -riscos* | -linux* | -uniplus* | -iris* | -rtu* | -xenix* \
+	      | -go32 | -sim | -es1800* | -udi | -hms* | -xray \
 	      | -os68k* | -none* | -v88r* | -aout | -coff | -elf | -abug )
 				# The last two lines above are CYGNUS LOCAL
 	;;
@@ -681,6 +710,9 @@ case $os in
 	-es1800*)					# CYGNUS LOCAL
 		os=-ose
 		;;
+	-xenix)
+		os=-xenix
+		;;
 	-none)
 		;;
 	*)
@@ -695,6 +727,13 @@ else
 # Here we handle the default operating systems that come with various machines.
 # The value should be what the vendor currently ships out the door with their
 # machine or put another way, the most popular os provided with the machine.
+
+# Note that if you're going to try to match "-MANUFACTURER" here (say,
+# "-sun"), then you have to tell the case statement up towards the top
+# that MANUFACTURER isn't an operating system.  Otherwise, code above
+# will signal an error saying that MANUFACTURER isn't an operating
+# system, and we'll never get to this point.
+
 case $basic_machine in
 	*-dec | vax-*)
 		os=-ultrix4.2
@@ -720,7 +759,7 @@ case $basic_machine in
 	*-hp)
 		os=-hpux
 		;;
-	*-sgi | i860-* | *-att | *-ncr | *-altos | *-motorola | *-convergent)
+	i860-* | *-att | *-ncr | *-altos | *-motorola | *-convergent)
 		os=-sysv
 		;;
 	*-cbm)
@@ -743,6 +782,21 @@ case $basic_machine in
 		;;
 	i[34]86-*)
 		os=-sco3.2v2
+		;;
+        *-gould)
+		os=-sysv
+		;;
+        *-highlevel)
+		os=-bsd
+		;;
+	*-encore)
+		os=-bsd
+		;;
+        *-sgi)
+		os=-irix
+		;;
+	*-masscomp)
+		os=-rtu
 		;;
 	*)
 		os=-none
