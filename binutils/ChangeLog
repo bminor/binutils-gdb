@@ -1,3 +1,20 @@
+Wed Sep 24 11:34:05 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* aclocal.m4: Rebuild with new libtool.
+	* configure: Rebuild.
+
+Tue Aug 26 17:48:34 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (EXEEXT_FOR_BUILD): New variable.  Use it in all
+	references to the sysinfo program.
+	* configure.in: Rebuild with new bfd/acinclude.m4.
+	* Makefile.in: Rebuild.
+
+Fri Aug  8 15:32:49 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* windres.c: Include <time.h>.
+	(define_resource): Set a timestamp for the resource.
+
 Wed Aug  6 13:37:58 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Define TARGET in header file.

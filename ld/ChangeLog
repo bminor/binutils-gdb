@@ -1,3 +1,8 @@
+Wed Sep 24 11:33:14 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* aclocal.m4: Rebuild with new libtool.
+	* configure: Rebuild.
+
 Mon Sep 22 17:24:06 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldlang.c (wild_doit): Revert patch of September 3.
