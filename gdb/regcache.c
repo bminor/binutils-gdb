@@ -377,7 +377,7 @@ read_register_bytes (int inregbyte, char *myaddr, int inlen)
          Update it from the target.  */
       if (regno < NUM_REGS)
 	target_fetch_registers (regno);
-      else if (regno < NUM_PSEUDO_REGS)
+      else if (regno < NUM_REGS + NUM_PSEUDO_REGS)
 	ARCH_FETCH_PSEUDO_REGISTERS (regno);
 
       if (!register_valid[regno])
@@ -532,7 +532,7 @@ read_register (int regno)
     {
       if (regno < NUM_REGS)
 	target_fetch_registers (regno);
-      else if (regno < NUM_PSEUDO_REGS)
+      else if (regno < NUM_REGS + NUM_PSEUDO_REGS)
 	ARCH_FETCH_PSEUDO_REGISTERS (regno);
     }
 

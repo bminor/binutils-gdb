@@ -1,3 +1,7 @@
+2000-07-21  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+        * regcache.c (read_register, read_register_bytes): Fix typos.
+
 2000-07-21  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* config/i386/tm-i386.h: treat PC and FP as unsigned.
