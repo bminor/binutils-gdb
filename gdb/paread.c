@@ -505,7 +505,7 @@ pa_symfile_offsets (objfile, addr)
 
 static struct sym_fns pa_sym_fns =
 {
-  bfd_target_som_flavour
+  bfd_target_som_flavour,
   pa_new_init,		/* sym_new_init: init anything gbl to entire symtab */
   pa_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
   pa_symfile_read,	/* sym_read: read a symbol file into symtab */
