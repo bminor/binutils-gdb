@@ -400,7 +400,10 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
       if (!done)
 	{
 	  if (print_frame_info_listing_hook)
-	    print_frame_info_listing_hook (sal.symtab, sal.line, sal.line + 1, 0);
+	    {
+	      print_frame_info_listing_hook (sal.symtab, sal.line, sal.line + 1, 0);
+	      current_source_symtab = sal.symtab;
+	    }
 	  else
 	    {
 	      /* We used to do this earlier, but that is clearly

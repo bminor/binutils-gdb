@@ -1,3 +1,8 @@
+2002-02-13  Martin M. Hunt  <hunt@redhat.com>
+
+	* stack.c (print_frame_info_base): When calling 
+	print_frame_info_listing_hook, set current_source_symtab.
+
 2002-02-14  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbserver/Makefile.in: Add regformats directory to INCLUDE_CFLAGS,
