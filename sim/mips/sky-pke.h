@@ -326,16 +326,24 @@ do { \
 #define PKE_REG_MASK_SET(me,reg,flag,value) \
      do { \
        unsigned_4 old = BIT_MASK_GET(((me)->regs[PKE_REG_##reg][0]), \
-		    PKE_REG_##reg##_##flag##_B, PKE_REG_##reg##_##flag##_E); \
+                    PKE_REG_##reg##_##flag##_B, PKE_REG_##reg##_##flag##_E); \
        BIT_MASK_SET(((me)->regs[PKE_REG_##reg][0]), \
-		    PKE_REG_##reg##_##flag##_B, PKE_REG_##reg##_##flag##_E, \
-		    (value)); \
-       if( indebug (me->dev.name)) \
-	 { \
-	   if (old != (value)) \
-        fprintf(((me)->fifo_trace_file != NULL) ? (me)->fifo_trace_file : stdout, \
-                 "# Reg %s:%s = 0x%x\n", #reg, #flag, (unsigned)(value)); \
-	 } \
+                    PKE_REG_##reg##_##flag##_B, PKE_REG_##reg##_##flag##_E, \
+                    (value)); \
+       if( indebug ((me)->dev.name)) \
+         { \
+           if (old != (value)) \
+           { \
+             if (((me)->fifo_trace_file == NULL ) &&  \
+                 ((me)->fifo_trace_file_name != NULL )) \
+               sky_open_file (&((me)->fifo_trace_file), \
+                              (me)->fifo_trace_file_name, \
+                              (char *) NULL); \
+             fprintf (((me)->fifo_trace_file != NULL) ? \
+                      (me)->fifo_trace_file : stdout, \
+                      "# Reg %s:%s = 0x%x\n", #reg, #flag, (unsigned)(value)); \
+           } \
+         } \
      } while(0)
 
 /* get a bitfield from a register by "name" */
@@ -444,8 +452,8 @@ int read_pke_pcx (struct pke_device *device, void *buf);
     do { \
       sim_cpu* cpu = STATE_CPU(CURRENT_STATE, 0); \
       unsigned_##size value = \
-	sim_core_read_aligned_##size(cpu, CIA_GET(cpu), read_map, \
-				     (SIM_ADDR)(addr)); \
+        sim_core_read_aligned_##size(cpu, CIA_GET(cpu), read_map, \
+                                     (SIM_ADDR)(addr)); \
       memcpy((unsigned_##size*) (data), (void*) & value, size); \
      } while(0)
 
@@ -454,22 +462,31 @@ int read_pke_pcx (struct pke_device *device, void *buf);
          unsigned_##size value; \
          memcpy((void*) & value, (unsigned_##size*)(data), size); \
          sim_core_write_aligned_##size(cpu, CIA_GET(cpu), write_map, \
-				       (SIM_ADDR)(addr), value); \
+                                       (SIM_ADDR)(addr), value); \
          if (indebug (me->dev.name)) \
-	   { \
-	     int i; \
-	     unsigned_##size value_te; \
-	     value_te = H2T_##size(value); \
-	     fprintf(((me)->fifo_trace_file != NULL) ? (me)->fifo_trace_file : stdout, \
-                 "# Write %2d bytes  to  ", size); \
-        fprintf(((me)->fifo_trace_file != NULL) ? (me)->fifo_trace_file : stdout, \
-                  "0x%08lx: ", (unsigned long)(addr)); \
-	     for(i=0; i<size; i++) \
-          fprintf(((me)->fifo_trace_file != NULL) ? (me)->fifo_trace_file : stdout, \
-	                " %02x", ((unsigned_1*)(& value_te))[i]); \
-          fprintf(((me)->fifo_trace_file != NULL) ? (me)->fifo_trace_file : stdout, \
- 	                "\n"); \
-	   } \
+           { \
+             int i; \
+             unsigned_##size value_te; \
+             value_te = H2T_##size(value); \
+             if (((me)->fifo_trace_file == NULL ) && \
+                 ((me)->fifo_trace_file_name != NULL )) \
+               sky_open_file (&((me)->fifo_trace_file), \
+                              (me)->fifo_trace_file_name, \
+                              (char *) NULL); \
+             fprintf (((me)->fifo_trace_file != NULL) ? \
+                      (me)->fifo_trace_file : stdout, \
+                      "# Write %2d bytes  to  ", size); \
+             fprintf (((me)->fifo_trace_file != NULL) ? \
+                      (me)->fifo_trace_file : stdout, \
+                     "0x%08lx: ", (unsigned long)(addr)); \
+             for(i=0; i<size; i++) \
+               fprintf (((me)->fifo_trace_file != NULL) ? \
+                        (me)->fifo_trace_file : stdout, \
+                        " %02x", ((unsigned_1*)(& value_te))[i]); \
+             fprintf (((me)->fifo_trace_file != NULL) ? \
+                      (me)->fifo_trace_file : stdout, \
+                      "\n"); \
+           } \
         } while(0)      
 
 
