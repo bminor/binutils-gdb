@@ -1,3 +1,8 @@
+Thu Jan 26 10:49:59 1995  Steve Chamberlain  <sac@splat>
+
+	* remote-hms.c (hms_ops): Change ref of hr_load_image
+	to gr_load_image.
+
 Thu Jan 26 12:08:31 1995  Michael Meissner  <meissner@cygnus.com>
 
 	* configure.in: Add support for powerpc-*-eabi.
