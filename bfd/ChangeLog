@@ -1,3 +1,15 @@
+2003-05-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* cpu-arm.c (arm_check_note): Warning fix.
+	* elf32-iq2000.c (iq2000_elf_check_relocs): Warning fixes.  Arrange
+	to keep relocs if edited.
+	(iq2000_elf_print_private_bfd_data): Return TRUE.
+	* elfxx-ia64.c (elfNN_ia64_relax_section): Use ELFNN_R_SYM, not
+	ELF64_R_SYM.
+	(elfNN_ia64_relax_ldxmov): Warning fix.
+	* xtensa-isa.c (xtensa_add_isa): Warning fix.
+	* xtensa-modules.c (get_num_opcodes): Warning fix.
+
 2003-05-09  Andrey Petrov <petrov@netbsd.org>
 
 	* elf.c (elf_fake_sections): Use correct cast for sh_name.

@@ -796,7 +796,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 		goto error_return;
 	    }
 
-	  isym = isymbuf + ELF64_R_SYM (irel->r_info);
+	  isym = isymbuf + ELFNN_R_SYM (irel->r_info);
 	  if (isym->st_shndx == SHN_UNDEF)
 	    continue;	/* We can't do anthing with undefined symbols.  */
 	  else if (isym->st_shndx == SHN_ABS)
@@ -1089,7 +1089,7 @@ elfNN_ia64_relax_ldxmov (abfd, contents, off)
     case 0: shift =  5; break;
     case 1: shift = 14; off += 3; break;
     case 2: shift = 23; off += 6; break;
-    case 3:
+    default:
       abort ();
     }
 
