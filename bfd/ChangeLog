@@ -1,8 +1,14 @@
+1998-07-22 14:57  Ulrich Drepper  <drepper@cygnus.com>
+
+	* elf-m10300.c: Let ELF header now define the macros to get the enum.
+	* elf32-mips.c: Likewise.
+	* elf32-ppc.c: Likewise.
+
 Wed Jul 22 13:53:52 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* bfd-in2.h: Change type of 'class' parameter to 'unsigned int' in
 	bfd_coff_set_symbol_class(), in order to avoid K&R compatability
-	prblems. 
+	prblems.
 	* bfd-in.h: Regenerate.
 	* coffgen.c (bfd_coff_set_symbol_class): Change type of 'class'
 	parameter to 'unsigned int' to avoid K&R compatability problems.

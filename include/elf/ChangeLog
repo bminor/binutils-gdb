@@ -3,6 +3,15 @@
 	* mn10300.h: Rewrite relocation definition using macros.
 	* mips.h: Likewise.
 	* ppc.h: Likewise.
+	* alpha.h: Likewise.
+	* arm.h: Likewise.
+	* d10v.h: Likewise.
+	* d30v.h: Likewise.
+	* m32r.h: Likewise.
+	* m68k.h: Likewise.
+	* mn10200.h: Likewise.
+	* sh.h: Likewise.
+	* sparc.h: Likewise.
 
 1998-07-21 13:07  Ulrich Drepper  <drepper@cygnus.com>
 

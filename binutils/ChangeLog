@@ -1,3 +1,9 @@
+1998-07-22 14:58  Ulrich Drepper  <drepper@cygnus.com>
+
+	* readelf.c: Remove definition of functions to return relocation
+	symbol strings.  They now get implicitly defined when include the
+	system specific ELF header.
+
 1998-07-22 13:51  Ulrich Drepper  <drepper@cygnus.com>
 
 	* readelf.c: Before include system specific ELF header define
