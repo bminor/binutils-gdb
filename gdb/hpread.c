@@ -538,7 +538,7 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 	      {
 		/* Variables, typedefs an the like.  */
 		enum address_class storage;
-		enum namespace namespace;
+		namespace_enum namespace;
 
 		/* Don't add locals to the partial symbol table.  */
 		if (within_function

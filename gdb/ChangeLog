@@ -1,3 +1,8 @@
+Tue Jan  9 09:33:53 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* hpread.c (hpread_build_psymtabs): Finish Jan 4th 
+	enum namespace -> enum_namespace change.
+
 Tue Jan  9 04:44:47 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
 
 	* ch-exp.c (parse_primval): in case ARRAY: Add missing FORWARD_TOKEN ().
