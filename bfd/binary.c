@@ -1,5 +1,5 @@
 /* BFD back-end for binary objects.
-   Copyright 1994, 95, 96, 97, 98, 99 Free Software Foundation, Inc.
+   Copyright 1994, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support, <ian@cygnus.com>
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -255,14 +255,6 @@ binary_set_section_contents (abfd, sec, data, offset, size)
      file_ptr offset;
      bfd_size_type size;
 {
-  /* We don't want to output anything for a section that is neither
-     loaded nor allocated.  The contents of such a section are not
-     meaningful in the binary format.  */
-  if ((sec->flags & (SEC_LOAD | SEC_ALLOC)) == 0)
-    return true;
-  if ((sec->flags & SEC_NEVER_LOAD) != 0)
-    return true;
-
   if (! abfd->output_has_begun)
     {
       boolean found_low;
@@ -275,7 +267,8 @@ binary_set_section_contents (abfd, sec, data, offset, size)
       found_low = false;
       low = 0;
       for (s = abfd->sections; s != NULL; s = s->next)
-	if (((s->flags & (SEC_HAS_CONTENTS | SEC_LOAD | SEC_ALLOC))
+	if (((s->flags
+	      & (SEC_HAS_CONTENTS | SEC_LOAD | SEC_ALLOC | SEC_NEVER_LOAD))
 	     == (SEC_HAS_CONTENTS | SEC_LOAD | SEC_ALLOC))
 	    && (! found_low || s->lma < low))
 	  {
@@ -302,6 +295,14 @@ binary_set_section_contents (abfd, sec, data, offset, size)
 
       abfd->output_has_begun = true;
     }
+
+  /* We don't want to output anything for a section that is neither
+     loaded nor allocated.  The contents of such a section are not
+     meaningful in the binary format.  */
+  if ((sec->flags & (SEC_LOAD | SEC_ALLOC)) == 0)
+    return true;
+  if ((sec->flags & SEC_NEVER_LOAD) != 0)
+    return true;
 
   return _bfd_generic_set_section_contents (abfd, sec, data, offset, size);
 }

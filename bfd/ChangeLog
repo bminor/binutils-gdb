@@ -1,3 +1,10 @@
+Thu Jan 28 20:05:22 1999  Ian Lance Taylor  <ian@cygnus.com>
+
+	* binary.c (binary_set_section_contents): Don't return early for a
+ 	non-loadable section, in case the first section is non-loadable.
+  	Don't set the low lma for a SEC_NEVER_LOAD section.  From Maciej
+	W. Rozycki <macro@ds2.pg.gda.pl>.
+
 1999-01-28  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-fr30.c (fr30_reloc_map): Add R_FR30_GNU_VTINHERIT and
