@@ -25,6 +25,7 @@ Things-to-keep:
 
 cpu32bug.exp
 est.exp
+gdbserver.exp
 mips-gdb.exp
 mt-a29k-udi
 mt-hpux

@@ -1,3 +1,8 @@
+Fri Jul 28 00:28:36 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* config/gdbremote.exp: New file.  Testing framework using
+	gdbserver.
+
 Thu Jul 27 12:17:14 1995  Fred Fish  (fnf@cygnus.com)
 
 	* gdb.base/interrupt.exp: Setup "i*86-*-linux" xfail for
