@@ -384,6 +384,14 @@ static bfd_boolean
 pe_bfd_copy_private_bfd_data (ibfd, obfd)
      bfd *ibfd, *obfd;
 {
+  /* PR binutils/716: Copy the large address aware flag.
+     XXX: Should we be copying other flags or other fields in the pe_data()
+     structure ?  */
+  if (pe_data (obfd) != NULL
+      && pe_data (ibfd) != NULL
+      && pe_data (ibfd)->real_flags & IMAGE_FILE_LARGE_ADDRESS_AWARE)
+    pe_data (obfd)->real_flags |= IMAGE_FILE_LARGE_ADDRESS_AWARE;
+      
   if (!_bfd_XX_bfd_copy_private_bfd_data_common (ibfd, obfd))
     return FALSE;
 
