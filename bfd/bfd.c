@@ -23,7 +23,7 @@ SECTION
 	<<typedef bfd>>
 
 	A BFD has type <<bfd>>; objects of this type are the
-	cornerstone of any application using <<libbfd>>. Using BFD
+	cornerstone of any application using BFD. Using BFD
 	consists of making references though the BFD and to data in the BFD.
 
 	Here is the structure that defines the type <<bfd>>.  It
@@ -136,6 +136,13 @@ CODE_FRAGMENT
 .    struct _bfd *archive_head;   {* The first BFD in the archive.  *}
 .    boolean has_armap;           
 .
+.    {* A chain of BFD structures involved in a link.  *}
+.    struct _bfd *link_next;
+.
+.    {* A field used by _bfd_generic_link_add_archive_symbols.  This will
+.       be used only for archive elements.  *}
+.    int archive_pass;
+.
 .    {* Used by the back end to hold private data. *}
 .
 .    union 
@@ -157,6 +164,7 @@ CODE_FRAGMENT
 .      struct trad_core_struct *trad_core_data;
 .      struct som_data_struct *som_data;
 .      struct hpux_core_struct *hpux_core_data;
+.      struct hppabsd_core_struct *hppabsd_core_data;
 .      struct sgi_core_struct *sgi_core_data;
 .      struct lynx_core_struct *lynx_core_data;
 .      struct osf_core_struct *osf_core_data;
@@ -168,15 +176,13 @@ CODE_FRAGMENT
 .
 .    {* Where all the allocated stuff under this BFD goes *}
 .    struct obstack memory;
-.
-.    {* Is this really needed in addition to usrdata?  *}
-.    asymbol **ld_symbols;
 .};
 .
 */
 
 #include "bfd.h"
 #include "sysdep.h"
+#include "bfdlink.h"
 #include "libbfd.h"
 #include "coff/internal.h"
 #include "coff/sym.h"
@@ -201,7 +207,7 @@ bfd_ec bfd_error = no_error;
 CONST char *CONST bfd_errmsgs[] = {
                         "No error",
                         "System call error",
-                        "Invalid target",
+                        "Invalid bfd target",
                         "File in wrong format",
                         "Invalid operation",
                         "Memory exhausted",
@@ -220,62 +226,6 @@ CONST char *CONST bfd_errmsgs[] = {
                         "#<Invalid error code>"
                        };
 
-static 
-void 
-DEFUN(bfd_nonrepresentable_section,(abfd, name),
-         CONST  bfd * CONST abfd AND
-         CONST  char * CONST name)
-{
-  fprintf(stderr,
-	  "bfd error writing file %s, format %s can't represent section %s\n",
-	  abfd->filename, 
-	  abfd->xvec->name,
-	  name);
-  exit(1);
-}
-
-/*ARGSUSED*/
-static 
-void 
-DEFUN(bfd_undefined_symbol,(relent, seclet),
-      CONST  arelent *relent AND
-      CONST  struct bfd_seclet *seclet)
-{
-  asymbol *symbol = *(relent->sym_ptr_ptr);
-  fprintf(stderr, "bfd error relocating, symbol %s is undefined\n",
-	  symbol->name);
-  exit(1);
-}
-/*ARGSUSED*/
-static 
-void 
-DEFUN(bfd_reloc_value_truncated,(relent, seclet),
-         CONST  arelent *relent AND
-      struct bfd_seclet *seclet)
-{
-  fprintf(stderr, "bfd error relocating, value truncated\n");
-  exit(1);
-}
-/*ARGSUSED*/
-static 
-void 
-DEFUN(bfd_reloc_is_dangerous,(relent, seclet),
-      CONST  arelent *relent AND
-     CONST  struct bfd_seclet *seclet)
-{
-  fprintf(stderr, "bfd error relocating, dangerous\n");
-  exit(1);
-}
-
-bfd_error_vector_type bfd_error_vector = 
-  {
-  bfd_nonrepresentable_section ,
-  bfd_undefined_symbol,
-  bfd_reloc_value_truncated,
-  bfd_reloc_is_dangerous,
-  };
-
-
 CONST char *
 bfd_errmsg (error_tag)
      bfd_ec error_tag;
@@ -292,16 +242,6 @@ bfd_errmsg (error_tag)
 
   return bfd_errmsgs [(int)error_tag];
 }
-
-void
-DEFUN (bfd_default_error_trap, (error_tag),
-       bfd_ec error_tag)
-{
-  fprintf(stderr, "bfd assert fail (%s)\n", bfd_errmsg(error_tag));
-}
-
-void (*bfd_error_trap) PARAMS ((bfd_ec)) = bfd_default_error_trap;
-void (*bfd_error_nonrepresentabltrap) PARAMS ((bfd_ec)) = bfd_default_error_trap;
 
 void
 DEFUN(bfd_perror,(message),
@@ -425,12 +365,12 @@ DESCRIPTION
 	Set the flag word in the BFD @var{abfd} to the value @var{flags}.
 
 	Possible errors are:
-	o wrong_format - The target bfd was not of object format.
-	o invalid_operation - The target bfd was open for reading.
-	o invalid_operation -
+	o <<wrong_format>> - The target bfd was not of object format.
+	o <<invalid_operation>> - The target bfd was open for reading.
+	o <<invalid_operation>> -
 	The flag word contained a bit which was not applicable to the
-	type of file.  E.g., an attempt was made to set the D_PAGED bit
-	on a bfd format which does not support demand paging.
+	type of file.  E.g., an attempt was made to set the <<D_PAGED>> bit
+	on a BFD format which does not support demand paging.
 
 */
 
@@ -578,7 +518,7 @@ SYNOPSIS
 
 DESCRIPTION
 	Return the maximum size of objects to be optimized using the GP
-	register under MIPS ECOFF.  This is typically set by the -G
+	register under MIPS ECOFF.  This is typically set by the <<-G>>
 	argument to the compiler, assembler or linker.
 */
 
@@ -588,6 +528,8 @@ bfd_get_gp_size (abfd)
 {
   if (abfd->xvec->flavour == bfd_target_ecoff_flavour)
     return ecoff_data (abfd)->gp_size;
+  else if (abfd->xvec->flavour == bfd_target_elf_flavour)
+    return elf_gp_size (abfd);
   return 0;
 }
 
@@ -601,7 +543,7 @@ SYNOPSIS
 DESCRIPTION
 	Set the maximum size of objects to be optimized using the GP
 	register under ECOFF or MIPS ELF.  This is typically set by
-	the -G argument to the compiler, assembler or linker.
+	the <<-G>> argument to the compiler, assembler or linker.
 */
 
 void
@@ -624,9 +566,9 @@ SYNOPSIS
 
 DESCRIPTION
 	Convert, like <<strtoul>>, a numerical expression
-	@var{string} into a bfd_vma integer, and returns that integer.
+	@var{string} into a <<bfd_vma>> integer, and return that integer.
 	(Though without as many bells and whistles as <<strtoul>>.)
-	The expression is assumed to be unsigned (i.e. positive).
+	The expression is assumed to be unsigned (i.e., positive).
 	If given a @var{base}, it is used as the base for conversion.
 	A base of 0 causes the function to interpret the string
 	in hex if a leading "0x" or "0X" is found, otherwise
@@ -719,13 +661,22 @@ DESCRIPTION
 .#define bfd_set_arch_mach(abfd, arch, mach)\
 .        BFD_SEND ( abfd, _bfd_set_arch_mach, (abfd, arch, mach))
 .
-.#define bfd_get_relocated_section_contents(abfd, seclet, data, relocateable) \
-.	BFD_SEND (abfd, _bfd_get_relocated_section_contents, (abfd, seclet, data, relocateable))
+.#define bfd_get_relocated_section_contents(abfd, link_info, link_order, data, relocateable, symbols) \
+.	BFD_SEND (abfd, _bfd_get_relocated_section_contents, \
+.                 (abfd, link_info, link_order, data, relocateable, symbols))
 . 
-.#define bfd_relax_section(abfd, section, symbols) \
-.       BFD_SEND (abfd, _bfd_relax_section, (abfd, section, symbols))
+.#define bfd_relax_section(abfd, section, link_info, symbols) \
+.       BFD_SEND (abfd, _bfd_relax_section, \
+.                 (abfd, section, link_info, symbols))
 .
-.#define bfd_seclet_link(abfd, data, relocateable) \
-.       BFD_SEND (abfd, _bfd_seclet_link, (abfd, data, relocateable))
+.#define bfd_link_hash_table_create(abfd) \
+.	BFD_SEND (abfd, _bfd_link_hash_table_create, (abfd))
+.
+.#define bfd_link_add_symbols(abfd, info) \
+.	BFD_SEND (abfd, _bfd_link_add_symbols, (abfd, info))
+.
+.#define bfd_final_link(abfd, info) \
+.	BFD_SEND (abfd, _bfd_final_link, (abfd, info))
+.
 
 */

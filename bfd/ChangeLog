@@ -1,5 +1,7 @@
 Fri Jan 21 01:11:55 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* bfd.c (bfd_get_gp_size): Added support for ELF.
+
 	* syms.c (BSF_DYNAMIC): New symbol flag.
 	(bfd_print_symbol_vandf): Print it.
 	* bfd-in2.h: Rebuilt.
