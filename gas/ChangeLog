@@ -1,3 +1,9 @@
+Tue Jun  9 13:52:53 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am: Rebuild dependencies.
+ 	(DEP_INCLUDES): Fix reference to intl build directory.
+	* Makefile.in: Rebuild.
+
 Tue Jun  9 12:20:05 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* doc/c-i386.texi: Update 16 bit documentation.
