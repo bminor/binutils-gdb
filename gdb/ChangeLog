@@ -1,3 +1,12 @@
+Thu Dec 12 13:29:14 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/powerpc/ppc{,le}-sim.mt (SIM): Add the simulator common
+	library ../sim/common/libcommon.a.
+
+Wed Dec 11 18:51:35 1996  Mark Alexander  <marka@cygnus.com>
+
+	* gdbtk.c (gdb_loc): Correct truncation of PC on 64-bit MIPS.
+
 Wed Dec 11 11:15:08 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* monitor.c (monitor_load): Add support for load address argument.
