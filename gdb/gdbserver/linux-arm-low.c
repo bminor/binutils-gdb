@@ -155,11 +155,6 @@ arm_fill_wmmxregset (void *buf)
  
   for (i = 0; i < 4; i++)
     collect_register (arm_num_regs + i + 16 + 8, ((char *) buf) + 16 * 8 + 8 + i * 4);
-
-        ((int*)buf)[0], 
-        ((int*)buf)[1], 
-        ((int*)buf)[2], 
-        ((int*)buf)[3]);
 }
  
 static void
@@ -167,10 +162,6 @@ arm_store_wmmxregset (const void *buf)
 {
   int i;
 
-        ((int*)buf)[0], 
-        ((int*)buf)[1], 
-        ((int*)buf)[2], 
-        ((int*)buf)[3]);
   for (i = 0; i < 16; i++)
     supply_register (arm_num_regs + i, ((char *) buf) + i * 8);
   
@@ -186,11 +177,10 @@ arm_available_registers (void)
 {
   char buf[64];
 
-  printf ("use_regsets %d target_regsets %d\n", use_regsets_p, target_regsets[1].size);
   if (use_regsets_p && target_regsets[1].size > 0)
     {
       int wr0 = find_regno ("wr0");
-      sprintf (buf, "iwmmxt:%d", wr0);
+      sprintf (buf, "iwmmxt:%x", wr0);
       return strdup (buf);
     }
 

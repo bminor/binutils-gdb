@@ -295,6 +295,8 @@ handle_v_requests (char *own_buf, char *status, unsigned char *signal)
   return;
 }
 
+extern int num_registers;
+
 /* Handle a register fetch ('p') request.  */
 void
 handle_p_packet (char *own_buf)
@@ -302,7 +304,7 @@ handle_p_packet (char *own_buf)
   char *end = own_buf + 1;
   int regnum = strtol (own_buf + 1, &end, 16);
 
-  if (*end)
+  if (*end || regnum < 0 || regnum >= num_registers)
     {
       write_enn (own_buf);
       return;
@@ -318,7 +320,7 @@ handle_P_packet (char *own_buf)
   char *end = own_buf + 1;
   int regnum = strtol (own_buf + 1, &end, 16);
 
-  if (*end != '=')
+  if (*end != '=' || regnum < 0 || regnum >= num_registers)
     {
       write_enn (own_buf);
       return;

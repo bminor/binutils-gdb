@@ -23,6 +23,7 @@
 #include "gdbcore.h"
 #include "gdb_string.h"
 #include "regcache.h"
+#include "gdb_assert.h"
 
 #include "arm-tdep.h"
 
@@ -40,6 +41,13 @@
 #ifndef PTRACE_GET_THREAD_AREA
 #define PTRACE_GET_THREAD_AREA 22
 #endif
+
+#ifndef PTRACE_GETWMMXREGS
+#define PTRACE_GETWMMXREGS 18
+#define PTRACE_SETWMMXREGS 19
+#endif
+
+static int arm_linux_has_wmmx_registers = 1;
 
 extern int arm_apcs_32;
 
@@ -99,7 +107,7 @@ get_thread_id (ptid_t ptid)
     tid = PIDGET (ptid);
   return tid;
 }
-#define GET_THREAD_ID(PTID)	get_thread_id ((PTID));
+#define GET_THREAD_ID(PTID)	get_thread_id (PTID)
 
 static void
 fetch_nwfpe_single (unsigned int fn, FPA11 * fpa11)
@@ -550,6 +558,97 @@ store_regs (void)
     }
 }
 
+/* Fetch all WMMX registers of the process and store into
+   regcache.  */
+
+#define IWMMXT_REGS_SIZE (16 * 8 + 6 * 4)
+
+static void
+fetch_wmmx_regs (void)
+{
+  char regbuf[IWMMXT_REGS_SIZE];
+  int ret, regno, tid, first;
+
+  /* Get the thread id for the ptrace call.  */
+  tid = GET_THREAD_ID (inferior_ptid);
+  
+  ret = ptrace (PTRACE_GETWMMXREGS, tid, 0, regbuf);
+  if (ret < 0)
+    {
+      warning (_("Unable to fetch WMMX registers."));
+      return;
+    }
+
+  first = gdbarch_tdep (current_gdbarch)->first_iwmmxt_regnum;
+
+  for (regno = 0; regno < NUM_IWMMXT_COP0REGS; regno++)
+    regcache_raw_supply (current_regcache, first + regno,
+			 &regbuf[regno * 8]);
+
+  first += NUM_IWMMXT_COP0REGS;
+
+  for (regno = 0; regno < 2; regno++)
+    regcache_raw_supply (current_regcache, first + regno, NULL);
+
+  for (regno = 2; regno < 4; regno++)
+    regcache_raw_supply (current_regcache, first + regno,
+			 &regbuf[16 * 8 + (regno - 2) * 4]);
+
+  for (regno = 4; regno < 8; regno++)
+    regcache_raw_supply (current_regcache, first + regno, NULL);
+
+  for (regno = 8; regno < 12; regno++)
+    regcache_raw_supply (current_regcache, first + regno,
+			 &regbuf[16 * 8 + 2 * 4 + (regno - 8) * 4]);
+
+  for (regno = 12; regno < 16; regno++)
+    regcache_raw_supply (current_regcache, first + regno, NULL);
+}
+
+static void
+store_wmmx_regs (void)
+{
+  char regbuf[IWMMXT_REGS_SIZE];
+  int ret, regno, tid, first;
+
+  /* Get the thread id for the ptrace call.  */
+  tid = GET_THREAD_ID (inferior_ptid);
+  
+  ret = ptrace (PTRACE_GETWMMXREGS, tid, 0, regbuf);
+  if (ret < 0)
+    {
+      warning (_("Unable to fetch WMMX registers."));
+      return;
+    }
+
+  first = gdbarch_tdep (current_gdbarch)->first_iwmmxt_regnum;
+
+  for (regno = 0; regno < NUM_IWMMXT_COP0REGS; regno++)
+    if (register_cached (first + regno))
+      regcache_raw_collect (current_regcache, first + regno,
+			    &regbuf[regno * 8]);
+
+  first += 18;
+  for (regno = 0; regno < 2; regno++)
+    if (register_cached (first + regno))
+      regcache_raw_collect (current_regcache, first + regno,
+			    &regbuf[16 * 8 + regno * 4]);
+
+  first += 6;
+  for (regno = 0; regno < 4; regno++)
+    if (register_cached (first + regno))
+      regcache_raw_collect (current_regcache, first + regno,
+			    &regbuf[16 * 8 + 2 * 4 + regno * 4]);
+
+  ret = ptrace (PTRACE_SETWMMXREGS, tid, 0, regbuf);
+
+  if (ret < 0)
+    {
+      warning (_("Unable to store WMMX registers."));
+      return;
+    }
+}
+
 /* Fetch registers from the child process.  Fetch all registers if
    regno == -1, otherwise fetch all general registers or all floating
    point registers depending upon the value of regno.  */
@@ -561,14 +660,21 @@ fetch_inferior_registers (int regno)
     {
       fetch_regs ();
       fetch_fpa_regs ();
+      if (arm_linux_has_wmmx_registers)
+	fetch_wmmx_regs ();
     }
   else 
     {
-      if (regno < ARM_F0_REGNUM || regno > ARM_FPS_REGNUM)
+      if (regno < ARM_F0_REGNUM || regno == ARM_PS_REGNUM)
         fetch_register (regno);
-
-      if (regno >= ARM_F0_REGNUM && regno <= ARM_FPS_REGNUM)
+      else if (regno >= ARM_F0_REGNUM && regno <= ARM_FPS_REGNUM)
         fetch_fpa_register (regno);
+      else if (arm_linux_has_wmmx_registers)
+	{
+	  int first = gdbarch_tdep (current_gdbarch)->first_iwmmxt_regnum;
+	  if (regno >= first && regno < first + NUM_IWMMXT_REGS)
+	    fetch_wmmx_regs ();
+	}
     }
 }
 
@@ -583,14 +689,21 @@ store_inferior_registers (int regno)
     {
       store_regs ();
       store_fpa_regs ();
+      if (arm_linux_has_wmmx_registers)
+	store_wmmx_regs ();
     }
   else
     {
-      if ((regno < ARM_F0_REGNUM) || (regno > ARM_FPS_REGNUM))
+      if (regno < ARM_F0_REGNUM || regno == ARM_PS_REGNUM)
         store_register (regno);
-
-      if ((regno >= ARM_F0_REGNUM) && (regno <= ARM_FPS_REGNUM))
-        store_fpa_register (regno);
+      else if ((regno >= ARM_F0_REGNUM) && (regno <= ARM_FPS_REGNUM))
+        store_fpa_register (regno); 
+      else if (arm_linux_has_wmmx_registers)
+	{
+	  int first = gdbarch_tdep (current_gdbarch)->first_iwmmxt_regnum;
+	  if (regno >= first && regno < first + NUM_IWMMXT_REGS)
+	    store_wmmx_regs ();
+	}
     }
 }
 
@@ -738,6 +851,50 @@ get_linux_version (unsigned int *vmajor,
   *vrelease = (unsigned int) strtoul (prelease, &tail, 0);
 
   return ((*vmajor << 16) | (*vminor << 8) | *vrelease);
+}
+
+LONGEST
+arm_linux_available_registers (struct target_ops *ops,
+			       int /* enum target_object */ object,
+			       const char *annex,
+			       void *readbuf,
+			       const void *writebuf,
+			       ULONGEST offset,
+			       LONGEST len)
+{
+  char *result = NULL;
+  int total_len;
+
+  gdb_assert (object == TARGET_OBJECT_AVAILABLE_REGISTERS);
+  gdb_assert (readbuf && !writebuf);
+
+  if (arm_linux_has_wmmx_registers)
+    {
+      int ret;
+      char regbuf[IWMMXT_REGS_SIZE];
+
+      ret = ptrace (PTRACE_GETWMMXREGS, GET_THREAD_ID (inferior_ptid), 0,
+		    regbuf);
+      if (ret < 0)
+	/* Should we be checking the error code?  */
+	arm_linux_has_wmmx_registers = 0;
+    }
+
+  if (arm_linux_has_wmmx_registers)
+    result = "iwmmxt";
+
+  if (result == NULL)
+    return 0;
+
+  total_len = strlen (result);
+  if (total_len > offset)
+    {
+      int bytes_read = min (total_len - offset, len);
+      memcpy (readbuf, result + offset, bytes_read);
+      return bytes_read;
+    }
+
+  return 0;
 }
 
 void

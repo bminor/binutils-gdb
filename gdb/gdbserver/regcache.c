@@ -38,7 +38,7 @@ struct inferior_regcache_data
 static int register_bytes, g_register_bytes;
 
 static struct reg *reg_defs;
-static int num_registers;
+int num_registers;
 
 const char **gdbserver_expedite_regs;
 
