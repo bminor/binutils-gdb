@@ -14,14 +14,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
-
+#include <ansidecl.h>
+#include <sysdep.h>
 #include "obstack.h"
 
-#ifdef __STDC__
-#define POINTER void *
-#else
-#define POINTER char *
-#endif
 
 /* Determine default alignment.  */
 struct fooalign {char x; double d;};
@@ -50,13 +46,12 @@ struct obstack *_obstack;
    CHUNKFUN is the function to use to allocate chunks,
    and FREEFUN the function to free them.  */
 
-void
-_obstack_begin (h, size, alignment, chunkfun, freefun)
-     struct obstack *h;
-     int size;
-     int alignment;
-     POINTER (*chunkfun) ();
-     void (*freefun) ();
+void DEFUN(_obstack_begin,(h, size, alignment, chunkfun, freefun),
+	   struct obstack *h AND
+	   int size AND
+	   int alignment AND
+	   PTR (*chunkfun) () AND
+	   void (*freefun) ())
 {
   register struct _obstack_chunk* chunk; /* points to new chunk */
 
@@ -101,9 +96,9 @@ _obstack_begin (h, size, alignment, chunkfun, freefun)
    compilers in a : expression.  */
 
 int
-_obstack_newchunk (h, length)
-     struct obstack *h;
-     int length;
+DEFUN(_obstack_newchunk,(h, length),
+      struct obstack *h AND
+      int length)
 {
   register struct _obstack_chunk*	old_chunk = h->chunk;
   register struct _obstack_chunk*	new_chunk;
@@ -152,19 +147,19 @@ return 0;
    If you use it in a program, you are probably losing.  */
 
 int
-_obstack_allocated_p (h, obj)
-     struct obstack *h;
-     POINTER obj;
+DEFUN(_obstack_allocated_p, (h, obj), 
+      struct obstack *h AND
+      PTR obj)
 {
-  register struct _obstack_chunk*  lp;	/* below addr of any objects in this chunk */
+  register struct _obstack_chunk*  lp; /* below addr of any objects in this chunk */
   register struct _obstack_chunk*  plp;	/* point to previous chunk if any */
 
   lp = (h)->chunk;
-  while (lp != 0 && ((POINTER)lp > obj || (POINTER)(lp)->limit < obj))
-    {
-      plp = lp -> prev;
-      lp = plp;
-    }
+  while (lp != 0 && ((PTR)lp > obj || (PTR)(lp)->limit < obj))
+      {
+	plp = lp -> prev;
+	lp = plp;
+      }
   return lp != 0;
 }
 
@@ -174,12 +169,12 @@ _obstack_allocated_p (h, obj)
 #ifdef __STDC__
 #undef obstack_free
 void
-obstack_free (struct obstack *h, POINTER obj)
+obstack_free (struct obstack *h, PTR obj)
 #else
 int
 _obstack_free (h, obj)
      struct obstack *h;
-     POINTER obj;
+     PTR obj;
 #endif
 {
   register struct _obstack_chunk*  lp;	/* below addr of any objects in this chunk */
@@ -189,10 +184,10 @@ _obstack_free (h, obj)
   /* We use >= because there cannot be an object at the beginning of a chunk.
      But there can be an empty object at that address
      at the end of another chunk.  */
-  while (lp != 0 && ((POINTER)lp >= obj || (POINTER)(lp)->limit < obj))
+  while (lp != 0 && ((PTR)lp >= obj || (PTR)(lp)->limit < obj))
     {
       plp = lp -> prev;
-      (*h->freefun) ((POINTER) lp);
+      (*h->freefun) ((PTR) lp);
       lp = plp;
     }
   if (lp)
@@ -212,7 +207,7 @@ _obstack_free (h, obj)
 int
 _obstack_free (h, obj)
      struct obstack *h;
-     POINTER obj;
+     PTR obj;
 {
   obstack_free (h, obj);
   return 0;
@@ -233,13 +228,13 @@ _obstack_free (h, obj)
 /* The function names appear in parentheses in order to prevent
    the macro-definitions of the names from being expanded there.  */
 
-POINTER (obstack_base) (obstack)
+PTR (obstack_base) (obstack)
      struct obstack *obstack;
 {
   return obstack_base (obstack);
 }
 
-POINTER (obstack_next_free) (obstack)
+PTR (obstack_next_free) (obstack)
      struct obstack *obstack;
 {
   return obstack_next_free (obstack);
@@ -257,34 +252,34 @@ int (obstack_room) (obstack)
   return obstack_room (obstack);
 }
 
-void (obstack_grow) (obstack, pointer, length)
+void (obstack_grow) (obstack, ptr, length)
      struct obstack *obstack;
-     POINTER pointer;
+     PTR ptr;
      int length;
 {
-  obstack_grow (obstack, pointer, length);
+(void)  obstack_grow (obstack, ptr, length);
 }
 
-void (obstack_grow0) (obstack, pointer, length)
+void (obstack_grow0) (obstack, ptr, length)
      struct obstack *obstack;
-     POINTER pointer;
+     PTR ptr;
      int length;
 {
-  obstack_grow0 (obstack, pointer, length);
+(void)  obstack_grow0 (obstack, ptr, length);
 }
 
 void (obstack_1grow) (obstack, character)
      struct obstack *obstack;
      int character;
 {
-  obstack_1grow (obstack, character);
+(void)  obstack_1grow (obstack, character);
 }
 
 void (obstack_blank) (obstack, length)
      struct obstack *obstack;
      int length;
 {
-  obstack_blank (obstack, length);
+(void)  obstack_blank (obstack, length);
 }
 
 void (obstack_1grow_fast) (obstack, character)
@@ -301,33 +296,33 @@ void (obstack_blank_fast) (obstack, length)
   obstack_blank_fast (obstack, length);
 }
 
-POINTER (obstack_finish) (obstack)
+PTR (obstack_finish) (obstack)
      struct obstack *obstack;
 {
   return obstack_finish (obstack);
 }
 
-POINTER (obstack_alloc) (obstack, length)
+PTR (obstack_alloc) (obstack, length)
      struct obstack *obstack;
      int length;
 {
   return obstack_alloc (obstack, length);
 }
 
-POINTER (obstack_copy) (obstack, pointer, length)
+PTR (obstack_copy) (obstack, ptr, length)
      struct obstack *obstack;
-     POINTER pointer;
+     PTR ptr;
      int length;
 {
-  return obstack_copy (obstack, pointer, length);
+  return obstack_copy (obstack, ptr, length);
 }
 
-POINTER (obstack_copy0) (obstack, pointer, length)
+PTR (obstack_copy0) (obstack, ptr, length)
      struct obstack *obstack;
-     POINTER pointer;
+     PTR ptr;
      int length;
 {
-  return obstack_copy0 (obstack, pointer, length);
+  return obstack_copy0 (obstack, ptr, length);
 }
 
 #endif /* __STDC__ */

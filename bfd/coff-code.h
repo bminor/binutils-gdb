@@ -2036,7 +2036,7 @@ coff_slurp_symbol_table(abfd)
     SYMENT         *native_symbols;
     coff_symbol_type *cached_area;
     unsigned int   *table_ptr;
-    char           *string_table = (char *) NULL;
+
     unsigned int    number_of_symbols = 0;
     if (obj_symbols(abfd))
 	return true;
