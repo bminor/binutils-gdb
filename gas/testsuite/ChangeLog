@@ -1,5 +1,9 @@
 Fri Apr  5 10:13:28 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* gas/h8300/{movb.s,movw.s}: Correct predecrement syntax.
+
+	* gas/h8300/h8300.exp: Fix typos in bitops4 and movb tests.
+
 	* gas/h8300/{addsub.s,bitops1.s,bitops2.s}: New h8300 tests.
 	* gas/h8300/{bitops3.s,bitops4.s,branches.s}: New h8300 tests.
 	* gas/h8300/{cbranch.s,compare.s,decimal.s}: New h8300 tests.
