@@ -1,3 +1,8 @@
+Mon Jun  3 11:01:53 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-mips.c (mips_elf_size_dynamic_sections): Initialize c.
+	From Per Fogelstrom <per.fogelstrom@mailbox200.swipnet.se>.
+
 Sat Jun  1 21:49:58 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf64-mips.c (bfd_mips_elf64_swap_reginfo_in)
