@@ -1,3 +1,15 @@
+Wed Jan 18 13:49:26 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/tc-sparc.c (sparc_ip): When scanning successive opcode
+	table entries, check names for pointer equality before doing
+	string comparisons.
+
+	* hash.c (hash_ask): Call strcmp instead of expanding it inline.
+	(hash_code): Replaced with a version from bfd.
+
+	* config/obj-coff.c (write_object_file): If COFF_FLAGS isn't
+	defined, default it to zero.
+
 Wed Jan 18 12:16:07 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* expr.c (operand): Parenthesize && within ||.
