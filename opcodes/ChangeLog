@@ -1,3 +1,8 @@
+Tue Nov  7 15:21:06 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Call AC_CHECK_PROG to find and cache AR.
+	* configure: Rebuilt.
+
 Mon Nov  6 17:39:47 1995  Harry Dolan  <dolan@ssd.intel.com>
 
 	* configure.in: Add case for bfd_i860_arch.

@@ -1,5 +1,8 @@
 Tue Nov  7 13:48:58 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in: Call AC_CHECK_PROG to find and cache AR.
+	* configure: Rebuilt.
+
 	* aclocal.m4 (BFD_CC_FOR_BUILD): Don't define CC_FOR_BUILD if it
 	is defined in the environment.
 
