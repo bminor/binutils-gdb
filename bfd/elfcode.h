@@ -1156,13 +1156,13 @@ DEFUN (elf_object_p, (abfd), bfd * abfd)
       bfd_default_set_arch_mach (abfd, bfd_arch_sparc, 0);
       break;
 
-      /* The "v9" comments are used by sanitize.  */
+      /* start-sanitize-v9 */
     case EM_SPARC64:		/* v9 */
       if (ebd->arch != bfd_arch_sparc) /* v9 */
 	goto wrong;		/* v9 */
       bfd_default_set_arch_mach (abfd, bfd_arch_sparc, 0); /* v9 */
       break;			/* v9 */
-      /* end v9 stuff */
+      /* end-sanitize-v9 */
 
     case EM_386:
       if (ebd->arch != bfd_arch_i386)
@@ -1963,11 +1963,11 @@ DEFUN (elf_compute_section_file_positions, (abfd), bfd * abfd)
 	  break;
 	case bfd_arch_sparc:
 	  i_ehdrp->e_machine = EM_SPARC;
-	  /* the v9 comments are used by sanitize; keep them */
+	  /* start-sanitize-v9 */
 #if ARCH_SIZE == 64		/* v9 */
 	  i_ehdrp->e_machine = EM_SPARC64; /* v9 */
 #endif /* v9 */
-	  /* end v9 stuff */
+	  /* end-sanitize-v9 */
 	  break;
 	case bfd_arch_i386:
 	  i_ehdrp->e_machine = EM_386;
