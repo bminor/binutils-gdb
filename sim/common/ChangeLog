@@ -1,3 +1,8 @@
+Thu Dec 10 14:14:39 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* hw-properties.c, hw-instances.c, hw-tree.c: Include
+ 	"sim-assert.h".
+
 1998-12-09  Doug Evans  <devans@casey.cygnus.com>
 
 	* sim-arange.c: Include libiberty.h, and stdlib.h if present.
