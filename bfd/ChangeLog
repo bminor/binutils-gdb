@@ -1,3 +1,15 @@
+Wed Jan  3 19:42:47 1996  Michael Meissner  <meissner@wogglebug.tiac.net>
+
+	* elf32-ppc.c (ppc_elf_relocate_section): Make @GOT relocations
+	work.
+	(ppc_elf_howto_raw): Just use bfd_elf_generic_reloc for all howto
+	relocs, since ppc_elf_relocate_section handles the linker case.
+	(ppc_elf_{addr16_ha,got16,toc16,brtaken}_reloc): Delete, no longer
+	used.
+	(ppc_elf_{addr16_ha,got16,toc16,brtaken}_inner): Merge these into
+	ppc_elf_relocate_section since that is now the only caller.
+	(ppc_elf_relocate_section): Ditto.
+
 Wed Jan  3 15:11:30 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coffcode.h (coff_write_object_contents): If we don't know the
