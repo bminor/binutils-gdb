@@ -58,6 +58,9 @@
 #include "alpha-opcode.h"
 #include "subsegs.h"
 
+/* @@ Will a simple 0x8000 work here?  If not, why not?  */
+#define GP_ADJUSTMENT	(0x8000 - 0x10)
+
 /* These are exported to relaxing code, even though we don't do any
    relaxing on this processor currently.  */
 const relax_typeS md_relax_table[1];
@@ -175,7 +178,7 @@ const char comment_chars[] = "#";
    first line of the input file.  This is because the compiler outputs
    #NO_APP at the beginning of its output. */
 /* Also note that '/*' will always start a comment */
-const char line_comment_chars[] = "#";
+const char line_comment_chars[] = "#!";
 
 /* Chars that can be used to separate mant from exp in floating point nums */
 const char EXP_CHARS[] = "eE";
@@ -335,7 +338,6 @@ tc_gen_reloc (sec, fixp)
      fixS *fixp;
 {
   arelent *reloc;
-  bfd_reloc_code_real_type code;
 
   reloc = (arelent *) bfd_alloc_by_size_t (stdoutput, sizeof (arelent));
   reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
@@ -361,13 +363,12 @@ tc_gen_reloc (sec, fixp)
     }
   assert (!fixp->fx_pcrel == !reloc->howto->pc_relative);
 
-  if (reloc->howto->pc_relative
-      && reloc->howto->pcrel_offset
-#if 1
-      && code != BFD_RELOC_ALPHA_GPDISP_HI16
-      && code != BFD_RELOC_ALPHA_GPDISP_LO16
-#endif
-    )
+  if (fixp->fx_r_type == BFD_RELOC_ALPHA_LITERAL)
+    {
+      /* fake out bfd_perform_relocation. sigh */
+      reloc->addend = -alpha_gp_value;
+    }
+  else if (reloc->howto->pc_relative && reloc->howto->pcrel_offset)
     {
       reloc->addend = fixp->fx_offset - reloc->address;
     }
@@ -577,9 +578,6 @@ md_assemble (str)
     }
 }
 
-/* @@ Will a simple 0x8000 work here?  If not, why not?  */
-#define GP_ADJUSTMENT	(0x8000 - 0x10)
-
 static void
 select_gp_value ()
 {
@@ -705,9 +703,6 @@ load_symbol_address (reg, insn)
   retval = add_to_literal_pool (insn->reloc[0].exp.X_add_symbol,
 				insn->reloc[0].exp.X_add_number,
 				lita_sec, 8);
-
-  /* @@ Get these numbers from GP setting.  */
-  retval -= GP_ADJUSTMENT;
 
   /* Now emit a LITERAL relocation for the original section.  */
   insn->reloc[0].exp.X_op = O_symbol;
@@ -1805,8 +1800,11 @@ md_apply_fix (fixP, valueP)
       return 3;
 
     case BFD_RELOC_32:
+      size = 4;
+      goto do_it;
     case BFD_RELOC_64:
-      return 42;
+      size = 8;
+      goto do_it;
     case BFD_RELOC_16:
       /* Don't want overflow checking.  */
       size = 2;
