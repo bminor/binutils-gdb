@@ -1,3 +1,10 @@
+Wed Feb 26 19:26:28 1992  Steve Chamberlain  (sac at thepub.cygnus.com)
+
+	* read.c, obj-coffbfd.c : fix h8300 specific bit rot
+
+	* expr.c (operand): if can't work out what sort of operand it is,
+	then look through FLT_CHARS for a hint.
+
 Tue Feb 25 14:17:15 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* expr.c: If an expression is single comma, then return with

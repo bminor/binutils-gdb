@@ -828,7 +828,8 @@ DEFUN_VOID(obj_coff_endef)
 	  case C_FCN:
 	    S_SET_SEGMENT(def_symbol_in_progress, SEG_E0);
 
-	    if (def_symbol_in_progress->sy_symbol.ost_entry._n._n_nptr[1][1] == 'b') { /* .bf */
+	    if (def_symbol_in_progress->sy_symbol.ost_entry._n._n_nptr[1][1] == 'b'
+		&& def_symbol_in_progress->sy_symbol.ost_entry._n._n_nptr[1][2] == 'f') { /* .bf */
 		    if (function_lineoff < 0) {
 			    fprintf(stderr, "`.bf' symbol without preceding function\n");
 			}	/* missing function symbol */
