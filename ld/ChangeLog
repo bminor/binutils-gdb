@@ -1,3 +1,12 @@
+start-sanitize-tic80
+Sun Feb  9 18:09:13 1997  Fred Fish  <fnf@cygnus.com>
+
+	* emulparams/tic80coff.sh: New (dummy) file for TIc80.
+	* scripttempl/tic80coff.sc: New (dummy) file for TIc80.
+	* Makefile.in (etic80coff.c): Add target and rule to build it.
+	* configure.tgt (tic80-*-coff): Set targ_emul to tic80coff.
+	
+end-sanitize-tic80
 Fri Jan 31 13:16:53 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/sunos.em (gld${EMULATION_NAME}_find_so): Search for

@@ -141,6 +141,8 @@ mips*vr5000-*-elf*)	targ_emul=elf32b4300 ;;
 mips*el-*-elf*)		targ_emul=elf32elmip ;;
 mips*-*-elf*)		targ_emul=elf32ebmip ;;
 mips*-*-rtems*)		targ_emul=elf32ebmip ;;
+mips*el-*-linux*)	targ_emul=elf32elmip ;;
+mips*-*-linux*)		targ_emul=elf32ebmip ;;
 mn10200-*-*)		targ_emul=mn10200 ;;
 mn10300-*-*)		targ_emul=mn10300 ;;
 alpha-*-linuxecoff*)	targ_emul=alpha targ_extra_emuls=elf64alpha
@@ -166,6 +168,9 @@ powerpcle-*-winnt*)     targ_emul=ppcpe ;;
 powerpcle-*-cygwin32)   targ_emul=ppcpe ;;
 powerpc-*-aix*)		targ_emul=aixppc ;;
 rs6000-*-aix*)		targ_emul=aixrs6 ;;
+# start-sanitize-tic80
+tic80-*-coff)		targ_emul=tic80coff ;;
+# end-sanitize-tic80
 # start-sanitize-v850
 v850-*-*)		targ_emul=v850 ;;
 # end-sanitize-v850

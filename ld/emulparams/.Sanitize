@@ -39,6 +39,14 @@ else
 	lose_these_too="${m32r_files} ${lose_these_too}"
 fi
 
+tic80_files="tic80coff.sh"
+
+if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
+	keep_these_too="${tic80_files} ${keep_these_too}"
+else
+	lose_these_too="${tic80_files} ${lose_these_too}"
+fi
+
 v850_files="v850.sh"
 
 if ( echo $* | grep keep\-v850 > /dev/null ) ; then
