@@ -40,6 +40,7 @@ archive.c
 archures.c
 bfd.c
 bfd.texinfo
+bfd.doc.ps
 bout.c
 cache.c
 coffcode.h
@@ -106,7 +107,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.12  1991/08/01 05:33:39  gnu
+# Revision 1.13  1991/08/01 14:37:51  steve
+# *** empty log message ***
+#
+# Revision 1.12  1991/08/01  05:33:39  gnu
 # Forgot one more place to remove amdcoff.c reference (sigh).
 #
 # Revision 1.11  1991/08/01  01:27:44  gnu
