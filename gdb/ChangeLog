@@ -1,3 +1,15 @@
+Tue Jul  4 10:30:22 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* infrun.c (wait_for_inferior): When we hit a breakpoint for the
+	wrong thread, make sure to write the fixed PC value into the thread
+	that stopped.  Restart all threads after single stepping over a
+	breakpoint for a different thread.
+	* breakpoint.c (set_momentary_breakpoint): Make momentary
+	breakpoints thread specific in a multi-threaded program.
+	* lynx-nat.c (child_resume): Add some comments.  Correctly
+	choose between the single and multi-threaded step and continue
+	ptrace calls.
+
 Fri Jun 30 16:15:36 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* config/h8300/h8300.mt: Renamed from h8300hms.mt.

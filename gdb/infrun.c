@@ -479,6 +479,8 @@ wait_for_inferior ()
       else
 	pid = target_wait (-1, &w);
 
+    have_waited:
+
       flush_cached_frames ();
 
       /* If it's a new process, add it to the thread database */
@@ -499,24 +501,6 @@ wait_for_inferior ()
 
 	  target_resume (-1, 0, TARGET_SIGNAL_0);
 	  continue;
-	}
-
-      stop_signal = w.value.sig;
-
-      stop_pc = read_pc_pid (pid);
-
-      if (STOPPED_BY_WATCHPOINT (w))
-	{
-	  write_pc (stop_pc - DECR_PC_AFTER_BREAK);
-
-	  remove_breakpoints ();
-	  target_resume (pid, 1, TARGET_SIGNAL_0); /* Single step */
-
-	  if (target_wait_hook)
-	    target_wait_hook (pid, &w);
-	  else
-	    target_wait (pid, &w);
-	  insert_breakpoints ();
 	}
 
       switch (w.kind)
@@ -587,6 +571,10 @@ wait_for_inferior ()
 	  break;
 	}
 
+      stop_signal = w.value.sig;
+
+      stop_pc = read_pc_pid (pid);
+
       /* See if a thread hit a thread-specific breakpoint that was meant for
 	 another thread.  If so, then step that thread past the breakpoint,
 	 and continue it.  */
@@ -599,7 +587,7 @@ wait_for_inferior ()
 	  if (!breakpoint_thread_match (stop_pc - DECR_PC_AFTER_BREAK, pid))
 	    {
 	      /* Saw a breakpoint, but it was hit by the wrong thread.  Just continue. */
-	      write_pc (stop_pc - DECR_PC_AFTER_BREAK);
+	      write_pc_pid (stop_pc - DECR_PC_AFTER_BREAK, pid);
 
 	      remove_breakpoints ();
 	      target_resume (pid, 1, TARGET_SIGNAL_0); /* Single step */
@@ -611,7 +599,9 @@ wait_for_inferior ()
 	      else
 		target_wait (pid, &w);
 	      insert_breakpoints ();
-	      target_resume (pid, 0, TARGET_SIGNAL_0);
+
+	      /* We need to restart all the threads now.  */
+	      target_resume (-1, 0, TARGET_SIGNAL_0);
 	      continue;
 	    }
 	}
@@ -702,6 +692,60 @@ wait_for_inferior ()
 	  resume (1, 0);
 	  continue;
 	}
+
+#ifdef HAVE_STEPPABLE_WATCHPOINT
+      /* It may not be necessary to disable the watchpoint to stop over
+	 it.  For example, the PA can (with some kernel cooperation) 
+	 single step over a watchpoint without disabling the watchpoint.  */
+      if (STOPPED_BY_WATCHPOINT (w))
+	{
+	  resume (1, 0);
+	  continue;
+	}
+#endif
+
+#ifdef HAVE_NONSTEPPABLE_WATCHPOINT
+      /* It is far more common to need to disable a watchpoint
+	 to step the inferior over it.  FIXME.  What else might
+	 a debug register or page protection watchpoint scheme need
+	 here?  */
+      if (STOPPED_BY_WATCHPOINT (w))
+	{
+/* At this point, we are stopped at an instruction which has attempted to write
+   to a piece of memory under control of a watchpoint.  The instruction hasn't
+   actually executed yet.  If we were to evaluate the watchpoint expression
+   now, we would get the old value, and therefore no change would seem to have
+   occurred.
+
+   In order to make watchpoints work `right', we really need to complete the
+   memory write, and then evaluate the watchpoint expression.  The following
+   code does that by removing the watchpoint (actually, all watchpoints and
+   breakpoints), single-stepping the target, re-inserting watchpoints, and then
+   falling through to let normal single-step processing handle proceed.  Since
+   this includes evaluating watchpoints, things will come to a stop in the
+   correct manner.  */
+
+	  write_pc (stop_pc - DECR_PC_AFTER_BREAK);
+
+	  remove_breakpoints ();
+	  target_resume (pid, 1, TARGET_SIGNAL_0); /* Single step */
+
+	  if (target_wait_hook)
+	    target_wait_hook (pid, &w);
+	  else
+	    target_wait (pid, &w);
+	  insert_breakpoints ();
+	  /* FIXME-maybe: is this cleaner than setting a flag?  Does it
+	     handle things like signals arriving and other things happening
+	     in combination correctly?  */
+	  goto have_waited;
+	}
+#endif
+
+#ifdef HAVE_CONTINUABLE_WATCHPOINT
+      /* It may be possible to simply continue after a watchpoint.  */
+      STOPPED_BY_WATCHPOINT (w);
+#endif
 
       stop_func_start = 0;
       stop_func_name = 0;

@@ -705,14 +705,16 @@ child_resume (pid, step, signal)
 
   errno = 0;
 
+  /* If pid == -1, then we want to step/continue all threads, else
+     we only want to step/continue a single thread.  */
   if (pid == -1)
     {
-      /* Resume all threads.  */
-
       pid = inferior_pid;
+      func = step ? PTRACE_SINGLESTEP : PTRACE_CONT;
     }
+  else
+    func = step ? PTRACE_SINGLESTEP_ONE : PTRACE_CONT_ONE;
 
-  func = step ? PTRACE_SINGLESTEP_ONE : PTRACE_CONT;
 
   /* An address of (PTRACE_ARG3_TYPE)1 tells ptrace to continue from where
      it was.  (If GDB wanted it to start some other way, we have already
