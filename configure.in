@@ -117,6 +117,7 @@ case "${host}" in
   *-*-solaris2*)          host_makefile_frag=config/mh-solaris ;;
   m68k-sun-*)		  host_makefile_frag=config/mh-sun3 ;;
   *-sun-*)		  host_makefile_frag=config/mh-sun ;;
+  *-hp-hpux[78]*)         host_makefile_frag=config/mh-hpux8 ;;
   *-hp-hpux*)             host_makefile_frag=config/mh-hpux ;;
   *-*-hiux*)              host_makefile_frag=config/mh-hpux ;;
   rs6000-*-lynxos*)	  host_makefile_frag=config/mh-lynxrs6k ;;
