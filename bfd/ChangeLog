@@ -1,3 +1,8 @@
+Mon Jul 26 08:56:16 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* configure.in: Don't look in ${srcdir} for ${target_makefile_frag};
+	the top level script has already adjusted for it.
+
 Mon Jul 26 08:09:19 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 
 	* srec.c (srec_write_symbols):  Get CR LF in the right order.
