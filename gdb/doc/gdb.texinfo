@@ -18,7 +18,7 @@
 @c %**end of header
 
 @iftex
-@smallbook
+@c @smallbook
 @c @cropmarks
 @end iftex
 
@@ -7384,8 +7384,33 @@ When you start @value{GDBN}, it automatically executes commands from its
 the init file (if any) in your home directory and then the init file
 (if any) in the current working directory.  (The init files are not
 executed if you use the @samp{-nx} option; @pxref{Mode Options,
-,Choosing modes}.)  You can also request the execution of a command
-file with the @code{source} command:
+,Choosing modes}.)
+
+@ifset GENERIC
+@cindex init file name
+On some configurations of @value{GDBN}, the init file is known by a
+different name (these are typically environments where a specialized
+form of GDB may need to coexist with other forms, hence a different name
+for the specialized version's init file).  These are the environments
+with special init file names:
+
+@itemize @bullet
+@kindex .vxgdbinit
+@item
+VxWorks (Wind River Systems real-time OS): @samp{.vxgdbinit}
+
+@kindex .os68gdbinit
+@item
+OS68K (Enea Data Systems real-time OS): @samp{.os68gdbinit}
+
+@kindex .esgdbinit
+@item
+ES-1800 (Ericsson Telecom AB M68000 emulator): @samp{.esgdbinit}
+@end itemize
+@end ifset
+
+You can also request the execution of a command file with the
+@code{source} command:
 
 @table @code
 @item source @var{filename}
