@@ -2315,14 +2315,6 @@ wait_again:
 	case PR_FAULTED:
 	  switch (what)
 	    {
-	    case FLTPRIV:
-	    case FLTILL:
-	      statval = (SIGILL << 8) | 0177;
-	      break;
-	    case FLTBPT:
-	    case FLTTRACE:
-	      statval = (SIGTRAP << 8) | 0177;
-	      break;	      
 #ifdef FLTWATCH
 	    case FLTWATCH:
 	      statval = (SIGTRAP << 8) | 0177;
@@ -2333,19 +2325,12 @@ wait_again:
 	      statval = (SIGTRAP << 8) | 0177;
 	      break;
 #endif
-	    case FLTSTACK:
-	    case FLTACCESS:
-	    case FLTBOUNDS:
-	      statval = (SIGSEGV << 8) | 0177;
-	      break;
-	    case FLTIOVF:
-	    case FLTIZDIV:
-	    case FLTFPE:
-	      statval = (SIGFPE << 8) | 0177;
-	      break;
-	    case FLTPAGE:		/* Recoverable page fault */
 	    default:
-	      error ("PIOCWSTOP, unknown why %d, what %d", why, what);
+	      /* Use the signal which the kernel assigns.  This is better than
+		 trying to second-guess it from the fault.  In fact, I suspect
+		 that FLTACCESS can be either SIGSEGV or SIGBUS.  */
+	      statval = ((pi->prstatus.pr_info.si_signo) << 8) | 0177;
+	      break;
 	    }
 	  break;
 	default:
