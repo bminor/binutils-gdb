@@ -1,3 +1,7 @@
+Thu Apr 24 00:47:20 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in (autoconf-common, autoconf-changelog): Change $* to $@.
+
 Mon Apr 21 22:57:55 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (.NOEXPORT, MAKEOVERRIDES): Moved to end, BSD make
