@@ -1,3 +1,8 @@
+Wed Aug 12 09:00:26 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
+
+	* expprint.c (dump_prefix/postfix_expression):  Don't try to print type
+	expressions.
+
 Tue Aug 11 11:33:25 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
 
 	* c-typeprint.c (c_print_type):  Don't crash if varstring is null.
