@@ -46,33 +46,6 @@ proc gdb_version {} {
 # gdb_unload -- unload a file if one is loaded
 #
 
-proc gdb_unload {} {
-    global verbose
-    global GDB
-    global prompt
-    send "file\n"
-    expect {
-	-re "No exec file now\.\r" { continue -expect }
-	-re "No symbol file now\.\r" { continue -expect }
-	-re "A program is being debugged already..*Kill it\? \(y or n\) $"\
-	    { send "y\n"
-		if $verbose>1 then {
-		    send_user "\t\tKilling previous program being debugged\n"
-		}
-	    continue -expect
-	}
-	-re "Discard symbol table from .*\? \(y or n\) $" {
-	    send "y\n"
-	    continue -expect
-	}
-	-re "$prompt $" {}
-	timeout {
-	    perror "Couldn't unload file in $GDB (timed out)."
-	    return -1
-	}
-    }
-}
-
 #
 # gdb_load -- load a file into the debugger.
 #             return a -1 if anything goes wrong.
