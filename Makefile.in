@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #
-# Last Mod Wed Nov 13 01:00:48 PST 1991, by rich@cygnus.com
+# Last Mod Wed Nov 13 15:08:42 PST 1991, by rich@rtl.cygnus.com
 #
 # $Id$
 
@@ -196,6 +196,18 @@ install-fixed-includes: force
 				$(MAKE) install-fixed-includes) ; \
 	else true; \
 	fi
+
+dir.info: force
+	gen-info-dir . > dir.info.new
+	mv -f dir.info.new dir.info
+
+generate-dir: force
+	- rm -f menus
+	for i in `find . -name \*.info -print` ; do \
+		echo Frobbing $$i... ; \
+		sed -e '1,/START-INFO-DIR-ENTRY/d' \
+			-e '/END-INFO-DIR-ENTRY/,$$d' $$i >> menus ; \
+	done
 
 etags tags: TAGS
 
