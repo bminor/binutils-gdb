@@ -1,3 +1,14 @@
+2003-03-19  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf64-sparc.c (struct sparc64_elf_section_data): Add reloc_count
+	field.
+	(canon_reloc_count): Define.
+	(sparc64_elf_slurp_one_reloc_table, sparc64_elf_slurp_reloc_table,
+	sparc64_elf_canonicalize_dynamic_reloc): Use it instead of
+	reloc_count.
+	(sparc64_elf_canonicalize_reloc): New routine.
+	(bfd_elf64_canonicalize_reloc): Define.
+
 2003-03-18  Jakub Jelinek  <jakub@redhat.com>
 
 	* elfxx-ia64.c (elfNN_ia64_relax_section): Handle relaxation

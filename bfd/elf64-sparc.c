@@ -96,6 +96,8 @@ static bfd_boolean sparc64_elf_slurp_one_reloc_table
   PARAMS ((bfd *, asection *, Elf_Internal_Shdr *, asymbol **, bfd_boolean));
 static bfd_boolean sparc64_elf_slurp_reloc_table
   PARAMS ((bfd *, asection *, asymbol **, bfd_boolean));
+static long sparc64_elf_canonicalize_reloc
+  PARAMS ((bfd *, asection *, arelent **, asymbol **));
 static long sparc64_elf_canonicalize_dynamic_reloc
   PARAMS ((bfd *, arelent **, asymbol **));
 static void sparc64_elf_write_relocs PARAMS ((bfd *, asection *, PTR));
@@ -311,6 +313,17 @@ sparc64_elf_info_to_howto (abfd, cache_ptr, dst)
   cache_ptr->howto = &sparc64_elf_howto_table[ELF64_R_TYPE_ID (dst->r_info)];
 }
 
+struct sparc64_elf_section_data
+{
+  struct bfd_elf_section_data elf;
+  unsigned int do_relax, reloc_count;
+};
+
+#define sec_do_relax(sec) \
+  ((struct sparc64_elf_section_data *) elf_section_data (sec))->do_relax
+#define canon_reloc_count(sec) \
+  ((struct sparc64_elf_section_data *) elf_section_data (sec))->reloc_count
+
 /* Due to the way how we handle R_SPARC_OLO10, each entry in a SHT_RELA
    section can represent up to two relocs, we must tell the user to allocate
    more space.  */
@@ -361,7 +374,7 @@ sparc64_elf_slurp_one_reloc_table (abfd, asect, rel_hdr, symbols, dynamic)
 
   native_relocs = (bfd_byte *) allocated;
 
-  relents = asect->relocation + asect->reloc_count;
+  relents = asect->relocation + canon_reloc_count (asect);
 
   entsize = rel_hdr->sh_entsize;
   BFD_ASSERT (entsize == sizeof (Elf64_External_Rela));
@@ -416,7 +429,7 @@ sparc64_elf_slurp_one_reloc_table (abfd, asect, rel_hdr, symbols, dynamic)
 	relent->howto = &sparc64_elf_howto_table[ELF64_R_TYPE_ID (rela.r_info)];
     }
 
-  asect->reloc_count += relent - relents;
+  canon_reloc_count (asect) += relent - relents;
 
   if (allocated != NULL)
     free (allocated);
@@ -478,8 +491,9 @@ sparc64_elf_slurp_reloc_table (abfd, asect, symbols, dynamic)
   if (asect->relocation == NULL)
     return FALSE;
 
-  /* The sparc64_elf_slurp_one_reloc_table routine increments reloc_count.  */
-  asect->reloc_count = 0;
+  /* The sparc64_elf_slurp_one_reloc_table routine increments
+     canon_reloc_count.  */
+  canon_reloc_count (asect) = 0;
 
   if (!sparc64_elf_slurp_one_reloc_table (abfd, asect, rel_hdr, symbols,
 					  dynamic))
@@ -492,6 +506,32 @@ sparc64_elf_slurp_reloc_table (abfd, asect, symbols, dynamic)
 
   return TRUE;
 }
+
+/* Canonicalize the relocs.  */
+
+static long
+sparc64_elf_canonicalize_reloc (abfd, section, relptr, symbols)
+     bfd *abfd;
+     sec_ptr section;
+     arelent **relptr;
+     asymbol **symbols;
+{
+  arelent *tblptr;
+  unsigned int i;
+  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+
+  if (! bed->s->slurp_reloc_table (abfd, section, symbols, FALSE))
+    return -1;
+
+  tblptr = section->relocation;
+  for (i = 0; i < canon_reloc_count (section); i++)
+    *relptr++ = tblptr++;
+
+  *relptr = NULL;
+
+  return canon_reloc_count (section);
+}
+
 
 /* Canonicalize the dynamic relocation entries.  Note that we return
    the dynamic relocations as a single block, although they are
@@ -528,7 +568,7 @@ sparc64_elf_canonicalize_dynamic_reloc (abfd, storage, syms)
 
 	  if (! sparc64_elf_slurp_reloc_table (abfd, s, syms, TRUE))
 	    return -1;
-	  count = s->reloc_count;
+	  count = canon_reloc_count (s);
 	  p = s->relocation;
 	  for (i = 0; i < count; i++)
 	    *storage++ = p++;
@@ -1918,15 +1958,6 @@ sparc64_elf_size_dynamic_sections (output_bfd, info)
   return TRUE;
 }
 
-struct sparc64_elf_section_data
-{
-  struct bfd_elf_section_data elf;
-  unsigned int do_relax;
-};
-
-#define sec_do_relax(sec) \
-  ((struct sparc64_elf_section_data *) elf_section_data (sec))->do_relax
-
 static bfd_boolean
 sparc64_elf_new_section_hook (abfd, sec)
      bfd *abfd;
@@ -3177,6 +3208,8 @@ const struct elf_size_info sparc64_elf_size_info =
   sparc64_elf_get_reloc_upper_bound
 #define bfd_elf64_get_dynamic_reloc_upper_bound \
   sparc64_elf_get_dynamic_reloc_upper_bound
+#define bfd_elf64_canonicalize_reloc \
+  sparc64_elf_canonicalize_reloc
 #define bfd_elf64_canonicalize_dynamic_reloc \
   sparc64_elf_canonicalize_dynamic_reloc
 #define bfd_elf64_bfd_reloc_type_lookup \
