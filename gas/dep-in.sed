@@ -13,6 +13,7 @@ s!@TOPDIR@/opcodes!$(srcdir)/../opcodes!g
 s!@SRCDIR@/!!g
 s! \$(srcdir)/config/te-generic\.h!!g
 s! \.\./bfd/bfd\.h!!g
+s! \.\./bfd/bfdver\.h!$(BFDVER_H)!g
 s! itbl-cpu\.h!!g
 s! itbl-parse\.h!!g
 

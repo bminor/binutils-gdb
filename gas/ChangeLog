@@ -1,3 +1,13 @@
+2002-10-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* configure.in (BFDVER_H): Set and subst.
+	* dep-in.sed: Replace bfdver.h with $(BFDVER_H).
+	* Makefile.am: Run "make dep-am".
+	(BFDVER_H): Define.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
 2002-10-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-i386.h (EXTERN_FORCE_RELOC): Define.

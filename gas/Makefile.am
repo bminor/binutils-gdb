@@ -493,6 +493,8 @@ GASLIBS = @OPCODES_LIB@ @BFDLIB@ ../libiberty/libiberty.a
 # Files to be copied away after each stage in building.
 STAGESTUFF = *.o $(noinst_PROGRAMS)
 
+BFDVER_H = @BFDVER_H@
+
 $(OBJS): @ALL_OBJ_DEPS@
 
 as_new_SOURCES = $(GAS_CFILES)
@@ -1882,11 +1884,6 @@ DEPOBJ_sh_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-sh.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
   struc-symbol.h $(INCDIR)/aout/aout64.h
-DEPOBJ_sh64_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
-  $(srcdir)/config/tc-sh64.h $(srcdir)/config/tc-sh.h \
-  $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h $(INCDIR)/coff/internal.h \
-  $(INCDIR)/coff/sh.h $(INCDIR)/coff/external.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h subsegs.h
 DEPOBJ_sh64_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-sh64.h \
@@ -2248,10 +2245,6 @@ DEP_sh_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-sh.h \
 DEP_sh_elf = $(srcdir)/config/obj-elf.h $(INCDIR)/symcat.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-sh.h
-DEP_sh64_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-sh64.h \
-  $(srcdir)/config/tc-sh.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
-  $(INCDIR)/symcat.h $(INCDIR)/coff/internal.h $(INCDIR)/coff/sh.h \
-  $(INCDIR)/coff/external.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
 DEP_sh64_elf = $(srcdir)/config/obj-elf.h $(INCDIR)/symcat.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-sh64.h \
@@ -2337,7 +2330,7 @@ BMKDEP = #DO NOT PUT ANYTHING BETWEEN THIS LINE AND THE MATCHING WARNING ABOVE.
 #MKDEP    DO NOT PUT ANYTHING BETWEEN THIS LINE AND THE MATCHING WARNING BELOW.
 app.o: app.c $(INCDIR)/symcat.h
 as.o: as.c $(INCDIR)/symcat.h subsegs.h $(INCDIR)/obstack.h \
-  output-file.h sb.h macro.h dwarf2dbg.h ../bfd/bfdver.h
+  output-file.h sb.h macro.h dwarf2dbg.h $(BFDVER_H)
 atof-generic.o: atof-generic.c $(INCDIR)/symcat.h $(INCDIR)/safe-ctype.h
 bignum-copy.o: bignum-copy.c $(INCDIR)/symcat.h
 cond.o: cond.c $(INCDIR)/symcat.h macro.h sb.h $(INCDIR)/obstack.h
