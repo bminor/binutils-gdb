@@ -1,3 +1,8 @@
+2002-05-06  Mark Kettenis  <kettenis@gnu.org>
+
+	* i387-nat.c (i387_fill_fsave): Use regcache_collect.
+	(i387_fill_fxsave): Likewise.
+
 2002-05-05  Alexandre Oliva  <aoliva@redhat.com>
 
 	* alpha-tdep.c (alpha_extract_return_value): Don't use
