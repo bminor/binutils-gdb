@@ -1,4 +1,22 @@
+Fri Mar 28 17:57:53 1997  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* Makefile.in ($(OBJDUMP_PROG)): Don't link against BFDLIB twice.
+	* configure.in: Add AC_ARG_ENABLE for commonbfdlib.  If it is set,
+	set OPCODES to empty.
+	* configure: Rebuild.
+
 Thu Mar 27 16:03:02 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	Based on patch from Marty Leisner <leisner@sdsp.mc.xerox.com>:
+	* objcopy.c: Include <utime.h> or <sys/time.h>.
+	(strip_options): Add "preserve-dates".
+	(copy_options): Likewise.
+	(copy_usage): Mention -p and --preserve-dates.
+	(strip_usage): Likewise.
+	(make_same_dates): New static function.
+	(strip_main): Handle -p.
+	(copy_main): Likewise.
+	* binutils.texi, strip.1, objcopy.1: Document new option.
 
 	addr2line.c contributed by Ulrich Lauther
 	<Ulrich.Lauther@zfe.siemens.de>:
