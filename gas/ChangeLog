@@ -1,7 +1,13 @@
+Thu Apr  8 15:15:02 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* doc/Makefile.in: update dvi, clean targets for new source 
+                           file structure
+
 Thu Apr  8 12:52:46 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* config/ho-decstatn.h: Define BROKEN_ASSERT if not __GNUC__,
 	rather than undefining know.
+	* configure.in: Match ultrix*, not just ultrix.
 
 Wed Apr  7 20:18:10 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
