@@ -391,6 +391,10 @@ DEFUN(styp_to_sec_flags, (styp_flags),
   {
     sec_flags = SEC_ALLOC;
   }
+  else if (styp_flags & STYP_INFO) 
+  {
+    sec_flags = SEC_NEVER_LOAD;
+  }
   else
   {
     sec_flags = SEC_ALLOC | SEC_LOAD;
@@ -1820,7 +1824,7 @@ DEFUN(coff_write_relocs,(abfd),
       n.r_type = q->howto->type;
 #endif
       coff_swap_reloc_out(abfd, &n, &dst);
-      bfd_write((PTR) &n, 1, RELSZ, abfd);
+      bfd_write((PTR) &dst, 1, RELSZ, abfd);
     }
   }
 }

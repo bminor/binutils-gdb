@@ -1,3 +1,4 @@
+#define BFD_AOUT_DEBUG
 /* BFD semi-generic back-end for a.out binaries
    Copyright (C) 1990-1991 Free Software Foundation, Inc.
    Written by Cygnus Support.
@@ -108,6 +109,15 @@ DESCRIPTION
 
 */
 
+/* Some assumptions:
+   * Any BFD with D_PAGED set is ZMAGIC, and vice versa.
+     Doesn't matter what the setting of WP_TEXT is on output, but it'll
+     get set on input.
+   * Any BFD with D_PAGED clear and WP_TEXT set is NMAGIC.
+   * Any BFD with both flags clear is OMAGIC.
+   (Just want to make these explicit, so the conditions tested in this
+   file make sense if you're more familiar with a.out than with BFD.)  */
+
 #define KEEPIT flags
 #define KEEPITTYPE int
 
@@ -122,7 +132,7 @@ struct external_exec;
 #include "aout/stab_gnu.h"
 #include "aout/ar.h"
 
-void (*bfd_error_trap)();
+extern void (*bfd_error_trap)();
 
 /*
 SUBSECTION
@@ -140,8 +150,10 @@ DESCRIPTION
 */
 #define CTOR_TABLE_RELOC_IDX 2
 
+#define howto_table_ext NAME(aout,ext_howto_table)
+#define howto_table_std NAME(aout,std_howto_table)
 
-static  reloc_howto_type howto_table_ext[] = 
+reloc_howto_type howto_table_ext[] = 
 {
   HOWTO(RELOC_8,      0,  0,  	8,  false, 0, true,  true,0,"8",      false, 0,0x000000ff, false),
   HOWTO(RELOC_16,     0,  1, 	16, false, 0, true,  true,0,"16",      false, 0,0x0000ffff, false),
@@ -172,7 +184,7 @@ static  reloc_howto_type howto_table_ext[] =
 
 /* Convert standard reloc records to "arelent" format (incl byte swap).  */
 
-static  reloc_howto_type howto_table_std[] = {
+reloc_howto_type howto_table_std[] = {
   /* type           rs   size bsz  pcrel bitpos  abs ovrf sf name    part_inpl   readmask  setmask  pcdone */
 HOWTO( 0,	       0,  0,  	8,  false, 0, true,  true,0,"8",	true, 0x000000ff,0x000000ff, false),
 HOWTO( 1,	       0,  1, 	16, false, 0, true,  true,0,"16",	true, 0x0000ffff,0x0000ffff, false),
@@ -185,7 +197,7 @@ HOWTO( 7,	       0,  3, 	64, true,  0, false, true,0,"DISP64",   true, 0xfeedfac
 };
 
 
-bfd_error_vector_type bfd_error_vector;
+extern bfd_error_vector_type bfd_error_vector;
 
 /*
 SUBSECTION
@@ -318,8 +330,18 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
   if (execp->a_syms) 
     abfd->flags |= HAS_LINENO | HAS_DEBUG | HAS_SYMS | HAS_LOCALS;
 
-  if (N_MAGIC (*execp) == ZMAGIC) abfd->flags |= D_PAGED;
-  if (N_MAGIC (*execp) == NMAGIC) abfd->flags |= WP_TEXT;
+  if (N_MAGIC (*execp) == ZMAGIC)
+    {
+      abfd->flags |= D_PAGED|WP_TEXT;
+      adata(abfd).magic = z_magic;
+    }
+  else if (N_MAGIC (*execp) == NMAGIC)
+    {
+      abfd->flags |= WP_TEXT;
+      adata(abfd).magic = n_magic;
+    }
+  else
+    adata(abfd).magic = o_magic;
 
   bfd_get_start_address (abfd) = execp->a_entry;
 
@@ -569,11 +591,246 @@ DEFUN(NAME(aout,set_arch_mach),(abfd, arch, machine),
       enum bfd_architecture arch AND
       unsigned long machine)
 {
+  bfd_arch_info_type *ainfo;
+
   bfd_default_set_arch_mach(abfd, arch, machine);
   if (arch != bfd_arch_unknown &&
       NAME(aout,machine_type) (arch, machine) == M_UNKNOWN)
     return false;		/* We can't represent this type */
+
+  BFD_ASSERT (&adata(abfd) != 0);
+  ainfo = bfd_get_arch_info (abfd);
+  if (ainfo->segment_size)
+    adata(abfd).segment_size = ainfo->segment_size;
+  if (ainfo->page_size)
+    adata(abfd).page_size = ainfo->page_size;
   return true;			/* We're easy ... */
+}
+
+boolean
+DEFUN (NAME (aout,adjust_sizes_and_vmas), (abfd, text_size, text_end),
+       bfd *abfd AND bfd_size_type *text_size AND file_ptr *text_end)
+{
+  struct internal_exec *execp = exec_hdr (abfd);
+  if ((obj_textsec (abfd) == NULL) || (obj_datasec (abfd) == NULL)) 
+    {
+      bfd_error = invalid_operation;
+      return false;
+    }
+  if (adata(abfd).magic != undecided_magic) return true;
+  obj_textsec(abfd)->_raw_size = 	      
+    align_power(obj_textsec(abfd)->_raw_size,
+		obj_textsec(abfd)->alignment_power);
+
+  *text_size = obj_textsec (abfd)->_raw_size;
+  /* Rule (heuristic) for when to pad to a new page.  Note that there
+   * are (at least) two ways demand-paged (ZMAGIC) files have been
+   * handled.  Most Berkeley-based systems start the text segment at
+   * (PAGE_SIZE).  However, newer versions of SUNOS start the text
+   * segment right after the exec header; the latter is counted in the
+   * text segment size, and is paged in by the kernel with the rest of
+   * the text. */
+
+  /* This perhaps isn't the right way to do this, but made it simpler for me
+     to understand enough to implement it.  Better would probably be to go
+     right from BFD flags to alignment/positioning characteristics.  But the
+     old code was sloppy enough about handling the flags, and had enough
+     other magic, that it was a little hard for me to understand.  I think
+     I understand it better now, but I haven't time to do the cleanup this
+     minute.  */
+  if (adata(abfd).magic == undecided_magic)
+    {
+      if (abfd->flags & D_PAGED)
+	/* whether or not WP_TEXT is set */
+	adata(abfd).magic = z_magic;
+      else if (abfd->flags & WP_TEXT)
+	adata(abfd).magic = n_magic;
+      else
+	adata(abfd).magic = o_magic;
+    }
+
+#ifdef BFD_AOUT_DEBUG /* requires gcc2 */
+#if __GNUC__ >= 2
+  fprintf (stderr, "%s text=<%x,%x,%x> data=<%x,%x,%x> bss=<%x,%x,%x>\n",
+	   ({ char *str;
+	      switch (adata(abfd).magic) {
+	      case n_magic: str = "NMAGIC"; break;
+	      case o_magic: str = "OMAGIC"; break;
+	      case z_magic: str = "ZMAGIC"; break;
+	      default: abort ();
+	      }
+	      str;
+	    }),
+	   obj_textsec(abfd)->vma, obj_textsec(abfd)->_raw_size, obj_textsec(abfd)->alignment_power,
+	   obj_datasec(abfd)->vma, obj_datasec(abfd)->_raw_size, obj_datasec(abfd)->alignment_power,
+	   obj_bsssec(abfd)->vma, obj_bsssec(abfd)->_raw_size, obj_bsssec(abfd)->alignment_power);
+#endif
+#endif
+
+  switch (adata(abfd).magic)
+    {
+    case o_magic:
+      {
+	file_ptr pos = adata (abfd).exec_bytes_size;
+	bfd_vma vma = 0;
+	int pad;
+
+	obj_textsec(abfd)->filepos = pos;
+	pos += obj_textsec(abfd)->_raw_size;
+	vma += obj_textsec(abfd)->_raw_size;
+	if (!obj_datasec(abfd)->user_set_vma)
+	  {
+	    /* ?? Does alignment in the file image really matter? */
+	    pad = align_power (vma, obj_datasec(abfd)->alignment_power) - vma;
+	    obj_textsec(abfd)->_raw_size += pad;
+	    pos += pad;
+	    vma += pad;
+	    obj_datasec(abfd)->vma = vma;
+	  }
+	obj_datasec(abfd)->filepos = pos;
+	pos += obj_datasec(abfd)->_raw_size;
+	vma += obj_datasec(abfd)->_raw_size;
+	if (!obj_bsssec(abfd)->user_set_vma)
+	  {
+	    pad = align_power (vma, obj_bsssec(abfd)->alignment_power) - vma;
+	    obj_datasec(abfd)->_raw_size += pad;
+	    pos += pad;
+	    vma += pad;
+	    obj_bsssec(abfd)->vma = vma;
+	  }
+	obj_bsssec(abfd)->filepos = pos;
+	execp->a_text = obj_textsec(abfd)->_raw_size;
+	execp->a_data = obj_datasec(abfd)->_raw_size;
+	execp->a_bss = obj_bsssec(abfd)->_raw_size;
+	N_SET_MAGIC (*execp, OMAGIC);
+      }
+      break;
+    case z_magic:
+      {
+	bfd_size_type data_pad, text_pad;
+	file_ptr text_end;
+	CONST struct aout_backend_data *abdp;
+	int ztih;
+	bfd_vma data_vma;
+
+	abdp = aout_backend_info (abfd);
+	ztih = abdp && abdp->text_includes_header;
+	obj_textsec(abfd)->filepos = (ztih
+				      ? adata(abfd).exec_bytes_size
+				      : adata(abfd).page_size);
+	if (! obj_textsec(abfd)->user_set_vma)
+	  /* ?? Do we really need to check for relocs here?  */
+	  obj_textsec(abfd)->vma = ((abfd->flags & HAS_RELOC)
+				    ? 0
+				    : (ztih
+				       ? (abdp->default_text_vma
+					  + adata(abfd).exec_bytes_size)
+				       : abdp->default_text_vma));
+	/* Could take strange alignment of text section into account here?  */
+
+	/* Find start of data.  */
+	text_end = obj_textsec(abfd)->filepos + obj_textsec(abfd)->_raw_size;
+	text_pad = BFD_ALIGN (text_end, adata(abfd).page_size) - text_end;
+	obj_textsec(abfd)->_raw_size += text_pad;
+	text_end += text_pad;
+
+	if (!obj_datasec(abfd)->user_set_vma)
+	  {
+	    bfd_vma vma;
+	    vma = obj_textsec(abfd)->vma + obj_textsec(abfd)->_raw_size;
+	    obj_datasec(abfd)->vma = BFD_ALIGN (vma, adata(abfd).segment_size);
+	  }
+	data_vma = obj_datasec(abfd)->vma;
+	if (abdp && abdp->zmagic_mapped_contiguous)
+	  {
+	    text_pad = (obj_datasec(abfd)->vma
+			- obj_textsec(abfd)->vma
+			- obj_textsec(abfd)->_raw_size);
+	    obj_textsec(abfd)->_raw_size += text_pad;
+	  }
+	obj_datasec(abfd)->filepos = (obj_textsec(abfd)->filepos
+				      + obj_textsec(abfd)->_raw_size);
+
+	/* Fix up exec header while we're at it.  */
+	execp->a_text = obj_textsec(abfd)->_raw_size;
+	if (ztih)
+	  execp->a_text += adata(abfd).exec_bytes_size;
+	N_SET_MAGIC (*execp, ZMAGIC);
+	/* Spec says data section should be rounded up to page boundary.  */
+	/* If extra space in page is left after data section, fudge data
+	   in the header so that the bss section looks smaller by that
+	   amount.  We'll start the bss section there, and lie to the OS.  */
+	obj_datasec(abfd)->_raw_size
+	  = align_power (obj_datasec(abfd)->_raw_size,
+			 obj_bsssec(abfd)->alignment_power);
+	execp->a_data = BFD_ALIGN (obj_datasec(abfd)->_raw_size,
+				   adata(abfd).page_size);
+	data_pad = execp->a_data - obj_datasec(abfd)->_raw_size;
+	/* This code is almost surely botched.  It'll only get tested
+	   for the case where the application does explicitly set the VMA
+	   of the BSS section.  */
+	if (obj_bsssec(abfd)->user_set_vma
+	    && (obj_bsssec(abfd)->vma
+		> BFD_ALIGN (obj_datasec(abfd)->vma
+			     + obj_datasec(abfd)->_raw_size,
+			     adata(abfd).page_size)))
+	  {
+	    /* Can't play with squeezing into data pages; fix this code.  */
+	    abort ();
+	  }
+	if (!obj_bsssec(abfd)->user_set_vma)
+	  obj_bsssec(abfd)->vma = (obj_datasec(abfd)->vma
+				   + obj_datasec(abfd)->_raw_size);
+	if (data_pad > obj_bsssec(abfd)->_raw_size)
+	  execp->a_bss = 0;
+	else
+	  execp->a_bss = obj_bsssec(abfd)->_raw_size - data_pad;
+      }
+      break;
+    case n_magic:
+      {
+	CONST struct aout_backend_data *abdp;
+	file_ptr pos = adata(abfd).exec_bytes_size;
+	bfd_vma vma = 0;
+	int pad;
+
+	obj_textsec(abfd)->filepos = pos;
+	if (!obj_textsec(abfd)->user_set_vma)
+	  obj_textsec(abfd)->vma = vma;
+	else
+	  vma = obj_textsec(abfd)->vma;
+	pos += obj_textsec(abfd)->_raw_size;
+	vma += obj_textsec(abfd)->_raw_size;
+	obj_datasec(abfd)->filepos = pos;
+	if (!obj_datasec(abfd)->user_set_vma)
+	  obj_datasec(abfd)->vma = BFD_ALIGN (vma, adata(abfd).segment_size);
+	vma = obj_datasec(abfd)->vma;
+
+	/* Since BSS follows data immediately, see if it needs alignment.  */
+	vma += obj_datasec(abfd)->_raw_size;
+	pad = align_power (vma, obj_bsssec(abfd)->alignment_power) - vma;
+	obj_datasec(abfd)->_raw_size += pad;
+	pos += obj_datasec(abfd)->_raw_size;
+
+	if (!obj_bsssec(abfd)->user_set_vma)
+	  obj_bsssec(abfd)->vma = vma;
+	else
+	  vma = obj_bsssec(abfd)->vma;
+      }
+      execp->a_text = obj_textsec(abfd)->_raw_size;
+      execp->a_data = obj_datasec(abfd)->_raw_size;
+      execp->a_bss = obj_bsssec(abfd)->_raw_size;
+      N_SET_MAGIC (*execp, NMAGIC);
+      break;
+    default:
+      abort ();
+    }
+#ifdef BFD_AOUT_DEBUG
+  fprintf (stderr, "       text=<%x,%x,%x> data=<%x,%x,%x> bss=<%x,%x>\n",
+	   obj_textsec(abfd)->vma, obj_textsec(abfd)->_raw_size, obj_textsec(abfd)->filepos,
+	   obj_datasec(abfd)->vma, obj_datasec(abfd)->_raw_size, obj_datasec(abfd)->filepos,
+	   obj_bsssec(abfd)->vma, obj_bsssec(abfd)->_raw_size);
+#endif
 }
 
 /*
@@ -634,6 +891,7 @@ boolean
 {
   file_ptr text_end;
   bfd_size_type text_size;
+
   if (abfd->output_has_begun == false)
       {				/* set by bfd.c handler */
 	switch (abfd->direction)
@@ -642,55 +900,14 @@ boolean
 	    case no_direction:
 	      bfd_error = invalid_operation;
 	      return false;
-		
+
+	    case write_direction:
+	      if (NAME(aout,adjust_sizes_and_vmas) (abfd,
+						    &text_size,
+						    &text_end) == false)
+		return false;
 	    case both_direction:
 	      break;
-		
-	    case write_direction:
-	      if ((obj_textsec (abfd) == NULL) || (obj_datasec (abfd) == NULL)) 
-		  {
-		    bfd_error = invalid_operation;
-		    return false;
-		  }
-	      obj_textsec(abfd)->_raw_size = 	      
-		  align_power(obj_textsec(abfd)->_raw_size,
-			      obj_textsec(abfd)->alignment_power);
-
-	      text_size = obj_textsec (abfd)->_raw_size;
-	      /* Rule (heuristic) for when to pad to a new page.
-	       * Note that there are (at least) two ways demand-paged
-	       * (ZMAGIC) files have been handled.  Most Berkeley-based systems
-	       * start the text segment at (PAGE_SIZE).  However, newer
-	       * versions of SUNOS start the text segment right after the
-	       * exec header; the latter is counted in the text segment size,
-	       * and is paged in by the kernel with the rest of the text. */
-	      if (!(abfd->flags & D_PAGED))
-		{ /* Not demand-paged. */
-		  obj_textsec(abfd)->filepos = adata(abfd).exec_bytes_size;
-	        }
-	      else if (obj_textsec(abfd)->vma % adata(abfd).page_size
-		    < adata(abfd).exec_bytes_size)
-		{ /* Old-style demand-paged. */
-		  obj_textsec(abfd)->filepos = adata(abfd).page_size;
-	        }
-	      else
-		{ /* Sunos-style demand-paged. */
-		  obj_textsec(abfd)->filepos = adata(abfd).exec_bytes_size;
-		  text_size += adata(abfd).exec_bytes_size;
-	        }
-	      text_end = obj_textsec(abfd)->_raw_size + obj_textsec(abfd)->filepos;
-	      if (abfd->flags & (D_PAGED|WP_TEXT))
-		{
-		  bfd_size_type text_pad =
-		      BFD_ALIGN(text_size, adata(abfd).page_size)
-			 - text_size;
-	          text_end += text_pad;
-		  obj_textsec(abfd)->_raw_size += text_pad;
-		}
-	      obj_datasec(abfd)->filepos = text_end;
-	      obj_datasec(abfd)->_raw_size =
-		  align_power(obj_datasec(abfd)->_raw_size,
-			      obj_datasec(abfd)->alignment_power);
 	    }
       }
 
@@ -1162,13 +1379,13 @@ DEFUN(NAME(aout,get_symtab),(abfd, location),
 {
     unsigned int counter = 0;
     aout_symbol_type *symbase;
-    
+
     if (!NAME(aout,slurp_symbol_table)(abfd)) return 0;
-    
+
     for (symbase = obj_aout_symbols(abfd); counter++ < bfd_get_symcount (abfd);)
       *(location++) = (asymbol *)( symbase++);
     *location++ =0;
-    return bfd_get_symcount(abfd);
+    return bfd_get_symcount (abfd);
 }
 
 
@@ -1189,9 +1406,9 @@ DEFUN(NAME(aout,swap_std_reloc_out),(abfd, g, natptr),
   int r_baserel, r_jmptable, r_relative;
   unsigned int r_addend;
   asection *output_section = sym->section->output_section;
-  
+
   PUT_WORD(abfd, g->address, natptr->r_address);
-    
+
   r_length = g->howto->size ;	/* Size as a power of two */
   r_pcrel  = (int) g->howto->pc_relative; /* Relative to PC? */
   /* r_baserel, r_jmptable, r_relative???  FIXME-soon */
@@ -1203,21 +1420,21 @@ DEFUN(NAME(aout,swap_std_reloc_out),(abfd, g, natptr),
     
   /* name was clobbered by aout_write_syms to be symbol index */
 
-if (output_section == &bfd_com_section 
-    || output_section == &bfd_abs_section
-    || output_section == &bfd_und_section) 
-  {
-    /* Fill in symbol */
-    r_extern = 1;
-    r_index =  stoi((*(g->sym_ptr_ptr))->KEEPIT);
-  }
+  if (output_section == &bfd_com_section 
+      || output_section == &bfd_abs_section
+      || output_section == &bfd_und_section) 
+    {
+      /* Fill in symbol */
+      r_extern = 1;
+      r_index =  stoi((*(g->sym_ptr_ptr))->KEEPIT);
+    }
   else 
-  {
-    /* Just an ordinary section */
-    r_extern = 0;
-    r_index  = output_section->target_index;      
-  }
-    
+    {
+      /* Just an ordinary section */
+      r_extern = 0;
+      r_index  = output_section->target_index;      
+    }
+
   /* now the fun stuff */
   if (abfd->xvec->header_byteorder_big_p != false) {
       natptr->r_index[0] = r_index >> 16;

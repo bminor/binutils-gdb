@@ -104,6 +104,8 @@ DESCRIPTION
 	argument must be parenthesized; it contains all the arguments
 	to the called function. 
 
+	They make the documentation (more) unpleasant to read, so if
+	someone wants to fix this and not break the above, please do.
 
 .#define BFD_SEND(bfd, message, arglist) \
 .               ((*((bfd)->xvec->message)) arglist)
@@ -126,7 +128,7 @@ DESCRIPTION
 .typedef struct bfd_target
 .{
 
-identifies the kind of target, eg SunOS4, Ultrix, etc 
+Identifies the kind of target, eg SunOS4, Ultrix, etc.
 
 .  char *name;
 
@@ -239,7 +241,7 @@ Standard stuff.
 .                                            file_ptr, bfd_size_type));
 .  SDEF (boolean, _new_section_hook, (bfd *, sec_ptr));
 
-Symbols and reloctions
+Symbols and relocations
 
 .  SDEF (unsigned int, _get_symtab_upper_bound, (bfd *));
 .  SDEF (unsigned int, _bfd_canonicalize_symtab,
@@ -268,7 +270,7 @@ Symbols and reloctions
 .  SDEF (void, _bfd_debug_info_start, (bfd *));
 .  SDEF (void, _bfd_debug_info_end, (bfd *));
 .  SDEF (void, _bfd_debug_info_accumulate, (bfd *, struct sec  *));
-.  SDEF (bfd_byte *, _bfd_get_relocated_section_contents, (bfd*,struct bfd_seclet_struct *));
+.  SDEF (bfd_byte *, _bfd_get_relocated_section_contents, (bfd*,struct bfd_seclet_struct *, bfd_byte *data));
 .  SDEF (boolean,_bfd_relax_section,(bfd *, struct sec *, struct symbol_cache_entry **));
 Special entry points for gdb to swap in coff symbol table parts
 
@@ -329,6 +331,24 @@ Special entry points for gas to swap coff parts
 .      	PTR	in,
 .	PTR	out));
 .
+. {* See documentation on reloc types.  *}
+. SDEF (CONST struct reloc_howto_struct *,
+.       reloc_type_lookup,
+.       (bfd *abfd, bfd_reloc_code_type code));
+.
+. {* Complete and utter crock, currently used for the assembler
+.    when creating COFF files.  *}
+. SDEF (asymbol *, _bfd_make_debug_symbol, (
+.       bfd *abfd,
+.       void *ptr,
+.       unsigned long size));
+
+Data for use by back-end routines; e.g., for a.out, includes whether
+this particular target maps ZMAGIC files contiguously or with text and
+data separated.  Could perhaps also be used to eliminate some of the
+above COFF-specific fields.
+
+. PTR backend_data;
 .} bfd_target;
 
 */
@@ -397,7 +417,7 @@ bfd_target *target_vector[] = {
 	&ecoff_little_vec,
 	&ecoff_big_vec,
 	&ieee_vec,
-#if 0
+#if 1
 	/* We have no oasys tools anymore, so we can't test any of this
 	   anymore. If you want to test the stuff yourself, go ahead...
 	   steve@cygnus.com */

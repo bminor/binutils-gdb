@@ -53,6 +53,29 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 struct external_exec;
 struct internal_exec;
 
+/* Back-end information for various a.out targets.  */
+struct aout_backend_data
+{
+  /* Are ZMAGIC files mapped contiguously?  If so, the text section may
+     need more padding, if the segment size (granularity for memory access
+     control) is larger than the page size.  */
+  unsigned char zmagic_mapped_contiguous : 1;
+  /* If this flag is set, ZMAGIC/NMAGIC file headers get mapped in with the
+     text section, which starts immediately after the file header.
+     If not, the text section starts on the next page.  */
+  unsigned char text_includes_header : 1;
+
+  /* If the text section VMA isn't specified, and we need an absolute
+     address, use this as the default.  If we're producing a relocatable
+     file, zero is always used.  */
+  /* ?? Perhaps a callback would be a better choice?  Will this do anything
+     reasonable for a format that handles multiple CPUs with different
+     load addresses for each?  */
+  bfd_vma default_text_vma;
+};
+#define aout_backend_info(abfd) \
+	((CONST struct aout_backend_data *)((abfd)->xvec->backend_data))
+
 /* This is the layout in memory of a "struct exec" while we process it.
    All 'lengths' are given as a number of bytes.
    All 'alignments' are for relinkable files only;  an alignment of
@@ -92,7 +115,7 @@ enum machine_type {
   M_29K = 101,
   M_HP200 = 200,	/* HP 200 (68010) BSD binary */
   M_HP300 = (300 % 256), /* HP 300 (68020+68881) BSD binary */
-  M_HPUX = (0x20c % 256),/* HP 200/300 HPUX binary */
+  M_HPUX = (0x20c % 256)/* HP 200/300 HPUX binary */
 };
 
 #define N_DYNAMIC(exec) ((exec).a_info & 0x8000000)
@@ -154,18 +177,30 @@ struct aoutdata {
   unsigned long segment_size;
 
   unsigned exec_bytes_size;
+  unsigned vma_adjusted : 1;
+
+  enum {
+    undecided_magic = 0,
+    z_magic,
+    o_magic,
+    n_magic } magic;
 };
 
-#define	adata(bfd)		((struct aoutdata *) ((bfd)->tdata))
-#define	exec_hdr(bfd)		(adata(bfd)->hdr)
-#define	obj_aout_symbols(bfd)	(adata(bfd)->symbols)
-#define	obj_textsec(bfd)	(adata(bfd)->textsec)
-#define	obj_datasec(bfd)	(adata(bfd)->datasec)
-#define	obj_bsssec(bfd)		(adata(bfd)->bsssec)
-#define	obj_sym_filepos(bfd)	(adata(bfd)->sym_filepos)
-#define	obj_str_filepos(bfd)	(adata(bfd)->str_filepos)
-#define	obj_reloc_entry_size(bfd) (adata(bfd)->reloc_entry_size)
-#define	obj_symbol_entry_size(bfd) (adata(bfd)->symbol_entry_size)
+struct  aout_data_struct {
+    struct aoutdata a;
+    struct internal_exec e;
+};
+
+#define	adata(bfd)		((bfd)->tdata.aout_data->a)
+#define	exec_hdr(bfd)		(adata(bfd).hdr)
+#define	obj_aout_symbols(bfd)	(adata(bfd).symbols)
+#define	obj_textsec(bfd)	(adata(bfd).textsec)
+#define	obj_datasec(bfd)	(adata(bfd).datasec)
+#define	obj_bsssec(bfd)		(adata(bfd).bsssec)
+#define	obj_sym_filepos(bfd)	(adata(bfd).sym_filepos)
+#define	obj_str_filepos(bfd)	(adata(bfd).str_filepos)
+#define	obj_reloc_entry_size(bfd) (adata(bfd).reloc_entry_size)
+#define	obj_symbol_entry_size(bfd) (adata(bfd).symbol_entry_size)
 
 /* We take the address of the first element of an asymbol to ensure that the
    macro is only ever applied to an asymbol */
@@ -209,7 +244,6 @@ PROTO (boolean,	NAME(aout,find_nearest_line), (bfd *abfd, asection *section,
       CONST char **functionname_ptr, unsigned int *line_ptr));
 PROTO (int,	NAME(aout,sizeof_headers), (bfd *abfd, boolean exec));
 
-
 PROTO (void,	NAME(aout,swap_exec_header_in), (bfd *abfd,
 			 struct external_exec *raw_bytes, struct internal_exec *execp));
 
@@ -227,64 +261,17 @@ PROTO(char *, aout_stab_name, (int code));
 
 #define	aout_64_get_section_contents	bfd_generic_get_section_contents
 #define	aout_64_close_and_cleanup	bfd_generic_close_and_cleanup
+#ifndef NO_WRITE_HEADER_KLUDGE
+#define NO_WRITE_HEADER_KLUDGE 0
+#endif
 
-/* Calculate the file positions of the parts of a newly read aout header */
-#define WORK_OUT_FILE_POSITIONS(abfd, execp)				\
-  obj_textsec (abfd)->size = N_TXTSIZE(*execp);				\
-  									\
-  /* The virtual memory addresses of the sections */			\
-  obj_textsec (abfd)->vma = N_TXTADDR(*execp);				\
-  obj_datasec (abfd)->vma = N_DATADDR(*execp);			 	\
-  obj_bsssec  (abfd)->vma = N_BSSADDR(*execp);				\
-  									\
-  /* The file offsets of the sections */				\
-  obj_textsec (abfd)->filepos = N_TXTOFF (*execp);			\
-  obj_datasec (abfd)->filepos = N_DATOFF (*execp);			\
-  									\
-  /* The file offsets of the relocation info */				\
-  obj_textsec (abfd)->rel_filepos = N_TRELOFF(*execp);			\
-  obj_datasec (abfd)->rel_filepos = N_DRELOFF(*execp);			\
-									\
-  /* The file offsets of the string table and symbol table.  */		\
-  obj_sym_filepos (abfd) = N_SYMOFF (*execp);				\
-  obj_str_filepos (abfd) = N_STROFF (*execp);				\
-
-
+#ifndef WRITE_HEADERS
 #define WRITE_HEADERS(abfd, execp)					      \
       {									      \
-	if (abfd->flags & D_PAGED) 					      \
-	    {								      \
-	      execp->a_text = obj_textsec (abfd)->size;			      \
-	      /* Kludge to distinguish old- and new-style ZMAGIC.	      \
-	         The latter includes the exec header in the text size. */     \
-	      if (obj_textsec(abfd)->filepos == EXEC_BYTES_SIZE)	      \
-		execp->a_text += EXEC_BYTES_SIZE;			      \
-	      N_SET_MAGIC (*execp, ZMAGIC);				      \
-	    } 								      \
-	else 								      \
-	    {								      \
-	      execp->a_text = obj_textsec (abfd)->size;			      \
-	      if (abfd->flags & WP_TEXT)				      \
-	        { N_SET_MAGIC (*execp, NMAGIC); }			      \
-	      else							      \
-	  	{ N_SET_MAGIC(*execp, OMAGIC); }			      \
-	    }								      \
-	if (abfd->flags & D_PAGED) 					      \
-	    {								      \
-	      data_pad = ALIGN(obj_datasec(abfd)->size, PAGE_SIZE)	      \
-		  - obj_datasec(abfd)->size;				      \
-	  								      \
-	      if (data_pad > obj_bsssec(abfd)->size)			      \
-		execp->a_bss = 0;					      \
-	      else 							      \
-		execp->a_bss = obj_bsssec(abfd)->size - data_pad;	      \
-	      execp->a_data = obj_datasec(abfd)->size + data_pad;	      \
-	    }								      \
-	else 								      \
-	    {								      \
-	      execp->a_data = obj_datasec (abfd)->size;			      \
-	      execp->a_bss = obj_bsssec (abfd)->size;			      \
-	    }								      \
+	bfd_size_type text_size; /* dummy vars */			      \
+	file_ptr text_end;						      \
+	if (adata(abfd).magic == undecided_magic)			      \
+	  NAME(aout,adjust_sizes_and_vmas) (abfd, &text_size, &text_end);     \
     									      \
 	execp->a_syms = bfd_get_symcount (abfd) * EXTERNAL_NLIST_SIZE;	      \
 	execp->a_entry = bfd_get_start_address (abfd);			      \
@@ -314,3 +301,4 @@ PROTO(char *, aout_stab_name, (int code));
 	      if (!NAME(aout,squirt_out_relocs)(abfd, obj_datasec (abfd))) return false; \
 	    }								      \
       }									      
+#endif
