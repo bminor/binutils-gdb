@@ -39,6 +39,12 @@ main ()
 
   printf ("value is %d\n", value);
   printf ("my_array[2] is %d\n", my_array[2]);
+  
+  {
+    int i;
+    for (i = 0; i < 5; i++)
+      value++;
+  }
 
   return 0;
 }

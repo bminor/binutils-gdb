@@ -359,6 +359,54 @@ gdb_expect {
   timeout { fail "re-run (timeout)" }
 }
 
+#
+# Test that breakpoints-invalid is issued once and only once for
+# breakpoint ignore count changes, after annotation stopped.
+#
+send_gdb "break 46\n"
+gdb_expect {
+    -re "Breakpoint 5 at $hex: file .*$srcfile, line 46.*$gdb_prompt$" {
+	pass "break at 46"
+    }
+    -re ".*$gdb_prompt$" { fail "break at 46" }
+    timeout { fail "break at 46 (timeout)" }
+}
+
+send_gdb "ignore 5 4\n"
+gdb_expect {
+    -re "Will ignore next 4 crossings of breakpoint 5.*$gdb_prompt$" {
+	pass "ignore 5 4"
+    }
+    -re ".*$gdb_prompt$" { fail "ignore 5 4" }
+    timeout { fail "ignore 5 4 (timeout)" }
+}
+
+send_gdb "continue\n"
+gdb_expect {
+    -re ".*$srcfile:46:.*\032\032stopped\r\n\r\n\032\032breakpoints-invalid\r\n$gdb_prompt$" {
+	pass "annotate ignore count change"
+    }
+    -re ".*$gdb_prompt$" { fail "annotate ignore count change" }
+    timeout { fail "annotate ignore count change (timeout)" }
+}
+
+# check that ignore command is working, or the above can provide
+# misleading assurance ...
+
+send_gdb "next\n"
+gdb_expect {
+    -re "$gdb_prompt$" {}
+    timeout { fail "next to exit loop" }
+}
+
+send_gdb "next\n"
+gdb_expect {
+    -re ".*$srcfile:49:.*$gdb_prompt$" {
+	pass "breakpoint ignore count"
+    }
+    -re ".*$gdb_prompt$" { fail "breakpoint ignore count" }
+    timeout { fail "breakpoint ignore count (timeout)" }
+}
 
 #
 # Send a signal that is not handled; test:

@@ -1,5 +1,5 @@
 /* Data structures associated with tracepoints in GDB.
-   Copyright (C) 1997 Free Software Foundation, Inc.
+   Copyright (C) 1997, 1999 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -121,7 +121,7 @@ void (*modify_tracepoint_hook) PARAMS ((struct tracepoint *));
 void (*trace_find_hook) PARAMS ((char *arg, int from_tty));
 void (*trace_start_stop_hook) PARAMS ((int start, int from_tty));
 
-struct tracepoint *get_tracepoint_by_number PARAMS ((char **));
+struct tracepoint *get_tracepoint_by_number PARAMS ((char **, int));
 int get_traceframe_number PARAMS ((void));
 void free_actions PARAMS ((struct tracepoint *));
 enum actionline_type validate_actionline PARAMS ((char **,

@@ -14,6 +14,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "adp.h"
 #include "hsys.h"
@@ -25,6 +26,172 @@
 #include "devsw.h"
 #include "hostchan.h"
 #include "logging.h"
+
+static char *angelDebugFilename = NULL;
+static FILE *angelDebugLogFile = NULL;
+static int angelDebugLogEnable = 0;
+
+static void openLogFile ()
+{
+  time_t t;
+  struct tm lt;
+  
+  if (angelDebugFilename == NULL || *angelDebugFilename =='\0')
+    return;
+  
+  angelDebugLogFile = fopen (angelDebugFilename,"a");
+  
+  if (!angelDebugLogFile)
+    {
+      fprintf (stderr,"Error opening log file '%s'\n",angelDebugFilename);
+      perror ("fopen");
+    }
+  else
+    setlinebuf (angelDebugLogFile);
+  
+  time (&t);
+  fprintf (angelDebugLogFile,"ADP log file opened at %s\n",asctime(localtime(&t)));
+}
+
+
+static void closeLogFile (void)
+{
+  time_t t;
+  struct tm lt;
+  
+  if (!angelDebugLogFile)
+    return;
+  
+  time (&t);
+  fprintf (angelDebugLogFile,"ADP log file closed at %s\n",asctime(localtime(&t)));
+  
+  fclose (angelDebugLogFile);
+  angelDebugLogFile = NULL;
+}
+
+void DevSW_SetLogEnable (int logEnableFlag)
+{
+  if (logEnableFlag && !angelDebugLogFile)
+    openLogFile ();
+  else if (!logEnableFlag && angelDebugLogFile)
+    closeLogFile ();
+  
+  angelDebugLogEnable = logEnableFlag;
+}
+
+
+void DevSW_SetLogfile (const char *filename)
+{
+  closeLogFile ();
+  
+  if (angelDebugFilename)
+    {
+      free (angelDebugFilename);
+      angelDebugFilename = NULL;
+    }
+  
+  if (filename && *filename)
+    {
+      angelDebugFilename = strdup (filename);
+      if (angelDebugLogEnable)
+        openLogFile ();
+    }
+}
+
+
+#define WordAt(p)  ((unsigned long) ((p)[0] | ((p)[1]<<8) | ((p)[2]<<16) | ((p)[3]<<24)))
+
+static void dumpPacket(FILE *fp, char *label, struct data_packet *p)
+{
+  unsigned r;
+  int i;
+  
+  if (!fp)
+    return;
+  
+  fprintf(fp,"%s [T=%d L=%d] ",label,p->type,p->len);
+  for (i=0; i<p->len; ++i)
+    fprintf(fp,"%02x ",p->data[i]);
+  fprintf(fp,"\n");
+
+  r = WordAt(p->data+4);
+  
+  fprintf(fp,"R=%08x ",r);
+  fprintf(fp,"%s ", r&0x80000000 ? "H<-T" : "H->T");
+
+  switch ((r>>16) & 0xff)
+    {
+     case CI_PRIVATE: fprintf(fp,"CI_PRIVATE: "); break;
+     case CI_HADP: fprintf(fp,"CI_HADP: "); break;
+     case CI_TADP: fprintf(fp,"CI_TADP: "); break;
+     case CI_HBOOT: fprintf(fp,"CI_HBOOT: "); break;
+     case CI_TBOOT: fprintf(fp,"CI_TBOOT: "); break;
+     case CI_CLIB: fprintf(fp,"CI_CLIB: "); break;
+     case CI_HUDBG: fprintf(fp,"CI_HUDBG: "); break;
+     case CI_TUDBG: fprintf(fp,"CI_TUDBG: "); break;
+     case CI_HTDCC: fprintf(fp,"CI_HTDCC: "); break;
+     case CI_TTDCC: fprintf(fp,"CI_TTDCC: "); break;
+     case CI_TLOG: fprintf(fp,"CI_TLOG: "); break;
+     default:      fprintf(fp,"BadChan: "); break;
+    }
+
+  switch (r & 0xffffff)
+    {
+     case ADP_Booted: fprintf(fp," ADP_Booted "); break;
+#if defined(ADP_TargetResetIndication)
+     case ADP_TargetResetIndication: fprintf(fp," ADP_TargetResetIndication "); break;
+#endif
+     case ADP_Reboot: fprintf(fp," ADP_Reboot "); break;
+     case ADP_Reset: fprintf(fp," ADP_Reset "); break;
+#if defined(ADP_HostResetIndication)
+     case ADP_HostResetIndication: fprintf(fp," ADP_HostResetIndication "); break;
+#endif      
+     case ADP_ParamNegotiate: fprintf(fp," ADP_ParamNegotiate "); break;
+     case ADP_LinkCheck: fprintf(fp," ADP_LinkCheck "); break;
+     case ADP_HADPUnrecognised: fprintf(fp," ADP_HADPUnrecognised "); break;
+     case ADP_Info: fprintf(fp," ADP_Info "); break;
+     case ADP_Control: fprintf(fp," ADP_Control "); break;
+     case ADP_Read: fprintf(fp," ADP_Read "); break;
+     case ADP_Write: fprintf(fp," ADP_Write "); break;
+     case ADP_CPUread: fprintf(fp," ADP_CPUread "); break;
+     case ADP_CPUwrite: fprintf(fp," ADP_CPUwrite "); break;
+     case ADP_CPread: fprintf(fp," ADP_CPread "); break;
+     case ADP_CPwrite: fprintf(fp," ADP_CPwrite "); break;
+     case ADP_SetBreak: fprintf(fp," ADP_SetBreak "); break;
+     case ADP_ClearBreak: fprintf(fp," ADP_ClearBreak "); break;
+     case ADP_SetWatch: fprintf(fp," ADP_SetWatch "); break;
+     case ADP_ClearWatch: fprintf(fp," ADP_ClearWatch "); break;
+     case ADP_Execute: fprintf(fp," ADP_Execute "); break;
+     case ADP_Step: fprintf(fp," ADP_Step "); break;
+     case ADP_InterruptRequest: fprintf(fp," ADP_InterruptRequest "); break;
+     case ADP_HW_Emulation: fprintf(fp," ADP_HW_Emulation "); break;
+     case ADP_ICEbreakerHADP: fprintf(fp," ADP_ICEbreakerHADP "); break;
+     case ADP_ICEman: fprintf(fp," ADP_ICEman "); break;
+     case ADP_Profile: fprintf(fp," ADP_Profile "); break;
+     case ADP_InitialiseApplication: fprintf(fp," ADP_InitialiseApplication "); break;
+     case ADP_End: fprintf(fp," ADP_End "); break;
+     case ADP_TADPUnrecognised: fprintf(fp," ADP_TADPUnrecognised "); break;
+     case ADP_Stopped: fprintf(fp," ADP_Stopped "); break;
+     case ADP_TDCC_ToHost: fprintf(fp," ADP_TDCC_ToHost "); break;
+     case ADP_TDCC_FromHost: fprintf(fp," ADP_TDCC_FromHost "); break;
+     default: fprintf(fp," BadReason "); break;
+    }
+
+  i = 20;
+  
+  if (((r & 0xffffff) == ADP_CPUread ||
+       (r & 0xffffff) == ADP_CPUwrite) && (r&0x80000000)==0)
+    {
+      fprintf(fp,"%02x ", p->data[i]);
+      ++i;
+    }
+  
+  for (; i<p->len; i+=4)
+    fprintf(fp,"%08x ",WordAt(p->data+i));
+  
+  fprintf(fp,"\n");
+}
+
 
 /*
  * TODO: this should be adjustable - it could be done by defining
@@ -309,6 +476,10 @@ AdpErrs DevSW_Read(const DeviceDescr *device, const DevChanID type,
 #ifdef RET_DEBUG
     printf("got a complete packet\n");
 #endif
+    
+    if (angelDebugLogEnable)
+      dumpPacket(angelDebugLogFile,"rx:",&ds->ds_activeread.dc_packet);
+
     enqueue_packet(ds);
     *packet = Adp_removeFromQueue(&ds->ds_readqueue[type]);
     return adp_ok;
@@ -380,6 +551,10 @@ AdpErrs DevSW_Write(const DeviceDescr *device, Packet *packet, DevChanID type)
      * we can take this packet - set things up, then try to get rid of it
      */
     initialise_write(dc, packet, type);
+  
+    if (angelDebugLogEnable)
+      dumpPacket(angelDebugLogFile,"tx:",&dc->dc_packet);
+  
     flush_packet(device, dc);
 
     return adp_ok;

@@ -23,6 +23,7 @@
 
 extern void breakpoints_changed PARAMS ((void));
 
+extern void annotate_ignore_count_change (void);
 extern void annotate_breakpoint PARAMS ((int));
 extern void annotate_catchpoint PARAMS ((int));
 extern void annotate_watchpoint PARAMS ((int));

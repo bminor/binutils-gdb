@@ -137,7 +137,7 @@ static void
 condition_command PARAMS ((char *, int));
 
 static int
-get_number PARAMS ((char **));
+get_number_trailer PARAMS ((char **, int));
 
 void
 set_breakpoint_count PARAMS ((int));
@@ -271,12 +271,12 @@ static int executing_breakpoint_commands;
    ALL_BREAKPOINTS_SAFE does so even if the statment deletes the current
    breakpoint.  */
 
-#define ALL_BREAKPOINTS(b)  for (b = breakpoint_chain; b; b = b->next)
+#define ALL_BREAKPOINTS(B)  for (B = breakpoint_chain; B; B = B->next)
 
-#define ALL_BREAKPOINTS_SAFE(b,tmp)	\
-	for (b = breakpoint_chain;	\
-	     b? (tmp=b->next, 1): 0;	\
-	     b = tmp)
+#define ALL_BREAKPOINTS_SAFE(B,TMP)	\
+	for (B = breakpoint_chain;	\
+	     B ? (TMP=B->next, 1): 0;	\
+	     B = TMP)
 
 /* True if SHIFT_INST_REGS defined, false otherwise.  */
 
@@ -403,12 +403,16 @@ int default_breakpoint_line;
 
    Currently the string can either be a number or "$" followed by the name
    of a convenience variable.  Making it an expression wouldn't work well
-   for map_breakpoint_numbers (e.g. "4 + 5 + 6").  */
+   for map_breakpoint_numbers (e.g. "4 + 5 + 6").
+   
+   TRAILER is a character which can be found after the number; most
+   commonly this is `-'.  If you don't want a trailer, use \0.  */ 
 static int
-get_number (pp)
+get_number_trailer (pp, trailer)
      char **pp;
+     int trailer;
 {
-  int retval;
+  int retval = 0;	/* default */
   char *p = *pp;
 
   if (p == NULL)
@@ -428,11 +432,13 @@ get_number (pp)
       strncpy (varname, start, p - start);
       varname[p - start] = '\0';
       val = value_of_internalvar (lookup_internalvar (varname));
-      if (TYPE_CODE (VALUE_TYPE (val)) != TYPE_CODE_INT)
-	error (
- "Convenience variables used to specify breakpoints must have integer values."
-	  );
-      retval = (int) value_as_long (val);
+      if (TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_INT)
+	retval = (int) value_as_long (val);
+      else
+	{
+	  printf_filtered ("Convenience variable must have integer value.\n");
+	  retval = 0;
+	}
     }
   else
     {
@@ -442,16 +448,115 @@ get_number (pp)
 	++p;
       if (p == *pp)
 	/* There is no number here.  (e.g. "cond a == b").  */
-	error_no_arg ("breakpoint number");
-      retval = atoi (*pp);
+	{
+	  /* Skip non-numeric token */
+	  while (*p && !isspace((int) *p))
+	    ++p;
+	  /* Return zero, which caller must interpret as error. */
+	  retval = 0;
+	}
+      else
+	retval = atoi (*pp);
     }
-  if (!(isspace (*p) || *p == '\0'))
-    error ("breakpoint number expected");
+  if (!(isspace (*p) || *p == '\0' || *p == trailer))
+    {
+      /* Trailing junk: return 0 and let caller print error msg. */
+      while (!(isspace (*p) || *p == '\0' || *p == trailer))
+	++p;
+      retval = 0;
+    }
   while (isspace (*p))
     p++;
   *pp = p;
   return retval;
 }
+
+/* Like get_number_trailer, but don't allow a trailer.  */
+int
+get_number (pp)
+     char **pp;
+{
+  return get_number_trailer (pp, '\0');
+}
+
+/* Parse a number or a range.
+ * A number will be of the form handled by get_number.
+ * A range will be of the form <number1> - <number2>, and 
+ * will represent all the integers between number1 and number2,
+ * inclusive.
+ *
+ * While processing a range, this fuction is called iteratively;
+ * At each call it will return the next value in the range.
+ *
+ * At the beginning of parsing a range, the char pointer PP will
+ * be advanced past <number1> and left pointing at the '-' token.
+ * Subsequent calls will not advance the pointer until the range
+ * is completed.  The call that completes the range will advance
+ * pointer PP past <number2>.
+ */
+
+int 
+get_number_or_range (pp)
+     char **pp;
+{
+  static int last_retval, end_value;
+  static char *end_ptr;
+  static int in_range = 0;
+
+  if (**pp != '-')
+    {
+      /* Default case: pp is pointing either to a solo number, 
+	 or to the first number of a range.  */
+      last_retval = get_number_trailer (pp, '-');
+      if (**pp == '-')
+	{
+	  char **temp;
+
+	  /* This is the start of a range (<number1> - <number2>).
+	     Skip the '-', parse and remember the second number,
+	     and also remember the end of the final token.  */
+
+	  temp = &end_ptr; 
+	  end_ptr = *pp + 1; 
+	  while (isspace ((int) *end_ptr))
+	    end_ptr++;	/* skip white space */
+	  end_value = get_number (temp);
+	  if (end_value < last_retval) 
+	    {
+	      error ("inverted range");
+	    }
+	  else if (end_value == last_retval)
+	    {
+	      /* degenerate range (number1 == number2).  Advance the
+		 token pointer so that the range will be treated as a
+		 single number.  */ 
+	      *pp = end_ptr;
+	    }
+	  else
+	    in_range = 1;
+	}
+    }
+  else if (! in_range)
+    error ("negative value");
+  else
+    {
+      /* pp points to the '-' that betokens a range.  All
+	 number-parsing has already been done.  Return the next
+	 integer value (one greater than the saved previous value).
+	 Do not advance the token pointer 'pp' until the end of range
+	 is reached.  */
+
+      if (++last_retval == end_value)
+	{
+	  /* End of range reached; advance token pointer.  */
+	  *pp = end_ptr;
+	  in_range = 0;
+	}
+    }
+  return last_retval;
+}
+
+
 
 /* condition N EXP -- set break condition of breakpoint N to EXP.  */
 
@@ -469,6 +574,8 @@ condition_command (arg, from_tty)
 
   p = arg;
   bnum = get_number (&p);
+  if (bnum == 0)
+    error ("Bad breakpoint argument: '%s'", arg);
 
   ALL_BREAKPOINTS (b)
     if (b->number == bnum)
@@ -525,6 +632,9 @@ commands_command (arg, from_tty)
 
   p = arg;
   bnum = get_number (&p);
+  if (bnum == 0)
+    error ("bad breakpoint number: '%s'", arg);
+
   if (p && *p)
     error ("Unexpected extra arguments following breakpoint number.");
 
@@ -842,8 +952,13 @@ insert_breakpoints ()
 	if (within_current_scope)
 	  {
 	    /* Evaluate the expression and cut the chain of values
-	       produced off from the value chain.  */
+	       produced off from the value chain.
+
+	       Make sure the value returned isn't lazy; we use
+	       laziness to determine what memory GDB actually needed
+	       in order to compute the value of the expression.  */
 	    v = evaluate_expression (b->exp);
+	    VALUE_CONTENTS(v);
 	    value_release_to_mark (mark);
 
 	    b->val_chain = v;
@@ -852,8 +967,11 @@ insert_breakpoints ()
 	    /* Look at each value on the value chain.  */
 	    for (; v; v = v->next)
 	      {
-		/* If it's a memory location, then we must watch it.  */
-		if (v->lval == lval_memory)
+		/* If it's a memory location, and GDB actually needed
+                   its contents to evaluate the expression, then we
+                   must watch it.  */
+		if (VALUE_LVAL (v) == lval_memory
+		    && ! VALUE_LAZY (v))
 		  {
 		    CORE_ADDR addr;
 		    int len, type;
@@ -1198,7 +1316,8 @@ remove_breakpoint (b, is)
 	{
 	  /* For each memory reference remove the watchpoint
 	     at that address.  */
-	  if (v->lval == lval_memory)
+	  if (VALUE_LVAL (v) == lval_memory
+	      && ! VALUE_LAZY (v))
 	    {
 	      CORE_ADDR addr;
 	      int len, type;
@@ -2333,7 +2452,8 @@ bpstat_stop_status (pc, not_a_breakpoint)
 	  continue;
 	for (v = b->val_chain; v; v = v->next)
 	  {
-	    if (v->lval == lval_memory)
+	    if (VALUE_LVAL (v) == lval_memory
+		&& ! VALUE_LAZY (v))
 	      {
 		CORE_ADDR vaddr;
 
@@ -2420,6 +2540,7 @@ bpstat_stop_status (pc, not_a_breakpoint)
 	else if (b->ignore_count > 0)
 	  {
 	    b->ignore_count--;
+	    annotate_ignore_count_change ();
 	    bs->stop = 0;
 	  }
 	else
@@ -4694,21 +4815,46 @@ can_use_hardware_watchpoint (v)
   if (!can_use_hw_watchpoints)
     return 0;
 
-  /* Make sure all the intermediate values are in memory.  Also make sure
-     we found at least one memory expression.  Guards against watch 0x12345,
-     which is meaningless, but could cause errors if one tries to insert a 
-     hardware watchpoint for the constant expression.  */
+  /* Make sure that the value of the expression depends only upon
+     memory contents, and values computed from them within GDB.  If we
+     find any register references or function calls, we can't use a
+     hardware watchpoint.
+
+     The idea here is that evaluating an expression generates a series
+     of values, one holding the value of every subexpression.  (The
+     expression a*b+c has five subexpressions: a, b, a*b, c, and
+     a*b+c.)  GDB's values hold almost enough information to establish
+     the criteria given above --- they identify memory lvalues,
+     register lvalues, computed values, etcetera.  So we can evaluate
+     the expression, and then scan the chain of values that leaves
+     behind to decide whether we can detect any possible change to the
+     expression's final value using only hardware watchpoints.
+
+     However, I don't think that the values returned by inferior
+     function calls are special in any way.  So this function may not
+     notice that an expression involving an inferior function call
+     can't be watched with hardware watchpoints.  FIXME.  */
   for (; v; v = v->next)
     {
-      if (v->lval == lval_memory)
+      if (VALUE_LVAL (v) == lval_memory)
 	{
-	  CORE_ADDR vaddr = VALUE_ADDRESS (v) + VALUE_OFFSET (v);
-	  int       len   = TYPE_LENGTH (VALUE_TYPE (v));
-
-	  if (!TARGET_REGION_OK_FOR_HW_WATCHPOINT (vaddr, len))
-	    return 0;
+	  if (VALUE_LAZY (v))
+	    /* A lazy memory lvalue is one that GDB never needed to fetch;
+	       we either just used its address (e.g., `a' in `a.b') or
+	       we never needed it at all (e.g., `a' in `a,b').  */
+	    ;
 	  else
-	    found_memory_cnt++;
+	    {
+	      /* Ahh, memory we actually used!  Check if we can cover
+                 it with hardware watchpoints.  */
+	      CORE_ADDR vaddr = VALUE_ADDRESS (v) + VALUE_OFFSET (v);
+	      int       len   = TYPE_LENGTH (VALUE_TYPE (v));
+
+	      if (!TARGET_REGION_OK_FOR_HW_WATCHPOINT (vaddr, len))
+		return 0;
+	      else
+		found_memory_cnt++;
+	    }
 	}
       else if (v->lval != not_lval && v->modifiable == 0)
 	return 0;	/* ??? What does this represent? */
@@ -6440,7 +6586,8 @@ ignore_command (args, from_tty)
     error_no_arg ("a breakpoint number");
 
   num = get_number (&p);
-
+  if (num == 0)
+    error ("bad breakpoint number: '%s'", args);
   if (*p == 0)
     error ("Second argument (specified ignore-count) is missing.");
 
@@ -6462,7 +6609,7 @@ map_breakpoint_numbers (args, function)
   register char *p = args;
   char *p1;
   register int num;
-  register struct breakpoint *b;
+  register struct breakpoint *b, *tmp;
 
   if (p == 0)
     error_no_arg ("one or more breakpoint numbers");
@@ -6471,19 +6618,25 @@ map_breakpoint_numbers (args, function)
     {
       p1 = p;
 
-      num = get_number (&p1);
-
-      ALL_BREAKPOINTS (b)
-	if (b->number == num)
+      num = get_number_or_range (&p1);
+      if (num == 0)
 	{
-	  struct breakpoint *related_breakpoint = b->related_breakpoint;
-	  function (b);
-	  if (related_breakpoint)
-	    function (related_breakpoint);
-	  goto win;
+	  warning ("bad breakpoint number at or near '%s'", p);
 	}
-      printf_unfiltered ("No breakpoint number %d.\n", num);
-    win:
+      else
+	{
+	  ALL_BREAKPOINTS_SAFE (b, tmp)
+	    if (b->number == num)
+	      {
+		struct breakpoint *related_breakpoint = b->related_breakpoint;
+		function (b);
+		if (related_breakpoint)
+		  function (related_breakpoint);
+		goto win;
+	      }
+	  printf_unfiltered ("No breakpoint number %d.\n", num);
+	win:
+	}
       p = p1;
     }
 }

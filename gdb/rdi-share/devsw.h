@@ -259,6 +259,13 @@ AdpErrs DevSW_Ioctl(const DeviceDescr *device, const int opcode, void *args);
  */
 bool DevSW_WriteFinished(const DeviceDescr *device);
 
+      
+/*
+ * set filename and enable/disable logginf of ADP packets
+ */
+void DevSW_SetLogfile(const char *filename);
+void DevSW_SetLogEnable(int logEnableFlag);
+      
 #ifdef __cplusplus
     }
 #endif

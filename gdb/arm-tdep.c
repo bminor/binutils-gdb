@@ -1698,8 +1698,8 @@ gdb_print_insn_arm (memaddr, info)
 /* Sequence of bytes for breakpoint instruction.  */
 #define ARM_LE_BREAKPOINT {0xFE,0xDE,0xFF,0xE7}		/* Recognized illegal opcodes */
 #define ARM_BE_BREAKPOINT {0xE7,0xFF,0xDE,0xFE}
-#define THUMB_LE_BREAKPOINT {0xfe,0xdf}
-#define THUMB_BE_BREAKPOINT {0xdf,0xfe}
+#define THUMB_LE_BREAKPOINT {0xbe,0xbe}       
+#define THUMB_BE_BREAKPOINT {0xbe,0xbe}       
 
 /* The following has been superseded by BREAKPOINT_FOR_PC, but
    is defined merely to keep mem-break.c happy.  */

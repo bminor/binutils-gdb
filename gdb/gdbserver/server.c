@@ -47,7 +47,7 @@ main (argc, argv)
      int argc;
      char *argv[];
 {
-  char ch, status, own_buf[2000], mem_buf[2000];
+  char ch, status, own_buf[PBUFSIZ], mem_buf[2000];
   int i = 0;
   unsigned char signal;
   unsigned int len;

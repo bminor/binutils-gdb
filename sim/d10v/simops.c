@@ -2360,7 +2360,7 @@ OP_3220 ()
 
   trace_input ("slae", OP_ACCUM, OP_REG, OP_VOID);
 
-  reg = SEXT16( GPR (OP[1]));
+  reg = SEXT16 (GPR (OP[1]));
 
   if (reg >= 17 || reg <= -17)
     {
@@ -2373,7 +2373,7 @@ OP_3220 ()
 
   if (PSW_ST && (tmp < SEXT40 (MIN32) || tmp > SEXT40 (MAX32)))
     {
-      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: value to shift 0x%x out of range.\n", tmp);
+      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: accumulator value 0x%.2x%.8lx out of range\n", ((int)(tmp >> 32) & 0xff), ((unsigned long) tmp) & 0xffffffff);
       State.exception = SIGILL;
       return;
     }

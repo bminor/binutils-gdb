@@ -287,7 +287,14 @@ extern int Unix_ReadSerial(unsigned char *buf, int n, bool block)
         return -1;
     }
     else if (err > 0 && FD_ISSET(serpfd, &fdset))
-        return read(serpfd, buf, n);
+      {
+	int s;
+
+	s = read(serpfd, buf, n);
+	if (s < 0)
+	  perror("read:");
+	return s;
+      }
     else /* err == 0 || FD_CLR(serpfd, &fdset) */
     {
         errno = ERRNO_FOR_BLOCKED_IO;

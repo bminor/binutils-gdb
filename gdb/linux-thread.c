@@ -161,13 +161,13 @@ struct linuxthreads_signal {
 };
 
 struct linuxthreads_signal linuxthreads_sig_restart = {
-  "__pthread_sig_restart", 1, 0, 0, 0
+  "__pthread_sig_restart", 1, 0, 0, 0, 0
 };
 struct linuxthreads_signal linuxthreads_sig_cancel = {
-  "__pthread_sig_cancel", 1, 0, 0, 0
+  "__pthread_sig_cancel", 1, 0, 0, 0, 0
 };
 struct linuxthreads_signal linuxthreads_sig_debug = {
-  "__pthread_sig_debug", 0, 0, 0, 0
+  "__pthread_sig_debug", 0, 0, 0, 0, 0
 };
 
 /* A table of breakpoint locations, one per PID.  */
@@ -336,10 +336,12 @@ linuxthreads_find_trap (pid, stop)
       else if (WSTOPSIG(status) != SIGSTOP)
 	wstatus[last++] = status;
       else if (stop)
-	if (found_trap)
-	  break;
-	else
-	  found_stop = 1;
+	{
+	  if (found_trap)
+	    break;
+	  else
+	    found_stop = 1;
+	}
     }
 
   /* Resend any other signals we noticed to the thread, to be received
@@ -651,10 +653,12 @@ resume_thread (pid)
   if (pid != inferior_pid
       && in_thread_list (pid)
       && linuxthreads_thread_alive (pid))
-    if (pid == linuxthreads_step_pid)
-      child_resume (pid, 1, linuxthreads_step_signo);
-    else
-      child_resume (pid, 0, TARGET_SIGNAL_0);
+    {
+      if (pid == linuxthreads_step_pid)
+	child_resume (pid, 1, linuxthreads_step_signo);
+      else
+	child_resume (pid, 0, TARGET_SIGNAL_0);
+    }
 }
 
 /* Detach a thread */
@@ -679,21 +683,23 @@ stop_thread (pid)
     int pid;
 {
   if (pid != inferior_pid)
-    if (in_thread_list (pid))
-      kill (pid, SIGSTOP);
-    else if (ptrace (PT_ATTACH, pid, (PTRACE_ARG3_TYPE) 0, 0) == 0)
-      {
-	if (!linuxthreads_attach_pending)
-	  printf_unfiltered ("[New %s]\n", target_pid_to_str (pid));
-	add_thread (pid);
-	if (linuxthreads_sig_debug.signal)
-	  /* After a new thread in glibc 2.1 signals gdb its existence,
-	     it suspends itself and wait for linuxthreads_sig_restart,
-	     now we can wake up it. */
-	  kill (pid, linuxthreads_sig_restart.signal);
-      }
-    else
-      perror_with_name ("ptrace in stop_thread");
+    {
+      if (in_thread_list (pid))
+	kill (pid, SIGSTOP);
+      else if (ptrace (PT_ATTACH, pid, (PTRACE_ARG3_TYPE) 0, 0) == 0)
+	{
+	  if (!linuxthreads_attach_pending)
+	    printf_unfiltered ("[New %s]\n", target_pid_to_str (pid));
+	  add_thread (pid);
+	  if (linuxthreads_sig_debug.signal)
+	    /* After a new thread in glibc 2.1 signals gdb its existence,
+	       it suspends itself and wait for linuxthreads_sig_restart,
+	       now we can wake up it. */
+	    kill (pid, linuxthreads_sig_restart.signal);
+	}
+      else
+	perror_with_name ("ptrace in stop_thread");
+    }
 }
 
 /* Wait for a thread */
@@ -1284,10 +1290,12 @@ linuxthreads_wait (pid, ourstatus)
 	      if (rpid > 0)
 		break;
 	      if (rpid < 0)
-		if (errno == EINTR)
-		  continue;
-		else if (save_errno != 0)
-		  break;
+		{
+		  if (errno == EINTR)
+		    continue;
+		  else if (save_errno != 0)
+		    break;
+		}
 
 	      sigsuspend(&omask);
 	    }
@@ -1364,10 +1372,12 @@ linuxthreads_wait (pid, ourstatus)
 	    {
 	      /* Skip SIGSTOP signals.  */
 	      if (!linuxthreads_pending_status (rpid))
-		if (linuxthreads_step_pid == rpid)
-		  child_resume (rpid, 1, linuxthreads_step_signo);
-		else
-		  child_resume (rpid, 0, TARGET_SIGNAL_0);
+		{
+		  if (linuxthreads_step_pid == rpid)
+		    child_resume (rpid, 1, linuxthreads_step_signo);
+		  else
+		    child_resume (rpid, 0, TARGET_SIGNAL_0);
+		}
 	      continue;
 	    }
 

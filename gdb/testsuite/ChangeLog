@@ -1,3 +1,14 @@
+1999-11-01  Stan Shebs  <shebs@andros.cygnus.com>
+
+	From Jimmy Guo  <guo@cup.hp.com>:
+	* gdb.base/annota1.exp: Add tests for annotate ignore count change.
+	* gdb.base/annota1.c: Add code for tests to work with.
+
+1999-10-26  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* gdb.base/remote.exp: New test for remote downloading settings.
+	* gdb.base/remote.c: New file with large .data.
+
 1999-10-18  Jim Blandy  <jimb@zwingli.cygnus.com>
 
 	* gdb.threads/linux-dp.c, gdb.threads/linux-dp.exp: New test suite

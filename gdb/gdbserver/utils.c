@@ -32,10 +32,12 @@ void
 perror_with_name (string)
      char *string;
 {
+#ifndef STDC_HEADERS
   extern int sys_nerr;
   extern char *sys_errlist[];
   extern int errno;
-  char *err;
+#endif
+  const char *err;
   char *combined;
 
   if (errno < sys_nerr)

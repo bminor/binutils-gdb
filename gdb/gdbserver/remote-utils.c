@@ -201,7 +201,7 @@ putpkt (buf)
 {
   int i;
   unsigned char csum = 0;
-  char buf2[2000];
+  char buf2[PBUFSIZ];
   char buf3[1];
   int cnt = strlen (buf);
   char *p;
@@ -435,10 +435,13 @@ outreg (regno, buf)
      int regno;
      char *buf;
 {
-  extern char registers[];
   int regsize = REGISTER_RAW_SIZE (regno);
 
-  *buf++ = tohex (regno >> 4);
+  if ((regno >> 12) != 0)
+    *buf++ = tohex ((regno >> 12) & 0xf);
+  if ((regno >> 8) != 0)
+    *buf++ = tohex ((regno >> 8) & 0xf);
+  *buf++ = tohex ((regno >> 4) & 0xf);
   *buf++ = tohex (regno & 0xf);
   *buf++ = ':';
   convert_int_to_ascii (&registers[REGISTER_BYTE (regno)], buf, regsize);
@@ -469,6 +472,18 @@ prepare_resume_reply (buf, status, signo)
 
   if (status == 'T')
     {
+#ifdef GDBSERVER_RESUME_REGS
+      static int gdbserver_resume_regs[] = GDBSERVER_RESUME_REGS ;
+      int i;
+      for (i = 0; 
+           i < sizeof (gdbserver_resume_regs) 
+	        / sizeof (gdbserver_resume_regs[0]);
+	   i++)
+	{
+	  int regnum = gdbserver_resume_regs[i];
+	  buf = outreg (regnum, buf);
+	}
+#else /* !defined(GDBSERVER_RESUME_REGS) */
       buf = outreg (PC_REGNUM, buf);
       buf = outreg (FP_REGNUM, buf);
       buf = outreg (SP_REGNUM, buf);
@@ -478,6 +493,7 @@ prepare_resume_reply (buf, status, signo)
 #ifdef O7_REGNUM
       buf = outreg (O7_REGNUM, buf);
 #endif
+#endif /* GDBSERVER_RESUME_REGS */
 
       /* If the debugger hasn't used any thread features, don't burden it with
          threads.  If we didn't check this, GDB 4.13 and older would choke.  */

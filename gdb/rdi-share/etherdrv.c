@@ -71,7 +71,7 @@
 
 #include "hsys.h"
 #include "devices.h"
-#include "endian.h"
+#include "angel_endian.h"
 #include "buffers.h"
 #include "hostchan.h"
 #include "params.h"
@@ -282,6 +282,10 @@ static void fetch_ports(void)
          * port on the remote target
          */
         ia->sin_port = htons(CTRL_PORT);
+#ifdef DEBUG
+	printf("CTLR_PORT=0x%04x  sin_port=0x%04x\n");
+#endif
+
         if (sendto(sock, ctrlpacket, sizeof(ctrlpacket), 0,
                        (struct sockaddr *)ia, sizeof(*ia)) < 0)
         {

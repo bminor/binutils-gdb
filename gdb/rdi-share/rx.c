@@ -19,7 +19,7 @@
 
 #include <stdarg.h>    /* ANSI varargs support */
 #include "angel.h"     /* Angel system definitions */
-#include "endian.h"    /* Endian independant memory access macros */
+#include "angel_endian.h"    /* Endian independant memory access macros */
 #include "crc.h"       /* crc generation definitions and headers */
 #include "rxtx.h"
 #include "channels.h"

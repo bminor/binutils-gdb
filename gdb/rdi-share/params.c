@@ -19,7 +19,7 @@
 
 #include "params.h"
 
-#include "endian.h"
+#include "angel_endian.h"
 #include "logging.h"
 
 

@@ -23,6 +23,9 @@
 
 #define I386_GNULINUX_TARGET
 #define HAVE_I387_REGS
+#ifdef HAVE_PTRACE_GETXFPREGS
+#define HAVE_SSE_REGS
+#endif
 
 #include "i386/tm-i386.h"
 
@@ -90,8 +93,12 @@ extern int i387_store_floating   (PTR addr, int len, long double val);
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
 #undef REGISTER_VIRTUAL_TYPE
-#define REGISTER_VIRTUAL_TYPE(N)					\
-  (IS_FP_REGNUM (N) ? builtin_type_long_double : builtin_type_int)
+#define REGISTER_VIRTUAL_TYPE(N)				\
+  (((N) == PC_REGNUM || (N) == FP_REGNUM || (N) == SP_REGNUM)	\
+   ? lookup_pointer_type (builtin_type_void)			\
+   : IS_FP_REGNUM(N) ? builtin_type_long_double			\
+   : IS_SSE_REGNUM(N) ? builtin_type_v4sf			\
+   : builtin_type_int)
 
 #endif
 

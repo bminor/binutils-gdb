@@ -36,7 +36,7 @@ int create_inferior ();
 
 /* Target-specific variables */
 
-extern char registers[];
+extern char *registers;
 
 /* Public variables in server.c */
 
@@ -71,3 +71,14 @@ void decode_M_packet PARAMS ((char *from, CORE_ADDR * mem_addr_ptr,
 /* Functions from utils.c */
 
 void perror_with_name PARAMS ((char *string));
+
+
+/* Maximum number of bytes to read/write at once.  The value here
+   is chosen to fill up a packet (the headers account for the 32).  */
+#define MAXBUFBYTES(N) (((N)-32)/2)
+
+/* Buffer sizes for transferring memory, registers, etc.  Round up PBUFSIZ to
+   hold all the registers, at least.  */
+#define	PBUFSIZ ((REGISTER_BYTES > MAXBUFBYTES (2000)) \
+		 ? (REGISTER_BYTES * 2 + 32) \
+		 : 2000)

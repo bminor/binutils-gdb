@@ -107,6 +107,18 @@ static int max_load_size;
 
 static int execute_status;
 
+/* Send heatbeat packets? */
+static int   rdi_heartbeat = 0;
+
+/* Target has ROM at address 0. */
+static int rom_at_zero = 0;
+
+/* Enable logging? */
+static int   log_enable = 0;
+
+/* Name of the log file. Default is "rdi.log". */
+static char *log_filename;
+
 /* A little list of breakpoints that have been set.  */
 
 static struct local_bp_list_entry
@@ -214,14 +226,33 @@ arm_rdi_open (name, from_tty)
 {
   int rslt, i;
   unsigned long arg1, arg2;
+  char *openArgs = NULL;
+  char *devName = NULL;
+  char *p;
 
   if (name == NULL)
     error ("To open an RDI connection, you need to specify what serial\n\
 device is attached to the remote system (e.g. /dev/ttya).");
 
+  /* split name after whitespace, pass tail as arg to open command */
+
+  devName = strdup(name);
+  p = strchr(devName,' ');
+  if (p)
+    {
+      *p = '\0';
+      ++p;
+
+      while (*p == ' ')
+	++p;
+
+      openArgs = p;
+    }
+
   /* Make the basic low-level connection.  */
 
-  rslt = Adp_OpenDevice (name, NULL, 1);
+  Adp_CloseDevice ();
+  rslt = Adp_OpenDevice (devName, openArgs, rdi_heartbeat);
 
   if (rslt != adp_ok)
     error ("Could not open device \"%s\"", name);
@@ -295,7 +326,8 @@ device is attached to the remote system (e.g. /dev/ttya).");
       printf_filtered ("RDI_open: %s\n", rdi_error_message (rslt));
     }
 
-  arg1 = 0x13b;
+  arg1 = rom_at_zero ? 0x0 : 0x13b;
+
   rslt = angel_RDI_info (RDIVector_Catch, &arg1, &arg2);
   if (rslt)
     {
@@ -967,11 +999,96 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   arm_rdi_ops.to_magic = OPS_MAGIC;
 }
 
+static void rdilogfile_command (char *arg, int from_tty)
+{
+  if (!arg || strlen (arg) == 0)
+    {
+      printf_filtered ("rdi log file is '%s'\n", log_filename);
+      return;
+    }
+  
+  if (log_filename)
+    free (log_filename);
+  
+  log_filename = strdup (arg);
+
+  Adp_SetLogfile (log_filename);
+}
+
+static void rdilogenable_command (char *args, int from_tty)
+{
+  if (!args || strlen (args) == 0)
+    {
+      printf_filtered ("rdi log is %s\n", log_enable ? "enabled" : "disabled");
+      return;
+    }
+  
+  if (!strcasecmp (args,"1") || 
+      !strcasecmp (args,"y") ||
+      !strcasecmp (args,"yes") ||
+      !strcasecmp (args,"on") ||
+      !strcasecmp (args,"t") ||
+      !strcasecmp (args,"true"))
+    Adp_SetLogEnable (log_enable=1);
+  else if (!strcasecmp (args,"0") || 
+      !strcasecmp (args,"n") ||
+      !strcasecmp (args,"no") ||
+      !strcasecmp (args,"off") ||
+      !strcasecmp (args,"f") ||
+      !strcasecmp (args,"false"))
+    Adp_SetLogEnable (log_enable=0);
+  else
+    printf_filtered ("rdilogenable: unrecognized argument '%s'\n"
+                     "              try y or n\n",args);
+}
+
 void
 _initialize_remote_rdi ()
 {
   init_rdi_ops ();
   add_target (&arm_rdi_ops);
+
+  log_filename = strdup("rdi.log");
+  Adp_SetLogfile(log_filename);
+  Adp_SetLogEnable(log_enable);
+
+  add_cmd ("rdilogfile", class_maintenance,
+	   rdilogfile_command,
+	   "Set filename for ADP packet log.\n\
+This file is used to log Angel Debugger Protocol packets.\n\
+With a single argument, sets the logfile name to that value.\n\
+Without an argument, shows the current logfile name.\n\
+See also: rdilogenable\n",
+	   &maintenancelist);
+
+  add_cmd("rdilogenable", class_maintenance,
+	   rdilogenable_command,
+	   "Set enable logging of ADP packets.\n\
+This will log ADP packets exchanged between gdb and the\n\
+rdi target device.\n\
+An argument of 1,t,true,y,yes will enable.\n\
+An argument of 0,f,false,n,no will disabled.\n\
+Withough an argument, it will display current state.\n",
+	   &maintenancelist);
+
+  add_show_from_set
+    (add_set_cmd ("rdiromatzero", no_class,
+		  var_boolean, (char *) &rom_at_zero,
+		  "Set target has ROM at addr 0.\n\
+A true value disables vector catching, false enables vector catching.\n\
+This is evaluated at the time the 'target rdi' command is executed\n",
+		  &setlist),
+    &showlist);
+
+  add_show_from_set
+    (add_set_cmd ("rdiheartbeat", no_class,
+		  var_boolean, (char *) &rdi_heartbeat,
+		  "Set enable for ADP heartbeat packets.\n\
+I don't know why you would want this. If you enable them,\n\
+it will confuse ARM and EPI JTAG interface boxes as well\n\
+as the Angel Monitor.\n",
+		  &setlist),
+    &showlist);
 }
 
 /* A little dummy to make linking with the library succeed. */

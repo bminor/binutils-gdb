@@ -89,9 +89,10 @@ READLINE_DEP = $$(READLINE_DIR)
 
 # All the includes used for CFLAGS and for lint.
 # -I. for config files.
+# -I.. for gdb's config files (especially config.h)
 # -I${srcdir} possibly for regex.h also.
 # -I${srcdir}/config for more generic config files.
-INCLUDE_CFLAGS = -I. -I${srcdir} -I${srcdir}/.. -I${srcdir}/../config -I$(INCLUDE_DIR)
+INCLUDE_CFLAGS = -I. -I.. -I${srcdir} -I${srcdir}/.. -I${srcdir}/../config -I$(INCLUDE_DIR)
 
 # M{H,T}_CFLAGS, if defined, has host- and target-dependent CFLAGS
 # from the config/ directory.
@@ -103,7 +104,7 @@ GLOBAL_CFLAGS = ${MT_CFLAGS} ${MH_CFLAGS}
 CFLAGS = -g
 # INTERNAL_CFLAGS is the aggregate of all other *CFLAGS macros.
 INTERNAL_CFLAGS = ${CFLAGS} ${GLOBAL_CFLAGS} ${PROFILE_CFLAGS} \
-	${BFD_CFLAGS} ${INCLUDE_CFLAGS}
+	${INCLUDE_CFLAGS} ${BFD_CFLAGS} -DGDBSERVER
 
 # LDFLAGS is specifically reserved for setting from the command line
 # when running make.

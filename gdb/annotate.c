@@ -40,6 +40,8 @@ void (*annotate_signalled_hook) PARAMS ((void));
 void (*annotate_signal_hook) PARAMS ((void));
 void (*annotate_exited_hook) PARAMS ((void));
 
+static int ignore_count_changed = 0;
+
 static void
 print_value_flags (t)
      struct type *t;
@@ -57,7 +59,22 @@ breakpoints_changed ()
     {
       target_terminal_ours ();
       printf_unfiltered ("\n\032\032breakpoints-invalid\n");
+      if (ignore_count_changed)
+	ignore_count_changed = 0;	/* Avoid multiple break annotations. */
     }
+}
+
+/* The GUI needs to be informed of ignore_count changes, but we don't
+   want to provide successive multiple breakpoints-invalid messages
+   that are all caused by the fact that the ignore count is changing
+   (which could keep the GUI very busy).  One is enough, after the
+   target actually "stops". */
+
+void
+annotate_ignore_count_change (void)
+{
+  if (annotation_level > 1)
+    ignore_count_changed = 1;
 }
 
 void
@@ -108,6 +125,11 @@ annotate_stopped ()
     {
       if (annotation_level > 1)
 	printf_filtered ("\n\032\032stopped\n");
+    }
+  if (annotation_level > 1 && ignore_count_changed)
+    {
+      ignore_count_changed = 0;
+      breakpoints_changed ();
     }
 }
 

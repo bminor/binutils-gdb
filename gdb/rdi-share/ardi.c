@@ -27,13 +27,13 @@
 #undef uint
 
 
-#include "endian.h"
+#include "angel_endian.h"
 #include "ardi.h"
 #include "buffers.h"
 #include "channels.h"
 #include "hostchan.h"
 #include "host.h"
-#include "bytesex.h"
+#include "angel_bytesex.h"
 #include "dbg_cp.h"
 #include "adp.h"
 #include "hsys.h"
@@ -1300,7 +1300,7 @@ static int HandleStoppedMessage(Packet *packet, void *stateptr) {
     stopped_info->stopped_status = RDIError_NoError;
     break;
   default:
-    stopped_info->stopped_status = RDIError_NoError;
+    stopped_info->stopped_status = RDIError_Error;
     break;
   }
   return RDIError_NoError;

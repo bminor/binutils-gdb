@@ -361,7 +361,7 @@ struct objfile
     int num_sections;
 
     /* These pointers are used to locate the section table, which
-       among other thigs, is used to map pc addresses into sections.
+       among other things, is used to map pc addresses into sections.
        SECTIONS points to the first entry in the table, and
        SECTIONS_END points to the first location past the last entry
        in the table.  Currently the table is stored on the

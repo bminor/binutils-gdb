@@ -1,3 +1,8 @@
+Mon Oct 18 18:03:24 MDT 1999	Diego Novillo <dnovillo@cygnus.com>
+
+	* simops.c (OP_3220): Fix trace output for illegal accumulator
+	message.
+
 1999-09-14  Nick Clifton  <nickc@cygnus.com>
 
 	* simops.c: Disable setting of DM bit in PSW.

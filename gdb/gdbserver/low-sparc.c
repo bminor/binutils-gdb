@@ -37,7 +37,8 @@
 
 /***************Begin MY defs*********************/
 int quit_flag = 0;
-char registers[REGISTER_BYTES];
+static char my_registers[REGISTER_BYTES];
+char *registers = my_registers;
 
 /* Index within `registers' of the first byte of the space for
    register N.  */

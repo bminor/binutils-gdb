@@ -29,7 +29,7 @@
 #include "ardi.h"
 #include "buffers.h"
 #include "channels.h"        /* Channel interface. */
-#include "endian.h"
+#include "angel_endian.h"
 #include "logging.h"         /* Angel support functions. */
 #include "msgbuild.h"
 #include "sys.h"    

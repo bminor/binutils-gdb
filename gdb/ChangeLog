@@ -1,3 +1,277 @@
+1999-11-01  Michael Snyder <msnyder@cygnus.com>
+	    Tom Tromey  <tromey@cygnus.com>
+
+	* tracepoint.h (get_tracepoint_by_number): Updated declaration.
+	* tracepoint.c (get_tracepoint_by_number): Added `multi_p'
+	argument.  Now uses get_number_or_range and get_number.
+	(trace_pass_command): Allow a tracepoint range.
+	* breakpoint.h (get_number, get_number_or_range): Declare.
+	* breakpoint.c (get_number_trailer): New function.
+	(get_number): Rewrote to use get_number_trailer.
+	(get_number_or_range): New function.
+	(condition_command): Check `get_number' return value.
+	(commands_command): Likewise.
+	(ignore_command): Likewise.
+	(map_breakpoint_numbers): Use get_number_or_range.
+
+1999-11-01  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* remote-rdi.c (_initialize_remote_rdi): Make log commands
+	subcommands of maintenance. Remove improper identation from
+	command documentation.
+
+1999-11-01  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	From Grant Edwards <grante@visi.com>:
+	* rdi-share/etherdrv.c (fetch_ports): Print out additional TCP/IP
+	port information in ethernet driver if the DEBUG flag is set.
+	* rdi-share/hostchan.c (Adp_addToQueue): Changed #if statement in
+	hostchan.c to avoid compiler complaint when DEBUG macro was
+	undefined.
+	* rdi-share/unixcomm.c (Unix_ReadSerial): Print system error code
+	if read() system call fails.
+
+1999-11-01  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* rdi-share/bytesex.h: Deleted. Conflicts with a system header file
+	on some systems like Linux Red Hat 5.2.
+        * rdi-share/angel_bytesex.h: New file. Replaces the above.
+        * rdi-share/bytesex.c: Deleted. Name changed to match the header
+	mentioned above (this is the implementation file).
+        * rdi-share/angel_bytesex.c: New file. Replaces the above.
+        * rdi-share/Makefile.am: Reflect above changes.
+        * rdi-share/Makefile.in: Reflect above changes.
+
+1999-11-01  Jimmy Guo  <guo@cup.hp.com>
+
+	* annotate.c (breakpoints_changed, annotate_ignore_count_change,
+ 	annotate_stopped): Provide annotation for breakpoint ignore_count
+ 	changes but only provide once at annotate_stopped time for
+ 	sucessive ignore_count triggered breakpoint changes, to make GUIs
+ 	happy yet lazy.
+	* annotate.h (annotate_ignore_count_change): Declare.
+	* breakpoint.c (bpstat_stop_status): Call
+	annotate_ignore_count_change when ignore_count changes.
+
+1999-11-01  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	From Grant Edwards <grante@visi.com>:
+	* rdi-share/ardi.c (HandleStoppedMessage): Changed code that
+	handles the "stop" message so that unrecognized errors are
+	returned as "Error" rather than "NoError".  The old code resulted
+	in some error conditions not being reported to the user.
+
+1999-11-01  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	From Grant Edwards <grante@visi.com>:
+	* remote-rdi.c (arm_rdi_open): Added a call to Adp_CloseDevice()
+	before attempting to open a connection.  This allows the user to
+	issue the "target rdi" command multiple times (in case the user
+	needs to change options or re-initialize the link).
+
+1999-11-01  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	From Grant Edwards <grante@visi.com>:
+	* rdi-share/endian.h: Deleted.  Name clash with
+	/usr/include/endian.h. This was causing the wrong  byte order to
+	be used by htons() in the RDI Ethernet driver.
+	* rdi-share/angel_endian.h: New file.  Replaces the above.
+	* rdi-share/ardi.c: Replace include to reflect the above change.
+	* rdi-share/etherdrv.c: Ditto.
+	* rdi-share/hsys.c: Ditto.
+	* rdi-share/msgbuild.c: Ditto.
+	* rdi-share/params.c: Ditto.
+	* rdi-share/rx.c: Ditto.
+	* rdi-share/tx.c: Ditto.
+        * rdi-share/Makefile.am: Reflect above changes.
+        * rdi-share/Makefile.in: Reflect above changes.
+
+1999-11-01  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	From Grant Edwards <grante@visi.com>:
+        * remote-rdi.c (_initialize_remote_rdi): Added command
+	rdilogenable. Allows the user to log ADP packets that are
+	exchanged between gdb and the target.  Both the raw packets are
+	shown and some minimal decoding is attempted. Default state is
+	disabled.
+	(_initialize_remote_rdi): Added command rdilogfile. Allows the
+	user to specify the filename to which the ADP packet log is to be
+	written. Default state is "rdi.log".
+	(rdilogenable_command): New function. Related to rdilogenable.
+	(rdilogfile_command): New function. Related to rdilogfile.
+	* rdi-share/devsw.c (openLogFile, closeLogFile,
+	DevSW_SetLogEnable, DevSW_SetLogfile, dumpPacket): New
+	functions. Implement logging.
+	(DevSW_Read): Log if requested.
+	(DevSW_Write): Log if requested.
+	* rdi-share/devsw.h: Add prototypes for DevSW_SetLogfile and
+	DevSW_SetLogEnable.
+	* rdi-share/hostchan.c (Adp_SetLogEnable, Adp_SetLogfile): New
+	functions.  Related to rdilogenable and rdilogfile.
+	* rdi-share/hostchan.h: Add prototypes for the above functions.
+
+1999-11-01  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+        From Grant Edwards <grante@visi.com>:
+        * remote-rdi.c (arm_rdi_open): Added code to split the arguments
+        to the 'target rdi' command at the first space.  The first word is
+        passed to Adp_OpenDevice as the device name, the tail is passed as
+        the "arguments" parameter.  This allows user specified baud rates
+        -- among other things that still need to be documented [e.g. (gdb)
+        target rdi /dev/ttyS1 19200]. NB: With very limited testing, the
+        ARM Embedded-ICE seems to run at 19.2K (though it is reported to
+        be unreliable above 9600), and the EPI Jeeni seems to run at
+        38.4K.
+
+1999-11-01  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	From Grant Edwards <grante@visi.com>:
+	* remote-rdi.c (_initialize_remote_rdi): Added the boolean
+	set/show variable rdiromatzero. Should be set to true if the
+	target has ROM at address 0.  If true, then gdb will not tell the
+	target to trap fetches to interrupt vectors (which are located at
+	address 0).  Using the Angel monitor, attempting to set
+	breakpoints in ROM is an error.  Using JTAG debugging of the
+	ARM7TDMI, attempting to set more than two breakpoints in ROM is an
+	error. Default state is false (vectors will be trapped) -- used to
+	be hardwired false.
+
+1999-11-01  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	From Grant Edwards <grante@visi.com>:
+	* remote-rdi.c (_initialize_remote_rdi): Added the boolean
+	set/show variable rdiheartbeat. This enables or disables ADP
+	link-check "heartbeat" packets sent by the host to the target.
+	Heartbeat packets can cause both the ARM Embedded-ICE and the EPI
+	Jeeni to malfunction: If a heartbeat packet is received by the
+	target while it is sending a packet, that packet will be aborted,
+	and the ADP protocol engine then gets very confused. Default state
+	is off -- used to hardwired on.
+
+1999-10-29  Kevin Buettner  <kevinb@cygnus.com>
+
+	* i386-linux-nat.c (dummy_sse_values): Also define for systems
+	without PTRACE_GETXFPREGS.
+
+1999-10-29  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	Hardware watchpoint fix from Eli Zaretskii <eliz@gnu.org>:
+	
+	* breakpoint.c (insert_breakpoints): Fetch the value of the
+ 	expression we need to watch.  If it's a lazy memory lvalue, then
+	we need to fetch it now, before we start the inferior again.
+	(insert_breakpoints, remove_breakpoint, bpstat_stop_status,
+ 	can_use_hardware_watchpoint): Only those values representing
+ 	memory we actually fetched need to be watched.
+
+1999-10-29  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* breakpoint.h (bpstat_print): Return 'enum print_stop_action',
+ 	not 'int'.
+
+1999-10-29  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* acconfig.h: Fix entries for HAVE_STRUCT_SAVE_STATE_T,
+ 	HAVE_STRUCT_MEMBER_SS_WIDE, and HAVE_PTRACE_GETXFPREGS.
+	* config.h.in: Regenerated.
+	
+1999-10-28  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	Fixes for warnings from Andreas Jaeger <aj@suse.de>.
+	* linux-thread.c (linuxthreads_sig_restart,
+	linuxthreads_sig_cancel, linuxthreads_sig_debug): Add missing
+	initializers to avoid gcc warnings.
+	(resume_thread): Add braces as recommended by gcc -Wparentheses.
+	(stop_thread): Likewise.
+	(linuxthreads_wait): Likewise.
+	(linuxthreads_find_trap): Likewise.
+
+1999-10-28  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* infcmd.c: Fix typo.
+
+1999-10-28  Jim Blandy  <jimb@zenia.red-bean.com>
+
+	* gdbtypes.c (init_simd_type): The upper bound to
+	create_range_type is inclusive, not exclusive.
+
+	* configure.in: Check for PTRACE_GETXFPREGS, and #define
+	HAVE_PTRACE_GETXFPREGS if we have it.
+	* acconfig.h: Add entry for HAVE_PTRACE_GETXFPREGS.
+	* configure, config.in: Regenerated.
+	* config/i386/tm-linux.h (HAVE_SSE_REGS): #define, iff the
+	configure script #defined HAVE_PTRACE_GETXFPREGS.
+	(REGISTER_VIRTUAL_TYPE): Provide the proper types for the pointer
+	registers and the SSE registers. 
+	* i386-linux-nat.c (GETREGS_SUPPLIES, GETFPREGS_SUPPLIES,
+	GETXFPREGS_SUPPLIES): New macros.
+	(have_ptrace_getxfpregs): New variable.
+	(FPREGSET_T_FPREG_ADDR): Renamed from FPREGSET_T_FPREG_OFFSET.
+	(supply_fpregset, convert_to_fpregset): Callers changed.
+	(supply_xfpregset, convert_to_xfpregset, fetch_xfpregs,
+	store_xfpregs, dummy_sse_values): New functions.
+	(fetch_inferior_registers, store_inferior_registers): Use the
+	*_SUPPLIES macros to decide how to fetch a given register.  Use
+	{fetch,store}_xfpregs and dummy_sse_values to provide access to
+	the SSE registers, on systems where they are present.
+
+1999-10-28  Kevin Buettner  <kevinb@cygnus.com>
+
+	* gdbserver/gdbreplay.c (config.h, errno.h): Include.
+	(perror_with_name): Don't declare sys_nerr, sys_errlist, or errno
+	when STDC_HEADERS is defined.
+	* gdbserver/utils.c (STDC_HEADERS): Likewise.
+
+	* gdbserver/low-hppabsd.c, gdbserver/low-linux.c,
+	gdbserver/low-lynx.c, gdbserver/low-sim.c, gdbserver/low-sparc.c,
+	gdbserver/low-sun3.c (my_registers): Declare.
+	(registers): Changed from array type to pointer type in order
+	to match declaration in inferior.h in main gdb sources.
+	* gdbserver/server.h (registers): Likewise.
+	* gdbserver/remote-utils.c (outreg): Removed declaration of
+	registers[].
+
+	* gdbserver/low-linux.c (fetch_register): Changed PTRACE_PEEKUSR to
+	PTRACE_PEEKUSER.  [Note the missing 'E'.]
+	(store_inferior_registers): Likewise for PTRACE_POKEUSER.
+
+	* gdbserver/low-linux.c (sys/ptrace.h): Move include to
+	avoid conflict with #defines coming from <sys/user.h>.
+	(sys/reg.h): Only include when HAVE_SYS_REG_H is defined.
+	(PTRACE_XFER_TYPE): Provide a default type in case
+	the target doesn't define it.
+	(fetch_register, read_inferior_memory, write_inferior_memory):
+	Use PTRACE_XFER_TYPE instead of int for ptrace() transfers.
+	(I386_GNULINUX_TARGET): Use #ifdef with this symbol instead
+	of assuming it's an x86 target when it's not a m68k target.
+	(i386_register_raw_size, i386_register_byte): Define these arrays
+	to match other changes that've been occuring to the x86 target
+	in the main gdb sources.
+	(initialize_arch): New (static) function for doing target arch
+	specific initializations.
+
+	* gdbserver/server.h (MAXBUFBYTES, PBUFSIZ): New defines
+	[actually stolen from remote.c].
+	* gdbserver/remote-utils.c (putpkt): Use PBUFSIZ to make
+	sure that buffer is big enough.
+	* gdbserver/server.c (main): Ditto.
+
+	* gdbserver/remote-utils.c (outreg): Allow register numbers
+	bigger than 255.
+	(prepare_resume_reply):  Provide alternate mechanism,
+	GDBSERVER_RESUME_REGS, for defining list of registers to send
+	to gdb.
+	* gdbserver/Makefile.in (INTERNAL_CFLAGS): Swapped order of
+	INCLUDE_CFLAGS and BFD_CFLAGS to ensure that gdb's config.h
+	gets found before bfd's config.h.  Also added -DGDBSERVER
+	switch.
+	(INCLUDE_CFLAGS): Added -I.. .
+
+1999-10-27  Nick Clifton  <nickc@cygnus.com>
+
+	* arm-tdep.c (THUMB_BE_BREAKPOINT): Change to 0xbebe.
+	(THUMB_LE_BREAKPOINT): Change to 0xbebe.
+
 Mon Oct 25 18:22:06 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote.c: Document future of compare_sections_command.

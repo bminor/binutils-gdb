@@ -375,6 +375,16 @@ struct bpstat_what
     int call_dummy;
   };
 
+/* The possible return values for print_bpstat, print_it_normal,
+   print_it_done, print_it_noop. */
+enum print_stop_action
+  {
+    PRINT_UNKNOWN = -1,
+    PRINT_SRC_AND_LOC,
+    PRINT_SRC_ONLY,
+    PRINT_NOTHING
+  };
+
 /* Tell what to do about this bpstat.  */
 struct bpstat_what bpstat_what PARAMS ((bpstat));
 
@@ -410,7 +420,7 @@ extern int bpstat_have_active_hw_watchpoints PARAMS ((void));
 /* Print a message indicating what happened.  Returns nonzero to
    say that only the source line should be printed after this (zero
    return means print the frame as well as the source line).  */
-extern int bpstat_print PARAMS ((bpstat));
+extern enum print_stop_action bpstat_print PARAMS ((bpstat));
 
 /* Return the breakpoint number of the first breakpoint we are stopped
    at.  *BSP upon return is a bpstat which points to the remaining
@@ -487,16 +497,6 @@ enum breakpoint_here
     no_breakpoint_here = 0,
     ordinary_breakpoint_here,
     permanent_breakpoint_here
-  };
-
-/* The possible return values for print_bpstat, print_it_normal,
-   print_it_done, print_it_noop. */
-enum print_stop_action
-  {
-    PRINT_UNKNOWN = -1,
-    PRINT_SRC_AND_LOC,
-    PRINT_SRC_ONLY,
-    PRINT_NOTHING
   };
 
 
@@ -617,6 +617,10 @@ enable_watchpoints_after_interactive_call_stop PARAMS ((void));
 
 
 extern void clear_breakpoint_hit_counts PARAMS ((void));
+
+extern int get_number PARAMS ((char **));
+
+extern int get_number_or_range PARAMS ((char **));
 
 /* The following are for displays, which aren't really breakpoints, but
    here is as good a place as any for them.  */

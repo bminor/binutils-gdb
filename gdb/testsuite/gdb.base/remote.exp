@@ -1,0 +1,83 @@
+#   Copyright (C) 1999 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
+
+# Please email any bugs, comments, and/or additions to this file to:
+# bug-gdb@prep.ai.mit.edu
+
+if $tracelevel then {
+    strace $tracelevel
+}
+
+set prms_id 0
+set bug_id 0
+
+
+# test only on a remote target board
+if {! [is_remote target]} {
+    return
+}
+
+
+set testfile "remote"
+set srcfile ${testfile}.c
+set binfile ${objdir}/${subdir}/${testfile}
+
+
+proc gdb_load_timed {executable writesize} {
+    global test gdb_prompt
+    set test "timed download `[file tail $executable]' ($writesize)"
+
+    if {$writesize != ""} then {
+	send_gdb "set remotewritesize $writesize\n"
+	gdb_expect 5 {
+	    -re ".*$gdb_prompt $" { }
+	    timeout { fail "$test - setting remotewritesize" ; return }
+	}
+    }
+
+    set load_begin_time [clock clicks]
+    set result [gdb_load $executable]
+    set load_end_time [clock clicks]
+    if {$result < 0} then { fail "$test - loading executable"; return }
+    verbose "$test - time [expr ($load_end_time - $load_begin_time) / 1000] ms"
+    pass $test
+}
+
+
+
+# tests
+
+gdb_start
+
+set result [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}]
+if {$result != "" } then {
+    gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+}
+
+gdb_load_timed $binfile {}
+gdb_load_timed $binfile 50
+gdb_load_timed $binfile 100
+gdb_load_timed $binfile 200
+gdb_load_timed $binfile 400
+
+# extra tests for capable targets
+if {[target_info gdb,big_rx_buffers] != ""} then {
+    gdb_load_timed $binfile 800
+    gdb_load_timed $binfile 8000
+    gdb_load_timed $binfile 80000
+}
+
+gdb_exit

@@ -28,7 +28,7 @@
 
 #include "channels.h"
 #include "buffers.h"
-#include "endian.h"     /* Endianness support macros */
+#include "angel_endian.h"     /* Endianness support macros */
 #include "msgbuild.h"   /* Header file for this source code */
 
 #ifndef UNUSED

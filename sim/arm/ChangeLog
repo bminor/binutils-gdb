@@ -1,3 +1,8 @@
+1999-10-27  Nick Clifton  <nickc@cygnus.com>
+
+	* thumbemu.c (ARMul_ThumbDecode): Accept 0xbebe as a thumb
+	breakpoint. 
+
 1999-10-08  Ulrich Drepper  <drepper@cygnus.com>
 
 	* armos.c (SWIopen): Always pass third parameter with 0666 since

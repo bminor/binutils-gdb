@@ -658,7 +658,8 @@ init_simd_type (char *name,
   memset (f, 0, sizeof (*f));
   f->loc.bitpos = 0;
   f->type = create_array_type (0, elt_type,
-			       create_range_type (0, builtin_type_int, 0, n));
+			       create_range_type (0, builtin_type_int,
+						  0, n-1));
   f->name = elt_name;
 
   /* Build a struct type with that field.  */

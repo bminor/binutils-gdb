@@ -556,6 +556,9 @@ tracepoint_operation (t, from_tty, opcode)
 {
   struct tracepoint *t2;
 
+  if (t == NULL)	/* no tracepoint operand */
+    return;
+
   switch (opcode)
     {
     case enable_op:
@@ -595,51 +598,36 @@ tracepoint_operation (t, from_tty, opcode)
     }
 }
 
-/* Utility: parse a tracepoint number and look it up in the list.  */
+/* Utility: parse a tracepoint number and look it up in the list.
+   If MULTI_P is true, there might be a range of tracepoints in ARG.  */
 struct tracepoint *
-get_tracepoint_by_number (arg)
+get_tracepoint_by_number (arg, multi_p)
      char **arg;
+     int multi_p;
 {
   struct tracepoint *t;
-  char *end, *copy;
-  value_ptr val;
+  char *instring = *arg;
   int tpnum;
 
-  if (arg == 0)
-    error ("Bad tracepoint argument");
+  if (arg == NULL)
+    error_no_arg ("tracepoint number");
 
-  if (*arg == 0 || **arg == 0)	/* empty arg means refer to last tp */
-    tpnum = tracepoint_count;
-  else if (**arg == '$')	/* handle convenience variable */
+  tpnum = multi_p ? get_number_or_range (arg) : get_number (arg);
+  if (tpnum <= 0)
     {
-      /* Make a copy of the name, so we can null-terminate it
-         to pass to lookup_internalvar().  */
-      end = *arg + 1;
-      while (isalnum ((int) *end) || *end == '_')
-	end++;
-      copy = (char *) alloca (end - *arg);
-      strncpy (copy, *arg + 1, (end - *arg - 1));
-      copy[end - *arg - 1] = '\0';
-      *arg = end;
+      printf_filtered ("bad tracepoint number at or near '%s'\n", instring);
+      return NULL;
+    }
 
-      val = value_of_internalvar (lookup_internalvar (copy));
-      if (TYPE_CODE (VALUE_TYPE (val)) != TYPE_CODE_INT)
-	error ("Convenience variable must have integral type.");
-      tpnum = (int) value_as_long (val);
-    }
-  else
-    /* handle tracepoint number */
-    {
-      tpnum = strtol (*arg, arg, 0);
-      if (tpnum == 0)		/* possible strtol failure */
-	while (**arg && !isspace ((int) **arg))
-	  (*arg)++;		/* advance to next white space, if any */
-    }
   ALL_TRACEPOINTS (t)
     if (t->number == tpnum)
     {
       return t;
     }
+
+  /* FIXME: if we are in the middle of a range we don't want to give
+     a message.  The current interface to get_number_or_range doesn't
+     allow us to discover this.  */
   printf_unfiltered ("No tracepoint number %d.\n", tpnum);
   return NULL;
 }
@@ -660,9 +648,8 @@ map_args_over_tracepoints (args, from_tty, opcode)
     while (*args)
       {
 	QUIT;			/* give user option to bail out with ^C */
-	t = get_tracepoint_by_number (&args);
-	if (t)
-	  tracepoint_operation (t, from_tty, opcode);
+	t = get_tracepoint_by_number (&args, 1);
+	tracepoint_operation (t, from_tty, opcode);
 	while (*args == ' ' || *args == '\t')
 	  args++;
       }
@@ -717,6 +704,7 @@ trace_pass_command (args, from_tty)
 {
   struct tracepoint *t1 = (struct tracepoint *) -1, *t2;
   unsigned int count;
+  int all = 0;
 
   if (args == 0 || *args == 0)
     error ("PASS command requires an argument (count + optional TP num)");
@@ -727,26 +715,34 @@ trace_pass_command (args, from_tty)
     args++;
 
   if (*args && strncasecmp (args, "all", 3) == 0)
-    args += 3;			/* skip special argument "all" */
-  else
-    t1 = get_tracepoint_by_number (&args);
-
-  if (*args)
-    error ("Junk at end of arguments.");
-
-  if (t1 == NULL)
-    return;			/* error, bad tracepoint number */
-
-  ALL_TRACEPOINTS (t2)
-    if (t1 == (struct tracepoint *) -1 || t1 == t2)
     {
-      t2->pass_count = count;
-      if (modify_tracepoint_hook)
-	modify_tracepoint_hook (t2);
-      if (from_tty)
-	printf_filtered ("Setting tracepoint %d's passcount to %d\n",
-			 t2->number, count);
+      args += 3;			/* skip special argument "all" */
+      all = 1;
+      if (*args)
+	error ("Junk at end of arguments.");
     }
+  else
+    t1 = get_tracepoint_by_number (&args, 1);
+
+  do
+    {
+      if (t1)
+	{
+	  ALL_TRACEPOINTS (t2)
+	    if (t1 == (struct tracepoint *) -1 || t1 == t2)
+	      {
+		t2->pass_count = count;
+		if (modify_tracepoint_hook)
+		  modify_tracepoint_hook (t2);
+		if (from_tty)
+		  printf_filtered ("Setting tracepoint %d's passcount to %d\n",
+				   t2->number, count);
+	      }
+	}
+      if (! all)
+	t1 = get_tracepoint_by_number (&args, 1);
+    }
+  while (*args);
 }
 
 /* ACTIONS functions: */
@@ -797,7 +793,7 @@ trace_actions_command (args, from_tty)
   char tmpbuf[128];
   char *end_msg = "End with a line saying just \"end\".";
 
-  t = get_tracepoint_by_number (&args);
+  t = get_tracepoint_by_number (&args, 0);
   if (t)
     {
       sprintf (tmpbuf, "Enter actions for tracepoint %d, one per line.",
@@ -817,10 +813,9 @@ trace_actions_command (args, from_tty)
 
       if (readline_end_hook)
 	(*readline_end_hook) ();
-
       /* tracepoints_changed () */
     }
-  /* else error, just return; */
+  /* else just return */
 }
 
 /* worker function */

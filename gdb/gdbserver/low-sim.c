@@ -28,7 +28,8 @@ extern int remote_debug;
 
 extern host_callback default_callback;	/* in sim/common/callback.c */
 
-char registers[REGISTER_BYTES] __attribute__ ((aligned));
+static char my_registers[REGISTER_BYTES] __attribute__ ((aligned));
+char * registers = my_registers;
 
 int target_byte_order;		/* used by simulator */
 

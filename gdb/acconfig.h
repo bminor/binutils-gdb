@@ -78,7 +78,10 @@
 #undef WITH_SIM
 
 /* Set to true if the save_state_t structure is present */
-#define HAVE_STRUCT_SAVE_STATE_T 0
+#undef HAVE_STRUCT_SAVE_STATE_T
 
 /* Set to true if the save_state_t structure has the ss_wide member */
-#define HAVE_STRUCT_MEMBER_SS_WIDE 0
+#undef HAVE_STRUCT_MEMBER_SS_WIDE
+
+/* Define if <sys/ptrace.h> defines the PTRACE_GETXFPREGS request.  */
+#undef HAVE_PTRACE_GETXFPREGS

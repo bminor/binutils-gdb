@@ -44,7 +44,8 @@
 #include <sys/wait.h>
 #include <sys/fpp.h>
 
-char registers[REGISTER_BYTES];
+static char my_registers[REGISTER_BYTES];
+char *registers = my_registers;
 
 #include <sys/ptrace.h>
 

@@ -45,6 +45,35 @@ static int regmap[] =
 };
 
 
+/* Which ptrace request retrieves which registers?
+   These apply to the corresponding SET requests as well.  */
+#define GETREGS_SUPPLIES(regno) \
+  (0 <= (regno) && (regno) <= 15)
+#define GETFPREGS_SUPPLIES(regno) \
+  (FP0_REGNUM <= (regno) && (regno) <= LAST_FPU_CTRL_REGNUM)
+#define GETXFPREGS_SUPPLIES(regno) \
+  (FP0_REGNUM <= (regno) && (regno) <= MXCSR_REGNUM)
+
+/* Does the current host support the GETXFPREGS request?  The header
+   file may or may not define it, and even if it is defined, the
+   kernel will return EIO if it's running on a pre-SSE processor.
+
+   My instinct is to attach this to some architecture- or
+   target-specific data structure, but really, a particular GDB
+   process can only run on top of one kernel at a time.  So it's okay
+   for this to be a simple variable.  */
+int have_ptrace_getxfpregs =
+#ifdef HAVE_PTRACE_GETXFPREGS
+  1
+#else
+  0
+#endif
+;
+
+
+
+/* Transfering the general registers between GDB, inferiors and core files.  */
+
 /* Given a pointer to a general register set in struct user format
    (gregset_t *), unpack the register contents and supply them as
    gdb's idea of the current register values. */
@@ -60,6 +89,7 @@ supply_gregset (gregsetp)
       supply_register (regi, (char *) (regp + regmap[regi]));
     }
 }
+
 
 /* Fill in a gregset_t object with selected data from a gdb-format
    register file.
@@ -82,6 +112,9 @@ convert_to_gregset (gregset_t *gregsetp,
       *(regp + regmap[regi]) = * (int *) &registers[REGISTER_BYTE (regi)];
 }
 
+
+/* Store GDB's value for REGNO in *GREGSETP.  If REGNO is -1, do all
+   of them.  */
 void
 fill_gregset (gregset_t *gregsetp,
 	      int regno)
@@ -98,8 +131,56 @@ fill_gregset (gregset_t *gregsetp,
 }
 
 
-/* Where does st(N) start in the fpregset_t structure F?  */
-#define FPREGSET_T_FPREG_OFFSET(f, n) \
+/* Read the general registers from the process, and store them
+   in registers[].  */
+static void
+fetch_regs ()
+{
+  int ret, regno;
+  gregset_t buf;
+
+  ret = ptrace (PTRACE_GETREGS, inferior_pid, 0, (int) &buf);
+  if (ret < 0)
+    {
+      warning ("Couldn't get registers");
+      return;
+    }
+
+  supply_gregset (&buf);
+}
+
+
+/* Set the inferior's general registers to the values in registers[]
+   --- but only those registers marked as valid.  */
+static void
+store_regs ()
+{
+  int ret, regno;
+  gregset_t buf;
+
+  ret = ptrace (PTRACE_GETREGS, inferior_pid, 0, (int) &buf);
+  if (ret < 0)
+    {
+      warning ("Couldn't get registers");
+      return;
+    }
+
+  convert_to_gregset (&buf, registers, register_valid);
+
+  ret = ptrace (PTRACE_SETREGS, inferior_pid, 0, (int)buf);
+  if (ret < 0)
+    {
+      warning ("Couldn't write registers");
+      return;
+    }
+}
+
+
+
+/* Transfering floating-point registers between GDB, inferiors and cores.  */
+
+/* What is the address of st(N) within the fpregset_t structure F?  */
+#define FPREGSET_T_FPREG_ADDR(f, n) \
   ((char *) &(f)->st_space + (n) * 10)
 
 /* Fill GDB's register file with the floating-point register values in
@@ -111,7 +192,7 @@ supply_fpregset (fpregset_t *fpregsetp)
 
   /* Supply the floating-point registers.  */
   for (i = 0; i < 8; i++)
-    supply_register (FP0_REGNUM + i, FPREGSET_T_FPREG_OFFSET (fpregsetp, i));
+    supply_register (FP0_REGNUM + i, FPREGSET_T_FPREG_ADDR (fpregsetp, i));
 
   supply_register (FCTRL_REGNUM, (char *) &fpregsetp->cwd);
   supply_register (FSTAT_REGNUM, (char *) &fpregsetp->swd);
@@ -151,7 +232,7 @@ convert_to_fpregset (fpregset_t *fpregsetp,
   /* Fill in the floating-point registers.  */
   for (i = 0; i < 8; i++)
     if (!valid || valid[i])
-      memcpy (FPREGSET_T_FPREG_OFFSET (fpregsetp, i),
+      memcpy (FPREGSET_T_FPREG_ADDR (fpregsetp, i),
 	      &registers[REGISTER_BYTE (FP0_REGNUM + i)],
 	      REGISTER_RAW_SIZE(FP0_REGNUM + i));
 
@@ -240,51 +321,190 @@ store_fpregs ()
     }
 }
 
+
+/* Transfering floating-point and SSE registers to and from GDB.  */
 
-/* Read the general registers from the process, and store them
-   in registers[].  */
+
+#ifdef HAVE_PTRACE_GETXFPREGS
 static void
-fetch_regs ()
+supply_xfpregset (struct user_xfpregs_struct *xfpregs)
 {
-  int ret, regno;
-  gregset_t buf;
+  int reg;
 
-  ret = ptrace (PTRACE_GETREGS, inferior_pid, 0, (int) &buf);
-  if (ret < 0)
+  /* Supply the floating-point registers.  */
+  for (reg = 0; reg < 8; reg++)
+    supply_register (FP0_REGNUM + reg, (char *) &xfpregs->st_space[reg]);
+
+  {
+    supply_register (FCTRL_REGNUM, (char *) &xfpregs->cwd);
+    supply_register (FSTAT_REGNUM, (char *) &xfpregs->swd);
+    supply_register (FTAG_REGNUM,  (char *) &xfpregs->twd);
+    supply_register (FCOFF_REGNUM, (char *) &xfpregs->fip);
+    supply_register (FDS_REGNUM,   (char *) &xfpregs->fos);
+    supply_register (FDOFF_REGNUM, (char *) &xfpregs->foo);
+  
+    /* Extract the code segment and opcode from the  "fcs" member.  */
     {
-      warning ("Couldn't get registers");
-      return;
-    }
+      long l;
+      
+      l = xfpregs->fcs & 0xffff;
+      supply_register (FCS_REGNUM, (char *) &l);
 
-  supply_gregset (&buf);
+      l = (xfpregs->fcs >> 16) & ((1 << 11) - 1);
+      supply_register (FOP_REGNUM, (char *) &l);
+    }
+  }
+
+  /* Supply the SSE registers.  */
+  for (reg = 0; reg < 8; reg++)
+    supply_register (XMM0_REGNUM + reg, (char *) &xfpregs->xmm_space[reg]);
+  supply_register (MXCSR_REGNUM, (char *) &xfpregs->mxcsr);
 }
 
 
-/* Set the inferior's general registers to the values in registers[]
-   --- but only those registers marked as valid.  */
 static void
-store_regs ()
+convert_to_xfpregset (struct user_xfpregs_struct *xfpregs,
+		      char *gdb_regs,
+		      signed char *valid)
 {
-  int ret, regno;
-  gregset_t buf;
+  int reg;
 
-  ret = ptrace (PTRACE_GETREGS, inferior_pid, 0, (int) &buf);
-  if (ret < 0)
-    {
-      warning ("Couldn't get registers");
-      return;
-    }
+  /* Fill in the floating-point registers.  */
+  for (reg = 0; reg < 8; reg++)
+    if (!valid || valid[reg])
+      memcpy (&xfpregs->st_space[reg],
+	      &registers[REGISTER_BYTE (FP0_REGNUM + reg)],
+	      REGISTER_RAW_SIZE(FP0_REGNUM + reg));
 
-  convert_to_gregset (&buf, registers, register_valid);
+#define fill(MEMBER, REGNO)						\
+  if (! valid || valid[(REGNO)])					\
+    memcpy (&xfpregs->MEMBER, &registers[REGISTER_BYTE (REGNO)],	\
+	    sizeof (xfpregs->MEMBER))
 
-  ret = ptrace (PTRACE_SETREGS, inferior_pid, 0, (int)buf);
-  if (ret < 0)
-    {
-      warning ("Couldn't write registers");
-      return;
-    }
+  fill (cwd, FCTRL_REGNUM);
+  fill (swd, FSTAT_REGNUM);
+  fill (twd, FTAG_REGNUM);
+  fill (fip, FCOFF_REGNUM);
+  fill (foo, FDOFF_REGNUM);
+  fill (fos, FDS_REGNUM);
+
+#undef fill
+
+  if (! valid || valid[FCS_REGNUM])
+    xfpregs->fcs
+      = ((xfpregs->fcs & ~0xffff)
+	 | (* (int *) &registers[REGISTER_BYTE (FCS_REGNUM)] & 0xffff));
+
+  if (! valid || valid[FOP_REGNUM])
+    xfpregs->fcs
+      = ((xfpregs->fcs & 0xffff)
+	 | ((*(int *) &registers[REGISTER_BYTE (FOP_REGNUM)] & ((1 << 11) - 1))
+	    << 16));
+
+  /* Fill in the XMM registers.  */
+  for (reg = 0; reg < 8; reg++)
+    if (! valid || valid[reg])
+      memcpy (&xfpregs->xmm_space[reg],
+	      &registers[REGISTER_BYTE (XMM0_REGNUM + reg)],
+	      REGISTER_RAW_SIZE (XMM0_REGNUM + reg));
 }
 
+
+/* Make a PTRACE_GETXFPREGS request, and supply all the register
+   values that yields to GDB.  */
+static int
+fetch_xfpregs ()
+{
+  int ret;
+  struct user_xfpregs_struct xfpregs;
+
+  if (! have_ptrace_getxfpregs) 
+    return 0;
+
+  ret = ptrace (PTRACE_GETXFPREGS, inferior_pid, 0, &xfpregs);
+  if (ret == -1)
+    {
+      if (errno == EIO)
+	{
+	  have_ptrace_getxfpregs = 0;
+	  return 0;
+	}
+
+      warning ("couldn't read floating-point and SSE registers.");
+      return 0;
+    }
+
+  supply_xfpregset (&xfpregs);
+  return 1;
+}
+
+
+/* Send all the valid register values in GDB's register file covered
+   by the PTRACE_SETXFPREGS request to the inferior.  */
+static int
+store_xfpregs ()
+{
+  int ret;
+  struct user_xfpregs_struct xfpregs;
+
+  if (! have_ptrace_getxfpregs)
+    return 0;
+
+  ret = ptrace (PTRACE_GETXFPREGS, inferior_pid, 0, &xfpregs);
+  if (ret == -1)
+    {
+      if (errno == EIO)
+	{
+	  have_ptrace_getxfpregs = 0;
+	  return 0;
+	}
+
+      warning ("couldn't read floating-point and SSE registers.");
+      return 0;
+    }
+
+  convert_to_xfpregset (&xfpregs, registers, register_valid);
+
+  if (ptrace (PTRACE_SETXFPREGS, inferior_pid, 0, &xfpregs) < 0)
+    {
+      warning ("Couldn't write floating-point and SSE registers.");
+      return 0;
+    }
+
+  return 1;
+}
+
+
+/* Fill the XMM registers in the register file with dummy values.  For
+   cases where we don't have access to the XMM registers.  I think
+   this is cleaner than printing a warning.  For a cleaner solution,
+   we should gdbarchify the i386 family.  */
+static void
+dummy_sse_values ()
+{
+  /* C doesn't have a syntax for NaN's, so write it out as an array of
+     longs.  */
+  static long dummy[4] = { 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff };
+  static long mxcsr = 0x1f80;
+  int reg;
+
+  for (reg = 0; reg < 8; reg++)
+    supply_register (XMM0_REGNUM + reg, (char *) dummy);
+  supply_register (MXCSR_REGNUM, (char *) &mxcsr);
+}
+
+#else
+
+/* Stub versions of the above routines, for systems that don't have
+   PTRACE_GETXFPREGS.  */
+static int store_xfpregs () { return 0; }
+static int fetch_xfpregs () { return 0; }
+static void dummy_sse_values () {}
+
+#endif
+
+
+/* Transferring arbitrary registers between GDB and inferior.  */
 
 /* Fetch registers from the child process.
    Fetch all if regno == -1, otherwise fetch all ordinary
@@ -294,11 +514,42 @@ store_regs ()
 void
 fetch_inferior_registers (int regno)
 {
-  if (regno < NUM_GREGS || regno == -1)
-    fetch_regs ();
+  /* Use the xfpregs requests whenever possible, since they transfer
+     more registers in one system call, and we'll cache the results.
+     But remember that fetch_xfpregs can fail, and return zero.  */
+  if (regno == -1)
+    {
+      fetch_regs ();
+      if (fetch_xfpregs ())
+	return;
+      fetch_fpregs ();
+      return;
+    }
 
-  if (regno >= NUM_GREGS || regno == -1)
-    fetch_fpregs ();
+  if (GETREGS_SUPPLIES (regno))
+    {
+      fetch_regs ();
+      return;
+    }
+
+  if (GETXFPREGS_SUPPLIES (regno))
+    {
+      if (fetch_xfpregs ())
+	return;
+
+      /* Either our processor or our kernel doesn't support the SSE
+	 registers, so read the FP registers in the traditional way,
+	 and fill the SSE registers with dummy values.  It would be
+	 more graceful to handle differences in the register set using
+	 gdbarch.  Until then, this will at least make things work
+	 plausibly.  */
+      fetch_fpregs ();
+      dummy_sse_values ();
+      return;
+    }
+
+  internal_error ("i386-linux-nat.c (fetch_inferior_registers): "
+		  "got request for bad register number %d", regno);
 }
 
 
@@ -312,13 +563,42 @@ void
 store_inferior_registers (regno)
      int regno;
 {
-  if (regno < NUM_GREGS || regno == -1)
-    store_regs ();
+  /* Use the xfpregs requests whenever possible, since they transfer
+     more registers in one system call.  But remember that
+     fetch_xfpregs can fail, and return zero.  */
+  if (regno == -1)
+    {
+      store_regs ();
+      if (store_xfpregs ())
+	return;
+      store_fpregs ();
+      return;
+    }
 
-  if (regno >= NUM_GREGS || regno == -1)
-    store_fpregs ();
+  if (GETREGS_SUPPLIES (regno))
+    {
+      store_regs ();
+      return;
+    }
+
+  if (GETXFPREGS_SUPPLIES (regno))
+    {
+      if (store_xfpregs ())
+	return;
+
+      /* Either our processor or our kernel doesn't support the SSE
+	 registers, so just write the FP registers in the traditional way.  */
+      store_fpregs ();
+      return;
+    }
+
+  internal_error ("i386-linux-nat.c (store_inferior_registers): "
+		  "got request to store bad register number %d", regno);
 }
 
+
+
+/* Calling functions in shared libraries.  */
 
 /* Find the minimal symbol named NAME, and return both the minsym
    struct and its objfile.  This probably ought to be in minsym.c, but

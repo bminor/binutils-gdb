@@ -325,6 +325,8 @@ ARMul_ThumbDecode (state,pc,tinstr,ainstr)
                      : 0xE28DDF00)              /* ADD */
                     | (tinstr & 0x007F);        /* off7 */
         }
+      else if ((tinstr & 0x0F00) == 0x0e00)
+	* ainstr = 0xEF000000 | SWI_Breakpoint;
       else
         {
           /* Format 14 */

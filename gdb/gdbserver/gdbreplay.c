@@ -19,6 +19,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#include "config.h"
 #include <stdio.h>
 #include <sys/file.h>
 #include <netinet/in.h>
@@ -28,6 +29,7 @@
 #include <signal.h>
 #include <ctype.h>
 #include <fcntl.h>
+#include <errno.h>
 
 /* Sort of a hack... */
 #define EOL (EOF - 1)
@@ -42,10 +44,12 @@ void
 perror_with_name (string)
      char *string;
 {
+#ifndef STDC_HEADERS
   extern int sys_nerr;
   extern char *sys_errlist[];
   extern int errno;
-  char *err;
+#endif
+  const char *err;
   char *combined;
 
   err = (errno < sys_nerr) ? sys_errlist[errno] : "unknown error";
