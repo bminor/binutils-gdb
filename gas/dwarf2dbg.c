@@ -341,9 +341,15 @@ out_end_sequence ()
 	}
       else
 	{
-	  delta = addr - ls.sm.addr;
+	  delta = (addr - ls.sm.addr) / DWARF2_LINE_MIN_INSN_LENGTH;
 	  if (delta > 0)
-	    gen_addr_line (0, delta / DWARF2_LINE_MIN_INSN_LENGTH);
+	    {
+	      /* Advance address without updating the line-debug
+		 matrix---the end_sequence entry is used only to tell
+		 the debugger the end of the sequence.*/
+	      out_opcode (DW_LNS_advance_pc);
+	      out_uleb128 (delta);
+	    }
 	}
     }
   else

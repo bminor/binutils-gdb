@@ -1,3 +1,10 @@
+1999-08-26  David Mosberger  <davidm@hpl.hp.com>
+
+        * dwarf2dbg.c (out_end_sequence): If address changed, directly
+	output "advance_pc" opcode instead of calling gen_addr_line().
+	The latter has the undesired side-effect of creating a new row
+	in the debug line info matrix. 
+
 1999-08-26  Jim Wilson  <wilson@cygnus.com>
 
 	* dwarf2dbg.c (out_end_sequence): Correct comments.  Set last to
