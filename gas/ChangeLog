@@ -1,3 +1,8 @@
+2003-07-22  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-h8300.c (md_assemble): Make sure characters after
+	slash and dot are lower-case.
+
 2003-07-17  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: New Spanish translation.

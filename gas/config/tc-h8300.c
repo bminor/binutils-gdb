@@ -1889,6 +1889,7 @@ md_assemble (str)
   const struct h8_instruction *prev_instruction;
 
   char *dot = 0;
+  char *slash = 0;
   char c;
   int size, i;
 
@@ -1908,6 +1909,8 @@ md_assemble (str)
 	  op_end += 2;
 	  break;
 	}
+      else if (*op_end == '/' && ! slash)
+	slash = op_end;
     }
 
   if (op_end == op_start)
@@ -1917,6 +1920,12 @@ md_assemble (str)
   c = *op_end;
 
   *op_end = 0;
+
+  /* The assembler stops scanning the opcode at slashes, so it fails
+     to make characters following them lower case.  Fix them.  */
+  if (slash)
+    while (*++slash)
+      *slash = TOLOWER (*slash);
 
   instruction = (const struct h8_instruction *)
     hash_find (opcode_hash_control, op_start);
@@ -1950,7 +1959,7 @@ md_assemble (str)
   size = SN;
   if (dot)
     {
-      switch (*dot)
+      switch (TOLOWER (*dot))
 	{
 	case 'b':
 	  size = SB;
