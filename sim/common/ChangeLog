@@ -1,3 +1,7 @@
+Mon Jul  6 15:51:14 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* sim-bits.h (EXTEND24): Define.
+
 Thu Jul  2 17:13:25 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen-sim.h (CPU_SCACHE): Make size unsigned.
