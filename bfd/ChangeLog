@@ -1,3 +1,17 @@
+Wed Oct 13 14:28:17 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* Makefile.in: Updated dependencies.
+	(.dep, .dep1, dep.sed): New targets, to make "make dep" work
+	better.
+	* dep-in.sed: New file.
+
+	* m68klynx-cf.c (ONLY_DECLARE_RELOCS): Define, to avoid name
+	conflicts when "--with-targets=all".
+	* coff-m68k.c (m68kcoff_howto_table, m68k_rtype2howto,
+	m68k_howto2rtype): Rename via macros to keep namespace clean.
+	* configure.in: For m68klynx_coff_vec, include coff-m68k.o for
+	now.
+
 Tue Oct 12 17:03:27 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* elf32-mips.c: Extensive additions to do relocations and to
