@@ -1,3 +1,12 @@
+Fri Jan 26 18:43:03 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-undefined/undefined.exp: ELF targets should now pass the
+	undefined line test.
+
+Thu Jan 25 15:36:13 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-empic/empic.exp: Update for change to MIPS disassembler.
+
 Mon Jan 15 15:05:53 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld-bootstrap/bootstrap.exp: Expect failure for mips*-*-irix5*
