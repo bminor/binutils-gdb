@@ -1,3 +1,8 @@
+2000-05-04  Alan Modra  <alan@linuxcare.com.au>
+
+	* as.c (parse_args): Just mention current year in printed
+	copyright message.
+
 2000-05-03  J.T. Conklin  <jtc@redback.com>
 
 	* config/tc-ppc.c (pre_defined_registers): Add entries for vector
