@@ -229,10 +229,16 @@ cgen_parse_keyword (cd, strp, keyword_table, valuep)
     ++p;
 
   if (p - start >= (int) sizeof (buf))
-    return _("unrecognized keyword/register name");
-
-  memcpy (buf, start, p - start);
-  buf[p - start] = 0;
+    {
+      /* All non-empty CGEN keywords can fit into BUF.  The only thing
+	 we can match here is the empty keyword.  */
+      buf[0] = 0;
+    }
+  else
+    {
+      memcpy (buf, start, p - start);
+      buf[p - start] = 0;
+    }
 
   ke = cgen_keyword_lookup_name (keyword_table, buf);
 

@@ -1,3 +1,8 @@
+2001-11-09  Richard Sandiford  <rsandifo@redhat.com>
+
+	* cgen-asm.c (cgen_parse_keyword): If the keyword is too big to
+	fit in the buffer, try to match the empty keyword.
+
 2001-11-09  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* cgen-ibld.in (extract_1): Fix badly placed #if 0.
