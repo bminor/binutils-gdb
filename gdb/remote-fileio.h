@@ -21,8 +21,8 @@
 
 /* See the GDB User Guide for details of the GDB remote protocol. */
 
-#ifndef FILEIO_H
-#define FILEIO_H
+#ifndef REMOTE_FILEIO_H
+#define REMOTE_FILEIO_H
 
 /* Unified interface to remote fileio, called in remote.c from
    remote_wait () and remote_async_wait () */

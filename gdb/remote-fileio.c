@@ -26,18 +26,14 @@
 #include "gdbcmd.h"
 #include "remote.h"
 #include "gdb/fileio.h"
+#include "gdb_wait.h"
+#include "gdb_stat.h"
 
-#include <ctype.h>
 #include <fcntl.h>
 #include <sys/time.h>
-#ifdef USG
-#include <sys/types.h>
-#endif
-#include <sys/stat.h>
 #ifdef __CYGWIN__
-#include <sys/cygwin.h>
+#include <sys/cygwin.h>		/* For cygwin_conv_to_full_posix_path.  */
 #endif
-#include <setjmp.h>
 #include <signal.h>
 
 static struct {
@@ -428,7 +424,6 @@ remote_fileio_to_fio_timeval (struct timeval *tv, struct fio_timeval *ftv)
 
 static int remote_fio_ctrl_c_flag = 0;
 static int remote_fio_no_longjmp = 0;
-jmp_buf remote_fio_jmp_buf;
 
 #if defined (HAVE_SIGACTION) && defined (SA_RESTART)
 static struct sigaction remote_fio_sa;
