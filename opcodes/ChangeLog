@@ -1,3 +1,20 @@
+Thu Jul 31 21:44:42 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am: New file, based on old Makefile.in.
+	* acconfig.h: New file.
+	* acinclude.m4: New file.
+	* stamp-h.in: New file.
+	* configure.in: Call AM_INIT_AUTOMAKE and AM_PROG_LIBTOOL.
+	Removed shared library handling; now handled by libtool.  Replace
+	AC_CONFIG_HEADER with AM_CONFIG_HEADER.  Call AM_MAINTAINER_MODE,
+	AM_CYGWIN32, and AM_EXEEXT.  Replace AC_PROG_INSTALL with
+	AM_PROG_INSTALL.  Change all .o files to .lo.  Remove stamp-h
+	handling in AC_OUTPUT.
+	* dep-in.sed: Change .o to .lo.
+	* Makefile.in: Now built with automake.
+	* aclocal.m4: Now built with aclocal.
+	* config.in, configure: Rebuild.
+
 Mon Jul 28 21:52:24 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* mips-opc.c: Fix typo/thinko in "eret" instruction.

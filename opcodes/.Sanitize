@@ -57,7 +57,10 @@ fi
 Things-to-keep:
 
 ChangeLog
+Makefile.am
 Makefile.in
+acconfig.h
+acinclude.m4
 aclocal.m4
 alpha-dis.c
 alpha-opc.c
@@ -106,6 +109,7 @@ sh-opc.h
 sh-dis.c
 sparc-dis.c
 sparc-opc.c
+stamp-h.in
 sysdep.h
 w65-dis.c
 w65-opc.h
