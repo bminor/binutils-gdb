@@ -436,7 +436,13 @@ void DEFUN(do_relocs_for,(abfd, file_cursor),
       *file_cursor += external_reloc_size;
       free( external_reloc_vec);
     }
+#if OLDWAY
+    This should work, but causes problems with addends in relocs.
+    Disable it for the moment
     addr += segment_info[idx].scnhdr.s_size;
+#else
+    addr = 0;
+#endif
   }
 }
 
@@ -544,7 +550,15 @@ static void DEFUN(fill_section,(abfd, filehdr, file_cursor),
       free(buffer);
 	  
       *file_cursor += s->s_size;
+
+#if 0
+    This should work, but causes problems with addends in relocs.
+    Disable it for the moment
+
       paddr += s->s_size;
+#else
+      paddr = 0;
+#endif
     }      
   }
 
@@ -2031,45 +2045,55 @@ symbolS *symbol_rootP)
 
 static void DEFUN_VOID(obj_coff_lcomm)
 {
-    char *name;
-    char c;
-    int temp;
-    char *p;
-    unsigned long vma;
+  char *name;
+  char c;
+  int temp;
+  char *p;
+  unsigned long vma;
 
-    symbolS *symbolP;
-    name = input_line_pointer;
+  symbolS *symbolP;
+  name = input_line_pointer;
 
 
+  c = get_symbol_end();
+  p = input_line_pointer;
+  *p = c;
+  SKIP_WHITESPACE();
+  if (*input_line_pointer != ',') {
+    as_bad("Expected comma after name");
+    ignore_rest_of_line();
+    return;
+  }
+  if (*input_line_pointer == '\n') {
+    as_bad("Missing size expression");
+    return;
+  }
+  input_line_pointer++;
+  if ((temp = get_absolute_expression ()) < 0) {
+    as_warn("lcomm length (%d.) <0! Ignored.", temp);
+    ignore_rest_of_line();
+    return;
+  }
+  *p = 0;
 
-    c = get_symbol_end();
-    p = input_line_pointer;
-    *p = c;
-    SKIP_WHITESPACE();
-    if (*input_line_pointer != ',') {
-	    as_bad("Expected comma after name");
-	    ignore_rest_of_line();
-	    return;
-	}
-    if (*input_line_pointer == '\n') {
-	    as_bad("Missing size expression");
-	    return;
-	}
-    input_line_pointer++;
-    if ((temp = get_absolute_expression ()) < 0) {
-	    as_warn("lcomm length (%d.) <0! Ignored.", temp);
-	    ignore_rest_of_line();
-	    return;
-	}
-    *p = 0;
-    symbolP = symbol_find_or_make(name);
-    vma = segment_info[SEG_E2].scnhdr.s_size;
-    vma += relax_align(vma, MIN(8, temp));
-    S_SET_VALUE(symbolP,vma);
-    S_SET_SEGMENT(symbolP, SEG_E2);
-    segment_info[SEG_E2].scnhdr.s_size = vma + temp;
-    S_SET_STORAGE_CLASS(symbolP, C_STAT);
-    demand_empty_rest_of_line();
+  {
+    /* Allocate zero static local data in the .data section now
+       instead of the bss section as a symbol with a value */
+   char *x;
+   segT  oldseg = now_seg;
+   int oldsubseg  = now_subseg;
+     
+   subseg_new(SEG_DATA, 10);
+   colon(name);
+   frag_align(2,0);
+   record_alignment(SEG_DATA, 4);
+   x =  frag_var (rs_fill, 1, 1, (relax_substateT)0, (symbolS *)0,
+		  temp, (char *)0);
+   * x= 0;
+
+   subseg_new(oldseg, oldsubseg);
+ }
+  demand_empty_rest_of_line();
 }
 
 static void DEFUN(fixup_mdeps,(frags),

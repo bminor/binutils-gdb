@@ -1,3 +1,12 @@
+Tue Sep 22 13:02:07 1992  Sean Eric Fagan  (sef@cygnus.com)
+
+	* obj-coffbfd.c (do_relocs_for,fill_section): now allocate all
+	sections starting from zero, rather than making them consecutive.
+	This makes subsequent reloc calculations easier, esp if the object
+	format doesn't understand addends. (obj_coff_lcomm): (maybe temporarily)
+	allocate lcomm in .data rather than in .bss.  It seems that some
+	tools can't cope with a non-zero sized bss before linkage.
+ 
 Tue Sep 22 15:10:51 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* tc-m68k.c: Replace "enum m68k_architecture" with "int"
