@@ -497,10 +497,9 @@ write_register_bytes (int myregstart, char *myaddr, int inlen)
 
 
 /* Return the raw contents of register REGNO, regarding it as an
-   integer.  This probably should be returning LONGEST rather than
-   CORE_ADDR.  */
+   UNSIGNED integer. */
 
-CORE_ADDR
+ULONGEST
 read_register (int regno)
 {
   if (registers_pid != inferior_pid)
@@ -512,12 +511,11 @@ read_register (int regno)
   if (!register_valid[regno])
     target_fetch_registers (regno);
 
-  return ((CORE_ADDR)
-	  extract_unsigned_integer (&registers[REGISTER_BYTE (regno)],
+  return (extract_unsigned_integer (&registers[REGISTER_BYTE (regno)],
 				    REGISTER_RAW_SIZE (regno)));
 }
 
-CORE_ADDR
+ULONGEST
 read_register_pid (int regno, int pid)
 {
   int save_pid;
@@ -531,6 +529,45 @@ read_register_pid (int regno, int pid)
   inferior_pid = pid;
 
   retval = read_register (regno);
+
+  inferior_pid = save_pid;
+
+  return retval;
+}
+
+/* Return the raw contents of register REGNO, regarding it a SIGNED
+   integer. */
+
+LONGEST
+read_signed_register (int regno)
+{
+  if (registers_pid != inferior_pid)
+    {
+      registers_changed ();
+      registers_pid = inferior_pid;
+    }
+
+  if (!register_valid[regno])
+    target_fetch_registers (regno);
+
+  return (extract_signed_integer (&registers[REGISTER_BYTE (regno)],
+				  REGISTER_RAW_SIZE (regno)));
+}
+
+LONGEST
+read_signed_register_pid (int regno, int pid)
+{
+  int save_pid;
+  LONGEST retval;
+
+  if (pid == inferior_pid)
+    return read_signed_register (regno);
+
+  save_pid = inferior_pid;
+
+  inferior_pid = pid;
+
+  retval = read_signed_register (regno);
 
   inferior_pid = save_pid;
 

@@ -1,3 +1,12 @@
+Tue Jul 11 12:52:31 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* value.h (read_register, read_signed_register): Change return
+ 	type to ULONGEST.
+	(read_signed_register, read_signed_register_pid): Declare.
+
+	* regcache.c (read_register, read_register_pid): Update.
+	(read_signed_register_pid, read_signed_register): New functions.
+	
 Mon Jul 10 18:06:18 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips-tdep.c (mips_push_arguments): Always align struct_addr on a
