@@ -2408,24 +2408,18 @@ watchpoint_check (void *p)
          the frame chain (so we can determine if we're in scope).  */
       reinit_frame_cache ();
       fr = frame_find_by_id (b->watchpoint_frame);
-#if 0
-      current_frame_id = get_frame_id (get_current_frame ());
-      within_current_scope = frame_id_eq (current_frame_id, b->watchpoint_frame)
-			     || frame_id_inner (current_frame_id,
-			     			b->watchpoint_frame);
-#else
       within_current_scope = (fr != NULL);
-#endif
       /* in_function_epilogue_p() returns a non-zero value if we're still
 	 in the function but the stack frame has already been invalidated.
 	 Since we can't rely on the values of local variables after the
 	 stack has been destroyed, we are treating the watchpoint in that
-	 state as `not changed' without further checking. */
-#if 0
-      if (within_current_scope && (!fr || fr == get_current_frame ())
-#else
+	 state as `not changed' without further checking.
+	 
+	 vinschen/2003-09-04: The former implementation left out the case
+	 that the watchpoint frame couldn't be found by frame_find_by_id()
+	 because the current PC is currently in an epilogue.  Calling
+	 gdbarch_in_function_epilogue_p() also when fr == NULL fixes that. */
       if ((!within_current_scope || fr == get_current_frame ())
-#endif
           && gdbarch_in_function_epilogue_p (current_gdbarch, read_pc ()))
 	return WP_VALUE_NOT_CHANGED;
       if (fr && within_current_scope)
