@@ -1,5 +1,17 @@
 2001-10-13  Andrew Cagney  <ac131313@redhat.com>
 
+	S/390 31 & 64 bit target and GNU/Linux native support.
+	Contributed by D.J. Barrow <djbarrow@de.ibm.com> of IBM.
+	* s390-nat.c, s390-tdep.c: New file.
+	* config/s390/nm-linux.h, config/s390/s390.mh: New file.
+	* config/s390/s390.mt, config/s390/s390x.mt: New file.
+	* config/s390/tm-linux.h, config/s390/tm-s390.h: New file.
+	* config/s390/xm-linux.h: New file.
+	* NEWS: Update.
+	* MAINTAINERS: Update.
+
+2001-10-13  Andrew Cagney  <ac131313@redhat.com>
+
 	From 2001-07-09 D.J. Barrow <djbarrow@de.ibm.com>:
         * gdbarch.sh: Fixed CALL_DUMMY_BREAKPOINT_OFFSET to check
 	CALL_DUMMY_BREAKPOINT_OFFSET_P.
