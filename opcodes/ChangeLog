@@ -1,3 +1,7 @@
+2003-09-09  Dave Brolley  <brolley@redhat.com>
+
+	* frv-desc.c: Regenerated.
+
 2003-09-08  Dave Brolley  <brolley@redhat.com>
 
 	On behalf of Doug Evans <dje@sebabeach.org>
