@@ -49,7 +49,7 @@
 
 #define WORD_ADDRESS(pc) ((pc) & ~0x3)
 
-/* Format of the assembler string :
+/* Format of the disassembler control string :
    
    %%			%
    %<bitfield>d		print the bitfield in decimal

@@ -1,3 +1,7 @@
+2004-11-29  Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-dis.c: Correct top-level comment.
+
 2004-11-27  Richard Earnshaw  <rearnsha@arm.com>
 
 	* arm-opc.h (arm_opcode, thumb_opcode): Add extra field for the
