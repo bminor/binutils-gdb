@@ -658,7 +658,7 @@ find_unwind_entry (CORE_ADDR pc)
   return NULL;
 }
 
-const unsigned char *
+static const unsigned char *
 hppa_breakpoint_from_pc (CORE_ADDR *pc, int *len)
 {
   static const unsigned char breakpoint[] = {0x00, 0x01, 0x00, 0x04};
@@ -2726,7 +2726,9 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     default:
       internal_error (__FILE__, __LINE__, "bad switch");
     }
-      
+
+  set_gdbarch_breakpoint_from_pc (gdbarch, hppa_breakpoint_from_pc);
+
   /* Frame unwind methods.  */
   set_gdbarch_unwind_dummy_id (gdbarch, hppa_unwind_dummy_id);
   set_gdbarch_unwind_pc (gdbarch, hppa_unwind_pc);

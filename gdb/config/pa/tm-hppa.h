@@ -39,12 +39,6 @@ struct value;
 struct type;
 struct inferior_status;
 
-/* Sequence of bytes for breakpoint instruction.  */
-
-const unsigned char *hppa_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr);
-#define BREAKPOINT_FROM_PC(PCPTR,LENPTR) hppa_breakpoint_from_pc ((PCPTR), (LENPTR))
-#define BREAKPOINT32 0x10004
-
 extern int hppa_pc_requires_run_before_use (CORE_ADDR pc);
 #define PC_REQUIRES_RUN_BEFORE_USE(pc) hppa_pc_requires_run_before_use (pc)
 

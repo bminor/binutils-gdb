@@ -1,5 +1,10 @@
 2004-04-06  Andrew Cagney  <cagney@redhat.com>
 
+	* hppa-tdep.c (hppa_breakpoint_from_pc): Make static.
+	(hppa_gdbarch_init): Set gdbarch_breakpoint_from_pc
+	* config/pa/tm-hppa.h (BREAKPOINT_FROM_PC, BREAKPOINT32): 
+	(hppa_breakpoint_from_pc): Delete.
+
 	* MAINTAINERS: Mark hppa-elf as buildable with -Werror.
 
 2004-04-05  Andrew Cagney  <cagney@redhat.com>
