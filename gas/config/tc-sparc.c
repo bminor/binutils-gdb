@@ -23,6 +23,7 @@
 #include <ctype.h>
 
 #include "as.h"
+#include "subsegs.h"
 
 /* careful, this file includes data *declarations* */
 #include "opcode/sparc.h"
@@ -123,6 +124,19 @@ struct sparc_it
   };
 
 struct sparc_it the_insn, set_insn;
+
+static INLINE int
+in_signed_range (val, max)
+     bfd_signed_vma val, max;
+{
+  if (max <= 0)
+    abort ();
+  if (val > max)
+    return 0;
+  if (val < ~max)
+    return 0;
+  return 1;
+}
 
 #if 0
 static void print_insn PARAMS ((struct sparc_it *insn));
@@ -1377,8 +1391,7 @@ sparc_ip (str)
 	      goto immediate;
 
 	    case 'i':		/* 13 bit immediate */
-	      /* What's the difference between base13 and 13?  */
-	      the_insn.reloc = BFD_RELOC_SPARC_BASE13;
+	      the_insn.reloc = BFD_RELOC_SPARC13;
 	      immediate_max = 0x0FFF;
 
 	      /*FALLTHROUGH */
@@ -1464,6 +1477,10 @@ sparc_ip (str)
 		{
 		  /* start-sanitize-v9 */
 #ifndef NO_V9
+		  /* Handle %uhi/%ulo by moving the upper word to the lower
+		     one and pretending it's %hi/%lo.  We also need to watch
+		     for %hi/%lo: the top word needs to be zeroed otherwise
+		     fixup_segment will complain the value is too big.  */
 		  switch (the_insn.reloc)
 		    {
 		    case BFD_RELOC_SPARC_HH22:
@@ -1476,19 +1493,47 @@ sparc_ip (str)
 		      break;
 		    default:
 		      break;
+		    case BFD_RELOC_HI22:
+		    case BFD_RELOC_LO10:
+		      the_insn.exp.X_add_number &= 0xffffffff;
+		      break;
 		    }
 #endif
 		  /* end-sanitize-v9 */
+		  /* For pc-relative call instructions, we reject
+		     constants to get better code.  */
+		  if (the_insn.pcrel
+		      && the_insn.reloc == BFD_RELOC_32_PCREL_S2
+		      && in_signed_range (the_insn.exp.X_add_number, 0x3fff)
+		      )
+		    {
+		      error_message = ": PC-relative operand can't be a constant";
+		      goto error;
+		    }
 		  /* Check for invalid constant values.  Don't warn if
 		     constant was inside %hi or %lo, since these
 		     truncate the constant to fit.  */
 		  if (immediate_max != 0
 		      && the_insn.reloc != BFD_RELOC_LO10
 		      && the_insn.reloc != BFD_RELOC_HI22
-		      && (the_insn.exp.X_add_number > immediate_max
-			  || the_insn.exp.X_add_number < ~immediate_max))
-		    as_bad ("constant value must be between %ld and %ld",
-			    ~immediate_max, immediate_max);
+		      && !in_signed_range (the_insn.exp.X_add_number,
+					   immediate_max)
+		      )
+		    {
+		      if (the_insn.pcrel)
+			/* Who knows?  After relocation, we may be within
+			   range.  Let the linker figure it out.  */
+			{
+			  the_insn.exp.X_op = O_symbol;
+			  the_insn.exp.X_add_symbol = section_symbol (absolute_section);
+			}
+		      else
+			/* Immediate value is non-pcrel, and out of
+                           range.  */
+			as_bad ("constant value %ld out of range (%ld .. %ld)",
+				the_insn.exp.X_add_number,
+				~immediate_max, immediate_max);
+		    }
 		}
 
 	      /* Reset to prevent extraneous range check.  */
@@ -1974,15 +2019,6 @@ md_apply_fix (fixP, value)
       buf[3] = val & 0xff;
       break;
 
-    case BFD_RELOC_SPARC13:
-      if (val & ~0x00001fff)
-	{
-	  as_bad ("relocation overflow");
-	}			/* on overflow */
-      buf[2] |= (val >> 8) & 0x1f;
-      buf[3] = val & 0xff;
-      break;
-
       /* start-sanitize-v9 */
 #ifndef NO_V9
     case BFD_RELOC_SPARC_HM10:
@@ -2000,12 +2036,11 @@ md_apply_fix (fixP, value)
       else
 	buf[3] = 0;
       break;
-    case BFD_RELOC_SPARC_BASE13:
-      if (((val > 0) && (val & ~(offsetT)0x00001fff))
-	  || ((val < 0) && (~(val - 1) & ~(offsetT)0x00001fff)))
-	{
-	  as_bad ("relocation overflow");
-	}
+
+    case BFD_RELOC_SPARC13:
+      if (! in_signed_range (val, 0x1fff))
+	as_bad ("relocation overflow");
+
       buf[2] |= (val >> 8) & 0x1f;
       buf[3] = val;
       break;
@@ -2024,6 +2059,10 @@ md_apply_fix (fixP, value)
       as_bad ("bad or unhandled relocation type: 0x%02x", fixP->fx_r_type);
       break;
     }
+
+  /* Are we finished with this relocation now?  */
+  if (fixP->fx_addsy == 0 && !fixP->fx_pcrel)
+    fixP->fx_done = 1;
 
   return 1;
 }
@@ -2051,6 +2090,7 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_HI22:
     case BFD_RELOC_LO10:
     case BFD_RELOC_32_PCREL_S2:
+    case BFD_RELOC_SPARC13:
     case BFD_RELOC_SPARC_BASE13:
     case BFD_RELOC_SPARC_WDISP22:
       /* start-sanitize-v9 */
@@ -2076,6 +2116,12 @@ tc_gen_reloc (section, fixp)
   /* @@ Why fx_addnumber sometimes and fx_offset other times?  */
   if (reloc->howto->pc_relative == 0)
     reloc->addend = fixp->fx_addnumber;
+#if defined (OBJ_ELF) || defined (OBJ_COFF)
+  else if ((fixp->fx_addsy->bsym->flags & BSF_SECTION_SYM) != 0)
+    reloc->addend = (section->vma
+		     + fixp->fx_addnumber
+		     + md_pcrel_from (fixp));
+#endif
   else
     reloc->addend = fixp->fx_offset - reloc->address;
 

@@ -1,3 +1,8 @@
+Thu Mar 31 16:51:16 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-sparc.c (tc_gen_reloc): Add a gruesome hack to get
+	cross section PC relative relocs right for COFF and ELF.
+
 Mon Mar 28 14:38:23 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* config/obj-coff.h (SEPARATE_STAB_SECTIONS): Always define.
