@@ -1,3 +1,8 @@
+2003-10-15  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* syscall.h (SYS_truncate, SYS_ftruncate): Define.
+	* interp.c (trap): Add support for SYS_ftruncate and SYS_truncate.
+
 2003-08-11  Shrinivas Atre  <shrinivasa@KPITCummins.com>	
 	* sim/sh/gencode.c ( tab[] ): Addition of MAC.L handler and 
 	correction for MAC.W handler

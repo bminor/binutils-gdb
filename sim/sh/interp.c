@@ -1153,6 +1153,17 @@ trap (i, regs, insn_ptr, memory, maskl, maskw, endianw)
 	  case SYS_time:
 	    regs[0] = get_now ();
 	    break;
+	  case SYS_ftruncate:
+	    regs[0] = callback->ftruncate (callback, regs[5], regs[6]);
+	    break;
+	  case SYS_truncate:
+	    {
+	      int len = strswaplen (regs[5]);
+	      strnswap (regs[5], len);
+	      regs[0] = callback->truncate (callback, ptr (regs[5]), regs[6]);
+	      strnswap (regs[5], len);
+	      break;
+	    }
 	  default:
 	    regs[0] = -1;
 	    break;
