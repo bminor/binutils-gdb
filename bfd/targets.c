@@ -517,6 +517,7 @@ extern const bfd_target bfd_elf32_bigarc_vec;
 extern const bfd_target bfd_elf32_bigarm_oabi_vec;
 extern const bfd_target bfd_elf32_bigarm_vec;
 extern const bfd_target bfd_elf32_bigmips_vec;
+extern const bfd_target bfd_elf32_cr16c_vec;
 extern const bfd_target bfd_elf32_cris_vec;
 extern const bfd_target bfd_elf32_d10v_vec;
 extern const bfd_target bfd_elf32_d30v_vec;
@@ -807,6 +808,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf32_bigarm_oabi_vec,
 	&bfd_elf32_bigarm_vec,
 	&bfd_elf32_bigmips_vec,
+	&bfd_elf32_cr16c_vec,
 	&bfd_elf32_cris_vec,
 	&bfd_elf32_d10v_vec,
 	&bfd_elf32_d30v_vec,

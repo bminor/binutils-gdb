@@ -166,6 +166,42 @@ i386_register_name (int reg)
   return NULL;
 }
 
+
+/* FIXME: jimb/2004-04-01: I don't think these functions are right.
+   For a given platform, GCC always uses the same register numbering
+   in both STABS and Dwarf2: gcc/dbxout.c and gcc/dwarf2out.c both use
+   the DBX_REGISTER_NUMBER macro, as defined by the config headers.
+   If you compile a program so that its variables are allocated to
+   floating-point registers, first with STABS and again with Dwarf 2,
+   you'll see that the variable's register numbers are the same in
+   each case.
+
+   GCC does use (at least) two different register numberings on the
+   i386; they differ in how they number %ebp, %esp, %eflags, and the
+   floating-point registers.  And it has a third numbering for "64bit
+   mode", which I assume is x86_64.  But it always uses a given
+   numbering in both STABS and Dwarf.
+
+   This does not match the arrangement we have below, which presumes
+   that STABS and Dwarf numberings are different, and does some
+   strange mixing and matching (e.g., registering the Dwarf 2 function
+   as the STABS function for "Generic i386 ELF") to get close enough
+   to the right effect on the platforms we care about.
+
+   If we wanted to match GCC, we should have two separate register
+   number translation functions (we handle x86_64 in a separate tdep
+   file altogether), one corresponding to each of GCC's i386 register
+   maps.  And for a given platform, we would register one of them as
+   both the STABS and Dwarf 2 functions.
+
+   However, we don't aspire to match GCC; we aspire to match the
+   native system's tools.  I don't have access to lots of different
+   native compilers and debuggers to verify that GCC is matching their
+   behavior in this regard.  Is it sufficient to argue that we at
+   least want to match GNU's compiler, and say we'll fix bugs relative
+   to native tools as they're reported?  */
+
+
 /* Convert stabs register number REG to the appropriate register
    number used by GDB.  */
 

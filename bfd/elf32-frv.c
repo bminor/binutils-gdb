@@ -1,5 +1,5 @@
 /* FRV-specific support for 32-bit ELF.
-   Copyright 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -52,7 +52,7 @@ static bfd_boolean elf32_frv_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
 static bfd_boolean elf32_frv_add_symbol_hook
-  PARAMS (( bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
+  PARAMS (( bfd *, struct bfd_link_info *, Elf_Internal_Sym *,
 	    const char **, flagword *, asection **, bfd_vma *));
 static bfd_reloc_status_type frv_final_link_relocate
   PARAMS ((reloc_howto_type *, bfd *, asection *, bfd_byte *,
@@ -2584,7 +2584,7 @@ static bfd_boolean
 elf32_frv_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      bfd *abfd;
      struct bfd_link_info *info;
-     const Elf_Internal_Sym *sym;
+     Elf_Internal_Sym *sym;
      const char **namep ATTRIBUTE_UNUSED;
      flagword *flagsp ATTRIBUTE_UNUSED;
      asection **secp;
@@ -2676,7 +2676,7 @@ _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
 
       /* Machine-specific: we want the symbol for executables as
 	 well.  */
-      if (! _bfd_elf_link_record_dynamic_symbol (info, h))
+      if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	return FALSE;
 
       elf_hash_table (info)->hgot = h;
@@ -2724,7 +2724,7 @@ _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
   h->type = STT_OBJECT;
 
   /* Machine-specific: we want the symbol for executables as well.  */
-  if (! _bfd_elf_link_record_dynamic_symbol (info, h))
+  if (! bfd_elf_link_record_dynamic_symbol (info, h))
     return FALSE;
   
   return TRUE;
@@ -2779,7 +2779,7 @@ elf32_frv_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
       h->type = STT_OBJECT;
 
       if (! info->executable
-	  && ! _bfd_elf_link_record_dynamic_symbol (info, h))
+	  && ! bfd_elf_link_record_dynamic_symbol (info, h))
 	return FALSE;
     }
 
@@ -3536,20 +3536,20 @@ elf32_frv_size_dynamic_sections (bfd *output_bfd,
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       if (frv_got_section (info)->_raw_size)
-	if (! bfd_elf32_add_dynamic_entry (info, DT_PLTGOT, 0))
+	if (!_bfd_elf_add_dynamic_entry (info, DT_PLTGOT, 0))
 	  return FALSE;
 
       if (frv_pltrel_section (info)->_raw_size)
-	if (! bfd_elf32_add_dynamic_entry (info, DT_PLTRELSZ, 0)
-	    || ! bfd_elf32_add_dynamic_entry (info, DT_PLTREL, DT_REL)
-	    || ! bfd_elf32_add_dynamic_entry (info, DT_JMPREL, 0))
+	if (!_bfd_elf_add_dynamic_entry (info, DT_PLTRELSZ, 0)
+	    || !_bfd_elf_add_dynamic_entry (info, DT_PLTREL, DT_REL)
+	    || !_bfd_elf_add_dynamic_entry (info, DT_JMPREL, 0))
 	  return FALSE;
 
       if (frv_gotrel_section (info)->_raw_size)
-	if (! bfd_elf32_add_dynamic_entry (info, DT_REL, 0)
-	    || ! bfd_elf32_add_dynamic_entry (info, DT_RELSZ, 0)
-	    || ! bfd_elf32_add_dynamic_entry (info, DT_RELENT,
-					      sizeof (Elf32_External_Rel)))
+	if (!_bfd_elf_add_dynamic_entry (info, DT_REL, 0)
+	    || !_bfd_elf_add_dynamic_entry (info, DT_RELSZ, 0)
+	    || !_bfd_elf_add_dynamic_entry (info, DT_RELENT,
+					    sizeof (Elf32_External_Rel)))
 	  return FALSE;
     }
 
@@ -4028,7 +4028,7 @@ elf32_frv_check_relocs (abfd, info, sec, relocs)
 		  case STV_HIDDEN:
 		    break;
 		  default:
-		    bfd_elf32_link_record_dynamic_symbol (info, h);
+		    bfd_elf_link_record_dynamic_symbol (info, h);
 		    break;
 		  }
 	      picrel
@@ -4107,14 +4107,14 @@ elf32_frv_check_relocs (abfd, info, sec, relocs)
         /* This relocation describes the C++ object vtable hierarchy.
            Reconstruct it for later use during GC.  */
         case R_FRV_GNU_VTINHERIT:
-          if (!_bfd_elf32_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
+          if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
             return FALSE;
           break;
 
         /* This relocation describes which C++ vtable entries are actually
            used.  Record for later use during GC.  */
         case R_FRV_GNU_VTENTRY:
-          if (!_bfd_elf32_gc_record_vtentry (abfd, sec, h, rel->r_addend))
+          if (!bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
             return FALSE;
           break;
         }

@@ -312,6 +312,7 @@ extern CORE_ADDR get_frame_base (struct frame_info *);
    frame after a frame cache flush (and other similar operations).  If
    FI is NULL, return the null_frame_id.  */
 extern struct frame_id get_frame_id (struct frame_info *fi);
+extern struct frame_id frame_unwind_id (struct frame_info *next_frame);
 
 /* Assuming that a frame is `normal', return its base-address, or 0 if
    the information isn't available.  NOTE: This address is really only

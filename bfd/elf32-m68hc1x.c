@@ -181,7 +181,7 @@ m68hc12_add_stub (const char *stub_name, asection *section,
 
 bfd_boolean
 elf32_m68hc11_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
-                               const Elf_Internal_Sym *sym,
+                               Elf_Internal_Sym *sym,
                                const char **namep ATTRIBUTE_UNUSED,
                                flagword *flagsp ATTRIBUTE_UNUSED,
                                asection **secp ATTRIBUTE_UNUSED,
@@ -893,14 +893,14 @@ elf32_m68hc11_check_relocs (bfd *abfd, struct bfd_link_info *info,
         /* This relocation describes the C++ object vtable hierarchy.
            Reconstruct it for later use during GC.  */
         case R_M68HC11_GNU_VTINHERIT:
-          if (!_bfd_elf32_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
+          if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
             return FALSE;
           break;
 
         /* This relocation describes which C++ vtable entries are actually
            used.  Record for later use during GC.  */
         case R_M68HC11_GNU_VTENTRY:
-          if (!_bfd_elf32_gc_record_vtentry (abfd, sec, h, rel->r_addend))
+          if (!bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
             return FALSE;
           break;
         }

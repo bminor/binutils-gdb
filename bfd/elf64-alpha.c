@@ -123,7 +123,7 @@ static bfd_boolean elf64_alpha_size_rela_got_section
 static bfd_boolean elf64_alpha_size_rela_got_1
   PARAMS ((struct alpha_elf_link_hash_entry *, struct bfd_link_info *));
 static bfd_boolean elf64_alpha_add_symbol_hook
-  PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
+  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Sym *,
 	   const char **, flagword *, asection **, bfd_vma *));
 static struct alpha_elf_got_entry *get_got_entry
   PARAMS ((bfd *, struct alpha_elf_link_hash_entry *, unsigned long,
@@ -2363,7 +2363,7 @@ static bfd_boolean
 elf64_alpha_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      bfd *abfd;
      struct bfd_link_info *info;
-     const Elf_Internal_Sym *sym;
+     Elf_Internal_Sym *sym;
      const char **namep ATTRIBUTE_UNUSED;
      flagword *flagsp ATTRIBUTE_UNUSED;
      asection **secp;
@@ -2462,7 +2462,7 @@ elf64_alpha_create_dynamic_sections (abfd, info)
   h->type = STT_OBJECT;
 
   if (info->shared
-      && ! _bfd_elf_link_record_dynamic_symbol (info, h))
+      && ! bfd_elf_link_record_dynamic_symbol (info, h))
     return FALSE;
 
   s = bfd_make_section (abfd, ".rela.plt");
@@ -2506,7 +2506,7 @@ elf64_alpha_create_dynamic_sections (abfd, info)
   h->type = STT_OBJECT;
 
   if (info->shared
-      && ! _bfd_elf_link_record_dynamic_symbol (info, h))
+      && ! bfd_elf_link_record_dynamic_symbol (info, h))
     return FALSE;
 
   elf_hash_table (info)->hgot = h;
@@ -4094,7 +4094,7 @@ elf64_alpha_size_dynamic_sections (output_bfd, info)
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
 #define add_dynamic_entry(TAG, VAL) \
-  bfd_elf64_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
       if (info->executable)
 	{
@@ -5335,7 +5335,7 @@ elf64_alpha_final_link (abfd, info)
     }
 
   /* Invoke the regular ELF backend linker to do all the work.  */
-  if (! bfd_elf64_bfd_final_link (abfd, info))
+  if (! bfd_elf_final_link (abfd, info))
     return FALSE;
 
   /* Now write out the computed sections.  */

@@ -3,34 +3,23 @@
 
 		See also: http://www.gnu.org/software/gdb/bugs/
 
-mips*-*-*
-powerpc*-*-*
-sparc*-*-*
 
-GDB's SPARC, MIPS and PowerPC targets, in 6.0, have not been updated
-to use the new frame mechanism.
+*** Misc
 
-People encountering problems with these targets should consult GDB's
-web pages and mailing lists (http://www.gnu.org/software/gdb/) to see
-if there is an update.
+gdb/1560: Control-C does not always interrupt GDB.
 
-*** Regressions since gdb 6.0
+When GDB is busy processing a command which takes a long time to
+complete, hitting Control-C does not have the expected effect.
+The command execution is not aborted, and the "QUIT" message confirming
+the abortion is displayed only after the command has been completed.
 
-gdb/826: variables in C++ namespaces have to be enclosed in quotes
-
-When referring to a variable in C++ code that is inside a
-namespace, you have to put it inside single quotes.
+*** C++ support
 
 gdb/931: GDB could be more generous when reading types C++ templates on input
 
 When the user types a template, GDB frequently requires the type to be
 typed in a certain way (e.g. "const char*" as opposed to "const char *"
 or "char const *" or "char const*").
-
-gdb/1505: [regression] gdb prints a bad backtrace for a thread
-
-When backtracing a thread, gdb doesn't stop until it hits garbage.
-This is sensitive to the operating system and thread library.
 
 gdb/1512: no canonical way to output names of C++ types
 
@@ -50,14 +39,17 @@ This applies only to classes where the class type is defined inside a
 function, not to variables defined with types that are defined somewhere
 outside any function (which most types are).
 
-gdb/1560: Control-C does not always interrupt GDB.
+gdb/1588: names of c++ nested types in casts must be enclosed in quotes
 
-When GDB is busy processing a command which takes a long time to
-complete, hitting Control-C does not have the expected effect.
-The command execution is not aborted, and the "QUIT" message confirming
-the abortion is displayed only after the command has been completed.
-
-*** Regressions since gdb 5.3
+You must type
+  (gdb) print ('Foo::Bar') x
+or
+  (gdb) print ('Foo::Bar' *) y
+instead of
+  (gdb) print (Foo::Bar) x
+or
+  (gdb) print (Foo::Bar *) y
+respectively.
 
 gdb/1091: Constructor breakpoints ignored
 gdb/1193: g++ 3.3 creates multiple constructors: gdb 5.3 can't set breakpoints
@@ -76,3 +68,38 @@ implement virtual base classes.  gcc 2.x generated just one object code
 function with a hidden parameter, but gcc 3.x conforms to a multi-vendor
 ABI for C++ which requires multiple object code functions.
 
+*** Stack backtraces
+
+GDB's core code base has been updated to use a new backtrace
+mechanism.  This mechanism makes it possible to support new features
+such DWARF 2 Call Frame Information (which in turn makes possible
+backtraces through optimized code).
+
+Since this code is new, it is known to still have a few problems:
+
+gdb/1505: [regression] gdb prints a bad backtrace for a thread
+
+When backtracing a thread, gdb does not stop when it reaches the
+outermost frame, instead continuing until it hits garbage.  This is
+sensitive to the operating system and thread library.
+
+hppa*-*-*
+mips*-*-*
+
+The MIPS and HPPA backtrace code has only very recently been updated
+to use GDB's new frame mechanism.  At present there are still a few
+problems, in particular backtraces through signal handlers do not
+work.
+
+People encountering problems with these architectures should consult
+GDB's web pages and mailing lists (http://www.gnu.org/software/gdb/)
+to see if there are updates.
+
+powerpc*-*-*
+
+PowerPC architecture support, in 6.1, does not use the new frame code.
+
+Fortunately, PowerPC architecture support, in GDB's mainline sources,
+have been updated.  People encountering problems should consider
+downloading a more current snapshot of GDB
+(http://www.gnu.org/software/gdb/current/).

@@ -73,7 +73,7 @@ static bfd_boolean v850_elf_section_from_bfd_section
 static void v850_elf_symbol_processing
   PARAMS ((bfd *, asymbol *));
 static bfd_boolean v850_elf_add_symbol_hook
-  PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
+  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Sym *,
 	   const char **, flagword *, asection **, bfd_vma *));
 static bfd_boolean v850_elf_link_output_symbol_hook
   PARAMS ((struct bfd_link_info *, const char *, Elf_Internal_Sym *,
@@ -699,14 +699,14 @@ v850_elf_check_relocs (abfd, info, sec, relocs)
         /* This relocation describes the C++ object vtable hierarchy.
            Reconstruct it for later use during GC.  */
         case R_V850_GNU_VTINHERIT:
-          if (!_bfd_elf32_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
+          if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
             return FALSE;
           break;
 
         /* This relocation describes which C++ vtable entries
 	   are actually used.  Record for later use during GC.  */
         case R_V850_GNU_VTENTRY:
-          if (!_bfd_elf32_gc_record_vtentry (abfd, sec, h, rel->r_addend))
+          if (!bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
             return FALSE;
           break;
 
@@ -2124,7 +2124,7 @@ static bfd_boolean
 v850_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      bfd *abfd;
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
-     const Elf_Internal_Sym *sym;
+     Elf_Internal_Sym *sym;
      const char **namep ATTRIBUTE_UNUSED;
      flagword *flagsp ATTRIBUTE_UNUSED;
      asection **secp;

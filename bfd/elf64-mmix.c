@@ -205,7 +205,7 @@ static bfd_boolean mmix_elf_section_from_bfd_section
   PARAMS ((bfd *, asection *, int *));
 
 static bfd_boolean mmix_elf_add_symbol_hook
-  PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
+  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Sym *,
 	   const char **, flagword *, asection **, bfd_vma *));
 
 static bfd_boolean mmix_elf_is_local_label_name
@@ -1474,9 +1474,11 @@ mmix_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  sec = local_sections [r_symndx];
 	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
 
-	  name = bfd_elf_string_from_elf_section
-	    (input_bfd, symtab_hdr->sh_link, sym->st_name);
-	  name = (name == NULL) ? bfd_section_name (input_bfd, sec) : name;
+	  name = bfd_elf_string_from_elf_section (input_bfd,
+						  symtab_hdr->sh_link,
+						  sym->st_name);
+	  if (name == NULL)
+	    name = bfd_section_name (input_bfd, sec);
 	}
       else
 	{
@@ -1486,6 +1488,7 @@ mmix_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 				   r_symndx, symtab_hdr, sym_hashes,
 				   h, sec, relocation,
 				   unresolved_reloc, undefined_signalled);
+	  name = h->root.root.string;
 	}
 
       r = mmix_final_link_relocate (howto, input_section,
@@ -2024,14 +2027,14 @@ mmix_elf_check_relocs (abfd, info, sec, relocs)
         /* This relocation describes the C++ object vtable hierarchy.
            Reconstruct it for later use during GC.  */
         case R_MMIX_GNU_VTINHERIT:
-          if (!_bfd_elf64_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
+          if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
             return FALSE;
           break;
 
         /* This relocation describes which C++ vtable entries are actually
            used.  Record for later use during GC.  */
         case R_MMIX_GNU_VTENTRY:
-          if (!_bfd_elf64_gc_record_vtentry (abfd, sec, h, rel->r_addend))
+          if (!bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
             return FALSE;
           break;
 	}
@@ -2175,7 +2178,7 @@ bfd_boolean
 mmix_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      bfd *abfd;
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
-     const Elf_Internal_Sym *sym;
+     Elf_Internal_Sym *sym;
      const char **namep ATTRIBUTE_UNUSED;
      flagword *flagsp ATTRIBUTE_UNUSED;
      asection **secp;
@@ -2269,7 +2272,7 @@ mmix_elf_final_link (abfd, info)
       --abfd->section_count;
     }
 
-  if (! bfd_elf64_bfd_final_link (abfd, info))
+  if (! bfd_elf_final_link (abfd, info))
     return FALSE;
 
   /* Since this section is marked SEC_LINKER_CREATED, it isn't output by

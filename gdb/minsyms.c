@@ -580,26 +580,23 @@ prim_record_minimal_symbol_and_info (const char *name, CORE_ADDR address,
   struct msym_bunch *new;
   struct minimal_symbol *msymbol;
 
-  if (ms_type == mst_file_text)
-    {
-      /* Don't put gcc_compiled, __gnu_compiled_cplus, and friends into
-         the minimal symbols, because if there is also another symbol
-         at the same address (e.g. the first function of the file),
-         lookup_minimal_symbol_by_pc would have no way of getting the
-         right one.  */
-      if (name[0] == 'g'
-	  && (strcmp (name, GCC_COMPILED_FLAG_SYMBOL) == 0
-	      || strcmp (name, GCC2_COMPILED_FLAG_SYMBOL) == 0))
-	return (NULL);
+  /* Don't put gcc_compiled, __gnu_compiled_cplus, and friends into
+     the minimal symbols, because if there is also another symbol
+     at the same address (e.g. the first function of the file),
+     lookup_minimal_symbol_by_pc would have no way of getting the
+     right one.  */
+  if (ms_type == mst_file_text && name[0] == 'g'
+      && (strcmp (name, GCC_COMPILED_FLAG_SYMBOL) == 0
+	  || strcmp (name, GCC2_COMPILED_FLAG_SYMBOL) == 0))
+    return (NULL);
 
-      {
-	const char *tempstring = name;
-	if (tempstring[0] == get_symbol_leading_char (objfile->obfd))
-	  ++tempstring;
-	if (strncmp (tempstring, "__gnu_compiled", 14) == 0)
-	  return (NULL);
-      }
-    }
+  /* It's safe to strip the leading char here once, since the name
+     is also stored stripped in the minimal symbol table. */
+  if (name[0] == get_symbol_leading_char (objfile->obfd))
+    ++name;
+
+  if (ms_type == mst_file_text && strncmp (name, "__gnu_compiled", 14) == 0)
+    return (NULL);
 
   if (msym_bunch_index == BUNCH_SIZE)
     {
@@ -831,7 +828,6 @@ install_minimal_symbols (struct objfile *objfile)
   struct msym_bunch *bunch;
   struct minimal_symbol *msymbols;
   int alloc_count;
-  char leading_char;
 
   if (msym_count > 0)
     {
@@ -859,18 +855,11 @@ install_minimal_symbols (struct objfile *objfile)
          each bunch is full. */
 
       mcount = objfile->minimal_symbol_count;
-      leading_char = get_symbol_leading_char (objfile->obfd);
 
       for (bunch = msym_bunch; bunch != NULL; bunch = bunch->next)
 	{
 	  for (bindex = 0; bindex < msym_bunch_index; bindex++, mcount++)
-	    {
-	      msymbols[mcount] = bunch->contents[bindex];
-	      if (SYMBOL_LINKAGE_NAME (&msymbols[mcount])[0] == leading_char)
-		{
-		  SYMBOL_LINKAGE_NAME (&msymbols[mcount])++;
-		}
-	    }
+	    msymbols[mcount] = bunch->contents[bindex];
 	  msym_bunch_index = BUNCH_SIZE;
 	}
 

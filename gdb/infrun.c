@@ -2959,7 +2959,7 @@ step_over_function (struct execution_control_state *ecs)
 	sr_id = get_frame_id (get_current_frame ());
     }
   else
-    sr_id = get_frame_id (get_prev_frame (get_current_frame ()));
+    sr_id = frame_unwind_id (get_current_frame ());
 
   step_resume_breakpoint = set_momentary_breakpoint (sr_sal, sr_id, bp_step_resume);
 

@@ -1,5 +1,5 @@
 /* GNU/Linux native-dependent code common to multiple platforms.
-   Copyright (C) 2003 Free Software Foundation, Inc.
+   Copyright (C) 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -224,7 +224,8 @@ linux_enable_event_reporting (ptid_t ptid)
   if (! linux_supports_tracefork ())
     return;
 
-  options = PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK | PTRACE_O_TRACEEXEC;
+  options = PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK | PTRACE_O_TRACEEXEC
+    | PTRACE_O_TRACECLONE;
   if (linux_supports_tracevforkdone ())
     options |= PTRACE_O_TRACEVFORKDONE;
 
@@ -391,11 +392,8 @@ linux_handle_extended_wait (int pid, int status,
 {
   int event = status >> 16;
 
-  if (event == PTRACE_EVENT_CLONE)
-    internal_error (__FILE__, __LINE__,
-		    "unexpected clone event");
-
-  if (event == PTRACE_EVENT_FORK || event == PTRACE_EVENT_VFORK)
+  if (event == PTRACE_EVENT_FORK || event == PTRACE_EVENT_VFORK
+      || event == PTRACE_EVENT_CLONE)
     {
       unsigned long new_pid;
       int ret;
@@ -406,12 +404,10 @@ linux_handle_extended_wait (int pid, int status,
       if (! pull_pid_from_list (&stopped_pids, new_pid))
 	{
 	  /* The new child has a pending SIGSTOP.  We can't affect it until it
-	     hits the SIGSTOP, but we're already attached.
-
-	     It won't be a clone (we didn't ask for clones in the event mask)
-	     so we can just call waitpid and wait for the SIGSTOP.  */
+	     hits the SIGSTOP, but we're already attached.  */
 	  do {
-	    ret = waitpid (new_pid, &status, 0);
+	    ret = waitpid (new_pid, &status,
+			   (event == PTRACE_EVENT_CLONE) ? __WCLONE : 0);
 	  } while (ret == -1 && errno == EINTR);
 	  if (ret == -1)
 	    perror_with_name ("waiting for new child");
@@ -423,8 +419,13 @@ linux_handle_extended_wait (int pid, int status,
 			    "wait returned unexpected status 0x%x", status);
 	}
 
-      ourstatus->kind = (event == PTRACE_EVENT_FORK)
-	? TARGET_WAITKIND_FORKED : TARGET_WAITKIND_VFORKED;
+      if (event == PTRACE_EVENT_FORK)
+	ourstatus->kind = TARGET_WAITKIND_FORKED;
+      else if (event == PTRACE_EVENT_VFORK)
+	ourstatus->kind = TARGET_WAITKIND_VFORKED;
+      else
+	ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+
       ourstatus->value.related_pid = new_pid;
       return inferior_ptid;
     }

@@ -55,6 +55,7 @@ ALL_MACHINES = \
 	cpu-arc.lo \
 	cpu-arm.lo \
 	cpu-avr.lo \
+	cpu-cr16c.lo \
 	cpu-cris.lo \
 	cpu-d10v.lo \
 	cpu-d30v.lo \
@@ -111,6 +112,7 @@ ALL_MACHINES_CFILES = \
 	cpu-arm.c \
 	cpu-avr.c \
 	cpu-cris.c \
+	cpu-cr16c.c \
 	cpu-d10v.c \
 	cpu-d30v.c \
 	cpu-dlx.c \
@@ -213,6 +215,7 @@ BFD32_BACKENDS = \
 	elfarm-oabi.lo \
 	elfarm-nabi.lo \
 	elf32-avr.lo \
+	elf32-cr16c.lo \
 	elf32-cris.lo \
 	elf32-d10v.lo \
 	elf32-d30v.lo \
@@ -378,6 +381,7 @@ BFD32_BACKENDS_CFILES = \
 	elfarm-oabi.c \
 	elfarm-nabi.c \
 	elf32-avr.c \
+	elf32-cr16c.c \
 	elf32-cris.c \
 	elf32-d10v.c \
 	elf32-d30v.c \
@@ -588,7 +592,7 @@ CFILES = $(SOURCE_CFILES) $(BUILD_CFILES)
 SOURCE_HFILES = \
 	aout-target.h aoutf1.h aoutx.h coffcode.h coffswap.h ecoffswap.h \
 	elf-bfd.h elf-hppa.h elf32-arm.h elf32-hppa.h \
-	elf64-hppa.h elfcode.h elfcore.h elflink.h \
+	elf64-hppa.h elfcode.h elfcore.h \
 	freebsd.h genlink.h go32stub.h \
 	libaout.h libbfd.h libcoff.h libecoff.h libhppa.h libieee.h \
 	libnlm.h liboasys.h libpei.h libxcoff.h mach-o.h \
@@ -915,6 +919,7 @@ cpu-alpha.lo: cpu-alpha.c $(INCDIR)/filenames.h
 cpu-arc.lo: cpu-arc.c $(INCDIR)/filenames.h
 cpu-arm.lo: cpu-arm.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h
 cpu-avr.lo: cpu-avr.c $(INCDIR)/filenames.h
+cpu-cr16c.lo: cpu-cr16c.c $(INCDIR)/filenames.h
 cpu-cris.lo: cpu-cris.c $(INCDIR)/filenames.h
 cpu-d10v.lo: cpu-d10v.c $(INCDIR)/filenames.h
 cpu-d30v.lo: cpu-d30v.c $(INCDIR)/filenames.h
@@ -1137,6 +1142,10 @@ elf32-avr.lo: elf32-avr.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/avr.h $(INCDIR)/elf/reloc-macros.h \
   elf32-target.h
+elf32-cr16c.lo: elf32-cr16c.c $(INCDIR)/filenames.h elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/elf/cr16c.h $(INCDIR)/elf/reloc-macros.h \
+  elf32-target.h
 elf32-cris.lo: elf32-cris.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/cris.h $(INCDIR)/elf/reloc-macros.h \
@@ -1310,7 +1319,7 @@ elf32-xtensa.lo: elf32-xtensa.c $(INCDIR)/filenames.h \
 elf32.lo: elf32.c elfcode.h $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
   $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h elfcore.h \
-  elflink.h $(INCDIR)/safe-ctype.h
+  $(INCDIR)/safe-ctype.h
 elflink.lo: elflink.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h
@@ -1592,7 +1601,7 @@ elf64-sparc.lo: elf64-sparc.c $(INCDIR)/filenames.h \
 elf64.lo: elf64.c elfcode.h $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
   $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h elfcore.h \
-  elflink.h $(INCDIR)/safe-ctype.h
+  $(INCDIR)/safe-ctype.h
 mmo.lo: mmo.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
   $(INCDIR)/elf/mmix.h $(INCDIR)/elf/reloc-macros.h $(INCDIR)/opcode/mmix.h
 nlm32-alpha.lo: nlm32-alpha.c $(INCDIR)/filenames.h \

@@ -126,7 +126,7 @@
 #define elf_backend_gc_sweep_hook	NULL
 #endif
 #ifndef bfd_elfNN_bfd_gc_sections
-#define bfd_elfNN_bfd_gc_sections _bfd_elfNN_gc_sections
+#define bfd_elfNN_bfd_gc_sections bfd_elf_gc_sections
 #endif
 
 #ifndef bfd_elfNN_bfd_merge_sections
@@ -189,6 +189,12 @@
 #ifndef bfd_elfNN_bfd_link_hash_table_create
 #define bfd_elfNN_bfd_link_hash_table_create _bfd_elf_link_hash_table_create
 #endif
+#ifndef bfd_elfNN_bfd_link_add_symbols
+#define bfd_elfNN_bfd_link_add_symbols	bfd_elf_link_add_symbols
+#endif
+#ifndef bfd_elfNN_bfd_final_link
+#define bfd_elfNN_bfd_final_link	bfd_elf_final_link
+#endif
 #else /* ! defined (elf_backend_relocate_section) */
 /* If no backend relocate_section routine, use the generic linker.
    Note - this will prevent the port from being able to use some of
@@ -233,6 +239,10 @@
 
 #ifndef bfd_elfNN_mkarchive
 #define bfd_elfNN_mkarchive _bfd_generic_mkarchive
+#endif
+
+#ifndef bfd_elfNN_print_symbol
+#define bfd_elfNN_print_symbol bfd_elf_print_symbol
 #endif
 
 #ifndef elf_symbol_leading_char

@@ -3186,6 +3186,7 @@ map_sections_to_segments (bfd *abfd)
   struct elf_segment_map **pm;
   struct elf_segment_map *m;
   asection *last_hdr;
+  bfd_vma last_size;
   unsigned int phdr_index;
   bfd_vma maxpagesize;
   asection **hdrpp;
@@ -3265,6 +3266,7 @@ map_sections_to_segments (bfd *abfd)
      segment when the start of the second section can be placed within
      a few bytes of the end of the first section.  */
   last_hdr = NULL;
+  last_size = 0;
   phdr_index = 0;
   maxpagesize = get_elf_backend_data (abfd)->maxpagesize;
   writable = FALSE;
@@ -3313,18 +3315,19 @@ map_sections_to_segments (bfd *abfd)
              segment.  */
 	  new_segment = TRUE;
 	}
-      else if (BFD_ALIGN (last_hdr->lma + last_hdr->_raw_size, maxpagesize)
+      else if (BFD_ALIGN (last_hdr->lma + last_size, maxpagesize)
 	       < BFD_ALIGN (hdr->lma, maxpagesize))
 	{
 	  /* If putting this section in this segment would force us to
              skip a page in the segment, then we need a new segment.  */
 	  new_segment = TRUE;
 	}
-      else if ((last_hdr->flags & SEC_LOAD) == 0
-	       && (hdr->flags & SEC_LOAD) != 0)
+      else if ((last_hdr->flags & (SEC_LOAD | SEC_THREAD_LOCAL)) == 0
+	       && (hdr->flags & (SEC_LOAD | SEC_THREAD_LOCAL)) != 0)
 	{
 	  /* We don't want to put a loadable section after a
-             nonloadable section in the same segment.  */
+             nonloadable section in the same segment.
+             Consider .tbss sections as loadable for this purpose.  */
 	  new_segment = TRUE;
 	}
       else if ((abfd->flags & D_PAGED) == 0)
@@ -3336,7 +3339,7 @@ map_sections_to_segments (bfd *abfd)
 	}
       else if (! writable
 	       && (hdr->flags & SEC_READONLY) == 0
-	       && (((last_hdr->lma + last_hdr->_raw_size - 1)
+	       && (((last_hdr->lma + last_size - 1)
 		    & ~(maxpagesize - 1))
 		   != (hdr->lma & ~(maxpagesize - 1))))
 	{
@@ -3359,9 +3362,12 @@ map_sections_to_segments (bfd *abfd)
 	{
 	  if ((hdr->flags & SEC_READONLY) == 0)
 	    writable = TRUE;
-	  /* Ignore .tbss section for segment layout purposes.  */
+	  last_hdr = hdr;
+	  /* .tbss sections effectively have zero size.  */
 	  if ((hdr->flags & (SEC_THREAD_LOCAL | SEC_LOAD)) != SEC_THREAD_LOCAL)
-	    last_hdr = hdr;
+	    last_size = hdr->_raw_size;
+	  else
+	    last_size = 0;
 	  continue;
 	}
 
@@ -3381,6 +3387,11 @@ map_sections_to_segments (bfd *abfd)
 	writable = FALSE;
 
       last_hdr = hdr;
+      /* .tbss sections effectively have zero size.  */
+      if ((hdr->flags & (SEC_THREAD_LOCAL | SEC_LOAD)) != SEC_THREAD_LOCAL)
+	last_size = hdr->_raw_size;
+      else
+	last_size = 0;
       phdr_index = i;
       phdr_in_segment = FALSE;
     }
