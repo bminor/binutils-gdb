@@ -295,9 +295,9 @@ can_run_code_for (const struct bfd_arch_info *a, const struct bfd_arch_info *b)
      written for B, but B can't run code written for A, then it'll
      return A.
 
-     struct bfd_arch_info objects are atoms: that is, there's supposed
-     to be exactly one instance for a given machine.  So you can tell
-     whether two are equivalent by comparing pointers.  */
+     struct bfd_arch_info objects are singletons: that is, there's
+     supposed to be exactly one instance for a given machine.  So you
+     can tell whether two are equivalent by comparing pointers.  */
   return (a == b || a->compatible (a, b) == a);
 }
 
@@ -333,6 +333,14 @@ gdbarch_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
 	 type that is compatible with the desired machine type.  Right
 	 now we simply return the first match, which is fine for now.
 	 However, we might want to do something smarter in the future.  */
+      /* NOTE: cagney/2003-10-23: The code for "a can_run_code_for b"
+         is implemented using BFD's compatible method (a->compatible
+         (b) == a -- the lowest common denominator between a and b is
+         a).  That method's definition of compatible may not be as you
+         expect.  For instance, while "amd64 can run code for i386"
+         (or more generally "64-bit ISA can run code for the 32-bit
+         ISA").  Fortunatly, BFD doesn't normally consider 32-bit and
+         64-bit "compatible" so won't get a match.  */
       if (can_run_code_for (arch_info, handler->arch_info))
 	{
 	  (*handler->init_osabi) (info, gdbarch);

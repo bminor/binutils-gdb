@@ -1,3 +1,8 @@
+2003-10-24  Andrew Cagney  <cagney@redhat.com>
+
+	* osabi.c (gdbarch_init_osabi): Add comment on 32-bit vs 64-bit.
+	(can_run_code_for): Use the OO term "singleton".
+
 2003-10-23  Andrew Cagney  <cagney@redhat.com>
 
 	* Makefile.in (stack.o): Add $(regcache_h).
