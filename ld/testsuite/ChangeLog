@@ -1,3 +1,7 @@
+1999-05-17  Nick Clifton  <nickc@cygnus.com>
+
+	* ld-undefined/undefined.exp: Add xfail for mcore-elf.
+
 1999-05-11  DJ Delorie  <dj@cygnus.com>
 
 	* ld-srec/srec.exp: Do not run tests for PE based ports.
