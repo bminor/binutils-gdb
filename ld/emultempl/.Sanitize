@@ -36,6 +36,7 @@ README
 aix.em
 armcoff.em
 armelf.em
+armelf_oabi.em
 elf32.em
 generic.em
 gld960.em
