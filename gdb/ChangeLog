@@ -25,6 +25,8 @@ Fri Apr 19 09:36:50 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 	before we compile it.
 	defs.h: Protect against multiple inclusion.
 	param.h: Include defs.h.
+	signame.c: Change #ifdef SYS_SIGLIST_MISSING to #if.
+	param-no-tm.h: Define SYS_SIGLIST_MISSING from USG.
 
 Thu Apr 18 19:49:10 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 

@@ -25,7 +25,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define CONST
 #endif
 
-#ifdef SYS_SIGLIST_MISSING
+#if SYS_SIGLIST_MISSING
 /* There is too much variation in Sys V signal numbers and names, so
    we must initialize them at runtime.  */
 
@@ -52,7 +52,7 @@ init_sig (number, abbrev, name)
      CONST char *abbrev;
      CONST char *name;
 {
-#ifdef SYS_SIGLIST_MISSING
+#if SYS_SIGLIST_MISSING
   sys_siglist[number] = name;
 #endif
   sig_table[sig_table_nelts].number = number;
@@ -61,7 +61,7 @@ init_sig (number, abbrev, name)
 
 static void init_sigs ()
 {
-#ifdef SYS_SIGLIST_MISSING
+#if SYS_SIGLIST_MISSING
   int i;
 
   /* Initialize signal names.  */
@@ -226,7 +226,7 @@ sig_number (abbrev)
   return -1;
 }
 
-#if defined (SYS_SIGLIST_MISSING)
+#if SYS_SIGLIST_MISSING
 /* Print to standard error the name of SIGNAL, preceded by MESSAGE and
    a colon, and followed by a newline.  */
 void
@@ -239,7 +239,7 @@ psignal (signal, message)
   else
     fprintf (stderr, "%s: %s\n", message, sys_siglist[signal]);
 }
-#endif
+#endif /* SYS_SIGLIST_MISSING */
 
 void
 _initialize_signame ()

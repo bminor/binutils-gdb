@@ -73,4 +73,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define ADDR_BITS_SET(addr) (addr)
 #endif /* No ADDR_BITS_REMOVE.  */
 
+#if !defined (SYS_SIGLIST_MISSING)
+#define SYS_SIGLIST_MISSING defined (USG)
+#endif /* No SYS_SIGLIST_MISSING */
+
 #endif /* param.h not already included.  */
