@@ -1,5 +1,10 @@
 2004-01-06  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.cp/m-static.exp: Compile one source file at a time.
+	Delete unused call to get_compiler_info.
+
+2004-01-06  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.base/call-ar-st.exp: Delete explicit reference to ${binfile}.ci.
 	* gdb.base/call-rt-st.exp: Likewise.
 	* gdb.base/nodebug.exp: Likewise.
