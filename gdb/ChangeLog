@@ -1,3 +1,12 @@
+2001-12-20  Michael Snyder  <msnyder@redhat.com>
+
+	* maint.c (maintenance_info_sections): Pass string argument to
+	print_section_table, so that it can be used to select sections.
+	(print_section_table): Change PTR to void *.  Look at string arg
+	to select sections by name and by flag attributes.
+	(match_bfd_flags): New function.
+	(print_bfd_flags): New function.
+
 Thu Dec 20 11:37:50 2001  Jeffrey A Law  (law@redhat.com)
 
 	* cli/cli-decode.c (add_cmd): Initialize pre_show_hook in

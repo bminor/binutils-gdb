@@ -52,7 +52,7 @@ static void maintenance_space_display (char *, int);
 
 static void maintenance_info_command (char *, int);
 
-static void print_section_table (bfd *, asection *, PTR);
+static void print_section_table (bfd *, asection *, void *);
 
 static void maintenance_info_sections (char *, int);
 
@@ -186,27 +186,52 @@ maintenance_info_command (char *arg, int from_tty)
   help_list (maintenanceinfolist, "maintenance info ", -1, gdb_stdout);
 }
 
-static void
-print_section_table (bfd *abfd, asection *asect, PTR ignore)
+static int 
+match_bfd_flags (char *string, flagword flags)
 {
-  flagword flags;
+  if (flags & SEC_ALLOC)
+    if (strstr (string, "ALLOC"))
+      return 1;
+  if (flags & SEC_LOAD)
+    if (strstr (string, "LOAD"))
+      return 1;
+  if (flags & SEC_RELOC)
+    if (strstr (string, "RELOC"))
+      return 1;
+  if (flags & SEC_READONLY)
+    if (strstr (string, "READONLY"))
+      return 1;
+  if (flags & SEC_CODE)
+    if (strstr (string, "CODE"))
+      return 1;
+  if (flags & SEC_DATA)
+    if (strstr (string, "DATA"))
+      return 1;
+  if (flags & SEC_ROM)
+    if (strstr (string, "ROM"))
+      return 1;
+  if (flags & SEC_CONSTRUCTOR)
+    if (strstr (string, "CONSTRUCTOR"))
+      return 1;
+  if (flags & SEC_HAS_CONTENTS)
+    if (strstr (string, "HAS_CONTENTS"))
+      return 1;
+  if (flags & SEC_NEVER_LOAD)
+    if (strstr (string, "NEVER_LOAD"))
+      return 1;
+  if (flags & SEC_COFF_SHARED_LIBRARY)
+    if (strstr (string, "COFF_SHARED_LIBRARY"))
+      return 1;
+  if (flags & SEC_IS_COMMON)
+    if (strstr (string, "IS_COMMON"))
+      return 1;
 
-  flags = bfd_get_section_flags (abfd, asect);
+  return 0;
+}
 
-  /* FIXME-32x64: Need print_address_numeric with field width.  */
-  printf_filtered ("    %s",
-		   local_hex_string_custom
-		   ((unsigned long) bfd_section_vma (abfd, asect), "08l"));
-  printf_filtered ("->%s",
-		   local_hex_string_custom
-		   ((unsigned long) (bfd_section_vma (abfd, asect)
-				     + bfd_section_size (abfd, asect)),
-		    "08l"));
-  printf_filtered (" at %s",
-		   local_hex_string_custom
-		   ((unsigned long) asect->filepos, "08l"));
-  printf_filtered (": %s", bfd_section_name (abfd, asect));
-
+static void
+print_bfd_flags (flagword flags)
+{
   if (flags & SEC_ALLOC)
     printf_filtered (" ALLOC");
   if (flags & SEC_LOAD)
@@ -231,8 +256,39 @@ print_section_table (bfd *abfd, asection *asect, PTR ignore)
     printf_filtered (" COFF_SHARED_LIBRARY");
   if (flags & SEC_IS_COMMON)
     printf_filtered (" IS_COMMON");
+}
 
-  printf_filtered ("\n");
+static void
+print_section_table (bfd *abfd, asection *asect, void *arg)
+{
+  flagword flags;
+  char *string = arg;
+
+  flags = bfd_get_section_flags (abfd, asect);
+
+  if (string == NULL || *string == '\0' ||
+      strstr (string, bfd_get_section_name (abfd, asect)) ||
+      match_bfd_flags (string, flags))
+    {
+      /* FIXME-32x64: Need print_address_numeric with field width.  */
+      printf_filtered ("    %s",
+		       local_hex_string_custom
+		       ((unsigned long) bfd_section_vma (abfd, asect), 
+			"08l"));
+      printf_filtered ("->%s",
+		       local_hex_string_custom
+		       ((unsigned long) (bfd_section_vma (abfd, asect)
+					 + bfd_section_size (abfd, asect)),
+			"08l"));
+      printf_filtered (" at %s",
+		       local_hex_string_custom
+		       ((unsigned long) asect->filepos, "08l"));
+      printf_filtered (": %s", bfd_section_name (abfd, asect));
+
+      print_bfd_flags (flags);
+
+      printf_filtered ("\n");
+    }
 }
 
 /* ARGSUSED */
@@ -245,7 +301,7 @@ maintenance_info_sections (char *arg, int from_tty)
       printf_filtered ("    `%s', ", bfd_get_filename (exec_bfd));
       wrap_here ("        ");
       printf_filtered ("file type %s.\n", bfd_get_target (exec_bfd));
-      bfd_map_over_sections (exec_bfd, print_section_table, 0);
+      bfd_map_over_sections (exec_bfd, print_section_table, arg);
     }
 
   if (core_bfd)
@@ -254,7 +310,7 @@ maintenance_info_sections (char *arg, int from_tty)
       printf_filtered ("    `%s', ", bfd_get_filename (core_bfd));
       wrap_here ("        ");
       printf_filtered ("file type %s.\n", bfd_get_target (core_bfd));
-      bfd_map_over_sections (core_bfd, print_section_table, 0);
+      bfd_map_over_sections (core_bfd, print_section_table, arg);
     }
 }
 
