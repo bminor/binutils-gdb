@@ -974,7 +974,7 @@ intel_float_operand (mnemonic)
      char *mnemonic;
 {
   if (mnemonic[0] == 'f' && mnemonic[1] =='i')
-    return 0;
+    return 2;
 
   if (mnemonic[0] == 'f')
     return 1;
@@ -1265,10 +1265,15 @@ md_assemble (line)
     unsigned int found_reverse_match;
     int suffix_check;
 
-    /* All intel opcodes have reversed operands except for BOUND and ENTER */
+    /* All intel opcodes have reversed operands except for "bound" and
+       "enter".  We also don't reverse intersegment "jmp" and "call"
+       instructions with 2 immediate operands so that the immediate segment
+       precedes the offset, as it does when in AT&T mode.  "enter" and the
+       intersegment "jmp" and "call" instructions are the only ones that
+       have two immediate operands.  */
     if (intel_syntax && i.operands > 1
-	&& (strcmp (mnemonic, "enter") != 0)
-	&& (strcmp (mnemonic, "bound") != 0))
+	&& (strcmp (mnemonic, "bound") != 0)
+	&& !((i.types[0] & Imm) && (i.types[1] & Imm)))
       {
 	union i386_op temp_op;
 	unsigned int temp_type;
@@ -1491,7 +1496,8 @@ md_assemble (line)
 	       register type.  */
 	    int op;
 	    for (op = i.operands; --op >= 0; )
-	      if (i.types[op] & Reg)
+	      if ((i.types[op] & Reg)
+		  && !(i.tm.operand_types[op] & InOutPortReg))
 		{
 		  i.suffix = ((i.types[op] & Reg8) ? BYTE_MNEM_SUFFIX :
 			      (i.types[op] & Reg16) ? WORD_MNEM_SUFFIX :
@@ -2818,14 +2824,17 @@ i386_operand_modifier (op_string, got_a_float)
     }
   else if (!strncasecmp (*op_string, "WORD PTR", 8))
     {
-      i.suffix = WORD_MNEM_SUFFIX;
+      if (got_a_float == 2)	/* "fi..." */
+	i.suffix = SHORT_MNEM_SUFFIX;
+      else
+	i.suffix = WORD_MNEM_SUFFIX;
       *op_string += 8;
       return WORD_PTR;
     }
 
   else if (!strncasecmp (*op_string, "DWORD PTR", 9))
     {
-      if (got_a_float)
+      if (got_a_float == 1)	/* "f..." */
 	i.suffix = SHORT_MNEM_SUFFIX;
       else
 	i.suffix = LONG_MNEM_SUFFIX;
@@ -2849,7 +2858,6 @@ i386_operand_modifier (op_string, got_a_float)
 
   else if (!strncasecmp (*op_string, "SHORT", 5))
     {
-      i.suffix = WORD_MNEM_SUFFIX;
       *op_string += 5;
       return SHORT;
     }

@@ -1,3 +1,11 @@
+2000-02-25  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* gas/i386/intel.s: New file, intel version of opcode.s
+	* gas/i386/intel.d: New file, copy opcode.d
+
+	* gas/i386/general.s: Add extra "out" instructions.
+	* gas/i386/general.l: Likewise.
+
 2000-01-31  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/arm/inst.s: Include test of ATPCS register naming

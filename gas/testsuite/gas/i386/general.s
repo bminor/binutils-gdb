@@ -61,9 +61,23 @@
 	inb	$255
 	inw	$2
 	inl	$4
-	outl	%eax,%dx
-	out	%al, $42
 	in	$13, %ax
+	out	%al,%dx
+	out	%ax,%dx
+	out	%eax,%dx
+	out	%al,(%dx)
+	out	%ax,(%dx)
+	out	%eax,(%dx)
+	outb	%al,%dx
+	outw	%ax,%dx
+	outl	%eax,%dx
+	outb	%dx
+	outw	%dx
+	outl	%dx
+	outb	$255
+	outw	$2
+	outl	$4
+	out	%ax, $13
 # These are used in AIX.
 	inw	(%dx)
 	outw	(%dx)
