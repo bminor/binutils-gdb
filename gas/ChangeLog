@@ -1,3 +1,13 @@
+2001-11-05  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* config/tc-s390.c (tc_s390_force_relocation): Force all relocations
+	that need the global offset table.
+	(md_apply_fix3): Add code to undo opertions done in fixup_segment
+	triggered by TC_FORCE_RELOCATION.
+	* config/tc-s390.h (TC_FORCE_RELOCATION): Replace macro code with
+	a call to function tc_s390_force_relocation.
+	(TC_FIX_ADJUSTABLE): Define.
+
 2001-11-04  Chris Demetriou  <cgd@broadcom.com>
 
 	* configure.in (mips-*-netbsd*): Add support for target.

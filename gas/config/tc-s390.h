@@ -44,12 +44,14 @@ struct fix;
            && S_IS_DEFINED ((FIX)->fx_addsy)      \
            && ! S_IS_COMMON ((FIX)->fx_addsy))))
 
-#define TC_FORCE_RELOCATION(FIXP)       \
-  ((FIXP)->fx_r_type == BFD_RELOC_VTABLE_INHERIT	\
-   || (FIXP)->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+#define TC_FORCE_RELOCATION(FIXP) tc_s390_force_relocation(FIXP)
+extern int tc_s390_force_relocation PARAMS ((struct fix *));
 
 #define tc_fix_adjustable(X)  tc_s390_fix_adjustable(X)
 extern int tc_s390_fix_adjustable PARAMS ((struct fix *));
+
+#define TC_FIX_ADJUSTABLE(fixP) \
+  (! symbol_used_in_reloc_p ((fixP)->fx_addsy) && tc_fix_adjustable (fixP))
 
 /* The target BFD architecture.  */
 #define TARGET_ARCH bfd_arch_s390
