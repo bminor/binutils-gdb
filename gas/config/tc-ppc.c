@@ -2440,7 +2440,7 @@ ppc_section_letter (letter, ptr_msg)
   if (letter == 'e')
     return SHF_EXCLUDE;
 
-  *ptr_msg = _("Bad .section directive: want a,w,x,e in string");
+  *ptr_msg = _("Bad .section directive: want a,e,w,x,M,S in string");
   return 0;
 }
 

@@ -750,15 +750,15 @@ obj_elf_parse_section_letters (str, len)
 	case 'x':
 	  attr |= SHF_EXECINSTR;
 	  break;
-	case 'm':
+	case 'M':
 	  attr |= SHF_MERGE;
 	  break;
-	case 's':
+	case 'S':
 	  attr |= SHF_STRINGS;
 	  break;
 	default:
 	  {
-	    char *bad_msg = _("Unrecognized .section attribute: want a,m,s,w,x");
+	    char *bad_msg = _("Unrecognized .section attribute: want a,w,x,M,S");
 #ifdef md_elf_section_letter
 	    int md_attr = md_elf_section_letter (*str, &bad_msg);
 	    if (md_attr >= 0)

@@ -1,3 +1,10 @@
+2001-09-11  Jakub Jelinek  <jakub@redhat.com>
+
+	* config/obj-elf.c (obj_elf_parse_section_letters): Use 'M' instead
+	of 'm', 'S' instead of 's'.  Update bad_msg.
+	* config/tc-ppc.c (ppc_section_letter): Update bad_msg.
+	* config/tc-i370.c (i370_sectioN_letter): Update bad_msg.
+
 2001-09-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* expr.c (expr): Move code setting "retval" to the end of the loop,
