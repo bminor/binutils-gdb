@@ -372,7 +372,6 @@ xstormy16_elf_24_reloc (abfd, reloc_entry, symbol, data, input_section,
      char **error_message ATTRIBUTE_UNUSED;
 {
   bfd_vma relocation, x;
-  bfd_size_type sz;
 
   if (output_bfd != NULL)
     {
@@ -380,8 +379,7 @@ xstormy16_elf_24_reloc (abfd, reloc_entry, symbol, data, input_section,
       return bfd_reloc_ok;
     }
 
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (reloc_entry->address > sz)
+  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   if (bfd_is_com_section (symbol->section))

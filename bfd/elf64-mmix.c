@@ -1261,7 +1261,6 @@ mmix_elf_reloc (abfd, reloc_entry, symbol, data, input_section,
   bfd_reloc_status_type flag = bfd_reloc_ok;
   bfd_vma output_base = 0;
   bfd_vma addr;
-  bfd_size_type sz;
 
   r = bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
 			     input_section, output_bfd, error_message);
@@ -1277,8 +1276,7 @@ mmix_elf_reloc (abfd, reloc_entry, symbol, data, input_section,
     return bfd_reloc_undefined;
 
   /* Is the address of the relocation really within the section?  */
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (reloc_entry->address > sz)
+  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   /* Work out which section the relocation is targeted at and the

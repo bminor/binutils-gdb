@@ -1,3 +1,42 @@
+2004-06-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* bfd-in.h (bfd_get_section_limit): Define.
+	* reloc.c (bfd_perform_relocation, bfd_install_relocation) 
+	(_bfd_final_link_relocate): Use bfd_get_section_limit.
+	* aout-tic30.c (tic30_aout_final_link_relocate): Likewise.
+	* coff-arm.c (coff_arm_relocate_section): Likewise.
+	* coff-mips.c (mips_refhi_reloc, mips_gprel_reloc): Likewise.
+	* cpu-ns32k.c (do_ns32k_reloc): Likewise.
+	(bfd_ns32k_final_link_relocate): Likewise.
+	* elf32-d30v.c (bfd_elf_d30v_reloc, bfd_elf_d30v_reloc_21): Likwise.
+	* elf32-dlx.c (_bfd_dlx_elf_hi16_reloc): Likewise.
+	* elf32-i860.c (i860_howto_pc26_reloc, i860_howto_pc16_reloc) 
+	(i860_howto_highadj_reloc, i860_howto_splitn_reloc): Likewise.
+	* elf32-m32r.c (m32r_elf_do_10_pcrel_reloc, m32r_elf_hi16_reloc) 
+	(m32r_elf_generic_reloc, m32r_elf_relocate_section): Likewise.
+	* elf32-m68hc1x.c (m68hc11_elf_special_reloc): Likewise.
+	* elf32-mips.c (gprel32_with_gp, mips16_gprel_reloc): Likewise.
+	* elf32-or32.c (or32_elf_consth_reloc): Likewise.
+	* elf32-ppc.c (ppc_elf_addr16_ha_reloc): Likewise.
+	* elf32-s390.c (s390_elf_ldisp_reloc): Likewise.
+	* elf32-sh.c (sh_elf_reloc_loop): Likewise.
+	* elf32-sparc.c (sparc_elf_wdisp16_reloc): Likewise.
+	(sparc_elf_hix22_reloc, sparc_elf_lox10_reloc): Likwise.
+	* elf32-v850.c (v850_elf_reloc): Likewise.
+	* elf32-xstormy16.c (xstormy16_elf_24_reloc): Likewise.
+	* elf32-xtensa.c (bfd_elf_xtensa_reloc): Likewise.
+	* elf64-alpha.c (elf64_alpha_reloc_gpdisp): Likewise.
+	* elf64-mips.c (mips_elf64_gprel32_reloc)
+	(mips16_gprel_reloc): Likewise.
+	* elf64-mmix.c (mmix_elf_reloc): Likewise.
+	* elf64-s390.c (s390_elf_ldisp_reloc): Likewise.
+	* elf64-sparc.c (init_insn_reloc): Likewise.
+	* elfn32-mips.c (gprel32_with_gp, mips16_gprel_reloc): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_gprel16_with_gp) 
+	(_bfd_mips_elf_hi16_reloc, _bfd_mips_elf_lo16_reloc) 
+	(_bfd_mips_elf_generic_reloc): Likewise.
+	* bfd-in2.h: Regenerate.
+
 2004-06-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* bfd-in.h (struct stab_info): Move from stabs.c.

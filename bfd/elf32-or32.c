@@ -400,7 +400,6 @@ or32_elf_consth_reloc (abfd, reloc_entry, symbol, data, input_section,
 {
   bfd_reloc_status_type ret;
   bfd_vma relocation;
-  bfd_size_type sz;
   struct or32_consth *n;
 
   ret = bfd_reloc_ok;
@@ -418,8 +417,7 @@ or32_elf_consth_reloc (abfd, reloc_entry, symbol, data, input_section,
   relocation += symbol->section->output_offset;
   relocation += reloc_entry->addend;
 
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (reloc_entry->address > sz)
+  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   /* Save the information, and let LO16 do the actual relocation.  */

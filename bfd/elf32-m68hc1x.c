@@ -790,8 +790,6 @@ m68hc11_elf_special_reloc (bfd *abfd ATTRIBUTE_UNUSED,
                            bfd *output_bfd,
                            char **error_message ATTRIBUTE_UNUSED)
 {
-  bfd_size_type sz;
-
   if (output_bfd != (bfd *) NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
       && (! reloc_entry->howto->partial_inplace
@@ -804,8 +802,7 @@ m68hc11_elf_special_reloc (bfd *abfd ATTRIBUTE_UNUSED,
   if (output_bfd != NULL)
     return bfd_reloc_continue;
 
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (reloc_entry->address > sz)
+  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   abort();

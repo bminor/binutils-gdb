@@ -38,7 +38,6 @@ i860_howto_pc26_reloc (bfd *abfd ATTRIBUTE_UNUSED,
 {
   bfd_vma insn;
   bfd_vma relocation;
-  bfd_size_type sz;
   bfd_byte *addr;
 
   if (output_bfd != NULL
@@ -64,8 +63,7 @@ i860_howto_pc26_reloc (bfd *abfd ATTRIBUTE_UNUSED,
   relocation += symbol->section->output_offset;
   relocation += reloc_entry->addend;
 
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (reloc_entry->address > sz)
+  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   /* Adjust for PC-relative relocation.  */
@@ -103,7 +101,6 @@ i860_howto_pc16_reloc (bfd *abfd,
 {
   bfd_vma insn;
   bfd_vma relocation;
-  bfd_size_type sz;
   bfd_byte *addr;
 
   if (output_bfd != NULL
@@ -129,8 +126,7 @@ i860_howto_pc16_reloc (bfd *abfd,
   relocation += symbol->section->output_offset;
   relocation += reloc_entry->addend;
 
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (reloc_entry->address > sz)
+  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   /* Adjust for PC-relative relocation.  */
@@ -169,7 +165,6 @@ i860_howto_highadj_reloc (bfd *abfd,
 {
   bfd_vma insn;
   bfd_vma relocation;
-  bfd_size_type sz;
   bfd_byte *addr;
 
   if (output_bfd != NULL
@@ -196,8 +191,7 @@ i860_howto_highadj_reloc (bfd *abfd,
   relocation += reloc_entry->addend;
   relocation += 0x8000;
 
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (reloc_entry->address > sz)
+  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   addr = (bfd_byte *) data + reloc_entry->address;
@@ -224,7 +218,6 @@ i860_howto_splitn_reloc (bfd *abfd,
 {
   bfd_vma insn;
   bfd_vma relocation;
-  bfd_size_type sz;
   bfd_byte *addr;
 
   if (output_bfd != NULL
@@ -250,8 +243,7 @@ i860_howto_splitn_reloc (bfd *abfd,
   relocation += symbol->section->output_offset;
   relocation += reloc_entry->addend;
 
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (reloc_entry->address > sz)
+  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   addr = (bfd_byte *) data + reloc_entry->address;

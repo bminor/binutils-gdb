@@ -266,7 +266,6 @@ bfd_elf_d30v_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd, 
   bfd_reloc_status_type r;
   asection *reloc_target_output_section;
   bfd_size_type addr = reloc_entry->address;
-  bfd_size_type sz;
   bfd_reloc_status_type flag = bfd_reloc_ok;
   bfd_vma output_base = 0;
   reloc_howto_type *howto = reloc_entry->howto;
@@ -291,8 +290,7 @@ bfd_elf_d30v_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd, 
     flag = bfd_reloc_undefined;
 
   /* Is the address of the relocation really within the section?  */
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (reloc_entry->address > sz)
+  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   /* Work out which section the relocation is targeted at and the
@@ -377,7 +375,6 @@ bfd_elf_d30v_reloc_21 (abfd, reloc_entry, symbol, data, input_section, output_bf
   bfd_reloc_status_type r;
   asection *reloc_target_output_section;
   bfd_size_type addr = reloc_entry->address;
-  bfd_size_type sz;
   bfd_reloc_status_type flag = bfd_reloc_ok;
   bfd_vma output_base = 0;
   reloc_howto_type *howto = reloc_entry->howto;
@@ -402,8 +399,7 @@ bfd_elf_d30v_reloc_21 (abfd, reloc_entry, symbol, data, input_section, output_bf
     flag = bfd_reloc_undefined;
 
   /* Is the address of the relocation really within the section?  */
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (reloc_entry->address > sz)
+  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   /* Work out which section the relocation is targeted at and the

@@ -794,7 +794,6 @@ init_insn_reloc (abfd,
      bfd_vma *pinsn;
 {
   bfd_vma relocation;
-  bfd_size_type sz;
   reloc_howto_type *howto = reloc_entry->howto;
 
   if (output_bfd != (bfd *) NULL
@@ -810,8 +809,7 @@ init_insn_reloc (abfd,
   if (output_bfd != NULL)
     return bfd_reloc_continue;
 
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (reloc_entry->address > sz)
+  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   relocation = (symbol->value

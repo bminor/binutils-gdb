@@ -824,7 +824,6 @@ gprel32_with_gp (bfd *abfd, asymbol *symbol, arelent *reloc_entry,
 {
   bfd_vma relocation;
   bfd_vma val;
-  bfd_size_type sz;
 
   if (bfd_is_com_section (symbol->section))
     relocation = 0;
@@ -834,8 +833,7 @@ gprel32_with_gp (bfd *abfd, asymbol *symbol, arelent *reloc_entry,
   relocation += symbol->section->output_section->vma;
   relocation += symbol->section->output_offset;
 
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (reloc_entry->address > sz)
+  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   /* Set val to the offset into the section or symbol.  */
@@ -943,7 +941,6 @@ mips16_gprel_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
   unsigned short insn = 0;
   bfd_signed_vma val;
   bfd_vma relocation;
-  bfd_size_type sz;
 
   /* If we're relocating, and this is an external symbol, we don't want
      to change anything.  */
@@ -968,8 +965,7 @@ mips16_gprel_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
   if (ret != bfd_reloc_ok)
     return ret;
 
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (reloc_entry->address > sz)
+  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   if (bfd_is_com_section (symbol->section))

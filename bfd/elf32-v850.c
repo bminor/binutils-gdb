@@ -1334,7 +1334,6 @@ v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
      bfd *obfd;
      char **err ATTRIBUTE_UNUSED;
 {
-  bfd_size_type sz;
   long relocation;
 
   /* If there is an output BFD,
@@ -1360,8 +1359,7 @@ v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
   /* We handle final linking of some relocs ourselves.  */
 
   /* Is the address of the relocation really within the section?  */
-  sz = isection->rawsize ? isection->rawsize : isection->size;
-  if (reloc->address > sz)
+  if (reloc->address > bfd_get_section_limit (abfd, isection))
     return bfd_reloc_outofrange;
 
   /* Work out which section the relocation is targeted at and the

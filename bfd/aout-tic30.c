@@ -402,10 +402,8 @@ tic30_aout_final_link_relocate (howto, input_bfd, input_section, contents,
      bfd_vma addend;
 {
   bfd_vma relocation;
-  bfd_size_type sz;
 
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (address > sz)
+  if (address > bfd_get_section_limit (input_bfd, input_section))
     return bfd_reloc_outofrange;
 
   relocation = value + addend;

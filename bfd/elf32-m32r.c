@@ -901,13 +901,11 @@ m32r_elf_do_10_pcrel_reloc (abfd, howto, input_section, data, offset,
      bfd_vma addend;
 {
   bfd_signed_vma relocation;
-  bfd_size_type sz;
   unsigned long x;
   bfd_reloc_status_type status;
 
   /* Sanity check the address (offset in section).  */
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (offset > sz)
+  if (offset > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   relocation = symbol_value + addend;
@@ -972,7 +970,6 @@ m32r_elf_hi16_reloc (abfd, reloc_entry, symbol, data,
 {
   bfd_reloc_status_type ret;
   bfd_vma relocation;
-  bfd_size_type sz;
   struct m32r_hi16 *n;
 
   /* This part is from bfd_elf_generic_reloc.
@@ -987,8 +984,7 @@ m32r_elf_hi16_reloc (abfd, reloc_entry, symbol, data,
     }
 
   /* Sanity check the address (offset in section).  */
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (reloc_entry->address > sz)
+  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   ret = bfd_reloc_ok;
@@ -1141,7 +1137,6 @@ m32r_elf_generic_reloc (input_bfd, reloc_entry, symbol, data,
 {
   bfd_reloc_status_type ret;
   bfd_vma relocation;
-  bfd_size_type sz;
   bfd_byte *inplace_address;
 
   /* This part is from bfd_elf_generic_reloc.
@@ -1162,8 +1157,7 @@ m32r_elf_generic_reloc (input_bfd, reloc_entry, symbol, data,
      a section relative addend which is wrong.  */
 
   /* Sanity check the address (offset in section).  */
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (reloc_entry->address > sz)
+  if (reloc_entry->address > bfd_get_section_limit (input_bfd, input_section))
     return bfd_reloc_outofrange;
 
   ret = bfd_reloc_ok;
@@ -2578,6 +2572,7 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   bfd *dynobj;
   bfd_vma *local_got_offsets;
   asection *sgot, *splt, *sreloc;
+  bfd_vma high_address = bfd_get_section_limit (input_bfd, input_section);
 
   dynobj = htab->root.dynobj;
   local_got_offsets = elf_local_got_offsets (input_bfd);
@@ -2695,7 +2690,6 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       else
 	{
 	  bfd_vma relocation;
-	  bfd_size_type sz;
 
 	  /* This is a final link.  */
 	  sym = NULL;
@@ -2830,10 +2824,7 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 
 	  /* Sanity check the address.  */
-	  sz = (input_section->rawsize
-		? input_section->rawsize
-		: input_section->size);
-	  if (offset > input_section->size)
+	  if (offset > high_address)
 	    {
 	      r = bfd_reloc_outofrange;
 	      goto check_reloc;

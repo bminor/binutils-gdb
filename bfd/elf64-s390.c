@@ -420,7 +420,6 @@ s390_elf_ldisp_reloc (abfd, reloc_entry, symbol, data, input_section,
   reloc_howto_type *howto = reloc_entry->howto;
   bfd_vma relocation;
   bfd_vma insn;
-  bfd_size_type sz;
 
   if (output_bfd != (bfd *) NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
@@ -433,8 +432,7 @@ s390_elf_ldisp_reloc (abfd, reloc_entry, symbol, data, input_section,
   if (output_bfd != NULL)
     return bfd_reloc_continue;
 
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (reloc_entry->address > sz)
+  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   relocation = (symbol->value

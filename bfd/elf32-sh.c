@@ -1843,12 +1843,10 @@ sh_elf_reloc_loop (int r_type ATTRIBUTE_UNUSED, bfd *input_bfd,
   bfd_byte *start_ptr, *ptr, *last_ptr;
   int diff, cum_diff;
   bfd_signed_vma x;
-  bfd_size_type sz;
   int insn;
 
   /* Sanity check the address.  */
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (addr > sz)
+  if (addr > bfd_get_section_limit (input_bfd, input_section))
     return bfd_reloc_outofrange;
 
   /* We require the start and end relocations to be processed consecutively -

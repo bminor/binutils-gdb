@@ -1650,7 +1650,6 @@ bfd_elf_xtensa_reloc (abfd, reloc_entry, symbol, data, input_section,
   bfd_vma relocation;
   bfd_reloc_status_type flag;
   bfd_size_type octets = reloc_entry->address * bfd_octets_per_byte (abfd);
-  bfd_size_type sz;
   bfd_vma output_base = 0;
   reloc_howto_type *howto = reloc_entry->howto;
   asection *reloc_target_output_section;
@@ -1675,8 +1674,7 @@ bfd_elf_xtensa_reloc (abfd, reloc_entry, symbol, data, input_section,
     }
 
   /* Is the address of the relocation really within the section?  */
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (reloc_entry->address > sz / bfd_octets_per_byte (abfd))
+  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   /* Work out which section the relocation is targeted at and the

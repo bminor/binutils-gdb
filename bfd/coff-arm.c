@@ -1202,6 +1202,7 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 {
   struct internal_reloc * rel;
   struct internal_reloc * relend;
+  bfd_vma high_address = bfd_get_section_limit (input_bfd, input_section);
 
   rel = relocs;
   relend = rel + input_section->reloc_count;
@@ -1635,12 +1636,8 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
              code.  */
 
           bfd_vma address = rel->r_vaddr - input_section->vma;
-	  bfd_size_type sz;
 
-	  sz = (input_section->rawsize
-		? input_section->rawsize
-		: input_section->size);
-          if (address > sz)
+	  if (address > high_address)
 	    rstat = bfd_reloc_outofrange;
           else
             {

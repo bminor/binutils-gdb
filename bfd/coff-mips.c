@@ -473,7 +473,6 @@ mips_refhi_reloc (abfd,
 {
   bfd_reloc_status_type ret;
   bfd_vma relocation;
-  bfd_size_type sz;
   struct mips_hi *n;
 
   /* If we're relocating, and this an external symbol, we don't want
@@ -500,8 +499,7 @@ mips_refhi_reloc (abfd,
   relocation += symbol->section->output_offset;
   relocation += reloc_entry->addend;
 
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (reloc_entry->address > sz)
+  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   /* Save the information, and let REFLO do the actual relocation.  */
@@ -610,7 +608,6 @@ mips_gprel_reloc (abfd,
   bfd_boolean relocatable;
   bfd_vma gp;
   bfd_vma relocation;
-  bfd_size_type sz;
   unsigned long val;
   unsigned long insn;
 
@@ -700,8 +697,7 @@ mips_gprel_reloc (abfd,
   relocation += symbol->section->output_section->vma;
   relocation += symbol->section->output_offset;
 
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (reloc_entry->address > sz)
+  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   insn = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address);

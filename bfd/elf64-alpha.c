@@ -1036,7 +1036,7 @@ elf64_alpha_reloc_gpdisp (abfd, reloc_entry, sym, data, input_section,
 {
   bfd_reloc_status_type ret;
   bfd_vma gp, relocation;
-  bfd_size_type sz;
+  bfd_vma high_address;
   bfd_byte *p_ldah, *p_lda;
 
   /* Don't do anything if we're not doing a final link.  */
@@ -1046,9 +1046,9 @@ elf64_alpha_reloc_gpdisp (abfd, reloc_entry, sym, data, input_section,
       return bfd_reloc_ok;
     }
 
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (reloc_entry->address > sz
-      || reloc_entry->address + reloc_entry->addend > sz)
+  high_address = bfd_get_section_limit (abfd, input_section);
+  if (reloc_entry->address > high_address
+      || reloc_entry->address + reloc_entry->addend > high_address)
     return bfd_reloc_outofrange;
 
   /* The gp used in the portion of the output object to which this

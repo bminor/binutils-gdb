@@ -1068,7 +1068,6 @@ _bfd_mips_elf_gprel16_with_gp (bfd *abfd, asymbol *symbol,
 {
   bfd_vma relocation;
   bfd_signed_vma val;
-  bfd_size_type sz;
   bfd_reloc_status_type status;
 
   if (bfd_is_com_section (symbol->section))
@@ -1079,8 +1078,7 @@ _bfd_mips_elf_gprel16_with_gp (bfd *abfd, asymbol *symbol,
   relocation += symbol->section->output_section->vma;
   relocation += symbol->section->output_offset;
 
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (reloc_entry->address > sz)
+  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   /* Set val to the offset into the section or symbol.  */
@@ -1145,10 +1143,8 @@ _bfd_mips_elf_hi16_reloc (bfd *abfd ATTRIBUTE_UNUSED, arelent *reloc_entry,
 			  char **error_message ATTRIBUTE_UNUSED)
 {
   struct mips_hi16 *n;
-  bfd_size_type sz;
 
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (reloc_entry->address > sz)
+  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   n = bfd_malloc (sizeof *n);
@@ -1198,10 +1194,8 @@ _bfd_mips_elf_lo16_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 			  bfd *output_bfd, char **error_message)
 {
   bfd_vma vallo;
-  bfd_size_type sz;
 
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (reloc_entry->address > sz)
+  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   vallo = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address);
@@ -1250,14 +1244,12 @@ _bfd_mips_elf_generic_reloc (bfd *abfd ATTRIBUTE_UNUSED, arelent *reloc_entry,
 			     char **error_message ATTRIBUTE_UNUSED)
 {
   bfd_signed_vma val;
-  bfd_size_type sz;
   bfd_reloc_status_type status;
   bfd_boolean relocatable;
 
   relocatable = (output_bfd != NULL);
 
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (reloc_entry->address > sz)
+  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
   /* Build up the field adjustment in VAL.  */
