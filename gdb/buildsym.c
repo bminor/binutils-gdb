@@ -2579,6 +2579,7 @@ read_struct_type (pp, type, objfile)
 	  mainlist = new_mainlist;
 	  nfn_fields++;
 	  total_length += length;
+	  if (**pp == '\\') *pp = next_symbol_text ();
 	}
       while (**pp != ';');
     }

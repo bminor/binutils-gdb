@@ -1,3 +1,8 @@
+Tue Mar 24 07:26:19 1992  Michael Tiemann  (tiemann@cygnus.com)
+
+	* buildsym.c (read_struct_type): Handle cretinous dbx symbol name
+	continuation in yet another place (between method declarations).
+
 Mon Mar 23 23:01:41 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* mips-tdep.c:  include symfile.h and objfiles.h to fix
