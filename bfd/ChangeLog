@@ -1,3 +1,7 @@
+Fri Aug 20 12:18:05 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecoff.c (ECOFF_LONG_SIZE): Removed.  Just use constants.
+
 Thu Aug 19 09:45:51 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* Makefile.in (BFD_LIBS, ALL_MACHINES, BFD32_BACKENDS, BFD64_BACKENDS,
