@@ -1,5 +1,7 @@
 Fri Jun 25 12:00:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.stabs/wierd{.def,.exp,-aout.S,-xcoff.S}: Add common block test.
+
 	* gdb.t{02,13}/{Makefile.in,gdbme.c,comp-info.c}: New way of
 	generating comp-info.exp which works for cross-compilation.
 

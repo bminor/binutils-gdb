@@ -306,6 +306,21 @@ STAB("attr90:G390=@Z !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]
 STAB("attr91:G391=@[ !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~;1",N_GSYM,attr91)
 STAB("attr92:G392=@\ !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~;1",N_GSYM,attr92)
 STAB("attr93:G393=@] !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~;1",N_GSYM,attr93)
+
+/* Provide one of each, so this wins regardless of whether names have
+   underscores.  */
+VAR (_common0)
+     .long 24
+     .long 22
+VAR (common0)
+     .long 24
+     .long 22
+STAB ("common0", N_BCOMM, 0)
+STAB ("common0var0:S1", N_GSYM, 0)
+STAB ("common0var1:S1", N_GSYM, 4)
+STAB ("common0var2:S1", N_GSYM, 8)
+STAB ("common0", N_ECOMM, 0)
+
 STAB("attr94:G394=@^ !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~;1",N_GSYM,attr94)
 STAB("attr95:G395=@_ !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~;1",N_GSYM,attr95)
 STAB("attr100:G400=@d !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~;1",N_GSYM,attr100)

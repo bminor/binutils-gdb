@@ -157,6 +157,17 @@ field3 = 0x77888877\}" "print struct constant"
 	gdb_test "whatis pointer_to_int_var" "type = int \*" "whatis p t i v"
 	setup_xfail "*-*-*"
 	gdb_test "whatis intp_var" "type = intp" "whatis intp_var"
+
+	gdb_test "p common0var0" "= 42"
+	# GDB seems to only understand common blocks local to a function.
+	# These variables never get relocated to be relative to the common 
+	# block.
+	# I'm not sure whether it is valid to have a common block which
+	# is not local to a function.
+	setup_xfail "*-*-*"
+	gdb_test "p common0var1" "= 24"
+	setup_xfail "*-*-*"
+	gdb_test "p common0var2" "= 22"
 }
 
 proc print_wierd_var { var } {

@@ -1,5 +1,7 @@
-#define N_LSYM 0x81
-#define N_GSYM 0x80
+#define N_GSYM 128
+#define N_LSYM 129
+#define N_BCOMM 135
+#define N_ECOMM 137
 
 #define VAR(name) \
 	.globl name; \

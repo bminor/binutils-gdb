@@ -3,6 +3,8 @@
 
 #define N_LSYM 0x80
 #define N_GSYM 0x20
+#define N_BCOMM 0xe2
+#define N_ECOMM 0xe4
 
 #define VAR(name) \
 	.globl name; \
