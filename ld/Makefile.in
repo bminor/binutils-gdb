@@ -899,7 +899,7 @@ LDDISTSTUFF = ldgram.c ldgram.h ldlex.c
 diststuff: $(LDDISTSTUFF) info
 
 mostlyclean:
-	-rm -f $(STAGESTUFF) ld.?? ld.??? ldlex.[qp] config.log
+	-rm -f $(STAGESTUFF) ld.?? ld.??? ldlex.[qp]
 	-rm -f ld ld1 ld2 ld3 *.o y.output cdtest cdtest.out cdtest.tmp
 	-rm -f cdtest-ur cdtest-ur.out cdtest-ur.tmp crtbegin.o crtend.o
 	-rm -f ldemul-list.h
@@ -908,7 +908,7 @@ clean: mostlyclean
 	-rm -f $(LD_PROG) configdoc.texi
 distclean: clean
 	-rm -f Makefile config.status TAGS site.exp site.bak config.cache
-	-rm -f config.h stamp-h
+	-rm -f config.h stamp-h config.log
 	-rm -rf ldscripts
 maintainer-clean realclean: clean distclean
 	@echo "This command is intended for maintainers to use;"
