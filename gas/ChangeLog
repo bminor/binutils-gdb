@@ -1,3 +1,7 @@
+Wed Jul 14 09:35:23 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* configure.in: Recognize h8300h.
+
 Tue Jul 13 12:09:44 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 
 	* config/tc-h8500.c (line_comment_chars): Add hash.
