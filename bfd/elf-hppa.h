@@ -1299,7 +1299,7 @@ elf_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  /* If this symbol has an entry in the PA64 dynamic hash
 	     table, then get it.  */
-	  dyn_name = get_dyn_name (input_bfd, h, rel,
+	  dyn_name = get_dyn_name (input_section, h, rel,
 				   &dynh_buf, &dynh_buflen);
 	  dyn_h = elf64_hppa_dyn_hash_lookup (&hppa_info->dyn_hash_table,
 					      dyn_name, false, false);
@@ -1322,7 +1322,7 @@ elf_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      /* If this symbol has an entry in the PA64 dynamic hash
 		 table, then get it.  */
-	      dyn_name = get_dyn_name (input_bfd, h, rel,
+	      dyn_name = get_dyn_name (input_section, h, rel,
 				       &dynh_buf, &dynh_buflen);
 	      dyn_h = elf64_hppa_dyn_hash_lookup (&hppa_info->dyn_hash_table,
 						  dyn_name, false, false);
@@ -1358,7 +1358,7 @@ elf_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      /* If this symbol has an entry in the PA64 dynamic hash
 		 table, then get it.  */
-	      dyn_name = get_dyn_name (input_bfd, h, rel,
+	      dyn_name = get_dyn_name (input_section, h, rel,
 				       &dynh_buf, &dynh_buflen);
 	      dyn_h = elf64_hppa_dyn_hash_lookup (&hppa_info->dyn_hash_table,
 						  dyn_name, false, false);

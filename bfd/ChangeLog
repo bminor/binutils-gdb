@@ -1,8 +1,21 @@
+2000-07-11  Alan Modra  <alan@linuxcare.com.au>
+
+	* elf64-hppa.c (get_dyn_name): Pass in section pointer instead of
+	bfd pointer.  Print section id instead of bfd pointer for local
+	syms.  Prefix addend with `+' for global syms as well as local.
+	Correct calculation of name component lengths.
+	(elf64_hppa_check_relocs): Update call to get_dyn_name.
+
+	From David Huggins-Daines  <dhd@linuxcare.com>
+	* elf-hppa.h (elf_hppa_relocate_section): Update calls here too.
+	* elf64-hppa.c (elf64_hppa_check_relocs): Fix some warnings.
+	(elf64_hppa_modify_segment_map): Likewise.
+
 Tue Jul 11 17:21:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* elf.c (bfd_elf_get_sign_extend_vma): Return tendency of VMA
  	addresses to be "naturally" sign extended.  Return -1 if unknown.
-	* bfd-in.h (bfd_elf_get_sign_extend_vma): : Add declaration.
+	* bfd-in.h (bfd_elf_get_sign_extend_vma): Add declaration.
 	* bfd-in2.h: Regenerate.
 
 Tue Jul 11 16:25:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>

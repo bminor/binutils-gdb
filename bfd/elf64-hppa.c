@@ -172,8 +172,8 @@ static void elf64_hppa_dyn_hash_traverse
 	   PTR info));
 
 static const char *get_dyn_name
-  PARAMS ((bfd *abfd, struct elf_link_hash_entry *h,
-	   const Elf_Internal_Rela *rel, char **pbuf, size_t *plen));
+  PARAMS ((asection *, struct elf_link_hash_entry *,
+	   const Elf_Internal_Rela *, char **, size_t *));
 
 
 /* This must follow the definitions of the various derived linker
@@ -399,8 +399,8 @@ elf64_hppa_section_from_shdr (abfd, hdr, name)
    allocate memory as necessary, possibly reusing PBUF/PLEN.  */
 
 static const char *
-get_dyn_name (abfd, h, rel, pbuf, plen)
-     bfd *abfd;
+get_dyn_name (sec, h, rel, pbuf, plen)
+     asection *sec;
      struct elf_link_hash_entry *h;
      const Elf_Internal_Rela *rel;
      char **pbuf;
@@ -416,11 +416,8 @@ get_dyn_name (abfd, h, rel, pbuf, plen)
   if (h)
     nlen = strlen (h->root.root.string);
   else
-    {
-      nlen = sizeof(void*)*2 + 1 + sizeof(bfd_vma)*4 + 1 + 1;
-      nlen += 10;	/* %p slop */
-    }
-  tlen = nlen + 1 + 16 + 1;
+    nlen = 8 + 1 + sizeof (rel->r_info) * 2 - 8;
+  tlen = nlen + 1 + sizeof (rel->r_addend) * 2 + 1;
 
   len = *plen;
   buf = *pbuf;
@@ -437,11 +434,14 @@ get_dyn_name (abfd, h, rel, pbuf, plen)
   if (h)
     {
       memcpy (buf, h->root.root.string, nlen);
+      buf[nlen++] = '+';
       sprintf_vma (buf + nlen, rel->r_addend);
     }
   else
     {
-      nlen = sprintf (buf, "%p:%lx", abfd, ELF64_R_SYM (rel->r_info));
+      nlen = sprintf (buf, "%x:%lx",
+		      sec->id & 0xffffffff,
+		      (long) ELF64_R_SYM (rel->r_info));
       if (rel->r_addend)
 	{
 	  buf[nlen++] = '+';
@@ -574,7 +574,8 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
  
   if (info->shared && hppa_info->section_syms_bfd != abfd)
     {
-      int i, highest_shndx;
+      unsigned int i;
+      int highest_shndx;
       Elf_Internal_Sym *local_syms, *isym;
       Elf64_External_Sym *ext_syms, *esym;
 
@@ -817,7 +818,7 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
 	continue;
 
       /* Collect a canonical name for this address.  */
-      addr_name = get_dyn_name (abfd, h, rel, &buf, &buf_len);
+      addr_name = get_dyn_name (sec, h, rel, &buf, &buf_len);
 
       /* Collect the canonical entry data for this address.  */
       dyn_h = elf64_hppa_dyn_hash_lookup (&hppa_info->dyn_hash_table,
@@ -2511,7 +2512,7 @@ elf64_hppa_modify_segment_map (abfd)
   for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
     if (m->p_type == PT_LOAD)
       {
-        int i;
+	unsigned int i;
 
 	for (i = 0; i < m->count; i++)
 	  {
