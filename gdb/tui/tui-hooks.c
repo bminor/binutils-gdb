@@ -420,6 +420,10 @@ tui_event_loop (void)
 static void
 tui_init_hook (char *argv0)
 {
+  /* Don't enable the TUI if a specific interpreter is installed.  */
+  if (interpreter_p)
+    return;
+
   /* Install exit handler to leave the screen in a good shape.  */
   atexit (tui_exit);
 
