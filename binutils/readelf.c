@@ -74,12 +74,6 @@
 #include "bucomm.h"
 #include "getopt.h"
 
-#ifdef ANSI_PROTOTYPES
-#include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
-
 char *          	program_name = "readelf";
 unsigned int    	dynamic_addr;
 bfd_size_type  		dynamic_size;
