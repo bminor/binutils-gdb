@@ -20,11 +20,8 @@ along with GAS; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <ctype.h>
-#include "m88k-opcode.h"
 #include "as.h"
-#include "flonum.h"
-#include "md.h"
-#include "m88k.h"
+#include "m88k-opcode.h"
 
 char *getval ();
 char *get_reg ();
@@ -90,7 +87,7 @@ struct field_val_assoc fcr_regs[] =
 
 struct field_val_assoc cmpslot[] =
 {
-/* Integer  Floating point */
+/* Integer	Floating point */
   {"nc", 0},
   {"cp", 1},
   {"eq", 2},
@@ -99,14 +96,16 @@ struct field_val_assoc cmpslot[] =
   {"le", 5},
   {"lt", 6},
   {"ge", 7},
-  {"hi", 8},
-  {"ou", 8},
-  {"ls", 9},
-  {"ib", 9},
-  {"lo", 10},
-  {"in", 10},
-  {"hs", 11},
-  {"ob", 11},
+  {"hi", 8},	{"ou", 8},
+  {"ls", 9},	{"ib", 9},
+  {"lo", 10},	{"in", 10},
+  {"hs", 11},	{"ob", 11},
+  {"be", 12},	{"ue", 12},
+  {"nb", 13},	{"lg", 13},
+  {"he", 14},	{"ug", 14},
+  {"nh", 15},	{"ule", 15},
+		{"ul", 16},
+		{"uge", 17},
 
   {NULL, 0},
 };
@@ -337,6 +336,7 @@ calcop (format, param, insn)
   int f;
   unsigned val;
   unsigned opcode;
+  int reg_prefix = 'r';
 
   insn->opcode = format->opcode;
   opcode = 0;
@@ -358,22 +358,29 @@ calcop (format, param, insn)
 	  break;
 
 	case 'd':
-	  param = get_reg (param, &val);
+	  param = get_reg (param, &val, reg_prefix);
+	  reg_prefix = 'r';
 	  opcode |= val << 21;
 	  break;
 
+	case 'x':
+	  reg_prefix = 'x';
+	  break;
+
 	case '1':
-	  param = get_reg (param, &val);
+	  param = get_reg (param, &val, reg_prefix);
+	  reg_prefix = 'r';
 	  opcode |= val << 16;
 	  break;
 
 	case '2':
-	  param = get_reg (param, &val);
+	  param = get_reg (param, &val, reg_prefix);
+	  reg_prefix = 'r';
 	  opcode |= val;
 	  break;
 
 	case '3':
-	  param = get_reg (param, &val);
+	  param = get_reg (param, &val, 'r');
 	  opcode |= (val << 16) | val;
 	  break;
 
@@ -453,15 +460,16 @@ match_name (param, assoc_tab, valp)
 }
 
 char *
-get_reg (param, regnop)
+get_reg (param, regnop, reg_prefix)
      char *param;
      unsigned *regnop;
+     int reg_prefix;
 {
   unsigned c;
   unsigned regno;
 
   c = *param++;
-  if (c == 'r')
+  if (c == reg_prefix)
     {
       regno = *param++ - '0';
       if (regno < 10)
@@ -722,9 +730,9 @@ get_bf (param, valp)
     {
       /* We did not find '<'.  We have an offset (width implicitly 32).  */
       param = get_bf_offset_expression (param, &offset);
+      input_line_pointer = save_ptr;
       if (param == NULL)
 	return NULL;
-      input_line_pointer = save_ptr;
     }
   else
     {
@@ -1084,7 +1092,7 @@ md_atof (type, litP, sizeP)
       md_number_to_chars (litP, (long) (*wordP++), sizeof (LITTLENUM_TYPE));
       litP += sizeof (LITTLENUM_TYPE);
     }
-  return "";			/* Someone should teach Dean about null pointers */
+  return "";	/* Someone should teach Dean about null pointers */
 }
 
 int md_short_jump_size = 4;
@@ -1172,7 +1180,6 @@ emit_relocations (fixP, segment_address_in_file)
   bzero ((char *) &ri, sizeof (ri));
   for (; fixP; fixP = fixP->fx_next)
     {
-
       if (fixP->fx_r_type >= NO_RELOC)
 	{
 	  fprintf (stderr, "fixP->fx_r_type = %d\n", fixP->fx_r_type);
@@ -1200,7 +1207,6 @@ emit_relocations (fixP, segment_address_in_file)
 	  ri.r_type = fixP->fx_r_type;
 	  if (fixP->fx_pcrel)
 	    {
-	      /*		ri.r_addend -= fixP->fx_where;          */
 	      ri.r_addend -= ri.r_address;
 	    }
 	  else
@@ -1208,7 +1214,6 @@ emit_relocations (fixP, segment_address_in_file)
 	      ri.r_addend = fixP->fx_addnumber;
 	    }
 
-	  /*	    md_ri_to_chars ((char *) &ri, ri);        */
 	  append (&next_object_file_charP, (char *) &ri, sizeof (ri));
 	}
     }
