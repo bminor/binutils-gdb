@@ -1,3 +1,10 @@
+Wed Aug  2 18:32:19 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* m68k.h: Move tables into opcodes/m68k-opc.c, leaving just the
+	declarations.  Remove F_ALIAS and flag field of struct
+	m68k_opcode.  Change arch field of struct m68k_opcode to unsigned
+	int.  Make name and args fields of struct m68k_opcode const.
+
 Wed Aug  2 08:16:46 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sparc.h (F_NOTV9): Define.
