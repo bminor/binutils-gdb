@@ -107,6 +107,7 @@ solib_add_stub (from_ttyp)
      char *from_ttyp;
 {
   SOLIB_ADD (NULL, *(int *)from_ttyp, &current_target);
+  re_enable_breakpoints_in_shlibs ();
   return 0;
 }
 #endif /* SOLIB_ADD */
