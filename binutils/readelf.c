@@ -485,7 +485,7 @@ get_data (var, file, offset, size, reason)
 
   if (fseek (file, offset, SEEK_SET))
     {
-      error (_("Unable to seek to %x for %s\n"), offset, reason);
+      error (_("Unable to seek to 0x%x for %s\n"), offset, reason);
       return NULL;
     }
 
@@ -496,7 +496,7 @@ get_data (var, file, offset, size, reason)
 
       if (mvar == NULL)
 	{
-	  error (_("Out of memory allocating %d bytes for %s\n"),
+	  error (_("Out of memory allocating 0x%x bytes for %s\n"),
 		 size, reason);
 	  return NULL;
 	}
@@ -504,7 +504,7 @@ get_data (var, file, offset, size, reason)
 
   if (fread (mvar, size, 1, file) != 1)
     {
-      error (_("Unable to read in %d bytes of %s\n"), size, reason);
+      error (_("Unable to read in 0x%x bytes of %s\n"), size, reason);
       if (mvar != var)
 	free (mvar);
       return NULL;
@@ -3767,6 +3767,9 @@ process_section_headers (file)
       string_table = (char *) get_data (NULL, file, section->sh_offset,
 					section->sh_size, _("string table"));
 
+      if (string_table == NULL)
+	return 0;
+      
       string_table_length = section->sh_size;
     }
 

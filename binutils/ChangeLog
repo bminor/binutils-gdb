@@ -1,3 +1,10 @@
+2003-07-04  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_data): Print (unsigned) hex values for size and
+	offset in error messages.
+	(process_section_headers): If the string table could not be
+	allocated, do not continue.
+
 2003-07-01  Jakub Jelinek  <jakub@redhat.com>
 
 	* readelf.c (dynamic_segment_ia64_val): Print address and newline
