@@ -5331,16 +5331,8 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
       if (prev_frame)
 	{
 	  struct breakpoint *scope_breakpoint;
-	  struct symtab_and_line scope_sal;
-
-	  INIT_SAL (&scope_sal);	/* initialize to zeroes */
-	  scope_sal.pc = get_frame_pc (prev_frame);
-	  scope_sal.section = find_pc_overlay (scope_sal.pc);
-
-	  scope_breakpoint = set_raw_breakpoint (scope_sal,
-	                                         bp_watchpoint_scope);
-	  set_breakpoint_count (breakpoint_count + 1);
-	  scope_breakpoint->number = breakpoint_count;
+	  scope_breakpoint = create_internal_breakpoint (get_frame_pc (prev_frame),
+							 bp_watchpoint_scope);
 
 	  scope_breakpoint->enable_state = bp_enabled;
 

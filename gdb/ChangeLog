@@ -1,3 +1,8 @@
+2002-08-20  Keith Seitz  <keiths@redhat.com>
+
+	* breakpoints.c (watch_command_1): Use internal breakpoint
+	when setting a watchpoint_scope breakpoint.
+
 2002-08-20  Elena Zannoni  <ezannoni@redhat.com>
 
         * gdbtypes.c (build_builtin_type_vec64): Add name to type.
