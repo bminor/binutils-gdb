@@ -1,3 +1,9 @@
+2000-07-26  Jimmy Guo       <guo@cup.hp.com>
+
+	* config/convex/tm-convex.h: Remove stray control characters.
+	* config/m68k/tm-altos.h: Ditto.
+	* config/tahoe/tm-tahoe.h: Ditto.
+
 2000-07-26  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* sh-tdep.c (sh_sh4_register_name, sh_sh4_register_byte,
