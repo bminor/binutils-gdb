@@ -107,7 +107,8 @@ void::function::do_and:signed32 *rDest, signed32 Source1, signed32 Source2
 instruction_address::function::do_bbo:instruction_address nia, int bitnum, unsigned32 source, int annul, unsigned32 offset
 	int jump_p;
 	unsigned32 target = cia.ip + 4 * offset;
-	if (MASKED32 (source, 32 - bitnum, 32 - bitnum))
+	bitnum = (~ bitnum) & 0x1f;
+	if (MASKED32 (source, bitnum, bitnum))
 	  {
 	    if (annul)
 	      nia.ip = -1;
@@ -131,7 +132,8 @@ instruction_address::function::do_bbo:instruction_address nia, int bitnum, unsig
 instruction_address::function::do_bbz:instruction_address nia, int bitnum, unsigned32 source, int annul, unsigned32 offset
 	int jump_p;
 	unsigned32 target = cia.ip + 4 * offset;
-	if (!MASKED32 (source, 32 - bitnum, 32 - bitnum))
+	bitnum = (~ bitnum) & 0x1f;
+	if (!MASKED32 (source, bitnum, bitnum))
 	  {
 	    if (annul)
 	      nia.ip = -1;
