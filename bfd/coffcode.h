@@ -2072,7 +2072,14 @@ coff_write_object_contents (abfd)
      backend linker, and obj_raw_syment_count is not valid until after
      coff_write_symbols is called.  */
   if (obj_raw_syment_count (abfd) != 0)
-    internal_f.f_symptr = sym_base;
+    {
+      internal_f.f_symptr = sym_base;
+#ifdef RS6000COFF_C
+      /* AIX appears to require that F_RELFLG not be set if there are
+         local symbols but no relocations.  */
+      internal_f.f_flags &=~ F_RELFLG;
+#endif
+    }
   else
     {
       internal_f.f_symptr = 0;
