@@ -1,3 +1,17 @@
+Wed Feb  7 14:01:33 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Look for --enable-shared.  Change the value of
+	BFDLIB when linking against a shared library on SunOS.
+	* configure: Rebuild.
+	* configure.host: If using a shared BFD library, try to pass a
+	reasonable -rpath option when linking.
+	* Makefile.in (BFDLIB): Set to @BFDLIB@.
+
+Tue Feb  6 12:29:14 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* emulparams/elf64_sparc.sh (ARCH): Change to `sparc:v9'.
+	* emultempl/generic.em: Strip `:foo' from ${ARCH}.
+
 Mon Feb  5 16:25:30 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	Support for building bfd and opcodes as shared libraries, based on

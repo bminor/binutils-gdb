@@ -80,11 +80,16 @@ i[345]86-*-lynxos*)
   HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else gcc -print-libgcc-file-name; fi` -lc -lm /lib/initn.o'
   ;;
 
-mips-dec-bsd*)
+mips*-dec-bsd*)
   HOSTING_CRT0=/usr/lib/crt0.o
   ;;
 
-mips-sgi-irix4*)
+mips*-sgi-irix4*)
+  HOSTING_CRT0=/usr/lib/crt1.o
+  HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else gcc -print-libgcc-file-name; fi` -lc /usr/lib/crtn.o'
+  ;;
+
+mips*-sgi-irix5*)
   HOSTING_CRT0=/usr/lib/crt1.o
   HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else gcc -print-libgcc-file-name; fi` -lc /usr/lib/crtn.o'
   ;;
@@ -125,4 +130,42 @@ sparc-*-solaris2*)
   NATIVE_LIB_DIRS=/usr/ccs/lib
   ;;
 
+esac
+
+HLDFLAGS=
+# If we have shared libraries, try to set rpath reasonably.
+if test "${shared}" = "true"; then
+  case "${host}" in
+  *-*-irix5*)
+    HLDFLAGS='-Wl,-rpath,$(libdir)'
+    ;;
+  *-*-linux*aout*)
+    ;;
+  *-*-linux*)
+    HLDFLAGS='-Wl,-rpath,$(libdir)'
+    ;;
+  *-*-sysv4* | *-*-solaris*)
+    HLDFLAGS='-R $(libdir)'
+    ;;
+  esac
+fi
+
+# On SunOS, if the linker supports the -rpath option, use it to
+# prevent ../bfd and ../opcodes from being included in the run time
+# search path.
+case "${host}" in
+  *-*-sunos*)
+    echo 'main () { }' > conftest.c
+    ${CC} -o conftest -Wl,-rpath= conftest.c >/dev/null 2>conftest.t
+    if grep 'unrecognized' conftest.t >/dev/null 2>&1; then
+      :
+    elif grep 'No such file' conftest.t >/dev/null 2>&1; then
+      :
+    elif test "${shared}" = "true"; then
+      HLDFLAGS='-Wl,-rpath=$(libdir)'
+    else
+      HLDFLAGS='-Wl,-rpath='
+    fi
+    rm -f conftest.t conftest.c conftest
+    ;;
 esac
