@@ -1488,6 +1488,7 @@ get_machine_flags (e_flags, e_machine)
 	    case E_MIPS_MACH_4650: strcat (buf, ", 4650"); break;
 	    case E_MIPS_MACH_4111: strcat (buf, ", 4111"); break;
 	    case E_MIPS_MACH_MIPS32_4K: strcat (buf, ", mips32-4k"); break;
+	    case E_MIPS_MACH_SB1:  strcat (buf, ", sb1");  break;
 	    default: strcat (buf, " UNKNOWN"); break;
 	    }
 	  break;

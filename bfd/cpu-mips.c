@@ -59,6 +59,7 @@ enum
   I_mips32_4k,
   I_mips5,
   I_mips64,
+  I_sb1,
 };
 
 #define NN(index) (&arch_info_struct[(index) + 1])
@@ -83,7 +84,8 @@ static const bfd_arch_info_type arch_info_struct[] =
   N (32, 32, bfd_mach_mips32,   "mips:mips32",    false, NN(I_mips32)),
   N (32, 32, bfd_mach_mips32_4k,"mips:mips32-4k", false, NN(I_mips32_4k)),
   N (64, 64, bfd_mach_mips5,    "mips:mips5",     false, NN(I_mips5)),
-  N (64, 64, bfd_mach_mips64,   "mips:mips64",    false, 0),
+  N (64, 64, bfd_mach_mips64,   "mips:mips64",    false, NN(I_mips64)),
+  N (64, 64, bfd_mach_mips_sb1, "mips:sb1",       false, 0),
 };
 
 /* The default architecture is mips:3000, but with a machine number of

@@ -689,8 +689,9 @@ instructions around accesses to the @samp{HI} and @samp{LO} registers.
 @samp{-no-m4650} turns off this option.
 
 @item -mcpu=@var{CPU}
-Generate code for a particular MIPS cpu.  This has little effect on the
-assembler, but it is passed by @code{@value{GCC}}.
+Generate code for a particular MIPS cpu.  It is exactly equivalent to
+@samp{-m@var{cpu}}, except that there are more value of @var{cpu}
+understood.
 
 @cindex emulation
 @item --emulation=@var{name}

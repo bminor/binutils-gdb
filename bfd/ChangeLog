@@ -36,6 +36,17 @@
         (_bfd_mips_elf_final_write_processing): Add cases for
         bfd_mach_mips5 and bfd_mach_mips64.
 
+        * bfd/aoutx.h (NAME(aout,machine_type)): Add a
+        bfd_mach_mips_sb1 case.
+        * bfd/archures.c (bfd_mach_mips_sb1): New constant.
+        * bfd/bfd-in2.h (bfd_mach_mips_sb1): New constant.
+        * bfd/cpu-mips.c (I_sb1): New constant.
+        (arch_info_struct): Add entry for bfd_mach_mips_sb1.
+        * bfd/elf32-mips.c (elf_mips_mach): Add case for
+        E_MIPS_MACH_SB1.
+        (_bfd_mips_elf_final_write_processing): Add case for
+        bfd_mach_mips_sb1.
+
 2000-12-01      Joel Sherrill <joel@OARcorp.com>
 
 	* config.bfd (arm-*-rtems*, a29k-*rtems*): New targets.

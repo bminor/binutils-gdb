@@ -67,6 +67,15 @@
         * doc/c-mips.texi: Likewise.  Also update introduction
         and ".set" usage information.
 
+        * config/tc-mips.c (md_show_usage): Add "sb1" to the
+        CPU list.
+        (mips_cpu_info_table): Add SB-1 entries.
+        * doc/c-mips.texi: Add "sb1" to the list of CPUs
+        known to the -mcpu option.
+        
+        * doc/as.texinfo: Correct description of MIPS -mcpu
+        option, by copying some of the text from doc/c-mips.texi.
+
 2000-12-01      Joel Sherrill <joel@OARcorp.com>
 
 	* configure.in (arm-*-rtems*, a29k-*rtems*, h8300-*-rtems*):

@@ -9243,6 +9243,7 @@ MIPS options:\n\
   show (stream, "8000", &column, &first);
   show (stream, "10000", &column, &first);
   show (stream, "mips32-4k", &column, &first);
+  show (stream, "sb-1", &column, &first);
   fputc ('\n', stream);
 
   fprintf (stream, _("\
@@ -12047,6 +12048,12 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "mips32-4kc",     0,      ISA_MIPS32,     CPU_MIPS32_4K, },
   { "mips32-4km",     0,      ISA_MIPS32,     CPU_MIPS32_4K, },
   { "mips32-4kp",     0,      ISA_MIPS32,     CPU_MIPS32_4K, },
+
+  /* SiByte SB-1 CPU */
+  { "SB-1",           0,      ISA_MIPS64,     CPU_SB1, },
+  { "sb-1250",                0,      ISA_MIPS64,     CPU_SB1, },
+  { "sb1",            0,      ISA_MIPS64,     CPU_SB1, },
+  { "sb1250",         0,      ISA_MIPS64,     CPU_SB1, },
 
   /* End marker. */
   { NULL, 0, 0, 0, },

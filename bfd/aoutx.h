@@ -780,6 +780,7 @@ NAME(aout,machine_type) (arch, machine, unknown)
     case bfd_mach_mips32_4k:
     case bfd_mach_mips5:
     case bfd_mach_mips64:
+    case bfd_mach_mips_sb1:
       /* FIXME: These should be MIPS3, MIPS4, MIPS16, MIPS32, etc.  */
       arch_flags = M_MIPS2;
       break;

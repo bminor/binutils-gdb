@@ -149,7 +149,8 @@ rm5721,
 rm7000,
 8000,
 10000,
-mips32-4k
+mips32-4k,
+sb1
 @end quotation
 
 

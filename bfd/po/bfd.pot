@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-12-01 16:44-0800\n"
+"POT-Creation-Date: 2000-12-01 17:03-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -34,22 +34,22 @@ msgstr ""
 msgid "%s: Bad relocation record imported: %d"
 msgstr ""
 
-#: aoutx.h:1258 aoutx.h:1672
+#: aoutx.h:1259 aoutx.h:1673
 #, c-format
 msgid "%s: can not represent section `%s' in a.out object file format"
 msgstr ""
 
-#: aoutx.h:1642
+#: aoutx.h:1643
 #, c-format
 msgid ""
 "%s: can not represent section for symbol `%s' in a.out object file format"
 msgstr ""
 
-#: aoutx.h:1644
+#: aoutx.h:1645
 msgid "*unknown*"
 msgstr ""
 
-#: aoutx.h:3683
+#: aoutx.h:3684
 #, c-format
 msgid "%s: relocateable link from %s to %s not supported"
 msgstr ""
@@ -660,7 +660,7 @@ msgstr ""
 
 #. Ignore init flag - it may not be set, despite the flags field
 #. containing valid data.
-#: elf32-arm.h:2195 elf32-cris.c:615 elf32-m68k.c:430 elf32-mips.c:2652
+#: elf32-arm.h:2195 elf32-cris.c:615 elf32-m68k.c:430 elf32-mips.c:2659
 #, c-format
 msgid "private flags = %lx:"
 msgstr ""
@@ -854,132 +854,132 @@ msgstr ""
 msgid "Linking mips16 objects into %s format is not supported"
 msgstr ""
 
-#: elf32-mips.c:2539
+#: elf32-mips.c:2546
 #, c-format
 msgid "%s: linking PIC files with non-PIC files"
 msgstr ""
 
-#: elf32-mips.c:2549
+#: elf32-mips.c:2556
 #, c-format
 msgid "%s: linking abicalls files with non-abicalls files"
 msgstr ""
 
-#: elf32-mips.c:2578
+#: elf32-mips.c:2585
 #, c-format
 msgid "%s: ISA mismatch (-mips%d) with previous modules (-mips%d)"
 msgstr ""
 
-#: elf32-mips.c:2587
+#: elf32-mips.c:2594
 #, c-format
 msgid "%s: ISA mismatch (%d) with previous modules (%d)"
 msgstr ""
 
-#: elf32-mips.c:2610
+#: elf32-mips.c:2617
 #, c-format
 msgid "%s: ABI mismatch: linking %s module with previous %s modules"
 msgstr ""
 
-#: elf32-mips.c:2624 elf32-ppc.c:1481 elf64-sparc.c:2974
+#: elf32-mips.c:2631 elf32-ppc.c:1481 elf64-sparc.c:2974
 #, c-format
 msgid "%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"
 msgstr ""
 
-#: elf32-mips.c:2655
+#: elf32-mips.c:2662
 msgid " [abi=O32]"
 msgstr ""
 
-#: elf32-mips.c:2657
+#: elf32-mips.c:2664
 msgid " [abi=O64]"
 msgstr ""
 
-#: elf32-mips.c:2659
+#: elf32-mips.c:2666
 msgid " [abi=EABI32]"
 msgstr ""
 
-#: elf32-mips.c:2661
+#: elf32-mips.c:2668
 msgid " [abi=EABI64]"
 msgstr ""
 
-#: elf32-mips.c:2663
+#: elf32-mips.c:2670
 msgid " [abi unknown]"
 msgstr ""
 
-#: elf32-mips.c:2665
+#: elf32-mips.c:2672
 msgid " [abi=N32]"
 msgstr ""
 
-#: elf32-mips.c:2667
+#: elf32-mips.c:2674
 msgid " [abi=64]"
 msgstr ""
 
-#: elf32-mips.c:2669
+#: elf32-mips.c:2676
 msgid " [no abi set]"
 msgstr ""
 
-#: elf32-mips.c:2672
+#: elf32-mips.c:2679
 msgid " [mips1]"
 msgstr ""
 
-#: elf32-mips.c:2674
+#: elf32-mips.c:2681
 msgid " [mips2]"
 msgstr ""
 
-#: elf32-mips.c:2676
+#: elf32-mips.c:2683
 msgid " [mips3]"
 msgstr ""
 
-#: elf32-mips.c:2678
+#: elf32-mips.c:2685
 msgid " [mips4]"
 msgstr ""
 
-#: elf32-mips.c:2680
+#: elf32-mips.c:2687
 msgid " [mips5]"
 msgstr ""
 
-#: elf32-mips.c:2682
+#: elf32-mips.c:2689
 msgid " [mips32]"
 msgstr ""
 
-#: elf32-mips.c:2684
+#: elf32-mips.c:2691
 msgid " [mips64]"
 msgstr ""
 
-#: elf32-mips.c:2686
+#: elf32-mips.c:2693
 msgid " [unknown ISA]"
 msgstr ""
 
-#: elf32-mips.c:2689
+#: elf32-mips.c:2696
 msgid " [32bitmode]"
 msgstr ""
 
-#: elf32-mips.c:2691
+#: elf32-mips.c:2698
 msgid " [not 32bitmode]"
 msgstr ""
 
-#: elf32-mips.c:4340
+#: elf32-mips.c:4347
 msgid "static procedure (no name)"
 msgstr ""
 
-#: elf32-mips.c:4955 elf64-alpha.c:4378
+#: elf32-mips.c:4962 elf64-alpha.c:4378
 #, c-format
 msgid "%s: illegal section name `%s'"
 msgstr ""
 
-#: elf32-mips.c:5519
+#: elf32-mips.c:5526
 msgid "not enough GOT space for local GOT entries"
 msgstr ""
 
-#: elf32-mips.c:6636
+#: elf32-mips.c:6643
 #, c-format
 msgid "%s: %s+0x%lx: jump to stub routine which is not jal"
 msgstr ""
 
-#: elf32-mips.c:7623
+#: elf32-mips.c:7630
 #, c-format
 msgid "Malformed reloc detected for section %s"
 msgstr ""
 
-#: elf32-mips.c:7700
+#: elf32-mips.c:7707
 #, c-format
 msgid "%s: CALL16 reloc at 0x%lx not against global symbol"
 msgstr ""

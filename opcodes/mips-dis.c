@@ -371,6 +371,10 @@ set_mips_isa_type (mach, isa, cputype)
       target_processor = CPU_MIPS64;
       mips_isa = ISA_MIPS64;
       break;
+    case bfd_mach_mips_sb1:
+      target_processor = CPU_SB1;
+      mips_isa = ISA_MIPS64;
+      break;
     default:
       target_processor = CPU_R3000;
       mips_isa = ISA_MIPS3;

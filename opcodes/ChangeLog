@@ -29,6 +29,9 @@
         bfd_mach_mips5 and bfd_mach_mips64.
         * mips-opc.c (I64): New definitions.
 
+        * mips-dis.c (set_mips_isa_type): Add case for
+        bfd_mach_mips_sb1.
+
 2000-11-28  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* sh-dis.c (print_insn_ddt): Make insn_x, insn_y unsigned.
