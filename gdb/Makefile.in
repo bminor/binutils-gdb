@@ -23,12 +23,12 @@ exec_prefix = @exec_prefix@
 host_alias = @host_alias@
 target_alias = @target_alias@
 program_transform_name = @program_transform_name@
-bindir = $(exec_prefix)/bin
-libdir = $(exec_prefix)/lib
+bindir = @bindir@
+libdir = @libdir@
 tooldir = $(libdir)/$(target_alias)
 
-datadir = $(prefix)/lib
-mandir = $(prefix)/man
+datadir = @datadir@
+mandir = @mandir@
 man1dir = $(mandir)/man1
 man2dir = $(mandir)/man2
 man3dir = $(mandir)/man3
@@ -38,9 +38,8 @@ man6dir = $(mandir)/man6
 man7dir = $(mandir)/man7
 man8dir = $(mandir)/man8
 man9dir = $(mandir)/man9
-infodir = $(prefix)/info
-includedir = $(prefix)/include
-docdir = $(datadir)/doc
+infodir = @infodir@
+includedir = @includedir@
 
 SHELL = /bin/sh
 
@@ -181,7 +180,7 @@ INTERNAL_CFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 # Profiling options need to go here to work.
 # I think it's perfectly reasonable for a user to set -pg in CFLAGS
 # and have it work; that's why CFLAGS is here.
-INTERNAL_LDFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) $(LDFLAGS)
+INTERNAL_LDFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) $(LDFLAGS) @CONFIG_LDFLAGS@
 
 # We are using our own version of REGEX now to be consistent across
 # machines.
@@ -450,7 +449,7 @@ POSSLIBS = gnu-regex.c gnu-regex.h
 # Makefile.in
 
 DEPFILES = $(TDEPFILES) $(XDEPFILES) $(SER_HARDWIRE) $(NATDEPFILES) \
-	   $(REMOTE_OBS) $(SIM_OBS) $(ENABLE_OBS)
+	   $(REMOTE_OBS) $(SIM_OBS) $(ENABLE_OBS) @THREAD_DB_OBS@
 
 SOURCES = $(SFILES) $(ALLDEPFILES) $(YYFILES)
 # Don't include YYFILES (*.tab.c) because we already include *.y in SFILES,

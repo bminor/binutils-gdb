@@ -14,7 +14,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 prefix = /usr/local
 
@@ -24,7 +24,7 @@ bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
 tooldir = $(libdir)/$(target_alias)
 
-datadir = $(prefix)/lib
+datadir = $(prefix)/share
 mandir = $(prefix)/man
 man1dir = $(mandir)/man1
 man2dir = $(mandir)/man2
@@ -41,22 +41,15 @@ docdir = $(datadir)/doc
 
 SHELL = /bin/sh
 
-INSTALL = install -c
+INSTALL = `cd $(srcdir)/../..;pwd`/install.sh -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
+INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
+INSTALL_XFORM1 = $(INSTALL_XFORM) -b=.1
 
 AR = ar
 AR_FLAGS = qv
 RANLIB = ranlib
-
-# Flags that describe where you can find the termcap library.
-# This can be overridden in the host Makefile fragment file.
-TERMCAP = -ltermcap
-
-# System V: If you compile gdb with a compiler which uses the coff
-# encapsulation feature (this is a function of the compiler used, NOT
-# of the m-?.h file selected by config.gdb), you must make sure that
-# the GNU nm is the one that is used by munch.
 
 # If you are compiling with GCC, make sure that either 1) You use the
 # -traditional flag, or 2) You have the fixed include files where GCC
@@ -75,17 +68,6 @@ srcdir = .
 # CFLAGS section if your system doesn't have fcntl.h in /usr/include (which 
 # is where it should be according to Posix).
 
-# If you use bison instead of yacc, it needs to include the "-y" argument.
-#BISON=bison -y
-BISON=yacc
-YACC=$(BISON)
-
-# where to find texinfo; GDB dist should include a recent one
-TEXIDIR=${srcdir}/../texinfo
-
-# where to find makeinfo, preferably one designed for texinfo-2
-MAKEINFO=makeinfo
-
 # Set this up with gcc if you have gnu ld and the loader will print out
 # line numbers for undefinded refs.
 #CC-LD=gcc -static
@@ -100,13 +82,19 @@ INCLUDE_DEP = $$(INCLUDE_DIR)
 # ${MMALLOC_DIR}${subdir}.)
 # Note that mmalloc can still be used on systems without mmap().
 # To use your system malloc, comment out the following defines.
-MMALLOC_DIR = ${srcdir}/../mmalloc
+MMALLOC_DIR = ${srcdir}/../../mmalloc
 MMALLOC_DEP = $$(MMALLOC_DIR)
 # To use your system malloc, uncomment MMALLOC_DISABLE.
 #MMALLOC_DISABLE = -DNO_MMALLOC
 # To use mmalloc but disable corruption checking, uncomment MMALLOC_CHECK
 #MMALLOC_CHECK = -DNO_MMALLOC_CHECK
-MMALLOC_CFLAGS = ${MMALLOC_CHECK} ${MMALLOC_DISABLE}
+MMALLOC_CFLAGS = ${MMALLOC_CHECK} ${MMALLOC_DISABLE} -I${MMALLOC_DIR}
+
+# Where are the BFD library?
+BFD_DIR = ../../bfd
+BFD = $(BFD_DIR)/libbfd.a
+BFD_SRC = $(srcdir)/$(BFD_DIR)
+BFD_CFLAGS = -I$(BFD_DIR) -I$(BFD_SRC)
 
 # Where is the source dir for the READLINE library?  Traditionally in .. or .
 # (For the binary library built from it, we use ${READLINE_DIR}${subdir}.)
@@ -128,15 +116,18 @@ GLOBAL_CFLAGS = ${MT_CFLAGS} ${MH_CFLAGS}
 # when running make.  I.E.  "make CFLAGS=-Wmissing-prototypes".
 CFLAGS = -g
 # INTERNAL_CFLAGS is the aggregate of all other *CFLAGS macros.
-INTERNAL_CFLAGS = ${CFLAGS} ${GLOBAL_CFLAGS} ${PROFILE_CFLAGS} ${MMALLOC_CFLAGS} ${INCLUDE_CFLAGS} ${USER_CFLAGS}
-LDFLAGS = $(CFLAGS)
+INTERNAL_CFLAGS = ${CFLAGS} ${GLOBAL_CFLAGS} ${PROFILE_CFLAGS} \
+	${BFD_CFLAGS} ${MMALLOC_CFLAGS} ${INCLUDE_CFLAGS}
+
+# LDFLAGS is specifically reserved for setting from the command line
+# when running make.
 
 # Perhaps should come from parent Makefile
-VERSION = gdbserver-4.9.1
+VERSION = gdbserver-4.12.3
 DIST=gdb
 
 LINT=/usr/5bin/lint
-LINTFLAGS= -I${BFD_DIR}
+LINTFLAGS= $(BFD_CFLAGS)
 
 # Host and target-dependent makefile fragments come in here.
 ####
@@ -145,11 +136,12 @@ LINTFLAGS= -I${BFD_DIR}
 # All source files that go into linking GDB remote server.
 
 SFILES = $(srcdir)/low-lynx.c $(srcdir)/low-sparc.c $(srcdir)/low-sun3.c \
+	 $(srcdir)/low-hppabsd.c \
 	 $(srcdir)/utils.c $(srcdir)/server.c $(srcdir)/remote-utils.c
 
 DEPFILES = $(GDBSERVER_DEPFILES)
 
-SOURCES = $(SFILES) $(ALLDEPFILES) $(YYFILES)
+SOURCES = $(SFILES) $(ALLDEPFILES)
 TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS} 
 
 OBS = utils.o $(GDBSERVER_DEPFILES) server.o remote-utils.o
@@ -159,7 +151,20 @@ OBS = utils.o $(GDBSERVER_DEPFILES) server.o remote-utils.o
 .c.o:
 	${CC} -c ${INTERNAL_CFLAGS} $<
 
-all: gdbserver
+all: gdbserver gdbreplay
+
+# Traditionally "install" depends on "all".  But it may be useful
+# not to; for example, if the user has made some trivial change to a 
+# source file and doesn't care about rebuilding or just wants to save the
+# time it takes for make to check that all is up to date.
+# install-only is intended to address that need.
+install: all install-only
+install-only: 
+	$(INSTALL_XFORM) gdbserver $(bindir)/gdbserver
+	$(INSTALL_XFORM1) $(srcdir)/gdbserver.1 $(man1dir)/gdbserver.1
+
+uninstall: force
+	rm -f $(bindir)/gdbserver $(man1dir)/gdbserver.1
 
 installcheck:
 check:
@@ -168,6 +173,7 @@ install-info:
 clean-info:
 
 gdbserver: $(OBS) ${ADD_DEPS} ${CDEPS}
+	rm -f gdbserver
 	${CC-LD} $(GLOBAL_CFLAGS) $(LDFLAGS) -o gdbserver $(OBS) \
 	  $(GDBSERVER_LIBS)
 
@@ -179,9 +185,9 @@ config.status:
 # specific routine gets the one for the correct machine.
 # The xyzzy stuff below deals with empty DEPFILES
 TAGS:	${TAGFILES}
-	etags `find ${srcdir}/config -name $(TM_FILE) -print` \
-	  `find ${srcdir}/config -name ${XM_FILE} -print` \
-	  `find ${srcdir}/config -name ${NAT_FILE} -print` \
+	etags `find ${srcdir}/../config -name $(TM_FILE) -print` \
+	  `find ${srcdir}/../config -name ${XM_FILE} -print` \
+	  `find ${srcdir}/../config -name ${NAT_FILE} -print` \
 	  `for i in yzzy ${DEPFILES}; do \
 	     if [ x$$i != xyzzy ]; then \
 	       echo ${srcdir}/$$i | sed -e 's/\.o$$/\.c/' ; \
@@ -190,63 +196,16 @@ TAGS:	${TAGFILES}
 	  ${TAGFILES}
 tags: TAGS
 
-# Making distributions of GDB and friends.
-
-# Make a tar file containing the GDB directory of the distribution.
-gdb.tar.Z: force_update
-	$(MAKE) $(MFLAGS) -f Makefile.in setup-to-dist
-	$(MAKE) $(MFLAGS) -f Makefile.in gdb-$(VERSION).tar.Z
-
-# Make a directory `proto-gdb.dir' that contains an image of the GDB
-# directory of the distribution, built up with symlinks.  Note that this
-# make target is not directly referenced by any other rules in this makefile,
-# it is referenced by the makefile in the parent directory.
-make-proto-gdb.dir: force_update 
-	$(MAKE) $(MFLAGS) -f Makefile.in setup-to-dist
-	$(MAKE) $(MFLAGS) -f Makefile make-proto-gdb-1
-
-# Set up the GDB source directory for distribution, by building all files that
-# are products of other files.
-setup-to-dist: update-depend force_update
-	../configure none
-	(cd doc; $(MAKE) $(MFLAGS) GDBvn.texi)
-	$(MAKE) $(MFLAGS) gdb.info
-	$(MAKE) $(MFLAGS) refcard.ps
-
-# Update the "depend" and "alldeps.mak" files in a source directory.
-# We update alldeps.mak first, since it is used to generate the list
-# of files to be checked for dependencies.
-update-depend: update-alldeps force_update
-	../configure none -norecursion
-	rm -f depend
-	$(MAKE) $(MFLAGS) depend
-
-# Update the "alldeps.mak" file in a source directory.
-update-alldeps: force_update
-	../configure none -norecursion
-	rm -f alldeps.mak
-	$(MAKE) $(MFLAGS) alldeps.mak
-
-# Build a tar file from a proto-gdb.dir.
-gdb-$(VERSION).tar.Z: force_update
-	rm -f gdb.tar gdb-$(VERSION).tar.Z
-	$(MAKE) $(MFLAGS) -f Makefile make-proto-gdb-1
-	ln -s proto-gdb.dir $(DIST)
-	tar chf - $(DIST) | compress >gdb-$(VERSION).tar.Z
-	rm -rf $(DIST) proto-gdb.dir
-
 clean:
 	rm -f *.o ${ADD_FILES} *~
-	rm -f init.c version.c
 	rm -f gdbserver core make.log
 
-distclean: clean c-exp.tab.c m2-exp.tab.c ch-exp.tab.c TAGS
-	rm -f tm.h xm.h config.status
+distclean: clean
+	rm -f nm.h tm.h xm.h config.status
 	rm -f Makefile
 
-realclean: clean
-	rm -f c-exp.tab.c m2-exp.tab.c ch-exp.tab.c TAGS
-	rm -f tm.h xm.h config.status
+maintainer-clean realclean: clean
+	rm -f nm.h tm.h xm.h config.status
 	rm -f Makefile
 
 STAGESTUFF=${OBS} ${TSOBS} ${NTSOBS} ${ADD_FILES} init.c init.o version.c gdb
@@ -280,6 +239,7 @@ remote-utils.o : ${srcdir}/remote-utils.c ${srcdir}/server.h
 low-lynx.o : ${srcdir}/low-lynx.c ${srcdir}/server.h
 low-sparc.o : $(srcdir)/low-sparc.c $(srcdir)/server.h
 low-sun3.o : $(srcdir)/low-sun3.c $(srcdir)/server.h
+low-hppabsd.o : $(srcdir)/low-hppabsd.c $(srcdir)/server.h
 utils.o : ${srcdir}/utils.c ${srcdir}/server.h
 
 # This is the end of "Makefile.in".
