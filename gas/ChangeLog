@@ -1,3 +1,8 @@
+2003-06-11  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* write.c (write_relocs): Use xcalloc. Fix relocs initialization
+	in the RELOC_EXPANSION_POSSIBLE case.
+
 2003-06-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-i960.c (line_comment_chars): Add '#'.

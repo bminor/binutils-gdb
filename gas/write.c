@@ -938,8 +938,7 @@ write_relocs (abfd, sec, xxx)
 
 #ifndef RELOC_EXPANSION_POSSIBLE
   /* Set up reloc information as well.  */
-  relocs = (arelent **) xmalloc (n * sizeof (arelent *));
-  memset ((char *) relocs, 0, n * sizeof (arelent *));
+  relocs = (arelent **) xcalloc (n, sizeof (arelent *));
 
   i = 0;
   for (fixp = seginfo->fix_root; fixp != (fixS *) NULL; fixp = fixp->fx_next)
@@ -1011,7 +1010,7 @@ write_relocs (abfd, sec, xxx)
 #else
   n = n * MAX_RELOC_EXPANSION;
   /* Set up reloc information as well.  */
-  relocs = (arelent **) xmalloc (n * sizeof (arelent *));
+  relocs = (arelent **) xcalloc (n, sizeof (arelent *));
 
   i = 0;
   for (fixp = seginfo->fix_root; fixp != (fixS *) NULL; fixp = fixp->fx_next)
