@@ -3440,14 +3440,7 @@ decode_coproc (SIM_DESC sd,
 	      }
 	    else /* CFC2 */
 	      {
-		unsigned_4 data;
-		/* enum + int calculation, argh! */
-		id = VU_REG_MST + 16 * id;
-		if (id >= VU_REG_CMSAR0)
-		  read_vu_special_reg(&vu0_device, id, & data);
-		else
-		  read_vu_misc_reg(&(vu0_device.regs), id, & data);
-		GPR[rt] = EXTEND32(T2H_4(data));
+		GPR[rt] = vu0_read_cop2_register(id);
 	      }
 	  }
 	else if((i_25_21 == 0x06 && i_10_1 == 0x000) || /* CTC2 */
@@ -3483,13 +3476,7 @@ decode_coproc (SIM_DESC sd,
 	      }
 	    else /* CTC2 */
 	      {
-		unsigned_4 data = H2T_4(GPR[rt]);
-		/* enum + int calculation, argh! */
-		id = VU_REG_VI + 16 * id;
-		if (id >= VU_REG_CMSAR0)
-		  write_vu_special_reg(&vu0_device, id, & data);
-		else
-		  write_vu_misc_reg(&(vu0_device.regs), id, & data);
+		vu0_write_cop2_register(id, GPR[rt]);
 	      }
 	  }
 	else if(i_10_0 == 0x3bf) /* VWAITQ */

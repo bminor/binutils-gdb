@@ -53,7 +53,7 @@ typedef unsigned_4 quadword[4];
 #define GPUIF_REG_STAT_APATH_B 10
 
 /* COP2 STAT register */
-#define COP2_REG_STAT_ADDR VPU_STAT
+#define COP2_REG_STAT_ADDR VPU_STAT_ADDR
 #define COP2_REG_STAT_VBS1_E 8
 #define COP2_REG_STAT_VBS1_B 8
 #define COP2_REG_STAT_VBS0_E 0
