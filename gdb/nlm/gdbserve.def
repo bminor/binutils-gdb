@@ -7,60 +7,31 @@ output GDBSERVE.NLM
 start _Prelude
 exit _Stop
 import
-	exit
-	getcmd
-	_get_stdstream
-	fprintf
-	UnRegisterDebugger
-	exit
-	GetThreadID
-	GetCurrentScreen
-	__GetScreenID
-	ConsolePrintf
-	GetCurrentScreen
-	__GetScreenID
-	LoadModule
-	_get_stdstream
-	fprintf
-	UnRegisterDebugger
-	exit
-	ConsolePrintf
-	SuspendThread
-	ConsolePrintf
-	_get_stdstream
-	fprintf
-	UnRegisterDebugger
-	exit
-	_TerminateNLM
-	_SetupArgv
-	_StartNLM
-	_GetCLibNLMLibHandle
-	_NWRegisterNLMLibraryUser
-	ResumeThread
-	_get_stdstream
-	fprintf
-	strlen
-	ConsolePrintf
-	GetThreadID
-	sprintf
-	strcpy
-	KillMe
-	strcmp
-	exit
-	memset
-	memcpy
-	GetNLMHandle
 	AllocateResourceTag
-	RegisterDebuggerRTag
-	getcmd
-	UnRegisterDebugger
+	ConsolePrintf
 	GetCurrentScreen
-	__GetScreenID
+	GetNLMHandle
+	GetThreadID
+	KillMe
 	LoadModule
+	RegisterDebuggerRTag
+	ResumeThread
 	SuspendThread
-	_TerminateNLM
-	_SetupArgv
-	_StartNLM
+	UnRegisterDebugger
 	_GetCLibNLMLibHandle
 	_NWRegisterNLMLibraryUser
+	_SetupArgv
+	_StartNLM
+	_TerminateNLM
+	__GetScreenID
 	__get_errno_ptr
+	_get_stdstream
+	exit
+	fprintf
+	getcmd
+	memcpy
+	memset
+	sprintf
+	strcmp
+	strcpy
+	strlen
