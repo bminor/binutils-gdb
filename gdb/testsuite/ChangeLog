@@ -1,5 +1,8 @@
 Thu Mar 30 15:36:55 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
+	* gdb.base/list.exp: Adjust line contents after adding new lines in
+	list0.c. Also fix a syntax error.
+
 	* lib/gdb.exp (gdb_run_cmd): Special handling for targets use stubs.
 	* gdb.base/break.exp: ditto.
 	* gdb.base/list.exp: ditto.
