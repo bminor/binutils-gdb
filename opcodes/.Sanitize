@@ -49,11 +49,20 @@ alpha-dis.c
 
 Do-last:
 
+if ( echo $* | egrep verbose > /dev/null ) ; then
+	verbose=true
+else
+	verbose=
+fi
 
 if ( echo $* | grep keep\-v9 > /dev/null ) ; then
-	echo Keeping v9 in sparc-opc.c
+	if [ -n "${verbose}" ] ; then
+		echo Keeping v9 in sparc-opc.c
+	fi
 else
-	echo Sanitizing v9 in sparc-opc.c
+	if [ -n "${verbose}" ] ; then
+		echo Sanitizing v9 in sparc-opc.c
+	fi
 	rm -f new
 	grep -v v9 sparc-opc.c > new
 	if [ -n "${safe}" ] ; then
@@ -68,14 +77,18 @@ fi
 v9dirty="sparc-dis.c"
 
 if ( echo $* | grep keep\-v9 > /dev/null ) ; then
-	echo Keeping v9 in ${v9dirty}
+	if [ -n "${verbose}" ] ; then
+		echo Keeping v9 in ${v9dirty}
+	fi
 else
 	for i in ${v9dirty} ; do
-		echo Sanitizing v9 in $i
+		if [ -n "${verbose}" ] ; then
+			echo Sanitizing v9 in $i
+		fi
 		rm -f new
 		sed '/^#ifndef[ 	]NO_V9/,/^#endif/d' < $i > new
 		if grep -s -i v9 new ; then
-			echo ***** SANITIZING V9 IN $i FAILED *****
+			echo '***' SANITIZING V9 IN $i FAILED ***** 1>&2
 		fi
 		if [ -n "${safe}" ] ; then
 			mv $i .Recover

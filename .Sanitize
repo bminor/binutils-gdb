@@ -105,20 +105,32 @@ xiberty
 
 Do-last:
 
-echo Looking for signs of \"v9\"...
+if ( echo $* | egrep verbose > /dev/null ) ; then
+	verbose=true
+else
+	verbose=
+fi
+
+if [ -n "${verbose}" ] ; then
+	echo Looking for signs of \"v9\"...
+fi
 
 # Don't try to clean directories here, as the 'mv' command will fail.
 # Also, grep fails on NFS mounted directories.
 if ( echo $* | grep keep\-v9 > /dev/null ) ; then
 	for i in * ; do
 		if test ! -d $i && (grep sanitize-v9 $i > /dev/null) ; then
-			echo Keeping v9 stuff in $i
+			if [ -n "${verbose}" ] ; then
+				echo Keeping v9 stuff in $i
+			fi
 		fi
 	done
 else
 	for i in * ; do
 		if test ! -d $i && (grep sanitize-v9 $i > /dev/null) ; then
-			echo Cleaning the \"v9\" out of $i...
+			if [ -n "${verbose}" ] ; then
+				echo Cleaning the \"v9\" out of $i...
+			fi
 			cp $i new
 			sed '/start\-sanitize\-v9/,/end-\sanitize\-v9/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
@@ -129,24 +141,32 @@ else
 	done
 fi
 
-echo Thawing away the \"chill\"...
+if [ -n "${verbose}" ] ; then
+	echo Thawing away the \"chill\"...
+fi
 
 # Don't try to clean directories here, as the 'mv' command will fail.
 # Also, grep fails on NFS mounted directories.
 if ( echo $* | grep keep\-chill > /dev/null ) ; then
 	for i in * ; do
 		if test ! -d $i && (grep sanitize-chill $i > /dev/null) ; then
-			echo Keeping chill stuff in $i
+			if [ -n "${verbose}" ] ; then
+				echo Keeping chill stuff in $i
+			fi
 		fi
 	done
 else
 	for i in * ; do
 		if test ! -d $i && (grep sanitize-chill $i > /dev/null) ; then
-			echo Thawing the \"chill\" out of $i...
+			if [ -n "${verbose}" ] ; then
+				echo Thawing the \"chill\" out of $i...
+			fi
 			cp $i new
 			sed '/start\-sanitize\-chill/,/end-\sanitize\-chill/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				echo Caching $i in .Recover...
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
 				mv $i .Recover
 			fi
 			mv new $i
@@ -156,7 +176,7 @@ fi
 
 for i in * ; do
 	if test ! -d $i && (grep sanitize $i > /dev/null) ; then
-		echo Some mentions of Sanitize are still left in $i!
+		echo '***' Some mentions of Sanitize are still left in $i! 1>&2
 	fi
 done
 

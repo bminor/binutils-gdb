@@ -51,11 +51,21 @@ Do-last:
 
 v9dirty="sparc.h"
 
+if ( echo $* | egrep verbose > /dev/null ) ; then
+	verbose=true
+else
+	verbose=
+fi
+
 if ( echo $* | grep keep\-v9 > /dev/null ) ; then
-	echo Keeping v9 in ${v9dirty}
+	if [ -n "${verbose}" ] ; then
+		echo Keeping v9 in ${v9dirty}
+	fi
 else
 	for i in ${v9dirty} ; do
-		echo Sanitizing v9 in $i
+		if [ -n "${verbose}" ] ; then
+			echo Sanitizing v9 in $i
+		fi
 		rm -f new
 		grep -v v9 $i > new
 		if [ -n "${safe}" ] ; then
