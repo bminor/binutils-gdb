@@ -313,6 +313,10 @@ struct elf_backend_data
 							  elf_symbol_type *,
 							  unsigned int));
 
+   /* A function to set the type of the info field.  Processor-specific
+     types should be handled here. */
+  int (*elf_backend_get_symbol_type) PARAMS (( Elf_Internal_Sym *)); 
+ 
   /* A function to do additional processing on the ELF section header
      just before writing it out.  This is used to set the flags and
      type fields for some sections, or to actually write out data for

@@ -1,4 +1,3 @@
- /* start-sanitize-armelf */
 /* 32-bit ELF support for ARM
    Copyright 1993, 1995, 1998 Free Software Foundation, Inc.
 
@@ -40,6 +39,8 @@ static boolean elf32_arm_merge_private_bfd_data
   PARAMS ((bfd *, bfd *));
 static boolean elf32_arm_print_private_bfd_data
   PARAMS ((bfd *, PTR));
+static int elf32_arm_get_symbol_type 
+  PARAMS (( Elf_Internal_Sym *));
 static struct bfd_link_hash_table *elf32_arm_link_hash_table_create
   PARAMS ((bfd *));
 
@@ -344,6 +345,7 @@ record_thumb_to_arm_glue (link_info, h)
   char *tmp_name;
   struct elf_link_hash_entry *myh;
   struct elf32_arm_link_hash_table *hash_table;
+  char bind;
 
   hash_table = elf32_arm_hash_table (link_info);
 
@@ -376,7 +378,8 @@ record_thumb_to_arm_glue (link_info, h)
 				    (struct bfd_link_hash_entry **) &myh);
 
   /* If we mark it 'thumb', the disassembler will do a better job.  */
-  myh->other = C_THUMBEXTFUNC;
+  bind = ELF_ST_BIND (myh->type);
+  myh->type = ELF_ST_INFO (bind, STT_ARM_TFUNC);
 
   free (tmp_name);
 
@@ -487,8 +490,6 @@ bfd_elf32_arm_process_before_allocation (abfd, link_info)
   /* Here we have a bfd that is to be included on the link.  We have a hook
      to do reloc rummaging, before section sizes are nailed down.  */
 
-  /* _bfd_coff_get_external_symbols (abfd); */
-
   globals = elf32_arm_hash_table (link_info);
 
   BFD_ASSERT (globals != NULL);
@@ -502,8 +503,6 @@ bfd_elf32_arm_process_before_allocation (abfd, link_info)
 
   for (; sec != NULL; sec = sec->next)
     {
-      struct internal_reloc *i;
-      struct internal_reloc *rel;
 
       if (sec->reloc_count == 0)
 	continue;
@@ -514,7 +513,7 @@ bfd_elf32_arm_process_before_allocation (abfd, link_info)
       irel = (_bfd_elf32_link_read_relocs (abfd, sec, (PTR) NULL,
 					(Elf_Internal_Rela *) NULL, false));
 
-      BFD_ASSERT (i != 0);
+      BFD_ASSERT (irel != 0);
 
       irelend = irel + sec->reloc_count;
       for (; irel < irelend; irel++)
@@ -599,30 +598,18 @@ bfd_elf32_arm_process_before_allocation (abfd, link_info)
 	         the target of the call. If it is a thumb target, we
 	         insert glue.  */
 
-	      if (h->other == C_THUMBEXTFUNC)
+	      if (ELF_ST_TYPE(h->type) == STT_ARM_TFUNC)
 		record_arm_to_thumb_glue (link_info, h);
 	      break;
 
 	    case R_ARM_THM_PC22:
 
-	      /* This one is a call from thumb code.  We used to look
-	         for ARM_THUMB9 and ARM_THUMB12 as well.  We need to look
-	         up the target of the call. If it is an arm target, we
-	         insert glue.  If the symbol does not exist it will be
-	         given a class of C_EXT and so we will generate a stub
-	         for it.  This is not really a problem, since the link
-	         is doomed anyway.  */
+	      /* This one is a call from thumb code.  We look 
+	         up the target of the call. If it is not a thumb
+                 target, we insert glue. */ 
 
-	      switch (h->other)
-		{
-		case C_EXT:
-		case C_STAT:
-		case C_LABEL:
-		  record_thumb_to_arm_glue (link_info, h);
-		  break;
-		default:
-		  ;
-		}
+	      if (ELF_ST_TYPE (h->type) != STT_ARM_TFUNC)
+		record_thumb_to_arm_glue (link_info, h);
 	      break;
 
 	    default:
@@ -1225,8 +1212,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
       /* Arm B/BL instruction */
 
       /* check for arm calling thumb function */
-      if (sym_flags == C_THUMBSTATFUNC
-	  || sym_flags == C_THUMBEXTFUNC)
+      if (sym_flags == STT_ARM_TFUNC)
 	{
 	  elf32_arm_to_thumb_stub (info, sym_name, input_bfd, output_bfd,
 		   input_section, hit_data, sym_sec, offset, addend, value);
@@ -1246,8 +1232,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 
     case R_ARM_ABS32:
       value += addend;
-      if (sym_flags == C_THUMBSTATFUNC
-	  || sym_flags == C_THUMBEXTFUNC)
+      if (sym_flags == STT_ARM_TFUNC)
 	value |= 1;
       bfd_put_32 (input_bfd, value, hit_data);
       return bfd_reloc_ok;
@@ -1316,9 +1301,8 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	bfd_vma add;
 	bfd_signed_vma signed_add;
 
-	if (sym_flags == C_EXT
-	    || sym_flags == C_STAT
-	    || sym_flags == C_LABEL)
+        /* If it's not a call to thumb, assume call to arm */
+	if (sym_flags != STT_ARM_TFUNC)
 	  {
 	    elf32_thumb_to_arm_stub (info, sym_name, input_bfd, output_bfd, input_section,
 				  hit_data, sym_sec, offset, addend, value);
@@ -1526,7 +1510,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 					 contents, rel->r_offset,
 					 relocation, rel->r_addend,
 					 info, sec, name,
-					 (h ? h->other : sym->st_other));
+					 (h ? ELF_ST_TYPE (h->type) : ELF_ST_TYPE (sym->st_info)));
 
 
       if (r != bfd_reloc_ok)
@@ -1785,6 +1769,13 @@ elf32_arm_print_private_bfd_data (abfd, ptr)
   return true;
 }
 
+static int
+elf32_arm_get_symbol_type (elf_sym)
+     Elf_Internal_Sym *elf_sym;
+{
+   return ELF_ST_TYPE(elf_sym->st_info);
+}
+    
 
 #define TARGET_LITTLE_SYM		bfd_elf32_littlearm_vec
 #define TARGET_LITTLE_NAME		"elf32-littlearm"
@@ -1802,8 +1793,7 @@ elf32_arm_print_private_bfd_data (abfd, ptr)
 #define bfd_elf32_bfd_set_private_flags		elf32_arm_set_private_flags
 #define bfd_elf32_bfd_print_private_bfd_data	elf32_arm_print_private_bfd_data
 #define bfd_elf32_bfd_link_hash_table_create    elf32_arm_link_hash_table_create
-
+#define elf_backend_get_symbol_type             elf32_arm_get_symbol_type
 #define elf_symbol_leading_char '_'
 
 #include "elf32-target.h"
-/* end-sanitize-armelf */

@@ -4001,6 +4001,10 @@ swap_out_syms (abfd, sttp, relocatable_p)
 	else
 	  type = STT_NOTYPE;
 
+        /* Processor-specific types */
+        if (bed->elf_backend_get_symbol_type)
+          type = (*bed->elf_backend_get_symbol_type) (&type_ptr->internal_elf_sym);
+
 	if (bfd_is_com_section (syms[idx]->section))
 	  sym.st_info = ELF_ST_INFO (STB_GLOBAL, type);
 	else if (bfd_is_und_section (syms[idx]->section))

@@ -1,3 +1,18 @@
+Mon Aug 31 10:23:40 1998  Catherine Moore  <clm@cygnus.com>
+
+        * Makefile.am:  Add elf32-arm.c.
+        * Makefile.in:  Rebuild.
+        * elf-bfd.h:  Add elf_backend_get_symbol_type.
+        * elf.c (swap_out_syms):  If defined, call
+        elf_backend_get_symbol_type.
+        * elf32-arm.c: Define elf_backend_get_symbol_type.
+        (elf32_arm_get_symbol-type):  New routine.
+        (record_thumb_to_arm_glue):  Change to use STT_ARM_TFUNC.
+        (bfd_elf32_arm_process_before_allocation):  Change to
+        check for STT_ARM_TFUNC.
+        (elf32_arm_final_link_relocate):  Likewise.
+        * elfxx-target.h:  Add elf_backend_get_symbol_type.
+
 Fri Aug 28 19:44:07 1998  Richard Henderson  <rth@cygnus.com>
 
 	* archures.c (bfd_mach_alpha_ev[456]): New.
