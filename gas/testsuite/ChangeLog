@@ -1,3 +1,12 @@
+2003-10-22  Andreas Schwab  <schwab@suse.de>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/ia64/dv-mutex-err.s: Add more tests for compare.
+	* gas/ia64/dv-mutex.s: Likewise.
+
+	* gas/ia64/dv-mutex-err.l: Updated.
+	* gas/ia64/dv-mutex.d: Likewise.
+
 2003-10-18  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* gas/mmix/op-0-1.d, gas/mmix/pushj-c.d, gas/mmix/weak1.d: Add

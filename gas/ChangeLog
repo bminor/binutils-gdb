@@ -1,3 +1,13 @@
+2003-10-22  Andreas Schwab  <schwab@suse.de>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+	    Jim Wilson <wilson@specifixinc.com>
+
+	* config/tc-ia64.c (update_qp_mutex): New.
+	(note_register_values): Properly handle one of PRs in compare
+	is PR0. Don't add a mutex relation for .and.orcm/.or.andcm.
+	Clear mutex relation for .none/.unc. Don't clear mutex relation
+	on predicated compare.
+
 2003-10-21  Wouter van Heyst <wouter@vidicode.nl>
 
 	* config/tc-arm.c (all_reg_maps): Correct text describing Maverick

@@ -8726,6 +8726,77 @@ clear_qp_branch_flag (mask)
     }
 }
 
+/* MASK contains 2 and only 2 PRs which are mutually exclusive.  Remove
+   any mutexes which contain one of the PRs and create new ones when
+   needed.  */
+
+static int
+update_qp_mutex (valueT mask)
+{
+  int i;
+  int add = 0;
+
+  i = 0;
+  while (i < qp_mutexeslen)
+    {
+      if ((qp_mutexes[i].prmask & mask) != 0)
+	{
+	  /* If it destroys and creates the same mutex, do nothing.  */
+	  if (qp_mutexes[i].prmask == mask
+	      && qp_mutexes[i].path == md.path)
+	    {
+	      i++;
+	      add = -1;
+	    }
+	  else
+	    {
+	      int keep = 0;
+
+	      if (md.debug_dv)
+		{
+		  fprintf (stderr, "  Clearing mutex relation");
+		  print_prmask (qp_mutexes[i].prmask);
+		  fprintf (stderr, "\n");
+		}
+	      
+	      /* Deal with the old mutex with more than 3+ PRs only if
+		 the new mutex on the same execution path with it.
+
+		 FIXME: The 3+ mutex support is incomplete.
+		 dot_pred_rel () may be a better place to fix it.  */
+	      if (qp_mutexes[i].path == md.path)
+		{
+		  /* If it is a proper subset of the mutex, create a
+		     new mutex.  */
+		  if (add == 0
+		      && (qp_mutexes[i].prmask & mask) == mask)
+		    add = 1;
+		  
+		  qp_mutexes[i].prmask &= ~mask;
+		  if (qp_mutexes[i].prmask & (qp_mutexes[i].prmask - 1))
+		    {
+		      /* Modify the mutex if there are more than one
+			 PR left.  */
+		      keep = 1;
+		      i++;
+		    }
+		}
+	      
+	      if (keep == 0)
+		/* Remove the mutex.  */
+		qp_mutexes[i] = qp_mutexes[--qp_mutexeslen];
+	    }
+	}
+      else
+	++i;
+    }
+
+  if (add == 1)
+    add_qp_mutex (mask);
+
+  return add;
+}
+
 /* Remove any mutexes which contain any of the PRs indicated in the mask.
 
    Any changes to a PR clears the mutex relations which include that PR.  */
@@ -8990,11 +9061,11 @@ note_register_values (idesc)
     {
       int p1 = CURR_SLOT.opnd[0].X_add_number - REG_P;
       int p2 = CURR_SLOT.opnd[1].X_add_number - REG_P;
-      valueT p1mask = (valueT) 1 << p1;
-      valueT p2mask = (valueT) 1 << p2;
+      valueT p1mask = (p1 != 0) ? (valueT) 1 << p1 : 0;
+      valueT p2mask = (p2 != 0) ? (valueT) 1 << p2 : 0;
 
-      /* If one of the PRs is PR0, we can't really do anything.  */
-      if (p1 == 0 || p2 == 0)
+      /* If both PRs are PR0, we can't really do anything.  */
+      if (p1 == 0 && p2 == 0)
 	{
 	  if (md.debug_dv)
 	    fprintf (stderr, "  Ignoring PRs due to inclusion of p0\n");
@@ -9004,7 +9075,6 @@ note_register_values (idesc)
       else if (has_suffix_p (idesc->name, ".or.andcm")
 	       || has_suffix_p (idesc->name, ".and.orcm"))
 	{
-	  add_qp_mutex (p1mask | p2mask);
 	  clear_qp_implies (p2mask, p1mask);
 	}
       else if (has_suffix_p (idesc->name, ".andcm")
@@ -9020,25 +9090,28 @@ note_register_values (idesc)
 	}
       else
 	{
+	  int added = 0;
+
 	  clear_qp_implies (p1mask | p2mask, p1mask | p2mask);
-	  if (has_suffix_p (idesc->name, ".unc"))
+
+	  /* If one of the PRs is PR0, we call clear_qp_mutex.  */
+	  if (p1 == 0 || p2 == 0)
+	    clear_qp_mutex (p1mask | p2mask);
+	  else
+	    added = update_qp_mutex (p1mask | p2mask);
+
+	  if (CURR_SLOT.qp_regno == 0
+	      || has_suffix_p (idesc->name, ".unc"))
 	    {
-	      add_qp_mutex (p1mask | p2mask);
+	      if (added == 0 && p1 && p2)
+		add_qp_mutex (p1mask | p2mask);
 	      if (CURR_SLOT.qp_regno != 0)
 		{
-		  add_qp_imply (CURR_SLOT.opnd[0].X_add_number - REG_P,
-				CURR_SLOT.qp_regno);
-		  add_qp_imply (CURR_SLOT.opnd[1].X_add_number - REG_P,
-				CURR_SLOT.qp_regno);
+		  if (p1)
+		    add_qp_imply (p1, CURR_SLOT.qp_regno);
+		  if (p2)
+		    add_qp_imply (p2, CURR_SLOT.qp_regno);
 		}
-	    }
-	  else if (CURR_SLOT.qp_regno == 0)
-	    {
-	      add_qp_mutex (p1mask | p2mask);
-	    }
-	  else
-	    {
-	      clear_qp_mutex (p1mask | p2mask);
 	    }
 	}
     }
