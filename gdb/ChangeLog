@@ -1,3 +1,19 @@
+2004-01-19  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* MAINTAINERS: Delete mmalloc.
+	* Makefile.in: Delete MMALLOC, MMALLOC_CFLAGS, -lmmalloc, mmalloc_h.
+	* NEWS: Mention removal of --with-malloc.
+	* acconfig.h: Delete USE_MMALLOC, MMCHECK_FORCE.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* configure.in: Delete MMALLOC_CFLAGS, MMALLOC, --with-mmalloc, USE_MMALLOC, MMCHECK_FORCE.
+	* gdbinit.in: Remove mmalloc.
+	* utils.c: Delete USE_MMALLOC, NO_MMCHECK, MMCHECK_FORCE, malloc_botch.
+	* config/alpha/alpha-linux.mh: Delete MMALLOC, MMALLOC_CFLAGS.
+	* config/i386/go32.mh: Likewise.
+	* config/i386/interix.mh: Likewise.
+	* config/powerpc/xm-linux.h: Delete MMAP_BASE_ADDRESS, MMAP_INCREMENT.
+
 2004-01-19  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* linespec.c (decode_variable, symtab_from_filename):  Call

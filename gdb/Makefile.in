@@ -106,10 +106,6 @@ INCLUDE_CFLAGS = -I$(INCLUDE_DIR)
 # Where is the "-liberty" library?  Typically in ../libiberty.
 LIBIBERTY = ../libiberty/libiberty.a
 
-# Configured by the --with-mmalloc option to configure.
-MMALLOC = @MMALLOC@
-MMALLOC_CFLAGS = @MMALLOC_CFLAGS@
-
 # Where is the BFD library?  Typically in ../bfd.
 BFD_DIR = ../bfd
 BFD = $(BFD_DIR)/libbfd.a
@@ -364,7 +360,7 @@ CXXFLAGS = -g -O
 INTERNAL_WARN_CFLAGS = \
 	$(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 	$(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
-	$(BFD_CFLAGS) $(MMALLOC_CFLAGS) $(INCLUDE_CFLAGS) \
+	$(BFD_CFLAGS) $(INCLUDE_CFLAGS) \
 	$(INTL_CFLAGS) $(ENABLE_CFLAGS) \
 	$(GDB_WARN_CFLAGS)
 INTERNAL_CFLAGS = $(INTERNAL_WARN_CFLAGS) $(GDB_WERROR_CFLAGS)
@@ -384,19 +380,18 @@ INTERNAL_LDFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(MH_LDFLAGS) $(LDFLAGS) $(CONFIG_
 
 # Libraries and corresponding dependencies for compiling gdb.
 # {X,T}M_CLIBS, defined in *config files, have host- and target-dependent libs.
-# MMALLOC comes after anything else that might want an allocation function.
 # LIBIBERTY appears twice on purpose.
 # If you have the Cygnus libraries installed,
 # you can use 'CLIBS=$(INSTALLED_LIBS)' 'CDEPS='
 INSTALLED_LIBS=-lbfd -lreadline -lopcodes -liberty \
 	$(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) $(GDBTKLIBS) @LIBS@ \
-	-lmmalloc -lintl -liberty
+	-lintl -liberty
 CLIBS = $(SIM) $(BFD) $(READLINE) $(OPCODES) $(INTL) $(LIBIBERTY) \
 	$(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) $(GDBTKLIBS) @LIBS@ \
 	$(LIBICONV) \
-	$(MMALLOC) $(LIBIBERTY) $(WIN32LIBS)
+	$(LIBIBERTY) $(WIN32LIBS)
 CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
-	$(OPCODES) $(MMALLOC) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS)
+	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS)
 
 ADD_FILES = $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
@@ -405,7 +400,7 @@ DIST=gdb
 
 LINT=/usr/5bin/lint
 LINTFLAGS= $(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
-	$(BFD_CFLAGS) $(MMALLOC_CFLAGS) $(INCLUDE_CFLAGS) \
+	$(BFD_CFLAGS) $(INCLUDE_CFLAGS) \
 	$(INTL_CFLAGS)
 
 RUNTEST = `if [ -f $${rootsrc}/../dejagnu/runtest ] ; then \
@@ -2134,7 +2129,7 @@ objc-lang.o: objc-lang.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
 objfiles.o: objfiles.c $(defs_h) $(bfd_h) $(symtab_h) $(symfile_h) \
 	$(objfiles_h) $(gdb_stabs_h) $(target_h) $(bcache_h) $(gdb_assert_h) \
 	$(gdb_stat_h) $(gdb_obstack_h) $(gdb_string_h) $(hashtab_h) \
-	$(breakpoint_h) $(block_h) $(dictionary_h) $(mmalloc_h)
+	$(breakpoint_h) $(block_h) $(dictionary_h)
 observer.o: observer.c $(defs_h) $(observer_h)
 ocd.o: ocd.c $(defs_h) $(gdbcore_h) $(gdb_string_h) $(frame_h) $(inferior_h) \
 	$(bfd_h) $(symfile_h) $(target_h) $(gdbcmd_h) $(objfiles_h) \
@@ -2467,7 +2462,7 @@ user-regs.o: user-regs.c $(defs_h) $(user_regs_h) $(gdbtypes_h) \
 utils.o: utils.c $(defs_h) $(gdb_assert_h) $(gdb_string_h) $(event_top_h) \
 	$(gdbcmd_h) $(serial_h) $(bfd_h) $(target_h) $(demangle_h) \
 	$(expression_h) $(language_h) $(charset_h) $(annotate_h) \
-	$(filenames_h) $(inferior_h) $(mmalloc_h)
+	$(filenames_h) $(inferior_h)
 uw-thread.o: uw-thread.c $(defs_h) $(gdbthread_h) $(target_h) $(inferior_h) \
 	$(regcache_h) $(gregset_h)
 v850ice.o: v850ice.c $(defs_h) $(gdb_string_h) $(frame_h) $(symtab_h) \

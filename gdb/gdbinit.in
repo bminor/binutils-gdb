@@ -10,7 +10,6 @@ commands
 	return
 end
 
-dir @srcdir@/../mmalloc
 dir @srcdir@/../libiberty
 dir @srcdir@/../bfd
 dir @srcdir@

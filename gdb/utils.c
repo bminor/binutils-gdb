@@ -61,10 +61,6 @@
 
 #include <readline/readline.h>
 
-#ifdef USE_MMALLOC
-#include "mmalloc.h"
-#endif
-
 #ifdef NEED_DECLARATION_MALLOC
 extern PTR malloc ();		/* OK: PTR */
 #endif
@@ -97,10 +93,6 @@ static void vfprintf_maybe_filtered (struct ui_file *, const char *,
 static void fputs_maybe_filtered (const char *, struct ui_file *, int);
 
 static void do_my_cleanups (struct cleanup **, struct cleanup *);
-
-#if defined (USE_MMALLOC) && !defined (NO_MMCHECK)
-static void malloc_botch (void);
-#endif
 
 static void prompt_for_continue (void);
 
@@ -993,8 +985,6 @@ request_quit (int signo)
 
 /* Memory management stuff (malloc friends).  */
 
-#if !defined (USE_MMALLOC)
-
 static void *
 mmalloc (void *md, size_t size)
 {
@@ -1022,62 +1012,12 @@ mfree (void *md, void *ptr)
   free (ptr);			/* NOTE: GDB's only call to free() */
 }
 
-#endif /* USE_MMALLOC */
-
-#if !defined (USE_MMALLOC) || defined (NO_MMCHECK)
-
+/* This used to do something interesting with USE_MMALLOC.
+ * It can be retired any time.  -- chastain 2004-01-19.  */
 void
 init_malloc (void *md)
 {
 }
-
-#else /* Have mmalloc and want corruption checking */
-
-static void
-malloc_botch (void)
-{
-  fprintf_unfiltered (gdb_stderr, "Memory corruption\n");
-  internal_error (__FILE__, __LINE__, "failed internal consistency check");
-}
-
-/* Attempt to install hooks in mmalloc/mrealloc/mfree for the heap specified
-   by MD, to detect memory corruption.  Note that MD may be NULL to specify
-   the default heap that grows via sbrk.
-
-   Note that for freshly created regions, we must call mmcheckf prior to any
-   mallocs in the region.  Otherwise, any region which was allocated prior to
-   installing the checking hooks, which is later reallocated or freed, will
-   fail the checks!  The mmcheck function only allows initial hooks to be
-   installed before the first mmalloc.  However, anytime after we have called
-   mmcheck the first time to install the checking hooks, we can call it again
-   to update the function pointer to the memory corruption handler.
-
-   Returns zero on failure, non-zero on success. */
-
-#ifndef MMCHECK_FORCE
-#define MMCHECK_FORCE 0
-#endif
-
-void
-init_malloc (void *md)
-{
-  if (!mmcheckf (md, malloc_botch, MMCHECK_FORCE))
-    {
-      /* Don't use warning(), which relies on current_target being set
-         to something other than dummy_target, until after
-         initialize_all_files(). */
-
-      fprintf_unfiltered
-	(gdb_stderr,
-	 "warning: failed to install memory consistency checks; ");
-      fprintf_unfiltered (gdb_stderr,
-			  "configuration should define NO_MMCHECK or MMCHECK_FORCE\n");
-    }
-
-  mmtrace ();
-}
-
-#endif /* Have mmalloc and want corruption checking  */
 
 /* Called when a memory allocation fails, with the number of bytes of
    memory requested in SIZE. */

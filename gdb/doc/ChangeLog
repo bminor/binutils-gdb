@@ -1,3 +1,8 @@
+2004-01-19  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdbint.texinfo: Delete USE_MMALLOC, NO_MMCHECK, MMCHECK_FORCE,
+	MMAP_BASE_ADDRESS, MMAP_INCREMENT.
+
 2004-01-19  Nick Roberts  <nick@nick.uklinux.net>
 
 	* gdb.texinfo (GDB/MI Stack Manipulation): Describe extension to

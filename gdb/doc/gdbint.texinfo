@@ -2238,12 +2238,6 @@ This macro is used as the argument to @code{lseek} (or, most commonly,
 @code{bfd_seek}).  FIXME, should be replaced by SEEK_SET instead,
 which is the POSIX equivalent.
 
-@item MMAP_BASE_ADDRESS
-When using HAVE_MMAP, the first mapping should go at this address.
-
-@item MMAP_INCREMENT
-when using HAVE_MMAP, this is the increment between mappings.
-
 @item NORETURN
 If defined, this should be one or more tokens, such as @code{volatile},
 that can be used in both the declaration and definition of functions to
@@ -2256,37 +2250,6 @@ If defined, this should be one or more tokens, such as
 of functions to indicate that they never return.  The default is already
 set correctly if compiling with GCC.  This will almost never need to be
 defined.
-
-@item USE_MMALLOC
-@findex mmalloc
-@value{GDBN} will use the @code{mmalloc} library for memory allocation
-for symbol reading if this symbol is defined.  Be careful defining it
-since there are systems on which @code{mmalloc} does not work for some
-reason.  One example is the DECstation, where its RPC library can't
-cope with our redefinition of @code{malloc} to call @code{mmalloc}.
-When defining @code{USE_MMALLOC}, you will also have to set
-@code{MMALLOC} in the Makefile, to point to the @code{mmalloc} library.  This
-define is set when you configure with @samp{--with-mmalloc}.
-
-@item NO_MMCHECK
-@findex mmcheck
-Define this if you are using @code{mmalloc}, but don't want the overhead
-of checking the heap with @code{mmcheck}.  Note that on some systems,
-the C runtime makes calls to @code{malloc} prior to calling @code{main}, and if
-@code{free} is ever called with these pointers after calling
-@code{mmcheck} to enable checking, a memory corruption abort is certain
-to occur.  These systems can still use @code{mmalloc}, but must define
-@code{NO_MMCHECK}.
-
-@item MMCHECK_FORCE
-Define this to 1 if the C runtime allocates memory prior to
-@code{mmcheck} being called, but that memory is never freed so we don't
-have to worry about it triggering a memory corruption abort.  The
-default is 0, which means that @code{mmcheck} will only install the heap
-checking functions if there has not yet been any memory allocation
-calls, and if it fails to install the functions, @value{GDBN} will issue a
-warning.  This is currently defined if you configure using
-@samp{--with-mmalloc}.
 
 @item NO_SIGINTERRUPT
 @findex siginterrupt

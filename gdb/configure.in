@@ -1082,26 +1082,6 @@ fi
 AC_SUBST(WARN_CFLAGS)
 AC_SUBST(WERROR_CFLAGS)
 
-MMALLOC_CFLAGS=
-MMALLOC=
-AC_SUBST(MMALLOC_CFLAGS)
-AC_SUBST(MMALLOC)
-
-AC_ARG_WITH(mmalloc,
-[  --with-mmalloc          Use memory mapped malloc package],
-[case "${withval}" in
-  yes)  want_mmalloc=true ;;
-  no)   want_mmalloc=false;;
-  *)    AC_MSG_ERROR(bad value ${withval} for GDB with-mmalloc option) ;;
-esac],[want_mmalloc=false])dnl
-
-if test x$want_mmalloc = xtrue; then
-   AC_DEFINE(USE_MMALLOC)
-   AC_DEFINE(MMCHECK_FORCE)
-   MMALLOC_CFLAGS="-I$srcdir/../mmalloc"
-   MMALLOC='../mmalloc/libmmalloc.a'
-fi
-
 # In the Cygwin environment, we need some additional flags.
 AC_CACHE_CHECK([for cygwin], gdb_cv_os_cygwin,
 [AC_EGREP_CPP(lose, [

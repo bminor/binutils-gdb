@@ -3,6 +3,11 @@
 
 *** Changes since GDB 6.0:
 
+* Removed --with-mmalloc
+
+Support for the mmalloc memory manager has been removed, as it
+conflicted with the internal gdb byte cache.
+
 * Changes in AMD64 configurations
 
 The AMD64 target now includes the %cs and %ss registers.  As a result
