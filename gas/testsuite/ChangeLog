@@ -1,5 +1,9 @@
 2003-09-19  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* gas/mips/rm7000.s: Let objdump print trailing dots.
+
+2003-09-19  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* gas/mips/empic3_e.s: Fix typo.
 
 2003-09-05  Richard Sandiford  <rsandifo@redhat.com>
